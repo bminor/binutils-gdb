@@ -106,6 +106,10 @@ yyerror PARAMS ((char *));
   {
     LONGEST lval;
     unsigned LONGEST ulval;
+    struct {
+      LONGEST val;
+      struct type *type;
+    } typed_val;
     double dval;
     struct symbol *sym;
     struct type *tval;
@@ -137,8 +141,7 @@ parse_number PARAMS ((char *, int, int, YYSTYPE *));
 %type <tval> ptype
 %type <lval> array_mod
 
-%token <lval> INT CHAR
-%token <ulval> UINT
+%token <typed_val> INT
 %token <dval> FLOAT
 
 /* Both NAME and TYPENAME tokens represent symbols in the input,
@@ -159,9 +162,9 @@ parse_number PARAMS ((char *, int, int, YYSTYPE *));
 /* A NAME_OR_INT is a symbol which is not known in the symbol table,
    but which would parse as a valid number in the current input radix.
    E.g. "c" when input_radix==16.  Depending on the parse, it will be
-   turned into a name or into a number.  NAME_OR_UINT ditto.  */
+   turned into a name or into a number.  */
 
-%token <ssym> NAME_OR_INT NAME_OR_UINT
+%token <ssym> NAME_OR_INT 
 
 %token STRUCT CLASS UNION ENUM SIZEOF UNSIGNED COLONCOLON
 %token TEMPLATE
@@ -170,7 +173,6 @@ parse_number PARAMS ((char *, int, int, YYSTYPE *));
 /* Special type cases, put in to allow the parser to distinguish different
    legal basetypes.  */
 %token SIGNED_KEYWORD LONG SHORT INT_KEYWORD CONST_KEYWORD VOLATILE_KEYWORD
-
 %token <lval> LAST REGNAME
 
 %token <ivar> VARIABLE
@@ -429,11 +431,8 @@ exp	:	exp ASSIGN_MODIFY exp
 
 exp	:	INT
 			{ write_exp_elt_opcode (OP_LONG);
-			  if ($1 == (int) $1 || $1 == (unsigned int) $1)
-			    write_exp_elt_type (builtin_type_int);
-			  else
-			    write_exp_elt_type (BUILTIN_TYPE_LONGEST);
-			  write_exp_elt_longcst ((LONGEST) $1);
+			  write_exp_elt_type ($1.type);
+			  write_exp_elt_longcst ((LONGEST)($1.val));
 			  write_exp_elt_opcode (OP_LONG); }
 	;
 
@@ -441,46 +440,12 @@ exp	:	NAME_OR_INT
 			{ YYSTYPE val;
 			  parse_number ($1.stoken.ptr, $1.stoken.length, 0, &val);
 			  write_exp_elt_opcode (OP_LONG);
-			  if (val.lval == (int) val.lval ||
-			      val.lval == (unsigned int) val.lval)
-			    write_exp_elt_type (builtin_type_int);
-			  else
-			    write_exp_elt_type (BUILTIN_TYPE_LONGEST);
-			  write_exp_elt_longcst (val.lval);
-			  write_exp_elt_opcode (OP_LONG); }
-	;
-
-exp	:	UINT
-			{
-			  write_exp_elt_opcode (OP_LONG);
-			  if ($1 == (unsigned int) $1)
-			    write_exp_elt_type (builtin_type_unsigned_int);
-			  else
-			    write_exp_elt_type (BUILTIN_TYPE_UNSIGNED_LONGEST);
-			  write_exp_elt_longcst ((LONGEST) $1);
+			  write_exp_elt_type (val.typed_val.type);
+			  write_exp_elt_longcst ((LONGEST)val.typed_val.val);
 			  write_exp_elt_opcode (OP_LONG);
 			}
 	;
 
-exp	:	NAME_OR_UINT
-			{ YYSTYPE val;
-			  parse_number ($1.stoken.ptr, $1.stoken.length, 0, &val);
-			  write_exp_elt_opcode (OP_LONG);
-			  if (val.ulval == (unsigned int) val.ulval)
-			    write_exp_elt_type (builtin_type_unsigned_int);
-			  else
-			    write_exp_elt_type (BUILTIN_TYPE_UNSIGNED_LONGEST);
-			  write_exp_elt_longcst ((LONGEST)val.ulval);
-			  write_exp_elt_opcode (OP_LONG);
-			}
-	;
-
-exp	:	CHAR
-			{ write_exp_elt_opcode (OP_LONG);
-			  write_exp_elt_type (builtin_type_char);
-			  write_exp_elt_longcst ((LONGEST) $1);
-			  write_exp_elt_opcode (OP_LONG); }
-	;
 
 exp	:	FLOAT
 			{ write_exp_elt_opcode (OP_DOUBLE);
@@ -809,7 +774,7 @@ direct_abs_decl: '(' abs_decl ')'
 array_mod:	'[' ']'
 			{ $$ = -1; }
 	|	'[' INT ']'
-			{ $$ = $2; }
+			{ $$ = $2.val; }
 	;
 
 func_mod:	'(' ')'
@@ -924,7 +889,6 @@ name	:	NAME { $$ = $1.stoken; }
 	|	BLOCKNAME { $$ = $1.stoken; }
 	|	TYPENAME { $$ = $1.stoken; }
 	|	NAME_OR_INT  { $$ = $1.stoken; }
-	|	NAME_OR_UINT  { $$ = $1.stoken; }
 	;
 
 name_not_typename :	NAME
@@ -935,7 +899,6 @@ name_not_typename :	NAME
    =exp) or just an exp.  If name_not_typename was ever used in an lvalue
    context where only a name could occur, this might be useful.
   	|	NAME_OR_INT
-  	|	NAME_OR_UINT
  */
 	;
 
@@ -960,6 +923,10 @@ parse_number (p, len, parsed_float, putithere)
   register int c;
   register int base = input_radix;
   int unsigned_p = 0;
+  int long_p = 0;
+  LONGEST high_bit;
+  struct type *signed_type;
+  struct type *unsigned_type;
 
   if (parsed_float)
     {
@@ -1012,8 +979,8 @@ parse_number (p, len, parsed_float, putithere)
 	{
 	  if (base > 10 && c >= 'a' && c <= 'f')
 	    n += i = c - 'a' + 10;
-	  else if (len == 0 && c == 'l')
-	    ;
+	  else if (len == 0 && c == 'l') 
+            long_p = 1;
 	  else if (len == 0 && c == 'u')
 	    unsigned_p = 1;
 	  else
@@ -1021,6 +988,7 @@ parse_number (p, len, parsed_float, putithere)
 	}
       if (i >= base)
 	return ERROR;		/* Invalid digit in this base */
+
       /* Portably test for overflow (only works for nonzero values, so make
 	 a second check for zero).  */
       if((prevn >= n) && n != 0)
@@ -1033,17 +1001,40 @@ parse_number (p, len, parsed_float, putithere)
       }
       prevn=n;
     }
+ 
+     /* If the number is too big to be an int, or it's got an l suffix
+	then it's a long.  Work out if this has to be a long by
+	shifting right and and seeing if anything remains, and the
+	target int size is different to the target long size. */
 
-  if (unsigned_p)
-    {
-      putithere->ulval = n;
-      return UINT;
-    }
-  else
-    {
-      putithere->lval = n;
-      return INT;
-    }
+    if ((TARGET_INT_BIT != TARGET_LONG_BIT && (n >> TARGET_INT_BIT)) || long_p)
+      {
+         high_bit = ((LONGEST)1) << (TARGET_LONG_BIT-1);
+	 unsigned_type = builtin_type_unsigned_long;
+	 signed_type = builtin_type_long;
+      }
+    else 
+      {
+	 high_bit = ((LONGEST)1) << (TARGET_INT_BIT-1);
+	 unsigned_type = builtin_type_unsigned_int;
+	 signed_type = builtin_type_int;
+      }    
+
+   putithere->typed_val.val = n;
+
+   /* If the high bit of the worked out type is set then this number
+      has to be unsigned. */
+
+   if (unsigned_p || (n & high_bit)) 
+     {
+        putithere->typed_val.type = unsigned_type;
+     }
+   else 
+     {
+        putithere->typed_val.type = signed_type;
+     }
+
+   return INT;
 }
 
 struct token
@@ -1133,7 +1124,10 @@ yylex ()
       c = *lexptr++;
       if (c == '\\')
 	c = parse_escape (&lexptr);
-      yylval.lval = c;
+
+      yylval.typed_val.val = c;
+      yylval.typed_val.type = builtin_type_char;
+
       c = *lexptr++;
       if (c != '\'')
 	{
@@ -1147,7 +1141,7 @@ yylex ()
 	    }
 	  error ("Invalid character constant.");
 	}
-      return CHAR;
+      return INT;
 
     case '(':
       paren_depth++;
@@ -1460,12 +1454,6 @@ yylex ()
 	    yylval.ssym.sym = sym;
 	    yylval.ssym.is_a_field_of_this = is_a_field_of_this;
 	    return NAME_OR_INT;
-	  }
-	if (hextype == UINT)
-	  {
-	    yylval.ssym.sym = sym;
-	    yylval.ssym.is_a_field_of_this = is_a_field_of_this;
-	    return NAME_OR_UINT;
 	  }
       }
 
