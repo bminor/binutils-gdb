@@ -1,5 +1,20 @@
 Fri Oct 16 13:06:08 1992  K. Richard Pixley  (rich@sendai.cygnus.com)
 
+	Miscellaneous 386 configs updated.
+
+	* config/i386aout.mt (TDEPFILES): removed exec.o.
+	* config/i386sol2.mh, config/ncr3000.mh, config/i386v4.mh
+	  (XDEPFILES): removed procfs.o fork-child.o i386-xdep.o.
+	  (NAT_FILE, NATDEPFILES): new macros.
+	* config/i386aout.mt, config/i386sol2.mt, config/ncr3000.mt,
+	  config/i386v4.mt (TDEPFILES): removed exec.o.
+	* config/i386v32.mh (XDEPFILES): removed infptrace.o inftarg.o
+	  fork-child.o coredep.o corelow.o i386-xdep.o i387-tdep.o.
+	  (NAT_FILE, NATDEPFILES): new macros.
+	* config/i386sco.mh (XDEPFILES): removed infptrace.o inftarg.o
+	  fork-child.o coredep.o corelow.o i386-xdep.o.
+	  (NAT_FILE, NATDEPFILES): new macros.
+
 	Native support cleanup for i386bsd (untested).
 
 	* config/i386bsd.mt (NATDEPFILES): exec.o removed.

@@ -10,10 +10,13 @@ REGEX1=regex.o
 
 # Need to compile and link in support for SVR4's /proc and i386 host dependent
 # routines.
-XDEPFILES= procfs.o fork-child.o i386-xdep.o
+XDEPFILES= 
 
 # Use the i386 SVR4 host configuration file.
 XM_FILE= xm-i386v4.h
+
+NAT_FILE= nm-i386v.h
+NATDEPFILES= exec.o procfs.o fork-child.o i386v-nat.o
 
 # We need to find alloca() somewhere.  Gcc has one built in, but most other
 # compilers don't.  Using the one in /usr/ucblib/libucb.a is tricky because

@@ -1,6 +1,8 @@
 # Host: Intel 386 running SCO Unix (pre-SVR4)
-XDEPFILES= infptrace.o inftarg.o fork-child.o coredep.o corelow.o i386-xdep.o i387-tdep.o
+XDEPFILES= i387-tdep.o
 XM_FILE= xm-i386sco.h
+NAT_FILE= nm-i386sco.h
+NATDEPFILES= infptrace.o inftarg.o fork-child.o coredep.o corelow.o i386v-nat.o
 XM_CLIBS= -lPW
 SYSV_DEFINE=-DSYSV
 REGEX=regex.o
