@@ -375,7 +375,14 @@ sh64_elf_${EMULATION_NAME}_after_allocation (void)
       }
     }
 
-  BFD_ASSERT (cranges->contents == NULL);
+  /* ldemul_after_allocation may be called twice.  First directly from
+     lang_process, and the second time when lang_process calls ldemul_finish,
+     which calls gld${EMULATION_NAME}_finish, e.g. gldshelf32_finish, which
+     is defined in emultempl/elf32.em and calls ldemul_after_allocation,
+     if bfd_elf${ELFSIZE}_discard_info returned true.  */
+  if (cranges->contents != NULL)
+    free (cranges->contents);
+
   BFD_ASSERT (sh64_elf_section_data (cranges)->sh64_info != NULL);
 
   /* Make sure we have .cranges in memory even if there were only

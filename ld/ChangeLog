@@ -1,3 +1,8 @@
+2003-07-08  J"orn Rennecke <joern.rennecke@superh.com>
+
+	* emultempl/sh64elf.em (sh64_elf_${EMULATION_NAME}_after_allocation):
+	Allow second call from ldemul_finish.
+
 2003-07-04  J"orn Rennecke <joern.rennecke@superh.com>
 
 	* emulparams/shelf32.sh (STACK_ADDR): Don't define.
