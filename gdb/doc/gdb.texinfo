@@ -3147,13 +3147,12 @@ Variables}).
 @table @code
 @kindex disassemble
 @item disassemble
-This specialized command is provided to dump a range of memory as
-machine instructions.  The default memory range is the function
-surrounding the program counter of the selected frame.  A single
-argument to this command is a program counter value; the function
-surrounding this value will be dumped.  Two arguments (separated by one
-or more spaces) specify a range of addresses (first inclusive, second
-exclusive) to be dumped.
+This specialized command dumps a range of memory as machine
+instructions.  The default memory range is the function surrounding the
+program counter of the selected frame.  A single argument to this
+command is a program counter value; the function surrounding this value
+will be dumped.  Two arguments specify a range of addresses (first
+inclusive, second exclusive) to dump.
 @end table
 
 We can use @code{disassemble} to inspect the object code
@@ -3171,7 +3170,6 @@ Dump of assembler code from 0x63e4 to 0x6404:
 0x63fc <builtin_init+5364>:     call 0x9288 <path_search>
 0x6400 <builtin_init+5368>:     nop
 End of assembler dump.
-(_GDBP__)
 @end smallexample
 
 @node Data, Languages, Source, Top
@@ -5226,7 +5224,7 @@ index bounds, and all built-in functions and procedures.
 @subsubsection The scope operators @code{::} and @code{.}
 @cindex scope
 @kindex .
-@kindex colon, doubled as scope operator
+@cindex colon, doubled as scope operator
 @ifinfo
 @kindex colon-colon
 @c Info cannot handoe :: but TeX can.
@@ -7488,8 +7486,8 @@ mips-dec-ultrix
 m68k-hp-bsd
 % sh config.sub i386v
 i386-none-sysv
-% sh config.sub i486v
-*** Configuration "i486v" not recognized
+% sh config.sub i786v
+*** Configuration "i786v" not recognized
 @end example
 
 @noindent
