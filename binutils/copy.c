@@ -92,12 +92,14 @@ bfd *obfd;
 	       ibfd->filename, ibfd->xvec->name,
 	       obfd->filename, obfd->xvec->name);
 
-    if ((bfd_set_start_address(obfd, bfd_get_start_address(ibfd)) == false) ||
+    if ((bfd_set_start_address(obfd, bfd_get_start_address(ibfd)) == false) 
+	||
 	(bfd_set_file_flags(obfd, (bfd_get_file_flags(ibfd) &
-				   ~(HAS_LINENO | HAS_DEBUG | HAS_SYMS | D_PAGED |
-				     HAS_LOCALS))) == false) ||
-	bfd_set_start_address(obfd, bfd_get_start_address(ibfd)) == false)
-	bfd_fatal(bfd_get_filename(ibfd));
+				   (HAS_LINENO | HAS_DEBUG |
+				    HAS_RELOC | HAS_SYMS | D_PAGED |
+				     HAS_LOCALS))) == false)) {
+      bfd_fatal(bfd_get_filename(ibfd));
+    }
 
     /* Copy architecture of input file to output file */
     if (!bfd_set_arch_mach(obfd, bfd_get_architecture(ibfd),
