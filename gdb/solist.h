@@ -20,6 +20,9 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
+#ifndef SOLIST_H
+#define SOLIST_H
+
 #define SO_NAME_MAX_PATH_SIZE 512	/* FIXME: Should be dynamic */
 
 /* Forward declaration for target specific link map information.  This
@@ -119,3 +122,5 @@ extern struct target_so_ops *current_target_so_ops;
   (current_target_so_ops->open_symbol_file_object)
 #define TARGET_SO_IN_DYNSYM_RESOLVE_CODE \
   (current_target_so_ops->in_dynsym_resolve_code)
+
+#endif

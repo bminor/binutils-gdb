@@ -19,7 +19,11 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
+#ifndef TYPEPRINT_H
+#define TYPEPRINT_H
+
 void print_type_scalar (struct type * type, LONGEST, struct ui_file *);
 
 void c_type_print_varspec_suffix (struct type *, struct ui_file *, int,
 				  int, int);
+#endif

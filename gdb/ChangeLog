@@ -1,5 +1,27 @@
 2001-10-21  Andrew Cagney  <ac131313@redhat.com>
 
+	* Makefile.in: Replace top.h with $(top_h). Replace expression.h
+	with $(expression_h).  Replace command.h with $(command_h).
+	(language_h): Define.  Replace language.h with $(language_h).
+	Replace call-cmds.h with $(call_cmds_h).  Replace varobj.h with
+	$(varobj_h).
+	(wrapper_h, valprint_h, objfiles_h, complaints_h): Ditto.
+	(serial_h, hpread_h, buildsym_h, stabsread_h): Ditto.
+	(xcoffsolib_h, gdb_stabs_h, linespec_h): Ditto.
+	(bcache_h, gdb_events_h, monitor_h): Ditto.
+	(ser_unix_h, source_h): Ditto.
+	(varobj_h): Update list.
+
+	* call-cmds.h: Add CALL_CMDS_H macro wrapper.
+	* solist.h: Add SOLIST_H macro wrapper.
+	* monitor.h: Add MONITOR_H macro wrapper.
+	* typeprint.h: Add TYPEPRINT_H macro wrapper.
+	* xcoffsolib.h: Add XCOFFSOLIB_H macro wrapper.
+	* valprint.h: Add VALPRINT_H macro wrapper.
+	* top.h: Add TOP_H macro wrapper.
+	
+2001-10-21  Andrew Cagney  <ac131313@redhat.com>
+
 	* config/a29k/tm-vx29k.h, i386-tdep.c: Include "value.h".
 	* arm-tdep.c, exec.c, ia64-tdep.c, infrun.c: Ditto.
 	* ppc-linux-tdep.c, remote-es.c, remote.c: Ditto.

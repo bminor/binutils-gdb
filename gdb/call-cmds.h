@@ -23,8 +23,13 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
+#ifndef CALL_CMDS_H
+#define CALL_CMDS_H
+
 extern void initialize_all_files (void);
 
 extern void core_file_command (char *, int);
 
 extern void break_command (char *, int);
+
+#endif

@@ -21,6 +21,9 @@
    Boston, MA 02111-1307, USA.
  */
 
+#ifndef MONITOR_H
+#define MONITOR_H
+
 struct serial;
 
 /* This structure describes the strings necessary to give small command
@@ -247,3 +250,5 @@ extern int monitor_readchar (void);
 extern char *monitor_get_dev_name (void);
 extern void init_monitor_ops (struct target_ops *);
 extern int monitor_dump_reg_block (char *dump_cmd);
+
+#endif

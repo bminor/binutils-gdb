@@ -19,6 +19,9 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
+#ifndef TOP_H
+#define TOP_H
+
 /* From top.c.  */
 extern char *line;
 extern int linesize;
@@ -67,3 +70,5 @@ extern char *source_error;
 extern char *source_pre_error;
 extern int history_expansion_p;
 extern int server_command;
+
+#endif

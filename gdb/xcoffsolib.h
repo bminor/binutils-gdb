@@ -27,6 +27,9 @@
    shared libraries are loaded, or a "load" system call, followed by the
    user's issuance of a "load" command.  */
 
+#ifndef XCOFFSOLIB_H
+#define XCOFFSOLIB_H
+
 struct vmap
   {
     struct vmap *nxt;		/* ptr to next in chain                 */
@@ -59,3 +62,5 @@ extern struct vmap *vmap;
 
 /* Add symbols for a vmap.  */
 extern int vmap_add_symbols (struct vmap *vp);
+
+#endif
