@@ -1,3 +1,9 @@
+2001-02-06  H.J. Lu  <hjl@gnu.org>
+
+	* elfxx-ia64.c (elfNN_ia64_dynamic_symbol_p): Only hidden and
+	internal symbols are not dynamic.
+	* elf64-alpha.c (alpha_elf_dynamic_symbol_p): Likewise.
+
 2001-02-06  Nick Clifton  <nickc@redhat.com>
 
 	* Makefile.am (BFD64_BACKENDS_CFILES): Remove elf64-ia64.c, so
