@@ -1,3 +1,11 @@
+2002-07-25  Keith Seitz  <keiths@redhat.com>
+
+	* mi-cli.exp: Fix typo in result for "-interpreter-exec console list"
+	test.
+	Don't break at main: use mi_run_to_main instead.
+	Add tests to break in callee4 and navigate the stack.
+	Add test to set a register and test for update event.
+
 2002-07-22  Keith Seitz  <keiths@redhat.com>
 
 	* mi-cli.exp: Use mi_run_to_main to get to main. Don't use "run".

@@ -38,7 +38,6 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {deb
      gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
 }
 
-mi_delete_breakpoints
 mi_gdb_reinitialize_dir $srcdir/$subdir
 
 mi_gdb_test "-interpreter-exec" \
@@ -62,9 +61,7 @@ mi_gdb_test "-interpreter-exec console \"file $binfile\"" \
   {(=.*)+\^done} \
   "-interpreter-exec console \"file \$binfile\""
 
-mi_gdb_test "-interpreter-exec console \"break main\"" \
-  {(&.*)*.*~"Breakpoint 1 at.*\\n".*=breakpoint-create,number="1".*\^done} \
-  "-interpreter-exec console \"break main\""
+mi_run_to_main
 
 mi_gdb_test "-interpreter-exec console \"set args foobar\"" \
   {\^done} \
@@ -74,11 +71,13 @@ mi_gdb_test "-interpreter-exec console \"show args\"" \
   {\~"Argument list to give program being debugged when it is started is \\\"foobar\\\"\.\\n".*\^done} \
   "-interpreter-exec console \"show args\""
 
-mi_gdb_test "-interpreter-exec console \"info break\"" \
-  {\~"Num[ \t]*Type[ \t]*Disp[ \t]*Enb[ \t]*Address[ \t]*What\\n".*~"1[ \t]*breakpoint[ \t]*keep[ \t]*y[ \t]*0x[0-9A-Fa-f]+[ \t]*in main at .*basics.c:[0-9]+\\n".*\^done} \
-  "-interpreter-exec console \"info break\""
+mi_gdb_test "-interpreter-exec console \"break callee4\"" \
+  {(&.*)*.*~"Breakpoint 2 at.*\\n".*=breakpoint-create,number="2".*\^done} \
+  "-interpreter-exec console \"break callee4\""
 
-mi_run_to_main
+mi_gdb_test "-interpreter-exec console \"info break\"" \
+  {\~"Num[ \t]*Type[ \t]*Disp[ \t]*Enb[ \t]*Address[ \t]*What\\n".*~"2[ \t]*breakpoint[ \t]*keep[ \t]*y[ \t]*0x[0-9A-Fa-f]+[ \t]*in callee4 at .*basics.c:[0-9]+\\n".*\^done} \
+  "-interpreter-exec console \"info break\""
 
 mi_gdb_test "-interpreter-exec console \"set listsize 1\"" \
   {\^done} \
@@ -88,25 +87,53 @@ mi_gdb_test "-interpreter-exec console \"list\"" \
   {.*\~"32[ \t(\\t)]*callee1.*\\n".*\^done} \
   "-interpreter-exec console \"list\""
 
-mi_gdb_test "-exec-next" \
-  {.*\*stopped,reason="end-stepping-range",.*,file=".*basics.c",line="33"\}} \
-  "-exec-next to line 33"
+mi_gdb_test "-exec-continue" \
+  {.*\*stopped,reason="breakpoint-hit",.*func="callee4".*file=".*basics.c",line="8"\}} \
+  "-interpreter-exec console \"continue to callee4\""
 
-mi_gdb_test "-exec-next" \
-  {.*\*stopped,reason="end-stepping-range",.*,file=".*basics.c",line="35"\}} \
-  "-exec-next to line 35"
+mi_gdb_test "-interpreter-exec console \"delete 2\"" \
+  {.*=breakpoint-delete,number=\"2\".*\^done} \
+  "-interpreter-exec console \"delete 2\""
+
+mi_gdb_test "-interpreter-exec console \"up\"" \
+  {.*=selected-frame-level-changed,level="1".*\^done} \
+  "-interpreter-exec console \"up\""
+
+mi_gdb_test "-interpreter-exec console \"down\"" \
+  {.*=selected-frame-level-changed,level="0".*\^done} \
+  "-interpreter-exec console \"down\""
+
+mi_gdb_test "-interpreter-exec console \"frame 2\"" \
+  {.*=selected-frame-level-changed,level="2".*\^done} \
+  "-interpreter-exec console \"frame 2\""
+
+mi_gdb_test "-stack-select-frame 0" \
+  {.*=selected-frame-level-changed,level="0".*\^done} \
+  "-stack-select-frame 0"
+
+mi_gdb_test "-break-insert -t basics.c:35" \
+  {.*=breakpoint-create,number="3".*\^done} \
+  "-break-insert -t basics.c:35"
+
+mi_gdb_test "-exec-continue" \
+  {.*\*stopped.*,file=".*basics.c",line="35"\}} \
+  "-exec-continue to line 35"
 
 mi_gdb_test "-exec-next" \
   {.*\*stopped,reason="end-stepping-range",.*,file=".*basics.c",line="37"\}} \
   "-exec-next to line 37"
 
 mi_gdb_test "-interpreter-exec console \"list\"" \
-  {\~"37[ \t(\\t)]*return 0;\\n".*^done} \
+  {\~"37[ \t(\\t)]*return 0;\\n".*\^done} \
   "-interpreter-exec console \"list\" at basics.c:37"
 
 mi_gdb_test "-interpreter-exec console \"help set args\"" \
   {\~"Set argument list to give program being debugged when it is started\.\\nFollow this command with any number of args, to be passed to the program\.".*\^done} \
   "-interpreter-exec console \"help set args\""
+
+mi_gdb_test "-interpreter-exec console \"set \$pc=0x0\"" \
+  {.*=register-update,number="[0-9]+".*\^done} \
+  "-interpreter-exec console \"set \$pc=0x0\""
 
 #mi_gdb_test "-interpreter-exec console \"\"" \
   {} \
