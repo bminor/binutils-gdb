@@ -1,4 +1,12 @@
 
+Wed Feb 12 02:44:39 1997  Dawn Perchik  <dawn@cygnus.com>
+
+        * c-valprint.c (c_val_print): Fix printing for arrays defined
+        with 0 length.  A sticky tag caused this fix from 
+	revision 2.32 date: 1996/04/29 23:25:27;  author: dawn;  
+	state: Exp;  lines: +1 -0 branches:  2.32.34;
+	to not make it into devo.
+
 Tue Feb 11 22:24:39 1997  Dawn Perchik  <dawn@cygnus.com>
 
 	* defs.h: Fix cntl-C to read from the Windows message queue.

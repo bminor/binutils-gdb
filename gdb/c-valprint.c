@@ -153,6 +153,7 @@ c_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
 	  addr = unpack_pointer (type, valaddr);
 	print_unpacked_pointer:
           elttype = check_typedef (TYPE_TARGET_TYPE (type));
+          elttype = check_typedef (TYPE_TARGET_TYPE (type));
 
 	  if (TYPE_CODE (elttype) == TYPE_CODE_FUNC)
 	    {
