@@ -11,20 +11,20 @@
 @c General Public License.
 @c
 @c $Id$
-@tex
+@iftex
 @finalout
 @c @smallbook
-@end tex
+@end iftex
 @c @cropmarks
 @setchapternewpage odd
 @settitle GNU Binary Utilities
 @titlepage
-@title{The GNU Binary Utilities}
-@subtitle{Version 1.90}
+@title The GNU Binary Utilities
+@subtitle Version 1.90
 @sp 1
 @subtitle October 1991
-@author{Roland H. Pesch}
-@author{Cygnus Support}
+@author Roland H. Pesch
+@author Cygnus Support
 @page
 
 @tex
@@ -82,13 +82,13 @@ into another language, under the above conditions for modified versions.
 @end ifinfo
 
 @menu
-* ar::				ar
-* ld::				ld
-* nm::				nm
-* objdump::			objdump
-* ranlib::			ranlib
-* size::			size
-* strip::			strip
+* ar::                          ar
+* ld::                          ld
+* nm::                          nm
+* objdump::                     objdump
+* ranlib::                      ranlib
+* size::                        size
+* strip::                       strip
 @end menu
 
 @node ar, ld, Top, Top
@@ -546,9 +546,9 @@ Here is an example of the Berkeley (default) format of output from
 @code{size}: 
 @smallexample
  eg$  size +format Berkeley ranlib size
-text	data	bss	dec	hex	filename
-294880 	81920  	11592  	388392 	5ed28  	ranlib
-294880 	81920  	11888  	388688 	5ee50  	size
+text    data    bss     dec     hex     filename
+294880  81920   11592   388392  5ed28   ranlib
+294880  81920   11888   388688  5ee50   size
 @end smallexample
 
 @noindent
@@ -557,19 +557,19 @@ This is the same data, but displayed closer to System V conventions:
 @smallexample
  eg$  size +format SysV ranlib size
 ranlib  :
-section		size	     addr
-.text         294880	     8192	
-.data          81920	   303104	
-.bss           11592	   385024	
-Total         388392	
+section         size         addr
+.text         294880         8192       
+.data          81920       303104       
+.bss           11592       385024       
+Total         388392    
 
 
 size  :
-section		size	     addr
-.text         294880	     8192	
-.data          81920	   303104	
-.bss           11888	   385024	
-Total         388688	
+section         size         addr
+.text         294880         8192       
+.data          81920       303104       
+.bss           11888       385024       
+Total         388688    
 @end smallexample
 
 @item +help
