@@ -254,6 +254,18 @@ sim_core_map_attach (SIM_DESC sd,
   (*last_mapping)->next = next_mapping;
 }
 
+/* Attach memory or a memory mapped device to the simulator.
+   LEVEL is ... ?
+   ACCESS is the kind of access to grant (some collection of r/w/x).
+   SPACE is ... ?
+   ADDR is the starting address of the section.
+   NR_BYTES is the size of the section.
+   MODULO is non-zero if this the section is to be split into several MODULO
+   sized identical chunks.
+   CLIENT is non-zero for devices, otherwise NULL.
+   OPTIONAL_BUFFER is the address of a pre-allocated buffer to use.
+   OPTIONAL_BUFFER is a sub-optimal hook that allows clients to do nasty
+   things that the interface doesn't accomodate.  */
 
 EXTERN_SIM_CORE\
 (void)
@@ -386,7 +398,7 @@ sim_core_attach (SIM_DESC sd,
 				 client, buffer, free_buffer);
 	  free_buffer = NULL;
 	  break;
-	case nr_sim_core_maps:
+	default:
 	  sim_io_error (sd, "sim_core_attach - internal error - bad switch");
 	  break;
 	}
