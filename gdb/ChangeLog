@@ -1,3 +1,8 @@
+2004-05-21  Jim Blandy  <jimb@redhat.com>
+
+	* dwarf2expr.c (execute_stack_op): Add 'break' statements after
+	cases for DW_OP_div and DW_OP_shr.  (Thanks to Reva Cuthbertson.)
+
 2004-05-20  Jim Blandy  <jimb@redhat.com>
 
 	* rs6000-tdep.c (rs6000_push_dummy_call): Formatting fixes.
