@@ -1,3 +1,28 @@
+2001-12-29  Elena Zannoni  <ezannoni@redhat.com>
+
+        * Makefile.in (rs6000-tdep.o): Add dependency on parser-defs.h.
+
+        * rs6000-tdep.c: Include parser-defs.h.
+        (rs6000_register_virtual_type): Rewrite, including handling of
+        AltiVec regs type.
+        (altivec_register_p): New function.
+        (rs6000_do_altivec_registers): New function.
+        (rs6000_altivec_registers_info): New function.
+        (rs6000_do_registers_info): New function.
+        (R16): Define.
+        (PPC_ALTIVEC_REGS): Define.
+        (registers_powerpc): Add AltiVec registers.
+        (registers_7400): Define.
+        (variants): Add 7400 machine.
+        (rs6000_gdbarch_init): Set the numbers of AltiVec registers.
+        Initialize gdbarch_do)_registers_info.
+        (rs6000_info_power_command): New function.
+        (info_power_cmdlist): New static variable.
+        (_initialize_rs6000_tdep): Add new 'info powerpc altivec' command.
+
+        * ppc-tdep.h (struct gdbarch_tdep): Add altivec regnum fields.
+        (altivec_register_p): Export.
+
 2001-12-29  Mark Kettenis  <kettenis@gnu.org>
 
 	* i386bsd-nat.c (reg_offset): Fix typo.

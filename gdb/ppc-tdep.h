@@ -43,6 +43,7 @@ void rs6000_init_extra_frame_info (int fromleaf, struct frame_info *);
 int rs6000_frameless_function_invocation (struct frame_info *);
 void rs6000_frame_init_saved_regs (struct frame_info *);
 CORE_ADDR rs6000_frame_chain (struct frame_info *);
+int altivec_register_p (int regno);
 
 /* Private data that this module attaches to struct gdbarch. */
 
@@ -61,6 +62,8 @@ struct gdbarch_tdep
     int ppc_ctr_regnum;		/* Count register */
     int ppc_xer_regnum;		/* Integer exception register */
     int ppc_mq_regnum;		/* Multiply/Divide extension register */
+    int ppc_vr0_regnum;		/* First AltiVec register */
+    int ppc_vrsave_regnum;	/* Last AltiVec register */
 };
 
 #endif

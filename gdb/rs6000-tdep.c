@@ -33,6 +33,7 @@
 #include "regcache.h"
 #include "doublest.h"
 #include "value.h"
+#include "parser-defs.h"
 
 #include "bfd/libbfd.h"		/* for bfd_default_set_arch_mach */
 #include "coff/internal.h"	/* for libcoff.h */
@@ -1538,9 +1539,24 @@ rs6000_register_virtual_type (int n)
   struct gdbarch_tdep *tdep = TDEP;
   const struct reg *reg = tdep->regs + n;
 
-  return reg->fpr ? builtin_type_double :
-    regsize (reg, tdep->wordsize) == 8 ? builtin_type_int64 :
-      builtin_type_int32;
+  if (reg->fpr)
+    return builtin_type_double;
+  else
+    {
+      int size = regsize (reg, tdep->wordsize);
+      switch (size)
+	{
+	case 8:
+	  return builtin_type_int64;
+	  break;
+	case 16:
+	  return builtin_type_int128;
+	  break;
+	default:
+	  return builtin_type_int32;
+	  break;
+	}
+    }
 }
 
 /* For the PowerPC, it appears that the debug info marks float parameters as
@@ -1597,6 +1613,191 @@ rs6000_register_convert_to_raw (struct type *type, int n,
     }
   else
     memcpy (to, from, REGISTER_RAW_SIZE (n));
+}
+
+int
+altivec_register_p (int regno)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+  if (tdep->ppc_vr0_regnum < 0 || tdep->ppc_vrsave_regnum < 0)
+    return 0;
+  else
+    return (regno >= tdep->ppc_vr0_regnum && regno <= tdep->ppc_vrsave_regnum);
+}
+
+static void
+rs6000_do_altivec_registers (int regnum)
+{
+  int i;
+  char *raw_buffer = (char*) alloca (MAX_REGISTER_RAW_SIZE);
+  char *virtual_buffer = (char*) alloca (MAX_REGISTER_VIRTUAL_SIZE);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+
+  for (i = tdep->ppc_vr0_regnum; i <= tdep->ppc_vrsave_regnum; i++)
+    {
+      /* If we want just one reg, check that this is the one we want. */
+      if (regnum != -1 && i != regnum)
+	continue;
+
+      /* If the register name is empty, it is undefined for this
+         processor, so don't display anything.  */
+      if (REGISTER_NAME (i) == NULL || *(REGISTER_NAME (i)) == '\0')
+        continue;
+
+      fputs_filtered (REGISTER_NAME (i), gdb_stdout);
+      print_spaces_filtered (15 - strlen (REGISTER_NAME (i)), gdb_stdout);
+
+      /* Get the data in raw format.  */
+      if (read_relative_register_raw_bytes (i, raw_buffer))
+        {
+          printf_filtered ("*value not available*\n");
+          continue;
+        }
+
+      /* Convert raw data to virtual format if necessary.  */
+      if (REGISTER_CONVERTIBLE (i))
+	REGISTER_CONVERT_TO_VIRTUAL (i, REGISTER_VIRTUAL_TYPE (i),
+				     raw_buffer, virtual_buffer);
+      else
+	memcpy (virtual_buffer, raw_buffer, REGISTER_VIRTUAL_SIZE (i));
+
+      /* Print as integer in hex only.  */
+      val_print (REGISTER_VIRTUAL_TYPE (i), virtual_buffer, 0, 0,
+                 gdb_stdout, 'x', 1, 0, Val_pretty_default);
+      printf_filtered ("\n");
+    }
+}
+
+static void
+rs6000_altivec_registers_info (char *addr_exp, int from_tty)
+{
+  int regnum, numregs;
+  register char *end;
+
+  if (!target_has_registers)
+    error ("The program has no registers now.");
+  if (selected_frame == NULL)
+    error ("No selected frame.");
+
+  if (!addr_exp)
+    {
+      rs6000_do_altivec_registers (-1);
+      return;
+    }
+
+  numregs = NUM_REGS + NUM_PSEUDO_REGS;
+  do
+    {
+      if (addr_exp[0] == '$')
+	addr_exp++;
+      end = addr_exp;
+      while (*end != '\0' && *end != ' ' && *end != '\t')
+	++end;
+
+      regnum = target_map_name_to_register (addr_exp, end - addr_exp);
+      if (regnum < 0)
+        {
+          regnum = numregs;
+          if (*addr_exp >= '0' && *addr_exp <= '9')
+	    regnum = atoi (addr_exp);	/* Take a number */
+          if (regnum >= numregs)	/* Bad name, or bad number */
+	    error ("%.*s: invalid register", end - addr_exp, addr_exp);
+	}
+
+      rs6000_do_altivec_registers (regnum);
+
+      addr_exp = end;
+      while (*addr_exp == ' ' || *addr_exp == '\t')
+	++addr_exp;
+    }
+  while (*addr_exp != '\0');
+}
+
+static void
+rs6000_do_registers_info (int regnum, int fpregs)
+{
+  register int i;
+  int numregs = NUM_REGS + NUM_PSEUDO_REGS;
+  char *raw_buffer = (char*) alloca (MAX_REGISTER_RAW_SIZE);
+  char *virtual_buffer = (char*) alloca (MAX_REGISTER_VIRTUAL_SIZE);
+
+  for (i = 0; i < numregs; i++)
+    {
+      /* Decide between printing all regs, nonfloat regs, or specific reg.  */
+      if (regnum == -1)
+        {
+          if ((TYPE_CODE (REGISTER_VIRTUAL_TYPE (i)) == TYPE_CODE_FLT && !fpregs)
+	      || (altivec_register_p (i) && !fpregs))
+            continue;
+        }
+      else
+        {
+          if (i != regnum)
+            continue;
+        }
+
+      /* If the register name is empty, it is undefined for this
+         processor, so don't display anything.  */
+      if (REGISTER_NAME (i) == NULL || *(REGISTER_NAME (i)) == '\0')
+        continue;
+
+      fputs_filtered (REGISTER_NAME (i), gdb_stdout);
+      print_spaces_filtered (15 - strlen (REGISTER_NAME (i)), gdb_stdout);
+
+      /* Get the data in raw format.  */
+      if (read_relative_register_raw_bytes (i, raw_buffer))
+        {
+          printf_filtered ("*value not available*\n");
+          continue;
+        }
+
+      /* Convert raw data to virtual format if necessary.  */
+      if (REGISTER_CONVERTIBLE (i))
+        REGISTER_CONVERT_TO_VIRTUAL (i, REGISTER_VIRTUAL_TYPE (i),
+				     raw_buffer, virtual_buffer);
+      else
+	memcpy (virtual_buffer, raw_buffer, REGISTER_VIRTUAL_SIZE (i));
+
+      /* If virtual format is floating, print it that way, and in raw hex.  */
+      if (TYPE_CODE (REGISTER_VIRTUAL_TYPE (i)) == TYPE_CODE_FLT)
+        {
+          register int j;
+
+#ifdef INVALID_FLOAT
+          if (INVALID_FLOAT (virtual_buffer, REGISTER_VIRTUAL_SIZE (i)))
+            printf_filtered ("<invalid float>");
+          else
+#endif
+            val_print (REGISTER_VIRTUAL_TYPE (i), virtual_buffer, 0, 0,
+                       gdb_stdout, 0, 1, 0, Val_pretty_default);
+
+          printf_filtered ("\t(raw 0x");
+          for (j = 0; j < REGISTER_RAW_SIZE (i); j++)
+            {
+              register int idx = TARGET_BYTE_ORDER == BIG_ENDIAN ? j
+		: REGISTER_RAW_SIZE (i) - 1 - j;
+              printf_filtered ("%02x", (unsigned char) raw_buffer[idx]);
+            }
+          printf_filtered (")");
+        }
+      else
+	{
+	  /* Print as integer in hex and in decimal.  */
+	  if (!altivec_register_p (i))
+	    {
+	      val_print (REGISTER_VIRTUAL_TYPE (i), virtual_buffer, 0, 0,
+			 gdb_stdout, 'x', 1, 0, Val_pretty_default);
+	      printf_filtered ("\t");
+	      val_print (REGISTER_VIRTUAL_TYPE (i), virtual_buffer, 0, 0,
+			 gdb_stdout, 0, 1, 0, Val_pretty_default);
+	    }
+	  else
+	    /* Print as integer in hex only.  */
+	    val_print (REGISTER_VIRTUAL_TYPE (i), virtual_buffer, 0, 0,
+		       gdb_stdout, 'x', 1, 0, Val_pretty_default);
+	}
+      printf_filtered ("\n");
+    }
 }
 
 /* Convert a dbx stab register number (from `r' declaration) to a gdb
@@ -1765,6 +1966,10 @@ rs6000_convert_from_func_ptr_addr (CORE_ADDR addr)
    systems. */
 #define R8(name)	{ STR(name), 8, 8, 0 }
 
+/* Return a struct reg defining register NAME that's 128 bits on all
+   systems. */
+#define R16(name)       { STR(name), 16, 16, 0 }
+
 /* Return a struct reg defining floating-point register NAME. */
 #define F(name)		{ STR(name), 8, 8, 1 }
 
@@ -1815,6 +2020,14 @@ rs6000_convert_from_func_ptr_addr (CORE_ADDR addr)
   /* 112 */ R(srr0),   R(srr1),   R(tbl),    R(tbu),    \
   /* 116 */ R4(dec),   R(dabr),   R4(ear)
 
+/* AltiVec registers */
+#define PPC_ALTIVEC_REGS \
+  /*119*/R16(vr0), R16(vr1), R16(vr2), R16(vr3), R16(vr4), R16(vr5), R16(vr6), R16(vr7),  \
+  /*127*/R16(vr8), R16(vr9), R16(vr10),R16(vr11),R16(vr12),R16(vr13),R16(vr14),R16(vr15), \
+  /*135*/R16(vr16),R16(vr17),R16(vr18),R16(vr19),R16(vr20),R16(vr21),R16(vr22),R16(vr23), \
+  /*143*/R16(vr24),R16(vr25),R16(vr26),R16(vr27),R16(vr28),R16(vr29),R16(vr30),R16(vr31), \
+  /*151*/R4(vscr), R4(vrsave)
+
 /* IBM POWER (pre-PowerPC) architecture, user-level view.  We only cover
    user-level SPR's. */
 static const struct reg registers_power[] =
@@ -1828,7 +2041,8 @@ static const struct reg registers_power[] =
 static const struct reg registers_powerpc[] =
 {
   COMMON_UISA_REGS,
-  PPC_UISA_SPRS
+  PPC_UISA_SPRS,
+  PPC_ALTIVEC_REGS
 };
 
 /* IBM PowerPC 403. */
@@ -1959,6 +2173,21 @@ static const struct reg registers_750[] =
 };
 
 
+/* Motorola PowerPC 7400. */
+static const struct reg registers_7400[] =
+{
+  /* gpr0-gpr31, fpr0-fpr31 */
+  COMMON_UISA_REGS,
+  /* ctr, xre, lr, cr */
+  PPC_UISA_SPRS,
+  /* sr0-sr15 */
+  PPC_SEGMENT_REGS,
+  PPC_OEA_SPRS,
+  /* vr0-vr31, vrsave, vscr */
+  PPC_ALTIVEC_REGS
+  /* FIXME? Add more registers? */
+};
+
 /* Information about a particular processor variant.  */
 
 struct variant
@@ -2018,6 +2247,8 @@ static const struct variant variants[] =
    bfd_mach_ppc_860, num_registers (registers_860), registers_860},
   {"750", "Motorola/IBM PowerPC 750 or 740", bfd_arch_powerpc,
    bfd_mach_ppc_750, num_registers (registers_750), registers_750},
+  {"7400", "Motorola/IBM PowerPC 7400 (G4)", bfd_arch_powerpc,
+   bfd_mach_ppc_7400, num_registers (registers_7400), registers_7400},
 
   /* FIXME: I haven't checked the register sets of the following. */
   {"620", "Motorola PowerPC 620", bfd_arch_powerpc,
@@ -2261,6 +2492,23 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   else
     tdep->ppc_mq_regnum = 70;
 
+  if (v->arch == bfd_arch_powerpc)
+    switch (v->mach)
+      {
+      case bfd_mach_ppc: 
+	tdep->ppc_vr0_regnum = 71;
+	tdep->ppc_vrsave_regnum = 104;
+	break;
+      case bfd_mach_ppc_7400:
+	tdep->ppc_vr0_regnum = 119;
+	tdep->ppc_vrsave_regnum = 153;
+	break;
+      default:
+	tdep->ppc_vr0_regnum = -1;
+	tdep->ppc_vrsave_regnum = -1;
+	break;
+      }   
+
   /* Calculate byte offsets in raw register array. */
   tdep->regoff = xmalloc (v->nregs * sizeof (int));
   for (i = off = 0; i < v->nregs; i++)
@@ -2289,6 +2537,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_register_virtual_size (gdbarch, generic_register_virtual_size);
   set_gdbarch_max_register_virtual_size (gdbarch, 8);
   set_gdbarch_register_virtual_type (gdbarch, rs6000_register_virtual_type);
+  set_gdbarch_do_registers_info (gdbarch, rs6000_do_registers_info);
 
   set_gdbarch_ptr_bit (gdbarch, wordsize * TARGET_CHAR_BIT);
   set_gdbarch_short_bit (gdbarch, 2 * TARGET_CHAR_BIT);
@@ -2389,6 +2638,14 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   return gdbarch;
 }
 
+static struct cmd_list_element *info_powerpc_cmdlist = NULL;
+
+static void
+rs6000_info_powerpc_command (char *args, int from_tty)
+{
+  help_list (info_powerpc_cmdlist, "info powerpc ", class_info, gdb_stdout);
+}
+
 /* Initialization code.  */
 
 void
@@ -2396,4 +2653,14 @@ _initialize_rs6000_tdep (void)
 {
   register_gdbarch_init (bfd_arch_rs6000, rs6000_gdbarch_init);
   register_gdbarch_init (bfd_arch_powerpc, rs6000_gdbarch_init);
+
+  /* Add root prefix command for "info powerpc" commands */
+  add_prefix_cmd ("powerpc", class_info, rs6000_info_powerpc_command,
+		  "Various POWERPC info specific commands.",
+		  &info_powerpc_cmdlist, "info powerpc ", 0, &infolist);
+
+  add_cmd ("altivec", class_info, rs6000_altivec_registers_info,
+	   "Display the contents of the AltiVec registers.",
+	   &info_powerpc_cmdlist);
+
 }
