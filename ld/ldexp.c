@@ -1,6 +1,6 @@
 /* This module handles expression trees.
    Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001, 2002, 2003, 2004
+   2001, 2002, 2003, 2004, 2005
    Free Software Foundation, Inc.
    Written by Steve Chamberlain of Cygnus Support <sac@cygnus.com>.
 
@@ -144,6 +144,7 @@ new_abs (bfd_vma value)
   new.valid_p = TRUE;
   new.section = abs_output_section;
   new.value = value;
+  new.str = NULL;
   return new;
 }
 

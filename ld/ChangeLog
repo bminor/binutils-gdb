@@ -1,3 +1,7 @@
+2005-02-17  Alan Modra  <amodra@bigpond.net.au>
+
+	* ldexp.c (new_abs): Init new.str.
+
 2005-02-15  Mark Mitchell  <mark@codesourcery.com>
 
 	* configure.in (AC_CHECK_FUNCS): Add glob.
