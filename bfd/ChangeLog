@@ -1,5 +1,9 @@
 Fri Aug  9 12:44:57 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* xcofflink.c (xcoff_link_add_dynamic_symbols): If a descriptor
+ 	symbol is found, automatically define the corresponding function
+ 	code.
+
 	* cofflink.c (coff_link_add_symbols): Only set (*sym_hash)->numaux
 	if sym.n_numaux is not zero.
 	(_bfd_coff_link_input_bfd): Permit the symbol and the hash table
