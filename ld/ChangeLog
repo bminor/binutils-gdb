@@ -1,3 +1,8 @@
+2002-02-17  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* emultempl/mmo.em (mmo_after_open): Don't call
+	_bfd_mmix_check_all_relocs when producing ELF output.
+
 2002-02-15  Richard Henderson  <rth@redhat.com>
 
         * emulparams/elf64alpha.sh (NOP): Adjust for big-endian

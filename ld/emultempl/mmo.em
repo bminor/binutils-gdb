@@ -238,12 +238,20 @@ mmo_finish ()
 static void
 mmo_after_open ()
 {
-  LANG_FOR_EACH_INPUT_STATEMENT (is)
+  /* When there's a mismatch between the output format and the emulation
+     (using weird combinations like "-m mmo --oformat elf64-mmix" for
+     example), we'd count relocs twice because they'd also be counted
+     along the usual route for ELF-only linking, which would lead to an
+     internal accounting error.  */
+  if (bfd_get_flavour (output_bfd) != bfd_target_elf_flavour)
     {
-      if (bfd_get_flavour (is->the_bfd) == bfd_target_elf_flavour
-	  && !_bfd_mmix_check_all_relocs (is->the_bfd, &link_info))
-	einfo ("%X%P: Internal problems scanning %B after opening it",
-	       is->the_bfd);
+      LANG_FOR_EACH_INPUT_STATEMENT (is)
+	{
+	  if (bfd_get_flavour (is->the_bfd) == bfd_target_elf_flavour
+	      && !_bfd_mmix_check_all_relocs (is->the_bfd, &link_info))
+	    einfo ("%X%P: Internal problems scanning %B after opening it",
+		   is->the_bfd);
+	}
     }
 }
 EOF
