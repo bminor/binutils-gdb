@@ -1,4 +1,16 @@
-		GDB 4.0 -- what has changed since 3.5?
+		What has changed since GDB-3.5?
+
+
+ *  GDB and Modula-2
+
+GDB now has preliminary support for the GNU Modula-2 compiler,
+currently under development at the State University of New York at
+Buffalo.  Development of both GDB and the GNU Modula-2 compiler will
+continue through the fall of 1991 and into 1992.
+
+Other Modula-2 compilers are currently not supported, and attempting to
+debug programs compiled with them will likely result in an error as the
+symbol table of the executable is read in.
 
  *  New Facilities
 
