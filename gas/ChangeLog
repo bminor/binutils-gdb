@@ -1,3 +1,10 @@
+2002-09-28  Matt Thomas  <matt@3am-software.com>
+            Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* config/tc-vax.c (md_estimate_size_before_relax): Only try to
+	convert undefined references to GOT32/PLT32 if PIC code is
+	requested.  Fix comment.
+
 2002-09-27  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
 
 	* config/tc-sh.c (sh_force_relocation): Return 0 for

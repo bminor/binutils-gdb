@@ -1244,12 +1244,11 @@ md_estimate_size_before_relax (fragP, segment)
 	  old_fr_fix = fragP->fr_fix;
 	  p = fragP->fr_literal + old_fr_fix;
 #ifdef OBJ_ELF
-	  /*
-	   * If this is to undefined symbol, then if it's an indirect
-	   * reference indicate that is can mutated into a GLOB_DAT
-	   * by the loader.  We restrict ourselves to no offset due to
-	   * a limitation in the NetBSD linker.
-	   */
+	  /* If this is to an undefined symbol, then if it's an indirect
+	     reference indicate that is can mutated into a GLOB_DAT or
+	     JUMP_SLOT by the loader.  We restrict ourselves to no offset
+	     due to a limitation in the NetBSD linker.  */
+
 	  if (GOT_symbol == NULL)
 	    GOT_symbol = symbol_find (GLOBAL_OFFSET_TABLE_NAME);
 	  if (PLT_symbol == NULL)
@@ -1257,6 +1256,7 @@ md_estimate_size_before_relax (fragP, segment)
 	  if ((GOT_symbol == NULL || fragP->fr_symbol != GOT_symbol)
 	      && (PLT_symbol == NULL || fragP->fr_symbol != PLT_symbol)
 	      && fragP->fr_symbol != NULL
+	      && flag_want_pic
 	      && (!S_IS_DEFINED (fragP->fr_symbol)
 	          || S_IS_WEAK (fragP->fr_symbol)
 	          || S_IS_EXTERNAL (fragP->fr_symbol)))
@@ -1269,7 +1269,6 @@ md_estimate_size_before_relax (fragP, segment)
 		}
 	      else
 		{
-	
 		  if (((unsigned char *) fragP->fr_opcode)[0] == VAX_CALLS
 		      || ((unsigned char *) fragP->fr_opcode)[0] == VAX_CALLG
 		      || ((unsigned char *) fragP->fr_opcode)[0] == VAX_JSB
