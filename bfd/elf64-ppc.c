@@ -2777,7 +2777,9 @@ struct ppc_link_hash_entry
   unsigned int is_func:1;
   unsigned int is_func_descriptor:1;
 
-  /* Whether global opd sym has been adjusted or not.  */
+  /* Whether global opd sym has been adjusted or not.
+     After ppc64_elf_edit_opd has run, this flag should be set for all
+     globals defined in any opd section.  */
   unsigned int adjust_done:1;
 
   /* Contexts in which symbol is used in the GOT (or TOC).
@@ -3472,7 +3474,8 @@ ppc64_elf_add_symbol_hook (bfd *ibfd ATTRIBUTE_UNUSED,
 			   asection **sec,
 			   bfd_vma *value ATTRIBUTE_UNUSED)
 {
-  if (strcmp (bfd_get_section_name (ibfd, *sec), ".opd") == 0)
+  if (*sec != NULL
+      && strcmp (bfd_get_section_name (ibfd, *sec), ".opd") == 0)
     isym->st_info = ELF_ST_INFO (ELF_ST_BIND (isym->st_info), STT_FUNC);
   return TRUE;
 }
@@ -4790,9 +4793,13 @@ ppc64_elf_hide_symbol (struct bfd_link_info *info,
 }
 
 static bfd_boolean
-get_sym_h (struct elf_link_hash_entry **hp, Elf_Internal_Sym **symp,
-	   asection **symsecp, char **tls_maskp, Elf_Internal_Sym **locsymsp,
-	   unsigned long r_symndx, bfd *ibfd)
+get_sym_h (struct elf_link_hash_entry **hp,
+	   Elf_Internal_Sym **symp,
+	   asection **symsecp,
+	   char **tls_maskp,
+	   Elf_Internal_Sym **locsymsp,
+	   unsigned long r_symndx,
+	   bfd *ibfd)
 {
   Elf_Internal_Shdr *symtab_hdr = &elf_tdata (ibfd)->symtab_hdr;
 
@@ -6938,6 +6945,7 @@ ppc64_elf_size_stubs (bfd *output_bfd,
 		  asection *sym_sec;
 		  bfd_vma sym_value;
 		  bfd_vma destination;
+		  bfd_boolean ok_dest;
 		  struct ppc_link_hash_entry *hash;
 		  struct elf_link_hash_entry *h;
 		  Elf_Internal_Sym *sym;
@@ -6962,19 +6970,17 @@ ppc64_elf_size_stubs (bfd *output_bfd,
 
 		  /* Now determine the call target, its name, value,
 		     section.  */
-		  destination = 0;
 		  if (!get_sym_h (&h, &sym, &sym_sec, NULL, &local_syms,
 				  r_indx, input_bfd))
 		    goto error_ret_free_internal;
 		  hash = (struct ppc_link_hash_entry *) h;
 
+		  ok_dest = FALSE;
 		  if (hash == NULL)
 		    {
 		      /* It's a local symbol.  */
 		      sym_value = sym->st_value;
-		      destination = (sym_value + irela->r_addend
-				     + sym_sec->output_offset
-				     + sym_sec->output_section->vma);
+		      ok_dest = TRUE;
 		    }
 		  else
 		    {
@@ -6985,9 +6991,7 @@ ppc64_elf_size_stubs (bfd *output_bfd,
 			{
 			  sym_value = hash->elf.root.u.def.value;
 			  if (sym_sec->output_section != NULL)
-			    destination = (sym_value + irela->r_addend
-					   + sym_sec->output_offset
-					   + sym_sec->output_section->vma);
+			    ok_dest = TRUE;
 			}
 		      else if (hash->elf.root.type == bfd_link_hash_undefweak)
 			;
@@ -6998,6 +7002,15 @@ ppc64_elf_size_stubs (bfd *output_bfd,
 			  bfd_set_error (bfd_error_bad_value);
 			  goto error_ret_free_internal;
 			}
+		    }
+
+		  destination = 0;
+		  if (ok_dest)
+		    {
+		      sym_value += irela->r_addend;
+		      destination = (sym_value
+				     + sym_sec->output_offset
+				     + sym_sec->output_section->vma);
 		    }
 
 		  /* Determine what (if any) linker stub is needed.  */
