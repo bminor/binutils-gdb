@@ -1,3 +1,9 @@
+Thu Jan 18 12:25:06 2001  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* varobj.c (FREEIF): Delete macro.
+	(varobj_set_value, free_variable): Replace FREEIF with ``xfree''
+ 	call.
+
 2001-01-18  Nick Clifton  <nickc@redhat.com>
 
 	* arc-tdep.c (arc_cpu_type_table): Add new arc core numbers.

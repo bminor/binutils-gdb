@@ -391,11 +391,6 @@ static int rootcount = 0;	/* number of root varobjs in the list */
 /* Pointer to the varobj hash table (built at run time) */
 static struct vlist **varobj_table;
 
-#if defined(FREEIF)
-#undef FREEIF
-#endif
-#define FREEIF(x) if (x != NULL) free((char *) (x))
-
 /* Is the variable X one of our "fake" children? */
 #define CPLUS_FAKE_CHILD(x) \
 ((x) != NULL && (x)->type == NULL && (x)->value == NULL)
@@ -788,7 +783,7 @@ varobj_set_value (struct varobj *var, char *expression)
       if (!gdb_evaluate_expression (exp, &value))
 	{
 	  /* We cannot proceed without a valid expression. */
-	  FREEIF (exp);
+	  xfree (exp);
 	  return 0;
 	}
 
@@ -1353,12 +1348,12 @@ free_variable (struct varobj *var)
   if (var->root->rootvar == var)
     {
       free_current_contents ((char **) &var->root->exp);
-      FREEIF (var->root);
+      xfree (var->root);
     }
 
-  FREEIF (var->name);
-  FREEIF (var->obj_name);
-  FREEIF (var);
+  xfree (var->name);
+  xfree (var->obj_name);
+  xfree (var);
 }
 
 static void
