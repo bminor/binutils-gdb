@@ -1,3 +1,8 @@
+2002-11-08  Andrew Cagney  <ac131313@redhat.com>
+
+	* config/djgpp/fnchange.lst: 8.3 proof i386obsd-nat.c and
+	i386obsd-tdep.c.  Rename to "gdb.cxx", paths containing "gdb.c++".
+
 2002-11-06  Joel Brobecker  <brobecker@gnat.com>
 
 	* PROBLEMS: Document gdb/816 (unable to read core file on alpha-osf).
