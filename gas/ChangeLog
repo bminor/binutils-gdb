@@ -1,3 +1,9 @@
+Thu Mar 20 13:42:01 1997  H.J. Lu  <hjl@lucon.org>
+
+	* Makefile.in (m68k-parse.c): Depend upon itbl-parse.c, to
+	serialize a parallel make.
+	(itbl-parse.h): Split target out from itbl-parse.c.
+
 Thu Mar 20 12:48:45 1997  Philippe De Muyter  <phdm@info.ucl.ac.be>
 
 	* config/te-delta.h (COFF_COMMON_ADDEND): Define.

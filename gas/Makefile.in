@@ -432,11 +432,11 @@ e-i386elf.o: $(srcdir)/config/e-i386elf.c
 
 # The m68k operand parser.
 
-m68k-parse.c: $(srcdir)/config/m68k-parse.y
+# Depend upon itbl-parse.c to serialize a parallel make.
+m68k-parse.c: $(srcdir)/config/m68k-parse.y itbl-parse.c
 	$(BISON) $(BISONFLAGS) $(srcdir)/config/m68k-parse.y
 	mv -f y.tab.c m68k-parse.c
 m68k-parse.o: m68k-parse.c $(srcdir)/config/m68k-parse.h
-
 
 # The instruction table specification lexical analyzer and parser.
 
@@ -452,10 +452,12 @@ itbl-lex.c: $(srcdir)/itbl-lex.l
 itbl-lex.o: itbl-lex.c itbl-parse.h
 	$(CC) -c $(ALL_CFLAGS) $(CPPFLAGS) $(INCLUDES) itbl-lex.c
 
-itbl-parse.c itbl-parse.h: $(srcdir)/itbl-parse.y
+itbl-parse.c: $(srcdir)/itbl-parse.y
 	$(BISON) -d $(BISONFLAGS) $(srcdir)/itbl-parse.y
 	mv -f y.tab.c itbl-parse.c
 	mv -f y.tab.h itbl-parse.h
+
+itbl-parse.h: itbl-parse.c
 
 itbl-parse.o: itbl-parse.c itbl-parse.h $(srcdir)/itbl-ops.h
 	$(CC) -c $(ALL_CFLAGS) $(CPPFLAGS) $(INCLUDES) itbl-parse.c
