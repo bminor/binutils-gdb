@@ -108,6 +108,7 @@ typedef int (*disassembler_ftype)
 extern int print_insn_big_mips		PARAMS ((bfd_vma, disassemble_info*));
 extern int print_insn_little_mips	PARAMS ((bfd_vma, disassemble_info*));
 extern int print_insn_i386		PARAMS ((bfd_vma, disassemble_info*));
+extern int print_insn_i8086		PARAMS ((bfd_vma, disassemble_info*));
 extern int print_insn_m68k		PARAMS ((bfd_vma, disassemble_info*));
 extern int print_insn_z8001		PARAMS ((bfd_vma, disassemble_info*));
 extern int print_insn_z8002		PARAMS ((bfd_vma, disassemble_info*));

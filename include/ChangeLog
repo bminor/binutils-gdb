@@ -1,3 +1,7 @@
+Fri Jul 12 10:19:27 1996  Stu Grossman  (grossman@critters.cygnus.com)
+
+	* dis-asm.h (print_insn_i8086):  Declare.
+
 Wed Jul  3 16:02:39 1996  Stu Grossman  (grossman@critters.cygnus.com)
 
 	* dis-asm.h (print_insn_sparclite):  Declare.
