@@ -68,12 +68,18 @@ SECTIONS
   .dynstr      ${RELOCATING-0} : { *(.dynstr)		}
   .dynsym      ${RELOCATING-0} : { *(.dynsym)		}
   .hash        ${RELOCATING-0} : { *(.hash)		}
-  .rel.text    ${RELOCATING-0} : { *(.rel.text)		}
-  .rela.text   ${RELOCATING-0} : { *(.rela.text) 	}
-  .rel.data    ${RELOCATING-0} : { *(.rel.data)		}
-  .rela.data   ${RELOCATING-0} : { *(.rela.data) 	}
-  .rel.rodata  ${RELOCATING-0} : { *(.rel.rodata) 	}
-  .rela.rodata ${RELOCATING-0} : { *(.rela.rodata) 	}
+  .rel.text    ${RELOCATING-0} :
+    { *(.rel.text) *(.rel.gnu.linkonce.t*) }
+  .rela.text   ${RELOCATING-0} :
+    { *(.rela.text) *(.rela.gnu.linkonce.t*) }
+  .rel.data    ${RELOCATING-0} :
+    { *(.rel.data) *(.rel.gnu.linkonce.d*) }
+  .rela.data   ${RELOCATING-0} :
+    { *(.rela.data) *(.rela.gnu.linkonce.d*) }
+  .rel.rodata  ${RELOCATING-0} :
+    { *(.rel.rodata) *(.rel.gnu.linkonce.r*) }
+  .rela.rodata ${RELOCATING-0} :
+    { *(.rela.rodata) *(.rela.gnu.linkonce.r*) }
   .rel.got     ${RELOCATING-0} : { *(.rel.got)		}
   .rela.got    ${RELOCATING-0} : { *(.rela.got)		}
   .rel.ctors   ${RELOCATING-0} : { *(.rel.ctors)	}
@@ -88,7 +94,7 @@ SECTIONS
   .rela.bss    ${RELOCATING-0} : { *(.rela.bss)		}
   .rel.plt     ${RELOCATING-0} : { *(.rel.plt)		}
   .rela.plt    ${RELOCATING-0} : { *(.rela.plt)		}
-  .rodata  ${RELOCATING-0} : { *(.rodata)  }
+  .rodata  ${RELOCATING-0} : { *(.rodata) *(.gnu.linkonce.r*) }
   .rodata1 ${RELOCATING-0} : { *(.rodata1) }
   .init        ${RELOCATING-0} : { *(.init)	} =${NOP-0}
   .text    ${RELOCATING-0} :
@@ -98,6 +104,7 @@ SECTIONS
     *(.stub)
     /* .gnu.warning sections are handled specially by elf32.em.  */
     *(.gnu.warning)
+    *(.gnu.linkonce.t*)
   } =${NOP-0}
   ${RELOCATING+_etext = .;}
   ${RELOCATING+PROVIDE (etext = .);}
@@ -125,6 +132,7 @@ SECTIONS
   {
     ${RELOCATING+${DATA_START_SYMBOLS}}
     *(.data)
+    *(.gnu.linkonce.d*)
     ${CONSTRUCTING+CONSTRUCTORS}
   }
   .data1 ${RELOCATING-0} : { *(.data1) }

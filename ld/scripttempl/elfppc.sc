@@ -53,9 +53,12 @@ SECTIONS
   .hash		${RELOCATING-0} : { *(.hash)		}
   .dynsym	${RELOCATING-0} : { *(.dynsym)		}
   .dynstr	${RELOCATING-0} : { *(.dynstr)		}
-  .rela.text	${RELOCATING-0} : { *(.rela.text) 	}
-  .rela.data	${RELOCATING-0} : { *(.rela.data) 	}
-  .rela.rodata	${RELOCATING-0} : { *(.rela.rodata) 	}
+  .rela.text   ${RELOCATING-0} :
+    { *(.rela.text) *(.rela.gnu.linkonce.t*) }
+  .rela.data   ${RELOCATING-0} :
+    { *(.rela.data) *(.rela.gnu.linkonce.d*) }
+  .rela.rodata ${RELOCATING-0} :
+    { *(.rela.rodata) *(.rela.gnu.linkonce.r*) }
   .rela.got	${RELOCATING-0} : { *(.rela.got)	}
   .rela.got1	${RELOCATING-0} : { *(.rela.got1)	}
   .rela.got2	${RELOCATING-0} : { *(.rela.got2)	}
@@ -76,10 +79,11 @@ SECTIONS
     *(.text)
     /* .gnu.warning sections are handled specially by elf32.em.  */
     *(.gnu.warning)
+    *(.gnu.linkonce.t*)
   } =${NOP-0}
   .init		${RELOCATING-0} : { *(.init)		} =${NOP-0}
   .fini		${RELOCATING-0} : { *(.fini)		} =${NOP-0}
-  .rodata	${RELOCATING-0} : { *(.rodata)  }
+  .rodata	${RELOCATING-0} : { *(.rodata) *(.gnu.linkonce.r*) }
   .rodata1	${RELOCATING-0} : { *(.rodata1) }
   ${RELOCATING+_etext = .;}
   ${RELOCATING+PROVIDE (etext = .);}
@@ -107,6 +111,7 @@ SECTIONS
   {
     ${RELOCATING+${DATA_START_SYMBOLS}}
     *(.data)
+    *(.gnu.linkonce.d*)
     ${CONSTRUCTING+CONSTRUCTORS}
   }
   .data1 ${RELOCATING-0} : { *(.data1) }
