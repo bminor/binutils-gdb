@@ -4,18 +4,23 @@ if ![istarget hppa*-*-*] {
     run_dump_test test1
 }
 
-run_dump_test test2
+if ![istarget *c54x*-*-*] {
+    run_dump_test test2
+}
 
 run_dump_test test3
 
-run_dump_test irp
+if ![istarget *c54x*-*-*] {
+    run_dump_test irp
+    run_dump_test rept
+}
 
-run_dump_test rept
 
 gas_test_error "err.s" "" "macro infinite recursion"
 
 case $target_triplet in {
     { hppa*-*-* } { }
+    { *c54x*-*-* } { }
     default {
 	run_dump_test semi
     }

@@ -149,6 +149,11 @@
 #define TARGET_FORMAT "coff-tic30"
 #endif
 
+#ifdef TC_TIC54X
+#include "coff/tic54x.h"
+#define TARGET_FORMAT "coff1-c54x"
+#endif
+
 #ifdef TC_TIC80
 #include "coff/tic80.h"
 #define TARGET_FORMAT "coff-tic80"

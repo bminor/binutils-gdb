@@ -1,3 +1,23 @@
+2000-06-20  Timothy Wall  <twall@cygnus.com>
+
+	* doc/internals.texi (CPU backend): Add @itemx for
+	TC_START_LABEL_WITHOUT_COLON. 
+	* doc/c-tic54x.texi: New.
+	* doc/as.texinfo: Add tic54x features and include primary tic54x
+	documentation file. 
+	* doc/all.texi: Add C54X.
+	* doc/Makefile.am (CPU_DOCS): Add c-tic54x.texi. 
+	* doc/Makefile.in: Regenerate.
+	* configure.in: Add tic54x and define LIBM for tic54x.
+	* configure: Regenrate.
+	* config/tc-tic54x.[ch]: New.
+	* config/obj-coff.h: Add tic54x.
+	* Makefile.am: (CPU_TYPES): Add tic54x.
+	(TARGET_CPU_CFILES): Add 'tc-tic54x.c'.
+	(TARGET_CPU_HFILES): Add 'tc-tic54x.h'.
+	(as_new_LDADD): Add $(LIBM).
+	* Makefile.in: Regenerate.
+	
 2000-06-18  Stephane Carrez  <stcarrez@worldnet.fr>
 
 	* doc/Makefile.am (CPU_DOCS): Added 68hc11 file.
@@ -746,7 +766,7 @@ Fri Apr 21 13:20:53 2000  Richard Henderson  <rth@cygnus.com>
 			  Jim Wilson  <wilson@cygnus.com>
 
 	* Makefile.am (CPU_TYPES): Add ia64.
-	(TARGET_CPU_CFILES): Add cofnig/tc-ia64.c.
+	(TARGET_CPU_CFILES): Add config/tc-ia64.c.
 	(TARGET_CPU_HFILES): Add config/tc-ia64.h.
 	* Makefile.in: Rebuild.
 	* app.c (do_scrub_chars): Handle DOUBLESLASH_COMMENTS.

@@ -68,6 +68,7 @@ CPU_TYPES = \
 	sparc \
 	tahoe \
 	tic30 \
+	tic54x \
 	tic80 \
 	vax \
 	w65 \
@@ -240,6 +241,7 @@ TARGET_CPU_CFILES = \
 	config/tc-sparc.c \
 	config/tc-tahoe.c \
 	config/tc-tic30.c \
+	config/tc-tic54x.c \
 	config/tc-tic80.c \
 	config/tc-vax.c \
 	config/tc-w65.c \
@@ -278,6 +280,7 @@ TARGET_CPU_HFILES = \
 	config/tc-sparc.h \
 	config/tc-tahoe.h \
 	config/tc-tic30.h \
+	config/tc-tic54x.h \
 	config/tc-tic80.h \
 	config/tc-vax.h \
 	config/tc-w65.h \
@@ -445,7 +448,7 @@ $(OBJS): @ALL_OBJ_DEPS@
 
 as_new_SOURCES = $(GAS_CFILES)
 as_new_LDADD = $(TARG_CPU_O) $(OBJ_FORMAT_O) $(ATOF_TARG_O) \
-	$(extra_objects) $(GASLIBS) $(INTLLIBS)
+	$(extra_objects) $(GASLIBS) $(INTLLIBS) $(LIBM)
 as_new_DEPENDENCIES = $(TARG_CPU_O) $(OBJ_FORMAT_O) $(ATOF_TARG_O) \
 	$(extra_objects) $(GASLIBS) $(INTLDEPS)
 
@@ -1264,6 +1267,10 @@ DEPTC_tic30_elf = $(INCDIR)/bin-bugs.h $(INCDIR)/progress.h \
   $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h \
   $(srcdir)/config/tc-tic30.h emul.h $(INCDIR)/opcode/tic30.h
+DEPTC_tic54x_coff = $(INCDIR)/bin-bugs.h $(INCDIR)/progress.h \
+  $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-tic54x.h \
+  $(INCDIR)/coff/internal.h $(INCDIR)/coff/tic54x.h $(BFDDIR)/libcoff.h \
+  $(INCDIR)/bfdlink.h emul.h $(INCDIR)/opcode/tic54x.h
 DEPTC_tic80_coff = $(INCDIR)/bin-bugs.h $(INCDIR)/progress.h \
   $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-tic80.h \
   $(INCDIR)/coff/internal.h $(INCDIR)/coff/tic80.h $(BFDDIR)/libcoff.h \
@@ -1658,6 +1665,10 @@ DEPOBJ_tic30_elf = $(INCDIR)/bin-bugs.h $(INCDIR)/progress.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h \
   $(srcdir)/config/tc-tic30.h emul.h subsegs.h $(INCDIR)/obstack.h \
   $(INCDIR)/aout/aout64.h
+DEPOBJ_tic54x_coff = $(INCDIR)/bin-bugs.h $(INCDIR)/progress.h \
+  $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-tic54x.h \
+  $(INCDIR)/coff/internal.h $(INCDIR)/coff/tic54x.h $(BFDDIR)/libcoff.h \
+  $(INCDIR)/bfdlink.h emul.h $(INCDIR)/obstack.h subsegs.h
 DEPOBJ_tic80_coff = $(INCDIR)/bin-bugs.h $(INCDIR)/progress.h \
   $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-tic80.h \
   $(INCDIR)/coff/internal.h $(INCDIR)/coff/tic80.h $(BFDDIR)/libcoff.h \
@@ -1914,6 +1925,9 @@ DEP_tic30_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-tic30.h \
 DEP_tic30_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   $(INCDIR)/bfdlink.h $(srcdir)/config/tc-tic30.h
+DEP_tic54x_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-tic54x.h \
+  $(INCDIR)/coff/internal.h $(INCDIR)/coff/tic54x.h $(BFDDIR)/libcoff.h \
+  $(INCDIR)/bfdlink.h
 DEP_tic80_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-tic80.h \
   $(INCDIR)/coff/internal.h $(INCDIR)/coff/tic80.h $(BFDDIR)/libcoff.h \
   $(INCDIR)/bfdlink.h

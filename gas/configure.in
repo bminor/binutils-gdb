@@ -393,6 +393,8 @@ changequote([,])dnl
 
       tic30-*-*aout*)	    fmt=aout bfd_gas=yes ;;
       tic30-*-*coff*)       fmt=coff bfd_gas=yes ;;
+      tic54x-*-* | c54x*-*-*)
+			    fmt=coff bfd_gas=yes need_libm=yes;;
       tic80-*-*)	    fmt=coff ;;
 
       v850-*-*)		    fmt=elf bfd_gas=yes ;;
@@ -815,6 +817,14 @@ AC_CHECK_FUNCS(unlink remove, break)
 
 # Some systems don't have sbrk().
 AC_CHECK_FUNCS(sbrk)
+
+# do we need the math library?
+case "${need_libm}" in
+yes) 
+  AC_CHECK_LIBM
+  AC_SUBST(LIBM)
+  ;;
+esac
 
 # Some non-ANSI preprocessors botch requoting inside strings.  That's bad
 # enough, but on some of those systems, the assert macro relies on requoting

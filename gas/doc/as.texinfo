@@ -249,6 +249,10 @@ Here is a brief summary of how to invoke @code{@value{AS}}.  For details,
    -Av8plus | -Av8plusa | -Av9 | -Av9a ]
  [ -xarch=v8plus | -xarch=v8plusa ] [ -bump ] [ -32 | -64 ]
 @end ifset
+@ifset TIC54X
+ [ -mcpu=54[123589] | -mcpu=54[56]lp ] [ -mfar-mode | -mf ] 
+ [ -merrors-to-file <filename> | -me <filename> ]
+@end ifset
 @ifset Z8000
 @c Z8000 has no machine-dependent assembler options
 @end ifset
@@ -620,6 +624,22 @@ equivalent to -Av8plus and -Av8plusa, respectively.
 
 @item -bump
 Warn when the assembler switches to another architecture.
+@end table
+@end ifset
+
+@ifset TIC54X
+The following options are available when @value{AS} is configured for the 'c54x
+architecture. 
+
+@table @code
+@item -mfar-mode
+Enable extended addressing mode.  All addresses and relocations will assume
+extended addressing (usually 23 bits).
+@item -mcpu=@var{CPU_VERSION}
+Sets the CPU version being compiled for.
+@item -merrors-to-file @var{FILENAME}
+Redirect error output to a file, for broken systems which don't support such
+behaviour in the shell.
 @end table
 @end ifset
 
@@ -5031,6 +5051,9 @@ subject, see the hardware manufacturer's manual.
 @ifset SPARC
 * Sparc-Dependent::             SPARC Dependent Features
 @end ifset
+@ifset TIC54X
+* TIC54X-Dependent::            TI TMS320C54x Dependent Features
+@end ifset
 @ifset V850
 * V850-Dependent::              V850 Dependent Features
 @end ifset
@@ -5219,6 +5242,10 @@ family.
 
 @ifset SPARC
 @include c-sparc.texi
+@end ifset
+
+@ifset TIC54X
+@include c-tic54x.texi
 @end ifset
 
 @ifset Z8000
@@ -5523,6 +5550,9 @@ Linas Vepstas added GAS support for the ESA/390 "IBM 370" architecture.
 
 Richard Henderson rewrote the Alpha assembler. Klaus Kaempf wrote GAS and BFD
 support for openVMS/Alpha.
+
+Timothy Wall, Michael Hayes, and Greg Smart contributed to the various tic*
+flavors.
 
 Several engineers at Cygnus Support have also provided many small bug fixes and
 configuration enhancements.

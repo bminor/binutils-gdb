@@ -44,6 +44,7 @@
 @set PJ
 @set SH
 @set SPARC
+@set C54X
 @set V850
 @set VAX
 @set VXWORKS

@@ -33,6 +33,7 @@ CPU_DOCS = \
 	c-pj.texi \
 	c-sh.texi \
 	c-sparc.texi \
+        c-tic54x.texi \
 	c-vax.texi \
 	c-v850.texi \
 	c-z8k.texi

@@ -1,4 +1,4 @@
-# Makefile.in generated automatically by automake 1.4 from Makefile.am
+# Makefile.in generated automatically by automake 1.4a from Makefile.am
 
 # Copyright (C) 1994, 1995-8, 1999 Free Software Foundation, Inc.
 # This Makefile.in is free software; the Free Software Foundation
@@ -46,9 +46,10 @@ AUTOMAKE = @AUTOMAKE@
 AUTOHEADER = @AUTOHEADER@
 
 INSTALL = @INSTALL@
-INSTALL_PROGRAM = @INSTALL_PROGRAM@ $(AM_INSTALL_PROGRAM_FLAGS)
+INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
+INSTALL_STRIP_FLAG =
 transform = @program_transform_name@
 
 NORMAL_INSTALL = :
@@ -83,6 +84,7 @@ INTLDEPS = @INTLDEPS@
 INTLLIBS = @INTLLIBS@
 INTLOBJS = @INTLOBJS@
 LEX = @LEX@
+LIBM = @LIBM@
 LIBTOOL = @LIBTOOL@
 LN_S = @LN_S@
 MAINT = @MAINT@
@@ -118,27 +120,7 @@ man_MANS = as.1
 
 info_TEXINFOS = as.texinfo gasp.texi
 
-CPU_DOCS = \
-	c-a29k.texi \
-	c-arm.texi \
-	c-d10v.texi \
-	c-h8300.texi \
-	c-h8500.texi \
-	c-hppa.texi \
-	c-i370.texi \
-	c-i386.texi \
-	c-i960.texi \
-	c-m32r.texi \
-	c-m68hc11.texi \
-	c-m68k.texi \
-	c-mips.texi \
-	c-ns32k.texi \
-	c-pj.texi \
-	c-sh.texi \
-	c-sparc.texi \
-	c-vax.texi \
-	c-v850.texi \
-	c-z8k.texi
+CPU_DOCS =  	c-a29k.texi 	c-arm.texi 	c-d10v.texi 	c-h8300.texi 	c-h8500.texi 	c-hppa.texi 	c-i370.texi 	c-i386.texi 	c-i960.texi 	c-m32r.texi 	c-m68hc11.texi 	c-m68k.texi 	c-mips.texi 	c-ns32k.texi 	c-pj.texi 	c-sh.texi 	c-sparc.texi         c-tic54x.texi 	c-vax.texi 	c-v850.texi 	c-z8k.texi
 
 
 # This one isn't ready for prime time yet.  Not even a little bit.
@@ -378,7 +360,7 @@ uninstall: uninstall-am
 all-am: Makefile $(MANS)
 all-redirect: all-am
 install-strip:
-	$(MAKE) $(AM_MAKEFLAGS) AM_INSTALL_PROGRAM_FLAGS=-s install
+	$(MAKE) $(AM_MAKEFLAGS) INSTALL_STRIP_FLAG=-s install
 installdirs:
 	$(mkinstalldirs)  $(DESTDIR)$(mandir)/man1
 

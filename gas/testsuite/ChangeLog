@@ -1,3 +1,12 @@
+2000-06-19  Timothy Wall  <twall@cygnus.com>
+
+	* gas/macros/macros.exp: Avoid tests which are not useful on tic54x.
+	* gas/all/gas.exp: Make adjustments for tic54x target.
+	* gas/ieee-fp/x930509a.exp: Ditto.
+	* gas/tic54x/*: New tests for tic54x.  NOTE: load page has been
+	moved into the LMA and is not printed separately by objdump any
+	longer.  This still needs to be tested.
+	
 2000-06-18  Stephane Carrez  <stcarrez@worldnet.fr>
 
 	* gas/m68k/all.exp: Don't execute tests if the target is m68hc11&12.

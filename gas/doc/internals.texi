@@ -991,6 +991,7 @@ If you define this macro, GAS will assume that any text at the start of a line
 is a label, even if it does not have a colon.
 
 @item TC_START_LABEL
+@itemx TC_START_LABEL_WITHOUT_COLON
 @cindex TC_START_LABEL
 You may define this macro to control what GAS considers to be a label.  The
 default definition is to accept any name followed by a colon character.
