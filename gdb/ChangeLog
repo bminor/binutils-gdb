@@ -1,3 +1,7 @@
+2001-07-30  Jim Blandy  <jimb@redhat.com>
+
+	* dwarf2read.c (dwarf2_build_psymtabs_hard): Doc fix.
+
 2001-07-27  Daniel Jacobowitz  <drow@mvista.com>
 
 	* configure.in: Only invoke AC_FUNC_SETPGRP if not cross-compiling.

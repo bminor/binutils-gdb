@@ -977,6 +977,34 @@ dwarf2_build_psymtabs_hard (struct objfile *objfile, int mainline)
   info_ptr = dwarf_info_buffer;
   abbrev_ptr = dwarf_abbrev_buffer;
 
+  /* We use dwarf2_tmp_obstack for objects that don't need to survive
+     the partial symbol scan, like attribute values.
+
+     We could reduce our peak memory consumption during partial symbol
+     table construction by freeing stuff from this obstack more often
+     --- say, after processing each compilation unit, or each die ---
+     but it turns out that this saves almost nothing.  For an
+     executable with 11Mb of Dwarf 2 data, I found about 64k allocated
+     on dwarf2_tmp_obstack.  Some investigation showed:
+
+     1) 69% of the attributes used forms DW_FORM_addr, DW_FORM_data*,
+        DW_FORM_flag, DW_FORM_[su]data, and DW_FORM_ref*.  These are
+        all fixed-length values not requiring dynamic allocation.
+
+     2) 30% of the attributes used the form DW_FORM_string.  For
+        DW_FORM_string, read_attribute simply hands back a pointer to
+        the null-terminated string in dwarf_info_buffer, so no dynamic
+        allocation is needed there either.
+
+     3) The remaining 1% of the attributes all used DW_FORM_block1.
+        75% of those were DW_AT_frame_base location lists for
+        functions; the rest were DW_AT_location attributes, probably
+        for the global variables.
+
+     Anyway, what this all means is that the memory the dwarf2
+     reader uses as temporary space reading partial symbols is about
+     0.5% as much as we use for dwarf_*_buffer.  That's noise.  */
+
   obstack_init (&dwarf2_tmp_obstack);
   back_to = make_cleanup (dwarf2_free_tmp_obstack, NULL);
 
