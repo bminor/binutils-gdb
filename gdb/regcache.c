@@ -178,16 +178,17 @@ init_regcache_descr (struct gdbarch *gdbarch)
 
   /* If an old style architecture, fill in the remainder of the
      register cache descriptor using the register macros.  */
-  if (!gdbarch_pseudo_register_read_p (gdbarch)
-      && !gdbarch_pseudo_register_write_p (gdbarch)
-      && !gdbarch_register_type_p (gdbarch))
+  /* NOTE: cagney/2003-06-29: If either of REGISTER_BYTE or
+     REGISTER_RAW_SIZE are still present, things are most likely
+     totally screwed.  Ex: an architecture with raw register sizes
+     smaller than what REGISTER_BYTE indicates; non monotonic
+     REGISTER_BYTE values.  For GDB 6 check for these nasty methods
+     and fall back to legacy code when present.  Sigh!  */
+  if ((!gdbarch_pseudo_register_read_p (gdbarch)
+       && !gdbarch_pseudo_register_write_p (gdbarch)
+       && !gdbarch_register_type_p (gdbarch))
+      || REGISTER_BYTE_P () || REGISTER_RAW_SIZE_P ())
     {
-      /* NOTE: cagney/2003-05-02: Don't add a test for REGISTER_BYTE_P
-	 to the above.  Doing that would cause all the existing
-	 architectures to revert back to the legacy regcache
-	 mechanisms, and that is not a good thing.  Instead just,
-	 later, check that the register cache's layout is consistent
-	 with REGISTER_BYTE.  */
       descr->legacy_p = 1;
       init_legacy_regcache_descr (gdbarch, descr);
       return descr;

@@ -641,8 +641,8 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of register_type, has predicate */
   /* Skip verify of deprecated_register_virtual_type, has predicate */
   /* Skip verify of deprecated_register_byte, has predicate */
-  /* Skip verify of deprecated_register_raw_size, invalid_p == 0 */
-  /* Skip verify of deprecated_register_virtual_size, invalid_p == 0 */
+  /* Skip verify of deprecated_register_raw_size, has predicate */
+  /* Skip verify of deprecated_register_virtual_size, has predicate */
   /* Skip verify of deprecated_max_register_raw_size, has predicate */
   /* Skip verify of deprecated_max_register_virtual_size, has predicate */
   /* Skip verify of unwind_dummy_id, has predicate */
@@ -2129,6 +2129,15 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         (long) current_gdbarch->register_name
                         /*REGISTER_NAME ()*/);
 #endif
+#ifdef REGISTER_RAW_SIZE_P
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "REGISTER_RAW_SIZE_P()",
+                      XSTRING (REGISTER_RAW_SIZE_P ()));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: REGISTER_RAW_SIZE_P() = %d\n",
+                      REGISTER_RAW_SIZE_P ());
+#endif
 #ifdef REGISTER_RAW_SIZE
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
@@ -2173,6 +2182,15 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
     fprintf_unfiltered (file,
                         "gdbarch_dump: register_type = 0x%08lx\n",
                         (long) current_gdbarch->register_type);
+#ifdef REGISTER_VIRTUAL_SIZE_P
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "REGISTER_VIRTUAL_SIZE_P()",
+                      XSTRING (REGISTER_VIRTUAL_SIZE_P ()));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: REGISTER_VIRTUAL_SIZE_P() = %d\n",
+                      REGISTER_VIRTUAL_SIZE_P ());
+#endif
 #ifdef REGISTER_VIRTUAL_SIZE
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
@@ -3368,12 +3386,20 @@ set_gdbarch_deprecated_register_byte (struct gdbarch *gdbarch,
 }
 
 int
+gdbarch_deprecated_register_raw_size_p (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  return gdbarch->deprecated_register_raw_size != generic_register_size;
+}
+
+int
 gdbarch_deprecated_register_raw_size (struct gdbarch *gdbarch, int reg_nr)
 {
   gdb_assert (gdbarch != NULL);
   if (gdbarch->deprecated_register_raw_size == 0)
     internal_error (__FILE__, __LINE__,
                     "gdbarch: gdbarch_deprecated_register_raw_size invalid");
+  /* Ignore predicate (gdbarch->deprecated_register_raw_size != generic_register_size).  */
   if (gdbarch_debug >= 2)
     fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_register_raw_size called\n");
   return gdbarch->deprecated_register_raw_size (reg_nr);
@@ -3387,12 +3413,20 @@ set_gdbarch_deprecated_register_raw_size (struct gdbarch *gdbarch,
 }
 
 int
+gdbarch_deprecated_register_virtual_size_p (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  return gdbarch->deprecated_register_virtual_size != generic_register_size;
+}
+
+int
 gdbarch_deprecated_register_virtual_size (struct gdbarch *gdbarch, int reg_nr)
 {
   gdb_assert (gdbarch != NULL);
   if (gdbarch->deprecated_register_virtual_size == 0)
     internal_error (__FILE__, __LINE__,
                     "gdbarch: gdbarch_deprecated_register_virtual_size invalid");
+  /* Ignore predicate (gdbarch->deprecated_register_virtual_size != generic_register_size).  */
   if (gdbarch_debug >= 2)
     fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_register_virtual_size called\n");
   return gdbarch->deprecated_register_virtual_size (reg_nr);

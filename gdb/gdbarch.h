@@ -709,6 +709,26 @@ extern void set_gdbarch_deprecated_register_byte (struct gdbarch *gdbarch, gdbar
    DEPRECATED_REGISTER_RAW_SIZE can be deleted.  See: maint print
    registers. */
 
+#if defined (REGISTER_RAW_SIZE)
+/* Legacy for systems yet to multi-arch REGISTER_RAW_SIZE */
+#if !defined (REGISTER_RAW_SIZE_P)
+#define REGISTER_RAW_SIZE_P() (1)
+#endif
+#endif
+
+/* Default predicate for non- multi-arch targets. */
+#if (!GDB_MULTI_ARCH) && !defined (REGISTER_RAW_SIZE_P)
+#define REGISTER_RAW_SIZE_P() (0)
+#endif
+
+extern int gdbarch_deprecated_register_raw_size_p (struct gdbarch *gdbarch);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (REGISTER_RAW_SIZE_P)
+#error "Non multi-arch definition of REGISTER_RAW_SIZE"
+#endif
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (REGISTER_RAW_SIZE_P)
+#define REGISTER_RAW_SIZE_P() (gdbarch_deprecated_register_raw_size_p (current_gdbarch))
+#endif
+
 /* Default (function) for non- multi-arch platforms. */
 #if (!GDB_MULTI_ARCH) && !defined (REGISTER_RAW_SIZE)
 #define REGISTER_RAW_SIZE(reg_nr) (generic_register_size (reg_nr))
@@ -728,6 +748,26 @@ extern void set_gdbarch_deprecated_register_raw_size (struct gdbarch *gdbarch, g
    sizes agree with the value computed from REGISTER_TYPE,
    DEPRECATED_REGISTER_VIRTUAL_SIZE can be deleted.  See: maint print
    registers. */
+
+#if defined (REGISTER_VIRTUAL_SIZE)
+/* Legacy for systems yet to multi-arch REGISTER_VIRTUAL_SIZE */
+#if !defined (REGISTER_VIRTUAL_SIZE_P)
+#define REGISTER_VIRTUAL_SIZE_P() (1)
+#endif
+#endif
+
+/* Default predicate for non- multi-arch targets. */
+#if (!GDB_MULTI_ARCH) && !defined (REGISTER_VIRTUAL_SIZE_P)
+#define REGISTER_VIRTUAL_SIZE_P() (0)
+#endif
+
+extern int gdbarch_deprecated_register_virtual_size_p (struct gdbarch *gdbarch);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (REGISTER_VIRTUAL_SIZE_P)
+#error "Non multi-arch definition of REGISTER_VIRTUAL_SIZE"
+#endif
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (REGISTER_VIRTUAL_SIZE_P)
+#define REGISTER_VIRTUAL_SIZE_P() (gdbarch_deprecated_register_virtual_size_p (current_gdbarch))
+#endif
 
 /* Default (function) for non- multi-arch platforms. */
 #if (!GDB_MULTI_ARCH) && !defined (REGISTER_VIRTUAL_SIZE)
