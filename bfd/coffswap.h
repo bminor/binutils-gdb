@@ -324,11 +324,13 @@ DEFUN(coff_swap_sym_out,(abfd, inp, extp),
 }
 
 static void
-DEFUN(coff_swap_aux_in,(abfd, ext1, type, class, in1),
+DEFUN(coff_swap_aux_in,(abfd, ext1, type, class, indx, numaux, in1),
       bfd            *abfd AND
       PTR 	      ext1 AND
       int             type AND
       int             class AND
+      int	      indx AND
+      int	      numaux AND
       PTR 	      in1)
 {
   AUXENT    *ext = (AUXENT *)ext1;
@@ -347,21 +349,27 @@ DEFUN(coff_swap_aux_in,(abfd, ext1, type, class, in1),
 	    memcpy (in->x_file.x_fname, ext->x_file.x_fname, FILNMLEN);
 #endif
 	  }
-      break;
+      return;
 
       /* RS/6000 "csect" auxents */
 #ifdef RS6000COFF_C
     case C_EXT:
     case C_HIDEXT:
-      in->x_csect.x_scnlen   = bfd_h_get_32 (abfd, (bfd_byte *) ext->x_csect.x_scnlen);
-      in->x_csect.x_parmhash = bfd_h_get_32 (abfd, (bfd_byte *) ext->x_csect.x_parmhash);
-      in->x_csect.x_snhash   = bfd_h_get_16 (abfd, (bfd_byte *) ext->x_csect.x_snhash);
-      /* We don't have to hack bitfields in x_smtyp because it's defined by
-	 shifts-and-ands, which are equivalent on all byte orders.  */
-      in->x_csect.x_smtyp    = bfd_h_get_8  (abfd, (bfd_byte *) ext->x_csect.x_smtyp);
-      in->x_csect.x_smclas   = bfd_h_get_8  (abfd, (bfd_byte *) ext->x_csect.x_smclas);
-      in->x_csect.x_stab     = bfd_h_get_32 (abfd, (bfd_byte *) ext->x_csect.x_stab);
-      in->x_csect.x_snstab   = bfd_h_get_16 (abfd, (bfd_byte *) ext->x_csect.x_snstab);
+      if (indx + 1 == numaux)
+	{
+	  in->x_csect.x_scnlen   = bfd_h_get_32 (abfd, ext->x_csect.x_scnlen);
+	  in->x_csect.x_parmhash = bfd_h_get_32 (abfd,
+						 ext->x_csect.x_parmhash);
+	  in->x_csect.x_snhash   = bfd_h_get_16 (abfd, ext->x_csect.x_snhash);
+	  /* We don't have to hack bitfields in x_smtyp because it's
+	     defined by shifts-and-ands, which are equivalent on all
+	     byte orders.  */
+	  in->x_csect.x_smtyp    = bfd_h_get_8  (abfd, ext->x_csect.x_smtyp);
+	  in->x_csect.x_smclas   = bfd_h_get_8  (abfd, ext->x_csect.x_smclas);
+	  in->x_csect.x_stab     = bfd_h_get_32 (abfd, ext->x_csect.x_stab);
+	  in->x_csect.x_snstab   = bfd_h_get_16 (abfd, ext->x_csect.x_snstab);
+	  return;
+	}
       break;
 #endif
 
@@ -374,45 +382,48 @@ DEFUN(coff_swap_aux_in,(abfd, ext1, type, class, in1),
 	  in->x_scn.x_scnlen = GET_SCN_SCNLEN(abfd, ext);
 	  in->x_scn.x_nreloc = GET_SCN_NRELOC(abfd, ext);
 	  in->x_scn.x_nlinno = GET_SCN_NLINNO(abfd, ext);
-	  break;
+	  return;
 	}
-    default:
-      in->x_sym.x_tagndx.l = bfd_h_get_32(abfd, (bfd_byte *) ext->x_sym.x_tagndx);
-#ifndef NO_TVNDX
-      in->x_sym.x_tvndx = bfd_h_get_16(abfd, (bfd_byte *) ext->x_sym.x_tvndx);
-#endif
-
-      if (ISARY(type)) {
-#if DIMNUM != E_DIMNUM
-	  -> Error, we need to cope with truncating or extending DIMNUM!;
-#else
-	  in->x_sym.x_fcnary.x_ary.x_dimen[0] = bfd_h_get_16(abfd, (bfd_byte *) ext->x_sym.x_fcnary.x_ary.x_dimen[0]);
-	  in->x_sym.x_fcnary.x_ary.x_dimen[1] = bfd_h_get_16(abfd, (bfd_byte *) ext->x_sym.x_fcnary.x_ary.x_dimen[1]);
-	  in->x_sym.x_fcnary.x_ary.x_dimen[2] = bfd_h_get_16(abfd, (bfd_byte *) ext->x_sym.x_fcnary.x_ary.x_dimen[2]);
-	  in->x_sym.x_fcnary.x_ary.x_dimen[3] = bfd_h_get_16(abfd, (bfd_byte *) ext->x_sym.x_fcnary.x_ary.x_dimen[3]);
-#endif
-	}
-      if (class == C_BLOCK || ISFCN(type) || ISTAG(class)) {
-	in->x_sym.x_fcnary.x_fcn.x_lnnoptr = GET_FCN_LNNOPTR(abfd, ext);
-	in->x_sym.x_fcnary.x_fcn.x_endndx.l = GET_FCN_ENDNDX(abfd, ext);
-      }
-
-      if (ISFCN(type)) {
-	  in->x_sym.x_misc.x_fsize = bfd_h_get_32(abfd, (bfd_byte *) ext->x_sym.x_misc.x_fsize);
-	}
-      else {
-	  in->x_sym.x_misc.x_lnsz.x_lnno = GET_LNSZ_LNNO(abfd, ext);
-	  in->x_sym.x_misc.x_lnsz.x_size = GET_LNSZ_SIZE(abfd, ext);
-	}
+      break;
     }
+
+  in->x_sym.x_tagndx.l = bfd_h_get_32(abfd, (bfd_byte *) ext->x_sym.x_tagndx);
+#ifndef NO_TVNDX
+  in->x_sym.x_tvndx = bfd_h_get_16(abfd, (bfd_byte *) ext->x_sym.x_tvndx);
+#endif
+
+  if (ISARY(type)) {
+#if DIMNUM != E_DIMNUM
+    -> Error, we need to cope with truncating or extending DIMNUM!;
+#else
+    in->x_sym.x_fcnary.x_ary.x_dimen[0] = bfd_h_get_16(abfd, (bfd_byte *) ext->x_sym.x_fcnary.x_ary.x_dimen[0]);
+    in->x_sym.x_fcnary.x_ary.x_dimen[1] = bfd_h_get_16(abfd, (bfd_byte *) ext->x_sym.x_fcnary.x_ary.x_dimen[1]);
+    in->x_sym.x_fcnary.x_ary.x_dimen[2] = bfd_h_get_16(abfd, (bfd_byte *) ext->x_sym.x_fcnary.x_ary.x_dimen[2]);
+    in->x_sym.x_fcnary.x_ary.x_dimen[3] = bfd_h_get_16(abfd, (bfd_byte *) ext->x_sym.x_fcnary.x_ary.x_dimen[3]);
+#endif
+  }
+  if (class == C_BLOCK || ISFCN(type) || ISTAG(class)) {
+    in->x_sym.x_fcnary.x_fcn.x_lnnoptr = GET_FCN_LNNOPTR(abfd, ext);
+    in->x_sym.x_fcnary.x_fcn.x_endndx.l = GET_FCN_ENDNDX(abfd, ext);
+  }
+
+  if (ISFCN(type)) {
+    in->x_sym.x_misc.x_fsize = bfd_h_get_32(abfd, (bfd_byte *) ext->x_sym.x_misc.x_fsize);
+  }
+  else {
+    in->x_sym.x_misc.x_lnsz.x_lnno = GET_LNSZ_LNNO(abfd, ext);
+    in->x_sym.x_misc.x_lnsz.x_size = GET_LNSZ_SIZE(abfd, ext);
+  }
 }
 
 static unsigned int
-DEFUN(coff_swap_aux_out,(abfd, inp, type, class, extp),
+DEFUN(coff_swap_aux_out,(abfd, inp, type, class, indx, numaux, extp),
   bfd   *abfd AND
   PTR 	inp AND
   int   type AND
   int   class AND
+  int   indx AND
+  int   numaux AND
   PTR	extp)
 {
   union internal_auxent *in = (union internal_auxent *)inp;
@@ -434,21 +445,26 @@ DEFUN(coff_swap_aux_out,(abfd, inp, type, class, extp),
       memcpy (ext->x_file.x_fname, in->x_file.x_fname, FILNMLEN);
 #endif
     }
-    break;
+    return sizeof (AUXENT);
 
 #ifdef RS6000COFF_C
   /* RS/6000 "csect" auxents */
   case C_EXT:
   case C_HIDEXT:
-    PUTWORD (abfd, in->x_csect.x_scnlen,	ext->x_csect.x_scnlen);
-    PUTWORD (abfd, in->x_csect.x_parmhash,	ext->x_csect.x_parmhash);
-    PUTHALF (abfd, in->x_csect.x_snhash,	ext->x_csect.x_snhash);
-    /* We don't have to hack bitfields in x_smtyp because it's defined by
-       shifts-and-ands, which are equivalent on all byte orders.  */
-    PUTBYTE (abfd, in->x_csect.x_smtyp,		ext->x_csect.x_smtyp);
-    PUTBYTE (abfd, in->x_csect.x_smclas,	ext->x_csect.x_smclas);
-    PUTWORD (abfd, in->x_csect.x_stab,		ext->x_csect.x_stab);
-    PUTHALF (abfd, in->x_csect.x_snstab,	ext->x_csect.x_snstab);
+    if (indx + 1 == numaux)
+      {
+	PUTWORD (abfd, in->x_csect.x_scnlen,	ext->x_csect.x_scnlen);
+	PUTWORD (abfd, in->x_csect.x_parmhash,	ext->x_csect.x_parmhash);
+	PUTHALF (abfd, in->x_csect.x_snhash,	ext->x_csect.x_snhash);
+	/* We don't have to hack bitfields in x_smtyp because it's
+	   defined by shifts-and-ands, which are equivalent on all
+	   byte orders.  */
+	PUTBYTE (abfd, in->x_csect.x_smtyp,	ext->x_csect.x_smtyp);
+	PUTBYTE (abfd, in->x_csect.x_smclas,	ext->x_csect.x_smclas);
+	PUTWORD (abfd, in->x_csect.x_stab,	ext->x_csect.x_stab);
+	PUTHALF (abfd, in->x_csect.x_snstab,	ext->x_csect.x_snstab);
+	return sizeof (AUXENT);
+      }
     break;
 #endif
 
@@ -461,38 +477,39 @@ DEFUN(coff_swap_aux_out,(abfd, inp, type, class, extp),
       PUT_SCN_SCNLEN(abfd, in->x_scn.x_scnlen, ext);
       PUT_SCN_NRELOC(abfd, in->x_scn.x_nreloc, ext);
       PUT_SCN_NLINNO(abfd, in->x_scn.x_nlinno, ext);
-      break;
+      return sizeof (AUXENT);
     }
-  default:
-    PUTWORD(abfd, in->x_sym.x_tagndx.l, (bfd_byte *) ext->x_sym.x_tagndx);
-#ifndef NO_TVNDX
-    bfd_h_put_16(abfd, in->x_sym.x_tvndx , (bfd_byte *) ext->x_sym.x_tvndx);
-#endif
-
-    if (class == C_BLOCK || ISFCN(type) || ISTAG(class)) {
-      PUT_FCN_LNNOPTR(abfd,  in->x_sym.x_fcnary.x_fcn.x_lnnoptr, ext);
-      PUT_FCN_ENDNDX(abfd,  in->x_sym.x_fcnary.x_fcn.x_endndx.l, ext);
-    }
-
-    if (ISFCN(type)) {
-      PUTWORD(abfd, in->x_sym.x_misc.x_fsize, (bfd_byte *)  ext->x_sym.x_misc.x_fsize);
-    }
-    else {
-      if (ISARY(type)) {
-#if DIMNUM != E_DIMNUM
-	-> Error, we need to cope with truncating or extending DIMNUM!;
-#else
-	bfd_h_put_16(abfd, in->x_sym.x_fcnary.x_ary.x_dimen[0], (bfd_byte *)ext->x_sym.x_fcnary.x_ary.x_dimen[0]);
-	bfd_h_put_16(abfd, in->x_sym.x_fcnary.x_ary.x_dimen[1], (bfd_byte *)ext->x_sym.x_fcnary.x_ary.x_dimen[1]);
-	bfd_h_put_16(abfd, in->x_sym.x_fcnary.x_ary.x_dimen[2], (bfd_byte *)ext->x_sym.x_fcnary.x_ary.x_dimen[2]);
-	bfd_h_put_16(abfd, in->x_sym.x_fcnary.x_ary.x_dimen[3], (bfd_byte *)ext->x_sym.x_fcnary.x_ary.x_dimen[3]);
-#endif
-      }
-      PUT_LNSZ_LNNO(abfd, in->x_sym.x_misc.x_lnsz.x_lnno, ext);
-      PUT_LNSZ_SIZE(abfd, in->x_sym.x_misc.x_lnsz.x_size, ext);
-    }
+    break;
   }
-return sizeof(AUXENT);
+
+  PUTWORD(abfd, in->x_sym.x_tagndx.l, (bfd_byte *) ext->x_sym.x_tagndx);
+#ifndef NO_TVNDX
+  bfd_h_put_16(abfd, in->x_sym.x_tvndx , (bfd_byte *) ext->x_sym.x_tvndx);
+#endif
+
+  if (class == C_BLOCK || ISFCN(type) || ISTAG(class)) {
+    PUT_FCN_LNNOPTR(abfd,  in->x_sym.x_fcnary.x_fcn.x_lnnoptr, ext);
+    PUT_FCN_ENDNDX(abfd,  in->x_sym.x_fcnary.x_fcn.x_endndx.l, ext);
+  }
+
+  if (ISFCN(type)) {
+    PUTWORD(abfd, in->x_sym.x_misc.x_fsize, (bfd_byte *)  ext->x_sym.x_misc.x_fsize);
+  }
+  else {
+    if (ISARY(type)) {
+#if DIMNUM != E_DIMNUM
+      -> Error, we need to cope with truncating or extending DIMNUM!;
+#else
+      bfd_h_put_16(abfd, in->x_sym.x_fcnary.x_ary.x_dimen[0], (bfd_byte *)ext->x_sym.x_fcnary.x_ary.x_dimen[0]);
+      bfd_h_put_16(abfd, in->x_sym.x_fcnary.x_ary.x_dimen[1], (bfd_byte *)ext->x_sym.x_fcnary.x_ary.x_dimen[1]);
+      bfd_h_put_16(abfd, in->x_sym.x_fcnary.x_ary.x_dimen[2], (bfd_byte *)ext->x_sym.x_fcnary.x_ary.x_dimen[2]);
+      bfd_h_put_16(abfd, in->x_sym.x_fcnary.x_ary.x_dimen[3], (bfd_byte *)ext->x_sym.x_fcnary.x_ary.x_dimen[3]);
+#endif
+    }
+    PUT_LNSZ_LNNO(abfd, in->x_sym.x_misc.x_lnsz.x_lnno, ext);
+    PUT_LNSZ_SIZE(abfd, in->x_sym.x_misc.x_lnsz.x_size, ext);
+  }
+  return sizeof(AUXENT);
 }
 
 #endif /* NO_COFF_SYMBOLS */
@@ -557,6 +574,14 @@ DEFUN(coff_swap_aouthdr_in,(abfd, aouthdr_ext1, aouthdr_int1),
 #ifdef I960
   aouthdr_int->tagentries = bfd_h_get_32(abfd, (bfd_byte *) aouthdr_ext->tagentries);
 #endif
+
+#ifdef APOLLO_M68
+  bfd_h_put_32(abfd, aouthdr_int->o_inlib, (bfd_byte *) aouthdr_ext->o_inlib);
+  bfd_h_put_32(abfd, aouthdr_int->o_sri, (bfd_byte *) aouthdr_ext->o_sri);
+  bfd_h_put_32(abfd, aouthdr_int->vid[0], (bfd_byte *) aouthdr_ext->vid);
+  bfd_h_put_32(abfd, aouthdr_int->vid[1], (bfd_byte *) aouthdr_ext->vid + 4);
+#endif
+
 
 #ifdef RS6000COFF_C
   aouthdr_int->o_toc = bfd_h_get_32(abfd, aouthdr_ext->o_toc);
@@ -624,7 +649,9 @@ DEFUN(coff_swap_aouthdr_out,(abfd, in, out),
 #endif
 
 #ifdef ALPHAECOFF
-  bfd_h_put_32(abfd, 0, (bfd_byte *) aouthdr_out->padding);
+  /* FIXME: What does bldrev mean?  */
+  bfd_h_put_16(abfd, (bfd_vma) 2, (bfd_byte *) aouthdr_out->bldrev);
+  bfd_h_put_16(abfd, (bfd_vma) 0, (bfd_byte *) aouthdr_out->padding);
   bfd_h_put_64(abfd, aouthdr_in->bss_start, (bfd_byte *) aouthdr_out->bss_start);
   bfd_h_put_64(abfd, aouthdr_in->gp_value, (bfd_byte *) aouthdr_out->gp_value);
   bfd_h_put_32(abfd, aouthdr_in->gprmask, (bfd_byte *) aouthdr_out->gprmask);
@@ -669,6 +696,9 @@ DEFUN(coff_swap_scnhdr_in,(abfd, ext, in),
   scnhdr_int->s_align = bfd_h_get_32(abfd, (bfd_byte *) scnhdr_ext->s_align);
 #endif
 }
+/* start-sanitize-mpw */
+#ifndef MPW_C
+/* end-sanitize-mpw */
 
 static unsigned int
 DEFUN(coff_swap_scnhdr_out,(abfd, in, out),
@@ -706,3 +736,47 @@ DEFUN(coff_swap_scnhdr_out,(abfd, in, out),
 #endif
   return sizeof(SCNHDR);
 }
+/* start-sanitize-mpw */
+#else
+/* Same routine, but with some pre-expanded macros, so ^&%$#&! MPW C doesn't
+   corrupt itself and then freak out. */
+
+static unsigned int
+DEFUN(coff_swap_scnhdr_out,(abfd, in, out),
+      bfd       *abfd AND
+      PTR	in AND
+      PTR	out)
+{
+  struct internal_scnhdr *scnhdr_int = (struct internal_scnhdr *)in;
+  SCNHDR *scnhdr_ext = (SCNHDR *)out;
+
+  memcpy(scnhdr_ext->s_name, scnhdr_int->s_name, sizeof(scnhdr_int->s_name));
+  bfd_h_put_32 (abfd, scnhdr_int->s_vaddr,
+		    (bfd_byte *) scnhdr_ext->s_vaddr);
+  bfd_h_put_32 (abfd, scnhdr_int->s_paddr,
+		    (bfd_byte *) scnhdr_ext->s_paddr);
+  bfd_h_put_32 (abfd, scnhdr_int->s_size,
+		   (bfd_byte *) scnhdr_ext->s_size);
+  PUT_SCNHDR_SCNPTR (abfd, scnhdr_int->s_scnptr,
+		     (bfd_byte *) scnhdr_ext->s_scnptr);
+  PUT_SCNHDR_RELPTR (abfd, scnhdr_int->s_relptr,
+		     (bfd_byte *) scnhdr_ext->s_relptr);
+  PUT_SCNHDR_LNNOPTR (abfd, scnhdr_int->s_lnnoptr,
+		      (bfd_byte *) scnhdr_ext->s_lnnoptr);
+  PUTWORD(abfd, scnhdr_int->s_flags, (bfd_byte *) scnhdr_ext->s_flags);
+#if defined(M88)
+  PUTWORD(abfd, scnhdr_int->s_nlnno, (bfd_byte *) scnhdr_ext->s_nlnno);
+  PUTWORD(abfd, scnhdr_int->s_nreloc, (bfd_byte *) scnhdr_ext->s_nreloc);
+#else
+  PUTHALF(abfd, scnhdr_int->s_nlnno, (bfd_byte *) scnhdr_ext->s_nlnno);
+  PUTHALF(abfd, scnhdr_int->s_nreloc, (bfd_byte *) scnhdr_ext->s_nreloc);
+#endif
+
+#if defined(I960)
+  PUTWORD(abfd, scnhdr_int->s_align, (bfd_byte *) scnhdr_ext->s_align);
+#endif
+  return sizeof(SCNHDR);
+}
+
+#endif
+/* end-sanitize-mpw */

@@ -290,7 +290,6 @@ CODE_FRAGMENT
 
 */
 
-#include "seclet.h"
 #include "coffswap.h"
 
 /* void warning(); */
@@ -475,10 +474,12 @@ Special entry points for gdb to swap in coff symbol table parts:
 .typedef struct 
 .{
 .  void (*_bfd_coff_swap_aux_in) PARAMS ((
-.       bfd            *abfd ,
+.       bfd            *abfd,
 .       PTR             ext,
 .       int             type,
-.       int             class ,
+.       int             class,
+.       int             indaux,
+.       int             numaux,
 .       PTR             in));
 .
 .  void (*_bfd_coff_swap_sym_in) PARAMS ((
@@ -499,6 +500,8 @@ Special entry points for gas to swap out coff parts:
 .       PTR	in,
 .       int    	type,
 .       int    	class,
+.       int     indaux,
+.       int     numaux,
 .       PTR    	ext));
 .
 . unsigned int (*_bfd_coff_swap_sym_out) PARAMS ((
@@ -581,7 +584,8 @@ dependent COFF routines:
 .       struct internal_syment *sym));
 . void (*_bfd_coff_reloc16_extra_cases) PARAMS ((
 .       bfd     *abfd,
-.       struct bfd_seclet *seclet,
+.       struct bfd_link_info *link_info,
+.       struct bfd_link_order *link_order,
 .       arelent *reloc,
 .       bfd_byte *data,
 .       unsigned int *src_ptr,
@@ -590,14 +594,15 @@ dependent COFF routines:
 .       asection *input_section,
 .       asymbol **symbols,
 .       arelent *r,
-.       unsigned int shrink));	
+.       unsigned int shrink,
+.       struct bfd_link_info *link_info));
 .
 .} bfd_coff_backend_data;
 .
 .#define coff_backend_info(abfd) ((bfd_coff_backend_data *) (abfd)->xvec->backend_data)
 .
-.#define bfd_coff_swap_aux_in(a,e,t,c,i) \
-.        ((coff_backend_info (a)->_bfd_coff_swap_aux_in) (a,e,t,c,i))
+.#define bfd_coff_swap_aux_in(a,e,t,c,ind,num,i) \
+.        ((coff_backend_info (a)->_bfd_coff_swap_aux_in) (a,e,t,c,ind,num,i))
 .
 .#define bfd_coff_swap_sym_in(a,e,i) \
 .        ((coff_backend_info (a)->_bfd_coff_swap_sym_in) (a,e,i))
@@ -611,8 +616,8 @@ dependent COFF routines:
 .#define bfd_coff_swap_lineno_out(abfd, i, o) \
 .        ((coff_backend_info (abfd)->_bfd_coff_swap_lineno_out) (abfd, i, o))
 .
-.#define bfd_coff_swap_aux_out(abfd, i, t,c,o) \
-.        ((coff_backend_info (abfd)->_bfd_coff_swap_aux_out) (abfd, i,t,c, o))
+.#define bfd_coff_swap_aux_out(a,i,t,c,ind,num,o) \
+.        ((coff_backend_info (a)->_bfd_coff_swap_aux_out) (a,i,t,c,ind,num,o))
 .
 .#define bfd_coff_swap_sym_out(abfd, i,o) \
 .        ((coff_backend_info (abfd)->_bfd_coff_swap_sym_out) (abfd, i, o))
@@ -665,13 +670,13 @@ dependent COFF routines:
 .#define bfd_coff_symname_in_debug(abfd, sym)\
 .        ((coff_backend_info (abfd)->_bfd_coff_symname_in_debug) (abfd, sym))
 .
-.#define bfd_coff_reloc16_extra_cases(abfd, seclet, reloc, data, src_ptr, dst_ptr)\
+.#define bfd_coff_reloc16_extra_cases(abfd, link_info, link_order, reloc, data, src_ptr, dst_ptr)\
 .        ((coff_backend_info (abfd)->_bfd_coff_reloc16_extra_cases)\
-.         (abfd, seclet, reloc, data, src_ptr, dst_ptr))
+.         (abfd, link_info, link_order, reloc, data, src_ptr, dst_ptr))
 .
-.#define bfd_coff_reloc16_estimate(abfd, section, symbols, reloc, shrink)\
+.#define bfd_coff_reloc16_estimate(abfd, section, symbols, reloc, shrink, link_info)\
 .        ((coff_backend_info (abfd)->_bfd_coff_reloc16_estimate)\
-.         (section, symbols, reloc, shrink))
+.         (section, symbols, reloc, shrink, link_info))
 . 
 */
 
@@ -2321,11 +2326,12 @@ bfd *abfd;
 #define coff_reloc16_estimate dummy_reloc16_estimate
 
 static int
-dummy_reloc16_estimate(input_section, symbols, reloc, shrink)
+dummy_reloc16_estimate (input_section, symbols, reloc, shrink, link_info)
      asection *input_section;
      asymbol **symbols;
      arelent *reloc;
      unsigned int shrink;
+     struct bfd_link_info *link_info;
 {
   abort ();
 }
@@ -2336,9 +2342,11 @@ dummy_reloc16_estimate(input_section, symbols, reloc, shrink)
 #define coff_reloc16_extra_cases dummy_reloc16_extra_cases
 /* This works even if abort is not declared in any header file.  */
 static void
-dummy_reloc16_extra_cases (abfd, seclet, reloc, data, src_ptr, dst_ptr)
+dummy_reloc16_extra_cases (abfd, link_info, link_order, reloc, data, src_ptr,
+			   dst_ptr)
      bfd *abfd;
-     struct bfd_seclet *seclet;
+     struct bfd_link_info *link_info;
+     struct bfd_link_order *link_order;
      arelent *reloc;
      bfd_byte *data;
      unsigned int *src_ptr;
@@ -2385,8 +2393,10 @@ static CONST bfd_coff_backend_data bfd_coff_std_swap_table = {
 			(void (*) PARAMS ((bfd *, struct sec *))) bfd_void
 #define coff_bfd_get_relocated_section_contents  bfd_generic_get_relocated_section_contents
 #define coff_bfd_relax_section		bfd_generic_relax_section
-#define coff_bfd_seclet_link		bfd_generic_seclet_link
 #ifndef coff_bfd_reloc_type_lookup
 #define coff_bfd_reloc_type_lookup \
   ((CONST struct reloc_howto_struct *(*) PARAMS ((bfd *, bfd_reloc_code_real_type))) bfd_nullvoidptr)
 #endif
+#define coff_bfd_link_hash_table_create _bfd_generic_link_hash_table_create
+#define coff_bfd_link_add_symbols _bfd_generic_link_add_symbols
+#define coff_bfd_final_link _bfd_generic_final_link

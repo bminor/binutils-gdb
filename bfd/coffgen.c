@@ -359,6 +359,7 @@ DEFUN(coff_count_linenumbers,(abfd),
 /* Takes a bfd and a symbol, returns a pointer to the coff specific
    area of the symbol if there is one.  */
 
+/*ARGSUSED*/
 coff_symbol_type *
 DEFUN(coff_symbol_from,(ignore_abfd, symbol),
       bfd            *ignore_abfd AND
@@ -641,6 +642,8 @@ unsigned int written)
 				&((native + j + 1)->u.auxent),
 				type,
 				class,
+				j,
+				native->u.syment.n_numaux,
 				buf);
 	  bfd_write(buf, 1, auxesz, abfd);
 	}
@@ -892,6 +895,7 @@ DEFUN(coff_write_linenumbers,(abfd),
   bfd_release (abfd, buff);
 }
 
+/*ARGSUSED*/
 alent   *
 DEFUN(coff_get_lineno,(ignore_abfd, symbol),
       bfd            *ignore_abfd AND
@@ -1143,6 +1147,7 @@ bfd            *abfd)
 	bfd_coff_swap_aux_in(abfd, (PTR) raw_src,
 			     symbol_ptr->u.syment.n_type,
 			     symbol_ptr->u.syment.n_sclass,
+			     i, symbol_ptr->u.syment.n_numaux,
 			     &(internal_ptr->u.auxent));
 	/* Remember that bal entries arn't pointerized */
 	if (i != 1 || symbol_ptr->u.syment.n_sclass != C_LEAFPROC)
@@ -1284,6 +1289,7 @@ coff_bfd_make_debug_symbol (abfd, ptr, sz)
   return &new->symbol;
 }
 
+/*ARGSUSED*/
 void
 coff_get_symbol_info (abfd, symbol, ret)
      bfd *abfd;
@@ -1392,6 +1398,7 @@ coff_print_symbol (abfd, filep, symbol, how)
    and return the name of the source file and the line nearest to the
    wanted location.  */
 
+/*ARGSUSED*/
 boolean
 DEFUN(coff_find_nearest_line,(abfd,
 			      section,
