@@ -1,3 +1,17 @@
+Wed Dec 15 08:04:16 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	* hosts/std-host.h: (time): Don't declare; conflicts on Mach3.
+
+	* hosts/i386mach3.h (HOST_PAGE_SIZE): Set to 1 to avoid padding.
+	(HOST_SEGMENT_SIZE): Set to 0 for same reason.
+
+	* i386mach3.c (PAGE_SIZE, SEGMENT_SIZE): Same changes as above.
+	(TEXT_START_ADDR): Correct.
+	(MY_backend_data): Define.
+
+	* aoutx.h (adjust_o_magic, adjust_z_magic, adjust_n_magic):
+	New functions; code moved from aout_<size>_adjust_sizes_and_vmas.
+
 Tue Dec 14 21:48:33 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
         * som.c (som_begin_writing): Fix thinkos in auxiliary header
