@@ -4417,9 +4417,9 @@ macro2 (ip)
 
     case M_ROL_I:
       macro_build ((char *) NULL, &icnt, NULL, "sll", "d,w,<", AT, sreg,
-		   imm_expr.X_add_number & 0x1f);
+		   (int) (imm_expr.X_add_number & 0x1f));
       macro_build ((char *) NULL, &icnt, NULL, "srl", "d,w,<", dreg, sreg,
-		   (0 - imm_expr.X_add_number) & 0x1f);
+		   (int) ((0 - imm_expr.X_add_number) & 0x1f));
       macro_build ((char *) NULL, &icnt, NULL, "or", "d,v,t", dreg, dreg, AT);
       break;
 
@@ -4433,9 +4433,9 @@ macro2 (ip)
 
     case M_ROR_I:
       macro_build ((char *) NULL, &icnt, NULL, "srl", "d,w,<", AT, sreg,
-		   imm_expr.X_add_number & 0x1f);
+		   (int) (imm_expr.X_add_number & 0x1f));
       macro_build ((char *) NULL, &icnt, NULL, "sll", "d,w,<", dreg, sreg,
-		   (0 - imm_expr.X_add_number) & 0x1f);
+		   (int) ((0 - imm_expr.X_add_number) & 0x1f));
       macro_build ((char *) NULL, &icnt, NULL, "or", "d,v,t", dreg, dreg, AT);
       break;
 
