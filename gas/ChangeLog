@@ -1,3 +1,9 @@
+Fri Oct 11 18:18:37 1991  Roland H. Pesch  (pesch at cygnus.com)
+
+	* doc/Makefile: new targets as.info, as.ms
+	doc/as.texinfo: minor changes for texi2roff-2
+	Makefile.in: revise 'doc' target.	
+
 Fri Jan  4 12:48:22 EST 1991	Jay Fenlason (hack@ai.mit.edu)
 
 	* messages.c  Moved as_perror from input-scrub.c  Modified the

@@ -228,8 +228,7 @@ all: $(ALL)
 
 fake-as: force
 	- rm -f ./as.new
-	cp /bin/as ./as.new
-	touch fake-as
+	cp /bin/as ./fake-as
 
 # Now figure out from those variables how to compile and link.
 
@@ -410,10 +409,10 @@ $(HOST_PREFIX_1)malloc.o: malloc.c
 
 # Remake the info files.
 
-doc: $(srcdir)/gas.info
+doc: $(srcdir)/as.info
 
-$(srcdir)/gas.info: $(srcdir)/gas.texinfo
-	makeinfo `echo $(srcdir)/gas.texinfo | sed 's,^\./,,'`
+$(srcdir)/as.info: $(srcdir)/doc/as.texinfo
+	(cd doc; make as.info; mv as.info $srcdir)	
 
 
 # Deletion of files made during compilation.
