@@ -12,6 +12,12 @@ Wed Aug  7 14:19:03 1996  Philippe De Muyter  <phdm@info.ucl.ac.be>
 
 Wed Aug  7 11:50:26 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* symbols.c (resolve_symbol_value): Handle addition or subtraction
+	by a constant before entering the main switch.  Reject attempts to
+	apply an arithmetic function to non-absolute symbols, except for
+	the special case of subtraction of two symbols in the same
+	section.
+
 	* config/tc-mips.c (md_section_align): Do align if OBJ_ELF, but
 	not to more than a 16 byte boundary.
 
