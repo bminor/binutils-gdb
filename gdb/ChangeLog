@@ -1,3 +1,163 @@
+2003-05-26  Elena Zannoni  <ezannoni@redhat.com>
+
+	* stabsread.c (dbx_lookup_type): Make static.
+	(read_type): Ditto.
+	(add_undefined_type): Ditto.
+	* stabsread.h (dbx_lookup_type, read_type, add_undefined_type): Do
+	not export.
+
+2003-05-26  Elena Zannoni  <ezannoni@redhat.com>
+
+	* hpread.c (hpread_has_name): Make static.
+	(hpread_psymtab_to_symtab): Ditto.
+	(file_exists): Ditto.
+	(hpread_call_pxdb): Ditto.
+	(hpread_pxdb_needed): Ditto.
+	(hpread_quick_traverse): Ditto.
+	(hpread_get_header): Ditto.
+	(hpread_get_lntt): Ditto.
+	(hpread_get_slt): Ditto.
+	(class_of): Ditto.
+
+2003-05-25  Andreas Schwab  <schwab@suse.de>
+
+	* m68k-tdep.c (m68k_gdbarch_init): Set parm_boundary instead of
+	stack_align and deprecated_extra_stack_alignment_needed.
+	(m68k_stack_align): Delete.
+
+	* m68k-tdep.c (m68k_register_raw_size): Remove cast.
+	(m68k_register_virtual_size): Likewise.
+	(altos_skip_prologue): Remove obsolete function.
+	(isi_frame_num_args): Likewise.
+	(news_frame_num_args): Likewise.
+	(m68k_fix_call_dummy): Make static.
+	(m68k_push_dummy_frame): Likewise.
+	(m68k_pop_frame): Likewise.
+	(m68k_skip_prologue): Likewise.
+	(m68k_frame_init_saved_regs): Likewise.
+	(m68k_saved_pc_after_call): Likewise.
+	(m68k_get_longjmp_target): Make multi-arch.
+	(m68k_gdbarch_init): Allocate and initialize gdbarch_tdep
+	structure.  Register m68k_get_longjmp_target if enabled.
+	* m68k-tdep.h (struct gdbarch_tdep): Define.
+	* config/m68k/tm-m68k.h: Don't include "regcache.h".
+
+	* Makefile.in (config.status): Also depend on configure.tgt
+	and configure.host.
+	(m68klinux-tdep.o): Update dependencies.
+	* configure.tgt (m68*-*-linux*): Set gdb_multi_arch to 1.
+	* m68klinux-tdep.c (M68K_LINUX_JB_ELEMENT_SIZE): Define.
+	(M68K_LINUX_JB_PC): Define.
+	(m68k_linux_pc_in_sigtramp): Renamed from m68k_linux_in_sigtramp
+	and take additional parameter.
+	(m68k_linux_sigtramp_saved_pc): Update.
+	(m68k_linux_init_abi): Set jb_pc and jb_elt_size.  Register
+	m68k_linux_pc_in_sigtramp, in_plt_section,
+	find_solib_trampoline_target.
+	* config/m68k/tm-linux.h: Don't include any tm headers.
+	(START_INFERIOR_TRAPS_EXPECTED): Remove definition.
+	(JB_ELEMENT_SIZE): Likewise.
+	(JB_PC): Likewise.
+	(GET_LONGJMP_TARGET): Likewise.
+	(IN_SIGTRAMP): Likewise.
+	(SVR4_SHARED_LIBS): Define this and include "solib.h".
+
+2003-05-25  Mark Kettenis  <kettenis@gnu.org>
+
+	* sparc-tdep.c (sparc32_do_push_arguments): New function.
+	(sparc32_push_arguments): Re-implement by calling
+	sparc32_do_push_arguments.
+
+2003-05-25  Mark Kettenis  <kettenis@gnu.org>
+
+	* sparc-tdep.c (SPARC_F0_REGNUM, SPARC_F1_REGNUM, SPARC_O0_REGNUM,
+	SPARC_O1_REGNUM): New defines.
+	(sparc32_extract_return_value): Rewrite to operate on a regcache.
+	(sparc32_store_return_value): New function.
+	(sparc_extract_struct_value_address): Rewrite to operate on a
+	regcache.
+	(sparc_gdbarch_init): Don't set
+	deprecated_extract_struct_value_address.  Set
+	extract_struct_value_address instead. Don't set
+	deprecated_extract_return_value and deprecated_store_return_value
+	for 32-bit targets.  Set extract_return_value and
+	store_return_value instead.
+	* config/sparc/tm-sparc.h (DEPRECATED_STORE_RETURN_VALUE,
+	DEPRECTAED_EXTRACT_RETURN_VALUE,
+	DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS): Don't define these.
+	(STORE_RETURN_VALUE, EXTRACT_RETURN_VALUE,
+	EXTRACT_STRUCT_VALUE_ADDRESS): Define these instead.
+	(sparc_store_return_value): Remove prototype.
+	(sparc32_store_return_value): New prototype.
+	(sparc32_extract_return_value, sparc_extract_struct_value_address):
+	Adjust prototypes.
+
+2003-05-24  Mark Kettenis  <kettenis@gnu.org>
+
+	* sparcnbsd-tdep.c: Include "gdb_string.h".
+
+2003-05-23  Andrew Cagney  <cagney@redhat.com>
+
+	* p-valprint.c (pascal_val_print): Replace extract_address with
+	the inline equivalent extract_unsigned_integer.
+	* jv-valprint.c (java_value_print): Ditto.
+	* ada-valprint.c (ada_val_print_1): Ditto.
+	* ada-lang.h (EXTRACT_ADDRESS): Ditto.
+
+2003-05-23  Theodore A. Roth  <troth@openavr.org>
+
+	* blockframe.c (frameless_look_for_prologue): Remove unused
+	after_prologue variable.
+
+2003-05-23  Mark Kettenis  <kettenis@gnu.org>
+
+	* blockframe.c (get_pc_function_start): Rewrite to avoid
+	asignments in if-statements.
+
+2003-05-23  Raoul Gough  <RaoulGough@yahoo.co.uk>
+
+	Committed by Elena Zannoni  <ezannoni@redhat.com>.
+  	* coffread.c(coff_symtab_read): Do relocate static symbols from PE
+	files, don't relocate absolute symbols (and do use mst_abs).
+
+2003-05-23  Andrew Cagney  <cagney@redhat.com>
+
+	* objc-lang.c: Include "gdb_assert.h".
+	(objc_op_print_tab): Use OP_NULL and PREC_NULL instead of 0.
+	(CHECK, CHECK_FATAL, __CHECK_FUNCTION): Delete macros.
+	(gdb_check, gdb_check_fatal): Delete functions.
+	(read_objc_methlist_method): Replace CHECK and CHECK_FATAL with
+	gdb_assert.
+	(parse_selector, parse_method, find_methods, find_imps): Ditto.
+	* Makefile.in (objc-lang.o): Update dependencies.
+
+2003-05-22  Ian Lance Taylor  <ian@airs.com>
+
+	* disasm.c (gdb_disassemble_info): Initialize disassemble_info
+	with fprintf_filtered, not fprintf_unfiltered.
+
+2003-05-22  Andrew Cagney  <cagney@redhat.com>
+
+	* stack.c (frame_info): Inline extract_address, replacing it with
+	extract_unsigned_integer.
+	* findvar.c (unsigned_pointer_to_address): Ditto.
+	* dwarf2loc.c (dwarf_expr_read_reg): Ditto.
+	* dwarf2expr.c (dwarf2_read_address): Ditto.
+	* frame.c (frame_pc_unwind): Update comment.
+	* dummy-frame.c (deprecated_read_register_dummy): Update comment.
+
+2003-05-22  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* infptrace.c (detach): Call print_sys_errmsg rather than
+	perror_with_name to issue warning message when errno is non-zero
+	after calling ptrace detach.
+
+2003-05-21  J. Brobecker  <brobecker@gnat.com>
+
+	* config/pa/tm-hppa.h: Delete some unused macros. Move some
+	macro definitions from here...
+	* hppa-tdep.c: ...to there.
+
 2003-05-20  Kevin Buettner  <kevinb@redhat.com>
 
 	* mips-nat.c (REGISTER_PTRACE_ADDR): Convert macro to function

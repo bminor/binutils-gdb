@@ -1,5 +1,5 @@
 /* Common target dependent code for the Motorola 68000 series.
-   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1999, 2000, 2001
+   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1999, 2000, 2001, 2003
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -42,6 +42,16 @@ enum
   M68K_FPC_REGNUM = 26,		/* 68881 control register */
   M68K_FPS_REGNUM = 27,		/* 68881 status register */
   M68K_FPI_REGNUM = 28
+};
+
+/* Target-dependent structure in gdbarch.  */
+struct gdbarch_tdep
+{
+  /* Offset to PC value in the jump buffer.  If this is negative,
+     longjmp support will be disabled.  */
+  int jb_pc;
+  /* The size of each entry in the jump buffer.  */
+  size_t jb_elt_size;
 };
 
 #endif /* M68K_TDEP_H */

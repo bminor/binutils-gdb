@@ -178,7 +178,9 @@ dwarf2_read_address (unsigned char *buf, unsigned char *buf_end, int *bytes_read
     error ("dwarf2_read_address: Corrupted DWARF expression.");
 
   *bytes_read = TARGET_ADDR_BIT / TARGET_CHAR_BIT;
-  result = extract_address (buf, TARGET_ADDR_BIT / TARGET_CHAR_BIT);
+  /* NOTE: cagney/2003-05-22: This extract is assuming that a DWARF 2
+     address is always unsigned.  That may or may not be true.  */
+  result = extract_unsigned_integer (buf, TARGET_ADDR_BIT / TARGET_CHAR_BIT);
   return result;
 }
 

@@ -140,9 +140,7 @@ lbrac_mismatch_complaint (int arg1)
 
 /* Forward procedure declarations */
 
-static void set_namestring (union dnttentry *sym, char **namep,
-                            struct objfile *objfile);
-
+/* Used in somread.c.  */
 void hpread_symfile_init (struct objfile *);
 
 void do_pxdb (bfd *);
@@ -150,6 +148,9 @@ void do_pxdb (bfd *);
 void hpread_build_psymtabs (struct objfile *, int);
 
 void hpread_symfile_finish (struct objfile *);
+
+static void set_namestring (union dnttentry *sym, char **namep,
+                            struct objfile *objfile);
 
 static union dnttentry *hpread_get_gntt (int, struct objfile *);
 
@@ -172,11 +173,11 @@ static unsigned long hpread_get_line (sltpointer, struct objfile *);
 
 static CORE_ADDR hpread_get_location (sltpointer, struct objfile *);
 
-int hpread_has_name (enum dntt_entry_type kind);
+static int hpread_has_name (enum dntt_entry_type kind);
 
 static void hpread_psymtab_to_symtab_1 (struct partial_symtab *);
 
-void hpread_psymtab_to_symtab (struct partial_symtab *);
+static void hpread_psymtab_to_symtab (struct partial_symtab *);
 
 static struct symtab *hpread_expand_symtab
   (struct objfile *, int, int, CORE_ADDR, int,
@@ -261,7 +262,7 @@ static struct type *fixup_method = NULL;
 #include "gdb_string.h"
 
 /* check for the existence of a file, given its full pathname */
-int
+static int
 file_exists (char *filename)
 {
   if (filename)
@@ -321,7 +322,7 @@ set_namestring (union dnttentry *sym, char **namep, struct objfile *objfile)
    NOTE: uses system function and string functions directly.
 
    Return value: 1 if ok, 0 if not */
-int
+static int
 hpread_call_pxdb (const char *file_name)
 {
   char *p;
@@ -354,7 +355,7 @@ hpread_call_pxdb (const char *file_name)
    by PXDB, and we have thus called PXDB to do this processing
    and the file therefore needs to be re-loaded.  Otherwise
    return 0. */
-int
+static int
 hpread_pxdb_needed (bfd *sym_bfd)
 {
   asection *pinfo_section, *debug_section, *header_section;
@@ -837,7 +838,7 @@ scan_procs (int *curr_pd_p, quick_procedure_entry *qPD, int max_procs,
    a file can result in a compiled object which does not have a module
    entry for it, so in such cases we create a psymtab for the file.  */
 
-int
+static int
 hpread_quick_traverse (struct objfile *objfile, char *gntt_bits,
 		       char *vt_bits, PXDB_header_ptr pxdb_header_p)
 {
@@ -1542,7 +1543,7 @@ hpread_quick_traverse (struct objfile *objfile, char *gntt_bits,
 
 /* Get appropriate header, based on pxdb type. 
    Return value: 1 if ok, 0 if not */
-int
+static int
 hpread_get_header (struct objfile *objfile, PXDB_header_ptr pxdb_header_p)
 {
   asection *pinfo_section, *debug_section, *header_section;
@@ -2294,7 +2295,7 @@ hpread_symfile_finish (struct objfile *objfile)
 
 /* Various small functions to get entries in the debug symbol sections.  */
 
-union dnttentry *
+static union dnttentry *
 hpread_get_lntt (int index, struct objfile *objfile)
 {
   return (union dnttentry *)
@@ -2308,7 +2309,7 @@ hpread_get_gntt (int index, struct objfile *objfile)
     &(GNTT (objfile)[(index * sizeof (struct dntt_type_block))]);
 }
 
-union sltentry *
+static union sltentry *
 hpread_get_slt (int index, struct objfile *objfile)
 {
   return (union sltentry *) &(SLT (objfile)[index * sizeof (union sltentry)]);
@@ -2588,7 +2589,7 @@ hpread_get_location (sltpointer index, struct objfile *objfile)
  * leave it here in case it proves useful later on. - RT).
  */
 
-int
+static int
 hpread_has_name (enum dntt_entry_type kind)
 {
   switch (kind)
@@ -2721,7 +2722,7 @@ hpread_psymtab_to_symtab_1 (struct partial_symtab *pst)
 /* Read in all of the symbols for a given psymtab for real.
    Be verbose about it if the user wants that.  */
 
-void
+static void
 hpread_psymtab_to_symtab (struct partial_symtab *pst)
 {
   /* Get out quick if given junk.  */
@@ -5016,7 +5017,7 @@ hpread_record_lines (struct subfile *subfile, sltpointer s_idx,
  * Called from hpread_process_one_debug_symbol()
  * If "f" is not a member function, return NULL.
  */
-char *
+static char *
 class_of (struct type *functype)
 {
   struct type *first_param_type;

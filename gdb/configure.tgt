@@ -130,6 +130,7 @@ m68*-*-aout*)		gdb_target=monitor ;;
 m68*-*-coff*)		gdb_target=monitor ;;
 m68*-*-elf*)		gdb_target=monitor ;;
 m68*-*-linux*)		gdb_target=linux
+			gdb_multi_arch=1
 			build_gdbserver=yes
 			;;
 m68*-*-lynxos*)		gdb_target=m68klynx ;;

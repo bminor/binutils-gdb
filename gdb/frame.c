@@ -376,7 +376,7 @@ frame_pc_unwind (struct frame_info *this_frame)
 	     implementation is no more than:
 	   
 	     frame_unwind_register (this_frame, ISA_PC_REGNUM, buf);
-	     return extract_address (buf, size of ISA_PC_REGNUM);
+	     return extract_unsigned_integer (buf, size of ISA_PC_REGNUM);
 
 	     Note: this method is very heavily dependent on a correct
 	     register-unwind implementation, it pays to fix that

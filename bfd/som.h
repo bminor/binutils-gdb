@@ -27,6 +27,9 @@
 
 #include "libhppa.h"
 
+/* Enable PA2.0 if available */
+#define PA_2_0
+
 #include <a.out.h>
 #include <lst.h>
 #include <ar.h>

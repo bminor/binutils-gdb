@@ -44,6 +44,7 @@
 #include "block.h"
 #include "infcall.h"
 #include "valprint.h"
+#include "gdb_assert.h"
 
 #include <ctype.h>
 
@@ -74,38 +75,6 @@ struct objc_method {
   CORE_ADDR types;
   CORE_ADDR imp;
 };
-
-/* Complaints about ObjC classes, selectors, etc.  */
-
-#if (!defined __GNUC__ || __GNUC__ < 2 || __GNUC_MINOR__ < (defined __cplusplus ? 6 : 4))
-#define __CHECK_FUNCTION ((__const char *) 0)
-#else
-#define __CHECK_FUNCTION __PRETTY_FUNCTION__
-#endif
-
-#define CHECK(expression) \
-  ((void) ((expression) ? 0 : gdb_check (#expression, __FILE__, __LINE__, \
-                                         __CHECK_FUNCTION)))
-
-#define CHECK_FATAL(expression) \
-  ((void) ((expression) ? 0 : gdb_check_fatal (#expression, __FILE__, \
-                              __LINE__, __CHECK_FUNCTION)))
-
-static void 
-gdb_check (const char *str, const char *file, 
-	   unsigned int line, const char *func)
-{
-  error ("assertion failure on line %u of \"%s\" in function \"%s\": %s\n",
-	 line, file, func, str);
-}
-
-static void 
-gdb_check_fatal (const char *str, const char *file, 
-		 unsigned int line, const char *func)
-{
-  internal_error (file, line, 
-		  "assertion failure in function \"%s\": %s\n", func, str);
-}
 
 /* Lookup a structure type named "struct NAME", visible in lexical
    block BLOCK.  If NOERR is nonzero, return zero if NAME is not
@@ -658,7 +627,7 @@ static const struct op_print objc_op_print_tab[] =
     {"sizeof ", UNOP_SIZEOF, PREC_PREFIX, 0},
     {"++", UNOP_PREINCREMENT, PREC_PREFIX, 0},
     {"--", UNOP_PREDECREMENT, PREC_PREFIX, 0},
-    {NULL, 0, 0, 0}
+    {NULL, OP_NULL, PREC_NULL, 0}
 };
 
 struct type ** const (objc_builtin_types[]) = 
@@ -1153,7 +1122,7 @@ parse_selector (char *method, char **selector)
 
   char *nselector = NULL;
 
-  CHECK (selector != NULL);
+  gdb_assert (selector != NULL);
 
   s1 = method;
 
@@ -1212,10 +1181,10 @@ parse_method (char *method, char *type, char **class,
   char *ncategory = NULL;
   char *nselector = NULL;
 
-  CHECK (type != NULL);
-  CHECK (class != NULL);
-  CHECK (category != NULL);
-  CHECK (selector != NULL);
+  gdb_assert (type != NULL);
+  gdb_assert (class != NULL);
+  gdb_assert (category != NULL);
+  gdb_assert (selector != NULL);
   
   s1 = method;
 
@@ -1325,8 +1294,8 @@ find_methods (struct symtab *symtab, char type,
   static char *tmp = NULL;
   static unsigned int tmplen = 0;
 
-  CHECK (nsym != NULL);
-  CHECK (ndebug != NULL);
+  gdb_assert (nsym != NULL);
+  gdb_assert (ndebug != NULL);
 
   if (symtab)
     block = BLOCKVECTOR_BLOCK (BLOCKVECTOR (symtab), STATIC_BLOCK);
@@ -1438,8 +1407,8 @@ char *find_imps (struct symtab *symtab, struct block *block,
   char *buf = NULL;
   char *tmp = NULL;
 
-  CHECK (nsym != NULL);
-  CHECK (ndebug != NULL);
+  gdb_assert (nsym != NULL);
+  gdb_assert (ndebug != NULL);
 
   if (nsym != NULL)
     *nsym = 0;
@@ -1826,7 +1795,7 @@ static void
 read_objc_methlist_method (CORE_ADDR addr, unsigned long num, 
 			   struct objc_method *method)
 {
-  CHECK_FATAL (num < read_objc_methlist_nmethods (addr));
+  gdb_assert (num < read_objc_methlist_nmethods (addr));
   read_objc_method (addr + 8 + (12 * num), method);
 }
   

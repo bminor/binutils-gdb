@@ -183,7 +183,7 @@ deprecated_read_register_dummy (CORE_ADDR pc, CORE_ADDR fp, int regno)
       /* NOTE: cagney/2002-08-12: Replaced a call to
 	 regcache_raw_read_as_address() with a call to
 	 regcache_cooked_read_unsigned().  The old, ...as_address
-	 function was eventually calling extract_unsigned_integer (via
+	 function was eventually calling extract_unsigned_integer (nee
 	 extract_address) to unpack the registers value.  The below is
 	 doing an unsigned extract so that it is functionally
 	 equivalent.  The read needs to be cooked as, otherwise, it

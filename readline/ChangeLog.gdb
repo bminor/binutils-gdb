@@ -1,3 +1,8 @@
+2003-05-25  Mark Kettenis  <kettenis@gnu.org>
+
+	* aclocal.m4: Don't add wcwidth.o if we don't have wchar.h.
+	* configure: Regenerate.
+
 2003-05-13  Andreas Jaeger  <aj@suse.de>
 
         * support/config.guess: Update to 2003-05-09 version.
