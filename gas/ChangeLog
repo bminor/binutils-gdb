@@ -1,3 +1,9 @@
+Mon Sep 29 15:24:52 1997  J"orn Rennecke <amylaar@cygnus.co.uk>
+
+	* as.h, input-scrub.c (new_logical_line): New return value.
+	* read.c (s_app_file): Don't note the same file several times
+	in a row.
+
 Thu Sep 25 13:08:02 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-m68k.c (m68k_ip): Remove ` operand specifier.
