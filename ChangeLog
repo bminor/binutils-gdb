@@ -43,20 +43,6 @@ Thu Oct 29 00:12:41 1992  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
         $(target_canonical), which are the full, canonical names for the
         given host and target
 
-Thu Nov  5 10:38:46 1992  Michael Werner  (mtw@rtl.cygnus.com)
-
-	* ./deja-gnu/gdb.t21/.Sanitize & ./deja-gnu/gdb.t22/.Sanitize
-	  Changed .Sanitize files to reflect earlier change of
-	  in-gdbme.C filename to in-gdbme.cc .
-
-Wed Nov  4 17:57:47 1992  Michael Werner  (mtw@rtl.cygnus.com)
-
-	* Makefile.in:  Added stuff for building deja-gnu.
-	* ./deja-gnu/gdb.t21/ & ./deja-gnu/gdb.t22/:
-	  Moved in-gdbme.C file to in-gdbme.cc because gcc was changed to
-	  not recognize .C extensions anymore.  Changed the configure.in
-	  file to reflect the filename extension change.
-
 Sun Nov  1 16:38:17 1992  Per Bothner  (bothner@cygnus.com)
 
 	* Makefile.in:  Added separate definitions for C++.
