@@ -3067,6 +3067,9 @@ prep_headers (abfd)
     case bfd_arch_d30v:
       i_ehdrp->e_machine = EM_CYGNUS_D30V;
       break;
+    case bfd_arch_fr30:
+      i_ehdrp->e_machine = EM_CYGNUS_FR30;
+      break;
     case bfd_arch_v850:
       switch (bfd_get_mach (abfd))
 	{

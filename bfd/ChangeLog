@@ -1,3 +1,7 @@
+Tue Nov 10 15:13:59 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* elf.c (prep_headers): Add support for bfd_arch_fr30.
+
 Tue Nov 10 13:37:36 1998  Felix Lee  <flee@cygnus.com>
 
 	* acinclude.m4 (BFD_HAVE_SYS_PROCFS_TYPE,
