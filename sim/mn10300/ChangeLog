@@ -1,4 +1,8 @@
 start-sanitize-am33
+Thu Jul  9 10:06:55 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* am33.igen: Add remaining non-DSP instructions.
+
 Wed Jul  8 16:29:12 1998  Jeffrey A Law  (law@cygnus.com)
 
 	* am33.igen (translate_rreg): New function.  Use it as appropriate.
