@@ -413,6 +413,7 @@ const struct mips_opcode mips_opcodes[] = {
 {"mtlo",    "s",	0x00000013, 0xfc1fffff,	RD_s|WR_LO	},
 {"mul.d",   "D,V,T",	0x46200002, 0xffe0003f,	WR_D|RD_S|RD_T	},
 {"mul.s",   "D,V,T",	0x46000002, 0xffe0003f,	WR_D|RD_S|RD_T	},
+{"mul",     "d,v,t",	0x70000002, 0xfc0007ff, WR_d|RD_s|RD_t|WR_HI|WR_LO|P3},
 {"mul",     "d,v,t",	0,    (int) M_MUL,	INSN_MACRO	},
 {"mul",     "d,v,I",	0,    (int) M_MUL_I,	INSN_MACRO	},
 {"mulo",    "d,v,t",	0,    (int) M_MULO,	INSN_MACRO	},

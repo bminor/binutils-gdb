@@ -1,3 +1,7 @@
+Thu Feb 16 17:34:41 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* mips-opc.c: Add r4650 mul instruction.
+
 Wed Feb 15 15:45:20 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* mips-opc.c: Add uld and usd macros for unaligned double load and
