@@ -27,11 +27,7 @@ load_lib gdb.exp
 load_lib vxworks.exp
 
 set shell_prompt "->"
-
-# these need to be initialized only if site.exp doesn't set them
-if ![info exists prompt] then {
-    set prompt "\(vxgdb\)"
-}
+set prompt "\[(\]vxgdb\[)\]"
 
 #
 # gdb_version -- extract and print the version number of gcc
