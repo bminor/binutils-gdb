@@ -1276,7 +1276,8 @@ find_opcode (opcode, myops)
 	  if (X_op != O_register
 	      || (num & ~flags
 		  & (OPERAND_GPR | OPERAND_ACC0 | OPERAND_ACC1
-		     | OPERAND_FFLAG | OPERAND_CFLAG | OPERAND_CONTROL)))
+		     | OPERAND_FFLAG | OPERAND_CFLAG | OPERAND_CONTROL))
+	      || ((flags & OPERAND_SP) && ! (num & OPERAND_SP)))
 	    {
 	      as_bad (_("bad opcode or operands"));
 	      return 0;
@@ -1385,7 +1386,8 @@ find_opcode (opcode, myops)
 		      || (num & ~flags
 			  & (OPERAND_GPR | OPERAND_ACC0 | OPERAND_ACC1
 			     | OPERAND_FFLAG | OPERAND_CFLAG
-			     | OPERAND_CONTROL)))
+			     | OPERAND_CONTROL))
+		      || ((flags & OPERAND_SP) && ! (num & OPERAND_SP)))
 		    {
 		      match = 0;
 		      break;

@@ -1,3 +1,8 @@
+2001-11-29  Alexandre Oliva  <aoliva@redhat.com>
+
+	* config/tc-d10v.c (find_opcode): Reject non-SP operand if
+	flags requires SP.
+
 2001-11-29 Arati Dikey <aratid@kpit.com>
 
 	* tc-sh.c (parse_at): Removed case-sensitivity of index register
