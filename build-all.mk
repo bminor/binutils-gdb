@@ -15,14 +15,14 @@ TREE	= devo
 
 NATIVE  = native
 
-DATE	= 921229
+DATE	= 930104
 
 TAG	= latest-$(DATE)
 
 INSTALLDIR = /cirdan/taxes/devo-test/$(TAG)
 
 GCC = gcc -O -g
-CFLAGS = -O
+CFLAGS = -g
 
 log	= 1>$(canonhost)-build-log 2>&1
 tlog    = 1> $(canonhost)-x-$$i-build-log 2>&1
@@ -53,38 +53,33 @@ endif
 ifeq ($(canonhost),mips-dec-ultrix)
 TARGETS	= $(NATIVE) m68k-vxworks m68k-aout i960-vxworks \
 	  sparc-vxworks m68k-coff i386-aout sparc-aout i960-intel-nindy
-CFLAGS = 
 all: all-cygnus
 endif
 
 ifeq ($(canonhost),mips-sgi-irix4)
-TARGETS	= $(NATIVE) m68k-vxworks m68k-aout
+TARGETS	= $(NATIVE) m68k-vxworks a29k-amd-udi
 all: all-cygnus
 endif
 
 ifeq ($(canonhost),rs6000-ibm-aix)
 TARGETS	= $(NATIVE) m68k-vxworks i960-vxworks m68k-aout
-CFLAGS=-g
 all: all-cygnus
 endif
 
 ifeq ($(canonhost),m68k-hp-hpux)
 TARGETS	= m68k-vxworks
 CC = cc +O1000 -Wp,-P
-CFLAGS =
 all: all-native
 endif
 
 ifeq ($(canonhost),hppa1.1-hp-hpux)
 TARGETS	= m68k-aout m68k-coff m68k-vxworks i960-vxworks a29k-amd-udi
 CC = cc 
-CFLAGS = -g
 all: all-native
 endif
 
 ifeq ($(canonhost),i386-sco3.2v4)
 TARGETS = $(NATIVE) i386-aout
-CFLAGS =
 all: all-cygnus
 endif
 
