@@ -1092,14 +1092,36 @@ ia64_flush_insns ()
      here.  Give an error for others.  */
   for (ptr = unwind.current_entry; ptr; ptr = ptr->next)
     {
-      if (ptr->r.type == prologue || ptr->r.type == prologue_gr
-	  || ptr->r.type == body || ptr->r.type == endp)
+      switch (ptr->r.type)
 	{
+	case prologue:
+	case prologue_gr:
+	case body:
+	case endp:
 	  ptr->slot_number = (unsigned long) frag_more (0);
 	  ptr->slot_frag = frag_now;
+	  break;
+
+	  /* Allow any record which doesn't have a "t" field (i.e.,
+	     doesn't relate to a particular instruction).  */
+	case unwabi:
+	case br_gr:
+	case copy_state:
+	case fr_mem:
+	case frgr_mem:
+	case gr_gr:
+	case gr_mem:
+	case label_state:
+	case rp_br:
+	case spill_base:
+	case spill_mask:
+	  /* nothing */
+	  break;
+
+	default:
+	  as_bad (_("Unwind directive not followed by an instruction."));
+	  break;
 	}
-      else
-	as_bad (_("Unwind directive not followed by an instruction."));
     }
   unwind.current_entry = NULL;
 

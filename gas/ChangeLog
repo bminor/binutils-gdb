@@ -1,3 +1,9 @@
+2004-02-18  David Mosberger  <davidm@hpl.hp.com>
+
+	* config/tc-ia64.c (ia64_flush_insns): In addition to prologue,
+	body, and endp, allow unwind records which do not have a "t"
+	(time/instruction) field.
+
 2004-02-17  Petko Manolov  <petkan@nucleusys.com>
 
 	* config/tc-arm.c (do_mav_dspsc_1): Correct offset of CRn.
