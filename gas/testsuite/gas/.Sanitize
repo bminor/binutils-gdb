@@ -30,9 +30,9 @@ else
 fi
 
 if ( echo $* | grep keep\-sky > /dev/null ) ; then
-	keep_these_too="txvu ${keep_these_too}"
+	keep_these_too="dvp ${keep_these_too}"
 else
-	lose_these_too="txvu ${lose_these_too}"
+	lose_these_too="dvp ${lose_these_too}"
 fi
 
 if ( echo $* | grep keep\-d30v > /dev/null ) ; then
