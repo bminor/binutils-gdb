@@ -1,3 +1,14 @@
+2001-02-14  Nick Clifton  <nickc@redhat.com>
+
+	* Makefile.am (BFD32_BACKENDS_CFILES): Remove peigen.c
+	(BFD64_BACKENDS): Add pepigen.c
+	Add rules to create peigen.c and pepigen.c from peXXigen.c.
+
+	* Makefile.in: Regenerate.
+	* configure:  Regenerate.
+	* po/POTFILES.in: Regenerate.
+	* po/bfd.pot: Regenerate.
+
 2001-02-14  H.J. Lu  <hjl@gnu.org>
 
 	* libcoff-in.h (pe_tdata): Add members target_subsystem and

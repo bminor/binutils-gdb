@@ -389,7 +389,6 @@ BFD32_BACKENDS_CFILES = \
 	pei-sh.c \
 	pe-mips.c \
 	pei-mips.c \
-	peigen.c \
 	ppcboot.c \
 	reloc16.c \
 	riscix.c \
@@ -425,7 +424,8 @@ BFD64_BACKENDS = \
 	elf64-sparc.lo \
 	elf64.lo \
 	nlm32-alpha.lo \
-	nlm64.lo
+	nlm64.lo \
+	pepigen.lo
 
 BFD64_BACKENDS_CFILES = \
 	aout64.c \
@@ -583,6 +583,16 @@ elf64-ia64.c : elfxx-ia64.c
 	rm -f elf64-ia64.c
 	sed -e s/NN/64/g < $(srcdir)/elfxx-ia64.c > elf64-ia64.new
 	mv -f elf64-ia64.new elf64-ia64.c
+
+peigen.c : peXXigen.c
+	rm -f peigen.c
+	sed -e s/XX/pe/g < $(srcdir)/peXXigen.c > peigen.new
+	mv -f peigen.new peigen.c
+
+pepigen.c : peXXigen.c
+	rm -f pepigen.c
+	sed -e s/XX/pep/g < $(srcdir)/peXXigen.c > pepigen.new
+	mv -f pepigen.new pepigen.c
 
 BFD_H_DEPS= $(INCDIR)/ansidecl.h
 LOCAL_H_DEPS= libbfd.h sysdep.h config.h
@@ -1199,6 +1209,9 @@ pei-mips.lo: pei-mips.c $(INCDIR)/filenames.h pe-mips.c \
   libpei.h
 peigen.lo: peigen.c $(INCDIR)/filenames.h $(INCDIR)/coff/internal.h \
   $(INCDIR)/coff/i386.h $(INCDIR)/coff/pe.h libcoff.h \
+  $(INCDIR)/bfdlink.h libpei.h
+pepigen.lo: pepigen.c $(INCDIR)/filenames.h $(INCDIR)/coff/internal.h \
+  $(INCDIR)/coff/ia64.h $(INCDIR)/coff/pe.h libcoff.h \
   $(INCDIR)/bfdlink.h libpei.h
 ppcboot.lo: ppcboot.c $(INCDIR)/filenames.h
 reloc16.lo: reloc16.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \

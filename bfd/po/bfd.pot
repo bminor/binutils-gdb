@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2001-02-09 16:27-0800\n"
+"POT-Creation-Date: 2001-02-14 11:05-0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -399,7 +399,7 @@ msgstr ""
 msgid "unsupported reloc type"
 msgstr ""
 
-#: coff-mips.c:874 elf32-mips.c:1417
+#: coff-mips.c:874 elf32-mips.c:1423
 msgid "GP relative relocation when _gp not defined"
 msgstr ""
 
@@ -551,7 +551,7 @@ msgstr ""
 
 #: elf-hppa.h:1369 elf-hppa.h:1402 elf32-arm.h:1853 elf32-i386.c:1442
 #: elf32-ppc.c:3092 elf32-s390.c:1442 elf32-sh.c:2996 elf64-s390.c:1431
-#: elf64-x86-64.c:1182
+#: elf64-x86-64.c:1200
 #, c-format
 msgid ""
 "%s: warning: unresolvable relocation against symbol `%s' from %s section"
@@ -661,7 +661,7 @@ msgstr ""
 
 #. Ignore init flag - it may not be set, despite the flags field
 #. containing valid data.
-#: elf32-arm.h:2193 elf32-cris.c:615 elf32-m68k.c:429 elf32-mips.c:2695
+#: elf32-arm.h:2193 elf32-cris.c:615 elf32-m68k.c:429 elf32-mips.c:2701
 #, c-format
 msgid "private flags = %lx:"
 msgstr ""
@@ -757,7 +757,7 @@ msgstr ""
 msgid "Could not find relocation section for %s"
 msgstr ""
 
-#: elf32-hppa.c:1030 elf32-hppa.c:3409
+#: elf32-hppa.c:1030 elf32-hppa.c:3421
 #, c-format
 msgid "%s(%s+0x%lx): cannot reach %s, recompile with -ffunction-sections"
 msgstr ""
@@ -781,17 +781,17 @@ msgstr ""
 msgid "%s: duplicate export stub %s"
 msgstr ""
 
-#: elf32-hppa.c:3293
+#: elf32-hppa.c:3305
 #, c-format
 msgid "%s(%s+0x%lx): fixing %s"
 msgstr ""
 
-#: elf32-hppa.c:3912
+#: elf32-hppa.c:3924
 #, c-format
 msgid "%s(%s+0x%lx): cannot handle %s for %s"
 msgstr ""
 
-#: elf32-hppa.c:4230
+#: elf32-hppa.c:4242
 msgid ".got section not immediately after .plt section"
 msgstr ""
 
@@ -856,141 +856,141 @@ msgstr ""
 msgid "%s: Unknown relocation type %d\n"
 msgstr ""
 
-#: elf32-mips.c:1576
+#: elf32-mips.c:1582
 msgid "32bits gp relative relocation occurs for an external symbol"
 msgstr ""
 
-#: elf32-mips.c:1725
+#: elf32-mips.c:1731
 #, c-format
 msgid "Linking mips16 objects into %s format is not supported"
 msgstr ""
 
-#: elf32-mips.c:2582
+#: elf32-mips.c:2588
 #, c-format
 msgid "%s: linking PIC files with non-PIC files"
 msgstr ""
 
-#: elf32-mips.c:2592
+#: elf32-mips.c:2598
 #, c-format
 msgid "%s: linking abicalls files with non-abicalls files"
 msgstr ""
 
-#: elf32-mips.c:2621
+#: elf32-mips.c:2627
 #, c-format
 msgid "%s: ISA mismatch (-mips%d) with previous modules (-mips%d)"
 msgstr ""
 
-#: elf32-mips.c:2630
+#: elf32-mips.c:2636
 #, c-format
 msgid "%s: ISA mismatch (%d) with previous modules (%d)"
 msgstr ""
 
-#: elf32-mips.c:2653
+#: elf32-mips.c:2659
 #, c-format
 msgid "%s: ABI mismatch: linking %s module with previous %s modules"
 msgstr ""
 
-#: elf32-mips.c:2667 elf32-ppc.c:1477 elf64-sparc.c:2991
+#: elf32-mips.c:2673 elf32-ppc.c:1477 elf64-sparc.c:2991
 #, c-format
 msgid "%s: uses different e_flags (0x%lx) fields than previous modules (0x%lx)"
 msgstr ""
 
-#: elf32-mips.c:2698
+#: elf32-mips.c:2704
 msgid " [abi=O32]"
 msgstr ""
 
-#: elf32-mips.c:2700
+#: elf32-mips.c:2706
 msgid " [abi=O64]"
 msgstr ""
 
-#: elf32-mips.c:2702
+#: elf32-mips.c:2708
 msgid " [abi=EABI32]"
 msgstr ""
 
-#: elf32-mips.c:2704
+#: elf32-mips.c:2710
 msgid " [abi=EABI64]"
 msgstr ""
 
-#: elf32-mips.c:2706
+#: elf32-mips.c:2712
 msgid " [abi unknown]"
 msgstr ""
 
-#: elf32-mips.c:2708
+#: elf32-mips.c:2714
 msgid " [abi=N32]"
 msgstr ""
 
-#: elf32-mips.c:2710
+#: elf32-mips.c:2716
 msgid " [abi=64]"
 msgstr ""
 
-#: elf32-mips.c:2712
+#: elf32-mips.c:2718
 msgid " [no abi set]"
 msgstr ""
 
-#: elf32-mips.c:2715
+#: elf32-mips.c:2721
 msgid " [mips1]"
 msgstr ""
 
-#: elf32-mips.c:2717
+#: elf32-mips.c:2723
 msgid " [mips2]"
 msgstr ""
 
-#: elf32-mips.c:2719
+#: elf32-mips.c:2725
 msgid " [mips3]"
 msgstr ""
 
-#: elf32-mips.c:2721
+#: elf32-mips.c:2727
 msgid " [mips4]"
 msgstr ""
 
-#: elf32-mips.c:2723
+#: elf32-mips.c:2729
 msgid " [mips5]"
 msgstr ""
 
-#: elf32-mips.c:2725
+#: elf32-mips.c:2731
 msgid " [mips32]"
 msgstr ""
 
-#: elf32-mips.c:2727
+#: elf32-mips.c:2733
 msgid " [mips64]"
 msgstr ""
 
-#: elf32-mips.c:2729
+#: elf32-mips.c:2735
 msgid " [unknown ISA]"
 msgstr ""
 
-#: elf32-mips.c:2732
+#: elf32-mips.c:2738
 msgid " [32bitmode]"
 msgstr ""
 
-#: elf32-mips.c:2734
+#: elf32-mips.c:2740
 msgid " [not 32bitmode]"
 msgstr ""
 
-#: elf32-mips.c:4388
+#: elf32-mips.c:4407
 msgid "static procedure (no name)"
 msgstr ""
 
-#: elf32-mips.c:5005 elf64-alpha.c:4417
+#: elf32-mips.c:5024 elf64-alpha.c:4417
 #, c-format
 msgid "%s: illegal section name `%s'"
 msgstr ""
 
-#: elf32-mips.c:5570
+#: elf32-mips.c:5589
 msgid "not enough GOT space for local GOT entries"
 msgstr ""
 
-#: elf32-mips.c:6686
+#: elf32-mips.c:6705
 #, c-format
 msgid "%s: %s+0x%lx: jump to stub routine which is not jal"
 msgstr ""
 
-#: elf32-mips.c:7673
+#: elf32-mips.c:7692
 #, c-format
 msgid "Malformed reloc detected for section %s"
 msgstr ""
 
-#: elf32-mips.c:7750
+#: elf32-mips.c:7769
 #, c-format
 msgid "%s: CALL16 reloc at 0x%lx not against global symbol"
 msgstr ""
@@ -1467,340 +1467,41 @@ msgid "Unhandled OSF/1 core file section type %d\n"
 msgstr ""
 
 #. XXX code yet to be written.
-#: peicode.h:787
+#: peicode.h:795
 #, c-format
 msgid "%s: Unhandled import type; %x"
 msgstr ""
 
-#: peicode.h:792
+#: peicode.h:800
 #, c-format
 msgid "%s: Unrecognised import type; %x"
 msgstr ""
 
-#: peicode.h:806
+#: peicode.h:814
 #, c-format
 msgid "%s: Unrecognised import name type; %x"
 msgstr ""
 
-#: peicode.h:1163
+#: peicode.h:1171
 #, c-format
 msgid "%s: Unrecognised machine type (0x%x) in Import Library Format archive"
 msgstr ""
 
-#: peicode.h:1175
+#: peicode.h:1183
 #, c-format
 msgid ""
 "%s: Recognised but unhandled machine type (0x%x) in Import Library Format "
 "archive"
 msgstr ""
 
-#: peicode.h:1192
+#: peicode.h:1200
 #, c-format
 msgid "%s: size field is zero in Import Library Format header"
 msgstr ""
 
-#: peicode.h:1220
+#: peicode.h:1228
 #, c-format
 msgid "%s: string not null terminated in ILF object file."
-msgstr ""
-
-#: peigen.c:993
-#, c-format
-msgid "%s: line number overflow: 0x%lx > 0xffff"
-msgstr ""
-
-#: peigen.c:1011
-#, c-format
-msgid "%s: reloc overflow 1: 0x%lx > 0xffff"
-msgstr ""
-
-#: peigen.c:1024
-msgid "Export Directory [.edata (or where ever we found it)]"
-msgstr ""
-
-#: peigen.c:1025
-msgid "Import Directory [parts of .idata]"
-msgstr ""
-
-#: peigen.c:1026
-msgid "Resource Directory [.rsrc]"
-msgstr ""
-
-#: peigen.c:1027
-msgid "Exception Directory [.pdata]"
-msgstr ""
-
-#: peigen.c:1028
-msgid "Security Directory"
-msgstr ""
-
-#: peigen.c:1029
-msgid "Base Relocation Directory [.reloc]"
-msgstr ""
-
-#: peigen.c:1030
-msgid "Debug Directory"
-msgstr ""
-
-#: peigen.c:1031
-msgid "Description Directory"
-msgstr ""
-
-#: peigen.c:1032
-msgid "Special Directory"
-msgstr ""
-
-#: peigen.c:1033
-msgid "Thread Storage Directory [.tls]"
-msgstr ""
-
-#: peigen.c:1034
-msgid "Load Configuration Directory"
-msgstr ""
-
-#: peigen.c:1035
-msgid "Bound Import Directory"
-msgstr ""
-
-#: peigen.c:1036
-msgid "Import Address Table Directory"
-msgstr ""
-
-#: peigen.c:1037
-msgid "Delay Import Directory"
-msgstr ""
-
-#: peigen.c:1038 peigen.c:1039
-msgid "Reserved"
-msgstr ""
-
-#: peigen.c:1103
-msgid ""
-"\n"
-"There is an import table, but the section containing it could not be found\n"
-msgstr ""
-
-#: peigen.c:1108
-#, c-format
-msgid ""
-"\n"
-"There is an import table in %s at 0x%lx\n"
-msgstr ""
-
-#: peigen.c:1147
-#, c-format
-msgid ""
-"\n"
-"Function descriptor located at the start address: %04lx\n"
-msgstr ""
-
-#: peigen.c:1150
-#, c-format
-msgid "\tcode-base %08lx toc (loadable/actual) %08lx/%08lx\n"
-msgstr ""
-
-#: peigen.c:1156
-msgid ""
-"\n"
-"No reldata section! Function descriptor not decoded.\n"
-msgstr ""
-
-#: peigen.c:1161
-#, c-format
-msgid ""
-"\n"
-"The Import Tables (interpreted %s section contents)\n"
-msgstr ""
-
-#: peigen.c:1164
-msgid " vma:            Hint    Time      Forward  DLL       First\n"
-msgstr ""
-
-#: peigen.c:1166
-msgid "                 Table   Stamp     Chain    Name      Thunk\n"
-msgstr ""
-
-#: peigen.c:1216
-#, c-format
-msgid ""
-"\n"
-"\tDLL Name: %s\n"
-msgstr ""
-
-#: peigen.c:1220 peigen.c:1283
-msgid "\tvma:  Hint/Ord Member-Name\n"
-msgstr ""
-
-#: peigen.c:1282
-msgid "\tThe Import Address Table (difference found)\n"
-msgstr ""
-
-#: peigen.c:1289
-msgid "\t>>> Ran out of IAT members!\n"
-msgstr ""
-
-#: peigen.c:1308
-msgid "\tThe Import Address Table is identical\n"
-msgstr ""
-
-#: peigen.c:1381
-msgid ""
-"\n"
-"There is an export table, but the section containing it could not be found\n"
-msgstr ""
-
-#: peigen.c:1386
-#, c-format
-msgid ""
-"\n"
-"There is an export table in %s at 0x%lx\n"
-msgstr ""
-
-#: peigen.c:1417
-#, c-format
-msgid ""
-"\n"
-"The Export Tables (interpreted %s section contents)\n"
-"\n"
-msgstr ""
-
-#: peigen.c:1421
-#, c-format
-msgid "Export Flags \t\t\t%lx\n"
-msgstr ""
-
-#: peigen.c:1424
-#, c-format
-msgid "Time/Date stamp \t\t%lx\n"
-msgstr ""
-
-#: peigen.c:1427
-#, c-format
-msgid "Major/Minor \t\t\t%d/%d\n"
-msgstr ""
-
-#: peigen.c:1430
-msgid "Name \t\t\t\t"
-msgstr ""
-
-#: peigen.c:1436
-#, c-format
-msgid "Ordinal Base \t\t\t%ld\n"
-msgstr ""
-
-#: peigen.c:1439
-msgid "Number in:\n"
-msgstr ""
-
-#: peigen.c:1442
-#, c-format
-msgid "\tExport Address Table \t\t%08lx\n"
-msgstr ""
-
-#: peigen.c:1446
-#, c-format
-msgid "\t[Name Pointer/Ordinal] Table\t%08lx\n"
-msgstr ""
-
-#: peigen.c:1449
-msgid "Table Addresses\n"
-msgstr ""
-
-#: peigen.c:1452
-msgid "\tExport Address Table \t\t"
-msgstr ""
-
-#: peigen.c:1457
-msgid "\tName Pointer Table \t\t"
-msgstr ""
-
-#: peigen.c:1462
-msgid "\tOrdinal Table \t\t\t"
-msgstr ""
-
-#: peigen.c:1476
-#, c-format
-msgid ""
-"\n"
-"Export Address Table -- Ordinal Base %ld\n"
-msgstr ""
-
-#: peigen.c:1495
-msgid "Forwarder RVA"
-msgstr ""
-
-#: peigen.c:1506
-msgid "Export RVA"
-msgstr ""
-
-#: peigen.c:1513
-msgid ""
-"\n"
-"[Ordinal/Name Pointer] Table\n"
-msgstr ""
-
-#: peigen.c:1568
-#, c-format
-msgid "Warning, .pdata section size (%ld) is not a multiple of %d\n"
-msgstr ""
-
-#: peigen.c:1572
-msgid ""
-"\n"
-"The Function Table (interpreted .pdata section contents)\n"
-msgstr ""
-
-#: peigen.c:1575
-msgid " vma:\t\t\tBegin Address    End Address      Unwind Info\n"
-msgstr ""
-
-#: peigen.c:1578
-msgid " vma:\t\tBegin    End      EH       EH       PrologEnd  Exception\n"
-msgstr ""
-
-#: peigen.c:1580
-msgid "     \t\tAddress  Address  Handler  Data     Address    Mask\n"
-msgstr ""
-
-#: peigen.c:1652
-msgid " Register save millicode"
-msgstr ""
-
-#: peigen.c:1655
-msgid " Register restore millicode"
-msgstr ""
-
-#: peigen.c:1658
-msgid " Glue code sequence"
-msgstr ""
-
-#: peigen.c:1709
-msgid ""
-"\n"
-"\n"
-"PE File Base Relocations (interpreted .reloc section contents)\n"
-msgstr ""
-
-#: peigen.c:1744
-#, c-format
-msgid ""
-"\n"
-"Virtual Address: %08lx Chunk size %ld (0x%lx) Number of fixups %ld\n"
-msgstr ""
-
-#: peigen.c:1757
-#, c-format
-msgid "\treloc %4d offset %4x [%4lx] %s"
-msgstr ""
-
-#. The MS dumpbin program reportedly ands with 0xff0f before
-#. printing the characteristics field.  Not sure why.  No reason to
-#. emulate it here.
-#: peigen.c:1796
-#, c-format
-msgid ""
-"\n"
-"Characteristics 0x%x\n"
 msgstr ""
 
 #: pe-mips.c:653

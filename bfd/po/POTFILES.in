@@ -217,7 +217,6 @@ pe-arm.c
 pe-i386.c
 pei-arm.c
 peicode.h
-peigen.c
 pei-i386.c
 pei-mcore.c
 pei-mips.c
