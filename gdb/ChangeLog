@@ -1,6 +1,13 @@
 Mon Aug 19 13:44:46 1991  John Gilmore  (gnu at cygint.cygnus.com)
 
-	* 
+	* mcheck.c:  Avoid warning about undeclared abort fn.
+	* tm-sparc.h (PC_ADJUST):  Avoid calling error() from this;
+	it causes recursive calls to error() when used in cleanups.
+	To do so requires that we make it a function, so we do.
+	* sparc-tdep.c (sparc_pc_adjust):  New implem of PC_ADJUST.
+	* utils.c (do_cleanups):  Remove the current cleanup from the
+	chain *before* calling it, in case error() is called from it.
+	The result won't be pretty, but won't be an infinite loop either.
 
 Mon Aug 19 00:41:04 1991  Michael Tiemann  (tiemann at cygint.cygnus.com)
 
@@ -147,7 +154,7 @@ Tue Aug  6 17:16:15 1991  Roland H. Pesch  (pesch at cygint.cygnus.com)
 
 Fri Aug  2 00:13:06 1991  John Gilmore  (gnu at cygint.cygnus.com)
 
-	* values.c (basetype_addr):  When reading target memory, use the
+	* values.c (baseclass_addr):  When reading target memory, use the
 	length of the basetype, not the upper type.  We've only malloc'd
 	enough space for the basetype, leading to errors in free().
 

@@ -84,8 +84,8 @@ extern CORE_ADDR skip_prologue ();
    encodes the structure size being returned.  If we detect such
    a fake insn, step past it.  */
 
-#define PC_ADJUST(pc) ((read_memory_integer (pc + 8, 4) & 0xfffffe00) == 0 ? \
-		       pc+12 : pc+8)
+#define PC_ADJUST(pc) sparc_pc_adjust(pc)
+extern CORE_ADDR sparc_pc_adjust();
 
 #define SAVED_PC_AFTER_CALL(frame) PC_ADJUST (read_register (RP_REGNUM))
 

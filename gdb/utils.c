@@ -134,8 +134,8 @@ do_cleanups (old_chain)
   register struct cleanup *ptr;
   while ((ptr = cleanup_chain) != old_chain)
     {
+      cleanup_chain = ptr->next;	/* Do this first incase recursion */
       (*ptr->function) (ptr->arg);
-      cleanup_chain = ptr->next;
       free (ptr);
     }
 }

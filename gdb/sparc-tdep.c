@@ -614,6 +614,26 @@ sparc_pop_frame ()
 					read_pc ()));
 }
 
+/* On the Sun 4 under SunOS, the compile will leave a fake insn which
+   encodes the structure size being returned.  If we detect such
+   a fake insn, step past it.  */
+
+CORE_ADDR
+sparc_pc_adjust(pc)
+     CORE_ADDR pc;
+{
+  long insn;
+  int err;
+
+  err = target_read_memory (pc + 8, (char *)&insn, sizeof(long));
+  SWAP_TARGET_AND_HOST (&insn, sizeof(long));
+  if ((err == 0) && (insn & 0xfffffe00) == 0)
+    return pc+12;
+  else
+    return pc+8;
+}
+
+
 /* Structure of SPARC extended floating point numbers.
    This information is not currently used by GDB, since no current SPARC
    implementations support extended float.  */
