@@ -1,13 +1,20 @@
+Wed Jan 13 10:38:40 1999  Edith Epstein  <eepstein@sophia.cygnus.com>
+
+	* gdb.texinfo: Changes made as part of a project to merge in 
+	  changes made by HP. Documentation makes extensive use of 
+	  @ifclear HPPA and @ifset HPPA. The HP manual omits doumentation
+	  on remote debugging. There are differences in documentation
+ 	  (HP vs.  non-HP) on C++ support (aCC vs. gnu gcc++). Also,
+	  the HP manual discusses catchpoints, hardware watchpoints, and
+	  some HPUX specific limitations for shared library support.
+	  
+	  There are also a number of @node changes.
+	
+
 1999-01-12  Jason Molenda  (jsm@bugshack.cygnus.com)
 
 	* gdbint.texinfo (Formatting): Disambiguate a sentence.
 	(C Usage): Same.
-
-Tue Jan 12 16:54:37 1999  Edith Epstein  <eepstein@sophia.cygnus.com>
-	
-	* gdb.texinfo (Shell Commands): fixed messages about shell usage. 
-	  HP was insisting on C shell. Now all UNIX platforms have the 
-	  same message. removed @ifset HPPA and @ifclear HPPA
 
 Wed Jan  6 11:55:34 1999  David Taylor  <taylor@texas.cygnus.com>
 
