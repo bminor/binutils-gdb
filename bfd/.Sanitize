@@ -225,6 +225,7 @@ syms.c
 targets.c
 tekhex.c
 trad-core.c
+versados.c
 
 Things-to-lose:
 

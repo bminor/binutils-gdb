@@ -1,3 +1,11 @@
+Fri Jun  2 18:54:59 1995  Steve Chamberlain  <sac@slash.cygnus.com>
+
+	* versados.c: New file.
+	* bfd-in2.h (struct _bfd): New field.
+	* bfd.c (struct _bfd): New field.
+	* configure.in (versados_vec): New field.
+	* targets.c (bfd_flavor): Added versados.
+
 Thu Jun  1 13:51:49 1995  Steve Chamberlain  <sac@slash.cygnus.com>
 
 	* coffcode.h (sec_to_styp_flags, styp_to_sec_flags, 
