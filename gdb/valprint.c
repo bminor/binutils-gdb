@@ -1212,6 +1212,11 @@ val_print (type, valaddr, address, stream, format,
       fprintf_filtered (stream, "?");
       break;
 
+    case TYPE_CODE_RANGE:
+      /* FIXME, we should not ever have to print one of these yet.  */
+      fprintf_filtered (stream, "<range type>");
+      break;
+
     default:
       error ("Invalid type code in symbol table.");
     }
@@ -1599,7 +1604,7 @@ type_print_base (type, stream, show, level)
   wrap_here ("    ");
   if (type == 0)
     {
-      fprintf_filtered (stream, "type unknown");
+      fprintf_filtered (stream, "<type unknown>");
       return;
     }
 
@@ -1813,12 +1818,17 @@ type_print_base (type, stream, show, level)
       fprintf_filtered (stream, "void");
       break;
 
-    case 0:
-      fprintf_filtered (stream, "struct unknown");
+    case TYPE_CODE_UNDEF:
+      fprintf_filtered (stream, "struct <unknown>");
       break;
 
     case TYPE_CODE_ERROR:
       fprintf_filtered (stream, "<unknown type>");
+      break;
+
+    case TYPE_CODE_RANGE:
+      /* This should not occur */
+      fprintf_filtered (stream, "<range type>");
       break;
 
     default:
@@ -2017,35 +2027,36 @@ _initialize_valprint ()
 
   print_max = 200;
 
-  /* FIXME!  This assumes that these sizes and types are the same on the
-     host and target machines!  */
-  unsigned_type_table
-    = (char **) xmalloc ((1 + sizeof (unsigned LONGEST)) * sizeof (char *));
-  bzero (unsigned_type_table, (1 + sizeof (unsigned LONGEST)));
-  unsigned_type_table[sizeof (unsigned char)] = "unsigned char";
-  unsigned_type_table[sizeof (unsigned short)] = "unsigned short";
-  unsigned_type_table[sizeof (unsigned long)] = "unsigned long";
-  unsigned_type_table[sizeof (unsigned int)] = "unsigned int";
-#ifdef LONG_LONG
-  unsigned_type_table[TARGET_LONG_LONG_BIT/TARGET_CHAR_BIT] =
-						"unsigned long long";
-#endif
+  /* Initialize the names of the various types based on their lengths on
+     the target, in bits.  Note that ordering is important, so that for example,
+     if ints and longs are the same size, that size will default to "int". */
 
-  signed_type_table
-    = (char **) xmalloc ((1 + sizeof (LONGEST)) * sizeof (char *));
-  bzero (signed_type_table, (1 + sizeof (LONGEST)));
-  signed_type_table[sizeof (char)] = "char";
-  signed_type_table[sizeof (short)] = "short";
-  signed_type_table[sizeof (long)] = "long";
-  signed_type_table[sizeof (int)] = "int";
-#ifdef LONG_LONG
+  unsigned_type_table = (char **)
+    xmalloc ((1 + (TARGET_LONG_LONG_BIT/TARGET_CHAR_BIT)) * sizeof (char *));
+  bzero (unsigned_type_table, (1 + (TARGET_LONG_LONG_BIT/TARGET_CHAR_BIT)));
+  unsigned_type_table[TARGET_CHAR_BIT/TARGET_CHAR_BIT] = "unsigned char";
+  unsigned_type_table[TARGET_SHORT_BIT/TARGET_CHAR_BIT] = "unsigned short";
+  unsigned_type_table[TARGET_LONG_LONG_BIT/TARGET_CHAR_BIT] = "unsigned long long";
+  unsigned_type_table[TARGET_LONG_BIT/TARGET_CHAR_BIT] = "unsigned long";
+  unsigned_type_table[TARGET_INT_BIT/TARGET_CHAR_BIT] = "unsigned int";
+
+  signed_type_table = (char **)
+    xmalloc ((1 + (TARGET_LONG_LONG_BIT/TARGET_CHAR_BIT)) * sizeof (char *));
+  bzero (signed_type_table, (1 + (TARGET_LONG_LONG_BIT/TARGET_CHAR_BIT)));
+  signed_type_table[TARGET_CHAR_BIT/TARGET_CHAR_BIT] = "char";
+  signed_type_table[TARGET_SHORT_BIT/TARGET_CHAR_BIT] = "short";
   signed_type_table[TARGET_LONG_LONG_BIT/TARGET_CHAR_BIT] = "long long";
-#endif
+  signed_type_table[TARGET_LONG_BIT/TARGET_CHAR_BIT] = "long";
+  signed_type_table[TARGET_INT_BIT/TARGET_CHAR_BIT] = "int";
 
-  float_type_table
-    = (char **) xmalloc ((1 + sizeof (double)) * sizeof (char *));
-  bzero (float_type_table, (1 + sizeof (double)));
-  float_type_table[sizeof (float)] = "float";
-  float_type_table[sizeof (double)] = "double";
+  float_type_table = (char **)
+    xmalloc ((1 + (TARGET_LONG_DOUBLE_BIT/TARGET_CHAR_BIT)) * sizeof (char *));
+  bzero (float_type_table, (1 + (TARGET_LONG_DOUBLE_BIT/TARGET_CHAR_BIT)));
+  float_type_table[TARGET_FLOAT_BIT/TARGET_CHAR_BIT] = "float";
+  float_type_table[TARGET_DOUBLE_COMPLEX_BIT/TARGET_CHAR_BIT] = "double complex";
+  float_type_table[TARGET_COMPLEX_BIT/TARGET_CHAR_BIT] = "complex";
+  float_type_table[TARGET_LONG_DOUBLE_BIT/TARGET_CHAR_BIT] = "long double";
+  float_type_table[TARGET_DOUBLE_BIT/TARGET_CHAR_BIT] = "double";
+
   obstack_begin (&dont_print_obstack, 32 * sizeof (struct type *));
 }

@@ -826,6 +826,9 @@ extern struct type *builtin_type_unsigned_int;
 extern struct type *builtin_type_unsigned_long;
 extern struct type *builtin_type_float;
 extern struct type *builtin_type_double;
+extern struct type *builtin_type_long_double;
+extern struct type *builtin_type_complex;
+extern struct type *builtin_type_double_complex;
 /* This type represents a type that was unrecognized in symbol
    read-in.  */
 extern struct type *builtin_type_error;

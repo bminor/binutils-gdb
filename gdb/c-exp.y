@@ -1455,6 +1455,9 @@ struct type *builtin_type_unsigned_long;
 struct type *builtin_type_unsigned_long_long;
 struct type *builtin_type_float;
 struct type *builtin_type_double;
+struct type *builtin_type_long_double;
+struct type *builtin_type_complex;
+struct type *builtin_type_double_complex;
 
 struct type ** const (c_builtin_types[]) = 
 {
@@ -1471,6 +1474,9 @@ struct type ** const (c_builtin_types[]) =
   &builtin_type_unsigned_int,
   &builtin_type_unsigned_long,
   &builtin_type_unsigned_long_long,
+  &builtin_type_long_double,
+  &builtin_type_complex,
+  &builtin_type_double_complex,
   0
 };
 
@@ -1486,7 +1492,7 @@ const struct language_defn c_language_defn = {
   c_error,
   &BUILTIN_TYPE_LONGEST,	 /* longest signed   integral type */
   &BUILTIN_TYPE_UNSIGNED_LONGEST,/* longest unsigned integral type */
-  &builtin_type_double,		/* longest floating point type */
+  &builtin_type_double,		/* longest floating point type */ /*FIXME*/
   "0x%x", "0x%", "x",		/* Hex   format, prefix, suffix */
   "0%o",  "0%",  "o",		/* Octal format, prefix, suffix */
   c_op_print_tab,		/* expression operators for printing */
@@ -1496,30 +1502,54 @@ const struct language_defn c_language_defn = {
 void
 _initialize_c_exp ()
 {
-  /* FIXME:  The code below assumes that the sizes of the basic data
-     types are the same on the host and target machines!!!  */
-
-  builtin_type_void = init_type (TYPE_CODE_VOID, 1, 0, "void");
-
-  builtin_type_float = init_type (TYPE_CODE_FLT, sizeof (float), 0, "float");
-  builtin_type_double = init_type (TYPE_CODE_FLT, sizeof (double), 0, "double");
-
-  builtin_type_char = init_type (TYPE_CODE_INT, sizeof (char), 0, "char");
-  builtin_type_short = init_type (TYPE_CODE_INT, sizeof (short), 0, "short");
-  builtin_type_long = init_type (TYPE_CODE_INT, sizeof (long), 0, "long");
-  builtin_type_int = init_type (TYPE_CODE_INT, sizeof (int), 0, "int");
-
-  builtin_type_unsigned_char = init_type (TYPE_CODE_INT, sizeof (char), 1, "unsigned char");
-  builtin_type_unsigned_short = init_type (TYPE_CODE_INT, sizeof (short), 1, "unsigned short");
-  builtin_type_unsigned_long = init_type (TYPE_CODE_INT, sizeof (long), 1, "unsigned long");
-  builtin_type_unsigned_int = init_type (TYPE_CODE_INT, sizeof (int), 1, "unsigned int");
-
+  builtin_type_void =
+    init_type (TYPE_CODE_VOID, 1, 0,
+	       "void");
+  builtin_type_char =
+    init_type (TYPE_CODE_INT, TARGET_CHAR_BIT / TARGET_CHAR_BIT, 0,
+	       "char");
+  builtin_type_unsigned_char =
+    init_type (TYPE_CODE_INT, TARGET_CHAR_BIT / TARGET_CHAR_BIT, 1,
+	       "unsigned char");
+  builtin_type_short =
+    init_type (TYPE_CODE_INT, TARGET_SHORT_BIT / TARGET_CHAR_BIT, 0,
+	       "short");
+  builtin_type_unsigned_short =
+    init_type (TYPE_CODE_INT, TARGET_SHORT_BIT / TARGET_CHAR_BIT, 1,
+	       "unsigned short");
+  builtin_type_int =
+    init_type (TYPE_CODE_INT, TARGET_INT_BIT / TARGET_CHAR_BIT, 0,
+	       "int");
+  builtin_type_unsigned_int =
+    init_type (TYPE_CODE_INT, TARGET_INT_BIT / TARGET_CHAR_BIT, 1,
+	       "unsigned int");
+  builtin_type_long =
+    init_type (TYPE_CODE_INT, TARGET_LONG_BIT / TARGET_CHAR_BIT, 0,
+	       "long");
+  builtin_type_unsigned_long =
+    init_type (TYPE_CODE_INT, TARGET_LONG_BIT / TARGET_CHAR_BIT, 1,
+	       "unsigned long");
   builtin_type_long_long =
-    init_type (TYPE_CODE_INT, TARGET_LONG_LONG_BIT / TARGET_CHAR_BIT,
-	       0, "long long");
+    init_type (TYPE_CODE_INT, TARGET_LONG_LONG_BIT / TARGET_CHAR_BIT, 0,
+	       "long long");
   builtin_type_unsigned_long_long = 
-    init_type (TYPE_CODE_INT, TARGET_LONG_LONG_BIT / TARGET_CHAR_BIT,
-	       1, "unsigned long long");
+    init_type (TYPE_CODE_INT, TARGET_LONG_LONG_BIT / TARGET_CHAR_BIT, 1,
+	       "unsigned long long");
+  builtin_type_float =
+    init_type (TYPE_CODE_FLT, TARGET_FLOAT_BIT / TARGET_CHAR_BIT, 0,
+	       "float");
+  builtin_type_double =
+    init_type (TYPE_CODE_FLT, TARGET_DOUBLE_BIT / TARGET_CHAR_BIT, 0,
+	       "double");
+  builtin_type_long_double =
+    init_type (TYPE_CODE_FLT, TARGET_LONG_DOUBLE_BIT / TARGET_CHAR_BIT, 0,
+	       "long double");
+  builtin_type_complex =
+    init_type (TYPE_CODE_FLT, TARGET_COMPLEX_BIT / TARGET_CHAR_BIT, 0,
+	       "complex");
+  builtin_type_double_complex =
+    init_type (TYPE_CODE_FLT, TARGET_DOUBLE_COMPLEX_BIT / TARGET_CHAR_BIT, 0,
+	       "double complex");
 
   add_language (&c_language_defn);
   set_language (language_c);		/* Make C the default language */

@@ -202,15 +202,55 @@ char *baud_rate;
 #define INT_MIN -0x80000000
 #endif
 
-/* Just like CHAR_BIT in <limits.h> but describes the target machine.  */
+/* Number of bits in a char or unsigned char for the target machine.
+   Just like CHAR_BIT in <limits.h> but describes the target machine.  */
 #if !defined (TARGET_CHAR_BIT)
 #define TARGET_CHAR_BIT 8
 #endif
 
-/* Number of bits in a long long or unsigned long long
-   for the target machine.  */
+/* Number of bits in a short or unsigned short for the target machine. */
+#if !defined (TARGET_SHORT_BIT)
+#define TARGET_SHORT_BIT (sizeof (short) * TARGET_CHAR_BIT)
+#endif
+
+/* Number of bits in an int or unsigned int for the target machine. */
+#if !defined (TARGET_INT_BIT)
+#define TARGET_INT_BIT (sizeof (int) * TARGET_CHAR_BIT)
+#endif
+
+/* Number of bits in a long or unsigned long for the target machine. */
+#if !defined (TARGET_LONG_BIT)
+#define TARGET_LONG_BIT (sizeof (long) * TARGET_CHAR_BIT)
+#endif
+
+/* Number of bits in a long long or unsigned long long for the target machine. */
 #if !defined (TARGET_LONG_LONG_BIT)
-#define TARGET_LONG_LONG_BIT 64
+#define TARGET_LONG_LONG_BIT (2 * TARGET_LONG_BIT)
+#endif
+
+/* Number of bits in a float for the target machine. */
+#if !defined (TARGET_FLOAT_BIT)
+#define TARGET_FLOAT_BIT (sizeof (float) * TARGET_CHAR_BIT)
+#endif
+
+/* Number of bits in a double for the target machine. */
+#if !defined (TARGET_DOUBLE_BIT)
+#define TARGET_DOUBLE_BIT (sizeof (double) * TARGET_CHAR_BIT)
+#endif
+
+/* Number of bits in a long double for the target machine. */
+#if !defined (TARGET_LONG_DOUBLE_BIT)
+#define TARGET_LONG_DOUBLE_BIT (2 * TARGET_DOUBLE_BIT)
+#endif
+
+/* Number of bits in a "complex" for the target machine. */
+#if !defined (TARGET_COMPLEX_BIT)
+#define TARGET_COMPLEX_BIT (2 * TARGET_FLOAT_BIT)
+#endif
+
+/* Number of bits in a "double complex" for the target machine. */
+#if !defined (TARGET_DOUBLE_COMPLEX_BIT)
+#define TARGET_DOUBLE_COMPLEX_BIT (2 * TARGET_DOUBLE_BIT)
 #endif
 
 /* Convert a LONGEST to an int.  This is used in contexts (e.g. number
@@ -227,12 +267,22 @@ char *baud_rate;
 #endif /* No LONG_LONG.  */
 #endif /* No longest_to_int.  */
 
+/* Languages represented in the symbol table and elsewhere. */
+
+enum language 
+{
+   language_unknown, 		/* Language not known */
+   language_auto,		/* Placeholder for automatic setting */
+   language_c, 			/* C */
+   language_m2,			/* Modula-2 */
+};
+
 /* Return a format string for printf that will print a number in the local
    (language-specific) hexadecimal format.  Result is static and is
    overwritten by the next call.  local_hex_format_custom takes printf
    options like "08" or "l" (to produce e.g. %08x or %lx).  */
 
-#define local_hex_format() local_hex_format_custom("")
+#define local_hex_format() (current_language->la_hex_format)
 char *local_hex_format_custom();		/* language.c */
 
 /* Return a string that contains a number formatted in the local
@@ -240,7 +290,7 @@ char *local_hex_format_custom();		/* language.c */
    overwritten by the next call.  local_hex_string_custom takes printf
    options like "08" or "l".  */
 
-#define local_hex_string(n) local_hex_string_custom((n),"")
-char *local_hex_string_custom();		/* language.c */
+char *local_hex_string ();			/* language.c */
+char *local_hex_string_custom ();		/* language.c */
 
 #endif /* no DEFS_H */
