@@ -1,3 +1,13 @@
+2002-09-17  Daniel Jacobowitz  <drow@mvista.com>
+
+	* bfd-in.h (bfd_get_dynamic_symcount): Define.
+	* bfd.c (struct _bfd): Add dynsymcount.
+	* bfd-in2.h: Regenerated.
+	* elf.c (_bfd_elf_canonicalize_dynamic_symtab): Set
+	abfd->dynsymcount.
+	* elfcode.h (elf_slurp_reloc_table_from_section): Check
+	for overflow.
+
 2002-09-17  Stan Cox <scox@redhat.com>	
 
 	* elf64-mips.c (mips_elf64_be_swap_reloca_out): Handle type2 and type3.

@@ -5572,7 +5572,11 @@ _bfd_elf_canonicalize_dynamic_symtab (abfd, alocation)
      asymbol **alocation;
 {
   struct elf_backend_data *bed = get_elf_backend_data (abfd);
-  return bed->s->slurp_symbol_table (abfd, alocation, true);
+  long symcount = bed->s->slurp_symbol_table (abfd, alocation, true);
+
+  if (symcount >= 0)
+    bfd_get_dynamic_symcount (abfd) = symcount;
+  return symcount;
 }
 
 /* Return the size required for the dynamic reloc entries.  Any

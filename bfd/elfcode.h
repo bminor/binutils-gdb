@@ -1421,6 +1421,13 @@ elf_slurp_reloc_table_from_section (abfd, asect, rel_hdr, reloc_count,
 
       if (ELF_R_SYM (rela.r_info) == 0)
 	relent->sym_ptr_ptr = bfd_abs_section_ptr->symbol_ptr_ptr;
+      else if (ELF_R_SYM (rela.r_info) > bfd_get_dynamic_symcount (abfd))
+	{
+	  (*_bfd_error_handler)
+	    (_("%s(%s): relocation %d has invalid symbol index %ld"),
+	     abfd->filename, asect->name, i, ELF_R_SYM (rela.r_info));
+	  relent->sym_ptr_ptr = bfd_abs_section.symbol_ptr_ptr;
+	}
       else
 	{
 	  asymbol **ps, *s;

@@ -128,6 +128,9 @@ CODE_FRAGMENT
 .  {* Symbol table for output BFD (with symcount entries).  *}
 .  struct symbol_cache_entry  **outsymbols;
 .
+.  {* Used for slurped dynamic symbol tables.  *}
+.  unsigned int dynsymcount;
+.
 .  {* Pointer to structure which contains architecture information.  *}
 .  const struct bfd_arch_info *arch_info;
 .

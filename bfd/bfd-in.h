@@ -529,6 +529,8 @@ extern void warn_deprecated
 #define bfd_get_outsymbols(abfd) ((abfd)->outsymbols)
 #define bfd_count_sections(abfd) ((abfd)->section_count)
 
+#define bfd_get_dynamic_symcount(abfd) ((abfd)->dynsymcount)
+
 #define bfd_get_symbol_leading_char(abfd) ((abfd)->xvec->symbol_leading_char)
 
 #define bfd_set_cacheable(abfd,bool) (((abfd)->cacheable = (boolean) (bool)), true)

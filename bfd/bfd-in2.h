@@ -535,6 +535,8 @@ extern void warn_deprecated
 #define bfd_get_outsymbols(abfd) ((abfd)->outsymbols)
 #define bfd_count_sections(abfd) ((abfd)->section_count)
 
+#define bfd_get_dynamic_symcount(abfd) ((abfd)->dynsymcount)
+
 #define bfd_get_symbol_leading_char(abfd) ((abfd)->xvec->symbol_leading_char)
 
 #define bfd_set_cacheable(abfd,bool) (((abfd)->cacheable = (boolean) (bool)), true)
@@ -1629,7 +1631,6 @@ enum bfd_architecture
   bfd_arch_v850,      /* NEC V850 */
 #define bfd_mach_v850          0
 #define bfd_mach_v850e         'E'
-#define bfd_mach_v850ea        'A'
   bfd_arch_arc,       /* ARC Cores */
 #define bfd_mach_arc_5         0
 #define bfd_mach_arc_6         1
@@ -3461,6 +3462,9 @@ struct _bfd
 
   /* Symbol table for output BFD (with symcount entries).  */
   struct symbol_cache_entry  **outsymbols;
+
+  /* Used for slurped dynamic symbol tables.  */
+  unsigned int dynsymcount;
 
   /* Pointer to structure which contains architecture information.  */
   const struct bfd_arch_info *arch_info;
