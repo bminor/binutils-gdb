@@ -1,3 +1,8 @@
+2003-12-07  Richard Sandiford  <rsandifo@redhat.com>
+
+	* ld-mips-elf/elf-rel-xgot-n32.d: Fix offset for "lw $5,dl1+34($5)".
+	* ld-mips-elf/elf-rel-xgot-n64-linux.d: Likewise.
+
 2003-12-01  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
 
 	* ld-sh/sh64/shmix-1.s: Add align to match data alignment.

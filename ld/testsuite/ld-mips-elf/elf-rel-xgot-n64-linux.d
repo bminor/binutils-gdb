@@ -313,7 +313,7 @@ Disassembly of section \.text:
    120000570:	dca507a0 	ld	a1,1952\(a1\)
    120000574:	df818020 	ld	at,-32736\(gp\)
    120000578:	0025082d 	daddu	at,at,a1
-   12000057c:	dc250794 	ld	a1,1940\(at\)
+   12000057c:	dc2507b6 	ld	a1,1974\(at\)
    120000580:	df818020 	ld	at,-32736\(gp\)
    120000584:	0025082d 	daddu	at,at,a1
    120000588:	fc2507cc 	sd	a1,1996\(at\)
