@@ -1,3 +1,8 @@
+2003-06-26  Andrew Cagney  <cagney@redhat.com>
+
+	* utils.c (internal_vproblem): Print the problem to a reason
+	buffer and then pass to query.  Make the msg variable more local.
+
 2003-06-26  Andreas Jaeger  <aj@suse.de>
 
 	* x86-64-tdep.c (x86_64_push_arguments): Always set %rax to number
