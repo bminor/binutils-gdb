@@ -1,3 +1,9 @@
+Fri Aug 14 11:14:03 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* mn10300-tdep.c (set_movm_offsets): Change second argument to
+	be the actual args to movm itself.  All callers changed.  Only set
+	fi->fsr.regs[x] if reg X is saved by the movm instruction.
+
 Fri Aug 14 04:18:23 1998  Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
 
 	* sol-thread.c (lwp_to_thread):  Fix error message for failing
