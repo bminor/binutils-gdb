@@ -691,11 +691,31 @@ bfd_seek (abfd, position, direction)
       
       if ((bfd_size_type) abfd->where > bim->size)
 	{
-	  abfd->where = bim->size;
-	  bfd_set_error (bfd_error_file_truncated);
-	  return -1;
-	}
-      
+	  if ((abfd->direction == write_direction) || 
+	      (abfd->direction == both_direction))
+	    {
+	      long newsize, oldsize = (bim->size + 127) & ~127;
+	      bim->size = abfd->where;
+	      /* Round up to cut down on memory fragmentation */
+	      newsize = (bim->size + 127) & ~127;
+	      if (newsize > oldsize)
+	        {
+		  bim->buffer = bfd_realloc (bim->buffer, newsize);
+		  if (bim->buffer == 0)
+		    {
+		      bim->size = 0;
+		      bfd_set_error (bfd_error_no_memory);
+		      return -1;
+		    }
+	        }
+	    }
+	  else
+	    {
+	      abfd->where = bim->size;
+	      bfd_set_error (bfd_error_file_truncated);
+	      return -1;
+	    }   
+	}      
       return 0;
     }
 
