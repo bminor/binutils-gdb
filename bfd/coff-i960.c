@@ -31,7 +31,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 static bfd_reloc_status_type optcall_callback
   PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
-       
+static bfd_reloc_status_type coff_i960_relocate
+  PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
+
 #define COFF_LONG_FILENAMES
 
 #define CALLS	 0x66003800	/* Template for 'calls' instruction	*/
@@ -105,13 +107,38 @@ optcall_callback (abfd, reloc_entry, symbol_in, data,
   return result;
 }
 
+/* When generating relocateable output, we don't want to do anything
+   for a reloc against a globally visible symbol.  */
+
+static bfd_reloc_status_type 
+coff_i960_relocate (abfd, reloc_entry, symbol, data, input_section,
+		    output_bfd, error_message)
+     bfd *abfd;
+     arelent *reloc_entry;
+     asymbol *symbol;
+     PTR data;
+     asection *input_section;
+     bfd *output_bfd;
+     char **error_message;
+{
+  if (output_bfd != (bfd *) NULL
+      && (symbol->flags & BSF_SECTION_SYM) == 0
+      && reloc_entry->addend == 0)
+    {
+      reloc_entry->address += input_section->output_offset;
+      return bfd_reloc_ok;
+    }
+
+  return bfd_reloc_continue;
+}
+
 static reloc_howto_type howto_rellong =
   HOWTO ((unsigned int) R_RELLONG, 0, 2, 32,false, 0,
-	 complain_overflow_bitfield, 0,"rellong", true, 0xffffffff,
-	 0xffffffff, 0);
+	 complain_overflow_bitfield, coff_i960_relocate,"rellong", true,
+	 0xffffffff, 0xffffffff, 0);
 static reloc_howto_type howto_iprmed =
-  HOWTO (R_IPRMED, 0, 2, 24,true,0, complain_overflow_signed,0,
-	 "iprmed ", true, 0x00ffffff, 0x00ffffff, 0);
+  HOWTO (R_IPRMED, 0, 2, 24,true,0, complain_overflow_signed,
+	 coff_i960_relocate, "iprmed ", true, 0x00ffffff, 0x00ffffff, 0);
 static reloc_howto_type howto_optcall =
   HOWTO (R_OPTCALL, 0,2,24,true,0, complain_overflow_signed,
 	 optcall_callback, "optcall", true, 0x00ffffff, 0x00ffffff, 0);
