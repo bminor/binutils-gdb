@@ -1215,7 +1215,7 @@ generic_func_frame_chain_valid (CORE_ADDR fp, struct frame_info *fi)
 }
 
 /* Function: fix_call_dummy
-   Stub function.  Generic dumy frames typically do not need to fix
+   Stub function.  Generic dummy frames typically do not need to fix
    the frame being created */
 
 void
