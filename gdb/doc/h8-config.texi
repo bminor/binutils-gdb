@@ -1,0 +1,17 @@
+@set Hviii
+@set HviiiEXCLUSIVE
+@clear NOVEL
+@set BARETARGET
+@set CONLY
+@set DOSHOST
+@set AGGLOMERATION
+@clear SERIAL
+@clear VXWORKS
+@clear POSIX
+@clear SPARC
+@clear AMDxxixK
+@clear Icmlx
+@clear REMOTESTUB
+@clear STmm
+@set PRECONFIGURED
+@clear ZviiiK
