@@ -1,5 +1,7 @@
 Thu Jan 28 19:09:02 1993  John Gilmore  (gnu@cygnus.com)
 
+	* Makefile.in:  Update to match doc/ subdir changes.
+
 	* config/hp300hpux.mh:  No cross-host file needed, just native.
 	* config/go32.mh:  Remove nonexistent "native" support.
 

@@ -579,7 +579,7 @@ update-depend: update-alldeps force_update
 # are products of other files.
 setup-to-dist: update-depend force_update
 	../configure none
-	(cd doc; $(MAKE) $(MFLAGS) gdbVN.m4)
+	(cd doc; $(MAKE) $(MFLAGS) GDBvn.texi)
 	$(MAKE) $(MFLAGS) gdb.info
 	$(MAKE) $(MFLAGS) refcard.ps
 
