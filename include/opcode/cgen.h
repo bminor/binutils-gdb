@@ -316,9 +316,9 @@ const char * cgen_parse_operand PARAMS ((enum cgen_parse_operand_type,
 					bfd_vma *));
 #endif
 
-void cgen_save_fixups ();
-void cgen_restore_fixups ();
-void cgen_swap_fixups ();
+void cgen_save_fixups PARAMS ((void));
+void cgen_restore_fixups PARAMS ((void));
+void cgen_swap_fixups PARAMS ((void));
      
 /* Add a register to the assembler's hash table.
    This makes lets GAS parse registers for us.
