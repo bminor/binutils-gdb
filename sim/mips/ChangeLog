@@ -1,3 +1,7 @@
+Thu Dec  4 09:21:05 1997  Doug Evans  <devans@canuck.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+
 Wed Nov 26 11:00:23 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* mips.igen (LWC1): Correct assembler - lwc1 not swc1.
