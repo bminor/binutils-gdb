@@ -4839,7 +4839,7 @@ pa_procend (unused)
 
 #ifdef OBJ_ELF
   /* ELF needs to mark the end of each function so that it can compute
-     the size of the function (apparently its needed in the symbol table.  */
+     the size of the function (apparently its needed in the symbol table).  */
   hppa_elf_mark_end_of_function ();
 #endif
 
@@ -5184,6 +5184,7 @@ pa_subspace (unused)
       if (ssd && SUBSPACE_DEFINED (ssd))
 	{
 	  subseg_set (ssd->ssd_seg, ssd->ssd_subseg);
+	  current_subspace = ssd;
 	  if (!is_end_of_statement ())
 	    as_warn ("Parameters of an existing subspace can\'t be modified");
 	  demand_empty_rest_of_line ();
@@ -5977,6 +5978,9 @@ static void
 pa_data (unused)
      int unused;
 {
+  current_space = is_defined_space ("$PRIVATE$");
+  current_subspace
+    = pa_subsegment_to_subspace (current_space->sd_seg, 0);
   s_data (0);
   pa_undefine_label ();
 }
@@ -6027,6 +6031,10 @@ static void
 pa_text (unused)
      int unused;
 {
+  current_space = is_defined_space ("$TEXT$");
+  current_subspace
+    = pa_subsegment_to_subspace (current_space->sd_seg, 0);
+
   s_text (0);
   pa_undefine_label ();
 }
