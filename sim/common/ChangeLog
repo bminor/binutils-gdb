@@ -1,3 +1,8 @@
+Wed Apr 23 17:23:15 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* run.c: Undo last exec_bfd patch.
+	(main): Only pass -E ifdef SIM_HAVE_BIENDIAN.
+
 Wed Apr 23 17:54:27 1997  Mike Meissner  <meissner@cygnus.com>
 
 	* run.c (exec_bfd): Add back in.
