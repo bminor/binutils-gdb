@@ -15,12 +15,12 @@
 
 Do-first:
 
-d10v_files="elfd10v.sc"
+d30v_files="elfd30v.sc"
 
-if ( echo $* | grep keep\-d10v > /dev/null ) ; then
-	keep_these_too="${d10v_files} ${keep_these_too}"
+if ( echo $* | grep keep\-d30v > /dev/null ) ; then
+	keep_these_too="${d30v_files} ${keep_these_too}"
 else
-	lose_these_too="${d10v_files} ${lose_these_too}"
+	lose_these_too="${d30v_files} ${lose_these_too}"
 fi
 
 tic80_files="tic80coff.sc"
