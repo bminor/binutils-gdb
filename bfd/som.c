@@ -1822,7 +1822,8 @@ som_mkobject (abfd)
       bfd_error = no_memory;
       return false;
     }
-  obj_som_file_hdr (abfd) = bfd_zalloc (abfd, sizeof (struct header));
+  obj_som_file_hdr (abfd)
+    = (struct header *) bfd_zalloc (abfd, sizeof (struct header));
   if (obj_som_file_hdr (abfd) == NULL)
 
     {
@@ -3878,8 +3879,8 @@ som_new_section_hook (abfd, newsect)
      bfd *abfd;
      asection *newsect;
 {
-  newsect->used_by_bfd = (struct som_section_data_struct *)
-    bfd_zalloc (abfd, sizeof (struct som_section_data_struct));
+  newsect->used_by_bfd
+    = (PTR) bfd_zalloc (abfd, sizeof (struct som_section_data_struct));
   newsect->alignment_power = 3;
 
   /* Initialize the subspace_index field to -1 so that it does
@@ -3973,9 +3974,9 @@ bfd_som_attach_aux_hdr (abfd, type, string)
 
       if (len % 4)
 	pad = (4 - (len % 4));
-      obj_som_version_hdr (abfd)
-	= bfd_zalloc (abfd, sizeof (struct aux_id)
-			      + sizeof (unsigned int) + len + pad);
+      obj_som_version_hdr (abfd) = (struct user_string_aux_hdr *)
+	bfd_zalloc (abfd, sizeof (struct aux_id)
+			    + sizeof (unsigned int) + len + pad);
       obj_som_version_hdr (abfd)->header_id.type = VERSION_AUX_ID;
       obj_som_version_hdr (abfd)->header_id.length = len + pad;
       obj_som_version_hdr (abfd)->header_id.length += sizeof (int);
@@ -3989,9 +3990,9 @@ bfd_som_attach_aux_hdr (abfd, type, string)
 
       if (len % 4)
 	pad = (4 - (len % 4));
-      obj_som_copyright_hdr (abfd)
-	= bfd_zalloc (abfd, sizeof (struct aux_id)
-			      + sizeof (unsigned int) + len + pad);
+      obj_som_copyright_hdr (abfd) = (struct copyright_aux_hdr *)
+	bfd_zalloc (abfd, sizeof (struct aux_id)
+			    + sizeof (unsigned int) + len + pad);
       obj_som_copyright_hdr (abfd)->header_id.type = COPYRIGHT_AUX_ID;
       obj_som_copyright_hdr (abfd)->header_id.length = len + pad;
       obj_som_copyright_hdr (abfd)->header_id.length += sizeof (int);

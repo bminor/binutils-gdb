@@ -1,3 +1,8 @@
+Wed Feb  9 21:34:58 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* som.c: Cast return values from BFD memory allocation routines to
+	avoid warnings from the HP compiler.
+
 Wed Feb  9 12:55:02 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* coff-alpha.c (alpha_relocate_section): Accept a LITERAL
