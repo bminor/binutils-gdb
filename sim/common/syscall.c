@@ -123,8 +123,6 @@ get_path (cb, sc, addr, bufp)
 }
 
 /* Perform a system call on behalf of the target.  */
-/* FIXME: TODO: Add magic number to CB_SYSCALL, macro to initialize it,
-   and test for the magic number here.  */
 
 CB_RC
 cb_syscall (cb, sc)
