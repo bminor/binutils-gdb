@@ -1,3 +1,8 @@
+Fri Feb 11 16:56:50 1994  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	* archive.c (normalize) [VMS]: Call malloc, not bfd_xmalloc.
+	(bfd_construct_extended_name_table): Check result of normalize.
+
 Tue Feb  8 08:57:31 1994  David J. Mackenzie  (djm@thepub.cygnus.com)
 
 	Make all callers of malloc or realloc (including via obstacks)

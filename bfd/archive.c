@@ -1121,7 +1121,10 @@ normalize (file)
     }
 
 
-  copy = bfd_xmalloc (last - first + 1);
+  copy = malloc (last - first + 1);
+  if (!copy)
+    return copy;
+
   memcpy (copy, first, last - first);
   copy[last - first] = 0;
 
@@ -1167,7 +1170,15 @@ bfd_construct_extended_name_table (abfd, tabloc, tablen)
   /* Figure out how long the table should be */
   for (current = abfd->archive_head; current != NULL; current = current->next)
     {
-      unsigned int thislen = strlen (normalize (current->filename));
+      CONST char *normal = normalize (current->filename);
+      unsigned int thislen;
+
+      if (!normal)
+	{
+	  bfd_error = no_memory;
+	  return false;
+	}
+      thislen = strlen (normal);
       if (thislen > maxname)
 	total_namelen += thislen + 1;	/* leave room for \n */
     }
@@ -1189,7 +1200,14 @@ bfd_construct_extended_name_table (abfd, tabloc, tablen)
        current->next)
     {
       CONST char *normal = normalize (current->filename);
-      unsigned int thislen = strlen (normal);
+      unsigned int thislen;
+
+      if (!normal)
+	{
+	  bfd_error = no_memory;
+	  return false;
+	}
+      thislen = strlen (normal);
       if (thislen > maxname)
 	{
 	  /* Works for now; may need to be re-engineered if we
