@@ -7799,10 +7799,10 @@ _bfd_mips_elf_hide_symbol (info, entry, force_local)
   h = (struct mips_elf_link_hash_entry *) entry;
   if (h->forced_local)
     return;
-  h->forced_local = TRUE;
+  h->forced_local = force_local;
 
   dynobj = elf_hash_table (info)->dynobj;
-  if (dynobj != NULL)
+  if (dynobj != NULL && force_local)
     {
       got = mips_elf_got_section (dynobj, FALSE);
       g = mips_elf_section_data (got)->u.got_info;
