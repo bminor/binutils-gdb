@@ -5116,7 +5116,12 @@ pa_parse_space_stmt (space_name, create_flag)
 		  private = TRUE;
 		}
 	      else
-		as_bad ("Invalid .SPACE argument");
+		{
+		  as_bad ("Invalid .SPACE argument");
+		  *input_line_pointer = c;
+		  if (! is_end_of_statement ())
+		    input_line_pointer++;
+		}
 	    }
 	}
       print_errors = TRUE;

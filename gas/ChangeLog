@@ -72,6 +72,9 @@ Thu Oct 28 12:36:13 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 	* config/tc-hppa.c (md_atof): Return a NULL on success rather than
 	an empty string.
 
+	* config/tc-hppa.c (pa_parse_space_stmt): Advance
+	input_line_poitner when an invalid argument is encountered.
+
 Thu Oct 28 13:09:26 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* config/tc-a29k.c (md_begin): When opcodes are mashed together in
