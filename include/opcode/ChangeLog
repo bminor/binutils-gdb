@@ -1,3 +1,24 @@
+Mon Feb  6 03:31:54 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	Changes from Bryan Ford <baford@schirf.cs.utah.edu> for 16-bit
+	i386 support:
+	* i386.h (MOV_AX_DISP32): New macro.
+	(i386_optab): Added Data16 and Data32 as needed.  Added "w" forms
+	of several call/return instructions.
+	(ADDR_PREFIX_OPCODE): New macro.
+
+Mon Jan 23 16:45:43 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	Sat Jan 21 17:50:38 1995  Pat Rankin  (rankin@eql.caltech.edu)
+
+	* ../include/opcode/vax.h (struct vot_wot, field `args'):  make
+	it pointer to const char;
+	(struct vot, field `name'):  ditto.
+
+Thu Jan 19 14:47:53 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* vax.h: Supply and properly group all values in end sentinel.
+
 Tue Jan 17 10:55:30 1995  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
 	* mips.h (INSN_ISA, INSN_4650): Define.

@@ -21,6 +21,7 @@ static const template i386_optab[] = {
 
 #define _ None
 /* move instructions */
+#define MOV_AX_DISP32 0xa0
 { "mov", 2, 0xa0, _, DW|NoModrm, { Disp32, Acc, 0 } },
 { "mov", 2, 0x88, _, DW|Modrm, { Reg, Reg|Mem, 0 } },
 { "mov", 2, 0xb0, _, ShortFormW, { Imm, Reg, 0 } },
@@ -36,8 +37,8 @@ static const template i386_optab[] = {
    conflict with the "movs" string move instruction.  Thus,
    {"movsb", 2, 0x0fbe, _, ReverseRegRegmem|Modrm, { Reg8|Mem,  Reg16|Reg32, 0} },
    is not kosher; we must seperate the two instructions. */
-{"movsbl", 2, 0x0fbe, _, ReverseRegRegmem|Modrm, { Reg8|Mem,  Reg32, 0} },
-{"movsbw", 2, 0x660fbe, _, ReverseRegRegmem|Modrm, { Reg8|Mem,  Reg16, 0} },
+{"movsbl", 2, 0x0fbe, _, ReverseRegRegmem|Modrm|Data32, { Reg8|Mem,  Reg32, 0} },
+{"movsbw", 2, 0x0fbe, _, ReverseRegRegmem|Modrm|Data16, { Reg8|Mem,  Reg16, 0} },
 {"movswl", 2, 0x0fbf, _, ReverseRegRegmem|Modrm, { Reg16|Mem, Reg32, 0} },
 
 /* move with zero extend */
@@ -48,7 +49,7 @@ static const template i386_optab[] = {
 {"push", 1, 0x50, _, ShortForm, { WordReg,0,0 } },
 {"push", 1, 0xff, 0x6,  Modrm, { WordReg|WordMem, 0, 0 } },
 {"push", 1, 0x6a, _, NoModrm, { Imm8S, 0, 0} },
-{"push", 1, 0x68, _, NoModrm, { Imm32, 0, 0} },
+{"push", 1, 0x68, _, NoModrm, { Imm16|Imm32, 0, 0} },
 {"push", 1, 0x06, _,  Seg2ShortForm, { SReg2,0,0 } },
 {"push", 1, 0x0fa0, _, Seg3ShortForm, { SReg3,0,0 } },
 /* push all */
@@ -80,17 +81,6 @@ static const template i386_optab[] = {
 {"out", 1, 0xe6, _, W|NoModrm, { Imm8, 0, 0 } },
 {"out", 1, 0xee, _, W|NoModrm, { InOutPortReg, 0, 0 } },
 
-#if 0
-{"inb",  1, 0xe4, _, NoModrm, { Imm8, 0, 0 } },
-{"inb",  1, 0xec, _, NoModrm, { WordMem, 0, 0 } },
-{"inw",  1, 0x66e5, _, NoModrm, { Imm8, 0, 0 } },
-{"inw",  1, 0x66ed, _, NoModrm, { WordMem, 0, 0 } },
-{"outb", 1, 0xe6, _, NoModrm, { Imm8, 0, 0 } },
-{"outb", 1, 0xee, _, NoModrm, { WordMem, 0, 0 } },
-{"outw", 1, 0x66e7, _, NoModrm, { Imm8, 0, 0 } },
-{"outw", 1, 0x66ef, _, NoModrm, { WordMem, 0, 0 } },
-#endif
-
 /* load effective address */
 {"lea", 2, 0x8d, _, Modrm, { WordMem, WordReg, 0 } },
 
@@ -109,8 +99,10 @@ static const template i386_optab[] = {
 {"cmc", 0, 0xf5, _, NoModrm, { 0, 0, 0} },
 {"lahf", 0, 0x9f, _, NoModrm, { 0, 0, 0} },
 {"sahf", 0, 0x9e, _, NoModrm, { 0, 0, 0} },
-{"pushf", 0, 0x9c, _, NoModrm, { 0, 0, 0} },
-{"popf", 0, 0x9d, _, NoModrm, { 0, 0, 0} },
+{"pushf", 0, 0x9c, _, NoModrm|Data32, { 0, 0, 0} },
+{"popf", 0, 0x9d, _, NoModrm|Data32, { 0, 0, 0} },
+{"pushfw", 0, 0x9c, _, NoModrm|Data16, { 0, 0, 0} },
+{"popfw", 0, 0x9d, _, NoModrm|Data16, { 0, 0, 0} },
 {"stc", 0, 0xf9, _, NoModrm, { 0, 0, 0} },
 {"std", 0, 0xfd, _, NoModrm, { 0, 0, 0} },
 {"sti", 0, 0xfb, _, NoModrm, { 0, 0, 0} },
@@ -178,20 +170,20 @@ static const template i386_optab[] = {
 
 /* conversion insns */
 /* conversion:  intel naming */
-{"cbw", 0, 0x6698, _, NoModrm, { 0, 0, 0} },
-{"cwd", 0, 0x6699, _, NoModrm, { 0, 0, 0} },
-{"cwde", 0, 0x98, _, NoModrm, { 0, 0, 0} },
-{"cdq", 0, 0x99, _, NoModrm, { 0, 0, 0} },
+{"cbw", 0, 0x98, _, NoModrm|Data16, { 0, 0, 0} },
+{"cwd", 0, 0x99, _, NoModrm|Data16, { 0, 0, 0} },
+{"cwde", 0, 0x98, _, NoModrm|Data32, { 0, 0, 0} },
+{"cdq", 0, 0x99, _, NoModrm|Data32, { 0, 0, 0} },
 /*  att naming */
-{"cbtw", 0, 0x6698, _, NoModrm, { 0, 0, 0} },
-{"cwtl", 0, 0x98, _, NoModrm, { 0, 0, 0} },
-{"cwtd", 0, 0x6699, _, NoModrm, { 0, 0, 0} },
-{"cltd", 0, 0x99, _, NoModrm, { 0, 0, 0} },
+{"cbtw", 0, 0x98, _, NoModrm|Data16, { 0, 0, 0} },
+{"cwtl", 0, 0x98, _, NoModrm|Data32, { 0, 0, 0} },
+{"cwtd", 0, 0x99, _, NoModrm|Data16, { 0, 0, 0} },
+{"cltd", 0, 0x99, _, NoModrm|Data32, { 0, 0, 0} },
 
 /* Warning! the mul/imul (opcode 0xf6) must only have 1 operand!  They are
    expanding 64-bit multiplies, and *cannot* be selected to accomplish
    'imul %ebx, %eax' (opcode 0x0faf must be used in this case)
-   These multiplies can only be selected with single opearnd forms. */
+   These multiplies can only be selected with single operand forms. */
 {"mul",  1, 0xf6, 4, W|Modrm, { Reg|Mem, 0, 0} },
 {"imul", 1, 0xf6, 5, W|Modrm, { Reg|Mem, 0, 0} },
 
@@ -266,22 +258,28 @@ static const template i386_optab[] = {
 /* control transfer instructions */
 #define CALL_PC_RELATIVE 0xe8
 {"call", 1, 0xe8, _, JumpDword, { Disp32, 0, 0} },
-{"call", 1, 0xff, 2, Modrm, { Reg|Mem|JumpAbsolute, 0, 0} },
+{"call", 1, 0xff, 2, Modrm|Data32, { Reg|Mem|JumpAbsolute, 0, 0} },
+{"callw", 1, 0xff, 2, Modrm|Data16, { Reg|Mem|JumpAbsolute, 0, 0} },
 #define CALL_FAR_IMMEDIATE 0x9a
 {"lcall", 2, 0x9a, _, JumpInterSegment, { Imm16, Abs32|Imm32, 0} },
-{"lcall", 1, 0xff, 3, Modrm, { Mem, 0, 0} },
+{"lcall", 1, 0xff, 3, Modrm|Data32, { Mem, 0, 0} },
+{"lcallw", 1, 0xff, 3, Modrm|Data16, { Mem, 0, 0} },
 
 #define JUMP_PC_RELATIVE 0xeb
 {"jmp", 1, 0xeb, _, Jump, { Disp, 0, 0} },
 {"jmp", 1, 0xff, 4, Modrm, { Reg32|Mem|JumpAbsolute, 0, 0} },
 #define JUMP_FAR_IMMEDIATE 0xea
 {"ljmp", 2, 0xea, _, JumpInterSegment, { Imm16, Imm32, 0} },
-{"ljmp", 1, 0xff, 5, Modrm, { Mem, 0, 0} },
+{"ljmp", 1, 0xff, 5, Modrm|Data32, { Mem, 0, 0} },
 
-{"ret", 0, 0xc3, _, NoModrm, { 0, 0, 0} },
-{"ret", 1, 0xc2, _, NoModrm, { Imm16, 0, 0} },
-{"lret", 0, 0xcb, _, NoModrm, { 0, 0, 0} },
-{"lret", 1, 0xca, _, NoModrm, { Imm16, 0, 0} },
+{"ret", 0, 0xc3, _, NoModrm|Data32, { 0, 0, 0} },
+{"ret", 1, 0xc2, _, NoModrm|Data32, { Imm16, 0, 0} },
+{"retw", 0, 0xc3, _, NoModrm|Data16, { 0, 0, 0} },
+{"retw", 1, 0xc2, _, NoModrm|Data16, { Imm16, 0, 0} },
+{"lret", 0, 0xcb, _, NoModrm|Data32, { 0, 0, 0} },
+{"lret", 1, 0xca, _, NoModrm|Data32, { Imm16, 0, 0} },
+{"lretw", 0, 0xcb, _, NoModrm|Data16, { 0, 0, 0} },
+{"lretw", 1, 0xca, _, NoModrm|Data16, { Imm16, 0, 0} },
 {"enter", 2, 0xc8, _, NoModrm, { Imm16, Imm8, 0} },
 {"leave", 0, 0xc9, _, NoModrm, { 0, 0, 0} },
 
@@ -332,14 +330,19 @@ static const template i386_optab[] = {
 {"jnle", 1, 0x7f, _, Jump, { Disp, 0, 0} },
 {"jg", 1, 0x7f, _, Jump, { Disp, 0, 0} },
 
+#if 0  /* XXX where are these macros used?
+	  To get them working again, they need to take
+	  an entire template as the parameter,
+	  and check for Data16/Data32 flags.  */
 /* these turn into pseudo operations when disp is larger than 8 bits */
 #define IS_JUMP_ON_CX_ZERO(o) \
-  (o == 0x67e3)
+  (o == 0x66e3)
 #define IS_JUMP_ON_ECX_ZERO(o) \
   (o == 0xe3)
+#endif
 
-{"jcxz", 1, 0x67e3, _, JumpByte, { Disp, 0, 0} },
-{"jecxz", 1, 0xe3, _, JumpByte, { Disp, 0, 0} },
+{"jcxz", 1, 0xe3, _, JumpByte|Data16, { Disp, 0, 0} },
+{"jecxz", 1, 0xe3, _, JumpByte|Data32, { Disp, 0, 0} },
 
 #define IS_LOOP_ECX_TIMES(o) \
   (o == 0xe2 || o == 0xe1 || o == 0xe0)
@@ -432,16 +435,20 @@ static const template i386_optab[] = {
 {"bts", 2, 0x0fba, 5, Modrm, { Imm8, Reg|Mem, 0} },
 
 /* interrupts & op. sys insns */
-/* See i386.c for conversion of 'int $3' into the special int 3 insn. */
+/* See gas/config/tc-i386.c for conversion of 'int $3' into the special
+   int 3 insn. */
 #define INT_OPCODE 0xcd
 #define INT3_OPCODE 0xcc
 {"int", 1, 0xcd, _, NoModrm, { Imm8, 0, 0} },
 {"int3", 0, 0xcc, _, NoModrm, { 0, 0, 0} },
 {"into", 0, 0xce, _, NoModrm, { 0, 0, 0} },
-{"iret", 0, 0xcf, _, NoModrm, { 0, 0, 0} },
+{"iret", 0, 0xcf, _, NoModrm|Data32, { 0, 0, 0} },
+{"iretw", 0, 0xcf, _, NoModrm|Data16, { 0, 0, 0} },
+/* i386sl (and i486sl?) only */
+{"rsm", 0, 0x0faa, _, NoModrm,{ 0, 0, 0} },
 
-{"boundl", 2, 0x62, _, Modrm, { Reg32, Mem, 0} },
-{"boundw", 2, 0x6662, _, Modrm, { Reg16, Mem, 0} },
+{"boundl", 2, 0x62, _, Modrm|Data32, { Reg32, Mem, 0} },
+{"boundw", 2, 0x62, _, Modrm|Data16, { Reg16, Mem, 0} },
 
 {"hlt", 0, 0xf4, _, NoModrm, { 0, 0, 0} },
 {"wait", 0, 0x9b, _, NoModrm, { 0, 0, 0} },
@@ -503,6 +510,7 @@ static const template i386_optab[] = {
 
 /* exchange %st<n> with %st0 */
 {"fxch", 1, 0xd9c8, _, ShortForm, { FloatReg, 0, 0} },
+{"fxch", 0, 0xd9c9, _, NoModrm, { 0, 0, 0} }, /* alias for fxch %st, %st(1) */
 
 /* comparison (without pop) */
 {"fcom", 1, 0xd8d0, _, ShortForm, { FloatReg, 0, 0} },
@@ -736,7 +744,7 @@ static const template i386_optab[] = {
 {"wbinvd", 0, 0x0f09, _, NoModrm, { 0, 0, 0} },
 {"invlpg", 1, 0x0f01, 7, Modrm, { Mem, 0, 0} },
 
-{"", 0, 0, 0, 0, { 0, 0, 0} }	/* sentinal */
+{"", 0, 0, 0, 0, { 0, 0, 0} }	/* sentinel */
 };
 #undef _
 
@@ -815,6 +823,7 @@ static const seg_entry *const two_byte_segment_defaults[] = {
 };
 
 static const prefix_entry i386_prefixtab[] = {
+#define ADDR_PREFIX_OPCODE 0x67
   { "addr16", 0x67 },		/* address size prefix ==> 16bit addressing
 				 * (How is this useful?) */
 #define WORD_PREFIX_OPCODE 0x66
