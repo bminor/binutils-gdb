@@ -1281,6 +1281,34 @@ sh3e_sh4_store_return_value (struct type *type, struct regcache *regcache,
     sh_default_store_return_value (type, regcache, valbuf);
 }
 
+static enum return_value_convention
+sh_return_value_nofpu (struct gdbarch *gdbarch, struct type *type,
+		       struct regcache *regcache,
+		       void *readbuf, const void *writebuf)
+{
+  if (sh_use_struct_convention (0, type))
+    return RETURN_VALUE_STRUCT_CONVENTION;
+  if (writebuf)
+    sh_default_store_return_value (type, regcache, writebuf);
+  else if (readbuf)
+    sh_default_extract_return_value (type, regcache, readbuf);
+  return RETURN_VALUE_REGISTER_CONVENTION;
+}
+
+static enum return_value_convention
+sh_return_value_fpu (struct gdbarch *gdbarch, struct type *type,
+		     struct regcache *regcache,
+		     void *readbuf, const void *writebuf)
+{
+  if (sh_use_struct_convention (0, type))
+    return RETURN_VALUE_STRUCT_CONVENTION;
+  if (writebuf)
+    sh3e_sh4_store_return_value (type, regcache, writebuf);
+  else if (readbuf)
+    sh3e_sh4_extract_return_value (type, regcache, readbuf);
+  return RETURN_VALUE_REGISTER_CONVENTION;
+}
+
 /* Print the registers in a form similar to the E7000 */
 
 static void
@@ -2564,16 +2592,15 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_print_registers_info (gdbarch, sh_print_registers_info);
 
   set_gdbarch_breakpoint_from_pc (gdbarch, sh_breakpoint_from_pc);
-  set_gdbarch_deprecated_use_struct_convention (gdbarch, sh_use_struct_convention);
 
   set_gdbarch_print_insn (gdbarch, gdb_print_insn_sh);
   set_gdbarch_register_sim_regno (gdbarch, legacy_register_sim_regno);
 
   set_gdbarch_write_pc (gdbarch, generic_target_write_pc);
 
-  set_gdbarch_store_return_value (gdbarch, sh_default_store_return_value);
-  set_gdbarch_extract_return_value (gdbarch, sh_default_extract_return_value);
-  set_gdbarch_deprecated_extract_struct_value_address (gdbarch, sh_extract_struct_value_address);
+  set_gdbarch_return_value (gdbarch, sh_return_value_nofpu);
+  set_gdbarch_deprecated_extract_struct_value_address (gdbarch,
+					    sh_extract_struct_value_address);
 
   set_gdbarch_skip_prologue (gdbarch, sh_skip_prologue);
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
@@ -2607,9 +2634,7 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_register_name (gdbarch, sh_sh2e_register_name);
       set_gdbarch_register_type (gdbarch, sh_sh3e_register_type);
       set_gdbarch_fp0_regnum (gdbarch, 25);
-      set_gdbarch_store_return_value (gdbarch, sh3e_sh4_store_return_value);
-      set_gdbarch_extract_return_value (gdbarch,
-					sh3e_sh4_extract_return_value);
+      set_gdbarch_return_value (gdbarch, sh_return_value_fpu);
       set_gdbarch_push_dummy_call (gdbarch, sh_push_dummy_call_fpu);
       break;
 
@@ -2622,8 +2647,7 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_num_pseudo_regs (gdbarch, 9);
       set_gdbarch_pseudo_register_read (gdbarch, sh_pseudo_register_read);
       set_gdbarch_pseudo_register_write (gdbarch, sh_pseudo_register_write);
-      set_gdbarch_store_return_value (gdbarch, sh3e_sh4_store_return_value);
-      set_gdbarch_extract_return_value (gdbarch, sh3e_sh4_extract_return_value);
+      set_gdbarch_return_value (gdbarch, sh_return_value_fpu);
       set_gdbarch_push_dummy_call (gdbarch, sh_push_dummy_call_fpu);
       break;
 
@@ -2652,9 +2676,7 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_register_name (gdbarch, sh_sh3e_register_name);
       set_gdbarch_register_type (gdbarch, sh_sh3e_register_type);
       set_gdbarch_fp0_regnum (gdbarch, 25);
-      set_gdbarch_store_return_value (gdbarch, sh3e_sh4_store_return_value);
-      set_gdbarch_extract_return_value (gdbarch,
-					sh3e_sh4_extract_return_value);
+      set_gdbarch_return_value (gdbarch, sh_return_value_fpu);
       set_gdbarch_push_dummy_call (gdbarch, sh_push_dummy_call_fpu);
       break;
 
@@ -2671,9 +2693,7 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_num_pseudo_regs (gdbarch, 13);
       set_gdbarch_pseudo_register_read (gdbarch, sh_pseudo_register_read);
       set_gdbarch_pseudo_register_write (gdbarch, sh_pseudo_register_write);
-      set_gdbarch_store_return_value (gdbarch, sh3e_sh4_store_return_value);
-      set_gdbarch_extract_return_value (gdbarch,
-					sh3e_sh4_extract_return_value);
+      set_gdbarch_return_value (gdbarch, sh_return_value_fpu);
       set_gdbarch_push_dummy_call (gdbarch, sh_push_dummy_call_fpu);
       break;
 

@@ -1,5 +1,15 @@
 2004-10-06  Corinna Vinschen  <vinschen@redhat.com>
 
+	* sh-tdep.c (sh_return_value_nofpu): New function, implementing
+	RETURN_VALUE.
+	(sh_return_value_fpu): Ditto for CPUs with FPU.
+	(sh_gdbarch_init): Remove STORE_RETURN_VALUE, EXTRACT_RETURN_VALUE,
+	RETURN_VALUE_ON_STACK and USE_STRUCT_CONVENTION throughout.
+	Install sh_return_value_nofpu resp. sh_return_value_fpu as
+	RETURN_VALUE functions.
+
+2004-10-06  Corinna Vinschen  <vinschen@redhat.com>
+
 	* sh-tdep.c (sh_pseudo_register_read): Add PSEUDO_BANK_REGNUM handling. 
 	(sh_pseudo_register_write): Ditto.
 
