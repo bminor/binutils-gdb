@@ -1,7 +1,12 @@
 Fri Apr  4 11:42:41 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* emultempl/pe.em: Include "libiberty.h".
+	(sort_sections_1): Use xmalloc rather than alloca.
+
 	* ldlex.l: Recognize SQUAD.
 	* ldgram.y (length): Add SQUAD.
+	* ldctor.c (ldctor_build_sets): Use SQUAD for a signed 8 byte
+	reloc.
 	* ldlang.c (print_data_statement): Handle SQUAD.
 	(lang_size_sections, lang_do_assignments): Likewise.
 	* ldexp.c (exp_print_token): Add SQUAD to table.
