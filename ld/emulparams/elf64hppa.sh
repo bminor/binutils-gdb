@@ -17,7 +17,7 @@ OTHER_READONLY_SECTIONS='.PARISC.unwind : { *(.PARISC.unwind) } .stubs : { *(.st
 
 # The PA64 ELF port treats .plt sections differently than most.  We also have
 # to create a .opd section.  What most systems call the .got, we call the .dlt
-OTHER_READWRITE_SECTIONS='__hp_load_map = .; . += 16; .opd : { *(.opd) }; __gp = .; .plt : { *(.plt) }; .dlt : { *(.dlt) }'
+OTHER_READWRITE_SECTIONS='__hp_load_map = .; . += 16; .opd : { *(.opd) } __gp = .; .plt : { *(.plt) } .dlt : { *(.dlt) }'
 
 # The PA64 ELF port has two additional bss sections. huge bss and thread bss.
 # Make sure they end up in the appropriate location.  We also have to set
