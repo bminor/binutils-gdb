@@ -1,5 +1,33 @@
 2000-02-26  Mark Kettenis  <kettenis@gnu.org>
 
+	* gnu-nat.c: Include "gdbthread.h".  Include <hurd.h>.
+	Reorder headers a bit.  Overall cleanup and minor reformatting.
+	(MIG_SERVER_DIED): Remove define.
+	(proc_update_sc): Add braces to silence compiler warning.
+	(proc_steal_exc_port): Initialize err to zero.
+	(make_proc): Add braces to silence compiler warning.
+	(inf_validate_task_sc): Add cast to silence compiler warning.
+	(inf_set_traced): Reorganize a bit to silence compiler warning.
+	(inf_validate_procs): Use mach_msg_type_number_t for all thread
+	numbers and add braces to silence compiler warning.
+	(gnu_wait): Add prototypes for server functions and add braces to
+	silence compiler warnings.
+	(S_exception_raise_request): Pass subcode to inf_debug call.
+	(gnu_write_inferior): Remove unused variable `protection_changed'.
+	(gnu_xfer_memory): Remove unused variable `result'.
+	(set_sig_thread_cmd): Remove unused varible `tid'.
+	(set_signals_cmd): Remve unused variable `trace'.
+	(add_task_commands): Provide complete prototype.  Reformat help
+	strings a bit to make sure the first line is a full sentence.
+	Call info_port_rights_cmd instead of info_send_rights_cmd for the
+	"info port-rights" command.
+	(add_thread_commands): Provide complete prototype.  Make static.
+	Reformat help strings a bit to make sure the first line is a full
+	sentence.
+	(_initialize_gnu_nat): Provide complete prototype.
+
+2000-02-26  Mark Kettenis  <kettenis@gnu.org>
+
 	Make cross-compilation for the Hurd more friendly.
 	From Jeff Bailey <jbailey@gnu.org>:
 	* configure.in: Use AC_CHECK_TOOL to find MiG.
