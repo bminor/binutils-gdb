@@ -1,3 +1,4 @@
+
 /* BFD library -- caching of file descriptors.
    Copyright (C) 1990-1991 Free Software Foundation, Inc.
    Hacked by Steve Chamberlain of Cygnus Support (steve@cygnus.com).
@@ -215,28 +216,31 @@ DEFUN(bfd_open_file, (abfd),
       bfd *abfd)
 {
   abfd->cacheable = true;	/* Allow it to be closed later. */
+
   if(open_files >= BFD_CACHE_MAX_OPEN) {
     close_one();
   }
+
   switch (abfd->direction) {
   case read_direction:
   case no_direction:
-    abfd->iostream = (char *) fopen(abfd->filename, "rb");
+    abfd->iostream = (char *) fopen(abfd->filename, FOPEN_RB);
     break;
   case both_direction:
   case write_direction:
     if (abfd->opened_once == true) {
-      abfd->iostream = (char *) fopen(abfd->filename, "r+b");
+      abfd->iostream = (char *) fopen(abfd->filename, FOPEN_RUB);
       if (!abfd->iostream) {
-	abfd->iostream = (char *) fopen(abfd->filename, "w+b");
+	abfd->iostream = (char *) fopen(abfd->filename, FOPEN_WUB);
       }
     } else {
       /*open for creat */
-      abfd->iostream = (char *) fopen(abfd->filename, "wb");
+      abfd->iostream = (char *) fopen(abfd->filename, FOPEN_WB);
       abfd->opened_once = true;
     }
     break;
   }
+
   if (abfd->iostream) {
     open_files++;
     bfd_cache_init (abfd);
