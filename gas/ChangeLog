@@ -1,3 +1,8 @@
+Tue Aug 12 12:17:03 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-m68k.c (m68k_ip): Give an error message for SIZE_BYTE
+	in ABSL case, rather than calling abort.
+
 Mon Aug 11 21:48:00 1997  Richard Henderson  <rth@cygnus.com>
 
 	* as.h (enum _relax_state): Add rs_leb128.
