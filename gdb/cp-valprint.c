@@ -167,8 +167,12 @@ cp_is_vtbl_ptr_type(type)
      struct type *type;
 {
   char *typename = type_name_no_tag (type);
+/* WAS this and from 4.10, it changed to __vtbl_ptr_type **
   static const char vtbl_ptr_name[] =
     { CPLUS_MARKER,'v','t','b','l','_','p','t','r','_','t','y','p','e', 0 };
+*/
+  static const char vtbl_ptr_name[] =
+    { '_','_','v','t','b','l','_','p','t','r','_','t','y','p','e', 0 };
 
   return (typename != NULL && STREQ(typename, vtbl_ptr_name));
 }
