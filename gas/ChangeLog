@@ -1,3 +1,10 @@
+1999-07-14  Ian Lance Taylor  <ian@zembu.com>
+
+	* write.c (cvt_frag_to_fill): Use frag file and line in rs_org
+	error message.
+	(relax_segment): Likewise.  After giving a rs_org error, convert
+	the frag to rs_align to avoid cascading errors.
+
 1999-07-12  Andreas Schwab  <schwab@suse.de>
 
 	* config/tc-m68k.c: Add some ATTRIBUTE_UNUSED.

@@ -498,8 +498,9 @@ cvt_frag_to_fill (headersP, sec, fragP)
 			  - fragP->fr_fix) / fragP->fr_var;
       if (fragP->fr_offset < 0)
 	{
-	  as_bad (_("attempt to .org/.space backwards? (%ld)"),
-		  (long) fragP->fr_offset);
+	  as_bad_where (fragP->fr_file, fragP->fr_line,
+			_("attempt to .org/.space backwards? (%ld)"),
+			(long) fragP->fr_offset);
 	}
       fragP->fr_type = rs_fill;
       break;
@@ -2302,8 +2303,16 @@ relax_segment (segment_frag_root, segment)
 		      /* Growth may be negative, but variable part of frag
 			 cannot have fewer than 0 chars.  That is, we can't
 			 .org backwards. */
-		      as_bad (_("attempt to .org backwards ignored"));
-		      growth = 0;
+		      as_bad_where (fragP->fr_file, fragP->fr_line,
+				    _("attempt to .org backwards ignored"));
+
+		      /* We've issued an error message.  Change the
+                         frag to avoid cascading errors.  */
+		      fragP->fr_type = rs_align;
+		      fragP->fr_subtype = 0;
+		      fragP->fr_offset = 0;
+		      fragP->fr_fix = after - address;
+		      growth = stretch;
 		    }
 
 		  growth -= stretch;	/* This is an absolute growth factor */
