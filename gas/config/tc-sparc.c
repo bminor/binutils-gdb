@@ -87,6 +87,10 @@ static int warn_on_bump;
    architecture, issue a warning.  */
 static enum sparc_opcode_arch_val warn_after_architecture;
 
+/* Non-zero if as should generate error if an undeclared g[23] register
+   has been used in -64.  */
+static int no_undeclared_regs;
+
 /* Non-zero if we are generating PIC code.  */
 int sparc_pic_code;
 
@@ -96,6 +100,9 @@ static int enforce_aligned_data;
 extern int target_big_endian;
 
 static int target_little_endian_data;
+
+/* Symbols for global registers on v9.  */
+static symbolS *globals[8];
 
 /* V9 and 86x have big and little endian data, but instructions are always big
    endian.  The sparclet has bi-endian support but both data and insns have
@@ -119,6 +126,7 @@ static void s_common PARAMS ((int));
 static void s_empty PARAMS ((int));
 static void s_uacons PARAMS ((int));
 static void s_ncons PARAMS ((int));
+static void s_register PARAMS ((int));
 
 const pseudo_typeS md_pseudo_table[] =
 {
@@ -143,6 +151,7 @@ const pseudo_typeS md_pseudo_table[] =
   {"2byte", s_uacons, 2},
   {"4byte", s_uacons, 4},
   {"8byte", s_uacons, 8},
+  {"register", s_register, 0},
 #endif
   {NULL, 0, 0},
 };
@@ -400,6 +409,10 @@ struct option md_longopts[] = {
   {"enforce-aligned-data", no_argument, NULL, OPTION_ENFORCE_ALIGNED_DATA},
 #define OPTION_LITTLE_ENDIAN_DATA (OPTION_MD_BASE + 11)
   {"little-endian-data", no_argument, NULL, OPTION_LITTLE_ENDIAN_DATA},
+#ifdef OBJ_ELF
+#define OPTION_NO_UNDECLARED_REGS (OPTION_MD_BASE + 12)
+  {"no-undeclared-regs", no_argument, NULL, OPTION_NO_UNDECLARED_REGS},
+#endif
   {NULL, no_argument, NULL, 0}
 };
 size_t md_longopts_size = sizeof(md_longopts);
@@ -548,6 +561,10 @@ md_parse_option (c, arg)
 	as_warn (_("Unrecognized option following -K"));
       else
 	sparc_pic_code = 1;
+      break;
+
+    case OPTION_NO_UNDECLARED_REGS:
+      no_undeclared_regs = 1;
       break;
 #endif
 
@@ -1864,6 +1881,11 @@ sparc_ip (str, pinsn)
 		    default:
 		      goto error;
 		    }
+
+		  if ((mask & ~1) == 2 && sparc_arch_size == 64
+		      && no_undeclared_regs && ! globals [mask])
+		    as_bad (_("detected global register use not "
+			      "covered by .register pseudo-op"));
 
 		  /* Got the register, now figure out where
 		     it goes in the opcode.  */
@@ -3706,6 +3728,123 @@ s_ncons (bytes)
 {
   cons (sparc_arch_size == 32 ? 4 : 8);
 }
+
+#ifdef OBJ_ELF
+/* Handle the SPARC ELF .register pseudo-op.  This sets the binding of a
+   global register.
+   The syntax is:
+   
+   .register %g[2367],{#scratch|symbolname|#ignore}
+   */
+
+static void
+s_register (ignore)
+     int ignore;
+{
+  char c;
+  int reg;
+  int flags;
+  const char *regname;
+
+  if (input_line_pointer[0] != '%'
+      || input_line_pointer[1] != 'g'
+      || ((input_line_pointer[2] & ~1) != '2'
+	  && (input_line_pointer[2] & ~1) != '6')
+      || input_line_pointer[3] != ',')
+    as_bad (_("register syntax is .register %%g[2367],{#scratch|symbolname|#ignore}"));
+  reg = input_line_pointer[2] - '0';
+  input_line_pointer += 4;
+
+  if (*input_line_pointer == '#')
+    {
+      ++input_line_pointer;
+      regname = input_line_pointer;
+      c = get_symbol_end ();
+      if (strcmp (regname, "scratch") && strcmp (regname, "ignore"))
+	as_bad (_("register syntax is .register %%g[2367],{#scratch|symbolname|#ignore}"));
+      if (regname [0] == 'i')
+	regname = NULL;
+      else
+	regname = "";
+    }
+  else
+    {
+      regname = input_line_pointer;
+      c = get_symbol_end ();
+    }
+  if (sparc_arch_size == 64)
+    {
+      if (globals [reg])
+	{
+	  if ((regname && globals [reg] != (symbolS *)1
+	       && strcmp (S_GET_NAME (globals [reg]), regname))
+	      || ((regname != NULL) ^ (globals [reg] != (symbolS *)1)))
+	    as_bad (_("redefinition of global register"));
+	}
+      else
+	{
+	  if (regname == NULL)
+	    globals [reg] = (symbolS *)1;
+	  else
+	    {
+	      if (*regname)
+		{
+		  if (symbol_find (regname))
+		    as_bad (_("Register symbol %s already defined."),
+			    regname);
+		}
+	      globals [reg] = symbol_make (regname);
+	      flags = symbol_get_bfdsym (globals [reg])->flags;
+	      if (! *regname)
+		flags = flags & ~(BSF_GLOBAL|BSF_LOCAL|BSF_WEAK);
+	      if (! (flags & (BSF_GLOBAL|BSF_LOCAL|BSF_WEAK)))
+		flags |= BSF_GLOBAL;
+	      symbol_get_bfdsym (globals [reg])->flags = flags;
+	      S_SET_VALUE (globals [reg], (valueT)reg);
+	      S_SET_ALIGN (globals [reg], reg);
+	      S_SET_SIZE (globals [reg], 0);
+	      /* Although we actually want undefined_section here,
+		 we have to use absolute_section, because otherwise
+		 generic as code will make it a COM section.
+		 We fix this up in sparc_adjust_symtab.  */
+	      S_SET_SEGMENT (globals [reg], absolute_section);
+	      S_SET_OTHER (globals [reg], 0);
+	      elf_symbol (symbol_get_bfdsym (globals [reg]))
+		->internal_elf_sym.st_info =
+		  ELF_ST_INFO(STB_GLOBAL, STT_REGISTER);
+	      elf_symbol (symbol_get_bfdsym (globals [reg]))
+		->internal_elf_sym.st_shndx = SHN_UNDEF;
+	    }
+	}
+    }
+
+  *input_line_pointer = c;
+
+  demand_empty_rest_of_line ();
+}
+
+/* Adjust the symbol table.  We set undefined sections for STT_REGISTER
+   symbols which need it.  */
+   
+void
+sparc_adjust_symtab ()
+{
+  symbolS *sym;
+     
+  for (sym = symbol_rootP; sym != NULL; sym = symbol_next (sym))
+    {
+      if (ELF_ST_TYPE (elf_symbol (symbol_get_bfdsym (sym))
+		       ->internal_elf_sym.st_info) != STT_REGISTER)
+	continue;
+
+      if (ELF_ST_TYPE (elf_symbol (symbol_get_bfdsym (sym))
+		       ->internal_elf_sym.st_shndx != SHN_UNDEF))
+	continue;
+
+      S_SET_SEGMENT (sym, undefined_section);
+    }
+}
+#endif
 
 /* If the --enforce-aligned-data option is used, we require .word,
    et. al., to be aligned correctly.  We do it by setting up an

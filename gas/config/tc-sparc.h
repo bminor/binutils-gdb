@@ -139,6 +139,10 @@ extern int elf32_sparc_force_relocation PARAMS ((struct fix *));
 	   && (S_GET_SEGMENT ((FIX)->fx_subsy)				\
 	       == S_GET_SEGMENT ((FIX)->fx_addsy)))			\
        || S_IS_LOCAL ((FIX)->fx_addsy)))
+
+/* Finish up the entire symtab.  */
+#define tc_adjust_symtab() sparc_adjust_symtab ()
+extern void sparc_adjust_symtab PARAMS ((void));
 #endif
 
 #ifdef OBJ_AOUT
