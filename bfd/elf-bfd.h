@@ -1476,12 +1476,12 @@ extern bfd_boolean _bfd_elf_maybe_strip_eh_frame_hdr
 extern bfd_boolean _bfd_elf_merge_symbol
   (bfd *, struct bfd_link_info *, const char *, Elf_Internal_Sym *,
    asection **, bfd_vma *, struct elf_link_hash_entry **, bfd_boolean *,
-   bfd_boolean *, bfd_boolean *, bfd_boolean *, bfd_boolean);
+   bfd_boolean *, bfd_boolean *, bfd_boolean *);
 
 extern bfd_boolean _bfd_elf_add_default_symbol
   (bfd *, struct bfd_link_info *, struct elf_link_hash_entry *,
    const char *, Elf_Internal_Sym *, asection **, bfd_vma *,
-   bfd_boolean *, bfd_boolean, bfd_boolean);
+   bfd_boolean *, bfd_boolean);
 
 extern bfd_boolean _bfd_elf_export_symbol
   (struct elf_link_hash_entry *, void *);

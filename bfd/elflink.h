@@ -147,7 +147,6 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
   Elf_Internal_Sym *isym;
   Elf_Internal_Sym *isymend;
   const struct elf_backend_data *bed;
-  bfd_boolean dt_needed;
   bfd_boolean add_needed;
   struct elf_link_hash_table * hash_table;
   bfd_size_type amt;
@@ -254,7 +253,6 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	}
     }
 
-  dt_needed = FALSE;
   add_needed = TRUE;
   if (! dynamic)
     {
@@ -290,19 +288,9 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 
       /* If this dynamic lib was specified on the command line with
 	 --as-needed in effect, then we don't want to add a DT_NEEDED
-	 tag unless the lib is actually used.
-	 For libs brought in by another lib's DT_NEEDED we do the same,
-	 and also modify handling of weak syms.  */
-      switch elf_dyn_lib_class (abfd)
-	{
-	case DYN_NORMAL:
-	  break;
-	case DYN_DT_NEEDED:
-	  dt_needed = TRUE;
-	  /* Fall thru */
-	case DYN_AS_NEEDED:
-	  add_needed = FALSE;
-	}
+	 tag unless the lib is actually used.  Similary for libs brought
+	 in by another lib's DT_NEEDED.  */
+      add_needed = elf_dyn_lib_class (abfd) == DYN_NORMAL;
 
       s = bfd_get_section_by_name (abfd, ".dynamic");
       if (s != NULL)
@@ -775,8 +763,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 
 	  if (!_bfd_elf_merge_symbol (abfd, info, name, isym, &sec, &value,
 				      sym_hash, &skip, &override,
-				      &type_change_ok, &size_change_ok,
-				      dt_needed))
+				      &type_change_ok, &size_change_ok))
 	    goto error_free_vers;
 
 	  if (skip)
@@ -1033,7 +1020,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	  if (definition || h->root.type == bfd_link_hash_common)
 	    if (!_bfd_elf_add_default_symbol (abfd, info, h, name, isym,
 					      &sec, &value, &dynsym,
-					      override, dt_needed))
+					      override))
 	      goto error_free_vers;
 
 	  if (definition && !dynamic)
