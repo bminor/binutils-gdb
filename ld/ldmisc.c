@@ -1,5 +1,5 @@
 /* ldmisc.c
-   Copyright (C) 1991 Free Software Foundation, Inc.
+   Copyright (C) 1991, 1993 Free Software Foundation, Inc.
 
    Written by Steve Chamberlain of Cygnus Support.
 
@@ -29,12 +29,13 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "ldexp.h"
 #include "ldlang.h"
 #include "ldlex.h"
-#include "ldsym.h"
 #include "ldmain.h"
 #include "ldfile.h"
 
 /* VARARGS*/
 static void finfo ();
+static const char *demangle PARAMS ((const char *string,
+				     int remove_underscore));
 
 /*
  %% literal %
@@ -44,7 +45,7 @@ static void finfo ();
  %E current bfd error or errno
  %I filename from a lang_input_statement_type
  %B filename from a bfd
- %T symbol table entry
+ %T symbol name
  %X no object output, fail return
  %V hex bfd_vma
  %v hex bfd_vma, no leading zeros
@@ -54,22 +55,22 @@ static void finfo ();
  %d integer, like printf
 */
 
-static char *
-demangle(string, remove_underscore)
-char *string;
-int remove_underscore;
+static const char *
+demangle (string, remove_underscore)
+     const char *string;
+     int remove_underscore;
 {
-  char *res;
+  const char *res;
   if (remove_underscore && output_bfd) 
   {
-    if (bfd_get_symbol_leading_char(output_bfd) == string[0])
+    if (bfd_get_symbol_leading_char (output_bfd) == string[0])
      string++;
   }
   /* Note that there's a memory leak here, we keep buying memory
      for demangled names, and never free.  But if you have so many
      errors that you run out of VM with the error messages, then
      there's something up */
-  res = cplus_demangle(string, DMGL_ANSI|DMGL_PARAMS);
+  res = cplus_demangle (string, DMGL_ANSI|DMGL_PARAMS);
   return res ? res : string;
 }
 
@@ -132,28 +133,15 @@ vfinfo(fp, fmt, arg)
 	break;
 
        case 'T':
-	/* symbol table entry */
-       {
-	 asymbol *symbol = va_arg(arg, asymbol *);
-	 if (symbol) 
-	 {
-	   asection *section = symbol->section;
-	   char *cplusname =   demangle(symbol->name, 1);
-	   CONST char *section_name =  section->name;
-	   if (section != &bfd_und_section) 
-	   {
-	     fprintf(fp,"%s (%s)", cplusname, section_name);
-	   }
-	   else 
-	   {
-	     fprintf(fp,"%s", cplusname);
-	   }
-	 }
-	 else 
-	 {
-	   fprintf(fp,"no symbol");
-	 }
-       }
+	/* Symbol name.  */
+	{
+	  const char *name = va_arg (arg, const char *);
+
+	  if (name != (const char *) NULL)
+	    fprintf (fp, "%s", demangle (name, 1));
+	  else
+	    fprintf (fp, "no symbol");
+	}
 	break;
 
        case 'B':
@@ -190,7 +178,9 @@ vfinfo(fp, fmt, arg)
        {
 	 lang_input_statement_type *i =
 	  va_arg(arg,lang_input_statement_type *);
-	
+
+	 if (i->the_bfd->my_archive)
+	   fprintf(fp, "(%s)", i->the_bfd->my_archive->filename);
 	 fprintf(fp,"%s", i->local_sym_name);
        }
 	break;
@@ -221,43 +211,59 @@ vfinfo(fp, fmt, arg)
 	
        case 'C':
 	/* Clever filename:linenumber with function name if possible,
-	   or section name as a last resort */
-       {
-	 CONST char *filename;
-	 CONST char *functionname;
-	 char *cplus_name;
-	 
-	 unsigned int linenumber;
-	 bfd *abfd = va_arg(arg, bfd *);
-	 asection *section = va_arg(arg, asection *);
-	 asymbol **symbols = va_arg(arg, asymbol **);
-	 bfd_vma offset = va_arg(arg, bfd_vma);
-	 
-	 if (bfd_find_nearest_line(abfd,
-				   section,
-				   symbols,
-				   offset,
-				   &filename,
-				   &functionname,
-				   &linenumber))
-	 {
-	   if (filename == (char *)NULL) 	
-	    filename = abfd->filename;
-	   if (functionname != (char *)NULL) 
-	   {
-	     cplus_name = demangle(functionname, 1);
-	     fprintf(fp,"%s:%u: %s", filename, linenumber, cplus_name);
-	   }
-		
-	   else if (linenumber != 0) 
-	    fprintf(fp,"%s:%u", filename, linenumber);
-	   else
-	     finfo (fp, "%s(%s+0x%v)", filename, section->name, offset);
+	   or section name as a last resort.  The arguments are a BFD,
+	   a section, and an offset.  */
+	{
+	  bfd *abfd;
+	  asection *section;
+	  bfd_vma offset;
+	  lang_input_statement_type *entry;
+	  asymbol **asymbols;
+	  const char *filename;
+	  const char *functionname;
+	  unsigned int linenumber;
 
-	 }
-	 else
-	   finfo (fp, "%s(%s+0x%v)", abfd->filename, section->name, offset);
-       }
+	  abfd = va_arg (arg, bfd *);
+	  section = va_arg (arg, asection *);
+	  offset = va_arg (arg, bfd_vma);
+
+	  entry = (lang_input_statement_type *) abfd->usrdata;
+	  if (entry != (lang_input_statement_type *) NULL
+	      && entry->asymbols != (asymbol **) NULL)
+	    asymbols = entry->asymbols;
+	  else
+	    {
+	      unsigned int symsize;
+	      unsigned int symbol_count;
+
+	      symsize = get_symtab_upper_bound (abfd);
+	      asymbols = (asymbol **) ldmalloc (symsize);
+	      symbol_count = bfd_canonicalize_symtab (abfd, asymbols);
+	      if (entry != (lang_input_statement_type *) NULL)
+		{
+		  entry->asymbols = asymbols;
+		  entry->symbol_count = symbol_count;
+		}
+	    }
+
+	  if (bfd_find_nearest_line (abfd, section, asymbols, offset,
+				     &filename, &functionname, &linenumber))
+	    {
+	      if (filename == (char *) NULL)
+		filename = abfd->filename;
+
+	      if (functionname != (char *)NULL) 
+		fprintf (fp, "%s:%u: %s", filename, linenumber,
+			 demangle (functionname, 1));
+	      else if (linenumber != 0) 
+		fprintf (fp, "%s:%u", filename, linenumber);
+	      else
+		finfo (fp, "%s(%s+0x%v)", filename, section->name, offset);
+
+	    }
+	  else
+	    finfo (fp, "%s(%s+0x%v)", abfd->filename, section->name, offset);
+	}
 	break;
 		
        case 's':
@@ -292,7 +298,7 @@ vfinfo(fp, fmt, arg)
    hosed by LynxOS, which defines that name in its libc.) */
 
 void info_msg(va_alist)
-va_dcl
+     va_dcl
 {
   char *fmt;
   va_list arg;
@@ -305,7 +311,7 @@ va_dcl
 /* ('e' for error.) Format info message and print on stderr. */
 
 void einfo(va_alist)
-va_dcl
+     va_dcl
 {
   char *fmt;
   va_list arg;
@@ -327,18 +333,18 @@ multiple_warn (message1, newsym, message2, oldsym)
      char *message2;
      asymbol *oldsym;
 {
-  lang_input_statement_type *stat;
+  lang_input_statement_type *inp_stat;
   asymbol **stat_symbols;
 
-  stat = (lang_input_statement_type *) bfd_asymbol_bfd (newsym)->usrdata;
-  stat_symbols = stat ? stat->asymbols : 0;
+  inp_stat = (lang_input_statement_type *) bfd_asymbol_bfd (newsym)->usrdata;
+  stat_symbols = inp_stat ? inp_stat->asymbols : 0;
 
   einfo (message1,
 	 bfd_asymbol_bfd (newsym), newsym->section, stat_symbols, newsym->value,
 	 demangle (newsym->name, 1));
 
-  stat = (lang_input_statement_type *) bfd_asymbol_bfd (oldsym)->usrdata;
-  stat_symbols = stat ? stat->asymbols : 0;
+  inp_stat = (lang_input_statement_type *) bfd_asymbol_bfd (oldsym)->usrdata;
+  stat_symbols = inp_stat ? inp_stat->asymbols : 0;
 
   einfo (message2,
 	 bfd_asymbol_bfd (oldsym), oldsym->section, stat_symbols, oldsym->value);
@@ -394,7 +400,7 @@ PTR
 xmalloc (size)
      int size;
 {
-return ldmalloc(size);
+  return ldmalloc ((size_t) size);
 }
 
 
@@ -414,9 +420,9 @@ ldrealloc (ptr, size)
 PTR
 xrealloc (ptr, size)
      PTR ptr;
-     size_t size;
+     int size;
 {
-return ldrealloc(ptr, size);
+  return ldrealloc (ptr, (size_t) size);
 }
 
 
@@ -434,7 +440,7 @@ buystring (x)
 /* ('m' for map) Format info message and print on map. */
 
 void minfo(va_alist)
-va_dcl
+     va_dcl
 {
   char *fmt;
   va_list arg;

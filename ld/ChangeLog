@@ -1,5 +1,8 @@
 Fri Jan 28 09:12:56 1994  David J. Mackenzie  (djm@thepub.cygnus.com)
 
+	* ldmisc.c (vfinfo): For `%I', if the file is in an archive, print
+	the archive filename too.
+
 	* ldlex.l: Add rule to catch invalid input characters instead of
 	printing them.  Include "ldmain.h" for program_name decl.
 	(lex_warn_invalid): New function.
