@@ -121,7 +121,7 @@ do
 			target_alias="${arg}"
 			;;
 		*)
-			echo '***' Can only configure for one target at a time.
+			echo '***' Can only configure for one target at a time.  1>&2
 			fatal=yes
 			;;
 		esac
@@ -151,7 +151,7 @@ do
 				host_alias="`echo ${arg} | sed 's/^[-a-z]*=//'`"
 				;;
 			*)
-				echo '***' Can only configure for one host at a time.
+				echo '***' Can only configure for one host at a time.  1>&2
 				fatal=yes
 				;;
 			esac
@@ -200,7 +200,7 @@ do
 			case "${target_alias}" in
 			"") target_alias="`echo ${arg} | sed 's/^[-a-z]*=//'`" ;;
 			*)
-				echo '***' Can only configure for one target at a time.
+				echo '***' Can only configure for one target at a time.  1>&2
 				fatal=yes
 				;;
 			esac
@@ -235,7 +235,7 @@ do
 				undefs="${arg}"
 				;;
 			*)
-				echo '***' Can only configure for one host and one target at a time.
+				echo '***' Can only configure for one host and one target at a time.  1>&2
 				fatal=yes
 				;;
 			esac
@@ -264,10 +264,10 @@ case "${fatal}" in
 ### there were no unadorned args, then the hosts are also targets.
 
 	if [ -n "${host_alias}" -a -n "${target_alias}" -a -n "${undefs}" ] ; then
-		echo '***' Can only configure for one host and one target at a time.
+		echo '***' Can only configure for one host and one target at a time.  1>&2
 		fatal=yes
 	elif [ -z "${host_alias}" -a -z "${undefs}" ] ; then
-		echo '***' You must tell me for which host you want to configure.
+		echo '***' You must tell me for which host you want to configure.  1>&2
 		fatal=yes
 	else
 		case "${host_alias}" in
@@ -321,7 +321,7 @@ configsub=`echo ${progname} | sed 's/configure$/config.sub/'`
 if ${configsub} `echo ${host_alias} | sed -e 's/ .*//'` >/dev/null 2>&1 ; then
 	true
 else
-	echo '***' cannot find config.sub.
+	echo '***' cannot find config.sub.  1>&2
 	exit 1
 fi
 
@@ -333,7 +333,7 @@ case "${srcdir}" in
 		if [ -r ${progname}.in ] ; then
 			srcdir=`echo ${progname} | sed 's:/configure$::'`
 		else
-			echo '***' "Can't find configure.in.  Try using -srcdir=some_dir"
+			echo '***' "Can't find configure.in.  Try using -srcdir=some_dir"  1>&2
 			exit 1
 		fi
 	fi
@@ -341,6 +341,16 @@ case "${srcdir}" in
 *) ;;
 esac
 
+### warn about some conflicting configurations.
+
+case "${srcdir}" in
+".") ;;
+*)
+	if [ -f ${srcdir}/config.status ] ; then
+		echo '***' Cannot configure for ${PWD} when ${srcdir}/config.status exists.  1>&2
+		exit 1
+	fi
+esac
 
 # default exec_prefix
 case "${exec_prefix}" in
@@ -393,7 +403,7 @@ fi
 # some sanity checks on configure.in
 case "${srctrigger}" in
 "")
-	echo '***' srctrigger not set in ${PWD}/configure.in.
+	echo '***' srctrigger not set in ${PWD}/configure.in.  1>&2
 	exit 1
 	;;
 *) ;;

@@ -1,12 +1,12 @@
 Tue Mar 10 21:49:18 1992  K. Richard Pixley  (rich@mars.cygnus.com)
 
-	* configure: remove trailing slashes from srcdir.  Otherwise emacs
-	  gdb mode gets cranky.
-
 	* Makefile.in: drop flex.  make stamp files work.
 
-	* configure: use relative paths for configure and srcdir whenever
-	  possible.
+	* configure: added test for conflicting configuration in srcdir,
+	  remove trailing slashes from srcdir.  Otherwise emacs gdb mode
+	  gets cranky.  use relative paths for configure and srcdir
+	  whenever possible.  Send some error messages to stderr that were
+	  going to stdout.
 
 Tue Mar 10 18:01:55 1992  Per Bothner  (bothner@cygnus.com)
 
