@@ -84,7 +84,6 @@ sh-dis.c
 sparc-dis.c
 sparc-opc.c
 sysdep.h
-v850-opc.c
 w65-dis.c
 w65-opc.h
 z8k-dis.c
