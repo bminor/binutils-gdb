@@ -2840,7 +2840,7 @@ pa_ip (str)
 		  a = (opcode & (1 << 9)) != 0;
 		  opcode &= ~ (3 << 8);
 		  num = evaluate_absolute (&the_insn);
-		  if (a == 1 && num >= 0 || (a == 0 && num < 0))
+		  if ((a == 1 && num >= 0) || (a == 0 && num < 0))
 		    break;
 		  CHECK_FIELD (num, 8191, -8192, 0);
 		  low_sign_unext (num, 14, &num);
@@ -2868,7 +2868,7 @@ pa_ip (str)
 		  a = (opcode & (1 << 9)) != 0;
 		  opcode &= ~ (3 << 8);
 		  num = evaluate_absolute (&the_insn);
-		  if (a == 1 && num < 0 || (a == 0 && num > 0))
+		  if ((a == 1 && num < 0) || (a == 0 && num > 0))
 		    break;
 		  if (num % 4)
 		    break;
@@ -3560,7 +3560,6 @@ pa_ip (str)
 		case 'C':
 		  {
 		    struct pa_11_fp_reg_struct result;
-		    int regnum;
 
 		    /* This should be more strict.  Small steps.  */
 		    if (strict && *s != '%')
