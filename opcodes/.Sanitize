@@ -23,6 +23,14 @@ else
 	lose_these_too="${arc_files} ${lose_these_too}"
 fi
 
+d10v_files="d10v-dis.c d10v-opc.c"
+
+if ( echo $* | grep keep\-d10v > /dev/null ) ; then
+	keep_these_too="${d10v_files} ${keep_these_too}"
+else
+	lose_these_too="${d10v_files} ${lose_these_too}"
+fi
+
 # All files listed between the "Things-to-keep:" line and the
 # "Files-to-sed:" line will be kept.  All other files will be removed.
 # Directories listed in this section will have their own Sanitize
@@ -94,6 +102,34 @@ else
 			fi
 			cp $i new
 			sed '/start\-sanitize\-arc/,/end-\sanitize\-arc/d' < $i > new
+			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
+				if [ -n "${verbose}" ] ; then
+					echo Caching $i in .Recover...
+				fi
+				mv $i .Recover
+			fi
+			mv new $i
+		fi
+	done
+fi
+
+d10v_files="ChangeLog Makefile.in configure.in configure disassemble.c"
+if ( echo $* | grep keep\-d10v > /dev/null ) ; then
+	for i in $d10v_files ; do
+		if test ! -d $i && (grep sanitize-d10v $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Keeping d10v stuff in $i
+			fi
+		fi
+	done
+else
+	for i in $d10v_files ; do
+		if test ! -d $i && (grep sanitize-d10v $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Removing traces of \"d10v\" from $i...
+			fi
+			cp $i new
+			sed '/start\-sanitize\-d10v/,/end-\sanitize\-d10v/d' < $i > new
 			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
 				if [ -n "${verbose}" ] ; then
 					echo Caching $i in .Recover...

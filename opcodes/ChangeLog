@@ -1,3 +1,13 @@
+start-sanitize-d10v
+	Wed Jul 17 14:39:05 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
+
+	* configure: (bfd_d10v_arch) Add new case.
+	* configure.in: (bfd_d10v_arch) Add new case.
+	* d10v-dis.c: New file.
+	* d10v-opc.c: New file.
+	* disassemble.c (disassembler) Add entry for d10v.
+end-sanitize-d10v
+	
 Wed Jul 17 10:12:05 1996  J.T. Conklin  <jtc@rtl.cygnus.com>
 
 	* m68k-opc.c (m68k_opcodes): Fix bugs in coldfire insns relating
