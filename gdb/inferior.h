@@ -450,22 +450,22 @@ extern CORE_ADDR text_end;
 #endif
 
 /* If STARTUP_WITH_SHELL is set, GDB's "run" 
- * will attempts to start up the debugee under a shell.
- * This is in order for argument-expansion to occur. E.g.,
- * (gdb) run *
- * The "*" gets expanded by the shell into a list of files.
- * While this is a nice feature, it turns out to interact badly
- * with some of the catch-fork/catch-exec features we have added.
- * In particular, if the shell does any fork/exec's before
- * the exec of the target program, that can confuse GDB.
- * To disable this feature, set STARTUP_WITH_SHELL to 0.
- * To enable this feature, set STARTUP_WITH_SHELL to 1.
- * The catch-exec traps expected during start-up will 
- * be 1 if target is not started up with a shell, 2 if it is.
- * - RT
- */
+   will attempts to start up the debugee under a shell.
+   This is in order for argument-expansion to occur. E.g.,
+   (gdb) run *
+   The "*" gets expanded by the shell into a list of files.
+   While this is a nice feature, it turns out to interact badly
+   with some of the catch-fork/catch-exec features we have added.
+   In particular, if the shell does any fork/exec's before
+   the exec of the target program, that can confuse GDB.
+   To disable this feature, set STARTUP_WITH_SHELL to 0.
+   To enable this feature, set STARTUP_WITH_SHELL to 1.
+   The catch-exec traps expected during start-up will 
+   be 1 if target is not started up with a shell, 2 if it is.
+   - RT
+   If you disable this, you need to decrement
+   START_INFERIOR_TRAPS_EXPECTED in tm.h. */
 #define STARTUP_WITH_SHELL 1
-#define START_INFERIOR_TRAPS_EXPECTED (STARTUP_WITH_SHELL + 1)
 
 #endif	/* !defined (INFERIOR_H) */
 

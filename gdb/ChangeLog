@@ -1,5 +1,8 @@
 Mon Jan  4 15:05:29 1999  David Taylor  <taylor@texas.cygnus.com>
 
+	* inferior.h (START_INFERIOR_TRAPS_EXPECTED): delete,
+	already defined in tm.h.
+
 	* inftarg.c: change <sys/unistd.h> to <unistd.h> and
 	conditionalize its inclusion.
 	* infttrace.c: ditto.
