@@ -1,3 +1,9 @@
+2002-06-11  Tom Rix  <trix@redhat.com>
+
+	* config/tc-ppc.c (ppc_subseg_align): Delete.
+	(ppc_change_csect): Default csect align is 2.
+	* config/tc-ppc.h (SUB_SEGMENT_ALIGN): Delete 
+
 2002-06-09  Marek Michalkiewicz  <marekm@amelek.gda.pl>
 
 	* config/tc-avr.c (mcu_types): Update.

@@ -196,10 +196,6 @@ extern int ppc_frob_symbol PARAMS ((symbolS *));
 #define tc_adjust_symtab() ppc_adjust_symtab ()
 extern void ppc_adjust_symtab PARAMS ((void));
 
-/* Niclas Andersson <nican@ida.liu.se> says this is needed.  */
-extern int ppc_subseg_align PARAMS ((void));
-#define SUB_SEGMENT_ALIGN(SEG, FRCHAIN) ppc_subseg_align ()
-
 /* We also need to copy, in particular, the class of the symbol,
    over what obj-coff would otherwise have copied.  */
 #define OBJ_COPY_SYMBOL_ATTRIBUTES(dest,src)			\

@@ -1120,14 +1120,6 @@ ppc_mach ()
   return ppc_size == PPC_OPCODE_64 ? 620 : 0;
 }
 
-#ifdef OBJ_XCOFF
-int
-ppc_subseg_align ()
-{
-  return ppc_xcoff64 ? 3 : 2;
-}
-#endif
-
 extern char*
 ppc_target_format ()
 {
@@ -2836,7 +2828,7 @@ ppc_change_csect (sym)
       symbol_set_frag (sym, frag_now);
       S_SET_VALUE (sym, (valueT) frag_now_fix ());
 
-      symbol_get_tc (sym)->align = (ppc_xcoff64) ? 3 : 2;
+      symbol_get_tc (sym)->align = 2;
       symbol_get_tc (sym)->output = 1;
       symbol_get_tc (sym)->within = sym;
 
