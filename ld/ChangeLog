@@ -1,3 +1,20 @@
+Tue Jun  4 18:43:07 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ldcref.c: New file.
+	* ld.h (add_cref, output_cref): Declare.
+	* ldmain.c (main): Initialize notice_all field.  If it is set at
+	end of link, call output_cref.
+	(notice): Rename from notice_ysym.  Check notice_all.
+	* ldmisc.c (finfo): Make globally visible.
+	* ldmisc.h (finfo): Declare.
+	* lexsup.c (OPTION_CREF): Define.
+	(ld_options): Add "cref".
+	(parse_args): Handle OPTION_CREF.
+	* Makefile.in: Rebuild dependencies.
+	(CFILES): Add ldcref.c.
+	(OFILES): Add ldcref.o.
+	* ld.texinfo, ld.1: Document --cref.
+
 Tue Jun  4 12:12:25 1996  Tom Tromey  <tromey@csk3.cygnus.com>
 
 	* Makefile.in (install): Make $(tooldir) and $(tooldir)/bin.

@@ -33,6 +33,7 @@ ld \- the GNU linker
 .RB "[\|" "\-c\ "\c
 .I commandfile\c
 \&\|] 
+.RB "[\|" \-\-cref "\|]"
 .RB "[\|" \-d | \-dc | \-dp\c
 \|]
 .br
@@ -407,6 +408,12 @@ line by bracketing it between `\|\c
 \|' and `\|\c
 .B }\c
 \|' characters.
+
+.TP
+.B \-\-cref
+Output a cross reference table.  If a linker map file is being
+generated, the cross reference table is printed to the map file.
+Otherwise, it is printed on the standard output.
 
 .TP
 .B \-d 

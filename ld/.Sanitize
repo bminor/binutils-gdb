@@ -45,6 +45,7 @@ ld.1
 gen-doc.texi
 ld.h
 ld.texinfo
+ldcref.c
 ldctor.c
 ldctor.h
 ldemul.c
