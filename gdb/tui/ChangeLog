@@ -1,3 +1,8 @@
+2002-10-25  Stephane Carrez  <stcarrez@nerim.fr>
+
+	Fix PR gdb/478
+	* tuiIO.c (tui_initialize_io): Use setvbuf since this is portable.
+
 2002-09-13  Stephane Carrez  <stcarrez@nerim.fr>
 
 	* tui.c (tui_rl_switch_mode): Remove unecessary TUI switch printfs.

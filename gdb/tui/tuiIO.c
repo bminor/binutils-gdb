@@ -600,7 +600,7 @@ tui_initialize_io ()
       fprintf_unfiltered (gdb_stderr, "Cannot redirect readline output");
       exit (1);
     }
-  setlinebuf (tui_rl_outstream);
+  setvbuf (tui_rl_outstream, (char*) NULL, _IOLBF, 0);
 
 #ifdef O_NONBLOCK
   (void) fcntl (tui_readline_pipe[0], F_SETFL, O_NONBLOCK);
