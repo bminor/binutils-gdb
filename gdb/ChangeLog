@@ -1,3 +1,47 @@
+2004-03-13  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* tui/tui-win.h (tui_get_cmd_list): Declare.
+	* tui/tui-win.c (tui_command): New function.
+	(tui_get_cmd_list): New function.
+	(_initialize_tui_win): Moved initialization of tui command in
+	tui_get_cmd_list.
+
+	* tui/tui-data.c (init_content_element): Setup new data members.
+	(init_win_info): Likewise.
+	(free_content_elements): Free it.
+	* tui/tui-data.h (struct tui_data_element): Store the register
+	content to print.
+	(struct tui_data_info): Keep the current register group.
+
+	* tui/tui-layout.c (tui_set_layout): Update call to tui_show_registers.
+
+	* tui/tui-regs.h (tui_show_registers): Update prototype.
+	(tui_toggle_float_regs, tui_calculate_regs_column_count): Remove.
+	(tui_resize_all): No need to calculate anything for register window.
+	* tui/tui-regs.c (tui_calculate_regs_column_count): Remove.
+	(tui_set_register_element, tui_set_general_regs_content): Remove.
+	(tui_set_special_regs_content): Remove.
+	(tui_set_general_and_special_regs_content): Remove.
+	(tui_set_float_regs_content): Remove.
+	(tui_reg_value_has_changed, tui_get_register_raw_value): Remove.
+	(tui_set_regs_content): Remove.
+	(tui_toggle_float_regs, _tui_toggle_float_regs_command): Remove.
+	(tui_v_show_registers_command_support): Remove.
+	(tui_show_registers): Use a reggroup to specify the registers to show.
+	(tui_show_register_group): New function.
+	(tui_display_registers_from): Compute the layout of register window
+	and refresh with new API; be sure to delete old register windows.
+	(tui_check_register_values): Update to use tui_get_register and
+	tui_display_data.
+	(tui_display_register): Just refresh the register window part.
+	(tui_register_format): Format registers and save in tui_data_element.
+	(tui_get_register): New to combine tui_reg_value_has_changed and
+	tui_get_register_raw_value; fix to use the new gdb API.
+	(tui_show_float_command): Renamed tui_reg_float_command.
+	(tui_show_general_command): Renamed tui_reg_general_command.
+	(tui_show_special_command): Renamed tui_reg_system_command.
+	(_initialize_tui_regs): Remove unused commands.
+
 2004-03-13  Mark Kettenis  <kettenis@gnu.org>
 
 	* NEWS (New native configurations): Mention OpenBSD/amd64.

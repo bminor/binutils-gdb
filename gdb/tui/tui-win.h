@@ -53,4 +53,7 @@ extern int tui_update_variables (void);
 /* Update gdb's knowledge of the terminal size.  */
 extern void tui_update_gdb_sizes (void);
 
+/* Create or get the TUI command list.  */
+struct cmd_list_element **tui_get_cmd_list ();
+
 #endif

@@ -180,6 +180,7 @@ struct tui_data_element
   enum tui_data_type type;
   void *value;
   int highlight;
+  char *content;
 };
 
 
@@ -248,6 +249,7 @@ struct tui_data_info
   enum tui_register_display_type regs_display_type;
   int regs_column_count;
   int display_regs;		/* Should regs be displayed at all? */
+  struct reggroup *current_group;
 };
 
 
