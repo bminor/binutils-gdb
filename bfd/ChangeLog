@@ -1,3 +1,10 @@
+Mon Jun 20 11:06:27 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* hp300hpux.c (MY_final_link_callback): Define to avoid warning.
+	(BMAGIC, QMAGIC): Define; used by aoutx.h.
+	(MY(slurp_symbol_table)): Change translate_from_native_sym_flags
+	calls to use new parameters.
+
 Fri Jun 17 14:45:32 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* aout-target.h (MY(callback)): Set the alignments of the text,

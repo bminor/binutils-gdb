@@ -134,6 +134,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define MY_bfd_link_hash_table_create _bfd_generic_link_hash_table_create
 #define MY_bfd_link_add_symbols _bfd_generic_link_add_symbols
+#define MY_final_link_callback unused
 #define MY_bfd_final_link _bfd_generic_final_link
 
 /* Until and unless we convert the slurp_reloc and slurp_symtab
@@ -145,6 +146,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define hp300hpux_write_syms aout_32_write_syms
 
 #define MY_callback MY(callback)
+
+#define MY_exec_hdr_flags 0x2
 
 #define NAME_swap_exec_header_in NAME(hp300hpux_32_,swap_exec_header_in)
 
@@ -179,6 +182,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define NAME(x,y) CAT3(hp300hpux,_32_,y)
 #define ARCH_SIZE 32
+
+/* aoutx.h requires definitions for BMAGIC and QMAGIC.  */
+#define BMAGIC 0415
+#define QMAGIC 0314
+
 #include "aoutx.h"
 
 /* Since the hpux symbol table has nlist elements interspersed with
@@ -263,7 +271,7 @@ MY (write_object_contents) (abfd)
 #endif
 
   if (adata (abfd).magic == undecided_magic)
-    NAME (aout, adjust_sizes_and_vmas) (abfd, &text_size, &text_end);
+    NAME (aout,adjust_sizes_and_vmas) (abfd, &text_size, &text_end);
   execp->a_syms = 0;
 
   execp->a_entry = bfd_get_start_address (abfd);
@@ -274,9 +282,9 @@ MY (write_object_contents) (abfd)
 		     obj_reloc_entry_size (abfd));
 
   N_SET_MACHTYPE (*execp, 0xc);
-  N_SET_FLAGS (*execp, 0x2);
+  N_SET_FLAGS (*execp, aout_backend_info (abfd)->exec_hdr_flags);
 
-  NAME (aout, swap_exec_header_out) (abfd, execp, &exec_bytes);
+  NAME (aout,swap_exec_header_out) (abfd, execp, &exec_bytes);
 
   /* update fields not covered by default swap_exec_header_out */
 
@@ -306,11 +314,11 @@ MY (write_object_contents) (abfd)
     {
       if (bfd_seek (abfd, (long) (N_TRELOFF (*execp)), false) != 0)
 	return false;
-      if (!NAME (aout, squirt_out_relocs) (abfd, obj_textsec (abfd)))
+      if (!NAME (aout,squirt_out_relocs) (abfd, obj_textsec (abfd)))
 	return false;
       if (bfd_seek (abfd, (long) (N_DRELOFF (*execp)), false) != 0)
 	return false;
-      if (!NAME (aout, squirt_out_relocs) (abfd, obj_datasec (abfd)))
+      if (!NAME (aout,squirt_out_relocs) (abfd, obj_datasec (abfd)))
 	return false;
     }
 
@@ -390,7 +398,7 @@ DESCRIPTION
 */
 
 void
-  NAME (aout, swap_exec_header_in) (abfd, raw_bytes, execp)
+NAME (aout,swap_exec_header_in) (abfd, raw_bytes, execp)
      bfd *abfd;
      struct external_exec *raw_bytes;
      struct internal_exec *execp;
@@ -562,7 +570,7 @@ MY (slurp_symbol_table) (abfd)
 
 	cache_save = *cache_ptr;
 	convert_sym_type (sym_pointer, cache_ptr, abfd);
-	if (!translate_from_native_sym_flags (sym_pointer, cache_ptr, abfd))
+	if (!translate_from_native_sym_flags (abfd, cache_ptr))
 	  return false;
 
 	/********************************************************/
@@ -608,8 +616,7 @@ MY (slurp_symbol_table) (abfd)
 	    strings += length + 10;
 	    cache_ptr2->type &= ~HP_SECONDARY_SYMBOL;	/* clear secondary */
 	    convert_sym_type (sym_pointer, cache_ptr2, abfd);
-	    if (!translate_from_native_sym_flags (sym_pointer, cache_ptr2,
-						  abfd))
+	    if (!translate_from_native_sym_flags (abfd, cache_ptr2))
 	      return false;
 	  }
 
