@@ -28,7 +28,7 @@
 #include "gdbcore.h"
 #include "target.h"
 #include "wait.h"
-#ifdef __STDC__
+#ifdef ANSI_PROTOTYPES
 #include <stdarg.h>
 #else
 #include <varargs.h>
@@ -173,7 +173,7 @@ Specify the serial device it is connected to (e.g. /dev/ttya).",
  * printf_monitor -- send data to monitor.  Works just like printf.
  */
 static void
-#ifdef __STDC__
+#ifdef ANSI_PROTOTYPES
 printf_monitor(char *pattern, ...)
 #else
 printf_monitor(va_alist)
@@ -184,7 +184,7 @@ printf_monitor(va_alist)
   char buf[PBUFSIZ];
   int i;
 
-#ifdef __STDC__
+#ifdef ANSI_PROTOTYPES
   va_start(args, pattern);
 #else
   char *pattern;
@@ -224,7 +224,7 @@ write_monitor(data, len)
  *	to be formatted and printed. A CR is added after each string is printed.
  */
 static void
-#ifdef __STDC__
+#ifdef ANSI_PROTOTYPES
 debuglogs(int level, char *pattern, ...)
 #else
 debuglogs(va_alist)
@@ -237,7 +237,7 @@ debuglogs(va_alist)
   char newbuf[PBUFSIZ];
   int i;
 
-#ifdef __STDC__
+#ifdef ANSI_PROTOTYPES
   va_start(args, pattern);
 #else
   char *pattern;

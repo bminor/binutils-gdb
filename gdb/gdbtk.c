@@ -29,7 +29,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "target.h"
 #include <tcl.h>
 #include <tk.h>
-#ifdef __STDC__
+#ifdef ANSI_PROTOTYPES
 #include <stdarg.h>
 #else
 #include <varargs.h>
@@ -140,7 +140,7 @@ gdbtk_query (query, args)
 }
 
 static void
-#ifdef __STDC__
+#ifdef ANSI_PROTOTYPES
 dsprintf_append_element (Tcl_DString *dsp, char *format, ...)
 #else
 dsprintf_append_element (va_alist)
@@ -150,7 +150,7 @@ dsprintf_append_element (va_alist)
   va_list args;
   char buf[1024];
 
-#ifdef __STDC__
+#ifdef ANSI_PROTOTYPES
   va_start (args, format);
 #else
   Tcl_DString *dsp;

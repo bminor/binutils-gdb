@@ -37,7 +37,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "gdbcore.h"
 #include "target.h"
 #include "wait.h"
-#ifdef __STDC__
+#ifdef ANSI_PROTOTYPES
 #include <stdarg.h>
 #else
 #include <varargs.h>
@@ -90,7 +90,7 @@ static char readbuf[16];
 
 /* Send data to monitor.  Works just like printf. */
 static void
-#ifdef __STDC__
+#ifdef ANSI_PROTOTYPES
 printf_monitor(char *pattern, ...)
 #else
 printf_monitor(va_alist)
@@ -101,7 +101,7 @@ printf_monitor(va_alist)
   char buf[200];
   int i;
 
-#ifdef __STDC__
+#ifdef ANSI_PROTOTYPES
   va_start (args, pattern);
 #else
   char *pattern;

@@ -1,3 +1,13 @@
+Fri May 19 06:15:40 1995  Jim Kingdon  <kingdon@deneb.cygnus.com>
+
+	* utils.c, complaints.c, language.c, monitor.c, remote-array.c,
+	remote-mips.c, remote-os9k.c, remote-st.c: Conditionalize use of
+	stdarg rather than varargs on ANSI_PROTOTYPES not __STDC__; it
+	must match the definition of PARAMS.
+start-sanitize-gdbtk
+        * gdbtk.c: Likewise.
+end-sanitize-gdbtk
+
 Thu May 18 15:58:46 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
 
 	* utils.c (fprintf_filtered, fprintf_unfiltered, fprintfi_filtered,

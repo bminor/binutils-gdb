@@ -29,7 +29,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "defs.h"
 #include <string.h>
-#ifdef __STDC__
+#ifdef ANSI_PROTOTYPES
 #include <stdarg.h>
 #else
 #include <varargs.h>
@@ -982,7 +982,7 @@ op_error (fmt,op,fatal)
    by the value of warning_pre_print and we do not return to the top level. */
 
 void
-#ifdef __STDC__
+#ifdef ANSI_PROTOTYPES
 type_error (char *string, ...)
 #else
 type_error (va_alist)
@@ -990,7 +990,7 @@ type_error (va_alist)
 #endif
 {
    va_list args;
-#ifdef __STDC__
+#ifdef ANSI_PROTOTYPES
    va_start (args, string);
 #else
    char *string;
@@ -1011,7 +1011,7 @@ type_error (va_alist)
 }
 
 void
-#ifdef __STDC__
+#ifdef ANSI_PROTOTYPES
 range_error (char *string, ...)
 #else
 range_error (va_alist)
@@ -1019,7 +1019,7 @@ range_error (va_alist)
 #endif
 {
    va_list args;
-#ifdef __STDC__
+#ifdef ANSI_PROTOTYPES
    va_start (args, string);
 #else
    char *string;

@@ -20,7 +20,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "defs.h"
 #include "complaints.h"
 #include "gdbcmd.h"
-#ifdef __STDC__
+#ifdef ANSI_PROTOTYPES
 #include <stdarg.h>
 #else
 #include <varargs.h>
@@ -63,7 +63,7 @@ extern int info_verbose;
 
 /* VARARGS */
 void
-#ifdef __STDC__
+#ifdef ANSI_PROTOTYPES
 complain (struct complaint *complaint, ...)
 #else
 complain (va_alist)
@@ -71,7 +71,7 @@ complain (va_alist)
 #endif
 {
   va_list args;
-#ifdef __STDC__
+#ifdef ANSI_PROTOTYPES
   va_start (args, complaint);
 #else
   struct complaint *complaint;

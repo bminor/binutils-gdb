@@ -38,7 +38,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "gdbcore.h"
 #include "target.h"
 #include "wait.h"
-#ifdef __STDC__
+#ifdef ANSI_PROTOTYPES
 #include <stdarg.h>
 #else
 #include <varargs.h>
@@ -70,7 +70,7 @@ static serial_t st2000_desc;
 /* Send data to stdebug.  Works just like printf. */
 
 static void
-#ifdef __STDC__
+#ifdef ANSI_PROTOTYPES
 printf_stdebug(char *pattern, ...)
 #else
 printf_stdebug(va_alist)
@@ -80,7 +80,7 @@ printf_stdebug(va_alist)
   va_list args;
   char buf[200];
 
-#ifdef __STDC__
+#ifdef ANSI_PROTOTYPES
   va_start(args, pattern);
 #else
   char *pattern;

@@ -31,7 +31,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "remote-utils.h"
 
 #include <signal.h>
-#ifdef __STDC__
+#ifdef ANSI_PROTOTYPES
 #include <stdarg.h>
 #else
 #include <varargs.h>
@@ -275,7 +275,7 @@ static serial_t mips_desc;
    inconsistent state.  */
 
 static NORETURN void
-#ifdef __STDC__
+#ifdef ANSI_PROTOTYPES
 mips_error (char *string, ...)
 #else
 mips_error (va_alist)
@@ -284,7 +284,7 @@ mips_error (va_alist)
 {
   va_list args;
 
-#ifdef __STDC__
+#ifdef ANSI_PROTOTYPES
   va_start (args, string);
 #else
   char *string;
