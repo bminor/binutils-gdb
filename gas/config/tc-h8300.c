@@ -55,6 +55,10 @@ h8300hmode ()
 {
   Hmode = 1;
   Smode = 0;
+#ifdef BFD_ASSEMBLER
+  if (!bfd_set_arch_mach (stdoutput, bfd_arch_h8300, bfd_mach_h8300h))
+    as_warn (_("could not set architecture and machine"));
+#endif
 }
 
 void
@@ -62,6 +66,10 @@ h8300smode ()
 {
   Smode = 1;
   Hmode = 1;
+#ifdef BFD_ASSEMBLER
+  if (!bfd_set_arch_mach (stdoutput, bfd_arch_h8300, bfd_mach_h8300s))
+    as_warn (_("could not set architecture and machine"));
+#endif
 }
 
 void
@@ -116,6 +124,11 @@ md_begin ()
   struct h8_opcode *opcode;
   char prev_buffer[100];
   int idx = 0;
+
+#ifdef BFD_ASSEMBLER
+  if (!bfd_set_arch_mach (stdoutput, bfd_arch_h8300, bfd_mach_h8300))
+    as_warn (_("could not set architecture and machine"));
+#endif
 
   opcode_hash_control = hash_new ();
   prev_buffer[0] = 0;

@@ -1,3 +1,9 @@
+Wed Aug 29 12:49:58 2001  Jeffrey A Law  (law@cygnus.com)
+
+	* config/tc-h8300.c (h8300hmode): Record the machine type 
+	if BFD_ASSEMBLER is defined.
+	(h8300smode, md_begin): Similarly.
+
 2001-08-29  Joel Sherrill <joel@OARcorp.com>
 
 	* configure.in (i[3456]86-*-rtems*, m68*-*-rtems*): Change 
