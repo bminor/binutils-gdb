@@ -1,3 +1,10 @@
+2002-08-20  David Carlton  <carlton@math.stanford.edu>
+
+	* dwarf2read.c (dwarf2_build_psymtabs): Check that
+	dwarf_line_offset is nonzero before creating dwarf_line_buffer.
+	(read_file_scope): Check that line_header is nonzero before
+	decoding macro information.
+
 2002-08-20  Mark Kettenis  <kettenis@gnu.org>
 
 	* i386-tdep.h (FP_REGNUM_P): Change such that we don't incorrectly

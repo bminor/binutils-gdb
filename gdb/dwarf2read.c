@@ -1009,9 +1009,13 @@ dwarf2_build_psymtabs (struct objfile *objfile, int mainline)
   dwarf_abbrev_buffer = dwarf2_read_section (objfile,
 					     dwarf_abbrev_offset,
 					     dwarf_abbrev_size);
-  dwarf_line_buffer = dwarf2_read_section (objfile,
-					   dwarf_line_offset,
-					   dwarf_line_size);
+
+  if (dwarf_line_offset)
+    dwarf_line_buffer = dwarf2_read_section (objfile,
+					     dwarf_line_offset,
+					     dwarf_line_size);
+  else
+    dwarf_line_buffer = NULL;
 
   if (dwarf_str_offset)
     dwarf_str_buffer = dwarf2_read_section (objfile,
@@ -1808,7 +1812,7 @@ read_file_scope (struct die_info *die, struct objfile *objfile,
      header, so we can only read it if we've read the header
      successfully.  */
   attr = dwarf_attr (die, DW_AT_macro_info);
-  if (attr)
+  if (attr && line_header)
     {
       unsigned int macro_offset = DW_UNSND (attr);
       dwarf_decode_macros (line_header, macro_offset,
