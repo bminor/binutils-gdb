@@ -1,3 +1,8 @@
+Wed Nov 26 12:32:11 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-io.c (sim_io_getstring): Delete unused len2.
+	(sim_io_syscalls): Ditto for sys_errno.
+
 Wed Nov 26 11:18:40 1997  Doug Evans  <devans@canuck.cygnus.com>
 
 	* syscall.c (cb_syscall): Test CB_SYSCALL struct magic number.

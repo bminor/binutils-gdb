@@ -306,7 +306,6 @@ sim_io_getstring(SIM_DESC sd,
 		 address_word target_string)
 {
   int len = 0;
-  int len2;
   char *buf;
 
   while (sim_core_read_1 (cpu, cia, sim_core_read_map, target_string+len) != 0)
@@ -335,7 +334,6 @@ sim_io_syscalls(SIM_DESC sd,
   int ret;
   char *buf;
   int fd;
-  int sys_errno = 0;
 
   *errno_return = 0;
   *syscall_return = 0;
