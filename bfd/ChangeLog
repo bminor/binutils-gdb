@@ -1,3 +1,21 @@
+Tue Mar  9 10:52:01 1993  Fred Fish  (fnf@cygnus.com)
+
+	* elf32.c (elf_object_p):  Use ELF_ARCH stored in xvec to match
+	against machine architecture stored in the ELF header, to resolve
+	ambiguities.
+	* elf32.c (bfd_section_from_shdr):  Bfd_make_section can return
+	NULL, so only use results when non-NULL.
+	* targets.c (elf32_m68k_vec, elf32_i860_vec):  Add extern decls
+	and add to vector of targets.
+
+Mon Mar  8 15:13:44 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* coff-mips.c (ecoff_set_symbol_info): Encapsulated STABS symbols
+	are always just debugging symbols.
+
+	* coff-mips.c (ecoff_[gs]et_sym_index): Moved macros from here...
+	libecoff.h (ecoff_[gs]et_sym_index): ...to here.
+
 Mon Mar  8 14:55:13 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	* hppa.c (_PA_RISC_ID): Defined if not already defined (e.g., for

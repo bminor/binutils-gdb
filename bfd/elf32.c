@@ -74,6 +74,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 */
 
+#include <string.h>		/* For strrchr and friends */
 #include "bfd.h"
 #include "sysdep.h"
 #include "libbfd.h"
@@ -456,27 +457,30 @@ DEFUN(bfd_section_from_shdr, (abfd, shindex),
     if (! hdr->rawdata ) 
       {
 	newsect = bfd_make_section (abfd, name);
-	newsect->vma = hdr->sh_addr;
-	newsect->_raw_size = hdr->sh_size;
-	newsect->filepos = hdr->sh_offset; /* so we can read back the bits */
-	newsect->flags |= SEC_HAS_CONTENTS;
-	
-	if (hdr->sh_flags & SHF_ALLOC)
+	if (newsect != NULL)
 	  {
-	    newsect->flags |= SEC_ALLOC;
-	    if (hdr->sh_type != SHT_NOBITS)
-	      newsect->flags |= SEC_LOAD;
+	    newsect->vma = hdr->sh_addr;
+	    newsect->_raw_size = hdr->sh_size;
+	    newsect->filepos = hdr->sh_offset; /* so we can read back the bits */
+	    newsect->flags |= SEC_HAS_CONTENTS;
+	    
+	    if (hdr->sh_flags & SHF_ALLOC)
+	      {
+		newsect->flags |= SEC_ALLOC;
+		if (hdr->sh_type != SHT_NOBITS)
+		  newsect->flags |= SEC_LOAD;
+	      }
+	    
+	    if (!(hdr->sh_flags & SHF_WRITE))
+	      newsect->flags |= SEC_READONLY;
+	    
+	    if (hdr->sh_flags & SHF_EXECINSTR)
+	      newsect->flags |= SEC_CODE;	/* FIXME: may only contain SOME code */
+	    else
+	      newsect->flags |= SEC_DATA;
+	    
+	    hdr->rawdata = (void*)newsect;
 	  }
-	
-	if (!(hdr->sh_flags & SHF_WRITE))
-	  newsect->flags |= SEC_READONLY;
-	
-	if (hdr->sh_flags & SHF_EXECINSTR)
-	  newsect->flags |= SEC_CODE;	/* FIXME: may only contain SOME code */
-	else
-	  newsect->flags |= SEC_DATA;
-	
-	hdr->rawdata = (void*)newsect;
       }
     return true;
     break;
@@ -1072,6 +1076,7 @@ DEFUN (elf_object_p, (abfd), bfd *abfd)
   Elf_Internal_Shdr *i_shdrp;	/* Section header table, internal form */
   int shindex;
   char *shstrtab;		/* Internal copy of section header stringtab */
+  struct elf_backend_data *ebd;	/* Use to get ELF_ARCH stored in xvec */
   
   /* Read in the ELF header in external format.  */
 
@@ -1150,28 +1155,48 @@ wrong:
   if (i_ehdrp->e_type == ET_EXEC || i_ehdrp->e_type == ET_DYN)
     abfd -> flags |= EXEC_P;
 
+  /* Retrieve the architecture information from the xvec and verify
+     that it matches the machine info stored in the ELF header.
+     This allows us to resolve ambiguous formats that might not
+     otherwise be distinguishable. */
+
+  ebd = (struct elf_backend_data *) (abfd->xvec->backend_data);
   switch (i_ehdrp->e_machine)
     {
     case EM_NONE:
     case EM_M32:		/* or should this be bfd_arch_obscure? */
+      if (ebd -> arch != bfd_arch_unknown)
+	goto wrong;
       bfd_default_set_arch_mach(abfd, bfd_arch_unknown, 0);
       break;
     case EM_SPARC:
+      if (ebd -> arch != bfd_arch_sparc)
+	goto wrong;
       bfd_default_set_arch_mach(abfd, bfd_arch_sparc, 0);
       break;
     case EM_386:
+      if (ebd -> arch != bfd_arch_i386)
+	goto wrong;
       bfd_default_set_arch_mach(abfd, bfd_arch_i386, 0);
       break;
     case EM_68K:
+      if (ebd -> arch != bfd_arch_m68k)
+	goto wrong;
       bfd_default_set_arch_mach(abfd, bfd_arch_m68k, 0);
       break;
     case EM_88K:
+      if (ebd -> arch != bfd_arch_m88k)
+	goto wrong;
       bfd_default_set_arch_mach(abfd, bfd_arch_m88k, 0);
       break;
     case EM_860:
+      if (ebd -> arch != bfd_arch_i860)
+	goto wrong;
       bfd_default_set_arch_mach(abfd, bfd_arch_i860, 0);
       break;
     case EM_MIPS:
+      if (ebd -> arch != bfd_arch_mips)
+	goto wrong;
       bfd_default_set_arch_mach(abfd, bfd_arch_mips, 0);
       break;
     default:
