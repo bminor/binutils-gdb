@@ -34,6 +34,12 @@ vers15.c
 vers15.dsym
 vers15.sym
 vers15.ver
+vers16.c
+vers16.dsym
+vers16.map
+vers16a.c
+vers16a.dsym
+vers16a.ver
 vers2.c
 vers2.dsym
 vers2.map
