@@ -1,3 +1,8 @@
+Fri Jul  4 14:52:31 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* gdbint.texinfo (Host Conditionals): Add CRLF_SOURCE_LINES.
+	Document LSEEK_NOT_LINEAR.
+
 Tue Mar 25 14:44:09 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* stabs.texinfo (Stab Section Basics): Make it clear that only
