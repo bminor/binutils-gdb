@@ -1,4 +1,12 @@
-2001-10-05  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+2001-10-05  Jeff Law <law@redhat.com>
+
+	* som.h (som_exec_data): New field "version_id".
+	* som.c (som_object_setup): Record the version_id if it
+	exists.
+	(som_prep_headers): Do not initialize version_id here.
+	(som_finish_writing): Initialize version_id here.
+
+2000-10-05  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
 	* elf32-mips.c (elf_mips_howto_table): Fix some relocation howtos
 	according to the MIPS/SGI ELF64 ABI Draft.

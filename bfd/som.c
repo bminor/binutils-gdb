@@ -1814,6 +1814,8 @@ som_object_setup (abfd, file_hdrp, aux_hdrp, current_offset)
       obj_som_exec_data (abfd)->exec_flags = aux_hdrp->exec_flags;
     }
 
+  obj_som_exec_data (abfd)->version_id = file_hdrp->version_id;
+
   bfd_default_set_arch_mach (abfd, bfd_arch_hppa, pa10);
   bfd_get_symcount (abfd) = file_hdrp->symbol_total;
 
@@ -2319,9 +2321,6 @@ som_prep_headers (abfd)
     }
   else
     file_hdr->a_magic = RELOC_MAGIC;
-
-  /* Only new format SOM is supported.  */
-  file_hdr->version_id = NEW_VERSION_ID;
 
   /* These fields are optional, and embedding timestamps is not always
      a wise thing to do, it makes comparing objects during a multi-stage
@@ -3687,6 +3686,14 @@ som_finish_writing (abfd)
   unsigned long current_offset;
   unsigned int total_reloc_size;
   bfd_size_type amt;
+
+  /* We must set up the version identifier here as objcopy/strip copy
+     private BFD data too late for us to handle this in som_begin_writing.  */
+  if (obj_som_exec_data (abfd)
+      && obj_som_exec_data (abfd)->version_id)
+    obj_som_file_hdr (abfd)->version_id = obj_som_exec_data (abfd)->version_id;
+  else
+    obj_som_file_hdr (abfd)->version_id = NEW_VERSION_ID;
 
   /* Next is the symbol table.  These are fixed length records.
 
