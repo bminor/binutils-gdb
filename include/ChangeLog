@@ -1,3 +1,9 @@
+start-sanitize-m32r
+Thu Oct 17 11:17:40 1996  Doug Evans  <dje@canuck.cygnus.com>
+
+	* dis-asm.h (print_insn_m32r): Declare.
+
+end-sanitize-m32r
 Mon Oct 14 23:56:52 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* libiberty.h: Declare parameter types for xmalloc and xrealloc.
