@@ -1,3 +1,16 @@
+Fri Aug 12 19:35:41 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* gdb.stabs/hppa.mt: Use $(AS), not $(CC) to assemble the
+	stabs testcode.
+
+Fri Aug  5 17:01:07 1994  J.T. Conklin  (jtc@phishhead.cygnus.com)
+
+	* lib/gdb.exp (gdb_test): Don't send anything if the first
+	  argument is an empty string.  This makes cases where we want to
+	  match output that is already in expect's buffers (for example,
+	  matching a breakpoint after gdb_run_cmd has been called) work
+	  reliably.
+
 Tue Aug  2 10:24:08 1994  J.T. Conklin  (jtc@phishhead.cygnus.com)
 
 	* config/netware.exp: New file.
