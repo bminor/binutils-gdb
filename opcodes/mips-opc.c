@@ -239,20 +239,29 @@ const struct mips_opcode mips_opcodes[] = {
 {"daddiu",  "t,r,j",	0x64000000, 0xfc000000, WR_t|RD_s|I3	},
 {"daddu",   "d,v,t",	0x0000002d, 0xfc0007ff, WR_d|RD_s|RD_t|I3},
 {"daddu",   "t,r,I",	3,    (int) M_DADDU_I,	INSN_MACRO	},
-{"ddiv",    "s,t",	0x0000001e, 0xfc00ffff, RD_s|RD_t|WR_HI|WR_LO|I3 },
-{"ddiv",    "d,s,t",	3,    (int) M_DDIV_3,	INSN_MACRO	},
+/* For ddiv, see the comments about div.  */
+{"ddiv",    "d,v,t",	3,    (int) M_DDIV_3,	INSN_MACRO	},
 {"ddiv",    "d,v,I",	3,    (int) M_DDIV_3I,	INSN_MACRO	},
-{"ddivu",   "s,t",	0x0000001f, 0xfc00ffff, RD_s|RD_t|WR_HI|WR_LO|I3 },
-{"ddivu",   "d,s,t",	3,    (int) M_DDIVU_3,	INSN_MACRO	},
+{"ddiv",    "s,t",	0x0000001e, 0xfc00ffff, RD_s|RD_t|WR_HI|WR_LO|I3 },
+/* For ddivu, see the comments about div.  */
+{"ddivu",   "d,v,t",	3,    (int) M_DDIVU_3,	INSN_MACRO	},
 {"ddivu",   "d,v,I",	3,    (int) M_DDIVU_3I,	INSN_MACRO	},
-{"div",     "s,t",	0x0000001a, 0xfc00ffff,	RD_s|RD_t|WR_HI|WR_LO	},
-{"div",     "d,s,t",	0,    (int) M_DIV_3,	INSN_MACRO	},
+{"ddivu",   "s,t",	0x0000001f, 0xfc00ffff, RD_s|RD_t|WR_HI|WR_LO|I3 },
+/* The MIPS assembler treats the div opcode with two operands as
+   though the first operand appeared twice (the first operand is both
+   a source and a destination).  To get the div machine instruction,
+   you must use an explicit destination of $0.  The final case of
+   "div" is the machine instruction itself, but actually a user
+   instruction will never match it (it will match d,v,t first).  */
+{"div",     "d,v,t",	0,    (int) M_DIV_3,	INSN_MACRO	},
 {"div",     "d,v,I",	0,    (int) M_DIV_3I,	INSN_MACRO	},
+{"div",     "s,t",	0x0000001a, 0xfc00ffff,	RD_s|RD_t|WR_HI|WR_LO	},
 {"div.d",   "D,V,T",	0x46200003, 0xffe0003f,	WR_D|RD_S|RD_T	},
 {"div.s",   "D,V,T",	0x46000003, 0xffe0003f,	WR_D|RD_S|RD_T	},
-{"divu",    "s,t",	0x0000001b, 0xfc00ffff,	RD_s|RD_t|WR_HI|WR_LO	},
-{"divu",    "d,s,t",	0,    (int) M_DIVU_3,	INSN_MACRO	},
+/* For divu, see the comments about div.  */
+{"divu",    "d,v,t",	0,    (int) M_DIVU_3,	INSN_MACRO	},
 {"divu",    "d,v,I",	0,    (int) M_DIVU_3I,	INSN_MACRO	},
+{"divu",    "s,t",	0x0000001b, 0xfc00ffff,	RD_s|RD_t|WR_HI|WR_LO	},
 {"dmfc0",   "t,G",	0x40200000, 0xffe007ff, LCD|WR_t|RD_C0|I3 },
 {"dmtc0",   "t,G",	0x40a00000, 0xffe007ff, COD|RD_t|WR_C0|WR_CC|I3 },
 {"dmfc1",   "t,S",	0x44200000, 0xffe007ff, LCD|WR_t|RD_S|I3 },

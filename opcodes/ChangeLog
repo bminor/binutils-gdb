@@ -1,3 +1,11 @@
+Thu Sep  2 10:35:25 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* mips-opc.c: Move div machine instruction after macro forms.
+	Change d,s,t form to d,v,t.  Likewise for divu, ddiv and ddivu.
+	This is for compatibility with the MIPS assembler, which only
+	generates the simple machine instruction when an explicit
+	destination of $0 is used.
+
 Thu Aug 26 17:41:44 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* mips-opc.c: From davidj@ICSI.Berkeley.EDU (David Johnson): Set
