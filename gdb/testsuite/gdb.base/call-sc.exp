@@ -286,13 +286,6 @@ proc test_scalar_returns { } {
     # "return_value_unknown" set above.
 
     set test "value foo returned; ${tests}"
-    setup_kfails call-sc-tc x86_64-*-* gdb/1624
-    setup_kfails call-sc-ts x86_64-*-* gdb/1624
-    setup_kfails call-sc-ti x86_64-*-* gdb/1624
-    setup_kfails call-sc-tl x86_64-*-* gdb/1624
-    setup_kfails call-sc-tll x86_64-*-* gdb/1624
-    setup_kfails call-sc-tld x86_64-*-* gdb/1624
-    setup_kfails call-sc-te x86_64-*-* gdb/1624
     gdb_test_multiple "p/c L" "${test}" {
 	-re " = 49 '1'.*${gdb_prompt} $" {
 	    if $return_value_unknown {

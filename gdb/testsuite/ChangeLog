@@ -1,5 +1,10 @@
 2004-04-28  Mark Kettenis  <kettenis@gnu.org>
 
+	* gdb.base/call-sc.exp: Remove patterns to KFAIL PR gdb/1624 on
+	x86_64-*-*.
+
+2004-04-28  Mark Kettenis  <kettenis@gnu.org>
+
 	* gdb.base/call-sc.exp: Remove patterns to KFAIL PR gdb/1623 on
 	i*86-*-*.
 
