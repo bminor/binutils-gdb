@@ -142,11 +142,11 @@ bfd_pef_convert_architecture (architecture, type, subtype)
      enum bfd_architecture *type;
      unsigned long *subtype;
 {
-  *subtype = bfd_arch_unknown;
-  *type = bfd_arch_unknown;
-
   const unsigned long ARCH_POWERPC = 0x70777063; /* 'pwpc' */
   const unsigned long ARCH_M68K = 0x6d36386b; /* 'm68k' */
+
+  *subtype = bfd_arch_unknown;
+  *type = bfd_arch_unknown;
 
   if (architecture == ARCH_POWERPC)
     *type = bfd_arch_powerpc;

@@ -1,3 +1,8 @@
+2002-11-15  Klee Dienes  <kdienes@apple.com>
+
+	* pef.c (bfd_pef_convert_architecture): Move declaration of
+	ARCH_POWERPC and ARCH_M68K to the start of the function.
+
 2002-11-14  Svein E. Seldal  <Svein.Seldal@solidas.com>
 
 	* coff-tic4x.c (tic4x_howto_table): Formatting fixup
