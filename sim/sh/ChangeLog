@@ -1,3 +1,19 @@
+Sat Oct 21 13:01:18 1995  Jim Wilson  <wilson@chestnut.cygnus.com>
+
+	* gencode.c (gensim): Indicate SIGILL instead of calling abort for
+	default case.
+
+start-sanitize-sh3e
+Mon Oct 16 18:24:03 1995  Jim Wilson  <wilson@chestnut.cygnus.com>
+
+	* interp.c (saved_start_type): Move FP registers to immediately
+	after SR.
+
+end-sanitize-sh3e
+Tue Oct 10 11:12:15 1995  Fred Fish  <fnf@cygnus.com>
+
+	* Makefile.in (BISON): Remove macro.
+
 Fri Oct  6 12:08:18 1995  Jim Wilson  <wilson@chestnut.cygnus.com>
 
 	* interp.c (trap, case SYS_utime): Cast second arg of utime to
