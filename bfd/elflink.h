@@ -1423,13 +1423,8 @@ elf_link_add_object_symbols (abfd, info)
 			{
 			  h->elf_link_hash_flags &=~ ELF_LINK_HASH_DEF_DYNAMIC;
 			  hi->elf_link_hash_flags |= ELF_LINK_HASH_REF_DYNAMIC;
-#if 0
-			  /* Don't record the unversioned alias.  This
-			     produces bogus ABS symbols on export as
-			     they never get defined peroperly.  */
 			  if (! _bfd_elf_link_record_dynamic_symbol (info, hi))
 			    goto error_return;
-#endif
 			}
 
 		      /* Now set HI to H, so that the following code
