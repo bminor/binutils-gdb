@@ -350,6 +350,8 @@ Makefile.in, configure*	ALL
 
 mmalloc/		ALL Host maintainers
 
+NEWS			ALL
+
 sim/			See sim/MAINTAINERS
 
 readline/		Master version: ftp://ftp.cwru.edu/pub/bash/

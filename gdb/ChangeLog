@@ -1,5 +1,9 @@
 2002-06-13  Daniel Jacobowitz  <drow@mvista.com>
 
+	* MAINTAINERS: Mention NEWS.
+
+2002-06-13  Daniel Jacobowitz  <drow@mvista.com>
+
 	* gdbserver/regcache.c: Add comment.
 
 2002-06-13  Daniel Jacobowitz  <drow@mvista.com>
