@@ -119,6 +119,9 @@ lib_LTLIBRARIES = libopcodes.la
 # This is where bfd.h lives.
 BFD_H = ../bfd/bfd.h
 
+# This is where libiberty lives.
+LIBIBERTY = ../libiberty/libiberty.a
+
 # Header files.
 HFILES = \
 	arm-opc.h \
@@ -327,7 +330,7 @@ acinclude.m4 aclocal.m4 config.in configure configure.in
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
-TAR = tar
+TAR = gtar
 GZIP_ENV = --best
 SOURCES = libopcodes.a.c $(libopcodes_la_SOURCES)
 OBJECTS = libopcodes.a.o $(libopcodes_la_OBJECTS)
@@ -694,23 +697,6 @@ all-redirect all-am all installdirs-am installdirs mostlyclean-generic \
 distclean-generic clean-generic maintainer-clean-generic clean \
 mostlyclean distclean maintainer-clean
 
-ia64-ic.tbl: $(srcdir)/ia64-ic.tbl
-	$(LN_S) -f $(srcdir)/ia64-ic.tbl
-ia64-raw.tbl: $(srcdir)/ia64-raw.tbl
-	$(LN_S) -f $(srcdir)/ia64-raw.tbl
-ia64-waw.tbl: $(srcdir)/ia64-waw.tbl
-	$(LN_S) -f $(srcdir)/ia64-waw.tbl
-ia64-war.tbl: $(srcdir)/ia64-war.tbl
-	$(LN_S) -f $(srcdir)/ia64-war.tbl
-
-ia64-gen: ia64-gen.o
-	$(LINK) ia64-gen.o $(LIBIBERTY)
-
-ia64-gen.o: ia64-gen.c ia64-opc.c ia64-opc-a.c ia64-opc-b.c ia64-opc-f.c \
-  ia64-opc-i.c ia64-opc-m.c ia64-opc-d.c ia64-opc.h
-
-ia64-asmtab.c: @MAINT@ ia64-gen ia64-ic.tbl ia64-raw.tbl ia64-waw.tbl ia64-war.tbl
-	./ia64-gen > $(srcdir)/ia64-asmtab.c
 
 disassemble.lo: disassemble.c $(INCDIR)/dis-asm.h
 	$(LIBTOOL) --mode=compile $(COMPILE) -c @archdefs@ $(srcdir)/disassemble.c
@@ -734,6 +720,24 @@ config.status: $(srcdir)/configure $(srcdir)/../bfd/configure.in
 	$(SHELL) ./config.status --recheck
 
 # The start marker is written this way to pass through automake unscathed.
+
+ia64-ic.tbl: $(srcdir)/ia64-ic.tbl
+	$(LN_S) -f $(srcdir)/ia64-ic.tbl
+ia64-raw.tbl: $(srcdir)/ia64-raw.tbl
+	$(LN_S) -f $(srcdir)/ia64-raw.tbl
+ia64-waw.tbl: $(srcdir)/ia64-waw.tbl
+	$(LN_S) -f $(srcdir)/ia64-waw.tbl
+ia64-war.tbl: $(srcdir)/ia64-war.tbl
+	$(LN_S) -f $(srcdir)/ia64-war.tbl
+
+ia64-gen: ia64-gen.o
+	$(LINK) ia64-gen.o $(LIBIBERTY)
+
+ia64-gen.o: ia64-gen.c ia64-opc.c ia64-opc-a.c ia64-opc-b.c ia64-opc-f.c \
+  ia64-opc-i.c ia64-opc-m.c ia64-opc-d.c ia64-opc.h
+
+ia64-asmtab.c: @MAINT@ ia64-gen ia64-ic.tbl ia64-raw.tbl ia64-waw.tbl ia64-war.tbl
+	./ia64-gen > $(srcdir)/ia64-asmtab.c
 
 # This dependency stuff is copied from BFD.
 
