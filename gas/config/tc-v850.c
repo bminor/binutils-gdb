@@ -137,6 +137,7 @@ static const struct reg_name pre_defined_registers[] =
 {
   { "ep", 30 },			/* ep - element ptr */
   { "gp", 4 },			/* gp - global ptr */
+  { "hp", 2 },			/* hp - handler stack ptr */
   { "lp", 31 },			/* lp - link ptr */
   { "r0", 0 },
   { "r1", 1 },
@@ -800,6 +801,17 @@ md_begin ()
 	}
       op++;
     }
+  
+  bfd_set_arch_mach (stdoutput, TARGET_ARCH, 0);
+  fprintf (stderr, "set to %d\n", 0 );
+  /* start-sanitize-v850e */
+  bfd_set_arch_mach (stdoutput, TARGET_ARCH, bfd_mach_v850e);
+  fprintf (stderr, "set to %d\n", bfd_mach_v850e);
+  /* end-sanitize-v850e */
+  /* start-sanitize-v850eq */
+  bfd_set_arch_mach (stdoutput, TARGET_ARCH, bfd_mach_v850eq);
+  fprintf (stderr, "set to %d\n", bfd_mach_v850eq);
+  /* end-sanitize-v850eq */
 }
 
 static bfd_reloc_code_real_type
