@@ -1,5 +1,5 @@
 /* Remote target glue for the Hitachi SH-3 ROM monitor.
-   Copyright 1995 Free Software Foundation, Inc.
+   Copyright 1995, 1996 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -23,6 +23,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "monitor.h"
 #include "serial.h"
 #include "srec.h"
+
+static serial_t parallel;
+static int parallel_in_use;
 
 static void sh3_open PARAMS ((char *args, int from_tty));
 
@@ -109,16 +112,25 @@ sh3_load (desc, file, hashmark)
      char *file;
      int hashmark;
 {
-  monitor_printf ("il;s:x\r");
-  monitor_expect ("\005", NULL, 0); /* Look for ENQ */
-  SERIAL_WRITE (desc, "\006", 1); /* Send ACK */
-  monitor_expect ("LO x\r", NULL, 0); /* Look for filename */
+  if (parallel_in_use) 
+    {
+      monitor_printf("pl;s\r");
+      load_srec (parallel, file, 80, SREC_ALL, hashmark);      
+      monitor_expect_prompt (NULL, 0);
+    }
+  else 
+    {
+      monitor_printf ("il;s:x\r");
+      monitor_expect ("\005", NULL, 0); /* Look for ENQ */
+      SERIAL_WRITE (desc, "\006", 1); /* Send ACK */
+      monitor_expect ("LO x\r", NULL, 0); /* Look for filename */
 
-  load_srec (desc, file, 80, SREC_ALL, hashmark);
+      load_srec (desc, file, 80, SREC_ALL, hashmark);
 
-  monitor_expect ("\005", NULL, 0); /* Look for ENQ */
-  SERIAL_WRITE (desc, "\006", 1); /* Send ACK */
-  monitor_expect_prompt (NULL, 0);
+      monitor_expect ("\005", NULL, 0); /* Look for ENQ */
+      SERIAL_WRITE (desc, "\006", 1); /* Send ACK */
+      monitor_expect_prompt (NULL, 0);
+    }
 }
 
 /* This array of registers need to match the indexes used by GDB.
@@ -203,7 +215,48 @@ sh3_open (args, from_tty)
      char *args;
      int from_tty;
 {
-  monitor_open (args, &sh3_cmds, from_tty);
+  char *serial_port_name = args;
+  char *parallel_port_name = 0;
+  if (args) 
+    {
+      char *cursor =  serial_port_name = strsave (args);
+
+      while (*cursor && *cursor != ' ')
+ 	cursor++;
+
+      if (*cursor)
+	*cursor++ = 0;
+
+      while (*cursor == ' ')
+	cursor++;
+
+      if (*cursor)
+	parallel_port_name = cursor;
+    }
+
+  monitor_open (serial_port_name, &sh3_cmds, from_tty);
+
+  if (parallel_port_name)
+    {
+      parallel = SERIAL_OPEN (parallel_port_name);
+      if (!parallel)
+	{
+	  perror_with_name ("Unable to open parallel port.");
+	}
+      parallel_in_use = 1;
+    }
+}
+
+
+static void
+sh3_close (quitting)
+     int quitting;
+{
+  monitor_close (quitting);
+  if (parallel_in_use) {
+    SERIAL_CLOSE (parallel);
+    parallel_in_use = 0;
+  }
 }
 
 void
@@ -213,9 +266,21 @@ _initialize_sh3 ()
 
   sh3_ops.to_shortname = "sh3";
   sh3_ops.to_longname = "Hitachi SH-3 rom monitor";
-  sh3_ops.to_doc = "Debug on a Hitachi eval board running the SH-3 rom monitor.\n\
+
+  sh3_ops.to_doc = 
+#ifdef _WINDOWS
+  /* On windows we can talk through the parallel port too. */
+    "Debug on a Hitachi eval board running the SH-3 rom monitor.\n"
+    "Specify the serial device it is connected to (e.g. com2).\n"
+    "If you want to use the parallel port to download to it, specify that\n"
+    "as the second argument. (e.g. lpt1)";
+#else
+    "Debug on a Hitachi eval board running the SH-3 rom monitor.\n\
 Specify the serial device it is connected to (e.g. /dev/ttya).";
+#endif
+
   sh3_ops.to_open = sh3_open;
+  sh3_ops.to_close = sh3_close;
 
   add_target (&sh3_ops);
 }

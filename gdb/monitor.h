@@ -1,8 +1,5 @@
 /* Remote debugging interface ROM monitors.
- *  Copyright 1990, 1991, 1992 Free Software Foundation, Inc.
- *  Contributed by Cygnus Support. Written by Rob Savoye for Cygnus.
- *
- *  Copyright 1990, 1991, 1992 Free Software Foundation, Inc.
+ *  Copyright 1990, 1991, 1992, 1996 Free Software Foundation, Inc.
  *  Contributed by Cygnus Support. Written by Rob Savoye for Cygnus.
  *
  * This file is part of GDB.
@@ -165,6 +162,7 @@ extern struct monitor_ops        *current_monitor;
 #define REG_DELIM               (current_monitor->regset.delim)
 
 extern void monitor_open PARAMS ((char *args, struct monitor_ops *ops, int from_tty));
+extern void monitor_close PARAMS ((int quitting));
 extern char *monitor_supply_register PARAMS ((int regno, char *valstr));
 extern int monitor_expect PARAMS ((char *prompt, char *buf, int buflen));
 extern int monitor_expect_prompt PARAMS ((char *buf, int buflen));

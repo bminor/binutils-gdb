@@ -1,3 +1,17 @@
+Fri Jan 12 15:56:12 1996  Steve Chamberlain  <sac@slash.cygnus.com>
+
+	* dsrec.c (load_srec): Remove unused variable.
+	monitor.c (monitor_expect): Don't expect a ^C to echo.
+	* serial.c (serial_open): Add parallel interface.
+	* sh3-rom.c (parallel, parallel_in_use): New.
+	(sh3_load): If parallel_in_use, download though the
+	parallel port.
+	(sh3_open): Open parallel port if specified.
+	(sh3_close): New function.
+	(_inititalize_sh3): Add sh3_close hook and documentation.
+	* monitor.c (monitor_close): Export.
+	* monitor.h (monitor_close): Add prototype.
+
 Fri Jan 12 13:11:42 1996  Stan Shebs  <shebs@andros.cygnus.com>
 
 	From Wilfried Moser <wilfried.moser@aut.alcatel.at>:

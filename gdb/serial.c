@@ -1,5 +1,5 @@
 /* Generic serial interface routines
-   Copyright 1992, 1993 Free Software Foundation, Inc.
+   Copyright 1992, 1993, 1996 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -74,6 +74,8 @@ serial_open (name)
     ops = serial_interface_lookup ("pc");
   else if (strchr (name, ':'))
     ops = serial_interface_lookup ("tcp");
+  else if (strncmp (name, "lpt", 3) == 0)
+    ops = serial_interface_lookup ("parallel");
   else
     ops = serial_interface_lookup ("hardwire");
 
