@@ -1,5 +1,7 @@
 2002-08-18  Mark Kettenis  <kettenis@gnu.org>
 
+	* i386b-nat.c [FETCH_INFERIOR_REGISTERS]: Remove dead code.
+
 	* config/i386/nm-i386bsd.h (FLOAT_INFO): Remove redundant #undef.
 	* i386b-nat.c [FLOAT_INFO]: Remove dead code.
 

@@ -21,57 +21,6 @@
 
 #include "defs.h"
 
-#ifdef FETCH_INFERIOR_REGISTERS
-#include <sys/types.h>
-#include <sys/ptrace.h>
-#include <machine/reg.h>
-#include <machine/frame.h>
-#include "inferior.h"
-#include "gdbcore.h" /* for registers_fetched() */
-#include "regcache.h"
-
-void
-fetch_inferior_registers (int regno)
-{
-  struct reg inferior_registers;
-
-  ptrace (PT_GETREGS, PIDGET (inferior_ptid),
-          (PTRACE_ARG3_TYPE) & inferior_registers, 0);
-  memcpy (&registers[REGISTER_BYTE (0)], &inferior_registers, 4 * NUM_REGS);
-  registers_fetched ();
-}
-
-void
-store_inferior_registers (int regno)
-{
-  struct reg inferior_registers;
-
-  memcpy (&inferior_registers, &registers[REGISTER_BYTE (0)], 4 * NUM_REGS);
-  ptrace (PT_SETREGS, PIDGET (inferior_ptid),
-          (PTRACE_ARG3_TYPE) & inferior_registers, 0);
-}
-
-struct md_core
-{
-  struct reg intreg;
-  struct fpreg freg;
-};
-
-void
-fetch_core_registers (char *core_reg_sect, unsigned core_reg_size, int which,
-		      CORE_ADDR ignore)
-{
-  struct md_core *core_reg = (struct md_core *) core_reg_sect;
-
-  /* integer registers */
-  memcpy (&registers[REGISTER_BYTE (0)], &core_reg->intreg,
-	  sizeof (struct reg));
-  /* floating point registers */
-  /* XXX */
-}
-
-#else
-
 #include <machine/reg.h>
 
 /* this table must line up with REGISTER_NAMES in tm-i386.h */
@@ -121,5 +70,3 @@ i386_register_u_addr (int blockend, int regnum)
   else
     return (blockend + 4 * sregmap[regnum]);
 }
-
-#endif /* !FETCH_INFERIOR_REGISTERS */
