@@ -20,10 +20,15 @@
 
 #include "defs.h"
 #include "frame.h"
+#include "frame-base.h"
+#include "frame-unwind.h"
+#include "dwarf2-frame.h"
 #include "gdbcore.h"
-#include "value.h"
-#include "osabi.h"
 #include "gdb_assert.h"
+#include "osabi.h"
+#include "symtab.h"
+#include "symfile.h"
+#include "value.h"
 
 #include "alpha-tdep.h"
 
@@ -131,6 +136,12 @@ alpha_linux_init_abi (struct gdbarch_info info,
 {
   struct gdbarch_tdep *tdep;
 
+  /* Hook into the DWARF CFI frame unwinder.  */
+  frame_unwind_append_predicate (gdbarch, dwarf2_frame_p);
+  frame_base_append_predicate (gdbarch, dwarf2_frame_base_p);
+  set_gdbarch_dwarf2_build_frame_info (gdbarch, dwarf2_build_frame_info);
+
+  /* Hook into the MDEBUG frame unwinder.  */
   alpha_mdebug_init_abi (info, gdbarch);
 
   set_gdbarch_pc_in_sigtramp (gdbarch, alpha_linux_pc_in_sigtramp);
