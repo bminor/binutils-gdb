@@ -26,6 +26,9 @@ Things-to-keep:
 allinsn.exp
 allinsn.d
 allinsn.s
+m32r.exp
+uppercase.d
+uppercase.s
 
 Things-to-lose:
 
