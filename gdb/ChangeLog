@@ -1,3 +1,12 @@
+Sun Sep 11 04:36:47 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* irix5-nat.c, osfsolib.c, solib.c (solib_add):  Simplify last
+	change by replacing `symbols_added' with `so_last'.
+	* mdebugread.c (parse_external, parse_partial_symbols):  Ignore
+	global common symbols, they will be resolved by the runtime loader.
+	* mdebugread.c (parse_symbol, parse_partial_symbols, cross_ref):
+	Handle scSCommon like scCommon symbols.
+
 Sat Sep 10 01:43:28 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* corelow.c (add_solib_stub):  Copy to_sections changes from
@@ -24,8 +33,8 @@ Thu Sep  8 17:14:43 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
 	(read_frame): Don't print bad checksum information unless
 	remote_debugging.  Don't use repeat count unless it's > 0.
 	* remote-e7000.c (expect): When echoing, ignore multiple newlines.
-	(e7000_insert_breakpoint, e7000_remove_breakpoint, target_ops): Optionally
-	cope with BC style breakpoints.  
+	(e7000_insert_breakpoint, e7000_remove_breakpoint, target_ops):
+	Optionally cope with BC style breakpoints.  
 	(e7000_command):  After command send directly to the E7000 mark
 	registers as changed. 
 	(why_stop, e7000_wait: Understand BC style stop condition.

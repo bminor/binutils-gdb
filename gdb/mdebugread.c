@@ -716,7 +716,7 @@ parse_symbol (sh, ax, ext_sh, bigend, section_offsets)
       class = LOC_STATIC;
       b = top_stack->cur_block;
       s = new_symbol (name);
-      if (sh->sc == scCommon)
+      if (sh->sc == scCommon || sh->sc == scSCommon)
 	{
 	  /* It is a FORTRAN common block.  At least for SGI Fortran the
 	     address is not in the symbol; we need to fix it later in
@@ -886,7 +886,7 @@ parse_symbol (sh, ax, ext_sh, bigend, section_offsets)
 	goto structured_common;
 
     case stBlock:		/* Either a lexical block, or some type */
-	if (sh->sc != scInfo && sh->sc != scCommon)
+	if (sh->sc != scInfo && sh->sc != scCommon && sh->sc != scSCommon)
 	  goto case_stBlock_code;	/* Lexical block */
 
 	type_code = TYPE_CODE_UNDEF;	/* We have a type.  */
@@ -1140,7 +1140,7 @@ parse_symbol (sh, ax, ext_sh, bigend, section_offsets)
       break;
 
     case stEnd:		/* end (of anything) */
-      if (sh->sc == scInfo || sh->sc == scCommon)
+      if (sh->sc == scInfo || sh->sc == scCommon || sh->sc == scSCommon)
 	{
 	  /* Finished with type */
 	  top_stack->cur_type = 0;
@@ -1962,6 +1962,11 @@ parse_external (es, bigend, section_offsets)
       break;
     case stGlobal:
     case stLabel:
+      /* Global common symbols are resolved by the runtime loader,
+	 ignore them.  */
+      if (es->asym.sc == scCommon || es->asym.sc == scSCommon)
+	break;
+
       /* Note that the case of a symbol with indexNil must be handled
 	 anyways by parse_symbol().  */
       parse_symbol (&es->asym, ax, (char *) NULL, bigend, section_offsets);
@@ -2226,7 +2231,7 @@ parse_partial_symbols (objfile, section_offsets)
 	  svalue += ANOFFSET (section_offsets, SECT_OFF_TEXT);
 	  break;
 	case stGlobal:
-          if (ext_in->asym.sc == scCommon)
+          if (ext_in->asym.sc == scCommon || ext_in->asym.sc == scSCommon)
 	    {
 	      /* The value of a common symbol is its size, not its address.
 		 Ignore it.  */
@@ -2648,7 +2653,8 @@ parse_partial_symbols (objfile, section_offsets)
 		case stBlock:	/* { }, str, un, enum*/
 		  /* Do not create a partial symbol for cc unnamed aggregates
 		     and gcc empty aggregates. */
-		  if ((sh.sc == scInfo || sh.sc == scCommon)
+		  if ((sh.sc == scInfo
+		       || sh.sc == scCommon || sh.sc == scSCommon)
 		      && sh.iss != 0
 		      && sh.index != cur_sdx + 2)
 		    {
@@ -2758,6 +2764,11 @@ parse_partial_symbols (objfile, section_offsets)
 			    debug_info->ssext + psh->iss);
 		  /* Fall through, pretend it's global.  */
 		case stGlobal:
+		  /* Global common symbols are resolved by the runtime loader,
+		     ignore them.  */
+		  if (psh->sc == scCommon || psh->sc == scSCommon)
+		    continue;
+
 		  class = LOC_STATIC;
 		  break;
 		}
@@ -3392,7 +3403,7 @@ cross_ref (fd, ax, tpp, type_code, pname, bigend, sym_name)
        || (sh.st != stBlock && sh.st != stTypedef && sh.st != stIndirect
 	   && sh.st != stStruct && sh.st != stUnion
 	   && sh.st != stEnum))
-      && (sh.sc != scCommon || sh.st != stBlock))
+      && (sh.st != stBlock || (sh.sc != scCommon && sh.sc != scSCommon)))
     {
       /* File indirect entry is corrupt.  */
       *pname = "<illegal>";

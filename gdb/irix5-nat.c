@@ -607,7 +607,6 @@ solib_add (arg_string, from_tty, target)
   char *re_err;
   int count;
   int old;
-  int symbols_added = 0;
   
   if ((re_err = re_comp (arg_string ? arg_string : ".")) != NULL)
     {
@@ -682,14 +681,13 @@ solib_add (arg_string, from_tty, target)
 	    {
 	      so_last = so;
 	      so -> symbols_loaded = 1;
-	      symbols_added = 1;
 	    }
 	}
     }
 
   /* Getting new symbols may change our opinion about what is
      frameless.  */
-  if (symbols_added)
+  if (so_last)
     reinit_frame_cache ();
 }
 
