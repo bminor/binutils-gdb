@@ -1,4 +1,4 @@
-# Makefile.in generated automatically by automake 1.4-p5 from Makefile.am
+# Makefile.in generated automatically by automake 1.4-p6 from Makefile.am
 
 # Copyright (C) 1994, 1995-8, 1999, 2001 Free Software Foundation, Inc.
 # This Makefile.in is free software; the Free Software Foundation
@@ -590,7 +590,7 @@ deffilep.c ldgram.c ldlex.c
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
-TAR = gtar
+TAR = tar
 GZIP_ENV = --best
 SOURCES = $(ld_new_SOURCES) $(EXTRA_ld_new_SOURCES)
 OBJECTS = $(ld_new_OBJECTS)
@@ -1072,7 +1072,7 @@ distclean-generic:
 	-test -z "$(DISTCLEANFILES)" || rm -f $(DISTCLEANFILES)
 
 maintainer-clean-generic:
-	-test -z "ldlexldeffilephdeffilepcldgramhldgramc$(MAINTAINERCLEANFILES)" || rm -f ldlexl deffileph deffilepc ldgramh ldgramc $(MAINTAINERCLEANFILES)
+	-test -z "ldlex.cdeffilep.hdeffilep.cldgram.hldgram.c$(MAINTAINERCLEANFILES)" || rm -f ldlex.c deffilep.h deffilep.c ldgram.h ldgram.c $(MAINTAINERCLEANFILES)
 mostlyclean-am:  mostlyclean-hdr mostlyclean-noinstPROGRAMS \
 		mostlyclean-compile mostlyclean-libtool \
 		mostlyclean-aminfo mostlyclean-tags mostlyclean-generic \
@@ -1666,16 +1666,16 @@ elnk960.c: $(srcdir)/emulparams/lnk960.sh \
   $(srcdir)/emultempl/lnk960.em $(srcdir)/scripttempl/i960.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} lnk960 "$(tdir_lnk960)"
 em68hc11elf.c: $(srcdir)/emulparams/m68hc11elf.sh \
-  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/elfm68hc11.sc ${GEN_DEPENDS}
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elfm68hc11.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} m68hc11elf "$(tdir_m68hc11)"
 em68hc11elfb.c: $(srcdir)/emulparams/m68hc11elfb.sh \
-  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/elfm68hc11.sc ${GEN_DEPENDS}
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elfm68hc11.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} m68hc11elfb "$(tdir_m68hc11b)"
 em68hc12elf.c: $(srcdir)/emulparams/m68hc12elf.sh \
-  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/elfm68hc12.sc ${GEN_DEPENDS}
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elfm68hc12.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} m68hc12elf "$(tdir_m68hc12)"
 em68hc12elfb.c: $(srcdir)/emulparams/m68hc12elfb.sh \
-  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/elfm68hc12.sc ${GEN_DEPENDS}
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elfm68hc12.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} m68hc12elfb "$(tdir_m68hc12b)"
 em68k4knbsd.c:	$(srcdir)/emulparams/m68k4knbsd.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}

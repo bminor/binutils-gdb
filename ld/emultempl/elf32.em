@@ -819,7 +819,7 @@ gld${EMULATION_NAME}_find_exp_assignment (exp)
     case etree_assign:
       if (strcmp (exp->assign.dst, ".") != 0)
 	{
-	  if (! (bfd_elf${ELFSIZE}_record_link_assignment
+	  if (! (bfd_elf_record_link_assignment
 		 (output_bfd, &link_info, exp->assign.dst,
 		  exp->type.node_class == etree_provide ? TRUE : FALSE)))
 	    einfo ("%P%F: failed to record assignment to %s: %E\n",

@@ -1,3 +1,11 @@
+2003-05-09  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.am (em68hc11elf.c): Correct dependencies.
+	(em68hc11elfb.c, em68hc12elf.c, em68hc12elfb.c): Likewise.
+	* Makefile.in: Regenerate.
+	* emultempl/elf32.em (find_exp_assignment): Adjust for changed
+	bfd_elf_record_link_assignment name.
+
 2003-05-07  Alexandre Oliva  <aoliva@redhat.com>
 
 	* ldmain.h (overflow_cutoff_limit): Declare.
