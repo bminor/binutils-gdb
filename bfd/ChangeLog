@@ -1,3 +1,8 @@
+2002-06-08  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf64-sparc.c (sparc64_elf_add_symbol_hook): Check the hash
+	table is elf64-sparc.
+
 2002-06-08  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
 	* elfxx-mips.c (_bfd_mips_elf_relocate_section): Simplify code.
