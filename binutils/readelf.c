@@ -168,6 +168,9 @@ int do_debug_loc;
 int do_arch;
 int do_notes;
 int is_32bit_elf;
+int have_frame_base;
+int need_base_address;
+unsigned long saved_base_address;
 
 struct group_list
 {
@@ -7551,7 +7554,7 @@ display_block (unsigned char *data, unsigned long length)
   return data;
 }
 
-static void
+static int
 decode_location_expression (unsigned char * data,
 			    unsigned int pointer_size,
 			    unsigned long length,
@@ -7561,6 +7564,7 @@ decode_location_expression (unsigned char * data,
   int bytes_read;
   unsigned long uvalue;
   unsigned char *end = data + length;
+  int need_frame_base = 0;
 
   while (data < end)
     {
@@ -7823,6 +7827,7 @@ decode_location_expression (unsigned char * data,
 	  data += bytes_read;
 	  break;
 	case DW_OP_fbreg:
+	  need_frame_base = 1;
 	  printf ("DW_OP_fbreg: %ld", read_leb128 (data, &bytes_read, 1));
 	  data += bytes_read;
 	  break;
@@ -7879,13 +7884,15 @@ decode_location_expression (unsigned char * data,
 	  else
 	    printf (_("(Unknown location op)"));
 	  /* No way to tell where the next op is, so just bail.  */
-	  return;
+	  return need_frame_base;
 	}
 
       /* Separate the ops.  */
       if (data < end)
 	printf ("; ");
     }
+
+  return need_frame_base;
 }
 
 /* Decode a DW_AT_ranges attribute for 64bit DWARF3 .  */
@@ -8008,8 +8015,10 @@ typedef struct
 {
   unsigned int   pointer_size;
   unsigned long  cu_offset;
+  unsigned long	 base_address;
   /* This is an array of offsets to the location list table.  */
   unsigned long *loc_offsets;
+  int		*have_frame_base;
   unsigned int   num_loc_offsets;
   unsigned int   max_loc_offsets;
 }
@@ -8031,7 +8040,6 @@ read_and_display_attr_value (unsigned long attribute,
 			     debug_info *debug_info_p,
 			     int do_loc)
 {
-  static unsigned long saved_DW_AT_low_pc = 0;
   unsigned long uvalue = 0;
   unsigned char *block_start = NULL;
   int bytes_read;
@@ -8221,6 +8229,7 @@ read_and_display_attr_value (unsigned long attribute,
       switch (attribute)
 	{
 	case DW_AT_frame_base:
+	  have_frame_base = 1;
 	case DW_AT_location:
 	case DW_AT_data_member_location:
 	case DW_AT_vtable_elem_location:
@@ -8242,11 +8251,20 @@ read_and_display_attr_value (unsigned long attribute,
 		  debug_info_p->loc_offsets
 		    = xrealloc (debug_info_p->loc_offsets,
 				max * sizeof (*debug_info_p->loc_offsets));
+		  debug_info_p->have_frame_base
+		    = xrealloc (debug_info_p->have_frame_base,
+				max * sizeof (*debug_info_p->have_frame_base));
 		  debug_info_p->max_loc_offsets = max;
 		}
 	      debug_info_p->loc_offsets [num] = uvalue;
+	      debug_info_p->have_frame_base [num] = have_frame_base;
 	      debug_info_p->num_loc_offsets++;
 	    }
+	  break;
+	
+	case DW_AT_low_pc:
+	  if (need_base_address)
+	    debug_info_p->base_address = uvalue;
 	  break;
 
 	default:
@@ -8401,6 +8419,7 @@ read_and_display_attr_value (unsigned long attribute,
       break;
 
     case DW_AT_frame_base:
+      have_frame_base = 1;
     case DW_AT_location:
     case DW_AT_data_member_location:
     case DW_AT_vtable_elem_location:
@@ -8412,9 +8431,16 @@ read_and_display_attr_value (unsigned long attribute,
     case DW_AT_lower_bound:
       if (block_start)
 	{
+	  int need_frame_base;
+
 	  printf ("(");
-	  decode_location_expression (block_start, pointer_size, uvalue, cu_offset);
+	  need_frame_base = decode_location_expression (block_start,
+							pointer_size,
+							uvalue,
+							cu_offset);
 	  printf (")");
+	  if (need_frame_base && !have_frame_base)
+	    printf (_(" [without DW_AT_frame_base]"));
 	}
       else if (form == DW_FORM_data4 || form == DW_FORM_data8)
 	printf (_("(location list)"));
@@ -8422,15 +8448,12 @@ read_and_display_attr_value (unsigned long attribute,
       break;
 
     case DW_AT_low_pc:
-      /* This is a hack.  We keep track of the DW_AT_low_pc attributes
-	 and use them when decoding DW_AT_ranges attributes.  The
-	 assumption here is that we are decoding the attributes in order
-	 and so the correct base address for the range is the low_pc.  */
-      saved_DW_AT_low_pc = uvalue;
+      if (need_base_address)
+	saved_base_address = uvalue;
       break;
 
     case DW_AT_ranges:
-      decode_range (uvalue, saved_DW_AT_low_pc);
+      decode_range (uvalue, saved_base_address);
       break;
 
     default:
@@ -8691,7 +8714,9 @@ process_debug_info (Elf_Internal_Shdr *section, unsigned char *start,
 	  debug_information [unit].cu_offset = cu_offset;
 	  debug_information [unit].pointer_size
 	    = compunit.cu_pointer_size;
+	  debug_information [unit].base_address = 0;
 	  debug_information [unit].loc_offsets = NULL;
+	  debug_information [unit].have_frame_base = NULL;
 	  debug_information [unit].max_loc_offsets = 0;
 	  debug_information [unit].num_loc_offsets = 0;
 	}
@@ -8779,6 +8804,24 @@ process_debug_info (Elf_Internal_Shdr *section, unsigned char *start,
 		    abbrev_number,
 		    get_TAG_name (entry->tag));
  
+	  switch (entry->tag)
+	    {
+	    default:
+	      need_base_address = 0;
+	      break;
+	    case DW_TAG_compile_unit:
+	      need_base_address = 1;
+	      saved_base_address = 0;
+	      break;
+	    case DW_TAG_entry_point:
+	    case DW_TAG_inlined_subroutine:
+	    case DW_TAG_subprogram:
+	      need_base_address = 0;
+	      /* Assuming that there is no DW_AT_frame_base.  */
+	      have_frame_base = 0;
+	      break;
+	    }
+
 	  for (attr = entry->first_attr; attr; attr = attr->next)
 	    tags = read_and_display_attr (attr->attribute,
 					  attr->form,
@@ -9386,7 +9429,6 @@ display_debug_loc (Elf_Internal_Shdr *section,
   unsigned char *section_end;
   unsigned long bytes;
   unsigned char *section_begin = start;
-  bfd_vma addr;
   unsigned int num_loc_list = 0;
   unsigned long last_offset = 0;
   unsigned int first = 0;
@@ -9396,7 +9438,6 @@ display_debug_loc (Elf_Internal_Shdr *section,
   int use_debug_info = 1;
   unsigned char *next;
 
-  addr = section->sh_addr;
   bytes = section->sh_size;
   section_end = start + bytes;
 
@@ -9468,14 +9509,19 @@ display_debug_loc (Elf_Internal_Shdr *section,
       unsigned long offset;
       unsigned int pointer_size;
       unsigned long cu_offset;
+      unsigned long base_address;
+      int need_frame_base;
+      int has_frame_base;
 
       pointer_size = debug_information [i].pointer_size;
       cu_offset = debug_information [i].cu_offset;
 
       for (j = 0; j < debug_information [i].num_loc_offsets; j++)
 	{
+	  has_frame_base = debug_information [i].have_frame_base [j];
 	  offset = debug_information [i].loc_offsets [j];
 	  next = section_begin + offset;
+	  base_address = debug_information [i].base_address;
 
 	  if (!seen_first_offset)
 	    seen_first_offset = 1;
@@ -9500,25 +9546,33 @@ display_debug_loc (Elf_Internal_Shdr *section,
 	      if (begin == 0 && end == 0)
 		break;
 
-	      /* For now, skip any base address specifiers.  */
-	      if (begin == 0xffffffff)
-		continue;
-
-	      begin += addr;
-	      end += addr;
+	      /* Check base address specifiers.  */
+	      if (begin == -1UL && end != -1UL)
+		{
+		  base_address = end;
+		  continue;
+		}
 
 	      length = byte_get (start, 2);
 	      start += 2;
 
 	      printf ("    %8.8lx %8.8lx %8.8lx (",
-		      offset, begin, end);
-	      decode_location_expression (start, pointer_size, length,
-					  cu_offset);
-	      printf (")\n");
+		      offset, begin + base_address, end + base_address);
+	      need_frame_base = decode_location_expression (start,
+							    pointer_size,
+							    length,
+							    cu_offset);
+	      putchar (')');
 
-	      if (begin >= end)
-		warn ("Bad location list at %8.8lx from %8.8lx to %8.8lx\n",
-		      offset, begin, end);
+	      if (need_frame_base && !has_frame_base)
+		printf (_(" [without DW_AT_frame_base]"));
+
+	      if (begin == end)
+		fputs (_(" (start == end)"), stdout);
+	      else if (begin > end)
+		fputs (_(" (start > end)"), stdout);
+
+	      putchar ('\n');
 
 	      start += length;
 	    }
@@ -11750,8 +11804,11 @@ process_object (char *file_name, FILE *file)
   if (debug_information)
     {
       for (i = 0; i < num_debug_info_entries; i++)
-	if (debug_information [i].loc_offsets != NULL)
-	  free (debug_information [i].loc_offsets);
+	if (!debug_information [i].max_loc_offsets)
+	  {
+	    free (debug_information [i].loc_offsets);
+	    free (debug_information [i].have_frame_base);
+	  }
       free (debug_information);
       debug_information = NULL;
       num_debug_info_entries = 0;

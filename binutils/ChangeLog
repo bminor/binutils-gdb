@@ -1,3 +1,24 @@
+2005-01-05  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* readelf.c (have_frame_base): New.
+	(need_base_address): Likewise.
+	(saved_base_address): Likewise.
+	(decode_location_expression): Return 1 if DW_AT_frame_base is
+	needed.
+	(debug_info): Add base_address and a have_frame_base pointer.
+	(read_and_display_attr_value): Replace saved_DW_AT_low_pc with
+	saved_base_address. Record base address. Set have_frame_base.
+	Record if a location list has DW_AT_frame_base. Display if a
+	location expression has no DW_AT_frame_base but needs one. Set
+	saved_base_address only if needed.
+	(process_debug_info): Clear have_frame_base, saved_base_address
+	and set need_base_address.
+	(display_debug_loc): Display if a location expression has no
+	DW_AT_frame_base but needs one. Display if start >= end. Don't
+	adjust for section address. Properly handle base address.
+	(process_object): Free the have_frame_base pointer in
+	debug_info.
+
 2005-01-04  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* readelf.c (display_debug_loc): Display offsets for hole and
