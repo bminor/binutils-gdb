@@ -1906,48 +1906,11 @@ elf64_x86_64_finish_dynamic_sections (output_bfd, info)
   return true;
 }
 
-/*
- * Why was the hash table entry size definition changed from
- * ARCH_SIZE/8 to 4? This breaks the 64 bit dynamic linker and
- * this is the only reason for the elf64_x86_64_size_info structure.
- */
-
-const struct elf_size_info elf64_86_64_size_info =
-{
-  sizeof (Elf64_External_Ehdr),
-  sizeof (Elf64_External_Phdr),
-  sizeof (Elf64_External_Shdr),
-  sizeof (Elf64_External_Rel),
-  sizeof (Elf64_External_Rela),
-  sizeof (Elf64_External_Sym),
-  sizeof (Elf64_External_Dyn),
-  sizeof (Elf_External_Note),
-  8,		/* hash-table entry size */
-  1,		/* internal relocations per external relocations */
-  64,		/* arch_size */
-  8,		/* file_align */
-  ELFCLASS64, EV_CURRENT,
-  bfd_elf64_write_out_phdrs,
-  bfd_elf64_write_shdrs_and_ehdr,
-  bfd_elf64_write_relocs,
-  bfd_elf64_swap_symbol_out,
-  bfd_elf64_slurp_reloc_table,
-  bfd_elf64_slurp_symbol_table,
-  bfd_elf64_swap_dyn_in,
-  bfd_elf64_swap_dyn_out,
-  NULL,
-  NULL,
-  NULL,
-  NULL
-};
-
 #define TARGET_LITTLE_SYM		    bfd_elf64_x86_64_vec
 #define TARGET_LITTLE_NAME		    "elf64-x86-64"
 #define ELF_ARCH			    bfd_arch_i386
 #define ELF_MACHINE_CODE		    EM_X86_64
 #define ELF_MAXPAGESIZE			    0x100000
-
-#define elf_backend_size_info		    elf64_86_64_size_info
 
 #define elf_backend_can_gc_sections	    1
 #define elf_backend_want_got_plt	    1

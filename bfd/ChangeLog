@@ -1,3 +1,9 @@
+2001-05-28  Andreas Jaeger  <aj@suse.de>
+
+	* elf64-x86-64.c (elf64_86_64_size_info): Remove, we can use the
+	generic version since we want a hashsize of 4.
+	(elf_backend_size_info): Likewise.
+
 2001-05-28  Thiemo Seufer  <seufer@csv.ica.uni-stuttgart.de>
 
 	src/bfd/ChangeLog
@@ -33,7 +39,7 @@
 	* elf32-sparc.c: Enable BFD_RELOC_SPARC_UA16, BFD_RELOC_SPARC_UA32
 	and BFD_RELOC_SPARC_UA64 mapping
 	* elf64-sparc.c: Likewise.
-	
+
 2001-05-25  H.J. Lu  <hjl@gnu.org>
 
 	* Makefile.am (BFD32_BACKENDS): Remove coff-pmac.lo.
@@ -93,7 +99,7 @@
 	linker now supported.  Explictly define the rs6000coff64_vec.
 
 	* coffcode.h : (coff_set_arch_mach_hook) xcoff 64 bit support
-	(coff_print_aux) same 
+	(coff_print_aux) same
 	(coff_write_object_contents) same
 	(coff_slurp_line_table) same
 
@@ -115,12 +121,12 @@
 
 	* libxcoff.h : New file
 
-	* xcofflink.c : Many changes for xcoff64 support.  Move common 
-	structures to include/coff/xcoff.h.  Move specific structure to 
+	* xcofflink.c : Many changes for xcoff64 support.  Move common
+	structures to include/coff/xcoff.h.  Move specific structure to
 	backends coff-rs6000.c and coff64-rs6000.c.   Use new backend
 	functions, defined in libxcoff.h, to isolate 32/64 dependencies.
-	
-	(bfd_xcoff_size_dynamic_sections) : special __rtinit symbol for 
+
+	(bfd_xcoff_size_dynamic_sections) : special __rtinit symbol for
 	aix4.2+ -binitfini.
 
 	(xcoff_build_ldsyms) : handle special __rtinit symbol.
