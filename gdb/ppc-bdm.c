@@ -201,6 +201,7 @@ bdm_ppc_fetch_registers (int regno)
 
       /* if asking for an invalid register */
       if ((first_regno == gdbarch_tdep (current_gdbarch)->ppc_mq_regnum)
+          || (first_regno == gdbarch_tdep (current_gdbarch)->fpscr_regnum)
 	  || ((first_regno >= FP0_REGNUM) && (first_regno <= FPLAST_REGNUM)))
 	{
 /*          printf("invalid reg request!\n"); */
@@ -289,7 +290,9 @@ bdm_ppc_store_registers (int regno)
 
       /* only attempt to write if it's a valid ppc 8xx register */
       /* (need to avoid FP regs and MQ reg) */
-      if ((i != gdbarch_tdep (current_gdbarch)->ppc_mq_regnum) && ((i < FP0_REGNUM) || (i > FPLAST_REGNUM)))
+      if ((i != gdbarch_tdep (current_gdbarch)->ppc_mq_regnum) 
+          && (i != gdbarch_tdep (current_gdbarch)->ppc_fpscr_regnum) 
+          && ((i < FP0_REGNUM) || (i > FPLAST_REGNUM)))
 	{
 /*          printf("write valid reg %d\n", bdm_regno); */
 	  ocd_write_bdm_registers (bdm_regno, registers + REGISTER_BYTE (i), 4);

@@ -149,6 +149,8 @@ ppc_register_u_addr (int regno)
     u_addr = PT_MQ * 4;
   if (regno == tdep->ppc_ps_regnum)
     u_addr = PT_MSR * 4;
+  if (regno == tdep->ppc_fpscr_regnum)
+    u_addr = PT_FPSCR * 4;
 
   return u_addr;
 }
@@ -290,8 +292,10 @@ fetch_ppc_registers (int tid)
   int i;
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
 
-  for (i = 0; i <= tdep->ppc_mq_regnum; i++)
+  for (i = 0; i <= tdep->ppc_fpscr_regnum; i++)
     fetch_register (tid, i);
+  if (tdep->ppc_mq_regnum != -1)
+    fetch_register (tid, tdep->ppc_mq_regnum);
   if (have_ptrace_getvrregs)
     if (tdep->ppc_vr0_regnum != -1 && tdep->ppc_vrsave_regnum != -1)
       fetch_altivec_registers (tid);
@@ -376,6 +380,14 @@ store_register (int tid, int regno)
       ptrace (PT_WRITE_U, tid, (PTRACE_ARG3_TYPE) regaddr,
 	      *(PTRACE_XFER_TYPE *) & buf[i]);
       regaddr += sizeof (PTRACE_XFER_TYPE);
+
+      if (errno == EIO 
+          && regno == gdbarch_tdep (current_gdbarch)->ppc_fpscr_regnum)
+	{
+	  /* Some older kernel versions don't allow fpscr to be written.  */
+	  continue;
+	}
+
       if (errno != 0)
 	{
 	  sprintf (mess, "writing register %s (#%d)", 
@@ -435,8 +447,10 @@ store_ppc_registers (int tid)
   int i;
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
   
-  for (i = 0; i <= tdep->ppc_mq_regnum; i++)
+  for (i = 0; i <= tdep->ppc_fpscr_regnum; i++)
     store_register (tid, i);
+  if (tdep->ppc_mq_regnum != -1)
+    store_register (tid, tdep->ppc_mq_regnum);
   if (have_ptrace_getvrregs)
     if (tdep->ppc_vr0_regnum != -1 && tdep->ppc_vrsave_regnum != -1)
       store_altivec_registers (tid);
@@ -473,7 +487,8 @@ supply_gregset (gdb_gregset_t *gregsetp)
   supply_register (tdep->ppc_cr_regnum, (char *) (regp + PT_CCR));
   supply_register (tdep->ppc_xer_regnum, (char *) (regp + PT_XER));
   supply_register (tdep->ppc_ctr_regnum, (char *) (regp + PT_CTR));
-  supply_register (tdep->ppc_mq_regnum, (char *) (regp + PT_MQ));
+  if (tdep->ppc_mq_regnum != -1)
+    supply_register (tdep->ppc_mq_regnum, (char *) (regp + PT_MQ));
   supply_register (tdep->ppc_ps_regnum, (char *) (regp + PT_MSR));
 }
 
@@ -500,7 +515,8 @@ fill_gregset (gdb_gregset_t *gregsetp, int regno)
     regcache_collect (tdep->ppc_xer_regnum, regp + PT_XER);
   if ((regno == -1) || regno == tdep->ppc_ctr_regnum)
     regcache_collect (tdep->ppc_ctr_regnum, regp + PT_CTR);
-  if ((regno == -1) || regno == tdep->ppc_mq_regnum)
+  if (((regno == -1) || regno == tdep->ppc_mq_regnum)
+      && (tdep->ppc_mq_regnum != -1))
     regcache_collect (tdep->ppc_mq_regnum, regp + PT_MQ);
   if ((regno == -1) || regno == tdep->ppc_ps_regnum)
     regcache_collect (tdep->ppc_ps_regnum, regp + PT_MSR);
@@ -510,9 +526,11 @@ void
 supply_fpregset (gdb_fpregset_t * fpregsetp)
 {
   int regi;
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch); 
 
   for (regi = 0; regi < 32; regi++)
     supply_register (FP0_REGNUM + regi, (char *) (*fpregsetp + regi));
+  supply_register (tdep->ppc_fpscr_regnum, (char *) (*fpregsetp + 32));
 }
 
 /* Given a pointer to a floating point register set in /proc format
@@ -523,10 +541,13 @@ void
 fill_fpregset (gdb_fpregset_t *fpregsetp, int regno)
 {
   int regi;
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch); 
   
   for (regi = 0; regi < 32; regi++)
     {
       if ((regno == -1) || (regno == FP0_REGNUM + regi))
 	regcache_collect (FP0_REGNUM + regi, (char *) (*fpregsetp + regi));
     }
+  if ((regno == -1) || regno == tdep->ppc_fpscr_regnum)
+    regcache_collect (tdep->ppc_fpscr_regnum, (char *) (*fpregsetp + regi));
 }

@@ -2075,7 +2075,7 @@ rs6000_convert_from_func_ptr_addr (CORE_ADDR addr)
 
 /* UISA-level SPRs for PowerPC.  */
 #define PPC_UISA_SPRS \
-  /* 66 */ R4(cr),  R(lr), R(ctr), R4(xer), R0
+  /* 66 */ R4(cr),  R(lr), R(ctr), R4(xer), R4(fpscr)
 
 /* Segment registers, for PowerPC.  */
 #define PPC_SEGMENT_REGS \
@@ -2109,7 +2109,8 @@ rs6000_convert_from_func_ptr_addr (CORE_ADDR addr)
 static const struct reg registers_power[] =
 {
   COMMON_UISA_REGS,
-  /* 66 */ R4(cnd), R(lr), R(cnt), R4(xer), R4(mq)
+  /* 66 */ R4(cnd), R(lr), R(cnt), R4(xer), R4(mq),
+  /* 71 */ R4(fpscr)
 };
 
 /* PowerPC UISA - a PPC processor as viewed by user-level code.  A UISA-only
@@ -2547,8 +2548,11 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep->ppc_xer_regnum = 69;
   if (v->mach == bfd_mach_ppc_601)
     tdep->ppc_mq_regnum = 124;
-  else
+  else if (power)
     tdep->ppc_mq_regnum = 70;
+  else
+    tdep->ppc_mq_regnum = -1;
+  tdep->ppc_fpscr_regnum = power ? 71 : 70;
 
   if (v->arch == bfd_arch_powerpc)
     switch (v->mach)

@@ -1,3 +1,19 @@
+2002-04-11  Kevin Buettner  <kevinb@redhat.com>
+
+	* ppc-tdep.h (struct gdbarch_tdep): Add new field ``ppc_fpscr_regnum''.
+	* ppc-bdm.c (bdm_ppc_fetch_registers, bdm_ppc_store_registers):
+	Add fpscr as an invalid/unfetchable register.
+	* ppc-linux-nat.c (ppc_register_u_addr, store_register)
+	(fetch_ppc_registers, store_ppc_registers, supply_fpregset)
+	(fill_fpregset): Add support for register fpscr.
+	(fetch_ppc_registers, store_ppc_registers, supply_gregset)
+	(fill_gregset): Account for the fact that register ``mq'' might
+	not exist.
+	* rs6000-tdep.c (PPC_UISA_SPRS): Use (unused) slot 70 for fpscr.
+	(registers_power): Add fpscr to register set at slot 71.
+	(rs6000_gdbarch_init): Account for the fact that ``mq'' doesn't
+	exist on most PPC architectures.  Initialize ppc_fpscr_regnum.
+
 2002-04-11  Michael Snyder  <msnyder@redhat.com>
 
 	* configure.in: Autoconfiscate _SYSCALL32 define for solaris.
