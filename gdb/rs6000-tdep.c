@@ -2499,7 +2499,11 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     }
   else
     {
-      wordsize = 4;
+      if (info.bfd_arch_info != NULL && info.bfd_arch_info->bits_per_word != 0)
+	wordsize = info.bfd_arch_info->bits_per_word /
+	  info.bfd_arch_info->bits_per_byte;
+      else
+	wordsize = 4;
     }
 
   /* Find a candidate among extant architectures. */
