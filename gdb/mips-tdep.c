@@ -362,6 +362,7 @@ init_extra_frame_info(fci)
 	 been saved yet.  But they haven't been clobbered either, so
 	 it's fine to say they have not been saved.  */
       if (fci->next == NULL
+          && !PROC_DESC_IS_DUMMY(proc_desc)
 	  && mips_in_lenient_prologue (PROC_LOW_ADDR (proc_desc), fci->pc))
 	/* We already zeroed the saved regs.  */
 	;

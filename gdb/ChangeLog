@@ -1,5 +1,14 @@
+Wed Jul 21 03:07:30 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* config/mips/xm-makeva.h:  New file implements va_list alignment
+	restrictions for mips hosts.
+	* config/mips/{xm-irix3.h, xm-mips.h, xm-news-mips.h, xm-riscos.h}:
+	Use it.
+
 Wed Jul 21 00:11:05 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
+	* mips-tdep.c (init_extra_frame_info):  Do not check for
+	mips_in_lenient_prologue if it is a dummy frame.
 	* mipsread.c (fixup_sigtramp):  Initialize pdr.adr, it is used by
 	mips_in_lenient_prologue.
 
