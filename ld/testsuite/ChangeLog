@@ -1,3 +1,7 @@
+2002-05-28  Hans-Peter Nilsson  <hp@axis.com>
+
+	* ld-cris/libdso-2.d: Tweak for combreloc now default on.
+
 2002-05-07  Richard Sandiford  <rsandifo@redhat.com>
 
 	* lib/ld-lib.exp (run_dump_test): Add -L$srcdir/$subdir.

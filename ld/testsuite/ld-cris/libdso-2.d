@@ -12,22 +12,22 @@
 
 There are 15 section headers.*
 #...
-  \[ 1\] \.hash             HASH            [0-9a-f]+ [0-9a-f]+ 00004c 04   A  2   0  4
-  \[ 2\] \.dynsym           DYNSYM          [0-9a-f]+ [0-9a-f]+ 0000e0 10   A  3   c  4
-  \[ 3\] \.dynstr           STRTAB          [0-9a-f]+ [0-9a-f]+ 000014 00   A  0   0  1
-  \[ 4\] \.gnu\.version      VERSYM          [0-9a-f]+ [0-9a-f]+ 00001c 02   A  2   0  2
-  \[ 5\] \.gnu\.version_d    VERDEF          [0-9a-f]+ [0-9a-f]+ 000038 00   A  3   2  4
-  \[ 6\] \.rela\.got         RELA            [0-9a-f]+ [0-9a-f]+ 00000c 0c   A  2   a  4
-  \[ 7\] \.text             PROGBITS        [0-9a-f]+ [0-9a-f]+ 000014 00  AX  0   0  1
-  \[ 8\] \.data             PROGBITS        [0-9a-f]+ [0-9a-f]+ 000000 00  WA  0   0  1
-  \[ 9\] \.dynamic          DYNAMIC         [0-9a-f]+ [0-9a-f]+ 000088 08  WA  3   0  4
-  \[10\] \.got              PROGBITS        [0-9a-f]+ [0-9a-f]+ 000010 04  WA  0   0  4
-  \[11\] \.bss              NOBITS          [0-9a-f]+ [0-9a-f]+ 000008 00  WA  0   0  1
-  \[12\] \.shstrtab         STRTAB          [0-9a-f]+ [0-9a-f]+ 000071 00      0   0  1
-  \[13\] \.symtab           SYMTAB          [0-9a-f]+ [0-9a-f]+ 000170 10     14  15  4
-  \[14\] \.strtab           STRTAB          [0-9a-f]+ [0-9a-f]+ 00004c 00      0   0  1
+  \[ 1\] \.hash             HASH     .*
+  \[ 2\] \.dynsym           DYNSYM   .*
+  \[ 3\] \.dynstr           STRTAB   .*
+  \[ 4\] \.gnu\.version      VERSYM  .*
+  \[ 5\] \.gnu\.version_d    VERDEF  .*
+  \[ 6\] \.rela\.dyn         RELA    .*
+  \[ 7\] \.text             PROGBITS .*
+  \[ 8\] \.data             PROGBITS .*
+  \[ 9\] \.dynamic          DYNAMIC  .*
+  \[10\] \.got              PROGBITS .*
+  \[11\] \.bss              NOBITS   .*
+  \[12\] \.shstrtab         STRTAB   .*
+  \[13\] \.symtab           SYMTAB   .*
+  \[14\] \.strtab           STRTAB   .*
 #...
-Relocation section '\.rela\.got' at offset 0x[0-9a-f]+ contains 1 entries:
+Relocation section '\.rela\.dyn' at offset 0x[0-9a-f]+ contains 1 entries:
 #...
 000022f4  0000000c R_CRIS_RELATIVE                              00000234
 #...
