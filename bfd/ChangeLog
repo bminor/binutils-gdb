@@ -1,3 +1,8 @@
+Mon Jun  1 12:14:28 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* peicode.h (coff_swap_sym_in): Check for C_SECTION rather than
+	0x68.  Reindent.  Add some comments.
+
 start-sanitize-sky
 Sun May 31 16:11:22 1998  Doug Evans  <devans@canuck.cygnus.com>
 
