@@ -793,6 +793,11 @@ static const pseudo_typeS mips_pseudo_table[] =
   {"stabn", s_mips_stab, 'n'},
   {"text", s_change_sec, 't'},
   {"word", s_cons, 2},
+
+#ifdef MIPS_STABS_ELF
+  { "extern", ecoff_directive_extern, 0},
+#endif
+
   { NULL, NULL, 0 },
 };
 
