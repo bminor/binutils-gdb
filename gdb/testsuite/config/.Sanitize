@@ -29,6 +29,7 @@ Things-to-keep:
 
 aout-gdb.exp
 coff-gdb.exp
+mips-gdb.exp
 udi-gdb.exp
 unix-gdb.exp
 vx-gdb.exp
