@@ -305,7 +305,7 @@ else
 	done
 fi
 
-fr30_files="ChangeLog configure.in configure"
+fr30_files="ChangeLog configure.in configure Makefile.am Makefile.in"
 if ( echo $* | grep keep\-fr30 > /dev/null ) ; then
 	for i in $fr30_files ; do
 		if test ! -d $i && (grep sanitize-fr30 $i > /dev/null) ; then
