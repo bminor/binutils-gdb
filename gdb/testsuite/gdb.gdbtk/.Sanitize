@@ -23,6 +23,7 @@ Do-first:
 
 Things-to-keep:
 
+ChangeLog-gdbtk
 Makefile.in
 browser.exp
 browser.test
@@ -39,6 +40,9 @@ cpp_variable.h
 cpp_variable.test
 defs
 simple.c
+srcwin.exp
+srcwin.test
+srcwin2.test
 stack1.c
 stack2.c
 
