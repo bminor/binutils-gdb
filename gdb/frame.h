@@ -412,8 +412,6 @@ extern void show_frame_info (struct frame_info *, int, int, int);
 
 extern struct frame_info *block_innermost_frame (struct block *);
 
-extern struct frame_info *find_frame_addr_in_frame_chain (CORE_ADDR);
-
 /* NOTE: cagney/2002-09-13: There is no need for this function.
    Instead either of frame_unwind_signed_register() or
    frame_unwind_unsigned_register() can be used.  */

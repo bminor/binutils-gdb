@@ -643,27 +643,6 @@ block_innermost_frame (struct block *block)
     }
 }
 
-/* Return the full FRAME which corresponds to the given CORE_ADDR
-   or NULL if no FRAME on the chain corresponds to CORE_ADDR.  */
-
-struct frame_info *
-find_frame_addr_in_frame_chain (CORE_ADDR frame_addr)
-{
-  struct frame_info *frame = NULL;
-
-  if (frame_addr == (CORE_ADDR) 0)
-    return NULL;
-
-  while (1)
-    {
-      frame = get_prev_frame (frame);
-      if (frame == NULL)
-	return NULL;
-      if (FRAME_FP (frame) == frame_addr)
-	return frame;
-    }
-}
-
 /* Are we in a call dummy?  The code below which allows DECR_PC_AFTER_BREAK
    below is for infrun.c, which may give the macro a pc without that
    subtracted out.  */

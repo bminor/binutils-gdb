@@ -1,5 +1,13 @@
 2002-11-23  Andrew Cagney  <ac131313@redhat.com>
 
+	* blockframe.c (find_frame_addr_in_frame_chain): Move function
+	from here ...
+	* varobj.c (find_frame_addr_in_frame_chain): ... to here.
+	(varobj_create): Note that frame ID should be used.
+	* frame.h (find_frame_addr_in_frame_chain): Delete declaration.
+
+2002-11-23  Andrew Cagney  <ac131313@redhat.com>
+
 	* breakpoint.c: Include "gdb_assert.h".
 	(deprecated_frame_in_dummy): Assert that generic dummy frames are
 	not being used.

@@ -396,6 +396,27 @@ static struct vlist **varobj_table;
 
 /* Creates a varobj (not its children) */
 
+/* Return the full FRAME which corresponds to the given CORE_ADDR
+   or NULL if no FRAME on the chain corresponds to CORE_ADDR.  */
+
+static struct frame_info *
+find_frame_addr_in_frame_chain (CORE_ADDR frame_addr)
+{
+  struct frame_info *frame = NULL;
+
+  if (frame_addr == (CORE_ADDR) 0)
+    return NULL;
+
+  while (1)
+    {
+      frame = get_prev_frame (frame);
+      if (frame == NULL)
+	return NULL;
+      if (FRAME_FP (frame) == frame_addr)
+	return frame;
+    }
+}
+
 struct varobj *
 varobj_create (char *objname,
 	       char *expression, CORE_ADDR frame, enum varobj_type type)
@@ -422,6 +443,12 @@ varobj_create (char *objname,
       if ((type == USE_CURRENT_FRAME) || (type == USE_SELECTED_FRAME))
 	fi = selected_frame;
       else
+	/* FIXME: cagney/2002-11-23: This code should be doing a
+	   lookup using the frame ID and not just the frame's
+	   ``address''.  This, of course, means an interface change.
+	   However, with out that interface change ISAs, such as the
+	   ia64 with its two stacks, won't work.  Similar goes for the
+	   case where there is a frameless function.  */
 	fi = find_frame_addr_in_frame_chain (frame);
 
       /* frame = -2 means always use selected frame */
