@@ -32,7 +32,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #define USE_RELA		/* we want RELA relocations, not REL */
 
-
 static reloc_howto_type *ppc_elf_reloc_type_lookup
   PARAMS ((bfd *abfd, bfd_reloc_code_real_type code));
 static void ppc_elf_info_to_howto
@@ -577,7 +576,7 @@ static reloc_howto_type ppc_elf_howto_raw[] =
 	 true),			/* pcrel_offset */
 
   /* 32-bit relocation to the symbol's procedure linkage table.
-     FIXME: not supported. */
+     FIXME: not supported.  */
   HOWTO (R_PPC_PLT32,		/* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
@@ -593,7 +592,7 @@ static reloc_howto_type ppc_elf_howto_raw[] =
 	 false),		/* pcrel_offset */
 
   /* 32-bit PC relative relocation to the symbol's procedure linkage table.
-     FIXME: not supported. */
+     FIXME: not supported.  */
   HOWTO (R_PPC_PLTREL32,	/* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
@@ -672,7 +671,7 @@ static reloc_howto_type ppc_elf_howto_raw[] =
 	 0xffff,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
-  /* 32-bit section relative relocation. */
+  /* 32-bit section relative relocation.  */
   HOWTO (R_PPC_SECTOFF,		/* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
@@ -687,7 +686,7 @@ static reloc_howto_type ppc_elf_howto_raw[] =
 	 0,			/* dst_mask */
 	 true),			/* pcrel_offset */
 
-  /* 16-bit lower half section relative relocation. */
+  /* 16-bit lower half section relative relocation.  */
   HOWTO (R_PPC_SECTOFF_LO,	  /* type */
 	 0,			/* rightshift */
 	 1,			/* size (0 = byte, 1 = short, 2 = long) */
@@ -702,7 +701,7 @@ static reloc_howto_type ppc_elf_howto_raw[] =
 	 0xffff,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
-  /* 16-bit upper half section relative relocation. */
+  /* 16-bit upper half section relative relocation.  */
   HOWTO (R_PPC_SECTOFF_HI,	/* type */
 	 16,			/* rightshift */
 	 1,			/* size (0 = byte, 1 = short, 2 = long) */
@@ -717,7 +716,7 @@ static reloc_howto_type ppc_elf_howto_raw[] =
 	 0xffff,		/* dst_mask */
 	 false),		 /* pcrel_offset */
 
-  /* 16-bit upper half adjusted section relative relocation. */
+  /* 16-bit upper half adjusted section relative relocation.  */
   HOWTO (R_PPC_SECTOFF_HA,	/* type */
 	 16,			/* rightshift */
 	 1,			/* size (0 = byte, 1 = short, 2 = long) */
@@ -960,7 +959,7 @@ ppc_elf_howto_init ()
   for (i = 0; i < sizeof (ppc_elf_howto_raw) / sizeof (ppc_elf_howto_raw[0]); i++)
     {
       type = ppc_elf_howto_raw[i].type;
-      BFD_ASSERT (type < sizeof(ppc_elf_howto_table) / sizeof(ppc_elf_howto_table[0]));
+      BFD_ASSERT (type < sizeof (ppc_elf_howto_table) / sizeof (ppc_elf_howto_table[0]));
       ppc_elf_howto_table[type] = &ppc_elf_howto_raw[i];
     }
 }
@@ -976,7 +975,7 @@ ppc_elf_howto_init ()
    3/ The branch is taken.
    4/ The branch is located in the last 5 words of a page.
       (The EOP limit is 5 by default but may be specified as any value from 1-10.)
-   
+
    Our software solution is to detect these problematic branches in a
    linker pass and modify them as follows:
    1/ Unconditional branches - Since these are always predicted taken,
@@ -998,7 +997,7 @@ ppc_elf_sort_rela (arg1, arg2)
   const Elf_Internal_Rela **rela1 = (const Elf_Internal_Rela**) arg1;
   const Elf_Internal_Rela **rela2 = (const Elf_Internal_Rela**) arg2;
 
-  /* Sort by offset. */
+  /* Sort by offset.  */
   return ((*rela1)->r_offset - (*rela2)->r_offset);
 }
 
@@ -1018,7 +1017,7 @@ ppc_elf_relax_section (abfd, isec, link_info, again)
   Elf_Internal_Rela **rela_comb = NULL;
   int comb_curr, comb_count;
 
-  /* We never have to do this more than once per input section. */
+  /* We never have to do this more than once per input section.  */
   *again = false;
 
   /* If needed, initialize this section's cooked size.  */
@@ -1026,13 +1025,13 @@ ppc_elf_relax_section (abfd, isec, link_info, again)
       isec->_cooked_size = isec->_raw_size;
 
   /* We're only interested in text sections which overlap the
-  troublesome area at the end of a page. */
+  troublesome area at the end of a page.  */
   if (link_info->mpc860c0 && (isec->flags & SEC_CODE) && isec->_cooked_size)
     {
       bfd_vma dot, end_page, end_section;
       boolean section_modified;
 
-      /* Get the section contents. */
+      /* Get the section contents.  */
       /* Get cached copy if it exists.  */
       if (elf_section_data (isec)->this_hdr.contents != NULL)
 	  contents = elf_section_data (isec)->this_hdr.contents;
@@ -1057,26 +1056,26 @@ ppc_elf_relax_section (abfd, isec, link_info, again)
 
           /* Get a copy of the native relocations.  */
           internal_relocs = _bfd_elf32_link_read_relocs (
-    	    abfd, isec, (PTR) NULL, (Elf_Internal_Rela *) NULL, 
+    	    abfd, isec, (PTR) NULL, (Elf_Internal_Rela *) NULL,
     	    link_info->keep_memory);
           if (internal_relocs == NULL)
     	      goto error_return;
           if (! link_info->keep_memory)
     	      free_relocs = internal_relocs;
-    
-          /* Setup a faster access method for the reloc info we need. */
+
+          /* Setup a faster access method for the reloc info we need.  */
           rela_comb = (Elf_Internal_Rela**)
-	    bfd_malloc (isec->reloc_count*sizeof(Elf_Internal_Rela*));
+	    bfd_malloc (isec->reloc_count*sizeof (Elf_Internal_Rela*));
           if (rela_comb == NULL)
               goto error_return;
           for (n=0; n<isec->reloc_count; ++n)
             {
               long r_type;
-    
+
               r_type = ELF32_R_TYPE (internal_relocs[n].r_info);
               if (r_type < 0 || r_type >= (int)R_PPC_max)
                   goto error_return;
-    
+
               /* Prologue constants are sometimes present in the ".text"
               sections and they can be identified by their associated relocation.
               We don't want to process those words and some others which
@@ -1084,16 +1083,16 @@ ppc_elf_relax_section (abfd, isec, link_info, again)
               conditional branches will have a relocation so we will
               only ignore words that 1) have a reloc, and 2) the reloc
               is not applicable to a conditional branch.
-              The array rela_comb is built here for use in the EOP scan loop. */
+              The array rela_comb is built here for use in the EOP scan loop.  */
               switch (r_type)
                 {
                 case R_PPC_ADDR14_BRNTAKEN:     /* absolute, predicted not taken */
-                case R_PPC_REL14:               /* relative cond. br. */
+                case R_PPC_REL14:               /* relative cond. br.  */
                 case R_PPC_REL14_BRNTAKEN:      /* rel. cond. br., predicted not taken */
-                  /* We should check the instruction. */
+                  /* We should check the instruction.  */
                   break;
                 default:
-                  /* The word is not a conditional branch - ignore it. */
+                  /* The word is not a conditional branch - ignore it.  */
                   rela_comb[comb_count++] = &internal_relocs[n];
                   break;
                 }
@@ -1102,19 +1101,19 @@ ppc_elf_relax_section (abfd, isec, link_info, again)
               qsort (rela_comb, (size_t) comb_count, sizeof (int), ppc_elf_sort_rela);
         }
 
-      /* Enumerate each EOP region that overlaps this section. */
+      /* Enumerate each EOP region that overlaps this section.  */
       end_section = isec->vma + isec->_cooked_size;
       dot = end_page = (isec->vma | (PAGESIZE - 1)) + 1;
       dot -= link_info->mpc860c0;
       section_modified = false;
       if (dot < isec->vma)      /* Increment the start position if this section */
-          dot = isec->vma;      /* begins in the middle of its first EOP region. */
+          dot = isec->vma;      /* begins in the middle of its first EOP region.  */
       for (;
            dot < end_section;
            dot += PAGESIZE, end_page += PAGESIZE)
         {
 
-          /* Check each word in this EOP region. */
+          /* Check each word in this EOP region.  */
           for (; dot < end_page; dot += 4)
             {
               bfd_vma isec_offset;
@@ -1122,7 +1121,7 @@ ppc_elf_relax_section (abfd, isec, link_info, again)
               boolean skip, modified;
 
               /* Don't process this word if there is a relocation for it and
-              the relocation indicates the word is not a conditional branch. */
+              the relocation indicates the word is not a conditional branch.  */
               skip = false;
               isec_offset = dot - isec->vma;
               for (; comb_curr<comb_count; ++comb_curr)
@@ -1138,7 +1137,7 @@ ppc_elf_relax_section (abfd, isec, link_info, again)
                 }
               if (skip) continue;
 
-              /* Check the current word for a problematic conditional branch. */
+              /* Check the current word for a problematic conditional branch.  */
 #define BO0(insn) ((insn) & 0x02000000)
 #define BO2(insn) ((insn) & 0x00800000)
 #define BO4(insn) ((insn) & 0x00200000)
@@ -1151,7 +1150,7 @@ ppc_elf_relax_section (abfd, isec, link_info, again)
                     {
                       bfd_vma target;
                       /* This branch is predicted as "normal".
-                      If this is a forward branch, it is problematic. */
+                      If this is a forward branch, it is problematic.  */
 
                       target = insn & 0x0000Fffc;               /*extract*/
                       target = (target ^ 0x8000) - 0x8000;      /*sign extend*/
@@ -1172,7 +1171,7 @@ ppc_elf_relax_section (abfd, isec, link_info, again)
 		      /* This branch is predicted as not-taken.
 		      If this is a forward branch, it is problematic.
                       Since we can't tell statically if it will branch forward,
-                      always set the prediction bit. */
+                      always set the prediction bit.  */
                       insn |= 0x00200000;   /* set the prediction bit */
                       modified = true;
 		    }
@@ -1185,7 +1184,7 @@ ppc_elf_relax_section (abfd, isec, link_info, again)
 		      /* This branch is predicted as not-taken.
 		      If this is a forward branch, it is problematic.
                       Since we can't tell statically if it will branch forward,
-                      always set the prediction bit. */
+                      always set the prediction bit.  */
                       insn |= 0x00200000;   /* set the prediction bit */
                       modified = true;
 		    }
@@ -1371,7 +1370,7 @@ ppc_elf_addr16_ha_reloc (abfd, reloc_entry, symbol, data, input_section,
   return bfd_reloc_continue;
 }
 
-/* Function to set whether a module needs the -mrelocatable bit set. */
+/* Function to set whether a module needs the -mrelocatable bit set.  */
 
 static boolean
 ppc_elf_set_private_flags (abfd, flags)
@@ -1712,7 +1711,6 @@ ppc_elf_adjust_dynamic_symbol (info, h)
 		      && (h->elf_link_hash_flags
 			  & ELF_LINK_HASH_DEF_REGULAR) == 0)));
 
-
   /* If this is a function, put it in the procedure linkage table.  We
      will fill in the contents of the procedure linkage table later,
      when we know the address of the .got section.  */
@@ -1985,7 +1983,7 @@ ppc_elf_size_dynamic_sections (output_bfd, info)
 	      asection *target;
 	      const char *outname;
 
-	      /* Remember whether there are any relocation sections. */
+	      /* Remember whether there are any relocation sections.  */
 	      relocs = true;
 
 	      /* If this relocation section applies to a read only
@@ -2108,7 +2106,6 @@ ppc_elf_check_relocs (abfd, info, sec, relocs)
 	return false;
     }
 
-
   if ((sdata2 = elf_linker_section (abfd, LINKER_SECTION_SDATA2)) == NULL)
     {
       sdata2 = ppc_elf_create_linker_section (abfd, info, LINKER_SECTION_SDATA2);
@@ -2121,7 +2118,7 @@ ppc_elf_check_relocs (abfd, info, sec, relocs)
   local_got_refcounts = elf_local_got_refcounts (abfd);
 
   sym_hashes = elf_sym_hashes (abfd);
-  sym_hashes_end = sym_hashes + symtab_hdr->sh_size/sizeof(Elf32_External_Sym);
+  sym_hashes_end = sym_hashes + symtab_hdr->sh_size/sizeof (Elf32_External_Sym);
   if (!elf_bad_symtab (abfd))
     sym_hashes_end -= symtab_hdr->sh_info;
 
@@ -2694,7 +2691,7 @@ ppc_elf_finish_dynamic_symbol (output_bfd, info, h, sym)
 	     Otherwise, the PLT entry would provide a definition for
 	     the symbol even if the symbol wasn't defined anywhere,
 	     and so the symbol would never be NULL.  */
-	  if ((h->elf_link_hash_flags & ELF_LINK_HASH_REF_REGULAR_NONWEAK) 
+	  if ((h->elf_link_hash_flags & ELF_LINK_HASH_REF_REGULAR_NONWEAK)
 	      == 0)
 	    sym->st_value = 0;
 	}
@@ -3120,7 +3117,7 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	    relocation = 0;
 	  else
 	    {
-	      if (! (*info->callbacks->undefined_symbol)(info,
+	      if (! (*info->callbacks->undefined_symbol) (info,
 							 h->root.root.string,
 							 input_bfd,
 							 input_section,
@@ -3290,7 +3287,7 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 #ifdef DEBUG
 			  if (indx <= 0)
 			    {
-			      printf("indx=%d section=%s flags=%08x name=%s\n",
+			      printf ("indx=%d section=%s flags=%08x name=%s\n",
 				     indx, osec->name, osec->flags,
 				     h->root.root.string);
 			    }
@@ -3512,7 +3509,6 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	  }
 	  break;
 
-
 	/* relocate against _SDA2_BASE_ */
 	case (int)R_PPC_EMB_SDA2REL:
 	  {
@@ -3527,7 +3523,7 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 				       sym_name,
 				       ppc_elf_howto_table[ (int)r_type ]->name,
 				       name);
-		
+
 		bfd_set_error (bfd_error_bad_value);
 		ret = false;
 		continue;
@@ -3537,7 +3533,6 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		       + sdata2->sym_hash->root.u.def.section->output_offset);
 	  }
 	  break;
-
 
 	/* relocate against either _SDA_BASE_, _SDA2_BASE_, or 0 */
 	case (int)R_PPC_EMB_SDA21:
@@ -3652,7 +3647,6 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	  continue;
 	}
 
-
 #ifdef DEBUG
       fprintf (stderr, "\ttype = %s (%d), name = %s, symbol index = %ld, offset = %ld, addend = %ld\n",
 	       howto->name,
@@ -3704,7 +3698,7 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		name = bfd_section_name (input_bfd, sec);
 	    }
 
-	  if (! (*info->callbacks->reloc_overflow)(info,
+	  if (! (*info->callbacks->reloc_overflow) (info,
 						   name,
 						   howto->name,
 						   (bfd_vma) 0,

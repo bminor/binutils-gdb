@@ -227,7 +227,7 @@ static const bfd_byte elf_cpu32_plt0_entry[PLT_CPU32_ENTRY_SIZE] =
   0x2f, 0x3b, 0x01, 0x70, /* move.l (%pc,addr),-(%sp) */
   0, 0, 0, 0,             /* replaced with offset to .got + 4.  */
   0x22, 0x7b, 0x01, 0x70, /* moveal %pc@(0xc), %a1 */
-  0, 0, 0, 0,             /* replace with offset to .got +8. */
+  0, 0, 0, 0,             /* replace with offset to .got +8.  */
   0x4e, 0xd1,             /* jmp %a1@ */
   0, 0, 0, 0,             /* pad out to 24 bytes.  */
   0, 0
@@ -376,12 +376,12 @@ elf32_m68k_copy_private_bfd_data (ibfd, obfd)
   if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour
       || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
     return true;
- 
+
   in_flags = elf_elfheader (ibfd)->e_flags;
- 
+
   elf_elfheader (obfd)->e_flags = in_flags;
   elf_flags_init (obfd) = true;
- 
+
   return true;
 }
 
@@ -931,7 +931,6 @@ elf_m68k_gc_sweep_hook (abfd, info, sec, relocs)
 
   return true;
 }
-
 
 /* Adjust a symbol defined by a dynamic object and referenced by a
    regular object.  The current definition is in some section of the
@@ -2139,7 +2138,7 @@ elf_m68k_finish_dynamic_sections (output_bfd, info)
 		           + sgot->output_offset + 8
 		           - (splt->output_section->vma + 10)),
 		          splt->contents + 12);
-              elf_section_data (splt->output_section)->this_hdr.sh_entsize 
+              elf_section_data (splt->output_section)->this_hdr.sh_entsize
                = PLT_ENTRY_SIZE;
             }
           else /* cpu32 */
@@ -2155,7 +2154,7 @@ elf_m68k_finish_dynamic_sections (output_bfd, info)
 		           + sgot->output_offset + 8
 		           - (splt->output_section->vma + 10)),
 		          splt->contents + 12);
-              elf_section_data (splt->output_section)->this_hdr.sh_entsize 
+              elf_section_data (splt->output_section)->this_hdr.sh_entsize
                = PLT_CPU32_ENTRY_SIZE;
             }
 	}
@@ -2302,7 +2301,7 @@ bfd_m68k_elf32_create_embedded_relocs (abfd, info, datasec, relsec, errmsg)
       if (targetsec != NULL)
 	strncpy (p + 4, targetsec->output_section->name, 8);
     }
-  
+
   if (free_extsyms != NULL)
     free (free_extsyms);
   if (free_relocs != NULL)

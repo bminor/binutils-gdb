@@ -30,7 +30,6 @@ PARAMS ((bfd * abfd, bfd_reloc_code_real_type code));
 static void m68hc11_info_to_howto_rel
 PARAMS ((bfd *, arelent *, Elf32_Internal_Rel *));
 
-
 /* Use REL instead of RELA to save space */
 #define USE_REL
 

@@ -1,3 +1,13 @@
+2000-12-06  Kazu Hirata  <kazu@hxi.com>
+
+	* elf32-m32r.c: Fix formatting.
+	* elf32-m68hc11.c: Likewise.
+	* elf32-m68hc12.c: Likewise.
+	* elf32-m68k.c: Likewise.
+	* elf32-mcore.c: Likewise.
+	* elf32-pj.c: Likewise.
+	* elf32-ppc.c: Likewise.
+
 2000-12-05  Kazu Hirata  <kazu@hxi.com>
 
 	* elf32-fr30.c: Fix formatting.
