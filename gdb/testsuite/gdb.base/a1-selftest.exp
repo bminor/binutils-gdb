@@ -374,8 +374,6 @@ proc test_with_self {} {
     }
 
     # and another step for good luck
-    # This one fails on Solaris (for some versions of gdb) because you
-    # can't step into library functions
     if $next_ok {
 	set description "step into xmalloc call"
         send "step\n"

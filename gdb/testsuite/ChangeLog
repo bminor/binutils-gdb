@@ -1,3 +1,8 @@
+Fri Mar 24 06:11:05 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* gdb.base/a1-selftest.exp (test_with_self): Remove comment which
+	apparently went with a (very) old xfail.
+
 Fri Mar 24 13:41:09 1995  Kung Hsu  <kung@mexican.cygnus.com>
 
 	* gdb.base/callfuncs.exp: call runto_main instead of runto main.
