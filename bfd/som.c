@@ -1605,7 +1605,31 @@ som_object_setup (abfd, file_hdrp, aux_hdrp)
       break;
     }
 
-  bfd_get_start_address (abfd) = aux_hdrp->exec_entry;
+  /* Allocate space to hold the saved exec header information.  */
+  obj_som_exec_data (abfd) = (struct som_exec_data *)
+    bfd_zalloc (abfd, sizeof (struct som_exec_data ));
+  if (obj_som_exec_data (abfd) == NULL)
+    {
+      bfd_set_error (bfd_error_no_memory);
+      return NULL;
+    }
+
+  /* The braindamaged OSF1 linker switched exec_flags and exec_entry!
+
+     It seems rather backward that the OSF1 linker which is much
+     older than any HPUX linker I've got uses a newer SOM version
+     id...  But that's what I've found by experimentation.  */
+  if (file_hdrp->version_id == NEW_VERSION_ID)
+    {
+      bfd_get_start_address (abfd) = aux_hdrp->exec_flags;
+      obj_som_exec_data (abfd)->exec_flags = aux_hdrp->exec_entry;
+    }
+  else
+    {
+      bfd_get_start_address (abfd) = aux_hdrp->exec_entry;
+      obj_som_exec_data (abfd)->exec_flags = aux_hdrp->exec_flags;
+    }
+
   bfd_default_set_arch_mach (abfd, bfd_arch_hppa, 0);
   bfd_get_symcount (abfd) = file_hdrp->symbol_total;
 
@@ -1618,17 +1642,8 @@ som_object_setup (abfd, file_hdrp, aux_hdrp)
   obj_som_sym_filepos (abfd) = file_hdrp->symbol_location;
   obj_som_str_filepos (abfd) = file_hdrp->symbol_strings_location;
   obj_som_reloc_filepos (abfd) = file_hdrp->fixup_request_location;
-
-  obj_som_exec_data (abfd) = (struct som_exec_data *)
-    bfd_zalloc (abfd, sizeof (struct som_exec_data ));
-  if (obj_som_exec_data (abfd) == NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return NULL;
-    }
-
   obj_som_exec_data (abfd)->system_id = file_hdrp->system_id;
-  obj_som_exec_data (abfd)->exec_flags = aux_hdrp->exec_flags;
+
   return abfd->xvec;
 }
 
@@ -2434,6 +2449,7 @@ som_write_fixups (abfd, current_offset, total_reloc_sizep)
 		/* This only needs to handle relocations that may be
 		   made by hppa_som_gen_reloc.  */
 		case R_ENTRY:
+		case R_ALT_ENTRY:
 		case R_EXIT:
 		case R_N_MODE:
 		case R_S_MODE:
@@ -2545,12 +2561,6 @@ som_write_fixups (abfd, current_offset, total_reloc_sizep)
 		    break;
 		  }
 		  
-		case R_EXIT:
-		  bfd_put_8 (abfd, R_EXIT, p);
-		  subspace_reloc_size += 1;
-		  p += 1;
-		  break;
-
 		case R_N_MODE:
 		case R_S_MODE:
 		case R_D_MODE:
@@ -2566,6 +2576,8 @@ som_write_fixups (abfd, current_offset, total_reloc_sizep)
 		    }
 		  break;
 
+		case R_EXIT:
+		case R_ALT_ENTRY:
 		case R_FSEL:
 		case R_LSEL:
 		case R_RSEL:
