@@ -7,7 +7,7 @@ AC_INIT(libbfd.c)
 AC_CANONICAL_SYSTEM
 AC_ISC_POSIX
 
-AM_INIT_AUTOMAKE(bfd, 2.14.90)
+AM_INIT_AUTOMAKE(bfd, 2.14.91)
 # Uncomment the next line to remove the date from the reported bfd version
 #is_release=y
 

@@ -1,5 +1,10 @@
 2004-04-09  Daniel Jacobowitz  <drow@mvista.com>
 
+	* configure.in: Update version to 2.14.91.
+	* configure: Likewise.
+
+2004-04-09  Daniel Jacobowitz  <drow@mvista.com>
+
 	Merge from mainline:
 	2004-04-06  Daniel Jacobowitz  <drow@mvista.com>
 	* elfxx-mips.c (MIPS_ELF_STUB_SECTION_NAME): Always use
