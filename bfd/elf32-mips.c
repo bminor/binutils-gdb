@@ -41,6 +41,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define ECOFF_32
 #include "ecoffswap.h"
 
+static bfd_reloc_status_type mips32_64bit_reloc
+  PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
 static reloc_howto_type *bfd_elf32_bfd_reloc_type_lookup
   PARAMS ((bfd *, bfd_reloc_code_real_type));
 static void mips_info_to_howto_rel
@@ -78,11 +80,16 @@ static void mips_elf_relocate_got_local
 	   Elf_Internal_Rela *, bfd_byte *, bfd_vma));
 static void mips_elf_relocate_global_got
    PARAMS ((bfd *, Elf_Internal_Rela *, bfd_byte *, bfd_vma));
+static bfd_reloc_status_type mips16_jump_reloc
+  PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
 static boolean mips_elf_adjust_dynindx
   PARAMS ((struct elf_link_hash_entry *, PTR));
 static boolean mips_elf_relocate_section
   PARAMS ((bfd *, struct bfd_link_info *, bfd *, asection *, bfd_byte *,
 	   Elf_Internal_Rela *, Elf_Internal_Sym *, asection **));
+static boolean mips_elf_link_output_symbol_hook
+  PARAMS ((bfd *, struct bfd_link_info *, const char *, Elf_Internal_Sym *,
+	   asection *));
 static boolean mips_elf_create_dynamic_sections
   PARAMS ((bfd *, struct bfd_link_info *));
 static boolean mips_elf_create_compact_rel_section
@@ -296,7 +303,9 @@ enum reloc_type
   R_MIPS_INSERT_B,	R_MIPS_DELETE,
   R_MIPS_HIGHER,	R_MIPS_HIGHEST,
   R_MIPS_CALL_HI16,	R_MIPS_CALL_LO16,
-  R_MIPS_max
+  R_MIPS_max,
+  /* This reloc is used for the mips16.  */
+  R_MIPS16_26 = 100
 };
 
 static reloc_howto_type elf_mips_howto_table[] =
@@ -538,8 +547,23 @@ static reloc_howto_type elf_mips_howto_table[] =
 	 0x000007c4,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
-  /* A 64 bit relocation.  Presumably not used in 32 bit ELF.  */
-  { R_MIPS_64 },
+  /* A 64 bit relocation.  This is used in 32 bit ELF when addresses
+     are 64 bits long; the upper 32 bits are simply a sign extension.
+     The fields of the howto should be the same as for R_MIPS_32,
+     other than the type, name, and special_function.  */
+  HOWTO (R_MIPS_64,		/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 32,			/* bitsize */
+	 false,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_bitfield, /* complain_on_overflow */
+	 mips32_64bit_reloc,	/* special_function */
+	 "R_MIPS_64",		/* name */
+	 true,			/* partial_inplace */
+	 0xffffffff,		/* src_mask */
+	 0xffffffff,		/* dst_mask */
+	 false),		/* pcrel_offset */
 
   /* Displacement in the global offset table.  */
   /* FIXME: Not handled correctly.  */
@@ -666,6 +690,25 @@ static reloc_howto_type elf_mips_howto_table[] =
 	 0x0000ffff,		/* dst_mask */
 	 false)			/* pcrel_offset */
 };
+
+/* The reloc used for the mips16 jump instruction.  */
+static reloc_howto_type elf_mips16_jump_howto =
+  HOWTO (R_MIPS16_26,		/* type */
+	 2,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 26,			/* bitsize */
+	 false,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 			/* This needs complex overflow
+				   detection, because the upper four
+				   bits must match the PC.  */
+	 mips16_jump_reloc,	/* special_function */
+	 "R_MIPS16_26",		/* name */
+	 true,			/* partial_inplace */
+	 0x3ffffff,		/* src_mask */
+	 0x3ffffff,		/* dst_mask */
+	 false);		/* pcrel_offset */
 
 /* Do a R_MIPS_HI16 relocation.  This has to be done in combination
    with a R_MIPS_LO16 reloc, because there is a carry from the LO16 to
@@ -1226,6 +1269,78 @@ gprel32_with_gp (abfd, symbol, reloc_entry, input_section, relocateable, data,
   return bfd_reloc_ok;
 }
 
+/* Handle a 64 bit reloc in a 32 bit MIPS ELF file.  These are
+   generated when addreses are 64 bits.  The upper 32 bits are a simle
+   sign extension.  */
+
+static bfd_reloc_status_type
+mips32_64bit_reloc (abfd, reloc_entry, symbol, data, input_section,
+		    output_bfd, error_message)
+     bfd *abfd;
+     arelent *reloc_entry;
+     asymbol *symbol;
+     PTR data;
+     asection *input_section;
+     bfd *output_bfd;
+     char **error_message;
+{
+  bfd_reloc_status_type r;
+  arelent reloc32;
+  unsigned long val;
+  bfd_size_type addr;
+
+  r = bfd_elf_generic_reloc (abfd, reloc_entry, symbol, data,
+			     input_section, output_bfd, error_message);
+  if (r != bfd_reloc_continue)
+    return r;
+
+  /* Do a normal 32 bit relocation on the lower 32 bits.  */
+  reloc32 = *reloc_entry;
+  if (bfd_big_endian (abfd))
+    reloc32.address += 4;
+  reloc32.howto = &elf_mips_howto_table[R_MIPS_32];
+  r = bfd_perform_relocation (abfd, &reloc32, data, input_section,
+			      output_bfd, error_message);
+
+  /* Sign extend into the upper 32 bits.  */
+  val = bfd_get_32 (abfd, (bfd_byte *) data + reloc32.address);
+  if ((val & 0x80000000) != 0)
+    val = 0xffffffff;
+  else
+    val = 0;
+  addr = reloc_entry->address;
+  if (bfd_little_endian (abfd))
+    addr += 4;
+  bfd_put_32 (abfd, val, (bfd_byte *) data + addr);
+
+  return r;
+}
+
+/* Handle a mips16 jump.  */
+
+static bfd_reloc_status_type
+mips16_jump_reloc (abfd, reloc_entry, symbol, data, input_section,
+		   output_bfd, error_message)
+     bfd *abfd;
+     arelent *reloc_entry;
+     asymbol *symbol;
+     PTR data;
+     asection *input_section;
+     bfd *output_bfd;
+     char **error_message;
+{
+  if (output_bfd != (bfd *) NULL
+      && (symbol->flags & BSF_SECTION_SYM) == 0
+      && reloc_entry->addend == 0)
+    {
+      reloc_entry->address += input_section->output_offset;
+      return bfd_reloc_ok;
+    }
+
+  /* FIXME.  */
+  abort ();
+}
+
 /* A mapping from BFD reloc types to MIPS ELF reloc types.  */
 
 struct elf_reloc_map {
@@ -1239,6 +1354,7 @@ static CONST struct elf_reloc_map mips_reloc_map[] =
   { BFD_RELOC_16, R_MIPS_16 },
   { BFD_RELOC_32, R_MIPS_32 },
   { BFD_RELOC_CTOR, R_MIPS_32 },
+  { BFD_RELOC_64, R_MIPS_64 },
   { BFD_RELOC_MIPS_JMP, R_MIPS_26 },
   { BFD_RELOC_HI16_S, R_MIPS_HI16 },
   { BFD_RELOC_LO16, R_MIPS_LO16 },
@@ -1268,6 +1384,12 @@ bfd_elf32_bfd_reloc_type_lookup (abfd, code)
       if (mips_reloc_map[i].bfd_reloc_val == code)
 	return &elf_mips_howto_table[(int) mips_reloc_map[i].elf_reloc_val];
     }
+
+  /* Special handling for the MIPS16 jump, since it is a made up reloc
+     type with a large value.  */
+  if (code == BFD_RELOC_MIPS16_JMP)
+    return &elf_mips16_jump_howto;
+
   return NULL;
 }
 
@@ -1282,8 +1404,13 @@ mips_info_to_howto_rel (abfd, cache_ptr, dst)
   unsigned int r_type;
 
   r_type = ELF32_R_TYPE (dst->r_info);
-  BFD_ASSERT (r_type < (unsigned int) R_MIPS_max);
-  cache_ptr->howto = &elf_mips_howto_table[r_type];
+  if (r_type == R_MIPS16_26)
+    cache_ptr->howto = &elf_mips16_jump_howto;
+  else
+    {
+      BFD_ASSERT (r_type < (unsigned int) R_MIPS_max);
+      cache_ptr->howto = &elf_mips_howto_table[r_type];
+    }
 
   /* The addend for a GPREL16 or LITERAL relocation comes from the GP
      value for the object file.  We get the addend now, rather than
@@ -3036,6 +3163,12 @@ mips_elf_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
       mips_elf_hash_table (info)->use_rld_obj_head = true;
     }
 
+  /* If this is a mips16 text symbol, add 1 to the value to make it
+     odd.  This will cause something like .word SYM to come up with
+     the right value when it is loaded into the PC.  */
+  if (sym->st_other == STO_MIPS16)
+    ++*valp;
+
   return true;
 }
 
@@ -4225,12 +4358,15 @@ mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
       bfd_reloc_status_type r;
 
       r_type = ELF32_R_TYPE (rel->r_info);
-      if (r_type < 0 || r_type >= (int) R_MIPS_max)
+      if ((r_type < 0 || r_type >= (int) R_MIPS_max) && r_type != R_MIPS16_26)
 	{
 	  bfd_set_error (bfd_error_bad_value);
 	  return false;
 	}
-      howto = elf_mips_howto_table + r_type;
+      if (r_type != R_MIPS16_26)
+	howto = elf_mips_howto_table + r_type;
+      else
+	howto = &elf_mips16_jump_howto;
 
       if (dynobj != NULL
 	  && (r_type == R_MIPS_CALL16
@@ -4334,7 +4470,11 @@ mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		  /* If this is HI16 or GOT16 with an associated LO16,
 		     adjust the addend accordingly.  Otherwise, just
 		     relocate.  */
-		  if (r_type != R_MIPS_HI16 && r_type != R_MIPS_GOT16)
+		  if (r_type == R_MIPS_64 && bfd_big_endian (input_bfd))
+		    r = _bfd_relocate_contents (howto, input_bfd,
+						addend,
+						contents + rel->r_offset + 4);
+		  else if (r_type != R_MIPS_HI16 && r_type != R_MIPS_GOT16)
 		    r = _bfd_relocate_contents (howto, input_bfd,
 						addend,
 						contents + rel->r_offset);
@@ -4394,6 +4534,10 @@ mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		 value.  */
 	      if (ELF_ST_TYPE (sym->st_info) != STT_SECTION)
 		relocation += sym->st_value;
+
+	      /* mips16 text labels should be treated as odd.  */
+	      if (sym->st_other == STO_MIPS16)
+		++relocation;
 	    }
 	  else
 	    {
@@ -4678,6 +4822,78 @@ mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 					      contents, rel->r_offset,
 					      relocation, addend);
 	    }
+	  else if (r_type == R_MIPS_64)
+	    {
+	      bfd_size_type addr;
+	      unsigned long val;
+
+	      /* Do a 32 bit relocation, and sign extend to 64 bits.  */
+	      addr = rel->r_offset;
+	      if (bfd_big_endian (input_bfd))
+		addr += 4;
+	      r = _bfd_final_link_relocate (howto, input_bfd, input_section,
+					    contents, addr, relocation,
+					    addend);
+	      val = bfd_get_32 (input_bfd, contents + addr);
+	      if ((val & 0x80000000) != 0)
+		val = 0xffffffff;
+	      else
+		val = 0;
+	      addr = rel->r_offset;
+	      if (bfd_little_endian (input_bfd))
+		addr += 4;
+	      bfd_put_32 (input_bfd, val, contents + addr);
+	    }
+	  else if (r_type == R_MIPS_26
+		   && ((h != NULL && h->other == STO_MIPS16)
+		       || (sym != NULL && sym->st_other == STO_MIPS16)))
+	    {
+	      unsigned long insn;
+
+	      /* This is a jump to a mips16 routine from a mips32
+                 routine.  We need to change jal into jalx.  */
+	      insn = bfd_get_32 (input_bfd, contents + rel->r_offset);
+	      if (((insn >> 26) & 0x3f) != 0x3
+		  && ((insn >> 26) & 0x3f) != 0x1d)
+		{
+		  (*_bfd_error_handler)
+		    ("%s: %s+0x%lx: jump to mips16 routine which is not jal",
+		     bfd_get_filename (input_bfd),
+		     input_section->name,
+		     (unsigned long) rel->r_offset);
+		  bfd_set_error (bfd_error_bad_value);
+		  return false;
+		}
+	      insn = (insn & 0x3ffffff) | (0x1d << 26);
+	      bfd_put_32 (input_bfd, insn, contents + rel->r_offset);
+	      r = _bfd_final_link_relocate (howto, input_bfd, input_section,
+					    contents, rel->r_offset,
+					    relocation, addend);
+	    }
+	  else if (r_type == R_MIPS16_26)
+	    {
+	      /* It's easiest to do the normal relocation, and then
+                 dig out the instruction and swap the first word the
+                 way the mips16 expects it.  */
+	      r = _bfd_final_link_relocate (howto, input_bfd, input_section,
+					    contents, rel->r_offset,
+					    relocation, addend);
+	      if (r == bfd_reloc_ok)
+		{
+		  unsigned long insn;
+
+		  insn = bfd_get_16 (input_bfd, contents + rel->r_offset);
+		  insn = ((insn & 0xfc00)
+			  | ((insn & 0x1f) << 5)
+			  | ((insn & 0x3e0) >> 5));
+		  /* If this is a jump to a 32 bit routine, then make
+		     it jalx.  */
+		  if ((h != NULL && h->other != STO_MIPS16)
+		      || (sym != NULL && sym->st_other != STO_MIPS16))
+		    insn |= 0x400;
+		  bfd_put_16 (input_bfd, insn, contents + rel->r_offset);
+		}
+	    }
 	  else
 	    r = _bfd_final_link_relocate (howto, input_bfd, input_section,
 					  contents, rel->r_offset,
@@ -4762,6 +4978,25 @@ mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	}
     }
 
+  return true;
+}
+
+/* This hook function is called before the linker writes out a global
+   symbol.  This is where we undo the increment of the value for a
+   mips16 symbol.  */
+
+/*ARGSIGNORED*/
+static boolean
+mips_elf_link_output_symbol_hook (abfd, info, name, sym, input_sec)
+     bfd *abfd;
+     struct bfd_link_info *info;
+     const char *name;
+     Elf_Internal_Sym *sym;
+     asection *input_sec;
+{
+  if (sym->st_other == STO_MIPS16
+      && (sym->st_value & 1) != 0)
+    --sym->st_value;
   return true;
 }
 
@@ -5845,6 +6080,11 @@ mips_elf_finish_dynamic_symbol (output_bfd, info, h, sym)
 	}
     }
 
+  /* If this is a mips16 symbol, force the value to be even.  */
+  if (sym->st_other == STO_MIPS16
+      && (sym->st_value & 1) != 0)
+    --sym->st_value;
+
   return true;
 }
 
@@ -6440,6 +6680,8 @@ static const struct ecoff_debug_swap mips_elf32_ecoff_debug_swap =
 #define elf_backend_size_dynamic_sections \
 					mips_elf_size_dynamic_sections
 #define elf_backend_relocate_section	mips_elf_relocate_section
+#define elf_backend_link_output_symbol_hook \
+					mips_elf_link_output_symbol_hook
 #define elf_backend_finish_dynamic_symbol \
 					mips_elf_finish_dynamic_symbol
 #define elf_backend_finish_dynamic_sections \

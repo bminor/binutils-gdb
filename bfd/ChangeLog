@@ -1,5 +1,12 @@
 Tue Dec 17 11:09:36 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* elf32-mips.c (mips_elf_add_symbol_hook): Add 1 to the value of a
+	mips16 symbol during the link.
+	(mips_elf_finish_dynamic_symbol): Subtract 1 from the value of a
+	mips16 symbol.
+	(mips_elf_link_output_symbol_hook): New static function.
+	(elf_backend_link_output_symbol_hook): Define.
+
 	* elf.c (bfd_elf_print_symbol): Print the st_other field if it is
 	not zero.
 
