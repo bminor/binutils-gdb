@@ -33,6 +33,16 @@ static bfd_reloc_status_type optcall_callback
   PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
 static bfd_reloc_status_type coff_i960_relocate
   PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
+static reloc_howto_type *coff_i960_reloc_type_lookup
+  PARAMS ((bfd *, bfd_reloc_code_real_type));
+static boolean coff_i960_start_final_link
+  PARAMS ((bfd *, struct bfd_link_info *));
+static boolean coff_i960_relocate_section
+  PARAMS ((bfd *, struct bfd_link_info *, bfd *, asection *, bfd_byte *,
+	   struct internal_reloc *, struct internal_syment *, asection **));
+static boolean coff_i960_adjust_symndx
+  PARAMS ((bfd *, struct bfd_link_info *, bfd *, asection *,
+	   struct internal_reloc *, boolean *));
 
 #define COFF_DEFAULT_SECTION_ALIGNMENT_POWER (3)
 
@@ -126,7 +136,14 @@ optcall_callback (abfd, reloc_entry, symbol_in, data,
    than adding their values into the object file.  We handle this here
    by converting all relocs against defined symbols into relocs
    against the section symbol, when generating a relocateable output
-   file.  */
+   file.
+
+   Note that this function is only called if we are not using the COFF
+   specific backend linker.  It only does something when doing a
+   relocateable link, which will almost certainly fail when not
+   generating COFF i960 output, so this function is actually no longer
+   useful.  It was used before this target was converted to use the
+   COFF specific backend linker.  */
 
 static bfd_reloc_status_type 
 coff_i960_relocate (abfd, reloc_entry, symbol, data, input_section,
@@ -161,11 +178,12 @@ coff_i960_relocate (abfd, reloc_entry, symbol, data, input_section,
     }
 
   /* Convert the reloc to use the section symbol.  FIXME: This method
-     is ridiculous.  Fortunately, we don't use the used_by_bfd field
-     in COFF.  */
+     is ridiculous.  */
   osec = bfd_get_section (symbol)->output_section;
-  if (osec->used_by_bfd != NULL)
-    reloc_entry->sym_ptr_ptr = (asymbol **) osec->used_by_bfd;
+  if (coff_section_data (output_bfd, osec) != NULL
+      && coff_section_data (output_bfd, osec)->tdata != NULL)
+    reloc_entry->sym_ptr_ptr =
+      (asymbol **) coff_section_data (output_bfd, osec)->tdata;
   else
     {
       const char *sec_name;
@@ -178,16 +196,28 @@ coff_i960_relocate (abfd, reloc_entry, symbol, data, input_section,
 	{
 	  if (bfd_asymbol_name (*syms) != NULL
 	      && (*syms)->value == 0
-	      && strcmp (!(*syms)->section->output_section->name, sec_name))
-	    {
-	      osec->used_by_bfd = (PTR) syms;
-	      reloc_entry->sym_ptr_ptr = syms;
-	      break;
-	    }
+	      && strcmp ((*syms)->section->output_section->name,
+			 sec_name) == 0)
+	    break;
 	}
 
       if (syms >= sym_end)
 	abort ();
+
+      reloc_entry->sym_ptr_ptr = syms;
+
+      if (coff_section_data (output_bfd, osec) == NULL)
+	{
+	  osec->used_by_bfd =
+	    ((PTR) bfd_zalloc (abfd,
+			       sizeof (struct coff_section_tdata)));
+	  if (osec->used_by_bfd == NULL)
+	    {
+	      bfd_set_error (bfd_error_no_memory);
+	      return bfd_reloc_overflow;
+	    }
+	}
+      coff_section_data (output_bfd, osec)->tdata = (PTR) syms;
     }
 
   /* Let bfd_perform_relocation do its thing, which will include
@@ -239,10 +269,307 @@ coff_i960_reloc_type_lookup (abfd, code)
    (cache_ptr)->howto = howto_ptr;			\
  }
 
-#include "coffcode.h"
+/* i960 COFF is used by VxWorks 5.1.  However, VxWorks 5.1 does not
+   appear to correctly handle a reloc against a symbol defined in the
+   same object file.  It appears to simply discard such relocs, rather
+   than adding their values into the object file.  We handle this by
+   converting all relocs against global symbols into relocs against
+   internal symbols at the start of the section.  This routine is
+   called at the start of the linking process, and it creates the
+   necessary symbols.  */
 
-#undef coff_bfd_reloc_type_lookup
+static boolean
+coff_i960_start_final_link (abfd, info)
+     bfd *abfd;
+     struct bfd_link_info *info;
+{
+  bfd_size_type symesz = bfd_coff_symesz (abfd);
+  asection *o;
+  bfd_byte *esym;
+
+  if (! info->relocateable)
+    return true;
+
+  esym = (bfd_byte *) malloc (symesz);
+  if (esym == NULL)
+    {
+      bfd_set_error (bfd_error_no_memory);
+      return false;
+    }
+
+  if (bfd_seek (abfd, obj_sym_filepos (abfd), SEEK_SET) != 0)
+    return false;
+
+  for (o = abfd->sections; o != NULL; o = o->next)
+    {
+      struct internal_syment isym;
+
+      strncpy (isym._n._n_name, o->name, SYMNMLEN);
+      isym.n_value = 0;
+      isym.n_scnum = o->target_index;
+      isym.n_type = T_NULL;
+      isym.n_sclass = C_STAT;
+      isym.n_numaux = 0;
+
+      bfd_coff_swap_sym_out (abfd, (PTR) &isym, (PTR) esym);
+
+      if (bfd_write (esym, symesz, 1, abfd) != symesz)
+	{
+	  free (esym);
+	  return false;
+	}
+
+      obj_raw_syment_count (abfd) += 1;
+    }
+
+  free (esym);
+
+  return true;
+}
+
+/* The reloc processing routine for the optimized COFF linker.  */
+
+static boolean
+coff_i960_relocate_section (output_bfd, info, input_bfd, input_section,
+			    contents, relocs, syms, sections)
+     bfd *output_bfd;
+     struct bfd_link_info *info;
+     bfd *input_bfd;
+     asection *input_section;
+     bfd_byte *contents;
+     struct internal_reloc *relocs;
+     struct internal_syment *syms;
+     asection **sections;
+{
+  struct internal_reloc *rel;
+  struct internal_reloc *relend;
+
+  rel = relocs;
+  relend = rel + input_section->reloc_count;
+  for (; rel < relend; rel++)
+    {
+      long symndx;
+      struct coff_link_hash_entry *h;
+      struct internal_syment *sym;
+      bfd_vma addend;
+      bfd_vma val;
+      reloc_howto_type *howto;
+      bfd_reloc_status_type rstat = bfd_reloc_ok;
+      boolean done;
+
+      symndx = rel->r_symndx;
+
+      if (symndx == -1)
+	{
+	  h = NULL;
+	  sym = NULL;
+	}
+      else
+	{    
+	  h = obj_coff_sym_hashes (input_bfd)[symndx];
+	  sym = syms + symndx;
+	}
+
+      if (sym != NULL && sym->n_scnum != 0)
+	addend = - sym->n_value;
+      else
+	addend = 0;
+
+      switch (rel->r_type)
+	{
+	case 17: howto = &howto_rellong; break;
+	case 25: howto = &howto_iprmed; break;
+	case 27: howto = &howto_optcall; break;
+	default:
+	  bfd_set_error (bfd_error_bad_value);
+	  return false;
+	}
+
+      val = 0;
+
+      if (h == NULL)
+	{
+	  asection *sec;
+
+	  if (symndx == -1)
+	    {
+	      sec = bfd_abs_section_ptr;
+	      val = 0;
+	    }
+	  else
+	    {
+	      sec = sections[symndx];
+              val = (sec->output_section->vma
+		     + sec->output_offset
+		     + sym->n_value
+		     - sec->vma);
+	    }
+	}
+      else
+	{
+	  if (h->root.type == bfd_link_hash_defined
+	      || h->root.type == bfd_link_hash_defweak)
+	    {
+	      asection *sec;
+
+	      sec = h->root.u.def.section;
+	      val = (h->root.u.def.value
+		     + sec->output_section->vma
+		     + sec->output_offset);
+	    }
+	  else if (! info->relocateable)
+	    {
+	      if (! ((*info->callbacks->undefined_symbol)
+		     (info, h->root.root.string, input_bfd, input_section,
+		      rel->r_vaddr - input_section->vma)))
+		return false;
+	    }
+	}
+
+      done = false;
+
+      if (howto->type == R_OPTCALL && ! info->relocateable && symndx != -1)
+	{
+	  int class;
+
+	  if (h != NULL)
+	    class = h->class;
+	  else
+	    class = sym->n_sclass;
+
+	  switch (class)
+	    {
+	    case C_NULL:
+	      /* This symbol is apparently not from a COFF input file.
+                 We warn, and then assume that it is not a leaf
+                 function.  */
+	      if (! ((*info->callbacks->reloc_dangerous)
+		     (info,
+		      "uncertain calling convention for non-COFF symbol",
+		      input_bfd, input_section,
+		      rel->r_vaddr - input_section->vma)))
+		return false;
+	      break;
+	    case C_LEAFSTAT:
+	    case C_LEAFEXT:
+	      /* This is a call to a leaf procedure; use the bal
+                 instruction.  */
+	      {
+		long olf;
+		unsigned long word;
+
+		if (h != NULL)
+		  {
+		    BFD_ASSERT (h->numaux == 2);
+		    olf = h->aux[1].x_bal.x_balntry;
+		  }
+		else
+		  {
+		    bfd_byte *esyms;
+		    union internal_auxent aux;
+
+		    BFD_ASSERT (sym->n_numaux == 2);
+		    esyms = (bfd_byte *) obj_coff_external_syms (input_bfd);
+		    esyms += (symndx + 2) * bfd_coff_symesz (input_bfd);
+		    bfd_coff_swap_aux_in (input_bfd, (PTR) esyms, sym->n_type,
+					  sym->n_sclass, 1, sym->n_numaux,
+					  (PTR) &aux);
+		    olf = aux.x_bal.x_balntry;
+		  }
+
+		word = bfd_get_32 (input_bfd,
+				   (contents
+				    + (rel->r_vaddr - input_section->vma)));
+		word = ((word + olf - val) & BAL_MASK) | BAL;
+		bfd_put_32 (input_bfd,
+			    word,
+			    (contents
+			     + (rel->r_vaddr - input_section->vma)));
+		done = true;
+	      }
+	      break;
+	    case C_SCALL:
+	      BFD_ASSERT (0);
+	      break;
+	    }
+	}
+
+      if (! done)
+	rstat = _bfd_final_link_relocate (howto, input_bfd, input_section,
+					  contents,
+					  rel->r_vaddr - input_section->vma,
+					  val, addend);
+
+      switch (rstat)
+	{
+	default:
+	  abort ();
+	case bfd_reloc_ok:
+	  break;
+	case bfd_reloc_overflow:
+	  {
+	    const char *name;
+	    char buf[SYMNMLEN + 1];
+
+	    if (symndx == -1)
+	      name = "*ABS*";
+	    else if (h != NULL)
+	      name = h->root.root.string;
+	    else
+	      {
+		name = _bfd_coff_internal_syment_name (input_bfd, sym, buf);
+		if (name == NULL)
+		  return false;
+	      }
+
+	    if (! ((*info->callbacks->reloc_overflow)
+		   (info, name, howto->name, (bfd_vma) 0, input_bfd,
+		    input_section, rel->r_vaddr - input_section->vma)))
+	      return false;
+	  }
+	}
+    }
+
+  return true;
+}
+
+/* Adjust the symbol index of any reloc against a global symbol to
+   instead be a reloc against the internal symbol we created specially
+   for the section.  */
+
+/*ARGSUSED*/
+static boolean
+coff_i960_adjust_symndx (obfd, info, ibfd, sec, irel, adjustedp)
+     bfd *obfd;
+     struct bfd_link_info *info;
+     bfd *ibfd;
+     asection *sec;
+     struct internal_reloc *irel;
+     boolean *adjustedp;
+{
+  struct coff_link_hash_entry *h;
+
+  h = obj_coff_sym_hashes (ibfd)[irel->r_symndx];
+  if (h == NULL
+      || (h->root.type != bfd_link_hash_defined
+	  && h->root.type != bfd_link_hash_defweak))
+    return true;
+
+  irel->r_symndx = h->root.u.def.section->output_section->target_index - 1;
+  *adjustedp = true;
+
+  return true;
+}
+
+#define coff_start_final_link coff_i960_start_final_link
+
+#define coff_relocate_section coff_i960_relocate_section
+
+#define coff_adjust_symndx coff_i960_adjust_symndx
+
 #define coff_bfd_reloc_type_lookup coff_i960_reloc_type_lookup
+
+#include "coffcode.h"
 
 const bfd_target icoff_little_vec =
 {

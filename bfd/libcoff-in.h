@@ -115,6 +115,8 @@ struct coff_section_tdata
   bfd_byte *contents;
   /* If this is true, the contents entry may not be freed.  */
   boolean keep_contents;
+  /* Available for individual backends.  */
+  PTR tdata;
 };
 
 /* An accessor macro for the coff_section_tdata structure.  */
@@ -222,6 +224,8 @@ extern void bfd_perform_slip PARAMS ((bfd *abfd, unsigned int slip,
 
 extern struct bfd_link_hash_table *_bfd_coff_link_hash_table_create
   PARAMS ((bfd *));
+extern const char *_bfd_coff_internal_syment_name
+  PARAMS ((bfd *, const struct internal_syment *, char *));
 extern boolean _bfd_coff_link_add_symbols
   PARAMS ((bfd *, struct bfd_link_info *));
 extern boolean _bfd_coff_final_link

@@ -115,6 +115,8 @@ struct coff_section_tdata
   bfd_byte *contents;
   /* If this is true, the contents entry may not be freed.  */
   boolean keep_contents;
+  /* Available for individual backends.  */
+  PTR tdata;
 };
 
 /* An accessor macro for the coff_section_tdata structure.  */
@@ -222,6 +224,8 @@ extern void bfd_perform_slip PARAMS ((bfd *abfd, unsigned int slip,
 
 extern struct bfd_link_hash_table *_bfd_coff_link_hash_table_create
   PARAMS ((bfd *));
+extern const char *_bfd_coff_internal_syment_name
+  PARAMS ((bfd *, const struct internal_syment *, char *));
 extern boolean _bfd_coff_link_add_symbols
   PARAMS ((bfd *, struct bfd_link_info *));
 extern boolean _bfd_coff_final_link
@@ -413,6 +417,9 @@ typedef struct
        struct internal_syment *));
  void (*_bfd_coff_compute_section_file_positions) PARAMS ((
        bfd *abfd));
+ boolean (*_bfd_coff_start_final_link) PARAMS ((
+       bfd *output_bfd,
+       struct bfd_link_info *info));
  boolean (*_bfd_coff_relocate_section) PARAMS ((
        bfd *output_bfd,
        struct bfd_link_info *info,
@@ -530,6 +537,9 @@ typedef struct
         ((coff_backend_info (abfd)->_bfd_coff_compute_section_file_positions)\
          (abfd))
 
+#define bfd_coff_start_final_link(obfd, info)\
+        ((coff_backend_info (obfd)->_bfd_coff_start_final_link)\
+         (obfd, info))
 #define bfd_coff_relocate_section(obfd,info,ibfd,o,con,rel,isyms,secs)\
         ((coff_backend_info (ibfd)->_bfd_coff_relocate_section)\
          (obfd, info, ibfd, o, con, rel, isyms, secs))

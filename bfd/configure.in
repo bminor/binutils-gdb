@@ -390,8 +390,8 @@ do
     i386mach3_vec)		tb="$tb i386mach3.o aout32.o stab-syms.o" ;;
     i386netbsd_vec)		tb="$tb i386netbsd.o aout32.o stab-syms.o" ;;
     i386os9k_vec)		tb="$tb i386os9k.o aout32.o stab-syms.o" ;;
-    icoff_big_vec)		tb="$tb coff-i960.o" ;;
-    icoff_little_vec)		tb="$tb coff-i960.o" ;;
+    icoff_big_vec)		tb="$tb coff-i960.o cofflink.o" ;;
+    icoff_little_vec)		tb="$tb coff-i960.o cofflink.o" ;;
     ieee_vec)			tb="$tb ieee.o" ;;
     m68kcoff_vec)		tb="$tb coff-m68k.o cofflink.o" ;;
     m68kcoffun_vec)		tb="$tb coff-u68k.o coff-m68k.o cofflink.o" ;;

@@ -87,8 +87,6 @@ static boolean coff_link_add_object_symbols
   PARAMS ((bfd *, struct bfd_link_info *));
 static boolean coff_link_check_archive_element
   PARAMS ((bfd *, struct bfd_link_info *, boolean *));
-static INLINE const char *_bfd_coff_internal_syment_name
-  PARAMS ((bfd *, const struct internal_syment *, char *));
 static boolean coff_link_check_ar_symbols
   PARAMS ((bfd *, struct bfd_link_info *, boolean *));
 static boolean coff_link_add_symbols PARAMS ((bfd *, struct bfd_link_info *));
@@ -238,7 +236,7 @@ coff_link_check_archive_element (abfd, info, pneeded)
 /* Get the name of a symbol.  The caller must pass in a buffer of size
    >= SYMNMLEN + 1.  */
 
-static INLINE const char *
+INLINE const char *
 _bfd_coff_internal_syment_name (abfd, sym, buf)
      bfd *abfd;
      const struct internal_syment *sym;
@@ -710,6 +708,13 @@ _bfd_coff_final_link (abfd, info)
      table in memory as we go along.  We process all the relocations
      for a single input file at once.  */
   obj_raw_syment_count (abfd) = 0;
+
+  if (coff_backend_info (abfd)->_bfd_coff_start_final_link)
+    {
+      if (! bfd_coff_start_final_link (abfd, info))
+	goto error_return;
+    }
+
   for (o = abfd->sections; o != NULL; o = o->next)
     {
       for (p = o->link_order_head; p != NULL; p = p->next)

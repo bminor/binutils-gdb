@@ -1,3 +1,30 @@
+Thu Sep 14 14:53:58 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	Convert i960 COFF to use COFF backend linker.
+	* coff-i960.c (coff_i960_relocate): Use a coff_section_data
+	structure to store the symbol being used.
+	(coff_i960_start_final_link): New static function.
+	(coff_i960_relocate_section): New static function.
+	(coff_i960_adjust_symndx): New static function.
+	(coff_start_final_link): Define.
+	(coff_relocate_section): Define.
+	(coff_adjust_symndx): Define.
+	* coffcode.h (bfd_coff_backend_data): Add new callback function
+	_bfd_coff_start_final_link.
+	(bfd_coff_start_final_link): Define.
+	(coff_start_final_link): Define if not defined.
+	(bfd_coff_std_swap_table): Add coff_start_final_link.
+	* cofflink.c (_bfd_coff_internal_syment_name): Make globally
+	visible.
+	(_bfd_coff_final_link): Call bfd_coff_start_final_link if the
+	function callback is not NULL.
+	* libcoff-in.h (struct coff_section_tdata): Add tdata field.
+	(_bfd_coff_internal_syment_name): Declare.
+	* libcoff.h: Rebuild.
+	* configure.in (icoff_big_vec): Add cofflink.o.
+	(icoff_little_vec): Likewise.
+	* configure: Rebuild.
+
 Wed Sep 13 17:38:23 1995  Fred Fish  <fnf@rtl.cygnus.com>
 
 	* Makefile.in (clean-info): Remove extraneous tab from line

@@ -681,6 +681,9 @@ dependent COFF routines:
 .       struct internal_syment *));
 . void (*_bfd_coff_compute_section_file_positions) PARAMS ((
 .       bfd *abfd));
+. boolean (*_bfd_coff_start_final_link) PARAMS ((
+.       bfd *output_bfd,
+.       struct bfd_link_info *info));
 . boolean (*_bfd_coff_relocate_section) PARAMS ((
 .       bfd *output_bfd,
 .       struct bfd_link_info *info,
@@ -798,6 +801,9 @@ dependent COFF routines:
 .        ((coff_backend_info (abfd)->_bfd_coff_compute_section_file_positions)\
 .         (abfd))
 .
+.#define bfd_coff_start_final_link(obfd, info)\
+.        ((coff_backend_info (obfd)->_bfd_coff_start_final_link)\
+.         (obfd, info))
 .#define bfd_coff_relocate_section(obfd,info,ibfd,o,con,rel,isyms,secs)\
 .        ((coff_backend_info (ibfd)->_bfd_coff_relocate_section)\
 .         (obfd, info, ibfd, o, con, rel, isyms, secs))
@@ -2814,6 +2820,10 @@ dummy_reloc16_extra_cases (abfd, link_info, link_order, reloc, data, src_ptr,
 #endif /* ! defined (coff_relocate_section) */
 #define coff_bfd_link_split_section  _bfd_generic_link_split_section
 
+#ifndef coff_start_final_link
+#define coff_start_final_link NULL
+#endif
+
 #ifndef coff_adjust_symndx
 #define coff_adjust_symndx NULL
 #endif
@@ -2837,7 +2847,8 @@ static CONST bfd_coff_backend_data bfd_coff_std_swap_table =
   coff_set_alignment_hook, coff_slurp_symbol_table, symname_in_debug_hook,
   coff_reloc16_extra_cases, coff_reloc16_estimate,
   coff_sym_is_global, coff_compute_section_file_positions,
-  coff_relocate_section, coff_rtype_to_howto, coff_adjust_symndx
+  coff_start_final_link, coff_relocate_section, coff_rtype_to_howto,
+  coff_adjust_symndx
 };
 
 #define	coff_close_and_cleanup _bfd_generic_close_and_cleanup
