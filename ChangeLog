@@ -1,3 +1,10 @@
+Tue Dec 16 17:36:05 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in: Add libgui directory.
+	(GDB_TK): Add all-libgui.
+	* configure.in: Add libgui directory.
+	* configure: Add all-libgui to GDB_TK.
+
 Mon Dec 15 16:12:28 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* config-ml.in (multidirs): Add m32r to multilib list.

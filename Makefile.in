@@ -513,6 +513,7 @@ ALL_MODULES = \
 	all-jstools \
 	$(end-sanitize-ide) \
 	all-ld \
+	all-libgui \
 	all-libiberty \
 	all-libide \
 	all-m4 \
@@ -587,6 +588,7 @@ CROSS_CHECK_MODULES = \
 	check-jstools \
 	$(end-sanitize-ide) \
 	check-ld \
+	check-libgui \
 	check-libiberty \
 	check-libide \
 	check-m4 \
@@ -662,6 +664,7 @@ INSTALL_MODULES = \
 	install-jstools \
 	$(end-sanitize-ide) \
 	install-ld \
+	install-libgui \
 	install-libiberty \
 	install-libide \
 	install-m4 \
@@ -820,6 +823,7 @@ CLEAN_MODULES = \
 	clean-jstools \
 	$(end-sanitize-ide) \
 	clean-ld \
+	clean-libgui \
 	clean-libiberty \
 	clean-libide \
 	clean-m4 \
@@ -1462,7 +1466,7 @@ all-gawk:
 ALL_GCC = all-gcc
 all-gcc: all-bison all-byacc all-binutils all-gas all-ld
 all-bootstrap: all-libiberty all-bison all-byacc all-binutils all-gas all-ld
-GDB_TK = all-tk all-tcl all-itcl all-tix all-libide
+GDB_TK = all-tk all-tcl all-itcl all-tix all-libgui all-libide
 all-gdb: all-libiberty all-opcodes all-bfd all-mmalloc all-readline all-bison all-byacc all-sim $(gdbnlmrequirements) $(GDB_TK)
 all-gnuserv:
 configure-target-gperf: $(ALL_GCC)
@@ -1482,7 +1486,7 @@ all-inet: all-tcl all-send-pr all-perl
 all-ispell: all-emacs19
 all-itcl: all-tcl all-tk
 # start-sanitize-ide
-all-jstools: all-tcl all-tk all-tix all-libide
+all-jstools: all-tcl all-tk all-tix all-libgui all-libide
 # end-sanitize-ide
 all-ld: all-libiberty all-bfd all-opcodes all-bison all-byacc all-flex
 configure-target-libg++: $(ALL_GCC) configure-target-librx
@@ -1492,6 +1496,7 @@ all-target-libgloss: configure-target-libgloss configure-target-newlib
 configure-target-libio: $(ALL_GCC)
 all-target-libio: configure-target-libio all-gas all-ld all-gcc all-target-libiberty all-target-newlib
 check-target-libio: all-target-libstdc++
+all-libgui: all-tcl all-tk all-itcl
 all-libiberty:
 # start-sanitize-ide
 all-libide: all-ilu
@@ -1528,7 +1533,7 @@ all-tgas: all-libiberty all-bfd all-opcodes
 all-time:
 all-tix: all-tcl all-tk
 # start-sanitize-ide
-all-vmake: all-tcl all-tk all-itcl all-tix all-libide
+all-vmake: all-tcl all-tk all-itcl all-tix all-libgui all-libide
 # end-sanitize-ide
 all-wdiff:
 all-target-winsup: all-target-newlib all-target-libiberty all-target-librx all-target-libio configure-target-winsup 

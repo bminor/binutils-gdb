@@ -41,7 +41,7 @@
 
 # these libraries are used by various programs built for the host environment
 #
-host_libs="mmalloc libiberty opcodes bfd readline gash db tcl tk tclX itcl tix libide"
+host_libs="mmalloc libiberty opcodes bfd readline gash db tcl tk tclX itcl tix libgui libide"
 
 if [ "${enable_gdbgui}" = "yes" ] ; then
 	host_libs="${host_libs} libgui"
@@ -232,7 +232,7 @@ case ${with_x} in
   yes | "")  # the default value for this tree is that X11 is available
 	;;
   no)
-	skipdirs="${skipdirs} libide tk gash"
+	skipdirs="${skipdirs} tk libgui libide gash"
 # start-sanitize-ide
 	skipdirs="${skipdirs} vmake jstools"
 # end-sanitize-ide
