@@ -1,3 +1,27 @@
+Wed Jul 31 16:35:58 1991  Roland H. Pesch  (pesch at cygint.cygnus.com)
+
+	* doc/gdb.texinfo: last changes for release.
+	Minor typo and formatting fixes; incorporated most fixes remaining from
+	filed mail commenting on earlier drafts.
+
+	Added warnings: pipes don't work in run command;
+	        conditions are converse of assertions;
+	      	step over fn without debug info goes to next fn;
+		vars may have "wrong" values near fn entrance, exit
+
+	Added example from Kingston on printing repeated nonadjacent values
+
+	Added explicit mention that in Emacs gdb mode C-c and C-z are like
+	shell mode for signals
+
+	Renamed "Stepping and Continuing" to "Continuing and Stepping" so it
+	doesn't sound so much like its parent "Stopping and Continuing"; also
+	moved entries on continue to top of section, so they don't get lost.
+
+	Improved installation directions in appendix, added manual formatting
+	instructions 
+
+
 Wed Jul 31 12:06:29 1991  John Gilmore  (gnu at cygint.cygnus.com)
 
 	* GDB-3.98 release.
