@@ -1719,56 +1719,59 @@ extern bfd_boolean _sh_elf_set_mach_from_flags
 
 /* This macro is to avoid lots of duplicated code in the body
    of xxx_relocate_section() in the various elfxx-xxxx.c files.  */
-#define RELOC_FOR_GLOBAL_SYMBOL(h, sym_hashes, r_symndx, symtab_hdr, relocation, sec, unresolved_reloc, info, warned)	\
-  do															\
-    {															\
-      /* It seems this can happen with erroneous or unsupported								\
-	 input (mixing a.out and elf in an archive, for example.)  */							\
-      if (sym_hashes == NULL)												\
-	return FALSE;													\
-															\
-      h = sym_hashes[r_symndx - symtab_hdr->sh_info];									\
-															\
-      while (h->root.type == bfd_link_hash_indirect									\
-	     || h->root.type == bfd_link_hash_warning)									\
-	h = (struct elf_link_hash_entry *) h->root.u.i.link;								\
-															\
-      warned = FALSE;													\
-      unresolved_reloc = FALSE;												\
-      relocation = 0;													\
-      if (h->root.type == bfd_link_hash_defined										\
-	  || h->root.type == bfd_link_hash_defweak)									\
-	{														\
-	  sec = h->root.u.def.section;											\
-	  if (sec == NULL												\
-	      || sec->output_section == NULL)										\
-	    /* Set a flag that will be cleared later if we find a							\
-	       relocation value for this symbol.  output_section							\
-	       is typically NULL for symbols satisfied by a shared							\
-	       library.  */												\
-	    unresolved_reloc = TRUE;											\
-	  else														\
-	    relocation = (h->root.u.def.value										\
-			  + sec->output_section->vma									\
-			  + sec->output_offset);									\
-	}														\
-      else if (h->root.type == bfd_link_hash_undefweak)									\
-	;														\
-      else if (info->unresolved_syms_in_objects == RM_IGNORE								\
-	       && ELF_ST_VISIBILITY (h->other) == STV_DEFAULT)								\
-	;														\
-      else														\
-	{														\
-	  if (! info->callbacks->undefined_symbol									\
-	      (info, h->root.root.string, input_bfd,									\
-	       input_section, rel->r_offset,										\
-	       (info->unresolved_syms_in_objects == RM_GENERATE_ERROR							\
-		|| ELF_ST_VISIBILITY (h->other))									\
-	       ))													\
-	    return FALSE;												\
-	  warned = TRUE;												\
-	}														\
-    }															\
+#define RELOC_FOR_GLOBAL_SYMBOL(info, input_bfd, input_section, rel,	\
+				r_symndx, symtab_hdr, sym_hashes,	\
+				h, sec, relocation,			\
+				unresolved_reloc, warned)		\
+  do									\
+    {									\
+      /* It seems this can happen with erroneous or unsupported		\
+	 input (mixing a.out and elf in an archive, for example.)  */	\
+      if (sym_hashes == NULL)						\
+	return FALSE;							\
+									\
+      h = sym_hashes[r_symndx - symtab_hdr->sh_info];			\
+									\
+      while (h->root.type == bfd_link_hash_indirect			\
+	     || h->root.type == bfd_link_hash_warning)			\
+	h = (struct elf_link_hash_entry *) h->root.u.i.link;		\
+									\
+      warned = FALSE;							\
+      unresolved_reloc = FALSE;						\
+      relocation = 0;							\
+      if (h->root.type == bfd_link_hash_defined				\
+	  || h->root.type == bfd_link_hash_defweak)			\
+	{								\
+	  sec = h->root.u.def.section;					\
+	  if (sec == NULL						\
+	      || sec->output_section == NULL)				\
+	    /* Set a flag that will be cleared later if we find a	\
+	       relocation value for this symbol.  output_section	\
+	       is typically NULL for symbols satisfied by a shared	\
+	       library.  */						\
+	    unresolved_reloc = TRUE;					\
+	  else								\
+	    relocation = (h->root.u.def.value				\
+			  + sec->output_section->vma			\
+			  + sec->output_offset);			\
+	}								\
+      else if (h->root.type == bfd_link_hash_undefweak)			\
+	;								\
+      else if (info->unresolved_syms_in_objects == RM_IGNORE		\
+	       && ELF_ST_VISIBILITY (h->other) == STV_DEFAULT)		\
+	;								\
+      else								\
+	{								\
+	  if (! info->callbacks->undefined_symbol			\
+	      (info, h->root.root.string, input_bfd,			\
+	       input_section, rel->r_offset,				\
+	       (info->unresolved_syms_in_objects == RM_GENERATE_ERROR	\
+		|| ELF_ST_VISIBILITY (h->other))			\
+	       ))							\
+	    return FALSE;						\
+	  warned = TRUE;						\
+	}								\
+    }									\
   while (0)
 
 #endif /* _LIBELF_H_ */

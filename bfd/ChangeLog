@@ -1,3 +1,17 @@
+2004-03-22  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf-bfd.h (RELOC_FOR_GLOBAL_SYMBOL): Add input_bfd, input_section
+	and rel args.  Group input and output args.  Wrap to 80 columns.
+	* elf-m10200.c, elf-m10300.c, elf32-arm.h, elf32-avr.c,
+	elf32-cris.c, elf32-d10v.c, elf32-fr30.c, elf32-h8300.c,
+	elf32-hppa.c, elf32-i386.c, elf32-i860.c, elf32-ip2k.c,
+	elf32-iq2000.c, elf32-m68hc1x.c, elf32-m68k.c, elf32-mcore.c,
+	elf32-msp430.c, elf32-openrisc.c, elf32-ppc.c, elf32-s390.c,
+	elf32-sparc.c, elf32-v850.c, elf32-vax.c, elf32-xstormy16.c,
+	elf32-xtensa.c, elf64-alpha.c, elf64-mmix.c, elf64-ppc.c,
+	elf64-s390.c, elf64-sparc.c, elf64-x86-64.c, elfxx-ia64.c: Update
+	RELOC_FOR_GLOBAL_SYMBOL invocation.
+
 2004-03-20  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf-bfd.h (RELOC_FOR_GLOBAL_SYMBOL): Report error if

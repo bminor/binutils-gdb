@@ -1,5 +1,5 @@
 /* Alpha specific support for 64-bit ELF
-   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
+   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004
    Free Software Foundation, Inc.
    Contributed by Richard Henderson <rth@tamu.edu>.
 
@@ -4399,12 +4399,12 @@ elf64_alpha_relocate_section (output_bfd, info, input_bfd, input_section,
 	  bfd_boolean warned;
 	  bfd_boolean unresolved_reloc;
 	  struct elf_link_hash_entry *hh;
-	  
-	  RELOC_FOR_GLOBAL_SYMBOL (hh,
-				   (struct elf_link_hash_entry *) alpha_elf_sym_hashes (input_bfd),
-				   r_symndx, symtab_hdr, value,
-				   sec, unresolved_reloc, info,
-				   warned);
+	  struct elf_link_hash_entry **sym_hashes = elf_sym_hashes (input_bfd);
+
+	  RELOC_FOR_GLOBAL_SYMBOL (info, input_bfd, input_section, rel,
+				   r_symndx, symtab_hdr, sym_hashes,
+				   hh, sec, value,
+				   unresolved_reloc, warned);
 
 	  if (warned)
 	    continue;

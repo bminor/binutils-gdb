@@ -1,6 +1,6 @@
 /* BFD back-end for HP PA-RISC ELF files.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1999, 2000, 2001,
-   2002, 2003 Free Software Foundation, Inc.
+   2002, 2003, 2004 Free Software Foundation, Inc.
 
    Original code by
 	Center for Software Science
@@ -3432,10 +3432,12 @@ elf32_hppa_relocate_section (bfd *output_bfd,
 	{
 	  struct elf_link_hash_entry *hh;
 	  bfd_boolean unresolved_reloc;
+	  struct elf_link_hash_entry **sym_hashes = elf_sym_hashes (input_bfd);
 
-	  RELOC_FOR_GLOBAL_SYMBOL (hh, elf_sym_hashes (input_bfd), r_symndx, symtab_hdr,
-				   relocation, sym_sec, unresolved_reloc, info,
-				   warned_undef);
+	  RELOC_FOR_GLOBAL_SYMBOL (info, input_bfd, input_section, rel,
+				   r_symndx, symtab_hdr, sym_hashes,
+				   hh, sym_sec, relocation,
+				   unresolved_reloc, warned_undef);
 
 	  if (relocation == 0
 	      && hh->root.type != bfd_link_hash_defined
