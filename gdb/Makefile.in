@@ -2029,9 +2029,10 @@ gdb-events.o: gdb-events.c gdb-events.h $(defs_h) $(gdbcmd_h)
 
 ui-out.o: ui-out.c $(defs_h) $(ui_out_h) expression.h language.h
 cli-out.o: cli-out.c $(defs_h) $(ui_out_h) $(cli_out_h)
+
 varobj.o: varobj.c $(defs_h) $(frame_h) $(value_h) \
 	$(language_h) valprint.h varobj.h wrapper.h
-	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(NO_WERROR_CFLAGS) $<
+
 wrapper.o: wrapper.c $(defs_h) $(frame_h) $(value_h) wrapper.h
 
 #
