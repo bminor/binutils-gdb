@@ -1,5 +1,7 @@
 Thu Jul 15 13:15:01 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* stabs.texinfo: Cleanups regarding statics.
+
 	* gdbinv-s.texi (Bootstrapping): Document exceptionHandler.
 	(Debug Session): Mention exceptionHandler.  Add xref to Bootstrapping.
 

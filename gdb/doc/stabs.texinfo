@@ -814,9 +814,8 @@ nesting is reflected in the nested bracketing stabs (@code{N_LBRAC},
 * Global Variables::		Variables used by more than one source file.
 * Register variables::		Variables in registers.
 * Common Blocks::		Variables statically allocated together.
-* Initialized statics::		Static variables with values.
-* Un-initialized statics::	Static variables initialialized to 0.
-* Parameters::			Passing variables to functions.
+* Statics::			Variables local to one source file.
+* Parameters::			Variables for arguments to functions.
 @end menu
 
 @node Automatic variables
@@ -974,99 +973,45 @@ looked at had a common block local to a function and it used the
 to a function (that is, if a common block @emph{can} be anything other
 than local to a function).
 
-@node Initialized statics
-@section Initialized static variables 
+@node Statics
+@section Static Variables
 
-@table @strong
-@item Directive:
-@code{.stabs}
-@item Type:
-@code{N_STSYM}
-@item Symbol Descriptors:
-@code{S} (file scope), @code{V} (procedure scope)
-@end table
+Initialized static variables are represented by the @samp{S} and
+@samp{V} symbol descriptors.  @samp{S} means file scope static, and
+@samp{V} means procedure scope static.
 
-Initialized static variables are represented by the @code{N_STSYM} stab
-type.  The symbol descriptor part of the string field shows if the
-variable is file scope static (@samp{S}) or procedure scope static
-(@samp{V}). The source line
+In a.out files, @code{N_STSYM} means the data segment (although gcc
+2.4.5 has a bug in that it uses @code{N_FUN}, so neither dbx nor gdb can
+find the variables), @code{N_FUN} means the text segment, and
+@code{N_LCSYM} means the bss segment.
+
+In xcoff files, each symbol has a section number, so the symbol type
+need not indicate the segment.
+
+@c In ELF files, it apparently is a big mess.  See kludge in dbxread.c
+@c in GDB.  FIXME: Investigate where this kludge comes from.
+@c
+@c This is the place to mention N_ROSYM; I'd rather do so once I can
+@c coherently explain how this stuff works for stabs-in-elf.
+@c
+For example, the source lines
 
 @example
-3  static int s_g_repeat = 2; 
+static const int var_const = 5;
+static int var_init = 2;
+static int var_noinit;
 @end example
 
 @noindent
-yields the following code.  The stab is located immediately preceding
-the storage for the variable it represents.  Since the variable in
-this example is file scope static the symbol descriptor is @samp{S}.
+yield the following stabs:
 
 @example
-@exdent @code{N_STSYM} (38): initialized static variable (data seg w/internal linkage)
-
-.stabs "@var{name}:
-        @var{descriptor}
-        @var{type-ref}",
-       N_STSYM,NIL,NIL,
-       @var{address}
-        
-26 .stabs "s_g_repeat:S1",38,0,0,_s_g_repeat
-27      .align 4
-28 _s_g_repeat:
-29      .word 2
+.stabs "var_const:S1",36,0,0,_var_const		; @r{36 = N_FUN}
+. . .
+.stabs "var_init:S1",38,0,0,_var_init		; @r{38 = N_STSYM}
+. . .
+.stabs "var_noinit:S1",40,0,0,_var_noinit	; @r{40 = N_LCSYM}
 @end example
-
-
-@node Un-initialized statics
-@section Un-initialized static variables
-
-@table @strong
-@item Directive:
-@code{.stabs}
-@item Type:
-@code{N_LCSYM}
-@item Symbol Descriptors:
-@code{S} (file scope), @code{V} (procedure scope)
-@end table
-
-Un-initialized static variables are represented by the @code{N_LCSYM}
-stab type.  The symbol descriptor part of the string shows if the
-variable is file scope static (@samp{S}) or procedure scope static
-(@samp{V}).  In this example it is procedure scope static.  The source
-line allocating @code{s_flap} immediately follows the open brace for the
-procedure @code{main}.
-
-@example
-20 @{
-21      static float s_flap;
-@end example
-
-The code that reserves storage for the variable @code{s_flap} precedes the
-body of body of @code{main}.  
-
-@example
-39      .reserve _s_flap.0,4,"bss",4
-@end example
-
-But since @code{s_flap} is scoped locally to @code{main}, its stab is
-located with the other stabs representing symbols local to @code{main}.
-The stab for @code{s_flap} is located just before the @code{N_LBRAC} for
-@code{main}.
-
-@example
-@exdent @code{N_LCSYM} (40): uninitialized static var (BSS seg w/internal linkage)
-
-.stabs "@var{name}:
-        @var{descriptor}
-        @var{type-ref}",
-        N_LCSYM, NIL, NIL,
-        @var{address}
-
-97 .stabs "s_flap:V12",40,0,0,_s_flap.0
-98 .stabs "times:1",128,0,0,-20
-99 .stabn 192,0,0,LBB2                  # N_LBRAC for main.
-@end example
-
-@c ............................................................
 
 @node Parameters
 @section Parameters
@@ -3025,14 +2970,15 @@ Global symbol, @xref{N_GSYM}.
 @item 0x22     N_FNAME
 Function name (for BSD Fortran), @xref{N_FNAME}.
 
-@item 0x24     N_FUN     
-Function name or text segment variable for C, @xref{N_FUN}.
+@item 0x24     N_FUN
+Function name (@pxref{Procedures}) or text segment variable
+(@pxref{Statics}).
 
-@item 0x26     N_STSYM   
-Static symbol (data segment variable with internal linkage), @xref{N_STSYM}.
+@item 0x26 N_STSYM
+Data segment file-scope variable, @xref{Statics}.
 
-@item 0x28     N_LCSYM   
-.lcomm symbol (BSS segment variable with internal linkage), @xref{N_LCSYM}.
+@item 0x28 N_LCSYM
+BSS segment file-scope variable, @xref{Statics}.
 
 @item 0x2a N_MAIN    
 Name of main routine, @xref{Main Program}.
@@ -3199,7 +3145,7 @@ Floating point register variable, @xref{Register variables}.
 Parameter in floating point register, @xref{Parameters}.
 
 @item f
-Static function, @xref{Procedures}.
+File scope function, @xref{Procedures}.
 
 @item F
 Global function, @xref{Procedures}.
@@ -3249,8 +3195,7 @@ Register parameter @xref{Parameters}.
 Register variable, @xref{Register variables}.
 
 @item S
-Static file scope variable @xref{Initialized statics},
-@xref{Un-initialized statics}.
+File scope variable, @xref{Statics}.
 
 @item t
 Type name, @xref{Typedefs}.
@@ -3262,8 +3207,7 @@ enumeration, struct or union tag, @xref{Typedefs}.
 Parameter passed by reference, @xref{Parameters}.
 
 @item V
-Static procedure scope variable @xref{Initialized statics},
-@xref{Un-initialized statics}.
+Procedure scope static variable, @xref{Statics}.
 
 @item x
 Conformant array, @xref{Parameters}.
@@ -3428,9 +3372,6 @@ Finally, any further information.
 @menu
 * N_GSYM::			Global variable
 * N_FNAME::			Function name (BSD Fortran)
-* N_FUN::			C Function name or text segment variable
-* N_STSYM::			Initialized static symbol
-* N_LCSYM::			Uninitialized static symbol
 * N_PC::			Pascal global symbol
 * N_NSYMS::			Number of symbols
 * N_NOMAP::			No DST map
@@ -3480,53 +3421,6 @@ Function name (for BSD Fortran)
 
 Only the "name" field is significant.  The location of the symbol is
 obtained from the corresponding extern symbol. 
-
-@node N_FUN
-@section 36 - 0x24 - N_FUN
-
-Function name (@pxref{Procedures}) or text segment variable
-(@pxref{Variables}).
-@example
-@exdent @emph{For functions:}
-"name" -> "proc_name:#return_type"
-                     #  -> F (global function)
-                           f (local function)
-desc  -> line num for proc start.  (GCC doesn't set and DBX doesn't miss it.)
-value -> Code address of proc start.
-
-@exdent @emph{For text segment variables:}
-<<How to create one?>>
-@end example
-
-@node N_STSYM
-@section 38 - 0x26 - N_STSYM   
-Initialized static symbol (data segment w/internal linkage).
-
-@display
-.stabs "name", N_STSYM, NIL, NIL, value
-@end display
-
-@example
-"name" -> "symbol_name#type"
-                      # -> S (scope global to compilation unit)
-                        -> V (scope local to a procedure)
-value  -> Data Address
-@end example
-
-@node N_LCSYM
-@section 40 - 0x28 - N_LCSYM    
-Unitialized static (.lcomm) symbol(BSS segment w/internal linkage).
-
-@display
-.stabs "name", N_LCLSYM, NIL, NIL, value
-@end display
-
-@example
-"name" -> "symbol_name#type"
-                      # -> S (scope global to compilation unit)
-                        -> V (scope local to procedure)
-value  -> BSS Address
-@end example
 
 @node N_PC
 @section 48 - 0x30 - N_PC               
@@ -3740,21 +3634,16 @@ What ends the procedure scope?  Is it the proc block's N_RBRAC or the
 next N_FUN?  (I believe its the first.)
 
 @item
-The comment in xcoff.h says DBX_STATIC_CONST_VAR_CODE is used for
-static const variables.  DBX_STATIC_CONST_VAR_CODE is set to N_FUN by
-default, in dbxout.c.  If included, xcoff.h redefines it to N_STSYM.
-But testing the default behaviour, my Sun4 native example shows
-N_STSYM not N_FUN is used to describe file static initialized
-variables.  (the code tests for TREE_READONLY(decl) &&
-!TREE_THIS_VOLATILE(decl) and if true uses DBX_STATIC_CONST_VAR_CODE).
- 
-@item
+@c FIXME: This should go with the other stuff about global variables.
 Global variable stabs don't have location information.  This comes
 from the external symbol for the same variable.  The external symbol
 has a leading underbar on the _name of the variable and the stab does
 not.  How do we know these two symbol table entries are talking about
-the same symbol when their names are different?
+the same symbol when their names are different? (Answer: the debugger
+knows that external symbols have leading underbars).
 
+@c FIXME: This is absurdly vague; there all kinds of differences, some
+@c of which are the same between gnu & sun, and some of which aren't.
 @item
 Can gcc be configured to output stabs the way the Sun compiler
 does, so that their native debugging tools work? <NO?> It doesn't by
@@ -3776,6 +3665,8 @@ BSD a.out stab types correspond to AIX xcoff storage classes. In general the
 mapping is N_STABTYPE becomes C_STABTYPE.  Some stab types in a.out
 are not supported in xcoff. See Table E. for full mappings.
 
+@c FIXME: Get C_* types for the block, figure out whether it is always
+@c used (I suspect not), explain clearly, and move to node Statics.
 exception: 
 initialised static N_STSYM and un-initialized static N_LCSYM both map
 to the C_STSYM storage class.  But the destinction is preserved
@@ -3783,11 +3674,12 @@ because in xcoff N_STSYM and N_LCSYM must be emited in a named static
 block.  Begin the block with .bs s[RW] data_section_name for N_STSYM
 or .bs s bss_section_name for N_LCSYM.  End the block with .es
 
+@c FIXME: I think they are trying to say something about whether the
+@c assembler defaults the value to the location counter.
 @item
 If the xcoff stab is a N_FUN (C_FUN) then follow the string field with
 ,. instead of just , 
 @end itemize
-
 
 (I think that's it for .s file differences.  They could stand to be
 better presented.  This is just a list of what I have noticed so far.
