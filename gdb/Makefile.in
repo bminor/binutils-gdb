@@ -41,9 +41,11 @@ docdir = $(datadir)/doc
 
 SHELL = /bin/sh
 
-INSTALL = install -c
+INSTALL = $(srcdir)/../install.sh -c
 INSTALL_PROGRAM = $(INSTALL)
 INSTALL_DATA = $(INSTALL)
+INSTALL_XFORM = $(INSTALL) -t=$(program_transform_name)
+INSTALL_XFORM1 = $(INSTALL_XFORM) -b=.1
 
 AR = ar
 AR_FLAGS = qv
@@ -446,14 +448,8 @@ gdb.z:gdb.1
 # source file and doesn't care about rebuilding or just wants to save the
 # time it takes for make to check that all is up to date.
 install:
-	-parent=`echo $(bindir)|sed -e 's@/[^/]*$$@@'`; \
-	if [ -d $$parent ] ; then true ; else mkdir $$parent ; fi
-	-if [ -d $(bindir) ] ; then true ; else mkdir $(bindir) ; fi
-	-parent=`echo $(man1dir)|sed -e 's@/[^/]*$$@@'`; \
-	if [ -d $$parent ] ; then true ; else mkdir $$parent ; fi
-	-if [ -d $(man1dir) ] ; then true ; else mkdir $(man1dir) ; fi
-	-n=`t='$(program_transform_name)'; echo gdb | sed -e "" $$t`; \
-	$(INSTALL_PROGRAM) gdb $(bindir)/$$n; \
+	$(INSTALL_XFORM) gdb $(bindir)/gdb
+	$(INSTALL_XFORM1) $(srcdir)/gdb.1 $(man1dir)/gdb.1
 	$(INSTALL_DATA) $(srcdir)/gdb.1 $(man1dir)/$$n.1
 	$(M_INSTALL)
 	@$(MAKE) DO=install "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS) subdir_do
