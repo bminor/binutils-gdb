@@ -1,3 +1,7 @@
+Tue Oct  3 22:38:55 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* arsup.c (ar_save): Use rename, not unlink/link/unlink.
+
 Mon Oct  2 12:10:25 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* strings.c (main): Exit with zero status if no files are given
