@@ -576,6 +576,18 @@ coff_mangle_symbols (bfd_ptr)
 		((combined_entry_type *) s->u.syment.n_value)->offset;
 	      s->fix_value = 0;
 	    }
+	  if (s->fix_line)
+	    {
+	      /* The value is the offset into the line number entries
+                 for the symbol's section.  On output, the symbol's
+                 section should be N_DEBUG.  */
+	      s->u.syment.n_value =
+		(coff_symbol_ptr->symbol.section->output_section->line_filepos
+		 + s->u.syment.n_value * bfd_coff_linesz (bfd_ptr));
+	      coff_symbol_ptr->symbol.section =
+		coff_section_from_bfd_index (bfd_ptr, N_DEBUG);
+	      BFD_ASSERT (coff_symbol_ptr->symbol.flags & BSF_DEBUGGING);
+	    }
 	  for (i = 0; i < s->u.syment.n_numaux; i++)
 	    {
 	      combined_entry_type *a = s + i + 1;
@@ -729,7 +741,8 @@ coff_write_symbol (abfd, symbol, native, written, string_size_p,
   if (native->u.syment.n_sclass == C_FILE)
     symbol->flags |= BSF_DEBUGGING;
 
-  if (symbol->flags & BSF_DEBUGGING)
+  if (symbol->flags & BSF_DEBUGGING
+      && bfd_is_abs_section (symbol->section))
     {
       native->u.syment.n_scnum = N_DEBUG;
     }
@@ -1699,12 +1712,20 @@ coff_print_symbol (abfd, filep, symbol, how)
     case bfd_print_symbol_all:
       if (coffsymbol (symbol)->native)
 	{
+	  unsigned long val;
 	  unsigned int aux;
 	  combined_entry_type *combined = coffsymbol (symbol)->native;
 	  combined_entry_type *root = obj_raw_syments (abfd);
 	  struct lineno_cache_entry *l = coffsymbol (symbol)->lineno;
 
 	  fprintf (file, "[%3ld]", (long) (combined - root));
+
+	  if (! combined->fix_value)
+	    val = (unsigned long) combined->u.syment.n_value;
+	  else
+	    val = ((unsigned long)
+		   ((combined_entry_type *) combined->u.syment.n_value
+		    - root));
 
 	  fprintf (file,
 		   "(sec %2d)(fl 0x%02x)(ty %3x)(scl %3d) (nx %d) 0x%08lx %s",
@@ -1713,7 +1734,7 @@ coff_print_symbol (abfd, filep, symbol, how)
 		   combined->u.syment.n_type,
 		   combined->u.syment.n_sclass,
 		   combined->u.syment.n_numaux,
-		   (unsigned long) combined->u.syment.n_value,
+		   val,
 		   symbol->name);
 
 	  for (aux = 0; aux < combined->u.syment.n_numaux; aux++)

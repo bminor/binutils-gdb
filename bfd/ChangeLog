@@ -1,5 +1,16 @@
 Mon Oct  9 11:24:08 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* coffcode.h (combined_entry_type): Add fix_line field.
+	(coff_slurp_line_table): Warn if we try to set the lineno field of
+	a symbol twice.
+	(coff_slurp_symbol_table): If RS6000COFF_C, handle C_BINCL and
+	C_EINCL by setting fix_line.  Fix C_BSTAT symbol value.
+	* coffgen.c (coff_mangle_symbols): Handle fix_line.
+	(coff_write_symbol): Only use N_DEBUG if the symbol is in the
+	absolute section.
+	(coff_print_symbol): Print fix_value symbols in a useful fashion.
+	* libcoff.h: Rebuild.
+
 	* libcoff-in.h (struct xcoff_tdata): Define.
 	(xcoff_data): Define.
 	* bfd.c (struct _bfd): Add xcoff_obj_data field to tdata union.

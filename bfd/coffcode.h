@@ -268,6 +268,11 @@ CODE_FRAGMENT
 .          Created by coff_pointerize_aux. *}
 .unsigned int fix_scnlen : 1;
 .
+.       {* Fix up an XCOFF C_BINCL/C_EINCL symbol.  The value is the
+.          index into the line number entries.  Set by
+.          coff_slurp_symbol_table.  *}
+.unsigned int fix_line : 1;
+.
 .       {* The container for the symbol structure as read and translated
 .           from the file. *}
 .
@@ -2453,6 +2458,13 @@ coff_slurp_line_table (abfd, asect)
 	      (coff_symbol_type *) (dst.l_addr.l_symndx
 		      + obj_raw_syments (abfd))->u.syment._n._n_n._n_zeroes;
 	      cache_ptr->u.sym = (asymbol *) sym;
+	      if (sym->lineno != NULL)
+		{
+		  (*_bfd_error_handler)
+		    ("%s: warning: duplicate line number information for `%s'",
+		     bfd_get_filename (abfd),
+		     bfd_asymbol_name (&sym->symbol));
+		}
 	      sym->lineno = cache_ptr;
 	    }
 	  else
@@ -2641,8 +2653,6 @@ coff_slurp_symbol_table (abfd)
 	    case C_FILE:	/* file name			 */
 	    case C_STRTAG:	/* structure tag		 */
 #ifdef RS6000COFF_C
-	    case C_BINCL:	/* beginning of include file     */
-	    case C_EINCL:	/* ending of include file        */
 	    case C_GSYM:
 	    case C_LSYM:
 	    case C_PSYM:
@@ -2659,15 +2669,43 @@ coff_slurp_symbol_table (abfd)
 	      break;
 
 #ifdef RS6000COFF_C
+	    case C_BINCL:	/* beginning of include file     */
+	    case C_EINCL:	/* ending of include file        */
+	      /* The value is actually a pointer into the line numbers
+                 of the file.  We locate the line number entry, and
+                 set the section to the section which contains it, and
+                 the value to the index in that section.  */
+	      {
+		asection *sec;
+
+		dst->symbol.flags = BSF_DEBUGGING;
+		for (sec = abfd->sections; sec != NULL; sec = sec->next)
+		  if (sec->line_filepos <= src->u.syment.n_value
+		      && (sec->line_filepos + sec->lineno_count * LINESZ
+			  > src->u.syment.n_value))
+		    break;
+		if (sec == NULL)
+		  dst->symbol.value = 0;
+		else
+		  {
+		    dst->symbol.section = sec;
+		    dst->symbol.value = ((src->u.syment.n_value
+					  - sec->line_filepos)
+					 / LINESZ);
+		    src->fix_line = 1;
+		  }
+	      }
+	      break;
+
 	    case C_BSTAT:
 	      dst->symbol.flags = BSF_DEBUGGING;
-	      dst->symbol.value = src->u.syment.n_value;
 
 	      /* The value is actually a symbol index.  Save a pointer
 		 to the symbol instead of the index.  FIXME: This
 		 should use a union.  */
 	      src->u.syment.n_value =
 		(long) (native_symbols + src->u.syment.n_value);
+	      dst->symbol.value = src->u.syment.n_value;
 	      src->fix_value = 1;
 	      break;
 #endif

@@ -294,6 +294,11 @@ unsigned int fix_end : 1;
           Created by coff_pointerize_aux. */
 unsigned int fix_scnlen : 1;
 
+        /* Fix up an XCOFF C_BINCL/C_EINCL symbol.  The value is the
+          index into the line number entries.  Set by
+          coff_slurp_symbol_table.  */
+unsigned int fix_line : 1;
+
         /* The container for the symbol structure as read and translated
            from the file. */
 
