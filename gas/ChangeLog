@@ -720,7 +720,7 @@ end-sanitize-v850e
 	* config/tc-v850.c (.v850): New pseudo op.
 start-sanitize-v850e
 	* config/tc-v850.c (.v850e): New pseudo op.
-	* config/tc-v850.c (.v850eq): New pseudo op.
+	* config/tc-v850.c (.v850ea): New pseudo op.
 end-sanitize-v850e
 	
 
@@ -747,7 +747,7 @@ Mon Sep  8 12:33:40 1997  Nick Clifton  <nickc@cygnus.com>
 	* config/tc-v850.c (v850_insert_operand): Add
 	-mwarn_unsigned_overflow. 
 	(md_begin): Set BFD machine number based on machine variable.
-	(md_parse_option): Add -mv850, -mv850e and -mv850eq options.
+	(md_parse_option): Add -mv850, -mv850e and -mv850ea options.
 
 Mon Sep  8 11:20:46 1997  Ian Lance Taylor  <ian@cygnus.com>
 
@@ -968,12 +968,12 @@ Mon Aug 18 11:24:21 1997  Nick Clifton  <nickc@cygnus.com>
 
 Mon Aug 18 11:24:21 1997  Nick Clifton  <nickc@cygnus.com>
 
-	* config/tc-v850.c: Remove support_v850eq flag and command line
+	* config/tc-v850.c: Remove support_v850ea flag and command line
 	option. 
 	
-	* configure.in (emulations): Add support for v850eq target
+	* configure.in (emulations): Add support for v850ea target
 
-	* configure (emulations): Add support for v850eq target
+	* configure (emulations): Add support for v850ea target
 end-sanitize-v850e
 
 Fri Aug 15 14:00:13 1997  Ian Lance Taylor  <ian@cygnus.com>
@@ -1010,7 +1010,7 @@ Wed Aug 13 18:58:56 1997  Nick Clifton  <nickc@cygnus.com>
 
 start-sanitize-v850e
 	* config/tc-v850.c (md_assemble, md_show_usage, md_parse_option):
-	Add support for v850eq instructions.
+	Add support for v850ea instructions.
 
 	* config/tc-v850.c (md_assemble, md_show_usage, md_parse_option):
 	Add support for v850e instructions.
