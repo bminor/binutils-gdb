@@ -4555,10 +4555,12 @@ s_alpha_prologue (ignore)
   switch (arg)
     {
       case 0: /* No PV required.  */
-	S_SET_OTHER (sym, STO_ALPHA_NOPV);
+	S_SET_OTHER (sym, STO_ALPHA_NOPV
+			  | (S_GET_OTHER (sym) & ~STO_ALPHA_STD_GPLOAD));
 	break;
       case 1: /* Std GP load.  */
-	S_SET_OTHER (sym, STO_ALPHA_STD_GPLOAD);
+	S_SET_OTHER (sym, STO_ALPHA_STD_GPLOAD
+			  | (S_GET_OTHER (sym) & ~STO_ALPHA_STD_GPLOAD));
 	break;
       case 2: /* Non-std use of PV.  */
 	break;

@@ -1,3 +1,8 @@
+2000-11-14  Jakub Jelinek  <jakub@redhat.com>
+
+	* elf64-alpha.c (elf64_alpha_relax_opt_call): Only check bits used
+	by STO_ALPHA constants.
+
 2000-11-14  Kazu Hirata  <kazu@hxi.com>
 
 	* coff-pmac.c: Fix formatting.

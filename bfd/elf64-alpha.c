@@ -1304,12 +1304,12 @@ elf64_alpha_relax_opt_call (info, symval)
 
   /* If the symbol is marked NOPV, we are being told the function never
      needs its procedure value.  */
-  if (info->other == STO_ALPHA_NOPV)
+  if ((info->other & STO_ALPHA_STD_GPLOAD) == STO_ALPHA_NOPV)
     return symval;
 
   /* If the symbol is marked STD_GP, we are being told the function does
      a normal ldgp in the first two words.  */ 
-  else if (info->other == STO_ALPHA_STD_GPLOAD)
+  else if ((info->other & STO_ALPHA_STD_GPLOAD) == STO_ALPHA_STD_GPLOAD)
     ;
 
   /* Otherwise, we may be able to identify a GP load in the first two
