@@ -1,3 +1,9 @@
+2004-04-18  Mark Kettenis  <kettenis@gnu.org>
+
+	* libaout.h (enum machine_type): Add M_POWERPC_NETBSD.
+	* netbsd-core.c (netbsd_core_file_p): Set architecture for PowerPC
+	core files.
+
 2004-04-17  Brian Ford  <ford@vss.fsi.com>
 
 	* peXXigen.c (_bfd_XXi_swap_aouthdr_out): Use the first non-zero

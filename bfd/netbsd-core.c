@@ -177,6 +177,10 @@ netbsd_core_file_p (abfd)
      bfd_default_set_arch_mach (abfd, bfd_arch_i386, bfd_mach_i386_i386);
      break;
 
+   case M_POWERPC_NETBSD:
+     bfd_default_set_arch_mach (abfd, bfd_arch_powerpc, bfd_mach_ppc);
+     break;
+
    case M_SPARC_NETBSD:
      bfd_default_set_arch_mach (abfd, bfd_arch_sparc, bfd_mach_sparc);
      break;
