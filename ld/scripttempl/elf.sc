@@ -26,6 +26,7 @@
 #	OTHER_BSS_SYMBOLS - symbols that appear at the start of the
 #		.bss section besides __bss_start.
 #	DATA_PLT - .plt should be in data segment, not text segment.
+#	PLT_BEFORE_GOT - .plt just before .got when .plt is in data segement.
 #	BSS_PLT - .plt should be in bss segment
 #	TEXT_DYNAMIC - .dynamic in text segment, not data segment.
 #	EMBEDDED - whether this is for an embedded system. 
@@ -358,7 +359,7 @@ cat <<EOF
   ${RELOCATING+${DATA_SEGMENT_RELRO_END}}
   ${NO_SMALL_DATA+${RELRO_NOW-${SEPARATE_GOTPLT-${GOT}}}}
 
-  ${DATA_PLT+${PLT}}
+  ${DATA_PLT+${PLT_BEFORE_GOT-${PLT}}}
 
   .data         ${RELOCATING-0} :
   {
@@ -370,6 +371,7 @@ cat <<EOF
   .data1        ${RELOCATING-0} : { *(.data1) }
   ${WRITABLE_RODATA+${RODATA}}
   ${OTHER_READWRITE_SECTIONS}
+  ${DATA_PLT+${PLT_BEFORE_GOT+${PLT}}}
   ${RELOCATING+${OTHER_GOT_SYMBOLS}}
   ${NO_SMALL_DATA-${GOT}}
   ${OTHER_GOT_SECTIONS}

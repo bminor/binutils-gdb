@@ -1,3 +1,10 @@
+2004-07-05  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
+
+	* emulparams/hppa64linux.sh: Define PLT_BEFORE_GOT.
+	* emulparams/hppalinux.sh: Likewise.
+	* scripttempl/elf.sc: Place .plt just before .got when .plt is in
+	data segment and PLT_BEFORE_GOT is defined.
+
 2004-07-03  Aaron W. LaFramboise  <aaron98wiridge9@aaronwl.com>
 
 	* ld.texinfo (WIN32): Document PE weak symbols.
