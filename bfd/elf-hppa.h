@@ -535,6 +535,11 @@ _bfd_elf_hppa_gen_reloc_type (abfd, base_type, format, field, ignore, sym)
 	}
       break;
 
+    case R_PARISC_SEGREL32:
+    case R_PARISC_SEGBASE:
+      /* The defaults are fine for these cases.  */
+      break;
+
     default:
       return NULL;
     }

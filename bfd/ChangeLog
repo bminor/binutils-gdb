@@ -1,3 +1,10 @@
+Tue Aug 10 12:48:09 1999  Jeffrey A Law  (law@cygnus.com)
+
+	* elf-hppa.h (_bfd_elf_hppa_gen_reloc_type): Handle
+	R_HPPA_SEGBASE and R_HPPA_SEGREL32.
+	* cpu-hppa.c (bfd_hppa20w_arch): New entry in architecture info
+	list.
+
 Tue Aug 10 00:34:29 1999  Mark P. Mitchell  <mark@codesourcery.com>
                           Ralf Baechle <ralf@uni-koblenz.de>
 
