@@ -3,7 +3,22 @@ Fri Oct  9 18:02:25 1998  Doug Evans  <devans@canuck.cygnus.com>
 	* interp.c: #include "itable.h" if WITH_IGEN.
 	(get_insn_name): New function.
 	(sim_open): Initialize CPU_INSN_NAME,CPU_MAX_INSNS.
+	* sim-main.h (MAX_INSNS,INSN_NAME): Delete.
 
+start-sanitize-sky
+Tue Sep 22 10:35:37 1998  Frank Ch. Eigler  <fche@cygnus.com>
+ 
+	* sim-main.c (tlb_try_match): Specially match virtual
+	pages mapped to scratchpad RAM, an unimplemented feature.
+
+end-sanitize-sky
+start-sanitize-r5900
+Fri Sep 18 11:31:16 1998  Frank Ch. Eigler <fche@cygnus.com>
+
+	* r5900.igen (prot3w): Correct rotation sequence; patch
+	from customer.
+
+end-sanitize-r5900
 Mon Sep 14 12:36:44 1998  Frank Ch. Eigler  <fche@cygnus.com>
 
 	* configure: Rebuilt to inhale new common/aclocal.m4.
@@ -12,6 +27,13 @@ start-sanitize-r5900
 Thu Sep 10 11:50:54 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* r5900.igen (plzcw): Make `i' signed.
+
+Wed Sep  9 15:02:10 1998  Doug Evans  <devans@canuck.cygnus.com>
+  
+	* sim-main.h (COP0_COUNT,COP0_COMPARE,status_IM7): New macros.
+	* sky-engine.c (cpu_issue): Increment COP0_COUNT and signal an
+	interrupt if == COP0_COMPARE and interrupt masks/enables allow it.
+	* interp.c (signal_exception, sky version): Handle INT 2.
 
 Wed Sep 9 11:28:20 1998  Ron Unrau <runrau@cygnus.com>
 
@@ -49,6 +71,13 @@ Tue Aug 25 12:49:46 1998  Frank Ch. Eigler  <fche@cygnus.com>
 	frequent hw-trace messages.
 
 end-sanitize-tx3904
+start-sanitize-sky	
+Tue Aug 11 13:52:16 1998  Frank Ch. Eigler  <fche@cygnus.com>
+ 
+	* interp.c (signal_exception): Set IP3 bit in CAUSE on
+	sky interrupt.
+
+end-sanitize-sky	
 Fri Jul 31 18:14:16 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* vr.igen (MulAcc): Identify as a vr4100 specific function.
@@ -67,8 +96,48 @@ end-sanitize-cygnus
 start-sanitize-vr4320
 	* vr4320.igen: Move instructions to vr.igen.
 	* Makefile.in (IGEN_INCLUDE): Remove vr5320.igen.
-end-sanitize-vr4320
 	
+end-sanitize-vr4320
+start-sanitize-sky		
+Fri Jul 24 16:01:03 1998  Ian Carmichael  <iancarm@cygnus.com>
+
+	* interp.c (MONITOR_SIZE): Make 1MB monitor for SKY.
+	* mips.igen (BREAK): Fix 0xffff2 monitor call.  Slightly less
+	confusing message if not enough --load-next options appear.
+ 
+	* sky-pke.h (VUx_MEMx_SRCADDR_START): Move to 0x19800000 range.
+	* sim-main.c (GDB_COMM_AREA): Move to 0x19810000.
+	* sky-gdb.c (init_fifo_bp_cache): Use VIO_BASE when reading GDB area.
+	(resume_handler): Same.
+	(suspend_handler): Same.
+	
+Wed Jul 22 13:04:13 1998  Frank Ch. Eigler  <fche@cygnus.com>
+ 
+	* mips.igen (break): Implement LOAD_INSTRUCTION ("break 0xffff1")
+	to trigger multi-phase load.
+
+	* sim-main.c: Include sim-assert.h for ASSERT macro.
+	* sim-main.h (PRINTF_INSTRUCTION): Correct bit pattern for
+	"break 0xffff2".
+
+Tue Jul 21 18:37:36 1998  Ian Carmichael  <iancarm@cygnus.com>
+  
+	MMU support.
+	* interp.c (sim_open): Initialize TLB.
+	* interp.c (signal_exceptions): New 5900 handling.
+	* r5900.igen (TLBWR, TLBWI, TLBR, TLBP): Make these work.
+	* sim-main.c (tlb_try_match, tlb_lookup): New functions.
+	(address_translation): Use the TLB.
+	* sim-main.h (r4000_tlb_entry_t): New type.
+	(TLB_*): New constants.
+	(COP0_*): New register names.
+  
+	Sky character I/O device.
+	* sky-psio.c: New file.
+	* sky-psio.h: New file.
+	* Makefile.in: Add sky-psio.o.
+	
+end-sanitize-sky	
 start-sanitize-r5900
 Tue Jul 14 16:10:45 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 

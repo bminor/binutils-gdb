@@ -35,9 +35,9 @@ sky_files="ChangeLog.sky sky-device.c sky-device.h sky-dma.c sky-dma.h sky-bits.
 sky_files="$sky_files sky-engine.c sky-gpuif.c sky-gpuif.h"
 sky_files="$sky_files sky-gs.c sky-gs.h"
 sky_files="$sky_files sky-hardware.c sky-hardware.h sky-gdb.c sky-gdb.h"
-sky_files="$sky_files sky-libvpe.c sky-libvpe.h sky-pke.c sky-pke.h"
+sky_files="$sky_files sky-libvpe.c sky-libvpe.h sky-vif.c sky-vif.h"
 sky_files="$sky_files sky-vpe.h sky-vu.h sky-vu.c sky-vudis.h sky-vudis.c"
-sky_files="$sky_files sky-console.h sky-console.c"
+sky_files="$sky_files sky-console.h sky-console.c sky-psio.h sky-psio.c"
 sky_files="$sky_files sky-interact.h sky-interact.c"
 sky_files="$sky_files sky-indebug.h sky-indebug.c"
 if ( echo $* | grep keep\-sky > /dev/null ) ; then

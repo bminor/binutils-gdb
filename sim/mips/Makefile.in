@@ -10,13 +10,17 @@ SIM_NO_OBJ =
 
 # start-sanitize-sky
 SIM_SKY_OBJS = \
+	sky-console.o \
 	sky-device.o \
 	sky-dma.o \
 	sky-engine.o \
+	sky-interact.o \
 	sky-gpuif.o \
 	sky-hardware.o \
+	sky-indebug.o \
 	sky-libvpe.o \
-	sky-pke.o \
+	sky-vif.o \
+	sky-psio.o \
 	sky-vu.o \
 	sky-vudis.o \
 	sky-gs.o \
@@ -29,7 +33,7 @@ SIM_IGEN_OBJ = \
 	semantics.o \
 	idecode.o \
 	icache.o \
-	engine.o \
+	@mips_igen_engine@ \
 	irun.o \
 
 SIM_M16_OBJ = \
@@ -128,15 +132,12 @@ IGEN_INCLUDE=\
 	$(start-sanitize-r5900) \
 	$(srcdir)/r5900.igen \
 	$(end-sanitize-r5900) \
-	$(start-sanitize-vr5400) \
-	$(srcdir)/vr5400.igen \
+	$(start-sanitize-cygnus) \
 	$(srcdir)/mdmx.igen \
-	$(end-sanitize-vr5400) \
-	$(start-sanitize-vr4320) \
-	$(srcdir)/vr4320.igen \
-	$(end-sanitize-vr4320) \
+	$(end-sanitize-cygnus) \
 	$(srcdir)/m16.igen \
-	$(srcdir)/tx.igen
+	$(srcdir)/tx.igen \
+	$(srcdir)/vr.igen \
 
 SIM_IGEN_ALL = tmp-igen
 

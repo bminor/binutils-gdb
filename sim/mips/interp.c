@@ -39,12 +39,16 @@ code on the hardware.
 #include "sim-assert.h"
 #include "sim-hw.h"
 
+#if WITH_IGEN
+#include "itable.h"
+#endif
+
 /* start-sanitize-sky */
 #ifdef TARGET_SKY
 #include "sky-vu.h"
 #include "sky-vpe.h"
 #include "sky-libvpe.h"
-#include "sky-pke.h"
+#include "sky-vif.h"
 #include "idecode.h"
 #include "sky-gdb.h"
 #endif
@@ -159,6 +163,8 @@ static void ColdReset PARAMS((SIM_DESC sd));
 #ifdef TARGET_SKY
 #undef MEM_SIZE
 #define MEM_SIZE (16 << 20) /* 16 MB */
+#undef MONITOR_SIZE
+#define MONITOR_SIZE 0x100000  /* 1MB */
 #endif
 /* end-sanitize-sky */
 
@@ -167,6 +173,10 @@ static char *tracefile = "trace.din"; /* default filename for trace log */
 FILE *tracefh = NULL;
 static void open_trace PARAMS((SIM_DESC sd));
 #endif /* TRACE */
+
+#if WITH_IGEN
+static const char * get_insn_name (sim_cpu *, int);
+#endif
 
 /* simulation target board.  NULL=canonical */
 static char* board = NULL;
@@ -329,7 +339,7 @@ interrupt_event (SIM_DESC sd, void *data)
   if (SR & status_IE)
     {
       interrupt_pending = 0;
-      SignalExceptionInterrupt ();
+      SignalExceptionInterrupt (1); /* interrupt "1" */
     }
   else if (!interrupt_pending)
     sim_events_schedule (sd, 1, interrupt_event, data);
@@ -366,6 +376,12 @@ sim_open (kind, cb, abfd, argv)
   STATE_WATCHPOINTS (sd)->pc = &(PC);
   STATE_WATCHPOINTS (sd)->sizeof_pc = sizeof (PC);
   STATE_WATCHPOINTS (sd)->interrupt_handler = interrupt_event;
+
+#if WITH_IGEN
+  /* Initialize the mechanism for doing insn profiling.  */
+  CPU_INSN_NAME (cpu) = get_insn_name;
+  CPU_MAX_INSNS (cpu) = nr_itable_entries;
+#endif
 
   STATE = 0;
   
@@ -431,6 +447,10 @@ sim_open (kind, cb, abfd, argv)
     {
       /* match VIRTUAL memory layout of JMR-TX3904 board */
 
+      /* --- environment --- */
+
+      STATE_ENVIRONMENT (sd) = OPERATING_ENVIRONMENT;
+
       /* --- memory --- */
 
       /* ROM: 0x9FC0_0000 - 0x9FFF_FFFF and 0xBFC0_0000 - 0xBFFF_FFFF */
@@ -451,18 +471,38 @@ sim_open (kind, cb, abfd, argv)
 		       32 * 1024 * 1024, /* 32 MB */
 		       0xA8000000);
 
+      /* Dummy memory regions for unsimulated devices */
+
+      sim_do_commandf (sd, "memory alias 0x%lx@1,0x%lx", 0xFFFFE010, 0x00c); /* EBIF */
+      sim_do_commandf (sd, "memory alias 0x%lx@1,0x%lx", 0xFFFF9000, 0x200); /* EBIF */
+      sim_do_commandf (sd, "memory alias 0x%lx@1,0x%lx", 0xFFFFF500, 0x300); /* PIO */
+
       /* --- simulated devices --- */
       sim_hw_parse (sd, "/tx3904irc@0xffffc000/reg 0xffffc000 0x20");
       sim_hw_parse (sd, "/tx3904cpu");
       sim_hw_parse (sd, "/tx3904tmr@0xfffff000/reg 0xfffff000 0x100");
       sim_hw_parse (sd, "/tx3904tmr@0xfffff100/reg 0xfffff100 0x100");
       sim_hw_parse (sd, "/tx3904tmr@0xfffff200/reg 0xfffff200 0x100");
-      
+      sim_hw_parse (sd, "/tx3904sio@0xfffff300/reg 0xfffff300 0x100");
+      {
+	/* FIXME: poking at dv-sockser internals, use tcp backend if
+	 --sockser_addr option was given.*/
+	extern char* sockser_addr;
+	if(sockser_addr == NULL)
+	  sim_hw_parse (sd, "/tx3904sio@0xfffff300/backend stdio");
+	else
+	  sim_hw_parse (sd, "/tx3904sio@0xfffff300/backend tcp");
+      }
+      sim_hw_parse (sd, "/tx3904sio@0xfffff400/reg 0xfffff400 0x100");
+      sim_hw_parse (sd, "/tx3904sio@0xfffff400/backend stdio");
+
       /* -- device connections --- */
       sim_hw_parse (sd, "/tx3904irc > ip level /tx3904cpu");
       sim_hw_parse (sd, "/tx3904tmr@0xfffff000 > int tmr0 /tx3904irc");
       sim_hw_parse (sd, "/tx3904tmr@0xfffff100 > int tmr1 /tx3904irc");
       sim_hw_parse (sd, "/tx3904tmr@0xfffff200 > int tmr2 /tx3904irc");
+      sim_hw_parse (sd, "/tx3904sio@0xfffff300 > int sio0 /tx3904irc");
+      sim_hw_parse (sd, "/tx3904sio@0xfffff400 > int sio1 /tx3904irc");
 
       /* add PAL timer & I/O module */
       if(! strcmp(board, BOARD_JMR3904_PAL))
@@ -559,11 +599,14 @@ sim_open (kind, cb, abfd, argv)
 	else
 	  cpu->register_widths[rn] = 0;
       }
-    /* start-sanitize-r5900 */
 
+    /* start-sanitize-r5900 */
     /* set the 5900 "upper" registers to 64 bits */
-    for( rn = LAST_EMBED_REGNUM+1; rn < NUM_REGS; rn++)
+    for( rn = LAST_EMBED_REGNUM+1; rn < FIRST_COP0_REG; rn++)
       cpu->register_widths[rn] = 64;      
+
+    for( rn = FIRST_COP0_REG; rn < NUM_REGS; rn++)
+      cpu->register_widths[rn] = 32;    
     /* end-sanitize-r5900 */
 
     /* start-sanitize-sky */
@@ -601,8 +644,12 @@ sim_open (kind, cb, abfd, argv)
 			   HALT_INSTRUCTION /* BREAK */ };
     H2T (halt[0]);
     H2T (halt[1]);
+    sim_write (sd, 0x80000000, (char *) halt, sizeof (halt));
     sim_write (sd, 0x80000180, (char *) halt, sizeof (halt));
+    sim_write (sd, 0x80000200, (char *) halt, sizeof (halt));
+    sim_write (sd, 0xBFC00200, (char *) halt, sizeof (halt));
     sim_write (sd, 0xBFC00380, (char *) halt, sizeof (halt));
+    sim_write (sd, 0xBFC00400, (char *) halt, sizeof (halt));
   }
 
 
@@ -667,6 +714,31 @@ sim_open (kind, cb, abfd, argv)
       }
   }
 
+
+    /* start-sanitize-sky */
+#ifdef TARGET_SKY
+  /* Default TLB initialization... */
+
+#define KPAGEMASK 0x001fe000
+#define PAGE_MASK_4K   0x00000000
+#define PAGE_MASK_16K  0x00006000
+#define PAGE_MASK_64K  0x0001e000
+#define PAGE_MASK_256K 0x0007e000
+#define PAGE_MASK_1M   0x001fe000
+#define PAGE_MASK_4M   0x007fe000
+#define PAGE_MASK_16M  0x01ffe000
+
+#define SET_TLB(index, page_mask, entry_hi, entry_lo0, entry_lo1) \
+       TLB[index].mask = page_mask; \
+       TLB[index].hi = entry_hi; \
+       TLB[index].lo0 = entry_lo0; \
+       TLB[index].lo1 = entry_lo1
+
+       SET_TLB(0,  PAGE_MASK_16M, 0x00000000, 0x0000001e, 0x0004001e);/*0-32M*/
+
+#endif /* TARGET_SKY */
+    /* end-sanitize-sky */
+
   return sd;
 }
 
@@ -683,6 +755,15 @@ open_trace(sd)
   }
 }
 #endif /* TRACE */
+
+#if WITH_IGEN
+/* Return name of an insn, used by insn profiling.  */
+static const char *
+get_insn_name (sim_cpu *cpu, int i)
+{
+  return itable[i].name;
+}
+#endif
 
 void
 sim_close (sd, quitting)
@@ -821,6 +902,38 @@ sim_store_register (sd,rn,memory,length)
       HI1 = T2H_8(*(unsigned64*)memory);
       return 8;
     }
+
+  if (rn >= FIRST_COP0_REG && rn < (FIRST_COP0_REG+NUM_COP0_REGS))
+    {
+      switch (rn - FIRST_COP0_REG)
+	{
+	case 12: /* Status */
+	case 13: /* Cause */
+	  return -1; /* Already done in regular register set */
+	case 14:
+	  EPC = T2H_4(*((unsigned32*) memory));
+	  break;
+	case 16:
+	  C0_CONFIG = T2H_4(*((unsigned32*) memory));
+	  break;
+	case 17: /* Debug */
+	  Debug = T2H_4(*((unsigned32*) memory));
+	  break;
+	case 18: /* Perf */
+	  COP0_GPR[rn - FIRST_COP0_REG + 7] = T2H_4(*((unsigned32*) memory));
+	  break;
+	case 19: /* TagLo */
+	case 20: /* TagHi */
+	case 21: /* ErrorEPC */
+	  COP0_GPR[rn - FIRST_COP0_REG + 9] = T2H_4(*((unsigned32*) memory));
+	  break;
+	default:
+	  COP0_GPR[rn - FIRST_COP0_REG] = T2H_4(*((unsigned32*) memory));
+	  break;
+	}
+
+      return 4;
+    }
   /* end-sanitize-r5900 */
 
   /* start-sanitize-sky */
@@ -831,6 +944,10 @@ sim_store_register (sd,rn,memory,length)
 
       if( rn < NUM_VU_REGS )
 	{
+#ifdef TARGET_SKY_B
+         sim_io_eprintf( sd, "Invalid VU register (register store ignored)\n" );
+         return 0;
+#else
 	  if (rn < NUM_VU_INTEGER_REGS)
 	    return write_vu_int_reg (&(vu0_device.regs), rn, memory);
 	  else if (rn >= FIRST_VEC_REG)
@@ -842,24 +959,34 @@ sim_store_register (sd,rn,memory,length)
 	  else switch (rn - NUM_VU_INTEGER_REGS)
 	    {
 	    case 0:
-	      return write_vu_special_reg (&vu0_device, VU_REG_CIA, 
-					   memory);
-	    case 1:
-	      return write_vu_misc_reg (&(vu0_device.regs), VU_REG_MR,
-					memory);
-	    case 2: /* VU0 has no P register */
+	      return write_vu_special_reg (&vu0_device, VU_REG_CIA, memory);
+
+	    case 1: /* Can't write TPC register */
+	    case 2: /* or VPU_STAT */
+	    case 4: /* or MAC */
+	    case 9: /* VU0 has no P register */
 	      return 4;
+
 	    case 3:
-	      return write_vu_misc_reg (&(vu0_device.regs), VU_REG_MI,
-					memory);
-	    case 4:
-	      return write_vu_misc_reg (&(vu0_device.regs), VU_REG_MQ,
-					memory);
+	      return write_vu_misc_reg(&(vu0_device.regs), VU_REG_MST, memory);
+	    case 5:
+	      return write_vu_misc_reg(&(vu0_device.regs), VU_REG_MCP, memory);
+	    case 6: 
+	      return write_vu_special_reg (&vu0_device, VU_REG_CMSAR0, memory);
+	    case 7: 
+	      return write_vu_special_reg (&vu0_device, VU_REG_FBRST, memory);
+	    case 8:
+	      return write_vu_misc_reg (&(vu0_device.regs), VU_REG_MR, memory);
+	    case 10:
+	      return write_vu_misc_reg (&(vu0_device.regs), VU_REG_MI, memory);
+	    case 11:
+	      return write_vu_misc_reg (&(vu0_device.regs), VU_REG_MQ, memory);
 	    default:
 	      return write_vu_acc_reg (&(vu0_device.regs), 
-				      rn - (NUM_VU_INTEGER_REGS + 5),
+				      rn - (NUM_VU_INTEGER_REGS + 12),
 				      memory);
 	    }
+#endif /* ! TARGET_SKY_B */
 	}
 
       rn = rn - NUM_VU_REGS;
@@ -877,23 +1004,35 @@ sim_store_register (sd,rn,memory,length)
 	  else switch (rn - NUM_VU_INTEGER_REGS)
 	    {
 	    case 0:
-	      return write_vu_special_reg (&vu1_device, VU_REG_CIA,
-					   memory);
-	    case 1:
-	      return write_vu_misc_reg (&(vu1_device.regs), VU_REG_MR,
-					memory);
-	    case 2: 
-	      return write_vu_misc_reg (&(vu1_device.regs), VU_REG_MP,
-					memory);
+	      return write_vu_special_reg (&vu1_device, VU_REG_CIA, memory);
+
+	    case 1: /* Can't write TPC register */
+	    case 2: /* or VPU_STAT */
+	    case 4: /* or MAC */
+	    case 7: /* VU1 has no FBRST register */
+	      return 4;
+
 	    case 3:
-	      return write_vu_misc_reg (&(vu1_device.regs), VU_REG_MI,
-					memory);
-	    case 4:
-	      return write_vu_misc_reg (&(vu1_device.regs), VU_REG_MQ,
-					memory);
+	      return write_vu_misc_reg(&(vu1_device.regs), VU_REG_MST, memory);
+	    case 5:
+	      return write_vu_misc_reg(&(vu1_device.regs), VU_REG_MCP, memory);
+	    case 6: /* CMSAR1 is actually part of VU0 */
+#ifdef TARGET_SKY_B
+	      return 0;
+#else
+	      return write_vu_special_reg (&vu0_device, VU_REG_CMSAR1, memory);
+#endif /* ! TARGET_SKY_B */
+	    case 8:
+	      return write_vu_misc_reg (&(vu1_device.regs), VU_REG_MR, memory);
+	    case 9:
+	      return write_vu_misc_reg (&(vu1_device.regs), VU_REG_MP, memory);
+	    case 10: 
+	      return write_vu_misc_reg (&(vu1_device.regs), VU_REG_MI, memory);
+	    case 11:
+	      return write_vu_misc_reg (&(vu1_device.regs), VU_REG_MQ, memory);
 	    default:
 	      return write_vu_acc_reg (&(vu1_device.regs), 
-				       rn - (NUM_VU_INTEGER_REGS + 5),
+				       rn - (NUM_VU_INTEGER_REGS + 12),
 				       memory);
 	    }
 	}
@@ -902,13 +1041,18 @@ sim_store_register (sd,rn,memory,length)
 
       if (rn < NUM_VIF_REGS)
 	{
+#ifdef TARGET_SKY_B
+	  sim_io_eprintf( sd, "Invalid VIF register (register store ignored)\n" );
+	  return 0;
+#else
 	  if (rn < NUM_VIF_REGS-1)
-	    return write_pke_reg (&pke0_device, rn, memory);
+	    return write_vif_reg (&vif0_device, rn, memory);
 	  else
 	    {
 	      sim_io_eprintf( sd, "Can't write vif0_pc (store ignored)\n" );
 	      return 0;
 	    }
+#endif /* ! TARGET_SKY_B */
 	}
 
       rn -= NUM_VIF_REGS;	/* VIF1 registers are last */
@@ -916,7 +1060,7 @@ sim_store_register (sd,rn,memory,length)
       if (rn < NUM_VIF_REGS)
 	{
 	  if (rn < NUM_VIF_REGS-1)
-	    return write_pke_reg (&pke1_device, rn, memory);
+	    return write_vif_reg (&vif1_device, rn, memory);
 	  else
 	    {
 	      sim_io_eprintf( sd, "Can't write vif1_pc (store ignored)\n" );
@@ -996,6 +1140,38 @@ sim_fetch_register (sd,rn,memory,length)
       *((unsigned64*)memory) = H2T_8(HI1);
       return 8;
     }
+
+  if (rn >= FIRST_COP0_REG && rn < (FIRST_COP0_REG+NUM_COP0_REGS))
+    {
+      switch (rn - FIRST_COP0_REG)
+	{
+	case 12: /* Status */
+	case 13: /* Cause */
+	  return -1; /* Already done in regular register set */
+	case 14:
+	  *((unsigned32*) memory) = H2T_4(EPC);
+	  break;
+	case 16:
+	  *((unsigned32*) memory) = H2T_4(C0_CONFIG);
+	  break;
+	case 17: /* Debug */
+	  *((unsigned32*) memory) = H2T_4(Debug);
+	  break;
+	case 18: /* Perf */
+	  *((unsigned32*) memory) = H2T_4(COP0_GPR[rn - FIRST_COP0_REG + 7]);
+	  break;
+	case 19: /* TagLo */
+	case 20: /* TagHi */
+	case 21: /* ErrorEPC */
+	  *((unsigned32*) memory) = H2T_4(COP0_GPR[rn - FIRST_COP0_REG + 9]);
+	  break;
+	default:
+	  *((unsigned32*) memory) = H2T_4(COP0_GPR[rn - FIRST_COP0_REG]);
+	  break;
+	}
+
+      return 4;
+    }
   /* end-sanitize-r5900 */
 
   /* start-sanitize-sky */
@@ -1006,6 +1182,10 @@ sim_fetch_register (sd,rn,memory,length)
 
       if (rn < NUM_VU_REGS)
 	{
+#ifdef TARGET_SKY_B
+         sim_io_eprintf( sd, "Invalid VU register (register fetch ignored)\n" );
+         return 0;
+#else
 	  if (rn < NUM_VU_INTEGER_REGS)
 	    return read_vu_int_reg (&(vu0_device.regs), rn, memory);
 	  else if (rn >= FIRST_VEC_REG)
@@ -1017,24 +1197,36 @@ sim_fetch_register (sd,rn,memory,length)
 	  else switch (rn - NUM_VU_INTEGER_REGS)
 	    {
 	    case 0:
-	      return read_vu_special_reg(&vu0_device, VU_REG_CIA, memory);
+	      return read_vu_special_reg (&vu0_device, VU_REG_CIA, memory);
 	    case 1:
-	      return read_vu_misc_reg (&(vu0_device.regs), VU_REG_MR,
-				      memory);
-	    case 2: /* VU0 has no P register */
+	      return read_vu_misc_reg(&(vu0_device.regs), VU_REG_MTPC, memory);
+	    case 2:
+	      return read_vu_special_reg (&vu0_device, VU_REG_STAT, memory);
+	    case 3:
+	      return read_vu_misc_reg (&(vu0_device.regs), VU_REG_MST, memory);
+	    case 4:
+	      return read_vu_misc_reg (&(vu0_device.regs), VU_REG_MMC, memory);
+	    case 5:
+	      return read_vu_misc_reg (&(vu0_device.regs), VU_REG_MCP, memory);
+	    case 6: 
+	      return read_vu_special_reg (&vu0_device, VU_REG_CMSAR0, memory);
+	    case 7: 
+	      return read_vu_special_reg (&vu0_device, VU_REG_FBRST, memory);
+	    case 8:
+	      return read_vu_misc_reg (&(vu0_device.regs), VU_REG_MR, memory);
+	    case 9: /* VU0 has no P register */
 	      *((int *) memory) = 0;
 	      return 4;
-	    case 3:
-	      return read_vu_misc_reg (&(vu0_device.regs), VU_REG_MI,
-				      memory);
-	    case 4:
-	      return read_vu_misc_reg (&(vu0_device.regs), VU_REG_MQ,
-				      memory);
+	    case 10:
+	      return read_vu_misc_reg (&(vu0_device.regs), VU_REG_MI, memory);
+	    case 11:
+	      return read_vu_misc_reg (&(vu0_device.regs), VU_REG_MQ, memory);
 	    default:
 	      return read_vu_acc_reg (&(vu0_device.regs), 
-				      rn - (NUM_VU_INTEGER_REGS + 5),
+				      rn - (NUM_VU_INTEGER_REGS + 12),
 				      memory);
 	    }
+#endif /* ! TARGET_SKY_B */
 	}
 
       rn -= NUM_VU_REGS;	/* VU1 registers are next */
@@ -1052,22 +1244,37 @@ sim_fetch_register (sd,rn,memory,length)
 	  else switch (rn - NUM_VU_INTEGER_REGS)
 	    {
 	    case 0:
-	      return read_vu_special_reg(&vu1_device, VU_REG_CIA, memory);
+	      return read_vu_special_reg (&vu1_device, VU_REG_CIA, memory);
 	    case 1:
-	      return read_vu_misc_reg (&(vu1_device.regs), 
-				       VU_REG_MR, memory);
+	      return read_vu_misc_reg(&(vu1_device.regs), VU_REG_MTPC, memory);
 	    case 2:
-	      return read_vu_misc_reg (&(vu1_device.regs), 
-				       VU_REG_MP, memory);
+	      return read_vu_special_reg (&vu1_device, VU_REG_STAT, memory);
 	    case 3:
-	      return read_vu_misc_reg (&(vu1_device.regs), 
-				       VU_REG_MI, memory);
+	      return read_vu_misc_reg (&(vu1_device.regs), VU_REG_MST, memory);
 	    case 4:
-	      return read_vu_misc_reg (&(vu1_device.regs), 
-				       VU_REG_MQ, memory);
+	      return read_vu_misc_reg (&(vu1_device.regs), VU_REG_MMC, memory);
+	    case 5:
+	      return read_vu_misc_reg (&(vu1_device.regs), VU_REG_MCP, memory);
+	    case 6: /* CMSAR1 is actually from VU0 */
+#ifdef TARGET_SKY_B
+	      return 0;
+#else
+	      return read_vu_special_reg (&vu0_device, VU_REG_CMSAR1, memory);
+#endif /* ! TARGET_SKY_B */
+	    case 7: /* VU1 has no FBRST register */
+	      *((int *) memory) = 0;
+	      return 4;
+	    case 8:
+	      return read_vu_misc_reg (&(vu1_device.regs), VU_REG_MR, memory);
+	    case 9:
+	      return read_vu_misc_reg (&(vu1_device.regs), VU_REG_MP, memory);
+	    case 10:
+	      return read_vu_misc_reg (&(vu1_device.regs), VU_REG_MI, memory);
+	    case 11:
+	      return read_vu_misc_reg (&(vu1_device.regs), VU_REG_MQ, memory);
 	    default:
 	      return read_vu_acc_reg (&(vu1_device.regs), 
-				      rn - (NUM_VU_INTEGER_REGS + 5),
+				      rn - (NUM_VU_INTEGER_REGS + 12),
 				      memory);
 	    }
 	}
@@ -1076,12 +1283,17 @@ sim_fetch_register (sd,rn,memory,length)
 
       if (rn < NUM_VIF_REGS)
 	{
+#ifdef TARGET_SKY_B
+	  sim_io_eprintf( sd, "Invalid VIF register (register fetch ignored)\n" );
+	  return 0;
+#else
 	  if (rn < NUM_VIF_REGS-2)
-	    return read_pke_reg (&pke0_device, rn, memory);
+	    return read_vif_reg (&vif0_device, rn, memory);
 	  else if (rn == NUM_VIF_REGS-2)
-	    return read_pke_pc (&pke0_device, memory);
+	    return read_vif_pc (&vif0_device, memory);
 	  else
-	    return read_pke_pcx (&pke0_device, memory);
+	    return read_vif_pcx (&vif0_device, memory);
+#endif /* ! TARGET_SKY_B */
 	}
 
       rn -= NUM_VIF_REGS;	/* VIF1 registers are last */
@@ -1089,11 +1301,11 @@ sim_fetch_register (sd,rn,memory,length)
       if (rn < NUM_VIF_REGS)
 	{
 	  if (rn < NUM_VIF_REGS-2)
-	    return read_pke_reg (&pke1_device, rn, memory);
+	    return read_vif_reg (&vif1_device, rn, memory);
 	  else if (rn == NUM_VIF_REGS-2)
-	    return read_pke_pc (&pke1_device, memory);
+	    return read_vif_pc (&vif1_device, memory);
 	  else
-	    return read_pke_pcx (&pke1_device, memory);
+	    return read_vif_pcx (&vif1_device, memory);
 	}
 
       sim_io_eprintf( sd, "Invalid VU register (register fetch ignored)\n" );
@@ -1205,7 +1417,7 @@ fetch_str (sd, addr)
 }
 
 /* Simple monitor interface (currently setup for the IDT and PMON monitors) */
-static void
+void
 sim_monitor (SIM_DESC sd,
 	     sim_cpu *cpu,
 	     address_word cia,
@@ -1715,6 +1927,259 @@ ColdReset (SIM_DESC sd)
     }
 }
 
+
+
+/* start-sanitize-sky */
+#ifdef TARGET_SKY
+
+/* See ch. 5 of the 5900 Users' Guide.  */
+void
+signal_exception (SIM_DESC sd,
+		  sim_cpu *cpu,
+		  address_word cia,
+		  int cause, ...)
+{
+  /* int vector; */
+
+#ifdef DEBUG
+  sim_io_printf(sd,"DBG: SignalException(%d) PC = 0x%s\n",cause,pr_addr(cia));
+#endif /* DEBUG */
+
+  /* Ensure that any active atomic read/modify/write operation will fail: */
+  LLBIT = 0;
+
+  /* First, handle any simulator specific magic exceptions.  These are not "real" exceptions, but
+     are exceptions which the simulator uses to implement different features.  */
+
+  switch (cause) {
+
+    case SimulatorFault:
+     {
+       va_list ap;
+       char *msg;
+       va_start(ap,cause);
+       msg = va_arg(ap,char *);
+       va_end(ap);
+       sim_engine_abort (SD, CPU, NULL_CIA,
+			 "FATAL: Simulator error \"%s\"\n",msg);
+     }
+
+    case DebugBreakPoint :
+      if (! (Debug & Debug_DM))
+        {
+          if (INDELAYSLOT())
+            {
+              CANCELDELAYSLOT();
+              
+              Debug |= Debug_DBD;  /* signaled from within in delay slot */
+              DEPC = cia - 4;      /* reference the branch instruction */
+            }
+          else
+            {
+              Debug &= ~Debug_DBD; /* not signaled from within a delay slot */
+              DEPC = cia;
+            }
+        
+          Debug |= Debug_DM;            /* in debugging mode */
+          Debug |= Debug_DBp;           /* raising a DBp exception */
+          PC = 0xBFC00200;
+          sim_engine_restart (SD, CPU, NULL, NULL_CIA);
+        }
+      break;
+
+    case ReservedInstruction :
+     {
+       va_list ap;
+       unsigned int instruction;
+       va_start(ap,cause);
+       instruction = va_arg(ap,unsigned int);
+       va_end(ap);
+       /* Provide simple monitor support using ReservedInstruction
+          exceptions. The following code simulates the fixed vector
+          entry points into the IDT monitor by causing a simulator
+          trap, performing the monitor operation, and returning to
+          the address held in the $ra register (standard PCS return
+          address). This means we only need to pre-load the vector
+          space with suitable instruction values. For systems were
+          actual trap instructions are used, we would not need to
+          perform this magic. */
+       if ((instruction & RSVD_INSTRUCTION_MASK) == RSVD_INSTRUCTION)
+	 {
+	   sim_monitor (SD, CPU, cia, ((instruction >> RSVD_INSTRUCTION_ARG_SHIFT) & RSVD_INSTRUCTION_ARG_MASK) );
+	   /* NOTE: This assumes that a branch-and-link style
+	      instruction was used to enter the vector (which is the
+	      case with the current IDT monitor). */
+	   sim_engine_restart (SD, CPU, NULL, RA);
+	 }
+       /* Look for the mips16 entry and exit instructions, and
+          simulate a handler for them.  */
+       else if ((cia & 1) != 0
+		&& (instruction & 0xf81f) == 0xe809
+		&& (instruction & 0x0c0) != 0x0c0)
+	 {
+	   mips16_entry (SD, CPU, cia, instruction);
+	   sim_engine_restart (sd, NULL, NULL, NULL_CIA);
+	 }
+       /* else fall through to normal exception processing */
+       sim_io_eprintf(sd,"ReservedInstruction at PC = 0x%s\n", pr_addr (cia));
+     }
+  }
+
+  /* Now we have the code for processing "real" exceptions.  */
+
+  if (is5900Level2Exception(cause)) {
+    switch(cause) {
+    case NMIReset:
+      cause_set_EXC2(1);
+      break;
+    default:
+      sim_engine_abort (SD, CPU, NULL_CIA,
+			"FATAL: Unexpected level 2 exception %d\n", cause);
+    }
+    if (STATE & simDELAYSLOT)
+      {
+	STATE &= ~simDELAYSLOT;
+	COP0_ERROREPC = (cia - 4); /* reference the branch instruction */
+	CAUSE |= cause_BD2;
+      }
+    else
+      {
+        COP0_ERROREPC = cia;
+        CAUSE &= ~cause_BD2;
+      }
+
+    SR |= status_ERL;
+
+    if (cause == NMIReset)
+      PC = 0xBFC0000;
+    else
+      {
+        ASSERT(0);	 /* At the moment, COUNTER, DEBUG never generated.  */
+      }
+    sim_engine_restart (SD, CPU, NULL, PC);
+  } else {
+    /* A level 1 exception.  */
+    int refill, vector_offset; 
+
+    cause_set_EXC(cause);
+    if (SR & status_EXL)
+      vector_offset = 0x180;
+    else
+      {
+        if (cause == TLBLoad || cause == TLBStore) {
+          va_list ap;
+          va_start(ap, cause);
+          refill = va_arg(ap,int);
+	  va_end(ap);
+        }
+
+	if (STATE & simDELAYSLOT)
+	  {
+	    STATE &= ~simDELAYSLOT;
+	    CAUSE |= cause_BD;
+	    COP0_EPC = (cia - 4); /* reference the branch instruction */
+	  }
+	else
+	  {
+	    COP0_EPC = cia;
+	    CAUSE &= ~cause_BD;
+	  }
+
+	SR |= status_EXL;
+
+	if ((cause == TLBLoad || cause == TLBStore) && refill == TLB_REFILL)
+	  vector_offset = 0x000;
+        else if (cause == Interrupt)
+	  vector_offset = 0x200;
+        else
+	  vector_offset = 0x180;
+
+        if (SR & status_BEV)
+          PC = (signed)0xBFC00200 + vector_offset;
+        else
+          PC = (signed)0x80000000 + vector_offset;
+      }
+
+    /* Now, handle the exception. */
+    switch (cause)
+      {
+      case Interrupt:
+	{
+	  va_list ap;
+	  unsigned int level;
+	  va_start(ap, cause);
+	  level = va_arg(ap,unsigned int);
+	  va_end(ap);
+	  /* Interrupts arrive during event processing, no need to restart.
+	     Hardware interrupts on sky target are INT1 and INT2. */
+	  if ( level == 1 )
+	    CAUSE |= cause_IP3; /* bit 11 */
+	  else if ( level == 2 )
+	    CAUSE |= cause_IP7; /* bit 15 */
+	  else
+	    sim_engine_abort (SD, CPU, NULL_CIA,
+			      "FATAL: Unexpected interrupt level %d\n", level);
+	  return;
+	}
+
+      case NMIReset:
+        ASSERT(0);	/* NMIReset is a level 0 exception. */
+	return;
+
+      case AddressLoad:
+      case AddressStore:
+      case InstructionFetch:
+      case DataReference:
+	/* The following is so that the simulator will continue from the
+	   exception address on breakpoint operations. */
+	PC = COP0_EPC;
+	sim_engine_halt (SD, CPU, NULL, NULL_CIA,
+			 sim_stopped, SIM_SIGBUS);
+	break;
+
+      case ReservedInstruction:
+      case CoProcessorUnusable:
+	PC = COP0_EPC;
+	sim_engine_halt (SD, CPU, NULL, NULL_CIA,
+			 sim_stopped, SIM_SIGILL);
+	break;
+
+      case IntegerOverflow:
+      case FPE:
+	PC = COP0_EPC;
+	sim_engine_halt (SD, CPU, NULL, NULL_CIA,
+			 sim_stopped, SIM_SIGFPE);
+	break;
+
+      case TLBModification:
+      case TLBLoad:
+      case TLBStore:
+      case BreakPoint:
+      case SystemCall:
+      case Trap:
+	sim_engine_restart (SD, CPU, NULL, PC);
+	break;
+
+      case Watch:
+	PC = COP0_EPC;
+	sim_engine_halt (SD, CPU, NULL, NULL_CIA,
+			 sim_stopped, SIM_SIGTRAP);
+	break;
+
+      default : /* Unknown internal exception */
+	PC = COP0_EPC;
+	sim_engine_halt (SD, CPU, NULL, NULL_CIA,
+			 sim_stopped, SIM_SIGABRT);
+	break;
+
+       }
+  }
+  return;
+}
+
+#else /* TARGET_SKY */
+/* end-sanitize-sky */
+
 /* Description from page A-26 of the "MIPS IV Instruction Set" manual (revision 3.1) */
 /* Signal an exception condition. This will result in an exception
    that aborts the instruction. The instruction operation pseudocode
@@ -1927,6 +2392,11 @@ signal_exception (SIM_DESC sd,
 
   return;
 }
+
+/* start-sanitize-sky */
+#endif /* ! TARGET_SKY */
+/* end-sanitize-sky */
+
 
 #if defined(WARN_RESULT)
 /* Description from page A-26 of the "MIPS IV Instruction Set" manual (revision 3.1) */
@@ -3082,7 +3552,7 @@ cop_ld (SIM_DESC sd,
 
 
 /* start-sanitize-sky */
-#ifdef TARGET_SKY
+#if defined(TARGET_SKY) && !defined(TARGET_SKY_B)
 void
 cop_lq (SIM_DESC sd,
 	sim_cpu *cpu,
@@ -3183,7 +3653,7 @@ cop_sd (SIM_DESC sd,
 
 
 /* start-sanitize-sky */
-#ifdef TARGET_SKY
+#if defined(TARGET_SKY) && !defined(TARGET_SKY_B)
 unsigned128
 cop_sq (SIM_DESC sd,
 	sim_cpu *cpu,
@@ -3423,7 +3893,7 @@ decode_coproc (SIM_DESC sd,
 	int handle = 0;
 
 	/* start-sanitize-sky */
-#ifdef TARGET_SKY
+#if defined(TARGET_SKY) && !defined(TARGET_SKY_B)
 	/* On the R5900, this refers to a "VU" vector co-processor. */
 
 	int i_25_21 = (instruction >> 21) & 0x1f;
@@ -3595,10 +4065,6 @@ decode_coproc (SIM_DESC sd,
 	    /* NOTREACHED */
 	  }
 	
-#undef MY_INDEX
-#undef MY_PREFIX
-#undef MY_NAME
-
 #endif /* TARGET_SKY */
 	/* end-sanitize-sky */
 

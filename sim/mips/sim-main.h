@@ -36,14 +36,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 typedef address_word sim_cia;
 
-#if (WITH_IGEN)
-/* Get the number of instructions.  FIXME: must be a more elegant way
-   of doing this.  */
-#include "itable.h"
-#define MAX_INSNS (nr_itable_entries)
-#define INSN_NAME(cpu,i) itable[(i)].name
-#endif
-
 #include "sim-base.h"
 
 
@@ -254,7 +246,25 @@ enum {
   R5900_FPMIN = LSMASK32 (31, 0),
 };
 
+typedef struct _r4000_tlb_entry {
+  unsigned32 mask;
+  unsigned32 hi;
+  unsigned32 lo0;
+  unsigned32 lo1;
+} r4000_tlb_entry_t;
 
+#define TLB_MASK_MASK_MASK 0x01ffe000
+#define TLB_HI_VPN2_MASK   0xffffe000
+#define TLB_HI_G_MASK      0x00001000
+#define TLB_HI_ASID_MASK   0x000000ff
+
+#define TLB_LO_S_MASK      0x80000000
+#define TLB_LO_PFN_MASK    0x03ffffc0
+#define TLB_LO_C_MASK      0x00000038
+#define TLB_LO_D_MASK      0x00000004
+#define TLB_LO_V_MASK      0x00000002
+
+#define TLB_SIZE 48
 
 typedef struct _sim_r5900_cpu {
 
@@ -270,6 +280,7 @@ typedef struct _sim_r5900_cpu {
      same register.  */
   signed_word gpr1[32];
 #define GPR1     ((CPU)->r5900.gpr1)
+#define GPR1_SET(N,VAL) (GPR1[(N]) = (VAL))
   signed_word lo1;
   signed_word hi1;
 #define LO1      ((CPU)->r5900.lo1)
@@ -293,6 +304,9 @@ typedef struct _sim_r5900_cpu {
 #define HI1HISTORY (&(CPU)->r5900.hi1_history)
   hilo_history lo1_history;
 #define LO1HISTORY (&(CPU)->r5900.lo1_history)
+
+  r4000_tlb_entry_t tlb[TLB_SIZE];
+#define TLB ((CPU)->r5900.tlb)
 
 } sim_r5900_cpu;
 
@@ -565,10 +579,14 @@ struct _sim_cpu {
 #ifndef TM_MIPS_H
 #define LAST_EMBED_REGNUM (89)
 #define NUM_REGS (LAST_EMBED_REGNUM + 1)
+
 /* start-sanitize-r5900 */
+#define FIRST_COP0_REG 128
+#define NUM_COP0_REGS 22
 #undef NUM_REGS
-#define NUM_REGS (128)
+#define NUM_REGS (150)
 /* end-sanitize-r5900 */
+
 #endif
 
 /* start-sanitize-sky */
@@ -582,7 +600,7 @@ struct _sim_cpu {
 
 #define NUM_VIF_REGS	26
 
-#define NUM_CORE_REGS	128
+#define NUM_CORE_REGS	150
 
 #undef NUM_REGS
 #define NUM_REGS (NUM_CORE_REGS + 2*(NUM_VU_REGS) + 2*(NUM_VIF_REGS))
@@ -667,9 +685,31 @@ enum float_operation
 #define COP0_BP	((CPU)->cop0_bp)
 #define NR_COP0_P 64
   unsigned_word cop0_p[NR_COP0_P];
-#define COP0_P	((CPU)->cop0_p)
-  /* end-sanitize-r5900 */
 
+#define COP0_P	((CPU)->cop0_p)
+#define COP0_INDEX    ((unsigned32)(COP0_GPR[0]))
+#define COP0_RANDOM   ((unsigned32)(COP0_GPR[1]))
+#define COP0_ENTRYLO0 ((unsigned32)(COP0_GPR[2]))
+#define COP0_ENTRYLO1 ((unsigned32)(COP0_GPR[3]))
+#define COP0_CONTEXT  ((unsigned32)(COP0_GPR[4]))
+#define COP0_PAGEMASK ((unsigned32)(COP0_GPR[5]))
+#define COP0_WIRED    ((unsigned32)(COP0_GPR[6]))
+#define COP0_BADVADDR ((unsigned32)(COP0_GPR[8]))
+#define COP0_COUNT    ((unsigned32)(COP0_GPR[9]))
+#define COP0_ENTRYHI  ((unsigned32)(COP0_GPR[10]))
+#define COP0_COMPARE  ((unsigned32)(COP0_GPR[11]))
+#define COP0_EPC      ((unsigned32)(EPC))	/* 14 */
+#define COP0_PRID     ((unsigned32)(COP0_GPR[15]))
+#define COP0_CONFIG   ((unsigned32)(C0_CONFIG)) /* 16 */
+#define COP0_TAGLO    ((unsigned32)(COP0_GPR[28]))
+#define COP0_TAGHI    ((unsigned32)(COP0_GPR[29]))
+#define COP0_ERROREPC ((unsigned32)(COP0_GPR[30]))
+
+#define COP0_CONTEXT_BADVPN2_MASK 0x007ffff0
+
+#define COP0_CONTEXT_set_BADVPN2(x) \
+	(COP0_CONTEXT = ((COP0_CONTEXT & 0xff100000) | ((x << 4) & 0x007ffff0)))
+  /* end-sanitize-r5900 */
 
   /* Keep the current format state for each register: */
   FP_formats fpr_state[32];
@@ -716,20 +756,20 @@ enum float_operation
   /* end-sanitize-branchbug4011 */
   /* start-sanitize-r5900 */
   sim_r5900_cpu r5900;
-
   /* end-sanitize-r5900 */
-  /* start-sanitize-cygnus */
 
+  /* start-sanitize-cygnus */
   /* The MDMX ISA has a very very large accumulator */
   unsigned8 acc[3 * 8];
   /* end-sanitize-cygnus */
-  /* start-sanitize-sky */
 
+  /* start-sanitize-sky */
 #ifdef TARGET_SKY
   /* Device on which instruction issue last occured.  */
   char cur_device;
 #endif
   /* end-sanitize-sky */
+
   sim_cpu_base base;
 };
 
@@ -778,12 +818,14 @@ struct sim_state {
 /* TODO : these should be the bitmasks for these bits within the
    status register. At the moment the following are VR4300
    bit-positions: */
-#define status_KSU_mask  (0x3)          /* mask for KSU bits */
+#define status_KSU_mask  (0x18)         /* mask for KSU bits */
 #define status_KSU_shift (3)            /* shift for field */
 #define ksu_kernel       (0x0)
 #define ksu_supervisor   (0x1)
 #define ksu_user         (0x2)
 #define ksu_unknown      (0x3)
+
+#define SR_KSU		 ((SR & status_KSU_mask) >> status_KSU_shift)
 
 #define status_IE	 (1 <<  0)      /* Interrupt enable */
 #define status_EIE	 (1 << 16)      /* Enable Interrupt Enable */
@@ -794,6 +836,7 @@ struct sim_state {
 #define status_BEV       (1 << 22)      /* Location of general exception vectors */
 #define status_TS        (1 << 21)      /* TLB shutdown has occurred */
 #define status_ERL       (1 <<  2)      /* Error level */
+#define status_IM7       (1 << 15)      /* Timer Interrupt Mask */
 #define status_RP        (1 << 27)      /* Reduced Power mode */
 /* start-sanitize-r5900 */
 #define status_CU0       (1 << 28)      /* COP0 usable */
@@ -813,16 +856,35 @@ struct sim_state {
 #define status_NMI       (1 << 20)      /* NMI */
 #define status_NMI       (1 << 20)      /* NMI */
 
-#define cause_EXC_mask  (0x1f)          /* Exception code */
+#define cause_BD ((unsigned)1 << 31)    /* L1 Exception in branch delay slot */
+#define cause_BD2         (1 << 30)     /* L2 Exception in branch delay slot */
+#define cause_CE_mask     0x30000000	/* Coprocessor exception */
+#define cause_CE_shift    28
+#define cause_EXC2_mask   0x00070000
+#define cause_EXC2_shift  16
+#define cause_IP7 	  (1 << 15)	/* Interrupt pending */
+#define cause_SIOP        (1 << 12)     /* SIO pending */
+#define cause_IP3 	  (1 << 11)	/* Int 0 pending */
+#define cause_IP2 	  (1 << 10)	/* Int 1 pending */
+
+/* start-sanitize-sky */
+#ifdef TARGET_SKY
+#define cause_EXC_mask  (0x7c)          /* Exception code */
+#else
+/* end-sanitize-sky */
+#define cause_EXC_mask  (0x1c)          /* Exception code */
+/* start-sanitize-sky */
+#endif
+/* end-sanitize-sky */
 #define cause_EXC_shift (2)
+
 #define cause_SW0       (1 << 8)        /* Software interrupt 0 */
 #define cause_SW1       (1 << 9)        /* Software interrupt 1 */
 #define cause_IP_mask   (0x3f)          /* Interrupt pending field */
 #define cause_IP_shift  (10)
-#define cause_CE_mask   (0x3)           /* Coprocessor error */
-#define cause_CE_shift  (28)
 
-#define cause_BD  ((unsigned)1 << 31)   /* Exception in branch delay slot */
+#define cause_set_EXC(x)  CAUSE = (CAUSE & ~cause_EXC_mask)  | ((x << cause_EXC_shift)  & cause_EXC_mask)
+#define cause_set_EXC2(x) CAUSE = (CAUSE & ~cause_EXC2_mask) | ((x << cause_EXC2_shift) & cause_EXC2_mask)
 
 
 /* NOTE: We keep the following status flags as bit values (1 for true,
@@ -834,7 +896,7 @@ struct sim_state {
 #ifdef SUBTARGET_R3900
 #define UserMode        ((SR & status_KUc) ? 1 : 0)
 #else
-#define UserMode        ((((SR & status_KSU_mask) >> status_KSU_shift) == ksu_user) ? 1 : 0)
+#define UserMode	((((SR & status_KSU_mask) >> status_KSU_shift) == ksu_user) ? 1 : 0)
 #endif /* SUBTARGET_R3900 */
 
 /* BigEndianMem */
@@ -863,54 +925,72 @@ struct sim_state {
 
 /* NOTE: These numbers depend on the processor architecture being
    simulated: */
-#define Interrupt               (0)
-#define TLBModification         (1)
-#define TLBLoad                 (2)
-#define TLBStore                (3)
-#define AddressLoad             (4)
-#define AddressStore            (5)
-#define InstructionFetch        (6)
-#define DataReference           (7)
-#define SystemCall              (8)
-#define BreakPoint              (9)
-#define ReservedInstruction     (10)
-#define CoProcessorUnusable     (11)
-#define IntegerOverflow         (12)    /* Arithmetic overflow (IDT monitor raises SIGFPE) */
-#define Trap                    (13)
-#define FPE                     (15)
-#define DebugBreakPoint         (16)
-#define Watch                   (23)
-#define NMIReset                (31)
+enum ExceptionCause {
+  Interrupt               = 0,
+  TLBModification         = 1,
+  TLBLoad                 = 2,
+  TLBStore                = 3,
+  AddressLoad             = 4,
+  AddressStore            = 5,
+  InstructionFetch        = 6,
+  DataReference           = 7,
+  SystemCall              = 8,
+  BreakPoint              = 9,
+  ReservedInstruction     = 10,
+  CoProcessorUnusable     = 11,
+  IntegerOverflow         = 12,    /* Arithmetic overflow (IDT monitor raises SIGFPE) */
+  Trap                    = 13,
+  FPE                     = 15,
+  DebugBreakPoint         = 16,
+  Watch                   = 23,
+  NMIReset                = 31,
 
 
 /* The following exception code is actually private to the simulator
    world. It is *NOT* a processor feature, and is used to signal
    run-time errors in the simulator. */
-#define SimulatorFault      (0xFFFFFFFF)
+  SimulatorFault      	  = 0xFFFFFFFF
+};
+
+#define TLB_REFILL  (0)
+#define TLB_INVALID (1)
+
+/* start-sanitize-r5900 */
+/* For the 5900, we have level 1 and level 2 exceptions.  The level 2 exceptions
+   are ColdReset, NMI, Counter, and Debug/SIO.  Of these, we support only
+   the NMIReset exception. */
+
+#define is5900Level2Exception(x) (x == NMIReset)
+/* end-sanitize-r5900 */
 
 /* The following break instructions are reserved for use by the
    simulator.  The first is used to halt the simulation.  The second
    is used by gdb for break-points.  NOTE: Care must be taken, since 
    this value may be used in later revisions of the MIPS ISA. */
-#define HALT_INSTRUCTION_MASK  (0x03FFFFC0)
+#define HALT_INSTRUCTION_MASK   (0x03FFFFC0)
 
-#define HALT_INSTRUCTION       (0x03ff000d)
-#define HALT_INSTRUCTION2      (0x0000ffcd)
+#define HALT_INSTRUCTION        (0x03ff000d)
+#define HALT_INSTRUCTION2       (0x0000ffcd)
 
 /* start-sanitize-sky */
-#define HALT_INSTRUCTION_PASS    (0x03fffc0d)
-#define HALT_INSTRUCTION_FAIL    (0x03ffffcd)
+#define HALT_INSTRUCTION_PASS   (0x03fffc0d)	/* break 0xffff0 */
+#define HALT_INSTRUCTION_FAIL   (0x03ffffcd)	/* break 0xfffff */
 /* end-sanitize-sky */
 
 #define BREAKPOINT_INSTRUCTION  (0x0005000d)
 #define BREAKPOINT_INSTRUCTION2 (0x0000014d)
+
+/* start-sanitize-sky */
+#define LOAD_INSTRUCTION   	(0x03fffc4d)	/* break 0xffff1 */
+#define PRINTF_INSTRUCTION 	(0x03fffc8d)	/* break 0xffff2 */
+/* end-sanitize-sky */
 
 
 void interrupt_event (SIM_DESC sd, void *data);
 
 void signal_exception (SIM_DESC sd, sim_cpu *cpu, address_word cia, int exception, ...);
 #define SignalException(exc,instruction)     signal_exception (SD, CPU, cia, (exc), (instruction))
-#define SignalExceptionInterrupt()           signal_exception (SD, CPU, cia, Interrupt)
+#define SignalExceptionInterrupt(level)      signal_exception (SD, CPU, cia, Interrupt, level)
 #define SignalExceptionInstructionFetch()    signal_exception (SD, CPU, cia, InstructionFetch)
 #define SignalExceptionAddressStore()        signal_exception (SD, CPU, cia, AddressStore)
 #define SignalExceptionAddressLoad()         signal_exception (SD, CPU, cia, AddressLoad)
@@ -919,6 +999,11 @@ void signal_exception (SIM_DESC sd, sim_cpu *cpu, address_word cia, int exceptio
 #define SignalExceptionIntegerOverflow()     signal_exception (SD, CPU, cia, IntegerOverflow)
 #define SignalExceptionCoProcessorUnusable() signal_exception (SD, CPU, cia, CoProcessorUnusable)
 #define SignalExceptionNMIReset()            signal_exception (SD, CPU, cia, NMIReset)
+#define SignalExceptionTLBRefillStore()      signal_exception (SD, CPU, cia, TLBStore, TLB_REFILL)
+#define SignalExceptionTLBRefillLoad()       signal_exception (SD, CPU, cia, TLBLoad, TLB_REFILL)
+#define SignalExceptionTLBInvalidStore()     signal_exception (SD, CPU, cia, TLBStore, TLB_INVALID)
+#define SignalExceptionTLBInvalidLoad()      signal_exception (SD, CPU, cia, TLBLoad, TLB_INVALID)
+#define SignalExceptionTLBModification()     signal_exception (SD, CPU, cia, TLBModification)
 
 /* Co-processor accesses */
 
@@ -1036,6 +1121,7 @@ char* pr_uword64 PARAMS ((uword64 addr));
 
 /* start-sanitize-sky */
 #ifdef TARGET_SKY
+
 #ifdef SIM_ENGINE_HALT_HOOK
 #undef SIM_ENGINE_HALT_HOOK
 #endif
@@ -1055,6 +1141,8 @@ SIM_RC sky_sim_module_install PARAMS ((SIM_DESC sd));
 
 #define MODULE_LIST	sky_sim_module_install,
   
+void sim_monitor (SIM_DESC sd, sim_cpu *cpu, address_word cia, unsigned int arg);
+  
 #ifndef TM_TXVU_H /* In case GDB hasn't been configured yet */
 enum txvu_cpu_context
 {
@@ -1062,7 +1150,7 @@ enum txvu_cpu_context
   TXVU_CPU_MASTER	= 0,	/* R5900 core */
   TXVU_CPU_VU0		= 1,	/* Vector units */
   TXVU_CPU_VU1		= 2,
-  TXVU_CPU_VIF0		= 3,	/* FIFO's */
+  TXVU_CPU_VIF0		= 3,	/* Vector interface units */
   TXVU_CPU_VIF1		= 4,
   TXVU_CPU_LAST			/* Count of context types */
 };
