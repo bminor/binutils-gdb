@@ -1,5 +1,8 @@
 Tue Nov 26 11:07:31 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* aclocal.m4 (BFD_CC_FOR_BUILD): Don't require AC_C_CROSS.
+	* configure, config.in: Rebuild with autoconf 2.12.
+
 	* elf-bfd.h (struct elf_link_hash_entry): Add other field.
 	* elf.c (_bfd_elf_link_hash_newfunc): Initialize other field.
 	(swap_out_syms): Set st_other from existing st_other field.
