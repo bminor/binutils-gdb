@@ -1,3 +1,7 @@
+Wed May 19 12:33:59 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* config/i386/linux.mh: Re-enable coredumps now that they should work.
+
 Wed May 19 15:44:20 1993  K. Richard Pixley  (rich@cygnus.com)
 
 	* config/m68k/tm-m68k.h (FRAME_CHAIN): add missing close paren.
