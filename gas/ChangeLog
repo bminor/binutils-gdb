@@ -1,3 +1,11 @@
+2001-10-17  Alan Modra  <amodra@bigpond.net.au>
+
+	* configure.in (MIPS_STABS_ELF): AC_DEFINE in only one place so
+	that autoheader doesn't duplicate config.in entries.
+	(DEFAULT_ARCH): Ditto.
+	* configure: Regenerate.
+	* config.in: Regenerate.
+
 2001-10-16  Alan Modra  <amodra@bigpond.net.au>
 
 	From Andrew Pines <apines@cosmodog.com>

@@ -164,6 +164,7 @@ changequote([,])dnl
     dev=no
     bfd_gas=no
     em=generic
+    mips_stabs_elf=
 
     # assign object format
     case ${generic_target} in
@@ -351,20 +352,13 @@ changequote([,])dnl
       mips-*-irix*)         fmt=ecoff ;;
       mips-*-lnews*)        fmt=ecoff em=lnews ;;
       mips-*-riscos*)       fmt=ecoff ;;
-      mips*-*-linux*)
-			    fmt=elf em=tmips
-			    AC_DEFINE(MIPS_STABS_ELF, 1,
-				[Use ELF stabs for MIPS, not ECOFF stabs])
-			    ;;
+      mips*-*-linux*)	    fmt=elf em=tmips mips_stabs_elf=y ;;
       mips-*-sysv4*MP* | mips-*-gnu*)
 			    fmt=elf em=tmips ;;
       mips-*-sysv*)         fmt=ecoff ;;
       mips-*-elf* | mips-*-rtems* | mips-*-openbsd*)
 			    fmt=elf ;;
-      mips-*-vxworks*)      fmt=elf
-			    AC_DEFINE(MIPS_STABS_ELF, 1,
-				[Use ELF stabs for MIPS, not ECOFF stabs])
-			    ;;
+      mips-*-vxworks*)      fmt=elf mips_stabs_elf=y ;;
       mn10200-*-*)	    fmt=elf bfd_gas=yes ;;
       mn10300-*-*)	    fmt=elf bfd_gas=yes ;;
       openrisc-*-*)	    fmt=elf bfd_gas=yes ;;
@@ -489,6 +483,11 @@ changequote([,])dnl
       fi
     fi
 
+    if test x${mips_stabs_elf} != x; then
+      AC_DEFINE(MIPS_STABS_ELF, 1,
+		[Use ELF stabs for MIPS, not ECOFF stabs])
+    fi
+
     case ${cpu_type}-${fmt} in
       alpha*-*)	bfd_gas=yes ;;
       arm-*)	bfd_gas=yes ;;
@@ -547,12 +546,6 @@ changequote([,])dnl
 	esac
 	;;
 
-      s390)
-       if test $this_target = $target ; then
-	  AC_DEFINE_UNQUOTED(DEFAULT_ARCH, "${arch}", [Default architecture.])
-       fi
-       ;;
-
       mips)
 	echo ${extra_objects} | grep -s "itbl-parse.o" 
 	if test $? -ne 0 ; then
@@ -570,12 +563,7 @@ changequote([,])dnl
 	fi
 	;;
 
-      i386)
-	if test $this_target = $target ; then
-	  AC_DEFINE_UNQUOTED(DEFAULT_ARCH, "${arch}", [Default architecture.])
-	fi
-	;;
-      sparc)
+      i386 | s390 | sparc)
 	if test $this_target = $target ; then
 	  AC_DEFINE_UNQUOTED(DEFAULT_ARCH, "${arch}", [Default architecture.])
 	fi
