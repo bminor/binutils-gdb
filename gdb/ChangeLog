@@ -1,3 +1,8 @@
+2004-10-10  Jim Blandy  <jimb@redhat.com>
+
+	* MAINTAINERS (generic symtabs, dwarf readers, elf reader, stabs
+	reader, tracing bytecode stuff): Remove self.
+
 2004-10-10  Mark Kettenis  <kettenis@gnu.org>
 
 	* sparc64-linux-tdep.c: Update copyright year.  Don't include

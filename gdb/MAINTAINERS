@@ -217,22 +217,17 @@ event loop		Elena Zannoni           ezannoni@redhat.com
                         For the part of top.c related to the event loop,
                         send questions to ezannoni@redhat.com
 
-generic symtabs		Jim Blandy		jimb@redhat.com
-			Elena Zannoni		ezannoni@redhat.com
-  dwarf readers		Jim Blandy		jimb@redhat.com
-			Elena Zannoni		ezannoni@redhat.com
-  elf reader		Jim Blandy		jimb@redhat.com
-			Elena Zannoni		ezannoni@redhat.com
-  stabs reader		Jim Blandy		jimb@redhat.com
-			Elena Zannoni		ezannoni@redhat.com
+generic symtabs		Elena Zannoni		ezannoni@redhat.com
+  dwarf readers		Elena Zannoni		ezannoni@redhat.com
+  elf reader		Elena Zannoni		ezannoni@redhat.com
+  stabs reader		Elena Zannoni		ezannoni@redhat.com
   coff reader		Philippe De Muyter	phdm@macqel.be
   xcoff reader		Any maintainer can modify this; please send tricky
 			ones to Kevin Buettner <kevinb@redhat.com>
   HP/UX readers		Any [past] maintainer can modify this.
 			Please send tricky ones to the symtabs maintainers.
 
-tracing bytecode stuff  Jim Blandy              jimb@redhat.com
-                        (Global Maintainers)
+tracing bytecode stuff  (Global Maintainers)
 tracing			Michael Snyder		msnyder@redhat.com
 threads			Michael Snyder		msnyder@redhat.com
 			Mark Kettenis		kettenis@gnu.org
