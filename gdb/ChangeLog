@@ -1,5 +1,9 @@
 2004-04-18  Mark Kettenis  <kettenis@gnu.org>
 
+	* Makefile.in (ALLDEPFILES): List ppc-sysv-tdep.c, ppcnbsd-nat.c
+	and ppcnbsd-tdep.c instead of ppc-sysv-tdep.o, ppcnbsd-nat.o and
+	ppcnbsd-tdep.o.
+
 	* m68k-tdep.h: Tweak comments.
 	* m68k-tdep.c: Tweak comment.
 

@@ -1350,8 +1350,8 @@ ALLDEPFILES = \
 	nbsd-tdep.c \
 	ns32k-tdep.c solib-osf.c \
 	somread.c somsolib.c $(HPREAD_SOURCE) \
-	ppc-sysv-tdep.o ppc-linux-nat.c ppc-linux-tdep.c \
-	ppcnbsd-nat.o ppcnbsd-tdep.o \
+	ppc-sysv-tdep.c ppc-linux-nat.c ppc-linux-tdep.c \
+	ppcnbsd-nat.c ppcnbsd-tdep.c \
 	procfs.c \
 	remote-e7000.c \
 	remote-hms.c remote-m32r-sdi.c remote-mips.c \
