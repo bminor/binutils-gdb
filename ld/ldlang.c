@@ -4993,7 +4993,7 @@ lang_vers_match (struct bfd_elf_version_expr_head *head,
       if (!cxx_sym)
 	cxx_sym = sym;
     }
-  if (head->mask & BFD_ELF_VERSION_JAVA_TYPE)
+  else if (head->mask & BFD_ELF_VERSION_JAVA_TYPE)
     {
       java_sym = cplus_demangle (sym, DMGL_JAVA);
       if (!java_sym)
@@ -5023,7 +5023,7 @@ lang_vers_match (struct bfd_elf_version_expr_head *head,
 	      {
 		e.symbol = cxx_sym;
 		expr = htab_find (head->htab, &e);
-		while (expr && strcmp (expr->symbol, sym) == 0)
+		while (expr && strcmp (expr->symbol, cxx_sym) == 0)
 		  if (expr->mask == BFD_ELF_VERSION_CXX_TYPE)
 		    goto out_ret;
 		else
@@ -5035,7 +5035,7 @@ lang_vers_match (struct bfd_elf_version_expr_head *head,
 	      {
 		e.symbol = java_sym;
 		expr = htab_find (head->htab, &e);
-		while (expr && strcmp (expr->symbol, sym) == 0)
+		while (expr && strcmp (expr->symbol, java_sym) == 0)
 		  if (expr->mask == BFD_ELF_VERSION_JAVA_TYPE)
 		    goto out_ret;
 		else

@@ -1,5 +1,9 @@
 2003-10-24  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* ldlang.c (lang_vers_match): Check demangled symbols.
+
+2003-10-24  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* ldlang.c (lang_vers_match): Check "symbol" instead of
 	"wildcard" and "pattern". Fix a typo.
 	(lang_finalize_version_expr_head): Likewise.
