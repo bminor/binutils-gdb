@@ -1,3 +1,7 @@
+Wed Sep 14 17:52:14 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* mips-opc.c (mips_opcodes): Set WR_t for sc and scd.
+
 Sun Sep 11 22:32:17 1994  Jeff Law  (law@snake.cs.utah.edu)
 
 	* hppa-dis.c (reg_names): Use r26-r23 for arg0-arg3.
