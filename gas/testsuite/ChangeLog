@@ -1,3 +1,13 @@
+2002-05-23  Tom Rix  <trix@redhat.com>
+
+	* gas/d10v/d10v.exp: Add instruction packing test.
+	* gas/d10v/instruction_packing.s : New test.
+
+2002-05-22  Tom Rix  <trix@redhat.com>
+
+	* gas/d10v/d10v.exp: Renamed from d10.exp. Add address-* tests.
+	* gas/d10v/address-001.s - address-041.s : New tests.
+
 2002-05-23  H.J. Lu <hjl@gnu.org>
 
 	* gas/mips/elf-rel.d: Skip the padding.
