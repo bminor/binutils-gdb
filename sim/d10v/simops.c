@@ -2419,7 +2419,7 @@ OP_1 ()
 void
 OP_5F00 ()
 {
-  trace_input ("trap", OP_CONSTANT16, OP_REG, OP_VOID);
+  trace_input ("trap", OP_CONSTANT4, OP_VOID, OP_VOID);
   trace_output (OP_VOID);
   
   switch (OP[0])

@@ -1,3 +1,7 @@
+Thu Sep 12 12:19:28 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* simops.c (OP_5F00): Correct tracing information for trap.
+
 Wed Sep 11 18:55:50 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* Makefile.in (CSEARCH): Correctly find opcodes directory.
