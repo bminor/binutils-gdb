@@ -87,6 +87,22 @@ hw_abort (struct hw *me,
   sim_io_error (sd, "%s", "");
 }
 
+void
+hw_trace (struct hw *me,
+	  const char *fmt,
+	  ...)
+{
+  if (hw_trace_p (me)) /* to be sure, to be sure */
+    {
+      va_list ap;
+      va_start (ap, fmt);
+      sim_io_eprintf (hw_system (me), "%s: ", hw_path (me));
+      sim_io_evprintf (hw_system (me), fmt, ap);
+      sim_io_eprintf (hw_system (me), "\n");
+      va_end (ap);
+    }
+}
+
 
 /* The event queue abstraction (for devices) */
 

@@ -1,3 +1,16 @@
+Sun Mar 22 16:21:15 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* hw-device.h (HW_TRACE): Define.
+	(hw_trace): Declare.
+	* hw-device.c (hw_trace): Implement function.
+
+	* hw-base.c (hw_create): Set hw trace level from "trace?"
+ 	property.
+
+	* dv-core.c (dv_core_attach_address_callback): Add trace.
+
+	* dv-pal.c: Replace DTRACE with HW_TRACE.
+
 Sun Mar 22 15:23:35 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* hw-device.h (HW_ZALLOC, HW_MALLOC): New macros.

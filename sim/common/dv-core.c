@@ -52,6 +52,8 @@ dv_core_attach_address_callback (struct hw *me,
 				 address_word nr_bytes,
 				 struct hw *client)
 {
+  HW_TRACE ((me, "attach (level=%d, space=%d, addr=0x%lx, nr_bytes=%ld, client=0x%lx)",
+	     level, space, (unsigned long) addr, (unsigned long) nr_bytes, (unsigned long) client));
   /* NOTE: At preset the space is assumed to be zero.  Perhaphs the
      space should be mapped onto something for instance: space0 -
      unified memory; space1 - IO memory; ... */

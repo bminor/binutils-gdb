@@ -442,6 +442,10 @@ hw_create (SIM_DESC sd,
       }
   }
 
+  /* Fill in the (hopefully) defined trace variable */
+  if (hw_find_property (hw, "trace?") != NULL)
+    hw->trace_of_hw_p = hw_find_boolean_property (hw, "trace?");
+
   /* Attach dummy ports */
   set_hw_ports (hw, empty_hw_ports);
   set_hw_port_event (hw, panic_hw_port_event);

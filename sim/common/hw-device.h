@@ -447,6 +447,18 @@ void volatile NORETURN hw_abort
 
 #define hw_trace_p(hw) ((hw)->trace_of_hw_p + 0)
 
+void hw_trace
+(struct hw *me,
+ const char *fmt,
+ ...) __attribute__ ((format (printf, 2, 3)));
+
+#define HW_TRACE(ARGS) \
+do { \
+  if (hw_trace_p (me)) \
+    { \
+      hw_trace ARGS; \
+    } \
+} while (0)
 
 
 /* Some of the related functions require specific types */

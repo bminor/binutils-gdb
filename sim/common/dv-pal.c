@@ -41,8 +41,6 @@
 #include <stdlib.h>
 #endif
 
-#define DTRACE(x,y)
-
 /* DEVICE
 
    
@@ -105,6 +103,15 @@
 
    Specify the address (within the parent bus) that this device is to
    live.
+
+
+   PORTS
+
+
+   int[0..NR_PROCESSORS] (output)
+
+   Driven as a result of a write to the interrupt-port /
+   interrupt-level register pair.
 
 
    */
@@ -191,32 +198,32 @@ hw_pal_io_read_buffer (struct hw *me,
 #else
       val = 0;
 #endif
-      DTRACE (pal, ("read - cpu-nr %d\n", val));
+      HW_TRACE ((me, "read - cpu-nr %d\n", val));
       break;
     case hw_pal_nr_cpu_register:
       val = hw_tree_find_integer_property (me, "/openprom/options/smp");
-      DTRACE (pal, ("read - nr-cpu %d\n", val));
+      HW_TRACE ((me, "read - nr-cpu %d\n", val));
       break;
     case hw_pal_read_fifo:
       val = hw_pal->input.buffer;
-      DTRACE (pal, ("read - input-fifo %d\n", val));
+      HW_TRACE ((me, "read - input-fifo %d\n", val));
       break;
     case hw_pal_read_status:
       scan_hw_pal (me);
       val = hw_pal->input.status;
-      DTRACE (pal, ("read - input-status %d\n", val));
+      HW_TRACE ((me, "read - input-status %d\n", val));
       break;
     case hw_pal_write_fifo:
       val = hw_pal->output.buffer;
-      DTRACE (pal, ("read - output-fifo %d\n", val));
+      HW_TRACE ((me, "read - output-fifo %d\n", val));
       break;
     case hw_pal_write_status:
       val = hw_pal->output.status;
-      DTRACE (pal, ("read - output-status %d\n", val));
+      HW_TRACE ((me, "read - output-status %d\n", val));
       break;
     default:
       val = 0;
-      DTRACE (pal, ("read - ???\n"));
+      HW_TRACE ((me, "read - ???\n"));
     }
   memset (dest, 0, nr_bytes);
   *(unsigned_1*)dest = val;
@@ -249,19 +256,19 @@ hw_pal_io_write_buffer (struct hw *me,
       break;
     case hw_pal_read_fifo:
       hw_pal->input.buffer = byte[0];
-      DTRACE (pal, ("write - input-fifo %d\n", byte[0]));
+      HW_TRACE ((me, "write - input-fifo %d\n", byte[0]));
       break;
     case hw_pal_read_status:
       hw_pal->input.status = byte[0];
-      DTRACE (pal, ("write - input-status %d\n", byte[0]));
+      HW_TRACE ((me, "write - input-status %d\n", byte[0]));
       break;
     case hw_pal_write_fifo:
       write_hw_pal (me, byte[0]);
-      DTRACE (pal, ("write - output-fifo %d\n", byte[0]));
+      HW_TRACE ((me, "write - output-fifo %d\n", byte[0]));
       break;
     case hw_pal_write_status:
       hw_pal->output.status = byte[0];
-      DTRACE (pal, ("write - output-status %d\n", byte[0]));
+      HW_TRACE ((me, "write - output-status %d\n", byte[0]));
       break;
     }
   return nr_bytes;
