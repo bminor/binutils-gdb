@@ -461,12 +461,9 @@ srec_scan (abfd)
 	      {
 		if (buf != NULL)
 		  free (buf);
-		buf = (bfd_byte *) malloc (bytes * 2);
+		buf = (bfd_byte *) bfd_malloc (bytes * 2);
 		if (buf == NULL)
-		  {
-		    bfd_set_error (bfd_error_no_memory);
-		    goto error_return;
-		  }
+		  goto error_return;
 		bufsize = bytes * 2;
 	      }
 
@@ -667,12 +664,9 @@ srec_read_section (abfd, section, contents)
 	{
 	  if (buf != NULL)
 	    free (buf);
-	  buf = (bfd_byte *) malloc (bytes * 2);
+	  buf = (bfd_byte *) bfd_malloc (bytes * 2);
 	  if (buf == NULL)
-	    {
-	      bfd_set_error (bfd_error_no_memory);
-	      goto error_return;
-	    }
+	    goto error_return;
 	  bufsize = bytes * 2;
 	}
 

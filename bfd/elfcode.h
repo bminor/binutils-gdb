@@ -891,12 +891,9 @@ elf_slurp_symbol_table (abfd, symptrs, dynamic)
 
       /* Temporarily allocate room for the raw ELF symbols.  */
       x_symp = ((Elf_External_Sym *)
-		malloc (symcount * sizeof (Elf_External_Sym)));
+		bfd_malloc (symcount * sizeof (Elf_External_Sym)));
       if (x_symp == NULL && symcount != 0)
-	{
-	  bfd_set_error (bfd_error_no_memory);
-	  goto error_return;
-	}
+	goto error_return;
 
       if (bfd_read ((PTR) x_symp, sizeof (Elf_External_Sym), symcount, abfd)
 	  != symcount * sizeof (Elf_External_Sym))
@@ -1053,12 +1050,9 @@ elf_slurp_reloc_table (abfd, asect, symbols)
 	      && (asect->reloc_count
 		  == d->rel_hdr.sh_size / d->rel_hdr.sh_entsize));
 
-  allocated = (PTR) malloc ((size_t) d->rel_hdr.sh_size);
+  allocated = (PTR) bfd_malloc ((size_t) d->rel_hdr.sh_size);
   if (allocated == NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      goto error_return;
-    }
+    goto error_return;
 
   if (bfd_seek (abfd, asect->rel_filepos, SEEK_SET) != 0
       || (bfd_read (allocated, 1, d->rel_hdr.sh_size, abfd)

@@ -482,12 +482,9 @@ sh_relax_section (abfd, sec, link_info, again)
 	    contents = coff_section_data (abfd, sec)->contents;
 	  else
 	    {
-	      contents = (bfd_byte *) malloc (sec->_raw_size);
+	      contents = (bfd_byte *) bfd_malloc (sec->_raw_size);
 	      if (contents == NULL)
-		{
-		  bfd_set_error (bfd_error_no_memory);
-		  goto error_return;
-		}
+		goto error_return;
 	      free_contents = contents;
 
 	      if (! bfd_get_section_contents (abfd, sec, contents,
@@ -1087,12 +1084,9 @@ sh_relax_delete_bytes (abfd, sec, addr, count)
                          Perhaps, if info->keep_memory is false, we
                          should free them, if we are permitted to,
                          when we leave sh_coff_relax_section.  */
-		      ocontents = (bfd_byte *) malloc (o->_raw_size);
+		      ocontents = (bfd_byte *) bfd_malloc (o->_raw_size);
 		      if (ocontents == NULL)
-			{
-			  bfd_set_error (bfd_error_no_memory);
-			  return false;
-			}
+			return false;
 		      if (! bfd_get_section_contents (abfd, o, ocontents,
 						      (file_ptr) 0,
 						      o->_raw_size))
@@ -1383,21 +1377,15 @@ sh_coff_get_relocated_section_contents (output_bfd, link_info, link_order,
 	goto error_return;
 
       internal_syms = ((struct internal_syment *)
-		       malloc (obj_raw_syment_count (input_bfd)
-			       * sizeof (struct internal_syment)));
+		       bfd_malloc (obj_raw_syment_count (input_bfd)
+				   * sizeof (struct internal_syment)));
       if (internal_syms == NULL)
-	{
-	  bfd_set_error (bfd_error_no_memory);
-	  goto error_return;
-	}
+	goto error_return;
 
-      sections = (asection **) malloc (obj_raw_syment_count (input_bfd)
-				       * sizeof (asection *));
+      sections = (asection **) bfd_malloc (obj_raw_syment_count (input_bfd)
+					   * sizeof (asection *));
       if (sections == NULL)
-	{
-	  bfd_set_error (bfd_error_no_memory);
-	  goto error_return;
-	}
+	goto error_return;
 
       isymp = internal_syms;
       secpp = sections;

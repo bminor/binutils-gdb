@@ -1,3 +1,14 @@
+Fri Dec  1 14:46:51 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* libbfd.c (bfd_malloc, bfd_realloc): New functions.
+	(bfd_zmalloc): Return PTR, not char *.  Take size_t, not
+	bfd_size_type.
+	* libbfd-in.h (bfd_malloc, bfd_realloc): Declare.
+	(bfd_zmalloc): Change declaration.
+	* libbfd.h: Rebuild.
+	* Many files: Use bfd_malloc and bfd_realloc rather than malloc
+	and realloc.  Don't set bfd_error_no_memory if they fail.
+
 Thu Nov 30 19:32:26 1995  Kim Knuttila  <krk@cygnus.com>
 
 	* coff-ppc.c: Added macros to tidy up toc cell treatment. Numerous

@@ -110,13 +110,10 @@ elf_link_add_archive_symbols (abfd, info)
   c = bfd_ardata (abfd)->symdef_count;
   if (c == 0)
     return true;
-  defined = (boolean *) malloc (c * sizeof (boolean));
-  included = (boolean *) malloc (c * sizeof (boolean));
+  defined = (boolean *) bfd_malloc (c * sizeof (boolean));
+  included = (boolean *) bfd_malloc (c * sizeof (boolean));
   if (defined == (boolean *) NULL || included == (boolean *) NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      goto error_return;
-    }
+    goto error_return;
   memset (defined, 0, c * sizeof (boolean));
   memset (included, 0, c * sizeof (boolean));
 
@@ -328,12 +325,10 @@ elf_link_add_object_symbols (abfd, info)
       extsymoff = hdr->sh_info;
     }
 
-  buf = (Elf_External_Sym *) malloc (extsymcount * sizeof (Elf_External_Sym));
+  buf = ((Elf_External_Sym *)
+	 bfd_malloc (extsymcount * sizeof (Elf_External_Sym)));
   if (buf == NULL && extsymcount != 0)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      goto error_return;
-    }
+    goto error_return;
 
   /* We store a pointer to the hash table entry for each external
      symbol.  */
@@ -404,12 +399,9 @@ elf_link_add_object_symbols (abfd, info)
 	  int elfsec;
 	  unsigned long link;
 
-	  dynbuf = (Elf_External_Dyn *) malloc ((size_t) s->_raw_size);
+	  dynbuf = (Elf_External_Dyn *) bfd_malloc ((size_t) s->_raw_size);
 	  if (dynbuf == NULL)
-	    {
-	      bfd_set_error (bfd_error_no_memory);
-	      goto error_return;
-	    }
+	    goto error_return;
 
 	  if (! bfd_get_section_contents (abfd, s, (PTR) dynbuf,
 					  (file_ptr) 0, s->_raw_size))
@@ -1090,15 +1082,9 @@ elf_add_dynamic_entry (info, tag, val)
   BFD_ASSERT (s != NULL);
 
   newsize = s->_raw_size + sizeof (Elf_External_Dyn);
-  if (s->contents == NULL)
-    newcontents = (bfd_byte *) malloc (newsize);
-  else
-    newcontents = (bfd_byte *) realloc (s->contents, newsize);
+  newcontents = (bfd_byte *) bfd_realloc (s->contents, newsize);
   if (newcontents == NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return false;
-    }
+    return false;
 
   dyn.d_tag = tag;
   dyn.d_un.d_val = val;
@@ -1146,22 +1132,16 @@ elf_link_read_relocs (abfd, o, external_relocs, internal_relocs, keep_memory)
       if (keep_memory)
 	internal_relocs = (Elf_Internal_Rela *) bfd_alloc (abfd, size);
       else
-	internal_relocs = alloc2 = (Elf_Internal_Rela *) malloc (size);
+	internal_relocs = alloc2 = (Elf_Internal_Rela *) bfd_malloc (size);
       if (internal_relocs == NULL)
-	{
-	  bfd_set_error (bfd_error_no_memory);
-	  goto error_return;
-	}
+	goto error_return;
     }
 
   if (external_relocs == NULL)
     {
-      alloc1 = (PTR) malloc ((size_t) rel_hdr->sh_size);
+      alloc1 = (PTR) bfd_malloc ((size_t) rel_hdr->sh_size);
       if (alloc1 == NULL)
-	{
-	  bfd_set_error (bfd_error_no_memory);
-	  goto error_return;
-	}
+	goto error_return;
       external_relocs = alloc1;
     }
 
@@ -1847,13 +1827,10 @@ elf_bfd_final_link (abfd, info)
 	    goto error_return;
 
 	  p = ((struct elf_link_hash_entry **)
-	       malloc (o->reloc_count
-		       * sizeof (struct elf_link_hash_entry *)));
+	       bfd_malloc (o->reloc_count
+			   * sizeof (struct elf_link_hash_entry *)));
 	  if (p == NULL && o->reloc_count != 0)
-	    {
-	      bfd_set_error (bfd_error_no_memory);
-	      goto error_return;
-	    }
+	    goto error_return;
 	  elf_section_data (o)->rel_hashes = p;
 	  pend = p + o->reloc_count;
 	  for (; p < pend; p++)
@@ -1898,12 +1875,9 @@ elf_bfd_final_link (abfd, info)
   else
     finfo.symbuf_size = max_sym_count;
   finfo.symbuf = ((Elf_External_Sym *)
-		  malloc (finfo.symbuf_size * sizeof (Elf_External_Sym)));
+		  bfd_malloc (finfo.symbuf_size * sizeof (Elf_External_Sym)));
   if (finfo.symbuf == NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      goto error_return;
-    }
+    goto error_return;
 
   /* Start writing out the symbol table.  The first symbol is always a
      dummy symbol.  */
@@ -1954,17 +1928,20 @@ elf_bfd_final_link (abfd, info)
 
   /* Allocate some memory to hold information read in from the input
      files.  */
-  finfo.contents = (bfd_byte *) malloc (max_contents_size);
-  finfo.external_relocs = (PTR) malloc (max_external_reloc_size);
+  finfo.contents = (bfd_byte *) bfd_malloc (max_contents_size);
+  finfo.external_relocs = (PTR) bfd_malloc (max_external_reloc_size);
   finfo.internal_relocs = ((Elf_Internal_Rela *)
-			   malloc (max_internal_reloc_count
-				   * sizeof (Elf_Internal_Rela)));
+			   bfd_malloc (max_internal_reloc_count
+				       * sizeof (Elf_Internal_Rela)));
   finfo.external_syms = ((Elf_External_Sym *)
-			 malloc (max_sym_count * sizeof (Elf_External_Sym)));
+			 bfd_malloc (max_sym_count
+				     * sizeof (Elf_External_Sym)));
   finfo.internal_syms = ((Elf_Internal_Sym *)
-			 malloc (max_sym_count * sizeof (Elf_Internal_Sym)));
-  finfo.indices = (long *) malloc (max_sym_count * sizeof (long));
-  finfo.sections = (asection **) malloc (max_sym_count * sizeof (asection *));
+			 bfd_malloc (max_sym_count
+				     * sizeof (Elf_Internal_Sym)));
+  finfo.indices = (long *) bfd_malloc (max_sym_count * sizeof (long));
+  finfo.sections = ((asection **)
+		    bfd_malloc (max_sym_count * sizeof (asection *)));
   if ((finfo.contents == NULL && max_contents_size != 0)
       || (finfo.external_relocs == NULL && max_external_reloc_size != 0)
       || (finfo.internal_relocs == NULL && max_internal_reloc_count != 0)
@@ -1972,10 +1949,7 @@ elf_bfd_final_link (abfd, info)
       || (finfo.internal_syms == NULL && max_sym_count != 0)
       || (finfo.indices == NULL && max_sym_count != 0)
       || (finfo.sections == NULL && max_sym_count != 0))
-    {
-      bfd_set_error (bfd_error_no_memory);
-      goto error_return;
-    }
+    goto error_return;
 
   /* Since ELF permits relocations to be against local symbols, we
      must have the local symbols available when we do the relocations.

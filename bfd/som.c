@@ -1724,12 +1724,9 @@ setup_sections (abfd, file_hdr)
 
   /* First, read in space names */
 
-  space_strings = malloc (file_hdr->space_strings_size);
+  space_strings = bfd_malloc (file_hdr->space_strings_size);
   if (!space_strings && file_hdr->space_strings_size != 0)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      goto error_return;
-    }
+    goto error_return;
 
   if (bfd_seek (abfd, file_hdr->space_strings_location, SEEK_SET) < 0)
     goto error_return;
@@ -1939,8 +1936,8 @@ setup_sections (abfd, file_hdr)
     }
   /* Now that we've read in all the subspace records, we need to assign
      a target index to each subspace.  */
-  subspace_sections = (asection **) malloc (total_subspaces
-					    * sizeof (asection *));
+  subspace_sections = (asection **) bfd_malloc (total_subspaces
+						* sizeof (asection *));
   if (subspace_sections == NULL)
     goto error_return;
 
@@ -3708,12 +3705,9 @@ som_build_and_write_symbol_table (abfd)
   /* Compute total symbol table size and allocate a chunk of memory
      to hold the symbol table as we build it.  */
   symtab_size = num_syms * sizeof (struct symbol_dictionary_record);
-  som_symtab = (struct symbol_dictionary_record *) malloc (symtab_size);
+  som_symtab = (struct symbol_dictionary_record *) bfd_malloc (symtab_size);
   if (som_symtab == NULL && symtab_size != 0)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      goto error_return;
-    }
+    goto error_return;
   memset (som_symtab, 0, symtab_size);
 
   /* Walk over each symbol.  */
@@ -3797,12 +3791,9 @@ som_slurp_string_table (abfd)
     }
 
   /* Allocate and read in the string table.  */
-  stringtab = malloc (obj_som_stringtab_size (abfd));
+  stringtab = bfd_malloc (obj_som_stringtab_size (abfd));
   if (stringtab == NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return false;
-    }
+    return false;
   memset (stringtab, 0, obj_som_stringtab_size (abfd));
 
   if (bfd_seek (abfd, obj_som_str_filepos (abfd), SEEK_SET) < 0)
@@ -3904,22 +3895,16 @@ som_slurp_symbol_table (abfd)
 
   stringtab = obj_som_stringtab (abfd);
 
-  symbase = (som_symbol_type *)
-    malloc (symbol_count * sizeof (som_symbol_type));
+  symbase = ((som_symbol_type *)
+	     bfd_malloc (symbol_count * sizeof (som_symbol_type)));
   if (symbase == NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      goto error_return;
-    }
+    goto error_return;
   memset (symbase, 0, symbol_count * sizeof (som_symbol_type));
 
   /* Read in the external SOM representation.  */
-  buf = malloc (symbol_count * symsize);
+  buf = bfd_malloc (symbol_count * symsize);
   if (buf == NULL && symbol_count * symsize != 0)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      goto error_return;
-    }
+    goto error_return;
   if (bfd_seek (abfd, obj_som_sym_filepos (abfd), SEEK_SET) < 0)
     goto error_return;
   if (bfd_read (buf, symbol_count * symsize, 1, abfd) 
@@ -4453,7 +4438,7 @@ som_set_reloc_info (fixup, end, internal_relocs, section, symbols, just_count)
 		      /* Got to read the damn contents first.  We don't
 		         bother saving the contents (yet).  Add it one
 			 day if the need arises.  */
-		      section->contents = malloc (section->_raw_size);
+		      section->contents = bfd_malloc (section->_raw_size);
 		      if (section->contents == NULL)
 			return -1;
 
@@ -4519,12 +4504,9 @@ som_slurp_reloc_table (abfd, section, symbols, just_count)
      parsed.  We must do so now to know how many relocations exist.  */
   if (section->reloc_count == -1)
     {
-      external_relocs = (char *) malloc (fixup_stream_size);
+      external_relocs = (char *) bfd_malloc (fixup_stream_size);
       if (external_relocs == (char *) NULL)
-	{
-	  bfd_set_error (bfd_error_no_memory);
-	  return false;
-	}
+	return false;
       /* Read in the external forms. */
       if (bfd_seek (abfd,
 		    obj_som_reloc_filepos (abfd) + section->rel_filepos,
@@ -5000,12 +4982,10 @@ som_bfd_count_ar_symbols (abfd, lst_header, count)
   file_ptr lst_filepos = bfd_tell (abfd) - sizeof (struct lst_header);
 
   hash_table = 
-    (unsigned int *) malloc (lst_header->hash_size * sizeof (unsigned int));
+    (unsigned int *) bfd_malloc (lst_header->hash_size
+				 * sizeof (unsigned int));
   if (hash_table == NULL && lst_header->hash_size != 0)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      goto error_return;
-    }
+    goto error_return;
 
   /* Don't forget to initialize the counter!  */
   *count = 0;
@@ -5080,21 +5060,16 @@ som_bfd_fill_in_ar_symbols (abfd, lst_header, syms)
   file_ptr lst_filepos = bfd_tell (abfd) - sizeof (struct lst_header);
 
   hash_table = 
-    (unsigned int *) malloc (lst_header->hash_size * sizeof (unsigned int));
+    (unsigned int *) bfd_malloc (lst_header->hash_size
+				 * sizeof (unsigned int));
   if (hash_table == NULL && lst_header->hash_size != 0)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      goto error_return;
-    }
+    goto error_return;
 
   som_dict =
-    (struct som_entry *) malloc (lst_header->module_count
-				 * sizeof (struct som_entry));
+    (struct som_entry *) bfd_malloc (lst_header->module_count
+				     * sizeof (struct som_entry));
   if (som_dict == NULL && lst_header->module_count != 0)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      goto error_return;
-    }
+    goto error_return;
 
   /* Read in the hash table.  The has table is an array of 32bit file offsets
      which point to the hash chains.  */
@@ -5435,29 +5410,20 @@ som_bfd_ar_write_symbol_stuff (abfd, nsyms, string_size, lst)
   unsigned int maxname = abfd->xvec->ar_max_namelen;
 
   hash_table =
-    (unsigned int *) malloc (lst.hash_size * sizeof (unsigned int));
+    (unsigned int *) bfd_malloc (lst.hash_size * sizeof (unsigned int));
   if (hash_table == NULL && lst.hash_size != 0)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      goto error_return;
-    }
+    goto error_return;
   som_dict =
-    (struct som_entry *) malloc (lst.module_count
-				 * sizeof (struct som_entry));
+    (struct som_entry *) bfd_malloc (lst.module_count
+				     * sizeof (struct som_entry));
   if (som_dict == NULL && lst.module_count != 0)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      goto error_return;
-    }
+    goto error_return;
 
   last_hash_entry =
     ((struct lst_symbol_record **)
-     malloc (lst.hash_size * sizeof (struct lst_symbol_record *)));
+     bfd_malloc (lst.hash_size * sizeof (struct lst_symbol_record *)));
   if (last_hash_entry == NULL && lst.hash_size != 0)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      goto error_return;
-    }
+    goto error_return;
 
   /* Lots of fields are file positions relative to the start
      of the lst record.  So save its location.  */
@@ -5504,18 +5470,12 @@ som_bfd_ar_write_symbol_stuff (abfd, nsyms, string_size, lst)
   curr_som_offset = (curr_som_offset + 0x1) & ~0x1;
 
   /* FIXME should be done with buffers just like everything else... */
-  lst_syms = malloc (nsyms * sizeof (struct lst_symbol_record));
+  lst_syms = bfd_malloc (nsyms * sizeof (struct lst_symbol_record));
   if (lst_syms == NULL && nsyms != 0)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      goto error_return;
-    }
-  strings = malloc (string_size);
+    goto error_return;
+  strings = bfd_malloc (string_size);
   if (strings == NULL && string_size != 0)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      goto error_return;
-    }
+    goto error_return;
 
   p = strings;
   curr_lst_sym = lst_syms;

@@ -1058,13 +1058,10 @@ xcoff_link_add_symbols (abfd, info)
      scanning along the relocs as we process the csects.  We index
      into reloc_info using the section target_index.  */
   reloc_info = ((struct reloc_info_struct *)
-		malloc ((abfd->section_count + 1)
-			* sizeof (struct reloc_info_struct)));
+		bfd_malloc ((abfd->section_count + 1)
+			    * sizeof (struct reloc_info_struct)));
   if (reloc_info == NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      goto error_return;
-    }
+    goto error_return;
   memset ((PTR) reloc_info, 0,
 	  (abfd->section_count + 1) * sizeof (struct reloc_info_struct));
 
@@ -1080,12 +1077,9 @@ xcoff_link_add_symbols (abfd, info)
 	    xcoff_read_internal_relocs (abfd, o, true, (bfd_byte *) NULL,
 					false, (struct internal_reloc *) NULL);
 	  reloc_info[o->target_index].csects =
-	    (asection **) malloc (o->reloc_count * sizeof (asection *));
+	    (asection **) bfd_malloc (o->reloc_count * sizeof (asection *));
 	  if (reloc_info[o->target_index].csects == NULL)
-	    {
-	      bfd_set_error (bfd_error_no_memory);
-	      goto error_return;
-	    }
+	    goto error_return;
 	  memset (reloc_info[o->target_index].csects, 0,
 		  o->reloc_count * sizeof (asection *));
 	}
@@ -1095,12 +1089,9 @@ xcoff_link_add_symbols (abfd, info)
 	{
 	  bfd_byte *linenos;
 
-	  linenos = (bfd_byte *) malloc (o->lineno_count * linesz);
+	  linenos = (bfd_byte *) bfd_malloc (o->lineno_count * linesz);
 	  if (linenos == NULL)
-	    {
-	      bfd_set_error (bfd_error_no_memory);
-	      goto error_return;
-	    }
+	    goto error_return;
 	  reloc_info[o->target_index].linenos = linenos;
 	  if (bfd_seek (abfd, o->line_filepos, SEEK_SET) != 0
 	      || (bfd_read (linenos, linesz, o->lineno_count, abfd)
@@ -1943,12 +1934,9 @@ xcoff_link_add_dynamic_symbols (abfd, info)
       goto error_return;
     }
 
-  buf = (bfd_byte *) malloc (lsec->_raw_size);
+  buf = (bfd_byte *) bfd_malloc (lsec->_raw_size);
   if (buf == NULL && lsec->_raw_size > 0)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      goto error_return;
-    }
+    goto error_return;
 
   if (! bfd_get_section_contents (abfd, lsec, (PTR) buf, (file_ptr) 0,
 				  lsec->_raw_size))
@@ -2441,12 +2429,9 @@ bfd_xcoff_export_symbol (output_bfd, info, harg, syscall)
       char *fnname;
       struct xcoff_link_hash_entry *hfn;
 
-      fnname = (char *) malloc (strlen (h->root.root.string) + 2);
+      fnname = (char *) bfd_malloc (strlen (h->root.root.string) + 2);
       if (fnname == NULL)
-	{
-	  bfd_set_error (bfd_error_no_memory);
-	  return false;
-	}
+	return false;
       fnname[0] = '.';
       strcpy (fnname + 1, h->root.root.string);
       hfn = xcoff_link_hash_lookup (xcoff_hash_table (info),
@@ -2838,12 +2823,9 @@ bfd_xcoff_size_dynamic_sections (output_bfd, info, libpath, entry,
 	 bfd_alloc, because I expect that, when linking many files
 	 together, many of the strings will be the same.  Storing the
 	 strings in the hash table should save space in this case.  */
-      debug_contents = (bfd_byte *) malloc (subdeb->_raw_size);
+      debug_contents = (bfd_byte *) bfd_malloc (subdeb->_raw_size);
       if (debug_contents == NULL)
-	{
-	  bfd_set_error (bfd_error_no_memory);
-	  goto error_return;
-	}
+	goto error_return;
       if (! bfd_get_section_contents (sub, subdeb, (PTR) debug_contents,
 				      (file_ptr) 0, subdeb->_raw_size))
 	goto error_return;
@@ -3106,15 +3088,11 @@ xcoff_build_ldsyms (h, p)
 	  while (ldinfo->string_size + len + 3 > newalc)
 	    newalc *= 2;
 
-	  if (ldinfo->strings == NULL)
-	    newstrings = (bfd_byte *) malloc (newalc);
-	  else
-	    newstrings = ((bfd_byte *)
-			  realloc ((PTR) ldinfo->strings, newalc));
+	  newstrings = ((bfd_byte *)
+			bfd_realloc ((PTR) ldinfo->strings, newalc));
 	  if (newstrings == NULL)
 	    {
 	      ldinfo->failed = true;
-	      bfd_set_error (bfd_error_no_memory);
 	      return false;
 	    }
 	  ldinfo->string_alc = newalc;
@@ -3334,14 +3312,12 @@ _bfd_xcoff_bfd_final_link (abfd, info)
 
     /* We use section_count + 1, rather than section_count, because
        the target_index fields are 1 based.  */
-    finfo.section_info = ((struct xcoff_link_section_info *)
-			  malloc ((abfd->section_count + 1)
-				  * sizeof (struct xcoff_link_section_info)));
+    finfo.section_info =
+      ((struct xcoff_link_section_info *)
+       bfd_malloc ((abfd->section_count + 1)
+		   * sizeof (struct xcoff_link_section_info)));
     if (finfo.section_info == NULL)
-      {
-	bfd_set_error (bfd_error_no_memory);
-	goto error_return;
-      }
+      goto error_return;
     for (i = 0; i <= abfd->section_count; i++)
       {
 	finfo.section_info[i].relocs = NULL;
@@ -3379,17 +3355,14 @@ _bfd_xcoff_bfd_final_link (abfd, info)
 	     would be slow.  */
 	  finfo.section_info[o->target_index].relocs =
 	    ((struct internal_reloc *)
-	     malloc (o->reloc_count * sizeof (struct internal_reloc)));
+	     bfd_malloc (o->reloc_count * sizeof (struct internal_reloc)));
 	  finfo.section_info[o->target_index].rel_hashes =
 	    ((struct xcoff_link_hash_entry **)
-	     malloc (o->reloc_count
+	     bfd_malloc (o->reloc_count
 		     * sizeof (struct xcoff_link_hash_entry *)));
 	  if (finfo.section_info[o->target_index].relocs == NULL
 	      || finfo.section_info[o->target_index].rel_hashes == NULL)
-	    {
-	      bfd_set_error (bfd_error_no_memory);
-	      goto error_return;
-	    }
+	    goto error_return;
 
 	  if (o->reloc_count > max_output_reloc_count)
 	    max_output_reloc_count = o->reloc_count;
@@ -3436,25 +3409,22 @@ _bfd_xcoff_bfd_final_link (abfd, info)
 
   /* Allocate some buffers used while linking.  */
   finfo.internal_syms = ((struct internal_syment *)
-			 malloc (max_sym_count
-				 * sizeof (struct internal_syment)));
-  finfo.sym_indices = (long *) malloc (max_sym_count * sizeof (long));
+			 bfd_malloc (max_sym_count
+				     * sizeof (struct internal_syment)));
+  finfo.sym_indices = (long *) bfd_malloc (max_sym_count * sizeof (long));
   finfo.outsyms = ((bfd_byte *)
-		   malloc ((size_t) ((max_sym_count + 1) * symesz)));
-  finfo.linenos = (bfd_byte *) malloc (max_lineno_count
-				       * bfd_coff_linesz (abfd));
-  finfo.contents = (bfd_byte *) malloc (max_contents_size);
-  finfo.external_relocs = (bfd_byte *) malloc (max_reloc_count * relsz);
+		   bfd_malloc ((size_t) ((max_sym_count + 1) * symesz)));
+  finfo.linenos = (bfd_byte *) bfd_malloc (max_lineno_count
+					   * bfd_coff_linesz (abfd));
+  finfo.contents = (bfd_byte *) bfd_malloc (max_contents_size);
+  finfo.external_relocs = (bfd_byte *) bfd_malloc (max_reloc_count * relsz);
   if ((finfo.internal_syms == NULL && max_sym_count > 0)
       || (finfo.sym_indices == NULL && max_sym_count > 0)
       || finfo.outsyms == NULL
       || (finfo.linenos == NULL && max_lineno_count > 0)
       || (finfo.contents == NULL && max_contents_size > 0)
       || (finfo.external_relocs == NULL && max_reloc_count > 0))
-    {
-      bfd_set_error (bfd_error_no_memory);
-      goto error_return;
-    }
+    goto error_return;
 
   obj_raw_syment_count (abfd) = 0;
   xcoff_data (abfd)->toc = (bfd_vma) -1;

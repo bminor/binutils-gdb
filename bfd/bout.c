@@ -500,16 +500,13 @@ b_out_slurp_reloc_table (abfd, asect, symbols)
     return false;
   count = reloc_size / sizeof (struct relocation_info);
 
-  relocs = (struct relocation_info *) malloc (reloc_size);
-  if (!relocs && reloc_size != 0) {
-    bfd_set_error (bfd_error_no_memory);
+  relocs = (struct relocation_info *) bfd_malloc (reloc_size);
+  if (!relocs && reloc_size != 0)
     return false;
-  }
-  reloc_cache = (arelent *) malloc ((count+1) * sizeof (arelent));
+  reloc_cache = (arelent *) bfd_malloc ((count+1) * sizeof (arelent));
   if (!reloc_cache) {
     if (relocs != NULL)
       free ((char*)relocs);
-    bfd_set_error (bfd_error_no_memory);
     return false;
   }
 
@@ -698,11 +695,9 @@ b_out_squirt_out_relocs (abfd, section)
   int extern_mask, pcrel_mask,  len_2, callj_mask;
   if (count == 0) return true;
   generic   = section->orelocation;
-  native = ((struct relocation_info *) malloc (natsize));
-  if (!native && natsize != 0) {
-    bfd_set_error (bfd_error_no_memory);
+  native = ((struct relocation_info *) bfd_malloc (natsize));
+  if (!native && natsize != 0)
     return false;
-  }
 
   if (abfd->xvec->header_byteorder_big_p)
   {
@@ -1154,12 +1149,9 @@ b_out_bfd_relax_section (abfd, i, link_info, again)
     {
       long reloc_count;
 
-      reloc_vector = (arelent **) malloc (reloc_size);
+      reloc_vector = (arelent **) bfd_malloc (reloc_size);
       if (reloc_vector == NULL && reloc_size != 0)
-	{
-	  bfd_set_error (bfd_error_no_memory);
-	  goto error_return;
-	}
+	goto error_return;
 
       /* Get the relocs and think about them */
       reloc_count =
@@ -1230,12 +1222,9 @@ b_out_bfd_get_relocated_section_contents (in_abfd, link_info, link_order,
 						       data, relocateable,
 						       symbols);
 
-  reloc_vector = (arelent **) malloc (reloc_size);
+  reloc_vector = (arelent **) bfd_malloc (reloc_size);
   if (reloc_vector == NULL && reloc_size != 0)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      goto error_return;
-    }
+    goto error_return;
 
   input_section->reloc_done = 1;
 

@@ -1158,12 +1158,9 @@ assign_section_numbers (abfd)
 	      char *alc;
 
 	      len = strlen (sec->name);
-	      alc = (char *) malloc (len - 2);
+	      alc = (char *) bfd_malloc (len - 2);
 	      if (alc == NULL)
-		{
-		  bfd_set_error (bfd_error_no_memory);
-		  return false;
-		}
+		return false;
 	      strncpy (alc, sec->name, len - 3);
 	      alc[len - 3] = '\0';
 	      s = bfd_get_section_by_name (abfd, alc);
@@ -1548,13 +1545,10 @@ map_sections_to_segments (abfd)
 
   /* Select the allocated sections, and sort them.  */
 
-  sections = (asection **) malloc (bfd_count_sections (abfd)
-				   * sizeof (asection *));
+  sections = (asection **) bfd_malloc (bfd_count_sections (abfd)
+				       * sizeof (asection *));
   if (sections == NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      goto error_return;
-    }
+    goto error_return;
 
   i = 0;
   for (s = abfd->sections; s != NULL; s = s->next)

@@ -238,7 +238,7 @@ elf_corefile_note (abfd, hdr)
   asection *newsect;
 
   if (hdr->p_filesz > 0
-      && (buf = (char *) malloc ((size_t) hdr->p_filesz)) != NULL
+      && (buf = (char *) bfd_malloc ((size_t) hdr->p_filesz)) != NULL
       && bfd_seek (abfd, hdr->p_offset, SEEK_SET) != -1
       && bfd_read ((PTR) buf, hdr->p_filesz, 1, abfd) == hdr->p_filesz)
     {
@@ -296,7 +296,6 @@ elf_corefile_note (abfd, hdr)
     }
   else if (hdr->p_filesz > 0)
     {
-      bfd_set_error (bfd_error_no_memory);
       return false;
     }
   return true;

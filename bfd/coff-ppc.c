@@ -824,7 +824,9 @@ record_toc(toc_section, our_toc_offset, cat, name)
 {
   /* add this entry to our toc addr-offset-name list */
   struct list_ele *t;
-  t = malloc(sizeof(struct list_ele));
+  t = bfd_malloc (sizeof (struct list_ele));
+  if (t == NULL)
+    abort ();
   t->next = 0;
   t->offset = our_toc_offset;
   t->name = name;

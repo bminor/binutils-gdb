@@ -418,12 +418,9 @@ doit:
   count = reloc_size / each_size;
 
 
-  reloc_cache = (arelent *) malloc (count * sizeof (arelent));
+  reloc_cache = (arelent *) bfd_malloc (count * sizeof (arelent));
   if (!reloc_cache && count != 0)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return false;
-    }
+    return false;
   memset (reloc_cache, 0, count * sizeof (arelent));
 
   relocs = (PTR) bfd_alloc (abfd, reloc_size);

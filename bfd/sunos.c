@@ -350,7 +350,7 @@ sunos_canonicalize_dynamic_symtab (abfd, storage)
     if (info->dyninfo.ld_buckets > info->dynsym_count)
       abort ();
     table_size = info->dyninfo.ld_stab - info->dyninfo.ld_hash;
-    table = (bfd_byte *) malloc (table_size);
+    table = (bfd_byte *) bfd_malloc (table_size);
     if (table == NULL && table_size != 0)
       abort ();
     if (bfd_seek (abfd, info->dyninfo.ld_hash, SEEK_SET) != 0
@@ -1311,13 +1311,10 @@ bfd_sunos_size_dynamic_sections (output_bfd, info, sdynptr, sneedptr,
       bfd_byte *contents;
 
       add = 8 - (s->_raw_size & 7);
-      contents = (bfd_byte *) realloc (s->contents,
-				       (size_t) (s->_raw_size + add));
+      contents = (bfd_byte *) bfd_realloc (s->contents,
+					   (size_t) (s->_raw_size + add));
       if (contents == NULL)
-	{
-	  bfd_set_error (bfd_error_no_memory);
-	  return false;
-	}
+	return false;
       memset (contents + s->_raw_size, 0, (size_t) add);
       s->contents = contents;
       s->_raw_size += add;
@@ -1389,7 +1386,7 @@ sunos_scan_relocs (info, abfd, sec, rel_size)
     return true;
 
   if (! info->keep_memory)
-    relocs = free_relocs = malloc ((size_t) rel_size);
+    relocs = free_relocs = bfd_malloc ((size_t) rel_size);
   else
     {
       struct aout_section_data_struct *n;
@@ -1401,15 +1398,12 @@ sunos_scan_relocs (info, abfd, sec, rel_size)
       else
 	{
 	  set_aout_section_data (sec, n);
-	  relocs = malloc ((size_t) rel_size);
+	  relocs = bfd_malloc ((size_t) rel_size);
 	  aout_section_data (sec)->relocs = relocs;
 	}
     }
   if (relocs == NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return false;
-    }
+    return false;
 
   if (bfd_seek (abfd, sec->rel_filepos, SEEK_SET) != 0
       || bfd_read (relocs, 1, rel_size, abfd) != rel_size)
@@ -1942,16 +1936,10 @@ sunos_scan_dynamic_symbol (h, data)
 	 There are no debugging symbols in the dynamic symbols.  */
       s = bfd_get_section_by_name (dynobj, ".dynstr");
       BFD_ASSERT (s != NULL);
-      if (s->contents == NULL)
-	contents = (bfd_byte *) malloc (len + 1);
-      else
-	contents = (bfd_byte *) realloc (s->contents,
-					 (size_t) (s->_raw_size + len + 1));
+      contents = (bfd_byte *) bfd_realloc (s->contents,
+					   s->_raw_size + len + 1);
       if (contents == NULL)
-	{
-	  bfd_set_error (bfd_error_no_memory);
-	  return false;
-	}
+	return false;
       s->contents = contents;
 
       h->dynstr_index = s->_raw_size;

@@ -759,12 +759,9 @@ alpha_ecoff_get_relocated_section_contents (abfd, link_info, link_order,
 
   if (reloc_size < 0)
     goto error_return;
-  reloc_vector = (arelent **) malloc (reloc_size);
+  reloc_vector = (arelent **) bfd_malloc (reloc_size);
   if (reloc_vector == NULL && reloc_size != 0)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      goto error_return;
-    }
+    goto error_return;
 
   if (! bfd_get_section_contents (input_bfd, input_section, data,
 				  (file_ptr) 0, input_section->_raw_size))

@@ -397,12 +397,9 @@ _bfd_coff_read_internal_relocs (abfd, sec, cache, external_relocs,
 
   if (external_relocs == NULL)
     {
-      free_external = (bfd_byte *) malloc (sec->reloc_count * relsz);
+      free_external = (bfd_byte *) bfd_malloc (sec->reloc_count * relsz);
       if (free_external == NULL && sec->reloc_count > 0)
-	{
-	  bfd_set_error (bfd_error_no_memory);
-	  goto error_return;
-	}
+	goto error_return;
       external_relocs = free_external;
     }
 
@@ -414,13 +411,10 @@ _bfd_coff_read_internal_relocs (abfd, sec, cache, external_relocs,
   if (internal_relocs == NULL)
     {
       free_internal = ((struct internal_reloc *)
-		       malloc (sec->reloc_count
-			       * sizeof (struct internal_reloc)));
+		       bfd_malloc (sec->reloc_count
+				   * sizeof (struct internal_reloc)));
       if (free_internal == NULL && sec->reloc_count > 0)
-	{
-	  bfd_set_error (bfd_error_no_memory);
-	  goto error_return;
-	}
+	goto error_return;
       internal_relocs = free_internal;
     }
 
@@ -1456,12 +1450,9 @@ _bfd_coff_get_external_symbols (abfd)
 
   size = obj_raw_syment_count (abfd) * symesz;
 
-  syms = (PTR) malloc (size);
+  syms = (PTR) bfd_malloc (size);
   if (syms == NULL && size != 0)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return false;
-    }
+    return false;
 
   if (bfd_seek (abfd, obj_sym_filepos (abfd), SEEK_SET) != 0
       || bfd_read (syms, size, 1, abfd) != size)
@@ -1523,12 +1514,9 @@ _bfd_coff_read_string_table (abfd)
       return NULL;
     }
 
-  strings = (char *) malloc (strsize);
+  strings = (char *) bfd_malloc (strsize);
   if (strings == NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return NULL;
-    }
+    return NULL;
 
   if (bfd_read (strings + STRING_SIZE_SIZE,
 		strsize - STRING_SIZE_SIZE, 1, abfd)

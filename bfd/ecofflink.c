@@ -270,15 +270,9 @@ ecoff_add_bytes (buf, bufend, need)
       if (want < ALLOC_SIZE)
 	want = ALLOC_SIZE;
     }
-  if (*buf == NULL)
-    newbuf = (char *) malloc (have + want);
-  else
-    newbuf = (char *) realloc (*buf, have + want);
+  newbuf = (char *) bfd_realloc (*buf, have + want);
   if (newbuf == NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return false;
-    }
+    return false;
   *buf = newbuf;
   *bufend = *buf + have + want;
   return true;
@@ -503,12 +497,9 @@ bfd_ecoff_debug_init (output_bfd, output_debug, output_swap, info)
 {
   struct accumulate *ainfo;
 
-  ainfo = (struct accumulate *) malloc (sizeof (struct accumulate));
+  ainfo = (struct accumulate *) bfd_malloc (sizeof (struct accumulate));
   if (!ainfo)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return NULL;
-    }
+    return NULL;
   if (! bfd_hash_table_init_n (&ainfo->fdr_hash.table, string_hash_newfunc,
 			       1021))
     return NULL;
@@ -720,12 +711,9 @@ bfd_ecoff_debug_accumulate (handle, output_bfd, output_debug, output_swap,
 	     information that should not be merged.  */
 	  name = input_debug->ss + fdr.issBase + fdr.rss;
 
-	  lookup = (char *) malloc (strlen (name) + 20);
+	  lookup = (char *) bfd_malloc (strlen (name) + 20);
 	  if (lookup == NULL)
-	    {
-	      bfd_set_error (bfd_error_no_memory);
-	      return false;
-	    }
+	    return false;
 	  sprintf (lookup, "%s %lx", name, fdr.csym);
 
 	  fh = string_hash_lookup (&ainfo->fdr_hash, lookup, true, true);
@@ -1558,12 +1546,9 @@ ecoff_write_symhdr (abfd, debug, swap, where)
   SET (cbExtOffset, iextMax, swap->external_ext_size);
 #undef SET
 
-  buff = (PTR) malloc ((size_t) swap->external_hdr_size);
+  buff = (PTR) bfd_malloc ((size_t) swap->external_hdr_size);
   if (buff == NULL && swap->external_hdr_size != 0)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      goto error_return;
-    }
+    goto error_return;
 
   (*swap->swap_hdr_out) (abfd, symhdr, buff);
   if (bfd_write (buff, 1, swap->external_hdr_size, abfd)
@@ -1660,12 +1645,9 @@ ecoff_write_shuffle (abfd, swap, shuffle, space)
       bfd_byte *s;
 
       i = swap->debug_align - (total & (swap->debug_align - 1));
-      s = (bfd_byte *) malloc (i);
+      s = (bfd_byte *) bfd_malloc (i);
       if (s == NULL && i != 0)
-	{
-	  bfd_set_error (bfd_error_no_memory);
-	  return false;
-	}
+	return false;
 
       memset ((PTR) s, 0, i);
       if (bfd_write ((PTR) s, 1, i, abfd) != i)
@@ -1697,12 +1679,9 @@ bfd_ecoff_write_accumulated_debug (handle, abfd, debug, swap, info, where)
   if (! ecoff_write_symhdr (abfd, debug, swap, where))
     goto error_return;
 
-  space = (PTR) malloc (ainfo->largest_file_shuffle);
+  space = (PTR) bfd_malloc (ainfo->largest_file_shuffle);
   if (space == NULL && ainfo->largest_file_shuffle != 0)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      goto error_return;
-    }
+    goto error_return;
 
   if (! ecoff_write_shuffle (abfd, swap, ainfo->line, space)
       || ! ecoff_write_shuffle (abfd, swap, ainfo->pdr, space)
@@ -1749,12 +1728,9 @@ bfd_ecoff_write_accumulated_debug (handle, abfd, debug, swap, info, where)
 	  bfd_byte *s;
 
 	  i = swap->debug_align - (total & (swap->debug_align - 1));
-	  s = (bfd_byte *) malloc (i);
+	  s = (bfd_byte *) bfd_malloc (i);
 	  if (s == NULL && i != 0)
-	    {
-	      bfd_set_error (bfd_error_no_memory);
-	      goto error_return;
-	    }
+	    goto error_return;
 	  memset ((PTR) s, 0, i);
 	  if (bfd_write ((PTR) s, 1, i, abfd) != i)
 	    {
@@ -1777,12 +1753,9 @@ bfd_ecoff_write_accumulated_debug (handle, abfd, debug, swap, info, where)
 
       i = (swap->debug_align
 	   - (debug->symbolic_header.issExtMax & (swap->debug_align - 1)));
-      s = (bfd_byte *) malloc (i);
+      s = (bfd_byte *) bfd_malloc (i);
       if (s == NULL && i != 0)
-	{
-	  bfd_set_error (bfd_error_no_memory);
-	  goto error_return;
-	}
+	goto error_return;
       memset ((PTR) s, 0, i);
       if (bfd_write ((PTR) s, 1, i, abfd) != i)
 	{
@@ -2352,12 +2325,9 @@ _bfd_ecoff_locate_line (abfd, section, offset, debug_info, debug_swap,
 	{
 	  if (line_info->find_buffer != NULL)
 	    free (line_info->find_buffer);
-	  buffer = (char *) malloc (len);
+	  buffer = (char *) bfd_malloc (len);
 	  if (buffer == NULL)
-	    {
-	      bfd_set_error (bfd_error_no_memory);
-	      return false;
-	    }
+	    return false;
 	  line_info->find_buffer = buffer;
 	}
 

@@ -3158,10 +3158,7 @@ ieee_make_empty_symbol (abfd)
   ieee_symbol_type *new =
   (ieee_symbol_type *) bfd_zmalloc (sizeof (ieee_symbol_type));
   if (!new)
-    {
-      bfd_set_error (bfd_error_no_error);
-      return NULL;
-    }
+    return NULL;
   new->symbol.the_bfd = abfd;
   return &new->symbol;
 }

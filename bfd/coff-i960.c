@@ -287,12 +287,9 @@ coff_i960_start_final_link (abfd, info)
   if (! info->relocateable)
     return true;
 
-  esym = (bfd_byte *) malloc (symesz);
+  esym = (bfd_byte *) bfd_malloc (symesz);
   if (esym == NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return false;
-    }
+    return false;
 
   if (bfd_seek (abfd, obj_sym_filepos (abfd), SEEK_SET) != 0)
     return false;

@@ -1160,13 +1160,10 @@ pe_print_idata(abfd, vfile)
 
       bfd_byte *data = 0;
       int offset;
-      data = (bfd_byte *) malloc ((size_t) bfd_section_size (abfd, 
-							     rel_section));
+      data = (bfd_byte *) bfd_malloc ((size_t) bfd_section_size (abfd, 
+								 rel_section));
       if (data == NULL && bfd_section_size (abfd, rel_section) != 0)
-	{
-	  bfd_set_error (bfd_error_no_memory);
-	  return false;
-	}
+	return false;
       datasize = bfd_section_size (abfd, rel_section);
   
       bfd_get_section_contents (abfd, 
@@ -1204,13 +1201,10 @@ pe_print_idata(abfd, vfile)
   if (bfd_section_size (abfd, section) == 0)
     return true;
 
-  data = (bfd_byte *) malloc ((size_t) bfd_section_size (abfd, section));
+  data = (bfd_byte *) bfd_malloc ((size_t) bfd_section_size (abfd, section));
   datasize = bfd_section_size (abfd, section);
   if (data == NULL && datasize != 0)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return false;
-    }
+    return false;
 
   bfd_get_section_contents (abfd, 
 			    section, 
@@ -1363,13 +1357,10 @@ pe_print_pdata(abfd, vfile)
   if (bfd_section_size (abfd, section) == 0)
     return true;
 
-  data = (bfd_byte *) malloc ((size_t) bfd_section_size (abfd, section));
+  data = (bfd_byte *) bfd_malloc ((size_t) bfd_section_size (abfd, section));
   datasize = bfd_section_size (abfd, section);
   if (data == NULL && datasize != 0)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return false;
-    }
+    return false;
 
   bfd_get_section_contents (abfd, 
 			    section, 

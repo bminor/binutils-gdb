@@ -1240,12 +1240,9 @@ aout_get_external_symbols (abfd)
 	 later on.  If we put them on the obstack it might not be
 	 possible to free them.  */
       syms = ((struct external_nlist *)
-	      malloc ((size_t) count * EXTERNAL_NLIST_SIZE));
+	      bfd_malloc ((size_t) count * EXTERNAL_NLIST_SIZE));
       if (syms == (struct external_nlist *) NULL && count != 0)
-	{
-	  bfd_set_error (bfd_error_no_memory);
-	  return false;
-	}
+	return false;
 
       if (bfd_seek (abfd, obj_sym_filepos (abfd), SEEK_SET) != 0
 	  || (bfd_read (syms, 1, exec_hdr (abfd)->a_syms, abfd)
@@ -1280,12 +1277,9 @@ aout_get_external_symbols (abfd)
 	return false;
       strings = (char *) obj_aout_string_window (abfd).data;
 #else
-      strings = (char *) malloc ((size_t) stringsize + 1);
+      strings = (char *) bfd_malloc ((size_t) stringsize + 1);
       if (strings == NULL)
-	{
-	  bfd_set_error (bfd_error_no_memory);
-	  return false;
-	}
+	return false;
 
       /* Skip space for the string count in the buffer for convenience
 	 when using indexes.  */
@@ -1736,12 +1730,9 @@ NAME(aout,slurp_symbol_table) (abfd)
 
   cached_size = (obj_aout_external_sym_count (abfd)
 		 * sizeof (aout_symbol_type));
-  cached = (aout_symbol_type *) malloc (cached_size);
+  cached = (aout_symbol_type *) bfd_malloc (cached_size);
   if (cached == NULL && cached_size != 0)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return false;
-    }
+    return false;
   if (cached_size != 0)
     memset (cached, 0, cached_size);
 
@@ -2294,19 +2285,15 @@ NAME(aout,slurp_reloc_table) (abfd, asect, symbols)
 
   count = reloc_size / each_size;
 
-  reloc_cache = (arelent *) malloc ((size_t) (count * sizeof (arelent)));
+  reloc_cache = (arelent *) bfd_malloc ((size_t) (count * sizeof (arelent)));
   if (reloc_cache == NULL && count != 0)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return false;
-    }
+    return false;
   memset (reloc_cache, 0, count * sizeof (arelent));
 
-  relocs = malloc ((size_t) reloc_size);
+  relocs = bfd_malloc ((size_t) reloc_size);
   if (relocs == NULL && reloc_size != 0)
     {
       free (reloc_cache);
-      bfd_set_error (bfd_error_no_memory);
       return false;
     }
 
@@ -2732,12 +2719,10 @@ NAME(aout,find_nearest_line)
     adata (abfd).line_buf = buf = NULL;
   else
     {
-      adata (abfd).line_buf = buf = (char *) malloc (filelen + funclen + 2);
-      if (adata (abfd).line_buf == NULL)
-	{
-	  bfd_set_error (bfd_error_no_memory);
-	  return false;
-	}
+      buf = (char *) bfd_malloc (filelen + funclen + 2);
+      adata (abfd).line_buf = buf;
+      if (buf == NULL)
+	return false;
     }
 
   if (main_file_name != NULL)
@@ -3568,20 +3553,17 @@ NAME(aout,final_link) (abfd, info, callback)
     goto error_return;
 
   /* Allocate buffers to hold section contents and relocs.  */
-  aout_info.contents = (bfd_byte *) malloc (max_contents_size);
-  aout_info.relocs = (PTR) malloc (max_relocs_size);
-  aout_info.symbol_map = (int *) malloc (max_sym_count * sizeof (int *));
+  aout_info.contents = (bfd_byte *) bfd_malloc (max_contents_size);
+  aout_info.relocs = (PTR) bfd_malloc (max_relocs_size);
+  aout_info.symbol_map = (int *) bfd_malloc (max_sym_count * sizeof (int *));
   aout_info.output_syms = ((struct external_nlist *)
-			   malloc ((max_sym_count + 1)
-				   * sizeof (struct external_nlist)));
+			   bfd_malloc ((max_sym_count + 1)
+				       * sizeof (struct external_nlist)));
   if ((aout_info.contents == NULL && max_contents_size != 0)
       || (aout_info.relocs == NULL && max_relocs_size != 0)
       || (aout_info.symbol_map == NULL && max_sym_count != 0)
       || aout_info.output_syms == NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      goto error_return;
-    }
+    goto error_return;
 
   /* If we have a symbol named __DYNAMIC, force it out now.  This is
      required by SunOS.  Doing this here rather than in sunos.c is a

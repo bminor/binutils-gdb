@@ -1996,12 +1996,9 @@ mips_relax_section (abfd, sec, info, again)
 	  if (info->keep_memory)
 	    contents = (bfd_byte *) bfd_alloc (abfd, sec->_raw_size);
 	  else
-	    contents = (bfd_byte *) malloc ((size_t) sec->_raw_size);
+	    contents = (bfd_byte *) bfd_malloc ((size_t) sec->_raw_size);
 	  if (contents == (bfd_byte *) NULL)
-	    {
-	      bfd_set_error (bfd_error_no_memory);
-	      goto error_return;
-	    }
+	    goto error_return;
 	  if (! bfd_get_section_contents (abfd, sec, (PTR) contents,
 					  (file_ptr) 0, sec->_raw_size))
 	    goto error_return;
