@@ -2596,9 +2596,9 @@ resolve_subexp (struct expression **expp, int *pos, int deprocedure_p,
       break;
 
     case OP_STRING:
-      (*pos) += 3
-        + BYTES_TO_EXP_ELEM (longest_to_int (exp->elts[pc + 1].longconst) +
-                             1);
+      (*pos) += 3 
+        + BYTES_TO_EXP_ELEM (longest_to_int (exp->elts[pc + 1].longconst) 
+                             + 1);
       break;
 
     case TERNOP_SLICE:
@@ -4755,7 +4755,8 @@ ada_lookup_symbol_nonlocal (const char *name,
    names (e.g., XVE) are not included here.  Currently, the possible suffixes
    are given by either of the regular expression:
 
-   (__[0-9]+)?\.[0-9]+  [nested subprogram suffix, on platforms such as Linux]
+   (__[0-9]+)?\.[0-9]+  [nested subprogram suffix, on platforms such 
+                         as GNU/Linux]
    ___[0-9]+            [nested subprogram suffix, on platforms such as HP/UX]
    (X[nb]*)?((\$|__)[0-9](_?[0-9]+)|___(LJM|X([FDBUP].*|R[^T]?)))?$
  */
@@ -10098,7 +10099,7 @@ emit_char (int c, struct ui_file *stream, int quoter)
 }
 
 static int
-parse ()
+parse (void)
 {
   warnings_issued = 0;
   return ada_parse ();

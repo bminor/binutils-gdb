@@ -331,7 +331,7 @@ xor		{ return XOR; }
 %%
 
 #include <ctype.h>
-#include <string.h>
+#include "gdb_string.h"
 
 /* Initialize the lexer for processing new expression */
 void
@@ -724,7 +724,7 @@ name_lookup (char *name0, char *err_name, int *token_type, int depth)
                                           strlen (renaming) + len0
 				          - yylval.ssym.stoken.length + 1);
 	      strcpy (new_name, renaming);
-              free (renaming);
+              xfree (renaming);
 	      strcat (new_name, name0 + yylval.ssym.stoken.length);
 	      result = name_lookup (new_name, err_name, token_type, depth - 1);
 	      if (result > segments)

@@ -22,6 +22,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define ADA_LANG_H 1
 
 struct partial_symbol;
+struct frame_info;
 
 #include "value.h"
 #include "gdbtypes.h"

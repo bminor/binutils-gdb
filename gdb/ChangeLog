@@ -1,3 +1,18 @@
+2004-07-01  Paul N. Hilfinger  <Hilfinger@gnat.com>
+
+	Address complaints from gdb_ari.sh:
+	
+	* ada-exp.y: Include gdb_string.h rather than string.h.
+	(convert_char_literal): Reformat declaration.
+	* ada-lang.h: Include opaque struct declaration for struct frame_info.
+	* ada-lex.l: Change use of free to xfree (the macro would do so
+	anyway, but this is harmless).
+	Include gdb_string.h rather than string.h.
+	* ada-valprint.c (ada_val_print_stub): Change PTR => void*.
+	
+	* ada-lang.c (parse): Remove K&Rism in parameter list.
+	(is_name_suffix): Correct Linux => GNU/Linux in comment.
+	
 2004-06-30  Mark Kettenis  <kettenis@gnu.org>
 
 	* dbxread.c (process_one_symbol) [SUN_FIXED_LBRAC_BUG]: Remove

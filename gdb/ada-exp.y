@@ -38,7 +38,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 %{
 
 #include "defs.h"
-#include <string.h>
+#include "gdb_string.h"
 #include <ctype.h>
 #include "expression.h"
 #include "value.h"
@@ -125,8 +125,7 @@ static void write_object_renaming (struct block *, struct symbol *, int);
 
 static void write_var_from_name (struct block *, struct name_info);
 
-static LONGEST
-convert_char_literal (struct type *, LONGEST);
+static LONGEST convert_char_literal (struct type *, LONGEST);
 %}
 
 %union
