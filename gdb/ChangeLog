@@ -1,3 +1,8 @@
+Tue Jul 22 12:11:48 1997  Michael Snyder  (msnyder@cleaver.cygnus.com)
+
+	* config/mips/tm-mips64.h: longs, long longs, and pointers
+	are all 64 bits on EABI mips targets.
+
 start-sanitize-gdbtk
 Mon Jul 21 22:24:07 1997  Martin M. Hunt  <hunt@cygnus.com>
 

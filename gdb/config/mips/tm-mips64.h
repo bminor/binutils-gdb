@@ -32,5 +32,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define OP_LDFPR 065	/* ldc1 */
 #define OP_LDGPR 067	/* ld */
 
+#if defined(MIPS_EABI) && (MIPS_EABI != 0)
+/* define sizes for 64-bit data types */
+#define TARGET_LONG_BIT      64
+#define TARGET_LONG_LONG_BIT 64
+#define TARGET_PTR_BIT       64
+#endif /* MIPS_EABI */
+
 /* Get the basic MIPS definitions.  */
 #include "tm-mips.h"
