@@ -1,7 +1,7 @@
 /* Remote debugging interface for Motorola's MVME187BUG monitor, an embedded
    monitor for the m88k.
 
-   Copyright 1992, 1993 Free Software Foundation, Inc.
+   Copyright 1992, 1993, 2001 Free Software Foundation, Inc.
    Contributed by Cygnus Support.  Written by K. Richard Pixley.
 
    This file is part of GDB.
@@ -555,7 +555,8 @@ bug_store_register (int regno)
 
 int
 bug_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
-		 struct target_ops *target)
+		 struct mem_attrib *attrib ATTRIBUTE_UNUSED,
+		 struct target_ops *target ATTRIBUTE_UNUSED)
 {
   int res;
 

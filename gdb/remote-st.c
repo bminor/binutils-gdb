@@ -1,5 +1,5 @@
 /* Remote debugging interface for Tandem ST2000 phone switch, for GDB.
-   Copyright 1990, 1991, 1992 Free Software Foundation, Inc.
+   Copyright 1990, 1991, 1992, 2001 Free Software Foundation, Inc.
    Contributed by Cygnus Support.  Written by Jim Kingdon for Cygnus.
 
    This file is part of GDB.
@@ -556,7 +556,9 @@ st2000_read_inferior_memory (CORE_ADDR memaddr, char *myaddr, int len)
 
 static int
 st2000_xfer_inferior_memory (CORE_ADDR memaddr, char *myaddr, int len,
-			     int write, struct target_ops *target)
+			     int write, 
+			     struct mem_attrib *attrib ATTRIBUTE_UNUSED,
+			     struct target_ops *target ATTRIBUTE_UNUSED)
 {
   if (write)
     return st2000_write_inferior_memory (memaddr, myaddr, len);

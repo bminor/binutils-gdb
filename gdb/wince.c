@@ -1,5 +1,5 @@
 /* Target-vector operations for controlling Windows CE child processes, for GDB.
-   Copyright 1999, 2000 Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2001 Free Software Foundation, Inc.
    Contributed by Cygnus Solutions, A Red Hat Company.
 
    This file is part of GDB.
@@ -1975,7 +1975,6 @@ _initialize_inftarg (void)
   add_show_from_set (set, &showlist);
   set->function.cfunc = set_upload_type;
   set_upload_type (NULL, 0);
-  set_dcache_state (1);
 
   add_show_from_set
     (add_set_cmd ((char *) "debugexec", class_support, var_boolean,

@@ -1,5 +1,5 @@
 /* GDB interface to ARM RDI library.
-   Copyright 1997, 1998 Free Software Foundation, Inc.
+   Copyright 1997, 1998, 2001 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -52,6 +52,7 @@ static void arm_rdi_files_info (struct target_ops *ignore);
 
 static int arm_rdi_xfer_memory (CORE_ADDR memaddr, char *myaddr,
 				int len, int should_write,
+				struct mem_attrib *attrib,
 				struct target_ops *target);
 
 static void arm_rdi_prepare_to_store (void);
@@ -626,8 +627,9 @@ arm_rdi_store_registers (int regno)
 
 /* ARGSUSED */
 static int
-arm_rdi_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len,
-		     int should_write, struct target_ops *target)
+arm_rdi_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int should_write,
+		     struct mem_attrib *attrib ATTRIBUTE_UNUSED,
+		     struct target_ops *target ATTRIBUTE_UNUSED)
 {
   int rslt, i;
 

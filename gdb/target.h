@@ -1,5 +1,5 @@
 /* Interface between GDB and target environments, including files and processes
-   Copyright 1990-1994, 1999, 2000 Free Software Foundation, Inc.
+   Copyright 1990-1994, 1999, 2000, 2001 Free Software Foundation, Inc.
    Contributed by Cygnus Support.  Written by John Gilmore.
 
    This file is part of GDB.
@@ -44,6 +44,7 @@
 #include "bfd.h"
 #include "symtab.h"
 #include "dcache.h"
+#include "memattr.h"
 
 enum strata
   {
@@ -363,7 +364,9 @@ struct target_ops
        something at MEMADDR + N.  */
 
     int (*to_xfer_memory) (CORE_ADDR memaddr, char *myaddr,
-			   int len, int write, struct target_ops * target);
+			   int len, int write, 
+			   struct mem_attrib *attrib,
+			   struct target_ops *target);
 
 #if 0
     /* Enable this after 4.12.  */
@@ -619,7 +622,8 @@ extern void target_detach (char *, int);
 
 extern DCACHE *target_dcache;
 
-extern int do_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write);
+extern int do_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
+			   struct mem_attrib *attrib);
 
 extern int target_read_string (CORE_ADDR, char **, int, int *);
 
@@ -627,10 +631,11 @@ extern int target_read_memory (CORE_ADDR memaddr, char *myaddr, int len);
 
 extern int target_write_memory (CORE_ADDR memaddr, char *myaddr, int len);
 
-extern int xfer_memory (CORE_ADDR, char *, int, int, struct target_ops *);
+extern int xfer_memory (CORE_ADDR, char *, int, int, 
+			struct mem_attrib *, struct target_ops *);
 
-extern int
-child_xfer_memory (CORE_ADDR, char *, int, int, struct target_ops *);
+extern int child_xfer_memory (CORE_ADDR, char *, int, int, 
+			      struct mem_attrib *, struct target_ops *);
 
 /* Make a single attempt at transfering LEN bytes.  On a successful
    transfer, the number of bytes actually transfered is returned and

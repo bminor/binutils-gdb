@@ -1,5 +1,5 @@
 /* Work with executable files, for GDB. 
-   Copyright 1988, 1989, 1991, 1992, 1993, 1994, 1997, 1998
+   Copyright 1988, 1989, 1991, 1992, 1993, 1994, 1997, 1998, 2001
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -449,6 +449,7 @@ map_vmap (bfd *abfd, bfd *arch)
 
 int
 xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
+	     struct mem_attrib *attrib,
 	     struct target_ops *target)
 {
   boolean res;

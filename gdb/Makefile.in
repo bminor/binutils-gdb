@@ -1,5 +1,5 @@
 # Copyright 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
-# 1998, 1999, 2000 Free Software Foundation, Inc.
+# 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
 
 # This file is part of GDB.
 
@@ -521,7 +521,7 @@ SFILES = ax-general.c ax-gdb.c bcache.c blockframe.c breakpoint.c \
 	varobj.c wrapper.c \
 	jv-exp.y jv-lang.c jv-valprint.c jv-typeprint.c \
 	m2-exp.y m2-lang.c m2-typeprint.c m2-valprint.c main.c maint.c \
-	mem-break.c minsyms.c mipsread.c nlmread.c objfiles.c \
+	memattr.c mem-break.c minsyms.c mipsread.c nlmread.c objfiles.c \
 	p-exp.y p-lang.c p-typeprint.c p-valprint.c parse.c \
 	printcmd.c remote.c remote-nrom.c scm-exp.c scm-lang.c \
 	scm-valprint.c source.c stabsread.c stack.c symfile.c \
@@ -664,7 +664,7 @@ COMMON_OBS = version.o blockframe.o breakpoint.o findvar.o regcache.o \
 	expprint.o environ.o stack.o thread.o \
 	event-loop.o event-top.o inf-loop.o completer.o \
 	gdbarch.o arch-utils.o gdbtypes.o copying.o $(DEPFILES) \
-	mem-break.o target.o parse.o language.o $(YYOBJ) buildsym.o \
+	memattr.o mem-break.o target.o parse.o language.o $(YYOBJ) buildsym.o \
 	kod.o kod-cisco.o \
 	gdb-events.o \
 	exec.o bcache.o objfiles.o minsyms.o maint.o demangle.o \
@@ -1288,7 +1288,8 @@ corelow.o: corelow.c $(command_h) $(defs_h) $(gdbcore_h) $(inferior_h) \
 cp-valprint.o: cp-valprint.c $(defs_h) $(expression_h) $(gdbcmd_h) \
 	$(gdbtypes_h) $(symtab_h) $(value_h) gdb_string.h
 
-dcache.o: dcache.c $(dcache_h) $(defs_h) $(gdbcmd_h) gdb_string.h $(gdbcore_h)
+dcache.o: dcache.c $(dcache_h) $(defs_h) $(gdbcmd_h) gdb_string.h \
+	$(gdbcore_h) target.h
 
 dbxread.o: dbxread.c $(breakpoint_h) buildsym.h $(command_h) \
 	complaints.h $(defs_h) $(expression_h) gdb-stabs.h $(gdbcore_h) \

@@ -1,5 +1,5 @@
 /* Remote debugging interface for Array Tech RAID controller..
-   Copyright 90, 91, 92, 93, 94, 1995, 1998  Free Software Foundation, Inc.
+   Copyright 90, 91, 92, 93, 94, 1995, 1998, 2001  Free Software Foundation, Inc.
    Contributed by Cygnus Support. Written by Rob Savoye for Cygnus.
 
    This module talks to a debug monitor called 'MONITOR', which
@@ -1026,7 +1026,8 @@ array_read_inferior_memory (CORE_ADDR memaddr, char *myaddr, int len)
 
 static int
 array_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
-		   struct target_ops *target)
+		   struct mem_attrib *attrib ATTRIBUTE_UNUSED,
+		   struct target_ops *target ATTRIBUTE_UNUSED)
 {
   if (write)
     return array_write_inferior_memory (memaddr, myaddr, len);

@@ -1,5 +1,5 @@
 /* Remote debugging interface for boot monitors, for GDB.
-   Copyright 1990-1993, 1995-1997, 1999-2000 Free Software Foundation, Inc.
+   Copyright 1990-1993, 1995-1997, 1999-2000, 2001 Free Software Foundation, Inc.
    Contributed by Cygnus Support.  Written by Rob Savoye for Cygnus.
    Resurrected from the ashes by Stu Grossman.
 
@@ -77,7 +77,9 @@ static void monitor_fetch_registers (int regno);
 static void monitor_store_registers (int regno);
 static void monitor_prepare_to_store (void);
 static int monitor_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len,
-				int write, struct target_ops *target);
+				int write, 
+				struct mem_attrib *attrib,
+				struct target_ops *target);
 static void monitor_files_info (struct target_ops *ops);
 static int monitor_insert_breakpoint (CORE_ADDR addr, char *shadow);
 static int monitor_remove_breakpoint (CORE_ADDR addr, char *shadow);
@@ -1988,7 +1990,8 @@ monitor_read_memory (CORE_ADDR memaddr, char *myaddr, int len)
 
 static int
 monitor_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
-		     struct target_ops *target)
+		     struct mem_attrib *attrib ATTRIBUTE_UNUSED,
+		     struct target_ops *target ATTRIBUTE_UNUSED)
 {
   int res;
 

@@ -1,5 +1,5 @@
 /* Select target systems and architectures at runtime for GDB.
-   Copyright 1990, 1992-1995, 1998-2000 Free Software Foundation, Inc.
+   Copyright 1990, 1992-1995, 1998-2000, 2001 Free Software Foundation, Inc.
    Contributed by Cygnus Support.
 
    This file is part of GDB.
@@ -102,7 +102,8 @@ static void debug_to_store_registers (int);
 static void debug_to_prepare_to_store (void);
 
 static int
-debug_to_xfer_memory (CORE_ADDR, char *, int, int, struct target_ops *);
+debug_to_xfer_memory (CORE_ADDR, char *, int, int, struct mem_attrib *, 
+		      struct target_ops *);
 
 static void debug_to_files_info (struct target_ops *);
 
@@ -379,7 +380,7 @@ cleanup_target (struct target_ops *t)
 	    (void (*) (void)) 
 	    noprocess);
   de_fault (to_xfer_memory, 
-	    (int (*) (CORE_ADDR, char *, int, int, struct target_ops *)) 
+	    (int (*) (CORE_ADDR, char *, int, int, struct mem_attrib *, struct target_ops *)) 
 	    nomemory);
   de_fault (to_files_info, 
 	    (void (*) (struct target_ops *)) 
@@ -843,7 +844,8 @@ target_write_memory (CORE_ADDR memaddr, char *myaddr, int len)
    Result is -1 on error, or the number of bytes transfered.  */
 
 int
-do_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write)
+do_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
+		struct mem_attrib *attrib)
 {
   int res;
   int done = 0;
@@ -860,7 +862,7 @@ do_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write)
 
   /* The quick case is that the top target can handle the transfer.  */
   res = current_target.to_xfer_memory
-    (memaddr, myaddr, len, write, &current_target);
+    (memaddr, myaddr, len, write, attrib, &current_target);
 
   /* If res <= 0 then we call it again in the loop.  Ah well. */
   if (res <= 0)
@@ -871,7 +873,7 @@ do_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write)
 	  if (!t->to_has_memory)
 	    continue;
 
-	  res = t->to_xfer_memory (memaddr, myaddr, len, write, t);
+	  res = t->to_xfer_memory (memaddr, myaddr, len, write, attrib, t);
 	  if (res > 0)
 	    break;		/* Handled all or part of xfer */
 	  if (t->to_has_all_memory)
@@ -895,6 +897,8 @@ static int
 target_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write)
 {
   int res;
+  int reg_len;
+  struct mem_region *region;
 
   /* Zero length requests are ok and require no work.  */
   if (len == 0)
@@ -904,22 +908,52 @@ target_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write)
 
   while (len > 0)
     {
-      res = dcache_xfer_memory(target_dcache, memaddr, myaddr, len, write);
-      if (res <= 0)
+      region = lookup_mem_region(memaddr);
+      if (memaddr + len < region->hi)
+	reg_len = len;
+      else
+	reg_len = region->hi - memaddr;
+
+      switch (region->attrib.mode)
 	{
-	  /* If this address is for nonexistent memory,
-	     read zeros if reading, or do nothing if writing.  Return error. */
-	  if (!write)
-	    memset (myaddr, 0, len);
-	  if (errno == 0)
+	case MEM_RO:
+	  if (write)
 	    return EIO;
-	  else
-	    return errno;
+	  break;
+	  
+	case MEM_WO:
+	  if (!write)
+	    return EIO;
+	  break;
 	}
 
-      memaddr += res;
-      myaddr  += res;
-      len     -= res;
+      while (reg_len > 0)
+	{
+	  if (region->attrib.cache)
+	    res = dcache_xfer_memory(target_dcache, memaddr, myaddr,
+				     reg_len, write);
+	  else
+	    res = do_xfer_memory(memaddr, myaddr, reg_len, write,
+				 &region->attrib);
+	      
+	  if (res <= 0)
+	    {
+	      /* If this address is for nonexistent memory, read zeros
+		 if reading, or do nothing if writing.  Return
+		 error. */
+	      if (!write)
+		memset (myaddr, 0, len);
+	      if (errno == 0)
+		return EIO;
+	      else
+		return errno;
+	    }
+
+	  memaddr += res;
+	  myaddr  += res;
+	  len     -= res;
+	  reg_len -= res;
+	}
     }
   
   return 0;			/* We managed to cover it all somehow. */
@@ -935,6 +969,8 @@ target_xfer_memory_partial (CORE_ADDR memaddr, char *myaddr, int len,
 			    int write_p, int *err)
 {
   int res;
+  int reg_len;
+  struct mem_region *region;
 
   /* Zero length requests are ok and require no work.  */
   if (len == 0)
@@ -943,7 +979,38 @@ target_xfer_memory_partial (CORE_ADDR memaddr, char *myaddr, int len,
       return 0;
     }
 
-  res = dcache_xfer_memory (target_dcache, memaddr, myaddr, len, write_p);
+  region = lookup_mem_region(memaddr);
+  if (memaddr + len < region->hi)
+    reg_len = len;
+  else
+    reg_len = region->hi - memaddr;
+
+  switch (region->attrib.mode)
+    {
+    case MEM_RO:
+      if (write_p)
+	{
+	  *err = EIO;
+	  return 0;
+	}
+      break;
+
+    case MEM_WO:
+      if (write_p)
+	{
+	  *err = EIO;
+	  return 0;
+	}
+      break;
+    }
+
+  if (region->attrib.cache)
+    res = dcache_xfer_memory (target_dcache, memaddr, myaddr,
+			      reg_len, write_p);
+  else
+    res = do_xfer_memory (memaddr, myaddr, reg_len, write_p,
+			  &region->attrib);
+      
   if (res <= 0)
     {
       if (errno != 0)
@@ -2313,11 +2380,13 @@ debug_to_prepare_to_store (void)
 
 static int
 debug_to_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
+		      struct mem_attrib *attrib,
 		      struct target_ops *target)
 {
   int retval;
 
-  retval = debug_target.to_xfer_memory (memaddr, myaddr, len, write, target);
+  retval = debug_target.to_xfer_memory (memaddr, myaddr, len, write,
+					attrib, target);
 
   fprintf_unfiltered (gdb_stdlog,
 		      "target_xfer_memory (0x%x, xxx, %d, %s, xxx) = %d",

@@ -1,5 +1,5 @@
 /* Remote debugging interface for AMD 29k interfaced via UDI, for GDB.
-   Copyright 1990, 1992, 1995, 2000 Free Software Foundation, Inc.
+   Copyright 1990, 1992, 1995, 2000, 2001 Free Software Foundation, Inc.
    Written by Daniel Mann.  Contributed by AMD.
 
    This file is part of GDB.
@@ -923,7 +923,8 @@ translate_addr (CORE_ADDR addr)
 /* FIXME!  Merge these two.  */
 static int
 udi_xfer_inferior_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
-			  struct target_ops * target)
+			  struct mem_attrib *attrib ATTRIBUTE_UNUSED,
+			  struct target_ops *target ATTRIBUTE_UNUSED)
 {
 
   memaddr = translate_addr (memaddr);

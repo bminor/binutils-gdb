@@ -1,3 +1,7 @@
+2001-01-23  J.T. Conklin  <jtc@redback.com>
+
+	* gdb.texinfo (Memory region attributes): New manual section.
+
 2001-01-04  Nicholas Duffek  <nsd@redhat.com>
 
 	* gdbint.texinfo (POP_FRAME): Document use by return_command.

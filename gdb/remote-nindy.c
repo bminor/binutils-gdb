@@ -1,5 +1,5 @@
 /* Memory-access and commands for remote NINDY process, for GDB.
-   Copyright 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
+   Copyright 1990, 1991, 1992, 1993, 2001 Free Software Foundation, Inc.
    Contributed by Intel Corporation.  Modified from remote.c by Chris Benenati.
 
    GDB is distributed in the hope that it will be useful, but WITHOUT ANY
@@ -476,7 +476,9 @@ nindy_store_registers (int regno)
 
 int
 nindy_xfer_inferior_memory (CORE_ADDR memaddr, char *myaddr, int len,
-			    int should_write, struct target_ops *target)
+			    int should_write, 
+			    struct mem_attrib *attrib ATTRIBUTE_UNUSED,
+			    struct target_ops *target ATTRIBUTE_UNUSED)
 {
   int res;
 

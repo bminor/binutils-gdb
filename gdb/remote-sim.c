@@ -1,5 +1,5 @@
 /* Generic remote debugging interface for simulators.
-   Copyright 1993, 1994, 1996, 1997, 2000 Free Software Foundation, Inc.
+   Copyright 1993, 1994, 1996, 1997, 2000, 2001 Free Software Foundation, Inc.
    Contributed by Cygnus Support.
    Steve Chamberlain (sac@cygnus.com).
 
@@ -91,9 +91,10 @@ static int gdbsim_wait (int pid, struct target_waitstatus *status);
 
 static void gdbsim_prepare_to_store (void);
 
-static int gdbsim_xfer_inferior_memory (CORE_ADDR memaddr,
-					char *myaddr, int len,
-					int write, struct target_ops *target);
+static int gdbsim_xfer_inferior_memory (CORE_ADDR memaddr, char *myaddr, 
+					int len, int write,
+					struct mem_attrib *attrib,
+					struct target_ops *target);
 
 static void gdbsim_files_info (struct target_ops *target);
 
@@ -714,7 +715,9 @@ gdbsim_prepare_to_store (void)
 
 static int
 gdbsim_xfer_inferior_memory (CORE_ADDR memaddr, char *myaddr, int len,
-			     int write, struct target_ops *target)
+			     int write, 
+			     struct mem_attrib *attrib ATTRIBUTE_UNUSED,
+			     struct target_ops *target ATTRIBUTE_UNUSED)
 {
   if (!program_loaded)
     error ("No program loaded.");

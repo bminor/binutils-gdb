@@ -1,5 +1,5 @@
 /* Remote debugging interface for AMD 290*0 Adapt Monitor Version 2.1d18. 
-   Copyright 1990, 1991, 1992 Free Software Foundation, Inc.
+   Copyright 1990, 1991, 1992, 2001 Free Software Foundation, Inc.
    Contributed by David Wood at New York University (wood@lab.ultra.nyu.edu).
    Adapted from work done at Cygnus Support in remote-eb.c.
 
@@ -1167,7 +1167,9 @@ translate_addr (CORE_ADDR addr)
 
 /* FIXME!  Merge these two.  */
 int
-adapt_xfer_inferior_memory (CORE_ADDR memaddr, char *myaddr, int len, int write)
+adapt_xfer_inferior_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
+			    struct mem_attrib *attrib ATTRIBUTE_UNUSED,
+			    struct target_ops *target ATTRIBUTE_UNUSED)
 {
 
   memaddr = translate_addr (memaddr);

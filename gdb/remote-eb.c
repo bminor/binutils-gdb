@@ -1,5 +1,5 @@
 /* Remote debugging interface for AMD 29000 EBMON on IBM PC, for GDB.
-   Copyright 1990, 1991, 1992 Free Software Foundation, Inc.
+   Copyright 1990, 1991, 1992, 2001 Free Software Foundation, Inc.
    Contributed by Cygnus Support.  Written by Jim Kingdon for Cygnus.
 
    This file is part of GDB.
@@ -879,7 +879,8 @@ eb_prepare_to_store (void)
 
 int
 eb_xfer_inferior_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
-			 struct target_ops *target)
+			 struct mem_attrib *attrib ATTRIBUTE_UNUSED,
+			 struct target_ops *target ATTRIBUTE_UNUSED)
 {
   if (write)
     return eb_write_inferior_memory (memaddr, myaddr, len);

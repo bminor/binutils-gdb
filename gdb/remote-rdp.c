@@ -1,5 +1,5 @@
 /* Remote debugging for the ARM RDP interface.
-   Copyright 1994, 1995 Free Software Foundation, Inc.
+   Copyright 1994, 1995, 2001 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -167,10 +167,10 @@ static int timeout = 2;
 static char *commandline = NULL;
 
 static int
-remote_rdp_xfer_inferior_memory (CORE_ADDR memaddr,
-				 char *myaddr,
-				 int len,
-				 int write, struct target_ops *target);
+remote_rdp_xfer_inferior_memory (CORE_ADDR memaddr, char *myaddr, int len,
+				 int write, 
+				 struct mem_attrib *attrib,
+				 struct target_ops *target);
 
 
 /* Stuff for talking to the serial layer. */
@@ -873,7 +873,7 @@ exec_swi (int swi, argsin *args)
 	char *copy = alloca (args[2].n);
 	int done = callback->read (callback, args[0].n, copy, args[2].n);
 	if (done > 0)
-	  remote_rdp_xfer_inferior_memory (args[1].n, copy, done, 1, 0);
+	  remote_rdp_xfer_inferior_memory (args[1].n, copy, done, 1, 0, 0);
 	args->n = args[2].n - done;
 	return 1;
       }
@@ -905,10 +905,10 @@ exec_swi (int swi, argsin *args)
 	      commandline[255] = '\0';
 	    }
 	  remote_rdp_xfer_inferior_memory (args[0].n,
-					   commandline, len + 1, 1, 0);
+					   commandline, len + 1, 1, 0, 0);
 	}
       else
-	remote_rdp_xfer_inferior_memory (args[0].n, "", 1, 1, 0);
+	remote_rdp_xfer_inferior_memory (args[0].n, "", 1, 1, 0, 0);
       return 1;
 
     default:
@@ -954,6 +954,7 @@ handle_swi (void)
 	      remote_rdp_xfer_inferior_memory (get_word (),
 					       buf,
 					       len,
+					       0,
 					       0,
 					       0);
 	    }
@@ -1249,7 +1250,9 @@ remote_rdp_prepare_to_store (void)
 
 static int
 remote_rdp_xfer_inferior_memory (CORE_ADDR memaddr, char *myaddr, int len,
-				 int write, struct target_ops *target)
+				 int write, 
+				 struct mem_attrib *attrib ATTRIBUTE_UNUSED,
+				 struct target_ops *target ATTRIBUTE_UNUSED)
 {
   /* I infer from D Taylor's code that there's a limit on the amount
      we can transfer in one chunk.. */

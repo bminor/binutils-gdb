@@ -1,5 +1,5 @@
 /* Remote target communications for serial-line targets in custom GDB protocol
-   Copyright 1988, 1991-2000 Free Software Foundation, Inc.
+   Copyright 1988, 1991-2000, 2001 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -70,6 +70,7 @@ static void remote_files_info (struct target_ops *ignore);
 
 static int remote_xfer_memory (CORE_ADDR memaddr, char *myaddr,
 			       int len, int should_write,
+			       struct mem_attrib *attrib,
 			       struct target_ops *target);
 
 static void remote_prepare_to_store (void);
@@ -3543,7 +3544,9 @@ remote_read_bytes (CORE_ADDR memaddr, char *myaddr, int len)
 /* ARGSUSED */
 static int
 remote_xfer_memory (CORE_ADDR mem_addr, char *buffer, int mem_len,
-		    int should_write, struct target_ops *target)
+		    int should_write,
+		    struct mem_attrib *attrib ATTRIBUTE_UNUSED,
+		    struct target_ops *target)
 {
   CORE_ADDR targ_addr;
   int targ_len;

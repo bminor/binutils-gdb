@@ -1,5 +1,5 @@
 /* Remote debugging interface for Am290*0 running MiniMON monitor, for GDB.
-   Copyright 1990, 1991, 1992 Free Software Foundation, Inc.
+   Copyright 1990, 1991, 1992, 2001 Free Software Foundation, Inc.
    Originally written by Daniel Mann at AMD.
 
    This file is part of GDB.
@@ -1173,7 +1173,9 @@ mm_read_inferior_memory (CORE_ADDR memaddr, char *myaddr, int len)
 
 /* FIXME!  Merge these two.  */
 static int
-mm_xfer_inferior_memory (CORE_ADDR memaddr, char *myaddr, int len, int write)
+mm_xfer_inferior_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
+			 struct mem_attrib *attrib ATTRIBUTE_UNUSED,
+			 struct target_ops *target ATTRIBUTE_UNUSED)
 {
 
   memaddr = translate_addr (memaddr);

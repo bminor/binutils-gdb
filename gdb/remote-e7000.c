@@ -1,5 +1,5 @@
 /* Remote debugging interface for Hitachi E7000 ICE, for GDB
-   Copyright 1993, 1994, 1996, 1997, 1998, 2000 Free Software Foundation, Inc.
+   Copyright 1993, 1994, 1996, 1997, 1998, 2000, 2001 Free Software Foundation, Inc.
    Contributed by Cygnus Support. 
 
    Written by Steve Chamberlain for Cygnus Support.
@@ -1474,7 +1474,9 @@ fast_but_for_the_pause_e7000_read_inferior_memory (CORE_ADDR memaddr,
 
 static int
 e7000_xfer_inferior_memory (CORE_ADDR memaddr, char *myaddr,
-			    int len, int write, struct target_ops *target)
+			    int len, int write, 
+			    struct mem_attrib *attrib ATTRIBUTE_UNUSED,
+			    struct target_ops *target ATTRIBUTE_UNUSED)
 {
   if (write)
     return e7000_write_inferior_memory (memaddr, myaddr, len);

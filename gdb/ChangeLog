@@ -1,5 +1,71 @@
 2001-01-23  J.T. Conklin  <jtc@redback.com>
+
+	* exec.c (xfer_memory): Add attrib argument.
+	* infptrace.c (child_xfer_memory): Likewise.
+	* monitor.c (monitor_xfer_memory): Likewise.
+	* remote-adapt.c (adapt_xfer_inferior_memory): Likewise.
+	* remote-array.c (array_xfer_memory): Likewise.
+	* remote-bug.c (bug_xfer_memory): Likewise.
+	* remote-e7000.c (e7000_xfer_inferior_memory): Likewise.
+	* remote-eb.c (eb_xfer_inferior_memory): Likewise.
+	* remote-es.c (es1800_xfer_inferior_memory): Likewise.
+	* remote-mips.c (mips_xfer_memory): Likewise.
+	* remote-mm.c (mm_xfer_inferior_memory): Likewise.
+	* remote-nindy.c (nindy_xfer_inferior_memory): Likewise.
+	* remote-os9k.c (rombug_xfer_inferior_memory): Likewise.
+	* remote-rdi.c (arm_rdi_xfer_memory): Likewise.
+	* remote-rdp.c (remote_rdp_xfer_inferior_memory): Likewise.
+	* remote-sds.c (sds_xfer_memory): Likewise.
+	* remote-sim.c (gdbsim_xfer_inferior_memory): Likewise.
+	* remote-st.c (st2000_xfer_inferior_memory): Likewise.
+	* remote-udi.c (udi_xfer_inferior_memory): Likewise.
+	* remote-vx.c (vx_xfer_memory): Likewise.
+	* remote.c (remote_xfer_memory): Likewise.
+	* target.c (debug_to_xfer_memory, do_xfer_memory): Likewise.
+	* target.h (child_xfer_memory, do_xfer_memory, xfer_memory): Likewise.
+
+	* target.h (#include "memattr.h"): Added.
+	(target_ops.to_xfer_memory): Add attrib argument.
+
+	* wince.c (_initialize_inftarg): Removed call to set_dcache_state.
+	* dcache.h (set_dcache_state): Removed declaration.
+	* dcache.c (set_dcache_state): Removed definition
 	
+	* dcache.c: Update module comment, as dcache is now enabled and
+ 	disabled with memory region attributes instead of by the global
+ 	variable "remotecache".  Add comment describing the interaction
+	between dcache and memory region attributes.
+	(dcache_xfer_memory): Add comment describing benefits of moving
+	cache writeback to a higher level.
+	(dcache_struct): Removed cache_has_stuff field.  This was used to
+ 	record whether the cache had been accessed in order to invalidate
+ 	it when it was disabled.  However, this is not needed because the
+ 	cache is write through and the code that enables, disables, and
+ 	deletes memory regions invalidate the cache.  Add comment which
+ 	suggests that we could be more selective and only invalidate those
+	cache lines containing data from those memory regions.
+	(dcache_invalidate): Updated.
+	(dcache_xfer_memory): Updated.
+	
+	(dcache_alloc): Don't abort() if dcache_enabled_p is clear.
+	(dcache_xfer_memory): Removed code that called do_xfer_memory() to
+ 	perform a uncached transfer if dcache_enabled_p was clear.  This
+ 	function is now only called if caching is enabled for the memory
+	region.
+	(dcache_info): Always print cache info.
+
+	* target.c (do_xfer_memory): Add attrib argument.
+	(target_xfer_memory, target_xfer_memory_partial): Break transfer
+ 	into chunks defined by memory regions, pass region attributes to
+ 	do_xfer_memory().
+	* dcache.c (dcache_read_line, dcache_write_line): Likewise.
+
+	* Makefile.in (SFILES): Add memattr.c.
+	(COMMON_OBS): Add memattr.o.
+	(dcache.o): Add target.h to dependencies.
+	* memattr.c: New file.
+	* memattr.h: Likewise.
+
 	* config/m32r/m32r.mt (GDBSERVER_LIBS): Added ../../intl/libintl.a.
 	* config/mips/vr5000.mt (GDBSERVER_LIBS): Likewise.
 	* config/tic80/tic80.mt (GDBSERVER_LIBS): Likewise.

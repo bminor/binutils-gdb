@@ -1,5 +1,5 @@
 /* Low level Unix child interface to ptrace, for GDB when running under Unix.
-   Copyright 1988, 89, 90, 91, 92, 93, 94, 95, 96, 1998 
+   Copyright 1988, 89, 90, 91, 92, 93, 94, 95, 96, 1998, 2001 
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -511,6 +511,7 @@ store_inferior_registers (int regno)
 
 int
 child_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
+		   struct mem_attrib *attrib ATTRIBUTE_UNUSED,
 		   struct target_ops *target)
 {
   register int i;

@@ -1,7 +1,7 @@
 /* Declarations for caching.  Typically used by remote back ends for
    caching remote memory.
 
-   Copyright 1992, 1993 Free Software Foundation, Inc.
+   Copyright 1992, 1993, 2001 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -38,8 +38,5 @@ void dcache_free (DCACHE *);
 
 int dcache_xfer_memory (DCACHE *cache, CORE_ADDR mem, char *my, int len,
 			int should_write);
-
-/* Turn dcache state on or off */
-void set_dcache_state (int);
 
 #endif /* DCACHE_H */
