@@ -1,3 +1,11 @@
+Thu Jun  6 15:24:45 1996  Richard Henderson  <rth@tamu.edu>
+
+	* ecoff.c (_bfd_ecoff_new_section_hook): Remove the _PDATA
+ 	alignment hack--we can get the lnnoptr info another way without
+ 	suddenly increasing the alignment requirements.  Set the flags for
+	the _PDATA section.
+	(ecoff_compute_section_file_positions): Do so.
+
 Thu Jun  6 11:24:37 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config.bfd: Recognize powerpc-*-linux* and powerpcle-*-linux*.
