@@ -23,7 +23,6 @@
 #define tc_coff_symbol_emit_hook(a)	{;} /* not used */
 #define tc_crawl_symbol_chain(a)	{;} /* not used */
 #define tc_headers_hook(a)		{;} /* not used */
-#define tc_headers_hook(a)		{;} /* not used */
 
 #define AOUT_MACHTYPE 101
 #define TC_COFF_FIX2RTYPE(fix_ptr) tc_coff_fix2rtype(fix_ptr)
