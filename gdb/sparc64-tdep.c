@@ -604,8 +604,12 @@ sparc64_16_byte_align_p (struct type *type)
       int i;
 
       for (i = 0; i < TYPE_NFIELDS (type); i++)
-	if (sparc64_16_byte_align_p (TYPE_FIELD_TYPE (type, i)))
-	  return 1;
+	{
+	  struct type *subtype = check_typedef (TYPE_FIELD_TYPE (type, i));
+
+	  if (sparc64_16_byte_align_p (subtype))
+	    return 1;
+	}
     }
 
   return 0;
@@ -657,9 +661,13 @@ sparc64_store_floating_fields (struct regcache *regcache, struct type *type,
       int i;
 
       for (i = 0; i < TYPE_NFIELDS (type); i++)
-	sparc64_store_floating_fields (regcache, TYPE_FIELD_TYPE (type, i),
-				       valbuf, element,
-				       bitpos + TYPE_FIELD_BITPOS (type, i));
+	{
+	  struct type *subtype = check_typedef (TYPE_FIELD_TYPE (type, i));
+	  int subpos = bitpos + TYPE_FIELD_BITPOS (type, i);
+
+	  sparc64_store_floating_fields (regcache, subtype, valbuf,
+					 element, subpos);
+	}
     }
 }
 
@@ -705,9 +713,12 @@ sparc64_extract_floating_fields (struct regcache *regcache, struct type *type,
       int i;
 
       for (i = 0; i < TYPE_NFIELDS (type); i++)
-	sparc64_extract_floating_fields (regcache, TYPE_FIELD_TYPE (type, i),
-					 valbuf,
-					 bitpos + TYPE_FIELD_BITPOS (type, i));
+	{
+	  struct type *subtype = check_typedef (TYPE_FIELD_TYPE (type, i));
+	  int subpos = bitpos + TYPE_FIELD_BITPOS (type, i);
+
+	  sparc64_extract_floating_fields (regcache, subtype, valbuf, subpos);
+	}
     }
 }
 
@@ -1019,7 +1030,7 @@ sparc64_store_return_value (struct type *type, struct regcache *regcache,
       memset (buf, 0, sizeof (buf));
       memcpy (buf, valbuf, len);
       for (i = 0; i < ((len + 7) / 8); i++)
-	regcache_cooked_write (regcache, SPARC_O0_REGNUM + i, buf + i * 4);
+	regcache_cooked_write (regcache, SPARC_O0_REGNUM + i, buf + i * 8);
       if (TYPE_CODE (type) != TYPE_CODE_UNION)
 	sparc64_store_floating_fields (regcache, type, buf, 0, 0);
     }
@@ -1042,12 +1053,20 @@ sparc64_store_return_value (struct type *type, struct regcache *regcache,
     }
 }
 
-static int
-sparc64_use_struct_convention (int gcc_p, struct type *type)
+static enum return_value_convention
+sparc64_return_value (struct gdbarch *gdbarch, struct type *type,
+		      struct regcache *regcache, void *readbuf,
+		      const void *writebuf)
 {
-  /* Structure and union types up to 32 bytes in size are returned in
-     registers.  */
-  return (TYPE_LENGTH (type) > 32);
+  if (TYPE_LENGTH (type) > 32)
+    return RETURN_VALUE_STRUCT_CONVENTION;
+
+  if (readbuf)
+    sparc64_extract_return_value (type, regcache, readbuf);
+  if (writebuf)
+    sparc64_store_return_value (type, regcache, writebuf);
+
+  return RETURN_VALUE_REGISTER_CONVENTION;
 }
 
 
@@ -1079,9 +1098,7 @@ sparc64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_push_dummy_code (gdbarch, NULL);
   set_gdbarch_push_dummy_call (gdbarch, sparc64_push_dummy_call);
 
-  set_gdbarch_extract_return_value (gdbarch, sparc64_extract_return_value);
-  set_gdbarch_store_return_value (gdbarch, sparc64_store_return_value);
-  set_gdbarch_use_struct_convention (gdbarch, sparc64_use_struct_convention);
+  set_gdbarch_return_value (gdbarch, sparc64_return_value);
   set_gdbarch_return_value_on_stack
     (gdbarch, generic_return_value_on_stack_not);
   set_gdbarch_stabs_argument_has_addr

@@ -1,3 +1,16 @@
+2004-01-03  Mark Kettenis  <kettenis@gnu.org>
+
+	* sparc64-tdep.c (sparc64_16_byte_align_p)
+	(sparc64_store_floating_fields, sparc64_store_floating_fields):
+	Use check_typedef to get subtypes of structures and unions.
+	(sparc64_store_return_value): Fix calculation of the appropriate
+	offset into VALBUF when storing a structure or union.
+	(sparc64_return_value): New function.
+	(sparc64_use_struct_convention): Remove function.
+	(sparc64_init_abi): Set return_value, don't set
+	extract_return_value, store_return_value and
+	use_struct_convention.
+
 2004-01-03  Eli Zaretskii  <eliz@elta.co.il>
 
 	* config/djgpp/fnchange.lst: Add lines for COPYING.LIBGLOSS,
