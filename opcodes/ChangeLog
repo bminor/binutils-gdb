@@ -1,3 +1,9 @@
+Wed Sep 29 16:24:49 1993  K. Richard Pixley  (rich@sendai.cygnus.com)
+
+	* m88k-dis.c (m88kdis): comment change.  Remove space after
+	  printing mnemonic.
+	  (printop): handle new arg types DEC and XREG for m88110.
+
 Tue Sep 28 19:20:16 1993  Jeffrey A Law (law@snake.cs.utah.edu)
 
 	* hppa-dis.c (print_insn_hppa): Handle 'z' operand
