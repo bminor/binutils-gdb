@@ -1,5 +1,8 @@
 Sat Feb  5 08:03:41 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* remote-mips.c (mips_fetch_registers): If regno is FP_REGNUM or
+	ZERO_REGNUM, just read it as zero without talking to the board.
+
 	* config/i386/tm-i386aix.h (REGISTER_CONVERT_TO_RAW): Add missing
 	backslash.
 	* i386-tdep.c (i386_extract_return_value): Pass TYPE_LENGTH (type)

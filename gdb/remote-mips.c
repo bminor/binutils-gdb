@@ -1181,10 +1181,18 @@ mips_fetch_registers (regno)
       return;
     }
 
-  val = mips_request ('r', (unsigned int) mips_map_regno (regno),
-		      (unsigned int) 0, &err, mips_receive_wait);
-  if (err)
-    mips_error ("Can't read register %d: %s", regno, safe_strerror (errno));
+  if (regno == FP_REGNUM || regno == ZERO_REGNUM)
+    /* FP_REGNUM on the mips is a hack which is just supposed to read
+       zero (see also mips-nat.c).  */
+    val = 0;
+  else
+    {
+      val = mips_request ('r', (unsigned int) mips_map_regno (regno),
+			  (unsigned int) 0, &err, mips_receive_wait);
+      if (err)
+	mips_error ("Can't read register %d: %s", regno,
+		    safe_strerror (errno));
+    }
 
   {
     char buf[MAX_REGISTER_RAW_SIZE];
