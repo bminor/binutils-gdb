@@ -459,39 +459,72 @@ v850_reloc_prefix()
 {
   if (strncmp(input_line_pointer, "hi0(", 4) == 0)
     {
-      input_line_pointer += 4;
+      input_line_pointer += 3;
       return BFD_RELOC_HI16;
     }
   if (strncmp(input_line_pointer, "hi(", 3) == 0)
     {
-      input_line_pointer += 3;
+      input_line_pointer += 2;
       return BFD_RELOC_HI16_S;
     }
   if (strncmp (input_line_pointer, "lo(", 3) == 0)
     {
-      input_line_pointer += 3;
+      input_line_pointer += 2;
       return BFD_RELOC_LO16;
     }
 
   if (strncmp (input_line_pointer, "sdaoff(", 7) == 0)
     {
-      input_line_pointer += 7;
+      input_line_pointer += 6;
       return BFD_RELOC_V850_SDA_OFFSET;
     }
 
   if (strncmp (input_line_pointer, "zdaoff(", 7) == 0)
     {
-      input_line_pointer += 7;
+      input_line_pointer += 6;
       return BFD_RELOC_V850_ZDA_OFFSET;
     }
 
   if (strncmp (input_line_pointer, "tdaoff(", 7) == 0)
     {
-      input_line_pointer += 7;
+      input_line_pointer += 6;
       return BFD_RELOC_V850_TDA_OFFSET;
     }
 
-  /* FIXME: implement sda, tda, zda here */
+  /* Disgusting */
+  if (strncmp(input_line_pointer, "(hi0(", 5) == 0)
+    {
+      input_line_pointer += 4;
+      return BFD_RELOC_HI16;
+    }
+  if (strncmp(input_line_pointer, "(hi(", 4) == 0)
+    {
+      input_line_pointer += 3;
+      return BFD_RELOC_HI16_S;
+    }
+  if (strncmp (input_line_pointer, "(lo(", 4) == 0)
+    {
+      input_line_pointer += 3;
+      return BFD_RELOC_LO16;
+    }
+
+  if (strncmp (input_line_pointer, "(sdaoff(", 8) == 0)
+    {
+      input_line_pointer += 7;
+      return BFD_RELOC_V850_SDA_OFFSET;
+    }
+
+  if (strncmp (input_line_pointer, "(zdaoff(", 8) == 0)
+    {
+      input_line_pointer += 7;
+      return BFD_RELOC_V850_ZDA_OFFSET;
+    }
+
+  if (strncmp (input_line_pointer, "(tdaoff(", 8) == 0)
+    {
+      input_line_pointer += 7;
+      return BFD_RELOC_V850_TDA_OFFSET;
+    }
 
   return BFD_RELOC_UNUSED;
 }
@@ -570,19 +603,20 @@ md_assemble (str)
 	    {
 	      expression(&ex);
 
-	      if (*input_line_pointer++ != ')')
-		{
-		  errmsg = "syntax error: expected `)'";
-		  goto error;
-		}
-	      
 	      if (ex.X_op == O_constant)
 		{
 		  switch (reloc)
 		    {
 		    case BFD_RELOC_LO16:
-		      ex.X_add_number &= 0xffff;
-		      break;
+		      {
+			/* Truncate, then sign extend the value.  */
+		        int temp = ex.X_add_number & 0xffff;
+
+			/* XXX Assumes 32bit ints! */
+		        temp = (temp << 16) >> 16;
+			ex.X_add_number = temp;
+			break;
+		      }
 
 		    case BFD_RELOC_HI16:
 		      ex.X_add_number = ((ex.X_add_number >> 16) & 0xffff);
@@ -720,7 +754,8 @@ md_assemble (str)
 	  str = input_line_pointer;
 	  input_line_pointer = hold;
 
-	  while (*str == ' ' || *str == ',' || *str == '[' || *str == ']')
+	  while (*str == ' ' || *str == ',' || *str == '[' || *str == ']'
+		 || *str == ')')
 	    ++str;
 	}
       match = 1;
@@ -1019,11 +1054,6 @@ parse_cons_expression_v850 (exp)
 
   /* Do normal expression parsing.  */
   expression (exp);
-
-  /* If we had to handle a reloc prefix, then eat the trailing
-     close paren.  */
-  if (hold_cons_reloc != BFD_RELOC_UNUSED)
-    input_line_pointer++;
 }
 
 /* Create a fixup for a cons expression.  If parse_cons_expression_v850

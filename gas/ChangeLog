@@ -1,6 +1,16 @@
 start-sanitize-v850
 Thu Oct 24 14:31:04 1996  Jeffrey A Law  (law@cygnus.com)
 
+	* config/tc-v850.c (v850_reloc_prefix): Several disgusting
+	hacks to improve parsing of complex hi, lo, zda, etc
+	expressions.
+	(md_assemble): Don't demand and eat a trailing ')' after finding
+	a v850 relocation prefix.  Sign extend the constant in a
+	BFD_RELOC_LO16 expression.  Do eat a trailing ')' after a complete
+	operand.
+	(parse_cons_expression_v850): Don't eat a trailing ')' after
+	finding a v850 relocation prefix.
+
 	* config/tc-v850.h (TC_PARSE_CONS_EXPRESSION): Define.
 	(TC_CONS_FIX_NEW): Likewise.
 	* config/tc-v850.c (parse_cons_expression_v850): New function.
