@@ -594,6 +594,30 @@ mn10200_push_return_address (pc, sp)
   write_memory (sp - 4, buf, 4);
   return sp - 4;
 }
+
+/* Function: store_struct_return (addr,sp)
+   Store the structure value return address for an inferior function
+   call.  */
+ 
+CORE_ADDR
+mn10200_store_struct_return (addr, sp)
+     CORE_ADDR addr;
+     CORE_ADDR sp;
+{
+  unsigned char buf1[4];
+  unsigned char buf2[4];
+
+  /* Get the saved PC and hold onto it.  */
+  target_read_memory (sp, buf1, 4);
+
+  /* Now push the structure value address.  */
+  store_unsigned_integer (buf2, 4, addr);
+  write_memory (sp, buf2, 4);
+
+  /* Now push the saved PC back onto the stack.  */
+  target_write_memory (sp - 4, buf1, 4);
+  return sp - 4;
+}
  
 /* Function: frame_saved_pc 
    Find the caller of this frame.  We do this by seeing if RP_REGNUM

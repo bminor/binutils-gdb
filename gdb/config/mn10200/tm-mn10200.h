@@ -154,8 +154,8 @@ extern CORE_ADDR mn10200_frame_saved_pc   PARAMS ((struct frame_info *));
       } \
   }
 
-#define STORE_STRUCT_RETURN(STRUCT_ADDR, SP) write_register (0, STRUCT_ADDR);
-
+#define STORE_STRUCT_RETURN(STRUCT_ADDR, SP) \
+  (SP) = mn10200_store_struct_return (STRUCT_ADDR, SP)
 
 extern CORE_ADDR mn10200_skip_prologue PARAMS ((CORE_ADDR));
 #define SKIP_PROLOGUE(pc) pc = mn10200_skip_prologue (pc)
@@ -190,8 +190,8 @@ mn10200_push_arguments PARAMS ((int, struct value **, CORE_ADDR,
 
 #define PC_IN_CALL_DUMMY(PC, SP, FP) generic_pc_in_call_dummy (PC, SP)
 
-#define REG_STRUCT_HAS_ADDR(gcc_p,type) \
-  (TYPE_LENGTH (type) > 8)
+#define REG_STRUCT_HAS_ADDR(gcc_p,TYPE) \
+  	(TYPE_NFIELDS (TYPE) > 1 || TYPE_LENGTH (TYPE) > 8)
 
 #define USE_STRUCT_CONVENTION(GCC_P, TYPE) \
   	(TYPE_NFIELDS (TYPE) > 1 || TYPE_LENGTH (TYPE) > 8)
