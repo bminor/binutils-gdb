@@ -1,5 +1,67 @@
 2004-02-06  Andrew Cagney  <cagney@redhat.com>
 
+	* tui/tui-data.h (struct tui_list): Rename _TuiList.
+	(enum tui_data_type): Rename _TuiDataType.
+	(struct tui_layout_def): Rename _TuiLayoutDef.
+	(struct tui_source_element): Rename _TuiSourceElement.
+	(struct tui_data_element): Rename _TuiDataElement.
+	(struct tui_command_element): Rename _TuiCommandElement.
+	(struct tui_locator_element): Rename _TuiLocatorElement.
+	(union tui_which_element): Define.
+	(struct tui_win_element): Rename _TuiWinElement.
+	(struct tui_data_info): Rename _TuiDataInfo.
+	(struct tui_source_info): Rename _TuiSourceInfo.
+	(struct tui_command_info): Rename _TuiCommandInfo.
+	(tui_initialize_static_data): Rename initializeStaticData.
+	(tui_alloc_generic_win_info): Rename allocGenericWinInfo.
+	(tui_alloc_win_info): Rename allocWinInfo.
+	(tui_init_generic_part): Rename initGenericPart.
+	(tui_init_win_info): Rename initWinInfo.
+	(tui_alloc_content): Rename allocContent.
+	(tui_add_content_elements): Rename addContentElements.
+	(tui_init_content_element): Rename initContentElement.
+	(tui_free_window): Rename freeWindow.
+	(tui_free_win_content): Rename freeWinContent.
+	(tui_free_data_content): Rename freeDataContent.
+	(tui_free_all_source_wins_content): Rename
+	freeAllSourceWinsContent.
+	(tui_del_window): Rename tuiDelWindow.
+	(tui_del_data_windows): Rename tuiDelDataWindows.
+	(tui_partial_win_by_name): Rename partialWinByName.
+	(tui_win_name): Rename winName.
+	(tui_current_layout): Rename currentLayout.
+	(tui_set_current_layout_to): Rename setCurrentLayoutTo.
+	(tui_term_height): Rename termHeight.
+	(tui_set_term_height_to): Rename setTermHeightTo.
+	(tui_term_width): Rename termWidth.
+	(tui_set_term_width_to): Rename setTermWidthTo.
+	(tui_set_gen_win_origin): Rename setGenWinOrigin.
+	(tui_locator_win_info_ptr): Rename locatorWinInfoPtr.
+	(tui_source_exec_info_win_ptr): Rename tui_gen_win_info.
+	(tui_disassem_exec_info_win_ptr): Rename disassemExecInfoWinPtr.
+	(tui_source_windows): Rename sourceWindows.
+	(tui_clear_source_windows): Rename clearSourceWindows.
+	(tui_clear_source_windows_detail): Rename
+	clearSourceWindowsDetail.
+	(tui_clear_win_detail): Rename clearWinDetail.
+	(tui_add_to_source_windows): Rename tuiAddToSourceWindows.
+	(tui_default_tab_len): Rename tuiDefaultTabLen.
+	(tui_set_default_tab_len): Rename tuiSetDefaultTabLen.
+	(tui_win_with_focus): Rename tuiWinWithFocus.
+	(tui_set_win_with_focus): Rename tuiSetWinWithFocus.
+	(tui_layout_def): Rename tuiLayoutDef.
+	(tui_win_resized): Rename tuiWinResized.
+	(tui_set_win_resized_to): Rename tuiSetWinResizedTo.
+	(tui_next_win): Rename tuiNextWin.
+	(tui_prev_win): Rename tuiPrevWin.
+	(tui_add_to_source_windows): Rename addToSourceWindows.
+	* tui/tui-winsource.c, tui/tui-win.c: Update references.
+	* tui/tui-layout.c, tui/tui-source.c: Ditto.
+	* tui/tui-stack.c, tui/tui-io.c: Ditto.
+	* tui/tui.c, tui/tui-data.c: Ditto.
+	* tui/tui-interp.c, tui/tui-data.c: Ditto.
+	* tui/tui-disasm.c, tui/tui-command.c: Ditto.
+
 	* tui/tui-source.h: Update copyright.  Include "tui-data.h".
 	(struct symtab): Declare.
 	(tui_set_source_content): Rename tuiSetSourceContent.

@@ -53,7 +53,7 @@ tui_init (void)
   /* Install exit handler to leave the screen in a good shape.  */
   atexit (tui_exit);
 
-  initializeStaticData ();
+  tui_initialize_static_data ();
 
   tui_initialize_io ();
   tui_initialize_readline ();

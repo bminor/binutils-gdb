@@ -710,11 +710,11 @@ tui_getc (FILE *fp)
 static unsigned int
 _tuiHandleResizeDuringIO (unsigned int originalCh)
 {
-  if (tuiWinResized ())
+  if (tui_win_resized ())
     {
       tui_refresh_all_win ();
       dont_repeat ();
-      tuiSetWinResizedTo (FALSE);
+      tui_set_win_resized_to (FALSE);
       return '\n';
     }
   else

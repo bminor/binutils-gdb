@@ -51,7 +51,7 @@
 void
 tui_display_main (void)
 {
-  if ((sourceWindows ())->count > 0)
+  if ((tui_source_windows ())->count > 0)
     {
       CORE_ADDR addr;
 
@@ -120,8 +120,8 @@ tui_update_source_window_as_is (TuiWinInfoPtr winInfo, struct symtab *s,
 	     ** If the focus was in the asm win, put it in the src
 	     ** win if we don't have a split layout
 	   */
-	  if (tuiWinWithFocus () == disassemWin &&
-	      currentLayout () != SRC_DISASSEM_COMMAND)
+	  if (tui_win_with_focus () == disassemWin &&
+	      tui_current_layout () != SRC_DISASSEM_COMMAND)
 	    tui_set_win_focus_to (srcWin);
 	}
     }
@@ -141,7 +141,7 @@ tui_update_source_windows_with_addr (CORE_ADDR addr)
       struct symtab_and_line sal;
       TuiLineOrAddress l;
       
-      switch (currentLayout ())
+      switch (tui_current_layout ())
 	{
 	case DISASSEM_COMMAND:
 	case DISASSEM_DATA_COMMAND:
@@ -161,9 +161,9 @@ tui_update_source_windows_with_addr (CORE_ADDR addr)
     {
       int i;
 
-      for (i = 0; i < (sourceWindows ())->count; i++)
+      for (i = 0; i < (tui_source_windows ())->count; i++)
 	{
-	  TuiWinInfoPtr winInfo = (TuiWinInfoPtr) (sourceWindows ())->list[i];
+	  TuiWinInfoPtr winInfo = (TuiWinInfoPtr) (tui_source_windows ())->list[i];
 
 	  tui_clear_source_content (winInfo, EMPTY_SOURCE_PROMPT);
 	  tui_clear_exec_info_content (winInfo);
@@ -181,7 +181,7 @@ tui_update_source_windows_with_line (struct symtab *s, int line)
   CORE_ADDR pc;
   TuiLineOrAddress l;
   
-  switch (currentLayout ())
+  switch (tui_current_layout ())
     {
     case DISASSEM_COMMAND:
     case DISASSEM_DATA_COMMAND:
@@ -191,7 +191,7 @@ tui_update_source_windows_with_line (struct symtab *s, int line)
     default:
       l.lineNo = line;
       tui_show_symtab_source (s, l, FALSE);
-      if (currentLayout () == SRC_DISASSEM_COMMAND)
+      if (tui_current_layout () == SRC_DISASSEM_COMMAND)
 	{
 	  find_line_pc (s, line, &pc);
 	  tui_show_disassem (pc);
@@ -379,7 +379,7 @@ tui_set_is_exec_point_at (TuiLineOrAddress l, TuiWinInfoPtr winInfo)
 void
 tui_update_all_breakpoint_info ()
 {
-  TuiList* list = sourceWindows ();
+  TuiList* list = tui_source_windows ();
   int i;
 
   for (i = 0; i < list->count; i++)
@@ -470,8 +470,8 @@ tuiSetExecInfoContent (TuiWinInfoPtr winInfo)
 
       if (execInfoPtr->content == (OpaquePtr) NULL)
 	execInfoPtr->content =
-	  (OpaquePtr) allocContent (winInfo->generic.height,
-				    execInfoPtr->type);
+	  (OpaquePtr) tui_alloc_content (winInfo->generic.height,
+					 execInfoPtr->type);
       if (execInfoPtr->content != (OpaquePtr) NULL)
 	{
 	  int i;
@@ -595,7 +595,7 @@ tui_alloc_source_buffer (struct tui_win_info *winInfo)
 	{
 	  /* allocate the content list */
 	  if ((winInfo->generic.content =
-	  (OpaquePtr) allocContent (maxLines, SRC_WIN)) == (OpaquePtr) NULL)
+	  (OpaquePtr) tui_alloc_content (maxLines, SRC_WIN)) == (OpaquePtr) NULL)
 	    {
 	      tuiFree (srcLineBuf);
 	      srcLineBuf = (char *) NULL;

@@ -93,7 +93,7 @@ tui_set_source_content (struct symtab *s, int lineNo, int noerror)
 	      else
 		{
 		  register int offset, curLineNo, curLine, curLen, threshold;
-		  TuiGenWinInfoPtr locator = locatorWinInfoPtr ();
+		  TuiGenWinInfoPtr locator = tui_locator_win_info_ptr ();
                   TuiSourceInfoPtr src = &srcWin->detail.sourceInfo;
 
                   if (srcWin->generic.title)
@@ -131,8 +131,8 @@ tui_set_source_content (struct symtab *s, int lineNo, int noerror)
 		      sprintf (srcLine, "%-6d", curLineNo);
 		      curLen = strlen (srcLine);
 		      i = curLen -
-			((curLen / tuiDefaultTabLen ()) * tuiDefaultTabLen ());
-		      while (i < tuiDefaultTabLen ())
+			((curLen / tui_default_tab_len ()) * tui_default_tab_len ());
+		      while (i < tui_default_tab_len ())
 			{
 			  srcLine[curLen] = ' ';
 			  i++;
@@ -176,7 +176,7 @@ tui_set_source_content (struct symtab *s, int lineNo, int noerror)
 					   buffer.  */
 				      if (c == '\t')
 					{
-					  int j, maxTabLen = tuiDefaultTabLen ();
+					  int j, maxTabLen = tui_default_tab_len ();
 
 					  for (j = i - (
 					       (i / maxTabLen) * maxTabLen);
@@ -313,7 +313,7 @@ int
 tui_source_is_displayed (char *fname)
 {
   return (srcWin->generic.contentInUse &&
-	  (strcmp (((TuiWinElementPtr) (locatorWinInfoPtr ())->
+	  (strcmp (((TuiWinElementPtr) (tui_locator_win_info_ptr ())->
 		  content[0])->whichElement.locator.fileName, fname) == 0));
 }
 

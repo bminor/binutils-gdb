@@ -180,8 +180,8 @@ tui_set_disassem_content (CORE_ADDR pc)
   register int offset = disassemWin->detail.sourceInfo.horizontalOffset;
   register int lineWidth, maxLines;
   CORE_ADDR cur_pc;
-  TuiGenWinInfoPtr locator = locatorWinInfoPtr ();
-  int tab_len = tuiDefaultTabLen ();
+  TuiGenWinInfoPtr locator = tui_locator_win_info_ptr ();
+  int tab_len = tui_default_tab_len ();
   struct tui_asm_line* lines;
   int insn_pos;
   int addr_size, max_size;
@@ -275,7 +275,7 @@ void
 tui_show_disassem (CORE_ADDR startAddr)
 {
   struct symtab *s = find_pc_symtab (startAddr);
-  TuiWinInfoPtr winWithFocus = tuiWinWithFocus ();
+  TuiWinInfoPtr winWithFocus = tui_win_with_focus ();
   TuiLineOrAddress val;
 
   val.addr = startAddr;
@@ -285,7 +285,7 @@ tui_show_disassem (CORE_ADDR startAddr)
      ** if the focus was in the src win, put it in the asm win, if the
      ** source view isn't split
    */
-  if (currentLayout () != SRC_DISASSEM_COMMAND && winWithFocus == srcWin)
+  if (tui_current_layout () != SRC_DISASSEM_COMMAND && winWithFocus == srcWin)
     tui_set_win_focus_to (disassemWin);
 
   return;
@@ -299,7 +299,7 @@ tui_show_disassem_and_update_source (CORE_ADDR startAddr)
   struct symtab_and_line sal;
 
   tui_show_disassem (startAddr);
-  if (currentLayout () == SRC_DISASSEM_COMMAND)
+  if (tui_current_layout () == SRC_DISASSEM_COMMAND)
     {
       TuiLineOrAddress val;
 
@@ -329,7 +329,7 @@ tui_get_begin_asm_address (void)
   TuiLocatorElementPtr element;
   CORE_ADDR addr;
 
-  locator = locatorWinInfoPtr ();
+  locator = tui_locator_win_info_ptr ();
   element = &((TuiWinElementPtr) locator->content[0])->whichElement.locator;
 
   if (element->addr == 0)

@@ -140,7 +140,7 @@ tui_rl_change_windows (int notused1, int notused2)
       TuiLayoutType new_layout;
       TuiRegisterDisplayType regs_type = TUI_UNDEFINED_REGS;
 
-      new_layout = currentLayout ();
+      new_layout = tui_current_layout ();
 
       /* Select a new layout to have a rolling layout behavior
 	 with always two windows (except when undefined).  */
@@ -188,7 +188,7 @@ tui_rl_delete_other_windows (int notused1, int notused2)
       TuiLayoutType new_layout;
       TuiRegisterDisplayType regs_type = TUI_UNDEFINED_REGS;
 
-      new_layout = currentLayout ();
+      new_layout = tui_current_layout ();
 
       /* Kill one window.  */
       switch (new_layout)
@@ -220,7 +220,7 @@ tui_rl_other_window (int count, int key)
   if (!tui_active)
     tui_rl_switch_mode (0/*notused*/, 0/*notused*/);
 
-  winInfo = tuiNextWin (tuiWinWithFocus ());
+  winInfo = tui_next_win (tui_win_with_focus ());
   if (winInfo)
     {
       tui_set_win_focus_to (winInfo);
@@ -384,8 +384,8 @@ tui_enable (void)
       nl();
       keypad (w, TRUE);
       rl_initialize ();
-      setTermHeightTo (LINES);
-      setTermWidthTo (COLS);
+      tui_set_term_height_to (LINES);
+      tui_set_term_width_to (COLS);
       def_prog_mode ();
 
       tui_show_frame_info (0);

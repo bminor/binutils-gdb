@@ -94,7 +94,7 @@ tui_make_status_line (TuiLocatorElement* loc)
   if (pid_width > MAX_PID_WIDTH)
     pid_width = MAX_PID_WIDTH;
 
-  status_size = termWidth ();  
+  status_size = tui_term_width ();
   string = (char *) xmalloc (status_size + 1);
   buf = (char*) alloca (status_size + 1);
 
@@ -251,7 +251,7 @@ tui_show_locator_content (void)
   char *string;
   TuiGenWinInfoPtr locator;
 
-  locator = locatorWinInfoPtr ();
+  locator = tui_locator_win_info_ptr ();
 
   if (m_genWinPtrNotNull (locator) && locator->handle != (WINDOW *) NULL)
     {
@@ -277,7 +277,7 @@ tui_show_locator_content (void)
 static void
 tui_set_locator_filename (const char *filename)
 {
-  TuiGenWinInfoPtr locator = locatorWinInfoPtr ();
+  TuiGenWinInfoPtr locator = tui_locator_win_info_ptr ();
   TuiLocatorElementPtr element;
 
   if (locator->content[0] == (Opaque) NULL)
@@ -296,13 +296,13 @@ static void
 tui_set_locator_info (const char *filename, const char *procname, int lineno,
                       CORE_ADDR addr)
 {
-  TuiGenWinInfoPtr locator = locatorWinInfoPtr ();
+  TuiGenWinInfoPtr locator = tui_locator_win_info_ptr ();
   TuiLocatorElementPtr element;
 
   /* Allocate the locator content if necessary.  */
   if (locator->contentSize <= 0)
     {
-      locator->content = (OpaquePtr) allocContent (1, locator->type);
+      locator->content = (OpaquePtr) tui_alloc_content (1, locator->type);
       locator->contentSize = 1;
     }
 
@@ -333,7 +333,7 @@ tui_show_frame_info (struct frame_info *fi)
     {
       register int startLine, i;
       CORE_ADDR low;
-      TuiGenWinInfoPtr locator = locatorWinInfoPtr ();
+      TuiGenWinInfoPtr locator = tui_locator_win_info_ptr ();
       int sourceAlreadyDisplayed;
       struct symtab_and_line sal;
 
@@ -347,10 +347,10 @@ tui_show_frame_info (struct frame_info *fi)
                             get_frame_pc (fi));
       tui_show_locator_content ();
       startLine = 0;
-      for (i = 0; i < (sourceWindows ())->count; i++)
+      for (i = 0; i < (tui_source_windows ())->count; i++)
 	{
 	  TuiWhichElement *item;
-	  winInfo = (TuiWinInfoPtr) (sourceWindows ())->list[i];
+	  winInfo = (TuiWinInfoPtr) (tui_source_windows ())->list[i];
 
 	  item = &((TuiWinElementPtr) locator->content[0])->whichElement;
 	  if (winInfo == srcWin)
@@ -404,9 +404,9 @@ tui_show_frame_info (struct frame_info *fi)
     {
       tui_set_locator_info (NULL, NULL, 0, (CORE_ADDR) 0);
       tui_show_locator_content ();
-      for (i = 0; i < (sourceWindows ())->count; i++)
+      for (i = 0; i < (tui_source_windows ())->count; i++)
 	{
-	  winInfo = (TuiWinInfoPtr) (sourceWindows ())->list[i];
+	  winInfo = (TuiWinInfoPtr) (tui_source_windows ())->list[i];
 	  tui_clear_source_content (winInfo, EMPTY_SOURCE_PROMPT);
 	  tui_update_exec_info (winInfo);
 	}

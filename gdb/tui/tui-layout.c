@@ -82,7 +82,7 @@ static void _tuiHandleXDBLayout (TuiLayoutDefPtr);
 static void
 showLayout (TuiLayoutType layout)
 {
-  TuiLayoutType curLayout = currentLayout ();
+  TuiLayoutType curLayout = tui_current_layout ();
 
   if (layout != curLayout)
     {
@@ -91,8 +91,8 @@ showLayout (TuiLayoutType layout)
          ** should free the content and reallocate on next display of
          ** source/asm
        */
-      freeAllSourceWinsContent ();
-      clearSourceWindows ();
+      tui_free_all_source_wins_content ();
+      tui_clear_source_windows ();
       if (layout == SRC_DATA_COMMAND || layout == DISASSEM_DATA_COMMAND)
 	{
 	  _showData (layout);
@@ -102,23 +102,23 @@ showLayout (TuiLayoutType layout)
 	{
 	  /* First make the current layout be invisible */
 	  tui_make_all_invisible ();
-	  tui_make_invisible (locatorWinInfoPtr ());
+	  tui_make_invisible (tui_locator_win_info_ptr ());
 
 	  switch (layout)
 	    {
 	      /* Now show the new layout */
 	    case SRC_COMMAND:
 	      _showSourceCommand ();
-	      addToSourceWindows (srcWin);
+	      tui_add_to_source_windows (srcWin);
 	      break;
 	    case DISASSEM_COMMAND:
 	      _showDisassemCommand ();
-	      addToSourceWindows (disassemWin);
+	      tui_add_to_source_windows (disassemWin);
 	      break;
 	    case SRC_DISASSEM_COMMAND:
 	      _showSourceDisassemCommand ();
-	      addToSourceWindows (srcWin);
-	      addToSourceWindows (disassemWin);
+	      tui_add_to_source_windows (srcWin);
+	      tui_add_to_source_windows (disassemWin);
 	      break;
 	    default:
 	      break;
@@ -141,11 +141,11 @@ tui_set_layout (enum tui_layout_type layoutType,
 
   if (layoutType != UNDEFINED_LAYOUT || regsDisplayType != TUI_UNDEFINED_REGS)
     {
-      TuiLayoutType curLayout = currentLayout (), newLayout = UNDEFINED_LAYOUT;
+      TuiLayoutType curLayout = tui_current_layout (), newLayout = UNDEFINED_LAYOUT;
       int regsPopulate = FALSE;
       CORE_ADDR addr = _extractDisplayStartAddr ();
-      TuiWinInfoPtr newWinWithFocus = (TuiWinInfoPtr) NULL, winWithFocus = tuiWinWithFocus ();
-      TuiLayoutDefPtr layoutDef = tuiLayoutDef ();
+      TuiWinInfoPtr newWinWithFocus = (TuiWinInfoPtr) NULL, winWithFocus = tui_win_with_focus ();
+      TuiLayoutDefPtr layoutDef = tui_layout_def ();
 
 
       if (layoutType == UNDEFINED_LAYOUT &&
@@ -271,7 +271,7 @@ tui_set_layout (enum tui_layout_type layoutType,
 void
 tui_add_win_to_layout (enum tui_win_type type)
 {
-  TuiLayoutType curLayout = currentLayout ();
+  TuiLayoutType curLayout = tui_current_layout ();
 
   switch (type)
     {
@@ -280,7 +280,7 @@ tui_add_win_to_layout (enum tui_win_type type)
 	  curLayout != SRC_DISASSEM_COMMAND &&
 	  curLayout != SRC_DATA_COMMAND)
 	{
-	  clearSourceWindowsDetail ();
+	  tui_clear_source_windows_detail ();
 	  if (curLayout == DISASSEM_DATA_COMMAND)
 	    showLayout (SRC_DATA_COMMAND);
 	  else
@@ -292,7 +292,7 @@ tui_add_win_to_layout (enum tui_win_type type)
 	  curLayout != SRC_DISASSEM_COMMAND &&
 	  curLayout != DISASSEM_DATA_COMMAND)
 	{
-	  clearSourceWindowsDetail ();
+	  tui_clear_source_windows_detail ();
 	  if (curLayout == SRC_DATA_COMMAND)
 	    showLayout (DISASSEM_DATA_COMMAND);
 	  else
@@ -337,17 +337,17 @@ tuiDefaultWinHeight (TuiWinType type, TuiLayoutType layout)
 	case SRC_COMMAND:
 	case DISASSEM_COMMAND:
 	  if (m_winPtrIsNull (cmdWin))
-	    h = termHeight () / 2;
+	    h = tui_term_height () / 2;
 	  else
-	    h = termHeight () - cmdWin->generic.height;
+	    h = tui_term_height () - cmdWin->generic.height;
 	  break;
 	case SRC_DISASSEM_COMMAND:
 	case SRC_DATA_COMMAND:
 	case DISASSEM_DATA_COMMAND:
 	  if (m_winPtrIsNull (cmdWin))
-	    h = termHeight () / 3;
+	    h = tui_term_height () / 3;
 	  else
-	    h = (termHeight () - cmdWin->generic.height) / 2;
+	    h = (tui_term_height () - cmdWin->generic.height) / 2;
 	  break;
 	default:
 	  h = 0;
@@ -432,7 +432,7 @@ tui_set_layout_for_display_command (const char *layoutName)
       register char *bufPtr;
       TuiLayoutType newLayout = UNDEFINED_LAYOUT;
       TuiRegisterDisplayType dpyType = TUI_UNDEFINED_REGS;
-      TuiLayoutType curLayout = currentLayout ();
+      TuiLayoutType curLayout = tui_current_layout ();
 
       bufPtr = (char *) xstrdup (layoutName);
       for (i = 0; (i < strlen (layoutName)); i++)
@@ -527,7 +527,7 @@ tui_set_layout_for_display_command (const char *layoutName)
 static CORE_ADDR
 _extractDisplayStartAddr (void)
 {
-  TuiLayoutType curLayout = currentLayout ();
+  TuiLayoutType curLayout = tui_current_layout ();
   CORE_ADDR addr;
   CORE_ADDR pc;
   struct symtab_and_line cursal = get_current_source_symtab_and_line ();
@@ -579,7 +579,7 @@ _tuiHandleXDBLayout (TuiLayoutDefPtr layoutDef)
 static void
 _tuiToggleLayout_command (char *arg, int fromTTY)
 {
-  TuiLayoutDefPtr layoutDef = tuiLayoutDef ();
+  TuiLayoutDefPtr layoutDef = tui_layout_def ();
 
   /* Make sure the curses mode is enabled.  */
   tui_enable ();
@@ -597,7 +597,7 @@ _tuiToggleLayout_command (char *arg, int fromTTY)
 static void
 _tuiToggleSplitLayout_command (char *arg, int fromTTY)
 {
-  TuiLayoutDefPtr layoutDef = tuiLayoutDef ();
+  TuiLayoutDefPtr layoutDef = tui_layout_def ();
 
   /* Make sure the curses mode is enabled.  */
   tui_enable ();
@@ -628,7 +628,7 @@ _nextLayout (void)
 {
   TuiLayoutType newLayout;
 
-  newLayout = currentLayout ();
+  newLayout = tui_current_layout ();
   if (newLayout == UNDEFINED_LAYOUT)
     newLayout = SRC_COMMAND;
   else
@@ -651,7 +651,7 @@ _prevLayout (void)
 {
   TuiLayoutType newLayout;
 
-  newLayout = currentLayout ();
+  newLayout = tui_current_layout ();
   if (newLayout == SRC_COMMAND)
     newLayout = DISASSEM_DATA_COMMAND;
   else
@@ -675,7 +675,7 @@ _makeCommandWindow (TuiWinInfoPtr * winInfoPtr, int height, int originY)
   _initAndMakeWin ((Opaque *) winInfoPtr,
 		   CMD_WIN,
 		   height,
-		   termWidth (),
+		   tui_term_width (),
 		   0,
 		   originY,
 		   DONT_BOX_WINDOW);
@@ -719,7 +719,7 @@ _makeDataWindow (TuiWinInfoPtr * winInfoPtr, int height, int originY)
   _initAndMakeWin ((Opaque *) winInfoPtr,
 		   DATA_WIN,
 		   height,
-		   termWidth (),
+		   tui_term_width (),
 		   0,
 		   originY,
 		   BOX_WINDOW);
@@ -762,17 +762,17 @@ _showDisassemCommand (void)
 static void
 _showSourceDisassemCommand (void)
 {
-  if (currentLayout () != SRC_DISASSEM_COMMAND)
+  if (tui_current_layout () != SRC_DISASSEM_COMMAND)
     {
       int cmdHeight, srcHeight, asmHeight;
 
       if (m_winPtrNotNull (cmdWin))
 	cmdHeight = cmdWin->generic.height;
       else
-	cmdHeight = termHeight () / 3;
+	cmdHeight = tui_term_height () / 3;
 
-      srcHeight = (termHeight () - cmdHeight) / 2;
-      asmHeight = termHeight () - (srcHeight + cmdHeight);
+      srcHeight = (tui_term_height () - cmdHeight) / 2;
+      asmHeight = tui_term_height () - (srcHeight + cmdHeight);
 
       if (m_winPtrIsNull (srcWin))
 	_makeSourceWindow (&srcWin, srcHeight, 0);
@@ -797,7 +797,7 @@ _showSourceDisassemCommand (void)
 	}
       if (m_winPtrNotNull (srcWin))
 	{
-	  TuiGenWinInfoPtr locator = locatorWinInfoPtr ();
+	  TuiGenWinInfoPtr locator = tui_locator_win_info_ptr ();
 
 	  tui_show_source_content (srcWin);
 	  if (m_winPtrIsNull (disassemWin))
@@ -806,7 +806,7 @@ _showSourceDisassemCommand (void)
 	      _initAndMakeWin ((Opaque *) & locator,
 			       LOCATOR_WIN,
 			       2 /* 1 */ ,
-			       termWidth (),
+			       tui_term_width (),
 			       0,
 			       (srcHeight + asmHeight) - 1,
 			       DONT_BOX_WINDOW);
@@ -816,7 +816,7 @@ _showSourceDisassemCommand (void)
 	      _initGenWinInfo (locator,
 			       LOCATOR_WIN,
 			       2 /* 1 */ ,
-			       termWidth (),
+			       tui_term_width (),
 			       0,
 			       (srcHeight + asmHeight) - 1);
 	      disassemWin->detail.sourceInfo.hasLocator = TRUE;
@@ -848,7 +848,7 @@ _showSourceDisassemCommand (void)
 	      if (m_winPtrIsNull (cmdWin))
 		_makeCommandWindow (&cmdWin,
 				    cmdHeight,
-				    termHeight () - cmdHeight);
+				    tui_term_height () - cmdHeight);
 	      else
 		{
 		  _initGenWinInfo (&cmdWin->generic,
@@ -864,7 +864,7 @@ _showSourceDisassemCommand (void)
 		tui_refresh_win (&cmdWin->generic);
 	    }
 	}
-      setCurrentLayoutTo (SRC_DISASSEM_COMMAND);
+      tui_set_current_layout_to (SRC_DISASSEM_COMMAND);
     }
 
   return;
@@ -878,10 +878,10 @@ _showSourceDisassemCommand (void)
 static void
 _showData (TuiLayoutType newLayout)
 {
-  int totalHeight = (termHeight () - cmdWin->generic.height);
+  int totalHeight = (tui_term_height () - cmdWin->generic.height);
   int srcHeight, dataHeight;
   TuiWinType winType;
-  TuiGenWinInfoPtr locator = locatorWinInfoPtr ();
+  TuiGenWinInfoPtr locator = tui_locator_win_info_ptr ();
 
 
   dataHeight = totalHeight / 2;
@@ -903,7 +903,7 @@ _showData (TuiLayoutType newLayout)
       _initAndMakeWin ((Opaque *) & locator,
 		       LOCATOR_WIN,
 		       2 /* 1 */ ,
-		       termWidth (),
+		       tui_term_width (),
 		       0,
 		       totalHeight - 1,
 		       DONT_BOX_WINDOW);
@@ -927,15 +927,15 @@ _showData (TuiLayoutType newLayout)
       _initGenWinInfo (locator,
 		       LOCATOR_WIN,
 		       2 /* 1 */ ,
-		       termWidth (),
+		       tui_term_width (),
 		       0,
 		       totalHeight - 1);
     }
   winList[winType]->detail.sourceInfo.hasLocator = TRUE;
   tui_make_visible (locator);
   tui_show_locator_content ();
-  addToSourceWindows (winList[winType]);
-  setCurrentLayoutTo (newLayout);
+  tui_add_to_source_windows (winList[winType]);
+  tui_set_current_layout_to (newLayout);
 
   return;
 }				/* _showData */
@@ -979,9 +979,9 @@ _initAndMakeWin (Opaque * winInfoPtr, TuiWinType winType,
   if (opaqueWinInfo == (Opaque) NULL)
     {
       if (m_winIsAuxillary (winType))
-	opaqueWinInfo = (Opaque) allocGenericWinInfo ();
+	opaqueWinInfo = (Opaque) tui_alloc_generic_win_info ();
       else
-	opaqueWinInfo = (Opaque) allocWinInfo (winType);
+	opaqueWinInfo = (Opaque) tui_alloc_win_info (winType);
     }
   if (m_winIsAuxillary (winType))
     generic = (TuiGenWinInfoPtr) opaqueWinInfo;
@@ -1017,9 +1017,9 @@ _makeSourceOrDisassemWindow (TuiWinInfoPtr * winInfoPtr, TuiWinType type,
      ** Create the exeuction info window.
    */
   if (type == SRC_WIN)
-    executionInfo = sourceExecInfoWinPtr ();
+    executionInfo = tui_source_exec_info_win_ptr ();
   else
-    executionInfo = disassemExecInfoWinPtr ();
+    executionInfo = tui_disassem_exec_info_win_ptr ();
   _initAndMakeWin ((Opaque *) & executionInfo,
 		   EXEC_INFO_WIN,
 		   height,
@@ -1033,7 +1033,7 @@ _makeSourceOrDisassemWindow (TuiWinInfoPtr * winInfoPtr, TuiWinType type,
   _initAndMakeWin ((Opaque *) winInfoPtr,
 		   type,
 		   height,
-		   termWidth () - executionInfo->width,
+		   tui_term_width () - executionInfo->width,
 		   executionInfo->width,
 		   originY,
 		   BOX_WINDOW);
@@ -1051,17 +1051,17 @@ _makeSourceOrDisassemWindow (TuiWinInfoPtr * winInfoPtr, TuiWinType type,
 static void
 _showSourceOrDisassemAndCommand (TuiLayoutType layoutType)
 {
-  if (currentLayout () != layoutType)
+  if (tui_current_layout () != layoutType)
     {
       TuiWinInfoPtr *winInfoPtr;
       int srcHeight, cmdHeight;
-      TuiGenWinInfoPtr locator = locatorWinInfoPtr ();
+      TuiGenWinInfoPtr locator = tui_locator_win_info_ptr ();
 
       if (m_winPtrNotNull (cmdWin))
 	cmdHeight = cmdWin->generic.height;
       else
-	cmdHeight = termHeight () / 3;
-      srcHeight = termHeight () - cmdHeight;
+	cmdHeight = tui_term_height () / 3;
+      srcHeight = tui_term_height () - cmdHeight;
 
 
       if (layoutType == SRC_COMMAND)
@@ -1078,7 +1078,7 @@ _showSourceOrDisassemAndCommand (TuiLayoutType layoutType)
 	  _initAndMakeWin ((Opaque *) & locator,
 			   LOCATOR_WIN,
 			   2 /* 1 */ ,
-			   termWidth (),
+			   tui_term_width (),
 			   0,
 			   srcHeight - 1,
 			   DONT_BOX_WINDOW);
@@ -1088,7 +1088,7 @@ _showSourceOrDisassemAndCommand (TuiLayoutType layoutType)
 	  _initGenWinInfo (locator,
 			   LOCATOR_WIN,
 			   2 /* 1 */ ,
-			   termWidth (),
+			   tui_term_width (),
 			   0,
 			   srcHeight - 1);
 	  (*winInfoPtr)->detail.sourceInfo.hasLocator = TRUE;
@@ -1133,7 +1133,7 @@ _showSourceOrDisassemAndCommand (TuiLayoutType layoutType)
 	      tui_make_visible (&cmdWin->generic);
 	    }
 	}
-      setCurrentLayoutTo (layoutType);
+      tui_set_current_layout_to (layoutType);
     }
 
   return;

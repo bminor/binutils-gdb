@@ -268,7 +268,7 @@ tui_show_registers (TuiRegisterDisplayType dpyType)
       dataWin->detail.dataDisplayInfo.regsDisplayType = dpyType;
       tui_display_all_data ();
     }
-  (tuiLayoutDef ())->regsDisplayType = dpyType;
+  (tui_layout_def ())->regsDisplayType = dpyType;
 
   return;
 }
@@ -452,7 +452,7 @@ tui_check_register_values (struct frame_info *frame)
     {
       if (dataWin->detail.dataDisplayInfo.regsContentCount <= 0 &&
 	  dataWin->detail.dataDisplayInfo.displayRegs)
-	tui_show_registers ((tuiLayoutDef ())->regsDisplayType);
+	tui_show_registers ((tui_layout_def ())->regsDisplayType);
       else
 	{
 	  int i, j;
@@ -509,7 +509,7 @@ tui_check_register_values (struct frame_info *frame)
 void
 tuiToggleFloatRegs (void)
 {
-  TuiLayoutDefPtr layoutDef = tuiLayoutDef ();
+  TuiLayoutDefPtr layoutDef = tui_layout_def ();
 
   if (layoutDef->floatRegsDisplayType == TUI_SFLOAT_REGS)
     layoutDef->floatRegsDisplayType = TUI_DFLOAT_REGS;
@@ -825,14 +825,14 @@ _tuiSetRegsContent (int startRegNum, int endRegNum,
   if (dataWin->detail.dataDisplayInfo.regsContentCount > 0 &&
       !refreshValuesOnly)
     {
-      freeDataContent (dataWin->detail.dataDisplayInfo.regsContent,
-		       dataWin->detail.dataDisplayInfo.regsContentCount);
+      tui_free_data_content (dataWin->detail.dataDisplayInfo.regsContent,
+			     dataWin->detail.dataDisplayInfo.regsContentCount);
       dataWin->detail.dataDisplayInfo.regsContentCount = 0;
     }
   if (dataWin->detail.dataDisplayInfo.regsContentCount <= 0)
     {
       dataWin->detail.dataDisplayInfo.regsContent =
-	allocContent (numRegs, DATA_WIN);
+	tui_alloc_content (numRegs, DATA_WIN);
       allocatedHere = TRUE;
     }
 
@@ -844,7 +844,7 @@ _tuiSetRegsContent (int startRegNum, int endRegNum,
 	{
 	  dataWin->generic.content = (OpaquePtr) NULL;
 	  dataWin->generic.contentSize = 0;
-	  addContentElements (&dataWin->generic, numRegs);
+	  tui_add_content_elements (&dataWin->generic, numRegs);
 	  dataWin->detail.dataDisplayInfo.regsContent =
 	    (TuiWinContent) dataWin->generic.content;
 	  dataWin->detail.dataDisplayInfo.regsContentCount = numRegs;
@@ -957,7 +957,7 @@ _tui_vShowRegisters_commandSupport (TuiRegisterDisplayType dpyType)
 	tui_show_registers (dpyType);
     }
   else
-    (tuiLayoutDef ())->regsDisplayType = dpyType;
+    (tui_layout_def ())->regsDisplayType = dpyType;
 
   return;
 }				/* _tui_vShowRegisters_commandSupport */
@@ -969,7 +969,7 @@ _tuiShowFloat_command (char *arg, int fromTTY)
   if (m_winPtrIsNull (dataWin) || !dataWin->generic.isVisible ||
       (dataWin->detail.dataDisplayInfo.regsDisplayType != TUI_SFLOAT_REGS &&
        dataWin->detail.dataDisplayInfo.regsDisplayType != TUI_DFLOAT_REGS))
-    _tui_vShowRegisters_commandSupport ((tuiLayoutDef ())->floatRegsDisplayType);
+    _tui_vShowRegisters_commandSupport ((tui_layout_def ())->floatRegsDisplayType);
 
   return;
 }				/* _tuiShowFloat_command */
@@ -996,7 +996,7 @@ _tuiToggleFloatRegs_command (char *arg, int fromTTY)
     tuiToggleFloatRegs ();
   else
     {
-      TuiLayoutDefPtr layoutDef = tuiLayoutDef ();
+      TuiLayoutDefPtr layoutDef = tui_layout_def ();
 
       if (layoutDef->floatRegsDisplayType == TUI_SFLOAT_REGS)
 	layoutDef->floatRegsDisplayType = TUI_DFLOAT_REGS;

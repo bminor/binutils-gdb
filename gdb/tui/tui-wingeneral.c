@@ -253,7 +253,7 @@ void
 tui_refresh_all (TuiWinInfoPtr * list)
 {
   TuiWinType type;
-  TuiGenWinInfoPtr locator = locatorWinInfoPtr ();
+  TuiGenWinInfoPtr locator = tui_locator_win_info_ptr ();
 
   for (type = SRC_WIN; (type < MAX_MAJOR_WINDOWS); type++)
     {

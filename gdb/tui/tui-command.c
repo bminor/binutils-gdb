@@ -52,7 +52,7 @@
 unsigned int
 tui_dispatch_ctrl_char (unsigned int ch)
 {
-  TuiWinInfoPtr winInfo = tuiWinWithFocus ();
+  TuiWinInfoPtr winInfo = tui_win_with_focus ();
   WINDOW *w = cmdWin->generic.handle;
 
   /*
