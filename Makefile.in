@@ -1054,15 +1054,12 @@ make-gdb.tar.Z: $(DEVO_SUPPORT) $(GDB_SUPPORT_DIRS) gdb texinfo/texinfo.tex
 # this macro.
 SUPPORT_FILES = list-of-support-files-for-tool-in-question
 # Directories that might want `make diststuff' run.
-DISTSTUFFDIRS= ld gprof gdb
+DISTSTUFFDIRS= ld gprof gdb libg++
 
 .PHONY: taz
 
 taz: $(DEVO_SUPPORT) $(SUPPORT_FILES) texinfo/texinfo.tex texinfo/gpl.texinfo
 	./configure sun4
-	$(MAKE) clean
-	./configure -rm sun4
-	chmod og=u `find etc $(DEVO_SUPPORT) $(SUPPORT_FILES) $(TOOL) -print`
 	# Make links, and run "make diststuff" when needed.
 	# The `echo' for setting `p' is to convert all whitespace to spaces.
 	# Then the `case' further below should tell whether $$d is in
@@ -1075,7 +1072,7 @@ taz: $(DEVO_SUPPORT) $(SUPPORT_FILES) texinfo/texinfo.tex texinfo/gpl.texinfo
 	    case " $$p " in \
 	    *" $$d "*)	\
 		echo making diststuff in $$d ; \
-		(cd $$d ; $(MAKE) -f Makefile.in diststuff) || exit 1  ;; \
+		(cd $$d ; $(MAKE) diststuff) || exit 1  ;; \
 	    esac ; \
 	    if [ -d $$d/proto-$$d.dir ]; then \
 	      ln -s ../$$d/proto-$$d.dir proto-toplev/$$d ; \
@@ -1084,6 +1081,7 @@ taz: $(DEVO_SUPPORT) $(SUPPORT_FILES) texinfo/texinfo.tex texinfo/gpl.texinfo
 	    fi ; \
 	  else ln -s ../$$d proto-toplev/$$d ; fi ; \
 	done
+	$(MAKE) distclean
 	#
 	mkdir proto-toplev/etc
 	(cd proto-toplev/etc; for i in $(ETC_SUPPORT); do \
@@ -1108,7 +1106,8 @@ taz: $(DEVO_SUPPORT) $(SUPPORT_FILES) texinfo/texinfo.tex texinfo/gpl.texinfo
 	ln -s ../../texinfo/texinfo.tex proto-toplev/texinfo/
 	ln -s ../../texinfo/gpl.texinfo proto-toplev/texinfo/
 	ln -s ../../texinfo/tex3patch   proto-toplev/texinfo/
-	chmod og=u `find proto-toplev -print`
+	chmod og=u `find proto-toplev \
+	  etc $(DEVO_SUPPORT) $(SUPPORT_FILES) $(TOOL) -print`
 	(VER=`sed <$(TOOL)/Makefile.in -n 's/^VERSION *= *//p'`; \
 		echo "==> Making $(TOOL)-$$VER.tar.gz"; \
 		ln -s proto-toplev $(TOOL)-$$VER; \
@@ -1133,6 +1132,11 @@ binutils.tar.gz: $(DIST_SUPPORT) $(BINUTILS_SUPPORT_DIRS) binutils
 GASB_SUPPORT_DIRS= $(GAS_SUPPORT_DIRS) binutils ld gprof
 gas+binutils.tar.gz: $(DIST_SUPPORT) $(GASB_SUPPORT_DIRS) gas
 	$(MAKE) -f Makefile.in taz SUPPORT_FILES="$(GASB_SUPPORT_DIRS)" TOOL=gas
+
+.PHONY: libg++.tar.gz
+LIBGXX_SUPPORT_DIRS=include libiberty
+libg++.tar.gz: $(DIST_SUPPORT) libg++
+	$(MAKE) -f Makefile.in taz SUPPORT_FILES="$(LIBGXX_SUPPORT_DIRS)" TOOL=libg++
 
 .NOEXPORT:
 MAKEOVERRIDES=
