@@ -1,3 +1,9 @@
+Tue Apr  9 14:10:42 1996  Doug Evans  <dje@canuck.cygnus.com>
+
+	* emultempl/generic.em (gld${EMULATION_NAME}_before_parse):
+	Pass $ARCH to ldfile_set_output_arch instead of setting
+	ldfile_output_architecture directly.
+
 Tue Apr  9 14:22:15 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* scripttempl/elfppc.sc (.init,.fini): Put .init, .fini section
