@@ -3,21 +3,21 @@
    Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
 
-This file is part of BFD, the Binary File Descriptor library.
+   This file is part of BFD, the Binary File Descriptor library.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /* This file is based on a preliminary PowerPC ELF ABI.  The
    information may not match the final PowerPC ELF ABI.  It includes
@@ -110,9 +110,9 @@ static bfd_boolean ppc_elf_grok_prstatus
 static bfd_boolean ppc_elf_grok_psinfo
   PARAMS ((bfd *abfd, Elf_Internal_Note *note));
 
-#define BRANCH_PREDICT_BIT 0x200000		/* branch prediction bit for branch taken relocs */
-#define RA_REGISTER_MASK 0x001f0000		/* mask to set RA in memory instructions */
-#define RA_REGISTER_SHIFT 16			/* value to shift register by to insert RA */
+#define BRANCH_PREDICT_BIT 0x200000		/* Branch prediction bit for branch taken relocs.  */
+#define RA_REGISTER_MASK 0x001f0000		/* Mask to set RA in memory instructions.  */
+#define RA_REGISTER_SHIFT 16			/* Value to shift register by to insert RA.  */
 
 /* The name of the dynamic interpreter.  This is put in the .interp
    section.  */
@@ -881,7 +881,7 @@ static reloc_howto_type ppc_elf_howto_raw[] = {
   /* The remaining relocs are from the Embedded ELF ABI, and are not
      in the SVR4 ELF ABI.  */
 
-  /* 32 bit value resulting from the addend minus the symbol */
+  /* 32 bit value resulting from the addend minus the symbol.  */
   HOWTO (R_PPC_EMB_NADDR32,	/* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
@@ -896,7 +896,7 @@ static reloc_howto_type ppc_elf_howto_raw[] = {
 	 0xffffffff,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
 
-  /* 16 bit value resulting from the addend minus the symbol */
+  /* 16 bit value resulting from the addend minus the symbol.  */
   HOWTO (R_PPC_EMB_NADDR16,	/* type */
 	 0,			/* rightshift */
 	 1,			/* size (0 = byte, 1 = short, 2 = long) */
@@ -911,7 +911,7 @@ static reloc_howto_type ppc_elf_howto_raw[] = {
 	 0xffff,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
 
-  /* 16 bit value resulting from the addend minus the symbol */
+  /* 16 bit value resulting from the addend minus the symbol.  */
   HOWTO (R_PPC_EMB_NADDR16_LO,	/* type */
 	 0,			/* rightshift */
 	 1,			/* size (0 = byte, 1 = short, 2 = long) */
@@ -926,7 +926,7 @@ static reloc_howto_type ppc_elf_howto_raw[] = {
 	 0xffff,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
 
-  /* The high order 16 bits of the addend minus the symbol */
+  /* The high order 16 bits of the addend minus the symbol.  */
   HOWTO (R_PPC_EMB_NADDR16_HI,	/* type */
 	 16,			/* rightshift */
 	 1,			/* size (0 = byte, 1 = short, 2 = long) */
@@ -960,7 +960,7 @@ static reloc_howto_type ppc_elf_howto_raw[] = {
 
   /* 16 bit value resulting from allocating a 4 byte word to hold an
      address in the .sdata section, and returning the offset from
-     _SDA_BASE_ for that relocation */
+     _SDA_BASE_ for that relocation.  */
   HOWTO (R_PPC_EMB_SDAI16,	/* type */
 	 0,			/* rightshift */
 	 1,			/* size (0 = byte, 1 = short, 2 = long) */
@@ -1049,7 +1049,7 @@ static reloc_howto_type ppc_elf_howto_raw[] = {
 	 0xffff,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
 
-  /* GNU extension to record C++ vtable hierarchy */
+  /* GNU extension to record C++ vtable hierarchy.  */
   HOWTO (R_PPC_GNU_VTINHERIT,	/* type */
 	 0,			/* rightshift */
 	 0,			/* size (0 = byte, 1 = short, 2 = long) */
@@ -1064,7 +1064,7 @@ static reloc_howto_type ppc_elf_howto_raw[] = {
 	 0,			/* dst_mask */
 	 FALSE),		/* pcrel_offset */
 
-  /* GNU extension to record C++ vtable member usage */
+  /* GNU extension to record C++ vtable member usage.  */
   HOWTO (R_PPC_GNU_VTENTRY,	/* type */
 	 0,			/* rightshift */
 	 0,			/* size (0 = byte, 1 = short, 2 = long) */
@@ -1079,7 +1079,7 @@ static reloc_howto_type ppc_elf_howto_raw[] = {
 	 0,			/* dst_mask */
 	 FALSE),		/* pcrel_offset */
 
-  /* Phony reloc to handle AIX style TOC entries */
+  /* Phony reloc to handle AIX style TOC entries.  */
   HOWTO (R_PPC_TOC16,		/* type */
 	 0,			/* rightshift */
 	 1,			/* size (0 = byte, 1 = short, 2 = long) */
@@ -1129,8 +1129,7 @@ ppc_elf_howto_init ()
    3/ Conditional forward branches - Ensure that the "inverse prediction
       bit" is set (ensure it is predicted taken).
    4/ Conditional register branches - Ensure that the "y bit" is set
-      (ensure it is predicted taken).
-*/
+      (ensure it is predicted taken).  */
 
 /* Sort sections by address.  */
 
@@ -1233,9 +1232,9 @@ ppc_elf_relax_section (abfd, isec, link_info, again)
               The array rela_comb is built here for use in the EOP scan loop.  */
               switch (r_type)
                 {
-                case R_PPC_ADDR14_BRNTAKEN:     /* absolute, predicted not taken */
-                case R_PPC_REL14:               /* relative cond. br.  */
-                case R_PPC_REL14_BRNTAKEN:      /* rel. cond. br., predicted not taken */
+                case R_PPC_ADDR14_BRNTAKEN:     /* Absolute, predicted not taken */
+                case R_PPC_REL14:               /* Relative cond. br.  */
+                case R_PPC_REL14_BRNTAKEN:      /* Rel. cond. br., predicted not taken */
                   /* We should check the instruction.  */
                   break;
                 default:
@@ -1268,7 +1267,7 @@ ppc_elf_relax_section (abfd, isec, link_info, again)
               bfd_boolean skip, modified;
 
               /* Don't process this word if there is a relocation for it and
-              the relocation indicates the word is not a conditional branch.  */
+		 the relocation indicates the word is not a conditional branch.  */
               skip = FALSE;
               isec_offset = dot - isec->vma;
               for (; comb_curr<comb_count; ++comb_curr)
@@ -1297,7 +1296,7 @@ ppc_elf_relax_section (abfd, isec, link_info, again)
                     {
                       bfd_vma target;
                       /* This branch is predicted as "normal".
-                      If this is a forward branch, it is problematic.  */
+			 If this is a forward branch, it is problematic.  */
 
                       target = insn & 0x0000Fffc;               /*extract*/
                       target = (target ^ 0x8000) - 0x8000;      /*sign extend*/
@@ -1305,21 +1304,21 @@ ppc_elf_relax_section (abfd, isec, link_info, again)
                           target += dot;                        /*convert to abs*/
                       if (target > dot)
                         {
-                          insn |= 0x00200000;   /* set the prediction bit */
+                          insn |= 0x00200000;   /* Set the prediction bit.  */
                           modified = TRUE;
                         }
                     }
                 }
               else if ((insn & 0xFc00Fffe) == 0x4c000420)
                 {
-                  /* Instruction is BCCTRx */
+                  /* Instruction is BCCTRx.  */
                   if ((!BO0(insn) || !BO2(insn)) && !BO4(insn))
 		    {
 		      /* This branch is predicted as not-taken.
-		      If this is a forward branch, it is problematic.
-                      Since we can't tell statically if it will branch forward,
-                      always set the prediction bit.  */
-                      insn |= 0x00200000;   /* set the prediction bit */
+			 If this is a forward branch, it is problematic.
+			 Since we can't tell statically if it will branch forward,
+			 always set the prediction bit.  */
+                      insn |= 0x00200000;   /* Set the prediction bit.  */
                       modified = TRUE;
 		    }
                 }
@@ -1329,10 +1328,10 @@ ppc_elf_relax_section (abfd, isec, link_info, again)
                   if ((!BO0(insn) || !BO2(insn)) && !BO4(insn))
 		    {
 		      /* This branch is predicted as not-taken.
-		      If this is a forward branch, it is problematic.
-                      Since we can't tell statically if it will branch forward,
-                      always set the prediction bit.  */
-                      insn |= 0x00200000;   /* set the prediction bit */
+			 If this is a forward branch, it is problematic.
+			 Since we can't tell statically if it will branch forward,
+			 always set the prediction bit.  */
+                      insn |= 0x00200000;   /* Set the prediction bit.  */
                       modified = TRUE;
 		    }
                 }
@@ -1554,7 +1553,8 @@ ppc_elf_set_private_flags (abfd, flags)
 }
 
 /* Merge backend specific data from an object file to the output
-   object file when linking */
+   object file when linking.  */
+
 static bfd_boolean
 ppc_elf_merge_private_bfd_data (ibfd, obfd)
      bfd *ibfd;
@@ -1564,7 +1564,7 @@ ppc_elf_merge_private_bfd_data (ibfd, obfd)
   flagword new_flags;
   bfd_boolean error;
 
-  /* Check if we have the same endianess */
+  /* Check if we have the same endianess.  */
   if (! _bfd_generic_verify_endian_match (ibfd, obfd))
     return FALSE;
 
@@ -1574,16 +1574,16 @@ ppc_elf_merge_private_bfd_data (ibfd, obfd)
 
   new_flags = elf_elfheader (ibfd)->e_flags;
   old_flags = elf_elfheader (obfd)->e_flags;
-  if (!elf_flags_init (obfd))	/* First call, no flags set */
+  if (!elf_flags_init (obfd))	/* First call, no flags set.  */
     {
       elf_flags_init (obfd) = TRUE;
       elf_elfheader (obfd)->e_flags = new_flags;
     }
 
-  else if (new_flags == old_flags)	/* Compatible flags are ok */
+  else if (new_flags == old_flags)	/* Compatible flags are ok.  */
     ;
 
-  else					/* Incompatible flags */
+  else					/* Incompatible flags.  */
     {
       /* Warn about -mrelocatable mismatch.  Allow -mrelocatable-lib to be linked
          with either.  */
@@ -1616,13 +1616,13 @@ ppc_elf_merge_private_bfd_data (ibfd, obfd)
 	  && (old_flags & (EF_PPC_RELOCATABLE_LIB | EF_PPC_RELOCATABLE)))
 	elf_elfheader (obfd)->e_flags |= EF_PPC_RELOCATABLE;
 
-      /* Do not warn about eabi vs. V.4 mismatch, just or in the bit if any module uses it */
+      /* Do not warn about eabi vs. V.4 mismatch, just or in the bit if any module uses it.  */
       elf_elfheader (obfd)->e_flags |= (new_flags & EF_PPC_EMB);
 
       new_flags &= ~ (EF_PPC_RELOCATABLE | EF_PPC_RELOCATABLE_LIB | EF_PPC_EMB);
       old_flags &= ~ (EF_PPC_RELOCATABLE | EF_PPC_RELOCATABLE_LIB | EF_PPC_EMB);
 
-      /* Warn about any other mismatches */
+      /* Warn about any other mismatches.  */
       if (new_flags != old_flags)
 	{
 	  error = TRUE;
@@ -1695,11 +1695,11 @@ ppc_elf_create_linker_section (abfd, info, which)
   bfd *dynobj = elf_hash_table (info)->dynobj;
   elf_linker_section_t *lsect;
 
-  /* Record the first bfd section that needs the special section */
+  /* Record the first bfd section that needs the special section.  */
   if (!dynobj)
     dynobj = elf_hash_table (info)->dynobj = abfd;
 
-  /* If this is the first time, create the section */
+  /* If this is the first time, create the section.  */
   lsect = elf_linker_section (dynobj, which);
   if (!lsect)
     {
@@ -2505,7 +2505,7 @@ ppc_elf_check_relocs (abfd, info, sec, relocs)
 	    }
 	  break;
 
-	/* Indirect .sdata relocation */
+	/* Indirect .sdata relocation.  */
 	case R_PPC_EMB_SDAI16:
 	  if (info->shared)
 	    {
@@ -2539,7 +2539,7 @@ ppc_elf_check_relocs (abfd, info, sec, relocs)
 
 	  break;
 
-	/* Indirect .sdata2 relocation */
+	/* Indirect .sdata2 relocation.  */
 	case R_PPC_EMB_SDA2I16:
 	  if (info->shared)
 	    {
@@ -2627,7 +2627,7 @@ ppc_elf_check_relocs (abfd, info, sec, relocs)
 	case R_PPC_SECTOFF_HA:
 	  break;
 
-	  /* This refers only to functions defined in the shared library */
+	  /* This refers only to functions defined in the shared library.  */
 	case R_PPC_LOCAL24PC:
 	  break;
 
@@ -3396,7 +3396,6 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	  else if (h->root.type == bfd_link_hash_undefweak)
 	    relocation = 0;
 	  else if (info->shared
-		   && (!info->symbolic || info->allow_shlib_undefined)
 		   && !info->no_undefined
 		   && ELF_ST_VISIBILITY (h->other) == STV_DEFAULT)
 	    relocation = 0;
@@ -3487,7 +3486,6 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	      /* When generating a shared object, these relocations
                  are copied into the output file to be resolved at run
                  time.  */
-
 	      if (sreloc == NULL)
 		{
 		  const char *name;
@@ -3613,7 +3611,7 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	    }
 	  break;
 
-	/* branch taken prediction relocations */
+	/* Branch taken prediction relocations.  */
 	case (int) R_PPC_ADDR14_BRTAKEN:
 	case (int) R_PPC_REL14_BRTAKEN:
 	  insn = bfd_get_32 (output_bfd, contents + offset);
@@ -3624,7 +3622,7 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	  bfd_put_32 (output_bfd, (bfd_vma) insn, contents + offset);
 	  break;
 
-	/* branch not taken predicition relocations */
+	/* Branch not taken predicition relocations.  */
 	case (int) R_PPC_ADDR14_BRNTAKEN:
 	case (int) R_PPC_REL14_BRNTAKEN:
 	  insn = bfd_get_32 (output_bfd, contents + offset);
@@ -3635,7 +3633,7 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	  bfd_put_32 (output_bfd, (bfd_vma) insn, contents + offset);
 	  break;
 
-	/* GOT16 relocations */
+	/* GOT16 relocations.  */
 	case (int) R_PPC_GOT16:
 	case (int) R_PPC_GOT16_LO:
 	case (int) R_PPC_GOT16_HI:
@@ -3727,7 +3725,7 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	    addend += ((relocation + addend) & 0x8000) << 1;
 	  break;
 
-	/* Indirect .sdata relocation */
+	/* Indirect .sdata relocation.  */
 	case (int) R_PPC_EMB_SDAI16:
 	  BFD_ASSERT (sdata != NULL);
 	  relocation = bfd_elf32_finish_pointer_linker_section (output_bfd, input_bfd, info,
@@ -3735,7 +3733,7 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 								R_PPC_RELATIVE);
 	  break;
 
-	/* Indirect .sdata2 relocation */
+	/* Indirect .sdata2 relocation.  */
 	case (int) R_PPC_EMB_SDA2I16:
 	  BFD_ASSERT (sdata2 != NULL);
 	  relocation = bfd_elf32_finish_pointer_linker_section (output_bfd, input_bfd, info,
@@ -3775,7 +3773,7 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 			+ h->plt.offset);
 	  break;
 
-	/* relocate against _SDA_BASE_ */
+	/* Relocate against _SDA_BASE_.  */
 	case (int) R_PPC_SDAREL16:
 	  {
 	    const char *name;
@@ -3825,7 +3823,7 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	  }
 	  break;
 
-	/* relocate against either _SDA_BASE_, _SDA2_BASE_, or 0 */
+	/* Relocate against either _SDA_BASE_, _SDA2_BASE_, or 0.  */
 	case (int) R_PPC_EMB_SDA21:
 	case (int) R_PPC_EMB_RELSDA:
 	  {
@@ -3882,7 +3880,7 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	  }
 	  break;
 
-	/* Relocate against the beginning of the section */
+	/* Relocate against the beginning of the section.  */
 	case (int) R_PPC_SECTOFF:
 	case (int) R_PPC_SECTOFF_LO:
 	case (int) R_PPC_SECTOFF_HI:
@@ -4033,7 +4031,8 @@ ppc_elf_reloc_type_class (rela)
     }
 }
 
-/* Support for core dump NOTE sections */
+/* Support for core dump NOTE sections.  */
+
 static bfd_boolean
 ppc_elf_grok_prstatus (abfd, note)
      bfd *abfd;
@@ -4047,7 +4046,7 @@ ppc_elf_grok_prstatus (abfd, note)
       default:
 	return FALSE;
 
-      case 268:		/* Linux/PPC */
+      case 268:		/* Linux/PPC.  */
 	/* pr_cursig */
 	elf_tdata (abfd)->core_signal = bfd_get_16 (abfd, note->descdata + 12);
 
@@ -4076,7 +4075,7 @@ ppc_elf_grok_psinfo (abfd, note)
       default:
 	return FALSE;
 
-      case 128:		/* Linux/PPC elf_prpsinfo */
+      case 128:		/* Linux/PPC elf_prpsinfo.  */
 	elf_tdata (abfd)->core_program
 	 = _bfd_elfcore_strndup (abfd, note->descdata + 32, 16);
 	elf_tdata (abfd)->core_command

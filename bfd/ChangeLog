@@ -1,5 +1,28 @@
 2003-02-17  Nick Clifton  <nickc@redhat.com>
 
+        * elflink.h (elf_link_output_extsym): Only check
+	allow_shlib_undefined for shared libraries.
+	* elf32-i386.c (elf_i386_relocate_section): Remove bogus check
+	of allow_shlib_undefined.
+	* elf32-cris.c (cris_elf_relocate_section): Likewise.
+	* elf32-hppa.c (elf32_hppa_relocate_section): Likewise.
+	* elf32-m68k.c (elf_m68k_relocate_section): Likewise.
+	* elf32-ppc.c (ppc_elf_relocate_section): Likewise.
+	* elf32-s390.c (elf_s390_relocate_section): Likewise.
+	* elf32-sh.c (sh_elf_relocate_section): Likewise.
+	* elf32-sparc.c (elf32_sparc_relocate_section): Likewise.
+	* elf32-vax.c (elf_vax_relocate_section): Likewise.
+	* elf64-alpha.c (elf64_alpha_relocate_section): Likewise.
+	* elf64-hppa.c (elf64_hppa_relocate_section): Likewise.
+	* elf64-ppc.c (ppc64_elf_relocate_section): Likewise.
+	* elf64-s390.c (elf_s390_relocate_section): Likewise.
+	* elf64-sparc.c (sparc64_elf_relocate_section): Likewise.
+	* elf64-x86-64.c (elf64_x86_64_relocate_section): Likewise.
+	* elfxx-ia64.c (elfNN_ia64_relocate_section): Likewise.
+	* elfxx-mips.c (_bfd_mips_elf_relocate_section): Likewise.
+
+2003-02-17  Nick Clifton  <nickc@redhat.com>
+
 	* elf.c (SEGMENT_AFTER_SEGMENT): Add third parameter - the
 	address field to use in the comparison.
         (SEGMENT_OVERLAPS): Check that LMAs overlap as well.

@@ -1,5 +1,5 @@
 /* IBM S/390-specific support for 64-bit ELF
-   Copyright 2000, 2001, 2002 Free Software Foundation, Inc.
+   Copyright 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
    Contributed Martin Schwidefsky (schwidefsky@de.ibm.com).
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -2226,7 +2226,6 @@ elf_s390_relocate_section (output_bfd, info, input_bfd, input_section,
 	  else if (h->root.type == bfd_link_hash_undefweak)
 	    relocation = 0;
 	  else if (info->shared
-		   && (!info->symbolic || info->allow_shlib_undefined)
 		   && !info->no_undefined
 		   && ELF_ST_VISIBILITY (h->other) == STV_DEFAULT)
 	    relocation = 0;
@@ -2371,12 +2370,10 @@ elf_s390_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	  relocation = htab->sgot->output_offset + off;
 
-	  /*
-	   * For @GOTENT the relocation is against the offset between
-	   * the instruction and the symbols entry in the GOT and not
-	   * between the start of the GOT and the symbols entry. We
-	   * add the vma of the GOT to get the correct value.
-	   */
+	  /* For @GOTENT the relocation is against the offset between
+	     the instruction and the symbols entry in the GOT and not
+	     between the start of the GOT and the symbols entry. We
+	     add the vma of the GOT to get the correct value.  */
 	  if (   r_type == R_390_GOTENT
 	      || r_type == R_390_GOTPLTENT)
 	    relocation += htab->sgot->output_section->vma;
@@ -2500,7 +2497,6 @@ elf_s390_relocate_section (output_bfd, info, input_bfd, input_section,
 	      /* When generating a shared object, these relocations
 		 are copied into the output file to be resolved at run
 		 time.  */
-
 	      skip = FALSE;
 	      relocate = FALSE;
 
@@ -2577,7 +2573,7 @@ elf_s390_relocate_section (output_bfd, info, input_bfd, input_section,
 	      loc += sreloc->reloc_count++ * sizeof (Elf64_External_Rela);
 	      bfd_elf64_swap_reloc_out (output_bfd, &outrel, loc);
 	    }
-	  /* Fall through */
+	  /* Fall through.  */
 
 	case R_390_TLS_GD64:
 	case R_390_TLS_GOTIE64:
@@ -3067,7 +3063,6 @@ elf_s390_finish_dynamic_symbol (output_bfd, info, h, sym)
 
       /* This symbol has an entry in the global offset table.  Set it
 	 up.  */
-
       if (htab->sgot == NULL || htab->srelgot == NULL)
 	abort ();
 
@@ -3278,11 +3273,9 @@ elf_s390_finish_dynamic_sections (output_bfd, info)
   return TRUE;
 }
 
-/*
- * Why was the hash table entry size definition changed from
- * ARCH_SIZE/8 to 4? This breaks the 64 bit dynamic linker and
- * this is the only reason for the s390_elf64_size_info structure.
- */
+/* Why was the hash table entry size definition changed from
+   ARCH_SIZE/8 to 4? This breaks the 64 bit dynamic linker and
+   this is the only reason for the s390_elf64_size_info structure.  */
 
 const struct elf_size_info s390_elf64_size_info =
 {
@@ -3294,10 +3287,10 @@ const struct elf_size_info s390_elf64_size_info =
   sizeof (Elf64_External_Sym),
   sizeof (Elf64_External_Dyn),
   sizeof (Elf_External_Note),
-  8,		/* hash-table entry size */
-  1,		/* internal relocations per external relocations */
-  64,		/* arch_size */
-  8,		/* file_align */
+  8,		/* hash-table entry size.  */
+  1,		/* internal relocations per external relocations.  */
+  64,		/* arch_size.  */
+  8,		/* file_align.  */
   ELFCLASS64, EV_CURRENT,
   bfd_elf64_write_out_phdrs,
   bfd_elf64_write_shdrs_and_ehdr,

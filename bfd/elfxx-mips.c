@@ -9,21 +9,21 @@
    Traditional MIPS targets support added by Koundinya.K, Dansk Data
    Elektronik & Operations Research Group. <kk@ddeorg.soft.net>
 
-This file is part of BFD, the Binary File Descriptor library.
+   This file is part of BFD, the Binary File Descriptor library.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /* This file handles functionality common to the different MIPS ABI's.  */
 
@@ -359,17 +359,17 @@ typedef struct
    loader for use by the static exception system.  */
 
 typedef struct runtime_pdr {
-	bfd_vma	adr;		/* memory address of start of procedure */
-	long	regmask;	/* save register mask */
-	long	regoffset;	/* save register offset */
-	long	fregmask;	/* save floating point register mask */
-	long	fregoffset;	/* save floating point register offset */
-	long	frameoffset;	/* frame size */
-	short	framereg;	/* frame pointer register */
-	short	pcreg;		/* offset or reg of return pc */
-	long	irpss;		/* index into the runtime string table */
+	bfd_vma	adr;		/* Memory address of start of procedure.  */
+	long	regmask;	/* Save register mask.  */
+	long	regoffset;	/* Save register offset.  */
+	long	fregmask;	/* Save floating point register mask.  */
+	long	fregoffset;	/* Save floating point register offset.  */
+	long	frameoffset;	/* Frame size.  */
+	short	framereg;	/* Frame pointer register.  */
+	short	pcreg;		/* Offset or reg of return pc.  */
+	long	irpss;		/* Index into the runtime string table.  */
 	long	reserved;
-	struct exception_info *exception_info;/* pointer to exception array */
+	struct exception_info *exception_info;/* Pointer to exception array.  */
 } RPDR, *pRPDR;
 #define cbRPDR sizeof (RPDR)
 #define rpdNil ((pRPDR) 0)
@@ -3095,7 +3095,6 @@ mips_elf_calculate_relocation (abfd, input_bfd, input_section, info,
 	   addresses.  */
 	symbol = 0;
       else if (info->shared
-	       && (!info->symbolic || info->allow_shlib_undefined)
 	       && !info->no_undefined
 	       && ELF_ST_VISIBILITY (h->root.other) == STV_DEFAULT)
 	symbol = 0;

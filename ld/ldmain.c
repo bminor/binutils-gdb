@@ -265,7 +265,7 @@ main (argc, argv)
   link_info.traditional_format = FALSE;
   link_info.optimize = FALSE;
   link_info.no_undefined = FALSE;
-  link_info.allow_shlib_undefined = FALSE;
+  link_info.allow_shlib_undefined = TRUE;
   link_info.allow_multiple_definition = FALSE;
   link_info.allow_undefined_version = TRUE;
   link_info.keep_memory = TRUE;

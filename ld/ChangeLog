@@ -1,3 +1,11 @@
+2003-02-17  Nick Clifton  <nickc@redhat.com>
+
+	* ldmain.c (main) Default allow_shlib_undefined to true.
+        * lexsup.c (ld_options): Add --no-allow-shlib-undefined.
+        (parse_args): Parse the new switch.
+        * ld.texinfo: Document new switch and default behaviour of
+        allowing undefined symbols in shared libraries.
+
 2003-02-11 Dmitry Diky  <diwil@mail.ru>
 
 	* scripttempl/elf32msp430.sc: Add new data anchors definitions.

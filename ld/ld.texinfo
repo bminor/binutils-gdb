@@ -1108,8 +1108,10 @@ while linking a large executable.
 @item --no-undefined
 @itemx -z defs
 Normally when creating a non-symbolic shared library, undefined symbols
-are allowed and left to be resolved by the runtime loader.  These options
-disallows such undefined symbols.
+are allowed and left to be resolved by the runtime loader.  This option
+disallows such undefined symbols if they come from regular object
+files.  The switch @samp{--no-allow-shlib-undefined} controls the
+behaviour for shared objects being linked into the shared library.
 
 @kindex --allow-multiple-definition
 @kindex -z muldefs
@@ -1120,17 +1122,25 @@ report a fatal error. These options allow multiple definitions and the
 first definition will be used.
 
 @kindex --allow-shlib-undefined
+@kindex --no-allow-shlib-undefined
 @item --allow-shlib-undefined
-Allow undefined symbols in shared objects even  when --no-undefined is
-set. The net result will be that undefined symbols in regular objects
-will still trigger an error, but undefined symbols in shared objects
-will be ignored.  The implementation of no_undefined makes the
-assumption that the runtime linker will choke on undefined symbols.
-However there is at least one system (BeOS) where undefined symbols in
-shared libraries is normal since the kernel patches them at load time to
-select which function is most appropriate for the current architecture.
-I.E. dynamically select an appropriate memset function.  Apparently it
-is also normal for HPPA shared libraries to have undefined symbols.
+@itemx --no-allow-shlib-undefined
+Allow (the default) or disallow undefined symbols in shared objects.
+The setting of this switch overrides @samp {--no-undefined} where
+shared objects are concerned.  Thus if @samp {--no-undefined} is set
+but @samp {--no-allow-shlib-undefined} is not, the net result will be
+that undefined symbols in regular object files will trigger an error,
+but undefined symbols in shared objects will be ignored.
+
+The reason that @samp{--allow-shlib-undefined} is the default is that
+the shared object being specified at link time may not be the same one
+that is available at load time, so the symbols might actually be
+resolvable at load time.  Plus there are some systems, (eg BeOS) where
+undefined symbols in shared libraries is normal since the kernel
+patches them at load time to select which function is most appropriate
+for the current architecture. eg. to dynamically select an appropriate
+memset function.  Apparently it is also normal for HPPA shared
+libraries to have undefined symbols.
 
 @kindex --no-undefined-version
 @item --no-undefined-version

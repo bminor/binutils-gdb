@@ -1,22 +1,22 @@
 /* X86-64 specific support for 64-bit ELF
-   Copyright 2000, 2001, 2002 Free Software Foundation, Inc.
+   Copyright 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
    Contributed by Jan Hubicka <jh@suse.cz>.
 
-This file is part of BFD, the Binary File Descriptor library.
+   This file is part of BFD, the Binary File Descriptor library.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "bfd.h"
 #include "sysdep.h"
@@ -1921,7 +1921,6 @@ elf64_x86_64_relocate_section (output_bfd, info, input_bfd, input_section,
 	  else if (h->root.type == bfd_link_hash_undefweak)
 	    relocation = 0;
 	  else if (info->shared
-		   && (!info->symbolic || info->allow_shlib_undefined)
 		   && !info->no_undefined
 		   && ELF_ST_VISIBILITY (h->other) == STV_DEFAULT)
 	    relocation = 0;
@@ -2106,7 +2105,6 @@ elf64_x86_64_relocate_section (output_bfd, info, input_bfd, input_section,
 	      /* When generating a shared object, these relocations
 		 are copied into the output file to be resolved at run
 		 time.	*/
-
 	      skip = FALSE;
 	      relocate = FALSE;
 
@@ -2592,7 +2590,6 @@ elf64_x86_64_finish_dynamic_symbol (output_bfd, info, h, sym)
 
       /* This symbol has an entry in the procedure linkage table.  Set
 	 it up.	 */
-
       if (h->dynindx == -1
 	  || htab->splt == NULL
 	  || htab->sgotplt == NULL
@@ -2671,7 +2668,6 @@ elf64_x86_64_finish_dynamic_symbol (output_bfd, info, h, sym)
 
       /* This symbol has an entry in the global offset table.  Set it
 	 up.  */
-
       if (htab->sgot == NULL || htab->srelgot == NULL)
 	abort ();
 

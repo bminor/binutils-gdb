@@ -1,6 +1,6 @@
 /* Parse options for the GNU linker.
    Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001, 2002
+   2001, 2002, 2003
    Free Software Foundation, Inc.
 
    This file is part of GLD, the Gnu Linker.
@@ -126,7 +126,8 @@ int parsing_defsym = 0;
 #define OPTION_UNIQUE			(OPTION_SECTION_START + 1)
 #define OPTION_TARGET_HELP              (OPTION_UNIQUE + 1)
 #define OPTION_ALLOW_SHLIB_UNDEFINED	(OPTION_TARGET_HELP + 1)
-#define OPTION_ALLOW_MULTIPLE_DEFINITION (OPTION_ALLOW_SHLIB_UNDEFINED + 1)
+#define OPTION_NO_ALLOW_SHLIB_UNDEFINED	(OPTION_ALLOW_SHLIB_UNDEFINED + 1)
+#define OPTION_ALLOW_MULTIPLE_DEFINITION (OPTION_NO_ALLOW_SHLIB_UNDEFINED + 1)
 #define OPTION_NO_UNDEFINED_VERSION	(OPTION_ALLOW_MULTIPLE_DEFINITION + 1)
 #define OPTION_DISCARD_NONE		(OPTION_NO_UNDEFINED_VERSION + 1)
 #define OPTION_SPARE_DYNAMIC_TAGS	(OPTION_DISCARD_NONE + 1)
@@ -335,7 +336,9 @@ static const struct ld_option ld_options[] =
   { {"no-undefined", no_argument, NULL, OPTION_NO_UNDEFINED},
      '\0', NULL, N_("Allow no undefined symbols"), TWO_DASHES },
   { {"allow-shlib-undefined", no_argument, NULL, OPTION_ALLOW_SHLIB_UNDEFINED},
-     '\0', NULL, N_("Allow undefined symbols in shared objects"), TWO_DASHES },
+     '\0', NULL, N_("Allow undefined symbols in shared objects (the default)"), TWO_DASHES },
+  { {"no-allow-shlib-undefined", no_argument, NULL, OPTION_NO_ALLOW_SHLIB_UNDEFINED},
+     '\0', NULL, N_("Do not allow undefined symbols in shared objects"), TWO_DASHES },
   { {"allow-multiple-definition", no_argument, NULL, OPTION_ALLOW_MULTIPLE_DEFINITION},
      '\0', NULL, N_("Allow multiple definitions"), TWO_DASHES },
   { {"no-undefined-version", no_argument, NULL, OPTION_NO_UNDEFINED_VERSION},
@@ -787,6 +790,9 @@ parse_args (argc, argv)
 	  break;
 	case OPTION_ALLOW_SHLIB_UNDEFINED:
 	  link_info.allow_shlib_undefined = TRUE;
+	  break;
+	case OPTION_NO_ALLOW_SHLIB_UNDEFINED:
+	  link_info.allow_shlib_undefined = FALSE;
 	  break;
 	case OPTION_ALLOW_MULTIPLE_DEFINITION:
 	  link_info.allow_multiple_definition = TRUE;

@@ -8,21 +8,21 @@
 	University of Utah
    Largely rewritten by Alan Modra <alan@linuxcare.com.au>
 
-This file is part of BFD, the Binary File Descriptor library.
+   This file is part of BFD, the Binary File Descriptor library.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "bfd.h"
 #include "sysdep.h"
@@ -111,7 +111,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
    :		ldw -24(%sp),%rp		; restore the original rp
    :		ldsid (%rp),%r1
    :		mtsp %r1,%sr0
-   :		be,n 0(%sr0,%rp)		; inter-space return  */
+   :		be,n 0(%sr0,%rp)		; inter-space return.  */
 
 #define PLT_ENTRY_SIZE 8
 #define GOT_ENTRY_SIZE 4
@@ -3705,14 +3705,11 @@ elf32_hppa_relocate_section (output_bfd, info, input_bfd, input_section,
 		   && ELF_ST_VISIBILITY (h->elf.other) == STV_DEFAULT
 		   && h->elf.type != STT_PARISC_MILLI)
 	    {
-	      if (info->symbolic && !info->allow_shlib_undefined)
-		{
-		  if (!((*info->callbacks->undefined_symbol)
-			(info, h->elf.root.root.string, input_bfd,
-			 input_section, rel->r_offset, FALSE)))
-		    return FALSE;
-		  warned_undef = TRUE;
-		}
+	      if (!((*info->callbacks->undefined_symbol)
+		    (info, h->elf.root.root.string, input_bfd,
+		     input_section, rel->r_offset, FALSE)))
+		return FALSE;
+	      warned_undef = TRUE;
 	    }
 	  else
 	    {

@@ -1022,7 +1022,7 @@ elf_s390_check_relocs (abfd, info, sec, relocs)
 	case R_390_TLS_IEENT:
 	  if (info->shared)
 	    info->flags |= DF_STATIC_TLS;
-	  /* Fall through */
+	  /* Fall through.  */
 
 	case R_390_GOT12:
         case R_390_GOT16:
@@ -1087,13 +1087,13 @@ elf_s390_check_relocs (abfd, info, sec, relocs)
 
 	  if (r_type != R_390_TLS_IE32)
 	    break;
-	  /* Fall through */
+	  /* Fall through.  */
 
 	case R_390_TLS_LE32:
 	  if (!info->shared)
 	    break;
 	  info->flags |= DF_STATIC_TLS;
-	  /* Fall through */	    
+	  /* Fall through.  */
 
         case R_390_8:
         case R_390_16:
@@ -1216,8 +1216,8 @@ elf_s390_check_relocs (abfd, info, sec, relocs)
 		  /* Track dynamic relocs needed for local syms too.
 		     We really need local syms available to do this
 		     easily.  Oh well.  */
-
 		  asection *s;
+
 		  s = bfd_section_from_r_symndx (abfd, &htab->sym_sec,
 						 sec, r_symndx);
 		  if (s == NULL)
@@ -1231,6 +1231,7 @@ elf_s390_check_relocs (abfd, info, sec, relocs)
 	      if (p == NULL || p->sec != sec)
 		{
 		  bfd_size_type amt = sizeof *p;
+
 		  p = ((struct elf_s390_dyn_relocs *)
 		       bfd_alloc (htab->elf.dynobj, amt));
 		  if (p == NULL)
@@ -1381,12 +1382,12 @@ elf_s390_gc_sweep_hook (abfd, info, sec, relocs)
 	    }
 	  if (r_type != R_390_TLS_IE32)
 	    break;
-	  /* Fall through */
+	  /* Fall through.  */
 	  
 	case R_390_TLS_LE32:
 	  if (!info->shared)
 	    break;
-	  /* Fall through */
+	  /* Fall through.  */
 
 	case R_390_8:
 	case R_390_12:
@@ -1847,6 +1848,7 @@ allocate_dynrelocs (h, inf)
   for (p = eh->dyn_relocs; p != NULL; p = p->next)
     {
       asection *sreloc = elf_section_data (p->sec)->sreloc;
+
       sreloc->_raw_size += p->count * sizeof (Elf32_External_Rela);
     }
 
@@ -2252,7 +2254,6 @@ elf_s390_relocate_section (output_bfd, info, input_bfd, input_section,
 	  else if (h->root.type == bfd_link_hash_undefweak)
 	    relocation = 0;
 	  else if (info->shared
-		   && (!info->symbolic || info->allow_shlib_undefined)
 		   && !info->no_undefined
 		   && ELF_ST_VISIBILITY (h->other) == STV_DEFAULT)
 	    relocation = 0;
@@ -2395,12 +2396,10 @@ elf_s390_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	  relocation = htab->sgot->output_offset + off;
 
-	  /*
-	   * For @GOTENT the relocation is against the offset between
-	   * the instruction and the symbols entry in the GOT and not
-	   * between the start of the GOT and the symbols entry. We
-	   * add the vma of the GOT to get the correct value.
-	   */
+	  /* For @GOTENT the relocation is against the offset between
+	     the instruction and the symbols entry in the GOT and not
+	     between the start of the GOT and the symbols entry. We
+	     add the vma of the GOT to get the correct value.  */
 	  if (   r_type == R_390_GOTENT
 	      || r_type == R_390_GOTPLTENT)
 	    relocation += htab->sgot->output_section->vma;
@@ -2592,7 +2591,7 @@ elf_s390_relocate_section (output_bfd, info, input_bfd, input_section,
 	      loc += sreloc->reloc_count++ * sizeof (Elf32_External_Rela);
 	      bfd_elf32_swap_reloc_out (output_bfd, &outrel, loc);
 	    }
-	  /* Fall through */
+	  /* Fall through.  */
 
 	case R_390_TLS_GD32:
 	case R_390_TLS_GOTIE32:
@@ -2982,7 +2981,6 @@ elf_s390_finish_dynamic_symbol (output_bfd, info, h, sym)
 
       /* This symbol has an entry in the procedure linkage table.  Set
          it up.  */
-
       if (h->dynindx == -1
 	  || htab->splt == NULL
 	  || htab->sgotplt == NULL

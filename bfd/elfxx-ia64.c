@@ -3828,7 +3828,6 @@ elfNN_ia64_relocate_section (output_bfd, info, input_bfd, input_section,
 	  else if (h->root.type == bfd_link_hash_undefweak)
 	    undef_weak_ref = TRUE;
 	  else if (info->shared
-		   && (!info->symbolic || info->allow_shlib_undefined)
 		   && !info->no_undefined
 		   && ELF_ST_VISIBILITY (h->other) == STV_DEFAULT)
 	    ;
@@ -3926,7 +3925,7 @@ elfNN_ia64_relocate_section (output_bfd, info, input_bfd, input_section,
 					    srel, rel->r_offset, dyn_r_type,
 					    dynindx, addend);
 	    }
-	  /* FALLTHRU */
+	  /* Fall through.  */
 
 	case R_IA64_LTV32MSB:
 	case R_IA64_LTV32LSB:
@@ -4536,7 +4535,7 @@ elfNN_ia64_finish_dynamic_sections (abfd, info)
 	  bfd_elfNN_swap_dyn_out (abfd, &dyn, dyncon);
 	}
 
-      /* Initialize the PLT0 entry */
+      /* Initialize the PLT0 entry.  */
       if (ia64_info->plt_sec)
 	{
 	  bfd_byte *loc = ia64_info->plt_sec->contents;
@@ -4555,7 +4554,7 @@ elfNN_ia64_finish_dynamic_sections (abfd, info)
   return TRUE;
 }
 
-/* ELF file flag handling: */
+/* ELF file flag handling:  */
 
 /* Function to keep IA-64 specific file flags.  */
 static bfd_boolean

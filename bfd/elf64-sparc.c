@@ -2,21 +2,21 @@
    Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002,
    2003 Free Software Foundation, Inc.
 
-This file is part of BFD, the Binary File Descriptor library.
+   This file is part of BFD, the Binary File Descriptor library.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "bfd.h"
 #include "sysdep.h"
@@ -2067,7 +2067,6 @@ sparc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	  else if (h->root.type == bfd_link_hash_undefweak)
 	    ;
 	  else if (info->shared
-		   && (!info->symbolic || info->allow_shlib_undefined)
 		   && !info->no_undefined
 		   && ELF_ST_VISIBILITY (h->other) == STV_DEFAULT)
 	    ;
@@ -2083,7 +2082,6 @@ sparc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	      /* To avoid generating warning messages about truncated
 		 relocations, set the relocation's address to be the same as
 		 the start of this section.  */
-
 	      if (input_section->output_section != NULL)
 		relocation = input_section->output_section->vma;
 	      else
@@ -2615,7 +2613,7 @@ sparc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		    }
 		}
 	    }
-	  /* FALLTHROUGH */
+	  /* Fall through.  */
 
 	default:
 	do_default:
@@ -2820,7 +2818,6 @@ sparc64_elf_finish_dynamic_symbol (output_bfd, info, h, sym)
       bfd_byte *loc;
 
       /* This symbols needs a copy reloc.  Set it up.  */
-
       BFD_ASSERT (h->dynindx != -1);
 
       s = bfd_get_section_by_name (h->root.u.def.section->owner,
@@ -2923,10 +2920,8 @@ sparc64_elf_finish_dynamic_sections (output_bfd, info)
 
       /* Initialize the contents of the .plt section.  */
       if (splt->_raw_size > 0)
-	{
-	  sparc64_elf_build_plt (output_bfd, splt->contents,
-				 (int) (splt->_raw_size / PLT_ENTRY_SIZE));
-	}
+	sparc64_elf_build_plt (output_bfd, splt->contents,
+			       (int) (splt->_raw_size / PLT_ENTRY_SIZE));
 
       elf_section_data (splt->output_section)->this_hdr.sh_entsize =
 	PLT_ENTRY_SIZE;
@@ -3137,14 +3132,14 @@ const struct elf_size_info sparc64_elf_size_info =
   sizeof (Elf64_External_Sym),
   sizeof (Elf64_External_Dyn),
   sizeof (Elf_External_Note),
-  4,		/* hash-table entry size */
-  /* internal relocations per external relocations.
+  4,		/* hash-table entry size.  */
+  /* Internal relocations per external relocations.
      For link purposes we use just 1 internal per
      1 external, for assembly and slurp symbol table
      we use 2.  */
   1,
-  64,		/* arch_size */
-  8,		/* file_align */
+  64,		/* arch_size.  */
+  8,		/* file_align.  */
   ELFCLASS64,
   EV_CURRENT,
   bfd_elf64_write_out_phdrs,
