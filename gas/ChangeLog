@@ -1,3 +1,11 @@
+2000-02-10  Timothy Wall  <twall@redhat.com>
+
+	* app.c (do_scrub_chars): Handle "||" for parallel instructions
+	when DOUBLEBAR_PARALLEL is defined.  Avoid stripping whitespace
+	around colons when KEEP_WHITE_AROUND_COLON is defined.
+	* doc/internals.texi (CPU backend): Document DOUBLEBAR_PARALLEL
+	and KEEP_WHITE_AROUND_COLON.
+
 2000-02-08  Timothy Wall  <twall@redhat.com>
 
 	* read.c (s_rept): Call do_repeat, which abstracts the repeat

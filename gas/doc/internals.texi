@@ -994,6 +994,11 @@ is a label, even if it does not have a colon.
 You may define this macro to control what GAS considers to be a label.  The
 default definition is to accept any name followed by a colon character.
 
+@item TC_START_LABEL_WITHOUT_COLON
+@cindex TC_START_LABEL_WITHOUT_COLON
+Same as TC_START_LABEL, but should be used instead of TC_START_LABEL when
+LABELS_WITHOUT_COLONS is defined. 
+
 @item NO_PSEUDO_DOT
 @cindex NO_PSEUDO_DOT
 If you define this macro, GAS will not require pseudo-ops to start with a
@@ -1223,6 +1228,21 @@ If you define this macro, GAS will call it each time a label is defined.
 @cindex md_section_align
 GAS will call this function for each section at the end of the assembly, to
 permit the CPU backend to adjust the alignment of a section.
+
+@item DOUBLEBAR_PARALLEL
+@cindex DOUBLEBAR_PARALLEL
+Affects the preprocessor so that lines containing '||' don't have their
+whitespace stripped following the double bar.  This is useful for targets that
+implement parallel instructions.
+
+@item KEEP_WHITE_AROUND_COLON
+@cindex KEEP_WHITE_AROUND_COLON
+Normally, whitespace is compressed and removed when, in the presence of the
+colon, the adjoining tokens can be distinguished.  This option affects the
+preprocessor so that whitespace around colons is preserved.  This is useful
+when colons might be removed from the input after preprocessing but before
+assembling, so that adjoining tokens can still be distinguished if there is
+whitespace, or concatentated if there is not.
 
 @item tc_frob_section
 @cindex tc_frob_section

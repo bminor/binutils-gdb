@@ -68,6 +68,9 @@ static const char symbol_chars[] =
 #define LEX_IS_DOUBLEDASH_1ST		12
 #endif
 #ifdef TC_M32R
+#define DOUBLEBAR_PARALLEL
+#endif
+#ifdef DOUBLEBAR_PARALLEL
 #define LEX_IS_DOUBLEBAR_1ST		13
 #endif
 #define IS_SYMBOL_COMPONENT(c)		(lex[c] == LEX_IS_SYMBOL_COMPONENT)
@@ -174,7 +177,7 @@ do_scrub_begin (m68k_mri)
 #ifdef TC_V850
   lex['-'] = LEX_IS_DOUBLEDASH_1ST;
 #endif
-#ifdef TC_M32R
+#ifdef DOUBLEBAR_PARALLEL
   lex['|'] = LEX_IS_DOUBLEBAR_1ST;
 #endif
 #ifdef TC_D30V
@@ -351,7 +354,7 @@ do_scrub_chars (get, tostart, tolen)
 #ifdef TC_V850
          12: After seeing a dash, looking for a second dash as a start of comment.
 #endif
-#ifdef TC_M32R
+#ifdef DOUBLEBAR_PARALLEL
 	 13: After seeing a vertical bar, looking for a second vertical bar as a parallel expression seperator.
 #endif
 	  */
@@ -761,6 +764,21 @@ do_scrub_chars (get, tostart, tolen)
 	      break;
 	    }
 
+#ifdef KEEP_WHITE_AROUND_COLON
+          if (lex[ch] == LEX_IS_COLON)
+            {
+              /* only keep this white if there's no white *after* the colon */
+              ch2 = GET ();
+              UNGET (ch2);
+              if (!IS_WHITESPACE (ch2))
+                {
+                  state = 9;
+                  UNGET (ch);
+                  PUT (' ');
+                  break;
+                }
+            }
+#endif
 	  if (IS_COMMENT (ch)
 	      || ch == '/'
 	      || IS_LINE_SEPARATOR (ch))
@@ -970,10 +988,14 @@ do_scrub_chars (get, tostart, tolen)
 #endif
 
 	case LEX_IS_COLON:
+#ifdef KEEP_WHITE_AROUND_COLON
+          state = 9;
+#else
 	  if (state == 9 || state == 10)
 	    state = 3;
 	  else if (state != 3)
 	    state = 1;
+#endif
 	  PUT (ch);
 	  break;
 
@@ -1013,7 +1035,7 @@ do_scrub_chars (get, tostart, tolen)
 	  PUT ('\n');
 	  break;
 #endif	    
-#ifdef TC_M32R
+#ifdef DOUBLEBAR_PARALLEL
 	case LEX_IS_DOUBLEBAR_1ST:
 	  ch2 = GET();
 	  if (ch2 != '|')
