@@ -2566,7 +2566,7 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 	    {
 	      if (h8300smode)
 		h8_set_exr (sd, (trace << 7) | intMask);
-	      res = h8_get_exr (sd);
+	      rd = h8_get_exr (sd);
 	    }
 	  else
 	    goto illegal;

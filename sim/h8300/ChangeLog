@@ -1,3 +1,7 @@
+2004-06-10  Michael Snyder  <msnyder@redhat.com>
+	Patch submitted by Nitin Yewale <NitinY@KPITCummins.com>.
+	* compile.c (sim_resume): Corrected ANDC operation on EXR for H8S.
+
 2004-01-05  Michael Snyder  <msnyder@redhat.com>
 
 	* compile.c (sim_load): Don't pass a type to bfd_openr.
