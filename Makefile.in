@@ -927,17 +927,25 @@ ls:
 
 # with the gnu make, this is done automatically.
 
-Makefile: $(srcdir)/Makefile.in $(host_makefile_frag) $(target_makefile_frag)
+Makefile: Makefile.in configure.in $(host_makefile_frag) $(target_makefile_frag)
 	$(SHELL) ./config.status
 
 #
-# Build GDB distributions that contain BFD, Include, Libiberty, Readline, etc
+# Support for building net releases
 
+# Files in devo used in any net release.
+# ChangeLog omitted because it may refer to files which are not in this
+# distribution (perhaps it would be better to include it anyway).
 DEVO_SUPPORT= README Makefile.in configure configure.in \
 	config.guess config.sub config move-if-change \
 	COPYING COPYING.LIB install.sh
+
+# Files in devo/etc used in any net release.
+# ChangeLog omitted because it may refer to files which are not in this
+# distribution (perhaps it would be better to include it anyway).
 ETC_SUPPORT= Makefile.in cfg-paper.texi configure.in configure.man \
 	configure.texi standards.texi make-stds.texi
+
 GDB_SUPPORT_DIRS= bfd include libiberty mmalloc opcodes readline glob sim
 GDB_SUPPORT_FILES= $(GDB_SUPPORT_DIRS)
 

@@ -1,3 +1,12 @@
+Tue Jul 27 12:43:40 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* Makefile.in (DEVO_SUPPORT): Add comments about ChangeLog.
+
+Fri Jul 23 09:53:37 1993  Jason Merrill  (jason@wahini.cygnus.com)
+
+	* configure: if ${newsrcdir}/configure doesn't exist, don't assume
+	that ${newsrcdir}/configure.in does.
+
 Tue Jul 20 11:28:50 1993  david d `zoo' zuhn  (zoo@rtl.cygnus.com)
 
 	* test-build.mk: support for CONFIG_SHELL
