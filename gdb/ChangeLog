@@ -2,10 +2,9 @@ Wed Feb 15 12:33:20 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* config/powerpc/tm-ppc-eabi.h (TEXT_SEGMENT_BASE): Define as 1.
 
-	* dcache.c (insque, remque): If compiling in standard C, protect
-	insque and remque with macros to cast the pointer arguments to the
-	proper type.  This is for systems like Linux, that define insque
-	and remque with prototypes in system header files.
+	* dcache.c (insque, remque): If compiling in standard C on Linux,
+	protect insque and remque with macros to cast the pointer
+	arguments to the proper type.
 
 Tue Feb 14 17:16:41 1995  Stu Grossman  (grossman@cygnus.com)
 

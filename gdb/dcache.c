@@ -23,7 +23,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "dcache.h"
 #include "gdbcmd.h"
 
-#ifdef __STDC__
+#if defined(__STDC__) && defined(__linux__)
 /* In case the system header files define a prototype for insque and
    remque that uses a pointer to a struct qelem, silence the warnings */
 struct qelem;
