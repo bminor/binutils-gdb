@@ -1,3 +1,18 @@
+Wed Oct 20 17:47:42 1993  Stu Grossman  (grossman at cygnus.com)
+
+	* main.c:  Make baud_rate and remote_debug be global variables,
+	remove #include "remote-utils.h".  This makes it possible to build
+	GDB without remote-utils.c.  Also, move setting of remote_debug
+	into main, so that all remote*.c files can use it (not just the
+	serial line ones).  And, make baud_rate be an int.
+	* remote-udi.c:  Change kiodebug to remote_debug.
+	* remote-utils.c:  Move setting of baud rate and debug into main.c.
+	* remote-utils.h:  Redefine sr_{get set}_debug and sr_{get set}_baud
+	to use baud_rate and remote_debug globals for compatibility.
+	* remote.c:  Use remote_debug and baud_rate globals directly,
+	instead of sr_ functions, so that we don't need to load
+	remote-utils.c.
+
 Wed Oct 20 11:35:43 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* stabsread.c (define_symbol): When combining a LOC_ARG and a

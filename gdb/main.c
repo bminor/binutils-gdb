@@ -29,7 +29,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "gdbtypes.h"
 #include "expression.h"
 #include "language.h"
-#include "serial.h" /* For job_control.  */
+#include "terminal.h" /* For job_control.  */
 
 #include "getopt.h"
 
@@ -278,7 +278,9 @@ struct cmd_list_element *setchecklist;
 
 struct cmd_list_element *showchecklist;
 
-/* stdio stream that command input is being read from.  */
+/* stdio stream that command input is being read from.  Set to stdin normally.
+   Set by source_command to the file we are sourcing.  Set to NULL if we are
+   executing a user-defined command.  */
 
 FILE *instream;
 
@@ -311,9 +313,13 @@ char *line;
 int linesize = 100;
 
 /* Baud rate specified for talking to serial target systems.  Default
-   is left as a zero pointer, so targets can choose their own defaults.  */
+   is left as -1, so targets can choose their own defaults.  */
 
-char *baud_rate;
+int baud_rate = -1;
+
+/* Non-zero tells remote* modules to output debugging info.  */
+
+int remote_debug = 0;
 
 /* Signal to catch ^Z typed while reading a command: SIGTSTP or SIGCONT.  */
 
@@ -374,6 +380,11 @@ return_to_top_level (reason)
    error, return the value returned by FUNC.  If there is an error,
    print ERRSTRING, print the specific error message, then return
    zero.
+
+   Must not be called with immediate_quit in effect (bad things might
+   happen, say we got a signal in the middle of a memcpy to quit_return).
+   This is an OK restriction; with very few exceptions immediate_quit can
+   be replaced by judicious use of QUIT.
 
    MASK specifies what to catch; it is normally set to
    RETURN_MASK_ALL, if for no other reason than that the code which
@@ -660,8 +671,18 @@ main (argc, argv)
 	    quiet = 1;
 	    break;
 	  case 'b':
-	    baud_rate = optarg;
+	    {
+	      int i;
+	      char *p;
+
+	      i = strtol (optarg, &p, 0);
+	      if (i == 0 && p == optarg)
+		warning ("Could not set baud rate to `%s'.\n", optarg);
+	      else
+		baud_rate = i;
+	    }
 	    break;
+
 #ifdef ADDITIONAL_OPTION_CASES
 	  ADDITIONAL_OPTION_CASES
 #endif
@@ -1112,6 +1133,11 @@ gdb_readline (prrompt)
 
       if (c == EOF)
 	{
+	  if (input_index > 0)
+	    /* The last line does not end with a newline.  Return it, and
+	       if we are called again fgetc will still return EOF and
+	       we'll return NULL then.  */
+	    break;
 	  free (result);
 	  return NULL;
 	}
@@ -2763,4 +2789,11 @@ the previous command number shown.",
 
   add_cmd ("version", no_class, show_version,
 	   "Show what version of GDB this is.", &showlist);
+
+  add_show_from_set (
+    add_set_cmd ("remotedebug", no_class, var_boolean, (char *)&remote_debug,
+		   "Set debugging of remote protocol.\n\
+When enabled, each packet sent or received with the remote target\n\
+is displayed.", &setlist),
+		     &showlist);
 }

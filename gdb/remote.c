@@ -133,7 +133,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "gdb-stabs.h"
 
 #include "dcache.h"
-#include "remote-utils.h"
 
 #if !defined(DONT_USE_REMOTE)
 #ifdef USG
@@ -192,7 +191,7 @@ static int
 readchar PARAMS ((void));
 
 static int
-remote_wait PARAMS ((WAITTYPE *status));
+remote_wait PARAMS ((int pid, WAITTYPE *status));
 
 static int
 tohex PARAMS ((int nib));
@@ -213,6 +212,10 @@ static void
 interrupt_query PARAMS ((void));
 
 extern struct target_ops remote_ops;	/* Forward decl */
+
+extern int baud_rate;
+
+extern int remote_debug;
 
 /* This was 5 seconds, which is a long time to sit and wait.
    Unless this is going though some terminal server or multiplexer or
@@ -297,7 +300,7 @@ device is attached to the remote system (e.g. /dev/ttya).");
   if (!remote_desc)
     perror_with_name (name);
 
-  if (SERIAL_SETBAUDRATE (remote_desc, sr_get_baud_rate()))
+  if (SERIAL_SETBAUDRATE (remote_desc, baud_rate))
     {
       SERIAL_CLOSE (remote_desc);
       perror_with_name (name);
@@ -412,7 +415,7 @@ remote_interrupt (signo)
   /* If this doesn't work, try more severe steps.  */
   signal (signo, remote_interrupt_twice);
   
-  if (sr_get_debug ())
+  if (remote_debug)
     printf ("remote_interrupt called\n");
 
   SERIAL_WRITE (remote_desc, "\003", 1); /* Send a ^C */
@@ -455,7 +458,8 @@ Give up (and stop debugging it)? "))
    means in the case of this target).  */
 
 static int
-remote_wait (status)
+remote_wait (pid, status)
+     int pid;
      WAITTYPE *status;
 {
   unsigned char buf[PBUFSIZ];
@@ -656,7 +660,7 @@ remote_fetch_registers (regno)
   while ((buf[0] < '0' || buf[0] > '9')
 	 && (buf[0] < 'a' || buf[0] > 'f'))
     {
-      if (sr_get_debug () > 0)
+      if (remote_debug)
 	printf ("Bad register packet; fetching a new packet\n");
       getpkt (buf, 0);
     }
@@ -998,7 +1002,7 @@ putpkt (buf)
 
   while (1)
     {
-      if (sr_get_debug ())
+      if (remote_debug)
 	{
 	  *p = '\0';
 	  printf ("Sending packet: %s...", buf2);  fflush(stdout);
@@ -1014,7 +1018,7 @@ putpkt (buf)
 	  switch (ch)
 	    {
 	    case '+':
-	      if (sr_get_debug ())
+	      if (remote_debug)
 		printf("Ack\n");
 	      return;
 	    case SERIAL_TIMEOUT:
@@ -1024,7 +1028,7 @@ putpkt (buf)
 	    case SERIAL_EOF:
 	      error ("putpkt: EOF while trying to read ACK");
 	    default:
-	      if (sr_get_debug ())
+	      if (remote_debug)
 		printf ("%02X %c ", ch&0xFF, ch);
 	      continue;
 	    }
@@ -1077,7 +1081,7 @@ getpkt (buf, forever)
 	  if (forever)
 	    continue;
 	  if (++retries >= MAX_RETRIES)
-	    if (sr_get_debug ()) puts_filtered ("Timed out.\n");
+	    if (remote_debug) puts_filtered ("Timed out.\n");
 	  goto out;
 	}
 
@@ -1095,13 +1099,13 @@ getpkt (buf, forever)
 	  c = readchar ();
 	  if (c == SERIAL_TIMEOUT)
 	    {
-	      if (sr_get_debug ())
+	      if (remote_debug)
 		puts_filtered ("Timeout in mid-packet, retrying\n");
 	      goto whole;		/* Start a new packet, count retries */
 	    } 
 	  if (c == '$')
 	    {
-	      if (sr_get_debug ())
+	      if (remote_debug)
 		puts_filtered ("Saw new packet start in middle of old one\n");
 	      goto whole;		/* Start a new packet, count retries */
 	    }
@@ -1146,7 +1150,7 @@ out:
 
   SERIAL_WRITE (remote_desc, "+", 1);
 
-  if (sr_get_debug ())
+  if (remote_debug)
     fprintf (stderr,"Packet received: %s\n", buf);
 }
 

@@ -50,7 +50,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* access the register store directly, without going through
    the normal handler functions. This avoids an extra data copy.  */
 
-static int kiodebug;
+extern int remote_debug;
 extern int stop_soon_quietly;           /* for wait_for_inferior */
 extern struct value *call_function_by_hand();
 static void udi_resume PARAMS ((int pid, int step, int sig));
@@ -665,7 +665,7 @@ int	regno;
       register_valid[i] = 1;
   }
 
-  if (kiodebug)
+  if (remote_debug)
     {
       printf("Fetching all registers\n");
       printf("Fetching PC0 = 0x%x, PC1 = 0x%x, PC2 = 0x%x\n",
@@ -706,7 +706,7 @@ int regno;
       return;
     }
 
-  if (kiodebug)
+  if (remote_debug)
     {
       printf("Storing all registers\n");
       printf("PC0 = 0x%x, PC1 = 0x%x, PC2 = 0x%x\n", read_register(NPC_REGNUM),
@@ -1331,7 +1331,7 @@ fetch_register (regno)
 
   supply_register(regno, (char *) &To);
 
-  if (kiodebug)
+  if (remote_debug)
     printf("Fetching register %s = 0x%x\n", reg_names[regno], To);
 }
 /*****************************************************************************/ 
@@ -1352,7 +1352,7 @@ store_register (regno)
 
   From =  read_register (regno);	/* get data value */
 
-  if (kiodebug)
+  if (remote_debug)
     printf("Storing register %s = 0x%x\n", reg_names[regno], From);
 
   if (regno == GR1_REGNUM)
@@ -1542,13 +1542,6 @@ Arguments are\n\
 void _initialize_remote_udi()
 {
   add_target (&udi_ops);
-  add_show_from_set (
-		     add_set_cmd ("remotedebug", no_class, var_boolean,
-				  (char *)&kiodebug,
-				  "Set debugging of UDI I/O.\n\
-When enabled, debugging info is displayed.",
-				  &setlist),
-		     &showlist);
 }
 
 #ifdef NO_HIF_SUPPORT

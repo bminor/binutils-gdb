@@ -29,14 +29,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    remote targets.  */
 
 struct _sr_settings {
-  /* Debugging level.  0 is off, and non-zero values mean to print
-     some debug information (higher values, more information).  */
-  unsigned int debug;
-
-  /* Baud rate specified for talking to remote target systems via a
-     serial port.  */
-  unsigned int baud_rate;
-
   unsigned int timeout;
 
   int retries;
@@ -47,14 +39,16 @@ struct _sr_settings {
 };
 
 extern struct _sr_settings sr_settings;
+extern int remote_debug;
+extern int baud_rate;
 
 /* get and set debug value. */
-#define sr_get_debug()			(sr_settings.debug)
-#define sr_set_debug(newval)		(sr_settings.debug = (newval))
+#define sr_get_debug()			(remote_debug)
+#define sr_set_debug(newval)		(remote_debug = (newval))
 
 /* get and set baud rate. */
-#define sr_get_baud_rate()		(sr_settings.baud_rate)
-#define sr_set_baud_rate(newval)	(sr_settings.baud_rate = (newval))
+#define sr_get_baud_rate()		(baud_rate)
+#define sr_set_baud_rate(newval)	(baud_rate = (newval))
 
 /* get and set timeout. */
 #define sr_get_timeout()		(sr_settings.timeout)

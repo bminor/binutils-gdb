@@ -52,8 +52,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "remote-utils.h"
 
 struct _sr_settings sr_settings = {
-  0, /* debug */
-  9600,	/* baud */
   4, /* timeout:
 	remote-hms.c had 2
 	remote-bug.c had "with a timeout of 2, we time out waiting for
@@ -625,16 +623,9 @@ gr_store_word (addr, word)
 void
 _initialize_sr_support ()
 {
-  add_show_from_set (add_set_cmd ("remotedebug", no_class,
-				  var_zinteger, (char *)&sr_settings.debug,
-				  "Set debugging of remote serial I/O.\n\
-When non-zero, each packet sent or received with the remote target\n\
-is displayed.  Higher numbers produce more debugging.", &setlist),
-		     &showlist);
-
 /* FIXME-now: if target is open when baud changes... */
   add_show_from_set (add_set_cmd ("remotebaud", no_class,
-				  var_zinteger, (char *)&sr_settings.baud_rate,
+				  var_zinteger, (char *)&baud_rate,
 				  "Set baud rate for remote serial I/O.\n\
 This value is used to set the speed of the serial port when debugging\n\
 using remote targets.", &setlist),
