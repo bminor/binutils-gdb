@@ -661,17 +661,7 @@ frvfdpic_elf_link_hash_table_create (bfd *abfd)
    its function descriptor must be assigned by the dynamic linker.  */
 #define FRVFDPIC_SYM_LOCAL(INFO, H) \
   (_bfd_elf_symbol_refs_local_p ((H), (INFO), 1) \
-   || ! elf_hash_table (INFO)->dynamic_sections_created \
-   || (/* The condition below is an ugly hack to get .scommon data to
-	  be regarded as local.  For some reason the
-	  ELF_LINK_HASH_DEF_REGULAR bit is not set on such common
-	  symbols, and the SEC_IS_COMMON bit is not set any longer
-	  when we need to perform this test.  Hopefully this
-	  approximation is good enough.  */ \
-       ((H)->root.type == bfd_link_hash_defined \
-	|| (H)->root.type == bfd_link_hash_defweak) \
-       && (H)->root.u.def.section->output_section \
-       && ((H)->root.u.def.section->flags & SEC_LINKER_CREATED)))
+   || ! elf_hash_table (INFO)->dynamic_sections_created)
 #define FRVFDPIC_FUNCDESC_LOCAL(INFO, H) \
   ((H)->dynindx == -1 || ! elf_hash_table (INFO)->dynamic_sections_created)
 

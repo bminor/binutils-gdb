@@ -2456,9 +2456,13 @@ _bfd_elf_symbol_refs_local_p (struct elf_link_hash_entry *h,
   if (h == NULL)
     return TRUE;
 
+  /* Common symbols that become definitions don't get the DEF_REGULAR
+     flag set, so test it first, and don't bail out.  */
+  if (ELF_COMMON_DEF_P (h))
+    /* Do nothing.  */;
   /* If we don't have a definition in a regular file, then we can't
      resolve locally.  The sym is either undefined or dynamic.  */
-  if ((h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0)
+  else if ((h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0)
     return FALSE;
 
   /* Forced local symbols resolve locally.  */

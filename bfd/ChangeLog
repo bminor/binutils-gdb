@@ -1,3 +1,13 @@
+2004-07-21  Alexandre Oliva  <aoliva@redhat.com>
+
+	* elf-bfd.h (ELF_COMMON_DEF_P): New.
+	* elflink.c (_bfd_elf_symbol_refs_local_p): Use it to handle
+	common definitions.
+	* elf-m10300.c: Use SYMBOL_REFERENCES_LOCAL instead of
+	_bfd_elf_symbol_refs_local_p.
+	* elf32-frv.c (FRVFDPIC_SYM_LOCAL): Remove hack for common
+	symbols.
+
 2004-07-19  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* bfd-in.h (dynamic_lib_link_class): Add DYN_NO_ADD_NEEDED and

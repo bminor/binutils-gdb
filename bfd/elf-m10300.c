@@ -1020,7 +1020,7 @@ mn10300_elf_final_link_relocate (howto, input_bfd, output_bfd,
       if (info->shared
 	  && (input_section->flags & SEC_ALLOC) != 0
 	  && h != NULL
-	  && ! _bfd_elf_symbol_refs_local_p (h, info, 1))
+	  && ! SYMBOL_REFERENCES_LOCAL (info, h))
 	return bfd_reloc_dangerous;
     }
 
@@ -1079,7 +1079,7 @@ mn10300_elf_final_link_relocate (howto, input_bfd, output_bfd,
 	      /* h->dynindx may be -1 if this symbol was marked to
 		 become local.  */
 	      if (h == NULL
-		  || _bfd_elf_symbol_refs_local_p (h, info, 1))
+		  || SYMBOL_REFERENCES_LOCAL (info, h))
 		{
 		  relocate = TRUE;
 		  outrel.r_info = ELF32_R_INFO (0, R_MN10300_RELATIVE);
@@ -1302,7 +1302,7 @@ mn10300_elf_final_link_relocate (howto, input_bfd, output_bfd,
 	      BFD_ASSERT (off != (bfd_vma) -1);
 
 	      if (! elf_hash_table (info)->dynamic_sections_created
-		  || _bfd_elf_symbol_refs_local_p (h, info, 1))
+		  || SYMBOL_REFERENCES_LOCAL (info, h))
 		/* This is actually a static link, or it is a
 		   -Bsymbolic link and the symbol is defined
 		   locally, or the symbol was forced to be local
@@ -1461,9 +1461,9 @@ mn10300_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		       || r_type == R_MN10300_GOT24
 		       || r_type == R_MN10300_GOT16)
 		      && elf_hash_table (info)->dynamic_sections_created
-		      && !_bfd_elf_symbol_refs_local_p (h, info, 1))
+		      && !SYMBOL_REFERENCES_LOCAL (info, hh))
 		  || (r_type == R_MN10300_32
-		      && !_bfd_elf_symbol_refs_local_p (h, info, 1)
+		      && !SYMBOL_REFERENCES_LOCAL (info, hh)
 		      && ((input_section->flags & SEC_ALLOC) != 0
 			  /* DWARF will emit R_MN10300_32 relocations
 			     in its sections against symbols defined

@@ -218,6 +218,13 @@ struct elf_link_hash_entry
 #define SYMBOL_CALLS_LOCAL(INFO, H) \
   _bfd_elf_symbol_refs_local_p (H, INFO, 1)
 
+/* Common symbols that are turned into definitions don't have the
+   DEF_REGULAR flag set, so they might appear to be undefined.  */
+#define ELF_COMMON_DEF_P(H) \
+  (((H)->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0		\
+   && ((H)->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) == 0	\
+   && (H)->root.type == bfd_link_hash_defined)
+
 /* Records local symbols to be emitted in the dynamic symbol table.  */
 
 struct elf_link_local_dynamic_entry
