@@ -1,5 +1,16 @@
 2004-04-09  Mark Kettenis  <kettenis@gnu.org>
 
+	* configure.tgt: Remove i[34567]86-*-go32*,
+	i[34567]86-*-msdosdjgpp*, i[34567]86-*-sco*, i[34567]86-*-sysv*
+	and i[34567]86-*-isc*.  Set gdb_target to i386 for
+	i[34567]86-*-netware* and i[34567]86-*-*.
+	* config/i386/i386.mt: New file.
+	* config/i386/embed.mt: Remove file.
+	* config/i386/go32.mt: Remove file.
+	* config/i386/i386nw.mt: Remove file.
+	* config/i386/i386v.mt: Remove file.
+	* config/i386/tm-go32.h: Remove file.
+
 	* tui/tui-hooks.c: Include "readline/readline.h" after
 	"gdb_curses.h" instead of before.
 	* tui/tui-io.c: Likewise.

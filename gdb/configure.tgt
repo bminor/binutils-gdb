@@ -80,23 +80,18 @@ i[34567]86-ncr-*)	gdb_target=ncr3000 ;;
 i[34567]86-*-netbsd* | i[34567]86-*-knetbsd*-gnu)
 			gdb_target=nbsd ;;
 i[34567]86-*-openbsd*)	gdb_target=obsd ;;
-i[34567]86-*-go32*)	gdb_target=i386aout ;;
-i[34567]86-*-msdosdjgpp*) gdb_target=go32 ;;
 i[34567]86-*-nto*)	gdb_target=nto ;;
 i[34567]86-*-lynxos*)	gdb_target=i386lynx ;;
 i[34567]86-*-solaris*)	gdb_target=i386sol2 ;;
-i[34567]86-*-sco*)	gdb_target=i386v ;;
-i[34567]86-*-sysv*)	gdb_target=i386v ;;
 i[34567]86-*-linux*)	gdb_target=linux
 			build_gdbserver=yes
 			;;
-i[34567]86-*-isc*)	gdb_target=i386v ;;
 i[34567]86-*-gnu*)	gdb_target=i386gnu ;;
-i[34567]86-*-netware*)	gdb_target=i386nw
-		configdirs="${configdirs} nlm" ;;
+i[34567]86-*-netware*)	gdb_target=i386
+			configdirs="${configdirs} nlm" ;;
 i[34567]86-*-cygwin*)	gdb_target=cygwin  ;;
 i[34567]86-*-vxworks*)	gdb_target=vxworks ;;
-i[34567]86-*-*)		gdb_target=embed ;;
+i[34567]86-*-*)		gdb_target=i386 ;;
 
 ia64-*-aix*)		gdb_target=aix ;;
 ia64-*-linux*)		gdb_target=linux
