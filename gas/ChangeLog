@@ -1,3 +1,8 @@
+Tue Jan 18 15:51:59 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
+
+	* config/obj-coffbfd.c (obj_coff_endef): For C_EFCN, C_BLOCK and
+	C_FCN assume .val has been set to .
+
 Tue Jan 18 16:19:58 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* config/tc-hppa.c: Disable multiple $CODE$ subspace code.  It
