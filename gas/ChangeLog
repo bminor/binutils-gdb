@@ -1,3 +1,8 @@
+Tue Mar 14 19:16:43 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* read.c (s_app_line): Fix last patch to deal with a line number
+	of 1.
+
 Tue Mar 14 17:00:57 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* config/tc-ppc.c (ppc_elf_validate_fix): Use as_warn_where, not
