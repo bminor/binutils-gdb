@@ -1,3 +1,7 @@
+2002-02-19  Frank Ch. Eigler  <fche@redhat.com>
+
+	* syms.c (stt[]): Sorted.  Added .init/.fini -> "t" mapping.
+
 2002-02-19  Jakub Jelinek  <jakub@redhat.com>
 
 	* elf-eh-frame.c (_bfd_elf_discard_section_eh_frame): Enable

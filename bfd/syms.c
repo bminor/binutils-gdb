@@ -545,23 +545,25 @@ struct section_to_type
    adding entries.  Since it is so short, a linear search is used.  */
 static const struct section_to_type stt[] =
 {
-  {"*DEBUG*", 'N'},
   {".bss", 'b'},
-  {"zerovars", 'b'},		/* MRI .bss */
+  {"code", 't'},		/* MRI .text */
   {".data", 'd'},
-  {"vars", 'd'},		/* MRI .data */
+  {"*DEBUG*", 'N'},
+  {".debug", 'N'},              /* MSVC's .debug (non-standard debug syms) */
+  {".drectve", 'i'},            /* MSVC's .drective section */
+  {".edata", 'e'},              /* MSVC's .edata (export) section */
+  {".fini", 't'},		/* ELF fini section */
+  {".idata", 'i'},              /* MSVC's .idata (import) section */
+  {".init", 't'},		/* ELF init section */
+  {".pdata", 'p'},              /* MSVC's .pdata (stack unwind) section */
   {".rdata", 'r'},		/* Read only data.  */
   {".rodata", 'r'},		/* Read only data.  */
   {".sbss", 's'},		/* Small BSS (uninitialized data).  */
   {".scommon", 'c'},		/* Small common.  */
   {".sdata", 'g'},		/* Small initialized data.  */
   {".text", 't'},
-  {"code", 't'},		/* MRI .text */
-  {".drectve", 'i'},            /* MSVC's .drective section */
-  {".idata", 'i'},              /* MSVC's .idata (import) section */
-  {".edata", 'e'},              /* MSVC's .edata (export) section */
-  {".pdata", 'p'},              /* MSVC's .pdata (stack unwind) section */
-  {".debug", 'N'},              /* MSVC's .debug (non-standard debug syms) */
+  {"vars", 'd'},		/* MRI .data */
+  {"zerovars", 'b'},		/* MRI .bss */
   {0, 0}
 };
 
