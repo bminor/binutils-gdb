@@ -1,5 +1,8 @@
 2001-12-19  Jim Blandy  <jimb@redhat.com>
 
+	* s390-tdep.c (s390_pop_frame_regular): Make sure the saved_regs
+	array is actually set before we try to use it.
+
 	* s390-tdep.c (s390_frame_saved_pc_nofix): If we get the saved PC
 	out of the return address register, cache that in the frame's
 	extra info, just as if we'd gotten it from the saved regs array;

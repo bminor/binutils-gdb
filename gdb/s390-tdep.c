@@ -1225,20 +1225,23 @@ s390_pop_frame_regular (struct frame_info *frame)
   write_register (S390_PC_REGNUM, FRAME_SAVED_PC (frame));
 
   /* Restore any saved registers.  */
-  for (regnum = 0; regnum < NUM_REGS; regnum++)
-    if (frame->saved_regs[regnum] != 0)
-      {
-        ULONGEST value;
+  if (frame->saved_regs)
+    {
+      for (regnum = 0; regnum < NUM_REGS; regnum++)
+        if (frame->saved_regs[regnum] != 0)
+          {
+            ULONGEST value;
+            
+            value = read_memory_unsigned_integer (frame->saved_regs[regnum],
+                                                  REGISTER_RAW_SIZE (regnum));
+            write_register (regnum, value);
+          }
 
-        value = read_memory_unsigned_integer (frame->saved_regs[regnum],
-                                              REGISTER_RAW_SIZE (regnum));
-        write_register (regnum, value);
-      }
-
-  /* Actually cut back the stack.  Remember that the SP's element of
-     saved_regs is the old SP itself, not the address at which it is
-     saved.  */
-  write_register (S390_SP_REGNUM, frame->saved_regs[S390_SP_REGNUM]);
+      /* Actually cut back the stack.  Remember that the SP's element of
+         saved_regs is the old SP itself, not the address at which it is
+         saved.  */
+      write_register (S390_SP_REGNUM, frame->saved_regs[S390_SP_REGNUM]);
+    }
 
   /* Throw away any cached frame information.  */
   flush_cached_frames ();
