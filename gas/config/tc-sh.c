@@ -994,15 +994,20 @@ parse_at (src, op)
 	}
       if (src[0] == '+')
 	{
+	  char l0, l1;
+
 	  src++;
-	  if ((src[0] == 'r' && src[1] == '8')
-	      || (src[0] == 'i' && (src[1] == 'x' || src[1] == 's')))
+	  l0 = TOLOWER (src[0]);
+	  l1 = TOLOWER (src[1]);
+
+	  if ((l0 == 'r' && l1 == '8')
+	      || (l0 == 'i' && (l1 == 'x' || l1 == 's')))
 	    {
 	      src += 2;
 	      op->type = A_PMOD_N;
 	    }
-	  if ((src[0] == 'r' && src[1] == '9')
-	      || (src[0] == 'i' && src[1] == 'y'))
+	  if ((l0 == 'r' && l1 == '9')
+	      || (l0 == 'i' && l1 == 'y'))
 	    {
 	      src += 2;
 	      op->type = A_PMODY_N;

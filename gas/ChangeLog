@@ -1,3 +1,8 @@
+2001-11-29 Arati Dikey <aratid@kpit.com>
+
+	* tc-sh.c (parse_at): Removed case-sensitivity of index register
+	R8, R9.
+
 2001-11-28  Jakub Jelinek  <jakub@redhat.com>
 
 	* write.c (adjust_reloc_syms): Mark SEC_MERGE symbols as used
