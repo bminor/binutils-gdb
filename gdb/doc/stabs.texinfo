@@ -62,7 +62,7 @@ are preserved on all copies.
 @node Top
 @top The "stabs" representation of debugging information
 
-This document describes the GNU stabs debugging format in a.out files.
+This document describes the stabs debugging format.
 
 @menu
 * Overview::                    Overview of stabs

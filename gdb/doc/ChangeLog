@@ -1,9 +1,11 @@
-<<<<<<< ChangeLog
+Fri Jun 18 13:57:09 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* stabs.texinfo (Top): Minor cleanup.
+
 Mon Jun 14 16:16:51 1993  david d `zoo' zuhn  (zoo at rtl.cygnus.com)
 
 	* Makefile.in (install-info): remove parentdir support
 
-=======
 Tue Jun 15 18:11:39 1993  Roland H. Pesch  (pesch@fowanton.cygnus.com)
 
 	* gdb.texinfo (Copying): delete this node and references to it;
@@ -15,7 +17,6 @@ Tue Jun 15 18:11:39 1993  Roland H. Pesch  (pesch@fowanton.cygnus.com)
 	largely due to Ian Taylor review. (Debug Session): minor edits to
 	new text.
 
->>>>>>> 2.97
 Sun Jun 13 12:52:39 1993  Jim Kingdon  (kingdon@cygnus.com)
 
 	* Makefile.in (realclean): Remove info and dvi files too.
