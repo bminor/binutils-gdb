@@ -44,6 +44,7 @@ fi
 Things-to-keep:
 
 ChangeLog
+LRS
 Makefile.in
 a4rc.sed
 all-cfg.texi
