@@ -1,3 +1,9 @@
+2003-07-04  Josh Baratz  <baratz@intersystems.com>
+
+	* Makefile.am (MKDOC rule): Add $(CFLAGS) in case it contains
+	CC_FOR_BUILD specific switches.
+	* Makefile.in: Regenerate.
+
 2003-06-29  Alan Modra  <amodra@bigpond.net.au>
 
 	* chew.c (paramstuff): Don't emit PARAMS.
