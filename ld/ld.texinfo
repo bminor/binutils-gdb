@@ -1504,6 +1504,12 @@ many relocations.  @var{count} defaults to a value of 32768.
 Compute and display statistics about the operation of the linker, such
 as execution time and memory usage.
 
+@kindex --sysroot
+@item --sysroot=@var{directory}
+Use @var{directory} as the location of the sysroot, overriding the
+configure-time default.  This option is only supported by linkers
+that were configured using @option{--with-sysroot}.
+
 @kindex --traditional-format
 @cindex traditional format
 @item --traditional-format

@@ -71,6 +71,7 @@ enum option_values
   OPTION_DEFSYM,
   OPTION_DEMANGLE,
   OPTION_DYNAMIC_LINKER,
+  OPTION_SYSROOT,
   OPTION_EB,
   OPTION_EL,
   OPTION_EMBEDDED_RELOCS,
@@ -233,6 +234,8 @@ static const struct ld_option ld_options[] =
   { {"library-path", required_argument, NULL, 'L'},
     'L', N_("DIRECTORY"), N_("Add DIRECTORY to library search path"),
     TWO_DASHES },
+  { {"sysroot=<DIRECTORY>", required_argument, NULL, OPTION_SYSROOT},
+    '\0', NULL, N_("Override the default sysroot location"), TWO_DASHES },
   { {NULL, required_argument, NULL, '\0'},
     'm', N_("EMULATION"), N_("Set emulation"), ONE_DASH },
   { {"print-map", no_argument, NULL, 'M'},
@@ -746,6 +749,9 @@ parse_args (unsigned argc, char **argv)
 	case 'I':		/* Used on Solaris.  */
 	case OPTION_DYNAMIC_LINKER:
 	  command_line.interpreter = optarg;
+	  break;
+	case OPTION_SYSROOT:
+	  /* Already handled in ldmain.c.  */
 	  break;
 	case OPTION_EB:
 	  command_line.endian = ENDIAN_BIG;

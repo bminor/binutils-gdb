@@ -23,7 +23,7 @@
 #define LDMAIN_H
 
 extern char *program_name;
-extern char *ld_sysroot;
+extern const char *ld_sysroot;
 extern char *ld_canon_sysroot;
 extern int ld_canon_sysroot_len;
 extern bfd *output_bfd;

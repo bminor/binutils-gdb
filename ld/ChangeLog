@@ -1,3 +1,16 @@
+2005-01-19  Richard Sandiford  <rsandifo@redhat.com>
+
+	* ldmain.h (ld_sysroot): Change type to a constant string.
+	* ldmain.c (ld_sysroot): Likewise.
+	(get_relative_sysroot, get_sysroot): New functions, adding command-line
+	support for changing the sysroot.
+	(main): Call the new functions.
+	* lexsup.c (OPTION_SYSROOT): New.
+	(ld_options): Add --sysroot.
+	(parse_args): Add a dummy handler for it.
+	* ld.texinfo (--sysroot): Document.
+	* NEWS: Mention the new --sysroot option.
+
 2005-01-18  Alan Modra  <amodra@bigpond.net.au>
 
 	* ldlang.c (section_already_linked): Adjust bfd_link_just_syms call.
