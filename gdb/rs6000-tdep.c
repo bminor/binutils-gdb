@@ -353,7 +353,7 @@ push_dummy_frame ()
   
   sp = read_register(SP_REGNUM);
   pc = read_register(PC_REGNUM);
-  store_address (pc, 4, pc_targ);
+  store_address (pc_targ, 4, pc);
 
   dummy_frame_addr [dummy_frame_count++] = sp;
 
