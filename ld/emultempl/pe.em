@@ -876,27 +876,6 @@ gld_${EMULATION_NAME}_after_open ()
 	  }
       }
   }
-
-  {
-    LANG_FOR_EACH_INPUT_STATEMENT (is)
-      {
-	asection *sec;
-	char *new_name, seq;
-
-
-	if (is->the_bfd->my_archive)
-	  for (sec = is->the_bfd->sections; sec; sec = sec->next)
-	    if (strcmp (sec->name, ".idata\$7") == 0
-		&& sec->reloc_count == 0)
-	      {
-		char *name = xmalloc (sec->_raw_size + 1);
-		bfd_get_section_contents (is->the_bfd, sec, name, 0, sec->_raw_size);
-		name[sec->_raw_size] = 0;
-		printf ("dj: implib \"%s\" for dll \"%s\" %d\n",
-			is->the_bfd->my_archive->filename, name, sec->_raw_size);
-	      }
-      }
-  }
 }
 
 static void  
