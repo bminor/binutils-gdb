@@ -3590,6 +3590,8 @@ do_bx (str, flags)
     }
 
   /* Note - it is not illegal to do a "bx pc".  Useless, but not illegal.  */
+  if (reg == REG_PC)
+    as_tsktsk (_("Use of r15 in bx in ARM mode is not really useful"));
 
   end_of_line (str);
 }
