@@ -240,6 +240,9 @@ case "${target}" in
   sparc-*-sunos4*)
     use_gnu_ld=no
     ;;
+  sparc-*-solaris2*)
+    configdirs=`echo ${configdirs} | sed -e 's/ld//'`
+    ;;
   i[34]86-*-sco*)
     configdirs=`echo ${configdirs} | sed -e 's/gprof//'`
     ;;

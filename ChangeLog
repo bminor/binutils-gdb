@@ -1,3 +1,8 @@
+Tue Oct 19 16:02:22 1993  david d `zoo' zuhn  (zoo@rtl.cygnus.com)
+
+	* configure.in: don't build ld on solaris2 (not a viable option
+	  due to bugs in getpwnam & getpwuid)
+
 Tue Oct 19 15:13:56 1993  Ken Raeburn  (raeburn@rtl.cygnus.com)
 
 	* configure.in: Accept alpha-dec-osf1*, not just -osf1, since
