@@ -88,10 +88,9 @@ dump_symbols PARAMS ((bfd *abfd));
 void
 usage ()
 {
-  fprintf (stderr, "objdump %s\n\
+  fprintf (stderr, "\
 Usage: %s [-ahifdrtxsl] [-m machine] [-j section_name] [-b bfdname]\n\
-       [--syms] [--reloc] [--header] [--version] objfile...\n",
-	   program_version, program_name);
+       [--syms] [--reloc] [--header] [--version] objfile...\n", program_name);
   exit (1);
 }
 
@@ -172,6 +171,12 @@ DEFUN (slurp_symtab, (abfd),
 	}
     }
   symcount = bfd_canonicalize_symtab (abfd, sy);
+  if (symcount <= 0)
+    {
+      fprintf (stderr, "%s: Bad symbol table in \"%s\".\n",
+	       program_name, bfd_get_filename (abfd));
+      exit (1);
+    }
   return sy;
 }
 

@@ -1,4 +1,18 @@
+Tue May 25 00:26:47 1993  Ken Raeburn  (raeburn@cygnus.com)
+
+	* objdump.c (slurp_symtab): Print warning for bad symbol table.
+
+	* Makefile.in (DISTSTUFF): Don't build binutils.mm.
+
 Fri May 21 10:51:19 1993  David J. Mackenzie  (djm@rtl.cygnus.com)
+
+	* nm.c: Add -f/--format, -P/--portability, -t/--radix options.
+	Make global variables static.
+	(main): Make -v like -n, not -V, and make -A like -o, for POSIX.2.
+	(set_print_radix, set_output_format,
+	print_{object_filename,archive_filename,archive_member,symbol_info}
+	{bsd,sysv,posix}): New functions.
+	(display_file, print_symbols): Call them.
 
 	* ar.c: Improve error messages.
 
