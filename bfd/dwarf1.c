@@ -129,7 +129,7 @@ struct linenumber {
 static struct dwarf1_unit *alloc_dwarf1_unit PARAMS ((struct dwarf1_debug *));
 static struct dwarf1_func *alloc_dwarf1_func
   PARAMS ((struct dwarf1_debug *, struct dwarf1_unit *));
-static boolean parse_die PARAMS ((bfd *, struct die_info *, char *));
+static boolean parse_die PARAMS ((bfd *, struct die_info *, char *, char *));
 static boolean parse_line_table
   PARAMS ((struct dwarf1_debug *, struct dwarf1_unit *));
 static boolean parse_functions_in_unit
@@ -179,10 +179,11 @@ alloc_dwarf1_func (stash, aUnit)
    Return false if the die is invalidly formatted; true otherwise.  */
 
 static boolean
-parse_die (abfd, aDieInfo, aDiePtr)
+parse_die (abfd, aDieInfo, aDiePtr, aDiePtrEnd)
      bfd* abfd;
      struct die_info* aDieInfo;
      char*            aDiePtr;
+     char*            aDiePtrEnd;
 {
   char* this_die = aDiePtr;
   char* xptr = this_die;
@@ -192,7 +193,8 @@ parse_die (abfd, aDieInfo, aDiePtr)
   /* First comes the length.  */
   aDieInfo->length = bfd_get_32 (abfd, (bfd_byte *) xptr);
   xptr += 4;
-  if (aDieInfo->length == 0)
+  if (aDieInfo->length == 0
+      || (this_die + aDieInfo->length) >= aDiePtrEnd)
     return false;
   if (aDieInfo->length < 6)
     {
@@ -360,7 +362,8 @@ parse_functions_in_unit (stash, aUnit)
       {
 	struct die_info eachDieInfo;
 
-	if (! parse_die (stash->abfd, &eachDieInfo, eachDie))
+	if (! parse_die (stash->abfd, &eachDieInfo, eachDie,
+			 stash->debug_section_end))
 	  return false;
 
 	if (eachDieInfo.tag == TAG_global_subroutine
@@ -534,7 +537,8 @@ _bfd_dwarf1_find_nearest_line (abfd, section, symbols, offset,
     {
       struct die_info aDieInfo;
 
-      if (! parse_die (stash->abfd, &aDieInfo, stash->currentDie))
+      if (! parse_die (stash->abfd, &aDieInfo, stash->currentDie,
+		       stash->debug_section_end))
 	return false;
 
       if (aDieInfo.tag == TAG_compile_unit)

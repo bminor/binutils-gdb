@@ -1,3 +1,11 @@
+2001-09-17  H.J. Lu  <hjl@gnu.org>
+
+	* dwarf1.c (parse_die): Take a new arg for the end of the
+	section. Return false if die is beyond the section.
+	(parse_functions_in_unit): Pass the end of the section to
+	parse_die ().
+	(_bfd_dwarf1_find_nearest_line): Likewise.
+
 2001-09-14  Michael Rauch <mrauch@netbsd.org>
 
 	* elf32-sparc.c (elf32_sparc_relocate_section): Treat R_SPARC_UA32
