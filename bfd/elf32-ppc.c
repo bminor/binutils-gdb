@@ -2719,7 +2719,7 @@ allocate_dynrelocs (h, inf)
 	     for two entries is allocated.  */
 	  s->_raw_size += PLT_ENTRY_SIZE;
 	  if ((s->_raw_size - PLT_INITIAL_ENTRY_SIZE) / PLT_ENTRY_SIZE
-	      >= PLT_NUM_SINGLE_ENTRIES)
+	      > PLT_NUM_SINGLE_ENTRIES)
 	    s->_raw_size += PLT_ENTRY_SIZE;
 
 	  /* We also need to make an entry in the .rela.plt section.  */
