@@ -706,9 +706,6 @@ if test "${target}" = "${host}"; then
 	AC_DEFINE(START_INFERIOR_TRAPS_EXPECTED,2)
 	AC_DEFINE(sys_quotactl)
 	;;
-  ia64-*-aix*)
-      AC_DEFINE(NEW_PROC_API)
-      ;;
   *-*-unixware* | *-*-sysv4.2* | *-*-sysv5* | *-*-interix* )
       AC_DEFINE(NEW_PROC_API)
       ;;

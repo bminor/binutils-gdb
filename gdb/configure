@@ -17385,12 +17385,6 @@ _ACEOF
 _ACEOF
 
 	;;
-  ia64-*-aix*)
-      cat >>confdefs.h <<\_ACEOF
-#define NEW_PROC_API 1
-_ACEOF
-
-      ;;
   *-*-unixware* | *-*-sysv4.2* | *-*-sysv5* | *-*-interix* )
       cat >>confdefs.h <<\_ACEOF
 #define NEW_PROC_API 1

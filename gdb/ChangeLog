@@ -1,5 +1,8 @@
 2005-01-21  Mark Kettenis  <kettenis@gnu.org>
 
+	* configure.ac: Remove ia64-*-aix* junk.
+	* configure: Regenerate.
+
 	* configure.ac: Use AC_CHECK_DECLS instead of gcc_AC_CHECK_DECLS
 	and BFD_NEED_DECLARATION.  Don't check if a declaration of strdup
 	is necessary.
