@@ -1,3 +1,8 @@
+2004-05-06  Zack Weinberg  <zack@codesourcery.com>
+
+	* dwarf2.c (add_line_info): Also set info->filename to NULL if
+	filename argument is null; do not call strlen on a null pointer.
+
 2004-05-06  Daniel Jacobowitz  <drow@mvista.com>
 
 	* elf32-arm.h (elf32_arm_relocate_section): Remove R_ARM_PLT32
