@@ -1,5 +1,8 @@
 Sat Aug 28 00:16:12 1999  Jerry Quinn <jquinn@nortelnetworks.com>
 
+	* gas/hppa/basic/basic.exp:
+	* gas/hppa/basic/media.s:  Add test cases for new instructions.
+
 	* gas/hppa/basic/basic.exp (do_branch2,do_media): New.
 	* gas/hppa/basic/branch2.s:  New.
 	* gas/hppa/basic/media.s:  New.

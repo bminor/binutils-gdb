@@ -2086,13 +2086,30 @@ proc do_media {} {
     # of instructions (as these tests to).
     while 1 {
 	expect {
-	    -re "^ +\[0-9\]+ 0000 096702CC\[^\n]*\n"	{ set x [expr $x+1] }
-	    -re "^ +\[0-9\]+ 0004 0967074C\[^\n]*\n"	{ set x [expr $x+1] }
-	    -re "^ +\[0-9\]+ 0008 0967078C\[^\n]*\n"	{ set x [expr $x+1] }
-	    -re "^ +\[0-9\]+ 000c 096707CC\[^\n]*\n"	{ set x [expr $x+1] }
-	    -re "^ +\[0-9\]+ 0010 0967054C\[^\n]*\n"	{ set x [expr $x+1] }
-	    -re "^ +\[0-9\]+ 0014 0967058C\[^\n]*\n"	{ set x [expr $x+1] }
-	    -re "^ +\[0-9\]+ 0018 096705CC\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0000 096703CC\[^\n\]*\n"	{set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0004 0967034C\[^\n\]*\n"	{set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0008 0967030C\[^\n\]*\n"	{set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 000c 096702CC\[^\n\]*\n"	{set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0010 F8078B4B\[^\n\]*\n"	{set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0014 0967074C\[^\n\]*\n"	{set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0018 0967078C\[^\n\]*\n"	{set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 001c 096707CC\[^\n\]*\n"	{set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0020 F8E0CF4B\[^\n\]*\n"	{set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0024 F8E0CF4B\[^\n\]*\n"	{set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0028 F8E0CB4B\[^\n\]*\n"	{set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 002c 0967054C\[^\n\]*\n"	{set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0030 0967058C\[^\n\]*\n"	{set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0034 096705CC\[^\n\]*\n"	{set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0038 0ACE01C9\[^\n\]*\n"	{set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 003c 0ACE0149\[^\n\]*\n"	{set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0040 0ACE0109\[^\n\]*\n"	{set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0044 FACE8409\[^\n\]*\n"	{set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0048 FACEC409\[^\n\]*\n"	{set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 004c FACE8009\[^\n\]*\n"	{set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0050 FACEC009\[^\n\]*\n"	{set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0054 FAD60E49\[^\n\]*\n"	{set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0058 FAD64A89\[^\n\]*\n"	{set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 005c FAD66309\[^\n\]*\n"	{set x [expr $x+1] }
 	    -re "\[^\n\]*\n"				{ }
 	    timeout				{ perror "timeout\n"; break }
 	    eof					{ break }
@@ -2104,7 +2121,7 @@ proc do_media {} {
     gas_finish
 
     # Did we find what we were looking for?  If not, flunk it.
-    if [expr $x==7] then { pass $testname } else { fail $testname }
+    if [expr $x==24] then { pass $testname } else { fail $testname }
 }
 
 proc do_special {} {
