@@ -1,8 +1,11 @@
 Mon Aug 19 13:48:22 1991  Roland H. Pesch  (pesch at cygint.cygnus.com)
 
+	* bfd.texinfo: use @setchapternewpage on instead of lots of
+	@page's; minor rephrasing in Introduction.
+
 	* aoutx.h, archive.c, archures.c, bfd.c, bfd.texinfo, cache.c,
-	coffcode.h, core.c, format.c, libbfd.c, libbfd.h, libcoff.h,
-	opncls.c, reloc.c, section.c, syms.c, targets.c (documentation
+	coffcode.h, core.c, format.c, ieee.c, libbfd.c, libbfd.h, libcoff.h,
+	oasys.c, opncls.c, reloc.c, section.c, syms.c, targets.c (documentation
 	segments): used BFD (caps) more consistently as a name in
 	discourse, fixed a few other minor typos and uses of fonts
 	

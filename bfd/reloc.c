@@ -136,7 +136,7 @@ returned by the back end's get_symtab action. @xref{Symbols}. The
 symbol is referenced through a pointer to a pointer so that tools like
 the linker can fixup all the symbols of the same name by modifying
 only one pointer. The relocation routine looks in the symbol and uses
-the base of the section the symbol is attatched to and the value of
+the base of the section the symbol is attached to and the value of
 the symbol as the initial relocation offset. If the symbol pointer is
 zero, then the section provided is looked up.
 @item address

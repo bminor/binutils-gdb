@@ -24,10 +24,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 @section typedef bfd
 
 Pointers to bfd structs are the cornerstone of any application using
-libbfd. References though the BFD and to data in the BFD give the
+@code{libbfd}. References though the BFD and to data in the BFD give the
 entire BFD functionality.
 
-Finally!  The BFD struct itself.  This contains the major data about
+Here is the BFD struct itself.  This contains the major data about
 the file, and contains pointers to the rest of the data.
 
 *+++
@@ -62,12 +62,13 @@ the back end.
 
 $  boolean target_defaulted;
 
-The caching routines use these to maintain an LRU list of BFDs.
+The caching routines use these to maintain a least-recently-used list of
+BFDs (@pxref{File Caching}).
 
 $  struct _bfd *lru_prev, *lru_next;
 
-When a file is closed by the caching routines, it retains the state
-here:
+When a file is closed by the caching routines, BFD retains state
+information on the file here:
 
 $  file_ptr where;              
 
@@ -117,14 +118,14 @@ The number of sections
 
 $  unsigned int section_count;
 
-Stuff only usefull for object files:
+Stuff only useful for object files:
 The start address.
 
 $  bfd_vma start_address;
 Used for input and output
 
 $  unsigned int symcount;
-Symtab for output BFD
+Symbol table for output BFD
 
 $  struct symbol_cache_entry  **outsymbols;             
 
@@ -136,7 +137,7 @@ Particular machine within arch, e.g. 68010
 
 $  unsigned long obj_machine;
 
-Stuff only usefull for archives:
+Stuff only useful for archives:
 
 $  PTR arelt_data;              
 $  struct _bfd *my_archive;     
@@ -152,7 +153,7 @@ Used by the application to hold private data
 
 $  PTR usrdata;
 
-Where all the allocated stuff under this BFD goes 
+Where all the allocated stuff under this BFD goes (@pxref{Memory Usage}).
 
 $  struct obstack memory;
 $};

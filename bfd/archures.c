@@ -22,7 +22,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 @section Architectures
 BFD's idea of an architecture is implimented in @code{archures.c}. BFD
 keeps two atoms in a BFD describing the architecture of the data
-attatched to the BFD, the @code{enum bfd_architecture arch} field and
+attached to the BFD, the @code{enum bfd_architecture arch} field and
 the @code{unsigned long machine} field.
 */
 

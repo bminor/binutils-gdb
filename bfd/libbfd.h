@@ -232,7 +232,7 @@ Initialize a BFD by putting it on the cache LRU.
 /*
 
 *i bfd_cache_close
-Remove the BFD from the cache. If the attatched file is open, then close it too.
+Remove the BFD from the cache. If the attached file is open, then close it too.
 */
  PROTO(void, bfd_cache_close, (bfd *));
 

@@ -282,7 +282,7 @@ pending operations are completed and the file written out and closed.
 If the created file is executable, then @code{chmod} is called to mark
 it as such.
 
-All memory attatched to the BFD's obstacks is released. 
+All memory attached to the BFD's obstacks is released. 
 
 @code{true} is returned if all is ok, otherwise @code{false}.
 *; PROTO(boolean, bfd_close,(bfd *));

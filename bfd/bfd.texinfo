@@ -29,6 +29,7 @@ into another language, under the above conditions for modified versions.
 @end ifinfo
 @iftex
 @c@finalout
+@setchapternewpage on
 @c@setchapternewpage odd
 @settitle LIB BFD, the Binary File Descriptor Library
 @titlepage
@@ -324,13 +325,13 @@ which can simply derive this information can pass it successfully
 between formats (COFF, IEEE and Oasys).
 @end table
 
-
-What is a backend
+@c FIXME: what is this line about?  Do we want introductory remarks 
+@c FIXME... on back ends?  commented out for now.
+@c What is a backend
 @node BFD front end, BFD back end, Mechanism, Top
-@page
 @chapter BFD front end
 @include  bfd.texi
-@page
+
 @node Memory Usage, Sections, bfd, Top
 @section Memory Usage
 BFD keeps all its internal structures in obstacks. There is one obstack
@@ -355,37 +356,37 @@ operation and reopen the BFD again, to get a fresh copy of the data structures.
 
 @node Sections,Symbols ,Memory Usage, Top
 @include  section.texi
-@page
+
 @node Symbols, Archives ,Sections, To
 @include  syms.texi
-@page
+
 @node Archives, Formats, Symbols, Top
 @include  archive.texi
-@page
+
 @node Formats, Relocations, Archives, Top
 @include  format.texi
-@page
+
 @node Relocations, Core Files,Formats, Top
 @include  reloc.texi
-@page
+
 @node Core Files, Targets,  Relocations, Top
 @include  core.texi
-@page
+
 @node Targets, Architectures, Core Files, Top
 @include  targets.texi
-@page
+
 @node Architectures, Opening and Closing, Targets, Top
 @include  archures.texi
-@page
+
 @node Opening and Closing, Internal, Architectures, Top
 @include  opncls.texi
-@page
+
 @node Internal, File Caching, Opening and Closing, Top
 @include  libbfd.texi
-@page
+
 @node File Caching, Top, Internal, Top
 @include  cache.texi
-@page
+
 @chapter BFD back end
 @node BFD back end, ,BFD front end, Top
 @menu
@@ -398,17 +399,16 @@ operation and reopen the BFD again, to get a fresh copy of the data structures.
 @end menu
 @node What to Put Where, aout backends, BFD back end, BFD back end
 All of BFD lives in one directory.
-@page
+
 @node aout backends, coff backends, What to Put Where, BFD back end
 @include  aoutx.texi
-@page
+
 @node coff backends, oasys backends, aout backends, BFD back end
 @include  coffcode.texi
-@page
+
 @node Index,  , BFD, Top
 @unnumbered Function Index
 @printindex  fn
-@setchapternewpage on
 @unnumbered Index
 @printindex cp
 

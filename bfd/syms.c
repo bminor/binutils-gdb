@@ -85,7 +85,7 @@ the BFD, and is freed when the BFD is closed.
 @node Writing Symbols, typedef asymbol, Reading Symbols, Symbols
 @subsection Writing Symbols
 Writing of a symbol table is automatic when a BFD open for writing
-is closed. The application attatches a vector of pointers to pointers to symbols
+is closed. The application attaches a vector of pointers to pointers to symbols
 to the BFD being written, and fills in the symbol count. The close and
 cleanup code reads through the table provided and performs all the
 necessary operations. The outputing code must always be provided with
