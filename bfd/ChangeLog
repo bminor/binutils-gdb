@@ -1,5 +1,28 @@
 Fri Jul 22 11:07:14 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
+	* linker.c (generic_link_check_archive_element): When changing a
+	symbol to common, set the alignment.
+	(_bfd_generic_link_add_one_symbol): When creating a common symbol,
+	set the alignment.
+	* aoutx.h (aout_link_check_ar_symbols): When changing a symbol to
+	common, set the alignment.
+	(aout_link_add_symbols): Restrict the alignment of a common symbol
+	to the alignment power given by the architecture.
+	* libelf.h (struct elf_link_hash_entry): Remove align field.  Add
+	copy_offset field.
+	* elfcode.h (elf_link_add_object_symbols): Store alignment in
+	new bfd_link_hash_entry field, not in elf_link_hash_entry field.
+	(elf_link_output_extsym): Similar change when getting alignment.
+	* elf.c (_bfd_elf_link_hash_newfunc): Don't initialize align.  Do
+	initialize copy_offset.
+	* elf32-i386.c (elf_i386_adjust_dynamic_symbol): Use copy_offset
+	field rather than align field.  Get alignment using bfd_log2
+	rather than switch.
+	* elf32-sparc.c (elf32_sparc_adjust_dynamic_symbol): Likewise.
+	* elf32-i386.c (elf_i386_finish_dynamic_symbol): Use copy_offset,
+	not align.
+	* elf32-sparc.c (elf32_sparc_finish_dynamic_symbol): Likewise.
+
 	* aoutx.h (NAME(aout,some_aout_object_p)): Just check
 	STAT_FOR_EXEC, don't check MACH.
 	* m88kmach3.c (MACH): Don't define.
