@@ -1,3 +1,12 @@
+Thu Mar 26 16:59:58 1992  John Gilmore  (gnu at cygnus.com)
+
+	* Makefile.in:  Set MINIMIZE back to 0 for a real release.
+
+Tue Mar 24 15:57:03 1992  K. Richard Pixley  (rich@cygnus.com)
+
+	* configure.in: config/irix4.m[ht], hosts/irix4.h: add support for
+	  irix4.
+
 Mon Mar 23 22:37:34 1992  Stu Grossman  (grossman at cygnus.com)
 
 	* coff-msym.c (ecoff_swap_rfd_in):  remove & for array ref.
