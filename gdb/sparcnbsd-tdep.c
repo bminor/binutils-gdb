@@ -21,6 +21,7 @@
    Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
+#include "floatformat.h"
 #include "frame.h"
 #include "frame-unwind.h"
 #include "gdbcore.h"
@@ -265,6 +266,7 @@ sparc32nbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   /* NetBSD doesn't support the 128-bit `long double' from the psABI.  */
   set_gdbarch_long_double_bit (gdbarch, 64);
+  set_gdbarch_long_double_format (gdbarch, &floatformat_ieee_double_big);
 
   set_gdbarch_pc_in_sigtramp (gdbarch, sparc32nbsd_pc_in_sigtramp);
   frame_unwind_append_sniffer (gdbarch, sparc32nbsd_sigtramp_frame_sniffer);

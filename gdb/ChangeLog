@@ -1,5 +1,14 @@
 2003-12-31  Mark Kettenis  <kettenis@gnu.org>
 
+	* sparc-tdep.c: Include "floatformat.h".
+	(floatformat_sparc_quad): New define.
+	(sparc32_gdbarch_init): Set long_double_format to
+	&floatformat_sparc_quad.
+	* sparc-linux-tdep.c: Include "floatformat.h".
+	(sparc32_linux_init_abi): Set long_double_format to
+	&floatformat_ieee_double_big.
+	* sparcnbsd-tdep.c: Likewise.
+
 	* sparc-tdep.c (sparc_stabs_unglobalize_name): New function.
 	* config/sparc/tm-sol2.h (SOFUN_ADDRESS_MAYBE_MISSING): Define.
 	(sparc_stabs_unglobalize_name): New prototype.

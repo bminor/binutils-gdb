@@ -22,6 +22,7 @@
 #include "defs.h"
 #include "arch-utils.h"
 #include "dis-asm.h"
+#include "floatformat.h"
 #include "frame.h"
 #include "frame-base.h"
 #include "frame-unwind.h"
@@ -59,6 +60,10 @@
    sparc64_-prefix for 64-bit specific code and the sparc_-prefix for
    code that can handle both.  The 64-bit specific code lives in
    sparc64-tdep.c; don't add any here.  */
+
+/* The SPARC Floating-Point Quad-Precision format is similar to
+   big-endian IA-64 Quad-recision format.  */
+#define floatformat_sparc_quad floatformat_ia64_quad_big
 
 /* The stack pointer is offset from the stack frame by a BIAS of 2047
    (0x7ff) for 64-bit code.  BIAS is likely to be defined on SPARC
@@ -1020,6 +1025,7 @@ sparc32_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep->plt_entry_size = 0;
 
   set_gdbarch_long_double_bit (gdbarch, 128);
+  set_gdbarch_long_double_format (gdbarch, &floatformat_sparc_quad);
 
   set_gdbarch_num_regs (gdbarch, SPARC32_NUM_REGS);
   set_gdbarch_register_name (gdbarch, sparc32_register_name);
