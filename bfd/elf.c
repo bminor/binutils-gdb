@@ -122,14 +122,14 @@ elf_get_str_section (abfd, shindex)
   if (i_shdrp == 0 || i_shdrp[shindex] == 0)
     return 0;
 
-  shstrtab = i_shdrp[shindex]->rawdata;
+  shstrtab = (char *) i_shdrp[shindex]->contents;
   if (shstrtab == NULL)
     {
       /* No cached one, attempt to read, and cache what we read. */
       offset = i_shdrp[shindex]->sh_offset;
       shstrtabsize = i_shdrp[shindex]->sh_size;
       shstrtab = elf_read (abfd, offset, shstrtabsize);
-      i_shdrp[shindex]->rawdata = (void *) shstrtab;
+      i_shdrp[shindex]->contents = (PTR) shstrtab;
     }
   return shstrtab;
 }
@@ -147,15 +147,15 @@ elf_string_from_elf_section (abfd, shindex, strindex)
 
   hdr = elf_elfsections (abfd)[shindex];
 
-  if (!hdr->rawdata
+  if (hdr->contents == NULL
       && elf_get_str_section (abfd, shindex) == NULL)
     return NULL;
 
-  return ((char *) hdr->rawdata) + strindex;
+  return ((char *) hdr->contents) + strindex;
 }
 
 /* Make a BFD section from an ELF section.  We store a pointer to the
-   BFD section in the rawdata field of the header.  */
+   BFD section in the bfd_section field of the header.  */
 
 boolean
 _bfd_elf_make_section_from_shdr (abfd, hdr, name)
@@ -166,9 +166,10 @@ _bfd_elf_make_section_from_shdr (abfd, hdr, name)
   asection *newsect;
   flagword flags;
 
-  if (hdr->rawdata != NULL)
+  if (hdr->bfd_section != NULL)
     {
-      BFD_ASSERT (strcmp (name, ((asection *) hdr->rawdata)->name) == 0);
+      BFD_ASSERT (strcmp (name,
+			  bfd_get_section_name (abfd, hdr->bfd_section)) == 0);
       return true;
     }
 
@@ -210,7 +211,7 @@ _bfd_elf_make_section_from_shdr (abfd, hdr, name)
   if (! bfd_set_section_flags (abfd, newsect, flags))
     return false;
 
-  hdr->rawdata = (PTR) newsect;
+  hdr->bfd_section = newsect;
   elf_section_data (newsect)->this_hdr = *hdr;
 
   return true;
@@ -301,6 +302,45 @@ bfd_elf_generic_reloc (abfd,
   return bfd_reloc_continue;
 }
 
+/* Display ELF-specific fields of a symbol.  */
+void
+bfd_elf_print_symbol (ignore_abfd, filep, symbol, how)
+     bfd *ignore_abfd;
+     PTR filep;
+     asymbol *symbol;
+     bfd_print_symbol_type how;
+{
+  FILE *file = (FILE *) filep;
+  switch (how)
+    {
+    case bfd_print_symbol_name:
+      fprintf (file, "%s", symbol->name);
+      break;
+    case bfd_print_symbol_more:
+      fprintf (file, "elf ");
+      fprintf_vma (file, symbol->value);
+      fprintf (file, " %lx", (long) symbol->flags);
+      break;
+    case bfd_print_symbol_all:
+      {
+	CONST char *section_name;
+	section_name = symbol->section ? symbol->section->name : "(*none*)";
+	bfd_print_symbol_vandf ((PTR) file, symbol);
+	fprintf (file, " %s\t", section_name);
+	/* Print the "other" value for a symbol.  For common symbols,
+	   we've already printed the size; now print the alignment.
+	   For other symbols, we have no specified alignment, and
+	   we've printed the address; now print the size.  */
+	fprintf_vma (file,
+		     (bfd_is_com_section (symbol->section)
+		      ? ((elf_symbol_type *) symbol)->internal_elf_sym.st_value
+		      : ((elf_symbol_type *) symbol)->internal_elf_sym.st_size));
+	fprintf (file, " %s", symbol->name);
+      }
+      break;
+    }
+}
+
 /* Create an entry in an ELF linker hash table.  */
 
 struct bfd_hash_entry *
@@ -334,7 +374,8 @@ _bfd_elf_link_hash_newfunc (entry, table, string)
       ret->dynindx = -1;
       ret->dynstr_index = 0;
       ret->weakdef = NULL;
-      ret->copy_offset = 0;
+      ret->got_offset = (bfd_vma) -1;
+      ret->plt_offset = (bfd_vma) -1;
       ret->type = STT_NOTYPE;
       ret->elf_link_hash_flags = 0;
     }
@@ -352,10 +393,13 @@ _bfd_elf_link_hash_table_init (table, abfd, newfunc)
 						struct bfd_hash_table *,
 						const char *));
 {
+  table->dynamic_sections_created = false;
   table->dynobj = NULL;
-  table->dynsymcount = 0;
+  /* The first dynamic symbol is a dummy.  */
+  table->dynsymcount = 1;
   table->dynstr = NULL;
   table->bucketcount = 0;
+  table->needed = NULL;
   return _bfd_link_hash_table_init (&table->root, abfd, newfunc);
 }
 
@@ -386,7 +430,8 @@ _bfd_elf_link_hash_table_create (abfd)
 
 /* This is a hook for the ELF emulation code in the generic linker to
    tell the backend linker what file name to use for the DT_NEEDED
-   entry for a dynamic object.  */
+   entry for a dynamic object.  The generic linker passes name as an
+   empty string to indicate that no DT_NEEDED entry should be made.  */
 
 void
 bfd_elf_set_dt_needed_name (abfd, name)
@@ -394,4 +439,14 @@ bfd_elf_set_dt_needed_name (abfd, name)
      const char *name;
 {
   elf_dt_needed_name (abfd) = name;
+}
+
+/* Get the list of DT_NEEDED entries for a link.  */
+
+struct bfd_elf_link_needed_list *
+bfd_elf_get_needed_list (abfd, info)
+     bfd *abfd;
+     struct bfd_link_info *info;
+{
+  return elf_hash_table (info)->needed;
 }

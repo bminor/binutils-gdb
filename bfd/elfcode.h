@@ -4297,6 +4297,7 @@ elf_link_add_object_symbols (abfd, info)
   else
     {
       asection *s;
+      boolean add_needed;
       const char *name;
       bfd_size_type oldsize;
       bfd_size_type strindex;
@@ -4317,15 +4318,24 @@ elf_link_add_object_symbols (abfd, info)
 	 object.  If the object has a DT_SONAME entry, we use it.
 	 Otherwise, if the generic linker stuck something in
 	 elf_dt_needed_name, we use that.  Otherwise, we just use the
-	 file name.  */
+	 file name.  If the generic linker put a null string into
+	 elf_dt_needed_name, we don't make a DT_NEEDED entry at all,
+	 even if there is a DT_SONAME entry.  */
+      add_needed = true;
       name = bfd_get_filename (abfd);
       if (elf_dt_needed_name (abfd) != NULL)
-	name = elf_dt_needed_name (abfd);
+	{
+	  name = elf_dt_needed_name (abfd);
+	  if (*name == '\0')
+	    add_needed = false;
+	}
       s = bfd_get_section_by_name (abfd, ".dynamic");
       if (s != NULL)
 	{
 	  Elf_External_Dyn *extdyn;
 	  Elf_External_Dyn *extdynend;
+	  int elfsec;
+	  unsigned long link;
 
 	  dynbuf = (Elf_External_Dyn *) malloc (s->_raw_size);
 	  if (dynbuf == NULL)
@@ -4338,6 +4348,11 @@ elf_link_add_object_symbols (abfd, info)
 					  (file_ptr) 0, s->_raw_size))
 	    goto error_return;
 
+	  elfsec = elf_section_from_bfd_section (abfd, s);
+	  if (elfsec == -1)
+	    goto error_return;
+	  link = elf_elfsections (abfd)[elfsec]->sh_link;
+
 	  extdyn = dynbuf;
 	  extdynend = extdyn + s->_raw_size / sizeof (Elf_External_Dyn);
 	  for (; extdyn < extdynend; extdyn++)
@@ -4345,22 +4360,37 @@ elf_link_add_object_symbols (abfd, info)
 	      Elf_Internal_Dyn dyn;
 
 	      elf_swap_dyn_in (abfd, extdyn, &dyn);
-	      if (dyn.d_tag == DT_SONAME)
+	      if (add_needed && dyn.d_tag == DT_SONAME)
 		{
-		  int elfsec;
-		  unsigned long link;
-
-		  elfsec = elf_section_from_bfd_section (abfd, s);
-		  if (elfsec == -1)
-		    goto error_return;
-		  link = elf_elfsections (abfd)[elfsec]->sh_link;
 		  name = elf_string_from_elf_section (abfd, link,
 						      dyn.d_un.d_val);
 		  if (name == NULL)
 		    goto error_return;
 		}
 	      if (dyn.d_tag == DT_NEEDED)
-		elf_hash_table (info)->saw_needed = true;
+		{
+		  struct bfd_elf_link_needed_list *n, **pn;
+		  char *fnm, *anm;
+
+		  n = bfd_alloc (abfd,
+				 sizeof (struct bfd_elf_link_needed_list));
+		  fnm = elf_string_from_elf_section (abfd, link,
+						     dyn.d_un.d_val);
+		  if (n == NULL || fnm == NULL)
+		    goto error_return;
+		  anm = bfd_alloc (abfd, strlen (fnm) + 1);
+		  if (anm == NULL)
+		    goto error_return;
+		  strcpy (anm, fnm);
+		  n->name = anm;
+		  n->by = abfd;
+		  n->next = NULL;
+		  for (pn = &elf_hash_table (info)->needed;
+		       *pn != NULL;
+		       pn = &(*pn)->next)
+		    ;
+		  *pn = n;
+		}
 	    }
 
 	  free (dynbuf);
@@ -4384,46 +4414,51 @@ elf_link_add_object_symbols (abfd, info)
 	    goto error_return;
 	}
 
-      /* Add a DT_NEEDED entry for this dynamic object.  */
-      oldsize = _bfd_stringtab_size (elf_hash_table (info)->dynstr);
-      strindex = _bfd_stringtab_add (elf_hash_table (info)->dynstr, name,
-				     true, false);
-      if (strindex == (bfd_size_type) -1)
-	goto error_return;
-
-      if (oldsize == _bfd_stringtab_size (elf_hash_table (info)->dynstr))
+      if (add_needed)
 	{
-	  asection *sdyn;
-	  Elf_External_Dyn *dyncon, *dynconend;
+	  /* Add a DT_NEEDED entry for this dynamic object.  */
+	  oldsize = _bfd_stringtab_size (elf_hash_table (info)->dynstr);
+	  strindex = _bfd_stringtab_add (elf_hash_table (info)->dynstr, name,
+					 true, false);
+	  if (strindex == (bfd_size_type) -1)
+	    goto error_return;
 
-	  /* The hash table size did not change, which means that the
-             dynamic object name was already entered.  If we have
-             already included this dynamic object in the link, just
-             ignore it.  There is no reason to include a particular
-             dynamic object more than once.  */
-	  sdyn = bfd_get_section_by_name (elf_hash_table (info)->dynobj,
-					  ".dynamic");
-	  BFD_ASSERT (sdyn != NULL);
-
-	  dyncon = (Elf_External_Dyn *) sdyn->contents;
-	  dynconend = (Elf_External_Dyn *) (sdyn->contents + sdyn->_raw_size);
-	  for (; dyncon < dynconend; dyncon++)
+	  if (oldsize == _bfd_stringtab_size (elf_hash_table (info)->dynstr))
 	    {
-	      Elf_Internal_Dyn dyn;
+	      asection *sdyn;
+	      Elf_External_Dyn *dyncon, *dynconend;
 
-	      elf_swap_dyn_in (elf_hash_table (info)->dynobj, dyncon, &dyn);
-	      if (dyn.d_tag == DT_NEEDED
-		  && dyn.d_un.d_val == strindex)
+	      /* The hash table size did not change, which means that
+		 the dynamic object name was already entered.  If we
+		 have already included this dynamic object in the
+		 link, just ignore it.  There is no reason to include
+		 a particular dynamic object more than once.  */
+	      sdyn = bfd_get_section_by_name (elf_hash_table (info)->dynobj,
+					      ".dynamic");
+	      BFD_ASSERT (sdyn != NULL);
+
+	      dyncon = (Elf_External_Dyn *) sdyn->contents;
+	      dynconend = (Elf_External_Dyn *) (sdyn->contents +
+						sdyn->_raw_size);
+	      for (; dyncon < dynconend; dyncon++)
 		{
-		  if (buf != NULL)
-		    free (buf);
-		  return true;
+		  Elf_Internal_Dyn dyn;
+
+		  elf_swap_dyn_in (elf_hash_table (info)->dynobj, dyncon,
+				   &dyn);
+		  if (dyn.d_tag == DT_NEEDED
+		      && dyn.d_un.d_val == strindex)
+		    {
+		      if (buf != NULL)
+			free (buf);
+		      return true;
+		    }
 		}
 	    }
-	}
 
-      if (! elf_add_dynamic_entry (info, DT_NEEDED, strindex))
-	goto error_return;
+	  if (! elf_add_dynamic_entry (info, DT_NEEDED, strindex))
+	    goto error_return;
+	}
     }
 
   if (bfd_seek (abfd,
@@ -6237,18 +6272,9 @@ elf_link_output_extsym (h, data)
      linker will complain that the symbol is undefined when the
      program is run.  We don't have to worry about symbols that are
      referenced by regular files, because we will already have issued
-     warnings for them.
-
-     FIXME: If we are linking against an object which uses DT_NEEDED,
-     we don't give this warning, because it might be the case that the
-     needed dynamic object will define the symbols.  Unfortunately,
-     this makes this type of check much less useful, but the only way
-     to fix it would be to locate the needed object and read its
-     symbol table.  That seems like a real waste of time just to give
-     better error messages.  */
+     warnings for them.  */
   if (! finfo->info->relocateable
       && ! finfo->info->shared
-      && ! elf_hash_table (finfo->info)->saw_needed
       && h->root.type == bfd_link_hash_undefined
       && (h->elf_link_hash_flags & ELF_LINK_HASH_REF_DYNAMIC) != 0
       && (h->elf_link_hash_flags & ELF_LINK_HASH_REF_REGULAR) == 0)

@@ -595,6 +595,14 @@ extern boolean bfd_elf32_record_link_assignment
   PARAMS ((bfd *, struct bfd_link_info *, const char *));
 extern boolean bfd_elf64_record_link_assignment
   PARAMS ((bfd *, struct bfd_link_info *, const char *));
+struct bfd_elf_link_needed_list
+{
+  struct bfd_elf_link_needed_list *next;
+  bfd *by;
+  const char *name;
+};
+extern struct bfd_elf_link_needed_list *bfd_elf_get_needed_list
+  PARAMS ((bfd *, struct bfd_link_info *));
 extern boolean bfd_elf32_size_dynamic_sections
   PARAMS ((bfd *, const char *, const char *, boolean,
 	   struct bfd_link_info *, struct sec **));

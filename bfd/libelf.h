@@ -144,10 +144,9 @@ struct elf_link_hash_table
   /* The number of buckets in the hash table in the .hash section.
      This is based on the number of dynamic symbols.  */
   size_t bucketcount;
-  /* Whether we are linking against a dynamic object which has a
-     DT_NEEDED entry in the .dynamic section.  This may need to become
-     a list of DT_NEEDED entries.  */
-  boolean saw_needed;
+  /* A linked list of DT_NEEDED names found in dynamic objects
+     included in the link.  */
+  struct bfd_elf_link_needed_list *needed;
 };
 
 /* Look up an entry in an ELF linker hash table.  */

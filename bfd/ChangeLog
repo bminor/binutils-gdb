@@ -1,5 +1,20 @@
 Tue Jul  4 12:22:21 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* libelf.h (struct elf_link_hash_table): Add needed field.  Remove
+	saw_needed field.
+	* elfcode.h (elf_link_add_object_symbols): If elf_dt_needed_name
+	is an empty string, don't make a DT_NEEDED entry in the output
+	file.  Record all DT_NEEDED entries found in input dynamic
+	objects.
+	(elf_link_output_extsym): Don't check saw_needed when issuing
+	warnings.
+	* elf.c (_bfd_elf_link_hash_table_init): Initialize needed, not
+	saw_needed.
+	(bfd_elf_get_needed_list): New function.
+	* bfd-in.h (struct bfd_elf_link_needed_list): Define.
+	(bfd_elf_get_needed_list): Define.
+	* bfd-in2.h: Rebuild.
+
 	* ecoff.c (_bfd_ecoff_find_nearest_line): Also initialize
 	find_buffer and fdrtab_len fields of newly allocated
 	find_line_info structure.

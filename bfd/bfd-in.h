@@ -482,6 +482,9 @@ typedef struct _bfd_link_stack_heap bfd_link_stack_heap;
 
 /* END OF PE STUFF */
 
+extern enum bfd_link_subsystem NT_subsystem;
+extern bfd_link_stack_heap NT_stack_heap;
+
 /* Cast from const char * to char * so that caller can assign to
    a char * without a warning.  */
 #define bfd_get_filename(abfd) ((char *) (abfd)->filename)
@@ -592,6 +595,14 @@ extern boolean bfd_elf32_record_link_assignment
   PARAMS ((bfd *, struct bfd_link_info *, const char *));
 extern boolean bfd_elf64_record_link_assignment
   PARAMS ((bfd *, struct bfd_link_info *, const char *));
+struct bfd_elf_link_needed_list
+{
+  struct bfd_elf_link_needed_list *next;
+  bfd *by;
+  const char *name;
+};
+extern struct bfd_elf_link_needed_list *bfd_elf_get_needed_list
+  PARAMS ((bfd *, struct bfd_link_info *));
 extern boolean bfd_elf32_size_dynamic_sections
   PARAMS ((bfd *, const char *, const char *, boolean,
 	   struct bfd_link_info *, struct sec **));
@@ -614,11 +625,3 @@ extern boolean bfd_linux_size_dynamic_sections
   PARAMS ((bfd *, struct bfd_link_info *));
 
 /* And more from the source.  */
-
-/* provide storage for subsystem, stack and heap data which may have been
-   passed in on the command line.  Ld puts this data into a bfd_link_info
-   struct which ultimately gets passed in to the bfd.  When it arrives, copy
-   it to the following struct so that the data will be available in coffcode.h
-   where it is needed.  The typedef's used are defined in bfd.h */
-enum   bfd_link_subsystem  NT_subsystem;
-bfd_link_stack_heap NT_stack_heap;
