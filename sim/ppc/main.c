@@ -1,6 +1,6 @@
 /*  This file is part of the program psim.
 
-    Copyright (C) 1994-1995, Andrew Cagney <cagney@highland.com.au>
+    Copyright (C) 1994-1996, Andrew Cagney <cagney@highland.com.au>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -23,8 +23,8 @@
 #include <stdio.h>
 
 #include "psim.h"
-#include "cpu.h"
 #include "options.h"
+#include "device.h" /* FIXME: psim should provide the interface */
 
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
@@ -43,10 +43,6 @@
 #endif
 
 extern char **environ;
-extern char *optarg;
-extern int optind;
-extern int optopt;
-extern int opterr;
 
 void
 printf_filtered(const char *msg, ...)
@@ -55,6 +51,12 @@ printf_filtered(const char *msg, ...)
   va_start(ap, msg);
   vprintf(msg, ap);
   va_end(ap);
+}
+
+void
+flush_stdoutput(void)
+{
+  fflush (stdout);
 }
 
 void
@@ -83,14 +85,6 @@ zfree(void *chunk)
   free(chunk);
 }
 
-static void
-usage(void)
-{
-  printf_filtered("Usage:\n\tpsim [ -t <trace-option> ] [-m model] [-i] [-I] <image> [ <image-args> ... ]\n");
-  trace_usage();
-  error("");
-}
-
 int
 main(int argc, char **argv)
 {
@@ -98,56 +92,35 @@ main(int argc, char **argv)
   const char *name_of_file;
   char *arg_;
   psim_status status;
-  int letter;
-  int print_info = 0;
+  device *root = psim_tree();
 
-  /* check for arguments -- note sim_calls.c also contains argument processing
-     code for the simulator linked within gdb.  */
-  while ((letter = getopt (argc, argv, "Iim:t:")) != EOF)
-    {
-      switch (letter) {
-      case 't':
-	trace_option(optarg);
-	break;
-      case 'm':
-	model_set(optarg);
-	break;
-      case 'i':
-	print_info = 1;
-	break;
-      case 'I':
-	current_model_issue = MODEL_ISSUE_PROCESS;
-	print_info = 2;
-	break;
-      default:
-	usage();
-      }
-    }
-  if (optind >= argc)
-    usage();
-  name_of_file = argv[optind];
+  /* parse the arguments */
+  argv = psim_options(root, argv + 1);
+  if (argv[0] == NULL)
+    psim_usage(0);
+  name_of_file = argv[0];
 
   if (ppc_trace[trace_opts])
     print_options ();
 
   /* create the simulator */
-  system = psim_create(name_of_file);
+  system = psim_create(name_of_file, root);
 
   /* fudge the environment so that _=prog-name */
-  arg_ = (char*)zalloc(strlen(argv[optind]) + strlen("_=") + 1);
+  arg_ = (char*)zalloc(strlen(argv[0]) + strlen("_=") + 1);
   strcpy(arg_, "_=");
-  strcat(arg_, argv[optind]);
+  strcat(arg_, argv[0]);
   putenv(arg_);
 
   /* initialize it */
   psim_init(system);
-  psim_stack(system, &argv[optind], environ);
+  psim_stack(system, argv, environ);
 
   psim_run(system);
 
   /* any final clean up */
-  if (print_info)
-    psim_print_info (system, print_info);
+  if (ppc_trace[trace_print_info])
+    psim_print_info (system, ppc_trace[trace_print_info]);
 
   /* why did we stop */
   status = psim_get_status(system);

@@ -360,6 +360,8 @@ do_write(os_emul_data *emul,
   status = write(d, scratch_buffer, nbytes);
   emul_write_status(processor, status, errno);
   zfree(scratch_buffer);
+
+  flush_stdoutput();
 }
 
 

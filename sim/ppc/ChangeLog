@@ -1,3 +1,17 @@
+Thu Feb 22 14:01:56 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* emul_bugapi.c (emul_bugapi_do_read): New function to handle
+	reads.
+	(emul_bugapi_instruction_call): Add support for .INCHR/.INLN
+	system calls.
+
+	* emul_bugapi.c (emul_bugapi_do_write): Call flush_stdoutput.
+	* emul_netbsd.c (do_write): Call flush_stdoutput.
+
+	* main.c (flush_stdoutput): Do fflush (stdout).
+	* sim_calls.c (flush_stdoutput): Do gdb_flush (gdb_stdout);
+	* sim_callbacks.h (flush_stdoutput): Declare.
+
 Wed Feb 21 10:39:35 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* emul_bugapi.c (bug_mapping): New structure to map bug system

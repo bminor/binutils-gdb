@@ -22,6 +22,20 @@
 #ifndef _EMUL_BUGAPI_C_
 #define _EMUL_BUGAPI_C_
 
+/* Note: this module is called via a table.  There is no benefit in
+   making it inline */
+
+#include "emul_generic.h"
+#include "emul_bugapi.h"
+
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+
 
 /* from PowerPCBug Debugging Package User's Manual, part 2 of 2 and also bug.S - Dale Rahn */
 #define _INCHR		0x000		/* Input character */
@@ -136,13 +150,6 @@ static const struct bug_map bug_mapping[] = {
   { _SYMBOLTA,	".SYMBOLTA -- Attach symbol table" },
   { _SYMBOLDA,	".SYMBOLDA -- Detach symbol table" },
 };
-
-/* Note: this module is called via a table.  There is no benefit in
-   making it inline */
-
-#include "emul_generic.h"
-#include "emul_bugapi.h"
-
 
 #ifndef OEA_START_ADDRESS
 #define OEA_START_ADDRESS 0x100000
@@ -285,6 +292,40 @@ emul_bugapi_instruction_name(int call_id)
   return buffer;
 }
 
+static int
+emul_bugapi_do_read(cpu *processor,
+		    unsigned_word cia,
+		    unsigned_word buf,
+		    int nbytes)
+{
+  unsigned char *scratch_buffer;
+  int status;
+
+  /* get a tempoary bufer */
+  scratch_buffer = (unsigned char *) zalloc(nbytes);
+  
+  /* check if buffer exists by reading it */
+  emul_read_buffer((void *)scratch_buffer, buf, nbytes, processor, cia);
+  
+  /* read */
+  status = read (0, (void *)scratch_buffer, nbytes);
+
+  if (status == -1) {
+    status = 0;
+  }
+
+  if (status > 0) {
+    emul_write_buffer((void *)scratch_buffer, buf, status, processor, cia);
+  
+    /* Bugapi chops off the trailing n, but leaves it in the buffer */
+    if (scratch_buffer[status-1] == '\n' || scratch_buffer[status-1] == '\r')
+      status--;
+  }
+
+  zfree(scratch_buffer);
+  return status;
+}
+
 static void
 emul_bugapi_do_write(cpu *processor,
 		     unsigned_word cia,
@@ -321,6 +362,8 @@ emul_bugapi_do_write(cpu *processor,
 
   if (suffix)
     printf_filtered("%s", suffix);
+
+  flush_stdoutput ();
 }
 
 static int
@@ -331,6 +374,7 @@ emul_bugapi_instruction_call(cpu *processor,
 {
   const int call_id = cpu_registers(processor)->gpr[10];
   const char *my_prefix = "bugapi";
+  unsigned char uc;
 
   ITRACE (trace_os_emul,(" 0x%x %s, r3 = 0x%lx, r4 = 0x%lx\n",
 			 call_id, emul_bugapi_instruction_name (call_id),
@@ -344,6 +388,19 @@ emul_bugapi_instruction_call(cpu *processor,
   default:
     error("emul-bugapi: unimplemented bugapi %s from address 0x%lx\n",
 	  emul_bugapi_instruction_name (call_id), SRR0);
+    break;
+  /* read a single character, output r3 = byte */
+  /* FIXME: Add support to unbuffer input */
+  case _INCHR:
+    if (read (0, &uc, 1) < 0)
+      uc = 0;
+    cpu_registers(processor)->gpr[3] = uc;
+    break;
+  /* read a line of at most 256 bytes, r3 = ptr to 1st byte, output r3 = ptr to last byte+1  */
+  case _INLN:
+    cpu_registers(processor)->gpr[3] += emul_bugapi_do_read(processor, cia,
+							    cpu_registers(processor)->gpr[3],
+							    256);
     break;
   /* output a character, r3 = character */
   case _OUTCHR:
