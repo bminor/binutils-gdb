@@ -1,3 +1,11 @@
+Mon Nov  3 12:36:19 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* objcopy.c (parse_flags): Make flag check case insensitive.
+	Check for `contents' flag.  Give an error for unrecognized flags.
+	(copy_section): If the contents flag was set for a section that
+	had no contents, zero out the new contents.
+	* binutils.texi (objcopy): Document contents section flag.
+
 Sun Nov  2 14:49:56 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* objcopy.c: Move new struct and variable definitions to top of

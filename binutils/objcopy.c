@@ -354,14 +354,31 @@ parse_flags (s)
 	  ++snext;
 	}
 
-#define PARSE_FLAG(fname,fval) if (strncmp (fname, s, len) == 0) ret |= fval;
+      if (0) ;
+#define PARSE_FLAG(fname,fval) \
+  else if (strncasecmp (fname, s, len) == 0) ret |= fval
       PARSE_FLAG ("alloc", SEC_ALLOC);
       PARSE_FLAG ("load", SEC_LOAD);
       PARSE_FLAG ("readonly", SEC_READONLY);
       PARSE_FLAG ("code", SEC_CODE);
       PARSE_FLAG ("data", SEC_DATA);
       PARSE_FLAG ("rom", SEC_ROM);
+      PARSE_FLAG ("contents", SEC_HAS_CONTENTS);
 #undef PARSE_FLAG
+      else
+	{
+	  char *copy;
+
+	  copy = xmalloc (len + 1);
+	  strncpy (copy, s, len);
+	  copy[len] = '\0';
+	  fprintf (stderr, "%s: unrecognized section flag `%s'\n",
+		   program_name, copy);
+	  fprintf (stderr,
+		   "%s: supported flags: alloc, load, readonly, code, data, rom, contents\n",
+		   program_name);
+	  exit (1);
+	}
 
       s = snext;
     }
@@ -1270,6 +1287,22 @@ copy_section (ibfd, isection, obfdarg)
 	{
 	  nonfatal (bfd_get_filename (obfd));
 	}
+      free (memhunk);
+    }
+  else if (p->set_flags && (p->flags & SEC_HAS_CONTENTS) != 0)
+    {
+      PTR memhunk = (PTR) xmalloc ((unsigned) size);
+
+      /* We don't permit the user to turn off the SEC_HAS_CONTENTS
+	 flag--they can just remove the section entirely and add it
+	 back again.  However, we do permit them to turn on the
+	 SEC_HAS_CONTENTS flag, and take it to mean that the section
+	 contents should be zeroed out.  */
+
+      memset (memhunk, 0, size);
+      if (! bfd_set_section_contents (obfd, osection, memhunk, (file_ptr) 0,
+				      size))
+	nonfatal (bfd_get_filename (obfd));
       free (memhunk);
     }
 }

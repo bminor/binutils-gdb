@@ -1004,9 +1004,12 @@ the named section does not exist.
 @item --set-section-flags @var{section}=@var{flags}
 Set the flags for the named section.  The @var{flags} argument is a
 comma separated string of flag names.  The recognized names are
-@samp{alloc}, @samp{load}, @samp{readonly}, @samp{code}, @samp{data},
-and @samp{rom}.  Not all flags are meaningful for all object file
-formats.
+@samp{alloc}, @samp{contents}, @samp{load}, @samp{readonly},
+@samp{code}, @samp{data}, and @samp{rom}.  You can set the
+@samp{contents} flag for a section which does not have contents, but it
+is not meaningful to clear the @samp{contents} flag of a section which
+does have contents--just remove the section instead.  Not all flags are
+meaningful for all object file formats.
 
 @item --add-section @var{sectionname}=@var{filename}
 Add a new section named @var{sectionname} while copying the file.  The
