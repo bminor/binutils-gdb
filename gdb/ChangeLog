@@ -1,3 +1,7 @@
+Mon Jan 19 14:01:28 1998  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* top.c (print_gdb_version): Restore to original message.
+
 Mon Jan 19 13:34:40 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	From cgf@bbc.com (Chris Faylor):
