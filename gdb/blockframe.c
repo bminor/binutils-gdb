@@ -144,7 +144,7 @@ inside_entry_func (CORE_ADDR pc)
 int
 frameless_look_for_prologue (struct frame_info *frame)
 {
-  CORE_ADDR func_start, after_prologue;
+  CORE_ADDR func_start;
 
   func_start = get_frame_func (frame);
   if (func_start)

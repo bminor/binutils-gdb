@@ -1,3 +1,8 @@
+2003-05-23  Theodore A. Roth  <troth@openavr.org>
+
+	* blockframe.c (frameless_look_for_prologue): Remove unused
+	after_prologue variable.
+
 2003-05-23  Mark Kettenis  <kettenis@gnu.org>
 
 	* blockframe.c (get_pc_function_start): Rewrite to avoid
