@@ -1,3 +1,9 @@
+Wed Oct 13 16:50:55 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* config/obj-coffbfd.c (fixup_segment) [DIFF_EXPR_OK]: If
+	sub_symbolP is in the current segment, convert to a PC-relative
+	fixup and discard the symbol.
+
 Wed Oct 13 14:00:02 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* config/obj-ecoff.c (ecoff_build_symbols): Handle st_End symbol
@@ -191,7 +197,7 @@ Sun Sep 26 23:45:29 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 	in different defined segments.
 
 	* write.c (relax_segment): Localize "aim" variable.  If
-	DIFF_EXPR_OK, don't impose checks on symbol segment types.  
+	DIFF_EXPR_OK, don't impose checks on symbol segment types.
 	(fixup_segment) [DIFF_EXPR_OK]: If sub_symbolP is in the current
 	segment, convert to a PC-relative fixup and discard the symbol.
 
@@ -515,7 +521,7 @@ Thu Sep  9 17:10:00 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 	Changes from Jeff Law:
 
 	* config/tc-hppa.c (md_assemble): Fix typo.
-	(pa_ip): Delete unused variables and labels.  Do not check for 
+	(pa_ip): Delete unused variables and labels.  Do not check for
 	unsigned values being < 0, it can't happen.
 	(is_same_frag): Return a value in recursive call case.
 	(pa_callinfo): Delete unused variables and labels.
@@ -548,7 +554,7 @@ Tue Sep  7 10:22:52 1993  Stan Shebs  (shebs@rtl.cygnus.com)
 	* config/obj-coffbfd.c (current_stab_symbol): Fake symbol
 	for stab reader to use.
 	* config/obj-coffbfdh.h (obj_symbol_type): Added fields for
-	stab reader, macros to access. 
+	stab reader, macros to access.
 
 Fri Sep  3 16:44:03 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
@@ -606,7 +612,7 @@ Fri Sep  3 16:44:03 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	* config/tc-hppa.c: Include libhppa.h.
 
-	* config/tc-hppa.h: Delete extern declarations of functions 
+	* config/tc-hppa.h: Delete extern declarations of functions
 	found in libhppa.h.
 
 	* config/tc-hppa.c (pa_space): Rework to avoid unwanted #ifdef
@@ -658,7 +664,7 @@ Wed Aug 25 13:37:46 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 	(pa_parse_nonneg_cmpsub_cmpltr): Delete old useless
 	version.  Handle cases where no completer exists for
 	comb,n or addb,n.
-	(pa_parse_neg_cmpsub_cmpltr): Handle cases where no 
+	(pa_parse_neg_cmpsub_cmpltr): Handle cases where no
 	completer exists for comb,n or addb,n.  Make logic
 	mirror that of pa_parse_nonneg_cmpsub_cmpltr.
 	(pa_parse_nonneg_add_cmpltr): Likewise.
@@ -1589,7 +1595,7 @@ Sun Jun 20 18:18:26 1993  Ken Raeburn  (raeburn@poseidon.cygnus.com)
 	* subsegs.c (subseg_new) [BFD_ASSEMBLER]: Name argument is const.
 
 Thu Jun 17 16:53:56 1993  david d `zoo' zuhn (zoo@cygnus.com)
-	
+
 	* Makefile.in: canonicalize install.sh; for use within
 	this directory (and subdirs)
 
@@ -2177,7 +2183,7 @@ Thu Apr  8 15:51:28 1993  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
 
 Thu Apr  8 15:15:02 1993  Roland H. Pesch  (pesch@fowanton.cygnus.com)
 
-	* doc/Makefile.in: update dvi, clean targets for new source 
+	* doc/Makefile.in: update dvi, clean targets for new source
                            file structure
 
 Thu Apr  8 12:52:46 1993  Ian Lance Taylor  (ian@cygnus.com)
@@ -3234,7 +3240,7 @@ Mon Nov 23 11:00:16 1992  Ken Raeburn  (raeburn@cygnus.com)
 	could be doing emulation.
 
 Thu Nov 19 11:47:19 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
-    
+
     	z8000 documentation
 	* doc/Makefile.in, doc/all.m4, doc/as-all.texinfo, doc/as.texinfo:
 	all modified.
@@ -3326,7 +3332,7 @@ Sat Oct 10 12:33:45 1992  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
 
 Mon Oct  5 09:28:57 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
-	 fix i960+non-bfd coff bit rot. 
+	 fix i960+non-bfd coff bit rot.
 	* obj-coff.c (c_dot_file_symbol, obj_coff_ln, obj_coff_line):
 	support for C source listings. (obj_coff_endef): look in the right
 	part of the symbol for the symbol name
@@ -3388,7 +3394,7 @@ Tue Sep 22 13:02:07 1992  Sean Eric Fagan  (sef@cygnus.com)
 	format doesn't understand addends. (obj_coff_lcomm): (maybe temporarily)
 	allocate lcomm in .data rather than in .bss.  It seems that some
 	tools can't cope with a non-zero sized bss before linkage.
- 
+
 Tue Sep 22 15:10:51 1992  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	* tc-m68k.c: Replace "enum m68k_architecture" with "int"
@@ -3436,7 +3442,7 @@ Sun Sep 13 20:30:10 1992  Ian Lance Taylor  (ian@cygnus.com)
 Fri Sep 11 10:21:04 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	Support for i386 coff
-	* obj-coffbfd.h : added stuff 
+	* obj-coffbfd.h : added stuff
 	* tc-i386.c (tc_coff_fix2rtype): new function
 	* tc-i386.h : new coff defines
 
@@ -3713,7 +3719,7 @@ Tue Jun  9 07:54:54 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 	as data0_frchainP
 
 	* write.c (write_object_file): various changes to handle data in
-	the BSS segment in much the same was as stuff in the DATA segment. 
+	the BSS segment in much the same was as stuff in the DATA segment.
 
 	* tc-m68k.c (m68kip): Fix typo so that only arch's >=68020 do
 	pcrel data stuff. (md_estimate_size_before_relax): when relaxing a
@@ -3825,7 +3831,7 @@ Fri Mar 13 08:03:03 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 Thu Mar 12 04:42:38 1992  K. Richard Pixley  (rich@cygnus.com)
 
 	* tc-m68k.h, te-sun3.h: moved LOCAL_LABELS_FB definition from
-	  tc-m68k.h to te-sun3.h. 
+	  tc-m68k.h to te-sun3.h.
 
 Wed Mar 11 23:32:42 1992  K. Richard Pixley  (rich@cygnus.com)
 
@@ -3884,7 +3890,7 @@ Tue Feb 25 14:17:15 1992  Steve Chamberlain  (sac at rtl.cygnus.com)
 
 	* expr.c: If an expression is single comma, then return with
 	SEG_ABSENT rather than an error - since the sparc front end does
-	really strange things with things like fbge,a 
+	really strange things with things like fbge,a
 
 	* as.h: include bfd.h if using many sections
 	* expr.c: LOCAL_LABELS_FB had been changed to lower case - so
@@ -4005,7 +4011,7 @@ Mon Feb 17 07:51:06 1992  K. Richard Pixley  (rich at cygnus.com)
 
 	* config/tc-ns32k.c: actually make tc_aout_fix_to_chars work
 	  rather than abort.
-				       
+
 	* nearly everything.  flush ChangeLog, package as gas-1.92.1.
 	  ChangeLog's prior to this are sketchy at best.  I have logs.
 	  They just aren't ChangeLogs.
