@@ -1015,7 +1015,7 @@ mmix_elf_reloc (abfd, reloc_entry, symbol, data, input_section,
 				   bfd_asymbol_name (symbol),
 				   reloc_target_output_section);
 }
-
+
 /* Relocate an MMIX ELF section.  Modified from elf32-fr30.c; look to it
    for guidance if you're thinking of copying this.  */
 
@@ -1190,7 +1190,7 @@ mmix_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 
   return true;
 }
-
+
 /* Perform a single relocation.  By default we use the standard BFD
    routines.  A few relocs we have to do ourselves.  */
 
@@ -1349,7 +1349,7 @@ mmix_final_link_relocate (howto, input_section, contents,
 
   return r;
 }
-
+
 /* Return the section that should be marked against GC for a given
    relocation.  */
 
@@ -1397,7 +1397,7 @@ mmix_elf_gc_mark_hook (abfd, info, rel, h, sym)
 
   return NULL;
 }
-
+
 /* Sort register relocs to come before expanding relocs.  */
 
 static int
@@ -1493,7 +1493,7 @@ mmix_elf_check_relocs (abfd, info, sec, relocs)
 
   return true;
 }
-
+
 /* Change symbols relative to the reg contents section to instead be to
    the register section, and scale them down to correspond to the register
    number.  */
@@ -1691,7 +1691,7 @@ mmix_elf_final_link (abfd, info)
 
   return true;
 }
-
+
 #define ELF_ARCH		bfd_arch_mmix
 #define ELF_MACHINE_CODE 	EM_MMIX
 
