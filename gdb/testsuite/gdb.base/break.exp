@@ -872,8 +872,31 @@ if ![target_info exists use_gdb_stub] {
 #
 # run until the breakpoint at a small function
 #
-gdb_test continue "Continuing\\..*Breakpoint \[0-9\]+, marker4 \\(d=177601976\\) at .*$srcfile:51.*51\[\t \]+void.*marker4.*" \
-			"run until breakpoint set at small function, optimized file"
+
+#
+# Add a second pass pattern.  The behavior differs here between stabs
+# and dwarf for one-line functions.  Stabs preserves two line symbols
+# (one before the prologue and one after) with the same line number, 
+# but dwarf regards these as duplicates and discards one of them.
+# Therefore the address after the prologue (where the breakpoint is)
+# has no exactly matching line symbol, and GDB reports the breakpoint
+# as if it were in the middle of a line rather than at the beginning.
+
+send_gdb "continue\n"
+gdb_expect {
+    -re "Breakpoint $decimal, marker4 \\(d=177601976\\) at .*$srcfile:51\[\r\n\]+51\[\t \]+void marker4.*" {
+	pass "run until breakpoint set at small function, optimized file"
+    }
+    -re "Breakpoint $decimal, $hex in marker4 \\(d=177601976\\) at .*$srcfile:51\[\r\n\]+51\[\t \]+void marker4.*" {
+	pass "run until breakpoint set at small function, optimized file"
+    }
+    -re ".*$gdb_prompt " {
+	fail "run until breakpoint set at small function, optimized file"
+    }
+    timeout {
+	fail "run until breakpoint set at small function, optimized file (timeout)"
+    }
+}
 
 
 # Reset the default arguments for VxWorks

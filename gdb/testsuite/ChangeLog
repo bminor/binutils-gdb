@@ -5,6 +5,17 @@
 	Instead, it is permissible for gdb to stop on the line of the
 	call itself.
 
+2000-05-12  Michael Snyder  <msnyder@.cygnus.com>
+
+	* gdb.base/break.exp (bp on small function, optimized file):
+	Add a second pass pattern.  The behavior differs here between stabs
+	and dwarf for one-line functions.  Stabs preserves two line symbols
+	(one before the prologue and one after) with the same line number,
+	but dwarf regards these as duplicates and discards one of them.
+	Therefore the address after the prologue (where the breakpoint is)
+	has no exactly matching line symbol, and GDB reports the breakpoint
+	as if it were in the middle of a line rather than at the beginning.
+
 2000-05-08  Michael Snyder  <msnyder@seadog.cygnus.com>
 
 	* gdb.base/interrupt.exp: Make "pass" message say "send" 
