@@ -1,21 +1,20 @@
-#
-# Makefile
-#   Copyright (C) 1992 Cygnus Support
-#
-# This file is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2 of the License, or
-# (at your option) any later version.
-# 
-# This program is distributed in the hope that it will be useful,
+# Copyright (C) 1992 Free Software Foundation, Inc.
+# This file is part of the GNU C Library.
+
+# The GNU C Library is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Library General Public License as
+# published by the Free Software Foundation; either version 2 of the
+# License, or (at your option) any later version.
+
+# The GNU C Library is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-# 
-# You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
-#
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Library General Public License for more details.
+
+# You should have received a copy of the GNU Library General Public
+# License along with the GNU C Library; see the file COPYING.LIB.  If
+# not, write to the Free Software Foundation, Inc., 675 Mass Ave,
+# Cambridge, MA 02139, USA.
 
 #
 # Makefile for mmalloc directory
@@ -27,10 +26,13 @@ srcdir = .
 
 prefix =	/usr/local
 
-bindir =	$(prefix)/bin
+exec_prefix = $(prefix)
+
+bindir =	$(exec_prefix)/bin
+libdir =	$(exec_prefix)/lib
+
 datadir =	$(prefix)/lib
-libdir =	$(prefix)/lib
-mandir =	$(datadir)/man
+mandir =	$(prefix)/man
 man1dir =	$(mandir)/man1
 man2dir =	$(mandir)/man2
 man3dir =	$(mandir)/man3
@@ -40,7 +42,7 @@ man6dir =	$(mandir)/man6
 man7dir =	$(mandir)/man7
 man8dir =	$(mandir)/man8
 man9dir =	$(mandir)/man9
-infodir =	$(datadir)/info
+infodir =	$(prefix)/info
 includedir =	$(prefix)/include
 docdir =	$(datadir)/doc
 
@@ -52,15 +54,13 @@ INSTALL_DATA =	$(INSTALL)
 
 AR =		ar
 AR_FLAGS =	qv
+CFLAGS =	-g
 BISON =		bison
 MAKEINFO =	makeinfo
 RANLIB =	ranlib
 RM =		rm
 
 TARGETLIB =	libmmalloc.a
-
-MINUS_G =	-g
-CFLAGS =	$(MINUS_G) -I. -I$(srcdir)/../include $(HDEFINES)
 
 CFILES =	mcalloc.c mfree.c mmalloc.c mmcheck.c mmemalign.c mmstats.c \
 		mmtrace.c mrealloc.c mvalloc.c mmap-sup.c attach.c detach.c \
@@ -75,12 +75,22 @@ OFILES =	mcalloc.o mfree.o mmalloc.o mmcheck.o mmemalign.o mmstats.o \
 #### Host, target, and site specific Makefile fragments come in here.
 ###
 
+.c.o:
+	$(CC) -c $(CFLAGS) -I. -I$(srcdir)/../include $(HDEFINES) $<
+
 # Do we want/need any config overrides?
 #	 
 
 STAGESTUFF =	$(TARGETLIB) *.o
 
 all:		$(TARGETLIB)
+
+info:
+clean-info:
+install-info:
+dvi:
+installcheck:
+check:
 
 install:	all
 		$(INSTALL_DATA) $(TARGETLIB) $(libdir)/$(TARGETLIB).n
@@ -139,15 +149,19 @@ de-stage4:	force
 etags tags:	TAGS
 
 TAGS:		$(CFILES)
-		etags $(HFILES) $(CFILES)
+	etags `for i in $(HFILES) $(CFILES); do echo $(srcdir)/$$i ; done`
 
 ls:
 		@echo Makefile $(HFILES) $(CFILES)
 
 # Need to deal with profiled libraries, too.
 
-clean:
+mostlyclean clean:
 		rm -f *.a *.o core errs *~ \#* TAGS *.E a.out errors 
+
+distclean realclean:	clean 
+		rm -f config.status
+		rm -f Makefile depend
 
 force:
 
