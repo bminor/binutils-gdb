@@ -769,7 +769,7 @@ push_dummy_frame ()
       for (i = 0; i < num_bytes; i += 4)
 	{
 	  /* Note:  word is in target byte order.  */
-	  read_register_gen (LR0_REGNUM + i / 4, &word, 4);
+	  read_register_gen (LR0_REGNUM + i / 4, &word);
 	  write_memory (rfb - num_bytes + i, &word, 4);
 	}
     }
