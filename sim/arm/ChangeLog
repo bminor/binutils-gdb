@@ -1,5 +1,13 @@
 2000-07-04  Alexandre Oliva  <aoliva@redhat.com>
 
+	* armemu.h (PSR_FBITS, PSR_SBITS, PSR_XBITS, PSR_CBITS): New.
+	(SETPSR_F, SETPSR_S, SETPSR_X, SETPSR_C): New macros.
+	(SETPSR, SET_INTMODE, SETCC): Removed.
+	* armsupp.c (ARMul_FixCPSR, ARMul_FixSPSR): Do not test bit
+	mask.  Use SETPSR_* to modify PSR.
+	(ARMul_SetCPSR): Load all bits from value.
+	* armemu.c (ARMul_Emulate, msr): Do not test bit mask.
+
 	* armemu.c (ARMul_Emulate): Compute writeback value before
 	loading, since the offset register may be the destination
 	register.

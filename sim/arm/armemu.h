@@ -102,6 +102,11 @@ extern ARMword isize;
 #define ASSIGNINT(res) state->IFFlags = (((res) >> 6) & 3)
 #define ASSIGNR15INT(res) state->IFFlags = (((res) >> 26) & 3) ;
 
+#define PSR_FBITS (0xff000000L)
+#define PSR_SBITS (0x00ff0000L)
+#define PSR_XBITS (0x0000ff00L)
+#define PSR_CBITS (0x000000ffL)
+
 #define CCBITS (0xf0000000L)
 #define INTBITS (0xc0L)
 
@@ -159,9 +164,10 @@ extern ARMword isize;
 #endif
 
 #define GETSPSR(bank) bank>0?state->Spsr[bank]:ECC | EINT | EMODE ;
-#define SETPSR(d,s) d = (s) & (ARMword)(CCBITS | INTBITS | MODEBITS)
-#define SETINTMODE(d,s) d = ((d) & CCBITS) | ((s) & (INTBITS | MODEBITS))
-#define SETCC(d,s) d = ((d) & (INTBITS | MODEBITS)) | ((s) & CCBITS)
+#define SETPSR_F(d,s) d = ((d) & ~PSR_FBITS) | ((s) & PSR_FBITS)
+#define SETPSR_S(d,s) d = ((d) & ~PSR_SBITS) | ((s) & PSR_SBITS)
+#define SETPSR_X(d,s) d = ((d) & ~PSR_XBITS) | ((s) & PSR_XBITS)
+#define SETPSR_C(d,s) d = ((d) & ~PSR_CBITS) | ((s) & PSR_CBITS)
 #define SETR15PSR(s) if (state->Mode == USER26MODE) { \
                         state->Reg[15] = ((s) & CCBITS) | R15PC | ER15INT | EMODE ; \
                         ASSIGNN((state->Reg[15] & NBIT) != 0) ; \

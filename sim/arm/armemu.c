@@ -1113,7 +1113,7 @@ ARMul_Emulate26 (register ARMul_State * state)
 		    }
 		}
 #endif
-	      if (DESTReg == 15 && BITS (17, 18) == 0)
+	      if (DESTReg == 15)
 		{		/* MSR reg to CPSR */
 		  UNDEF_MSRPC;
 		  temp = DPRegRHS;
@@ -1241,7 +1241,7 @@ ARMul_Emulate26 (register ARMul_State * state)
 		  break;
 		}
 #endif
-	      if (DESTReg == 15 && BITS (17, 18) == 0)
+	      if (DESTReg == 15)
 		{		/* MSR */
 		  UNDEF_MSRPC;
 		  ARMul_FixSPSR (state, instr, DPRegRHS);
@@ -1590,7 +1590,7 @@ ARMul_Emulate26 (register ARMul_State * state)
 	      break;
 
 	    case 0x32:		/* TEQ immed and MSR immed to CPSR */
-	      if (DESTReg == 15 && BITS (17, 18) == 0)
+	      if (DESTReg == 15)
 		{		/* MSR immed to CPSR */
 		  ARMul_FixCPSR (state, instr, DPImmRHS);
 		}
@@ -1655,7 +1655,7 @@ ARMul_Emulate26 (register ARMul_State * state)
 	      break;
 
 	    case 0x36:		/* CMN immed and MSR immed to SPSR */
-	      if (DESTReg == 15 && BITS (17, 18) == 0)	/* MSR */
+	      if (DESTReg == 15)	/* MSR */
 		ARMul_FixSPSR (state, instr, DPImmRHS);
 	      else
 		{

@@ -193,8 +193,7 @@ ARMul_GetCPSR (ARMul_State * state)
 void
 ARMul_SetCPSR (ARMul_State * state, ARMword value)
 {
-  state->Cpsr = CPSR;
-  SETPSR (state->Cpsr, value);
+  state->Cpsr = value;
   ARMul_CPSRAltered (state);
 }
 
@@ -207,22 +206,17 @@ void
 ARMul_FixCPSR (ARMul_State * state, ARMword instr, ARMword rhs)
 {
   state->Cpsr = CPSR;
-  if (state->Bank == USERBANK)
-    {				/* Only write flags in user mode */
-      if (BIT (19))
-	{
-	  SETCC (state->Cpsr, rhs);
-	}
+  if (state->Bank != USERBANK)
+    {				/* In user mode, only write flags */
+      if (BIT (16))
+	SETPSR_C (state->Cpsr, rhs);
+      if (BIT (17))
+	SETPSR_X (state->Cpsr, rhs);
+      if (BIT (18))
+	SETPSR_S (state->Cpsr, rhs);
     }
-  else
-    {				/* Not a user mode */
-      if (BITS (16, 19) == 9)
-	SETPSR (state->Cpsr, rhs);
-      else if (BIT (16))
-	SETINTMODE (state->Cpsr, rhs);
-      else if (BIT (19))
-	SETCC (state->Cpsr, rhs);
-    }
+  if (BIT (19))
+    SETPSR_F (state->Cpsr, rhs);
   ARMul_CPSRAltered (state);
 }
 
@@ -263,12 +257,14 @@ ARMul_FixSPSR (ARMul_State * state, ARMword instr, ARMword rhs)
 {
   if (BANK_CAN_ACCESS_SPSR (state->Bank))
     {
-      if (BITS (16, 19) == 9)
-	SETPSR (state->Spsr[state->Bank], rhs);
-      else if (BIT (16))
-	SETINTMODE (state->Spsr[state->Bank], rhs);
-      else if (BIT (19))
-	SETCC (state->Spsr[state->Bank], rhs);
+      if (BIT (16))
+	SETPSR_C (state->Spsr[state->Bank], rhs);
+      if (BIT (17))
+	SETPSR_X (state->Spsr[state->Bank], rhs);
+      if (BIT (18))
+	SETPSR_S (state->Spsr[state->Bank], rhs);
+      if (BIT (19))
+	SETPSR_F (state->Spsr[state->Bank], rhs);
     }
 }
 
