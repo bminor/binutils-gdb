@@ -3,7 +3,7 @@ Mon Jan 13 22:39:08 1997  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* config.bfd (tic80-*-*): Don't require 'coff'.
 
-start-sanitize-tic80
+end-sanitize-tic80
 start-sanitize-v850
 Mon Jan 13 19:36:25 1997  Michael Meissner  <meissner@tiktok.cygnus.com>
 
