@@ -1,3 +1,153 @@
+Mon May 15 22:04:51 2000  J"orn Rennecke <amylaar@cygnus.co.uk>
+
+sh-dsp support, simulator speedup by using host byte order:
+
+	* Makefile.in (interp.o): Depends on ppi.c .
+	(ppi.c): New rule.
+	* gencode.c (printonmatch, think, genopc): Deleted.
+	(MAX_NR_STUFF): Now 42.
+	(tab): Add SH-DSP CPU instructions.
+	Amalgamate ldc / stc / lds / sts instructions with similar
+	bit patterns.  Fix opcodes of stc Rm_BANK,@-<REG_N>.
+	Fix semantics of lds.l @<REG_N>+,MACH (no sign extend).
+	(movsxy_tab): New array.
+	For movs, change MMMM field to GGGG, and mmmm field to MMMM.
+	Added entries for movx, movy and parallel processing insns.
+	(ppi_tab): New array.
+	(qfunc): Stabilize sort.
+	(expand_opcode): Handle [01][01]NN, [01][01]xx and [01][01]yy.
+	Handle 'M', 'G' 's' 'X', 'a', 'Y' and 'A'.
+	(dumptable): Now takes three arguments.  Changed all callers.
+	Emit just one contigous jump table.
+	(filltable): Now takes an argument.  Changed all callers.
+	Make index static.
+	(ppi_moves, expand_ppi_code, ppi_filltable, ppi_gensim): New functions.
+	(gensim_caselist): New function, broken out of gensim.
+	Handle opcode fields 'x', 'y', 's', 'M', 'G', 'X', 'a', and 'Y'.
+	Handle ref '9'.
+	(gensim): Handle 'N' in code field and '8' in refs field.
+	Call gensim_caselist - twice.
+	(ppi_index): New static variable.
+	(main): Unsupport default action.
+	Add dsp support for -x / -s option.  Add -p option.
+	* interp.c (sh_jump_table, sh_dsp_table, ppi_table): Declare.
+	(saved_state_type): Rearrange to allow amalgamated ldc / stc /
+	lds / sts to work efficiently.
+	(target_dsp): New static variable.
+	(GBR, VBR, SSR, SPC, MACH, MACL): Reflect saved_state_type change.
+	(FPUL, Rn_BANK, SET_Rn_BANK, M, Q, S, T, SR_BL, SR_RB): Likewise.
+	(SR_MD, SR_RC, SET_SR_BIT, GET_SR, SET_RC, GET_FPSCR): Likewise.
+	(RS, RE, MOD, MOD_ME, DSP_R): Likewise.
+	(set_fpscr1): Likewise.  Use target_dsp to check for dsp.
+	(MOD_MSi, SIG_BUS_FETCH): Deleted.
+	(CREG, SREG, PR, SR_MASK_DMY, SR_MASK_DMX, SR_DMY): New macros.
+	(SR_DMX, DSR, MOD_DELTA, GET_DSP_GRD): Likewise.
+	(SET_MOD): Reflect saved_state_type change.  Set MOD_DELTA instead
+	of MOD_MS, and encode SR_DMY / SR_DMX into high word of MOD_ME.
+	(set_sr): Reflect saved_state_type change.  Fix SR_RB handling.
+	Use SET_MOD.
+	(MA, L, TL, TB): Now controlled by ACE_FAST.
+	(SEXT32): Just cast to int.
+	(SIGN32): Fixed to only shift by 31.
+	(CHECK_INSN_PTR): SIGBUS at insn fetch now represented by insn_end 0.
+	(ppi_insn): Declare.
+	(ppi.c): Include.
+	(init_dsp): Set target_dsp.  When it changes, switch end of
+	sh_jump_table with sh_dsp_table.
+	(sim_resume) Don't declare sh_jump_table0.  Use sh_jump_table instead.
+	Don't Declare PR if it's #defined.
+	Fix single-stepping (Was broken in Mar  6 16:59:10 patch).
+	(sim_store_register, sim_read_register): Translate accesses to
+	reflect saved_state_type change.
+
+	* interp.c (set_sr): Set sr.
+	(SET_RC, MOD, MOD_MS, MOD_ME, SET_MOD, MOD_MS, MOD_ME): New macros.
+	(set_fpscr1): Don't bank-switch fpu registers when simulating sh-dsp.
+	(DSP_R): Fix definition.
+	(sim_resume): Remove outdated SET_SR use.
+
+	* interp.c (saved_state): New members for struct member asregs:
+	rs, re, insn_end, xram_start, yram_start.
+	(struct loop_bounds): New struct.
+	(SKIP_INSN): New macro.
+	(get_loop_bounds): New function.
+	(endianw): Renamed to global_endianw.
+	(maskw): negated bits.
+	(PC): Now insn_ptr.
+	(SR_MASK_RC, SR_RC_INCREMENT, SR_RC, RAISE_EXCEPTION): New macros.
+	(RS, RE, DSP_R, DSP_GRD, A1, A0, X0, X1, Y0, Y1, M0, A1G): Likewise.
+	(M1, A0G, RIAT, PT2H, PH2T, SET_NIP, CHECK_INSN_PTR): Likewise.
+	(SIG_BUS_FETCH): Likewise
+	(raise_exception, riat_fast): New functions.
+	(raise_buserror, sim_stop): Use raise_exception.
+	(PROCESS_SPECIAL_ADDRESS): Use xram_start / yram_start.
+	(BUSERROR, WRITE_BUSERROR, READ_BUSERROR):
+	Reverse sense of mask argument.
+	(FP_OP, set_dr): Use RAISE_EXCEPTION.
+	(wlat_fast, wwat_fast, wbat_fast, rlat_fast, rwat_fast, rbat_fast):
+	Declare.  Remove redundant masking.
+	(wwat_fast, rwat_fast): Add argument endianw.  Changed callers.
+	(MA): Updated for change pc -> PC.
+	(Delay_Slot): Use RIAT.
+	(empty): Deleted.
+	(trap): Remove argument little_endian.  Add argument endianw.
+	Changed all callers.  Use raise_exception.
+	(macw): Add argument endainw.  Changed all callers.
+	(init_dsp): New function, extended after broken out of init_pointers.
+	(sim_resume): Replace pc with insn_ptr.  Replace little_endian with
+	endianw.  Replace nia with nip.  Reverse sense of maskb / maskw /
+	maskl.  Implement logic for zero-overhead loops.  Don't try to
+	interpret garbage when getting a SIGBUS at insn fetch.
+	(sim_open): Call init_dsp.
+	* gencode.c (tab): Use SET_NIP instead of nia = .  Use PH2T / PT2H /
+	RAISE_EXCEPTION where appropriate.
+	Add extra cycles for brai, braf , bsr, bsrf, jmp, jsr.
+
+	* interp.c (sim_store_register, sim_fetch_register):
+	Do proper endianness switch.
+
+	* interp.c (saved_state_type): New members for struct member asregs:
+	xymem_select, xmem, ymem, xmem_offset, ymem_offset.
+	(special_address): Delete.
+	(BUSERROR): Now a two-argument predicate.
+	(PROCESS_SPECIAL_ADDRESS, WRITE_BUSERROR, READ_BUSERROR): New macros.
+	(wlat_little, wwat_little, wbat_any, wlat_big, wwat_big): Delete.
+	(process_wlat_addr, process_wwat_addr): New functions.
+	(process_wbat_addr, process_rlat_addr, process_rwat_addr): Likewise.
+	(process_rbat_addr): Likewise.
+	(wlat_fast, wwat_fast, wbat_fast): Use WRITE_BUSERROR.
+	(rlat_little, rwat_little, rbat_any, rlat_big, rwat_big): Delete.
+	(rlat_fast, rwat_fast, rbat_fast): Use READ_BUSERROR.
+	(RWAT, RLAT, RBAT, WWAT, WLAT, WBAT): Delete SLOW versions.
+	(do_rdat, trap): Delete SLOW code.
+	(SEXT32, SIGN32): New macros.
+	(swap, swap16): Now integer in - integer out.  Changed all callers.
+	(strswaplen, strnswap): Delete SLOW versions.
+	(init_pointers): Initialize dsp memory selection (preliminary).
+	(sim_store_register, sim_fetch_register): Use swap instead of
+	big / little endian read / write functions.
+
+	* interp.c (maskl): Deleted.
+	(endianw, endianb): New variables.
+	(special_address): Now inline.
+	(bp_holder): Put raising of buserror there, rename to:
+	(raise_buserror).
+	(BUSERROR): Now yields a value.  Changed all users.
+	(wbat_big): Delete.
+	(wlat_fast, wwat_fast, wbat_fast): New functions.
+	(rlat_fast, rwat_fast, rbat_fast): Likewise.
+	(RWAT, RLAT, RBAT, WWAT, WLAT, WBAT): Use new functions.
+	(do_rdat, do_wdat): Likewise.  Take maskl argument instead of
+	little_endian one.  Changed caller macros.
+	(swap, swap16): Use w[rw]lat_big / w[rw]lat_little directly.
+	(strswaplen, strnswap): New functions.
+	(trap): Use them to fix up endian mismatches;
+	disable SYS_execve and SYS_execv; fix double address translation for
+	SYS_pipe and SYS_stat.
+	(sym_write, sym_read): Add endianness translation.
+	(sym_store_register, sym_fetch_register): Add maskl local variable.
+	(sim_open): Set endianw and endianb.
+
 Thu Sep  2 18:15:53 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure: Regenerated to track ../common/aclocal.m4 changes.

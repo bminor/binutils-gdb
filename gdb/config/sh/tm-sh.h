@@ -101,8 +101,10 @@ extern CORE_ADDR sh_skip_prologue PARAMS ((CORE_ADDR));
    of data in register N.  */
 
 #define REGISTER_VIRTUAL_TYPE(N) \
-	((((N) >= FP0_REGNUM && (N) <= FP15_REGNUM)	\
-	  || (N) == FPUL_REGNUM)			\
+	(((((N) >= FP0_REGNUM && (N) <= FP15_REGNUM)		\
+	   || (N) == FPUL_REGNUM)				\
+	  && TARGET_ARCHITECTURE->mach != bfd_mach_sh_dsp	\
+	  && TARGET_ARCHITECTURE->mach != bfd_mach_sh3_dsp)	\
 	 ? builtin_type_float : builtin_type_int)
 
 /* Initializer for an array of names of registers.
@@ -135,12 +137,27 @@ extern char **sh_register_names;
 #define SR_REGNUM 	22
 #define FPUL_REGNUM	23
 #define FPSCR_REGNUM	24
+#define DSR_REGNUM	24
 #define FP0_REGNUM	25
 #define FP15_REGNUM	40
+#define A0G_REGNUM	25
+#define A0_REGNUM	26
+#define A1G_REGNUM	27
+#define A1_REGNUM	28
+#define M0_REGNUM	29
+#define M1_REGNUM	30
+#define X0_REGNUM	31
+#define X1_REGNUM	32
+#define Y0_REGNUM	33
+#define Y1_REGNUM	34
+#define MOD_REGNUM	40
 #define SSR_REGNUM	41
 #define SPC_REGNUM	42
 #define R0B0_REGNUM	43
 #define R0B1_REGNUM	51
+#define RS_REGNUM	43
+#define RE_REGNUM	44
+#define R0B_REGNUM	51
 
 #define NUM_REALREGS	59
 

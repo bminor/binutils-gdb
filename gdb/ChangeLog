@@ -1,3 +1,17 @@
+Mon May 15 21:27:27 2000  J"orn Rennecke <amylaar@cygnus.co.uk>
+
+	* sh-tdep.c (sh_dsp_reg_names, sh3_dsp_reg_names): New arrays.
+	(sh_processor_type_table): Add entries for bfd_mach_sh_dsp and
+	 bfd_mach_sh3_dsp.
+	(sh_show_regs): Floating point registers are called fr0-fr15.
+	For sh4, display fpul, fpscr and fr0-fr15 / dr0-dr14 as appropriate.
+	Handle sh-dsp and sh3-dsp.
+	config/sh/tm-sh.h (REGISTER_VIRTUAL_TYPE): sh-dsp / sh3-dsp
+	don't have floating point registers.
+	(DSR_REGNUM, A0G_REGNUM, A0_REGNUM, A1G_REGNUM, A1_REGNUM): Define.
+	(M0_REGNUM, M1_REGNUM, X0_REGNUM, X1_REGNUM, Y0_REGNUM): Likewise.
+	(Y1_REGNUM, MOD_REGNUM, RS_REGNUM, RE_REGNUM, R0B_REGNUM): Likewise.
+
 2000-05-15  Eli Zaretskii  <eliz@is.elta.co.il>
 
 	* Makefile.in (gdbtypes.o, varobj.o): Depend on wrapper.h.
