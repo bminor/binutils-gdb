@@ -22,6 +22,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
  * 80386 instruction printer by Pace Willisson (pace@prep.ai.mit.edu)
  * July 1988
  *  modified by John Hassey (hassey@dg-rtp.dg.com)
+ *  x86-64 support added by Jan Hubicka (jh@suse.cz)
  */
 
 /*
@@ -62,8 +63,31 @@ struct dis_private
    when we can.  */
 #define FWAIT_OPCODE (0x9b)
 
+/* Set to 1 for 64bit mode disassembly.  */
+static int mode_64bit;
+
 /* Flags for the prefixes for the current instruction.  See below.  */
 static int prefixes;
+
+/* REX prefix the current instruction.  See below.  */
+static int rex;
+/* Bits of REX we've already used.  */
+static int rex_used;
+#define REX_MODE64	8
+#define REX_EXTX	4
+#define REX_EXTY	2
+#define REX_EXTZ	1
+/* Mark parts used in the REX prefix.  When we are testing for
+   empty prefix (for 8bit register REX extension), just mask it
+   out.  Otherwise test for REX bit is excuse for existence of REX
+   only in case value is nonzero.  */
+#define USED_REX(value)					\
+  {							\
+    if (value)						\
+      rex_used |= (rex & value) ? (value) | 0x40 : 0;	\
+    else						\
+      rex_used |= 0x40;					\
+  }
 
 /* Flags for prefixes which we somehow handled when printing the
    current instruction.  */
@@ -121,6 +145,8 @@ fetch_data (info, addr)
 #define XX NULL, 0
 
 #define Eb OP_E, b_mode
+#define Ev OP_E, v_mode
+#define Ed OP_E, d_mode
 #define indirEb OP_indirE, b_mode
 #define Gb OP_G, b_mode
 #define Ev OP_E, v_mode
@@ -133,40 +159,74 @@ fetch_data (info, addr)
 #define Gv OP_G, v_mode
 #define Gw OP_G, w_mode
 #define Rd OP_Rd, d_mode
+#define Rm OP_Rd, m_mode
 #define Ib OP_I, b_mode
 #define sIb OP_sI, b_mode	/* sign extened byte */
 #define Iv OP_I, v_mode
+#define Iq OP_I, q_mode
+#define Iv64 OP_I64, v_mode
 #define Iw OP_I, w_mode
 #define Jb OP_J, b_mode
 #define Jv OP_J, v_mode
-#define Cd OP_C, d_mode
-#define Dd OP_D, d_mode
+#define Cm OP_C, m_mode
+#define Dm OP_D, m_mode
 #define Td OP_T, d_mode
 
-#define eAX OP_REG, eAX_reg
-#define eBX OP_REG, eBX_reg
-#define eCX OP_REG, eCX_reg
-#define eDX OP_REG, eDX_reg
-#define eSP OP_REG, eSP_reg
-#define eBP OP_REG, eBP_reg
-#define eSI OP_REG, eSI_reg
-#define eDI OP_REG, eDI_reg
-#define AL OP_REG, al_reg
-#define CL OP_REG, cl_reg
-#define DL OP_REG, dl_reg
-#define BL OP_REG, bl_reg
-#define AH OP_REG, ah_reg
-#define CH OP_REG, ch_reg
-#define DH OP_REG, dh_reg
-#define BH OP_REG, bh_reg
-#define AX OP_REG, ax_reg
-#define DX OP_REG, dx_reg
-#define indirDX OP_REG, indir_dx_reg
+#define RMeAX OP_REG, eAX_reg
+#define RMeBX OP_REG, eBX_reg
+#define RMeCX OP_REG, eCX_reg
+#define RMeDX OP_REG, eDX_reg
+#define RMeSP OP_REG, eSP_reg
+#define RMeBP OP_REG, eBP_reg
+#define RMeSI OP_REG, eSI_reg
+#define RMeDI OP_REG, eDI_reg
+#define RMrAX OP_REG, rAX_reg
+#define RMrBX OP_REG, rBX_reg
+#define RMrCX OP_REG, rCX_reg
+#define RMrDX OP_REG, rDX_reg
+#define RMrSP OP_REG, rSP_reg
+#define RMrBP OP_REG, rBP_reg
+#define RMrSI OP_REG, rSI_reg
+#define RMrDI OP_REG, rDI_reg
+#define RMAL OP_REG, al_reg
+#define RMAL OP_REG, al_reg
+#define RMCL OP_REG, cl_reg
+#define RMDL OP_REG, dl_reg
+#define RMBL OP_REG, bl_reg
+#define RMAH OP_REG, ah_reg
+#define RMCH OP_REG, ch_reg
+#define RMDH OP_REG, dh_reg
+#define RMBH OP_REG, bh_reg
+#define RMAX OP_REG, ax_reg
+#define RMDX OP_REG, dx_reg
+
+#define eAX OP_IMREG, eAX_reg
+#define eBX OP_IMREG, eBX_reg
+#define eCX OP_IMREG, eCX_reg
+#define eDX OP_IMREG, eDX_reg
+#define eSP OP_IMREG, eSP_reg
+#define eBP OP_IMREG, eBP_reg
+#define eSI OP_IMREG, eSI_reg
+#define eDI OP_IMREG, eDI_reg
+#define AL OP_IMREG, al_reg
+#define AL OP_IMREG, al_reg
+#define CL OP_IMREG, cl_reg
+#define DL OP_IMREG, dl_reg
+#define BL OP_IMREG, bl_reg
+#define AH OP_IMREG, ah_reg
+#define CH OP_IMREG, ch_reg
+#define DH OP_IMREG, dh_reg
+#define BH OP_IMREG, bh_reg
+#define AX OP_IMREG, ax_reg
+#define DX OP_IMREG, dx_reg
+#define indirDX OP_IMREG, indir_dx_reg
 
 #define Sw OP_SEG, w_mode
 #define Ap OP_DIR, 0
 #define Ob OP_OFF, b_mode
+#define Ob64 OP_OFF64, b_mode
 #define Ov OP_OFF, v_mode
+#define Ov64 OP_OFF64, v_mode
 #define Xb OP_DSreg, eSI_reg
 #define Xv OP_DSreg, eSI_reg
 #define Yb OP_ESreg, eDI_reg
@@ -201,6 +261,11 @@ typedef void (*op_rtn) PARAMS ((int bytemode, int sizeflag));
 static void OP_E PARAMS ((int, int));
 static void OP_G PARAMS ((int, int));
 static void OP_I PARAMS ((int, int));
+static void OP_I64 PARAMS ((int, int));
+static void OP_OFF PARAMS ((int, int));
+static void OP_REG PARAMS ((int, int));
+static void OP_IMREG PARAMS ((int, int));
+static void OP_OFF64 PARAMS ((int, int));
 static void OP_indirE PARAMS ((int, int));
 static void OP_sI PARAMS ((int, int));
 static void OP_REG PARAMS ((int, int));
@@ -226,21 +291,25 @@ static void OP_SIMD_Suffix PARAMS ((int, int));
 static void SIMD_Fixup PARAMS ((int, int));
 
 static void append_seg PARAMS ((void));
-static void set_op PARAMS ((unsigned int op));
+static void set_op PARAMS ((unsigned int op, int));
 static void putop PARAMS ((const char *template, int sizeflag));
 static void dofloat PARAMS ((int sizeflag));
 static int get16 PARAMS ((void));
-static int get32 PARAMS ((void));
+static bfd_vma get64 PARAMS ((void));
+static bfd_signed_vma get32 PARAMS ((void));
+static bfd_signed_vma get32s PARAMS ((void));
 static void ckprefix PARAMS ((void));
 static const char *prefix_name PARAMS ((int, int));
 static void ptr_reg PARAMS ((int, int));
 static void BadOp PARAMS ((void));
 
-#define b_mode 1
-#define v_mode 2
-#define w_mode 3
-#define d_mode 4
-#define x_mode 5
+#define b_mode 1  /* byte operand */
+#define v_mode 2  /* operand size depends on prefixes */
+#define w_mode 3  /* word operand */
+#define d_mode 4  /* double word operand  */
+#define q_mode 5  /* quad word operand */
+#define x_mode 6
+#define m_mode 7  /* d_mode in 32bit, q_mode in 64bit mode.  */
 
 #define es_reg 100
 #define cs_reg 101
@@ -275,6 +344,15 @@ static void BadOp PARAMS ((void));
 #define bp_reg 129
 #define si_reg 130
 #define di_reg 131
+
+#define rAX_reg 132
+#define rCX_reg 133
+#define rDX_reg 134
+#define rBX_reg 135
+#define rSP_reg 136
+#define rBP_reg 137
+#define rSI_reg 138
+#define rDI_reg 139
 
 #define indir_dx_reg 150
 
@@ -340,11 +418,14 @@ struct dis386 {
    'E' => print 'e' if 32-bit form of jcxz
    'L' => print 'l' if suffix_always is true
    'N' => print 'n' if instruction has no wait "prefix"
-   'P' => print 'w' or 'l' if instruction has an operand size prefix,
+   'O' => print 'd', or 'o'
+   'P' => print 'w', 'l' or 'q' if instruction has an operand size prefix,
                               or suffix_always is true
-   'Q' => print 'w' or 'l' if no register operands or suffix_always is true
-   'R' => print 'w' or 'l' ("wd" or "dq" in intel mode)
-   'S' => print 'w' or 'l' if suffix_always is true
+	  print 'q' if rex prefix is present.
+   'I' => print 'q' in 64bit mode and behave as 'P' otherwise
+   'Q' => print 'w', 'l' or 'q' if no register operands or suffix_always is true
+   'R' => print 'w', 'l' or 'q' ("wd" or "dq" in intel mode)
+   'S' => print 'w', 'l' or 'q' if suffix_always is true
    'W' => print 'b' or 'w' ("w" or "de" in intel mode)
 */
 
@@ -356,8 +437,8 @@ static const struct dis386 dis386_att[] = {
   { "addS",	Gv, Ev, XX },
   { "addB",	AL, Ib, XX },
   { "addS",	eAX, Iv, XX },
-  { "pushP",	es, XX, XX },
-  { "popP",	es, XX, XX },
+  { "pushI",	es, XX, XX },
+  { "popI",	es, XX, XX },
   /* 08 */
   { "orB",	Eb, Gb, XX },
   { "orS",	Ev, Gv, XX },
@@ -365,7 +446,7 @@ static const struct dis386 dis386_att[] = {
   { "orS",	Gv, Ev, XX },
   { "orB",	AL, Ib, XX },
   { "orS",	eAX, Iv, XX },
-  { "pushP",	cs, XX, XX },
+  { "pushI",	cs, XX, XX },
   { "(bad)",	XX, XX, XX },	/* 0x0f extended opcode escape */
   /* 10 */
   { "adcB",	Eb, Gb, XX },
@@ -374,8 +455,8 @@ static const struct dis386 dis386_att[] = {
   { "adcS",	Gv, Ev, XX },
   { "adcB",	AL, Ib, XX },
   { "adcS",	eAX, Iv, XX },
-  { "pushP",	ss, XX, XX },
-  { "popP",	ss, XX, XX },
+  { "pushI",	ss, XX, XX },
+  { "popI",	ss, XX, XX },
   /* 18 */
   { "sbbB",	Eb, Gb, XX },
   { "sbbS",	Ev, Gv, XX },
@@ -383,8 +464,8 @@ static const struct dis386 dis386_att[] = {
   { "sbbS",	Gv, Ev, XX },
   { "sbbB",	AL, Ib, XX },
   { "sbbS",	eAX, Iv, XX },
-  { "pushP",	ds, XX, XX },
-  { "popP",	ds, XX, XX },
+  { "pushI",	ds, XX, XX },
+  { "popI",	ds, XX, XX },
   /* 20 */
   { "andB",	Eb, Gb, XX },
   { "andS",	Ev, Gv, XX },
@@ -422,41 +503,41 @@ static const struct dis386 dis386_att[] = {
   { "(bad)",	XX, XX, XX },			/* SEG DS prefix */
   { "aas",	XX, XX, XX },
   /* 40 */
-  { "incS",	eAX, XX, XX },
-  { "incS",	eCX, XX, XX },
-  { "incS",	eDX, XX, XX },
-  { "incS",	eBX, XX, XX },
-  { "incS",	eSP, XX, XX },
-  { "incS",	eBP, XX, XX },
-  { "incS",	eSI, XX, XX },
-  { "incS",	eDI, XX, XX },
+  { "incS",	RMeAX, XX, XX },
+  { "incS",	RMeCX, XX, XX },
+  { "incS",	RMeDX, XX, XX },
+  { "incS",	RMeBX, XX, XX },
+  { "incS",	RMeSP, XX, XX },
+  { "incS",	RMeBP, XX, XX },
+  { "incS",	RMeSI, XX, XX },
+  { "incS",	RMeDI, XX, XX },
   /* 48 */
-  { "decS",	eAX, XX, XX },
-  { "decS",	eCX, XX, XX },
-  { "decS",	eDX, XX, XX },
-  { "decS",	eBX, XX, XX },
-  { "decS",	eSP, XX, XX },
-  { "decS",	eBP, XX, XX },
-  { "decS",	eSI, XX, XX },
-  { "decS",	eDI, XX, XX },
+  { "decS",	RMeAX, XX, XX },
+  { "decS",	RMeCX, XX, XX },
+  { "decS",	RMeDX, XX, XX },
+  { "decS",	RMeBX, XX, XX },
+  { "decS",	RMeSP, XX, XX },
+  { "decS",	RMeBP, XX, XX },
+  { "decS",	RMeSI, XX, XX },
+  { "decS",	RMeDI, XX, XX },
   /* 50 */
-  { "pushS",	eAX, XX, XX },
-  { "pushS",	eCX, XX, XX },
-  { "pushS",	eDX, XX, XX },
-  { "pushS",	eBX, XX, XX },
-  { "pushS",	eSP, XX, XX },
-  { "pushS",	eBP, XX, XX },
-  { "pushS",	eSI, XX, XX },
-  { "pushS",	eDI, XX, XX },
+  { "pushS",	RMeAX, XX, XX },
+  { "pushS",	RMeCX, XX, XX },
+  { "pushS",	RMeDX, XX, XX },
+  { "pushS",	RMeBX, XX, XX },
+  { "pushS",	RMeSP, XX, XX },
+  { "pushS",	RMeBP, XX, XX },
+  { "pushS",	RMeSI, XX, XX },
+  { "pushS",	RMeDI, XX, XX },
   /* 58 */
-  { "popS",	eAX, XX, XX },
-  { "popS",	eCX, XX, XX },
-  { "popS",	eDX, XX, XX },
-  { "popS",	eBX, XX, XX },
-  { "popS",	eSP, XX, XX },
-  { "popS",	eBP, XX, XX },
-  { "popS",	eSI, XX, XX },
-  { "popS",	eDI, XX, XX },
+  { "popS",	RMeAX, XX, XX },
+  { "popS",	RMeCX, XX, XX },
+  { "popS",	RMeDX, XX, XX },
+  { "popS",	RMeBX, XX, XX },
+  { "popS",	RMeSP, XX, XX },
+  { "popS",	RMeBP, XX, XX },
+  { "popS",	RMeSI, XX, XX },
+  { "popS",	RMeDI, XX, XX },
   /* 60 */
   { "pushaP",	XX, XX, XX },
   { "popaP",	XX, XX, XX },
@@ -467,9 +548,9 @@ static const struct dis386 dis386_att[] = {
   { "(bad)",	XX, XX, XX },			/* op size prefix */
   { "(bad)",	XX, XX, XX },			/* adr size prefix */
   /* 68 */
-  { "pushP",	Iv, XX, XX },		/* 386 book wrong */
+  { "pushI",	Iv, XX, XX },		/* 386 book wrong */
   { "imulS",	Gv, Ev, Iv },
-  { "pushP",	sIb, XX, XX },	/* push of byte really pushes 2 or 4 bytes */
+  { "pushI",	sIb, XX, XX },	/* push of byte really pushes 2 or 4 bytes */
   { "imulS",	Gv, Ev, sIb },
   { "insb",	Yb, indirDX, XX },
   { "insR",	Yv, indirDX, XX },
@@ -513,20 +594,20 @@ static const struct dis386 dis386_att[] = {
   { "popQ",	Ev, XX, XX },
   /* 90 */
   { "nop",	XX, XX, XX },
-  { "xchgS",	eCX, eAX, XX },
-  { "xchgS",	eDX, eAX, XX },
-  { "xchgS",	eBX, eAX, XX },
-  { "xchgS",	eSP, eAX, XX },
-  { "xchgS",	eBP, eAX, XX },
-  { "xchgS",	eSI, eAX, XX },
-  { "xchgS",	eDI, eAX, XX },
+  { "xchgS",	RMeCX, eAX, XX },
+  { "xchgS",	RMeDX, eAX, XX },
+  { "xchgS",	RMeBX, eAX, XX },
+  { "xchgS",	RMeSP, eAX, XX },
+  { "xchgS",	RMeBP, eAX, XX },
+  { "xchgS",	RMeSI, eAX, XX },
+  { "xchgS",	RMeDI, eAX, XX },
   /* 98 */
   { "cWtR",	XX, XX, XX },
-  { "cRtd",	XX, XX, XX },
-  { "lcallP",	Ap, XX, XX },
+  { "cRtO",	XX, XX, XX },
+  { "lcallI",	Ap, XX, XX },
   { "(bad)",	XX, XX, XX },		/* fwait */
-  { "pushfP",	XX, XX, XX },
-  { "popfP",	XX, XX, XX },
+  { "pushfI",	XX, XX, XX },
+  { "popfI",	XX, XX, XX },
   { "sahf",	XX, XX, XX },
   { "lahf",	XX, XX, XX },
   /* a0 */
@@ -548,23 +629,23 @@ static const struct dis386 dis386_att[] = {
   { "scasB",	AL, Yb, XX },
   { "scasS",	eAX, Yv, XX },
   /* b0 */
-  { "movB",	AL, Ib, XX },
-  { "movB",	CL, Ib, XX },
-  { "movB",	DL, Ib, XX },
-  { "movB",	BL, Ib, XX },
-  { "movB",	AH, Ib, XX },
-  { "movB",	CH, Ib, XX },
-  { "movB",	DH, Ib, XX },
-  { "movB",	BH, Ib, XX },
+  { "movB",	RMAL, Ib, XX },
+  { "movB",	RMCL, Ib, XX },
+  { "movB",	RMDL, Ib, XX },
+  { "movB",	RMBL, Ib, XX },
+  { "movB",	RMAH, Ib, XX },
+  { "movB",	RMCH, Ib, XX },
+  { "movB",	RMDH, Ib, XX },
+  { "movB",	RMBH, Ib, XX },
   /* b8 */
-  { "movS",	eAX, Iv, XX },
-  { "movS",	eCX, Iv, XX },
-  { "movS",	eDX, Iv, XX },
-  { "movS",	eBX, Iv, XX },
-  { "movS",	eSP, Iv, XX },
-  { "movS",	eBP, Iv, XX },
-  { "movS",	eSI, Iv, XX },
-  { "movS",	eDI, Iv, XX },
+  { "movS",	RMeAX, Iv, XX },
+  { "movS",	RMeCX, Iv, XX },
+  { "movS",	RMeDX, Iv, XX },
+  { "movS",	RMeBX, Iv, XX },
+  { "movS",	RMeSP, Iv, XX },
+  { "movS",	RMeBP, Iv, XX },
+  { "movS",	RMeSI, Iv, XX },
+  { "movS",	RMeDI, Iv, XX },
   /* c0 */
   { GRP2b },
   { GRP2S },
@@ -575,14 +656,14 @@ static const struct dis386 dis386_att[] = {
   { "movA",	Eb, Ib, XX },
   { "movQ",	Ev, Iv, XX },
   /* c8 */
-  { "enterP",	Iw, Ib, XX },
-  { "leaveP",	XX, XX, XX },
-  { "lretP",	Iw, XX, XX },
-  { "lretP",	XX, XX, XX },
+  { "enterI",	Iw, Ib, XX },
+  { "leaveI",	XX, XX, XX },
+  { "lretI",	Iw, XX, XX },
+  { "lretI",	XX, XX, XX },
   { "int3",	XX, XX, XX },
   { "int",	Ib, XX, XX },
   { "into",	XX, XX, XX},
-  { "iretP",	XX, XX, XX },
+  { "iretI",	XX, XX, XX },
   /* d0 */
   { GRP2b_one },
   { GRP2S_one },
@@ -611,9 +692,9 @@ static const struct dis386 dis386_att[] = {
   { "outB",	Ib, AL, XX },
   { "outS",	Ib, eAX, XX },
   /* e8 */
-  { "callP",	Jv, XX, XX },
-  { "jmpP",	Jv, XX, XX },
-  { "ljmpP",	Ap, XX, XX },
+  { "callI",	Jv, XX, XX },
+  { "jmpI",	Jv, XX, XX },
+  { "ljmpI",	Ap, XX, XX },
   { "jmp",	Jb, XX, XX },
   { "inB",	AL, indirDX, XX },
   { "inS",	eAX, indirDX, XX },
@@ -713,41 +794,41 @@ static const struct dis386 dis386_intel[] = {
   { "(bad)",	XX, XX, XX },			/* SEG DS prefix */
   { "aas",	XX, XX, XX },
   /* 40 */
-  { "inc",	eAX, XX, XX },
-  { "inc",	eCX, XX, XX },
-  { "inc",	eDX, XX, XX },
-  { "inc",	eBX, XX, XX },
-  { "inc",	eSP, XX, XX },
-  { "inc",	eBP, XX, XX },
-  { "inc",	eSI, XX, XX },
-  { "inc",	eDI, XX, XX },
+  { "inc",	RMeAX, XX, XX },
+  { "inc",	RMeCX, XX, XX },
+  { "inc",	RMeDX, XX, XX },
+  { "inc",	RMeBX, XX, XX },
+  { "inc",	RMeSP, XX, XX },
+  { "inc",	RMeBP, XX, XX },
+  { "inc",	RMeSI, XX, XX },
+  { "inc",	RMeDI, XX, XX },
   /* 48 */
-  { "dec",	eAX, XX, XX },
-  { "dec",	eCX, XX, XX },
-  { "dec",	eDX, XX, XX },
-  { "dec",	eBX, XX, XX },
-  { "dec",	eSP, XX, XX },
-  { "dec",	eBP, XX, XX },
-  { "dec",	eSI, XX, XX },
-  { "dec",	eDI, XX, XX },
+  { "dec",	RMeAX, XX, XX },
+  { "dec",	RMeCX, XX, XX },
+  { "dec",	RMeDX, XX, XX },
+  { "dec",	RMeBX, XX, XX },
+  { "dec",	RMeSP, XX, XX },
+  { "dec",	RMeBP, XX, XX },
+  { "dec",	RMeSI, XX, XX },
+  { "dec",	RMeDI, XX, XX },
   /* 50 */
-  { "push",	eAX, XX, XX },
-  { "push",	eCX, XX, XX },
-  { "push",	eDX, XX, XX },
-  { "push",	eBX, XX, XX },
-  { "push",	eSP, XX, XX },
-  { "push",	eBP, XX, XX },
-  { "push",	eSI, XX, XX },
-  { "push",	eDI, XX, XX },
+  { "push",	RMeAX, XX, XX },
+  { "push",	RMeCX, XX, XX },
+  { "push",	RMeDX, XX, XX },
+  { "push",	RMeBX, XX, XX },
+  { "push",	RMeSP, XX, XX },
+  { "push",	RMeBP, XX, XX },
+  { "push",	RMeSI, XX, XX },
+  { "push",	RMeDI, XX, XX },
   /* 58 */
-  { "pop",	eAX, XX, XX },
-  { "pop",	eCX, XX, XX },
-  { "pop",	eDX, XX, XX },
-  { "pop",	eBX, XX, XX },
-  { "pop",	eSP, XX, XX },
-  { "pop",	eBP, XX, XX },
-  { "pop",	eSI, XX, XX },
-  { "pop",	eDI, XX, XX },
+  { "pop",	RMeAX, XX, XX },
+  { "pop",	RMeCX, XX, XX },
+  { "pop",	RMeDX, XX, XX },
+  { "pop",	RMeBX, XX, XX },
+  { "pop",	RMeSP, XX, XX },
+  { "pop",	RMeBP, XX, XX },
+  { "pop",	RMeSI, XX, XX },
+  { "pop",	RMeDI, XX, XX },
   /* 60 */
   { "pusha",	XX, XX, XX },
   { "popa",	XX, XX, XX },
@@ -804,13 +885,13 @@ static const struct dis386 dis386_intel[] = {
   { "pop",	Ev, XX, XX },
   /* 90 */
   { "nop",	XX, XX, XX },
-  { "xchg",	eCX, eAX, XX },
-  { "xchg",	eDX, eAX, XX },
-  { "xchg",	eBX, eAX, XX },
-  { "xchg",	eSP, eAX, XX },
-  { "xchg",	eBP, eAX, XX },
-  { "xchg",	eSI, eAX, XX },
-  { "xchg",	eDI, eAX, XX },
+  { "xchg",	RMeCX, eAX, XX },
+  { "xchg",	RMeDX, eAX, XX },
+  { "xchg",	RMeBX, eAX, XX },
+  { "xchg",	RMeSP, eAX, XX },
+  { "xchg",	RMeBP, eAX, XX },
+  { "xchg",	RMeSI, eAX, XX },
+  { "xchg",	RMeDI, eAX, XX },
   /* 98 */
   { "cW",	XX, XX, XX },		/* cwde and cbw */
   { "cR",	XX, XX, XX },		/* cdq and cwd */
@@ -839,23 +920,23 @@ static const struct dis386 dis386_intel[] = {
   { "scas",	AL, Yb, XX },
   { "scas",	eAX, Yv, XX },
   /* b0 */
-  { "mov",	AL, Ib, XX },
-  { "mov",	CL, Ib, XX },
-  { "mov",	DL, Ib, XX },
-  { "mov",	BL, Ib, XX },
-  { "mov",	AH, Ib, XX },
-  { "mov",	CH, Ib, XX },
-  { "mov",	DH, Ib, XX },
-  { "mov",	BH, Ib, XX },
+  { "mov",	RMAL, Ib, XX },
+  { "mov",	RMCL, Ib, XX },
+  { "mov",	RMDL, Ib, XX },
+  { "mov",	RMBL, Ib, XX },
+  { "mov",	RMAH, Ib, XX },
+  { "mov",	RMCH, Ib, XX },
+  { "mov",	RMDH, Ib, XX },
+  { "mov",	RMBH, Ib, XX },
   /* b8 */
-  { "mov",	eAX, Iv, XX },
-  { "mov",	eCX, Iv, XX },
-  { "mov",	eDX, Iv, XX },
-  { "mov",	eBX, Iv, XX },
-  { "mov",	eSP, Iv, XX },
-  { "mov",	eBP, Iv, XX },
-  { "mov",	eSI, Iv, XX },
-  { "mov",	eDI, Iv, XX },
+  { "mov",	RMeAX, Iv, XX },
+  { "mov",	RMeCX, Iv, XX },
+  { "mov",	RMeDX, Iv, XX },
+  { "mov",	RMeBX, Iv, XX },
+  { "mov",	RMeSP, Iv, XX },
+  { "mov",	RMeBP, Iv, XX },
+  { "mov",	RMeSI, Iv, XX },
+  { "mov",	RMeDI, Iv, XX },
   /* c0 */
   { GRP2b },
   { GRP2S },
@@ -930,6 +1011,590 @@ static const struct dis386 dis386_intel[] = {
   { GRP5 },
 };
 
+/* 64bit mode is having some instruction set differences, so separate table is
+   needed.  */
+static const struct dis386 disx86_64_att[] = {
+  /* 00 */
+  { "addB",	Eb, Gb, XX },
+  { "addS",	Ev, Gv, XX },
+  { "addB",	Gb, Eb, XX },
+  { "addS",	Gv, Ev, XX },
+  { "addB",	AL, Ib, XX },
+  { "addS",	eAX, Iv, XX },
+  { "(bad)",	XX, XX, XX },   /* Reserved.  */
+  { "(bad)",	XX, XX, XX },   /* Reserved.  */
+  /* 08 */
+  { "orB",	Eb, Gb, XX },
+  { "orS",	Ev, Gv, XX },
+  { "orB",	Gb, Eb, XX },
+  { "orS",	Gv, Ev, XX },
+  { "orB",	AL, Ib, XX },
+  { "orS",	eAX, Iv, XX },
+  { "(bad)",	XX, XX, XX },   /* Reserved.  */
+  { "(bad)",	XX, XX, XX },	/* 0x0f extended opcode escape */
+  /* 10 */
+  { "adcB",	Eb, Gb, XX },
+  { "adcS",	Ev, Gv, XX },
+  { "adcB",	Gb, Eb, XX },
+  { "adcS",	Gv, Ev, XX },
+  { "adcB",	AL, Ib, XX },
+  { "adcS",	eAX, Iv, XX },
+  { "(bad)",	XX, XX, XX },   /* Reserved.  */
+  { "(bad)",	XX, XX, XX },   /* Reserved.  */
+  /* 18 */
+  { "sbbB",	Eb, Gb, XX },
+  { "sbbS",	Ev, Gv, XX },
+  { "sbbB",	Gb, Eb, XX },
+  { "sbbS",	Gv, Ev, XX },
+  { "sbbB",	AL, Ib, XX },
+  { "sbbS",	eAX, Iv, XX },
+  { "(bad)",	XX, XX, XX },   /* Reserved.  */
+  { "(bad)",	XX, XX, XX },   /* Reserved.  */
+  /* 20 */
+  { "andB",	Eb, Gb, XX },
+  { "andS",	Ev, Gv, XX },
+  { "andB",	Gb, Eb, XX },
+  { "andS",	Gv, Ev, XX },
+  { "andB",	AL, Ib, XX },
+  { "andS",	eAX, Iv, XX },
+  { "(bad)",	XX, XX, XX },			/* SEG ES prefix */
+  { "(bad)",	XX, XX, XX },   /* Reserved.  */
+  /* 28 */
+  { "subB",	Eb, Gb, XX },
+  { "subS",	Ev, Gv, XX },
+  { "subB",	Gb, Eb, XX },
+  { "subS",	Gv, Ev, XX },
+  { "subB",	AL, Ib, XX },
+  { "subS",	eAX, Iv, XX },
+  { "(bad)",	XX, XX, XX },			/* SEG CS prefix */
+  { "(bad)",	XX, XX, XX },   /* Reserved.  */
+  /* 30 */
+  { "xorB",	Eb, Gb, XX },
+  { "xorS",	Ev, Gv, XX },
+  { "xorB",	Gb, Eb, XX },
+  { "xorS",	Gv, Ev, XX },
+  { "xorB",	AL, Ib, XX },
+  { "xorS",	eAX, Iv, XX },
+  { "(bad)",	XX, XX, XX },			/* SEG SS prefix */
+  { "(bad)",	XX, XX, XX },   /* Reserved.  */
+  /* 38 */
+  { "cmpB",	Eb, Gb, XX },
+  { "cmpS",	Ev, Gv, XX },
+  { "cmpB",	Gb, Eb, XX },
+  { "cmpS",	Gv, Ev, XX },
+  { "cmpB",	AL, Ib, XX },
+  { "cmpS",	eAX, Iv, XX },
+  { "(bad)",	XX, XX, XX },			/* SEG DS prefix */
+  { "(bad)",	XX, XX, XX },   /* Reserved.  */
+  /* 40 */
+  { "(bad)",	XX, XX, XX },			/* REX prefix area.  */
+  { "(bad)",	XX, XX, XX },
+  { "(bad)",	XX, XX, XX },
+  { "(bad)",	XX, XX, XX },
+  { "(bad)",	XX, XX, XX },
+  { "(bad)",	XX, XX, XX },
+  { "(bad)",	XX, XX, XX },
+  { "(bad)",	XX, XX, XX },
+  /* 48 */
+  { "(bad)",	XX, XX, XX },
+  { "(bad)",	XX, XX, XX },
+  { "(bad)",	XX, XX, XX },
+  { "(bad)",	XX, XX, XX },
+  { "(bad)",	XX, XX, XX },
+  { "(bad)",	XX, XX, XX },
+  { "(bad)",	XX, XX, XX },
+  { "(bad)",	XX, XX, XX },
+  /* 50 */
+  { "pushI",	RMrAX, XX, XX },
+  { "pushI",	RMrCX, XX, XX },
+  { "pushI",	RMrDX, XX, XX },
+  { "pushI",	RMrBX, XX, XX },
+  { "pushI",	RMrSP, XX, XX },
+  { "pushI",	RMrBP, XX, XX },
+  { "pushI",	RMrSI, XX, XX },
+  { "pushI",	RMrDI, XX, XX },
+  /* 58 */
+  { "popI",	RMrAX, XX, XX },
+  { "popI",	RMrCX, XX, XX },
+  { "popI",	RMrDX, XX, XX },
+  { "popI",	RMrBX, XX, XX },
+  { "popI",	RMrSP, XX, XX },
+  { "popI",	RMrBP, XX, XX },
+  { "popI",	RMrSI, XX, XX },
+  { "popI",	RMrDI, XX, XX },
+  /* 60 */
+  { "(bad)",	XX, XX, XX },   /* reserved.  */
+  { "(bad)",	XX, XX, XX },   /* reserved.  */
+  { "(bad)",	XX, XX, XX },   /* reserved.  */
+  { "movslR",   Gv, Ed, XX },
+  { "(bad)",	XX, XX, XX },			/* seg fs */
+  { "(bad)",	XX, XX, XX },			/* seg gs */
+  { "(bad)",	XX, XX, XX },			/* op size prefix */
+  { "(bad)",	XX, XX, XX },			/* adr size prefix */
+  /* 68 */
+  { "pushI",	Iq, XX, XX },		/* 386 book wrong */
+  { "imulS",	Gv, Ev, Iv },
+  { "pushI",	sIb, XX, XX },	/* push of byte really pushes 2 or 4 bytes */
+  { "imulS",	Gv, Ev, sIb },
+  { "insb",	Yb, indirDX, XX },
+  { "insR",	Yv, indirDX, XX },
+  { "outsb",	indirDX, Xb, XX },
+  { "outsR",	indirDX, Xv, XX },
+  /* 70 */
+  { "jo",	Jb, XX, XX },
+  { "jno",	Jb, XX, XX },
+  { "jb",	Jb, XX, XX },
+  { "jae",	Jb, XX, XX },
+  { "je",	Jb, XX, XX },
+  { "jne",	Jb, XX, XX },
+  { "jbe",	Jb, XX, XX },
+  { "ja",	Jb, XX, XX },
+  /* 78 */
+  { "js",	Jb, XX, XX },
+  { "jns",	Jb, XX, XX },
+  { "jp",	Jb, XX, XX },
+  { "jnp",	Jb, XX, XX },
+  { "jl",	Jb, XX, XX },
+  { "jge",	Jb, XX, XX },
+  { "jle",	Jb, XX, XX },
+  { "jg",	Jb, XX, XX },
+  /* 80 */
+  { GRP1b },
+  { GRP1S },
+  { "(bad)",	XX, XX, XX },
+  { GRP1Ss },
+  { "testB",	Eb, Gb, XX },
+  { "testS",	Ev, Gv, XX },
+  { "xchgB",	Eb, Gb, XX },
+  { "xchgS",	Ev, Gv, XX },
+  /* 88 */
+  { "movB",	Eb, Gb, XX },
+  { "movS",	Ev, Gv, XX },
+  { "movB",	Gb, Eb, XX },
+  { "movS",	Gv, Ev, XX },
+  { "movQ",	Ev, Sw, XX },
+  { "leaS",	Gv, M, XX },
+  { "movQ",	Sw, Ev, XX },
+  { "popI",	Ev, XX, XX },
+  /* 90 */
+  { "nop",	XX, XX, XX },
+  { "xchgS",	RMeCX, eAX, XX },
+  { "xchgS",	RMeDX, eAX, XX },
+  { "xchgS",	RMeBX, eAX, XX },
+  { "xchgS",	RMeSP, eAX, XX },
+  { "xchgS",	RMeBP, eAX, XX },
+  { "xchgS",	RMeSI, eAX, XX },
+  { "xchgS",	RMeDI, eAX, XX },
+  /* 98 */
+  { "cWtR",	XX, XX, XX },
+  { "cRtO",	XX, XX, XX },
+  { "(bad)",	XX, XX, XX },   /* reserved.  */
+  { "(bad)",	XX, XX, XX },		/* fwait */
+  { "pushfI",	XX, XX, XX },
+  { "popfI",	XX, XX, XX },
+  { "(bad)",	XX, XX, XX },   /* reserved.  */
+  { "(bad)",	XX, XX, XX },   /* reserved.  */
+  /* a0 */
+  { "movB",	AL, Ob64, XX },
+  { "movS",	eAX, Ov64, XX },
+  { "movB",	Ob64, AL, XX },
+  { "movS",	Ov64, eAX, XX },
+  { "movsb",	Yb, Xb, XX },
+  { "movsR",	Yv, Xv, XX },
+  { "cmpsb",	Xb, Yb, XX },
+  { "cmpsR",	Xv, Yv, XX },
+  /* a8 */
+  { "testB",	AL, Ib, XX },
+  { "testS",	eAX, Iv, XX },
+  { "stosB",	Yb, AL, XX },
+  { "stosS",	Yv, eAX, XX },
+  { "lodsB",	AL, Xb, XX },
+  { "lodsS",	eAX, Xv, XX },
+  { "scasB",	AL, Yb, XX },
+  { "scasS",	eAX, Yv, XX },
+  /* b0 */
+  { "movB",	RMAL, Ib, XX },
+  { "movB",	RMCL, Ib, XX },
+  { "movB",	RMDL, Ib, XX },
+  { "movB",	RMBL, Ib, XX },
+  { "movB",	RMAH, Ib, XX },
+  { "movB",	RMCH, Ib, XX },
+  { "movB",	RMDH, Ib, XX },
+  { "movB",	RMBH, Ib, XX },
+  /* b8 */
+  { "movS",	RMeAX, Iv64, XX },
+  { "movS",	RMeCX, Iv64, XX },
+  { "movS",	RMeDX, Iv64, XX },
+  { "movS",	RMeBX, Iv64, XX },
+  { "movS",	RMeSP, Iv64, XX },
+  { "movS",	RMeBP, Iv64, XX },
+  { "movS",	RMeSI, Iv64, XX },
+  { "movS",	RMeDI, Iv64, XX },
+  /* c0 */
+  { GRP2b },
+  { GRP2S },
+  { "retI",	Iw, XX, XX },
+  { "retI",	XX, XX, XX },
+  { "(bad)",	XX, XX, XX },   /* reserved.  */
+  { "ldsS",	Gv, Mp, XX },
+  { "movA",	Eb, Ib, XX },
+  { "movQ",	Ev, Iv, XX },
+  /* c8 */
+  { "enterI",	Iw, Ib, XX },
+  { "leaveI",	XX, XX, XX },
+  { "lretI",	Iw, XX, XX },
+  { "lretI",	XX, XX, XX },
+  { "int3",	XX, XX, XX },
+  { "int",	Ib, XX, XX },
+  { "(bad)",	XX, XX, XX },   /* reserved.  */
+  { "iretI",	XX, XX, XX },
+  /* d0 */
+  { GRP2b_one },
+  { GRP2S_one },
+  { GRP2b_cl },
+  { GRP2S_cl },
+  { "(bad)",	XX, XX, XX },   /* reserved.  */
+  { "(bad)",	XX, XX, XX },   /* reserved.  */
+  { "(bad)",	XX, XX, XX },
+  { "xlat",	DSBX, XX, XX },
+  /* d8 */
+  { FLOAT },
+  { FLOAT },
+  { FLOAT },
+  { FLOAT },
+  { FLOAT },
+  { FLOAT },
+  { FLOAT },
+  { FLOAT },
+  /* e0 */
+  { "loopne",	Jb, XX, XX },
+  { "loope",	Jb, XX, XX },
+  { "loop",	Jb, XX, XX },
+  { "jEcxz",	Jb, XX, XX },
+  { "inB",	AL, Ib, XX },
+  { "inS",	eAX, Ib, XX },
+  { "outB",	Ib, AL, XX },
+  { "outS",	Ib, eAX, XX },
+  /* e8 */
+  { "callI",	Jv, XX, XX },
+  { "jmpI",	Jv, XX, XX },
+  { "(bad)",	XX, XX, XX },   /* reserved.  */
+  { "jmp",	Jb, XX, XX },
+  { "inB",	AL, indirDX, XX },
+  { "inS",	eAX, indirDX, XX },
+  { "outB",	indirDX, AL, XX },
+  { "outS",	indirDX, eAX, XX },
+  /* f0 */
+  { "(bad)",	XX, XX, XX },			/* lock prefix */
+  { "(bad)",	XX, XX, XX },
+  { "(bad)",	XX, XX, XX },			/* repne */
+  { "(bad)",	XX, XX, XX },			/* repz */
+  { "hlt",	XX, XX, XX },
+  { "cmc",	XX, XX, XX },
+  { GRP3b },
+  { GRP3S },
+  /* f8 */
+  { "clc",	XX, XX, XX },
+  { "stc",	XX, XX, XX },
+  { "cli",	XX, XX, XX },
+  { "sti",	XX, XX, XX },
+  { "cld",	XX, XX, XX },
+  { "std",	XX, XX, XX },
+  { GRP4 },
+  { GRP5 },
+};
+
+static const struct dis386 dis386_64_intel[] = {
+  /* 00 */
+  { "add",	Eb, Gb, XX },
+  { "add",	Ev, Gv, XX },
+  { "add",	Gb, Eb, XX },
+  { "add",	Gv, Ev, XX },
+  { "add",	AL, Ib, XX },
+  { "add",	eAX, Iv, XX },
+  { "(bad)",	XX, XX, XX },   /* Reserved.  */
+  { "(bad)",	XX, XX, XX },   /* Reserved.  */
+  /* 08 */
+  { "or",	Eb, Gb, XX },
+  { "or",	Ev, Gv, XX },
+  { "or",	Gb, Eb, XX },
+  { "or",	Gv, Ev, XX },
+  { "or",	AL, Ib, XX },
+  { "or",	eAX, Iv, XX },
+  { "(bad)",	XX, XX, XX },   /* Reserved.  */
+  { "(bad)",	XX, XX, XX },	/* 0x0f extended opcode escape */
+  /* 10 */
+  { "adc",	Eb, Gb, XX },
+  { "adc",	Ev, Gv, XX },
+  { "adc",	Gb, Eb, XX },
+  { "adc",	Gv, Ev, XX },
+  { "adc",	AL, Ib, XX },
+  { "adc",	eAX, Iv, XX },
+  { "(bad)",	XX, XX, XX },   /* Reserved.  */
+  { "(bad)",	XX, XX, XX },   /* Reserved.  */
+  /* 18 */
+  { "sbb",	Eb, Gb, XX },
+  { "sbb",	Ev, Gv, XX },
+  { "sbb",	Gb, Eb, XX },
+  { "sbb",	Gv, Ev, XX },
+  { "sbb",	AL, Ib, XX },
+  { "sbb",	eAX, Iv, XX },
+  { "(bad)",	XX, XX, XX },   /* Reserved.  */
+  { "(bad)",	XX, XX, XX },   /* Reserved.  */
+  /* 20 */
+  { "and",	Eb, Gb, XX },
+  { "and",	Ev, Gv, XX },
+  { "and",	Gb, Eb, XX },
+  { "and",	Gv, Ev, XX },
+  { "and",	AL, Ib, XX },
+  { "and",	eAX, Iv, XX },
+  { "(bad)",	XX, XX, XX },			/* SEG ES prefix */
+  { "(bad)",	XX, XX, XX },   /* Reserved.  */
+  /* 28 */
+  { "sub",	Eb, Gb, XX },
+  { "sub",	Ev, Gv, XX },
+  { "sub",	Gb, Eb, XX },
+  { "sub",	Gv, Ev, XX },
+  { "sub",	AL, Ib, XX },
+  { "sub",	eAX, Iv, XX },
+  { "(bad)",	XX, XX, XX },			/* SEG CS prefix */
+  { "(bad)",	XX, XX, XX },   /* Reserved.  */
+  /* 30 */
+  { "xor",	Eb, Gb, XX },
+  { "xor",	Ev, Gv, XX },
+  { "xor",	Gb, Eb, XX },
+  { "xor",	Gv, Ev, XX },
+  { "xor",	AL, Ib, XX },
+  { "xor",	eAX, Iv, XX },
+  { "(bad)",	XX, XX, XX },			/* SEG SS prefix */
+  { "(bad)",	XX, XX, XX },   /* Reserved.  */
+  /* 38 */
+  { "cmp",	Eb, Gb, XX },
+  { "cmp",	Ev, Gv, XX },
+  { "cmp",	Gb, Eb, XX },
+  { "cmp",	Gv, Ev, XX },
+  { "cmp",	AL, Ib, XX },
+  { "cmp",	eAX, Iv, XX },
+  { "(bad)",	XX, XX, XX },			/* SEG DS prefix */
+  { "(bad)",	XX, XX, XX },   /* Reserved.  */
+  /* 40 */
+  { "(bad)",	XX, XX, XX },			/* REX prefix area.  */
+  { "(bad)",	XX, XX, XX },
+  { "(bad)",	XX, XX, XX },
+  { "(bad)",	XX, XX, XX },
+  { "(bad)",	XX, XX, XX },
+  { "(bad)",	XX, XX, XX },
+  { "(bad)",	XX, XX, XX },
+  { "(bad)",	XX, XX, XX },
+  /* 48 */
+  { "(bad)",	XX, XX, XX },
+  { "(bad)",	XX, XX, XX },
+  { "(bad)",	XX, XX, XX },
+  { "(bad)",	XX, XX, XX },
+  { "(bad)",	XX, XX, XX },
+  { "(bad)",	XX, XX, XX },
+  { "(bad)",	XX, XX, XX },
+  { "(bad)",	XX, XX, XX },
+  /* 50 */
+  { "push",	RMrAX, XX, XX },
+  { "push",	RMrCX, XX, XX },
+  { "push",	RMrDX, XX, XX },
+  { "push",	RMrBX, XX, XX },
+  { "push",	RMrSP, XX, XX },
+  { "push",	RMrBP, XX, XX },
+  { "push",	RMrSI, XX, XX },
+  { "push",	RMrDI, XX, XX },
+  /* 58 */
+  { "pop",	RMrAX, XX, XX },
+  { "pop",	RMrCX, XX, XX },
+  { "pop",	RMrDX, XX, XX },
+  { "pop",	RMrBX, XX, XX },
+  { "pop",	RMrSP, XX, XX },
+  { "pop",	RMrBP, XX, XX },
+  { "pop",	RMrSI, XX, XX },
+  { "pop",	RMrDI, XX, XX },
+  /* 60 */
+  { "(bad)",	XX, XX, XX },   /* Reserved.  */
+  { "(bad)",	XX, XX, XX },   /* Reserved.  */
+  { "(bad)",	XX, XX, XX },   /* Reserved.  */
+  { "movsx",	Gv, Ed, XX },
+  { "(bad)",	XX, XX, XX },			/* seg fs */
+  { "(bad)",	XX, XX, XX },			/* seg gs */
+  { "(bad)",	XX, XX, XX },			/* op size prefix */
+  { "(bad)",	XX, XX, XX },			/* adr size prefix */
+  /* 68 */
+  { "push",	Iq, XX, XX },		/* 386 book wrong */
+  { "imul",	Gv, Ev, Iv },
+  { "push",	sIb, XX, XX },	/* push of byte really pushes 2 or 4 bytes */
+  { "imul",	Gv, Ev, sIb },
+  { "ins",	Yb, indirDX, XX },
+  { "ins",	Yv, indirDX, XX },
+  { "outs",	indirDX, Xb, XX },
+  { "outs",	indirDX, Xv, XX },
+  /* 70 */
+  { "jo",	Jb, XX, XX },
+  { "jno",	Jb, XX, XX },
+  { "jb",	Jb, XX, XX },
+  { "jae",	Jb, XX, XX },
+  { "je",	Jb, XX, XX },
+  { "jne",	Jb, XX, XX },
+  { "jbe",	Jb, XX, XX },
+  { "ja",	Jb, XX, XX },
+  /* 78 */
+  { "js",	Jb, XX, XX },
+  { "jns",	Jb, XX, XX },
+  { "jp",	Jb, XX, XX },
+  { "jnp",	Jb, XX, XX },
+  { "jl",	Jb, XX, XX },
+  { "jge",	Jb, XX, XX },
+  { "jle",	Jb, XX, XX },
+  { "jg",	Jb, XX, XX },
+  /* 80 */
+  { GRP1b },
+  { GRP1S },
+  { "(bad)",	XX, XX, XX },
+  { GRP1Ss },
+  { "test",	Eb, Gb, XX },
+  { "test",	Ev, Gv, XX },
+  { "xchg",	Eb, Gb, XX },
+  { "xchg",	Ev, Gv, XX },
+  /* 88 */
+  { "mov",	Eb, Gb, XX },
+  { "mov",	Ev, Gv, XX },
+  { "mov",	Gb, Eb, XX },
+  { "mov",	Gv, Ev, XX },
+  { "mov",	Ev, Sw, XX },
+  { "lea",	Gv, M, XX },
+  { "mov",	Sw, Ev, XX },
+  { "pop",	Ev, XX, XX },
+  /* 90 */
+  { "nop",	XX, XX, XX },
+  { "xchg",	RMeCX, eAX, XX },
+  { "xchg",	RMeDX, eAX, XX },
+  { "xchg",	RMeBX, eAX, XX },
+  { "xchg",	RMeSP, eAX, XX },
+  { "xchg",	RMeBP, eAX, XX },
+  { "xchg",	RMeSI, eAX, XX },
+  { "xchg",	RMeDI, eAX, XX },
+  /* 98 */
+  { "cW",	XX, XX, XX },		/* cwde and cbw */
+  { "cR",	XX, XX, XX },		/* cdq and cwd */
+  { "(bad)",	XX, XX, XX },   /* Reserved.  */
+  { "(bad)",	XX, XX, XX },		/* fwait */
+  { "pushf",	XX, XX, XX },
+  { "popf",	XX, XX, XX },
+  { "(bad)",	XX, XX, XX },   /* Reserved.  */
+  { "(bad)",	XX, XX, XX },   /* Reserved.  */
+  /* a0 */
+  { "mov",	AL, Ob, XX },
+  { "mov",	eAX, Ov, XX },
+  { "mov",	Ob, AL, XX },
+  { "mov",	Ov, eAX, XX },
+  { "movs",	Yb, Xb, XX },
+  { "movs",	Yv, Xv, XX },
+  { "cmps",	Xb, Yb, XX },
+  { "cmps",	Xv, Yv, XX },
+  /* a8 */
+  { "test",	AL, Ib, XX },
+  { "test",	eAX, Iv, XX },
+  { "stos",	Yb, AL, XX },
+  { "stos",	Yv, eAX, XX },
+  { "lods",	AL, Xb, XX },
+  { "lods",	eAX, Xv, XX },
+  { "scas",	AL, Yb, XX },
+  { "scas",	eAX, Yv, XX },
+  /* b0 */
+  { "mov",	RMAL, Ib, XX },
+  { "mov",	RMCL, Ib, XX },
+  { "mov",	RMDL, Ib, XX },
+  { "mov",	RMBL, Ib, XX },
+  { "mov",	RMAH, Ib, XX },
+  { "mov",	RMCH, Ib, XX },
+  { "mov",	RMDH, Ib, XX },
+  { "mov",	RMBH, Ib, XX },
+  /* b8 */
+  { "mov",	RMeAX, Iv, XX },
+  { "mov",	RMeCX, Iv, XX },
+  { "mov",	RMeDX, Iv, XX },
+  { "mov",	RMeBX, Iv, XX },
+  { "mov",	RMeSP, Iv, XX },
+  { "mov",	RMeBP, Iv, XX },
+  { "mov",	RMeSI, Iv, XX },
+  { "mov",	RMeDI, Iv, XX },
+  /* c0 */
+  { GRP2b },
+  { GRP2S },
+  { "ret",	Iw, XX, XX },
+  { "ret",	XX, XX, XX },
+  { "(bad)",	XX, XX, XX },   /* Reserved.  */
+  { "lds",	Gv, Mp, XX },
+  { "mov",	Eb, Ib, XX },
+  { "mov",	Ev, Iv, XX },
+  /* c8 */
+  { "enter",	Iw, Ib, XX },
+  { "leave",	XX, XX, XX },
+  { "lret",	Iw, XX, XX },
+  { "lret",	XX, XX, XX },
+  { "int3",	XX, XX, XX },
+  { "int",	Ib, XX, XX },
+  { "(bad)",	XX, XX, XX },   /* Reserved.  */
+  { "iret",	XX, XX, XX },
+  /* d0 */
+  { GRP2b_one },
+  { GRP2S_one },
+  { GRP2b_cl },
+  { GRP2S_cl },
+  { "(bad)",	XX, XX, XX },   /* Reserved.  */
+  { "(bad)",	XX, XX, XX },   /* Reserved.  */
+  { "(bad)",	XX, XX, XX },
+  { "xlat",	DSBX, XX, XX },
+  /* d8 */
+  { FLOAT },
+  { FLOAT },
+  { FLOAT },
+  { FLOAT },
+  { FLOAT },
+  { FLOAT },
+  { FLOAT },
+  { FLOAT },
+  /* e0 */
+  { "loopne",	Jb, XX, XX },
+  { "loope",	Jb, XX, XX },
+  { "loop",	Jb, XX, XX },
+  { "jEcxz",	Jb, XX, XX },
+  { "in",	AL, Ib, XX },
+  { "in",	eAX, Ib, XX },
+  { "out",	Ib, AL, XX },
+  { "out",	Ib, eAX, XX },
+  /* e8 */
+  { "call",	Jv, XX, XX },
+  { "jmp",	Jv, XX, XX },
+  { "(bad)",	XX, XX, XX },   /* Reserved.  */
+  { "jmp",	Jb, XX, XX },
+  { "in",	AL, indirDX, XX },
+  { "in",	eAX, indirDX, XX },
+  { "out",	indirDX, AL, XX },
+  { "out",	indirDX, eAX, XX },
+  /* f0 */
+  { "(bad)",	XX, XX, XX },			/* lock prefix */
+  { "(bad)",	XX, XX, XX },
+  { "(bad)",	XX, XX, XX },			/* repne */
+  { "(bad)",	XX, XX, XX },			/* repz */
+  { "hlt",	XX, XX, XX },
+  { "cmc",	XX, XX, XX },
+  { GRP3b },
+  { GRP3S },
+  /* f8 */
+  { "clc",	XX, XX, XX },
+  { "stc",	XX, XX, XX },
+  { "cli",	XX, XX, XX },
+  { "sti",	XX, XX, XX },
+  { "cld",	XX, XX, XX },
+  { "std",	XX, XX, XX },
+  { GRP4 },
+  { GRP5 },
+};
+
 static const struct dis386 dis386_twobyte_att[] = {
   /* 00 */
   { GRP6 },
@@ -937,9 +1602,9 @@ static const struct dis386 dis386_twobyte_att[] = {
   { "larS", Gv, Ew, XX },
   { "lslS", Gv, Ew, XX },
   { "(bad)", XX, XX, XX },
-  { "(bad)", XX, XX, XX },
+  { "syscall", XX, XX, XX },
   { "clts", XX, XX, XX },
-  { "(bad)", XX, XX, XX },
+  { "sysretP", XX, XX, XX },
   /* 08 */
   { "invd", XX, XX, XX },
   { "wbinvd", XX, XX, XX },
@@ -969,10 +1634,10 @@ static const struct dis386 dis386_twobyte_att[] = {
   { "(bad)", XX, XX, XX },
   /* 20 */
   /* these are all backward in appendix A of the intel book */
-  { "movL", Rd, Cd, XX },
-  { "movL", Rd, Dd, XX },
-  { "movL", Cd, Rd, XX },
-  { "movL", Dd, Rd, XX },
+  { "movL", Rm, Cm, XX },
+  { "movL", Rm, Dm, XX },
+  { "movL", Cm, Rm, XX },
+  { "movL", Dm, Rm, XX },
   { "movL", Rd, Td, XX },
   { "(bad)", XX, XX, XX },
   { "movL", Td, Rd, XX },
@@ -1113,8 +1778,8 @@ static const struct dis386 dis386_twobyte_att[] = {
   { "setle", Eb, XX, XX },
   { "setg", Eb, XX, XX },
   /* a0 */
-  { "pushP", fs, XX, XX },
-  { "popP", fs, XX, XX },
+  { "pushI", fs, XX, XX },
+  { "popI", fs, XX, XX },
   { "cpuid", XX, XX, XX },
   { "btS", Ev, Gv, XX },
   { "shldS", Ev, Gv, Ib },
@@ -1122,8 +1787,8 @@ static const struct dis386 dis386_twobyte_att[] = {
   { "(bad)", XX, XX, XX },
   { "(bad)", XX, XX, XX },
   /* a8 */
-  { "pushP", gs, XX, XX },
-  { "popP", gs, XX, XX },
+  { "pushI", gs, XX, XX },
+  { "popI", gs, XX, XX },
   { "rsm", XX, XX, XX },
   { "btsS", Ev, Gv, XX },
   { "shrdS", Ev, Gv, Ib },
@@ -1158,14 +1823,14 @@ static const struct dis386 dis386_twobyte_att[] = {
   { "shufps", XM, EX, Ib },
   { GRP9 },
   /* c8 */
-  { "bswap", eAX, XX, XX },	/* bswap doesn't support 16 bit regs */
-  { "bswap", eCX, XX, XX },
-  { "bswap", eDX, XX, XX },
-  { "bswap", eBX, XX, XX },
-  { "bswap", eSP, XX, XX },
-  { "bswap", eBP, XX, XX },
-  { "bswap", eSI, XX, XX },
-  { "bswap", eDI, XX, XX },
+  { "bswap", RMeAX, XX, XX },	/* bswap doesn't support 16 bit regs */
+  { "bswap", RMeCX, XX, XX },
+  { "bswap", RMeDX, XX, XX },
+  { "bswap", RMeBX, XX, XX },
+  { "bswap", RMeSP, XX, XX },
+  { "bswap", RMeBP, XX, XX },
+  { "bswap", RMeSI, XX, XX },
+  { "bswap", RMeDI, XX, XX },
   /* d0 */
   { "(bad)", XX, XX, XX },
   { "psrlw", MX, EM, XX },
@@ -1229,9 +1894,9 @@ static const struct dis386 dis386_twobyte_intel[] = {
   { "lar", Gv, Ew, XX },
   { "lsl", Gv, Ew, XX },
   { "(bad)", XX, XX, XX },
-  { "(bad)", XX, XX, XX },
+  { "syscall", XX, XX, XX },
   { "clts", XX, XX, XX },
-  { "(bad)", XX, XX, XX },
+  { "sysretP", XX, XX, XX },
   /* 08 */
   { "invd", XX, XX, XX },
   { "wbinvd", XX, XX, XX },
@@ -1261,10 +1926,10 @@ static const struct dis386 dis386_twobyte_intel[] = {
   { "(bad)", XX, XX, XX },
   /* 20 */
   /* these are all backward in appendix A of the intel book */
-  { "mov", Rd, Cd, XX },
-  { "mov", Rd, Dd, XX },
-  { "mov", Cd, Rd, XX },
-  { "mov", Dd, Rd, XX },
+  { "mov", Rm, Cm, XX },
+  { "mov", Rm, Dm, XX },
+  { "mov", Cm, Rm, XX },
+  { "mov", Dm, Rm, XX },
   { "mov", Rd, Td, XX },
   { "(bad)", XX, XX, XX },
   { "mov", Td, Rd, XX },
@@ -1450,14 +2115,14 @@ static const struct dis386 dis386_twobyte_intel[] = {
   { "shufps", XM, EX, Ib },
   { GRP9 },
   /* c8 */
-  { "bswap", eAX, XX, XX },	/* bswap doesn't support 16 bit regs */
-  { "bswap", eCX, XX, XX },
-  { "bswap", eDX, XX, XX },
-  { "bswap", eBX, XX, XX },
-  { "bswap", eSP, XX, XX },
-  { "bswap", eBP, XX, XX },
-  { "bswap", eSI, XX, XX },
-  { "bswap", eDI, XX, XX },
+  { "bswap", RMeAX, XX, XX },	/* bswap doesn't support 16 bit regs */
+  { "bswap", RMeCX, XX, XX },
+  { "bswap", RMeDX, XX, XX },
+  { "bswap", RMeBX, XX, XX },
+  { "bswap", RMeSP, XX, XX },
+  { "bswap", RMeBP, XX, XX },
+  { "bswap", RMeSI, XX, XX },
+  { "bswap", RMeDI, XX, XX },
   /* d0 */
   { "(bad)", XX, XX, XX },
   { "psrlw", MX, EM, XX },
@@ -1595,14 +2260,24 @@ static int rm;
 static int reg;
 static void oappend PARAMS ((const char *s));
 
-static const char *names32[]={
+static const char *names64[] = {
+  "%rax","%rcx","%rdx","%rbx", "%rsp","%rbp","%rsi","%rdi",
+  "%r8", "%r9", "%r10", "%r11", "%r12", "%r13", "%r14", "%r15"
+};
+static const char *names32[] = {
   "%eax","%ecx","%edx","%ebx", "%esp","%ebp","%esi","%edi",
+  "%r8d", "%r9d", "%r10d", "%r11d", "%r12d", "%r13d", "%r14d", "%r15d"
 };
 static const char *names16[] = {
   "%ax","%cx","%dx","%bx","%sp","%bp","%si","%di",
+  "%r8w", "%r9w", "%r10w", "%r11w", "%r12w", "%r13w", "%r14w", "%r15w"
 };
 static const char *names8[] = {
   "%al","%cl","%dl","%bl","%ah","%ch","%dh","%bh",
+};
+static const char *names8rex[] = {
+  "%al","%cl","%dl","%bl","%spl", "%bpl", "%sil", "%dil", 
+  "%r8b", "%r9b", "%r10b", "%r11b", "%r12b", "%r13b", "%r14b", "%r15b"
 };
 static const char *names_seg[] = {
   "%es","%cs","%ss","%ds","%fs","%gs","%?","%?",
@@ -1748,10 +2423,10 @@ static const struct dis386 grps[][8] = {
   {
     { "incQ",	Ev, XX, XX },
     { "decQ",	Ev, XX, XX },
-    { "callP",	indirEv, XX, XX },
-    { "lcallP",	indirEv, XX, XX },
-    { "jmpP",	indirEv, XX, XX },
-    { "ljmpP",	indirEv, XX, XX },
+    { "callI",	indirEv, XX, XX },
+    { "lcallI",	indirEv, XX, XX },
+    { "jmpI",	indirEv, XX, XX },
+    { "ljmpI",	indirEv, XX, XX },
     { "pushQ",	Ev, XX, XX },
     { "(bad)",	XX, XX, XX },
   },
@@ -1951,13 +2626,39 @@ static const struct dis386 prefix_user_table[][2] = {
 static void
 ckprefix ()
 {
+  int newrex;
+  rex = 0;
   prefixes = 0;
   used_prefixes = 0;
+  rex_used = 0;
   while (1)
     {
       FETCH_DATA (the_info, codep + 1);
+      newrex = 0;
       switch (*codep)
 	{
+	/* REX prefixes family.  */
+	case 0x40:
+	case 0x41:
+	case 0x42:
+	case 0x43:
+	case 0x44:
+	case 0x45:
+	case 0x46:
+	case 0x47:
+	case 0x48:
+	case 0x49:
+	case 0x4a:
+	case 0x4b:
+	case 0x4c:
+	case 0x4d:
+	case 0x4e:
+	case 0x4f:
+	    if (mode_64bit)
+	      newrex = *codep;
+	    else
+	      return;
+	  break;
 	case 0xf3:
 	  prefixes |= PREFIX_REPZ;
 	  break;
@@ -2006,6 +2707,13 @@ ckprefix ()
 	default:
 	  return;
 	}
+      /* Rex is ignored when followed by another prefix.  */
+      if (rex)
+	{
+	  oappend (prefix_name (rex, 0));
+	  oappend (" ");
+	}
+      rex = newrex;
       codep++;
     }
 }
@@ -2020,6 +2728,39 @@ prefix_name (pref, sizeflag)
 {
   switch (pref)
     {
+    /* REX prefixes family.  */
+    case 0x40:
+      return "rex";
+    case 0x41:
+      return "rexZ";
+    case 0x42:
+      return "rexY";
+    case 0x43:
+      return "rexYZ";
+    case 0x44:
+      return "rexX";
+    case 0x45:
+      return "rexXZ";
+    case 0x46:
+      return "rexXY";
+    case 0x47:
+      return "rexXYZ";
+    case 0x48:
+      return "rex64";
+    case 0x49:
+      return "rex64Z";
+    case 0x4a:
+      return "rex64Y";
+    case 0x4b:
+      return "rex64YZ";
+    case 0x4c:
+      return "rex64X";
+    case 0x4d:
+      return "rex64XZ";
+    case 0x4e:
+      return "rex64XY";
+    case 0x4f:
+      return "rex64XYZ";
     case 0xf3:
       return "repz";
     case 0xf2:
@@ -2052,7 +2793,8 @@ prefix_name (pref, sizeflag)
 static char op1out[100], op2out[100], op3out[100];
 static int op_ad, op_index[3];
 static unsigned int op_address[3];
-static unsigned int start_pc;
+static unsigned int op_riprel[3];
+static bfd_vma start_pc;
 
 
 /*
@@ -2119,8 +2861,13 @@ print_insn_i386 (pc, info)
   struct dis_private priv;
   bfd_byte *inbuf = priv.the_buffer;
 
+  mode_64bit = (info->mach == bfd_mach_x86_64_intel_syntax
+		|| info->mach == bfd_mach_x86_64);
+
   if (info->mach == bfd_mach_i386_i386
-      || info->mach == bfd_mach_i386_i386_intel_syntax)
+      || info->mach == bfd_mach_x86_64
+      || info->mach == bfd_mach_i386_i386_intel_syntax
+      || info->mach == bfd_mach_x86_64_intel_syntax)
     sizeflag = AFLAG|DFLAG;
   else if (info->mach == bfd_mach_i386_i8086)
     sizeflag = 0;
@@ -2173,14 +2920,13 @@ print_insn_i386 (pc, info)
       return -1;
     }
 
+  obufp = obuf;
   ckprefix ();
 
   insn_codep = codep;
 
   FETCH_DATA (info, codep + 1);
   two_source_ops = (*codep == 0x62) || (*codep == 0xc8);
-
-  obufp = obuf;
 
   if ((prefixes & PREFIX_FWAIT)
       && ((*codep < 0xd8) || (*codep > 0xdf)))
@@ -2209,9 +2955,15 @@ print_insn_i386 (pc, info)
   else
     {
       if (intel_syntax)
-        dp = &dis386_intel[*codep];
+	if (mode_64bit)
+	  dp = &dis386_64_intel[*codep];
+	else
+	  dp = &dis386_intel[*codep];
       else
-        dp = &dis386_att[*codep];
+	if (mode_64bit)
+	  dp = &disx86_64_att[*codep];
+	else
+	  dp = &dis386_att[*codep];
       need_modrm = onebyte_has_modrm[*codep];
       uses_f3_prefix = 0;
     }
@@ -2309,6 +3061,14 @@ print_insn_i386 (pc, info)
       (*info->fprintf_func) (info->stream, "%s", name);
       return 1;
     }
+  if (rex & ~rex_used)
+    {
+      const char *name;
+      name = prefix_name (rex | 0x40, orig_sizeflag);
+      if (name == NULL)
+	name = INTERNAL_DISASSEMBLER_ERROR;
+      (*info->fprintf_func) (info->stream, "%s ", name);
+    }
 
   obufp = obuf + strlen (obuf);
   for (i = strlen (obuf); i < 6; i++)
@@ -2336,7 +3096,7 @@ print_insn_i386 (pc, info)
   needcomma = 0;
   if (*first)
     {
-      if (op_index[0] != -1)
+      if (op_index[0] != -1 && !op_riprel[0])
 	(*info->print_address_func) ((bfd_vma) op_address[op_index[0]], info);
       else
 	(*info->fprintf_func) (info->stream, "%s", first);
@@ -2346,7 +3106,7 @@ print_insn_i386 (pc, info)
     {
       if (needcomma)
 	(*info->fprintf_func) (info->stream, ",");
-      if (op_index[1] != -1)
+      if (op_index[1] != -1 && !op_riprel[1])
 	(*info->print_address_func) ((bfd_vma) op_address[op_index[1]], info);
       else
 	(*info->fprintf_func) (info->stream, "%s", second);
@@ -2356,11 +3116,18 @@ print_insn_i386 (pc, info)
     {
       if (needcomma)
 	(*info->fprintf_func) (info->stream, ",");
-      if (op_index[2] != -1)
+      if (op_index[2] != -1 && !op_riprel[2])
 	(*info->print_address_func) ((bfd_vma) op_address[op_index[2]], info);
       else
 	(*info->fprintf_func) (info->stream, "%s", third);
     }
+  for (i = 0; i < 3; i++)
+    if (op_index[i] != -1 && op_riprel[i])
+      {
+	(*info->fprintf_func) (info->stream, "        # ");
+	(*info->print_address_func) ((bfd_vma) (start_pc + codep - start_codep
+						+ op_address[op_index[i]]), info);
+      }
   return codep - inbuf;
 }
 
@@ -2800,23 +3567,38 @@ putop (template, sizeflag)
 	  else
 	    used_prefixes |= PREFIX_FWAIT;
 	  break;
+	case 'O':
+	  USED_REX (REX_MODE64);
+	  if (rex & REX_MODE64)
+	      *obufp++ = 'o';
+	  else
+	    *obufp++ = 'd';
+	  break;
 	case 'P':
           if (intel_syntax)
             break;
 	  if ((prefixes & PREFIX_DATA)
+	      || (rex & REX_MODE64)
 #ifdef SUFFIX_ALWAYS
 	      || (sizeflag & SUFFIX_ALWAYS)
 #endif
 	      )
 	    {
-	      if (sizeflag & DFLAG)
-		*obufp++ = 'l';
-	      else
-		*obufp++ = 'w';
-	      used_prefixes |= (prefixes & PREFIX_DATA);
+	      USED_REX (REX_MODE64);
+	      if (rex & REX_MODE64)
+		*obufp++ = 'q';
+	      else 
+		{
+		   if (sizeflag & DFLAG)
+		      *obufp++ = 'l';
+		   else
+		     *obufp++ = 'w';
+		   used_prefixes |= (prefixes & PREFIX_DATA);
+		}
 	    }
 	  break;
 	case 'Q':
+	  USED_REX (REX_MODE64);
           if (intel_syntax)
             break;
 	  if (mod != 3
@@ -2825,17 +3607,28 @@ putop (template, sizeflag)
 #endif
 	      )
 	    {
-	      if (sizeflag & DFLAG)
-		*obufp++ = 'l';
+	      if (rex & REX_MODE64)
+		*obufp++ = 'q';
 	      else
-		*obufp++ = 'w';
-	      used_prefixes |= (prefixes & PREFIX_DATA);
+		{
+		  if (sizeflag & DFLAG)
+		    *obufp++ = 'l';
+		  else
+		    *obufp++ = 'w';
+		  used_prefixes |= (prefixes & PREFIX_DATA);
+		}
 	    }
 	  break;
 	case 'R':
+	  USED_REX (REX_MODE64);
           if (intel_syntax)
 	    {
-	      if (sizeflag & DFLAG)
+	      if (rex & REX_MODE64)
+		{
+		  *obufp++ = 'q';
+		  *obufp++ = 't';
+		}
+	      else if (sizeflag & DFLAG)
 		{
 		  *obufp++ = 'd';
 		  *obufp++ = 'q';
@@ -2848,12 +3641,15 @@ putop (template, sizeflag)
 	    }
 	  else
 	    {
-	      if (sizeflag & DFLAG)
+	      if (rex & REX_MODE64)
+		*obufp++ = 'q';
+	      else if (sizeflag & DFLAG)
 		*obufp++ = 'l';
 	      else
 		*obufp++ = 'w';
 	    }
-	  used_prefixes |= (prefixes & PREFIX_DATA);
+	  if (!(rex & REX_MODE64))
+	    used_prefixes |= (prefixes & PREFIX_DATA);
 	  break;
 	case 'S':
           if (intel_syntax)
@@ -2861,22 +3657,55 @@ putop (template, sizeflag)
 #ifdef SUFFIX_ALWAYS
 	  if (sizeflag & SUFFIX_ALWAYS)
 	    {
-	      if (sizeflag & DFLAG)
-		*obufp++ = 'l';
+	      if (rex & REX_MODE64)
+		*obufp++ = 'q';
 	      else
-		*obufp++ = 'w';
-	      used_prefixes |= (prefixes & PREFIX_DATA);
+		{
+		  if (sizeflag & DFLAG)
+		    *obufp++ = 'l';
+		  else
+		    *obufp++ = 'w';
+		  used_prefixes |= (prefixes & PREFIX_DATA);
+		}
 	    }
 #endif
 	  break;
+	  /* implicit operand size 'l' for i386 or 'q' for x86-64 */
+	case 'I':
+	  if (mode_64bit)
+	    *obufp++ = 'q';
+	  else
+	    {
+	      if ((prefixes & PREFIX_DATA)
+#ifdef SUFFIX_ALWAYS
+		  || (sizeflag & SUFFIX_ALWAYS)
+#endif
+		  )
+		{
+		  if (sizeflag & DFLAG)
+		    *obufp++ = 'l';
+		  else
+		    *obufp++ = 'w';
+		  used_prefixes |= (prefixes & PREFIX_DATA);
+	      }
+	    }
+	  break;
 	case 'W':
 	  /* operand size flag for cwtl, cbtw */
-	  if (sizeflag & DFLAG)
+	  USED_REX (0);
+	  if (rex)
+	    *obufp++ = 'l';
+	  else if (sizeflag & DFLAG)
 	    *obufp++ = 'w';
 	  else
 	    *obufp++ = 'b';
           if (intel_syntax)
 	    {
+	      if (rex)
+		{
+		  *obufp++ = 'q';
+		  *obufp++ = 'e';
+		}
 	      if (sizeflag & DFLAG)
 		{
 		  *obufp++ = 'd';
@@ -2887,7 +3716,8 @@ putop (template, sizeflag)
 		  *obufp++ = 'w';
 		}
 	    }
-	  used_prefixes |= (prefixes & PREFIX_DATA);
+	  if (!rex)
+	    used_prefixes |= (prefixes & PREFIX_DATA);
 	  break;
 	}
     }
@@ -2948,11 +3778,76 @@ OP_indirE (bytemode, sizeflag)
 }
 
 static void
+print_operand_value (buf, hex, disp)
+  char *buf;
+  int hex;
+  bfd_vma disp;
+{
+  if (mode_64bit)
+    {
+      if (hex)
+	{
+	  char tmp[30];
+	  int i;
+	  buf[0] = '0';
+	  buf[1] = 'x';
+	  sprintf_vma (tmp, disp);
+	  for (i = 0; tmp[i] == '0' && tmp[i+1]; i++);
+	  strcpy (buf + 2, tmp + i);
+	}
+      else
+	{
+	  bfd_signed_vma v = disp;
+	  char tmp[30];
+	  int i;
+	  if (v < 0)
+	    {
+	      *(buf++) = '-';
+	      v = -disp;
+	      /* Check for possible overflow on 0x8000000000000000 */
+	      if (v < 0)
+		{
+		  strcpy (buf, "9223372036854775808");
+		  return;
+		}
+	    }
+	  if (!v)
+	    {
+	      strcpy (buf, "0");
+	      return;
+	    }
+
+	  i = 0;
+	  tmp[29] = 0;
+	  while (v)
+	    {
+	      tmp[28-i] = (v % 10) + '0';
+	      v /= 10;
+	      i++;
+	    }
+	  strcpy (buf, tmp + 29 - i);
+	}
+    }
+  else
+    {
+      if (hex)
+	sprintf (buf, "0x%x", (unsigned int) disp);
+      else
+	sprintf (buf, "%d", (int) disp);
+    }
+}
+
+static void
 OP_E (bytemode, sizeflag)
      int bytemode;
      int sizeflag;
 {
-  int disp;
+  bfd_vma disp;
+  int add = 0;
+  int riprel = 0;
+  USED_REX (REX_EXTZ);
+  if (rex & REX_EXTZ)
+    add += 8;
 
   /* skip mod/rm byte */
   codep++;
@@ -2962,19 +3857,35 @@ OP_E (bytemode, sizeflag)
       switch (bytemode)
 	{
 	case b_mode:
-	  oappend (names8[rm]);
+	  USED_REX (0);
+	  if (rex)
+	    oappend (names8rex[rm + add]);
+	  else
+	    oappend (names8[rm + add]);
 	  break;
 	case w_mode:
-	  oappend (names16[rm]);
+	  oappend (names16[rm + add]);
 	  break;
 	case d_mode:
-	  oappend (names32[rm]);
+	  oappend (names32[rm + add]);
+	  break;
+	case q_mode:
+	  oappend (names64[rm + add]);
+	  break;
+	case m_mode:
+	  if (mode_64bit)
+	    oappend (names64[rm + add]);
+	  else
+	    oappend (names32[rm + add]);
 	  break;
 	case v_mode:
-	  if (sizeflag & DFLAG)
-	    oappend (names32[rm]);
+	  USED_REX (REX_MODE64);
+	  if (rex & REX_MODE64)
+	    oappend (names64[rm + add]);
+	  else if (sizeflag & DFLAG)
+	    oappend (names32[rm + add]);
 	  else
-	    oappend (names16[rm]);
+	    oappend (names16[rm + add]);
 	  used_prefixes |= (prefixes & PREFIX_DATA);
 	  break;
 	case 0:
@@ -3010,16 +3921,24 @@ OP_E (bytemode, sizeflag)
 	  scale = (*codep >> 6) & 3;
 	  index = (*codep >> 3) & 7;
 	  base = *codep & 7;
+	  USED_REX (REX_EXTY);
+	  USED_REX (REX_EXTZ);
+	  if (rex & REX_EXTY)
+	    index += 8;
+	  if (rex & REX_EXTZ)
+	    base += 8;
 	  codep++;
 	}
 
       switch (mod)
 	{
 	case 0:
-	  if (base == 5)
+	  if ((base & 7) == 5)
 	    {
 	      havebase = 0;
-	      disp = get32 ();
+	      if (mode_64bit && !havesib)
+		riprel = 1;
+	      disp = get32s ();
 	    }
 	  break;
 	case 1:
@@ -3029,15 +3948,20 @@ OP_E (bytemode, sizeflag)
 	    disp -= 0x100;
 	  break;
 	case 2:
-	  disp = get32 ();
+	  disp = get32s ();
 	  break;
 	}
 
       if (!intel_syntax)
-        if (mod != 0 || base == 5)
+        if (mod != 0 || (base & 7) == 5)
           {
-            sprintf (scratchbuf, "0x%x", disp);
+	    print_operand_value (scratchbuf, !riprel, disp);
             oappend (scratchbuf);
+	    if (riprel)
+	      {
+		set_op (disp, 1);
+		oappend ("(%rip)");
+	      }
           }
 
       if (havebase || (havesib && (index != 4 || scale != 0)))
@@ -3047,28 +3971,39 @@ OP_E (bytemode, sizeflag)
               switch (bytemode)
                 {
                 case b_mode:
-                  oappend("BYTE PTR ");
+                  oappend ("BYTE PTR ");
                   break;
                 case w_mode:
-                  oappend("WORD PTR ");
+                  oappend ("WORD PTR ");
                   break;
                 case v_mode:
-                  oappend("DWORD PTR ");
+                  oappend ("DWORD PTR ");
                   break;
                 case d_mode:
-                  oappend("QWORD PTR ");
+                  oappend ("QWORD PTR ");
                   break;
+                case m_mode:
+		  if (mode_64bit)
+		    oappend ("DWORD PTR ");
+		  else
+		    oappend ("QWORD PTR ");
+		  break;
                 case x_mode:
-                  oappend("XWORD PTR ");
+                  oappend ("XWORD PTR ");
                   break;
                 default:
                   break;
                 }
              }
 	  *obufp++ = open_char;
+	  if (intel_syntax && riprel)
+	    oappend ("rip + ");
           *obufp = '\0';
+	  USED_REX (REX_EXTZ);
+	  if (!havesib && (rex & REX_EXTZ))
+	    base += 8;
 	  if (havebase)
-	    oappend (names32[base]);
+	    oappend (mode_64bit ? names64[base] : names32[base]);
 	  if (havesib)
 	    {
 	      if (index != 4)
@@ -3080,10 +4015,10 @@ OP_E (bytemode, sizeflag)
                           *obufp++ = separator_char;
                           *obufp = '\0';
                         }
-                      sprintf (scratchbuf, "%s", names32[index]);
+                      sprintf (scratchbuf, "%s", mode_64bit ? names64[index] : names32[index]);
                     }
                   else
-		    sprintf (scratchbuf, ",%s", names32[index]);
+		    sprintf (scratchbuf, ",%s", mode_64bit ? names64[index] : names32[index]);
 		  oappend (scratchbuf);
 		}
               if (!intel_syntax
@@ -3099,17 +4034,12 @@ OP_E (bytemode, sizeflag)
                 }
 	    }
           if (intel_syntax)
-            if (mod != 0 || base == 5)
+            if (mod != 0 || (base & 7) == 5)
               {
                 /* Don't print zero displacements */
-                if (disp > 0)
+                if (disp != 0)
                   {
-                    sprintf (scratchbuf, "+%d", disp);
-                    oappend (scratchbuf);
-                  }
-                else if (disp < 0)
-                  {
-                    sprintf (scratchbuf, "%d", disp);
+		    print_operand_value (scratchbuf, 0, disp);
                     oappend (scratchbuf);
                   }
               }
@@ -3119,7 +4049,7 @@ OP_E (bytemode, sizeflag)
 	}
       else if (intel_syntax)
         {
-          if (mod != 0 || base == 5)
+          if (mod != 0 || (base & 7) == 5)
             {
 	      if (prefixes & (PREFIX_CS | PREFIX_SS | PREFIX_DS
 			      | PREFIX_ES | PREFIX_FS | PREFIX_GS))
@@ -3129,7 +4059,7 @@ OP_E (bytemode, sizeflag)
 		  oappend (names_seg[3]);
 		  oappend (":");
 		}
-              sprintf (scratchbuf, "0x%x", disp);
+	      print_operand_value (scratchbuf, 1, disp);
               oappend (scratchbuf);
             }
         }
@@ -3139,7 +4069,7 @@ OP_E (bytemode, sizeflag)
       switch (mod)
 	{
 	case 0:
-	  if (rm == 6)
+	  if ((rm & 7) == 6)
 	    {
 	      disp = get16 ();
 	      if ((disp & 0x8000) != 0)
@@ -3160,17 +4090,17 @@ OP_E (bytemode, sizeflag)
 	}
 
       if (!intel_syntax)
-        if (mod != 0 || rm == 6)
+        if (mod != 0 || (rm & 7) == 6)
           {
-            sprintf (scratchbuf, "%d", disp);
+	    print_operand_value (scratchbuf, 0, disp);
             oappend (scratchbuf);
           }
 
-      if (mod != 0 || rm != 6)
+      if (mod != 0 || (rm & 7) != 6)
 	{
 	  *obufp++ = open_char;
           *obufp = '\0';
-	  oappend (index16[rm]);
+	  oappend (index16[rm + add]);
           *obufp++ = close_char;
           *obufp = '\0';
 	}
@@ -3182,22 +4112,36 @@ OP_G (bytemode, sizeflag)
      int bytemode;
      int sizeflag;
 {
+  int add = 0;
+  USED_REX (REX_EXTX);
+  if (rex & REX_EXTX)
+    add += 8;
   switch (bytemode)
     {
     case b_mode:
-      oappend (names8[reg]);
+      USED_REX (0);
+      if (rex)
+	oappend (names8rex[reg + add]);
+      else
+	oappend (names8[reg + add]);
       break;
     case w_mode:
-      oappend (names16[reg]);
+      oappend (names16[reg + add]);
       break;
     case d_mode:
-      oappend (names32[reg]);
+      oappend (names32[reg + add]);
+      break;
+    case q_mode:
+      oappend (names64[reg + add]);
       break;
     case v_mode:
-      if (sizeflag & DFLAG)
-	oappend (names32[reg]);
+      USED_REX (REX_MODE64);
+      if (rex & REX_MODE64)
+	oappend (names64[reg + add]);
+      else if (sizeflag & DFLAG)
+	oappend (names32[reg + add]);
       else
-	oappend (names16[reg]);
+	oappend (names16[reg + add]);
       used_prefixes |= (prefixes & PREFIX_DATA);
       break;
     default:
@@ -3206,16 +4150,56 @@ OP_G (bytemode, sizeflag)
     }
 }
 
-static int
+static bfd_vma
+get64 ()
+{
+  unsigned int a = 0;
+  unsigned int b = 0;
+  bfd_vma x = 0;
+
+#ifdef BFD64
+  FETCH_DATA (the_info, codep + 8);
+  a = *codep++ & 0xff;
+  a |= (*codep++ & 0xff) << 8;
+  a |= (*codep++ & 0xff) << 16;
+  a |= (*codep++ & 0xff) << 24;
+  b |= (*codep++ & 0xff);
+  b |= (*codep++ & 0xff) << 8;
+  b |= (*codep++ & 0xff) << 16;
+  b |= (*codep++ & 0xff) << 24;
+  x = a + ((bfd_vma) b << 32);
+#else
+  abort();
+#endif
+  return x;
+}
+
+static bfd_signed_vma
 get32 ()
 {
-  int x = 0;
+  bfd_signed_vma x = 0;
 
   FETCH_DATA (the_info, codep + 4);
-  x = *codep++ & 0xff;
-  x |= (*codep++ & 0xff) << 8;
-  x |= (*codep++ & 0xff) << 16;
-  x |= (*codep++ & 0xff) << 24;
+  x = *codep++ & (bfd_signed_vma) 0xff;
+  x |= (*codep++ & (bfd_signed_vma) 0xff) << 8;
+  x |= (*codep++ & (bfd_signed_vma) 0xff) << 16;
+  x |= (*codep++ & (bfd_signed_vma) 0xff) << 24;
+  return x;
+}
+
+static bfd_signed_vma
+get32s ()
+{
+  bfd_signed_vma x = 0;
+
+  FETCH_DATA (the_info, codep + 4);
+  x = *codep++ & (bfd_signed_vma) 0xff;
+  x |= (*codep++ & (bfd_signed_vma) 0xff) << 8;
+  x |= (*codep++ & (bfd_signed_vma) 0xff) << 16;
+  x |= (*codep++ & (bfd_signed_vma) 0xff) << 24;
+
+  x = (x ^ ((bfd_signed_vma) 1 << 31)) - ((bfd_signed_vma) 1 << 31);
+
   return x;
 }
 
@@ -3231,15 +4215,71 @@ get16 ()
 }
 
 static void
-set_op (op)
+set_op (op, riprel)
      unsigned int op;
+     int riprel;
 {
   op_index[op_ad] = op_ad;
   op_address[op_ad] = op;
+  op_riprel[op_ad] = riprel;
 }
 
 static void
 OP_REG (code, sizeflag)
+     int code;
+     int sizeflag;
+{
+  const char *s;
+  int add = 0;
+  USED_REX (REX_EXTZ);
+  if (rex & REX_EXTZ)
+    add = 8;
+
+  switch (code)
+    {
+    case indir_dx_reg:
+      s = "(%dx)";
+      break;
+    case ax_reg: case cx_reg: case dx_reg: case bx_reg:
+    case sp_reg: case bp_reg: case si_reg: case di_reg:
+      s = names16[code - ax_reg + add];
+      break;
+    case es_reg: case ss_reg: case cs_reg:
+    case ds_reg: case fs_reg: case gs_reg:
+      s = names_seg[code - es_reg + add];
+      break;
+    case al_reg: case ah_reg: case cl_reg: case ch_reg:
+    case dl_reg: case dh_reg: case bl_reg: case bh_reg:
+      USED_REX (0);
+      if (rex)
+	s = names8rex[code - al_reg + add];
+      else
+	s = names8[code - al_reg];
+      break;
+    case eAX_reg: case eCX_reg: case eDX_reg: case eBX_reg:
+    case eSP_reg: case eBP_reg: case eSI_reg: case eDI_reg:
+      USED_REX (REX_MODE64);
+      if (rex & REX_MODE64)
+	s = names64[code - eAX_reg + add];
+      else if (sizeflag & DFLAG)
+	s = names32[code - eAX_reg + add];
+      else
+	s = names16[code - eAX_reg + add];
+      used_prefixes |= (prefixes & PREFIX_DATA);
+      break;
+    case rAX_reg: case rCX_reg: case rDX_reg: case rBX_reg:
+    case rSP_reg: case rBP_reg: case rSI_reg: case rDI_reg:
+      s = names64[code - rAX_reg + add];
+      break;
+    default:
+      s = INTERNAL_DISASSEMBLER_ERROR;
+      break;
+    }
+  oappend (s);
+}
+
+static void
+OP_IMREG (code, sizeflag)
      int code;
      int sizeflag;
 {
@@ -3260,11 +4300,18 @@ OP_REG (code, sizeflag)
       break;
     case al_reg: case ah_reg: case cl_reg: case ch_reg:
     case dl_reg: case dh_reg: case bl_reg: case bh_reg:
-      s = names8[code - al_reg];
+      USED_REX (0);
+      if (rex)
+	s = names8rex[code - al_reg];
+      else
+	s = names8[code - al_reg];
       break;
     case eAX_reg: case eCX_reg: case eDX_reg: case eBX_reg:
     case eSP_reg: case eBP_reg: case eSI_reg: case eDI_reg:
-      if (sizeflag & DFLAG)
+      USED_REX (REX_MODE64);
+      if (rex & REX_MODE64)
+	s = names64[code - eAX_reg];
+      else if (sizeflag & DFLAG)
 	s = names32[code - eAX_reg];
       else
 	s = names16[code - eAX_reg];
@@ -3282,22 +4329,37 @@ OP_I (bytemode, sizeflag)
      int bytemode;
      int sizeflag;
 {
-  int op;
+  bfd_signed_vma op;
+  bfd_signed_vma mask = -1;
 
   switch (bytemode)
     {
     case b_mode:
       FETCH_DATA (the_info, codep + 1);
-      op = *codep++ & 0xff;
+      op = *codep++;
+      mask = 0xff;
+      break;
+    case q_mode:
+      op = get32s ();
       break;
     case v_mode:
-      if (sizeflag & DFLAG)
-	op = get32 ();
+      USED_REX (REX_MODE64);
+      if (rex & REX_MODE64)
+	op = get32s ();
+      else if (sizeflag & DFLAG)
+	{
+	  op = get32 ();
+	  mask = 0xffffffff;
+	}
       else
-	op = get16 ();
+	{
+	  op = get16 ();
+	  mask = 0xfffff;
+	}
       used_prefixes |= (prefixes & PREFIX_DATA);
       break;
     case w_mode:
+      mask = 0xfffff;
       op = get16 ();
       break;
     default:
@@ -3305,10 +4367,56 @@ OP_I (bytemode, sizeflag)
       return;
     }
 
-  if (intel_syntax)
-    sprintf (scratchbuf, "0x%x", op);
-  else
-    sprintf (scratchbuf, "$0x%x", op);
+  op &= mask;
+  scratchbuf[0] = '$';
+  print_operand_value (scratchbuf + !intel_syntax, 1, op);
+  oappend (scratchbuf);
+  scratchbuf[0] = '\0';
+}
+
+static void
+OP_I64 (bytemode, sizeflag)
+     int bytemode;
+     int sizeflag;
+{
+  bfd_signed_vma op;
+  bfd_signed_vma mask = -1;
+
+  switch (bytemode)
+    {
+    case b_mode:
+      FETCH_DATA (the_info, codep + 1);
+      op = *codep++;
+      mask = 0xff;
+      break;
+    case v_mode:
+      USED_REX (REX_MODE64);
+      if (rex & REX_MODE64)
+	op = get64 ();
+      else if (sizeflag & DFLAG)
+	{
+	  op = get32 ();
+	  mask = 0xffffffff;
+	}
+      else
+	{
+	  op = get16 ();
+	  mask = 0xfffff;
+	}
+      used_prefixes |= (prefixes & PREFIX_DATA);
+      break;
+    case w_mode:
+      mask = 0xfffff;
+      op = get16 ();
+      break;
+    default:
+      oappend (INTERNAL_DISASSEMBLER_ERROR);
+      return;
+    }
+
+  op &= mask;
+  scratchbuf[0] = '$';
+  print_operand_value (scratchbuf + !intel_syntax, 1, op);
   oappend (scratchbuf);
   scratchbuf[0] = '\0';
 }
@@ -3318,7 +4426,8 @@ OP_sI (bytemode, sizeflag)
      int bytemode;
      int sizeflag;
 {
-  int op;
+  bfd_signed_vma op;
+  bfd_signed_vma mask = -1;
 
   switch (bytemode)
     {
@@ -3327,12 +4436,20 @@ OP_sI (bytemode, sizeflag)
       op = *codep++;
       if ((op & 0x80) != 0)
 	op -= 0x100;
+      mask = 0xffffffff;
       break;
     case v_mode:
-      if (sizeflag & DFLAG)
-	op = get32 ();
+      USED_REX (REX_MODE64);
+      if (rex & REX_MODE64)
+	op = get32s ();
+      else if (sizeflag & DFLAG)
+	{
+	  op = get32s ();
+	  mask = 0xffffffff;
+	}
       else
 	{
+	  mask = 0xffffffff;
 	  op = get16();
 	  if ((op & 0x8000) != 0)
 	    op -= 0x10000;
@@ -3341,6 +4458,7 @@ OP_sI (bytemode, sizeflag)
       break;
     case w_mode:
       op = get16 ();
+      mask = 0xffffffff;
       if ((op & 0x8000) != 0)
 	op -= 0x10000;
       break;
@@ -3348,10 +4466,9 @@ OP_sI (bytemode, sizeflag)
       oappend (INTERNAL_DISASSEMBLER_ERROR);
       return;
     }
-  if (intel_syntax)
-    sprintf (scratchbuf, "%d", op);
-  else
-    sprintf (scratchbuf, "$0x%x", op);
+
+  scratchbuf[0] = '$';
+  print_operand_value (scratchbuf + 1, 1, op);
   oappend (scratchbuf);
 }
 
@@ -3360,7 +4477,7 @@ OP_J (bytemode, sizeflag)
      int bytemode;
      int sizeflag;
 {
-  int disp;
+  bfd_vma disp;
   int mask = -1;
 
   switch (bytemode)
@@ -3373,7 +4490,7 @@ OP_J (bytemode, sizeflag)
       break;
     case v_mode:
       if (sizeflag & DFLAG)
-	disp = get32 ();
+	disp = get32s ();
       else
 	{
 	  disp = get16 ();
@@ -3389,8 +4506,8 @@ OP_J (bytemode, sizeflag)
       return;
     }
   disp = (start_pc + codep - start_codep + disp) & mask;
-  set_op (disp);
-  sprintf (scratchbuf, "0x%x", disp);
+  set_op (disp, 0);
+  print_operand_value (scratchbuf, 1, disp);
   oappend (scratchbuf);
 }
 
@@ -3432,11 +4549,11 @@ OP_DIR (dummy, sizeflag)
 
 /* ARGSUSED */
 static void
-OP_OFF (ignore, sizeflag)
-     int ignore ATTRIBUTE_UNUSED;
+OP_OFF (ignored, sizeflag)
+     int ignored ATTRIBUTE_UNUSED;
      int sizeflag;
 {
-  int off;
+  bfd_vma off;
 
   append_seg ();
 
@@ -3454,7 +4571,31 @@ OP_OFF (ignore, sizeflag)
 	  oappend (":");
 	}
     }
-  sprintf (scratchbuf, "0x%x", off);
+  print_operand_value (scratchbuf, 1, off);
+  oappend (scratchbuf);
+}
+/* ARGSUSED */
+static void
+OP_OFF64 (ignored, sizeflag)
+     int ignored ATTRIBUTE_UNUSED;
+     int sizeflag ATTRIBUTE_UNUSED;
+{
+  bfd_vma off;
+
+  append_seg ();
+
+  off = get64();
+
+  if (intel_syntax)
+    {
+      if (!(prefixes & (PREFIX_CS | PREFIX_SS | PREFIX_DS
+		        | PREFIX_ES | PREFIX_FS | PREFIX_GS)))
+	{
+	  oappend (names_seg[3]);
+	  oappend (":");
+	}
+    }
+  print_operand_value (scratchbuf, 1, off);
   oappend (scratchbuf);
 }
 
@@ -3465,7 +4606,10 @@ ptr_reg (code, sizeflag)
 {
   const char *s;
   oappend ("(");
-  if (sizeflag & AFLAG)
+  USED_REX (REX_MODE64);
+  if (rex & REX_MODE64)
+    s = names64[code - eAX_reg];
+  else if (sizeflag & AFLAG)
     s = names32[code - eAX_reg];
   else
     s = names16[code - eAX_reg];
@@ -3505,7 +4649,11 @@ OP_C (dummy, sizeflag)
      int dummy ATTRIBUTE_UNUSED;
      int sizeflag ATTRIBUTE_UNUSED;
 {
-  sprintf (scratchbuf, "%%cr%d", reg);
+  int add = 0;
+  USED_REX (REX_EXTX);
+  if (rex & REX_EXTX)
+    add = 8;
+  sprintf (scratchbuf, "%%cr%d", reg+add);
   oappend (scratchbuf);
 }
 
@@ -3515,7 +4663,11 @@ OP_D (dummy, sizeflag)
      int dummy ATTRIBUTE_UNUSED;
      int sizeflag ATTRIBUTE_UNUSED;
 {
-  sprintf (scratchbuf, "%%db%d", reg);
+  int add = 0;
+  USED_REX (REX_EXTX);
+  if (rex & REX_EXTX)
+    add = 8;
+  sprintf (scratchbuf, "%%db%d", reg+add);
   oappend (scratchbuf);
 }
 

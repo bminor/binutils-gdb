@@ -147,7 +147,8 @@ disassembler (abfd)
 #endif
 #ifdef ARCH_i386
     case bfd_arch_i386:
-      if (bfd_get_mach (abfd) == bfd_mach_i386_i386_intel_syntax)
+      if (bfd_get_mach (abfd) == bfd_mach_i386_i386_intel_syntax
+          || bfd_get_mach (abfd) == bfd_mach_x86_64_intel_syntax)
         disassemble = print_insn_i386_intel;
       else
         disassemble = print_insn_i386_att;

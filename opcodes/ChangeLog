@@ -1,3 +1,38 @@
+Fri Jan  5 11:31:07 MET 2001  Jan Hubicka  <jh@suse.cz>
+
+	* i386-dis.c: Add x86_64 support.
+	(rex): New static variable.
+	(REX_MODE64, REX_EXTX, REX_EXTY, REX_EXTZ): New constants.
+	(USED_REX): New macro.
+	(Ev, Ed, Rm, Iq, Iv64, Cm, Dm, Rm*, Ob64, Ov64): New macros.
+	(OP_I64, OP_OFF64, OP_IMREG): New functions.
+	(OP_REG, OP_OFF): Declare.
+	(get64, get32, get32s): New functions.
+	(r??_reg): New constants.
+	(dis386_att): Change templates of instruction implicitly promoted
+	to 64bit; change e?? to RMe?? for unwind RM byte instructions.
+	(grps): Likewise.
+	(dis386_intel): Likewise.
+	(dixx86_64_att): New table based on dis386_att.
+	(dixx86_64_intel): New table based on dis386_intel.
+	(names64, names8rex): New global variable.
+	(names32, names16): Add extended registers.
+	(prefix_user_t): Recognize rex prefixes.
+	(prefix_name): Print REX prefixes nicely.
+	(op_riprel): New global variable.
+	(start_pc): Set type to bfd_vma.
+	(print_insn_i386): Detect the 64bit mode and use proper table;
+	move ckprefix after initializing the buffer; output unused rex prefixes;
+	output information about target of RIP relative addresses.
+	(putop): Support 'O' and 'I'. Update handling of "P', 'Q', 'R' and 'S';
+	(print_operand_value): New function.
+	(OP_E, OP_G, OP_REG, OP_I, OP_J, OP_DIR, OP_OFF, OP_D): Add support for
+	REX prefix and new modes.
+	(get64, get32s): New.
+	(get32): Return bfd_signed_vma type.
+	(set_op): Initialize the op_riprel.
+	* disassemble.c (disassembler): Recognize the x86-64 disassembly.
+
 2001-01-03  Richard Sandiford  <r.sandiford@redhat.com>
 
 	 cgen-dis.in (read_insn): Use bfd_get_bits()
