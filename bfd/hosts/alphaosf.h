@@ -18,6 +18,6 @@ typedef  long int64_type;
 
 #define BYTES_IN_PRINTF_INT 4
 
-#define uint64_typeLOW(x) (uint32_type)(((x) & 0xffffffff))
-#define uint64_typeHIGH(x) (uint32_type)(((x) >> 32) & 0xffffffff)
+#define uint64_typeLOW(x) (((x) & 0xffffffff))
+#define uint64_typeHIGH(x) (((x) >> 32) & 0xffffffff)
 #include "fopen-same.h"
