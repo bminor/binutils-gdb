@@ -91,6 +91,7 @@ static void i860_process_insn (char *);
 static void s_dual (int);
 static void s_enddual (int);
 static void s_atmp (int);
+static void s_align_wrapper (int);
 static int i860_get_expression (char *);
 static bfd_reloc_code_real_type obtain_reloc_for_imm16 (fixS *, long *); 
 #ifdef DEBUG_I860
@@ -99,13 +100,11 @@ static void print_insn (struct i860_it *);
 
 const pseudo_typeS md_pseudo_table[] =
 {
-#ifdef OBJ_ELF
-  {"align",   s_align_bytes, 0},
-#endif
-  {"dual",    s_dual,        0},
-  {"enddual", s_enddual,     0},
-  {"atmp",    s_atmp,        0},
-  {NULL,      0,             0},
+  {"align",   s_align_wrapper, 0},
+  {"dual",    s_dual,          0},
+  {"enddual", s_enddual,       0},
+  {"atmp",    s_atmp,          0},
+  {NULL,      0,               0},
 };
 
 /* Dual-instruction mode handling.  */
@@ -174,6 +173,39 @@ s_atmp (int ignore ATTRIBUTE_UNUSED)
       as_bad (_("Unknown temporary pseudo register"));
     }
   demand_empty_rest_of_line ();
+}
+
+/* Handle ".align" directive depending on syntax mode.
+   AT&T/SVR4 syntax uses the standard align directive.  However, 
+   the Intel syntax additionally allows keywords for the alignment
+   parameter: ".align type", where type is one of {.short, .long,
+   .quad, .single, .double} representing alignments of 2, 4,
+   16, 4, and 8, respectively.  */
+static void
+s_align_wrapper (int arg)
+{
+  char *parm = input_line_pointer;
+
+  if (target_intel_syntax)
+    {
+      /* Replace a keyword with the equivalent integer so the
+         standard align routine can parse the directive.  */
+      if (strncmp (parm, ".short", 6) == 0)
+        strncpy (parm, "     2", 6);
+      else if (strncmp (parm, ".long", 5) == 0)
+        strncpy (parm, "    4", 5);
+      else if (strncmp (parm, ".quad", 5) == 0)
+        strncpy (parm, "   16", 5);
+      else if (strncmp (parm, ".single", 7) == 0)
+        strncpy (parm, "      4", 7);
+      else if (strncmp (parm, ".double", 7) == 0)
+        strncpy (parm, "      8", 7);
+     
+      while (*input_line_pointer == ' ')
+        ++input_line_pointer;
+    }
+
+  s_align_bytes (arg);
 }
 
 /* This function is called once, at assembler startup time.  It should

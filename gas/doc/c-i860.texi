@@ -106,6 +106,12 @@ default register is @code{r31}.
 
 The @code{.dual}, @code{.enddual}, and @code{.atmp} directives are available only in the Intel syntax mode.
 
+Both syntaxes allow for the standard @code{.align} directive.  However,
+the Intel syntax additionally allows keywords for the alignment
+parameter: "@code{.align type}", where `type' is one of @code{.short}, @code{.long},
+@code{.quad}, @code{.single}, @code{.double} representing alignments of 2, 4,
+16, 4, and 8, respectively.
+
 @node Opcodes for i860
 @section i860 Opcodes
 

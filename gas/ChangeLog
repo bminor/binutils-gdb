@@ -1,5 +1,13 @@
 2003-08-06  Jason Eckhardt  <jle@rice.edu>
 
+        * config/tc-i860.c (s_align_wrapper): New function and prototype.
+        (md_pseudo_table): Change s_align_bytes to s_align_wrapper, remove
+        surrounding OBJ_ELF ifdef, and re-format slightly.
+        * doc/c-i860.texi: Document the special .align syntax available
+        in Intel mode.
+
+2003-08-06  Jason Eckhardt  <jle@rice.edu>
+
 	* config/tc-i860.c (i860_handle_align): New function.
 	* config/tc-i860.h (HANDLE_ALIGN): Define macro.
 	(MAX_MEM_FOR_RS_ALIGN_CODE): Define macro.
