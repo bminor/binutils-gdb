@@ -190,8 +190,6 @@ a29k-*-udi*)		gdb_target=a29k-udi ;;
 a29k-*-vxworks*)        gdb_target=vx29k ;;
 
 alpha-*-osf*)		gdb_target=alpha-osf1 ;;
-alpha-*-netware*)	gdb_target=alpha-nw
-			configdirs="${configdirs} nlm" ;;
 
 # start-sanitize-arc
 arc-*-*)		gdb_target=arc ;;

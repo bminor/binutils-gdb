@@ -3,6 +3,7 @@ Wed Mar 15 12:22:35 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
 	* nlmstub.def: Removed, this was moved to nlm/gdbserve.def 
 	  long ago.
 
+	* configure.in (alpha-*-netware*): Removed configuration.
 	* config/alpha/{alpha-nw.mt, gdbserve.mt, tm-alphanw.h}: Removed.
 	* nlm/{README-ALPHA-NETWARE, aio.h, alpha-io.S, alpha-regdef.h,
 	  alpha.c, alpha.h, altdebug.h}: Removed.
