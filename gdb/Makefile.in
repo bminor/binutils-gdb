@@ -1465,12 +1465,6 @@ v850ice.o: $(srcdir)/v850ice.c
 		$(GDBTK_CFLAGS) \
 		$(srcdir)/v850ice.c
 
-# FIXME: cagney/2003-08-10: Do not try to build "valprint.c" with
-# -Wformat-nonliteral.  It relies on local_hex_format et.al. and
-# that's a mess.  It needs a serious overhaul.
-valprint.o: $(srcdir)/valprint.c
-	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(NO_WERROR_CFLAGS) $(srcdir)/valprint.c
-
 
 # Message files.  Based on code in gcc/Makefile.in.
 

@@ -230,7 +230,8 @@ void
 print_longest (struct ui_file *stream, int format, int use_c_format,
 	       LONGEST val_long)
 {
-  char *val;
+  const char *val;
+
   switch (format)
     {
     case 'd':
@@ -253,8 +254,7 @@ print_longest (struct ui_file *stream, int format, int use_c_format,
     default:
       internal_error (__FILE__, __LINE__, "failed internal consistency check");
     } 
-
-  fprintf_filtered (stream, val);
+  fputs_filtered (val, stream);
 }
 
 /* This used to be a macro, but I don't think it is called often enough

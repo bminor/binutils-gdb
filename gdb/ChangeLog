@@ -1,5 +1,9 @@
 2004-09-12  Andrew Cagney  <cagney@gnu.org>
 
+	* valprint.c (print_longest): Use fputs_filtered.  Make "val"
+	const.
+	* Makefile.in (valprint.o): Delete explict rule.
+
 	* config/m68k/nbsdelf.mh: Add missing trailing newline.  Problem
 	reported by Dave Anderson.
 
