@@ -36,6 +36,7 @@ struct monitor_ops {
   char	*step;			/* single step */
   char	*set_break;		/* set a breakpoint */
   char	*clr_break;		/* clear a breakpoint */
+  int	clr_type;		/* number or address for clearing */
   struct rom_cmd_data setmem;	/* set memory to a value */
   struct rom_cmd_data getmem;	/* display memory */
   struct rom_cmd_data regset;	/* set a register */
@@ -59,6 +60,7 @@ extern struct monitor_ops        *current_monitor;
 #define STEP_CMD		(current_monitor->step)
 #define SET_BREAK_CMD		(current_monitor->set_break)
 #define CLR_BREAK_CMD		(current_monitor->clr_break)
+#define CLR_BREAK_ADDR		(current_monitor->clr_type)
 #define SET_MEM			(current_monitor->setmem)
 #define GET_MEM			(current_monitor->getmem)
 #define LOAD_CMD		(current_monitor->load)
@@ -79,6 +81,7 @@ extern struct monitor_ops        *current_monitor;
 extern void monitor_open();
 extern void monitor_close();
 extern void monitor_detach();
+extern void monitor_attach();
 extern void monitor_resume();
 extern int  monitor_wait();
 extern void monitor_fetch_register();

@@ -18,7 +18,7 @@ static char *w89k_regnames[] = {
   "r0",   "r1",    "r2",   "r3",   "r4",  "r5",  "r6",  "r7",  "r8",  "r9",
   "r10",  "r11",   "r12",  "r13",  "r14", "r15", "r16", "r17", "r18", "r19",
   "r20",  "r21",   "r22",  "r23",  "r24", "r25", "r26", "r27", "r28", "r29",
-  "r30",  "r31",   "sar",  "",     "",    "",    "",
+  "r30",  "r31",   "sar",  "pc",   "",    "",    "",
   "eiem", "iir",   "iva",  "ior",  "ipsw","",    "",    "",    "",    "",
   "",     "",      "",     "",     "",    "",    "",    "ccr", "",    "",
   "tr0",  "tr1",   "",     "",     "",    "",    "",
@@ -45,7 +45,7 @@ struct target_ops w89k_ops = {
 Specify the serial device it is connected to (e.g. /dev/ttya).",
   w89k_open,
   monitor_close, 
-  0,
+  monitor_attach,
   monitor_detach,
   monitor_resume,
   monitor_wait,
@@ -82,12 +82,13 @@ Specify the serial device it is connected to (e.g. /dev/ttya).",
 
 struct monitor_ops w89k_cmds = {
   1,					/* 1 for ASCII, 0 for binary */
-  "\r",					/* monitor init string */
-  "G = 100000\r",		        /* execute or usually GO command */
-  "G\r",				/* continue command */
-  "T\r",				/* single step */
-  "BP %x\r",				/* set a breakpoint */
-  "BC %x\r",				/* clear a breakpoint */
+  "\n",					/* monitor init string */
+  "g = %x\n",		        /* execute or usually GO command */
+  "g\n",				/* continue command */
+  "t\n",				/* single step */
+  "bp %x\n",				/* set a breakpoint */
+  "bc %x\n",				/* clear a breakpoint */
+  0,					/* 0 for number, 1 for address */
   {
     "e %x %x\n",			/* set memory */
     "",				        /* delimiter */
@@ -111,7 +112,7 @@ struct monitor_ops w89k_cmds = {
   "U\r",				/* download command */
   "ROM>",				/* monitor command prompt */
   "",					/* end-of-command delimitor */
-  "",				/* optional command terminator */
+  "",					/* optional command terminator */
   &w89k_ops,				/* target operations */
   "xmodem-srec,xmodem-som",		/* load types */
   w89k_regnames				/* registers names */

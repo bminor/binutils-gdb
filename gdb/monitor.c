@@ -128,8 +128,9 @@ printf_monitor(va_alist)
     fprintf(stderr, "SERIAL_WRITE failed: %s\n", safe_strerror(errno));
 }
 
-/* Read a character from the remote system, doing all the fancy
-   timeout stuff.  */
+/* readchar -- read a character from the remote system, doing all the fancy
+ *	timeout stuff.
+ */
 static int
 readchar(timeout)
      int timeout;
@@ -138,7 +139,7 @@ readchar(timeout)
 
   c = SERIAL_READCHAR(monitor_desc, timeout);
 
-  if (sr_get_debug())
+  if (sr_get_debug() > 5)
     putchar(c & 0x7f);
 
 #ifdef LOG_FILE
@@ -149,20 +150,19 @@ readchar(timeout)
   if (c >= 0)
     return c & 0x7f;
 
-  if (c == SERIAL_TIMEOUT)
-    {
-      if (timeout == 0)
-	return c;		/* Polls shouldn't generate timeout errors */
-
-      error("Timeout reading from remote system.");
-    }
-
+  if (c == SERIAL_TIMEOUT) {
+    if (timeout == 0)
+      return c;		/* Polls shouldn't generate timeout errors */
+    error("Timeout reading from remote system.");
+  }
   perror_with_name("remote-monitor");
 }
 
-/* Scan input from the remote system, until STRING is found.  If DISCARD is
-   non-zero, then discard non-matching input, else print it out.
-   Let the user break out immediately.  */
+/* 
+ * expect --  scan input from the remote system, until STRING is found.
+ *	If DISCARD is non-zero, then discard non-matching input, else print
+ *	it out. Let the user break out immediately.
+ */
 static void
 expect (string, discard)
      char *string;
@@ -363,9 +363,10 @@ monitor_create_inferior (execfile, args, env)
   proceed ((CORE_ADDR)entry_pt, TARGET_SIGNAL_DEFAULT, 0);
 }
 
-/* Open a connection to a remote debugger.
-   NAME is the filename used for communication.  */
-
+/*
+ * monitor_open -- open a connection to a remote debugger.
+ *	NAME is the filename used for communication.
+ */
 static int baudrate = 9600;
 static char dev_name[100];
 
@@ -421,7 +422,8 @@ monitor_open(args, name, from_tty)
 }
 
 /*
- * _close -- Close out all files and local state before this target loses control.
+ * monitor_close -- Close out all files and local state before this
+ *	target loses control.
  */
 
 void
@@ -430,6 +432,9 @@ monitor_close (quitting)
 {
   SERIAL_CLOSE(monitor_desc);
   monitor_desc = NULL;
+
+  if (sr_get_debug() > 4)
+    puts ("\nmonitor_close ()");
 
 #if defined (LOG_FILE)
   if (log_file) {
@@ -441,20 +446,49 @@ monitor_close (quitting)
 #endif
 }
 
-/* Terminate the open connection to the remote debugger.
-   Use this when you want to detach and do something else
-   with your gdb.  */
+/* 
+ * monitor_detach -- terminate the open connection to the remote
+ *	debugger. Use this when you want to detach and do something
+ *	else with your gdb.
+ */
 void
 monitor_detach (from_tty)
      int from_tty;
 {
+#ifdef LOG_FILE
+  fprintf (log_file, "\nmonitor_detach ()\n");
+#endif
+
   pop_target();		/* calls monitor_close to do the real work */
   if (from_tty)
     printf ("Ending remote %s debugging\n", target_shortname);
 }
- 
+
 /*
- * _resume -- Tell the remote machine to resume.
+ * monitor_attach -- attach GDB to the target.
+ */
+void
+monitor_attach (args, from_tty)
+     char *args;
+     int from_tty;
+{
+  if (from_tty)
+    printf ("Starting remote %s debugging\n", target_shortname);
+ 
+#ifdef LOG_FILE
+  fprintf (log_file, "\nmonitor_attach (args=%s)\n", args);
+#endif
+  
+  if (sr_get_debug() > 4)
+    printf ("\nmonitor_attach (args=%s)\n", args);
+
+  printf_monitor (GO_CMD);
+  /* swallow the echo.  */
+  expect (GO_CMD, 1);
+}
+  
+/*
+ * monitor_resume -- Tell the remote machine to resume.
  */
 void
 monitor_resume (pid, step, sig)
@@ -462,21 +496,21 @@ monitor_resume (pid, step, sig)
      enum target_signal sig;
 {
 #ifdef LOG_FILE
-  fprintf (log_file, "\nIn Resume (step=%d, sig=%d)\n", step, sig);
+  fprintf (log_file, "\nmonitor_resume (step=%d, sig=%d)\n", step, sig);
 #endif
 
-  if (step)
-    {
-      printf_monitor (STEP_CMD);
-      /* wait for the echo.  */
-      expect (STEP_CMD, 1);
-    }
-  else
-    {
-      printf_monitor (GO_CMD);
-      /* swallow the echo.  */
-      expect (GO_CMD, 1);
-    }
+  if (sr_get_debug() > 4)
+    printf ("\nmonitor_resume (step=%d, sig=%d)\n", step, sig);
+
+  if (step) {
+    printf_monitor (STEP_CMD);
+    /* wait for the echo.  */
+    expect (STEP_CMD, 1);
+  } else {
+    printf_monitor (CONT_CMD);
+    /* swallow the echo.  */
+    expect (CONT_CMD, 1);
+  }
 }
 
 /*
@@ -879,19 +913,22 @@ monitor_remove_breakpoint (addr, shadow)
 #ifdef LOG_FILE
   fprintf (log_file, "\nIn Remove_breakpoint (addr=%x)\n", addr);
 #endif
-  for (i = 0; i < MAX_MONITOR_BREAKPOINTS; i++)
-    if (breakaddr[i] == addr)
-      {
-	breakaddr[i] = 0;
-	/* some monitors remove breakpoints based on the address */
-	if (strcasecmp (target_shortname, "bug") == 0)   
-	    printf_monitor(CLR_BREAK_CMD, addr);
-	  else
-	    printf_monitor(CLR_BREAK_CMD, i);
-	expect_prompt(1);
-	return 0;
-      }
 
+  if (sr_get_debug() > 4)
+    printf ("remove_breakpoint (addr=%x)\n", addr);
+
+  for (i = 0; i < MAX_MONITOR_BREAKPOINTS; i++) {
+    if (breakaddr[i] == addr) {
+      breakaddr[i] = 0;
+      /* some monitors remove breakpoints based on the address */
+      if (CLR_BREAK_ADDR)   
+	printf_monitor(CLR_BREAK_CMD, addr);
+      else
+	printf_monitor(CLR_BREAK_CMD, i);
+      expect_prompt(1);
+      return 0;
+    }
+  }
   fprintf(stderr, "Can't find breakpoint associated with 0x%x\n", addr);
   return 1;
 }
@@ -953,24 +990,36 @@ monitor_load (arg)
   fclose (download);
 }
 
-/* Put a command string, in args, out to MONITOR.  Output from MONITOR is placed
-   on the users terminal until the prompt is seen. */
-
+/* 
+ * monitor_command -- put a command string, in args, out to MONITOR.
+ *	Output from MONITOR is placed on the users terminal until the
+ *	prompt is seen. FIXME: We read the charcters ourseleves here
+ *	cause of a nasty echo.
+ */
 void
 monitor_command (args, fromtty)
      char	*args;
      int	fromtty;
 {
+
+  char *p;
+  char c, cp;
+  p = PROMPT;
+
 #ifdef LOG_FILE
-  fprintf (log_file, "\nIn command (args=%s)\n", args);
+  fprintf (log_file, "\nmonitor_command (args=%s)\n", args);
 #endif
   if (monitor_desc == NULL)
     error("monitor target not open.");
-  
+
   if (!args)
     error("Missing command.");
 	
-  printf_monitor("%s\r", args);
+  if (sr_get_debug() > 4)
+    printf ("monitor_command (args=%s)\n", args);
+
+  printf_monitor ("%s\n", args);
+
   expect_prompt(0);
 }
 

@@ -20,7 +20,7 @@ static char *op50n_regnames[] = {
   "r7_s11 ", "r8_s10 ", "r9_s9 ",  "r10_s8 ", "r11_s7 ", "r12_s6 ", "r13_s5 ",
   "r14_s4 ", "r15_s3 ", "r16_s2 ", "r17_s1 ", "r18_s0 ", "r19_t4 ", "r20_t3 ",
   "r21_t2 ", "r22_t1 ", "r23_a3 ", "r24_a2 ", "r25_a1 ", "r26_a0 ", "r27_dp ",
-  "r28_v0 ", "r29_v1 ", "r30_sp ", "r31_t5 ", "",       "",       "",
+  "r28_v0 ", "r29_v1 ", "r30_sp ", "r31_t5 ", "",        "p",       "",
   "",        "",       "",       "",       "",       "",       "",
   "",        "",       "",       "",       "",       "",       "",
   "",        "",       "",       "",       "",       "",       "",    "",
@@ -88,11 +88,12 @@ Specify the serial device it is connected to (e.g. /dev/ttya).",
 struct monitor_ops op50n_cmds = {
   1,					/* 1 for ASCII, 0 for binary */
   ".\n",				/* monitor init string */
-  "",		        /* execute or usually GO command */
+  "g %x",		        /* execute or usually GO command */
   "",				/* continue command */
   "",				/* single step */
-  "",				/* set a breakpoint */
+  "b %x\n",				/* set a breakpoint */
   "",				/* clear a breakpoint */
+  1,					/* 0 for number, 1 for address */
   {
     "sx %x %x;.\n",			/* set memory */
     "",				/* delimiter  */
