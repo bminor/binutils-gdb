@@ -1,3 +1,10 @@
+Sat Mar 14 17:30:40 1992  Fred Fish  (fnf@cygnus.com)
+
+	* elf.c (elf_corefile_note):  Call bfd_xmalloc() instead of bare
+	malloc().
+	* reloc.c (bfd_generic_get_relocated_section_contents):  Call
+	bfd_xmalloc() instead of bare malloc().
+
 Fri Mar 13 15:44:37 1992  K. Richard Pixley  (rich@cygnus.com)
 
 	* Makefile.in: pass down MAKEINFO on info.
