@@ -2,7 +2,7 @@
 
 THIS FILE IS MACHINE GENERATED WITH CGEN.
 
-Copyright (C) 1996, 1997, 1998, 1999 Free Software Foundation, Inc.
+Copyright (C) 1996, 1997, 1998, 1999, 2000 Free Software Foundation, Inc.
 
 This file is part of the GNU Simulators.
 
@@ -258,81 +258,31 @@ m32rxf_decode (SIM_CPU *current_cpu, IADDR pc,
       unsigned int val = (((insn >> 8) & (15 << 4)) | ((insn >> 4) & (15 << 0)));
       switch (val)
       {
-      case 0 : itype = M32RXF_INSN_SUBV; goto extract_sfmt_addv;
-      case 1 : itype = M32RXF_INSN_SUBX; goto extract_sfmt_addx;
-      case 2 : itype = M32RXF_INSN_SUB; goto extract_sfmt_add;
-      case 3 : itype = M32RXF_INSN_NEG; goto extract_sfmt_mv;
-      case 4 : itype = M32RXF_INSN_CMP; goto extract_sfmt_cmp;
-      case 5 : itype = M32RXF_INSN_CMPU; goto extract_sfmt_cmp;
-      case 6 : itype = M32RXF_INSN_CMPEQ; goto extract_sfmt_cmp;
-      case 7 :
+      case 0 : itype = M32RXF_INSN_SUBV; goto extract_sfmt_addv;      case 1 : itype = M32RXF_INSN_SUBX; goto extract_sfmt_addx;      case 2 : itype = M32RXF_INSN_SUB; goto extract_sfmt_add;      case 3 : itype = M32RXF_INSN_NEG; goto extract_sfmt_mv;      case 4 : itype = M32RXF_INSN_CMP; goto extract_sfmt_cmp;      case 5 : itype = M32RXF_INSN_CMPU; goto extract_sfmt_cmp;      case 6 : itype = M32RXF_INSN_CMPEQ; goto extract_sfmt_cmp;      case 7 :
         {
-          unsigned int val = (((insn >> 8) & (15 << 0)));
+          unsigned int val = (((insn >> 8) & (3 << 0)));
           switch (val)
           {
-          case 0 : itype = M32RXF_INSN_CMPZ; goto extract_sfmt_cmpz;
-          case 3 : itype = M32RXF_INSN_PCMPBZ; goto extract_sfmt_cmpz;
-          default : itype = M32RXF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 0 : itype = M32RXF_INSN_CMPZ; goto extract_sfmt_cmpz;          case 3 : itype = M32RXF_INSN_PCMPBZ; goto extract_sfmt_cmpz;          default : itype = M32RXF_INSN_X_INVALID; goto extract_sfmt_empty;
           }
         }
-      case 8 : itype = M32RXF_INSN_ADDV; goto extract_sfmt_addv;
-      case 9 : itype = M32RXF_INSN_ADDX; goto extract_sfmt_addx;
-      case 10 : itype = M32RXF_INSN_ADD; goto extract_sfmt_add;
-      case 11 : itype = M32RXF_INSN_NOT; goto extract_sfmt_mv;
-      case 12 : itype = M32RXF_INSN_AND; goto extract_sfmt_add;
-      case 13 : itype = M32RXF_INSN_XOR; goto extract_sfmt_add;
-      case 14 : itype = M32RXF_INSN_OR; goto extract_sfmt_add;
-      case 16 : itype = M32RXF_INSN_SRL; goto extract_sfmt_add;
-      case 18 : itype = M32RXF_INSN_SRA; goto extract_sfmt_add;
-      case 20 : itype = M32RXF_INSN_SLL; goto extract_sfmt_add;
-      case 22 : itype = M32RXF_INSN_MUL; goto extract_sfmt_add;
-      case 24 : itype = M32RXF_INSN_MV; goto extract_sfmt_mv;
-      case 25 : itype = M32RXF_INSN_MVFC; goto extract_sfmt_mvfc;
-      case 26 : itype = M32RXF_INSN_MVTC; goto extract_sfmt_mvtc;
-      case 28 :
+      case 8 : itype = M32RXF_INSN_ADDV; goto extract_sfmt_addv;      case 9 : itype = M32RXF_INSN_ADDX; goto extract_sfmt_addx;      case 10 : itype = M32RXF_INSN_ADD; goto extract_sfmt_add;      case 11 : itype = M32RXF_INSN_NOT; goto extract_sfmt_mv;      case 12 : itype = M32RXF_INSN_AND; goto extract_sfmt_add;      case 13 : itype = M32RXF_INSN_XOR; goto extract_sfmt_add;      case 14 : itype = M32RXF_INSN_OR; goto extract_sfmt_add;      case 16 : itype = M32RXF_INSN_SRL; goto extract_sfmt_add;      case 18 : itype = M32RXF_INSN_SRA; goto extract_sfmt_add;      case 20 : itype = M32RXF_INSN_SLL; goto extract_sfmt_add;      case 22 : itype = M32RXF_INSN_MUL; goto extract_sfmt_add;      case 24 : itype = M32RXF_INSN_MV; goto extract_sfmt_mv;      case 25 : itype = M32RXF_INSN_MVFC; goto extract_sfmt_mvfc;      case 26 : itype = M32RXF_INSN_MVTC; goto extract_sfmt_mvtc;      case 28 :
         {
-          unsigned int val = (((insn >> 8) & (15 << 0)));
+          unsigned int val = (((insn >> 8) & (3 << 0)));
           switch (val)
           {
-          case 12 : itype = M32RXF_INSN_JC; goto extract_sfmt_jc;
-          case 13 : itype = M32RXF_INSN_JNC; goto extract_sfmt_jc;
-          case 14 : itype = M32RXF_INSN_JL; goto extract_sfmt_jl;
-          case 15 : itype = M32RXF_INSN_JMP; goto extract_sfmt_jmp;
-          default : itype = M32RXF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 0 : itype = M32RXF_INSN_JC; goto extract_sfmt_jc;          case 1 : itype = M32RXF_INSN_JNC; goto extract_sfmt_jc;          case 2 : itype = M32RXF_INSN_JL; goto extract_sfmt_jl;          case 3 : itype = M32RXF_INSN_JMP; goto extract_sfmt_jmp;          default : itype = M32RXF_INSN_X_INVALID; goto extract_sfmt_empty;
           }
         }
-      case 29 : itype = M32RXF_INSN_RTE; goto extract_sfmt_rte;
-      case 31 : itype = M32RXF_INSN_TRAP; goto extract_sfmt_trap;
-      case 32 : itype = M32RXF_INSN_STB; goto extract_sfmt_stb;
-      case 34 : itype = M32RXF_INSN_STH; goto extract_sfmt_sth;
-      case 36 : itype = M32RXF_INSN_ST; goto extract_sfmt_st;
-      case 37 : itype = M32RXF_INSN_UNLOCK; goto extract_sfmt_unlock;
-      case 38 : itype = M32RXF_INSN_ST_PLUS; goto extract_sfmt_st_plus;
-      case 39 : itype = M32RXF_INSN_ST_MINUS; goto extract_sfmt_st_plus;
-      case 40 : itype = M32RXF_INSN_LDB; goto extract_sfmt_ld;
-      case 41 : itype = M32RXF_INSN_LDUB; goto extract_sfmt_ld;
-      case 42 : itype = M32RXF_INSN_LDH; goto extract_sfmt_ld;
-      case 43 : itype = M32RXF_INSN_LDUH; goto extract_sfmt_ld;
-      case 44 : itype = M32RXF_INSN_LD; goto extract_sfmt_ld;
-      case 45 : itype = M32RXF_INSN_LOCK; goto extract_sfmt_lock;
-      case 46 : itype = M32RXF_INSN_LD_PLUS; goto extract_sfmt_ld_plus;
-      case 48 : /* fall through */
-      case 56 : itype = M32RXF_INSN_MULHI_A; goto extract_sfmt_mulhi_a;
-      case 49 : /* fall through */
-      case 57 : itype = M32RXF_INSN_MULLO_A; goto extract_sfmt_mulhi_a;
-      case 50 : /* fall through */
-      case 58 : itype = M32RXF_INSN_MULWHI_A; goto extract_sfmt_mulhi_a;
-      case 51 : /* fall through */
-      case 59 : itype = M32RXF_INSN_MULWLO_A; goto extract_sfmt_mulhi_a;
-      case 52 : /* fall through */
-      case 60 : itype = M32RXF_INSN_MACHI_A; goto extract_sfmt_machi_a;
-      case 53 : /* fall through */
-      case 61 : itype = M32RXF_INSN_MACLO_A; goto extract_sfmt_machi_a;
-      case 54 : /* fall through */
-      case 62 : itype = M32RXF_INSN_MACWHI_A; goto extract_sfmt_machi_a;
-      case 55 : /* fall through */
-      case 63 : itype = M32RXF_INSN_MACWLO_A; goto extract_sfmt_machi_a;
-      case 64 : /* fall through */
+      case 29 : itype = M32RXF_INSN_RTE; goto extract_sfmt_rte;      case 31 : itype = M32RXF_INSN_TRAP; goto extract_sfmt_trap;      case 32 : itype = M32RXF_INSN_STB; goto extract_sfmt_stb;      case 34 : itype = M32RXF_INSN_STH; goto extract_sfmt_sth;      case 36 : itype = M32RXF_INSN_ST; goto extract_sfmt_st;      case 37 : itype = M32RXF_INSN_UNLOCK; goto extract_sfmt_unlock;      case 38 : itype = M32RXF_INSN_ST_PLUS; goto extract_sfmt_st_plus;      case 39 : itype = M32RXF_INSN_ST_MINUS; goto extract_sfmt_st_plus;      case 40 : itype = M32RXF_INSN_LDB; goto extract_sfmt_ld;      case 41 : itype = M32RXF_INSN_LDUB; goto extract_sfmt_ld;      case 42 : itype = M32RXF_INSN_LDH; goto extract_sfmt_ld;      case 43 : itype = M32RXF_INSN_LDUH; goto extract_sfmt_ld;      case 44 : itype = M32RXF_INSN_LD; goto extract_sfmt_ld;      case 45 : itype = M32RXF_INSN_LOCK; goto extract_sfmt_lock;      case 46 : itype = M32RXF_INSN_LD_PLUS; goto extract_sfmt_ld_plus;      case 48 : /* fall through */
+      case 56 : itype = M32RXF_INSN_MULHI_A; goto extract_sfmt_mulhi_a;      case 49 : /* fall through */
+      case 57 : itype = M32RXF_INSN_MULLO_A; goto extract_sfmt_mulhi_a;      case 50 : /* fall through */
+      case 58 : itype = M32RXF_INSN_MULWHI_A; goto extract_sfmt_mulhi_a;      case 51 : /* fall through */
+      case 59 : itype = M32RXF_INSN_MULWLO_A; goto extract_sfmt_mulhi_a;      case 52 : /* fall through */
+      case 60 : itype = M32RXF_INSN_MACHI_A; goto extract_sfmt_machi_a;      case 53 : /* fall through */
+      case 61 : itype = M32RXF_INSN_MACLO_A; goto extract_sfmt_machi_a;      case 54 : /* fall through */
+      case 62 : itype = M32RXF_INSN_MACWHI_A; goto extract_sfmt_machi_a;      case 55 : /* fall through */
+      case 63 : itype = M32RXF_INSN_MACWLO_A; goto extract_sfmt_machi_a;      case 64 : /* fall through */
       case 65 : /* fall through */
       case 66 : /* fall through */
       case 67 : /* fall through */
@@ -347,39 +297,23 @@ m32rxf_decode (SIM_CPU *current_cpu, IADDR pc,
       case 76 : /* fall through */
       case 77 : /* fall through */
       case 78 : /* fall through */
-      case 79 : itype = M32RXF_INSN_ADDI; goto extract_sfmt_addi;
-      case 80 : /* fall through */
-      case 81 : itype = M32RXF_INSN_SRLI; goto extract_sfmt_slli;
-      case 82 : /* fall through */
-      case 83 : itype = M32RXF_INSN_SRAI; goto extract_sfmt_slli;
-      case 84 : /* fall through */
-      case 85 : itype = M32RXF_INSN_SLLI; goto extract_sfmt_slli;
-      case 87 :
+      case 79 : itype = M32RXF_INSN_ADDI; goto extract_sfmt_addi;      case 80 : /* fall through */
+      case 81 : itype = M32RXF_INSN_SRLI; goto extract_sfmt_slli;      case 82 : /* fall through */
+      case 83 : itype = M32RXF_INSN_SRAI; goto extract_sfmt_slli;      case 84 : /* fall through */
+      case 85 : itype = M32RXF_INSN_SLLI; goto extract_sfmt_slli;      case 87 :
         {
-          unsigned int val = (((insn >> 0) & (3 << 0)));
+          unsigned int val = (((insn >> 0) & (1 << 0)));
           switch (val)
           {
-          case 0 : itype = M32RXF_INSN_MVTACHI_A; goto extract_sfmt_mvtachi_a;
-          case 1 : itype = M32RXF_INSN_MVTACLO_A; goto extract_sfmt_mvtachi_a;
-          default : itype = M32RXF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 0 : itype = M32RXF_INSN_MVTACHI_A; goto extract_sfmt_mvtachi_a;          case 1 : itype = M32RXF_INSN_MVTACLO_A; goto extract_sfmt_mvtachi_a;          default : itype = M32RXF_INSN_X_INVALID; goto extract_sfmt_empty;
           }
         }
-      case 88 : itype = M32RXF_INSN_RACH_DSI; goto extract_sfmt_rac_dsi;
-      case 89 : itype = M32RXF_INSN_RAC_DSI; goto extract_sfmt_rac_dsi;
-      case 90 : itype = M32RXF_INSN_MULWU1; goto extract_sfmt_mulwu1;
-      case 91 : itype = M32RXF_INSN_MACWU1; goto extract_sfmt_macwu1;
-      case 92 : itype = M32RXF_INSN_MACLH1; goto extract_sfmt_macwu1;
-      case 93 : itype = M32RXF_INSN_MSBLO; goto extract_sfmt_msblo;
-      case 94 : itype = M32RXF_INSN_SADD; goto extract_sfmt_sadd;
-      case 95 :
+      case 88 : itype = M32RXF_INSN_RACH_DSI; goto extract_sfmt_rac_dsi;      case 89 : itype = M32RXF_INSN_RAC_DSI; goto extract_sfmt_rac_dsi;      case 90 : itype = M32RXF_INSN_MULWU1; goto extract_sfmt_mulwu1;      case 91 : itype = M32RXF_INSN_MACWU1; goto extract_sfmt_macwu1;      case 92 : itype = M32RXF_INSN_MACLH1; goto extract_sfmt_macwu1;      case 93 : itype = M32RXF_INSN_MSBLO; goto extract_sfmt_msblo;      case 94 : itype = M32RXF_INSN_SADD; goto extract_sfmt_sadd;      case 95 :
         {
           unsigned int val = (((insn >> 0) & (3 << 0)));
           switch (val)
           {
-          case 0 : itype = M32RXF_INSN_MVFACHI_A; goto extract_sfmt_mvfachi_a;
-          case 1 : itype = M32RXF_INSN_MVFACLO_A; goto extract_sfmt_mvfachi_a;
-          case 2 : itype = M32RXF_INSN_MVFACMI_A; goto extract_sfmt_mvfachi_a;
-          default : itype = M32RXF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 0 : itype = M32RXF_INSN_MVFACHI_A; goto extract_sfmt_mvfachi_a;          case 1 : itype = M32RXF_INSN_MVFACLO_A; goto extract_sfmt_mvfachi_a;          case 2 : itype = M32RXF_INSN_MVFACMI_A; goto extract_sfmt_mvfachi_a;          default : itype = M32RXF_INSN_X_INVALID; goto extract_sfmt_empty;
           }
         }
       case 96 : /* fall through */
@@ -397,22 +331,12 @@ m32rxf_decode (SIM_CPU *current_cpu, IADDR pc,
       case 108 : /* fall through */
       case 109 : /* fall through */
       case 110 : /* fall through */
-      case 111 : itype = M32RXF_INSN_LDI8; goto extract_sfmt_ldi8;
-      case 112 :
+      case 111 : itype = M32RXF_INSN_LDI8; goto extract_sfmt_ldi8;      case 112 :
         {
           unsigned int val = (((insn >> 8) & (15 << 0)));
           switch (val)
           {
-          case 0 : itype = M32RXF_INSN_NOP; goto extract_sfmt_nop;
-          case 4 : itype = M32RXF_INSN_SC; goto extract_sfmt_sc;
-          case 5 : itype = M32RXF_INSN_SNC; goto extract_sfmt_sc;
-          case 8 : itype = M32RXF_INSN_BCL8; goto extract_sfmt_bcl8;
-          case 9 : itype = M32RXF_INSN_BNCL8; goto extract_sfmt_bcl8;
-          case 12 : itype = M32RXF_INSN_BC8; goto extract_sfmt_bc8;
-          case 13 : itype = M32RXF_INSN_BNC8; goto extract_sfmt_bc8;
-          case 14 : itype = M32RXF_INSN_BL8; goto extract_sfmt_bl8;
-          case 15 : itype = M32RXF_INSN_BRA8; goto extract_sfmt_bra8;
-          default : itype = M32RXF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 0 : itype = M32RXF_INSN_NOP; goto extract_sfmt_nop;          case 4 : itype = M32RXF_INSN_SC; goto extract_sfmt_sc;          case 5 : itype = M32RXF_INSN_SNC; goto extract_sfmt_sc;          case 8 : itype = M32RXF_INSN_BCL8; goto extract_sfmt_bcl8;          case 9 : itype = M32RXF_INSN_BNCL8; goto extract_sfmt_bcl8;          case 12 : itype = M32RXF_INSN_BC8; goto extract_sfmt_bc8;          case 13 : itype = M32RXF_INSN_BNC8; goto extract_sfmt_bc8;          case 14 : itype = M32RXF_INSN_BL8; goto extract_sfmt_bl8;          case 15 : itype = M32RXF_INSN_BRA8; goto extract_sfmt_bra8;          default : itype = M32RXF_INSN_X_INVALID; goto extract_sfmt_empty;
           }
         }
       case 113 : /* fall through */
@@ -431,87 +355,29 @@ m32rxf_decode (SIM_CPU *current_cpu, IADDR pc,
       case 126 : /* fall through */
       case 127 :
         {
-          unsigned int val = (((insn >> 8) & (15 << 0)));
+          unsigned int val = (((insn >> 8) & (7 << 0)));
           switch (val)
           {
-          case 8 : itype = M32RXF_INSN_BCL8; goto extract_sfmt_bcl8;
-          case 9 : itype = M32RXF_INSN_BNCL8; goto extract_sfmt_bcl8;
-          case 12 : itype = M32RXF_INSN_BC8; goto extract_sfmt_bc8;
-          case 13 : itype = M32RXF_INSN_BNC8; goto extract_sfmt_bc8;
-          case 14 : itype = M32RXF_INSN_BL8; goto extract_sfmt_bl8;
-          case 15 : itype = M32RXF_INSN_BRA8; goto extract_sfmt_bra8;
-          default : itype = M32RXF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 0 : itype = M32RXF_INSN_BCL8; goto extract_sfmt_bcl8;          case 1 : itype = M32RXF_INSN_BNCL8; goto extract_sfmt_bcl8;          case 4 : itype = M32RXF_INSN_BC8; goto extract_sfmt_bc8;          case 5 : itype = M32RXF_INSN_BNC8; goto extract_sfmt_bc8;          case 6 : itype = M32RXF_INSN_BL8; goto extract_sfmt_bl8;          case 7 : itype = M32RXF_INSN_BRA8; goto extract_sfmt_bra8;          default : itype = M32RXF_INSN_X_INVALID; goto extract_sfmt_empty;
           }
         }
-      case 132 : itype = M32RXF_INSN_CMPI; goto extract_sfmt_cmpi;
-      case 133 : itype = M32RXF_INSN_CMPUI; goto extract_sfmt_cmpi;
-      case 134 :
+      case 132 : itype = M32RXF_INSN_CMPI; goto extract_sfmt_cmpi;      case 133 : itype = M32RXF_INSN_CMPUI; goto extract_sfmt_cmpi;      case 134 :
         {
-          unsigned int val = (((insn >> -6) & (63 << 0)));
+          unsigned int val = (((insn >> -8) & (3 << 0)));
           switch (val)
           {
-          case 0 :
-            {
-              unsigned int val = (((insn >> -12) & (63 << 0)));
-              switch (val)
-              {
-              case 0 : itype = M32RXF_INSN_SAT; goto extract_sfmt_sat;
-              case 32 : itype = M32RXF_INSN_SATH; goto extract_sfmt_satb;
-              case 48 : itype = M32RXF_INSN_SATB; goto extract_sfmt_satb;
-              default : itype = M32RXF_INSN_X_INVALID; goto extract_sfmt_empty;
-              }
-            }
-          default : itype = M32RXF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 0 : itype = M32RXF_INSN_SAT; goto extract_sfmt_sat;          case 2 : itype = M32RXF_INSN_SATH; goto extract_sfmt_satb;          case 3 : itype = M32RXF_INSN_SATB; goto extract_sfmt_satb;          default : itype = M32RXF_INSN_X_INVALID; goto extract_sfmt_empty;
           }
         }
-      case 136 : itype = M32RXF_INSN_ADDV3; goto extract_sfmt_addv3;
-      case 138 : itype = M32RXF_INSN_ADD3; goto extract_sfmt_add3;
-      case 140 : itype = M32RXF_INSN_AND3; goto extract_sfmt_and3;
-      case 141 : itype = M32RXF_INSN_XOR3; goto extract_sfmt_and3;
-      case 142 : itype = M32RXF_INSN_OR3; goto extract_sfmt_or3;
-      case 144 :
+      case 136 : itype = M32RXF_INSN_ADDV3; goto extract_sfmt_addv3;      case 138 : itype = M32RXF_INSN_ADD3; goto extract_sfmt_add3;      case 140 : itype = M32RXF_INSN_AND3; goto extract_sfmt_and3;      case 141 : itype = M32RXF_INSN_XOR3; goto extract_sfmt_and3;      case 142 : itype = M32RXF_INSN_OR3; goto extract_sfmt_or3;      case 144 :
         {
-          unsigned int val = (((insn >> -6) & (63 << 0)));
+          unsigned int val = (((insn >> -12) & (1 << 0)));
           switch (val)
           {
-          case 0 :
-            {
-              unsigned int val = (((insn >> -12) & (63 << 0)));
-              switch (val)
-              {
-              case 0 : itype = M32RXF_INSN_DIV; goto extract_sfmt_div;
-              case 1 : itype = M32RXF_INSN_DIVH; goto extract_sfmt_div;
-              default : itype = M32RXF_INSN_X_INVALID; goto extract_sfmt_empty;
-              }
-            }
-          default : itype = M32RXF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 0 : itype = M32RXF_INSN_DIV; goto extract_sfmt_div;          case 1 : itype = M32RXF_INSN_DIVH; goto extract_sfmt_div;          default : itype = M32RXF_INSN_X_INVALID; goto extract_sfmt_empty;
           }
         }
-      case 145 : itype = M32RXF_INSN_DIVU; goto extract_sfmt_div;
-      case 146 : itype = M32RXF_INSN_REM; goto extract_sfmt_div;
-      case 147 : itype = M32RXF_INSN_REMU; goto extract_sfmt_div;
-      case 152 : itype = M32RXF_INSN_SRL3; goto extract_sfmt_sll3;
-      case 154 : itype = M32RXF_INSN_SRA3; goto extract_sfmt_sll3;
-      case 156 : itype = M32RXF_INSN_SLL3; goto extract_sfmt_sll3;
-      case 159 : itype = M32RXF_INSN_LDI16; goto extract_sfmt_ldi16;
-      case 160 : itype = M32RXF_INSN_STB_D; goto extract_sfmt_stb_d;
-      case 162 : itype = M32RXF_INSN_STH_D; goto extract_sfmt_sth_d;
-      case 164 : itype = M32RXF_INSN_ST_D; goto extract_sfmt_st_d;
-      case 168 : itype = M32RXF_INSN_LDB_D; goto extract_sfmt_ld_d;
-      case 169 : itype = M32RXF_INSN_LDUB_D; goto extract_sfmt_ld_d;
-      case 170 : itype = M32RXF_INSN_LDH_D; goto extract_sfmt_ld_d;
-      case 171 : itype = M32RXF_INSN_LDUH_D; goto extract_sfmt_ld_d;
-      case 172 : itype = M32RXF_INSN_LD_D; goto extract_sfmt_ld_d;
-      case 176 : itype = M32RXF_INSN_BEQ; goto extract_sfmt_beq;
-      case 177 : itype = M32RXF_INSN_BNE; goto extract_sfmt_beq;
-      case 184 : itype = M32RXF_INSN_BEQZ; goto extract_sfmt_beqz;
-      case 185 : itype = M32RXF_INSN_BNEZ; goto extract_sfmt_beqz;
-      case 186 : itype = M32RXF_INSN_BLTZ; goto extract_sfmt_beqz;
-      case 187 : itype = M32RXF_INSN_BGEZ; goto extract_sfmt_beqz;
-      case 188 : itype = M32RXF_INSN_BLEZ; goto extract_sfmt_beqz;
-      case 189 : itype = M32RXF_INSN_BGTZ; goto extract_sfmt_beqz;
-      case 220 : itype = M32RXF_INSN_SETH; goto extract_sfmt_seth;
-      case 224 : /* fall through */
+      case 145 : itype = M32RXF_INSN_DIVU; goto extract_sfmt_div;      case 146 : itype = M32RXF_INSN_REM; goto extract_sfmt_div;      case 147 : itype = M32RXF_INSN_REMU; goto extract_sfmt_div;      case 152 : itype = M32RXF_INSN_SRL3; goto extract_sfmt_sll3;      case 154 : itype = M32RXF_INSN_SRA3; goto extract_sfmt_sll3;      case 156 : itype = M32RXF_INSN_SLL3; goto extract_sfmt_sll3;      case 159 : itype = M32RXF_INSN_LDI16; goto extract_sfmt_ldi16;      case 160 : itype = M32RXF_INSN_STB_D; goto extract_sfmt_stb_d;      case 162 : itype = M32RXF_INSN_STH_D; goto extract_sfmt_sth_d;      case 164 : itype = M32RXF_INSN_ST_D; goto extract_sfmt_st_d;      case 168 : itype = M32RXF_INSN_LDB_D; goto extract_sfmt_ld_d;      case 169 : itype = M32RXF_INSN_LDUB_D; goto extract_sfmt_ld_d;      case 170 : itype = M32RXF_INSN_LDH_D; goto extract_sfmt_ld_d;      case 171 : itype = M32RXF_INSN_LDUH_D; goto extract_sfmt_ld_d;      case 172 : itype = M32RXF_INSN_LD_D; goto extract_sfmt_ld_d;      case 176 : itype = M32RXF_INSN_BEQ; goto extract_sfmt_beq;      case 177 : itype = M32RXF_INSN_BNE; goto extract_sfmt_beq;      case 184 : itype = M32RXF_INSN_BEQZ; goto extract_sfmt_beqz;      case 185 : itype = M32RXF_INSN_BNEZ; goto extract_sfmt_beqz;      case 186 : itype = M32RXF_INSN_BLTZ; goto extract_sfmt_beqz;      case 187 : itype = M32RXF_INSN_BGEZ; goto extract_sfmt_beqz;      case 188 : itype = M32RXF_INSN_BLEZ; goto extract_sfmt_beqz;      case 189 : itype = M32RXF_INSN_BGTZ; goto extract_sfmt_beqz;      case 220 : itype = M32RXF_INSN_SETH; goto extract_sfmt_seth;      case 224 : /* fall through */
       case 225 : /* fall through */
       case 226 : /* fall through */
       case 227 : /* fall through */
@@ -526,8 +392,7 @@ m32rxf_decode (SIM_CPU *current_cpu, IADDR pc,
       case 236 : /* fall through */
       case 237 : /* fall through */
       case 238 : /* fall through */
-      case 239 : itype = M32RXF_INSN_LD24; goto extract_sfmt_ld24;
-      case 240 : /* fall through */
+      case 239 : itype = M32RXF_INSN_LD24; goto extract_sfmt_ld24;      case 240 : /* fall through */
       case 241 : /* fall through */
       case 242 : /* fall through */
       case 243 : /* fall through */
@@ -544,16 +409,10 @@ m32rxf_decode (SIM_CPU *current_cpu, IADDR pc,
       case 254 : /* fall through */
       case 255 :
         {
-          unsigned int val = (((insn >> 8) & (15 << 0)));
+          unsigned int val = (((insn >> 8) & (7 << 0)));
           switch (val)
           {
-          case 8 : itype = M32RXF_INSN_BCL24; goto extract_sfmt_bcl24;
-          case 9 : itype = M32RXF_INSN_BNCL24; goto extract_sfmt_bcl24;
-          case 12 : itype = M32RXF_INSN_BC24; goto extract_sfmt_bc24;
-          case 13 : itype = M32RXF_INSN_BNC24; goto extract_sfmt_bc24;
-          case 14 : itype = M32RXF_INSN_BL24; goto extract_sfmt_bl24;
-          case 15 : itype = M32RXF_INSN_BRA24; goto extract_sfmt_bra24;
-          default : itype = M32RXF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 0 : itype = M32RXF_INSN_BCL24; goto extract_sfmt_bcl24;          case 1 : itype = M32RXF_INSN_BNCL24; goto extract_sfmt_bcl24;          case 4 : itype = M32RXF_INSN_BC24; goto extract_sfmt_bc24;          case 5 : itype = M32RXF_INSN_BNC24; goto extract_sfmt_bc24;          case 6 : itype = M32RXF_INSN_BL24; goto extract_sfmt_bl24;          case 7 : itype = M32RXF_INSN_BRA24; goto extract_sfmt_bra24;          default : itype = M32RXF_INSN_X_INVALID; goto extract_sfmt_empty;
           }
         }
       default : itype = M32RXF_INSN_X_INVALID; goto extract_sfmt_empty;
@@ -566,7 +425,6 @@ m32rxf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_empty:
   {
     const IDESC *idesc = &m32rxf_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
 #define FLD(f) abuf->fields.fmt_empty.f
 
 
@@ -1689,7 +1547,6 @@ m32rxf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_nop:
   {
     const IDESC *idesc = &m32rxf_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
 #define FLD(f) abuf->fields.fmt_empty.f
 
 
@@ -1726,7 +1583,6 @@ m32rxf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_rte:
   {
     const IDESC *idesc = &m32rxf_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
 #define FLD(f) abuf->fields.fmt_empty.f
 
 
@@ -2169,7 +2025,6 @@ m32rxf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_sadd:
   {
     const IDESC *idesc = &m32rxf_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
 #define FLD(f) abuf->fields.fmt_empty.f
 
 
@@ -2273,7 +2128,6 @@ m32rxf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_sc:
   {
     const IDESC *idesc = &m32rxf_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
 #define FLD(f) abuf->fields.fmt_empty.f
 
 
