@@ -1450,7 +1450,7 @@ gdbtypes.o: gdbtypes.c $(bfd_h) complaints.h $(defs_h) $(expression_h) \
 	$(value_h) gdb_string.h wrapper.h
 
 go32-nat.o: go32-nat.c $(defs_h) $(inferior_h) gdb_wait.h $(gdbcore_h) \
-	$(command_h) $(floatformat_h) target.h
+	$(command_h) $(floatformat_h) target.h i387-nat.h
 
 gnu-nat.o: process_reply_S.h exc_request_S.h notify_S.h msg_reply_S.h \
 	exc_request_U.h msg_U.h gnu-nat.h

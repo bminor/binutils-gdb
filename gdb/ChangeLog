@@ -1,5 +1,17 @@
 2001-02-18  Eli Zaretskii  <eliz@is.elta.co.il>
 
+	* go32-nat.c: Include i387-nat.h.
+	(fetch_register): New function, uses some of the guts of
+	go32_fetch_registers and calls i387_supply_register.
+	(go32_fetch_registers): Most of the code moved into
+	fetch_register.  Use i387_supply_fsave.
+	(store_register): Use i387_fill_fsave instead of custom code.
+	(go32_store_registers): Use i387_fill_fsave.
+
+	* Makefile.in (go32-nat.o): Depend on i387-nat.h.
+
+	* config/i386/go32.mh (NATDEPFILES): Add i387-nat.o.
+
 	* completer.c (gdb_completer_file_name_break_characters): Remove
 	slash from file-name break characters.
 	[__MSDOS__]: Special definition for DOS/Windows file names.

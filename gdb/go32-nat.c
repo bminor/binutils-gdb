@@ -28,6 +28,7 @@
 #include "command.h"
 #include "floatformat.h"
 #include "buildsym.h"
+#include "i387-nat.h"
 
 #include <stdio.h>		/* required for __DJGPP_MINOR__ */
 #include <stdlib.h>
@@ -450,55 +451,27 @@ go32_wait (int pid ATTRIBUTE_UNUSED, struct target_waitstatus *status)
 }
 
 static void
+fetch_register (int regno)
+{
+  if (regno < FP0_REGNUM)
+    supply_register (regno, (char *) &a_tss + regno_mapping[regno].tss_ofs);
+  else if (regno <= LAST_FPU_CTRL_REGNUM)
+    i387_supply_register (regno, (char *) &npx);
+  else
+    internal_error (__FILE__, __LINE__,
+		    "Invalid register no. %d in fetch_register.", regno);
+}
+
+static void
 go32_fetch_registers (int regno)
 {
-  /*JHW */
-  int end_reg = regno + 1;	/* just one reg initially */
-
-  if (regno < 0)		/* do the all registers */
+  if (regno >= 0)
+    fetch_register (regno);
+  else
     {
-      regno = 0;		/* start at first register */
-      /* # regs in table */
-      end_reg = sizeof (regno_mapping) / sizeof (regno_mapping[0]);
-    }
-
-  for (; regno < end_reg; regno++)
-    {
-      if (regno < 16)
-	supply_register (regno,
-			 (char *) &a_tss + regno_mapping[regno].tss_ofs);
-      else if (regno < 24)
-	supply_register (regno,
-			 (char *) &npx.reg[regno_mapping[regno].tss_ofs]);
-      else if (regno < 32)
-	{
-	  unsigned regval;
-
-	  switch (regno_mapping[regno].size)
-	    {
-	      case 2:
-		regval = *(unsigned short *)
-		  ((char *) &npx + regno_mapping[regno].tss_ofs);
-		regval &= 0xffff;
-		if (regno == FOP_REGNUM && regval)
-		  /* Feature: restore the 5 bits of the opcode
-		     stripped by FSAVE/FNSAVE.  */
-		  regval |= 0xd800;
-		break;
-	      case 4:
-		regval = *(unsigned *)
-		  ((char *) &npx + regno_mapping[regno].tss_ofs);
-		break;
-	      default:
-		internal_error (__FILE__, __LINE__, "\
-Invalid native size for register no. %d in go32_fetch_register.", regno);
-	    }
-	  supply_register (regno, (char *) &regval);
-	}
-      else
-	internal_error (__FILE__, __LINE__,
-			"Invalid register no. %d in go32_fetch_register.",
-			regno);
+      for (regno = 0; regno < FP0_REGNUM; regno++)
+	fetch_register (regno);
+      i387_supply_fsave ((char *) &npx);
     }
 }
 
@@ -508,18 +481,14 @@ store_register (int regno)
   void *rp;
   void *v = (void *) &registers[REGISTER_BYTE (regno)];
 
-  if (regno < 16)
-    rp = (char *) &a_tss + regno_mapping[regno].tss_ofs;
-  else if (regno < 24)
-    rp = (char *) &npx.reg[regno_mapping[regno].tss_ofs];
-  else if (regno < 32)
-    rp = (char *) &npx + regno_mapping[regno].tss_ofs;
+  if (regno < FP0_REGNUM)
+    memcpy ((char *) &a_tss + regno_mapping[regno].tss_ofs,
+	    v, regno_mapping[regno].size);
+  else if (regno <= LAST_FPU_CTRL_REGNUM)
+    i387_fill_fsave ((char *)&npx, regno);
   else
     internal_error (__FILE__, __LINE__,
 		    "Invalid register no. %d in store_register.", regno);
-  memcpy (rp, v, regno_mapping[regno].size);
-  if (regno == FOP_REGNUM)
-    *(short *)rp &= 0x07ff; /* strip high 5 bits, in case they added them */
 }
 
 static void
@@ -531,8 +500,9 @@ go32_store_registers (int regno)
     store_register (regno);
   else
     {
-      for (r = 0; r < sizeof (regno_mapping) / sizeof (regno_mapping[0]); r++)
+      for (r = 0; r < FP0_REGNUM; r++)
 	store_register (r);
+      i387_fill_fsave ((char *) &npx, -1);
     }
 }
 
