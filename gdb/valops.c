@@ -187,11 +187,11 @@ value_cast (type, arg2)
   COERCE_VARYING_ARRAY (arg2, type2);
   code2 = TYPE_CODE (type2);
 
-  if (code1 == TYPE_CODE_COMPLEX) 
-    return cast_into_complex (type, arg2); 
-  if (code1 == TYPE_CODE_BOOL) 
+  if (code1 == TYPE_CODE_COMPLEX)
+    return cast_into_complex (type, arg2);
+  if (code1 == TYPE_CODE_BOOL || code1 == TYPE_CODE_CHAR)
     code1 = TYPE_CODE_INT; 
-  if (code2 == TYPE_CODE_BOOL) 
+  if (code2 == TYPE_CODE_BOOL || code2 == TYPE_CODE_CHAR)
     code2 = TYPE_CODE_INT;
 
   scalar = (code2 == TYPE_CODE_INT || code2 == TYPE_CODE_FLT
@@ -1137,7 +1137,9 @@ call_function_by_hand (function, nargs, args)
 	if ((TYPE_CODE (arg_type) == TYPE_CODE_STRUCT
 	     || TYPE_CODE (arg_type) == TYPE_CODE_UNION
 	     || TYPE_CODE (arg_type) == TYPE_CODE_ARRAY
-	     || TYPE_CODE (arg_type) == TYPE_CODE_STRING)
+	     || TYPE_CODE (arg_type) == TYPE_CODE_STRING
+	     || TYPE_CODE (arg_type) == TYPE_CODE_BITSTRING
+	     || TYPE_CODE (arg_type) == TYPE_CODE_SET)
 	  && REG_STRUCT_HAS_ADDR (using_gcc, arg_type))
 	  {
 	    CORE_ADDR addr;

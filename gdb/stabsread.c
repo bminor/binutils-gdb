@@ -2967,8 +2967,7 @@ read_struct_type (pp, type, objfile)
       || !attach_fn_fields_to_type (&fi, type)
       || !read_tilde_fields (&fi, pp, type, objfile))
     {
-      do_cleanups (back_to);
-      return (error_type (pp, objfile));
+      type = error_type (pp, objfile);
     }
 
   do_cleanups (back_to);

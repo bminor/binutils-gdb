@@ -1,7 +1,10 @@
 Thu Jan 11 17:21:25 1996  Per Bothner  <bothner@kalessin.cygnus.com>
 
+	* stabsread.c (read_struct_type):  Trivial simplification.
+
 	* stabsread.c (define-symbol):  Use invisible references
 	for TYPE_CODE_SET and TYPE_CODE_BITSTRING too.
+	* valops.c (call_function_by_hand):  Likewise.
 	* eval.c (evaluate_subexp_standard):  When known, use the formal
 	parameter type as the expected type when evaluating arg expressions.
 	* ch-lang.c (evaluate_subexp_chill):  Likewise (for MULTI_SUBSCRIPT).
