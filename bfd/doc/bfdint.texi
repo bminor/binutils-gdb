@@ -28,6 +28,7 @@ The initial version of this document was written by Ian Lance Taylor
 * BFD generated files::		BFD generated files
 * BFD multiple compilations::	Files compiled multiple times in BFD
 * BFD relocation handling::	BFD relocation handling
+* BFD ELF support::		BFD ELF support
 * Index::			Index
 @end menu
 
@@ -416,6 +417,7 @@ somewhat incompatible, none perfect.
 @menu
 * BFD relocation concepts::	BFD relocation concepts
 * BFD relocation functions::	BFD relocation functions
+* BFD relocation codes::	BFD relocation codes
 * BFD relocation future::	BFD relocation future
 @end menu
 
@@ -579,6 +581,41 @@ may want to consider testing this case, both when the output object file
 format is the same as your format, and when it is different.
 @end itemize
 
+@node BFD relocation codes
+@subsection BFD relocation codes
+
+BFD has another way of describing relocations besides the howto
+structures described above: the enum @samp{bfd_reloc_code_real_type}.
+
+Every known relocation type can be described as a value in this
+enumeration.  The enumeration contains many target specific relocations,
+but where two or more targets have the same relocation, a single code is
+used.  For example, the single value @samp{BFD_RELOC_32} is used for all
+simple 32 bit relocation types.
+
+The main purpose of this relocation code is to give the assembler some
+mechanism to create @samp{arelent} structures.  In order for the
+assembler to create an @samp{arelent} structure, it has to be able to
+obtain a howto structure.  The function @samp{bfd_reloc_type_lookup},
+which simply calls the target vector entry point
+@samp{reloc_type_lookup}, takes a relocation code and returns a howto
+structure.
+
+The function @samp{bfd_get_reloc_code_name} returns the name of a
+relocation code.  This is mainly used in error messages.
+
+Using both howto structures and relocation codes can be somewhat
+confusing.  There are many processor specific relocation codes.
+However, the relocation is only fully defined by the howto structure.
+The same relocation code will map to different howto structures in
+different object file formats.  For example, the addend handling may be
+different.
+
+Most of the relocation codes are not really general.  The assembler can
+not use them without already understanding what sorts of relocations can
+be used for a particular target.  It might be possible to replace the
+relocation codes with something simpler.
+
 @node BFD relocation future
 @subsection BFD relocation future
 
@@ -613,6 +650,239 @@ currently normally used.
 For the special case of ELF dynamic linking, more consideration needs to
 be given to writing ELF specific but ELF target generic code to handle
 special relocation types such as GOT and PLT.
+
+@node BFD ELF support
+@section BFD ELF support
+@cindex elf support in bfd
+@cindex bfd elf support
+
+The ELF object file format is defined in two parts: a generic ABI and a
+processor specific supplement.  The ELF support in BFD is split in a
+similar fashion.  The processor specific support is largely kept within
+a single file.  The generic support is provided by several other file.
+The processor specific support provides a set of function pointers and
+constants used by the generic support.
+
+@menu
+* BFD ELF generic support::		BFD ELF generic support
+* BFD ELF processor specific support::	BFD ELF processor specific support
+* BFD ELF future::			BFD ELF future
+@end menu
+
+@node BFD ELF generic support
+@subsection BFD ELF generic support
+
+In general, functions which do not read external data from the ELF file
+are found in @file{elf.c}.  They operate on the internal forms of the
+ELF structures, which are defined in @file{include/elf/internal.h}.  The
+internal structures are defined in terms of @samp{bfd_vma}, and so may
+be used for both 32 bit and 64 bit ELF targets.
+
+The file @file{elfcode.h} contains functions which operate on the
+external data.  @file{elfcode.h} is compiled twice, once via
+@file{elf32.c} with @samp{ARCH_SIZE} defined as @samp{32}, and once via
+@file{elf64.c} with @samp{ARCH_SIZE} defined as @samp{64}.
+@file{elfcode.h} includes functions to swap the ELF structures in and
+out of external form, as well as a few more complex functions.
+
+Linker support is found in @file{elflink.c} and @file{elflink.h}.  The
+latter file is compiled twice, for both 32 and 64 bit support.  The
+linker support is only used if the processor specific file defines
+@samp{elf_backend_relocate_section}, which is required to relocate the
+section contents.  If that macro is not defined, the generic linker code
+is used, and relocations are handled via @samp{bfd_perform_relocation}.
+
+The core file support is in @file{elfcore.h}, which is compiled twice,
+for both 32 and 64 bit support.  The more interesting cases of core file
+support only work on a native system which has the @file{sys/procfs.h}
+header file.  Without that file, the core file support does little more
+than read the ELF program segments as BFD sections.
+
+The BFD internal header file @file{elf-bfd.h} is used for communication
+among these files and the processor specific files.
+
+The default entries for the BFD ELF target vector are found mainly in
+@file{elf.c}.  Some functions are found in @file{elfcode.h}.
+
+The processor specific files may override particular entries in the
+target vector, but most do not, with one exception: the
+@samp{bfd_reloc_type_lookup} entry point is always processor specific.
+
+@node BFD ELF processor specific support
+@subsection BFD ELF processor specific support
+
+By convention, the processor specific support for a particular processor
+will be found in @file{elf@var{nn}-@var{cpu}.c}, where @var{nn} is
+either 32 or 64, and @var{cpu} is the name of the processor.
+
+@menu
+* BFD ELF processor required::	Required processor specific support
+* BFD ELF processor linker::	Processor specific linker support
+* BFD ELF processor other::	Other processor specific support options
+@end menu
+
+@node BFD ELF processor required
+@subsubsection Required processor specific support
+
+When writing a @file{elf@var{nn}-@var{cpu}.c} file, you must do the
+following:
+@itemize @bullet
+@item
+Define either @samp{TARGET_BIG_SYM} or @samp{TARGET_LITTLE_SYM}, or
+both, to a unique C name to use for the target vector.  This name should
+appear in the list of target vectors in @file{targets.c}, and will also
+have to appear in @file{config.bfd} and @file{configure.in}.  Define
+@samp{TARGET_BIG_SYM} for a big-endian processor,
+@samp{TARGET_LITTLE_SYM} for a little-endian processor, and define both
+for a bi-endian processor.
+@item
+Define either @samp{TARGET_BIG_NAME} or @samp{TARGET_LITTLE_NAME}, or
+both, to a string used as the name of the target vector.  This is the
+name which a user of the BFD tool would use to specify the object file
+format.  It would normally appear in a linker emulation parameters
+file.
+@item
+Define @samp{ELF_ARCH} to the BFD architecture (an element of the
+@samp{bfd_architecture} enum, typically @samp{bfd_arch_@var{cpu}}).
+@item
+Define @samp{ELF_MACHINE_CODE} to the magic number which should appear
+in the @samp{e_machine} field of the ELF header.  As of this writing,
+these magic numbers are assigned by SCO; if you want to get a magic
+number for a particular processor, try sending a note to
+@email{registry@@sco.com}.  In the BFD sources, the magic numbers are
+found in @file{include/elf/common.h}; they have names beginning with
+@samp{EM_}.
+@item
+Define @samp{ELF_MAXPAGESIZE} to the maximum size of a virtual page in
+memory.  This can normally be found at the start of chapter 5 in the
+processor specific supplement.  For a processor which will only be used
+in an embedded system, or which has no memory management hardware, this
+can simply be @samp{1}.
+@item
+If the format should use @samp{Rel} rather than @samp{Rela} relocations,
+define @samp{USE_REL}.  This is normally defined in chapter 4 of the
+processor specific supplement.  In the absence of a supplement, it's
+usually easier to work with @samp{Rela} relocations, although they will
+require more space in object files (but not in executables, except when
+using dynamic linking).  It is possible, though somewhat awkward, to
+support both @samp{Rel} and @samp{Rela} relocations for a single target;
+@file{elf64-mips.c} does it by overriding the relocation reading and
+writing routines.
+@item
+Define howto structures for all the relocation types.
+@item
+Define a @samp{bfd_reloc_type_lookup} routine.  This must be named
+@samp{bfd_elf@var{nn}_bfd_reloc_type_lookup}, and may be either a
+function or a macro.  It must translate a BFD relocation code into a
+howto structure.  This is normally a table lookup or a simple switch.
+@item
+If using @samp{Rel} relocations, define @samp{elf_info_to_howto_rel}.
+If using @samp{Rela} relocations, define @samp{elf_info_to_howto}.
+Either way, this is a macro defined as the name of a function which
+takes an @samp{arelent} and a @samp{Rel} or @samp{Rela} structure, and
+sets the @samp{howto} field of the @samp{arelent} based on the
+@samp{Rel} or @samp{Rela} structure.  This is normally uses
+@samp{ELF@var{nn}_R_TYPE} to get the ELF relocation type and uses it as
+an index into a table of howto structures.
+@end itemize
+
+You must also add the magic number for this processor to the
+@samp{prep_headers} function in @file{elf.c}.
+
+@node BFD ELF processor linker
+@subsubsection Processor specific linker support
+
+The linker will be much more efficient if you define a relocate section
+function.  This will permit BFD to use the ELF specific linker support.
+
+If you do not define a relocate section function, BFD must use the
+generic linker support, which requires converting all symbols and
+relocations into BFD @samp{asymbol} and @samp{arelent} structures.  In
+this case, relocations will be handled by calling
+@samp{bfd_perform_relocation}, which will use the howto structures you
+have defined.  @xref{BFD relocation handling}.
+
+In order to support linking into a different object file format, such as
+S-records, @samp{bfd_perform_relocation} must work correctly with your
+howto structures, so you can't skip that step.  However, if you define
+the relocate section function, then in the normal case of linking into
+an ELF file the linker will not need to convert symbols and relocations,
+and will be much more efficient.
+
+To use a relocation section function, define the macro
+@samp{elf_backend_relocate_section} as the name of a function which will
+take the contents of a section, as well as relocation, symbol, and other
+information, and modify the section contents according to the relocation
+information.  In simple cases, this is little more than a loop over the
+relocations which computes the value of each relocation and calls
+@samp{_bfd_final_link_relocate}.  The function must check for a
+relocateable link, and in that case normally needs to do nothing other
+than adjust the addend for relocations against a section symbol.
+
+The complex cases generally have to do with dynamic linker support.  GOT
+and PLT relocations must be handled specially, and the linker normally
+arranges to set up the GOT and PLT sections while handling relocations.
+When generating a shared library, random relocations must normally be
+copied into the shared library, or converted to RELATIVE relocations
+when possible.
+
+@node BFD ELF processor other
+@subsubsection Other processor specific support options
+
+There are many other macros which may be defined in
+@file{elf@var{nn}-@var{cpu}.c}.  These macros may be found in
+@file{elfxx-target.h}.
+
+Macros may be used to override some of the generic ELF target vector
+functions.
+
+Several processor specific hook functions which may be defined as
+macros.  These functions are found as function pointers in the
+@samp{elf_backend_data} structure defined in @file{elf-bfd.h}.  In
+general, a hook function is set by defining a macro
+@samp{elf_backend_@var{name}}.
+
+There are a few processor specific constants which may also be defined.
+These are again found in the @samp{elf_backend_data} structure.
+
+I will not define the various functions and constants here; see the
+comments in @file{elf-bfd.h}.
+
+Normally any odd characteristic of a particular ELF processor is handled
+via a hook function.  For example, the special @samp{SHN_MIPS_SCOMMON}
+section number found in MIPS ELF is handled via the hooks
+@samp{section_from_bfd_section}, @samp{symbol_processing},
+@samp{add_symbol_hook}, and @samp{output_symbol_hook}.
+
+Dynamic linking support, which involves processor specific relocations
+requiring special handling, is also implemented via hook functions.
+
+@node BFD ELF future
+@subsection BFD ELF future
+
+The current dynamic linking support has too much code duplication.
+While each processor has particular differences, much of the dynamic
+linking support is quite similar for each processor.  The GOT and PLT
+are handled in fairly similar ways, the details of -Bsymbolic linking
+are generally similar, etc.  This code should be reworked to use more
+generic functions, eliminating the duplication.
+
+Similarly, the relocation handling has too much duplication.  Many of
+the @samp{reloc_type_lookup} and @samp{info_to_howto} functions are
+quite similar.  The relocate section functions are also often quite
+similar, both in the standard linker handling and the dynamic linker
+handling.  Many of the COFF processor specific backends share a single
+relocate section function (@samp{_bfd_coff_generic_relocate_section}),
+and it should be possible to do something like this for the ELF targets
+as well.
+
+The appearance of the processor specific magic number in
+@samp{prep_headers} in @file{elf.c} is somewhat bogus.  It should be
+possible to add support for a new processor without changing the generic
+support.
+
+The processor function hooks and constants are ad hoc and need better
+documentation.
 
 @node Index
 @unnumberedsec Index
