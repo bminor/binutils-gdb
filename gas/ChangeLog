@@ -1,3 +1,7 @@
+1998-12-23  Gavin Romig-Koch  <gavin@cygnus.com>
+
+	* config/tc-mips.c (md_begin): Correct type-o in setting of mips_eabi64.
+
 1998-12-21  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-m32r.c (md_assemble): Emit a NOP after a relaxable 16
