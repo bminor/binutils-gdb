@@ -38,6 +38,7 @@ mips.h
 rs6000.h
 sym.h
 symconst.h
+we32k.h
 z8k.h
 Do-last:
 
