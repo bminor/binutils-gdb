@@ -37,6 +37,11 @@ sim_stop_reason (SIM_DESC sd, enum sim_stop *reason, int *sigrc)
       break;
     case sim_stopped :
     case sim_signalled :
+      /* ??? See the comment below case `sim_signalled' in
+	 gdb/remote-sim.c:gdbsim_wait.  The gdb/simulator interface calls
+	 for us to return the host version of the signal which gdb then
+	 converts into the target's version.  This is obviously a bit
+	 clumsy.  */
       *sigrc = sim_signal_to_host (sd, engine->sigrc);
       break;
     default :
