@@ -2,7 +2,7 @@
 
 	* MAINTAINERS: Update my email address.
 
-2002-05-15  Richard Earnshaw  <rearnsha@arm.com>
+2002-05-16  Richard Earnshaw  <rearnsha@arm.com>
 
 	* config/arm/nm-nbsd.h: Use "config/nm-nbsd.h" to include generic
 	include file of the same name.
@@ -25,8 +25,8 @@
 	Carries the type of the expression at the position that is parsed.
 	(push_current_type, pop_current_type): Two new functions. Used
 	to store/restore current_type in expression on specific tokens.
-	(search_field): New static variable. Set to one after parsing a point as
-	at that point only a FIELDNAME token should be searched.
+	(search_field): New static variable. Set to one after parsing a point
+	as at that point only a FIELDNAME token should be searched.
 	(FIELDNAME): New token. After a point only a token belonging to 
 	current_type type definition is allowed.
 	(all over token rules): reset and change current_type according
