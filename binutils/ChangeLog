@@ -1,3 +1,15 @@
+Thu Jan 26 12:03:56 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* configure.in: Add support for powerpc-*-ebai.
+
+Wed Jan 18 10:02:12 1995  Steve Chamberlain  <sac@splat>
+
+	* coffdump.c: Include sysdep.h.
+	(dump_coff_type): Hanlde coff_secdef_type.
+	* coffgrok.c : Include sysdep.h.
+	* srconv.c: Include libiberty.h
+	(absolute_p, dty_start, dty_end, dump_tree_structure): Remove.
+
 Wed Jan 18 12:24:14 1995  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
 	* coffdump.c (dump_coff_scope): Cast pointer to unsigned long for
