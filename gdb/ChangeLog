@@ -1,5 +1,7 @@
 2002-11-09  Mark Kettenis  <kettenis@gnu.org>
 
+	* i386-tdep.h (IS_FPU_CTRL_REGNUM): Remove.
+
 	* i387-tdep.c (i387_fill_fxsave): Use FOOFF_REGNUM instead of
 	FDOFF_REGNUM.
 

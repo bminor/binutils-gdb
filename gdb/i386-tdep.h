@@ -138,7 +138,6 @@ extern int i386_mxcsr_regnum_p (int regnum);
 #define FDS_REGNUM FOSEG_REGNUM
 #define FDOFF_REGNUM FOOFF_REGNUM
 #define IS_FP_REGNUM(n) i386_fp_regnum_p (n)
-#define IS_FPU_CTRL_REGNUM(n) i386_fpc_regnum_p (n)
 #define IS_SSE_REGNUM(n) i386_sse_regnum_p (n)
 
 #define I386_NUM_GREGS	16
