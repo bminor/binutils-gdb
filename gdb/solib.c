@@ -1,5 +1,5 @@
 /* Handle SunOS and SVR4 shared libraries for GDB, the GNU Debugger.
-   Copyright 1990, 1991 Free Software Foundation, Inc.
+   Copyright 1990, 1991, 1992 Free Software Foundation, Inc.
    
 This file is part of GDB.
 
@@ -573,8 +573,9 @@ find_solib (so_list_ptr)
 	 (for the inferior executable) since it is not a shared object. */
       if (LM_NAME (new) != 0)
 	{
-	  (void) target_read_string((CORE_ADDR) LM_NAME (new), new -> so_name,
-		      MAX_PATH_SIZE - 1);
+	  if (!target_read_string((CORE_ADDR) LM_NAME (new), new -> so_name,
+		      MAX_PATH_SIZE - 1))
+	      error ("find_solib: Can't read pathname for load map\n");
 	  new -> so_name[MAX_PATH_SIZE - 1] = 0;
 	  solib_map_sections (new);
 	}      
@@ -669,20 +670,20 @@ solib_add (arg_string, from_tty, target)
       if (count)
 	{
 	  /* Reallocate the target's section table including the new size.  */
-	  if (target -> sections)
+	  if (target -> to_sections)
 	    {
-	      old = target -> sections_end - target -> sections;
-	      target -> sections = (struct section_table *)
-		realloc ((char *)target -> sections,
+	      old = target -> to_sections_end - target -> to_sections;
+	      target -> to_sections = (struct section_table *)
+		realloc ((char *)target -> to_sections,
 			 (sizeof (struct section_table)) * (count + old));
 	    }
 	  else
 	    {
 	      old = 0;
-	      target -> sections = (struct section_table *)
+	      target -> to_sections = (struct section_table *)
 		malloc ((sizeof (struct section_table)) * count);
 	    }
-	  target -> sections_end = target -> sections + (count + old);
+	  target -> to_sections_end = target -> to_sections + (count + old);
 	  
 	  /* Add these section table entries to the target's table.  */
 	  while ((so = find_solib (so)) != NULL)
@@ -690,7 +691,7 @@ solib_add (arg_string, from_tty, target)
 	      if (so -> so_name[0])
 		{
 		  count = so -> sections_end - so -> sections;
-		  bcopy (so -> sections, (char *)(target -> sections + old), 
+		  bcopy (so -> sections, (char *)(target -> to_sections + old), 
 			 (sizeof (struct section_table)) * count);
 		  old += count;
 		}

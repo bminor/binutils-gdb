@@ -1,5 +1,5 @@
 /* Low level interface to ptrace, for GDB when running under Unix.
-   Copyright (C) 1986, 1987, 1989, 1991 Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1989, 1991, 1992 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -35,7 +35,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <fcntl.h>
 
 #include <sys/param.h>
-#include <sys/dir.h>
 #include <signal.h>
 
 extern char *strerror();		/* strings corresponding to errno */
@@ -418,7 +417,7 @@ kill_command (arg, from_tty)
     error ("The program is not being run.");
   if (!query ("Kill the inferior process? "))
     error ("Not confirmed.");
-  target_kill (arg, from_tty);
+  target_kill ();
 
   /* Killing off the inferior can leave us with a core file.  If so,
      print the state we are left in.  */

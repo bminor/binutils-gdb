@@ -1,5 +1,5 @@
 /* Top level `main' program for GDB, the GNU debugger.
-   Copyright 1986, 1987, 1988, 1989, 1990, 1991 Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -43,7 +43,9 @@ int fclose ();
 #endif
 
 #include <string.h>
+#ifndef	NO_SYS_FILE
 #include <sys/file.h>
+#endif
 #include <setjmp.h>
 #include <sys/param.h>
 #include <sys/stat.h>
@@ -81,6 +83,10 @@ extern char *version;
 extern char *error_pre_print;
 
 extern char lang_frame_mismatch_warn[];		/* language.c */
+
+/* Whether GDB's stdin is on a terminal.  */
+
+extern int gdb_has_a_terminal;			/* inflow.c */
 
 /* Flag for whether we want all the "from_tty" gubbish printed.  */
 
@@ -383,33 +389,40 @@ main (argc, argv)
        with no equivalent).  */
     static struct option long_options[] =
       {
-	{"quiet", 0, &quiet, 1},
-	{"nx", 0, &inhibit_gdbinit, 1},
-	{"batch", 0, &batch, 1},
-	{"epoch", 0, &epoch_interface, 1},
-	{"fullname", 0, &frame_file_full_name, 1},
-	{"help", 0, &print_help, 1},
-	{"se", 1, 0, 10},
-	{"symbols", 1, 0, 's'},
-	{"s", 1, 0, 's'},
-	{"exec", 1, 0, 'e'},
-	{"core", 1, 0, 'c'},
-	{"c", 1, 0, 'c'},
-	{"command", 1, 0, 'x'},
-	{"x", 1, 0, 'x'},
-	{"directory", 1, 0, 'd'},
-	{"cd", 1, 0, 11},
-	{"tty", 1, 0, 't'},
-	{"b", 1, 0, 'b'},
+	{"quiet", no_argument, &quiet, 1},
+	{"q", no_argument, &quiet, 1},
+	{"nx", no_argument, &inhibit_gdbinit, 1},
+	{"n", no_argument, &inhibit_gdbinit, 1},
+	{"batch", no_argument, &batch, 1},
+	{"epoch", no_argument, &epoch_interface, 1},
+	{"fullname", no_argument, &frame_file_full_name, 1},
+	{"f", no_argument, &frame_file_full_name, 1},
+	{"help", no_argument, &print_help, 1},
+	{"se", required_argument, 0, 10},
+	{"symbols", required_argument, 0, 's'},
+	{"s", required_argument, 0, 's'},
+	{"exec", required_argument, 0, 'e'},
+	{"e", required_argument, 0, 'e'},
+	{"core", required_argument, 0, 'c'},
+	{"c", required_argument, 0, 'c'},
+	{"command", required_argument, 0, 'x'},
+	{"x", required_argument, 0, 'x'},
+	{"directory", required_argument, 0, 'd'},
+	{"cd", required_argument, 0, 11},
+	{"tty", required_argument, 0, 't'},
+	{"baud", required_argument, 0, 'b'},
+	{"b", required_argument, 0, 'b'},
 /* Allow machine descriptions to add more options... */
 #ifdef ADDITIONAL_OPTIONS
 	ADDITIONAL_OPTIONS
 #endif
-	{0, 0, 0, 0},
+	{0, no_argument, 0, 0},
       };
 
     while (1)
       {
+	int option_index;
+
 	c = getopt_long_only (argc, argv, "",
 			      long_options, &option_index);
 	if (c == EOF)
@@ -739,7 +752,7 @@ execute_command (p, from_tty)
   register struct cmd_list_element *c;
   register struct command_line *cmdlines;
   register enum language flang;
-  static struct language_defn *saved_language = 0;
+  static const struct language_defn *saved_language = 0;
   static int warned = 0;
 
   free_all_values ();
@@ -791,7 +804,7 @@ execute_command (p, from_tty)
   {
     if (language_mode == language_mode_auto) {
       if (saved_language)
-	language_info ();
+	language_info (1);	/* Print what changed.  */
     }
     saved_language = current_language;
     warned = 0;
@@ -1613,7 +1626,7 @@ static void
 print_gdb_version ()
 {
   printf_filtered ("\
-GDB %s, Copyright 1991 Free Software Foundation, Inc.",
+GDB %s, Copyright 1992 Free Software Foundation, Inc.",
 	  version);
 }
 
@@ -1648,7 +1661,7 @@ quit_command (args, from_tty)
     {
       if (query ("The program is running.  Quit anyway? "))
 	{
-	  target_kill (args, from_tty);
+	  target_kill ();
 	}
       else
 	error ("Not confirmed.");
@@ -1659,10 +1672,13 @@ quit_command (args, from_tty)
   exit (0);
 }
 
+/* Returns whether GDB is running on a terminal and whether the user
+   desires that questions be asked of them on that terminal.  */
+
 int
 input_from_terminal_p ()
 {
-  return (instream == stdin) & caution;
+  return gdb_has_a_terminal && (instream == stdin) & caution;
 }
 
 /* ARGSUSED */
@@ -1698,6 +1714,9 @@ cd_command (dir, from_tty)
 
   dir = tilde_expand (dir);
   make_cleanup (free, dir);
+
+  if (chdir (dir) < 0)
+    perror_with_name (dir);
 
   len = strlen (dir);
   dir = savestring (dir, len - (len > 1 && dir[len-1] == '/'));
@@ -1737,9 +1756,6 @@ cd_command (dir, from_tty)
 	  else p++;
 	}
     }
-
-  if (chdir (dir) < 0)
-    perror_with_name (dir);
 
   forget_cached_source_info ();
 
@@ -1843,21 +1859,6 @@ show_commands (args, from_tty)
   struct _hist_entry *history_get();
   extern int history_base;
 
-#if 0
-  /* This is all reported by individual "show" commands.  */
-  printf_filtered ("Interactive command editing is %s.\n",
-	  command_editing_p ? "on" : "off");
-
-  printf_filtered ("History expansion of command input is %s.\n",
-	  history_expansion_p ? "on" : "off");
-  printf_filtered ("Writing of a history record upon exit is %s.\n",
-	  write_history_p ? "enabled" : "disabled");
-  printf_filtered ("The size of the history list (number of stored commands) is %d.\n",
-	  history_size);
-  printf_filtered ("The name of the history record is \"%s\".\n\n",
-	  history_filename ? history_filename : "");
-#endif /* 0 */
-
   /* Print out some of the commands from the command history.  */
   /* First determine the length of the history list.  */
   hist_len = history_size;
@@ -1879,7 +1880,7 @@ show_commands (args, from_tty)
 	/* "info editing <exp>" should print around command number <exp>.  */
 	num = (parse_and_eval_address (args) - history_base) - Hist_print / 2;
     }
-  /* "info editing" means print the last Hist_print commands.  */
+  /* "show commands" means print the last Hist_print commands.  */
   else
     {
       num = hist_len - Hist_print;
@@ -1897,14 +1898,6 @@ show_commands (args, from_tty)
 	num = 0;
     }
 
-#if 0
-  /* No need for a header now that "info editing" only prints one thing.  */
-  if (num == hist_len - Hist_print)
-    printf_filtered ("The list of the last %d commands is:\n\n", Hist_print);
-  else
-    printf_filtered ("Some of the stored commands are:\n\n");
-#endif /* 0 */
-
   for (offset = num; offset < num + Hist_print && offset < hist_len; offset++)
     {
       printf_filtered ("%5d  %s\n", history_base + offset,
@@ -1916,8 +1909,8 @@ show_commands (args, from_tty)
   num += Hist_print;
   
   /* If the user repeats this command with return, it should do what
-     "info editing +" does.  This is unnecessary if arg is null,
-     because "info editing +" is not useful after "info editing".  */
+     "show commands +" does.  This is unnecessary if arg is null,
+     because "show commands +" is not useful after "show commands".  */
   if (from_tty && args)
     {
       args[0] = '+';
@@ -2153,9 +2146,10 @@ when gdb is started.");
 
   add_show_from_set
     (add_set_cmd ("editing", class_support, var_boolean, (char *)&command_editing_p,
-	   "Set command line editing.\n\
+	   "Set editing of command lines as they are typed.\n\
 Use \"on\" to enable to enable the editing, and \"off\" to disable it.\n\
-Without an argument, command line editing is enabled.", &setlist),
+Without an argument, command line editing is enabled.  To edit, use\n\
+EMACS-like or VI-like commands like control-P or ESC.", &setlist),
      &showlist);
 
   add_prefix_cmd ("history", class_support, set_history,
@@ -2198,19 +2192,22 @@ ie. the number of previous commands to keep a record of.", &sethistlist);
      &showlist);
 
   add_prefix_cmd ("info", class_info, info_command,
-		  "Generic command for printing status.",
+        "Generic command for showing things about the program being debugged.",
 		  &infolist, "info ", 0, &cmdlist);
   add_com_alias ("i", "info", class_info, 1);
 
   add_prefix_cmd ("show", class_info, show_command,
-		  "Generic command for showing things set with \"set\".",
+		  "Generic command for showing things about the debugger.",
 		  &showlist, "show ", 0, &cmdlist);
   /* Another way to get at the same thing.  */
   add_info ("set", show_command, "Show all GDB settings.");
 
-  add_cmd ("commands", no_class, show_commands, "Status of command editor.",
+  add_cmd ("commands", no_class, show_commands,
+	   "Show the the history of commands you typed.\n\
+You can supply a command number to start with, or a `+' to start after\n\
+the previous command number shown.",
 	   &showlist);
 
   add_cmd ("version", no_class, show_version,
-	   "Report what version of GDB this is.", &showlist);
+	   "Show what version of GDB this is.", &showlist);
 }

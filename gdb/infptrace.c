@@ -1,5 +1,5 @@
 /* Low level Unix child interface to ptrace, for GDB when running under Unix.
-   Copyright (C) 1988, 1989, 1990, 1991 Free Software Foundation, Inc.
+   Copyright 1988, 1989, 1990, 1991, 1992 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -55,7 +55,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #endif
 
 #include "gdbcore.h"
+#ifndef	NO_SYS_FILE
 #include <sys/file.h>
+#endif
 #include <sys/stat.h>
 
 #if !defined (FETCH_INFERIOR_REGISTERS)
@@ -93,9 +95,7 @@ kill_inferior_fast ()
 }
 
 void
-kill_inferior (args, from_tty)
-     char *args;
-     int from_tty;
+kill_inferior ()
 {
   kill_inferior_fast ();
   target_mourn_inferior ();
@@ -166,7 +166,6 @@ detach (signal)
 #if defined (KERNEL_U_ADDR_BSD)
 /* Get kernel_u_addr using BSD-style nlist().  */
 CORE_ADDR kernel_u_addr;
-#include <a.out.h>		/* For struct nlist */
 
 void
 _initialize_kernel_u_addr ()
@@ -357,7 +356,7 @@ child_xfer_memory (memaddr, myaddr, len, write, target)
      char *myaddr;
      int len;
      int write;
-     struct target_ops target;		/* ignored */
+     struct target_ops *target;		/* ignored */
 {
   register int i;
   /* Round starting address down to longword boundary.  */

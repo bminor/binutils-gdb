@@ -1,28 +1,27 @@
-/* Memory-access and commands for inferior process, for GDB.
-   Copyright (C) 1986, 1987, 1988, 1989 Free Software Foundation, Inc.
+/* Memory-access and commands for "inferior" (child) process, for GDB.
+   Copyright 1986, 1987, 1988, 1989, 1991, 1992 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
-GDB is free software; you can redistribute it and/or modify
+This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 1, or (at your option)
-any later version.
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
 
-GDB is distributed in the hope that it will be useful,
+This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with GDB; see the file COPYING.  If not, write to
-the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+along with this program; if not, write to the Free Software
+Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include <stdio.h>
 #include <signal.h>
 #include <sys/param.h>
 #include <string.h>
 #include "defs.h"
-#include "param.h"
 #include "symtab.h"
 #include "frame.h"
 #include "inferior.h"
@@ -149,7 +148,7 @@ run_command (args, from_tty)
 	  !query ("The program being debugged has been started already.\n\
 Start it from the beginning? "))
 	error ("Program not restarted.");
-      target_kill ((char *)0, 0);
+      target_kill ();
     }
 
   exec_file = (char *) get_exec_file (0);
@@ -161,7 +160,7 @@ Start it from the beginning? "))
   if (args)
     {
       char *cmd;
-      cmd = concat ("set args ", args, "");
+      cmd = concat ("set args ", args, NULL);
       make_cleanup (free, cmd);
       execute_command (cmd, from_tty);
     }
@@ -356,8 +355,7 @@ jump_command (arg, from_tty)
   if (sal.symtab == 0 && sal.pc == 0)
     error ("No source file has been specified.");
 
-  if (sal.pc == 0)
-    sal.pc = find_line_pc (sal.symtab, sal.line);
+  resolve_sal_pc (&sal);			/* May error out */
 
   {
     struct symbol *fn = get_frame_function (get_current_frame ());
@@ -368,13 +366,10 @@ jump_command (arg, from_tty)
       error ("Not confirmed.");
   }
 
-  if (sal.pc == 0)
-    error ("No line %d in file \"%s\".", sal.line, sal.symtab->filename);
-
   addr = ADDR_BITS_SET (sal.pc);
 
   if (from_tty)
-    printf ("Continuing at 0x%x.\n", addr);
+    printf ("Continuing at %s.\n", local_hex_string(addr));
 
   clear_proceed_status ();
   proceed (addr, 0, 0);
@@ -419,7 +414,7 @@ signal_command (signum_exp, from_tty)
    returns to its caller with that frame already gone.
    Otherwise, the caller never gets returned to.  */
 
-/* 4 => return instead of letting the stack dummy run.  */
+/* DEBUG HOOK:  4 => return instead of letting the stack dummy run.  */
 
 static int stack_dummy_testing = 0;
 
@@ -554,10 +549,12 @@ finish_command (arg, from_tty)
   fi = get_frame_info (selected_frame);
   function = find_pc_function (fi->pc);
 
+  /* Print info on the selected frame, including level number
+     but not source.  */
   if (from_tty)
     {
-      printf ("Run till exit from ");
-      print_selected_frame ();
+      printf_filtered ("Run till exit from ");
+      print_stack_frame (selected_frame, selected_frame_level, 0);
     }
 
   proceed_to_finish = 1;		/* We want stop_registers, please... */
@@ -584,9 +581,9 @@ finish_command (arg, from_tty)
 				   value_type,
 		BLOCK_GCC_COMPILED (SYMBOL_BLOCK_VALUE (function))));
 
-      printf ("Value returned is $%d = ", record_latest_value (val));
+      printf_filtered ("Value returned is $%d = ", record_latest_value (val));
       value_print (val, stdout, 0, Val_no_prettyprint);
-      putchar ('\n');
+      printf_filtered ("\n");
     }
 }
 
@@ -606,7 +603,7 @@ program_info (args, from_tty)
     }
 
   target_files_info ();
-  printf ("Program stopped at 0x%x.\n", stop_pc);
+  printf ("Program stopped at %s.\n", local_hex_string(stop_pc));
   if (stop_step)
     printf ("It stopped after being stepped.\n");
   else if (num != 0)
@@ -787,31 +784,38 @@ write_pc (val)
 char *reg_names[] = REGISTER_NAMES;
 
 /* Print out the machine register regnum. If regnum is -1,
-   print all registers.
+   print all registers (fpregs == 1) or all non-float registers
+   (fpregs == 0).
+
    For most machines, having all_registers_info() print the
    register(s) one per line is good enough. If a different format
-   is required, (eg, for SPARC or Pyramid 90x, which both have
+   is required, (eg, for MIPS or Pyramid 90x, which both have
    lots of regs), or there is an existing convention for showing
-   all the registers, define the macro DO_REGISTERS_INFO(regnum)
+   all the registers, define the macro DO_REGISTERS_INFO(regnum, fp)
    to provide that format.  */  
+
 #if !defined (DO_REGISTERS_INFO)
-#define DO_REGISTERS_INFO(regnum) do_registers_info(regnum)
-static void do_registers_info (regnum)
+#define DO_REGISTERS_INFO(regnum, fp) do_registers_info(regnum, fp)
+static void
+do_registers_info (regnum, fpregs)
      int regnum;
+     int fpregs;
 {
   register int i;
-
-  if (regnum == -1)
-    printf_filtered (
-      "Register       Contents (relative to selected stack frame)\n\n");
 
   for (i = 0; i < NUM_REGS; i++)
     {
       char raw_buffer[MAX_REGISTER_RAW_SIZE];
       char virtual_buffer[MAX_REGISTER_VIRTUAL_SIZE];
 
-      if (regnum != -1 && i != regnum)
-	continue;
+      /* Decide between printing all regs, nonfloat regs, or specific reg.  */
+      if (regnum == -1) {
+	if (TYPE_CODE (REGISTER_VIRTUAL_TYPE (i)) == TYPE_CODE_FLT && !fpregs)
+	  continue;
+      } else {
+        if (i != regnum)
+	  continue;
+      }
 
       fputs_filtered (reg_names[i], stdout);
       print_spaces_filtered (15 - strlen (reg_names[i]), stdout);
@@ -873,8 +877,9 @@ static void do_registers_info (regnum)
 #endif /* no DO_REGISTERS_INFO.  */
 
 static void
-registers_info (addr_exp)
+registers_info (addr_exp, fpregs)
      char *addr_exp;
+     int fpregs;
 {
   int regnum;
 
@@ -900,7 +905,21 @@ registers_info (addr_exp)
   else
     regnum = -1;
 
-  DO_REGISTERS_INFO(regnum);
+  DO_REGISTERS_INFO(regnum, fpregs);
+}
+
+static void
+all_registers_info (addr_exp)
+     char *addr_exp;
+{
+  registers_info (addr_exp, 1);
+}
+
+static void
+nofp_registers_info (addr_exp)
+     char *addr_exp;
+{
+  registers_info (addr_exp, 0);
 }
 
 /*
@@ -1022,12 +1041,13 @@ This path is equivalent to the $PATH shell variable.  It is a list of\n\
 directories, separated by colons.  These directories are searched to find\n\
 fully linked executable files and separately compiled object files as needed.");
 
-  add_info ("path", path_info,
+  c = add_cmd ("paths", no_class, path_info,
 	    "Current search path for finding object files.\n\
 $cwd in the path means the current working directory.\n\
 This path is equivalent to the $PATH shell variable.  It is a list of\n\
 directories, separated by colons.  These directories are searched to find\n\
-fully linked executable files and separately compiled object files as needed.");
+fully linked executable files and separately compiled object files as needed.", &showlist);
+  c->completer = noop_completer;
 
  add_com ("attach", class_run, attach_command,
  	   "Attach to a process or file outside of GDB.\n\
@@ -1100,8 +1120,12 @@ To cancel previous arguments and run with no arguments,\n\
 use \"set args\" without arguments.");
   add_com_alias ("r", "run", class_run, 1);
 
-  add_info ("registers", registers_info,
-	    "List of registers and their contents, for selected stack frame.\n\
+  add_info ("registers", nofp_registers_info,
+    "List of integer registers and their contents, for selected stack frame.\n\
+Register name as argument means describe only that register.");
+
+  add_info ("all-registers", all_registers_info,
+"List of all registers and their contents, for selected stack frame.\n\
 Register name as argument means describe only that register.");
 
   add_info ("program", program_info,
