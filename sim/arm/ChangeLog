@@ -1,3 +1,9 @@
+2002-05-21  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* armcopro.c (check_cp13_access): Allow access to register 1 when
+	CRm is 1.
+	(write_cp13_reg): Allow bit 0 of reg 1 of CRm 1 to be written to.
+
 2002-05-20  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* Makefile.in (SWI_TARGET_SWITCHES): Define.

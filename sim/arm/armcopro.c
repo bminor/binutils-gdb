@@ -587,7 +587,7 @@ check_cp13_access (ARMul_State * state,
 		   unsigned      opcode_1,
 		   unsigned      opcode_2)
 {
-  /* Do not allow access to these register in USER mode.  */
+  /* Do not allow access to these registers in USER mode.  */
   if (state->Mode == USER26MODE || state->Mode == USER32MODE)
     return ARMul_CANT;
 
@@ -601,7 +601,7 @@ check_cp13_access (ARMul_State * state,
     return ARMul_CANT;
 
   /* Registers 0, 4 and 8 are defined when CRm == 0.
-     Registers 0, 4, 5, 6, 7, 8 are defined when CRm == 1.
+     Registers 0, 1, 4, 5, 6, 7, 8 are defined when CRm == 1.
      For all other CRm values undefined behaviour results.  */
   if (CRm == 0)
     {
@@ -610,7 +610,7 @@ check_cp13_access (ARMul_State * state,
     }
   else if (CRm == 1)
     {
-      if (reg == 0 || (reg >= 4 && reg <= 8))
+      if (reg == 0 || reg == 1 || (reg >= 4 && reg <= 8))
 	return ARMul_DONE;
     }
 
@@ -657,6 +657,12 @@ write_cp13_reg (unsigned reg, unsigned CRm, ARMword value)
 	     BIT(31) is write ignored.  */
 	  value &= 0x7000000f;
 	  value |= XScale_cp13_CR1_Regs[0] & (1UL << 31);
+	  break;
+
+	case 1: /* BCUMOD */
+	  /* Only bit 0 is accecssible.  */
+	  value &= 1;
+	  value |= XScale_cp13_CR1_Regs[1] & ~ 1;
 	  break;
 
 	case 4: /* ELOG0 */
