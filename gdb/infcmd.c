@@ -191,6 +191,23 @@ int step_multi;
 
 struct environ *inferior_environ;
 
+/* Accessor routines. */
+
+char *
+get_inferior_args (void)
+{
+  return inferior_args;
+}
+
+char *
+set_inferior_args (char *newargs)
+{
+  char *saved_args = inferior_args;
+
+  inferior_args = newargs;
+
+  return saved_args;
+}
 
 /* This function detects whether or not a '&' character (indicating
    background execution) has been added as *the last* of the arguments ARGS
@@ -280,7 +297,6 @@ Start it from the beginning? "))
     }
   else
     {
-      char *cmd;
       int async_exec = strip_bg_char (&args);
 
       /* If we get a request for running in the bg but the target
@@ -299,9 +315,8 @@ Start it from the beginning? "))
       /* If there were other args, beside '&', process them. */
       if (args)
 	{
-	  cmd = concat ("set args ", args, NULL);
-	  make_cleanup (xfree, cmd);
-	  execute_command (cmd, from_tty);
+          char *old_args = set_inferior_args (xstrdup (args));
+          xfree (old_args);
 	}
     }
 
@@ -335,8 +350,8 @@ Start it from the beginning? "))
 static void
 run_no_args_command (char *args, int from_tty)
 {
-  execute_command ("set args", from_tty);
-  run_command ((char *) NULL, from_tty);
+  char *old_args = set_inferior_args (xstrdup (""));
+  xfree (old_args);
 }
 
 
@@ -1944,7 +1959,7 @@ Register name as argument means describe only that register.");
   add_info ("float", float_info,
 	    "Print the status of the floating point unit\n");
 
-  inferior_args = savestring ("", 1);	/* Initially no args */
+  set_inferior_args (xstrdup (""));	/* Initially no args */
   inferior_environ = make_environ ();
   init_environ (inferior_environ);
 }

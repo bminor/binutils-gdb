@@ -1,3 +1,11 @@
+2001-01-24  Fernando Nasser  <fnasser@redhat.com>
+
+	* infcmd.c (get_inferior_args, set_inferior_args): Accessor functions
+	for the inferior program arguments.
+	(run_command, run_no_args_command, init_infcmd)): Use accessor
+	functions to set the inferior program arguments.
+	* inferior.h: Add definitions to the accessor functions above.
+
 2001-01-23  Jim Blandy  <jimb@redhat.com>
 
 	* dwarf2read.c (read_tag_const_type, read_tag_volatile_type):
