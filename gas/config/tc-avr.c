@@ -29,7 +29,7 @@ struct avr_opcodes_s
 {
   char *name;
   char *constraints;
-  int insn_size;		/* in words */
+  int insn_size;		/* In words.  */
   int isa;
   unsigned int bin_opcode;
 };
@@ -42,7 +42,6 @@ struct avr_opcodes_s avr_opcodes[] =
   #include "opcode/avr.h"
   {NULL, NULL, 0, 0, 0}
 };
-
 
 const char comment_chars[] = ";";
 const char line_comment_chars[] = "#";
@@ -91,7 +90,6 @@ static struct mcu_type_s mcu_types[] =
   {NULL, 0, 0}
 };
 
-
 /* Current MCU type.  */
 static struct mcu_type_s default_mcu = {"avr2", AVR_ISA_2xxx,bfd_mach_avr2};
 static struct mcu_type_s *avr_mcu = &default_mcu;
@@ -99,9 +97,9 @@ static struct mcu_type_s *avr_mcu = &default_mcu;
 /* AVR target-specific switches.  */
 struct avr_opt_s
 {
-  int all_opcodes;  /* -mall-opcodes: accept all known AVR opcodes */
-  int no_skip_bug;  /* -mno-skip-bug: no warnings for skipping 2-word insns */
-  int no_wrap;      /* -mno-wrap: reject rjmp/rcall with 8K wrap-around */
+  int all_opcodes;  /* -mall-opcodes: accept all known AVR opcodes  */
+  int no_skip_bug;  /* -mno-skip-bug: no warnings for skipping 2-word insns  */
+  int no_wrap;      /* -mno-wrap: reject rjmp/rcall with 8K wrap-around  */
 };
 
 static struct avr_opt_s avr_opt = { 0, 0, 0 };
@@ -120,16 +118,15 @@ const pseudo_typeS md_pseudo_table[] =
 #define LDI_IMMEDIATE(x) (((x) & 0xf) | (((x) << 4) & 0xf00))
 
 static void show_mcu_list (FILE *stream);
-static char * skip_space (char * s);
-static char * extract_word (char *from, char *to, int limit);
+static char *skip_space (char *s);
+static char *extract_word (char *from, char *to, int limit);
 static unsigned int avr_operand (struct avr_opcodes_s *opcode,
 				 int where, char *op, char **line);
 static unsigned int avr_operands (struct avr_opcodes_s *opcode, char **line);
-static unsigned int avr_get_constant (char * str, int max);
-static char *parse_exp (char *s, expressionS * op);
+static unsigned int avr_get_constant (char *str, int max);
+static char *parse_exp (char *s, expressionS *op);
 static bfd_reloc_code_real_type avr_ldi_expression (expressionS *exp);
 long md_pcrel_from_section PARAMS ((fixS *, segT));
-
 
 #define EXP_MOD_NAME(i) exp_mod[i].name
 #define EXP_MOD_RELOC(i) exp_mod[i].reloc
@@ -138,13 +135,14 @@ long md_pcrel_from_section PARAMS ((fixS *, segT));
 
 struct exp_mod_s
 {
-  char * name;
+  char *name;
   bfd_reloc_code_real_type reloc;
   bfd_reloc_code_real_type neg_reloc;
   int have_pm;
 };
 
-static struct exp_mod_s exp_mod[] = {
+static struct exp_mod_s exp_mod[] =
+{
   {"hh8",    BFD_RELOC_AVR_HH8_LDI,    BFD_RELOC_AVR_HH8_LDI_NEG,    1},
   {"pm_hh8", BFD_RELOC_AVR_HH8_LDI_PM, BFD_RELOC_AVR_HH8_LDI_PM_NEG, 0},
   {"hi8",    BFD_RELOC_AVR_HI8_LDI,    BFD_RELOC_AVR_HI8_LDI_NEG,    1},
@@ -166,45 +164,49 @@ static struct hash_control *avr_mod_hash;
 #define OPTION_NO_SKIP_BUG (OPTION_MD_BASE + 2)
 #define OPTION_NO_WRAP     (OPTION_MD_BASE + 3)
 
-struct option md_longopts[] = {
+struct option md_longopts[] =
+{
   { "mmcu",   required_argument, NULL, OPTION_MMCU        },
   { "mall-opcodes", no_argument, NULL, OPTION_ALL_OPCODES },
   { "mno-skip-bug", no_argument, NULL, OPTION_NO_SKIP_BUG },
   { "mno-wrap",     no_argument, NULL, OPTION_NO_WRAP     },
   { NULL, no_argument, NULL, 0 }
 };
-size_t md_longopts_size = sizeof(md_longopts);
 
+size_t md_longopts_size = sizeof (md_longopts);
 
 /* Display nicely formatted list of known MCU names.  */
+
 static void
-show_mcu_list (FILE *stream)
+show_mcu_list (stream)
+     FILE *stream;
 {
   int i, x;
 
   fprintf (stream, _("Known MCU names:"));
   x = 1000;
+  
   for (i = 0; mcu_types[i].name; i++)
     {
       int len = strlen (mcu_types[i].name);
+      
       x += len + 1;
+      
       if (x < 75)
-	{
-	  fprintf (stream, " %s", mcu_types[i].name);
-	}
+	fprintf (stream, " %s", mcu_types[i].name);
       else
 	{
 	  fprintf (stream, "\n  %s", mcu_types[i].name);
 	  x = len + 2;
 	}
     }
-    fprintf (stream, "\n");
+  
+  fprintf (stream, "\n");
 }
-
 
 static inline char *
 skip_space (s)
-     char * s;
+     char *s;
 {
   while (*s == ' ' || *s == '\t')
     ++s;
@@ -212,6 +214,7 @@ skip_space (s)
 }
 
 /* Extract one word from FROM and copy it to TO.  */
+
 static char *
 extract_word (char *from, char *to, int limit)
 {
@@ -222,13 +225,15 @@ extract_word (char *from, char *to, int limit)
   /* Drop leading whitespace.  */
   from = skip_space (from);
   *to = 0;
+
   /* Find the op code end.  */
-  for (op_start = op_end = from; *op_end != 0 && is_part_of_name(*op_end); )
+  for (op_start = op_end = from; *op_end != 0 && is_part_of_name (*op_end);)
     {
       to[size++] = *op_end++;
       if (size + 1 >= limit)
 	break;
     }
+  
   to[size] = 0;
   return op_end;
 }
@@ -244,7 +249,7 @@ md_estimate_size_before_relax (fragp, seg)
 
 void
 md_show_usage (stream)
-  FILE *stream;
+     FILE *stream;
 {
   fprintf (stream,
       _("AVR options:\n"
@@ -269,8 +274,9 @@ static void
 avr_set_arch (dummy)
      int dummy ATTRIBUTE_UNUSED;
 {
-  char * str;
-  str = (char *)alloca (20);
+  char *str;
+  
+  str = (char *) alloca (20);
   input_line_pointer = extract_word (input_line_pointer, str, 20);
   md_parse_option (OPTION_MMCU, str);
   bfd_set_arch_mach (stdoutput, TARGET_ARCH, avr_mcu->mach);
@@ -293,7 +299,7 @@ md_parse_option (c, arg)
 	  char *arg1 = arg;
 
 	  do
-	    *t = tolower(*arg1++);
+	    *t = tolower (*arg1++);
 	  while (*t++);
 	}
 
@@ -310,7 +316,6 @@ md_parse_option (c, arg)
 	/* It is OK to redefine mcu type within the same avr[1-5] bfd machine
 	   type - this for allows passing -mmcu=... via gcc ASM_SPEC as well
 	   as .arch ... in the asm output at the same time.  */
-
 	if (avr_mcu == &default_mcu || avr_mcu->mach == mcu_types[i].mach)
 	  avr_mcu = &mcu_types[i];
 	else
@@ -328,20 +333,22 @@ md_parse_option (c, arg)
       avr_opt.no_wrap = 1;
       return 1;
     }
+  
   return 0;
 }
 
 symbolS *
-md_undefined_symbol(name)
+md_undefined_symbol (name)
      char *name ATTRIBUTE_UNUSED;
 {
   return 0;
 }
 
-/* Convert a string pointed to by input_line_pointer into a floating point
-   constant of type `type', and store the appropriate bytes to `*litP'.
-   The number of LITTLENUMS emitted is stored in `*sizeP'.  Returns NULL if
-   OK, or an error message otherwise.  */
+/* Turn a string in input_line_pointer into a floating point constant
+   of type TYPE, and store the appropriate bytes in *LITP.  The number
+   of LITTLENUMS emitted is stored in *SIZEP.  An error message is
+   returned, or NULL on OK.  */
+
 char *
 md_atof (type, litP, sizeP)
      int type;
@@ -371,54 +378,53 @@ md_atof (type, litP, sizeP)
     input_line_pointer = t;
 
   *sizeP = prec * sizeof (LITTLENUM_TYPE);
+  
   /* This loop outputs the LITTLENUMs in REVERSE order.  */
   for (wordP = words + prec - 1; prec--;)
     {
       md_number_to_chars (litP, (valueT) (*wordP--), sizeof (LITTLENUM_TYPE));
       litP += sizeof (LITTLENUM_TYPE);
     }
+  
   return NULL;
 }
 
 void
 md_convert_frag (abfd, sec, fragP)
-  bfd *abfd ATTRIBUTE_UNUSED;
-  asection *sec ATTRIBUTE_UNUSED;
-  fragS *fragP ATTRIBUTE_UNUSED;
+     bfd *abfd ATTRIBUTE_UNUSED;
+     asection *sec ATTRIBUTE_UNUSED;
+     fragS *fragP ATTRIBUTE_UNUSED;
 {
   abort ();
 }
-
 
 void
 md_begin ()
 {
   unsigned int i;
   struct avr_opcodes_s *opcode;
-  avr_hash = hash_new();
+  avr_hash = hash_new ();
 
   /* Insert unique names into hash table.  This hash table then provides a
      quick index to the first opcode with a particular name in the opcode
      table.  */
-
   for (opcode = avr_opcodes; opcode->name; opcode++)
     hash_insert (avr_hash, opcode->name, (char *) opcode);
 
   avr_mod_hash = hash_new ();
 
   for (i = 0; i < sizeof (exp_mod) / sizeof (exp_mod[0]); ++i)
-    hash_insert (avr_mod_hash, EXP_MOD_NAME(i), (void*)(i+10));
-  
+    hash_insert (avr_mod_hash, EXP_MOD_NAME (i), (void *) (i + 10));
+
   bfd_set_arch_mach (stdoutput, TARGET_ARCH, avr_mcu->mach);
 }
 
-
 /* Resolve STR as a constant expression and return the result.
-   If result greater than MAX then error. */
+   If result greater than MAX then error.  */
 
 static unsigned int
 avr_get_constant (str, max)
-     char * str;
+     char *str;
      int max;
 {
   expressionS ex;
@@ -430,13 +436,13 @@ avr_get_constant (str, max)
     as_bad (_("constant value required"));
 
   if (ex.X_add_number > max || ex.X_add_number < 0)
-    as_bad (_("number must be less than %d"), max+1);
+    as_bad (_("number must be less than %d"), max + 1);
+  
   return ex.X_add_number;
 }
 
-
 /* Parse instruction operands.
-   Returns binary opcode. */
+   Return binary opcode.  */
 
 static unsigned int
 avr_operands (opcode, line)
@@ -448,7 +454,7 @@ avr_operands (opcode, line)
   char *frag = frag_more (opcode->insn_size * 2);
   char *str = *line;
   int where = frag - frag_now->fr_literal;
-  static unsigned int prev = 0;  /* previous opcode */
+  static unsigned int prev = 0;  /* Previous opcode.  */
 
   /* Opcode have operands.  */
   if (*op)
@@ -469,6 +475,7 @@ avr_operands (opcode, line)
 	{
 	  if (*op == ',')
 	    ++op;
+	  
 	  if (*op == '=')
 	    {
 	      reg2 = reg1;
@@ -487,6 +494,7 @@ avr_operands (opcode, line)
 	      reg2 = avr_operand (opcode, where, op, &str);
 
 	    }
+	  
 	  if (reg1_present && reg2_present)
 	    reg2 = (reg2 & 0xf) | ((reg2 << 5) & 0x200);
 	  else if (reg2_present)
@@ -520,20 +528,19 @@ avr_operands (opcode, line)
 	    as_warn (_("skipping two-word instruction"));
 	}
 
-      bfd_putl32 ((bfd_vma)bin, frag);
+      bfd_putl32 ((bfd_vma) bin, frag);
     }
   else
-    bfd_putl16 ((bfd_vma)bin, frag);
+    bfd_putl16 ((bfd_vma) bin, frag);
 
   prev = bin;
   *line = str;
   return bin;
 }
 
-
 /* Parse one instruction operand.
-   Returns operand bitmask. Also fixups can be generated.  */
-   
+   Return operand bitmask.  Also fixups can be generated.  */
+
 static unsigned int
 avr_operand (opcode, where, op, line)
      struct avr_opcodes_s *opcode;
@@ -553,71 +560,70 @@ avr_operand (opcode, where, op, line)
     case 'r':
     case 'a':
     case 'v':
-      {
-	op_mask = -1;
-
-	if (*str == 'r' || *str == 'R')
-	  {	    
-	    char r_name[20];
-	    
-	    str = extract_word (str, r_name, sizeof (r_name));
-	    if (isdigit(r_name[1]))
-	      {
-		if (r_name[2] == '\0')
-		  op_mask = r_name[1] - '0';
-		else if (r_name[1] != '0'
-			 && isdigit(r_name[2])
-			 && r_name[3] == '\0')
-		  op_mask = (r_name[1] - '0') * 10 + r_name[2] - '0';
-	      }
-	  }
-	else
-	  {
-	    op_mask = avr_get_constant (str, 31);
-	    str = input_line_pointer;
-	  }
-	
-	if (op_mask <= 31)
-	  {
-	    switch (*op)
-	      {
-	      case 'a':
-		if (op_mask < 16 || op_mask > 23)
-		  as_bad (_("register r16-r23 required"));
-		op_mask -= 16;
-		break;
-
-	      case 'd':
-		if (op_mask < 16)
-		  as_bad (_("register number above 15 required"));
-		op_mask -= 16;
-		break;
-		
-	      case 'v':
-		if (op_mask & 1)
-		  as_bad (_("even register number required"));
-		op_mask >>= 1;
-		break;
-		
-	      case 'w':
-		op_mask -= 24;
-		if (op_mask & 1 || op_mask > 6)
-		  as_bad (_("register r24, r26, r28 or r30 required"));
-		op_mask >>= 1;
-		break;
-	      }
-	    break;
-	  }
-	as_bad (_("register name or number from 0 to 31 required"));
-      }
+      op_mask = -1;
+      
+      if (*str == 'r' || *str == 'R')
+	{
+	  char r_name[20];
+	  
+	  str = extract_word (str, r_name, sizeof (r_name));
+	  if (isdigit (r_name[1]))
+	    {
+	      if (r_name[2] == '\0')
+		op_mask = r_name[1] - '0';
+	      else if (r_name[1] != '0'
+		       && isdigit (r_name[2])
+		       && r_name[3] == '\0')
+		op_mask = (r_name[1] - '0') * 10 + r_name[2] - '0';
+	    }
+	}
+      else
+	{
+	  op_mask = avr_get_constant (str, 31);
+	  str = input_line_pointer;
+	}
+      
+      if (op_mask <= 31)
+	{
+	  switch (*op)
+	    {
+	    case 'a':
+	      if (op_mask < 16 || op_mask > 23)
+		as_bad (_("register r16-r23 required"));
+	      op_mask -= 16;
+	      break;
+	      
+	    case 'd':
+	      if (op_mask < 16)
+		as_bad (_("register number above 15 required"));
+	      op_mask -= 16;
+	      break;
+	      
+	    case 'v':
+	      if (op_mask & 1)
+		as_bad (_("even register number required"));
+	      op_mask >>= 1;
+	      break;
+	      
+	    case 'w':
+	      op_mask -= 24;
+	      if (op_mask & 1 || op_mask > 6)
+		as_bad (_("register r24, r26, r28 or r30 required"));
+	      op_mask >>= 1;
+	      break;
+	    }
+	  break;
+	}
+      as_bad (_("register name or number from 0 to 31 required"));
       break;
 
     case 'e':
       {
 	char c;
+	
 	if (*str == '-')
 	  {
-	    str = skip_space (str+1);
+	    str = skip_space (str + 1);
 	    op_mask = 0x1002;
 	  }
 	c = tolower (*str);
@@ -628,7 +634,7 @@ avr_operand (opcode, where, op, line)
 	else if (c != 'z')
 	  as_bad (_("pointer register (X, Y or Z) required"));
 
-	str = skip_space (str+1);
+	str = skip_space (str + 1);
 	if (*str == '+')
 	  {
 	    ++str;
@@ -639,7 +645,6 @@ avr_operand (opcode, where, op, line)
 
 	/* avr1 can do "ld r,Z" and "st Z,r" but no other pointer
 	   registers, no predecrement, no postincrement.  */
-	
 	if (!avr_opt.all_opcodes && (op_mask & 0x100F)
 	    && !(avr_mcu->isa & AVR_ISA_SRAM))
 	  as_bad (_("addressing mode not supported"));
@@ -647,25 +652,25 @@ avr_operand (opcode, where, op, line)
       break;
 
     case 'z':
-      {
-	if (*str == '-')
-	  as_bad (_("can't predecrement"));
+      if (*str == '-')
+	as_bad (_("can't predecrement"));
+      
+      if (! (*str == 'z' || *str == 'Z'))
+	as_bad (_("pointer register Z required"));
+      
+      str = skip_space (str + 1);
 
-	if (! (*str == 'z' || *str == 'Z'))
-	  as_bad (_("pointer register Z required"));
-
-	str = skip_space (str + 1);
-	if (*str == '+')
-	  {
-	    ++str;
-	    op_mask |= 1;
-	  }
-      }
+      if (*str == '+')
+	{
+	  ++str;
+	  op_mask |= 1;
+	}
       break;
 
     case 'b':
       {
 	char c = tolower (*str++);
+	
 	if (c == 'y')
 	  op_mask |= 0x8;
 	else if (c != 'z')
@@ -682,47 +687,36 @@ avr_operand (opcode, where, op, line)
       break;
 
     case 'h':
-      {
-	str = parse_exp (str, &op_expr);
-	fix_new_exp (frag_now, where, opcode->insn_size * 2,
-		     &op_expr, false, BFD_RELOC_AVR_CALL);
-
-      }
+      str = parse_exp (str, &op_expr);
+      fix_new_exp (frag_now, where, opcode->insn_size * 2,
+		   &op_expr, false, BFD_RELOC_AVR_CALL);
       break;
 
     case 'L':
-      {
-	str = parse_exp (str, &op_expr);
-	fix_new_exp (frag_now, where, opcode->insn_size * 2,
-		     &op_expr, true, BFD_RELOC_AVR_13_PCREL);
-
-      }
+      str = parse_exp (str, &op_expr);
+      fix_new_exp (frag_now, where, opcode->insn_size * 2,
+		   &op_expr, true, BFD_RELOC_AVR_13_PCREL);
       break;
 
     case 'l':
-      {
-	str = parse_exp (str, &op_expr);
-	fix_new_exp (frag_now, where, opcode->insn_size * 2,
-		     &op_expr, true, BFD_RELOC_AVR_7_PCREL);
-
-      }
+      str = parse_exp (str, &op_expr);
+      fix_new_exp (frag_now, where, opcode->insn_size * 2,
+		   &op_expr, true, BFD_RELOC_AVR_7_PCREL);
       break;
 
     case 'i':
-      {
-	str = parse_exp (str, &op_expr);
-	fix_new_exp (frag_now, where+2, opcode->insn_size * 2,
-		     &op_expr, false, BFD_RELOC_16);
-
-      }
+      str = parse_exp (str, &op_expr);
+      fix_new_exp (frag_now, where + 2, opcode->insn_size * 2,
+		   &op_expr, false, BFD_RELOC_16);
       break;
 
     case 'M':
       {
 	bfd_reloc_code_real_type r_type;
- 	input_line_pointer = str;
- 	r_type = avr_ldi_expression (&op_expr);
- 	str = input_line_pointer;
+	
+	input_line_pointer = str;
+	r_type = avr_ldi_expression (&op_expr);
+	str = input_line_pointer;
 	fix_new_exp (frag_now, where, 3,
 		     &op_expr, false, r_type);
       }
@@ -731,6 +725,7 @@ avr_operand (opcode, where, op, line)
     case 'n':
       {
 	unsigned int x;
+	
 	x = ~avr_get_constant (str, 255);
 	str = input_line_pointer;
 	op_mask |= (x & 0xf) | ((x << 4) & 0xf00);
@@ -740,6 +735,7 @@ avr_operand (opcode, where, op, line)
     case 'K':
       {
 	unsigned int x;
+	
 	x = avr_get_constant (str, 63);
 	str = input_line_pointer;
 	op_mask |= (x & 0xf) | ((x & 0x30) << 2);
@@ -750,6 +746,7 @@ avr_operand (opcode, where, op, line)
     case 's':
       {
 	unsigned int x;
+	
 	x = avr_get_constant (str, 7);
 	str = input_line_pointer;
 	if (*op == 'S')
@@ -761,6 +758,7 @@ avr_operand (opcode, where, op, line)
     case 'P':
       {
 	unsigned int x;
+	
 	x = avr_get_constant (str, 63);
 	str = input_line_pointer;
 	op_mask |= (x & 0xf) | ((x & 0x30) << 5);
@@ -770,22 +768,27 @@ avr_operand (opcode, where, op, line)
     case 'p':
       {
 	unsigned int x;
+	
 	x = avr_get_constant (str, 31);
 	str = input_line_pointer;
 	op_mask |= x << 3;
       }
       break;
+      
     case '?':
       break;
+      
     default:
       as_bad (_("unknown constraint `%c'"), *op);
     }
+  
   *line = str;
   return op_mask;
 }
 
 /* GAS will call this function for each section at the end of the assembly,
    to permit the CPU backend to adjust the alignment of a section.  */
+
 valueT
 md_section_align (seg, addr)
      asection *seg;
@@ -800,20 +803,23 @@ md_section_align (seg, addr)
    relative adjustment should be made.  On many processors, the base
    of a PC relative instruction is the next instruction, so this
    macro would return the length of an instruction.  */
+
 long
 md_pcrel_from_section (fixp, sec)
      fixS *fixp;
      segT sec;
 {
-  if (fixp->fx_addsy != (symbolS *)NULL
+  if (fixp->fx_addsy != (symbolS *) NULL
       && (!S_IS_DEFINED (fixp->fx_addsy)
 	  || (S_GET_SEGMENT (fixp->fx_addsy) != sec)))
     return 0;
+  
   return fixp->fx_frag->fr_address + fixp->fx_where;
 }
 
 /* GAS will call this for each fixup.  It should store the correct
-   value in the object file. */
+   value in the object file.  */
+
 int
 md_apply_fix3 (fixp, valuep, seg)
      fixS *fixp;
@@ -832,6 +838,7 @@ md_apply_fix3 (fixp, valuep, seg)
   else if (fixp->fx_pcrel)
     {
       segT s = S_GET_SEGMENT (fixp->fx_addsy);
+      
       if (fixp->fx_addsy && (s == seg || s == absolute_section))
 	{
 	  value = S_GET_VALUE (fixp->fx_addsy) + *valuep;
@@ -843,6 +850,7 @@ md_apply_fix3 (fixp, valuep, seg)
   else
     {
       value = fixp->fx_offset;
+      
       if (fixp->fx_subsy != (symbolS *) NULL)
 	{
 	  if (S_GET_SEGMENT (fixp->fx_subsy) == absolute_section)
@@ -853,11 +861,12 @@ md_apply_fix3 (fixp, valuep, seg)
 	  else
 	    {
 	      /* We don't actually support subtracting a symbol.  */
- 	      as_bad_where (fixp->fx_file, fixp->fx_line,
+	      as_bad_where (fixp->fx_file, fixp->fx_line,
 			    _("expression too complex"));
 	    }
 	}
     }
+  
   switch (fixp->fx_r_type)
     {
     default:
@@ -884,9 +893,11 @@ md_apply_fix3 (fixp, valuep, seg)
 	  if (value & 1)
 	    as_bad_where (fixp->fx_file, fixp->fx_line,
 			  _("odd address operand: %ld"), value);
+	  
 	  /* Instruction addresses are always right-shifted by 1.  */
 	  value >>= 1;
 	  --value;			/* Correct PC.  */
+	  
 	  if (value < -64 || value > 63)
 	    as_bad_where (fixp->fx_file, fixp->fx_line,
 			  _("operand out of range: %ld"), value);
@@ -898,6 +909,7 @@ md_apply_fix3 (fixp, valuep, seg)
 	  if (value & 1)
 	    as_bad_where (fixp->fx_file, fixp->fx_line,
 			  _("odd address operand: %ld"), value);
+	  
 	  /* Instruction addresses are always right-shifted by 1.  */
 	  value >>= 1;
 	  --value;			/* Correct PC.  */
@@ -923,7 +935,7 @@ md_apply_fix3 (fixp, valuep, seg)
 	  break;
 
 	case BFD_RELOC_AVR_16_PM:
-	  bfd_putl16 ((bfd_vma) (value>>1), where);
+	  bfd_putl16 ((bfd_vma) (value >> 1), where);
 	  break;
 
 	case BFD_RELOC_AVR_LO8_LDI:
@@ -993,6 +1005,7 @@ md_apply_fix3 (fixp, valuep, seg)
 	case BFD_RELOC_AVR_CALL:
 	  {
 	    unsigned long x;
+	    
 	    x = bfd_getl16 (where);
 	    if (value & 1)
 	      as_bad_where (fixp->fx_file, fixp->fx_line,
@@ -1000,13 +1013,13 @@ md_apply_fix3 (fixp, valuep, seg)
 	    value >>= 1;
 	    x |= ((value & 0x10000) | ((value << 3) & 0x1f00000)) >> 16;
 	    bfd_putl16 ((bfd_vma) x, where);
-	    bfd_putl16 ((bfd_vma) (value & 0xffff), where+2);
+	    bfd_putl16 ((bfd_vma) (value & 0xffff), where + 2);
 	  }
 	  break;
 
 	default:
-	  as_fatal ( _("line %d: unknown relocation type: 0x%x"),
-		     fixp->fx_line, fixp->fx_r_type);
+	  as_fatal (_("line %d: unknown relocation type: 0x%x"),
+		    fixp->fx_line, fixp->fx_r_type);
 	  break;
 	}
     }
@@ -1030,13 +1043,12 @@ md_apply_fix3 (fixp, valuep, seg)
   return 0;
 }
 
-
 /* A `BFD_ASSEMBLER' GAS will call this to generate a reloc.  GAS
    will pass the resulting reloc to `bfd_install_relocation'.  This
    currently works poorly, as `bfd_install_relocation' often does the
    wrong thing, and instances of `tc_gen_reloc' have been written to
    work around the problems, which in turns makes it difficult to fix
-   `bfd_install_relocation'. */
+   `bfd_install_relocation'.  */
 
 /* If while processing a fixup, a reloc really needs to be created
    then it is done here.  */
@@ -1058,8 +1070,8 @@ tc_gen_reloc (seg, fixp)
   if (reloc->howto == (reloc_howto_type *) NULL)
     {
       as_bad_where (fixp->fx_file, fixp->fx_line,
-                    _("reloc %d not supported by object file format"),
-		    (int)fixp->fx_r_type);
+		    _("reloc %d not supported by object file format"),
+		    (int) fixp->fx_r_type);
       return NULL;
     }
 
@@ -1072,15 +1084,14 @@ tc_gen_reloc (seg, fixp)
   return reloc;
 }
 
-
 void
 md_assemble (str)
      char *str;
 {
-  struct avr_opcodes_s * opcode;
+  struct avr_opcodes_s *opcode;
   char op[11];
 
-  str = skip_space (extract_word (str, op, sizeof(op)));
+  str = skip_space (extract_word (str, op, sizeof (op)));
 
   if (!op[0])
     as_bad (_("can't find opcode "));
@@ -1095,7 +1106,7 @@ md_assemble (str)
 
   /* Special case for opcodes with optional operands (lpm, elpm) -
      version with operands exists in avr_opcodes[] in the next entry.  */
-  
+
   if (*str && *opcode->constraints == '?')
     ++opcode;
 
@@ -1114,10 +1125,11 @@ md_assemble (str)
 }
 
 /* Parse ordinary expression.  */
+
 static char *
 parse_exp (s, op)
      char *s;
-     expressionS * op;
+     expressionS *op;
 {
   input_line_pointer = s;
   expression (op);
@@ -1126,14 +1138,13 @@ parse_exp (s, op)
   return input_line_pointer;
 }
 
-
 /* Parse special expressions (needed for LDI command):
    xx8 (address)
    xx8 (-address)
    pm_xx8 (address)
    pm_xx8 (-address)
-   where xx is: hh, hi, lo
-*/
+   where xx is: hh, hi, lo.  */
+
 static bfd_reloc_code_real_type
 avr_ldi_expression (exp)
      expressionS *exp;
@@ -1145,28 +1156,35 @@ avr_ldi_expression (exp)
   tmp = str;
 
   str = extract_word (str, op, sizeof (op));
+  
   if (op[0])
     {
       mod = (int) hash_find (avr_mod_hash, op);
+      
       if (mod)
 	{
 	  int closes = 0;
+	  
 	  mod -= 10;
 	  str = skip_space (str);
+	  
 	  if (*str == '(')
 	    {
 	      int neg_p = 0;
+	      
 	      ++str;
+	      
 	      if (strncmp ("pm(", str, 3) == 0
 		  || strncmp ("-(pm(", str, 5) == 0)
 		{
-		  if (HAVE_PM_P(mod))
+		  if (HAVE_PM_P (mod))
 		    {
 		      ++mod;
 		      ++closes;
 		    }
 		  else
 		    as_bad (_("illegal expression"));
+		  
 		  if (*str == '-')
 		    {
 		      neg_p = 1;
@@ -1176,14 +1194,17 @@ avr_ldi_expression (exp)
 		  else
 		    str += 3;
 		}
+	      
 	      if (*str == '-' && *(str + 1) == '(')
 		{
 		  neg_p ^= 1;
 		  ++closes;
 		  str += 2;
 		}
+	      
 	      input_line_pointer = str;
 	      expression (exp);
+	      
 	      do
 		{
 		  if (*input_line_pointer != ')')
@@ -1194,14 +1215,16 @@ avr_ldi_expression (exp)
 		  input_line_pointer++;
 		}
 	      while (closes--);
+	      
 	      return neg_p ? EXP_MOD_NEG_RELOC (mod) : EXP_MOD_RELOC (mod);
 	    }
 	}
     }
+  
   input_line_pointer = tmp;
   expression (exp);
 
-  /* Warn about expressions that fail to use lo8().  */
+  /* Warn about expressions that fail to use lo8 ().  */
   if (exp->X_op == O_constant)
     {
       int x = exp->X_add_number;
@@ -1215,18 +1238,19 @@ avr_ldi_expression (exp)
 }
 
 /* Flag to pass `pm' mode between `avr_parse_cons_expression' and
-   `avr_cons_fix_new' */
+   `avr_cons_fix_new'.  */
 static int exp_mod_pm = 0;
 
 /* Parse special CONS expression: pm (expression)
    which is used for addressing to a program memory.
-   Relocation: BFD_RELOC_AVR_16_PM */
+   Relocation: BFD_RELOC_AVR_16_PM.  */
+
 void
 avr_parse_cons_expression (exp, nbytes)
      expressionS *exp;
      int nbytes;
 {
-  char * tmp;
+  char *tmp;
 
   exp_mod_pm = 0;
 
@@ -1234,16 +1258,19 @@ avr_parse_cons_expression (exp, nbytes)
 
   if (nbytes == 2)
     {
-      char * pm_name = "pm";
+      char *pm_name = "pm";
       int len = strlen (pm_name);
+      
       if (strncasecmp (input_line_pointer, pm_name, len) == 0)
 	{
 	  input_line_pointer = skip_space (input_line_pointer + len);
+	  
 	  if (*input_line_pointer == '(')
 	    {
 	      input_line_pointer = skip_space (input_line_pointer + 1);
 	      exp_mod_pm = 1;
 	      expression (exp);
+	      
 	      if (*input_line_pointer == ')')
 		++input_line_pointer;
 	      else
@@ -1251,16 +1278,19 @@ avr_parse_cons_expression (exp, nbytes)
 		  as_bad (_("`)' required"));
 		  exp_mod_pm = 0;
 		}
+	      
 	      return;
 	    }
+	  
 	  input_line_pointer = tmp;
 	}
     }
+  
   expression (exp);
 }
 
 void
-avr_cons_fix_new(frag, where, nbytes, exp)
+avr_cons_fix_new (frag, where, nbytes, exp)
      fragS *frag;
      int where;
      int nbytes;
