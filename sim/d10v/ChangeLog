@@ -17,6 +17,11 @@ Mon Jan  3 00:14:33 2000  Andrew Cagney  <cagney@b1.cygnus.com>
  	OP_6E1F, OP_6A01, OP_6E01, OP_37010000): For "ld", "ld2w", "st"
  	and "st2w" check that the address is aligned.
 
+1999-12-30  Chandra Chavva   <cchavva@cygnus.com>
+	
+	* d10v_sim.h (INC_ADDR): Added code to assign
+	proper address for loads with predec operations.
+
 1999-11-25  Nick Clifton  <nickc@cygnus.com>
 
 	* simops.c (OP_4E0F): New function: Simulate new bit pattern for
