@@ -1147,7 +1147,7 @@ avr_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_write_pc (gdbarch, avr_write_pc);
   set_gdbarch_read_fp (gdbarch, avr_read_fp);
   set_gdbarch_read_sp (gdbarch, avr_read_sp);
-  set_gdbarch_write_sp (gdbarch, avr_write_sp);
+  set_gdbarch_deprecated_dummy_write_sp (gdbarch, avr_write_sp);
 
   set_gdbarch_num_regs (gdbarch, AVR_NUM_REGS);
 

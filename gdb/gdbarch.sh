@@ -430,7 +430,8 @@ f:2:TARGET_READ_PC:CORE_ADDR:read_pc:ptid_t ptid:ptid::0:generic_target_read_pc:
 f:2:TARGET_WRITE_PC:void:write_pc:CORE_ADDR val, ptid_t ptid:val, ptid::0:generic_target_write_pc::0
 f:2:TARGET_READ_FP:CORE_ADDR:read_fp:void:::0:generic_target_read_fp::0
 f:2:TARGET_READ_SP:CORE_ADDR:read_sp:void:::0:generic_target_read_sp::0
-f:2:TARGET_WRITE_SP:void:write_sp:CORE_ADDR val:val::0:generic_target_write_sp::0
+# The dummy call frame SP should be set by push_dummy_call.
+F:2:DEPRECATED_DUMMY_WRITE_SP:void:deprecated_dummy_write_sp:CORE_ADDR val:val
 # Function for getting target's idea of a frame pointer.  FIXME: GDB's
 # whole scheme for dealing with "frames" and "frame pointers" needs a
 # serious shakedown.

@@ -4323,6 +4323,9 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Helpful for backtracing and returning in a call dummy.  */
   set_gdbarch_save_dummy_frame_tos (gdbarch, generic_save_dummy_frame_tos);
 
+  /* Should be using push_dummy_call.  */
+  set_gdbarch_deprecated_dummy_write_sp (gdbarch, generic_target_write_sp);
+
   /* Use target_specific function to define link map offsets.  */
   set_solib_svr4_fetch_link_map_offsets 
     (gdbarch, cris_linux_svr4_fetch_link_map_offsets);

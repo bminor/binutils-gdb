@@ -1630,6 +1630,9 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   i386_add_reggroups (gdbarch);
   set_gdbarch_register_reggroup_p (gdbarch, i386_register_reggroup_p);
 
+  /* Should be using push_dummy_call.  */
+  set_gdbarch_deprecated_dummy_write_sp (gdbarch, generic_target_write_sp);
+
   /* Hook in ABI-specific overrides, if they have been registered.  */
   gdbarch_init_osabi (info, gdbarch);
 

@@ -1696,8 +1696,8 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
      stored the stack pointer (as part of creating the fake call
      frame), and none of the code following that code adjusts the
      stack-pointer value, the below call is entirely redundant.  */
-  if (!gdbarch_push_dummy_call_p (current_gdbarch))
-    TARGET_WRITE_SP (sp);
+  if (DEPRECATED_DUMMY_WRITE_SP_P ())
+    DEPRECATED_DUMMY_WRITE_SP (sp);
 
   if (SAVE_DUMMY_FRAME_TOS_P ())
     SAVE_DUMMY_FRAME_TOS (sp);

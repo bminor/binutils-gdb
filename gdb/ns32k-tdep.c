@@ -612,6 +612,9 @@ ns32k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Misc info */
   set_gdbarch_function_start_offset (gdbarch, 0);
 
+  /* Should be using push_dummy_call.  */
+  set_gdbarch_deprecated_dummy_write_sp (gdbarch, generic_target_write_sp);
+
   /* Hook in OS ABI-specific overrides, if they have been registered.  */
   gdbarch_init_osabi (info, gdbarch);
 

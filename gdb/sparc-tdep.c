@@ -1040,7 +1040,7 @@ sparc_push_dummy_frame (void)
 
   sp -= DUMMY_STACK_SIZE;
 
-  TARGET_WRITE_SP (sp);
+  DEPRECATED_DUMMY_WRITE_SP (sp);
 
   write_memory (sp + DUMMY_REG_SAVE_OFFSET, &register_temp[0],
 		DUMMY_STACK_REG_BUF_SIZE);
@@ -1310,7 +1310,7 @@ sparc_pop_frame (void)
 			read_memory_integer (fsr[O0_REGNUM + 7],
 					     SPARC_INTREG_SIZE));
 
-      TARGET_WRITE_SP (get_frame_base (frame));
+      DEPRECATED_DUMMY_WRITE_SP (get_frame_base (frame));
     }
   else if (fsr[I0_REGNUM])
     {
@@ -3279,7 +3279,7 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_deprecated_store_struct_return (gdbarch, sparc32_store_struct_return);
       set_gdbarch_use_struct_convention (gdbarch, 
 					 generic_use_struct_convention);
-      set_gdbarch_write_sp (gdbarch, generic_target_write_sp);
+      set_gdbarch_deprecated_dummy_write_sp (gdbarch, generic_target_write_sp);
       tdep->y_regnum = SPARC32_Y_REGNUM;
       tdep->fp_max_regnum = SPARC_FP0_REGNUM + 32;
       tdep->intreg_size = 4;
@@ -3337,7 +3337,7 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_deprecated_store_struct_return (gdbarch, sparc64_store_struct_return);
       set_gdbarch_use_struct_convention (gdbarch, 
 					 sparc64_use_struct_convention);
-      set_gdbarch_write_sp (gdbarch, sparc64_write_sp);
+      set_gdbarch_deprecated_dummy_write_sp (gdbarch, sparc64_write_sp);
       tdep->y_regnum = SPARC64_Y_REGNUM;
       tdep->fp_max_regnum = SPARC_FP0_REGNUM + 48;
       tdep->intreg_size = 8;

@@ -148,7 +148,7 @@ struct gdbarch
   gdbarch_write_pc_ftype *write_pc;
   gdbarch_read_fp_ftype *read_fp;
   gdbarch_read_sp_ftype *read_sp;
-  gdbarch_write_sp_ftype *write_sp;
+  gdbarch_deprecated_dummy_write_sp_ftype *deprecated_dummy_write_sp;
   gdbarch_virtual_frame_pointer_ftype *virtual_frame_pointer;
   gdbarch_pseudo_register_read_ftype *pseudo_register_read;
   gdbarch_pseudo_register_write_ftype *pseudo_register_write;
@@ -504,7 +504,6 @@ gdbarch_alloc (const struct gdbarch_info *info,
   current_gdbarch->write_pc = generic_target_write_pc;
   current_gdbarch->read_fp = generic_target_read_fp;
   current_gdbarch->read_sp = generic_target_read_sp;
-  current_gdbarch->write_sp = generic_target_write_sp;
   current_gdbarch->virtual_frame_pointer = legacy_virtual_frame_pointer;
   current_gdbarch->num_regs = -1;
   current_gdbarch->sp_regnum = -1;
@@ -632,7 +631,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of write_pc, invalid_p == 0 */
   /* Skip verify of read_fp, invalid_p == 0 */
   /* Skip verify of read_sp, invalid_p == 0 */
-  /* Skip verify of write_sp, invalid_p == 0 */
+  /* Skip verify of deprecated_dummy_write_sp, has predicate */
   /* Skip verify of virtual_frame_pointer, invalid_p == 0 */
   /* Skip verify of pseudo_register_read, has predicate */
   /* Skip verify of pseudo_register_write, has predicate */
@@ -1126,6 +1125,29 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         "gdbarch_dump: DEPRECATED_DO_REGISTERS_INFO = <0x%08lx>\n",
                         (long) current_gdbarch->deprecated_do_registers_info
                         /*DEPRECATED_DO_REGISTERS_INFO ()*/);
+#endif
+#ifdef DEPRECATED_DUMMY_WRITE_SP_P
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "DEPRECATED_DUMMY_WRITE_SP_P()",
+                      XSTRING (DEPRECATED_DUMMY_WRITE_SP_P ()));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: DEPRECATED_DUMMY_WRITE_SP_P() = %d\n",
+                      DEPRECATED_DUMMY_WRITE_SP_P ());
+#endif
+#ifdef DEPRECATED_DUMMY_WRITE_SP
+#if GDB_MULTI_ARCH
+  /* Macro might contain `[{}]' when not multi-arch */
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "DEPRECATED_DUMMY_WRITE_SP(val)",
+                      XSTRING (DEPRECATED_DUMMY_WRITE_SP (val)));
+#endif
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: DEPRECATED_DUMMY_WRITE_SP = <0x%08lx>\n",
+                        (long) current_gdbarch->deprecated_dummy_write_sp
+                        /*DEPRECATED_DUMMY_WRITE_SP ()*/);
 #endif
 #ifdef DEPRECATED_EXTRACT_RETURN_VALUE
 #if GDB_MULTI_ARCH
@@ -2576,20 +2598,6 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         (long) current_gdbarch->write_pc
                         /*TARGET_WRITE_PC ()*/);
 #endif
-#ifdef TARGET_WRITE_SP
-#if GDB_MULTI_ARCH
-  /* Macro might contain `[{}]' when not multi-arch */
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "TARGET_WRITE_SP(val)",
-                      XSTRING (TARGET_WRITE_SP (val)));
-#endif
-  if (GDB_MULTI_ARCH)
-    fprintf_unfiltered (file,
-                        "gdbarch_dump: TARGET_WRITE_SP = <0x%08lx>\n",
-                        (long) current_gdbarch->write_sp
-                        /*TARGET_WRITE_SP ()*/);
-#endif
   if (GDB_MULTI_ARCH)
     fprintf_unfiltered (file,
                         "gdbarch_dump: gdbarch_unwind_dummy_id_p() = %d\n",
@@ -2938,23 +2946,30 @@ set_gdbarch_read_sp (struct gdbarch *gdbarch,
   gdbarch->read_sp = read_sp;
 }
 
-void
-gdbarch_write_sp (struct gdbarch *gdbarch, CORE_ADDR val)
+int
+gdbarch_deprecated_dummy_write_sp_p (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  if (gdbarch->write_sp == 0)
-    internal_error (__FILE__, __LINE__,
-                    "gdbarch: gdbarch_write_sp invalid");
-  if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_write_sp called\n");
-  gdbarch->write_sp (val);
+  return gdbarch->deprecated_dummy_write_sp != 0;
 }
 
 void
-set_gdbarch_write_sp (struct gdbarch *gdbarch,
-                      gdbarch_write_sp_ftype write_sp)
+gdbarch_deprecated_dummy_write_sp (struct gdbarch *gdbarch, CORE_ADDR val)
 {
-  gdbarch->write_sp = write_sp;
+  gdb_assert (gdbarch != NULL);
+  if (gdbarch->deprecated_dummy_write_sp == 0)
+    internal_error (__FILE__, __LINE__,
+                    "gdbarch: gdbarch_deprecated_dummy_write_sp invalid");
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_dummy_write_sp called\n");
+  gdbarch->deprecated_dummy_write_sp (val);
+}
+
+void
+set_gdbarch_deprecated_dummy_write_sp (struct gdbarch *gdbarch,
+                                       gdbarch_deprecated_dummy_write_sp_ftype deprecated_dummy_write_sp)
+{
+  gdbarch->deprecated_dummy_write_sp = deprecated_dummy_write_sp;
 }
 
 void

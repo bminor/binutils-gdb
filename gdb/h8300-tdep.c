@@ -1175,6 +1175,9 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* set_gdbarch_stack_align (gdbarch, SOME_stack_align); */
   set_gdbarch_believe_pcc_promotion (gdbarch, 1);
 
+  /* Should be using push_dummy_call.  */
+  set_gdbarch_deprecated_dummy_write_sp (gdbarch, generic_target_write_sp);
+
   return gdbarch;
 }
 

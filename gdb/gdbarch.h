@@ -388,20 +388,42 @@ extern void set_gdbarch_read_sp (struct gdbarch *gdbarch, gdbarch_read_sp_ftype 
 #endif
 #endif
 
-/* Default (function) for non- multi-arch platforms. */
-#if (!GDB_MULTI_ARCH) && !defined (TARGET_WRITE_SP)
-#define TARGET_WRITE_SP(val) (generic_target_write_sp (val))
+/* The dummy call frame SP should be set by push_dummy_call. */
+
+#if defined (DEPRECATED_DUMMY_WRITE_SP)
+/* Legacy for systems yet to multi-arch DEPRECATED_DUMMY_WRITE_SP */
+#if !defined (DEPRECATED_DUMMY_WRITE_SP_P)
+#define DEPRECATED_DUMMY_WRITE_SP_P() (1)
+#endif
 #endif
 
-typedef void (gdbarch_write_sp_ftype) (CORE_ADDR val);
-extern void gdbarch_write_sp (struct gdbarch *gdbarch, CORE_ADDR val);
-extern void set_gdbarch_write_sp (struct gdbarch *gdbarch, gdbarch_write_sp_ftype *write_sp);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (TARGET_WRITE_SP)
-#error "Non multi-arch definition of TARGET_WRITE_SP"
+/* Default predicate for non- multi-arch targets. */
+#if (!GDB_MULTI_ARCH) && !defined (DEPRECATED_DUMMY_WRITE_SP_P)
+#define DEPRECATED_DUMMY_WRITE_SP_P() (0)
+#endif
+
+extern int gdbarch_deprecated_dummy_write_sp_p (struct gdbarch *gdbarch);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_DUMMY_WRITE_SP_P)
+#error "Non multi-arch definition of DEPRECATED_DUMMY_WRITE_SP"
+#endif
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_DUMMY_WRITE_SP_P)
+#define DEPRECATED_DUMMY_WRITE_SP_P() (gdbarch_deprecated_dummy_write_sp_p (current_gdbarch))
+#endif
+
+/* Default (function) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (DEPRECATED_DUMMY_WRITE_SP)
+#define DEPRECATED_DUMMY_WRITE_SP(val) (internal_error (__FILE__, __LINE__, "DEPRECATED_DUMMY_WRITE_SP"), 0)
+#endif
+
+typedef void (gdbarch_deprecated_dummy_write_sp_ftype) (CORE_ADDR val);
+extern void gdbarch_deprecated_dummy_write_sp (struct gdbarch *gdbarch, CORE_ADDR val);
+extern void set_gdbarch_deprecated_dummy_write_sp (struct gdbarch *gdbarch, gdbarch_deprecated_dummy_write_sp_ftype *deprecated_dummy_write_sp);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_DUMMY_WRITE_SP)
+#error "Non multi-arch definition of DEPRECATED_DUMMY_WRITE_SP"
 #endif
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (TARGET_WRITE_SP)
-#define TARGET_WRITE_SP(val) (gdbarch_write_sp (current_gdbarch, val))
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_DUMMY_WRITE_SP)
+#define DEPRECATED_DUMMY_WRITE_SP(val) (gdbarch_deprecated_dummy_write_sp (current_gdbarch, val))
 #endif
 #endif
 

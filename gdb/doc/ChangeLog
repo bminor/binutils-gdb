@@ -1,8 +1,13 @@
+2003-03-30  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbint.texinfo (Target Architecture Definition): Remove
+	reference to TARGET_WRITE_SP.
+	
 2003-03-27  Andrew Cagney  <cagney@redhat.com>
 
 	* gdbint.texinfo (Target Architecture Definition): Remove
 	references to write_sp.
-	
+
 2003-03-27  Andrew Cagney  <cagney@redhat.com>
 
 	* gdb.texinfo (GDB/MI Variable Objects): Replace @include with

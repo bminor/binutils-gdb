@@ -3777,10 +3777,8 @@ that is at the start of the real function.
 @item SP_REGNUM
 @findex SP_REGNUM
 If the stack-pointer is kept in a register, then define this macro to be
-the number (greater than or equal to zero) of that register.
-
-This should only need to be defined if @code{TARGET_WRITE_SP} and
-@code{TARGET_WRITE_SP} are not defined.
+the number (greater than or equal to zero) of that register, or -1 if
+there is no such register.
 
 @item STAB_REG_TO_REGNUM
 @findex STAB_REG_TO_REGNUM
@@ -3887,8 +3885,6 @@ Number of bits in a short integer; defaults to @code{2 * TARGET_CHAR_BIT}.
 @findex TARGET_WRITE_PC
 @itemx TARGET_READ_SP
 @findex TARGET_READ_SP
-@itemx TARGET_WRITE_SP
-@findex TARGET_WRITE_SP
 @itemx TARGET_READ_FP
 @findex TARGET_READ_FP
 @findex read_pc
