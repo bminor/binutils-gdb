@@ -163,6 +163,13 @@ extern int in_sigtramp PARAMS ((CORE_ADDR, char *));
 #define ZERO_REGNUM 0		/* read-only register, always 0 */
 #define V0_REGNUM 2		/* Function integer return value */
 #define A0_REGNUM 4		/* Loc of first arg during a subr call */
+#if MIPS_EABI
+  #define MIPS_LAST_ARG_REGNUM 11 /* EABI uses R4 through R11 for args */
+  #define MIPS_NUM_ARG_REGS 8
+#else
+  #define MIPS_LAST_ARG_REGNUM 7  /* old ABI uses R4 through R7 for args */
+  #define MIPS_NUM_ARG_REGS 4
+#endif
 #define SP_REGNUM 29		/* Contains address of top of stack */
 #define RA_REGNUM 31		/* Contains return address value */
 #define PS_REGNUM 32		/* Contains processor status */

@@ -1,3 +1,14 @@
+Thu Nov 21 19:13:58 1996  Mark Alexander  <marka@cygnus.com>
+
+	* mips-tdep.c: Replace hard-coded constants with MIPS_INSTLEN.
+	(common_breakpoint): Use paddr instead of %x to print 64-bit values.
+	(heuristic_proc_desc): Add tests for 64-bit instructions.
+	(init_extra_frame_info, mips_push_arguments): Recognize additional
+	registers for EABI.
+	* remote-mips.c: Extend DDB target to allow TFTP downloads.
+	* config/mips/tm-mips.h (MIPS_LAST_ARG_REGNUM, MIPS_NUM_ARG_REGS):
+	Define.
+
 Wed Nov 20 19:09:16 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* infcmd.c (do_registers_info): Call val_print with the

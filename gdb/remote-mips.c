@@ -29,8 +29,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "serial.h"
 #include "target.h"
 #include "remote-utils.h"
+#include "gdb_string.h"
 
 #include <signal.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 #ifdef ANSI_PROTOTYPES
 #include <stdarg.h>
 #else
@@ -118,7 +121,13 @@ static void pmon_make_fastrec PARAMS ((char **outbuf, unsigned char *inbuf,
                                        int *inptr, int inamount, int *recsize,
                                        unsigned int *csum, unsigned int *zerofill));
 
-static int pmon_check_ack PARAMS ((void));
+static int pmon_check_ack PARAMS ((char *mesg));
+
+static void pmon_start_download PARAMS ((void));
+
+static void pmon_end_download PARAMS ((int final, int bintotal));
+
+static void pmon_download PARAMS ((char *buffer, int length));
 
 static void pmon_load_fast PARAMS ((char *file));
 
@@ -239,7 +248,7 @@ extern struct target_ops ddb_ops;
   (((hdr)[HDR_INDX_TYPE_LEN] & TYPE_LEN_DA_BIT) == TYPE_LEN_DATA)
 #define HDR_GET_LEN(hdr) \
   ((((hdr)[HDR_INDX_TYPE_LEN] & 0x1f) << 6) + (((hdr)[HDR_INDX_LEN1] & 0x3f)))
-#define HDR_GET_SEQ(hdr) ((hdr)[HDR_INDX_SEQ] & 0x3f)
+#define HDR_GET_SEQ(hdr) ((unsigned int)(hdr)[HDR_INDX_SEQ] & 0x3f)
 
 /* The maximum data length.  */
 #define DATA_MAXLEN 1023
@@ -270,6 +279,10 @@ extern struct target_ops ddb_ops;
 
 /* The sequence number modulos.  */
 #define SEQ_MODULOS (64)
+
+/* PMON commands to load from the serial port or UDP socket.  */
+#define LOAD_CMD	"load -b -s tty0\r"
+#define LOAD_CMD_UDP	"load -b -s udp\r"
 
 enum mips_monitor_type {
   /* IDT/SIM monitor being used: */
@@ -329,6 +342,17 @@ static int mips_need_reply = 0;
 /* Handle used to access serial I/O stream.  */
 static serial_t mips_desc;
 
+/* UDP handle used to download files to target.  */
+static serial_t udp_desc;
+static int udp_in_use;
+
+/* TFTP filename used to download files to DDB board, in the form
+   host:filename.  */
+static char *tftp_name;		/* host:filename */
+static char *tftp_localname;	/* filename portion of above */
+static int tftp_in_use;
+static FILE *tftp_file;
+
 /* Counts the number of times the user tried to interrupt the target (usually
    via ^C.  */
 static int interrupt_count;
@@ -341,11 +365,27 @@ static monitor_supports_breakpoints = 0;
 
 /* Data cache header.  */
 
+#if 0	/* not used (yet?) */
 static DCACHE *mips_dcache;
+#endif
 
 /* Non-zero means that we've just hit a read or write watchpoint */
 static int hit_watchpoint;
 
+static void
+close_ports()
+{
+  mips_is_open = 0;
+  SERIAL_CLOSE (mips_desc);
+
+  if (udp_in_use)
+    {
+      SERIAL_CLOSE (udp_desc);
+      udp_in_use = 0;
+    }
+  tftp_in_use = 0;
+}
+    
 /* Handle low-level error that we can't recover from.  Note that just
    error()ing out from target_wait or some such low-level place will cause
    all hell to break loose--the rest of GDB will tend to get left in an
@@ -382,8 +422,7 @@ mips_error (va_alist)
   /* Clean up in such a way that mips_close won't try to talk to the
      board (it almost surely won't work since we weren't able to talk to
      it).  */
-  mips_is_open = 0;
-  SERIAL_CLOSE (mips_desc);
+  close_ports ();
 
   printf_unfiltered ("Ending remote MIPS debugging.\n");
   target_mourn_inferior ();
@@ -391,14 +430,57 @@ mips_error (va_alist)
   return_to_top_level (RETURN_ERROR);
 }
 
-/* Wait until STRING shows up in mips_desc.  Returns 1 if successful, else 0 if
-   timed out.  */
+/* putc_readable - print a character, displaying non-printable chars in
+   ^x notation or in hex.  */
 
-int
-mips_expect (string)
+static void
+putc_readable (ch)
+     int ch;
+{
+  if (ch == '\n')
+    putchar_unfiltered ('\n');
+  else if (ch == '\r')
+    printf_unfiltered ("\\r");
+  else if (ch < 0x20)	/* ASCII control character */
+    printf_unfiltered ("^%c", ch + '@');
+  else if (ch >= 0x7f)	/* non-ASCII characters (rubout or greater) */
+    printf_unfiltered ("[%02x]", ch & 0xff);
+  else
+    putchar_unfiltered (ch);
+}
+
+
+/* puts_readable - print a string, displaying non-printable chars in
+   ^x notation or in hex.  */
+
+static void
+puts_readable (string)
      char *string;
 {
+  int c;
+
+  while ((c = *string++) != '\0')
+    putc_readable (c);
+}
+
+
+/* Wait until STRING shows up in mips_desc.  Returns 1 if successful, else 0 if
+   timed out.  TIMEOUT specifies timeout value in seconds.
+*/
+
+int
+mips_expect_timeout (string, timeout)
+     char *string;
+     int timeout;
+{
   char *p = string;
+
+  if (remote_debug)
+    {
+      printf_unfiltered ("Expected \"");
+      puts_readable (string);
+      printf_unfiltered ("\", got \"");
+    }
 
   immediate_quit = 1;
   while (1)
@@ -408,16 +490,25 @@ mips_expect (string)
 /* Must use SERIAL_READCHAR here cuz mips_readchar would get confused if we
    were waiting for the mips_monitor_prompt... */
 
-      c = SERIAL_READCHAR (mips_desc, 2);
+      c = SERIAL_READCHAR (mips_desc, timeout);
 
       if (c == SERIAL_TIMEOUT)
-	return 0;
+	{
+	  if (remote_debug)
+	    printf_unfiltered ("\": FAIL\n");
+	  return 0;
+	}
+
+      if (remote_debug)
+	putc_readable (c);
 
       if (c == *p++)
 	{	
 	  if (*p == '\0')
 	    {
 	      immediate_quit = 0;
+	      if (remote_debug)
+	      printf_unfiltered ("\": OK\n");
 	      return 1;
 	    }
 	}
@@ -428,6 +519,18 @@ mips_expect (string)
 	    p++;
 	}
     }
+}
+
+/* Wait until STRING shows up in mips_desc.  Returns 1 if successful, else 0 if
+   timed out.  The timeout value is hard-coded to 2 seconds.  Use
+   mips_expect_timeout if a different timeout value is needed.
+*/
+
+int
+mips_expect (string)
+     char *string;
+{
+    return mips_expect_timeout (string, 2);
 }
 
 /* Read the required number of characters into the given buffer (which
@@ -481,7 +584,7 @@ mips_readchar (timeout)
 
   /* NASTY, since we assume that the prompt does not change after the
      first mips_readchar call: */
-  if (mips_monitor_prompt_len = -1)
+  if (mips_monitor_prompt_len == -1)
    mips_monitor_prompt_len = strlen(mips_monitor_prompt);
 
 #ifdef MAINTENANCE_CMDS
@@ -584,19 +687,7 @@ mips_receive_header (hdr, pgarbage, ch, timeout)
 		 we can't deal with a QUIT out of target_wait.  */
 	      if (! mips_initializing || remote_debug > 0)
 		{
-		  /* Note that the host's idea of newline may not
-		     correspond to the target's idea, so recognize
-		     newline by its actual ASCII code, but write it
-		     out using the \n notation.  */
-		  if (ch < 0x20 && ch != '\012')
-		    {
-		      putchar_unfiltered ('^');
-		      putchar_unfiltered (ch + 0x40);
-		    }
-		  else if (ch == '\012')
-		    putchar_unfiltered ('\n');
-		  else
-		    putchar_unfiltered (ch);
+		  putc_readable (ch);
 		  gdb_flush (gdb_stdout);
 		}
 
@@ -692,7 +783,7 @@ mips_send_packet (s, get_ack)
      const char *s;
      int get_ack;
 {
-  unsigned int len;
+  /* unsigned */ int len;
   unsigned char *packet;
   register int cksum;
   int try;
@@ -749,7 +840,7 @@ mips_send_packet (s, get_ack)
 	  unsigned char hdr[HDR_LENGTH + 1];
 	  unsigned char trlr[TRLR_LENGTH + 1];
 	  int err;
-	  int seq;
+	  unsigned int seq;
 
 	  /* Get the packet header.  If we time out, resend the data
 	     packet.  */
@@ -1145,7 +1236,7 @@ mips_send_command (cmd, prompt)
 {
   SERIAL_WRITE (mips_desc, cmd, strlen(cmd));
   mips_expect (cmd);
-  mips_expect ("\012");
+  mips_expect ("\n");
   if (prompt)
     mips_expect (mips_monitor_prompt);
 }
@@ -1159,18 +1250,18 @@ mips_enter_debug ()
   mips_receive_seq = 0;
 
   if (mips_monitor == MON_PMON || mips_monitor == MON_DDB)
-    mips_send_command ("debug\015", 0);
+    mips_send_command ("debug\r", 0);
   else /* assume IDT monitor by default */
-    mips_send_command ("db tty0\015", 0);
+    mips_send_command ("db tty0\r", 0);
 
-  SERIAL_WRITE (mips_desc, "\015", sizeof "\015" - 1);
+  SERIAL_WRITE (mips_desc, "\r", sizeof "\r" - 1);
 
   /* We don't need to absorb any spurious characters here, since the
      mips_receive_header will eat up a reasonable number of characters
      whilst looking for the SYN, however this avoids the "garbage"
      being displayed to the user. */
   if (mips_monitor == MON_PMON || mips_monitor == MON_DDB)
-    mips_expect ("\015");
+    mips_expect ("\r");
   
   {
     char buff[DATA_MAXLEN + 1];
@@ -1204,11 +1295,11 @@ mips_exit_debug ()
     
   if (mips_monitor == MON_DDB)
     {
-      if (!mips_expect ("\012"))
+      if (!mips_expect ("\n"))
         return -1;
     }
   else
-    if (!mips_expect ("\015\012"))
+    if (!mips_expect ("\r\n"))
       return -1;
 
   if (!mips_expect (mips_monitor_prompt))
@@ -1255,7 +1346,7 @@ mips_initialize ()
 	{
         case 0:                 /* First, try sending a CR */
           SERIAL_FLUSH_INPUT (mips_desc);
-	  SERIAL_WRITE (mips_desc, "\015", 1);
+	  SERIAL_WRITE (mips_desc, "\r", 1);
           break;
 	case 1:			/* First, try sending a break */
 	  SERIAL_SEND_BREAK (mips_desc);
@@ -1276,7 +1367,7 @@ mips_initialize ()
                    we flush the output buffer before inserting a
                    termination sequence. */
                 SERIAL_FLUSH_OUTPUT (mips_desc);
-                sprintf (tbuff, "\015/E/E\015");
+                sprintf (tbuff, "\r/E/E\r");
                 SERIAL_WRITE (mips_desc, tbuff, 6);
               }
             else
@@ -1317,11 +1408,11 @@ mips_initialize ()
   if (mips_monitor == MON_PMON || mips_monitor == MON_DDB)
     {
       /* Ensure the correct target state: */
-      mips_send_command ("set regsize 64\015", -1);
-      mips_send_command ("set hostport tty0\015", -1);
-      mips_send_command ("set brkcmd \"\"\015", -1);
+      mips_send_command ("set regsize 64\r", -1);
+      mips_send_command ("set hostport tty0\r", -1);
+      mips_send_command ("set brkcmd \"\"\r", -1);
       /* Delete all the current breakpoints: */
-      mips_send_command ("db *\015", -1);
+      mips_send_command ("db *\r", -1);
       /* NOTE: PMON does not have breakpoint support through the
          "debug" mode, only at the monitor command-line. */
     }
@@ -1353,31 +1444,89 @@ common_open (ops, name, from_tty)
      int from_tty;
 {
   char *ptype;
+  char *serial_port_name;
+  char *remote_name = 0;
+  char *local_name = 0;
+  char **argv;
 
   if (name == 0)
     error (
 "To open a MIPS remote debugging connection, you need to specify what serial\n\
-device is attached to the target board (e.g., /dev/ttya).");
+device is attached to the target board (e.g., /dev/ttya).\n"
+"If you want to use TFTP to download to the board, specify the name of a\n"
+"temporary file to be used by GDB for downloads as the second argument.\n"
+"This filename must be in the form host:filename, where host is the name\n"
+"of the host running the TFTP server, and the file must be readable by the\n"
+"world.  If the local name of the temporary file differs from the name as\n",
+"seen from the board via TFTP, specify that name as the third parameter\n");
+
+  /* Parse the serial port name, the optional TFTP name, and the
+     optional local TFTP name.  */
+  if ((argv = buildargv (name)) == NULL)
+    nomem(0);
+  make_cleanup (freeargv, (char *) argv);
+
+  serial_port_name = strsave (argv[0]);
+  if (argv[1])				/* remote TFTP name specified? */
+    {
+      remote_name = argv[1];
+      if (argv[2])			/* local TFTP filename specified? */
+	local_name = argv[2];
+    }
 
   target_preopen (from_tty);
 
   if (mips_is_open)
     unpush_target (current_ops);
 
-  mips_desc = SERIAL_OPEN (name);
+  /* Open and initialize the serial port.  */
+  mips_desc = SERIAL_OPEN (serial_port_name);
   if (mips_desc == (serial_t) NULL)
-    perror_with_name (name);
+    perror_with_name (serial_port_name);
 
   if (baud_rate != -1)
     {
       if (SERIAL_SETBAUDRATE (mips_desc, baud_rate))
         {
           SERIAL_CLOSE (mips_desc);
-          perror_with_name (name);
+          perror_with_name (serial_port_name);
         }
     }
 
   SERIAL_RAW (mips_desc);
+
+  /* Open and initialize the optional download port.  If it is in the form
+     hostname#portnumber, it's a UDP socket.  If it is in the form
+     hostname:filename, assume it's the TFTP filename that must be
+     passed to the DDB board to tell it where to get the load file.  */
+  if (remote_name)
+    {
+      if (strchr (remote_name, '#'))
+	{
+	  udp_desc = SERIAL_OPEN (remote_name);
+	  if (!udp_desc)
+	    perror_with_name ("Unable to open UDP port");
+	  udp_in_use = 1;
+	}
+      else
+	{
+	  /* Save the remote and local names of the TFTP temp file.  If
+	     the user didn't specify a local name, assume it's the same
+	     as the part of the remote name after the "host:".  */
+	  if (tftp_name)
+	    free (tftp_name);
+	  if (tftp_localname)
+	    free (tftp_localname);
+	  if (local_name == NULL)
+	      if ((local_name = strchr (remote_name, ':')) != NULL)
+		local_name++;		/* skip over the colon */
+	  if (local_name == NULL)
+	    local_name = remote_name;	/* local name same as remote name */
+	  tftp_name = strsave (remote_name);
+	  tftp_localname = strsave (local_name);
+	  tftp_in_use = 1;
+	}
+    }
 
   current_ops = ops;
   mips_is_open = 1;
@@ -1385,7 +1534,7 @@ device is attached to the target board (e.g., /dev/ttya).");
   mips_initialize ();
 
   if (from_tty)
-    printf_unfiltered ("Remote MIPS debugging using %s\n", name);
+    printf_unfiltered ("Remote MIPS debugging using %s\n", serial_port_name);
 
   /* Switch to using remote target now.  */
   push_target (ops);
@@ -1408,6 +1557,7 @@ device is attached to the target board (e.g., /dev/ttya).");
   set_current_frame (create_new_frame (read_fp (), stop_pc));
   select_frame (get_current_frame (), 0);
   print_stack_frame (selected_frame, -1, 1);
+  free (serial_port_name);
 }
 
 static void
@@ -1451,14 +1601,10 @@ mips_close (quitting)
 {
   if (mips_is_open)
     {
-      int err;
-
-      mips_is_open = 0;
-
       /* Get the board out of remote debugging mode.  */
       (void) mips_exit_debug ();
 
-      SERIAL_CLOSE (mips_desc);
+      close_ports ();
     }
 }
 
@@ -1732,7 +1878,7 @@ static void
 mips_fetch_registers (regno)
      int regno;
 {
-  ULONGEST val;
+  unsigned LONGEST val;
   int err;
 
   if (regno == -1)
@@ -1977,8 +2123,7 @@ Give up (and stop debugging it)? "))
 	     board (it almost surely won't work since we weren't able to talk to
 	     it).  */
 	  mips_wait_flag = 0;
-	  mips_is_open = 0;
-	  SERIAL_CLOSE (mips_desc);
+	  close_ports();
 
 	  printf_unfiltered ("Ending remote MIPS debugging.\n");
 	  target_mourn_inferior ();
@@ -2079,8 +2224,6 @@ mips_insert_breakpoint (addr, contents_cache)
      CORE_ADDR addr;
      char *contents_cache;
 {
-  int status;
-
   if (monitor_supports_breakpoints)
     return common_breakpoint ('B', addr, 0x3, "f");
 
@@ -2126,7 +2269,7 @@ pmon_insert_breakpoint (addr, contents_cache)
       if (mips_exit_debug ())
         mips_error ("Failed to exit debug mode");
 
-      sprintf (tbuff, "b %08x\015", addr);
+      sprintf (tbuff, "b %08x\r", addr);
       mips_send_command (tbuff, 0);
 
       mips_expect ("Bpt ");
@@ -2170,7 +2313,7 @@ pmon_insert_breakpoint (addr, contents_cache)
 
       mips_pmon_bp_info[bpnum] = bpaddr;
 
-      mips_expect ("\015\012");
+      mips_expect ("\r\n");
       mips_expect (mips_monitor_prompt);
 
       mips_enter_debug ();
@@ -2204,7 +2347,7 @@ pmon_remove_breakpoint (addr, contents_cache)
       if (mips_exit_debug ())
         mips_error ("Failed to exit debug mode");
 
-      sprintf (tbuff, "db %02d\015", bpnum);
+      sprintf (tbuff, "db %02d\r", bpnum);
 
       mips_send_command (tbuff, -1);
       /* NOTE: If the breakpoint does not exist then a "Bpt <dd> not
@@ -2328,9 +2471,9 @@ common_breakpoint (cmd, addr, mask, flags)
   int nfields;
 
   if (flags)
-    sprintf (buf, "0x0 %c 0x%x 0x%x %s", cmd, addr, mask, flags);
+    sprintf (buf, "0x0 %c 0x%s 0x%s %s", cmd, paddr (addr), paddr (mask), flags);
   else
-    sprintf (buf, "0x0 %c 0x%x", cmd, addr);
+    sprintf (buf, "0x0 %c 0x%s", cmd, paddr (addr));
 
   mips_send_packet (buf, 1);
 
@@ -2397,8 +2540,8 @@ mips_load_srec (args)
   bfd *abfd;
   asection *s;
   char *buffer, srec[1024];
-  int i;
-  int srec_frame = 200;
+  unsigned int i;
+  unsigned int srec_frame = 200;
   int reclen;
   static int hashmark = 1;
 
@@ -2418,14 +2561,13 @@ mips_load_srec (args)
     }
 
 /* This actually causes a download in the IDT binary format: */
-#define LOAD_CMD "load -b -s tty0\015"
   mips_send_command (LOAD_CMD, 0);
 
   for (s = abfd->sections; s; s = s->next)
     {
       if (s->flags & SEC_LOAD)
 	{
-	  int numbytes;
+	  unsigned int numbytes;
 
 	  /* FIXME!  vma too small?? */
 	  printf_filtered ("%s\t: 0x%4x .. 0x%4x  ", s->name, s->vma,
@@ -2646,7 +2788,7 @@ pmon_checkset (recsize, buff, value)
   sprintf (*buff, "/C");
   count = pmon_makeb64 (*value, (*buff + 2), 12, NULL);
   *buff += (count + 2);
-  sprintf (*buff, "\015");
+  sprintf (*buff, "\n");
   *buff += 2; /* include zero terminator */
   /* Forcing a checksum validation clears the sum: */
   *value = 0;
@@ -2722,18 +2864,112 @@ pmon_make_fastrec (outbuf, inbuf, inptr, inamount, recsize, csum, zerofill)
   return;
 }
 
-#if defined(DOETXACK)
 static int
-pmon_check_ack()
+pmon_check_ack(mesg)
+     char *mesg;
 {
-  int c = SERIAL_READCHAR (mips_desc, 2);
-  if ((c == SERIAL_TIMEOUT) || (c != 0x06)) {
-    fprintf_unfiltered (gdb_stderr, "Failed to receive valid ACK\n");
-    return(-1); /* terminate the download */
-  }
+#if defined(DOETXACK)
+  int c;
+
+  if (!tftp_in_use)
+    {
+      c = SERIAL_READCHAR (udp_in_use ? udp_desc : mips_desc, 2);
+      if ((c == SERIAL_TIMEOUT) || (c != 0x06))
+	{
+	  fprintf_unfiltered (gdb_stderr,
+			      "Failed to receive valid ACK for %s\n", mesg);
+	  return(-1); /* terminate the download */
+	}
+    }
+#endif /* DOETXACK */
   return(0);
 }
-#endif /* DOETXACK */
+
+/* pmon_download - Send a sequence of characters to the PMON download port,
+   which is either a serial port or a UDP socket.  */
+
+static void
+pmon_start_download ()
+{
+  if (tftp_in_use)
+    {
+      /* Create the temporary download file.  */
+      if ((tftp_file = fopen (tftp_localname, "w")) == NULL)
+	perror_with_name (tftp_localname);
+    }
+  else
+    {
+      mips_send_command (udp_in_use ? LOAD_CMD_UDP : LOAD_CMD, 0);
+      mips_expect ("Downloading from ");
+      mips_expect (udp_in_use ? "udp" : "tty0");
+      mips_expect (", ^C to abort\r\n");
+    }
+}
+
+static void
+pmon_end_download (final, bintotal)
+     int final;
+     int bintotal;
+{
+  char hexnumber[9]; /* includes '\0' space */
+
+  if (tftp_in_use)
+    {
+      static char *load_cmd_prefix = "load -b -s ";
+      char *cmd;
+      struct stat stbuf;
+
+      /* Close off the temporary file containing the load data.  */
+      fclose (tftp_file);
+      tftp_file = NULL;
+
+      /* Make the temporary file readable by the world.  */
+      if (stat (tftp_localname, &stbuf) == 0)
+	chmod (tftp_localname, stbuf.st_mode | S_IROTH);
+
+      /* Must reinitialize the board to prevent PMON from crashing.  */
+      mips_send_command ("initEther\r", -1);
+
+      /* Send the load command.  */
+      cmd = xmalloc (strlen (load_cmd_prefix) + strlen (tftp_name) + 2);
+      strcpy (cmd, load_cmd_prefix);
+      strcat (cmd, tftp_name);
+      strcat (cmd, "\r");
+      mips_send_command (cmd, 0);
+      free (cmd);
+      mips_expect ("Downloading from ");
+      mips_expect (tftp_name);
+      mips_expect (", ^C to abort\r\n");
+    }
+
+  /* Wait for the stuff that PMON prints after the load has completed.
+     The timeout value for use in the tftp case (15 seconds) was picked
+     arbitrarily but might be too small for really large downloads. FIXME. */
+  mips_expect_timeout ("Entry Address  = ", tftp_in_use ? 15 : 2);
+  sprintf (hexnumber,"%x",final);
+  mips_expect (hexnumber);
+  mips_expect ("\r\n");
+  pmon_check_ack ("termination");
+  mips_expect ("\r\ntotal = 0x");
+  sprintf (hexnumber,"%x",bintotal);
+  mips_expect (hexnumber);
+  if (!mips_expect (" bytes\r\n"))
+    fprintf_unfiltered (gdb_stderr, "Load did not complete successfully.\n");
+
+  if (tftp_in_use)
+    remove (tftp_localname);	/* Remove temporary file */
+}
+
+static void
+pmon_download (buffer, length)
+     char *buffer;
+     int length;
+{
+  if (tftp_in_use)
+    fwrite (buffer, 1, length, tftp_file);
+  else
+    SERIAL_WRITE (udp_in_use ? udp_desc : mips_desc, buffer, length);
+}
 
 static void
 pmon_load_fast (file)
@@ -2745,9 +2981,9 @@ pmon_load_fast (file)
   char *buffer;
   int reclen;
   unsigned int csum = 0;
-  static int hashmark = 1;
+  int hashmark = !tftp_in_use;
   int bintotal = 0;
-  int final;
+  int final = 0;
   int finished = 0;
 
   buffer = (char *)xmalloc(MAXRECSIZE + 1);
@@ -2767,23 +3003,19 @@ pmon_load_fast (file)
    }
 
   /* Setup the required download state: */
-  mips_send_command ("set dlproto etxack\015", -1);
-  mips_send_command ("set dlecho off\015", -1);
+  mips_send_command ("set dlproto etxack\r", -1);
+  mips_send_command ("set dlecho off\r", -1);
   /* NOTE: We get a "cannot set variable" message if the variable is
      already defined to have the argument we give. The code doesn't
      care, since it just scans to the next prompt anyway. */
   /* Start the download: */
-  mips_send_command (LOAD_CMD, 0);
-  mips_expect ("Downloading from tty0, ^C to abort\015\012");
+  pmon_start_download();
   
   /* Zero the checksum */
-  sprintf(buffer,"/Kxx\015");
+  sprintf(buffer,"/Kxx\n");
   reclen = strlen(buffer);
-  SERIAL_WRITE (mips_desc, buffer, reclen);
-
-#if defined(DOETXACK)
-  finished = pmon_check_ack();
-#endif /* DOETXACK */
+  pmon_download (buffer, reclen);
+  finished = pmon_check_ack("/Kxx");
 
   for (s = abfd->sections; s && !finished; s = s->next)
    if (s->flags & SEC_LOAD) /* only deal with loadable sections */
@@ -2798,20 +3030,18 @@ pmon_load_fast (file)
       /* Output the starting address */
       sprintf(buffer,"/A");
       reclen = pmon_makeb64(s->vma,&buffer[2],36,&csum);
-      buffer[2 + reclen] = '\015';
+      buffer[2 + reclen] = '\n';
       buffer[3 + reclen] = '\0';
       reclen += 3; /* for the initial escape code and carriage return */
-      SERIAL_WRITE (mips_desc, buffer, reclen);
-#if defined(DOETXACK)
-      finished = pmon_check_ack();
-#endif /* DOETXACK */
+      pmon_download (buffer, reclen);
+      finished = pmon_check_ack("/A");
 
       if (!finished)
        {
-         int binamount;
+         unsigned int binamount;
          unsigned int zerofill = 0;
          char *bp = buffer;
-         int i;
+         unsigned int i;
 
          reclen = 0;
 
@@ -2828,14 +3058,12 @@ pmon_load_fast (file)
              pmon_make_fastrec (&bp, binbuf, &binptr, binamount, &reclen, &csum, &zerofill);
              if (reclen >= (MAXRECSIZE - CHECKSIZE)) {
                reclen = pmon_checkset (reclen, &bp, &csum);
-               SERIAL_WRITE (mips_desc, buffer, reclen);
-#if defined(DOETXACK)
-               finished = pmon_check_ack();
+               pmon_download (buffer, reclen);
+               finished = pmon_check_ack("data record");
                if (finished) {
                  zerofill = 0; /* do not transmit pending zerofills */
                  break;
                }
-#endif /* DOETXACK */
 
                if (hashmark) {
                  putchar_unfiltered ('#');
@@ -2857,38 +3085,24 @@ pmon_load_fast (file)
            reclen = pmon_checkset (reclen, &bp, &csum);
            /* Currently pmon_checkset outputs the line terminator by
               default, so we write out the buffer so far: */
-           SERIAL_WRITE (mips_desc, buffer, reclen);
-#if defined(DOETXACK)
-           finished = pmon_check_ack();
-#endif /* DOETXACK */
+           pmon_download (buffer, reclen);
+           finished = pmon_check_ack("record remnant");
          }
        }
 
-      if (hashmark)
-       putchar_unfiltered ('\n');
+      putchar_unfiltered ('\n');
     }
 
   /* Terminate the transfer. We know that we have an empty output
      buffer at this point. */
-  sprintf (buffer, "/E/E\015"); /* include dummy padding characters */
+  sprintf (buffer, "/E/E\n"); /* include dummy padding characters */
   reclen = strlen (buffer);
-  SERIAL_WRITE (mips_desc, buffer, reclen);
+  pmon_download (buffer, reclen);
 
   if (finished) { /* Ignore the termination message: */
-    SERIAL_FLUSH_INPUT (mips_desc);
+    SERIAL_FLUSH_INPUT (udp_in_use ? udp_desc : mips_desc);
   } else { /* Deal with termination message: */
-    char hexnumber[9]; /* includes '\0' space */
-    mips_expect ("Entry Address  = ");
-    sprintf(hexnumber,"%x",final);
-    mips_expect (hexnumber);
-#if defined(DOETXACK)
-    mips_expect ("\015\012\006\015\012total = 0x");
-#else /* normal termination */
-    mips_expect ("\015\012\015\012total = 0x");
-#endif /* !DOETXACK */
-    sprintf(hexnumber,"%x",bintotal);
-    mips_expect (hexnumber);
-    mips_expect (" bytes\015\012");
+    pmon_end_download (final, bintotal);
   }
 
   return;
@@ -3040,8 +3254,12 @@ struct target_ops ddb_ops =
   "Remote MIPS debugging over serial line",	/* to_longname */
   "\
 Debug a board using the PMON MIPS remote debugging protocol over a serial\n\
-line. The argument is the device it is connected to or, if it contains a\n\
-colon, HOST:PORT to access a board over a network",  /* to_doc */
+line. The first argument is the device it is connected to or, if it contains\n\
+a colon, HOST:PORT to access a board over a network.  The optional second\n\
+parameter is the temporary file in the form HOST:FILENAME to be used for\n\
+TFTP downloads to the board.  The optional third parameter is the local\n\
+of the TFTP temporary file, if it differs from the filename seen by the board",
+				/* to_doc */
   ddb_open,			/* to_open */
   mips_close,			/* to_close */
   NULL,				/* to_attach */
