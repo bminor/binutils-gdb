@@ -78,13 +78,31 @@ demangle (string)
 
   /* This is a hack for better error reporting on XCOFF, PowerPC64-ELF
      or the MS PE format.  These formats have a number of leading '.'s
-     on at least some symbols, so we remove all dots.  */
+     on at least some symbols, so we remove all dots to avoid
+     confusing the demangler.  */
   p = string;
   while (*p == '.')
     ++p;
 
   res = cplus_demangle (p, DMGL_ANSI | DMGL_PARAMS);
-  return res ? res : xstrdup (string);
+  if (res)
+    {
+      size_t dots = p - string;
+
+      /* Now put back any stripped dots.  */
+      if (dots != 0)
+	{
+	  size_t len = strlen (res) + 1;
+	  char *add_dots = xmalloc (len + dots);
+
+	  memcpy (add_dots, string, dots);
+	  memcpy (add_dots + dots, res, len);
+	  free (res);
+	  res = add_dots;
+	}
+      return res;
+    }
+  return xstrdup (string);
 }
 
 static void
