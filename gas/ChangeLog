@@ -1,5 +1,8 @@
 Wed Sep 24 11:30:25 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/m68k-parse.y (yylex): Permit an expression to be used for
+	the scale factor.
+
 	* Makefile.am (EXTRA_as_new_SOURCES): Set to config/m68k-parse.y,
 	not m68k-parse.y.
 	* Makefile.in: Rebuild.
