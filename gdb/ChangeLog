@@ -1,3 +1,15 @@
+Thu Apr  2 19:38:31 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* mipsread.c (fixup_sigtramp):  Also look for _sigtramp as a real
+	routine (for Irix-4.x).  Make many funcs static and void.
+	* mips-tdep.c (mips-frame-chain):  Clean up, simplify.
+	* (init_extra_frame_info):  Don't trash cached value of frame
+	pointer register.  This fixes backtracing through routines that use
+	alloca().  Generally clean up declarations of functions, and use
+	typedefs and macros to reference data structures as appropriate.
+	* tm-irix3.h, tm-mips.h (EXTRA_FRAME_INFO):  use proper type for
+	proc_desc element.
+
 Thu Apr  2 09:47:11 1992  Fred Fish  (fnf@cygnus.com)
 
 	* values.c (unpack_long):  Fix unpacking error for signed chars

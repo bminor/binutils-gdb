@@ -290,13 +290,13 @@ mips_next_symbol_text PARAMS ((void));
 
 CORE_ADDR sigtramp_address, sigtramp_end;
 
-void
+static void
 mipscoff_new_init (ignore)
      struct objfile *ignore;
 {
 }
 
-void
+static void
 mipscoff_symfile_init (objfile)
      struct objfile *objfile;
 {
@@ -307,7 +307,7 @@ mipscoff_symfile_init (objfile)
   objfile -> sym_private = NULL;
 }
 
-void
+static void
 mipscoff_symfile_read (objfile, addr, mainline)
      struct objfile *objfile;
      CORE_ADDR addr;
@@ -736,7 +736,8 @@ static struct parse_stack {
 
 /* Enter a new lexical context */
 
-static push_parse_stack()
+static void
+push_parse_stack()
 {
 	struct parse_stack *new;
 
@@ -759,7 +760,8 @@ static push_parse_stack()
 
 /* Exit a lexical context */
 
-static pop_parse_stack()
+static void
+pop_parse_stack()
 {
 	if (!top_stack)
 		return;
@@ -782,8 +784,8 @@ static struct mips_pending {
 
 /* Check whether we already saw symbol SH in file FH as undefined */
 
-static
-struct mips_pending *is_pending_symbol(fh, sh)
+static struct mips_pending *
+is_pending_symbol(fh, sh)
 	FDR *fh;
 	SYMR *sh;
 {
@@ -799,7 +801,7 @@ struct mips_pending *is_pending_symbol(fh, sh)
 
 /* Add a new undef symbol SH of type T */
 
-static
+static void
 add_pending(fh, sh, t)
 	FDR *fh;
 	SYMR *sh;
@@ -822,7 +824,7 @@ add_pending(fh, sh, t)
 /* Throw away undef entries when done with file index F_IDX */
 /* FIXME -- storage leak.  This is never called!!!   --gnu */
 
-static
+static void
 free_pending(f_idx)
 {
 	register struct mips_pending *p, *q;
@@ -834,7 +836,7 @@ free_pending(f_idx)
 	pending_list[f_idx] = 0;
 }
 
-char*
+static char *
 prepend_tag_kind(tag_name, type_code)
      char *tag_name;
      int type_code;
@@ -1613,11 +1615,11 @@ parse_procedure(pr, bound)
 		add_block(b, top_stack->cur_st);
 	}
 
-	s = mylookup_symbol(".gdbinfo.", b, LABEL_NAMESPACE, LOC_CONST);
+	i = mylookup_symbol(".gdbinfo.", b, LABEL_NAMESPACE, LOC_CONST);
 
-	if (s)
+	if (i)
 	  {
-	    e = (struct mips_extra_func_info *)SYMBOL_VALUE(s);
+	    e = (struct mips_extra_func_info *)SYMBOL_VALUE(i);
 	    e->pdr = *pr;
 	    e->pdr.isym = (long)s;
 	  }
@@ -1632,7 +1634,7 @@ parse_procedure(pr, bound)
 
    This routine clobbers top_stack->cur_block and ->cur_st. */
 
-static
+static void
 parse_external(es, skip_procedures, bigend)
 	EXTR *es;
 	int skip_procedures;
@@ -1697,7 +1699,7 @@ parse_external(es, skip_procedures, bigend)
    numbers can go back and forth, apparently we can live
    with that and do not need to reorder our linetables */
 
-static
+static void
 parse_lines(fh, lt)
 	FDR *fh;
 	struct linetable *lt;
@@ -2651,8 +2653,7 @@ sort_blocks(s)
 /* Allocate a new symtab for NAME.  Needs an estimate of how many symbols
    MAXSYMS and linenumbers MAXLINES we'll put in it */
 
-static
-struct symtab *
+static struct symtab *
 new_symtab(name, maxsyms, maxlines, objfile)
 	char *name;
 	int maxsyms;
@@ -2734,8 +2735,7 @@ shrink_linetable(lt)
 
 /* Allocate and zero a new blockvector of NBLOCKS blocks. */
 
-static
-struct blockvector *
+static struct blockvector *
 new_bvect(nblocks)
 	int nblocks;
 {
@@ -2752,8 +2752,7 @@ new_bvect(nblocks)
 
 /* Allocate and zero a new block of MAXSYMS symbols */
 
-static
-struct block *
+static struct block *
 new_block(maxsyms)
 	int maxsyms;
 {
@@ -2793,8 +2792,7 @@ shrink_block(b, s)
 
 /* Create a new symbol with printname NAME */
 
-static
-struct symbol *
+static struct symbol *
 new_symbol(name)
 	char *name;
 {
@@ -2808,8 +2806,7 @@ new_symbol(name)
 
 /* Create a new type with printname NAME */
 
-static
-struct type *
+static struct type *
 new_type(name)
 	char *name;
 {
@@ -2847,23 +2844,29 @@ fixup_sigtramp()
 
 	/* Most programs do not play with signals */
 	if (s == 0)
-		return;
+	  s = lookup_symbol("_sigtramp", 0, VAR_NAMESPACE, 0, NULL);
+	else
+	  {
+	    b0 = SYMBOL_BLOCK_VALUE(s);
 
-	b0 = SYMBOL_BLOCK_VALUE(s);
-
-	/* A label of sigvec, to be more precise */
-	s = lookup_symbol("sigtramp", b0, VAR_NAMESPACE, 0, NULL);
+	    /* A label of sigvec, to be more precise */
+	    s = lookup_symbol("sigtramp", b0, VAR_NAMESPACE, 0, NULL);
+	  }
 
 	/* But maybe this program uses its own version of sigvec */
 	if (s == 0)
 		return;
 
-	sigtramp_address = SYMBOL_VALUE(s);
-	sigtramp_end = sigtramp_address + 0x88;	/* black magic */
-
 	/* Did we or MIPSco fix the library ? */
 	if (SYMBOL_CLASS(s) == LOC_BLOCK)
-		return;
+	  {
+	    sigtramp_address = BLOCK_START(SYMBOL_BLOCK_VALUE(s));
+	    sigtramp_end = BLOCK_END(SYMBOL_BLOCK_VALUE(s));
+	    return;
+	  }
+
+	sigtramp_address = SYMBOL_VALUE(s);
+	sigtramp_end = sigtramp_address + 0x88;	/* black magic */
 
 	/* But what symtab does it live in ? */
 	st = find_pc_symtab(SYMBOL_VALUE(s));
@@ -2931,6 +2934,7 @@ static struct sym_fns ecoff_sym_fns =
 };
 
 
+void
 _initialize_mipsread ()
 {
 	add_symtab_fns (&ecoff_sym_fns);

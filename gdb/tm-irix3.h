@@ -307,7 +307,7 @@ typedef struct mips_extra_func_info {
 } *mips_extra_func_info_t;
 
 #define EXTRA_FRAME_INFO \
-  char *proc_desc; /* actually, a mips_extra_func_info_t */\
+  mips_extra_func_info_t proc_desc; \
   int num_args;\
   struct frame_saved_regs *saved_regs;
 
