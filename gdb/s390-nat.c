@@ -219,55 +219,67 @@ store_inferior_registers (int regnum)
 }
 
 
-/* watch_areas are required if you put 2 or more watchpoints on the same 
-   address or overlapping areas gdb will call us to delete the watchpoint 
-   more than once when we try to delete them.
-   attempted reference counting to reduce the number of areas unfortunately
-   they didn't shrink when areas had to be split overlapping occurs. */
-struct watch_area;
-typedef struct watch_area watch_area;
+/* Hardware-assisted watchpoint handling.  */
+
+/* We maintain a list of all currently active watchpoints in order
+   to properly handle watchpoint removal.
+
+   The only thing we actually need is the total address space area
+   spanned by the watchpoints.  */
+
 struct watch_area
 {
-  watch_area *next;
+  struct watch_area *next;
   CORE_ADDR lo_addr;
   CORE_ADDR hi_addr;
 };
 
-static watch_area *watch_base = NULL;
-int watch_area_cnt = 0;
-static CORE_ADDR watch_lo_addr = 0, watch_hi_addr = 0;
+static struct watch_area *watch_base = NULL;
 
-
-
-CORE_ADDR
-s390_stopped_by_watchpoint (int pid)
+int
+s390_stopped_by_watchpoint (void)
 {
   per_lowcore_bits per_lowcore;
   ptrace_area parea;
 
+  /* Speed up common case.  */
+  if (!watch_base)
+    return 0;
+
   parea.len = sizeof (per_lowcore);
   parea.process_addr = (addr_t) & per_lowcore;
   parea.kernel_addr = offsetof (struct user_regs_struct, per_info.lowcore);
-  ptrace (PTRACE_PEEKUSR_AREA, pid, &parea);
-  return ((per_lowcore.perc_storage_alteration == 1) &&
-	  (per_lowcore.perc_store_real_address == 0));
+  if (ptrace (PTRACE_PEEKUSR_AREA, s390_inferior_tid (), &parea) < 0)
+    perror_with_name ("Couldn't retrieve watchpoint status");
+
+  return per_lowcore.perc_storage_alteration == 1
+	 && per_lowcore.perc_store_real_address == 0;
 }
 
-
-void
-s390_fix_watch_points (int pid)
+static void
+s390_fix_watch_points (void)
 {
+  int tid = s390_inferior_tid ();
+
   per_struct per_info;
   ptrace_area parea;
 
+  CORE_ADDR watch_lo_addr = (CORE_ADDR)-1, watch_hi_addr = 0;
+  struct watch_area *area;
+
+  for (area = watch_base; area; area = area->next)
+    {
+      watch_lo_addr = min (watch_lo_addr, area->lo_addr);
+      watch_hi_addr = max (watch_hi_addr, area->hi_addr);
+    }
+
   parea.len = sizeof (per_info);
   parea.process_addr = (addr_t) & per_info;
-  parea.kernel_addr = PT_CR_9;
-  ptrace (PTRACE_PEEKUSR_AREA, pid, &parea);
-  /* The kernel automatically sets the psw for per depending */
-  /* on whether the per control registers are set for event recording */
-  /* & sets cr9 & cr10 appropriately also */
-  if (watch_area_cnt)
+  parea.kernel_addr = offsetof (struct user_regs_struct, per_info);
+  if (ptrace (PTRACE_PEEKUSR_AREA, tid, &parea) < 0)
+    perror_with_name ("Couldn't retrieve watchpoint status");
+
+  if (watch_base)
     {
       per_info.control_regs.bits.em_storage_alteration = 1;
       per_info.control_regs.bits.storage_alt_space_ctl = 1;
@@ -279,103 +291,53 @@ s390_fix_watch_points (int pid)
     }
   per_info.starting_addr = watch_lo_addr;
   per_info.ending_addr = watch_hi_addr;
-  ptrace (PTRACE_POKEUSR_AREA, pid, &parea);
+
+  if (ptrace (PTRACE_POKEUSR_AREA, tid, &parea) < 0)
+    perror_with_name ("Couldn't modify watchpoint status");
 }
 
 int
-s390_insert_watchpoint (int pid, CORE_ADDR addr, int len, int rw)
+s390_insert_watchpoint (CORE_ADDR addr, int len)
 {
-  CORE_ADDR hi_addr = addr + len - 1;
-  watch_area *newarea = (watch_area *) xmalloc (sizeof (watch_area));
+  struct watch_area *area = xmalloc (sizeof (struct watch_area));
+  if (!area)
+    return -1; 
 
+  area->lo_addr = addr;
+  area->hi_addr = addr + len - 1;
+ 
+  area->next = watch_base;
+  watch_base = area;
 
-  if (newarea)
-    {
-      newarea->next = watch_base;
-      watch_base = newarea;
-      watch_lo_addr = min (watch_lo_addr, addr);
-      watch_hi_addr = max (watch_hi_addr, hi_addr);
-      newarea->lo_addr = addr;
-      newarea->hi_addr = hi_addr;
-      if (watch_area_cnt == 0)
-	{
-	  watch_lo_addr = newarea->lo_addr;
-	  watch_hi_addr = newarea->hi_addr;
-	}
-      watch_area_cnt++;
-      s390_fix_watch_points (pid);
-    }
-  return newarea ? 0 : -1;
+  s390_fix_watch_points ();
+  return 0;
 }
 
-
 int
-s390_remove_watchpoint (int pid, CORE_ADDR addr, int len)
+s390_remove_watchpoint (CORE_ADDR addr, int len)
 {
-  watch_area *curr = watch_base, *prev, *matchCurr;
-  CORE_ADDR hi_addr = addr + len - 1;
-  CORE_ADDR watch_second_lo_addr = 0xffffffffUL, watch_second_hi_addr = 0;
-  int lo_addr_ref_cnt, hi_addr_ref_cnt;
-  prev = matchCurr = NULL;
-  lo_addr_ref_cnt = (addr == watch_lo_addr);
-  hi_addr_ref_cnt = (addr == watch_hi_addr);
-  while (curr)
-    {
-      if (matchCurr == NULL)
-	{
-	  if (curr->lo_addr == addr && curr->hi_addr == hi_addr)
-	    {
-	      matchCurr = curr;
-	      if (prev)
-		prev->next = curr->next;
-	      else
-		watch_base = curr->next;
-	    }
-	  prev = curr;
-	}
-      if (lo_addr_ref_cnt)
-	{
-	  if (watch_lo_addr == curr->lo_addr)
-	    lo_addr_ref_cnt++;
-	  if (curr->lo_addr > watch_lo_addr &&
-	      curr->lo_addr < watch_second_lo_addr)
-	    watch_second_lo_addr = curr->lo_addr;
-	}
-      if (hi_addr_ref_cnt)
-	{
-	  if (watch_hi_addr == curr->hi_addr)
-	    hi_addr_ref_cnt++;
-	  if (curr->hi_addr < watch_hi_addr &&
-	      curr->hi_addr > watch_second_hi_addr)
-	    watch_second_hi_addr = curr->hi_addr;
-	}
-      curr = curr->next;
-    }
-  if (matchCurr)
-    {
-      xfree (matchCurr);
-      watch_area_cnt--;
-      if (watch_area_cnt)
-	{
-	  if (lo_addr_ref_cnt == 2)
-	    watch_lo_addr = watch_second_lo_addr;
-	  if (hi_addr_ref_cnt == 2)
-	    watch_hi_addr = watch_second_hi_addr;
-	}
-      else
-	{
-	  watch_lo_addr = watch_hi_addr = 0;
-	}
-      s390_fix_watch_points (pid);
-      return 0;
-    }
-  else
+  struct watch_area *area, **parea;
+
+  for (parea = &watch_base; *parea; parea = &(*parea)->next)
+    if ((*parea)->lo_addr == addr
+	&& (*parea)->hi_addr == addr + len - 1)
+      break;
+
+  if (!*parea)
     {
       fprintf_unfiltered (gdb_stderr,
-			  "Attempt to remove nonexistent watchpoint in s390_remove_watchpoint\n");
+			  "Attempt to remove nonexistent watchpoint.\n");
       return -1;
     }
+
+  area = *parea;
+  *parea = area->next;
+  xfree (area);
+
+  s390_fix_watch_points ();
+  return 0;
 }
+
 
 int
 kernel_u_size (void)

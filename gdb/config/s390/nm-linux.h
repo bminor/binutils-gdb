@@ -39,33 +39,24 @@
 extern int kernel_u_size (void);
 
 
-/* WATCHPOINT SPECIFIC STUFF */
+/* Hardware watchpoints.  */
+
+extern int s390_stopped_by_watchpoint (void);
+extern int s390_insert_watchpoint (CORE_ADDR addr, int len);
+extern int s390_remove_watchpoint (CORE_ADDR addr, int len);
 
 #define TARGET_HAS_HARDWARE_WATCHPOINTS
+#define TARGET_CAN_USE_HARDWARE_WATCHPOINT(type, cnt, ot) 1
 #define HAVE_CONTINUABLE_WATCHPOINT 1
-#define target_insert_watchpoint(addr, len, type)  \
-  s390_insert_watchpoint (PIDGET (inferior_ptid), addr, len, type)
 
-#define target_remove_watchpoint(addr, len, type)  \
-  s390_remove_watchpoint (PIDGET (inferior_ptid), addr, len)
+#define STOPPED_BY_WATCHPOINT(w) \
+  s390_stopped_by_watchpoint ()
 
-extern int watch_area_cnt;
-/* gdb if really stupid & calls this all the time without a
-   watchpoint even being set */
-#define STOPPED_BY_WATCHPOINT(W)  \
-  (watch_area_cnt&&s390_stopped_by_watchpoint (PIDGET(inferior_ptid)))
+#define target_insert_watchpoint(addr, len, type) \
+  s390_insert_watchpoint (addr, len)
 
-extern CORE_ADDR s390_stopped_by_watchpoint (int);
+#define target_remove_watchpoint(addr, len, type) \
+  s390_remove_watchpoint (addr, len)
 
-/*
-  Type can be 1 for a read_watchpoint or 2 for an access watchpoint.
- */
-extern int s390_insert_watchpoint (int pid, CORE_ADDR addr, int len, int rw);
-extern int s390_remove_watchpoint (int pid, CORE_ADDR addr, int len);
-#define TARGET_CAN_USE_HARDWARE_WATCHPOINT(type, cnt, ot) \
-	 (((type) == bp_hardware_watchpoint)|| \
-	 ((type) == bp_watchpoint)|| \
-	 ((type) == bp_read_watchpoint) || \
-         ((type) == bp_access_watchpoint))
 
 #endif /* nm_linux.h */

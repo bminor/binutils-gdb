@@ -1,6 +1,25 @@
 2004-02-17  Ulrich Weigand <Ulrich.Weigand@de.ibm.com>
 
 	Committed by Jim Blandy  <jimb@redhat.com>.
+
+	* config/s390/nm-linux.h: Update comments.
+	(target_insert_watchpoint, target_remove_watchpoint): Redefine.
+	(STOPPED_BY_WATCHPOINT): Redefine.
+	(TARGET_CAN_USE_HARDWARE_WATCHPOINT): Redefine to 1.
+	(s390_insert_watchpoint, s390_remove_watchpoint): Update prototype.
+	(s390_stopped_by_watchpoint): Likewise.
+	(watch_area_cnt): Remove.
+	* s390-nat.c: Update comments.
+	(watch_area): Remove typedef.
+	Global replace watch_area by struct watch_area.
+	(watch_area_cnt, watch_lo_addr, watch_hi_addr): Remove.
+	(s390_stopped_by_watchpoint): Remove pid argument, 
+	use s390_inferior_tid.  Add short-cut for the no watchpoint case.
+	(s390_fix_watch_points): Remove pid argument,
+	use s390_inferior_tid.  Recompute area spanned by watchpoints.
+	(s390_insert_watchpoint, s390_remove_watchpoint): Remove pid
+	argument.  Reimplement.
+
 	* config/s390/nm-linux.h: Update comments.  Do not include "solib.h".
 	(KERNEL_U_ADDR, REGISTER_U_ADDR, U_REGS_OFFSET): Remove.
 	(FETCH_INFERIOR_REGISTERS): Define.
