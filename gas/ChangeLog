@@ -12,7 +12,7 @@ Mon Oct 20 14:54:06 1997  Klaus K"ampf  <kkaempf@progis.de>
 
 Mon Oct 20 10:13:32 1997  Doug Evans  <devans@canuck.cygnus.com>
 
-	* tc-sparc.c (default_arch_size): New static local.
+	* config/tc-sparc.c (default_arch_size): New static local.
 	(struct sparc_arch): Rename arch_size to default_arch_size.
 	New member user_option_p.
 	(sparc_arch_table): Always include v9, v9a.  New entry v9-64.
@@ -22,6 +22,8 @@ Mon Oct 20 10:13:32 1997  Doug Evans  <devans@canuck.cygnus.com>
 	(md_longopts): New entries for -32, -64.
 	(md_parse_option): Handle them.
 	(md_show_usage): Print them.  Ensure init_default_arch called.
+	* configure.in (sparc64): Set arch to v9-64.
+	* configure: Regenerated.
 
 Sun Oct 19 13:50:50 1997  Ian Lance Taylor  <ian@cygnus.com>
 

@@ -1313,7 +1313,7 @@ for this_target in $target $canon_targets ; do
       rs6000*)		cpu_type=ppc ;;
       sparclite*)	cpu_type=sparc arch=sparclite ;;
       sparclet*)	cpu_type=sparc arch=sparclet ;;
-      sparc64*)		cpu_type=sparc arch=v9 ;;
+      sparc64*)		cpu_type=sparc arch=v9-64 ;;
       sparc*)		cpu_type=sparc arch=sparclite ;; # ??? See tc-sparc.c.
       v850*)		cpu_type=v850 ;;
       *)		cpu_type=${cpu} ;;
