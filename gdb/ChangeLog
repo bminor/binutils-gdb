@@ -1,5 +1,10 @@
 2004-12-12  Andrew Cagney  <cagney@gnu.org>
 
+	* frame.c (get_prev_frame): When unwinding normal frames, check
+	that the PC isn't zero.
+	* hppa-tdep.c (hppa_stub_frame_unwind_cache): Delete check for a
+	zero PC.
+
 	* MAINTAINERS: Reword description of what "Target Instruction Set
 	Architectures" covers.
 

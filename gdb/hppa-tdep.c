@@ -2105,9 +2105,6 @@ hppa_stub_frame_unwind_cache (struct frame_info *next_frame,
   if (*this_cache)
     return *this_cache;
 
-  if (frame_pc_unwind (next_frame) == 0)
-    return NULL;
-
   info = FRAME_OBSTACK_ZALLOC (struct hppa_stub_unwind_cache);
   *this_cache = info;
   info->saved_regs = trad_frame_alloc_saved_regs (next_frame);
