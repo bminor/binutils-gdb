@@ -1080,7 +1080,7 @@ the function call).", name);
   if (struct_return)
     {
       do_cleanups (retbuf_cleanup);
-      return VALUE_RETURNED_FROM_STACK (value_type, struct_addr);
+      return DEPRECATED_VALUE_RETURNED_FROM_STACK (value_type, struct_addr);
     }
 #endif
   /* NOTE: cagney/2002-09-10: Only when the stack has been correctly
