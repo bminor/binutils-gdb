@@ -52,7 +52,7 @@ static void
 type_print_base PARAMS ((struct type *, FILE *, int, int));
 
 static void
-type_print_varspec_suffix PARAMS ((struct type *, FILE *, int, int));
+type_print_varspec_suffix PARAMS ((struct type *, FILE *, int, int, int));
 
 static void
 type_print_varspec_prefix PARAMS ((struct type *, FILE *, int, int));
@@ -1350,6 +1350,8 @@ type_print_1 (type, varstring, stream, show, level)
      int level;
 {
   register enum type_code code;
+  char *demangled;
+
   type_print_base (type, stream, show, level);
   code = TYPE_CODE (type);
   if ((varstring && *varstring)
@@ -1365,13 +1367,23 @@ type_print_1 (type, varstring, stream, show, level)
 	|| code == TYPE_CODE_REF)))
     fprintf_filtered (stream, " ");
   type_print_varspec_prefix (type, stream, show, 0);
-  /* FIXME:  Previously this printed demangled names without function args,
-     which is a lose since you can't distinguish between overloaded function
-     names (try "info func" for example).  This change is still not optimal,
-     since you now get a superflous pair of parens for functions, but at
-     least you can distinguish them. */
-  fputs_demangled (varstring, stream, DMGL_PARAMS);
-  type_print_varspec_suffix (type, stream, show, 0);
+  if (demangle)
+    {
+      demangled = cplus_demangle (varstring, DMGL_ANSI | DMGL_PARAMS);
+    }
+  if ((demangled != NULL) && (code == TYPE_CODE_FUNC))
+    {
+      /* For demangled function names, we have the arglist as part
+	 of the name, so don't print an additional pair of ()'s */
+      fputs_filtered (demangled, stream);
+      type_print_varspec_suffix (type, stream, show, 0, 1);
+      free (demangled);
+    }
+  else
+    {
+      fputs_filtered (varstring, stream);
+      type_print_varspec_suffix (type, stream, show, 0, 0);
+    }
 }
 
 /* Print the method arguments ARGS to the file STREAM.  */
@@ -1550,11 +1562,12 @@ type_print_varspec_prefix (type, stream, show, passed_a_ptr)
    Args work like type_print_varspec_prefix.  */
 
 static void
-type_print_varspec_suffix (type, stream, show, passed_a_ptr)
+type_print_varspec_suffix (type, stream, show, passed_a_ptr, demangled_args)
      struct type *type;
      FILE *stream;
      int show;
      int passed_a_ptr;
+     int demangled_args;
 {
   if (type == 0)
     return;
@@ -1579,19 +1592,19 @@ type_print_varspec_suffix (type, stream, show, passed_a_ptr)
       fprintf_filtered (stream, "]");
       
       type_print_varspec_suffix (TYPE_TARGET_TYPE (type), stream, 0,
-				 0);
+				 0, 0);
       break;
 
     case TYPE_CODE_MEMBER:
       if (passed_a_ptr)
 	fprintf_filtered (stream, ")");
-      type_print_varspec_suffix (TYPE_TARGET_TYPE (type), stream, 0, 0);
+      type_print_varspec_suffix (TYPE_TARGET_TYPE (type), stream, 0, 0, 0);
       break;
 
     case TYPE_CODE_METHOD:
       if (passed_a_ptr)
 	fprintf_filtered (stream, ")");
-      type_print_varspec_suffix (TYPE_TARGET_TYPE (type), stream, 0, 0);
+      type_print_varspec_suffix (TYPE_TARGET_TYPE (type), stream, 0, 0, 0);
       if (passed_a_ptr)
 	{
 	  int i;
@@ -1616,15 +1629,16 @@ type_print_varspec_suffix (type, stream, show, passed_a_ptr)
 
     case TYPE_CODE_PTR:
     case TYPE_CODE_REF:
-      type_print_varspec_suffix (TYPE_TARGET_TYPE (type), stream, 0, 1);
+      type_print_varspec_suffix (TYPE_TARGET_TYPE (type), stream, 0, 1, 0);
       break;
 
     case TYPE_CODE_FUNC:
       type_print_varspec_suffix (TYPE_TARGET_TYPE (type), stream, 0,
-				 passed_a_ptr);
+				 passed_a_ptr, 0);
       if (passed_a_ptr)
 	fprintf_filtered (stream, ")");
-      fprintf_filtered (stream, "()");
+      if (!demangled_args)
+	fprintf_filtered (stream, "()");
       break;
 
     case TYPE_CODE_UNDEF:

@@ -1,3 +1,17 @@
+Sat May  9 18:02:17 1992  Fred Fish  (fnf at fishpond)
+
+	* Makefile.in (VERSION):  Bump to 4.5.3
+	* Makefile.in (DEMANGLE_OPTS):  Remove obsolete -Dnounderscore
+	* Makefile.in (demangle):  New target to create standalone
+	demangler with same code and options as internal demangler.
+	* cplus-dem.c:  Massive restructuring, rewriting, cleanups, etc
+	to support ARM style and Lucid style demangling, improve
+	maintainability, fix several demangling bugs.  More changes
+	to follow.
+	* defs.h (strstr):  Add ANSI compatible prototype.
+	* valprint.c (type_print_1):  Demangle using ansi option.
+	* config/ncr3000.mt (DEMANGLE_OPTS):  Remove -Dnounderscore.
+
 Sat May  9 14:47:28 1992  Stu Grossman  (grossman at cygnus.com)
 
 	* xcoffexec.c (vmap_exec):  Don't assume .text and .data are the

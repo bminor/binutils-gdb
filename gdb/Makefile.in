@@ -165,7 +165,7 @@ CDEPS = ${XM_CDEPS} ${TM_CDEPS} ${BFD_LIB} ${MMALLOC_LIB} ${LIBIBERTY} \
 ADD_FILES = ${REGEX} ${ALLOCA} ${XM_ADD_FILES} ${TM_ADD_FILES}
 ADD_DEPS = ${REGEX1} ${ALLOCA1} ${XM_ADD_FILES} ${TM_ADD_FILES}
 
-VERSION = 4.5.2
+VERSION = 4.5.3
 DIST=gdb
 
 LINT=/usr/5bin/lint
@@ -174,12 +174,12 @@ LINTFLAGS= -I${BFD_DIR}
 # Select demangler to use.
 DEMANGLER=cplus-dem
 
-# Select options to use when compiling ${DEMANGLER}.c.  The default is to
-# use -Dnounderscore, which is correct for most targets, and also
-# defaults to g++ style demangling.  For other demangling styles, such
-# as the Annotated C++ Reference Manual (section 7.2.1c) style, set
-# this define in the target-dependent makefile fragment.
-DEMANGLE_OPTS=-Dnounderscore
+# Select options to use when compiling ${DEMANGLER}.c.  The default is no
+# options, which is correct for most targets, and also defaults to g++ style
+# demangling.  For other demangling styles, such as the Annotated C++
+# Reference Manual (section 7.2.1c) style, set this define in the target-
+# dependent makefile fragment.
+DEMANGLE_OPTS=
 
 # Host and target-dependent makefile fragments come in here.
 ####
@@ -729,12 +729,15 @@ gdb.cxref: $(SFILES)
 
 force_update:
 
-# When used with GDB, the demangler should never look for leading
-# underscores because GDB strips them off during symbol read-in.  Thus
-# -Dnounderscore.  
+# Generate the demangler linked in with gdb.  Also create a standalone
+# demangler if so desired ("make demangle").
 
-${DEMANGLER}.o: ${DEMANGLER}.c
+${DEMANGLER}.o:	${DEMANGLER}.c
 	${CC} -c ${INTERNAL_CFLAGS} ${DEMANGLE_OPTS} \
+	  `echo ${srcdir}/${DEMANGLER}.c | sed 's,^\./,,'`
+
+demangle: ${DEMANGLER}.c
+	${CC} -o $@ -DMAIN ${INTERNAL_CFLAGS} ${DEMANGLE_OPTS} \
 	  `echo ${srcdir}/${DEMANGLER}.c | sed 's,^\./,,'`
 
 # GNU Make has an annoying habit of putting *all* the Makefile variables
