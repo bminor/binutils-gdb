@@ -1,3 +1,9 @@
+2004-06-30  Michael Chastain   <mec.gnu@mindspring.com>
+
+	* lib/compiler.cc: Work around string preprocessing problem
+	with old hp c++ compiler.
+	* lib/compiler.c: Likewise.
+
 2004-06-29  Corinna Vinschen  <vinschen@redhat.com>
 
 	* gdb.arch/i386-prologue.c: Add copyright header.  Use preprocessor

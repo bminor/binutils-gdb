@@ -22,7 +22,14 @@
 /* This file is exactly like compiler.c.  I could just use compiler.c if
    I could be sure that every C++ compiler accepted extensions of ".c".  */
 
-set compiler_info "unknown"
+/* Note the semicolon at the end of this line.  Older versions of
+   hp c++ have a bug in string preprocessing: if the last token on a
+   line is a string, then the preprocessor concatenates the next line
+   onto the current line and eats the newline!  That messes up TCL of
+   course.  That happens with HP aC++ A.03.13, but it no longer happens
+   with HP aC++ A.03.45. */
+
+set compiler_info "unknown" ;
 
 #if defined (__GNUC__)
 #if defined (__GNUC_PATCHLEVEL__)
