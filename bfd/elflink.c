@@ -309,7 +309,7 @@ _bfd_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
 	 section into the .bss section of the final image.  */
       s = bfd_make_section (abfd, ".dynbss");
       if (s == NULL
-	  || ! bfd_set_section_flags (abfd, s, SEC_ALLOC))
+	  || ! bfd_set_section_flags (abfd, s, SEC_ALLOC | SEC_LINKER_CREATED))
 	return FALSE;
 
       /* The .rel[a].bss section holds copy relocs.  This section is not
