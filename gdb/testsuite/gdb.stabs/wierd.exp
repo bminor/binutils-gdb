@@ -144,19 +144,22 @@ field3 = 0x77888877\}" "print struct constant"
 	gdb_test "p array1" " = \{42, 43, 44\}" "array1 with strange index"
 
 	# GDB does not yet support this feature
-	setup_xfail "*-*-*"
-	gdb_test "whatis one_var" "type = inttype_one" "whatis one_var"
+	gdb_test "whatis one_var" "type = inttype_one" \
+	    "whatis one_var (known failure in gdb 4.10)"
 	# But do make sure that it prints as something reasonable
-	gdb_test "whatis one_var" "type = inttype(|_one)" "whatis one_var test 2"
+	gdb_test "whatis one_var" "type = inttype(|_one)" \
+	    "whatis one_var test 2"
+
+	gdb_test "whatis two_var" "type = inttype_two" \
+	    "whatis two_var (known failure in gdb 4.10)"
+	# But do make sure that it prints as something reasonable
+	gdb_test "whatis two_var" "type = inttype(|_two)" \
+	    "whatis two_var test 2"
 
 	setup_xfail "*-*-*"
-	gdb_test "whatis two_var" "type = inttype_two" "whatis two_var"
-	gdb_test "whatis two_var" "type = inttype(|_two)" "whatis two_var test 2"
-
+	gdb_test "whatis pointer_to_int_var" "type = int \*"
 	setup_xfail "*-*-*"
-	gdb_test "whatis pointer_to_int_var" "type = int \*" "whatis p t i v"
-	setup_xfail "*-*-*"
-	gdb_test "whatis intp_var" "type = intp" "whatis intp_var"
+	gdb_test "whatis intp_var" "type = intp"
 
 	# xcoffread.c doesn't understand common blocks at all
 	setup_xfail "rs6*-*-aix*"
@@ -197,7 +200,12 @@ proc print_wierd_var { var } {
 	# If somehow the stabs got skipped, then the above test can
 	# pass because GDB assumes int for variables without a stab.
 
-	gdb_test "whatis $var" "type = (unsigned int|inttype)" "whatis on $var"
+	# This doesn't work because 32=45 doesn't preserve the name in
+	# gdb (as of 14 Sep 93 anyway).
+	#gdb_test "whatis $var" "type = (unsigned int|inttype)"
+
+	# But the size should be right.
+	gdb_test "print sizeof ($var)" "= 4"
 }
 
 # Start with a fresh gdb

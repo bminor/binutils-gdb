@@ -1,3 +1,13 @@
+Tue Sep 14 17:16:44 1993  Jim Kingdon  (kingdon@cirdan.cygnus.com)
+
+	* gdb.stabs/wierd.exp (print_wierd_var): Test size, not type name.
+	(do_tests): Remove xfail for whatis on one_var and two_var.
+
+Wed Sep  8 23:14:23 1993  Rob Savoye  (rob@darkstar.cygnus.com)
+
+	* Makefile.in: Made cross building work better by adding
+	{RUNTEST,CC}_FOR_TARGET and using TARGET_FLAGS_TO_PASS.
+
 Tue Sep  7 14:11:52 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* gdb.t15/{return.c,return.exp,Makefile.in}:
