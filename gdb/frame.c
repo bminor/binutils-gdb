@@ -78,43 +78,6 @@ frame_find_by_id (struct frame_id id)
   return NULL;
 }
 
-/* FIND_SAVED_REGISTER ()
-
-   Return the address in which frame FRAME's value of register REGNUM
-   has been saved in memory.  Or return zero if it has not been saved.
-   If REGNUM specifies the SP, the value we return is actually
-   the SP value, not an address where it was saved.  */
-
-CORE_ADDR
-find_saved_register (struct frame_info *frame, int regnum)
-{
-  register struct frame_info *frame1 = NULL;
-  register CORE_ADDR addr = 0;
-
-  if (frame == NULL)		/* No regs saved if want current frame */
-    return 0;
-
-  /* Note that the following loop assumes that registers used in
-     frame x will be saved only in the frame that x calls and frames
-     interior to it.  */
-  while (1)
-    {
-      QUIT;
-      frame1 = get_next_frame (frame);
-      if (frame1 == 0)
-	break;
-      frame = frame1;
-      FRAME_INIT_SAVED_REGS (frame1);
-      if (frame1->saved_regs[regnum])
-	{
-	  addr = frame1->saved_regs[regnum];
-	  break;
-	}
-    }
-
-  return addr;
-}
-
 void
 frame_register_unwind (struct frame_info *frame, int regnum,
 		       int *optimizedp, enum lval_type *lvalp,

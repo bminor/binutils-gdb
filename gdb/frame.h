@@ -296,8 +296,6 @@ extern void print_frame_info (struct frame_info *, int, int, int);
 
 extern void show_frame_info (struct frame_info *, int, int, int);
 
-extern CORE_ADDR find_saved_register (struct frame_info *, int);
-
 extern struct frame_info *block_innermost_frame (struct block *);
 
 extern struct frame_info *find_frame_addr_in_frame_chain (CORE_ADDR);

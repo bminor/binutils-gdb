@@ -1,3 +1,9 @@
+2002-09-13  Andrew Cagney  <ac131313@redhat.com>
+
+	* frame.c (find_saved_register): Delete function.
+	* frame.h (find_saved_register): Delete declaration.
+	Fix PR gdb/631.
+
 Fri Sep 13 14:59:55 2002  Andrew Cagney  <cagney@redhat.com>
 
 	* mips-tdep.c (read_next_frame_reg): Re-hack using
