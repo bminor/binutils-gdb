@@ -35,12 +35,21 @@
 
 #include <math.h>
 
+#ifdef _WIN32
+#include <float.h>		/* Needed for _isnan() */
+#define isnan _isnan
+#endif
+
 #ifndef SIGBUS
 #define SIGBUS SIGSEGV
 #endif
 
 #ifndef SIGQUIT
 #define SIGQUIT SIGTERM
+#endif
+
+#ifndef SIGTRAP
+#define SIGTRAP 5
 #endif
 
 #define O_RECOMPILE 85
@@ -341,7 +350,7 @@ int empty[16];
 #define TL(x)  if ((x) == prevlock) stalls++;
 #define TB(x,y)  if ((x) == prevlock || (y)==prevlock) stalls++;
 
-#if defined(__GO32__) || defined(WIN32)
+#if defined(__GO32__) || defined(_WIN32)
 int sim_memory_size = 19;
 #else
 int sim_memory_size = 24;
@@ -479,7 +488,7 @@ trap (i, regs, memory, maskl, maskw, little_endian)
 	switch (regs[4])
 	  {
 
-#if !defined(__GO32__) && !defined(WIN32)
+#if !defined(__GO32__) && !defined(_WIN32)
 	  case SYS_fork:
 	    regs[0] = fork ();
 	    break;
@@ -578,9 +587,11 @@ trap (i, regs, memory, maskl, maskw, little_endian)
 	    }
 	    break;
 
+#ifndef _WIN32
 	  case SYS_chown:
 	    regs[0] = chown (ptr (regs[5]), regs[6], regs[7]);
 	    break;
+#endif /* _WIN32 */
 	  case SYS_chmod:
 	    regs[0] = chmod (ptr (regs[5]), regs[6]);
 	    break;
