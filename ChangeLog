@@ -1,5 +1,7 @@
 Tue Dec 29 15:06:00 1992  Ian Lance Taylor  (ian@cygnus.com)
 
+	* config/mh-sco: Don't override BISON definition.
+
 	* build-all.mk: If canonhost is i386-unknown-sco3.2v4, change it
 	to i386-sco3.2v4.  Set TARGETS and CFLAGS for i386-sco3.2v4.
 	(all-cygnus, native, build-cygnus): Make
