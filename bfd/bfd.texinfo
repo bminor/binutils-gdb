@@ -148,6 +148,9 @@ California.
 
 @node How It Works, History, Porting, Top
 @section How It Works
+
+To use the library, include @code{bfd.h} and link with @code{libbfd.a}.	
+
 @code{bfd} provides a common interface to the parts of an object file
 to a calling application. 
 
