@@ -1,4 +1,4 @@
-/* Objective C language support routines for GDB, the GNU debugger.
+/* Objective-C language support routines for GDB, the GNU debugger.
    Copyright 1996 NeXT Software, Inc.
 
 This file is part of GDB.
@@ -23,6 +23,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "expression.h"
 #include "parser-defs.h"
 #include "language.h"
+#include "c-lang.h"
 #include "objc-lang.h"
 #include "complaints.h"
 #include "value.h"
@@ -68,11 +69,13 @@ struct objc_method {
 
 /* Complaints about ObjC classes, selectors, etc.  */
 
-static struct complaint noclass_lookup_complaint = 
-  {"no way to lookup Objective-C classes", 0, 0};
+static struct complaint noclass_lookup_complaint = {
+  "no way to lookup Objective-C classes", 0, 0
+};
 
-static struct complaint nosel_lookup_complaint = 
-  {"no way to lookup Objective-C selectors", 0, 0};
+static struct complaint nosel_lookup_complaint = {
+  "no way to lookup Objective-C selectors", 0, 0
+};
 
 
 #if (!defined __GNUC__ || __GNUC__ < 2 || __GNUC_MINOR__ < (defined __cplusplus ? 6 : 4))
@@ -89,32 +92,33 @@ static struct complaint nosel_lookup_complaint =
   ((void) ((expression) ? 0 : gdb_check_fatal (#expression, __FILE__, \
                               __LINE__, __CHECK_FUNCTION)))
 
-void 
-gdb_check (const char *str, const char *file, unsigned int line, 
-	   const char *func)
+static void 
+gdb_check (const char *str, const char *file, 
+	   unsigned int line, const char *func)
 {
   error ("assertion failure on line %u of \"%s\" in function \"%s\": %s\n",
 	 line, file, func, str);
 }
 
-void 
-gdb_check_fatal (const char *str, const char *file, unsigned int line, 
-		 const char *func)
+static void 
+gdb_check_fatal (const char *str, const char *file, 
+		 unsigned int line, const char *func)
 {
   internal_error (file, line, 
 		  "assertion failure in function \"%s\": %s\n", func, str);
 }
 
-/* Lookup a structure type named "struct NAME",
-   visible in lexical block BLOCK.  
-   If NOERR is nonzero, return zero if NAME is not suitably defined.  */
+/* Lookup a structure type named "struct NAME", visible in lexical
+   block BLOCK.  If NOERR is nonzero, return zero if NAME is not
+   suitably defined.  */
 
 struct symbol *
 lookup_struct_typedef (char *name, struct block *block, int noerr)
 {
   register struct symbol *sym;
 
-  sym = lookup_symbol (name, block, STRUCT_NAMESPACE, 0, (struct symtab **) NULL);
+  sym = lookup_symbol (name, block, STRUCT_NAMESPACE, 0, 
+		       (struct symtab **) NULL);
 
   if (sym == NULL)
     {
@@ -128,7 +132,8 @@ lookup_struct_typedef (char *name, struct block *block, int noerr)
       if (noerr)
 	return 0;
       else
-	error ("This context has class, union or enum %s, not a struct.", name);
+	error ("This context has class, union or enum %s, not a struct.", 
+	       name);
     }
   return sym;
 }
@@ -140,7 +145,7 @@ lookup_objc_class (char *classname)
 
   if (! target_has_execution)
     {
-      /* can't call into inferior to lookup class */
+      /* Can't call into inferior to lookup class.  */
       return 0;
     }
 
@@ -167,7 +172,7 @@ lookup_child_selector (char *selname)
 
   if (! target_has_execution)
     {
-      /* can't call into inferior to lookup selector */
+      /* Can't call into inferior to lookup selector.  */
       return 0;
     }
 
@@ -181,7 +186,8 @@ lookup_child_selector (char *selname)
       return 0;
     }
 
-  selstring = value_coerce_array (value_string (selname, strlen (selname) + 1));
+  selstring = value_coerce_array (value_string (selname, 
+						strlen (selname) + 1));
   return value_as_long (call_function_by_hand (function, 1, &selstring));
 }
 
@@ -194,7 +200,7 @@ value_nsstring (char *ptr, int len)
   struct type *type;
 
   if (!target_has_execution)
-    return 0;		/* can't call into inferior to create NSString */
+    return 0;		/* Can't call into inferior to create NSString.  */
 
   if (!(sym = lookup_struct_typedef("NSString", 0, 1)) &&
       !(sym = lookup_struct_typedef("NXString", 0, 1)))
@@ -204,7 +210,7 @@ value_nsstring (char *ptr, int len)
 
   stringValue[2] = value_string(ptr, len);
   stringValue[2] = value_coerce_array(stringValue[2]);
-  /* _NSNewStringFromCString replaces "istr" after Lantern2A */
+  /* _NSNewStringFromCString replaces "istr" after Lantern2A.  */
   if (lookup_minimal_symbol("_NSNewStringFromCString", 0, 0))
     {
       function = find_function_in_inferior("_NSNewStringFromCString");
@@ -231,7 +237,7 @@ value_nsstring (char *ptr, int len)
   return nsstringValue;
 }
 
-/* Objective C name demangling */
+/* Objective-C name demangling.  */
 
 char *
 objc_demangle (const char *mangled)
@@ -272,7 +278,7 @@ objc_demangle (const char *mangled)
 	    return NULL;
 	  }
 	*cp++ = ')';
-	*cp++ = ' ';		/* overwriting 1st char of method name... */
+	*cp++ = ' ';		/* overwriting 1st char of method name...  */
 	strcpy(cp, mangled + (cp - demangled));	/* get it back */
       }
 
@@ -288,18 +294,18 @@ objc_demangle (const char *mangled)
       return demangled;
     }
   else
-    return NULL;	/* not an objc mangled name */
+    return NULL;	/* Not an objc mangled name.  */
 }
 
-/* Print the character C on STREAM as part of the contents of a literal
-   string whose delimiter is QUOTER.  Note that that format for printing
-   characters and strings is language specific. */
+/* Print the character C on STREAM as part of the contents of a
+   literal string whose delimiter is QUOTER.  Note that that format
+   for printing characters and strings is language specific.  */
 
 static void
 objc_emit_char (register int c, struct ui_file *stream, int quoter)
 {
 
-  c &= 0xFF;			/* Avoid sign bit follies */
+  c &= 0xFF;			/* Avoid sign bit follies.  */
 
   if (PRINT_LITERAL_FORM (c))
     {
@@ -349,14 +355,15 @@ objc_printchar (int c, struct ui_file *stream)
   fputs_filtered ("'", stream);
 }
 
-/* Print the character string STRING, printing at most LENGTH characters.
-   Printing stops early if the number hits print_max; repeat counts
-   are printed as appropriate.  Print ellipses at the end if we
-   had to stop before printing LENGTH characters, or if FORCE_ELLIPSES.  */
+/* Print the character string STRING, printing at most LENGTH
+   characters.  Printing stops early if the number hits print_max;
+   repeat counts are printed as appropriate.  Print ellipses at the
+   end if we had to stop before printing LENGTH characters, or if
+   FORCE_ELLIPSES.  */
 
 static void
-objc_printstr (struct ui_file *stream, char *string, unsigned int length, 
-	       int force_ellipses)
+objc_printstr (struct ui_file *stream, char *string, 
+	       unsigned int length, int force_ellipses)
 {
   register unsigned int i;
   unsigned int things_printed = 0;
@@ -367,8 +374,8 @@ objc_printstr (struct ui_file *stream, char *string, unsigned int length,
   extern int print_max;
 
   /* If the string was not truncated due to `set print elements', and
-     the last byte of it is a null, we don't print that, in traditional C
-     style.  */
+     the last byte of it is a null, we don't print that, in
+     traditional C style.  */
   if ((!force_ellipses) && length > 0 && string[length-1] == '\0')
     length--;
 
@@ -380,8 +387,8 @@ objc_printstr (struct ui_file *stream, char *string, unsigned int length,
 
   for (i = 0; i < length && things_printed < print_max; ++i)
     {
-      /* Position of the character we are examining
-	 to see whether it is repeated.  */
+      /* Position of the character we are examining to see whether it
+	 is repeated.  */
       unsigned int rep1;
       /* Number of repetitions we have detected so far.  */
       unsigned int reps;
@@ -446,28 +453,29 @@ objc_printstr (struct ui_file *stream, char *string, unsigned int length,
     fputs_filtered ("...", stream);
 }
 
-/* Create a fundamental C type using default reasonable for the current
-   target machine.
+/* Create a fundamental C type using default reasonable for the
+   current target.
 
-   Some object/debugging file formats (DWARF version 1, COFF, etc) do not
-   define fundamental types such as "int" or "double".  Others (stabs or
-   DWARF version 2, etc) do define fundamental types.  For the formats which
-   don't provide fundamental types, gdb can create such types using this
-   function.
+   Some object/debugging file formats (DWARF version 1, COFF, etc) do
+   not define fundamental types such as "int" or "double".  Others
+   (stabs or DWARF version 2, etc) do define fundamental types.  For
+   the formats which don't provide fundamental types, gdb can create
+   such types using this function.
 
-   FIXME:  Some compilers distinguish explicitly signed integral types
-   (signed short, signed int, signed long) from "regular" integral types
-   (short, int, long) in the debugging information.  There is some dis-
-   agreement as to how useful this feature is.  In particular, gcc does
-   not support this.  Also, only some debugging formats allow the
-   distinction to be passed on to a debugger.  For now, we always just
-   use "short", "int", or "long" as the type name, for both the implicit
-   and explicitly signed types.  This also makes life easier for the
-   gdb test suite since we don't have to account for the differences
-   in output depending upon what the compiler and debugging format
-   support.  We will probably have to re-examine the issue when gdb
-   starts taking it's fundamental type information directly from the
-   debugging information supplied by the compiler.  fnf@cygnus.com */
+   FIXME: Some compilers distinguish explicitly signed integral types
+   (signed short, signed int, signed long) from "regular" integral
+   types (short, int, long) in the debugging information.  There is
+   some disagreement as to how useful this feature is.  In particular,
+   gcc does not support this.  Also, only some debugging formats allow
+   the distinction to be passed on to a debugger.  For now, we always
+   just use "short", "int", or "long" as the type name, for both the
+   implicit and explicitly signed types.  This also makes life easier
+   for the gdb test suite since we don't have to account for the
+   differences in output depending upon what the compiler and
+   debugging format support.  We will probably have to re-examine the
+   issue when gdb starts taking it's fundamental type information
+   directly from the debugging information supplied by the compiler.
+   fnf@cygnus.com */
 
 static struct type *
 objc_create_fundamental_type (struct objfile *objfile, int typeid)
@@ -477,10 +485,11 @@ objc_create_fundamental_type (struct objfile *objfile, int typeid)
   switch (typeid)
     {
       default:
-	/* FIXME:  For now, if we are asked to produce a type not in this
-	   language, create the equivalent of a C integer type with the
-	   name "<?type?>".  When all the dust settles from the type
-	   reconstruction work, this should probably become an error. */
+	/* FIXME: For now, if we are asked to produce a type not in
+	   this language, create the equivalent of a C integer type
+	   with the name "<?type?>".  When all the dust settles from
+	   the type reconstruction work, this should probably become
+	   an error.  */
 	type = init_type (TYPE_CODE_INT,
 			  TARGET_INT_BIT / TARGET_CHAR_BIT,
 			  0, "<?type?>", objfile);
@@ -646,7 +655,7 @@ struct type ** const (objc_builtin_types[]) =
 };
 
 const struct language_defn objc_language_defn = {
-  "objective-c",				/* Language name */
+  "objective-c",		/* Language name */
   language_objc,
   objc_builtin_types,
   range_check_off,
@@ -666,8 +675,8 @@ const struct language_defn objc_language_defn = {
   {"0%lo",  "0",   "o", ""},	/* Octal format info */
   {"%ld",   "",    "d", ""},	/* Decimal format info */
   {"0x%lx", "0x",  "x", ""},	/* Hex format info */
-  objc_op_print_tab,		/* expression operators for printing */
-  1,				/* c-style arrays */
+  objc_op_print_tab,		/* Expression operators for printing */
+  1,				/* C-style arrays */
   0,				/* String lower bound */
   &builtin_type_char,		/* Type of string elements */
   LANG_MAGIC
@@ -675,10 +684,10 @@ const struct language_defn objc_language_defn = {
 
 /*
  * ObjC:
- * Following functions help construct Objective C message calls 
+ * Following functions help construct Objective-C message calls 
  */
 
-struct selname		/* for parsing Objective C */
+struct selname		/* For parsing Objective-C.  */
   {
     struct selname *next;
     char *msglist_sel;
@@ -710,8 +719,8 @@ add_msglist(struct stoken *str, int addcolon)
   char *s, *p;
   int len, plen;
 
-  if (str == 0) {		/* unnamed arg, or... */
-    if (addcolon == 0) {	/* variable number of args */
+  if (str == 0) {		/* Unnamed arg, or...  */
+    if (addcolon == 0) {	/* variable number of args.  */
       msglist_len++;
       return;
     }
@@ -751,7 +760,7 @@ end_msglist(void)
     error("Can't find selector \"%s\"", p);
   write_exp_elt_longcst (selid);
   free(p);
-  write_exp_elt_longcst (val);/* Number of args */
+  write_exp_elt_longcst (val);	/* Number of args */
   free(sel);
 
   return val;
@@ -761,7 +770,7 @@ end_msglist(void)
  * Function: specialcmp (char *a, char *b)
  *
  * Special strcmp: treats ']' and ' ' as end-of-string.
- * Used for qsorting lists of objc methods (either by class or selector) 
+ * Used for qsorting lists of objc methods (either by class or selector).
  */
 
 int specialcmp(char *a, char *b)
@@ -782,14 +791,12 @@ int specialcmp(char *a, char *b)
 /*
  * Function: compare_selectors (void *, void *)
  *
- * Comparison function for use with qsort.  Arguments are symbols or msymbols
- * Compares selector part of objc method name alphabetically.
+ * Comparison function for use with qsort.  Arguments are symbols or
+ * msymbols Compares selector part of objc method name alphabetically.
  */
 
 static int
-compare_selectors (a, b)
-     void *a;
-     void *b;
+compare_selectors (void *a, void *b)
 {
   char *aname, *bname;
 
@@ -807,10 +814,10 @@ compare_selectors (a, b)
 /*
  * Function: selectors_info (regexp, from_tty)
  *
- * Implements the "Info selectors" command.  Takes an optional regexp arg.
- * Lists all objective c selectors that match the regexp.  Works by 
- * grepping thru all symbols for objective c methods.  Output list is 
- * sorted and uniqued. 
+ * Implements the "Info selectors" command.  Takes an optional regexp
+ * arg.  Lists all objective c selectors that match the regexp.  Works
+ * by grepping thru all symbols for objective c methods.  Output list
+ * is sorted and uniqued. 
  */
 
 static void
@@ -829,11 +836,11 @@ selectors_info (char *regexp, int from_tty)
   int                    plusminus = 0;
 
   if (regexp == NULL)
-    strcpy(myregexp, ".*]");	/* null input, match all objc methods */
+    strcpy(myregexp, ".*]");	/* Null input, match all objc methods.  */
   else
     {
-      if (*regexp == '+' || *regexp == '-')	/* if regexp starts with +/- */
-	{ 	   /* user wants only class methods or only instance methods */
+      if (*regexp == '+' || *regexp == '-')
+	{ /* User wants only class methods or only instance methods.  */
 	  plusminus = *regexp++;
 	  while (*regexp == ' ' || *regexp == '\t')
 	    regexp++;
@@ -854,7 +861,7 @@ selectors_info (char *regexp, int from_tty)
     if (0 != (val = re_comp (myregexp)))
       error ("Invalid regexp (%s): %s", val, regexp);
 
-  /* first time thru is JUST to get max length and count */
+  /* First time thru is JUST to get max length and count.  */
   ALL_MSYMBOLS (objfile, msymbol)
     {
       QUIT;
@@ -862,18 +869,20 @@ selectors_info (char *regexp, int from_tty)
 	name = SYMBOL_NAME (msymbol);
       if (name &&
 	 (name[0] == '-' || name[0] == '+') &&
-	  name[1] == '[')		/* got a method name */
+	  name[1] == '[')		/* Got a method name.  */
 	{
+	  /* Filter for class/instance methods.  */
 	  if (plusminus && name[0] != plusminus)
-	    continue;			/* filter for class/instance methods */
-	  name = (char *) strchr(name+2, ' ');	/* find selector part */
+	    continue;
+	  /* Find selector part.  */
+	  name = (char *) strchr(name+2, ' ');
 	  if (regexp == NULL || re_exec(++name) != 0)
 	    { 
 	      char *mystart = name;
 	      char *myend   = (char *) strchr(mystart, ']');
 	      
 	      if (myend && (myend - mystart > maxlen))
-		maxlen = myend - mystart;	/* get longest selector */
+		maxlen = myend - mystart;	/* Get longest selector.  */
 	      matches++;
 	    }
 	}
@@ -892,11 +901,13 @@ selectors_info (char *regexp, int from_tty)
 	    name = SYMBOL_NAME (msymbol);
 	  if (name &&
 	     (name[0] == '-' || name[0] == '+') &&
-	      name[1] == '[')		/* got a method name */
+	      name[1] == '[')		/* Got a method name.  */
 	    {
+	      /* Filter for class/instance methods.  */
 	      if (plusminus && name[0] != plusminus)
-		continue;		/* filter for class/instance methods */
-	      name = (char *) strchr(name+2, ' ');     /* find selector part */
+		continue;
+	      /* Find selector part.  */
+	      name = (char *) strchr(name+2, ' ');
 	      if (regexp == NULL || re_exec(++name) != 0)
 		sym_arr[matches++] = (struct symbol *) msymbol;
 	    }
@@ -904,8 +915,9 @@ selectors_info (char *regexp, int from_tty)
 
       qsort (sym_arr, matches, sizeof (struct minimal_symbol *), 
 	     compare_selectors);
-      asel[0] = 0;		/* to prevent compare on first iteration */
-      for (ix = 0; ix < matches; ix++)	/* now do the output */
+      /* Prevent compare on first iteration.  */
+      asel[0] = 0;
+      for (ix = 0; ix < matches; ix++)	/* Now do the output.  */
 	{
 	  char *p = asel;
 
@@ -914,12 +926,14 @@ selectors_info (char *regexp, int from_tty)
 	    name = SYMBOL_NAME (sym_arr[ix]);
 	  name = strchr (name, ' ') + 1;
 	  if (p[0] && specialcmp(name, p) == 0)
-	    continue;		/* seen this one already (not unique) */
+	    continue;		/* Seen this one already (not unique).  */
 
-	  while (*name && *name != ']')		/* copy selector part */
+	  /* Copy selector part.  */
+	  while (*name && *name != ']')
 	    *p++ = *name++;
 	  *p++ = '\0';
-	  puts_filtered_tabular(asel, maxlen + 1, 0);	/* print in columns */
+	  /* Print in columns.  */
+	  puts_filtered_tabular(asel, maxlen + 1, 0);
 	}
       begin_line();
     }
@@ -930,14 +944,12 @@ selectors_info (char *regexp, int from_tty)
 /*
  * Function: compare_classes (void *, void *)
  *
- * Comparison function for use with qsort.  Arguments are symbols or msymbols
- * Compares class part of objc method name alphabetically.
+ * Comparison function for use with qsort.  Arguments are symbols or
+ * msymbols Compares class part of objc method name alphabetically. 
  */
 
 static int
-compare_classes (a, b)
-     void *a;
-     void *b;
+compare_classes (void *a, void *b)
 {
   char *aname, *bname;
 
@@ -953,9 +965,9 @@ compare_classes (a, b)
  *
  * Implements the "info classes" command for objective c classes.
  * Lists all objective c classes that match the optional regexp.
- * Works by grepping thru the list of objective c methods.
- * List will be sorted and uniqued (since one class may have many methods).
- * BUGS: will not list a class that has no methods.
+ * Works by grepping thru the list of objective c methods.  List will
+ * be sorted and uniqued (since one class may have many methods).
+ * BUGS: will not list a class that has no methods. 
  */
 
 static void
@@ -973,12 +985,12 @@ classes_info (char *regexp, int from_tty)
   struct symbol        **sym_arr;
 
   if (regexp == NULL)
-    strcpy(myregexp, ".* ");	/* null input: match all objc classes */
+    strcpy(myregexp, ".* ");	/* Null input: match all objc classes.  */
   else
     {
       strcpy(myregexp, regexp);
       if (myregexp[strlen(myregexp) - 1] == '$')
-	/* in the method name, the end of the class name is marked by ' ' */
+	/* In the method name, the end of the class name is marked by ' '.  */
 	myregexp[strlen(myregexp) - 1] = ' ';
       else
 	strcat(myregexp, ".* ");
@@ -988,7 +1000,7 @@ classes_info (char *regexp, int from_tty)
     if (0 != (val = re_comp (myregexp)))
       error ("Invalid regexp (%s): %s", val, regexp);
 
-  /* first time thru is JUST to get max length and count */
+  /* First time thru is JUST to get max length and count.  */
   ALL_MSYMBOLS (objfile, msymbol)
     {
       QUIT;
@@ -996,10 +1008,11 @@ classes_info (char *regexp, int from_tty)
 	name = SYMBOL_NAME (msymbol);
       if (name &&
 	 (name[0] == '-' || name[0] == '+') &&
-	  name[1] == '[')				/* got a method name */
+	  name[1] == '[')			/* Got a method name.  */
 	if (regexp == NULL || re_exec(name+2) != 0)
 	  { 
-	    char *mystart = name + 2;	/* compute length of classname part */
+	    /* Compute length of classname part.  */
+	    char *mystart = name + 2;
 	    char *myend   = (char *) strchr(mystart, ' ');
 	    
 	    if (myend && (myend - mystart > maxlen))
@@ -1020,15 +1033,16 @@ classes_info (char *regexp, int from_tty)
 	    name = SYMBOL_NAME (msymbol);
 	  if (name &&
 	     (name[0] == '-' || name[0] == '+') &&
-	      name[1] == '[')				/* got a method name */
+	      name[1] == '[')			/* Got a method name.  */
 	    if (regexp == NULL || re_exec(name+2) != 0)
 		sym_arr[matches++] = (struct symbol *) msymbol;
 	}
 
       qsort (sym_arr, matches, sizeof (struct minimal_symbol *), 
 	     compare_classes);
-      aclass[0] = 0;		/* to prevent compare on first iteration */
-      for (ix = 0; ix < matches; ix++)	/* now do the output */
+      /* Prevent compare on first iteration.  */
+      aclass[0] = 0;
+      for (ix = 0; ix < matches; ix++)	/* Now do the output.  */
 	{
 	  char *p = aclass;
 
@@ -1037,12 +1051,14 @@ classes_info (char *regexp, int from_tty)
 	    name = SYMBOL_NAME (sym_arr[ix]);
 	  name += 2;
 	  if (p[0] && specialcmp(name, p) == 0)
-	    continue;	/* seen this one already (not unique) */
+	    continue;	/* Seen this one already (not unique).  */
 
-	  while (*name && *name != ' ')	/* copy class part of method name */
+	  /* Copy class part of method name.  */
+	  while (*name && *name != ' ')
 	    *p++ = *name++;
 	  *p++ = '\0';
-	  puts_filtered_tabular(aclass, maxlen + 1, 0);	/* print in columns */
+	  /* Print in columns.  */
+	  puts_filtered_tabular(aclass, maxlen + 1, 0);
 	}
       begin_line();
     }
@@ -1057,27 +1073,27 @@ classes_info (char *regexp, int from_tty)
  *         a pointer to an array of symbol pointers
  *         possibly a pointer to a symbol found by the caller.
  *
- * Output: number of methods that implement that selector.
- * Side effects: The array of symbol pointers is filled with matching syms.
+ * Output: number of methods that implement that selector.  Side
+ * effects: The array of symbol pointers is filled with matching syms.
  *
- * By analogy with function "find_methods" (symtab.c), builds a list of
- * symbols matching the ambiguous input, so that "decode_line_2" (symtab.c)
- * can list them and ask the user to choose one or more.  In this case the
- * matches are objective c methods ("implementations") matching an objective
- * c selector.
+ * By analogy with function "find_methods" (symtab.c), builds a list
+ * of symbols matching the ambiguous input, so that "decode_line_2"
+ * (symtab.c) can list them and ask the user to choose one or more.
+ * In this case the matches are objective c methods
+ * ("implementations") matching an objective c selector.
  *
- * Note that it is possible for a normal (c-style) function to have the
- * same name as an objective c selector.  To prevent the selector from
- * eclipsing the function, we allow the caller (decode_line_1) to search
- * for such a function first, and if it finds one, pass it in to us.  We
- * will then integrate it into the list.  We also search for one here, 
- * among the minsyms.
+ * Note that it is possible for a normal (c-style) function to have
+ * the same name as an objective c selector.  To prevent the selector
+ * from eclipsing the function, we allow the caller (decode_line_1) to
+ * search for such a function first, and if it finds one, pass it in
+ * to us.  We will then integrate it into the list.  We also search
+ * for one here, among the minsyms.
  *
- * NOTE: if NUM_DEBUGGABLE is non-zero, the sym_arr will be 
- *       divided into two parts: debuggable (struct symbol) syms, 
- *       and non_debuggable (struct minimal_symbol) syms.  
- *       The debuggable ones will come first, before NUM_DEBUGGABLE
- *       (which will thus be the index of the first non-debuggable one).
+ * NOTE: if NUM_DEBUGGABLE is non-zero, the sym_arr will be divided
+ *       into two parts: debuggable (struct symbol) syms, and
+ *       non_debuggable (struct minimal_symbol) syms.  The debuggable
+ *       ones will come first, before NUM_DEBUGGABLE (which will thus
+ *       be the index of the first non-debuggable one). 
  */
 
 /*
@@ -1086,10 +1102,10 @@ classes_info (char *regexp, int from_tty)
  * Input:  a string representing a selector 
  * Output: number of methods that implement that selector.
  *
- * By analogy with function "total_number_of_methods", this allows 
+ * By analogy with function "total_number_of_methods", this allows
  * decode_line_1 (symtab.c) to detect if there are objective c methods
- * matching the input, and to allocate an array of pointers to them 
- * which can be manipulated by "decode_line_2" (also in symtab.c)
+ * matching the input, and to allocate an array of pointers to them
+ * which can be manipulated by "decode_line_2" (also in symtab.c).
  */
 
 char * 
@@ -1148,8 +1164,8 @@ parse_selector (char *method, char **selector)
 }
 
 char * 
-parse_method (char *method, char *type, char **class, char **category, 
-	      char **selector)
+parse_method (char *method, char *type, char **class, 
+	      char **category, char **selector)
 {
   char *s1 = NULL;
   char *s2 = NULL;
@@ -1206,7 +1222,7 @@ parse_method (char *method, char *type, char **class, char **category,
       *s2++ = '\0';
     }
 
-  /* truncate the class name now that we're not using the open paren */
+  /* Truncate the class name now that we're not using the open paren.  */
   *s1++ = '\0';
 
   nselector = s2;
@@ -1250,10 +1266,10 @@ parse_method (char *method, char *type, char **class, char **category,
 }
 
 void
-find_methods (struct symtab *symtab, 
-	      char type, const char *class, const char *category, 
-	      const char *selector,
-	      struct symbol **syms, unsigned int *nsym, unsigned int *ndebug)
+find_methods (struct symtab *symtab, char type, 
+	      const char *class, const char *category, 
+	      const char *selector, struct symbol **syms, 
+	      unsigned int *nsym, unsigned int *ndebug)
 {
   struct objfile *objfile = NULL;
   struct minimal_symbol *msymbol = NULL;
@@ -1284,13 +1300,13 @@ find_methods (struct symtab *symtab,
       QUIT;
 
       if ((msymbol->type != mst_text) && (msymbol->type != mst_file_text))
-	/* not a function or method */
+	/* Not a function or method.  */
 	continue;
 
       if (symtab)
 	if ((SYMBOL_VALUE_ADDRESS (msymbol) <  block->startaddr) ||
 	    (SYMBOL_VALUE_ADDRESS (msymbol) >= block->endaddr))
-	  /* not in the specified symtab */
+	  /* Not in the specified symtab.  */
 	  continue;
 
       symname = SYMBOL_DEMANGLED_NAME (msymbol);
@@ -1300,7 +1316,7 @@ find_methods (struct symtab *symtab,
 	continue;
 
       if ((symname[0] != '-' && symname[0] != '+') || (symname[1] != '['))
-	/* not a method name */
+	/* Not a method name.  */
 	continue;
       
       while ((strlen (symname) + 1) >= tmplen)
@@ -1316,13 +1332,16 @@ find_methods (struct symtab *symtab,
       if ((type != '\0') && (ntype != type))
 	continue;
 
-      if ((class != NULL) && ((nclass == NULL) || (strcmp (class, nclass) != 0)))
+      if ((class != NULL) 
+	  && ((nclass == NULL) || (strcmp (class, nclass) != 0)))
 	continue;
 
-      if ((category != NULL) && ((ncategory == NULL) || (strcmp (category, ncategory) != 0)))
+      if ((category != NULL) && 
+	  ((ncategory == NULL) || (strcmp (category, ncategory) != 0)))
 	continue;
 
-      if ((selector != NULL) && ((nselector == NULL) || (strcmp (selector, nselector) != 0)))
+      if ((selector != NULL) && 
+	  ((nselector == NULL) || (strcmp (selector, nselector) != 0)))
 	continue;
 
       sym = find_pc_function (SYMBOL_VALUE_ADDRESS (msymbol));
@@ -1334,8 +1353,8 @@ find_methods (struct symtab *symtab,
             newsymname = SYMBOL_NAME (sym);
           if (strcmp (symname, newsymname) == 0)
             {
-              /* found a high-level method sym: swap it into the
-                 lower part of sym_arr (below num_debuggable) */
+              /* Found a high-level method sym: swap it into the
+                 lower part of sym_arr (below num_debuggable).  */
               if (syms != NULL)
                 {
                   syms[csym] = syms[cdebug];
@@ -1346,7 +1365,8 @@ find_methods (struct symtab *symtab,
             }
           else
             {
-              warning ("debugging symbol \"%s\" does not match minimal symbol (\"%s\"); ignoring",
+              warning (
+"debugging symbol \"%s\" does not match minimal symbol (\"%s\"); ignoring",
                        newsymname, symname);
               if (syms != NULL)
                 syms[csym] = (struct symbol *) msymbol;
@@ -1355,7 +1375,7 @@ find_methods (struct symtab *symtab,
         }
       else 
 	{
-	  /* found a non-debuggable method symbol */
+	  /* Found a non-debuggable method symbol.  */
 	  if (syms != NULL)
 	    syms[csym] = (struct symbol *) msymbol;
 	  csym++;
@@ -1369,8 +1389,8 @@ find_methods (struct symtab *symtab,
 }
 
 char *find_imps (struct symtab *symtab, struct block *block,
-		 char *method, struct symbol **syms, unsigned int *nsym, 
-		 unsigned int *ndebug) 
+		 char *method, struct symbol **syms, 
+		 unsigned int *nsym, unsigned int *ndebug)
 {
   char type = '\0';
   char *class = NULL;
@@ -1431,11 +1451,13 @@ char *find_imps (struct symtab *symtab, struct block *block,
   }
 
   if (syms != NULL)
-    find_methods (symtab, type, class, category, selector, syms + csym, &ncsym, &ncdebug);
+    find_methods (symtab, type, class, category, selector, 
+		  syms + csym, &ncsym, &ncdebug);
   else
-    find_methods (symtab, type, class, category, selector, NULL, &ncsym, &ncdebug);
+    find_methods (symtab, type, class, category, selector, 
+		  NULL, &ncsym, &ncdebug);
 
-  /* If we didn't find any methods, just return. */
+  /* If we didn't find any methods, just return.  */
   if (ncsym == 0 && ncdebug == 0)
     return method;
 
@@ -1443,22 +1465,25 @@ char *find_imps (struct symtab *symtab, struct block *block,
    * with debug symbols from the first batch.  Repeat until either the
    * second section is out of debug symbols or the first section is
    * full of debug symbols.  Either way we have all debug symbols
-   * packed to the beginning of the buffer.  */
+   * packed to the beginning of the buffer.  
+   */
 
   if (syms != NULL) 
     {
       while ((cdebug < csym) && (ncdebug > 0))
 	{
 	  struct symbol *s = NULL;
-
-	  unsigned int i = cdebug;	          /* first non-debugging symbol */
-	  unsigned int j = csym + ncdebug -1; /* last of second batch of debug symbols */
+	  /* First non-debugging symbol.  */
+	  unsigned int i = cdebug;
+	  /* Last of second batch of debug symbols.  */
+	  unsigned int j = csym + ncdebug - 1;
 
 	  s = syms[j];
 	  syms[j] = syms[i];
 	  syms[i] = s;
 
-	  /* We've moved a symbol from the second debug section to the first one. */
+	  /* We've moved a symbol from the second debug section to the
+             first one.  */
 	  cdebug++;
 	  ncdebug--;
 	}
@@ -1477,15 +1502,18 @@ char *find_imps (struct symtab *symtab, struct block *block,
 
   if (csym > 1)
     {
-      /* sort debuggable symbols */
+      /* Sort debuggable symbols.  */
       if (cdebug > 1)
-	qsort (syms, cdebug, sizeof (struct minimal_symbol *), compare_classes);
+	qsort (syms, cdebug, sizeof (struct minimal_symbol *), 
+	       compare_classes);
       
-      /* sort minimal_symbols */
+      /* Sort minimal_symbols.  */
       if ((csym - cdebug) > 1)
-	qsort (&syms[cdebug], csym - cdebug, sizeof (struct minimal_symbol *), compare_classes);
+	qsort (&syms[cdebug], csym - cdebug, 
+	       sizeof (struct minimal_symbol *), compare_classes);
     }
-  syms[csym] = 0;		/* terminate the sym_arr list */
+  /* Terminate the sym_arr list.  */
+  syms[csym] = 0;
 
   return method + (tmp - buf);
 }
@@ -1499,18 +1527,21 @@ print_object_command (char *args, int from_tty)
   char c = -1;
 
   if (!args || !*args)
-    error ("The 'print-object' command requires an argument (an Objective-C object)");
+    error (
+"The 'print-object' command requires an argument (an Objective-C object)");
 
   {
     struct expression *expr = parse_expression (args);
-    register struct cleanup *old_chain = make_cleanup (free_current_contents, &expr);
+    register struct cleanup *old_chain = 
+      make_cleanup (free_current_contents, &expr);
     int pc = 0;
 
 #if 1
     object = expr->language_defn->evaluate_exp (builtin_type_void_data_ptr,
 						expr, &pc, EVAL_NORMAL);
 #else
-    object = evaluate_subexp (builtin_type_void_data_ptr, expr, &pc, EVAL_NORMAL);
+    object = evaluate_subexp (builtin_type_void_data_ptr, 
+			      expr, &pc, EVAL_NORMAL);
 #endif
     do_cleanups (old_chain);
   }
@@ -1526,7 +1557,7 @@ print_object_command (char *args, int from_tty)
   read_memory (string_addr + i++, &c, 1);
   if (c != '\0')
     do
-      { /* read and print characters up to EOS */
+      { /* Read and print characters up to EOS.  */
 	QUIT;
 	printf_filtered ("%c", c);
 	read_memory (string_addr + i++, &c, 1);
@@ -1536,22 +1567,25 @@ print_object_command (char *args, int from_tty)
   printf_filtered ("\n");
 }
 
-/* The data structure 'methcalls' is used to detect method calls
- * (thru ObjC runtime lib functions objc_msgSend, objc_msgSendSuper, etc.),
- * and ultimately find the method being called.
+/* The data structure 'methcalls' is used to detect method calls (thru
+ * ObjC runtime lib functions objc_msgSend, objc_msgSendSuper, etc.),
+ * and ultimately find the method being called. 
  */
 
 struct objc_methcall {
   char *name;
-  CORE_ADDR (*stop_at) (CORE_ADDR); /* should return instance method to be called */
-  CORE_ADDR begin;		    /* start of pc range corresponding to method invocation */
-  CORE_ADDR end;		    /* end of pc range corresponding to method invocation */
+ /* Return instance method to be called.  */
+  CORE_ADDR (*stop_at) (CORE_ADDR);
+  /* Start of pc range corresponding to method invocation.  */
+  CORE_ADDR begin;
+  /* End of pc range corresponding to method invocation.  */
+  CORE_ADDR end;
 };
 
-static int resolve_msgsend PARAMS ((CORE_ADDR pc, CORE_ADDR *new_pc));
-static int resolve_msgsend_stret PARAMS ((CORE_ADDR pc, CORE_ADDR *new_pc));
-static int resolve_msgsend_super PARAMS ((CORE_ADDR pc, CORE_ADDR *new_pc));
-static int resolve_msgsend_super_stret PARAMS ((CORE_ADDR pc, CORE_ADDR *new_pc));
+static int resolve_msgsend (CORE_ADDR pc, CORE_ADDR *new_pc);
+static int resolve_msgsend_stret (CORE_ADDR pc, CORE_ADDR *new_pc);
+static int resolve_msgsend_super (CORE_ADDR pc, CORE_ADDR *new_pc);
+static int resolve_msgsend_super_stret (CORE_ADDR pc, CORE_ADDR *new_pc);
 
 static struct objc_methcall methcalls[] = {
   { "_objc_msgSend", resolve_msgsend, 0, 0},
@@ -1564,11 +1598,11 @@ static struct objc_methcall methcalls[] = {
 
 #define nmethcalls (sizeof (methcalls) / sizeof (methcalls[0]))
 
-/* The following function, "find_objc_msgsend", fills in the data structure
- * "objc_msgs" by finding the addresses of each of the (currently four) 
- * functions that it holds (of which objc_msgSend is the first).  This
- * must be called each time symbols are loaded, in case the functions
- * have moved for some reason.
+/* The following function, "find_objc_msgsend", fills in the data
+ * structure "objc_msgs" by finding the addresses of each of the
+ * (currently four) functions that it holds (of which objc_msgSend is
+ * the first).  This must be called each time symbols are loaded, in
+ * case the functions have moved for some reason.  
  */
 
 void 
@@ -1579,7 +1613,7 @@ find_objc_msgsend (void)
 
     struct minimal_symbol *func;
 
-    /* try both with and without underscore */
+    /* Try both with and without underscore.  */
     func = lookup_minimal_symbol (methcalls[i].name, NULL, NULL);
     if ((func == NULL) && (methcalls[i].name[0] == '_')) {
       func = lookup_minimal_symbol (methcalls[i].name + 1, NULL, NULL);
@@ -1599,17 +1633,17 @@ find_objc_msgsend (void)
 
 /* find_objc_msgcall (replaces pc_off_limits)
  *
- * ALL that this function now does is to determine whether the input 
- * address ("pc") is the address of one of the Objective C message
+ * ALL that this function now does is to determine whether the input
+ * address ("pc") is the address of one of the Objective-C message
  * dispatch functions (mainly objc_msgSend or objc_msgSendSuper), and
  * if so, it returns the address of the method that will be called.
  *
  * The old function "pc_off_limits" used to do a lot of other things
- * in addition, such as detecting shared library jump stubs and 
+ * in addition, such as detecting shared library jump stubs and
  * returning the address of the shlib function that would be called.
- * That functionality has been moved into the SKIP_TRAMPOLINE_CODE
- * and IN_SOLIB_TRAMPOLINE macros, which are resolved in the target-
- * dependent modules.
+ * That functionality has been moved into the SKIP_TRAMPOLINE_CODE and
+ * IN_SOLIB_TRAMPOLINE macros, which are resolved in the target-
+ * dependent modules.  
  */
 
 struct objc_submethod_helper_data {
@@ -1621,19 +1655,19 @@ struct objc_submethod_helper_data {
 int 
 find_objc_msgcall_submethod_helper (PTR arg)
 {
-  struct objc_submethod_helper_data *s = (struct objc_submethod_helper_data *) arg;
-  if (s->f (s->pc, s->new_pc) == 0) { 
+  struct objc_submethod_helper_data *s = 
+    (struct objc_submethod_helper_data *) arg;
+
+  if (s->f (s->pc, s->new_pc) == 0) 
     return 1;
-  } else {
+  else 
     return 0;
-  }
 }
 
 int 
-find_objc_msgcall_submethod (f, pc, new_pc)
-     CORE_ADDR (*f) (CORE_ADDR, CORE_ADDR *);
-     CORE_ADDR pc;
-     CORE_ADDR *new_pc;
+find_objc_msgcall_submethod (CORE_ADDR (*f) (CORE_ADDR, CORE_ADDR *),
+			     CORE_ADDR pc, 
+			     CORE_ADDR *new_pc)
 {
   struct objc_submethod_helper_data s;
 
@@ -1642,13 +1676,12 @@ find_objc_msgcall_submethod (f, pc, new_pc)
   s.new_pc = new_pc;
 
   if (catch_errors (find_objc_msgcall_submethod_helper,
-		   (PTR) &s,
-		   "Unable to determine target of Objective-C method call (ignoring):\n",
-		   RETURN_MASK_ALL) == 0) {
+		    (PTR) &s,
+		    "Unable to determine target of Objective-C method call (ignoring):\n",
+		    RETURN_MASK_ALL) == 0) 
     return 1;
-  } else {
+  else 
     return 0;
-  }
 }
 
 int 
@@ -1659,15 +1692,16 @@ find_objc_msgcall (CORE_ADDR pc, CORE_ADDR *new_pc)
   find_objc_msgsend ();
   if (new_pc != NULL) { *new_pc = 0; }
 
-  for (i = 0; i < nmethcalls; i++) {
-    if ((pc >= methcalls[i].begin) && (pc < methcalls[i].end)) {
-      if (methcalls[i].stop_at != NULL) {
-	return find_objc_msgcall_submethod (methcalls[i].stop_at, pc, new_pc);
-      } else {
-	return 0;
+  for (i = 0; i < nmethcalls; i++) 
+    if ((pc >= methcalls[i].begin) && (pc < methcalls[i].end)) 
+      {
+	if (methcalls[i].stop_at != NULL) 
+	  return find_objc_msgcall_submethod (methcalls[i].stop_at, 
+					      pc, new_pc);
+	else 
+	  return 0;
       }
-    }
-  }
+
   return 0;
 }
 
@@ -1675,10 +1709,10 @@ void
 _initialize_objc_language (void)
 {
   add_language (&objc_language_defn);
-  add_info ("selectors", selectors_info, 	/* INFO SELECTORS command */
-	    "All Objective C selectors, or those matching REGEXP.");
-  add_info ("classes", classes_info, 		/* INFO CLASSES   command */
-	    "All Objective C classes, or those matching REGEXP.");
+  add_info ("selectors", selectors_info,    /* INFO SELECTORS command.  */
+	    "All Objective-C selectors, or those matching REGEXP.");
+  add_info ("classes", classes_info, 	    /* INFO CLASSES   command.  */
+	    "All Objective-C classes, or those matching REGEXP.");
   add_com ("print-object", class_vars, print_object_command, 
 	   "Ask an Objective-C object to print itself.\n");
   add_com_alias ("po", "print-object", class_vars, 1);
@@ -1712,9 +1746,9 @@ static unsigned long FETCH_ARGUMENT (int i)
 #if defined (__hppa__) || defined (__hppa)
 static CORE_ADDR CONVERT_FUNCPTR (CORE_ADDR pc)
 {
-  if (pc & 0x2) {
+  if (pc & 0x2)
     pc = (CORE_ADDR) read_memory_integer (pc & ~0x3, 4);
-  }
+
   return pc;
 }
 #else
@@ -1727,9 +1761,9 @@ static CORE_ADDR CONVERT_FUNCPTR (CORE_ADDR pc)
 static void 
 read_objc_method (CORE_ADDR addr, struct objc_method *method)
 {
-  method->name = read_memory_unsigned_integer (addr, 4);
+  method->name  = read_memory_unsigned_integer (addr + 0, 4);
   method->types = read_memory_unsigned_integer (addr + 4, 4);
-  method->imp = read_memory_unsigned_integer (addr + 8, 4);
+  method->imp   = read_memory_unsigned_integer (addr + 8, 4);
 }
 
 static 
@@ -1779,41 +1813,45 @@ find_implementation_from_class (CORE_ADDR class, CORE_ADDR sel)
 {
   CORE_ADDR subclass = class;
 
-  while (subclass != 0) {
+  while (subclass != 0) 
+    {
 
-    struct objc_class class_str;
-    unsigned mlistnum = 0;
+      struct objc_class class_str;
+      unsigned mlistnum = 0;
 
-    read_objc_class (subclass, &class_str);
+      read_objc_class (subclass, &class_str);
 
-    for (;;) {
-      CORE_ADDR mlist;
-      unsigned long nmethods;
-      unsigned long i;
+      for (;;) 
+	{
+	  CORE_ADDR mlist;
+	  unsigned long nmethods;
+	  unsigned long i;
       
-      mlist = read_memory_unsigned_integer (class_str.methods + (4 * mlistnum), 4);
-      if (mlist == 0) { break; }
+	  mlist = read_memory_unsigned_integer (class_str.methods + 
+						(4 * mlistnum), 4);
+	  if (mlist == 0) 
+	    break;
 
-      nmethods = read_objc_methlist_nmethods (mlist);
+	  nmethods = read_objc_methlist_nmethods (mlist);
 
-      for (i = 0; i < nmethods; i++) {
-	struct objc_method meth_str;
-	read_objc_methlist_method (mlist, i, &meth_str);
+	  for (i = 0; i < nmethods; i++) 
+	    {
+	      struct objc_method meth_str;
+	      read_objc_methlist_method (mlist, i, &meth_str);
 
 #if 0
-	fprintf (stderr, "checking method 0x%lx against selector 0x%lx\n", meth_str.name, sel);
+	      fprintf (stderr, 
+		       "checking method 0x%lx against selector 0x%lx\n", 
+		       meth_str.name, sel);
 #endif
 
-	if (meth_str.name == sel) {
-	  return CONVERT_FUNCPTR (meth_str.imp);
+	      if (meth_str.name == sel) 
+		return CONVERT_FUNCPTR (meth_str.imp);
+	    }
+	  mlistnum++;
 	}
-      }
-
-      mlistnum++;
+      subclass = class_str.super_class;
     }
-      
-    subclass = class_str.super_class;
-  }
 
   return 0;
 }
@@ -1823,9 +1861,11 @@ find_implementation (CORE_ADDR object, CORE_ADDR sel)
 {
   struct objc_object ostr;
 
-  if (object == 0) { return 0; }
+  if (object == 0)
+    return 0;
   read_objc_object (object, &ostr);
-  if (ostr.isa == 0) { return 0; }
+  if (ostr.isa == 0)
+    return 0;
 
   return find_implementation_from_class (ostr.isa, sel);
 }
@@ -1841,8 +1881,10 @@ resolve_msgsend (CORE_ADDR pc, CORE_ADDR *new_pc)
   sel = FETCH_ARGUMENT (1);
 
   res = find_implementation (object, sel);
-  if (new_pc != 0) { *new_pc = res; }
-  if (res == 0) { return 1; }
+  if (new_pc != 0)
+    *new_pc = res;
+  if (res == 0)
+    return 1;
   return 0;
 }
 
@@ -1857,8 +1899,10 @@ resolve_msgsend_stret (CORE_ADDR pc, CORE_ADDR *new_pc)
   sel = FETCH_ARGUMENT (2);
 
   res = find_implementation (object, sel);
-  if (new_pc != 0) { *new_pc = res; }
-  if (res == 0) { return 1; }
+  if (new_pc != 0)
+    *new_pc = res;
+  if (res == 0)
+    return 1;
   return 0;
 }
 
@@ -1875,11 +1919,14 @@ resolve_msgsend_super (CORE_ADDR pc, CORE_ADDR *new_pc)
   sel = FETCH_ARGUMENT (1);
 
   read_objc_super (super, &sstr);
-  if (sstr.class == 0) { return 0; }
+  if (sstr.class == 0)
+    return 0;
   
   res = find_implementation_from_class (sstr.class, sel);
-  if (new_pc != 0) { *new_pc = res; }
-  if (res == 0) { return 1; }
+  if (new_pc != 0)
+    *new_pc = res;
+  if (res == 0)
+    return 1;
   return 0;
 }
 
@@ -1896,10 +1943,13 @@ resolve_msgsend_super_stret (CORE_ADDR pc, CORE_ADDR *new_pc)
   sel = FETCH_ARGUMENT (2);
 
   read_objc_super (super, &sstr);
-  if (sstr.class == 0) { return 0; }
+  if (sstr.class == 0)
+    return 0;
   
   res = find_implementation_from_class (sstr.class, sel);
-  if (new_pc != 0) { *new_pc = res; }
-  if (res == 0) { return 1; }
+  if (new_pc != 0)
+    *new_pc = res;
+  if (res == 0)
+    return 1;
   return 0;
 }
