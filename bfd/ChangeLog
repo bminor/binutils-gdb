@@ -1,5 +1,9 @@
 2002-06-05  Alan Modra  <amodra@bigpond.net.au>
 
+	* coff-alpha.c: Update copyright date.
+	* coff-mips.c: Likewise.
+	* xcoff-target.h: Likewise.
+
 	* bfd-in.h: Remove "taken from the source" comment.
 	* libbfd-in.h: Likewise.
 	* libcoff-in.h: Likewise.
