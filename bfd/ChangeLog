@@ -1,5 +1,17 @@
 1999-06-26  David Mosberger  <davidm@hpl.hp.com>
 
+	* dwarf2.c (struct arange): New type.
+	(struct comp_unit): Replace LOW and HIGH by member ARANGE.
+	(arange_add): New function.
+	(decode_line_info): Keep track of address ranges that a compilation
+	unit covers.
+	(comp_unit_contains_address): Return true if address is contained
+	in _any_ of the address ranges associated with a compilation unit.
+	(_bfd_dwarf2_find_nearest_line): Call comp_unit_find_nearest_line
+	on the first comp_unit that contains the address.
+
+1999-06-26  David Mosberger  <davidm@hpl.hp.com>
+
 	* dwarf2.c (struct dwarf2_debug): Add member dwarf_line_buffer.
 	(decode_line_info): Add variable STASH and initialize it to point
 	to the per-bfd dwarf2_debug info.  Remove static variable

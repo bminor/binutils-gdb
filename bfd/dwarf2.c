@@ -104,6 +104,11 @@ struct dwarf2_debug {
   char *dwarf_line_buffer;
 };
 
+struct arange {
+  struct arange *next;
+  bfd_vma low;
+  bfd_vma high;
+};
 
 
 /* A minimal decoding of DWARF2 compilation units.  We only decode
@@ -119,8 +124,7 @@ struct comp_unit {
 
   /* The lowest and higest addresses contained in this compilation
      unit as specified in the compilation unit header. */
-  bfd_vma low;
-  bfd_vma high;
+  struct arange arange;
 
   /* The DW_AT_name attribute (for error messages). */
   char* name;
@@ -705,6 +709,50 @@ concat_filename (table, file)
     }
 }
 
+static void
+arange_add (unit, low_pc, high_pc)
+     struct comp_unit *unit;
+     bfd_vma low_pc;
+     bfd_vma high_pc;
+{
+  struct arange *arange;
+
+  /* first see if we can cheaply extend an existing range: */
+  arange = &unit->arange;
+  do
+    {
+      if (low_pc == arange->high)
+	{
+	  arange->high = high_pc;
+	  return;
+	}
+      if (high_pc == arange->low)
+	{
+	  arange->low = low_pc;
+	  return;
+	}
+      arange = arange->next;
+    }
+  while (arange);
+
+  if (unit->arange.high == 0)
+    {
+      /* this is the first address range: store it in unit->arange: */
+      unit->arange.next = 0;
+      unit->arange.low = low_pc;
+      unit->arange.high = high_pc;
+      return;
+    }
+
+  /* need to allocate a new arange and insert it into the arange list: */
+  arange = bfd_zalloc (unit->abfd, sizeof (*arange));
+  arange->low = low_pc;
+  arange->high = high_pc;
+
+  arange->next = unit->arange.next;
+  unit->arange.next = arange;
+}
+
 /* Decode the line number information for UNIT. */
 
 static struct line_info_table*
@@ -723,12 +771,6 @@ decode_line_info (unit)
   unsigned int i, bytes_read;
   char *cur_file, *cur_dir;
   unsigned char op_code, extended_op, adj_opcode;
-#if 0
-  /* This optimization unfortunately does not work well on programs
-     that have multiple sections containing text (such as Linux which
-     uses .text, and .text.init, for example.  */
-  bfd_vma hi_pc = 0, lo_pc = ~ (bfd_vma) 0;
-#endif
 
   stash = elf_tdata (abfd)->dwarf2_find_line_info;
 
@@ -747,11 +789,11 @@ decode_line_info (unit)
       
       size = bfd_get_section_size_before_reloc (msec);
       stash->dwarf_line_buffer = (char *) bfd_alloc (abfd, size);
-      if (! dwarf_line_buffer)
+      if (! stash->dwarf_line_buffer)
 	return 0;
 
       if (! bfd_get_section_contents (abfd, msec, 
-				      dwarf_line_buffer, 0,
+				      stash->dwarf_line_buffer, 0,
 				      size))
 	return 0;
 
@@ -856,7 +898,8 @@ decode_line_info (unit)
       unsigned int column = 0;
       int is_stmt = lh.default_is_stmt;
       int basic_block = 0;
-      int end_sequence = 0;
+      int end_sequence = 0, need_low_pc = 1;
+      bfd_vma low_pc = 0;
 
       /* Decode the table. */
       while (! end_sequence)
@@ -873,7 +916,14 @@ decode_line_info (unit)
 		{
 		case DW_LNE_end_sequence:
 		  end_sequence = 1;
-		  add_line_info (table, address, filename, line, column, end_sequence);
+		  add_line_info (table, address, filename, line, column,
+				 end_sequence);
+		  if (need_low_pc)
+		    {
+		      need_low_pc = 0;
+		      low_pc = address;
+		    }
+		  arange_add (unit, low_pc, address);
 		  break;
 		case DW_LNE_set_address:
 		  address = read_address (unit, line_ptr);
@@ -912,6 +962,11 @@ decode_line_info (unit)
 	    case DW_LNS_copy:
 	      add_line_info (table, address, filename, line, column, 0);
 	      basic_block = 0;
+	      if (need_low_pc)
+		{
+		  need_low_pc = 0;
+		  low_pc = address;
+		}
 	      break;
 	    case DW_LNS_advance_pc:
 	      address += lh.minimum_instruction_length
@@ -959,25 +1014,14 @@ decode_line_info (unit)
 	      /* append row to matrix using current values */
 	      add_line_info (table, address, filename, line, column, 0);
 	      basic_block = 1;
+	      if (need_low_pc)
+		{
+		  need_low_pc = 0;
+		  low_pc = address;
+		}
 	    }
-#if 0
-	  if (unit->high == 0)
-	    {
-	      if (address > hi_pc)
-		hi_pc = address;
-	      if (address < lo_pc)
-		lo_pc = address;
-	    }
-#endif
 	}
     }
-#if 0
-  if (unit->high == 0 && hi_pc != 0)
-    {
-      unit->high = hi_pc;
-      unit->low = lo_pc;
-    }
-#endif
 
   return table;
 }
@@ -1275,11 +1319,11 @@ parse_comp_unit (abfd, info_ptr, end_ptr)
 	  break;
 
 	case DW_AT_low_pc:
-	  unit->low = DW_ADDR (&attr);
+	  unit->arange.low = DW_ADDR (&attr);
 	  break;
 
 	case DW_AT_high_pc:
-	  unit->high = DW_ADDR (&attr);
+	  unit->arange.high = DW_ADDR (&attr);
 	  break;
 
 	case DW_AT_comp_dir:
@@ -1318,8 +1362,20 @@ comp_unit_contains_address (unit, addr)
      struct comp_unit* unit;
      bfd_vma addr;
 {
-  return ! unit->error
-    && (addr >= unit->low && addr <= unit->high);
+  struct arange *arange;
+
+  if (unit->error)
+    return 0;
+
+  arange = &unit->arange;
+  do
+    {
+      if (addr >= arange->low && addr < arange->high)
+	return 1;
+      arange = arange->next;
+    }
+  while (arange);
+  return 0;
 }
 
 
@@ -1410,8 +1466,6 @@ _bfd_dwarf2_find_nearest_line (abfd, section, symbols, offset,
 
   struct comp_unit* each;
   
-  boolean found;
-
   *filename_ptr = NULL;
   *functionname_ptr = NULL;
   *linenumber_ptr = 0;
@@ -1478,31 +1532,16 @@ _bfd_dwarf2_find_nearest_line (abfd, section, symbols, offset,
   /* Check the previously read comp. units first. */
 
   for (each = stash->all_comp_units; each; each = each->next_unit)
-    {
-      if (each->high > 0)
-	{
-	  if (comp_unit_contains_address (each, addr))
-	    return comp_unit_find_nearest_line (each, addr,
-						filename_ptr, 
-						functionname_ptr, 
-						linenumber_ptr);
-	}
-      else
-	{
-	  found = comp_unit_find_nearest_line (each, addr,
-						filename_ptr, 
-						functionname_ptr, 
-						linenumber_ptr);
-	  if (found)
-	    return true;
-	}
-    }
+    if (comp_unit_contains_address (each, addr))
+      return comp_unit_find_nearest_line (each, addr, filename_ptr, 
+					  functionname_ptr, linenumber_ptr);
 
   /* Read each remaining comp. units checking each as they are read. */
   while (stash->info_ptr < stash->info_ptr_end)
     {
       struct comp_unit* each;
       unsigned int length;
+      boolean found;
 
       length = read_4_bytes (abfd, stash->info_ptr);
       stash->info_ptr += 4;
@@ -1523,7 +1562,7 @@ _bfd_dwarf2_find_nearest_line (abfd, section, symbols, offset,
 		 unit->high == 0), we need to consult the line info
 		 table to see if a compilation unit contains the given
 		 address. */
-	      if (each->high > 0)
+	      if (each->arange.high > 0)
 		{
 		  if (comp_unit_contains_address (each, addr))
 		    return comp_unit_find_nearest_line (each, addr,
