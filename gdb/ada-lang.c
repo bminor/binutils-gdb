@@ -5040,7 +5040,7 @@ find_printable_frame (struct frame_info *fi, int level)
 	find_pc_line (fi->pc,
 		      fi->next != NULL
 		      && !fi->next->signal_handler_caller
-		      && !frame_in_dummy (fi->next));
+		      && !deprecated_frame_in_dummy (fi->next));
       if (sal.symtab && !is_ada_runtime_file (sal.symtab->filename))
 	{
 #if defined(__alpha__) && defined(__osf__) && !defined(VXWORKS_TARGET)

@@ -1,3 +1,13 @@
+2002-11-10  Andrew Cagney  <ac131313@redhat.com>
+
+	* breakpoint.h (deprecated_frame_in_dummy): Rename frame_in_dummy.
+	* stack.c (print_frame_info_base): Update.
+	(print_frame_info_base, frame_info): Update.
+	* sparc-tdep.c (sparc_init_extra_frame_info): Update.
+	(sparc_frame_saved_pc): Update.
+	* ada-lang.c (find_printable_frame): Update.
+	* breakpoint.c (deprecated_frame_in_dummy): Update.
+	
 2002-11-09  Mark Kettenis  <kettenis@gnu.org>
 
 	* i386-linux-nat.c (ORIG_EAX): Define to -1 if not already

@@ -350,7 +350,7 @@ print_frame_info_base (struct frame_info *fi, int level, int source, int args)
      to check for a bp_call_dummy breakpoint.  */
   if (PC_IN_CALL_DUMMY (fi->pc, sp, fi->frame))
 #else
-  if (frame_in_dummy (fi))
+  if (deprecated_frame_in_dummy (fi))
 #endif
     {
       annotate_frame_begin (level == -1 ? 0 : level, fi->pc);
@@ -394,7 +394,7 @@ print_frame_info_base (struct frame_info *fi, int level, int source, int args)
     find_pc_line (fi->pc,
 		  fi->next != NULL
 		  && !fi->next->signal_handler_caller
-		  && !frame_in_dummy (fi->next));
+		  && !deprecated_frame_in_dummy (fi->next));
 
   location_print = (source == LOCATION 
 		    || source == LOC_AND_ADDRESS
@@ -794,7 +794,7 @@ frame_info (char *addr_exp, int from_tty)
   sal = find_pc_line (fi->pc,
 		      fi->next != NULL
 		      && !fi->next->signal_handler_caller
-		      && !frame_in_dummy (fi->next));
+		      && !deprecated_frame_in_dummy (fi->next));
   func = get_frame_function (fi);
   s = find_pc_symtab (fi->pc);
   if (func)

@@ -315,7 +315,7 @@ sparc_init_extra_frame_info (int fromleaf, struct frame_info *fi)
          it later.  */
       if (fi->next->next != NULL
 	  && (fi->next->next->signal_handler_caller
-	      || frame_in_dummy (fi->next->next))
+	      || deprecated_frame_in_dummy (fi->next->next))
 	  && frameless_look_for_prologue (fi->next))
 	{
 	  /* A frameless function interrupted by a signal did not change
@@ -488,7 +488,7 @@ sparc_frame_saved_pc (struct frame_info *frame)
   else if (frame->extra_info->in_prologue ||
 	   (frame->next != NULL &&
 	    (frame->next->signal_handler_caller ||
-	     frame_in_dummy (frame->next)) &&
+	     deprecated_frame_in_dummy (frame->next)) &&
 	    frameless_look_for_prologue (frame)))
     {
       /* A frameless function interrupted by a signal did not save

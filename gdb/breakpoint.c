@@ -1688,7 +1688,7 @@ breakpoint_inserted_here_p (CORE_ADDR pc)
    bp_call_dummy breakpoint.  */
 
 int
-frame_in_dummy (struct frame_info *frame)
+deprecated_frame_in_dummy (struct frame_info *frame)
 {
   struct breakpoint *b;
 
