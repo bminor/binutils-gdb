@@ -113,6 +113,10 @@ if { [istarget mips*-*-*] } then {
     run_dump_test "mips32"
     run_dump_test "mips64"
 
+    # It will always fail until someone fixes it.
+    setup_xfail "mips*-*-*"
+    run_dump_test "relax"
+
     run_list_test "illegal" ""
 
     if $svr4pic {

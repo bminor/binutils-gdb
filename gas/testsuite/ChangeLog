@@ -1,5 +1,19 @@
 2001-06-08  H.J. Lu  <hjl@gnu.org>
 
+	* gas/mips/elfel-rel3.s: Moved to ...
+	* gas/mips/elf-rel3.s: Here.
+
+	* gas/mips/elf-rel3.d: Updated.
+
+	* gas/mips/elfel-rel3.d: Updated.
+
+	* gas/mips/relax.d: New file.
+	* gas/mips/relax.s: Likewise.
+
+	* gas/mips/mips.exp: Run relax and set xfail.
+
+2001-06-08  H.J. Lu  <hjl@gnu.org>
+
 	* gas/mips/illegal.s: New file.
 	* gas/mips/illegal.l: Likewise.
 
