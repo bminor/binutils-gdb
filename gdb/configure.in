@@ -237,6 +237,7 @@ a29k)
 mips)
 	case "${target_vendor}" in
 	sony)	gdb_target=bigmips ;;
+	big)	gdb_target=bigmips ;;
 	dec)	gdb_target=decstation ;;
 	little)	gdb_target=littlemips ;;
 	sgi)	gdb_target=irix3 ;;
