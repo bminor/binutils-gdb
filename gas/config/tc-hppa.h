@@ -161,10 +161,10 @@ int hppa_fix_adjustable PARAMS((struct fix *));
 #define UNDEFINED_DIFFERENCE_OK
 #endif
 
-#ifdef OBJ_ELF
 /* Values passed to md_apply_fix3 don't include the symbol value.  */
 #define MD_APPLY_SYM_VALUE(FIX) 0
 
+#ifdef OBJ_ELF
 /* Handle .type psuedo.  Given a type string of `millicode', set the
    internal elf symbol type to STT_PARISC_MILLI, and return
    BSF_FUNCTION for the BFD symbol type.  */

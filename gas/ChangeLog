@@ -1,3 +1,10 @@
+2002-09-05  Jeff Law  <law@redhat.com>
+
+        * config/tc-hppa.c (md_apply_fix3): Don't set fx_done for
+        marker relocations such as ENTRY/EXIT.
+        * config/tc-hppa.h (MD_APPLY_SYM_VALUE): Definition applies
+        to both OBJ_ELF and OBJ_SOM.
+
 2002-09-05  Alan Modra  <amodra@bigpond.net.au>
 
 	* doc/internals.texi (md_apply_fix3): Expand.

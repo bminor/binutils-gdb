@@ -4419,9 +4419,6 @@ md_apply_fix3 (fixP, valP, seg)
   offsetT new_val;
   int insn, val, fmt;
 
-  if (fixP->fx_addsy == NULL && fixP->fx_pcrel == 0)
-    fixP->fx_done = 1;
-
   /* SOM uses R_HPPA_ENTRY and R_HPPA_EXIT relocations which can
      never be "applied" (they are just markers).  Likewise for
      R_HPPA_BEGIN_BRTAB and R_HPPA_END_BRTAB.  */
@@ -4447,6 +4444,9 @@ md_apply_fix3 (fixP, valP, seg)
       || fixP->fx_r_type == (int) R_PARISC_GNU_VTINHERIT)
     return;
 #endif
+
+  if (fixP->fx_addsy == NULL && fixP->fx_pcrel == 0)
+    fixP->fx_done = 1;
 
   /* There should have been an HPPA specific fixup associated
      with the GAS fixup.  */
