@@ -1,3 +1,7 @@
+Thu Feb  5 15:55:31 1998  C. M. Heard (heard@vvnet.com)
+
+        * top.c (do_nothing): Remove signal handler after signal is caught.
+
 Thu Feb  5 11:57:06 1998  Michael Snyder  (msnyder@cleaver.cygnus.com)
 
 	* tracepoint.c (tracepoint_operation): call free_actions instead
