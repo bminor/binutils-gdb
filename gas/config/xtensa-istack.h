@@ -72,17 +72,17 @@ typedef struct tinsn_stack
 } IStack;
 
 
-void istack_init PARAMS ((IStack *));
-bfd_boolean istack_empty PARAMS ((IStack *));
-bfd_boolean istack_full PARAMS ((IStack *));
-TInsn *istack_top PARAMS ((IStack *));
-void istack_push PARAMS ((IStack *, TInsn *));
-TInsn *istack_push_space PARAMS ((IStack *)); 
-void istack_pop PARAMS ((IStack *));
+void istack_init (IStack *);
+bfd_boolean istack_empty (IStack *);
+bfd_boolean istack_full (IStack *);
+TInsn *istack_top (IStack *);
+void istack_push (IStack *, TInsn *);
+TInsn *istack_push_space (IStack *); 
+void istack_pop (IStack *);
 
 /* TInsn utilities.  */
-void tinsn_init PARAMS ((TInsn *));
-expressionS *tinsn_get_tok PARAMS ((TInsn *, int));
+void tinsn_init (TInsn *);
+expressionS *tinsn_get_tok (TInsn *, int);
 
 
 /* vliw_insn: bundles of TInsns.  */

@@ -39,11 +39,6 @@ extern xtensa_isa xtensa_default_isa;
 
 int show_raw_fields;
 
-static int fetch_data
-  PARAMS ((struct disassemble_info *, bfd_vma));
-static void print_xtensa_operand
-  PARAMS ((bfd_vma, struct disassemble_info *, xtensa_opcode, int, unsigned));
-
 struct dis_private
 {
   bfd_byte *byte_buf;
@@ -52,9 +47,7 @@ struct dis_private
 
 
 static int
-fetch_data (info, memaddr)
-     struct disassemble_info *info;
-     bfd_vma memaddr;
+fetch_data (struct disassemble_info *info, bfd_vma memaddr)
 {
   int length, status = 0;
   struct dis_private *priv = (struct dis_private *) info->private_data;
@@ -79,12 +72,11 @@ fetch_data (info, memaddr)
 
 
 static void
-print_xtensa_operand (memaddr, info, opc, opnd, operand_val)
-     bfd_vma memaddr;
-     struct disassemble_info *info;
-     xtensa_opcode opc;
-     int opnd;
-     unsigned operand_val;
+print_xtensa_operand (bfd_vma memaddr,
+		      struct disassemble_info *info,
+		      xtensa_opcode opc,
+		      int opnd,
+		      unsigned operand_val)
 {
   xtensa_isa isa = xtensa_default_isa;
   int signed_operand_val;
@@ -141,9 +133,7 @@ print_xtensa_operand (memaddr, info, opc, opnd, operand_val)
    Returns length of the instruction in bytes.  */
 
 int
-print_insn_xtensa (memaddr, info)
-     bfd_vma memaddr;
-     struct disassemble_info *info;
+print_insn_xtensa (bfd_vma memaddr, struct disassemble_info *info)
 {
   unsigned operand_val;
   int bytes_fetched, size, maxsize, i, n, noperands, nslots;
@@ -184,7 +174,7 @@ print_insn_xtensa (memaddr, info)
 
   priv.byte_buf = byte_buf;
 
-  info->private_data = (PTR) &priv;
+  info->private_data = (void *) &priv;
   if (setjmp (priv.bailout) != 0)
       /* Error return.  */
       return -1;

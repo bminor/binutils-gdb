@@ -1,3 +1,7 @@
+2004-10-12  Bob Wilson  <bob.wilson@acm.org>
+
+	* emultempl/xtensaelf.em: Use ISO C90 formatting.
+
 2004-10-11  Jakub Jelinek  <jakub@redhat.com>
 
 	* emultempl/elf32.em (gld${EMULATION_NAME}_parse_ld_so_conf): Avoid

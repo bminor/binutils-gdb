@@ -1,3 +1,11 @@
+2004-10-12  Bob Wilson  <bob.wilson@acm.org>
+
+	* config/tc-xtensa.c: Use ISO C90 formatting.
+	* config/tc-xtensa.h: Likewise.
+	* config/xtensa-istack.h: Likewise.
+	* config/xtensa-relax.c: Likewise.
+	* config/xtensa-relax.h: Likewise.
+
 2004-10-12  Paul Brook  <paul@codesourcery.com>
 
 	* config/tc-arm.c (md_begin): Change EF_ARM_EABI_VER3 to

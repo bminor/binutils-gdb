@@ -173,10 +173,10 @@ struct transition_rule
 typedef int (*transition_cmp_fn) (const TransitionRule *,
 				  const TransitionRule *);
 
-extern TransitionTable *xg_build_simplify_table PARAMS ((transition_cmp_fn));
-extern TransitionTable *xg_build_widen_table PARAMS ((transition_cmp_fn));
+extern TransitionTable *xg_build_simplify_table (transition_cmp_fn);
+extern TransitionTable *xg_build_widen_table (transition_cmp_fn);
 
-extern bfd_boolean xg_has_userdef_op_fn PARAMS ((OpType));
-extern long xg_apply_userdef_op_fn PARAMS ((OpType, long));
+extern bfd_boolean xg_has_userdef_op_fn (OpType);
+extern long xg_apply_userdef_op_fn (OpType, long);
 
 #endif /* !XTENSA_RELAX_H */

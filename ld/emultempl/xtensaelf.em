@@ -32,10 +32,6 @@ cat >>e${EMULATION_NAME}.c <<EOF
 
 static void xtensa_wild_group_interleave (lang_statement_union_type *);
 static void xtensa_colocate_output_literals (lang_statement_union_type *);
-static void remove_section (bfd *, asection *);
-static bfd_boolean replace_insn_sec_with_prop_sec (bfd *, const char *,
-						   const char *, char **);
-static void replace_instruction_table_sections (bfd *, asection *);
 
 
 /* Flag for the emulation-specific "--no-relax" option.  */
@@ -82,10 +78,8 @@ elf_xtensa_before_parse (void)
 }
 
 
-void
-remove_section (abfd, os)
-     bfd *abfd;
-     asection *os;
+static void
+remove_section (bfd *abfd, asection *os)
 {
   asection **spp;
   for (spp = &abfd->sections; *spp; spp = &(*spp)->next)
@@ -98,13 +92,11 @@ remove_section (abfd, os)
 }
 
 
-bfd_boolean
-replace_insn_sec_with_prop_sec (abfd, insn_sec_name, prop_sec_name,
-				error_message)
-     bfd *abfd;
-     const char *insn_sec_name;
-     const char *prop_sec_name;
-     char **error_message;
+static bfd_boolean
+replace_insn_sec_with_prop_sec (bfd *abfd,
+				const char *insn_sec_name,
+				const char *prop_sec_name,
+				char **error_message)
 {
   asection *insn_sec;
   asection *prop_sec;
@@ -269,10 +261,8 @@ replace_insn_sec_with_prop_sec (abfd, insn_sec_name, prop_sec_name,
 #define LINKONCE_SEC_OLD_TEXT_BASE_NAME ".gnu.linkonce.x."
 
 
-void
-replace_instruction_table_sections (abfd, sec)
-     bfd *abfd;
-     asection *sec;
+static void
+replace_instruction_table_sections (bfd *abfd, asection *sec)
 {
   char *message = "";
   const char *insn_sec_name = NULL;
@@ -445,8 +435,7 @@ typedef void (*deps_callback_t) (asection *, /* src_sec */
 
 extern bfd_boolean xtensa_callback_required_dependence
   (bfd *, asection *, struct bfd_link_info *, deps_callback_t, void *);
-static void xtensa_ldlang_clear_addresses
-  (lang_statement_union_type *);
+static void xtensa_ldlang_clear_addresses (lang_statement_union_type *);
 static bfd_boolean ld_local_file_relocations_fit
   (lang_statement_union_type *, const reloc_deps_graph *);
 static bfd_vma ld_assign_relative_paged_dot
@@ -455,8 +444,7 @@ static bfd_vma ld_assign_relative_paged_dot
 static bfd_vma ld_xtensa_insert_page_offsets
   (bfd_vma, lang_statement_union_type *, reloc_deps_graph *, bfd_boolean);
 #if EXTRA_VALIDATION
-static size_t ld_count_children
-  (lang_statement_union_type *);
+static size_t ld_count_children (lang_statement_union_type *);
 #endif
 
 extern lang_statement_list_type constructor_list;
@@ -633,6 +621,7 @@ section_is_target (const reloc_deps_graph *deps ATTRIBUTE_UNUSED,
   sec_deps = xtensa_get_section_deps (deps, sec);
   return sec_deps && sec_deps->preds != NULL;
 }
+
 
 static bfd_boolean
 section_is_source_or_target (const reloc_deps_graph *deps ATTRIBUTE_UNUSED,
@@ -860,8 +849,7 @@ iter_stack_create (xtensa_ld_iter_stack **stack_p,
 
 
 static void
-iter_stack_copy_current (xtensa_ld_iter_stack **stack_p,
-			 xtensa_ld_iter *front)
+iter_stack_copy_current (xtensa_ld_iter_stack **stack_p, xtensa_ld_iter *front)
 {
   *front = (*stack_p)->iterloc;
 }
@@ -1027,9 +1015,7 @@ xtensa_move_dependencies_to_front (reloc_deps_graph *deps,
 
 
 static bfd_boolean
-deps_has_sec_edge (const reloc_deps_graph *deps,
-		   asection *src,
-		   asection *tgt)
+deps_has_sec_edge (const reloc_deps_graph *deps, asection *src, asection *tgt)
 {
   const reloc_deps_section *sec_deps;
   const reloc_deps_e *sec_deps_e;
@@ -1071,9 +1057,7 @@ deps_has_edge (const reloc_deps_graph *deps,
 
 
 static void
-add_deps_edge (reloc_deps_graph *deps,
-	       asection *src_sec,
-	       asection *tgt_sec)
+add_deps_edge (reloc_deps_graph *deps, asection *src_sec, asection *tgt_sec)
 {
   reloc_deps_section *src_sec_deps;
   reloc_deps_section *tgt_sec_deps;
@@ -1295,8 +1279,7 @@ xtensa_wild_group_interleave (lang_statement_union_type *s)
 
 
 static void
-xtensa_layout_wild (const reloc_deps_graph *deps,
-		    lang_wild_statement_type *w)
+xtensa_layout_wild (const reloc_deps_graph *deps, lang_wild_statement_type *w)
 {
   /* If it does not fit initially, we need to do this step.  Move all
      of the wild literal sections to a new list, then move each of

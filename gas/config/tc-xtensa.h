@@ -289,46 +289,29 @@ typedef struct xtensa_segment_info_struct
 
 /* Section renaming is only supported in Tensilica's version of GAS.  */
 #ifdef XTENSA_SECTION_RENAME
-extern const char *xtensa_section_rename
-  PARAMS ((const char *));
+extern const char *xtensa_section_rename (const char *);
 #else
 /* Tensilica's section renaming feature is not included here.  */
 #define xtensa_section_rename(name)	(name)
 #endif /* XTENSA_SECTION_RENAME */
 
 
-extern const char *xtensa_target_format
-  PARAMS ((void));
-extern void xtensa_init_fix_data
-  PARAMS ((struct fix *));
-extern void xtensa_frag_init
-  PARAMS ((fragS *));
-extern int xtensa_force_relocation
-  PARAMS ((struct fix *));
-extern void xtensa_frob_label
-  PARAMS ((struct symbol *));
-extern void xtensa_end
-  PARAMS ((void));
-extern void xtensa_post_relax_hook
-  PARAMS ((void));
-extern void xtensa_file_arch_init
-  PARAMS ((bfd *));
-extern void xtensa_flush_pending_output
-  PARAMS ((void));
-extern bfd_boolean xtensa_fix_adjustable
-  PARAMS ((struct fix *));
-extern void xtensa_symbol_new_hook
-  PARAMS ((symbolS *));
-extern long xtensa_relax_frag
-  PARAMS ((fragS *, long, int *));
-extern void xtensa_elf_section_change_hook
-  PARAMS ((void));
-extern int xtensa_unrecognized_line
-  PARAMS ((int));
-extern bfd_boolean xtensa_check_inside_bundle
-  PARAMS ((void));
-extern void xtensa_handle_align
-  PARAMS ((fragS *));
+extern const char *xtensa_target_format (void);
+extern void xtensa_init_fix_data (struct fix *);
+extern void xtensa_frag_init (fragS *);
+extern int xtensa_force_relocation (struct fix *);
+extern void xtensa_frob_label (struct symbol *);
+extern void xtensa_end (void);
+extern void xtensa_post_relax_hook (void);
+extern void xtensa_file_arch_init (bfd *);
+extern void xtensa_flush_pending_output (void);
+extern bfd_boolean xtensa_fix_adjustable (struct fix *);
+extern void xtensa_symbol_new_hook (symbolS *);
+extern long xtensa_relax_frag (fragS *, long, int *);
+extern void xtensa_elf_section_change_hook (void);
+extern int xtensa_unrecognized_line (int);
+extern bfd_boolean xtensa_check_inside_bundle (void);
+extern void xtensa_handle_align (fragS *);
 
 #define TARGET_FORMAT			xtensa_target_format ()
 #define TARGET_ARCH			bfd_arch_xtensa
@@ -421,8 +404,8 @@ typedef int (*opcode_funcUnit_use_stage_func) (void *, xtensa_opcode, int);
    Of course the optional scheduler has its own reservation table 
    and functions.  */
 
-int opcode_funcUnit_use_unit PARAMS ((void *, xtensa_opcode, int));
-int opcode_funcUnit_use_stage PARAMS ((void *, xtensa_opcode, int));
+int opcode_funcUnit_use_unit (void *, xtensa_opcode, int);
+int opcode_funcUnit_use_stage (void *, xtensa_opcode, int);
 
 typedef struct
 {
@@ -438,13 +421,12 @@ typedef struct
 } resource_table;
 
 resource_table *new_resource_table 
-  PARAMS ((void *, int, int, unit_num_copies_func, opcode_num_units_func, 
-	   opcode_funcUnit_use_unit_func, opcode_funcUnit_use_stage_func));
-void resize_resource_table PARAMS ((resource_table *, int));
-void clear_resource_table PARAMS ((resource_table *));
-bfd_boolean resources_available
-  PARAMS ((resource_table *, xtensa_opcode, int));
-void reserve_resources PARAMS ((resource_table *, xtensa_opcode, int));
-void release_resources PARAMS ((resource_table *, xtensa_opcode, int));
+  (void *, int, int, unit_num_copies_func, opcode_num_units_func, 
+   opcode_funcUnit_use_unit_func, opcode_funcUnit_use_stage_func);
+void resize_resource_table (resource_table *, int);
+void clear_resource_table (resource_table *);
+bfd_boolean resources_available (resource_table *, xtensa_opcode, int);
+void reserve_resources (resource_table *, xtensa_opcode, int);
+void release_resources (resource_table *, xtensa_opcode, int);
 
 #endif /* TC_XTENSA */

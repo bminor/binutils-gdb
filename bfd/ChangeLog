@@ -1,3 +1,7 @@
+2004-10-12  Bob Wilson  <bob.wilson@acm.org>
+
+	* elf32-xtensa.c: Use ISO C90 formatting.
+
 2004-10-12  Paul Brook  <paul@codesourcery.com>
 
 	* elf32-arm.h (elf32_arm_merge_private_bfd_data): Rephrase error

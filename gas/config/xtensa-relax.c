@@ -442,148 +442,17 @@ string_pattern_pair simplify_spec_list[] =
   (sizeof (simplify_spec_list) / sizeof (string_pattern_pair))
 
 
-/* Transition generation helpers.  */
-
-static void append_transition 
-  PARAMS ((TransitionTable *, xtensa_opcode, TransitionRule *,
-	   transition_cmp_fn));
-static void append_condition 
-  PARAMS ((TransitionRule *, Precondition *));
-static void append_value_condition 
-  PARAMS ((TransitionRule *, CmpOp, unsigned, unsigned));
-static void append_constant_value_condition 
-  PARAMS ((TransitionRule *, CmpOp, unsigned, unsigned));
-static void append_build_insn
-  PARAMS ((TransitionRule *, BuildInstr *));
-static void append_op
-  PARAMS ((BuildInstr *, BuildOp *));
-static void append_literal_op 
-  PARAMS ((BuildInstr *, unsigned, unsigned));
-static void append_label_op 
-  PARAMS ((BuildInstr *, unsigned, unsigned));
-static void append_constant_op 
-  PARAMS ((BuildInstr *, unsigned, unsigned));
-static void append_field_op 
-  PARAMS ((BuildInstr *, unsigned, unsigned));
-static void append_user_fn_field_op 
-  PARAMS ((BuildInstr *, unsigned, OpType, unsigned));
-static long operand_function_HI24S
-  PARAMS ((long));
-static long operand_function_F32MINUS
-  PARAMS ((long));
-static long operand_function_LOW8
-  PARAMS ((long));
-static long operand_function_LOW16U
-  PARAMS ((long));
-static long operand_function_HI16U
-  PARAMS ((long));
-
 /* Externally visible functions.  */
 
-extern bfd_boolean xg_has_userdef_op_fn
-  PARAMS ((OpType));
-extern long xg_apply_userdef_op_fn
-  PARAMS ((OpType, long));
+extern bfd_boolean xg_has_userdef_op_fn (OpType);
+extern long xg_apply_userdef_op_fn (OpType, long);
 
-/* Parsing helpers.  */
 
-static const char *enter_opname_n
-  PARAMS ((const char *, int));
-static const char *enter_opname
-  PARAMS ((const char *));
-
-/* Construction and destruction.  */
-
-static void init_opname_map
-  PARAMS ((opname_map *));
-static void clear_opname_map
-  PARAMS ((opname_map *));
-static void init_precond_list
-  PARAMS ((precond_list *));
-static void clear_precond_list
-  PARAMS ((precond_list *));
-static void init_insn_templ
-  PARAMS ((insn_templ *));
-static void clear_insn_templ
-  PARAMS ((insn_templ *));
-static void init_insn_pattern
-  PARAMS ((insn_pattern *));
-static void clear_insn_pattern
-  PARAMS ((insn_pattern *));
-static void init_insn_repl
-  PARAMS ((insn_repl *));
-static void clear_insn_repl
-  PARAMS ((insn_repl *));
-static void init_split_rec
-  PARAMS ((split_rec *));
-static void clear_split_rec
-  PARAMS ((split_rec *));
-static void clear_req_or_option_list
-  PARAMS ((ReqOrOption **));
-static void clear_req_option_list
-  PARAMS ((ReqOption **));
-static ReqOrOption *clone_req_or_option_list
-  PARAMS ((ReqOrOption *));
-static ReqOption *clone_req_option_list
-  PARAMS ((ReqOption *));
-
-/* Operand and insn_templ helpers.  */
-
-static bfd_boolean same_operand_name
-  PARAMS ((const opname_map_e *, const opname_map_e *));
-static opname_map_e *get_opmatch
-  PARAMS ((opname_map *, const char *));
-static bfd_boolean op_is_constant
-  PARAMS ((const opname_map_e *));
-static unsigned op_get_constant
-  PARAMS ((const opname_map_e *));
-static int insn_templ_operand_count
-  PARAMS ((const insn_templ *));
-
-/* Parsing helpers.  */
-
-static const char *skip_white
-  PARAMS ((const char *));
-static void trim_whitespace
-  PARAMS ((char *));
-static void split_string 
-  PARAMS ((split_rec *, const char *, char,  bfd_boolean));
-
-/* Language parsing.  */
-
-static bfd_boolean parse_insn_pattern 
-  PARAMS ((const char *, insn_pattern *));
-static bfd_boolean parse_insn_repl 
-  PARAMS ((const char *, insn_repl *));
-static bfd_boolean parse_insn_templ 
-  PARAMS ((const char *, insn_templ *));
-static bfd_boolean parse_special_fn 
-  PARAMS ((const char *, const char **, const char **));
-static bfd_boolean parse_precond
-  PARAMS ((const char *, precond_e *));
-static bfd_boolean parse_constant
-  PARAMS ((const char *, unsigned *));
-static bfd_boolean parse_id_constant 
-  PARAMS ((const char *, const char *, unsigned *));
-static bfd_boolean parse_option_cond
-  PARAMS ((const char *, ReqOption *));
-
-/* Transition table building code.  */
-
-static bfd_boolean transition_applies 
-  PARAMS ((insn_pattern *, const char *, const char *));
-static TransitionRule *build_transition 
-  PARAMS ((insn_pattern *, insn_repl *, const char *, const char *));
-static TransitionTable *build_transition_table 
-  PARAMS ((const string_pattern_pair *, int, transition_cmp_fn));
-
-
-void
-append_transition (tt, opcode, t, cmp)
-     TransitionTable *tt;
-     xtensa_opcode opcode;
-     TransitionRule *t;
-     transition_cmp_fn cmp;
+static void
+append_transition (TransitionTable *tt,
+		   xtensa_opcode opcode,
+		   TransitionRule *t,
+		   transition_cmp_fn cmp)
 {
   TransitionList *tl = (TransitionList *) xmalloc (sizeof (TransitionList));
   TransitionList *prev;
@@ -614,10 +483,8 @@ append_transition (tt, opcode, t, cmp)
 }
 
 
-void
-append_condition (tr, cond)
-     TransitionRule *tr;
-     Precondition *cond;
+static void
+append_condition (TransitionRule *tr, Precondition *cond)
 {
   PreconditionList *pl =
     (PreconditionList *) xmalloc (sizeof (PreconditionList));
@@ -641,12 +508,11 @@ append_condition (tr, cond)
 }
 
 
-void
-append_value_condition (tr, cmp, op1, op2)
-     TransitionRule *tr;
-     CmpOp cmp;
-     unsigned op1;
-     unsigned op2;
+static void
+append_value_condition (TransitionRule *tr,
+			CmpOp cmp,
+			unsigned op1,
+			unsigned op2)
 {
   Precondition *cond = (Precondition *) xmalloc (sizeof (Precondition));
 
@@ -658,12 +524,11 @@ append_value_condition (tr, cmp, op1, op2)
 }
 
 
-void
-append_constant_value_condition (tr, cmp, op1, cnst)
-     TransitionRule *tr;
-     CmpOp cmp;
-     unsigned op1;
-     unsigned cnst;
+static void
+append_constant_value_condition (TransitionRule *tr,
+				 CmpOp cmp,
+				 unsigned op1,
+				 unsigned cnst)
 {
   Precondition *cond = (Precondition *) xmalloc (sizeof (Precondition));
 
@@ -675,10 +540,8 @@ append_constant_value_condition (tr, cmp, op1, cnst)
 }
 
 
-void
-append_build_insn (tr, bi)
-     TransitionRule *tr;
-     BuildInstr *bi;
+static void
+append_build_insn (TransitionRule *tr, BuildInstr *bi)
 {
   BuildInstr *prev = tr->to_instr;
   BuildInstr *nxt;
@@ -699,10 +562,8 @@ append_build_insn (tr, bi)
 }
 
 
-void
-append_op (bi, b_op)
-     BuildInstr *bi;
-     BuildOp *b_op;
+static void
+append_op (BuildInstr *bi, BuildOp *b_op)
 {
   BuildOp *prev = bi->ops;
   BuildOp *nxt;
@@ -722,11 +583,8 @@ append_op (bi, b_op)
 }
 
 
-void
-append_literal_op (bi, op1, litnum)
-     BuildInstr *bi;
-     unsigned op1;
-     unsigned litnum;
+static void
+append_literal_op (BuildInstr *bi, unsigned op1, unsigned litnum)
 {
   BuildOp *b_op = (BuildOp *) xmalloc (sizeof (BuildOp));
 
@@ -738,11 +596,8 @@ append_literal_op (bi, op1, litnum)
 }
 
 
-void
-append_label_op (bi, op1, labnum)
-     BuildInstr *bi;
-     unsigned op1;
-     unsigned labnum;
+static void
+append_label_op (BuildInstr *bi, unsigned op1, unsigned labnum)
 {
   BuildOp *b_op = (BuildOp *) xmalloc (sizeof (BuildOp));
 
@@ -754,11 +609,8 @@ append_label_op (bi, op1, labnum)
 }
 
 
-void
-append_constant_op (bi, op1, cnst)
-     BuildInstr *bi;
-     unsigned op1;
-     unsigned cnst;
+static void
+append_constant_op (BuildInstr *bi, unsigned op1, unsigned cnst)
 {
   BuildOp *b_op = (BuildOp *) xmalloc (sizeof (BuildOp));
 
@@ -770,11 +622,8 @@ append_constant_op (bi, op1, cnst)
 }
 
 
-void
-append_field_op (bi, op1, src_op)
-     BuildInstr *bi;
-     unsigned op1;
-     unsigned src_op;
+static void
+append_field_op (BuildInstr *bi, unsigned op1, unsigned src_op)
 {
   BuildOp *b_op = (BuildOp *) xmalloc (sizeof (BuildOp));
 
@@ -788,12 +637,11 @@ append_field_op (bi, op1, src_op)
 
 /* These could be generated but are not currently.  */
 
-void
-append_user_fn_field_op (bi, op1, typ, src_op)
-     BuildInstr *bi;
-     unsigned op1;
-     OpType typ;
-     unsigned src_op;
+static void
+append_user_fn_field_op (BuildInstr *bi,
+			 unsigned op1,
+			 OpType typ,
+			 unsigned src_op)
 {
   BuildOp *b_op = (BuildOp *) xmalloc (sizeof (BuildOp));
 
@@ -808,9 +656,8 @@ append_user_fn_field_op (bi, op1, typ, src_op)
 /* These operand functions are the semantics of user-defined
    operand functions.  */
 
-long
-operand_function_HI24S (a)
-     long a;
+static long
+operand_function_HI24S (long a)
 {
   if (a & 0x80)
     return (a & (~0xff)) + 0x100;
@@ -819,17 +666,15 @@ operand_function_HI24S (a)
 }
 
 
-long
-operand_function_F32MINUS (a)
-     long a;
+static long
+operand_function_F32MINUS (long a)
 {
   return (32 - a);
 }
 
 
-long
-operand_function_LOW8 (a)
-     long a;
+static long
+operand_function_LOW8 (long a)
 {
   if (a & 0x80)
     return (a & 0xff) | ~0xff;
@@ -838,17 +683,15 @@ operand_function_LOW8 (a)
 }
 
 
-long
-operand_function_LOW16U (a)
-     long a;
+static long
+operand_function_LOW16U (long a)
 {
   return (a & 0xffff);
 }
 
 
-long
-operand_function_HI16U (a)
-     long a;
+static long
+operand_function_HI16U (long a)
 {
   unsigned long b = a & 0xffff0000;
   return (long) (b >> 16);
@@ -856,8 +699,7 @@ operand_function_HI16U (a)
 
 
 bfd_boolean
-xg_has_userdef_op_fn (op)
-     OpType op;
+xg_has_userdef_op_fn (OpType op)
 {
   switch (op)
     {
@@ -875,9 +717,7 @@ xg_has_userdef_op_fn (op)
 
 
 long
-xg_apply_userdef_op_fn (op, a)
-     OpType op;
-     long a;
+xg_apply_userdef_op_fn (OpType op, long a)
 {
   switch (op)
     {
@@ -900,10 +740,8 @@ xg_apply_userdef_op_fn (op, a)
 
 /* Generate a transition table.  */
 
-const char *
-enter_opname_n (name, len)
-     const char *name;
-     int len;
+static const char *
+enter_opname_n (const char *name, int len)
 {
   opname_e *op;
 
@@ -922,8 +760,7 @@ enter_opname_n (name, len)
 
 
 static const char *
-enter_opname (name)
-     const char *name;
+enter_opname (const char *name)
 {
   opname_e *op;
 
@@ -938,18 +775,16 @@ enter_opname (name)
 }
 
 
-void
-init_opname_map (m)
-     opname_map *m;
+static void
+init_opname_map (opname_map *m)
 {
   m->head = NULL;
   m->tail = &m->head;
 }
 
 
-void
-clear_opname_map (m)
-     opname_map *m;
+static void
+clear_opname_map (opname_map *m)
 {
   opname_map_e *e;
 
@@ -964,9 +799,7 @@ clear_opname_map (m)
 
 
 static bfd_boolean
-same_operand_name (m1, m2)
-     const opname_map_e *m1;
-     const opname_map_e *m2;
+same_operand_name (const opname_map_e *m1, const opname_map_e *m2)
 {
   if (m1->operand_name == NULL || m1->operand_name == NULL)
     return FALSE;
@@ -974,10 +807,8 @@ same_operand_name (m1, m2)
 }
 
 
-opname_map_e *
-get_opmatch (map, operand_name)
-     opname_map *map;
-     const char *operand_name;
+static opname_map_e *
+get_opmatch (opname_map *map, const char *operand_name)
 {
   opname_map_e *m;
 
@@ -990,35 +821,31 @@ get_opmatch (map, operand_name)
 }
 
 
-bfd_boolean
-op_is_constant (m1)
-     const opname_map_e *m1;
+static bfd_boolean
+op_is_constant (const opname_map_e *m1)
 {
   return (m1->operand_name == NULL);
 }
 
 
 static unsigned
-op_get_constant (m1)
-     const opname_map_e *m1;
+op_get_constant (const opname_map_e *m1)
 {
   assert (m1->operand_name == NULL);
   return m1->constant_value;
 }
 
 
-void
-init_precond_list (l)
-     precond_list *l;
+static void
+init_precond_list (precond_list *l)
 {
   l->head = NULL;
   l->tail = &l->head;
 }
 
 
-void
-clear_precond_list (l)
-     precond_list *l;
+static void
+clear_precond_list (precond_list *l)
 {
   precond_e *e;
 
@@ -1032,26 +859,23 @@ clear_precond_list (l)
 }
 
 
-void
-init_insn_templ (t)
-     insn_templ *t;
+static void
+init_insn_templ (insn_templ *t)
 {
   t->opcode_name = NULL;
   init_opname_map (&t->operand_map);
 }
 
 
-void
-clear_insn_templ (t)
-     insn_templ *t;
+static void
+clear_insn_templ (insn_templ *t)
 {
   clear_opname_map (&t->operand_map);
 }
 
 
-void
-init_insn_pattern (p)
-     insn_pattern *p;
+static void
+init_insn_pattern (insn_pattern *p)
 {
   init_insn_templ (&p->t);
   init_precond_list (&p->preconds);
@@ -1059,27 +883,24 @@ init_insn_pattern (p)
 }
 
 
-void
-clear_insn_pattern (p)
-     insn_pattern *p;
+static void
+clear_insn_pattern (insn_pattern *p)
 {
   clear_insn_templ (&p->t);
   clear_precond_list (&p->preconds);
 }
 
 
-void
-init_insn_repl (r)
-     insn_repl *r;
+static void
+init_insn_repl (insn_repl *r)
 {
   r->head = NULL;
   r->tail = &r->head;
 }
 
 
-void
-clear_insn_repl (r)
-     insn_repl *r;
+static void
+clear_insn_repl (insn_repl *r)
 {
   insn_repl_e *e;
 
@@ -1094,8 +915,7 @@ clear_insn_repl (r)
 
 
 static int
-insn_templ_operand_count (t)
-     const insn_templ *t;
+insn_templ_operand_count (const insn_templ *t)
 {
   int i = 0;
   const opname_map_e *op;
@@ -1108,10 +928,8 @@ insn_templ_operand_count (t)
 
 /* Convert a string to a number.  E.G.: parse_constant("10", &num) */
 
-bfd_boolean
-parse_constant (in, val_p)
-     const char *in;
-     unsigned *val_p;
+static bfd_boolean
+parse_constant (const char *in, unsigned *val_p)
 {
   unsigned val = 0;
   const char *p;
@@ -1137,11 +955,8 @@ parse_constant (in, val_p)
    parse_id_constant("foo1", "foo", &num).
    This may also be used to just match a number.  */
 
-bfd_boolean
-parse_id_constant (in, name, val_p)
-     const char *in;
-     const char *name;
-     unsigned *val_p;
+static bfd_boolean
+parse_id_constant (const char *in, const char *name, unsigned *val_p)
 {
   unsigned namelen = 0;
   const char *p;
@@ -1161,10 +976,9 @@ parse_id_constant (in, name, val_p)
 
 
 static bfd_boolean
-parse_special_fn (name, fn_name_p, arg_name_p)
-     const char *name;
-     const char **fn_name_p;
-     const char **arg_name_p;
+parse_special_fn (const char *name,
+		  const char **fn_name_p,
+		  const char **arg_name_p)
 {
   char *p_start;
   const char *p_end;
@@ -1187,9 +1001,8 @@ parse_special_fn (name, fn_name_p, arg_name_p)
 }
 
 
-const char *
-skip_white (p)
-     const char *p;
+static const char *
+skip_white (const char *p)
 {
   if (p == NULL)
     return p;
@@ -1199,9 +1012,8 @@ skip_white (p)
 }
 
 
-void
-trim_whitespace (in)
-     char *in;
+static void
+trim_whitespace (char *in)
 {
   char *last_white = NULL;
   char *p = in;
@@ -1228,12 +1040,11 @@ trim_whitespace (in)
 /* Split a string into component strings where "c" is the
    delimiter.  Place the result in the split_rec.  */
 
-void
-split_string (rec, in, c, elide_whitespace)
-     split_rec *rec;
-     const char *in;
-     char c;
-     bfd_boolean elide_whitespace;
+static void
+split_string (split_rec *rec,
+	      const char *in,
+	      char c,
+	      bfd_boolean elide_whitespace)
 {
   int cnt = 0;
   int i;
@@ -1284,9 +1095,8 @@ split_string (rec, in, c, elide_whitespace)
 }
 
 
-void
-clear_split_rec (rec)
-     split_rec *rec;
+static void
+clear_split_rec (split_rec *rec)
 {
   int i;
 
@@ -1301,9 +1111,8 @@ clear_split_rec (rec)
 /* Initialize a split record.  The split record must be initialized
    before split_string is called.  */
 
-void
-init_split_rec (rec)
-     split_rec *rec;
+static void
+init_split_rec (split_rec *rec)
 {
   rec->vec = NULL;
   rec->count = 0;
@@ -1312,10 +1121,8 @@ init_split_rec (rec)
 
 /* Parse an instruction template like "insn op1, op2, op3".  */
 
-bfd_boolean
-parse_insn_templ (s, t)
-     const char *s;
-     insn_templ *t;
+static bfd_boolean
+parse_insn_templ (const char *s, insn_templ *t)
 {
   const char *p = s;
   int insn_name_len;
@@ -1374,10 +1181,8 @@ parse_insn_templ (s, t)
 }
 
 
-bfd_boolean
-parse_precond (s, precond)
-     const char *s;
-     precond_e *precond;
+static bfd_boolean
+parse_precond (const char *s, precond_e *precond)
 {
   /* All preconditions are currently of the form:
      a == b or a != b or a == k (where k is a constant).
@@ -1430,9 +1235,8 @@ parse_precond (s, precond)
 }
 
 
-void
-clear_req_or_option_list (r_p)
-     ReqOrOption **r_p;
+static void
+clear_req_or_option_list (ReqOrOption **r_p)
 {
   if (*r_p == NULL)
     return;
@@ -1443,9 +1247,8 @@ clear_req_or_option_list (r_p)
 }
 
 
-void
-clear_req_option_list (r_p)
-     ReqOption **r_p;
+static void
+clear_req_option_list (ReqOption **r_p)
 {
   if (*r_p == NULL)
     return;
@@ -1456,9 +1259,8 @@ clear_req_option_list (r_p)
 }
 
 
-ReqOrOption *
-clone_req_or_option_list (req_or_option)
-     ReqOrOption *req_or_option;
+static ReqOrOption *
+clone_req_or_option_list (ReqOrOption *req_or_option)
 {
   ReqOrOption *new_req_or_option;
 
@@ -1474,9 +1276,8 @@ clone_req_or_option_list (req_or_option)
 }
 
 
-ReqOption *
-clone_req_option_list (req_option)
-     ReqOption *req_option;
+static ReqOption *
+clone_req_option_list (ReqOption *req_option)
 {
   ReqOption *new_req_option;
 
@@ -1493,10 +1294,8 @@ clone_req_option_list (req_option)
 }
 
 
-bfd_boolean
-parse_option_cond (s, option)
-     const char *s;
-     ReqOption *option;
+static bfd_boolean
+parse_option_cond (const char *s, ReqOption *option)
 {
   int i;
   split_rec option_term_rec;
@@ -1560,10 +1359,8 @@ parse_option_cond (s, option)
    split_string, it requires that '|' and '?' are only used as
    delimiters for predicates and required options.  */
 
-bfd_boolean
-parse_insn_pattern (in, insn)
-     const char *in;
-     insn_pattern *insn;
+static bfd_boolean
+parse_insn_pattern (const char *in, insn_pattern *insn)
 {
   split_rec rec;
   split_rec optionrec;
@@ -1644,10 +1441,8 @@ parse_insn_pattern (in, insn)
 }
 
 
-bfd_boolean
-parse_insn_repl (in, r_p)
-     const char *in;
-     insn_repl *r_p;
+static bfd_boolean
+parse_insn_repl (const char *in, insn_repl *r_p)
 {
   /* This is a list of instruction templates separated by ';'.  */
   split_rec rec;
@@ -1674,11 +1469,10 @@ parse_insn_repl (in, r_p)
 }
 
 
-bfd_boolean
-transition_applies (initial_insn, from_string, to_string)
-     insn_pattern *initial_insn;
-     const char *from_string ATTRIBUTE_UNUSED; 
-     const char *to_string ATTRIBUTE_UNUSED; 
+static bfd_boolean
+transition_applies (insn_pattern *initial_insn,
+		    const char *from_string ATTRIBUTE_UNUSED,
+		    const char *to_string ATTRIBUTE_UNUSED)
 {
   ReqOption *req_option;
 
@@ -1727,12 +1521,11 @@ transition_applies (initial_insn, from_string, to_string)
 }
 
 
-TransitionRule *
-build_transition (initial_insn, replace_insns, from_string, to_string)
-     insn_pattern *initial_insn;
-     insn_repl *replace_insns;
-     const char *from_string;
-     const char *to_string;
+static TransitionRule *
+build_transition (insn_pattern *initial_insn,
+		  insn_repl *replace_insns,
+		  const char *from_string,
+		  const char *to_string)
 {
   TransitionRule *tr = NULL;
   xtensa_opcode opcode;
@@ -2019,11 +1812,10 @@ build_transition (initial_insn, replace_insns, from_string, to_string)
 }
 
 
-TransitionTable *
-build_transition_table (transitions, transition_count, cmp)
-     const string_pattern_pair *transitions;
-     int transition_count;
-     transition_cmp_fn cmp;
+static TransitionTable *
+build_transition_table (const string_pattern_pair *transitions,
+			int transition_count,
+			transition_cmp_fn cmp)
 {
   TransitionTable *table = NULL;
   int num_opcodes = xtensa_isa_num_opcodes (xtensa_default_isa);
@@ -2090,8 +1882,7 @@ build_transition_table (transitions, transition_count, cmp)
 
 
 extern TransitionTable *
-xg_build_widen_table (cmp)
-     transition_cmp_fn cmp;
+xg_build_widen_table (transition_cmp_fn cmp)
 {
   static TransitionTable *table = NULL;
   if (table == NULL)
@@ -2101,8 +1892,7 @@ xg_build_widen_table (cmp)
 
 
 extern TransitionTable *
-xg_build_simplify_table (cmp)
-     transition_cmp_fn cmp;
+xg_build_simplify_table (transition_cmp_fn cmp)
 {
   static TransitionTable *table = NULL;
   if (table == NULL)
