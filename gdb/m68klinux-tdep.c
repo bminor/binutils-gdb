@@ -27,8 +27,16 @@
 #include "gdb_string.h"
 #include "gdbtypes.h"
 #include "osabi.h"
+#include "regcache.h"
+#include "objfiles.h"
+#include "symtab.h"
 #include "m68k-tdep.h"
 
+/* Offsets (in target ints) into jmp_buf.  */
+
+#define M68K_LINUX_JB_ELEMENT_SIZE 4
+#define M68K_LINUX_JB_PC 7
+
 /* Check whether insn1 and insn2 are parts of a signal trampoline.  */
 
 #define IS_SIGTRAMP(insn1, insn2)					\
@@ -47,8 +55,8 @@
    of m68k_linux_frame_saved_pc we also distinguish between non-RT and RT
    signal trampolines.  */
 
-int
-m68k_linux_in_sigtramp (CORE_ADDR pc)
+static int
+m68k_linux_pc_in_sigtramp (CORE_ADDR pc, char *name)
 {
   CORE_ADDR sp;
   char buf[12];
@@ -110,7 +118,7 @@ m68k_linux_sigtramp_saved_pc (struct frame_info *frame)
 
   /* Don't cause a memory_error when accessing sigcontext in case the
      stack layout has changed or the stack is corrupt.  */
-  if (m68k_linux_in_sigtramp (get_frame_pc (frame)) == 2)
+  if (m68k_linux_pc_in_sigtramp (get_frame_pc (frame), 0) == 2)
     target_read_memory (sigcontext_addr + UCONTEXT_PC_OFFSET, buf, ptrbytes);
   else
     target_read_memory (sigcontext_addr + SIGCONTEXT_PC_OFFSET, buf, ptrbytes);
@@ -189,6 +197,11 @@ m68k_linux_extract_struct_value_address (char *regbuf)
 static void
 m68k_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  tdep->jb_pc = M68K_LINUX_JB_PC;
+  tdep->jb_elt_size = M68K_LINUX_JB_ELEMENT_SIZE;
+
   set_gdbarch_deprecated_frame_saved_pc (gdbarch,
 					 m68k_linux_frame_saved_pc);
   set_gdbarch_deprecated_extract_return_value (gdbarch,
@@ -197,6 +210,12 @@ m68k_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 					     m68k_linux_store_return_value);
   set_gdbarch_deprecated_extract_struct_value_address (gdbarch,
 						       m68k_linux_extract_struct_value_address);
+
+  set_gdbarch_pc_in_sigtramp (gdbarch, m68k_linux_pc_in_sigtramp);
+
+  /* Shared library handling.  */
+  set_gdbarch_in_solib_call_trampoline (gdbarch, in_plt_section);
+  set_gdbarch_skip_trampoline_code (gdbarch, find_solib_trampoline_target);
 }
 
 void

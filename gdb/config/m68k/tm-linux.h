@@ -20,28 +20,11 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#include "config/tm-linux.h"
-#include "m68k/tm-m68k.h"
+/* We define SVR4_SHARED_LIBS unconditionally, on the assumption that
+   link.h is available on all linux platforms.  For I386 and SH3/4, 
+   we hard-code the information rather than use link.h anyway (for 
+   the benefit of cross-debugging).  We may move to doing that for
+   other architectures as well.  */
 
-#include "regcache.h"
-
-/* Number of traps that happen between exec'ing the shell to run an
-   inferior, and when we finally get to the inferior code.  This is 2
-   on most implementations.  */
-
-#define START_INFERIOR_TRAPS_EXPECTED 2
-
-/* Offsets (in target ints) into jmp_buf.  */
-
-#define JB_ELEMENT_SIZE 4
-#define JB_PC 7
-
-/* Figure out where the longjmp will land.  Slurp the args out of the stack.
-   We expect the first arg to be a pointer to the jmp_buf structure from which
-   we extract the pc (JB_PC) that we will land at.  The pc is copied into ADDR.
-   This routine returns true on success */
-
-#define GET_LONGJMP_TARGET(ADDR) m68k_get_longjmp_target(ADDR)
-
-#define IN_SIGTRAMP(pc,name) m68k_linux_in_sigtramp (pc)
-extern int m68k_linux_in_sigtramp (CORE_ADDR pc);
+#define SVR4_SHARED_LIBS
+#include "solib.h"		/* Support for shared libraries. */

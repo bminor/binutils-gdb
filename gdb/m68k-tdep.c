@@ -77,13 +77,13 @@
 #endif
 
 
-void m68k_frame_init_saved_regs (struct frame_info *frame_info);
+static void m68k_frame_init_saved_regs (struct frame_info *frame_info);
 
 
 /* gdbarch_breakpoint_from_pc is set to m68k_local_breakpoint_from_pc
    so m68k_remote_breakpoint_from_pc is currently not used.  */
 
-const static unsigned char *
+static const unsigned char *
 m68k_remote_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
 {
   static unsigned char break_insn[] = {0x4e, (0x40 | REMOTE_BPT_VECTOR)};
@@ -91,7 +91,7 @@ m68k_remote_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
   return break_insn;
 }
 
-const static unsigned char *
+static const unsigned char *
 m68k_local_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
 {
   static unsigned char break_insn[] = {0x4e, (0x40 | BPT_VECTOR)};
@@ -110,13 +110,11 @@ m68k_register_bytes_ok (long numbytes)
 /* Number of bytes of storage in the actual machine representation
    for register regnum.  On the 68000, all regs are 4 bytes
    except the floating point regs which are 12 bytes.  */
-/* Note that the unsigned cast here forces the result of the
-   subtraction to very high positive values if regnum < FP0_REGNUM */
 
 static int
 m68k_register_raw_size (int regnum)
 {
-  return (((unsigned) (regnum) - FP0_REGNUM) < 8 ? 12 : 4);
+  return (regnum >= FP0_REGNUM && regnum < FP0_REGNUM + 8 ? 12 : 4);
 }
 
 /* Number of bytes of storage in the program's representation
@@ -126,7 +124,7 @@ m68k_register_raw_size (int regnum)
 static int
 m68k_register_virtual_size (int regnum)
 {
-  return (((unsigned) (regnum) - FP0_REGNUM) < 8 ? 12 : 4);
+  return (regnum >= FP0_REGNUM && regnum < FP0_REGNUM + 8 ? 12 : 4);
 }
 
 /* Return the GDB type object for the "standard" data type of data in
@@ -296,28 +294,6 @@ m68k_frame_saved_pc (struct frame_info *frame)
 }
 
 
-/* The only reason this is here is the tm-altos.h reference below.  It
-   was moved back here from tm-m68k.h.  FIXME? */
-
-extern CORE_ADDR
-altos_skip_prologue (CORE_ADDR pc)
-{
-  register int op = read_memory_unsigned_integer (pc, 2);
-  if (op == P_LINKW_FP)
-    pc += 4;			/* Skip link #word */
-  else if (op == P_LINKL_FP)
-    pc += 6;			/* Skip link #long */
-  /* Not sure why branches are here.  */
-  /* From tm-altos.h */
-  else if (op == 0060000)
-    pc += 4;			/* Skip bra #word */
-  else if (op == 00600377)
-    pc += 6;			/* skip bra #long */
-  else if ((op & 0177400) == 0060000)
-    pc += 2;			/* skip bra #char */
-  return pc;
-}
-
 int
 delta68_in_sigtramp (CORE_ADDR pc, char *name)
 {
@@ -353,55 +329,8 @@ delta68_frame_saved_pc (struct frame_info *frame_info)
 				       + 4, 4);
 }
 
-/* Return number of args passed to a frame.
-   Can return -1, meaning no way to tell.  */
-
-int
-isi_frame_num_args (struct frame_info *fi)
-{
-  int val;
-  CORE_ADDR pc = DEPRECATED_FRAME_SAVED_PC (fi);
-  int insn = read_memory_unsigned_integer (pc, 2);
-  val = 0;
-  if (insn == 0047757 || insn == 0157374)	/* lea W(sp),sp or addaw #W,sp */
-    val = read_memory_integer (pc + 2, 2);
-  else if ((insn & 0170777) == 0050217	/* addql #N, sp */
-	   || (insn & 0170777) == 0050117)	/* addqw */
-    {
-      val = (insn >> 9) & 7;
-      if (val == 0)
-	val = 8;
-    }
-  else if (insn == 0157774)	/* addal #WW, sp */
-    val = read_memory_integer (pc + 2, 4);
-  val >>= 2;
-  return val;
-}
-
 int
 delta68_frame_num_args (struct frame_info *fi)
-{
-  int val;
-  CORE_ADDR pc = DEPRECATED_FRAME_SAVED_PC (fi);
-  int insn = read_memory_unsigned_integer (pc, 2);
-  val = 0;
-  if (insn == 0047757 || insn == 0157374)	/* lea W(sp),sp or addaw #W,sp */
-    val = read_memory_integer (pc + 2, 2);
-  else if ((insn & 0170777) == 0050217	/* addql #N, sp */
-	   || (insn & 0170777) == 0050117)	/* addqw */
-    {
-      val = (insn >> 9) & 7;
-      if (val == 0)
-	val = 8;
-    }
-  else if (insn == 0157774)	/* addal #WW, sp */
-    val = read_memory_integer (pc + 2, 4);
-  val >>= 2;
-  return val;
-}
-
-int
-news_frame_num_args (struct frame_info *fi)
 {
   int val;
   CORE_ADDR pc = DEPRECATED_FRAME_SAVED_PC (fi);
@@ -426,7 +355,7 @@ news_frame_num_args (struct frame_info *fi)
    into a call sequence of the above form stored at DUMMYNAME.
    We use the BFD routines to store a big-endian value of known size.  */
 
-void
+static void
 m68k_fix_call_dummy (char *dummy, CORE_ADDR pc, CORE_ADDR fun, int nargs,
 		     struct value **args, struct type *type, int gcc_p)
 {
@@ -438,7 +367,7 @@ m68k_fix_call_dummy (char *dummy, CORE_ADDR pc, CORE_ADDR fun, int nargs,
 
 /* Push an empty stack frame, to record the current PC, etc.  */
 
-void
+static void
 m68k_push_dummy_frame (void)
 {
   register CORE_ADDR sp = read_register (SP_REGNUM);
@@ -468,7 +397,7 @@ m68k_push_dummy_frame (void)
 /* Discard from the stack the innermost frame,
    restoring all saved registers.  */
 
-void
+static void
 m68k_pop_frame (void)
 {
   register struct frame_info *frame = get_current_frame ();
@@ -539,7 +468,7 @@ m68k_pop_frame (void)
 
  */
 
-CORE_ADDR
+static CORE_ADDR
 m68k_skip_prologue (CORE_ADDR ip)
 {
   register CORE_ADDR limit;
@@ -580,7 +509,7 @@ m68k_skip_prologue (CORE_ADDR ip)
    ways in the stack frame.  sp is even more special:
    the address we return for it IS the sp for the next frame.  */
 
-void
+static void
 m68k_frame_init_saved_regs (struct frame_info *frame_info)
 {
   register int regnum;
@@ -905,17 +834,19 @@ fill_fpregset (fpregset_t *fpregsetp, int regno)
    we extract the pc (JB_PC) that we will land at.  The pc is copied into PC.
    This routine returns true on success. */
 
-/* NOTE: cagney/2000-11-08: For this function to be fully multi-arched
-   the macro's JB_PC and JB_ELEMENT_SIZE would need to be moved into
-   the ``struct gdbarch_tdep'' object and then set on a target ISA/ABI
-   dependant basis. */
-
 int
 m68k_get_longjmp_target (CORE_ADDR *pc)
 {
-#if defined (JB_PC) && defined (JB_ELEMENT_SIZE)
   char *buf;
   CORE_ADDR sp, jb_addr;
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+
+  if (tdep->jb_pc < 0)
+    {
+      internal_error (__FILE__, __LINE__,
+		      "m68k_get_longjmp_target: not implemented");
+      return 0;
+    }
 
   buf = alloca (TARGET_PTR_BIT / TARGET_CHAR_BIT);
   sp = read_register (SP_REGNUM);
@@ -926,18 +857,12 @@ m68k_get_longjmp_target (CORE_ADDR *pc)
 
   jb_addr = extract_address (buf, TARGET_PTR_BIT / TARGET_CHAR_BIT);
 
-  if (target_read_memory (jb_addr + JB_PC * JB_ELEMENT_SIZE, buf,
+  if (target_read_memory (jb_addr + tdep->jb_pc * tdep->jb_elt_size, buf,
 			  TARGET_PTR_BIT / TARGET_CHAR_BIT))
     return 0;
 
   *pc = extract_address (buf, TARGET_PTR_BIT / TARGET_CHAR_BIT);
-
   return 1;
-#else
-  internal_error (__FILE__, __LINE__,
-		  "m68k_get_longjmp_target: not implemented");
-  return 0;
-#endif
 }
 
 /* Immediately after a function call, return the saved pc before the frame
@@ -945,7 +870,7 @@ m68k_get_longjmp_target (CORE_ADDR *pc)
    system call, and if so, we know that Sun pushes the call # on the stack
    prior to doing the trap. */
 
-CORE_ADDR
+static CORE_ADDR
 m68k_saved_pc_after_call (struct frame_info *frame)
 {
 #ifdef SYSCALL_TRAP
@@ -979,11 +904,8 @@ m68k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   if (arches != NULL)
     return (arches->gdbarch);
 
-#if 0
-  tdep = (struct gdbarch_tdep *) xmalloc (sizeof (struct gdbarch_tdep));
-#endif
- 
-  gdbarch = gdbarch_alloc (&info, 0);
+  tdep = xmalloc (sizeof (struct gdbarch_tdep));
+  gdbarch = gdbarch_alloc (&info, tdep);
 
   /* NOTE: cagney/2002-12-06: This can be deleted when this arch is
      ready to unwind the PC first (see frame.c:get_prev_frame()).  */
@@ -1053,8 +975,21 @@ m68k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Should be using push_dummy_call.  */
   set_gdbarch_deprecated_dummy_write_sp (gdbarch, generic_target_write_sp);
 
+#if defined JB_PC && defined JB_ELEMENT_SIZE
+  tdep->jb_pc = JB_PC;
+  tdep->jb_elt_size = JB_ELEMENT_SIZE;
+#else
+  tdep->jb_pc = -1;
+#endif
+
   /* Hook in ABI-specific overrides, if they have been registered.  */
   gdbarch_init_osabi (info, gdbarch);
+
+  /* Now we have tuned the configuration, set a few final things,
+     based on what the OS ABI has told us.  */
+
+  if (tdep->jb_pc >= 0)
+    set_gdbarch_get_longjmp_target (gdbarch, m68k_get_longjmp_target);
 
   return gdbarch;
 }
@@ -1063,7 +998,10 @@ m68k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 static void
 m68k_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
 {
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
 
+  if (tdep == NULL)
+    return;
 }
 
 void

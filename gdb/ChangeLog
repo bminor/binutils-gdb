@@ -1,3 +1,42 @@
+2003-05-25  Andreas Schwab  <schwab@suse.de>
+
+	* m68k-tdep.c (m68k_register_raw_size): Remove cast.
+	(m68k_register_virtual_size): Likewise.
+	(altos_skip_prologue): Remove obsolete function.
+	(isi_frame_num_args): Likewise.
+	(news_frame_num_args): Likewise.
+	(m68k_fix_call_dummy): Make static.
+	(m68k_push_dummy_frame): Likewise.
+	(m68k_pop_frame): Likewise.
+	(m68k_skip_prologue): Likewise.
+	(m68k_frame_init_saved_regs): Likewise.
+	(m68k_saved_pc_after_call): Likewise.
+	(m68k_get_longjmp_target): Make multi-arch.
+	(m68k_gdbarch_init): Allocate and initialize gdbarch_tdep
+	structure.  Register m68k_get_longjmp_target if enabled.
+	* m68k-tdep.h (struct gdbarch_tdep): Define.
+	* config/m68k/tm-m68k.h: Don't include "regcache.h".
+
+	* Makefile.in (config.status): Also depend on configure.tgt
+	and configure.host.
+	(m68klinux-tdep.o): Update dependencies.
+	* configure.tgt (m68*-*-linux*): Set gdb_multi_arch to 1.
+	* m68klinux-tdep.c (M68K_LINUX_JB_ELEMENT_SIZE): Define.
+	(M68K_LINUX_JB_PC): Define.
+	(m68k_linux_pc_in_sigtramp): Renamed from m68k_linux_in_sigtramp
+	and take additional parameter.
+	(m68k_linux_sigtramp_saved_pc): Update.
+	(m68k_linux_init_abi): Set jb_pc and jb_elt_size.  Register
+	m68k_linux_pc_in_sigtramp, in_plt_section,
+	find_solib_trampoline_target.
+	* config/m68k/tm-linux.h: Don't include any tm headers.
+	(START_INFERIOR_TRAPS_EXPECTED): Remove definition.
+	(JB_ELEMENT_SIZE): Likewise.
+	(JB_PC): Likewise.
+	(GET_LONGJMP_TARGET): Likewise.
+	(IN_SIGTRAMP): Likewise.
+	(SVR4_SHARED_LIBS): Define this and include "solib.h".
+
 2003-05-25  Mark Kettenis  <kettenis@gnu.org>
 
 	* sparc-tdep.c (sparc32_do_push_arguments): New function.
