@@ -952,10 +952,12 @@ I believe @sc{fortran} is the only language with this feature.  A
 @code{N_BCOMM} stab begins a common block and an @code{N_ECOMM} stab
 ends it.  The only thing which is significant about these two stabs is
 their name, which can be used to look up a normal (non-debugging) symbol
-which gives the address of the common block.  Each variable in the
-common block has a @code{N_ECOML} stab, whose value is the offset within
-the common block of that variable.  I'm not sure what symbol descriptor
-is used for the @code{N_ECOML} stabs.
+which gives the address of the common block.  Then each stab between the
+@code{N_BCOMM} and the @code{N_ECOMM} specifies a member of that common
+block; its value is the offset within the common block of that variable.
+The @code{N_ECOML} stab type is documented for this purpose, but Sun's
+@sc{fortran} compiler uses @code{N_GSYM} instead, with the @samp{V}
+symbol descriptor.
 
 @node Initialized statics
 @section Initialized static variables 

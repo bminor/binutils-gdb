@@ -1,3 +1,7 @@
+Fri Jun 25 21:34:52 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* stabs.texinfo (Common Blocks): Say what Sun FORTRAN does.
+
 Fri Jun 25 16:15:10 1993  Roland H. Pesch  (pesch@fowanton.cygnus.com)
 
 	* Makefile.in: (REFEDITS) new var to control whether PS or CM
