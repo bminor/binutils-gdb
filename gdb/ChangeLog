@@ -1,4 +1,4 @@
-2002-12-06  Elena Zannoni  <ezannoni@redhat.com>
+2002-12-08  Elena Zannoni  <ezannoni@redhat.com>
 
 	* Makefile.in (thread-db.o): Add explicit rule to ignore the use of
 	-Werror on this file.
