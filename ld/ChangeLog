@@ -1,3 +1,8 @@
+2004-04-18  Danny Smith  <dannysmith@users.sourceforge.net>
+
+	* scriptempl/pe.sc:  Put numbered .ctors.* after .ctors
+	with default priority. Likewise for dtors.
+
 2004-04-11  Thiemo Seufer  <seufer@csv.ica.uni-stuttgart.de>
 
 	* configure.host: Remove mips*-dec-bsd* target.
