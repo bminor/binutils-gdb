@@ -1,3 +1,12 @@
+Tue Oct 19 17:23:34 1993  Fred Fish  (fnf@deneb.cygnus.com)
+
+	* Makefile.in (ALLCONFIG):  Add config/i386/{i386m3.mh, i386m3.mt,
+	i386/i386mk.mh i386/i386mk.mt}, config/mips/{mipsm3.mh,
+	mipsm3.mt}, config/ns32k/{ns32km3.mh, ns32m3.mt}
+	* Makefile.in (remote_utils_h):  Add remote-sim.h
+	* Makefile.in (NONSRC):  Add i386-nlmstub.c
+	* Makefile.in (HFILES):  Add coff-solib.h
+
 Tue Oct 19 14:15:40 1993  Kung Hsu  (kung@cirdan.cygnus.com)
 
 	* values.c (value_virtual_fn_field): Fix the offset calculation

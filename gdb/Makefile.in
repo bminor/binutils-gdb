@@ -311,7 +311,8 @@ NONSRC = Makefile.in munch configure.in ChangeLog ChangeLog-9091 \
 	Projects .gdbinit COPYING $(YYFILES) copying.c copying.awk \
 	saber.suppress standalone.c stuff.c kdb-start.c gcc.patch \
 	nindy-share/Makefile nindy-share/VERSION nindy-share/README \
-	vx-share/README 29k-share/README config/convex/Convex.notes
+	vx-share/README 29k-share/README config/convex/Convex.notes \
+	i386-nlmstub.c
 
 # All source files that lint should look at
 LINTFILES = $(SFILES) $(YYFILES) init.c
@@ -330,7 +331,7 @@ SFILES_KGDB  = $(SFILES) stuff.c kdb-start.c
 #dis-asm_h =	$(INCLUDE_DIR)/dis-asm.h 
 
 dcache_h = dcache.h
-remote_utils_h = $(dcache_h) serial.h target.h remote-utils.h
+remote_utils_h = $(dcache_h) serial.h target.h remote-utils.h remote-sim.h
 
 readline_headers = \
 	$(READLINE_SRC)/chardefs.h \
@@ -368,7 +369,7 @@ inferior_h =	inferior.h $(breakpoint_h)
 # Header files that are not named in config/*/* Makefile fragments go
 # into HFILES.
 
-HFILES = buildsym.h call-cmds.h defs.h environ.h $(gdbcmd_h) \
+HFILES = buildsym.h call-cmds.h coff-solib.h defs.h environ.h $(gdbcmd_h) \
 	$(gdbcore_h) gdb-stabs.h $(inferior_h) language.h minimon.h monitor.h \
 	objfiles.h parser-defs.h partial-stab.h serial.h signals.h solib.h \
 	symfile.h stabsread.h target.h terminal.h typeprint.h xcoffsolib.h \
@@ -924,8 +925,9 @@ ALLCONFIG = config/a29k/a29k-kern.mt config/a29k/a29k-udi.mt \
 	config/h8500/h8500hms.mt config/i386/go32.mh config/i386/i386aix.mh \
 	config/i386/i386aix.mt config/i386/i386aout.mt config/i386/i386bsd.mh \
 	config/i386/i386bsd.mt config/i386/i386lynx.mh \
-	config/i386/i386lynx.mt \
-	config/i386/i386mach.mh config/i386/i386nw.mt config/i386/i386sco.mh \
+	config/i386/i386lynx.mt config/i386/i386m3.mh config/i386/i386m3.mt \
+	config/i386/i386mach.mh config/i386/i386mk.mh config/i386/i386mk.mt \
+	config/i386/i386nw.mt config/i386/i386sco.mh \
 	config/i386/i386sco4.mh \
 	config/i386/i386sol2.mh config/i386/i386sol2.mt config/i386/i386v.mh \
 	config/i386/i386v.mt config/i386/i386v32.mh config/i386/i386v4.mh \
@@ -954,9 +956,11 @@ ALLCONFIG = config/a29k/a29k-kern.mt config/a29k/a29k-udi.mt \
 	config/mips/decstation.mt config/mips/idt.mt config/mips/idtl.mt \
 	config/mips/irix3.mh config/mips/irix3.mt config/mips/irix4.mh \
 	config/mips/littlemips.mh config/mips/littlemips.mt \
+	config/mips/mipsm3.mh config/mips/mipsm3.mt \
 	config/mips/news-mips.mh config/mips/riscos.mh \
 	config/none/none.mh config/none/none.mt config/ns32k/merlin.mh \
-	config/ns32k/merlin.mt config/ns32k/umax.mh config/ns32k/umax.mt \
+	config/ns32k/merlin.mt config/ns32k/ns32km3.mh config/ns32k/ns32km3.mt \
+	config/ns32k/umax.mh config/ns32k/umax.mt \
 	config/pa/hppabsd.mh config/pa/hppabsd.mt config/pa/hppahpux.mh \
 	config/pa/hppahpux.mt config/pyr/pyramid.mh config/pyr/pyramid.mt \
 	config/romp/rtbsd.mh config/rs6000/rs6000.mh config/rs6000/rs6000.mt \
