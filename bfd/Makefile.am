@@ -425,6 +425,7 @@ ofiles: stamp-ofiles ; @true
 libbfd_la_SOURCES = $(BFD_LIBS_CFILES)
 libbfd_la_DEPENDENCIES = $(OFILES) ofiles
 libbfd_la_LIBADD = `cat ofiles`
+libbfd_la_LDFLAGS = -release $(VERSION)
 
 # libtool will build .libs/libbfd.a.  We create libbfd.a in the build
 # directory so that we don't have to convert all the programs that use

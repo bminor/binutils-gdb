@@ -493,6 +493,7 @@ OFILES = $(BFD_BACKENDS) $(BFD_MACHINES) @COREFILE@
 libbfd_la_SOURCES = $(BFD_LIBS_CFILES)
 libbfd_la_DEPENDENCIES = $(OFILES) ofiles
 libbfd_la_LIBADD = `cat ofiles`
+libbfd_la_LDFLAGS = -release $(VERSION)
 
 # libtool will build .libs/libbfd.a.  We create libbfd.a in the build
 # directory so that we don't have to convert all the programs that use
@@ -530,7 +531,6 @@ libbfd_a_LIBADD =
 libbfd_a_OBJECTS = 
 LTLIBRARIES =  $(lib_LTLIBRARIES)
 
-libbfd_la_LDFLAGS = 
 libbfd_la_OBJECTS =  archive.lo archures.lo bfd.lo cache.lo coffgen.lo \
 corefile.lo format.lo init.lo libbfd.lo opncls.lo reloc.lo section.lo \
 syms.lo targets.lo hash.lo linker.lo elf.lo srec.lo binary.lo tekhex.lo \

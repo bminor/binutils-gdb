@@ -1,3 +1,8 @@
+Fri Feb 13 13:11:33 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.am (libbfd_la_LDFLAGS): Define.
+	* Makefile.in: Rebuild.
+
 Thu Feb 12 17:31:11 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	NetBSD patches from Gordon W. Ross <gwr@mc.com>:
