@@ -28,7 +28,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #if defined (TDESC)
 /* Need to get C_VERSION and friends.  FIXME, should be in internalcoff.h */
-#include "m88k-bcs.h"
+#include "coff-m88k.h"
 #endif /* not TDESC */
 
 #include <obstack.h>
