@@ -11,6 +11,7 @@
 
   switch,combine        :   4 :   0 :    :    :    :    1 : V,VII       :
   switch,combine        :   4 :   0 :    :    :    :    1 : V,XIII      : v850e
+  switch,combine        :   4 :   0 :    :    :    :    1 : V,XIII      : v850e1
 
 
 # for opcode 63, 127, 1087 et.al.
