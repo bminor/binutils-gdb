@@ -14,3 +14,6 @@ f:
 	lb	$2,%gprel(bar)($3)
 	lb	$2,%gprel(bar+1)($3)
 	.end	f
+
+# align section end to 16-byte boundary for easier testing on multiple targets
+	.p2align 4
