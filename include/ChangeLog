@@ -1,3 +1,7 @@
+Thu Jan 12 17:51:17 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* libiberty.h (hex_p): Fix sense of test.
+
 Wed Jan 11 22:36:40 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* libiberty.h (_hex_array_size, _hex_bad, _hex_value, hex_init,
