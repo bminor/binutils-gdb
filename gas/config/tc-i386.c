@@ -778,6 +778,19 @@ static struct hash_control *op_hash;
 /* Hash table for register lookup.  */
 static struct hash_control *reg_hash;
 
+#ifdef BFD_ASSEMBLER
+unsigned long
+i386_mach ()
+{
+  if (!strcmp (default_arch, "x86_64"))
+    return bfd_mach_x86_64;
+  else if (!strcmp (default_arch, "i386"))
+    return bfd_mach_i386_i386;
+  else
+    as_fatal (_("Unknown architecture"));
+}
+#endif
+
 void
 md_begin ()
 {
