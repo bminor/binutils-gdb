@@ -1,3 +1,7 @@
+Mon Mar 27 14:43:00 1995  Kung Hsu  <kung@mexican.cygnus.com>
+
+	* vx-share/regPacket.h: a new file interfacing with vxworks.
+
 Sun Mar 26 13:22:47 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* breakpoint.c (bpstat_do_actions): Once we've executed the
