@@ -48,6 +48,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    weird scope.  */
 struct external_exec;
 struct external_nlist;
+struct reloc_ext_external;
+struct reloc_std_external;
 
 /* Back-end information for various a.out targets.  */
 struct aout_backend_data
@@ -77,25 +79,6 @@ struct aout_backend_data
      to the size of the text section in the file for alignment purposes but
      does *not* get counted in the length of the text section. */
   unsigned char exec_header_not_counted;
-
-  /* A callback function to read in the dynamic symbols of an object
-     which is dynamically linked.  This returns the number of symbols
-     read (or -1 on error) and sets *SYMS to a buffer holding an array
-     of external_nlist structures and *STRS and *STRSIZE to the
-     associated string table.  (This interface works for SunOS, but
-     can be changed if some other interface is better for some other
-     shared library implementation).  */
-  bfd_size_type (*read_dynamic_symbols) PARAMS ((bfd *,
-						 struct external_nlist **syms,
-						 char **strs,
-						 bfd_size_type *strsize));
-
-  /* A callback function to read in the dynamic relocs of an object
-     which is dynamically linked.  This returns the number of relocs
-     read (or -1 on error) and sets *RELOCS to a buffer holding an
-     array of external reloc structures (the type depends upon the
-     type of object file).  */
-  bfd_size_type (*read_dynamic_relocs) PARAMS ((bfd *, PTR *relocs));
 };
 #define aout_backend_info(abfd) \
 	((CONST struct aout_backend_data *)((abfd)->xvec->backend_data))
@@ -318,6 +301,13 @@ asymbol *
 NAME(aout,make_empty_symbol) PARAMS ((bfd *abfd));
 
 boolean
+NAME(aout,translate_symbol_table) PARAMS ((bfd *, aout_symbol_type *,
+					   struct external_nlist *,
+					   bfd_size_type, char *,
+					   bfd_size_type,
+					   boolean dynamic));
+
+boolean
 NAME(aout,slurp_symbol_table) PARAMS ((bfd *abfd));
 
 boolean
@@ -331,6 +321,13 @@ NAME(aout,get_symtab_upper_bound) PARAMS ((bfd *abfd));
 
 long
 NAME(aout,get_symtab) PARAMS ((bfd *abfd, asymbol **location));
+
+void
+NAME(aout,swap_ext_reloc_in) PARAMS ((bfd *, struct reloc_ext_external *,
+				      arelent *, asymbol **));
+void
+NAME(aout,swap_std_reloc_in) PARAMS ((bfd *, struct reloc_std_external *,
+				      arelent *, asymbol **));
 
 boolean
 NAME(aout,slurp_reloc_table) PARAMS ((bfd *abfd, sec_ptr asect,

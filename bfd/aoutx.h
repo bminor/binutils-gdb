@@ -134,11 +134,6 @@ DESCRIPTION
 #include "aout/ar.h"
 
 static boolean aout_get_external_symbols PARAMS ((bfd *));
-static boolean translate_symbol_table PARAMS ((bfd *, aout_symbol_type *,
-					       struct external_nlist *,
-					       bfd_size_type, char *,
-					       bfd_size_type,
-					       boolean dynamic));
 
 /*
 SUBSECTION
@@ -1487,8 +1482,8 @@ NAME(aout,make_empty_symbol) (abfd)
 
 /* Translate a set of internal symbols into external symbols.  */
 
-static boolean
-translate_symbol_table (abfd, in, ext, count, str, strsize, dynamic)
+boolean
+NAME(aout,translate_symbol_table) (abfd, in, ext, count, str, strsize, dynamic)
      bfd *abfd;
      aout_symbol_type *in;
      struct external_nlist *ext;
@@ -1546,10 +1541,6 @@ NAME(aout,slurp_symbol_table) (abfd)
   struct external_nlist *old_external_syms;
   aout_symbol_type *cached;
   size_t cached_size;
-  bfd_size_type dynsym_count = 0;
-  struct external_nlist *dynsyms = NULL;
-  char *dynstrs = NULL;
-  bfd_size_type dynstr_size;
 
   /* If there's no work to be done, don't do any */
   if (obj_aout_symbols (abfd) != (aout_symbol_type *) NULL)
@@ -1566,18 +1557,7 @@ NAME(aout,slurp_symbol_table) (abfd)
       return false;
     }
 
-  /* If this is a dynamic object, see if we can get the dynamic symbol
-     table.  */
-  if ((bfd_get_file_flags (abfd) & DYNAMIC) != 0
-      && aout_backend_info (abfd)->read_dynamic_symbols)
-    {
-      dynsym_count = ((*aout_backend_info (abfd)->read_dynamic_symbols)
-		      (abfd, &dynsyms, &dynstrs, &dynstr_size));
-      if (dynsym_count == (bfd_size_type) -1)
-	return false;
-    }
-
-  cached_size = ((obj_aout_external_sym_count (abfd) + dynsym_count)
+  cached_size = (obj_aout_external_sym_count (abfd)
 		 * sizeof (aout_symbol_type));
   cached = (aout_symbol_type *) malloc (cached_size);
   memset (cached, 0, cached_size);
@@ -1589,24 +1569,19 @@ NAME(aout,slurp_symbol_table) (abfd)
     }
 
   /* Convert from external symbol information to internal.  */
-  if (! translate_symbol_table (abfd, cached,
-				obj_aout_external_syms (abfd),
-				obj_aout_external_sym_count (abfd),
-				obj_aout_external_strings (abfd),
-				obj_aout_external_string_size (abfd),
-				false)
-      || ! translate_symbol_table (abfd,
-				   (cached
-				    + obj_aout_external_sym_count (abfd)),
-				   dynsyms, dynsym_count, dynstrs,
-				   dynstr_size, true))
+  if (! (NAME(aout,translate_symbol_table)
+	 (abfd, cached,
+	  obj_aout_external_syms (abfd),
+	  obj_aout_external_sym_count (abfd),
+	  obj_aout_external_strings (abfd),
+	  obj_aout_external_string_size (abfd),
+	  false)))
     {
       free (cached);
       return false;
     }
 
-  bfd_get_symcount (abfd) = (obj_aout_external_sym_count (abfd)
-			     + dynsym_count);
+  bfd_get_symcount (abfd) = obj_aout_external_sym_count (abfd);
 
   obj_aout_symbols (abfd) = cached;
 
@@ -2400,8 +2375,6 @@ NAME(aout,slurp_reloc_table) (abfd, asect, symbols)
   unsigned int count;
   bfd_size_type reloc_size;
   PTR relocs;
-  bfd_size_type dynrel_count = 0;
-  PTR dynrels = NULL;
   arelent *reloc_cache;
   size_t each_size;
   unsigned int counter = 0;
@@ -2423,15 +2396,6 @@ NAME(aout,slurp_reloc_table) (abfd, asect, symbols)
       return false;
     }
 
-  if ((bfd_get_file_flags (abfd) & DYNAMIC) != 0
-      && aout_backend_info (abfd)->read_dynamic_relocs)
-    {
-      dynrel_count = ((*aout_backend_info (abfd)->read_dynamic_relocs)
-		      (abfd, &dynrels));
-      if (dynrel_count == (bfd_size_type) -1)
-	return false;
-    }
-
   if (bfd_seek (abfd, asect->rel_filepos, SEEK_SET) != 0)
     return false;
 
@@ -2439,14 +2403,13 @@ NAME(aout,slurp_reloc_table) (abfd, asect, symbols)
 
   count = reloc_size / each_size;
 
-  reloc_cache = (arelent *) malloc ((size_t) ((count + dynrel_count)
-					      * sizeof (arelent)));
+  reloc_cache = (arelent *) malloc ((size_t) (count * sizeof (arelent)));
   if (reloc_cache == NULL && count != 0)
     {
       bfd_set_error (bfd_error_no_memory);
       return false;
     }
-  memset (reloc_cache, 0, (count + dynrel_count) * sizeof (arelent));
+  memset (reloc_cache, 0, count * sizeof (arelent));
 
   relocs = malloc (reloc_size);
   if (relocs == NULL && reloc_size != 0)
@@ -2482,47 +2445,6 @@ NAME(aout,slurp_reloc_table) (abfd, asect, symbols)
     }
 
   free (relocs);
-
-  if (dynrel_count > 0)
-    {
-      asymbol **dynsyms;
-
-      /* The dynamic symbols are at the end of the symbol table.  */
-      for (dynsyms = symbols;
-	   *dynsyms != NULL && ((*dynsyms)->flags & BSF_DYNAMIC) == 0;
-	   ++dynsyms)
-	;
-
-      /* Swap in the dynamic relocs.  These relocs may be for either
-	 section, so we must discard ones we don't want.  */
-      counter = 0;
-      if (each_size == RELOC_EXT_SIZE)
-	{
-	  register struct reloc_ext_external *rptr
-	    = (struct reloc_ext_external *) dynrels;
-
-	  for (; counter < dynrel_count; counter++, rptr++, cache_ptr++)
-	    {
-	      NAME(aout,swap_ext_reloc_in) (abfd, rptr, cache_ptr, dynsyms);
-	      cache_ptr->address -= bfd_get_section_vma (abfd, asect);
-	      if (cache_ptr->address >= bfd_section_size (abfd, asect))
-		--cache_ptr;
-	    }
-	}
-      else
-	{
-	  register struct reloc_std_external *rptr
-	    = (struct reloc_std_external *) dynrels;
-
-	  for (; counter < dynrel_count; counter++, rptr++, cache_ptr++)
-	    {
-	      NAME(aout,swap_std_reloc_in) (abfd, rptr, cache_ptr, dynsyms);
-	      cache_ptr->address -= bfd_get_section_vma (abfd, asect);
-	      if (cache_ptr->address >= bfd_section_size (abfd, asect))
-		--cache_ptr;
-	    }
-	}
-    }
 
   asect->relocation = reloc_cache;
   asect->reloc_count = cache_ptr - reloc_cache;
@@ -2619,8 +2541,6 @@ NAME(aout,get_reloc_upper_bound) (abfd, asect)
      bfd *abfd;
      sec_ptr asect;
 {
-  bfd_size_type dynrel_count = 0;
-
   if (bfd_get_format (abfd) != bfd_object) {
     bfd_set_error (bfd_error_invalid_operation);
     return -1;
@@ -2629,26 +2549,15 @@ NAME(aout,get_reloc_upper_bound) (abfd, asect)
     return (sizeof (arelent *) * (asect->reloc_count+1));
   }
 
-  if ((bfd_get_file_flags (abfd) & DYNAMIC) != 0
-      && aout_backend_info (abfd)->read_dynamic_relocs)
-    {
-      PTR dynrels;
-
-      dynrel_count = ((*aout_backend_info (abfd)->read_dynamic_relocs)
-		      (abfd, &dynrels));
-      if (dynrel_count == (bfd_size_type) -1)
-	return -1;
-    }
-
   if (asect == obj_datasec (abfd))
-    return (sizeof (arelent *) *
-	    ((exec_hdr(abfd)->a_drsize / obj_reloc_entry_size (abfd))
-	     + dynrel_count + 1));
+    return (sizeof (arelent *)
+	    * ((exec_hdr(abfd)->a_drsize / obj_reloc_entry_size (abfd))
+	       + 1));
 
   if (asect == obj_textsec (abfd))
-    return (sizeof (arelent *) *
-	    ((exec_hdr(abfd)->a_trsize / obj_reloc_entry_size (abfd))
-	     + dynrel_count + 1));
+    return (sizeof (arelent *)
+	    * ((exec_hdr(abfd)->a_trsize / obj_reloc_entry_size (abfd))
+	       + 1));
 
   bfd_set_error (bfd_error_invalid_operation);
   return -1;
