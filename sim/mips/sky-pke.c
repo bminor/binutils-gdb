@@ -990,25 +990,17 @@ pke_code_stmod(struct pke_device* me, unsigned_4 pkecode)
 void
 pke_code_mskpath3(struct pke_device* me, unsigned_4 pkecode)
 {
-#if 0
-  /* XXX: pending on patrickm support code */
   int imm = BIT_MASK_GET(pkecode, PKE_OPCODE_IMM_B, PKE_OPCODE_IMM_E);
   unsigned_4 gif_mode;
 
-  /* read old GIF control register */
-  ASSERT(sizeof(unsigned_4) == 4);
-  PKE_MEM_READ(me, GIF_REG_MODE, & gif_mode, 4);
-
-  /* mask appropriate bit */
+  /* set appropriate bit */
   if(BIT_MASK_GET(imm, PKE_REG_MSKPATH3_B, PKE_REG_MSKPATH3_E) != 0)
-    gif_mode |= GIF_REG_MODE_M3R_MASK;
+    gif_mode = GIF_REG_MODE_M3R_MASK;
   else
-    gif_mode &= ~GIF_REG_MODE_M3R_MASK;
+    gif_mode = 0;
 
-  /* write back modified register */
+  /* write register; patrickm code will look at M3R bit only */
   PKE_MEM_WRITE(me, GIF_REG_MODE, & gif_mode, 4);
-
-#endif
 
   /* done */
   pke_pc_advance(me, 1);
@@ -1415,6 +1407,7 @@ pke_code_mpg(struct pke_device* me, unsigned_4 pkecode)
 	    {
 	      address_word vu_addr_base, vu_addr;
 	      address_word vutrack_addr_base, vutrack_addr;
+	      address_word vu_addr_max_size;
 	      unsigned_4 vu_lower_opcode, vu_upper_opcode;
 	      unsigned_4* operand;
 	      unsigned_4 source_addr;
@@ -1429,14 +1422,19 @@ pke_code_mpg(struct pke_device* me, unsigned_4 pkecode)
 	      /* VU*_MEM0 : instruction memory */
 	      vu_addr_base = (me->pke_number == 0) ?
 		VU0_MEM0_WINDOW_START : VU1_MEM0_WINDOW_START;
-	      vu_addr = vu_addr_base + (imm + i) * 8;
-
-	      /* XXX: overflow check! */
-	      
-	      /* VU*_MEM0_TRACK : source-addr tracking table */
+	      vu_addr_max_size = (me->pke_number == 0) ?
+		VU0_MEM0_SIZE : VU1_MEM0_SIZE;
 	      vutrack_addr_base = (me->pke_number == 0) ?
 		VU0_MEM0_SRCADDR_START : VU1_MEM0_SRCADDR_START;
-	      vutrack_addr = vutrack_addr_base + (imm + i) * 4;
+
+	      /* compute VU address for this word-pair */
+	      vu_addr = vu_addr_base + (imm + i) * 8;
+	      /* check for vu_addr overflow */
+	      while(vu_addr >= vu_addr_base + vu_addr_max_size)
+		vu_addr -= vu_addr_max_size;
+
+	      /* compute VU tracking address */
+	      vutrack_addr = vutrack_addr_base + ((signed_8)vu_addr - (signed_8)vu_addr_base) / 2;
 
 	      /* Fetch operand words; assume they are already little-endian for VU imem */
 	      fq = pke_pc_fifo(me, i*2 + 1, & operand);
