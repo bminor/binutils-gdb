@@ -1,3 +1,9 @@
+Fri Mar  4 11:43:47 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* ldlang.c (lookup_name): Stomp on a pointer if in MPW.
+	* mpw-em.c: Edit to reflect changed syntax of compiled-in linker
+	scripts.
+
 Mon Feb 28 11:07:41 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	* mpw-build.in: Remove, subsumed in mpw-make.in.

@@ -51,7 +51,7 @@ gldmipsidt_get_script(isfile)
  *isfile = 0;
 
  if (link_info.relocateable == true && config.build_constructors == true)
- return "{OUTPUT_FORMAT(\"ecoff-bigmips\")\n\
+ return "OUTPUT_FORMAT(\"ecoff-bigmips\")\n\
 ENTRY(start)\n\
 SECTIONS\n\
 {\n\
@@ -88,9 +88,9 @@ SECTIONS\n\
  *(.bss)\n\
  *(COMMON)\n\
  }\n\
-}\n\n}";
+}\n\n";
  else if (link_info.relocateable == true)
- return "{OUTPUT_FORMAT(\"ecoff-bigmips\")\n\
+ return "OUTPUT_FORMAT(\"ecoff-bigmips\")\n\
 ENTRY(start)\n\
 SECTIONS\n\
 {\n\
@@ -126,9 +126,9 @@ SECTIONS\n\
  *(.bss)\n\
  *(COMMON)\n\
  }\n\
-}\n\n}";
+}\n\n";
  else if (!config.text_read_only)
- return "{OUTPUT_FORMAT(\"ecoff-bigmips\")\n\
+ return "OUTPUT_FORMAT(\"ecoff-bigmips\")\n\
 ENTRY(start)\n\
 SECTIONS\n\
 {\n\
@@ -172,9 +172,9 @@ SECTIONS\n\
  }\n\
   end = .;\n\
   _end = .;\n\
-}\n\n}";
+}\n\n";
  else if (!config.magic_demand_paged)
- return "{OUTPUT_FORMAT(\"ecoff-bigmips\")\n\
+ return "OUTPUT_FORMAT(\"ecoff-bigmips\")\n\
 ENTRY(start)\n\
 SECTIONS\n\
 {\n\
@@ -218,9 +218,9 @@ SECTIONS\n\
  }\n\
   end = .;\n\
   _end = .;\n\
-}\n\n}";
+}\n\n";
  else
- return "{OUTPUT_FORMAT(\"ecoff-bigmips\")\n\
+ return "OUTPUT_FORMAT(\"ecoff-bigmips\")\n\
 ENTRY(start)\n\
 SECTIONS\n\
 {\n\
@@ -264,7 +264,7 @@ SECTIONS\n\
  }\n\
   end = .;\n\
   _end = .;\n\
-}\n\n}";
+}\n\n";
 }
 
 struct ld_emulation_xfer_struct ld_mipsidt_emulation = 
