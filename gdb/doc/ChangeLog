@@ -1,3 +1,8 @@
+Tue Jul  6 12:41:28 1993  John Gilmore  (gnu@cygnus.com)
+
+	* gdbint.texinfo (Target Conditionals): Remove NO_TYPEDEFS,
+	removed from the code by Kingdon. 
+
 Tue Jul  6 12:24:34 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* gdb.texinfo (Break Commands): Remove stuff about flushing terminal
