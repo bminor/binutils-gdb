@@ -1,5 +1,16 @@
 2003-11-06  Daniel Jacobowitz  <drow@mvista.com>
 
+	* breakpoint.h (struct bp_location): Add section.
+	(struct breakpoint): Remove section.
+	* breakpoint.c (insert_breakpoints, remove_breakpoint)
+	(breakpoint_here_p, breakpoint_inserted_here_p)
+	(breakpoint_thread_match, bpstat_stop_status, print_one_breakpoint)
+	(describe_other_breakpoints, check_duplicates, set_raw_breakpoint)
+	(clear_command, delete_breakpoint, breakpoint_re_set_one): Access
+	section through loc.
+
+2003-11-06  Daniel Jacobowitz  <drow@mvista.com>
+
 	* breakpoint.c (read_memory_nobpt): Use ALL_BP_LOCATIONS
 	instead of ALL_BREAKPOINTS.  Check for software breakpoints only.
 

@@ -237,6 +237,10 @@ struct bp_location
      bp_loc_other.  */
   CORE_ADDR address;
 
+  /* For any breakpoint type with an address, this is the BFD section
+     associated with the address.  Used primarily for overlay debugging.  */
+  asection *section;
+
   /* "Real" contents of byte where breakpoint has been inserted.
      Valid only when breakpoints are in the program.  Under the complete
      control of the target insert_breakpoint and remove_breakpoint routines.
@@ -378,8 +382,6 @@ struct breakpoint
        This field is only valid immediately after this catchpoint has
        triggered.  */
     char *exec_pathname;
-
-    asection *section;
 
     /* Methods associated with this breakpoint.  */
     struct breakpoint_ops *ops;
