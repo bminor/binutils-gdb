@@ -1,5 +1,10 @@
 2004-05-25  Randolph Chung  <tausq@debian.org>
 
+	* hppa-linux-tdep.c (hppa_linux_init_abi): sizeof(long double) == 8 on
+	hppa-linux.
+
+2004-05-25  Randolph Chung  <tausq@debian.org>
+
 	* hppa-hpux-tdep.c (offsetof): Define.
 	(hppa_hpux_pc_in_sigtramp, hppa32_hpux_frame_saved_pc_in_sigtramp)
 	(hppa32_hpux_frame_base_before_sigtramp)

@@ -493,6 +493,11 @@ hppa_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   /* GNU/Linux uses the dynamic linker included in the GNU C Library.  */
   set_gdbarch_skip_solib_resolver (gdbarch, glibc_skip_solib_resolver);
 
+  /* On hppa-linux, currently, sizeof(long double) == 8.  There has been
+     some discussions to support 128-bit long double, but it requires some
+     more work in gcc and glibc first.  */
+  set_gdbarch_long_double_bit (gdbarch, 64);
+
 #if 0
   /* Dwarf-2 unwinding support.  Not yet working.  */
   set_gdbarch_dwarf_reg_to_regnum (gdbarch, hppa_dwarf_reg_to_regnum);
