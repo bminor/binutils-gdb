@@ -39,10 +39,10 @@ NEWS
 Projects
 README
 TODO
-a68v-nat.c
-altos-xdep.c
 a29k-pinsn.c
 a29k-tdep.c
+a68v-nat.c
+altos-xdep.c
 arm-convert.s
 arm-pinsn.c
 arm-tdep.c
@@ -75,10 +75,10 @@ convex-tdep.c
 convex-xdep.c
 copying.awk
 copying.c
+core-svr4.c
 core.c
 coredep.c
 corelow.c
-core-svr4.c
 cp-valprint.c
 dbxread.c
 defs.h
@@ -182,6 +182,7 @@ regex.c
 regex.h
 rem-multi.shar
 remote-adapt.c
+remote-bug.c
 remote-eb.c
 remote-es.c
 remote-hms.c
@@ -223,8 +224,8 @@ sun3-nat.c
 sun386-nat.c
 symfile.c
 symfile.h
-symm-tdep.c
 symm-nat.c
+symm-tdep.c
 symmisc.c
 symtab.c
 symtab.h
