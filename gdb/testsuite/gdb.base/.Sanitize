@@ -79,6 +79,7 @@ ptype.exp
 radix.exp
 recurse.c
 recurse.exp
+regs.exp
 return.c
 return.exp
 run.c
