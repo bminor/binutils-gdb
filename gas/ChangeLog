@@ -1,3 +1,12 @@
+Mon Jun 17 11:26:56 1996  Jeffrey A. Law  <law@rtl.cygnus.com>
+
+	* config/tc-hppa.c (md_pseudo_table): Add ".begin_try" and ".end_try"
+	pseudo ops.
+	(tc_gen_reloc, SOM version): Handle R_BEGIN_TRY and R_END_TRY.
+	(md_apply_fix): Likewise.
+	(pa_try): New function.
+	(hppa_force_relocation): Force relocs for BEGIN_TRY and END_TRY.
+
 Sun Jun 16 22:57:47 1996  Jeffrey A. Law  <law@rtl.cygnus.com>
 
 	* config/tc-hppa.c (md_pseudo_table): Add ".level" pseudo op.
