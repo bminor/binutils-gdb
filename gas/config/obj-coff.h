@@ -1,5 +1,5 @@
 /* coff object file format
-   Copyright (C) 1989, 90, 91, 92, 94, 95, 96, 1997
+   Copyright (C) 1989, 90, 91, 92, 94, 95, 96, 97, 1998
    Free Software Foundation, Inc.
 
    This file is part of GAS.
@@ -127,6 +127,11 @@
 #define TARGET_FORMAT "coff-w65"
 #endif
 
+#ifdef TC_TIC30
+#include "coff/tic30.h"
+#define TARGET_FORMAT "coff-tic30"
+#endif
+
 /* start-sanitize-tic80 */
 #ifdef TC_TIC80
 #include "coff/tic80.h"
@@ -209,6 +214,7 @@ extern void coff_obj_read_begin_hook PARAMS ((void));
 #define sy_obj			sy_flags
 
 #define SYM_AUXENT(S)	(&coffsymbol ((S)->bsym)->native[1].u.auxent)
+#define SYM_AUXINFO(S)	(&coffsymbol ((S)->bsym)->native[1])
 
 #define DO_NOT_STRIP	0
 

@@ -1,3 +1,11 @@
+Tue Jun 23 13:54:57 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* config/obj-coff.h (SYM_AUXINFO): New macro to conceal ugly
+	code. 
+
+	* config/obj-coff.c (c_symbol_merge): Replace complex expresion
+	with call to macro SYM_AUXINFO.
+
 Tue Jun 23 15:09:27 1998  Mike Stump  <mrs@wrs.com>
 
 	* Makefile.am (install-exec-local): Don't let EXEEXT interfere
