@@ -132,9 +132,9 @@ static struct
       }
     *file;
 
-    struct dwarf2_line_info current;	/* current source info: */
+    struct dwarf2_line_info current;	/* current source info */
 
-    /* counters for statistical purposes: */
+    /* counters for statistical purposes */
     unsigned int num_line_entries;
     unsigned int opcode_hist[256];	/* histogram of opcode frequencies */
   }
@@ -174,8 +174,7 @@ ls =
     }
   };
 
-
-/* Function prototypes: */
+/* Function prototypes.  */
 static void out_uleb128 PARAMS ((addressT));
 static void out_sleb128 PARAMS ((offsetT));
 static void gen_addr_line PARAMS ((int, addressT));
@@ -187,11 +186,11 @@ static void gen_dir_list PARAMS ((void));
 static void gen_file_list PARAMS ((void));
 static void print_stats PARAMS ((unsigned long));
 
-
 #define out_byte(byte)	FRAG_APPEND_1_CHAR(byte)
 #define out_opcode(opc)	(out_byte ((opc)), ++ls.opcode_hist[(opc) & 0xff])
 
 /* Output an unsigned "little-endian base 128" number.  */
+
 static void
 out_uleb128 (value)
      addressT value;
@@ -210,6 +209,7 @@ out_uleb128 (value)
 }
 
 /* Output a signed "little-endian base 128" number.  */
+
 static void
 out_sleb128 (value)
      offsetT value;
@@ -231,6 +231,7 @@ out_sleb128 (value)
 /* Encode a pair of line and address skips as efficiently as possible.
    Note that the line skip is signed, whereas the address skip is
    unsigned.  */
+
 static void
 gen_addr_line (line_delta, addr_delta)
      int line_delta;
@@ -250,7 +251,7 @@ gen_addr_line (line_delta, addr_delta)
 
   tmp += DWARF2_LINE_OPCODE_BASE;
 
-  /* try using a special opcode: */
+  /* Try using a special opcode.  */
   opcode = tmp + addr_delta*DWARF2_LINE_RANGE;
   if (opcode <= 255)
     {
@@ -258,8 +259,8 @@ gen_addr_line (line_delta, addr_delta)
       return;
     }
 
-  /* try using DW_LNS_const_add_pc followed by special op: */
-  opcode = tmp + (addr_delta - MAX_SPECIAL_ADDR_DELTA)*DWARF2_LINE_RANGE;
+  /* Try using DW_LNS_const_add_pc followed by special op.  */
+  opcode = tmp + (addr_delta - MAX_SPECIAL_ADDR_DELTA) * DWARF2_LINE_RANGE;
   if (opcode <= 255)
     {
       out_opcode (DW_LNS_const_add_pc);
@@ -271,9 +272,11 @@ gen_addr_line (line_delta, addr_delta)
   out_uleb128 (addr_delta);
 
   if (line_delta)
-    out_opcode (tmp);		/* output line-delta */
+    /* Output line-delta.  */
+    out_opcode (tmp);
   else
-    out_opcode (DW_LNS_copy);	/* append new row with current info */
+    /* Append new row with current info.  */
+    out_opcode (DW_LNS_copy);
 }
 
 static void
@@ -284,7 +287,8 @@ reset_state_machine ()
   ls.sm = initial_state;
 }
 
-/* Set an absolute address (may results in a relocation entry): */
+/* Set an absolute address (may results in a relocation entry).  */
+
 static void
 out_set_addr (addr)
      addressT addr;
@@ -322,6 +326,7 @@ out_set_addr (addr)
 
 /* Emit DW_LNS_end_sequence and reset state machine.  Does not
    preserve the current segment/sub-segment!  */
+
 static void
 out_end_sequence ()
 {
@@ -351,7 +356,7 @@ out_end_sequence ()
 	    {
 	      /* Advance address without updating the line-debug
 		 matrix---the end_sequence entry is used only to tell
-		 the debugger the end of the sequence.*/
+		 the debugger the end of the sequence.  */
 	      out_opcode (DW_LNS_advance_pc);
 	      out_uleb128 (delta);
 	    }
@@ -371,6 +376,7 @@ out_end_sequence ()
    a filenumber and a filename are specified, lookup by filename takes
    precedence.  If the filename cannot be found, it is added to the
    filetable and the filenumber for the new entry is returned.  */
+
 static int
 get_filenum (filenum, file)
      int filenum;
@@ -389,7 +395,7 @@ get_filenum (filenum, file)
       && strcmp (ls.file[last].name + 1, file + 1) == 0)
     return last + 1;
 
-  /* no match, fall back to simple linear scan: */
+  /* No match, fall back to simple linear scan.  */
   for (i = 0; i < ls.num_filenames; ++i)
     {
       if (ls.file[i].name[0] == char0
@@ -400,7 +406,7 @@ get_filenum (filenum, file)
 	}
     }
 
-  /* no match: enter new filename */
+  /* No match, enter new filename.  */
   if (ls.num_filenames >= ls.filename_len)
     {
       ls.filename_len += 13;
@@ -441,7 +447,8 @@ dwarf2_gen_line_info (addr, l)
   else if (l->filename)
     filenum = get_filenum (filenum, l->filename);
   else
-    return;	/* no filename, no filnum => no play */
+    /* No filename, no filnum => no play.  */
+    return;
 
   /* Must save these before the subseg_new call, as that call will change
      them.  */
@@ -463,9 +470,9 @@ dwarf2_gen_line_info (addr, l)
       /* We're going to need this symbol.  */
       secsym = symbol_find (".debug_line");
       if (secsym != NULL)
-        symbol_set_bfdsym (secsym, ls.line_seg->symbol);
+	symbol_set_bfdsym (secsym, ls.line_seg->symbol);
       else
-        symbol_table_insert (section_symbol (ls.line_seg));
+	symbol_table_insert (section_symbol (ls.line_seg));
 #endif
     }
 
@@ -475,7 +482,8 @@ dwarf2_gen_line_info (addr, l)
     {
       if (!ls.sm.empty_sequence)
 	{
-	  out_end_sequence ();		/* terminate previous sequence */
+	  /* Terminate previous sequence.  */
+	  out_end_sequence ();
 	  ls.sm.empty_sequence = 1;
 	}
       any_output = 1;
@@ -568,7 +576,7 @@ gen_dir_list ()
 	    }
 	  if (j >= num_dirs)
 	    {
-	      /* didn't find this directory: append it to the list */
+	      /* Didn't find this directory: append it to the list.  */
 	      size_t size = strlen (str) + 1;
 	      cp = frag_more (size);
 	      memcpy (cp, str, size);
@@ -578,7 +586,9 @@ gen_dir_list ()
 	  ls.file[i].name = slash + 1;
 	}
     }
-  out_byte ('\0');	/* terminate directory list */
+
+  /* Terminate directory list.  */
+  out_byte ('\0');
 }
 
 static void
@@ -598,7 +608,9 @@ gen_file_list ()
       out_uleb128 (0);			/* last modification timestamp */
       out_uleb128 (0);			/* filesize */
     }
-  out_byte (0);		/* terminate filename list */
+
+  /* Terminate filename list.  */
+  out_byte (0);
 }
 
 static void
@@ -619,7 +631,7 @@ print_stats (total_size)
 
   fprintf (stderr, "\nStandard opcode histogram:\n");
 
-  for (i = 0; i < sizeof (opc_name)/sizeof (opc_name[0]); ++i)
+  for (i = 0; i < sizeof (opc_name) / sizeof (opc_name[0]); ++i)
     {
       fprintf (stderr, "%s", opc_name[i]);
       for (j = strlen (opc_name[i]); j < 16; ++j)
@@ -655,7 +667,7 @@ dwarf2_finish ()
   char *cp;
 
   if (!ls.line_seg)
-    /* no .debug_line segment, no work to do... */
+    /* No .debug_line segment, no work to do.  */
     return;
 
   saved_seg = now_seg;
@@ -665,13 +677,13 @@ dwarf2_finish ()
     out_end_sequence ();
   total_size = body_size = frag_now_fix ();
 
-  /* now generate the directory and file lists: */
+  /* Now generate the directory and file lists.  */
   subseg_set (ls.line_seg, DL_FILES);
   gen_dir_list ();
   gen_file_list ();
   total_size += frag_now_fix ();
 
-  /* and now the header ("statement program prolog", in DWARF2 lingo...) */
+  /* And now the header ("statement program prolog", in DWARF2 lingo...).  */
   subseg_set (ls.line_seg, DL_PROLOG);
 
   cp = frag_more (15 + DWARF2_LINE_OPCODE_BASE - 1);
