@@ -1,5 +1,27 @@
 2003-07-27  Stephane Carrez  <stcarrez@nerim.fr>
 
+	* m68hc11-tdep.c (struct m68hc11_unwind_cache): New struct to hold
+	frame unwind information.
+	(m68hc11_scan_prologue): New function from m68hc11_guess_from_prologue
+	and adapted for frame unwinding.
+	(m68hc11_skip_prologue): Update to scan prologue in temporary object.
+	(m68hc11_unwind_pc): New function.
+	(m68hc11_frame_unwind_cache): New function to analyze frames.
+	(m68hc11_frame_this_id): New function to create new frame struct.
+	(m68hc11_frame_prev_register): New function to unwind a register from
+	the frame.
+	(m68hc11_frame_unwind): Default 68hc11/68hc12 unwinder.
+	(m68hc11_frame_p): New function for the above.
+	(m68hc11_frame_base_address): New function to return fp of frame.
+	(m68hc11_frame_args_address): Update for frame.
+	(m68hc11_frame_base): Default 68hc11/68hc12 frame.
+	(m68hc11_unwind_sp): New function.
+	(m68hc11_unwind_dummy_id): New function.
+	(m68hc11_gdbarch_init): Install the above frames; remove deprecated
+	calls.
+
+2003-07-27  Stephane Carrez  <stcarrez@nerim.fr>
+
 	* m68hc11-tdep.c (m68hc11_analyze_instruction): Don't advance the pc.
 	(m68hc11_guess_from_prologue): Advance the pc and frame size only
 	when we are beyond the current pc.
