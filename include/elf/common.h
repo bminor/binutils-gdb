@@ -106,15 +106,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 /* Old version of PowerPC, this should be removed shortly. */
 #define EM_PPC_OLD	17
 
-/* start-sanitize-arc */
 /* Cygnus ARC ELF backend.  Written in the absence of an ABI.  */
 #define EM_CYGNUS_ARC 0x9040
-/* end-sanitize-arc */
 
-/* start-sanitize-m32r */
 /* Cygnus M32R ELF backend.  Written in the absence of an ABI.  */
 #define EM_CYGNUS_M32R 0x9041
-/* end-sanitize-m32r */
 
 /* Alpha backend magic number.  Written in the absence of an ABI.  */
 #define EM_ALPHA	0x9026
@@ -130,6 +126,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 /* start-sanitize-v850 */
 /* V850 backend magic number.  Written in the absense of an ABI.  */
 #define EM_CYGNUS_V850	0x9080
+/* start-sanitize-v850e */
+#define EM_CYGNUS_V850E	0x908e
+/* end-sanitize-v850e */
+/* start-sanitize-v850eq */
+#define EM_CYGNUS_V850EQ	0x908f
+/* end-sanitize-v850eq */
 /* end-sanitize-v850 */
 
 /* mn10200 and mn10300 backend magic numbers.
@@ -325,6 +327,16 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #define VER_NEED_NONE		0
 #define VER_NEED_CURRENT	1
+
+/* This flag appears in a Versym structure.  It means that the symbol
+   is hidden, and is only visible with an explicit version number.
+   This is a GNU extension.  */
+
+#define VERSYM_HIDDEN		0x8000
+
+/* This is the mask for the rest of the Versym information.  */
+
+#define VERSYM_VERSION		0x7fff
 
 /* This is a special token which appears as part of a symbol name.  It
    indictes that the rest of the name is actually the name of a

@@ -1,3 +1,16 @@
+start-sanitize-v850e
+Mon Aug 25 16:06:47 1997  Nick Clifton  <nickc@cygnus.com>
+
+	* common.h (EM_CYGNUS_V850E): backend magic number for v850e.
+start-sanitize-v850eq
+	* common.h (EM_CYGNUS_V850EQ): backend magic number for v850eq.
+end-sanitize-v850eq
+end-sanitize-v850e
+
+Mon Aug 18 11:05:23 1997  Nick Clifton  <nickc@cygnus.com>
+
+	* v850.h (reloc_type): Add 16 bit PC relative relocation.
+
 Fri Aug 15 05:10:09 1997  Doug Evans  <dje@canuck.cygnus.com>
 
 	* arc.h (enum reloc): Move here from elf32-arc.c.
