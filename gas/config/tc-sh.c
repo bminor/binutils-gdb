@@ -18,10 +18,7 @@
    the Free Software Foundation, 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-/*
-   Written By Steve Chamberlain
-   sac@cygnus.com
- */
+/* Written By Steve Chamberlain <sac@cygnus.com>  */
 
 #include <stdio.h>
 #include "as.h"
@@ -65,8 +62,7 @@ little (ignore)
    has to support.  The fields are:
    pseudo-op name without dot
    function to call to execute this pseudo-op
-   Integer arg to pass to the function
- */
+   Integer arg to pass to the function.  */
 
 const pseudo_typeS md_pseudo_table[] =
 {
@@ -102,7 +98,7 @@ static int valid_arch;
 
 const char EXP_CHARS[] = "eE";
 
-/* Chars that mean this number is a floating point constant */
+/* Chars that mean this number is a floating point constant.  */
 /* As in 0f12.456 */
 /* or    0d1.2345e12 */
 const char FLT_CHARS[] = "rRsSfFdDxXpP";
@@ -113,7 +109,7 @@ const char FLT_CHARS[] = "rRsSfFdDxXpP";
 #define ENCODE_RELAX(what,length) (((what) << 4) + (length))
 #define GET_WHAT(x) ((x>>4))
 
-/* These are the three types of relaxable instrction */
+/* These are the three types of relaxable instrction.  */
 #define COND_JUMP 1
 #define COND_JUMP_DELAY 2
 #define UNCOND_JUMP  3
@@ -199,10 +195,8 @@ const relax_typeS md_relax_table[C (END, 0)] = {
 
 static struct hash_control *opcode_hash_control;	/* Opcode mnemonics */
 
-/*
-   This function is called once, at assembler startup time.  This should
-   set up all the tables, etc that the MD part of the assembler needs
- */
+/* This function is called once, at assembler startup time.  This should
+   set up all the tables, etc that the MD part of the assembler needs.  */
 
 void
 md_begin ()
@@ -224,7 +218,7 @@ md_begin ()
 
   opcode_hash_control = hash_new ();
 
-  /* Insert unique names into hash table */
+  /* Insert unique names into hash table.  */
   for (opcode = sh_table; opcode->name; opcode++)
     {
       if (strcmp (prev_name, opcode->name))
@@ -237,7 +231,7 @@ md_begin ()
       else
 	{
 	  /* Make all the opcodes with the same name point to the same
-	     string */
+	     string.  */
 	  opcode->name = prev_name;
 	}
     }
@@ -259,7 +253,8 @@ sh_operand_info;
 
 #define IDENT_CHAR(c) (isalnum (c) || (c) == '_')
 
-/* try and parse a reg name, returns number of chars consumed */
+/* Try to parse a reg name.  Return the number of chars consumed.  */
+
 static int
 parse_reg (src, mode, reg)
      char *src;
@@ -673,7 +668,7 @@ parse_at (src, op)
   src++;
   if (src[0] == '-')
     {
-      /* Must be predecrement */
+      /* Must be predecrement.  */
       src++;
 
       len = parse_reg (src, &mode, &(op->reg));
@@ -820,7 +815,7 @@ get_operand (ptr, op)
     }
   else
     {
-      /* Not a reg, the only thing left is a displacement */
+      /* Not a reg, the only thing left is a displacement.  */
       *ptr = parse_exp (src, op);
       op->type = A_DISP_PC;
       return;
@@ -887,8 +882,7 @@ get_operands (info, args, operand)
 
 /* Passed a pointer to a list of opcodes which use different
    addressing modes, return the opcode which matches the opcodes
-   provided
- */
+   provided.  */
 
 static
 sh_opcode_info *
@@ -905,18 +899,19 @@ get_specific (opcode, operands)
       if (this_try->name != name)
 	{
 	  /* We've looked so far down the table that we've run out of
-	     opcodes with the same name */
+	     opcodes with the same name.  */
 	  return 0;
 	}
-      /* look at both operands needed by the opcodes and provided by
+      
+      /* Look at both operands needed by the opcodes and provided by
          the user - since an arg test will often fail on the same arg
          again and again, we'll try and test the last failing arg the
-         first on each opcode try */
-
+         first on each opcode try.  */
       for (n = 0; this_try->arg[n]; n++)
 	{
 	  sh_operand_info *user = operands + n;
 	  sh_arg_type arg = this_try->arg[n];
+	  
 	  switch (arg)
 	    {
 	    case A_IMM:
@@ -1236,7 +1231,7 @@ build_relax (opcode, op)
 
 }
 
-/* insert ldrs & ldre with fancy relocations that relaxation can recognize.  */
+/* Insert ldrs & ldre with fancy relocations that relaxation can recognize.  */
 static char *
 insert_loop_bounds (output, operand)
      char *output;
@@ -1286,6 +1281,7 @@ insert_loop_bounds (output, operand)
 }
 
 /* Now we know what sort of opcodes it is, lets build the bytes.  */
+
 static void
 build_Mytes (opcode, operand)
      sh_opcode_info *opcode;
@@ -1403,7 +1399,8 @@ find_cooked_opcode (str_p)
   unsigned char *op_end;
   char name[20];
   int nlen = 0;
-  /* Drop leading whitespace */
+  
+  /* Drop leading whitespace.  */
   while (*str == ' ')
     str++;
 
@@ -1428,19 +1425,19 @@ find_cooked_opcode (str_p)
       name[nlen] = c;
       nlen++;
     }
+  
   name[nlen] = 0;
   *str_p = op_end;
 
   if (nlen == 0)
-    {
-      as_bad (_("can't find opcode "));
-    }
+    as_bad (_("can't find opcode "));
 
   return (sh_opcode_info *) hash_find (opcode_hash_control, name);
 }
 
 /* Assemble a parallel processing insn.  */
 #define DDT_BASE 0xf000 /* Base value for double data transfer insns */
+
 static void
 assemble_ppi (op_end, opcode)
      char *op_end;
@@ -1467,7 +1464,7 @@ assemble_ppi (op_end, opcode)
       opcode = get_specific (opcode, operand);
       if (opcode == 0)
 	{
-	  /* Couldn't find an opcode which matched the operands */
+	  /* Couldn't find an opcode which matched the operands.  */
 	  char *where = frag_more (2);
 
 	  where[0] = 0x0;
@@ -1475,6 +1472,7 @@ assemble_ppi (op_end, opcode)
 	  as_bad (_("invalid operands for opcode"));
 	  return;
 	}
+      
       if (opcode->nibbles[0] != PPI)
 	as_bad (_("insn can't be combined with parallel processing insn"));
 
@@ -1646,8 +1644,7 @@ assemble_ppi (op_end, opcode)
 
 /* This is the guts of the machine-dependent assembler.  STR points to a
    machine dependent instruction.  This function is supposed to emit
-   the frags/bytes it assembles to.
- */
+   the frags/bytes it assembles to.  */
 
 void
 md_assemble (str)
@@ -1705,7 +1702,7 @@ md_assemble (str)
 
       if (opcode == 0)
 	{
-	  /* Couldn't find an opcode which matched the operands */
+	  /* Couldn't find an opcode which matched the operands.  */
 	  char *where = frag_more (2);
 
 	  where[0] = 0x0;
@@ -1789,14 +1786,15 @@ tc_headers_hook (headers)
 #endif
 #endif
 
-/* Various routines to kill one day */
-/* Equal to MAX_PRECISION in atof-ieee.c */
+/* Various routines to kill one day.  */
+/* Equal to MAX_PRECISION in atof-ieee.c.  */
 #define MAX_LITTLENUMS 6
 
-/* Turn a string in input_line_pointer into a floating point constant of type
-   type, and store the appropriate bytes in *litP.  The number of LITTLENUMS
-   emitted is stored in *sizeP .  An error message is returned, or NULL on OK.
- */
+/* Turn a string in input_line_pointer into a floating point constant
+   of type TYPE, and store the appropriate bytes in *LITP.  The number
+   of LITTLENUMS emitted is stored in *SIZEP .  An error message is
+   returned, or NULL on OK.  */
+
 char *
 md_atof (type, litP, sizeP)
      int type;
@@ -1878,8 +1876,8 @@ s_uses (ignore)
 }
 
 CONST char *md_shortopts = "";
-struct option md_longopts[] = {
-
+struct option md_longopts[] =
+{
 #define OPTION_RELAX  (OPTION_MD_BASE)
 #define OPTION_LITTLE (OPTION_MD_BASE + 1)
 #define OPTION_SMALL (OPTION_LITTLE + 1)
@@ -2054,8 +2052,8 @@ sh_frob_section (abfd, sec, ignore)
 	  continue;
 	}
 
-      /* fscan should also be a fixup to a local symbol in the same
-	 section.  */
+      /* The variable fscan should also be a fixup to a local symbol
+	 in the same section.  */
       sym = fscan->fx_addsy;
       if (sym == NULL
 	  || fscan->fx_subsy != NULL
@@ -2175,8 +2173,8 @@ md_convert_frag (headers, seg, fragP)
 		(unsigned long) fragP->fr_address,		
 		S_GET_NAME (fragP->fr_symbol));
 
-#if 0				/* This code works, but generates poor code and the compiler
-				   should never produce a sequence that requires it to be used.  */
+#if 0		/* This code works, but generates poor code and the compiler
+		   should never produce a sequence that requires it to be used.  */
 
       /* A jump wont fit in 12 bits, make code which looks like
 	 bra foo
@@ -2202,7 +2200,7 @@ md_convert_frag (headers, seg, fragP)
       buffer[highbyte+10] = 0x20; /* build nop */
       buffer[lowbyte+10] = 0x0b;
 
-      /* Make reloc for the long disp */
+      /* Make reloc for the long disp.  */
       fix_new (fragP,
 	       fragP->fr_fix + 4,
 	       4,
@@ -2219,7 +2217,7 @@ md_convert_frag (headers, seg, fragP)
 
     case C (COND_JUMP, COND12):
     case C (COND_JUMP_DELAY, COND12):
-      /* A bcond won't fit, so turn it into a b!cond; bra disp; nop */
+      /* A bcond won't fit, so turn it into a b!cond; bra disp; nop.  */
       /* I found that a relax failure for gcc.c-torture/execute/930628-1.c
 	 was due to gas incorrectly relaxing an out-of-range conditional
 	 branch with delay slot.  It turned:
@@ -2298,8 +2296,8 @@ md_convert_frag (headers, seg, fragP)
 		(unsigned long) fragP->fr_address,		
 		S_GET_NAME (fragP->fr_symbol));
 
-#if 0				/* This code works, but generates poor code, and the compiler
-				   should never produce a sequence that requires it to be used.  */
+#if 0		/* This code works, but generates poor code, and the compiler
+		   should never produce a sequence that requires it to be used.  */
 
       /* A bcond won't fit and it won't go into a 12 bit
 	 displacement either, the code sequence looks like:
@@ -2522,7 +2520,8 @@ sh_fix_adjustable (fixP)
   return 1;
 }
 
-void sh_elf_final_processing()
+void
+sh_elf_final_processing ()
 {
   int val;
 
@@ -2574,9 +2573,9 @@ md_apply_fix (fixP, val)
   int shift;
 
 #ifdef BFD_ASSEMBLER
-  /* adjust_reloc_syms won't convert a reloc against a weak symbol
-     into a reloc against a section, but bfd_install_relocation will
-     screw up if the symbol is defined, so we have to adjust val here
+  /* The function adjust_reloc_syms won't convert a reloc against a weak
+     symbol into a reloc against a section, but bfd_install_relocation
+     will screw up if the symbol is defined, so we have to adjust val here
      to avoid the screw up later.  */
   if (fixP->fx_addsy != NULL
       && S_IS_WEAK (fixP->fx_addsy))
@@ -2771,7 +2770,7 @@ md_estimate_size_before_relax (fragP, segment_type)
   switch (fragP->fr_subtype)
     {
     case C (UNCOND_JUMP, UNDEF_DISP):
-      /* used to be a branch to somewhere which was unknown */
+      /* Used to be a branch to somewhere which was unknown.  */
       if (!fragP->fr_symbol)
 	{
 	  fragP->fr_subtype = C (UNCOND_JUMP, UNCOND12);
@@ -2794,20 +2793,20 @@ md_estimate_size_before_relax (fragP, segment_type)
       abort ();
     case C (COND_JUMP, UNDEF_DISP):
     case C (COND_JUMP_DELAY, UNDEF_DISP):
-      /* used to be a branch to somewhere which was unknown */
+      /* Used to be a branch to somewhere which was unknown.  */
       if (fragP->fr_symbol
 	  && S_GET_SEGMENT (fragP->fr_symbol) == segment_type)
 	{
 	  int what = GET_WHAT (fragP->fr_subtype);
 	  /* Got a symbol and it's defined in this segment, become byte
-	     sized - maybe it will fix up */
+	     sized - maybe it will fix up.  */
 	  fragP->fr_subtype = C (what, COND8);
 	  fragP->fr_var = md_relax_table[C (what, COND8)].rlx_length;
 	}
       else if (fragP->fr_symbol)
 	{
 	  int what = GET_WHAT (fragP->fr_subtype);
-	  /* Its got a segment, but its not ours, so it will always be long */
+	  /* Its got a segment, but its not ours, so it will always be long.  */
 	  fragP->fr_subtype = C (what, UNDEF_WORD_DISP);
 	  fragP->fr_var = md_relax_table[C (what, COND32)].rlx_length;
 	  return md_relax_table[C (what, COND32)].rlx_length;
@@ -2815,7 +2814,7 @@ md_estimate_size_before_relax (fragP, segment_type)
       else
 	{
 	  int what = GET_WHAT (fragP->fr_subtype);
-	  /* We know the abs value */
+	  /* We know the abs value.  */
 	  fragP->fr_subtype = C (what, COND8);
 	  fragP->fr_var = md_relax_table[C (what, COND8)].rlx_length;
 	}
@@ -2825,7 +2824,7 @@ md_estimate_size_before_relax (fragP, segment_type)
   return fragP->fr_var;
 }
 
-/* Put number into target byte order */
+/* Put number into target byte order.  */
 
 void
 md_number_to_chars (ptr, use, nbytes)
