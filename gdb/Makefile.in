@@ -55,6 +55,8 @@ INSTALL = @INSTALL@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_DATA = @INSTALL_DATA@
 
+DESTDIR =
+
 AR = @AR@
 AR_FLAGS = qv
 RANLIB = @RANLIB@
@@ -908,9 +910,12 @@ install-only: $(CONFIG_INSTALL)
 		  true ; \
 		fi ; \
 		$(srcdir)/../mkinstalldirs $(bindir) ; \
-		$(INSTALL_PROGRAM) gdb$(EXEEXT) $(bindir)/$$transformed_name$(EXEEXT) ; \
-		$(srcdir)/../mkinstalldirs $(man1dir) ; \
-		$(INSTALL_DATA) $(srcdir)/gdb.1 $(man1dir)/$$transformed_name.1
+		$(INSTALL_PROGRAM) gdb$(EXEEXT) \
+			$(DESTDIR)$(bindir)/$$transformed_name$(EXEEXT) ; \
+		$(srcdir)/../mkinstalldirs \
+			$(DESTDIR)$(man1dir) ; \
+		$(INSTALL_DATA) $(srcdir)/gdb.1 \
+			$(DESTDIR)$(man1dir)/$$transformed_name.1
 	@$(MAKE) DO=install "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS) subdir_do 
 
 uninstall: force $(CONFIG_UNINSTALL)
@@ -2327,20 +2332,25 @@ install-gdbtk:
 	  true ; \
 	fi ; \
 	$(SHELL) $(srcdir)/../mkinstalldirs $(bindir); \
-	$(INSTALL_PROGRAM) insight$(EXEEXT) $(bindir)/$$transformed_name$(EXEEXT) ; \
-	$(SHELL) $(srcdir)/../mkinstalldirs $(GDBTK_LIBRARY) ; \
-	$(SHELL) $(srcdir)/../mkinstalldirs $(libdir)/insight$(GDBTK_VERSION) ; \
-	$(INSTALL_DATA) $(srcdir)/gdbtk/plugins/plugins.tcl $(libdir)/insight$(GDBTK_VERSION)/plugins.tcl ; \
+	$(INSTALL_PROGRAM) insight$(EXEEXT) \
+		$(DESTDIR)$(bindir)/$$transformed_name$(EXEEXT) ; \
 	$(SHELL) $(srcdir)/../mkinstalldirs \
-		$(GDBTK_LIBRARY)/images \
-		$(GDBTK_LIBRARY)/images2 ; \
-	$(SHELL) $(srcdir)/../mkinstalldirs $(GDBTK_LIBRARY)/help \
-		$(GDBTK_LIBRARY)/help/images \
-		$(GDBTK_LIBRARY)/help/trace ; \
+		$(DESTDIR)$(GDBTK_LIBRARY) ; \
+	$(SHELL) $(srcdir)/../mkinstalldirs \
+		$(DESTDIR)$(libdir)/insight$(GDBTK_VERSION) ; \
+	$(INSTALL_DATA) $(srcdir)/gdbtk/plugins/plugins.tcl \
+		$(DESTDIR)$(libdir)/insight$(GDBTK_VERSION)/plugins.tcl ; \
+	$(SHELL) $(srcdir)/../mkinstalldirs \
+		$(DESTDIR)$(GDBTK_LIBRARY)/images \
+		$(DESTDIR)$(GDBTK_LIBRARY)/images2 ; \
+	$(SHELL) $(srcdir)/../mkinstalldirs \
+		$(DESTDIR)$(GDBTK_LIBRARY)/help \
+		$(DESTDIR)$(GDBTK_LIBRARY)/help/images \
+		$(DESTDIR)$(GDBTK_LIBRARY)/help/trace ; \
 	cd $(srcdir)/gdbtk/library ; \
 	for i in *.tcl *.itcl *.ith *.itb images/*.gif images2/*.gif images/icons.txt images2/icons.txt tclIndex help/*.html  help/trace/*.html help/trace/index.toc help/images/*.gif; \
 	  do \
-		$(INSTALL_DATA) $$i $(GDBTK_LIBRARY)/$$i ; \
+		$(INSTALL_DATA) $$i $(DESTDIR)$(GDBTK_LIBRARY)/$$i ; \
 	  done ;
 
 uninstall-gdbtk:
@@ -2351,8 +2361,8 @@ uninstall-gdbtk:
 	else \
 		true ; \
 	fi ; \
-	rm -f $(bindir)/$$transformed_name$(EXEEXT) ; \
-	rm -rf $(GDBTK_LIBRARY)
+	rm -f $(DESTDIR)$(bindir)/$$transformed_name$(EXEEXT) ; \
+	rm -rf $(DESTDIR)$(GDBTK_LIBRARY)
 
 clean-gdbtk:
 	rm -f insight$(EXEEXT)

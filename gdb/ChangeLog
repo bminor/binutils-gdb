@@ -1,5 +1,9 @@
 2002-11-08  Andrew Cagney  <ac131313@redhat.com>
 
+	* Makefile.in (DESTDIR): Define.
+	(install-only, install-gdbtk, uninstall-gdbtk): Add $(DESTDIR)
+	prefix.
+
 	* config/djgpp/fnchange.lst: 8.3 proof i386obsd-nat.c and
 	i386obsd-tdep.c.  Rename to "gdb.cxx", paths containing "gdb.c++".
 
