@@ -649,6 +649,9 @@ build_command_line (type, args)
 {
   struct command_line *cmd;
 
+  if (args == NULL)
+    error ("if/while commands require arguments.\n");
+
   cmd = (struct command_line *)xmalloc (sizeof (struct command_line));
   cmd->next = NULL;
   cmd->control_type = type;

@@ -1,3 +1,8 @@
+Mon Oct  2 21:45:44 1995  Jeff Law  (law@hurl)
+
+	* top.c (build_command_line): Demand arguments for if/while
+	commands.
+
 Mon Oct  2 13:08:01 1995  Jason Molenda   (crash@phydeaux.cygnus.com)
 
 	* Makefile.in (X11_CFLAGS): Set only to @X_INCDIR@.
