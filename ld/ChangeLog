@@ -1,3 +1,9 @@
+2004-09-27  Filip Navara  <navaraf@reactos.com>
+
+	* emultempl/pe.em (gld_${EMULATION_NAME}_unrecognized_file): Allow
+	def_file_parse to handle pe_def_file if NULL and prevent crash with
+	invalid .def files.
+
 2004-09-27  Alan Modra  <amodra@bigpond.net.au>
 
 	* emultempl/ppc64elf.em (gld${EMULATION_NAME}_finish): Enable

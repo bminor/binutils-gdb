@@ -1293,10 +1293,7 @@ gld_${EMULATION_NAME}_unrecognized_file (lang_input_statement_type *entry ATTRIB
 
   if (strcmp (ext, ".def") == 0 || strcmp (ext, ".DEF") == 0)
     {
-      if (pe_def_file == 0)
-	pe_def_file = def_file_empty ();
-
-      def_file_parse (entry->filename, pe_def_file);
+      pe_def_file = def_file_parse (entry->filename, pe_def_file);
 
       if (pe_def_file)
 	{
