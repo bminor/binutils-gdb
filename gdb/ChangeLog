@@ -1,3 +1,9 @@
+2002-02-26  Richard Earnshaw  <rearnsha@arm.com>
+
+	* config/arm/tm-embed.h (TARGET_UPAGES): Delete.
+	(TARGET_NBPG, STACK_END_ADDR): Delete
+	(VARIABLES_INSIDE_BLOCK): Delete.
+
 2002-02-25  Andrew Cagney  <ac131313@redhat.com>
 
 	* utils.c (perror_with_name): Make string parameter constant.
