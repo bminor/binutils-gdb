@@ -43,23 +43,23 @@ const char comment_chars[] = ";";
 const char line_comment_chars[] = "#";
 const char line_separator_chars[] = "";
 
-void sbranch (int);
-void h8300hmode (int);
-void h8300smode (int);
-void h8300hnmode (int);
-void h8300snmode (int);
-void h8300sxmode (int);
-void h8300sxnmode (int);
+static void sbranch (int);
+static void h8300hmode (int);
+static void h8300smode (int);
+static void h8300hnmode (int);
+static void h8300snmode (int);
+static void h8300sxmode (int);
+static void h8300sxnmode (int);
 static void pint (int);
 
-int Hmode;
-int Smode;
-int Nmode;
-int SXmode;
+static int Hmode;
+static int Smode;
+static int Nmode;
+static int SXmode;
 
 #define PSIZE (Hmode && !Nmode ? L_32 : L_16)
 
-int bsize = L_8;		/* Default branch displacement.  */
+static int bsize = L_8;		/* Default branch displacement.  */
 
 struct h8_instruction
 {
@@ -70,9 +70,9 @@ struct h8_instruction
   const struct h8_opcode *opcode;
 };
 
-struct h8_instruction *h8_instructions;
+static struct h8_instruction *h8_instructions;
 
-void
+static void
 h8300hmode (int arg ATTRIBUTE_UNUSED)
 {
   Hmode = 1;
@@ -83,7 +83,7 @@ h8300hmode (int arg ATTRIBUTE_UNUSED)
 #endif
 }
 
-void
+static void
 h8300smode (int arg ATTRIBUTE_UNUSED)
 {
   Smode = 1;
@@ -94,7 +94,7 @@ h8300smode (int arg ATTRIBUTE_UNUSED)
 #endif
 }
 
-void
+static void
 h8300hnmode (int arg ATTRIBUTE_UNUSED)
 {
   Hmode = 1;
@@ -106,7 +106,7 @@ h8300hnmode (int arg ATTRIBUTE_UNUSED)
 #endif
 }
 
-void
+static void
 h8300snmode (int arg ATTRIBUTE_UNUSED)
 {
   Smode = 1;
@@ -118,7 +118,7 @@ h8300snmode (int arg ATTRIBUTE_UNUSED)
 #endif
 }
 
-void
+static void
 h8300sxmode (int arg ATTRIBUTE_UNUSED)
 {
   Smode = 1;
@@ -130,7 +130,7 @@ h8300sxmode (int arg ATTRIBUTE_UNUSED)
 #endif
 }
 
-void
+static void
 h8300sxnmode (int arg ATTRIBUTE_UNUSED)
 {
   Smode = 1;
@@ -143,7 +143,7 @@ h8300sxnmode (int arg ATTRIBUTE_UNUSED)
 #endif
 }
 
-void
+static void
 sbranch (int size)
 {
   bsize = size;
