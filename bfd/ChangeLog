@@ -1,3 +1,8 @@
+Thu Apr 16 13:49:00 1998  Richard Henderson  <rth@cygnus.com>
+
+	* elf64-alpha.c (elf64_alpha_do_reloc_gpdisp): Do all gpdisp 
+	comparisons signed.
+
 Thu Apr 16 11:43:33 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* targets.c (bfd_target_vector) [SELECT_VECS not defined]: Add
