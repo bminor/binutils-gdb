@@ -736,7 +736,7 @@ print_it_normal (bs)
       printf_filtered ("\n");
       value_free (bs->old_val);
       bs->old_val = NULL;
-      return 1;
+      return 0;
     }
   /* We can't deal with it.  Maybe another member of the bpstat chain can.  */
   return -1;
@@ -745,7 +745,7 @@ print_it_normal (bs)
 /* Print a message indicating what happened.  Returns nonzero to
    say that only the source line should be printed after this (zero
    return means print the frame as well as the source line).  */
-
+/* Currently we always return zero.  */
 int
 bpstat_print (bs)
      bpstat bs;

@@ -1,5 +1,7 @@
 Tue Mar 30 08:06:24 1993  Jim Kingdon  (kingdon@cygnus.com)
 
+	* breakpoint.c (print_it_normal): Return 0 after hitting watchpoint.
+
 	* breakpoint.h (bpstat): New field print_it.
 	breakpoint.c (bpstat_print): Use it.
 	(print_it_normal): New function (from old bpstat_print code).
