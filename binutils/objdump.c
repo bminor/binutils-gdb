@@ -1198,10 +1198,18 @@ disassemble_bytes (info, disassemble_fn, insns, data, start, stop, relppp,
 	      while (pb < bytes)
 		{
 		  long j;
+		  char *s;
 
 		  putchar ('\n');
 		  j = i + pb;
-		  printf ("%6lx:\t", (unsigned long) (j - start));
+
+		  sprintf_vma (buf, section->vma + j);
+		  for (s = buf + skip_addr_chars; *s == '0'; s++)
+		    *s = ' ';
+		  if (*s == '\0')
+		    *--s = '0';
+		  printf ("%s:\t", buf + skip_addr_chars);
+
 		  pb += bytes_per_line;
 		  if (pb > bytes)
 		    pb = bytes;
