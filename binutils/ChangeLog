@@ -1,7 +1,13 @@
+1998-07-22 13:51  Ulrich Drepper  <drepper@cygnus.com>
+
+	* readelf.c: Before include system specific ELF header define
+	START_RELOC_NUMBERS, RELOC_NUMBER, and END_RELOC_NUMBERS.  For now
+	used for ppc, mips, and mn10300.
+
 Wed Jul 22 10:26:32 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* readelf.c (dump_relocations): Display number of unrecognised
-	relocations. 
+	relocations.
 
 1998-07-21 13:13  Ulrich Drepper  <drepper@cygnus.com>
 

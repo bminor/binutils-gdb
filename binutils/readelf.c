@@ -38,10 +38,7 @@
 #include "elf/i386.h"
 #include "elf/m32r.h"
 #include "elf/m68k.h"
-#include "elf/mips.h"
 #include "elf/mn10200.h"
-#include "elf/mn10300.h"
-#include "elf/ppc.h"
 #include "elf/sh.h"
 #include "elf/sparc.h"
 #include "elf/v850.h"
@@ -543,22 +540,24 @@ get_sh_rel_type (rtype)
 }
 
 
-static const char *
-get_mn10300_rel_type (rtype)
-     unsigned long rtype;
-{
-  switch (rtype)
-    {
-    case R_MN10300_NONE: return "R_MN10300_NONE";
-    case R_MN10300_32: return "R_MN10300_32";
-    case R_MN10300_16: return "R_MN10300_16";
-    case R_MN10300_8: return "R_MN10300_8";
-    case R_MN10300_PCREL32: return "R_MN10300_PCREL32";
-    case R_MN10300_PCREL16: return "R_MN10300_PCREL16";
-    case R_MN10300_PCREL8: return "R_MN10300_PCREL8";
-    default:		 return NULL;
-    }
-}
+/* Define the function to get MN10300 relocations.  */
+#define START_RELOC_NUMBERS(name)  static const char *			      \
+				   get_mn10300_rel_type (rtype)		      \
+				        unsigned long rtype;		      \
+				   {					      \
+				     switch (rtype) {
+#ifdef __STDC__
+# define RELOC_NUMBER(name, number)    case number: return #name;
+#else
+# define RELOC_NUMBER(name, number)    case number: return "name";
+#endif
+#define END_RELOC_NUMBERS              default: return NULL;		      \
+				     }					      \
+				   }
+#include "elf/mn10300.h"
+#undef START_RELOC_NUMBERS
+#undef RELOC_NUMBER
+#undef END_RELOC_NUMBERS
 
 
 static const char *
@@ -580,93 +579,44 @@ get_mn10200_rel_type (rtype)
 }
 
 
-static const char *
-get_ppc_rel_type (rtype)
-     unsigned long rtype;
-{
-  switch (rtype)
-    {
-    case R_PPC_NONE: return "R_PPC_NONE";
-    case R_PPC_ADDR32: return "R_PPC_ADDR32";
-    case R_PPC_ADDR24: return "R_PPC_ADDR24";
-    case R_PPC_ADDR16: return "R_PPC_ADDR16";
-    case R_PPC_ADDR16_LO: return "R_PPC_ADDR16_LO";
-    case R_PPC_ADDR16_HI: return "R_PPC_ADDR16_HI";
-    case R_PPC_ADDR16_HA: return "R_PPC_ADDR16_HA";
-    case R_PPC_ADDR14: return "R_PPC_ADDR14";
-    case R_PPC_ADDR14_BRTAKEN: return "R_PPC_ADDR14_BRTAKEN";
-    case R_PPC_ADDR14_BRNTAKEN: return "R_PPC_ADDR14_BRNTAKEN";
-    case R_PPC_REL24: return "R_PPC_REL24";
-    case R_PPC_REL14: return "R_PPC_REL14";
-    case R_PPC_REL14_BRTAKEN: return "R_PPC_REL14_BRTAKEN";
-    case R_PPC_REL14_BRNTAKEN: return "R_PPC_REL14_BRNTAKEN";
-    case R_PPC_GOT16: return "R_PPC_GOT16";
-    case R_PPC_GOT16_LO: return "R_PPC_GOT16_LO";
-    case R_PPC_GOT16_HI: return "R_PPC_GOT16_HI";
-    case R_PPC_GOT16_HA: return "R_PPC_GOT16_HA";
-    case R_PPC_PLTREL24: return "R_PPC_PLTREL24";
-    case R_PPC_COPY: return "R_PPC_COPY";
-    case R_PPC_GLOB_DAT: return "R_PPC_GLOB_DAT";
-    case R_PPC_JMP_SLOT: return "R_PPC_JMP_SLOT";
-    case R_PPC_RELATIVE: return "R_PPC_RELATIVE";
-    case R_PPC_LOCAL24PC: return "R_PPC_LOCAL24PC";
-    case R_PPC_UADDR32: return "R_PPC_UADDR32";
-    case R_PPC_UADDR16: return "R_PPC_UADDR16";
-    case R_PPC_REL32: return "R_PPC_REL32";
-    case R_PPC_PLT32: return "R_PPC_PLT32";
-    case R_PPC_PLTREL32: return "R_PPC_PLTREL32";
-    case R_PPC_PLT16_LO: return "R_PPC_PLT16_LO";
-    case R_PPC_PLT16_HI: return "R_PPC_PLT16_HI";
-    case R_PPC_PLT16_HA: return "R_PPC_PLT16_HA";
-    case R_PPC_SDAREL16: return "R_PPC_SDAREL16";
-    case R_PPC_SECTOFF: return "R_PPC_SECTOFF";
-    case R_PPC_SECTOFF_LO: return "R_PPC_SECTOFF_LO";
-    case R_PPC_SECTOFF_HI: return "R_PPC_SECTOFF_HI";
-    case R_PPC_SECTOFF_HA: return "R_PPC_SECTOFF_HA";
-    case R_PPC_EMB_NADDR32: return "R_PPC_EMB_NADDR32";
-    case R_PPC_EMB_NADDR16: return "R_PPC_EMB_NADDR16";
-    case R_PPC_EMB_NADDR16_LO: return "R_PPC_EMB_NADDR16_LO";
-    case R_PPC_EMB_NADDR16_HI: return "R_PPC_EMB_NADDR16_HI";
-    case R_PPC_EMB_NADDR16_HA: return "R_PPC_EMB_NADDR16_HA";
-    case R_PPC_EMB_SDAI16: return "R_PPC_EMB_SDAI16";
-    case R_PPC_EMB_SDA2I16: return "R_PPC_EMB_SDA2I16";
-    case R_PPC_EMB_SDA2REL: return "R_PPC_EMB_SDA2REL";
-    case R_PPC_EMB_SDA21: return "R_PPC_EMB_SDA21";
-    case R_PPC_EMB_MRKREF: return "R_PPC_EMB_MRKREF";
-    case R_PPC_EMB_RELSEC16: return "R_PPC_EMB_RELSEC16";
-    case R_PPC_EMB_RELST_LO: return "R_PPC_EMB_RELST_LO";
-    case R_PPC_EMB_RELST_HI: return "R_PPC_EMB_RELST_HI";
-    case R_PPC_EMB_RELST_HA: return "R_PPC_EMB_RELST_HA";
-    case R_PPC_EMB_BIT_FLD: return "R_PPC_EMB_BIT_FLD";
-    case R_PPC_EMB_RELSDA: return "R_PPC_EMB_RELSDA";
-    case R_PPC_TOC16: return "R_PPC_TOC16";
-    default:		 return NULL;
-    }
-}
+/* Define the function to get PPC relocations.  */
+#define START_RELOC_NUMBERS(name)  static const char *			      \
+				   get_ppc_rel_type (rtype)		      \
+				        unsigned long rtype;		      \
+				   {					      \
+				     switch (rtype) {
+#ifdef __STDC__
+# define RELOC_NUMBER(name, number)    case number: return #name;
+#else
+# define RELOC_NUMBER(name, number)    case number: return "name";
+#endif
+#define END_RELOC_NUMBERS              default: return NULL;		      \
+				     }					      \
+				   }
+#include "elf/ppc.h"
+#undef START_RELOC_NUMBERS
+#undef RELOC_NUMBER
+#undef END_RELOC_NUMBERS
 
 
-static const char *
-get_mips_rel_type (rtype)
-     unsigned long rtype;
-{
-  switch (rtype)
-    {
-    case R_MIPS_NONE: return "R_MIPS_NONE";
-    case R_MIPS_16: return "R_MIPS_16";
-    case R_MIPS_32: return "R_MIPS_32";
-    case R_MIPS_REL32: return "R_MIPS_REL32";
-    case R_MIPS_26: return "R_MIPS_26";
-    case R_MIPS_HI16: return "R_MIPS_HI16";
-    case R_MIPS_LO16: return "R_MIPS_LO16";
-    case R_MIPS_GPREL16: return "R_MIPS_GPREL16";
-    case R_MIPS_LITERAL: return "R_MIPS_LITERAL";
-    case R_MIPS_GOT16: return "R_MIPS_GOT16";
-    case R_MIPS_PC16: return "R_MIPS_PC16";
-    case R_MIPS_CALL16: return "R_MIPS_CALL16";
-    case R_MIPS_GPREL32: return "R_MIPS_GPREL32";
-    default:		 return NULL;
-    }
-}
+/* Define the function to get MIPS relocations.  */
+#define START_RELOC_NUMBERS(name)  static const char *			      \
+				   get_mips_rel_type (rtype)		      \
+				        unsigned long rtype;		      \
+				   {					      \
+				     switch (rtype) {
+#ifdef __STDC__
+# define RELOC_NUMBER(name, number)    case number: return #name;
+#else
+# define RELOC_NUMBER(name, number)    case number: return "name";
+#endif
+#define END_RELOC_NUMBERS              default: return NULL;		      \
+				     }					      \
+				   }
+#include "elf/mips.h"
+#undef START_RELOC_NUMBERS
+#undef RELOC_NUMBER
+#undef END_RELOC_NUMBERS
 
 
 static const char *
