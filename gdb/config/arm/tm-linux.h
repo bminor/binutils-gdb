@@ -61,6 +61,7 @@ extern void arm_linux_extract_return_value (struct type *, char[], char *);
 	arm_linux_extract_return_value ((TYPE), (REGBUF), (VALBUF))
 
 /* The first page is not writeable in ARM Linux.  */
+#undef LOWEST_PC
 #define LOWEST_PC	0x8000
 
 /* Define NO_SINGLE_STEP if ptrace(PT_STEP,...) fails to function correctly
