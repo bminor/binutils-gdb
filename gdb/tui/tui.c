@@ -19,6 +19,16 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
+/* If we need <curses.h>, we must include it before we get "bfd.h".  */
+#include "config.h"
+#ifdef HAVE_NCURSES_H       
+#include <ncurses.h>
+#else
+#ifdef HAVE_CURSES_H
+#include <curses.h>
+#endif
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>

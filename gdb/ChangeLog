@@ -1,3 +1,21 @@
+2002-02-08  Daniel Jacobowitz  <drow@mvista.com>
+
+	* utils.c: Include <curses.h> before "bfd.h".
+	* tui/tui-hooks.c: Likewise.
+	* tui/tui.c: Likewise.
+	* tui/tuiCommand.c: Likewise.
+	* tui/tuiData.c: Likewise.
+	* tui/tuiDataWin.c: Likewise.
+	* tui/tuiDisassem.c: Likewise.
+	* tui/tuiGeneralWin.c: Likewise.
+	* tui/tuiIO.c: Likewise.
+	* tui/tuiLayout.c: Likewise.
+	* tui/tuiRegs.c: Likewise.
+	* tui/tuiSource.c: Likewise.
+	* tui/tuiSourceWin.c: Likewise.
+	* tui/tuiStack.c: Likewise.
+	* tui/tuiWin.c: Likewise.
+
 2002-02-07  Elena Zannoni  <ezannoni@redhat.com>
 
 	* sh-tdep.c (sh_nofp_frame_init_saved_regs): Extend where[] array

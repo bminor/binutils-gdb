@@ -20,18 +20,22 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#include "defs.h"
-#include "gdb_assert.h"
-#include <ctype.h>
-#include "gdb_string.h"
-#include "event-top.h"
+#include "config.h"
 
+/* Include before "bfd.h" so that we get stdbool.h in time, if <curses.h>
+   brings it in.  */
 #ifdef HAVE_CURSES_H
 #include <curses.h>
 #endif
 #ifdef HAVE_TERM_H
 #include <term.h>
 #endif
+
+#include "defs.h"
+#include "gdb_assert.h"
+#include <ctype.h>
+#include "gdb_string.h"
+#include "event-top.h"
 
 #ifdef __GO32__
 #include <pc.h>

@@ -24,6 +24,16 @@
 
    Author: Susan B. Macchia  */
 
+/* If we need <curses.h>, we must include it before we get "bfd.h".  */
+#include "config.h"
+#ifdef HAVE_NCURSES_H       
+#include <ncurses.h>
+#else
+#ifdef HAVE_CURSES_H
+#include <curses.h>
+#endif
+#endif
+
 #include <string.h>
 #include <ctype.h>
 #include "defs.h"
