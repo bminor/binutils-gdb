@@ -457,7 +457,7 @@ process_otr (abfd, otr, pass)
 			  EDATA (abfd, otr->esdid - 1).section->relocation + rn;
 			  n->address = dst_idx;
 
-			  n->sym_ptr_ptr = (asymbol **) esdid;
+			  n->sym_ptr_ptr = (asymbol **) (size_t) esdid;
 			  n->addend = 0;
 			  n->howto = versados_howto_table + ((j & 1) * 2) + (sizeinwords - 1);
 			}
@@ -819,7 +819,7 @@ versados_canonicalize_reloc (abfd, section, relptr, symbols)
       /* translate from indexes to symptr ptrs */
       for (count = 0; count < section->reloc_count; count++)
 	{
-	  int esdid = (int) src[count].sym_ptr_ptr;
+	  int esdid = (int) (size_t) src[count].sym_ptr_ptr;
 
 	  if (esdid == 0)
 	    {

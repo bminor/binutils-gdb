@@ -4471,7 +4471,7 @@ literal_value_hash (const literal_value *src)
 	sec_or_hash = r_reloc_get_section (&src->r_rel);
       else
 	sec_or_hash = r_reloc_get_hash_entry (&src->r_rel);
-      hash_val += hash_bfd_vma ((bfd_vma) (unsigned) sec_or_hash);
+      hash_val += hash_bfd_vma ((bfd_vma) (size_t) sec_or_hash);
     }
   return hash_val;
 }

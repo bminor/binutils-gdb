@@ -374,8 +374,8 @@ sh_symbian_process_embedded_commands (struct bfd_link_info *info, bfd * abfd,
       if (! result)
 	{
 	  if (DEBUG)
-	    fprintf (stderr, "offset into .directive section: %d\n",
-		     directive - (char *) contents);
+	    fprintf (stderr, "offset into .directive section: %ld\n",
+		     (long) (directive - (char *) contents));
 	  
 	  bfd_set_error (bfd_error_invalid_operation);
 	  _bfd_error_handler (_("%B: Unrecognised .directive command: %s"),

@@ -1,6 +1,6 @@
 /* Support for the generic parts of most COFF variants, for BFD.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003, 2004
+   2000, 2001, 2002, 2003, 2004, 2005
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
@@ -2406,7 +2406,8 @@ coff_print_aux (abfd, file, table_base, symbol, aux, indaux)
 	{
 	  BFD_ASSERT (! aux->fix_scnlen);
 #ifdef XCOFF64
-	  fprintf (file, "val %5lld", aux->u.auxent.x_csect.x_scnlen.l);
+	  fprintf (file, "val %5lld",
+		   (long long) aux->u.auxent.x_csect.x_scnlen.l);
 #else
 	  fprintf (file, "val %5ld", (long) aux->u.auxent.x_csect.x_scnlen.l);
 #endif
@@ -2416,7 +2417,8 @@ coff_print_aux (abfd, file, table_base, symbol, aux, indaux)
 	  fprintf (file, "indx ");
 	  if (! aux->fix_scnlen)
 #ifdef XCOFF64
-	    fprintf (file, "%4lld", aux->u.auxent.x_csect.x_scnlen.l);
+	    fprintf (file, "%4lld",
+		     (long long) aux->u.auxent.x_csect.x_scnlen.l);
 #else
 	    fprintf (file, "%4ld", (long) aux->u.auxent.x_csect.x_scnlen.l);
 #endif

@@ -1,6 +1,6 @@
 /* vms-gsd.c -- BFD back-end for VAX (openVMS/VAX) and
    EVAX (openVMS/Alpha) files.
-   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2004
+   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2004, 2005
    Free Software Foundation, Inc.
 
    go and read the openVMS linker manual (esp. appendix B)
@@ -520,7 +520,7 @@ _bfd_vms_slurp_gsd (abfd, objtype)
 		  else
 		    psect = vms_rec[value_offset-1];
 
-		  symbol->section = (asection *)psect;
+		  symbol->section = (asection *) (size_t) psect;
 #if VMS_DEBUG
 		  vms_debug(4, "gsd sym def #%d (%s, %d [%p], %04x=%s)\n", abfd->symcount,
 				symbol->name, (int)symbol->section, symbol->section, old_flags, flag2str(gsyflagdesc, old_flags));

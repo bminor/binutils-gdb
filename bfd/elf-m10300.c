@@ -1,5 +1,5 @@
 /* Matsushita 10300 specific support for 32-bit ELF
-   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004
+   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005
    Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -1800,8 +1800,7 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 			  if (new_name == 0)
 			    goto error_return;
 
-			  sprintf (new_name, "%s_%08x",
-				   sym_name, (int) sym_sec);
+			  sprintf (new_name, "%s_%08x", sym_name, sym_sec->id);
 			  sym_name = new_name;
 
 			  elftab = &hash_table->static_hash_table->root;
@@ -1906,8 +1905,7 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 			  if (new_name == 0)
 			    goto error_return;
 
-			  sprintf (new_name, "%s_%08x",
-				   sym_name, (int) sym_sec);
+			  sprintf (new_name, "%s_%08x", sym_name, sym_sec->id);
 			  sym_name = new_name;
 
 			  elftab = &hash_table->static_hash_table->root;
@@ -2078,7 +2076,7 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 		  new_name = bfd_malloc (amt);
 		  if (new_name == 0)
 		    goto error_return;
-		  sprintf (new_name, "%s_%08x", sym_name, (int) sym_sec);
+		  sprintf (new_name, "%s_%08x", sym_name, sym_sec->id);
 		  sym_name = new_name;
 
 		  elftab = &hash_table->static_hash_table->root;
@@ -2330,7 +2328,7 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 	  new_name = bfd_malloc ((bfd_size_type) strlen (sym_name) + 10);
 	  if (new_name == 0)
 	    goto error_return;
-	  sprintf (new_name, "%s_%08x", sym_name, (int) sym_sec);
+	  sprintf (new_name, "%s_%08x", sym_name, sym_sec->id);
 	  sym_name = new_name;
 
 	  h = (struct elf32_mn10300_link_hash_entry *)

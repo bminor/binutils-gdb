@@ -1,6 +1,6 @@
 /* vms.c -- BFD back-end for VAX (openVMS/VAX) and
    EVAX (openVMS/Alpha) files.
-   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004
+   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005
    Free Software Foundation, Inc.
 
    Written by Klaus K"ampf (kkaempf@rmi.de)
@@ -365,10 +365,10 @@ fill_section_ptr (entry, sections)
 
   /* fill forward references (these contain section number, not section ptr).  */
 
-  if ((unsigned int) sec < priv_section_count)
+  if ((unsigned int) (size_t) sec < priv_section_count)
     {
-      sec = ((vms_symbol_entry *)entry)->symbol->section =
-	((asection **)sections)[(int)sec];
+      sec = ((vms_symbol_entry *) entry)->symbol->section =
+	((asection **) sections)[(unsigned int) (size_t) sec];
     }
 
   if (strcmp (sym->name, sec->name) == 0)

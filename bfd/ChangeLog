@@ -1,3 +1,20 @@
+2005-02-24  Alan Modra  <amodra@bigpond.net.au>
+
+	* coffcode.h (coff_print_aux): Warning fix.
+	* elf-m10300.c (mn10300_elf_relax_section): Use section->id
+	instead of section pointer to identify.
+	* coff-h8300.c (h8300_reloc16_extra_cases): Likewise.  Allocate
+	the correct size buffer for local sym mangling too.
+	(h8300_bfd_link_add_symbols): Likewise.
+	* elf32-sh-symbian.c (sh_symbian_process_embedded_commands): Fix
+	warning.
+	* elf32-sh64.c (shmedia_prepare_reloc): Use %B and %p in error message
+	* elf32-xtensa.c (literal_value_hash): Warning fix.
+	* versados.c (process_otr): Warning fix.
+	(versados_canonicalize_reloc): Likewise.
+	* vms-gsd.c (_bfd_vms_slurp_gsd): Warning fix.
+	* vms.c (fill_section_ptr): Warning fix.
+
 2005-02-23  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* coff-tic54x.c (SWAP_OUT_RELOC_EXTRA): Defined.
