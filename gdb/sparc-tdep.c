@@ -89,7 +89,7 @@ single_step (ignore)
       npc4 = next_pc + 4; /* branch not taken */
 
       target_insert_breakpoint (next_pc, break_mem[0]);
-      /* printf ("set break at %x\n",next_pc); */
+      /* printf_unfiltered ("set break at %x\n",next_pc); */
 
       pc = read_register (PC_REGNUM);
       pc_instruction = read_memory_integer (pc, sizeof(pc_instruction));
@@ -138,25 +138,24 @@ CORE_ADDR
 sparc_frame_chain (thisframe)
      FRAME thisframe;
 {
-  REGISTER_TYPE retval;
+  char buf[MAX_REGISTER_RAW_SIZE];
   int err;
   CORE_ADDR addr;
 
   addr = thisframe->frame + FRAME_SAVED_I0 +
 	 REGISTER_RAW_SIZE (FP_REGNUM) * (FP_REGNUM - I0_REGNUM);
-  err = target_read_memory (addr, (char *) &retval, sizeof (REGISTER_TYPE));
+  err = target_read_memory (addr, buf, REGISTER_RAW_SIZE (FP_REGNUM));
   if (err)
     return 0;
-  return extract_address (&retval, sizeof (retval));
+  return extract_address (buf, REGISTER_RAW_SIZE (FP_REGNUM));
 }
 
 CORE_ADDR
 sparc_extract_struct_value_address (regbuf)
      char regbuf[REGISTER_BYTES];
 {
-  /* FIXME, handle byte swapping */
   return read_memory_integer (((int *)(regbuf))[SP_REGNUM]+(16*4), 
-	       		      sizeof (CORE_ADDR));
+	       		      TARGET_PTR_BIT / TARGET_CHAR_BIT);
 }
 
 /* Find the pc saved in frame FRAME.  */
@@ -165,13 +164,13 @@ CORE_ADDR
 frame_saved_pc (frame)
      FRAME frame;
 {
-  REGISTER_TYPE retval;
+  char buf[MAX_REGISTER_RAW_SIZE];
   CORE_ADDR addr;
 
   addr = (frame->bottom + FRAME_SAVED_I0 +
 	  REGISTER_RAW_SIZE (I7_REGNUM) * (I7_REGNUM - I0_REGNUM));
-  read_memory (addr, (char *) &retval, sizeof (REGISTER_TYPE));
-  return PC_ADJUST (extract_address (&retval, sizeof (REGISTER_TYPE)));
+  read_memory (addr, buf, REGISTER_RAW_SIZE (I7_REGNUM));
+  return PC_ADJUST (extract_address (buf, REGISTER_RAW_SIZE (I7_REGNUM)));
 }
 
 /*
@@ -369,17 +368,13 @@ sparc_frame_find_saved_regs (fi, saved_regs_addr)
      struct frame_saved_regs *saved_regs_addr;
 {
   register int regnum;
-  FRAME_ADDR frame = read_register (FP_REGNUM);
+  FRAME_ADDR frame = FRAME_FP(fi);
   FRAME fid = FRAME_INFO_ID (fi);
 
   if (!fid)
     fatal ("Bad frame info struct in FRAME_FIND_SAVED_REGS");
 
   memset (saved_regs_addr, 0, sizeof (*saved_regs_addr));
-
-  /* Old test.
-  if (fi->pc >= frame - CALL_DUMMY_LENGTH - 0x140
-      && fi->pc <= frame) */
 
   if (fi->pc >= (fi->bottom ? fi->bottom :
 		   read_register (SP_REGNUM))
@@ -427,57 +422,41 @@ sparc_frame_find_saved_regs (fi, saved_regs_addr)
 
    We save the non-windowed registers and the ins.  The locals and outs
    are new; they don't need to be saved. The i's and l's of
-   the last frame were already saved on the stack
-
-   The return pointer register %i7 does not have the pc saved into it
-   (return from this frame will be accomplished by a POP_FRAME).  In
-   fact, we must leave it unclobbered, since we must preserve it in
-   the calling routine except across call instructions.  I'm not sure
-   the preceding sentence is true; isn't it based on confusing the %i7
-   saved in the dummy frame versus the one saved in the frame of the
-   calling routine?  */
+   the last frame were already saved on the stack.  */
 
 /* Definitely see tm-sparc.h for more doc of the frame format here.  */
 
 void
 sparc_push_dummy_frame ()
 {
-  CORE_ADDR sp;
-  char register_temp[REGISTER_BYTES];
+  CORE_ADDR sp, old_sp;
+  char register_temp[0x140];
 
-  sp = read_register (SP_REGNUM);
-
-  read_register_bytes (REGISTER_BYTE (FP0_REGNUM), register_temp,
-		       REGISTER_RAW_SIZE (FP0_REGNUM) * 32);
-  write_memory (sp - 0x80, register_temp, REGISTER_RAW_SIZE (FP0_REGNUM) * 32);
-
-  read_register_bytes (REGISTER_BYTE (G0_REGNUM), register_temp,
-		       REGISTER_RAW_SIZE (G0_REGNUM) * 8);
-  write_memory (sp - 0xa0, register_temp, REGISTER_RAW_SIZE (G0_REGNUM) * 8);
-
-  read_register_bytes (REGISTER_BYTE (O0_REGNUM), register_temp,
-		       REGISTER_RAW_SIZE (O0_REGNUM) * 8);
-  write_memory (sp - 0xc0, register_temp, REGISTER_RAW_SIZE (O0_REGNUM) * 8);
+  old_sp = sp = read_register (SP_REGNUM);
 
   /* Y, PS, WIM, TBR, PC, NPC, FPS, CPS regs */
-  read_register_bytes (REGISTER_BYTE (Y_REGNUM), register_temp,
+  read_register_bytes (REGISTER_BYTE (Y_REGNUM), &register_temp[0],
 		       REGISTER_RAW_SIZE (Y_REGNUM) * 8);
-  write_memory (sp - 0xe0, register_temp, REGISTER_RAW_SIZE (Y_REGNUM) * 8);
 
-  {
-    CORE_ADDR old_sp = sp;
+  read_register_bytes (REGISTER_BYTE (O0_REGNUM), &register_temp[8 * 4],
+		       REGISTER_RAW_SIZE (O0_REGNUM) * 8);
 
-    /* Now move the stack pointer (equivalent to the add part of a save
-       instruction).  */
-    sp -= 0x140;
-    write_register (SP_REGNUM, sp);
+  read_register_bytes (REGISTER_BYTE (G0_REGNUM), &register_temp[16 * 4],
+		       REGISTER_RAW_SIZE (G0_REGNUM) * 8);
 
-    /* Now make sure that the frame pointer we save in the new frame points
-       to the old frame (equivalent to the register window shift part of
-       a save instruction).  Need to do this after the write to the sp, or
-       else this might get written into the wrong set of saved ins&locals.  */
-    write_register (FP_REGNUM, old_sp);
-  }
+  read_register_bytes (REGISTER_BYTE (FP0_REGNUM), &register_temp[24 * 4],
+		       REGISTER_RAW_SIZE (FP0_REGNUM) * 32);
+
+  sp -= 0x140;
+
+  write_register (SP_REGNUM, sp);
+
+  write_memory (sp + 0x60, &register_temp[0], (8 + 8 + 8 + 32) * 4);
+
+  write_register (FP_REGNUM, old_sp);
+
+  /* Set return address register for the call dummy to the current PC.  */
+  write_register (I7_REGNUM, read_pc() - 8);
 }
 
 /* Discard from the stack the innermost frame, restoring all saved registers.
@@ -509,6 +488,16 @@ sparc_pop_frame ()
     {
       read_memory (fsr.regs[FP0_REGNUM], raw_buffer, 32 * 4);
       write_register_bytes (REGISTER_BYTE (FP0_REGNUM), raw_buffer, 32 * 4);
+    }
+  if (fsr.regs[FPS_REGNUM])
+    {
+      read_memory (fsr.regs[FPS_REGNUM], raw_buffer, 4);
+      write_register_bytes (REGISTER_BYTE (FPS_REGNUM), raw_buffer, 4);
+    }
+  if (fsr.regs[CPS_REGNUM])
+    {
+      read_memory (fsr.regs[CPS_REGNUM], raw_buffer, 4);
+      write_register_bytes (REGISTER_BYTE (CPS_REGNUM), raw_buffer, 4);
     }
   if (fsr.regs[G1_REGNUM])
     {

@@ -1381,6 +1381,10 @@ Further execution is probably impossible.\n");
          POP_FRAME ends with a setting of the current frame, so we
 	 can use that next. */
       POP_FRAME;
+      /* Set stop_pc to what it was before we called the function.  Can't rely
+	 on restore_inferior_status because that only gets called if we don't
+	 stop in the called function.  */
+      stop_pc = read_pc();
       select_frame (get_current_frame (), 0);
     }
 }

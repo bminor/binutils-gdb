@@ -222,12 +222,14 @@ print_frame_info (fi, level, source, args)
   /* If fi is not the innermost frame, that normally means that fi->pc
      points to *after* the call instruction, and we want to get the line
      containing the call, never the next line.  But if the next frame is
-     a signal_handler_caller frame, then the next frame was not entered
-     as the result of a call, and we want to get the line containing
-     fi->pc.  */
+     a signal_handler_caller or a dummy frame, then the next frame was
+     not entered as the result of a call, and we want to get the line
+     containing fi->pc.  */
   sal =
     find_pc_line (fi->pc,
-		  fi->next != NULL && fi->next->signal_handler_caller == 0);
+		  fi->next != NULL
+		  && !fi->next->signal_handler_caller
+		  && !frame_in_dummy (fi->next));
 
   func = find_pc_function (fi->pc);
   if (func)
@@ -466,7 +468,9 @@ frame_info (addr_exp, from_tty)
 
   fi = get_frame_info (frame);
   sal = find_pc_line (fi->pc,
-		      fi->next != NULL && fi->next->signal_handler_caller == 0);
+		      fi->next != NULL
+		      && !fi->next->signal_handler_caller
+		      && !frame_in_dummy (fi->next));
   func = get_frame_function (frame);
   s = find_pc_symtab(fi->pc);
   if (func)
@@ -597,6 +601,8 @@ frame_info (addr_exp, from_tty)
       }
   if (count)
     puts_filtered ("\n");
+#else  /* Have FRAME_FIND_SAVED_REGS.  */
+  puts_filtered ("\n");
 #endif /* Have FRAME_FIND_SAVED_REGS.  */
 }
 
@@ -746,15 +752,22 @@ print_block_frame_locals (b, frame, stream)
   for (i = 0; i < nsyms; i++)
     {
       sym = BLOCK_SYM (b, i);
-      if (SYMBOL_CLASS (sym) == LOC_LOCAL
-	  || SYMBOL_CLASS (sym) == LOC_REGISTER
-	  || SYMBOL_CLASS (sym) == LOC_STATIC)
+      switch (SYMBOL_CLASS (sym))
 	{
+	case LOC_LOCAL:
+	case LOC_REGISTER:
+	case LOC_STATIC:
+	case LOC_BASEREG:
 	  values_printed = 1;
 	  fputs_filtered (SYMBOL_SOURCE_NAME (sym), stream);
 	  fputs_filtered (" = ", stream);
 	  print_variable_value (sym, frame, stream);
 	  fprintf_filtered (stream, "\n");
+	  break;
+
+	default:
+	  /* Ignore symbols which are not locals.  */
+	  break;
 	}
     }
   return values_printed;

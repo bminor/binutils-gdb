@@ -1,3 +1,16 @@
+Wed Jan 19 12:40:25 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* infrun.c (normal_stop):  Set stop_pc after popping the dummy frame
+	in case execution was stopped in the called function.
+	* stack.c (print_frame_info, frame_info):  If backtracing through
+	a call dummy, handle the starting source line number on a line
+	boundary like backtracing through sigtramp.
+	* sparc-tdep.c (sparc_frame_find_saved_regs):  Get frame address
+	for call dummy frame right.  Remove old test for dummy frame,
+	it has been unused at least since gdb-3.5.
+	* sparc-tdep.c (sparc_push_dummy_frame):  Set return address register
+	of the dummy frame.
+
 Tue Jan 18 16:16:35 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* infcmd.c (signal_command): Accept 0 as legitimate signal number.
