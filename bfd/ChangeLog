@@ -7,6 +7,12 @@ Thu Jun 16 14:25:22 1994  Eric Youngdale  (ericy@cais.cais.com)
 
 Thu Jun 16 14:23:46 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* config.bfd: If second argument is ``_'', then, instead of
+	echoing config file name, echo whether target uses leading
+	underscores on symbol names.  Add appropriate settings to
+	different cases.  Used by binutils/configure.in to set default for
+	c++filt.
+
 	* elfcode.h (elf_bfd_final_link): If trying to generate a shared
 	object, warn and return false.
 
