@@ -1,3 +1,30 @@
+Thu Dec 18 00:26:46 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* mdebugread.c (parse_partial_symbols): Delete check that symbols
+ 	for file not already loaded.  Did not work when an include file
+ 	was involved.
+
+Wed Dec 17 10:43:04 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* elfread.c (elf_symfile_read): Since the partial symbol table is
+ 	searched last in first, insert mdebug or XCOFF info into the
+ 	partial symbol table before any DWARF2 info.
+
+Thu Dec 18 00:00:48 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* symfile.c (init_psymbol_list): Handle init with zero elements.
+
+	* elfread.c (elf_symfile_read): If `mainline', clear psymbol table
+ 	using init_psymbol_list 0.  For build_psymtabs functions, pass
+ 	mainline==0 so that psymbol_list isn't re-initialized.
+
+	* symfile.c (discard_psymtab): New function, correctly unlink an
+ 	empty psymtab from an object file.
+	* dbxread.c (end_psymtab): Call discard_psymtab.
+	* xcoffread.c (xcoff_end_psymtab): Ditto.
+	* hpread.c (hpread_end_psymtab):  Ditto.
+	* os9kread.c (os9k_end_psymtab):  Ditto.
+
 Wed Dec 17 10:47:05 1997  Michael Snyder  (msnyder@cleaver.cygnus.com)
 
 	* tracepoint.c (set_raw_tracepoint): initialize addr_string

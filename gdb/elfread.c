@@ -615,21 +615,42 @@ elf_symfile_read (objfile, section_offsets, mainline)
   elf_symtab_read (abfd, offset, objfile, 1);
 
   /* Now process debugging information, which is contained in
-     special ELF sections.  We first have to find them... */
+     special ELF sections. */
 
-  bfd_map_over_sections (abfd, elf_locate_sections, (PTR) &ei);
-  if (dwarf2_has_info (abfd))
+  /* If we are reinitializing, or if we have never loaded syms yet,
+     set table to empty.  MAINLINE is cleared so that *_read_psymtab
+     functions do not all also re-initialize the psymbol table. */
+  if (mainline)
     {
-      /* DWARF 2 sections */
-      dwarf2_build_psymtabs (objfile, section_offsets, mainline);
+      init_psymbol_list (objfile, 0);
+      mainline = 0;
     }
-  else if (ei.dboffset && ei.lnoffset)
+
+  /* We first have to find them... */
+  bfd_map_over_sections (abfd, elf_locate_sections, (PTR) &ei);
+
+  /* ELF debugging information is inserted into the psymtab in the
+     order of least informative first - most informative last.  Since
+     the psymtab table is searched `most recent insertion first' this
+     increases the probability that more detailed debug information
+     for a section is found.
+
+     For instance, an object file might contain both .mdebug (XCOFF)
+     and .debug_info (DWARF2) sections then .mdebug is inserted first
+     (searched last) and DWARF2 is inserted last (searched first).  If
+     we don't do this then the XCOFF info is found first - for code in
+     an included file XCOFF info is useless. */
+
+  if (ei.mdebugsect)
     {
-      /* DWARF sections */
-      dwarf_build_psymtabs (objfile,
-			    section_offsets, mainline,
-			    ei.dboffset, ei.dbsize,
-			    ei.lnoffset, ei.lnsize);
+      const struct ecoff_debug_swap *swap;
+
+      /* .mdebug section, presumably holding ECOFF debugging
+	 information.  */
+      swap = get_elf_backend_data (abfd)->elf_backend_ecoff_debug_swap;
+      if (swap)
+	elfmdebug_build_psymtabs (objfile, swap, ei.mdebugsect,
+				  section_offsets);
     }
   if (ei.stabsect)
     {
@@ -649,16 +670,18 @@ elf_symfile_read (objfile, section_offsets, mainline)
 				str_sect->filepos,
 				bfd_section_size (abfd, str_sect));
     }
-  if (ei.mdebugsect)
+  if (dwarf2_has_info (abfd))
     {
-      const struct ecoff_debug_swap *swap;
-
-      /* .mdebug section, presumably holding ECOFF debugging
-	 information.  */
-      swap = get_elf_backend_data (abfd)->elf_backend_ecoff_debug_swap;
-      if (swap)
-	elfmdebug_build_psymtabs (objfile, swap, ei.mdebugsect,
-				  section_offsets);
+      /* DWARF 2 sections */
+      dwarf2_build_psymtabs (objfile, section_offsets, mainline);
+    }
+  else if (ei.dboffset && ei.lnoffset)
+    {
+      /* DWARF sections */
+      dwarf_build_psymtabs (objfile,
+			    section_offsets, mainline,
+			    ei.dboffset, ei.dbsize,
+			    ei.lnoffset, ei.lnsize);
     }
 
   /* Install any minimal symbols that have been collected as the current

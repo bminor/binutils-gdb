@@ -1003,7 +1003,7 @@ os9k_end_psymtab (pst, include_list, num_includes, capping_symbol_cnt,
      CORE_ADDR capping_text;
      struct partial_symtab **dependency_list;
      int number_dependencies;
-/*     struct partial_symbol *capping_global, *capping_static;*/
+     /* struct partial_symbol *capping_global, *capping_static; */
 {
   int i;
   struct partial_symtab *p1;
@@ -1160,22 +1160,10 @@ os9k_end_psymtab (pst, include_list, num_includes, capping_symbol_cnt,
    && pst->n_static_syms == 0) {
     /* Throw away this psymtab, it's empty.  We can't deallocate it, since
        it is on the obstack, but we can forget to chain it on the list.  */
-    struct partial_symtab *prev_pst;
-
-    /* First, snip it out of the psymtab chain */
-
-    if (pst->objfile->psymtabs == pst)
-      pst->objfile->psymtabs = pst->next;
-    else
-      for (prev_pst = pst->objfile->psymtabs; prev_pst; prev_pst = pst->next)
-	if (prev_pst->next == pst)
-	  prev_pst->next = pst->next;
-
-    /* Next, put it on a free list for recycling */
-    pst->next = pst->objfile->free_psymtabs;
-    pst->objfile->free_psymtabs = pst;
-
     /* Indicate that psymtab was thrown away.  */
+
+    discard_psymtab (pst);
+
     pst = (struct partial_symtab *)NULL;
   }
   return pst;

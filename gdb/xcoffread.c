@@ -2115,21 +2115,8 @@ xcoff_end_psymtab (pst, include_list, num_includes, capping_symbol_number,
 	 it is on the obstack, but we can forget to chain it on the list.  */
       /* Empty psymtabs happen as a result of header files which don't have
 	 any symbols in them.  There can be a lot of them.  */
-      struct partial_symtab *prev_pst;
 
-      /* First, snip it out of the psymtab chain */
-
-      if (pst->objfile->psymtabs == pst)
-	pst->objfile->psymtabs = pst->next;
-      else
-	for (prev_pst = pst->objfile->psymtabs; prev_pst; prev_pst = pst->next)
-	  if (prev_pst->next == pst)
-	    prev_pst->next = pst->next;
-
-      /* Next, put it on a free list for recycling */
-
-      pst->next = pst->objfile->free_psymtabs;
-      pst->objfile->free_psymtabs = pst;
+      discard_psymtab (pst);
 
       /* Indicate that psymtab was thrown away.  */
       pst = (struct partial_symtab *)NULL;

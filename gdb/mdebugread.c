@@ -2490,13 +2490,6 @@ parse_partial_symbols (objfile, section_offsets)
 
       cur_fdr = fh = debug_info->fdr + f_idx;
 
-      /* If a partial symbol table has already been read for this file,
-         don't make another one.  This works around a problem with some
-	 compilers that emit both DWARF and mdebug sections for a single
-	 module.  */
-      if (lookup_partial_symtab (fdr_name (fh)))
-	continue;
-
       if (fh->csym == 0)
 	{
 	  fdr_to_pst[f_idx].pst = NULL;

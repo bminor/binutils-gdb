@@ -938,21 +938,8 @@ hpread_end_psymtab (pst, include_list, num_includes, capping_symbol_offset,
 	 is wrong, in that a psymtab with N_SLINE entries but nothing else
 	 is not empty, but we don't realize that.  Fixing that without slowing
 	 things down might be tricky.  */
-      struct partial_symtab *prev_pst;
 
-      /* First, snip it out of the psymtab chain */
-
-      if (pst->objfile->psymtabs == pst)
-	pst->objfile->psymtabs = pst->next;
-      else
-	for (prev_pst = pst->objfile->psymtabs; prev_pst; prev_pst = pst->next)
-	  if (prev_pst->next == pst)
-	    prev_pst->next = pst->next;
-
-      /* Next, put it on a free list for recycling */
-
-      pst->next = pst->objfile->free_psymtabs;
-      pst->objfile->free_psymtabs = pst;
+      discard_psymtab (pst);
 
       /* Indicate that psymtab was thrown away.  */
       pst = (struct partial_symtab *)NULL;
