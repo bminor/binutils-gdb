@@ -75,7 +75,7 @@ INCLUDES = -D_GNU_SOURCE \
 	 -I. -I$(srcdir) -I../bfd -I$(BFDDIR) -I$(INCDIR) \
 	 @HDEFINES@ \
 	 -I$(srcdir)/../intl -I../intl \
-	 -DLOCALEDIR="\"$(prefix)/share/locale\"" \
+	 -DLOCALEDIR="\"$(datadir)/locale\"" \
 	 -Dbin_dummy_emulation=$(EMULATION_VECTOR)
 
 HFILES = \

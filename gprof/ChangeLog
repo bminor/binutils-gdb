@@ -1,3 +1,8 @@
+2004-11-30  Tero Niemela  <tero_niemela@yahoo.com>
+
+	* Makefile.am: Change LOCALEDIR to $(datadir)/share.
+	* Makefile.in: Regenerate.
+
 2004-09-17  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.in: Regenerate.

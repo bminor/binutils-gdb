@@ -64,23 +64,68 @@ host_triplet = @host@
 target_alias = @target_alias@
 target_triplet = @target@
 AR = @AR@
+AS = @AS@
 BUILD_DLLTOOL = @BUILD_DLLTOOL@
 BUILD_DLLWRAP = @BUILD_DLLWRAP@
 BUILD_MISC = @BUILD_MISC@
 BUILD_NLMCONV = @BUILD_NLMCONV@
 BUILD_SRCONV = @BUILD_SRCONV@
 BUILD_WINDRES = @BUILD_WINDRES@
+CATALOGS = @CATALOGS@
+CATOBJEXT = @CATOBJEXT@
 CC = @CC@
+CPP = @CPP@
+CXX = @CXX@
+CXXCPP = @CXXCPP@
+DATADIRNAME = @DATADIRNAME@
 DEMANGLER_NAME = @DEMANGLER_NAME@
+DLLTOOL = @DLLTOOL@
 DLLTOOL_DEFS = @DLLTOOL_DEFS@
 EMULATION = @EMULATION@
 EMULATION_VECTOR = @EMULATION_VECTOR@
 EXEEXT = @EXEEXT@
+GCJ = @GCJ@
+GCJFLAGS = @GCJFLAGS@
+GMOFILES = @GMOFILES@
+GMSGFMT = @GMSGFMT@
+GNATBIND = @GNATBIND@
+GT_NO = @GT_NO@
+GT_YES = @GT_YES@
 HDEFINES = @HDEFINES@
+INCLUDE_LOCALE_H = @INCLUDE_LOCALE_H@
+INSTOBJEXT = @INSTOBJEXT@
+INTLDEPS = @INTLDEPS@
+INTLOBJS = @INTLOBJS@
 LIBTOOL = @LIBTOOL@
+LN = @LN@
+LN_S = @LN_S@
+MAINT = @MAINT@
+MAKEINFO = @MAKEINFO@
+MKINSTALLDIRS = @MKINSTALLDIRS@
+MSGFMT = @MSGFMT@
 NLMCONV_DEFS = @NLMCONV_DEFS@
+OBJDUMP = @OBJDUMP@
 OBJDUMP_DEFS = @OBJDUMP_DEFS@
+OBJEXT = @OBJEXT@
+PACKAGE = @PACKAGE@
+POFILES = @POFILES@
+POSUB = @POSUB@
 RANLIB = @RANLIB@
+STRIP = @STRIP@
+USE_INCLUDED_LIBINTL = @USE_INCLUDED_LIBINTL@
+USE_NLS = @USE_NLS@
+VERSION = @VERSION@
+bfdincludedir = @bfdincludedir@
+bfdlibdir = @bfdlibdir@
+build_noncanonical = @build_noncanonical@
+build_subdir = @build_subdir@
+do_compare = @do_compare@
+host_noncanonical = @host_noncanonical@
+host_subdir = @host_subdir@
+l = @l@
+ncn_cv_ = @ncn_cv_@
+target_noncanonical = @target_noncanonical@
+target_subdir = @target_subdir@
 
 INTLLIBS = @INTLLIBS@
 
@@ -151,7 +196,7 @@ INCLUDES = -D_GNU_SOURCE \
 	 -I. -I$(srcdir) -I../bfd -I$(BFDDIR) -I$(INCDIR) \
 	 @HDEFINES@ \
 	 -I$(srcdir)/../intl -I../intl \
-	 -DLOCALEDIR="\"$(prefix)/share/locale\"" \
+	 -DLOCALEDIR="\"$(datadir)/locale\"" \
 	 -Dbin_dummy_emulation=$(EMULATION_VECTOR)
 
 
@@ -284,6 +329,7 @@ DISTCLEANFILES = sysinfo sysroff.c sysroff.h \
 MOSTLYCLEANFILES = sysinfo binutils.log binutils.sum abcdefgh*
 
 CLEANFILES = dep.sed DEP DEPA DEP1 DEP2
+ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 mkinstalldirs = $(SHELL) $(top_srcdir)/../mkinstalldirs
 CONFIG_HEADER = config.h
 CONFIG_CLEAN_FILES = 
@@ -299,77 +345,96 @@ DEFS = @DEFS@ -I. -I$(srcdir) -I.
 CPPFLAGS = @CPPFLAGS@
 LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@
-nlmconv_OBJECTS =  nlmconv.o nlmheader.o bucomm.o version.o filemode.o
+nlmconv_OBJECTS =  nlmconv.$(OBJEXT) nlmheader.$(OBJEXT) \
+bucomm.$(OBJEXT) version.$(OBJEXT) filemode.$(OBJEXT)
 nlmconv_LDADD = $(LDADD)
 nlmconv_DEPENDENCIES =  ../bfd/libbfd.la ../libiberty/libiberty.a
 nlmconv_LDFLAGS = 
-srconv_OBJECTS =  srconv.o coffgrok.o bucomm.o version.o filemode.o
+srconv_OBJECTS =  srconv.$(OBJEXT) coffgrok.$(OBJEXT) bucomm.$(OBJEXT) \
+version.$(OBJEXT) filemode.$(OBJEXT)
 srconv_LDADD = $(LDADD)
 srconv_DEPENDENCIES =  ../bfd/libbfd.la ../libiberty/libiberty.a
 srconv_LDFLAGS = 
-sysdump_OBJECTS =  sysdump.o bucomm.o version.o filemode.o
+sysdump_OBJECTS =  sysdump.$(OBJEXT) bucomm.$(OBJEXT) version.$(OBJEXT) \
+filemode.$(OBJEXT)
 sysdump_LDADD = $(LDADD)
 sysdump_DEPENDENCIES =  ../bfd/libbfd.la ../libiberty/libiberty.a
 sysdump_LDFLAGS = 
-coffdump_OBJECTS =  coffdump.o coffgrok.o bucomm.o version.o filemode.o
+coffdump_OBJECTS =  coffdump.$(OBJEXT) coffgrok.$(OBJEXT) \
+bucomm.$(OBJEXT) version.$(OBJEXT) filemode.$(OBJEXT)
 coffdump_LDADD = $(LDADD)
 coffdump_DEPENDENCIES =  ../bfd/libbfd.la ../libiberty/libiberty.a
 coffdump_LDFLAGS = 
-dlltool_OBJECTS =  dlltool.o defparse.o deflex.o bucomm.o version.o \
-filemode.o
+dlltool_OBJECTS =  dlltool.$(OBJEXT) defparse.$(OBJEXT) deflex.$(OBJEXT) \
+bucomm.$(OBJEXT) version.$(OBJEXT) filemode.$(OBJEXT)
 dlltool_DEPENDENCIES =  ../bfd/libbfd.la ../libiberty/libiberty.a
 dlltool_LDFLAGS = 
-windres_OBJECTS =  windres.o resrc.o rescoff.o resbin.o rcparse.o \
-rclex.o winduni.o resres.o bucomm.o version.o filemode.o
+windres_OBJECTS =  windres.$(OBJEXT) resrc.$(OBJEXT) rescoff.$(OBJEXT) \
+resbin.$(OBJEXT) rcparse.$(OBJEXT) rclex.$(OBJEXT) winduni.$(OBJEXT) \
+resres.$(OBJEXT) bucomm.$(OBJEXT) version.$(OBJEXT) filemode.$(OBJEXT)
 windres_DEPENDENCIES =  ../bfd/libbfd.la ../libiberty/libiberty.a
 windres_LDFLAGS = 
-dllwrap_OBJECTS =  dllwrap.o version.o
+dllwrap_OBJECTS =  dllwrap.$(OBJEXT) version.$(OBJEXT)
 dllwrap_DEPENDENCIES =  ../libiberty/libiberty.a
 dllwrap_LDFLAGS = 
-size_OBJECTS =  size.o bucomm.o version.o filemode.o
+size_OBJECTS =  size.$(OBJEXT) bucomm.$(OBJEXT) version.$(OBJEXT) \
+filemode.$(OBJEXT)
 size_LDADD = $(LDADD)
 size_DEPENDENCIES =  ../bfd/libbfd.la ../libiberty/libiberty.a
 size_LDFLAGS = 
-objdump_OBJECTS =  objdump.o budemang.o prdbg.o rddbg.o debug.o stabs.o \
-ieee.o rdcoff.o bucomm.o version.o filemode.o
+objdump_OBJECTS =  objdump.$(OBJEXT) budemang.$(OBJEXT) prdbg.$(OBJEXT) \
+rddbg.$(OBJEXT) debug.$(OBJEXT) stabs.$(OBJEXT) ieee.$(OBJEXT) \
+rdcoff.$(OBJEXT) bucomm.$(OBJEXT) version.$(OBJEXT) filemode.$(OBJEXT)
 objdump_DEPENDENCIES =  ../opcodes/libopcodes.la ../bfd/libbfd.la \
 ../libiberty/libiberty.a
 objdump_LDFLAGS = 
-ar_OBJECTS =  arparse.o arlex.o ar.o not-ranlib.o arsup.o rename.o \
-binemul.o emul_$(EMULATION).o bucomm.o version.o filemode.o
+ar_OBJECTS =  arparse.$(OBJEXT) arlex.$(OBJEXT) ar.$(OBJEXT) \
+not-ranlib.$(OBJEXT) arsup.$(OBJEXT) rename.$(OBJEXT) binemul.$(OBJEXT) \
+emul_$(EMULATION).$(OBJEXT) bucomm.$(OBJEXT) version.$(OBJEXT) \
+filemode.$(OBJEXT)
 ar_DEPENDENCIES =  ../bfd/libbfd.la ../libiberty/libiberty.a
 ar_LDFLAGS = 
-strings_OBJECTS =  strings.o bucomm.o version.o filemode.o
+strings_OBJECTS =  strings.$(OBJEXT) bucomm.$(OBJEXT) version.$(OBJEXT) \
+filemode.$(OBJEXT)
 strings_LDADD = $(LDADD)
 strings_DEPENDENCIES =  ../bfd/libbfd.la ../libiberty/libiberty.a
 strings_LDFLAGS = 
-ranlib_OBJECTS =  ar.o is-ranlib.o arparse.o arlex.o arsup.o rename.o \
-binemul.o emul_$(EMULATION).o bucomm.o version.o filemode.o
+ranlib_OBJECTS =  ar.$(OBJEXT) is-ranlib.$(OBJEXT) arparse.$(OBJEXT) \
+arlex.$(OBJEXT) arsup.$(OBJEXT) rename.$(OBJEXT) binemul.$(OBJEXT) \
+emul_$(EMULATION).$(OBJEXT) bucomm.$(OBJEXT) version.$(OBJEXT) \
+filemode.$(OBJEXT)
 ranlib_DEPENDENCIES =  ../bfd/libbfd.la ../libiberty/libiberty.a
 ranlib_LDFLAGS = 
-objcopy_OBJECTS =  objcopy.o not-strip.o rename.o rddbg.o debug.o \
-stabs.o ieee.o rdcoff.o wrstabs.o bucomm.o version.o filemode.o
+objcopy_OBJECTS =  objcopy.$(OBJEXT) not-strip.$(OBJEXT) \
+rename.$(OBJEXT) rddbg.$(OBJEXT) debug.$(OBJEXT) stabs.$(OBJEXT) \
+ieee.$(OBJEXT) rdcoff.$(OBJEXT) wrstabs.$(OBJEXT) bucomm.$(OBJEXT) \
+version.$(OBJEXT) filemode.$(OBJEXT)
 objcopy_LDADD = $(LDADD)
 objcopy_DEPENDENCIES =  ../bfd/libbfd.la ../libiberty/libiberty.a
 objcopy_LDFLAGS = 
-addr2line_OBJECTS =  addr2line.o budemang.o bucomm.o version.o \
-filemode.o
+addr2line_OBJECTS =  addr2line.$(OBJEXT) budemang.$(OBJEXT) \
+bucomm.$(OBJEXT) version.$(OBJEXT) filemode.$(OBJEXT)
 addr2line_LDADD = $(LDADD)
 addr2line_DEPENDENCIES =  ../bfd/libbfd.la ../libiberty/libiberty.a
 addr2line_LDFLAGS = 
-readelf_OBJECTS =  readelf.o version.o unwind-ia64.o
+readelf_OBJECTS =  readelf.$(OBJEXT) version.$(OBJEXT) \
+unwind-ia64.$(OBJEXT)
 readelf_DEPENDENCIES =  ../libiberty/libiberty.a
 readelf_LDFLAGS = 
-nm_new_OBJECTS =  nm.o budemang.o bucomm.o version.o filemode.o
+nm_new_OBJECTS =  nm.$(OBJEXT) budemang.$(OBJEXT) bucomm.$(OBJEXT) \
+version.$(OBJEXT) filemode.$(OBJEXT)
 nm_new_LDADD = $(LDADD)
 nm_new_DEPENDENCIES =  ../bfd/libbfd.la ../libiberty/libiberty.a
 nm_new_LDFLAGS = 
-strip_new_OBJECTS =  objcopy.o is-strip.o rename.o rddbg.o debug.o \
-stabs.o ieee.o rdcoff.o wrstabs.o bucomm.o version.o filemode.o
+strip_new_OBJECTS =  objcopy.$(OBJEXT) is-strip.$(OBJEXT) \
+rename.$(OBJEXT) rddbg.$(OBJEXT) debug.$(OBJEXT) stabs.$(OBJEXT) \
+ieee.$(OBJEXT) rdcoff.$(OBJEXT) wrstabs.$(OBJEXT) bucomm.$(OBJEXT) \
+version.$(OBJEXT) filemode.$(OBJEXT)
 strip_new_LDADD = $(LDADD)
 strip_new_DEPENDENCIES =  ../bfd/libbfd.la ../libiberty/libiberty.a
 strip_new_LDFLAGS = 
-cxxfilt_OBJECTS =  cxxfilt.o bucomm.o version.o filemode.o
+cxxfilt_OBJECTS =  cxxfilt.$(OBJEXT) bucomm.$(OBJEXT) version.$(OBJEXT) \
+filemode.$(OBJEXT)
 cxxfilt_LDADD = $(LDADD)
 cxxfilt_DEPENDENCIES =  ../bfd/libbfd.la ../libiberty/libiberty.a
 cxxfilt_LDFLAGS = 
@@ -382,12 +447,9 @@ LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $
 CCLD = $(CC)
 LINK = $(LIBTOOL) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(LDFLAGS) -o $@
 DIST_COMMON =  README ./stamp-h.in ChangeLog Makefile.am Makefile.in \
-NEWS acinclude.m4 arlex.c arparse.c config.in configure configure.in \
-deflex.c defparse.c nlmheader.c rclex.c rcparse.c
+NEWS acinclude.m4 aclocal.m4 arlex.c arparse.c config.in configure \
+configure.in deflex.c defparse.c nlmheader.c rclex.c rcparse.c
 
-
-PACKAGE = @PACKAGE@
-VERSION = @VERSION@
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
@@ -398,7 +460,7 @@ OBJECTS = $(nlmconv_OBJECTS) $(srconv_OBJECTS) $(sysdump_OBJECTS) $(coffdump_OBJ
 
 all: all-redirect
 .SUFFIXES:
-.SUFFIXES: .S .c .l .lo .o .s .y
+.SUFFIXES: .S .c .l .lo .o .obj .s .y
 $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ Makefile.am $(top_srcdir)/configure.in $(ACLOCAL_M4) 
 	cd $(top_srcdir) && $(AUTOMAKE) --cygnus Makefile
 
@@ -479,6 +541,11 @@ maintainer-clean-noinstPROGRAMS:
 .c.o:
 	$(COMPILE) -c $<
 
+# FIXME: We should only use cygpath when building on Windows,
+# and only if it is available.
+.c.obj:
+	$(COMPILE) -c `cygpath -w $<`
+
 .s.o:
 	$(COMPILE) -c $<
 
@@ -487,6 +554,7 @@ maintainer-clean-noinstPROGRAMS:
 
 mostlyclean-compile:
 	-rm -f *.o core *.core
+	-rm -f *.$(OBJEXT)
 
 clean-compile:
 

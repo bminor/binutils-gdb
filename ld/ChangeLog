@@ -1,3 +1,8 @@
+2004-11-30  Tero Niemela  <tero_niemela@yahoo.com>
+
+	* Makefile.am: Change LOCALEDIR to $(datadir)/share.
+	* Makefile.in: Regenerate.
+
 2004-11-26  Melissa Mears  <asterisk@graces.dricas.com>
 
 	* emultempl/pe.em: Add --subsystem:xbox as well as
