@@ -53,8 +53,8 @@ BISON = bison
 MAKEINFO = makeinfo
 RANLIB = ranlib
 
-INCDIR = $(srcdir)/../include
-CSEARCH = -I. -I$(srcdir) -I$(INCDIR)
+INCDIR = $(srcdir)/../include 
+CSEARCH = -I. -I$(srcdir) -I$(INCDIR) -I$(srcdir)/../bfd
 DEP = mkdep
 
 
@@ -74,7 +74,7 @@ p2.c:writecode
 writecode:writecode.o
 
 writecode.o:writecode.c
-	$(CC) -g -I$(INCDIR) -c writecode.c 
+	$(CC) -g $(CSEARCH) -c writecode.c 
 
 
 

@@ -57,7 +57,6 @@ char **av;
     printf("run %s\n", name);
   }
   abfd = bfd_openr(name,"coff-h8300");
-
   if (abfd) {
       
     if (bfd_check_format(abfd, bfd_object)) 
@@ -71,7 +70,8 @@ char **av;
       }
 
       start_address = bfd_get_start_address(abfd);
-      sim_store_register(start_address);
+      sim_store_register(
+			 9,start_address);
       sim_resume(0,0);
       return 0;
     }

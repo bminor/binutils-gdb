@@ -1,3 +1,8 @@
+Sun Jan  3 14:15:07 1993  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* p1.c, p3.c, run.c, writecode.c: all used h8/300 opcodes in and
+	running
+
 Tue Dec 22 13:56:48 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* new 

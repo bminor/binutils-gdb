@@ -32,6 +32,8 @@ Makefile.in
 configure.in
 writecode.c
 run.c
+p1.c
+p3.c
 
 Do-last:
 
