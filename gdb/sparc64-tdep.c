@@ -544,8 +544,12 @@ sparc64_frame_prev_register (struct frame_info *next_frame, void **this_cache,
       && regnum >= SPARC_O0_REGNUM && regnum <= SPARC_O7_REGNUM)
     regnum += (SPARC_I0_REGNUM - SPARC_O0_REGNUM);
 
-  frame_register_unwind (next_frame, regnum,
-			 optimizedp, lvalp, addrp, realnump, valuep);
+  *optimizedp = 0;
+  *lvalp = lval_register;
+  *addrp = 0;
+  *realnump = regnum;
+  if (valuep)
+    frame_unwind_register (next_frame, regnum, valuep);
 }
 
 static const struct frame_unwind sparc64_frame_unwind =

@@ -145,9 +145,13 @@ trad_frame_get_prev_register (struct frame_info *next_frame,
     }
   else if (trad_frame_realreg_p (this_saved_regs, regnum))
     {
+      *optimizedp = 0;
+      *lvalp = lval_register;
+      *addrp = 0;
+      *realregp = this_saved_regs[regnum].realreg;
       /* Ask the next frame to return the value of the register.  */
-      frame_register_unwind (next_frame, this_saved_regs[regnum].realreg,
-			     optimizedp, lvalp, addrp, realregp, bufferp);
+      if (bufferp)
+	frame_unwind_register (next_frame, (*realregp), bufferp);
     }
   else if (trad_frame_value_p (this_saved_regs, regnum))
     {

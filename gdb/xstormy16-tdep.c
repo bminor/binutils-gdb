@@ -712,8 +712,12 @@ xstormy16_frame_prev_register (struct frame_info *next_frame, void **this_cache,
       return;
     }
 
-  frame_register_unwind (next_frame, regnum,
-                         optimizedp, lvalp, addrp, realnump, valuep);
+  *optimizedp = 0;
+  *lvalp = lval_register;
+  *addrp = 0;
+  *realnump = regnum;
+  if (valuep)
+    frame_unwind_register (next_frame, (*realnump), valuep);
 }
 
 static void

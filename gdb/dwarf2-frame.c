@@ -770,9 +770,12 @@ dwarf2_frame_prev_register (struct frame_info *next_frame, void **this_cache,
       break;
 
     case DWARF2_FRAME_REG_SAVED_REG:
-      regnum = DWARF2_REG_TO_REGNUM (cache->reg[regnum].loc.reg);
-      frame_register_unwind (next_frame, regnum,
-			     optimizedp, lvalp, addrp, realnump, valuep);
+      *optimizedp = 0;
+      *lvalp = lval_register;
+      *addrp = 0;
+      *realnump = DWARF2_REG_TO_REGNUM (cache->reg[regnum].loc.reg);
+      if (valuep)
+	frame_unwind_register (next_frame, (*realnump), valuep);
       break;
 
     case DWARF2_FRAME_REG_SAVED_EXP:
@@ -797,13 +800,21 @@ dwarf2_frame_prev_register (struct frame_info *next_frame, void **this_cache,
 	 "undefined").  Code above issues a complaint about this.
 	 Here just fudge the books, assume GCC, and that the value is
 	 more inner on the stack.  */
-      frame_register_unwind (next_frame, regnum,
-			     optimizedp, lvalp, addrp, realnump, valuep);
+      *optimizedp = 0;
+      *lvalp = lval_register;
+      *addrp = 0;
+      *realnump = regnum;
+      if (valuep)
+	frame_unwind_register (next_frame, (*realnump), valuep);
       break;
 
     case DWARF2_FRAME_REG_SAME_VALUE:
-      frame_register_unwind (next_frame, regnum,
-			     optimizedp, lvalp, addrp, realnump, valuep);
+      *optimizedp = 0;
+      *lvalp = lval_register;
+      *addrp = 0;
+      *realnump = regnum;
+      if (valuep)
+	frame_unwind_register (next_frame, (*realnump), valuep);
       break;
 
     case DWARF2_FRAME_REG_CFA:
