@@ -2255,9 +2255,16 @@ breakpoint_re_set ()
   static char message1[] = "Error in re-setting breakpoint %d:\n";
   char message[sizeof (message1) + 30 /* slop */];
   
+  /* If we have no current source symtab, and we have any breakpoints,
+     go through the work of making a source context.  */
   if (current_source_symtab == NULL)
     {
-      select_source_symtab (NULL);
+      ALL_BREAKPOINTS (b)
+      {
+	select_source_symtab (NULL);
+	break;				/* We only care if there are any, and
+					   don't need to do it N times.  */
+      }
     }
 
   ALL_BREAKPOINTS_SAFE (b, temp)
@@ -2732,7 +2739,6 @@ fixup_breakpoints (low, high, delta)
   CORE_ADDR delta;
 {
   struct breakpoint *b;
-  extern struct breakpoint *breakpoint_chain;
 
   ALL_BREAKPOINTS (b)
     {

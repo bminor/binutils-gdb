@@ -1,3 +1,8 @@
+Tue Sep  1 17:31:45 1992  John Gilmore  (gnu@cygnus.com)
+
+	* breakpoint.c (breakpoint_re_set):  Avoid setting source symtab
+	(which involves reading in main's symtab) if we have no breakpoints.
+
 Mon Aug 31 13:47:45 1992  Fred Fish  (fnf@cygnus.com)
 
 	* dwarfread.c (cu_language):  New local variable to record
