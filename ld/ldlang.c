@@ -995,6 +995,7 @@ DEFUN(print_assignment,(assignment, output_section),
       }
   print_space();
   exp_print_tree(assignment->exp);
+  
   fprintf(config.map_file, "\n");
 }
 
@@ -1240,7 +1241,8 @@ static void
 DEFUN_VOID(print_statements)
 {
   print_statement(statement_list.head,
-		  (lang_output_section_statement_type *)NULL);
+		  abs_output_section);
+  
 }
 
 static bfd_vma
