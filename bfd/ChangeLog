@@ -1,5 +1,9 @@
 Fri Jun  3 10:58:02 1994  Jeff Law  (law@snake.cs.utah.edu)
 
+	* som.c (som_write_object_contents): Don't compute the file header's
+	checksum here.
+	(som_write_headers): Instead do it here.
+
 	* libbfd.h (bfd_realloc): Change last arg to "size_t size".
 
 Thu Jun  2 17:39:22 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
