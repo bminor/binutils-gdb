@@ -1,5 +1,7 @@
 Sat Sep 19 03:14:37 1992  John Gilmore  (gnu@cygnus.com)
 
+	* Makefile.in (gdb-all.texi):  Build in objdir, not $srcdir.
+
 	* config/decstation.mh:  Add MMALLOC_LIB and MMALLOC_DISABLE
 	overrides, to avoid problem in xdr_bytes with malloc(0) => 0.
 

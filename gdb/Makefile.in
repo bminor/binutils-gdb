@@ -645,7 +645,7 @@ gdb.info: ./doc/gdb-all.texi
 	mv ./doc/gdb.info* .
 
 ./doc/gdb-all.texi:
-	(cd $(srcdir)/doc; $(MAKE) M4=$(M4) gdb-all.texi $(FLAGS_TO_PASS) )
+	(cd ./doc; $(MAKE) M4=$(M4) gdb-all.texi $(FLAGS_TO_PASS) )
 
 # Make copying.c from COPYING
 copying.c: ${srcdir}/COPYING ${srcdir}/copying.awk
