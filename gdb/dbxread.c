@@ -2378,13 +2378,10 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
          ahead and add it.  Otherwise, just return sym. */
       char *s;
       int refnum;
-      extern int symbol_reference_defined PARAMS ((char **));
-      extern void ref_add PARAMS ((int, struct symbol *, char *, CORE_ADDR));
-      extern struct symbol * ref_search PARAMS ((int));
-
       /* If defined, store away a pointer to the symbol;
 	 we'll use it later when we resolve references in
 	 "resolve_symbol_reference". */
+
       s = name;
       if (refnum = symbol_reference_defined (&s), refnum)
 	if (!ref_search (refnum))

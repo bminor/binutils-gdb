@@ -154,21 +154,22 @@ read_cpp_abbrev PARAMS ((struct field_info *, char **, struct type *,
 
 static int
 copy_cfront_struct_fields PARAMS ((struct field_info *, struct type *,
-                        struct objfile *));
+                                   struct objfile *));
 
 static char *
 get_cfront_method_physname PARAMS ((char *));
 
 static int
 read_cfront_baseclasses PARAMS ((struct field_info *, char **, 
-			struct type *, struct objfile *));
+				 struct type *, struct objfile *));
 
 static int
 read_cfront_static_fields PARAMS ((struct field_info *, char**,
-			struct type *, struct objfile *));
+				   struct type *, struct objfile *));
 static int
 read_cfront_member_functions PARAMS ((struct field_info *, char **, 
-			struct type *, struct objfile *));
+				      struct type *, struct objfile *));
+
 /* end new functions added for cfront support */
 
 static void 
@@ -184,10 +185,11 @@ process_reference PARAMS ((char **string));
 static CORE_ADDR 
 ref_search_value PARAMS ((int refnum));
 
-struct symbol * 
-ref_search PARAMS ((int refnum));
+static void 
+ref_init PARAMS ((void));
 
-
+static char * 
+get_substring PARAMS ((char ** p, int c));
 
 static const char vptr_name[] = { '_','v','p','t','r',CPLUS_MARKER,'\0' };
 static const char vb_name[] =   { '_','v','b',CPLUS_MARKER,'\0' };
@@ -1160,7 +1162,8 @@ static struct ref_map_s
    leave as is, as long as we read and process an object's symbol table all 
    at once.  */
 static int ref_count = 0;	/* Ptr to free cell in linked list. */
-static void ref_init ()
+static void 
+ref_init ()
 {
   ref_count = 0;
   memset (ref_map, 0, MAX_REFS * sizeof (struct ref_map_s));
@@ -1188,24 +1191,6 @@ ref_add (refnum, sym, stabs, value)
   ref_map[refnum].value = value;
 }
 
-/* Remove reference at refnum. 
-   This should be called before a new symbol table is read to clear out the 
-   previous symbol's reference information. */
-/* FIXME!  not used at the moment. */
-static void
-ref_rmv (refnum)
-     int refnum;
-{
-  if (ref_count < 0)
-    error ("slots are empty\n");
-  if (refnum < 0 || refnum > ref_count)
-    error ("No reference for refnum.\n");
-  /* Copy last element over the removed element and reduce count. */
-  ref_map[refnum].stabs = ref_map[ref_count].stabs;
-  ref_map[refnum].sym = ref_map[ref_count].sym;
-  --ref_count;
-}
-
 /* Return defined sym for the reference "refnum" */
 struct symbol *
 ref_search (refnum)
@@ -1217,7 +1202,7 @@ ref_search (refnum)
 }
 
 /* Return value for the reference "refnum" */
-CORE_ADDR
+static CORE_ADDR
 ref_search_value (refnum)
      int refnum;
 {
@@ -2170,7 +2155,7 @@ resolve_live_range (objfile, sym, p)
   return 0; 
 }
 
-void
+static void
 add_live_range (objfile, sym, start, end)
   struct objfile *objfile;
   struct symbol *sym;

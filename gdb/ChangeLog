@@ -1,3 +1,8 @@
+Mon Sep 22 15:32:06 1997  Dawn Perchik  <dawn@cygnus.com>
+
+	* stabsread.h, symtab.h, dbxread.c, symtab.c, stabsread.c:
+	Fix prototypes.  Remove function scoped function declarations.
+
 Fri Sep 19 18:51:26 1997  Felix Lee  <flee@cygnus.com>
 
 	* config/i386/windows.mh (XDEPFILES): need to list some files
