@@ -5,12 +5,12 @@
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
@@ -119,7 +119,7 @@ set sh64tests {
     {"SH64 Little Endianness" "-mshlelf64 -Tendian.ld"
      "--abi=64 --little" {endian.s}
      {{objdump -s endian.sld} {objdump -d endian.dld}}}
-    
+
 }
 
 # FIXME: Generalize and move this to ld-lib.exp
@@ -132,6 +132,7 @@ proc run_ld_link_tests { ldtests } {
     global readelf
     global srcdir
     global subdir
+    global env
 
     set binfile "tmpdir/linked"
 
@@ -199,8 +200,19 @@ proc run_ld_link_tests { ldtests } {
 		    set dumpfile [lindex $actionlist 2]
 		    set binary $dump_prog
 
-		    send_log "$binary $progopts $binfile > dump.out\n"
-		    catch "exec $binary $progopts $binfile > dump.out" comp_output
+		    # Ensure consistent sorting of symbols
+		    if {[info exists env(LC_ALL)]} {
+			set old_lc_all $env(LC_ALL)
+		    }
+		    set env(LC_ALL) "C"
+		    set cmd "$binary $progopts $binfile > dump.out"
+		    send_log "$cmd\n"
+		    catch "exec $cmd" comp_output
+		    if {[info exists old_lc_all]} {
+			set env(LC_ALL) $old_lc_all
+		    } else {
+			unset env(LC_ALL)
+		    }
 		    set comp_output [prune_warnings $comp_output]
 
 		    if ![string match "" $comp_output] then {
@@ -300,9 +312,9 @@ proc regexp_diff { file_1 file_2 } {
 	    }
 	}
 
-        if { $diff_pass } { 
-            break 
-        } elseif { $end_1 && $end_2 } { 
+        if { $diff_pass } {
+            break
+        } elseif { $end_1 && $end_2 } {
             break
         } elseif { $end_1 } {
             send_log "extra regexps in $file_2 starting with \"^$line_b$\"\nEOF from $file_1\n"

@@ -1,7 +1,14 @@
+2002-07-03  Alan Modra  <amodra@bigpond.net.au>
+
+	* lib/ld-lib.exp (default_ld_nm): Run nm with LC_ALL=C to ensure
+	consistent sorting.
+	(run_dump_test): Likewise for objdump/nm/objcopy/readelf.
+	* ld-sh/sh64/sh64.exp (run_ld_link_tests): Likewise.
+
 2002-06-29  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* ld-mmix/sec-8m.d, ld-mmix/sec-8m.s, ld-mmix/sec-8a.s,
-	ld-mmix/sec-8b.s, ld-mmix/sec-8d.s: New test. 
+	ld-mmix/sec-8b.s, ld-mmix/sec-8d.s: New test.
 
 2002-06-18  Chris Demetriou  <cgd@broadcom.com>
 
@@ -14,7 +21,7 @@
 	* ld-d10v/default_layout.d : New test.
 	* ld-d10v/regression-001.lt: New test for a linker regression.
 	* ld-d10v/linktest-002.lt: New test for run_link_test.
-	* ld-d10v/reloc-001.d - reloc-016.d: New tests. 
+	* ld-d10v/reloc-001.d - reloc-016.d: New tests.
 
 2002-06-11  John David Anglin  <dave@hiauly1.hia.nrc.ca>
 
@@ -36,9 +43,9 @@
 2002-06-07  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* ld-scripts/phdrs2.s: Use .p2align instead of .align.
-        Use section names .foo and .bar instead of .text and .data.
-        * ld-scripts/phdrs2.t: Refer to .foo and .bar instead of .text
-        and .data.
+	Use section names .foo and .bar instead of .text and .data.
+	* ld-scripts/phdrs2.t: Refer to .foo and .bar instead of .text
+	and .data.
 
 2002-06-06  David Heine <dlheine@tensilica.com>
 
@@ -206,11 +213,11 @@
 	2001-03-14  DJ Delorie	<dj@redhat.com>
 	* ld-sh/sh64/endian.dbd: New file, endian tests.
 	* ld-sh/sh64/endian.dld: Ditto.
-	* ld-sh/sh64/endian.ld:	 Ditto.
-	* ld-sh/sh64/endian.s:	Ditto.
-	* ld-sh/sh64/endian.sbd:  Ditto.
-	* ld-sh/sh64/endian.sld:  Ditto.
-	* ld-sh/sh64/sh64.exp: Add above tests.	 Add -L option to ld.
+	* ld-sh/sh64/endian.ld: Ditto.
+	* ld-sh/sh64/endian.s: Ditto.
+	* ld-sh/sh64/endian.sbd: Ditto.
+	* ld-sh/sh64/endian.sld: Ditto.
+	* ld-sh/sh64/sh64.exp: Add above tests.  Add -L option to ld.
 	2001-03-12  DJ Delorie	<dj@redhat.com>
 	* ld-sh/sh64/relax.exp: New file, test disabling relaxing.
 	* ld-sh/sh64/relax1.s: Ditto.
@@ -1131,9 +1138,9 @@ Wed Jun  9 12:02:33 1999  Andreas Schwab  <schwab@issan.cs.uni-dortmund.de>
 
 Tue Feb  2 19:15:02 1999  Catherine Moore  <clm@cygnus.com>
 
-        * ld-selective/selective.exp:  Disable test for unsupported
-        targets.  Change tests to check for absence of symbols instead
-        of address zero.
+	* ld-selective/selective.exp:  Disable test for unsupported
+	targets.  Change tests to check for absence of symbols instead
+	of address zero.
 
 Mon Jan 18 03:44:52 1999  Ian Lance Taylor  <ian@cygnus.com>
 
@@ -1173,10 +1180,10 @@ Sun Dec  6 12:59:37 1998  H.J. Lu  <hjl@gnu.org>
 
 Fri Oct 23 16:28:29 1998 Catherine Moore  <clm@cygnus.com>
 
-       * ld-selective:  New directory with new files to test
-       selective linking.
+	* ld-selective: New directory with new files to test
+	selective linking.
 
-       * lib/ld-lib.exp (ld_nm):  Strip leading underscore from $name.
+	* lib/ld-lib.exp (ld_nm): Strip leading underscore from $name.
 
 Sun Oct  4 22:17:05 1998  Ian Lance Taylor  <ian@cygnus.com>
 
@@ -1793,7 +1800,7 @@ Fri May 27 09:35:04 1994  Ken Raeburn  (raeburn@cygnus.com)
 Tue May 17 15:06:49 1994  Bill Cox  (bill@rtl.cygnus.com)
 
 	* ld.bootstrap/bootstrap.exp, lib/ld.exp: Replace error proc
-	  calls with perror calls.
+	calls with perror calls.
 
 Wed May 11 16:47:46 1994  Ken Raeburn  (raeburn@rtl.cygnus.com)
 

@@ -1,23 +1,23 @@
 # Support routines for LD testsuite.
-#   Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001
+#   Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002
 #   Free Software Foundation, Inc.
 #
 # This file is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #
 #
-# default_ld_version 
+# default_ld_version
 #	extract and print the version number of ld
 #
 proc default_ld_version { ld } {
@@ -27,7 +27,7 @@ proc default_ld_version { ld } {
 	perror "$ld does not exist"
 	exit 1
     }
-    
+
     catch "exec $ld --version" tmp
     set tmp [prune_warnings $tmp]
     regexp "\[^\n\]* (cygnus-|)(\[-0-9.a-zA-Z-\]+)\[\r\n\].*" $tmp version cyg number
@@ -37,20 +37,20 @@ proc default_ld_version { ld } {
 }
 
 #
-# default_ld_relocate 
+# default_ld_relocate
 #	link an object using relocation
 #
 proc default_ld_relocate { ld target objects } {
     global HOSTING_EMU
     global host_triplet
-    
+
     if { [which $ld] == 0 } then {
 	perror "$ld does not exist"
 	return 0
     }
-    
+
     verbose -log "$ld $HOSTING_EMU -o $target -r $objects"
-    
+
     catch "exec $ld $HOSTING_EMU -o $target -r $objects" exec_output
     set exec_output [prune_warnings $exec_output]
     if [string match "" $exec_output] then {
@@ -88,7 +88,7 @@ proc is_endian_output_format { object_flags } {
 # process_multilib_options.
 
 proc big_or_little_endian {} {
-    
+
     if [board_info [target_info name] exists multilib_flags] {
 	set tmp_flags " [board_info [target_info name] multilib_flags]";
 
@@ -111,7 +111,7 @@ proc big_or_little_endian {} {
 }
 
 #
-# default_ld_link 
+# default_ld_link
 #	link a program using ld
 #
 proc default_ld_link { ld target objects } {
@@ -121,10 +121,10 @@ proc default_ld_link { ld target objects } {
     global LIBS
     global host_triplet
     global link_output
-    
+
     set objs "$HOSTING_CRT0 $objects"
     set libs "$LIBS $HOSTING_LIBS"
-    
+
     if { [which $ld] == 0 } then {
 	perror "$ld does not exist"
 	return 0
@@ -136,7 +136,7 @@ proc default_ld_link { ld target objects } {
 	set flags ""
     }
     verbose -log "$ld $HOSTING_EMU $flags -o $target $objs $libs"
-    
+
     catch "exec $ld $HOSTING_EMU $flags -o $target $objs $libs" link_output
     set exec_output [prune_warnings $link_output]
     if [string match "" $link_output] then {
@@ -148,7 +148,7 @@ proc default_ld_link { ld target objects } {
 }
 
 #
-# default_ld_simple_link 
+# default_ld_simple_link
 #	link a program using ld, without including any libraries
 #
 proc default_ld_simple_link { ld target objects } {
@@ -159,15 +159,15 @@ proc default_ld_simple_link { ld target objects } {
 	perror "$ld does not exist"
 	return 0
     }
-    
+
     if [is_endian_output_format $objects] then {
 	set flags [big_or_little_endian]
     } else {
 	set flags ""
     }
-    
+
     verbose -log "$ld $flags -o $target $objects"
-    
+
     catch "exec $ld $flags -o $target $objects" link_output
     set exec_output [prune_warnings $link_output]
 
@@ -184,7 +184,7 @@ proc default_ld_simple_link { ld target objects } {
 }
 
 #
-# default_ld_compile 
+# default_ld_compile
 #	compile an object using cc
 #
 proc default_ld_compile { cc source object } {
@@ -256,7 +256,7 @@ proc default_ld_compile { cc source object } {
 proc default_ld_assemble { as source object } {
     global ASFLAGS
     global host_triplet
-    
+
     if {[which $as] == 0} then {
 	perror "$as does not exist"
 	return 0
@@ -299,9 +299,19 @@ proc default_ld_nm { nm nmflags object } {
 
     if ![info exists NMFLAGS] { set NMFLAGS "" }
 
+    # Ensure consistent sorting of symbols
+    if {[info exists env(LC_ALL)]} {
+	set old_lc_all $env(LC_ALL)
+    }
+    set env(LC_ALL) "C"
     verbose -log "$nm $NMFLAGS $nmflags $object >tmpdir/nm.out"
 
     catch "exec $nm $NMFLAGS $nmflags $object >tmpdir/nm.out" exec_output
+    if {[info exists old_lc_all]} {
+	set env(LC_ALL) $old_lc_all
+    } else {
+	unset env(LC_ALL)
+    }
     set exec_output [prune_warnings $exec_output]
     if [string match "" $exec_output] then {
 	set file [open tmpdir/nm.out r]
@@ -353,26 +363,26 @@ proc is_elf_format {} {
 #
 proc simple_diff { file_1 file_2 } {
     global target
-	
+
     set eof -1
     set differences 0
-    
+
     if [file exists $file_1] then {
 	set file_a [open $file_1 r]
     } else {
 	warning "$file_1 doesn't exist"
 	return
     }
-    
+
     if [file exists $file_2] then {
 	set file_b [open $file_2 r]
     } else {
 	fail "$file_2 doesn't exist"
 	return
     }
-    
+
     verbose "# Diff'ing: $file_1 $file_2\n" 2
-    
+
     while { [gets $file_a line] != $eof } {
 	if [regexp "^#.*$" $line] then {
 	    continue
@@ -381,7 +391,7 @@ proc simple_diff { file_1 file_2 } {
 	}
     }
     close $file_a
-    
+
     while { [gets $file_b line] != $eof } {
 	if [regexp "^#.*$" $line] then {
 	    continue
@@ -405,7 +415,7 @@ proc simple_diff { file_1 file_2 } {
 	    return
 	}
     }
-    
+
     if { [llength $list_a] != [llength $list_b] } {
 	fail "Test: $target"
 	return
@@ -416,11 +426,11 @@ proc simple_diff { file_1 file_2 } {
     }
 }
 
-# run_dump_test FILE 
+# run_dump_test FILE
 # Copied from gas testsuite, tweaked and further extended.
 #
 # Assemble a .s file, then run some utility on it and check the output.
-# 
+#
 # There should be an assembly language file named FILE.s in the test
 # suite directory, and a pattern file called FILE.d.  `run_dump_test'
 # will assemble FILE.s, run some tool like `objdump', `objcopy', or
@@ -432,9 +442,9 @@ proc simple_diff { file_1 file_2 } {
 # flags to pass to the assembler, the program to run to dump the
 # assembler's output, and the options it wants.  The option lines have
 # the syntax:
-# 
+#
 #         # OPTION: VALUE
-# 
+#
 # OPTION is the name of some option, like "name" or "objdump", and
 # VALUE is OPTION's value.  The valid options are described below.
 # Whitespace is ignored everywhere, except within VALUE.  The option
@@ -442,12 +452,12 @@ proc simple_diff { file_1 file_2 } {
 # (hmm, not great for error detection).
 #
 # The interesting options are:
-# 
+#
 #   name: TEST-NAME
 #	The name of this test, passed to DejaGNU's `pass' and `fail'
 #       commands.  If omitted, this defaults to FILE, the root of the
 #       .s and .d files' names.
-# 
+#
 #   as: FLAGS
 #	When assembling, pass FLAGS to the assembler.
 #       If assembling several files, you can pass different assembler
@@ -474,6 +484,8 @@ proc simple_diff { file_1 file_2 } {
 #   objcopy: FLAGS
 #	Use the specified program to analyze the assembler or linker
 #       output file, and pass it FLAGS, in addition to the output name.
+#	Note that they are run with LC_ALL=C in the environment to give
+#	consistent sorting of symbols.
 #
 #   source: SOURCE [FLAGS]
 #	Assemble the file SOURCE.s using the flags in the "as" directive
@@ -512,6 +524,7 @@ proc run_dump_test { name } {
     global OBJDUMP NM AS OBJCOPY READELF LD
     global OBJDUMPFLAGS NMFLAGS ASFLAGS OBJCOPYFLAGS READELFFLAGS LDFLAGS
     global host_triplet runtests
+    global env
 
     if [string match "*/*" $name] {
 	set file $name
@@ -778,26 +791,28 @@ proc run_dump_test { name } {
 
     # Objcopy, unlike the other two, won't send its output to stdout,
     # so we have to run it specially.
+    set cmd "$binary $progopts $progopts1 $objfile > $dumpfile"
     if { $program == "objcopy" } {
 	set cmd "$binary $progopts $progopts1 $objfile $dumpfile"
-	send_log "$cmd\n"
-	catch "exec $cmd" comp_output
-	set comp_output [prune_warnings $comp_output]
-	if ![string match "" $comp_output] then {
-	    send_log "$comp_output\n"
-	    fail $testname
-	    return
-	}
+    }
+
+    # Ensure consistent sorting of symbols
+    if {[info exists env(LC_ALL)]} {
+	set old_lc_all $env(LC_ALL)
+    }
+    set env(LC_ALL) "C"
+    send_log "$cmd\n"
+    catch "exec $cmd" comp_output
+    if {[info exists old_lc_all]} {
+	set env(LC_ALL) $old_lc_all
     } else {
-	set cmd "$binary $progopts $progopts1 $objfile > $dumpfile"
-	send_log "$cmd\n"
-	catch "exec $cmd" comp_output
-	set comp_output [prune_warnings $comp_output]
-	if ![string match "" $comp_output] then {
-	    send_log "$comp_output\n"
-	    fail $testname
-	    return
-	}
+	unset env(LC_ALL)
+    }
+    set comp_output [prune_warnings $comp_output]
+    if ![string match "" $comp_output] then {
+	send_log "$comp_output\n"
+	fail $testname
+	return
     }
 
     verbose_eval {[file_contents $dumpfile]} 3
@@ -903,9 +918,9 @@ proc regexp_diff { file_1 file_2 } {
 	    }
 	}
 
-        if { $diff_pass } { 
-            break 
-        } elseif { $end_1 && $end_2 } { 
+        if { $diff_pass } {
+            break
+        } elseif { $end_1 && $end_2 } {
             break
         } elseif { $end_1 } {
             send_log "extra regexps in $file_2 starting with \"^$line_b$\"\nEOF from $file_1\n"
