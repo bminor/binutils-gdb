@@ -1,3 +1,8 @@
+Thu Oct  2 13:17:18 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* peicode.h (coff_swap_scnhdr_out): Set IMAGE_SCN_MEM_READ for an
+	unrecognized section.  From Jon Thackray <jont@harlequin.co.uk>.
+
 Wed Oct  1 14:03:44 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.am ($(BFD_H)): Change stmp-bfd.h to stmp-bfd-h.
