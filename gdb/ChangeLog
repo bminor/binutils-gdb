@@ -1,3 +1,10 @@
+2000-04-13  Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
+
+	* config/i386/nm-i386sol2.h (CANNOT_STEP_HW_WATCHPOINTS):  Define.
+	* config/i386/tm-i386sol2.h (HAVE_I387_REGS):  Define.
+	* i386v4-nat.c (supply_fpregset, fill_fpregset):  Add code
+	to handle floating point registers if NUM_FREGS is not zero.
+
 2000-04-13  Eli Zaretskii  <eliz@is.elta.co.il>
 
 	* infrun.c (proceed, normal_stop): Change the error message about
