@@ -52,10 +52,6 @@
  * Some local macros that have multi-arch and non-multi-arch versions:
  */
 
-#if 0
-// OBSOLETE /* Does the target have Floating Point registers?  */
-// OBSOLETE #define SPARC_HAS_FPU     (gdbarch_tdep (current_gdbarch)->has_fpu)
-#endif
 #define SPARC_HAS_FPU 1
 /* Number of bytes devoted to Floating Point registers: */
 #define FP_REGISTER_BYTES (gdbarch_tdep (current_gdbarch)->fp_register_bytes)
@@ -68,9 +64,6 @@
 
 struct gdbarch_tdep
   {
-#if 0
-    // OBSOLETE     int has_fpu;
-#endif
     int fp_register_bytes;
     int y_regnum;
     int fp_max_regnum;
@@ -95,15 +88,6 @@ struct gdbarch_tdep
    so we only need send the groups that have changed.  */
 
 int deferred_stores = 0;    /* Accumulated stores we want to do eventually. */
-
-
-#if 0
-// OBSOLETE /* Some machines, such as Fujitsu SPARClite 86x, have a bi-endian mode
-// OBSOLETE    where instructions are big-endian and data are little-endian.
-// OBSOLETE    This flag is set when we detect that the target is of this type. */
-// OBSOLETE 
-// OBSOLETE int bi_endian = 0;
-#endif
 
 
 const unsigned char *
@@ -2122,24 +2106,6 @@ sparc_do_registers_info (int regnum, int all)
 			      regnum, all);
 }
 
-#if 0
-// OBSOLETE static void
-// OBSOLETE sparclet_print_registers_info (struct gdbarch *gdbarch,
-// OBSOLETE 			       struct ui_file *file,
-// OBSOLETE 			       struct frame_info *frame,
-// OBSOLETE 			       int regnum, int print_all)
-// OBSOLETE {
-// OBSOLETE   sparc_print_registers (gdbarch, file, frame, regnum, print_all, NULL);
-// OBSOLETE }
-// OBSOLETE 
-// OBSOLETE void
-// OBSOLETE sparclet_do_registers_info (int regnum, int all)
-// OBSOLETE {
-// OBSOLETE   sparclet_print_registers_info (current_gdbarch, gdb_stdout,
-// OBSOLETE 				 deprecated_selected_frame, regnum, all);
-// OBSOLETE }
-#endif
-
 #define SPARC_F0_REGNUM		FP0_REGNUM	/* %f0 */
 #define SPARC_F1_REGNUM		(FP0_REGNUM + 1)/* %f1 */
 #define SPARC_O0_REGNUM		O0_REGNUM	/* %o0 */
@@ -2420,17 +2386,6 @@ sparc_store_return_value (struct type *type, char *valbuf)
 				     TYPE_LENGTH (type));
 }
 
-#if 0
-// OBSOLETE extern void
-// OBSOLETE sparclet_store_return_value (struct type *type, char *valbuf)
-// OBSOLETE {
-// OBSOLETE   /* Other values are returned in register %o0.  */
-// OBSOLETE   deprecated_write_register_bytes (REGISTER_BYTE (O0_REGNUM), valbuf,
-// OBSOLETE 				   TYPE_LENGTH (type));
-// OBSOLETE }
-#endif
-
-
 #ifndef CALL_DUMMY_CALL_OFFSET
 #define CALL_DUMMY_CALL_OFFSET \
      (gdbarch_tdep (current_gdbarch)->call_dummy_call_offset)
@@ -2495,44 +2450,7 @@ sparc_fix_call_dummy (char *dummy, CORE_ADDR pc, CORE_ADDR fun,
 	    store_unsigned_integer (dummy + (i * 4), 4, 0x01000000);
 	}
     }
-
-#if 0
-// OBSOLETE   /* If this is a bi-endian target, GDB has written the call dummy
-// OBSOLETE      in little-endian order.  We must byte-swap it back to big-endian. */
-// OBSOLETE   if (bi_endian)
-// OBSOLETE     {
-// OBSOLETE       for (i = 0; i < CALL_DUMMY_LENGTH; i += 4)
-// OBSOLETE 	{
-// OBSOLETE 	  char tmp = dummy[i];
-// OBSOLETE 	  dummy[i] = dummy[i + 3];
-// OBSOLETE 	  dummy[i + 3] = tmp;
-// OBSOLETE 	  tmp = dummy[i + 1];
-// OBSOLETE 	  dummy[i + 1] = dummy[i + 2];
-// OBSOLETE 	  dummy[i + 2] = tmp;
-// OBSOLETE 	}
-// OBSOLETE     }
-#endif
 }
-
-
-#if 0
-// OBSOLETE /* Set target byte order based on machine type. */
-// OBSOLETE 
-// OBSOLETE static int
-// OBSOLETE sparc_target_architecture_hook (const bfd_arch_info_type *ap)
-// OBSOLETE {
-// OBSOLETE   int i, j;
-// OBSOLETE 
-// OBSOLETE   if (ap->mach == bfd_mach_sparc_sparclite_le)
-// OBSOLETE     {
-// OBSOLETE       target_byte_order = BFD_ENDIAN_LITTLE;
-// OBSOLETE       bi_endian = 1;
-// OBSOLETE     }
-// OBSOLETE   else
-// OBSOLETE     bi_endian = 0;
-// OBSOLETE   return 1;
-// OBSOLETE }
-#endif
 
 /*
  * Module "constructor" function. 
@@ -2549,8 +2467,6 @@ _initialize_sparc_tdep (void)
 {
   /* Hook us into the gdbarch mechanism.  */
   gdbarch_register (bfd_arch_sparc, sparc_gdbarch_init, sparc_dump_tdep);
-
-  /* OBSOLETE target_architecture_hook = sparc_target_architecture_hook; */
 }
 
 /* Compensate for stack bias. Note that we currently don't handle
@@ -2780,20 +2696,6 @@ sparc64_extract_return_value (struct type *type, char *regbuf, char *valbuf)
   sp64_extract_return_value (type, regbuf, valbuf, 0);
 }
 
-#if 0
-// OBSOLETE extern void 
-// OBSOLETE sparclet_extract_return_value (struct type *type,
-// OBSOLETE 			       char *regbuf, 
-// OBSOLETE 			       char *valbuf)
-// OBSOLETE {
-// OBSOLETE   regbuf += REGISTER_RAW_SIZE (O0_REGNUM) * 8;
-// OBSOLETE   if (TYPE_LENGTH (type) < REGISTER_RAW_SIZE (O0_REGNUM))
-// OBSOLETE     regbuf += REGISTER_RAW_SIZE (O0_REGNUM) - TYPE_LENGTH (type);
-// OBSOLETE 
-// OBSOLETE   memcpy ((void *) valbuf, regbuf, TYPE_LENGTH (type));
-// OBSOLETE }
-#endif
-
 extern CORE_ADDR
 sparc32_stack_align (CORE_ADDR addr)
 {
@@ -2870,71 +2772,6 @@ sparc64_register_name (int regno)
   else
     return register_names[regno];
 }
-
-#if 0
-// OBSOLETE static const char *
-// OBSOLETE sparclite_register_name (int regno)
-// OBSOLETE {
-// OBSOLETE   static char *register_names[] = 
-// OBSOLETE   { "g0", "g1", "g2", "g3", "g4", "g5", "g6", "g7",
-// OBSOLETE     "o0", "o1", "o2", "o3", "o4", "o5", "sp", "o7",
-// OBSOLETE     "l0", "l1", "l2", "l3", "l4", "l5", "l6", "l7",
-// OBSOLETE     "i0", "i1", "i2", "i3", "i4", "i5", "fp", "i7",
-// OBSOLETE 
-// OBSOLETE     "f0",  "f1",  "f2",  "f3",  "f4",  "f5",  "f6",  "f7",
-// OBSOLETE     "f8",  "f9",  "f10", "f11", "f12", "f13", "f14", "f15",
-// OBSOLETE     "f16", "f17", "f18", "f19", "f20", "f21", "f22", "f23",
-// OBSOLETE     "f24", "f25", "f26", "f27", "f28", "f29", "f30", "f31",
-// OBSOLETE 
-// OBSOLETE     "y", "psr", "wim", "tbr", "pc", "npc", "fpsr", "cpsr",
-// OBSOLETE     "dia1", "dia2", "dda1", "dda2", "ddv1", "ddv2", "dcr", "dsr" 
-// OBSOLETE   };
-// OBSOLETE 
-// OBSOLETE   if (regno < 0 ||
-// OBSOLETE       regno >= (sizeof (register_names) / sizeof (register_names[0])))
-// OBSOLETE     return NULL;
-// OBSOLETE   else
-// OBSOLETE     return register_names[regno];
-// OBSOLETE }
-#endif
-
-#if 0
-// OBSOLETE static const char *
-// OBSOLETE sparclet_register_name (int regno)
-// OBSOLETE {
-// OBSOLETE   static char *register_names[] = 
-// OBSOLETE   { "g0", "g1", "g2", "g3", "g4", "g5", "g6", "g7",
-// OBSOLETE     "o0", "o1", "o2", "o3", "o4", "o5", "sp", "o7",
-// OBSOLETE     "l0", "l1", "l2", "l3", "l4", "l5", "l6", "l7",
-// OBSOLETE     "i0", "i1", "i2", "i3", "i4", "i5", "fp", "i7",
-// OBSOLETE 
-// OBSOLETE     "", "", "", "", "", "", "", "", /* no floating point registers */
-// OBSOLETE     "", "", "", "", "", "", "", "",
-// OBSOLETE     "", "", "", "", "", "", "", "",
-// OBSOLETE     "", "", "", "", "", "", "", "",
-// OBSOLETE 
-// OBSOLETE     "y", "psr", "wim", "tbr", "pc", "npc", "", "", /* no FPSR or CPSR */
-// OBSOLETE     "ccsr", "ccpr", "cccrcr", "ccor", "ccobr", "ccibr", "ccir", "", 
-// OBSOLETE 
-// OBSOLETE     /*       ASR15                 ASR19 (don't display them) */    
-// OBSOLETE     "asr1",  "", "asr17", "asr18", "", "asr20", "asr21", "asr22"
-// OBSOLETE     /* None of the rest get displayed */
-// OBSOLETE #if 0
-// OBSOLETE     "awr0",  "awr1",  "awr2",  "awr3",  "awr4",  "awr5",  "awr6",  "awr7",  
-// OBSOLETE     "awr8",  "awr9",  "awr10", "awr11", "awr12", "awr13", "awr14", "awr15", 
-// OBSOLETE     "awr16", "awr17", "awr18", "awr19", "awr20", "awr21", "awr22", "awr23", 
-// OBSOLETE     "awr24", "awr25", "awr26", "awr27", "awr28", "awr29", "awr30", "awr31", 
-// OBSOLETE     "apsr"
-// OBSOLETE #endif /* 0 */
-// OBSOLETE   };
-// OBSOLETE 
-// OBSOLETE   if (regno < 0 ||
-// OBSOLETE       regno >= (sizeof (register_names) / sizeof (register_names[0])))
-// OBSOLETE     return NULL;
-// OBSOLETE   else
-// OBSOLETE     return register_names[regno];
-// OBSOLETE }
-#endif
 
 static CORE_ADDR
 sparc_push_return_address (CORE_ADDR pc_unused, CORE_ADDR sp)
@@ -3288,15 +3125,8 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   switch (info.bfd_arch_info->mach)
     {
     case bfd_mach_sparc:
-#if 0
-      // OBSOLETE     case bfd_mach_sparc_sparclet:
-      // OBSOLETE     case bfd_mach_sparc_sparclite:
-#endif
     case bfd_mach_sparc_v8plus:
     case bfd_mach_sparc_v8plusa:
-#if 0
-      // OBSOLETE     case bfd_mach_sparc_sparclite_le:
-#endif
       /* 32-bit machine types: */
 
 #ifdef SPARC32_CALL_DUMMY_ON_STACK
@@ -3460,36 +3290,9 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_num_regs (gdbarch, 72);
       set_gdbarch_deprecated_register_bytes (gdbarch, 32*4 + 32*4 + 8*4);
       set_gdbarch_register_name (gdbarch, sparc32_register_name);
-#if 0
-      // OBSOLETE       tdep->has_fpu = 1;	/* (all but sparclet and sparclite) */
-#endif
       tdep->fp_register_bytes = 32 * 4;
       tdep->print_insn_mach = bfd_mach_sparc;
       break;
-#if 0
-      // OBSOLETE     case bfd_mach_sparc_sparclet:
-      // OBSOLETE       set_gdbarch_deprecated_extract_return_value (gdbarch, sparclet_extract_return_value);
-      // OBSOLETE       set_gdbarch_num_regs (gdbarch, 32 + 32 + 8 + 8 + 8);
-      // OBSOLETE       set_gdbarch_register_bytes (gdbarch, 32*4 + 32*4 + 8*4 + 8*4 + 8*4);
-      // OBSOLETE       set_gdbarch_register_name (gdbarch, sparclet_register_name);
-      // OBSOLETE       set_gdbarch_deprecated_store_return_value (gdbarch, sparclet_store_return_value);
-      // OBSOLETE       tdep->has_fpu = 0;	/* (all but sparclet and sparclite) */
-      // OBSOLETE       tdep->fp_register_bytes = 0;
-      // OBSOLETE       tdep->print_insn_mach = bfd_mach_sparc_sparclet;
-      // OBSOLETE       break;
-#endif
-#if 0
-      // OBSOLETE     case bfd_mach_sparc_sparclite:
-      // OBSOLETE       set_gdbarch_deprecated_extract_return_value (gdbarch, sparc32_extract_return_value);
-      // OBSOLETE       set_gdbarch_num_regs (gdbarch, 80);
-      // OBSOLETE       set_gdbarch_register_bytes (gdbarch, 32*4 + 32*4 + 8*4 + 8*4);
-      // OBSOLETE       set_gdbarch_register_name (gdbarch, sparclite_register_name);
-      // OBSOLETE       set_gdbarch_deprecated_store_return_value (gdbarch, sparc_store_return_value);
-      // OBSOLETE       tdep->has_fpu = 0;	/* (all but sparclet and sparclite) */
-      // OBSOLETE       tdep->fp_register_bytes = 0;
-      // OBSOLETE       tdep->print_insn_mach = bfd_mach_sparc_sparclite;
-      // OBSOLETE       break;
-#endif
     case bfd_mach_sparc_v8plus:
       set_gdbarch_extract_return_value (gdbarch, sparc32_extract_return_value);
       set_gdbarch_store_return_value (gdbarch, sparc32_store_return_value);
@@ -3498,9 +3301,6 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_register_name (gdbarch, sparc32_register_name);
       tdep->print_insn_mach = bfd_mach_sparc;
       tdep->fp_register_bytes = 32 * 4;
-#if 0
-      // OBSOLETE       tdep->has_fpu = 1;	/* (all but sparclet and sparclite) */
-#endif
       break;
     case bfd_mach_sparc_v8plusa:
       set_gdbarch_extract_return_value (gdbarch, sparc32_extract_return_value);
@@ -3508,33 +3308,15 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_num_regs (gdbarch, 72);
       set_gdbarch_deprecated_register_bytes (gdbarch, 32*4 + 32*4 + 8*4);
       set_gdbarch_register_name (gdbarch, sparc32_register_name);
-#if 0
-      // OBSOLETE       tdep->has_fpu = 1;	/* (all but sparclet and sparclite) */
-#endif
       tdep->fp_register_bytes = 32 * 4;
       tdep->print_insn_mach = bfd_mach_sparc;
       break;
-#if 0
-// OBSOLETE     case bfd_mach_sparc_sparclite_le:
-// OBSOLETE       set_gdbarch_deprecated_extract_return_value (gdbarch, sparc32_extract_return_value);
-// OBSOLETE       set_gdbarch_num_regs (gdbarch, 80);
-// OBSOLETE       set_gdbarch_register_bytes (gdbarch, 32*4 + 32*4 + 8*4 + 8*4);
-// OBSOLETE       set_gdbarch_register_name (gdbarch, sparclite_register_name);
-// OBSOLETE       set_gdbarch_deprecated_store_return_value (gdbarch, sparc_store_return_value);
-// OBSOLETE       tdep->has_fpu = 0;	/* (all but sparclet and sparclite) */
-// OBSOLETE       tdep->fp_register_bytes = 0;
-// OBSOLETE       tdep->print_insn_mach = bfd_mach_sparc_sparclite;
-// OBSOLETE       break;
-#endif
     case bfd_mach_sparc_v9:
       set_gdbarch_deprecated_extract_return_value (gdbarch, sparc64_extract_return_value);
       set_gdbarch_num_regs (gdbarch, 125);
       set_gdbarch_deprecated_register_bytes (gdbarch, 32*8 + 32*8 + 45*8);
       set_gdbarch_register_name (gdbarch, sparc64_register_name);
       set_gdbarch_deprecated_store_return_value (gdbarch, sparc_store_return_value);
-#if 0
-      // OBSOLETE       tdep->has_fpu = 1;	/* (all but sparclet and sparclite) */
-#endif
       tdep->fp_register_bytes = 64 * 4;
       tdep->print_insn_mach = bfd_mach_sparc_v9a;
       break;
@@ -3544,9 +3326,6 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_deprecated_register_bytes (gdbarch, 32*8 + 32*8 + 45*8);
       set_gdbarch_register_name (gdbarch, sparc64_register_name);
       set_gdbarch_deprecated_store_return_value (gdbarch, sparc_store_return_value);
-#if 0
-      // OBSOLETE       tdep->has_fpu = 1;	/* (all but sparclet and sparclite) */
-#endif
       tdep->fp_register_bytes = 64 * 4;
       tdep->print_insn_mach = bfd_mach_sparc_v9a;
       break;
@@ -3568,10 +3347,6 @@ sparc_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
   if (tdep == NULL)
     return;
 
-#if 0
-  // OBSOLETE   fprintf_unfiltered (file, "sparc_dump_tdep: has_fpu = %d\n",
-  // OBSOLETE 		      tdep->has_fpu);
-#endif
   fprintf_unfiltered (file, "sparc_dump_tdep: fp_register_bytes = %d\n",
 		      tdep->fp_register_bytes);
   fprintf_unfiltered (file, "sparc_dump_tdep: y_regnum = %d\n",

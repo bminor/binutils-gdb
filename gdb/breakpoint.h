@@ -223,9 +223,8 @@ struct breakpoint
     int number;
 
     /* Address to break at.  Note that zero is a perfectly valid code
-       address on some platforms (for example, the OBSOLETE mn10200
-       and mn10300 simulators).  NULL is not a special value for this
-       field.  */
+       address on some platforms (for example, the and mn10300
+       simulators).  NULL is not a special value for this field.  */
     CORE_ADDR address;
 
     /* Line number of this address.  */

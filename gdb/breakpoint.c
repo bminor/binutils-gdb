@@ -1245,11 +1245,11 @@ update_breakpoints_after_exec (void)
        automagically.  Certainly on HP-UX that's true.
 
        Jim Blandy <jimb@redhat.com>: Actually, zero is a perfectly
-       valid code address on some platforms (like the OBSOLETE mn10200
-       and mn10300 simulators).  We shouldn't assign any special
-       interpretation to a breakpoint with a zero address.  And in
-       fact, GDB doesn't --- I can't see what that comment above is
-       talking about.  As far as I can tell, setting the address of a
+       valid code address on some platforms (like the mn10300
+       simulators).  We shouldn't assign any special interpretation to
+       a breakpoint with a zero address.  And in fact, GDB doesn't ---
+       I can't see what that comment above is talking about.  As far
+       as I can tell, setting the address of a
        bp_catch_exec/bp_catch_vfork/bp_catch_fork breakpoint to zero
        is meaningless, since those are implemented with HP-UX kernel
        hackery, not by storing breakpoint instructions somewhere.  */

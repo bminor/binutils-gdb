@@ -568,14 +568,6 @@ monitor_expect (char *string, char *buf, int buflen)
 		return 0;
 	    }
 	}
-#if 0
-      // OBSOLETE       else if ((c == '\021' || c == '\023') &&
-      // OBSOLETE 	       (STREQ (targ_ops->to_shortname, "m32r")
-      // OBSOLETE 		|| STREQ (targ_ops->to_shortname, "mon2000")))
-      // OBSOLETE 	{			/* m32r monitor emits random DC1/DC3 chars */
-      // OBSOLETE 	  continue;
-      // OBSOLETE 	}
-#endif
       else
 	{
 	  /* We got a character that doesn't match the string.  We need to

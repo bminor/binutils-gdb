@@ -1,5 +1,10 @@
 2003-10-06  Andrew Cagney  <cagney@redhat.com>
 
+	* breakpoint.c, breakpoint.h: Remove obsolete code.
+	* buildsym.c, dbxread.c, gdbtypes.c, mdebugread.c: Ditto.
+	* monitor.c, sparc-tdep.c, stabsread.c: Ditto.
+	* stabsread.h, xcoffread.c: Ditto.
+
 	* z8k-tdep.c, symm-tdep.c, symm-nat.c: Delete obsolete file.
 	* sparclet-stub.c, sparclet-rom.c: Delete obsolete file.
 	* sparcl-tdep.c, sparcl-stub.c, h8500-tdep.c: Delete obsolete file.

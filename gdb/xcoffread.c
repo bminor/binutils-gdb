@@ -2635,22 +2635,6 @@ scan_xcoff_symtab (struct objfile *objfile)
 					     psymtab_language, objfile);
 			p += 1;
 		      }
-#if 0 /* OBSOLETE CFront */
-// OBSOLETE  		    /* The semantics of C++ state that "struct foo { ... }"
-// OBSOLETE  		       also defines a typedef for "foo".  Unfortuantely, cfront
-// OBSOLETE  		       never makes the typedef when translating from C++ to C.
-// OBSOLETE  		       We make the typedef here so that "ptype foo" works as
-// OBSOLETE  		       expected for cfront translated code.  */
-// OBSOLETE  		    else if (psymtab_language == language_cplus)
-// OBSOLETE  		      {
-// OBSOLETE  			/* Also a typedef with the same name.  */
-// OBSOLETE  			add_psymbol_to_list (namestring, p - namestring,
-// OBSOLETE  					     VAR_DOMAIN, LOC_TYPEDEF,
-// OBSOLETE  					     &objfile->static_psymbols,
-// OBSOLETE  					     symbol.n_value, 0,
-// OBSOLETE  					     psymtab_language, objfile);
-// OBSOLETE  		      }
-#endif /* OBSOLETE CFront */
 		  }
 		goto check_enum;
 
@@ -2799,11 +2783,6 @@ scan_xcoff_symtab (struct objfile *objfile)
 	      case '9':
 	      case '-':
 	      case '#':		/* for symbol identification (used in live ranges) */
-#if 0 /* OBSOLETE CFront */
-// OBSOLETE 		/* added to support cfront stabs strings */
-// OBSOLETE 	      case 'Z':		/* for definition continuations */
-// OBSOLETE 	      case 'P':		/* for prototypes */
-#endif /* OBSOLETE CFront */
 		continue;
 
 	      case ':':
