@@ -1,7 +1,7 @@
 Thu Dec  8 14:36:15 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* binutils-all/objdump.exp (cpus_expected): New variable, taken
-	from objdump -i test, added ns32k, sorted.
+	from objdump -i test, added ns32k and powerpc, sorted.
 	(objdump -i, -f tests): Use $cpus_expected.
 
 	* binutils-all/objcopy.exp: For simple-copy test, expect failure
