@@ -771,9 +771,10 @@ alloc_failure:
    with _bfd_merge_section.  */
 
 boolean
-_bfd_merge_sections (abfd, xsinfo)
+_bfd_merge_sections (abfd, xsinfo, remove_hook)
      bfd *abfd ATTRIBUTE_UNUSED;
      PTR xsinfo;
+     void (*remove_hook) PARAMS((bfd *, asection *));
 {
   struct sec_merge_info *sinfo;
 
@@ -792,7 +793,11 @@ _bfd_merge_sections (abfd, xsinfo)
       /* Record the sections into the hash table.  */
       for (secinfo = sinfo->chain; secinfo; secinfo = secinfo->next)
 	if (secinfo->sec->flags & SEC_EXCLUDE)
-	  *secinfo->psecinfo = NULL;
+	  {
+	    *secinfo->psecinfo = NULL;
+	    if (remove_hook)
+	      (*remove_hook) (abfd, secinfo->sec);
+	  }
 	else if (! record_section (sinfo, secinfo))
 	  break;
 

@@ -1,3 +1,14 @@
+2002-01-15  Jakub Jelinek  <jakub@redhat.com>
+
+	* elflink.h (elf_link_input_bfd): Back out 2002-01-07 change.
+	* elf.c (merge_sections_remove_hook): New function.
+	(_bfd_elf_merge_sections): Pass it as 3rd argument to
+	_bfd_merge_sections.
+	* libbfd-in.h (_bfd_merge_sections): Add 3rd argument.
+	* libbfd.h: Rebuilt.
+	* merge.c (_bfd_merge_sections): Add remove_hook argument.
+	Call remove_hook if a SEC_EXCLUDE section is encountered.
+
 2002-01-15  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* elf32-xstormy16.c (xstormy16_reloc_map): Add new field 'table'.

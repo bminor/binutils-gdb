@@ -6375,8 +6375,6 @@ elf_link_input_bfd (finfo, input_bfd)
 	  isec = section_from_elf_index (input_bfd, isym->st_shndx);
 	  if (isec
 	      && elf_section_data (isec)->sec_info_type == ELF_INFO_TYPE_MERGE
-	      && (finfo->info->relocateable
-		  || ! (isec->flags & SEC_EXCLUDE))
 	      && ELF_ST_TYPE (isym->st_info) != STT_SECTION)
 	    isym->st_value =
 	      _bfd_merged_section_offset (output_bfd, &isec,

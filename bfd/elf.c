@@ -53,6 +53,7 @@ static boolean swap_out_syms PARAMS ((bfd *, struct bfd_strtab_hash **, int));
 static boolean copy_private_bfd_data PARAMS ((bfd *, bfd *));
 static char *elf_read PARAMS ((bfd *, file_ptr, bfd_size_type));
 static boolean setup_group PARAMS ((bfd *, Elf_Internal_Shdr *, asection *));
+static void merge_sections_remove_hook PARAMS ((bfd *, asection *));
 static void elf_fake_sections PARAMS ((bfd *, asection *, PTR));
 static void set_group_contents PARAMS ((bfd *, asection *, PTR));
 static boolean assign_section_numbers PARAMS ((bfd *));
@@ -770,6 +771,20 @@ bfd_elf_generic_reloc (abfd,
   return bfd_reloc_continue;
 }
 
+/* Make sure sec_info_type is cleared if sec_info is cleared too.  */
+
+static void
+merge_sections_remove_hook (abfd, sec)
+     bfd *abfd ATTRIBUTE_UNUSED;
+     asection *sec;
+{
+  struct bfd_elf_section_data *sec_data;
+    
+  sec_data = elf_section_data (sec);
+  BFD_ASSERT (sec_data->sec_info_type == ELF_INFO_TYPE_MERGE);
+  sec_data->sec_info_type = ELF_INFO_TYPE_NONE;
+}
+
 /* Finish SHF_MERGE section merging.  */
 
 boolean
@@ -780,7 +795,8 @@ _bfd_elf_merge_sections (abfd, info)
   if (!is_elf_hash_table (info))
     return false;
   if (elf_hash_table (info)->merge_info)
-    _bfd_merge_sections (abfd, elf_hash_table (info)->merge_info);
+    _bfd_merge_sections (abfd, elf_hash_table (info)->merge_info,
+			 merge_sections_remove_hook);
   return true;
 }
 

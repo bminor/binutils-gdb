@@ -483,7 +483,7 @@ extern boolean _bfd_merge_section
 /* Attempt to merge SEC_MERGE sections.  */
 
 extern boolean _bfd_merge_sections
-  PARAMS ((bfd *, PTR));
+  PARAMS ((bfd *, PTR, void (*)(bfd *, asection *)));
 
 /* Write out a merged section.  */
 
