@@ -1,7 +1,7 @@
 Wed Oct  5 11:41:24 1994  J.T. Conklin  (jtc@phishhead.cygnus.com)
 
 	* nlm/Makefile.in: Get rid of NWINCLUDES.
-	* config/{alpha,i386,powerpc}/gdbserve.mt: Remove NWINCLUDES.
+	* config/{alpha,powerpc}/gdbserve.mt: Remove NWINCLUDES.
 	  User should now configure with --with-headers.
 
 Mon Oct  3 07:48:34 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
