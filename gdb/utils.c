@@ -1259,7 +1259,18 @@ fputs_unfiltered (linebuffer, stream)
      const char *linebuffer;
      FILE *stream;
 {
+#if 0
+
+  /* This gets the wrap_buffer buffering wrong when called from
+     gdb_readline (GDB was sometimes failing to print the prompt
+     before reading input).  Even at other times, it seems kind of
+     misguided, especially now that printf_unfiltered doesn't use
+     printf_maybe_filtered.  */
+
   fputs_maybe_filtered (linebuffer, stream, 0);
+#else
+  fputs (linebuffer, stream);
+#endif
 }
 
 void

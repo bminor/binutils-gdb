@@ -1,5 +1,7 @@
 Sat Jan 15 10:20:13 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* utils.c (fputs_unfiltered): Call fputs, not fputs_maybe_filtered.
+
 	* c-exp.y (parse_number): Check for overflow regardless of range
 	checking.  Fix overflow check to use unsigned LONGEST, not
 	unsigned int.
