@@ -1,5 +1,5 @@
 /* Generic serial interface routines
-   Copyright 1992, 1993, 1996 Free Software Foundation, Inc.
+   Copyright 1992, 1993, 1996, 1997 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -116,8 +116,8 @@ serial_log_command (cmd)
 
   serial_current_type = 'c';
 
-  fputs_unfiltered (serial_logfp, "\nc ");
-  fputs_unfiltered (serial_logfp, cmd);
+  fputs_unfiltered ("\nc ", serial_logfp);
+  fputs_unfiltered (cmd, serial_logfp);
 
   /* Make sure that the log file is as up-to-date as possible,
      in case we are getting ready to dump core or something. */

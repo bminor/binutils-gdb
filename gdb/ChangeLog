@@ -1,5 +1,7 @@
 Sat Apr 19 01:49:37 1997  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
+	* serial.c (serial_log_command):  Fix fputs_unfiltered calls.
+
 	* config/powerpc/tm-ppc-aix4.h, config/rs6000/tm-rs6000-aix4.h
 	(DONT_RELOCATE_SYMFILE_OBJFILE):  Removed.
 	* xcoffsolib.h (struct vmap):  Add new members tvma, toffs and dvma,
