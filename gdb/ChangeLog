@@ -1,5 +1,10 @@
 2002-01-07  Michael Snyder  <msnyder@redhat.com>
 
+	* arm-linux-nat.c: Remove references to regcache.c internal data
+	(registers[] and register_valid[]).
+
+2002-01-07  Michael Snyder  <msnyder@redhat.com>
+
 	* linux-proc.c: New file.  Implement child_pid_to_exec_file, 
 	so that attaching to a pid will automatically read the process's 
 	symbol file and shlibs.

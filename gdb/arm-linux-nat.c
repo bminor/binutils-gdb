@@ -194,7 +194,7 @@ store_nwfpe_extended (unsigned int fn, FPA11 * fpa11)
 void
 store_nwfpe_register (int regno, FPA11 * fpa11)
 {
-  if (register_valid[regno])
+  if (register_cached (regno))
     {
        unsigned int fn = regno - F0_REGNUM;
        switch (fpa11->fType[fn])
@@ -216,7 +216,7 @@ store_nwfpe_register (int regno, FPA11 * fpa11)
 
 
 /* Get the value of a particular register from the floating point
-   state of the process and store it into registers[].  */
+   state of the process and store it into regcache.  */
 
 static void
 fetch_fpregister (int regno)
@@ -265,7 +265,7 @@ fetch_fpregister (int regno)
 }
 
 /* Get the whole floating point state of the process and store it
-   into registers[].  */
+   into regcache.  */
 
 static void
 fetch_fpregs (void)
@@ -313,7 +313,7 @@ fetch_fpregs (void)
 }
 
 /* Save a particular register into the floating point state of the
-   process using the contents from registers[].  */
+   process using the contents from regcache.  */
 
 static void
 store_fpregister (int regno)
@@ -333,7 +333,7 @@ store_fpregister (int regno)
     }
 
   /* Store fpsr.  */
-  if (FPS_REGNUM == regno && register_valid[FPS_REGNUM])
+  if (FPS_REGNUM == regno && register_cached (FPS_REGNUM))
     read_register_gen (FPS_REGNUM, (char *) &fp.fpsr);
 
   /* Store the floating point register.  */
@@ -351,7 +351,7 @@ store_fpregister (int regno)
 }
 
 /* Save the whole floating point state of the process using
-   the contents from registers[].  */
+   the contents from regcache.  */
 
 static void
 store_fpregs (void)
@@ -371,7 +371,7 @@ store_fpregs (void)
     }
 
   /* Store fpsr.  */
-  if (register_valid[FPS_REGNUM])
+  if (register_cached (FPS_REGNUM))
     read_register_gen (FPS_REGNUM, (char *) &fp.fpsr);
 
   /* Store the floating point registers.  */
@@ -389,7 +389,7 @@ store_fpregs (void)
 }
 
 /* Fetch a general register of the process and store into
-   registers[].  */
+   regcache.  */
 
 static void
 fetch_register (int regno)
@@ -426,7 +426,7 @@ fetch_register (int regno)
 }
 
 /* Fetch all general registers of the process and store into
-   registers[].  */
+   regcache.  */
 
 static void
 fetch_regs (void)
@@ -457,7 +457,7 @@ fetch_regs (void)
 }
 
 /* Store all general registers of the process from the values in
-   registers[].  */
+   regcache.  */
 
 static void
 store_register (int regno)
@@ -465,7 +465,7 @@ store_register (int regno)
   int ret, tid;
   elf_gregset_t regs;
   
-  if (!register_valid[regno])
+  if (!register_cached (regno))
     return;
 
   /* Get the thread id for the ptrace call.  */
@@ -509,7 +509,7 @@ store_regs (void)
 
   for (regno = A1_REGNUM; regno <= PC_REGNUM; regno++)
     {
-      if (register_valid[regno])
+      if (register_cached (regno))
 	read_register_gen (regno, (char *) &regs[regno]);
     }
 
