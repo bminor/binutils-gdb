@@ -26,9 +26,7 @@ Things-to-keep:
 ChangeLog
 Makefile.in
 configure.in
-config
 endian.c
-hosts
 h8300
 h8500
 z8k
