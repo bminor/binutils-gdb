@@ -280,8 +280,13 @@ bfd_target sco_core_vec =
     ' ',					/* ar_pad_char */
     16,						/* ar_max_namelen */
     3,						/* minimum alignment power */
-    NO_GET, NO_PUT, NO_GET, NO_PUT, NO_GET, NO_PUT, /* data */
-    NO_GET, NO_PUT, NO_GET, NO_PUT, NO_GET, NO_PUT, /* hdrs */
+
+    NO_GET, NO_GET, NO_PUT,	/* 64 bit data */
+    NO_GET, NO_GET, NO_PUT,	/* 32 bit data */
+    NO_GET, NO_GET, NO_PUT,	/* 16 bit data */
+    NO_GET, NO_GET, NO_PUT,	/* 64 bit hdrs */
+    NO_GET, NO_GET, NO_PUT,	/* 32 bit hdrs */
+    NO_GET, NO_GET, NO_PUT,	/* 16 bit hdrs */
 
     {_bfd_dummy_target, _bfd_dummy_target,
      _bfd_dummy_target, sco_core_file_p},

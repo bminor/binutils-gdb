@@ -1,3 +1,8 @@
+Mon Apr 26 11:25:58 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* sco-core.c (sco_core_vec): Add initializers for new target
+	fields.
+
 Sat Apr 24 21:33:45 1993  Jim Kingdon  (kingdon@cygnus.com)
 
 	* coffcode.h [_LIT]: Recognize .lit section.
