@@ -209,7 +209,10 @@ libbfd.h: $(LIBBFD_H_DEP)
 	  case $$file in \
 	    *-in.h) cat $$file >> $@ ;; \
 	    */header.sed) break ;; \
-	    *) ./$(MKDOC) -i -f $(srcdir)/proto.str < $$file >> $@ ;; \
+	    *)	echo -n '/* Extracted from ' >> $@ ; \
+		echo -n $$file | sed -e 's,.*/,,' >> $@ ; \
+		echo '.  */' >> $@ ; \
+		./$(MKDOC) -i -f $(srcdir)/proto.str < $$file >> $@ ;; \
 	  esac; \
 	done
 
@@ -226,7 +229,10 @@ libcoff.h: $(LIBCOFF_H_DEP)
 	  case $$file in \
 	    *-in.h) cat $$file >> $@ ;; \
 	    */header.sed) break ;; \
-	    *) ./$(MKDOC) -i -f $(srcdir)/proto.str < $$file >> $@ ;; \
+	    *)	echo -n '/* Extracted from ' >> $@ ; \
+		echo -n $$file | sed -e 's,.*/,,' >> $@ ; \
+		echo '.  */' >> $@ ; \
+		./$(MKDOC) -i -f $(srcdir)/proto.str < $$file >> $@ ;; \
 	  esac; \
 	done
 
@@ -255,7 +261,10 @@ bfd.h: $(BFD_H_DEP)
 	  case $$file in \
 	    *-in.h) cat $$file >> $@ ;; \
 	    */header.sed) break ;; \
-	    *) ./$(MKDOC) -f $(srcdir)/proto.str < $$file >> $@ ;; \
+	    *)	echo -n '/* Extracted from ' >> $@ ; \
+		echo -n $$file | sed -e 's,.*/,,' >> $@ ; \
+		echo '.  */' >> $@ ; \
+		./$(MKDOC) -f $(srcdir)/proto.str < $$file >> $@ ;; \
 	  esac; \
 	done
 	echo "#ifdef __cplusplus" >> $@
