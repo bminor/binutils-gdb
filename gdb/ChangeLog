@@ -1,5 +1,12 @@
 2002-10-23  David Carlton  <carlton@math.stanford.edu>
 
+	* parse.c (parse_exp_1): Use BLOCK_START.
+	* x86-64-tdep.c (x86_64_skip_prologue): Use BLOCK_END,
+	SYMBOL_BLOCK_VALUE.
+	* objc-lang.c (find_methods): Use BLOCK_START, BLOCK_END.
+
+2002-10-23  David Carlton  <carlton@math.stanford.edu>
+
 	* symtab.c: Delete cplusplus_hint.
 	Delete prototype for find_template_name_end.
 
