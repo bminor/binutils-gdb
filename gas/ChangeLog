@@ -1,3 +1,8 @@
+Wed Jun  1 10:48:19 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* config/tc-mips.c (mips_ip): Force floating point values to be
+	aligned correctly.
+
 Fri May 27 10:05:53 1994  Ken Raeburn  (raeburn@cygnus.com)
 
 	Merged in changes from gas-2.3 net release:

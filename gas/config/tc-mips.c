@@ -1222,8 +1222,9 @@ mips_emit_delays ()
 	      S_SET_VALUE (insn_label, (valueT) frag_now_fix ());
 	    }
 	}
-      mips_no_prev_insn ();
     }
+
+  mips_no_prev_insn ();
 }
 
 /* Build an instruction created by a macro expansion.  This is passed
@@ -4488,8 +4489,11 @@ mips_ip (str, ip)
 			break;
 		      }
 		    new_seg = subseg_new (newname, (subsegT) 0);
+		    frag_align (*args == 'l' ? 2 : 3, 0);
 #ifdef OBJ_ELF
-		    bfd_set_section_alignment (stdoutput, new_seg, 4);
+		    record_alignment (new_seg, 4);
+#else
+		    record_alignment (new_seg, *args == 'l' ? 2 : 3);
 #endif
 		    if (seg == now_seg)
 		      as_bad ("Can't use floating point insn in this section");
@@ -5179,7 +5183,7 @@ md_apply_fix (fixP, valueP)
       if (value & 0x8000)
 	value += 0x10000;
       value >>= 16;
-      buf = fixP->fx_frag->fr_literal + fixP->fx_where;
+      buf = (unsigned char *) fixP->fx_frag->fr_literal + fixP->fx_where;
       if (byte_order == BIG_ENDIAN)
 	buf += 2;
       md_number_to_chars (buf, value, 2);
@@ -5190,7 +5194,7 @@ md_apply_fix (fixP, valueP)
 	 do everything here rather than in bfd_perform_relocation.  */
       if ((fixP->fx_addsy->bsym->flags & BSF_SECTION_SYM) == 0)
 	value += fixP->fx_frag->fr_address + fixP->fx_where;
-      buf = fixP->fx_frag->fr_literal + fixP->fx_where;
+      buf = (unsigned char *) fixP->fx_frag->fr_literal + fixP->fx_where;
       if (byte_order == BIG_ENDIAN)
 	buf += 2;
       md_number_to_chars (buf, value, 2);
@@ -5216,7 +5220,7 @@ md_apply_fix (fixP, valueP)
 	  if (value < -0x8000 || value > 0x7fff)
 	    as_bad_where (fixP->fx_file, fixP->fx_line,
 			  "relocation overflow");
-	  buf = fixP->fx_frag->fr_literal + fixP->fx_where;
+	  buf = (unsigned char *) fixP->fx_frag->fr_literal + fixP->fx_where;
 	  if (byte_order == BIG_ENDIAN)
 	    buf += 2;
 	  md_number_to_chars (buf, value, 2);
@@ -5605,6 +5609,7 @@ s_option (x)
       else
 	as_bad (".option pic%d not supported", i);
 
+#ifdef GPOPT
       if (mips_pic == SVR4_PIC)
 	{
 	  if (g_switch_seen && g_switch_value != 0)
@@ -5612,6 +5617,7 @@ s_option (x)
 	  g_switch_value = 0;
 	  bfd_set_gp_size (stdoutput, 0);
 	}
+#endif
     }
   else
     as_warn ("Unrecognized option \"%s\"", opt);
@@ -5722,9 +5728,11 @@ s_abicalls (ignore)
      int ignore;
 {
   mips_pic = SVR4_PIC;
+#ifdef GPOPT
   if (g_switch_seen && g_switch_value != 0)
     as_warn ("-G may not be used with SVR4 PIC code");
   g_switch_value = 0;
+#endif
   bfd_set_gp_size (stdoutput, 0);
   demand_empty_rest_of_line ();
 }
