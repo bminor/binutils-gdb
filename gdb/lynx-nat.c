@@ -666,6 +666,22 @@ child_wait (pid, ourstatus)
 	    error ("Signal for unknown thread was not SIGNEWTHREAD");
 	}
 
+      /* Check for thread termination.  */
+      else if (WIFSTOPPED(status)
+	       && WSTOPSIG(status) == SIGTRAP
+	       && in_thread_list (pid))
+	{
+	  int realsig;
+
+	  realsig = ptrace (PTRACE_GETTRACESIG, pid, (PTRACE_ARG3_TYPE)0, 0);
+
+	  if (realsig == SIGTHREADEXIT)
+	    {
+	      ptrace (PTRACE_CONT, PIDGET (pid), (PTRACE_ARG3_TYPE)0, 0);
+	      continue;
+	    }
+	}
+
 #ifdef SPARC
       /* SPARC Lynx uses an byte reversed wait status; we must use the
 	 host macros to access it.  These lines just a copy of
