@@ -1300,7 +1300,9 @@ breakpoint.o: breakpoint.c $(defs_h) $(gdbcmd_h) $(gdbcore_h) \
 	$(completer_h) $(gdb_h)
 
 buildsym.o: buildsym.c $(bfd_h) $(buildsym_h) $(complaints_h) $(defs_h) \
-	$(objfiles_h) $(symfile_h) $(symtab_h) $(gdb_string_h)
+	$(objfiles_h) $(symfile_h) $(symtab_h) $(gdb_string_h) \
+	$(obstack_h) $(symtab_h) $(gdbtypes_h) $(expression_h) \
+	$(language_h) $(bcache_h) $(filenames_h) $(stabsread_h)
 
 builtin-regs.o: builtin-regs.c $(defs.h) $(builtin_regs_h) $(gdbtypes_h) \
 	$(gdb_string_h) $(value_h) $(frame_h)
@@ -1551,10 +1553,17 @@ tracepoint.o: tracepoint.c $(defs_h) $(symtab_h) $(frame_h) $(tracepoint_h) \
 	$(language_h) $(gdb_string_h) $(readline_headers) $(remote_h) \
 	$(linespec_h) $(regcache_h) $(completer_h)
 
-gdbarch.o: gdbarch.c $(defs_h) $(bfd_h) $(gdbcmd_h)
+gdbarch.o: gdbarch.c $(defs_h) $(bfd_h) $(gdbcmd_h) $(gdb_string_h) \
+	$(symtab_h) $(frame_h) $(inferior_h) $(breakpoint_h) $(gdb_wait_h) \
+	$(gdbcore_h) $(target_h) $(gdbthread_h) $(annotate_h) $(symfile_h) \
+	$(value_h) $(symcat_h) $(floatformat_h) $(gdb_assert_h) \
+	$(gdb_events_h)
 
 arch-utils.o: arch-utils.c $(defs_h) $(bfd_h) $(gdbcmd_h) \
-	$(arch_utils_h) $(gdb_assert_h)
+	$(arch_utils_h) $(gdb_assert_h) $(inferior_h) \
+	$(gdb_string_h) $(symtab.h) $(frame_h) $(breakpoint_h) $(gdb_wait_h) \
+	$(gdbcore_h) $(target_h) $(annotate_h) $(regcache_h) $(gdb_assert_h) \
+	$(version_h) $(floatformat_h)
 
 gdbtypes.o: gdbtypes.c $(bfd_h) $(complaints_h) $(defs_h) $(expression_h) \
 	$(gdbtypes_h) $(language_h) $(objfiles_h) $(symfile_h) $(symtab_h) \
@@ -1740,7 +1749,7 @@ m88k-tdep.o: m88k-tdep.c $(defs_h) $(gdbcore_h) $(inferior_h) $(regcache_h)
 mac-nat.o: mac-nat.c $(defs_h) $(gdb_string_h) $(regcache_h)
 
 main.o: main.c $(top_h) $(defs_h) $(gdb_string_h) $(event_loop_h) \
-	$(symfile_h)  $(gdbcore_h) $(ui_out_h)
+	$(symfile_h)  $(gdbcore_h) $(ui_out_h) $(inferior_h)
 
 maint.o: maint.c $(defs_h) $(gdbcmd_h) $(gdbtypes_h) $(symtab_h) \
 	$(language_h) $(expression_h) $(objfiles_h) $(symfile_h) \
@@ -1768,7 +1777,8 @@ os9kread.o: os9kread.c $(buildsym_h) $(complaints_h) $(bfd_h) $(defs_h) \
 	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(NO_WERROR_CFLAGS) \
 		$(srcdir)/os9kread.c
 
-mem-break.o: mem-break.c $(defs_h) 
+mem-break.o: mem-break.c $(defs_h) $(symtab_h) $(breakpoint_h) $(inferior_h) \
+	$(target_h)
 
 memattr.o: memattr.c $(defs_h) $(command_h) $(gdbcmd_h) $(memattr_h) \
 	$(target_h) $(value_h) $(language_h) $(gdb_string_h)
@@ -2055,7 +2065,7 @@ solib-legacy.o: solib-legacy.c $(defs_h) $(gdbcore_h) solib-svr4.h
 source.o: source.c $(defs_h) $(expression_h) $(frame_h) $(gdbcmd_h) \
 	$(gdbcore_h) $(language_h) $(objfiles_h) $(gdb_regex_h) $(symfile_h) \
 	$(symtab_h) $(gdb_string_h) $(source_h) $(completer_h) $(linespec_h) \
-	$(ui_out_h)
+	$(ui_out_h) $(value_h)
 
 sparc-linux-nat.o: sparc-linux-nat.c $(defs_h) $(regcache_h)
 
@@ -2137,7 +2147,7 @@ typeprint.o: typeprint.c $(defs_h) $(expression_h) $(gdbcmd_h) \
 
 utils.o: utils.c $(bfd_h) $(defs_h) $(expression_h) $(gdbcmd_h) \
 	$(language_h) $(target_h) $(terminal_h) $(readline_headers) \
-	$(gdb_string_h) $(event_loop_h) $(event_top_h)
+	$(gdb_string_h) $(event_loop_h) $(event_top_h) $(inferior_h)
 
 valarith.o: valarith.c $(bfd_h) $(defs_h) $(expression_h) \
 	$(gdbtypes_h) $(language_h) $(symtab_h) $(target_h) $(value_h) \
@@ -2285,14 +2295,17 @@ mi-cmd-stack.o: $(srcdir)/mi/mi-cmd-stack.c $(defs_h) $(top_h) $(mi_cmds_h) \
 		$(ui_out_h) $(frame_h) $(value_h) $(target_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/mi/mi-cmd-stack.c
 mi-cmd-break.o: $(srcdir)/mi/mi-cmd-break.c $(defs_h) $(mi_cmds_h) \
-		$(ui_out_h) $(mi_getopt_h) $(gdb_h)
+		$(ui_out_h) $(mi_out_h) $(breakpoint_h) $(gdb_string_h) \
+		$(gdb_events_h) $(mi_getopt_h) $(gdb_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/mi/mi-cmd-break.c
 mi-cmd-disas.o: $(srcdir)/mi/mi-cmd-disas.c $(defs_h) $(mi_cmds_h) \
 		$(ui_out_h) $(value_h) $(target_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/mi/mi-cmd-disas.c
 mi-main.o: $(srcdir)/mi/mi-main.c $(defs_h) $(top_h) $(mi_cmds_h) $(ui_out_h) \
 		$(mi_console_h) $(mi_getopt_h) $(event_loop_h) $(event_top_h) \
-		$(mi_getopt_h) $(regcache_h) $(gdb_h)
+		$(mi_getopt_h) $(regcache_h) $(gdb_h) $(target_h) \
+		$(inferior_h) $(gdb_string_h) $(gdbthread_h) $(mi_out_h) \
+		$(gdbcore_h) $(value_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/mi/mi-main.c
 mi-out.o: $(srcdir)/mi/mi-out.c $(defs_h) $(mi_out_h) $(ui_out_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/mi/mi-out.c

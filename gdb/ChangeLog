@@ -1,3 +1,7 @@
+2002-05-12  Daniel Jacobowitz  <drow@mvista.com>
+
+	* Makefile.in: Update dependencies.
+
 2002-05-11  Andrew Cagney  <ac131313@redhat.com>
 
 	* language.c (local_hex_string_custom): Simplify.  Do not depend
