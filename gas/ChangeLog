@@ -1,3 +1,9 @@
+Mon Nov  8 12:05:07 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* config/tc-mips.c (mips_ip, printInsn): Handle 'k' (from Ted
+	Lemon <mellon@pepper.ncd.com>).
+	(mips_ip): Permit odd numbered floating point registers if -mips3.
+
 Mon Nov  8 07:45:01 1993  Doug Evans  (dje@canuck.cygnus.com)
 
 	* configure.in: Remove h8300h, we have multilib now.
