@@ -1,5 +1,9 @@
 Fri Jan 31 13:16:53 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* emultempl/sunos.em (gld${EMULATION_NAME}_find_so): Search for
+	".so" in the name, not ".so.".
+	(gld${EMULATION_NAME}_search_dir): Accept a plain .so file.
+
 	* Makefile.in (ld.info): Add -I$(srcdir).  From Alan Modra
 	<alan@spri.levels.unisa.edu.au>.
 
