@@ -167,6 +167,10 @@ case "${targ}" in
     targ_defvec=bfd_elf32_littlearm_vec
     targ_selvecs=bfd_elf32_bigarm_vec
     ;;
+  arm9e-*-elf)
+    targ_defvec=bfd_elf32_littlearm_vec
+    targ_selvecs=bfd_elf32_bigarm_vec
+    ;;
   arm-*-oabi)
     targ_defvec=bfd_elf32_littlearm_oabi_vec
     targ_selvecs=bfd_elf32_bigarm_oabi_vec
