@@ -908,6 +908,11 @@ install.all: install-no-fixedincludes
 		true ; \
 	fi
 
+# inet-install is used because the I*Net wants DejaGNU installed but
+# not built.
+inet-install:
+	$(MAKE) INSTALL_MODULES=`echo $(INSTALL_MODULES) | sed -e 's/install-dejagnu//'` install
+
 # install-no-fixedincludes is used because Cygnus can not distribute
 # the fixed header files.
 .PHONY: install-no-fixedincludes

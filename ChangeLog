@@ -1,5 +1,7 @@
 Fri May  3 08:57:17 1996  Tom Tromey  <tromey@lisa.cygnus.com>
 
+	* Makefile.in (inet-install): New target.
+
 	* Makefile.in (all-inet): Depend on all-tcl.
 	(all-inet): Depend on all-send-pr.
 
