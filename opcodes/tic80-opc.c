@@ -98,19 +98,29 @@ const struct tic80_operand tic80_operands[] =
 #define REG_DEST (REG_22 + 1)
   { 5, 27, NULL, NULL, TIC80_OPERAND_GPR },
 
-  /* Short signed offset in bits 14-0 */
+  /* Short signed PC word offset in bits 14-0 */
 
-#define OFF_SS (REG_DEST + 1)
-  { 15, 0, NULL, NULL, TIC80_OPERAND_RELATIVE | TIC80_OPERAND_SIGNED },
+#define OFF_SS_PC (REG_DEST + 1)
+  { 15, 0, NULL, NULL, TIC80_OPERAND_PCREL | TIC80_OPERAND_SIGNED },
 
-  /* Long signed offset in following 32 bit word */
+  /* Long signed PC word offset in following 32 bit word */
 
-#define OFF_SL (OFF_SS + 1)
-  {32, 0, NULL, NULL, TIC80_OPERAND_RELATIVE | TIC80_OPERAND_SIGNED },
+#define OFF_SL_PC (OFF_SS_PC + 1)
+  {32, 0, NULL, NULL, TIC80_OPERAND_PCREL | TIC80_OPERAND_SIGNED },
+
+  /* Short signed base relative byte offset in bits 14-0 */
+
+#define OFF_SS_BR (OFF_SL_PC + 1)
+  { 15, 0, NULL, NULL, TIC80_OPERAND_BASEREL | TIC80_OPERAND_SIGNED },
+
+  /* Long signed base relative byte offset in following 32 bit word */
+
+#define OFF_SL_BR (OFF_SS_BR + 1)
+  {32, 0, NULL, NULL, TIC80_OPERAND_BASEREL | TIC80_OPERAND_SIGNED },
 
   /* BITNUM in bits 31-27 */
 
-#define BITNUM (OFF_SL + 1)
+#define BITNUM (OFF_SL_BR + 1)
   { 5, 27, NULL, NULL, TIC80_OPERAND_BITNUM },
 
   /* Condition code in bits 31-27 */
@@ -128,10 +138,15 @@ const struct tic80_operand tic80_operands[] =
 #define CR_LI (CR_SI + 1)
   { 32, 0, NULL, NULL, TIC80_OPERAND_CR },
 
+  /* A base register in bits 26-22, enclosed in parens */
+
+#define REG_BASE (CR_LI + 1)
+  { 5, 22, NULL, NULL, TIC80_OPERAND_GPR | TIC80_OPERAND_PARENS },
+
   /* A base register in bits 26-22, enclosed in parens, with optional ":m"
      flag in bit 17 (short immediate instructions only) */
 
-#define REG_BASE_M_SI (CR_LI + 1)
+#define REG_BASE_M_SI (REG_BASE + 1)
   { 5, 22, NULL, NULL, TIC80_OPERAND_GPR | TIC80_OPERAND_PARENS | TIC80_OPERAND_M_SI },
 
   /* A base register in bits 26-22, enclosed in parens, with optional ":m"
@@ -225,6 +240,8 @@ const int tic80_num_operands = sizeof (tic80_operands)/sizeof(*tic80_operands);
 #define P1(x)		((x) << 5)
 
 
+/* The opcode table.  Formatted for better readability on a wide screen. */
+
 const struct tic80_opcode tic80_opcodes[] = {
 
   /* The "nop" instruction is really "rdcr 0,r0".  We put it first so that this
@@ -236,167 +253,164 @@ const struct tic80_opcode tic80_opcodes[] = {
   /* The "br" instruction is really "bbz target,r0,31".  We put it first so that
      this specific bit pattern will get disassembled as a br rather than bbz. */
 
-  {"br",	OP_SI(0x48),	0xFFFF8000,	0,		{OFF_SS}			},
-  {"br",	OP_LI(0x391),	0xFFFFF000,	0,		{OFF_SL}			},
+  {"br",	OP_SI(0x48),	0xFFFF8000,	0,		{OFF_SS_PC}			},
   {"br",	OP_REG(0x390),	0xFFFFF000,	0,		{REG_0}			},
+  {"br",	OP_LI(0x391),	0xFFFFF000,	0,		{OFF_SL_PC}			},
 
-  {"br.a",	OP_SI(0x49),	0xFFFF8000,	0,		{OFF_SS}			},
-  {"br.a",	OP_LI(0x393),	0xFFFFF000,	0,		{OFF_SL}			},
+  {"br.a",	OP_SI(0x49),	0xFFFF8000,	0,		{OFF_SS_PC}			},
   {"br.a",	OP_REG(0x392),	0xFFFFF000,	0,		{REG_0}			},
+  {"br.a",	OP_LI(0x393),	0xFFFFF000,	0,		{OFF_SL_PC}			},
 
   /* Signed integer ADD */
 
   {"add",	OP_SI(0x58),	MASK_SI,	FMT_SI,		{SSI, REG_22, REG_DEST}	},
-  {"add",	OP_LI(0x3B1),	MASK_LI,	FMT_LI,		{LSI, REG_22, REG_DEST}	},
   {"add",	OP_REG(0x3B0),	MASK_REG,	FMT_REG,	{REG_0, REG_22, REG_DEST}	},
+  {"add",	OP_LI(0x3B1),	MASK_LI,	FMT_LI,		{LSI, REG_22, REG_DEST}	},
 
   /* Unsigned integer ADD */
 
   {"addu",	OP_SI(0x59),	MASK_SI,	FMT_SI,		{SSI, REG_22, REG_DEST}	},
-  {"addu",	OP_LI(0x3B3),	MASK_LI,	FMT_LI,		{LSI, REG_22, REG_DEST}	},
   {"addu",	OP_REG(0x3B2),	MASK_REG,	FMT_REG,	{REG_0, REG_22, REG_DEST}	},
+  {"addu",	OP_LI(0x3B3),	MASK_LI,	FMT_LI,		{LSI, REG_22, REG_DEST}	},
 
   /* Bitwise AND */
 
   {"and",	OP_SI(0x11),	MASK_SI,	FMT_SI,		{SUBF, REG_22, REG_DEST}	},
-  {"and",	OP_LI(0x323),	MASK_LI,	FMT_LI,		{LUBF, REG_22, REG_DEST}	},
-  {"and",	OP_REG(0x322),	MASK_REG,	FMT_REG,	{REG_0, REG_22, REG_DEST}	},
-
   {"and.tt",	OP_SI(0x11),	MASK_SI,	FMT_SI,		{SUBF, REG_22, REG_DEST}	},
-  {"and.tt",	OP_LI(0x323),	MASK_LI,	FMT_LI,		{LUBF, REG_22, REG_DEST}	},
+
+  {"and",	OP_REG(0x322),	MASK_REG,	FMT_REG,	{REG_0, REG_22, REG_DEST}	},
   {"and.tt",	OP_REG(0x322),	MASK_REG,	FMT_REG,	{REG_0, REG_22, REG_DEST}	},
+
+  {"and",	OP_LI(0x323),	MASK_LI,	FMT_LI,		{LUBF, REG_22, REG_DEST}	},
+  {"and.tt",	OP_LI(0x323),	MASK_LI,	FMT_LI,		{LUBF, REG_22, REG_DEST}	},
 
   /* Bitwise AND with ones complement of both sources */
 
   {"and.ff",	OP_SI(0x18),	MASK_SI,	FMT_SI,		{SUBF, REG_22, REG_DEST}	},
-  {"and.ff",	OP_LI(0x331),	MASK_LI,	FMT_LI,		{LUBF, REG_22, REG_DEST}	},
   {"and.ff",	OP_REG(0x330),	MASK_REG,	FMT_REG,	{REG_0, REG_22, REG_DEST}	},
+  {"and.ff",	OP_LI(0x331),	MASK_LI,	FMT_LI,		{LUBF, REG_22, REG_DEST}	},
 
   /* Bitwise AND with ones complement of source 1 */
 
   {"and.ft",	OP_SI(0x14),	MASK_SI,	FMT_SI,		{SUBF, REG_22, REG_DEST}	},
-  {"and.ft",	OP_LI(0x329),	MASK_LI,	FMT_LI,		{LUBF, REG_22, REG_DEST}	},
   {"and.ft",	OP_REG(0x328),	MASK_REG,	FMT_REG,	{REG_0, REG_22, REG_DEST}	},
+  {"and.ft",	OP_LI(0x329),	MASK_LI,	FMT_LI,		{LUBF, REG_22, REG_DEST}	},
 
   /* Bitwise AND with ones complement of source 2 */
 
   {"and.tf",	OP_SI(0x12),	MASK_SI,	FMT_SI,		{SUBF, REG_22, REG_DEST}	},
-  {"and.tf",	OP_LI(0x325),	MASK_LI,	FMT_LI,		{LUBF, REG_22, REG_DEST}	},
   {"and.tf",	OP_REG(0x324),	MASK_REG,	FMT_REG,	{REG_0, REG_22, REG_DEST}	},
+  {"and.tf",	OP_LI(0x325),	MASK_LI,	FMT_LI,		{LUBF, REG_22, REG_DEST}	},
 
   /* Branch Bit One - nonannulled */
 
-  {"bbo",	OP_SI(0x4A),	MASK_SI,	FMT_SI, 	{OFF_SS, REG_22, BITNUM}	},
-  {"bbo",	OP_LI(0x395),	MASK_LI,	FMT_LI, 	{OFF_SL, REG_22, BITNUM}	},
+  {"bbo",	OP_SI(0x4A),	MASK_SI,	FMT_SI, 	{OFF_SS_PC, REG_22, BITNUM}	},
   {"bbo",	OP_REG(0x394),	MASK_REG,	FMT_REG, 	{REG_0, REG_22, BITNUM}	},
+  {"bbo",	OP_LI(0x395),	MASK_LI,	FMT_LI, 	{OFF_SL_PC, REG_22, BITNUM}	},
 
   /* Branch Bit One - annulled */
 
-  {"bbo.a",	OP_SI(0x4B),	MASK_SI,	FMT_SI, 	{OFF_SS, REG_22, BITNUM}	},
-  {"bbo.a",	OP_LI(0x397),	MASK_LI,	FMT_LI, 	{OFF_SL, REG_22, BITNUM}	},
+  {"bbo.a",	OP_SI(0x4B),	MASK_SI,	FMT_SI, 	{OFF_SS_PC, REG_22, BITNUM}	},
   {"bbo.a",	OP_REG(0x396),	MASK_REG,	FMT_REG, 	{REG_0, REG_22, BITNUM}	},
+  {"bbo.a",	OP_LI(0x397),	MASK_LI,	FMT_LI, 	{OFF_SL_PC, REG_22, BITNUM}	},
 
   /* Branch Bit Zero - nonannulled */
 
-  {"bbz",	OP_SI(0x48),	MASK_SI,	FMT_SI, 	{OFF_SS, REG_22, BITNUM}	},
-  {"bbz",	OP_LI(0x391),	MASK_LI,	FMT_LI, 	{OFF_SL, REG_22, BITNUM}	},
+  {"bbz",	OP_SI(0x48),	MASK_SI,	FMT_SI, 	{OFF_SS_PC, REG_22, BITNUM}	},
   {"bbz",	OP_REG(0x390),	MASK_REG,	FMT_REG, 	{REG_0, REG_22, BITNUM}	},
+  {"bbz",	OP_LI(0x391),	MASK_LI,	FMT_LI, 	{OFF_SL_PC, REG_22, BITNUM}	},
 
   /* Branch Bit Zero - annulled */
 
-  {"bbz.a",	OP_SI(0x49),	MASK_SI,	FMT_SI, 	{OFF_SS, REG_22, BITNUM}	},
-  {"bbz.a",	OP_LI(0x393),	MASK_LI,	FMT_LI, 	{OFF_SL, REG_22, BITNUM}	},
+  {"bbz.a",	OP_SI(0x49),	MASK_SI,	FMT_SI, 	{OFF_SS_PC, REG_22, BITNUM}	},
   {"bbz.a",	OP_REG(0x392),	MASK_REG,	FMT_REG, 	{REG_0, REG_22, BITNUM}	},
+  {"bbz.a",	OP_LI(0x393),	MASK_LI,	FMT_LI, 	{OFF_SL_PC, REG_22, BITNUM}	},
 
   /* Branch Conditional - nonannulled */
 
-  {"bcnd",	OP_SI(0x4C),	MASK_SI,	FMT_SI, 	{OFF_SS, REG_22, CC}	},
-  {"bcnd",	OP_LI(0x399),	MASK_LI,	FMT_LI, 	{OFF_SL, REG_22, CC}	},
+  {"bcnd",	OP_SI(0x4C),	MASK_SI,	FMT_SI, 	{OFF_SS_PC, REG_22, CC}	},
   {"bcnd",	OP_REG(0x398),	MASK_REG,	FMT_REG, 	{REG_0, REG_22, CC}	},
+  {"bcnd",	OP_LI(0x399),	MASK_LI,	FMT_LI, 	{OFF_SL_PC, REG_22, CC}	},
 
   /* Branch Conditional - annulled */
 
-  {"bcnd.a",	OP_SI(0x4D),	MASK_SI,	FMT_SI, 	{OFF_SS, REG_22, CC}	},
-  {"bcnd.a",	OP_LI(0x39B),	MASK_LI,	FMT_LI, 	{OFF_SL, REG_22, CC}	},
+  {"bcnd.a",	OP_SI(0x4D),	MASK_SI,	FMT_SI, 	{OFF_SS_PC, REG_22, CC}	},
   {"bcnd.a",	OP_REG(0x39A),	MASK_REG,	FMT_REG, 	{REG_0, REG_22, CC}	},
+  {"bcnd.a",	OP_LI(0x39B),	MASK_LI,	FMT_LI, 	{OFF_SL_PC, REG_22, CC}	},
 
   /* Branch Control Register */
 
   {"brcr",	OP_SI(0x6),	MASK_SI,	FMT_SI,		{CR_SI}			},
-  {"brcr",	OP_LI(0x30D),	MASK_LI,	FMT_LI,		{CR_LI}			},
   {"brcr",	OP_REG(0x30C),	MASK_REG,	FMT_REG,	{REG_0}			},
+  {"brcr",	OP_LI(0x30D),	MASK_LI,	FMT_LI,		{CR_LI}			},
 
   /* Branch and save return - nonannulled */
 
-  {"bsr",	OP_SI(0x40),	MASK_SI,	FMT_SI, 	{OFF_SS, REG_DEST}	},
-  {"bsr",	OP_LI(0x381),	MASK_LI,	FMT_LI, 	{OFF_SL, REG_DEST}	},
+  {"bsr",	OP_SI(0x40),	MASK_SI,	FMT_SI, 	{OFF_SS_PC, REG_DEST}	},
   {"bsr",	OP_REG(0x380),	MASK_REG,	FMT_REG, 	{REG_0, REG_DEST}	},
+  {"bsr",	OP_LI(0x381),	MASK_LI,	FMT_LI, 	{OFF_SL_PC, REG_DEST}	},
 
   /* Branch and save return - annulled */
 
-  {"bsr.a",	OP_SI(0x41),	MASK_SI,	FMT_SI, 	{OFF_SS, REG_DEST}	},
-  {"bsr.a",	OP_LI(0x383),	MASK_LI,	FMT_LI, 	{OFF_SL, REG_DEST}	},
+  {"bsr.a",	OP_SI(0x41),	MASK_SI,	FMT_SI, 	{OFF_SS_PC, REG_DEST}	},
   {"bsr.a",	OP_REG(0x382),	MASK_REG,	FMT_REG, 	{REG_0, REG_DEST}	},
+  {"bsr.a",	OP_LI(0x383),	MASK_LI,	FMT_LI, 	{OFF_SL_PC, REG_DEST}	},
 
   /* Send command */
 
   {"cmnd",	OP_SI(0x2),	MASK_SI,	FMT_SI, 	{SUI}			},
-  {"cmnd",	OP_LI(0x305),	MASK_LI,	FMT_LI, 	{LUI}			},
   {"cmnd",	OP_REG(0x304),	MASK_REG,	FMT_REG, 	{REG_0}			},
+  {"cmnd",	OP_LI(0x305),	MASK_LI,	FMT_LI, 	{LUI}			},
 
   /* Integer compare */
 
   {"cmp",	OP_SI(0x50),	MASK_SI,	FMT_SI, 	{SSI, REG_22, REG_DEST}		},
-  {"cmp",	OP_LI(0x3A1),	MASK_LI,	FMT_LI, 	{LSI, REG_22, REG_DEST}		},
   {"cmp",	OP_REG(0x3A0),	MASK_REG,	FMT_REG, 	{REG_0, REG_22, REG_DEST}	},
+  {"cmp",	OP_LI(0x3A1),	MASK_LI,	FMT_LI, 	{LSI, REG_22, REG_DEST}		},
 
   /* Flush data cache subblock - don't clear subblock preset flag */
 
   {"dcachec",	OP_SI(0x38),	F(1) | (MASK_SI & ~M_SI(1)),			FMT_SI, {SSI, REG_BASE_M_SI}	},
-  {"dcachec",	OP_LI(0x371),	F(1) | (MASK_LI & ~M_LI(1)) | S(1) | D(1),	FMT_LI, {LSI, REG_BASE_M_LI}	},
   {"dcachec",	OP_REG(0x370),	F(1) | (MASK_REG & ~M_REG(1)) | S(1) | D(1),	FMT_REG, {REG_0, REG_BASE_M_LI}	},
+  {"dcachec",	OP_LI(0x371),	F(1) | (MASK_LI & ~M_LI(1)) | S(1) | D(1),	FMT_LI, {LSI, REG_BASE_M_LI}	},
 
   /* Flush data cache subblock - clear subblock preset flag */
 
   {"dcachef",	OP_SI(0x38) | F(1),	F(1) | (MASK_SI & ~M_SI(1)),			FMT_SI, {SSI, REG_BASE_M_SI}	},
-  {"dcachef",	OP_LI(0x371) | F(1),	F(1) | (MASK_LI & ~M_LI(1)) | S(1) | D(1),	FMT_LI, {LSI, REG_BASE_M_LI}	},
   {"dcachef",	OP_REG(0x370) | F(1),	F(1) | (MASK_REG & ~M_REG(1)) | S(1) | D(1),	FMT_REG, {REG_0, REG_BASE_M_LI}	},
+  {"dcachef",	OP_LI(0x371) | F(1),	F(1) | (MASK_LI & ~M_LI(1)) | S(1) | D(1),	FMT_LI, {LSI, REG_BASE_M_LI}	},
 
   /* Direct load signed data into register */
 
-  {"dld.b",	OP_LI(0x341) | D(1),	(MASK_LI & ~M_REG(1)) | D(1),	FMT_LI,		{LSI_SCALED, REG_BASE_M_LI, REG_DEST}	},
   {"dld.b",	OP_REG(0x340) | D(1),	(MASK_REG & ~M_REG(1)) | D(1),	FMT_REG,	{REG_SCALED, REG_BASE_M_LI, REG_DEST}	},
-
-  {"dld.h",	OP_LI(0x343) | D(1),	(MASK_LI & ~M_REG(1)) | D(1),	FMT_LI,		{LSI_SCALED, REG_BASE_M_LI, REG_DEST}	},
   {"dld.h",	OP_REG(0x342) | D(1),	(MASK_REG & ~M_REG(1)) | D(1),	FMT_REG,	{REG_SCALED, REG_BASE_M_LI, REG_DEST}	},
-
-  {"dld",	OP_LI(0x345) | D(1),	(MASK_LI & ~M_REG(1)) | D(1),	FMT_LI,		{LSI_SCALED, REG_BASE_M_LI, REG_DEST}	},
   {"dld",	OP_REG(0x344) | D(1),	(MASK_REG & ~M_REG(1)) | D(1),	FMT_REG,	{REG_SCALED, REG_BASE_M_LI, REG_DEST}	},
-
-  {"dld.d",	OP_LI(0x347) | D(1),	(MASK_LI & ~M_REG(1)) | D(1),	FMT_LI,		{LSI_SCALED, REG_BASE_M_LI, REG_DEST}	},
   {"dld.d",	OP_REG(0x346) | D(1),	(MASK_REG & ~M_REG(1)) | D(1),	FMT_REG,	{REG_SCALED, REG_BASE_M_LI, REG_DEST}	},
+
+  {"dld.b",	OP_LI(0x341) | D(1),	(MASK_LI & ~M_REG(1)) | D(1),	FMT_LI,		{LSI_SCALED, REG_BASE_M_LI, REG_DEST}	},
+  {"dld.h",	OP_LI(0x343) | D(1),	(MASK_LI & ~M_REG(1)) | D(1),	FMT_LI,		{LSI_SCALED, REG_BASE_M_LI, REG_DEST}	},
+  {"dld",	OP_LI(0x345) | D(1),	(MASK_LI & ~M_REG(1)) | D(1),	FMT_LI,		{LSI_SCALED, REG_BASE_M_LI, REG_DEST}	},
+  {"dld.d",	OP_LI(0x347) | D(1),	(MASK_LI & ~M_REG(1)) | D(1),	FMT_LI,		{LSI_SCALED, REG_BASE_M_LI, REG_DEST}	},
 
   /* Direct load unsigned data into register */
 
-  {"dld.ub",	OP_LI(0x351) | D(1),	(MASK_LI & ~M_REG(1)) | D(1),	FMT_LI,		{LSI_SCALED, REG_BASE_M_LI, REG_DEST}	},
   {"dld.ub",	OP_REG(0x350) | D(1),	(MASK_REG & ~M_REG(1)) | D(1),	FMT_REG,	{REG_SCALED, REG_BASE_M_LI, REG_DEST}	},
-
-  {"dld.uh",	OP_LI(0x353) | D(1),	(MASK_LI & ~M_REG(1)) | D(1),	FMT_LI,		{LSI_SCALED, REG_BASE_M_LI, REG_DEST}	},
   {"dld.uh",	OP_REG(0x352) | D(1),	(MASK_REG & ~M_REG(1)) | D(1),	FMT_REG,	{REG_SCALED, REG_BASE_M_LI, REG_DEST}	},
+
+  {"dld.ub",	OP_LI(0x351) | D(1),	(MASK_LI & ~M_REG(1)) | D(1),	FMT_LI,		{LSI_SCALED, REG_BASE_M_LI, REG_DEST}	},
+  {"dld.uh",	OP_LI(0x353) | D(1),	(MASK_LI & ~M_REG(1)) | D(1),	FMT_LI,		{LSI_SCALED, REG_BASE_M_LI, REG_DEST}	},
 
   /* Direct store data into memory */
 
-  {"dst.b",	OP_LI(0x361) | D(1),	(MASK_LI & ~M_REG(1)) | D(1),	FMT_LI,		{LSI_SCALED, REG_BASE_M_LI, REG_DEST}	},
   {"dst.b",	OP_REG(0x360) | D(1),	(MASK_REG & ~M_REG(1)) | D(1),	FMT_REG,	{REG_SCALED, REG_BASE_M_LI, REG_DEST}	},
-
-  {"dst.h",	OP_LI(0x363) | D(1),	(MASK_LI & ~M_REG(1)) | D(1),	FMT_LI,		{LSI_SCALED, REG_BASE_M_LI, REG_DEST}	},
   {"dst.h",	OP_REG(0x362) | D(1),	(MASK_REG & ~M_REG(1)) | D(1),	FMT_REG,	{REG_SCALED, REG_BASE_M_LI, REG_DEST}	},
-
-  {"dst",	OP_LI(0x365) | D(1),	(MASK_LI & ~M_REG(1)) | D(1),	FMT_LI,		{LSI_SCALED, REG_BASE_M_LI, REG_DEST}	},
   {"dst",	OP_REG(0x364) | D(1),	(MASK_REG & ~M_REG(1)) | D(1),	FMT_REG,	{REG_SCALED, REG_BASE_M_LI, REG_DEST}	},
-
-  {"dst.d",	OP_LI(0x367) | D(1),	(MASK_LI & ~M_REG(1)) | D(1),	FMT_LI,		{LSI_SCALED, REG_BASE_M_LI, REG_DEST}	},
   {"dst.d",	OP_REG(0x366) | D(1),	(MASK_REG & ~M_REG(1)) | D(1),	FMT_REG,	{REG_SCALED, REG_BASE_M_LI, REG_DEST}	},
+
+  {"dst.b",	OP_LI(0x361) | D(1),	(MASK_LI & ~M_REG(1)) | D(1),	FMT_LI,		{LSI_SCALED, REG_BASE_M_LI, REG_DEST}	},
+  {"dst.h",	OP_LI(0x363) | D(1),	(MASK_LI & ~M_REG(1)) | D(1),	FMT_LI,		{LSI_SCALED, REG_BASE_M_LI, REG_DEST}	},
+  {"dst",	OP_LI(0x365) | D(1),	(MASK_LI & ~M_REG(1)) | D(1),	FMT_LI,		{LSI_SCALED, REG_BASE_M_LI, REG_DEST}	},
+  {"dst.d",	OP_LI(0x367) | D(1),	(MASK_LI & ~M_REG(1)) | D(1),	FMT_LI,		{LSI_SCALED, REG_BASE_M_LI, REG_DEST}	},
 
   /* Emulation stop */
 
@@ -405,26 +419,10 @@ const struct tic80_opcode tic80_opcodes[] = {
   /* Emulation trap */
 
   {"etrap",	OP_SI(0x1) | E(1),	MASK_SI | E(1),		FMT_SI,		{SUI}	},
-  {"etrap",	OP_LI(0x303) | E(1),	MASK_LI | E(1),		FMT_LI,		{LUI}	},
   {"etrap",	OP_REG(0x302) | E(1),	MASK_REG | E(1),	FMT_REG,	{REG_0}	},
-
-  /* Extract signed field (actually an sr.ds instruction) */
-
-  {"exts",	OP_SI(0xA) | i(0) | n(1),	MASK_SI | i(1) | n(1),	FMT_SI, 	{ROTATE, ENDMASK, REG_22, REG_DEST}	},
-  {"exts",	OP_REG(0x314) | i(0) | n(1),	MASK_REG | i(1) | n(1),	FMT_REG, 	{REG_0, ENDMASK, REG_22, REG_DEST}	},
-
-  /* Extract unsigned field (actually an sr.dz instruction */
-
-  {"extu",	OP_SI(0x8) | i(0) | n(1),	MASK_SI | i(1) | n(1),	FMT_SI, 	{ROTATE, ENDMASK, REG_22, REG_DEST}	},
-  {"extu",	OP_REG(0x310) | i(0) | n(1),	MASK_REG | i(1) | n(1),	FMT_REG, 	{REG_0, ENDMASK, REG_22, REG_DEST}	},
+  {"etrap",	OP_LI(0x303) | E(1),	MASK_LI | E(1),		FMT_LI,		{LUI}	},
 
   /* Floating-point addition */
-
-  {"fadd.sss",	OP_LI(0x3E1) | PD(0) | P2(0) | P1(0),	MASK_LI | PD(3) | P2(3) | P1(3), FMT_LI, {SPFI, REG_22, REG_DEST}	},
-  {"fadd.ssd",	OP_LI(0x3E1) | PD(1) | P2(0) | P1(0),	MASK_LI | PD(3) | P2(3) | P1(3), FMT_LI, {SPFI, REG_22, REG_DEST}	},
-  {"fadd.sdd",	OP_LI(0x3E1) | PD(1) | P2(1) | P1(0),	MASK_LI | PD(3) | P2(3) | P1(3), FMT_LI, {SPFI, REG_22, REG_DEST}	},
-  {"fadd.dsd",	OP_LI(0x3E1) | PD(1) | P2(0) | P1(1),	MASK_LI | PD(3) | P2(3) | P1(3), FMT_LI, {SPFI, REG_22, REG_DEST}	},
-  {"fadd.ddd",	OP_LI(0x3E1) | PD(1) | P2(1) | P1(1),	MASK_LI | PD(3) | P2(3) | P1(3), FMT_LI, {SPFI, REG_22, REG_DEST}	},
 
   {"fadd.sss",	OP_REG(0x3E0) | PD(0) | P2(0) | P1(0),	MASK_REG | PD(3) | P2(3) | P1(3), FMT_REG, {REG_0, REG_22, REG_DEST}	},
   {"fadd.ssd",	OP_REG(0x3E0) | PD(1) | P2(0) | P1(0),	MASK_REG | PD(3) | P2(3) | P1(3), FMT_REG, {REG_0, REG_22, REG_DEST}	},
@@ -432,25 +430,25 @@ const struct tic80_opcode tic80_opcodes[] = {
   {"fadd.dsd",	OP_REG(0x3E0) | PD(1) | P2(0) | P1(1),	MASK_REG | PD(3) | P2(3) | P1(3), FMT_REG, {REG_0, REG_22, REG_DEST}	},
   {"fadd.ddd",	OP_REG(0x3E0) | PD(1) | P2(1) | P1(1),	MASK_REG | PD(3) | P2(3) | P1(3), FMT_REG, {REG_0, REG_22, REG_DEST}	},
 
-  /* Floating point compare */
+  {"fadd.sss",	OP_LI(0x3E1) | PD(0) | P2(0) | P1(0),	MASK_LI | PD(3) | P2(3) | P1(3), FMT_LI, {SPFI, REG_22, REG_DEST}	},
+  {"fadd.ssd",	OP_LI(0x3E1) | PD(1) | P2(0) | P1(0),	MASK_LI | PD(3) | P2(3) | P1(3), FMT_LI, {SPFI, REG_22, REG_DEST}	},
+  {"fadd.sdd",	OP_LI(0x3E1) | PD(1) | P2(1) | P1(0),	MASK_LI | PD(3) | P2(3) | P1(3), FMT_LI, {SPFI, REG_22, REG_DEST}	},
+  {"fadd.dsd",	OP_LI(0x3E1) | PD(1) | P2(0) | P1(1),	MASK_LI | PD(3) | P2(3) | P1(3), FMT_LI, {SPFI, REG_22, REG_DEST}	},
+  {"fadd.ddd",	OP_LI(0x3E1) | PD(1) | P2(1) | P1(1),	MASK_LI | PD(3) | P2(3) | P1(3), FMT_LI, {SPFI, REG_22, REG_DEST}	},
 
-  {"fcmp.ss",	OP_LI(0x3EB) | PD(0) | P2(0) | P1(0),	MASK_LI | PD(3) | P2(3) | P1(3),  FMT_REG, {SPFI, REG_22, REG_DEST}	},
-  {"fcmp.sd",	OP_LI(0x3EB) | PD(0) | P2(1) | P1(0),	MASK_LI | PD(3) | P2(3) | P1(3),  FMT_REG, {SPFI, REG_22, REG_DEST}	},
-  {"fcmp.ds",	OP_LI(0x3EB) | PD(0) | P2(0) | P1(1),	MASK_LI | PD(3) | P2(3) | P1(3),  FMT_REG, {SPFI, REG_22, REG_DEST}	},
-  {"fcmp.dd",	OP_LI(0x3EB) | PD(0) | P2(1) | P1(1),	MASK_LI | PD(3) | P2(3) | P1(3),  FMT_REG, {SPFI, REG_22, REG_DEST}	},
+  /* Floating point compare */
 
   {"fcmp.ss",	OP_REG(0x3EA) | PD(0) | P2(0) | P1(0),	MASK_REG | PD(3) | P2(3) | P1(3),  FMT_REG, {REG_0, REG_22, REG_DEST}	},
   {"fcmp.sd",	OP_REG(0x3EA) | PD(0) | P2(1) | P1(0),	MASK_REG | PD(3) | P2(3) | P1(3),  FMT_REG, {REG_0, REG_22, REG_DEST}	},
   {"fcmp.ds",	OP_REG(0x3EA) | PD(0) | P2(0) | P1(1),	MASK_REG | PD(3) | P2(3) | P1(3),  FMT_REG, {REG_0, REG_22, REG_DEST}	},
   {"fcmp.dd",	OP_REG(0x3EA) | PD(0) | P2(1) | P1(1),	MASK_REG | PD(3) | P2(3) | P1(3),  FMT_REG, {REG_0, REG_22, REG_DEST}	},
 
-  /* Floating point divide */
+  {"fcmp.ss",	OP_LI(0x3EB) | PD(0) | P2(0) | P1(0),	MASK_LI | PD(3) | P2(3) | P1(3),  FMT_REG, {SPFI, REG_22, REG_DEST}	},
+  {"fcmp.sd",	OP_LI(0x3EB) | PD(0) | P2(1) | P1(0),	MASK_LI | PD(3) | P2(3) | P1(3),  FMT_REG, {SPFI, REG_22, REG_DEST}	},
+  {"fcmp.ds",	OP_LI(0x3EB) | PD(0) | P2(0) | P1(1),	MASK_LI | PD(3) | P2(3) | P1(3),  FMT_REG, {SPFI, REG_22, REG_DEST}	},
+  {"fcmp.dd",	OP_LI(0x3EB) | PD(0) | P2(1) | P1(1),	MASK_LI | PD(3) | P2(3) | P1(3),  FMT_REG, {SPFI, REG_22, REG_DEST}	},
 
-  {"fdiv.sss",	OP_LI(0x3E7) | PD(0) | P2(0) | P1(0),	MASK_LI | PD(3) | P2(3) | P1(3), FMT_LI, {SPFI, REG_22, REG_DEST}	},
-  {"fdiv.ssd",	OP_LI(0x3E7) | PD(1) | P2(0) | P1(0),	MASK_LI | PD(3) | P2(3) | P1(3), FMT_LI, {SPFI, REG_22, REG_DEST}	},
-  {"fdiv.sdd",	OP_LI(0x3E7) | PD(1) | P2(1) | P1(0),	MASK_LI | PD(3) | P2(3) | P1(3), FMT_LI, {SPFI, REG_22, REG_DEST}	},
-  {"fdiv.dsd",	OP_LI(0x3E7) | PD(1) | P2(0) | P1(1),	MASK_LI | PD(3) | P2(3) | P1(3), FMT_LI, {SPFI, REG_22, REG_DEST}	},
-  {"fdiv.ddd",	OP_LI(0x3E7) | PD(1) | P2(1) | P1(1),	MASK_LI | PD(3) | P2(3) | P1(3), FMT_LI, {SPFI, REG_22, REG_DEST}	},
+  /* Floating point divide */
 
   {"fdiv.sss",	OP_REG(0x3E6) | PD(0) | P2(0) | P1(0),	MASK_REG | PD(3) | P2(3) | P1(3), FMT_REG, {REG_0, REG_22, REG_DEST}	},
   {"fdiv.ssd",	OP_REG(0x3E6) | PD(1) | P2(0) | P1(0),	MASK_REG | PD(3) | P2(3) | P1(3), FMT_REG, {REG_0, REG_22, REG_DEST}	},
@@ -458,83 +456,334 @@ const struct tic80_opcode tic80_opcodes[] = {
   {"fdiv.dsd",	OP_REG(0x3E6) | PD(1) | P2(0) | P1(1),	MASK_REG | PD(3) | P2(3) | P1(3), FMT_REG, {REG_0, REG_22, REG_DEST}	},
   {"fdiv.ddd",	OP_REG(0x3E6) | PD(1) | P2(1) | P1(1),	MASK_REG | PD(3) | P2(3) | P1(3), FMT_REG, {REG_0, REG_22, REG_DEST}	},
 
-  /* WORK IN PROGRESS BELOW THIS POINT */
+  {"fdiv.sss",	OP_LI(0x3E7) | PD(0) | P2(0) | P1(0),	MASK_LI | PD(3) | P2(3) | P1(3), FMT_LI, {SPFI, REG_22, REG_DEST}	},
+  {"fdiv.ssd",	OP_LI(0x3E7) | PD(1) | P2(0) | P1(0),	MASK_LI | PD(3) | P2(3) | P1(3), FMT_LI, {SPFI, REG_22, REG_DEST}	},
+  {"fdiv.sdd",	OP_LI(0x3E7) | PD(1) | P2(1) | P1(0),	MASK_LI | PD(3) | P2(3) | P1(3), FMT_LI, {SPFI, REG_22, REG_DEST}	},
+  {"fdiv.dsd",	OP_LI(0x3E7) | PD(1) | P2(0) | P1(1),	MASK_LI | PD(3) | P2(3) | P1(3), FMT_LI, {SPFI, REG_22, REG_DEST}	},
+  {"fdiv.ddd",	OP_LI(0x3E7) | PD(1) | P2(1) | P1(1),	MASK_LI | PD(3) | P2(3) | P1(3), FMT_LI, {SPFI, REG_22, REG_DEST}	},
 
-  {"illop0",	OP_SI(0),	MASK_SI,	FMT_SI,		FIXME},
+  /* Floating point multiply */
 
-  {"ld",	OP_LI(0x345),	MASK_LI & ~M_LI(1),	FMT_LI,		FIXME},
-  {"ld",	OP_REG(0x344),	MASK_REG & ~M_REG(1),	FMT_REG,	FIXME},
-  {"ld",	OP_SI(0x22),	MASK_SI & ~M_SI(1),	FMT_SI,		FIXME},
-  {"ld.b",	OP_LI(0x341),	MASK_LI & ~M_LI(1),	FMT_LI,		FIXME},
-  {"ld.b",	OP_REG(0x340),	MASK_REG & ~M_REG(1),	FMT_REG,	FIXME},
-  {"ld.b",	OP_SI(0x20),	MASK_SI & ~M_SI(1),	FMT_SI,		FIXME},
-  {"ld.d",	OP_LI(0x347),	MASK_LI & ~M_LI(1),	FMT_LI,		FIXME},
-  {"ld.d",	OP_REG(0x346),	MASK_REG & ~M_REG(1),	FMT_REG,	FIXME},
-  {"ld.d",	OP_SI(0x23),	MASK_SI & ~M_SI(1),	FMT_SI,		FIXME},
-  {"ld.h",	OP_LI(0x343),	MASK_LI & ~M_LI(1),	FMT_LI,		FIXME},
-  {"ld.h",	OP_REG(0x342),	MASK_REG & ~M_REG(1),	FMT_REG,	FIXME},
-  {"ld.h",	OP_SI(0x21),	MASK_SI & ~M_SI(1),	FMT_SI,		FIXME},
-  {"ld.u",	OP_LI(0x355),	MASK_LI & ~M_LI(1),	FMT_LI,		FIXME},
-  {"ld.u",	OP_REG(0x354),	MASK_REG & ~M_REG(1),	FMT_REG,	FIXME},
-  {"ld.u",	OP_SI(0x2A),	MASK_SI & ~M_SI(1),	FMT_SI,		FIXME},
-  {"ld.ub",	OP_LI(0x351),	MASK_LI & ~M_LI(1),	FMT_LI,		FIXME},
-  {"ld.ub",	OP_REG(0x350),	MASK_REG & ~M_REG(1),	FMT_REG,	FIXME},
-  {"ld.ub",	OP_SI(0x28),	MASK_SI & ~M_SI(1),	FMT_SI,		FIXME},
-  {"ld.ud",	OP_LI(0x357),	MASK_LI & ~M_LI(1),	FMT_LI,		FIXME},
-  {"ld.ud",	OP_REG(0x356),	MASK_REG & ~M_REG(1),	FMT_REG,	FIXME},
-  {"ld.ud",	OP_SI(0x2B),	MASK_SI & ~M_SI(1),	FMT_SI,		FIXME},
-  {"ld.uh",	OP_LI(0x353),	MASK_LI & ~M_LI(1),	FMT_LI,		FIXME},
-  {"ld.uh",	OP_REG(0x352),	MASK_REG & ~M_REG(1),	FMT_REG,	FIXME},
-  {"ld.uh",	OP_SI(0x29),	MASK_SI & ~M_SI(1),	FMT_SI,		FIXME},
-  {"or.ff",	OP_LI(0x33D),	MASK_LI,	FMT_LI,		FIXME},
-  {"or.ff",	OP_REG(0x33C),	MASK_REG,	FMT_REG,	FIXME},
-  {"or.ff",	OP_SI(0x1E),	MASK_SI,	FMT_SI,		FIXME},
-  {"or.ft",	OP_LI(0x33B),	MASK_LI,	FMT_LI,		FIXME},
-  {"or.ft",	OP_REG(0x33A),	MASK_REG,	FMT_REG,	FIXME},
-  {"or.ft",	OP_SI(0x1D),	MASK_SI,	FMT_SI,		FIXME},
-  {"or.tf",	OP_LI(0x337),	MASK_LI,	FMT_LI,		FIXME},
-  {"or.tf",	OP_REG(0x336),	MASK_REG,	FMT_REG,	FIXME},
-  {"or.tf",	OP_SI(0x1B),	MASK_SI,	FMT_SI,		FIXME},
-  {"or.tt",	OP_LI(0x32F),	MASK_LI,	FMT_LI,		FIXME},
-  {"or.tt",	OP_REG(0x32E),	MASK_REG,	FMT_REG,	FIXME},
-  {"or.tt",	OP_SI(0x17),	MASK_SI,	FMT_SI,		FIXME},
-  {"rdcr",	OP_LI(0x309),	MASK_LI,	FMT_LI,		FIXME},
-  {"rdcr",	OP_REG(0x308),	MASK_REG,	FMT_REG,	FIXME},
-  {"rdcr",	OP_SI(0x4),	MASK_SI,	FMT_SI,		FIXME},
-  {"shift.dm",	OP_REG(0x312),	MASK_REG,	FMT_REG,	FIXME},
-  {"shift.dm",	OP_SI(0x9),	MASK_SI,	FMT_SI,		FIXME},
-  {"shift.ds",	OP_REG(0x314),	MASK_REG,	FMT_REG,	FIXME},
-  {"shift.ds",	OP_SI(0xA),	MASK_SI,	FMT_SI,		FIXME},
-  {"shift.dz",	OP_REG(0x310),	MASK_REG,	FMT_REG,	FIXME},
-  {"shift.dz",	OP_SI(0x8),	MASK_SI,	FMT_SI,		FIXME},
-  {"shift.em",	OP_REG(0x318),	MASK_REG,	FMT_REG,	FIXME},
-  {"shift.em",	OP_SI(0xC),	MASK_SI,	FMT_SI,		FIXME},
-  {"shift.es",	OP_REG(0x31A),	MASK_REG,	FMT_REG,	FIXME},
-  {"shift.es",	OP_SI(0xD),	MASK_SI,	FMT_SI,		FIXME},
-  {"shift.ez",	OP_REG(0x316),	MASK_REG,	FMT_REG,	FIXME},
-  {"shift.ez",	OP_SI(0xB),	MASK_SI,	FMT_SI,		FIXME},
-  {"shift.im",	OP_REG(0x31E),	MASK_REG,	FMT_REG,	FIXME},
-  {"shift.im",	OP_SI(0xF),	MASK_SI,	FMT_SI,		FIXME},
-  {"shift.iz",	OP_REG(0x31C),	MASK_REG,	FMT_REG,	FIXME},
-  {"shift.iz",	OP_SI(0xE),	MASK_SI,	FMT_SI,		FIXME},
-  {"st",	OP_LI(0x365),	MASK_LI & ~M_LI(1),	FMT_LI,		FIXME},
-  {"st",	OP_REG(0x364),	MASK_REG & ~M_REG(1),	FMT_REG,	FIXME},
-  {"st",	OP_SI(0x32),	MASK_SI & ~M_SI(1),	FMT_SI,		FIXME},
-  {"st.b",	OP_LI(0x361),	MASK_LI & ~M_LI(1),	FMT_LI,		FIXME},
-  {"st.b",	OP_REG(0x360),	MASK_REG & ~M_REG(1),	FMT_REG,	FIXME},
-  {"st.b",	OP_SI(0x30),	MASK_SI & ~M_SI(1),	FMT_SI,		FIXME},
-  {"st.d",	OP_LI(0x367),	MASK_LI & ~M_LI(1),	FMT_LI,		FIXME},
-  {"st.d",	OP_REG(0x366),	MASK_REG & ~M_REG(1),	FMT_REG,	FIXME},
-  {"st.d",	OP_SI(0x33),	MASK_SI & ~M_SI(1),	FMT_SI,		FIXME},
-  {"st.h",	OP_LI(0x363),	MASK_LI & ~M_LI(1),	FMT_LI,		FIXME},
-  {"st.h",	OP_REG(0x362),	MASK_REG & ~M_REG(1),	FMT_REG,	FIXME},
-  {"st.h",	OP_SI(0x31),	MASK_SI & ~M_SI(1),	FMT_SI,		FIXME},
-  {"swcr",	OP_LI(0x30B),	MASK_LI,	FMT_LI,		FIXME},
-  {"swcr",	OP_REG(0x30A),	MASK_REG,	FMT_REG,	FIXME},
-  {"swcr",	OP_SI(0x5),	MASK_SI,	FMT_SI,		FIXME},
-  {"trap",	OP_LI(0x303),	MASK_LI,	FMT_LI,		FIXME},
-  {"trap",	OP_REG(0x302),	MASK_REG,	FMT_REG,	FIXME},
-  {"trap",	OP_SI(0x1),	MASK_SI,	FMT_SI,		FIXME},
+  {"fmpy.sss",	OP_REG(0x3E4) | PD(0) | P2(0) | P1(0),	MASK_REG | PD(3) | P2(3) | P1(3), FMT_REG, {REG_0, REG_22, REG_DEST}	},
+  {"fmpy.ssd",	OP_REG(0x3E4) | PD(1) | P2(0) | P1(0),	MASK_REG | PD(3) | P2(3) | P1(3), FMT_REG, {REG_0, REG_22, REG_DEST}	},
+  {"fmpy.sdd",	OP_REG(0x3E4) | PD(1) | P2(1) | P1(0),	MASK_REG | PD(3) | P2(3) | P1(3), FMT_REG, {REG_0, REG_22, REG_DEST}	},
+  {"fmpy.dsd",	OP_REG(0x3E4) | PD(1) | P2(0) | P1(1),	MASK_REG | PD(3) | P2(3) | P1(3), FMT_REG, {REG_0, REG_22, REG_DEST}	},
+  {"fmpy.ddd",	OP_REG(0x3E4) | PD(1) | P2(1) | P1(1),	MASK_REG | PD(3) | P2(3) | P1(3), FMT_REG, {REG_0, REG_22, REG_DEST}	},
+  {"fmpy.iii",	OP_REG(0x3E4) | PD(2) | P2(2) | P1(2),	MASK_REG | PD(3) | P2(3) | P1(3), FMT_REG, {REG_0, REG_22, REG_DEST}	},
+  {"fmpy.uuu",	OP_REG(0x3E4) | PD(3) | P2(3) | P1(3),	MASK_REG | PD(3) | P2(3) | P1(3), FMT_REG, {REG_0, REG_22, REG_DEST}	},
+
+  {"fmpy.sss",	OP_LI(0x3E5) | PD(0) | P2(0) | P1(0),	MASK_LI | PD(3) | P2(3) | P1(3), FMT_LI, {SPFI, REG_22, REG_DEST}	},
+  {"fmpy.ssd",	OP_LI(0x3E5) | PD(1) | P2(0) | P1(0),	MASK_LI | PD(3) | P2(3) | P1(3), FMT_LI, {SPFI, REG_22, REG_DEST}	},
+  {"fmpy.sdd",	OP_LI(0x3E5) | PD(1) | P2(1) | P1(0),	MASK_LI | PD(3) | P2(3) | P1(3), FMT_LI, {SPFI, REG_22, REG_DEST}	},
+  {"fmpy.dsd",	OP_LI(0x3E5) | PD(1) | P2(0) | P1(1),	MASK_LI | PD(3) | P2(3) | P1(3), FMT_LI, {SPFI, REG_22, REG_DEST}	},
+  {"fmpy.ddd",	OP_LI(0x3E5) | PD(1) | P2(1) | P1(1),	MASK_LI | PD(3) | P2(3) | P1(3), FMT_LI, {SPFI, REG_22, REG_DEST}	},
+  {"fmpy.iii",	OP_LI(0x3E5) | PD(2) | P2(2) | P1(2),	MASK_LI | PD(3) | P2(3) | P1(3), FMT_LI, {LSI, REG_22, REG_DEST}	},
+  {"fmpy.uuu",	OP_LI(0x3E5) | PD(3) | P2(3) | P1(3),	MASK_LI | PD(3) | P2(3) | P1(3), FMT_LI, {LUI, REG_22, REG_DEST}	},
+
+  /* Convert/Round to Minus Infinity */
+
+  {"frndm.ss",	OP_REG(0x3E8) | PD(0) | P2(3) | P1(0),	MASK_REG | PD(3) | P2(3) | P1(3), FMT_REG, {REG_0, REG_DEST}	},
+  {"frndm.sd",	OP_REG(0x3E8) | PD(1) | P2(3) | P1(0),	MASK_REG | PD(3) | P2(3) | P1(3), FMT_REG, {REG_0, REG_DEST}	},
+  {"frndm.si",	OP_REG(0x3E8) | PD(2) | P2(3) | P1(0),	MASK_REG | PD(3) | P2(3) | P1(3), FMT_REG, {REG_0, REG_DEST}	},
+  {"frndm.su",	OP_REG(0x3E8) | PD(3) | P2(3) | P1(0),	MASK_REG | PD(3) | P2(3) | P1(3), FMT_REG, {REG_0, REG_DEST}	},
+  {"frndm.is",	OP_REG(0x3E8) | PD(0) | P2(3) | P1(2),	MASK_REG | PD(3) | P2(3) | P1(3), FMT_REG, {REG_0, REG_DEST}	},
+  {"frndm.id",	OP_REG(0x3E8) | PD(1) | P2(3) | P1(2),	MASK_REG | PD(3) | P2(3) | P1(3), FMT_REG, {REG_0, REG_DEST}	},
+
+  {"frndm.ss",	OP_LI(0x3E9) | PD(0) | P2(3) | P1(0),	MASK_LI | PD(3) | P2(3) | P1(3), FMT_LI, {SPFI, REG_DEST}	},
+  {"frndm.sd",	OP_LI(0x3E9) | PD(1) | P2(3) | P1(0),	MASK_LI | PD(3) | P2(3) | P1(3), FMT_LI, {SPFI, REG_DEST}	},
+  {"frndm.si",	OP_LI(0x3E9) | PD(2) | P2(3) | P1(0),	MASK_LI | PD(3) | P2(3) | P1(3), FMT_LI, {SPFI, REG_DEST}	},
+  {"frndm.su",	OP_LI(0x3E9) | PD(3) | P2(3) | P1(0),	MASK_LI | PD(3) | P2(3) | P1(3), FMT_LI, {SPFI, REG_DEST}	},
+  {"frndm.is",	OP_LI(0x3E9) | PD(0) | P2(3) | P1(2),	MASK_LI | PD(3) | P2(3) | P1(3), FMT_LI, {LSI, REG_DEST}	},
+  {"frndm.id",	OP_LI(0x3E9) | PD(1) | P2(3) | P1(2),	MASK_LI | PD(3) | P2(3) | P1(3), FMT_LI, {LSI, REG_DEST}	},
+
+  /* Convert/Round to Nearest */
+
+  {"frndn.ss",	OP_REG(0x3E8) | PD(0) | P2(0) | P1(0),	MASK_REG | PD(3) | P2(3) | P1(3), FMT_REG, {REG_0, REG_DEST}	},
+  {"frndn.sd",	OP_REG(0x3E8) | PD(1) | P2(0) | P1(0),	MASK_REG | PD(3) | P2(3) | P1(3), FMT_REG, {REG_0, REG_DEST}	},
+  {"frndn.si",	OP_REG(0x3E8) | PD(2) | P2(0) | P1(0),	MASK_REG | PD(3) | P2(3) | P1(3), FMT_REG, {REG_0, REG_DEST}	},
+  {"frndn.su",	OP_REG(0x3E8) | PD(3) | P2(0) | P1(0),	MASK_REG | PD(3) | P2(3) | P1(3), FMT_REG, {REG_0, REG_DEST}	},
+  {"frndn.is",	OP_REG(0x3E8) | PD(0) | P2(0) | P1(2),	MASK_REG | PD(3) | P2(3) | P1(3), FMT_REG, {REG_0, REG_DEST}	},
+  {"frndn.id",	OP_REG(0x3E8) | PD(1) | P2(0) | P1(2),	MASK_REG | PD(3) | P2(3) | P1(3), FMT_REG, {REG_0, REG_DEST}	},
+
+  {"frndn.ss",	OP_LI(0x3E9) | PD(0) | P2(0) | P1(0),	MASK_LI | PD(3) | P2(3) | P1(3), FMT_LI, {SPFI, REG_DEST}	},
+  {"frndn.sd",	OP_LI(0x3E9) | PD(1) | P2(0) | P1(0),	MASK_LI | PD(3) | P2(3) | P1(3), FMT_LI, {SPFI, REG_DEST}	},
+  {"frndn.si",	OP_LI(0x3E9) | PD(2) | P2(0) | P1(0),	MASK_LI | PD(3) | P2(3) | P1(3), FMT_LI, {SPFI, REG_DEST}	},
+  {"frndn.su",	OP_LI(0x3E9) | PD(3) | P2(0) | P1(0),	MASK_LI | PD(3) | P2(3) | P1(3), FMT_LI, {SPFI, REG_DEST}	},
+  {"frndn.is",	OP_LI(0x3E9) | PD(0) | P2(0) | P1(2),	MASK_LI | PD(3) | P2(3) | P1(3), FMT_LI, {LSI, REG_DEST}	},
+  {"frndn.id",	OP_LI(0x3E9) | PD(1) | P2(0) | P1(2),	MASK_LI | PD(3) | P2(3) | P1(3), FMT_LI, {LSI, REG_DEST}	},
+
+  /* Convert/Round to Positive Infinity */
+
+  {"frndp.ss",	OP_REG(0x3E8) | PD(0) | P2(2) | P1(0),	MASK_REG | PD(3) | P2(3) | P1(3), FMT_REG, {REG_0, REG_DEST}	},
+  {"frndp.sd",	OP_REG(0x3E8) | PD(1) | P2(2) | P1(0),	MASK_REG | PD(3) | P2(3) | P1(3), FMT_REG, {REG_0, REG_DEST}	},
+  {"frndp.si",	OP_REG(0x3E8) | PD(2) | P2(2) | P1(0),	MASK_REG | PD(3) | P2(3) | P1(3), FMT_REG, {REG_0, REG_DEST}	},
+  {"frndp.su",	OP_REG(0x3E8) | PD(3) | P2(2) | P1(0),	MASK_REG | PD(3) | P2(3) | P1(3), FMT_REG, {REG_0, REG_DEST}	},
+  {"frndp.is",	OP_REG(0x3E8) | PD(0) | P2(2) | P1(2),	MASK_REG | PD(3) | P2(3) | P1(3), FMT_REG, {REG_0, REG_DEST}	},
+  {"frndp.id",	OP_REG(0x3E8) | PD(1) | P2(2) | P1(2),	MASK_REG | PD(3) | P2(3) | P1(3), FMT_REG, {REG_0, REG_DEST}	},
+
+  {"frndp.ss",	OP_LI(0x3E9) | PD(0) | P2(2) | P1(0),	MASK_LI | PD(3) | P2(3) | P1(3), FMT_LI, {SPFI, REG_DEST}	},
+  {"frndp.sd",	OP_LI(0x3E9) | PD(1) | P2(2) | P1(0),	MASK_LI | PD(3) | P2(3) | P1(3), FMT_LI, {SPFI, REG_DEST}	},
+  {"frndp.si",	OP_LI(0x3E9) | PD(2) | P2(2) | P1(0),	MASK_LI | PD(3) | P2(3) | P1(3), FMT_LI, {SPFI, REG_DEST}	},
+  {"frndp.su",	OP_LI(0x3E9) | PD(3) | P2(2) | P1(0),	MASK_LI | PD(3) | P2(3) | P1(3), FMT_LI, {SPFI, REG_DEST}	},
+  {"frndp.is",	OP_LI(0x3E9) | PD(0) | P2(2) | P1(2),	MASK_LI | PD(3) | P2(3) | P1(3), FMT_LI, {LSI, REG_DEST}	},
+  {"frndp.id",	OP_LI(0x3E9) | PD(1) | P2(2) | P1(2),	MASK_LI | PD(3) | P2(3) | P1(3), FMT_LI, {LSI, REG_DEST}	},
+
+  /* Convert/Round to Zero */
+
+  {"frndz.ss",	OP_REG(0x3E8) | PD(0) | P2(1) | P1(0),	MASK_REG | PD(3) | P2(3) | P1(3), FMT_REG, {REG_0, REG_DEST}	},
+  {"frndz.sd",	OP_REG(0x3E8) | PD(1) | P2(1) | P1(0),	MASK_REG | PD(3) | P2(3) | P1(3), FMT_REG, {REG_0, REG_DEST}	},
+  {"frndz.si",	OP_REG(0x3E8) | PD(2) | P2(1) | P1(0),	MASK_REG | PD(3) | P2(3) | P1(3), FMT_REG, {REG_0, REG_DEST}	},
+  {"frndz.su",	OP_REG(0x3E8) | PD(3) | P2(1) | P1(0),	MASK_REG | PD(3) | P2(3) | P1(3), FMT_REG, {REG_0, REG_DEST}	},
+  {"frndz.is",	OP_REG(0x3E8) | PD(0) | P2(1) | P1(2),	MASK_REG | PD(3) | P2(3) | P1(3), FMT_REG, {REG_0, REG_DEST}	},
+  {"frndz.id",	OP_REG(0x3E8) | PD(1) | P2(1) | P1(2),	MASK_REG | PD(3) | P2(3) | P1(3), FMT_REG, {REG_0, REG_DEST}	},
+
+  {"frndz.ss",	OP_LI(0x3E9) | PD(0) | P2(1) | P1(0),	MASK_LI | PD(3) | P2(3) | P1(3), FMT_LI, {SPFI, REG_DEST}	},
+  {"frndz.sd",	OP_LI(0x3E9) | PD(1) | P2(1) | P1(0),	MASK_LI | PD(3) | P2(3) | P1(3), FMT_LI, {SPFI, REG_DEST}	},
+  {"frndz.si",	OP_LI(0x3E9) | PD(2) | P2(1) | P1(0),	MASK_LI | PD(3) | P2(3) | P1(3), FMT_LI, {SPFI, REG_DEST}	},
+  {"frndz.su",	OP_LI(0x3E9) | PD(3) | P2(1) | P1(0),	MASK_LI | PD(3) | P2(3) | P1(3), FMT_LI, {SPFI, REG_DEST}	},
+  {"frndz.is",	OP_LI(0x3E9) | PD(0) | P2(1) | P1(2),	MASK_LI | PD(3) | P2(3) | P1(3), FMT_LI, {LSI, REG_DEST}	},
+  {"frndz.id",	OP_LI(0x3E9) | PD(1) | P2(1) | P1(2),	MASK_LI | PD(3) | P2(3) | P1(3), FMT_LI, {LSI, REG_DEST}	},
+
+  /* Floating point square root */
+
+  {"fsqrt.ss",	OP_REG(0x3EE) | PD(0) | P2(0) | P1(0),	MASK_REG | PD(3) | P2(3) | P1(3), FMT_REG, {REG_0, REG_DEST}	},
+  {"fsqrt.sd",	OP_REG(0x3EE) | PD(1) | P2(0) | P1(0),	MASK_REG | PD(3) | P2(3) | P1(3), FMT_REG, {REG_0, REG_DEST}	},
+  {"fsqrt.dd",	OP_REG(0x3EE) | PD(1) | P2(0) | P1(1),	MASK_REG | PD(3) | P2(3) | P1(3), FMT_REG, {REG_0, REG_DEST}	},
+
+  {"fsqrt.ss",	OP_LI(0x3EF) | PD(0) | P2(0) | P1(0),	MASK_LI | PD(3) | P2(3) | P1(3), FMT_LI, {SPFI, REG_DEST}	},
+  {"fsqrt.sd",	OP_LI(0x3EF) | PD(1) | P2(0) | P1(0),	MASK_LI | PD(3) | P2(3) | P1(3), FMT_LI, {SPFI, REG_DEST}	},
+  {"fsqrt.dd",	OP_LI(0x3EF) | PD(1) | P2(0) | P1(1),	MASK_LI | PD(3) | P2(3) | P1(3), FMT_LI, {SPFI, REG_DEST}	},
+
+  /* Floating point subtraction */
+
+  { "fsub.sss",	OP_REG(0x3E2) | PD(0) | P2(0) | P1(0),	MASK_REG | PD(3) | P2(3) | P1(3), FMT_REG, {REG_0, REG_22, REG_DEST}	},
+  { "fsub.ssd",	OP_REG(0x3E2) | PD(1) | P2(0) | P1(0),	MASK_REG | PD(3) | P2(3) | P1(3), FMT_REG, {REG_0, REG_22, REG_DEST}	},
+  { "fsub.sdd",	OP_REG(0x3E2) | PD(1) | P2(1) | P1(0),	MASK_REG | PD(3) | P2(3) | P1(3), FMT_REG, {REG_0, REG_22, REG_DEST}	},
+  { "fsub.dsd",	OP_REG(0x3E2) | PD(1) | P2(0) | P1(1),	MASK_REG | PD(3) | P2(3) | P1(3), FMT_REG, {REG_0, REG_22, REG_DEST}	},
+  { "fsub.ddd",	OP_REG(0x3E2) | PD(1) | P2(1) | P1(1),	MASK_REG | PD(3) | P2(3) | P1(3), FMT_REG, {REG_0, REG_22, REG_DEST}	},
+
+  { "fsub.sss",	OP_LI(0x3E3) | PD(0) | P2(0) | P1(0),	MASK_LI | PD(3) | P2(3) | P1(3), FMT_LI, {SPFI, REG_22, REG_DEST}	},
+  { "fsub.ssd",	OP_LI(0x3E3) | PD(1) | P2(0) | P1(0),	MASK_LI | PD(3) | P2(3) | P1(3), FMT_LI, {SPFI, REG_22, REG_DEST}	},
+  { "fsub.sdd",	OP_LI(0x3E3) | PD(1) | P2(1) | P1(0),	MASK_LI | PD(3) | P2(3) | P1(3), FMT_LI, {SPFI, REG_22, REG_DEST}	},
+  { "fsub.dsd",	OP_LI(0x3E3) | PD(1) | P2(0) | P1(1),	MASK_LI | PD(3) | P2(3) | P1(3), FMT_LI, {SPFI, REG_22, REG_DEST}	},
+  { "fsub.ddd",	OP_LI(0x3E3) | PD(1) | P2(1) | P1(1),	MASK_LI | PD(3) | P2(3) | P1(3), FMT_LI, {SPFI, REG_22, REG_DEST}	},
+
+  /* Illegal instructions */
+
+  {"illop0",	OP_SI(0x0),	MASK_SI,	FMT_SI,		0},
+  {"illopF",	0x1FF << 13,	0x1FF << 13,	FMT_REG,	0},
+
+  /* Jump and save return */
+
+  {"jsr",	OP_SI(0x44),	MASK_SI,	FMT_SI,		{OFF_SS_BR, REG_BASE, REG_DEST}	},
+  {"jsr.a",	OP_SI(0x45),	MASK_SI,	FMT_SI,		{OFF_SS_BR, REG_BASE, REG_DEST}	},
+
+  {"jsr",	OP_REG(0x388),	MASK_REG,	FMT_REG,	{REG_0, REG_BASE, REG_DEST}	},
+  {"jsr.a",	OP_REG(0x38A),	MASK_REG,	FMT_REG,	{REG_0, REG_BASE, REG_DEST}	},
+
+  {"jsr",	OP_LI(0x389),	MASK_LI,	FMT_LI,		{OFF_SL_BR, REG_BASE, REG_DEST}	},
+  {"jsr.a",	OP_LI(0x38B),	MASK_LI,	FMT_LI,		{OFF_SL_BR, REG_BASE, REG_DEST}	},
+
+  /* Load Signed Data Into Register */
+
+  {"ld.b",	OP_SI(0x20),		(MASK_SI & ~M_SI(1)),		FMT_SI,		{SSI, REG_BASE_M_SI, REG_DEST}		},
+  {"ld.h",	OP_SI(0x21),		(MASK_SI & ~M_SI(1)),		FMT_SI,		{SSI, REG_BASE_M_SI, REG_DEST}		},
+  {"ld",	OP_SI(0x22),		(MASK_SI & ~M_SI(1)),		FMT_SI,		{SSI, REG_BASE_M_SI, REG_DEST}		},
+  {"ld.d",	OP_SI(0x23),		(MASK_SI & ~M_SI(1)),		FMT_SI,		{SSI, REG_BASE_M_SI, REG_DEST}		},
+
+  {"ld.b",	OP_REG(0x340) | D(0),	(MASK_REG & ~M_REG(1)) | D(1),	FMT_REG,	{REG_SCALED, REG_BASE_M_LI, REG_DEST}	},
+  {"ld.h",	OP_REG(0x342) | D(0),	(MASK_REG & ~M_REG(1)) | D(1),	FMT_REG,	{REG_SCALED, REG_BASE_M_LI, REG_DEST}	},
+  {"ld",	OP_REG(0x344) | D(0),	(MASK_REG & ~M_REG(1)) | D(1),	FMT_REG,	{REG_SCALED, REG_BASE_M_LI, REG_DEST}	},
+  {"ld.d",	OP_REG(0x346) | D(0),	(MASK_REG & ~M_REG(1)) | D(1),	FMT_REG,	{REG_SCALED, REG_BASE_M_LI, REG_DEST}	},
+
+  {"ld.b",	OP_LI(0x341) | D(0),	(MASK_LI & ~M_REG(1)) | D(1),	FMT_LI,		{LSI_SCALED, REG_BASE_M_LI, REG_DEST}	},
+  {"ld.h",	OP_LI(0x343) | D(0),	(MASK_LI & ~M_REG(1)) | D(1),	FMT_LI,		{LSI_SCALED, REG_BASE_M_LI, REG_DEST}	},
+  {"ld",	OP_LI(0x345) | D(0),	(MASK_LI & ~M_REG(1)) | D(1),	FMT_LI,		{LSI_SCALED, REG_BASE_M_LI, REG_DEST}	},
+  {"ld.d",	OP_LI(0x347) | D(0),	(MASK_LI & ~M_REG(1)) | D(1),	FMT_LI,		{LSI_SCALED, REG_BASE_M_LI, REG_DEST}	},
+
+  /* Load Unsigned Data Into Register */
+
+  {"ld.ub",	OP_SI(0x28),		(MASK_SI & ~M_SI(1)),		FMT_SI,		{SSI, REG_BASE_M_SI, REG_DEST}		},
+  {"ld.uh",	OP_SI(0x29),		(MASK_SI & ~M_SI(1)),		FMT_SI,		{SSI, REG_BASE_M_SI, REG_DEST}		},
+
+  {"ld.ub",	OP_REG(0x350) | D(0),	(MASK_REG & ~M_REG(1)) | D(1),	FMT_REG,	{REG_SCALED, REG_BASE_M_LI, REG_DEST}	},
+  {"ld.uh",	OP_REG(0x352) | D(0),	(MASK_REG & ~M_REG(1)) | D(1),	FMT_REG,	{REG_SCALED, REG_BASE_M_LI, REG_DEST}	},
+
+  {"ld.ub",	OP_LI(0x351) | D(0),	(MASK_LI & ~M_REG(1)) | D(1),	FMT_LI,		{LSI_SCALED, REG_BASE_M_LI, REG_DEST}	},
+  {"ld.uh",	OP_LI(0x353) | D(0),	(MASK_LI & ~M_REG(1)) | D(1),	FMT_LI,		{LSI_SCALED, REG_BASE_M_LI, REG_DEST}	},
+
+  /* Leftmost one */
+
+  {"lmo",	OP_LI(0x3F0),	MASK_LI,	FMT_LI,		{REG_22, REG_DEST}	},
+
+  /* Bitwise logical OR */
+
+  {"or.ff",	OP_SI(0x1E),	MASK_SI,	FMT_SI,		{SUI, REG_22, REG_DEST}		},
+  {"or.ft",	OP_SI(0x1D),	MASK_SI,	FMT_SI,		{SUI, REG_22, REG_DEST}		},
+  {"or.tf",	OP_SI(0x1B),	MASK_SI,	FMT_SI,		{SUI, REG_22, REG_DEST}		},
+  {"or.tt",	OP_SI(0x17),	MASK_SI,	FMT_SI,		{SUI, REG_22, REG_DEST}		},
+
+  {"or.ff",	OP_REG(0x33C),	MASK_REG,	FMT_REG,	{REG_0, REG_22, REG_DEST}	},
+  {"or.ft",	OP_REG(0x33A),	MASK_REG,	FMT_REG,	{REG_0, REG_22, REG_DEST}	},
+  {"or.tf",	OP_REG(0x336),	MASK_REG,	FMT_REG,	{REG_0, REG_22, REG_DEST}	},
+  {"or.tt",	OP_REG(0x32E),	MASK_REG,	FMT_REG,	{REG_0, REG_22, REG_DEST}	},
+
+  {"or.ff",	OP_LI(0x33D),	MASK_LI,	FMT_LI,		{LUI, REG_22, REG_DEST}		},
+  {"or.ft",	OP_LI(0x33B),	MASK_LI,	FMT_LI,		{LUI, REG_22, REG_DEST}		},
+  {"or.tf",	OP_LI(0x337),	MASK_LI,	FMT_LI,		{LUI, REG_22, REG_DEST}		},
+  {"or.tt",	OP_LI(0x32F),	MASK_LI,	FMT_LI,		{LUI, REG_22, REG_DEST}		},
+
+  /* Read Control Register */
+
+  {"rdcr",	OP_SI(0x4),	MASK_SI | (0x1F << 22),		FMT_SI,		{CR_SI, REG_DEST}	},
+  {"rdcr",	OP_REG(0x308),	MASK_REG | (0x1F << 22),	FMT_REG,	{REG_0, REG_DEST}	},
+  {"rdcr",	OP_LI(0x309),	MASK_LI | (0x1F << 22),		FMT_LI,		{CR_LI, REG_DEST}	},
+
+  /* Rightmost one */
+
+  {"rmo",	OP_LI(0x3F2),	MASK_LI,	FMT_LI,		{REG_22, REG_DEST}	},
+
+  /* Shift Register Left - note that rotl, shl, and ins are all alternate names for one of the shift instructions.
+     They appear prior to their sl equivalent so that they will be diassembled as the alternate name. */
+
+  {"rotl",	OP_SI(0x8) | i(0) | n(0),	MASK_SI | i(1) | n(1),	FMT_SI,		{ROTATE, ENDMASK, REG_22, REG_DEST}	},
+  {"sl.dz",	OP_SI(0x8) | i(0) | n(0),	MASK_SI | i(1) | n(1),	FMT_SI, 	{ROTATE, ENDMASK, REG_22, REG_DEST}	},
+  {"sl.dm",	OP_SI(0x9) | i(0) | n(0),	MASK_SI | i(1) | n(1),	FMT_SI, 	{ROTATE, ENDMASK, REG_22, REG_DEST}	},
+  {"sl.ds",	OP_SI(0xA) | i(0) | n(0),	MASK_SI | i(1) | n(1),	FMT_SI, 	{ROTATE, ENDMASK, REG_22, REG_DEST}	},
+  {"sl.ez",	OP_SI(0xB) | i(0) | n(0),	MASK_SI | i(1) | n(1),	FMT_SI, 	{ROTATE, ENDMASK, REG_22, REG_DEST}	},
+  {"sl.em",	OP_SI(0xC) | i(0) | n(0),	MASK_SI | i(1) | n(1),	FMT_SI, 	{ROTATE, ENDMASK, REG_22, REG_DEST}	},
+  {"sl.es",	OP_SI(0xD) | i(0) | n(0),	MASK_SI | i(1) | n(1),	FMT_SI, 	{ROTATE, ENDMASK, REG_22, REG_DEST}	},
+  {"shl",	OP_SI(0xE) | i(0) | n(0),	MASK_SI | i(1) | n(1),	FMT_SI, 	{ROTATE, ENDMASK, REG_22, REG_DEST}	},
+  {"sl.iz",	OP_SI(0xE) | i(0) | n(0),	MASK_SI | i(1) | n(1),	FMT_SI, 	{ROTATE, ENDMASK, REG_22, REG_DEST}	},
+  {"ins",	OP_SI(0xF) | i(0) | n(0),	MASK_SI | i(1) | n(1),	FMT_SI,		{ROTATE, ENDMASK, REG_22, REG_DEST}	},
+  {"sl.im",	OP_SI(0xF) | i(0) | n(0),	MASK_SI | i(1) | n(1),	FMT_SI, 	{ROTATE, ENDMASK, REG_22, REG_DEST}	},
+
+  {"rotl",	OP_REG(0x310) | i(0) | n(0),	MASK_REG | i(1) | n(1),	FMT_REG,	{REG_0, ENDMASK, REG_22, REG_DEST}	},
+  {"sl.dz",	OP_REG(0x310) | i(0) | n(0),	MASK_REG | i(1) | n(1),	FMT_REG, 	{REG_0, ENDMASK, REG_22, REG_DEST}	},
+  {"sl.dm",	OP_REG(0x312) | i(0) | n(0),	MASK_REG | i(1) | n(1),	FMT_REG, 	{REG_0, ENDMASK, REG_22, REG_DEST}	},
+  {"sl.ds",	OP_REG(0x314) | i(0) | n(0),	MASK_REG | i(1) | n(1),	FMT_REG, 	{REG_0, ENDMASK, REG_22, REG_DEST}	},
+  {"sl.ez",	OP_REG(0x316) | i(0) | n(0),	MASK_REG | i(1) | n(1),	FMT_REG, 	{REG_0, ENDMASK, REG_22, REG_DEST}	},
+  {"sl.em",	OP_REG(0x318) | i(0) | n(0),	MASK_REG | i(1) | n(1),	FMT_REG, 	{REG_0, ENDMASK, REG_22, REG_DEST}	},
+  {"sl.es",	OP_REG(0x31A) | i(0) | n(0),	MASK_REG | i(1) | n(1),	FMT_REG, 	{REG_0, ENDMASK, REG_22, REG_DEST}	},
+  {"shl",	OP_REG(0x31C) | i(0) | n(0),	MASK_REG | i(1) | n(1),	FMT_REG, 	{REG_0, ENDMASK, REG_22, REG_DEST}	},
+  {"sl.iz",	OP_REG(0x31C) | i(0) | n(0),	MASK_REG | i(1) | n(1),	FMT_REG, 	{REG_0, ENDMASK, REG_22, REG_DEST}	},
+  {"ins",	OP_REG(0x31E) | i(0) | n(0),	MASK_REG | i(1) | n(1),	FMT_REG,	{REG_0, ENDMASK, REG_22, REG_DEST}	},
+  {"sl.im",	OP_REG(0x31E) | i(0) | n(0),	MASK_REG | i(1) | n(1),	FMT_REG, 	{REG_0, ENDMASK, REG_22, REG_DEST}	},
+
+  /* Shift Register Left With Inverted Endmask */
+
+  {"sli.dz",	OP_SI(0x8) | i(1) | n(0),	MASK_SI | i(1) | n(1),	FMT_SI, 	{ROTATE, ENDMASK, REG_22, REG_DEST}	},
+  {"sli.dm",	OP_SI(0x9) | i(1) | n(0),	MASK_SI | i(1) | n(1),	FMT_SI, 	{ROTATE, ENDMASK, REG_22, REG_DEST}	},
+  {"sli.ds",	OP_SI(0xA) | i(1) | n(0),	MASK_SI | i(1) | n(1),	FMT_SI, 	{ROTATE, ENDMASK, REG_22, REG_DEST}	},
+  {"sli.ez",	OP_SI(0xB) | i(1) | n(0),	MASK_SI | i(1) | n(1),	FMT_SI, 	{ROTATE, ENDMASK, REG_22, REG_DEST}	},
+  {"sli.em",	OP_SI(0xC) | i(1) | n(0),	MASK_SI | i(1) | n(1),	FMT_SI, 	{ROTATE, ENDMASK, REG_22, REG_DEST}	},
+  {"sli.es",	OP_SI(0xD) | i(1) | n(0),	MASK_SI | i(1) | n(1),	FMT_SI, 	{ROTATE, ENDMASK, REG_22, REG_DEST}	},
+  {"sli.iz",	OP_SI(0xE) | i(1) | n(0),	MASK_SI | i(1) | n(1),	FMT_SI, 	{ROTATE, ENDMASK, REG_22, REG_DEST}	},
+  {"sli.im",	OP_SI(0xF) | i(1) | n(0),	MASK_SI | i(1) | n(1),	FMT_SI, 	{ROTATE, ENDMASK, REG_22, REG_DEST}	},
+
+  {"sli.dz",	OP_REG(0x310) | i(1) | n(0),	MASK_REG | i(1) | n(1),	FMT_REG, 	{REG_0, ENDMASK, REG_22, REG_DEST}	},
+  {"sli.dm",	OP_REG(0x312) | i(1) | n(0),	MASK_REG | i(1) | n(1),	FMT_REG, 	{REG_0, ENDMASK, REG_22, REG_DEST}	},
+  {"sli.ds",	OP_REG(0x314) | i(1) | n(0),	MASK_REG | i(1) | n(1),	FMT_REG, 	{REG_0, ENDMASK, REG_22, REG_DEST}	},
+  {"sli.ez",	OP_REG(0x316) | i(1) | n(0),	MASK_REG | i(1) | n(1),	FMT_REG, 	{REG_0, ENDMASK, REG_22, REG_DEST}	},
+  {"sli.em",	OP_REG(0x318) | i(1) | n(0),	MASK_REG | i(1) | n(1),	FMT_REG, 	{REG_0, ENDMASK, REG_22, REG_DEST}	},
+  {"sli.es",	OP_REG(0x31A) | i(1) | n(0),	MASK_REG | i(1) | n(1),	FMT_REG, 	{REG_0, ENDMASK, REG_22, REG_DEST}	},
+  {"sli.iz",	OP_REG(0x31C) | i(1) | n(0),	MASK_REG | i(1) | n(1),	FMT_REG, 	{REG_0, ENDMASK, REG_22, REG_DEST}	},
+  {"sli.im",	OP_REG(0x31E) | i(1) | n(0),	MASK_REG | i(1) | n(1),	FMT_REG, 	{REG_0, ENDMASK, REG_22, REG_DEST}	},
+
+  /* Shift Register Right - note that exts, extu, rotr, sra, and srl are all alternate names for one of the shift instructions.
+     They appear prior to their sr equivalent so that they will be diassembled as the alternate name. */
+
+  {"rotr",	OP_SI(0x8) | i(0) | n(1),	MASK_SI | i(1) | n(1),	FMT_SI,		{ROTATE, ENDMASK, REG_22, REG_DEST}	},
+  {"extu",	OP_SI(0x8) | i(0) | n(1),	MASK_SI | i(1) | n(1),	FMT_SI, 	{ROTATE, ENDMASK, REG_22, REG_DEST}	},
+  {"sr.dz",	OP_SI(0x8) | i(0) | n(1),	MASK_SI | i(1) | n(1),	FMT_SI, 	{ROTATE, ENDMASK, REG_22, REG_DEST}	},
+  {"sr.dm",	OP_SI(0x9) | i(0) | n(1),	MASK_SI | i(1) | n(1),	FMT_SI, 	{ROTATE, ENDMASK, REG_22, REG_DEST}	},
+  {"exts",	OP_SI(0xA) | i(0) | n(1),	MASK_SI | i(1) | n(1),	FMT_SI, 	{ROTATE, ENDMASK, REG_22, REG_DEST}	},
+  {"sr.ds",	OP_SI(0xA) | i(0) | n(1),	MASK_SI | i(1) | n(1),	FMT_SI, 	{ROTATE, ENDMASK, REG_22, REG_DEST}	},
+  {"srl",	OP_SI(0xB) | i(0) | n(1),	MASK_SI | i(1) | n(1),	FMT_SI, 	{ROTATE, ENDMASK, REG_22, REG_DEST}	},
+  {"sr.ez",	OP_SI(0xB) | i(0) | n(1),	MASK_SI | i(1) | n(1),	FMT_SI, 	{ROTATE, ENDMASK, REG_22, REG_DEST}	},
+  {"sr.em",	OP_SI(0xC) | i(0) | n(1),	MASK_SI | i(1) | n(1),	FMT_SI, 	{ROTATE, ENDMASK, REG_22, REG_DEST}	},
+  {"sra",	OP_SI(0xD) | i(0) | n(1),	MASK_SI | i(1) | n(1),	FMT_SI, 	{ROTATE, ENDMASK, REG_22, REG_DEST}	},
+  {"sr.es",	OP_SI(0xD) | i(0) | n(1),	MASK_SI | i(1) | n(1),	FMT_SI, 	{ROTATE, ENDMASK, REG_22, REG_DEST}	},
+  {"sr.iz",	OP_SI(0xE) | i(0) | n(1),	MASK_SI | i(1) | n(1),	FMT_SI, 	{ROTATE, ENDMASK, REG_22, REG_DEST}	},
+  {"sr.im",	OP_SI(0xF) | i(0) | n(1),	MASK_SI | i(1) | n(1),	FMT_SI, 	{ROTATE, ENDMASK, REG_22, REG_DEST}	},
+
+  {"rotr",	OP_REG(0x310) | i(0) | n(1),	MASK_REG | i(1) | n(1),	FMT_REG,	{REG_0, ENDMASK, REG_22, REG_DEST}	},
+  {"extu",	OP_REG(0x310) | i(0) | n(1),	MASK_REG | i(1) | n(1),	FMT_REG, 	{REG_0, ENDMASK, REG_22, REG_DEST}	},
+  {"sr.dz",	OP_REG(0x310) | i(0) | n(1),	MASK_REG | i(1) | n(1),	FMT_REG, 	{REG_0, ENDMASK, REG_22, REG_DEST}	},
+  {"sr.dm",	OP_REG(0x312) | i(0) | n(1),	MASK_REG | i(1) | n(1),	FMT_REG, 	{REG_0, ENDMASK, REG_22, REG_DEST}	},
+  {"exts",	OP_REG(0x314) | i(0) | n(1),	MASK_REG | i(1) | n(1),	FMT_REG, 	{REG_0, ENDMASK, REG_22, REG_DEST}	},
+  {"sr.ds",	OP_REG(0x314) | i(0) | n(1),	MASK_REG | i(1) | n(1),	FMT_REG, 	{REG_0, ENDMASK, REG_22, REG_DEST}	},
+  {"srl",	OP_REG(0x316) | i(0) | n(1),	MASK_REG | i(1) | n(1),	FMT_REG, 	{REG_0, ENDMASK, REG_22, REG_DEST}	},
+  {"sr.ez",	OP_REG(0x316) | i(0) | n(1),	MASK_REG | i(1) | n(1),	FMT_REG, 	{REG_0, ENDMASK, REG_22, REG_DEST}	},
+  {"sr.em",	OP_REG(0x318) | i(0) | n(1),	MASK_REG | i(1) | n(1),	FMT_REG, 	{REG_0, ENDMASK, REG_22, REG_DEST}	},
+  {"sra",	OP_REG(0x31A) | i(0) | n(1),	MASK_REG | i(1) | n(1),	FMT_REG, 	{REG_0, ENDMASK, REG_22, REG_DEST}	},
+  {"sr.es",	OP_REG(0x31A) | i(0) | n(1),	MASK_REG | i(1) | n(1),	FMT_REG, 	{REG_0, ENDMASK, REG_22, REG_DEST}	},
+  {"sr.iz",	OP_REG(0x31C) | i(0) | n(1),	MASK_REG | i(1) | n(1),	FMT_REG, 	{REG_0, ENDMASK, REG_22, REG_DEST}	},
+  {"sr.im",	OP_REG(0x31E) | i(0) | n(1),	MASK_REG | i(1) | n(1),	FMT_REG, 	{REG_0, ENDMASK, REG_22, REG_DEST}	},
+
+  /* Shift Register Right With Inverted Endmask */
+
+  {"sri.dz",	OP_SI(0x8) | i(1) | n(1),	MASK_SI | i(1) | n(1),	FMT_SI, 	{ROTATE, ENDMASK, REG_22, REG_DEST}	},
+  {"sri.dm",	OP_SI(0x9) | i(1) | n(1),	MASK_SI | i(1) | n(1),	FMT_SI, 	{ROTATE, ENDMASK, REG_22, REG_DEST}	},
+  {"sri.ds",	OP_SI(0xA) | i(1) | n(1),	MASK_SI | i(1) | n(1),	FMT_SI, 	{ROTATE, ENDMASK, REG_22, REG_DEST}	},
+  {"sri.ez",	OP_SI(0xB) | i(1) | n(1),	MASK_SI | i(1) | n(1),	FMT_SI, 	{ROTATE, ENDMASK, REG_22, REG_DEST}	},
+  {"sri.em",	OP_SI(0xC) | i(1) | n(1),	MASK_SI | i(1) | n(1),	FMT_SI, 	{ROTATE, ENDMASK, REG_22, REG_DEST}	},
+  {"sri.es",	OP_SI(0xD) | i(1) | n(1),	MASK_SI | i(1) | n(1),	FMT_SI, 	{ROTATE, ENDMASK, REG_22, REG_DEST}	},
+  {"sri.iz",	OP_SI(0xE) | i(1) | n(1),	MASK_SI | i(1) | n(1),	FMT_SI, 	{ROTATE, ENDMASK, REG_22, REG_DEST}	},
+  {"sri.im",	OP_SI(0xF) | i(1) | n(1),	MASK_SI | i(1) | n(1),	FMT_SI, 	{ROTATE, ENDMASK, REG_22, REG_DEST}	},
+
+  {"sri.dz",	OP_REG(0x310) | i(1) | n(1),	MASK_REG | i(1) | n(1),	FMT_REG, 	{REG_0, ENDMASK, REG_22, REG_DEST}	},
+  {"sri.dm",	OP_REG(0x312) | i(1) | n(1),	MASK_REG | i(1) | n(1),	FMT_REG, 	{REG_0, ENDMASK, REG_22, REG_DEST}	},
+  {"sri.ds",	OP_REG(0x314) | i(1) | n(1),	MASK_REG | i(1) | n(1),	FMT_REG, 	{REG_0, ENDMASK, REG_22, REG_DEST}	},
+  {"sri.ez",	OP_REG(0x316) | i(1) | n(1),	MASK_REG | i(1) | n(1),	FMT_REG, 	{REG_0, ENDMASK, REG_22, REG_DEST}	},
+  {"sri.em",	OP_REG(0x318) | i(1) | n(1),	MASK_REG | i(1) | n(1),	FMT_REG, 	{REG_0, ENDMASK, REG_22, REG_DEST}	},
+  {"sri.es",	OP_REG(0x31A) | i(1) | n(1),	MASK_REG | i(1) | n(1),	FMT_REG, 	{REG_0, ENDMASK, REG_22, REG_DEST}	},
+  {"sri.iz",	OP_REG(0x31C) | i(1) | n(1),	MASK_REG | i(1) | n(1),	FMT_REG, 	{REG_0, ENDMASK, REG_22, REG_DEST}	},
+  {"sri.im",	OP_REG(0x31E) | i(1) | n(1),	MASK_REG | i(1) | n(1),	FMT_REG, 	{REG_0, ENDMASK, REG_22, REG_DEST}	},
+
+  /* Store Data into Memory */
+
+  {"st.b",	OP_SI(0x30),		(MASK_SI & ~M_SI(1)),		FMT_SI, 	{SSI, REG_BASE_M_SI, REG_DEST}},
+  {"st.h",	OP_SI(0x31),		(MASK_SI & ~M_SI(1)),		FMT_SI, 	{SSI, REG_BASE_M_SI, REG_DEST}},
+  {"st",	OP_SI(0x32),		(MASK_SI & ~M_SI(1)),		FMT_SI, 	{SSI, REG_BASE_M_SI, REG_DEST}},
+  {"st.d",	OP_SI(0x33),		(MASK_SI & ~M_SI(1)),		FMT_SI, 	{SSI, REG_BASE_M_SI, REG_DEST}},
+
+  {"st.b",	OP_REG(0x360) | D(0),	(MASK_REG & ~M_REG(1)) | D(1),	FMT_REG,	{REG_SCALED, REG_BASE_M_LI, REG_DEST}	},
+  {"st.h",	OP_REG(0x362) | D(0),	(MASK_REG & ~M_REG(1)) | D(1),	FMT_REG,	{REG_SCALED, REG_BASE_M_LI, REG_DEST}	},
+  {"st",	OP_REG(0x364) | D(0),	(MASK_REG & ~M_REG(1)) | D(1),	FMT_REG,	{REG_SCALED, REG_BASE_M_LI, REG_DEST}	},
+  {"st.d",	OP_REG(0x366) | D(0),	(MASK_REG & ~M_REG(1)) | D(1),	FMT_REG,	{REG_SCALED, REG_BASE_M_LI, REG_DEST}	},
+
+  {"st.b",	OP_LI(0x361) | D(0),	(MASK_LI & ~M_REG(1)) | D(1),	FMT_LI,		{LSI_SCALED, REG_BASE_M_LI, REG_DEST}	},
+  {"st.h",	OP_LI(0x363) | D(0),	(MASK_LI & ~M_REG(1)) | D(1),	FMT_LI,		{LSI_SCALED, REG_BASE_M_LI, REG_DEST}	},
+  {"st",	OP_LI(0x365) | D(0),	(MASK_LI & ~M_REG(1)) | D(1),	FMT_LI,		{LSI_SCALED, REG_BASE_M_LI, REG_DEST}	},
+  {"st.d",	OP_LI(0x367) | D(0),	(MASK_LI & ~M_REG(1)) | D(1),	FMT_LI,		{LSI_SCALED, REG_BASE_M_LI, REG_DEST}	},
+
+  /* Signed Integer Subtract */
+
+  {"sub",	OP_SI(0x5A),	MASK_SI,	FMT_SI, 	{SSI, REG_22, REG_DEST}		},
+  {"sub",	OP_REG(0x3B4),	MASK_REG,	FMT_REG,	{REG_0, REG_22, REG_DEST}	},
+  {"sub",	OP_LI(0x3B5),	MASK_LI,	FMT_LI,		{LSI, REG_22, REG_DEST}		},
+
+  /* Unsigned Integer Subtract */
+
+  {"subu",	OP_SI(0x5B),	MASK_SI,	FMT_SI, 	{SSI, REG_22, REG_DEST}		},
+  {"subu",	OP_REG(0x3B6),	MASK_REG,	FMT_REG,	{REG_0, REG_22, REG_DEST}	},
+  {"subu",	OP_LI(0x3B7),	MASK_LI,	FMT_LI,		{LSI, REG_22, REG_DEST}		},
+
+  /* Swap Control Register */
+
+  {"swcr",	OP_SI(0x5),	MASK_SI,	FMT_SI,		{CR_SI, REG_22, REG_DEST}	},
+  {"swcr",	OP_REG(0x30A),	MASK_REG,	FMT_REG,	{REG_0, REG_22, REG_DEST}	},
+  {"swcr",	OP_LI(0x30B),	MASK_LI,	FMT_LI,		{CR_LI, REG_22, REG_DEST}	},
+
+  /* Trap */
+
+  {"trap",	OP_SI(0x1) | E(0),	MASK_SI | E(1),		FMT_SI,		{SUI}	},
+  {"trap",	OP_REG(0x302) | E(0),	MASK_REG | E(1),	FMT_REG,	{REG_0}	},
+  {"trap",	OP_LI(0x303) | E(0),	MASK_LI | E(1),		FMT_LI,		{LUI}	},
+
+
+
   {"xnor",	OP_LI(0x333),	MASK_LI,	FMT_LI,		FIXME},
   {"xnor",	OP_REG(0x332),	MASK_REG,	FMT_REG,	FIXME},
   {"xnor",	OP_SI(0x19),	MASK_SI,	FMT_SI,		FIXME},

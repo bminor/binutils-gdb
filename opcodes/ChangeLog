@@ -1,4 +1,30 @@
 start-sanitize-tic80
+Wed Jan 15 18:59:51 1997  Fred Fish  <fnf@cygnus.com>
+
+	* tic80-opc.c (tic80_operands): Reorder some table entries to make
+	the order more logical.  Move the shift alias instructions ("rotl",
+	"shl", "ins", "rotr", "extu", "exts", "srl", and "sra" to be
+ 	interspersed with the regular sr.x and sl.x instructions.  Add
+	and test new instruction opcodes for "sl", "sli", "sr", "sri", "st",
+ 	"sub", "subu", "swcr", and "trap".
+
+Tue Jan 14 19:42:50 1997  Fred Fish  <fnf@cygnus.com>
+
+	* tic80-opc.c (OFF_SS_PC): Renamed from OFF_SS.
+	(OFF_SL_PC): Renamed from OFF_SL.
+	(OFF_SS_BR): New operand type for base relative operand.
+	(OFF_SL_BR): New operand type for base relative operand.
+	(REG_BASE): New operand type for base register operand.
+	(tic80_opcodes): Add and test "fmpy", "frndm", "frndn", "frndp",
+	"frndz", "fsqrt", "fsub", "illop0", "illopF", "ins", "jsr",
+	"ld", "ld.u", "lmo", "or", "rdcr", "rmo", "rotl", and "rotr"
+	instructions.
+	* tic80-dis.c (print_insn_tic80): Print opcode name with fixed width
+ 	10 char field, padded with spaces on rhs, rather than a string
+ 	followed by a tab.  Use renamed TIC80_OPERAND_PCREL flag bit rather
+ 	than old TIC80_OPERAND_RELATIVE.  Add support for new
+	TIC80_OPERAND_BASEREL flag bit.
+	
 Mon Jan 13 15:58:56 1997  Fred Fish  <fnf@cygnus.com>
 
 	* tic80-dis.c (print_insn_tic80): Print floating point operands
@@ -12,7 +38,7 @@ Mon Jan 13 15:58:56 1997  Fred Fish  <fnf@cygnus.com>
 	(PD): Macro for the 'PD' field.
 	(P2): Macro for the 'P2' field.
 	(P1): Macro for the 'P1' field.
-	(tic80_operands): Add entries for "exts", "extu", "fadd",
+	(tic80_opcodes): Add entries for "exts", "extu", "fadd",
 	"fcmp", and "fdiv". 
 	
 end-sanitize-tic80
