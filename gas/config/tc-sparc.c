@@ -337,16 +337,19 @@ sparc_target_format ()
  *
  *	-Av6, -Av7, -Av8, -Asparclite, -Asparclet
  *		Standard 32 bit architectures.
- *	-Av8plus, -Av8plusa
- *		Sparc64 in a 32 bit world.
  *	-Av9, -Av9a
  *		Sparc64 in either a 32 or 64 bit world (-32/-64 says which).
  *		This used to only mean 64 bits, but properly specifying it
  *		complicated gcc's ASM_SPECs, so now opcode selection is
  *		specified orthogonally to word size (except when specifying
  *		the default, but that is an internal implementation detail).
+ *	-Av8plus, -Av8plusa
+ *		Same as -Av9{,a}.
  *	-xarch=v8plus, -xarch=v8plusa
- *		Same as -Av8plus{,a}, for compatibility with Sun's assembler.
+ *		Same as -Av8plus{,a} -32, for compatibility with Sun's
+ *		assembler.
+ *	-xarch=v9, -xarch=v9a
+ *		Same as -Av9{,a} -64, for compatibility with Sun's assembler.
  *
  *		Select the architecture and possibly the file format.
  *		Instructions or features not supported by the selected
@@ -449,13 +452,12 @@ md_parse_option (c, arg)
       break;
 
     case OPTION_XARCH:
-      /* This is for compatibility with Sun's assembler.  */
-      if (strcmp (arg, "v8plus") != 0
-	  && strcmp (arg, "v8plusa") != 0)
-	{
-	  as_bad (_("invalid architecture -xarch=%s"), arg);
-	  return 0;
-	}
+#ifdef OBJ_ELF
+      if (strncmp (arg, "v9", 2) != 0)
+	md_parse_option (OPTION_32, NULL);
+      else
+	md_parse_option (OPTION_64, NULL);
+#endif
       /* Fall through.  */
 
     case 'A':
@@ -467,7 +469,10 @@ md_parse_option (c, arg)
 	if (sa == NULL
 	    || ! sa->user_option_p)
 	  {
-	    as_bad (_("invalid architecture -A%s"), arg);
+	    if (c == OPTION_XARCH)
+	      as_bad (_("invalid architecture -xarch=%s"), arg);
+	    else
+	      as_bad (_("invalid architecture -A%s"), arg);
 	    return 0;
 	  }
 
@@ -605,6 +610,7 @@ md_show_usage (stream)
      FILE *stream;
 {
   const struct sparc_arch *arch;
+  int column;
 
   /* We don't get a chance to initialize anything before we're called,
      so handle that now.  */
@@ -612,15 +618,35 @@ md_show_usage (stream)
     init_default_arch ();
 
   fprintf (stream, _("SPARC options:\n"));
+  column = 0;
   for (arch = &sparc_arch_table[0]; arch->name; arch++)
     {
+      if (!arch->user_option_p)
+	continue;
       if (arch != &sparc_arch_table[0])
 	fprintf (stream, " | ");
-      if (arch->user_option_p)
-	fprintf (stream, "-A%s", arch->name);
+      if (column + strlen(arch->name) > 70)
+	{
+	  column = 0;
+	  fputc ('\n', stream);
+	}
+      column += 5 + 2 + strlen(arch->name);
+      fprintf (stream, "-A%s", arch->name);
     }
-  fprintf (stream, _("\n-xarch=v8plus | -xarch=v8plusa\n"));
-  fprintf (stream, _("\
+  for (arch = &sparc_arch_table[0]; arch->name; arch++)
+    {
+      if (!arch->user_option_p)
+	continue;
+      fprintf (stream, " | ");
+      if (column + strlen(arch->name) > 65)
+	{
+	  column = 0;
+	  fputc ('\n', stream);
+	}
+      column += 5 + 7 + strlen(arch->name);
+      fprintf (stream, "-xarch=%s", arch->name);
+    }
+  fprintf (stream, _("\n\
 			specify variant of SPARC architecture\n\
 -bump			warn when assembler switches architectures\n\
 -sparc			ignored\n\
@@ -2110,7 +2136,7 @@ sparc_ip (str, pinsn)
 		      { "l44", 3, BFD_RELOC_SPARC_L44, 1, 0 },
 		      { "uhi", 3, BFD_RELOC_SPARC_HH22, 1, 0 },
 		      { "ulo", 3, BFD_RELOC_SPARC_HM10, 1, 0 },
-		      { NULL }
+		      { NULL, 0, 0, 0, 0 }
 		    };
 		    const struct ops *o;
 
@@ -3375,7 +3401,7 @@ tc_gen_reloc (section, fixp)
 
 symbolS *
 md_undefined_symbol (name)
-     char *name;
+     char *name ATTRIBUTE_UNUSED;
 {
   return 0;
 }
@@ -3384,7 +3410,7 @@ md_undefined_symbol (name)
 
 valueT
 md_section_align (segment, size)
-     segT segment;
+     segT segment ATTRIBUTE_UNUSED;
      valueT size;
 {
 #ifndef OBJ_ELF
@@ -3447,7 +3473,7 @@ static int max_alignment = 15;
 
 static void
 s_reserve (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   char *name;
   char *p;
@@ -3592,7 +3618,7 @@ s_reserve (ignore)
 
 static void
 s_common (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   char *name;
   char c;
@@ -3773,7 +3799,7 @@ s_common (ignore)
 
 static void
 s_empty (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   /* The easy way to implement is to just forget about the last
      instruction.  */
@@ -3782,7 +3808,7 @@ s_empty (ignore)
 
 static void
 s_seg (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
 
   if (strncmp (input_line_pointer, "\"text\"", 6) == 0)
@@ -3825,7 +3851,7 @@ s_data1 ()
 
 static void
 s_proc (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   while (!is_end_of_line[(unsigned char) *input_line_pointer])
     {
@@ -3858,7 +3884,7 @@ s_uacons (bytes)
 
 static void
 s_ncons (bytes)
-     int bytes;
+     int bytes ATTRIBUTE_UNUSED;
 {
   cons (sparc_arch_size == 32 ? 4 : 8);
 }
@@ -3873,7 +3899,7 @@ s_ncons (bytes)
 
 static void
 s_register (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   char c;
   int reg;

@@ -1,6 +1,13 @@
+2000-08-16  Jakub Jelinek  <jakub@redhat.com>
+
+	* config/tc-sparc.c: Kill all warnings.
+	(md_parse_option): Set -32/-64 for -xarch=, allow all -A archs
+	in -xarch= as well.
+	(md_show_usage): Update usage text.
+
 2000-08-16  Nick Clifton  <nickc@redhat.com>
 
-	* config/tc-arm.c (do_bx): Warn about "bx px" not being veryu
+	* config/tc-arm.c (do_bx): Warn about "bx px" not being very
 	useful.
 
 2000-08-14  Will Cohen  <wcohen@redhat.com>
