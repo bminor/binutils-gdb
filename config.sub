@@ -1,6 +1,9 @@
 #!/bin/sh
-# Configuration validation subroutine script, version 1.0.
+# Configuration validation subroutine script, version 1.1.
 #   Copyright (C) 1991, 1992 Free Software Foundation, Inc.
+# This file is (in principle) common to ALL GNU software.
+# The presence of a machine in this file suggests that SOME GNU software
+# can handle that machine.  It does not imply ALL GNU software can. 
 
 #This file is free software; you can redistribute it and/or modify
 #it under the terms of the GNU General Public License as published by
@@ -55,51 +58,52 @@ case $1 in
 esac
 
 # Separate what the user gave into CPU-COMPANY and OS (if any).
-basic_machine=`echo $1 | sed 's/-[^-][^-]*$//'`
+basic_machine=`echo $1 | sed 's/-[^-]*$//'`
 if [ $basic_machine != $1 ]
 then os=`echo $1 | sed 's/.*-/-/'`
 else os=; fi
 
 # Lets recognize common machines as not being OS so that things like
-# config.subr decstation-3100 as legal.
+# config.sub decstation-3100 work.
 case $os in
 	-dec* | -mips* | -sequent* | -encore* | -pc532* | -sgi* | -sony* | \
 	-att* | -7300* | -3300* | -delta* | -motorola* | -sun[234]* | \
 	-unicom* | -ibm* | -next* | -hp | -isi* | -apollo | -altos* | \
-	-convergent* | -ncr* | -news | -32* | -3600* | -3100* | -osf* | \
+	-convergent* | -ncr* | -news | -32* | -3600* | -3100* | \
 	-c[123]* | -convex* | -sun | -crds | -omron* | -dg | -ultra | -tti* | \
-	-harris | -sim)
+	-harris | -dolphin | \
+	-sim)						# CYGNUS LOCAL
 		os=
 		basic_machine=$1
 		;;
-	-scout)
+	-scout)						# CYGNUS LOCAL
 		;;
 	-sco*)
-		os=-scosysv322
+		os=-sco3.2v2
 		basic_machine=i386-unknown
 		;;
-	-OSE68k | -ose68k | -OSE | -ose | -es1800)
+	-isc*)
+		os=-isc
+		basic_machine=i386-unknown
+		;;
+	-OSE68k | -ose68k | -OSE | -ose | -es1800)	# CYGNUS LOCAL
 		os=-ose
 		basic_machine=m68k-ericsson
 		;;
-	-OSE68000 | -ose68000)
+	-OSE68000 | -ose68000)				# CYGNUS LOCAL
 		os=-ose
 		basic_machine=m68000-ericsson
 		;;
-	-isc*)
-		os=-iscsysv
-		basic_machine=i386-unknown
-		;;
 # start-sanitize-v9
-	-32)
+	-32)						# CYGNUS LOCAL
 		basic_machine=sparc64-hal
 		os=-hal32
 		;;
-	-64)
+	-64)						# CYGNUS LOCAL
 		basic_machine=sparc64-hal
 		os=-hal64
 		;;
-	-v7)
+	-v7)						# CYGNUS LOCAL
 		basic_machine=sparc64-sun
 		os=-v7
 		;;
@@ -109,37 +113,38 @@ esac
 # Decode aliases for certain CPU-COMPANY combinations.
 case $basic_machine in
 	# Recognize the basic CPU types with without company name.
-	tahoe | i386 | i486 | i860 | m68k | m680[01234]0 | m683?2 \
-		| m88k | ns32k | arm | pyramid \
-		| tron | a29k | 580 | i960 | h8300 | hppa1.0 | hppa1.1 | we32k\
-		| v70 | we32k | z8k)
+	# Some are omitted here because they have special meanings below.
+	tahoe | i[34]86 | i860 | m68k | m68000 | m88k | ns32k | arm | pyramid \
+		| tron | a29k | 580 | i960 | h8300 | hppa1.0 | hppa1.1 \
+		| alpha | we32k \
+		| m680[01234]0 | m683?2 | z8k | v70)	# CYGNUS LOCAL
 		basic_machine=$basic_machine-unknown
 		;;
 	# Recognize the basic CPU types with with company name.
-	vax-* | tahoe-* | i386-* | i486-* | i860-* | m68k-* \
-	      | m680[01234]0-* | m683?2-* | m88k-* \
-	      | sparc-* | ns32k-* | alliant-* | arm-* | c[123]* \
+	vax-* | tahoe-* | i[34]86-* | i860-* | m68k-* | m68000-* | m88k-* \
+	      | sparc-* | ns32k-* | fx80-* | arm-* | c[123]* \
 	      | mips-* | pyramid-* | tron-* | a29k-* | romp-* | rs6000-* \
 	      | none-* | 580-* | cray2-* | h8300-* | i960-* | xmp-* | ymp-* \
-	      | hppa1.0-* | hppa1.1-* | we32k-* | z8k-*)
+	      | hppa1.0-* | hppa1.1-* | alpha-* | we32k-* \
+	      | m680[01234]0-* | m683?2-* | z8k-*)	# CYGNUS LOCAL
 		;;
 	# Recognize the various machine names and aliases which stand
 	# for a CPU type and a company and sometimes even an OS.
 # start-sanitize-v9
-	sparc64-*) ;;
-	hal-32 | hal32)
+	sparc64-*) ;;					# CYGNUS LOCAL
+	hal-32 | hal32)					# CYGNUS LOCAL
 		basic_machine=sparc64-hal
 		os=-hal32
 		;;
-	hal-64 | hal64)
+	hal-64 | hal64)					# CYGNUS LOCAL
 		basic_machine=sparc64-hal
 		os=-hal64
 		;;
-	sparc64)
+	sparc64)					# CYGNUS LOCAL
 		basic_machine=sparc64-sun
 		os=-v9
 		;;
-	sparc64-v7 | sparc64v7)
+	sparc64-v7 | sparc64v7)				# CYGNUS LOCAL
 		basic_machine=sparc64-sun
 		os=-v7
 		;;
@@ -153,7 +158,7 @@ case $basic_machine in
 		basic_machine=vax-dec
 		os=-vms
 		;;
-	i386mach)
+	i386mach)					# CYGNUS LOCAL
 		basic_machine=i386-mach
 		os=-mach
 		;;
@@ -163,19 +168,31 @@ case $basic_machine in
 		;;
 	i386-sco* | i386sco | sco)
 		basic_machine=i386-unknown
-		os=-scosysv322
+		os=-sco3.2v2
 		;;
-	go32 | i386-go32)
+	go32 | i386-go32)				# CYGNUS LOCAL
 		basic_machine=i386-unknown
 		os=-go32
 		;;
 	i386-isc* | isc)
 		basic_machine=i386-unknown
-		os=-iscsysv
+		os=-isc
 		;;
-	i386-linux* | linux)
+	i386-linux* | linux)				# CYGNUS LOCAL
 		basic_machine=i386-unknown
 		os=-linux
+		;;
+	i486v32)
+		basic_machine=i486-unknown
+		os=-sysv32
+		;;
+	i486-sco* | i486sco | sco)
+		basic_machine=i486-unknown
+		os=-sco3.2v2
+		;;
+	i486-isc* | isc)
+		basic_machine=i486-unknown
+		os=-isc
 		;;
 	i386v4*)
 		basic_machine=i386-unknown
@@ -193,35 +210,35 @@ case $basic_machine in
 		basic_machine=i486-unknown
 		os=-sysv
 		;;
-	386bsd)
+	386bsd)						# CYGNUS LOCAL
 		basic_machine=i386-unknown
 		os=-bsd
 		;;
 	spur)
 		basic_machine=spur-unknown
 		;;
-	alliant)
-		basic_machine=alliant-alliant
+	alliant | fx80)
+		basic_machine=fx80-alliant
 		;;
 	convex-c1)
 		basic_machine=c1-convex
-		os=-sysv
+		os=-bsd
 		;;
 	convex-c2)
 		basic_machine=c2-convex
-		os=-sysv
+		os=-bsd
 		;;
 	convex-c32)
 		basic_machine=c32-convex
-		os=-sysv
+		os=-bsd
 		;;
 	convex-c34)
 		basic_machine=c34-convex
-		os=-sysv
+		os=-bsd
 		;;
 	convex-c38)
 		basic_machine=c38-convex
-		os=-sysv
+		os=-bsd
 		;;
 	m88k-omron*)
 		basic_machine=m88k-omron
@@ -233,31 +250,37 @@ case $basic_machine in
 	crds | unos)
 		basic_machine=m68k-crds
 		;;
+	elxsi)
+		basic_machine=elxsi-elxsi
+		os=-bsd
+		;;
 	encore | umax | mmax)
 		basic_machine=ns32k-encore
-		os=-sysv
+		os=-bsd
 		;;
 	genix)
 		basic_machine=ns32k-ns
 		;;
-	iris | iris3 | iris4d)
+	iris | iris4d | \
+	iris3 | iris4)					# CYGNUS LOCAL
 		basic_machine=mips-sgi
-		os=-irix3
-		;;
-	iris4)
-		basic_machine=mips-sgi
-		os=-irix4
+		case $os in
+		    -irix*)
+			;;
+		    *)
+			os=-irix4
+			;;
+		esac
 		;;
 	news | news700 | news800 | news900)
 		basic_machine=m68k-sony
 		os=-newsos
 		;;
 	3b1 | 7300 | 7300-att | att-7300 | pc7300 | safari | unixpc)
-		basic_machine=m68k-att
+		basic_machine=m68000-att
 		;;
-	3b* | we32k* )
+	3b*)
 		basic_machine=we32k-att
-		os=-sysv
 		;;
 	delta | 3300 | motorola-3300 | motorola-delta \
 	      | 3300-motorola | delta-motorola)
@@ -301,11 +324,11 @@ case $basic_machine in
 		basic_machine=sparc-sun
 		os=-sunos4
 		;;
-	sun4sol2)
+	sun4sol2)					# CYGNUS LOCAL
 		basic_machine=sparc-sun
 		os=-solaris2
 		;;
-	z8ksim)
+	z8ksim)						# CYGNUS LOCAL
 		basic_machine=z8k-unknown
 		os=-sim
 		;;
@@ -315,12 +338,15 @@ case $basic_machine in
 	sun4)
 		basic_machine=sparc-sun
 		;;
-	msdos)
+	msdos)						# CYGNUS LOCAL
 		basic_machine=i386-unknown	
 		os=-msdos
 		;;
 	pbd)
-		basic_machine=sparc-unicom
+		basic_machine=sparc-tti
+		;;
+	pbb)
+		basic_machine=m68k-tti
 		;;
 	sun386 | sun386i | roadrunner)
 		basic_machine=i386-sun
@@ -328,9 +354,15 @@ case $basic_machine in
 	ps2)
 		basic_machine=i386-ibm
 		;;
+	fx2800)
+		basic_machine=i860-alliant
+		;;
 	next)
 		basic_machine=m68k-next
 		os=-bsd
+		;;
+	amiga)
+		basic_machine=m68k-cbm
 		;;
 	hp9k3[2-9][0-9])
 		basic_machine=m68k-hp
@@ -352,7 +384,7 @@ case $basic_machine in
 		basic_machine=m68k-apollo
 		os=-sysv
 		;;
-	apollo68bsd)
+	apollo68bsd)					# CYGNUS LOCAL
 		basic_machine=m68k-apollo
 		os=-bsd
 		;;
@@ -369,10 +401,10 @@ case $basic_machine in
 		basic_machine=mips-sony
 		os=-newsos
 		;;
-	st2000)
+	st2000)						# CYGNUS LOCAL
 		basic_machine=m68k-tandem
 		;;
-	decstation-dec | decstation | decstation-3100 | pmax | pmin | dec3100 | decstatn)
+	decstation | decstation-3100 | pmax | pmin | dec3100 | decstatn)
 		basic_machine=mips-dec
 		;;
 	magnum | m3230)
@@ -402,7 +434,7 @@ case $basic_machine in
 		basic_machine=m68k-cbm
 		os=-sysv4
 		;;
-	stratus)
+	stratus)					# CYGNUS LOCAL
 		basic_machine=i860-stratus
 		os=-sysv4
 		;;
@@ -431,25 +463,29 @@ case $basic_machine in
 		os=-ebmon
 		;;
 
-	h8300hms)
+	h8300hms)					# CYGNUS LOCAL
 		basic_machine=h8300-hitachi
 		os=-hms
 		;;
-	udi29k)
-		basic_machine=a29k-amd
-		os=-udi
-		;;
-	a29khif)
-		basic_machine=a29k-amd
-		os=-udi
-		;;
-	sa29200)
-		basic_machine=a29k-amd
-		os=-udi
-		;;
-	h8300xray)
+	h8300xray)					# CYGNUS LOCAL
 		basic_machine=h8300-hitachi
 		os=-xray
+		;;
+	h8300hds)
+		basic_machine=h8300-hitachi
+		os=-hds
+		;;
+	udi29k)						# CYGNUS LOCAL
+		basic_machine=a29k-amd
+		os=-udi
+		;;
+	a29khif)					# CYGNUS LOCAL
+		basic_machine=a29k-amd
+		os=-udi
+		;;
+	sa29200)					# CYGNUS LOCAL
+		basic_machine=a29k-amd
+		os=-udi
 		;;
 	harris)
 		basic_machine=m88k-harris
@@ -471,19 +507,11 @@ case $basic_machine in
 		basic_machine=m68k-hp
 		os=-hpux
 		;;
-	hppabsd)
-		basic_machine=hppa-hp
-		os=-bsd
-		;;
-	hppahpux)
-		basic_machine=hppa-hp
-		os=-hpux
-		;;
 	ncr3000)
 		basic_machine=i486-ncr
 		os=-sysv4
 		;;
-	necv70)
+	necv70)						# CYGNUS LOCAL
 		basic_machine=v70-nec
 		os=-sysv
 		;;
@@ -515,43 +543,43 @@ case $basic_machine in
 		basic_machine=m68k-wrs
 		os=-vxworks
 		;;
-	es1800 | OSE68k | ose68k)
+	es1800 | OSE68k | ose68k)			# CYGNUS LOCAL
 		basic_machine=m68k-ericsson
 		os=-ose
 		;;
-	OSE68000 | ose68000)
+	OSE68000 | ose68000)				# CYGNUS LOCAL
 		basic_machine=m68000-ericsson
 		os=-ose
 		;;
-	os68k)
+	os68k)						# CYGNUS LOCAL
 		basic_machine=m68k-none
 		os=-os68k
 		;;
-	sparclite)
+	sparclite)					# CYGNUS LOCAL
 		basic_machine=sparclite-fujitsu
 		os=-none
 		;;
-	sparclite-wrs)
+	sparclite-wrs)					# CYGNUS LOCAL
 		basic_machine=sparclite-wrs
 		os=-vxworks
 		;;
-	sparcfrw)
+	sparcfrw)					# CYGNUS LOCAL
 		basic_machine=sparcfrw-sun
 		os=-sunos4
 		;;
-	sparcfrwcompat)
+	sparcfrwcompat)					# CYGNUS LOCAL
 		basic_machine=sparcfrwcompat-sun
 		os=-sunos4
 		;;
-	sparclitefrw)
+	sparclitefrw)					# CYGNUS LOCAL
 		basic_machine=sparclitefrw-fujitsu
 		os=-none
 		;;
-	sparclitefrwcompat)
+	sparclitefrwcompat)				# CYGNUS LOCAL
 		basic_machine=sparclitefrwcompat-fujitsu
 		os=-none
 		;;
-	adobe68k)
+	adobe68k)					# CYGNUS LOCAL
 		basic_machine=m68010-adobe
 		os=-scout
 		;;
@@ -575,15 +603,27 @@ case $basic_machine in
 	vax)
 		basic_machine=vax-dec
 		;;
+	we32k)
+		basic_machine=we32k-att
+		;;
 	sparc)
 		basic_machine=sparc-sun
-		;;
-	fx2800)
-		basic_machine=i860-alliant
 		;;
 	*)
 		echo Invalid configuration \`$1\': machine \`$basic_machine\' not recognized 1>&2
 		exit 1
+		;;
+esac
+
+# Here we canonicalize certain aliases for manufacturers.
+case $basic_machine in
+	*-digital*)
+		basic_machine=`echo $basic_machine | sed 's/digital.*/dec/'`
+		;;
+	*-commodore*)
+		basic_machine=`echo $basic_machine | sed 's/commodore.*/cbm/'`
+		;;
+	*)
 		;;
 esac
 
@@ -595,39 +635,46 @@ case $os in
 	# First accept the basic system types.
 	# The portable systems comes first.
 	# Each alternative must end in a *, to match a version number.
-	-bsd* | -sysv* | -mach* | -minix* | -genix* | -ultrix* \
-	      | -aout | -coff | -elf \
+	-bsd* | -sysv* | -mach* | -minix* | -genix* | -ultrix* | -irix* \
 	      | -vms* | -sco* | -esix* | -isc* | -aix* | -sunos* | -hpux* \
-	      | -unos* | -osf* | -v88r* | -luna* | -dgux* | -solaris* | -sym* \
-	      | -newsos | -amigados* | -msdos* | -none* | -os68k* | -irix* \
-	      | -nindy* | -vxworks* | -ebmon* | -udi | -hms* | -xray \
-	      | -m88kbcs* | -go32 | -linux* | -sim | -es1800*)
+	      | -unos* | -osf* | -luna* | -dgux* | -solaris* | -sym* \
+	      | -amigados* | -msdos* | -newsos* | -unicos* | -aos* \
+	      | -nindy* | -vxworks* | -ebmon* | -hds* | -m88kbcs* \
+	      | -riscos* | -linux* \
+	      | -go32 | -linux* | -sim | -es1800* | -udi | -hms* | -xray \
+	      | -os68k* | -none* | -v88r* | -aout | -coff | -elf)
+				# The last two lines above are CYGNUS LOCAL
 	;;
 # start-sanitize-v9
-	-v7 | -v9 | -hal32 | -hal64) ;;
+	-v7 | -v9 | -hal32 | -hal64) ;;			# CYGNUS LOCAL
 # end-sanitize-v9
 
-# Note that readline checks for newsos
-#	-newsos*)
-#		os=-bsd
-#		;;
 	-osfrose*)
-		os=-osf
+		os=-osfrose
 		;;
 	-osf*)
+		os=-osf
+		;;
+	-utek*)
 		os=-bsd
 		;;
 	-dynix*)
 		os=-bsd
 		;;
-	-aos*)
-		os=-bsd
+	-acis*)
+		os=-aos
 		;;
-	-386bsd)
+	-386bsd)					# CYGNUS LOCAL
 		os=-bsd
 		;;
 	-ctix* | -uts*)
 		os=-sysv
+		;;
+	-triton*)
+		os=-sysv3
+		;;
+	-oss*)
+		os=-sysv3
 		;;
 	-svr4)
 		os=-sysv4
@@ -635,11 +682,13 @@ case $os in
 	-svr3)
 		os=-sysv3
 		;;
-	-ose*)
+	-ose*)						# CYGNUS LOCAL
 		os=-ose
 		;;
-	-es1800*)
+	-es1800*)					# CYGNUS LOCAL
 		os=-ose
+		;;
+	-none)
 		;;
 	*)
 		# Get rid of the `-' at the beginning of $os.
@@ -655,10 +704,10 @@ else
 # machine or put another way, the most popular os provided with the machine.
 case $basic_machine in
 	*-dec | vax-*)
-		os=-ultrix42
+		os=-ultrix4.2
 		;;
 	i386-sun)
-		os=-sunos402
+		os=-sunos4.0.2
 		;;
 	m68000-sun)
 		os=-sunos3
@@ -666,11 +715,11 @@ case $basic_machine in
 		# default.
 		# os=-sunos4
 		;;
-	sparc-* | *-sun)
-		os=-sunos411
+	*-tti)	# must be before sparc entry or we get the wrong os.
+		os=-sysv3
 		;;
-	romp-*)
-		os=-bsd
+	sparc-* | *-sun)
+		os=-sunos4.1.1
 		;;
 	*-ibm)
 		os=-aix
@@ -681,8 +730,14 @@ case $basic_machine in
 	*-sgi | i860-* | *-att | *-ncr | *-altos | *-motorola | *-convergent)
 		os=-sysv
 		;;
+	*-cbm)
+		os=-amigados
+		;;
 	*-dg)
 		os=-dgux
+		;;
+	*-dolphin)
+		os=-sysv3
 		;;
 	m88k-omron*)
 		os=-luna
@@ -693,8 +748,8 @@ case $basic_machine in
 	*-ns)
 		os=-genix
 		;;
-	i386-*)
-		os=-scosysv322
+	i[34]86-*)
+		os=-sco3.2v2
 		;;
 	*)
 		os=-none
@@ -729,7 +784,7 @@ case $basic_machine in
 			-genix*)
 				vendor=ns
 				;;
-			-vxworks*)
+			-vxworks*)			# CYGNUS LOCAL
 				vendor=wrs
 				;;
 		esac

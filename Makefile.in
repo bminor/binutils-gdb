@@ -45,7 +45,7 @@ docdir = $(datadir)/doc
 
 SHELL = /bin/sh
 
-INSTALL = install -c
+INSTALL = cp
 INSTALL_PROGRAM = $(INSTALL)
 INSTALL_DATA = $(INSTALL)
 
@@ -59,7 +59,7 @@ NM = nm
 
 BISON = `if [ -f $${rootme}/byacc/byacc ] ; \
 	    then echo $${rootme}/byacc/byacc ; \
-	    else echo bison -y ; \
+	    else echo byacc ; \
 	fi`
 
 LEX = `if [ -f $${rootme}/flex/flex ] ; \
@@ -75,7 +75,7 @@ MAKEINFO = `if [ -f $${rootme}/texinfo/C/makeinfo ] ; \
 CC_FOR_BUILD = $(CC)
 C++_FOR_BUILD = gcc
 
-SUBDIRS = libiberty mmalloc glob readline opcodes bfd gdb  binutils ld gas tgas gcc libg++ newlib deja-gnu
+SUBDIRS = libiberty mmalloc glob readline opcodes bfd gdb binutils ld gas tgas gcc libg++ newlib deja-gnu
 OTHERS = 
 
 ALL = all.normal
@@ -88,7 +88,7 @@ CC_FOR_TARGET = ` \
   if [ -f $${rootme}/gcc/Makefile ] ; then \
     echo $${rootme}/gcc/gcc -B$${rootme}/gcc/; \
   else \
-    if [ "$(host_cpu)-$(host_vendor)-$(host_os)" = "$(target_cpu)-$(target_vendor)-$(target_os)" ] ; then \
+    if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
       echo $(CC); \
     else \
       t='$(program_transform_name)'; echo gcc | sed -e '' $$t; \
@@ -121,7 +121,7 @@ AR_FOR_TARGET = ` \
   if [ -f $${rootme}/binutils/Makefile ] ; then \
     echo $${rootme}/binutils/ar ; \
   else \
-    if [ "$(host_cpu)-$(host_vendor)-$(host_os)" = "$(target_cpu)-$(target_vendor)-$(target_os)" ] ; then \
+    if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
       echo $(AR); \
     else \
        t='$(program_transform_name)'; echo ar | sed -e '' $$t ; \
@@ -132,7 +132,7 @@ RANLIB_FOR_TARGET = ` \
   if [ -f $${rootme}/binutils/Makefile ] ; then \
     echo $${rootme}/binutils/ranlib ; \
   else \
-    if [ "$(host_cpu)-$(host_vendor)-$(host_os)" = "$(target_cpu)-$(target_vendor)-$(target_os)" ] ; then \
+    if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
       echo $(RANLIB); \
     else \
        t='$(program_transform_name)'; echo ranlib | sed -e '' $$t ; \
@@ -143,7 +143,7 @@ NM_FOR_TARGET = ` \
   if [ -f $${rootme}/binutils/Makefile ] ; then \
     echo $${rootme}/binutils/nm ; \
   else \
-    if [ "$(host_cpu)-$(host_vendor)-$(host_os)" = "$(target_cpu)-$(target_vendor)-$(target_os)" ] ; then \
+    if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
       echo $(NM); \
     else \
        t='$(program_transform_name)'; echo nm | sed -e '' $$t ; \
@@ -164,53 +164,53 @@ XTRAFLAGS = ` \
 #### host and target specific makefile fragments come in here.
 ###
 
-# Flags to pass down to sub-makes
+# Flags to pass down to sub-makes -- please keep these in alphabetical order
 FLAGS_TO_PASS = \
-	"prefix=$(prefix)" \
-	"exec_prefix=$(exec_prefix)" \
-	"tooldir=$(tooldir)" \
 	"AR=$(AR)" \
 	"AR_FLAGS=$(AR_FLAGS)" \
-	"CC=$(CC)" \
-	"CFLAGS=$(CFLAGS)" \
-	"C++FLAGS=$(C++FLAGS)" \
-	"RANLIB=$(RANLIB)" \
-	"LOADLIBES=$(LOADLIBES)" \
-	"LDFLAGS=$(LDFLAGS)" \
 	"BISON=$(BISON)" \
-	"LEX=$(LEX)" \
-	"MAKEINFO=$(MAKEINFO)" \
+	"C++FLAGS=$(C++FLAGS)" \
+	"C++_FOR_BUILD=$(C++_FOR_BUILD)"
+	"CC=$(CC)" \
+	"CC_FOR_BUILD=$(CC_FOR_BUILD)" \
+	"CFLAGS=$(CFLAGS)" \
 	"INSTALL=$(INSTALL)" \
 	"INSTALL_DATA=$(INSTALL_DATA)" \
 	"INSTALL_PROGRAM=$(INSTALL_PROGRAM)" \
-	"CC_FOR_BUILD=$(CC_FOR_BUILD)" \
-	"C++_FOR_BUILD=$(C++_FOR_BUILD)"
+	"LDFLAGS=$(LDFLAGS)" \
+	"LEX=$(LEX)" \
+	"LOADLIBES=$(LOADLIBES)" \
+	"MAKEINFO=$(MAKEINFO)" \
+	"RANLIB=$(RANLIB)" \
+	"exec_prefix=$(exec_prefix)" \
+	"prefix=$(prefix)" \
+	"tooldir=$(tooldir)" 
 
 # Flags to pass down to makes which are built with the target
-# environment (e.g. libg++, xiberty, newlib).
+# environment (e.g. libg++, xiberty, newlib).  -- keep these in alpha order please
 TARGET_FLAGS_TO_PASS = \
-	"prefix=$(prefix)" \
-	"exec_prefix=$(exec_prefix)" \
-	"tooldir=$(tooldir)" \
+	"AR=$(AR_FOR_TARGET)" \
 	"AR_FLAGS=$(AR_FLAGS)" \
-	"CFLAGS=$(CFLAGS)" \
-	"LOADLIBES=$(LOADLIBES)" \
-	"LDFLAGS=$(LDFLAGS)" \
+	"AS=$(AS_FOR_TARGET)" \
 	"BISON=$(BISON)" \
-	"LEX=$(LEX)" \
-	"MAKEINFO=$(MAKEINFO)" \
+	"C++=$(C++_FOR_TARGET)" \
+	"C++_FOR_BUILD=$(C++_FOR_BUILD)" \
+	"CC=$(CC_FOR_TARGET)" \
+	"CC_FOR_BUILD=$(CC_FOR_BUILD)" \
+	"CFLAGS=$(CFLAGS)" \
 	"INSTALL=$(INSTALL)" \
 	"INSTALL_DATA=$(INSTALL_DATA)" \
 	"INSTALL_PROGRAM=$(INSTALL_PROGRAM)" \
-	"CC_FOR_BUILD=$(CC_FOR_BUILD)" \
-	"C++_FOR_BUILD=$(C++_FOR_BUILD)" \
-	"CC=$(CC_FOR_TARGET)" \
-	"C++=$(C++_FOR_TARGET)" \
-	"AS=$(AS_FOR_TARGET)" \
-	"AR=$(AR_FOR_TARGET)" \
-	"RANLIB=$(RANLIB_FOR_TARGET)" \
+	"LDFLAGS=$(LDFLAGS)" \
+	"LEX=$(LEX)" \
+	"LOADLIBES=$(LOADLIBES)" \
+	"MAKEINFO=$(MAKEINFO)" \
 	"NM=$(NM_FOR_TARGET)" \
-	"XTRAFLAGS=$(XTRAFLAGS)"
+	"RANLIB=$(RANLIB_FOR_TARGET)" \
+	"XTRAFLAGS=$(XTRAFLAGS)" \
+	"exec_prefix=$(exec_prefix)" \
+	"prefix=$(prefix)" \
+	"tooldir=$(tooldir)" 
 
 # The first rule in the file had better be this one.  Don't put any above it.
 all:	$(ALL)
@@ -715,7 +715,7 @@ install-flex: force
 		true ; \
 	fi
 ### gcc
-all-gcc: all-libiberty all-byacc
+all-gcc: all-libiberty all-byacc all-binutils
 	@if [ -f ./gcc/Makefile ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./gcc; \
@@ -1177,7 +1177,7 @@ install-libm: force
 
 ### libg++
 
-all-libg++: all-gas all-ld all-gcc
+all-libg++: all-gas all-ld all-gcc all-xiberty
 	@if [ -f ./libg++/Makefile ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		srcroot=`cd $(srcdir); pwd` ; export srcroot ; \
@@ -1208,11 +1208,6 @@ install-libg++: force
 	fi
 
 ### other supporting targets
-# this is a bad hack.
-all.xclib:	all.normal
-	if [ -f clib/Makefile ] ; then \
-		(cd clib ; $(MAKE) $(FLAGS_TO_PASS)) ; \
-	fi
 
 subdir_do:
 	@for i in $(DODIRS); do \
@@ -1279,12 +1274,8 @@ install-dirs:
 MAKEINFODIRS= \
 	$(prefix)
 
-#	$(infodir)
-
 install-info-dirs:
 	if [ -d $(prefix) ] ; then true ; else mkdir $(prefix) ; fi
-#	if [ -d $(datadir) ] ; then true ; else mkdir $(datadir) ; fi
-#	if [ -d $(infodir) ] ; then true ; else mkdir $(infodir) ; fi
 
 dir.info:
 	$(srcdir)/texinfo/gen-info-dir $(infodir) $(srcdir)/texinfo/dir.info-template > dir.info.new

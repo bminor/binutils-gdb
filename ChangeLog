@@ -1,3 +1,48 @@
+Thu Nov  5 14:35:41 1992  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
+
+	* config.sub: removed bogus hppabsd and hppahpux names, since
+	"hppa" is not a valid cpu (hppa1.1 or hppa1.0 are, though)
+
+Thu Oct 29 00:12:41 1992  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
+
+	* Makefile.in: all-gcc now depends on all-binutils.  all-libg++
+	depends upon all-xiberty
+
+	* Makefile.in: changes from p3, including:
+
+	Thu Oct  8 15:00:17 1992  Ian Lance Taylor  (ian@cygnus.com)
+
+	* Makefile.in (XTRAFLAGS): include newlib directories if
+	newlib/Makefile exists, rather than if host != target.
+
+	Fri Sep 25 13:41:52 1992  Ian Lance Taylor  (ian@cygnus.com)
+
+	* Makefile.in: added -nostdinc to XTRAFLAGS if we are using gcc
+	from the same source tree and not building a cross-compiler.  This
+	matters for the libg++ configuration if reconfiguring a tree that
+	has already been installed.
+
+	Thu Sep 10 10:35:51 1992  Ian Lance Taylor  (ian@cygnus.com)
+
+	* Makefile.in: added -I for newlib/targ-include to XTRAFLAGS, to
+	pick up the machine and system specific header files.
+
+	* Makefile.in: added AS_FOR_TARGET, passed down in
+	TARGET_FLAGS_TO_PASS.  Added CC_FOR_BUILD, which is intended to be
+	the C compiler to use to create programs which are run in the
+	build environment, set it to default to $(CC), and passed it down
+	in FLAGS_TO_PASS and TARGET_FLAGS_TO_PASS.
+
+	Mon Sep  7 22:34:42 1992  Ian Lance Taylor  (ian@cirdan.cygnus.com)
+
+	* Makefile.in: add $(host) = $(target) tests back to *_FOR_TARGET.
+	We need them for unusual native builds, like systems without
+	ranlib.
+
+	* configure: also define $(host_canonical) and
+        $(target_canonical), which are the full, canonical names for the
+        given host and target
+
 Thu Nov  5 10:38:46 1992  Michael Werner  (mtw@rtl.cygnus.com)
 
 	* ./deja-gnu/gdb.t21/.Sanitize & ./deja-gnu/gdb.t22/.Sanitize

@@ -38,7 +38,7 @@ CVS_TAG :=
 CVS_MODULE := devo
 
 ### Historically, this was identical to CVS_TAG.  This is changing.
-RELEASE_TAG := latest
+RELEASE_TAG := latest-921102
 
 ### Historically, binaries were installed here.  This is changing.
 release_root := $(ROOTING)/$(RELEASE_TAG)
@@ -71,7 +71,7 @@ INPLACEDIR := $(host)-in-place
 HOLESDIR := $(host)-holes
 
 .PHONY: all
-all:	$(TREE)-stamp-co do1 do2 do3 comparison
+all:	in-place $(TREE)-stamp-co do1 do2 do3 comparison
 
 .PHONY: in-place
 in-place:	$(host)-stamp-in-place
