@@ -22,9 +22,6 @@ INSTALL = install -c
 INSTALL_PROGRAM = $(INSTALL)
 INSTALL_FILE = $(INSTALL)
 
-## Configuration options
-# These should be all you need set before compiling
-
 #CC=gcc -Wall
 # these two are almost the same program
 AR_PROG=ar
