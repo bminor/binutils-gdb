@@ -800,17 +800,18 @@ DEPTC_fr30_elf = $(INCDIR)/symcat.h $(srcdir)/config/obj-elf.h \
 
 DEPTC_frv_coff = $(INCDIR)/symcat.h $(srcdir)/config/obj-coff.h \
   $(srcdir)/config/tc-frv.h $(INCDIR)/coff/internal.h \
-  $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h $(INCDIR)/safe-ctype.h \
+  $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h dwarf2dbg.h \
   subsegs.h $(INCDIR)/obstack.h $(srcdir)/../opcodes/frv-desc.h \
   $(INCDIR)/opcode/cgen.h $(srcdir)/../opcodes/frv-opc.h \
-  cgen.h
+  cgen.h $(BFDDIR)/libbfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/frv.h \
+  $(INCDIR)/elf/reloc-macros.h
 
 DEPTC_frv_elf = $(INCDIR)/symcat.h $(srcdir)/config/obj-elf.h \
   $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-frv.h \
-  $(INCDIR)/safe-ctype.h subsegs.h $(INCDIR)/obstack.h \
-  $(srcdir)/../opcodes/frv-desc.h $(INCDIR)/opcode/cgen.h \
-  $(srcdir)/../opcodes/frv-opc.h cgen.h
+  dwarf2dbg.h subsegs.h $(INCDIR)/obstack.h $(srcdir)/../opcodes/frv-desc.h \
+  $(INCDIR)/opcode/cgen.h $(srcdir)/../opcodes/frv-opc.h \
+  cgen.h $(BFDDIR)/libbfd.h $(INCDIR)/elf/frv.h $(INCDIR)/elf/reloc-macros.h
 
 DEPTC_h8300_coff = $(INCDIR)/symcat.h $(srcdir)/config/obj-coff.h \
   $(srcdir)/config/tc-h8300.h $(INCDIR)/coff/internal.h \
@@ -1228,24 +1229,27 @@ DEPTC_tic80_elf = $(INCDIR)/symcat.h $(srcdir)/config/obj-elf.h \
 
 DEPTC_vax_aout = $(INCDIR)/symcat.h $(srcdir)/config/obj-aout.h \
   $(srcdir)/config/tc-vax.h $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h \
-  $(srcdir)/config/vax-inst.h $(INCDIR)/obstack.h $(INCDIR)/opcode/vax.h \
-  $(INCDIR)/safe-ctype.h
+  $(srcdir)/config/vax-inst.h $(INCDIR)/obstack.h subsegs.h \
+  $(INCDIR)/opcode/vax.h $(INCDIR)/safe-ctype.h
 
 DEPTC_vax_coff = $(INCDIR)/symcat.h $(srcdir)/config/obj-coff.h \
   $(srcdir)/config/tc-vax.h $(INCDIR)/coff/internal.h \
   $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h $(srcdir)/config/vax-inst.h \
-  $(INCDIR)/obstack.h $(INCDIR)/opcode/vax.h $(INCDIR)/safe-ctype.h
+  $(INCDIR)/obstack.h subsegs.h $(INCDIR)/opcode/vax.h \
+  $(INCDIR)/safe-ctype.h
 
 DEPTC_vax_elf = $(INCDIR)/symcat.h $(srcdir)/config/obj-elf.h \
   $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-vax.h \
-  $(srcdir)/config/vax-inst.h $(INCDIR)/obstack.h $(INCDIR)/opcode/vax.h \
+  $(srcdir)/config/vax-inst.h $(INCDIR)/obstack.h subsegs.h \
+  $(INCDIR)/elf/vax.h $(INCDIR)/elf/reloc-macros.h $(INCDIR)/opcode/vax.h \
   $(INCDIR)/safe-ctype.h
 
 DEPTC_vax_vms = $(INCDIR)/symcat.h $(srcdir)/config/obj-vms.h \
   $(srcdir)/config/tc-vax.h $(INCDIR)/aout/stab_gnu.h \
   $(INCDIR)/aout/stab.def $(srcdir)/config/vax-inst.h \
-  $(INCDIR)/obstack.h $(INCDIR)/opcode/vax.h $(INCDIR)/safe-ctype.h
+  $(INCDIR)/obstack.h subsegs.h $(INCDIR)/opcode/vax.h \
+  $(INCDIR)/safe-ctype.h
 
 DEPTC_w65_coff = $(INCDIR)/symcat.h $(srcdir)/config/obj-coff.h \
   $(srcdir)/config/tc-w65.h $(INCDIR)/coff/internal.h \
@@ -2802,7 +2806,6 @@ check-DEJAGNU: site.exp
 	  TCL_LIBRARY=`cd $(top_srcdir)/../tcl/library && pwd`; \
 	  export TCL_LIBRARY; \
 	fi; \
-	LC_ALL=C; export LC_ALL; \
 	runtest=$(RUNTEST); \
 	cd testsuite; \
 	if $(SHELL) -c "$$runtest --version" > /dev/null 2>&1; then \

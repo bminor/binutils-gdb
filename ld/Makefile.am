@@ -1091,7 +1091,6 @@ check-DEJAGNU: site.exp
 	  TCL_LIBRARY=`cd $(top_srcdir)/../tcl/library && pwd`; \
 	  export TCL_LIBRARY; \
 	fi; \
-	LC_ALL=C; export LC_ALL; \
 	runtest=$(RUNTEST); \
 	if $(SHELL) -c "$$runtest --version" > /dev/null 2>&1; then \
 	  $$runtest --tool $(DEJATOOL) --srcdir $${srcroot}/testsuite \
@@ -1379,9 +1378,9 @@ ldgram.o: ldgram.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   mri.h ldctor.h ldlex.h
 ldlex.o: ldlex.c $(INCDIR)/ansidecl.h ../bfd/bfd.h \
   $(INCDIR)/symcat.h sysdep.h config.h $(INCDIR)/fopen-same.h \
-  $(INCDIR)/safe-ctype.h ld.h $(INCDIR)/bin-bugs.h ldmisc.h \
-  ldexp.h ldlang.h ldgram.h ldfile.h ldlex.h ldmain.h \
-  $(INCDIR)/libiberty.h
+  $(INCDIR)/safe-ctype.h $(INCDIR)/bfdlink.h ld.h $(INCDIR)/bin-bugs.h \
+  ldmisc.h ldexp.h ldlang.h ldgram.h ldfile.h ldlex.h \
+  ldmain.h $(INCDIR)/libiberty.h
 deffilep.o: deffilep.c $(INCDIR)/libiberty.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/safe-ctype.h ../bfd/bfd.h $(INCDIR)/symcat.h \
   sysdep.h config.h $(INCDIR)/fopen-same.h ld.h $(INCDIR)/bin-bugs.h \
