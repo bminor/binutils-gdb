@@ -245,7 +245,7 @@ VMS_OTHER_OBJS = \
 	../libiberty/getopt1.o \
 	../libiberty/getruntime.o
 
-all: as.new gasp.new
+all: .gdbinit as.new gasp.new
 	@srcroot=`cd $(srcroot); pwd`; export srcroot; \
 	(cd doc ; $(MAKE) $(FLAGS_TO_PASS) all)
 
@@ -548,4 +548,6 @@ force:
 
 Makefile: $(srcdir)/Makefile.in $(host_makefile_frag) $(target_makefile_frag) \
 		$(srcdir)/configure.in config.status
+	$(SHELL) ./config.status
+.gdbinit: $(srcdir)/gdbinit.in config.status
 	$(SHELL) ./config.status
