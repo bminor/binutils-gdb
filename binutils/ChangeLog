@@ -1,3 +1,12 @@
+Tue Dec 22 15:46:56 1992  Per Bothner  (bothner@rtl.cygnus.com)
+
+	* Makefile.in:  Make check depend on all.
+	* Makefile.in (distclean): Remove sysdep.h.
+	* size.c:  Use %u format where appropriate.
+	* objdump.c:  Standardize:  L_SET -> SEEK_SET.
+	* objdump.c:  Use new macro bfd_asymbol_bfd.
+	* configure.in:  Allow std-host as the default ${mys_host}.
+
 Tue Dec 15 18:05:07 1992  Per Bothner  (bothner@cygnus.com)
 
 	* Makefile.in (dist):  Fix permissions before release.
