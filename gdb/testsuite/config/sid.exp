@@ -30,8 +30,8 @@ proc sid_start {} {
 	    if {[target_info exists sim,defaultendian]} then {
 		set sidendian [target_info sim,defaultendian] 
 	    } else { 
-		warning "Unknown target endianness - assuming -EB"
-		set sidendian "-EB" 
+                # rely on endianness settings in sid configuration defaults
+                set sidendian ""
 	    }
 	}
     }

@@ -1,3 +1,8 @@
+2001-08-16  Frank Ch. Eigler  <fche@redhat.com>
+
+	* config/sid.exp (sid_start): Don't warn if we cannot figure out
+	what to force sid endianness to.
+
 2001-08-15  Keith Seitz  <keiths@redhat.com>
 
 	* lib/gdb.exp (gdbtk_start): Don't set environment
