@@ -1,3 +1,8 @@
+1998-12-12  Gavin Romig-Koch  <gavin@cygnus.com>
+
+	* elf32-mips.c (_bfd_mips_elf_final_write_processing): 
+	Handle bfd_mach_mips4300.
+
 start-sanitize-sky
 Sat Dec 12 08:52:41 1998  Doug Evans  <devans@charmed.cygnus.com>
 
