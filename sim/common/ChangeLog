@@ -1,3 +1,7 @@
+Mon Apr  7 15:53:21 1997  Andrew Cagney  <cagney@kremvax.cygnus.com>
+
+	* run.c (main): Check that a program to run was specified.
+
 Mon Apr  7 15:45:02 1997  Andrew Cagney  <cagney@kremvax.cygnus.com>
 
 	* aclocal.m4 (AC_TYPE_SIGNAL): Add check.
