@@ -1,3 +1,8 @@
+2003-05-01  Andrew Cagney  <cagney@redhat.com>
+
+	* gdb.asm/asm-source.exp: Check that "disassm" and "x/i" of a
+	variable do not give memory errors.
+
 2003-04-30  Adam Fedor  <fedor@gnu.org>
 
 	* Makefile.in (ALL_SUBDIRS): Add gdb.objc

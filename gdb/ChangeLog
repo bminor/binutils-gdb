@@ -1,5 +1,12 @@
 2003-05-01  Andrew Cagney  <cagney@redhat.com>
 
+	* disasm.c (gdb_disassemble_from_exec): Delete global variable.
+	(gdb_disassembly): Make "di" non static, always initialize and
+	cleanup.  Always use dis_asm_read_memory.
+	(gdb_dis_asm_read_memory): Delete function.
+
+2003-05-01  Andrew Cagney  <cagney@redhat.com>
+
 	* d10v-tdep.c (d10v_frame_align): Replace d10v_stack_align.
 	(d10v_gdbarch_init): Set frame_align instead of stack_align.
 

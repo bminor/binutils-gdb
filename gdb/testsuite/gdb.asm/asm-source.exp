@@ -293,11 +293,35 @@ gdb_test "next" "17\[ \t\]+gdbasm_leave" "next over foo3"
 gdb_test "return" "\#0  main .*37\[ \t\]+gdbasm_exit0" "return from foo2" \
 	"Make (foo2|selected stack frame) return now\?.*" "y"
 
-# See if we can look at a global variable
-gdb_test "print globalvar" ".* = 11" "look at global variable"
+# Disassemble something, check the output
+proc test_dis { command var } {
+    global gdb_prompt
+    send_gdb "${command}\n"
+    gdb_expect {
+	-re "${var}.*:.*Cannot access" {
+	    # The "disassembler" was only accessing the local
+	    # executable and that would cause attempts to disassemble
+	    # variables to fail (memory not valid).
+	    fail "${command} (memory read error)"
+	}
+	-re "${var}.*:.*${gdb_prompt}" {
+	    pass "${command}"
+	}
+	timeout {
+	    fail "${command} (timeout)"
+	}
+    }
+}
 
-# See if we can look at a static variable
+# See if we can look at a global variable, three ways
+gdb_test "print globalvar" ".* = 11" "look at global variable"
+test_dis "x/i globalvar" "globalvar"
+test_dis "disassem &globalvar &globalvar+1" "globalvar"
+
+# See if we can look at a static variable, three ways
 gdb_test "print staticvar" ".* = 5" "look at static variable"
+test_dis "x/i &staticvar" "staticvar"
+test_dis "disassem &staticvar &staticvar+1" "staticvar"
 
 # See if we can look at a static function
 gdb_test "disassem foostatic" ".*<foostatic\\+0>:.*End of assembler dump." \
