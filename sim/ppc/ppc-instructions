@@ -66,10 +66,10 @@
 #	6	Comma separated list of functional units
 
 # PowerPC models
-::model:604:ppc604:  PPC_UNIT_BAD,   PPC_UNIT_BAD,   1,  1,  ppc_insn_bad
-::model:603e:ppc603e:PPC_UNIT_BAD,   PPC_UNIT_BAD,   1,  1,  ppc_insn_bad
-::model:603:ppc603:  PPC_UNIT_BAD,   PPC_UNIT_BAD,   1,  1,  ppc_insn_bad
-::model:601:ppc601:  PPC_UNIT_BAD,   PPC_UNIT_BAD,   1,  1,  ppc_insn_bad
+::model:604:ppc604:  PPC_UNIT_BAD,   PPC_UNIT_BAD,   1,  1,  0
+::model:603e:ppc603e:PPC_UNIT_BAD,   PPC_UNIT_BAD,   1,  1,  0
+::model:603:ppc603:  PPC_UNIT_BAD,   PPC_UNIT_BAD,   1,  1,  0
+::model:601:ppc601:  PPC_UNIT_BAD,   PPC_UNIT_BAD,   1,  1,  0
 
 # Flags for model.h
 ::model-data:::
@@ -92,13 +92,7 @@
 	  ppc_function_unit last_unit;			/* last functional unit this insn could use */
 	  signed16	    issue;			/* # cycles before function unit can process other insns */
 	  signed16	    done;			/* # cycles before insn is done */
-	  void		    (*function)(itable_index index,	/* function to do actual processing */
-					model_data *model_ptr,
-					unsigned_word cia,
-					idecode_cache *cache_entry,
-					instruction_word instruction,
-					const model_time *const default_time);
-					
+	  unsigned32	    flags;			/* any flags that are needed */
 	};
 
 	/* Register mappings */
@@ -140,7 +134,12 @@
 	  count_type nr_branches_fallthrough;		/* # conditional branches that fell through */
 	  count_type nr_branch_predict_trues;		/* # branches predicted correctly */
 	  count_type nr_branch_predict_falses;		/* # branches predicted incorrectly */
+	  count_type nr_stalls_data;			/* # of stalls for data */
+	  count_type nr_stalls_unit;			/* # of stalls waiting for a function unit */
+	  count_type nr_stalls_serialize;		/* # of stalls waiting for things to quiet down */
+	  count_type nr_insns_not_handled;		/* # of instructions not handled */
 	  count_type nr_units[nr_ppc_function_units];	/* function unit counts */
+	  int insn_handled;				/* whether last insn was handled */
 	};
 
 	STATIC_MODEL const char *const ppc_function_unit_name[ (int)nr_ppc_function_units ] = {
@@ -154,6 +153,15 @@
 	  "load/store functional unit instruction",
 	  "branch functional unit instruction",
 	};
+
+# Code called after executing the semantics of the function
+void::model-function::model_cleanup:itable_index index, model_data *model_ptr
+	if (model_ptr->insn_handled)
+	  model_ptr->insn_handled = 0;
+	else {
+	  model_ptr->nr_insns_not_handled++;
+	  TRACE(trace_tbd,("model specific code for %s not done\n", itable[index].name));
+	}
 
 # Advance state to next cycle, releasing any registers allocated
 void::model-internal::model_new_cycle:model_data *model_ptr
@@ -203,6 +211,7 @@ model_busy *::model-internal::model_make_busy:model_data *model_ptr, ppc_functio
 	model_busy *busy;
 
 	TRACE(trace_model,("unit = %s, issue = %d, done = %d\n", ppc_function_unit_name[unit], issue, done));
+	model_ptr->insn_handled = 1;
 
 	if (!model_ptr->free_list) {
 	  busy = ZALLOC(model_busy);
@@ -217,38 +226,362 @@ model_busy *::model-internal::model_make_busy:model_data *model_ptr, ppc_functio
 	busy->issue = issue;
 	busy->done = done;
 	model_ptr->busy_list = busy;
+	model_ptr->busy_mask |= (1 << unit);
+	model_ptr->nr_units[unit]++;
 	return busy;
 
-# Signal an instruction this model doesn't support
-void::model-internal::ppc_insn_bad:itable_index index, model_data *model_ptr, unsigned_word cia, idecode_cache *cache_entry, instruction_word instruction, const model_time *const default_time
-	  program_interrupt(model_ptr->processor, cia,
-	                    illegal_instruction_program_interrupt);
-
-# Branch instruction, always end the current cycle
-void::model-internal::ppc_insn_branch:itable_index index, model_data *model_ptr, unsigned_word cia, idecode_cache *cache_entry, instruction_word instruction, const model_time *const default_time
-	model_ptr->nr_units[PPC_UNIT_BPU]++;
-	model_new_cycle(model_ptr);
-
-# Generic instruction, right now schedule, but don't worry about data dependencies
-void::model-internal::ppc_insn_generic:itable_index index, model_data *model_ptr, unsigned_word cia, idecode_cache *cache_entry, instruction_word instruction, const model_time *const default_time
-	ppc_function_unit first_unit = default_time->first_unit;
-	ppc_function_unit last_unit  = default_time->last_unit;
+# Wait until a function unit is non-busy, and then allocate a busy pointer & return the pointer
+model_busy *::model-internal::model_wait_for_unit:itable_index index, model_data *const model_ptr, const model_time *const time_ptr
+	ppc_function_unit first_unit = time_ptr->first_unit;
+	ppc_function_unit last_unit = time_ptr->last_unit;
 	ppc_function_unit unit;
+	int stall_increment = 0;
 
 	for (;;) {
 	  unsigned32 busy_mask = model_ptr->busy_mask;
 	  for (unit = first_unit; unit <= last_unit; unit++) {
 	    if (((1 << unit) & busy_mask) == 0) {
-	      (void) model_make_busy(model_ptr, unit,
+	      return model_make_busy(model_ptr, unit,
 				     model_ptr->timing[index].issue,
 				     model_ptr->timing[index].done);
 
-	      model_ptr->busy_mask |= (1 << unit);
-	      model_ptr->nr_units[unit]++;
-	      return;
 	    }
 	  }
+	  TRACE(trace_model,("all function units are busy for %s\n", itable[index].name));
+	  model_ptr->nr_stalls_unit += stall_increment;		/* don't count first stall */
+	  stall_increment = 1;
 	  model_new_cycle(model_ptr);
+	}
+
+# Serialize the processor, waiting for all instructions to drain out before adding an instruction.
+void::model-function::model_serialize:itable_index index, model_data *model_ptr
+	while (model_ptr->busy_list) {
+	  TRACE(trace_model,("waiting for pipeline to empty\n"));
+	  model_ptr->nr_stalls_serialize++;
+	  model_new_cycle(model_ptr);
+	}
+	(void) model_make_busy(model_ptr,
+			       model_ptr->timing[index].first_unit,
+			       model_ptr->timing[index].issue,
+			       model_ptr->timing[index].done);
+
+# Wait for a CR to become unbusy
+void::model-function::model_wait_for_cr:model_data *model_ptr, unsigned CRBIT
+	unsigned u;
+	int cr_var = 0;
+	for (u = 0xc0000000; (u != 0) && (CRBIT & u) == 0; u >>= 4 )
+	  cr_var++;
+
+	while (model_ptr->registers[cr_var + PPC_CR_REG].in_use) {
+	  TRACE(trace_model,("waiting for CR %d\n", cr_var));
+	  model_ptr->nr_stalls_data++;
+	  model_new_cycle(model_ptr);
+	}
+
+# Schedule an instruction that takes 2 integer input registers and produces an output register & possibly sets CR0
+void::model-function::ppc_insn_int2:itable_index index, cpu *processor, model_data *model_ptr, signed_word *rD, signed_word *rA, signed_word *rB, unsigned Rc
+	if (!WITH_MODEL_ISSUE)
+	  return;
+
+	else {
+	  registers *cpu_regs = cpu_registers(processor);
+	  const unsigned ppc_RA = (rA - &cpu_regs->gpr[0]) + PPC_INT_REG;
+	  const unsigned ppc_RB = (rB - &cpu_regs->gpr[0]) + PPC_INT_REG;
+	  const unsigned ppc_RD = (rD - &cpu_regs->gpr[0]) + PPC_INT_REG;
+	  model_reg *ppc_regs = model_ptr->registers;
+	  model_busy *busy_ptr;
+
+	  if (ppc_regs[ppc_RA].in_use | ppc_regs[ppc_RB].in_use) {
+	    model_new_cycle(model_ptr);			/* don't count first dependency as a stall */
+
+	    while (ppc_regs[ppc_RA].in_use | ppc_regs[ppc_RB].in_use) {
+	      model_ptr->nr_stalls_data++;
+	      model_new_cycle(model_ptr);
+	    }
+	  }
+
+	  busy_ptr = model_wait_for_unit(index, model_ptr, &model_ptr->timing[index]);
+	   ppc_regs[ppc_RD].next = (model_reg *)0;
+	   ppc_regs[ppc_RD].in_use = 1;
+	   if (!Rc)
+	     busy_ptr->reg = &ppc_regs[ppc_RD];
+	   else {
+	     model_reg *reg_CR0 = &ppc_regs[0 + PPC_CR_REG];
+	     reg_CR0->next = &ppc_regs[ppc_RD];
+	     busy_ptr->reg = reg_CR0;
+	  }
+	}
+
+# Schedule an instruction that takes 1 integer input registers and produces an output register & possibly sets CR0
+void::model-function::ppc_insn_int1:itable_index index, cpu *processor, model_data *model_ptr, signed_word *rD, signed_word *rA, unsigned Rc
+	if (!WITH_MODEL_ISSUE)
+	  return;
+
+	else {
+	  registers *cpu_regs = cpu_registers(processor);
+	  const unsigned ppc_RA = (rA - &cpu_regs->gpr[0]) + PPC_INT_REG;
+	  const unsigned ppc_RD = (rD - &cpu_regs->gpr[0]) + PPC_INT_REG;
+	  model_reg *ppc_regs = model_ptr->registers;
+	  model_busy *busy_ptr;
+
+	if (ppc_regs[ppc_RA].in_use) {
+	    model_new_cycle(model_ptr);			/* don't count first dependency as a stall */
+
+	    while (ppc_regs[ppc_RA].in_use) {
+	      model_ptr->nr_stalls_data++;
+	      model_new_cycle(model_ptr);
+	    }
+	  }
+
+	  busy_ptr = model_wait_for_unit(index, model_ptr, &model_ptr->timing[index]);
+	  ppc_regs[ppc_RD].next = (model_reg *)0;
+	  ppc_regs[ppc_RD].in_use = 1;
+	  if (!Rc)
+	    busy_ptr->reg = &ppc_regs[ppc_RD];
+	  else {
+	    model_reg *reg_CR0 = &ppc_regs[0 + PPC_CR_REG];
+	    reg_CR0->next = &ppc_regs[ppc_RD];
+	    busy_ptr->reg = reg_CR0;
+	  }
+	}
+
+# Schedule an instruction that takes no integer input registers and produces an output register & possibly sets CR0
+void::model-function::ppc_insn_int0:itable_index index, cpu *processor, model_data *model_ptr, signed_word *rD, unsigned Rc
+	if (!WITH_MODEL_ISSUE)
+	  return;
+
+	else {
+	  registers *cpu_regs = cpu_registers(processor);
+	  const unsigned ppc_RD = (rD - &cpu_regs->gpr[0]) + PPC_INT_REG;
+	  model_reg *ppc_regs = model_ptr->registers;
+	  model_busy *busy_ptr;
+
+	  busy_ptr = model_wait_for_unit(index, model_ptr, &model_ptr->timing[index]);
+	  ppc_regs[ppc_RD].next = (model_reg *)0;
+	  ppc_regs[ppc_RD].in_use = 1;
+	  if (!Rc)
+	    busy_ptr->reg = &ppc_regs[ppc_RD];
+	  else {
+	    model_reg *reg_CR0 = &ppc_regs[0 + PPC_CR_REG];
+	    reg_CR0->next = &ppc_regs[ppc_RD];
+	    busy_ptr->reg = reg_CR0;
+	  }
+	}
+
+# Schedule an instruction that takes 2 integer input registers and produces an output register & updates a second register
+void::model-function::ppc_insn_int2_update:itable_index index, cpu *processor, model_data *model_ptr, signed_word *rD, signed_word *rA, signed_word *rB
+	if (!WITH_MODEL_ISSUE)
+	  return;
+
+	else {
+	  registers *cpu_regs = cpu_registers(processor);
+	  const unsigned ppc_RA = (rA - &cpu_regs->gpr[0]) + PPC_INT_REG;
+	  const unsigned ppc_RB = (rB - &cpu_regs->gpr[0]) + PPC_INT_REG;
+	  const unsigned ppc_RD = (rD - &cpu_regs->gpr[0]) + PPC_INT_REG;
+	  model_reg *ppc_regs = model_ptr->registers;
+	  model_busy *busy_ptr;
+
+	  if (ppc_regs[ppc_RA].in_use | ppc_regs[ppc_RB].in_use) {
+	    model_new_cycle(model_ptr);			/* don't count first dependency as a stall */
+
+	    while (ppc_regs[ppc_RA].in_use | ppc_regs[ppc_RB].in_use) {
+	      model_ptr->nr_stalls_data++;
+	      model_new_cycle(model_ptr);
+	    }
+	  }
+
+	  busy_ptr = model_wait_for_unit(index, model_ptr, &model_ptr->timing[index]);
+	  ppc_regs[ppc_RA].next = (model_reg *)0;
+	  ppc_regs[ppc_RA].in_use = 1;
+
+	  ppc_regs[ppc_RD].next = &ppc_regs[ppc_RA];
+	  ppc_regs[ppc_RD].in_use = 1;
+	  busy_ptr->reg = &ppc_regs[ppc_RD];
+	}
+
+# Schedule an instruction that takes 1 integer input registers and produces an output register & updates the other register
+void::model-function::ppc_insn_int1_update:itable_index index, cpu *processor, model_data *model_ptr, signed_word *rD, signed_word *rA
+	if (!WITH_MODEL_ISSUE)
+	  return;
+
+	else {
+	  registers *cpu_regs = cpu_registers(processor);
+	  const unsigned ppc_RA = (rA - &cpu_regs->gpr[0]) + PPC_INT_REG;
+	  const unsigned ppc_RD = (rD - &cpu_regs->gpr[0]) + PPC_INT_REG;
+	  model_reg *ppc_regs = model_ptr->registers;
+	  model_busy *busy_ptr;
+
+	  if (ppc_regs[ppc_RA].in_use) {
+	    model_new_cycle(model_ptr);			/* don't count first dependency as a stall */
+
+	    while (ppc_regs[ppc_RA].in_use) {
+	      model_ptr->nr_stalls_data++;
+	      model_new_cycle(model_ptr);
+	    }
+	  }
+
+	  busy_ptr = model_wait_for_unit(index, model_ptr, &model_ptr->timing[index]);
+	  ppc_regs[ppc_RA].next = (model_reg *)0;
+	  ppc_regs[ppc_RA].in_use = 1;
+
+	  ppc_regs[ppc_RD].next = &ppc_regs[ppc_RA];
+	  ppc_regs[ppc_RD].in_use = 1;
+	  busy_ptr->reg = &ppc_regs[ppc_RD];
+	}
+
+# Schedule an instruction that takes 2 integer input registers and produces no output register
+void::model-function::ppc_insn_int2_noout:itable_index index, cpu *processor, model_data *model_ptr, signed_word *rA, signed_word *rB
+	if (!WITH_MODEL_ISSUE)
+	  return;
+
+	else {
+	  registers *cpu_regs = cpu_registers(processor);
+	  const unsigned ppc_RA = (rA - &cpu_regs->gpr[0]) + PPC_INT_REG;
+	  const unsigned ppc_RB = (rB - &cpu_regs->gpr[0]) + PPC_INT_REG;
+	  model_reg *ppc_regs = model_ptr->registers;
+
+	  if (ppc_regs[ppc_RA].in_use | ppc_regs[ppc_RB].in_use) {
+	    model_new_cycle(model_ptr);			/* don't count first dependency as a stall */
+
+	    while (ppc_regs[ppc_RA].in_use | ppc_regs[ppc_RB].in_use) {
+	      model_ptr->nr_stalls_data++;
+	      model_new_cycle(model_ptr);
+	    }
+	  }
+
+	  (void) model_wait_for_unit(index, model_ptr, &model_ptr->timing[index]);
+	}
+
+# Schedule an instruction that takes 1 integer input registers and produces no output register
+void::model-function::ppc_insn_int1_noout:itable_index index, cpu *processor, model_data *model_ptr, signed_word *rA
+	if (!WITH_MODEL_ISSUE)
+	  return;
+
+	else {
+	  registers *cpu_regs = cpu_registers(processor);
+	  const unsigned ppc_RA = (rA - &cpu_regs->gpr[0]) + PPC_INT_REG;
+	  model_reg *ppc_regs = model_ptr->registers;
+
+	  if (ppc_regs[ppc_RA].in_use) {
+	    model_new_cycle(model_ptr);			/* don't count first dependency as a stall */
+
+	    while (ppc_regs[ppc_RA].in_use) {
+	      model_ptr->nr_stalls_data++;
+	      model_new_cycle(model_ptr);
+	    }
+	  }
+
+	  (void) model_wait_for_unit(index, model_ptr, &model_ptr->timing[index]);
+	}
+
+# Schedule an instruction that takes no input registers and produces no output
+void::model-function::ppc_insn_int0_noout:itable_index index, cpu *processor, model_data *model_ptr
+	if (!WITH_MODEL_ISSUE)
+	  return;
+
+	else {
+	  (void) model_wait_for_unit(index, model_ptr, &model_ptr->timing[index]);
+	}
+
+# Schedule an instruction that takes 2 integer input registers and produces a CR output register
+void::model-function::ppc_insn_int2_cr:itable_index index, cpu *processor, model_data *model_ptr, unsigned CRD, signed_word *rA, signed_word *rB
+	if (!WITH_MODEL_ISSUE)
+	  return;
+
+	else {
+	  registers *cpu_regs = cpu_registers(processor);
+	  const unsigned ppc_RA = (rA - &cpu_regs->gpr[0]) + PPC_INT_REG;
+	  const unsigned ppc_RB = (rB - &cpu_regs->gpr[0]) + PPC_INT_REG;
+	  const unsigned ppc_CRD = CRD + PPC_CR_REG;
+	  model_reg *ppc_regs = model_ptr->registers;
+	  model_busy *busy_ptr;
+
+	  if (ppc_regs[ppc_RA].in_use | ppc_regs[ppc_RB].in_use) {
+	    model_new_cycle(model_ptr);			/* don't count first dependency as a stall */
+
+	    while (ppc_regs[ppc_RA].in_use | ppc_regs[ppc_RB].in_use) {
+	      model_ptr->nr_stalls_data++;
+	      model_new_cycle(model_ptr);
+	    }
+	  }
+
+	  busy_ptr = model_wait_for_unit(index, model_ptr, &model_ptr->timing[index]);
+	  ppc_regs[ppc_CRD].next = (model_reg *)0;
+	  ppc_regs[ppc_CRD].in_use = 1;
+	  busy_ptr->reg = &ppc_regs[ppc_CRD];
+	}
+
+# Schedule an instruction that takes 1 integer input register and produces a CR output register
+void::model-function::ppc_insn_int1_cr:itable_index index, cpu *processor, model_data *model_ptr, unsigned CRD, signed_word *rA
+	if (!WITH_MODEL_ISSUE)
+	  return;
+
+	else {
+	  registers *cpu_regs = cpu_registers(processor);
+	  const unsigned ppc_RA = (rA - &cpu_regs->gpr[0]) + PPC_INT_REG;
+	  const unsigned ppc_CRD = CRD + PPC_CR_REG;
+	  model_reg *ppc_regs = model_ptr->registers;
+	  model_busy *busy_ptr;
+
+	  if (ppc_regs[ppc_RA].in_use) {
+	    model_new_cycle(model_ptr);			/* don't count first dependency as a stall */
+
+	    while (ppc_regs[ppc_RA].in_use) {
+	      model_ptr->nr_stalls_data++;
+	      model_new_cycle(model_ptr);
+	    }
+	  }
+
+	  busy_ptr = model_wait_for_unit(index, model_ptr, &model_ptr->timing[index]);
+	  ppc_regs[ppc_CRD].next = (model_reg *)0;
+	  ppc_regs[ppc_CRD].in_use = 1;
+	  busy_ptr->reg = &ppc_regs[ppc_CRD];
+	}
+
+# Schedule an MFSPR instruction that takes 1 special purpose register and produces an integer output register
+void::model-function::ppc_insn_from_spr:itable_index index, cpu *processor, model_data *model_ptr, signed_word *rD, unsigned nSPR
+	if (!WITH_MODEL_ISSUE)
+	  return;
+
+	else {
+	  registers *cpu_regs = cpu_registers(processor);
+	  const unsigned ppc_RD = (rD - &cpu_regs->gpr[0]) + PPC_INT_REG;
+	  const unsigned ppc_SPR = nSPR + PPC_SPR_REG;
+	  model_reg *ppc_regs = model_ptr->registers;
+	  model_busy *busy_ptr;
+
+	  while (ppc_regs[ppc_SPR].in_use) {
+	    model_ptr->nr_stalls_data++;
+	    model_new_cycle(model_ptr);
+	  }
+
+	  busy_ptr = model_wait_for_unit(index, model_ptr, &model_ptr->timing[index]);
+	  ppc_regs[ppc_RD].next = (model_reg *)0;
+	  ppc_regs[ppc_RD].in_use = 1;
+	  busy_ptr->reg = &ppc_regs[ppc_RD];
+	}
+
+# Schedule an MTSPR instruction that takes 1 integer register and produces a special purpose output register
+void::model-function::ppc_insn_to_spr:itable_index index, cpu *processor, model_data *model_ptr, unsigned nSPR, signed_word *rS
+	if (!WITH_MODEL_ISSUE)
+	  return;
+
+	else {
+	  registers *cpu_regs = cpu_registers(processor);
+	  const unsigned ppc_RS = (rS - &cpu_regs->gpr[0]) + PPC_INT_REG;
+	  const unsigned ppc_SPR = nSPR + PPC_SPR_REG;
+	  model_reg *ppc_regs = model_ptr->registers;
+	  model_busy *busy_ptr;
+
+	  while (ppc_regs[ppc_RS].in_use) {
+	    model_ptr->nr_stalls_data++;
+	    model_new_cycle(model_ptr);
+	  }
+
+	  busy_ptr = model_wait_for_unit(index, model_ptr, &model_ptr->timing[index]);
+	  ppc_regs[ppc_SPR].next = (model_reg *)0;
+	  ppc_regs[ppc_SPR].in_use = 1;
+	  busy_ptr->reg = &ppc_regs[ppc_SPR];
 	}
 
 model_data *::model-function::model_create:cpu *processor
@@ -267,10 +600,6 @@ void::model-function::model_halt:model_data *model_ptr
 	while (model_ptr->busy_list)
 	  model_new_cycle(model_ptr);
 
-void::model-function::model_issue:itable_index index, model_data *model_ptr, unsigned_word cia, idecode_cache *cache_entry, instruction_word instruction
-	const model_time *const default_time = &model_ptr->timing[(int)index];
-	(*default_time->function)(index, model_ptr, cia, cache_entry, instruction, default_time);
-
 model_print *::model-function::model_mon_info:model_data *model_ptr
 	model_print *head;
 	model_print *tail;
@@ -281,6 +610,42 @@ model_print *::model-function::model_mon_info:model_data *model_ptr
 	tail->name = "cycle";
 	tail->suffix_plural = "s";
 	tail->suffix_singular = "";
+
+	if (model_ptr->nr_stalls_data) {
+	  tail->next = ZALLOC(model_print);
+	  tail = tail->next;
+	  tail->count = model_ptr->nr_stalls_data;
+	  tail->name = "stall";
+	  tail->suffix_plural = "s waiting for data";
+	  tail->suffix_singular = " waiting for data";
+	}
+
+	if (model_ptr->nr_stalls_unit) {
+	  tail->next = ZALLOC(model_print);
+	  tail = tail->next;
+	  tail->count = model_ptr->nr_stalls_unit;
+	  tail->name = "stall";
+	  tail->suffix_plural = "s waiting for a function unit";
+	  tail->suffix_singular = " waiting for a function unit";
+	}
+
+	if (model_ptr->nr_stalls_serialize) {
+	  tail->next = ZALLOC(model_print);
+	  tail = tail->next;
+	  tail->count = model_ptr->nr_stalls_serialize;
+	  tail->name = "stall";
+	  tail->suffix_plural = "s waiting for serialization";
+	  tail->suffix_singular = " waiting for serialization";
+	}
+
+	if (model_ptr->nr_insns_not_handled) {
+	  tail->next = ZALLOC(model_print);
+	  tail = tail->next;
+	  tail->count = model_ptr->nr_insns_not_handled;
+	  tail->name = "instruction";
+	  tail->suffix_plural = "s that were not accounted for in timing info";
+	  tail->suffix_singular = " that was not accounted for in timing info";
+	}
 
 	if (model_ptr->nr_branches) {
 	  tail->next = ZALLOC(model_print);
@@ -333,19 +698,20 @@ model_print *::model-function::model_mon_info:model_data *model_ptr
 	return head;
 
 void::model-function::model_mon_info_free:model_data *model_ptr, model_print *ptr
-	model_print *next;
-
 	while (ptr) {
-	  next = ptr->next;
+	  model_print *next = ptr->next;
 	  free((void *)ptr);
 	  ptr = next;
 	}
 
 void::model-function::model_branches:model_data *model_ptr, int failed
+	model_ptr->nr_units[PPC_UNIT_BPU]++;
+	model_ptr->insn_handled = 1;
 	if (failed)
 	  model_ptr->nr_branches_fallthrough++;
 	else
 	  model_ptr->nr_branches++;
+	model_new_cycle(model_ptr);	/* A branch always ends the current cycle */
 
 void::model-function::model_branch_predict:model_data *model_ptr, int success
 	if (success)
@@ -828,21 +1194,23 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 # I.2.4.1 Branch Instructions
 #
 0.18,6.LI,30.AA,31.LK:I:t::Branch
-*601: PPC_UNIT_BPU,   PPC_UNIT_BPU,   1,  1,  ppc_insn_branch
-*603: PPC_UNIT_BPU,   PPC_UNIT_BPU,   1,  1,  ppc_insn_branch
-*603e:PPC_UNIT_BPU,   PPC_UNIT_BPU,   1,  1,  ppc_insn_branch
-*604: PPC_UNIT_BPU,   PPC_UNIT_BPU,   1,  1,  ppc_insn_branch
+*601: PPC_UNIT_BPU,   PPC_UNIT_BPU,   1,  1,  0
+*603: PPC_UNIT_BPU,   PPC_UNIT_BPU,   1,  1,  0
+*603e:PPC_UNIT_BPU,   PPC_UNIT_BPU,   1,  1,  0
+*604: PPC_UNIT_BPU,   PPC_UNIT_BPU,   1,  1,  0
 	if (AA) NIA = IEA(EXTS(LI_0b00));
 	else    NIA = IEA(CIA + EXTS(LI_0b00));
 	if (LK) LR = (spreg)CIA+4;
 	model_branches(cpu_model(processor), 1);
 
 0.16,6.BO,11.BI,16.BD,30.AA,31.LK:B:t::Branch Conditional
-*601: PPC_UNIT_BPU,   PPC_UNIT_BPU,   1,  1,  ppc_insn_branch
-*603: PPC_UNIT_BPU,   PPC_UNIT_BPU,   1,  1,  ppc_insn_branch
-*603e:PPC_UNIT_BPU,   PPC_UNIT_BPU,   1,  1,  ppc_insn_branch
-*604: PPC_UNIT_BPU,   PPC_UNIT_BPU,   1,  1,  ppc_insn_branch
+*601: PPC_UNIT_BPU,   PPC_UNIT_BPU,   1,  1,  0
+*603: PPC_UNIT_BPU,   PPC_UNIT_BPU,   1,  1,  0
+*603e:PPC_UNIT_BPU,   PPC_UNIT_BPU,   1,  1,  0
+*604: PPC_UNIT_BPU,   PPC_UNIT_BPU,   1,  1,  0
 	int M, ctr_ok, cond_ok, succeed;
+	if (! BO{0})
+	  model_wait_for_cr(cpu_model(processor), BIT32_BI);
 	if (is_64bit_implementation && is_64bit_mode) M = 0;
 	else                                          M = 32;
 	if (!BO{2}) CTR = CTR - 1;
@@ -868,13 +1236,15 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	}
 
 0.19,6.BO,11.BI,16./,21.16,31.LK:XL:t::Branch Conditional to Link Register
-*601: PPC_UNIT_BPU,   PPC_UNIT_BPU,   1,  1,  ppc_insn_branch
-*603: PPC_UNIT_BPU,   PPC_UNIT_BPU,   1,  1,  ppc_insn_branch
-*603e:PPC_UNIT_BPU,   PPC_UNIT_BPU,   1,  1,  ppc_insn_branch
-*604: PPC_UNIT_BPU,   PPC_UNIT_BPU,   1,  1,  ppc_insn_branch
+*601: PPC_UNIT_BPU,   PPC_UNIT_BPU,   1,  1,  0
+*603: PPC_UNIT_BPU,   PPC_UNIT_BPU,   1,  1,  0
+*603e:PPC_UNIT_BPU,   PPC_UNIT_BPU,   1,  1,  0
+*604: PPC_UNIT_BPU,   PPC_UNIT_BPU,   1,  1,  0
 	int M, ctr_ok, cond_ok, succeed;
 	if (is_64bit_implementation && is_64bit_mode) M = 0;
 	else                                          M = 32;
+	if (! BO{0})
+	  model_wait_for_cr(cpu_model(processor), BIT32_BI);
 	if (!BO{2}) CTR = CTR - 1;
 	ctr_ok = BO{2} || ((MASKED(CTR, M, 63) != 0) != BO{3});
 	cond_ok = BO{0} || (CR{BI} == BO{1});
@@ -890,11 +1260,13 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	  model_branch_predict(cpu_model(processor), BO{4} ? !succeed : succeed);
 
 0.19,6.BO,11.BI,16./,21.528,31.LK:XL:t::Branch Conditional to Count Register
-*601: PPC_UNIT_BPU,   PPC_UNIT_BPU,   1,  1,  ppc_insn_branch
-*603: PPC_UNIT_BPU,   PPC_UNIT_BPU,   1,  1,  ppc_insn_branch
-*603e:PPC_UNIT_BPU,   PPC_UNIT_BPU,   1,  1,  ppc_insn_branch
-*604: PPC_UNIT_BPU,   PPC_UNIT_BPU,   1,  1,  ppc_insn_branch
+*601: PPC_UNIT_BPU,   PPC_UNIT_BPU,   1,  1,  0
+*603: PPC_UNIT_BPU,   PPC_UNIT_BPU,   1,  1,  0
+*603e:PPC_UNIT_BPU,   PPC_UNIT_BPU,   1,  1,  0
+*604: PPC_UNIT_BPU,   PPC_UNIT_BPU,   1,  1,  0
 	int cond_ok, succeed;
+	if (! BO{0})
+	  model_wait_for_cr(cpu_model(processor), BIT32_BI);
 	cond_ok = BO{0} || (CR{BI} == BO{1});
 	if (cond_ok) {
 	  NIA = IEA(CTR_0b00);
@@ -911,79 +1283,80 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 # I.2.4.2 System Call Instruction
 #
 0.17,6./,11./,16./,30.1,31./:SC:t::System Call
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603: PPC_UNIT_SRU,   PPC_UNIT_SRU,   3,  3,  ppc_insn_generic
-*603e:PPC_UNIT_SRU,   PPC_UNIT_SRU,   3,  3,  ppc_insn_generic
-*604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603: PPC_UNIT_SRU,   PPC_UNIT_SRU,   3,  3,  0
+*603e:PPC_UNIT_SRU,   PPC_UNIT_SRU,   3,  3,  0
+*604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  0
+	model_serialize(my_index, cpu_model(processor));
 	system_call_interrupt(processor, cia);
 
 #
 # I.2.4.3 Condition Register Logical Instructions
 #
 0.19,6.BT,11.BA,16.BB,21.257,31./:XL::crand:Condition Register AND
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603: PPC_UNIT_SRU,   PPC_UNIT_SRU,   1,  1,  ppc_insn_generic
-*603e:PPC_UNIT_SRU,   PPC_UNIT_SRU,   1,  1,  ppc_insn_generic
-*604: PPC_UNIT_BPU,   PPC_UNIT_BPU,   1,  1,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603: PPC_UNIT_SRU,   PPC_UNIT_SRU,   1,  1,  0
+*603e:PPC_UNIT_SRU,   PPC_UNIT_SRU,   1,  1,  0
+*604: PPC_UNIT_BPU,   PPC_UNIT_BPU,   1,  1,  0
 	BLIT32(CR, BT, CR{BA} && CR{BB});
 
 0.19,6.BT,11.BA,16.BB,21.449,31./:XL::cror:Condition Register OR
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603: PPC_UNIT_SRU,   PPC_UNIT_SRU,   1,  1,  ppc_insn_generic
-*603e:PPC_UNIT_SRU,   PPC_UNIT_SRU,   1,  1,  ppc_insn_generic
-*604: PPC_UNIT_BPU,   PPC_UNIT_BPU,   1,  1,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603: PPC_UNIT_SRU,   PPC_UNIT_SRU,   1,  1,  0
+*603e:PPC_UNIT_SRU,   PPC_UNIT_SRU,   1,  1,  0
+*604: PPC_UNIT_BPU,   PPC_UNIT_BPU,   1,  1,  0
 	BLIT32(CR, BT, CR{BA} || CR{BB});
 
 0.19,6.BT,11.BA,16.BB,21.193,31./:XL::crxor:Condition Register XOR
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603: PPC_UNIT_SRU,   PPC_UNIT_SRU,   1,  1,  ppc_insn_generic
-*603e:PPC_UNIT_SRU,   PPC_UNIT_SRU,   1,  1,  ppc_insn_generic
-*604: PPC_UNIT_BPU,   PPC_UNIT_BPU,   1,  1,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603: PPC_UNIT_SRU,   PPC_UNIT_SRU,   1,  1,  0
+*603e:PPC_UNIT_SRU,   PPC_UNIT_SRU,   1,  1,  0
+*604: PPC_UNIT_BPU,   PPC_UNIT_BPU,   1,  1,  0
 	BLIT32(CR, BT, CR{BA} != CR{BB});
 
 0.19,6.BT,11.BA,16.BB,21.225,31./:XL::crnand:Condition Register NAND
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603: PPC_UNIT_SRU,   PPC_UNIT_SRU,   1,  1,  ppc_insn_generic
-*603e:PPC_UNIT_SRU,   PPC_UNIT_SRU,   1,  1,  ppc_insn_generic
-*604: PPC_UNIT_BPU,   PPC_UNIT_BPU,   1,  1,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603: PPC_UNIT_SRU,   PPC_UNIT_SRU,   1,  1,  0
+*603e:PPC_UNIT_SRU,   PPC_UNIT_SRU,   1,  1,  0
+*604: PPC_UNIT_BPU,   PPC_UNIT_BPU,   1,  1,  0
 	BLIT32(CR, BT, !(CR{BA} && CR{BB}));
 
 0.19,6.BT,11.BA,16.BB,21.33,31./:XL::crnor:Condition Register NOR
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603: PPC_UNIT_SRU,   PPC_UNIT_SRU,   1,  1,  ppc_insn_generic
-*603e:PPC_UNIT_SRU,   PPC_UNIT_SRU,   1,  1,  ppc_insn_generic
-*604: PPC_UNIT_BPU,   PPC_UNIT_BPU,   1,  1,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603: PPC_UNIT_SRU,   PPC_UNIT_SRU,   1,  1,  0
+*603e:PPC_UNIT_SRU,   PPC_UNIT_SRU,   1,  1,  0
+*604: PPC_UNIT_BPU,   PPC_UNIT_BPU,   1,  1,  0
 	BLIT32(CR, BT, !(CR{BA} || CR{BB}));
 
 0.19,6.BT,11.BA,16.BB,21.289,31./:XL::creqv:Condition Register Equivalent
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603: PPC_UNIT_SRU,   PPC_UNIT_SRU,   1,  1,  ppc_insn_generic
-*603e:PPC_UNIT_SRU,   PPC_UNIT_SRU,   1,  1,  ppc_insn_generic
-*604: PPC_UNIT_BPU,   PPC_UNIT_BPU,   1,  1,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603: PPC_UNIT_SRU,   PPC_UNIT_SRU,   1,  1,  0
+*603e:PPC_UNIT_SRU,   PPC_UNIT_SRU,   1,  1,  0
+*604: PPC_UNIT_BPU,   PPC_UNIT_BPU,   1,  1,  0
 	BLIT32(CR, BT, CR{BA} == CR{BB});
 
 0.19,6.BT,11.BA,16.BB,21.129,31./:XL::crandc:Condition Register AND with Complement
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603: PPC_UNIT_SRU,   PPC_UNIT_SRU,   1,  1,  ppc_insn_generic
-*603e:PPC_UNIT_SRU,   PPC_UNIT_SRU,   1,  1,  ppc_insn_generic
-*604: PPC_UNIT_BPU,   PPC_UNIT_BPU,   1,  1,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603: PPC_UNIT_SRU,   PPC_UNIT_SRU,   1,  1,  0
+*603e:PPC_UNIT_SRU,   PPC_UNIT_SRU,   1,  1,  0
+*604: PPC_UNIT_BPU,   PPC_UNIT_BPU,   1,  1,  0
 	BLIT32(CR, BT, CR{BA} && !CR{BB});
 
 0.19,6.BT,11.BA,16.BB,21.417,31./:XL::crorc:Condition Register OR with Complement
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603: PPC_UNIT_SRU,   PPC_UNIT_SRU,   1,  1,  ppc_insn_generic
-*603e:PPC_UNIT_SRU,   PPC_UNIT_SRU,   1,  1,  ppc_insn_generic
-*604: PPC_UNIT_BPU,   PPC_UNIT_BPU,   1,  1,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603: PPC_UNIT_SRU,   PPC_UNIT_SRU,   1,  1,  0
+*603e:PPC_UNIT_SRU,   PPC_UNIT_SRU,   1,  1,  0
+*604: PPC_UNIT_BPU,   PPC_UNIT_BPU,   1,  1,  0
 	BLIT32(CR, BT, CR{BA} || !CR{BB});
 
 #
 # I.2.4.4 Condition Register Field Instruction
 #
 0.19,6.BF,9./,11.BFA,14./,16./,21.0,31./:XL:::Move Condition Register Field
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603: PPC_UNIT_SRU,   PPC_UNIT_SRU,   1,  1,  ppc_insn_generic
-*603e:PPC_UNIT_SRU,   PPC_UNIT_SRU,   1,  1,  ppc_insn_generic
-*604: PPC_UNIT_BPU,   PPC_UNIT_BPU,   1,  1,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603: PPC_UNIT_SRU,   PPC_UNIT_SRU,   1,  1,  0
+*603e:PPC_UNIT_SRU,   PPC_UNIT_SRU,   1,  1,  0
+*604: PPC_UNIT_BPU,   PPC_UNIT_BPU,   1,  1,  0
 	MBLIT32(CR, 4*BF, 4*BF+3, EXTRACTED32(CR, 4*BFA, 4*BFA+3));
 
 
@@ -992,34 +1365,43 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 #
 
 0.34,6.RT,11.RA,16.D:D:::Load Byte and Zero
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  2,  ppc_insn_generic
-*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
-*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
-*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  2,  0
+*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
+*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
+*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
 	unsigned_word b;
 	unsigned_word EA;
 	if (RA == 0) b = 0;
 	else         b = *rA;
 	EA = b + EXTS(D);
 	*rT = MEM(unsigned, EA, 1);
+	if (RA == 0)
+	  ppc_insn_int0(my_index, processor, cpu_model(processor), rT, 0/*Rc*/);
+	else
+	  ppc_insn_int1(my_index, processor, cpu_model(processor), rT, rA, 0/*Rc*/);
+
 
 0.31,6.RT,11.RA,16.RB,21.87,31./:X:::Load Byte and Zero Indexed
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  2,  ppc_insn_generic
-*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
-*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
-*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  2,  0
+*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
+*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
+*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
 	unsigned_word b;
 	unsigned_word EA;
 	if (RA == 0) b = 0;
 	else         b = *rA;
 	EA = b + *rB;
 	*rT = MEM(unsigned, EA, 1);
+	if (RA == 0)
+	  ppc_insn_int1(my_index, processor, cpu_model(processor), rT, rB, 0/*Rc*/);
+	else
+	  ppc_insn_int2(my_index, processor, cpu_model(processor), rT, rA, rB, 0/*Rc*/);
 
 0.35,6.RT,11.RA,16.D:D:::Load Byte and Zero with Update
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  2,  ppc_insn_generic
-*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
-*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
-*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  2,  0
+*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
+*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
+*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
 	unsigned_word EA;
 	if (RA == 0 || RA == RT)
 	  program_interrupt(processor, cia,
@@ -1027,12 +1409,13 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	EA = *rA + EXTS(D);
 	*rT = MEM(unsigned, EA, 1);
 	*rA = EA;
+	ppc_insn_int1_update(my_index, processor, cpu_model(processor), rT, rA);
 
 0.31,6.RT,11.RA,16.RB,21.119,31./:X:::Load Byte and Zero with Update Indexed
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  2,  ppc_insn_generic
-*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
-*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
-*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  2,  0
+*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
+*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
+*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
 	unsigned_word EA;
 	if (RA == 0 || RA == RT)
 	  program_interrupt(processor, cia,
@@ -1040,35 +1423,45 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	EA = *rA + *rB;
 	*rT = MEM(unsigned, EA, 1);
 	*rA = EA;
+	ppc_insn_int2_update(my_index, processor, cpu_model(processor), rT, rA, rB);
 
 0.40,6.RT,11.RA,16.D:D:::Load Halfword and Zero
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  2,  ppc_insn_generic
-*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
-*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
-*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  2,  0
+*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
+*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
+*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
 	unsigned_word b;
 	unsigned_word EA;
 	if (RA == 0) b = 0;
 	else         b = *rA;
 	EA = b + EXTS(D);
 	*rT = MEM(unsigned, EA, 2);
+	if (RA == 0)
+	  ppc_insn_int0(my_index, processor, cpu_model(processor), rT, 0/*Rc*/);
+	else
+	  ppc_insn_int1(my_index, processor, cpu_model(processor), rT, rA, 0/*Rc*/);
 
 0.31,6.RT,11.RA,16.RB,21.279,31./:X:::Load Halfword and Zero Indexed
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  2,  ppc_insn_generic
-*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
-*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
-*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  2,  0
+*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
+*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
+*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
 	unsigned_word b;
 	unsigned_word EA;
 	if (RA == 0) b = 0;
 	else         b = *rA;
 	EA = b + *rB;
 	*rT = MEM(unsigned, EA, 2);
+	if (RA == 0)
+	  ppc_insn_int1(my_index, processor, cpu_model(processor), rT, rB, 0/*Rc*/);
+	else
+	  ppc_insn_int2(my_index, processor, cpu_model(processor), rT, rA, rB, 0/*Rc*/);
+
 0.41,6.RT,11.RA,16.D:D:::Load Halfword and Zero with Update
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  2,  ppc_insn_generic
-*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
-*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
-*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  2,  0
+*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
+*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
+*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
 	unsigned_word EA;
 	if (RA == 0 || RA == RT)
 	  program_interrupt(processor, cia,
@@ -1076,12 +1469,13 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	EA = *rA + EXTS(D);
 	*rT = MEM(unsigned, EA, 2);
 	*rA = EA;
+	ppc_insn_int1_update(my_index, processor, cpu_model(processor), rT, rA);
 
 0.31,6.RT,11.RA,16.RB,21.311,31./:X:::Load Halfword and Zero with Update Indexed
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  2,  ppc_insn_generic
-*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
-*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
-*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  2,  0
+*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
+*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
+*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
 	unsigned_word EA;
 	if (RA == 0 || RA == RT)
 	  program_interrupt(processor, cia,
@@ -1089,48 +1483,58 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	EA = *rA + *rB;
 	*rT = MEM(unsigned, EA, 2);
 	*rA = EA;
+	ppc_insn_int2_update(my_index, processor, cpu_model(processor), rT, rA, rB);
 
 0.42,6.RT,11.RA,16.D:D:::Load Halfword Algebraic
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  2,  ppc_insn_generic
-*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
-*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
-*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  2,  0
+*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
+*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
+*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
 	unsigned_word b;
 	unsigned_word EA;
 	if (RA == 0) b = 0;
 	else         b = *rA;
 	EA = b + EXTS(D);
 	*rT = MEM(signed, EA, 2);
+	if (RA == 0)
+	  ppc_insn_int0(my_index, processor, cpu_model(processor), rT, 0/*Rc*/);
+	else
+	  ppc_insn_int1(my_index, processor, cpu_model(processor), rT, rA, 0/*Rc*/);
 
 0.31,6.RT,11.RA,16.RB,21.343,31./:X:::Load Halfword Algebraic Indexed
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  2,  ppc_insn_generic
-*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
-*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
-*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  2,  0
+*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
+*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
+*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
 	unsigned_word b;
 	unsigned_word EA;
 	if (RA == 0) b = 0;
 	else         b = *rA;
 	EA = b + *rB;
 	*rT = MEM(signed, EA, 2);
+	if (RA == 0)
+	  ppc_insn_int1(my_index, processor, cpu_model(processor), rT, rB, 0/*Rc*/);
+	else
+	  ppc_insn_int2(my_index, processor, cpu_model(processor), rT, rA, rB, 0/*Rc*/);
 
 0.43,6.RT,11.RA,16.D:D:::Load Halfword Algebraic with Update
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  2,  ppc_insn_generic
-*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
-*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
-*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  2,  0
+*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
+*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
+*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
 	unsigned_word EA;
 	if (RA == 0 || RA == RT)
 	  program_interrupt(processor, cia,
 	                    illegal_instruction_program_interrupt);
 	EA = *rA + EXTS(D);
 	*rT = MEM(signed, EA, 2);
+	ppc_insn_int1_update(my_index, processor, cpu_model(processor), rT, rA);
 
 0.31,6.RT,11.RA,16.RB,21.375,31./:X:::Load Halfword Algebraic with Update Indexed
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  2,  ppc_insn_generic
-*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
-*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
-*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  2,  0
+*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
+*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
+*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
 	unsigned_word EA;
 	if (RA == 0 || RA == RT)
 	  program_interrupt(processor, cia,
@@ -1138,36 +1542,45 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	EA = *rA + *rB;
 	*rT = MEM(signed, EA, 2);
 	*rA = EA;
+	ppc_insn_int2_update(my_index, processor, cpu_model(processor), rT, rA, rB);
 
 0.32,6.RT,11.RA,16.D:D:::Load Word and Zero
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  2,  ppc_insn_generic
-*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
-*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
-*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  2,  0
+*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
+*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
+*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
 	unsigned_word b;
 	unsigned_word EA;
 	if (RA == 0) b = 0;
 	else         b = *rA;
 	EA = b + EXTS(D);
 	*rT = MEM(unsigned, EA, 4);
+	if (RA == 0)
+	  ppc_insn_int0(my_index, processor, cpu_model(processor), rT, 0/*Rc*/);
+	else
+	  ppc_insn_int1(my_index, processor, cpu_model(processor), rT, rA, 0/*Rc*/);
 
 0.31,6.RT,11.RA,16.RB,21.23,31./:X:::Load Word and Zero Indexed
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  2,  ppc_insn_generic
-*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
-*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
-*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  2,  0
+*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
+*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
+*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
 	unsigned_word b;
 	unsigned_word EA;
 	if (RA == 0) b = 0;
 	else         b = *rA;
 	EA = b + *rB;
 	*rT = MEM(unsigned, EA, 4);
+	if (RA == 0)
+	  ppc_insn_int1(my_index, processor, cpu_model(processor), rT, rB, 0/*Rc*/);
+	else
+	  ppc_insn_int2(my_index, processor, cpu_model(processor), rT, rA, rB, 0/*Rc*/);
 
 0.33,6.RT,11.RA,16.D:D:::Load Word and Zero with Update
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  2,  ppc_insn_generic
-*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
-*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
-*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  2,  0
+*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
+*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
+*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
 	unsigned_word EA;
 	if (RA == 0 || RA == RT)
 	  program_interrupt(processor, cia,
@@ -1175,12 +1588,13 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	EA = *rA + EXTS(D);
 	*rT = MEM(unsigned, EA, 4);
 	*rA = EA;
+	ppc_insn_int1_update(my_index, processor, cpu_model(processor), rT, rA);
 
 0.31,6.RT,11.RA,16.RB,21.55,31./:X:::Load Word and Zero with Update Indexed
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  2,  ppc_insn_generic
-*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
-*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
-*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  2,  0
+*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
+*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
+*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
 	unsigned_word EA;
 	if (RA == 0 || RA == RT)
 	  program_interrupt(processor, cia,
@@ -1188,6 +1602,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	EA = *rA + *rB;
 	*rT = MEM(unsigned, EA, 4);
 	*rA = EA;
+	ppc_insn_int2_update(my_index, processor, cpu_model(processor), rT, rA, rB);
 
 0.58,6.RT,11.RA,16.DS,30.2:DS:64::Load Word Algebraic
 #	unsigned_word b;
@@ -1255,34 +1670,42 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 #
 
 0.38,6.RS,11.RA,16.D:D:::Store Byte
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
-*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
-*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  3,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
+*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
+*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  3,  0
 	unsigned_word b;
 	unsigned_word EA;
 	if (RA == 0) b = 0;
 	else         b = *rA;
 	EA = b + EXTS(D);
 	STORE(EA, 1, *rS);
+	if (RA == 0)
+	  ppc_insn_int0_noout(my_index, processor, cpu_model(processor));
+	else
+	  ppc_insn_int1_noout(my_index, processor, cpu_model(processor), rA);
 
 0.31,6.RS,11.RA,16.RB,21.215,31./:X:::Store Byte Indexed
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
-*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
-*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  3,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
+*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
+*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  3,  0
 	unsigned_word b;
 	unsigned_word EA;
 	if (RA == 0) b = 0;
 	else         b = *rA;
 	EA = b + *rB;
 	STORE(EA, 1, *rS);
+	if (RA == 0)
+	  ppc_insn_int1_noout(my_index, processor, cpu_model(processor), rB);
+	else
+	  ppc_insn_int2_noout(my_index, processor, cpu_model(processor), rA, rB);
 
 0.39,6.RS,11.RA,16.D:D:::Store Byte with Update
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
-*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
-*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  3,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
+*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
+*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  3,  0
 	unsigned_word EA;
 	if (RA == 0)
 	  program_interrupt(processor, cia,
@@ -1290,12 +1713,13 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	EA = *rA + EXTS(D);
 	STORE(EA, 1, *rS);
 	*rA = EA;
+	ppc_insn_int1(my_index, processor, cpu_model(processor), rA, rA, 0/*Rc*/);
 
 0.31,6.RS,11.RA,16.RB,21.247,31./:X:::Store Byte with Update Indexed
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
-*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
-*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  3,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
+*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
+*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  3,  0
 	unsigned_word EA;
 	if (RA == 0)
 	  program_interrupt(processor, cia,
@@ -1303,36 +1727,45 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	EA = *rA + *rB;
 	STORE(EA, 1, *rS);
 	*rA = EA;
+	ppc_insn_int2(my_index, processor, cpu_model(processor), rA, rA, rB, 0/*Rc*/);
 
 0.44,6.RS,11.RA,16.D:D:::Store Half Word
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
-*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
-*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  3,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
+*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
+*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  3,  0
 	unsigned_word b;
 	unsigned_word EA;
 	if (RA == 0) b = 0;
 	else         b = *rA;
 	EA = b + EXTS(D);
 	STORE(EA, 2, *rS);
+	if (RA == 0)
+	  ppc_insn_int0_noout(my_index, processor, cpu_model(processor));
+	else
+	  ppc_insn_int1_noout(my_index, processor, cpu_model(processor), rA);
 
 0.31,6.RS,11.RA,16.RB,21.407,31./:X:::Store Half Word Indexed
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
-*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
-*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  3,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
+*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
+*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  3,  0
 	unsigned_word b;
 	unsigned_word EA;
 	if (RA == 0) b = 0;
 	else         b = *rA;
 	EA = b + *rB;
 	STORE(EA, 2, *rS);
+	if (RA == 0)
+	  ppc_insn_int1_noout(my_index, processor, cpu_model(processor), rB);
+	else
+	  ppc_insn_int2_noout(my_index, processor, cpu_model(processor), rA, rB);
 
 0.45,6.RS,11.RA,16.D:D:::Store Half Word with Update
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
-*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
-*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  3,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
+*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
+*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  3,  0
 	unsigned_word EA;
 	if (RA == 0)
 	  program_interrupt(processor, cia,
@@ -1340,12 +1773,13 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	EA = *rA + EXTS(D);
 	STORE(EA, 2, *rS);
 	*rA = EA;
+	ppc_insn_int1(my_index, processor, cpu_model(processor), rA, rA, 0/*Rc*/);
 
 0.31,6.RS,11.RA,16.RB,21.439,31./:X:::Store Half Word with Update Indexed
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
-*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
-*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  3,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
+*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
+*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  3,  0
 	unsigned_word EA;
 	if (RA == 0)
 	  program_interrupt(processor, cia,
@@ -1353,36 +1787,45 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	EA = *rA + *rB;
 	STORE(EA, 2, *rS);
 	*rA = EA;
+	ppc_insn_int2(my_index, processor, cpu_model(processor), rA, rA, rB, 0/*Rc*/);
 
 0.36,6.RS,11.RA,16.D:D:::Store Word
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
-*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
-*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  3,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
+*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
+*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  3,  0
 	unsigned_word b;
 	unsigned_word EA;
 	if (RA == 0) b = 0;
 	else         b = *rA;
 	EA = b + EXTS(D);
 	STORE(EA, 4, *rS);
+	if (RA == 0)
+	  ppc_insn_int0_noout(my_index, processor, cpu_model(processor));
+	else
+	  ppc_insn_int1_noout(my_index, processor, cpu_model(processor), rA);
 
 0.31,6.RS,11.RA,16.RB,21.151,31./:X:::Store Word Indexed
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
-*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
-*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  3,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
+*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
+*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  3,  0
 	unsigned_word b;
 	unsigned_word EA;
 	if (RA == 0) b = 0;
 	else         b = *rA;
 	EA = b + *rB;
 	STORE(EA, 4, *rS);
+	if (RA == 0)
+	  ppc_insn_int1_noout(my_index, processor, cpu_model(processor), rB);
+	else
+	  ppc_insn_int2_noout(my_index, processor, cpu_model(processor), rA, rB);
 
 0.37,6.RS,11.RA,16.D:D:::Store Word with Update
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
-*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
-*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  3,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
+*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
+*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  3,  0
 	unsigned_word EA;
 	if (RA == 0)
 	  program_interrupt(processor, cia,
@@ -1390,12 +1833,13 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	EA = *rA + EXTS(D);
 	STORE(EA, 4, *rS);
 	*rA = EA;
+	ppc_insn_int1(my_index, processor, cpu_model(processor), rA, rA, 0/*Rc*/);
 
 0.31,6.RS,11.RA,16.RB,21.183,31./:X:::Store Word with Update Indexed
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
-*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
-*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  3,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
+*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
+*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  3,  0
 	unsigned_word EA;
 	if (RA == 0)
 	  program_interrupt(processor, cia,
@@ -1403,6 +1847,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	EA = *rA + *rB;
 	STORE(EA, 4, *rS);
 	*rA = EA;
+	ppc_insn_int2(my_index, processor, cpu_model(processor), rA, rA, rB, 0/*Rc*/);
 
 0.62,6.RS,11.RA,16.DS,30.0:DS:64::Store Doubleword
 #	unsigned_word b;
@@ -1441,52 +1886,68 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 #
 
 0.31,6.RT,11.RA,16.RB,21.790,31./:X:::Load Halfword Byte-Reverse Indexed
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
-*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
-*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  3,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
+*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
+*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  3,  0
 	unsigned_word b;
 	unsigned_word EA;
 	if (RA == 0) b = 0;
 	else         b = *rA;
 	EA = b + *rB;
 	*rT = SWAP_2(MEM(unsigned, EA, 2));
+	if (RA == 0)
+	  ppc_insn_int1(my_index, processor, cpu_model(processor), rT, rB, 0/*Rc*/);
+	else
+	  ppc_insn_int2(my_index, processor, cpu_model(processor), rT, rA, rB, 0/*Rc*/);
 
 0.31,6.RT,11.RA,16.RB,21.534,31./:X:::Load Word Byte-Reverse Indexed
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
-*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
-*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  3,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
+*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
+*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  3,  0
 	unsigned_word b;
 	unsigned_word EA;
 	if (RA == 0) b = 0;
 	else         b = *rA;
 	EA = b + *rB;
 	*rT = SWAP_4(MEM(unsigned, EA, 4));
+	if (RA == 0)
+	  ppc_insn_int1(my_index, processor, cpu_model(processor), rT, rB, 0/*Rc*/);
+	else
+	  ppc_insn_int2(my_index, processor, cpu_model(processor), rT, rA, rB, 0/*Rc*/);
 
 0.31,6.RS,11.RA,16.RB,21.918,31./:X:::Store Half Word Byte-Reversed Indexed
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
-*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
-*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  3,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
+*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
+*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  3,  0
 	unsigned_word b;
 	unsigned_word EA;
 	if (RA == 0) b = 0;
 	else         b = *rA;
 	EA = b + *rB;
 	STORE(EA, 2, SWAP_2(*rS));
+	if (RA == 0)
+	  ppc_insn_int1_noout(my_index, processor, cpu_model(processor), rB);
+	else
+	  ppc_insn_int2_noout(my_index, processor, cpu_model(processor), rA, rB);
 
 0.31,6.RS,11.RA,16.RB,21.662,31./:X:::Store Word Byte-Reversed Indexed
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
-*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
-*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  3,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
+*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
+*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  3,  0
 	unsigned_word b;
 	unsigned_word EA;
 	if (RA == 0) b = 0;
 	else         b = *rA;
 	EA = b + *rB;
 	STORE(EA, 4, SWAP_4(*rS));
+	if (RA == 0)
+	  ppc_insn_int1_noout(my_index, processor, cpu_model(processor), rB);
+	else
+	  ppc_insn_int2_noout(my_index, processor, cpu_model(processor), rA, rB);
 
 
 #
@@ -1520,10 +1981,10 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 #	a store, the memory area is checked to see if it has
 #	been changed.
 0.31,6.RT,11.RA,16.RB,21.20,31./:X:::Load Word And Reserve Indexed
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    2,  2,  ppc_insn_generic
-*603: PPC_UNIT_LSU,   PPC_UNIT_IU,    1,  2,  ppc_insn_generic
-*603e:PPC_UNIT_LSU,   PPC_UNIT_IU,    1,  2,  ppc_insn_generic
-*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  3,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    2,  2,  0
+*603: PPC_UNIT_LSU,   PPC_UNIT_IU,    1,  2,  0
+*603e:PPC_UNIT_LSU,   PPC_UNIT_IU,    1,  2,  0
+*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  3,  0
 	unsigned_word b;
 	unsigned_word EA;
 	if (RA == 0) b = 0;
@@ -1546,10 +2007,10 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	*rT = RESERVE_DATA;
 
 0.31,6.RS,11.RA,16.RB,21.150,31.1:X:::Store Word Conditional Indexed
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603: PPC_UNIT_SRU,   PPC_UNIT_SRU,   8,  8,  ppc_insn_generic
-*603e:PPC_UNIT_SRU,   PPC_UNIT_SRU,   8,  8,  ppc_insn_generic
-*604: PPC_UNIT_BPU,   PPC_UNIT_BPU,   1,  3,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603: PPC_UNIT_SRU,   PPC_UNIT_SRU,   8,  8,  0
+*603e:PPC_UNIT_SRU,   PPC_UNIT_SRU,   8,  8,  0
+*604: PPC_UNIT_BPU,   PPC_UNIT_BPU,   1,  3,  0
 	unsigned_word b;
 	unsigned_word EA;
 	if (RA == 0) b = 0;
@@ -1593,10 +2054,10 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	}
 
 0.31,6./,11./,16./,21.598,31./:X::sync:Synchronize
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603: PPC_UNIT_SRU,   PPC_UNIT_SRU,   1,  1,  ppc_insn_generic
-*603e:PPC_UNIT_SRU,   PPC_UNIT_SRU,   1,  1,  ppc_insn_generic
-*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  1,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603: PPC_UNIT_SRU,   PPC_UNIT_SRU,   1,  1,  0
+*603e:PPC_UNIT_SRU,   PPC_UNIT_SRU,   1,  1,  0
+*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  1,  0
 	/* do nothing */
 
 
@@ -1605,127 +2066,148 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 #
 
 0.14,6.RT,11.RA,16.SI:D:T::Add Immediate
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603e:PPC_UNIT_IU,    PPC_UNIT_SRU,   1,  1,  ppc_insn_generic
-*604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  ppc_insn_generic
-	if (RA_is_0) *rT = EXTS(SI);
-	else         *rT = *rA + EXTS(SI);
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603e:PPC_UNIT_IU,    PPC_UNIT_SRU,   1,  1,  0
+*604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  0
+	if (RA_is_0) {
+	  *rT = EXTS(SI);
+	  ppc_insn_int0(my_index, processor, cpu_model(processor), rT, 0/*Rc*/);
+	}
+	else {
+	  *rT = *rA + EXTS(SI);
+	  ppc_insn_int1(my_index, processor, cpu_model(processor), rT, rA, 0/*Rc*/);
+	}
 
 0.15,6.RT,11.RA,16.SI:D:::Add Immediate Shifted
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603e:PPC_UNIT_IU,    PPC_UNIT_SRU,   1,  1,  ppc_insn_generic
-*604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  ppc_insn_generic
-	if (RA_is_0) *rT = EXTS(SI) << 16;
-	else         *rT = *rA + (EXTS(SI) << 16);
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603e:PPC_UNIT_IU,    PPC_UNIT_SRU,   1,  1,  0
+*604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  0
+	if (RA_is_0) {
+	  *rT = EXTS(SI) << 16;
+	  ppc_insn_int0(my_index, processor, cpu_model(processor), rT, 0/*Rc*/);
+	}
+	else {
+	  *rT = *rA + (EXTS(SI) << 16);
+	  ppc_insn_int1(my_index, processor, cpu_model(processor), rT, rA, 0/*Rc*/);
+	}
 
 0.31,6.RT,11.RA,16.RB,21.OE,22.266,31.Rc:XO:::Add
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603e:PPC_UNIT_IU,    PPC_UNIT_SRU,   1,  1,  ppc_insn_generic
-*604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603e:PPC_UNIT_IU,    PPC_UNIT_SRU,   1,  1,  0
+*604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  0
 	ALU_BEGIN(*rA);
 	ALU_ADD(*rB);
 	ALU_END(*rT, 0/*CA*/, OE, Rc);
+	ppc_insn_int2(my_index, processor, cpu_model(processor), rT, rA, rB, Rc);
 
 0.31,6.RT,11.RA,16.RB,21.OE,22.40,31.Rc:XO:::Subtract From
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603e:PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603e:PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  0
 	ALU_BEGIN(*rA);
 	ALU_NOT;
 	ALU_ADD(*rB);
 	ALU_ADD(1);
 	ALU_END(*rT, 0/*CA*/, OE, Rc);
+	ppc_insn_int2(my_index, processor, cpu_model(processor), rT, rA, rB, Rc);
 
 0.12,6.RT,11.RA,16.SI:D:::Add Immediate Carrying
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603e:PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603e:PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  0
 	ALU_BEGIN(*rA);
 	ALU_ADD(EXTS(SI));
 	ALU_END(*rT, 1/*CA*/, 0/*OE*/, 0/*Rc*/);
+	ppc_insn_int1(my_index, processor, cpu_model(processor), rT, rA, 0/*Rc*/);
 
 0.13,6.RT,11.RA,16.SI:D:::Add Immediate Carrying and Record
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603e:PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603e:PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  0
 	ALU_BEGIN(*rA);
 	ALU_ADD(EXTS(SI));
 	ALU_END(*rT, 1/*CA*/, 0/*OE*/, 1/*Rc*/);
+	ppc_insn_int1(my_index, processor, cpu_model(processor), rT, rA, 1/*Rc*/);
 
 0.8,6.RT,11.RA,16.SI:D:::Subtract From Immediate Carrying
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603e:PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603e:PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  0
 	ALU_BEGIN(*rA);
 	ALU_NOT;
 	ALU_ADD(EXTS(SI));
 	ALU_ADD(1);
 	ALU_END(*rT, 1/*CA*/, 0/*OE*/, 0/*Rc*/);
+	ppc_insn_int1(my_index, processor, cpu_model(processor), rT, rA, 0/*Rc*/);
 
 0.31,6.RT,11.RA,16.RB,21.OE,22.10,31.Rc:XO:::Add Carrying
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603e:PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603e:PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  0
 	ALU_BEGIN(*rA);
 	ALU_ADD(*rB);
 	ALU_END(*rT, 1/*CA*/, OE, Rc);
+	ppc_insn_int2(my_index, processor, cpu_model(processor), rT, rA, rB, Rc);
 
 0.31,6.RT,11.RA,16.RB,21.OE,22.8,31.Rc:XO:::Subtract From Carrying
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603e:PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603e:PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  0
 	/* RT <- ~RA + RB + 1 === RT <- RB - RA */
 	ALU_BEGIN(*rA);
 	ALU_NOT;
 	ALU_ADD(*rB);
 	ALU_ADD(1);
 	ALU_END(*rT, 1/*CA*/, OE, Rc);
+	ppc_insn_int2(my_index, processor, cpu_model(processor), rT, rA, rB, Rc);
 
 0.31,6.RT,11.RA,16.RB,21.OE,22.138,31.Rc:XO:::Add Extended
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603e:PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603e:PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  0
 	ALU_BEGIN(*rA);
 	ALU_ADD(*rB);
 	ALU_ADD_CA;
 	ALU_END(*rT, 1/*CA*/, OE, Rc);
+	ppc_insn_int2(my_index, processor, cpu_model(processor), rT, rA, rB, Rc);
 
 0.31,6.RT,11.RA,16.RB,21.OE,22.136,31.Rc:XO:::Subtract From Extended
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603e:PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603e:PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  0
 	ALU_BEGIN(*rA);
 	ALU_NOT;
 	ALU_ADD(*rB);
 	ALU_ADD_CA;
 	ALU_END(*rT, 1/*CA*/, OE, Rc);
+	ppc_insn_int2(my_index, processor, cpu_model(processor), rT, rA, rB, Rc);
 
 0.31,6.RT,11.RA,16./,21.OE,22.234,31.Rc:XO:::Add to Minus One Extended
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603e:PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603e:PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  0
 #	ALU_BEGIN(*rA);
 #	ALU_ADD_CA;
 #	ALU_SUB(1);
 #	ALU_END(*rT, 1/*CA*/, OE, Rc);
 
 0.31,6.RT,11.RA,16./,21.OE,22.232,31.Rc:XO:::Subtract From Minus One Extended
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603e:PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603e:PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  0
 #	ALU_BEGIN(*rA);
 #	ALU_NOT;
 #	ALU_ADD_CA;
@@ -1733,49 +2215,53 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 #	ALU_END(*rT, 1/*CA*/, OE, Rc);
 
 0.31,6.RT,11.RA,16./,21.OE,22.202,31.Rc:XO::addze:Add to Zero Extended
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603e:PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603e:PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  0
 	ALU_BEGIN(*rA);
 	ALU_ADD_CA;
 	ALU_END(*rT, 1/*CA*/, OE, Rc);
+	ppc_insn_int1(my_index, processor, cpu_model(processor), rT, rA, Rc);
 
 0.31,6.RT,11.RA,16./,21.OE,22.200,31.Rc:XO:::Subtract from Zero Extended
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603e:PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603e:PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  0
 	ALU_BEGIN(*rA);
 	ALU_NOT;
 	ALU_ADD_CA;
 	ALU_END(*rT, 1/*CA*/, OE, Rc);
+	ppc_insn_int1(my_index, processor, cpu_model(processor), rT, rA, Rc);
 
 0.31,6.RT,11.RA,16./,21.OE,22.104,31.Rc:XO:::Negate
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603e:PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603e:PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  0
 	ALU_BEGIN(*rA);
 	ALU_NOT;
 	ALU_ADD(1);
 	ALU_END(*rT,0/*CA*/,OE,Rc);
+	ppc_insn_int1(my_index, processor, cpu_model(processor), rT, rA, Rc);
 
 0.7,6.RT,11.RA,16.SI:D::mulli:Multiply Low Immediate
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    5,  5,  ppc_insn_generic
-*603: PPC_UNIT_IU,    PPC_UNIT_IU,    3,  3,  ppc_insn_generic
-*603e:PPC_UNIT_IU,    PPC_UNIT_IU,    3,  3,  ppc_insn_generic
-*604: PPC_UNIT_MCIU,  PPC_UNIT_MCIU,  3,  3,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    5,  5,  0
+*603: PPC_UNIT_IU,    PPC_UNIT_IU,    3,  3,  0
+*603e:PPC_UNIT_IU,    PPC_UNIT_IU,    3,  3,  0
+*604: PPC_UNIT_MCIU,  PPC_UNIT_MCIU,  3,  3,  0
 	signed_word prod = *rA * EXTS(SI);
 	*rT = prod;
+	ppc_insn_int1(my_index, processor, cpu_model(processor), rT, rA, 0/*Rc*/);
 
 0.31,6.RT,11.RA,16.RB,21.OE,22.233,31.Rc:D:64::Multiply Low Doubleword
 
 0.31,6.RT,11.RA,16.RB,21.OE,22.235,31.Rc:XO::mullw:Multiply Low Word
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    5,  5,  ppc_insn_generic
-*603: PPC_UNIT_IU,    PPC_UNIT_IU,    5,  5,  ppc_insn_generic
-*603e:PPC_UNIT_IU,    PPC_UNIT_IU,    5,  5,  ppc_insn_generic
-*604: PPC_UNIT_MCIU,  PPC_UNIT_MCIU,  4,  4,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    5,  5,  0
+*603: PPC_UNIT_IU,    PPC_UNIT_IU,    5,  5,  0
+*603e:PPC_UNIT_IU,    PPC_UNIT_IU,    5,  5,  0
+*604: PPC_UNIT_MCIU,  PPC_UNIT_MCIU,  4,  4,  0
 	signed64 a = (signed32)(*rA);
 	signed64 b = (signed32)(*rB);
 	signed64 prod = a * b;
@@ -1784,42 +2270,45 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	if (t != prod && OE)
 	  XER |= (xer_overflow | xer_summary_overflow);
 	CR0_COMPARE(t, 0, Rc);
+	ppc_insn_int2(my_index, processor, cpu_model(processor), rT, rA, rB, Rc);
 
 0.31,6.RT,11.RA,16.RB,21./,22.73,31.Rc:XO:64::Multiply High Doubleword
 
 0.31,6.RT,11.RA,16.RB,21./,22.75,31.Rc:XO::mulhw:Multiply High Word
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    5,  5,  ppc_insn_generic
-*603: PPC_UNIT_IU,    PPC_UNIT_IU,    5,  5,  ppc_insn_generic
-*603e:PPC_UNIT_IU,    PPC_UNIT_IU,    5,  5,  ppc_insn_generic
-*604: PPC_UNIT_MCIU,  PPC_UNIT_MCIU,  4,  4,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    5,  5,  0
+*603: PPC_UNIT_IU,    PPC_UNIT_IU,    5,  5,  0
+*603e:PPC_UNIT_IU,    PPC_UNIT_IU,    5,  5,  0
+*604: PPC_UNIT_MCIU,  PPC_UNIT_MCIU,  4,  4,  0
 	signed64 a = (signed32)(*rA);
 	signed64 b = (signed32)(*rB);
 	signed64 prod = a * b;
 	signed_word t = EXTRACTED64(prod, 0, 31);
 	*rT = t;
 	CR0_COMPARE(t, 0, Rc);
+	ppc_insn_int2(my_index, processor, cpu_model(processor), rT, rA, rB, Rc);
 
 0.31,6.RT,11.RA,16.RB,21./,22.9,31.Rc:XO:64::Multiply High Doubleword Unsigned
 
 0.31,6.RT,11.RA,16.RB,21./,22.11,31.Rc:XO::milhwu:Multiply High Word Unsigned
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    10, 10, ppc_insn_generic
-*603: PPC_UNIT_IU,    PPC_UNIT_IU,    6,  6,  ppc_insn_generic
-*603e:PPC_UNIT_IU,    PPC_UNIT_IU,    6,  6,  ppc_insn_generic
-*604: PPC_UNIT_MCIU,  PPC_UNIT_MCIU,  4,  4,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    10, 10, 0
+*603: PPC_UNIT_IU,    PPC_UNIT_IU,    6,  6,  0
+*603e:PPC_UNIT_IU,    PPC_UNIT_IU,    6,  6,  0
+*604: PPC_UNIT_MCIU,  PPC_UNIT_MCIU,  4,  4,  0
 	unsigned64 a = (unsigned32)(*rA);
 	unsigned64 b = (unsigned32)(*rB);
 	unsigned64 prod = a * b;
 	signed_word t = EXTRACTED64(prod, 0, 31);
 	*rT = t;
 	CR0_COMPARE(t, 0, Rc);
+	ppc_insn_int2(my_index, processor, cpu_model(processor), rT, rA, rB, Rc);
 
 0.31,6.RT,11.RA,16.RB,21.OE,22.489,31.Rc:XO:64::Divide Doubleword
 
 0.31,6.RT,11.RA,16.RB,21.OE,22.491,31.Rc:XO::divw:Divide Word
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    36, 36, ppc_insn_generic
-*603: PPC_UNIT_IU,    PPC_UNIT_IU,    37, 37, ppc_insn_generic
-*603e:PPC_UNIT_IU,    PPC_UNIT_IU,    37, 37, ppc_insn_generic
-*604: PPC_UNIT_MCIU,  PPC_UNIT_MCIU,  20, 20, ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    36, 36, 0
+*603: PPC_UNIT_IU,    PPC_UNIT_IU,    37, 37, 0
+*603e:PPC_UNIT_IU,    PPC_UNIT_IU,    37, 37, 0
+*604: PPC_UNIT_MCIU,  PPC_UNIT_MCIU,  20, 20, 0
 	signed64 dividend = (signed32)(*rA);
 	signed64 divisor = (signed32)(*rB);
 	if (divisor == 0 /* nb 0x8000..0 is sign extended */
@@ -1833,13 +2322,15 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	  *rT = quotent;
 	  CR0_COMPARE((signed_word)quotent, 0, Rc);
 	}
+	ppc_insn_int2(my_index, processor, cpu_model(processor), rT, rA, rB, Rc);
+
 0.31,6.RT,11.RA,16.RB,21.OE,22.457,31.Rc:XO:64::Divide Doubleword Unsigned
 
 0.31,6.RT,11.RA,16.RB,21.OE,22.459,31.Rc:XO::divwu:Divide Word Unsigned
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    36, 36, ppc_insn_generic
-*603: PPC_UNIT_IU,    PPC_UNIT_IU,    37, 37, ppc_insn_generic
-*603e:PPC_UNIT_IU,    PPC_UNIT_IU,    37, 37, ppc_insn_generic
-*604: PPC_UNIT_MCIU,  PPC_UNIT_MCIU,  20, 20, ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    36, 36, 0
+*603: PPC_UNIT_IU,    PPC_UNIT_IU,    37, 37, 0
+*603e:PPC_UNIT_IU,    PPC_UNIT_IU,    37, 37, 0
+*604: PPC_UNIT_MCIU,  PPC_UNIT_MCIU,  20, 20, 0
 	unsigned64 dividend = (unsigned32)(*rA);
 	unsigned64 divisor = (unsigned32)(*rB);
 	if (divisor == 0) {
@@ -1852,6 +2343,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	  *rT = quotent;
 	  CR0_COMPARE((signed_word)quotent, 0, Rc);
 	}
+	ppc_insn_int2(my_index, processor, cpu_model(processor), rT, rA, rB, Rc);
 
 
 #
@@ -1859,10 +2351,10 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 #
 
 0.11,6.BF,9./,10.L,11.RA,16.SI:D:::Compare Immediate
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603e:PPC_UNIT_IU,    PPC_UNIT_SRU,   1,  1,  ppc_insn_generic
-*604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603e:PPC_UNIT_IU,    PPC_UNIT_SRU,   1,  1,  0
+*604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  0
 	if (!is_64bit_mode && L)
 	  program_interrupt(processor, cia,
 	                    illegal_instruction_program_interrupt);
@@ -1875,12 +2367,13 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	    a = *rA;
 	  CR_COMPARE(BF, a, b);
 	}
+	ppc_insn_int1_cr(my_index, processor, cpu_model(processor), BF, rA);
 
 0.31,6.BF,9./,10.L,11.RA,16.RB,21.0,31./:X:::Compare
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603e:PPC_UNIT_IU,    PPC_UNIT_SRU,   1,  1,  ppc_insn_generic
-*604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603e:PPC_UNIT_IU,    PPC_UNIT_SRU,   1,  1,  0
+*604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  0
 	if (!is_64bit_mode && L)
 	  program_interrupt(processor, cia,
 	                    illegal_instruction_program_interrupt);
@@ -1897,12 +2390,13 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	  }
 	  CR_COMPARE(BF, a, b);
 	}
+	ppc_insn_int2_cr(my_index, processor, cpu_model(processor), BF, rA, rB);
 
 0.10,6.BF,9./,10.L,11.RA,16.UI:D:::Compare Logical Immediate
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603e:PPC_UNIT_IU,    PPC_UNIT_SRU,   1,  1,  ppc_insn_generic
-*604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603e:PPC_UNIT_IU,    PPC_UNIT_SRU,   1,  1,  0
+*604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  0
 	if (!is_64bit_mode && L)
 	  program_interrupt(processor, cia,
 	                    illegal_instruction_program_interrupt);
@@ -1915,12 +2409,13 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	    a = *rA;
 	  CR_COMPARE(BF, a, b);
 	}
+	ppc_insn_int1_cr(my_index, processor, cpu_model(processor), BF, rA);
 
 0.31,6.BF,9./,10.L,11.RA,16.RB,21.32,31./:X:::Compare Logical
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603e:PPC_UNIT_IU,    PPC_UNIT_SRU,   1,  1,  ppc_insn_generic
-*604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603e:PPC_UNIT_IU,    PPC_UNIT_SRU,   1,  1,  0
+*604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  0
 	if (!is_64bit_mode && L)
 	  program_interrupt(processor, cia,
 	                    illegal_instruction_program_interrupt);
@@ -1937,6 +2432,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	  }
 	  CR_COMPARE(BF, a, b);
 	}
+	ppc_insn_int2_cr(my_index, processor, cpu_model(processor), BF, rA, rB);
 
 
 #
@@ -1961,10 +2457,10 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	}
 
 0.3,6.TO,11.RA,16.SI:D:::Trap Word Immediate
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603: PPC_UNIT_IU,    PPC_UNIT_IU,    2,  2,  ppc_insn_generic
-*603e:PPC_UNIT_IU,    PPC_UNIT_IU,    2,  2,  ppc_insn_generic
-*604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603: PPC_UNIT_IU,    PPC_UNIT_IU,    2,  2,  0
+*603e:PPC_UNIT_IU,    PPC_UNIT_IU,    2,  2,  0
+*604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  0
 	signed_word a = EXTENDED(*rA);
 	signed_word b = EXTS(SI);
 	if ((a < b && TO{0})
@@ -1994,10 +2490,10 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	}
 
 0.31,6.TO,11.RA,16.RB,21.4,31./:X:::Trap Word
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603: PPC_UNIT_IU,    PPC_UNIT_IU,    2,  2,  ppc_insn_generic
-*603e:PPC_UNIT_IU,    PPC_UNIT_IU,    2,  2,  ppc_insn_generic
-*604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603: PPC_UNIT_IU,    PPC_UNIT_IU,    2,  2,  0
+*603e:PPC_UNIT_IU,    PPC_UNIT_IU,    2,  2,  0
+*604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  0
 	signed_word a = EXTENDED(*rA);
 	signed_word b = EXTENDED(*rB);
 	if (TO == 12 && rA == rB) {
@@ -2018,133 +2514,149 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 #
 
 0.28,6.RS,11.RA,16.UI:D:::AND Immediate
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603e:PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603e:PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  0
 	*rA = *rS & UI;
 	CR0_COMPARE(*rA, 0, 1/*Rc*/);
+	ppc_insn_int1(my_index, processor, cpu_model(processor), rA, rS, 1/*Rc*/);
 
 0.29,6.RS,11.RA,16.UI:D:::AND Immediate Shifted
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603e:PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603e:PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  0
 	*rA = *rS & (UI << 16);
 	CR0_COMPARE(*rA, 0, 1/*Rc*/);
+	ppc_insn_int1(my_index, processor, cpu_model(processor), rA, rS, 1/*Rc*/);
 
 0.24,6.RS,11.RA,16.UI:D:::OR Immediate
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603e:PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603e:PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  0
 	*rA = *rS | UI;
+	ppc_insn_int1(my_index, processor, cpu_model(processor), rA, rS, 0);
 
 0.25,6.RS,11.RA,16.UI:D:::OR Immediate Shifted
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603e:PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603e:PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  0
 	*rA = *rS | (UI << 16);
+	ppc_insn_int1(my_index, processor, cpu_model(processor), rA, rS, 0);
 
 0.26,6.RS,11.RA,16.UI:D:::XOR Immediate
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603e:PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603e:PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  0
 	*rA = *rS ^ UI;
+	ppc_insn_int1(my_index, processor, cpu_model(processor), rA, rS, 0);
 
 0.27,6.RS,11.RA,16.UI:D:::XOR Immediate Shifted
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603e:PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603e:PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  0
 	*rA = *rS ^ (UI << 16);
+	ppc_insn_int1(my_index, processor, cpu_model(processor), rA, rS, 0);
 
 0.31,6.RS,11.RA,16.RB,21.28,31.Rc:X:::AND
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603e:PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603e:PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  0
 	*rA = *rS & *rB;
 	CR0_COMPARE(*rA, 0, Rc);
+	ppc_insn_int2(my_index, processor, cpu_model(processor), rA, rS, rB, Rc);
 
 0.31,6.RS,11.RA,16.RB,21.444,31.Rc:X:::OR
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603e:PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603e:PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  0
 	*rA = *rS | *rB;
 	CR0_COMPARE(*rA, 0, Rc);
+	ppc_insn_int2(my_index, processor, cpu_model(processor), rA, rS, rB, Rc);
 
 0.31,6.RS,11.RA,16.RB,21.316,31.Rc:X:::XOR
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603e:PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603e:PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  0
 	*rA = *rS ^ *rB;
 	CR0_COMPARE(*rA, 0, Rc);
+	ppc_insn_int2(my_index, processor, cpu_model(processor), rA, rS, rB, Rc);
 
 0.31,6.RS,11.RA,16.RB,21.476,31.Rc:X:::NAND
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603e:PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603e:PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  0
 	*rA = ~(*rS & *rB);
 	CR0_COMPARE(*rA, 0, Rc);
+	ppc_insn_int2(my_index, processor, cpu_model(processor), rA, rS, rB, Rc);
 
 0.31,6.RS,11.RA,16.RB,21.124,31.Rc:X:::NOR
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603e:PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603e:PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  0
 	*rA = ~(*rS | *rB);
 	CR0_COMPARE(*rA, 0, Rc);
+	ppc_insn_int2(my_index, processor, cpu_model(processor), rA, rS, rB, Rc);
 
 0.31,6.RS,11.RA,16.RB,21.284,31.Rc:X:::Equivalent
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603e:PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603e:PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  0
 #	*rA = ~(*rS ^ *rB); /* A === B */
 #	CR0_COMPARE(*rA, 0, Rc);
 
 0.31,6.RS,11.RA,16.RB,21.60,31.Rc:X:::AND with Complement
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603e:PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603e:PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  0
 	*rA = *rS & ~*rB;
 	CR0_COMPARE(*rA, 0, Rc);
+	ppc_insn_int2(my_index, processor, cpu_model(processor), rA, rS, rB, Rc);
+
 0.31,6.RS,11.RA,16.RB,21.412,31.Rc:X:::OR with Complement
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603e:PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603e:PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  0
 	*rA = *rS | ~*rB;
 	CR0_COMPARE(*rA, 0, Rc);
+	ppc_insn_int2(my_index, processor, cpu_model(processor), rA, rS, rB, Rc);
 
 0.31,6.RS,11.RA,16./,21.954,31.Rc:X::extsb:Extend Sign Byte
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603e:PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603e:PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  0
 	*rA = (signed_word)(signed8)*rS;
 	CR0_COMPARE(*rA, 0, Rc);
+	ppc_insn_int1(my_index, processor, cpu_model(processor), rA, rS, Rc);
 
 0.31,6.RS,11.RA,16./,21.922,31.Rc:X::extsh:Extend Sign Half Word
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603e:PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603e:PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  0
 	*rA = (signed_word)(signed16)*rS;
 	CR0_COMPARE(*rA, 0, Rc);
+	ppc_insn_int1(my_index, processor, cpu_model(processor), rA, rS, Rc);
 
 0.31,6.RS,11.RA,16./,21.986,31.Rc:X:64::Extend Sign Word
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603e:PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603e:PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  0
 #	*rA = (signed_word)(signed32)*rS;
 #	CR0_COMPARE(*rA, 0, Rc);
 
@@ -2160,10 +2672,10 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 #	CR0_COMPARE(count, 0, Rc); /* FIXME - is this correct */
 
 0.31,6.RS,11.RA,16./,21.26,31.Rc:X:::Count Leading Zeros Word
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603e:PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603e:PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  0
 	int count = 0;
 	unsigned32 mask = BIT32(0);
 	unsigned32 source = *rS;
@@ -2207,10 +2719,10 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 #	CR0_COMPARE(result, 0, Rc); /* FIXME - is this correct */
 
 0.21,6.RS,11.RA,16.SH,21.MB,26.ME,31.Rc:M:::Rotate Left Word Immediate then AND with Mask
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603e:PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603e:PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  0
 	long n = SH;
 	unsigned32 s = *rS;
 	unsigned32 r = ROTL32(s, n);
@@ -2221,6 +2733,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	ITRACE(trace_alu,
 	       ("n=%d, s=0x%x, r=0x%x, m=0x%x, result=0x%x, cr=0x%x\n",
 	        n, s, r, m, result, CR));
+	ppc_insn_int1(my_index, processor, cpu_model(processor), rA, rS, Rc);
 
 0.30,6.RS,11.RA,16.RB,21.mb,27.8,31.Rc:MDS:64::Rotate Left Doubleword then Clear Left
 #	long n = MASKED(*rB, 58, 63);
@@ -2258,10 +2771,10 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 #	CR0_COMPARE(result, 0, Rc);
 
 0.20,6.RS,11.RA,16.SH,21.MB,26.ME,31.Rc:M::rlwimi:Rotate Left Word Immediate then Mask Insert
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603e:PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603e:PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  0
 	long n = SH;
 	unsigned32 r = ROTL32(*rS, n);
 	unsigned32 m = MASK(MB+32, ME+32);
@@ -2270,15 +2783,16 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	ITRACE(trace_alu, (": n=%d *rS=0x%x r=0x%x m=0x%x result=0x%x\n",
 	                   n, *rS, r, m, result));
 	CR0_COMPARE(result, 0, Rc);
+	ppc_insn_int1(my_index, processor, cpu_model(processor), rA, rS, Rc);
 
 
 0.31,6.RS,11.RA,16.RB,21.27,31.Rc:X:64::Shift Left Doubleword
 
 0.31,6.RS,11.RA,16.RB,21.24,31.Rc:X:::Shift Left Word
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603e:PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603e:PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  0
 	int n = MASKED(*rB, 59, 63);
 	unsigned32 source = *rS;
 	signed_word shifted;
@@ -2291,14 +2805,15 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	ITRACE(trace_alu,
 	       ("n=%d, source=0x%x, shifted=0x%x\n",
 	        n, source, shifted));
+	ppc_insn_int1(my_index, processor, cpu_model(processor), rA, rS, Rc);
 
 0.31,6.RS,11.RA,16.RB,21.539,31.Rc:X:64::Shift Right Doubleword
 
 0.31,6.RS,11.RA,16.RB,21.536,31.Rc:X:::Shift Right Word
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603e:PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603e:PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  0
 	int n = MASKED(*rB, 59, 63);
 	unsigned32 source = *rS;
 	signed_word shifted;
@@ -2311,14 +2826,15 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	ITRACE(trace_alu, \
 	       ("n=%d, source=0x%x, shifted=0x%x\n",
 	        n, source, shifted));
+	ppc_insn_int1(my_index, processor, cpu_model(processor), rA, rS, Rc);
 
 0.31,6.RS,11.RA,16.sh_0_4,21.413,30.sh_5,31.Rc:XS:64::Shift Right Algebraic Doubleword Immediate
 
 0.31,6.RS,11.RA,16.SH,21.824,31.Rc:X:::Shift Right Algebraic Word Immediate
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603e:PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603e:PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  0
 	int n = SH;
 	signed_word r = ROTL32(*rS, /*64*/32-n);
 	signed_word m = MASK(n+32, 63);
@@ -2330,14 +2846,15 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	else
 	  XER &= ~xer_carry;
 	CR0_COMPARE(shifted, 0, Rc);
+	ppc_insn_int1(my_index, processor, cpu_model(processor), rA, rS, Rc);
 
 0.31,6.RS,11.RA,16.RB,21.794,31.Rc:X:64::Shift Right Algebraic Doubleword
 
 0.31,6.RS,11.RA,16.RB,21.792,31.Rc:X:::Shift Right Algebraic Word
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603e:PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603e:PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  0
 	int n = MASKED(*rB, 58, 63);
 	int shift = (n >= 31 ? 31 : n);
 	signed32 source = (signed32)*rS; /* signed to keep sign bit */
@@ -2349,17 +2866,17 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	else
 	  XER &= ~xer_carry;
 	CR0_COMPARE(shifted, 0, Rc);
-
+	ppc_insn_int1(my_index, processor, cpu_model(processor), rA, rS, Rc);
 
 #
 # I.3.3.14 Move to/from System Register Instructions
 #
 
 0.31,6.RS,11.spr,21.467,31./:XFX::mtspr %SPR, %RS:Move to Special Purpose Register
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603: PPC_UNIT_SRU,   PPC_UNIT_SRU,   2,  2,  ppc_insn_generic
-*603e:PPC_UNIT_SRU,   PPC_UNIT_SRU,   2,  2,  ppc_insn_generic
-*604: PPC_UNIT_MCIU,  PPC_UNIT_MCIU,  1,  1,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603: PPC_UNIT_SRU,   PPC_UNIT_SRU,   2,  2,  0
+*603e:PPC_UNIT_SRU,   PPC_UNIT_SRU,   2,  2,  0
+*604: PPC_UNIT_MCIU,  PPC_UNIT_MCIU,  1,  1,  0
 	int n = (spr{5:9} << 5) | spr{0:4};
 	if (spr{0} && IS_PROBLEM_STATE(processor))
 	  program_interrupt(processor, cia,
@@ -2398,12 +2915,13 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	    SPREG(n) = new_val;
 	  }
 	}
+	ppc_insn_to_spr(my_index, processor, cpu_model(processor), n, rS);
 
 0.31,6.RT,11.spr,21.339,31./:XFX::mfspr %RT, %SPR:Move from Special Purpose Register
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603: PPC_UNIT_SRU,   PPC_UNIT_SRU,   1,  1,  ppc_insn_generic
-*603e:PPC_UNIT_SRU,   PPC_UNIT_SRU,   1,  1,  ppc_insn_generic
-*604: PPC_UNIT_MCIU,  PPC_UNIT_MCIU,  3,  3,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603: PPC_UNIT_SRU,   PPC_UNIT_SRU,   1,  1,  0
+*603e:PPC_UNIT_SRU,   PPC_UNIT_SRU,   1,  1,  0
+*604: PPC_UNIT_MCIU,  PPC_UNIT_MCIU,  3,  3,  0
 	int n = (spr{5:9} << 5) | spr{0:4};
 	if (spr{0} && IS_PROBLEM_STATE(processor))
 	  program_interrupt(processor, cia,
@@ -2415,13 +2933,14 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	  /* HACK - some SPR's need to get their value extracted specially */
 	  *rT = SPREG(n);
 	}
+	ppc_insn_from_spr(my_index, processor, cpu_model(processor), rT, n);
 
 # FIXME: 604 uses SCIU{1,2} if only one bit is being set
 0.31,6.RS,11./,12.FXM,20./,21.144,31./:XFX::mtfcr:Move to Condition Register Fields
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    2,  2,  ppc_insn_generic
-*603: PPC_UNIT_SRU,   PPC_UNIT_SRU,   1,  1,  ppc_insn_generic
-*603e:PPC_UNIT_SRU,   PPC_UNIT_SRU,   1,  1,  ppc_insn_generic
-*604: PPC_UNIT_MCIU,  PPC_UNIT_MCIU,  1,  1,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    2,  2,  0
+*603: PPC_UNIT_SRU,   PPC_UNIT_SRU,   1,  1,  0
+*603e:PPC_UNIT_SRU,   PPC_UNIT_SRU,   1,  1,  0
+*604: PPC_UNIT_MCIU,  PPC_UNIT_MCIU,  1,  1,  0
 	if (FXM == 0xff) {
 	  CR = *rS;
 	}
@@ -2438,10 +2957,10 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 0.31,6.BF,9./,11./,16./,21.512,31./:X:::Move to Condition Register from XER
 
 0.31,6.RT,11./,16./,21.19,31./:X:::Move From Condition Register
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603: PPC_UNIT_SRU,   PPC_UNIT_SRU,   1,  1,  ppc_insn_generic
-*603e:PPC_UNIT_SRU,   PPC_UNIT_SRU,   1,  1,  ppc_insn_generic
-*604: PPC_UNIT_MCIU,  PPC_UNIT_MCIU,  3,  3,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603: PPC_UNIT_SRU,   PPC_UNIT_SRU,   1,  1,  0
+*603e:PPC_UNIT_SRU,   PPC_UNIT_SRU,   1,  1,  0
+*604: PPC_UNIT_MCIU,  PPC_UNIT_MCIU,  3,  3,  0
 	*rT = (unsigned32)CR;
 
 #
@@ -2449,10 +2968,10 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 #
 
 0.48,6.FRT,11.RA,16.D:D:f:lfs:Load Floating-Point Single
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    3,  3,  ppc_insn_generic
-*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
-*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
-*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  3,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    3,  3,  0
+*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
+*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
+*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  3,  0
 	unsigned_word b;
 	unsigned_word EA;
 	if (RA == 0) b = 0;
@@ -2461,10 +2980,10 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	*frT = DOUBLE(MEM(unsigned, EA, 4));
 
 0.31,6.FRT,11.RA,16.RB,21.535,31./:X:f::Load Floating-Point Single Indexed
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    3,  3,  ppc_insn_generic
-*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
-*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
-*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  3,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    3,  3,  0
+*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
+*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
+*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  3,  0
 	unsigned_word b;
 	unsigned_word EA;
 	if (RA == 0) b = 0;
@@ -2473,10 +2992,10 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	*frT = DOUBLE(MEM(unsigned, EA, 4));
 
 0.49,6.FRT,11.RA,16.D:D:f::Load Floating-Point Single with Update
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    3,  3,  ppc_insn_generic
-*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
-*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
-*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  3,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    3,  3,  0
+*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
+*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
+*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  3,  0
 	unsigned_word EA;
 	if (RA == 0)
 	  program_interrupt(processor, cia,
@@ -2486,10 +3005,10 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	*rA = EA;
 
 0.31,6.FRT,11.RA,16.RB,21.576,31./:X:f::Load Floating-Point Single with Update Indexed
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    3,  3,  ppc_insn_generic
-*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
-*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
-*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  3,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    3,  3,  0
+*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
+*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
+*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  3,  0
 	unsigned_word EA;
 	if (RA == 0)
 	  program_interrupt(processor, cia,
@@ -2499,10 +3018,10 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	*rA = EA;
 
 0.50,6.FRT,11.RA,16.D:D:f::Load Floating-Point Double
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    3,  3,  ppc_insn_generic
-*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
-*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
-*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  3,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    3,  3,  0
+*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
+*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
+*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  3,  0
 	unsigned_word b;
 	unsigned_word EA;
 	if (RA == 0) b = 0;
@@ -2511,10 +3030,10 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	*frT = MEM(unsigned, EA, 8);
 
 0.31,6.FRT,11.RA,16.RB,21.599,31./:X:f::Load Floating-Point Double Indexed
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    3,  3,  ppc_insn_generic
-*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
-*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
-*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  3,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    3,  3,  0
+*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
+*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
+*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  3,  0
 	unsigned_word b;
 	unsigned_word EA;
 	if (RA == 0) b = 0;
@@ -2523,10 +3042,10 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	*frT = MEM(unsigned, EA, 8);
 
 0.51,6.FRT,11.RA,16.D:D:f::Load Floating-Point Double with Update
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    3,  3,  ppc_insn_generic
-*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
-*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
-*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  3,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    3,  3,  0
+*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
+*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
+*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  3,  0
 	unsigned_word EA;
 	if (RA == 0)
 	  program_interrupt(processor, cia,
@@ -2536,10 +3055,10 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	*rA = EA;
 
 0.31,6.FRT,11.RA,16.RB,21.631,31./:X:f::Load Floating-Point Double with Update Indexed
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    3,  3,  ppc_insn_generic
-*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
-*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
-*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  3,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    3,  3,  0
+*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
+*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
+*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  3,  0
 	unsigned_word EA;
 	if (RA == 0)
 	  program_interrupt(processor, cia,
@@ -2554,10 +3073,10 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 #
 
 0.52,6.FRS,11.RA,16.D:D:f::Store Floating-Point Single
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
-*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
-*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  3,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
+*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
+*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  3,  0
 	unsigned_word b;
 	unsigned_word EA;
 	if (RA == 0) b = 0;
@@ -2566,10 +3085,10 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	STORE(EA, 4, SINGLE(*frS));
 
 0.31,6.FRS,11.RA,16.RB,21.663,31./:X:f::Store Floating-Point Single Indexed
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
-*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
-*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  3,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
+*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
+*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  3,  0
 	unsigned_word b;
 	unsigned_word EA;
 	if (RA == 0) b = 0;
@@ -2578,10 +3097,10 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	STORE(EA, 4, SINGLE(*frS));
 
 0.53,6.FRS,11.RA,16.D:D:f::Store Floating-Point Single with Update
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
-*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
-*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  3,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
+*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
+*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  3,  0
 	unsigned_word EA;
 	if (RA == 0)
 	  program_interrupt(processor, cia,
@@ -2591,10 +3110,10 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	*rA = EA;
 
 0.31,6.FRS,11.RA,16.RB,21.695,31./:X:f::Store Floating-Point Single with Update Indexed
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
-*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
-*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  3,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
+*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
+*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  3,  0
 	unsigned_word EA;
 	if (RA == 0)
 	  program_interrupt(processor, cia,
@@ -2604,10 +3123,10 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	*rA = EA;
 
 0.54,6.FRS,11.RA,16.D:D:f::Store Floating-Point Double
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
-*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
-*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  3,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
+*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
+*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  3,  0
 	unsigned_word b;
 	unsigned_word EA;
 	if (RA == 0) b = 0;
@@ -2616,10 +3135,10 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	STORE(EA, 8, *frS);
 
 0.31,6.FRS,11.RA,16.RB,21.727,31./:X:f::Store Floating-Point Double Indexed
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
-*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
-*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  3,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
+*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
+*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  3,  0
 	unsigned_word b;
 	unsigned_word EA;
 	if (RA == 0) b = 0;
@@ -2628,10 +3147,10 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	STORE(EA, 8, *frS);
 
 0.55,6.FRS,11.RA,16.D:D:f::Store Floating-Point Double with Update
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
-*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
-*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  3,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
+*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
+*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  3,  0
 	unsigned_word EA;
 	if (RA == 0)
 	  program_interrupt(processor, cia,
@@ -2641,10 +3160,10 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	*rA = EA;
 
 0.31,6.FRS,11.RA,16.RB,21.759,31./:X:f::Store Floating-Point Double with Update Indexed
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
-*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  ppc_insn_generic
-*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  3,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
+*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  2,  0
+*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  3,  0
 	unsigned_word EA;
 	if (RA == 0)
 	  program_interrupt(processor, cia,
@@ -2659,34 +3178,34 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 #
 
 0.63,6.FRT,11./,16.FRB,21.72,31.Rc:X:f::Floating Move Register
-*601: PPC_UNIT_FPU,   PPC_UNIT_FPU,   4,  4,  ppc_insn_generic
-*603: PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  ppc_insn_generic
-*603e:PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  ppc_insn_generic
-*604: PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  ppc_insn_generic
+*601: PPC_UNIT_FPU,   PPC_UNIT_FPU,   4,  4,  0
+*603: PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  0
+*603e:PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  0
+*604: PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  0
 	*frT = *frB;
 	CR1_UPDATE(Rc);
 
 0.63,6.FRT,11./,16.FRB,21.40,31.Rc:X:f::Floating Negate
-*601: PPC_UNIT_FPU,   PPC_UNIT_FPU,   4,  4,  ppc_insn_generic
-*603: PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  ppc_insn_generic
-*603e:PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  ppc_insn_generic
-*604: PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  ppc_insn_generic
+*601: PPC_UNIT_FPU,   PPC_UNIT_FPU,   4,  4,  0
+*603: PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  0
+*603e:PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  0
+*604: PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  0
 	*frT = *frB ^ BIT64(0);
 	CR1_UPDATE(Rc);
 
 0.63,6.FRT,11./,16.FRB,21.264,31.Rc:X:f::Floating Absolute Value
-*601: PPC_UNIT_FPU,   PPC_UNIT_FPU,   4,  4,  ppc_insn_generic
-*603: PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  ppc_insn_generic
-*603e:PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  ppc_insn_generic
-*604: PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  ppc_insn_generic
+*601: PPC_UNIT_FPU,   PPC_UNIT_FPU,   4,  4,  0
+*603: PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  0
+*603e:PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  0
+*604: PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  0
 	*frT = *frB & ~BIT64(0);
 	CR1_UPDATE(Rc);
 
 0.63,6.FRT,11./,16.FRB,21.136,31.Rc:X:f::Floating Negative Absolute Value
-*601: PPC_UNIT_FPU,   PPC_UNIT_FPU,   4,  4,  ppc_insn_generic
-*603: PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  ppc_insn_generic
-*603e:PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  ppc_insn_generic
-*604: PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  ppc_insn_generic
+*601: PPC_UNIT_FPU,   PPC_UNIT_FPU,   4,  4,  0
+*603: PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  0
+*603e:PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  0
+*604: PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  0
 	*frT = *frB | BIT64(0);
 	CR1_UPDATE(Rc);
 
@@ -2697,10 +3216,10 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 #
 
 0.63,6.FRT,11.FRA,16.FRB,21./,26.21,31.Rc:A:f:fadd:Floating Add
-*601: PPC_UNIT_FPU,   PPC_UNIT_FPU,   4,  4,  ppc_insn_generic
-*603: PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  ppc_insn_generic
-*603e:PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  ppc_insn_generic
-*604: PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  ppc_insn_generic
+*601: PPC_UNIT_FPU,   PPC_UNIT_FPU,   4,  4,  0
+*603: PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  0
+*603e:PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  0
+*604: PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  0
 	FPSCR_BEGIN;
 	if (is_invalid_operation(processor, cia,
 	                         *frA, *frB,
@@ -2722,10 +3241,10 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	FPSCR_END(Rc);
 
 0.59,6.FRT,11.FRA,16.FRB,21./,26.21,31.Rc:A:f:fadds:Floating Add Single
-*601: PPC_UNIT_FPU,   PPC_UNIT_FPU,   4,  4,  ppc_insn_generic
-*603: PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  ppc_insn_generic
-*603e:PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  ppc_insn_generic
-*604: PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  ppc_insn_generic
+*601: PPC_UNIT_FPU,   PPC_UNIT_FPU,   4,  4,  0
+*603: PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  0
+*603e:PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  0
+*604: PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  0
 	FPSCR_BEGIN;
 	if (is_invalid_operation(processor, cia,
 	                         *frA, *frB,
@@ -2747,10 +3266,10 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	FPSCR_END(Rc);
 
 0.63,6.FRT,11.FRA,16.FRB,21./,26.20,31.Rc:A:f:fsub:Floating Subtract
-*601: PPC_UNIT_FPU,   PPC_UNIT_FPU,   4,  4,  ppc_insn_generic
-*603: PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  ppc_insn_generic
-*603e:PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  ppc_insn_generic
-*604: PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  ppc_insn_generic
+*601: PPC_UNIT_FPU,   PPC_UNIT_FPU,   4,  4,  0
+*603: PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  0
+*603e:PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  0
+*604: PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  0
 	FPSCR_BEGIN;
 	if (is_invalid_operation(processor, cia,
 	                         *frA, *frB,
@@ -2772,10 +3291,10 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	FPSCR_END(Rc);
 
 0.59,6.FRT,11.FRA,16.FRB,21./,26.20,31.Rc:A:f:fsubs:Floating Subtract Single
-*601: PPC_UNIT_FPU,   PPC_UNIT_FPU,   4,  4,  ppc_insn_generic
-*603: PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  ppc_insn_generic
-*603e:PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  ppc_insn_generic
-*604: PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  ppc_insn_generic
+*601: PPC_UNIT_FPU,   PPC_UNIT_FPU,   4,  4,  0
+*603: PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  0
+*603e:PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  0
+*604: PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  0
 	FPSCR_BEGIN;
 	if (is_invalid_operation(processor, cia,
 	                         *frA, *frB,
@@ -2797,10 +3316,10 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	FPSCR_END(Rc);
 
 0.63,6.FRT,11.FRA,16./,21.FRC,26.25,31.Rc:A:f:fmul:Floating Multiply
-*601: PPC_UNIT_FPU,   PPC_UNIT_FPU,   5,  5,  ppc_insn_generic
-*603: PPC_UNIT_FPU,   PPC_UNIT_FPU,   2,  4,  ppc_insn_generic
-*603e:PPC_UNIT_FPU,   PPC_UNIT_FPU,   2,  4,  ppc_insn_generic
-*604: PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  ppc_insn_generic
+*601: PPC_UNIT_FPU,   PPC_UNIT_FPU,   5,  5,  0
+*603: PPC_UNIT_FPU,   PPC_UNIT_FPU,   2,  4,  0
+*603e:PPC_UNIT_FPU,   PPC_UNIT_FPU,   2,  4,  0
+*604: PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  0
 	FPSCR_BEGIN;
 	if (is_invalid_operation(processor, cia,
 	                         *frA, *frC,
@@ -2822,10 +3341,10 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	FPSCR_END(Rc);
 
 0.59,6.FRT,11.FRA,16./,21.FRC,26.25,31.Rc:A:f:fmuls:Floating Multiply Single
-*601: PPC_UNIT_FPU,   PPC_UNIT_FPU,   4,  4,  ppc_insn_generic
-*603: PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  ppc_insn_generic
-*603e:PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  ppc_insn_generic
-*604: PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  ppc_insn_generic
+*601: PPC_UNIT_FPU,   PPC_UNIT_FPU,   4,  4,  0
+*603: PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  0
+*603e:PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  0
+*604: PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  0
 	FPSCR_BEGIN;
 	if (is_invalid_operation(processor, cia,
 	                         *frA, *frC,
@@ -2847,10 +3366,10 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	FPSCR_END(Rc);
 
 0.63,6.FRT,11.FRA,16.FRB,21./,26.18,31.Rc:A:f:fdiv:Floating Divide
-*601: PPC_UNIT_FPU,   PPC_UNIT_FPU,   31, 31, ppc_insn_generic
-*603: PPC_UNIT_FPU,   PPC_UNIT_FPU,   33, 33, ppc_insn_generic
-*603e:PPC_UNIT_FPU,   PPC_UNIT_FPU,   33, 33, ppc_insn_generic
-*604: PPC_UNIT_FPU,   PPC_UNIT_FPU,   32, 32, ppc_insn_generic
+*601: PPC_UNIT_FPU,   PPC_UNIT_FPU,   31, 31, 0
+*603: PPC_UNIT_FPU,   PPC_UNIT_FPU,   33, 33, 0
+*603e:PPC_UNIT_FPU,   PPC_UNIT_FPU,   33, 33, 0
+*604: PPC_UNIT_FPU,   PPC_UNIT_FPU,   32, 32, 0
 	FPSCR_BEGIN;
 	if (is_invalid_operation(processor, cia,
 	                         *frA, *frB,
@@ -2872,10 +3391,10 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	FPSCR_END(Rc);
 
 0.59,6.FRT,11.FRA,16.FRB,21./,26.18,31.Rc:A:f:fdivs:Floating Divide Single
-*601: PPC_UNIT_FPU,   PPC_UNIT_FPU,   17, 17, ppc_insn_generic
-*603: PPC_UNIT_FPU,   PPC_UNIT_FPU,   18, 18, ppc_insn_generic
-*603e:PPC_UNIT_FPU,   PPC_UNIT_FPU,   18, 18, ppc_insn_generic
-*604: PPC_UNIT_FPU,   PPC_UNIT_FPU,   18, 18, ppc_insn_generic
+*601: PPC_UNIT_FPU,   PPC_UNIT_FPU,   17, 17, 0
+*603: PPC_UNIT_FPU,   PPC_UNIT_FPU,   18, 18, 0
+*603e:PPC_UNIT_FPU,   PPC_UNIT_FPU,   18, 18, 0
+*604: PPC_UNIT_FPU,   PPC_UNIT_FPU,   18, 18, 0
 	FPSCR_BEGIN;
 	if (is_invalid_operation(processor, cia,
 	                         *frA, *frB,
@@ -2897,10 +3416,10 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	FPSCR_END(Rc);
 
 0.63,6.FRT,11.FRA,16.FRB,21.FRC,26.29,31.Rc:A:f:fmadd:Floating Multiply-Add
-*601: PPC_UNIT_FPU,   PPC_UNIT_FPU,   5,  5,  ppc_insn_generic
-*603: PPC_UNIT_FPU,   PPC_UNIT_FPU,   2,  4,  ppc_insn_generic
-*603e:PPC_UNIT_FPU,   PPC_UNIT_FPU,   2,  4,  ppc_insn_generic
-*604: PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  ppc_insn_generic
+*601: PPC_UNIT_FPU,   PPC_UNIT_FPU,   5,  5,  0
+*603: PPC_UNIT_FPU,   PPC_UNIT_FPU,   2,  4,  0
+*603e:PPC_UNIT_FPU,   PPC_UNIT_FPU,   2,  4,  0
+*604: PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  0
 	FPSCR_BEGIN;
 	double product; /*HACK! - incorrectly loosing precision ... */
 	/* compute the multiply */
@@ -2941,46 +3460,46 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	FPSCR_END(Rc);
 
 0.59,6.FRT,11.FRA,16.FRB,21.FRC,26.29,31.Rc:A:f::Floating Multiply-Add Single
-*601: PPC_UNIT_FPU,   PPC_UNIT_FPU,   4,  4,  ppc_insn_generic
-*603: PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  ppc_insn_generic
-*603e:PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  ppc_insn_generic
-*604: PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  ppc_insn_generic
+*601: PPC_UNIT_FPU,   PPC_UNIT_FPU,   4,  4,  0
+*603: PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  0
+*603e:PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  0
+*604: PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  0
 
 0.63,6.FRT,11.FRA,16.FRB,21.FRC,26.28,31.Rc:A:f::Floating Multiply-Subtract
-*601: PPC_UNIT_FPU,   PPC_UNIT_FPU,   5,  5,  ppc_insn_generic
-*603: PPC_UNIT_FPU,   PPC_UNIT_FPU,   2,  4,  ppc_insn_generic
-*603e:PPC_UNIT_FPU,   PPC_UNIT_FPU,   2,  4,  ppc_insn_generic
-*604: PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  ppc_insn_generic
+*601: PPC_UNIT_FPU,   PPC_UNIT_FPU,   5,  5,  0
+*603: PPC_UNIT_FPU,   PPC_UNIT_FPU,   2,  4,  0
+*603e:PPC_UNIT_FPU,   PPC_UNIT_FPU,   2,  4,  0
+*604: PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  0
 
 0.59,6.FRT,11.FRA,16.FRB,21.FRC,26.28,31.Rc:A:f::Floating Multiply-Subtract Single
-*601: PPC_UNIT_FPU,   PPC_UNIT_FPU,   4,  4,  ppc_insn_generic
-*603: PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  ppc_insn_generic
-*603e:PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  ppc_insn_generic
-*604: PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  ppc_insn_generic
+*601: PPC_UNIT_FPU,   PPC_UNIT_FPU,   4,  4,  0
+*603: PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  0
+*603e:PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  0
+*604: PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  0
 
 0.63,6.FRT,11.FRA,16.FRB,21.FRC,26.31,31.Rc:A:f::Floating Negative Multiply-Add
-*601: PPC_UNIT_FPU,   PPC_UNIT_FPU,   5,  5,  ppc_insn_generic
-*603: PPC_UNIT_FPU,   PPC_UNIT_FPU,   2,  4,  ppc_insn_generic
-*603e:PPC_UNIT_FPU,   PPC_UNIT_FPU,   2,  4,  ppc_insn_generic
-*604: PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  ppc_insn_generic
+*601: PPC_UNIT_FPU,   PPC_UNIT_FPU,   5,  5,  0
+*603: PPC_UNIT_FPU,   PPC_UNIT_FPU,   2,  4,  0
+*603e:PPC_UNIT_FPU,   PPC_UNIT_FPU,   2,  4,  0
+*604: PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  0
 
 0.59,6.FRT,11.FRA,16.FRB,21.FRC,26.31,31.Rc:A:f::Floating Negative Multiply-Add Single
-*601: PPC_UNIT_FPU,   PPC_UNIT_FPU,   4,  4,  ppc_insn_generic
-*603: PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  ppc_insn_generic
-*603e:PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  ppc_insn_generic
-*604: PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  ppc_insn_generic
+*601: PPC_UNIT_FPU,   PPC_UNIT_FPU,   4,  4,  0
+*603: PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  0
+*603e:PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  0
+*604: PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  0
 
 0.63,6.FRT,11.FRA,16.FRB,21.FRC,26.30,31.Rc:A:f::Floating Negative Multiply-Subtract
-*601: PPC_UNIT_FPU,   PPC_UNIT_FPU,   5,  5,  ppc_insn_generic
-*603: PPC_UNIT_FPU,   PPC_UNIT_FPU,   2,  4,  ppc_insn_generic
-*603e:PPC_UNIT_FPU,   PPC_UNIT_FPU,   2,  4,  ppc_insn_generic
-*604: PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  ppc_insn_generic
+*601: PPC_UNIT_FPU,   PPC_UNIT_FPU,   5,  5,  0
+*603: PPC_UNIT_FPU,   PPC_UNIT_FPU,   2,  4,  0
+*603e:PPC_UNIT_FPU,   PPC_UNIT_FPU,   2,  4,  0
+*604: PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  0
 
 0.59,6.FRT,11.FRA,16.FRB,21.FRC,26.30,31.Rc:A:f::Floating Negative Multiply-Subtract Single
-*601: PPC_UNIT_FPU,   PPC_UNIT_FPU,   4,  4,  ppc_insn_generic
-*603: PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  ppc_insn_generic
-*603e:PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  ppc_insn_generic
-*604: PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  ppc_insn_generic
+*601: PPC_UNIT_FPU,   PPC_UNIT_FPU,   4,  4,  0
+*603: PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  0
+*603e:PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  0
+*604: PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  0
 
 
 #
@@ -2988,10 +3507,10 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 #
 
 0.63,6.FRT,11./,16.FRB,21.12,31.Rc:X:f::Floating Round to Single-Precision
-*601: PPC_UNIT_FPU,   PPC_UNIT_FPU,   4,  4,  ppc_insn_generic
-*603: PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  ppc_insn_generic
-*603e:PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  ppc_insn_generic
-*604: PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  ppc_insn_generic
+*601: PPC_UNIT_FPU,   PPC_UNIT_FPU,   4,  4,  0
+*603: PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  0
+*603e:PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  0
+*604: PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  0
 	int sign;
 	int exp;
 	unsigned64 frac_grx;
@@ -3201,10 +3720,10 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 0.63,6.FRT,11./,16.FRB,21.14,31.Rc:X:f::Floating Convert To Integer Word
 
 0.63,6.FRT,11./,16.FRB,21.15,31.Rc:X:f:fctiwz:Floating Convert To Integer Word with round towards Zero
-*601: PPC_UNIT_FPU,   PPC_UNIT_FPU,   4,  4,  ppc_insn_generic
-*603: PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  ppc_insn_generic
-*603e:PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  ppc_insn_generic
-*604: PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  ppc_insn_generic
+*601: PPC_UNIT_FPU,   PPC_UNIT_FPU,   4,  4,  0
+*603: PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  0
+*603e:PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  0
+*604: PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  0
 	FPSCR_BEGIN;
 	convert_to_integer(processor, cia,
 	                   frT, *frB,
@@ -3244,10 +3763,10 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 #
 
 0.63,6.BF,9./,11.FRA,16.FRB,21.0,31./:X:f:fcmpu:Floating Compare Unordered
-*601: PPC_UNIT_FPU,   PPC_UNIT_FPU,   4,  4,  ppc_insn_generic
-*603: PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  ppc_insn_generic
-*603e:PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  ppc_insn_generic
-*604: PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  ppc_insn_generic
+*601: PPC_UNIT_FPU,   PPC_UNIT_FPU,   4,  4,  0
+*603: PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  0
+*603e:PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  0
+*604: PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  0
 	FPSCR_BEGIN;
 	unsigned c;
 	if (is_NaN(*frA, 0) || is_NaN(*frB, 0))
@@ -3265,10 +3784,10 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	FPSCR_END(0);
 
 0.63,6.BF,9./,11.FRA,16.FRB,21.32,31./:X:f:fcmpo:Floating Compare Ordered
-*601: PPC_UNIT_FPU,   PPC_UNIT_FPU,   4,  4,  ppc_insn_generic
-*603: PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  ppc_insn_generic
-*603e:PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  ppc_insn_generic
-*604: PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  ppc_insn_generic
+*601: PPC_UNIT_FPU,   PPC_UNIT_FPU,   4,  4,  0
+*603: PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  0
+*603e:PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  0
+*604: PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  0
 	FPSCR_BEGIN;
 	unsigned c;
 	if (is_NaN(*frA, 0) || is_NaN(*frB, 0))
@@ -3338,20 +3857,20 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 #
 
 0.31,6./,11.RA,16.RB,21.982,31./:X::icbi:Instruction Cache Block Invalidate
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  3,  ppc_insn_generic
-*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  3,  ppc_insn_generic
-*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  1,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  3,  0
+*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  3,  0
+*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  1,  0
 	/* blindly flush all instruction cache entries */
 	#if WITH_IDECODE_CACHE_SIZE
 	cpu_flush_icache(processor);
 	#endif
 
 0.19,6./,11./,16./,21.150,31./:XL::isync:Instruction Synchronize
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  3,  ppc_insn_generic
-*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  3,  ppc_insn_generic
-*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  1,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  3,  0
+*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  3,  0
+*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  1,  0
 	cpu_synchronize_context(processor);
 
 
@@ -3360,38 +3879,38 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 #
 
 0.31,6./,11.RA,16.RB,21.278,31./:X:::Data Cache Block Touch
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   2,  2,  ppc_insn_generic
-*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   2,  2,  ppc_insn_generic
-*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  1,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   2,  2,  0
+*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   2,  2,  0
+*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  1,  0
 	TRACE(trace_tbd,("Data Cache Block Touch\n"));
 
 0.31,6./,11.RA,16.RB,21.246,31./:X:::Data Cache Block Touch for Store
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   2,  2,  ppc_insn_generic
-*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   2,  2,  ppc_insn_generic
-*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  3,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   2,  2,  0
+*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   2,  2,  0
+*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  3,  0
 	TRACE(trace_tbd,("Data Cache Block Touch for Store\n"));
 
 0.31,6./,11.RA,16.RB,21.1014,31./:X:::Data Cache Block set to Zero
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   10, 10, ppc_insn_generic
-*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   10, 10, ppc_insn_generic
-*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  3,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   10, 10, 0
+*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   10, 10, 0
+*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  3,  0
 	TRACE(trace_tbd,("Data Cache Block set to Zero\n"));
 
 0.31,6./,11.RA,16.RB,21.54,31./:X:::Data Cache Block Store
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   5,  5,  ppc_insn_generic
-*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   5,  5,  ppc_insn_generic
-*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  1,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   5,  5,  0
+*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   5,  5,  0
+*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  1,  0
 	TRACE(trace_tbd,("Data Cache Block Store\n"));
 
 0.31,6./,11.RA,16.RB,21.86,31./:X:::Data Cache Block Flush
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   5,  5,  ppc_insn_generic
-*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   5,  5,  ppc_insn_generic
-*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  1,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   5,  5,  0
+*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   5,  5,  0
+*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  1,  0
 	TRACE(trace_tbd,("Data Cache Block Flush\n"));
 
 #
@@ -3407,9 +3926,9 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 #
 
 0.31,6.RT,11.tbr,21.371,31./:XFX::mftb:Move From Time Base
-*603: PPC_UNIT_SRU,   PPC_UNIT_SRU,   1,  1,  ppc_insn_generic
-*603e:PPC_UNIT_SRU,   PPC_UNIT_SRU,   1,  1,  ppc_insn_generic
-*604: PPC_UNIT_MCIU,  PPC_UNIT_MCIU,  3,  3,  ppc_insn_generic
+*603: PPC_UNIT_SRU,   PPC_UNIT_SRU,   1,  1,  0
+*603e:PPC_UNIT_SRU,   PPC_UNIT_SRU,   1,  1,  0
+*604: PPC_UNIT_MCIU,  PPC_UNIT_MCIU,  3,  3,  0
 	int n = (tbr{5:9} << 5) | tbr{0:4};
 	if (n == 268) {
 	  if (is_64bit_implementation) *rT = TB;
@@ -3429,10 +3948,10 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 #
 
 0.19,6./,11./,16./,21.50,31./:XL::rfi:Return From Interrupt
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603: PPC_UNIT_SRU,   PPC_UNIT_SRU,   3,  3,  ppc_insn_generic
-*603e:PPC_UNIT_SRU,   PPC_UNIT_SRU,   3,  3,  ppc_insn_generic
-*604: PPC_UNIT_MCIU,  PPC_UNIT_MCIU,  3,  3,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603: PPC_UNIT_SRU,   PPC_UNIT_SRU,   3,  3,  0
+*603e:PPC_UNIT_SRU,   PPC_UNIT_SRU,   3,  3,  0
+*604: PPC_UNIT_MCIU,  PPC_UNIT_MCIU,  3,  3,  0
 	if (IS_PROBLEM_STATE(processor)) {
 	  program_interrupt(processor, cia,
 	                    privileged_instruction_program_interrupt);
@@ -3452,10 +3971,10 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 #0.31,6.RS,11.spr,21.467,31./:XFX:::Move To Special Purpose Register
 #0.31,6.RT,11.spr,21.339,31./:XFX:::Move From Special Purpose Register
 0.31,6.RS,11./,16./,21.146,31./:X:::Move To Machine State Register
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603: PPC_UNIT_SRU,   PPC_UNIT_SRU,   2,  2,  ppc_insn_generic
-*603e:PPC_UNIT_SRU,   PPC_UNIT_SRU,   2,  2,  ppc_insn_generic
-*604: PPC_UNIT_MCIU,  PPC_UNIT_MCIU,  1,  1,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603: PPC_UNIT_SRU,   PPC_UNIT_SRU,   2,  2,  0
+*603e:PPC_UNIT_SRU,   PPC_UNIT_SRU,   2,  2,  0
+*604: PPC_UNIT_MCIU,  PPC_UNIT_MCIU,  1,  1,  0
 	if (IS_PROBLEM_STATE(processor))
 	  program_interrupt(processor, cia,
 	                    privileged_instruction_program_interrupt);
@@ -3463,10 +3982,10 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	  MSR = *rS;
 
 0.31,6.RT,11./,16./,21.83,31./:X:::Move From Machine State Register
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603: PPC_UNIT_SRU,   PPC_UNIT_SRU,   1,  1,  ppc_insn_generic
-*603e:PPC_UNIT_SRU,   PPC_UNIT_SRU,   1,  1,  ppc_insn_generic
-*604: PPC_UNIT_MCIU,  PPC_UNIT_MCIU,  3,  3,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603: PPC_UNIT_SRU,   PPC_UNIT_SRU,   1,  1,  0
+*603e:PPC_UNIT_SRU,   PPC_UNIT_SRU,   1,  1,  0
+*604: PPC_UNIT_MCIU,  PPC_UNIT_MCIU,  3,  3,  0
 	if (IS_PROBLEM_STATE(processor))
 	  program_interrupt(processor, cia,
 	                    privileged_instruction_program_interrupt);
@@ -3479,10 +3998,10 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 #
 
 0.31,6./,11.RA,16.RB,21.470,31./:X::dcbi:Data Cache Block Invalidate
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   2,  2,  ppc_insn_generic
-*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   2,  2,  ppc_insn_generic
-*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  3,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603: PPC_UNIT_LSU,   PPC_UNIT_LSU,   2,  2,  0
+*603e:PPC_UNIT_LSU,   PPC_UNIT_LSU,   2,  2,  0
+*604: PPC_UNIT_LSU,   PPC_UNIT_LSU,   1,  3,  0
 	if (IS_PROBLEM_STATE(processor))
 	  program_interrupt(processor, cia,
 	                    privileged_instruction_program_interrupt);
@@ -3494,10 +4013,10 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 #
 
 0.31,6.RS,11./,12.SR,16./,21.210,31./:X:32:mtsr %SR,%RS:Move To Segment Register
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603: PPC_UNIT_SRU,   PPC_UNIT_SRU,   2,  2,  ppc_insn_generic
-*603e:PPC_UNIT_SRU,   PPC_UNIT_SRU,   2,  2,  ppc_insn_generic
-*604: PPC_UNIT_MCIU,  PPC_UNIT_MCIU,  1,  1,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603: PPC_UNIT_SRU,   PPC_UNIT_SRU,   2,  2,  0
+*603e:PPC_UNIT_SRU,   PPC_UNIT_SRU,   2,  2,  0
+*604: PPC_UNIT_MCIU,  PPC_UNIT_MCIU,  1,  1,  0
 	if (IS_PROBLEM_STATE(processor))
 	  program_interrupt(processor, cia,
 	                    privileged_instruction_program_interrupt);
@@ -3505,10 +4024,10 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	  SEGREG(SR) = *rS;
 
 0.31,6.RS,11./,16.RB,21.242,31./:X:32:mtsrin %RS,%RB:Move To Segment Register Indirect
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  ppc_insn_generic
-*603: PPC_UNIT_SRU,   PPC_UNIT_SRU,   2,  2,  ppc_insn_generic
-*603e:PPC_UNIT_SRU,   PPC_UNIT_SRU,   2,  2,  ppc_insn_generic
-*604: PPC_UNIT_MCIU,  PPC_UNIT_MCIU,  1,  1,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
+*603: PPC_UNIT_SRU,   PPC_UNIT_SRU,   2,  2,  0
+*603e:PPC_UNIT_SRU,   PPC_UNIT_SRU,   2,  2,  0
+*604: PPC_UNIT_MCIU,  PPC_UNIT_MCIU,  1,  1,  0
 	if (IS_PROBLEM_STATE(processor))
 	  program_interrupt(processor, cia,
 	                    privileged_instruction_program_interrupt);
@@ -3516,10 +4035,10 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	  SEGREG(EXTRACTED32(*rB, 0, 3)) = *rS;
 
 0.31,6.RT,11./,12.SR,16./,21.595,31./:X:32:mfsr %RT,%RS:Move From Segment Register
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    2,  2,  ppc_insn_generic
-*603: PPC_UNIT_SRU,   PPC_UNIT_SRU,   3,  3,  ppc_insn_generic
-*603e:PPC_UNIT_SRU,   PPC_UNIT_SRU,   3,  3,  ppc_insn_generic
-*604: PPC_UNIT_MCIU,  PPC_UNIT_MCIU,  1,  1,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    2,  2,  0
+*603: PPC_UNIT_SRU,   PPC_UNIT_SRU,   3,  3,  0
+*603e:PPC_UNIT_SRU,   PPC_UNIT_SRU,   3,  3,  0
+*604: PPC_UNIT_MCIU,  PPC_UNIT_MCIU,  1,  1,  0
 	if (IS_PROBLEM_STATE(processor))
 	  program_interrupt(processor, cia,
 	                    privileged_instruction_program_interrupt);
@@ -3527,10 +4046,10 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 	  *rT = SEGREG(SR);
 
 0.31,6.RT,11./,16.RB,21.659,31./:X:32:mfsrin %RT,%RB:Move From Segment Register Indirect
-*601: PPC_UNIT_IU,    PPC_UNIT_IU,    2,  2,  ppc_insn_generic
-*603: PPC_UNIT_SRU,   PPC_UNIT_SRU,   3,  3,  ppc_insn_generic
-*603e:PPC_UNIT_SRU,   PPC_UNIT_SRU,   3,  3,  ppc_insn_generic
-*604: PPC_UNIT_MCIU,  PPC_UNIT_MCIU,  1,  1,  ppc_insn_generic
+*601: PPC_UNIT_IU,    PPC_UNIT_IU,    2,  2,  0
+*603: PPC_UNIT_SRU,   PPC_UNIT_SRU,   3,  3,  0
+*603e:PPC_UNIT_SRU,   PPC_UNIT_SRU,   3,  3,  0
+*604: PPC_UNIT_MCIU,  PPC_UNIT_MCIU,  1,  1,  0
 	if (IS_PROBLEM_STATE(processor))
 	  program_interrupt(processor, cia,
 	                    privileged_instruction_program_interrupt);
