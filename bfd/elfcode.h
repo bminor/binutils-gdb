@@ -161,6 +161,7 @@ static file_ptr align_file_position PARAMS ((file_ptr));
 static file_ptr assign_file_position_for_section
   PARAMS ((Elf_Internal_Shdr *, file_ptr, boolean));
 static boolean assign_file_positions_except_relocs PARAMS ((bfd *, boolean));
+static int elf_sort_hdrs PARAMS ((const PTR, const PTR));
 static void assign_file_positions_for_relocs PARAMS ((bfd *));
 static bfd_size_type get_program_header_size PARAMS ((bfd *));
 static file_ptr map_program_segments
@@ -2028,6 +2029,8 @@ assign_file_positions_except_relocs (abfd, dosyms)
       file_ptr phdr_off;
       bfd_size_type phdr_size;
       bfd_vma maxpagesize;
+      size_t hdrppsize;
+      Elf_Internal_Shdr **sorted_hdrs;
       Elf_Internal_Shdr **hdrpp;
       unsigned int i;
       Elf_Internal_Shdr *first;
@@ -2048,55 +2051,55 @@ assign_file_positions_except_relocs (abfd, dosyms)
       if (maxpagesize == 0)
 	maxpagesize = 1;
 
-      /* FIXME: We might want to sort the sections on the sh_addr
-	 field here.  For now, we just assume that the linker will
-	 create the sections in an appropriate order.  */
+      /* We must sort the sections.  The GNU linker will always create
+	 the sections in an appropriate order, but the Irix 5 linker
+	 will not.  We don't include the dummy first section in the
+	 sort.  We sort sections which are not SHF_ALLOC to the end.  */
+      hdrppsize = (i_ehdrp->e_shnum - 1) * sizeof (Elf_Internal_Shdr *);
+      sorted_hdrs = (Elf_Internal_Shdr **) malloc (hdrppsize);
+      if (sorted_hdrs == NULL)
+	{
+	  bfd_set_error (bfd_error_no_memory);
+	  return false;
+	}
 
-      /* Assign file positions in two passes.  In the first pass, we
-	 assign a file position to every section which forms part of
-	 the executable image.  */
+      memcpy (sorted_hdrs, i_shdrpp + 1, hdrppsize);
+      qsort (sorted_hdrs, i_ehdrp->e_shnum - 1, sizeof (Elf_Internal_Shdr *),
+	     elf_sort_hdrs);
+
       first = NULL;
-      for (i = 1, hdrpp = i_shdrpp + 1; i < i_ehdrp->e_shnum; i++, hdrpp++)
+      for (i = 1, hdrpp = sorted_hdrs; i < i_ehdrp->e_shnum; i++, hdrpp++)
 	{
 	  Elf_Internal_Shdr *hdr;
 
 	  hdr = *hdrpp;
 	  if ((hdr->sh_flags & SHF_ALLOC) == 0)
-	    continue;
+	    {
+	      if (hdr->sh_type == SHT_REL || hdr->sh_type == SHT_RELA)
+		{
+		  hdr->sh_offset = -1;
+		  continue;
+		}
+	      if (! dosyms
+		  && (hdr == i_shdrpp[tdata->symtab_section]
+		      || hdr == i_shdrpp[tdata->strtab_section]))
+		{
+		  hdr->sh_offset = -1;
+		  continue;
+		}
+	    }
+	  else
+	    {
+	      if (first == NULL)
+		first = hdr;
 
-	  if (first == NULL)
-	    first = hdr;
-
-	  /* The section VMA must equal the file position modulo the
-	     page size.  This is required by the program header.  */
-	  off += (hdr->sh_addr - off) % maxpagesize;
+	      /* The section VMA must equal the file position modulo
+		 the page size.  This is required by the program
+		 header.  */
+	      off += (hdr->sh_addr - off) % maxpagesize;
+	    }
 
 	  off = assign_file_position_for_section (hdr, off, false);
-	}
-
-      /* Assign file positions to all the sections which do not form
-	 part of the loadable image, except for the relocs.  */
-      for (i = 1, hdrpp = i_shdrpp + 1; i < i_ehdrp->e_shnum; i++, hdrpp++)
-	{
-	  Elf_Internal_Shdr *hdr;
-
-	  hdr = *hdrpp;
-	  if ((hdr->sh_flags & SHF_ALLOC) != 0)
-	    continue;
-	  if (hdr->sh_type == SHT_REL || hdr->sh_type == SHT_RELA)
-	    {
-	      hdr->sh_offset = -1;
-	      continue;
-	    }
-	  if (! dosyms
-	      && (i == tdata->symtab_section
-		  || i == tdata->strtab_section))
-	    {
-	      hdr->sh_offset = -1;
-	      continue;
-	    }
-
-	  off = assign_file_position_for_section (hdr, off, true);
 	}
 
       phdr_map = map_program_segments (abfd, phdr_off, first, phdr_size);
@@ -2113,6 +2116,36 @@ assign_file_positions_except_relocs (abfd, dosyms)
   elf_tdata (abfd)->next_file_pos = off;
 
   return true;
+}
+
+/* Sort the ELF headers by VMA.  We sort headers which are not
+   SHF_ALLOC to the end.  */
+
+static int
+elf_sort_hdrs (arg1, arg2)
+     const PTR arg1;
+     const PTR arg2;
+{
+  const Elf_Internal_Shdr *hdr1 = *(const Elf_Internal_Shdr **) arg1;
+  const Elf_Internal_Shdr *hdr2 = *(const Elf_Internal_Shdr **) arg2;
+
+  if ((hdr1->sh_flags & SHF_ALLOC) != 0)
+    {
+      if ((hdr2->sh_flags & SHF_ALLOC) == 0)
+	return -1;
+      if (hdr1->sh_addr < hdr2->sh_addr)
+	return -1;
+      else if (hdr1->sh_addr > hdr2->sh_addr)
+	return 1;
+      else
+	return 0;
+    }
+  else
+    {
+      if ((hdr1->sh_flags & SHF_ALLOC) != 0)
+	return 1;
+      return 0;
+    }
 }
 
 static boolean
@@ -3677,6 +3710,8 @@ static boolean elf_link_add_archive_symbols
   PARAMS ((bfd *, struct bfd_link_info *));
 static Elf_Internal_Rela *elf_link_read_relocs
   PARAMS ((bfd *, asection *, PTR, Elf_Internal_Rela *, boolean));
+static boolean elf_export_symbol
+  PARAMS ((struct elf_link_hash_entry *, PTR));
 static boolean elf_adjust_dynamic_symbol
   PARAMS ((struct elf_link_hash_entry *, PTR));
 
@@ -4796,11 +4831,12 @@ static const size_t elf_buckets[] =
    addresses of the various sections.  */
 
 boolean
-NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath, info,
-				     sinterpptr)
+NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
+				     export_dynamic, info, sinterpptr)
      bfd *output_bfd;
      const char *soname;
      const char *rpath;
+     boolean export_dynamic;
      struct bfd_link_info *info;
      asection **sinterpptr;
 {
@@ -4819,6 +4855,12 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath, info,
      do here.  */
   if (dynobj == NULL)
     return true;
+
+  /* If we are supposed to export all symbols into the dynamic symbol
+     table (this is not the normal case), then do so.  */
+  if (export_dynamic)
+    elf_link_hash_traverse (elf_hash_table (info), elf_export_symbol,
+			    (PTR) info);
 
   if (elf_hash_table (info)->dynamic_sections_created)
     {
@@ -4946,6 +4988,29 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath, info,
 
       if (! elf_add_dynamic_entry (info, DT_NULL, 0))
 	return false;
+    }
+
+  return true;
+}
+
+/* This routine is used to export all defined symbols into the dynamic
+   symbol table.  It is called via elf_link_hash_traverse.  */
+
+static boolean
+elf_export_symbol (h, data)
+     struct elf_link_hash_entry *h;
+     PTR data;
+{
+  struct bfd_link_info *info = (struct bfd_link_info *) data;
+
+  if (h->dynindx == -1
+      && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) != 0)
+    {
+      if (! elf_link_record_dynamic_symbol (info, h))
+	{
+	  /* FIXME: No way to report error.  */
+	  abort ();
+	}
     }
 
   return true;

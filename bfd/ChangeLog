@@ -1,3 +1,12 @@
+Fri Nov 11 14:29:31 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* elfcode.h (NAME(bfd_elf,size_dynamic_sections)): Add
+	export_dynamic argument, and handle it.
+	(elf_export_symbol): New function.
+	* bfd-in.h (bfd_elf32_size_dynamic_sections): Update declaration.
+	(bfd_elf64_size_dynamic_sections): Update declaration.
+	* bfd-in2.h: Rebuild.
+
 Fri Nov 11 10:35:33 1994  Jeff Law  (law@snake.cs.utah.edu)
 
 	* hpux-core.c (hpux_core_struct): Delete handles for the
