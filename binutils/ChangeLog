@@ -1,5 +1,21 @@
 Wed Jan 24 12:06:05 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* stabs.c (parse_stab_members): Don't adjust voffset.
+
+	* ieee.c (ieee_read_cxx_class): Don't multiply voffset by 4.
+	(struct ieee_write_type): Add name field.
+	(struct ieee_type_class): Remove name field.  Change all uses to
+	use new name field in type instead.
+	(struct ieee_name_type): Likewise.
+	(ieee_start_struct_type): Initialize name field of type.
+	(ieee_start_class_type): Don't initialize classdef entry of tag.
+	(ieee_class_method_var): Don't adjust voffset.
+	(ieee_end_class_type): Likewise.
+	(ieee_tag_type): Initialize new name field of type.
+	(ieee_typdef): Set name after copying in type information.
+
+	* debug.c (VOFFSET_STATIC_METHOD): Define as -1, not 1.
+
 	* ieee.c (struct ieee_modified_type): Define.
 	(struct ieee_handle): Add modified and modified_alloc fields.
 	(ieee_get_modified_info): New static function.
