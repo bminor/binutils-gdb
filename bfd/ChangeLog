@@ -1,3 +1,7 @@
+Fri Apr 30 09:38:59 1993  Jim Kingdon  (kingdon@cygnus.com)
+
+	* coffcode.h: use dummy_reloc16_extra_cases rather than casting abort.
+
 Thu Apr 29 11:30:32 1993  Ken Raeburn  (raeburn@deneb.cygnus.com)
 
 	* Makefile.in: Build elf32-hppa.o.

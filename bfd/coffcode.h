@@ -2223,9 +2223,19 @@ bfd *abfd;
 #endif
 
 #ifndef coff_reloc16_extra_cases
-#define coff_reloc16_extra_cases \
-  (void (*) PARAMS ((bfd *, bfd_seclet_type *, arelent *, bfd_byte *,\
-		     unsigned int *, unsigned int *))) abort
+#define coff_reloc16_extra_cases dummy_reloc16_extra_cases
+/* This works even if abort is not declared in any header file.  */
+void
+dummy_reloc16_extra_cases (abfd, seclet, reloc, data, src_ptr, dst_ptr)
+     bfd *abfd;
+     struct bfd_seclet *seclet;
+     arelent *reloc;
+     bfd_byte *data;
+     unsigned int *src_ptr;
+     unsigned int *dst_ptr;
+{
+  abort ();
+}
 #endif
 
 static CONST bfd_coff_backend_data bfd_coff_std_swap_table = {
