@@ -22,6 +22,9 @@ case "${target}" in
 # start-sanitize-d30v
 	d30v-*-elf)		configdirs="${configdirs} d30v-elf" ;;
 # end-sanitize-d30v
+# start-sanitize-r5900
+	mips64vr5900el-*-elf)	configdirs="${configdirs} mips64vr5900el-elf" ;;
+# end-sanitize-r5900
 	*)		;;
 esac
 
