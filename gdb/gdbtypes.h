@@ -849,6 +849,16 @@ extern struct type *builtin_type_bool;
 /* (C) Language pointer type. Some target platforms use an implicitly
    {sign,zero} -extended 32 bit C language pointer on a 64 bit ISA. */
 extern struct type *builtin_type_ptr;
+
+/* (C) Language `pointer to function returning void' type.  Since
+   ANSI, C standards have explicitly said that pointers to functions
+   and pointers to data are not interconvertible --- that is, you
+   can't cast a function pointer to void * and back, and expect to get
+   the same value.  However, all function pointer types are
+   interconvertible, so void (*) () can server as a generic function
+   pointer.  */
+extern struct type *builtin_type_void_func_ptr;
+
 /* The target CPU's address type.  This is the ISA address size. */
 extern struct type *builtin_type_CORE_ADDR;
 /* The symbol table address type.  Some object file formats have a 32

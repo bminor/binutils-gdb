@@ -1,4 +1,12 @@
+2001-07-06  Jim Blandy  <jimb@redhat.com>
+
+	* gdbtypes.h (builtin_type_void_func_ptr): New builtin type.
+	* gdbtypes.c (builtin_type_void_func_ptr): Define the variable.
+	(build_gdbtypes): Initialize it.
+	(_initialize_gdbtypes): Swap it.
+
 2001-07-04  Daniel Jacobowitz  <drow@mvista.com>
+
 	* mips-tdep.c (mips32_op): Correct offset.
 	(itype_op): Likewise.
 	(itype_rs): Fix formatting.

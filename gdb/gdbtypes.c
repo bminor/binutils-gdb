@@ -74,6 +74,7 @@ struct type *builtin_type_v8qi;
 struct type *builtin_type_v4hi;
 struct type *builtin_type_v2si;
 struct type *builtin_type_ptr;
+struct type *builtin_type_void_func_ptr;
 struct type *builtin_type_CORE_ADDR;
 struct type *builtin_type_bfd_vma;
 
@@ -2928,10 +2929,36 @@ build_gdbtypes (void)
     = init_simd_type ("__builtin_v2si", builtin_type_int32, "f", 2);
 
   /* Pointer/Address types. */
-  /* NOTE: At present there is no way of differentiating between at
-     target address and the target C language pointer type type even
-     though the two can be different (cf d10v) */
+
+  /* NOTE: on some targets, addresses and pointers are not necessarily
+     the same --- for example, on the D10V, pointers are 16 bits long,
+     but addresses are 32 bits long.  See doc/gdbint.texinfo,
+     ``Pointers Are Not Always Addresses''.
+
+     The upshot is:
+     - gdb's `struct type' always describes the target's
+       representation.
+     - gdb's `struct value' objects should always hold values in
+       target form.
+     - gdb's CORE_ADDR values are addresses in the unified virtual
+       address space that the assembler and linker work with.  Thus,
+       since target_read_memory takes a CORE_ADDR as an argument, it
+       can access any memory on the target, even if the processor has
+       separate code and data address spaces.
+
+     So, for example:
+     - If v is a value holding a D10V code pointer, its contents are
+       in target form: a big-endian address left-shifted two bits.
+     - If p is a D10V pointer type, TYPE_LENGTH (p) == 2, just as
+       sizeof (void *) == 2 on the target.
+
+     In this context, builtin_type_CORE_ADDR is a bit odd: it's a
+     target type for a value the target will never see.  It's only
+     used to hold the values of (typeless) linker symbols, which are
+     indeed in the unified virtual address space.  */
   builtin_type_ptr = make_pointer_type (builtin_type_void, NULL);
+  builtin_type_void_func_ptr
+    = lookup_pointer_type (lookup_function_type (builtin_type_void));
   builtin_type_CORE_ADDR =
     init_type (TYPE_CODE_INT, TARGET_ADDR_BIT / 8,
 	       TYPE_FLAG_UNSIGNED,
@@ -2985,6 +3012,7 @@ _initialize_gdbtypes (void)
   register_gdbarch_swap (&builtin_type_v4hi, sizeof (struct type *), NULL);
   register_gdbarch_swap (&builtin_type_v2si, sizeof (struct type *), NULL);
   REGISTER_GDBARCH_SWAP (builtin_type_ptr);
+  REGISTER_GDBARCH_SWAP (builtin_type_void_func_ptr);
   REGISTER_GDBARCH_SWAP (builtin_type_CORE_ADDR);
   REGISTER_GDBARCH_SWAP (builtin_type_bfd_vma);
   register_gdbarch_swap (NULL, 0, build_gdbtypes);
