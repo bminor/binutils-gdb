@@ -437,7 +437,7 @@ _bfd_default_error_handler (const char *fmt, ...)
     abort ();
 
   p = fmt;
-  while (*p != '\0')
+  while (1)
     {
       char *q;
       size_t len, extra, trim;
