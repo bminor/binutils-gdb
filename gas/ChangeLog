@@ -1,3 +1,11 @@
+start-sanitize-sky
+Mon Dec 22 17:57:51 1997  Doug Evans  <devans@canuck.cygnus.com>
+
+	* configure.in: Add txvu support.
+	* configure: Regenerate.
+	* config/tc-txvu.[ch]: New files.
+
+end-sanitize-sky
 Mon Dec 22 13:06:05 1997  Joel Sherrill  <joel@oarcorp.com>
 
         * configure.in (i386*-go32-rtems*): Fix to be the same as

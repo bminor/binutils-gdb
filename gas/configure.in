@@ -287,6 +287,11 @@ changequote([,])dnl
 # start-sanitize-tic80
       tic80-*-*)	    fmt=coff ;;
 # end-sanitize-tic80
+
+# start-sanitize-sky
+      txvu-*-*)		    fmt=elf bfd_gas=yes ;;
+# end-sanitize-sky
+
       v850-*-*)		    fmt=elf bfd_gas=yes ;;
 
 # start-sanitize-v850e
