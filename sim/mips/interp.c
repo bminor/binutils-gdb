@@ -75,9 +75,13 @@ char* pr_uword64 PARAMS ((uword64 addr));
 
 
 /* Get the simulator engine description, without including the code: */
+#if (WITH_IGEN)
+#define LOADDRMASK (WITH_TARGET_WORD_BITSIZE == 64 ? 0x7 : 0x3)
+#else
 #define SIM_MANIFESTS
 #include "oengine.c"
 #undef SIM_MANIFESTS
+#endif
 
 /* Within interp.c we refer to the sim_state and sim_cpu directly. */
 #define SD sd
@@ -331,45 +335,17 @@ sim_open (kind, cb, abfd, argv)
   SIM_ASSERT (sizeof(int) == (4 * sizeof(char)));
   SIM_ASSERT (sizeof(word64) == (8 * sizeof(char)));
 
-#if defined(HASFPU)
-  /* Check that the host FPU conforms to IEEE 754-1985 for the SINGLE
-     and DOUBLE binary formats. This is a bit nasty, requiring that we
-     trust the explicit manifests held in the source: */
-  /* TODO: We need to cope with the simulated target and the host not
-     having the same endianness. This will require the high and low
-     words of a (double) to be swapped when converting between the
-     host and the simulated target. */
-  {
-    union {
-      unsigned int i[2];
-      double d;
-      float f[2];
-    } s;
-
-    s.d = (double)523.2939453125;
-
-    if ((s.i[0] == 0 && (s.f[1] != (float)4.01102924346923828125
-			 || s.i[1] != 0x40805A5A))
-	|| (s.i[1] == 0 && (s.f[0] != (float)4.01102924346923828125
-			    || s.i[0] != 0x40805A5A)))
-      {
-	fprintf(stderr,"The host executing the simulator does not seem to have IEEE 754-1985 std FP\n");
-	return 0;
-      }
-  }
-#endif /* HASFPU */
-
   /* This is NASTY, in that we are assuming the size of specific
      registers: */
   {
     int rn;
     for (rn = 0; (rn < (LAST_EMBED_REGNUM + 1)); rn++) {
       if (rn < 32)
-       cpu->register_widths[rn] = GPRLEN;
+       cpu->register_widths[rn] = WITH_TARGET_WORD_BITSIZE;
       else if ((rn >= FGRIDX) && (rn < (FGRIDX + 32)))
-       cpu->register_widths[rn] = GPRLEN;
+       cpu->register_widths[rn] = WITH_TARGET_WORD_BITSIZE;
       else if ((rn >= 33) && (rn <= 37))
-       cpu->register_widths[rn] = GPRLEN;
+       cpu->register_widths[rn] = WITH_TARGET_WORD_BITSIZE;
       else if ((rn == SRIDX) || (rn == FCR0IDX) || (rn == FCR31IDX) || ((rn >= 72) && (rn <= 89)))
        cpu->register_widths[rn] = 32;
       else
@@ -627,7 +603,7 @@ sim_info (sd,verbose)
     {
       
       sim_io_printf (sd, "MIPS %d-bit %s endian simulator\n",
-		     (PROCESSOR_64BIT ? 64 : 32),
+		     WITH_TARGET_WORD_BITSIZE,
 		     (CURRENT_TARGET_BYTE_ORDER == BIG_ENDIAN ? "Big" : "Little"));
       
 #if !defined(FASTSIM)
@@ -788,7 +764,7 @@ sim_monitor (SIM_DESC sd,
     case 2:  /* Densan monitor: char inbyte(int waitflag) */
       {
 	if (A0 == 0)	/* waitflag == NOWAIT */
-	  V0 = (ut_reg)-1;
+	  V0 = (unsigned_word)-1;
       }
      /* Drop through to case 11 */
 
@@ -798,10 +774,10 @@ sim_monitor (SIM_DESC sd,
         if (sim_io_read_stdin (sd, &tmp, sizeof(char)) != sizeof(char))
 	  {
 	    sim_io_error(sd,"Invalid return from character read");
-	    V0 = (ut_reg)-1;
+	    V0 = (unsigned_word)-1;
 	  }
         else
-	  V0 = (ut_reg)tmp;
+	  V0 = (unsigned_word)tmp;
 	break;
       }
 
@@ -967,7 +943,7 @@ store_word (SIM_DESC sd,
 	    sim_cpu *cpu,
 	    address_word cia,
 	    uword64 vaddr,
-	    t_reg val)
+	    signed_word val)
 {
   address_word paddr;
   int uncached;
@@ -994,7 +970,7 @@ store_word (SIM_DESC sd,
 
 /* Load a word from memory.  */
 
-static t_reg
+static signed_word
 load_word (SIM_DESC sd,
 	   sim_cpu *cpu,
 	   address_word cia,
@@ -1054,7 +1030,7 @@ mips16_entry (SIM_DESC sd,
   if (aregs < 5)
     {
       int i;
-      t_reg tsp;
+      signed_word tsp;
 
       /* This is the entry pseudo-instruction.  */
 
@@ -1079,7 +1055,7 @@ mips16_entry (SIM_DESC sd,
   else
     {
       int i;
-      t_reg tsp;
+      signed_word tsp;
 
       /* This is the exit pseudo-instruction.  */
 
@@ -1099,23 +1075,25 @@ mips16_entry (SIM_DESC sd,
 
       SP += 32;
 
-#if defined(HASFPU)
-      if (aregs == 5)
+      if (CURRENT_FLOATING_POINT == HARD_FLOATING_POINT)
 	{
-	  FGR[0] = WORD64LO (GPR[4]);
-	  FPR_STATE[0] = fmt_uninterpreted;
-	}
-      else if (aregs == 6)
-	{
-	  FGR[0] = WORD64LO (GPR[5]);
-	  FGR[1] = WORD64LO (GPR[4]);
-	  FPR_STATE[0] = fmt_uninterpreted;
-	  FPR_STATE[1] = fmt_uninterpreted;
-	}
-#endif /* defined(HASFPU) */
+	  if (aregs == 5)
+	    {
+	      FGR[0] = WORD64LO (GPR[4]);
+	      FPR_STATE[0] = fmt_uninterpreted;
+	    }
+	  else if (aregs == 6)
+	    {
+	      FGR[0] = WORD64LO (GPR[5]);
+	      FGR[1] = WORD64LO (GPR[4]);
+	      FPR_STATE[0] = fmt_uninterpreted;
+	      FPR_STATE[1] = fmt_uninterpreted;
+	    }
+	}	  
 
       PC = RA;
     }
+  
 }
 
 /*-- trace support ----------------------------------------------------------*/
@@ -1925,8 +1903,6 @@ cache_op (SIM_DESC sd,
 }
 
 /*-- FPU support routines ---------------------------------------------------*/
-
-#if defined(HASFPU) /* Only needed when building FPU aware simulators */
 
 /* Numbers are held in normalized form. The SINGLE and DOUBLE binary
    formats conform to ANSI/IEEE Std 754-1985. */
@@ -2846,7 +2822,6 @@ convert (SIM_DESC sd,
 
   return(result64);
 }
-#endif /* HASFPU */
 
 
 /*-- co-processor support routines ------------------------------------------*/
@@ -2867,23 +2842,25 @@ cop_lw (SIM_DESC sd,
 	int coproc_reg,
 	unsigned int memword)
 {
-  switch (coproc_num) {
-#if defined(HASFPU)
+  switch (coproc_num)
+    {
     case 1:
+      if (CURRENT_FLOATING_POINT == HARD_FLOATING_POINT)
+	{
 #ifdef DEBUG
-    printf("DBG: COP_LW: memword = 0x%08X (uword64)memword = 0x%s\n",memword,pr_addr(memword));
+	  printf("DBG: COP_LW: memword = 0x%08X (uword64)memword = 0x%s\n",memword,pr_addr(memword));
 #endif
-     StoreFPR(coproc_reg,fmt_word,(uword64)memword);
-     FPR_STATE[coproc_reg] = fmt_uninterpreted;
-     break;
-#endif /* HASFPU */
+	  StoreFPR(coproc_reg,fmt_word,(uword64)memword);
+	  FPR_STATE[coproc_reg] = fmt_uninterpreted;
+	  break;
+	}
 
     default:
 #if 0 /* this should be controlled by a configuration option */
-     sim_io_printf(sd,"COP_LW(%d,%d,0x%08X) at PC = 0x%s : TODO (architecture specific)\n",coproc_num,coproc_reg,memword,pr_addr(cia));
+      sim_io_printf(sd,"COP_LW(%d,%d,0x%08X) at PC = 0x%s : TODO (architecture specific)\n",coproc_num,coproc_reg,memword,pr_addr(cia));
 #endif
-     break;
-  }
+      break;
+    }
 
   return;
 }
@@ -2897,11 +2874,12 @@ cop_ld (SIM_DESC sd,
 	uword64 memword)
 {
   switch (coproc_num) {
-#if defined(HASFPU)
     case 1:
-     StoreFPR(coproc_reg,fmt_uninterpreted,memword);
-     break;
-#endif /* HASFPU */
+      if (CURRENT_FLOATING_POINT == HARD_FLOATING_POINT)
+	{
+	  StoreFPR(coproc_reg,fmt_uninterpreted,memword);
+	  break;
+	}
 
     default:
 #if 0 /* this message should be controlled by a configuration option */
@@ -2922,36 +2900,25 @@ cop_sw (SIM_DESC sd,
 {
   unsigned int value = 0;
 
-  switch (coproc_num) {
-#if defined(HASFPU)
+  switch (coproc_num)
+    {
     case 1:
-#if 1
-      {
-        FP_formats hold;
-        hold = FPR_STATE[coproc_reg];
-        FPR_STATE[coproc_reg] = fmt_word;
-        value = (unsigned int)ValueFPR(coproc_reg,fmt_uninterpreted);
-        FPR_STATE[coproc_reg] = hold;
-      }
-#else
-#if 1
-     value = (unsigned int)ValueFPR(coproc_reg,FPR_STATE[coproc_reg]);
-#else
-#ifdef DEBUG
-     printf("DBG: COP_SW: reg in format %s (will be accessing as single)\n",DOFMT(FPR_STATE[coproc_reg])); 
-#endif /* DEBUG */
-     value = (unsigned int)ValueFPR(coproc_reg,fmt_single);
-#endif
-#endif
-     break;
-#endif /* HASFPU */
+      if (CURRENT_FLOATING_POINT == HARD_FLOATING_POINT)
+	{
+	  FP_formats hold;
+	  hold = FPR_STATE[coproc_reg];
+	  FPR_STATE[coproc_reg] = fmt_word;
+	  value = (unsigned int)ValueFPR(coproc_reg,fmt_uninterpreted);
+	  FPR_STATE[coproc_reg] = hold;
+	  break;
+	}
 
     default:
 #if 0 /* should be controlled by configuration option */
-     sim_io_printf(sd,"COP_SW(%d,%d) at PC = 0x%s : TODO (architecture specific)\n",coproc_num,coproc_reg,pr_addr(cia));
+      sim_io_printf(sd,"COP_SW(%d,%d) at PC = 0x%s : TODO (architecture specific)\n",coproc_num,coproc_reg,pr_addr(cia));
 #endif
-     break;
-  }
+      break;
+    }
 
   return(value);
 }
@@ -2964,30 +2931,21 @@ cop_sd (SIM_DESC sd,
 	int coproc_reg)
 {
   uword64 value = 0;
-  switch (coproc_num) {
-#if defined(HASFPU)
+  switch (coproc_num)
+    {
     case 1:
-#if 1
-     value = ValueFPR(coproc_reg,fmt_uninterpreted);
-#else
-#if 1
-     value = ValueFPR(coproc_reg,FPR_STATE[coproc_reg]);
-#else
-#ifdef DEBUG
-     printf("DBG: COP_SD: reg in format %s (will be accessing as double)\n",DOFMT(FPR_STATE[coproc_reg]));
-#endif /* DEBUG */
-     value = ValueFPR(coproc_reg,fmt_double);
-#endif
-#endif
-     break;
-#endif /* HASFPU */
+      if (CURRENT_FLOATING_POINT == HARD_FLOATING_POINT)
+	{
+	  value = ValueFPR(coproc_reg,fmt_uninterpreted);
+	  break;
+	}
 
     default:
 #if 0 /* should be controlled by configuration option */
-     sim_io_printf(sd,"COP_SD(%d,%d) at PC = 0x%s : TODO (architecture specific)\n",coproc_num,coproc_reg,pr_addr(cia));
+      sim_io_printf(sd,"COP_SD(%d,%d) at PC = 0x%s : TODO (architecture specific)\n",coproc_num,coproc_reg,pr_addr(cia));
 #endif
-     break;
-  }
+      break;
+    }
 
   return(value);
 }
@@ -3376,22 +3334,25 @@ sim_engine_run (sd, next_cpu_nr, nr_cpus, siggnal)
               printf("pending_slot_reg[%d] = %d\n",index,PENDING_SLOT_REG[index]);
               printf("pending_slot_value[%d] = 0x%s\n",index,pr_addr(PENDING_SLOT_VALUE[index]));
 #endif /* DEBUG */
-              if (PENDING_SLOT_REG[index] == COCIDX) {
-#if defined(HASFPU)
-                SETFCC(0,((FCR31 & (1 << 23)) ? 1 : 0));
-#else
-                ;
-#endif
-              } else {
-                REGISTERS[PENDING_SLOT_REG[index]] = PENDING_SLOT_VALUE[index];
-#if defined(HASFPU)
-                /* The only time we have PENDING updates to FPU
-                   registers, is when performing binary transfers. This
-                   means we should update the register type field.  */
-                if ((PENDING_SLOT_REG[index] >= FGRIDX) && (PENDING_SLOT_REG[index] < (FGRIDX + 32)))
-                 FPR_STATE[PENDING_SLOT_REG[index] - FGRIDX] = fmt_uninterpreted;
-#endif /* HASFPU */
-              }
+              if (PENDING_SLOT_REG[index] == COCIDX)
+		{
+		  if (CURRENT_FLOATING_POINT == HARD_FLOATING_POINT)
+		    {
+		      SETFCC(0,((FCR31 & (1 << 23)) ? 1 : 0));
+		    }
+		}
+	      else
+		{
+		  REGISTERS[PENDING_SLOT_REG[index]] = PENDING_SLOT_VALUE[index];
+		  if (CURRENT_FLOATING_POINT == HARD_FLOATING_POINT)
+		    {
+		      /* The only time we have PENDING updates to FPU
+			 registers, is when performing binary transfers. This
+			 means we should update the register type field.  */
+		      if ((PENDING_SLOT_REG[index] >= FGRIDX) && (PENDING_SLOT_REG[index] < (FGRIDX + 32)))
+			FPR_STATE[PENDING_SLOT_REG[index] - FGRIDX] = fmt_uninterpreted;
+		    }
+		}
 #ifdef DEBUG
               printf("registers[%d] = 0x%s\n",PENDING_SLOT_REG[index],pr_addr(REGISTERS[PENDING_SLOT_REG[index]]));
 #endif /* DEBUG */

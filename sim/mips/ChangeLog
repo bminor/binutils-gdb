@@ -1,3 +1,15 @@
+Mon Feb  2 17:43:15 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* interp.c (oengine.h): Do not include when building with IGEN.
+	(sim_open): Replace GPRLEN by WITH_TARGET_WORD_BITSIZE.
+	(sim_info): Ditto for PROCESSOR_64BIT.
+	(sim_monitor): Replace ut_reg with unsigned_word.
+	(*): Ditto for t_reg.
+	(LOADDRMASK): Define.
+	(sim_open): Remove defunct check that host FP is IEEE compliant,
+ 	using software to emulate floating point.
+	(value_fpr, ...): Always compile, was conditional on HASFPU.
+
 Sun Feb  1 11:15:29 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim-main.h (sim_state): Make the cpu array MAX_NR_PROCESSORS in
