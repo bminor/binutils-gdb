@@ -1,3 +1,7 @@
+2001-05-06  Jim Blandy  <jimb@redhat.com>
+
+	* mn10300.igen: Doc fixes.
+	
 2001-04-26  Alexandre Oliva  <aoliva@redhat.com>
 
 	* Makefile.in (idecode.o, op_utils.o, semantics.o, simops.o):
