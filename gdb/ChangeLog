@@ -1,3 +1,23 @@
+2001-03-16  J.T. Conklin  <jtc@redback.com>
+
+	* config/h8300/tm-h8300.h (FRAME_ARGS_ADDRESS): Changed to use
+	h8300_frame_args_address from frame_args_address.
+	(FRAME_LOCALS_ADDRESS): Changed to use h8300_frame_locals_address
+	from frame_locals_address.
+	(PRINT_REGISTER_HOOK): Changed to use h8300_print_register_hook
+	from print_register_hook.
+	(h8300_frame_args_address): Declare.
+	(h8300_frame_find_saved_regs): Declare.
+	(h8300_frame_locals_address): Declare.
+	(h8300_frame_saved_pc): Declare.
+	(h8300_pop_frame): Declare.
+	(h8300_print_register_hook): Declare.
+	* h8300-tdep.c (h8300_frame_find_saved_regs): Removed declaration.
+	(h8300_frame_args_address): Renamed from frame_args_address.
+	(h8300_frame_locals_address): Renamed from frame_locals_address.
+	(h8300_pop_frame): Renamed from pop_frame.
+	(h8300_print_register_hook): Renamed from print_register_hook.
+
 2001-03-16  Kevin Buettner  <kevinb@redhat.com>
 
 	* solib-svr4.c (bfd_lookup_symbol):  Change type of

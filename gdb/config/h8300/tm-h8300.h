@@ -235,10 +235,13 @@ CORE_ADDR h8300_frame_chain (struct frame_info *);
  */
 
 #define FRAME_SAVED_PC(FRAME) h8300_frame_saved_pc(FRAME)
+extern CORE_ADDR h8300_frame_saved_pc (struct frame_info *);
 
-#define FRAME_ARGS_ADDRESS(fi) frame_args_address(fi)
+#define FRAME_ARGS_ADDRESS(fi) h8300_frame_args_address(fi)
+extern CORE_ADDR h8300_frame_args_address (struct frame_info *);
 
-#define FRAME_LOCALS_ADDRESS(fi) frame_locals_address(fi);
+#define FRAME_LOCALS_ADDRESS(fi) h8300_frame_locals_address(fi)
+extern CORE_ADDR h8300_frame_locals_address (struct frame_info *);
 
 /* Set VAL to the number of args passed to frame described by FI.
    Can set VAL to -1, meaning no way to tell.  */
@@ -260,12 +263,15 @@ CORE_ADDR h8300_frame_chain (struct frame_info *);
 
 #define FRAME_FIND_SAVED_REGS(frame_info, frame_saved_regs)	    \
    h8300_frame_find_saved_regs(frame_info, &(frame_saved_regs))
+extern void h8300_frame_find_saved_regs (struct frame_info *,
+					 struct frame_saved_regs *);
 
 
 typedef unsigned short INSN_WORD;
 
 
-#define	PRINT_REGISTER_HOOK(regno) print_register_hook(regno)
+#define	PRINT_REGISTER_HOOK(regno) h8300_print_register_hook(regno)
+extern void h8300_print_register_hook (int);
 
 #define GDB_TARGET_IS_H8300
 
@@ -292,6 +298,7 @@ extern CORE_ADDR h8300_push_arguments (int nargs,
 				       unsigned char struct_return,
 				       CORE_ADDR struct_addr);
 extern CORE_ADDR h8300_push_return_address (CORE_ADDR, CORE_ADDR);
+extern void h8300_pop_frame (void);
 
 #define PC_IN_CALL_DUMMY(PC, SP, FP)	generic_pc_in_call_dummy (PC, SP, FP)
 #define FIX_CALL_DUMMY(DUMMY, START_SP, FUNADDR, NARGS, ARGS, TYPE, GCCP)
