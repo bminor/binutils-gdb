@@ -1,5 +1,8 @@
 Thu Sep 28 11:19:53 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* coffcode.h (coff_new_section_hook): Make sure that the alignment
+	of .ctors and .dtors sections is no larger than 2.
+
 	* sunos.c (sunos_add_one_symbol): Don't change
 	bfd_link_hash_common to bfd_link_hash_new, since it may be on the
 	undef list.
