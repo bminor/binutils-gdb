@@ -1,5 +1,5 @@
 /* interrupts.c -- 68HC11 Interrupts Emulation
-   Copyright 1999, 2000 Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2001 Free Software Foundation, Inc.
    Written by Stephane Carrez (stcarrez@worldnet.fr)
 
 This file is part of GDB, GAS, and the GNU binutils.
@@ -67,10 +67,12 @@ interrupts_initialize (struct _sim_cpu *proc)
   interrupts->nb_interrupts_raised = 0;
   interrupts->min_mask_cycles = CYCLES_MAX;
   interrupts->max_mask_cycles = 0;
+  interrupts->last_mask_cycles = 0;
   interrupts->start_mask_cycle = -1;
   interrupts->xirq_start_mask_cycle = -1;
   interrupts->xirq_max_mask_cycles = 0;
   interrupts->xirq_min_mask_cycles = CYCLES_MAX;
+  interrupts->xirq_last_mask_cycles = 0;
   
   for (i = 0; i < M6811_INT_NUMBER; i++)
     {
@@ -89,7 +91,11 @@ interrupts_update_pending (struct interrupts *interrupts)
 {
   int i;
   uint8 *ioregs;
+  unsigned long clear_mask;
+  unsigned long set_mask;
 
+  clear_mask = 0;
+  set_mask = 0;
   ioregs = &interrupts->cpu->ios[0];
   
   for (i = 0; i < TableSize(idefs); i++)
@@ -104,7 +110,7 @@ interrupts_update_pending (struct interrupts *interrupts)
 	  if (!(data & idef->enabled_mask))
             {
               /* Disable it.  */
-              interrupts->pending_mask &= ~(1 << idef->int_number);
+              clear_mask |= (1 << idef->int_number);
               continue;
             }
 	}
@@ -114,13 +120,18 @@ interrupts_update_pending (struct interrupts *interrupts)
       if (!(data & idef->int_mask))
         {
           /* Disable it.  */
-          interrupts->pending_mask &= ~(1 << idef->int_number);
+          clear_mask |= (1 << idef->int_number);
           continue;
         }
 
       /* Ok, raise it.  */
-      interrupts->pending_mask |= (1 << idef->int_number);
+      set_mask |= (1 << idef->int_number);
     }
+
+  /* Some interrupts are shared (M6811_INT_SCI) so clear
+     the interrupts before setting the new ones.  */
+  interrupts->pending_mask &= ~clear_mask;
+  interrupts->pending_mask |= set_mask;
 }
 
 
@@ -214,6 +225,7 @@ interrupts_process (struct interrupts *interrupts)
       if (t > interrupts->max_mask_cycles)
         interrupts->max_mask_cycles = t;
       interrupts->start_mask_cycle = -1;
+      interrupts->last_mask_cycles = t;
     }
   if (ccr & M6811_X_BIT)
     {
@@ -232,6 +244,7 @@ interrupts_process (struct interrupts *interrupts)
       if (t > interrupts->xirq_max_mask_cycles)
         interrupts->xirq_max_mask_cycles = t;
       interrupts->xirq_start_mask_cycle = -1;
+      interrupts->xirq_last_mask_cycles = t;
     }
 
   id = interrupts_get_current (interrupts);
@@ -275,6 +288,10 @@ interrupts_info (SIM_DESC sd, struct interrupts *interrupts)
 {
   signed64 t;
   
+  sim_io_printf (sd, "Interrupts Info:\n");
+  sim_io_printf (sd, "  Interrupts raised: %lu\n",
+                 interrupts->nb_interrupts_raised);
+
   if (interrupts->start_mask_cycle >= 0)
     {
       t = cpu_current_cycle (interrupts->cpu);
@@ -282,20 +299,10 @@ interrupts_info (SIM_DESC sd, struct interrupts *interrupts)
       t -= interrupts->start_mask_cycle;
       if (t > interrupts->max_mask_cycles)
         interrupts->max_mask_cycles = t;
+
+      sim_io_printf (sd, "  Current interrupts masked sequence: %s\n",
+                     cycle_to_string (interrupts->cpu, t));
     }
-  if (interrupts->xirq_start_mask_cycle >= 0)
-    {
-      t = cpu_current_cycle (interrupts->cpu);
-
-      t -= interrupts->xirq_start_mask_cycle;
-      if (t > interrupts->xirq_max_mask_cycles)
-        interrupts->xirq_max_mask_cycles = t;
-    }
-
-  sim_io_printf (sd, "Interrupts Info:\n");
-  sim_io_printf (sd, "  Interrupts raised: %lu\n",
-                 interrupts->nb_interrupts_raised);
-
   t = interrupts->min_mask_cycles == CYCLES_MAX ?
     interrupts->max_mask_cycles :
     interrupts->min_mask_cycles;
@@ -306,6 +313,22 @@ interrupts_info (SIM_DESC sd, struct interrupts *interrupts)
   sim_io_printf (sd, "  Longest interrupts masked sequence: %s\n",
                  cycle_to_string (interrupts->cpu, t));
 
+  t = interrupts->last_mask_cycles;
+  sim_io_printf (sd, "  Last interrupts masked sequence: %s\n",
+                 cycle_to_string (interrupts->cpu, t));
+  
+  if (interrupts->xirq_start_mask_cycle >= 0)
+    {
+      t = cpu_current_cycle (interrupts->cpu);
+
+      t -= interrupts->xirq_start_mask_cycle;
+      if (t > interrupts->xirq_max_mask_cycles)
+        interrupts->xirq_max_mask_cycles = t;
+
+      sim_io_printf (sd, "  XIRQ Current interrupts masked sequence: %s\n",
+                     cycle_to_string (interrupts->cpu, t));
+    }
+
   t = interrupts->xirq_min_mask_cycles == CYCLES_MAX ?
     interrupts->xirq_max_mask_cycles :
     interrupts->xirq_min_mask_cycles;
@@ -314,5 +337,9 @@ interrupts_info (SIM_DESC sd, struct interrupts *interrupts)
 
   t = interrupts->xirq_max_mask_cycles;
   sim_io_printf (sd, "  XIRQ Max interrupts masked sequence: %s\n",
+                 cycle_to_string (interrupts->cpu, t));
+
+  t = interrupts->xirq_last_mask_cycles;
+  sim_io_printf (sd, "  XIRQ Last interrupts masked sequence: %s\n",
                  cycle_to_string (interrupts->cpu, t));
 }

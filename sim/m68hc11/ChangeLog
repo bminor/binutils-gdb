@@ -1,3 +1,17 @@
+2001-05-20  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+
+	* dv-m68hc11sio.c (m68hc11sio_tx_poll): Always check for
+	pending interrupts.
+	* interrupts.c (interrupts_process): Keep track of the last number
+	of masked insn cycles.
+	(interrupts_initialize): Clear last number of masked insn cycles.
+	(interrupts_info): Report them.
+	(interrupts_update_pending): Compute clear and set masks of 
+	interrupts and clear the interrupt bits before setting them 
+	(due to SCI interrupt sharing).
+	* interrupts.h (struct interrupts): New members last_mask_cycles
+	and xirq_last_mask_cycles.
+
 2000-11-26  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
 
 	* dv-m68hc11.c (m68hc11cpu_io_read_buffer): Use attach_size

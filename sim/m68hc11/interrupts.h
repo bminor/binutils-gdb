@@ -1,5 +1,5 @@
 /* interrupts.h -- 68HC11 Interrupts Emulation
-   Copyright 1999, 2000 Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2001 Free Software Foundation, Inc.
    Written by Stephane Carrez (stcarrez@worldnet.fr)
 
 This file is part of GDB, GAS, and the GNU binutils.
@@ -109,11 +109,13 @@ struct interrupts {
   signed64          start_mask_cycle;
   signed64          min_mask_cycles;
   signed64          max_mask_cycles;
+  signed64          last_mask_cycles;
 
   /* - Same for XIRQ.  */
   signed64          xirq_start_mask_cycle;
   signed64          xirq_min_mask_cycles;
   signed64          xirq_max_mask_cycles;
+  signed64          xirq_last_mask_cycles;
 
   /* - Total number of interrupts raised.  */
   unsigned long     nb_interrupts_raised;

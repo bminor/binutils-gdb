@@ -1,5 +1,5 @@
 /*  dv-m68hc11sio.c -- Simulation of the 68HC11 serial device.
-    Copyright (C) 1999, 2000 Free Software Foundation, Inc.
+    Copyright (C) 1999, 2000, 2001 Free Software Foundation, Inc.
     Written by Stephane Carrez (stcarrez@worldnet.fr)
     (From a driver model Contributed by Cygnus Solutions.)
 
@@ -320,7 +320,6 @@ m68hc11sio_tx_poll (struct hw *me, void *data)
   SIM_DESC sd;
   struct m68hc11sio *controller;
   sim_cpu *cpu;
-  int check_interrupt = 0;
   
   controller = hw_data (me);
   sd         = hw_system (me);
@@ -329,13 +328,12 @@ m68hc11sio_tx_poll (struct hw *me, void *data)
   cpu->ios[M6811_SCSR] |= M6811_TDRE;
   cpu->ios[M6811_SCSR] |= M6811_TC;
   
-  /* Transmitter is enabled and we have something to sent.  */
+  /* Transmitter is enabled and we have something to send.  */
   if ((cpu->ios[M6811_SCCR2] & M6811_TE) && controller->tx_has_char)
     {
       cpu->ios[M6811_SCSR] &= ~M6811_TDRE;
       cpu->ios[M6811_SCSR] &= ~M6811_TC;
       controller->tx_has_char = 0;
-      check_interrupt = 1;
       switch (controller->backend)
         {
         case sio_tcp:
@@ -371,8 +369,7 @@ m68hc11sio_tx_poll (struct hw *me, void *data)
                                                            NULL);
     }
 
-  if (check_interrupt)
-      interrupts_update_pending (&cpu->cpu_interrupts);
+  interrupts_update_pending (&cpu->cpu_interrupts);
 }
 
 /* Descriptions of the SIO I/O ports.  These descriptions are only used to
