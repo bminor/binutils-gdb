@@ -1941,6 +1941,11 @@ signal_exception (SIM_DESC sd,
   /* Ensure that any active atomic read/modify/write operation will fail: */
   LLBIT = 0;
 
+  /* Save registers before interrupt dispatching */
+#ifdef SIM_CPU_EXCEPTION_TRIGGER
+  SIM_CPU_EXCEPTION_TRIGGER(sd, cpu, cia);
+#endif
+
   /* First, handle any simulator specific magic exceptions.  These are not "real" exceptions, but
      are exceptions which the simulator uses to implement different features.  */
 
@@ -2144,10 +2149,13 @@ signal_exception (SIM_DESC sd,
 			 sim_stopped, SIM_SIGFPE);
 	break;
 
+       case BreakPoint:
+	 sim_engine_halt (SD, CPU, NULL, PC, sim_stopped, SIM_SIGTRAP);
+	 break;
+
       case TLBModification:
       case TLBLoad:
       case TLBStore:
-      case BreakPoint:
       case SystemCall:
       case Trap:
 	sim_engine_restart (SD, CPU, NULL, PC);

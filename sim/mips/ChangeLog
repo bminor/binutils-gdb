@@ -1,3 +1,11 @@
+1998-12-30  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* mips.igen (BREAK): Call signal_exception instead of sim_engine_halt.
+start-sanitize-sky	
+	* interp.c (signal_exception): Call SIM_CPU_EXCEPTION_TRIGGER hook.
+ 	Call sim_engine_halt on BreakPoint.
+end-sanitize-sky
+	
 Tue Dec 29 16:03:53 1998  Rainer Orth  <ro@TechFak.Uni-Bielefeld.DE>
 
 	* configure.in, configure (mips64vr5*-*-*): Added missing ;; in
