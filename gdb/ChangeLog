@@ -1,3 +1,9 @@
+2001-07-27  John R. Moore  <jmoore@redhat.com>
+
+	* configure.in: Added dependency of gdb on tcl/tk libraries.
+	* Makefile.in: Likewise.
+	* configure: Regenerated with the above using autoconf.
+
 2001-07-26  Elena Zannoni  <ezannoni@redhat.com>
 
 	* sh-tdep.c (sh_gdbarch_init): Use SH_DEFAULT_NUM_REGS instead of
