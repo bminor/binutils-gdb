@@ -9,6 +9,37 @@ Fri Oct 27 18:14:39 1995  Ian Lance Taylor  <ian@cygnus.com>
 	(bfd_xcoff_record_link_assignment): Declare.
 	* bfd-in2.h: Rebuild.
 
+Fri Oct 27 14:42:15 1995  Niklas Hallqvist  <niklas@appli.se>
+
+	* PORTING, aout-arm.c, aout-encap.c, aout-rce.c, aout-target.h,
+	aoutx.h, gen-aout.c, host-aout.c, hp300bsd.c, i386aout.c
+	i386bsd.c, i386dynix.c, i386linux.c, i386lynx.c, i386mach3.c,
+	i386netbsd.c, m68klynx.c, m88kmach3.c, mipsbsd.c, newsos3.c,
+	ns32knetbsd.c, pc532-mach.c, riscix.c, sparclynx.c, sparcnetbsd.c:
+	Change PAGE_SIZE to TARGET_PAGE_SIZE.
+
+	* m68knetbsd.c: Ditto as well as add support for the m68k4k object
+	format.
+
+	* netbsd.h: Double ditto (incl. m68k4k support).  NetBSD's text
+	segments includes the a.out header.  See to that the magic number
+	*always* is big-endian.
+
+	* config.bfd: Add m68*-hp*-netbsd* case.  Cross-pollinate m68k and
+	m68k4k NetBSD configurations.
+
+	* configure.in, configure: Separate i386 & mips NetBSD
+	configurations from other BSD ones.  Don't assume DEC is the only
+	thing NetBSD/mips run on.  Add {m68k,ns32k,sparc}-*-netbsd*
+	configurations.  Add support for m68k4k NetBSD object format.
+
+	* libaout.h: Added M_68K4K_NETBSD magic.
+	
+	* hosts/{m68k,sparc}nbsd.h: Don't define HOST_BIG_ENDIAN_P.
+
+	* hosts/nbsd.h: Define HOST_BIG_ENDIAN_P according to
+	<machine/endian.h>.
+
 start-sanitize-gm
 Fri Oct 27 09:41:51 1995  Stu Grossman  (grossman@cygnus.com)
 
