@@ -1,3 +1,8 @@
+Mon Nov 29 12:23:25 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* mipsread.c (parse_symbol, parse_partial_symbols):  Do not create
+	(partial) symbols for opaque struct definitions.
+
 Mon Nov 29 11:36:57 1993  Stu Grossman  (grossman at cygnus.com)
 
 	* i386ly-tdep.c (i386lynx_saved_pc_after_call):  Change call_inst
