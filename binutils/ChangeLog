@@ -1,3 +1,9 @@
+Sat Jul 16 22:34:39 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* objdump.c (slurp_dynamic_symtab): Try to get the dynamic symbols
+	even if the bfd is not marked DYNAMIC.  ELF executables are not
+	marked DYNAMIC, but do have dynamic symbols.
+
 Fri Jul 15 01:41:35 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
 
 	* coffgrok.c (do_where): Make data with no type 'int'.
