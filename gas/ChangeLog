@@ -1,5 +1,9 @@
 Tue Sep 13 21:15:36 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
+	* config/tc-i386.c (md_apply_fix_1): For GOTPC relocs, decrement
+	value by one; discard adjustments previously being made.  From
+	Eric Youngdale.
+
 	VMS- and Vax-related changes from Pat Rankin:
 	* Makefile.in (VMS_OTHER_OBJS): add concat, getopt, and getopt1.
 	* vmsconf.sh: no longer have make-gas.com echo text about needing
