@@ -2690,8 +2690,13 @@ read_struct_type (pp, type, objfile)
   {
     int i;
     for (i = 0; i < TYPE_N_BASECLASSES (type); ++i)
-      TYPE_NFN_FIELDS_TOTAL (type) +=
-	TYPE_NFN_FIELDS_TOTAL (TYPE_BASECLASS (type, i));
+      {
+	if (TYPE_CODE (TYPE_BASECLASS (type, i)) == TYPE_CODE_UNDEF)
+	  /* @@ Memory leak on objfile->type_obstack?  */
+	  return error_type (pp);
+	TYPE_NFN_FIELDS_TOTAL (type) +=
+	  TYPE_NFN_FIELDS_TOTAL (TYPE_BASECLASS (type, i));
+      }
   }
 
   for (n = nfn_fields; mainlist; mainlist = mainlist->next) {
