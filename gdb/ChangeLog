@@ -1,3 +1,9 @@
+Mon Nov 19 14:58:52 2001  Andrew Cagney  <cagney@redhat.com>
+
+	* remote.c (remote_open_1, remote_async_open_1): Use ISO C string
+ 	concatenation for error parameter.
+	(remote_cisco_open): Ditto.
+
 2001-11-19  Keith Seitz  <keiths@redhat.com>
 
 	* varobj.c (c_value_of_child): Use the wrapper function,

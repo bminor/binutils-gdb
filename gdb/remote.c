@@ -2227,9 +2227,9 @@ remote_open_1 (char *name, int from_tty, struct target_ops *target,
 {
   struct remote_state *rs = get_remote_state ();
   if (name == 0)
-    error ("To open a remote debug connection, you need to specify what\n\
-serial device is attached to the remote system\n\
-(e.g. /dev/ttyS0, /dev/ttya, COM1, etc.).");
+    error ("To open a remote debug connection, you need to specify what\n"
+	   "serial device is attached to the remote system\n"
+	   "(e.g. /dev/ttyS0, /dev/ttya, COM1, etc.).");
 
   /* See FIXME above */
   wait_forever_enabled_p = 1;
@@ -2328,9 +2328,9 @@ remote_async_open_1 (char *name, int from_tty, struct target_ops *target,
 {
   struct remote_state *rs = get_remote_state ();
   if (name == 0)
-    error ("To open a remote debug connection, you need to specify what\n\
-serial device is attached to the remote system\n\
-(e.g. /dev/ttyS0, /dev/ttya, COM1, etc.).");
+    error ("To open a remote debug connection, you need to specify what\n"
+	   "serial device is attached to the remote system\n"
+	   "(e.g. /dev/ttyS0, /dev/ttya, COM1, etc.).");
 
   target_preopen (from_tty);
 
@@ -5437,9 +5437,8 @@ static void
 remote_cisco_open (char *name, int from_tty)
 {
   if (name == 0)
-    error (
-	    "To open a remote debug connection, you need to specify what \n\
-device is attached to the remote system (e.g. host:port).");
+    error ("To open a remote debug connection, you need to specify what \n"
+	   "device is attached to the remote system (e.g. host:port).");
 
   /* See FIXME above */
   wait_forever_enabled_p = 1;
