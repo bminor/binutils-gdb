@@ -1,3 +1,7 @@
+Wed Aug 19 03:07:53 1998  Richard Henderson  <rth@cygnus.com>
+
+	* config/alpha/alpha-linux (XDEPFILES): Build ser-tcp.
+
 1998-08-18  Keith Seitz  <keiths@cygnus.com>
 
 	* stack.c: Define new hook, selected_frame_level_changed_hook, which
