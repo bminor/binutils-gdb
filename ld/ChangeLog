@@ -1,3 +1,17 @@
+1998-10-26 16:05  Ulrich Drepper  <drepper@cygnus.com>
+
+	* lexsup.c (ld_options): Change text of -O to Optimize output file".
+	(parse_args): Set link_info.optimize based on -O argument.
+	* ldmain.c (main): Initialize link_info.optimze to false.
+	* ld.texinfo: Describe -O option.
+	* ld.1: Likewise.
+
+Mon Oct 12 14:29:56 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* scripttempl/v850.sc: Move .sbss and .scommon sections into their
+	own segment, so that they can be next to the .bss section and so
+	initialised by the same piece of code.
+
 Fri Oct  9 15:59:52 1998  Catherine Moore  <clm@cygnus.com>
 
         * scripttempl/elf.sc:  Merge .sdata.* etc sections.
@@ -5,8 +19,8 @@ Fri Oct  9 15:59:52 1998  Catherine Moore  <clm@cygnus.com>
         ctor sections.
 
 Mon Oct  5 09:40:43 1998  Catherine Moore  <clm@cygnus.com>
-  
-        * ldmain.c (main):  Error if --gc-sections and 
+
+        * ldmain.c (main):  Error if --gc-sections and
         dyanmic linking.
         * scripttempl/v850.sc:  Add KEEP attribute to .init,
         .fini, .dtors and .ctors.  Add .data and .text
@@ -16,7 +30,7 @@ Wed Sep 30 11:19:15 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* scripttempl/v850.sc: Rename .call_table section to
 	.call_table_data and create a new section called
-	.call_table_text. 
+	.call_table_text.
 
 Sun Sep 20 00:43:26 1998  Ian Lance Taylor  <ian@cygnus.com>
 
@@ -43,12 +57,12 @@ Mon Aug 31 01:06:00 1998  Catherine Moore  <clm@cygnus.com>
         * Makefile.in:  Regenerate.
 
 Mon Aug 31 11:12:04 1998  Catherine Moore  <clm@cygnus.com>
-   
+
         * emulparams/armelf.sh:  Change SCRIPT_NAME to
         elf.  Change TEXT_START_ADDR to 0x8000.  Define
         OTHER_TEXT_SECTIONS, OTHER_BSS_SYMBOLS and
         OTHER_BSS_END_SYMBOLS.
-        * scripttempl/elf.sc:  Modify to use 
+        * scripttempl/elf.sc:  Modify to use
         OTHER_BSS_END_SYMBOLS.
         * scripttempl/elfarm.sc:  Remove file.
 
@@ -57,7 +71,7 @@ Tue Aug 18 12:05:34 1998  Catherine Moore  <clm@cygnus.com>
         * emultempl/armelf.em (gld_armelf_before_allocation):
         Add bfd_ prefix to elf32_arm_process_before_allocation
         and elf32_arm_allocate_interworking_sections.
-        (gld_armelf_after_open): Add bfd_ prefix to 
+        (gld_armelf_after_open): Add bfd_ prefix to
         elf32_arm_get_bfd_for_interworking.
 
 Fri Aug 14 15:34:29 1998  Ian Lance Taylor  <ian@cygnus.com>
@@ -79,12 +93,12 @@ Fri Aug 14 15:34:29 1998  Ian Lance Taylor  <ian@cygnus.com>
  	(CONSTRUCTORS).
 
 Thu Aug 13 12:20:39 1998  Catherine Moore  <clm@cygnus.com>
- 
+
        * emulparams/armelf.sh:  Define TEMPLATE_NAME to armelf.
-       * scripttempl/elfarm.sc:  Include .glue_7t and .glue7 
+       * scripttempl/elfarm.sc:  Include .glue_7t and .glue7
        sections.
        * emultempl/armelf.em: New file.
- 
+
 Thu Aug 13 12:52:45 1998  H.J. Lu  <hjl@gnu.org>
 
 	* Makefile.am (ld.dvi): Use " instead of ' for MAKEINFO.
@@ -387,7 +401,7 @@ Thu May 14 14:51:24 1998  Nick Clifton  <nickc@cygnus.com>
 	list_options field of the ld_emulation_xfer_struct for each
 	supported emulation, if such a function is present.
 	* lexsup.c (help): Call ldemul_list_emulation_options.
-	* emultempl/pe.em (gld_<>_list_options): New function.  Describe 
+	* emultempl/pe.em (gld_<>_list_options): New function.  Describe
 	the pe emulation specific command line options.
 	* emultempl/armcoff.em (gld<>_list_options): New function.
 	Describe  the armcoff emulation specific command line options.
@@ -399,9 +413,9 @@ Thu May 14 14:51:24 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* Makefile.in: Add emulation files for POTFILES.in target.
 	* emultempl/pe.em: Internationalise suitable strings.
-	* emultempl/armcoff.em: Internationalise suitable strings. 
+	* emultempl/armcoff.em: Internationalise suitable strings.
 	* po/POTFILES.in: Rebuilt.
-	
+
 Sun May 10 22:36:30 1998  Jeffrey A Law  (law@cygnus.com)
 
         * po/Make-in (install-info): New target.
@@ -753,7 +767,7 @@ Wed Jan 28 14:06:30 1998  Richard Henderson  <rth@cygnus.com>
 	* emulparams/elf64_sparc.sh (ELFSIZE): 64
 	(TEXT_START_ADDR): Round off, since SIZEOF_HEADERS is added later.
 	(DATA_PLT): Needed by v9 abi.
-	
+
 Wed Jan 28 16:37:27 1998  J.J. van der Heijden  <J.J.vanderHeijden@student.utwente.nl>
 
 	* configure.tgt (i[3456]86-*-mingw32*): New entry.
@@ -867,7 +881,7 @@ Thu Dec 11 09:00:15 1997  Michael Meissner  <meissner@cygnus.com>
 Wed Dec 10 17:40:08 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* scripttempl/armcoff.sc: Add glue sections (code taken from Arm
-	branch). 
+	branch).
 
 	* emulparams/armcoff.sh (TEMPLATE_NAME): Set to armcoff.
 
@@ -1037,7 +1051,7 @@ Thu Oct  2 18:40:28 1997  Ian Lance Taylor  <ian@cygnus.com>
 Wed Oct  1 16:41:00 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* emulparams/v850.sh (ROZDATA_START_ADDR, ROSDATA_START_ADDR): New
-	Variables. 
+	Variables.
 
 	* scripttempl/v850.sc: Move read only areas out of zero and small
 	data sections and into their own sections.
@@ -1459,7 +1473,7 @@ Fri Mar  7 18:40:12 1997  Fred Fish  <fnf@cygnus.com>
 	rather than _start.
 	(__edata): Define this rather than "edata".
 	(__end): Define this rather than "end".
-	
+
 Tue Mar  4 17:18:35 1997  Michael Meissner  <meissner@cygnus.com>
 
 	* configure.tgt (tic80-*-*): Allow dropping of -coff.
@@ -1475,7 +1489,7 @@ start-sanitize-tic80
 	about each shell variable that is set (or not set).
 	* scripttempl/tic80coff.sc: Complete rewrite.
 end-sanitize-tic80
-	
+
 Fri Feb 28 17:42:27 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ldmain.c (main): Call bfd_set_default_target.
@@ -1578,9 +1592,9 @@ Tue Feb 11 15:34:26 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 start-sanitize-r5900
 Fri Feb  7 13:16:53 1997  Gavin Koch  <gavin@cygnus.com>
-        
+
         * configure.tgt: add r5900.
-        
+
 end-sanitize-r5900
 start-sanitize-tic80
 Sun Feb  9 18:09:13 1997  Fred Fish  <fnf@cygnus.com>
@@ -1589,7 +1603,7 @@ Sun Feb  9 18:09:13 1997  Fred Fish  <fnf@cygnus.com>
 	* scripttempl/tic80coff.sc: New (dummy) file for TIc80.
 	* Makefile.in (etic80coff.c): Add target and rule to build it.
 	* configure.tgt (tic80-*-coff): Set targ_emul to tic80coff.
-	
+
 end-sanitize-tic80
 Fri Jan 31 13:16:53 1997  Ian Lance Taylor  <ian@cygnus.com>
 
@@ -1711,7 +1725,7 @@ Fri Dec 13 14:08:50 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 	where the different sections go.  Change some whitespace.
 
 	* emulparams/v850.sh ({TEXT,{Z,S,T}DATA}_START_ADDR): Define
-	appropriately.  Remove crud not used anymore.	
+	appropriately.  Remove crud not used anymore.
 
 Fri Dec 13 10:19:57 1996  Jeffrey A Law  (law@cygnus.com)
 
@@ -1774,7 +1788,7 @@ Tue Nov  5 10:57:50 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* emulparams/d10velf.sh (READONLY_START_ADDR): Changed to 0x2000004.
 	(EMBEDDED): Define.
-	
+
 Fri Nov  1 10:01:27 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ld.texinfo: Add section on reporting bugs.
@@ -1789,10 +1803,10 @@ Thu Oct 31 09:28:59 1996  Jeffrey A Law  (law@cygnus.com)
 
 Tue Oct 29 12:33:05 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
-	* emulparams/d10velf.sh: Changes needed for D10V-EVA board. 
-	Set TEXT_START_ADDR to 0x1000000. Set READONLY_START_ADDR to 
+	* emulparams/d10velf.sh: Changes needed for D10V-EVA board.
+	Set TEXT_START_ADDR to 0x1000000. Set READONLY_START_ADDR to
 	0x2000000.
-	
+
 	* scripttempl/elfd10v.sc:  Fix calculation of .text.  Change
 	.stack to start at 0x2007ffe.
 
@@ -2561,7 +2575,7 @@ Thu May  9 08:52:23 1996  Rob Savoye  <rob@chinadoll.cygnus.com>
 
 	* emulparams/{elf32bmip.sh,elf32lmip.sh,mipsidt.sh,mipsidtl.sh}:
 	Set a new variable to signify if the final target is an embedded
-	system. 
+	system.
 	* scripttempl/{mips.sc,elfmips.sc}: Don't add SIZEOF_HEADERS to
 	.text for an embedded system.
 
@@ -3104,7 +3118,7 @@ Wed Jan 31 17:30:19 1996  Steve Chamberlain  <sac@slash.cygnus.com>
 	* configure.tgt (i[345]86-*-cygwin32, powerpcle-*-cygwin32): New.
 	* emultempl/pe.em (definfo init): Make the default stack reserve
 	of a PPC larger.
-	
+
 Wed Jan 31 14:34:23 1996  Richard Henderson  <rth@tamu.edu>
 
 	* configure.tgt (m68*-apple-aux*): New target.
@@ -3532,7 +3546,7 @@ Fri Oct 27 18:03:17 1995  Niklas Hallqvist  <niklas@appli.se>
 	m88kbcs,mipsbig,mipsbsd,mipsidt,mipsidtl,mipslit,news,ns32knbsd,
 	pc532machaout,riscix,sa29200,sh,shl,sparclynx,sparcnbsd,
 	st2000,sun3,sun4,vanilla,vax,vsta,w65,z8001,z8002}.sh: Changed
-	PAGE_SIZE to TARGET_PAGE_SIZE. 
+	PAGE_SIZE to TARGET_PAGE_SIZE.
 
 	* emulparams/m68knbsd.h: Ditto.
 	(TEXT_START_ADDR, NONPAGED_TEXT_START_ADDR): We have 8K pagesize.
@@ -3542,7 +3556,7 @@ Fri Oct 27 18:03:17 1995  Niklas Hallqvist  <niklas@appli.se>
 	* emulparams/m68k4knbsd.sh: New file.
 
 	* scripttempl/aout.sc: Expand EXECUTABLE_SYMBOLS if relocating.
-	
+
 Fri Oct 27 17:59:09 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* emultempl/aix.em: Include ldctor.h.
@@ -3569,7 +3583,7 @@ Fri Oct 27 17:59:09 1995  Ian Lance Taylor  <ian@cygnus.com>
 	new name parameter.
 	(constructor_callback): Pass name to ldctor_add_new_set_entry for
 	new name parameter.
-	
+
 	* ldmisc.c (demangle): Fix indentation.  Remove a leading period.
 
 Thu Oct 26 22:22:49 1995  Stan Shebs  <shebs@andros.cygnus.com>
@@ -3984,7 +3998,7 @@ Mon Aug 21 18:30:42 1995  steve chamberlain  <sac@slash.cygnus.com>
 	(set_pe_value): New function.
 
 Thu Aug 17 13:35:49 1995  steve chamberlain  <sac@slash.cygnus.com>
-	
+
 
 	* emultempl/{armpe.sc, i386pe.sc}: Deleted.
 	* emultempl/pe.sc: New file performs generic PE support and sorts
@@ -4004,7 +4018,7 @@ Wed Aug 16 11:38:59 1995  steve chamberlain  <sac@slash.cygnus.com>
 	* scripttempl/armpe.sc: Always start code at 0x401000, even
 	if -r.
 	* ldwrite.c (strdup): New extern declaration.
-	* ldgram.y (atype): New rule to clarify type parsing. 
+	* ldgram.y (atype): New rule to clarify type parsing.
 	* ldlang.c (init_os): Remove commented out code.
 	(lang_size_sections): Set SEC_ALLOC and SEC_LOAD bits
 	unless told not to by the link script.
@@ -4541,7 +4555,7 @@ Thu Mar  2 14:34:43 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	Doc note from pierre@phi.la.tce.com (Pierre Willard):
 	* ld.texinfo: -X and -x work even if -s or -S are not specified.
-	* ld.1: Similar change. 
+	* ld.1: Similar change.
 
 Wed Mar  1 13:51:16 1995  Ian Lance Taylor  <ian@cygnus.com>
 
@@ -4843,7 +4857,7 @@ Mon Oct 31 19:35:17 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
 Wed Oct 26 13:59:12 1994  J.T. Conklin  (jtc@phishhead.cygnus.com)
 
-	* Makefile.in (ALL_EMULATIONS): Added ei386nbsd.o, ens32knbsd.o 
+	* Makefile.in (ALL_EMULATIONS): Added ei386nbsd.o, ens32knbsd.o
 	  and esparcnbsd.o; sorted entries.
           (ei386nbsd.c,ens32knbsd.c,esparcnbsd.c): New targets.
 
@@ -4852,7 +4866,7 @@ Wed Oct 26 13:59:12 1994  J.T. Conklin  (jtc@phishhead.cygnus.com)
 
 	* config/{i386-nbsd.mt,ns32k-nbsd.mt,sparc-nbsd.mt}: New files.
 	* emulparams/{i386nbsd.sh,ns32knbsd.sh,sparcnbsd.sh}: New files.
-	* configure.in (i[345]86-*-netbsd*, ns32k-pc532-netbsd*, 
+	* configure.in (i[345]86-*-netbsd*, ns32k-pc532-netbsd*,
 	  sparc*-*-netbsd*): Use above configs.
 
 Tue Oct 25 11:47:10 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
@@ -4881,7 +4895,7 @@ Fri Oct 14 14:35:38 1994  J.T. Conklin  (jtc@rtl.cygnus.com)
 
 	* config/{i386,ppc}-nw.mt, emulparams/{i386,ppc}nw.sh,
 	  scripttempl/nw.sc: New files, for i386 and powerpc netware.
-	  
+
 	* configure.in: Changed netware ld_target name to be {i386,ppc}-nw
 	  instead of {i386,ppc}-elf.
 
@@ -5263,7 +5277,7 @@ Wed Jul 20 15:49:27 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 Sun Jul 10 00:33:24 1994  Ian Dall  (dall@hfrd.dsto.gov.au)
 
 	* emulparams/pc532machaout.sh: New file. Pc532 mach script
-	parameters. 
+	parameters.
 
 	* emulparams/netbsd532.sh: New file. Netbsd 532 script parameters.
 
@@ -5526,7 +5540,7 @@ Thu Jun  9 08:35:17 1994  Ian Lance Taylor  (ian@cygnus.com)
 Thu Jun  9 06:52:29 1994  Bill Cox  (bill@rtl.cygnus.com)
 
 	* Makefile.in (check): Delete ld.new dependency so that a regression
-	  test doesn't trigger a rebuild of the linker.	
+	  test doesn't trigger a rebuild of the linker.
 
 Thu Jun  9 00:17:20 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
@@ -6132,7 +6146,7 @@ Thu Feb 17 15:51:23 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 Thu Feb 17 09:32:14 1994  David J. Mackenzie  (djm@thepub.cygnus.com)
 
 	* ldlang.c, ldmain.c, ldmisc.c: Use bfd_get_error and
-	bfd_set_error and new error names. 
+	bfd_set_error and new error names.
 
 Tue Feb 15 20:14:53 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
@@ -6188,7 +6202,7 @@ Sun Feb  6 20:31:56 1994  David J. Mackenzie  (djm@thepub.cygnus.com)
 	Call xmalloc_set_program_name.
 
 	* ldlang.c (lang_size_sections): Check if bfd_relax_section set
-	bfd_errno. 
+	bfd_errno.
 
 Sat Feb  5 03:54:34 1994  David J. Mackenzie  (djm@thepub.cygnus.com)
 
@@ -6251,9 +6265,9 @@ Thu Jan 27 17:19:54 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
 
 Thu Jan 27 12:35:01 1994  David J. Mackenzie  (djm@thepub.cygnus.com)
 
-	* ldmain.c ldmain.h ldgram.y: If -v -V or --version was given, 
+	* ldmain.c ldmain.h ldgram.y: If -v -V or --version was given,
 	exit successfully instead of complaining if no input files are
-	given. 
+	given.
 
 Tue Jan 25 13:19:41 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
@@ -6528,7 +6542,7 @@ Wed Dec  1 14:04:20 1993  Ken Raeburn  (raeburn@cygnus.com)
 	* Makefile.in (ALL_EMULATIONS): Add em_coff_sparc.o.
 	(em_coff_sparc.c): Add dependencies and build rules.
 
-	* ldmisc.c (errno, sys_nerr, sys_errlist): Don't declare. 
+	* ldmisc.c (errno, sys_nerr, sys_errlist): Don't declare.
 
 Wed Dec  1 12:19:55 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
@@ -6582,7 +6596,7 @@ Fri Nov  5 09:02:52 1993  D. V. Henkel-Wallace  (gumby@blues.cygnus.com)
 
 Fri Nov  5 21:47:55 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
 
-	* emulparams/i386mach.sh (TEXT_START_ADDR, NONPAGED_TEXT_START_ADDR): 
+	* emulparams/i386mach.sh (TEXT_START_ADDR, NONPAGED_TEXT_START_ADDR):
 	Correct values (?).
 
 Wed Nov  3 15:10:15 1993  Ken Raeburn  (raeburn@rover.cygnus.com)
@@ -6791,7 +6805,7 @@ Sun Sep 12 16:04:40 1993  Doug Evans  (dje@cygnus.com)
 
 Fri Sep 10 09:36:29 1993  Jeffrey Wheat  (cassidy@cygnus.com)
 
-	* Makefile.in: Changed CXX back to g++. 
+	* Makefile.in: Changed CXX back to g++.
 
 Fri Sep 10 09:34:29 1993  Jeffrey Wheat  (cassidy@cygnus.com)
 
@@ -7034,7 +7048,7 @@ Thu Jul 15 12:44:35 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
 	* ldmain.c (set_scripts_dir): Don't look in "." first.
 
 	* ldgram.y, ldlang.c, ldsym.c: Remove traces of unused var
-	option_longmap. 
+	option_longmap.
 
 Thu Jul 15 10:55:59 1993  Ian Lance Taylor  (ian@cygnus.com)
 
@@ -7119,7 +7133,7 @@ Mon Jul  5 14:29:48 1993  Ian Lance Taylor  (ian@cygnus.com)
 Fri Jul  2 18:06:05 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
 
 	* genscripts.sh: Put the scripts in the ldscripts directory, not
-	emulations. 
+	emulations.
 	* configure.in (ldscripts): Make, instead of emulations.
 	* Makefile.in (scriptdir): Take off the "ld" part.
 	(install, clean, distclean): Use ldscripts, not emulations.
@@ -7175,7 +7189,7 @@ Mon Jun 21 16:38:35 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
 	* ldlang.h: Change prototype.
 
 Thu Jun 17 16:53:56 1993  david d `zoo' zuhn (zoo@cygnus.com)
-	
+
 	* Makefile.in: canonicalize install.sh; for use within
 	this directory (and subdirs)
 
@@ -7263,7 +7277,7 @@ Mon Jun  7 12:53:28 1993  Per Bothner  (bothner@rtl.cygnus.com)
 
 Fri Jun  4 16:18:24 1993  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
 
-	* Makefile.in: remove install:all and install-info:info 
+	* Makefile.in: remove install:all and install-info:info
 	dependencies (these cause some spurious rebuilds at 'make install'
         time)
 
@@ -7554,7 +7568,7 @@ Fri Jan  8 14:39:07 1993  Steve Chamberlain  (sac@thepub.cygnus.com)
 	 Fix support for NOLOAD, add INCLUDE
 	* ldfile.c (ldfile_open_command_file): pass file name to
 	lex_push_file.
-	* ldlex.l, ldgram.y: tidy up, parse INCLUDE and NOLOAD 
+	* ldlex.l, ldgram.y: tidy up, parse INCLUDE and NOLOAD
 	* ldlang.c (wild_doit): make output sections inherit NEVER_LOAD
 	attribute.
 
@@ -7659,7 +7673,7 @@ Thu Oct 15 15:20:26 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 Thu Oct  8 09:05:25 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
-	* ldmisc.c (demangle,vfinfo): use the new underscore in bfd to 
+	* ldmisc.c (demangle,vfinfo): use the new underscore in bfd to
 	to demangle symbols better
 
 Tue Oct  6 13:08:54 1992  Ian Lance Taylor  (ian@cygnus.com)
@@ -7674,7 +7688,7 @@ Mon Oct  5 14:07:37 1992  Ian Lance Taylor  (ian@cygnus.com)
 
 Mon Oct  5 08:55:14 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
-	* ldmain.c (linear_library): don't even think about processing 
+	* ldmain.c (linear_library): don't even think about processing
 	an object file if it's already been done
 
 Thu Oct  1 23:14:59 1992  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
@@ -7791,8 +7805,8 @@ Wed Aug 26 17:28:51 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 	* ldwrite.c (ldwrite): use malloc to allocate the largest space
 	used, and pass that down.
 	* relax.c,relax.h (write_relaxnorel): use the passed malloc area rather
-	than alloca. 
-	
+	than alloca.
+
 Mon Aug 24 14:42:06 1992  Ian Lance Taylor  (ian@cygnus.com)
 
 	* configure.in, config/ose68.mt: renamed OSE to ose.
@@ -7812,7 +7826,7 @@ Thu Aug 13 11:49:34 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* ldlex.l: now parses comment correctly, added ~ to acceptable
 	chars in filenames
-	
+
 	* ldexp.c (exp_unop): pass down abs_output_section - now can have
 	unary -ve constants.
 
@@ -7864,7 +7878,7 @@ Fri Jul 17 22:06:11 1992  K. Richard Pixley  (rich@rtl.cygnus.com)
 Tue Jul 14 08:34:34 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* ldlang.c (lang_map): print changes in sizes due to relaxing
-	(size_input_section): maintain the delta information. 
+	(size_input_section): maintain the delta information.
 	* ldlang.h: add new field to struct to contain delta info.
 	* relax.c  (relax_section): complain if input not relaxable.
 	* ldlex.l : add '_', ',' and '$' to chars which can appear at the
@@ -7879,7 +7893,7 @@ Wed Jul  1 17:51:19 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* ldmain.c (Q_enter_global_ref), ldindr.c (add_indirect): fix for
 	aliasing problems
-	
+
 
 Thu Jun 18 09:38:56 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
@@ -7965,7 +7979,7 @@ Tue May  5 17:47:33 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 	* ldmain.c (main): take out ./ from library path, and close file
 	before unlinking. Make multiple defs of a symbol create an
 	unexecable file.
-	* ldmisc.c: fatal errosrs delete output file 
+	* ldmisc.c: fatal errosrs delete output file
 
 Tue May  5 14:05:05 1992  Per Bothner  (bothner@rtl.cygnus.com)
 
@@ -8041,7 +8055,7 @@ Thu Apr  9 05:52:02 1992  Ken Raeburn  (Raeburn@Cygnus.COM)
 
 Sat Apr  4 17:44:06 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
-	* ldlex.l, ldgram.y, ldlex.h: Rewrote lexer. Now it's much nicer. 
+	* ldlex.l, ldgram.y, ldlex.h: Rewrote lexer. Now it's much nicer.
 	* h8300*: fix bit rot and add support for h8300xray target
 	* go32.sh: target emulation for go32.
 
@@ -8093,7 +8107,7 @@ Fri Feb 28 08:17:45 1992  Steve Chamberlain  (sac at thepub.cygnus.com)
 
 
 Thu Feb 27 09:20:41 1992  Steve Chamberlain  (sac at thepub.cygnus.com)
-    
+
 	* cplus-dem.c: yet another copy of this - maybe it should go into
 	libiberty ?
 	* ldgram.y: now -V and -v have different actions
@@ -8180,7 +8194,7 @@ Thu Feb  6 11:40:15 1992  Steve Chamberlain  (sac at rtl.cygnus.com)
 	* config/mt-coff-h8300: use EMUL like everything else
 	* ldlang.c: (print_padding_statement): print the right address.
 	* Makefile.in, config.h, ldemul.c: renamed  h8300hds to h8300hms
-	
+
 
 Tue Feb  4 15:28:01 1992  Steve Chamberlain  (sac at rtl.cygnus.com)
 
@@ -8260,7 +8274,7 @@ Sat Dec  7 17:19:26 1991  Steve Chamberlain  (sac at rtl.cygnus.com)
 	* ldfile.c: include ctype.h
 	* ldmain.c: include the requried prototype headers
 	* ldwrite.c: get_reloc_upper_bound has been renamed
-	bfd_get_reloc_upper_bound 
+	bfd_get_reloc_upper_bound
 
 Fri Dec  6 23:29:26 1991  K. Richard Pixley  (rich at rtl.cygnus.com)
 
@@ -8306,7 +8320,7 @@ Thu Nov 14 19:55:09 1991  Per Bothner  (bothner at cygnus.com)
 Wed Nov 13 15:17:43 1991  Per Bothner  (bothner at cygnus.com)
 
 	* Makefile.in:  Rename .c files generated from ldtemplate
-	to have names starting with ld__.  This helps 'make clean'.	
+	to have names starting with ld__.  This helps 'make clean'.
 
 Tue Nov 12 18:36:50 1991  Steve Chamberlain  (sac at cygnus.com)
 
@@ -8353,7 +8367,7 @@ Wed Oct 16 12:27:08 1991  Per Bothner  (bothner at cygnus.com)
 	ldgram.y, ldlex.l, ldlnk960.c, ldmain.c, ldmisc.c, ldmisc.h,
 	ldsym.c, ldsym.h, ldtemplate, ldvanilla.c, ldver.c, ldver.h,
 	ldwarn.c, ldwarn.h, ldwrite.c, ldwrite.h, mkscript.c:
-	Add or update copyright notices.	
+	Add or update copyright notices.
 
 Mon Oct 14 23:55:27 1991  Per Bothner  (bothner at cygnus.com)
 
@@ -8440,7 +8454,7 @@ Tue Oct  8 14:51:21 1991  Roland H. Pesch  (pesch at cygnus.com)
 Fri Oct  4 21:51:58 1991  John Gilmore  (gnu at cygnus.com)
 
 	* Makefile.in:  Avoid using $< in non-suffix rules (breaks on Sun
-	Make). 
+	Make).
 	* ldfile.c, ldlang.c, ldmain.c, ldwrite.c:  Cope with renames of a
 	few BFD types & enums.
 
