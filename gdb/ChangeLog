@@ -1,3 +1,8 @@
+Fri Jun 12 18:54:40 1992  John Gilmore  (gnu at cygnus.com)
+
+	* configure.in:  Solaris config is sparc-sun-solaris2.
+	* config/sun4os5.m[ht]:  Rename to config/sun4sol2.m[ht].
+
 Fri Jun 12 12:49:43 1992  Fred Fish  (fnf@cygnus.com)
 
 	* expprint.c (print_subexp):  Add missing ']'.

@@ -65,7 +65,7 @@ sparc)
 	case "${host_os}" in
 	sunos3)		gdb_host=sun4os3 ;;
 	sunos4)		gdb_host=sun4os4 ;;
-	sunos5*|sysv4*)	gdb_host=sun4os5 ;;
+	solaris2*)	gdb_host=sun4sol2 ;;
 	*)		gdb_host=sun4 ;;
 	esac
 	;;
@@ -276,7 +276,7 @@ sparc)
 		case "${target_os}" in
 		sunos3)		gdb_target=sun4os3 ;;
 		sunos4)		gdb_target=sun4os4 ;;
-		sunos5|sysv4*)	gdb_target=sun4os5 ;;
+		solaris2*)	gdb_target=sun4sol2 ;;
 		*)		gdb_target=sun4 ;;
 		esac
 		;;
