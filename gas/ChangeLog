@@ -1,5 +1,9 @@
 2003-06-04  Richard Henderson  <rth@redhat.com>
 
+	* dw2gencfi.c (cfi_finish): Set .eh_frame read-only.
+
+2003-06-04  Richard Henderson  <rth@redhat.com>
+
 	* config/tc-alpha.c (s_alpha_usepv): New.
 	(md_pseudo_table): Add it.
 	(alpha_cfi_frame_initial_instructions): New.

@@ -785,7 +785,7 @@ cfi_finish (void)
   cfi_seg = subseg_new (".eh_frame", 0);
 #ifdef BFD_ASSEMBLER
   bfd_set_section_flags (stdoutput, cfi_seg,
-			 SEC_ALLOC | SEC_LOAD | SEC_RELOC | SEC_DATA);
+			 SEC_ALLOC | SEC_LOAD | SEC_DATA | SEC_READONLY);
 #endif
   subseg_set (cfi_seg, 0);
   record_alignment (cfi_seg, 2);
