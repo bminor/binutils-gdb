@@ -341,9 +341,9 @@ exp	: 	'[' TYPENAME
 			  start_msglist();
 			}
 		msglist ']'
-			{ write_exp_elt_opcode (OP_MSGCALL);
+			{ write_exp_elt_opcode (OP_OBJC_MSGCALL);
 			  end_msglist();
-			  write_exp_elt_opcode (OP_MSGCALL); 
+			  write_exp_elt_opcode (OP_OBJC_MSGCALL); 
 			}
 	;
 
@@ -356,18 +356,18 @@ exp	:	'[' CLASSNAME
 			  start_msglist();
 			}
 		msglist ']'
-			{ write_exp_elt_opcode (OP_MSGCALL);
+			{ write_exp_elt_opcode (OP_OBJC_MSGCALL);
 			  end_msglist();
-			  write_exp_elt_opcode (OP_MSGCALL); 
+			  write_exp_elt_opcode (OP_OBJC_MSGCALL); 
 			}
 	;
 
 exp	:	'[' exp
 			{ start_msglist(); }
 		msglist ']'
-			{ write_exp_elt_opcode (OP_MSGCALL);
+			{ write_exp_elt_opcode (OP_OBJC_MSGCALL);
 			  end_msglist();
-			  write_exp_elt_opcode (OP_MSGCALL); 
+			  write_exp_elt_opcode (OP_OBJC_MSGCALL); 
 			}
 	;
 
@@ -565,9 +565,9 @@ exp	:	VARIABLE
 
 exp	:	SELECTOR 
 			{
-			  write_exp_elt_opcode (OP_SELECTOR);
+			  write_exp_elt_opcode (OP_OBJC_SELECTOR);
 			  write_exp_string ($1);
-			  write_exp_elt_opcode (OP_SELECTOR); }
+			  write_exp_elt_opcode (OP_OBJC_SELECTOR); }
 
 exp	:	SIZEOF '(' type ')'	%prec UNARY
 			{ write_exp_elt_opcode (OP_LONG);
@@ -605,9 +605,9 @@ exp	:	STRING
 exp     :	NSSTRING	/* ObjC NextStep NSString constant
 				 * of the form '@' '"' string '"'.
 				 */
-			{ write_exp_elt_opcode (OP_NSSTRING);
+			{ write_exp_elt_opcode (OP_OBJC_NSSTRING);
 			  write_exp_string ($1);
-			  write_exp_elt_opcode (OP_NSSTRING); }
+			  write_exp_elt_opcode (OP_OBJC_NSSTRING); }
 	;
 
 block	:	BLOCKNAME
@@ -756,8 +756,8 @@ variable:	name_not_typename
 			      if (innermost_block == 0 || 
 				  contained_in (block_found, innermost_block))
 				innermost_block = block_found;
-			      write_exp_elt_opcode (OP_SELF);
-			      write_exp_elt_opcode (OP_SELF);
+			      write_exp_elt_opcode (OP_OBJC_SELF);
+			      write_exp_elt_opcode (OP_OBJC_SELF);
 			      write_exp_elt_opcode (STRUCTOP_PTR);
 			      write_exp_string ($1.stoken);
 			      write_exp_elt_opcode (STRUCTOP_PTR);

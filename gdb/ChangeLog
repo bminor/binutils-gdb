@@ -1,5 +1,12 @@
 2002-11-18  Adam Fedor  <fedor@gnu.org>
 
+	* expression.h: Rename ObjC ops to OP_OBJC_MSGCALL,
+	OP_OBJC_SELECTOR, OP_OBJC_NSSTRING, and OP_OBJC_SELF.
+	* parse.c (length_of_subexp, prefixify_subexp): Likewise.
+	* objc-exp.y: Likewise.	
+
+2002-11-18  Adam Fedor  <fedor@gnu.org>
+
 	* gdb/parser-defs.h: (struct objc_class_str): New structure
 	for parsing ObjC classes.
 
