@@ -1,10 +1,7 @@
 2001-07-04  Jim Blandy  <jimb@redhat.com>
 
 	* dwarf2read.c (dwarf2_build_psymtabs_hard): Remove extraneous
-	code in loop condition.  This seemed to be trying to round
-	info_ptr up to the next four-byte boundary, but that's not what it
-	actually did.  If we discover the problem the old code was really
-	trying to address, we can fix it properly.
+	code in loop condition.
 
 2001-07-03  Michael Snyder  <msnyder@redhat.com>
 
