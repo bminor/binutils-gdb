@@ -2869,7 +2869,7 @@ void OP_F0FE (insn, extension)
 }
 
 /* syscall */
-void OP_F020 (insn, extension)
+void OP_F0C0 (insn, extension)
      unsigned long insn, extension;
 {
   /* We use this for simulated system calls; we may need to change
