@@ -6279,6 +6279,15 @@ difficult to test, such as code that handles host OS failures or bugs
 in particular versions of compilers, and it's OK not to try to write
 tests for all of those.
 
+DejaGNU supports separate build, host, and target machines.  However,
+some @value{GDBN} test scripts do not work if the build machine and
+the host machine are not the same.  In such an environment, these scripts
+will give a result of ``UNRESOLVED'', like this:
+
+@smallexample
+UNRESOLVED: gdb.base/example.exp: This test script does not work on a remote host.
+@end smallexample
+
 @section Testsuite Organization
 
 @cindex test suite organization
