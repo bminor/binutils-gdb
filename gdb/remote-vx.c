@@ -1,5 +1,5 @@
 /* Memory-access and commands for remote VxWorks processes, for GDB.
-   Copyright 1990, 1991, 1992 Free Software Foundation, Inc.
+   Copyright (C) 1990-95, 1997-98, 1999 Free Software Foundation, Inc.
    Contributed by Wind River Systems and Cygnus Support.
 
 This file is part of GDB.
