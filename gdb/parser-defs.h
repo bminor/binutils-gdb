@@ -133,6 +133,8 @@ pop_type PARAMS ((void));
 extern int
 pop_type_int PARAMS ((void));
 
+extern struct type *follow_types PARAMS ((struct type *));
+
 /* During parsing of a C expression, the pointer to the next character
    is in this variable.  */
 

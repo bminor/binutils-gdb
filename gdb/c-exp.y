@@ -722,48 +722,23 @@ variable:	name_not_typename
 	;
 
 
+/* shift/reduce conflict: "typebase ." and the token is '('.  (Shows up
+   twice, once where qualified_name is a possibility and once where
+   it is not).  */
+/* shift/reduce conflict: "typebase CONST_KEYWORD ." and the token is '('.  */
+/* shift/reduce conflict: "typebase VOLATILE_KEYWORD ." and the token is
+   '('.  */
 ptype	:	typebase
+	/* "const" and "volatile" are curently ignored.  A type qualifier
+	   before the type is currently handled in the typebase rule.  */
+	|	typebase CONST_KEYWORD
+	|	typebase VOLATILE_KEYWORD
 	|	typebase abs_decl
-		{
-		  /* This is where the interesting stuff happens.  */
-		  int done = 0;
-		  int array_size;
-		  struct type *follow_type = $1;
-		  struct type *range_type;
-		  
-		  while (!done)
-		    switch (pop_type ())
-		      {
-		      case tp_end:
-			done = 1;
-			break;
-		      case tp_pointer:
-			follow_type = lookup_pointer_type (follow_type);
-			break;
-		      case tp_reference:
-			follow_type = lookup_reference_type (follow_type);
-			break;
-		      case tp_array:
-			array_size = pop_type_int ();
-			if (array_size != -1)
-			  {
-			    range_type =
-			      create_range_type ((struct type *) NULL,
-						 builtin_type_int, 0,
-						 array_size - 1);
-			    follow_type =
-			      create_array_type ((struct type *) NULL,
-						 follow_type, range_type);
-			  }
-			else
-			  follow_type = lookup_pointer_type (follow_type);
-			break;
-		      case tp_function:
-			follow_type = lookup_function_type (follow_type);
-			break;
-		      }
-		  $$ = follow_type;
-		}
+		{ $$ = follow_types ($1); }
+	|	typebase CONST_KEYWORD abs_decl
+		{ $$ = follow_types ($1); }
+	|	typebase VOLATILE_KEYWORD abs_decl
+		{ $$ = follow_types ($1); }
 	;
 
 abs_decl:	'*'
@@ -790,6 +765,10 @@ direct_abs_decl: '(' abs_decl ')'
 			  push_type (tp_array);
 			  $$ = 0;
 			}
+
+     /* shift/reduce conflict.  "direct_abs_decl . func_mod", and the token
+	is '('.  */
+
 	| 	direct_abs_decl func_mod
 			{ push_type (tp_function); }
 	|	func_mod
@@ -808,6 +787,8 @@ func_mod:	'(' ')'
 			{ free ((PTR)$2); $$ = 0; }
 	;
 
+/* shift/reduce conflict: "type '(' typebase COLONCOLON '*' ')' ." and the
+   token is '('.  */
 type	:	ptype
 	|	typebase COLONCOLON '*'
 			{ $$ = lookup_member_type (builtin_type_int, $1); }
@@ -871,7 +852,9 @@ typebase  /* Implements (approximately): (type-qualifier)* type-specifier */
 			{ $$ = lookup_template_type(copy_name($2), $4,
 						    expression_context_block);
 			}
-	/* "const" and "volatile" are curently ignored. */
+	/* "const" and "volatile" are curently ignored.  A type qualifier
+	   after the type is handled in the ptype rule.  I think these could
+	   be too.  */
 	|	CONST_KEYWORD typebase { $$ = $2; }
 	|	VOLATILE_KEYWORD typebase { $$ = $2; }
 	;

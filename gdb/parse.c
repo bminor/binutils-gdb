@@ -726,6 +726,9 @@ parse_expression (string)
     error ("Junk after end of expression.");
   return exp;
 }
+
+/* Stuff for maintaining a stack of types.  Currently just used by C, but
+   probably useful for any language which declares its types "backwards".  */
 
 void 
 push_type (tp)
@@ -770,6 +773,50 @@ pop_type_int ()
   return 0;
 }
 
+/* Pop the type stack and return the type which corresponds to FOLLOW_TYPE
+   as modified by all the stuff on the stack.  */
+struct type *
+follow_types (follow_type)
+     struct type *follow_type;
+{
+  int done = 0;
+  int array_size;
+  struct type *range_type;
+
+  while (!done)
+    switch (pop_type ())
+      {
+      case tp_end:
+	done = 1;
+	break;
+      case tp_pointer:
+	follow_type = lookup_pointer_type (follow_type);
+	break;
+      case tp_reference:
+	follow_type = lookup_reference_type (follow_type);
+	break;
+      case tp_array:
+	array_size = pop_type_int ();
+	if (array_size != -1)
+	  {
+	    range_type =
+	      create_range_type ((struct type *) NULL,
+				 builtin_type_int, 0,
+				 array_size - 1);
+	    follow_type =
+	      create_array_type ((struct type *) NULL,
+				 follow_type, range_type);
+	  }
+	else
+	  follow_type = lookup_pointer_type (follow_type);
+	break;
+      case tp_function:
+	follow_type = lookup_function_type (follow_type);
+	break;
+      }
+  return follow_type;
+}
+
 void
 _initialize_parse ()
 {
