@@ -180,6 +180,9 @@ if { [istarget mips*-*-*] } then {
 	run_dump_test "elf_e_flags3"
 	run_dump_test "elf_e_flags4"
 
+	# Verify that ASE markings are handled properly.
+	if { !$no_mips16 } { run_dump_test "elf_ase_mips16" }
+
  	run_dump_test "mips-gp32-fp32-pic"
  	run_dump_test "mips-gp32-fp64-pic"
  	run_dump_test "mips-gp64-fp32-pic"
