@@ -63,9 +63,12 @@ FIXME: See other FIXME's and "ifdef 0" scattered throughout the code for
 other things to work on, if you get bored. :-)
 
 */
-
 #include <stdio.h>
+#ifdef __STDC__
+#include <stdarg.h>
+#else
 #include <varargs.h>
+#endif
 #include <fcntl.h>
 
 #include "defs.h"
@@ -300,7 +303,8 @@ static int numutypes;		/* Max number of user type pointers */
    more intuitive, since it can be used for both static and external
    definitions. */
 
-static void dwarfwarn ();	/* EXFUN breaks with <varargs.h> (FIXME)*/
+static void
+EXFUN (dwarfwarn, (char *fmt DOTS));
 
 static void
 EXFUN (scan_partial_symbols, (char *thisdie AND char *enddie));
@@ -590,6 +594,26 @@ NOTES
 	information for the DIE where the problem was noticed.
 */
 
+#ifdef __STDC__
+static void
+DEFUN(dwarfwarn, (fmt), char *fmt DOTS)
+{
+  va_list ap;
+  
+  va_start (ap, fmt);
+  warning_setup ();
+  fprintf (stderr, "DWARF warning (ref 0x%x): ", curdie -> dieref);
+  if (curdie -> at_name)
+    {
+      fprintf (stderr, "'%s': ", curdie -> at_name);
+    }
+  vfprintf (stderr, fmt, ap);
+  fprintf (stderr, "\n");
+  fflush (stderr);
+  va_end (ap);
+}
+#else
+
 static void
 dwarfwarn (va_alist)
      va_dcl
@@ -610,7 +634,7 @@ dwarfwarn (va_alist)
   fflush (stderr);
   va_end (ap);
 }
-
+#endif
 /*
 
 LOCAL FUNCTION

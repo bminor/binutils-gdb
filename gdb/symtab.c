@@ -165,25 +165,25 @@ type_name_no_tag (type)
      register struct type *type;
 {
   register char *name = TYPE_NAME (type);
-  char *strchr ();
+
   if (name == 0)
     return 0;
 
-#if 0
   switch (TYPE_CODE (type))
     {
     case TYPE_CODE_STRUCT:
-      return name + 7;
+      if(!strncmp(name,"struct ",7))
+	return name + 7;
+      else return name;
     case TYPE_CODE_UNION:
+      if(!strncmp(name,"union ",6))
       return name + 6;
+      else return name;
     case TYPE_CODE_ENUM:
+      if(!strncmp(name,"enum ",5))
       return name + 5;
+      else return name;
     }
-#endif
-
-  name = strchr (name, ' ');
-  if (name)
-    return name + 1;
 
   return TYPE_NAME (type);
 }
@@ -375,6 +375,31 @@ lookup_enum (name, block)
     error ("No enum type named %s.", name);
   if (TYPE_CODE (SYMBOL_TYPE (sym)) != TYPE_CODE_ENUM)
     error ("This context has class, struct or union %s, not an enum.", name);
+  return SYMBOL_TYPE (sym);
+}
+
+/* Lookup a template type named "template NAME<TYPE>",
+   visible in lexical block BLOCK.  */
+
+struct type *
+lookup_template_type (name, type, block)
+     char *name;
+     struct type *type;
+     struct block *block;
+{
+  struct symbol *sym ;
+  char *nam = (char*) alloca(strlen(name) + strlen(type->name) + 4);
+  strcpy(nam, name);
+  strcat(nam, "<");
+  strcat(nam, type->name);
+  strcat(nam, " >");		/* extra space still introduced in gcc? */
+
+  sym = lookup_symbol (nam, block, VAR_NAMESPACE, 0, (struct symtab **)NULL);
+
+  if (sym == 0)
+    error ("No template type named %s.", name);
+  if (TYPE_CODE (SYMBOL_TYPE (sym)) != TYPE_CODE_STRUCT)
+    error ("This context has class, union or enum %s, not a struct.", name);
   return SYMBOL_TYPE (sym);
 }
 
@@ -2072,21 +2097,9 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line)
       /* Extract the file name.  */
       p1 = p;
       while (p != *argptr && p[-1] == ' ') --p;
-      copy = (char *) alloca (p - *argptr + 1 + (q1 - q));
-      if (q1 - q)
-	{
-	  copy[0] = 'o';
-	  copy[1] = 'p';
-	  copy[2] = CPLUS_MARKER;
-	  bcopy (q, copy + 3, q1-q);
-	  copy[3 + (q1-q)] = 0;
-	  p = q1;
-	}
-      else
-	{
-	  bcopy (*argptr, copy, p - *argptr);
-	  copy[p - *argptr] = 0;
-	}
+      copy = (char *) alloca (p - *argptr + 1);
+      bcopy (*argptr, copy, p - *argptr);
+      copy[p - *argptr] = 0;
 
       /* Find that file's data.  */
       s = lookup_symtab (copy);
