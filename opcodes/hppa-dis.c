@@ -614,10 +614,22 @@ print_insn_hppa (memaddr, info)
 		     of address.  */
 		  fput_const (extract_17 (insn), info);
 		  break;
+		case '.':
+		  (*info->fprintf_func) (info->stream, "%d",
+				    GET_FIELD (insn, 24, 25));
+		  break;
 		case 'p':
 		  (*info->fprintf_func) (info->stream, "%d",
 				    31 - GET_FIELD (insn, 22, 26));
 		  break;
+		case '~':
+		  {
+		    int num;
+		    num = GET_FIELD (insn, 20, 20) << 5;
+		    num |= GET_FIELD (insn, 22, 26);
+		    (*info->fprintf_func) (info->stream, "%d", 63 - num);
+		    break;
+		  }
 		case 'P':
 		  (*info->fprintf_func) (info->stream, "%d",
 				    GET_FIELD (insn, 22, 26));
@@ -625,6 +637,9 @@ print_insn_hppa (memaddr, info)
 		case 'T':
 		  (*info->fprintf_func) (info->stream, "%d",
 				    32 - GET_FIELD (insn, 27, 31));
+		  break;
+		case '$':
+		  fput_const (GET_FIELD (insn, 20, 28), info);
 		  break;
 		case 'A':
 		  fput_const (GET_FIELD (insn, 6, 18), info);
