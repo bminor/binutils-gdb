@@ -163,7 +163,7 @@ support the FR bit in its status  register, and this bit is known (by
 the programmer) to be set.  This bit prevents the aliasing of the double
 width register by the single width registers.
 
-By default @code {--construct-floats} is selected, allowing construction
+By default @code{--construct-floats} is selected, allowing construction
 of these floating point constants.
 
 @item --trap
