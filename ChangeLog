@@ -1,3 +1,10 @@
+start-sanitize-gdbtk
+Tue Apr 28 16:24:24 1998  Jason Molenda  (crash@bugshack.cygnus.com)
+
+	* Makefile.in (install-gdbtk): Call this 'install-gdb' so that
+	the right GUI libraries and files are installed along with GDB.
+
+end-sanitize-gdbtk
 Tue Apr 28 18:11:24 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.in: Change alpha to alpha* in several places.

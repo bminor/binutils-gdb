@@ -1616,7 +1616,7 @@ all-target-libiberty: configure-target-libiberty all-gcc all-ld all-target-newli
 all-target: $(ALL_TARGET_MODULES)
 install-target: $(INSTALL_TARGET_MODULES)
 # start-sanitize-gdbtk
-install-gdbtk: install-tcl install-tk install-itcl install-tix install-libgui install-gdb
+install-gdb: install-tcl install-tk install-itcl install-tix install-libgui
 #end-sanitize-gdbtk
 ### other supporting targets
 
