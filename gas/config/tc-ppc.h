@@ -102,6 +102,10 @@ extern int target_big_endian;
 /* Question marks are permitted in symbol names.  */
 #define LEX_QM 1
 
+/* Don't adjust TOC relocs.  */
+#define tc_fix_adjustable(fixp) ppc_pe_fix_adjustable (fixp)
+extern int ppc_pe_fix_adjustable PARAMS ((struct fix *));
+
 #endif
 
 #ifdef OBJ_XCOFF
@@ -187,15 +191,20 @@ extern void ppc_frob_file PARAMS ((void));
 #endif
 
 /* Branch prediction relocations must force relocation */
-#define TC_FORCE_RELOCATION(FIXP)					\
+#define TC_FORCE_RELOCATION_SECTION(FIXP,SEC)				\
 ((FIXP)->fx_r_type == BFD_RELOC_PPC_B16_BRTAKEN				\
  || (FIXP)->fx_r_type == BFD_RELOC_PPC_B16_BRNTAKEN			\
  || (FIXP)->fx_r_type == BFD_RELOC_PPC_BA16_BRTAKEN			\
- || (FIXP)->fx_r_type == BFD_RELOC_PPC_BA16_BRNTAKEN)
+ || (FIXP)->fx_r_type == BFD_RELOC_PPC_BA16_BRNTAKEN			\
+ || ((FIXP)->fx_addsy && !(FIXP)->fx_subsy && (FIXP)->fx_addsy->bsym	\
+     && (FIXP)->fx_addsy->bsym->section != SEC))
 
 #endif /* OBJ_ELF */
 
 /* call md_apply_fix3 with segment instead of md_apply_fix */
 #define MD_APPLY_FIX3
+
+/* call md_pcrel_from_section, not md_pcrel_from */
+#define MD_PCREL_FROM_SECTION(FIXP, SEC) md_pcrel_from_section(FIXP, SEC)
 
 #define md_operand(x)

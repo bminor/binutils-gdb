@@ -43,6 +43,14 @@
 #define TC_FORCE_RELOCATION(FIXP) 0
 #endif
 
+#ifndef TC_FORCE_RELOCATION_SECTION
+#define TC_FORCE_RELOCATION_SECTION(FIXP,SEG) TC_FORCE_RELOCATION(FIXP)
+#endif
+
+#ifndef	MD_PCREL_FROM_SECTION
+#define MD_PCREL_FROM_SECTION(FIXP, SEC) md_pcrel_from(FIXP)
+#endif
+
 #ifndef WORKING_DOT_WORD
 extern CONST int md_short_jump_size;
 extern CONST int md_long_jump_size;
@@ -235,7 +243,7 @@ fix_new_exp (frag, where, size, exp, pcrel, r_type)
   symbolS *add = NULL;
   symbolS *sub = NULL;
   offsetT off = 0;
-  
+
   switch (exp->X_op)
     {
     case O_absent:
@@ -253,6 +261,19 @@ fix_new_exp (frag, where, size, exp, pcrel, r_type)
 	exp->X_add_number = 0;
 	return fix_new_exp (frag, where, size, exp, pcrel, r_type);
       }
+
+    case O_symbol_rva:
+      add = exp->X_add_symbol;
+      off = exp->X_add_number;
+
+#if defined(BFD_ASSEMBLER)
+      r_type = BFD_RELOC_RVA;
+#elif defined(TC_RVA_RELOC)
+      r_type = TC_RVA_RELOC;
+#else
+      as_fatal("rva not supported");
+#endif
+      break;
 
     case O_uminus:
       sub = exp->X_add_symbol;
@@ -355,6 +376,7 @@ chain_frchains_together_1 (section, frchp)
     {
       prev_frag->fr_next = frchp->frch_root;
       prev_frag = frchp->frch_last;
+      assert (prev_frag->fr_type != 0);
 #ifdef BFD_ASSEMBLER
       if (frchp->fix_root != (fixS *) NULL)
 	{
@@ -366,6 +388,7 @@ chain_frchains_together_1 (section, frchp)
 	}
 #endif
     }
+  assert (prev_frag->fr_type != 0);
   prev_frag->fr_next = 0;
   return prev_frag;
 }
@@ -2183,11 +2206,21 @@ fixup_segment (fixP, this_segment_type)
       if (sub_symbolP)
 	{
 	  resolve_symbol_value (sub_symbolP);
-	  if (!add_symbolP)
+	  if (add_symbolP == NULL || add_symbol_segment == absolute_section)
 	    {
-	      /* Its just -sym */
+	      if (add_symbolP != NULL)
+		{
+		  add_number += S_GET_VALUE (add_symbolP);
+		  add_symbolP = NULL;
+		  fixP->fx_addsy = NULL;
+		}
+
+	      /* It's just -sym */
 	      if (S_GET_SEGMENT (sub_symbolP) == absolute_section)
-		add_number -= S_GET_VALUE (sub_symbolP);
+		{
+		  add_number -= S_GET_VALUE (sub_symbolP);
+		  fixP->fx_subsy = NULL;
+		}
 	      else if (pcrel
 		       && S_GET_SEGMENT (sub_symbolP) == this_segment_type)
 		{
@@ -2200,9 +2233,8 @@ fixup_segment (fixP, this_segment_type)
 			      "Negative of non-absolute symbol %s",
 			      S_GET_NAME (sub_symbolP));
 	    }
-	  else if ((S_GET_SEGMENT (sub_symbolP) == add_symbol_segment)
-		   && (SEG_NORMAL (add_symbol_segment)
-		       || (add_symbol_segment == absolute_section)))
+	  else if (S_GET_SEGMENT (sub_symbolP) == add_symbol_segment
+		   && SEG_NORMAL (add_symbol_segment))
 	    {
 	      /* Difference of 2 symbols from same segment.
 		 Can't make difference of 2 undefineds: 'value' means
@@ -2223,10 +2255,11 @@ fixup_segment (fixP, this_segment_type)
 	      /* Let the target machine make the final determination
 		 as to whether or not a relocation will be needed to
 		 handle this fixup.  */
-	      if (!TC_FORCE_RELOCATION (fixP))
+	      if (!TC_FORCE_RELOCATION_SECTION (fixP, this_segment_type))
 		{
 		  fixP->fx_pcrel = 0;
 		  fixP->fx_addsy = NULL;
+		  fixP->fx_subsy = NULL;
 		}
 	    }
 	  else
@@ -2248,7 +2281,7 @@ fixup_segment (fixP, this_segment_type)
 		       )
 		{
 		  /* Make it pc-relative.  */
-		  add_number += (md_pcrel_from (fixP)
+		  add_number += (MD_PCREL_FROM_SECTION (fixP, this_segment_type)
 				 - S_GET_VALUE (sub_symbolP));
 		  pcrel = 1;
 		  fixP->fx_pcrel = 1;
@@ -2304,7 +2337,7 @@ fixup_segment (fixP, this_segment_type)
 #endif /* TC_I960 */
 
 	      add_number += S_GET_VALUE (add_symbolP);
-	      add_number -= md_pcrel_from (fixP);
+	      add_number -= MD_PCREL_FROM_SECTION (fixP, this_segment_type);
 	      pcrel = 0;	/* Lie. Don't want further pcrel processing. */
 	      
 	      /* Let the target machine make the final determination
@@ -2378,7 +2411,7 @@ fixup_segment (fixP, this_segment_type)
 
       if (pcrel)
 	{
-	  add_number -= md_pcrel_from (fixP);
+	  add_number -= MD_PCREL_FROM_SECTION (fixP, this_segment_type);
 	  if (add_symbolP == 0)
 	    {
 #ifndef BFD_ASSEMBLER

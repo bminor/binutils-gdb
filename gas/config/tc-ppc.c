@@ -561,10 +561,8 @@ md_parse_option (c, arg)
       /* -mpwr means to assemble for the IBM POWER (RIOS1).  */
       else if (strcmp (arg, "pwr") == 0)
 	ppc_cpu = PPC_OPCODE_POWER;
-      /* -m601 means to assemble for the Motorola PowerPC 601.  FIXME: We
-	 ignore the option for now, but we should really use it to permit
-	 instructions defined on the 601 that are not part of the standard
-	 PowerPC architecture (mostly holdovers from the POWER).  */
+      /* -m601 means to assemble for the Motorola PowerPC 601, which includes
+         instructions that are holdovers from the Power. */
       else if (strcmp (arg, "601") == 0)
 	ppc_cpu = PPC_OPCODE_PPC | PPC_OPCODE_601;
       /* -mppc, -mppc32, -m603, and -m604 mean to assemble for the
@@ -586,10 +584,10 @@ md_parse_option (c, arg)
 	 and PowerPC.  At present, we just allow the union, rather
 	 than the intersection.  */
       else if (strcmp (arg, "com") == 0)
-	ppc_cpu = PPC_OPCODE_POWER | PPC_OPCODE_PPC;
+	ppc_cpu = PPC_OPCODE_COMMON;
       /* -many means to assemble for any architecture (PWR/PWRX/PPC).  */
       else if (strcmp (arg, "any") == 0)
-	ppc_cpu = PPC_OPCODE_POWER | PPC_OPCODE_POWER2 | PPC_OPCODE_PPC;
+	ppc_cpu = PPC_OPCODE_ANY;
 
 #ifdef OBJ_ELF
       /* -mrelocatable/-mrelocatable-lib -- warn about initializations that require relocation */
@@ -700,17 +698,24 @@ ppc_set_cpu ()
 enum bfd_architecture
 ppc_arch ()
 {
+  const char *default_cpu = TARGET_CPU;
   ppc_set_cpu ();
 
   if ((ppc_cpu & PPC_OPCODE_PPC) != 0)
     return bfd_arch_powerpc;
   else if ((ppc_cpu & PPC_OPCODE_POWER) != 0)
     return bfd_arch_rs6000;
-  else
+  else if ((ppc_cpu & (PPC_OPCODE_COMMON | PPC_OPCODE_ANY)) != 0)
     {
-      as_fatal ("Neither Power nor PowerPC opcodes were selected.");
-      return bfd_arch_unknown;
+      if (strcmp (default_cpu, "rs6000") == 0)
+	return bfd_arch_rs6000;
+      else if (strcmp (default_cpu, "powerpc") == 0
+	       || strcmp (default_cpu, "powerpcle") == 0)
+	return bfd_arch_powerpc;
     }
+
+  as_fatal ("Neither Power nor PowerPC opcodes were selected.");
+  return bfd_arch_unknown;
 }
 
 /* This function is called when the assembler starts up.  It is called
@@ -724,6 +729,7 @@ md_begin ()
   const struct powerpc_opcode *op_end;
   const struct powerpc_macro *macro;
   const struct powerpc_macro *macro_end;
+  boolean dup_insn = false;
 
   ppc_set_cpu ();
 
@@ -750,28 +756,13 @@ md_begin ()
 	  retval = hash_insert (ppc_hash, op->name, (PTR) op);
 	  if (retval != (const char *) NULL)
 	    {
-	      /* We permit a duplication of the mfdec instruction on
-		 the 601, because it seems to have one value on the
-		 601 and a different value on other PowerPC
-		 processors.  It's easier to permit a duplication than
-		 to define a new instruction type flag.  When using
-		 -many/-mcom, the comparison instructions are a harmless
-		 special case.  */
-	      if (strcmp (retval, "exists") != 0
-		  || ((((ppc_cpu & PPC_OPCODE_601) == 0
-			&& ((ppc_cpu & ~PPC_OPCODE_POWER2)
-			    == (PPC_OPCODE_POWER | PPC_OPCODE_PPC)))
-		       || strcmp (op->name, "mfdec") != 0)
-		      && (((ppc_cpu & ~PPC_OPCODE_POWER2)
-			  != (PPC_OPCODE_POWER | PPC_OPCODE_PPC))
-			  || (strcmp (op->name, "cmpli") != 0
-			      && strcmp (op->name, "cmpi") != 0
-			      && strcmp (op->name, "cmp") != 0
-			      && strcmp (op->name, "cmpl") != 0))))
-		{
-		  as_bad ("Internal assembler error for instruction %s", op->name);
-		  abort ();
-		}
+	      /* Ignore Power duplicates for -m601 */
+	      if ((ppc_cpu & PPC_OPCODE_601) != 0
+		  && (op->flags & PPC_OPCODE_POWER) != 0)
+		continue;
+
+	      as_bad ("Internal assembler error for instruction %s", op->name);
+	      dup_insn = true;
 	    }
 	}
     }
@@ -788,9 +779,15 @@ md_begin ()
 
 	  retval = hash_insert (ppc_macro_hash, macro->name, (PTR) macro);
 	  if (retval != (const char *) NULL)
-	    abort ();
+	    {
+	      as_bad ("Internal assembler error for macro %s", macro->name);
+	      dup_insn = true;
+	    }
 	}
     }
+
+  if (dup_insn)
+    abort ();
 
   /* Tell the main code what the endianness is if it is not overidden by the user.  */
   if (!set_target_endian)
@@ -3756,13 +3753,14 @@ md_undefined_symbol (name)
    given a PC relative reloc.  */
 
 long
-md_pcrel_from (fixp)
+md_pcrel_from_section (fixp, sec)
      fixS *fixp;
+     segT sec;
 {
 #ifdef OBJ_ELF
   if (fixp->fx_addsy != (symbolS *) NULL
       && (! S_IS_DEFINED (fixp->fx_addsy)
-	  || TC_FORCE_RELOCATION (fixp)))
+	  || TC_FORCE_RELOCATION_SECTION (fixp, sec)))
     return 0;
 #endif
 

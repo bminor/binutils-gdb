@@ -1,3 +1,22 @@
+Tue Oct 24 14:50:38 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* config/tc-ppc.h (TC_FORCE_RELOCATION_SECTION): Rename from
+	TC_FORCE_RELOCATION, taking an additional section argument.  If
+	the section of the target symbol is not the same as the current
+	section, always force the relocation to be used.
+	(MD_PCREL_FROM_SECTION): New macro to call md_pcrel_from_section.
+
+	* config/tc-ppc.c (md_pcrel_from_section): Rename from the
+	md_pcrel_from function, taking an additional section argument.
+	Invoke TC_FORCE_RELOCATION_SECTION instead of TC_FORCE_RELOCATION.
+
+	* write.c (TC_FORCE_RELOCATION_SECTION): Define in terms of the
+	older TC_FORCE_RELOCATION if not defined.
+	(MD_PCREL_FROM_SECTION): If not defined, invoke md_pcrel_from.
+	(fixup_segment): Use MD_PCREL_FROM_SECTION instead of
+	md_pcrel_from, and TC_FORCE_RELOCATION_SECTION instead of
+	TC_FORCE_RELOCATION.
+	
 Mon Oct 23 16:20:04 1995  Ken Raeburn  <raeburn@cygnus.com>
 
 	* input-scrub.c (as_where): Set name to null pointer if we don't
