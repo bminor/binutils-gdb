@@ -874,9 +874,9 @@ OP_1403 ()
 void
 OP_401 ()
 {
-  trace_input ("cmpeqi.s", OP_REG, OP_CONSTANT16, OP_VOID);
+  trace_input ("cmpeqi.s", OP_REG, OP_CONSTANT4, OP_VOID);
   State.F1 = State.F0;
-  State.F0 = (State.regs[OP[0]] == SEXT4(OP[1])) ? 1 : 0;  
+  State.F0 = (State.regs[OP[0]] == (reg_t)SEXT4(OP[1])) ? 1 : 0;  
   trace_output (OP_FLAG);
 }
 
@@ -886,7 +886,7 @@ OP_2000000 ()
 {
   trace_input ("cmpeqi.l", OP_REG, OP_CONSTANT16, OP_VOID);
   State.F1 = State.F0;
-  State.F0 = (State.regs[OP[0]] == OP[1]) ? 1 : 0;  
+  State.F0 = (State.regs[OP[0]] == (reg_t)OP[1]) ? 1 : 0;  
   trace_output (OP_FLAG);
 }
 
@@ -896,7 +896,7 @@ OP_601 ()
 {
   trace_input ("cmpi.s", OP_REG, OP_CONSTANT4, OP_VOID);
   State.F1 = State.F0;
-  State.F0 = ((int16)(State.regs[OP[0]]) < SEXT4(OP[1])) ? 1 : 0;  
+  State.F0 = ((int16)(State.regs[OP[0]]) < (int16)SEXT4(OP[1])) ? 1 : 0;  
   trace_output (OP_FLAG);
 }
 
@@ -926,7 +926,7 @@ OP_23000000 ()
 {
   trace_input ("cmpui", OP_REG, OP_CONSTANT16, OP_VOID);
   State.F1 = State.F0;
-  State.F0 = (State.regs[OP[0]] < OP[1]) ? 1 : 0;  
+  State.F0 = (State.regs[OP[0]] < (reg_t)OP[1]) ? 1 : 0;  
   trace_output (OP_FLAG);
 }
 
