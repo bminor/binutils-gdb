@@ -58,15 +58,17 @@ int magic_number_for_object_file = DEFAULT_MAGIC_NUMBER_FOR_OBJECT_FILE;
 
 #endif /* BFD_ASSEMBLER */
 
+#ifdef BFD_ASSEMBLER
 static fixS *fix_new_internal PARAMS ((fragS *, int where, short int size,
 				       symbolS *add, symbolS *sub,
 				       offsetT offset, int pcrel,
-#ifdef BFD_ASSEMBLER
-				       bfd_reloc_code_real_type r_type
+				       bfd_reloc_code_real_type r_type));
 #else
-				       int r_type
+static fixS *fix_new_internal PARAMS ((fragS *, int where, short int size,
+				       symbolS *add, symbolS *sub,
+				       offsetT offset, int pcrel,
+				       int r_type));
 #endif
-				       ));
 static long fixup_segment PARAMS ((fixS * fixP, segT this_segment_type));
 static relax_addressT relax_align PARAMS ((relax_addressT addr, int align));
 void relax_segment PARAMS ((struct frag * seg_frag_root, segT seg_type));
