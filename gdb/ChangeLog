@@ -1,5 +1,8 @@
 Mon May 24 10:01:10 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* mipsread.c (parse_symbol): Deal with scVar and scVarRegister.
+	* symtab.h: Comment that LOC_REGPARM_ADDR can be call by reference.
+
 	* c-typeprint.c (c_type_print_base): Don't print typedef'd names
 	as struct, union, or enum tags.
 
