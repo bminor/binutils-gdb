@@ -4,6 +4,13 @@ OUTPUT_FORMAT="elf64-hppa"
 LIB_PATH=/usr/lib/pa20_64:/opt/langtools/lib/pa20_64
 TEXT_START_ADDR=0x4000000000001000
 DATA_ADDR=0x8000000000001000
+
+# The HP dynamic linker actually requires you set the start of text and
+# data to some reasonable value.  Of course nobody knows what reasoanble
+# really is, so we just use the same values that HP's linker uses.
+SHLIB_TEXT_START_ADDR=0x4000000000001000
+SHLIB_DATA_ADDR=0x8000000000001000
+
 TARGET_PAGE_SIZE=4096
 MAXPAGESIZE=4096
 ARCH=hppa
@@ -30,6 +37,9 @@ OTHER_GOT_RELOC_SECTIONS='.rela.dlt : { *(.rela.dlt) }'
 # The linker is required to define these two symbols.
 EXECUTABLE_SYMBOLS='__SYSTEM_ID = 0x214; _FPU_STATUS = 0x0;'
 DATA_PLT=
+
+# .dynamic should be at the start of the .text segment.
+TEXT_DYNAMIC=
 
 # The PA64 ELF port needs two additional initializer sections and also wants
 # a start/end symbol pair for the .init and .fini sections.
