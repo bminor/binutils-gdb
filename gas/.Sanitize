@@ -50,6 +50,7 @@ configure.bat
 configure.in
 debug.c
 dep-in.sed
+depend.c
 doc
 ecoff.c
 ecoff.h
