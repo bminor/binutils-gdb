@@ -128,6 +128,7 @@ elf32-mips.c
 elf32-pj.c
 elf32-ppc.c
 elf32-sh.c
+elf32-sh-lin.c
 elf32-sparc.c
 elf32-v850.c
 elf64-alpha.c

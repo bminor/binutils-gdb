@@ -652,6 +652,10 @@ extern int bfd_get_arch_size PARAMS ((bfd *));
 /* Return true if address "naturally" sign extends, or -1 if not elf. */
 extern int bfd_get_sign_extend_vma PARAMS ((bfd *));
 
+extern boolean bfd_m68k_elf32_create_embedded_relocs
+  PARAMS ((bfd *, struct bfd_link_info *, struct sec *, struct sec *,
+	   char **));
+
 /* SunOS shared library support routines for the linker.  */
 
 extern struct bfd_link_needed_list *bfd_sunos_get_needed_list
@@ -1393,8 +1397,8 @@ enum bfd_architecture
 #define bfd_mach_mips6000              6000
 #define bfd_mach_mips8000              8000
 #define bfd_mach_mips10000             10000
-#define bfd_mach_mips16                16
 #define bfd_mach_mips4K                32
+#define bfd_mach_mips16                16
   bfd_arch_i386,      /* Intel 386 */
 #define bfd_mach_i386_i386 0
 #define bfd_mach_i386_i8086 1

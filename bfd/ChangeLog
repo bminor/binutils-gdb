@@ -1,3 +1,9 @@
+2000-09-10  Michael Sokolov  <msokolov@ivan.Harhan.ORG>
+
+	* elf32-m68k.c (bfd_m68k_elf32_create_embedded_relocs): New function.
+	* bfd-in.h (bfd_m68k_elf32_create_embedded_relocs): Add declaration.
+	* bfd-in2.h: Regenerate.
+
 2000-09-15  Kenneth Block  <Kenneth.Block@compaq.com>
 
 	* bfd/elf64-alpha.c (elf64_alpha_relax_with_lituse): ld performs

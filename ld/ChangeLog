@@ -1,3 +1,10 @@
+2000-09-10  Michael Sokolov  <msokolov@ivan.Harhan.ORG>
+
+	* emultempl/m68kelf.em: New file.
+	* emulparams/m68kelf.sh (EXTRA_EM_FILE): Use it.
+	* Makefile.am (em68kelf.c): Add dependency on m68kelf.em.
+	* Makefile.in: Regenerate.
+
 2000-09-15  Alan Modra  <alan@linuxcare.com.au>
 
 	* emulparams/hppalinux.sh (DATA_START_SYMBOLS): Provide $global$
