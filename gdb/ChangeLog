@@ -1,5 +1,10 @@
 2003-07-18  Andrew Cagney  <cagney@redhat.com>
 
+	From 2003-07-04 Kei Sakamoto <sakamoto.kei@renesas.com>:
+        * disasm.c (gdb_disassemble_info): Initilize di.arch.
+
+2003-07-18  Andrew Cagney  <cagney@redhat.com>
+
 	* dwarf2-frame.c (dwarf2_frame_sniffer): Use
 	frame_unwind_address_in_block, instead of frame_pc_unwind.
 	(dwarf2_frame_cache): Ditto.

@@ -331,6 +331,7 @@ gdb_disassemble_info (struct gdbarch *gdbarch, struct ui_file *file)
      Further, it has been supperseeded by trust-read-only-sections
      (although that should be superseeded by target_trust..._p()).  */
   di.read_memory_func = dis_asm_read_memory;
+  di.arch = gdbarch_bfd_arch_info (gdbarch)->arch;
   di.mach = gdbarch_bfd_arch_info (gdbarch)->mach;
   di.endian = gdbarch_byte_order (gdbarch);
   return di;
