@@ -4617,7 +4617,7 @@ hppa_frame_cache (struct frame_info *next_frame, void **this_cache)
   /* Yow! */
   u = find_unwind_entry (frame_func_unwind (next_frame));
   if (!u)
-    return;
+    return (*this_cache);
 
   /* Turn the Entry_GR field into a bitmask.  */
   saved_gr_mask = 0;
