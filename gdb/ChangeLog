@@ -1,3 +1,10 @@
+2002-06-02  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* config/rs6000/aix4.mt (TDEPFILES): Use ppc-sysv-tdep.o
+	insetead of ppc-linux-tdep.o.
+	* config/rs6000/rs6000.mt (TDEPFILES): Likewise.
+	* config/rs6000/rs6000lynx.mt (TDEPFILES): Likewise.
+
 2002-06-02  Andrew Cagney  <ac131313@redhat.com>
 
 	2002-05-07 Christian Groessler <chris@groessler.org>
