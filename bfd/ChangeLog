@@ -1,3 +1,13 @@
+Wed Jul  6 19:21:57 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* hosts/sysv4.h (qsort, strtol): Don't declare.
+
+	* elfcode.h (elf_link_output_sym): Don't call output_symbol_hook
+	if it is NULL.
+
+	* elf32-mips.c (mips_elf_final_write_processing): Add ignored info
+	argument to correspond to recent libelf.h change.
+
 Wed Jul  6 00:48:57 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* coff-alpha.c (alpha_ecoff_mkobject_hook):  New hook to
