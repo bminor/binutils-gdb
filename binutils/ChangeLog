@@ -1,14 +1,22 @@
+2003-11-28  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.am (install-exec-local): Remove common term from string
+	comparison.
+	* Makefile.in: Regenerate.
+	* doc/Makefile.am: Don't use $<.
+	* doc/Makefile.in: Regenerate.
+
 2003-11-27  Nick Clifton  <nickc@redhat.com>
 
 	* rename.c (smart_rename): Make sure that we have write
 	permission on the destination file before renaming.
 
 2003-11-26  Daniel Jacobowitz <drow@mvista.com>
-            Nick Clifton  <nickc@redhat.com>
+	    Nick Clifton  <nickc@redhat.com>
 
 	* readelf.c: Add a comment describing the difference between
 	readelf and objdump.
-        * doc/binutils.texi (readelf): Likewise.
+	* doc/binutils.texi (readelf): Likewise.
 
 2003-11-25  Danny Smith  <dannysmith@users.sourceforge.net>
 
@@ -35,10 +43,10 @@
 	a few fields.  Use the symbol_is_valid field to check the
 	validity of located symbols and continue searching if they are
 	not valid.
-        (objdump_print_addr): Alter parameters passed to
+	(objdump_print_addr): Alter parameters passed to
 	find_symbol_for_address.
-        (objdump_symbol_at_address): Likewise.
-        (disassemble_section): Likewise.  Also use symbol_is_valid
+	(objdump_symbol_at_address): Likewise.
+	(disassemble_section): Likewise.  Also use symbol_is_valid
 	function to check the validity of located symbols.
 
 2003-11-13  Tobias Burnus  <tobias.burnus@physik.fu-berlin.de>
@@ -264,30 +272,30 @@
 2003-09-03  Nick Clifton  <nickc@redhat.com>
 
 	* objdump.c (struct objdump_disasm_info): Add new fields
-        'dynrelbuf', 'dynrelcount' and 'disassemble_fn'.
-        (process_section_p): New function:  Returns TRUE if a section
-        can be dumped.
-        (disassemble_section): New function: Contains the body of
+	'dynrelbuf', 'dynrelcount' and 'disassemble_fn'.
+	(process_section_p): New function:  Returns TRUE if a section
+	can be dumped.
+	(disassemble_section): New function: Contains the body of
 	disassemble_data(), but just for one section.
-        (disassemble_data): Use bfd_map_over_sections to walk section
-        chain.
-        (find_stabs_section): New function: Find a stabs containing
-        section and then dump it.
-        (dump_stabs_section): New function: Use bfd_map_over_sections
-        to find the section to dump.
-        (dump_stabs): Use dump_stabs_section.
-        (dump_section): New function: Display the contents of a
-        section.
-        (dump_data): Use bfd_map_over_sections to display section
-        contents.
-        (dump_relocs_in_section): Display the relocs in a given section.
-        (dump_relocs): Use bfd_map_over_sections to display relocs.
+	(disassemble_data): Use bfd_map_over_sections to walk section
+	chain.
+	(find_stabs_section): New function: Find a stabs containing
+	section and then dump it.
+	(dump_stabs_section): New function: Use bfd_map_over_sections
+	to find the section to dump.
+	(dump_stabs): Use dump_stabs_section.
+	(dump_section): New function: Display the contents of a
+	section.
+	(dump_data): Use bfd_map_over_sections to display section
+	contents.
+	(dump_relocs_in_section): Display the relocs in a given section.
+	(dump_relocs): Use bfd_map_over_sections to display relocs.
 	(adjust_addresses): New function: Adjust the vma and lma of
-        sections.
-        (dump_bfd): Use bfd_map_over_sections.
-        * doc/binutils.texi: Document the "objdump -s" (no longer)
-        dumps empty sections.
-        
+	sections.
+	(dump_bfd): Use bfd_map_over_sections.
+	* doc/binutils.texi: Document the "objdump -s" (no longer)
+	dumps empty sections.
+
 2003-08-24  Jonathan R. Grant  <jg-binutils@jguk.org>
 
 	* objdump.c: Improve comments/documentation.
@@ -332,7 +340,7 @@
 	* NEWS: Document readelf's new ability.
 	* doc/binutils: Alter text to say that readelf supports archives
 	and 64-bit ELF files.
-	
+
 2003-08-08  Nick Clifton  <nickc@redhat.com>
 
 	* po/fr.po: Updated French translation.
@@ -395,26 +403,26 @@
 
 	* objdump.c: New command line option --debugging-tags.
 	* doc/binutils.texi: Document new command line option.
-	* prdbg.c: Code to print the debug info as tags compatible 
+	* prdbg.c: Code to print the debug info as tags compatible
 	with ctags.
 	* budbg.h: Adjust prototype.
 	* NEWS: Mention new switch
-        
+
 2003-07-18  Nick Clifton  <nickc@redhat.com>
 
 	* objdump.c (main) :Accept multiple -M switch.
-        * doc/binutils.texi: Document that multiple -M switches are
-        accepted and that a single -M switch can contain comma
-        separated options.
+	* doc/binutils.texi: Document that multiple -M switches are
+	accepted and that a single -M switch can contain comma
+	separated options.
 
 2003-07-17  Nick Clifton  <nickc@redhat.com>
 
 	* objdump.c (main): Issue a warning message if multiple -M
 	switches are used.
-	
+
 	* doc/binutils.texi (objdump): Update documentation about -M
 	option.
-	
+
 2003-07-17  Nick Clifton  <nickc@redhat.com>
 
 	* po/es.po: New Spanish translation.
@@ -493,16 +501,16 @@
 2003-06-26  Nick Clifton  <nickc@redhat.com>
 
 	* objcopy (enum strip_action): Add STRIP_NONDEBUG.
-        (OPTION_ONLY_KEEP_DEBUG): New.
-        (strip_options): Add --only-keep-debug.
-        (copy_options): Likewise.
-        (is_strip_section): Invert return value if STRIP_NONDEBUG is
-        active.
-        (copy_object): Do not copy private data when STRIP_NONDEBUG is
-        active.
-        (setup_section): Likewise.
-        (strip_main): Handle --only-keep-debug.
-        (copy_main): Likewise.
+	(OPTION_ONLY_KEEP_DEBUG): New.
+	(strip_options): Add --only-keep-debug.
+	(copy_options): Likewise.
+	(is_strip_section): Invert return value if STRIP_NONDEBUG is
+	active.
+	(copy_object): Do not copy private data when STRIP_NONDEBUG is
+	active.
+	(setup_section): Likewise.
+	(strip_main): Handle --only-keep-debug.
+	(copy_main): Likewise.
 	* NEWS: Mention new switch
 	* doc/binutils.texi: Document new switch.
 
@@ -521,20 +529,20 @@
 2003-06-11  Nick Clifton  <nickc@redhat.com>
 
 	* objcopy.c (gnu_debuglink_filename): New variable.
-        (OPTION_ADD_GNU_DEBUGLINK): New switch
-        (copy_options): Describe --add-gnu-debuglink switch.
-        Mention that --strip-debug removes sections as well.
-        (is_strip_section): Process the sections removed and kept
-        lists before checking for debugging sections.
-        (add_redefine_syms_file): Make function static.
-        (copy_object): Use is_strip_section.
-        Check to see if a .gnu_debuglink section should be added.  If
-        so, call bfd_add_gnu_debuglink.
-        (setup_section): Use is_strip_section.
-        (copy_section): Use is_strip_section.
-        (copy_main): Handle OPTION_ADD_GNU_DEBUGLINK.
+	(OPTION_ADD_GNU_DEBUGLINK): New switch
+	(copy_options): Describe --add-gnu-debuglink switch.
+	Mention that --strip-debug removes sections as well.
+	(is_strip_section): Process the sections removed and kept
+	lists before checking for debugging sections.
+	(add_redefine_syms_file): Make function static.
+	(copy_object): Use is_strip_section.
+	Check to see if a .gnu_debuglink section should be added.  If
+	so, call bfd_add_gnu_debuglink.
+	(setup_section): Use is_strip_section.
+	(copy_section): Use is_strip_section.
+	(copy_main): Handle OPTION_ADD_GNU_DEBUGLINK.
 	* NEWS: Mention new objcopy switch.
-        * doc/binutils.texi: Document new switch.
+	* doc/binutils.texi: Document new switch.
 
 2003-06-11  H.J. Lu <hongjiu.lu@intel.com>
 
@@ -554,9 +562,9 @@
 
 	* NEWS: Document the new BSD/POSIX single-character mapping for
 	.comment/.note sections.
-	
+
 2003-06-02  Chris Demetriou  <cgd@broadcom.com>
-            Jason Thorpe  <thorpej@wasabisystems.com>
+	    Jason Thorpe  <thorpej@wasabisystems.com>
 
 	* objcopy.c (redefine_list_append): Add an argument that
 	indicates the context from which this function is being
@@ -629,7 +637,7 @@
 
 2003-04-24  Dimitrie O. Paun <dpaun@rogers.com>
 
-        * doc/binutils.texi: Fix the documentation for the -fo option.
+	* doc/binutils.texi: Fix the documentation for the -fo option.
 
 2003-04-23  J"orn Rennecke <joern.rennecke@superh.com>
 
@@ -639,7 +647,7 @@
 	* readelf.c (decode_location_expression): Don't add a trailing ';'.
 
 2003-04-23  Dimitrie O. Paun <dpaun@rogers.com>
-            Nick Clifton  <nickc@redhat.com>
+	    Nick Clifton  <nickc@redhat.com>
 
 	* windres.c (long_options): Move close to main, where it is used.
 	Add 'input' and 'output' long options.
@@ -777,7 +785,7 @@
 	* bucomm.c: Include bfdver.h and libbfd.h
 	(display_target_list): Call bfd_nonfatal instead of nonfatal and
 	return 0 on a non-fatal error, 1 on success.
-	(display_info_table): Likewise.	
+	(display_info_table): Likewise.
 	* bucomm.h (display_info): Provide a prototype.
 	* Makefile.am (bucomm.o): Add dependencies on bfdver.h and
 	libbfd.h.
@@ -799,7 +807,7 @@
 	the symbol's value when --size-sort is used, unless -S is used.
 	doc/binutils.texi (--size-sort): For non-bsd formats both the
 	value and size of the symbols are displayed.
-	
+
 2003-03-13  Nick Clifton  <nickc@redhat.com>
 
 	* po/da.po: Update.
@@ -825,7 +833,7 @@
 2003-03-04  Elias Athanasopoulos  <elathan@phys.uoa.gr>
 
 	* nm.c (print_symbol): Remove check for undefined_only.
-	
+
 2003-03-03  Nick Clifton  <nickc@redhat.com>
 
 	* po/da.po: Installed latest translation.

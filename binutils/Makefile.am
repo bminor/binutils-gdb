@@ -350,7 +350,7 @@ install-exec-local: install-binPROGRAMS $(bin_PROGRAMS) $(noinst_PROGRAMS)
 	  if [ -f $$i$(EXEEXT) ]; then \
 	    j=`echo $$i | sed -e 's/-new//'`; \
 	    k=`echo $$j | sed '$(transform)'`; \
-	    if [ "$(DESTDIR)$(bindir)/$$k$(EXEEXT)" != "$(DESTDIR)$(tooldir)/bin/$$j$(EXEEXT)" ]; then \
+	    if [ "$(bindir)/$$k" != "$(tooldir)/bin/$$j" ]; then \
 	      rm -f $(DESTDIR)$(tooldir)/bin/$$j$(EXEEXT); \
 	      ln $(DESTDIR)$(bindir)/$$k$(EXEEXT) $(DESTDIR)$(tooldir)/bin/$$j$(EXEEXT) >/dev/null 2>/dev/null \
 		|| $(LIBTOOL) --mode=install $(INSTALL_PROGRAM) $$i$(EXEEXT) $(DESTDIR)$(tooldir)/bin/$$j$(EXEEXT); \
