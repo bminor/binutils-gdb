@@ -134,7 +134,7 @@ Must use symbol-file or exec-file before add-symbol-file-from-memory.");
 
 
 void
-_initialize_symfile_mem ()
+_initialize_symfile_mem (void)
 {
   add_cmd ("add-symbol-file-from-memory", class_files,
            add_symbol_file_from_memory_command,

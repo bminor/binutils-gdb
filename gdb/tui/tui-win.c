@@ -301,7 +301,7 @@ tui_command (char *args, int from_tty)
 }
 
 struct cmd_list_element **
-tui_get_cmd_list ()
+tui_get_cmd_list (void)
 {
   if (tuilist == 0)
     add_prefix_cmd ("tui", class_tui, tui_command,

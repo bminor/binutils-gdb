@@ -1,5 +1,9 @@
 2004-07-17  Andrew Cagney  <cagney@gnu.org>
 
+	* ppc-linux-nat.c (store_spe_registers): Eliminate K&R C.
+	* tui/tui-win.c (tui_get_cmd_list): Ditto.
+	* symfile-mem.c (_initialize_symfile_mem): Ditto.
+	
 	* ppc-linux-tdep.c (ppc_linux_init_abi): Add [sic] to Linux.
 	* ppc-linux-nat.c: Use "Linux kernel".
 	* hppa-linux-tdep.c: Use GNU/Linux.
