@@ -1264,16 +1264,16 @@ sim_resume (step, siggnal)
 		   t = rd & hm; c = rd & 2; v = 0; rd >>= 2; rd |= t | t >> 1 );
 	  OSHIFTS (O_ROTL,
 		   c = rd & hm; v = 0; rd <<= 1; rd |= C,
-		   c = rd & (hm >> 1); v = 0; rd <<= 2; rd |= C);
+		   c = rd & hm; v = 0; rd <<= 1; rd |= C; c = rd & hm; rd <<= 1; rd |= C);
 	  OSHIFTS (O_ROTR,
 		   c = rd & 1; v = 0; rd = (unsigned int) rd >> 1; if (c) rd |= hm,
-		   c = rd & 2; v = 0; rd = (unsigned int) rd >> 2; if (c) rd |= hm);
+		   c = rd & 1; v = 0; rd = (unsigned int) rd >> 1; if (c) rd |= hm; c = rd & 1; rd = (unsigned int) rd >> 1; if (c) rd |= hm);
 	  OSHIFTS (O_ROTXL,
 		   t = rd & hm; rd <<= 1; rd |= C; c = t; v = 0,
-		   t = rd & (hm >> 1); rd <<= 2; rd |= C; c = t; v = 0);
+		   t = rd & hm; rd <<= 1; rd |= C; c = t; v = 0; t = rd & hm; rd <<= 1; rd |= C; c = t);
 	  OSHIFTS (O_ROTXR,
 		   t = rd & 1; rd = (unsigned int) rd >> 1; if (C) rd |= hm; c = t; v = 0,
-		   t = rd & 2; rd = (unsigned int) rd >> 2; if (C) rd |= hm; c = t; v = 0);
+		   t = rd & 1; rd = (unsigned int) rd >> 1; if (C) rd |= hm; c = t; v = 0; t = rd & 1; rd = (unsigned int) rd >> 1; if (C) rd |= hm; c = t);
 
 	case O (O_JMP, SB):
 	  {

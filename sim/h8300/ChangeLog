@@ -1,3 +1,7 @@
+Tue Jul  9 22:15:39 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* compile.c (sim_resume): Fix all rotate-by-2-bits insns.
+
 Tue Jul  2 23:08:45 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* run.c (main): Don't "load" sections which don't have
