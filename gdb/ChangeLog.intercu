@@ -1,5 +1,14 @@
 2004-02-21  Daniel Jacobowitz  <drow@mvista.com>
 
+	* dwarf2read.c (struct partial_die_info): Use bitfields and
+	rearrange members for packing.  Replace spec_attr with spec_offset.
+	(load_partial_dies): Only follow structures for C++.
+	(load_partial_die): Use memset.  Save specification attributes
+	only as offsets.
+	(fixup_partial_die): Adjust to use spec_offset.
+
+2004-02-21  Daniel Jacobowitz  <drow@mvista.com>
+
 	* dwarf2read.c (struct dwarf2_cu): Add partial_die_obstack.
 	(splay_tree_obstack_allocate, splay_tree_obstack_deallocate): New
 	functions.

@@ -391,21 +391,21 @@ struct dwarf_block
 struct partial_die_info
   {
     enum dwarf_tag tag;
-    unsigned char has_children;
-    unsigned char is_external;
-    unsigned char is_declaration;
-    unsigned char has_type;
-    unsigned char has_specification;
     unsigned int offset;
-    unsigned int abbrev;
+    unsigned int abbrev : 16;
+    unsigned int language : 8;
+    unsigned int has_children : 1;
+    unsigned int is_external : 1;
+    unsigned int is_declaration : 1;
+    unsigned int has_type : 1;
+    unsigned int has_specification : 1;
+    unsigned int has_pc_info : 1;
     char *name;
-    int has_pc_info;
+    struct dwarf_block *locdesc;
     CORE_ADDR lowpc;
     CORE_ADDR highpc;
-    struct dwarf_block *locdesc;
-    unsigned int language;
     char *sibling;
-    struct attribute spec_attr;
+    unsigned int spec_offset;
     struct partial_die_info *die_parent, *die_child, *die_sibling;
   };
 
@@ -4565,18 +4565,20 @@ load_partial_dies (bfd *abfd, char *info_ptr, struct dwarf2_cu *cu)
       part_die = obstack_alloc (&cu->partial_die_obstack,
 				sizeof (struct partial_die_info));
 
-      /* For some DIEs we want to follow their children (if any).  */
-      if (last_die->tag == DW_TAG_namespace
-	  || last_die->tag == DW_TAG_enumeration_type
-	  || last_die->tag == DW_TAG_class_type
-	  || last_die->tag == DW_TAG_structure_type)
+      /* For some DIEs we want to follow their children (if any).  We do
+         not normally follow the children of structures; do so for C++
+         so that we can use method physnames to infer fully qualified
+         type names.  */
+      if (last_die->has_children
+	  && (last_die->tag == DW_TAG_namespace
+	      || last_die->tag == DW_TAG_enumeration_type
+	      || (cu->language == language_cplus
+		  && (last_die->tag == DW_TAG_class_type
+		      || last_die->tag == DW_TAG_structure_type))))
 	{
-	  if (last_die->has_children)
-	    {
-	      nesting_level++;
-	      parent_die = last_die;
-	      continue;
-	    }
+	  nesting_level++;
+	  parent_die = last_die;
+	  continue;
 	}
 
       /* Otherwise we skip to the next sibling, if any.  */
@@ -4598,7 +4600,7 @@ load_partial_die (struct partial_die_info *part_die, bfd *abfd,
   int has_low_pc_attr = 0;
   int has_high_pc_attr = 0;
 
-  *part_die = zeroed_partial_die;
+  memset (part_die, 0, sizeof (struct partial_die_info));
 
   part_die->offset = info_ptr - dwarf_info_buffer;
 
@@ -4674,7 +4676,7 @@ load_partial_die (struct partial_die_info *part_die, bfd *abfd,
 	case DW_AT_abstract_origin:
 	case DW_AT_specification:
 	  part_die->has_specification = 1;
-	  part_die->spec_attr = attr;
+	  part_die->spec_offset = dwarf2_get_ref_die_offset (&attr, cu);
 	  break;
 	case DW_AT_sibling:
 	  /* Ignore absolute siblings, they might point outside of
@@ -4729,13 +4731,11 @@ fixup_partial_die (struct partial_die_info *part_die,
   /* If we found a reference attribute and the die has no name, try
      to find a name in the referred to die.  */
 
-  if (part_die->has_specification && part_die->name == NULL)
+  if (part_die->name == NULL && part_die->has_specification)
     {
       struct partial_die_info *spec_die;
-      unsigned long spec_offset;
 
-      spec_offset = dwarf2_get_ref_die_offset (&part_die->spec_attr, cu);
-      spec_die = find_partial_die (spec_offset, cu);
+      spec_die = find_partial_die (part_die->spec_offset, cu);
 
       if (spec_die->name)
 	{
