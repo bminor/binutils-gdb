@@ -1429,6 +1429,92 @@
   return (memval >> (8 * byte));
 }
 
+:function:::unsigned_word:do_load_left:unsigned access, address_word base, address_word offset, unsigned_word rt
+{
+  address_word mask = (WITH_TARGET_WORD_BITSIZE == 64 ? 0x7 : 0x3);
+  address_word reverseendian = (ReverseEndian ? -1 : 0);
+  address_word bigendiancpu = (BigEndianCPU ? -1 : 0);
+  unsigned int byte;
+  unsigned int word;
+  address_word paddr;
+  int uncached;
+  unsigned64 memval;
+  address_word vaddr;
+  int nr_lhs_bits;
+  int nr_rhs_bits;
+  unsigned_word lhs_mask;
+  unsigned_word temp;
+
+  vaddr = base + offset;
+  AddressTranslation (vaddr, isDATA, isLOAD, &paddr, &uncached, isTARGET, isREAL);
+  paddr = (paddr ^ (reverseendian & mask));
+  if (BigEndianMem == 0)
+    paddr = paddr & ~access;
+
+  /* compute where within the word/mem we are */
+  byte = ((vaddr ^ bigendiancpu) & access); /* 0..access */
+  word = ((vaddr ^ bigendiancpu) & (mask & ~access)) / (access + 1); /* 0..1 */
+  nr_lhs_bits = 8 * byte + 8;
+  nr_rhs_bits = 8 * access - 8 * byte;
+  /* nr_lhs_bits + nr_rhs_bits == 8 * (accesss + 1) */
+
+  /* fprintf (stderr, "l[wd]l: 0x%08lx%08lx 0x%08lx%08lx %d:%d %d+%d\n",
+	   (long) ((unsigned64) vaddr >> 32), (long) vaddr,
+	   (long) ((unsigned64) paddr >> 32), (long) paddr,
+	   word, byte, nr_lhs_bits, nr_rhs_bits); */
+
+  LoadMemory (&memval, NULL, uncached, byte, paddr, vaddr, isDATA, isREAL);
+  if (word == 0)
+    {
+      /* GPR{31..32-NR_LHS_BITS} = memval{NR_LHS_BITS-1..0} */
+      temp = (memval << nr_rhs_bits);
+    }
+  else
+    {
+      /* GPR{31..32-NR_LHS_BITS = memval{32+NR_LHS_BITS..32} */
+      temp = (memval >> nr_lhs_bits);
+    }
+  lhs_mask = LSMASK (nr_lhs_bits + nr_rhs_bits - 1, nr_rhs_bits);
+  rt = (rt & ~lhs_mask) | (temp & lhs_mask);
+
+  /* fprintf (stderr, "l[wd]l: 0x%08lx%08lx -> 0x%08lx%08lx & 0x%08lx%08lx -> 0x%08lx%08lx\n",
+	   (long) ((unsigned64) memval >> 32), (long) memval,
+	   (long) ((unsigned64) temp >> 32), (long) temp,
+	   (long) ((unsigned64) lhs_mask >> 32), (long) lhs_mask,
+	   (long) (rt >> 32), (long) rt); */
+  return rt;
+}
+
+:function:::unsigned_word:do_load_right:unsigned access, address_word base, address_word offset, unsigned_word rt
+{
+  address_word mask = (WITH_TARGET_WORD_BITSIZE == 64 ? 0x7 : 0x3);
+  address_word reverseendian = (ReverseEndian ? -1 : 0);
+  address_word bigendiancpu = (BigEndianCPU ? -1 : 0);
+  unsigned int byte;
+  address_word paddr;
+  int uncached;
+  unsigned64 memval;
+  address_word vaddr;
+
+  vaddr = base + offset;
+  AddressTranslation (vaddr, isDATA, isLOAD, &paddr, &uncached, isTARGET, isREAL);
+  /* NOTE: SPEC is wrong, has `BigEndianMem == 0' not `BigEndianMem != 0' */
+  paddr = (paddr ^ (reverseendian & mask));
+  if (BigEndianMem != 0)
+    paddr = paddr & ~access;
+  byte = ((vaddr & mask) ^ (bigendiancpu & mask));
+  /* NOTE: SPEC is wrong, had `byte' not `access - byte'.  See SW. */
+  LoadMemory (&memval, NULL, uncached, access - (access & byte), paddr, vaddr, isDATA, isREAL);
+  /* printf ("lr: 0x%08lx %d@0x%08lx 0x%08lx\n",
+     (long) paddr, byte, (long) paddr, (long) memval); */
+  {
+    unsigned_word screen = LSMASK (8 * (access - (byte & access) + 1) - 1, 0);
+    rt &= ~screen;
+    rt |= (memval >> (8 * byte)) & screen;
+  }
+  return rt;
+}
+
 
 100000,5.BASE,5.RT,16.OFFSET:NORMAL:32::LB
 "lb r<RT>, <OFFSET>(r<BASE>)"
@@ -1667,63 +1753,6 @@
 }
 
 
-:function:::unsigned_word:do_load_left:unsigned access, address_word base, address_word offset, unsigned_word rt
-{
-  address_word mask = (WITH_TARGET_WORD_BITSIZE == 64 ? 0x7 : 0x3);
-  address_word reverseendian = (ReverseEndian ? -1 : 0);
-  address_word bigendiancpu = (BigEndianCPU ? -1 : 0);
-  unsigned int byte;
-  unsigned int word;
-  address_word paddr;
-  int uncached;
-  unsigned64 memval;
-  address_word vaddr;
-  int nr_lhs_bits;
-  int nr_rhs_bits;
-  unsigned_word lhs_mask;
-  unsigned_word temp;
-
-  vaddr = base + offset;
-  AddressTranslation (vaddr, isDATA, isLOAD, &paddr, &uncached, isTARGET, isREAL);
-  paddr = (paddr ^ (reverseendian & mask));
-  if (BigEndianMem == 0)
-    paddr = paddr & ~access;
-
-  /* compute where within the word/mem we are */
-  byte = ((vaddr ^ bigendiancpu) & access); /* 0..access */
-  word = ((vaddr ^ bigendiancpu) & (mask & ~access)) / (access + 1); /* 0..1 */
-  nr_lhs_bits = 8 * byte + 8;
-  nr_rhs_bits = 8 * access - 8 * byte;
-  /* nr_lhs_bits + nr_rhs_bits == 8 * (accesss + 1) */
-
-  /* fprintf (stderr, "l[wd]l: 0x%08lx%08lx 0x%08lx%08lx %d:%d %d+%d\n",
-	   (long) ((unsigned64) vaddr >> 32), (long) vaddr,
-	   (long) ((unsigned64) paddr >> 32), (long) paddr,
-	   word, byte, nr_lhs_bits, nr_rhs_bits); */
-
-  LoadMemory (&memval, NULL, uncached, byte, paddr, vaddr, isDATA, isREAL);
-  if (word == 0)
-    {
-      /* GPR{31..32-NR_LHS_BITS} = memval{NR_LHS_BITS-1..0} */
-      temp = (memval << nr_rhs_bits);
-    }
-  else
-    {
-      /* GPR{31..32-NR_LHS_BITS = memval{32+NR_LHS_BITS..32} */
-      temp = (memval >> nr_lhs_bits);
-    }
-  lhs_mask = LSMASK (nr_lhs_bits + nr_rhs_bits - 1, nr_rhs_bits);
-  rt = (rt & ~lhs_mask) | (temp & lhs_mask);
-
-  /* fprintf (stderr, "l[wd]l: 0x%08lx%08lx -> 0x%08lx%08lx & 0x%08lx%08lx -> 0x%08lx%08lx\n",
-	   (long) ((unsigned64) memval >> 32), (long) memval,
-	   (long) ((unsigned64) temp >> 32), (long) temp,
-	   (long) ((unsigned64) lhs_mask >> 32), (long) lhs_mask,
-	   (long) (rt >> 32), (long) rt); */
-  return rt;
-}
-
-
 100010,5.BASE,5.RT,16.OFFSET:NORMAL:32::LWL
 "lwl r<RT>, <OFFSET>(r<BASE>)"
 *mipsI:
@@ -1736,37 +1765,6 @@
 *r3900:
 {
   GPR[RT] = EXTEND32 (do_load_left (SD_, AccessLength_WORD, GPR[BASE], EXTEND16 (OFFSET), GPR[RT]));
-}
-
-
-:function:::unsigned_word:do_load_right:unsigned access, address_word base, address_word offset, unsigned_word rt
-{
-  address_word mask = (WITH_TARGET_WORD_BITSIZE == 64 ? 0x7 : 0x3);
-  address_word reverseendian = (ReverseEndian ? -1 : 0);
-  address_word bigendiancpu = (BigEndianCPU ? -1 : 0);
-  unsigned int byte;
-  address_word paddr;
-  int uncached;
-  unsigned64 memval;
-  address_word vaddr;
-
-  vaddr = base + offset;
-  AddressTranslation (vaddr, isDATA, isLOAD, &paddr, &uncached, isTARGET, isREAL);
-  /* NOTE: SPEC is wrong, has `BigEndianMem == 0' not `BigEndianMem != 0' */
-  paddr = (paddr ^ (reverseendian & mask));
-  if (BigEndianMem != 0)
-    paddr = paddr & ~access;
-  byte = ((vaddr & mask) ^ (bigendiancpu & mask));
-  /* NOTE: SPEC is wrong, had `byte' not `access - byte'.  See SW. */
-  LoadMemory (&memval, NULL, uncached, access - (access & byte), paddr, vaddr, isDATA, isREAL);
-  /* printf ("lr: 0x%08lx %d@0x%08lx 0x%08lx\n",
-     (long) paddr, byte, (long) paddr, (long) memval); */
-  {
-    unsigned_word screen = LSMASK (8 * (access - (byte & access) + 1) - 1, 0);
-    rt &= ~screen;
-    rt |= (memval >> (8 * byte)) & screen;
-  }
-  return rt;
 }
 
 
@@ -2063,6 +2061,7 @@
   }
 }
 
+
 :function:::void:do_store:unsigned access, address_word base, address_word offset, unsigned_word word
 {
   address_word mask = (WITH_TARGET_WORD_BITSIZE == 64 ? 0x7 : 0x3);
@@ -2084,6 +2083,72 @@
   byte = ((vaddr & mask) ^ bigendiancpu);
   memval = (word << (8 * byte));
   StoreMemory (uncached, access, memval, 0, paddr, vaddr, isREAL);
+}
+
+:function:::void:do_store_left:unsigned access, address_word base, address_word offset, unsigned_word rt
+{
+  address_word mask = (WITH_TARGET_WORD_BITSIZE == 64 ? 0x7 : 0x3);
+  address_word reverseendian = (ReverseEndian ? -1 : 0);
+  address_word bigendiancpu = (BigEndianCPU ? -1 : 0);
+  unsigned int byte;
+  unsigned int word;
+  address_word paddr;
+  int uncached;
+  unsigned64 memval;
+  address_word vaddr;
+  int nr_lhs_bits;
+  int nr_rhs_bits;
+
+  vaddr = base + offset;
+  AddressTranslation (vaddr, isDATA, isSTORE, &paddr, &uncached, isTARGET, isREAL);
+  paddr = (paddr ^ (reverseendian & mask));
+  if (BigEndianMem == 0)
+    paddr = paddr & ~access;
+
+  /* compute where within the word/mem we are */
+  byte = ((vaddr ^ bigendiancpu) & access); /* 0..access */
+  word = ((vaddr ^ bigendiancpu) & (mask & ~access)) / (access + 1); /* 0..1 */
+  nr_lhs_bits = 8 * byte + 8;
+  nr_rhs_bits = 8 * access - 8 * byte;
+  /* nr_lhs_bits + nr_rhs_bits == 8 * (accesss + 1) */
+  /* fprintf (stderr, "s[wd]l: 0x%08lx%08lx 0x%08lx%08lx %d:%d %d+%d\n",
+	   (long) ((unsigned64) vaddr >> 32), (long) vaddr,
+	   (long) ((unsigned64) paddr >> 32), (long) paddr,
+	   word, byte, nr_lhs_bits, nr_rhs_bits); */
+
+  if (word == 0)
+    {
+      memval = (rt >> nr_rhs_bits);
+    }
+  else
+    {
+      memval = (rt << nr_lhs_bits);
+    }
+  /* fprintf (stderr, "s[wd]l: 0x%08lx%08lx -> 0x%08lx%08lx\n",
+	   (long) ((unsigned64) rt >> 32), (long) rt,
+	   (long) ((unsigned64) memval >> 32), (long) memval); */
+  StoreMemory (uncached, byte, memval, 0, paddr, vaddr, isREAL);
+}
+
+:function:::void:do_store_right:unsigned access, address_word base, address_word offset, unsigned_word rt
+{
+  address_word mask = (WITH_TARGET_WORD_BITSIZE == 64 ? 0x7 : 0x3);
+  address_word reverseendian = (ReverseEndian ? -1 : 0);
+  address_word bigendiancpu = (BigEndianCPU ? -1 : 0);
+  unsigned int byte;
+  address_word paddr;
+  int uncached;
+  unsigned64 memval;
+  address_word vaddr;
+
+  vaddr = base + offset;
+  AddressTranslation (vaddr, isDATA, isSTORE, &paddr, &uncached, isTARGET, isREAL);
+  paddr = (paddr ^ (reverseendian & mask));
+  if (BigEndianMem != 0)
+    paddr &= ~access;
+  byte = ((vaddr & mask) ^ (bigendiancpu & mask));
+  memval = (rt << (byte * 8));
+  StoreMemory (uncached, access - (access & byte), memval, 0, paddr, vaddr, isREAL);
 }
 
 
@@ -2556,53 +2621,6 @@
 }
 
 
-
-:function:::void:do_store_left:unsigned access, address_word base, address_word offset, unsigned_word rt
-{
-  address_word mask = (WITH_TARGET_WORD_BITSIZE == 64 ? 0x7 : 0x3);
-  address_word reverseendian = (ReverseEndian ? -1 : 0);
-  address_word bigendiancpu = (BigEndianCPU ? -1 : 0);
-  unsigned int byte;
-  unsigned int word;
-  address_word paddr;
-  int uncached;
-  unsigned64 memval;
-  address_word vaddr;
-  int nr_lhs_bits;
-  int nr_rhs_bits;
-
-  vaddr = base + offset;
-  AddressTranslation (vaddr, isDATA, isSTORE, &paddr, &uncached, isTARGET, isREAL);
-  paddr = (paddr ^ (reverseendian & mask));
-  if (BigEndianMem == 0)
-    paddr = paddr & ~access;
-
-  /* compute where within the word/mem we are */
-  byte = ((vaddr ^ bigendiancpu) & access); /* 0..access */
-  word = ((vaddr ^ bigendiancpu) & (mask & ~access)) / (access + 1); /* 0..1 */
-  nr_lhs_bits = 8 * byte + 8;
-  nr_rhs_bits = 8 * access - 8 * byte;
-  /* nr_lhs_bits + nr_rhs_bits == 8 * (accesss + 1) */
-  /* fprintf (stderr, "s[wd]l: 0x%08lx%08lx 0x%08lx%08lx %d:%d %d+%d\n",
-	   (long) ((unsigned64) vaddr >> 32), (long) vaddr,
-	   (long) ((unsigned64) paddr >> 32), (long) paddr,
-	   word, byte, nr_lhs_bits, nr_rhs_bits); */
-
-  if (word == 0)
-    {
-      memval = (rt >> nr_rhs_bits);
-    }
-  else
-    {
-      memval = (rt << nr_lhs_bits);
-    }
-  /* fprintf (stderr, "s[wd]l: 0x%08lx%08lx -> 0x%08lx%08lx\n",
-	   (long) ((unsigned64) rt >> 32), (long) rt,
-	   (long) ((unsigned64) memval >> 32), (long) memval); */
-  StoreMemory (uncached, byte, memval, 0, paddr, vaddr, isREAL);
-}
-
-
 101010,5.BASE,5.RT,16.OFFSET:NORMAL:32::SWL
 "swl r<RT>, <OFFSET>(r<BASE>)"
 *mipsI:
@@ -2617,27 +2635,6 @@
   do_store_left (SD_, AccessLength_WORD, GPR[BASE], EXTEND16 (OFFSET), GPR[RT]);
 }
 
-
-:function:::void:do_store_right:unsigned access, address_word base, address_word offset, unsigned_word rt
-{
-  address_word mask = (WITH_TARGET_WORD_BITSIZE == 64 ? 0x7 : 0x3);
-  address_word reverseendian = (ReverseEndian ? -1 : 0);
-  address_word bigendiancpu = (BigEndianCPU ? -1 : 0);
-  unsigned int byte;
-  address_word paddr;
-  int uncached;
-  unsigned64 memval;
-  address_word vaddr;
-
-  vaddr = base + offset;
-  AddressTranslation (vaddr, isDATA, isSTORE, &paddr, &uncached, isTARGET, isREAL);
-  paddr = (paddr ^ (reverseendian & mask));
-  if (BigEndianMem != 0)
-    paddr &= ~access;
-  byte = ((vaddr & mask) ^ (bigendiancpu & mask));
-  memval = (rt << (byte * 8));
-  StoreMemory (uncached, access - (access & byte), memval, 0, paddr, vaddr, isREAL);
-}
 
 101110,5.BASE,5.RT,16.OFFSET:NORMAL:32::SWR
 "swr r<RT>, <OFFSET>(r<BASE>)"

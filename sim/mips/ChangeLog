@@ -1,5 +1,12 @@
 2002-02-27  Chris Demetriou  <cgd@broadcom.com>
 
+	* mips.igen (do_load_left, do_load_right): Move to be immediately
+	following do_load.
+	(do_store_left, do_store_right): Move to be immediately following
+	do_store.
+
+2002-02-27  Chris Demetriou  <cgd@broadcom.com>
+
 	* mips.igen (mipsV): New model name.  Also, add it to
 	all instructions and functions where it is appropriate.
 
