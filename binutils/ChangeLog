@@ -1,3 +1,8 @@
+1999-08-18  Nick Clifton  <nickc@cygnus.com>
+
+	* dlltool.c (make_head): Only emit interworking directive if
+	necessary. 
+
 Thu Jul 15 22:44:21 1999  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* readelf.c (process_abbrev_section): Handle standard-conforming

@@ -143,27 +143,27 @@
    SECTIONS donkey READ WRITE
    aardvark EXECUTE
 
- # compile up the parts of the dll
+ # Compile up the parts of the dll and the program
 
-   gcc -c file1.c
-   gcc -c file2.c
+   gcc -c file1.c file2.c themain.c
 
- # put them in a library (you don't have to, you
- # could name all the .os on the dlltool line)
+ # Optional: put the dll objects into a library
+ # (you don't have to, you could name all the object
+ # files on the dlltool line)
 
    ar  qcv thedll.in file1.o file2.o
    ranlib thedll.in
 
- # run this tool over the library and the def file
+ # Run this tool over the DLL's .def file and generate an exports
+ # file (thedll.o) and an imports file (thedll.a).
+ # (You may have to use -S to tell dlltool where to find the assembler).
+ 
    ./dlltool --def thedll.def --output-exp thedll.o --output-lib thedll.a
 
- # build the dll with the library with file1.o, file2.o and the export table
+ # Build the dll with the library with file1.o, file2.o and the export table
    ld -o thedll.dll thedll.o thedll.in
 
- # build the mainline
-   gcc -c themain.c
-
- # link the executable with the import library
+ # Link the executable with the import library
    gcc -o themain.exe themain.o thedll.a
 
  */
@@ -2681,7 +2681,7 @@ make_tail ()
   sprintf (cmd, "%s -o %s %s", as_flags, TMP_TAIL_O, TMP_TAIL_S);
   
 #ifdef DLLTOOL_ARM
-  if (machine == MARM_INTERWORK || MTHUMB)
+  if (machine == MARM_INTERWORK || machine == MTHUMB)
     strcat (cmd, " -mthumb-interwork");
 #endif
   
