@@ -41,7 +41,11 @@
 #define	DEFAULT_ARCH	bfd_arch_pdp11
 #define	DEFAULT_MID 	M_PDP11
 
-#define MY(OP) CAT(pdp11_aout_,OP)
+/* Do not "beautify" the CONCAT* macro args.  Traditional C will not
+   remove whitespace added here, and thus will fail to concatenate
+   the tokens.  */
+#define MY(OP) CONCAT2 (pdp11_aout_,OP)
+
 /* This needs to start with a.out so GDB knows it is an a.out variant.  */
 #define TARGETNAME "a.out-pdp11"
 

@@ -21,9 +21,13 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "bfd.h"
 #include "sysdep.h"
+
 /* Avoid multiple defininitions from aoutx if supporting standarad a.out
    as well as our own.  */
-#define NAME(x,y) CAT3(aoutarm,_32_,y)
+/* Do not "beautify" the CONCAT* macro args.  Traditional C will not
+   remove whitespace added here, and thus will fail to concatenate
+   the tokens.  */
+#define NAME(x,y) CONCAT3 (aoutarm,_32_,y)
 
 #define N_TXTADDR(x)						\
   ((N_MAGIC (x) == NMAGIC)					\
@@ -39,7 +43,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define SEGMENT_SIZE TARGET_PAGE_SIZE
 #define DEFAULT_ARCH bfd_arch_arm
 
-#define MY(OP) CAT(aoutarm_,OP)
+#define MY(OP) CONCAT2 (aoutarm_,OP)
 #define N_BADMAG(x) ((((x).a_info & ~007200) != ZMAGIC) && \
                      (((x).a_info & ~006000) != OMAGIC) && \
                      ((x).a_info != NMAGIC))

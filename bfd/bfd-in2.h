@@ -34,8 +34,22 @@ extern "C" {
 #endif
 
 #include "ansidecl.h"
+#include "symcat.h"
+#if defined (__STDC__) || defined (ALMOST_STDC) || defined (HAVE_STRINGIZE)
+#ifndef SABER
+/* This hack is to avoid a problem with some strict ANSI C preprocessors.
+   The problem is, "32_" is not a valid preprocessing token, and we don't
+   want extra underscores (e.g., "nlm_32_").  The XCONCAT2 macro will
+   cause the inner CONCAT2 macros to be evaluated first, producing
+   still-valid pp-tokens.  Then the final concatenation can be done.  */
+#undef CONCAT4
+#define CONCAT4(a,b,c,d) XCONCAT2(CONCAT2(a,b),CONCAT2(c,d))
+#endif
+#endif
 
-#define BFD_VERSION  "@VERSION@"
+#define BFD_VERSION @bfd_version@
+#define BFD_VERSION_DATE @bfd_version_date@
+#define BFD_VERSION_STRING @bfd_version_string@
 
 /* The word size used by BFD on the host.  This may be 64 with a 32
    bit target if the host is 64 bit, or if other 64 bit targets have
@@ -436,34 +450,9 @@ extern void bfd_hash_traverse PARAMS ((struct bfd_hash_table *,
 				       boolean (*) (struct bfd_hash_entry *,
 						    PTR),
 				       PTR info));
-
-/* Semi-portable string concatenation in cpp.
-   The CAT4 hack is to avoid a problem with some strict ANSI C preprocessors.
-   The problem is, "32_" is not a valid preprocessing token, and we don't
-   want extra underscores (e.g., "nlm_32_").  The XCAT2 macro will cause the
-   inner CAT macros to be evaluated first, producing still-valid pp-tokens.
-   Then the final concatenation can be done.  (Sigh.)  */
-#ifndef CAT
-#ifdef SABER
-#define CAT(a,b)	a##b
-#define CAT3(a,b,c)	a##b##c
-#define CAT4(a,b,c,d)	a##b##c##d
-#else
-#if defined(__STDC__) || defined(ALMOST_STDC)
-#define CAT(a,b) a##b
-#define CAT3(a,b,c) a##b##c
-#define XCAT2(a,b)	CAT(a,b)
-#define CAT4(a,b,c,d)	XCAT2(CAT(a,b),CAT(c,d))
-#else
-#define CAT(a,b) a/**/b
-#define CAT3(a,b,c) a/**/b/**/c
-#define CAT4(a,b,c,d)	a/**/b/**/c/**/d
-#endif
-#endif
-#endif
 
 #define COFF_SWAP_TABLE (PTR) &bfd_coff_std_swap_table
-
+
 /* User program access to BFD facilities */
 
 /* Direct I/O routines, for programs which know more about the object
@@ -3473,12 +3462,12 @@ typedef struct bfd_target
   boolean  (*_bfd_write_contents[bfd_type_end]) PARAMS ((bfd *));
 
   /* Generic entry points.  */
-#define BFD_JUMP_TABLE_GENERIC(NAME)\
-CAT(NAME,_close_and_cleanup),\
-CAT(NAME,_bfd_free_cached_info),\
-CAT(NAME,_new_section_hook),\
-CAT(NAME,_get_section_contents),\
-CAT(NAME,_get_section_contents_in_window)
+#define BFD_JUMP_TABLE_GENERIC(NAME) \
+CONCAT2 (NAME,_close_and_cleanup), \
+CONCAT2 (NAME,_bfd_free_cached_info), \
+CONCAT2 (NAME,_new_section_hook), \
+CONCAT2 (NAME,_get_section_contents), \
+CONCAT2 (NAME,_get_section_contents_in_window)
 
   /* Called when the BFD is being closed to do any necessary cleanup.  */
   boolean  (*_close_and_cleanup) PARAMS ((bfd *));
@@ -3493,13 +3482,13 @@ CAT(NAME,_get_section_contents_in_window)
     PARAMS ((bfd *, sec_ptr, bfd_window *, file_ptr, bfd_size_type));
 
   /* Entry points to copy private data.  */
-#define BFD_JUMP_TABLE_COPY(NAME)\
-CAT(NAME,_bfd_copy_private_bfd_data),\
-CAT(NAME,_bfd_merge_private_bfd_data),\
-CAT(NAME,_bfd_copy_private_section_data),\
-CAT(NAME,_bfd_copy_private_symbol_data),\
-CAT(NAME,_bfd_set_private_flags),\
-CAT(NAME,_bfd_print_private_bfd_data)\
+#define BFD_JUMP_TABLE_COPY(NAME) \
+CONCAT2 (NAME,_bfd_copy_private_bfd_data), \
+CONCAT2 (NAME,_bfd_merge_private_bfd_data), \
+CONCAT2 (NAME,_bfd_copy_private_section_data), \
+CONCAT2 (NAME,_bfd_copy_private_symbol_data), \
+CONCAT2 (NAME,_bfd_set_private_flags), \
+CONCAT2 (NAME,_bfd_print_private_bfd_data) \
   /* Called to copy BFD general private data from one object file
      to another.  */
   boolean  (*_bfd_copy_private_bfd_data) PARAMS ((bfd *, bfd *));
@@ -3521,26 +3510,26 @@ CAT(NAME,_bfd_print_private_bfd_data)\
   boolean  (*_bfd_print_private_bfd_data) PARAMS ((bfd *, PTR));
 
   /* Core file entry points.  */
-#define BFD_JUMP_TABLE_CORE(NAME)\
-CAT(NAME,_core_file_failing_command),\
-CAT(NAME,_core_file_failing_signal),\
-CAT(NAME,_core_file_matches_executable_p)
+#define BFD_JUMP_TABLE_CORE(NAME) \
+CONCAT2 (NAME,_core_file_failing_command), \
+CONCAT2 (NAME,_core_file_failing_signal), \
+CONCAT2 (NAME,_core_file_matches_executable_p)
   char *   (*_core_file_failing_command) PARAMS ((bfd *));
   int      (*_core_file_failing_signal) PARAMS ((bfd *));
   boolean  (*_core_file_matches_executable_p) PARAMS ((bfd *, bfd *));
 
   /* Archive entry points.  */
-#define BFD_JUMP_TABLE_ARCHIVE(NAME)\
-CAT(NAME,_slurp_armap),\
-CAT(NAME,_slurp_extended_name_table),\
-CAT(NAME,_construct_extended_name_table),\
-CAT(NAME,_truncate_arname),\
-CAT(NAME,_write_armap),\
-CAT(NAME,_read_ar_hdr),\
-CAT(NAME,_openr_next_archived_file),\
-CAT(NAME,_get_elt_at_index),\
-CAT(NAME,_generic_stat_arch_elt),\
-CAT(NAME,_update_armap_timestamp)
+#define BFD_JUMP_TABLE_ARCHIVE(NAME) \
+CONCAT2 (NAME,_slurp_armap), \
+CONCAT2 (NAME,_slurp_extended_name_table), \
+CONCAT2 (NAME,_construct_extended_name_table), \
+CONCAT2 (NAME,_truncate_arname), \
+CONCAT2 (NAME,_write_armap), \
+CONCAT2 (NAME,_read_ar_hdr), \
+CONCAT2 (NAME,_openr_next_archived_file), \
+CONCAT2 (NAME,_get_elt_at_index), \
+CONCAT2 (NAME,_generic_stat_arch_elt), \
+CONCAT2 (NAME,_update_armap_timestamp)
   boolean  (*_bfd_slurp_armap) PARAMS ((bfd *));
   boolean  (*_bfd_slurp_extended_name_table) PARAMS ((bfd *));
   boolean  (*_bfd_construct_extended_name_table)
@@ -3556,18 +3545,18 @@ CAT(NAME,_update_armap_timestamp)
   boolean  (*_bfd_update_armap_timestamp) PARAMS ((bfd *));
 
   /* Entry points used for symbols.  */
-#define BFD_JUMP_TABLE_SYMBOLS(NAME)\
-CAT(NAME,_get_symtab_upper_bound),\
-CAT(NAME,_get_symtab),\
-CAT(NAME,_make_empty_symbol),\
-CAT(NAME,_print_symbol),\
-CAT(NAME,_get_symbol_info),\
-CAT(NAME,_bfd_is_local_label_name),\
-CAT(NAME,_get_lineno),\
-CAT(NAME,_find_nearest_line),\
-CAT(NAME,_bfd_make_debug_symbol),\
-CAT(NAME,_read_minisymbols),\
-CAT(NAME,_minisymbol_to_symbol)
+#define BFD_JUMP_TABLE_SYMBOLS(NAME) \
+CONCAT2 (NAME,_get_symtab_upper_bound), \
+CONCAT2 (NAME,_get_symtab), \
+CONCAT2 (NAME,_make_empty_symbol), \
+CONCAT2 (NAME,_print_symbol), \
+CONCAT2 (NAME,_get_symbol_info), \
+CONCAT2 (NAME,_bfd_is_local_label_name), \
+CONCAT2 (NAME,_get_lineno), \
+CONCAT2 (NAME,_find_nearest_line), \
+CONCAT2 (NAME,_bfd_make_debug_symbol), \
+CONCAT2 (NAME,_read_minisymbols), \
+CONCAT2 (NAME,_minisymbol_to_symbol)
   long     (*_bfd_get_symtab_upper_bound) PARAMS ((bfd *));
   long     (*_bfd_canonicalize_symtab) PARAMS ((bfd *,
                                                 struct symbol_cache_entry **));
@@ -3602,10 +3591,10 @@ CAT(NAME,_minisymbol_to_symbol)
                                              asymbol *));
 
   /* Routines for relocs.  */
-#define BFD_JUMP_TABLE_RELOCS(NAME)\
-CAT(NAME,_get_reloc_upper_bound),\
-CAT(NAME,_canonicalize_reloc),\
-CAT(NAME,_bfd_reloc_type_lookup)
+#define BFD_JUMP_TABLE_RELOCS(NAME) \
+CONCAT2 (NAME,_get_reloc_upper_bound), \
+CONCAT2 (NAME,_canonicalize_reloc), \
+CONCAT2 (NAME,_bfd_reloc_type_lookup)
   long     (*_get_reloc_upper_bound) PARAMS ((bfd *, sec_ptr));
   long     (*_bfd_canonicalize_reloc) PARAMS ((bfd *, sec_ptr, arelent **,
                                                struct symbol_cache_entry **));
@@ -3614,25 +3603,25 @@ CAT(NAME,_bfd_reloc_type_lookup)
            (*reloc_type_lookup) PARAMS ((bfd *, bfd_reloc_code_real_type));
 
   /* Routines used when writing an object file.  */
-#define BFD_JUMP_TABLE_WRITE(NAME)\
-CAT(NAME,_set_arch_mach),\
-CAT(NAME,_set_section_contents)
+#define BFD_JUMP_TABLE_WRITE(NAME) \
+CONCAT2 (NAME,_set_arch_mach), \
+CONCAT2 (NAME,_set_section_contents)
   boolean  (*_bfd_set_arch_mach) PARAMS ((bfd *, enum bfd_architecture,
                                           unsigned long));
   boolean  (*_bfd_set_section_contents) PARAMS ((bfd *, sec_ptr, PTR,
                                                  file_ptr, bfd_size_type));
 
   /* Routines used by the linker.  */
-#define BFD_JUMP_TABLE_LINK(NAME)\
-CAT(NAME,_sizeof_headers),\
-CAT(NAME,_bfd_get_relocated_section_contents),\
-CAT(NAME,_bfd_relax_section),\
-CAT(NAME,_bfd_link_hash_table_create),\
-CAT(NAME,_bfd_link_add_symbols),\
-CAT(NAME,_bfd_final_link),\
-CAT(NAME,_bfd_link_split_section),\
-CAT(NAME,_bfd_gc_sections),\
-CAT(NAME,_bfd_merge_sections)
+#define BFD_JUMP_TABLE_LINK(NAME) \
+CONCAT2 (NAME,_sizeof_headers), \
+CONCAT2 (NAME,_bfd_get_relocated_section_contents), \
+CONCAT2 (NAME,_bfd_relax_section), \
+CONCAT2 (NAME,_bfd_link_hash_table_create), \
+CONCAT2 (NAME,_bfd_link_add_symbols), \
+CONCAT2 (NAME,_bfd_final_link), \
+CONCAT2 (NAME,_bfd_link_split_section), \
+CONCAT2 (NAME,_bfd_gc_sections), \
+CONCAT2 (NAME,_bfd_merge_sections)
   int      (*_bfd_sizeof_headers) PARAMS ((bfd *, boolean));
   bfd_byte *(*_bfd_get_relocated_section_contents)
     PARAMS ((bfd *, struct bfd_link_info *, struct bfd_link_order *,
@@ -3662,11 +3651,11 @@ CAT(NAME,_bfd_merge_sections)
   boolean  (*_bfd_merge_sections) PARAMS ((bfd *, struct bfd_link_info *));
 
   /* Routines to handle dynamic symbols and relocs.  */
-#define BFD_JUMP_TABLE_DYNAMIC(NAME)\
-CAT(NAME,_get_dynamic_symtab_upper_bound),\
-CAT(NAME,_canonicalize_dynamic_symtab),\
-CAT(NAME,_get_dynamic_reloc_upper_bound),\
-CAT(NAME,_canonicalize_dynamic_reloc)
+#define BFD_JUMP_TABLE_DYNAMIC(NAME) \
+CONCAT2 (NAME,_get_dynamic_symtab_upper_bound), \
+CONCAT2 (NAME,_canonicalize_dynamic_symtab), \
+CONCAT2 (NAME,_get_dynamic_reloc_upper_bound), \
+CONCAT2 (NAME,_canonicalize_dynamic_reloc)
   /* Get the amount of memory required to hold the dynamic symbols. */
   long     (*_bfd_get_dynamic_symtab_upper_bound) PARAMS ((bfd *));
   /* Read in the dynamic symbols.  */

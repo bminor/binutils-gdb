@@ -64,10 +64,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 /* The definition here seems not used; just provided as a convention.  */
 #define DEFAULT_ARCH bfd_arch_cris
 
-/* ??? Spacing might be essential for the parameters in this macro.
-   Do Not Change.  */
-#define MY(OP) CAT (cris_aout_,OP)
-#define NAME(x,y) CAT3(cris_aout,_32_,y)
+/* Do not "beautify" the CONCAT* macro args.  Traditional C will not
+   remove whitespace added here, and thus will fail to concatenate
+   the tokens.  */
+#define MY(OP) CONCAT2 (cris_aout_,OP)
+#define NAME(x, y) CONCAT3 (cris_aout,_32_,y)
 
 #include "bfd.h"
 

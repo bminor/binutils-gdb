@@ -25,7 +25,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "aout/aout64.h"
 #include "ns32k.h"
 
-#define MYNS(OP) CAT(ns32kaout_,OP)
+/* Do not "beautify" the CONCAT* macro args.  Traditional C will not
+   remove whitespace added here, and thus will fail to concatenate
+   the tokens.  */
+#define MYNS(OP) CONCAT2 (ns32kaout_,OP)
+
 reloc_howto_type *
 MYNS(bfd_reloc_type_lookup)
   PARAMS((bfd *abfd AND
@@ -37,7 +41,7 @@ MYNS(write_object_contents)
 
 /* Avoid multiple definitions from aoutx if supporting
    standard a.out format(s) as well as this one.  */
-#define NAME(x,y) CAT3(ns32kaout,_32_,y)
+#define NAME(x,y) CONCAT3 (ns32kaout,_32_,y)
 
 void bfd_ns32k_arch PARAMS ((void));
 

@@ -41,7 +41,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define SEGMENT_SIZE 0x400000
 #define DEFAULT_ARCH bfd_arch_i386
 
-#define MY(OP) CAT(i386aout_,OP)
+/* Do not "beautify" the CONCAT* macro args.  Traditional C will not
+   remove whitespace added here, and thus will fail to concatenate
+   the tokens.  */
+#define MY(OP) CONCAT2 (i386aout_,OP)
 #define TARGETNAME "a.out-i386"
 #define NO_WRITE_HEADER_KLUDGE 1
 

@@ -100,7 +100,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
    This should also be fixed.  */
 
 #define TARGETNAME "a.out-hp300hpux"
-#define MY(OP) CAT(hp300hpux_,OP)
+
+/* Do not "beautify" the CONCAT* macro args.  Traditional C will not
+   remove whitespace added here, and thus will fail to concatenate
+   the tokens.  */
+#define MY(OP) CONCAT2 (hp300hpux_,OP)
 
 #define external_exec hp300hpux_exec_bytes
 #define external_nlist hp300hpux_nlist_bytes
@@ -123,7 +127,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 /* provide overrides for routines in this file */
 /***********************************************/
 /* these don't use MY because that causes problems within JUMP_TABLE
-   (CAT winds up being expanded recursively, which ANSI C compilers
+   (CONCAT2 winds up being expanded recursively, which ANSI C compilers
    will not do).  */
 #define MY_get_symtab hp300hpux_get_symtab
 #define MY_get_symtab_upper_bound hp300hpux_get_symtab_upper_bound
@@ -181,7 +185,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define HP_RLENGTH_LONG		0x02
 #define HP_RLENGTH_ALIGN	0x03
 
-#define NAME(x,y) CAT3(hp300hpux,_32_,y)
+#define NAME(x,y) CONCAT3 (hp300hpux,_32_,y)
 #define ARCH_SIZE 32
 
 /* aoutx.h requires definitions for BMAGIC and QMAGIC.  */

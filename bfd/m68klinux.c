@@ -37,7 +37,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #define TARGET_IS_BIG_ENDIAN_P
 #define DEFAULT_ARCH bfd_arch_m68k
-#define MY(OP) CAT(m68klinux_,OP)
+
+/* Do not "beautify" the CONCAT* macro args.  Traditional C will not
+   remove whitespace added here, and thus will fail to concatenate
+   the tokens.  */
+#define MY(OP) CONCAT2 (m68klinux_,OP)
 #define TARGETNAME "a.out-m68k-linux"
 
 extern const bfd_target MY(vec);

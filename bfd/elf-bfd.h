@@ -33,17 +33,20 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define NUM_SHDR_ENTRIES(shdr) ((shdr)->sh_size / (shdr)->sh_entsize)
 
 /* If size isn't specified as 64 or 32, NAME macro should fail.  */
+/* Do not "beautify" the CONCAT* macro args.  Traditional C will not
+   remove whitespace added here, and thus will fail to concatenate
+   the tokens.  */
 #ifndef NAME
 #if ARCH_SIZE==64
-#define NAME(x,y) CAT4(x,64,_,y)
+#define NAME(x,y) CONCAT4 (x,64,_,y)
 #endif
 #if ARCH_SIZE==32
-#define NAME(x,y) CAT4(x,32,_,y)
+#define NAME(x,y) CONCAT4 (x,32,_,y)
 #endif
 #endif
 
 #ifndef NAME
-#define NAME(x,y) CAT4(x,NOSIZE,_,y)
+#define NAME(x,y) CONCAT4 (x,NOSIZE,_,y)
 #endif
 
 #define ElfNAME(X)	NAME(Elf,X)

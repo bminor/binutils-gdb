@@ -78,6 +78,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /* Parameterize the a.out code based on whether it is being built
    for a 32-bit architecture or a 64-bit architecture.  */
+/* Do not "beautify" the CONCAT* macro args.  Traditional C will not
+   remove whitespace added here, and thus will fail to concatenate
+   the tokens.  */
 #if ARCH_SIZE==64
 #define GET_WORD H_GET_64
 #define GET_SWORD H_GET_S64
@@ -85,9 +88,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define PUT_WORD H_PUT_64
 #define PUT_MAGIC H_PUT_32
 #ifndef NAME
-#define NAME(x,y) CAT3(x,_64_,y)
+#define NAME(x,y) CONCAT3 (x,_64_,y)
 #endif
-#define JNAME(x) CAT(x,_64)
+#define JNAME(x) CONCAT2 (x,_64)
 #define BYTES_IN_WORD 8
 #else
 #if ARCH_SIZE==16
@@ -97,9 +100,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define PUT_WORD H_PUT_16
 #define PUT_MAGIC H_PUT_16
 #ifndef NAME
-#define NAME(x,y) CAT3(x,_16_,y)
+#define NAME(x,y) CONCAT3 (x,_16_,y)
 #endif
-#define JNAME(x) CAT(x,_16)
+#define JNAME(x) CONCAT2 (x,_16)
 #define BYTES_IN_WORD 2
 #else /* ARCH_SIZE == 32 */
 #define GET_WORD H_GET_32
@@ -108,9 +111,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define PUT_WORD H_PUT_32
 #define PUT_MAGIC H_PUT_32
 #ifndef NAME
-#define NAME(x,y) CAT3(x,_32_,y)
+#define NAME(x,y) CONCAT3 (x,_32_,y)
 #endif
-#define JNAME(x) CAT(x,_32)
+#define JNAME(x) CONCAT2 (x,_32)
 #define BYTES_IN_WORD 4
 #endif /* ARCH_SIZE==32 */
 #endif /* ARCH_SIZE==64 */

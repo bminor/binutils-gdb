@@ -28,9 +28,12 @@
 #define DEFAULT_ARCH bfd_arch_tic30
 #define ARCH_SIZE 32
 
-#define MY(OP) CAT(tic30_aout_,OP)
+/* Do not "beautify" the CONCAT* macro args.  Traditional C will not
+   remove whitespace added here, and thus will fail to concatenate
+   the tokens.  */
+#define MY(OP) CONCAT2 (tic30_aout_,OP)
 #define TARGETNAME "a.out-tic30"
-#define NAME(x,y) CAT3(tic30_aout,_32_,y)
+#define NAME(x,y) CONCAT3 (tic30_aout,_32_,y)
 
 #include "bfd.h"
 #include "sysdep.h"

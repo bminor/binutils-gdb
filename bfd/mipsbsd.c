@@ -36,7 +36,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 			    || (mtype) == M_MIPS1 || (mtype) == M_MIPS2)
 #define MY_symbol_leading_char '\0'
 
-#define MY(OP) CAT(mipsbsd_,OP)
+/* Do not "beautify" the CONCAT* macro args.  Traditional C will not
+   remove whitespace added here, and thus will fail to concatenate
+   the tokens.  */
+#define MY(OP) CONCAT2 (mipsbsd_,OP)
 
 #include "bfd.h"
 #include "sysdep.h"
@@ -52,7 +55,7 @@ static void MY(choose_reloc_size) PARAMS ((bfd *abfd));
 #define MY_write_object_contents MY(write_object_contents)
 static boolean MY(write_object_contents) PARAMS ((bfd *abfd));
 
-/* We can't use MY(x) here because it leads to a recursive call to CAT
+/* We can't use MY(x) here because it leads to a recursive call to CONCAT2
    when expanded inside JUMP_TABLE.  */
 #define MY_bfd_reloc_type_lookup mipsbsd_reloc_howto_type_lookup
 #define MY_canonicalize_reloc mipsbsd_canonicalize_reloc

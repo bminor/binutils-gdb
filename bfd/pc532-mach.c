@@ -50,10 +50,13 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define SEGMENT_SIZE TARGET_PAGE_SIZE
 #define DEFAULT_ARCH bfd_arch_ns32k
 
-#define MY(OP) CAT(pc532machaout_,OP)
+/* Do not "beautify" the CONCAT* macro args.  Traditional C will not
+   remove whitespace added here, and thus will fail to concatenate
+   the tokens.  */
+#define MY(OP) CONCAT2 (pc532machaout_,OP)
 
 /* Must be the same as aout-ns32k.c */
-#define NAME(x,y) CAT3(ns32kaout,_32_,y)
+#define NAME(x,y) CONCAT3 (ns32kaout,_32_,y)
 
 #define TARGETNAME "a.out-pc532-mach"
 

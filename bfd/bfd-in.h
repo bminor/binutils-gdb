@@ -28,8 +28,22 @@ extern "C" {
 #endif
 
 #include "ansidecl.h"
+#include "symcat.h"
+#if defined (__STDC__) || defined (ALMOST_STDC) || defined (HAVE_STRINGIZE)
+#ifndef SABER
+/* This hack is to avoid a problem with some strict ANSI C preprocessors.
+   The problem is, "32_" is not a valid preprocessing token, and we don't
+   want extra underscores (e.g., "nlm_32_").  The XCONCAT2 macro will
+   cause the inner CONCAT2 macros to be evaluated first, producing
+   still-valid pp-tokens.  Then the final concatenation can be done.  */
+#undef CONCAT4
+#define CONCAT4(a,b,c,d) XCONCAT2(CONCAT2(a,b),CONCAT2(c,d))
+#endif
+#endif
 
-#define BFD_VERSION  "@VERSION@"
+#define BFD_VERSION @bfd_version@
+#define BFD_VERSION_DATE @bfd_version_date@
+#define BFD_VERSION_STRING @bfd_version_string@
 
 /* The word size used by BFD on the host.  This may be 64 with a 32
    bit target if the host is 64 bit, or if other 64 bit targets have
@@ -430,34 +444,9 @@ extern void bfd_hash_traverse PARAMS ((struct bfd_hash_table *,
 				       boolean (*) (struct bfd_hash_entry *,
 						    PTR),
 				       PTR info));
-
-/* Semi-portable string concatenation in cpp.
-   The CAT4 hack is to avoid a problem with some strict ANSI C preprocessors.
-   The problem is, "32_" is not a valid preprocessing token, and we don't
-   want extra underscores (e.g., "nlm_32_").  The XCAT2 macro will cause the
-   inner CAT macros to be evaluated first, producing still-valid pp-tokens.
-   Then the final concatenation can be done.  (Sigh.)  */
-#ifndef CAT
-#ifdef SABER
-#define CAT(a,b)	a##b
-#define CAT3(a,b,c)	a##b##c
-#define CAT4(a,b,c,d)	a##b##c##d
-#else
-#if defined(__STDC__) || defined(ALMOST_STDC)
-#define CAT(a,b) a##b
-#define CAT3(a,b,c) a##b##c
-#define XCAT2(a,b)	CAT(a,b)
-#define CAT4(a,b,c,d)	XCAT2(CAT(a,b),CAT(c,d))
-#else
-#define CAT(a,b) a/**/b
-#define CAT3(a,b,c) a/**/b/**/c
-#define CAT4(a,b,c,d)	a/**/b/**/c/**/d
-#endif
-#endif
-#endif
 
 #define COFF_SWAP_TABLE (PTR) &bfd_coff_std_swap_table
-
+
 /* User program access to BFD facilities */
 
 /* Direct I/O routines, for programs which know more about the object

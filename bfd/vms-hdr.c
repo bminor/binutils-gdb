@@ -313,7 +313,7 @@ _bfd_vms_write_hdr (abfd, objtype)
   else
     _bfd_vms_output_counted (abfd, "NONAME");
 
-  _bfd_vms_output_counted (abfd, BFD_VERSION);
+  _bfd_vms_output_counted (abfd, BFD_VERSION_STRING);
   _bfd_vms_output_dump (abfd, get_vms_time_string (), 17);
   _bfd_vms_output_fill (abfd, 0, 17);
   _bfd_vms_output_flush (abfd);

@@ -1,3 +1,61 @@
+2001-10-02  Alan Modra  <amodra@bigpond.net.au>
+
+	* version.h: New file.
+	* bfd-in.h: (BFD_VERSION): Substitute bfd_version.
+	(BFD_VERSION_DATE): Define.
+	(BFD_VERSION_STRING): Define.
+	* configure.in: AC_SUBST bfd_version, bfd_version_date and
+	bfd_version_string.
+	(AC_OUTPUT <bfd-in3.h>): Depend on version.h.
+	* bfd-in2.h: Regenerate.
+	* configure: Regenerate.
+	* Makefile.am: Run "make dep-am".
+	* Makefile.in: Regenerate.
+
+	* bfd-in.h: Include "symcat.h".
+	(CONCAT4): Redefine as for old CAT4.
+	* aout-arm.c: Use equivalent CONCAT* macro in place of CAT* macros.
+	Add warning regarding whitespace.
+	* aout-cris.c: Likewise.
+	* aout-ns32k.c: Likewise.
+	* aout-sparcle.c: Likewise.
+	* aout-tic30.c: Likewise.
+	* aout0.c: Likewise.
+	* armnetbsd.c: Likewise.
+	* demo64.c: Likewise.
+	* elf-bfd.h: Likewise.
+	* gen-aout.c: Likewise.
+	* host-aout.c: Likewise.
+	* hp300bsd.c: Likewise.
+	* hp300hpux.c: Likewise.
+	* i386aout.c: Likewise.
+	* i386bsd.c: Likewise.
+	* i386dynix.c: Likewise.
+	* i386freebsd.c: Likewise.
+	* i386linux.c: Likewise.
+	* i386lynx.c: Likewise.
+	* i386mach3.c: Likewise.
+	* i386netbsd.c: Likewise.
+	* libaout.h: Likewise.
+	* m68k4knetbsd.c: Likewise.
+	* m68klinux.c: Likewise.
+	* m68klynx.c: Likewise.
+	* m68knetbsd.c: Likewise.
+	* m88kmach3.c: Likewise.
+	* mipsbsd.c: Likewise.
+	* newsos3.c: Likewise.
+	* ns32knetbsd.c: Likewise.
+	* pc532-mach.c: Likewise.
+	* pdp11.c: Likewise.
+	* riscix.c: Likewise.
+	* sparclinux.c: Likewise.
+	* sparclynx.c: Likewise.
+	* sparcnetbsd.c: Likewise.
+	* sunos.c: Likewise.
+	* targets.c: Likewise.
+	* vaxnetbsd.c: Likewise.
+	* vms-hdr.c: Likewise.
+
 2001-10-01  Alan Modra  <amodra@bigpond.net.au>
 
 	* bfd-in.h: Remove comments regarding generated files.

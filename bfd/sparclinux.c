@@ -37,7 +37,10 @@ USA.  */
 #include "libaout.h"           /* BFD a.out internal data structures */
 
 #define DEFAULT_ARCH bfd_arch_sparc
-#define MY(OP) CAT(sparclinux_,OP)
+/* Do not "beautify" the CONCAT* macro args.  Traditional C will not
+   remove whitespace added here, and thus will fail to concatenate
+   the tokens.  */
+#define MY(OP) CONCAT2 (sparclinux_,OP)
 #define TARGETNAME "a.out-sparc-linux"
 
 extern const bfd_target MY(vec);

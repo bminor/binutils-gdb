@@ -31,9 +31,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define DEFAULT_ARCH	bfd_arch_i386
 #define MACHTYPE_OK(mtype) ((mtype) == M_386 || (mtype) == M_UNKNOWN)
 
-#define MY(OP) CAT(i386dynix_,OP)
+/* Do not "beautify" the CONCAT* macro args.  Traditional C will not
+   remove whitespace added here, and thus will fail to concatenate
+   the tokens.  */
+#define MY(OP) CONCAT2 (i386dynix_,OP)
 #define TARGETNAME "a.out-i386-dynix"
-#define NAME(x,y) CAT3(i386dynix,_32_,y)
+#define NAME(x,y) CONCAT3 (i386dynix,_32_,y)
 #define ARCH_SIZE 32
 #define NAME_swap_exec_header_in NAME(i386dynix_32_,swap_exec_header_in)
 #define MY_get_section_contents aout_32_get_section_contents
