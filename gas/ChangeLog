@@ -2,6 +2,7 @@ Wed Feb  4 13:17:19 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-sparc.h (tc_fix_adjustable) [OBJ_ELF]: A reloc against
 	a gas internal symbol is adjustable.
+	* config/tc-ppc.h (tc_fix_adjustable): Likewise.
 
 	* as.h: If gcc version greater than 2.6, use `__format__' and
 	`__printf__' in function attributes, rather than `format' and
