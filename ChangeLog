@@ -1,3 +1,15 @@
+Thu Oct 13 15:51:20 1994  Jason Merrill  (jason@phydeaux.cygnus.com)
+
+	* Makefile.in (ALL_TARGET_MODULES): Add libstdc++.
+	(CHECK_TARGET_MODULES): Ditto.
+	(INSTALL_TARGET_MODULES): Ditto.
+	(TARGET_LIBS): Ditto.
+	(all-libstdc++): Note dependencies.
+
+Thu Oct 13 01:43:08 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* Makefile.in (BINUTILS_SUPPORT_DIRS): Add gas.
+
 Tue Oct 11 12:12:29 1994  Jason Merrill  (jason@phydeaux.cygnus.com)
 
 	* Makefile.in (CXXFLAGS): Use -fno-implicit-templates instead of

@@ -510,6 +510,7 @@ ALL_TARGET_MODULES = \
 	all-chillrt \
 	$(end-sanitize-chill) \
 	all-libio \
+	all-libstdc++ \
 	all-librx \
 	all-libg++ \
 	all-newlib \
@@ -522,6 +523,7 @@ CHECK_TARGET_MODULES = \
 	check-chillrt \
 	$(end-sanitize-chill) \
 	check-libio \
+	check-libstdc++ \
 	check-libg++ \
 	check-newlib \
 	check-xiberty
@@ -533,15 +535,16 @@ INSTALL_TARGET_MODULES = \
 	install-chillrt \
 	$(end-sanitize-chill) \
 	install-libio \
+	install-libstdc++ \
 	install-libg++ \
 	install-newlib \
 	install-xiberty
 
 # This is a shell case of all modules which are compiled using
 # $(TARGET_FLAGS_TO_PASS), used in the do-X rule.
-TARGET_LIBS = libio | librx | libg++ | newlib | xiberty
+TARGET_LIBS = libio | libstdc++ | librx | libg++ | newlib | xiberty
 # start-sanitize-chill
-TARGET_LIBS = chillrt | libio | librx | libg++ | newlib | xiberty
+TARGET_LIBS = chillrt | libio | libstdc++ | librx | libg++ | newlib | xiberty
 # end-sanitize-chill
 
 # The first rule in the file had better be this one.  Don't put any above it.
@@ -920,6 +923,8 @@ all-libg++: all-gas all-pagas all-ld all-gcc all-xiberty all-newlib \
 	all-libio all-librx
 all-libio: all-gas all-pagas all-ld all-gcc all-xiberty all-newlib 
 all-libiberty:
+all-libstdc++: all-gas all-pagas all-ld all-gcc all-xiberty all-newlib \
+	all-libio
 all-m4: all-libiberty
 all-make: all-libiberty
 all-mmalloc:
@@ -1109,7 +1114,7 @@ gas.tar.gz: $(DIST_SUPPORT) $(GAS_SUPPORT_DIRS) gas
 
 # The FSF "binutils" release includes gprof and ld.
 .PHONY: binutils.tar.gz
-BINUTILS_SUPPORT_DIRS= bfd include libiberty opcodes ld gprof
+BINUTILS_SUPPORT_DIRS= bfd gas include libiberty opcodes ld gprof
 binutils.tar.gz: $(DIST_SUPPORT) $(BINUTILS_SUPPORT_DIRS) binutils
 	$(MAKE) -f Makefile.in taz TOOL=binutils \
 		SUPPORT_FILES="$(BINUTILS_SUPPORT_DIRS)"
