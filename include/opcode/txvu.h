@@ -47,13 +47,19 @@ struct txvu_opcode {
 
   /* Macros to create the hash values for the lists.  */
 #define TXVU_HASH_UPPER_OPCODE(string) \
-  ((string)[0] >= 'a' && (string)[0] <= 'z' ? (string)[0] - 'a' : 26)
+  (tolower ((string)[0]) >= 'a' && tolower ((string)[0]) <= 'z' \
+   ? tolower ((string)[0]) - 'a' : 26)
 #define TXVU_HASH_LOWER_OPCODE(string) \
-  ((string)[0] >= 'a' && (string)[0] <= 'z' ? (string)[0] - 'a' : 26)
+  (tolower ((string)[0]) >= 'a' && tolower ((string)[0]) <= 'z' \
+   ? tolower ((string)[0]) - 'a' : 26)
+/* ??? The icode hashing is very simplistic.
+   upper: bits 0x3c, can't use lower two bits because of bc field
+   lower: upper 6 bits  */
+#define TXVU_ICODE_HASH_SIZE 6 /* bits */
 #define TXVU_HASH_UPPER_ICODE(insn) \
-  ((insn) & 0x3f)
+  ((insn) & 0x3c)
 #define TXVU_HASH_LOWER_ICODE(insn) \
-  ((insn) & 0x3f)
+  ((((insn) & 0xfc) >> 26) & 0x3f)
 
   /* Macros to access `next_asm', `next_dis' so users needn't care about the
      underlying mechanism.  */
@@ -113,7 +119,8 @@ struct txvu_operand {
 #define TXVU_OPERAND_FAKE 0x80
 
 /* Modifier values.  */
-/* A dot is required before a suffix.  Eg: .le  */
+
+/* A dot is required before a suffix.  e.g. .le  */
 #define TXVU_MOD_DOT 0x1000
 
 /* Sum of all TXVU_MOD_XXX bits.  */
