@@ -1,3 +1,72 @@
+2001-11-08  Martin Schwidefsky  <schwidefsky@de.ibm.com>
+
+	* elf32-s390: Major rework that introduces all recent changes to
+	the s390 backends.  Get a closer match to elf32-i386.
+	(elf_s390_relocate_section): Make use of dynamic section short-cuts.
+	Localise vars, and delay setting.  Better error reporting, replace
+	BFD_ASSERT with abort.  Check ELF_LINK_HASH_DEF_DYNAMIC to see if a
+	symbol is not defined in the regular object file and tread the weak
+	definition as the normal one.  Don't discard relocs for undefweak or
+	undefined symbols and check !DEF_REGULAR as well as DEF_DYNAMIC in
+	test for avoided copy relocs.  Reinstate fudge for unresolved relocs
+	in debugging sections.
+	(elf32_s390_adjust_dynamic_symbol): Handle nocopyreloc.  Don't do copy
+	reloc processing for weakdefs.  Remove redundant casts and aborts.
+	Delay setting of vars until needed.  Move creation of dynamic symbols
+	and allocation of .plt and .rela.plt to allocate_dynrelocs.  Replace
+	BFD_ASSERT with abort.  Discard .plt entries for everything with
+	plt.refcount <= 0.
+	(elf_s390_check_relocs):  Don't allocate space for dynamic relocs,
+	.got or .relgot here but do it in allocate_dynrelocs.  Reference count
+	possible .plt and .got entries.  Don't test input section SEC_READONLY
+	here to try to avoid copy relocs, and keep dyn_relocs regardless of
+	ELF_LINK_NON_GOT_REF.  Don't set DF_TEXTREL here.  Delay setting of
+	variables until needed.  Remove separate switch stmt for creating .got
+	section.  Initialise local_got_refcounts to 0.  Cache pointer to
+	"sreloc" section in elf_section_data. Tweak condition under which .got
+	created.  Report files with bad relocation section names.
+	(elf_s390_finish_dynamic_symbol): Don't copy relocs for symbols that
+	have been forced local.  Use same test to decide if we can use a
+	relative reloc for got as elf_s390_relocate_section.  Expand SHN_UNDEF
+	comment.  Move expressions out of function calls.  Replace BFD_ASSERT
+	with abort.
+	(elf_s390_finish_dynamic_sections): Migrate common code out of switch
+	statement.  Replace BFD_ASSERT with abort.
+	(elf_s390_size_dynamic_sections): Call readonly_dynrelocs. Rename "i"
+	to "ibfd".  Allocate space for local dyn relocs.  Use DF_TEXTREL flag
+	instead of looking up section names for DT_TEXTREL.  Replace
+	BFD_ASSERT with abort.  Zero out the dynamic allocated content space.
+	Add a comment to remind us that one day this ought to be fixed.
+	(struct elf_s390_link_hash_entry): Rename "root" to "elf".
+	(struct elf_s390_link_hash_table): Likewise.
+	(elf_s390_link_hash_newfunc): Rename to link_hash_newfunc and get
+	rid of unnecessary casts.
+	(struct elf_s390_dyn_relocs): Add "sec", and "pc_count" fields.
+	Remove "section" field.
+	(elf_s390_gc_sweep_hook): Sweep dyn_relocs and local_dynrel.
+	Reference count possible .plt entries.  Don't deallocate .got and
+	.relgot space here.
+	(struct elf_s390_pcrel_relocs_copied): Rename to elf_s390_dyn_relocs.
+	Update comment.
+	(struct elf_s390_link_hash_entry): Rename pcrel_relocs_copied to
+	dyn_relocs.
+	(elf_s390_discard_copies):  Delete.
+	(elf_s390_link_hash_traverse): Delete.
+	(bfd_elf32_bfd_final_link): Delete.  (ie. use regular final link
+	rather than gc variety).
+	(struct elf_s390_link_hash_table): Add sgot, sgotplt, srelgot, splt,
+	srelplt, sdynbss, srelbss fields.
+	(elf_s390_link_hash_table_create): Init them.
+	(WILL_CALL_FINISH_DYNAMIC_SYMBOL): Define.
+	(allocate_dynrelocs): New function.
+	(create_got_section): New function.
+	(elf_backend_can_refcount): Define.
+	(elf_backend_copy_indirect_symbol): Define.
+	(elf_s390_copy_indirect_symbol): New function.
+	(elf_s390_create_dynamic_sections): New function.
+	(readonly_dynrelocs): New function.
+	* elf64-s390x: Likewise.
+
 2001-11-07  Jakub Jelinek  <jakub@redhat.com>
 
 	* Makefile.am (BFD32_BACKENDS): Add elf-strtab.lo.
