@@ -672,8 +672,10 @@ init_sal (struct symtab_and_line *sal)
 
 
 
-/* Find which partial symtab on contains PC and SECTION.  Return 0 if none.  */
-
+/* Find which partial symtab contains PC and SECTION.  Return 0 if
+   none.  We return the psymtab that contains a symbol whose address
+   exactly matches PC, or, if we cannot find an exact match, the
+   psymtab that contains a symbol whose address is closest to PC.  */
 struct partial_symtab *
 find_pc_sect_psymtab (CORE_ADDR pc, asection *section)
 {
@@ -698,6 +700,8 @@ find_pc_sect_psymtab (CORE_ADDR pc, asection *section)
     if (pc >= pst->textlow && pc < pst->texthigh)
       {
 	struct partial_symtab *tpst;
+	struct partial_symtab *best_pst = pst;
+	struct partial_symbol *best_psym = NULL;
 
 	/* An objfile that has its functions reordered might have
 	   many partial symbol tables containing the PC, but
@@ -710,6 +714,13 @@ find_pc_sect_psymtab (CORE_ADDR pc, asection *section)
 	if (msymbol == NULL)
 	  return (pst);
 
+	/* The code range of partial symtabs sometimes overlap, so, in
+	   the loop below, we need to check all partial symtabs and
+	   find the one that fits better for the given PC address. We
+	   select the partial symtab that contains a symbol whose
+	   address is closest to the PC address.  By closest we mean
+	   that find_pc_sect_symbol returns the symbol with address
+	   that is closest and still less than the given PC.  */
 	for (tpst = pst; tpst != NULL; tpst = tpst->next)
 	  {
 	    if (pc >= tpst->textlow && pc < tpst->texthigh)
@@ -721,9 +732,33 @@ find_pc_sect_psymtab (CORE_ADDR pc, asection *section)
 		    && SYMBOL_VALUE_ADDRESS (p)
 		    == SYMBOL_VALUE_ADDRESS (msymbol))
 		  return (tpst);
+		if (p != NULL)
+		  {
+		    /* We found a symbol in this partial symtab which
+		       matches (or is closest to) PC, check whether it
+		       is closer than our current BEST_PSYM.  Since
+		       this symbol address is necessarily lower or
+		       equal to PC, the symbol closer to PC is the
+		       symbol which address is the highest.  */
+		    /* This way we return the psymtab which contains
+		       such best match symbol. This can help in cases
+		       where the symbol information/debuginfo is not
+		       complete, like for instance on IRIX6 with gcc,
+		       where no debug info is emitted for
+		       statics. (See also the nodebug.exp
+		       testcase.)  */
+		    if (best_psym == NULL
+			|| SYMBOL_VALUE_ADDRESS (p)
+			> SYMBOL_VALUE_ADDRESS (best_psym))
+		      {
+			best_psym = p;
+			best_pst = tpst;
+		      }
+		  }
+
 	      }
 	  }
-	return (pst);
+	return (best_pst);
       }
   }
   return (NULL);

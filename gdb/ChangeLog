@@ -1,5 +1,13 @@
-2004-02-19  Elena Zannoni  <ezannoni@redhat.com>
+2004-02-19  Joel Brobecker  <brobecker@gnat.com>
 
+	Committed by Elena Zannoni  <ezannoni@redhat.com>
+
+	* symtab.c (find_pc_sect_psymtab): Return the psymtab that
+	contains a symbol wich is the best, non-exact match for the given
+	pc.  Update comments.
+
+2004-02-19  Elena Zannoni  <ezannoni@redhat.com>
+	
 	* event-top.c (async_request_quit): Remove uses of REQUEST_QUIT
 	macro, which was part of the now removed Mach 3 port.
 	* utils.c (request_quit): Ditto.
