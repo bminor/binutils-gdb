@@ -44,6 +44,7 @@ extern int info_verbose;
 extern void (*readline_begin_hook) PARAMS ((char *, ...));
 extern char * (*readline_hook) PARAMS ((char *));
 extern void (*readline_end_hook) PARAMS ((void));
+extern void x_command PARAMS ((char *, int));
 
 /* If this definition isn't overridden by the header files, assume
    that isatty and fileno exist on this system.  */

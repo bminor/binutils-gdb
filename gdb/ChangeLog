@@ -1,3 +1,9 @@
+Wed Dec  3 12:44:15 1997  Keith Seitz  <keiths@onions.cygnus.com>
+
+	* tracepoint.c: add declaration for x_command
+
+	* printcmd.c (x_command): remove static declaration
+
 Wed Dec  3 12:00:42 1997  Michael Snyder  (msnyder@cleaver.cygnus.com)
 
 	* tracepoint.c (finish_tfind_command): call do_display so that
