@@ -4,18 +4,25 @@ Fri Jan 13 17:52:57 1995  Jim Kingdon  <kingdon@lioth.cygnus.com>
 	accept it was accidental.  "handle 0" and "info signal 0" remain
 	illegal, though.
 
+Fri Jan 13 15:19:01 1995  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* Makefile.in (all): Don't make libgdb-files.
+	(libgdb): New action, makes libgdb-files.
+
 Thu Jan 12 21:23:25 1995  Per Bothner  <bothner@kalessin.cygnus.com>
 
 	* stabsread.c (read_enum_type):  When pending enum symbols are
 	put into the enum type, they must be inserted in "backwards
 	order, in case we've overflowed a struct pending buffer.
 
+start-sanitize-gdbtk
 Thu Jan 12 15:02:40 1995  Stu Grossman  (grossman@cygnus.com)
 
-	* gdbtk.c gdbtk.tcl:  Update/add copyright.
+	* gdbtk.c, gdbtk.tcl:  Update/add copyright.
 	* gdbtk.tcl (build_framework):  Several fixes for filespec widget,
 	including dismiss button, and better error handling.
 	* (create_command_win):  Bind button 2 to retrieve selection.
+end-sanitize-gdbtk
 
 Thu Jan 12 09:33:24 1995  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
@@ -62,19 +69,21 @@ Thu Jan 12 09:33:24 1995  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 	(_initialize_procfs):  Don't add procfs support if we have an
 	optional procfs and /proc is not accessible.
 
+start-sanitize-gdbtk
 Wed Jan 11 17:06:55 1995  Stu Grossman  (grossman@cygnus.com)
 
 	* gdbtk.tcl:  Add button to control mixed source disassembly.
-	* Use text widgets in expr window.  The give me more control over
+	Use text widgets in expr window.  The give me more control over
 	layout.
-	* Add auto-updating of exprs in expression window.
-	* Handle expressions out of scope a bit better.
-	* Make selected window pop up to the top when invoked via the
+	Add auto-updating of exprs in expression window.
+	Handle expressions out of scope a bit better.
+	Make selected window pop up to the top when invoked via the
 	menubar.
-	* Make copyright message have raised relief.
+	Make copyright message have raised relief.
 
 	* gdbtk.c (gdbtk_init):  Improve handling for errors in gdbtk.tcl
 	during startup.
+end-sanitize-gdbtk
 
 Wed Jan 11 17:53:26 1995  Rob Savoye  <rob@darkstar.cygnus.com>
 

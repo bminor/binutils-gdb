@@ -475,7 +475,7 @@ DISTSTUFF = $(YYFILES)
 .c.o:
 	$(CC) -c $(INTERNAL_CFLAGS) $<
 
-all: gdb libgdb-files $(LIBGDB_OBS)
+all: gdb
 	@$(MAKE) $(FLAGS_TO_PASS) DO=all "DODIRS=`echo $(SUBDIRS) | sed 's/testsuite//'`" subdir_do
 
 installcheck:
@@ -584,6 +584,8 @@ gdb: $(OBS) $(TSOBS) $(ADD_DEPS) $(CDEPS) init.o
 
 nlm:	force
 	rootme=`pwd`; export rootme; $(MAKE) $(TARGET_FLAGS_TO_PASS) DO=all DODIRS=nlm subdir_do
+
+libgdb:	libgdb-files $(LIBGDB_OBS)
 
 # libproc is not listed here because all-libproc is a dependency of all-gui,
 # not all-gdb, and thus might be built after us.
