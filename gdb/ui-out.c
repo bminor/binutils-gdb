@@ -344,9 +344,10 @@ specified after table_body.");
 }
 
 void
-ui_out_list_begin (struct ui_out *uiout)
+ui_out_list_begin (struct ui_out *uiout,
+		   const char *id)
 {
-  ui_out_begin (uiout, ui_out_type_list, NULL);
+  ui_out_begin (uiout, ui_out_type_list, id);
 }
 
 void
@@ -418,8 +419,10 @@ make_cleanup_ui_out_tuple_begin_end (struct ui_out *uiout,
 }
 
 struct cleanup *
-make_cleanup_ui_out_list_begin_end (struct ui_out *uiout)
+make_cleanup_ui_out_list_begin_end (struct ui_out *uiout,
+				    const char *id)
 {
+  ui_out_list_begin (uiout, id);
   return make_cleanup_ui_out_end (uiout, ui_out_type_list);
 }
 
