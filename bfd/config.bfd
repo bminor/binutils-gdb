@@ -71,6 +71,7 @@ case "${canon}" in
   mips-sgi-*)		bfd_name=bigmips ;;
   mips-*-sysv*)		bfd_name=riscos ;;
   mips-*-riscos*)	bfd_name=riscos ;;
+  mips-sony-bsd*)	bfd_name=bigmips ;;
   mips-*-bsd*)		bfd_name=noop ;;
   mips-*-elfl*)		bfd_name=mipslelf ;;
   mips-*-elf*)		bfd_name=mipsbelf ;;
