@@ -6,38 +6,38 @@ msgid ""
 msgstr ""
 "Project-Id-Version: opcodes 2.12-pre020121\n"
 "POT-Creation-Date: 2002-01-17 13:58+0000\n"
-"PO-Revision-Date: 2002-02-24 11:49+0100\n"
+"PO-Revision-Date: 2002-02-24 13:59+0100\n"
 "Last-Translator: Martin v. Löwis <martin@v.loewis.de>\n"
 "Language-Team: German <de@li.org>\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=iso-8859-1\n"
+"Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
 #: alpha-opc.c:335
 msgid "branch operand unaligned"
-msgstr ""
+msgstr "Sprung-Operand ist nicht ausgerichtet (unaligned)."
 
 #: alpha-opc.c:358 alpha-opc.c:380
 msgid "jump hint unaligned"
-msgstr ""
+msgstr "Sprunghinweis ist nicht ausgerichtet (unaligned)."
 
 #: arc-dis.c:52
 msgid "Illegal limm reference in last instruction!\n"
-msgstr ""
+msgstr "Ungültige limm-Referenz in der letzten Anweisung!\n"
 
 #: arm-dis.c:509
 msgid "<illegal precision>"
-msgstr ""
+msgstr "<ungültige Präzision>"
 
 #: arm-dis.c:1019
 #, c-format
 msgid "Unrecognised register name set: %s\n"
-msgstr ""
+msgstr "Unbekannte Registernamensmenge: %s\n"
 
 #: arm-dis.c:1026
 #, c-format
 msgid "Unrecognised disassembler option: %s\n"
-msgstr ""
+msgstr "Unbekannte Disassembler-Option: %s\n"
 
 #: arm-dis.c:1198
 msgid ""
@@ -48,11 +48,11 @@ msgstr ""
 
 #: avr-dis.c:118 avr-dis.c:128
 msgid "undefined"
-msgstr ""
+msgstr "undefiniert"
 
 #: avr-dis.c:180
 msgid "Internal disassembler error"
-msgstr ""
+msgstr "Interner Disassemblerfehler."
 
 #: avr-dis.c:228
 #, c-format
@@ -72,13 +72,13 @@ msgstr ""
 #: d30v-dis.c:312
 #, c-format
 msgid "<unknown register %d>"
-msgstr ""
+msgstr "<unbekanntes Register %d>"
 
 #. Can't happen.
 #: dis-buf.c:57
 #, c-format
 msgid "Unknown error %d\n"
-msgstr ""
+msgstr "Unbekannter Fehler %d\n"
 
 #: dis-buf.c:62
 #, c-format
@@ -95,16 +95,14 @@ msgid "missing mnemonic in syntax string"
 msgstr ""
 
 #. We couldn't parse it.
-#: fr30-asm.c:510 fr30-asm.c:514 fr30-asm.c:601 fr30-asm.c:703 m32r-asm.c:512
-#: m32r-asm.c:516 m32r-asm.c:603 m32r-asm.c:705 openrisc-asm.c:431
-#: openrisc-asm.c:435 openrisc-asm.c:522 openrisc-asm.c:624
+#: fr30-asm.c:510 fr30-asm.c:514 fr30-asm.c:601 fr30-asm.c:703 m32r-asm.c:512 m32r-asm.c:516 m32r-asm.c:603 m32r-asm.c:705 openrisc-asm.c:431 openrisc-asm.c:435 openrisc-asm.c:522 openrisc-asm.c:624
 msgid "unrecognized instruction"
 msgstr ""
 
 #: fr30-asm.c:557 m32r-asm.c:559 openrisc-asm.c:478
 #, c-format
 msgid "syntax error (expected char `%c', found `%c')"
-msgstr ""
+msgstr "Syntaxfehler (erwartetes Zeichen »%c«, gefunden »%c«)"
 
 #: fr30-asm.c:567 m32r-asm.c:569 openrisc-asm.c:488
 #, c-format
