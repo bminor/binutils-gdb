@@ -611,7 +611,7 @@ case "${target}" in
          ;;
     esac
     ;;    
-  *-*-cygwin32)
+  *-*-cygwin32*)
     target_configdirs="$target_configdirs target-winsup"
     noconfigdirs="$noconfigdirs target-gperf target-libgloss"
     # always build newlib.
@@ -619,8 +619,8 @@ case "${target}" in
 
     # Can't build gdb for cygwin32 if not native.
     case "${host}" in
-      *-*-cygwin32) ;; # keep gdb tcl tk expect etc.
-      *) noconfigdirs="$noconfigdirs gdb tcl tk expect itcl tix db sn gnuserv"
+      *-*-cygwin32*) ;; # keep gdb tcl tk expect etc.
+      *) noconfigdirs="$noconfigdirs gdb tcl tk expect itcl tix libgui db sn gnuserv"
 # start-sanitize-ide
          noconfigdirs="$noconfigdirs libide vmake jstools"
 # end-sanitize-ide

@@ -1,3 +1,13 @@
+Thu Feb 19 13:40:41 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in: Don't build libgui for a cygwin32 target when not on
+	a cygwin32 host.
+
+Wed Feb 18 12:29:00 1998  Jason Molenda  (crash@bugshack.cygnus.com)
+
+	* configure (redirect): Set to null, so default behavior of
+	configure is now --verbose.
+
 Thu Feb 12 15:03:08 1998  H.J. Lu  <hjl@gnu.org>
 
 	* ltmain.sh (mkdir): Check that the directory doesn't exist
