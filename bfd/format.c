@@ -45,7 +45,7 @@ SECTION
 #include "libbfd.h"
 
 /* IMPORT from targets.c.  */
-extern char *matching_vector[];
+extern CONST size_t bfd_default_vector_entries;
 
 /*
 FUNCTION
@@ -83,15 +83,43 @@ DESCRIPTION
 
 	o <<file_ambiguously_recognized>> -
 	more than one backend recognised the file format.
-
 */
 
 boolean
-DEFUN(bfd_check_format,(abfd, format),
-      bfd *abfd AND
-      bfd_format format)
+bfd_check_format (abfd, format)
+     bfd *abfd;
+     bfd_format format;
+{
+  return bfd_check_format_matches (abfd, format, NULL);
+}
+
+/*
+FUNCTION
+	bfd_check_format_matches
+
+SYNOPSIS
+	boolean bfd_check_format_matches(bfd *abfd, bfd_format format, char ***matching);
+
+DESCRIPTION
+	Like <<bfd_check_format>>, except when it returns false with
+	<<bfd_errno>> set to <<file_ambiguously_recognized>>.  In that
+	case, if @var{matching} is not NULL, it will be filled in with
+	a NULL-terminated list of the names of the formats that matched,
+	allocated with <<malloc>>.
+	Then the user may choose a format and try again.
+
+	When done with the list that @var{matching} points to, the caller
+	should free it.  
+*/
+
+boolean
+bfd_check_format_matches (abfd, format, matching)
+     bfd *abfd;
+     bfd_format format;
+     char ***matching;
 {
   bfd_target **target, *save_targ, *right_targ;
+  char **matching_vector;
   int match_count;
 
   if (!bfd_read_p (abfd) ||
@@ -110,7 +138,13 @@ DEFUN(bfd_check_format,(abfd, format),
 
   save_targ = abfd->xvec;
   match_count = 0;
-  matching_vector[0] = NULL;
+  if (matching)
+    {
+      *matching = matching_vector =
+	bfd_xmalloc_by_size_t (sizeof (char *) *
+			       (bfd_default_vector_entries + 1));
+      matching_vector[0] = NULL;
+    }
   right_targ = 0;
 
 
@@ -125,6 +159,8 @@ DEFUN(bfd_check_format,(abfd, format),
     right_targ = BFD_SEND_FMT (abfd, _bfd_check_format, (abfd));
     if (right_targ) {
       abfd->xvec = right_targ;		/* Set the target as returned */
+      if (matching)
+	free (matching_vector);
       return true;			/* File position has moved, BTW */
     }
   }
@@ -141,16 +177,23 @@ DEFUN(bfd_check_format,(abfd, format),
     temp = BFD_SEND_FMT (abfd, _bfd_check_format, (abfd));
     if (temp) {				/* This format checks out as ok! */
       right_targ = temp;
-      matching_vector[match_count++] = temp->name;
-      matching_vector[match_count] = NULL;
+      match_count++;
+      if (matching)
+	{
+	  matching_vector[match_count] = temp->name;
+	  matching_vector[match_count] = NULL;
+	}
       /* If this is the default target, accept it, even if other targets
 	 might match.  People who want those other targets have to set 
 	 the GNUTARGET variable.  */
       if (temp == default_vector[0])
 	{
 	  match_count = 1;
-	  matching_vector[0] = temp->name;
-	  matching_vector[1] = NULL;
+	  if (matching)
+	    {
+	      matching_vector[0] = temp->name;
+	      matching_vector[1] = NULL;
+	    }
 	  break;
 	}
 #ifdef GNU960
@@ -165,40 +208,30 @@ DEFUN(bfd_check_format,(abfd, format),
     } else if (bfd_error != wrong_format) {
       abfd->xvec = save_targ;
       abfd->format = bfd_unknown;
+      if (matching && bfd_error != file_ambiguously_recognized)
+	free (matching_vector);
       return false;
     }
   }
 
   if (match_count == 1) {
     abfd->xvec = right_targ;		/* Change BFD's target permanently */
+    if (matching)
+      free (matching_vector);
     return true;			/* File position has moved, BTW */
   }
 
   abfd->xvec = save_targ;		/* Restore original target type */
   abfd->format = bfd_unknown;		/* Restore original format */
-  bfd_error = ((match_count == 0) ? file_not_recognized :
-	       file_ambiguously_recognized);
+  if (match_count == 0)
+    {
+      bfd_error = file_not_recognized;
+      if (matching)
+	free (matching_vector);
+    }
+  else
+    bfd_error = file_ambiguously_recognized;
   return false;
-}
-
-/*
-FUNCTION
-	bfd_matching_formats
-
-SYNOPSIS
-	char **bfd_matching_formats();
-
-DESCRIPTION
-	If a call to <<bfd_check_format>> returns
-	<<file_ambiguously_recognized>>, you can call this function
-	afterward to return a NULL-terminated list of the names of
-	the formats that matched.
-	Then you can choose one and try again.  */
-
-char **
-bfd_matching_formats ()
-{
-  return &matching_vector[0];
 }
 
 /*
@@ -217,9 +250,9 @@ DESCRIPTION
 */
 
 boolean
-DEFUN(bfd_set_format,(abfd, format),
-      bfd *abfd AND
-      bfd_format format)
+bfd_set_format (abfd, format)
+     bfd *abfd;
+     bfd_format format;
 {
 
   if (bfd_read_p (abfd) ||
@@ -258,8 +291,8 @@ DESCRIPTION
 */
 
 CONST char *
-DEFUN(bfd_format_string,(format),
-     bfd_format format)
+bfd_format_string (format)
+     bfd_format format;
 {
   if (((int)format <(int) bfd_unknown) 
       || ((int)format >=(int) bfd_type_end)) 

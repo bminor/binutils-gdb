@@ -1,3 +1,12 @@
+Mon Jan 24 14:41:23 1994  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	* format.c (bfd_check_format_matches): New function.
+	(bfd_check_format): Call it.
+	(bfd_matching_formats): Function removed.
+	* targets.c: Replace the vector added on Jan 21 with a count of
+	entries in default_vector.
+	* bfd-in2.h: Regenerated.
+
 Mon Jan 24 12:38:54 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* elf32-hppa.c (hppa_elf_gen_reloc_type): Typo (== for =).

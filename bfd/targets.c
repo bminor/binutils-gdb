@@ -573,12 +573,10 @@ bfd_target *default_vector[] = {
 	NULL
 };
 
-/* When there is an ambiguous match, bfd_check_format puts the names
-   of the matching targets in this array.
-   It is declared here so we can give it the same number of entries
-   (+ a terminating NULL) as the number of possible targets.  */
-char *matching_vector[sizeof(target_vector)/sizeof(*target_vector) + 1];
-
+/* When there is an ambiguous match, bfd_check_format_ambig puts the names
+   of the matching targets in an array.  This variable is the maximum
+   number of entries that array could possibly need.  */
+CONST size_t bfd_default_vector_entries = sizeof(target_vector)/sizeof(*target_vector);
 
 /*
 FUNCTION
