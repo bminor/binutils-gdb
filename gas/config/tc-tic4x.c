@@ -101,17 +101,107 @@ c4x_insn_t;
 static c4x_insn_t the_insn;	/* Info about our instruction.  */
 static c4x_insn_t *insn = &the_insn;
 
-static void c4x_asg PARAMS ((int));
-static void c4x_bss PARAMS ((int));
-static void c4x_globl PARAMS ((int));
-static void c4x_eval PARAMS ((int));
-static void c4x_cons PARAMS ((int));
-static void c4x_set PARAMS ((int));
-static void c4x_newblock PARAMS ((int));
-static void c4x_pseudo_ignore PARAMS ((int));
-static void c4x_sect PARAMS ((int));
-static void c4x_usect PARAMS ((int));
-static void c4x_version PARAMS ((int));
+int c4x_gen_to_words
+    PARAMS ((FLONUM_TYPE, LITTLENUM_TYPE *, int ));
+char *c4x_atof
+    PARAMS ((char *, char, LITTLENUM_TYPE * ));
+static void c4x_insert_reg
+    PARAMS ((char *, int ));
+static void c4x_insert_sym
+    PARAMS ((char *, int ));
+static char *c4x_expression
+    PARAMS ((char *, expressionS *));
+static char *c4x_expression_abs
+    PARAMS ((char *, int *));
+static void c4x_emit_char
+    PARAMS ((char));
+static void c4x_seg_alloc
+    PARAMS ((char *, segT, int, symbolS *));
+static void c4x_asg
+    PARAMS ((int));
+static void c4x_bss
+    PARAMS ((int));
+void c4x_globl
+    PARAMS ((int));
+static void c4x_cons
+    PARAMS ((int));
+static void c4x_eval
+    PARAMS ((int));
+static void c4x_newblock
+    PARAMS ((int));
+static void c4x_sect
+    PARAMS ((int));
+static void c4x_set
+    PARAMS ((int));
+static void c4x_usect
+    PARAMS ((int));
+static void c4x_version
+    PARAMS ((int));
+static void c4x_pseudo_ignore
+    PARAMS ((int));
+static void c4x_init_regtable
+    PARAMS ((void));
+static void c4x_init_symbols
+    PARAMS ((void));
+static int c4x_inst_insert
+    PARAMS ((c4x_inst_t *));
+static c4x_inst_t *c4x_inst_make
+    PARAMS ((char *, unsigned long, char *));
+static int c4x_inst_add
+    PARAMS ((c4x_inst_t *));
+void md_begin
+    PARAMS ((void));
+void c4x_end
+    PARAMS ((void));
+static int c4x_indirect_parse
+    PARAMS ((c4x_operand_t *, const c4x_indirect_t *));
+char *c4x_operand_parse
+    PARAMS ((char *, c4x_operand_t *));
+static int c4x_operands_match
+    PARAMS ((c4x_inst_t *, c4x_insn_t *));
+void c4x_insn_output
+    PARAMS ((c4x_insn_t *));
+int c4x_operands_parse
+    PARAMS ((char *, c4x_operand_t *, int ));
+void md_assemble
+    PARAMS ((char *));
+void c4x_cleanup
+    PARAMS ((void));
+char *md_atof
+    PARAMS ((int, char *, int *));
+void md_apply_fix3
+    PARAMS ((fixS *, valueT *, segT ));
+void md_convert_frag
+    PARAMS ((bfd *, segT, fragS *));
+void md_create_short_jump
+    PARAMS ((char *, addressT, addressT, fragS *, symbolS *));
+void md_create_long_jump
+    PARAMS ((char *, addressT, addressT, fragS *, symbolS *));
+int md_estimate_size_before_relax
+    PARAMS ((register fragS *, segT));
+int md_parse_option
+    PARAMS ((int, char *));
+void md_show_usage
+    PARAMS ((FILE *));
+int c4x_unrecognized_line
+    PARAMS ((int));
+symbolS *md_undefined_symbol
+    PARAMS ((char *));
+void md_operand
+    PARAMS ((expressionS *));
+valueT md_section_align
+    PARAMS ((segT, valueT));
+static int c4x_pc_offset
+    PARAMS ((unsigned int));
+long md_pcrel_from
+    PARAMS ((fixS *));
+int c4x_do_align
+    PARAMS ((int, const char *, int, int));
+void c4x_start_line
+    PARAMS ((void));
+arelent *tc_gen_reloc
+    PARAMS ((asection *, fixS *));
+
 
 const pseudo_typeS
   md_pseudo_table[] =
@@ -203,9 +293,13 @@ extern FLONUM_TYPE generic_floating_point_number;
 #define F_PRECISION (2)		/* Float and double types 32-bit.  */
 #define GUARD (2)
 
+
 /* Turn generic_floating_point_number into a real short/float/double.  */
 int
-c4x_gen_to_words (FLONUM_TYPE flonum, LITTLENUM_TYPE *words, int precision)
+c4x_gen_to_words (flonum, words, precision)
+     FLONUM_TYPE flonum;
+     LITTLENUM_TYPE *words;
+     int precision;
 {
   int return_value = 0;
   LITTLENUM_TYPE *p;		/* Littlenum pointer.  */
@@ -467,7 +561,10 @@ c4x_gen_to_words (FLONUM_TYPE flonum, LITTLENUM_TYPE *words, int precision)
 
 /* Returns pointer past text consumed.  */
 char *
-c4x_atof (char *str, char what_kind, LITTLENUM_TYPE *words)
+c4x_atof (str, what_kind, words)
+     char *str;
+     char what_kind;
+     LITTLENUM_TYPE *words;
 {
   /* Extra bits for zeroed low-order bits.  The 1st MAX_PRECISION are
      zeroed, the last contain flonum bits.  */
@@ -535,7 +632,9 @@ c4x_atof (char *str, char what_kind, LITTLENUM_TYPE *words)
 }
 
 static void 
-c4x_insert_reg (char *regname, int regnum)
+c4x_insert_reg (regname, regnum)
+     char *regname;
+     int regnum;
 {
   char buf[32];
   int i;
@@ -551,7 +650,9 @@ c4x_insert_reg (char *regname, int regnum)
 }
 
 static void 
-c4x_insert_sym (char *symname, int value)
+c4x_insert_sym (symname, value)
+     char *symname;
+     int value;
 {
   symbolS *symbolP;
 
@@ -562,7 +663,9 @@ c4x_insert_sym (char *symname, int value)
 }
 
 static char *
-c4x_expression (char *str, expressionS *exp)
+c4x_expression (str, exp)
+     char *str;
+     expressionS *exp;
 {
   char *s;
   char *t;
@@ -576,7 +679,9 @@ c4x_expression (char *str, expressionS *exp)
 }
 
 static char *
-c4x_expression_abs (char *str, int *value)
+c4x_expression_abs (str, value)
+     char *str;
+     int *value;
 {
   char *s;
   char *t;
@@ -590,7 +695,8 @@ c4x_expression_abs (char *str, int *value)
 }
 
 static void 
-c4x_emit_char (char c)
+c4x_emit_char (c)
+     char c;
 {
   expressionS exp;
 
@@ -600,7 +706,11 @@ c4x_emit_char (char c)
 }
 
 static void 
-c4x_seg_alloc (char *name, segT seg, int size, symbolS *symbolP)
+c4x_seg_alloc (name, seg, size, symbolP)
+     char *name ATTRIBUTE_UNUSED;
+     segT seg ATTRIBUTE_UNUSED;
+     int size;
+     symbolS *symbolP;
 {
   /* Note that the size is in words
      so we multiply it by 4 to get the number of bytes to allocate.  */
@@ -622,7 +732,8 @@ c4x_seg_alloc (char *name, segT seg, int size, symbolS *symbolP)
 
 /* .asg ["]character-string["], symbol */
 static void 
-c4x_asg (int x)
+c4x_asg (x)
+     int x ATTRIBUTE_UNUSED;
 {
   char c;
   char *name;
@@ -659,7 +770,8 @@ c4x_asg (int x)
 
 /* .bss symbol, size  */
 static void 
-c4x_bss (int x)
+c4x_bss (x)
+     int x ATTRIBUTE_UNUSED;
 {
   char c;
   char *name;
@@ -713,7 +825,8 @@ c4x_bss (int x)
 }
 
 void
-c4x_globl (int ignore)
+c4x_globl (ignore)
+     int ignore ATTRIBUTE_UNUSED;
 {
   char *name;
   int c;
@@ -742,7 +855,8 @@ c4x_globl (int ignore)
 
 /* Handle .byte, .word. .int, .long */
 static void 
-c4x_cons (int bytes)
+c4x_cons (bytes)
+     int bytes;
 {
   register unsigned int c;
   do
@@ -785,7 +899,8 @@ c4x_cons (int bytes)
 
 /* .eval expression, symbol */
 static void 
-c4x_eval (int x)
+c4x_eval (x)
+     int x ATTRIBUTE_UNUSED;
 {
   char c;
   int value;
@@ -807,7 +922,8 @@ c4x_eval (int x)
 
 /* Reset local labels.  */
 static void 
-c4x_newblock (int x)
+c4x_newblock (x)
+     int x ATTRIBUTE_UNUSED;
 {
   dollar_label_clear ();
 }
@@ -815,7 +931,8 @@ c4x_newblock (int x)
 /* .sect "section-name" [, value] */
 /* .sect ["]section-name[:subsection-name]["] [, value] */
 static void 
-c4x_sect (int x)
+c4x_sect (x)
+     int x ATTRIBUTE_UNUSED;
 {
   char c;
   char *section_name;
@@ -888,7 +1005,8 @@ c4x_sect (int x)
 
 /* symbol[:] .set value  or  .set symbol, value */
 static void 
-c4x_set (int x)
+c4x_set (x)
+     int x ATTRIBUTE_UNUSED;
 {
   symbolS *symbolP;
 
@@ -917,7 +1035,8 @@ c4x_set (int x)
 
 /* [symbol] .usect ["]section-name["], size-in-words [, alignment-flag] */
 static void 
-c4x_usect (int x)
+c4x_usect (x)
+     int x ATTRIBUTE_UNUSED;
 {
   char c;
   char *name;
@@ -983,7 +1102,8 @@ c4x_usect (int x)
 
 /* .version cpu-version.  */
 static void 
-c4x_version (int x)
+c4x_version (x)
+     int x ATTRIBUTE_UNUSED;
 {
   unsigned int temp;
 
@@ -1000,7 +1120,8 @@ c4x_version (int x)
 }
 
 static void 
-c4x_pseudo_ignore (int x)
+c4x_pseudo_ignore (x)
+     int x ATTRIBUTE_UNUSED;
 {
   /* We could print warning message here...  */
 
@@ -1009,7 +1130,7 @@ c4x_pseudo_ignore (int x)
 }
 
 static void 
-c4x_init_regtable (void)
+c4x_init_regtable ()
 {
   unsigned int i;
 
@@ -1027,7 +1148,7 @@ c4x_init_regtable (void)
 }
 
 static void 
-c4x_init_symbols (void)
+c4x_init_symbols ()
 {
   /* The TI tools accept case insensitive versions of these symbols,
      we don't !
@@ -1082,7 +1203,8 @@ c4x_init_symbols (void)
 
 /* Insert a new instruction template into hash table.  */
 static int 
-c4x_inst_insert (c4x_inst_t *inst)
+c4x_inst_insert (inst)
+     c4x_inst_t *inst;
 {
   static char prev_name[16];
   const char *retval = NULL;
@@ -1102,7 +1224,10 @@ c4x_inst_insert (c4x_inst_t *inst)
 
 /* Make a new instruction template.  */
 static c4x_inst_t *
-c4x_inst_make (char *name, unsigned long opcode, char *args)
+c4x_inst_make (name, opcode, args)
+     char *name;
+     unsigned long opcode;
+     char *args;
 {
   static c4x_inst_t *insts = NULL;
   static char *names = NULL;
@@ -1132,7 +1257,8 @@ c4x_inst_make (char *name, unsigned long opcode, char *args)
 
 /* Add instruction template, creating dynamic templates as required.  */
 static int 
-c4x_inst_add (c4x_inst_t *insts)
+c4x_inst_add (insts)
+     c4x_inst_t *insts;
 {
   char *s = insts->name;
   char *d;
@@ -1198,7 +1324,7 @@ c4x_inst_add (c4x_inst_t *insts)
    set up all the tables, etc., that the MD part of the assembler will
    need.  */
 void 
-md_begin (void)
+md_begin ()
 {
   int ok = 1;
   unsigned int i;
@@ -1233,15 +1359,16 @@ md_begin (void)
 }
 
 void 
-c4x_end (void)
+c4x_end ()
 {
   bfd_set_arch_mach (stdoutput, bfd_arch_tic4x, 
 		     IS_CPU_C4X (c4x_cpu) ? bfd_mach_c4x : bfd_mach_c3x);
 }
 
 static int 
-c4x_indirect_parse (c4x_operand_t *operand,
-		    const c4x_indirect_t *indirect)
+c4x_indirect_parse (operand, indirect)
+     c4x_operand_t *operand;
+     const c4x_indirect_t *indirect;
 {
   char *n = indirect->name;
   char *s = input_line_pointer;
@@ -1339,7 +1466,9 @@ c4x_indirect_parse (c4x_operand_t *operand,
 }
 
 char *
-c4x_operand_parse (char *s, c4x_operand_t *operand)
+c4x_operand_parse (s, operand)
+     char *s;
+     c4x_operand_t *operand;
 {
   unsigned int i;
   char c;
@@ -1503,7 +1632,9 @@ c4x_operand_parse (char *s, c4x_operand_t *operand)
 }
 
 static int 
-c4x_operands_match (c4x_inst_t *inst, c4x_insn_t *insn)
+c4x_operands_match (inst, insn)
+     c4x_inst_t *inst;
+     c4x_insn_t *insn;
 {
   const char *args = inst->args;
   unsigned long opcode = inst->opcode;
@@ -2058,7 +2189,8 @@ c4x_operands_match (c4x_inst_t *inst, c4x_insn_t *insn)
 }
 
 void 
-c4x_insn_output (c4x_insn_t *insn)
+c4x_insn_output (insn)
+     c4x_insn_t *insn;
 {
   char *dst;
 
@@ -2083,7 +2215,10 @@ c4x_insn_output (c4x_insn_t *insn)
 
 /* Parse the operands.  */
 int 
-c4x_operands_parse (char *s, c4x_operand_t *operands, int num_operands)
+c4x_operands_parse (s, operands, num_operands)
+     char *s;
+     c4x_operand_t *operands;
+     int num_operands;
 {
   if (!*s)
     return num_operands;
@@ -2104,7 +2239,8 @@ c4x_operands_parse (char *s, c4x_operand_t *operands, int num_operands)
    by the generic front end.  We just parse mnemonic and operands, and
    produce the bytes of data and relocation.  */
 void 
-md_assemble (char *str)
+md_assemble (str)
+     char *str;
 {
   int ok = 0;
   char *s;
@@ -2204,7 +2340,7 @@ md_assemble (char *str)
 }
 
 void
-c4x_cleanup (void)
+c4x_cleanup ()
 {
   if (insn->in_use)
     md_assemble (NULL);
@@ -2216,7 +2352,10 @@ c4x_cleanup (void)
    returned, or NULL on OK.  */
 
 char *
-md_atof (int type, char *litP, int *sizeP)
+md_atof (type, litP, sizeP)
+     int type;
+     char *litP;
+     int *sizeP;
 {
   int prec;
   int ieee;
@@ -2275,7 +2414,10 @@ md_atof (int type, char *litP, int *sizeP)
 }
 
 void 
-md_apply_fix3 (fixS *fixP, valueT *value, segT seg ATTRIBUTE_UNUSED)
+md_apply_fix3 (fixP, value, seg)
+     fixS *fixP;
+     valueT *value;
+     segT seg ATTRIBUTE_UNUSED;
 {
   char *buf = fixP->fx_where + fixP->fx_frag->fr_literal;
   valueT val = *value;
@@ -2319,30 +2461,43 @@ md_apply_fix3 (fixS *fixP, valueT *value, segT seg ATTRIBUTE_UNUSED)
 
 /* Should never be called for c4x.  */
 void 
-md_convert_frag (bfd *headers, segT sec, fragS *fragP)
+md_convert_frag (headers, sec, fragP)
+     bfd *headers ATTRIBUTE_UNUSED;
+     segT sec ATTRIBUTE_UNUSED;
+     fragS *fragP ATTRIBUTE_UNUSED;
 {
   as_fatal ("md_convert_frag");
 }
 
 /* Should never be called for c4x.  */
 void
-md_create_short_jump (char *ptr, addressT from_addr, addressT to_addr,
-		      fragS *frag, symbolS *to_symbol)
+md_create_short_jump (ptr, from_addr, to_addr, frag, to_symbol)
+     char *ptr ATTRIBUTE_UNUSED;
+     addressT from_addr ATTRIBUTE_UNUSED;
+     addressT to_addr ATTRIBUTE_UNUSED;
+     fragS *frag ATTRIBUTE_UNUSED;
+     symbolS *to_symbol ATTRIBUTE_UNUSED;
 {
   as_fatal ("md_create_short_jmp\n");
 }
 
 /* Should never be called for c4x.  */
 void
-md_create_long_jump (char *ptr, addressT from_addr, addressT to_addr,
-		     fragS *frag, symbolS *to_symbol)
+md_create_long_jump (ptr, from_addr, to_addr, frag, to_symbol)
+     char *ptr ATTRIBUTE_UNUSED;
+     addressT from_addr ATTRIBUTE_UNUSED;
+     addressT to_addr ATTRIBUTE_UNUSED;
+     fragS *frag ATTRIBUTE_UNUSED;
+     symbolS *to_symbol ATTRIBUTE_UNUSED;
 {
   as_fatal ("md_create_long_jump\n");
 }
 
 /* Should never be called for c4x.  */
 int
-md_estimate_size_before_relax (register fragS *fragP, segT segtype)
+md_estimate_size_before_relax (fragP, segtype)
+     register fragS *fragP ATTRIBUTE_UNUSED;
+     segT segtype ATTRIBUTE_UNUSED;
 {
   as_fatal ("md_estimate_size_before_relax\n");
   return 0;
@@ -2357,7 +2512,9 @@ struct option md_longopts[] =
 size_t md_longopts_size = sizeof (md_longopts);
 
 int
-md_parse_option (int c, char *arg)
+md_parse_option (c, arg)
+     int c;
+     char *arg;
 {
   switch (c)
     {
@@ -2388,7 +2545,8 @@ md_parse_option (int c, char *arg)
 }
 
 void
-md_show_usage (FILE *stream)
+md_show_usage (stream)
+     FILE *stream;
 {
   fputs ("\
 C[34]x options:\n\
@@ -2405,7 +2563,8 @@ C[34]x options:\n\
    definitions of TI C3x tools style local labels $n where n is a single
    decimal digit.  */
 int 
-c4x_unrecognized_line (int c)
+c4x_unrecognized_line (c)
+     int c;
 {
   int lab;
   char *s;
@@ -2438,7 +2597,8 @@ c4x_unrecognized_line (int c)
 
 /* Handle local labels peculiar to us referred to in an expression.  */
 symbolS *
-md_undefined_symbol (char *name)
+md_undefined_symbol (name)
+     char *name;
 {
   /* Look for local labels of the form $n.  */
   if (name[0] == '$' && isdigit (name[1]))
@@ -2470,19 +2630,23 @@ md_undefined_symbol (char *name)
 
 /* Parse an operand that is machine-specific.  */
 void
-md_operand (expressionS *expressionP)
+md_operand (expressionP)
+     expressionS *expressionP ATTRIBUTE_UNUSED;
 {
 }
 
 /* Round up a section size to the appropriate boundary---do we need this?  */
 valueT
-md_section_align (segT segment, valueT size)
+md_section_align (segment, size)
+     segT segment ATTRIBUTE_UNUSED;
+     valueT size;
 {
   return size;			/* Byte (i.e., 32-bit) alignment is fine?  */
 }
 
 static int 
-c4x_pc_offset (unsigned int op)
+c4x_pc_offset (op)
+     unsigned int op;
 {
   /* Determine the PC offset for a C[34]x instruction.
      This could be simplified using some boolean algebra
@@ -2544,7 +2708,8 @@ c4x_pc_offset (unsigned int op)
    DBcondD, BcondD  disp + PC + 3 => PC
  */
 long
-md_pcrel_from (fixS *fixP)
+md_pcrel_from (fixP)
+     fixS *fixP;
 {
   unsigned char *buf = fixP->fx_where + fixP->fx_frag->fr_literal;
   unsigned int op;
@@ -2558,7 +2723,11 @@ md_pcrel_from (fixS *fixP)
 /* This is probably not necessary, if we have played our cards right,
    since everything should be already aligned on a 4-byte boundary.  */
 int 
-c4x_do_align (int alignment, const char *fill, int len, int max)
+c4x_do_align (alignment, fill, len, max)
+     int alignment ATTRIBUTE_UNUSED;
+     const char *fill ATTRIBUTE_UNUSED;
+     int len ATTRIBUTE_UNUSED;
+     int max ATTRIBUTE_UNUSED;
 {
   char *p;
 
@@ -2572,7 +2741,7 @@ c4x_do_align (int alignment, const char *fill, int len, int max)
 
 /* Look for and remove parallel instruction operator ||.  */
 void 
-c4x_start_line (void)
+c4x_start_line ()
 {
   char *s = input_line_pointer;
 
@@ -2598,7 +2767,9 @@ c4x_start_line (void)
 }
 
 arelent *
-tc_gen_reloc (asection *seg, fixS *fixP)
+tc_gen_reloc (seg, fixP)
+     asection *seg ATTRIBUTE_UNUSED;
+     fixS *fixP;
 {
   arelent *reloc;
 
@@ -2624,4 +2795,3 @@ tc_gen_reloc (asection *seg, fixS *fixP)
 
   return reloc;
 }
-
