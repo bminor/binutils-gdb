@@ -1,3 +1,25 @@
+000-12-02  Chris Demetriou  <cgd@sibyte.com>
+
+        * gas/mips/elf_e_flags.s: Add padding to the end of the
+        file so that objdump output will be consistent.
+        * gas/mips/elf_e_flags1.d, gas/mips/elf_e_flags2.d,
+        gas/mips/elf_e_flags3.d, gas/mips/elf_e_flags4.d: Expect
+        "..." at end of objdump output because of zero bytes at end
+        of section.
+        * gas/mips/elf_e_flags.c: Add note to comment about
+        what's changing in elf_e_flags.s.
+
+        * gas/mips/la.s: Add padding to the end of the file so that
+        objdump output will be consistent.
+        * gas/mips/la-svr4pic.d, gas/mips/la-xgot.d: Expect "..." at
+        end of objdump output because of zero bytes at end of
+        section.
+
+        * gas/mips/sync.s: Add padding to the end of the file so that
+        objdump output will be consistent.
+        * gas/mips/sync.d: Expect "..." at end of objdump output
+        because of zero bytes at end of section.
+
 2000-12-01  Chris Demetriou  <cgd@sibyte.com>
 
         * gas/mips/mips16.d: Expect mips16 nops to be used for padding
