@@ -1,5 +1,7 @@
 Wed Mar 16 11:57:07 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
+	* gas/hppa/more.parse/regpopbug.s: Add trivial .equ test.
+
 	* gas/hppa/unsorted/globalbug.s: New test (expected to fail).
 	* gas/hppa/unsorted/unsorted.exp: Run it.
 
