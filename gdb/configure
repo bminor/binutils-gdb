@@ -5773,7 +5773,7 @@ fi
 if test "${with_sim_gpu2+set}" = set; then
   withval="$with_sim_gpu2"
   case "${target}" in
-  mips*-sky-*)
+  mips*-sky*-*)
     if test -d "${withval}"
     then
       LIBS="${LIBS} -L${withval}/lib -lgpu2 -L${x_libraries} -lX11 -lXext"
@@ -5789,7 +5789,7 @@ fi
 if test "${with_sim_funit+set}" = set; then
   withval="$with_sim_funit"
   case "${target}" in
-  mips*-sky-*)
+  mips*-sky*-*)
     if test -d "${withval}"
     then
       LIBS="${LIBS} -L${withval}/lib -lfunit"

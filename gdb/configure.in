@@ -665,7 +665,7 @@ AC_PATH_X
 AC_ARG_WITH(sim-gpu2,
 [  --with-sim-gpu2=DIR     Use GPU2 library under given DIR],
 [case "${target}" in
-  mips*-sky-*)
+  mips*-sky*-*)
     if test -d "${withval}"
     then
       LIBS="${LIBS} -L${withval}/lib -lgpu2 -L${x_libraries} -lX11 -lXext"
@@ -679,7 +679,7 @@ esac])dnl
 AC_ARG_WITH(sim-funit,
 [  --with-sim-funit=DIR    Use target FP lib under given DIR],
 [case "${target}" in
-  mips*-sky-*)
+  mips*-sky*-*)
     if test -d "${withval}"
     then
       LIBS="${LIBS} -L${withval}/lib -lfunit"

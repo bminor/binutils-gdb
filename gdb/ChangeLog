@@ -1,3 +1,11 @@
+start-sanitize-sky
+Wed Oct 28 12:33:52 EST 1998  Frank Ch. Eigler <fche@cygnus.com>
+
+	* configure.in: Accept both -skyb- and -sky- for
+	--with-sim-funit/gpu2 options.
+	* configure: Rebuilt.
+
+end-sanitize-sky
 Wed Oct 28 08:01:38 1998  Mark Alexander  <marka@cygnus.com>
 
 	* sparcl-tdep.c (send_resp, sparclite_serial_start,
