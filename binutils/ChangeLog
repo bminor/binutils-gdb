@@ -1,3 +1,8 @@
+2004-09-22  Alan Modra  <amodra@bigpond.net.au>
+
+	* readelf.c (process_program_headers): Don't include .tbss in non-TLS
+	segments.
+
 2004-09-17  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.am: Run "make dep-am".

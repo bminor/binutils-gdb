@@ -46,7 +46,7 @@ Program Headers:
  Section to Segment mapping:
   Segment Sections...
    00 +.hash .dynsym .dynstr .rela.dyn .rela.plt .plt .text *
-   01 +.tdata .tbss .dynamic .got .got.plt *
+   01 +.tdata .dynamic .got .got.plt *
    02 +.dynamic *
    03 +.tdata .tbss *
 

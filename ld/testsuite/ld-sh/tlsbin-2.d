@@ -52,8 +52,8 @@ Program Headers:
    00 +
    01 +\.interp *
    02 +\.interp \.hash \.dynsym \.dynstr \.rela\.dyn \.rela\.plt \.plt \.text *
-   03 +\.tdata \.tbss \.dynamic \.got *
-   04 +\.tbss \.dynamic *
+   03 +\.tdata \.dynamic \.got *
+   04 +\.dynamic *
    05 +\.tdata \.tbss *
 
 Relocation section '\.rela\.dyn' at offset 0x[0-9a-f]+ contains 4 entries:

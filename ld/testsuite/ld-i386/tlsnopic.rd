@@ -44,8 +44,8 @@ Program Headers:
  Section to Segment mapping:
   Segment Sections...
    00 +.hash .dynsym .dynstr .rel.dyn .text *
-   01 +.tbss .dynamic .got .got.plt *
-   02 +.tbss .dynamic *
+   01 +.dynamic .got .got.plt *
+   02 +.dynamic *
    03 +.tbss *
 
 Relocation section '.rel.dyn' at offset 0x[0-9a-f]+ contains 20 entries:
