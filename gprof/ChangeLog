@@ -1,3 +1,14 @@
+Tue Apr 28 19:50:09 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* corefile.c: Rename from core.c.
+	* corefile.h: Rename from core.h.
+	* Many .c files: Include corefile.h rather than core.h.
+	* Makefile.am (sources): Change core.c to corefile.c.
+	(noinst_HEADERS): Change core.h to corefile.h.
+	($(OBJECTS)): Depend upon corefile.h rather than core.h.
+	(corefile.o): Rename target from core.o, depend upon corefile.c.
+	* Makefile.in, po/POTFILES.in: Rebuild.
+
 Mon Apr 27 16:50:40 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.in: Change version number to 2.9.4

@@ -1,6 +1,6 @@
 #include "gprof.h"
 #include "cg_arcs.h"
-#include "core.h"
+#include "corefile.h"
 #include "symtab.h"
 
 Sym_Table symtab;

@@ -23,7 +23,7 @@
 #include "call_graph.h"
 #include "cg_arcs.h"
 #include "cg_print.h"
-#include "core.h"
+#include "corefile.h"
 #include "gmon_io.h"
 #include "hertz.h"
 #include "hist.h"

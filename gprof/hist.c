@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include "libiberty.h"
 #include "gprof.h"
-#include "core.h"
+#include "corefile.h"
 #include "gmon_io.h"
 #include "gmon_out.h"
 #include "hist.h"

@@ -12,7 +12,7 @@ bin_PROGRAMS = gprof
 
 ## Convenience var listing pure sources.
 sources = basic_blocks.c call_graph.c cg_arcs.c cg_dfn.c \
-	cg_print.c core.c gmon_io.c gprof.c hertz.c hist.c source.c \
+	cg_print.c corefile.c gmon_io.c gprof.c hertz.c hist.c source.c \
 	search_list.c symtab.c sym_ids.c utils.c \
 	i386.c alpha.c vax.c tahoe.c sparc.c
 gprof_SOURCES = $(sources) flat_bl.c bsd_callg_bl.c fsf_callg_bl.c
@@ -21,7 +21,7 @@ gprof_LDADD = ../bfd/libbfd.la ../libiberty/libiberty.a $(INTLLIBS)
 
 noinst_HEADERS = \
 	basic_blocks.h call_graph.h cg_arcs.h cg_dfn.h cg_print.h \
-	core.h gmon.h gmon_io.h gmon_out.h gprof.h hertz.h hist.h \
+	corefile.h gmon.h gmon_io.h gmon_out.h gprof.h hertz.h hist.h \
 	search_list.h source.h sym_ids.h symtab.h utils.h
 
 EXTRA_DIST = flat_bl.c bsd_callg_bl.c fsf_callg_bl.c bbconv.pl
@@ -45,7 +45,7 @@ man_MANS = gprof.1
 
 # Dependencies.
 $(OBJECTS): ../bfd/bfd.h call_graph.h cg_arcs.h cg_print.h \
-	core.h gmon_io.h gmon_out.h gprof.h hertz.h hist.h \
+	corefile.h gmon_io.h gmon_out.h gprof.h hertz.h hist.h \
 	search_list.h source.h sym_ids.h symtab.h utils.h \
 	$(srcdir)/../include/libiberty.h $(srcdir)/../bfd/sysdep.h \
 	gconfig.h ../bfd/config.h
@@ -55,7 +55,7 @@ call_graph.o: call_graph.c
 cg_arcs.o: cg_arcs.c
 cg_dfn.o: cg_dfn.c
 cg_print.o: cg_print.c
-core.o: core.c
+corefile.o: corefile.c
 flat_bl.o: flat_bl.c
 fsf_callg_bl.o: fsf_callg_bl.c
 gmon_io.o: gmon_io.c

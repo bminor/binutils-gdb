@@ -1,6 +1,6 @@
 #include "libiberty.h"
 #include "gprof.h"
-#include "core.h"
+#include "corefile.h"
 #include "symtab.h"
 
 bfd *core_bfd;

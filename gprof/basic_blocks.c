@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include "basic_blocks.h"
-#include "core.h"
+#include "corefile.h"
 #include "gmon_io.h"
 #include "gmon_out.h"
 #include "gprof.h"

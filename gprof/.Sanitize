@@ -50,8 +50,8 @@ cg_print.h
 configure
 configure.bat
 configure.in
-core.c
-core.h
+corefile.c
+corefile.h
 flat_bl.m
 fsf_callg_bl.m
 gconfig.in

@@ -1,5 +1,5 @@
-#ifndef core_h
-#define core_h
+#ifndef corefile_h
+#define corefile_h
 
 #include "bfd.h"
 
@@ -18,4 +18,4 @@ extern void core_get_text_space PARAMS ((bfd * core_bfd));
 extern void core_create_function_syms PARAMS ((bfd * core_bfd));
 extern void core_create_line_syms PARAMS ((bfd * core_bfd));
 
-#endif /* core_h */
+#endif /* corefile_h */

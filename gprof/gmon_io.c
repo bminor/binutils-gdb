@@ -4,7 +4,7 @@
 #include "cg_arcs.h"
 #include "basic_blocks.h"
 #include "bfd.h"
-#include "core.h"
+#include "corefile.h"
 #include "call_graph.h"
 #include "gmon_io.h"
 #include "gmon_out.h"

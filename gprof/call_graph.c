@@ -1,6 +1,6 @@
 #include "cg_arcs.h"
 #include "call_graph.h"
-#include "core.h"
+#include "corefile.h"
 #include "gmon_io.h"
 #include "gmon_out.h"
 #include "symtab.h"

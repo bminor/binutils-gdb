@@ -9,8 +9,8 @@ cg_dfn.c
 cg_dfn.h
 cg_print.c
 cg_print.h
-core.c
-core.h
+corefile.c
+corefile.h
 gmon.h
 gmon_io.c
 gmon_io.h

@@ -18,7 +18,7 @@
  */
 #include "gprof.h"
 #include "cg_arcs.h"
-#include "core.h"
+#include "corefile.h"
 #include "hist.h"
 #include "symtab.h"
 
