@@ -686,8 +686,10 @@ gcc-no-fixedincludes:
 # This rule is used to build the modules which use FLAGS_TO_PASS.  To
 # build a target all-X means to cd to X and make all.
 # all-glob is handled specially because it doesn't actually build.
-.PHONY: $(ALL_MODULES) all-glob
-$(ALL_MODULES) all-glob:
+# all-gui is handled specially because it is still experimental, and
+# if it fails to build, that shouldn't stop "make all".
+.PHONY: $(ALL_MODULES) all-glob all-gui
+$(ALL_MODULES) all-glob all-gui:
 	@dir=`echo $@ | sed -e 's/all-//'`; \
 	if [ -f ./$${dir}/Makefile ] ; then \
 	  r=`pwd`; export r; \
@@ -879,6 +881,7 @@ all-gdb: all-libiberty all-opcodes all-bfd all-mmalloc all-readline all-glob all
 all-glob:
 all-gprof: all-libiberty all-bfd
 all-grep: all-libiberty
+all-gui: all-gdb
 all-gzip: all-libiberty
 all-hello: all-libiberty
 all-indent:

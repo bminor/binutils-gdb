@@ -1,3 +1,7 @@
+Wed May 25 16:47:10 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* Makefile.in: Add all-gui target (but not yet build by "all").
+
 Thu May 26 08:53:19 1994  Bill Cox  (bill@rtl.cygnus.com)
 
 	* config.sub: Move deletion of patch suffix from here...
