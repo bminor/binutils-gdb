@@ -102,6 +102,11 @@ static symbolS *insn_label;
 /* To output NOP instructions correctly, we need to keep information
    about the previous two instructions.  */
 
+/* Whether we are optimizing.  We always optimize unless -O0 is given.
+   For the very simple optimizations we do, this is compatible with
+   the MIPS assembler.  */
+static int mips_optimize = 1;
+
 /* The previous instruction.  */
 static struct mips_cl_insn prev_insn;
 
@@ -126,6 +131,13 @@ static fixS *prev_insn_fixp;
 
 /* Non-zero if the previous instruction was in a delay slot.  */
 static int prev_insn_is_delay_slot;
+
+/* Non-zero if the previous instruction was in a .set noreorder.  */
+static int prev_insn_unreordered;
+
+/* Non-zero if the previous previous instruction was in a .set
+   noreorder.  */
+static int prev_prev_insn_unreordered;
 
 /* Prototypes for static functions.  */
 
@@ -613,15 +625,33 @@ append_insn (ip, address_expr, reloc_type)
       if ((ip->insn_mo->pinfo & INSN_UNCOND_BRANCH_DELAY)
 	  || (ip->insn_mo->pinfo & INSN_COND_BRANCH_DELAY))
 	{
-	  /* If we had to emit any NOP instructions, then we already
-	     know we can not swap.  */
-	  if (nops != 0
+	  if (! mips_optimize
+	      /* If we had to emit any NOP instructions, then we
+		 already know we can not swap.  */
+	      || nops != 0
 	      /* If we don't even know the previous insn, we can not
 		 swap. */
 	      || ! prev_insn_valid
 	      /* If the previous insn is already in a branch delay
 		 slot, then we can not swap.  */
 	      || prev_insn_is_delay_slot
+	      /* If the previous previous insn was in a .set
+		 noreorder, we can't swap.  Actually, the MIPS
+		 assembler will swap in this situation.  However, gcc
+		 configured -with-gnu-as will generate code like
+		   .set noreorder
+		   lw	$4,XXX
+		   .set	reorder
+		   INSN
+		   bne	$4,$0,foo
+		 in which we can not swap the bne and INSN.  If gcc is
+		 not configured -with-gnu-as, it does not output the
+		 .set pseudo-ops.  We don't have to check
+		 prev_insn_unreordered, because prev_insn_valid will
+		 be 0 in that case.  We don't want to use
+		 prev_prev_insn_valid, because we do want to be able
+		 to swap at the start of a function.  */
+	      || prev_prev_insn_unreordered
 	      /* If the branch is itself the target of a branch, we
 		 can not swap.  We cheat on this; all we check for is
 		 whether there is a label on this instruction.  If
@@ -738,6 +768,8 @@ append_insn (ip, address_expr, reloc_type)
 	  prev_insn_is_delay_slot = 0;
 	}
 
+      prev_prev_insn_unreordered = prev_insn_unreordered;
+      prev_insn_unreordered = 0;
       prev_insn_frag = frag_now;
       prev_insn_where = f - frag_now->fr_literal;
       prev_insn_fixp = fixp;
@@ -758,6 +790,8 @@ mips_no_prev_insn ()
   prev_prev_insn.insn_mo = &dummy_opcode;
   prev_insn_valid = 0;
   prev_insn_is_delay_slot = 0;
+  prev_insn_unreordered = 0;
+  prev_prev_insn_unreordered = 0;
   insn_label = NULL;
 }
 
@@ -2965,6 +2999,12 @@ md_parse_option (argP, cntP, vecP)
       return 1;
     }
 
+  if (**argP == 'O')
+    {
+      mips_optimize = (*argP)[1] != '0';
+      return 1;
+    }
+
 #ifdef OBJ_ECOFF
   if (**argP == 'G')
     {
@@ -2983,6 +3023,7 @@ md_parse_option (argP, cntP, vecP)
       return 1;
     }
 #endif
+
   return 1;			/* pretend you parsed the character */
 }
 
@@ -3356,6 +3397,11 @@ s_mipsset (x)
 
   if (strcmp (name, "reorder") == 0)
     {
+      if (mips_noreorder)
+	{
+	  prev_insn_unreordered = 1;
+	  prev_prev_insn_unreordered = 1;
+	}
       mips_noreorder = 0;
     }
   else if (strcmp (name, "noreorder") == 0)
