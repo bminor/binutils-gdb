@@ -1,3 +1,10 @@
+start-sanitize-beos
+Tue Jul 14 15:28:41 1998  Richard Henderson  <rth@cygnus.com>
+
+	* config.guess: Recognize i586-pc-beos.
+	* configure.in: Don't build some bits for beos.
+
+end-sanitize-beos
 Tue Jul 14 13:22:18 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure: If CC is set but CFLAGS is not, and CC is gcc, make

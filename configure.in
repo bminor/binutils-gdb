@@ -576,6 +576,11 @@ case "${host}" in
      noconfigdirs="$noconfigdirs flexlm"
 # end-sanitize-cygnus
     ;;
+# start-sanitize-beos
+  i[3456]86-*-beos)
+     noconfigdirs="$noconfigdirs tk itcl tix libgui gdb"
+     ;;
+# end-sanitize-beos
 esac
 
 
@@ -864,6 +869,11 @@ case "${target}" in
     # Macs want a resource compiler.
     configdirs="$configdirs grez"
     ;;    
+# start-sanitize-beos
+  i[3456]86-*-beos)
+     noconfigdirs="$noconfigdirs target-gperf"
+     ;;
+# end-sanitize-beos
 esac
 
 # If we aren't building newlib, then don't build libgloss, since libgloss
