@@ -361,6 +361,9 @@ extern bfd_target bfd_elf32_sparc_vec;
 extern bfd_target bfd_elf32_i386_vec;
 extern bfd_target bfd_elf32_m68k_vec;
 extern bfd_target bfd_elf32_i860_vec;
+extern bfd_target bfd_elf32_m88k_vec;
+extern bfd_target bfd_elf32_bigmips_vec;
+extern bfd_target bfd_elf32_littlemips_vec;
 extern bfd_target ieee_vec;
 extern bfd_target oasys_vec;
 extern bfd_target m88kbcs_vec;
@@ -416,7 +419,7 @@ bfd_target *target_vector[] = {
 	&oasys_vec,
 #endif
 	&sunos_big_vec,
-#ifdef HOST_64_BIT
+#ifdef BFD64
 	&demo_64_vec,	/* Only compiled if host has long-long support */
 #endif
 	&h8300coff_vec,
@@ -431,6 +434,9 @@ bfd_target *target_vector[] = {
 	&bfd_elf32_i386_vec,
 	&bfd_elf32_m68k_vec,
 	&bfd_elf32_i860_vec,
+	&bfd_elf32_m88k_vec,
+	&bfd_elf32_littlemips_vec,
+	&bfd_elf32_bigmips_vec,
 	&a_out_adobe_vec,
 	&b_out_vec_little_host,
 	&b_out_vec_big_host,
@@ -449,7 +455,7 @@ bfd_target *target_vector[] = {
 	&sco_core_vec,
 #endif
 #ifdef AIX386_CORE
-  &aix386_core_vec,
+	&aix386_core_vec,
 #endif
 
 #endif /* not SELECT_VECS */

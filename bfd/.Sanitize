@@ -77,6 +77,8 @@ elf32-i386.c
 elf32-i860.c
 elf32-m68k.c
 elf32-sparc.c
+elf32-m88k.c
+elf32-mips.c
 elf32-target.h
 elf32.c
 elf64.c

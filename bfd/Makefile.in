@@ -84,7 +84,7 @@ BFD32_BACKENDS = aout32.o sunos.o newsos3.o mipsbsd.o aout-adobe.o \
 	coff-mips.o coff-msym.o \
 	elf.o \
 	elf32.o elf32-sparc.o elf32-i386.o elf32-i860.o elf32-m68k.o \
-	elf32-hppa.o \
+	elf32-hppa.o elf32-mips.o elf32-m88k.o \
 	bout.o \
 	hppa.o oasys.o ieee.o srec.o stab-syms.o coff-alpha.o coff-sh.o \
 	hp300hpux.o
@@ -137,7 +137,7 @@ CFILES = libbfd.c opncls.c bfd.c archive.c targets.c cache.c \
 	 cpu-rs6000.c coff-h8300.c hppa.c cpu-hppa.c cpu-we32k.c reloc16.c \
 	 mipsbsd.c cpu-sh.c \
 	 elf32.c elf32-sparc.c elf32-i386.c elf32-i860.c elf32-m68k.c \
-	 elf32-hppa.c \
+	 elf32-hppa.c elf32-m88k.c elf32-mips.c \
 	 elf64.c \
 	 coff-alpha.c cpu-alpha.c \
 	 hp300hpux.c i386lynx.c
@@ -464,6 +464,10 @@ elf32-i860.o : elf32-i860.c libelf.h libbfd.h $(BFD_H) \
 elf32-i386.o : elf32-i386.c libelf.h libbfd.h $(BFD_H) \
   $(INCDIR)/obstack.h
 elf32-hppa.o : elf32-hppa.c $(srcdir)/elf32-hppa.h libelf.h libbfd.h \
+  $(BFD_H) $(INCDIR)/obstack.h
+elf32-m88k.o : elf32-m88k.c $(srcdir)/elf32-hppa.h libelf.h libbfd.h \
+  $(BFD_H) $(INCDIR)/obstack.h
+elf32-mips.o : elf32-mips.c $(srcdir)/elf32-hppa.h libelf.h libbfd.h \
   $(BFD_H) $(INCDIR)/obstack.h
 elf64.o : elf64.c elfcode.h libelf.h libbfd.h $(BFD_H) \
   $(INCDIR)/obstack.h

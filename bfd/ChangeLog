@@ -1,3 +1,9 @@
+Fri Jun 18 10:00:14 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* Makefile.in: Add elf32-{mips,m88k}.
+	elf32-{mips,m88k}.c: New files.
+	targets.c (target_vector): Include bfd_elf32_{mips,m88k}_vec.
+
 Fri Jun 18 03:12:12 1993  John Gilmore  (gnu@cygnus.com)
 
 	Eliminate "int8_type", "int16_type", "int32_type", and their
