@@ -1,7 +1,7 @@
 #objdump: -dr --prefix-addresses --show-raw-insn -M reg-names=numeric
 #name: MIPS MIPS32r2 instructions
 
-# Check MIPS32 instruction assembly
+# Check MIPS32 Release 2 (mips32r2) instruction assembly
 
 .*: +file format .*mips.*
 

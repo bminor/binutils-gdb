@@ -1,3 +1,12 @@
+2003-01-02  Chris Demetriou  <cgd@broadcom.com>
+
+	* config/tc-mips.c: Update copyright years to include 2003.
+	(mips_ip): Fix indentation of "+A", "+B", and "+C" handling.
+	Additionally, clean up their code slightly and clean up their
+	comments some more.
+
+	* doc/c-mips.texi: Add MIPS32r2 to ".set mipsN" documentation.
+
 2003-01-01  Daniel Jacobowitz  <drow@mvista.com>
 
 	* doc/Makefile.am (as.1): Depend on "asconfig.texi gasver.texi

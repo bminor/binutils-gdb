@@ -288,8 +288,8 @@ assembly language programmers!
 @kindex @code{.set mips@var{n}}
 @sc{gnu} @code{@value{AS}} supports an additional directive to change
 the @sc{mips} Instruction Set Architecture level on the fly: @code{.set
-mips@var{n}}.  @var{n} should be a number from 0 to 5, or 32 or 64.
-The values 1 to 5, 32, and 64 make the assembler accept instructions
+mips@var{n}}.  @var{n} should be a number from 0 to 5, or 32, 32r2, or 64.
+The values other than 0 make the assembler accept instructions
 for the corresponding @sc{isa} level, from that point on in the
 assembly.  @code{.set mips@var{n}} affects not only which instructions
 are permitted, but also how certain macros are expanded.  @code{.set

@@ -1,5 +1,5 @@
 /* tc-mips.c -- assemble code for a MIPS chip.
-   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002
+   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
    Contributed by the OSF and Ralph Campbell.
    Written by Keith Knowles and Ralph Campbell, working independently.
@@ -8118,6 +8118,7 @@ mips_ip (str, ip)
   unsigned int regno;
   unsigned int lastregno = 0;
   unsigned int lastpos = 0;
+  unsigned int limlo, limhi;
   char *s_reset;
   char save_c = 0;
 
@@ -8286,58 +8287,76 @@ mips_ip (str, ip)
 	    case '+':		/* Opcode extension character.  */
 	      switch (*++args)
 		{
-		  case 'A':		/* ins/ext "pos".  */
-		    my_getExpression (&imm_expr, s);
-		    check_absolute_expr (ip, &imm_expr);
-		    if ((unsigned long) imm_expr.X_add_number > 31)
-		      {
-			as_bad (_("Improper position (%lu)"),
-				(unsigned long) imm_expr.X_add_number);
-			imm_expr.X_add_number = 0;
-		      }
-		    lastpos = imm_expr.X_add_number;
-		    ip->insn_opcode |= lastpos << OP_SH_SHAMT;
-		    imm_expr.X_op = O_absent;
-		    s = expr_end;
-		    continue;
+		case 'A':		/* ins/ext position, becomes LSB.  */
+		  limlo = 0;
+		  limhi = 31;
+		  my_getExpression (&imm_expr, s);
+		  check_absolute_expr (ip, &imm_expr);
+		  if ((unsigned long) imm_expr.X_add_number < limlo
+		      || (unsigned long) imm_expr.X_add_number > limhi)
+		    {
+		      as_bad (_("Improper position (%lu)"),
+			      (unsigned long) imm_expr.X_add_number);
+		      imm_expr.X_add_number = limlo;
+		    }
+		  lastpos = imm_expr.X_add_number;
+		  ip->insn_opcode |= (imm_expr.X_add_number
+				      & OP_MASK_SHAMT) << OP_SH_SHAMT;
+		  imm_expr.X_op = O_absent;
+		  s = expr_end;
+		  continue;
 
-		  case 'B':		/* "ins" size spec (becomes MSB).  */
-		    my_getExpression (&imm_expr, s);
-		    check_absolute_expr (ip, &imm_expr);
-		    if (imm_expr.X_add_number == 0
-			|| (unsigned long) imm_expr.X_add_number > 32
-			|| ((unsigned long) imm_expr.X_add_number
-			    + lastpos) > 32)
-		      {
-			as_bad (_("Improper insert size (%lu, position %lu)"),
-				(unsigned long) imm_expr.X_add_number,
-				(unsigned long) lastpos);
-			imm_expr.X_add_number &= OP_MASK_INSMSB;
-		      }
-		    ip->insn_opcode |= (lastpos + imm_expr.X_add_number
-					- 1) << OP_SH_INSMSB;
-		    imm_expr.X_op = O_absent;
-		    s = expr_end;
-		    continue;
+		case 'B':		/* ins size, becomes MSB.  */
+		  limlo = 1;
+		  limhi = 32;
+		  my_getExpression (&imm_expr, s);
+		  check_absolute_expr (ip, &imm_expr);
+		  /* Check for negative input so that small negative numbers
+		     will not succeed incorrectly.  The checks against
+		     (pos+size) transitively check "size" itself,
+		     assuming that "pos" is reasonable.  */
+		  if ((long) imm_expr.X_add_number < 0
+		      || ((unsigned long) imm_expr.X_add_number
+			  + lastpos) < limlo
+		      || ((unsigned long) imm_expr.X_add_number
+			  + lastpos) > limhi)
+		    {
+		      as_bad (_("Improper insert size (%lu, position %lu)"),
+			      (unsigned long) imm_expr.X_add_number,
+			      (unsigned long) lastpos);
+		      imm_expr.X_add_number = limlo - lastpos;
+		    }
+		  ip->insn_opcode |= ((lastpos + imm_expr.X_add_number - 1)
+				      & OP_MASK_INSMSB) << OP_SH_INSMSB;
+		  imm_expr.X_op = O_absent;
+		  s = expr_end;
+		  continue;
 
-		  case 'C':		/* "ext" size spec (becomes MSBD).  */
-		    my_getExpression (&imm_expr, s);
-		    check_absolute_expr (ip, &imm_expr);
-		    if (imm_expr.X_add_number == 0
-			|| (unsigned long) imm_expr.X_add_number > 32
-			|| ((unsigned long) imm_expr.X_add_number
-			    + lastpos) > 32)
-		      {
-			as_bad (_("Improper extract size (%lu, position %lu)"),
-				(unsigned long) imm_expr.X_add_number,
-				(unsigned long) lastpos);
-			imm_expr.X_add_number &= OP_MASK_EXTMSBD;
-		      }
-		    ip->insn_opcode |= (imm_expr.X_add_number
-					- 1) << OP_SH_EXTMSBD;
-		    imm_expr.X_op = O_absent;
-		    s = expr_end;
-		    continue;
+		case 'C':		/* ext size, becomes MSBD.  */
+		  limlo = 1;
+		  limhi = 32;
+		  my_getExpression (&imm_expr, s);
+		  check_absolute_expr (ip, &imm_expr);
+		  /* Check for negative input so that small negative numbers
+		     will not succeed incorrectly.  The checks against
+		     (pos+size) transitively check "size" itself,
+		     assuming that "pos" is reasonable.  */
+		  if ((long) imm_expr.X_add_number < 0
+		      || ((unsigned long) imm_expr.X_add_number
+			  + lastpos) < limlo
+		      || ((unsigned long) imm_expr.X_add_number
+			  + lastpos) > limhi)
+		    {
+		      as_bad (_("Improper extract size (%lu, position %lu)"),
+			      (unsigned long) imm_expr.X_add_number,
+			      (unsigned long) lastpos);
+		      imm_expr.X_add_number = limlo - lastpos;
+		    }
+		  ip->insn_opcode |= ((imm_expr.X_add_number - 1)
+				      & OP_MASK_EXTMSBD) << OP_SH_EXTMSBD;
+		  imm_expr.X_op = O_absent;
+		  s = expr_end;
+		  continue;
 
 		case 'D':
 		  /* +D is for disassembly only; never match.  */
