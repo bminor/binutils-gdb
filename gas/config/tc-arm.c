@@ -6033,7 +6033,9 @@ _("Warning: Use of the 'nv' conditional is deprecated\n"));
  *            -m[arm]3                Arm 3 processor
  *            -m[arm]6[xx],           Arm 6 processors
  *            -m[arm]7[xx][t][[d]m]   Arm 7 processors
- *            -mstrongarm[110]	      Arm 8 processors
+ *            -m8[10]                 Arm 8 processors
+ *            -m9[20][tdmi]           Arm 9 processors
+ *            -mstrongarm[110[0]]     StrongARM processors
  *            -mall                   All (except the ARM1)
  *    FP variants:
  *            -mfpa10, -mfpa11        FPA10 and 11 co-processor instructions
@@ -6290,7 +6292,11 @@ md_parse_option (c, arg)
 	      
 	    case '9':
 	      if (streq (str, "9"))
+		cpu_variant = (cpu_variant & ~ARM_ANY) | ARM_9 | ARM_ARCHv4 | ARM_LONGMUL | ARM_THUMB;
+	      else if (streq (str, "920"))
 		cpu_variant = (cpu_variant & ~ARM_ANY) | ARM_9 | ARM_ARCHv4 | ARM_LONGMUL;
+	      else if (streq (str, "920t"))
+		cpu_variant = (cpu_variant & ~ARM_ANY) | ARM_9 | ARM_ARCHv4 | ARM_LONGMUL | ARM_THUMB;
 	      else if (streq (str, "9tdmi"))
 		cpu_variant = (cpu_variant & ~ARM_ANY) | ARM_9 | ARM_ARCHv4 | ARM_LONGMUL | ARM_THUMB;
 	      else

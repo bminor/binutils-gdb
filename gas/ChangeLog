@@ -1,3 +1,8 @@
+1999-06-10  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-arm.c (md_parse_option): Add support for ARM920 and
+	ARM920t. 
+
 1999-06-07  Jakub Jelinek  <jj@ultra.linux.cz>
 
 	* config/tc-sparc.c (md_assemble): Fix up setx, support setsw.
