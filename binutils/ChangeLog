@@ -1,3 +1,9 @@
+2003-05-12  Nick Clifton  <nickc@redhat.com>
+
+	* configure.in (ALL_LINGUAS): Add zh_CN.
+	* configure: Regenerate.
+	* po/zh_CN.po: New file: Chinese (simplified) translation.
+
 2003-05-11  Jason Eckhardt  <jle@rice.edu>
 
 	* MAINTAINERS: Update my mail address.
