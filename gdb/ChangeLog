@@ -1,5 +1,9 @@
 2004-02-08  Andrew Cagney  <cagney@redhat.com>
 
+	* frame.c (legacy_frame_p): Check for DEPRECATED_TARGET_READ_FP_P
+	and DEPRECATED_FP_REGNUM.  Don't assume that the lack of
+	unwind_dummy_id indicates a legacy frame.
+
 	* configure.in (CONFIG_LIB_OBS): Replace with CONFIG_OBS.
 	* configure: Re-generate.
 
