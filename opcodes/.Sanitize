@@ -489,10 +489,20 @@ else
 	done
 fi
 
-for i in * ; do
-	if test ! -d $i && (grep sanitize $i > /dev/null) ; then
-		echo '***' Some mentions of Sanitize are still left in $i! 1>&2
-	fi
+for i in *; do
+  if test ! -d $i && (grep sanitize $i > /dev/null) ; then
+    echo '***' Some mentions of Sanitize are still left in opcodes/$i! 1>&2
+  fi
+done
+
+for lost in .. $lose_these_too; do
+  if test $lost != ..; then
+    for i in Makefile.am Makefile.in configure.in configure; do
+      if fgrep $lost $i >/dev/null 2>&1; then
+        echo '***' File $lost was sanitized out but is still mentioned in opcodes/$i 1>&2
+      fi
+    done
+  fi
 done
 
 # This must come after all other sanitizations.  Re-sanitize the .pot
