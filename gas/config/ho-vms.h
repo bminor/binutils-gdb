@@ -27,4 +27,9 @@
 /* We need this to make sure that sys_nerr has the right Psect hack. */
 #include <perror.h>
 
+#ifndef EXIT_SUCCESS
+#define EXIT_SUCCESS 1
+#define EXIT_FAILURE 0
+#endif
+
 /* end of ho-vms.h */
