@@ -122,6 +122,8 @@ sparc-*-solaris2* | sparcv9-*-solaris2* | sparc64-*-solaris2*)
 			gdb_host=sol2
 			;;
 
+vax-*-netbsdelf*)	gdb_host=nbsdelf ;;
+vax-*-netbsd*)		gdb_host=nbsdaout ;;
 vax-*-bsd*)		gdb_host=vaxbsd ;;
 vax-*-ultrix2*)		gdb_host=vaxult2 ;;
 vax-*-ultrix*)		gdb_host=vaxult ;;

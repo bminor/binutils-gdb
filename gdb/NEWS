@@ -3,6 +3,10 @@
 
 *** Changes since GDB 6.1:
 
+* New native configurations
+
+NetBSD/vax					vax-*-netbsd*
+
 * REMOVED configurations and files
 
 Sun 3, running SunOS 3				m68*-*-sunos3*

@@ -1,5 +1,12 @@
 2004-04-14  Mark Kettenis  <kettenis@gnu.org>
 
+	* NEWS (New native configurations): Mention NetBSD/vax.
+	* configure.host: Add vax-*-netbsdelf* and vax-*-netbsd*.
+	* config/vax/nbsdelf.mh: New file.
+	* config/vax/nbsdaout.mh: New file.
+	* config/vax/nm-nbsd.h: New file.
+	* config/vax/nm-nbsdaout.h: New file.
+
 	* vaxnbsd-tdep.c: New file.
 	* Makefile.in (vaxnbsd-tdep.o): New dependency.
 	* configure.tgt: Add vax-*-netbsd* and vax-*-openbsd*.
