@@ -1,3 +1,19 @@
+start-sanitize-armelf
+Tue Aug 18 11:48:12 1998  Catherine Moore  <clm@cygnus.com>
+
+        * elf32-arm.c: Add prefix bfd_ to elf32_arm_get_bfd_for_interworking,
+       elf32_arm_allocate_interworking_sections and
+       elf32_arm_process_before_allocation.
+
+Tue Aug 18 11:46:00 1998  Nick Clifton  <nickc@cygnus.com>
+
+        * bfd-in.h: Ammend prototype for
+        elf32_arm_process_before_allocation to remove surplus third
+        argument.
+ 
+        * bfd-in2.h: Regenerate.
+
+end-sanitize-armelf
 Sat Aug 15 20:55:08 1998  Richard Henderson  <rth@cygnus.com>
 
 	* elf64-alpha.c (elf64_alpha_relax_section): Handle indirect symbols.
