@@ -30,6 +30,20 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #define FUNCTION_START_OFFSET 0
 
+/* these are the addresses the D10V-EVA board maps data */
+/* and instruction memory to. */
+
+#define DMEM_START	0x2000000
+#define IMEM_START	0x1000000
+#define STACK_START	0x2007ffe
+
+#ifdef __STDC__		/* Forward decls for prototypes */
+struct frame_info;
+struct frame_saved_regs; 
+struct type;
+struct value;
+#endif
+
 /* Advance PC across any function entry prologue instructions
    to reach some "real" code.  */
 
@@ -37,7 +51,6 @@ extern CORE_ADDR d10v_skip_prologue ();
 #define SKIP_PROLOGUE(ip) \
     {(ip) = d10v_skip_prologue(ip);}
 
-#define SAVED_PC_AFTER_CALL(frame) (read_register(LR_REGNUM) << 2 )
 
 /* Stack grows downward.  */
 #define INNER_THAN <
@@ -142,10 +155,13 @@ extern CORE_ADDR d10v_skip_prologue ();
 #define EXTRA_FRAME_INFO \
     CORE_ADDR return_pc; \
     int dummy; \
+    int frameless; \
     int size;
 
 #define INIT_EXTRA_FRAME_INFO(fromleaf, fi) \
     d10v_init_extra_frame_info(fromleaf, fi) 
+
+extern void d10v_init_extra_frame_info PARAMS (( int fromleaf, struct frame_info *fi ));
 
 /* A macro that tells us whether the function invocation represented
    by FI does not have a frame on the stack associated with it.  If it
@@ -155,13 +171,20 @@ extern CORE_ADDR d10v_skip_prologue ();
   (FRAMELESS) = frameless_look_for_prologue(FI)
 
 #define FRAME_CHAIN(FRAME)       d10v_frame_chain(FRAME)
+#define FRAME_CHAIN_VALID(chain,frame)	\
+      ((chain) != 0 && (frame) != 0 && (frame)->pc > IMEM_START)
 #define FRAME_SAVED_PC(FRAME)    ((FRAME)->return_pc)   
 #define FRAME_ARGS_ADDRESS(fi)   (fi)->frame
 #define FRAME_LOCALS_ADDRESS(fi) (fi)->frame
 
+/* Immediately after a function call, return the saved pc.  We can't */
+/* use frame->return_pc beause that is determined by reading R13 off the */
+/*stack and that may not be written yet. */
+
+#define SAVED_PC_AFTER_CALL(frame) ((read_register(LR_REGNUM) << 2) | IMEM_START)
+    
 /* Set VAL to the number of args passed to frame described by FI.
    Can set VAL to -1, meaning no way to tell.  */
-
 /* We can't tell how many args there are */
 
 #define FRAME_NUM_ARGS(val,fi) (val = -1)
@@ -169,6 +192,7 @@ extern CORE_ADDR d10v_skip_prologue ();
 /* Return number of bytes at start of arglist that are not really args.  */
 
 #define FRAME_ARGS_SKIP 0
+
 
 /* Put here the code to store, into a struct frame_saved_regs,
    the addresses of the saved registers of frame described by FRAME_INFO.
@@ -178,6 +202,8 @@ extern CORE_ADDR d10v_skip_prologue ();
 
 #define FRAME_FIND_SAVED_REGS(frame_info, frame_saved_regs)	    \
    d10v_frame_find_saved_regs(frame_info, &(frame_saved_regs))
+
+extern void d10v_frame_find_saved_regs PARAMS ((struct frame_info *, struct frame_saved_regs *));
 
 #define NAMES_HAVE_UNDERSCORE
       
@@ -200,17 +226,11 @@ extern CORE_ADDR d10v_call_dummy_address PARAMS ((void));
 #define CALL_DUMMY_ADDRESS() d10v_call_dummy_address()
 
 #define FIX_CALL_DUMMY(dummyname, pc, fun, nargs, args, type, gcc_p) \
-d10v_fix_call_dummy (dummyname, pc, fun, nargs, args, type, gcc_p)
+sp = d10v_fix_call_dummy (dummyname, pc, fun, nargs, args, type, gcc_p)
 
-#define PC_IN_CALL_DUMMY(pc, sp, frame_address)			\
-  ((pc>>2) >= CALL_DUMMY_ADDRESS ()				\
-   && (pc>>2) <= (CALL_DUMMY_ADDRESS () + DECR_PC_AFTER_BREAK))
+#define PC_IN_CALL_DUMMY(pc, sp, frame_address)	( pc == IMEM_START + 4 )
 
-#ifdef __STDC__		/* Forward decls for prototypes */
-struct type;
-struct value;
-#endif
-extern void d10v_fix_call_dummy PARAMS ((char *, CORE_ADDR, CORE_ADDR,
+extern CORE_ADDR d10v_fix_call_dummy PARAMS ((char *, CORE_ADDR, CORE_ADDR,
 					   int, struct value **,
 					   struct type *, int));
 #define PUSH_ARGUMENTS(nargs, args, sp, struct_return, struct_addr) \
@@ -231,6 +251,7 @@ d10v_extract_return_value PARAMS ((struct type *, char *, char *));
 /* Discard from the stack the innermost frame,
    restoring all saved registers.  */
 #define POP_FRAME d10v_pop_frame();
+extern void d10v_pop_frame PARAMS((void));
 
 #define REGISTER_SIZE 2
 
@@ -240,13 +261,17 @@ d10v_extract_return_value PARAMS ((struct type *, char *, char *));
 #  define LONGEST long
 #endif 
 
-void d10v_write_pc PARAMS ((LONGEST val, int pid));
+void d10v_write_pc PARAMS ((CORE_ADDR val, int pid));
 CORE_ADDR d10v_read_pc PARAMS ((int pid));
+void d10v_write_sp PARAMS ((CORE_ADDR val));
+CORE_ADDR d10v_read_sp PARAMS ((void));
 
 #define TARGET_READ_PC(pid)		d10v_read_pc (pid)
 #define TARGET_WRITE_PC(val,pid)	d10v_write_pc (val, pid)
-#define TARGET_READ_FP()		d10v_read_fp ()
-#define TARGET_WRITE_FP(val)		d10v_write_fp (val)
+#define TARGET_READ_FP()		d10v_read_sp ()
+#define TARGET_WRITE_FP(val)		d10v_write_sp (val)
+#define TARGET_READ_SP()		d10v_read_sp ()
+#define TARGET_WRITE_SP(val)		d10v_write_sp (val)
 
 /* Number of bits in the appropriate type */
 #define TARGET_INT_BIT (2 * TARGET_CHAR_BIT)
