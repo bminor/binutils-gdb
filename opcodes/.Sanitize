@@ -433,7 +433,7 @@ fi
 # After 99r1, the sanitization will be removed.
 # N.B. there is special sanitization going on here to remove PIPE_[A-Z]*.
 
-cygnus_files="ChangeLog m32r-opc.c m32r-opc.h m32r-dis.c m32r-asm.c"
+cygnus_files="ChangeLog m32r-desc.c m32r-desc.h m32r-opc.c m32r-opc.h m32r-dis.c m32r-asm.c m32r-ibld.c m32r-opinst.c"
 if ( echo $* | grep keep\-cygnus > /dev/null ) ; then
 	for i in $cygnus_files ; do
 		if test -f $i && (grep sanitize-cygnus $i > /dev/null) ; then
