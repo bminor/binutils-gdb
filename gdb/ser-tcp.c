@@ -59,6 +59,7 @@ tcp_open(scb, name)
   int tmp;
   char hostname[100];
   struct protoent *protoent;
+  int i;
 
   port_str = strchr (name, ':');
 
