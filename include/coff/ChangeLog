@@ -1,3 +1,17 @@
+Wed Nov  1 15:25:18 1995  Manfred Hollstein KS/EF4A 60/1F/110 #40283  <manfred@lts.sel.alcatel.de>
+
+	* m68k.h (PAGEMAGICEXECSWAPPED): Define.
+	(PAGEMAGICPEXECSWAPPED): Define.
+	(PAGEMAGICPEXECTSHLIB): Define.
+	(PAGEMAGICPEXECPAGED): Define.
+	(_COMMENT): DEFINE.
+	* m88k.h (_COMMENT): Define.
+
+Wed Oct 18 18:36:19 1995  Geoffrey Noer  <noer@cygnus.com>
+
+	* sym.h: #if 0'd out runtime_pdr struct because it chokes 
+	Visual C++ and there aren't any references to it elsewhere in gdb.
+
 Mon Oct 16 11:12:24 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* rs6000.h (SMALL_AOUTSZ): Define.
