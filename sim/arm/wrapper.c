@@ -23,6 +23,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include <stdio.h>
 #include <stdarg.h>
+#include <string.h>
 #include <bfd.h>
 #include <signal.h>
 #include "callback.h"
@@ -30,6 +31,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "armdefs.h"
 #include "armemu.h"
 #include "dbg_rdi.h"
+#include "ansidecl.h"
 
 host_callback *sim_callback;
 
@@ -106,14 +108,15 @@ ARMul_ConsolePrint (ARMul_State * state, const char *format, ...)
     }
 }
 
-ARMword ARMul_Debug (ARMul_State * state, ARMword pc, ARMword instr)
+ARMword
+ARMul_Debug (ARMul_State * state ATTRIBUTE_UNUSED, ARMword pc ATTRIBUTE_UNUSED, ARMword instr ATTRIBUTE_UNUSED)
 {
-
+  return 0;
 }
 
 int
 sim_write (sd, addr, buffer, size)
-     SIM_DESC sd;
+     SIM_DESC sd ATTRIBUTE_UNUSED;
      SIM_ADDR addr;
      unsigned char *buffer;
      int size;
@@ -129,7 +132,7 @@ sim_write (sd, addr, buffer, size)
 
 int
 sim_read (sd, addr, buffer, size)
-     SIM_DESC sd;
+     SIM_DESC sd ATTRIBUTE_UNUSED;
      SIM_ADDR addr;
      unsigned char *buffer;
      int size;
@@ -145,7 +148,7 @@ sim_read (sd, addr, buffer, size)
 
 int
 sim_trace (sd)
-     SIM_DESC sd;
+     SIM_DESC sd ATTRIBUTE_UNUSED;
 {  
   (*sim_callback->printf_filtered) (sim_callback,
 				    "This simulator does not support tracing\n");
@@ -154,7 +157,7 @@ sim_trace (sd)
 
 int
 sim_stop (sd)
-     SIM_DESC sd;
+     SIM_DESC sd ATTRIBUTE_UNUSED;
 {
   state->Emulate = STOP;
   stop_simulator = 1;
@@ -163,8 +166,9 @@ sim_stop (sd)
 
 void
 sim_resume (sd, step, siggnal)
-     SIM_DESC sd;
-     int step, siggnal;
+     SIM_DESC sd ATTRIBUTE_UNUSED;
+     int step;
+     int siggnal ATTRIBUTE_UNUSED;
 {
   state->EndCondition = 0;
   stop_simulator = 0;
@@ -188,7 +192,7 @@ sim_resume (sd, step, siggnal)
 
 SIM_RC
 sim_create_inferior (sd, abfd, argv, env)
-     SIM_DESC sd;
+     SIM_DESC sd ATTRIBUTE_UNUSED;
      struct _bfd *abfd;
      char **argv;
      char **env;
@@ -247,7 +251,6 @@ sim_create_inferior (sd, abfd, argv, env)
 	{
 	  if (strncmp (*env, "MEMSIZE=", sizeof ("MEMSIZE=") - 1) == 0)
 	    {
-	      unsigned long top_of_memory;
 	      char *end_of_num;
 
 	      /* Set up memory limit */
@@ -263,8 +266,8 @@ sim_create_inferior (sd, abfd, argv, env)
 
 void
 sim_info (sd, verbose)
-     SIM_DESC sd;
-     int verbose;
+     SIM_DESC sd ATTRIBUTE_UNUSED;
+     int verbose ATTRIBUTE_UNUSED;
 {
 }
 
@@ -311,10 +314,10 @@ tomem (state, memory, val)
 
 int
 sim_store_register (sd, rn, memory, length)
-     SIM_DESC sd;
+     SIM_DESC sd ATTRIBUTE_UNUSED;
      int rn;
      unsigned char *memory;
-     int length;
+     int length ATTRIBUTE_UNUSED;
 {
   init ();
   ARMul_SetReg (state, state->Mode, rn, frommem (state, memory));
@@ -323,10 +326,10 @@ sim_store_register (sd, rn, memory, length)
 
 int
 sim_fetch_register (sd, rn, memory, length)
-     SIM_DESC sd;
+     SIM_DESC sd ATTRIBUTE_UNUSED;
      int rn;
      unsigned char *memory;
-     int length;
+     int length ATTRIBUTE_UNUSED;
 {
   ARMword regval;
 
@@ -404,8 +407,8 @@ sim_open (kind, ptr, abfd, argv)
 
 void
 sim_close (sd, quitting)
-     SIM_DESC sd;
-     int quitting;
+     SIM_DESC sd ATTRIBUTE_UNUSED;
+     int quitting ATTRIBUTE_UNUSED;
 {
   /* nothing to do */
 }
@@ -415,7 +418,7 @@ sim_load (sd, prog, abfd, from_tty)
      SIM_DESC sd;
      char *prog;
      bfd *abfd;
-     int from_tty;
+     int from_tty ATTRIBUTE_UNUSED;
 {
   extern bfd *sim_load_file ();	/* ??? Don't know where this should live.  */
   bfd *prog_bfd;
@@ -432,7 +435,7 @@ sim_load (sd, prog, abfd, from_tty)
 
 void
 sim_stop_reason (sd, reason, sigrc)
-     SIM_DESC sd;
+     SIM_DESC sd ATTRIBUTE_UNUSED;
      enum sim_stop *reason;
      int *sigrc;
 {
@@ -458,8 +461,8 @@ sim_stop_reason (sd, reason, sigrc)
 
 void
 sim_do_command (sd, cmd)
-     SIM_DESC sd;
-     char *cmd;
+     SIM_DESC sd ATTRIBUTE_UNUSED;
+     char *cmd ATTRIBUTE_UNUSED;
 {  
   (*sim_callback->printf_filtered) (sim_callback,
 				    "This simulator does not accept any commands.\n");

@@ -372,3 +372,9 @@ pascal void SpinCursor (short increment);	/* copied from CursorCtl.h */
 # define HOURGLASS           SpinCursor( 1 )
 # define HOURGLASS_RATE      1023	/* 2^n - 1 */
 #endif
+
+extern void ARMul_UndefInstr      (ARMul_State *, ARMword);
+extern void ARMul_FixCPSR         (ARMul_State *, ARMword, ARMword);
+extern void ARMul_FixSPSR         (ARMul_State *, ARMword, ARMword);
+extern void ARMul_ConsolePrint    (ARMul_State *, const char *, ...);
+extern void ARMul_SelectProcessor (ARMul_State *, unsigned);

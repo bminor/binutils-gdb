@@ -25,6 +25,7 @@ defined to generate aborts. */
 
 #include "armopts.h"
 #include "armdefs.h"
+#include "ansidecl.h"
 
 #ifdef VALIDATE			/* for running the validate suite */
 #define TUBE 48 * 1024 * 1024	/* write a char on the screen */
@@ -462,7 +463,7 @@ ARMword ARMul_SwapByte (ARMul_State * state, ARMword address, ARMword data)
 \***************************************************************************/
 
 void
-ARMul_Icycles (ARMul_State * state, unsigned number, ARMword address)
+ARMul_Icycles (ARMul_State * state, unsigned number, ARMword address ATTRIBUTE_UNUSED)
 {
   state->NumIcycles += number;
   ARMul_CLEARABORT;
@@ -473,7 +474,7 @@ ARMul_Icycles (ARMul_State * state, unsigned number, ARMword address)
 \***************************************************************************/
 
 void
-ARMul_Ccycles (ARMul_State * state, unsigned number, ARMword address)
+ARMul_Ccycles (ARMul_State * state, unsigned number, ARMword address ATTRIBUTE_UNUSED)
 {
   state->NumCcycles += number;
   ARMul_CLEARABORT;

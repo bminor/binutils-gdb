@@ -45,6 +45,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "bfd.h"
 #include "callback.h"
 #include "remote-sim.h"
+#include "ansidecl.h"
 
 #include "../libiberty/alloca-conf.h"
 
@@ -69,7 +70,7 @@ int (*ui_loop_hook) PARAMS ((int signo));
 static SIM_DESC sd;
 
 static RETSIGTYPE
-cntrl_c (int sig)
+cntrl_c (int sig ATTRIBUTE_UNUSED)
 {
   if (! sim_stop (sd))
     {

@@ -279,11 +279,11 @@ ARMul_Emulate26 (register ARMul_State * state)
 {
 #endif
   register ARMword instr,	/* the current instruction */
-    dest,			/* almost the DestBus */
+    dest = 0,			/* almost the DestBus */
     temp,			/* ubiquitous third hand */
-    pc;				/* the address of the current instruction */
+    pc = 0;			/* the address of the current instruction */
   ARMword lhs, rhs;		/* almost the ABus and BBus */
-  ARMword decoded, loaded;	/* instruction pipeline */
+  ARMword decoded = 0, loaded = 0;	/* instruction pipeline */
 
 /***************************************************************************\
 *                        Execute the next instruction                       *
@@ -2628,7 +2628,7 @@ ARMul_Emulate26 (register ARMul_State * state)
 #ifdef MODE32
 	      state->Reg[14] = pc + 4;	/* put PC into Link */
 #else
-	      state->Reg[14] = pc + 4 | ECC | ER15INT | EMODE;	/* put PC into Link */
+	      state->Reg[14] = (pc + 4) | ECC | ER15INT | EMODE;	/* put PC into Link */
 #endif
 	      state->Reg[15] = pc + 8 + POSBRANCH;
 	      FLUSHPIPE;
@@ -3742,7 +3742,7 @@ static unsigned
 Multiply64 (ARMul_State * state, ARMword instr, int msigned, int scc)
 {
   int nRdHi, nRdLo, nRs, nRm;	/* operand register numbers */
-  ARMword RdHi, RdLo, Rm;
+  ARMword RdHi = 0, RdLo = 0, Rm;
   int scount;			/* cycle count */
 
   nRdHi = BITS (16, 19);
@@ -3809,7 +3809,6 @@ Multiply64 (ARMul_State * state, ARMword instr, int msigned, int scc)
 
       state->Reg[nRdLo] = RdLo;
       state->Reg[nRdHi] = RdHi;
-
     }				/* else undefined result */
   else
     fprintf (stderr, "MULTIPLY64 - INVALID ARGUMENTS\n");

@@ -306,7 +306,7 @@ os_write (p, fd, buf, len)
 
 static int 
 os_write_stdout (p, buf, len)
-     host_callback *p;
+     host_callback *p ATTRIBUTE_UNUSED;
      const char *buf;
      int len;
 {
@@ -315,14 +315,14 @@ os_write_stdout (p, buf, len)
 
 static void
 os_flush_stdout (p)
-     host_callback *p;
+     host_callback *p ATTRIBUTE_UNUSED;
 {
   fflush (stdout);
 }
 
 static int 
 os_write_stderr (p, buf, len)
-     host_callback *p;
+     host_callback *p ATTRIBUTE_UNUSED;
      const char *buf;
      int len;
 {
@@ -331,7 +331,7 @@ os_write_stderr (p, buf, len)
 
 static void
 os_flush_stderr (p)
-     host_callback *p;
+     host_callback *p ATTRIBUTE_UNUSED;
 {
   fflush (stderr);
 }
@@ -440,7 +440,7 @@ os_init (p)
 /* VARARGS */
 static void
 #ifdef ANSI_PROTOTYPES
-os_printf_filtered (host_callback *p, const char *format, ...)
+os_printf_filtered (host_callback *p ATTRIBUTE_UNUSED, const char *format, ...)
 #else
 os_printf_filtered (p, va_alist)
      host_callback *p;
@@ -464,7 +464,7 @@ os_printf_filtered (p, va_alist)
 /* VARARGS */
 static void
 #ifdef ANSI_PROTOTYPES
-os_vprintf_filtered (host_callback *p, const char *format, va_list args)
+os_vprintf_filtered (host_callback *p ATTRIBUTE_UNUSED, const char *format, va_list args)
 #else
 os_vprintf_filtered (p, format, args)
      host_callback *p;
@@ -478,7 +478,7 @@ os_vprintf_filtered (p, format, args)
 /* VARARGS */
 static void
 #ifdef ANSI_PROTOTYPES
-os_evprintf_filtered (host_callback *p, const char *format, va_list args)
+os_evprintf_filtered (host_callback *p ATTRIBUTE_UNUSED, const char *format, va_list args)
 #else
 os_evprintf_filtered (p, format, args)
      host_callback *p;
@@ -492,7 +492,7 @@ os_evprintf_filtered (p, format, args)
 /* VARARGS */
 static void
 #ifdef ANSI_PROTOTYPES
-os_error (host_callback *p, const char *format, ...)
+os_error (host_callback *p ATTRIBUTE_UNUSED, const char *format, ...)
 #else
 os_error (p, va_alist)
      host_callback *p;
