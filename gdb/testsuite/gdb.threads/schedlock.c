@@ -7,7 +7,7 @@ void *thread_function(void *arg); /* Pointer to function executed by each thread
 
 #define NUM 5
 
-int args[NUM+1];
+unsigned int args[NUM+1];
 
 int main() {
     int res;
