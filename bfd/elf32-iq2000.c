@@ -234,30 +234,6 @@ static reloc_howto_type iq2000_elf_vtentry_howto =
 	 FALSE);		   /* pcrel_offset */
 
 
-/* Map BFD reloc types to IQ2000 ELF reloc types.  */
-
-struct iq2000_reloc_map
-{
-  bfd_reloc_code_real_type bfd_reloc_val;
-  unsigned int iq2000_reloc_val;
-};
-
-static const struct iq2000_reloc_map iq2000_reloc_map [] =
-{
-  { BFD_RELOC_NONE,	       R_IQ2000_NONE },
-  { BFD_RELOC_16,	       R_IQ2000_16 },
-  { BFD_RELOC_32,	       R_IQ2000_32 },
-  { BFD_RELOC_MIPS_JMP,	       R_IQ2000_26 },
-  { BFD_RELOC_16_PCREL_S2,     R_IQ2000_PC16 },
-  { BFD_RELOC_HI16,	       R_IQ2000_HI16 },
-  { BFD_RELOC_LO16,	       R_IQ2000_LO16 },
-  { BFD_RELOC_IQ2000_OFFSET_16,R_IQ2000_OFFSET_16 },
-  { BFD_RELOC_IQ2000_OFFSET_21,R_IQ2000_OFFSET_21 },
-  { BFD_RELOC_IQ2000_UHI16,    R_IQ2000_UHI16 },
-  { BFD_RELOC_VTABLE_INHERIT,  R_IQ2000_GNU_VTINHERIT },
-  { BFD_RELOC_VTABLE_ENTRY,    R_IQ2000_GNU_VTENTRY },
-};
-
 static bfd_reloc_status_type
 iq2000_elf_howto_hi16_reloc (bfd *abfd ATTRIBUTE_UNUSED,
 			     arelent *reloc_entry,
@@ -328,6 +304,8 @@ iq2000_elf_relocate_hi16 (bfd *input_bfd,
   bfd_put_32 (input_bfd, insn, contents + relhi->r_offset);
   return bfd_reloc_ok;
 }
+
+/* Map BFD reloc types to IQ2000 ELF reloc types.  */
 
 static reloc_howto_type *
 iq2000_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED,

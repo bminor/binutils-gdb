@@ -35,6 +35,9 @@
 	* elf32-ip2k.c (ip2k_call_opcode, IS_CALL_OPCODE): Remove unused
 	structure and macro.
 
+	* elf32-iq2000.c (iq2000_reloc_map): Remove unused structure and
+	array.
+
 2005-02-12  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf64-ppc.c (toc_adjusting_stub_needed): Return true for
