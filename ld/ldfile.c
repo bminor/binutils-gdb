@@ -115,7 +115,6 @@ ldfile_add_library_path (name, cmdline)
      bfd_boolean cmdline;
 {
   search_dirs_type *new;
-  char *newname;
 
   if (!cmdline && config.only_cmd_line_lib_dirs)
     return;
