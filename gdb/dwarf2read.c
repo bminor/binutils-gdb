@@ -685,12 +685,15 @@ static void dwarf2_read_abbrevs (bfd *abfd, struct dwarf2_cu *cu);
 
 static void dwarf2_empty_abbrev_table (void *);
 
+static struct abbrev_info *peek_die_abbrev (char *, int *, struct dwarf2_cu *);
+
 static struct abbrev_info *dwarf2_lookup_abbrev (unsigned int,
 						 struct dwarf2_cu *);
 
 static void load_partial_dies (bfd *, char *, struct dwarf2_cu *);
 
 static char *load_partial_die (struct partial_die_info *,
+			       struct abbrev_info *abbrev, unsigned int,
 			       bfd *, char *, struct dwarf2_cu *);
 
 static struct partial_die_info *find_partial_die (unsigned long,
@@ -1267,6 +1270,9 @@ dwarf2_build_psymtabs_hard (struct objfile *objfile, int mainline)
     {
       struct cleanup *back_to_inner;
       struct dwarf2_cu cu;
+      struct abbrev_info *abbrev;
+      unsigned int bytes_read;
+
       beg_of_comp_unit = info_ptr;
 
       cu.objfile = objfile;
@@ -1308,8 +1314,9 @@ dwarf2_build_psymtabs_hard (struct objfile *objfile, int mainline)
       back_to_inner = make_cleanup (dwarf2_empty_abbrev_table, &cu);
 
       /* Read the compilation unit die */
-      info_ptr = load_partial_die (&comp_unit_die, abfd, info_ptr,
-				   &cu);
+      abbrev = peek_die_abbrev (info_ptr, &bytes_read, &cu);
+      info_ptr = load_partial_die (&comp_unit_die, abbrev, bytes_read,
+				   abfd, info_ptr, &cu);
 
       /* Set the language we're debugging */
       set_cu_language (comp_unit_die.language, &cu);
@@ -4578,7 +4585,8 @@ load_partial_dies (bfd *abfd, char *info_ptr, struct dwarf2_cu *cu)
 	}
 
       //      fprintf_unfiltered (gdb_stderr, "Loading DIE %x\n", info_ptr - dwarf_info_buffer);
-      info_ptr = load_partial_die (part_die, abfd, info_ptr, cu);
+      info_ptr = load_partial_die (part_die, abbrev, bytes_read,
+				   abfd, info_ptr, cu);
 
       /* We'll save this DIE so link it in.  */
       part_die->die_parent = parent_die;
@@ -4628,11 +4636,12 @@ load_partial_dies (bfd *abfd, char *info_ptr, struct dwarf2_cu *cu)
 /* Read a minimal amount of information into the minimal die structure.  */
 
 static char *
-load_partial_die (struct partial_die_info *part_die, bfd *abfd,
+load_partial_die (struct partial_die_info *part_die,
+		  struct abbrev_info *abbrev,
+		  unsigned int abbrev_len, bfd *abfd,
 		  char *info_ptr, struct dwarf2_cu *cu)
 {
-  unsigned int abbrev_number, bytes_read, i;
-  struct abbrev_info *abbrev;
+  unsigned int bytes_read, i;
   struct attribute attr;
   int has_low_pc_attr = 0;
   int has_high_pc_attr = 0;
@@ -4641,21 +4650,14 @@ load_partial_die (struct partial_die_info *part_die, bfd *abfd,
 
   part_die->offset = info_ptr - dwarf_info_buffer;
 
-  abbrev_number = read_unsigned_leb128 (abfd, info_ptr, &bytes_read);
-  info_ptr += bytes_read;
-  if (!abbrev_number)
-    return info_ptr;
+  info_ptr += abbrev_len;
 
-  abbrev = dwarf2_lookup_abbrev (abbrev_number, cu);
-  if (!abbrev)
-    {
-      error ("Dwarf Error: Could not find abbrev number %d [in module %s]", abbrev_number,
-		      bfd_get_filename (abfd));
-    }
+  if (abbrev == NULL)
+    return info_ptr;
 
   part_die->tag = abbrev->tag;
   part_die->has_children = abbrev->has_children;
-  part_die->abbrev = abbrev_number;
+  part_die->abbrev = abbrev->number;
 
   for (i = 0; i < abbrev->num_attrs; ++i)
     {
