@@ -1,5 +1,8 @@
 Wed Sep 24 11:27:23 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* Makefile.am (libbfd_a_SOURCES): Define.
+	* Makefile.in: Rebuild.
+
 	* configure.in: Call AC_CHECK_TOOL before AM_PROG_LIBTOOL.
 	* aclocal.m4: Rebuild with new libtool.
 	* configure: Rebuild.
