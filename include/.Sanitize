@@ -98,19 +98,15 @@ else
 	mv new aout64.h
 fi
 
-if ( echo $* | grep keep\-29k > /dev/null ) ; then
-	echo Keeping 29k in amdcoff.h
-else
-	echo Sanitizing 29k in amdcoff.h
-	rm -f amdcoff.h
-fi
-
 echo Done in `pwd`.
 
 #
 #
 # $Log$
-# Revision 1.9  1991/08/22 08:00:35  gnu
+# Revision 1.10  1991/08/29 00:34:45  gnu
+# Paperwork handled for AMD Coff.
+#
+# Revision 1.9  1991/08/22  08:00:35  gnu
 # Add ChangeLog for Include.
 #
 # Revision 1.8  1991/07/31  17:36:04  gnu
