@@ -1,3 +1,13 @@
+2004-05-09  Mark Kettenis  <kettenis@gnu.org>
+
+	* vax-tdep.c: Tweak comments.  Reorder include files.  Don't
+	include "symtab.h", "opcode/vax.h" and "inferior.h".
+	(vax_skip_prologue): Replace calls to read_memory_integer by calls
+	to read_memory_unsigned_integer.
+	(vax_gdbarch_init): Reorder.
+	(_initialize_vax_tdep): Spell out prototype.
+	* Makefile.in (vax-tdep.o): Update dependencies.
+
 2004-05-08  Andrew Cagney  <cagney@redhat.com>
 
 	* infrun.c (resume): Delete call to DO_DEFERRED_STORES.

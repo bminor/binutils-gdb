@@ -2511,10 +2511,10 @@ values.o: values.c $(defs_h) $(gdb_string_h) $(symtab_h) $(gdbtypes_h) \
 	$(gdb_assert_h) $(regcache_h) $(block_h)
 varobj.o: varobj.c $(defs_h) $(value_h) $(expression_h) $(frame_h) \
 	$(language_h) $(wrapper_h) $(gdbcmd_h) $(gdb_string_h) $(varobj_h)
-vax-tdep.o: vax-tdep.c $(defs_h) $(symtab_h) $(opcode_vax_h) $(gdbcore_h) \
-	$(inferior_h) $(regcache_h) $(frame_h) $(frame_base_h) \
-	$(frame_unwind_h) $(value_h) $(arch_utils_h) $(osabi_h) \
-	$(dis_asm_h) $(regset_h) $(gdb_string_h) $(vax_tdep_h)
+vax-tdep.o: vax-tdep.c $(defs_h) $(arch_utils_h) $(dis_asm_h) $(frame_h) \
+	$(frame_base_h) $(frame_unwind_h) $(gdbcore_h) $(osabi_h) \
+	$(regcache_h) $(regset_h) $(value_h) $(trad_frame_h) \
+	$(gdb_string_h) $(vax_tdep_h)
 vaxbsd-nat.o: vaxbsd-nat.c $(defs_h) $(inferior_h) $(regcache_h) $(vax_tdep_h)
 vaxnbsd-tdep.o: vaxnbsd-tdep.c $(defs_h) $(arch_utils_h) $(osabi_h) \
 	$(vax_tdep_h) $(solib_svr4_h) $(gdb_string_h)

@@ -1,4 +1,4 @@
-/* Print VAX instructions for GDB, the GNU debugger.
+/* Target-dependent code for the VAX.
 
    Copyright 1986, 1989, 1991, 1992, 1995, 1996, 1998, 1999, 2000,
    2002, 2003, 2004 Free Software Foundation, Inc.
@@ -21,20 +21,18 @@
    Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
-#include "symtab.h"
-#include "opcode/vax.h"
-#include "gdbcore.h"
-#include "inferior.h"
-#include "regcache.h"
+#include "arch-utils.h"
+#include "dis-asm.h"
 #include "frame.h"
 #include "frame-base.h"
 #include "frame-unwind.h"
+#include "gdbcore.h"
+#include "gdbtypes.h"
+#include "osabi.h"
+#include "regcache.h"
+#include "regset.h"
 #include "trad-frame.h"
 #include "value.h"
-#include "arch-utils.h"
-#include "osabi.h"
-#include "dis-asm.h"
-#include "regset.h"
 
 #include "gdb_string.h"
 
@@ -258,26 +256,28 @@ vax_breakpoint_from_pc (CORE_ADDR *pc, int *len)
 static CORE_ADDR
 vax_skip_prologue (CORE_ADDR pc)
 {
-  int op = (unsigned char) read_memory_integer (pc, 1);
+  unsigned char op = read_memory_unsigned_integer (pc, 1);
+
   if (op == 0x11)
     pc += 2;			/* skip brb */
   if (op == 0x31)
     pc += 3;			/* skip brw */
   if (op == 0xC2
-      && ((unsigned char) read_memory_integer (pc + 2, 1)) == 0x5E)
+      && (read_memory_unsigned_integer (pc + 2, 1)) == 0x5E)
     pc += 3;			/* skip subl2 */
   if (op == 0x9E
-      && ((unsigned char) read_memory_integer (pc + 1, 1)) == 0xAE
-      && ((unsigned char) read_memory_integer (pc + 3, 1)) == 0x5E)
+      && (read_memory_unsigned_integer (pc + 1, 1)) == 0xAE
+      && (read_memory_unsigned_integer (pc + 3, 1)) == 0x5E)
     pc += 4;			/* skip movab */
   if (op == 0x9E
-      && ((unsigned char) read_memory_integer (pc + 1, 1)) == 0xCE
-      && ((unsigned char) read_memory_integer (pc + 4, 1)) == 0x5E)
+      && (read_memory_unsigned_integer (pc + 1, 1)) == 0xCE
+      && (read_memory_unsigned_integer (pc + 4, 1)) == 0x5E)
     pc += 5;			/* skip movab */
   if (op == 0x9E
-      && ((unsigned char) read_memory_integer (pc + 1, 1)) == 0xEE
-      && ((unsigned char) read_memory_integer (pc + 6, 1)) == 0x5E)
+      && (read_memory_unsigned_integer (pc + 1, 1)) == 0xEE
+      && (read_memory_unsigned_integer (pc + 6, 1)) == 0x5E)
     pc += 7;			/* skip movab */
+
   return pc;
 }
 
@@ -476,7 +476,6 @@ vax_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Frame and stack info */
   set_gdbarch_skip_prologue (gdbarch, vax_skip_prologue);
   set_gdbarch_frame_num_args (gdbarch, vax_frame_num_args);
-
   set_gdbarch_frame_args_skip (gdbarch, 4);
 
   /* Stack grows downward.  */
@@ -496,6 +495,8 @@ vax_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_function_start_offset (gdbarch, 2);
   set_gdbarch_believe_pcc_promotion (gdbarch, 1);
 
+  set_gdbarch_print_insn (gdbarch, print_insn_vax);
+
   set_gdbarch_unwind_pc (gdbarch, vax_unwind_pc);
 
   frame_base_set_default (gdbarch, &vax_frame_base);
@@ -505,12 +506,11 @@ vax_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   frame_unwind_append_sniffer (gdbarch, vax_frame_sniffer);
 
-  set_gdbarch_print_insn (gdbarch, print_insn_vax);
-
   return (gdbarch);
 }
 
-extern initialize_file_ftype _initialize_vax_tdep; /* -Wmissing-prototypes */
+/* Provide a prototype to silence -Wmissing-prototypes.  */
+void _initialize_vax_tdep (void);
 
 void
 _initialize_vax_tdep (void)
