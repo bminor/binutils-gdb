@@ -136,6 +136,10 @@ static enum mips_abi_level mips_abi = NO_ABI;
 /* Whether or not we have code that can call pic code.  */
 int mips_abicalls = FALSE;
 
+/* Whether or not we have code which can be put into a shared
+   library.  */
+static bfd_boolean mips_in_shared = TRUE;
+
 /* This is the set of options which may be modified by the .set
    pseudo-op.  We use a struct so that .set push and .set pop are more
    reliable.  */
@@ -3388,10 +3392,13 @@ macro_build_lui (expressionS *ep, int regnum)
   else
     {
       assert (ep->X_op == O_symbol);
-      /* _gp_disp is a special case, used from s_cpload.  */
+      /* _gp_disp is a special case, used from s_cpload.  _gp is used
+	 if mips_no_shared.  */
       assert (mips_pic == NO_PIC
 	      || (! HAVE_NEWABI
-		  && strcmp (S_GET_NAME (ep->X_add_symbol), "_gp_disp") == 0));
+		  && strcmp (S_GET_NAME (ep->X_add_symbol), "_gp_disp") == 0)
+	      || (! mips_in_shared
+		  && strcmp (S_GET_NAME (ep->X_add_symbol), "_gp") == 0));
       *r = BFD_RELOC_HI16_S;
     }
 
@@ -10120,10 +10127,14 @@ struct option md_longopts[] =
 #define OPTION_NO_RELAX_BRANCH (OPTION_MISC_BASE + 11)
   {"relax-branch", no_argument, NULL, OPTION_RELAX_BRANCH},
   {"no-relax-branch", no_argument, NULL, OPTION_NO_RELAX_BRANCH},
+#define OPTION_MSHARED (OPTION_MISC_BASE + 12)
+#define OPTION_MNO_SHARED (OPTION_MISC_BASE + 13)
+  {"mshared", no_argument, NULL, OPTION_MSHARED},
+  {"mno-shared", no_argument, NULL, OPTION_MNO_SHARED},
 
   /* ELF-specific options.  */
 #ifdef OBJ_ELF
-#define OPTION_ELF_BASE    (OPTION_MISC_BASE + 12)
+#define OPTION_ELF_BASE    (OPTION_MISC_BASE + 14)
 #define OPTION_CALL_SHARED (OPTION_ELF_BASE + 0)
   {"KPIC",        no_argument, NULL, OPTION_CALL_SHARED},
   {"call_shared", no_argument, NULL, OPTION_CALL_SHARED},
@@ -10334,6 +10345,14 @@ md_parse_option (int c, char *arg)
 
     case OPTION_NO_RELAX_BRANCH:
       mips_relax_branch = 0;
+      break;
+
+    case OPTION_MSHARED:
+      mips_in_shared = TRUE;
+      break;
+
+    case OPTION_MNO_SHARED:
+      mips_in_shared = FALSE;
       break;
 
 #ifdef OBJ_ELF
@@ -11794,12 +11813,22 @@ s_abicalls (int ignore ATTRIBUTE_UNUSED)
 	lui	$gp,%hi(_gp_disp)
 	addiu	$gp,$gp,%lo(_gp_disp)
 	addu	$gp,$gp,.cpload argument
-   The .cpload argument is normally $25 == $t9.  */
+   The .cpload argument is normally $25 == $t9.
+
+   The -mno-shared option changes this to:
+	lui	$gp,%hi(_gp)
+	addiu	$gp,$gp,%lo(_gp)
+   and the argument is ignored.  This saves an instruction, but the
+   resulting code is not position independent; it uses an absolute
+   address for _gp.  Thus code assembled with -mno-shared can go into
+   an ordinary executable, but not into a shared library.  */
 
 static void
 s_cpload (int ignore ATTRIBUTE_UNUSED)
 {
   expressionS ex;
+  int reg;
+  int in_shared;
 
   /* If we are not generating SVR4 PIC code, or if this is NewABI code,
      .cpload is ignored.  */
@@ -11813,8 +11842,14 @@ s_cpload (int ignore ATTRIBUTE_UNUSED)
   if (mips_opts.noreorder == 0)
     as_warn (_(".cpload not in noreorder section"));
 
+  reg = tc_get_register (0);
+
+  /* If we need to produce a 64-bit address, we are better off using
+     the default instruction sequence.  */
+  in_shared = mips_in_shared || HAVE_64BIT_ADDRESSES;
+
   ex.X_op = O_symbol;
-  ex.X_add_symbol = symbol_find_or_make ("_gp_disp");
+  ex.X_add_symbol = symbol_find_or_make (in_shared ? "_gp_disp" : "_gp");
   ex.X_op_symbol = NULL;
   ex.X_add_number = 0;
 
@@ -11825,8 +11860,9 @@ s_cpload (int ignore ATTRIBUTE_UNUSED)
   macro_build_lui (&ex, mips_gp_register);
   macro_build (&ex, "addiu", "t,r,j", mips_gp_register,
 	       mips_gp_register, BFD_RELOC_LO16);
-  macro_build (NULL, "addu", "d,v,t", mips_gp_register,
-	       mips_gp_register, tc_get_register (0));
+  if (in_shared)
+    macro_build (NULL, "addu", "d,v,t", mips_gp_register,
+		 mips_gp_register, reg);
   macro_end ();
 
   demand_empty_rest_of_line ();
@@ -11846,7 +11882,13 @@ s_cpload (int ignore ATTRIBUTE_UNUSED)
      lui	$gp, %hi(%neg(%gp_rel(label)))
      addiu	$gp, $gp, %lo(%neg(%gp_rel(label)))
      daddu	$gp, $gp, $reg1
-   $reg1 is normally $25 == $t9.  */
+   $reg1 is normally $25 == $t9.
+
+   The -mno-shared option replaces the last three instructions with
+	lui	$gp,%hi(_gp)
+	addiu	$gp,$gp,%lo(_gp)
+   */
+
 static void
 s_cpsetup (int ignore ATTRIBUTE_UNUSED)
 {
@@ -11908,15 +11950,36 @@ s_cpsetup (int ignore ATTRIBUTE_UNUSED)
     macro_build (NULL, "daddu", "d,v,t", mips_cpreturn_register,
 		 mips_gp_register, 0);
 
-  macro_build (&ex_sym, "lui", "t,u", mips_gp_register,
-	       -1, BFD_RELOC_GPREL16, BFD_RELOC_MIPS_SUB, BFD_RELOC_HI16_S);
+  if (mips_in_shared || HAVE_64BIT_ADDRESSES)
+    {
+      macro_build (&ex_sym, "lui", "t,u", mips_gp_register,
+		   -1, BFD_RELOC_GPREL16, BFD_RELOC_MIPS_SUB,
+		   BFD_RELOC_HI16_S);
 
-  macro_build (&ex_sym, "addiu", "t,r,j", mips_gp_register,
-	       mips_gp_register, -1, BFD_RELOC_GPREL16,
-	       BFD_RELOC_MIPS_SUB, BFD_RELOC_LO16);
+      macro_build (&ex_sym, "addiu", "t,r,j", mips_gp_register,
+		   mips_gp_register, -1, BFD_RELOC_GPREL16,
+		   BFD_RELOC_MIPS_SUB, BFD_RELOC_LO16);
 
-  macro_build (NULL, ADDRESS_ADD_INSN, "d,v,t", mips_gp_register,
-	       mips_gp_register, reg1);
+      macro_build (NULL, ADDRESS_ADD_INSN, "d,v,t", mips_gp_register,
+		   mips_gp_register, reg1);
+    }
+  else
+    {
+      expressionS ex;
+
+      ex.X_op = O_symbol;
+      ex.X_add_symbol = symbol_find_or_make ("_gp");
+      ex.X_op_symbol = NULL;
+      ex.X_add_number = 0;
+
+      /* In ELF, this symbol is implicitly an STT_OBJECT symbol.  */
+      symbol_get_bfdsym (ex.X_add_symbol)->flags |= BSF_OBJECT;
+
+      macro_build_lui (&ex, mips_gp_register);
+      macro_build (&ex, "addiu", "t,r,j", mips_gp_register,
+		   mips_gp_register, BFD_RELOC_LO16);
+    }
+
   macro_end ();
 
   demand_empty_rest_of_line ();

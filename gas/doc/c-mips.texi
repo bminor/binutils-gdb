@@ -238,6 +238,16 @@ error is detected.  This is the default.
 @itemx -mno-pdr
 Control generation of @code{.pdr} sections.  Off by default on IRIX, on
 elsewhere.
+
+@item -mshared
+@itemx -mno-shared
+When generating code using the Unix calling conventions (selected by
+@samp{-KPIC} or @samp{-mcall_shared}), gas will normally generate code
+which can go into a shared library.  The @samp{-mno-shared} option
+tells gas to generate code which uses the calling convention, but can
+not go into a shared library.  The resulting code is slightly more
+efficient.  This option only affects the handling of the
+@samp{.cpload} and @samp{.cpsetup} pseudo-ops.
 @end table
 
 @node MIPS Object

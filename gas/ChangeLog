@@ -1,3 +1,14 @@
+2004-12-10  Ian Lance Taylor  <ian@wasabisystems.com>
+
+	* config/tc-mips.c (mips_in_shared): New static variable.
+	(macro_build_lui): Permit "_gp" if !mips_in_shared.
+	(md_longopts): Add -mshared and -mno-shared.
+	(md_parse_option): Handle OPTION_MSHARED and OPTION_MNO_SHARED.
+	(s_cpload): Implement !mips_in_shared case.
+	(s_cpsetup): Likewise.
+	* doc/c-mips.texi (MIPS Opts): Document -mno-shared.
+	* NEWS: Mention -mno-shared.
+
 2004-12-09  Paul Brook  <paul@codesourcery.com>
 
 	* config/tc-arm.c (s_arm_unwind_fnend): Use R_ARM_PREL31 relocation
