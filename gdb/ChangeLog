@@ -1,3 +1,9 @@
+2004-02-09  Elena Zannoni  <ezannoni@redhat.com>
+
+	* linespec.c (decode_line_1, locate_first_half)
+	(decode_compound, lookup_prefix_sym): Update comments. Delete old
+	commented out code.
+
 2004-02-09  Daniel Jacobowitz  <drow@mvista.com>
 
 	* cp-namespace.c (check_one_possible_namespace_symbol): Don't use
