@@ -37,7 +37,6 @@ mt-ebmon29k
 mt-m68k		
 obj-ieee.h	
 tc-mips.c
-mh-cygnus	
 mt-h8300	
 mt-mips		
 tc-h8300.c	
@@ -107,6 +106,8 @@ tmake-m68k
 vax-inst.h
 vms
 
+
+
 Do-last:
 
 if ( echo $* | grep keep\-v9 > /dev/null ) ; then
@@ -125,7 +126,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.6  1991/11/05 21:21:12  sac
+# Revision 1.7  1991/11/06 09:14:33  sac
+# Uniq contents, since configure gets confused if the same file is in more than once.
+#
+# Revision 1.6  1991/11/05  21:21:12  sac
 # Added a load of mt/mh files
 #
 # Revision 1.5  1991/10/22  03:26:06  steve
