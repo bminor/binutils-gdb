@@ -1,3 +1,9 @@
+2000-04-10  Fernando Nasser  <fnasser@cygnus.com>
+
+	From 2000-04-10 Rodney Brown <rdb@redhat.com>:
+	* command.h (enum command_class): Remove trailing "," to placate
+	AIX xlc.
+
 Mon Apr 10 20:17:32 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* TODO, NEWS: Update.  Mention MI.
