@@ -501,6 +501,59 @@ d30v_frame_find_saved_regs (fi, fsr)
   frame_size = 0;
   end_of_stack = 0;
 
+  uses_frame = 0;
+
+  d30v_frame_find_saved_regs_offsets (fi, fsr);
+  
+  fi->size = frame_size;
+
+  if (!fp)
+    fp = read_register(SP_REGNUM);
+
+  for (i=0; i<NUM_REGS-1; i++)
+    if (fsr->regs[i])
+      {
+	fsr->regs[i] = fsr->regs[i] + fp + frame_size;
+      }
+
+  if (fsr->regs[LR_REGNUM])
+    fi->return_pc = read_memory_unsigned_integer(fsr->regs[LR_REGNUM],4);
+  else
+    fi->return_pc = read_register(LR_REGNUM);
+  
+  /* the SP is not normally (ever?) saved, but check anyway */
+  if (!fsr->regs[SP_REGNUM])
+    {
+      /* if the FP was saved, that means the current FP is valid, */
+      /* otherwise, it isn't being used, so we use the SP instead */
+      if (uses_frame)
+	fsr->regs[SP_REGNUM] = read_register(FP_REGNUM) + fi->size;
+      else
+	{
+	  fsr->regs[SP_REGNUM] = fp + fi->size;
+	  fi->frameless = 1;
+	  fsr->regs[FP_REGNUM] = 0;
+	}
+    }
+}
+
+void
+d30v_frame_find_saved_regs_offsets (fi, fsr)
+     struct frame_info *fi;
+     struct frame_saved_regs *fsr;
+{
+  CORE_ADDR fp, pc;
+  unsigned long opl, opr;
+  unsigned long op1, op2;
+  unsigned long fm0, fm1;
+  int i;
+
+  fp = fi->frame;
+  memset (fsr, 0, sizeof (*fsr));
+  next_addr = 0;
+  frame_size = 0;
+  end_of_stack = 0;
+
   pc = get_pc_function_start (fi->pc);
 
   uses_frame = 0;
@@ -571,14 +624,12 @@ d30v_frame_find_saved_regs (fi, fsr)
       pc += 8;
     }
   
-  fi->size = frame_size;
 #if 0
-  if (!fp || !uses_frame)
-    fp = read_register(SP_REGNUM);
-#else
+  fi->size = frame_size;
+
   if (!fp)
     fp = read_register(SP_REGNUM);
-#endif
+
   for (i=0; i<NUM_REGS-1; i++)
     if (fsr->regs[i])
       {
@@ -604,6 +655,7 @@ d30v_frame_find_saved_regs (fi, fsr)
 	  fsr->regs[FP_REGNUM] = 0;
 	}
     }
+#endif
 }
 
 void
@@ -616,7 +668,26 @@ d30v_init_extra_frame_info (fromleaf, fi)
   if (fi->next && (fi->pc == 0))
     fi->pc = fi->next->return_pc; 
 
-  d30v_frame_find_saved_regs (fi, &dummy);
+  d30v_frame_find_saved_regs_offsets (fi, &dummy);
+
+  if (uses_frame == 0)
+    fi->frameless = 1;
+  else
+    fi->frameless = 0;
+
+  if ((fi->next == 0) && (uses_frame == 0))
+    /* innermost frame and it's "frameless",
+       so the fi->frame field is wrong, fix it! */
+    fi->frame = read_sp ();
+
+  if (dummy.regs[LR_REGNUM])
+    {
+      /* it was saved, grab it! */
+      dummy.regs[LR_REGNUM] += (fi->frame + frame_size);
+      fi->return_pc = read_memory_unsigned_integer(dummy.regs[LR_REGNUM],4);
+    }
+  else
+    fi->return_pc = read_register(LR_REGNUM);
 }
 
 void
