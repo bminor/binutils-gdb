@@ -1,3 +1,15 @@
+2001-07-11  Jakub Jelinek  <jakub@redhat.com>
+
+	* elf32-sparc.c (_bfd_sparc_elf_howto_table): Remove support for
+	R_SPARC_UA64.
+	(elf32_sparc_check_relocs): Likewise.
+	Only create .rela section for alloced sections in shared libraries.
+	(elf32_sparc_relocate_section): Likewise.
+	Remove redundant check.
+	Optimize unaligned reloc usage.
+	* elf64-sparc.c (sparc64_elf_relocate_section): Remove redundant
+	check.
+
 2001-07-11  H.J. Lu  <hjl@gnu.org>
 
 	* elf64-alpha.c (elf64_alpha_check_relocs): Only use the same

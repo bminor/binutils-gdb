@@ -2283,12 +2283,8 @@ sparc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		++sreloc->reloc_count;
 
 		/* This reloc will be computed at runtime, so there's no
-		   need to do anything now, unless this is a RELATIVE
-		   reloc in an unallocated section.  */
-		if (skip
-		    || (input_section->flags & SEC_ALLOC) != 0
-		    || ELF64_R_TYPE_ID (outrel.r_info) != R_SPARC_RELATIVE)
-		  continue;
+		   need to do anything now.  */
+		continue;
 	      }
 	    break;
 	    }

@@ -120,7 +120,7 @@ reloc_howto_type _bfd_sparc_elf_howto_table[] =
   HOWTO(R_SPARC_NONE,      0,0, 0,false,0,complain_overflow_dont,    bfd_elf_generic_reloc,  "R_SPARC_NONE",    false,0,0x00000000,true),
   HOWTO(R_SPARC_NONE,      0,0, 0,false,0,complain_overflow_dont,    bfd_elf_generic_reloc,  "R_SPARC_NONE",    false,0,0x00000000,true),
   HOWTO(R_SPARC_NONE,      0,0, 0,false,0,complain_overflow_dont,    bfd_elf_generic_reloc,  "R_SPARC_NONE",    false,0,0x00000000,true),
-  HOWTO(R_SPARC_UA64,      0,4,64,false,0,complain_overflow_bitfield,bfd_elf_generic_reloc,  "R_SPARC_UA64",    false,0,(~ (bfd_vma)0), true),
+  HOWTO(R_SPARC_UA64,      0,0, 0,false,0,complain_overflow_dont,    sparc_elf_notsupported_reloc,  "R_SPARC_UA64",    false,0,0x00000000,true),
   HOWTO(R_SPARC_UA16,      0,1,16,false,0,complain_overflow_bitfield,bfd_elf_generic_reloc,  "R_SPARC_UA16",    false,0,0x0000ffff,true),
   HOWTO(R_SPARC_REV32,     0,2,32,false,0,complain_overflow_bitfield,bfd_elf_generic_reloc,  "R_SPARC_REV32",   false,0,0xffffffff,true),
 };
@@ -554,11 +554,10 @@ elf32_sparc_check_relocs (abfd, info, sec, relocs)
 	case R_SPARC_LO10:
 	case R_SPARC_UA16:
 	case R_SPARC_UA32:
-	case R_SPARC_UA64:
 	  if (h != NULL)
 	    h->elf_link_hash_flags |= ELF_LINK_NON_GOT_REF;
 
-	  if (info->shared)
+	  if (info->shared && (sec->flags & SEC_ALLOC))
 	    {
 	      /* When creating a shared object, we must copy these
                  relocs into the output file.  We create a reloc
@@ -1223,7 +1222,6 @@ elf32_sparc_relocate_section (output_bfd, info, input_bfd, input_section,
 			  || r_type == R_SPARC_LO10
 			  || r_type == R_SPARC_UA16
 			  || r_type == R_SPARC_UA32
-			  || r_type == R_SPARC_UA64
 			  || ((r_type == R_SPARC_PC10
 			       || r_type == R_SPARC_PC22)
 			      && strcmp (h->root.root.string,
@@ -1412,8 +1410,7 @@ elf32_sparc_relocate_section (output_bfd, info, input_bfd, input_section,
 	case R_SPARC_LO10:
 	case R_SPARC_UA16:
 	case R_SPARC_UA32:
-	case R_SPARC_UA64:
-	  if (info->shared)
+	  if (info->shared && (input_section->flags & SEC_ALLOC))
 	    {
 	      Elf_Internal_Rela outrel;
 	      boolean skip;
@@ -1462,6 +1459,28 @@ elf32_sparc_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	      outrel.r_offset += (input_section->output_section->vma
 				  + input_section->output_offset);
+
+	      /* Optimize unaligned reloc usage now that we know where
+		 it finally resides.  */
+	      switch (r_type)
+		{
+		case R_SPARC_16:
+		  if (outrel.r_offset & 1)
+		    r_type = R_SPARC_UA16;
+		  break;
+		case R_SPARC_UA16:
+		  if (!(outrel.r_offset & 1))
+		    r_type = R_SPARC_16;
+		  break;
+		case R_SPARC_32:
+		  if (outrel.r_offset & 3)
+		    r_type = R_SPARC_UA32;
+		  break;
+		case R_SPARC_UA32:
+		  if (!(outrel.r_offset & 3))
+		    r_type = R_SPARC_32;
+		  break;
+		}
 
 	      if (skip)
 		memset (&outrel, 0, sizeof outrel);
@@ -1535,12 +1554,8 @@ elf32_sparc_relocate_section (output_bfd, info, input_bfd, input_section,
 	      ++sreloc->reloc_count;
 
 	      /* This reloc will be computed at runtime, so there's no
-                 need to do anything now, unless this is a RELATIVE
-                 reloc in an unallocated section.  */
-	      if (skip
-		  || (input_section->flags & SEC_ALLOC) != 0
-		  || ELF32_R_TYPE (outrel.r_info) != R_SPARC_RELATIVE)
-		continue;
+                 need to do anything now.  */
+	      continue;
 	    }
 	  break;
 
@@ -2024,7 +2039,7 @@ elf32_sparc_object_p (abfd)
     }
   else if (elf_elfheader (abfd)->e_flags & EF_SPARC_LEDATA)
     return bfd_default_set_arch_mach (abfd, bfd_arch_sparc,
-                                      bfd_mach_sparc_sparclite_le);
+				      bfd_mach_sparc_sparclite_le);
   else
     return bfd_default_set_arch_mach (abfd, bfd_arch_sparc, bfd_mach_sparc);
 }
