@@ -1,3 +1,7 @@
+Tue Mar 24 23:27:01 1992  K. Richard Pixley  (rich@cygnus.com)
+
+	* config/irix4.mh: new file.
+
 Tue Mar 24 14:17:48 1992  Stu Grossman  (grossman@cygnus.com)
 
 	* infcmd.c (step_1):  Call disable_longjmp_breakpoint at the right
