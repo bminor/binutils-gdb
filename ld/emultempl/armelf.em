@@ -108,11 +108,15 @@ arm_elf_before_allocation ()
 	tem->output_has_begun = FALSE;
 
       lang_for_each_statement (arm_elf_set_bfd_for_interworking);
-      ASSERT (bfd_for_interwork != NULL);
       for (tem = link_info.input_bfds; tem != NULL; tem = tem->link_next)
 	tem->output_has_begun = FALSE;
 
-      bfd_elf32_arm_get_bfd_for_interworking (bfd_for_interwork, &link_info);
+      /* If bfd_for_interwork is NULL, then there are no loadable sections
+	 with real contents to be linked, so we are not going to have to
+	 create any interworking stubs, so it is OK not to call
+	 bfd_elf32_arm_get_bfd_for_interworking.  */
+      if (bfd_for_interwork != NULL)
+	bfd_elf32_arm_get_bfd_for_interworking (bfd_for_interwork, &link_info);
     }
   /* We should be able to set the size of the interworking stub section.  */
 

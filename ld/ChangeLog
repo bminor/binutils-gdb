@@ -1,3 +1,8 @@
+2003-05-30  Nick Clifton  <nickc@redhat.com>
+
+	* emultempl/armelf.em (arm_elf_before_allocation): Replace ASSERT
+	with a test for a NULL bfd_for_interworking.
+
 2003-05-29  Jason Thorpe  <thorpej@wasabisystems.com>
 
 	* configure.host (*-*-netbsd*): Set HOSTING_CRT0 and HOSTING_LIBS
