@@ -1200,11 +1200,11 @@ warning_callback (struct bfd_link_info *info ATTRIBUTE_UNUSED,
     return TRUE;
 
   if (section != NULL)
-    einfo ("%C: %s\n", abfd, section, address, warning);
+    einfo ("%C: %s%s\n", abfd, section, address, _("warning: "), warning);
   else if (abfd == NULL)
-    einfo ("%P: %s\n", warning);
+    einfo ("%P: %s%s\n", _("warning: "), warning);
   else if (symbol == NULL)
-    einfo ("%B: %s\n", abfd, warning);
+    einfo ("%B: %s%s\n", abfd, _("warning: "), warning);
   else
     {
       lang_input_statement_type *entry;
@@ -1242,7 +1242,7 @@ warning_callback (struct bfd_link_info *info ATTRIBUTE_UNUSED,
       bfd_map_over_sections (abfd, warning_find_reloc, &info);
 
       if (! info.found)
-	einfo ("%B: %s\n", abfd, warning);
+	einfo ("%B: %s%s\n", abfd, _("warning: "), warning);
 
       if (entry == NULL)
 	free (asymbols);
@@ -1290,7 +1290,8 @@ warning_find_reloc (bfd *abfd, asection *sec, void *iarg)
 	  && strcmp (bfd_asymbol_name (*q->sym_ptr_ptr), info->symbol) == 0)
 	{
 	  /* We found a reloc for the symbol we are looking for.  */
-	  einfo ("%C: %s\n", abfd, sec, q->address, info->warning);
+	  einfo ("%C: %s%s\n", abfd, sec, q->address, _("warning: "),
+		 info->warning);
 	  info->found = TRUE;
 	  break;
 	}
