@@ -1,3 +1,16 @@
+Sat Jul  3 23:47:56 1993  Doug Evans  (dje@canuck.cygnus.com)
+
+	* h8300-dis.c (bfd_h8_disassemble): Correct fetching of instruction.
+
+Thu Jul  1 12:23:38 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* m68k-dis.c (NEXTWORD, NEXTLONG): Use ((x) ^ 0x8000) - 0x8000 to sign
+	extend, rather than shifts.
+
+Sun Jun 20 20:56:56 1993  Ken Raeburn  (raeburn@poseidon.cygnus.com)
+
+	* Makefile.in: Undo 15 June change.
+
 Fri Jun 18 14:15:15 1993  Per Bothner  (bothner@deneb.cygnus.com)
 
 	* m68k-dis.c (print_insn_arg):  Change return value to byte count
