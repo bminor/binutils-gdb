@@ -1,3 +1,17 @@
+Fri Jul 31 12:26:34 1992  Jim Wilson  (wilson@sphagnum.cygnus.com)
+
+	* read.c (potable): Revert sac's incorrect change made Jul 13.
+	Align really is supposed to be ptwo not nbytes.
+
+Mon Jul 20 02:51:59 1992  D. V. Henkel-Wallace  (gumby@cygnus.com)
+
+	* Makefile.in: _Do_ include libiberty.  (from sef)
+
+Fri Jul 17 15:15:28 1992  Ken Raeburn  (raeburn@cygnus.com)
+
+	* expr.c (integer_constant): Handle "0f" and "0b" label references
+	properly.
+
 Thu Jul 16 08:20:17 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* write.c (fixup_segment): if relaxing, don't do anything.
