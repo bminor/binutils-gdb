@@ -1496,7 +1496,7 @@ _bfd_dwarf2_find_nearest_line (abfd, section, symbols, offset,
      However, some compilers do things differently.  */
   if (addr_size == 0)
     addr_size = 4;
-  BFD_ASSERT (addr_size == 2 || addr_size == 4 || addr_size == 8);
+  BFD_ASSERT (addr_size == 4 || addr_size == 8);
     
   if (! stash)
     {
