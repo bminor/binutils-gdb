@@ -1,3 +1,19 @@
+Tue Apr 26 17:44:27 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* mpw-make.in (MacGDB): New target, standalone Mac-hosted gdb.
+	(XDEPFILES): Define.
+	(main.c.o): Compile with gC instead of C.
+	* mac-defs.h: New file, menu etc definitions shared between
+	C and Rez files.
+	* macgdb.r: New file, Rez (resource compiler) resource
+	definitions.
+	* mac-xdep.c: New file, Mac host interface code.
+	* config/m68k/xm-mpw.h (PATHNAME_SEPARATOR): Rename to
+	DIRNAME_SEPARATOR.
+	(PATHNAME_SEPARATOR_STRING): Remove.
+	(SIGQUIT, SIGHUP): Define.
+	(fileno, R_OK): Define.
+
 Thu Mar 10 15:49:05 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	* mpw-config.in: New file, MPW configuration fragment.

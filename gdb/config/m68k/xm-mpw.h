@@ -86,10 +86,29 @@ char *strdup (char *s1);
 
 #define GDBINIT_FILENAME "_gdbinit"
 
-#define PATHNAME_SEPARATOR ','
+/* Commas are more common to separate dirnames in a path on Macs. */
 
-#define PATHNAME_SEPARATOR_STRING ","
+#define DIRNAME_SEPARATOR ','
 
 /* This is a real crufty hack. */
 
 #define HAVE_TERMIO
+
+/* Addons to the basic MPW-supported signal list. */
+
+#ifndef SIGQUIT
+#define SIGQUIT (1<<6)
+#endif
+#ifndef SIGHUP
+#define SIGHUP (1<<7)
+#endif
+
+/* If __STDC__ is on, then this definition will be missing. */
+
+#ifndef fileno
+#define fileno(p)	(p)->_file
+#endif
+
+#ifndef R_OK
+#define R_OK 4
+#endif

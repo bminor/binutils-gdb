@@ -5,6 +5,8 @@ XM_CDEPS =
 TM_CDEPS = 
 NAT_CDEPS = 
 
+XDEPFILES = "{o}"mac-xdep.c.o
+
 CC_LD = Link
 
 gC = gC1
@@ -646,7 +648,7 @@ TARFILES = {SFILES} {HFILES_NO_SRCDIR} {HFILES_WITH_SRCDIR} \Option-d
 	{ALLPARAM} {INFOFILES} {POSSLIBS} {REMOTE_EXAMPLES}
 
 
-OBS =	"{o}"version.c.o "{o}"main.gc.o "{o}"blockframe.c.o "{o}"breakpoint.gc.o "{o}"findvar.c.o "{o}"stack.c.o "{o}"thread.c.o \Option-d
+OBS =	"{o}"version.c.o "{o}"main.c.o "{o}"blockframe.c.o "{o}"breakpoint.gc.o "{o}"findvar.c.o "{o}"stack.c.o "{o}"thread.c.o \Option-d
 	"{o}"source.gc.o "{o}"values.c.o "{o}"eval.c.o "{o}"valops.c.o "{o}"valarith.c.o "{o}"valprint.c.o "{o}"printcmd.gc.o \Option-d
 	"{o}"symtab.c.o "{o}"symfile.c.o "{o}"symmisc.c.o "{o}"infcmd.c.o "{o}"infrun.gc.o "{o}"command.c.o \Option-d
 	"{o}"utils.c.o "{o}"expprint.c.o "{o}"environ.c.o "{o}"gdbtypes.c.o "{o}"copying.c.o {DEPFILES} \Option-d
@@ -745,6 +747,11 @@ saber_gdb \Option-f  {SFILES} {DEPFILES} "{s}"copying.c "{s}"version.c
 	#load `echo " "{DEPFILES} | sed -e 's:\.o:.c:g' -e 's, , ::,g'`
 	echo "Load "{s}".c corresponding to \Option-f " {DEPFILES}
 
+MacGDB \Option-f  {OBS} {TSOBS} {ADD_DEPS} {CDEPS} "{o}"init.c.o
+	Delete -i -y MacGDB
+	Rez -rd -o MacGDB "{s}"macgdb.r -append
+	Link -d -model far -o MacGDB -t 'APPL' -c 'gdb ' \Option-d
+	  "{o}"init.c.o {OBS} {TSOBS} {ADD_FILES} {CLIBS} {LOADLIBES}
 
 # This is useful when debugging GDB, because some Unix's don't let you run GDB
 # on itself without copying the executable.  So "make gdb1" will make
@@ -1235,10 +1242,10 @@ MAKEOVERRIDES=
 "{o}"m88k-pinsn.c.o \Option-f  "{s}"m88k-pinsn.c {defs_h} {symtab_h} 
 "{o}"m88k-tdep.c.o \Option-f  "{s}"m88k-tdep.c {defs_h} {gdbcore_h} {inferior_h}
 
-"{o}"main.gc.o \Option-f  "{s}"main.c {bfd_h} {getopt_h} {readline_headers} "{s}"call-cmds.h \Option-d
+"{o}"main.c.o \Option-f  "{s}"main.c {bfd_h} {getopt_h} {readline_headers} "{s}"call-cmds.h \Option-d
 	{defs_h} {gdbcmd_h} {inferior_h} "{s}"language.h "{s}"signals.h \Option-d
 	{remote_utils_h}
-	{gC} {INTERNAL_CFLAGS} {READLINE_CFLAGS} "{srcdir}"main.c -o "{o}"main.gc.o
+	{CC} {INTERNAL_CFLAGS} {READLINE_CFLAGS} "{srcdir}"main.c -o "{o}"main.c.o
 
 "{o}"maint.c.o \Option-f  "{s}"maint.c {defs_h} {gdbcmd_h} {gdbtypes_h} {symtab_h} "{s}"language.h \Option-d
 	{expression_h}
