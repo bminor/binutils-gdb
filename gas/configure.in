@@ -728,9 +728,9 @@ GAS_UNIQ(emulations)
 for em in . $emulations ; do
   case $em in
     .)	continue ;;
-    mipsbelf | mipslelf)
+    mipsbelf | mipslelf | mipself)
 	fmt=elf   file=mipself ;;
-    mipsbecoff | mipslecoff)
+    mipsbecoff | mipslecoff | mipsecoff)
 	fmt=ecoff file=mipsecoff ;;
     *coff)
 	fmt=coff  file=$em ;;

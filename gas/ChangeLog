@@ -1,5 +1,12 @@
 2001-02-10  Chris Demetriou  <cgd@broadcom.com>
 
+	* configure.in: Make 'mipself' and 'mipsecoff' emulations
+	map to MIPS-specific files, as they used to do before the
+	change on 2000-05-21.
+	* configure: Regerate.
+
+2001-02-10  Chris Demetriou  <cgd@broadcom.com>
+
 	* config/tc-mips.c (md_parse_option): Don't try to compile
 	ELF-only option code if not ELF.
 
