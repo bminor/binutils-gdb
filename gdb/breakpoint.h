@@ -184,6 +184,24 @@ enum target_hw_bp_type
     hw_execute = 3		/* Execute HW breakpoint */
   };
 
+/* This structure is a collection of function pointers that, if available,
+   will be called instead of the performing the default action for this
+   bptype.  */
+
+struct breakpoint_ops 
+{
+  /* The normal print routine for this breakpoint, called when we
+     hit it.  */
+  enum print_stop_action (*print_it) (struct breakpoint *);
+
+  /* Display information about this breakpoint, for "info breakpoints".  */
+  void (*print_one) (struct breakpoint *, CORE_ADDR *);
+
+  /* Display information about this breakpoint after setting it (roughly
+     speaking; this is called from "mention").  */
+  void (*print_mention) (struct breakpoint *);
+};
+
 /* Note that the ->silent field is not currently used by any commands
    (though the code is in there if it was to be, and set_raw_breakpoint
    does set it to 0).  I implemented it because I thought it would be
@@ -306,6 +324,9 @@ struct breakpoint
     char *exec_pathname;
 
     asection *section;
+
+    /* Methods associated with this breakpoint.  */
+    struct breakpoint_ops *ops;
   };
 
 /* The following stuff is an abstract data type "bpstat" ("breakpoint

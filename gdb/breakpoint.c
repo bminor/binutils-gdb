@@ -2271,9 +2271,15 @@ print_bp_stop_message (bpstat bs)
       break;
 
     case print_it_normal:
-      /* Normal case, we handle everything in print_it_typical. */
-      return print_it_typical (bs);
+      /* Normal case.  Call the breakpoint's print_it method, or
+	 print_it_typical.  */
+      if (bs->breakpoint_at != NULL && bs->breakpoint_at->ops != NULL
+	  && bs->breakpoint_at->ops->print_it != NULL)
+	return bs->breakpoint_at->ops->print_it (bs->breakpoint_at);
+      else
+	return print_it_typical (bs);
       break;
+
     default:
       internal_error (__FILE__, __LINE__,
 		      "print_bp_stop_message: unrecognized enum value");
@@ -3265,143 +3271,147 @@ print_one_breakpoint (struct breakpoint *b,
       else
 	strcat (wrap_indent, "                   ");
     }
-  switch (b->type)
-    {
-    case bp_none:
-      internal_error (__FILE__, __LINE__,
-		      "print_one_breakpoint: bp_none encountered\n");
-      break;
 
-    case bp_watchpoint:
-    case bp_hardware_watchpoint:
-    case bp_read_watchpoint:
-    case bp_access_watchpoint:
-      /* Field 4, the address, is omitted (which makes the columns
-	 not line up too nicely with the headers, but the effect
-	 is relatively readable).  */
-      if (addressprint)
-	ui_out_field_skip (uiout, "addr");
-      annotate_field (5);
-      print_expression (b->exp, stb->stream);
-      ui_out_field_stream (uiout, "what", stb);
-      break;
-      
-    case bp_catch_load:
-    case bp_catch_unload:
-      /* Field 4, the address, is omitted (which makes the columns
-	 not line up too nicely with the headers, but the effect
-	 is relatively readable).  */
-      if (addressprint)
-	ui_out_field_skip (uiout, "addr");
-      annotate_field (5);
-      if (b->dll_pathname == NULL)
-	{
-	  ui_out_field_string (uiout, "what", "<any library>");
-	  ui_out_spaces (uiout, 1);
-	}
-      else
-	{
-	  ui_out_text (uiout, "library \"");
-	  ui_out_field_string (uiout, "what", b->dll_pathname);
-	  ui_out_text (uiout, "\" ");
-	}
-      break;
-      
-    case bp_catch_fork:
-    case bp_catch_vfork:
-      /* Field 4, the address, is omitted (which makes the columns
-	 not line up too nicely with the headers, but the effect
-	 is relatively readable).  */
-      if (addressprint)
-	ui_out_field_skip (uiout, "addr");
-      annotate_field (5);
-      if (b->forked_inferior_pid != 0)
-	{
-	  ui_out_text (uiout, "process ");
-	  ui_out_field_int (uiout, "what", b->forked_inferior_pid);
-	  ui_out_spaces (uiout, 1);
-	}
-      
-    case bp_catch_exec:
-      /* Field 4, the address, is omitted (which makes the columns
-	 not line up too nicely with the headers, but the effect
-	 is relatively readable).  */
-      if (addressprint)
-	ui_out_field_skip (uiout, "addr");
-      annotate_field (5);
-      if (b->exec_pathname != NULL)
-	{
-	  ui_out_text (uiout, "program \"");
-	  ui_out_field_string (uiout, "what", b->exec_pathname);
-	  ui_out_text (uiout, "\" ");
-	}
-      break;
+  if (b->ops != NULL && b->ops->print_one != NULL)
+    b->ops->print_one (b, last_addr);
+  else
+    switch (b->type)
+      {
+      case bp_none:
+	internal_error (__FILE__, __LINE__,
+			"print_one_breakpoint: bp_none encountered\n");
+	break;
 
-    case bp_catch_catch:
-      /* Field 4, the address, is omitted (which makes the columns
-	 not line up too nicely with the headers, but the effect
-	 is relatively readable).  */
-      if (addressprint)
-	ui_out_field_skip (uiout, "addr");
-      annotate_field (5);
-      ui_out_field_string (uiout, "what", "exception catch");
-      ui_out_spaces (uiout, 1);
-      break;
+      case bp_watchpoint:
+      case bp_hardware_watchpoint:
+      case bp_read_watchpoint:
+      case bp_access_watchpoint:
+	/* Field 4, the address, is omitted (which makes the columns
+	   not line up too nicely with the headers, but the effect
+	   is relatively readable).  */
+	if (addressprint)
+	  ui_out_field_skip (uiout, "addr");
+	annotate_field (5);
+	print_expression (b->exp, stb->stream);
+	ui_out_field_stream (uiout, "what", stb);
+	break;
 
-    case bp_catch_throw:
-      /* Field 4, the address, is omitted (which makes the columns
-	 not line up too nicely with the headers, but the effect
-	 is relatively readable).  */
-      if (addressprint)
-	ui_out_field_skip (uiout, "addr");
-      annotate_field (5);
-      ui_out_field_string (uiout, "what", "exception throw");
-      ui_out_spaces (uiout, 1);
-      break;
-      
-    case bp_breakpoint:
-    case bp_hardware_breakpoint:
-    case bp_until:
-    case bp_finish:
-    case bp_longjmp:
-    case bp_longjmp_resume:
-    case bp_step_resume:
-    case bp_through_sigtramp:
-    case bp_watchpoint_scope:
-    case bp_call_dummy:
-    case bp_shlib_event:
-    case bp_thread_event:
-    case bp_overlay_event:
-      if (addressprint)
-	{
-	  annotate_field (4);
-	  ui_out_field_core_addr (uiout, "addr", b->address);
-	}
-      annotate_field (5);
-      *last_addr = b->address;
-      if (b->source_file)
-	{
-	  sym = find_pc_sect_function (b->address, b->section);
-	  if (sym)
-	    {
-	      ui_out_text (uiout, "in ");
-	      ui_out_field_string (uiout, "func",
-				   SYMBOL_PRINT_NAME (sym));
-	      ui_out_wrap_hint (uiout, wrap_indent);
-	      ui_out_text (uiout, " at ");
-	    }
-	  ui_out_field_string (uiout, "file", b->source_file);
-	  ui_out_text (uiout, ":");
-	  ui_out_field_int (uiout, "line", b->line_number);
-	}
-      else
-	{
-	  print_address_symbolic (b->address, stb->stream, demangle, "");
-	  ui_out_field_stream (uiout, "at", stb);
-	}
-      break;
-    }
-  
+      case bp_catch_load:
+      case bp_catch_unload:
+	/* Field 4, the address, is omitted (which makes the columns
+	   not line up too nicely with the headers, but the effect
+	   is relatively readable).  */
+	if (addressprint)
+	  ui_out_field_skip (uiout, "addr");
+	annotate_field (5);
+	if (b->dll_pathname == NULL)
+	  {
+	    ui_out_field_string (uiout, "what", "<any library>");
+	    ui_out_spaces (uiout, 1);
+	  }
+	else
+	  {
+	    ui_out_text (uiout, "library \"");
+	    ui_out_field_string (uiout, "what", b->dll_pathname);
+	    ui_out_text (uiout, "\" ");
+	  }
+	break;
+
+      case bp_catch_fork:
+      case bp_catch_vfork:
+	/* Field 4, the address, is omitted (which makes the columns
+	   not line up too nicely with the headers, but the effect
+	   is relatively readable).  */
+	if (addressprint)
+	  ui_out_field_skip (uiout, "addr");
+	annotate_field (5);
+	if (b->forked_inferior_pid != 0)
+	  {
+	    ui_out_text (uiout, "process ");
+	    ui_out_field_int (uiout, "what", b->forked_inferior_pid);
+	    ui_out_spaces (uiout, 1);
+	  }
+
+      case bp_catch_exec:
+	/* Field 4, the address, is omitted (which makes the columns
+	   not line up too nicely with the headers, but the effect
+	   is relatively readable).  */
+	if (addressprint)
+	  ui_out_field_skip (uiout, "addr");
+	annotate_field (5);
+	if (b->exec_pathname != NULL)
+	  {
+	    ui_out_text (uiout, "program \"");
+	    ui_out_field_string (uiout, "what", b->exec_pathname);
+	    ui_out_text (uiout, "\" ");
+	  }
+	break;
+
+      case bp_catch_catch:
+	/* Field 4, the address, is omitted (which makes the columns
+	   not line up too nicely with the headers, but the effect
+	   is relatively readable).  */
+	if (addressprint)
+	  ui_out_field_skip (uiout, "addr");
+	annotate_field (5);
+	ui_out_field_string (uiout, "what", "exception catch");
+	ui_out_spaces (uiout, 1);
+	break;
+
+      case bp_catch_throw:
+	/* Field 4, the address, is omitted (which makes the columns
+	   not line up too nicely with the headers, but the effect
+	   is relatively readable).  */
+	if (addressprint)
+	  ui_out_field_skip (uiout, "addr");
+	annotate_field (5);
+	ui_out_field_string (uiout, "what", "exception throw");
+	ui_out_spaces (uiout, 1);
+	break;
+
+      case bp_breakpoint:
+      case bp_hardware_breakpoint:
+      case bp_until:
+      case bp_finish:
+      case bp_longjmp:
+      case bp_longjmp_resume:
+      case bp_step_resume:
+      case bp_through_sigtramp:
+      case bp_watchpoint_scope:
+      case bp_call_dummy:
+      case bp_shlib_event:
+      case bp_thread_event:
+      case bp_overlay_event:
+	if (addressprint)
+	  {
+	    annotate_field (4);
+	    ui_out_field_core_addr (uiout, "addr", b->address);
+	  }
+	annotate_field (5);
+	*last_addr = b->address;
+	if (b->source_file)
+	  {
+	    sym = find_pc_sect_function (b->address, b->section);
+	    if (sym)
+	      {
+		ui_out_text (uiout, "in ");
+		ui_out_field_string (uiout, "func",
+				     SYMBOL_PRINT_NAME (sym));
+		ui_out_wrap_hint (uiout, wrap_indent);
+		ui_out_text (uiout, " at ");
+	      }
+	    ui_out_field_string (uiout, "file", b->source_file);
+	    ui_out_text (uiout, ":");
+	    ui_out_field_int (uiout, "line", b->line_number);
+	  }
+	else
+	  {
+	    print_address_symbolic (b->address, stb->stream, demangle, "");
+	    ui_out_field_stream (uiout, "at", stb);
+	  }
+	break;
+      }
+
   if (b->thread != -1)
     {
       /* FIXME: This seems to be redundant and lost here; see the
@@ -3851,6 +3861,7 @@ set_raw_breakpoint (struct symtab_and_line sal, enum bptype bptype)
   b->triggered_dll_pathname = NULL;
   b->forked_inferior_pid = 0;
   b->exec_pathname = NULL;
+  b->ops = NULL;
 
   /* Add this breakpoint to the end of the chain
      so that a list of breakpoints will come out in order
@@ -4413,103 +4424,107 @@ mention (struct breakpoint *b)
     create_breakpoint_hook (b);
   breakpoint_create_event (b->number);
 
-  switch (b->type)
-    {
-    case bp_none:
-      printf_filtered ("(apparently deleted?) Eventpoint %d: ", b->number);
-      break;
-    case bp_watchpoint:
-      ui_out_text (uiout, "Watchpoint ");
-      ui_out_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "wpt");
-      ui_out_field_int (uiout, "number", b->number);
-      ui_out_text (uiout, ": ");
-      print_expression (b->exp, stb->stream);
-      ui_out_field_stream (uiout, "exp", stb);
-      do_cleanups (ui_out_chain);
-      break;
-    case bp_hardware_watchpoint:
-      ui_out_text (uiout, "Hardware watchpoint ");
-      ui_out_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "wpt");
-      ui_out_field_int (uiout, "number", b->number);
-      ui_out_text (uiout, ": ");
-      print_expression (b->exp, stb->stream);
-      ui_out_field_stream (uiout, "exp", stb);
-      do_cleanups (ui_out_chain);
-      break;
-    case bp_read_watchpoint:
-      ui_out_text (uiout, "Hardware read watchpoint ");
-      ui_out_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "hw-rwpt");
-      ui_out_field_int (uiout, "number", b->number);
-      ui_out_text (uiout, ": ");
-      print_expression (b->exp, stb->stream);
-      ui_out_field_stream (uiout, "exp", stb);
-      do_cleanups (ui_out_chain);
-      break;
-    case bp_access_watchpoint:
-      ui_out_text (uiout, "Hardware access (read/write) watchpoint ");
-      ui_out_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "hw-awpt");
-      ui_out_field_int (uiout, "number", b->number);
-      ui_out_text (uiout, ": ");
-      print_expression (b->exp, stb->stream);
-      ui_out_field_stream (uiout, "exp", stb);
-      do_cleanups (ui_out_chain);
-      break;
-    case bp_breakpoint:
-      if (ui_out_is_mi_like_p (uiout))
-	{
-	  say_where = 0;
-	  break;
-	}
-      printf_filtered ("Breakpoint %d", b->number);
-      say_where = 1;
-      break;
-    case bp_hardware_breakpoint:
-      if (ui_out_is_mi_like_p (uiout))
-	{
-	  say_where = 0;
-	  break;
-	}
-      printf_filtered ("Hardware assisted breakpoint %d", b->number);
-      say_where = 1;
-      break;
-    case bp_catch_load:
-    case bp_catch_unload:
-      printf_filtered ("Catchpoint %d (%s %s)",
-		       b->number,
-		       (b->type == bp_catch_load) ? "load" : "unload",
-		       (b->dll_pathname != NULL) ? 
-		       b->dll_pathname : "<any library>");
-      break;
-    case bp_catch_fork:
-    case bp_catch_vfork:
-      printf_filtered ("Catchpoint %d (%s)",
-		       b->number,
-		       (b->type == bp_catch_fork) ? "fork" : "vfork");
-      break;
-    case bp_catch_exec:
-      printf_filtered ("Catchpoint %d (exec)",
-		       b->number);
-      break;
-    case bp_catch_catch:
-    case bp_catch_throw:
-      printf_filtered ("Catchpoint %d (%s)",
-		       b->number,
-		       (b->type == bp_catch_catch) ? "catch" : "throw");
-      break;
+  if (b->ops != NULL && b->ops->print_mention != NULL)
+    b->ops->print_mention (b);
+  else
+    switch (b->type)
+      {
+      case bp_none:
+	printf_filtered ("(apparently deleted?) Eventpoint %d: ", b->number);
+	break;
+      case bp_watchpoint:
+	ui_out_text (uiout, "Watchpoint ");
+	ui_out_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "wpt");
+	ui_out_field_int (uiout, "number", b->number);
+	ui_out_text (uiout, ": ");
+	print_expression (b->exp, stb->stream);
+	ui_out_field_stream (uiout, "exp", stb);
+	do_cleanups (ui_out_chain);
+	break;
+      case bp_hardware_watchpoint:
+	ui_out_text (uiout, "Hardware watchpoint ");
+	ui_out_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "wpt");
+	ui_out_field_int (uiout, "number", b->number);
+	ui_out_text (uiout, ": ");
+	print_expression (b->exp, stb->stream);
+	ui_out_field_stream (uiout, "exp", stb);
+	do_cleanups (ui_out_chain);
+	break;
+      case bp_read_watchpoint:
+	ui_out_text (uiout, "Hardware read watchpoint ");
+	ui_out_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "hw-rwpt");
+	ui_out_field_int (uiout, "number", b->number);
+	ui_out_text (uiout, ": ");
+	print_expression (b->exp, stb->stream);
+	ui_out_field_stream (uiout, "exp", stb);
+	do_cleanups (ui_out_chain);
+	break;
+      case bp_access_watchpoint:
+	ui_out_text (uiout, "Hardware access (read/write) watchpoint ");
+	ui_out_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "hw-awpt");
+	ui_out_field_int (uiout, "number", b->number);
+	ui_out_text (uiout, ": ");
+	print_expression (b->exp, stb->stream);
+	ui_out_field_stream (uiout, "exp", stb);
+	do_cleanups (ui_out_chain);
+	break;
+      case bp_breakpoint:
+	if (ui_out_is_mi_like_p (uiout))
+	  {
+	    say_where = 0;
+	    break;
+	  }
+	printf_filtered ("Breakpoint %d", b->number);
+	say_where = 1;
+	break;
+      case bp_hardware_breakpoint:
+	if (ui_out_is_mi_like_p (uiout))
+	  {
+	    say_where = 0;
+	    break;
+	  }
+	printf_filtered ("Hardware assisted breakpoint %d", b->number);
+	say_where = 1;
+	break;
+      case bp_catch_load:
+      case bp_catch_unload:
+	printf_filtered ("Catchpoint %d (%s %s)",
+			 b->number,
+			 (b->type == bp_catch_load) ? "load" : "unload",
+			 (b->dll_pathname != NULL) ? 
+			 b->dll_pathname : "<any library>");
+	break;
+      case bp_catch_fork:
+      case bp_catch_vfork:
+	printf_filtered ("Catchpoint %d (%s)",
+			 b->number,
+			 (b->type == bp_catch_fork) ? "fork" : "vfork");
+	break;
+      case bp_catch_exec:
+	printf_filtered ("Catchpoint %d (exec)",
+			 b->number);
+	break;
+      case bp_catch_catch:
+      case bp_catch_throw:
+	printf_filtered ("Catchpoint %d (%s)",
+			 b->number,
+			 (b->type == bp_catch_catch) ? "catch" : "throw");
+	break;
 
-    case bp_until:
-    case bp_finish:
-    case bp_longjmp:
-    case bp_longjmp_resume:
-    case bp_step_resume:
-    case bp_through_sigtramp:
-    case bp_call_dummy:
-    case bp_watchpoint_scope:
-    case bp_shlib_event:
-    case bp_thread_event:
-    case bp_overlay_event:
-      break;
-    }
+      case bp_until:
+      case bp_finish:
+      case bp_longjmp:
+      case bp_longjmp_resume:
+      case bp_step_resume:
+      case bp_through_sigtramp:
+      case bp_call_dummy:
+      case bp_watchpoint_scope:
+      case bp_shlib_event:
+      case bp_thread_event:
+      case bp_overlay_event:
+	break;
+      }
+
   if (say_where)
     {
       if (addressprint || b->source_file == NULL)
@@ -6004,6 +6019,90 @@ create_exception_catchpoint (int tempflag, char *cond_string,
   mention (b);
 }
 
+static enum print_stop_action
+print_exception_catchpoint (struct breakpoint *b)
+{
+  annotate_catchpoint (b->number);
+
+  if (strstr (b->addr_string, "throw") != NULL)
+    printf_filtered ("\nCatchpoint %d (exception thrown)\n",
+		     b->number);
+  else
+    printf_filtered ("\nCatchpoint %d (exception caught)\n",
+		     b->number);
+
+  return PRINT_SRC_AND_LOC;
+}
+
+static void
+print_one_exception_catchpoint (struct breakpoint *b, CORE_ADDR *last_addr)
+{
+  if (addressprint)
+    {
+      annotate_field (4);
+      ui_out_field_core_addr (uiout, "addr", b->address);
+    }
+  annotate_field (5);
+  *last_addr = b->address;
+  if (strstr (b->addr_string, "throw") != NULL)
+    ui_out_field_string (uiout, "what", "exception throw");
+  else
+    ui_out_field_string (uiout, "what", "exception catch");
+}
+
+static void
+print_mention_exception_catchpoint (struct breakpoint *b)
+{
+  if (strstr (b->addr_string, "throw") != NULL)
+    printf_filtered ("Catchpoint %d (throw)", b->number);
+  else
+    printf_filtered ("Catchpoint %d (catch)", b->number);
+}
+
+static struct breakpoint_ops gnu_v3_exception_catchpoint_ops = {
+  print_exception_catchpoint,
+  print_one_exception_catchpoint,
+  print_mention_exception_catchpoint
+};
+
+static int
+handle_gnu_v3_exceptions (int tempflag, char *cond_string,
+			  enum exception_event_kind ex_event, int from_tty)
+{
+  char *trigger_func_name, *nameptr;
+  struct symtabs_and_lines sals;
+  struct breakpoint *b;
+
+  if (ex_event == EX_EVENT_CATCH)
+    trigger_func_name = xstrdup ("__cxa_begin_catch");
+  else
+    trigger_func_name = xstrdup ("__cxa_throw");
+
+  nameptr = trigger_func_name;
+  sals = decode_line_1 (&nameptr, 1, NULL, 0, NULL);
+  if (sals.nelts == 0)
+    {
+      free (trigger_func_name);
+      return 0;
+    }
+
+  b = set_raw_breakpoint (sals.sals[0], bp_breakpoint);
+  set_breakpoint_count (breakpoint_count + 1);
+  b->number = breakpoint_count;
+  b->cond = NULL;
+  b->cond_string = (cond_string == NULL) ? 
+    NULL : savestring (cond_string, strlen (cond_string));
+  b->thread = -1;
+  b->addr_string = trigger_func_name;
+  b->enable_state = bp_enabled;
+  b->disposition = tempflag ? disp_del : disp_donttouch;
+  b->ops = &gnu_v3_exception_catchpoint_ops;
+
+  free (sals.sals);
+  mention (b);
+  return 1;
+}
+
 /* Deal with "catch catch" and "catch throw" commands */
 
 static void
@@ -6023,6 +6122,9 @@ catch_exception_command_1 (enum exception_event_kind ex_event, char *arg,
   if ((ex_event != EX_EVENT_THROW) &&
       (ex_event != EX_EVENT_CATCH))
     error ("Unsupported or unknown exception event; cannot catch it");
+
+  if (handle_gnu_v3_exceptions (tempflag, cond_string, ex_event, from_tty))
+    return;
 
   /* See if we can find a callback routine */
   sal = target_enable_exception_callback (ex_event, 1);

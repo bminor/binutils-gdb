@@ -1,3 +1,16 @@
+2003-04-26  Daniel Jacobowitz  <drow@mvista.com>
+
+	* breakpoint.h (struct breakpoint_ops): New.
+	(struct breakpoint): Add ops member.
+
+	* breakpoint.c (print_bp_stop_message, print_one_breakpoint)
+	(mention): Use new breakpoint ops member.
+	(set_raw_breakpoint): Initialize ops field to NULL.
+	(print_exception_catchpoint, print_one_exception_catchpoint)
+	(print_mention_exception_catchpoint, handle_gnu_v3_exceptions): New.
+	(gnu_v3_exception_catchpoint_ops): New.
+	(catch_exception_command_1): Call handle_gnu_v3_exceptions.
+
 2003-04-25  Adam Fedor  <fedor@gnu.org>
 
 	* Makefile.in (COMMON_OBS): Add objc-lang.o
