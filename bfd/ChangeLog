@@ -1,3 +1,8 @@
+2001-05-11  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* dwarf1.c (_bfd_dwarf1_find_nearest_line): Change type of 'addr'
+	to be unsigned long, in order to match its use.
+
 2001-05-10  H.J. Lu  <hjl@gnu.org>
 
 	* linker.c (_bfd_generic_link_add_one_symbol): Check loop on
