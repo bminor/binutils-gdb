@@ -1,3 +1,13 @@
+2002-04-04  Alan Modra  <amodra@bigpond.net.au>
+
+	* srec.c (MAXCHUNK, Chunk): Revise comments.
+	(srec_write_record): Correct buffer size.
+	(srec_write_header): Do without intermediate buffer.
+	(srec_write_section): Validate Chunk.
+	(srec_write_terminator): Pass NULL instead of dummy buffer.
+	(srec_write_symbols): Pass file and symbol names directly to
+	bfd_bwrite so sprintf won't overflow buffer.
+
 2002-04-03  Jakub Jelinek  <jakub@redhat.com>
 
 	* elf32-sparc.c (elf32_sparc_relocate_section): Don't emit dynamic
