@@ -1,3 +1,26 @@
+2002-01-05  Andrew Cagney  <ac131313@redhat.com>
+
+	* configure.tgt: Remove powerpc-*-macos* target.
+	* config/m68k/xm-mpw.h: Delete file.
+	* config/xm-mpw.h: Delete file.
+	* ser-mac.c: Delete file.
+	* mpw-make.sed: Delete file.
+	* mpw-config.in: Delete file.
+	* mac-xdep.c: Delete file.
+	* mac-gdb.r: Delete file.
+	* mac-defs.h: Delete file.
+	* mac-nat.c: Delete file.
+	* config/powerpc/macos.mh: Delete file.
+	* config/powerpc/macos.mt: Delete file.
+	* config/powerpc/nm-macos.h: Delete file.
+	* config/powerpc/tm-macos.h: Delete file.
+	* source.c (openp, open_source_file): Remove obsolete code.
+	* top.c	(gdb_readline): Ditto.
+	* utils.c (query): Ditto.
+	* event-top.c (display_gdb_prompt): Ditto.
+	* Makefile.in (ser-mac.o): Delete obsolete target.
+	* NEWS: Update.
+
 2002-01-04  Andrew Cagney  <ac131313@redhat.com>
 
 	* defs.h (BIG_ENDIAN): Delete macro definition.

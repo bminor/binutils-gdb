@@ -1,6 +1,6 @@
 /* General utility routines for GDB, the GNU debugger.
-   Copyright 1986, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996,
-   1997, 1998, 1999, 2000, 2001
+   Copyright 1986, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
+   1996, 1997, 1998, 1999, 2000, 2001, 2002
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -1237,11 +1237,6 @@ query (char *ctlstr,...)
   /* Automatically answer "yes" if input is not from a terminal.  */
   if (!input_from_terminal_p ())
     return 1;
-  /* OBSOLETE #ifdef MPW */
-  /* OBSOLETE    *//* FIXME Automatically answer "yes" if called from MacGDB.  */
-  /* OBSOLETE   if (mac_app) */
-  /* OBSOLETE     return 1; */
-  /* OBSOLETE #endif  *//* MPW */
 
   while (1)
     {
@@ -1256,13 +1251,6 @@ query (char *ctlstr,...)
 
       if (annotation_level > 1)
 	printf_filtered ("\n\032\032query\n");
-
-      /* OBSOLETE #ifdef MPW */
-      /* OBSOLETE        *//* If not in MacGDB, move to a new line so the entered line doesn't */
-      /* OBSOLETE          have a prompt on the front of it. */
-      /* OBSOLETE       if (!mac_app) */
-      /* OBSOLETE 	fputs_unfiltered ("\n", gdb_stdout); */
-      /* OBSOLETE #endif  *//* MPW */
 
       wrap_here ("");
       gdb_flush (gdb_stdout);

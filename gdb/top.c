@@ -1,6 +1,8 @@
 /* Top level stuff for GDB, the GNU debugger.
-   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
-   1996, 1997, 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
+
+   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994,
+   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -890,11 +892,6 @@ gdb_readline (char *prompt_arg)
          character position to be off, since the newline we read from
          the user is not accounted for.  */
       fputs_unfiltered (prompt_arg, gdb_stdout);
-      /* OBSOLETE #ifdef MPW */
-      /* OBSOLETE          Move to a new line so the entered line doesn't have a prompt */
-      /* OBSOLETE          on the front of it. */
-      /* OBSOLETE       fputs_unfiltered ("\n", gdb_stdout); */
-      /* OBSOLETE #endif  *//* MPW */
       gdb_flush (gdb_stdout);
     }
 

@@ -1990,8 +1990,6 @@ scm-valprint.o: $(defs_h) $(value_h) $(parser_defs_h) $(language_h)  \
 
 ser-go32.o: ser-go32.c $(defs_h) $(serial_h) 
 
-# OBSOLETE ser-mac.o: ser-mac.c $(defs_h) $(serial_h) 
-
 ser-pipe.o: ser-pipe.c $(defs_h) $(serial_h) $(gdb_string_h) $(ser_unix_h)
 
 ser-tcp.o: ser-tcp.c $(defs_h) $(serial_h) $(gdb_string_h) $(ser_unix_h)

@@ -1,5 +1,5 @@
 /* Top level stuff for GDB, the GNU debugger.
-   Copyright 1999, 2000, 2001 Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
    Written by Elena Zannoni <ezannoni@cygnus.com> of Cygnus Solutions.
 
    This file is part of GDB.
@@ -307,12 +307,6 @@ display_gdb_prompt (char *new_prompt)
          character position to be off, since the newline we read from
          the user is not accounted for.  */
       fputs_unfiltered (new_prompt, gdb_stdout);
-
-      /* OBSOLETE #ifdef MPW */
-      /* OBSOLETE        *//* Move to a new line so the entered line doesn't have a prompt */
-      /* OBSOLETE          on the front of it. */
-      /* OBSOLETE       fputs_unfiltered ("\n", gdb_stdout); */
-      /* OBSOLETE #endif  *//* MPW */
       gdb_flush (gdb_stdout);
     }
 }

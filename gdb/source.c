@@ -1,6 +1,7 @@
 /* List lines of source files for GDB, the GNU debugger.
-   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
-   1996, 1997, 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994,
+   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -626,22 +627,6 @@ done:
 	  xfree (f);
 	}
     }
-  /* OBSOLETE #ifdef MPW  */
-  /* OBSOLETE This is a debugging hack that can go away when all combinations */
-  /* OBSOLETE of Mac and Unix names are handled reasonably.  */
-  /* OBSOLETE   { */
-  /* OBSOLETE     extern int debug_openp; */
-  /* OBSOLETE  */
-  /* OBSOLETE     if (debug_openp) */
-  /* OBSOLETE       { */
-  /* OBSOLETE 	printf ("openp on %s, path %s mode %d prot %d\n  returned %d", */
-  /* OBSOLETE 		string, path, mode, prot, fd); */
-  /* OBSOLETE 	if (*filename_opened) */
-  /* OBSOLETE 	  printf (" (filename is %s)", *filename_opened); */
-  /* OBSOLETE 	printf ("\n"); */
-  /* OBSOLETE       } */
-  /* OBSOLETE   } */
-  /* OBSOLETE #endif  *//* MPW */
 
   return fd;
 }
@@ -727,22 +712,6 @@ open_source_file (struct symtab *s)
       if (p != s->filename)
 	result = openp (path, 0, p, OPEN_MODE, 0, &s->fullname);
     }
-  /* OBSOLETE #ifdef MPW */
-  /* OBSOLETE   if (result < 0) */
-  /* OBSOLETE     { */
-  /* OBSOLETE        *//* Didn't work.  Try using just the MPW basename. */
-  /* OBSOLETE       p = (char *) mpw_basename (s->filename); */
-  /* OBSOLETE       if (p != s->filename) */
-  /* OBSOLETE 	result = openp (path, 0, p, OPEN_MODE, 0, &s->fullname); */
-  /* OBSOLETE     } */
-  /* OBSOLETE   if (result < 0) */
-  /* OBSOLETE     { */
-  /* OBSOLETE        *//* Didn't work.  Try using the mixed Unix/MPW basename. */
-  /* OBSOLETE       p = (char *) mpw_mixed_basename (s->filename); */
-  /* OBSOLETE       if (p != s->filename) */
-  /* OBSOLETE 	result = openp (path, 0, p, OPEN_MODE, 0, &s->fullname); */
-  /* OBSOLETE     } */
-  /* OBSOLETE #endif MPW */
 
   if (result >= 0)
     {
