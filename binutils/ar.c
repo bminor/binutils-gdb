@@ -24,7 +24,7 @@
    should have long options too. GNU ar used to check file against filesystem
    in quick_update and replace operations (would check mtime). Doesn't warn
    when name truncated. No way to specify pos_end. Error messages should be
-   more consistant.  */
+   more consistent.  */
 
 #include "bfd.h"
 #include "libiberty.h"
@@ -103,7 +103,7 @@ int newer_only = 0;
 
 /* Controls the writing of an archive symbol table (in BSD: a __.SYMDEF
    member).  -1 means we've been explicitly asked to not write a symbol table;
-   +1 means we've been explictly asked to write it;
+   +1 means we've been explicitly asked to write it;
    0 is the default.
    Traditionally, the default in BSD has been to not write the table.
    However, for POSIX.2 compliance the default is now to write a symbol table
@@ -991,7 +991,7 @@ do_quick_append (const char *archive_filename, char **files_to_append)
   if (ar_truncate)
     temp->flags |= BFD_TRADITIONAL_FORMAT;
 
-  /* assume it's an achive, go straight to the end, sans $200 */
+  /* assume it's an archive, go straight to the end, sans $200 */
   fseek (ofile, 0, 2);
 
   for (; files_to_append && *files_to_append; ++files_to_append)

@@ -22,7 +22,7 @@
 /* This file implements a generic debugging format.  We may eventually
    have readers which convert different formats into this generic
    format, and writers which write it out.  The initial impetus for
-   this was writing a convertor from stabs to HP IEEE-695 debugging
+   this was writing a converter from stabs to HP IEEE-695 debugging
    format.  */
 
 #include <stdio.h>

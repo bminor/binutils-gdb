@@ -370,7 +370,7 @@ do_type (int i)
 	{
 	  if (aux->x_sym.x_tagndx.p)
 	    {
-	      /* Refering to a struct defined elsewhere */
+	      /* Referring to a struct defined elsewhere */
 	      res->type = coff_structref_type;
 	      res->u.astructref.ref = tindex[INDEXOF (aux->x_sym.x_tagndx.p)];
 	      res->size = res->u.astructref.ref ?
@@ -389,7 +389,7 @@ do_type (int i)
 	}
       else
 	{
-	  /* No auxents - it's anonynmous */
+	  /* No auxents - it's anonymous */
 	  res->type = coff_structref_type;
 	  res->u.astructref.ref = 0;
 	  res->size = 0;

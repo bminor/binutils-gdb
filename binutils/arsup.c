@@ -235,7 +235,7 @@ ar_addlib (char *name, struct list *list)
       if (arch != NULL)
 	map_over_list (arch, ar_addlib_doer, list);
 
-      /* Don't close the bfd, since it will make the elements disasppear.  */
+      /* Don't close the bfd, since it will make the elements disappear.  */
     }
 }
 

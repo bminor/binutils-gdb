@@ -6036,7 +6036,7 @@ ieee_end_struct_type (void *p)
 	  && ! ieee_buffer_emptyp (&info->type_stack->type.strdef));
 
   /* If we were ignoring this struct definition because it was a
-     duplicate defintion, just through away whatever bytes we have
+     duplicate definition, just through away whatever bytes we have
      accumulated.  Leave the type on the stack.  */
   if (info->type_stack->type.ignorep)
     return TRUE;

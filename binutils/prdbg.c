@@ -267,7 +267,7 @@ static const struct debug_write_fns tg_fns =
   tg_start_class_type,
   tg_class_static_member,
   tg_class_baseclass,
-  pr_class_start_method,	/* Same, remmembers that's a method.  */
+  pr_class_start_method,	/* Same, remembers that's a method.  */
   tg_class_method_variant,
   tg_class_static_method_variant,
   pr_class_end_method,		/* Same, forgets that's a method.  */

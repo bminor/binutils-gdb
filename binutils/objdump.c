@@ -35,16 +35,16 @@
       processed in order by display_bfd().  If the file is an archive each
       of its elements is processed in turn.
       
-   3. The file's target architecture and binary file format are determnined
+   3. The file's target architecture and binary file format are determined
       by bfd_check_format().  If they are recognised, then dump_bfd() is
       called.
 
-   4. dump_bfd() in turn calls seperate functions to display the requested
-      item(s) of infomation(s).  For example dissasemble_data() is called if
+   4. dump_bfd() in turn calls separate functions to display the requested
+      item(s) of information(s).  For example disassemble_data() is called if
       a disassmebly has been requested.
 
    When disassembling the code loops through blocks of instructions bounded
-   by symbols, calling dissassemble_bytes() on each block.  The actual
+   by symbols, calling disassemble_bytes() on each block.  The actual
    disassembling is done by the libopcodes library, via a function pointer
    supplied by the disassembler() function.  */
 
@@ -871,7 +871,7 @@ static char *prev_functionname;
 static unsigned int prev_line;
 
 /* We keep a list of all files that we have seen when doing a
-   dissassembly with source, so that we know how much of the file to
+   disassembly with source, so that we know how much of the file to
    display.  This can be important for inlined functions.  */
 
 struct print_file_list
@@ -999,7 +999,7 @@ skip_to_line (struct print_file_list *p, unsigned int line,
     }
 }
 
-/* Show the line number, or the source line, in a dissassembly
+/* Show the line number, or the source line, in a disassembly
    listing.  */
 
 static void
@@ -1585,7 +1585,7 @@ disassemble_section (bfd *abfd, asection *section, void *info)
       rel_pp = paux->dynrelbuf;
       rel_count = paux->dynrelcount;
       /* Dynamic reloc addresses are absolute, non-dynamic are section
-	 relative.  REL_OFFSET specifies the reloc address corresponnding
+	 relative.  REL_OFFSET specifies the reloc address corresponding
 	 to the start of this section.  */
       rel_offset = pinfo->buffer_vma;
     }

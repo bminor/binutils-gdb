@@ -251,7 +251,7 @@ run_cmd (char *cmd, const char *redir)
   /* Restore stdout to its previous setting.  */
   dup2 (stdout_save, STDOUT_FILENO);
 
-  /* Close reponse file.  */
+  /* Close response file.  */
   close (redir_handle);
 
   if (pid == -1)

@@ -1,3 +1,24 @@
+2003-10-27  Kazu Hirata  <kazu@cs.umass.edu>
+
+	* ChangeLog: Fix typos.
+	* ChangeLog-9197: Likewise.
+	* ChangeLog-9899: Likewise.
+	* NEWS: Likewise.
+	* ar.c: Fix comment typos.
+	* arsup.c: Likewise.
+	* coffgrok.c: Likewise.
+	* debug.c: Likewise.
+	* debug.h: Likewise.
+	* dlltool.c: Likewise.
+	* ieee.c: Likewise.
+	* nm.c: Likewise.
+	* objdump.c: Likewise.
+	* prdbg.c: Likewise.
+	* readelf.c: Likewise.
+	* resrc.c: Likewise.
+	* sysinfo.y: Likewise.
+	* windres.c: Likewise.
+
 2003-10-27  Nick Clifton  <nickc@redhat.com>
 
 	* objcopy.c (copy_section): Do not complain when a target does not
@@ -340,9 +361,9 @@
 2003-06-27  Nick Clifton  <nickc@redhat.com>
 
 	* objcopy.c (copy_object): Replace call to
-	bfd_create_gnu_debuglink_section with seperate calls to
+	bfd_create_gnu_debuglink_section with separate calls to
 	bfd_add_gnu_debuglink_section and
-	bfd_fill_in_gnu_debuglink_section, seperated by a walk over the
+	bfd_fill_in_gnu_debuglink_section, separated by a walk over the
 	symbol tables.
 
 2003-06-26  Roland McGrath  <roland@redhat.com>
@@ -857,7 +878,7 @@
 
 	* objcopy.c: Add --prefix-symbols=<prefix> option to rename all
 	symbols by adding the given prefix to the begining of the symbol
-	name. This is useful to provide name space seperation regardless
+	name. This is useful to provide name space separation regardless
 	of how the object file was created. Added --prefix-sections=
 	<prefix> and --prefix-alloc-sections=<prefix> options to rename all
 	sections (or all sections with the alloc flag set) by adding the given
@@ -1366,7 +1387,7 @@
 
 2002-6-13  Elias Athanasopoulos  <eathan@otenet.gr>
 
-	* nm.c (struct extended_symbol_info): New strcuture: Add the size
+	* nm.c (struct extended_symbol_info): New structure: Add the size
 	of the symbols to the information provided by the symbol_info
 	structure.
 	(print_symbols): Pass the symbol size to print_symbol.
@@ -3279,7 +3300,7 @@
 2000-08-14  Todd Vierling <tv@wasabisystems.com>
 
 	* objcopy.c (strip_main): Silently accept -d as an alias for -g
-	for compatability with old BSD systems.
+	for compatibility with old BSD systems.
 
 2000-08-14  Jason Eckhardt  <jle@cygnus.com>
 

@@ -444,7 +444,7 @@ main (int argc, char **argv)
 	  break;
 	case 'X':
 	  /* Ignored for (partial) AIX compatibility.  On AIX, the
-	     argument has values 32, 64, or 32_64, and specfies that
+	     argument has values 32, 64, or 32_64, and specifies that
 	     only 32-bit, only 64-bit, or both kinds of objects should
 	     be examined.  The default is 32.  So plain AIX nm on a
 	     library archive with both kinds of objects will ignore
@@ -1442,7 +1442,7 @@ print_symbol_info_bsd (struct extended_symbol_info *info, bfd *abfd)
   else
     {
       /* Normally we print the value of the symbol.  If we are printing the
-	 size or sorting by size then we print its size, execpt for the
+	 size or sorting by size then we print its size, except for the
 	 (weird) special case where both flags are defined, in which case we
 	 print both values.  This conforms to documented behaviour.  */
       if (sort_by_size && !print_size)

@@ -406,7 +406,7 @@ enum_list:
 %%
 /* four modes
 
-   -d write structure defintions for sysroff in host format
+   -d write structure definitions for sysroff in host format
    -i write functions to swap into sysroff format in
    -o write functions to swap into sysroff format out
    -c write code to print info in human form */

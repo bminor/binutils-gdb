@@ -25,7 +25,7 @@
 /* This header file describes a generic debugging information format.
    We may eventually have readers which convert different formats into
    this generic format, and writers which write it out.  The initial
-   impetus for this was writing a convertor from stabs to HP IEEE-695
+   impetus for this was writing a converter from stabs to HP IEEE-695
    debugging format.  */
 
 /* Different kinds of types.  */

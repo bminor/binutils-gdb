@@ -60,7 +60,7 @@
    Declares that <external-name> or the exported function whoes ordinal number
    is <integer> is to be imported from the file <module-name>.  If
    <internal-name> is specified then this is the name that the imported
-   function will be refered to in the body of the DLL.
+   function will be refereed to in the body of the DLL.
 
    DESCRIPTION <string>
    Puts <string> into output .exp file in the .rdata section
@@ -443,7 +443,7 @@ char *tmp_stub_buf;
 #define TMP_TAIL_O	dlltmp (&tmp_tail_o_buf, "%st.o")
 #define TMP_STUB	dlltmp (&tmp_stub_buf, "%ss")
 
-/* This bit of assemly does jmp * ....  */
+/* This bit of assembly does jmp * ....  */
 static const unsigned char i386_jtab[] =
 {
   0xff, 0x25, 0x00, 0x00, 0x00, 0x00, 0x90, 0x90
@@ -1943,7 +1943,7 @@ gen_exp_file (void)
 	  int dst = 0;
 	  int last = -1;
 	  qsort (copy, num_entries, sizeof (long), sfunc);
-	  /* Delete duplcates */
+	  /* Delete duplicates */
 	  for (src = 0; src < num_entries; src++)
 	    {
 	      if (last != copy[src])
@@ -2364,7 +2364,7 @@ make_one_lib_file (export_type *exp, int i)
       ptrs[oidx++] = iname_lab;
 
 #ifdef DLLTOOL_PPC
-      /* The symbol refering to the code (.text).  */
+      /* The symbol referring to the code (.text).  */
       {
 	asymbol *function_name;
 
@@ -3160,7 +3160,7 @@ static const struct option long_options[] =
   {"exclude-symbols", required_argument, NULL, OPTION_EXCLUDE_SYMS},
   {"no-default-excludes", no_argument, NULL, OPTION_NO_DEFAULT_EXCLUDES},
   {"output-lib", required_argument, NULL, 'l'},
-  {"def", required_argument, NULL, 'd'}, /* for compatiblity with older versions */
+  {"def", required_argument, NULL, 'd'}, /* for compatibility with older versions */
   {"input-def", required_argument, NULL, 'd'},
   {"add-underscore", no_argument, NULL, 'U'},
   {"kill-at", no_argument, NULL, 'k'},

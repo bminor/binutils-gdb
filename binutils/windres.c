@@ -788,7 +788,7 @@ main (int argc, char **argv)
 	  break;
 
 	case 'f':
-	  /* For compatability with rc we accept "-fo <name>" as being the
+	  /* For compatibility with rc we accept "-fo <name>" as being the
 	     equivalent of "-o <name>".  We do not advertise this fact
 	     though, as we do not want users to use non-GNU like command
 	     line switches.  */
