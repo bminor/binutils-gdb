@@ -215,6 +215,8 @@ t-cop2.vuexpect
 t-cop2b.c
 t-dma.c
 t-dma.dmaexpect
+rw-vureg.c
+rw-vureg.vuexpect
 t-pke2.trc
 t-pke2.vif1expect
 t-pke3.trc

@@ -1,3 +1,7 @@
+Wed Apr 29 8:44:31 1998  Ron Unrau  <runrau@cygnus.com>
+
+	* rw-vureg.c: test VU register read/writes through aliased memory
+
 Tue Apr 28 20:16:02 EDT 1998 Jillian Ye <jillian@cygnus.com>
 
 	* sce*test*_out_gif.dat: change the last line of the files

@@ -118,7 +118,8 @@ TESTS = \
 	tsv408_0.ok tsv408_1.ok \
 	tsv416_0.ok tsv416_1.ok \
 	tsv432_0.ok tsv432_1.ok \
-	t-cop2.vuok t-cop2b.ok
+	t-cop2.vuok t-cop2b.ok \
+	rw-vureg.ok
 
 #SCE_TESTS := $(patsubst %.dvpasm, %.ok, $(wildcard sce*.dvpasm))
 SCE_TESTS = \
