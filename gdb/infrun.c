@@ -1933,12 +1933,16 @@ process_event_stop_test:
 	     breakpoint.  */
 	  insert_step_resume_breakpoint_at_frame (get_current_frame ());
 	  ecs->step_after_step_resume_breakpoint = 1;
+	  keep_going (ecs);
+	  return;
 	}
-      else if (step_range_end != 0
-	       && stop_signal != TARGET_SIGNAL_0
-	       && stop_pc >= step_range_start && stop_pc < step_range_end
-	       && frame_id_eq (get_frame_id (get_current_frame ()),
-			       step_frame_id))
+
+      if (step_range_end != 0
+	  && stop_signal != TARGET_SIGNAL_0
+	  && stop_pc >= step_range_start && stop_pc < step_range_end
+	  && frame_id_eq (get_frame_id (get_current_frame ()),
+			  step_frame_id)
+	  && step_resume_breakpoint == NULL)
 	{
 	  /* The inferior is about to take a signal that will take it
 	     out of the single step range.  Set a breakpoint at the
@@ -1950,7 +1954,16 @@ process_event_stop_test:
 	     while in the single-step range.  Nested signals aren't a
 	     problem as they eventually all return.  */
 	  insert_step_resume_breakpoint_at_frame (get_current_frame ());
+	  keep_going (ecs);
+	  return;
 	}
+
+      /* Note: step_resume_breakpoint may be non-NULL.  This occures
+	 when either there's a nested signal, or when there's a
+	 pending signal enabled just as the signal handler returns
+	 (leaving the inferior at the step-resume-breakpoint without
+	 actually executing it).  Either way continue until the
+	 breakpoint is really hit.  */
       keep_going (ecs);
       return;
     }

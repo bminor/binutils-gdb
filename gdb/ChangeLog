@@ -1,5 +1,11 @@
 2005-01-24  Andrew Cagney  <cagney@gnu.org>
 
+	* infrun.c (handle_inferior_event): Handle back-to-back and nested
+	signals where the step_resume_breakpoint may have already been
+	inserted.
+
+2005-01-24  Andrew Cagney  <cagney@gnu.org>
+
 	* configure: Regenerate, ../gettext.m4 was updated.
 
 2005-01-23  Mark Kettenis  <kettenis@gnu.org>
