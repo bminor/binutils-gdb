@@ -469,6 +469,24 @@ v850_reloc_prefix()
       return BFD_RELOC_LO16;
     }
 
+  if (strncmp (input_line_pointer, "sdaoff(", 7) == 0)
+    {
+      input_line_pointer += 7;
+      return BFD_RELOC_V850_SDA_OFFSET;
+    }
+
+  if (strncmp (input_line_pointer, "zdaoff(", 7) == 0)
+    {
+      input_line_pointer += 7;
+      return BFD_RELOC_V850_ZDA_OFFSET;
+    }
+
+  if (strncmp (input_line_pointer, "tdaoff(", 7) == 0)
+    {
+      input_line_pointer += 7;
+      return BFD_RELOC_V850_TDA_OFFSET;
+    }
+
   /* FIXME: implement sda, tda, zda here */
 
   return BFD_RELOC_UNUSED;

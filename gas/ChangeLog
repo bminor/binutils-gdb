@@ -1,6 +1,9 @@
 start-sanitize-v850
 Wed Oct 16 11:28:31 1996  Jeffrey A Law  (law@cygnus.com)
 
+	* config/tc-v850.c (v850_reloc_prefix): Recognize zdaoff, tdaoff
+	and sdaoff expressions.
+
 	* write.c (fixup_segment): Don't add symbol value to addend if
 	TC_V850 and OBJ_ELF.
 	* config/tc-v850.h (tc_fix_adjustable): Don't adjust any
