@@ -1,3 +1,7 @@
+2001-10-03  Alan Modra  <amodra@bigpond.net.au>
+
+	* configure: Regenerate.
+
 2001-10-02  Alan Modra  <amodra@bigpond.net.au>
 
 	* ldver.h (ld_program_version): Remove declaration.

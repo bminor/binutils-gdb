@@ -1,3 +1,8 @@
+2001-10-03  Alan Modra  <amodra@bigpond.net.au>
+
+	* doc/Makefile.in: Regenerate.
+	* configure: Regenerate.
+
 2001-10-02  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* readelf.c (display_debug_line, display_debug_pubnames,

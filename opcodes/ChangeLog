@@ -1,3 +1,8 @@
+2001-10-03  Alan Modra  <amodra@bigpond.net.au>
+
+	* po/POTFILES.in: Regenerate.
+	* configure: Regenerate.
+
 2001-10-02  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.am (Makefile): Depend on bfd/configure.in.
