@@ -120,12 +120,8 @@ extern breakpoint_from_pc_fn arm_breakpoint_from_pc;
 
 #define DECR_PC_AFTER_BREAK 0
 
-/* Code to execute to print interesting information about the floating
-   point processor (if any) or emulator.  No need to define if there
-   is nothing to do. */
-extern void arm_float_info (void);
-
-#define FLOAT_INFO	{ arm_float_info (); }
+void arm_print_float_info (void);
+#define PRINT_FLOAT_INFO()	arm_print_float_info ()
 
 /* Say how long (ordinary) registers are.  This is a piece of bogosity
    used in push_word and a few other places; REGISTER_RAW_SIZE is the

@@ -2864,6 +2864,11 @@ library in which breakpoints cannot be set and so should be disabled.
 @findex DO_REGISTERS_INFO
 If defined, use this to print the value of a register or all registers.
 
+@item PRINT_FLOAT_INFO()
+#findex PRINT_FLOAT_INFO
+If defined, then the @samp{info float} command will print information about
+the processor's floating point unit.
+
 @item DWARF_REG_TO_REGNUM
 @findex DWARF_REG_TO_REGNUM
 Convert DWARF register number into @value{GDBN} regnum.  If not defined,
@@ -2904,8 +2909,7 @@ Predicate for @code{EXTRACT_STRUCT_VALUE_ADDRESS}.
 
 @item FLOAT_INFO
 @findex FLOAT_INFO
-If defined, then the @samp{info float} command will print information about
-the processor's floating point unit.
+Deprecated in favor of @code{PRINT_FLOAT_INFO}.
 
 @item FP_REGNUM
 @findex FP_REGNUM

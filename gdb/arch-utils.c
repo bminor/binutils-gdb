@@ -225,6 +225,19 @@ default_double_format (struct gdbarch *gdbarch)
     }
 }
 
+void
+default_print_float_info (void)
+{
+#ifdef FLOAT_INFO
+#if GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL
+#error "FLOAT_INFO defined in multi-arch"
+#endif
+  FLOAT_INFO;
+#else
+  printf_filtered ("No floating point info available for this processor.\n");
+#endif
+}
+
 /* Misc helper functions for targets. */
 
 int

@@ -177,6 +177,7 @@ struct gdbarch
   int max_register_virtual_size;
   gdbarch_register_virtual_type_ftype *register_virtual_type;
   gdbarch_do_registers_info_ftype *do_registers_info;
+  gdbarch_print_float_info_ftype *print_float_info;
   gdbarch_register_sim_regno_ftype *register_sim_regno;
   gdbarch_register_bytes_ok_ftype *register_bytes_ok;
   gdbarch_cannot_fetch_register_ftype *cannot_fetch_register;
@@ -344,6 +345,7 @@ struct gdbarch startup_gdbarch =
   0,
   0,
   0,
+  0,
   generic_get_saved_register,
   0,
   0,
@@ -478,6 +480,7 @@ gdbarch_alloc (const struct gdbarch_info *info,
   current_gdbarch->max_register_raw_size = -1;
   current_gdbarch->max_register_virtual_size = -1;
   current_gdbarch->do_registers_info = do_registers_info;
+  current_gdbarch->print_float_info = default_print_float_info;
   current_gdbarch->register_sim_regno = default_register_sim_regno;
   current_gdbarch->cannot_fetch_register = cannot_register_not;
   current_gdbarch->cannot_store_register = cannot_register_not;
@@ -629,6 +632,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
       && (gdbarch->register_virtual_type == 0))
     fprintf_unfiltered (log, "\n\tregister_virtual_type");
   /* Skip verify of do_registers_info, invalid_p == 0 */
+  /* Skip verify of print_float_info, invalid_p == 0 */
   /* Skip verify of register_sim_regno, invalid_p == 0 */
   /* Skip verify of register_bytes_ok, has predicate */
   /* Skip verify of cannot_fetch_register, invalid_p == 0 */
@@ -800,17 +804,18 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: GDB_MULTI_ARCH = %d\n",
                       GDB_MULTI_ARCH);
-#ifdef ADDR_BITS_REMOVE
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "ADDR_BITS_REMOVE(addr)",
-                      XSTRING (ADDR_BITS_REMOVE (addr)));
   if (GDB_MULTI_ARCH)
     fprintf_unfiltered (file,
-                        "gdbarch_dump: ADDR_BITS_REMOVE = 0x%08lx\n",
-                        (long) current_gdbarch->addr_bits_remove
-                        /*ADDR_BITS_REMOVE ()*/);
-#endif
+                        "gdbarch_dump: in_function_epilogue_p = 0x%08lx\n",
+                        (long) current_gdbarch->in_function_epilogue_p);
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: register_read = 0x%08lx\n",
+                        (long) current_gdbarch->register_read);
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: register_write = 0x%08lx\n",
+                        (long) current_gdbarch->register_write);
 #ifdef ADDRESS_TO_POINTER
 #if GDB_MULTI_ARCH
   /* Macro might contain `[{}]' when not multi-arch */
@@ -824,6 +829,17 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         "gdbarch_dump: ADDRESS_TO_POINTER = 0x%08lx\n",
                         (long) current_gdbarch->address_to_pointer
                         /*ADDRESS_TO_POINTER ()*/);
+#endif
+#ifdef ADDR_BITS_REMOVE
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "ADDR_BITS_REMOVE(addr)",
+                      XSTRING (ADDR_BITS_REMOVE (addr)));
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: ADDR_BITS_REMOVE = 0x%08lx\n",
+                        (long) current_gdbarch->addr_bits_remove
+                        /*ADDR_BITS_REMOVE ()*/);
 #endif
 #ifdef BELIEVE_PCC_PROMOTION
   fprintf_unfiltered (file,
@@ -1160,6 +1176,17 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                       "gdbarch_dump: FP_REGNUM = %d\n",
                       FP_REGNUM);
 #endif
+#ifdef FRAMELESS_FUNCTION_INVOCATION
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "FRAMELESS_FUNCTION_INVOCATION(fi)",
+                      XSTRING (FRAMELESS_FUNCTION_INVOCATION (fi)));
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: FRAMELESS_FUNCTION_INVOCATION = 0x%08lx\n",
+                        (long) current_gdbarch->frameless_function_invocation
+                        /*FRAMELESS_FUNCTION_INVOCATION ()*/);
+#endif
 #ifdef FRAME_ARGS_ADDRESS
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
@@ -1214,17 +1241,6 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         "gdbarch_dump: FRAME_INIT_SAVED_REGS = 0x%08lx\n",
                         (long) current_gdbarch->frame_init_saved_regs
                         /*FRAME_INIT_SAVED_REGS ()*/);
-#endif
-#ifdef FRAMELESS_FUNCTION_INVOCATION
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "FRAMELESS_FUNCTION_INVOCATION(fi)",
-                      XSTRING (FRAMELESS_FUNCTION_INVOCATION (fi)));
-  if (GDB_MULTI_ARCH)
-    fprintf_unfiltered (file,
-                        "gdbarch_dump: FRAMELESS_FUNCTION_INVOCATION = 0x%08lx\n",
-                        (long) current_gdbarch->frameless_function_invocation
-                        /*FRAMELESS_FUNCTION_INVOCATION ()*/);
 #endif
 #ifdef FRAME_LOCALS_ADDRESS
   fprintf_unfiltered (file,
@@ -1295,20 +1311,6 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         (long) current_gdbarch->init_extra_frame_info
                         /*INIT_EXTRA_FRAME_INFO ()*/);
 #endif
-#ifdef INIT_FRAME_PC_FIRST
-#if GDB_MULTI_ARCH
-  /* Macro might contain `[{}]' when not multi-arch */
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "INIT_FRAME_PC_FIRST(fromleaf, prev)",
-                      XSTRING (INIT_FRAME_PC_FIRST (fromleaf, prev)));
-#endif
-  if (GDB_MULTI_ARCH)
-    fprintf_unfiltered (file,
-                        "gdbarch_dump: INIT_FRAME_PC_FIRST = 0x%08lx\n",
-                        (long) current_gdbarch->init_frame_pc_first
-                        /*INIT_FRAME_PC_FIRST ()*/);
-#endif
 #ifdef INIT_FRAME_PC
 #if GDB_MULTI_ARCH
   /* Macro might contain `[{}]' when not multi-arch */
@@ -1323,6 +1325,20 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         (long) current_gdbarch->init_frame_pc
                         /*INIT_FRAME_PC ()*/);
 #endif
+#ifdef INIT_FRAME_PC_FIRST
+#if GDB_MULTI_ARCH
+  /* Macro might contain `[{}]' when not multi-arch */
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "INIT_FRAME_PC_FIRST(fromleaf, prev)",
+                      XSTRING (INIT_FRAME_PC_FIRST (fromleaf, prev)));
+#endif
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: INIT_FRAME_PC_FIRST = 0x%08lx\n",
+                        (long) current_gdbarch->init_frame_pc_first
+                        /*INIT_FRAME_PC_FIRST ()*/);
+#endif
 #ifdef INNER_THAN
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
@@ -1333,17 +1349,6 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         "gdbarch_dump: INNER_THAN = 0x%08lx\n",
                         (long) current_gdbarch->inner_than
                         /*INNER_THAN ()*/);
-#endif
-#ifdef IN_SOLIB_CALL_TRAMPOLINE
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "IN_SOLIB_CALL_TRAMPOLINE(pc, name)",
-                      XSTRING (IN_SOLIB_CALL_TRAMPOLINE (pc, name)));
-  if (GDB_MULTI_ARCH)
-    fprintf_unfiltered (file,
-                        "gdbarch_dump: IN_SOLIB_CALL_TRAMPOLINE = 0x%08lx\n",
-                        (long) current_gdbarch->in_solib_call_trampoline
-                        /*IN_SOLIB_CALL_TRAMPOLINE ()*/);
 #endif
 #ifdef INTEGER_TO_ADDRESS
   fprintf_unfiltered (file,
@@ -1356,10 +1361,17 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         (long) current_gdbarch->integer_to_address
                         /*INTEGER_TO_ADDRESS ()*/);
 #endif
+#ifdef IN_SOLIB_CALL_TRAMPOLINE
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "IN_SOLIB_CALL_TRAMPOLINE(pc, name)",
+                      XSTRING (IN_SOLIB_CALL_TRAMPOLINE (pc, name)));
   if (GDB_MULTI_ARCH)
     fprintf_unfiltered (file,
-                        "gdbarch_dump: in_function_epilogue_p = 0x%08lx\n",
-                        (long) current_gdbarch->in_function_epilogue_p);
+                        "gdbarch_dump: IN_SOLIB_CALL_TRAMPOLINE = 0x%08lx\n",
+                        (long) current_gdbarch->in_solib_call_trampoline
+                        /*IN_SOLIB_CALL_TRAMPOLINE ()*/);
+#endif
 #ifdef MAX_REGISTER_RAW_SIZE
   fprintf_unfiltered (file,
                       "gdbarch_dump: MAX_REGISTER_RAW_SIZE # %s\n",
@@ -1492,6 +1504,20 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         "gdbarch_dump: PREPARE_TO_PROCEED = 0x%08lx\n",
                         (long) current_gdbarch->prepare_to_proceed
                         /*PREPARE_TO_PROCEED ()*/);
+#endif
+#ifdef PRINT_FLOAT_INFO
+#if GDB_MULTI_ARCH
+  /* Macro might contain `[{}]' when not multi-arch */
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "PRINT_FLOAT_INFO()",
+                      XSTRING (PRINT_FLOAT_INFO ()));
+#endif
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: PRINT_FLOAT_INFO = 0x%08lx\n",
+                        (long) current_gdbarch->print_float_info
+                        /*PRINT_FLOAT_INFO ()*/);
 #endif
 #ifdef PROLOGUE_FRAMELESS_P
   fprintf_unfiltered (file,
@@ -2119,14 +2145,6 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         (long) current_gdbarch->use_struct_convention
                         /*USE_STRUCT_CONVENTION ()*/);
 #endif
-  if (GDB_MULTI_ARCH)
-    fprintf_unfiltered (file,
-                        "gdbarch_dump: register_read = 0x%08lx\n",
-                        (long) current_gdbarch->register_read);
-  if (GDB_MULTI_ARCH)
-    fprintf_unfiltered (file,
-                        "gdbarch_dump: register_write = 0x%08lx\n",
-                        (long) current_gdbarch->register_write);
   if (current_gdbarch->dump_tdep != NULL)
     current_gdbarch->dump_tdep (current_gdbarch, file);
 }
@@ -2914,6 +2932,24 @@ set_gdbarch_do_registers_info (struct gdbarch *gdbarch,
                                gdbarch_do_registers_info_ftype do_registers_info)
 {
   gdbarch->do_registers_info = do_registers_info;
+}
+
+void
+gdbarch_print_float_info (struct gdbarch *gdbarch)
+{
+  if (gdbarch->print_float_info == 0)
+    internal_error (__FILE__, __LINE__,
+                    "gdbarch: gdbarch_print_float_info invalid");
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_print_float_info called\n");
+  gdbarch->print_float_info ();
+}
+
+void
+set_gdbarch_print_float_info (struct gdbarch *gdbarch,
+                              gdbarch_print_float_info_ftype print_float_info)
+{
+  gdbarch->print_float_info = print_float_info;
 }
 
 int

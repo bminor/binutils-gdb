@@ -1846,11 +1846,7 @@ interrupt_target_command (char *args, int from_tty)
 static void
 float_info (char *addr_exp, int from_tty)
 {
-#ifdef FLOAT_INFO
-  FLOAT_INFO;
-#else
-  printf_filtered ("No floating point info available for this processor.\n");
-#endif
+  PRINT_FLOAT_INFO ();
 }
 
 /* ARGSUSED */

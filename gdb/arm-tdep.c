@@ -1559,8 +1559,10 @@ print_fpu_flags (int flags)
   putchar ('\n');
 }
 
+/* Print interesting information about the floating point processor
+   (if present) or emulator.  */
 void
-arm_float_info (void)
+arm_print_float_info (void)
 {
   register unsigned long status = read_register (FPS_REGNUM);
   int type;
