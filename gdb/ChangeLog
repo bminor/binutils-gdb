@@ -1,3 +1,18 @@
+2004-12-05  Richard Earnshaw  <rearnsha@arm.com>
+
+	* doublest.c (FLOATFORMAT_LARGEST_BYTES): New define.
+	(get_field, put_field): Assert that the format is one we can handle.
+	Simplify logic accordingly.
+	(floatformat_normalize_byteorder): New function.
+	(convert_floatformat_to_doublest): Use floatformat_normalize_byteorder
+	to normalize and select modified byte order. Pass modified byte order
+	to get_field.
+	(floatformat_is_negative, floatformat_is_nan, floatformat_mantissa): 
+	Likewise.
+	(convert_doublest_to_floatformat): Select an appropriate intermediate
+	byte order if necessary.  Always convert to the final format before
+	returning.
+
 2004-12-04  Daniel Jacobowitz  <dan@debian.org>
 
 	PR tui/1703
