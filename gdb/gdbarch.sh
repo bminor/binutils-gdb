@@ -517,8 +517,6 @@ F::DEPRECATED_TARGET_READ_FP:CORE_ADDR:deprecated_target_read_fp:void
 M::PUSH_DUMMY_CALL:CORE_ADDR:push_dummy_call:CORE_ADDR func_addr, struct regcache *regcache, CORE_ADDR bp_addr, int nargs, struct value **args, CORE_ADDR sp, int struct_return, CORE_ADDR struct_addr:func_addr, regcache, bp_addr, nargs, args, sp, struct_return, struct_addr
 # PUSH_DUMMY_CALL is a direct replacement for DEPRECATED_PUSH_ARGUMENTS.
 F:2:DEPRECATED_PUSH_ARGUMENTS:CORE_ADDR:deprecated_push_arguments:int nargs, struct value **args, CORE_ADDR sp, int struct_return, CORE_ADDR struct_addr:nargs, args, sp, struct_return, struct_addr
-# DEPRECATED_USE_GENERIC_DUMMY_FRAMES can be deleted.  Always true.
-v::DEPRECATED_USE_GENERIC_DUMMY_FRAMES:int:deprecated_use_generic_dummy_frames:::::1::0
 # Implement PUSH_RETURN_ADDRESS, and then merge in
 # DEPRECATED_PUSH_RETURN_ADDRESS.
 F:2:DEPRECATED_PUSH_RETURN_ADDRESS:CORE_ADDR:deprecated_push_return_address:CORE_ADDR pc, CORE_ADDR sp:pc, sp
@@ -866,6 +864,8 @@ struct obstack;
 
 extern struct gdbarch *current_gdbarch;
 
+/* Always one, being eliminated.  */
+#define DEPRECATED_USE_GENERIC_DUMMY_FRAMES 1
 
 /* If any of the following are defined, the target wasn't correctly
    converted. */

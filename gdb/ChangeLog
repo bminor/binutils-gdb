@@ -1,3 +1,11 @@
+2004-05-07  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbarch.sh (DEPRECATED_USE_GENERIC_DUMMY_FRAMES): Replace with
+	macro defined to 1.
+	* gdbarch.h, gdbarch.c: Re-generate.
+	* ns32k-tdep.c (ns32k_gdbarch_init): Do not set
+	deprecated_use_generic_dummy_frames.
+
 2004-05-07  Brian Ford  <ford@vss.fsi.com>
 
 	* NEWS: Mention Cygwin DWARF 2 support.

@@ -52,6 +52,8 @@ struct obstack;
 
 extern struct gdbarch *current_gdbarch;
 
+/* Always one, being eliminated.  */
+#define DEPRECATED_USE_GENERIC_DUMMY_FRAMES 1
 
 /* If any of the following are defined, the target wasn't correctly
    converted. */
@@ -751,17 +753,6 @@ extern void set_gdbarch_deprecated_push_arguments (struct gdbarch *gdbarch, gdba
 #endif
 #if !defined (DEPRECATED_PUSH_ARGUMENTS)
 #define DEPRECATED_PUSH_ARGUMENTS(nargs, args, sp, struct_return, struct_addr) (gdbarch_deprecated_push_arguments (current_gdbarch, nargs, args, sp, struct_return, struct_addr))
-#endif
-
-/* DEPRECATED_USE_GENERIC_DUMMY_FRAMES can be deleted.  Always true. */
-
-extern int gdbarch_deprecated_use_generic_dummy_frames (struct gdbarch *gdbarch);
-extern void set_gdbarch_deprecated_use_generic_dummy_frames (struct gdbarch *gdbarch, int deprecated_use_generic_dummy_frames);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_USE_GENERIC_DUMMY_FRAMES)
-#error "Non multi-arch definition of DEPRECATED_USE_GENERIC_DUMMY_FRAMES"
-#endif
-#if !defined (DEPRECATED_USE_GENERIC_DUMMY_FRAMES)
-#define DEPRECATED_USE_GENERIC_DUMMY_FRAMES (gdbarch_deprecated_use_generic_dummy_frames (current_gdbarch))
 #endif
 
 /* Implement PUSH_RETURN_ADDRESS, and then merge in
