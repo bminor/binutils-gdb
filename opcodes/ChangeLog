@@ -1,3 +1,26 @@
+Tue Oct  1 10:49:11 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* i386-dis.c (op_rtn): Change to be a pointer.  Adjust uses
+	accordingly.  Don't declare functions using op_rtn.
+
+start-sanitize-v850
+Fri Sep 27 18:28:59 1996  Stu Grossman  (grossman@critters.cygnus.com)
+
+	* v850-dis.c (disassemble):  Add memaddr argument.  Re-arrange
+	params to be more standard.
+	* (disassemble):  Print absolute addresses and symbolic names for
+	branch and jump targets.
+	* v850-opc.c (v850_operand):  Add displacement flag to 9 and 22
+	bit operands.
+	* (v850_opcodes):  Add breakpoint insn.
+
+end-sanitize-v850
+Mon Sep 23 12:32:26 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* m68k-opc.c: Move the fmovemx data register cases before the
+ 	other cases, so that they get recognized before the data register
+ 	does gets treated as a degenerate register list.
+
 Tue Sep 17 12:06:51 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* mips-opc.c: Add a case for "div" and "divu" with two registers
