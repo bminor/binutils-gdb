@@ -1,3 +1,38 @@
+2002-10-11  David Carlton  <carlton@math.stanford.edu>
+
+	* jv-lang.c (get_java_class_symtab): Initialize BLOCK_USING (bl)
+	to NULL.
+	* cp-support.c: Change all uses of 'struct using_data' and 'struct
+	using_data_node' to 'struct using_direct' and 'struct
+	using_direct_node'.
+	(cp_free_usings): Fix loop.
+	* symtab.c: Ditto.
+	* symtab.h: Ditto
+	* cp-support.h: Delete declarations for commented-out functions.
+	Rename 'struct using_data' and 'struct using_data_node' to 'struct
+	using_direct' and 'struct using_direct_node'.
+	* cp-support.c: Delete commented-out functions.
+
+2002-10-10  David Carlton  <carlton@math.stanford.edu>
+
+	* symtab.c (lookup_symbol_aux_using_loop): New function.
+	(lookup_symbol_aux_nonlocal): New function.
+	(lookup_symbol_aux): Call lookup_symbol_aux_nonlocal instead of
+	lookup_symbol_aux_symtabs and lookup_symbol_aux_psymtabs.
+
+	* Makefile.in (symtab.o): Depend on $(cp_support_h).
+
+	* symtab.c: #include "cp-support.h"
+
+	* cp-support.h: Declare cp_copy_usings, cp_free_usings.
+
+	* cp-support.c (cp_free_usings): New function.
+	(cp_copy_usings): New function.
+
+	* symtab.c (lookup_symbol_aux): Call lookup_symbol_aux_using to
+	apply using directives.
+	(lookup_symbol_aux_using): New function.
+
 2002-10-09  David Carlton  <carlton@math.stanford.edu>
 
 	* cp-support.c: Comment out cp_find_last_component and

@@ -26,7 +26,7 @@
 /* Opaque declarations.  */
 struct obstack;
 struct dictionary;
-struct using_data_node;
+struct using_direct_node;
 
 /* Don't do this; it means that if some .o's are compiled with GNU C
    and some are not (easy to do accidentally the way we configure
@@ -400,6 +400,7 @@ struct block
   struct dictionary *dict;
 
   /* Used for language-specific info.  */
+
   union
   {
     struct
@@ -408,7 +409,8 @@ struct block
 	 similar features are added by this block.  This should always
 	 be NULL for global blocks: if there are using directives that
 	 affect an entire file, put it in the static block.  */
-      struct using_data_node *using;
+      
+      struct using_direct_node *using;
     }
     cplus_specific;
   }

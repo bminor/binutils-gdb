@@ -1,3 +1,8 @@
+2002-10-11  David Carlton  <carlton@math.stanford.edu>
+
+	* gdb.c++/namespace.exp: Add tests from within C::D::marker2.
+	* gdb.c++/namespace.cc: Add namespace C and its contents.
+
 2002-09-26  Keith Seitz  <keiths@redhat.com>
 
 	* lib/insight-support.exp (gdbtk_start): Figure out where

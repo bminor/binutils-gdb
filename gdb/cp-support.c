@@ -170,125 +170,20 @@ method_name_from_physname (const char *physname)
   return ret;
 }
 
-#if 0
-
-/* FIXME: carlton/2002-10-09: cp_locate_arguments and
-   cp_find_last_component are broken: they don't deal with operator<<
-   and the like.  Oops.  I decided to fix this by starting from the
-   front, leading to cp_find_first_component (which may or may not be
-   correct...); if I don't find other uses for cp_locate_arguments and
-   cp_find_last_component soon, I'll delete them.  */
-
-/* Given a name that may or may not be the demangled name of a
-   function or method, this returns a pointer to the last character
-   that isn't part of the arguments, if there are any.  I.e. given a
-   pointer to "foo", it returns a pointer to the trailing '\0'; given
-   a pointer to "C::foo() const", it returns a pointer to the '('.  */
-
-const char *
-cp_locate_arguments (const char *name)
-{
-/* NOTE: carlton/2002-10-08: we search from the front rather than from
-   the back to avoid getting screwed up by the 'const' on the end.
-   ARGSOK says when a parenthesis should be the start of the arguments
-   to a function: otherwise, we get screwed up by 'A::(anonymous
-   namespace)::foo' and its ilk.  */
-
-  const char *current = name;
-  const char *end = name + strlen(name);
-  /* The nesting depth.  */
-  int depth = 0;
-  /* Might a parenthesis be the start of arguments?  */
-  int argsok = 0;
-
-  while (current < end)
-    {
-      switch (*current)
-	{
-	case '(':
-	  if (depth == 0 && argsok)
-	    return current;
-	  ++depth;
-	  argsok = 0;
-	  break;
-	case '<':
-	  ++depth;
-	  argsok = 0;
-	  break;
-	case ')':
-	case '>':
-	  --depth;
-	  argsok = 1;
-	  break;
-	case ':':
-	  argsok = 0;
-	  break;
-	default:
-	  argsok = 1;
-	  break;
-	}
-      ++current;
-    }
-
-  return current;
-}
-
-/* Given pointers FIRST and LAST such that [FIRST,LAST) is a substring
-   of a demangled name, not including the arguments (i.e. call
-   cp_locate_arguments first!), this returns a pointer to the
-   beginning of the end of the last component.  For example, given
-   either "A::B::C::foo" or "foo", it returns a pointer to 'f'.  */
-
-/* FIXME: carlton/2002-10-08: This overlaps dreadfully with
-   find_last_component.  Sigh.  */
-
-const char *
-cp_find_last_component (const char *first, const char *last)
-{
-  const char *current;
-  int depth;
-
-  for (current = last - 1, depth = 0;
-       current >= first;
-       --current)
-    {
-      switch (*current)
-	{
-	case '(':
-	case '<':
-	  --depth;
-	  break;
-	case ')':
-	case '>':
-	  ++depth;
-	  break;
-	case ':':
-	  if (depth == 0)
-	    return current + 1;
-	  break;
-	default:
-	  break;
-	}
-    }
-
-  return first;
-}
-
-#endif /* 0 */
-
-/* This allocates a new using_data structure initialized to contain
+/* This allocates a new using_direct structure initialized to contain
    OUTER and INNER, and puts it at the beginning of the linked list
-   given by NEXT.  It returns the resulting struct using_data_node.
+   given by NEXT.  It returns the resulting struct using_direct_node.
    All memory is allocated using OBSTACK.  */
-struct using_data_node *
+
+struct using_direct_node *
 cp_add_using (const char *outer, const char *inner,
-	      struct using_data_node *next,
+	      struct using_direct_node *next,
 	      struct obstack *obstack)
 {
-  struct using_data *current
-    = obstack_alloc (obstack, sizeof (struct using_data));
-  struct using_data_node *retval
-    = obstack_alloc (obstack, sizeof (struct using_data_node));
+  struct using_direct *current
+    = obstack_alloc (obstack, sizeof (struct using_direct));
+  struct using_direct_node *retval
+    = obstack_alloc (obstack, sizeof (struct using_direct_node));
 
   current->outer = outer;
   current->inner = inner;
@@ -297,6 +192,42 @@ cp_add_using (const char *outer, const char *inner,
 
   return retval;
 }
+
+/* This copies the using_direct_nodes in TOCOPY, using xmalloc, and
+   sticks them onto a list ending in TAIL.  */
+struct using_direct_node *
+cp_copy_usings (struct using_direct_node *tocopy,
+		struct using_direct_node *tail)
+{
+  struct using_direct_node *new_node;
+  
+  if (tocopy == NULL)
+    return tail;
+
+  new_node = xmalloc (sizeof (struct using_direct_node));
+  new_node->current = tocopy->current;
+  new_node->next = cp_copy_usings (tocopy->next, tail);
+
+  return new_node;
+}
+
+/* This xfree's all the using_direct_nodes in USING (but not their
+   using_directs!)  */
+void
+cp_free_usings (struct using_direct_node *using)
+{
+  struct using_direct_node *next;
+
+  if (using != NULL)
+    {
+      for (next = using->next; next;
+	   using = next, next = next->next)
+	xfree (using);
+      
+      xfree (using);
+    }
+}
+
 
 /* This returns the first component of NAME, which should be the
    demangled name of a C++ variable/function/method/etc.

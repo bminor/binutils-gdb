@@ -28,23 +28,18 @@ extern char *class_name_from_physname (const char *physname);
 
 extern char *method_name_from_physname (const char *physname);
 
-extern const char *cp_locate_arguments (const char *name);
-
-extern const char *cp_find_last_component (const char *first,
-					   const char *last);
-
 extern const char *cp_find_first_component (const char *name);
 
 /* This is a struct to store data from "using directives" and similar
    language constructs.  It contains two strings, OUTER and INNER;
-   both should be fully-qualified namespace names, OUTER should be an
-   initial substring of INNER, and it says that names in the namespace
-   INNER should be imported into namespace OUTER.  For example, if it
-   is used to represent the directive "using namespace std;" then
-   INNER should be "std" and new should be "".  For a more complicated
-   example, if there is an anonymous namespace with a named namespace
-   A, then INNER should be "A::(anonymous namespace)" and new should
-   be "A".  */
+   both should be fully-qualified namespace names, OUTER should be a
+   strict initial substring of INNER, and it says that names in the
+   namespace INNER should be imported into namespace OUTER.  For
+   example, if it is used to represent the directive "using namespace
+   std;" then INNER should be "std" and new should be "".  For a more
+   complicated example, if there is an anonymous namespace with a
+   named namespace A, then INNER should be "A::(anonymous namespace)"
+   and new should be "A".  */
 
 /* FIXME: carlton/2002-10-07: That anonymous namespace example isn't
    that great, since it really depends not only on what the
@@ -53,21 +48,27 @@ extern const char *cp_find_first_component (const char *name);
    alas, it doesn't, but should, leaving us with no way to distinguish
    between anonymous namespaces in different files.  Sigh...  */
 
-struct using_data
+struct using_direct
 {
   const char *outer;
   const char *inner;
 };
 
-/* This is a struct for a linked list of using_data's.  */
+/* This is a struct for a linked list of using_direct's.  */
 
-struct using_data_node
+struct using_direct_node
 {
-  struct using_data *current;
-  struct using_data_node *next;
+  struct using_direct *current;
+  struct using_direct_node *next;
 };
 
-extern struct using_data_node *cp_add_using (const char *outer,
-					     const char *inner,
-					     struct using_data_node *next,
-					     struct obstack *obstack);
+extern struct using_direct_node *cp_add_using (const char *outer,
+					       const char *inner,
+					       struct using_direct_node *next,
+					       struct obstack *obstack);
+
+extern
+struct using_direct_node *cp_copy_usings (struct using_direct_node *tocopy,
+					  struct using_direct_node *tail);
+
+extern void cp_free_usings (struct using_direct_node *using);

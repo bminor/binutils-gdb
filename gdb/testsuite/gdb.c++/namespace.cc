@@ -68,6 +68,47 @@ void marker1(void)
   return;
 }
 
+namespace C
+{
+  int c = 1;
+
+  namespace C
+  {
+    int cc = 2;
+  }
+
+  namespace E
+  {
+    int ce = 4;
+  }
+
+  namespace D
+  {
+    int cd = 3;
+
+    namespace E
+    {
+      int cde = 5;
+    }
+
+    void marker2 (void)
+    {
+      // NOTE: carlton/2002-10-11: I'm listing the expressions that I
+      // plan to have GDB try to print out, just to make sure that the
+      // compiler and I agree which ones should be legal!  It's easy
+      // to screw up when testing the boundaries of namespace stuff.
+      c;
+      //cc;
+      C::cc;
+      cd;
+      E::cde;
+      //E::ce;
+      return;
+    }
+
+  }
+}
+
 
 int main ()
 {
@@ -94,10 +135,6 @@ int main ()
   c1 = cl.xyzq('e');
 
   marker1();
-  
+
+  C::D::marker2 ();
 }
-
-  
-
-
-
