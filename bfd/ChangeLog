@@ -1,3 +1,21 @@
+2002-07-01  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
+	* elfxx-mips.c (ABI_64_P): Fix comment.
+	(MIPS_ELF_OPTIONS_SECTION_NAME,MIPS_ELF_STUB_SECTION_NAME): Use the
+	new section names for N64 ABI.
+	(mips_elf_output_extsym): No special _gp_disp handling for NewABI.
+	(mips_elf_calculate_relocation): Code formatting.
+	(mips_elf_create_dynamic_relocation): Likewise.
+	(_bfd_mips_elf_fake_sections): IRIX6 needs this hack, too.
+	(_bfd_mips_elf_size_dynamic_sections): Handle GOT_PAGE for any NewABI.
+	(_bfd_mips_elf_relocate_section): No special handling for R_MIPS_64
+	in any NewABI.
+	(_bfd_mips_elf_finish_dynamic_symbol): No special _gp_disp handling
+	for NewABI.
+	(_bfd_mips_elf_modify_segment_map): Handle any N64 ABI.
+	(_bfd_mips_elf_gc_sweep_hook): NewABI GOT relocs should be handled
+	here, too.
+
 2002-07-01  Andreas Schwab  <schwab@suse.de>
 
 	* elf64-x86-64.c (elf64_x86_64_relocate_section): Only convert

@@ -373,14 +373,16 @@ static bfd *reldyn_sorting_bfd;
 #define ABI_N32_P(abfd) \
   ((elf_elfheader (abfd)->e_flags & EF_MIPS_ABI2) != 0)
 
-/* Nonzero if ABFD is using the 64-bit ABI. */
+/* Nonzero if ABFD is using the N64 ABI.  */
 #define ABI_64_P(abfd) \
   ((get_elf_backend_data (abfd)->s->elfclass == ELFCLASS64) != 0)
 
+/* Nonzero if ABFD is using NewABI conventions.  */
+#define NEWABI_P(abfd) (ABI_N32_P (abfd) || ABI_64_P (abfd))
+
+/* The IRIX compatibility level we are striving for.  */
 #define IRIX_COMPAT(abfd) \
   (get_elf_backend_data (abfd)->elf_backend_mips_irix_compat (abfd))
-
-#define NEWABI_P(abfd) (ABI_N32_P(abfd) || ABI_64_P(abfd))
 
 /* Whether we are trying to be compatible with IRIX at all.  */
 #define SGI_COMPAT(abfd) \
@@ -388,11 +390,11 @@ static bfd *reldyn_sorting_bfd;
 
 /* The name of the options section.  */
 #define MIPS_ELF_OPTIONS_SECTION_NAME(abfd) \
-  (IRIX_COMPAT (abfd) == ict_irix6 ? ".MIPS.options" : ".options")
+  (ABI_64_P (abfd) ? ".MIPS.options" : ".options")
 
 /* The name of the stub section.  */
 #define MIPS_ELF_STUB_SECTION_NAME(abfd) \
-  (IRIX_COMPAT (abfd) == ict_irix6 ? ".MIPS.stubs" : ".stub")
+  (ABI_64_P (abfd) ? ".MIPS.stubs" : ".stub")
 
 /* The size of an external REL relocation.  */
 #define MIPS_ELF_REL_SIZE(abfd) \
@@ -1242,7 +1244,7 @@ mips_elf_output_extsym (h, data)
 	      h->esym.asym.value =
 		mips_elf_hash_table (einfo->info)->procedure_count;
 	    }
-	  else if (strcmp (name, "_gp_disp") == 0)
+	  else if (strcmp (name, "_gp_disp") == 0 && ! NEWABI_P (einfo->abfd))
 	    {
 	      h->esym.asym.sc = scAbs;
 	      h->esym.asym.st = stLabel;
@@ -2473,8 +2475,7 @@ mips_elf_calculate_relocation (abfd, input_bfd, input_section, info,
 	    return bfd_reloc_outofrange;
 	  value
 	    = mips_elf_got_offset_from_index (elf_hash_table (info)->dynobj,
-					      abfd,
-					      value);
+					      abfd, value);
 	  overflowed_p = mips_elf_overflow_p (value, 16);
 	  break;
 	}
@@ -2516,8 +2517,7 @@ mips_elf_calculate_relocation (abfd, input_bfd, input_section, info,
       if (value == MINUS_ONE)
 	return bfd_reloc_outofrange;
       value = mips_elf_got_offset_from_index (elf_hash_table (info)->dynobj,
-					      abfd,
-					      value);
+					      abfd, value);
       overflowed_p = mips_elf_overflow_p (value, 16);
       break;
 
@@ -2830,8 +2830,7 @@ mips_elf_create_dynamic_relocation (output_bfd, info, rel, h, sec,
 
   r_type = ELF_R_TYPE (output_bfd, rel->r_info);
   dynobj = elf_hash_table (info)->dynobj;
-  sreloc
-    = bfd_get_section_by_name (dynobj, ".rel.dyn");
+  sreloc = bfd_get_section_by_name (dynobj, ".rel.dyn");
   BFD_ASSERT (sreloc != NULL);
   BFD_ASSERT (sreloc->contents != NULL);
   BFD_ASSERT (sreloc->reloc_count * MIPS_ELF_REL_SIZE (output_bfd)
@@ -3641,7 +3640,8 @@ _bfd_mips_elf_fake_sections (abfd, hdr, sec)
      sh_offset == object size, and ld doesn't allow that.  While the check
      is arguably bogus for empty or SHT_NOBITS sections, it can easily be
      avoided by not emitting those useless sections in the first place.  */
-  if (IRIX_COMPAT (abfd) != ict_irix5 && (sec->flags & SEC_RELOC) != 0)
+  if ((IRIX_COMPAT (abfd) != ict_irix5 && (IRIX_COMPAT (abfd) != ict_irix6))
+      && (sec->flags & SEC_RELOC) != 0)
     {
       struct bfd_elf_section_data *esd;
       bfd_size_type amt = sizeof (Elf_Internal_Shdr);
@@ -4769,7 +4769,7 @@ _bfd_mips_elf_size_dynamic_sections (output_bfd, info)
 	  /* Assume there are two loadable segments consisting of
 	     contiguous sections.  Is 5 enough?  */
 	  local_gotno = (loadable_size >> 16) + 5;
-	  if (IRIX_COMPAT (output_bfd) == ict_irix6)
+	  if (NEWABI_P (output_bfd))
 	    /* It's possible we will need GOT_PAGE entries as well as
 	       GOT16 entries.  Often, these will be able to share GOT
 	       entries, but not always.  */
@@ -5004,7 +5004,7 @@ _bfd_mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
       const char * msg = (const char *) NULL;
 
       /* Find the relocation howto for this relocation.  */
-      if (r_type == R_MIPS_64 && !ABI_64_P (output_bfd))
+      if (r_type == R_MIPS_64 && ! NEWABI_P (input_bfd))
 	{
 	  /* Some 32-bit code uses R_MIPS_64.  In particular, people use
 	     64-bit code, but make sure all their addresses are in the
@@ -5121,7 +5121,7 @@ _bfd_mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	  Elf_Internal_Sym *sym;
 	  unsigned long r_symndx;
 
-	  if (r_type == R_MIPS_64 && !ABI_64_P (output_bfd)
+	  if (r_type == R_MIPS_64 && ! NEWABI_P (output_bfd)
 	      && bfd_big_endian (input_bfd))
 	    rel->r_offset -= 4;
 
@@ -5297,7 +5297,7 @@ _bfd_mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	  continue;
 	}
 
-      if (r_type == R_MIPS_64 && !ABI_64_P (output_bfd))
+      if (r_type == R_MIPS_64 && ! NEWABI_P (output_bfd))
 	/* See the comment above about using R_MIPS_64 in the 32-bit
 	   ABI.  Until now, we've been using the HOWTO for R_MIPS_32;
 	   that calculated the right value.  Now, however, we
@@ -5525,7 +5525,7 @@ _bfd_mips_elf_finish_dynamic_symbol (output_bfd, info, h, sym)
       sym->st_info = ELF_ST_INFO (STB_GLOBAL, STT_SECTION);
       sym->st_value = 1;
     }
-  else if (strcmp (name, "_gp_disp") == 0)
+  else if (strcmp (name, "_gp_disp") == 0 && ! NEWABI_P (output_bfd))
     {
       sym->st_shndx = SHN_ABS;
       sym->st_info = ELF_ST_INFO (STB_GLOBAL, STT_SECTION);
@@ -6105,7 +6105,7 @@ _bfd_mips_elf_modify_segment_map (abfd)
      .dynamic end up in PT_DYNAMIC.  However, we do have to insert a
      PT_OPTIONS segement immediately following the program header
      table.  */
-  if (IRIX_COMPAT (abfd) == ict_irix6)
+  if (ABI_64_P (abfd))
     {
       for (s = abfd->sections; s; s = s->next)
 	if (elf_section_data (s)->this_hdr.sh_type == SHT_MIPS_OPTIONS)
@@ -6343,6 +6343,9 @@ _bfd_mips_elf_gc_sweep_hook (abfd, info, sec, relocs)
       case R_MIPS_CALL_LO16:
       case R_MIPS_GOT_HI16:
       case R_MIPS_GOT_LO16:
+      case R_MIPS_GOT_DISP:
+      case R_MIPS_GOT_PAGE:
+      case R_MIPS_GOT_OFST:
 	/* ??? It would seem that the existing MIPS code does no sort
 	   of reference counting or whatnot on its GOT and PLT entries,
 	   so it is not possible to garbage collect them at this time.  */
