@@ -1,3 +1,13 @@
+2003-10-09  Elena Zannoni  <ezannoni@redhat.com>
+
+	* sh-tdep.c (sh_gdbarch_init): Delete setting of push_dummy_code.
+	(sh_gdbarch_init): Delete function, it's only used for dummy calls
+	on stack.
+	
+	Based on input by Stephen Clarke (stephen.clarke@superh.com):
+	* sh-tdep.c (sh_use_struct_convention): Add comment explaining ABI
+	in detail.
+	
 2003-10-09  Daniel Jacobowitz  <drow@mvista.com>
 
 	* remote-mips.c (mips_initialize): Remove unneeded call to

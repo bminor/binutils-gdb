@@ -266,22 +266,6 @@ sh_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
   return breakpoint;
 }
 
-static CORE_ADDR
-sh_push_dummy_code (struct gdbarch *gdbarch,
-		    CORE_ADDR sp, CORE_ADDR funaddr, int using_gcc,
-		    struct value **args, int nargs,
-		    struct type *value_type,
-		    CORE_ADDR *real_pc, CORE_ADDR *bp_addr)
-{
-  /* Allocate space sufficient for a breakpoint.  */
-  sp = (sp - 2) & ~1;
-  /* Store the address of that breakpoint */
-  *bp_addr = sp;
-  /* sh always starts the call at the callee's entry point.  */
-  *real_pc = funaddr;
-  return sp;
-}
-
 /* Prologue looks like
    mov.l	r14,@-r15
    sts.l	pr,@-r15
@@ -559,7 +543,47 @@ sh_skip_prologue (CORE_ADDR start_pc)
   return pc;
 }
 
-/* Should call_function allocate stack space for a struct return?  */
+/* Should call_function allocate stack space for a struct return?
+
+   The ABI says:
+
+   Aggregate types not bigger than 8 bytes that have the same size and
+   alignment as one of the integer scalar types are returned in the
+   same registers as the integer type they match.
+
+   For example, a 2-byte aligned structure with size 2 bytes has the
+   same size and alignment as a short int, and will be returned in R0.
+   A 4-byte aligned structure with size 8 bytes has the same size and
+   alignment as a long long int, and will be returned in R0 and R1.
+
+   When an aggregate type is returned in R0 and R1, R0 contains the
+   first four bytes of the aggregate, and R1 contains the
+   remainder. If the size of the aggregate type is not a multiple of 4
+   bytes, the aggregate is tail-padded up to a multiple of 4
+   bytes. The value of the padding is undefined. For little-endian
+   targets the padding will appear at the most significant end of the
+   last element, for big-endian targets the padding appears at the
+   least significant end of the last element.
+
+   All other aggregate types are returned by address. The caller
+   function passes the address of an area large enough to hold the
+   aggregate value in R2. The called function stores the result in
+   this location."
+
+   To reiterate, structs smaller than 8 bytes could also be returned
+   in memory, if they don't pass the "same size and alignment as an
+   integer type" rule.
+
+   For example, in
+
+   struct s { char c[3]; } wibble;
+   struct s foo(void) {  return wibble; }
+
+   the return value from foo() will be in memory, not
+   in R0, because there is no 3-byte integer type.
+
+*/
+
 static int
 sh_use_struct_convention (int gcc_p, struct type *type)
 {
@@ -2032,7 +2056,6 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_decr_pc_after_break (gdbarch, 0);
   set_gdbarch_function_start_offset (gdbarch, 0);
 
-  set_gdbarch_push_dummy_code (gdbarch, sh_push_dummy_code);
   set_gdbarch_push_dummy_call (gdbarch, sh_push_dummy_call_nofpu);
 
   set_gdbarch_frame_args_skip (gdbarch, 0);
