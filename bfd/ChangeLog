@@ -1,5 +1,16 @@
 2002-08-06  Alan Modra  <amodra@bigpond.net.au>
 
+	* coff-rs6000.c (xcoff_howto_table): Revert some of last change to
+	mask entries.  Use complain_overflow_dont for R_REF.
+	(xcoff_reloc_type_ba): Revert last change.
+	(xcoff_reloc_type_br): Likewise.
+	(xcoff_reloc_type_crel): Likewise.
+	(xcoff_ppc_relocate_section): Likewise.
+	* coff64-rs6000.c (xcoff64_reloc_type_br): Likewise.
+	(xcoff64_ppc_relocate_section): Likewise.
+	(xcoff64_howto_table): Revert some of last change to mask entries.
+	Use complain_overflow_dont for R_REF.
+
 	* coff-rs6000.c (xcoff_howto_table): Fix src_mask entries.  Make all
 	relocs with bitsize == 16 have size = 1.
 	(xcoff_reloc_type_ba): Correct src_mask and dst_mask adjustment.

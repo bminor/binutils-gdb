@@ -588,7 +588,7 @@ reloc_howto_type xcoff_howto_table[] =
 	 0,		        /* special_function */
 	 "R_POS",               /* name */
 	 true,	                /* partial_inplace */
-	 0,			/* src_mask */
+	 0xffffffff,            /* src_mask */
 	 0xffffffff,            /* dst_mask */
 	 false),                /* pcrel_offset */
 
@@ -603,7 +603,7 @@ reloc_howto_type xcoff_howto_table[] =
 	 0,		        /* special_function */
 	 "R_NEG",               /* name */
 	 true,	                /* partial_inplace */
-	 0,			/* src_mask */
+	 0xffffffff,            /* src_mask */
 	 0xffffffff,            /* dst_mask */
 	 false),                /* pcrel_offset */
 
@@ -618,7 +618,7 @@ reloc_howto_type xcoff_howto_table[] =
 	 0,		        /* special_function */
 	 "R_REL",               /* name */
 	 true,	                /* partial_inplace */
-	 0,			/* src_mask */
+	 0xffffffff,            /* src_mask */
 	 0xffffffff,            /* dst_mask */
 	 false),                /* pcrel_offset */
 
@@ -633,7 +633,7 @@ reloc_howto_type xcoff_howto_table[] =
 	 0,		        /* special_function */
 	 "R_TOC",               /* name */
 	 true,	                /* partial_inplace */
-	 0,			/* src_mask */
+	 0xffff,	        /* src_mask */
 	 0xffff,        	/* dst_mask */
 	 false),                /* pcrel_offset */
 
@@ -648,7 +648,7 @@ reloc_howto_type xcoff_howto_table[] =
 	 0,		        /* special_function */
 	 "R_RTB",               /* name */
 	 true,	                /* partial_inplace */
-	 0,			/* src_mask */
+	 0xffffffff,	        /* src_mask */
 	 0xffffffff,        	/* dst_mask */
 	 false),                /* pcrel_offset */
 
@@ -663,7 +663,7 @@ reloc_howto_type xcoff_howto_table[] =
 	 0,		        /* special_function */
 	 "R_GL",                /* name */
 	 true,	                /* partial_inplace */
-	 0,			/* src_mask */
+	 0xffff,	        /* src_mask */
 	 0xffff,        	/* dst_mask */
 	 false),                /* pcrel_offset */
 
@@ -678,7 +678,7 @@ reloc_howto_type xcoff_howto_table[] =
 	 0,		        /* special_function */
 	 "R_TCL",               /* name */
 	 true,	                /* partial_inplace */
-	 0,			/* src_mask */
+	 0xffff,	        /* src_mask */
 	 0xffff,        	/* dst_mask */
 	 false),                /* pcrel_offset */
 
@@ -695,7 +695,7 @@ reloc_howto_type xcoff_howto_table[] =
 	 0,		        /* special_function */
 	 "R_BA_26",             /* name */
 	 true,	                /* partial_inplace */
-	 0xfc000003,		/* src_mask */
+	 0x03fffffc,		/* src_mask */
 	 0x03fffffc,		/* dst_mask */
 	 false),                /* pcrel_offset */
 
@@ -712,7 +712,7 @@ reloc_howto_type xcoff_howto_table[] =
 	 0,		        /* special_function */
 	 "R_BR",                /* name */
 	 true,	                /* partial_inplace */
-	 0xfc000003,		/* src_mask */
+	 0x03fffffc,		/* src_mask */
 	 0x03fffffc,		/* dst_mask */
 	 false),                /* pcrel_offset */
 
@@ -729,7 +729,7 @@ reloc_howto_type xcoff_howto_table[] =
 	 0,		        /* special_function */
 	 "R_RL",                /* name */
 	 true,	                /* partial_inplace */
-	 0,			/* src_mask */
+	 0xffff,	        /* src_mask */
 	 0xffff,        	/* dst_mask */
 	 false),                /* pcrel_offset */
 
@@ -744,7 +744,7 @@ reloc_howto_type xcoff_howto_table[] =
 	 0,		        /* special_function */
 	 "R_RLA",               /* name */
 	 true,	                /* partial_inplace */
-	 0,			/* src_mask */
+	 0xffff,	        /* src_mask */
 	 0xffff,        	/* dst_mask */
 	 false),                /* pcrel_offset */
 
@@ -779,7 +779,7 @@ reloc_howto_type xcoff_howto_table[] =
 	 0,		        /* special_function */
 	 "R_TRL",               /* name */
 	 true,	                /* partial_inplace */
-	 0,			/* src_mask */
+	 0xffff,	        /* src_mask */
 	 0xffff,        	/* dst_mask */
 	 false),                /* pcrel_offset */
 
@@ -794,7 +794,7 @@ reloc_howto_type xcoff_howto_table[] =
 	 0,		        /* special_function */
 	 "R_TRLA",              /* name */
 	 true,	                /* partial_inplace */
-	 0,			/* src_mask */
+	 0xffff,	        /* src_mask */
 	 0xffff,        	/* dst_mask */
 	 false),                /* pcrel_offset */
 
@@ -809,7 +809,7 @@ reloc_howto_type xcoff_howto_table[] =
 	 0,		        /* special_function */
 	 "R_RRTBI",             /* name */
 	 true,	                /* partial_inplace */
-	 0,			/* src_mask */
+	 0xffffffff,	        /* src_mask */
 	 0xffffffff,        	/* dst_mask */
 	 false),                /* pcrel_offset */
 
@@ -824,7 +824,7 @@ reloc_howto_type xcoff_howto_table[] =
 	 0,		        /* special_function */
 	 "R_RRTBA",             /* name */
 	 true,	                /* partial_inplace */
-	 0,			/* src_mask */
+	 0xffffffff,	        /* src_mask */
 	 0xffffffff,        	/* dst_mask */
 	 false),                /* pcrel_offset */
 
@@ -839,7 +839,7 @@ reloc_howto_type xcoff_howto_table[] =
 	 0,		        /* special_function */
 	 "R_CAI",               /* name */
 	 true,	                /* partial_inplace */
-	 0,			/* src_mask */
+	 0xffff,	        /* src_mask */
 	 0xffff,        	/* dst_mask */
 	 false),                /* pcrel_offset */
 
@@ -854,7 +854,7 @@ reloc_howto_type xcoff_howto_table[] =
 	 0,		        /* special_function */
 	 "R_CREL",              /* name */
 	 true,	                /* partial_inplace */
-	 0,			/* src_mask */
+	 0xffff,	        /* src_mask */
 	 0xffff,        	/* dst_mask */
 	 false),                /* pcrel_offset */
 
@@ -869,7 +869,7 @@ reloc_howto_type xcoff_howto_table[] =
 	 0,		        /* special_function */
 	 "R_RBA",               /* name */
 	 true,	                /* partial_inplace */
-	 0xfc000003,		/* src_mask */
+	 0x03fffffc,		/* src_mask */
 	 0x03fffffc,		/* dst_mask */
 	 false),                /* pcrel_offset */
 
@@ -884,7 +884,7 @@ reloc_howto_type xcoff_howto_table[] =
 	 0,		        /* special_function */
 	 "R_RBAC",              /* name */
 	 true,	                /* partial_inplace */
-	 0,			/* src_mask */
+	 0xffffffff,		/* src_mask */
 	 0xffffffff,		/* dst_mask */
 	 false),                /* pcrel_offset */
 
@@ -899,7 +899,7 @@ reloc_howto_type xcoff_howto_table[] =
 	 0,		        /* special_function */
 	 "R_RBR_26",            /* name */
 	 true,	                /* partial_inplace */
-	 0xfc000003,		/* src_mask */
+	 0x03fffffc,		/* src_mask */
 	 0x03fffffc,		/* dst_mask */
 	 false),                /* pcrel_offset */
 
@@ -914,7 +914,7 @@ reloc_howto_type xcoff_howto_table[] =
 	 0,		        /* special_function */
 	 "R_RBRC",              /* name */
 	 true,	                /* partial_inplace */
-	 0,			/* src_mask */
+	 0xffff,	        /* src_mask */
 	 0xffff,        	/* dst_mask */
 	 false),                /* pcrel_offset */
 
@@ -929,7 +929,7 @@ reloc_howto_type xcoff_howto_table[] =
 	 0,		        /* special_function */
 	 "R_BA_16",             /* name */
 	 true,	                /* partial_inplace */
-	 0x0003,		/* src_mask */
+	 0xfffc,	        /* src_mask */
 	 0xfffc,        	/* dst_mask */
 	 false),                /* pcrel_offset */
 
@@ -944,7 +944,7 @@ reloc_howto_type xcoff_howto_table[] =
 	 0,		        /* special_function */
 	 "R_RBR_16",            /* name */
 	 true,	                /* partial_inplace */
-	 0,			/* src_mask */
+	 0xffff,	        /* src_mask */
 	 0xffff,        	/* dst_mask */
 	 false),                /* pcrel_offset */
 
@@ -959,7 +959,7 @@ reloc_howto_type xcoff_howto_table[] =
 	 0,		        /* special_function */
 	 "R_RBA_16",            /* name */
 	 true,	                /* partial_inplace */
-	 0,			/* src_mask */
+	 0xffff,	        /* src_mask */
 	 0xffff,        	/* dst_mask */
 	 false),                /* pcrel_offset */
 
@@ -2885,8 +2885,8 @@ xcoff_reloc_type_ba (input_bfd, input_section, output_bfd, rel, sym, howto,
      bfd_vma *relocation;
      bfd_byte *contents ATTRIBUTE_UNUSED;
 {
-  howto->src_mask |= 3;
-  howto->dst_mask &= ~3;
+  howto->src_mask &= ~3;
+  howto->dst_mask = howto->src_mask;
 
   *relocation = val + addend;
 
@@ -2960,8 +2960,8 @@ xcoff_reloc_type_br (input_bfd, input_section, output_bfd, rel, sym, howto,
     }
   
   howto->pc_relative = true;
-  howto->src_mask |= 3;
-  howto->dst_mask &= ~3;
+  howto->src_mask &= ~3;
+  howto->dst_mask = howto->src_mask;
 
   /* A PC relative reloc includes the section address.  */
   addend += input_section->vma;
@@ -2987,8 +2987,8 @@ xcoff_reloc_type_crel (input_bfd, input_section, output_bfd, rel, sym, howto,
      bfd_byte *contents ATTRIBUTE_UNUSED;
 {
   howto->pc_relative = true;
-  howto->src_mask |= 3;
-  howto->dst_mask &= ~3;
+  howto->src_mask &= ~3;
+  howto->dst_mask = howto->src_mask;
 
   /* A PC relative reloc includes the section address.  */
   addend += input_section->vma;
@@ -3348,8 +3348,7 @@ xcoff_ppc_relocate_section (output_bfd, info, input_bfd,
       howto.special_function = NULL;
       howto.name = "internal";
       howto.partial_inplace = true;
-      howto.dst_mask = N_ONES (howto.bitsize);
-      howto.src_mask = ~howto.dst_mask & N_ONES (8 << howto.size);
+      howto.src_mask = howto.dst_mask = N_ONES(howto.bitsize);
       howto.pcrel_offset = false;
 
       /* symbol */
