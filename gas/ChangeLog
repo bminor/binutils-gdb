@@ -1,5 +1,51 @@
 Wed Oct 18 13:20:32 1995  Ken Raeburn  <raeburn@cygnus.com>
 
+	* Use one active frag and one obstack per frag chain:
+	* frags.c (frags): Variable deleted.
+	(frag_alloc): New function.
+	(frag_grow, frag_more, frag_variant, frag_now_fix,
+	frag_append_1_char): Refer to frchain_now->frch_obstack instead of
+	frags variable.
+	(frag_new): Ditto.  Verify that frch_last and frag_now match on
+	entry and exit, and that old frag_now has non-zero type.  Replace
+	"know" uses with "assert".  Use frag_alloc instead of mucking with
+	obstack alignment.
+	* frags.h (frags): Declaration deleted.
+	* subsegs.h (struct frchain): Add new field frch_frag_now.
+	* subsegs.c (frchains, dummy_frag, absolute_frchain): New static
+	variables.
+	(subsegs_begin): Initialize frchains obstack.  Under gcc, don't
+	give it any stricter alignment than frchainS structures need.  Do
+	not initialize frags obstack.  Set frag_now to point to
+	dummy_obstack.  Initialize absolute_frchain.
+	(subseg_set_rest): Save and restore frag_now in frch_frag_now
+	field of frchainS.  Don't create new frags on section switch, and
+	use frag_alloc when creating a new frag chain.  For absolute
+	section, set frchain_now to absolute_frchain.  Verify that
+	frch_last and frag_now match on entry and exit.  Initialize
+	per-chain obstack, and under gcc, set required alignment to that
+	needed by fragS structure.
+	* write.c (chain_frchains_together_1): Verify fr_type is nonzero.
+
+	* stabs.c (get_stab_string_offset): Only copy input string if a
+	fresh copy is needed, not if the section already exists.
+	(s_stab_generic): Cache stab section name to bypass lookups, since
+	usually it will match.  Could be made faster still by changing the
+	memory allocation rules.
+	(s_xstab): Cache section name to bypass repeated string
+	allocation.
+
+	* frags.c (frag_new): Deleted register declarations.
+
+	* listing.c (frag_now): Don't declare.
+
+	* as.c (chunksize): New variable.
+	(debug_memory): New variable.
+	(main): If debug_memory is set, reduce chunksize and
+	_bfd_chunksize.
+	* as.h (chunksize): Declare it.
+	* read.c (read_begin): Use it.
+
 	* config/tc-alpha.c (md_shortopts): Include 'g'.
 	(md_parse_option): Ignore it.
 
