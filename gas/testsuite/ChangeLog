@@ -1,3 +1,17 @@
+Thu Jan 23 03:15:06 1997  Angela Marie Thomas (angela@cygnus.com)
+
+	* gas/mips/mips.exp: set ilocks for all 4100/4300
+
+Thu Jan  2 16:49:17 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* gas/mips/mips16.s, gas/mips/mips16.d: New test.
+	* gas/mips/mips.exp: Run mips16 test.
+
+	* gas/mips/mips.exp: Run dli test unconditionally.
+	* gas/mips/dli.s: Add text symbol.  Add nops to round to 16 byte
+	boundary.
+	* gas/mips/dli.d: Corresponding changes.
+
 Tue Dec 31 13:03:16 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* gas/sparc/synth.d: Use --prefix-addresses for objdump.
