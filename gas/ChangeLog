@@ -1,3 +1,16 @@
+2001-02-06  Alan Modra  <alan@linuxcare.com.au>
+
+	* config/tc-hppa.c (fix_new_hppa): Pass in unwind directly rather
+	than via pointer.  Update all callers.
+	(UNWIND_LOW32): Define.
+	(UNWIND_HIGH32): Define.
+	(pa_build_unwind_subspace): Use the above macros instead of dumping
+	bitfields directly.  Call frag_more once rather than multiple times.
+	(md_assemble): Use UNWIND_LOW32.
+	(pa_entry): Likewise
+	(pa_procend): Likewise.
+	(process_exit): Use UNWIND_HIGH32.
+
 2001-02-04  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
 
 	* config/tc-m68hc11.h (LISTING_HEADER): Use m68hc11_listing_header
