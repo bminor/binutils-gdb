@@ -66,7 +66,8 @@ DEFUN (read_function_mappings, (filename), const char *filename)
     }
 
   /* Now we know how big we need to make our table.  */
-  symbol_map = xmalloc (count * sizeof (struct function_map));
+  symbol_map = ((struct function_map *)
+		xmalloc (count * sizeof (struct function_map)));
 
   /* Rewind the input file so we can read it again.  */
   rewind (file);
