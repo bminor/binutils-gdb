@@ -97,22 +97,22 @@
 	* fr30-asm.c: Regenerate.
 	* fr30-dis.c: Ditto.
 	* fr30-ibld.c: Ditto.
-	* frv-asm.c: Regenerate.
+	* frv-asm.c: Ditto.
 	* frv-dis.c: Ditto.
 	* frv-ibld.c: Ditto.
-	* ip2k-asm.c: Regenerate.
+	* ip2k-asm.c: Ditto.
 	* ip2k-dis.c: Ditto.
 	* ip2k-ibld.c: Ditto.
-	* iq2000-asm.c: Regenerate.
+	* iq2000-asm.c: Ditto.
 	* iq2000-dis.c: Ditto.
 	* iq2000-ibld.c: Ditto.
-	* m32r-asm.c: Regenerate.
+	* m32r-asm.c: Ditto.
 	* m32r-dis.c: Ditto.
 	* m32r-ibld.c: Ditto.
-	* openrisc-asm.c: Regenerate.
+	* openrisc-asm.c: Ditto.
 	* openrisc-dis.c: Ditto.
 	* openrisc-ibld.c: Ditto.
-	* xstormy16-asm.c: Regenerate.
+	* xstormy16-asm.c: Ditto.
 	* xstormy16-dis.c: Ditto.
 	* xstormy16-ibld.c: Ditto.
 
