@@ -2320,11 +2320,18 @@ md_section_align (segment, size)
      segT segment;
      valueT size;
 {
-#ifdef OBJ_AOUT
-  /* Round all sects to multiple of 8 */
-  size = (size + 7) & (valueT) ~7;
-#endif
+#ifndef OBJ_ELF
+  /* This is not right for ELF; a.out wants it, and COFF will force
+     the alignment anyways.  */
+  valueT align = (valueT) 1 << (valueT) (stdoutput->xvec->align_power_min);
+  valueT newsize;
+  /* turn alignment value into a mask */
+  align--;
+  newsize = (size + align) & ~align;
+  return newsize;
+#else
   return size;
+#endif
 }
 
 /* Exactly what point is a PC-relative offset relative TO?

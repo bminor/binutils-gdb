@@ -1,3 +1,8 @@
+Thu May 19 15:40:13 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* config/tc-sparc.c (md_section_align): Don't change the size if
+	OBJ_ELF.
+
 Wed May 18 13:08:07 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* Makefile.in (install): Redirect ln output to /dev/null.  If ln
