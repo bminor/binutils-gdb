@@ -1634,7 +1634,7 @@ load_register (counter, reg, ep)
      expressionS *ep;
 {
   int shift;
-  expressionS hi32, lo32;
+  expressionS hi32, lo32, tmp;
 
   if (ep->X_op != O_big)
     {
@@ -1656,9 +1656,12 @@ load_register (counter, reg, ep)
 		       (int) BFD_RELOC_LO16);
 	  return;
 	}
-      else if ((ep->X_add_number &~ (offsetT) 0x7fffffff) == 0
-	       || ((ep->X_add_number &~ (offsetT) 0x7fffffff)
-		   == ~ (offsetT) 0x7fffffff))
+      else if (((ep->X_add_number &~ (offsetT) 0x7fffffff) == 0
+		|| ((ep->X_add_number &~ (offsetT) 0x7fffffff)
+		    == ~ (offsetT) 0x7fffffff))
+	       && (mips_isa < 3
+		   || sizeof (ep->X_add_number) > 4
+		   || (ep->X_add_number & 0x80000000) == 0))
 	{
 	  /* 32 bit values require an lui.  */
 	  macro_build ((char *) NULL, counter, ep, "lui", "t,u", reg,
@@ -1667,6 +1670,19 @@ load_register (counter, reg, ep)
 	    macro_build ((char *) NULL, counter, ep, "ori", "t,r,i", reg, reg,
 			 (int) BFD_RELOC_LO16);
 	  return;
+	}
+      else
+	{
+	  /* 32 bit value with high bit set being loaded into a 64 bit
+             register.  We can't use lui, because that would
+             incorrectly set the 32 high bits.  */
+	  generic_bignum[3] = 0;
+	  generic_bignum[2] = 0;
+	  generic_bignum[1] = (ep->X_add_number >> 16) & 0xffff;
+	  generic_bignum[0] = ep->X_add_number & 0xffff;
+	  tmp.X_op = O_big;
+	  tmp.X_add_number = 4;
+	  ep = &tmp;
 	}
     }
 
