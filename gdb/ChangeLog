@@ -1,3 +1,8 @@
+Tue Aug 12 14:37:18 1997  Geoffrey Noer  <noer@cygnus.com>
+
+	* ocd.c (ocd_wait): loop until we're in BDM mode instead of
+	assuming control has returned to GDB.
+
 start-sanitize-gdbtk
 Tue Aug 12 16:35:21 1997  Ian Lance Taylor  <ian@cygnus.com>
 

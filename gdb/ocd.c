@@ -453,7 +453,10 @@ ocd_wait ()
 
   /* Target may already be stopped by the time we get here. */
 
-  if (!(last_run_status & OCD_FLAG_BDM))
+/* if (!(last_run_status & OCD_FLAG_BDM)) */
+
+  /* Loop until we've dropped back into BDM mode */
+  while (!(last_run_status & OCD_FLAG_BDM))
     {
       ofunc = (void (*)()) signal (SIGINT, ocd_interrupt);
 
@@ -464,19 +467,20 @@ ocd_wait ()
       if (pktlen < 2)
 	error ("Truncated response packet from OCD device");
 
-      status = p[1];
+      last_run_status = p[1];
       error_code = p[2];
 
       if (error_code != 0)
 	ocd_error ("target_wait:", error_code);
 
-      if (status & OCD_FLAG_PWF)
+      if (last_run_status & OCD_FLAG_PWF)
 	error ("OCD device lost VCC at BDM interface.");
-      else if (status & OCD_FLAG_CABLE_DISC)
-	error ("BDM cable appears to have been disconnected.");
-
-      if (!(status & OCD_FLAG_BDM))
+      else if (last_run_status & OCD_FLAG_CABLE_DISC)
+	error ("OCD device cable appears to have been disconnected.");
+#if 0
+      if (!(last_run_status & OCD_FLAG_BDM))
 	error ("OCD device woke up, but wasn't stopped: 0x%x", status);
+#endif
     }
 
   if (ocd_interrupt_flag)
