@@ -1,6 +1,4 @@
-# Sanitize.in for devo.
-# $Id$
-#
+# Sanitize.in for include/coff.
 
 # Each directory to survive it's way into a release will need a file
 # like this one called "./.Sanitize".  All keyword lines must exist,
@@ -40,12 +38,7 @@ sym.h
 symconst.h
 we32k.h
 z8k.h
+
 Do-last:
-
-echo Done in `pwd`.
-
-#
-#
-#
 
 # End of file.
