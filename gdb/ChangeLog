@@ -1,3 +1,12 @@
+2002-04-30  Michael Chastain  <mec@shout.net>
+
+	Merge from trunk.  This also fixes PR gdb/172.
+
+	2002-04-25  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	Fix PR gdb/508.
+	* symfile.c (add_filename_language): Fix wrong xrealloc size argument.
+
 2002-04-29  GDB Administrator  <gdbadmin@sourceware.cygnus.com>
 
 	* version.in: Bump to version 5.2.0-0000-00-00-cvs.
