@@ -1,5 +1,9 @@
 2004-01-02  Michael Chastain  <mec.gnu@mindspring.com>
 
+	* gdb.cp/templates.exp: Accept gcc abi 2.
+
+2004-01-02  Michael Chastain  <mec.gnu@mindspring.com>
+
 	* lib/compiler.cc: Remove supports_template_debugging.
 	* gdb.cp/templates.exp: Do not test supports_template_debugging.
 
