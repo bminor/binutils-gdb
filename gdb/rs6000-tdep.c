@@ -399,7 +399,7 @@ skip_prologue (pc, fdata)
 		 (op & 0xffff0000) == 0x3bde0000) {	/* addi 30,30,foo@l */
 	continue;
 
-      } else if ((op & 0xfc000000) == 0x48000000) {	/* bl foo, 
+      } else if ((op & 0xfc000001) == 0x48000001) {	/* bl foo, 
 							   to save fprs??? */
 
 	fdata->frameless = 0;

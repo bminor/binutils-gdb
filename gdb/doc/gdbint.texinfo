@@ -1398,6 +1398,15 @@ detect that GCC compiled the file.  The default symbols are
 @code{gcc_compiled.} and @code{gcc2_compiled.}, respectively. (Currently
 only defined for the Delta 68.)
 
+@item GDB_MULTI_ARCH
+If defined and non-zero, enables suport for multiple architectures
+within GDB.
+
+The support can be enabled at two levels.  At level one, only
+definitions for previously undefined macros are provided; at level two,
+a multi-arch definition of all architecture dependant macros will be
+defined.
+
 @item GDB_TARGET_IS_HPPA
 This determines whether horrible kludge code in dbxread.c and
 partial-stab.h is used to mangle multiple-symbol-table files from

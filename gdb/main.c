@@ -48,7 +48,7 @@ int display_space;
 invoked on the command line with the -nw --async options.  In this
 version, the usual command_loop is substituted by and event loop which
 processes UI events asynchronously. */
-int async = 0;
+int async_p = 0;
 
 /* Whether this is the command line version or not */
 int tui_version = 0;
@@ -61,6 +61,7 @@ int dbx_commands = 0;
 
 GDB_FILE *gdb_stdout;
 GDB_FILE *gdb_stderr;
+GDB_FILE *gdb_stdlog;
 
 /* Whether to enable writing into executable and core files */
 extern int write_files;
@@ -161,9 +162,11 @@ main (argc, argv)
   /* not yet */
   gdb_stdout = stdio_fileopen (stdout);
   gdb_stderr = stdio_fileopen (stderr);
+  gdb_stdlog = gdb_stderr; /* for moment */
 #else
   gdb_stdout = tui_fileopen (stdout);
   gdb_stderr = tui_fileopen (stderr);
+  gdb_stdlog = gdb_stdout; /* for moment */
 #endif
 
   /* Parse arguments and options.  */
@@ -174,7 +177,8 @@ main (argc, argv)
        with no equivalent).  */
     static struct option long_options[] =
        {
-        {"async", no_argument, &async, 1},  
+        {"async", no_argument, &async_p, 1},  
+        {"noasync", no_argument, &async_p, 0},  
 #if defined(TUI)
 	{"tui", no_argument, &tui_version, 1},
 #endif
@@ -388,12 +392,16 @@ main (argc, argv)
 
   /* Get ready to invoke the event loop instead of the
      command_loop. See event-loop.h for more details.*/
-  if (async)
-    async_hook = setup_event_loop;
+  if (async_p)
+    command_loop_hook = start_event_loop;
 #if defined(TUI)
+  /* Should this be moved to tui-top.c:_initialize_tui()? */
   if (tui_version)
     init_ui_hook = tuiInit;
 #endif
+
+  /* Initialize all files.  Give the interpreter a chance to take
+     control of the console via the init_ui_hook()) */
   gdb_init (argv[0]);
 
   /* Do these (and anything which might call wrap_here or *_filtered)
@@ -617,12 +625,6 @@ main (argc, argv)
 #endif
     }
 
-  /* Call the event loop, if gdb was invoked with the --async
-     option. Control will never get back to this file, if the event
-     loop is invoked. See the files event-*.[ch] for details. */
-  if (async_hook)
-    async_hook();
-                
   /* The default command loop. 
      The WIN32 Gui calls this main to set up gdb's state, and 
      has its own command loop. */
@@ -642,7 +644,6 @@ main (argc, argv)
           quit_command ((char *)0, instream == stdin);
 	}
     }
-
   /* No exit -- exit is through quit_command.  */
 #endif
 
@@ -660,6 +661,9 @@ print_gdb_help (stream)
 This is the GNU debugger.  Usage:\n\n\
     gdb [options] [executable-file [core-file or process-id]]\n\n\
 Options:\n\n\
+", stream);
+       fputs_unfiltered ("\
+  --[no]async        Enable (disable) asynchronous version of CLI\n\
 ", stream);
       fputs_unfiltered ("\
   -b BAUDRATE        Set serial port baud rate used for remote debugging.\n\

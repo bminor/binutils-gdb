@@ -1454,6 +1454,32 @@ value_from_longest (type, num)
   return val;
 }
 
+/* Create a value for a string constant to be stored locally
+   (not in the inferior's memory space, but in GDB memory).  
+   This is analogous to value_from_longest, which also does not
+   use inferior memory.  String shall NOT contain embedded nulls.  */
+
+value_ptr
+value_from_string (ptr)
+     char *ptr;
+{
+  value_ptr val;
+  int   len = strlen (ptr);
+  int lowbound = current_language->string_lower_bound;
+  struct type *rangetype = 
+    create_range_type ((struct type *) NULL, 
+		       builtin_type_int,
+		       lowbound, len + lowbound - 1);
+  struct type *stringtype = 
+    create_array_type ((struct type *) NULL, 
+		       *current_language->string_char_type, 
+		       rangetype);
+
+  val = allocate_value (stringtype);
+  memcpy (VALUE_CONTENTS_RAW (val), ptr, len);
+  return val;
+}
+
 value_ptr
 value_from_double (type, num)
      struct type *type;

@@ -717,7 +717,6 @@ void notice_quit()
 #endif /* !defined(__GO32__) && !defined(_MSC_VER) */
 
 /* Control C comes here */
-
 void
 request_quit (signo)
      int signo;
@@ -735,7 +734,6 @@ request_quit (signo)
     quit ();
 #endif
 }
-
 
 /* Memory management stuff (malloc friends).  */
 
@@ -1444,7 +1442,12 @@ prompt_for_continue ()
       while (*p == ' ' || *p == '\t')
 	++p;
       if (p[0] == 'q')
-	request_quit (SIGINT);
+	{
+	  if (!async_p)
+	    request_quit (SIGINT);
+	  else
+	    async_request_quit (0); 
+	}
       free (ignore);
     }
   immediate_quit--;
@@ -1633,6 +1636,8 @@ stdio_fileopen (file)
 static gdb_file_flush_ftype tui_file_flush;
 extern gdb_file_fputs_ftype tui_file_fputs;
 static gdb_file_isatty_ftype tui_file_isatty;
+static gdb_file_rewind_ftype tui_file_rewind;
+static gdb_file_put_ftype tui_file_put;
 static gdb_file_delete_ftype tui_file_delete;
 static struct gdb_file *tui_file_new PARAMS ((void));
 static int tui_file_magic;
@@ -1646,6 +1651,8 @@ tui_file_new ()
   set_gdb_file_flush (file, tui_file_flush);
   set_gdb_file_fputs (file, tui_file_fputs);
   set_gdb_file_isatty (file, tui_file_isatty);
+  set_gdb_file_rewind (file, tui_file_rewind);
+  set_gdb_file_put (file, tui_file_put);
   tui->ts_magic = &tui_file_magic;
   return file;
 }
@@ -1688,6 +1695,30 @@ tui_file_isatty (file)
   if (stream->ts_streamtype == afile)
      return (isatty(fileno(stream->ts_filestream)));
   else return 0;
+}
+
+static void
+tui_file_rewind (file)
+    struct gdb_file *file;
+{
+  struct tui_stream *stream = gdb_file_data (file);
+  if (stream->ts_magic != &tui_file_magic)
+    error ("Internal error: bad magic number");
+  stream->ts_strbuf[0] = '\0';
+}
+
+static void
+tui_file_put (file, dest)
+    struct gdb_file *file;
+    struct gdb_file *dest;
+{
+  struct tui_stream *stream = gdb_file_data (file);
+  if (stream->ts_magic != &tui_file_magic)
+    error ("Internal error: bad magic number");
+  if (stream->ts_streamtype == astring)
+    {
+      fputs_unfiltered (stream->ts_strbuf, dest);
+    }
 }
 
 GDB_FILE *
@@ -1806,6 +1837,8 @@ static gdb_file_isatty_ftype null_file_isatty;
 static gdb_file_fputs_ftype null_file_fputs;
 static gdb_file_flush_ftype null_file_flush;
 static gdb_file_delete_ftype null_file_delete;
+static gdb_file_rewind_ftype null_file_rewind;
+static gdb_file_put_ftype null_file_put;
 
 struct gdb_file
 {
@@ -1813,6 +1846,8 @@ struct gdb_file
   gdb_file_fputs_ftype *to_fputs;
   gdb_file_delete_ftype *to_delete;
   gdb_file_isatty_ftype *to_isatty;
+  gdb_file_rewind_ftype *to_rewind;
+  gdb_file_put_ftype *to_put;
   void *to_data;
 };
 
@@ -1824,6 +1859,8 @@ gdb_file_new ()
   set_gdb_file_flush (file, null_file_flush);
   set_gdb_file_fputs (file, null_file_fputs);
   set_gdb_file_isatty (file, null_file_isatty);
+  set_gdb_file_rewind (file, null_file_rewind);
+  set_gdb_file_put (file, null_file_put);
   return file;
 }
 
@@ -1840,6 +1877,21 @@ null_file_isatty (file)
      struct gdb_file *file;
 {
   return 0;
+}
+
+static void
+null_file_rewind (file)
+     struct gdb_file *file;
+{
+  return;
+}
+
+static void
+null_file_put (file, src)
+     struct gdb_file *file;
+     struct gdb_file *src;
+{
+  return;
 }
 
 static void
@@ -1886,6 +1938,21 @@ gdb_file_isatty (file)
 }
 
 void
+gdb_file_rewind (file)
+     struct gdb_file *file;
+{
+  return file->to_rewind (file);
+}
+
+void
+gdb_file_put (file, dest)
+     struct gdb_file *file;
+     struct gdb_file *dest;
+{
+  return file->to_put (file, dest);
+}
+
+void
 fputs_unfiltered (buf, file)
      const char *buf;
      struct gdb_file *file;
@@ -1907,6 +1974,22 @@ set_gdb_file_isatty (file, isatty)
      gdb_file_isatty_ftype *isatty;
 {
   file->to_isatty = isatty;
+}
+
+void
+set_gdb_file_rewind (file, rewind)
+     struct gdb_file *file;
+     gdb_file_rewind_ftype *rewind;
+{
+  file->to_rewind = rewind;
+}
+
+void
+set_gdb_file_put (file, put)
+     struct gdb_file *file;
+     gdb_file_put_ftype *put;
+{
+  file->to_put = put;
 }
 
 void

@@ -122,17 +122,29 @@ extern CORE_ADDR read_pc PARAMS ((void));
 
 extern CORE_ADDR read_pc_pid PARAMS ((int));
 
+extern CORE_ADDR generic_target_read_pc PARAMS ((int));
+
 extern void write_pc PARAMS ((CORE_ADDR));
 
 extern void write_pc_pid PARAMS ((CORE_ADDR, int));
 
+extern void generic_target_write_pc PARAMS ((CORE_ADDR, int));
+
 extern CORE_ADDR read_sp PARAMS ((void));
+
+extern CORE_ADDR generic_target_read_sp PARAMS ((void));
 
 extern void write_sp PARAMS ((CORE_ADDR));
 
+extern void generic_target_write_sp PARAMS ((CORE_ADDR));
+
 extern CORE_ADDR read_fp PARAMS ((void));
 
+extern CORE_ADDR generic_target_read_fp PARAMS ((void));
+
 extern void write_fp PARAMS ((CORE_ADDR));
+
+extern void generic_target_write_fp PARAMS ((CORE_ADDR));
 
 extern void wait_for_inferior PARAMS ((void));
 
@@ -435,23 +447,31 @@ extern int sizeof_call_dummy_words;
 /* Are we in a call dummy? */
 
 extern int pc_in_call_dummy_before_text_end PARAMS ((CORE_ADDR pc, CORE_ADDR sp, CORE_ADDR frame_address));
+#if !GDB_MULTI_ARCH
 #if !defined (PC_IN_CALL_DUMMY) && CALL_DUMMY_LOCATION == BEFORE_TEXT_END
 #define PC_IN_CALL_DUMMY(pc, sp, frame_address) pc_in_call_dummy_before_text_end (pc, sp, frame_address)
 #endif /* Before text_end.  */
+#endif
 
 extern int pc_in_call_dummy_after_text_end PARAMS ((CORE_ADDR pc, CORE_ADDR sp, CORE_ADDR frame_address));
+#if !GDB_MULTI_ARCH
 #if !defined (PC_IN_CALL_DUMMY) && CALL_DUMMY_LOCATION == AFTER_TEXT_END
 #define PC_IN_CALL_DUMMY(pc, sp, frame_address) pc_in_call_dummy_after_text_end (pc, sp, frame_address) 
 #endif
+#endif
 
 extern int pc_in_call_dummy_on_stack PARAMS ((CORE_ADDR pc, CORE_ADDR sp, CORE_ADDR frame_address));
+#if !GDB_MULTI_ARCH
 #if !defined (PC_IN_CALL_DUMMY) && CALL_DUMMY_LOCATION == ON_STACK
 #define PC_IN_CALL_DUMMY(pc, sp, frame_address) pc_in_call_dummy_on_stack (pc, sp, frame_address)
 #endif
+#endif
 
 extern int pc_in_call_dummy_at_entry_point PARAMS ((CORE_ADDR pc, CORE_ADDR sp, CORE_ADDR frame_address));
+#if !GDB_MULTI_ARCH
 #if !defined (PC_IN_CALL_DUMMY) && CALL_DUMMY_LOCATION == AT_ENTRY_POINT
 #define PC_IN_CALL_DUMMY(pc, sp, frame_address) pc_in_call_dummy_at_entry_point (pc, sp, frame_address)
+#endif
 #endif
 
 /* It's often not enough for our clients to know whether the PC is merely

@@ -67,6 +67,9 @@ extern void command_loop PARAMS ((void));
 extern int quit_confirm PARAMS ((void));
 extern void quit_force PARAMS ((char *, int));
 extern void quit_command PARAMS ((char *, int));
+extern void command_loop_marker PARAMS ((int));
+extern int quit_cover PARAMS ((PTR));
+extern void execute_command PARAMS ((char *, int));
 
 /* This function returns a pointer to the string that is used
    by gdb for its command prompt. */
@@ -83,3 +86,12 @@ extern int readnow_symbol_files;
 
 /* Perform _initialize initialization */
 extern void gdb_init PARAMS ((char *));
+
+/* For use by event-top.c */
+/* Variables from top.c. */
+extern int source_line_number;
+extern char *source_file_name;
+extern char *source_error;
+extern char *source_pre_error;
+extern int history_expansion_p;
+extern int server_command;

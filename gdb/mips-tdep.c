@@ -2020,11 +2020,18 @@ mips_push_arguments(nargs, args, sp, struct_return, struct_addr)
 	}
     }
 
+  /* Return adjusted stack pointer.  */
+  return sp;
+}
+
+CORE_ADDR
+mips_push_return_address (pc, sp)
+     CORE_ADDR pc;
+     CORE_ADDR sp;
+{
   /* Set the return address register to point to the entry
      point of the program, where a breakpoint lies in wait.  */
   write_register (RA_REGNUM, CALL_DUMMY_ADDRESS());
-
-  /* Return adjusted stack pointer.  */
   return sp;
 }
 

@@ -2897,4 +2897,35 @@ void
 _initialize_gdbtypes ()
 {
   build_gdbtypes ();
+
+  /* FIXME - For the moment, handle types by swapping them in and out.
+     Should be using the per-architecture data-pointer and a large
+     struct. */
+  register_gdbarch_swap (&builtin_type_void, sizeof (struct type*), NULL);
+  register_gdbarch_swap (&builtin_type_char, sizeof (struct type*), NULL);
+  register_gdbarch_swap (&builtin_type_short, sizeof (struct type*), NULL);
+  register_gdbarch_swap (&builtin_type_int, sizeof (struct type*), NULL);
+  register_gdbarch_swap (&builtin_type_long, sizeof (struct type*), NULL);
+  register_gdbarch_swap (&builtin_type_long_long, sizeof (struct type*), NULL);
+  register_gdbarch_swap (&builtin_type_signed_char, sizeof (struct type*), NULL);
+  register_gdbarch_swap (&builtin_type_unsigned_char, sizeof (struct type*), NULL);
+  register_gdbarch_swap (&builtin_type_unsigned_short, sizeof (struct type*), NULL);
+  register_gdbarch_swap (&builtin_type_unsigned_int, sizeof (struct type*), NULL);
+  register_gdbarch_swap (&builtin_type_unsigned_long, sizeof (struct type*), NULL);
+  register_gdbarch_swap (&builtin_type_unsigned_long_long, sizeof (struct type*), NULL);
+  register_gdbarch_swap (&builtin_type_float, sizeof (struct type*), NULL);
+  register_gdbarch_swap (&builtin_type_double, sizeof (struct type*), NULL);
+  register_gdbarch_swap (&builtin_type_long_double, sizeof (struct type*), NULL);
+  register_gdbarch_swap (&builtin_type_complex, sizeof (struct type*), NULL);
+  register_gdbarch_swap (&builtin_type_double_complex, sizeof (struct type*), NULL);
+  register_gdbarch_swap (&builtin_type_string, sizeof (struct type*), NULL);
+  register_gdbarch_swap (&builtin_type_int8, sizeof (struct type*), NULL);
+  register_gdbarch_swap (&builtin_type_uint8, sizeof (struct type*), NULL);
+  register_gdbarch_swap (&builtin_type_int16, sizeof (struct type*), NULL);
+  register_gdbarch_swap (&builtin_type_uint16, sizeof (struct type*), NULL);
+  register_gdbarch_swap (&builtin_type_int32, sizeof (struct type*), NULL);
+  register_gdbarch_swap (&builtin_type_uint32, sizeof (struct type*), NULL);
+  register_gdbarch_swap (&builtin_type_int64, sizeof (struct type*), NULL);
+  register_gdbarch_swap (&builtin_type_uint64, sizeof (struct type*), NULL);
+  register_gdbarch_swap (NULL, 0, build_gdbtypes);
 }

@@ -28,14 +28,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "gdbcore.h"
 #include "symfile.h"
 
-static char *mn10300_generic_register_names[] = 
-{ "d0", "d1", "d2", "d3", "a0", "a1", "a2", "a3",
-  "sp", "pc", "mdr", "psw", "lir", "lar", "", "",
-  "", "", "", "", "", "", "", "",
-  "", "", "", "", "", "", "", "fp" };
-
-char **mn10300_register_names = mn10300_generic_register_names;
-
 static CORE_ADDR mn10300_analyze_prologue PARAMS ((struct frame_info *fi,
 						  CORE_ADDR pc));
 
@@ -46,6 +38,60 @@ struct frame_extra_info
   int status;
   int stack_size;
 };
+
+
+static char *mn10300_generic_register_names[] = 
+{ "d0", "d1", "d2", "d3", "a0", "a1", "a2", "a3",
+  "sp", "pc", "mdr", "psw", "lir", "lar", "", "",
+  "", "", "", "", "", "", "", "",
+  "", "", "", "", "", "", "", "fp" };
+
+static char **mn10300_register_names = mn10300_generic_register_names;
+
+char *
+mn10300_register_name (i)
+     int i;
+{
+  return mn10300_register_names[i];
+}
+
+CORE_ADDR
+mn10300_saved_pc_after_call (fi)
+     struct frame_info *fi;
+{
+  return read_memory_integer (read_register (SP_REGNUM), 4);
+}
+
+void
+mn10300_extract_return_value (type, regbuf, valbuf)
+     struct type *type;
+     char *regbuf;
+     char *valbuf;
+{
+  if (TYPE_CODE (type) == TYPE_CODE_PTR)
+    memcpy (valbuf, regbuf + REGISTER_BYTE (4), TYPE_LENGTH (type));
+  else
+    memcpy (valbuf, regbuf + REGISTER_BYTE (0), TYPE_LENGTH (type));
+}
+
+CORE_ADDR
+mn10300_extract_struct_value_address (regbuf)
+     char *regbuf;
+{
+  return extract_address (regbuf + REGISTER_BYTE (4),
+			  REGISTER_RAW_SIZE (4));
+}
+
+void
+mn10300_store_return_value (type, valbuf)
+     struct type *type;
+     char *valbuf;
+{
+  if (TYPE_CODE (type) == TYPE_CODE_PTR)
+    write_register_bytes (REGISTER_BYTE (4), valbuf, TYPE_LENGTH (type));
+  else
+    write_register_bytes (REGISTER_BYTE (0), valbuf, TYPE_LENGTH (type));
+}
 
 static struct frame_info *analyze_dummy_frame PARAMS ((CORE_ADDR, CORE_ADDR));
 static struct frame_info *

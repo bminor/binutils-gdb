@@ -37,8 +37,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #define REGISTER_BYTES (NUM_REGS * REGISTER_SIZE)
 
-extern char **mn10300_register_names;
-#define REGISTER_NAME(i) mn10300_register_names[i]
+extern char *mn10300_register_name PARAMS ((int regnr));
+#define REGISTER_NAME(i) (mn10300_register_name (i))
 
 #define D2_REGNUM 2
 #define D3_REGNUM 3
@@ -65,8 +65,9 @@ extern breakpoint_from_pc_fn mn10300_breakpoint_from_pc;
 
 #define INNER_THAN(lhs,rhs) ((lhs) < (rhs))
 
+extern CORE_ADDR mn10300_saved_pc_after_call PARAMS ((struct frame_info *frame));
 #define SAVED_PC_AFTER_CALL(frame) \
-  read_memory_integer (read_register (SP_REGNUM), 4)
+  mn10300_saved_pc_after_call (frame)
 
 #ifdef __STDC__
 struct frame_info;
@@ -92,25 +93,20 @@ extern CORE_ADDR mn10300_frame_saved_pc   PARAMS ((struct frame_info *));
    a function return value of type TYPE, and copy that, in virtual format,
    into VALBUF. */
 
+extern void mn10300_extract_return_value PARAMS ((struct type *type, char *regbuf, char *valbuf));
 #define EXTRACT_RETURN_VALUE(TYPE, REGBUF, VALBUF) \
-  if (TYPE_CODE (TYPE) == TYPE_CODE_PTR) \
-    memcpy (VALBUF, REGBUF + REGISTER_BYTE (4), TYPE_LENGTH (TYPE)); \
-  else \
-    memcpy (VALBUF, REGBUF + REGISTER_BYTE (0), TYPE_LENGTH (TYPE));
+  mn10300_extract_return_value (TYPE, REGBUF, VALBUF)
 
-
+CORE_ADDR mn10300_extract_struct_value_address PARAMS ((char *regbuf));
 #define EXTRACT_STRUCT_VALUE_ADDRESS(REGBUF) \
-  extract_address (REGBUF + REGISTER_BYTE (4), \
-		   REGISTER_RAW_SIZE (4))
+  mn10300_extract_struct_value_address (REGBUF)
 
+void mn10300_store_return_value PARAMS ((struct type *type, char *valbuf));
 #define STORE_RETURN_VALUE(TYPE, VALBUF) \
-  if (TYPE_CODE (TYPE) == TYPE_CODE_PTR) \
-    write_register_bytes(REGISTER_BYTE (4), VALBUF, TYPE_LENGTH (TYPE)); \
-  else \
-    write_register_bytes(REGISTER_BYTE (0), VALBUF, TYPE_LENGTH (TYPE));
+  mn10300_store_return_value (TYPE, VALBUF)
 
 #define STORE_STRUCT_RETURN(STRUCT_ADDR, SP) \
-  (SP) = mn10300_store_struct_return (STRUCT_ADDR, SP)
+  (mn10300_store_struct_return (STRUCT_ADDR, SP))
 
 extern CORE_ADDR mn10300_skip_prologue PARAMS ((CORE_ADDR));
 #define SKIP_PROLOGUE(pc) (mn10300_skip_prologue (pc))
@@ -160,7 +156,3 @@ extern use_struct_convention_fn mn10300_use_struct_convention;
 extern void mn10300_virtual_frame_pointer PARAMS ((CORE_ADDR, long *, long *));
 #define TARGET_VIRTUAL_FRAME_POINTER(PC, REGP, OFFP) \
 	mn10300_virtual_frame_pointer ((PC), (REGP), (OFFP))
-
-/* Define this for Wingdb */
-
-#define TARGET_MN10300

@@ -1,3 +1,19 @@
+Fri Jun 11 12:56:50 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdb.base/call-strs.c (link_malloc): New function.  Ensure that
+ 	malloc() is linked in.
+
+1999-06-08  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+	* gdb.base/ending-run.exp: Make sure we fail and do not timeout at
+	step at end.
+
+	* gdb.base/annota1.exp: Increase match_max to prevent timeout.
+
+1999-06-08  Jim Blandy  <jimb@zwingli.cygnus.com>
+
+	* gdb.java/jv-print.exp: New file.  (Our first Java test!)
+
 Fri Jun  4 10:47:46 1999  Jeffrey A Law  (law@cygnus.com)
 
 	* gdb.base/a1-selftest.exp: Remove bogus hppa xfail.

@@ -3784,6 +3784,9 @@ _initialize_infrun ()
 
   build_infrun ();
 
+  register_gdbarch_swap (&stop_registers, sizeof (stop_registers), NULL);
+  register_gdbarch_swap (NULL, 0, build_infrun);
+
   add_info ("signals", signals_info,
 	    "What debugger does when program gets various signals.\n\
 Specify a signal as argument to print info on that signal only.");

@@ -835,7 +835,12 @@ read_actions (t)
   immediate_quit++;
 #ifdef STOP_SIGNAL
   if (job_control)
-    signal (STOP_SIGNAL, stop_sig);
+    {
+      if (async_p)
+	signal (STOP_SIGNAL, handle_stop_sig);
+      else
+	signal (STOP_SIGNAL, stop_sig);
+    } 
 #endif
   old_chain = make_cleanup ((make_cleanup_func) free_actions, (void *) t);
   while (1)

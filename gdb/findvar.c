@@ -998,7 +998,34 @@ supply_register (regno, val)
 
 /* This routine is getting awfully cluttered with #if's.  It's probably
    time to turn this into READ_PC and define it in the tm.h file.
-   Ditto for write_pc.  */
+   Ditto for write_pc.
+
+   1999-06-08: The following were re-written so that it assumes the
+   existance of a TARGET_READ_PC et.al. macro.  A default generic
+   version of that macro is made available where needed.
+
+   Since the ``TARGET_READ_PC'' et.al. macro is going to be controlled
+   by the multi-arch framework, it will eventually be possible to
+   eliminate the intermediate read_pc_pid().  The client would call
+   TARGET_READ_PC directly. (cagney). */
+
+#ifndef TARGET_READ_PC
+#define TARGET_READ_PC generic_target_read_pc
+#endif
+
+CORE_ADDR
+generic_target_read_pc (pid)
+{
+#ifdef PC_REGNUM
+  if (PC_REGNUM >= 0)
+    {
+      CORE_ADDR pc_val = ADDR_BITS_REMOVE ((CORE_ADDR) read_register_pid (PC_REGNUM, pid));
+      return pc_val;
+    }
+#endif
+  fatal ("generic_target_read_pc");
+  return 0;
+}
 
 CORE_ADDR
 read_pc_pid (pid)
@@ -1011,11 +1038,7 @@ read_pc_pid (pid)
   saved_inferior_pid = inferior_pid;
   inferior_pid = pid;
   
-#ifdef TARGET_READ_PC
   pc_val = TARGET_READ_PC (pid);
-#else
-  pc_val = ADDR_BITS_REMOVE ((CORE_ADDR) read_register_pid (PC_REGNUM, pid));
-#endif
 
   inferior_pid = saved_inferior_pid;
   return pc_val;
@@ -1025,6 +1048,31 @@ CORE_ADDR
 read_pc ()
 {
   return read_pc_pid (inferior_pid);
+}
+
+#ifndef TARGET_WRITE_PC
+#define TARGET_WRITE_PC generic_target_write_pc
+#endif
+
+void
+generic_target_write_pc (pc, pid)
+     CORE_ADDR pc;
+     int pid;
+{
+#ifdef PC_REGNUM
+  if (PC_REGNUM >= 0)
+    write_register_pid (PC_REGNUM, pc, pid);
+#ifdef NPC_REGNUM
+  if (NPC_REGNUM >= 0)
+    write_register_pid (NPC_REGNUM, pc + 4, pid);
+#ifdef NNPC_REGNUM
+  if (NNPC_REGNUM >= 0)
+    write_register_pid (NNPC_REGNUM, pc + 8, pid);
+#endif
+#endif
+#else
+  fatal ("generic_target_write_pc");
+#endif
 }
 
 void
@@ -1038,17 +1086,7 @@ write_pc_pid (pc, pid)
   saved_inferior_pid = inferior_pid;
   inferior_pid = pid;
   
-#ifdef TARGET_WRITE_PC
   TARGET_WRITE_PC (pc, pid);
-#else
-  write_register_pid (PC_REGNUM, pc, pid);
-#ifdef NPC_REGNUM
-  write_register_pid (NPC_REGNUM, pc + 4, pid);
-#ifdef NNPC_REGNUM
-  write_register_pid (NNPC_REGNUM, pc + 8, pid);
-#endif
-#endif
-#endif
 
   inferior_pid = saved_inferior_pid;
 }
@@ -1062,46 +1100,94 @@ write_pc (pc)
 
 /* Cope with strage ways of getting to the stack and frame pointers */
 
+#ifndef TARGET_READ_SP
+#define TARGET_READ_SP generic_target_read_sp
+#endif
+
+CORE_ADDR
+generic_target_read_sp ()
+{
+#ifdef SP_REGNUM
+  if (SP_REGNUM >= 0)
+    return read_register (SP_REGNUM);
+#endif
+  fatal ("generic_target_read_sp");
+}
+
 CORE_ADDR
 read_sp ()
 {
-#ifdef TARGET_READ_SP
   return TARGET_READ_SP ();
-#else
-  return read_register (SP_REGNUM);
+}
+
+#ifndef TARGET_WRITE_SP
+#define TARGET_WRITE_SP generic_target_write_sp
 #endif
+
+void
+generic_target_write_sp (val)
+     CORE_ADDR val;
+{
+#ifdef SP_REGNUM
+  if (SP_REGNUM >= 0)
+    {
+      write_register (SP_REGNUM, val);
+      return;
+    }
+#endif
+  fatal ("generic_target_write_sp");
 }
 
 void
 write_sp (val)
      CORE_ADDR val;
 {
-#ifdef TARGET_WRITE_SP
   TARGET_WRITE_SP (val);
-#else
-  write_register (SP_REGNUM, val);
+}
+
+#ifndef TARGET_READ_FP
+#define TARGET_READ_FP generic_target_read_fp
 #endif
+
+CORE_ADDR
+generic_target_read_fp ()
+{
+#ifdef FP_REGNUM
+  if (FP_REGNUM >= 0)
+    return read_register (FP_REGNUM);
+#endif
+  fatal ("generic_target_read_fp");
 }
 
 CORE_ADDR
 read_fp ()
 {
-#ifdef TARGET_READ_FP
   return TARGET_READ_FP ();
-#else
-  return read_register (FP_REGNUM);
+}
+
+#ifndef TARGET_WRITE_FP
+#define TARGET_WRITE_FP generic_target_write_fp
 #endif
+
+void
+generic_target_write_fp (val)
+     CORE_ADDR val;
+{
+#ifdef FP_REGNUM
+  if (FP_REGNUM >= 0)
+    {
+      write_register (FP_REGNUM, val);
+      return;
+    }
+#endif
+  fatal ("generic_target_write_fp");
 }
 
 void
 write_fp (val)
      CORE_ADDR val;
 {
-#ifdef TARGET_WRITE_FP
   TARGET_WRITE_FP (val);
-#else
-  write_register (FP_REGNUM, val);
-#endif
 }
 
 /* Will calling read_var_value or locate_var_value on SYM end
@@ -1640,4 +1726,8 @@ void
 _initialize_findvar ()
 {
   build_findvar ();
+
+  register_gdbarch_swap (&registers, sizeof (registers), NULL);
+  register_gdbarch_swap (&register_valid, sizeof (register_valid), NULL);
+  register_gdbarch_swap (NULL, 0, build_findvar);
 }

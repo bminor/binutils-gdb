@@ -359,8 +359,15 @@ struct tui_stream
 struct gdb_file;
 typedef struct gdb_file GDB_FILE; /* deprecated */
 
+/* Normal results */
 extern GDB_FILE *gdb_stdout;
+/* Serious error notifications */
 extern GDB_FILE *gdb_stderr;
+/* Log/debug/trace messages that should bypass normal stdout/stderr
+   filtering.  For momement, always call this stream using
+   *_unfiltered. In the very near future that restriction shall be
+   removed - either call shall be unfiltered. (cagney 1999-06-13). */
+extern GDB_FILE *gdb_stdlog;
 
 #if defined(TUI)
 #include "tui.h"
@@ -382,12 +389,23 @@ extern void set_gdb_file_fputs PARAMS ((struct gdb_file *stream, gdb_file_fputs_
 typedef int (gdb_file_isatty_ftype) PARAMS ((struct gdb_file *stream));
 extern void set_gdb_file_isatty PARAMS ((struct gdb_file *stream, gdb_file_isatty_ftype *isatty));
 
+typedef void (gdb_file_rewind_ftype) PARAMS ((struct gdb_file *stream));
+extern void set_gdb_file_rewind PARAMS ((struct gdb_file *stream, gdb_file_rewind_ftype *rewind));
+
+typedef void (gdb_file_put_ftype) PARAMS ((struct gdb_file *stream, struct gdb_file *dest));
+extern void set_gdb_file_put PARAMS ((struct gdb_file *stream, gdb_file_put_ftype *put));
+
 typedef void (gdb_file_delete_ftype) PARAMS ((struct gdb_file *stream));
 extern void set_gdb_file_data PARAMS ((struct gdb_file *stream, void *data, gdb_file_delete_ftype *delete));
 
 extern struct gdb_file *gdb_file_new PARAMS ((void));
 
 extern void gdb_file_delete PARAMS ((struct gdb_file *stream));
+
+extern void gdb_file_rewind PARAMS ((struct gdb_file *stream));
+
+/* NOTE: copies left to right */
+extern void gdb_file_put PARAMS ((struct gdb_file *src, struct gdb_file *dest));
 
 extern void *gdb_file_data PARAMS ((struct gdb_file *file));
 
@@ -1068,13 +1086,15 @@ extern CORE_ADDR push_word PARAMS ((CORE_ADDR, ULONGEST));
 extern int watchdog;
 
 /* Hooks for alternate command interfaces.  */
-
 #ifdef __STDC__
 struct target_waitstatus;
 struct cmd_list_element;
 #endif
 
-extern void (*async_hook) PARAMS ((void));                                                                   
+/* Should the asynchronous variant of the interpreter (using the
+   event-loop) be enabled? */
+extern int async_p;
+                                                                   
 extern void (*init_ui_hook) PARAMS ((char *argv0));
 extern void (*command_loop_hook) PARAMS ((void));
 extern void (*fputs_unfiltered_hook) PARAMS ((const char *linebuffer,

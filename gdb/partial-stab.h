@@ -441,7 +441,15 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 	      continue;
 
 	    case 'T':
-	      if (p != namestring)	/* a name is there, not just :T... */
+	      /* When a 'T' entry is defining an anonymous enum, it
+		 may have a name which is the empty string, or a
+		 single space.  Since they're not really defining a
+		 symbol, those shouldn't go in the partial symbol
+		 table.  We do pick up the elements of such enums at
+		 'check_enum:', below.  */
+	      if (p >= namestring + 2
+		  || (p == namestring + 1
+		      && namestring[0] != ' '))
 		{
 		  add_psymbol_to_list (namestring, p - namestring,
 				       STRUCT_NAMESPACE, LOC_TYPEDEF,
@@ -580,10 +588,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 		  textlow_not_set = 0;
 		}
 #endif
-#if 0
-	      if (startup_file_end == 0)
-		startup_file_end = CUR_SYMBOL_VALUE;
-#endif
 	      /* End kludge.  */
 
 	      /* In reordered executables this function may lie outside
@@ -626,10 +630,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 		    find_stab_function_addr (namestring, pst, objfile);
 		  textlow_not_set = 0;
 		}
-#endif
-#if 0
-	      if (startup_file_end == 0)
-		startup_file_end = CUR_SYMBOL_VALUE;
 #endif
 	      /* End kludge.  */
 	      /* In reordered executables this function may lie outside

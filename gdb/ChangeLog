@@ -1,3 +1,267 @@
+1999-06-14  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* MAINTAINERS: Add Jimmy Guo and Jim Blandy as HP testsuite and
+	SVR4 solib maintainers, respectively.
+
+1999-06-14  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	Add parameters to the gdb prompt.
+	* top.c (prompt): Rename to gdb_prompt_string for clarity.
+	(command_line_input): rename "prrompt" to prompt_arg for clarity.
+	(gdb_readline): rename "prrompt" to prompt_arg for clarity.
+	(read_command_lines): rename "prompt" to prompt_arg for clarity.
+	(stop_sig): call get_prompt instead of reading prompt string directly.
+	(command_loop): ditto.
+	(simplified_command_loop): ditto.
+	(gdb_prompt_escape): New variable.  Esc char for prompt parameters.
+	(get_prompt_1): New function, workhorse for get_prompt.
+	(get_prompt): Completely rewrite.  Add functionality for a 
+	parameterized prompt, ie. the displayed prompt can change according
+	to the value of one or more expressions given as parameters in the
+	prompt string.
+	(init_main): use renamed variable gdb_prompt_string.  Add new
+	command "set prompt-escape-char" to set gdb_prompt_escape.
+	
+Sun Jun 13 10:44:13 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* defs.h (gdb_stdlog), main.c: Declare.
+	* main.c (main): Initialize.
+	* gdbarch.c: Write trace messages to the log file.
+	* remote.c: Update any debug/log prints.
+
+1999-06-11  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* remote.c (remote_wait): Clean up new thread handling.
+	(record_currthread): Announce new threads.
+
+1999-06-11  Jim Blandy  <jimb@zwingli.cygnus.com>
+
+	* partial-stab.h (case N_LSYM, 'T' descriptor): Don't create
+	partial symbol table entries for nameless enums, even if the type
+	name is " ".  (We still pick up the enum elements, though.)
+
+	* partial-stab.h: Remove #if 0'd sections, dating back to 1992,
+ 	which set a variable which exists nowhere else in the source.
+  	Please examine your test suite output carefully, and report any
+ 	problems to me.
+
+1999-06-11  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* event-top.c (setup_event_loop): Change name to start_event_loop.
+  	Move the intialization of event-loop variables to
+ 	_initialize_event_loop.
+	(_initialize_event_loop): New function. Called at init time, to
+ 	set up important event-loop variables.
+
+	* event-loop.h: setup_event_loop is now start_event_loop.
+	* main.c (main): Ditto.
+
+Fri Jun 11 18:34:33 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* defs.h (gdb_file_rewind_ftype, gdb_file_rewind,
+ 	set_gdb_file_rewind, gdb_file_put_ftype, gdb_file_put,
+ 	set_gdb_file_put): Declare.
+	
+	* utils.c (gdb_file_new): Initialize ``rewind'' and ``put''.
+	(struct gdb_file): Add to_rewind and to_put.
+	(null_file_put, null_file_rewind, gdb_file_put, gdb_file_rewind,
+ 	set_gdb_file_put, set_gdb_file_rewind): New functions.
+	(tui_file_rewind, tui_file_put): New functions.
+	(tui_file_new): Add rewind and put.
+
+Fri Jun 11 15:10:32 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* d10v-tdep.c (d10v_push_arguments): Fix order of arguments passed
+ 	to store_address.
+
+Fri Jun 11 10:31:29 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* remote.c (tty_input): Change array to pointer.
+ 	(_initialize_remote): Call build_remote_gdbarch_data.
+	(build_remote_gdbarch_data): New function. Allocate space for
+ 	tty_input.
+	(readsocket, readtty): Delete extern declaration of tty_input.
+
+1999-06-10  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* event-top.c (gdb_readline2): Call the command handling function
+ 	via the input_handler pointer.
+	(change_line_handler): When turning off editing, set input_handler
+ 	as well.
+
+	* utils.c (prompt_for_continue): If running asynchronously, call
+ 	async_request_quit, instead of request_quit.
+
+	* tracepoint.c (read_actions): If running asynchronously, set the
+ 	signal handler for STOP_SIGNAL to handle_stop_sig.
+
+	* top.h: (source_line_number, source_file_name, source_error,
+ 	source_pre_error, history_expansion_p, server_command): export for
+ 	use of event-top.c.
+
+	* event-top.c: Include top.h and terminal.h.
+	(instream): Remove extern declaration.
+	(handle_sigint, handle_sigquit, handle_sighup, handle_sigfpe,
+ 	handle_sigwinch, async_do_nothing, async_disconnect,
+ 	async_float_handler, async_stop_sig): Make static.
+	(async_request_quit, async_do_nothing, async_disconnect,
+ 	async_float_handler, async_stop_sig): Add gdb_glient_data
+ 	argument.
+	(handle_stop_sig): New function.
+	(sigtstp_token): New variable.
+	(sigint_token, sigquit_token, sigfpe_token, sigwinch_token):
+ 	Change their type tp PTR.
+	(mark_async_signal_handler_wrapper): New function.
+	(setup_event_loop): Initialize all the variables used by readline
+ 	only if not already done while reading the .gdbinit file.  Display
+ 	the initial gdb prompt, if .gdbinit took care of setting things up
+ 	for readline.
+	(change_line_handler): When turning on the use of readline,
+ 	initialize input_handler as well.
+	(command_line_handler): Set up the signal handler for STOP_SIGNAL
+ 	to be handle_stop_sig.
+	(async_init_signals): Remove coercion of signal handlers in calls
+ 	to create_async_signal_handler.  Initialize token for stop signal.
+	(handle_sigint): Call async_request_quit using one argument.
+	(handle_sigint, handle_sigquit, handle_sighup, handle_sigfpe,
+ 	handle_sigwinch): Call mark_async_signal_handler_wrapper instead
+ 	of mark_async_signal_handler.
+
+	* event-loop.h: Add extern declarations for handle_stop_sig,
+ 	async_command_editing_p, async_annotation_suffix,
+ 	new_async_prompt, the_prompts.
+
+	* top.c (command_line_input): Set the signal handler to be
+ 	handle_stop_sig, in case gdb is running asynchronously.
+	(get_prompt): Return the top of the prompt stack if running
+ 	asynchronously.
+	(set_prompt): Set the top of the prompt stack if running
+ 	asynchronously.
+	(init_main): Move ``extern'' vars from here to event-loop.h.
+	
+1999-06-10  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* values.c (value_from_string): new function.  Make a value_ptr
+	from a string, with storage in local GDB memory (not in inferior).
+	* value.h (value_from_string): add prototype.
+	* remote.c (remote_cisco_ops): New remote target, "target cisco".
+	(init_remote_cisco_ops): New function, initialize new target.
+	(remote_cisco_mourn, remote_cisco_wait, remote_cisco_open, 
+	remote_cisco_close): New functions, implement new target cisco.
+	(minitelnet, readtty, readsocket) New functions, implement the
+	I/O pass-through mode for target cisco.
+	(remote_wait): Detect special enhanced version of the 'S' packet
+	for target cisco.  
+	(remote_cisco_expand): Perform Cisco variant of RLL decoding.
+
+1999-06-10  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* event-loop.c (gdb_wait_for_event): Initialize num_found to 0.
+
+	* top.c (print_prompt): Delete this function.
+
+	From: Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* event-top.c (async_hook): Delete extern declaration.
+
+	* defs.h: Replace ``async_hook'' with ``async_p''.
+	* top.c (gdb_init, init_main, init_main, init_main, init_main):
+ 	Replace ``async_hook'' with ``async_p''.
+
+	* main.c: Rename ``async'' to ``async_p''.
+	(main): Add --noasync option.
+	(main): Hook in the asynchronous event-loop based CLI using
+ 	command_loop_hook instead of async_hook. Delete call to
+ 	async_hook().
+
+Thu Jun 10 21:14:16 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* mn10300-tdep.c (mn10300_store_return_value,
+ 	mn10300_extract_struct_value_address,
+ 	mn10300_extract_return_value), config/mn10300/tm-mn10300.h: New
+ 	functions.
+	* config/mn10300/tm-mn10300.h (EXTRACT_STRUCT_VALUE_ADDRESS,
+ 	STORE_RETURN_VALUE, EXTRACT_RETURN_VALUE): Update.
+	(TARGET_MN10300): Delete macro.  Not used.
+
+Thu Jun 10 20:04:02 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* mn10300-tdep.c (mn10300_register_names): Make static.
+	(STORE_STRUCT_RETURN): Do not modify SP.
+
+	* config/mn10300/tm-mn10300.h(mn10300_register_name),
+ 	mn10300-tdep.c : New function.
+	* config/mn10300/tm-mn10300.h (REGISTER_NAME): Update.
+	* config/mn10300/tm-mn10300.h (mn10300_saved_pc_after_call),
+ 	mn10300-tdep.c: New function.
+	* config/mn10300/tm-mn10300.h (SAVED_PC_AFTER_CALL): Update.
+
+1999-06-09  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+   
+        * rs6000-tdep.c (skip_prologue): Don't mistake a branch for a     
+        subroutine call.        
+
+1999-06-08  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* remote.c (remote_wait): Add 'N' response packet, which is a
+	stop with signal number plus section offsets for .text, .data and
+	.bss.  This is used by Cisco to indicate relocation offsets.
+	(remote_cisco_section_offsets, remote_cisco_objfile_relocate):
+	new files to support 'N' packet.  
+	(remote_info_process): New function.  Implements the 
+	"info remote-process" command, by means of which the remote target 
+	can report anything it wants to about the remote process/app being 
+	debugged.  
+	(_initialize_remote): add info remote-proc command.  
+	(remote_threads_info): New function for "info threads" command.  
+	Attempts to use new query "qfThreadInfo" instead of the old 
+	undocumented query.
+	* exec.c (exec_set_section_offsets) new files to support 'N' packet.
+
+Tue Jun  8 13:33:42 1999  Andrew Cagney  <cagney@amy.cygnus.com>
+
+	* inferior.h (generic_target_read_pc, generic_target_write_pc,
+ 	generic_target_read_fp, generic_target_write_fp,
+ 	generic_target_read_sp, generic_target_write_sp): Declare new
+ 	functions.
+	* findvar.c (generic_target_read_pc, generic_target_write_pc,
+ 	generic_target_read_fp, generic_target_write_fp,
+ 	generic_target_read_sp, generic_target_write_sp): New functions.
+	(TARGET_READ_PC, TARGET_WRITE_PC, TARGET_READ_FP, TARGET_WRITE_FP,
+ 	TARGET_READ_SP, TARGET_WRITE_SP): Default to corresponding generic
+ 	function.
+	(write_pc_pid, write_pc_pid, read_sp, write_sp, read_fp,
+ 	write_fp): Simplify.
+
+	* gdbarch.c (verify_gdbarch): Always verify TARGET_PTR_BIT,
+ 	TARGET_SHORT_BIT, TARGET_INT_BIT, TARGET_LONG_BIT,
+ 	TARGET_LONG_LONG_BIT, TARGET_FLOAT_BIT, TARGET_DOUBLE_BIT,
+ 	TARGET_LONG_DOUBLE_BIT, TARGET_READ_PC, TARGET_WRITE_PC,
+ 	TARGET_READ_FP, TARGET_WRITE_FP, TARGET_READ_SP, TARGET_WRITE_SP,
+ 	USE_GENERIC_DUMMY_FRAMES, CALL_DUMMY_BREAKPOINT_OFFSET_P,
+ 	CALL_DUMMY_P, CALL_DUMMY_STACK_ADJUST_P, GET_SAVED_REGISTER,
+ 	REGISTER_CONVERTIBLE, PUSH_ARGUMENTS, PUSH_RETURN_ADDRESS,
+ 	FRAME_CHAIN_VALID.
+	(GET_GDBARCH, SET_GDBARCH): Delete macros.  Implement functions
+ 	directly.
+	* gdbarch.h, gdbarch.c: Call fatal() instead of abort().  Identify
+ 	the function / macro with a problem.  Always verify a architecture
+ 	attribute before returning it.
+	* gdbarch.h, gdbarch.c (generic_register_convertible_not): New
+ 	function.
+
+	* mips-tdep.c (mips_push_return_address): New function.
+	* config/mips/tm-mips.h (PUSH_RETURN_ADDRESS): Define.
+
+	* mips-tdep.c (mips_gdbarch_init): Initialize short_bit,
+ 	double_bit, long_double_bit, read_pc, write_pc, read_fp, write_fp,
+ 	read_sp, write_sp, frame_chain_valid, get_saved_register,
+ 	push_arguments, push_return_address, register_convertible,
+ 	call_dummy_p, use_generic_dummy_frames,
+ 	call_dummy_breakpoint_offset_p, call_dummy_stack_adjust_p,
+ 	call_dummy_words and sizeof_call_dummy_words.
+	* config/mips/tm-mips.h: Don't define CALL_DUMMY when multi-arch.
+
 1999-06-07  Keith Seitz  <keiths@cygnus.com>
 
 	* v850ice.c (init_hidden_window): Do not rely on the existence of
@@ -52,6 +316,8 @@ Sun Jun  6 11:09:19 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 	* remote.c (PBUFSIZ): Re-define so that value is computed at
  	run-time.
 	(MAXBUFBYTES): Re-define as a macro function.
+	* gdbarch.h, gdbarch.c: Add multi-arch support for REGISTER_BYTES.
+	* d10v-tdep.c, config/d10v/tm-d10v.h: Update.
 
 1999-06-05  Fernando Nasser  <fnasser@totem.to.cygnus.com>
 
@@ -83,6 +349,11 @@ Fri Jun  4 17:10:36 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 	* parser-defs.h (std_regs): Replace array with pointer.
 	* parse.c (build_parse): Build the std_regs table according to the
  	standard registers available.
+	(_initialize_parse): Register std_regs and num_std_regs as
+ 	architecture specific.
+	* gdbarch.h, gdbarch.c: Add multi-arch support for SP_REGNUM,
+ 	FP_REGNUM, PC_REGNUM, NUM_REGS, REGISTER_NAME.
+	* d10v-tdep.c, config/d10v/tm-d10v.h: Update.
 	
 1999-06-03  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
@@ -110,6 +381,8 @@ Fri Jun  4 17:10:36 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 	* parse.c: Ditto.
 	* somread.c: Ditto.
 
+	* gdbarch.h: Forward decl of struct value.
+
 Thu Jun  3 10:12:38 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* d10v-tdep.c (do_d10v_pop_frame): Rename d10v_pop_frame.  Make
@@ -118,6 +391,16 @@ Thu Jun  3 10:12:38 1999  Andrew Cagney  <cagney@b1.cygnus.com>
  	function.  Call generic_pop_current_frame.
 	* config/d10v/tm-d10v.h (POP_FRAME): Update.
 	* gdbarch.h, gdbarch.c (frame_num_args_unknown): New function.
+	* gdbarch.h, gdbarch.c: Add multi-arch support for POP_FRAME,
+ 	SKIP_PROLOGUE, INNER_THAN, DECR_PC_AFTER_BREAK,
+ 	FUNCTION_START_OFFSET, REMOTE_TRANSLATE_XFER_ADDRESS, FRAME_CHAIN,
+ 	FRAME_CHAIN_VALID, FRAME_SAVED_PC, FRAME_ARGS_ADDRESS,
+ 	FRAME_LOCALS_ADDRESS, FRAME_ARGS_SKIP,
+ 	FRAMELESS_FUNCTION_INVOCATION, REGISTER_BYTE, REGISTER_RAW_SIZE,
+ 	REGISTER_VIRTUAL_SIZE, REGISTER_VIRTUAL_TYPE, SAVED_PC_AFTER_CALL,
+ 	FRAME_NUM_ARGS, MAX_REGISTER_RAW_SIZE, MAX_REGISTER_VIRTUAL_SIZE,
+ 	REGISTER_SIZE.
+	* d10v-tdep.c, config/d10v/tm-d10v.h: Update.
 	* config/d10v/tm-d10v.h (DMEM_START, IMEM_START, STACK_START,
  	ARG1_REGNUM, ARGN_REGNUM, RET1_REGNUM): Move definitions from
  	here.
@@ -189,16 +472,29 @@ Wed Jun  2 17:37:03 1999  Jeffrey A Law  (law@cygnus.com)
 
 Wed Jun  2 16:10:08 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
+	* gdbarch.h, gdbarch.c: Add multi-arch support for
+ 	STORE_STRUCT_RETURN, STORE_RETURN_VALUE,
+ 	EXTRACT_STRUCT_VALUE_ADDRESS, USE_STRUCT_CONVENTION,
+	FRAME_INIT_SAVED_REGS and INIT_EXTRA_FRAME_INFO.
+	* d10v-tdep.c, config/d10v/tm-d10v.h: Update.
+
 	* config/d10v/tm-d10v.h (FRAME_INIT_SAVED_REGS): Replace
  	FRAME_FIND_SAVED_REGS.
 	(d10v_frame_init_saved_regs): Replace d10v_frame_find_saved_regs.
 	* d10v-tdep.c (d10v_pop_frame, d10v_frame_chain,
  	d10v_frame_init_saved_regs): Update.
+	* gdbarch.h: Disallow FRAME_FIND_SAVED_REGS when multi-arch.
+
+	* gdbarch.h, gdbarch.c: Add multi-arch support for
+ 	D10V_MAKE_DADDR, D10V_MAKE_IADDR, D10V_DADDR_P, D10V_IADDR_P,
+ 	D10V_CONVERT_DADDR_TO_RAW and D10V_CONVERT_IADDR_TO_RAW.
+	* d10v-tdep.c, config/d10v/tm-d10v.h: Update.
 
 	* config/d10v/tm-d10v.h (EXTRA_FRAME_INFO): Delete.
 	* d10v-tdep.c (struct frame_extra_info): Define.
 	(d10v_init_extra_frame_info, d10v_pop_frame, d10v_frame_chain,
  	d10v_frame_find_saved_regs): Update.
+	* gdbarch.h: Disallow EXTRA_FRAME_INFO when multi-arch.
 
 Tue Jun  1 13:36:31 1999  Philippe De Muyter  <phdm@macqel.be>
 
@@ -209,18 +505,66 @@ Tue Jun  1 13:36:31 1999  Philippe De Muyter  <phdm@macqel.be>
 
 Wed Jun  2 11:18:37 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
+	* gdbarch.h, gdbarch.c: Add multi-arch support for
+ 	EXTRACT_RETURN_VALUE, PUSH_ARGUMENTS, PUSH_DUMMY_FRAME,
+ 	PUSH_RETURN_ADDRESS, POP_FRAME, FRAME_FIND_SAVED_REGS.
+	* d10v-tdep.c, config/d10v/tm-d10v.h: Update.
+
+	* gdbarch.h, gdbarch.c: Add multi-arch support for
+ 	REGISTER_CONVERTIBLE, REGISTER_CONVERT_TO_VIRTUAL,
+ 	REGISTER_CONVERT_TO_RAW.
+	* config/d10v/tm-d10v.h, d10v-tdep.c (d10v_gdbarch_init): Update.
+
 	* defs.h (REGISTER_NAME): Move compatibility definition from here.
 	* gdbarch.h: To here.
 
 	* frame.h, blockframe.c (generic_fix_call_dummy): New
  	stub function.
+	* gdbarch.h, gdbarch.c: Add multi-arch support for FIX_CALL_DUMMY.
+	* config/d10v/tm-d10v.h, d10v-tdep.c (d10v_gdbarch_init): Update.
 
+Tue Jun  1 20:06:38 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* d10v-tdep.c (d10v_gdbarch_init): Set get_saved_register.
+	* config/d10v/tm-d10v.h: Update.
+	
+Tue Jun  1 19:50:05 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdbarch.h, gdbarch.c: Add multi-arch support for TARGET_READ_PC,
+ 	TARGET_WRITE_PC, TARGET_READ_FP, TARGET_WRITE_FP, TARGET_READ_SP
+ 	and TARGET_WRITE_SP.
+	* config/d10v/tm-d10v.h, d10v-tdep.c (d10v_gdbarch_init): Update.
+
+Tue Jun  1 19:19:02 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdbarch.c (default_gdbarch): Set field GET_SAVED_REGISTER to
+ 	generic_get_saved_register.
+	* gdbarch.c: Change update dispatch functions so that they check
+ 	for a NULL function pointer.
+
+Tue Jun  1 19:19:02 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdbarch.h, gdbarch.c: Add multi-arch support for TARGET_INT_BIT,
+ 	TARGET_CHAR_BIT, TARGET_SHORT_BIT, TARGET_FLOAT_BIT,
+ 	TARGET_DOUBLE_BIT and TARGET_LONG_DOUBLE_BIT.
+	* config/d10v/tm-d10v.h, d10v-tdep.c (d10v_gdbarch_init): Update.
+	
 Tue Jun  1 18:47:54 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* parse.c (build_parse): New function.  Initialize
  	msym_text_symbol_type, msym_data_symbol_type and
  	msym_unknown_symbol_type.
 	(_initialize_parse): Call build_parse.
+	(_initialize_parse): Register variables msym_text_symbol_type,
+ 	msym_data_symbol_type as msym_unknown_symbol_type as
+ 	per-architecture.
+
+Tue Jun  1 11:30:09 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* d10v-tdep.c (_initialize_d10v_tdep): Register d10v as an
+ 	architecture.
+	(d10v_gdbarch_init): New function.
+	* confg/d10v/tm-d10v.h (GDB_MULTI_ARCH): Define.
 
 Tue Jun  1 10:45:24 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
@@ -406,6 +750,11 @@ Tue May 25 12:23:39 1999  Andrew Cagney  <cagney@amy.cygnus.com>
 	(java_rerun_cleanup): Add extern declaration for this stub
  	function.
 	
+Tue May 25 12:06:29 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdbarch.h: When multi-arch, check that REGISTER_NAMES was not
+ 	defined.
+
 Mon May 24 16:16:29 1999  Andrew Cagney  <cagney@amy.cygnus.com>
 
 	* inflow.c (_initialize_inflow), annotate.c
@@ -865,6 +1214,15 @@ Mon Apr 26 08:55:46 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* gdbarch.h, gdbarch.c: More format cleanups.
 
+Sun Apr 25 18:54:51 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdbarch.h (CALL_DUMMY_STACK_ADJUST_P): Replace
+ 	SIZEOF_CALL_DUMMY_STACK_ADJUST_P.
+	(CALL_DUMMY_STACK_ADJUST): Replace
+ 	SIZEOF_CALL_DUMMY_STACK_ADJUST_P.
+	* gdbarch.c (gdbarch_call_dummy_stack_adjust,
+ 	set_gdbarch_call_dummy_stack_adjust): Define.
+
 Fri Apr 23 15:00:25 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* gdbarch.c (arch_ok): New function. Fix logic test for a valid
@@ -877,6 +1235,11 @@ Fri Apr 23 15:00:25 1999  Andrew Cagney  <cagney@b1.cygnus.com>
         make install.
 
 Thu Apr 22 21:02:28 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdbarch.h, gdbarch.c (GET_SAVED_REGISTER, get_saved_register):
+ 	Add.
+	(struct gdbarch, verify_gdbarch, gdbarch_alloc, gdbarch_dump,
+ 	default_gdbarch): Update.
 
 	* value.h (get_saved_register): Cleanup prototype.
 	* findvar.c (default_get_saved_register): Rename function
@@ -902,7 +1265,18 @@ Thu Apr 22 21:02:28 1999  Andrew Cagney  <cagney@b1.cygnus.com>
  	mn10200-tdep.c, m32r-tdep.c, h8300-tdep.c, rs6000-tdep.c: Delete
  	function get_saved_register.
 
+Thu Apr 22 13:32:23 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdbarch.c: Cleanup.  Re-order the definition of the ``struct
+ 	gdbarch'' initialization functions so that maintenance is more
+ 	straightforward.
+	
 Thu Apr 22 11:07:21 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdbarch.h, gdbarch.c (use_generic_dummy_frames,
+ 	USE_GENERIC_DUMMY_FRAMES): Add.
+	(struct gdbarch, verify_gdbarch, gdbarch_alloc, gdbarch_dump,
+ 	default_gdbarch): Update.
 
 	* config/v850/tm-v850.h, config/tic80/tm-tic80.h,
  	config/sh/tm-sh.h, config/powerpc/tm-ppc-eabi.h,
@@ -928,13 +1302,32 @@ Thu Apr 22 11:07:21 1999  Andrew Cagney  <cagney@b1.cygnus.com>
  	runtime test.
 	(get_saved_register): Always define.
 
+Wed Apr 21 17:15:52 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdbarch.c (gdbarch_dump): Fix robustness check on
+ 	BELIEVE_PCC_PROMOTION_TYPE.
+
+Wed Apr 21 15:39:27 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdbarch.h (TARGET_BYTE_ORDER_SELECTABLE_P): When multi-arch,
+ 	force selectable byte order.
+	(CALL_DUMMY): Check for CALL_DUMMY definition when multi-arch. Are
+ 	incompatible.
+	* gdbarch.c (verify_gdbarch): Check call_dummy_stack_adjust.
+	
 Wed Apr 21 14:45:44 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
+	* gdbarch.c (gdbarch_update): Move dump-arch code from here.
+	(gdbarch_dump): To here.  Make more robust.
+	* gdbarch.h (gdbarch_dump): Add prototype.
+	
 	* gdbarch.c (enum set_arch): Declare.
 	(set_arch): Add type parameter.  Only disable
  	``target_architecture_auto'' when set_arch_manual.
 	(set_architecture, set_architecture_from_arch_mach,
  	set_architecture_from_file): Update.
+	(set_arch): When ``gdbarch_debug'', gdbarch_dump() the current
+ 	architecture.
 
 Wed Apr 21 10:48:53 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
@@ -963,6 +1356,17 @@ Tue Apr 20 12:15:45 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 	* values.c (unpack_long): Ditto.
 	* printcmd.c (print_frame_args): Ditto.
 
+Sat Apr 17 15:39:33 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdbarch.h: Cleanup multi-arch comments.
+
+Fri Apr 16 15:39:10 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdbarch.h: Provide definition if GDB_MULTI_ARCH > 1 or
+ 	GDB_MULTI_ARCH > 0 and no previous definition.
+	* gdbarch.c (verify_gdbarch): Only verify a full multi-arch
+ 	target.
+
 1999-04-15  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* infrun.c (wait_for_inferior) [HAVE_STEPPABLE_WATCHPOINT,
@@ -985,6 +1389,13 @@ Tue Apr 20 12:15:45 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
 Wed Apr 14 11:09:45 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
+	* gdbarch.h (BELIEVE_PCC_PROMOTION_TYPE, BELIEVE_PCC_PROMOTION):
+ 	Add multi-arch definitions.
+	* gdbarch.c (gdbarch_believe_pcc_promotion,
+ 	gdbarch_believe_pcc_promotion_type): New functions.
+	(gdbarch_update): Update
+	(struct gdbarch default_gdbarch): Update.
+
 	* stabsread.c (BELIEVE_PCC_PROMOTION_TYPE): Provide default.
 	(define_symbol): Change #if BELIEVE_PCC_PROMOTION_TYPE and #if
  	BELIEVE_PCC_PROMOTION to if().
@@ -995,6 +1406,19 @@ Wed Apr 14 11:09:45 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 	on a Solaris host (of any architecture).
 	* configure: Regenerated.
 
+Wed Apr 14 08:23:32 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdbarch.c (SET_GDBARCH, GET_GDBARCH, FSET_GDBARCH): New macros.
+	(gdbarch_byte_order, gdbarch_long_bit, gdbarch_long_long_bit,
+ 	gdbarch_ptr_bit, gdbarch_call_dummy_location,
+ 	gdbarch_call_dummy_address, gdbarch_call_dummy_address,
+ 	gdbarch_call_dummy_breakpoint_offset,
+ 	gdbarch_call_dummy_breakpoint_offset, gdbarch_call_dummy_length,
+ 	gdbarch_pc_in_call_dummy, dbarch_call_dummy_breakpoint_offset_p,
+ 	dbarch_call_dummy_p, dbarch_call_dummy_words,
+ 	dbarch_sizeof_call_dummy_words, dbarch_call_dummy_stack_adjust,
+ 	dbarch_call_dummy_stack_adjust_p): Define using new macros.
+	
 1999-04-13  Jason Molenda  (jsm@bugshack.cygnus.com)
 
 	* rom68k-rom.c (init_rom68k_cmds): Fix an accidental substitution
@@ -1043,6 +1467,16 @@ Mon Apr 12 15:57:16 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 	* valops.c (hand_function_call): Replace #ifdef
  	CALL_DUMMY_STACK_ADJUST with if (CALL_DUMMY_STACK_ADJUST_P).
 
+	* gdbarch.h (SIZEOF_CALL_DUMMY_STACK_ADJUST,
+	(SIZEOF_CALL_DUMMY_STACK_ADJUST_P): Define
+	* gdbarch.c (struct gdbarch): Add call_dummy_stack_adjust,
+ 	call_dummy_stack_adjust_p.
+	(gdbarch_call_dummy_stack_adjust,
+ 	set_gdbarch_call_dummy_stack_adjust,
+ 	gdbarch_call_dummy_stack_adjust_p,
+ 	set_gdbarch_call_dummy_stack_adjust_p): New functions.
+	(default_gdbarch): Update.
+
 1999-04-09  Jim Blandy  <jimb@zwingli.cygnus.com>
 
 	* ax-gdb.c, ax-gdb.h, ax-general.c, ax.h: Remove RCS Id strings.
@@ -1067,6 +1501,15 @@ Thu Apr  8 16:04:34 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 	(hand_function_call): Update.  Allocate space for *dummy and
  	*dummy1 using alloca.
 	* breakpoint.c (frame_in_dummy): Update.
+
+	* gdbarch.h (CALL_DUMMY_P, CALL_DUMMY_WORDS,
+ 	SIZEOF_CALL_DUMMY_WORDS): Define.
+	* gdbarch.c (gdbarch_call_dummy_p, set_gdbarch_call_dummy_p,
+ 	gdbarch_call_dummy_words, set_gdbarch_call_dummy_words,
+ 	gdbarch_sizeof_call_dummy_words,
+ 	set_gdbarch_sizeof_call_dummy_words): New functions.
+	(gdbarch_alloc, verify_gdbarch, gdbarch_update, struct
+ 	default_gdbarch): Update.
 
 1999-04-08  Jason Molenda  (jsm@bugshack.cygnus.com)
 
@@ -1093,6 +1536,12 @@ Thu Apr  8 14:13:19 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 	* infcmd.c (breakpoint_auto_delete_contents): Always define.
 	(run_stack_dummy): Update.
 	* infrun.c (wait_for_inferior): Update
+
+	* gdbarch.h (CALL_DUMMY_BREAKPOINT_OFFSET_P): New macro.
+	* gdbarch.c (set_gdbarch_call_dummy_breakpoint_offset_p,
+ 	gdbarch_call_dummy_breakpoint_offset_p): New functions.
+	(struct gdbarch, gdbarch_alloc, default_gdbarch, gdbarch_update):
+ 	Update.
 
 1999-04-07  Stan Shebs  <shebs@andros.cygnus.com>
 
@@ -1275,6 +1724,13 @@ Fri Mar 26 17:27:27 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 Thu Mar 25 19:30:02 1999  Andrew Cagney  <cagney@amy.cygnus.com>
 
 	* gdbarch.c: Include all headers.
+	(struct gdbarch), gdbarch.h (CALL_DUMMY_LOCATION,
+ 	CALL_DUMMY_ADDRESS, CALL_DUMMY_START_OFFSET,
+ 	CALL_DUMMY_BREAKPOINT_OFFSET, CALL_DUMMY_LENGTH,
+ 	PC_IN_CALL_DUMMY): Add ``call_dummy_location'',
+ 	``call_dummy_length'', ``pc_in_call_dummy'',
+ 	``call_dummy_start_offset'', ``call_dummy_breakpoint_offset'' to
+ 	multi-arch framework.
 
 	* inferior.h, blockframe.c (pc_in_call_dummy_before_text_end,
  	pc_in_call_dummy_after_text_end, pc_in_call_dummy_on_stack,
@@ -1527,6 +1983,8 @@ Wed Mar 10 21:20:25 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 	(build_findvar): New function.  Allocate space for REGISTERS and
  	REGISTER_VALID.
 	(_initialize_findvar): Call build_findvar.
+	(_initialize_findvar): Register REGISTERS and REGISTER_VALID as
+ 	arch dependant.
 	
 	* inferior.h (registers, register_valid): Replace array with
  	pointer.
@@ -1546,6 +2004,7 @@ Wed Mar 10 21:20:25 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 	* infrun.c (stop_registers): Update.
 	(build_infrun): Initialize stop_registers.
 	(_initialize_infrun): Call build_infrun.
+	(_initialize_infrun): Register ``stop_registers'' as arch dependant.
 
 Wed Mar 10 14:50:42 1999  Andrew Cagney  <cagney@amy.cygnus.com>
 

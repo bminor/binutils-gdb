@@ -141,6 +141,17 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 					targets.
 	or...		XAA		The process terminated with signal
 					AA.
+	or (obsolete)	NAA;tttttttt;dddddddd;bbbbbbbb
+					AA = signal number
+					tttttttt = address of symbol "_start"
+					dddddddd = base of data section
+					bbbbbbbb = base of bss  section.
+					Note: only used by Cisco Systems 
+					targets.  The difference between this
+					reply and the "qOffsets" query is that
+					the 'N' packet may arrive spontaneously
+					whereas the 'qOffsets' is a query
+					initiated by the host debugger.
         or...           OXX..XX	XX..XX  is hex encoding of ASCII data. This
 					can happen at any time while the 
 					program is running and the debugger 
@@ -212,6 +223,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "serial.h"
 
 /* Prototypes for local functions */
+
+static void build_remote_gdbarch_data PARAMS ((void));
 
 static int remote_write_bytes PARAMS ((CORE_ADDR memaddr,
 				       char *myaddr, int len));
@@ -291,6 +304,10 @@ static void init_remote_ops PARAMS ((void));
 
 static void init_extended_remote_ops PARAMS ((void));
 
+static void init_remote_cisco_ops PARAMS ((void));
+
+static struct target_ops remote_cisco_ops;
+
 static void remote_stop PARAMS ((void));
 
 static int ishex PARAMS ((int ch, int *val));
@@ -365,6 +382,10 @@ static int remote_break;
    remote_open knows that we don't have a file open when the program
    starts.  */
 static serial_t remote_desc = NULL;
+
+/* This is set by the target (thru the 'S' message)
+   to denote that the target is in kernel mode.  */
+static int cisco_kernel_mode = 0;
 
 /* This variable (available to the user via "set remotebinarydownload")
    dictates whether downloads are sent in binary (via the 'X' packet).
@@ -451,7 +472,10 @@ record_currthread (currthread)
   /* If this is a new thread, add it to GDB's thread list.
      If we leave it up to WFI to do this, bad things will happen.  */
   if (!in_thread_list (currthread))
-    add_thread (currthread);
+    {
+      add_thread (currthread);
+      printf_filtered ("[New %s]\n", target_pid_to_str (currthread));
+    }
 }
 
 #define MAGIC_NULL_PID 42000
@@ -1264,6 +1288,35 @@ remote_find_new_threads ()
     inferior_pid = remote_current_thread (inferior_pid);
 }
 
+static void
+remote_threads_info (void)
+{
+  char buf[PBUFSIZ], *bufp;
+  int tid;
+
+  if (remote_desc == 0)		/* paranoia */
+    error ("Command can only be used when connected to the remote target.");
+
+  putpkt ("qfThreadInfo");
+  getpkt (bufp = buf, 0);
+  if (bufp[0] == '\0')		/* q packet not recognized! */
+    {				/* try old jmetzler method  */
+      remote_find_new_threads ();
+      return;
+    }
+  else				/* try new 'q' method */
+    while (*bufp++ == 'm')		/* reply contains one or more TID */
+      {
+	do {
+	  tid = strtol(bufp, &bufp, 16);
+	  if (tid != 0 && !in_thread_list (tid))
+	    add_thread (tid);
+	} while (*bufp++ == ',');		/* comma-separated list */
+	putpkt ("qsThreadInfo");
+	getpkt (bufp = buf, 0);
+      }
+}
+
 
 /*  Restart the remote side; this is an extended protocol operation.  */
 
@@ -1381,7 +1434,140 @@ get_offsets ()
   objfile_relocate (symfile_objfile, offs);
 }
 
+/*
+ * Cisco version of section offsets:
+ *
+ * Instead of having GDB query the target for the section offsets,
+ * Cisco lets the target volunteer the information!  It's also in
+ * a different format, so here are the functions that will decode
+ * a section offset packet from a Cisco target.
+ */
+
+/* 
+ * Function: remote_cisco_section_offsets
+ *
+ * Returns:  zero for success, non-zero for failure 
+ */
+
+static int 
+remote_cisco_section_offsets (text_addr, data_addr, bss_addr, 
+			      text_offs, data_offs, bss_offs)
+     bfd_vma text_addr;
+     bfd_vma data_addr;
+     bfd_vma bss_addr;
+     bfd_signed_vma * text_offs;
+     bfd_signed_vma * data_offs;
+     bfd_signed_vma * bss_offs;
+{
+  bfd_vma text_base, data_base, bss_base;
+  struct minimal_symbol *start;
+  asection *sect;
+  bfd * abfd;
+  int len;
+  char *p;
+
+  if (symfile_objfile == NULL)
+    return -1;		/* no can do nothin' */
+
+  start = lookup_minimal_symbol ("_start", NULL, NULL);
+  if (start == NULL)
+    return -1;		/* Can't find "_start" symbol */
+
+  data_base = bss_base = 0;
+  text_base = SYMBOL_VALUE_ADDRESS (start);
+
+  abfd = symfile_objfile->obfd;
+    for (sect = abfd->sections; 
+       sect != 0;
+       sect = sect->next)
+    {
+      p   = (unsigned char *) bfd_get_section_name (abfd, sect);
+      len = strlen (p);
+      if (strcmp (p + len - 4, "data") == 0)	/* ends in "data" */
+	if (data_base == 0 ||
+	    data_base > bfd_get_section_vma (abfd, sect))
+	  data_base = bfd_get_section_vma (abfd, sect);
+      if (strcmp (p + len - 3, "bss") == 0)	/* ends in "bss" */
+	if (bss_base == 0 || 
+	    bss_base > bfd_get_section_vma (abfd, sect))
+	  bss_base = bfd_get_section_vma (abfd, sect);
+    }
+  *text_offs = text_addr - text_base;
+  *data_offs = data_addr - data_base;
+  *bss_offs  = bss_addr  - bss_base;
+  if (remote_debug)
+    {
+      char tmp[128];
+
+      sprintf (tmp, "VMA:          text = 0x");
+      sprintf_vma (tmp + strlen (tmp), text_addr);
+      sprintf     (tmp + strlen (tmp), " data = 0x");
+      sprintf_vma (tmp + strlen (tmp), data_addr);
+      sprintf     (tmp + strlen (tmp), " bss = 0x");
+      sprintf_vma (tmp + strlen (tmp), bss_addr);
+      fprintf_filtered (gdb_stdlog, tmp);
+      fprintf_filtered (gdb_stdlog,
+			"Reloc offset: text = 0x%x data = 0x%x bss = 0x%x\n",
+		       (long) *text_offs, (long) *data_offs, (long) *bss_offs);
+    }
+
+  return 0;
+}
+
+/*
+ * Function: remote_cisco_objfile_relocate
+ *
+ * Relocate the symbol file for a remote target. 
+ */
+
+static void
+remote_cisco_objfile_relocate (text_off, data_off, bss_off)
+     bfd_signed_vma text_off;
+     bfd_signed_vma data_off;
+     bfd_signed_vma bss_off;
+{
+  struct section_offsets *offs;
+
+  if (text_off != 0 || data_off != 0 || bss_off  != 0)
+    {
+      /* FIXME: This code assumes gdb-stabs.h is being used; it's
+	 broken for xcoff, dwarf, sdb-coff, etc.  But there is no
+	 simple canonical representation for this stuff.  */
+
+      offs = ((struct section_offsets *)
+	      alloca (sizeof (struct section_offsets)
+		      + (symfile_objfile->num_sections
+			 * sizeof (offs->offsets))));
+
+      memcpy (offs, symfile_objfile->section_offsets,
+	      (sizeof (struct section_offsets)
+	       + (symfile_objfile->num_sections
+		  * sizeof (offs->offsets))));
+
+      ANOFFSET (offs, SECT_OFF_TEXT) = text_off;
+      ANOFFSET (offs, SECT_OFF_DATA) = data_off;
+      ANOFFSET (offs, SECT_OFF_BSS)  = bss_off;
+
+      /* First call the standard objfile_relocate.  */
+      objfile_relocate (symfile_objfile, offs);
+
+      /* Now we need to fix up the section entries already attached to
+	 the exec target.  These entries will control memory transfers
+	 from the exec file.  */
+
+      exec_set_section_offsets (text_off, data_off, bss_off);
+    }
+}
+
 /* Stub for catch_errors.  */
+
+static int
+remote_start_remote_dummy (dummy)
+     char *dummy;
+{
+  start_remote ();		/* Initialize gdb process mechanisms */
+  return 1;
+}
 
 static int
 remote_start_remote (dummy)
@@ -1402,8 +1588,7 @@ remote_start_remote (dummy)
   putpkt ("?");			/* initiate a query from remote machine */
   immediate_quit = 0;
 
-  start_remote ();		/* Initialize gdb process mechanisms */
-  return 1;
+  return remote_start_remote_dummy (dummy);
 }
 
 /* Open a connection to a remote debugger.
@@ -1629,7 +1814,7 @@ remote_interrupt (signo)
   signal (signo, remote_interrupt_twice);
 
   if (remote_debug)
-    printf_unfiltered ("remote_interrupt called\n");
+    fprintf_unfiltered (gdb_stdlog, "remote_interrupt called\n");
 
   target_stop ();
 }
@@ -1653,7 +1838,7 @@ remote_stop ()
 {
   /* Send a break or a ^C, depending on user preference.  */
   if (remote_debug)
-    printf_unfiltered ("remote_stop called\n");
+    fprintf_unfiltered (gdb_stdlog, "remote_stop called\n");
 
   if (remote_break)
     SERIAL_SEND_BREAK (remote_desc);
@@ -1701,9 +1886,10 @@ remote_console_output (msg)
     }
 }
 
-/* Wait until the remote machine stops, then return, storing status in
-   STATUS just as `wait' would.  Returns "pid" (though it's not clear
-   what, if anything, that means in the case of this target).  */
+/* Wait until the remote machine stops, then return,
+   storing status in STATUS just as `wait' would.
+   Returns "pid", which in the case of a multi-threaded 
+   remote OS, is the thread-id.  */
 
 static int
 remote_wait (pid, status)
@@ -1808,7 +1994,72 @@ Packet: '%s'\n",
 	  status->value.sig = (enum target_signal)
 	    (((fromhex (buf[1])) << 4) + (fromhex (buf[2])));
 
+	  if (buf[3] == 'p')
+	    {
+	      /* Export Cisco kernel mode as a convenience variable
+		 (so that it can be used in the GDB prompt if desired). */
+
+	      if (cisco_kernel_mode == 1)
+		set_internalvar (lookup_internalvar ("cisco_kernel_mode"), 
+				 value_from_string ("PDEBUG-"));
+	      cisco_kernel_mode = 0;
+	      thread_num = strtol ((const char *) &buf[4], NULL, 16);
+	      record_currthread (thread_num);
+	    }
+	  else if (buf[3] == 'k')
+	    {
+	      /* Export Cisco kernel mode as a convenience variable
+		 (so that it can be used in the GDB prompt if desired). */
+
+	      if (cisco_kernel_mode == 1)
+		set_internalvar (lookup_internalvar ("cisco_kernel_mode"), 
+				 value_from_string ("KDEBUG-"));
+	      cisco_kernel_mode = 1;
+	    }
 	  goto got_status;
+	case 'N':		/* Cisco special: status and offsets */
+	  {
+	    bfd_vma text_addr, data_addr, bss_addr;
+	    bfd_signed_vma text_off, data_off, bss_off;
+	    unsigned char *p1;
+
+	    status->kind = TARGET_WAITKIND_STOPPED;
+	    status->value.sig = (enum target_signal)
+	      (((fromhex (buf[1])) << 4) + (fromhex (buf[2])));
+
+	    if (symfile_objfile == NULL) 
+	      {
+		warning ("Relocation packet recieved with no symbol file.  \
+Packet Dropped");
+		goto got_status;
+	      }
+
+	    /* Relocate object file.  Buffer format is NAATT;DD;BB
+	     * where AA is the signal number, TT is the new text
+	     * address, DD * is the new data address, and BB is the
+	     * new bss address.  */
+
+	    p = &buf[3];
+	    text_addr = strtoul (p, (char **) &p1, 16);
+	    if (p1 == p || *p1 != ';')
+	      warning ("Malformed relocation packet: Packet '%s'", buf);
+	    p = p1 + 1;
+	    data_addr = strtoul (p, (char **) &p1, 16);
+	    if (p1 == p || *p1 != ';')
+	      warning ("Malformed relocation packet: Packet '%s'", buf);
+	    p = p1 + 1;
+	    bss_addr = strtoul (p, (char **) &p1, 16);
+	    if (p1 == p) 
+	      warning ("Malformed relocation packet: Packet '%s'", buf);
+
+	    if (remote_cisco_section_offsets (text_addr, data_addr, bss_addr,
+					      &text_off, &data_off, &bss_off)
+		== 0)
+	      if (text_off != 0 || data_off != 0 || bss_off  != 0) 
+		remote_cisco_objfile_relocate (text_off, data_off, bss_off);
+
+	    goto got_status;
+	  }
 	case 'W':		/* Target exited */
 	  {
 	    /* The remote process exited.  */
@@ -1851,15 +2102,6 @@ Packet: '%s'\n",
  got_status:
   if (thread_num != -1)
     {
-      /* Initial thread value can only be acquired via wait, so deal with
-	 this marker which is used before the first thread value is
-	 acquired.  */
-      if (inferior_pid == MAGIC_NULL_PID)
-	{
-	  inferior_pid = thread_num;
-	  if (!in_thread_list (inferior_pid))
-	    add_thread (inferior_pid);
-	}
       return thread_num;
     }
   return inferior_pid;
@@ -1901,7 +2143,8 @@ remote_fetch_registers (regno)
 	 && buf[0] != 'x')	/* New: unavailable register value */
     {
       if (remote_debug)
-	printf_unfiltered ("Bad register packet; fetching a new packet\n");
+	fprintf_unfiltered (gdb_stdlog,
+			    "Bad register packet; fetching a new packet\n");
       getpkt (buf, 0);
     }
 
@@ -2138,9 +2381,11 @@ check_binary_download (addr)
   if (remote_debug)
     {
       if (remote_binary_download)
-	printf_unfiltered ("binary downloading suppported by target\n");
+	fprintf_unfiltered (gdb_stdlog,
+			    "binary downloading suppported by target\n");
       else
-	printf_unfiltered ("binary downloading NOT suppported by target\n");
+	fprintf_unfiltered (gdb_stdlog,
+			    "binary downloading NOT suppported by target\n");
     }
 }
 
@@ -2566,8 +2811,8 @@ putpkt_binary (buf, cnt)
       if (remote_debug)
 	{
 	  *p = '\0';
-	  printf_unfiltered ("Sending packet: %s...", buf2);
-	  gdb_flush (gdb_stdout);
+	  fprintf_unfiltered (gdb_stdlog, "Sending packet: %s...", buf2);
+	  gdb_flush (gdb_stdlog);
 	}
       if (SERIAL_WRITE (remote_desc, buf2, p - buf2))
 	perror_with_name ("putpkt: write failed");
@@ -2596,7 +2841,7 @@ putpkt_binary (buf, cnt)
 	    {
 	    case '+':
 	      if (remote_debug)
-		printf_unfiltered ("Ack\n");
+		fprintf_unfiltered (gdb_stdlog, "Ack\n");
 	      return 1;
 	    case SERIAL_TIMEOUT:
 	      tcount ++;
@@ -2618,9 +2863,9 @@ putpkt_binary (buf, cnt)
 		  if (!started_error_output)
 		    {
 		      started_error_output = 1;
-		      printf_unfiltered ("putpkt: Junk: ");
+		      fprintf_unfiltered (gdb_stdlog, "putpkt: Junk: ");
 		    }
-		  putchar_unfiltered (ch & 0177);
+		  fputc_unfiltered (ch & 0177, gdb_stdlog);
 		}
 	      continue;
 	    }
@@ -2640,6 +2885,32 @@ putpkt_binary (buf, cnt)
 	}
 #endif
     }
+}
+
+static int remote_cisco_mode;
+
+static void remote_cisco_expand (src, dest)
+     char *src;
+     char *dest;
+{
+  int i;
+  int repeat;
+
+  do {
+    if (*src == '*') 
+      {
+	repeat = (fromhex (src[1]) << 4) + fromhex (src[2]);
+	for (i = 0; i < repeat; i++) 
+	  {
+	    *dest++ = *(src-1);
+	  }
+	src += 2;
+      }
+    else 
+      {
+	*dest++ = *src;
+      }
+  } while (*src++);
 }
 
 /* Come here after finding the start of the frame.  Collect the rest
@@ -2665,11 +2936,12 @@ read_frame (buf)
 	{
 	case SERIAL_TIMEOUT:
 	  if (remote_debug)
-	    puts_filtered ("Timeout in mid-packet, retrying\n");
+	    fputs_filtered ("Timeout in mid-packet, retrying\n", gdb_stdlog);
 	  return 0;
 	case '$':
 	  if (remote_debug)
-	    puts_filtered ("Saw new packet start in middle of old one\n");
+	    fputs_filtered ("Saw new packet start in middle of old one\n",
+			    gdb_stdlog);
 	  return 0;		/* Start a new packet, count retries */
 	case '#':
 	  {
@@ -2681,37 +2953,49 @@ read_frame (buf)
 	    pktcsum |= fromhex (readchar (remote_timeout));
 
 	    if (csum == pktcsum)
-	      return 1;
+	      {
+		if (remote_cisco_mode)	/* variant run-length-encoding */
+		  {
+		    char tmp_buf[PBUFSIZ];
+
+		    remote_cisco_expand (buf, tmp_buf);
+		    strcpy (buf, tmp_buf);
+		  }
+		return 1;
+	      }
 
 	    if (remote_debug) 
 	      {
-		printf_filtered ("Bad checksum, sentsum=0x%x, csum=0x%x, buf=",
-				 pktcsum, csum);
-		puts_filtered (buf);
-		puts_filtered ("\n");
+		fprintf_filtered (gdb_stdlog,
+				  "Bad checksum, sentsum=0x%x, csum=0x%x, buf=",
+				  pktcsum, csum);
+		fputs_filtered (buf, gdb_stdlog);
+		fputs_filtered ("\n", gdb_stdlog);
 	      }
 	    return 0;
 	  }
 	case '*':		/* Run length encoding */
-	  csum += c;
-	  c = readchar (remote_timeout);
-	  csum += c;
-	  c = c - ' ' + 3;	/* Compute repeat count */
-
-
-	  if (c > 0 && c < 255 && bp + c - 1 < buf + PBUFSIZ - 1)
+	  if (remote_cisco_mode == 0)	/* variant run-length-encoding */
 	    {
-	      memset (bp, *(bp - 1), c);
-	      bp += c;
-	      continue;
+	      csum += c;
+	      c = readchar (remote_timeout);
+	      csum += c;
+	      c = c - ' ' + 3;	/* Compute repeat count */
+
+	      if (c > 0 && c < 255 && bp + c - 1 < buf + PBUFSIZ - 1)
+		{
+		  memset (bp, *(bp - 1), c);
+		  bp += c;
+		  continue;
+		}
+
+	      *bp = '\0';
+	      printf_filtered ("Repeat count %d too large for buffer: ", c);
+	      puts_filtered (buf);
+	      puts_filtered ("\n");
+	      return 0;
 	    }
-
-	  *bp = '\0';
-	  printf_filtered ("Repeat count %d too large for buffer: ", c);
-	  puts_filtered (buf);
-	  puts_filtered ("\n");
-	  return 0;
-
+	  /* else fall thru to treat like default */
 	default:
 	  if (bp < buf + PBUFSIZ - 1)
 	    {
@@ -2779,7 +3063,7 @@ getpkt (buf, forever)
 		  error ("Watchdog has expired.  Target detached.\n");
 		}
 	      if (remote_debug)
-		puts_filtered ("Timed out.\n");
+		fputs_filtered ("Timed out.\n", gdb_stdlog);
 	      goto retry;
 	    }
 	}
@@ -2792,7 +3076,7 @@ getpkt (buf, forever)
       if (val == 1)
 	{
 	  if (remote_debug)
-	    fprintf_unfiltered (gdb_stdout, "Packet received: %s\n", buf);
+	    fprintf_unfiltered (gdb_stdlog, "Packet received: %s\n", buf);
 	  SERIAL_WRITE (remote_desc, "+", 1);
 	  return;
 	}
@@ -3390,7 +3674,7 @@ Specify the serial device it is connected to (e.g. /dev/ttya).";
   remote_ops.to_load = generic_load;		
   remote_ops.to_mourn_inferior = remote_mourn;
   remote_ops.to_thread_alive = remote_thread_alive;
-  remote_ops.to_find_new_threads = remote_find_new_threads;
+  remote_ops.to_find_new_threads = remote_threads_info;
   remote_ops.to_stop = remote_stop;
   remote_ops.to_query = remote_query;
   remote_ops.to_stratum = process_stratum;
@@ -3411,21 +3695,425 @@ init_extended_remote_ops ()
 {
   extended_remote_ops = remote_ops;
 
-  extended_remote_ops.to_shortname = "extended-remote";	
+  extended_remote_ops.to_shortname = "extended-remote";
   extended_remote_ops.to_longname = 
     "Extended remote serial target in gdb-specific protocol";
   extended_remote_ops.to_doc = 
     "Use a remote computer via a serial line, using a gdb-specific protocol.\n\
 Specify the serial device it is connected to (e.g. /dev/ttya).",
-  extended_remote_ops.to_open = extended_remote_open;	
+  extended_remote_ops.to_open = extended_remote_open;
   extended_remote_ops.to_create_inferior = extended_remote_create_inferior;
   extended_remote_ops.to_mourn_inferior = extended_remote_mourn;
-} 
+}
+
+/*
+ * Command: info remote-process
+ *
+ * This implements Cisco's version of the "info proc" command.
+ *
+ * This query allows the target stub to return an arbitrary string
+ * (or strings) giving arbitrary information about the target process.
+ * This is optional; the target stub isn't required to implement it.
+ *
+ * Syntax: qfProcessInfo        request first string
+ *         qsProcessInfo        request subsequent string
+ * reply:  'O'<hex-encoded-string>
+ *         'l'                  last reply (empty)
+ */
+
+static void
+remote_info_process (args, from_tty)
+     char *args;
+     int from_tty;
+{
+  char buf[PBUFSIZ];
+
+  if (remote_desc == 0)
+    error ("Command can only be used when connected to the remote target.");
+
+  putpkt ("qfProcessInfo");
+  getpkt (buf, 0);
+  if (buf[0] == 0)
+    return;             /* Silently: target does not support this feature. */
+
+  if (buf[0] == 'E')
+    error ("info proc: target error.");
+
+  while (buf[0] == 'O') /* Capitol-O packet */
+    {
+      remote_console_output (&buf[1]);
+      putpkt ("qsProcessInfo");
+      getpkt (buf, 0);
+    }
+}
+
+/*
+ * Target Cisco 
+ */
+
+static void
+remote_cisco_open (name, from_tty)
+     char *name;
+     int from_tty;
+{
+  if (name == 0)
+    error (
+"To open a remote debug connection, you need to specify what \n\
+device is attached to the remote system (e.g. host:port).");
+
+  target_preopen (from_tty);
+
+  unpush_target (&remote_cisco_ops);
+
+  remote_dcache = dcache_init (remote_read_bytes, remote_write_bytes);
+
+  remote_desc = SERIAL_OPEN (name);
+  if (!remote_desc)
+    perror_with_name (name);
+
+  /*
+   * If a baud rate was specified on the gdb  command line it will
+   * be greater than the initial value of -1.  If it is, use it otherwise
+   * default to 9600
+   */
+
+  baud_rate = (baud_rate > 0) ? baud_rate : 9600;
+  if (SERIAL_SETBAUDRATE (remote_desc, baud_rate)) 
+    {
+      SERIAL_CLOSE (remote_desc);
+      perror_with_name (name);
+    }
+
+  SERIAL_RAW (remote_desc);
+
+  /* If there is something sitting in the buffer we might take it as a
+     response to a command, which would be bad.  */
+  SERIAL_FLUSH_INPUT (remote_desc);
+
+  if (from_tty)
+    {
+      puts_filtered ("Remote debugging using ");
+      puts_filtered (name);
+      puts_filtered ("\n");
+    }
+
+  remote_cisco_mode = 1;
+
+  push_target (&remote_cisco_ops);	/* Switch to using cisco target now */
+
+  /* Start out by trying the 'P' request to set registers.  We set this each
+     time that we open a new target so that if the user switches from one
+     stub to another, we can (if the target is closed and reopened) cope.  */
+  stub_supports_P = 1;
+
+  general_thread  = -2;
+  continue_thread = -2;
+
+  /* Force remote_write_bytes to check whether target supports
+     binary downloading. */
+  remote_binary_checked = 0;
+
+  /* Without this, some commands which require an active target (such
+     as kill) won't work.  This variable serves (at least) double duty
+     as both the pid of the target process (if it has such), and as a
+     flag indicating that a target is active.  These functions should
+     be split out into seperate variables, especially since GDB will
+     someday have a notion of debugging several processes.  */
+  inferior_pid = MAGIC_NULL_PID;
+
+  /* Start the remote connection; if error (0), discard this target. */
+
+  if (!catch_errors (remote_start_remote_dummy, (char *) 0, 
+		     "Couldn't establish connection to remote target\n", 
+		     RETURN_MASK_ALL))
+    {
+      pop_target ();
+      return;
+    }
+}
+
+static void
+remote_cisco_close (quitting)
+     int quitting;
+{
+  remote_cisco_mode = 0;
+  remote_close (quitting);
+}
+
+static void 
+remote_cisco_mourn PARAMS ((void))
+{
+  remote_mourn_1 (&remote_cisco_ops);
+}
+
+enum {
+  READ_MORE, 
+  FATAL_ERROR, 
+  ENTER_DEBUG, 
+  DISCONNECT_TELNET
+} minitelnet_return;
+
+/* shared between readsocket() and readtty()  */
+static char *tty_input;
+
+static int escape_count;
+static int echo_check;
+extern int quit_flag;
+
+static int
+readsocket ()
+{
+  int data;
+
+  /* Loop until the socket doesn't have any more data */
+
+  while ((data = readchar (0)) >= 0) 
+    {
+      /* Check for the escape sequence */
+      if (data == '|') 
+	{
+	  /* If this is the fourth escape, get out */
+	  if (++escape_count == 4) 
+	    {
+	      return ENTER_DEBUG;
+	    }
+	  else 
+	    { /* This is a '|', but not the fourth in a row. 
+		 Continue without echoing it.  If it isn't actually 
+		 one of four in a row, it'll be echoed later.  */
+	      continue;
+	    }
+	}
+      else /* Not a '|' */
+	{ 
+	  /* Ensure any pending '|'s are flushed.  */
+
+	  for ( ; escape_count > 0; escape_count--)
+	    putchar('|');
+	}
+		
+      if (data == '\r')			/* If this is a return character, */
+	continue;			/*  - just supress it. */
+
+      if (echo_check != -1) 		/* Check for echo of user input.  */
+	{
+	  if (tty_input[echo_check] == data)
+	    {
+	      echo_check++;		/* Character matched user input: */
+	      continue;			/* Continue without echoing it.  */
+	    }
+	  else if ((data == '\n') && (tty_input[echo_check] == '\r')) 
+	    { /* End of the line (and of echo checking).  */
+	      echo_check = -1;		/* No more echo supression */
+	      continue;			/* Continue without echoing.  */
+	    }
+	  else
+	    { /* Failed check for echo of user input.
+		 We now have some suppressed output to flush!  */
+	      int j;
+
+	      for (j = 0; j < echo_check; j++) 
+		putchar (tty_input[j]);
+	      echo_check = -1;
+	    }
+	}
+      putchar (data);			/* Default case: output the char.  */
+    }
+
+  if (data == SERIAL_TIMEOUT)		/* Timeout returned from readchar.  */
+    return READ_MORE;			/* Try to read some more */
+  else 
+    return FATAL_ERROR;			/* Trouble, bail out */
+}
+
+static int
+readtty ()
+{
+  int status;
+  int tty_bytecount;
+
+  /* First, read a buffer full from the terminal */
+  tty_bytecount = read (fileno (stdin), tty_input, sizeof (tty_input) - 1);
+  if (tty_bytecount == -1) 
+    {
+      perror ("readtty: read failed");
+      return FATAL_ERROR;
+    }
+
+  /* Remove a quoted newline.  */
+  if (tty_input[tty_bytecount - 1] == '\n' &&
+      tty_input[tty_bytecount - 2] == '\\')	/* line ending in backslash */
+    {
+      tty_input[--tty_bytecount] = 0;		/* remove newline */
+      tty_input[--tty_bytecount] = 0;		/* remove backslash */
+    }
+
+  /* Turn trailing newlines into returns */
+  if (tty_input[tty_bytecount - 1] == '\n')
+    tty_input[tty_bytecount - 1]   =  '\r';
+
+  /* If the line consists of a ~, enter debugging mode.  */
+  if ((tty_input[0] == '~') && (tty_bytecount == 2))
+    return ENTER_DEBUG;
+
+  /* Make this a zero terminated string and write it out */
+  tty_input[tty_bytecount] = 0;
+  if (SERIAL_WRITE (remote_desc, tty_input, tty_bytecount)) 
+    {
+      perror_with_name ("readtty: write failed");
+      return FATAL_ERROR;
+    }
+
+  return READ_MORE;
+}
+
+static int
+minitelnet ()
+{
+  fd_set input;			/* file descriptors for select */
+  int    tablesize;		/* max number of FDs for select */
+  int    status;
+  int    quit_count = 0;
+
+  extern int escape_count;	/* global shared by readsocket */
+  extern int echo_check;	/* ditto */
+
+  escape_count = 0;
+  echo_check   = -1;
+
+  tablesize = 8 * sizeof (input);
+
+  for (;;) 
+    {
+      /* Check for anything from our socket - doesn't block. Note that
+	 this must be done *before* the select as there may be
+	 buffered I/O waiting to be processed.  */
+
+      if ((status = readsocket ()) == FATAL_ERROR) 
+	{
+	  error ("Debugging terminated by communications error");
+	}
+      else if (status != READ_MORE) 
+	{
+	  return (status);
+	}
+
+      fflush(stdout);			/* Flush output before blocking */
+
+      /* Now block on more socket input or TTY input */
+    
+      FD_ZERO (&input);
+      FD_SET (fileno(stdin), &input);
+      FD_SET (remote_desc->fd, &input);
+
+      status = select (tablesize, &input, 0, 0, 0);
+      if ((status == -1) && (errno != EINTR)) 
+	{
+	  error ("Communications error on select %d", errno);
+	}
+
+      /* Handle Control-C typed */
+
+      if (quit_flag) 
+	{
+	  if ((++quit_count) == 2)
+	    {
+	      if (query ("Interrupt GDB? "))
+		{
+		  printf_filtered ("Interrupted by user.\n");
+		  return_to_top_level (RETURN_QUIT);
+		}
+	      quit_count = 0;
+	    }
+	  quit_flag = 0;
+
+	  if (remote_break)
+	    SERIAL_SEND_BREAK (remote_desc);
+	  else
+	    SERIAL_WRITE (remote_desc, "\003", 1);
+
+	  continue;
+	}
+
+      /* Handle console input */
+
+      if (FD_ISSET (fileno (stdin), &input)) 
+	{
+	  quit_count = 0;
+	  echo_check = 0;
+	  status = readtty ();
+	  if (status == READ_MORE)
+	    continue;
+
+	  return status;	/* telnet session ended */
+	}
+    }
+}
+
+static int
+remote_cisco_wait (pid, status)
+     int pid;
+     struct target_waitstatus *status;
+{
+  if (minitelnet() != ENTER_DEBUG) 
+    {
+      error ("Debugging session terminated by protocol error");
+    }
+  putpkt ("?");
+  return remote_wait (pid, status);
+}
+
+static void
+init_remote_cisco_ops ()
+{
+  remote_cisco_ops.to_shortname = "cisco";
+  remote_cisco_ops.to_longname  = "Remote serial target in cisco-specific protocol";
+  remote_cisco_ops.to_doc       = 
+    "Use a remote machine via TCP, using a cisco-specific protocol.\n\
+Specify the serial device it is connected to (e.g. host:2020).";
+  remote_cisco_ops.to_open              = remote_cisco_open;
+  remote_cisco_ops.to_close             = remote_cisco_close;
+  remote_cisco_ops.to_detach            = remote_detach;
+  remote_cisco_ops.to_resume            = remote_resume;
+  remote_cisco_ops.to_wait              = remote_cisco_wait;
+  remote_cisco_ops.to_fetch_registers   = remote_fetch_registers;
+  remote_cisco_ops.to_store_registers   = remote_store_registers;
+  remote_cisco_ops.to_prepare_to_store  = remote_prepare_to_store;
+  remote_cisco_ops.to_xfer_memory       = remote_xfer_memory;
+  remote_cisco_ops.to_files_info        = remote_files_info;
+  remote_cisco_ops.to_insert_breakpoint = remote_insert_breakpoint;
+  remote_cisco_ops.to_remove_breakpoint = remote_remove_breakpoint;
+  remote_cisco_ops.to_kill              = remote_kill;
+  remote_cisco_ops.to_load              = generic_load;
+  remote_cisco_ops.to_mourn_inferior    = remote_cisco_mourn;
+  remote_cisco_ops.to_thread_alive      = remote_thread_alive;
+  remote_cisco_ops.to_find_new_threads  = remote_threads_info;
+  remote_cisco_ops.to_stratum           = process_stratum;
+  remote_cisco_ops.to_has_all_memory    = 1;
+  remote_cisco_ops.to_has_memory        = 1;
+  remote_cisco_ops.to_has_stack         = 1;
+  remote_cisco_ops.to_has_registers     = 1;
+  remote_cisco_ops.to_has_execution     = 1;
+  remote_cisco_ops.to_magic             = OPS_MAGIC;
+}
+
+static void
+build_remote_gdbarch_data ()
+{
+  tty_input = xmalloc (PBUFSIZ);
+}
+
 
 void
 _initialize_remote ()
 {
-  /* runtime constants */
+  /* architecture specific data */
+  build_remote_gdbarch_data ();
+  register_gdbarch_swap (&tty_input, sizeof (&tty_input), NULL);
+  register_gdbarch_swap (NULL, 0, build_remote_gdbarch_data);
+
+  /* runtime constants - we retain the value of remote_write_size
+     across architecture swaps. */
   remote_write_size = PBUFSIZ;
 
   init_remote_ops ();
@@ -3433,6 +4121,9 @@ _initialize_remote ()
 
   init_extended_remote_ops ();
   add_target (&extended_remote_ops);
+
+  init_remote_cisco_ops ();
+  add_target (&remote_cisco_ops);
 
 #if 0
   init_remote_threadtests ();
@@ -3487,4 +4178,8 @@ in a memory packet.\n",
 		  var_boolean, (char *) &remote_binary_download,
 		  "Set binary downloads.\n", &setlist),
      &showlist);
+
+  add_info ("remote-process", remote_info_process,
+	    "Query the remote system for process info.");
+
 }

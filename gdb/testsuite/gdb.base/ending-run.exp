@@ -141,6 +141,7 @@ gdb_expect {
 	    -re ".*in.*start.*$gdb_prompt $" { 
 		pass "step out of main"
 	    }
+            -re ".*$gdb_prompt $" { fail "step at end 2" }
 	    timeout { fail "hang or timeout on step at end 2" }
 	}
     }
@@ -157,6 +158,7 @@ gdb_expect {
     -re ".*Program received signal SIGTRAP.*$gdb_prompt $" {
         pass "Cygmon stopped in ending trap."
     }
+    -re ".*$gdb_prompt $" { fail "step at end 1" }
     timeout { fail "hang or timeout on step at end 1" }
 }
 

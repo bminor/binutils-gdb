@@ -1,3 +1,4 @@
+hp testsuite (gdb.hp)	Jimmy Guo	 adl-debugger-wdb-merge-guru@cup.hp.com
 d10v target		Andrew Cagney		cagney@cygnus.com
 d30v target		Andrew Cagney		cagney@cygnus.com
 mips target		Andrew Cagney		cagney@cygnus.com
@@ -17,6 +18,7 @@ elf reader		Jim Blandy		jimb@cygnus.com
 stabs reader		Jim Blandy		jimb@cygnus.com
 x86 linux native	Jim Blandy		jimb@cygnus.com
 Scheme support		Jim Blandy		jimb@cygnus.com
+svr4 shlibs (solib.c)	Jim Blandy		jimb@cygnus.com
 hurd native		Mark Kettenis		kettenis@wins.va.nl
 hpux, hp pa native	Jeff Law		law@cygnus.com
 m32r target		Michael Snyder		msnyder@cygnus.com

@@ -19,10 +19,13 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /* Contributed by Martin Hunt, hunt@cygnus.com */
 
+#define GDB_MULTI_ARCH 1
 
 /* #define GDB_TARGET_IS_D10V - moved to gdbarch.h */
 
 /* Define the bit, byte, and word ordering of the machine.  */
+
+#if !GDB_MULTI_ARCH
 
 #define TARGET_BYTE_ORDER	BIG_ENDIAN
 
@@ -53,6 +56,8 @@ extern char *d10v_register_name PARAMS ((int reg_nr));
 
 #define NUM_REGS 37
 
+#endif /* GDB_MULTI_ARCH */
+
 /* Register numbers of various important registers.
    Note that some of these values are "real" register numbers,
    and correspond to the general registers of the machine,
@@ -64,14 +69,18 @@ extern char *d10v_register_name PARAMS ((int reg_nr));
 
 #define R0_REGNUM	0
 #define LR_REGNUM 	13
+#if !GDB_MULTI_ARCH
 #define SP_REGNUM 	15
 #define FP_REGNUM	11
 #define PC_REGNUM 	18
+#endif
 #define PSW_REGNUM 	16
 #define IMAP0_REGNUM	32
 #define IMAP1_REGNUM	33
 #define DMAP_REGNUM	34
 #define A0_REGNUM 	35
+
+#if !GDB_MULTI_ARCH
 
 /* ??? */
 #define REGISTER_SIZE 2
@@ -298,3 +307,4 @@ extern void remote_d10v_translate_xfer_address PARAMS ((CORE_ADDR gdb_addr, int 
 #define REMOTE_TRANSLATE_XFER_ADDRESS(GDB_ADDR, GDB_LEN, REM_ADDR, REM_LEN) \
  remote_d10v_translate_xfer_address ((GDB_ADDR), (GDB_LEN), (REM_ADDR), (REM_LEN))
 
+#endif

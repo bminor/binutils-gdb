@@ -531,7 +531,8 @@ gdb_wait_for_event ()
 {
   file_handler *file_ptr;
   gdb_event *file_event_ptr;
-  int num_found, i;
+  int num_found = 0;
+  int i;
 
 #ifndef HAVE_POLL
   int mask, bit, index;

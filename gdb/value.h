@@ -276,6 +276,8 @@ extern value_ptr value_from_longest PARAMS ((struct type *type, LONGEST num));
 
 extern value_ptr value_from_double PARAMS ((struct type *type, DOUBLEST num));
 
+extern value_ptr value_from_string PARAMS ((char *string));
+
 extern value_ptr value_at PARAMS ((struct type *type, CORE_ADDR addr, asection *sect));
 
 extern value_ptr value_at_lazy PARAMS ((struct type *type, CORE_ADDR addr, asection *sect));

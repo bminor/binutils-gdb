@@ -43,6 +43,11 @@ char * s7;
   return bigbuf;
 }
 
+char *
+link_malloc ()
+{
+  return (char*) malloc (1);
+}
 
 main()
 {
