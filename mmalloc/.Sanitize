@@ -34,6 +34,7 @@ detach.c
 keys.c
 mcalloc.c
 mfree.c
+mm.c
 mmalloc.c
 mmalloc.h
 mmalloc.texi
