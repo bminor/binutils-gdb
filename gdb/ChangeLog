@@ -1,3 +1,8 @@
+2002-12-17  Andrew Cagney  <ac131313@redhat.com>
+
+	* stack.c (frame_info): Use get_frame_saved_regs.
+	* breakpoint.c (until_break_command): Use get_frame_pc.
+
 2002-12-16  Kevin Buettner  <kevinb@redhat.com>
 
 	* buildsym.c (block_end_complaint, anon_block_end_complaint)

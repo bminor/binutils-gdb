@@ -5649,8 +5649,8 @@ until_break_command (char *arg, int from_tty)
 
   if (prev_frame)
     {
-      sal = find_pc_line (prev_frame->pc, 0);
-      sal.pc = prev_frame->pc;
+      sal = find_pc_line (get_frame_pc (prev_frame), 0);
+      sal.pc = get_frame_pc (prev_frame);
       breakpoint = set_momentary_breakpoint (sal, get_frame_id (prev_frame),
 					     bp_until);
       if (!event_loop_p || !target_can_async_p ())
