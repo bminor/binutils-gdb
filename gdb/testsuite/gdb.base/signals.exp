@@ -357,6 +357,7 @@ if [runto_main] then {
 The program being debugged stopped while in a function called from GDB.*" \
 	"p func1 () #2 in signals.exp"
     # But we should be able to backtrace...
+    setup_xfail "alpha-*-osf2"
     gdb_test "bt" "#0.*handler.*#1.*#2.*main.*" "bt in signals.exp"
     # ...and continue...
     gdb_test "continue" "Continuing\\." "continue in signals.exp"

@@ -1,24 +1,45 @@
+Mon Nov 27 11:40:16 1995  Fred Fish  <fnf@cygnus.com>
+
+	* gdb.base/signals.exp: Setup "alpha-*-osf2*" xfail for
+	"bt in signals.exp".
+
+Sat Nov 25 20:52:15 1995  Fred Fish  <fnf@phydeaux.cygnus.com>
+
+	* gdb.base/a1-selftest.exp: Add alpha-dec-osf2 setup_xfail for
+	"step over execarg initialization" and
+ 	"step over corearg initialization".
+
+Sat Nov 25 18:20:14 1995  Fred Fish  <fnf@cygnus.com>
+
+	* gdb.base/ptype.c (main): Declare malloc as a "char *" for systems
+	with sizeof(pointer) > sizeof(int).  Avoid "void *" or include files.
+
 Sat Nov 25 11:03:42 1995  Fred Fish  <fnf@cygnus.com>
 
 	From Rob Savoye  (rob@poseidon.cygnus.com)
 	* Makefile.in, configure.in, gdb.base/{Makefile.in, configure.in},
-	gdb.c++/{Makefile.in, configure.in}, gdb.chill/{Makefile.in, configure.in},
-	gdb.disasm/{Makefile.in, configure.in}, gdb.stabs/{Makefile.in, configure.in},
-	gdb.threads/{Makefile.in, configure.in}: Major reworking for autoconfig.
+	gdb.c++/{Makefile.in, configure.in}, gdb.chill/{Makefile.in,
+ 	configure.in}, gdb.disasm/{Makefile.in, configure.in},
+ 	gdb.stabs/{Makefile.in, configure.in}, gdb.threads/{Makefile.in,
+ 	configure.in}: Major reworking for autoconfig.
 	* aclocal.m4, configure, gdb.base/configure, gdb.c++/configure,
-	gdb.disasm/configure, gdb.stabs/configure, gdb.stabs/default.mt : New files.
+	gdb.disasm/configure, gdb.stabs/configure, gdb.stabs/default.mt :
+ 	New files.
 	* config/unix-gdb.exp:  Make GDB global.
-	* gdb.base/{a1-selftest.exp, a2-run.exp,bitfields.exp, break.exp, callfuncs.exp,
-	commands.exp, corefile.exp, crossload.exp, exprs.exp, funcargs.exp, interrupt.exp,
-	langs.exp, list.exp, mips_pro.exp, nodebug.exp, opaque.exp, printcmds.exp,
-	ptype.exp, recurse.exp, regs.exp, return.exp, scope.exp, setvar.exp, sigall.exp,
-	signals.exp, term.exp, twice.exp, watchpoint.exp, whatis.exp},
- 	gdb.c++/{classes.exp, callfuncs.exp, inherit.exp, misc.exp, templates.exp,
-	virtfunc.exp}, gdb.chill/{callch.exp, chillvars.exp, misc.exp, pr-4975.exp,
-	pr-5016.exp, pr-5020.exp, pr-5022.exp, pr-5646.exp, pr-5984.exp, pr-6292.exp,
-	pr-6632.exp, pr-8134.exp, pr-8136.exp, result.exp, string.exp, tuples.exp},
+	* gdb.base/{a1-selftest.exp, a2-run.exp,bitfields.exp, break.exp,
+ 	callfuncs.exp, commands.exp, corefile.exp, crossload.exp, exprs.exp,
+ 	funcargs.exp, interrupt.exp, langs.exp, list.exp, mips_pro.exp,
+ 	nodebug.exp, opaque.exp, printcmds.exp, ptype.exp, recurse.exp,
+ 	regs.exp, return.exp, scope.exp, setvar.exp, sigall.exp, signals.exp,
+ 	term.exp, twice.exp, watchpoint.exp, whatis.exp},
+	gdb.c++/{classes.exp, callfuncs.exp, inherit.exp, misc.exp,
+ 	templates.exp, virtfunc.exp}, gdb.chill/{callch.exp, chillvars.exp,
+ 	misc.exp, pr-4975.exp, pr-5016.exp, pr-5020.exp, pr-5022.exp,
+ 	pr-5646.exp, pr-5984.exp, pr-6292.exp, pr-6632.exp, pr-8134.exp,
+ 	pr-8136.exp, result.exp, string.exp, tuples.exp},
 	gdb.disasm/{hppa.exp, sh3.exp}, gdb.stabs/weird.exp: Change continues
- 	to returns as necessary, arrange for test to compile own testcase executable.
+ 	to returns as necessary, arrange for test to compile own testcase
+ 	executable.
 	* lib/gdb.exp: Changes for testsuite to compile own test cases.
 	
 Tue Nov 21 16:15:45 1995  Fred Fish  <fnf@cygnus.com>

@@ -154,6 +154,7 @@ proc test_with_self {} {
 	}
     }
 
+    setup_xfail "alpha-dec-osf2*"
     set description "step over execarg initialization"
     send "step\n"
     expect {
@@ -174,6 +175,7 @@ proc test_with_self {} {
 	}
     }
 
+    setup_xfail "alpha-dec-osf2*"
     set description "step over corearg initialization"
     send "step\n"
     expect {
