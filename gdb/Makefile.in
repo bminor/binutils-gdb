@@ -1535,6 +1535,11 @@ alpha-tdep.o: alpha-tdep.c $(defs_h) $(doublest_h) $(frame_h) \
 	$(symfile_h) $(objfiles_h) $(gdb_string_h) $(linespec_h) \
 	$(regcache_h) $(reggroups_h) $(arch_utils_h) $(osabi_h) $(block_h) \
 	$(elf_bfd_h) $(alpha_tdep_h)
+amd64fbsd-nat.o: amd64fbsd-nat.o $(defs_h) $(inferior_h) $(regcache_h) \
+	$(gdb_assert_h) $(gregset_h) $(x86_64_tdep_h)
+amd64fbsd-tdep.o: amd64fbsd-tdep.o $(defs_h) $(arch_utils_h) $(frame_h) \
+	$(gdbcore_h) $(regcache_h) $(osabi_h) $(gdb_string_h) \
+	$(x86_64_tdep_h)
 annotate.o: annotate.c $(defs_h) $(annotate_h) $(value_h) $(target_h) \
 	$(gdbtypes_h) $(breakpoint_h)
 arch-utils.o: arch-utils.c $(defs_h) $(arch_utils_h) $(gdbcmd_h) \

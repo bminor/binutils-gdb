@@ -39,18 +39,7 @@
 #include "x86-64-tdep.h"
 #include "i387-tdep.h"
 
-/* Register numbers of various important registers.  */
-
-#define X86_64_RAX_REGNUM	0 /* %rax */
-#define X86_64_RDX_REGNUM	3 /* %rdx */
-#define X86_64_RDI_REGNUM	5 /* %rdi */
-#define X86_64_RBP_REGNUM	6 /* %rbp */
-#define X86_64_RSP_REGNUM	7 /* %rsp */
-#define X86_64_RIP_REGNUM	16 /* %rip */
-#define X86_64_EFLAGS_REGNUM	17 /* %eflags */
-#define X86_64_ST0_REGNUM	22 /* %st0 */
-#define X86_64_XMM0_REGNUM	38 /* %xmm0 */
-#define X86_64_XMM1_REGNUM	39 /* %xmm1 */
+/* Register information.  */
 
 struct x86_64_register_info
 {
