@@ -1,3 +1,22 @@
+Tue Aug 17 07:02:19 1993  Steve Chamberlain  (sac@phydeaux.cygnus.com)
+
+	* scripttempl/h8500.sc: Start all sections in a different segment.
+	* scripttempl/z8ksim.sc: Handle constructors
+
+
+Thu Aug 12 16:05:37 1993  Jeffrey Wheat  (cassidy@cygnus.com)
+
+        * Makefile.in: revert earlier changes back to execute runtest
+          with make check. cdtest and bootstrap now function as they
+	  did within the Makefile.
+
+Thu Aug 12 10:20:05 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	* Makefile.in: 	Update dependencies.
+
+	* configure.in: Set EMULATION_OFILES in Makefile based on
+	--with-targets option.
+
 Thu Aug 12 08:52:29 1993  Jeffrey Wheat  (cassidy@cygnus.com)
 
 	* Makefile.in: check targets reimplemented to old way.
