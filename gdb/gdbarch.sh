@@ -667,7 +667,7 @@ f:2:CONVERT_FROM_FUNC_PTR_ADDR:CORE_ADDR:convert_from_func_ptr_addr:CORE_ADDR ad
 # sort of generic thing to handle alignment or segmentation (it's
 # possible it should be in TARGET_READ_PC instead).
 f:2:ADDR_BITS_REMOVE:CORE_ADDR:addr_bits_remove:CORE_ADDR addr:addr:::core_addr_identity::0
-# It is not at all clear why SMASH_TEXT_ADDRESS is not folded into 
+# It is not at all clear why SMASH_TEXT_ADDRESS is not folded into
 # ADDR_BITS_REMOVE.
 f:2:SMASH_TEXT_ADDRESS:CORE_ADDR:smash_text_address:CORE_ADDR addr:addr:::core_addr_identity::0
 # FIXME/cagney/2001-01-18: This should be split in two.  A target method that indicates if
@@ -745,7 +745,7 @@ M:2:ADDRESS_CLASS_TYPE_FLAGS_TO_NAME:const char *:address_class_type_flags_to_na
 M:2:ADDRESS_CLASS_NAME_TO_TYPE_FLAGS:int:address_class_name_to_type_flags:const char *name, int *type_flags_ptr:name, type_flags_ptr
 # Is a register in a group
 m:::int:register_reggroup_p:int regnum, struct reggroup *reggroup:regnum, reggroup:::default_register_reggroup_p::0
-# Fetch the pointer to the ith function argument.  
+# Fetch the pointer to the ith function argument.
 F::FETCH_POINTER_ARGUMENT:CORE_ADDR:fetch_pointer_argument:struct frame_info *frame, int argi, struct type *type:frame, argi, type
 EOF
 }
