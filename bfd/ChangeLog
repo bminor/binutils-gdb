@@ -1,3 +1,9 @@
+2000-05-31  Alan Modra  <alan@linuxcare.com.au>
+
+	* elf-hppa.h: (elf_hppa_final_link_relocate): Use e_rsel field
+        selector for R_PARISC_PCREL17R.  R_PARISC_DIR17R and
+        R_PARISC_DIR17F are for absolute branches; Handle them as such.
+
 2000-05-30  Nick Clifton  <nickc@cygnus.com>
 
 	* cpu-i960.c (scan_960_mach): Accept 80960KA, 80960KB,

@@ -1521,7 +1521,10 @@ elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,
 		  + input_section->output_section->vma);
 
 	/* Adjust for any field selectors.  */
-	value = hppa_field_adjust (value, -8 + addend, e_fsel);
+	if (r_type == R_PARISC_PCREL17R)
+	  value = hppa_field_adjust (value, -8 + addend, e_rsel);
+	else
+	  value = hppa_field_adjust (value, -8 + addend, e_fsel);
 
 	/* All branches are implicitly shifted by 2 places.  */
 	value >>= 2;
@@ -1681,8 +1684,9 @@ elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,
     case R_PARISC_DIR16DF:
       {
 	/* All DIR relocations are basically the same at this point,
-	   except that we need different field selectors for the 21bit
-	   version vs the 14bit versions.  */
+	   except that branch offsets need to be divided by four, and
+	   we need different field selectors.  Note that we don't
+	   redirect absolute calls to local stubs.  */
 
 	if (r_type == R_PARISC_DIR21L)
 	  value = hppa_field_adjust (value, addend, e_lrsel);
@@ -1693,6 +1697,12 @@ elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,
 	  value = hppa_field_adjust (value, addend, e_fsel);
 	else
 	  value = hppa_field_adjust (value, addend, e_rrsel);
+
+	if (r_type == R_PARISC_DIR17R || r_type == R_PARISC_DIR17F)
+	  {
+	    /* All branches are implicitly shifted by 2 places.  */
+	    value >>= 2;
+	  }
 
 	insn = elf_hppa_relocate_insn (insn, value, r_type);
 	break;
