@@ -1,3 +1,8 @@
+2003-07-24  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* ia64-linux-nat.c (ia64_linux_stopped_by_watchpoint): Verify
+	that we have a SIGTRAP before returning non-zero.
+
 2003-07-23  Michal Ludvig  <mludvig@suse.cz>
 	    Elena Zannoni  <ezannoni@redhat.com>
 
