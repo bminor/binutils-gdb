@@ -6,4 +6,4 @@
 .*: .*
 
 Contents of section .text:
- 0000 ff[ 	0-9a-fA-F]*[ 	]+.*
+ 0000 ff[ 	0-9a-f]*[ 	]+.*
