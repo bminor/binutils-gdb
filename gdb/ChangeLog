@@ -1,3 +1,9 @@
+2004-08-22  Mark Kettenis  <kettenis@gnu.org>
+
+	* configure.in: Change test for return type of ptrace to default
+	to `long' instead of `int'.
+	* configure: Regenerate.	
+
 2004-08-21  Mark Kettenis  <kettenis@gnu.org>
 
 	* config/alpha/alpha-linux.mh (LOADLIBES): New variable.

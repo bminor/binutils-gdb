@@ -7328,17 +7328,17 @@ else
 #include "confdefs.h"
 $gdb_ptrace_headers
 int main() {
-extern long ptrace ();
+extern int ptrace ();
 ; return 0; }
 EOF
 if { (eval echo configure:7335: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
-  gdb_cv_func_ptrace_ret='long'
+  gdb_cv_func_ptrace_ret='int'
 else
   echo "configure: failed program was:" >&5
   cat conftest.$ac_ext >&5
   rm -rf conftest*
-  gdb_cv_func_ptrace_ret='int'
+  gdb_cv_func_ptrace_ret='long'
 fi
 rm -f conftest*
 fi

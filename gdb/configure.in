@@ -506,9 +506,9 @@ gcc_AC_CHECK_DECLS(ptrace, , [
 # Check return type.
 AC_CACHE_CHECK([return type of ptrace], gdb_cv_func_ptrace_ret,
   AC_TRY_COMPILE($gdb_ptrace_headers,
-    [extern long ptrace ();],
-    gdb_cv_func_ptrace_ret='long',
-    gdb_cv_func_ptrace_ret='int'))
+    [extern int ptrace ();],
+    gdb_cv_func_ptrace_ret='int',
+    gdb_cv_func_ptrace_ret='long'))
 AC_DEFINE_UNQUOTED(PTRACE_TYPE_RET, $gdb_cv_func_ptrace_ret,
   [Define as the return type of ptrace.])
 # Check argument types.
