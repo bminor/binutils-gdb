@@ -7,8 +7,6 @@ NAT_CDEPS =
 
 CC_LD = Link
 
-gC = gC1
-
 s = "{srcdir}"
 
 o = :
@@ -21,9 +19,6 @@ o = :
 
 .c.o  \Option-f .c
    {CC}  {DepDir}{Default}.c {INTERNAL_CFLAGS} -s gdb_{Default} -o {TargDir}{Default}.c.o
-
-.gc.o \Option-f .c
-   {gC}	 {DepDir}{Default}.c {INTERNAL_CFLAGS} -s gdb_{Default} -o {TargDir}{Default}.gc.o
 
 #Copyright 1989, 1990, 1991, 1992, 1993, 1994 Free Software Foundation, Inc.
 
@@ -117,24 +112,26 @@ LIBIBERTY = ::libiberty:libiberty.o
 # Where is the MMALLOC library?  Typically ::mmalloc.
 # Note that mmalloc can still be used on systems without mmap().
 # To use your system malloc, comment out the following defines.
-MMALLOC = ::mmalloc:libmmalloc.o
+MMALLOC_DIR = :mmalloc
+MMALLOC_SRC = "{s}"{MMALLOC_DIR}
+MMALLOC = :{MMALLOC_DIR}:libmmalloc.o
 # To use your system malloc, uncomment MMALLOC_DISABLE.
 MMALLOC_DISABLE = -d NO_MMALLOC
 # To use mmalloc but disable corruption checking, uncomment MMALLOC_CHECK
 #MMALLOC_CHECK = -d NO_MMALLOC_CHECK
-MMALLOC_CFLAGS = {MMALLOC_DISABLE}
+MMALLOC_CFLAGS = -i {MMALLOC_SRC} {MMALLOC_CHECK} {MMALLOC_DISABLE}
 
 # Where are the BFD library?
-BFD_DIR = ::bfd
-BFD = {BFD_DIR}:libbfd.o
+BFD_DIR = :bfd
 BFD_SRC = "{s}"{BFD_DIR}
-BFD_CFLAGS = -i {BFD_DIR} -i {BFD_SRC}
+BFD = :{BFD_DIR}:libbfd.o
+BFD_CFLAGS = -i :{BFD_DIR} -i {BFD_SRC}
 
 # Where is the READLINE library?  Typically in ::readline.
-READLINE_DIR = ::readline
-READLINE = {READLINE_DIR}:libreadline.o
-#READLINE_DISABLE = -d NO_READLINE
+READLINE_DIR = :readline
 READLINE_SRC = "{s}"{READLINE_DIR}
+READLINE = :{READLINE_DIR}:libreadline.o
+#READLINE_DISABLE = -d NO_READLINE
 READLINE_CFLAGS = -i {READLINE_SRC}
 #READLINE_CFLAGS = {READLINE_DISABLE}
 
@@ -209,7 +206,7 @@ CDEPS = {XM_CDEPS} {TM_CDEPS} {NAT_CDEPS} \Option-d
 ADD_FILES = {REGEX} {XM_ADD_FILES} {TM_ADD_FILES} {NAT_ADD_FILES}
 ADD_DEPS = {REGEX1} {XM_ADD_FILES} {TM_ADD_FILES} {NAT_ADD_FILES}
 
-VERSION = 4.12.3
+VERSION = 4.13.1
 DIST=gdb
 
 LINT=:usr:5bin:lint
@@ -345,7 +342,7 @@ ALLDEPFILES = "{s}"29k-share:udi:udip2soc.c "{s}"29k-share:udi:udr.c \Option-d
 	"{s}"nindy-share:Onindy.c "{s}"nindy-share:nindy.c \Option-d
 	"{s}"nindy-share:ttyflush.c "{s}"nindy-tdep.c \Option-d
 	"{s}"ns32k-pinsn.c "{s}"ns32km3-nat.c "{s}"osfsolib.c \Option-d
-	"{s}"somread.c "{s}"somsolib.c \
+	"{s}"somread.c "{s}"somsolib.c \Option-d
 	"{s}"procfs.c "{s}"pyr-pinsn.c "{s}"pyr-tdep.c "{s}"pyr-xdep.c \Option-d
 	"{s}"remote-adapt.c "{s}"remote-bug.c "{s}"remote-e7000.c "{s}"remote-eb.c "{s}"remote-es.c \Option-d
 	"{s}"remote-hms.c "{s}"remote-mips.c \Option-d
@@ -549,7 +546,7 @@ SFILES_KGDB  = {SFILES} "{s}"stuff.c "{s}"kdb-start.c
 getopt_h =	"{INCLUDE_DIR}":getopt.h
 #ieee-float_h =	"{INCLUDE_DIR}":ieee-float.h
 ieee_float_h = 
-bfd_h =		"{BFD_DIR}":bfd.h
+bfd_h =		:"{BFD_DIR}":bfd.h
 wait_h =	"{INCLUDE_DIR}":wait.h
 dis_asm_h =	"{INCLUDE_DIR}":dis-asm.h 
 
@@ -645,16 +642,17 @@ TARFILES = {SFILES} {HFILES_NO_SRCDIR} {HFILES_WITH_SRCDIR} \Option-d
 	{ALLPARAM} {INFOFILES} {POSSLIBS} {REMOTE_EXAMPLES}
 
 
-OBS =	"{o}"version.c.o "{o}"main.c.o "{o}"top.c.o "{o}"blockframe.c.o "{o}"breakpoint.gc.o "{o}"findvar.c.o "{o}"stack.c.o "{o}"thread.c.o \Option-d
-	"{o}"source.c.o "{o}"values.c.o "{o}"eval.c.o "{o}"valops.c.o "{o}"valarith.c.o "{o}"valprint.c.o "{o}"printcmd.gc.o \Option-d
-	"{o}"symtab.c.o "{o}"symfile.c.o "{o}"symmisc.c.o "{o}"infcmd.c.o "{o}"infrun.gc.o "{o}"command.c.o \Option-d
+OBS =	"{o}"version.c.o "{o}"main.c.o "{o}"top.c.o "{o}"blockframe.c.o "{o}"breakpoint.c.o "{o}"findvar.c.o "{o}"stack.c.o "{o}"thread.c.o \Option-d
+	"{o}"source.c.o "{o}"values.c.o "{o}"eval.c.o "{o}"valops.c.o "{o}"valarith.c.o "{o}"valprint.c.o "{o}"printcmd.c.o \Option-d
+	"{o}"symtab.c.o "{o}"symfile.c.o "{o}"symmisc.c.o "{o}"infcmd.c.o "{o}"infrun.c.o "{o}"command.c.o \Option-d
 	"{o}"utils.c.o "{o}"expprint.c.o "{o}"environ.c.o "{o}"gdbtypes.c.o "{o}"copying.c.o {DEPFILES} \Option-d
 	"{o}"mem-break.c.o "{o}"target.c.o "{o}"parse.c.o "{o}"language.c.o {YYOBJ} "{o}"buildsym.c.o \Option-d
 	"{o}"objfiles.c.o "{o}"minsyms.c.o "{o}"maint.c.o "{o}"demangle.c.o "{o}"dbxread.c.o "{o}"coffread.c.o "{o}"elfread.c.o \Option-d
 	"{o}"dwarfread.c.o "{o}"mipsread.c.o "{o}"stabsread.c.o "{o}"core.c.o "{o}"c-lang.c.o "{o}"ch-lang.c.o "{o}"f-lang.c.o "{o}"m2-lang.c.o \Option-d
 	"{o}"complaints.c.o "{o}"typeprint.c.o "{o}"c-typeprint.c.o "{o}"ch-typeprint.c.o "{o}"f-typeprint.c.o "{o}"m2-typeprint.c.o \Option-d
 	"{o}"c-valprint.c.o "{o}"cp-valprint.c.o "{o}"ch-valprint.c.o "{o}"f-valprint.c.o "{o}"m2-valprint.c.o "{o}"nlmread.c.o \Option-d
-	"{o}"serial.c.o "{o}"mdebugread.c.o "{o}"annotate.c.o
+	"{o}"serial.c.o "{o}"mdebugread.c.o "{o}"annotate.c.o \Option-d
+	"{o}"exec.c.o
 
 TSOBS =
 
@@ -719,39 +717,37 @@ uninstall \Option-f  force
 #
 # Formatting conventions:   The name of the _initialize_* routines must start
 # in column zero, and must not be inside #if.
-:init.c \Option-f  {OBS} {TSOBS}
-	Duplicate -d -y "{s}"mpw-init.c :init.c
 
-:init-new.c \Option-f  {OBS} {TSOBS}
-	Echo Making init.c
-	Delete -i -y init.c-tmp
+"{o}"init.c \Option-f  {OBS} {TSOBS}
+	Echo Making "{o}"init.c
+	Delete -i -y "{o}"init.c init.c-tmp
 	Echo '/* Do not modify this file.  */' >init.c-tmp
 	Echo '/* It is created automatically by the Makefile.  */'>>init.c-tmp
-	Echo 'void initialize_all_files () {' >>init.c-tmp
+	Echo 'void initialize_all_files () ' `mpw-open-brace` >>init.c-tmp
 	For i in {OBS} {TSOBS}
-	  set filename `Echo {i} | sed \Option-d
-	    -e ',^Onindy.o,d' \Option-d
-	    -e ',^nindy.o,d' \Option-d
-	    -e ',ttyflush.o,d' \Option-d
-	    -e ',xdr_ld.o,d' \Option-d
-	    -e ',xdr_ptrace.o,d' \Option-d
-	    -e ',xdr_rdb.o,d' \Option-d
-	    -e ',udr.o,d' \Option-d
-	    -e ',udip2soc.o,d' \Option-d
-	    -e ',udi2go32.o,d' \Option-d
-	    -e ',version.o,d' \Option-d
-	    -e ',[a-z0-9A-Z_]*-exp.tab.o,d' \Option-d
-	    -e 's,\.gc\.o,.c,' \Option-d
-	    -e 's,\.c\.o,.c,'`
-	  If {filename} != ""
-	    sed <{s}{filename} >>init.c-tmp -n \Option-d
-	    -e ',^_initialize_[a-z_0-9A-Z]* *(,s,^\([a-z_0-9A-Z]*\).*,  {extern void \1 (); \1 ();},p'
+	  set filename "`Echo {i} | sed \Option-d
+	    -e '/^Onindy.c.o/d' \Option-d
+	    -e '/^nindy.c.o/d' \Option-d
+	    -e '/ttyflush.c.o/d' \Option-d
+	    -e '/xdr_ld.c.o/d' \Option-d
+	    -e '/xdr_ptrace.c.o/d' \Option-d
+	    -e '/xdr_rdb.c.o/d' \Option-d
+	    -e '/udr.c.o/d' \Option-d
+	    -e '/udip2soc.c.o/d' \Option-d
+	    -e '/udi2go32.c.o/d' \Option-d
+	    -e '/version.c.o/d' \Option-d
+	    -e '/[a-z0-9A-Z_]*-exp.tab.c.o/d' \Option-d
+	    -e 's/\.gc\.o/.c/' \Option-d
+	    -e 's/\.c\.o/.c/' \Option-d
+		-e 's/^{o}//'`"
+	  If "{filename}" != ""
+	    sed <"{s}""{filename}" >>init.c-tmp -n \Option-d
+	    -e '/^_initialize_[a-z_0-9A-Z]* *(/s/^\([a-z_0-9A-Z]*\).*/  {extern void \1 (); \1 ();}/p'
 	  End if
 	End For
 	Echo '}' >>init.c-tmp
-	Rename -y init.c-tmp init-new.c
+	Rename -y init.c-tmp "{o}"init.c
 
-# .PRECIOUS \Option-f  "{s}"init.c
 
 LOADLIBES = {EXTRALIBS}
 
@@ -789,7 +785,8 @@ SiowGDB \Option-f  {OBS} {TSOBS} {ADD_DEPS} {CDEPS} "{o}"init.c.o
 	  "{CLibraries}"StdClib.o \Option-d
 	  "{Libraries}"SIOW.o \Option-d
 	  "{Libraries}"Runtime.o \Option-d
-	  "{Libraries}"Interface.o
+	  "{Libraries}"Interface.o \Option-d
+	  "{Libraries}"ToolLibs.o
 
 # Version of GDB that uses a real library.
 
@@ -1117,7 +1114,7 @@ MAKEOVERRIDES=
 "{o}"blockframe.c.o \Option-f  "{s}"blockframe.c {defs_h} {gdbcore_h} {inferior_h} \Option-d
 	"{s}"objfiles.h "{s}"symfile.h "{s}"target.h
 
-"{o}"breakpoint.gc.o \Option-f  "{s}"breakpoint.c {defs_h} {gdbcmd_h} {gdbcore_h} \Option-d
+"{o}"breakpoint.c.o \Option-f  "{s}"breakpoint.c {defs_h} {gdbcmd_h} {gdbcore_h} \Option-d
 	{inferior_h} "{s}"language.h "{s}"target.h "{s}"thread.h
 
 "{o}"buildsym.c.o \Option-f  "{s}"buildsym.c {bfd_h} "{s}"buildsym.h "{s}"complaints.h {defs_h} \Option-d
@@ -1275,7 +1272,7 @@ MAKEOVERRIDES=
 
 "{o}"infptrace.c.o \Option-f  "{s}"infptrace.c {defs_h} {gdbcore_h} {inferior_h} "{s}"target.h
 
-"{o}"infrun.gc.o \Option-f  "{s}"infrun.c {wait_h} {defs_h} {gdbcmd_h} {gdbcore_h} \Option-d
+"{o}"infrun.c.o \Option-f  "{s}"infrun.c {wait_h} {defs_h} {gdbcmd_h} {gdbcore_h} \Option-d
 	{inferior_h} "{s}"target.h "{s}"thread.h
 
 "{o}"inftarg.c.o \Option-f  "{s}"inftarg.c {wait_h} {defs_h} {gdbcore_h} {inferior_h} \Option-d
@@ -1370,7 +1367,7 @@ MAKEOVERRIDES=
 "{o}"parse.c.o \Option-f  "{s}"parse.c {command_h} {defs_h} {expression_h} {frame_h} \Option-d
 	{gdbtypes_h} "{s}"language.h "{s}"parser-defs.h {symtab_h} {value_h}
 
-"{o}"printcmd.gc.o \Option-f  "{s}"printcmd.c {breakpoint_h} {defs_h} {expression_h} \Option-d
+"{o}"printcmd.c.o \Option-f  "{s}"printcmd.c {breakpoint_h} {defs_h} {expression_h} \Option-d
 	{gdbcmd_h} {gdbcore_h} {gdbtypes_h} "{s}"language.h "{s}"objfiles.h "{s}"symfile.h \Option-d
 	{symtab_h} "{s}"target.h
 

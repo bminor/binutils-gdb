@@ -1,3 +1,13 @@
+Tue Dec 13 16:32:09 1994  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* mpw-config.in (m68k-apple-macos, ppc-apple-macos,
+        i386-unknown-aout): New targets.
+	(mk.tmp): Add *DEPFILES definitions.
+	* mpw-make.in: Remove gC rules, clean up definitions for other
+        include files, bump version, fix bogus \ that should be \Option-d.
+	(init.c): Build correctly.
+	(mpw-init.c): Remove.
+
 Mon Nov  7 00:46:22 1994  Jeff Law  (law@snake.cs.utah.edu)
 
 	* mpw-make.in (HFILES_NO_SRCDIR): Add somsolib.h
