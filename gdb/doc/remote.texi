@@ -980,44 +980,44 @@ sequences gets you back to the @value{GDBN} command prompt:
 @end ifset
 
 @ifset VXWORKS
-@node Sparclet Remote
-@subsection @value{GDBN} and Sparclet
-@cindex Sparclet
+@node VxWorks Remote
+@subsection @value{GDBN} and VxWorks
+@cindex VxWorks
 
 @value{GDBN} enables developers to spawn and debug tasks running on networked
-Sparclet targets from a Unix host.  Already-running tasks spawned from
-the Sparclet shell can also be debugged.  @value{GDBN} uses code that runs on
-both the Unix host and on the Sparclet target.  The program
+VxWorks targets from a Unix host.  Already-running tasks spawned from
+the VxWorks shell can also be debugged.  @value{GDBN} uses code that runs on
+both the Unix host and on the VxWorks target.  The program
 @code{gdb} is installed and executed on the Unix host.  (It may be
 installed with the name @code{vxgdb}, to distinguish it from a
 @value{GDBN} for debugging programs on the host itself.)
 
 @table @code
-@item Sparclet-timeout @var{args}
+@item VxWorks-timeout @var{args}
 @kindex vxworks-timeout
-All Sparclet-based targets now support the option @code{vxworks-timeout}.  
+All VxWorks-based targets now support the option @code{vxworks-timeout}.  
 This option is set by the user, and  @var{args} represents the number of 
 seconds @value{GDBN} waits for responses to rpc's.  You might use this if 
-your Sparclet target is a slow software simulator or is on the far side 
+your VxWorks target is a slow software simulator or is on the far side 
 of a thin network line.
 @end table
 
-The following information on connecting to Sparclet was current when
-this manual was produced; newer releases of Sparclet may use revised
+The following information on connecting to VxWorks was current when
+this manual was produced; newer releases of VxWorks may use revised
 procedures.
 
 @kindex INCLUDE_RDB
-To use @value{GDBN} with Sparclet, you must rebuild your Sparclet kernel
-to include the remote debugging interface routines in the Sparclet
+To use @value{GDBN} with VxWorks, you must rebuild your VxWorks kernel
+to include the remote debugging interface routines in the VxWorks
 library @file{rdb.a}.  To do this, define @code{INCLUDE_RDB} in the
-Sparclet configuration file @file{configAll.h} and rebuild your Sparclet
+VxWorks configuration file @file{configAll.h} and rebuild your VxWorks
 kernel.  The resulting kernel contains @file{rdb.a}, and spawns the
-source debugging task @code{tRdbTask} when Sparclet is booted.  For more
-information on configuring and remaking Sparclet, see the manufacturer's
+source debugging task @code{tRdbTask} when VxWorks is booted.  For more
+information on configuring and remaking VxWorks, see the manufacturer's
 manual.
-@c Sparclet, see the @cite{Sparclet Programmer's Guide}.
+@c VxWorks, see the @cite{VxWorks Programmer's Guide}.
 
-Once you have included @file{rdb.a} in your Sparclet system image and set
+Once you have included @file{rdb.a} in your VxWorks system image and set
 your Unix execution search path to find @value{GDBN}, you are ready to
 run @value{GDBN}.  From your Unix host, run @code{gdb} (or @code{vxgdb},
 depending on your installation).
@@ -1029,15 +1029,15 @@ depending on your installation).
 @end example
 
 @menu
-* Sparclet Connection::          Connecting to Sparclet
-* Sparclet Download::            Sparclet download
-* Sparclet Attach::              Running tasks
+* VxWorks Connection::          Connecting to VxWorks
+* VxWorks Download::            VxWorks download
+* VxWorks Attach::              Running tasks
 @end menu
 
-@node Sparclet Connection
-@subsubsection Connecting to Sparclet
+@node VxWorks Connection
+@subsubsection Connecting to VxWorks
 
-The @value{GDBN} command @code{target} lets you connect to a Sparclet target on the
+The @value{GDBN} command @code{target} lets you connect to a VxWorks target on the
 network.  To connect to a target whose host name is ``@code{tt}'', type:
 
 @example
@@ -1054,7 +1054,7 @@ Connected to tt.
 
 @need 1000
 @value{GDBN} then attempts to read the symbol tables of any object modules
-loaded into the Sparclet target since it was last booted.  @value{GDBN} locates
+loaded into the VxWorks target since it was last booted.  @value{GDBN} locates
 these files by searching the directories listed in the command search
 path (@pxref{Environment, ,Your program's environment}); if it fails
 to find an object file, it displays a message such as:
@@ -1067,15 +1067,15 @@ When this happens, add the appropriate directory to the search path with
 the @value{GDBN} command @code{path}, and execute the @code{target}
 command again.
 
-@node Sparclet Download
-@subsubsection Sparclet download
+@node VxWorks Download
+@subsubsection VxWorks download
 
-@cindex download to Sparclet
-If you have connected to the Sparclet target and you want to debug an
+@cindex download to VxWorks
+If you have connected to the VxWorks target and you want to debug an
 object that has not yet been loaded, you can use the @value{GDBN}
-@code{load} command to download a file from Unix to Sparclet
+@code{load} command to download a file from Unix to VxWorks
 incrementally.  The object file given as an argument to the @code{load}
-command is actually opened twice: first by the Sparclet target in order
+command is actually opened twice: first by the VxWorks target in order
 to download the code, then by @value{GDBN} in order to read the symbol
 table.  This can lead to problems if the current working directories on
 the two systems differ.  If both systems have NFS mounted the same
@@ -1083,9 +1083,9 @@ filesystems, you can avoid these problems by using absolute paths.
 Otherwise, it is simplest to set the working directory on both systems
 to the directory in which the object file resides, and then to reference
 the file by its name, without any path.  For instance, a program
-@file{prog.o} may reside in @file{@var{vxpath}/vw/demo/rdb} in Sparclet
+@file{prog.o} may reside in @file{@var{vxpath}/vw/demo/rdb} in VxWorks
 and in @file{@var{hostpath}/vw/demo/rdb} on the host.  To load this
-program, type this on Sparclet:
+program, type this on VxWorks:
 
 @example
 -> cd "@var{vxpath}/vw/demo/rdb"
@@ -1112,10 +1112,10 @@ history.  (This is necessary in order to preserve the integrity of
 debugger data structures that reference the target system's symbol
 table.)
 
-@node Sparclet Attach
+@node VxWorks Attach
 @subsubsection Running tasks
 
-@cindex running Sparclet tasks
+@cindex running VxWorks tasks
 You can also attach to an existing task using the @code{attach} command as
 follows:
 
@@ -1124,7 +1124,7 @@ follows:
 @end example
 
 @noindent
-where @var{task} is the Sparclet hexadecimal task ID.  The task can be running
+where @var{task} is the VxWorks hexadecimal task ID.  The task can be running
 or suspended when you attach to it.  Running tasks are suspended at
 the time of attachment.
 @end ifset
@@ -1186,8 +1186,7 @@ run @value{GDBN}.  From your Unix host, run @code{gdb}
 @node Sparclet File
 @subsubsection Setting file to debug
 
-The @value{GDBN} command @code{target} lets you connect to a Sparclet target.
-To connect to a target on serial port ``@code{ttya}'', type:
+The @value{GDBN} command @code{file} lets you choose with program to debug.
 
 @example
 (gdbslet) file prog
@@ -1255,7 +1254,7 @@ and bss at 0x12010170, in @value{GDBN}, type:
 Loading section .text, size 0xdb0 vma 0x12010000
 @end example
 
-If the code is loaded at a diferent address then what the program was linked 
+If the code is loaded at a different address then what the program was linked 
 to, you may need to use the @code{section} and @code{add-symbol-file} commands 
 to tell @value{GDBN} where to map the symbol table.
 

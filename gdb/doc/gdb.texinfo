@@ -753,6 +753,9 @@ in sequential order.  The order makes a difference when the
 @ifset MIPS
 * MIPS Remote::			@value{GDBN} and MIPS boards
 @end ifset
+@ifset SPARCLET
+* Sparclet Remote::             @value{GDBN} and Sparclet boards
+@end ifset
 @ifset SIMS
 * Simulator::                   Simulated CPU target
 @end ifset
@@ -7682,6 +7685,9 @@ configuration of @value{GDBN}; use @code{help target} to list them.
 @end ifset
 @ifset MIPS
 * MIPS Remote::			@value{GDBN} and MIPS boards
+@end ifset
+@ifset SPARCLET
+* Sparclet Remote::             @value{GDBN} and Sparclet boards
 @end ifset
 @ifset SIMS
 * Simulator::                   Simulated CPU target
