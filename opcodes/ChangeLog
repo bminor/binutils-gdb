@@ -1,3 +1,7 @@
+2001-06-15  Aldy Hernandez  <aldyh@redhat.com>
+
+	* m10300-opc.c (mn10300_opcodes): Change opcode for AM33 subc.
+
 2001-06-14  Geoffrey Keating  <geoffk@redhat.com>
 
 	* cgen-asm.c (cgen_parse_keyword): When looking for the
