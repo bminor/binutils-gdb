@@ -374,11 +374,11 @@ DEFUN(NAME(aout,some_aout_object_p),(abfd, execp, callback_to_real_object_p),
   obj_bsssec (abfd)->_raw_size = execp->a_bss;
 
   obj_textsec (abfd)->flags = (execp->a_trsize != 0 ?
-		       (SEC_ALLOC | SEC_LOAD | SEC_RELOC | SEC_HAS_CONTENTS) :
-		       (SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS));
+       (SEC_ALLOC | SEC_LOAD | SEC_CODE | SEC_HAS_CONTENTS | SEC_RELOC) :
+       (SEC_ALLOC | SEC_LOAD | SEC_CODE | SEC_HAS_CONTENTS));
   obj_datasec (abfd)->flags = (execp->a_drsize != 0 ?
-		       (SEC_ALLOC | SEC_LOAD | SEC_RELOC | SEC_HAS_CONTENTS) :
-		       (SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS));
+       (SEC_ALLOC | SEC_LOAD | SEC_DATA | SEC_HAS_CONTENTS | SEC_RELOC) :
+       (SEC_ALLOC | SEC_LOAD | SEC_DATA | SEC_HAS_CONTENTS));
   obj_bsssec (abfd)->flags = SEC_ALLOC;
 
 #ifdef THIS_IS_ONLY_DOCUMENTATION
@@ -822,6 +822,7 @@ DEFUN (NAME (aout,adjust_sizes_and_vmas), (abfd, text_size, text_end),
 	   obj_datasec(abfd)->vma, obj_datasec(abfd)->_raw_size, obj_datasec(abfd)->filepos,
 	   obj_bsssec(abfd)->vma, obj_bsssec(abfd)->_raw_size);
 #endif
+  return true;
 }
 
 /*

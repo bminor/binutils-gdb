@@ -1,7 +1,13 @@
+Thu Oct  8 17:33:39 1992  John Gilmore  (gnu@cygnus.com)
+
+	* configure.in:  Undo some brain damage in the host section.
+	* Makefile.in (make):  Remove obsolete `make make'.
+	* aoutx.h (some_aout_object_p):  Make defines line up.
+
 Thu Oct  8 08:52:48 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
-	 Now a bfd knows whether underscores are normally prepended
-	 to symbols in its file format.
+	Now a bfd knows whether underscores are normally prepended
+	to symbols in its file format.
 
 	* aout-adobe.c, aout-target.h, bout.c, coff-a29k.c, coff-h8300.c,
 	coff-z8k.c: targets set so they have leading underscore
