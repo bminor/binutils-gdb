@@ -868,6 +868,7 @@ get_child_debug_event (int pid ATTRIBUTE_UNUSED, struct target_waitstatus *ourst
 		     (unsigned) current_event.dwProcessId,
 		     (unsigned) current_event.dwThreadId,
 		     "CREATE_PROCESS_DEBUG_EVENT"));
+      CloseHandle (current_event.u.CreateProcessInfo.hFile);
       current_process_handle = current_event.u.CreateProcessInfo.hProcess;
 
       main_thread_id = current_event.dwThreadId;
@@ -897,6 +898,7 @@ get_child_debug_event (int pid ATTRIBUTE_UNUSED, struct target_waitstatus *ourst
 		     (unsigned) current_event.dwProcessId,
 		     (unsigned) current_event.dwThreadId,
 		     "LOAD_DLL_DEBUG_EVENT"));
+      CloseHandle (current_event.u.LoadDll.hFile);
       catch_errors (handle_load_dll, NULL, (char *) "", RETURN_MASK_ALL);
       registers_changed ();	/* mark all regs invalid */
       ourstatus->kind = TARGET_WAITKIND_LOADED;
@@ -1207,6 +1209,8 @@ child_create_inferior (char *exec_file, char *allargs, char **env)
   if (!ret)
     error ("Error creating process %s, (error %d)\n", exec_file, GetLastError ());
 
+  CloseHandle (pi.hThread);
+  CloseHandle (pi.hProcess);
   do_initial_child_stuff (pi.dwProcessId);
 
   /* child_continue (DBG_CONTINUE, -1); */

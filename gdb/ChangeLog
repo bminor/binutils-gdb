@@ -1,3 +1,10 @@
+2001-10-10  Christopher Faylor  <cgf@redhat.com>
+
+	* win32-nat.c (get_child_debug_event): Close file handles created after
+	process creation and DLL load.
+	(child_create_inferior): Close unneeded process/thread handle after
+	thread creation.
+
 2001-10-08  J. Brobecker <brobecker@gnat.com>
 
 	* hpux-thread.c: rewrite find_active_thread() and find_tcb()
