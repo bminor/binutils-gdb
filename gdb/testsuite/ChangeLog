@@ -1,3 +1,8 @@
+2004-10-05  Kei Sakamoto  <sakamoto.kei@renesas.com>
+
+	* gdb.asm/asm-source.exp: Add m32r-linux target.
+	* gdb.asm/m32r-linux.inc: New file.
+
 2004-09-24  Andrew Cagney  <cagney@redhat.com>
 	    David Anderson <anderson@redhat.com>
 
