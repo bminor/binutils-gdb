@@ -25,7 +25,7 @@ RANLIB = ranlib
 AR = 
 INCDIR = $(srcdir)/../include
 CSEARCH = -I$(INCDIR)
-
+DEP = mkdep
 #### host and target dependent Makefile fragments come in here.
 ###
 
@@ -112,26 +112,7 @@ saber:
 	#suppress 590 on abfd 
 	#setopt load_flags $(CFLAGS)
 	#load $(CFILES)
-m88k-bcs.o : m88k-bcs.c
-ieee.o : ieee.c
-srec.o : srec.c
-oasys.o : oasys.c
 
-archive.o : archive.c libbfd.h $(BFD_H) $(SYSDEP_H)  
-archures.o : archures.c $(BFD_H) $(SYSDEP_H) archures.h 
-b.out.o : b.out.c libbfd.h $(BFD_H) $(SYSDEP_H) liba.out.h archures.h 
-m88k-bcs.o : m88k-bcs.c libbfd.h $(BFD_H) $(SYSDEP_H) libcoff.h coff-code.h archures.h 
-bfd.o : bfd.c libbfd.h $(BFD_H) $(SYSDEP_H)     
-cache.o : cache.c libbfd.h $(BFD_H) $(SYSDEP_H)     
-coff.o : coff.c  
-cplus-dem.o : cplus-dem.c  
-filemode.o : filemode.c 
-icoff.o : icoff.c libbfd.h $(BFD_H) $(SYSDEP_H) libcoff.h coff-code.h archures.h 
-libbfd.o : libbfd.c libbfd.h $(BFD_H) $(SYSDEP_H)      
-misc.o : misc.c 
-opncls.o : opncls.c libbfd.h $(BFD_H) $(SYSDEP_H)     
-sunos.o : sunos.c libbfd.h $(BFD_H) $(SYSDEP_H) liba.out.h
-targets.o : targets.c libbfd.h $(BFD_H) $(SYSDEP_H)      
 
 #-----------------------------------------------------------------------------
 #		'STANDARD' GNU/960 TARGETS BELOW THIS POINT
@@ -189,4 +170,7 @@ Makefile: $(srcdir)/Makefile.in $(srcdir)/configure
 		./configure +norecurse \
 		+destdir=$(destdir) \
 		`if [ "$(srcdir)" != "." ] ; then echo +f; fi` \
-		$(host) +target=$(target))
+		$(host) +target=$(target);) ; make dep
+
+dep: $(CFILES)
+	mkdep $(CFLAGS) $?
