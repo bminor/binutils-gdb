@@ -1,5 +1,10 @@
 Thu Sep 29 18:57:06 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
+	* Makefile.in (all): Depend on .gdbinit.
+	(.gdbinit): Rebuild from gdbinit.in by running config.status.
+
+	* gdbinit.in: Define new function "pf".  Fix doc on "pe" and "ps".
+
 	* write.c (print_fixup): Print source location on first line.
 	Show fx_r_type and fx_addsy fields.
 
