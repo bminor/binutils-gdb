@@ -1707,8 +1707,8 @@ cfi_pop_frame (struct frame_info *fi)
   for (regnum = 0; regnum < NUM_REGS; regnum++)
     {
       get_reg (regbuf, UNWIND_CONTEXT (fi), regnum);
-      write_register_bytes (REGISTER_BYTE (regnum), regbuf,
-			    REGISTER_RAW_SIZE (regnum));
+      deprecated_write_register_bytes (REGISTER_BYTE (regnum), regbuf,
+				       REGISTER_RAW_SIZE (regnum));
     }
   write_register (PC_REGNUM, UNWIND_CONTEXT (fi)->ra);
 

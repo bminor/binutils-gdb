@@ -309,7 +309,8 @@ write_return_value (struct type *type, char *valbuf)
   int len;
 
   for (len = 0; len < TYPE_LENGTH (type); len += 2)
-    write_register_bytes (REGISTER_BYTE (len / 2 + 2), valbuf + len, 2);
+    deprecated_write_register_bytes (REGISTER_BYTE (len / 2 + 2),
+				     valbuf + len, 2);
 }
 
 void

@@ -3528,7 +3528,8 @@ remote_prepare_to_store (void)
       /* NOTE: This isn't rs->sizeof_g_packet because here, we are
          forcing the register cache to read its and not the target
          registers.  */
-      read_register_bytes (0, (char *) NULL, REGISTER_BYTES); /* OK use.  */
+      deprecated_read_register_bytes (0, (char *) NULL,
+				      REGISTER_BYTES); /* OK use.  */
       break;
     case PACKET_ENABLE:
       break;

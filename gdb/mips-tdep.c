@@ -4666,17 +4666,15 @@ mips_eabi_store_return_value (struct type *valtype, char *valbuf)
 
   memset (raw_buffer, 0, sizeof (raw_buffer));
   memcpy (raw_buffer + lo.reg_offset, valbuf + lo.buf_offset, lo.len);
-  write_register_bytes (REGISTER_BYTE (lo.reg),
-			raw_buffer,
-			REGISTER_RAW_SIZE (lo.reg));
+  deprecated_write_register_bytes (REGISTER_BYTE (lo.reg), raw_buffer,
+				   REGISTER_RAW_SIZE (lo.reg));
 
   if (hi.len > 0)
     {
       memset (raw_buffer, 0, sizeof (raw_buffer));
       memcpy (raw_buffer + hi.reg_offset, valbuf + hi.buf_offset, hi.len);
-      write_register_bytes (REGISTER_BYTE (hi.reg),
-			    raw_buffer,
-			    REGISTER_RAW_SIZE (hi.reg));
+      deprecated_write_register_bytes (REGISTER_BYTE (hi.reg), raw_buffer,
+				       REGISTER_RAW_SIZE (hi.reg));
     }
 }
 
@@ -4690,17 +4688,15 @@ mips_o64_store_return_value (struct type *valtype, char *valbuf)
 
   memset (raw_buffer, 0, sizeof (raw_buffer));
   memcpy (raw_buffer + lo.reg_offset, valbuf + lo.buf_offset, lo.len);
-  write_register_bytes (REGISTER_BYTE (lo.reg),
-			raw_buffer,
-			REGISTER_RAW_SIZE (lo.reg));
+  deprecated_write_register_bytes (REGISTER_BYTE (lo.reg), raw_buffer,
+				   REGISTER_RAW_SIZE (lo.reg));
 
   if (hi.len > 0)
     {
       memset (raw_buffer, 0, sizeof (raw_buffer));
       memcpy (raw_buffer + hi.reg_offset, valbuf + hi.buf_offset, hi.len);
-      write_register_bytes (REGISTER_BYTE (hi.reg),
-			    raw_buffer,
-			    REGISTER_RAW_SIZE (hi.reg));
+      deprecated_write_register_bytes (REGISTER_BYTE (hi.reg), raw_buffer,
+				       REGISTER_RAW_SIZE (hi.reg));
     }
 }
 

@@ -509,7 +509,7 @@ static void
 sds_prepare_to_store (void)
 {
   /* Make sure the entire registers array is valid.  */
-  read_register_bytes (0, (char *) NULL, REGISTER_BYTES);
+  deprecated_read_register_bytes (0, (char *) NULL, REGISTER_BYTES);
 }
 
 /* Store register REGNO, or all registers if REGNO == -1, from the contents

@@ -769,8 +769,8 @@ x86_64_store_return_value (struct type *type, char *valbuf)
 	  && TARGET_LONG_DOUBLE_FORMAT == &floatformat_i387_ext)
 	{
 	  /* Copy straight over.  */
-	  write_register_bytes (REGISTER_BYTE (FP0_REGNUM), valbuf,
-				FPU_REG_RAW_SIZE);
+	  deprecated_write_register_bytes (REGISTER_BYTE (FP0_REGNUM), valbuf,
+					   FPU_REG_RAW_SIZE);
 	}
       else
 	{
@@ -783,8 +783,8 @@ x86_64_store_return_value (struct type *type, char *valbuf)
 	     it is the best we can do.  */
 	  val = extract_floating (valbuf, TYPE_LENGTH (type));
 	  floatformat_from_doublest (&floatformat_i387_ext, &val, buf);
-	  write_register_bytes (REGISTER_BYTE (FP0_REGNUM), buf,
-				FPU_REG_RAW_SIZE);
+	  deprecated_write_register_bytes (REGISTER_BYTE (FP0_REGNUM), buf,
+					   FPU_REG_RAW_SIZE);
 	}
     }
   else
@@ -793,12 +793,13 @@ x86_64_store_return_value (struct type *type, char *valbuf)
       int high_size = REGISTER_RAW_SIZE (1);
 
       if (len <= low_size)
-	write_register_bytes (REGISTER_BYTE (0), valbuf, len);
+	deprecated_write_register_bytes (REGISTER_BYTE (0), valbuf, len);
       else if (len <= (low_size + high_size))
 	{
-	  write_register_bytes (REGISTER_BYTE (0), valbuf, low_size);
-	  write_register_bytes (REGISTER_BYTE (1),
-				valbuf + low_size, len - low_size);
+	  deprecated_write_register_bytes (REGISTER_BYTE (0), valbuf,
+					   low_size);
+	  deprecated_write_register_bytes (REGISTER_BYTE (1),
+					   valbuf + low_size, len - low_size);
 	}
       else
 	internal_error (__FILE__, __LINE__,

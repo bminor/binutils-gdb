@@ -170,7 +170,7 @@ extern struct type *h8500_register_virtual_type (int regno);
    of type TYPE, given in virtual format.  */
 
 #define DEPRECATED_STORE_RETURN_VALUE(TYPE,VALBUF) \
-  write_register_bytes (0, VALBUF, TYPE_LENGTH (TYPE))
+  deprecated_write_register_bytes (0, VALBUF, TYPE_LENGTH (TYPE))
 
 /* Extract from an array REGBUF containing the (raw) register state
    the address in which a function should return its structure value,

@@ -990,32 +990,34 @@ sparc_push_dummy_frame (void)
   if (GDB_TARGET_IS_SPARC64)
     {
       /* PC, NPC, CCR, FSR, FPRS, Y, ASI */
-      read_register_bytes (REGISTER_BYTE (PC_REGNUM), &register_temp[0],
-			   REGISTER_RAW_SIZE (PC_REGNUM) * 7);
-      read_register_bytes (REGISTER_BYTE (PSTATE_REGNUM), 
-			   &register_temp[7 * SPARC_INTREG_SIZE],
-			   REGISTER_RAW_SIZE (PSTATE_REGNUM));
+      deprecated_read_register_bytes (REGISTER_BYTE (PC_REGNUM),
+				      &register_temp[0],
+				      REGISTER_RAW_SIZE (PC_REGNUM) * 7);
+      deprecated_read_register_bytes (REGISTER_BYTE (PSTATE_REGNUM), 
+				      &register_temp[7 * SPARC_INTREG_SIZE],
+				      REGISTER_RAW_SIZE (PSTATE_REGNUM));
       /* FIXME: not sure what needs to be saved here.  */
     }
   else
     {
       /* Y, PS, WIM, TBR, PC, NPC, FPS, CPS regs */
-      read_register_bytes (REGISTER_BYTE (Y_REGNUM), &register_temp[0],
-			   REGISTER_RAW_SIZE (Y_REGNUM) * 8);
+      deprecated_read_register_bytes (REGISTER_BYTE (Y_REGNUM),
+				      &register_temp[0],
+				      REGISTER_RAW_SIZE (Y_REGNUM) * 8);
     }
 
-  read_register_bytes (REGISTER_BYTE (O0_REGNUM),
-		       &register_temp[8 * SPARC_INTREG_SIZE],
-		       SPARC_INTREG_SIZE * 8);
+  deprecated_read_register_bytes (REGISTER_BYTE (O0_REGNUM),
+				  &register_temp[8 * SPARC_INTREG_SIZE],
+				  SPARC_INTREG_SIZE * 8);
 
-  read_register_bytes (REGISTER_BYTE (G0_REGNUM),
-		       &register_temp[16 * SPARC_INTREG_SIZE],
-		       SPARC_INTREG_SIZE * 8);
+  deprecated_read_register_bytes (REGISTER_BYTE (G0_REGNUM),
+				  &register_temp[16 * SPARC_INTREG_SIZE],
+				  SPARC_INTREG_SIZE * 8);
 
   if (SPARC_HAS_FPU)
-    read_register_bytes (REGISTER_BYTE (FP0_REGNUM),
-			 &register_temp[24 * SPARC_INTREG_SIZE],
-			 FP_REGISTER_BYTES);
+    deprecated_read_register_bytes (REGISTER_BYTE (FP0_REGNUM),
+				    &register_temp[24 * SPARC_INTREG_SIZE],
+				    FP_REGISTER_BYTES);
 
   sp -= DUMMY_STACK_SIZE;
 
@@ -1237,8 +1239,8 @@ sparc_pop_frame (void)
       if (fsr[FP0_REGNUM])
 	{
 	  read_memory (fsr[FP0_REGNUM], raw_buffer, FP_REGISTER_BYTES);
-	  write_register_bytes (REGISTER_BYTE (FP0_REGNUM),
-				raw_buffer, FP_REGISTER_BYTES);
+	  deprecated_write_register_bytes (REGISTER_BYTE (FP0_REGNUM),
+					   raw_buffer, FP_REGISTER_BYTES);
 	}
       if (!(GDB_TARGET_IS_SPARC64))
 	{
@@ -1257,8 +1259,8 @@ sparc_pop_frame (void)
   if (fsr[G1_REGNUM])
     {
       read_memory (fsr[G1_REGNUM], raw_buffer, 7 * SPARC_INTREG_SIZE);
-      write_register_bytes (REGISTER_BYTE (G1_REGNUM), raw_buffer,
-			    7 * SPARC_INTREG_SIZE);
+      deprecated_write_register_bytes (REGISTER_BYTE (G1_REGNUM), raw_buffer,
+				       7 * SPARC_INTREG_SIZE);
     }
 
   if (frame->extra_info->flat)
@@ -1310,11 +1312,11 @@ sparc_pop_frame (void)
 
       /* Restore the out registers.
          Among other things this writes the new stack pointer.  */
-      write_register_bytes (REGISTER_BYTE (O0_REGNUM), raw_buffer,
-			    SPARC_INTREG_SIZE * 8);
+      deprecated_write_register_bytes (REGISTER_BYTE (O0_REGNUM), raw_buffer,
+				       SPARC_INTREG_SIZE * 8);
 
-      write_register_bytes (REGISTER_BYTE (L0_REGNUM), reg_temp,
-			    SPARC_INTREG_SIZE * 16);
+      deprecated_write_register_bytes (REGISTER_BYTE (L0_REGNUM), reg_temp,
+				       SPARC_INTREG_SIZE * 16);
     }
 
   if (!(GDB_TARGET_IS_SPARC64))
@@ -2298,15 +2300,16 @@ sparc_store_return_value (struct type *type, char *valbuf)
       deprecated_write_register_gen (regno, buffer);
     }
   else
-    write_register_bytes (REGISTER_BYTE (regno), valbuf, TYPE_LENGTH (type));
+    deprecated_write_register_bytes (REGISTER_BYTE (regno), valbuf,
+				     TYPE_LENGTH (type));
 }
 
 extern void
 sparclet_store_return_value (struct type *type, char *valbuf)
 {
   /* Other values are returned in register %o0.  */
-  write_register_bytes (REGISTER_BYTE (O0_REGNUM), valbuf,
-			TYPE_LENGTH (type));
+  deprecated_write_register_bytes (REGISTER_BYTE (O0_REGNUM), valbuf,
+				   TYPE_LENGTH (type));
 }
 
 
@@ -2567,9 +2570,9 @@ sparc64_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 	      default:
 		internal_error (__FILE__, __LINE__, "bad switch");
 	      }
-	      write_register_bytes (REGISTER_BYTE (fpreg),
-				    VALUE_CONTENTS (args[i]),
-				    len);
+	      deprecated_write_register_bytes (REGISTER_BYTE (fpreg),
+					       VALUE_CONTENTS (args[i]),
+					       len);
 	    }
 	}
       else /* all other args go into the first six 'o' registers */

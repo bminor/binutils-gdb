@@ -1,3 +1,23 @@
+2002-11-13  Andrew Cagney  <cagney@redhat.com>
+
+	* regcache.h (deprecated_read_register_bytes): Rename
+	read_register_bytes.
+	(deprecated_write_register_bytes): Rename write_register_bytes.
+	* alpha-tdep.c, arm-tdep.c, cris-tdep.c, d10v-tdep.c: Update.
+	* dwarf2cfi.c, frv-tdep.c, hppa-tdep.c, ia64-tdep.c: Update.
+	* m68k-tdep.c, mcore-tdep.c, mips-tdep.c, mn10300-tdep.c: Update.
+	* ns32k-tdep.c, regcache.c, remote-sds.c, remote-vx.c: Update.
+	* remote.c, rs6000-tdep.c, s390-tdep.c, sh-tdep.c: Update.
+	* sparc-tdep.c, v850-tdep.c, vax-tdep.c, x86-64-tdep.c: Update.
+	* xstormy16-tdep.c, z8k-tdep.c, config/nm-gnu.h: Update.
+	* config/nm-m3.h, config/h8500/tm-h8500.h: Update.
+	* config/i386/nm-ptx4.h, config/i386/nm-symmetry.h: Update.
+	* config/m32r/tm-m32r.h, config/m68k/nm-sun3.h: Update.
+	* config/m68k/tm-delta68.h, config/m68k/tm-linux.h: Update.
+	* config/mn10200/tm-mn10200.h, config/pa/tm-hppa64.h: Update.
+	* config/sparc/nm-nbsd.h, config/sparc/nm-sun4os4.h: Update.
+	* config/sparc/nm-sun4sol2.h, config/sparc/tm-sparclet.h: Update.
+
 2002-11-13  Jim Blandy  <jimb@redhat.com>
 
 	* findvar.c (read_var_value): Doc fix.

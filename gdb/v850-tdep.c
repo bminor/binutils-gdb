@@ -1089,8 +1089,8 @@ v850_store_return_value (struct type *type, char *valbuf)
   CORE_ADDR return_buffer;
 
   if (!v850_use_struct_convention (0, type))
-    write_register_bytes (REGISTER_BYTE (E_V0_REGNUM), valbuf,	
-    			  TYPE_LENGTH (type));
+    deprecated_write_register_bytes (REGISTER_BYTE (E_V0_REGNUM), valbuf,
+				     TYPE_LENGTH (type));
   else
     {
       return_buffer = read_register (E_V0_REGNUM);

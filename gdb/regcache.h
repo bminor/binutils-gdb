@@ -176,6 +176,10 @@ extern char *deprecated_grub_regcache_for_registers (struct regcache *);
 extern char *deprecated_grub_regcache_for_register_valid (struct regcache *);
 extern void deprecated_read_register_gen (int regnum, char *myaddr);
 extern void deprecated_write_register_gen (int regnum, char *myaddr);
+extern void deprecated_read_register_bytes (int regbyte, char *myaddr,
+					    int len);
+extern void deprecated_write_register_bytes (int regbyte, char *myaddr,
+					     int len);
 
 /* Character array containing the current state of each register
    (unavailable<0, invalid=0, valid>0) for the most recently
@@ -198,10 +202,6 @@ extern void set_register_cached (int regnum, int state);
 
 extern void registers_changed (void);
 
-
-extern void read_register_bytes (int regbyte, char *myaddr, int len);
-
-extern void write_register_bytes (int regbyte, char *myaddr, int len);
 
 /* Rename to read_unsigned_register()? */
 extern ULONGEST read_register (int regnum);

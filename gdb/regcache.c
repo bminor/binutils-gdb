@@ -598,29 +598,29 @@ deprecated_registers_fetched (void)
      Fetching all real regs NEVER accounts for pseudo-regs.  */
 }
 
-/* read_register_bytes and write_register_bytes are generally a *BAD*
-   idea.  They are inefficient because they need to check for partial
-   updates, which can only be done by scanning through all of the
-   registers and seeing if the bytes that are being read/written fall
-   inside of an invalid register.  [The main reason this is necessary
-   is that register sizes can vary, so a simple index won't suffice.]
-   It is far better to call read_register_gen and write_register_gen
-   if you want to get at the raw register contents, as it only takes a
-   regnum as an argument, and therefore can't do a partial register
-   update.
+/* deprecated_read_register_bytes and deprecated_write_register_bytes
+   are generally a *BAD* idea.  They are inefficient because they need
+   to check for partial updates, which can only be done by scanning
+   through all of the registers and seeing if the bytes that are being
+   read/written fall inside of an invalid register.  [The main reason
+   this is necessary is that register sizes can vary, so a simple
+   index won't suffice.]  It is far better to call read_register_gen
+   and write_register_gen if you want to get at the raw register
+   contents, as it only takes a regnum as an argument, and therefore
+   can't do a partial register update.
 
    Prior to the recent fixes to check for partial updates, both read
-   and write_register_bytes always checked to see if any registers
-   were stale, and then called target_fetch_registers (-1) to update
-   the whole set.  This caused really slowed things down for remote
-   targets.  */
+   and deprecated_write_register_bytes always checked to see if any
+   registers were stale, and then called target_fetch_registers (-1)
+   to update the whole set.  This caused really slowed things down for
+   remote targets.  */
 
 /* Copy INLEN bytes of consecutive data from registers
    starting with the INREGBYTE'th byte of register data
    into memory at MYADDR.  */
 
 void
-read_register_bytes (int in_start, char *in_buf, int in_len)
+deprecated_read_register_bytes (int in_start, char *in_buf, int in_len)
 {
   int in_end = in_start + in_len;
   int regnum;
@@ -960,7 +960,7 @@ regcache_cooked_write (struct regcache *regcache, int regnum, const void *buf)
    into registers starting with the MYREGSTART'th byte of register data.  */
 
 void
-write_register_bytes (int myregstart, char *myaddr, int inlen)
+deprecated_write_register_bytes (int myregstart, char *myaddr, int inlen)
 {
   int myregend = myregstart + inlen;
   int regnum;

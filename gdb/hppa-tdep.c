@@ -1469,7 +1469,8 @@ push_dummy_frame (struct inferior_status *inf_status)
 
   for (regnum = FP0_REGNUM; regnum < NUM_REGS; regnum++)
     {
-      read_register_bytes (REGISTER_BYTE (regnum), (char *) &freg_buffer, 8);
+      deprecated_read_register_bytes (REGISTER_BYTE (regnum),
+				      (char *) &freg_buffer, 8);
       sp = push_bytes (sp, (char *) &freg_buffer, 8);
     }
   sp = push_word (sp, read_register (IPSW_REGNUM));
@@ -1548,7 +1549,8 @@ hppa_pop_frame (void)
     if (fsr.regs[regnum])
       {
 	read_memory (fsr.regs[regnum], (char *) &freg_buffer, 8);
-	write_register_bytes (REGISTER_BYTE (regnum), (char *) &freg_buffer, 8);
+	deprecated_write_register_bytes (REGISTER_BYTE (regnum),
+					 (char *) &freg_buffer, 8);
       }
 
   if (fsr.regs[IPSW_REGNUM])
@@ -4710,16 +4712,14 @@ hppa_store_return_value (struct type *type, char *valbuf)
 
      If its a float value, then we also store it into the floating
      point registers.  */
-  write_register_bytes (REGISTER_BYTE (28)
-		        + (TYPE_LENGTH (type) > 4
-			   ? (8 - TYPE_LENGTH (type))
-			   : (4 - TYPE_LENGTH (type))),
-			valbuf,
-			TYPE_LENGTH (type));
+  deprecated_write_register_bytes (REGISTER_BYTE (28)
+				   + (TYPE_LENGTH (type) > 4
+				      ? (8 - TYPE_LENGTH (type))
+				      : (4 - TYPE_LENGTH (type))),
+				   valbuf, TYPE_LENGTH (type));
   if (! SOFT_FLOAT && TYPE_CODE (type) == TYPE_CODE_FLT)
-    write_register_bytes (REGISTER_BYTE (FP4_REGNUM),
-			  valbuf,
-			  TYPE_LENGTH (type));
+    deprecated_write_register_bytes (REGISTER_BYTE (FP4_REGNUM),
+				     valbuf, TYPE_LENGTH (type));
 }
 
 /* Copy the function's return value into VALBUF.

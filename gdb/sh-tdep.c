@@ -2473,20 +2473,20 @@ sh_default_store_return_value (struct type *type, char *valbuf)
 		valbuf, TYPE_LENGTH (type));
       else
 	memcpy (buf, valbuf, TYPE_LENGTH (type));
-      write_register_bytes (REGISTER_BYTE (R0_REGNUM), buf, 
-			    REGISTER_RAW_SIZE (R0_REGNUM));
+      deprecated_write_register_bytes (REGISTER_BYTE (R0_REGNUM), buf, 
+				       REGISTER_RAW_SIZE (R0_REGNUM));
     }
   else
-    write_register_bytes (REGISTER_BYTE (R0_REGNUM), valbuf, 
-			  TYPE_LENGTH (type));
+    deprecated_write_register_bytes (REGISTER_BYTE (R0_REGNUM), valbuf, 
+				     TYPE_LENGTH (type));
 }
 
 static void
 sh3e_sh4_store_return_value (struct type *type, char *valbuf)
 {
   if (TYPE_CODE (type) == TYPE_CODE_FLT) 
-    write_register_bytes (REGISTER_BYTE (FP0_REGNUM), 
-			  valbuf, TYPE_LENGTH (type));
+    deprecated_write_register_bytes (REGISTER_BYTE (FP0_REGNUM), 
+				     valbuf, TYPE_LENGTH (type));
   else
     sh_default_store_return_value (type, valbuf);
 }

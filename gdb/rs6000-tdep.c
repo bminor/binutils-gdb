@@ -966,7 +966,7 @@ rs6000_pop_frame (void)
     }
 
   /* Make sure that all registers are valid.  */
-  read_register_bytes (0, NULL, REGISTER_BYTES);
+  deprecated_read_register_bytes (0, NULL, REGISTER_BYTES);
 
   /* Figure out previous %pc value.  If the function is frameless, it is 
      still in the link register, otherwise walk the frames and retrieve the
@@ -2030,19 +2030,19 @@ rs6000_store_return_value (struct type *type, char *valbuf)
        Say a double_double_double type could be returned in
        FPR1/FPR2/FPR3 triple.  */
 
-    write_register_bytes (REGISTER_BYTE (FP0_REGNUM + 1), valbuf,
-			  TYPE_LENGTH (type));
+    deprecated_write_register_bytes (REGISTER_BYTE (FP0_REGNUM + 1), valbuf,
+				     TYPE_LENGTH (type));
   else if (TYPE_CODE (type) == TYPE_CODE_ARRAY)
     {
       if (TYPE_LENGTH (type) == 16
           && TYPE_VECTOR (type))
-	write_register_bytes (REGISTER_BYTE (tdep->ppc_vr0_regnum + 2),
-			      valbuf, TYPE_LENGTH (type));
+	deprecated_write_register_bytes (REGISTER_BYTE (tdep->ppc_vr0_regnum + 2),
+					 valbuf, TYPE_LENGTH (type));
     }
   else
     /* Everything else is returned in GPR3 and up.  */
-    write_register_bytes (REGISTER_BYTE (gdbarch_tdep (current_gdbarch)->ppc_gp0_regnum + 3),
-			  valbuf, TYPE_LENGTH (type));
+    deprecated_write_register_bytes (REGISTER_BYTE (gdbarch_tdep (current_gdbarch)->ppc_gp0_regnum + 3),
+				     valbuf, TYPE_LENGTH (type));
 }
 
 /* Extract from an array REGBUF containing the (raw) register state

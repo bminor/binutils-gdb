@@ -391,8 +391,8 @@ xstormy16_store_return_value (struct type *type, char *valbuf)
     }
   else if (xstormy16_type_is_scalar (type) &&
 	   TYPE_LENGTH (type) <= E_MAX_RETTYPE_SIZE_IN_REGS)
-    write_register_bytes (REGISTER_BYTE (E_1ST_ARG_REGNUM),
-			  valbuf, TYPE_LENGTH (type));
+    deprecated_write_register_bytes (REGISTER_BYTE (E_1ST_ARG_REGNUM),
+				     valbuf, TYPE_LENGTH (type));
   else
     {
       return_buffer = read_register (E_PTR_RET_REGNUM);

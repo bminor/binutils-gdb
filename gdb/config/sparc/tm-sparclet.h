@@ -121,7 +121,7 @@ enum {
 #define DEPRECATED_STORE_RETURN_VALUE(TYPE,VALBUF) \
   {                                                                    \
     /* Other values are returned in register %o0.  */                  \
-    write_register_bytes (REGISTER_BYTE (O0_REGNUM), (VALBUF),         \
+    deprecated_write_register_bytes (REGISTER_BYTE (O0_REGNUM), (VALBUF),         \
 			  TYPE_LENGTH (TYPE));                         \
   }
 

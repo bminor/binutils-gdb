@@ -298,7 +298,7 @@ vax_extract_return_value (struct type *valtype, char *regbuf, char *valbuf)
 static void
 vax_store_return_value (struct type *valtype, char *valbuf)
 {
-  write_register_bytes (0, valbuf, TYPE_LENGTH (valtype));
+  deprecated_write_register_bytes (0, valbuf, TYPE_LENGTH (valtype));
 }
 
 static CORE_ADDR

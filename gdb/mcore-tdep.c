@@ -1024,8 +1024,9 @@ mcore_store_return_value (struct type *type, char *valbuf)
   zeros = alloca (return_size);
   memset (zeros, 0, return_size);
 
-  write_register_bytes (REGISTER_BYTE (RETVAL_REGNUM), zeros, return_size);
-  write_register_bytes (offset, valbuf, value_size);
+  deprecated_write_register_bytes (REGISTER_BYTE (RETVAL_REGNUM), zeros,
+				   return_size);
+  deprecated_write_register_bytes (offset, valbuf, value_size);
 }
 
 /* Initialize our target-dependent "stuff" for this newly created frame.

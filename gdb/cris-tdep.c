@@ -972,7 +972,7 @@ cris_abi_original_store_return_value (struct type *type, char *valbuf)
   int len = TYPE_LENGTH (type);
   
   if (len <= REGISTER_SIZE) 
-    write_register_bytes (REGISTER_BYTE (RET_REGNUM), valbuf, len);
+    deprecated_write_register_bytes (REGISTER_BYTE (RET_REGNUM), valbuf, len);
   else
     internal_error (__FILE__, __LINE__, "cris_abi_original_store_return_value: type length too large.");
 }
@@ -987,7 +987,8 @@ cris_abi_v2_store_return_value (struct type *type, char *valbuf)
   if (len <= 2 * REGISTER_SIZE)
     {
       /* Note that this works since R10 and R11 are consecutive registers.  */
-      write_register_bytes (REGISTER_BYTE (RET_REGNUM), valbuf, len);
+      deprecated_write_register_bytes (REGISTER_BYTE (RET_REGNUM), valbuf,
+				       len);
     }
   else
     internal_error (__FILE__, __LINE__, "cris_abi_v2_store_return_value: type length too large.");

@@ -139,9 +139,11 @@ static void
 mn10300_store_return_value (struct type *type, char *valbuf)
 {
   if (TYPE_CODE (type) == TYPE_CODE_PTR)
-    write_register_bytes (REGISTER_BYTE (4), valbuf, TYPE_LENGTH (type));
+    deprecated_write_register_bytes (REGISTER_BYTE (4), valbuf,
+				     TYPE_LENGTH (type));
   else
-    write_register_bytes (REGISTER_BYTE (0), valbuf, TYPE_LENGTH (type));
+    deprecated_write_register_bytes (REGISTER_BYTE (0), valbuf,
+				     TYPE_LENGTH (type));
 }
 
 static struct frame_info *analyze_dummy_frame (CORE_ADDR, CORE_ADDR);

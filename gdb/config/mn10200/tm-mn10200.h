@@ -154,16 +154,16 @@ extern CORE_ADDR mn10200_frame_saved_pc (struct frame_info *);
       internal_error (__FILE__, __LINE__, "failed internal consistency check"); \
     else if (TYPE_LENGTH (TYPE) > 2 && TYPE_CODE (TYPE) != TYPE_CODE_PTR) \
       { \
-	write_register_bytes (REGISTER_BYTE (0), VALBUF, 2); \
-	write_register_bytes (REGISTER_BYTE (1), VALBUF + 2, 2); \
+	deprecated_write_register_bytes (REGISTER_BYTE (0), VALBUF, 2); \
+	deprecated_write_register_bytes (REGISTER_BYTE (1), VALBUF + 2, 2); \
       } \
     else if (TYPE_CODE (TYPE) == TYPE_CODE_PTR)\
       { \
-        write_register_bytes (REGISTER_BYTE (4), VALBUF, TYPE_LENGTH (TYPE)); \
+        deprecated_write_register_bytes (REGISTER_BYTE (4), VALBUF, TYPE_LENGTH (TYPE)); \
       } \
     else \
       { \
-        write_register_bytes (REGISTER_BYTE (0), VALBUF, TYPE_LENGTH (TYPE)); \
+        deprecated_write_register_bytes (REGISTER_BYTE (0), VALBUF, TYPE_LENGTH (TYPE)); \
       } \
   }
 

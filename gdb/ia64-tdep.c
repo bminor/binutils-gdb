@@ -1958,8 +1958,8 @@ ia64_store_return_value (struct type *type, char *valbuf)
       target_store_registers (IA64_FR8_REGNUM);
     }
   else
-    write_register_bytes (REGISTER_BYTE (IA64_GR8_REGNUM),
-			  valbuf, TYPE_LENGTH (type));
+    deprecated_write_register_bytes (REGISTER_BYTE (IA64_GR8_REGNUM),
+				     valbuf, TYPE_LENGTH (type));
 }
 
 void
