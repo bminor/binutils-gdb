@@ -1,3 +1,9 @@
+Wed Jan 28 14:06:30 1998  Richard Henderson  <rth@cygnus.com>
+
+	* emulparams/elf64_sparc.sh (ELFSIZE): 64
+	(TEXT_START_ADDR): Round off, since SIZEOF_HEADERS is added later.
+	(DATA_PLT): Needed by v9 abi.
+	
 Wed Jan 28 16:37:27 1998  J.J. van der Heijden  <J.J.vanderHeijden@student.utwente.nl>
 
 	* configure.tgt (i[3456]86-*-mingw32*): New entry.
