@@ -1291,6 +1291,17 @@ frame_extra_info_zalloc (struct frame_info *fi, long size)
 }
 
 void
+deprecated_update_current_frame_pc_hack (CORE_ADDR pc)
+{
+  /* FIXME: cagney/2002-12-06: Has the PC in the current frame
+     changed?  "infrun.c", Thanks to DECR_PC_AFTER_BREAK, can change
+     the PC after the initial frame create.  This puts things back in
+     sync.  */
+  if (current_frame != NULL)
+    current_frame->pc = pc;
+}
+
+void
 _initialize_frame (void)
 {
   obstack_init (&frame_cache_obstack);

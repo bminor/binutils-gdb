@@ -3066,8 +3066,12 @@ normal_stop (void)
   /* Make sure that the current_frame's pc is correct.  This
      is a correction for setting up the frame info before doing
      DECR_PC_AFTER_BREAK */
-  if (target_has_execution && get_current_frame ())
-    (get_current_frame ())->pc = read_pc ();
+  if (target_has_execution)
+    /* FIXME: cagney/2002-12-06: Has the PC changed?  Thanks to
+       DECR_PC_AFTER_BREAK, the program counter can change.  Ask the
+       frame code to check for this and sort out any resultant mess.
+       DECR_PC_AFTER_BREAK needs to just go away.  */
+    deprecated_update_current_frame_pc_hack (read_pc ());
 
   if (target_has_execution && breakpoints_inserted)
     {

@@ -654,4 +654,9 @@ extern struct frame_extra_info *frame_extra_info_zalloc (struct frame_info *fi,
 							 long size);
 extern struct frame_extra_info *get_frame_extra_info (struct frame_info *fi);
 
+/* FIXME: cagney/2002-12-06: Has the PC in the current frame changed?
+   "infrun.c", Thanks to DECR_PC_AFTER_BREAK, can change the PC after
+   the initial frame create.  This puts things back in sync.  */
+extern void deprecated_update_current_frame_pc_hack (CORE_ADDR pc);
+
 #endif /* !defined (FRAME_H)  */
