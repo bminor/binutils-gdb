@@ -78,6 +78,10 @@ case $os in
 		;;
 	-scout)						# CYGNUS LOCAL
 		;;
+	-wrs)
+		os=vxworks
+		basic_machine=$1
+		;;
 	-sco*)
 		os=-sco3.2v2
 		basic_machine=i386-unknown
@@ -85,14 +89,6 @@ case $os in
 	-isc*)
 		os=-isc
 		basic_machine=i386-unknown
-		;;
-	-OSE68k | -ose68k | -OSE | -ose | -es1800)	# CYGNUS LOCAL
-		os=-ose
-		basic_machine=m68k-ericsson
-		;;
-	-OSE68000 | -ose68000)				# CYGNUS LOCAL
-		os=-ose
-		basic_machine=m68000-ericsson
 		;;
 # start-sanitize-v9
 	-32)						# CYGNUS LOCAL
@@ -543,7 +539,7 @@ case $basic_machine in
 		basic_machine=m68k-wrs
 		os=-vxworks
 		;;
-	es1800 | OSE68k | ose68k)			# CYGNUS LOCAL
+	es1800 | OSE68k | ose68k | ose | OSE)		# CYGNUS LOCAL
 		basic_machine=m68k-ericsson
 		os=-ose
 		;;
@@ -639,7 +635,7 @@ case $os in
 	      | -nindy* | -vxworks* | -ebmon* | -hds* | -m88kbcs* \
 	      | -riscos* | -linux* \
 	      | -go32 | -linux* | -sim | -es1800* | -udi | -hms* | -xray \
-	      | -os68k* | -none* | -v88r* | -aout | -coff | -elf)
+	      | -os68k* | -none* | -v88r* | -aout | -coff | -elf | -abug )
 				# The last two lines above are CYGNUS LOCAL
 	;;
 # start-sanitize-v9
