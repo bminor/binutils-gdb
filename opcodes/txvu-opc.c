@@ -57,6 +57,7 @@ PRINT_FN (dotdest);
 PARSE_FN (dotdest1);
 
 PARSE_FN (bc);
+EXTRACT_FN (bc);
 PRINT_FN (sdest);
 
 PARSE_FN (vfreg);
@@ -68,7 +69,7 @@ PRINT_FN (bcftreg);
 PARSE_FN (accdest);
 PRINT_FN (accdest);
 
-PARSE_FN (xyz);
+INSERT_FN (xyz);
 
 PARSE_FN (ireg);
 PRINT_FN (ireg);
@@ -132,7 +133,7 @@ const struct txvu_operand txvu_operands[] =
 
   /* broadcast */
 #define UBC (VFDREG + 1)
-  { 2, 0, 0, parse_bc, 0, 0, print_sdest },
+  { 2, 0, TXVU_OPERAND_SUFFIX, parse_bc, 0, extract_bc, print_sdest },
 
   /* ftreg in broadcast case */
 #define UBCFTREG (UBC + 1)
@@ -140,12 +141,12 @@ const struct txvu_operand txvu_operands[] =
 
   /* accumulator dest */
 #define UACCDEST (UBCFTREG + 1)
-  { 0, 0, TXVU_OPERAND_FAKE, parse_accdest, 0, 0, print_accdest },
+  { 0, 0, 0, parse_accdest, 0, 0, print_accdest },
 
   /* The XYZ operand is a fake one that is used to ensure only "xyz" is
      specified.  It simplifies the opmula and opmsub entries.  */
 #define UXYZ (UACCDEST + 1)
-  { 0, 0, TXVU_OPERAND_FAKE, parse_xyz, 0, 0, 0 },
+  { 0, 0, TXVU_OPERAND_FAKE, 0, insert_xyz, 0, 0 },
 
   /* Lower word operands.  */
 
@@ -187,7 +188,7 @@ const struct txvu_operand txvu_operands[] =
 
   /* VI01 register.  */
 #define LVI01 (LFTFFTREG + 1)
-  { 0, 0, TXVU_OPERAND_FAKE, parse_vi01, 0, 0, print_vi01 },
+  { 0, 0, 0, parse_vi01, 0, 0, print_vi01 },
 
   /* 24 bit unsigned immediate.  */
 #define LUIMM24 (LVI01 + 1)
@@ -336,7 +337,7 @@ struct txvu_opcode txvu_upper_opcodes[] = {
   { "max", { UBC, DOTDEST, SP, VFDREG, C, VFSREG, C, UBCFTREG }, MURES + MUOP4, VUOP4 (0x4) },
   /* ??? mini or min? */
   { "mini", { DOTDEST, SP, VFDREG, C, VFSREG, C, VFTREG }, MURES + MUOP6, VUOP6 (0x2f) },
-  { "mini", { DOTDEST, SP, VFDREG, C, VFSREG, C, I }, MURES + MT + MUOP6, VUOP6 (0x1f) },
+  { "minii", { DOTDEST, SP, VFDREG, C, VFSREG, C, I }, MURES + MT + MUOP6, VUOP6 (0x1f) },
   { "mini", { UBC, DOTDEST, SP, VFDREG, C, VFSREG, C, UBCFTREG }, MURES + MUOP4, VUOP4 (0x5) },
   { "msub", { DOTDEST, SP, VFDREG, C, VFSREG, C, VFTREG }, MURES + MUOP6, VUOP6 (0x2d) },
   { "msubi", { DOTDEST, SP, VFDREG, C, VFSREG, C, I }, MURES + MT + MUOP6, VUOP6 (0x27) },
@@ -904,7 +905,7 @@ print_vfreg (info, insn, value)
      TXVU_INSN insn;
      long value;
 {
-  (*info->fprintf_func) (info->stream, "vf%ld", value);
+  (*info->fprintf_func) (info->stream, "vf%02ld", value);
   _print_dest (info, insn, dest);
 }
 
@@ -956,7 +957,7 @@ print_bcftreg (info, insn, value)
      TXVU_INSN insn;
      long value;
 {
-  (*info->fprintf_func) (info->stream, "vf%ld", value);
+  (*info->fprintf_func) (info->stream, "vf%02ld", value);
   print_sdest (info, insn, bc);
 }
 
@@ -1000,24 +1001,27 @@ print_accdest (info, insn, value)
      long value;
 {
   (*info->fprintf_func) (info->stream, "acc");
-  _print_dest (info, insn, value);
+  _print_dest (info, insn, dest);
 }
 
 /* XYZ operand handling.
    This simplifies the opmula,opmsub entries by keeping them equivalent to
    the others.  */
 
-static long
-parse_xyz (pstr, errmsg)
-     char **pstr;
+static TXVU_INSN
+insert_xyz (insn, operand, mods, value, errmsg)
+     TXVU_INSN insn;
+     const struct txvu_operand *operand;
+     int mods;
+     long value;
      const char **errmsg;
 {
   if (dest != (TXVU_DEST_X | TXVU_DEST_Y | TXVU_DEST_Z))
     {
       *errmsg = "expecting `xyz' for `dest' value";
-      return 0;
+      return insn;
     }
-  return 0;
+  return insn;
 }
 
 /* F[ST] register using selector in F[ST]F field.

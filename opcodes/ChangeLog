@@ -1,3 +1,17 @@
+start-sanitize-sky
+Fri Jan 23 01:49:24 1998  Doug Evans  <devans@seba.cygnus.com>
+
+	* txvu-opc.c (txvu_operands, UBC): Add extract entry.
+ 	(txvu_operands, UACCDEST): Not a fake operand.
+	(txvu_operands, UXYZ): Move parse entry to insert entry.
+	(txvu_operands, LVI01): Not a fake operand.
+	(txvu_upper_opcodes): Fix spelling of minii instruction.
+	(printf_vfreg): Print register number with "%02ld".
+	(print_bcftreg): Likewise.
+	(print_accdest): Pass `dest' to _print_dest.
+	(insert_xyz): Renamed from parse_xyz.
+
+end-sanitize-sky
 Thu Jan 22 16:20:17 1998  Fred Fish  <fnf@cygnus.com>
 
 	* d10v-dis.c (PC_MASK): Correct value.
