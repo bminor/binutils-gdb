@@ -1,3 +1,38 @@
+2002-12-16  Andrew Cagney  <ac131313@redhat.com>
+
+	* config/arc/arc.mt, config/arc/tm-arc.h: Delete.
+	* config/d30v/d30v.mt, config/d30v/tm-d30v.h: Delete.
+	* config/fr30/fr30.mt, config/fr30/tm-fr30.h: Delete.
+	* config/i386/i386aix.mh, config/i386/i386aix.mt: Delete.
+	* config/i386/i386m3.mh, config/i386/i386m3.mt: Delete.
+	* config/i386/i386mach.mh, config/i386/i386os9k.mt: Delete.
+	* config/i386/nm-i386aix.h, config/i386/nm-i386mach.h: Delete.
+	* config/i386/nm-m3.h, config/i386/tm-i386aix.h: Delete.
+	* config/i386/tm-i386m3.h, config/i386/tm-i386mk.h: Delete.
+	* config/i386/xm-i386aix.h, config/i386/xm-i386m3.h: Delete.
+	* config/i386/xm-i386mach.h, config/i386/xm-i386mk.h: Delete.
+	* config/i960/mon960.mt, config/i960/nindy960.mt: Delete.
+	* config/i960/tm-i960.h, config/i960/tm-mon960.h: Delete.
+	* config/i960/tm-nindy960.h, config/i960/tm-vx960.h: Delete.
+	* config/i960/vxworks960.mt, config/m68k/apollo68b.mh: Delete.
+	* config/m68k/apollo68b.mt, config/m68k/apollo68v.mh: Delete.
+	* config/m68k/hp300bsd.mh, config/m68k/hp300bsd.mt: Delete.
+	* config/m68k/hp300hpux.mh, config/m68k/hp300hpux.mt: Delete.
+	* config/m88k/delta88.mh, config/m88k/delta88.mt: Delete.
+	* config/m88k/delta88v4.mh, config/m88k/delta88v4.mt: Delete.
+	* config/m88k/m88k.mh, config/m88k/m88k.mt: Delete.
+	* config/m88k/nm-delta88v4.h, config/m88k/nm-m88k.h: Delete.
+	* config/m88k/tm-delta88.h, config/m88k/tm-delta88v4.h: Delete.
+	* config/m88k/tm-m88k.h, config/m88k/xm-delta88.h: Delete.
+	* config/m88k/xm-dgux.h: Delete.
+	* fr30-tdep.c, i386aix-nat.c, i386m3-nat.c: Delete.
+	* i386mach-nat.c, i960-tdep.c, m88k-nat.c: Delete.
+	* os9kread.c, remote-bug.c, remote-nindy.c: Delete.
+	* remote-nrom.c, remote-os9k.c, remote-vx960.c: Delete.
+	* d30v-tdep.c, arc-tdep.c, cxux-nat.c, dst.h, dstread.c: Delete.
+	* ch-exp.c, ch-lang.c, ch-lang.h, ch-typeprint.c: Delete.
+	* ch-valprint.c: Delete.
+	
 2002-12-15  Daniel Jacobowitz  <drow@mvista.com>
 
 	* infrun.c (handle_inferior_event): Rearrange code to resume if
