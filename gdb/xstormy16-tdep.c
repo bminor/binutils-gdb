@@ -451,8 +451,8 @@ xstormy16_frame_saved_register (struct frame_info *fi, int regnum)
 */
 
 static CORE_ADDR
-xstormy16_scan_prologue (CORE_ADDR start_addr,
-			 CORE_ADDR end_addr, struct frame_info *fi)
+xstormy16_scan_prologue (CORE_ADDR start_addr, CORE_ADDR end_addr,
+			 struct frame_info *fi, int *frameless)
 {
   CORE_ADDR sp = 0, fp = 0;
   CORE_ADDR next_addr;
@@ -460,6 +460,8 @@ xstormy16_scan_prologue (CORE_ADDR start_addr,
   LONGEST offset;
   int regnum;
 
+  if (frameless)
+    *frameless = 1;
   if (fi)
     {
       /* In a call dummy, don't touch the frame. */
@@ -518,6 +520,8 @@ xstormy16_scan_prologue (CORE_ADDR start_addr,
 	{
 	  if (fi)		/* Record that the frame pointer is in use. */
 	    fi->extra_info->frameless_p = 0;
+	  if (frameless)
+	    *frameless = 0;
 	}
 
       /* optional copying of args in r2-r7 to r10-r13 */
@@ -633,11 +637,18 @@ xstormy16_skip_prologue (CORE_ADDR pc)
       struct symtab_and_line sal;
       struct symbol *sym;
 
+      /* Don't trust line number debug info in frameless functions. */
+      int frameless = 1;
+      CORE_ADDR plg_end = xstormy16_scan_prologue (func_addr, func_end,
+						   NULL, &frameless);
+      if (frameless)
+        return plg_end;
+
       /* Found a function.  */
       sym = lookup_symbol (func_name, NULL, VAR_NAMESPACE, NULL, NULL);
+      /* Don't use line number debug info for assembly source files. */
       if (sym && SYMBOL_LANGUAGE (sym) != language_asm)
 	{
-	  /* Don't use this trick for assembly source files. */
 	  sal = find_pc_line (func_addr, 0);
 	  if (sal.end && sal.end < func_end)
 	    {
@@ -645,8 +656,8 @@ xstormy16_skip_prologue (CORE_ADDR pc)
 	      return sal.end;
 	    }
 	}
-      /* No useable line symbol.  Use prologue parsing method. */
-      return xstormy16_scan_prologue (func_addr, func_end, NULL);
+      /* No useable line symbol.  Use result of prologue parsing method. */
+      return plg_end;
     }
 
   /* No function symbol -- just return the PC. */
@@ -727,7 +738,7 @@ xstormy16_frame_init_saved_regs (struct frame_info *fi)
       /* Find the beginning of this function, so we can analyze its
          prologue. */
       if (find_pc_partial_function (fi->pc, NULL, &func_addr, &func_end))
-	xstormy16_scan_prologue (func_addr, fi->pc, fi);
+	xstormy16_scan_prologue (func_addr, fi->pc, fi, NULL);
       /* Else we're out of luck (can't debug completely stripped code). 
          FIXME. */
     }

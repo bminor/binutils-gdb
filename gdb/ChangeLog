@@ -1,3 +1,13 @@
+2002-01-22  Corinna Vinschen  <vinschen@redhat.com>
+
+	* xstormy16-tdep.c (xstormy16_scan_prologue): Add frameless
+	parameter.  Set frameless flag if it exists and depended of
+	whether the scanned function is frameless or not.
+	(xstormy16_skip_prologue): If function is frameless, return
+	result of xstormy16_scan_prologue().
+	(xstormy16_frame_init_saved_regs): Adjust xstormy16_scan_prologue()
+	call.
+
 2002-01-21  Elena Zannoni  <ezannoni@redhat.com>
 
 	* sh-tdep.c (sh_fp_frame_init_saved_regs, sh_push_arguments,
