@@ -59,7 +59,7 @@ case $os in
 	-unicom* | -ibm* | -next* | -hp | -isi* | -apollo | -altos* | \
 	-convergent* | -ncr* | -news | -32* | -3600* | -3100* | -osf* | \
 	-c[123]* | -convex* | -sun | -crds | -omron* | -dg | -ultra | -tti* | \
-	-harris)
+	-harris | -sim)
 		os=
 		basic_machine=$1
 		;;
@@ -101,7 +101,7 @@ case $basic_machine in
 	tahoe | i386 | i486 | i860 | m68k | m680[01234]0 | m683?2 \
 		| m88k | ns32k | arm | pyramid \
 		| tron | a29k | 580 | i960 | h8300 | hppa1.0 | hppa1.1 | we32k\
-		| v70)
+		| v70 | we32k | z8k)
 		basic_machine=$basic_machine-unknown
 		;;
 	# Recognize the basic CPU types with with company name.
@@ -110,7 +110,7 @@ case $basic_machine in
 	      | sparc-* | ns32k-* | alliant-* | arm-* | c[123]* \
 	      | mips-* | pyramid-* | tron-* | a29k-* | romp-* | rs6000-* \
 	      | none-* | 580-* | cray2-* | h8300-* | i960-* | xmp-* | ymp-* \
-	      | hppa1.0-* | hppa1.1-* | we32k-*)
+	      | hppa1.0-* | hppa1.1-* | we32k-* | z8k-*)
 		;;
 	# Recognize the various machine names and aliases which stand
 	# for a CPU type and a company and sometimes even an OS.
@@ -240,6 +240,10 @@ case $basic_machine in
 	3b1 | 7300 | 7300-att | att-7300 | pc7300 | safari | unixpc)
 		basic_machine=m68k-att
 		;;
+	3b* | we32k* )
+		basic_machine=we32k-att
+		os=-sysv
+		;;
 	delta | 3300 | motorola-3300 | motorola-delta \
 	      | 3300-motorola | delta-motorola)
 		basic_machine=m68k-motorola
@@ -285,6 +289,10 @@ case $basic_machine in
 	sun4sol2)
 		basic_machine=sparc-sun
 		os=-solaris2
+		;;
+	z8ksim)
+		basic_machine=z8k-unknown
+		os=-sim
 		;;
 	sun3)
 		basic_machine=m68k-sun
@@ -569,7 +577,7 @@ case $os in
 	      | -unos* | -osf* | -v88r* | -luna* | -dgux* | -solaris* | -sym* \
 	      | -newsos | -amigados* | -msdos* | -none* | -os68k* | -irix* \
 	      | -nindy* | -vxworks* | -ebmon* | -udi | -hms* | -xray \
-	      | -m88kbcs* | -go32 | -linux* )
+	      | -m88kbcs* | -go32 | -linux* | -sim | -es1800*)
 	;;
 # start-sanitize-v9
 	-v7 | -v9 | -hal32 | -hal64) ;;

@@ -1,4 +1,10 @@
+Thu Aug 27 13:04:42 1992  Brendan Kehoe  (brendan@rtl.cygnus.com)
+
+	* config.sub: accept we32k
+
 Mon Aug 24 14:05:14 1992  Ian Lance Taylor  (ian@cygnus.com)
+
+ 	* config.sub, configure.in: accept OSE68000 and OSE68k.
 
 	* Makefile.in: don't create all directories for ``make install'';
 	let the subdirectories create the ones they need.
