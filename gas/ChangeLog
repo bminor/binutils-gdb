@@ -1,5 +1,23 @@
 2002-12-01  Stephane Carrez  <stcarrez@nerim.fr>
 
+	Fix Bug savannah/1825:
+	* config/tc-m68hc11.h (md_relax_frag): Define to support relaxations
+	that are not pc-relative.
+	(m68hc11_relax_frag): Declare.
+
+	* config/tc-m68hc11.c (build_indexed_byte): Use a frag_var to handle
+	the offsetable indexed addressing modes (n,r).
+	(build_insn): Cleanup some locals.
+	(m68hc11_relax_frag): New function imported from tc-cris.c to handle
+	relaxation of difference between two symbols of same section.
+	(md_convert_frag): For INDEXED_OFFSET relaxs, use the displacement
+	only when this is a PC-relative operand and the offset is not absolute.
+	(md_estimate_size_before_relax): Convert the INDEXED_OFFSET,UNDEF frag
+	to INDEXED_OFFSET,STATE_BITS5 when the symbol is absolute; this will
+	be handled by m68hc11_relax_frag.
+
+2002-12-01  Stephane Carrez  <stcarrez@nerim.fr>
+
 	* config/tc-m68hc11.c (elf_flags): Set default ABI to gcc default
 	(32-bit int, 64-bit double).
 	(md_longopts): New options -mshort, -mlong, -mshort-double and

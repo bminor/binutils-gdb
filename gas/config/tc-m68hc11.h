@@ -93,6 +93,15 @@ extern int m68hc11_parse_long_option PARAMS ((char *));
 #define TC_GENERIC_RELAX_TABLE md_relax_table
 extern struct relax_type md_relax_table[];
 
+/* GAS only handles relaxations for pc-relative data targeting addresses
+   in the same segment, so we have to handle the rest on our own.  */
+#define md_relax_frag(SEG, FRAGP, STRETCH)		\
+ ((FRAGP)->fr_symbol != NULL				\
+  && S_GET_SEGMENT ((FRAGP)->fr_symbol) == (SEG)	\
+  ? relax_frag (SEG, FRAGP, STRETCH)			\
+  : m68hc11_relax_frag (SEG, FRAGP, STRETCH))
+extern long m68hc11_relax_frag PARAMS ((segT, fragS*, long));
+
 #define TC_HANDLES_FX_DONE
 
 #define DIFF_EXPR_OK		/* .-foo gets turned into PC relative relocs */

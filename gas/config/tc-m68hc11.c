@@ -1933,14 +1933,21 @@ build_indexed_byte (op, format, move_insn)
         }
       else if (op->reg1 != REG_PC)
 	{
-	  byte = (byte << 3) | 0xe2;
+          symbolS *sym;
+          offsetT off;
+
 	  f = frag_more (1);
 	  number_to_chars_bigendian (f, byte, 1);
-
-	  f = frag_more (2);
-	  fix_new_exp (frag_now, f - frag_now->fr_literal, 2,
-		       &op->exp, FALSE, BFD_RELOC_16);
-	  number_to_chars_bigendian (f, 0, 2);
+          sym = op->exp.X_add_symbol;
+          off = op->exp.X_add_number;
+          if (op->exp.X_op != O_symbol)
+            {
+              sym = make_expr_symbol (&op->exp);
+              off = 0;
+            }
+	  frag_var (rs_machine_dependent, 2, 2,
+		    ENCODE_RELAX (STATE_INDEXED_OFFSET, STATE_UNDF),
+		    sym, off, f);
 	}
       else
 	{
@@ -2060,17 +2067,12 @@ build_insn (opcode, operands, nb_operands)
   char *f;
   long format;
   int move_insn = 0;
-  fragS *frag;
-  int where;
 
   /* Put the page code instruction if there is one.  */
   format = opcode->format;
 
-  frag = frag_now;
-  where = frag_now_fix ();
-
   if (format & M6811_OP_BRANCH)
-    fix_new (frag, where, 1,
+    fix_new (frag_now, frag_now_fix (), 1,
              &abs_symbol, 0, 1, BFD_RELOC_M68HC11_RL_JUMP);
 
   if (format & OP_EXTENDED)
@@ -2732,6 +2734,97 @@ tc_gen_reloc (section, fixp)
   return reloc;
 }
 
+/* We need a port-specific relaxation function to cope with sym2 - sym1
+   relative expressions with both symbols in the same segment (but not
+   necessarily in the same frag as this insn), for example:
+     ldab sym2-(sym1-2),pc
+    sym1:
+   The offset can be 5, 9 or 16 bits long.  */
+
+long
+m68hc11_relax_frag (seg, fragP, stretch)
+     segT seg ATTRIBUTE_UNUSED;
+     fragS *fragP;
+     long stretch ATTRIBUTE_UNUSED;
+{
+  long growth;
+  offsetT aim = 0;
+  symbolS *symbolP;
+  const relax_typeS *this_type;
+  const relax_typeS *start_type;
+  relax_substateT next_state;
+  relax_substateT this_state;
+  const relax_typeS *table = TC_GENERIC_RELAX_TABLE;
+
+  /* We only have to cope with frags as prepared by
+     md_estimate_size_before_relax.  The STATE_BITS16 case may geet here
+     because of the different reasons that it's not relaxable.  */
+  switch (fragP->fr_subtype)
+    {
+    case ENCODE_RELAX (STATE_INDEXED_OFFSET, STATE_BITS16):
+      /* When we get to this state, the frag won't grow any more.  */
+      return 0;
+
+    case ENCODE_RELAX (STATE_INDEXED_OFFSET, STATE_BITS5):
+    case ENCODE_RELAX (STATE_INDEXED_OFFSET, STATE_BITS9):
+      if (fragP->fr_symbol == NULL
+	  || S_GET_SEGMENT (fragP->fr_symbol) != absolute_section)
+	as_fatal (_("internal inconsistency problem in %s: fr_symbol %lx"),
+		  __FUNCTION__, (long) fragP->fr_symbol);
+      symbolP = fragP->fr_symbol;
+      if (symbol_resolved_p (symbolP))
+	as_fatal (_("internal inconsistency problem in %s: resolved symbol"),
+		  __FUNCTION__);
+      aim = S_GET_VALUE (symbolP);
+      break;
+
+    default:
+      as_fatal (_("internal inconsistency problem in %s: fr_subtype %d"),
+		  __FUNCTION__, fragP->fr_subtype);
+    }
+
+  /* The rest is stolen from relax_frag.  There's no obvious way to
+     share the code, but fortunately no requirement to keep in sync as
+     long as fragP->fr_symbol does not have its segment changed.  */
+
+  this_state = fragP->fr_subtype;
+  start_type = this_type = table + this_state;
+
+  if (aim < 0)
+    {
+      /* Look backwards.  */
+      for (next_state = this_type->rlx_more; next_state;)
+	if (aim >= this_type->rlx_backward)
+	  next_state = 0;
+	else
+	  {
+	    /* Grow to next state.  */
+	    this_state = next_state;
+	    this_type = table + this_state;
+	    next_state = this_type->rlx_more;
+	  }
+    }
+  else
+    {
+      /* Look forwards.  */
+      for (next_state = this_type->rlx_more; next_state;)
+	if (aim <= this_type->rlx_forward)
+	  next_state = 0;
+	else
+	  {
+	    /* Grow to next state.  */
+	    this_state = next_state;
+	    this_type = table + this_state;
+	    next_state = this_type->rlx_more;
+	  }
+    }
+
+  growth = this_type->rlx_length - start_type->rlx_length;
+  if (growth != 0)
+    fragP->fr_subtype = this_state;
+  return growth;
+}
+
 void
 md_convert_frag (abfd, sec, fragP)
      bfd *abfd ATTRIBUTE_UNUSED;
@@ -2799,25 +2892,32 @@ md_convert_frag (abfd, sec, fragP)
       break;
 
     case ENCODE_RELAX (STATE_INDEXED_OFFSET, STATE_BITS5):
+      if (fragP->fr_opcode[0] == 3
+          && fragP->fr_symbol != 0
+          && S_GET_SEGMENT (fragP->fr_symbol) != absolute_section)
+        value = disp;
       fragP->fr_opcode[0] = fragP->fr_opcode[0] << 6;
-      if ((fragP->fr_opcode[0] & 0x0ff) == 0x0c0)
-	fragP->fr_opcode[0] |= disp & 0x1f;
-      else
-	fragP->fr_opcode[0] |= value & 0x1f;
+      fragP->fr_opcode[0] |= value & 0x1f;
       break;
 
     case ENCODE_RELAX (STATE_INDEXED_OFFSET, STATE_BITS9):
+      if (fragP->fr_opcode[0] == 3
+          && fragP->fr_symbol != 0
+          && S_GET_SEGMENT (fragP->fr_symbol) != absolute_section)
+        value = disp;
       fragP->fr_opcode[0] = (fragP->fr_opcode[0] << 3);
       fragP->fr_opcode[0] |= 0xE0;
-      fix_new (fragP, fragP->fr_fix, 1,
-	       fragP->fr_symbol, fragP->fr_offset, 0, BFD_RELOC_8);
+      fragP->fr_opcode[0] |= (value >> 8) & 1;
+      fragP->fr_opcode[1] = value;
       fragP->fr_fix += 1;
       break;
 
     case ENCODE_RELAX (STATE_INDEXED_OFFSET, STATE_BITS16):
       fragP->fr_opcode[0] = (fragP->fr_opcode[0] << 3);
       fragP->fr_opcode[0] |= 0xe2;
-      if ((fragP->fr_opcode[0] & 0x0ff) == 0x0fa)
+      if ((fragP->fr_opcode[0] & 0x0ff) == 0x0fa
+          && fragP->fr_symbol != 0
+          && S_GET_SEGMENT (fragP->fr_symbol) != absolute_section)
 	{
 	  fixp = fix_new (fragP, fragP->fr_fix, 2,
 			  fragP->fr_symbol, fragP->fr_offset,
@@ -2927,13 +3027,23 @@ md_estimate_size_before_relax (fragP, segment)
 	    case STATE_INDEXED_OFFSET:
 	      assert (current_architecture & cpu6812);
 
-	      /* Switch the indexed operation to 16-bit mode.  */
-	      fragP->fr_opcode[0] = fragP->fr_opcode[0] << 3;
-	      fragP->fr_opcode[0] |= 0xe2;
-	      fragP->fr_fix++;
-	      fix_new (fragP, fragP->fr_fix, 2, fragP->fr_symbol,
-		       fragP->fr_offset, 0, BFD_RELOC_16);
-	      fragP->fr_fix++;
+              if (fragP->fr_symbol
+                  && S_GET_SEGMENT (fragP->fr_symbol) == absolute_section)
+                {
+                   fragP->fr_subtype = ENCODE_RELAX (STATE_INDEXED_OFFSET,
+                                                     STATE_BITS5);
+                   /* Return the size of the variable part of the frag. */
+                   return md_relax_table[fragP->fr_subtype].rlx_length;
+                }
+              else
+                {
+                   /* Switch the indexed operation to 16-bit mode.  */
+                   fragP->fr_opcode[0] = fragP->fr_opcode[0] << 3;
+                   fragP->fr_opcode[0] |= 0xe2;
+                   fix_new (fragP, fragP->fr_fix, 2, fragP->fr_symbol,
+                            fragP->fr_offset, 0, BFD_RELOC_16);
+                   fragP->fr_fix += 2;
+                }
 	      break;
 
 	    case STATE_XBCC_BRANCH:
