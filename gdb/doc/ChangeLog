@@ -1,3 +1,9 @@
+2004-01-13  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.texinfo: Update copyright year.  Mention that set
+	follow-fork-mode is supported on GNU/Linux.  Remove documentation of
+	"set follow-fork-mode ask".
+
 2004-01-13  Andrew Cagney  <cagney@redhat.com>
 
 	* gdbint.texinfo: Update copyright year.

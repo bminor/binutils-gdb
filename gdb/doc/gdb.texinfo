@@ -84,7 +84,7 @@ development.''
 
 @vskip 0pt plus 1filll
 Copyright @copyright{} 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
-1996, 1998, 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+1996, 1998, 1999, 2000, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
 @sp 2
 Published by the Free Software Foundation @*
 59 Temple Place - Suite 330, @*
@@ -2289,9 +2289,10 @@ get its process ID.  Then tell @value{GDBN} (a new invocation of
 the child process (@pxref{Attach}).  From that point on you can debug
 the child process just like any other process which you attached to.
 
-On HP-UX (11.x and later only?), @value{GDBN} provides support for
-debugging programs that create additional processes using the
-@code{fork} or @code{vfork} function.
+On some systems, @value{GDBN} provides support for debugging programs that
+create additional processes using the @code{fork} or @code{vfork} functions.
+Currently, the only platforms with this feature are HP-UX (11.x and later
+only?) and GNU/Linux (kernel version 2.5.60 and later).
 
 By default, when a program forks, @value{GDBN} will continue to debug
 the parent process and the child process will run unimpeded.
@@ -2315,8 +2316,6 @@ unimpeded.  This is the default.
 The new process is debugged after a fork.  The parent process runs
 unimpeded.
 
-@item ask
-The debugger will ask for one of the above choices.
 @end table
 
 @item show follow-fork-mode
