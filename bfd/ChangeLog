@@ -1,3 +1,10 @@
+2004-10-28  Nick Clifton  <nickc@redhat.com>
+
+	* elf32-iq2000.c (iq2000_elf_relocate_section): Do nothing when
+	perfoming a relocatable link.
+	(iq2000_elf_object_p): Do not set elf_bad_symtab.  This is only
+	for MIPS ports under Irix.
+
 2004-10-27  Richard Earnshaw  <rearnsha@arm.com>
 
 	* elf32-arm.h (bfd_elf32_arm_process_before_allocation): Handle

@@ -512,7 +512,7 @@ iq2000_elf_check_relocs (abfd, info, sec, relocs)
   if (changed)
     /* Note that we've changed relocs, otherwise if !info->keep_memory
        we'll free the relocs and lose our changes.  */
-    (const Elf_Internal_Rela *) (elf_section_data (sec)->relocs) = relocs;
+    elf_section_data (sec)->relocs = (Elf_Internal_Rela *) relocs;
 
   return TRUE;
 }
@@ -567,6 +567,9 @@ iq2000_elf_relocate_section (output_bfd, info, input_bfd, input_section,
   struct elf_link_hash_entry ** sym_hashes;
   Elf_Internal_Rela *		rel;
   Elf_Internal_Rela *		relend;
+
+  if (info->relocatable)
+    return TRUE;
 
   symtab_hdr = & elf_tdata (input_bfd)->symtab_hdr;
   sym_hashes = elf_sym_hashes (input_bfd);
@@ -915,11 +918,6 @@ bfd_boolean
 iq2000_elf_object_p (abfd)
      bfd *abfd;
 {
-  /* Irix 5 and 6 is broken.  Object file symbol tables are not always
-     sorted correctly such that local symbols precede global symbols,
-     and the sh_info field in the symbol table is not always right.  */
-  elf_bad_symtab (abfd) = TRUE;
-
   bfd_default_set_arch_mach (abfd, bfd_arch_iq2000,
 			     elf32_iq2000_machine (abfd));
   return TRUE;
