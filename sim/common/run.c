@@ -112,13 +112,22 @@ main (ac, av)
   for (s = abfd->sections; s; s = s->next)
   if (abfd && (s->flags & SEC_LOAD))
     {
-      unsigned char *buffer = (unsigned char *)malloc (bfd_section_size (abfd, s));
-      bfd_get_section_contents (abfd,
-				s,
-				buffer,
-				0,
-				bfd_section_size (abfd, s));
-      sim_write (s->vma, buffer, bfd_section_size (abfd, s));
+      unsigned char *buffer = (unsigned char *)malloc ((size_t)(bfd_section_size (abfd, s)));
+      if (buffer != NULL)
+        {
+          bfd_get_section_contents (abfd,
+                                    s,
+                                    buffer,
+                                    0,
+                                    bfd_section_size (abfd, s));
+          sim_write (s->vma, buffer, bfd_section_size (abfd, s));
+        }
+      else
+        {
+          fprintf (stderr, "run: failed to allocate section buffer: %s\n", 
+                   bfd_errmsg(bfd_get_error()));
+          exit (1);
+        }
     }
 
   start_address = bfd_get_start_address (abfd);
