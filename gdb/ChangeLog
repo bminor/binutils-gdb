@@ -1,5 +1,10 @@
 2001-10-21  Andrew Cagney  <ac131313@redhat.com>
 
+	* top.c (print_gdb_version): Do not print ``(MI_OUT)''.  MI
+	interface is always enabled.
+
+2001-10-21  Andrew Cagney  <ac131313@redhat.com>
+
 	* Makefile.in: Replace top.h with $(top_h). Replace expression.h
 	with $(expression_h).  Replace command.h with $(command_h).
 	(language_h): Define.  Replace language.h with $(language_h).
