@@ -1,3 +1,8 @@
+2003-01-13  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdb_indent.sh: Update to version 2.2.9.  Warn when not exact
+	version match.
+
 2003-01-13  Daniel Jacobowitz  <drow@mvista.com>
 
 	* symtab.c (find_pc_sect_line): Don't consider end-of-function
