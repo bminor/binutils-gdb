@@ -99,7 +99,7 @@
 2004-08-16  Alan Modra  <amodra@bigpond.net.au>
 
 	* pdp11.c (struct pdp11_aout_reloc_external): Delete.  Replace
-	occurrences with bfd_btye * thoughout file.
+	occurrences with bfd_byte * thoughout file.
 
 	* coff-rs6000.c (do_shared_object_padding): Warning fix.
 	(xcoff_write_armap_big): Likewise.
