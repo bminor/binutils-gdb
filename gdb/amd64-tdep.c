@@ -371,8 +371,11 @@ amd64_classify (struct type *type, enum amd64_reg_class class[2])
   class[0] = class[1] = AMD64_NO_CLASS;
 
   /* Arguments of types (signed and unsigned) _Bool, char, short, int,
-     long, long long, and pointers are in the INTEGER class.  */
+     long, long long, and pointers are in the INTEGER class.  Similarly,
+     range types, used by languages such as Ada, are also in the INTEGER
+     class.  */
   if ((code == TYPE_CODE_INT || code == TYPE_CODE_ENUM
+       || code == TYPE_CODE_RANGE
        || code == TYPE_CODE_PTR || code == TYPE_CODE_REF)
       && (len == 1 || len == 2 || len == 4 || len == 8))
     class[0] = AMD64_INTEGER;

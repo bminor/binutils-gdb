@@ -1,3 +1,8 @@
+2004-02-26  J. Brobecker  <brobecker@gnat.com>
+
+	* amd64-tdep.c (amd64_classify): make RANGE_TYPE objects be part
+	of the INTEGER class.
+
 2004-03-26  Jim Blandy  <jimb@redhat.com>
 
 	* ppc-linux-tdep.c (ppc_linux_init_abi): Long doubles are eight
