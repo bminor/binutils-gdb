@@ -1,3 +1,8 @@
+Fri Sep 19 17:08:41 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* config/tc-mn10300.c (md_assemble): Use strcasecomp instead
+	of strcmp where appropriate.
+
 Thu Sep 18 14:11:56 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-v850.c (md_assemble): Cope with a zero data area
