@@ -1,3 +1,8 @@
+2004-05-07  Andrew Cagney  <cagney@redhat.com>
+
+	* cli/cli-decode.c (add_setshow_zinteger_cmd): New function.
+	* command.h (add_setshow_zinteger_cmd): Declare.
+
 2004-05-06  Randolph Chung  <tausq@debian.org>
 
 	* config/pa/tm-hppa.h (RO_REGNUM, FLAGS_REGNUM, RP_REGNUM)

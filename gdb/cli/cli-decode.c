@@ -472,6 +472,26 @@ add_setshow_uinteger_cmd (char *name,
 			NULL, NULL);
 }
 
+/* Add element named NAME to both the set and show command LISTs (the
+   list for set/show or some sublist thereof).  CLASS is as in
+   add_cmd.  VAR is address of the variable which will contain the
+   value.  SET_DOC and SHOW_DOR are the documentation strings.  */
+void
+add_setshow_zinteger_cmd (char *name,
+			  enum command_class class,
+			  int *var, char *set_doc, char *show_doc,
+			  cmd_sfunc_ftype *set_func,
+			  cmd_sfunc_ftype *show_func,
+			  struct cmd_list_element **set_list,
+			  struct cmd_list_element **show_list)
+{
+  add_setshow_cmd_full (name, class, var_zinteger, var,
+			set_doc, show_doc,
+			set_func, show_func,
+			set_list, show_list,
+			NULL, NULL);
+}
+
 /* Where SETCMD has already been added, add the corresponding show
    command to LIST and return a pointer to the added command (not
    necessarily the head of LIST).  */

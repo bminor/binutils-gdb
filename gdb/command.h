@@ -272,6 +272,16 @@ extern void add_setshow_uinteger_cmd (char *name,
 				      struct cmd_list_element **set_list,
 				      struct cmd_list_element **show_list);
 
+extern void add_setshow_zinteger_cmd (char *name,
+				      enum command_class class,
+				      int *var,
+				      char *set_doc,
+				      char *show_doc,
+				      cmd_sfunc_ftype *set_func,
+				      cmd_sfunc_ftype *show_func,
+				      struct cmd_list_element **set_list,
+				      struct cmd_list_element **show_list);
+
 extern struct cmd_list_element *add_show_from_set (struct cmd_list_element *,
 						   struct cmd_list_element
 						   **);
