@@ -1794,7 +1794,7 @@ bfd            *abfd;
 }
 
 static void 
-DEFUN(coff_print_symbol,(ignore_abfd, file, symbol, how),
+DEFUN(coff_print_symbol,(ignore_abfd, filep, symbol, how),
       bfd            *ignore_abfd AND
       PTR           filep AND
       asymbol        *symbol AND
