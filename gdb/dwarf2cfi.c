@@ -201,6 +201,7 @@ static void fde_chunks_need_space ();
 
 static struct context *context_alloc ();
 static struct frame_state *frame_state_alloc ();
+static void unwind_tmp_obstack_init ();
 static void unwind_tmp_obstack_free ();
 static void context_cpy (struct context *dst, struct context *src);
 
@@ -308,10 +309,16 @@ frame_state_alloc ()
 }
 
 static void
+unwind_tmp_obstack_init ()
+{
+  obstack_init (&unwind_tmp_obstack);
+}
+
+static void
 unwind_tmp_obstack_free ()
 {
   obstack_free (&unwind_tmp_obstack, NULL);
-  obstack_init (&unwind_tmp_obstack);
+  unwind_tmp_obstack_init ();
 }
 
 static void
@@ -1255,8 +1262,11 @@ update_context (struct context *context, struct frame_state *fs, int chain)
   CORE_ADDR cfa;
   long i;
 
+  unwind_tmp_obstack_init ();
+
   orig_context = context_alloc ();
   context_cpy (orig_context, context);
+
   /* Compute this frame's CFA.  */
   switch (fs->cfa_how)
     {
@@ -1380,7 +1390,7 @@ dwarf2_build_frame_info (struct objfile *objfile)
   char *end = NULL;
   int from_eh = 0;
 
-  obstack_init (&unwind_tmp_obstack);
+  unwind_tmp_obstack_init ();
 
   dwarf_frame_buffer = 0;
 
@@ -1535,6 +1545,8 @@ cfi_read_fp ()
   struct frame_state *fs;
   CORE_ADDR cfa;
 
+  unwind_tmp_obstack_init ();
+
   context = context_alloc ();
   fs = frame_state_alloc ();
 
@@ -1544,7 +1556,9 @@ cfi_read_fp ()
   update_context (context, fs, 0);
 
   cfa = context->cfa;
+  
   unwind_tmp_obstack_free ();
+  
   return cfa;
 }
 
@@ -1555,6 +1569,8 @@ cfi_write_fp (CORE_ADDR val)
 {
   struct context *context;
   struct frame_state *fs;
+
+  unwind_tmp_obstack_init ();
 
   context = context_alloc ();
   fs = frame_state_alloc ();
@@ -1603,6 +1619,8 @@ cfi_frame_chain (struct frame_info *fi)
   struct frame_state *fs;
   CORE_ADDR cfa;
 
+  unwind_tmp_obstack_init ();
+
   context = context_alloc ();
   fs = frame_state_alloc ();
   context_cpy (context, UNWIND_CONTEXT (fi));
@@ -1639,6 +1657,8 @@ cfi_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 {
   struct frame_state *fs;
 
+  unwind_tmp_obstack_init ();
+  
   fs = frame_state_alloc ();
   fi->context = frame_obstack_alloc (sizeof (struct context));
   UNWIND_CONTEXT (fi)->reg =
@@ -1658,6 +1678,7 @@ cfi_init_extra_frame_info (int fromleaf, struct frame_info *fi)
       frame_state_for (UNWIND_CONTEXT (fi), fs);
       update_context (UNWIND_CONTEXT (fi), fs, 0);
     }
+  
   unwind_tmp_obstack_free ();
 }
 
@@ -1764,6 +1785,8 @@ cfi_virtual_frame_pointer (CORE_ADDR pc, int *frame_reg,
 {
   struct context *context;
   struct frame_state *fs;
+
+  unwind_tmp_obstack_init ();
 
   context = context_alloc ();
   fs = frame_state_alloc ();

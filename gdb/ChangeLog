@@ -1,3 +1,11 @@
+2002-06-11  Michal Ludvig  <mludvig@suse.cz>
+
+	* dwarf2cfi.c (unwind_tmp_obstack_init): New.
+	(unwind_tmp_obstack_free, parse_frame_info)
+	(update_context, cfi_read_fp, cfi_write_fp)
+	(cfi_frame_chain, cfi_init_extra_frame_info)
+	(cfi_virtual_frame_pointer): Use the above function.
+
 2002-06-11  Corinna Vinschen  <vinschen@redhat.com>
 
 	* v850-tdep.c (v850_type_is_scalar): New function.
