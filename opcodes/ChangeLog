@@ -1,3 +1,16 @@
+2001-11-14  Alan Modra  <amodra@bigpond.net.au>
+
+	* disassemble.c (disassembler): Call print_insn_i386.
+	* i386-dis.c (SUFFIX_ALWAYS): Define.
+	(struct dis_private): Add orig_sizeflag.
+	(print_insn_i386): Make it a wrapper, calling..
+	(print_insn): ..The old body of print_insn_i386.  Avoid longjmp
+	warning without using volatile by moving orig_sizeflag to priv,
+	and removing inbuf.  Parse disassembler_options.
+	(print_insn_i386_att, print_insn_i386_intel): Move initialisation
+	code to print_insn.
+	(putop): Remove #ifdef SUFFIX_ALWAYS.
+
 2001-11-11  Timothy Wall  <twall@alum.mit.edu>
 
 	* tic54x-dis.c: Use revised opcode structure.  Export opcode

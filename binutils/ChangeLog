@@ -1,3 +1,7 @@
+2001-11-14  Alan Modra  <amodra@bigpond.net.au>
+
+	* doc/binutils.texi (objdump): Document x86 -M options.
+
 2001-11-13  Keith Walker <keith.walker@arm.com>
 
 	* readelf.c (read_and_display_attr_value): New function to
