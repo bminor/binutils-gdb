@@ -1938,19 +1938,17 @@ elf_link_add_object_symbols (abfd, info)
 	     might be needed here.  */
 	  if (isym->st_other != 0)
 	    {
+	      unsigned char hvis, symvis, other;
+
+	      /* Take the balance of OTHER from the definition.  */
+	      other = (definition ? isym->st_other : h->other);
+	      other &= ~ ELF_ST_VISIBILITY (-1);
+
 	      /* Combine visibilities, using the most constraining one.  */
-	      unsigned char hvis   = ELF_ST_VISIBILITY (h->other);
-	      unsigned char symvis = ELF_ST_VISIBILITY (isym->st_other);
+	      hvis   = ELF_ST_VISIBILITY (h->other);
+	      symvis = ELF_ST_VISIBILITY (isym->st_other);
 
-	      if (symvis && (hvis > symvis || hvis == 0))
-		h->other = isym->st_other;
-
-	      /* If neither has visibility, use the st_other of the
-		 definition.  This is an arbitrary choice, since the
-		 other bits have no general meaning.  */
-	      if (!symvis && !hvis
-		  && (definition || h->other == 0))
-		h->other = isym->st_other;
+	      h->other = other | (hvis > symvis ? hvis : symvis);
 	    }
 
 	  /* Set a flag in the hash table entry indicating the type of
@@ -6389,11 +6387,10 @@ elf_link_output_extsym (h, data)
       sym.st_info = ELF_ST_INFO (bindtype, ELF_ST_TYPE (sym.st_info));
     }
 
-  /* If a symbol is not defined locally, we clear the visibility
-     field.  */
+  /* If a symbol is not defined locally, we clear the visibility field.  */
   if (! finfo->info->relocateable
       && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0)
-    sym.st_other ^= ELF_ST_VISIBILITY (sym.st_other);
+    sym.st_other &= ~ ELF_ST_VISIBILITY (-1);
 
   /* If this symbol should be put in the .dynsym section, then put it
      there now.  We already know the symbol index.  We also fill in
