@@ -1,5 +1,8 @@
 Thu Jul 11 11:58:44 1996  Jeffrey A Law  (law@cygnus.com)
 
+	* h8300-dis.c (bfd_h8_disassemble): Mask off unwanted bits
+	for L_3 and L_2.
+
 	* h8300-dis.c (bfd_h8_disassemble): Don't set plen for
 	3bit immediate operands.
 
