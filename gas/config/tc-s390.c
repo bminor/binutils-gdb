@@ -375,7 +375,7 @@ md_parse_option (c, arg)
 	warn_areg_zero = TRUE;
 
       else if (arg != NULL && strcmp (arg, "31") == 0)
-	s390_arch_size = 31;
+	s390_arch_size = 32;
 
       else if (arg != NULL && strcmp (arg, "64") == 0)
 	s390_arch_size = 64;

@@ -1,3 +1,8 @@
+2002-10-18  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* config/tc-s390.c (md_parse_option): Set s390_arch_size to 32
+	for option -m31.
+
 2002-10-18  Svein E. Seldal  <Svein.Seldal@solidas.com>
 
 	* expr.c (operand): Add support for n.nn flonums.
