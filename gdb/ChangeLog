@@ -1,3 +1,18 @@
+2003-12-15  Mark Kettenis  <kettenis@gnu.org>
+
+	* sparc-sol2-nat.c: Add 64-bit support.
+	(supply_gregset): Call sparc_supply_gregset
+	instead of sparc32_supply_gregset.
+	(supply_fpregset, fill_gregset, fill_fpregset): Likewise.
+	* sparc64-sol2-nat.c: Remove file.
+	* configure.host: Use a single configuration for
+	sparc-*-solaris2*, sparcv9-*-solaris2* and sparc64-solaris2*.
+	* Makefile.in (ALLDEPFILES): Remobe sparc64-sol2-nat.c.
+	(sparc-sol2-nat.o): Update dependency.
+	(sparc64-sol2-nat.o): Remove dependency.
+	* config/sparc/sol2.mh: Update comment.
+	* config/sparc/sol64.mh: Remobe file.
+
 2003-12-14  Mark Kettenis  <kettenis@gnu.org>
 
 	* configure.tgt: Rearrange things such that we include 64-bit
