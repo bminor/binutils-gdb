@@ -115,7 +115,7 @@ nto_find_and_open_solib (char *solib, unsigned o_flags, char **temp_pathname)
   sprintf (buf, path_fmt, arch_path, arch_path, arch_path, arch_path,
 	   arch_path);
 
-  return openp (buf, 1, solib, o_flags, 0, temp_pathname);
+  return openp (buf, OPF_TRY_CWD_FIRST, solib, o_flags, 0, temp_pathname);
 }
 
 void

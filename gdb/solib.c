@@ -156,15 +156,15 @@ solib_open (char *in_pathname, char **found_pathname)
   
   /* If not found, search the solib_search_path (if any).  */
   if (found_file < 0 && solib_search_path != NULL)
-    found_file = openp (solib_search_path,
-			1, in_pathname, O_RDONLY, 0, &temp_pathname);
+    found_file = openp (solib_search_path, OPF_TRY_CWD_FIRST,
+			in_pathname, O_RDONLY, 0, &temp_pathname);
   
   /* If not found, next search the solib_search_path (if any) for the basename
      only (ignoring the path).  This is to allow reading solibs from a path
      that differs from the opened path.  */
   if (found_file < 0 && solib_search_path != NULL)
-    found_file = openp (solib_search_path, 
-                        1, lbasename (in_pathname), O_RDONLY, 0,
+    found_file = openp (solib_search_path, OPF_TRY_CWD_FIRST,
+                        lbasename (in_pathname), O_RDONLY, 0,
                         &temp_pathname);
 
   /* If not found, try to use target supplied solib search method */
@@ -175,13 +175,15 @@ solib_open (char *in_pathname, char **found_pathname)
   /* If not found, next search the inferior's $PATH environment variable. */
   if (found_file < 0 && solib_absolute_prefix == NULL)
     found_file = openp (get_in_environ (inferior_environ, "PATH"),
-			1, in_pathname, O_RDONLY, 0, &temp_pathname);
+			OPF_TRY_CWD_FIRST, in_pathname, O_RDONLY, 0,
+			&temp_pathname);
 
   /* If not found, next search the inferior's $LD_LIBRARY_PATH 
      environment variable. */
   if (found_file < 0 && solib_absolute_prefix == NULL)
     found_file = openp (get_in_environ (inferior_environ, "LD_LIBRARY_PATH"),
-			1, in_pathname, O_RDONLY, 0, &temp_pathname);
+			OPF_TRY_CWD_FIRST, in_pathname, O_RDONLY, 0,
+			&temp_pathname);
 
   /* Done.  If not found, tough luck.  Return found_file and 
      (optionally) found_pathname.  */

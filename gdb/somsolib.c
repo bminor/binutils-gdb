@@ -216,7 +216,8 @@ som_solib_sizeof_symbol_table (char *filename)
   /* We believe that filename was handed to us by the dynamic linker, and
      is therefore always an absolute path.
    */
-  desc = openp (getenv ("PATH"), 1, filename, O_RDONLY | O_BINARY, 0, &absolute_name);
+  desc = openp (getenv ("PATH"), OPF_TRY_CWD_FIRST, filename,
+		O_RDONLY | O_BINARY, 0, &absolute_name);
   if (desc < 0)
     {
       perror_with_name (filename);

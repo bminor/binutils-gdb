@@ -1222,14 +1222,15 @@ symfile_bfd_open (char *name)
   name = tilde_expand (name);	/* Returns 1st new malloc'd copy */
 
   /* Look down path for it, allocate 2nd new malloc'd copy.  */
-  desc = openp (getenv ("PATH"), 1, name, O_RDONLY | O_BINARY, 0, &absolute_name);
+  desc = openp (getenv ("PATH"), OPF_TRY_CWD_FIRST, name, O_RDONLY | O_BINARY,
+		0, &absolute_name);
 #if defined(__GO32__) || defined(_WIN32) || defined (__CYGWIN__)
   if (desc < 0)
     {
       char *exename = alloca (strlen (name) + 5);
       strcat (strcpy (exename, name), ".exe");
-      desc = openp (getenv ("PATH"), 1, exename, O_RDONLY | O_BINARY,
-		    0, &absolute_name);
+      desc = openp (getenv ("PATH"), OPF_TRY_CWD_FIRST, exename,
+		    O_RDONLY | O_BINARY, 0, &absolute_name);
     }
 #endif
   if (desc < 0)

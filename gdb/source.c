@@ -636,11 +636,17 @@ is_regular_file (const char *name)
 /* Open a file named STRING, searching path PATH (dir names sep by some char)
    using mode MODE and protection bits PROT in the calls to open.
 
-   If TRY_CWD_FIRST, try to open ./STRING before searching PATH.
+   OPTS specifies the function behaviour in specific cases.
+
+   If OPF_TRY_CWD_FIRST, try to open ./STRING before searching PATH.
    (ie pretend the first element of PATH is ".").  This also indicates
    that a slash in STRING disables searching of the path (this is
    so that "exec-file ./foo" or "symbol-file ./foo" insures that you
    get that particular version of foo or an error message).
+
+   If OPTS has OPF_SEARCH_IN_PATH set, absolute names will also be
+   searched in path (we usually want this for source files but not for
+   executables).
 
    If FILENAME_OPENED is non-null, set it to a newly allocated string naming
    the actual file opened (this string will always start with a "/").  We
@@ -654,7 +660,7 @@ is_regular_file (const char *name)
 /*  >>>> This should only allow files of certain types,
     >>>>  eg executable, non-directory */
 int
-openp (const char *path, int try_cwd_first, const char *string,
+openp (const char *path, int opts, const char *string,
        int mode, int prot,
        char **filename_opened)
 {
@@ -672,7 +678,7 @@ openp (const char *path, int try_cwd_first, const char *string,
   mode |= O_BINARY;
 #endif
 
-  if (try_cwd_first || IS_ABSOLUTE_PATH (string))
+  if ((opts & OPF_TRY_CWD_FIRST) || IS_ABSOLUTE_PATH (string))
     {
       int i;
 
@@ -690,10 +696,15 @@ openp (const char *path, int try_cwd_first, const char *string,
 	  fd = -1;
 	}
 
-      for (i = 0; string[i]; i++)
-	if (IS_DIR_SEPARATOR (string[i]))
-	  goto done;
+      if (!(opts & OPF_SEARCH_IN_PATH))
+	for (i = 0; string[i]; i++)
+	  if (IS_DIR_SEPARATOR (string[i]))
+	    goto done;
     }
+
+  /* /foo => foo, to avoid multiple slashes that Emacs doesn't like. */
+  while (IS_DIR_SEPARATOR(string[0]))
+    string++;
 
   /* ./foo => foo */
   while (string[0] == '.' && IS_DIR_SEPARATOR (string[1]))
@@ -793,7 +804,8 @@ source_full_path_of (char *filename, char **full_pathname)
 {
   int fd;
 
-  fd = openp (source_path, 1, filename, O_RDONLY, 0, full_pathname);
+  fd = openp (source_path, OPF_TRY_CWD_FIRST | OPF_SEARCH_IN_PATH, filename,
+	      O_RDONLY, 0, full_pathname);
   if (fd < 0)
     {
       *full_pathname = NULL;
@@ -864,13 +876,13 @@ find_and_open_source (struct objfile *objfile,
 	}
     }
 
-  result = openp (path, 0, filename, OPEN_MODE, 0, fullname);
+  result = openp (path, OPF_SEARCH_IN_PATH, filename, OPEN_MODE, 0, fullname);
   if (result < 0)
     {
       /* Didn't work.  Try using just the basename. */
       p = lbasename (filename);
       if (p != filename)
-	result = openp (path, 0, p, OPEN_MODE, 0, fullname);
+	result = openp (path, OPF_SEARCH_IN_PATH, p, OPEN_MODE, 0, fullname);
     }
 
   if (result >= 0)
