@@ -116,8 +116,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
   _bfd_elf_merge_sections
 #endif
 
+#ifndef bfd_elfNN_bfd_make_debug_symbol
 #define bfd_elfNN_bfd_make_debug_symbol \
   ((asymbol *(*) PARAMS ((bfd *, void *, unsigned long))) bfd_nullvoidptr)
+#endif
 
 #ifndef bfd_elfNN_bfd_copy_private_symbol_data
 #define bfd_elfNN_bfd_copy_private_symbol_data \

@@ -776,6 +776,7 @@ NAME(aout,machine_type) (arch, machine, unknown)
     case bfd_mach_mips4650:
     case bfd_mach_mips8000:
     case bfd_mach_mips10000:
+    case bfd_mach_mips12000:
     case bfd_mach_mips16:
     case bfd_mach_mips32:
     case bfd_mach_mips32_4k:

@@ -135,6 +135,7 @@ DESCRIPTION
 .#define bfd_mach_mips6000		6000
 .#define bfd_mach_mips8000		8000
 .#define bfd_mach_mips10000		10000
+.#define bfd_mach_mips12000		12000
 .#define bfd_mach_mips16		16
 .#define bfd_mach_mips32                32
 .#define bfd_mach_mips32_4k             3204113 {* 32, 04, octal 'K' *}
@@ -727,7 +728,7 @@ DESCRIPTION
 
 boolean
 bfd_default_scan (info, string)
-     const struct bfd_arch_info *info;
+     const bfd_arch_info_type *info;
      const char *string;
 {
   const char *ptr_src;

@@ -241,7 +241,7 @@ static int mips_gp32 = 0;
    (ISA) == ISA_MIPS3                \
    || (ISA) == ISA_MIPS4             \
    || (ISA) == ISA_MIPS5             \
-   || (ISA) == ISA_MIPS32            \
+   || (ISA) == ISA_MIPS64            \
    )
 
 /* Whether the processor uses hardware interlocks to protect
@@ -9273,6 +9273,7 @@ MIPS options:\n\
   show (stream, "6000", &column, &first);
   show (stream, "8000", &column, &first);
   show (stream, "10000", &column, &first);
+  show (stream, "12000", &column, &first);
   show (stream, "mips32-4k", &column, &first);
   show (stream, "sb-1", &column, &first);
   fputc ('\n', stream);
@@ -12037,6 +12038,12 @@ static const struct mips_cpu_info mips_cpu_info_table[] =
   { "10000",          0,      ISA_MIPS4,      CPU_R10000, },
   { "10k",            0,      ISA_MIPS4,      CPU_R10000, },
   { "r10k",           0,      ISA_MIPS4,      CPU_R10000, },
+
+  /* R12000 CPU */
+  { "R12000",         0,      ISA_MIPS4,      CPU_R12000, },
+  { "12000",          0,      ISA_MIPS4,      CPU_R12000, },
+  { "12k",            0,      ISA_MIPS4,      CPU_R12000, },
+  { "r12k",           0,      ISA_MIPS4,      CPU_R12000, },
 
   /* VR4100 CPU */
   { "VR4100",         0,      ISA_MIPS3,      CPU_VR4100, },

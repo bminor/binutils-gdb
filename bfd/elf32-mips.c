@@ -2390,6 +2390,8 @@ _bfd_mips_elf_final_write_processing (abfd, linker)
       break;
 
     case bfd_mach_mips8000:
+    case bfd_mach_mips10000:
+    case bfd_mach_mips12000:
       val = E_MIPS_ARCH_4;
       break;
 
@@ -8332,7 +8334,7 @@ _bfd_mips_elf_size_dynamic_sections (output_bfd, info)
 	  int i;
 	  bfd_size_type loadable_size = 0;
 	  bfd_size_type local_gotno;
-	  struct _bfd *sub;
+	  bfd *sub;
 
 	  BFD_ASSERT (elf_section_data (s) != NULL);
 	  g = (struct mips_got_info *) elf_section_data (s)->tdata;

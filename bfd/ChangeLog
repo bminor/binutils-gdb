@@ -1,3 +1,14 @@
+2001-05-23  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
+	* aoutx.h (aout_@var{size}_machine_type): Add MIPS r12k support.
+	* archures.c (bfd_mach_mips12000): Define.
+	* cpu-mips.c (arch_info_struct): Add MIPS r12k support.
+	* elf32-mips.c (_bfd_mips_elf_final_write_processing): Add MIPS r12k
+	support.
+	(_bfd_mips_elf_size_dynamic_sections): Use official bfd typedef.
+	* bfd-in2.h: Regenerate.
+	* elfxx-target.h: Do not redefine bfd_elfNN_bfd_make_debug_symbol.
+
 2001-05-23  kaz Kojima  <kkojima@rr.iij4u.or.jp>
 
 	* elf32-sh.c (elf_sh_plt0_entry_be, elf_sh_plt0_entry,
