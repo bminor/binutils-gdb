@@ -1,3 +1,13 @@
+2002-11-07  Andrew Cagney  <ac131313@redhat.com>
+
+	* regcache.h (regcache_cooked_read_using_offset_hack)
+	(regcache_cooked_write_using_offset_hack): Delete declarations.
+	(register_changed): Delete declaration.
+	* regcache.c (regcache_cooked_read_using_offset_hack)
+	(regcache_cooked_write_using_offset_hack): Delete functions.
+	(cooked_xfer_using_offset_hack): Delete function.
+	(register_changed): Delete function.
+
 2002-11-07  Jim Blandy  <jimb@redhat.com>
 
 	* macroscope.c: #include "complaints.h".

@@ -474,15 +474,6 @@ set_register_cached (int regnum, int state)
   current_regcache->raw_register_valid_p[regnum] = state;
 }
 
-/* REGISTER_CHANGED
-
-   invalidate a single register REGNUM in the cache */
-void
-register_changed (int regnum)
-{
-  set_register_cached (regnum, 0);
-}
-
 /* If REGNUM >= 0, return a pointer to register REGNUM's cache buffer area,
    else return a pointer to the start of the cache buffer.  */
 
@@ -1062,84 +1053,6 @@ register_offset_hack (struct gdbarch *gdbarch, int regnum)
   struct regcache_descr *descr = regcache_descr (gdbarch);
   gdb_assert (regnum >= 0 && regnum < descr->nr_cooked_registers);
   return descr->register_offset[regnum];
-}
-
-static void
-cooked_xfer_using_offset_hack (struct regcache *regcache,
-			       int buf_start, int buf_len, void *in_b,
-			       const void *out_b)
-{
-  struct regcache_descr *descr = regcache->descr;
-  struct gdbarch *gdbarch = descr->gdbarch;
-  bfd_byte *in_buf = in_b;
-  const bfd_byte *out_buf = out_b;
-  int buf_end = buf_start + buf_len;
-  int regnum;
-  char *reg_buf = alloca (descr->max_register_size);
-
-  /* NOTE: cagney/2002-08-17: This code assumes that the register
-     offsets are strictly increasing and do not overlap.  If this
-     isn't the case then the bug is in the target architecture and NOT
-     this code.  */
-
-  /* NOTE: cagney/2002-08-17: This code assumes that only the
-     registers covered by BUF_START:BUF_LEN should be transfered.  If,
-     for some reason, there is a gap between two registers, then that
-     gap isn't transfered.  (The gap shouldn't be there but that is
-     another story.)  */
-
-  /* Iterate through all registers looking for those that lie within
-     BUF_START:BUF_LEN.  */
-
-  for (regnum = 0; regnum < descr->nr_cooked_registers; regnum++)
-    {
-      /* The register's location.  */
-      int reg_start = descr->register_offset[regnum];
-      int reg_len = descr->sizeof_register[regnum];
-      int reg_end = reg_start + reg_len;
-
-      /* The START, END and LEN that falls within the current
-         register.  */
-      int xfer_start;
-      int xfer_end;
-      int xfer_len;
-
-      /* start = max (reg_start, buf_start) */
-      if (reg_start > buf_start)
-	xfer_start = reg_start;
-      else
-	xfer_start = buf_start;
-      
-      /* end = min (reg_end, buf_end) */
-      if (reg_end < buf_end)
-	xfer_end = reg_end;
-      else
-	xfer_end = buf_end;
-      
-      /* The number of bytes to transfer.  If there isn't anything to
-         transfer (the end is before the start) this will be -ve.  */
-      xfer_len = xfer_end - xfer_start;
-
-      if (xfer_len > 0)
-	regcache_xfer_part (regcache, regnum, xfer_start - reg_start,
-			    xfer_len, in_b, out_b, regcache_cooked_read,
-			    regcache_cooked_write);
-    }
-}
-
-void
-regcache_cooked_read_using_offset_hack (struct regcache *regcache,
-					int buf_start, int buf_len, void *b)
-{
-  cooked_xfer_using_offset_hack (regcache, buf_start, buf_len, b, NULL);
-}
-
-void
-regcache_cooked_write_using_offset_hack (struct regcache *regcache,
-					 int buf_start, int buf_len,
-					 const void *b)
-{
-  cooked_xfer_using_offset_hack (regcache, buf_start, buf_len, NULL, b);
 }
 
 /* Return the contents of register REGNUM as an unsigned integer.  */

@@ -94,29 +94,14 @@ extern void regcache_collect (int regnum, void *buf);
 
 /* The register's ``offset''.
 
-   NOTE: cagney/2002-08-17: The ``struct value'' and expression
-   evaluator treat the register cache as a large liner buffer.
-   Instead of reading/writing a register using its register number,
-   the code read/writes registers by specifying their offset into the
-   buffer and a number of bytes.  The code also assumes that these
-   byte read/writes can cross register boundaries, adjacent registers
-   treated as a contiguous set of bytes.
-
-   The below map that model onto the real register cache.  New code
-   should go out of their way to avoid using these interfaces.
-
-   FIXME: cagney/2002-08-17: The ``struct value'' and expression
-   evaluator should be fixed.  Instead of using the { offset, length }
-   pair to describe a value within one or more registers, the code
-   should use a chain of { regnum, offset, len } tripples.  */
+   FIXME: cagney/2002-11-07: The get_saved_register() function, when
+   specifying the real location of a register, does so using that
+   registers offset in the register cache.  That offset is then used
+   by valops.c to determine the location of the register.  The code
+   should instead use the register's number and a location expression
+   to describe a value spread across multiple registers or memory.  */
 
 extern int register_offset_hack (struct gdbarch *gdbarch, int regnum);
-extern void regcache_cooked_read_using_offset_hack (struct regcache *regcache,
-						    int offset, int len,
-						    void *buf);
-extern void regcache_cooked_write_using_offset_hack (struct regcache *regcache,
-						     int offset, int len,
-						     const void *buf);
 
 
 /* The type of a register.  This function is slightly more efficient
@@ -200,8 +185,6 @@ extern void deprecated_registers_fetched (void);
 extern int register_cached (int regnum);
 
 extern void set_register_cached (int regnum, int state);
-
-extern void register_changed (int regnum);
 
 extern void registers_changed (void);
 
