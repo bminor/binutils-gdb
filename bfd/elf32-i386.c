@@ -1199,8 +1199,9 @@ allocate_plt_and_got_and_discard_relocs (h, inf)
   if (!info->shared
       && (h->elf_link_hash_flags & ELF_LINK_NON_GOT_REF) == 0
       && ((h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) != 0
-	  || h->root.type == bfd_link_hash_undefweak
-	  || h->root.type == bfd_link_hash_undefined))
+	  || (htab->root.dynamic_sections_created
+	      && (h->root.type == bfd_link_hash_undefweak
+		  || h->root.type == bfd_link_hash_undefined))))
     {
       /* Make sure this symbol is output as a dynamic symbol.
 	 Undefined weak syms won't yet be marked as dynamic.  */

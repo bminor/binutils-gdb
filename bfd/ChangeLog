@@ -1,3 +1,11 @@
+2001-08-03  Alan Modra  <amodra@bigpond.net.au>
+
+	From  H.J. Lu  <hjl@gnu.org>
+	* elf32-i386.c (allocate_plt_and_got_and_discard_relocs): Don't
+	keep relocs for undefined syms if there are no dynamic sections in
+	executable.
+	* elf32-hppa.c (allocate_plt_and_got_and_discard_relocs): Likewise.
+
 2001-08-02  Paul Sokolovsky  <paul.sokolovsky@technologist.com>
 
 	* cofflink.c (coff_link_check_ar_symbols): also search for
@@ -138,7 +146,7 @@
 2001-06-29  H.J. Lu  <hjl@gnu.org>
 
 	* elf32-hppa.c (elf32_hppa_finish_dynamic_sections): Check if
-	hplink->sgot is NULL before filling GOT. Checck if hplink->splt
+	hplink->sgot is NULL before filling GOT.  Check if hplink->splt
 	is NULL before filling PLT.
 
 2001-06-29  Alan Modra  <amodra@bigpond.net.au>
