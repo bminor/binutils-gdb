@@ -1,5 +1,8 @@
 2001-07-04  Elena Zannoni  <ezannoni@redhat.com>
 
+	* memattr.c (create_mem_region): Move n to next memory region,
+	to avoid infinite loop.
+
 	* memattr.h: Add copyright statement.
 	* memattr.c: Ditto.
 

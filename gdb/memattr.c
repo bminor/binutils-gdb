@@ -71,6 +71,7 @@ create_mem_region (CORE_ADDR lo, CORE_ADDR hi,
 	  printf_unfiltered ("overlapping memory region\n");
 	  return NULL;
 	}
+      n = n->next;
     }
 
   new = xmalloc (sizeof (struct mem_region));
