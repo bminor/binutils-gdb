@@ -38,16 +38,16 @@ Symbol table '\.symtab' contains 24 entries:
     11: 00000000     0 SECTION LOCAL  DEFAULT   11 
     12: 00000000     0 SECTION LOCAL  DEFAULT   12 
     13: 00001004     0 NOTYPE  LOCAL  DEFAULT    2 start2
-    14: 000010a0     0 OBJECT  GLOBAL DEFAULT    5 ___dtors
-    15: 000010a0     0 OBJECT  GLOBAL DEFAULT  ABS __bss_start
-    16: 000010a0     0 OBJECT  GLOBAL DEFAULT    4 ___ctors_end
+    14: 000010a0     0 NOTYPE  GLOBAL DEFAULT    5 ___dtors
+    15: 000010a0     0 NOTYPE  GLOBAL DEFAULT  ABS __bss_start
+    16: 000010a0     0 NOTYPE  GLOBAL DEFAULT    4 ___ctors_end
     17: 00001004     0 NOTYPE  GLOBAL DEFAULT    2 diversion2
-    18: 000010a0     0 OBJECT  GLOBAL DEFAULT    4 ___ctors
-    19: 000010a0     0 OBJECT  GLOBAL DEFAULT  ABS _edata
-    20: 000010a0     0 OBJECT  GLOBAL DEFAULT  ABS _end
+    18: 000010a0     0 NOTYPE  GLOBAL DEFAULT    4 ___ctors
+    19: 000010a0     0 NOTYPE  GLOBAL DEFAULT  ABS _edata
+    20: 000010a0     0 NOTYPE  GLOBAL DEFAULT  ABS _end
     21: 00001000     0 NOTYPE  GLOBAL DEFAULT    1 start
-    22: 00080000     0 OBJECT  GLOBAL DEFAULT    8 _stack
-    23: 000010a0     0 OBJECT  GLOBAL DEFAULT    5 ___dtors_end
+    22: 00080000     0 NOTYPE  GLOBAL DEFAULT    8 _stack
+    23: 000010a0     0 NOTYPE  GLOBAL DEFAULT    5 ___dtors_end
 
 Hex dump of section '\.init':
   0x00001000 6ff0fff0                            .*
