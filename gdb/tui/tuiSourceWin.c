@@ -241,16 +241,22 @@ tui_vUpdateSourceWindowsWithAddr (va_list args)
 void
 tuiUpdateSourceWindowsWithLine (struct symtab *s, int line)
 {
+  CORE_ADDR pc;
+
   switch (currentLayout ())
     {
     case DISASSEM_COMMAND:
     case DISASSEM_DATA_COMMAND:
-      tuiUpdateSourceWindowsWithAddr ((Opaque) find_line_pc (s, line));
+      find_line_pc (s, line, &pc);
+      tuiUpdateSourceWindowsWithAddr ((Opaque) pc);
       break;
     default:
       tuiShowSource (s, (Opaque) line, FALSE);
       if (currentLayout () == SRC_DISASSEM_COMMAND)
-	tuiShowDisassem ((Opaque) find_line_pc (s, line));
+	{
+	  find_line_pc (s, line, &pc);
+	  tuiShowDisassem ((Opaque) pc);
+	}
       break;
     }
 
@@ -514,6 +520,7 @@ tuiSetHasBreakAt (struct breakpoint *bp, TuiWinInfoPtr winInfo, int hasBreak)
 	    fileNameDisplayed = current_source_symtab->filename;
 
 	  gotIt = (fileNameDisplayed != (char *) NULL &&
+                   bp->source_file != NULL &&
 		   (strcmp (bp->source_file, fileNameDisplayed) == 0) &&
 		   content[i]->whichElement.source.lineOrAddr.lineNo ==
 		   bp->line_number);

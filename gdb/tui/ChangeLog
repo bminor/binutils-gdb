@@ -1,5 +1,17 @@
 2001-07-17  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
 
+	* tuiWin.c: Add missing includes.
+	(_makeVisibleWithNewHeight): Fix call to find_line_pc.
+	* tuiLayout.c: Add missing includes.
+	(_initAndMakeWin): Don't put curses in echo mode.
+	(_extractDisplayStartAddr): Fix calls to find_line_pc.
+	(_tuiLayout_command): Missing ',' in warning call.
+	* tuiSourceWin.c (tuiUpdateSourceWindowsWithLine): Fix calls to
+	find_line_pc.
+	(tuiSetHasBreakAt): Check for null source file.
+
+2001-07-17  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+
 	* tuiWin.c (_tuiSetFocus): Replace subsetCompare with subset_compare.
 	* tuiLayout.c (_tuiSetLayoutTo): Likewise.
 	* tui.c (_tui_vToggle_command): Likewise.

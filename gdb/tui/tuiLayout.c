@@ -23,12 +23,16 @@
 #include "command.h"
 #include "symtab.h"
 #include "frame.h"
+#include <ctype.h>
 
 #include "tui.h"
 #include "tuiData.h"
+#include "tuiDataWin.h"
 #include "tuiGeneralWin.h"
 #include "tuiStack.h"
 #include "tuiRegs.h"
+#include "tuiWin.h"
+#include "tuiSourceWin.h"
 #include "tuiDisassem.h"
 
 /*******************************
@@ -539,7 +543,7 @@ _tuiSetLayoutTo (char *layoutName)
 		dpyType = TUI_GENERAL_REGS;
 	      else if (subset_compare (bufPtr, TUI_SPECIAL_REGS_NAME))
 		dpyType = TUI_SPECIAL_REGS;
-	      else
+	      else if (dataWin)
 		{
 		  if (dataWin->detail.dataDisplayInfo.regsDisplayType !=
 		      TUI_UNDEFINED_REGS)
@@ -582,14 +586,16 @@ _extractDisplayStartAddr (void)
 {
   TuiLayoutType curLayout = currentLayout ();
   Opaque addr;
+  CORE_ADDR pc;
 
   switch (curLayout)
     {
     case SRC_COMMAND:
     case SRC_DATA_COMMAND:
-      addr = (Opaque) find_line_pc (
-				     current_source_symtab,
-			  srcWin->detail.sourceInfo.startLineOrAddr.lineNo);
+      find_line_pc (current_source_symtab,
+		    srcWin->detail.sourceInfo.startLineOrAddr.lineNo,
+		    &pc);
+      addr =(Opaque) pc;
       break;
     case DISASSEM_COMMAND:
     case SRC_DISASSEM_COMMAND:
@@ -672,7 +678,7 @@ _tuiLayout_command (char *arg, int fromTTY)
 {
   if ((TuiStatus) tuiDo (
 		   (TuiOpaqueFuncPtr) tui_vSetLayoutTo, arg) != TUI_SUCCESS)
-    warning ("Invalid layout specified.\n%s" LAYOUT_USAGE);
+    warning ("Invalid layout specified.\n%s", LAYOUT_USAGE);
 
   return;
 }				/* _tuiLayout_command */
@@ -1061,7 +1067,6 @@ _initAndMakeWin (Opaque * winInfoPtr, TuiWinType winType,
       makeWindow (generic, boxIt);
       if (winType == LOCATOR_WIN)
 	tuiClearLocatorDisplay ();
-      echo ();
     }
   *winInfoPtr = opaqueWinInfo;
 

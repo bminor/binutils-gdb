@@ -25,6 +25,7 @@
    Author: Susan B. Macchia  */
 
 #include <string.h>
+#include <ctype.h>
 #include "defs.h"
 #include "command.h"
 #include "symtab.h"
@@ -35,6 +36,9 @@
 #include "tuiData.h"
 #include "tuiGeneralWin.h"
 #include "tuiStack.h"
+#include "tuiRegs.h"
+#include "tuiDisassem.h"
+#include "tuiSource.h"
 #include "tuiSourceWin.h"
 #include "tuiDataWin.h"
 
@@ -1221,7 +1225,12 @@ _makeVisibleWithNewHeight (TuiWinInfoPtr winInfo)
 	  if (winInfo->generic.type == SRC_WIN)
 	    line = (Opaque) current_source_line;
 	  else
-	    line = (Opaque) find_line_pc (s, current_source_line);
+	    {
+	      CORE_ADDR pc;
+
+	      find_line_pc (s, current_source_line, &pc);
+	      line = (Opaque) pc;
+	    }
 	  tuiUpdateSourceWindow (winInfo, s, line, TRUE);
 	}
       if (m_hasLocator (winInfo))
