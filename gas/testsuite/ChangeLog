@@ -1,3 +1,11 @@
+2004-10-21  Tomer Levi  <Tomer.Levi@nsc.com>
+
+	* gas/crx/cop_insn.s: Reverse operands order in store co-processor 
+	instructions.
+	* gas/crx/list_insn.s: Remove test for unsupported 'popa' instruction.
+	* gas/crx/cop_insn.d: Regenerate.
+	* gas/crx/list_insn.d: Likewise.
+
 2004-10-14  Paul Brook  <paul@codesourcery.com>
 
 	* gas/arm/mapping.d: Pass --special-syms to objdump.
