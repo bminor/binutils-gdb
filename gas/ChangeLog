@@ -1,3 +1,14 @@
+2004-03-03  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-ia64.c (dot_align): New.
+	(ia64_do_align): Make it static.
+	(md_pseudo_table): Use "dot_align" for "align".
+	(ia64_md_do_align): Don't set align_frag here.
+	(ia64_handle_align): Add a stop bit to the previous bundle if
+	needed.
+
+	* config/tc-ia64.h (ia64_do_align): Removed.
+
 2003-03-03  Andrew Stubbs  <andrew.stubbs@superh.com>
 
 	* config/tc-sh.c (md_parse_option): Add -isa=sh4-nofpu and

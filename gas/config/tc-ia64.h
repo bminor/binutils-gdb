@@ -86,7 +86,6 @@ struct ia64_fix
     enum ia64_opnd opnd;
   };
 
-extern void ia64_do_align PARAMS((int n));
 extern void ia64_end_of_source PARAMS((void));
 extern void ia64_start_line PARAMS((void));
 extern int ia64_unrecognized_line PARAMS((int ch));

@@ -705,6 +705,7 @@ static int ar_is_in_integer_unit PARAMS ((int regnum));
 static void set_section PARAMS ((char *name));
 static unsigned int set_regstack PARAMS ((unsigned int, unsigned int,
 					  unsigned int, unsigned int));
+static void dot_align (int);
 static void dot_radix PARAMS ((int));
 static void dot_special_section PARAMS ((int));
 static void dot_proc PARAMS ((int));
@@ -1135,9 +1136,8 @@ ia64_flush_insns ()
     as_bad ("qualifying predicate not followed by instruction");
 }
 
-void
-ia64_do_align (nbytes)
-     int nbytes;
+static void
+ia64_do_align (int nbytes)
 {
   char *saved_input_line_pointer = input_line_pointer;
 
@@ -3031,6 +3031,14 @@ convert_expr_to_xy_reg (e, xy, regp)
   else
     return -1;
   return 1;
+}
+
+static void
+dot_align (int arg)
+{
+  /* The current frag is an alignment frag.  */
+  align_frag = frag_now;
+  s_align_bytes (arg);
 }
 
 static void
@@ -4960,7 +4968,7 @@ const pseudo_typeS md_pseudo_table[] =
     { "lb", dot_scope, 0 },
     { "le", dot_scope, 1 },
 #endif
-    { "align", s_align_bytes, 0 },
+    { "align", dot_align, 0 },
     { "regstk", dot_regstk, 0 },
     { "rotr", dot_rot, DYNREG_GR },
     { "rotf", dot_rot, DYNREG_FR },
@@ -10828,8 +10836,6 @@ ia64_md_do_align (n, fill, len, max)
      int len ATTRIBUTE_UNUSED;
      int max ATTRIBUTE_UNUSED;
 {
-  /* The current frag is an alignment frag.  */
-  align_frag = frag_now;
   if (subseg_text_p (now_seg))
     ia64_flush_insns ();
 }
@@ -10861,6 +10867,18 @@ ia64_handle_align (fragp)
 
   bytes = fragp->fr_next->fr_address - fragp->fr_address - fragp->fr_fix;
   p = fragp->fr_literal + fragp->fr_fix;
+
+  /* If no paddings are needed, we check if we need a stop bit.  */ 
+  if (!bytes && fragp->tc_frag_data)
+    {
+      if (fragp->fr_fix < 16)
+	as_bad_where (fragp->fr_file, fragp->fr_line,
+		      _("Can't add stop bit to mark end of instruction group"));
+      else
+	/* Bundles are always in little-endian byte order. Make sure
+	   the previous bundle has the stop bit.  */
+	*(p - 16) |= 1;
+    }
 
   /* Make sure we are on a 16-byte boundary, in case someone has been
      putting data into a text section.  */
