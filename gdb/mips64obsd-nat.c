@@ -28,9 +28,13 @@
 #include <sys/ptrace.h>
 #include <machine/reg.h>
 
+#include "mips-tdep.h"
 #include "inf-ptrace.h"
 
-#define MIPS64OBSD_NUM_REGS 73
+/* Shorthand for some register numbers used below.  */
+#define MIPS_PC_REGNUM	MIPS_EMBED_PC_REGNUM
+#define MIPS_FP0_REGNUM	MIPS_EMBED_FP0_REGNUM
+#define MIPS_FSR_REGNUM MIPS_EMBED_FP0_REGNUM + 32
 
 /* Supply the general-purpose registers stored in GREGS to REGCACHE.  */
 
@@ -40,8 +44,11 @@ mips64obsd_supply_gregset (struct regcache *regcache, const void *gregs)
   const char *regs = gregs;
   int regnum;
 
-  for (regnum = 0; regnum < MIPS64OBSD_NUM_REGS; regnum++)
+  for (regnum = MIPS_ZERO_REGNUM; regnum <= MIPS_PC_REGNUM; regnum++)
     regcache_raw_supply (regcache, regnum, regs + regnum * 8);
+
+  for (regnum = MIPS_FP0_REGNUM; regnum <= MIPS_FSR_REGNUM; regnum++)
+    regcache_raw_supply (regcache, regnum, regs + (regnum + 2) * 8);
 }
 
 /* Collect the general-purpose registers from REGCACHE and store them
@@ -54,10 +61,16 @@ mips64obsd_collect_gregset (const struct regcache *regcache,
   char *regs = gregs;
   int i;
 
-  for (i = 0; i <= MIPS64OBSD_NUM_REGS; i++)
+  for (i = MIPS_ZERO_REGNUM; i <= MIPS_PC_REGNUM; i++)
     {
       if (regnum == -1 || regnum == i)
 	regcache_raw_collect (regcache, i, regs + i * 8);
+    }
+
+  for (i = MIPS_FP0_REGNUM; i <= MIPS_FSR_REGNUM; i++)
+    {
+      if (regnum == -1 || regnum == i)
+	regcache_raw_collect (regcache, i, regs + (i + 2) * 8);
     }
 }
 

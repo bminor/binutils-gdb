@@ -1,5 +1,12 @@
 2004-11-07  Mark Kettenis  <kettenis@gnu.org>
 
+	* mips64obsd-nat.c: Include "mips-tdep.h".
+	(MIPS64OBSD_NUM_REGS): Remove define.
+	(MIPS_PC_REGNUM, MIPS_FP0_REGNUM, MIPS_FSR_REGNUM): New defines.
+	(mips64obsd_supply_gregset, mips64obsd_collect_gregset): Handle
+	floating-point registers correctly.
+	* Makefile.in (mips64obsd-nat.o): Update dependencies.
+
 	* mips64obsd-tdep.c: Include "trad-frame.h", "tramp-frame.h" and
 	"gdb_assert.h".
 	(mips64obsd_sigframe_init): New function.

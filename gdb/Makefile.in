@@ -2236,7 +2236,7 @@ mem-break.o: mem-break.c $(defs_h) $(symtab_h) $(breakpoint_h) $(inferior_h) \
 minsyms.o: minsyms.c $(defs_h) $(gdb_string_h) $(symtab_h) $(bfd_h) \
 	$(symfile_h) $(objfiles_h) $(demangle_h) $(value_h) $(cp_abi_h)
 mips64obsd-nat.o: mips64obsd-nat.c $(defs_h) $(inferior_h) $(regcache_h) \
-	$(target_h) $(inf_ptrace_h)
+	$(target_h) $(mips_tdep_h) $(inf_ptrace_h)
 mips64obsd-tdep.o: mips64obsd-tdep.c $(defs_h) $(osabi_h) $(regcache_h) \
 	$(regset_h) $(trad_frame_h) $(tramp_frame_h) $gdb_assert_h) \
 	$(gdb_string_h) $(mips_tdep_h) $(solib_svr4_h)
