@@ -1,3 +1,8 @@
+2003-06-27  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
+	* elfxx-mips.c (_bfd_mips_elf_fake_sections): Remove non-default
+	relocation header setup.
+
 2003-06-25  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-ppc.c (ppc_elf_howto_table): Remove unnecessary cast.
