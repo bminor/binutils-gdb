@@ -1,3 +1,7 @@
+2002-01-15  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* gas/sh/dsp.d: Fix expected results.
+
 2002-01-14  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* gas/elf/elf.exp (run_list_test): Use section2.e-mips script for
@@ -2147,38 +2151,38 @@ Mon Aug 30 12:18:40 1999  Jeffrey A Law  (law@cygnus.com)
 	* gas/fr30/allinsn.d: Added disassembly of currently assembliable
 	opcodes.
 
-Mon Nov 16 16:50:27 1998  Nick Clifton  <nickc@cygnus.com>
+1998-11-16  Nick Clifton  <nickc@cygnus.com>
 
 	* gas/fr30/allinsn.s: Fix syntax errors.
 
-Mon Nov 16 19:27:52 1998  Dave Brolley  <brolley@cygnus.com>
+1998-11-16  Dave Brolley  <brolley@cygnus.com>
 
 	* gas/fr30/allinsn.s: Fixed more typos.
 
-Fri Nov 13 13:15:01 1998  Nick Clifton  <nickc@cygnus.com>
+1998-11-13  Nick Clifton  <nickc@cygnus.com>
 
 	* gas/fr30/allinsn.s: Fixed typos and added some tests of upper
 	case vs lower case.
 
-Tue Nov 10 14:54:47 1998  Nick Clifton  <nickc@cygnus.com>
+1998-11-10  Nick Clifton  <nickc@cygnus.com>
 
 	* gas/fr30/allinsn.s: New file.
 	* gas/fr30/allinsn.d: New file.
 	* gas/fr30/allinsn.exp: New file.
 	* gas/fr30/fr30.exp: New file.
 
-Mon Nov  2 20:16:50 1998  Doug Evans  <devans@canuck.cygnus.com>
+1998-11-02  Doug Evans  <devans@canuck.cygnus.com>
 
 	* gas/m32r/fslot.[sd]: New testcase.
 	* gas/m32r/m32r.exp: Run it.
 
-Tue Oct 20 11:35:06 1998  Alan Modra  <alan@spri.levels.unisa.edu.au>
+1998-10-20  Alan Modra  <alan@spri.levels.unisa.edu.au>
 
 	* gas/i386/i386.exp: Run AMD insn test.
 	* gas/i386/amd.s: New test.
 	* gas/i386/amd.d: New test results.
 
-Sun Sep 20 01:00:01 1998  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
+1998-09-20  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
 
 	* gas/vtable/inherit1.l: Require only the word GAS somewere in the
 	first line of the listing.
@@ -2253,7 +2257,7 @@ Sun Jun 21 12:44:43 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* gas/d30v/reloc.d: Updated to match latest assembler output.
 
-Wed Jun 17 14:02:10 1998  Frank Ch. Eigler  <fche@cygnus.com>
+1998-06-17  Frank Ch. Eigler  <fche@cygnus.com>
 
 	* gas/mips/delay.d: Add -mcpu=NNNN to gas flags to let test case
 	run on differently targeted assembler.
@@ -2267,20 +2271,20 @@ Wed Jun 17 14:02:10 1998  Frank Ch. Eigler  <fche@cygnus.com>
 	original `ld.d' had.  Find `ld.s'.
 	* gas/mips/mul-ilocks.d: Nearly ditto.
 
-Thu Jun 11 16:50:46 1998  Nick Clifton  <nickc@cygnus.com>
+1998-06-11  Nick Clifton  <nickc@cygnus.com>
 
 	* gas/d30v/inst.d: Expect repeati instrucitons to be combined.
 
 	* gas/d30v/inst.s: Add nop to keep assembled instructions at
 	expected addresses.
 
-Mon Jun  8 18:47:11 1998  Nick Clifton  <nickc@cygnus.com>
+1998-06-08  Nick Clifton  <nickc@cygnus.com>
 
 	* gas/d30v/array.d: Updated to match latest assembler results.
 	* gas/d30v/reloc.d: Partially updated to match latest assembler
 	results.
 
-Fri Jun  5 19:15:59 1998  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
+1998-06-05  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
 
 	* gas/m68k/operands.s: For all pc relative addresses change tstl
 	to pea since the former does not allow pcrel on m68000.  Do not
@@ -2288,18 +2292,18 @@ Fri Jun  5 19:15:59 1998  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.
 	ELF targets.
 	* gas/m68k/operands.d, gas/m68k/op68000.d: Updated.
 
-Tue Jun  2 15:08:36 1998  Geoff Keating  <geoffk@ozemail.com.au>
+1998-06-02  Geoff Keating  <geoffk@ozemail.com.au>
 
 	* gas/ppc/ppc.exp: Run simpshft test.
 	* gas/ppc/simpshft.d: New file.
 	* gas/ppc/simpshft.s: New file.
 
-Mon Jun  1 17:00:22 1998  Jeffrey A Law  (law@cygnus.com)
+1998-06-01  Jeffrey A Law  (law@cygnus.com)
 
 	* gas/mips/div-ilocks.d: Handle both "break" instruction variants.
 	* gas/mips/{div.d, mul-ilocks.d, mul.d}: Likewise.
 
-Fri May 29 12:07:35 1998  Ian Lance Taylor  <ian@cygnus.com>
+1998-05-29  Ian Lance Taylor  <ian@cygnus.com>
 
 	* gas/mips/mips.exp: Adjust ilocks initialization to match current
 	assembler defaults more closely.
