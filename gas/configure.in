@@ -77,6 +77,7 @@ changequote([,])dnl
       alpha*)		cpu_type=alpha ;;
       armeb)		cpu_type=arm endian=big ;;
       arm*)		cpu_type=arm endian=little ;;
+      strongarm*)	cpu_type=arm endian=little ;;
       thumb*)		cpu_type=arm endian=little ;;
       hppa*)		cpu_type=hppa ;;
 changequote(,)dnl
@@ -301,6 +302,9 @@ dnl end-sanitize-beos
       sparc-*-netbsd*)      fmt=aout em=nbsd ;;
       sparc-*-openbsd*)     fmt=aout em=nbsd ;;
 
+      strongarm-*-coff)     fmt=coff ;;
+      strongarm-*-elf)      fmt=elf ;;
+
       tic30-*-*aout*)	    fmt=aout bfd_gas=yes ;;
       tic30-*-*coff*)       fmt=coff bfd_gas=yes ;;
 # start-sanitize-tic80
@@ -353,6 +357,7 @@ dnl end-sanitize-beos
       ns32k-*)	bfd_gas=yes ;;
       ppc-*)	bfd_gas=yes ;;
       sparc-*)	bfd_gas=yes ;;
+      strongarm-*)	bfd_gas=yes ;;
       *-elf)	bfd_gas=yes ;;
       *-ecoff)	bfd_gas=yes ;;
       *-som)	bfd_gas=yes ;;
@@ -361,10 +366,11 @@ dnl end-sanitize-beos
 
 # Other random stuff.
 
-    # do we need the opcodes library?
+    # Do we need the opcodes library?
     case ${cpu_type} in
       vax | i386 | tic30)
 	;;
+
       *)
 	need_opcodes=yes
 
@@ -380,6 +386,7 @@ dnl end-sanitize-beos
 	;;
     esac
 
+    # Any other special object files needed ?
     case ${cpu_type} in
       fr30 | m32r)
 	case "x${extra_objects}" in

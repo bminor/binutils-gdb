@@ -1586,6 +1586,7 @@ for this_target in $target $canon_targets ; do
       alpha*)		cpu_type=alpha ;;
       armeb)		cpu_type=arm endian=big ;;
       arm*)		cpu_type=arm endian=little ;;
+      strongarm*)	cpu_type=arm endian=little ;;
       thumb*)		cpu_type=arm endian=little ;;
       hppa*)		cpu_type=hppa ;;
       i[456]86)		cpu_type=i386 ;;
@@ -1813,6 +1814,9 @@ EOF
       sparc-*-netbsd*)      fmt=aout em=nbsd ;;
       sparc-*-openbsd*)     fmt=aout em=nbsd ;;
 
+      strongarm-*-coff)     fmt=coff ;;
+      strongarm-*-elf)      fmt=elf ;;
+
       tic30-*-*aout*)	    fmt=aout bfd_gas=yes ;;
       tic30-*-*coff*)       fmt=coff bfd_gas=yes ;;
 # start-sanitize-tic80
@@ -1871,6 +1875,7 @@ EOF
       ns32k-*)	bfd_gas=yes ;;
       ppc-*)	bfd_gas=yes ;;
       sparc-*)	bfd_gas=yes ;;
+      strongarm-*)	bfd_gas=yes ;;
       *-elf)	bfd_gas=yes ;;
       *-ecoff)	bfd_gas=yes ;;
       *-som)	bfd_gas=yes ;;

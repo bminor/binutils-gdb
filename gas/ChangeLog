@@ -1,3 +1,8 @@
+1999-02-08  Nick Clifton  <nickc@cygnus.com>
+
+	* configure.in: Add support for StrongARM target.
+	* configure: Regenerate.
+
 start-sanitize-cygnus
 Fri Feb  5 19:25:50 1999  Doug Evans  <devans@canuck.cygnus.com>
 
