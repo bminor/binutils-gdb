@@ -688,6 +688,9 @@ funcsymbol( symp )
    *	where `funny' includes	`.', .o file names
    *			and	`$', pascal labels.
    */
+  if (!symp->name)
+    return FALSE;
+
   for (name = symp->name; *name; name++) {
     if ( *name == '.' || *name == '$' ) {
       return FALSE;
