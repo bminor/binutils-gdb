@@ -1,3 +1,9 @@
+Mon May  8 00:49:32 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* procfs.c (PROCFS_TRACE): Delete definition.
+	* proc-utils.h (PROCFS_NOTE, PROC_PRETTYFPRINT_STATUS): Always
+ 	define.
+
 2000-05-05  Michael Snyder  <msnyder@seadog.cygnus.com>
 
 	* procfs.c: Cleanup of procfs tracing.  Move defines and 

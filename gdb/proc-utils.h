@@ -88,7 +88,7 @@ extern  void  procfs_note      (char *, char *, int);
 #define open(X,Y)      open_with_trace  (X, Y,    __FILE__, __LINE__)
 #define close(X)       close_with_trace (X,       __FILE__, __LINE__)
 #define wait(X)        wait_with_trace  (X,       __FILE__, __LINE__)
+#endif
 #define PROCFS_NOTE(X) procfs_note      (X,       __FILE__, __LINE__)
 #define PROC_PRETTYFPRINT_STATUS(X,Y,Z,T) \
      proc_prettyfprint_status (X, Y, Z, T)
-#endif

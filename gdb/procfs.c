@@ -87,7 +87,6 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
    files, because it redefines various system calls using macros.
    This may be incompatible with the prototype declarations.  */
 
-#define PROCFS_TRACE
 #include "proc-utils.h"
 
 /* =================== TARGET_OPS "MODULE" =================== */
