@@ -1,5 +1,7 @@
 \input texinfo       @c                    -*- Texinfo -*-
 @setfilename binutils.info
+@c Copyright 2001 Free Software Foundation, Inc.
+
 @include config.texi
 
 @ifinfo

@@ -27,6 +27,16 @@ AC_DEFUN([CY_WITH_NLS],)
 AC_SUBST(INTLLIBS)
 ])
 
+
+
+dnl AM_PROG_LEX
+dnl Look for flex, lex or missing, then run AC_PROG_LEX and AC_DECL_YYTEXT
+AC_DEFUN(AM_PROG_LEX,
+[missing_dir=ifelse([$1],,`cd $ac_aux_dir && pwd`,$1)
+AC_CHECK_PROGS(LEX, flex lex, [$missing_dir/missing flex])
+AC_PROG_LEX
+AC_DECL_YYTEXT])
+
 #serial 1
 # This test replaces the one in autoconf.
 # Currently this macro should have the same name as the autoconf macro
@@ -44,15 +54,6 @@ AC_DEFUN(AC_ISC_POSIX,
     AC_CHECK_LIB(cposix, strerror, [LIBS="$LIBS -lcposix"])
   ]
 )
-
-
-dnl AM_PROG_LEX
-dnl Look for flex, lex or missing, then run AC_PROG_LEX and AC_DECL_YYTEXT
-AC_DEFUN(AM_PROG_LEX,
-[missing_dir=ifelse([$1],,`cd $ac_aux_dir && pwd`,$1)
-AC_CHECK_PROGS(LEX, flex lex, [$missing_dir/missing flex])
-AC_PROG_LEX
-AC_DECL_YYTEXT])
 
 # Do all the work for Automake.  This macro actually does too much --
 # some checks are only needed if your package does certain things.

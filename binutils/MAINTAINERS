@@ -6,6 +6,9 @@ gas, gprof, ld, and opcodes subdirectories.  The home page for binutils
 is http://sources.redhat.com/binutils/ and patches should be sent to
 binutils@sources.redhat.com with "[patch]" as part of the subject.
 
+Note - patches to the top level configure.in and config.sub scripts
+should be sent to config-patches@gnu.org and not to the binutils list.
+
 		--------- Blanket Write Privs ---------
 
 Nick Clifton <nickc@redhat.com> (head maintainer)

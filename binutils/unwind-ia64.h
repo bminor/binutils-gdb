@@ -1,5 +1,5 @@
 /* unwind-ia64.h -- dump IA-64 unwind info.
-   Copyright (c) 2000, 2001 Free Software Foundation, Inc.
+   Copyright 2000, 2001 Free Software Foundation, Inc.
 	Contributed by David Mosberger-Tang <davidm@hpl.hp.com>
 
 This file is part of GNU Binutils.

@@ -438,7 +438,7 @@ configure.in deflex.c defparse.c nlmheader.c rclex.c rcparse.c
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
-TAR = tar
+TAR = gtar
 GZIP_ENV = --best
 SOURCES = $(nlmconv_SOURCES) $(srconv_SOURCES) $(sysdump_SOURCES) $(coffdump_SOURCES) $(dlltool_SOURCES) $(windres_SOURCES) $(dllwrap_SOURCES) $(size_SOURCES) $(objdump_SOURCES) $(ar_SOURCES) $(strings_SOURCES) $(ranlib_SOURCES) $(objcopy_SOURCES) $(addr2line_SOURCES) $(readelf_SOURCES) $(nm_new_SOURCES) $(strip_new_SOURCES) $(cxxfilt_SOURCES)
 OBJECTS = $(nlmconv_OBJECTS) $(srconv_OBJECTS) $(sysdump_OBJECTS) $(coffdump_OBJECTS) $(dlltool_OBJECTS) $(windres_OBJECTS) $(dllwrap_OBJECTS) $(size_OBJECTS) $(objdump_OBJECTS) $(ar_OBJECTS) $(strings_OBJECTS) $(ranlib_OBJECTS) $(objcopy_OBJECTS) $(addr2line_OBJECTS) $(readelf_OBJECTS) $(nm_new_OBJECTS) $(strip_new_OBJECTS) $(cxxfilt_OBJECTS)

@@ -209,8 +209,8 @@ Wed Jun 24 09:20:21 1998  Nick Clifton  <nickc@cygnus.com>
 
 1998-07-20  Vladimir N. Makarov  <vmakarov@cygnus.com>
 
-	* objcopy.exp: Two new tests - strip object file with saving a
-	symbol and strip executable file with saving a symbol.
+	* binutils-all/objcopy.exp: Two new tests - strip object file with
+	saving a symbol and strip executable file with saving a symbol.
 
 Fri May 29 14:50:24 1998  Ian Lance Taylor  <ian@cygnus.com>
 
