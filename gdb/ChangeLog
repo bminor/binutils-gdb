@@ -14,6 +14,10 @@
 
 2004-02-22  Andrew Cagney  <cagney@redhat.com>
 
+	* hppa-tdep.c (hppa32_return_value): New function.
+	(hppa64_return_value): New function.
+	(hppa_gdbarch_init): Set return_value; keep disabled.
+
 	* hppa-tdep.c (hppa_gdbarch_init): Re-order separating
 	struct-return and inferior function call methods.
 

@@ -255,6 +255,111 @@ hppa64_use_struct_convention (int gcc_p, struct type *type)
   return TYPE_LENGTH (type) > 16;
 }
 
+/* Handle 32/64-bit struct return conventions.  */
+
+static enum return_value_convention
+hppa32_return_value (struct gdbarch *gdbarch,
+		     struct type *type, struct regcache *regcache,
+		     void *readbuf, const void *writebuf)
+{
+  if (TYPE_CODE (type) == TYPE_CODE_FLT)
+    {
+      if (readbuf != NULL)
+	regcache_cooked_read_part (regcache, FP4_REGNUM, 0,
+				   TYPE_LENGTH (type), readbuf);
+      if (writebuf != NULL)
+	regcache_cooked_write_part (regcache, FP4_REGNUM, 0,
+				    TYPE_LENGTH (type), writebuf);
+      return RETURN_VALUE_REGISTER_CONVENTION;
+    }
+  if (TYPE_LENGTH (type) <= 2 * 4)
+    {
+      /* The value always lives in the right hand end of the register
+	 (or register pair)?  */
+      int b;
+      int reg = 28;
+      int part = TYPE_LENGTH (type) % 4;
+      /* The left hand register contains only part of the value,
+	 transfer that first so that the rest can be xfered as entire
+	 4-byte registers.  */
+      if (part > 0)
+	{
+	  if (readbuf != NULL)
+	    regcache_cooked_read_part (regcache, reg, 4 - part,
+				       part, readbuf);
+	  if (writebuf != NULL)
+	    regcache_cooked_write_part (regcache, reg, 4 - part,
+					part, writebuf);
+	  reg++;
+	}
+      /* Now transfer the remaining register values.  */
+      for (b = part; b < TYPE_LENGTH (type); b += 4)
+	{
+	  if (readbuf != NULL)
+	    regcache_cooked_read (regcache, reg, (char *) readbuf + b);
+	  if (writebuf != NULL)
+	    regcache_cooked_write (regcache, reg, (const char *) writebuf + b);
+	  reg++;
+	}
+      return RETURN_VALUE_REGISTER_CONVENTION;
+    }
+  else
+    return RETURN_VALUE_STRUCT_CONVENTION;
+}
+
+static enum return_value_convention
+hppa64_return_value (struct gdbarch *gdbarch,
+		     struct type *type, struct regcache *regcache,
+		     void *readbuf, const void *writebuf)
+{
+  /* RM: Floats are returned in FR4R, doubles in FR4.  Integral values
+     are in r28, padded on the left.  Aggregates less that 65 bits are
+     in r28, right padded.  Aggregates upto 128 bits are in r28 and
+     r29, right padded.  */ 
+  if (TYPE_CODE (type) == TYPE_CODE_FLT)
+    {
+      /* Floats are right aligned?  */
+      int offset = register_size (gdbarch, FP4_REGNUM) - TYPE_LENGTH (type);
+      if (readbuf != NULL)
+	regcache_cooked_read_part (regcache, FP4_REGNUM, offset,
+				   TYPE_LENGTH (type), readbuf);
+      if (writebuf != NULL)
+	regcache_cooked_write_part (regcache, FP4_REGNUM, offset,
+				    TYPE_LENGTH (type), writebuf);
+      return RETURN_VALUE_REGISTER_CONVENTION;
+    }
+  else if (TYPE_LENGTH (type) <= 8 && is_integral_type (type))
+    {
+      /* Integrals are right aligned.  */
+      int offset = register_size (gdbarch, FP4_REGNUM) - TYPE_LENGTH (type);
+      if (readbuf != NULL)
+	regcache_cooked_read_part (regcache, 28, offset,
+				   TYPE_LENGTH (type), readbuf);
+      if (writebuf != NULL)
+	regcache_cooked_write_part (regcache, 28, offset,
+				    TYPE_LENGTH (type), writebuf);
+      return RETURN_VALUE_REGISTER_CONVENTION;
+    }
+  else if (TYPE_LENGTH (type) <= 2 * 8)
+    {
+      /* Composite values are left aligned.  */
+      int b;
+      for (b = 0; b < TYPE_LENGTH (type); b += 8)
+	{
+	  int part = (TYPE_LENGTH (type) - b - 1) % 8 + 1;
+	  if (readbuf != NULL)
+	    regcache_cooked_read_part (regcache, 28, 0, part,
+				       (char *) readbuf + b);
+	  if (writebuf != NULL)
+	    regcache_cooked_write_part (regcache, 28, 0, part,
+					(const char *) writebuf + b);
+	}
+  return RETURN_VALUE_REGISTER_CONVENTION;
+    }
+  else
+    return RETURN_VALUE_STRUCT_CONVENTION;
+}
+
 /* Routines to extract various sized constants out of hppa 
    instructions. */
 
@@ -5506,6 +5611,17 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Struct return methods.  */
   if (0)
     {
+      switch (tdep->bytes_per_address)
+	{
+	case 4:
+	  set_gdbarch_return_value (gdbarch, hppa32_return_value);
+	  break;
+	case 8:
+	  set_gdbarch_return_value (gdbarch, hppa64_return_value);
+	  break;
+	default:
+	  internal_error (__FILE__, __LINE__, "bad switch");
+	}
     }
   else
     {
