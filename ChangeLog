@@ -1,3 +1,7 @@
+Tue Mar 30 10:03:09 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* build-all.mk: Use CC=cc -Xs on Solaris.
+
 Mon Mar 29 19:59:26 1993  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
 
 	* config/mh-sun3: cc needs -J to compile cp-parse.c correctly

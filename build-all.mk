@@ -49,6 +49,7 @@ endif
 
 ifeq ($(canonhost),sparc-sun-solaris2)
 TARGETS	= $(NATIVE) m68k-aout sparc-aout a29k-amd-udi
+CC = cc -Xs
 all: all-cygnus
 endif
 
