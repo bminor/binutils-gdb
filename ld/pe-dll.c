@@ -361,7 +361,7 @@ process_def_file (abfd, info)
 	  einfo (_("%XCannot export %s: symbol not found\n"),
 		 pe_def_file->exports[i].internal_name);
 	}
-      free(name);
+      free (name);
     }
 }
 
@@ -374,7 +374,7 @@ process_def_file (abfd, info)
 static void
 build_filler_bfd ()
 {
-  static lang_input_statement_type *filler_file;
+  lang_input_statement_type *filler_file;
   filler_file = lang_add_input_file ("dll stuff",
 				     lang_input_file_is_fake_enum,
 				     NULL);
@@ -666,7 +666,7 @@ generate_reloc (abfd, info)
 	  free (relocs);
 	  /* Warning: the allocated symbols are remembered in BFD and reused
 	     later, so don't free them! */
-	  /* free(symbols); */
+	  /* free (symbols); */
 	}
     }
 
@@ -779,8 +779,8 @@ pe_dll_generate_def_file (pe_out_def_filename)
 	  else
 	    fprintf (out, "NAME ");
 	  quoteput (pe_def_file->name, out, 1);
-	  if (pe_def_file->base_address != (bfd_vma) (-1))
-	    fprintf (out, " BASE=0x%x", pe_def_file->base_address);
+	  if (pe_data (output_bfd)->pe_opthdr.ImageBase)
+	    fprintf (out, " BASE=0x%x", pe_data (output_bfd)->pe_opthdr.ImageBase);
 	  fprintf (out, "\n");
 	}
 
@@ -791,10 +791,10 @@ pe_dll_generate_def_file (pe_out_def_filename)
 	  fprintf (out, "\n");
 	}
 
-      if (pe_def_file->version_minor)
+      if (pe_def_file->version_minor != -1)
 	fprintf (out, "VERSION %d.%d\n", pe_def_file->version_major,
 		 pe_def_file->version_minor);
-      else
+      else if (pe_def_file->version_major != -1)
 	fprintf (out, "VERSION %d\n", pe_def_file->version_major);
 
       if (pe_def_file->stack_reserve != -1 || pe_def_file->heap_reserve != -1)
@@ -908,6 +908,8 @@ static int tmp_seq;
 static const char *dll_filename;
 static char *dll_symname;
 
+#define UNDSEC (asection *) &bfd_und_section
+
 static asection *
 quick_section(abfd, name, flags, align)
      bfd *abfd;
@@ -918,12 +920,17 @@ quick_section(abfd, name, flags, align)
   asection *sec;
   asymbol *sym;
 
-  sec = bfd_make_section_old_way(abfd, name);
-  sec->output_section = sec;
-  bfd_set_section_flags (abfd, sec, flags);
+  sec = bfd_make_section_old_way (abfd, name);
+  bfd_set_section_flags (abfd, sec, flags
+				  | SEC_ALLOC
+				  | SEC_LOAD
+				  | SEC_KEEP
+			 );
   bfd_set_section_alignment (abfd, sec, align);
+  /* remember to undo this before trying to link internally! */
+  sec->output_section = sec;
 
-  sym = bfd_make_empty_symbol(abfd);
+  sym = bfd_make_empty_symbol (abfd);
   symtab[symptr++] = sym;
   sym->name = sec->name;
   sym->section = sec;
@@ -943,11 +950,13 @@ quick_symbol (abfd, n1, n2, n3, sec, flags, addr)
      int flags;
      int addr;
 {
-  asymbol *sym = bfd_make_empty_symbol(abfd);
-  char *name = (char *) xmalloc (strlen(n1) + strlen(n2) + strlen(n3) + 1);
+  asymbol *sym;
+  struct bfd_link_hash_entry *blhe;
+  char *name = (char *) xmalloc (strlen (n1) + strlen (n2) + strlen (n3) + 1);
   strcpy (name, n1);
   strcat (name, n2);
   strcat (name, n3);
+  sym = bfd_make_empty_symbol (abfd);
   sym->name = name;
   sym->section = sec;
   sym->flags = flags;
@@ -955,7 +964,7 @@ quick_symbol (abfd, n1, n2, n3, sec, flags, addr)
   symtab[symptr++] = sym;
 }
 
-static arelent **reltab = 0;
+static arelent *reltab = 0;
 static int relcount = 0, relsize = 0;
 
 static void
@@ -969,29 +978,31 @@ quick_reloc (abfd, address, which_howto, symidx)
     {
       relsize += 10;
       if (reltab)
-	reltab = (arelent **) xrealloc (reltab, relsize * sizeof (arelent *));
+	reltab = (arelent *) xrealloc (reltab, relsize * sizeof (arelent));
       else
-	reltab = (arelent **) xmalloc (relsize * sizeof (arelent *));
+	reltab = (arelent *) xmalloc (relsize * sizeof (arelent));
     }
-  reltab[relcount] = (arelent *) xmalloc (sizeof (arelent));
-  reltab[relcount]->address = address;
-  reltab[relcount]->addend = 0;
-  reltab[relcount]->howto = bfd_reloc_type_lookup (abfd, which_howto);
-  reltab[relcount]->sym_ptr_ptr = symtab + symidx;
+  reltab[relcount].address = address;
+  reltab[relcount].addend = 0;
+  reltab[relcount].howto = bfd_reloc_type_lookup (abfd, which_howto);
+  reltab[relcount].sym_ptr_ptr = symtab + symidx;
   relcount++;
 }
 
 static void
 save_relocs (asection *sec)
 {
-  reltab[relcount] = 0;
-  sec->orelocation = reltab;
+  int i;
+  sec->relocation = reltab;
   sec->reloc_count = relcount;
+  sec->orelocation = (arelent **) xmalloc ((relcount+1) * sizeof (arelent *));
+  for (i=0; i<relcount; i++)
+    sec->orelocation[i] = sec->relocation + i;
+  sec->orelocation[relcount] = 0;
+  sec->flags |= SEC_RELOC;
   reltab = 0;
   relcount = relsize = 0;
 }
-
-#define UNDSEC (asection *) &bfd_und_section
 
 /*
  *	.section	.idata$2
@@ -1012,8 +1023,6 @@ save_relocs (asection *sec)
  * hname:
  */
 
-#define BFD_OPEN_OLDWAY 0
-
 bfd *
 make_head (parent)
      bfd *parent;
@@ -1021,53 +1030,49 @@ make_head (parent)
   asection *id2, *id5, *id4;
   unsigned char *d2, *d5, *d4;
 
-#if BFD_OPEN_OLDWAY
-  bfd *abfd = bfd_openw ("dh.o", 0);
-#else
   bfd *abfd = bfd_create ("dh.o", parent);
+  bfd_find_target ("pe-i386", abfd);
   bfd_make_writable (abfd);
-#endif
+
   bfd_set_format (abfd, bfd_object);
   bfd_set_arch_mach (abfd, bfd_arch_i386, 0);
 
   symptr = 0;
   symtab = (asymbol **) xmalloc (6 * sizeof (asymbol *));
-  id2 = quick_section(abfd, ".idata$2", SEC_HAS_CONTENTS, 2);
-  id5 = quick_section(abfd, ".idata$5", SEC_HAS_CONTENTS, 2);
-  id4 = quick_section(abfd, ".idata$4", SEC_HAS_CONTENTS, 2);
+  id2 = quick_section (abfd, ".idata$2", SEC_HAS_CONTENTS, 2);
+  id5 = quick_section (abfd, ".idata$5", SEC_HAS_CONTENTS, 2);
+  id4 = quick_section (abfd, ".idata$4", SEC_HAS_CONTENTS, 2);
   quick_symbol (abfd, "__head_", dll_symname, "", id2, BSF_GLOBAL, 0);
   quick_symbol (abfd, "_", dll_symname, "_iname", UNDSEC, BSF_GLOBAL, 0);
 
-  bfd_set_section_size(abfd, id2, 20);
+  bfd_set_section_size (abfd, id2, 20);
   d2 = (unsigned char *) xmalloc (20);
+  id2->contents = d2;
   memset (d2, 0, 20);
   d2[0] = d2[16] = 4; /* reloc addend */
-  quick_reloc(abfd,  0, BFD_RELOC_RVA, 2);
-  quick_reloc(abfd, 12, BFD_RELOC_RVA, 4);
-  quick_reloc(abfd, 16, BFD_RELOC_RVA, 1);
-  save_relocs(id2);
+  quick_reloc (abfd,  0, BFD_RELOC_RVA, 2);
+  quick_reloc (abfd, 12, BFD_RELOC_RVA, 4);
+  quick_reloc (abfd, 16, BFD_RELOC_RVA, 1);
+  save_relocs (id2);
 
   bfd_set_section_size (abfd, id5, 4);
   d5 = (unsigned char *) xmalloc (4);
+  id5->contents = d5;
   memset (d5, 0, 4);
 
   bfd_set_section_size (abfd, id4, 4);
   d4 = (unsigned char *) xmalloc (4);
+  id4->contents = d4;
   memset (d4, 0, 4);
 
-  bfd_set_symtab(abfd, symtab, symptr);
+  bfd_set_symtab (abfd, symtab, symptr);
 
-  bfd_set_section_contents(abfd, id2, d2, 0, 20);
-  bfd_set_section_contents(abfd, id5, d5, 0, 4);
-  bfd_set_section_contents(abfd, id4, d4, 0, 4);
-
-#if BFD_OPEN_OLDWAY
-  bfd_close (abfd);
-  return bfd_openr("dh.o", 0);
-#else
+  bfd_set_section_contents (abfd, id2, d2, 0, 20);
+  bfd_set_section_contents (abfd, id5, d5, 0, 4);
+  bfd_set_section_contents (abfd, id4, d4, 0, 4);
+  
   bfd_make_readable (abfd);
   return abfd;
-#endif
 }
 
 /*
@@ -1089,50 +1094,46 @@ make_tail (parent)
   unsigned char *d4, *d5, *d7;
   int len;
 
-#if BFD_OPEN_OLDWAY
-  bfd *abfd = bfd_openw ("dt.o", 0);
-#else
   bfd *abfd = bfd_create ("dt.o", parent);
+  bfd_find_target ("pe-i386", abfd);
   bfd_make_writable (abfd);
-#endif
+
   bfd_set_format (abfd, bfd_object);
   bfd_set_arch_mach (abfd, bfd_arch_i386, 0);
 
   symptr = 0;
   symtab = (asymbol **) xmalloc (5 * sizeof (asymbol *));
-  id4 = quick_section(abfd, ".idata$4", SEC_HAS_CONTENTS, 2);
-  id5 = quick_section(abfd, ".idata$5", SEC_HAS_CONTENTS, 2);
-  id7 = quick_section(abfd, ".idata$7", SEC_HAS_CONTENTS, 2);
+  id4 = quick_section (abfd, ".idata$4", SEC_HAS_CONTENTS, 2);
+  id5 = quick_section (abfd, ".idata$5", SEC_HAS_CONTENTS, 2);
+  id7 = quick_section (abfd, ".idata$7", SEC_HAS_CONTENTS, 2);
   quick_symbol (abfd, "_", dll_symname, "_iname", id7, BSF_GLOBAL, 0);
 
-  bfd_set_section_size(abfd, id4, 4);
+  bfd_set_section_size (abfd, id4, 4);
   d4 = (unsigned char *) xmalloc (4);
+  id4->contents = d4;
   memset (d4, 0, 4);
 
   bfd_set_section_size (abfd, id5, 4);
   d5 = (unsigned char *) xmalloc (4);
+  id5->contents = d5;
   memset (d5, 0, 4);
 
-  len = strlen(dll_filename)+1;
+  len = strlen (dll_filename)+1;
   if (len & 1)
     len ++;
   bfd_set_section_size (abfd, id7, len);
   d7 = (unsigned char *) xmalloc (len);
+  id7->contents = d7;
   strcpy (d7, dll_filename);
 
-  bfd_set_symtab(abfd, symtab, symptr);
+  bfd_set_symtab (abfd, symtab, symptr);
 
-  bfd_set_section_contents(abfd, id4, d4, 0, 4);
-  bfd_set_section_contents(abfd, id5, d5, 0, 4);
-  bfd_set_section_contents(abfd, id7, d7, 0, len);
+  bfd_set_section_contents (abfd, id4, d4, 0, 4);
+  bfd_set_section_contents (abfd, id5, d5, 0, 4);
+  bfd_set_section_contents (abfd, id7, d7, 0, len);
 
-#if BFD_OPEN_OLDWAY
-  bfd_close (abfd);
-  return bfd_openr ("dt.o", 0);
-#else
   bfd_make_readable (abfd);
   return abfd;
-#endif
 }
 
 /*
@@ -1175,43 +1176,44 @@ make_one (exp, parent)
   bfd *abfd;
 
   oname = (char *) xmalloc (20);
-  sprintf(oname, "ds%d.o", tmp_seq);
+  sprintf (oname, "ds%d.o", tmp_seq);
   tmp_seq++;
-#if BFD_OPEN_OLDWAY
-  abfd = bfd_openw (oname, 0);
-#else
   abfd = bfd_create (oname, parent);
+  bfd_find_target ("pe-i386", abfd);
   bfd_make_writable (abfd);
-#endif
+
   bfd_set_format (abfd, bfd_object);
   bfd_set_arch_mach (abfd, bfd_arch_i386, 0);
 
   symptr = 0;
   symtab = (asymbol **) xmalloc (10 * sizeof (asymbol *));
-  tx  = quick_section(abfd, ".text",    SEC_CODE|SEC_HAS_CONTENTS, 2);
-  id7 = quick_section(abfd, ".idata$7", SEC_HAS_CONTENTS, 2);
-  id5 = quick_section(abfd, ".idata$5", SEC_HAS_CONTENTS, 2);
-  id4 = quick_section(abfd, ".idata$4", SEC_HAS_CONTENTS, 2);
-  id6 = quick_section(abfd, ".idata$6", SEC_HAS_CONTENTS, 2);
-  quick_symbol (abfd, "_", exp->name, "", tx, BSF_GLOBAL, 0);
+  tx  = quick_section (abfd, ".text",    SEC_CODE|SEC_HAS_CONTENTS, 2);
+  id7 = quick_section (abfd, ".idata$7", SEC_HAS_CONTENTS, 2);
+  id5 = quick_section (abfd, ".idata$5", SEC_HAS_CONTENTS, 2);
+  id4 = quick_section (abfd, ".idata$4", SEC_HAS_CONTENTS, 2);
+  id6 = quick_section (abfd, ".idata$6", SEC_HAS_CONTENTS, 2);
+  quick_symbol (abfd, "_", exp->internal_name, "", tx, BSF_GLOBAL, 0);
   quick_symbol (abfd, "__head_", dll_symname, "", UNDSEC, BSF_GLOBAL, 0);
-  quick_symbol (abfd, "___imp_", exp->name, "", id5, BSF_GLOBAL, 0);
-  quick_symbol (abfd, "__imp__", exp->name, "", id5, BSF_GLOBAL, 0);
+  quick_symbol (abfd, "___imp_", exp->internal_name, "", id5, BSF_GLOBAL, 0);
+  quick_symbol (abfd, "__imp__", exp->internal_name, "", id5, BSF_GLOBAL, 0);
 
   bfd_set_section_size (abfd, tx, 8);
   td = (unsigned char *) xmalloc (8);
+  tx->contents = td;
   memcpy (td, jmp_ix86_bytes, 8);
   quick_reloc (abfd, 2, BFD_RELOC_32, 2);
   save_relocs (tx);
 
-  bfd_set_section_size(abfd, id7, 4);
+  bfd_set_section_size (abfd, id7, 4);
   d7 = (unsigned char *) xmalloc (4);
+  id7->contents = d7;
   memset (d7, 0, 4);
   quick_reloc (abfd, 0, BFD_RELOC_RVA, 6);
   save_relocs (id7);
 
   bfd_set_section_size (abfd, id5, 4);
   d5 = (unsigned char *) xmalloc (4);
+  id5->contents = d5;
   memset (d5, 0, 4);
   if (exp->flag_noname)
     {
@@ -1227,6 +1229,7 @@ make_one (exp, parent)
 
   bfd_set_section_size (abfd, id4, 4);
   d4 = (unsigned char *) xmalloc (4);
+  id4->contents = d4;
   memset (d4, 0, 4);
   if (exp->flag_noname)
     {
@@ -1243,36 +1246,33 @@ make_one (exp, parent)
   if (exp->flag_noname)
     {
       len = 0;
-      bfd_set_section_size(abfd, id6, 0);
+      bfd_set_section_size (abfd, id6, 0);
     }
   else
     {
-      len = strlen(exp->name) + 3;
+      len = strlen (exp->name) + 3;
       if (len & 1)
 	len++;
-      bfd_set_section_size(abfd, id6, len);
+      bfd_set_section_size (abfd, id6, len);
       d6 = (unsigned char *) xmalloc (len);
+      id6->contents = d6;
       memset (d6, 0, len);
       d6[0] = exp->hint & 0xff;
       d6[1] = exp->hint >> 8;
-      strcpy(d6+2, exp->name);
+      strcpy (d6+2, exp->name);
     }
 
-  bfd_set_symtab(abfd, symtab, symptr);
+  bfd_set_symtab (abfd, symtab, symptr);
 
-  bfd_set_section_contents(abfd, tx, td, 0, 8);
-  bfd_set_section_contents(abfd, id7, d7, 0, 4);
-  bfd_set_section_contents(abfd, id5, d5, 0, 4);
-  bfd_set_section_contents(abfd, id4, d4, 0, 4);
-  bfd_set_section_contents(abfd, id6, d6, 0, len);
+  bfd_set_section_contents (abfd, tx, td, 0, 4);
+  bfd_set_section_contents (abfd, id7, d7, 0, 4);
+  bfd_set_section_contents (abfd, id5, d5, 0, 4);
+  bfd_set_section_contents (abfd, id4, d4, 0, 4);
+  if (!exp->flag_noname)
+    bfd_set_section_contents (abfd, id6, d6, 0, len);
 
-#if BFD_OPEN_OLDWAY
-  bfd_close(abfd);
-  return bfd_openr(oname, 0);
-#else
   bfd_make_readable (abfd);
   return abfd;
-#endif
 }
 
 void
@@ -1281,11 +1281,10 @@ pe_dll_generate_implib (def, impfilename)
      char *impfilename;
 {
   int i;
-  /*export_type *exp;*/
   bfd *ar_head;
   bfd *ar_tail;
   bfd *outarch;
-  bfd * head  = 0;
+  bfd *head = 0;
 
   dll_filename = def->name;
   if (dll_filename == 0)
@@ -1327,9 +1326,14 @@ pe_dll_generate_implib (def, impfilename)
 
   for (i = 0; i<def->num_exports; i++)
     {
-      bfd *n = make_one (def->exports+i, outarch);
+      /* The import library doesn't know about the internal name */
+      char *internal = def->exports[i].internal_name;
+      bfd *n;
+      def->exports[i].internal_name = def->exports[i].name;
+      n = make_one (def->exports+i, outarch);
       n->next = head;
       head = n;
+      def->exports[i].internal_name = internal;
     }
 
   /* Now stick them all into the archive */
@@ -1350,17 +1354,85 @@ pe_dll_generate_implib (def, impfilename)
       bfd_close (head);
       head = n;
     }
+}
 
-#if BFD_OPEN_OLDWAY
-  unlink ("dh.o");
-  unlink ("dt.o");
-  for (i=0; i<tmp_seq; i++)
+static void
+add_bfd_to_link (abfd, name, link_info)
+     bfd *abfd;
+     char *name;
+     struct bfd_link_info *link_info;
+{
+  lang_input_statement_type *fake_file;
+  fake_file = lang_add_input_file (name,
+				   lang_input_file_is_fake_enum,
+				   NULL);
+  fake_file->the_bfd = abfd;
+  ldlang_add_file (fake_file);
+  if (!bfd_link_add_symbols (abfd, link_info))
+    einfo ("%Xaddsym %s: %s\n", name, bfd_errmsg (bfd_get_error ()));
+}
+
+void
+pe_process_import_defs (output_bfd, link_info)
+     bfd *output_bfd;
+     struct bfd_link_info *link_info;
+{
+  def_file_module *module;
+
+  if (!pe_def_file)
+    return;
+
+  for (module = pe_def_file->modules; module; module = module->next)
     {
-      char buf[20];
-      sprintf (buf, "ds%d.o", i);
-      unlink (buf);
+      bfd *ar_head;
+      bfd *ar_tail;
+      int i, do_this_dll;
+
+      dll_filename = module->name;
+      dll_symname = xstrdup (module->name);
+      for (i=0; dll_symname[i]; i++)
+	if (!isalnum (dll_symname[i]))
+	  dll_symname[i] = '_';
+
+      do_this_dll = 0;
+
+      for (i=0; i<pe_def_file->num_imports; i++)
+	if (pe_def_file->imports[i].module == module)
+	  {
+	    def_file_export exp;
+	    bfd *n;
+	    struct bfd_link_hash_entry *blhe;
+
+	    /* see if we need this import */
+	    char *name = (char *) xmalloc (strlen (pe_def_file->imports[i].internal_name) + 2);
+	    sprintf (name, "_%s", pe_def_file->imports[i].internal_name);
+	    blhe = bfd_link_hash_lookup (link_info->hash, name,
+					 false, false, false);
+	    free (name);
+	    if (blhe && blhe->type == bfd_link_hash_undefined)
+	      {
+		/* we do */
+		if (!do_this_dll)
+		  {
+		    add_bfd_to_link (make_head (output_bfd), "imp-head", link_info);
+		    do_this_dll = 1;
+		  }
+		exp.internal_name = pe_def_file->imports[i].internal_name;
+		exp.name = pe_def_file->imports[i].name;
+		exp.ordinal = pe_def_file->imports[i].ordinal;
+		exp.hint = 0;
+		exp.flag_private = 0;
+		exp.flag_constant = 0;
+		exp.flag_data = 0;
+		exp.flag_noname = exp.name ? 0 : 1;
+		add_bfd_to_link (make_one (&exp, output_bfd), "imp-sym", link_info);
+	      }
+	  }
+      if (do_this_dll)
+	add_bfd_to_link (make_tail (output_bfd), "imp-tail", link_info);
+
+      free (dll_symname);
     }
-#endif
 }
 
 /************************************************************************

@@ -1,3 +1,16 @@
+1998-11-23  DJ Delorie  <dj@cygnus.com>
+
+	* emultempl/pe.em (gld_i386pe_after_open): call
+	pe_process_import_defs
+	* pe-dll.c (pe_dll_generate_def_file): calculate BASE from
+	pe_data, only print if actually set.  Print version only if
+	set.
+	(save_relocs): save relocs for both input and output.
+	(make_one): support internal/external different names.
+	(pe_dll_generate_implib): support new make_one
+	(pe_process_import_defs): new function; handles IMPORT
+	directives in .def files.
+
 Fri Nov 20 13:06:49 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* ldmisc.c (vfinfo): Cope with empty symbol names.

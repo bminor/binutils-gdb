@@ -575,8 +575,8 @@ pe_fixup_stdcalls ()
       }
       else
       {
-	/* The symbol is a cdecl symbol, so we don't look for stdcall
-	   symbols - you should have included the right header */
+	/* The symbol is a cdecl symbol, so we look for stdcall
+	   symbols - which means scanning the whole symbol table */
 	pe_undef_found_sym = 0;
 	bfd_link_hash_traverse (link_info.hash, pe_undef_cdecl_match,
 				(PTR) undef->root.string);
@@ -619,6 +619,7 @@ gld_${EMULATION_NAME}_after_open ()
     pe_fixup_stdcalls ();
 
 #ifdef TARGET_IS_i386pe
+  pe_process_import_defs(output_bfd, &link_info);
   if (link_info.shared)
     pe_dll_build_sections (output_bfd, &link_info);
 #endif
