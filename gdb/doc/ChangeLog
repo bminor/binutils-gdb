@@ -1,3 +1,7 @@
+2003-05-04  Andrew Cagney  <cagney@redhat.com>
+
+	* gdb.texinfo (GDB/MI Symbol Query): Use @{ and @}.
+
 2003-05-03  J. Brobecker  <brobecker@gnat.com>
 
 	Thierry Schneider  <tpschneider1@yahoo.com>

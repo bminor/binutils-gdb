@@ -17135,7 +17135,7 @@ There is no corresponding @value{GDBN} command.
 @smallexample
 (@value{GDBP})
 -symbol-list-lines basics.c
-^done,lines=[{pc="0x08048554",line="7"},{pc="0x0804855a",line="8"}]
+^done,lines=[@{pc="0x08048554",line="7"@},@{pc="0x0804855a",line="8"@}]
 (@value{GDBP})
 @end smallexample
 
