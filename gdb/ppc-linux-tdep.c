@@ -1106,9 +1106,6 @@ ppc_linux_init_abi (struct gdbarch_info info,
         (gdbarch, ppc64_linux_convert_from_func_ptr_addr);
       set_gdbarch_skip_trampoline_code (gdbarch, ppc64_skip_trampoline_code);
 
-      /* PPC64 malloc's entry-point is called ".malloc".  */
-      set_gdbarch_name_of_malloc (gdbarch, ".malloc");
-
       /* Trampolines.  */
       tramp_frame_prepend_unwinder (gdbarch, &ppc64_linux_sigaction_tramp_frame);
       tramp_frame_prepend_unwinder (gdbarch, &ppc64_linux_sighandler_tramp_frame);
