@@ -575,7 +575,7 @@ set_scripts_dir ()
   {
     /* We could have \foo\bar, or /foo\bar.  */
     char *bslash = strrchr (program_name, '\\');
-    if (bslash > end)
+    if (end == NULL || (bslash != NULL && bslash > end))
       end = bslash;
   }
 #endif

@@ -1,3 +1,10 @@
+2000-06-20  Alan Modra  <alan@linuxcare.com.au>
+
+	* archive.c (normalize): Correct pointer comparison when checking
+	for backslashes.
+	(bfd_bsd_truncate_arname): Likewise.
+	(bfd_gnu_truncate_arname): Likewise.
+
 2000-06-20  Ulf Carlsson  <ulfc@engr.sgi.com>
 
 	* elf-bfd.h (struct elf_obj_tdata): Define per BFD Irix 5 virtual

@@ -307,10 +307,10 @@ normalize (file, abfd)
   {
     /* We could have foo/bar\\baz, or foo\\bar, or d:bar.  */
     char *bslash = strrchr (file, '\\');
-    if (bslash > filename)
+    if (filename == NULL || (bslash != NULL && bslash > filename))
       filename = bslash;
     if (filename == NULL && file[0] != '\0' && file[1] == ':')
-	filename = file + 1;
+      filename = file + 1;
   }
 #endif
   if (filename != (char *) NULL)
@@ -392,7 +392,7 @@ main (argc, argv)
 	{
 	  /* We could have foo/bar\\baz, or foo\\bar, or d:bar.  */
 	  char *bslash = strrchr (program_name, '\\');
-	  if (bslash > temp)
+	  if (temp == NULL || (bslash != NULL && bslash > temp))
 	    temp = bslash;
 	  if (temp == NULL && program_name[0] != '\0' && program_name[1] == ':')
 	    temp = program_name + 1;

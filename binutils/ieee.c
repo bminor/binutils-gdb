@@ -4940,8 +4940,8 @@ ieee_start_compilation_unit (p, filename)
   info->filename = filename;
   modname = strrchr (filename, '/');
   /* We could have a mixed forward/back slash case.  */
-  backslash = strrchr (modname, '\\');
-  if (backslash > modname)
+  backslash = strrchr (filename, '\\');
+  if (modname == NULL || (backslash != NULL && backslash > modname))
     modname = backslash;
 
   if (modname != NULL)
@@ -5206,8 +5206,8 @@ ieee_add_bb11 (info, sec, low, high)
       /* Start the enclosing BB10 block.  */
       filename = bfd_get_filename (info->abfd);
       modname = strrchr (filename, '/');
-      backslash = strrchr (modname, '\\');
-      if (backslash > modname)
+      backslash = strrchr (filename, '\\');
+      if (modname == NULL || (backslash != NULL && backslash > modname))
 	modname = backslash;
 
       if (modname != NULL)

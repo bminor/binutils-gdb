@@ -1188,7 +1188,7 @@ normalize (abfd, file)
   {
     /* We could have foo/bar\\baz, or foo\\bar, or d:bar.  */
     char *bslash = strrchr (file, '\\');
-    if (bslash > filename)
+    if (filename == NULL || (bslash != NULL && bslash > filename))
       filename = bslash;
     if (filename == NULL && file[0] != '\0' && file[1] == ':')
       filename = file + 1;
@@ -1581,7 +1581,7 @@ bfd_bsd_truncate_arname (abfd, pathname, arhdr)
   {
     /* We could have foo/bar\\baz, or foo\\bar, or d:bar.  */
     char *bslash = strrchr (pathname, '\\');
-    if (bslash > filename)
+    if (filename == NULL || (bslash != NULL && bslash > filename))
       filename = bslash;
     if (filename == NULL && pathname[0] != '\0' && pathname[1] == ':')
       filename = pathname + 1;
@@ -1632,7 +1632,7 @@ bfd_gnu_truncate_arname (abfd, pathname, arhdr)
   {
     /* We could have foo/bar\\baz, or foo\\bar, or d:bar.  */
     char *bslash = strrchr (pathname, '\\');
-    if (bslash > filename)
+    if (filename == NULL || (bslash != NULL && bslash > filename))
       filename = bslash;
     if (filename == NULL && pathname[0] != '\0' && pathname[1] == ':')
       filename = pathname + 1;

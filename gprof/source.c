@@ -116,7 +116,7 @@ DEFUN (annotate_source, (sf, max_width, annote, arg),
 #ifdef HAVE_DOS_BASED_FILE_SYSTEM
 	  {
 	    char *bslash = strrchr (sf->name, '\\');
-	    if (bslash > name_only)
+	    if (name_only == NULL || (bslash != NULL && bslash > name_only))
 	      name_only = bslash;
 	    if (name_only == NULL && sf->name[0] != '\0' && sf->name[1] == ':')
 	      name_only = (char *)sf->name + 1;
@@ -174,7 +174,7 @@ DEFUN (annotate_source, (sf, max_width, annote, arg),
 #ifdef HAVE_DOS_BASED_FILE_SYSTEM
 	{
 	  char *bslash = strrchr (sf->name, '\\');
-	  if (bslash > filename)
+	  if (filename == NULL || (bslash != NULL && bslash > filename))
 	    filename = bslash;
 	  if (filename == NULL && sf->name[0] != '\0' && sf->name[1] == ':')
 	    filename = sf->name + 1;

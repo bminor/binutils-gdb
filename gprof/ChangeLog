@@ -1,3 +1,8 @@
+2000-06-20  Alan Modra  <alan@linuxcare.com.au>
+
+	* source.c (annotate_source): Correct pointer comparison when
+	checking for backslashes.
+
 2000-06-13  H.J. Lu  <hjl@gnu.org>
 
 	* configure: Regenerate.

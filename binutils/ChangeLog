@@ -1,3 +1,14 @@
+2000-06-20  Alexander Aganichev <AAganichev@hypercom.com>
+
+	* ar.c (normalize): Correct pointer comparison when checking for
+	backslashes.
+	(main): Likewise.
+	* bucomm.c (make_tempname): Likewise.
+
+	* ieee.c (ieee_start_compilation_unit): Correct pointer comparison
+	and search for backslashes in the original pathname.
+	(ieee_add_bb11): Likewise.
+
 2000-06-18  Nick Clifton  <nickc@redhat.com>
 
 	* ar.c (print_contents): Improve verbose message.
