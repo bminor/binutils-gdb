@@ -43,6 +43,17 @@ if ![info exists prompt] then {
     set prompt "\[(\]gdb\[)\]"
 }
 
+global usestubs
+if [istarget "sparclite-*-*"] then {
+    set usestubs 1
+} else {
+    set usestubs 0
+}
+
+if ![info exists noargs] then {
+    set noargs 0
+}
+
 #
 # gdb_version -- extract and print the version number of GDB
 #
@@ -187,6 +198,42 @@ proc runto { function } {
 	    fail "running to $function (timeout)"
 	    return 0
 	}
+    }
+}
+
+#
+# runto_main -- ask gdb to run and untill hit break point at main.
+#		if it uses stubs, assuming we hit breakpoint() and just
+#		step out of the function.
+#
+proc runto_main {} {
+    global prompt
+    global decimal
+    global usestubs
+
+    if $usestubs==0 {
+	runto main
+	return 1
+    }			
+
+    send "delete\n"
+    expect {
+	-re "delete.*Delete all breakpoints.*y or n. $" {
+	    send "y\n"
+	    expect {
+		-re "$prompt $" {}
+		timeout { fail "deleting breakpoints (timeout)" ; return 0 }
+	    }
+	}
+	-re ".*$prompt $" {}
+	timeout { fail "deleting breakpoints (timeout)" ; return 0 }
+    }
+
+    send "step\n"
+    # if use stubs step out of the breakpoint() function.
+    expect {
+	-re "* at .*$prompt $" {}
+	timeout { fail "single step at breakpoint() (timeout)" ; return 0 }
     }
 }
 
