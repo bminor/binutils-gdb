@@ -915,6 +915,17 @@ md_apply_fix3 (fixp, valuep, seg)
 	  return 1;
 	}
     }
+  else if (fixp->fx_done)
+    {
+      /* We still have to insert the value into memory!  */
+      where = fixp->fx_frag->fr_literal + fixp->fx_where;
+      if (fixp->fx_size == 1)
+	*where = value & 0xff;
+      if (fixp->fx_size == 2)
+	bfd_putl16(value & 0xffff, (unsigned char *) where);
+      if (fixp->fx_size == 4)
+	bfd_putl32(value, (unsigned char *) where);
+    }
 
   fixp->fx_addnumber = value;
   return 1;
