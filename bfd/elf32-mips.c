@@ -6332,7 +6332,8 @@ mips_elf_calculate_relocation (abfd,
       if ((info->shared
 	   || (elf_hash_table (info)->dynamic_sections_created
 	       && h != NULL
-	       && (h->root.type == bfd_link_hash_defweak
+	       && h->root.root.type != bfd_link_hash_undefweak
+	       && (h->root.root.type == bfd_link_hash_defweak
 		   || (h->root.elf_link_hash_flags
 		       & ELF_LINK_HASH_DEF_REGULAR) == 0)))
 	  && (input_section->flags & SEC_ALLOC) != 0)
