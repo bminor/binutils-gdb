@@ -26,6 +26,9 @@ cat >>e${EMULATION_NAME}.c <<EOF
 
 #include "ldctor.h"
 
+/* Flag for the emulation-specific "--no-relax" option.  */
+static bfd_boolean disable_relaxation = FALSE;
+
 static void crxelf_after_parse (void);
 
 static void
@@ -38,13 +41,54 @@ crxelf_after_parse (void)
   config.sort_common = TRUE;
 
   /* Don't create a demand-paged executable, since this feature isn't
-     meaninful in CR16C embedded systems. Moreover, when magic_demand_paged
+     meaninful in CRX embedded systems. Moreover, when magic_demand_paged
      is true the link sometimes fails.  */
   config.magic_demand_paged = FALSE;
 }
 
+/* This is called after the sections have been attached to output
+   sections, but before any sizes or addresses have been set.  */
+
+static void
+crxelf_before_allocation (void)
+{
+  /* Call the default first.  */
+  gld${EMULATION_NAME}_before_allocation ();
+
+  /* Enable relaxation by default if the "--no-relax" option was not
+     specified.  This is done here instead of in the before_parse hook
+     because there is a check in main() to prohibit use of --relax and
+     -r together.  */
+
+  if (!disable_relaxation)
+    command_line.relax = TRUE;
+}
+
 EOF
+
+# Define some shell vars to insert bits of code into the standard elf
+# parse_args and list_options functions.
+#
+PARSE_AND_LIST_PROLOGUE='
+#define OPTION_NO_RELAX			301
+'
+
+PARSE_AND_LIST_LONGOPTS='
+  { "no-relax", no_argument, NULL, OPTION_NO_RELAX},
+'
+
+PARSE_AND_LIST_OPTIONS='
+  fprintf (file, _("  --no-relax                  Do not relax branches\n"));
+'
+
+PARSE_AND_LIST_ARGS_CASES='
+    case OPTION_NO_RELAX:
+      disable_relaxation = TRUE;
+      break;
+'
 
 # Put these extra crx-elf routines in ld_${EMULATION_NAME}_emulation
 #
 LDEMUL_AFTER_PARSE=crxelf_after_parse
+LDEMUL_BEFORE_ALLOCATION=crxelf_before_allocation
+
