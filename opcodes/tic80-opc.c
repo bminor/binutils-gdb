@@ -79,9 +79,10 @@ const struct predefined_symbol tic80_predefined_symbols[] =
   { "ECOMCNTL",	TIC80_OPERAND_CR | 0x33 },
   { "EIP",	TIC80_OPERAND_CR | 1 },
   { "EPC",	TIC80_OPERAND_CR | 0 },
-  { "eq.b",	TIC80_OPERAND_BITNUM  | 0 },
-  { "eq.h",	TIC80_OPERAND_BITNUM  | 10 },
-  { "eq.w",	TIC80_OPERAND_BITNUM  | 20 },
+  { "eq.b",	TIC80_OPERAND_BITNUM  | (~0 & 0x1F) },
+  { "eq.f",	TIC80_OPERAND_BITNUM  | (~20 & 0x1F) },
+  { "eq.h",	TIC80_OPERAND_BITNUM  | (~10 & 0x1F) },
+  { "eq.w",	TIC80_OPERAND_BITNUM  | (~20 & 0x1F) },
   { "eq0.b",	TIC80_OPERAND_CC | 2 },
   { "eq0.h",	TIC80_OPERAND_CC | 10 },
   { "eq0.w",	TIC80_OPERAND_CC | 18 },
@@ -91,26 +92,30 @@ const struct predefined_symbol tic80_predefined_symbols[] =
   { "FLTOP",	TIC80_OPERAND_CR | 0x10 },
   { "FLTTAG",	TIC80_OPERAND_CR | 0x12 },
   { "FPST",	TIC80_OPERAND_CR | 8 },
-  { "ge.b",	TIC80_OPERAND_BITNUM  | 5 },
-  { "ge.h",	TIC80_OPERAND_BITNUM  | 15 },
-  { "ge.w",	TIC80_OPERAND_BITNUM  | 25 },
+  { "ge.b",	TIC80_OPERAND_BITNUM  | (~5 & 0x1F) },
+  { "ge.f",	TIC80_OPERAND_BITNUM  | (~25 & 0x1F) },
+  { "ge.h",	TIC80_OPERAND_BITNUM  | (~15 & 0x1F) },
+  { "ge.w",	TIC80_OPERAND_BITNUM  | (~25 & 0x1F) },
   { "ge0.b",	TIC80_OPERAND_CC | 3 },
   { "ge0.h",	TIC80_OPERAND_CC | 11 },
   { "ge0.w",	TIC80_OPERAND_CC | 19 },
-  { "gt.b",	TIC80_OPERAND_BITNUM  | 2 },
-  { "gt.h",	TIC80_OPERAND_BITNUM  | 12 },
-  { "gt.w",	TIC80_OPERAND_BITNUM  | 22 },
+  { "gt.b",	TIC80_OPERAND_BITNUM  | (~2 & 0x1F) },
+  { "gt.f",	TIC80_OPERAND_BITNUM  | (~22 & 0x1F) },
+  { "gt.h",	TIC80_OPERAND_BITNUM  | (~12 & 0x1F) },
+  { "gt.w",	TIC80_OPERAND_BITNUM  | (~22 & 0x1F) },
   { "gt0.b",	TIC80_OPERAND_CC | 1 },
   { "gt0.h",	TIC80_OPERAND_CC | 9 },
   { "gt0.w",	TIC80_OPERAND_CC | 17 },
-  { "hi.b",	TIC80_OPERAND_BITNUM  | 6 },
-  { "hi.h",	TIC80_OPERAND_BITNUM  | 16 },
-  { "hi.w",	TIC80_OPERAND_BITNUM  | 26 },
-  { "hs.b",	TIC80_OPERAND_BITNUM  | 9 },
-  { "hs.h",	TIC80_OPERAND_BITNUM  | 19 },
-  { "hs.w",	TIC80_OPERAND_BITNUM  | 29 },
+  { "hi.b",	TIC80_OPERAND_BITNUM  | (~6 & 0x1F) },
+  { "hi.h",	TIC80_OPERAND_BITNUM  | (~16 & 0x1F) },
+  { "hi.w",	TIC80_OPERAND_BITNUM  | (~26 & 0x1F) },
+  { "hs.b",	TIC80_OPERAND_BITNUM  | (~9 & 0x1F) },
+  { "hs.h",	TIC80_OPERAND_BITNUM  | (~19 & 0x1F) },
+  { "hs.w",	TIC80_OPERAND_BITNUM  | (~29 & 0x1F) },
+  { "ib.f",	TIC80_OPERAND_BITNUM  | (~28 & 0x1F) },
   { "IE",	TIC80_OPERAND_CR | 6 },
   { "ILRU",	TIC80_OPERAND_CR | 0x300 },
+  { "in.f",	TIC80_OPERAND_BITNUM  | (~27 & 0x1F) },
   { "IN0P",	TIC80_OPERAND_CR | 0x4000 },
   { "IN1P",	TIC80_OPERAND_CR | 0x4001 },
   { "INTPEN",	TIC80_OPERAND_CR | 4 },
@@ -130,35 +135,41 @@ const struct predefined_symbol tic80_predefined_symbols[] =
   { "ITAG7",	TIC80_OPERAND_CR | 0x207 },
   { "ITAG8",	TIC80_OPERAND_CR | 0x208 },
   { "ITAG9",	TIC80_OPERAND_CR | 0x209 },
-  { "le.b",	TIC80_OPERAND_BITNUM  | 3 },
-  { "le.h",	TIC80_OPERAND_BITNUM  | 13 },
-  { "le.w",	TIC80_OPERAND_BITNUM  | 23 },
+  { "le.b",	TIC80_OPERAND_BITNUM  | (~3 & 0x1F) },
+  { "le.f",	TIC80_OPERAND_BITNUM  | (~23 & 0x1F) },
+  { "le.h",	TIC80_OPERAND_BITNUM  | (~13 & 0x1F) },
+  { "le.w",	TIC80_OPERAND_BITNUM  | (~23 & 0x1F) },
   { "le0.b",	TIC80_OPERAND_CC | 6 },
   { "le0.h",	TIC80_OPERAND_CC | 14 },
   { "le0.w",	TIC80_OPERAND_CC | 22 },
-  { "lo.b",	TIC80_OPERAND_BITNUM  | 8 },
-  { "lo.h",	TIC80_OPERAND_BITNUM  | 18 },
-  { "lo.w",	TIC80_OPERAND_BITNUM  | 28 },
-  { "ls.b",	TIC80_OPERAND_BITNUM  | 7 },
-  { "ls.h",	TIC80_OPERAND_BITNUM  | 17 },
-  { "ls.w",	TIC80_OPERAND_BITNUM  | 27 },
-  { "lt.b",	TIC80_OPERAND_BITNUM  | 4 },
-  { "lt.h",	TIC80_OPERAND_BITNUM  | 14 },
-  { "lt.w",	TIC80_OPERAND_BITNUM  | 24 },
+  { "lo.b",	TIC80_OPERAND_BITNUM  | (~8 & 0x1F) },
+  { "lo.h",	TIC80_OPERAND_BITNUM  | (~18 & 0x1F) },
+  { "lo.w",	TIC80_OPERAND_BITNUM  | (~28 & 0x1F) },
+  { "ls.b",	TIC80_OPERAND_BITNUM  | (~7 & 0x1F) },
+  { "ls.h",	TIC80_OPERAND_BITNUM  | (~17 & 0x1F) },
+  { "ls.w",	TIC80_OPERAND_BITNUM  | (~27 & 0x1F) },
+  { "lt.b",	TIC80_OPERAND_BITNUM  | (~4 & 0x1F) },
+  { "lt.f",	TIC80_OPERAND_BITNUM  | (~24 & 0x1F) },
+  { "lt.h",	TIC80_OPERAND_BITNUM  | (~14 & 0x1F) },
+  { "lt.w",	TIC80_OPERAND_BITNUM  | (~24 & 0x1F) },
   { "lt0.b",	TIC80_OPERAND_CC | 4 },
   { "lt0.h",	TIC80_OPERAND_CC | 12 },
   { "lt0.w",	TIC80_OPERAND_CC | 20 },
   { "MIP",	TIC80_OPERAND_CR | 0x31 },
   { "MPC",	TIC80_OPERAND_CR | 0x30 },
-  { "ne.b",	TIC80_OPERAND_BITNUM  | 1 },
-  { "ne.h",	TIC80_OPERAND_BITNUM  | 11 },
-  { "ne.w",	TIC80_OPERAND_BITNUM  | 21 },
+  { "ne.b",	TIC80_OPERAND_BITNUM  | (~1 & 0x1F) },
+  { "ne.f",	TIC80_OPERAND_BITNUM  | (~21 & 0x1F) },
+  { "ne.h",	TIC80_OPERAND_BITNUM  | (~11 & 0x1F) },
+  { "ne.w",	TIC80_OPERAND_BITNUM  | (~21 & 0x1F) },
   { "ne0.b",	TIC80_OPERAND_CC | 5 },
   { "ne0.h",	TIC80_OPERAND_CC | 13 },
   { "ne0.w",	TIC80_OPERAND_CC | 21 },
   { "nev.b",	TIC80_OPERAND_CC | 0 },
   { "nev.h",	TIC80_OPERAND_CC | 8 },
   { "nev.w",	TIC80_OPERAND_CC | 16 },
+  { "ob.f",	TIC80_OPERAND_BITNUM  | (~29 & 0x1F) },
+  { "or.f",	TIC80_OPERAND_BITNUM  | (~31 & 0x1F) },
+  { "ou.f",	TIC80_OPERAND_BITNUM  | (~26 & 0x1F) },
   { "OUTP",	TIC80_OPERAND_CR | 0x4002 },
   { "PKTREQ",	TIC80_OPERAND_CR | 0xD },
   { "PPERROR",	TIC80_OPERAND_CR | 0xA },
@@ -198,6 +209,7 @@ const struct predefined_symbol tic80_predefined_symbols[] =
   { "SYSTMP",	TIC80_OPERAND_CR | 0x21 },
   { "TCOUNT",	TIC80_OPERAND_CR | 0xE },
   { "TSCALE",	TIC80_OPERAND_CR | 0xF },
+  { "uo.f",	TIC80_OPERAND_BITNUM  | (~30 & 0x1F) },
 };
 
 const int tic80_num_predefined_symbols = sizeof (tic80_predefined_symbols) / sizeof (struct predefined_symbol);
@@ -246,9 +258,9 @@ tic80_symbol_to_value (name, class)
       else 
 	{
 	  pdsp = &tic80_predefined_symbols[middle];
-	  if ((class == 0) || (class & pdsp -> value))
+	  if ((class == 0) || (class & PDS_VALUE (pdsp)))
 	    {
-	      rtnval = pdsp -> value;
+	      rtnval = PDS_VALUE (pdsp);
 	    }
 	  /* For now we assume that there are no duplicate names */
 	  break;
@@ -275,19 +287,47 @@ tic80_value_to_symbol (val, class)
        pdsp < tic80_predefined_symbols + tic80_num_predefined_symbols;
        pdsp++)
     {
-      ival = pdsp -> value & ~TIC80_OPERAND_MASK;
+      ival = PDS_VALUE (pdsp) & ~TIC80_OPERAND_MASK;
       if (ival == val)
 	{
-	  if ((class == 0) || (class & pdsp -> value))
+	  if ((class == 0) || (class & PDS_VALUE (pdsp)))
 	    {
 	      /* Found the desired match */
-	      name = pdsp -> name;
+	      name = PDS_NAME (pdsp);
 	      break;
 	    }
 	}
     }
   return (name);
 }
+
+/* This function returns a pointer to the next symbol in the predefined
+   symbol table after PDSP, or NULL if PDSP points to the last symbol.  If
+   PDSP is NULL, it returns the first symbol in the table.  Thus it can be
+   used to walk through the table by first calling it with NULL and then
+   calling it with each value it returned on the previous call, until it
+   returns NULL. */
+
+const struct predefined_symbol *
+tic80_next_predefined_symbol (pdsp)
+     const struct predefined_symbol *pdsp;
+{
+  if (pdsp == NULL)
+    {
+      pdsp = tic80_predefined_symbols;
+    }
+  else if (pdsp >= tic80_predefined_symbols &&
+	   pdsp < tic80_predefined_symbols + tic80_num_predefined_symbols - 1)
+    {
+      pdsp++;
+    }
+  else
+    {
+      pdsp = NULL;
+    }
+  return (pdsp);
+}
+
 
 
 /* The operands table.  The fields are:
