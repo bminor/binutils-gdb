@@ -1,3 +1,17 @@
+start-sanitize-d30v
+Thu May  7 11:13:00 1998  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* config/tc-d30v.c (do_assemble): Abort with error message
+	if opcode operands do not match.
+	
+end-sanitize-d30v
+Thu May  7 09:36:06 1998  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* config/tc-mips.c (macro_build, validate_mips_insn): Implement
+	'q' operand format for 20-bit "break"/"sdbbp" instructions.
+	(mips_ip): Truncate overflowed "break" 'c' operand.  Implement
+	similar new 'q' operand.
+
 Thu May  7 07:47:14 1998  Michael Meissner  <meissner@cygnus.com>
 
 	* cgen.c (cgen_asm_finish_insn): Fix typo.
@@ -39,12 +53,14 @@ Wed May  6 15:11:12 1998  Klaus Kaempf  <kkaempf@progis.de>
 
 	* doc/c-vax.texi: Correct and extend vax/vms documentation.
 
+start-sanitize-d30v
 Wed May  6 11:51:51 1998  Richard Henderson  <rth@cygnus.com>
 
 	* config/tc-d30v.c (do_assemble): Accept a new parameter requesting
 	a short format insn.
 	(md_assemble): Set it for explicitly packed insns.
-
+end-sanitize-d30v
+	
 Tue May  5 13:23:13 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* config/obj-coff.c (c_symbol_merge): Do not take address of

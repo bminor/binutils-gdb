@@ -2557,6 +2557,10 @@ macro_build (place, counter, ep, name, fmt, va_alist)
 	  insn.insn_opcode |= va_arg (args, int) << 6;
 	  continue;
 
+	case 'q':
+	  insn.insn_opcode |= va_arg (args, int) << 6;
+	  continue;
+
 	case 'b':
 	case 's':
 	case 'r':
@@ -3433,6 +3437,7 @@ macro (ip)
   int dbl = 0;
   int coproc = 0;
   int lr = 0;
+  int imm = 0;
   offsetT maxnum;
   int off;
   bfd_reloc_code_real_type r;
@@ -5912,6 +5917,7 @@ macro2 (ip)
   int dbl = 0;
   int coproc = 0;
   int lr = 0;
+  int imm = 0;
   int off;
   offsetT maxnum;
   bfd_reloc_code_real_type r;
@@ -5953,15 +5959,24 @@ macro2 (ip)
       macro_build ((char *) NULL, &icnt, NULL, "mflo", "d", dreg);
       break;
 
+    case M_DMULO_I:
+      dbl = 1;
+    case M_MULO_I:
+      imm = 1;
+      goto do_mulo;
+
     case M_DMULO:
       dbl = 1;
     case M_MULO:
+    do_mulo:
       mips_emit_delays (true);
       ++mips_opts.noreorder;
       mips_any_noreorder = 1;
+      if (imm)
+	load_register (&icnt, AT, &imm_expr, dbl);
       macro_build ((char *) NULL, &icnt, NULL,
 		   dbl ? "dmult" : "mult",
-		   "s,t", sreg, treg);
+		   "s,t", sreg, imm ? AT : treg);
       macro_build ((char *) NULL, &icnt, NULL, "mflo", "d", dreg);
       macro_build ((char *) NULL, &icnt, NULL,
 		   dbl ? "dsra32" : "sra",
@@ -5980,15 +5995,24 @@ macro2 (ip)
       macro_build ((char *) NULL, &icnt, NULL, "mflo", "d", dreg);
       break;
 
+    case M_DMULOU_I:
+      dbl = 1;
+    case M_MULOU_I:
+      imm = 1;
+      goto do_mulou;
+
     case M_DMULOU:
       dbl = 1;
     case M_MULOU:
+    do_mulou:
       mips_emit_delays (true);
       ++mips_opts.noreorder;
       mips_any_noreorder = 1;
+      if (imm)
+	load_register (&icnt, AT, &imm_expr, dbl);
       macro_build ((char *) NULL, &icnt, NULL,
 		   dbl ? "dmultu" : "multu",
-		   "s,t", sreg, treg);
+		   "s,t", sreg, imm ? AT : treg);
       macro_build ((char *) NULL, &icnt, NULL, "mfhi", "d", AT);
       macro_build ((char *) NULL, &icnt, NULL, "mflo", "d", dreg);
       if (mips_trap)
@@ -6903,6 +6927,7 @@ validate_mips_insn (opc)
       case 'l': break;
       case 'o': USE_BITS (OP_MASK_DELTA,	OP_SH_DELTA);	break;
       case 'p':	USE_BITS (OP_MASK_DELTA,	OP_SH_DELTA);	break;
+      case 'q':	USE_BITS (OP_MASK_CODE2,	OP_SH_CODE2);	break;
       case 'r': USE_BITS (OP_MASK_RS,		OP_SH_RS);	break;
       case 's':	USE_BITS (OP_MASK_RS,		OP_SH_RS);	break;
       case 't':	USE_BITS (OP_MASK_RT,		OP_SH_RT);	break;
@@ -7387,9 +7412,26 @@ mips_ip (str, ip)
 	      my_getExpression (&imm_expr, s);
 	      check_absolute_expr (ip, &imm_expr);
 	      if ((unsigned) imm_expr.X_add_number > 1023)
-		as_warn (_("Illegal break code (%ld)"),
-			 (long) imm_expr.X_add_number);
+		{
+		  as_warn (_("Illegal break code (%ld)"),
+			   (long) imm_expr.X_add_number);
+		  imm_expr.X_add_number &= 0x3ff;
+		}
 	      ip->insn_opcode |= imm_expr.X_add_number << 16;
+	      imm_expr.X_op = O_absent;
+	      s = expr_end;
+	      continue;
+
+	    case 'q':		/* lower break code */
+	      my_getExpression (&imm_expr, s);
+	      check_absolute_expr (ip, &imm_expr);
+	      if ((unsigned) imm_expr.X_add_number > 1023)
+		{
+		  as_warn (_("Illegal lower break code (%ld)"),
+			   (long) imm_expr.X_add_number);
+		  imm_expr.X_add_number &= 0x3ff;
+		}
+	      ip->insn_opcode |= imm_expr.X_add_number << 6;
 	      imm_expr.X_op = O_absent;
 	      s = expr_end;
 	      continue;

@@ -1,8 +1,21 @@
+start-sanitize-d30v
+Thu Apr 30 11:55:01 1998  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* gas/d30v/{inst,array,opt,reloc}.d: Accept <symbol+offset> labels
+ 	in disassembly, where the offset is in hex and has a "0x" prefix.
+	
+end-sanitize-d30v
+Tue Apr 28 16:38:34 1998  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* gas/mips/lineno.[sd]: Assembly source line number test.
+	* gas/mips/mips.exp: Added lineno test.
+
 start-sanitize-sky
 Thu Apr 16 11:23:13 1998  Doug Evans  <devans@canuck.cygnus.com>
 
-	* gas/testsuite/dvp/{vif-1.[sd],vif-3.s}: Update, '*' no longer
-	supported as unpack address.
+	* gas/dvp/{vif-1.[sd],vif-3.s}: Update, '*' no longer supported as
+ 	unpack address.  * gas/dvp/vif-4.[sd]: Test wl > cl with no input
+ 	data.
 
 end-sanitize-sky
 start-sanitize-r5900
