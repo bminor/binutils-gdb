@@ -1,3 +1,9 @@
+2002-02-24  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* ld-sh/ld-r-1.d: Adjust to changes in readelf output.
+	* ld-sh/shared-1.d, ld-sh/sh64/crangerel1.rd, ld-sh/crangerel2.rd,
+	ld-sh/sh64/reldl32.rd, ld-sh/sh64/reldl64.rd: Ditto.
+
 2002-02-18  Daniel Jacobowitz  <drow@mvista.com>
 
 	* ld-elfvsb/sh1.c: Fix typo in last change.

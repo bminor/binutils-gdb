@@ -17,15 +17,15 @@ Key to Flags:
   I \(info\), L \(link order\), G \(group\), x \(unknown\)
   O \(extra OS processing required\) o \(OS specific\), p \(processor specific\)
 
-Relocation section '\.rela\.cranges' at offset 0x2ac contains 7 entries:
-[ ]*Offset[ ]+Info[ ]+Type[ ]+Symbol's Value[ ]+Symbol's Name[ ]+Addend
-0*00000000  0+0201 R_SH_DIR32            00000000  \.text\.mixed               \+ 0
-0*0000000a  0+0201 R_SH_DIR32            00000000  \.text\.mixed               \+ 0
-0*00000014  0+0201 R_SH_DIR32            00000000  \.text\.mixed               \+ 0
-0*0000001e  0+0201 R_SH_DIR32            00000000  \.text\.mixed               \+ 0
-0*00000028  0+0201 R_SH_DIR32            00000000  \.text\.mixed               \+ 0
-0*00000032  0+0201 R_SH_DIR32            00000000  \.text\.mixed               \+ 0
-0*0000003c  0+0201 R_SH_DIR32            00000000  \.text\.mixed               \+ 0
+Relocation section '\.rela\.cranges' at offset 0x[0-9a-f]+ contains 7 entries:
+.*
+0*00000000 +0+0201 R_SH_DIR32 +00000000 +\.text\.mixed +\+ 0
+0*0000000a +0+0201 R_SH_DIR32 +00000000 +\.text\.mixed +\+ 0
+0*00000014 +0+0201 R_SH_DIR32 +00000000 +\.text\.mixed +\+ 0
+0*0000001e +0+0201 R_SH_DIR32 +00000000 +\.text\.mixed +\+ 0
+0*00000028 +0+0201 R_SH_DIR32 +00000000 +\.text\.mixed +\+ 0
+0*00000032 +0+0201 R_SH_DIR32 +00000000 +\.text\.mixed +\+ 0
+0*0000003c +0+0201 R_SH_DIR32 +00000000 +\.text\.mixed +\+ 0
 
 Symbol table '\.symtab' contains 16 entries:
    Num:    Value  Size Type    Bind   Vis      Ndx Name
