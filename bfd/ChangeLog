@@ -1,3 +1,8 @@
+2004-05-22  Ben Elliston  <bje@au.ibm.com>
+
+	* Makefile.am (config.status): Don't depend on version.h.
+	* Makefile.in: Regenerate.
+
 2004-05-22  Alan Modra  <amodra@bigpond.net.au>
 
 	* merge.c (_bfd_merged_section_offset): Remove "addend" param.
