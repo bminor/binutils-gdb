@@ -1,5 +1,8 @@
 2002-06-11  Jim Blandy  <jimb@redhat.com>
 
+	* source.c (source_info): Mention whether the symtab has
+	information about preprocessor macros.
+
 	Call the command `info macro', not `show macro'.
 	* macrocmd.c (info_macro_command): Renamed from `show_macro_command'.
 	Fix error message.

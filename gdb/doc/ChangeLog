@@ -1,5 +1,8 @@
 2002-06-11  Jim Blandy  <jimb@redhat.com>
 
+	* gdb.texinfo (Symbols): Update documentation for `info source'
+	command.
+
 	* gdb.texinfo (Macros): Call the command `info macro', not
 	`show macro'.
 

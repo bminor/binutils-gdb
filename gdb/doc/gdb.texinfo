@@ -9020,9 +9020,25 @@ collect}.
 
 @kindex info source
 @item info source
-Show the name of the current source file---that is, the source file for
-the function containing the current point of execution---and the language
-it was written in.
+Show information about the current source file---that is, the source file for
+the function containing the current point of execution:
+@itemize @bullet
+@item
+the name of the source file, and the directory containing it,
+@item
+the directory it was compiled in,
+@item
+its length, in lines,
+@item
+which programming language it is written in,
+@item
+whether the executable includes debugging information for that file, and
+if so, what format the information is in (e.g., STABS, Dwarf 2, etc.), and
+@item
+whether the debugging information includes information about
+preprocessor macros.
+@end itemize
+
 
 @kindex info sources
 @item info sources
