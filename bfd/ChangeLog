@@ -1,3 +1,11 @@
+Thu Jul  6 14:37:43 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in: Rebuild dependencies.
+	(CFILES): Added elflink.c.
+	(Makefile): Depend upon config.status, not configure.in.
+	(config.status): New target; depend upon configure configure.host
+	and config.bfd.
+
 Wed Jul  5 20:17:14 1995  Ken Raeburn  <raeburn@cygnus.com>
 
 	* elfcore.h, elflink.h, elfcode.h, elf.c, elflink.c: Moved some

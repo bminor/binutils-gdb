@@ -270,9 +270,9 @@ CFILES = libbfd.c opncls.c bfd.c archive.c targets.c cache.c \
 	 cpu-m88k.c cpu-vax.c cpu-mips.c cpu-a29k.c cpu-i386.c cpu-powerpc.c cpu-w65.c \
 	 cpu-rs6000.c coff-h8300.c som.c cpu-hppa.c cpu-we32k.c reloc16.c \
 	 mipsbsd.c cpu-sh.c \
-	 elf.c elf32.c elf32-sparc.c elf32-i386.c elf32-i860.c elf32-m68k.c \
-	 elf32-hppa.c elf32-m88k.c elf32-mips.c elf32-gen.c elf32-ppc.c \
-	 elf64.c elf64-gen.c elf64-sparc.c \
+	 elf.c elflink.c elf32.c elf32-sparc.c elf32-i386.c elf32-i860.c \
+	 elf32-m68k.c elf32-hppa.c elf32-m88k.c elf32-mips.c elf32-gen.c \
+	 elf32-ppc.c elf64.c elf64-gen.c elf64-sparc.c \
 	 nlm.c nlm32.c nlm32-i386.c nlm32-sparc.c nlm32-alpha.c \
 	 nlm64.c coff-alpha.c cpu-alpha.c nlm32-ppc.c \
 	 hp300bsd.c hp300hpux.c \
@@ -480,8 +480,11 @@ install:
 	$(MAKE) subdir_do DO=install "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS); \
 	fi
 
-Makefile: Makefile.in configure.in @frags@
+Makefile: Makefile.in config.status @frags@
 	$(SHELL) config.status
+
+config.status: configure configure.host config.bfd
+	$(SHELL) config.status --recheck
 
 # Have to get rid of .dep1 here so that "$?" later includes all of $(CFILES).
 .dep: dep.sed $(CFILES) $(HFILES) bfd.h
@@ -714,10 +717,11 @@ mipsbsd.o: mipsbsd.c libaout.h $(INCDIR)/bfdlink.h \
 cpu-sh.o: cpu-sh.c
 elf.o: elf.c $(INCDIR)/bfdlink.h libelf.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h
-elflink.o : elflink.c $(INCDIR)/bfdlink.h libelf.h $(INCDIR)/elf/common.h \
+elflink.o: elflink.c $(INCDIR)/bfdlink.h libelf.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h
-elf32.o: elf32.c elfcode.h $(INCDIR)/bfdlink.h libelf.h elfcore.h elflink.h \
-  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h
+elf32.o: elf32.c elfcode.h $(INCDIR)/bfdlink.h libelf.h \
+  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
+  elfcore.h elflink.h
 elf32-sparc.o: elf32-sparc.c $(INCDIR)/bfdlink.h libelf.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   elf32-target.h
@@ -749,8 +753,9 @@ elf32-gen.o: elf32-gen.c libelf.h $(INCDIR)/elf/common.h \
 elf32-ppc.o: elf32-ppc.c $(INCDIR)/bfdlink.h libelf.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   $(INCDIR)/elf/ppc.h elf32-target.h
-elf64.o: elf64.c elfcode.h $(INCDIR)/bfdlink.h libelf.h elfcore.h elflink.h \
-  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h
+elf64.o: elf64.c elfcode.h $(INCDIR)/bfdlink.h libelf.h \
+  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
+  elfcore.h elflink.h
 elf64-gen.o: elf64-gen.c libelf.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h \
   elf64-target.h
