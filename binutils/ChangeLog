@@ -1,3 +1,7 @@
+2004-02-21  Dmitry Timoshkov  <dmitry@baikal.ru>
+
+	* dlltool.c (gen_exp_file): Always output names for forwarded symbols.
+
 2004-02-19  Jakub Jelinek  <jakub@redhat.com>
 
 	* objcopy.c (copy_section): Avoid warnings.

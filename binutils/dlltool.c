@@ -1841,14 +1841,14 @@ gen_exp_file (void)
 
       fprintf(f,"%s Export Name Table\n", ASM_C);
       for (i = 0; (exp = d_exports_lexically[i]); i++)
-	if (!exp->noname || show_allnames)
-	  {
+	{
+	  if (!exp->noname || show_allnames)
 	    fprintf (f, "n%d:	%s	\"%s\"\n",
 		     exp->ordinal, ASM_TEXT, xlate (exp->name));
-	    if (exp->forward != 0)
-	      fprintf (f, "f%d:	%s	\"%s\"\n",
-		       exp->forward, ASM_TEXT, exp->internal_name);
-	  }
+	  if (exp->forward != 0)
+	    fprintf (f, "f%d:	%s	\"%s\"\n",
+		     exp->forward, ASM_TEXT, exp->internal_name);
+	}
 
       if (a_list)
 	{
