@@ -1,3 +1,7 @@
+2002-11-27  David O'Brien  <obrien@FreeBSD.org>
+
+	* configure.host: Fix generic FreeBSD configuration entry.
+
 2002-11-27  H.J. Lu <hjl@gnu.org>
 
 	* ld.texinfo: Add the missing `;' to sample version scripts.
