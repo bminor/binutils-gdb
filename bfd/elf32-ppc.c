@@ -2068,7 +2068,6 @@ ppc_elf_size_dynamic_sections (output_bfd, info)
 	{
 	  if (!add_dynamic_entry (DT_TEXTREL, 0))
 	    return FALSE;
-	  info->flags |= DF_TEXTREL;
 	}
     }
 #undef add_dynamic_entry
@@ -2437,7 +2436,8 @@ ppc_elf_check_relocs (abfd, info, sec, relocs)
 			  || ! bfd_set_section_alignment (dynobj, sreloc, 2))
 			return FALSE;
 		    }
-		  if (sec->flags & SEC_READONLY)
+		  if ((sec->flags & (SEC_READONLY | SEC_ALLOC))
+		      == (SEC_READONLY | SEC_ALLOC))
 		    info->flags |= DF_TEXTREL;
 		}
 
