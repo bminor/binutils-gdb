@@ -1,3 +1,8 @@
+2003-03-03  David Carlton  <carlton@math.stanford.edu>
+
+	* gdb.c++/templates.exp (do_tests): Convert the KFAILs with
+	respect to PR c++/33 into FAILs.
+
 2003-03-03  Michael Chastain  <mec@shout.net>
 
 	* configure.in: Update copyright years.
