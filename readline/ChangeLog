@@ -1,3 +1,11 @@
+Fri Jun 19 12:53:28 1992  John Gilmore  (gnu at cygnus.com)
+
+	* config/mh-apollo68v, mh-sco, mh-sysv, mh-sysv4}: RANLIB=true.
+
+Mon Jun 15 13:50:34 1992  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
+
+	* configure.in: use mh-sysv4 on solaris2
+
 Mon Jun 15 12:28:24 1992  Fred Fish  (fnf@cygnus.com)
 
 	* config/mh-ncr3000 (INSTALL):  Don't use /usr/ucb/install,
@@ -7,7 +15,7 @@ Mon Jun 15 12:28:24 1992  Fred Fish  (fnf@cygnus.com)
 Mon Jun 15 01:35:55 1992  John Gilmore  (gnu at cygnus.com)
 
 	* readline.c: Make new SIGNALS_* macros to parameterize the 
-	ugly changes in signal blocking macro.  Use them throughout,
+	ugly changes in signal blocking.  Use them throughout,
 	reducing #ifdef HAVE_POSIX_SIGNALS and HAVE_BSD_SIGNALS clutter
 	significantly.  Make all such places use POSIX if available,
 	to avoid losing with poor `sigsetmask' emulation from libiberty.
