@@ -1,3 +1,8 @@
+Wed Nov 13 19:51:11 1991  Steve Chamberlain  (sac at cygnus.com)
+
+	* Makefile.in, xconfig/delta88 made it install a sysV manual page;
+	gdb.z into the right place.
+
 Wed Nov 13 16:45:13 1991  John Gilmore  (gnu at cygnus.com)
 
 	Motorola 88000 port without tears, I mean without tdescs.

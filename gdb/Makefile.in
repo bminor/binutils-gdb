@@ -280,7 +280,12 @@ YYOBJ = c-exp.tab.o m2-exp.tab.o
 all: gdb
 	$(MAKE) subdir_do DO=all "DODIRS=$(SUBDIRS)"
 
-install: gdb
+gdb.z:gdb.1
+	nroff -man gdb.1 | col -b > gdb.t 
+	pack gdb.t ; rm -f gdb.t
+	mv gdb.t.z gdb.z
+	
+install: gdb gdb.z
 	cp gdb $(bindir)/gdb.new
 	mv $(bindir)/gdb.new $(bindir)/gdb
 	$(M_INSTALL)
