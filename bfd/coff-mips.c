@@ -31,8 +31,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    we do want.  */
 #include "libaout.h"
 #include "aout/aout64.h"
-#undef OMAGIC
-#undef ZMAGIC
 #undef N_ABS
 #undef exec_hdr
 #undef obj_sym_filepos
@@ -464,7 +462,7 @@ ecoff_mkobject_hook (abfd, filehdr, aouthdr)
       ecoff->gprmask = internal_a->gprmask;
       for (i = 0; i < 4; i++)
 	ecoff->cprmask[i] = internal_a->cprmask[i];
-      if (internal_a->magic == ZMAGIC)
+      if (internal_a->magic == MIPS_AOUT_ZMAGIC)
 	abfd->flags |= D_PAGED;
     }
 
@@ -809,7 +807,14 @@ ecoff_set_symbol_info (abfd, ecoff_sym, asym, ext, indirect_ptr_ptr)
   if (*indirect_ptr_ptr != (asymbol *) NULL)
     {
       BFD_ASSERT (MIPS_IS_STAB (ecoff_sym));
+
+      /* @@ Stuffing pointers into integers is a no-no.
+	 We can usually get away with it if the integer is
+	 large enough though.  */
+      if (sizeof (asym) > sizeof (bfd_vma))
+	abort ();
       (*indirect_ptr_ptr)->value = (bfd_vma) asym;
+
       asym->flags = BSF_DEBUGGING;
       asym->section = &bfd_und_section;
       *indirect_ptr_ptr = NULL;
@@ -2384,6 +2389,8 @@ ecoff_find_nearest_line (abfd,
 			   + fdr_ptr->issBase
 			   + proc_sym.iss);
     }
+  if (lineno == ilineNil)
+    lineno = 0;
   *retline_ptr = lineno;
   return true;
 }
@@ -3559,9 +3566,9 @@ ecoff_write_object_contents (abfd)
 
   /* Set up the ``optional'' header.  */
   if ((abfd->flags & D_PAGED) != 0)
-    internal_a.magic = ZMAGIC;
+    internal_a.magic = MIPS_AOUT_ZMAGIC;
   else
-    internal_a.magic = OMAGIC;
+    internal_a.magic = MIPS_AOUT_OMAGIC;
 
   /* FIXME: This is what Ultrix puts in, and it makes the Ultrix
      linker happy.  But, is it right?  */

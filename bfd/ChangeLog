@@ -1,3 +1,7 @@
+Fri Jul 16 09:53:23 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* coff-mips.c: Use MIPS_AOUT_{OZ}MAGIC rather than {OZ}MAGIC.
+
 Thu Jul 15 16:02:07 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* coff-m88k.c (howto_table): Corrected bitsize for R_PCR26L from
