@@ -32,48 +32,57 @@ typedef unsigned int SIM_ADDR;
 typedef CORE_ADDR_TYPE SIM_ADDR;
 #endif
 
+
 /* Semi-opaque type used as result of sim_open and passed back to all
    other routines.  "desc" is short for "descriptor".
    It is up to each simulator to define `sim_state'.  */
 
 typedef struct sim_state *SIM_DESC;
 
+
 /* Values for `kind' arg to sim_open.  */
+
 typedef enum {
   SIM_OPEN_STANDALONE, /* simulator used standalone (run.c) */
   SIM_OPEN_DEBUG       /* simulator used by debugger (gdb) */
 } SIM_OPEN_KIND;
 
+
 /* Return codes from various functions.  */
+
 typedef enum {
   SIM_RC_FAIL = 0,
   SIM_RC_OK = 1
 } SIM_RC;
 
+
 /* The bfd struct, as an opaque type.  */
+
 struct _bfd;
 
 
 /* Main simulator entry points.  */
 
 
-/* Initialize the simulator.  This function is called when the simulator
-   is selected from the gdb command line.
+/* Create a simulator instance.
+   (This function is called when the simulator is selected from the
+   gdb command line.)
    KIND specifies how the simulator will be used.  Currently there are only
    two kinds: standalone and debug.
-   CALLBACK provides a standard host callback.
+   CALLBACK specifies a standard host callback (defined in callback.h).
    ARGV is passed from the command line and can be used to select whatever
    run time options the simulator provides.  It is the standard NULL
    terminated array of pointers, with argv[0] being the program name.
-   The result is a descriptor that must be passed back to the other sim_foo
-   functions.  */
+   The result is a descriptor that shall be passed to the other
+   sim_foo functions.  */
 
 SIM_DESC sim_open PARAMS ((SIM_OPEN_KIND kind, struct host_callback_struct *callback, char **argv));
 
 
-/* Terminate usage of the simulator.  This may involve freeing target memory
-   and closing any open files and mmap'd areas.  You cannot assume sim_kill
-   has already been called.
+/* Destory a simulator instance.
+   This may involve freeing target memory and closing any open files
+   and mmap'd areas.  You cannot assume sim_kill has already been
+   called.
    QUITTING is non-zero if we cannot hang on errors.  */
 
 void sim_close PARAMS ((SIM_DESC sd, int quitting));
@@ -110,12 +119,12 @@ int sim_read PARAMS ((SIM_DESC sd, SIM_ADDR mem, unsigned char *buf, int length)
 int sim_write PARAMS ((SIM_DESC sd, SIM_ADDR mem, unsigned char *buf, int length));
 
 
-/* Fetch register REGNO and store the raw value in BUF.  */
+/* Fetch register REGNO and store the raw (target endian) value in BUF.  */
 
 void sim_fetch_register PARAMS ((SIM_DESC sd, int regno, unsigned char *buf));
 
 
-/* Store register REGNO from BUF (in raw format).  */
+/* Store register REGNO from the raw (target endian) value in BUF.  */
 
 void sim_store_register PARAMS ((SIM_DESC sd, int regno, unsigned char *buf));
 
@@ -126,23 +135,7 @@ void sim_store_register PARAMS ((SIM_DESC sd, int regno, unsigned char *buf));
 void sim_info PARAMS ((SIM_DESC sd, int verbose));
 
 
-/* Fetch the reason why the program stopped.
-   SIM_EXITED: The program has terminated. SIGRC indicates the target
-     dependant exit status.
-   SIM_STOPPED: Any of a breakpoint (SIGTRAP), a completed step
-     (SIGTRAP), a sim_stop request (SIGINT), or an internal error
-     condition (SIGABRT) was encountered.
-   SIM_SIGNALLED: The simulator encountered target code that requires
-     the signal SIGRC to be delivered to the simulated program.
-   SIM_RUNNING, SIM_POLLING: The return of one of these values
-     indicates a problem internal to the simulator. */
-
-enum sim_stop { sim_running, sim_polling, sim_exited, sim_stopped, sim_signalled };
-
-void sim_stop_reason PARAMS ((SIM_DESC sd, enum sim_stop *reason, int *sigrc));
-
-
-/* Run (or resume) the program.  */
+/* Run (or resume) the simulated program.  */
 
 void sim_resume PARAMS ((SIM_DESC sd, int step, int siggnal));
 
@@ -154,31 +147,59 @@ void sim_resume PARAMS ((SIM_DESC sd, int step, int siggnal));
 int sim_stop PARAMS ((SIM_DESC sd));
 
 
-/* Passthru for other commands that the simulator might support.
-   If SD is NULL, the command is to be interpreted as refering to
-   the global state, however the simulator defines that.  */
+/* Fetch the REASON why the program stopped.
+   SIM_EXITED: The program has terminated. SIGRC indicates the target
+   dependant exit status.
+   SIM_STOPPED: The program has stopped.  SIGRC indicates the reason:
+   program interrupted by user via a sim_stop request (SIGINT); a
+   breakpoint instruction (SIGTRAP); a completed step (SIGTRAP); an
+   internal error condition (SIGABRT).
+   SIM_SIGNALLED: The simulator encountered target code that requires
+   the signal SIGRC to be delivered to the simulated program.
+   SIM_RUNNING, SIM_POLLING: The return of one of these values
+   indicates a problem internal to the simulator. */
 
+enum sim_stop { sim_running, sim_polling, sim_exited, sim_stopped, sim_signalled };
+
+void sim_stop_reason PARAMS ((SIM_DESC sd, enum sim_stop *reason, int *sigrc));
+
+
+/* Passthru for other commands that the simulator might support.
+   Simulators should be prepared to deal with any combination of NULL
+   or empty CMD. */
 
 void sim_do_command PARAMS ((SIM_DESC sd, char *cmd));
 
 
-/* NOTE: sim_set_callbacks () is depreciated.
-   Provide simulator with a default (global) host_callback_struct. */
+/* Provide simulator with a default (global) host_callback_struct.
+   THIS PROCEDURE IS IS DEPRECIATED.
+   This procedure does not take a SIM_DESC argument as it is
+   used before sim_open. */
+
 void sim_set_callbacks PARAMS ((struct host_callback_struct *));
 
 
-/* NOTE: sim_size() is depreciated.
-   sim_size() does not take a SIM_DESC argument as this function is
-   used before sim_open() has been called. */
+/* Set the size of the simulator memory array.
+   THIS PROCEDURE IS IS DEPRECIATED.
+   This procedure does not take a SIM_DESC argument as it is
+   used before sim_open. */
+
 void sim_size PARAMS ((int i));
 
 
-/* NOTE: sim_trace() is depreciated. */
+/* Run a simulation with tracing enabled.
+   THIS PROCEDURE IS IS DEPRECIATED.
+   This procedure does not take a SIM_DESC argument as it is
+   used before sim_open. */
+
 int sim_trace PARAMS ((SIM_DESC sd));
 
 
-/* NOTE: sim_set_profile_size is depreciated */
-void sim_set_profile_size PARAMS ((int n));
+/* Configure the size of the profile buffer.
+   THIS PROCEDURE IS IS DEPRECIATED.
+   This procedure does not take a SIM_DESC argument as it is
+   used before sim_open. */
 
+void sim_set_profile_size PARAMS ((int n));
 
 #endif /* !defined (REMOTE_SIM_H) */

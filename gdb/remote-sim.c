@@ -500,6 +500,8 @@ gdbsim_open (args, from_tty)
   sprintf (arg_buf, "gdbsim%s%s",
 	   args ? " " : "", args ? args : "");
 #ifdef TARGET_BYTE_ORDER_SELECTABLE
+  /* Since GDB always closes the target and updates byte-order when
+     opening a new file, TARGET_BYTE_ORDER is normally correct. */
   if (TARGET_BYTE_ORDER == BIG_ENDIAN)
     strcat (arg_buf, " -E big");
   else
@@ -777,15 +779,22 @@ simulator_command (args, from_tty)
      char *args;
      int from_tty;
 {
-  /* The user may give a command before the simulator is opened, so
-     ensure that the callbacks have been set up.  */
-  init_callbacks ();
+  if (gdbsim_desc == NULL)
+    {
 
-  /* Note that if the simulator hasn't been opened, gdbsim_desc == NULL
-     which is correct (??? assuming of course one wishes to continue to
-     allow commands to be sent to unopened simulators, which isn't entirely
-     unreasonable).  Simulators should be prepared to deal with any
-     combination of NULL or empty args. */
+      /* PREVIOUSLY: The user may give a command before the simulator
+         is opened. [...] (??? assuming of course one wishes to
+         continue to allow commands to be sent to unopened simulators,
+         which isn't entirely unreasonable). */
+
+      /* The simulator is a builtin abstraction of a remote target.
+         Consistent with that model, access to the simulator, via sim
+         commands, is restricted to the period when the channel to the
+         simulator is open. */
+
+      error ("Not connected to the simulator target");
+    }
+
   sim_do_command (gdbsim_desc, args);
 }
 

@@ -1,3 +1,8 @@
+Thu May 22 11:53:21 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* remote-sim.c (simulator_command): Restrict access to the
+ 	simulator to periods when the simulator is open.
+
 Wed May 21 16:03:25 1997  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	* procfs.c (init_procinfo): new function, abstracts some code

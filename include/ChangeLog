@@ -1,3 +1,8 @@
+Thu May 22 11:32:49 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* remote-sim.h: Review documentation.  Clarify restrictions on
+ 	when functions can be called.
+
 Wed May 21 16:47:53 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* remote-sim.h (sim_set_profile_size): Add prototype, document as
