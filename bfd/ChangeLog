@@ -1,3 +1,35 @@
+Tue Oct 26 10:16:54 1993  Ken Raeburn  (raeburn@cygnus.com)
+
+	From Jeff Law and Pete Hoogenboom at Utah:
+
+	* elf32-hppa.h (hppa_elf_stub_finish): Add prototype.
+	(ELF32_HPPA_R_ARG_RELOC): Renamed without the ELF32 prefix
+	and moved into libhppa.h.  All references changed.
+	(ELF32_HPPA_R_CONSTANT, ELF32_HPPA_R_ADDEND): Likewise.
+	(get_opcode and opcode defines): Move into libhppa.h
+	* elf32-hppa.c (hppa_elf_insn2fmt): Rename and move info
+	libhppa.h.
+	* libhppa.h (HPPA_R_*): Moved here.  Reformatted slightly to make
+	for easier reading.
+	(get_opcode): Moved here.  FIXME! this really should be a C function
+	inside the opcode library!
+	(bfd_hppa_insn2fmt): Likewise.
+
+	* targets.c (target_vector): Enable elf32-hppa vector.
+
+	* elf32-hppa.c (hppa_elf_get_section_contents): Add new comments
+	and clarify existing comments.  Do not use DEFUN to declare this
+	function.  Fix numerous indention problems.  Correctly handle cases
+	where symbol extension section may need to be read from disk, 
+	read from memory, or built then read from memory.
+
+	* elf32-hppa.h: Reformat with gnu-indent and hand fix numerous
+	formatting and indention problems gnu-indent can not handle.
+	Clarify some comments about relocation types.  Comment basic
+	relocation "classes".  Group PARAM declarations together.
+	(HPPA_SXT_{NULL, SYMNDX, RG_RELOC}): Make members of a new 
+	enumerated type rather than #defines.
+
 Tue Oct 26 02:40:46 1993  Stu Grossman  (grossman at cygnus.com)
 
 	* som.c (hppa_object_setup):  Set SEC_CODE for .text section so

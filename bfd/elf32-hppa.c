@@ -196,6 +196,7 @@ static reloc_howto_type elf_hppa_howto_table[ELF_HOWTO_TABLE_SIZE] =
 
 static symext_chainS *symext_rootP;
 static symext_chainS *symext_lastP;
+static boolean symext_chain_built;
 
 static unsigned long
 DEFUN (hppa_elf_rebuild_insn, (abfd, insn, value, r_type, r_field, r_format),
@@ -296,7 +297,7 @@ DEFUN (hppa_elf_relocate_insn,
     case STH:
     case STW:
     case STWM:
-      constant_value = ELF32_HPPA_R_CONSTANT (r_addend);
+      constant_value = HPPA_R_CONSTANT (r_addend);
       BFD_ASSERT (r_format == 14);
 
       if (pcrel)
@@ -310,7 +311,7 @@ DEFUN (hppa_elf_relocate_insn,
     case ADDI:			/* case ADDIO: */
       BFD_ASSERT (r_format == 11);
 
-      constant_value = ((insn & 0x1) << 10) | ((insn & 0xffe) >> 1);
+      constant_value = HPPA_R_CONSTANT(r_addend);
       sym_value = hppa_field_adjust (sym_value, constant_value, r_field);
       return hppa_elf_rebuild_insn (abfd, insn, sym_value, r_type, r_field, r_format);
 
@@ -318,15 +319,14 @@ DEFUN (hppa_elf_relocate_insn,
     case ADDIL:
       BFD_ASSERT (r_format == 21);
 
-      constant_value = assemble_21 (insn);
-      constant_value += ELF32_HPPA_R_CONSTANT (r_addend);
+      constant_value = HPPA_R_CONSTANT (r_addend);
       sym_value = hppa_field_adjust (sym_value, constant_value, r_field);
       return hppa_elf_rebuild_insn (abfd, insn, sym_value, r_type, r_field, r_format);
 
     case BL:
     case BE:
     case BLE:
-      arg_reloc = ELF32_HPPA_R_ARG_RELOC (r_addend);
+      arg_reloc = HPPA_R_ARG_RELOC (r_addend);
 
       BFD_ASSERT (r_format == 17);
 
@@ -352,8 +352,7 @@ DEFUN (hppa_elf_relocate_insn,
       if (opcode == 0)
 	{
 	  BFD_ASSERT (r_format == 32);
-	  constant_value = insn;
-	  constant_value += ELF32_HPPA_R_CONSTANT (r_addend);
+	  constant_value = HPPA_R_CONSTANT (r_addend);
 
 	  return hppa_field_adjust (sym_value, constant_value, r_field);
 	}
@@ -1170,75 +1169,6 @@ hppa_elf_gen_reloc_type (abfd, base_type, format, field)
 
 #undef final_type
 
-/* 12.4.4. Derive format from instruction
-
-	Given a machine instruction, this function determines its format.
-	The format can be determined solely from looking at the first six
-	bits (the major opcode) of the instruction.  Several major opcodes
-	map to the same format.  Opcodes which do not map to a known format
-	should probably be reported as an error.  */
-
-unsigned char
-hppa_elf_insn2fmt (type, insn)
-     elf32_hppa_reloc_type type;
-     unsigned long insn;
-{
-  unsigned char fmt = 0;	/* XXX: is this a proper default?	*/
-  unsigned char op = get_opcode (insn);
-
-  if (type == R_HPPA_NONE)
-    fmt = 0;
-  else
-    {
-      switch (op)
-	{
-	case ADDI:
-	case ADDIT:
-	case SUBI:
-	  fmt = 11;
-	  break;
-	case MOVB:
-	case MOVIB:
-	case COMBT:
-	case COMBF:
-	case COMIBT:
-	case COMIBF:
-	case ADDBT:
-	case ADDBF:
-	case ADDIBT:
-	case ADDIBF:
-	case BVB:
-	case BB:
-	  fmt = 12;
-	  break;
-	case LDO:
-	case LDB:
-	case LDH:
-	case LDW:
-	case LDWM:
-	case STB:
-	case STH:
-	case STW:
-	case STWM:
-	  fmt = 14;
-	  break;
-	case BL:
-	case BE:
-	case BLE:
-	  fmt = 17;
-	  break;
-	case LDIL:
-	case ADDIL:
-	  fmt = 21;
-	  break;
-	default:
-	  fmt = 32;
-	  break;
-	}
-
-    }
-  return fmt;
-}
 
 /* this function is in charge of performing all the HP PA relocations */
 static long global_value;
@@ -1609,10 +1539,30 @@ DEFUN (hppa_elf_reloc, (abfd, reloc_entry, symbol_in, data, input_section, outpu
     case R_HPPA_STUB_CALL_17:
       /* yes, a branch to a long branch stub. Change instruction to a BLE */
       /* or BLE,N */
-      if ( *(unsigned *)hit_data & 2 )
+      if ( insn & 2 )
 	insn = BLE_N_XXX_0_0;
       else
-	insn = BLE_XXX_0_0;
+	{
+	  unsigned long old_delay_slot_insn = bfd_get_32 (abfd, hit_data + 4);
+	  unsigned rtn_reg = (insn & 0x03e00000) >> 21;
+
+	  if (get_opcode(old_delay_slot_insn) == LDO)
+	    {
+	      unsigned ldo_src_reg = (old_delay_slot_insn & 0x03e00000) >> 21;
+	      unsigned ldo_target_reg = (old_delay_slot_insn & 0x001f0000) >> 16;
+
+	      if (ldo_target_reg == rtn_reg)
+		{
+		  unsigned long new_delay_slot_insn = old_delay_slot_insn;
+
+		  BFD_ASSERT(ldo_src_reg == ldo_target_reg);
+		  new_delay_slot_insn &= 0xfc00ffff;
+		  new_delay_slot_insn |= ((31 << 21) | (31 << 16));
+		  bfd_put_32(abfd, new_delay_slot_insn, hit_data + 4);
+		}
+	    }
+	  insn = BLE_XXX_0_0;
+	}
       bfd_put_32 (abfd, insn, hit_data);
       r_type = R_HPPA_ABS_CALL_17;
       r_pcrel = 0;
@@ -2494,7 +2444,7 @@ hppa_elf_build_arg_reloc_stub (abfd, output_bfd, reloc_entry, stub_types)
       /* generate the ending common section for all stubs */
       
       /* XXX: can we assume this is a save return? */
-      NEW_INSTRUCTION (stub_entry, BV_N_0RP);
+      NEW_INSTRUCTION (stub_entry, BV_N_0_RP);
     }
 
   return stub_sym;
@@ -2633,6 +2583,7 @@ hppa_elf_build_long_branch_stub (abfd, output_bfd, reloc_entry, symbol, data)
   asection *output_text_section = bfd_get_section_by_name (output_bfd, ".text");
   char stub_sym_name[128];
   int milli = false;
+  int dyncall = false;
   elf32_hppa_stub_name_list *stub_entry;
 
   if (!stub_sec)
@@ -2762,14 +2713,25 @@ hppa_elf_build_long_branch_stub (abfd, output_bfd, reloc_entry, symbol, data)
       if ( ((*data & 0x03e00000) >> 21) == 31 )
 	milli = true;
 
+      if ( strcmp(symbol->name,"$$dyncall") == 0 )
+	dyncall = true;
+
       /* 1. initialization for the call. */
 
-      NEW_INSTRUCTION(stub_entry, LDSID_31_RP);
-      NEW_INSTRUCTION(stub_entry, MTSP_RP_SR0);
-      if ( !milli )
+      NEW_INSTRUCTION(stub_entry, LDSID_31_1);
+      NEW_INSTRUCTION(stub_entry, MTSP_1_SR0);
+
+      if ( !dyncall )
 	{
-	  NEW_INSTRUCTION(stub_entry, COPY_31_2);
-	  
+	  if ( !milli )
+	    {
+	      NEW_INSTRUCTION(stub_entry, COPY_31_2);
+	    }
+	  else
+	    {
+	      NEW_INSTRUCTION(stub_entry, COPY_31_1);
+	    }
+
 	  NEW_INSTRUCTION(stub_entry, LDIL_XXX_31);
 	  hppa_elf_stub_reloc (stub_desc,
 			       abfd,	/* the output bfd */
@@ -2778,39 +2740,45 @@ hppa_elf_build_long_branch_stub (abfd, output_bfd, reloc_entry, symbol, data)
 			       R_HPPA_L21);
 	  
 	  /* 2. Make the call. */
-	  
+
+	  if ( !milli )
+	    {
+	      NEW_INSTRUCTION(stub_entry,BE_N_XXX_0_31);
+	      hppa_elf_stub_reloc (stub_desc,
+				   abfd,	/* the output bfd */
+				   target_sym,	/* the target symbol */
+				   CURRENT_STUB_OFFSET(stub_entry),	/* offset in stub buffer */
+				   R_HPPA_ABS_CALL_R17);
+	    }
+	  else
+	    {
+	      NEW_INSTRUCTION(stub_entry,BE_XXX_0_31);
+	      hppa_elf_stub_reloc (stub_desc,
+				   abfd,	/* the output bfd */
+				   target_sym,	/* the target symbol */
+				   CURRENT_STUB_OFFSET(stub_entry),	/* offset in stub buffer */
+				   R_HPPA_ABS_CALL_R17);
+	      NEW_INSTRUCTION(stub_entry, COPY_1_31);
+	    }
+	  /* 3. Branch back to the original location.		*/
+	  /*    (for non-millicode calls, accomplished with the COPY_31_2 instruction)	*/
+	  /*    (for millicode calls, return location is already in r2)	*/
+	}
+      else
+	{
+	  NEW_INSTRUCTION(stub_entry, LDIL_XXX_31);
+	  hppa_elf_stub_reloc (stub_desc,
+			       abfd,	/* the output bfd */
+			       target_sym,	/* the target symbol */
+			       CURRENT_STUB_OFFSET(stub_entry),	/* offset in stub buffer */
+			       R_HPPA_L21);
+
 	  NEW_INSTRUCTION(stub_entry,BE_N_XXX_0_31);
 	  hppa_elf_stub_reloc (stub_desc,
 			       abfd,	/* the output bfd */
 			       target_sym,	/* the target symbol */
 			       CURRENT_STUB_OFFSET(stub_entry),	/* offset in stub buffer */
 			       R_HPPA_ABS_CALL_R17);
-	  /* 3. Branch back to the original location.		*/
-	  /*    (accomplished with the COPY_31_2 instruction)	*/
-	}
-      else
-	{
-	  NEW_INSTRUCTION(stub_entry, STW_31_M24SP);
-	  NEW_INSTRUCTION(stub_entry, LDIL_XXX_RP);
-	  hppa_elf_stub_reloc (stub_desc,
-			       abfd,	/* the output bfd */
-			       target_sym,	/* the target symbol */
-			       CURRENT_STUB_OFFSET(stub_entry),	/* offset in stub buffer */
-			       R_HPPA_L21);
-	  
-	  /* 2. Make the call. */
-	  
-	  NEW_INSTRUCTION(stub_entry,BLE_XXX_0_RP);
-	  hppa_elf_stub_reloc (stub_desc,
-			       abfd,	/* the output bfd */
-			       target_sym,	/* the target symbol */
-			       CURRENT_STUB_OFFSET(stub_entry),	/* offset in stub buffer */
-			       R_HPPA_ABS_CALL_R17);
-	  NEW_INSTRUCTION(stub_entry,COPY_31_2);
-	  
-	  /* 3. Branch back to the original location.		*/
-	  NEW_INSTRUCTION(stub_entry, LDW_M24SP_RP);
-	  NEW_INSTRUCTION(stub_entry, BV_N_0RP);
 	}
     }
 
@@ -2831,8 +2799,6 @@ hppa_elf_long_branch_needed_p (abfd, asec, reloc_entry, symbol, insn)
   unsigned raddr;
 
 #define too_far(val,num_bits)	((int)(val) > (1<<(num_bits))-1) || ((int)(val) < (-1<<(num_bits)))
-
-  BFD_ASSERT(fmt == hppa_elf_insn2fmt(reloc_entry->howto->type,insn));
 
   switch (op)
     {
@@ -2903,7 +2869,7 @@ hppa_elf_stub_check (abfd, output_bfd, input_section, reloc_entry, symbol, hit_d
     case R_HPPA_PCREL_CALL_RR14: /*	RR(Symbol - PC, Addend)	14	*/
     case R_HPPA_PCREL_CALL_RR17: /*	RR(Symbol - PC, Addend)	17	*/
       {
-	symext_entryS caller_ar = (symext_entryS) ELF32_HGPPA_R_ARG_RELOC (reloc_entry->addend);
+	symext_entryS caller_ar = (symext_entryS) HPPA_R_ARG_RELOC (reloc_entry->addend);
 	if (hppa_elf_arg_reloc_needed_p (abfd, reloc_entry, stub_types, caller_ar))
 	  {
 	    /* generate a stub */
@@ -3009,7 +2975,7 @@ hppa_look_for_stubs_in_section (stub_bfd, abfd, output_bfd, asec, syms, new_sym_
 	    case R_HPPA_PCREL_CALL_RR14: /*	RR(Symbol - PC, Addend)	14 */
 	    case R_HPPA_PCREL_CALL_RR17: /*	RR(Symbol - PC, Addend)	17 */
 	      {
-		symext_entryS caller_ar = (symext_entryS) ELF32_HPPA_R_ARG_RELOC (rle->addend);
+		symext_entryS caller_ar = (symext_entryS) HPPA_R_ARG_RELOC (rle->addend);
 		if (hppa_elf_arg_reloc_needed_p (abfd, rle, stub_types,
 						 caller_ar))
 		  {
@@ -3141,47 +3107,91 @@ DEFUN (hppa_elf_set_section_contents, (abfd, section, location, offset, count),
 					   offset, count);
 }
 
+/* Get the contents of the given section.
+   
+   This is special for PA ELF because some sections (such as linker stubs)
+   may reside in memory rather than on disk, or in the case of the symbol
+   extension section, the contents may need to be generated from other
+   information contained in the BFD.  */
+
 boolean
-DEFUN (hppa_elf_get_section_contents, (abfd, section, location, offset, count),
-       bfd * abfd AND
-       sec_ptr section AND
-       PTR location AND
-       file_ptr offset AND
-       bfd_size_type count)
+hppa_elf_get_section_contents (abfd, section, location, offset, count)
+     bfd *abfd;
+     sec_ptr section;
+     PTR location;
+     file_ptr offset;
+     bfd_size_type count;
 {
-  /* if this is the linker stub section, then we have the	*/
-  /* section contents in memory rather than on disk.	*/
+  /* If this is the linker stub section, then its contents are contained
+     in memory rather than on disk.  FIXME.  Is that always right?  What
+     about the case where a final executable is read in and a user tries
+     to get the contents of this section?  In that case the contents would
+     be on disk like everything else.  */
   if (strcmp (section->name, ".hppa_linker_stubs") == 0)
     {
       elf32_hppa_stub_description *stub_desc = find_stubs (abfd, section);
-
+      
       if (count == 0)
 	return true;
-      if ((bfd_size_type) (offset + count) > section->_raw_size)
-	return (false);		/* on error */
-      if ((bfd_size_type) (offset + count) > stub_desc->real_size)
-	return (false);		/* on error */
-
+      
+      /* Sanity check our arguments.  */
+      if ((bfd_size_type) (offset + count) > section->_raw_size
+	  || (bfd_size_type) (offset + count) > stub_desc->real_size)
+	return (false);
+      
       memcpy (location, stub_desc->stub_contents + offset, count);
       return (true);
     }
-  /* if this is the symbol extension section, then we have the	*/
-  /* section contents in memory rather than on disk.	*/
+
+  /* The symbol extension section also needs special handling.  Its
+     contents might be on the disk, in memory, or still need to
+     be generated. */
   else if (strcmp (section->name, ".hppa_symextn") == 0)
     {
+      /* If this is the first time through and there are no output 
+	 sections, then read the contents of the symbol extension section
+	 from disk.  */
+      if (! symext_chain_built
+	  || ((section->output_section == NULL)
+	      && (abfd->direction == read_direction)))
+	{
+	  return bfd_generic_get_section_contents (abfd, section, location,
+						   offset, count);
+	}
+      
+      /* If this is the first time through, and there are output sections,
+	 then build the symbol extension section based on other information
+	 contained in the BFD.  */
+      else if (! symext_chain_built)
+	{
+	  int i;
+	  int *symtab_map = elf_sym_extra(section->output_section->owner);
+	  
+	  for (i = 0; i < section->output_section->owner->symcount; i++ )
+	    {
+	      elf_hppa_tc_symbol(section->output_section->owner,
+				 section->output_section->owner->outsymbols[i],
+				 symtab_map[i]);
+	    }
+	  symext_chain_built++;
+	  elf_hppa_tc_make_sections (section->output_section->owner, NULL);
+	}
       if (count == 0)
 	return true;
-      if ((bfd_size_type) (offset + count) > section->_raw_size)
-	return (false);		/* on error */
-      if ((bfd_size_type) (offset + count) > symextn_contents_real_size)
-	return (false);		/* on error */
-
-      memcpy (location, symextn_contents + offset, count);
+      
+      /* Sanity check our arguments.  */
+      if ((bfd_size_type) (offset + count) > section->_raw_size
+	  || (bfd_size_type) (offset + count) > symextn_contents_real_size)
+	return (false);
+      
+      memcpy (location,
+	      ((char *)symextn_contents + section->output_offset + offset),
+	      count);
       return (true);
     }
   else
-    return bfd_generic_get_section_contents (abfd, section, location, offset,
-					     count);
+    return bfd_generic_get_section_contents (abfd, section, location,
+					     offset, count);
 }
 
 static void
@@ -3433,16 +3443,28 @@ DEFUN (elf32_hppa_backend_fake_sections, (abfd, secthdr, asect),
       return true;
     }
 
+  /* @@ Should this be CPU specific??  KR */
+  if (!strcmp (asect->name, ".stabstr"))
+    {
+      secthdr->sh_type = SHT_STRTAB;
+      secthdr->sh_flags = 0;
+      secthdr->sh_info = 0;
+      secthdr->sh_link = 0;
+      secthdr->sh_entsize = 0;
+      return true;
+    }
+
   return false;
 }
 
 #define elf_backend_fake_sections	elf32_hppa_backend_fake_sections
 
 static boolean
-DEFUN (elf32_hppa_backend_section_from_bfd_section, (abfd, hdr, asect),
+DEFUN (elf32_hppa_backend_section_from_bfd_section, (abfd, hdr, asect, retval),
        bfd 			*abfd AND
        Elf32_Internal_Shdr	*hdr AND
-       asection			*asect)
+       asection			*asect AND
+       int			*retval)
 {
 
   if ( hdr->sh_type == SHT_HPPA_SYMEXTN )
@@ -3452,6 +3474,17 @@ DEFUN (elf32_hppa_backend_section_from_bfd_section, (abfd, hdr, asect),
 	  if (((struct sec *) (hdr->rawdata)) == asect)
 	    {
 	      BFD_ASSERT( strcmp(asect->name, ".hppa_symextn") == 0 );
+	      return true;
+	    }
+	}
+    }
+  else if ( hdr->sh_type == SHT_STRTAB )
+    {
+      if (hdr->rawdata)
+	{
+	  if (((struct sec *) (hdr->rawdata)) == asect)
+	    {
+	      BFD_ASSERT ( strcmp (asect->name, ".stabstr") == 0);
 	      return true;
 	    }
 	}

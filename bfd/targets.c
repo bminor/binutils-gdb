@@ -421,17 +421,15 @@ bfd_target *target_vector[] = {
 	&b_out_vec_little_host,
 #if 0				/* No one seems to use this.  */
 	&bfd_elf32_big_generic_vec,
+#endif
 	&bfd_elf32_bigmips_vec,
-#endif
-#if 0
 	&bfd_elf32_hppa_vec,
-#endif
 	&bfd_elf32_i386_vec,
 	&bfd_elf32_i860_vec,
 #if 0				/* No one seems to use this.  */
 	&bfd_elf32_little_generic_vec,
-	&bfd_elf32_littlemips_vec,
 #endif
+	&bfd_elf32_littlemips_vec,
 	&bfd_elf32_m68k_vec,
 	&bfd_elf32_m88k_vec,
 	&bfd_elf32_sparc_vec,
