@@ -60,8 +60,8 @@ proc test_integer_literals_accepted {} {
 
     # Test various decimal values.
 
-    test_print_accept "p 123" "123"
-    test_print_accept "p -123" "-123"
+    gdb_test "p 123" " = 123"
+    gdb_test "p -123" " = -123"
 }
 
 proc test_character_literals_accepted {} {
@@ -69,7 +69,7 @@ proc test_character_literals_accepted {} {
 
     # Test various character values.
 
-    test_print_accept "p 'a'" "'a'"
+    gdb_test "p 'a'" " = 'a'"
 }
 
 proc test_integer_literals_rejected {} {
@@ -83,8 +83,8 @@ proc test_logical_literals_accepted {} {
 
     # Test the only possible values for a logical, TRUE and FALSE.
 
-    test_print_accept "p .TRUE." ".TRUE."
-    test_print_accept "p .FALSE." ".FALSE."
+    gdb_test "p .TRUE." " = .TRUE."
+    gdb_test "p .FALSE." " = .FALSE."
 }
 
 proc test_float_literals_accepted {} {
@@ -92,84 +92,84 @@ proc test_float_literals_accepted {} {
 
     # Test various floating point formats
 
-    test_print_accept "p .44 .LT. .45" "1"
-    test_print_accept "p .44 .GT. .45" "0"
-    test_print_accept "p 0.44 .LT. 0.45" "1"
-    test_print_accept "p 0.44 .GT. 0.45" "0"
-    test_print_accept "p 44. .LT. 45." "1"
-    test_print_accept "p 44. .GT. 45." "0"
-    test_print_accept "p 44.0 .LT. 45.0" "1"
-    test_print_accept "p 44.0 .GT. 45.0" "0"
-    test_print_accept "p 10D20 .LT. 10D21" "1"
-    test_print_accept "p 10D20 .GT. 10D21" "0"
-    test_print_accept "p 10d20 .LT. 10d21" "1"
-    test_print_accept "p 10d20 .GT. 10d21" "0"
-    test_print_accept "p 10E20 .LT. 10E21" "1"
-    test_print_accept "p 10E20 .GT. 10E21" "0"
-    test_print_accept "p 10e20 .LT. 10e21" "1"
-    test_print_accept "p 10e20 .GT. 10e21" "0"
-    test_print_accept "p 10.D20 .LT. 10.D21" "1"
-    test_print_accept "p 10.D20 .GT. 10.D21" "0"
-    test_print_accept "p 10.d20 .LT. 10.d21" "1"
-    test_print_accept "p 10.d20 .GT. 10.d21" "0"
-    test_print_accept "p 10.E20 .LT. 10.E21" "1"
-    test_print_accept "p 10.E20 .GT. 10.E21" "0"
-    test_print_accept "p 10.e20 .LT. 10.e21" "1"
-    test_print_accept "p 10.e20 .GT. 10.e21" "0"
-    test_print_accept "p 10.0D20 .LT. 10.0D21" "1"
-    test_print_accept "p 10.0D20 .GT. 10.0D21" "0"
-    test_print_accept "p 10.0d20 .LT. 10.0d21" "1"
-    test_print_accept "p 10.0d20 .GT. 10.0d21" "0"
-    test_print_accept "p 10.0E20 .LT. 10.0E21" "1"
-    test_print_accept "p 10.0E20 .GT. 10.0E21" "0"
-    test_print_accept "p 10.0e20 .LT. 10.0e21" "1"
-    test_print_accept "p 10.0e20 .GT. 10.0e21" "0"
-    test_print_accept "p 10.0D+20 .LT. 10.0D+21" "1"
-    test_print_accept "p 10.0D+20 .GT. 10.0D+21" "0"
-    test_print_accept "p 10.0d+20 .LT. 10.0d+21" "1"
-    test_print_accept "p 10.0d+20 .GT. 10.0d+21" "0"
-    test_print_accept "p 10.0E+20 .LT. 10.0E+21" "1"
-    test_print_accept "p 10.0E+20 .GT. 10.0E+21" "0"
-    test_print_accept "p 10.0e+20 .LT. 10.0e+21" "1"
-    test_print_accept "p 10.0e+20 .GT. 10.0e+21" "0"
-    test_print_accept "p 10.0D-11 .LT. 10.0D-10" "1"
-    test_print_accept "p 10.0D-11 .GT. 10.0D-10" "0"
-    test_print_accept "p 10.0d-11 .LT. 10.0d-10" "1"
-    test_print_accept "p 10.0d-11 .GT. 10.0d-10" "0"
-    test_print_accept "p 10.0E-11 .LT. 10.0E-10" "1"
-    test_print_accept "p 10.0E-11 .GT. 10.0E-10" "0"
-    test_print_accept "p 10.0e-11 .LT. 10.0e-10" "1"
-    test_print_accept "p 10.0e-11 .GT. 10.0e-10" "0"
+    gdb_test "p .44 .LT. .45" " = 1"
+    gdb_test "p .44 .GT. .45" " = 0"
+    gdb_test "p 0.44 .LT. 0.45" " = 1"
+    gdb_test "p 0.44 .GT. 0.45" " = 0"
+    gdb_test "p 44. .LT. 45." " = 1"
+    gdb_test "p 44. .GT. 45." " = 0"
+    gdb_test "p 44.0 .LT. 45.0" " = 1"
+    gdb_test "p 44.0 .GT. 45.0" " = 0"
+    gdb_test "p 10D20 .LT. 10D21" " = 1"
+    gdb_test "p 10D20 .GT. 10D21" " = 0"
+    gdb_test "p 10d20 .LT. 10d21" " = 1"
+    gdb_test "p 10d20 .GT. 10d21" " = 0"
+    gdb_test "p 10E20 .LT. 10E21" " = 1"
+    gdb_test "p 10E20 .GT. 10E21" " = 0"
+    gdb_test "p 10e20 .LT. 10e21" " = 1"
+    gdb_test "p 10e20 .GT. 10e21" " = 0"
+    gdb_test "p 10.D20 .LT. 10.D21" " = 1"
+    gdb_test "p 10.D20 .GT. 10.D21" " = 0"
+    gdb_test "p 10.d20 .LT. 10.d21" " = 1"
+    gdb_test "p 10.d20 .GT. 10.d21" " = 0"
+    gdb_test "p 10.E20 .LT. 10.E21" " = 1"
+    gdb_test "p 10.E20 .GT. 10.E21" " = 0"
+    gdb_test "p 10.e20 .LT. 10.e21" " = 1"
+    gdb_test "p 10.e20 .GT. 10.e21" " = 0"
+    gdb_test "p 10.0D20 .LT. 10.0D21" " = 1"
+    gdb_test "p 10.0D20 .GT. 10.0D21" " = 0"
+    gdb_test "p 10.0d20 .LT. 10.0d21" " = 1"
+    gdb_test "p 10.0d20 .GT. 10.0d21" " = 0"
+    gdb_test "p 10.0E20 .LT. 10.0E21" " = 1"
+    gdb_test "p 10.0E20 .GT. 10.0E21" " = 0"
+    gdb_test "p 10.0e20 .LT. 10.0e21" " = 1"
+    gdb_test "p 10.0e20 .GT. 10.0e21" " = 0"
+    gdb_test "p 10.0D+20 .LT. 10.0D+21" " = 1"
+    gdb_test "p 10.0D+20 .GT. 10.0D+21" " = 0"
+    gdb_test "p 10.0d+20 .LT. 10.0d+21" " = 1"
+    gdb_test "p 10.0d+20 .GT. 10.0d+21" " = 0"
+    gdb_test "p 10.0E+20 .LT. 10.0E+21" " = 1"
+    gdb_test "p 10.0E+20 .GT. 10.0E+21" " = 0"
+    gdb_test "p 10.0e+20 .LT. 10.0e+21" " = 1"
+    gdb_test "p 10.0e+20 .GT. 10.0e+21" " = 0"
+    gdb_test "p 10.0D-11 .LT. 10.0D-10" " = 1"
+    gdb_test "p 10.0D-11 .GT. 10.0D-10" " = 0"
+    gdb_test "p 10.0d-11 .LT. 10.0d-10" " = 1"
+    gdb_test "p 10.0d-11 .GT. 10.0d-10" " = 0"
+    gdb_test "p 10.0E-11 .LT. 10.0E-10" " = 1"
+    gdb_test "p 10.0E-11 .GT. 10.0E-10" " = 0"
+    gdb_test "p 10.0e-11 .LT. 10.0e-10" " = 1"
+    gdb_test "p 10.0e-11 .GT. 10.0e-10" " = 0"
 }
 
 proc test_convenience_variables {} {
     global prompt
 
-    gdb_test "set \\\$foo = 101"	" = 101" \
+    gdb_test "set \$foo = 101"	" = 101\[\r\n\]+" \
 	"Set a new convenience variable"
 
-    gdb_test "print \\\$foo"		" = 101" \
+    gdb_test "print \$foo"		" = 101" \
 	"Print contents of new convenience variable"
 
-    gdb_test "set \\\$foo = 301"	" = 301" \
+    gdb_test "set \$foo = 301"	" = 301\[\r\n\]+" \
 	"Set convenience variable to a new value"
 
-    gdb_test "print \\\$foo"		" = 301" \
+    gdb_test "print \$foo"		" = 301" \
 	"Print new contents of convenience variable"
 
-    gdb_test "set \\\$_ = 11"		" = 11" \
+    gdb_test "set \$_ = 11"		" = 11\[\r\n\]+" \
 	"Set convenience variable \$_"
 
-    gdb_test "print \\\$_"		" = 11" \
+    gdb_test "print \$_"		" = 11" \
 	"Print contents of convenience variable \$_"
 
-    gdb_test "print \\\$foo + 10"	" = 311" \
+    gdb_test "print \$foo + 10"	" = 311" \
 	"Use convenience variable in arithmetic expression"
 
-    gdb_test "print (\\\$foo = 32) + 4"	" = 36" \
+    gdb_test "print (\$foo = 32) + 4"	" = 36" \
 	"Use convenience variable assignment in arithmetic expression"
 
-    gdb_test "print \\\$bar"		" = VOID" \
+    gdb_test "print \$bar"		" = VOID" \
 	"Print contents of uninitialized convenience variable"
 }
 
@@ -185,39 +185,39 @@ proc test_value_history {} {
     gdb_test "print 103"	"\\\$3 = 103" \
 	"Set value-history\[3\] using \$3"
 
-    gdb_test "print \\\$\\\$"	"\\\$4 = 102" \
+    gdb_test "print \$\$"	"\\\$4 = 102" \
 	"Print value-history\[MAX-1\] using inplicit index \$\$"
 
-    gdb_test "print \\\$\\\$"	"\\\$5 = 103" \
+    gdb_test "print \$\$"	"\\\$5 = 103" \
 	"Print value-history\[MAX-1\] again using implicit index \$\$"
 
-    gdb_test "print \\\$"	"\\\$6 = 103" \
+    gdb_test "print \$"	"\\\$6 = 103" \
 	"Print value-history\[MAX\] using implicit index \$"
 
-    gdb_test "print \\\$\\\$2"	"\\\$7 = 102" \
+    gdb_test "print \$\$2"	"\\\$7 = 102" \
 	"Print value-history\[MAX-2\] using explicit index \$\$2"
 
-    gdb_test "print \\\$0"	"\\\$8 = 102" \
+    gdb_test "print \$0"	"\\\$8 = 102" \
 	"Print value-history\[MAX\] using explicit index \$0"
 
     gdb_test "print 108"	"\\\$9 = 108" ""
 
-    gdb_test "print \\\$\\\$0"	"\\\$10 = 108" \
+    gdb_test "print \$\$0"	"\\\$10 = 108" \
 	"Print value-history\[MAX\] using explicit index \$\$0"
 
-    gdb_test "print \\\$1"	"\\\$11 = 101" \
+    gdb_test "print \$1"	"\\\$11 = 101" \
 	"Print value-history\[1\] using explicit index \$1"
 
-    gdb_test "print \\\$2"	"\\\$12 = 102" \
+    gdb_test "print \$2"	"\\\$12 = 102" \
 	"Print value-history\[2\] using explicit index \$2"
 
-    gdb_test "print \\\$3"	"\\\$13 = 103" \
+    gdb_test "print \$3"	"\\\$13 = 103" \
 	"Print value-history\[3\] using explicit index \$3"
 
-    gdb_test "print \\\$-3"	"\\\$14 = 100" \
+    gdb_test "print \$-3"	"\\\$14 = 100" \
 	"Print (value-history\[MAX\] - 3) using implicit index \$"
 
-    gdb_test "print \\\$1 + 3"	"\\\$15 = 104" \
+    gdb_test "print \$1 + 3"	"\\\$15 = 104" \
 	"Use value-history element in arithmetic expression"
 }
 
@@ -226,38 +226,38 @@ proc test_arithmetic_expressions {} {
 
     # Test unary minus with various operands
 
-#    test_print_accept "p -(TRUE)"	"-1"	"unary minus applied to bool"
-#    test_print_accept "p -('a')"	"xxx"	"unary minus applied to char"
-    test_print_accept "p -(1)"		"-1"	"unary minus applied to int"
-    test_print_accept "p -(1.0)"	"-1"	"unary minus applied to real"
+#    gdb_test "p -(TRUE)"	" = -1"	"unary minus applied to bool"
+#    gdb_test "p -('a')"	" = xxx"	"unary minus applied to char"
+    gdb_test "p -(1)"		" = -1"	"unary minus applied to int"
+    gdb_test "p -(1.0)"	" = -1"	"unary minus applied to real"
 
     # Test addition with various operands
 
-    test_print_accept "p .TRUE. + 1"	"2"	"bool plus int"
-    test_print_accept "p 1 + 1"		"2"	"int plus int"
-    test_print_accept "p 1.0 + 1"	"2"	"real plus int"
-    test_print_accept "p 1.0 + 2.0"	"3"	"real plus real"
+    gdb_test "p .TRUE. + 1"	" = 2"	"bool plus int"
+    gdb_test "p 1 + 1"		" = 2"	"int plus int"
+    gdb_test "p 1.0 + 1"	" = 2"	"real plus int"
+    gdb_test "p 1.0 + 2.0"	" = 3"	"real plus real"
 
     # Test subtraction with various operands
 
-    test_print_accept "p .TRUE. - 1"	"0"	"bool minus int"
-    test_print_accept "p 3 - 1"		"2"	"int minus int"
-    test_print_accept "p 3.0 - 1"	"2"	"real minus int"
-    test_print_accept "p 5.0 - 2.0"	"3"	"real minus real"
+    gdb_test "p .TRUE. - 1"	" = 0"	"bool minus int"
+    gdb_test "p 3 - 1"		" = 2"	"int minus int"
+    gdb_test "p 3.0 - 1"	" = 2"	"real minus int"
+    gdb_test "p 5.0 - 2.0"	" = 3"	"real minus real"
 
     # Test multiplication with various operands
 
-    test_print_accept "p .TRUE. * 1"	"1"	"bool times int"
-    test_print_accept "p 2 * 3"		"6"	"int times int"
-    test_print_accept "p 2.0 * 3"	"6"	"real times int"
-    test_print_accept "p 2.0 * 3.0"	"6"	"real times real"
+    gdb_test "p .TRUE. * 1"	" = 1"	"bool times int"
+    gdb_test "p 2 * 3"		" = 6"	"int times int"
+    gdb_test "p 2.0 * 3"	" = 6"	"real times int"
+    gdb_test "p 2.0 * 3.0"	" = 6"	"real times real"
 
     # Test division with various operands
 
-    test_print_accept "p .TRUE. / 1"	"1"	"bool divided by int"
-    test_print_accept "p 6 / 3"		"2"	"int divided by int"
-    test_print_accept "p 6.0 / 3"	"2"	"real divided by int"
-    test_print_accept "p 6.0 / 3.0"	"2"	"real divided by real"
+    gdb_test "p .TRUE. / 1"	" = 1"	"bool divided by int"
+    gdb_test "p 6 / 3"		" = 2"	"int divided by int"
+    gdb_test "p 6.0 / 3"	" = 2"	"real divided by int"
+    gdb_test "p 6.0 / 3.0"	" = 2"	"real divided by real"
 
     # Test modulo with various operands
 

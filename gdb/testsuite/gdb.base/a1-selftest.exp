@@ -52,15 +52,13 @@ proc test_with_self {} {
     # entire symbol table.  Set the timeout to 10 minutes, which should be
     # adequate for most environments (it *has* timed out with 5 min on a
     # SPARCstation SLC under moderate load, so this isn't unreasonable).
-    # After gdb is loaded, set the timeout to 30 seconds for the duration
+    # After gdb is started, set the timeout to 30 seconds for the duration
     # of this test, and then back to the original value.
 
     set timeout 600
     if {[gdb_load "./x$tool"] <0} then {
 	return -1
     }
-
-    set timeout 30
 
     # disassemble yourself
     send "x/10i main\n"
@@ -116,6 +114,10 @@ proc test_with_self {} {
 	    fail "$description (timeout)"
 	}
     }
+
+    # It may take a very long time for the inferior gdb to start (lynx),
+    # so we wait until after it's started to reset the timeout value.
+    set timeout 30
 
     # do we have a version number ?
     send "print version\n"

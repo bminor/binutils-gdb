@@ -1,4 +1,19 @@
-Thu Jul 20 11:40:13 1995  Jeff Law  (law@snake.cs.utah.edu)
+Thu Jul 20 13:28:36 1995  Jeffrey A. Law  <law@rtl.cygnus.com>
+
+	* gdb.base/a1-selftest.exp: Reset the timeout value to 30 seconds
+	after the inferior gdb has started.
+
+	* gdb.base/a2-run.exp: Handle gdb echoing more than one cr-lf
+	after each command.
+	* gdb.base/funcargs.exp: Likewise.
+	* gdb.base/gdbvars.exp: Likewise.
+	* gdb.base/interrupt.exp: Likewise.
+	* gdb.base/list.exp: Likewise.
+	* gdb.base/watchpoint.exp: Likewise.
+	* gdb.c++/demangle.exp: Likewise.
+	* gdb.c++/inherit.exp: Likewise.
+	* gdb.chill/chexp.exp: Likewise.
+	* gdb.fortran/exprs.exp: Likewise.
 
 	* gdb.base/watchpoint.exp: Disable watchpoint triggered in syscall
 	test if we can't handle IO to/from the inferior.
