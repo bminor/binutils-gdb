@@ -1,3 +1,8 @@
+2001-09-08  Jakub Jelinek  <jakub@redhat.com>
+
+	* config/tc-sparc.c (md_apply_fix3): Handle relocs against SEC_MERGE
+	section symbols the same way as externs.
+
 2001-09-07  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
 	* config/tc-mips.c (s_mipsset): Reallow unrestricted use of .set mipsX

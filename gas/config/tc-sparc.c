@@ -2908,6 +2908,7 @@ md_apply_fix3 (fixP, value, segment)
       if (symbol_used_in_reloc_p (fixP->fx_addsy)
 	  && (S_IS_EXTERNAL (fixP->fx_addsy)
 	      || S_IS_WEAK (fixP->fx_addsy)
+	      || (S_GET_SEGMENT (fixP->fx_addsy)->flags & SEC_MERGE)
 	      || (sparc_pic_code && ! fixP->fx_pcrel)
 	      || (S_GET_SEGMENT (fixP->fx_addsy) != segment
 		  && ((bfd_get_section_flags (stdoutput,
