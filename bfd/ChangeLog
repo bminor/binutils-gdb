@@ -5,6 +5,9 @@ Fri Jan 12 15:27:59 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 Fri Jan 12 13:59:16 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* elf-bfd.h (_bfd_elf_section_from_bfd_section): Declare.
+	* elfcode.h (_bfd_elf_section_from_bfd_section): Don't declare.
+
 	* elf.c (_bfd_elf_print_private_bfd_data): Dump contents of
 	dynamic section, if there is one.
 	* elf-bfd.h (struct elf_size_info): Add swap_dyn_in field.

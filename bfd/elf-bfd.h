@@ -566,8 +566,10 @@ struct elf_obj_tdata
 #define elf_bad_symtab(bfd)	(elf_tdata(bfd) -> bad_symtab)
 #define elf_flags_init(bfd)	(elf_tdata(bfd) -> flags_init)
 
-extern char * bfd_elf_string_from_elf_section PARAMS ((bfd *, unsigned, unsigned));
-extern char * bfd_elf_get_str_section PARAMS ((bfd *, unsigned));
+extern int _bfd_elf_section_from_bfd_section PARAMS ((bfd *, asection *));
+extern char *bfd_elf_string_from_elf_section
+  PARAMS ((bfd *, unsigned, unsigned));
+extern char *bfd_elf_get_str_section PARAMS ((bfd *, unsigned));
 
 extern boolean _bfd_elf_print_private_bfd_data PARAMS ((bfd *, PTR));
 extern void bfd_elf_print_symbol PARAMS ((bfd *, PTR, asymbol *,

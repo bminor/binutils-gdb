@@ -146,8 +146,6 @@ extern struct bfd_strtab_hash *_bfd_elf_stringtab_init PARAMS ((void));
 extern boolean bfd_section_from_phdr PARAMS ((bfd *, Elf_Internal_Phdr *,
 					      int));
 
- int _bfd_elf_section_from_bfd_section PARAMS ((bfd *, struct sec *));
-
 static long elf_slurp_symbol_table PARAMS ((bfd *, asymbol **, boolean));
 
 static boolean elf_slurp_reloc_table PARAMS ((bfd *, asection *, asymbol **));
