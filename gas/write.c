@@ -435,7 +435,7 @@ relax_and_size_seg (abfd, sec, xxx)
     flags |= SEC_HAS_CONTENTS;
 
   /* @@ This is just an approximation.  */
-  if (seginfo->fix_root)
+  if (seginfo && seginfo->fix_root)
     flags |= SEC_RELOC;
   else
     flags &= ~SEC_RELOC;
