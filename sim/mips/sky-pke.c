@@ -1686,6 +1686,7 @@ pke_code_mpg(struct pke_device* me, unsigned_4 pkecode)
 	      unsigned_4 source_addr;
 	      struct fifo_quadword* fq;
 	      int next_num;
+	      int j;
 
 	      /* decrement NUM */
 	      next_num = PKE_REG_MASK_GET(me, NUM, NUM) - 1;
@@ -1715,9 +1716,9 @@ pke_code_mpg(struct pke_device* me, unsigned_4 pkecode)
 
 	      source_addr = fq->source_address;
 	      /* add word offset */
-	      for(i=0; i<3; i++)
-		if(operand == & fq->data[i])
-		  source_addr += sizeof(unsigned_4) * i;
+	      for(j=0; j<3; j++)
+		if(operand == & fq->data[j])
+		  source_addr += sizeof(unsigned_4) * j;
 
 	      fq = pke_pcrel_fifo(me, i*2 + 2, & operand);
 	      vu_upper_opcode = *operand;
