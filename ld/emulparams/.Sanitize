@@ -38,6 +38,10 @@ go32.sh
 h8300.sh
 h8300h.sh
 h8500.sh
+h8500b.sh
+h8500c.sh
+h8500s.sh
+h8500m.sh
 hp300bsd.sh
 hp3hpux.sh
 hppaelf.sh
