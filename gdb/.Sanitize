@@ -277,6 +277,8 @@ xm-tahoe.h
 xm-ultra3.h
 xm-umax.h
 xm-vax.h
+xm-vaxbsd.h
+xm-vaxult.h
 
 Do-last:
 
