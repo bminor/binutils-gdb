@@ -1,5 +1,7 @@
 Sat Jan 18 15:35:29 1992  Stu Grossman  (grossman at cygnus.com)
 
+	* Makefile.in (DEV_SUPPORT):  add configure.man.
+
 	* config.sub(Decode manufacturer-specific):  add -none*.
 
 Fri Jan 17 17:58:05 1992  Stu Grossman  (grossman at cygnus.com)
