@@ -1,3 +1,21 @@
+Sun Sep 20 00:58:12 1998  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
+
+	* config/tc-m68k.h (TC_FORCE_RELOCATION): New macro.  Force vtable
+	relocs.
+	* config/tc-m68k.c (md_apply_fix_2): Do nothing for vtable relocs.
+
+Tue Sep 15 08:51:07 1998  Catherine Moore  <clm@cygnus.com>
+ 
+        * config/obj-elf.c (obj_elf_vtable_inherit):  Handle arm
+        assembler syntax.
+        (obj_elf_vtable_entry):  Likewise.
+        * config/tc-arm.h:  Define TC_FORCE_RELOCATION for OBJ_ELF.
+        * config/tc-arm.c (md_apply_fix3): Handle VTABLE relocations.
+        (tc_gen_reloc): Likewise.
+        (arm_fix_adjustable): Likewise.
+        (elf32_arm_force_relocation): New.
+        (armelf_frob_symbol):  Remove coff-style symbol support.
+
 Wed Sep  9 11:27:16 1998  Richard Henderson  <rth@cygnus.com>
 
 	* config/tc-i386.c (i386_operand): Fix typo in last patch.
