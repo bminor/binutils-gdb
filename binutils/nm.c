@@ -19,11 +19,13 @@
 
 #include "bfd.h"
 #include "sysdep.h"
+#include "progress.h"
 #include "bucomm.h"
 #include "getopt.h"
 #include "aout/stab_gnu.h"
 #include "aout/ranlib.h"
 #include "demangle.h"
+#include "libiberty.h"
 
 static boolean
 display_file PARAMS ((char *filename));
@@ -34,6 +36,9 @@ display_rel_file PARAMS ((bfd * file, bfd * archive));
 static unsigned int
 filter_symbols PARAMS ((bfd * file, asymbol ** syms, unsigned long symcount));
 
+static unsigned int
+sort_symbols_by_size PARAMS ((bfd *, asymbol **, unsigned long));
+
 static void
 print_symbols PARAMS ((bfd * file, asymbol ** syms, unsigned long symcount,
 		       bfd * archive));
@@ -41,6 +46,22 @@ print_symbols PARAMS ((bfd * file, asymbol ** syms, unsigned long symcount,
 static void
 print_symdef_entry PARAMS ((bfd * abfd));
 
+/* The sorting functions.  */
+
+static int
+numeric_forward PARAMS ((const PTR, const PTR));
+
+static int
+numeric_reverse PARAMS ((const PTR, const PTR));
+
+static int
+non_numeric_forward PARAMS ((const PTR, const PTR));
+
+static int
+non_numeric_reverse PARAMS ((const PTR, const PTR));
+
+static int
+size_forward PARAMS ((const PTR, const PTR));
 
 /* The output formatting functions.  */
 
@@ -151,6 +172,7 @@ static int print_debug_syms = 0;	/* print debugger-only symbols too */
 static int print_armap = 0;	/* describe __.SYMDEF data in archive files.  */
 static int reverse_sort = 0;	/* sort in downward(alpha or numeric) order */
 static int sort_numerically = 0;	/* sort in numeric rather than alpha order */
+static int sort_by_size = 0;	/* sort by size of symbol */
 static int undefined_only = 0;	/* print undefined symbols only */
 static int dynamic = 0;		/* print dynamic symbols.  */
 static int show_version = 0;	/* show the version number */
@@ -192,6 +214,7 @@ static struct option long_options[] =
   {"print-file-name", no_argument, 0, 'o'},
   {"radix", required_argument, 0, 't'},
   {"reverse-sort", no_argument, &reverse_sort, 1},
+  {"size-sort", no_argument, &sort_by_size, 1},
   {"target", required_argument, 0, 200},
   {"undefined-only", no_argument, &undefined_only, 1},
   {"version", no_argument, &show_version, 1},
@@ -208,11 +231,13 @@ usage (stream, status)
   fprintf (stream, "\
 Usage: %s [-aABCDgnopPrsuvV] [-t radix] [--radix=radix] [--target=bfdname]\n\
        [--debug-syms] [--extern-only] [--print-armap] [--print-file-name]\n\
-       [--numeric-sort] [--no-sort] [--reverse-sort] [--undefined-only]\n\
-       [--portability] [-f {bsd,sysv,posix}] [--format={bsd,sysv,posix}]\n\
-       [--demangle] [--no-demangle] [--dynamic] [--version] [--help]\n\
+       [--numeric-sort] [--no-sort] [--reverse-sort] [--size-sort]\n\
+       [--undefined-only] [--portability] [-f {bsd,sysv,posix}]\n\
+       [--format={bsd,sysv,posix}] [--demangle] [--no-demangle] [--dynamic]\n\
+       [--version] [--help]\n\
        [file...]\n",
 	   program_name);
+  list_supported_targets (program_name, stream);
   exit (status);
 }
 
@@ -277,6 +302,8 @@ main (argc, argv)
 
   program_name = *argv;
   xmalloc_set_program_name (program_name);
+
+  START_PROGRESS (program_name, 0);
 
   bfd_init ();
 
@@ -364,9 +391,12 @@ main (argc, argv)
   /* We were given several filenames to do.  */
   while (optind < argc)
     {
+      PROGRESS (1);
       if (!display_file (argv[optind++]))
 	retval++;
     }
+
+  END_PROGRESS (program_name);
 
   exit (retval);
   return retval;
@@ -387,6 +417,8 @@ display_archive (file)
 
   for (;;)
     {
+      PROGRESS (1);
+
       arfile = bfd_openr_next_archived_file (file, arfile);
 
       if (arfile == NULL)
@@ -464,26 +496,47 @@ display_file (filename)
 
 /* Symbol-sorting predicates */
 #define valueof(x) ((x)->section->vma + (x)->value)
-int
-numeric_forward (x, y)
-     CONST void *x;
-     CONST void *y;
+
+/* Numeric sorts.  Undefined symbols are always considered "less than"
+   defined symbols with zero values.  Common symbols are not treated
+   specially -- i.e., their sizes are used as their "values".  */
+static int
+numeric_forward (P_x, P_y)
+     const PTR P_x;
+     const PTR P_y;
 {
-  return (valueof (*(asymbol **) x) - valueof (*(asymbol **) y));
+  asymbol *x = *(asymbol **) P_x;
+  asymbol *y = *(asymbol **) P_y;
+  asection *xs = bfd_get_section (x);
+  asection *ys = bfd_get_section (y);
+  if (bfd_is_und_section (xs))
+    {
+      if (bfd_is_und_section (ys))
+	goto equal;
+      return -1;
+    }
+  else if (bfd_is_und_section (ys))
+    return 1;
+  /* Don't just return the difference -- in cross configurations,
+     after truncation to `int' it might not have the sign we want.  */
+  if (valueof (x) != valueof (y))
+    return valueof (x) < valueof (y) ? -1 : 1;
+ equal:
+  return non_numeric_forward (P_x, P_y);
 }
 
-int
+static int
 numeric_reverse (x, y)
-     CONST void *x;
-     CONST void *y;
+     const PTR x;
+     const PTR y;
 {
-  return (valueof (*(asymbol **) y) - valueof (*(asymbol **) x));
+  return -numeric_forward (x, y);
 }
 
-int
+static int
 non_numeric_forward (x, y)
-     CONST void *x;
-     CONST void *y;
+     const PTR x;
+     const PTR y;
 {
   CONST char *xn = (*(asymbol **) x)->name;
   CONST char *yn = (*(asymbol **) y)->name;
@@ -492,19 +545,155 @@ non_numeric_forward (x, y)
 	  ((yn == NULL) ? 1 : strcmp (xn, yn)));
 }
 
-int
+static int
 non_numeric_reverse (x, y)
-     CONST void *x;
-     CONST void *y;
+     const PTR x;
+     const PTR y;
 {
-  return -(non_numeric_forward (x, y));
+  return -non_numeric_forward (x, y);
 }
 
-static int (*(sorters[2][2])) PARAMS ((CONST void *, CONST void *)) =
+static int (*(sorters[2][2])) PARAMS ((const PTR, const PTR)) =
 {
   { non_numeric_forward, non_numeric_reverse },
   { numeric_forward, numeric_reverse }
 };
+
+/* This sort routine is used by sort_symbols_by_size.  It is similar
+   to numeric_forward, but when symbols have the same value it sorts
+   by section VMA.  This simplifies the sort_symbols_by_size code
+   which handles symbols at the end of sections.  Also, this routine
+   tries to sort file names before other symbols with the same value.
+   That will make the file name have a zero size, which will make
+   sort_symbols_by_size choose the non file name symbol, leading to
+   more meaningful output.  For similar reasons, this code sorts
+   gnu_compiled_* and gcc2_compiled before other symbols with the same
+   value.  */
+
+static int
+size_forward (P_x, P_y)
+     const PTR P_x;
+     const PTR P_y;
+{
+  asymbol *x = *(asymbol **) P_x;
+  asymbol *y = *(asymbol **) P_y;
+  asection *xs = bfd_get_section (x);
+  asection *ys = bfd_get_section (y);
+  const char *xn;
+  const char *yn;
+  size_t xnl;
+  size_t ynl;
+  int xf;
+  int yf;
+
+  if (bfd_is_und_section (xs))
+    abort ();
+  if (bfd_is_und_section (ys))
+    abort ();
+
+  if (valueof (x) != valueof (y))
+    return valueof (x) < valueof (y) ? -1 : 1;
+
+  if (xs->vma != ys->vma)
+    return xs->vma < ys->vma ? -1 : 1;
+
+  xn = bfd_asymbol_name (x);
+  yn = bfd_asymbol_name (y);
+  xnl = strlen (xn);
+  ynl = strlen (yn);
+
+  /* The symbols gnu_compiled and gcc2_compiled convey even less
+     information than the file name, so sort them out first.  */
+
+  xf = (strstr (xn, "gnu_compiled") != NULL
+	|| strstr (xn, "gcc2_compiled") != NULL);
+  yf = (strstr (yn, "gnu_compiled") != NULL
+	|| strstr (yn, "gcc2_compiled") != NULL);
+
+  if (xf && ! yf)
+    return -1;
+  if (! xf && yf)
+    return 1;
+
+  /* We use a heuristic for the file name.  It may not work on non
+     Unix systems, but it doesn't really matter; the only difference
+     is precisely which symbol names get printed.  */
+
+#define file_symbol(s, sn, snl)			\
+  ((s->flags & BSF_FILE) != 0			\
+   || (sn[snl - 2] == '.'			\
+       && (sn[snl - 1] == 'o'			\
+	   || sn[snl - 1] == 'a')))
+
+  xf = file_symbol (x, xn, xnl);
+  yf = file_symbol (y, yn, ynl);
+
+  if (xf && ! yf)
+    return -1;
+  if (! xf && yf)
+    return 1;
+
+  return non_numeric_forward (P_x, P_y);
+}
+
+/* Sort the symbols by size.  We guess the size by assuming that the
+   difference between the address of a symbol and the address of the
+   next higher symbol is the size.  FIXME: ELF actually stores a size
+   with each symbol.  We should use it.  */
+
+static unsigned int
+sort_symbols_by_size (abfd, syms, symcount)
+     bfd *abfd;
+     asymbol **syms;
+     unsigned long symcount;
+{
+  asymbol **from, **to;
+  unsigned int src_count;
+  unsigned int dst_count = 0;
+  asymbol *sym;
+  asection *sec;
+
+  qsort ((PTR) syms, symcount, sizeof (asymbol *), size_forward);
+
+  /* Note that filter_symbols has already removed all absolute and
+     undefined symbols.  Here we remove all symbols whose size winds
+     up as zero.  */
+
+  for (from = to = syms, src_count = 0; src_count < symcount; src_count++)
+    {
+      bfd_vma size;
+
+      sym = from[src_count];
+      sec = bfd_get_section (sym);
+
+      if (bfd_is_com_section (sec))
+	size = sym->value;
+      else
+	{
+	  if (src_count + 1 < symcount
+	      && sec == bfd_get_section (from[src_count + 1]))
+	    size = valueof (from[src_count + 1]) - valueof (sym);
+	  else
+	    size = (bfd_get_section_vma (abfd, sec)
+		    + bfd_section_size (abfd, sec)
+		    - valueof (sym));
+	}
+
+      if (size != 0)
+	{
+	  /* We adjust the value of the symbol so that when it is
+             printed out, it will actually be the size.  */
+	  sym->value = size - bfd_get_section_vma (abfd, sec);
+
+	  to[dst_count++] = sym;
+	}
+    }
+
+  /* We must now sort again by size.  */
+  qsort ((PTR) syms, dst_count, sizeof (asymbol *), sorters[1][reverse_sort]);
+
+  return dst_count;
+}
 
 /* If ARCHIVE_BFD is non-NULL, it is the archive containing ABFD.  */
 
@@ -573,8 +762,13 @@ display_rel_file (abfd, archive_bfd)
   symcount = filter_symbols (abfd, syms, symcount);
 
   if (!no_sort)
-    qsort ((char *) syms, symcount, sizeof (asymbol *),
-	   sorters[sort_numerically][reverse_sort]);
+    {
+      if (! sort_by_size)
+	qsort ((char *) syms, symcount, sizeof (asymbol *),
+	       sorters[sort_numerically][reverse_sort]);
+      else
+	symcount = sort_symbols_by_size (abfd, syms, symcount);
+    }
 
   print_symbols (abfd, syms, symcount, archive_bfd);
   free (syms);
@@ -600,17 +794,24 @@ filter_symbols (abfd, syms, symcount)
       int keep = 0;
       flagword flags = (from[src_count])->flags;
 
+      PROGRESS (1);
+
       sym = from[src_count];
       if (undefined_only)
-	keep = sym->section == &bfd_und_section;
+	keep = bfd_is_und_section (sym->section);
       else if (external_only)
 	keep = ((flags & BSF_GLOBAL)
-		|| (sym->section == &bfd_und_section)
-		|| (bfd_is_com_section (sym->section)));
+		|| bfd_is_und_section (sym->section)
+		|| bfd_is_com_section (sym->section));
       else
 	keep = 1;
 
       if (!print_debug_syms && ((flags & BSF_DEBUGGING) != 0))
+	keep = 0;
+
+      if (sort_by_size
+	  && (bfd_is_abs_section (sym->section)
+	      || bfd_is_und_section (sym->section)))
 	keep = 0;
 
       if (keep)
@@ -664,11 +865,13 @@ print_symbols (abfd, syms, symcount, archive_bfd)
 
   for (; sym < end; ++sym)
     {
+      PROGRESS (1);
+
       (*format->print_symbol_filename) (archive_bfd, abfd);
 
       if (undefined_only)
 	{
-	  if ((*sym)->section == &bfd_und_section)
+	  if (bfd_is_und_section ((*sym)->section))
 	    {
 	      print_symname ("%s\n", (*sym)->name, abfd);
 	    }
@@ -826,7 +1029,15 @@ print_symbol_info_bsd (info, abfd)
      bfd *abfd;
 {
   if (info->type == 'U')
-    printf ("        ");
+    {
+      printf ("%*s",
+#ifdef BFD_HOST_64_BIT
+	      16,
+#else
+	      8,
+#endif
+	      "");
+    }
   else
     {
 #ifdef BFD_HOST_64_BIT
@@ -922,7 +1133,8 @@ print_symdef_entry (abfd)
       elt = bfd_get_elt_at_index (abfd, idx);
       if (thesym->name != (char *) NULL)
 	{
-	  printf ("%s in %s\n", thesym->name, bfd_get_filename (elt));
+	  print_symname ("%s", thesym->name, abfd);
+	  printf (" in %s\n", bfd_get_filename (elt));
 	}
     }
 }

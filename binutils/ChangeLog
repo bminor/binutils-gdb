@@ -1,5 +1,7 @@
 Tue Jul  4 14:48:42 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* nm.c (size_forward): Check yf against yn, not xn.
+
 	* objcopy.c (copy_archive): Record all output BFD's, and close
 	them before unlinking them and removing the temporary directory,
 	to avoid NFS problems.
