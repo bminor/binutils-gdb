@@ -49,6 +49,7 @@ if {[istarget *arm*-*-*] || [istarget "xscale-*-*"]} then {
     run_dump_test "reg-alias"
     run_dump_test "maverick"    
     run_dump_test "archv6"
+    run_dump_test "archv6t2"
     run_dump_test "thumbv6"
     run_dump_test "thumbv6k"
     run_dump_test "arch6zk"
@@ -57,6 +58,7 @@ if {[istarget *arm*-*-*] || [istarget "xscale-*-*"]} then {
     run_errors_test "req" "-mcpu=arm7m" ".req errors"
     run_errors_test "armv1-bad" "-mcpu=arm7m" "ARM v1 errors"
     run_errors_test "r15-bad" "" "Invalid use of r15 errors"
+    run_errors_test "archv6t2-bad" "-march=armv6t2" "Invalid V6T2 instructions"
 
     if {[istarget *-*-*coff] || [istarget *-*-pe] || [istarget *-*-wince] ||
         [istarget *-*-*aout*] || [istarget *-*-netbsd] || [istarget *-*-riscix*]} then {

@@ -1,3 +1,13 @@
+2005-03-15  Zack Weinberg  <zack@codesourcery.com>
+
+	* config/tc-arm.c (do_mla): Rename to do_mlas, take second
+	is_mls parameter; do not diagnose Rm==Rd when is_mls.
+	(do_mla, do_mls, five_bit_unsigned_immediate, bfci_lsb_and_width)
+	(do_bfc, do_bfi, do_bfx, do_rbit, do_mov16, do_ldsttv4): New functions.
+	(insns): Add ARMv6T2 instructions:
+	bfc bfi mls movw movt rbit sbfx ubfx ldrht ldrsht ldrsbt strht.
+	(arm_archs): Add V6T2 variants.
+
 2005-03-15  Nick Clifton  <nickc@redhat.com>
 
 	* NEWS: Add cutoff for changes in 2.16 release.
