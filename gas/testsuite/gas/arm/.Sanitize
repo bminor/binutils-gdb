@@ -35,6 +35,7 @@ arm7t.s
 copro.s
 float.s
 immed.s
+inst.d
 inst.s
 le-fpconst.s
 le-fpconst.d
