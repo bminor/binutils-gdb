@@ -40,7 +40,7 @@ MAKEINFO = `if [ -d $(unsubdir)/../texinfo/C ] ; \
 	else echo echo ; fi`
 
 #\`(cd $(srcdir)/bison ; \\`pwd\\`)\`
-SUBDIRS = libiberty readline bfd gdb binutils ld gas gcc gnulib clib
+SUBDIRS = libiberty glob readline bfd gdb binutils ld gas gcc gnulib clib
 OTHERS = 
 
 ALL = all.normal
@@ -254,7 +254,7 @@ Makefile: $(srcdir)/Makefile.in $(host_makefile_frag) $(target_makefile_frag)
 
 DEVO_SUPPORT= README DOC.configure Makefile.in configure configure.in \
 	config.sub config
-GDB_SUPPORT_DIRS= bfd include libiberty readline
+GDB_SUPPORT_DIRS= bfd include libiberty readline glob
 GDB_SUPPORT_FILES= $(GDB_SUPPORT_DIRS) texinfo/fsf/texinfo.tex
 
 setup-dirs: force_update
@@ -278,6 +278,9 @@ make-gdb.tar.Z: $(DEVO_SUPPORT) $(GDB_SUPPORT_DIRS) gdb texinfo/fsf/texinfo.tex
 	(cd proto-toplev; for i in $(DEVO_SUPPORT) $(GDB_SUPPORT_DIRS); do \
 		ln -s ../$$i . ; \
 	done)
+	# Take out texinfo from configurable dirs
+	rm proto-toplev/configure.in
+	sed '/^configdirs=/s/texinfo //' <configure.in >proto-toplev/configure.in
 	mkdir proto-toplev/texinfo
 	mkdir proto-toplev/texinfo/fsf
 	ln -s ../../../texinfo/fsf/texinfo.tex proto-toplev/texinfo/fsf/
