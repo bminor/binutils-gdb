@@ -194,7 +194,7 @@ aout_adobe_callback (abfd)
 	default:
 	  (*_bfd_error_handler)
 	    (_("%s: Unknown section type in a.out.adobe file: %x\n"),
-	     bfd_get_filename (abfd), ext->e_type[0]);
+	     bfd_archive_filename (abfd), ext->e_type[0]);
 	  goto no_more_sections;
 	}
 

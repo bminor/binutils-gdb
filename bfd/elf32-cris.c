@@ -876,21 +876,12 @@ cris_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 			      + sec->output_offset);
 	      else
 		{
-		  if (input_bfd->my_archive)
-		    (*_bfd_error_handler)
-		      (_("%s(%s): unresolvable relocation %s against symbol `%s' from %s section"),
-		       bfd_get_filename (bfd_my_archive (input_bfd)),
-		       bfd_get_filename (input_bfd),
-		       cris_elf_howto_table[r_type].name,
-		       symname,
-		       bfd_get_section_name (input_bfd, input_section));
-		  else
-		    (*_bfd_error_handler)
-		      (_("%s: unresolvable relocation %s against symbol `%s' from %s section"),
-		       bfd_get_filename (input_bfd),
-		       cris_elf_howto_table[r_type].name,
-		       symname,
-		       bfd_get_section_name (input_bfd, input_section));
+		  (*_bfd_error_handler)
+		    (_("%s: unresolvable relocation %s against symbol `%s' from %s section"),
+		     bfd_archive_filename (input_bfd),
+		     cris_elf_howto_table[r_type].name,
+		     symname,
+		     bfd_get_section_name (input_bfd, input_section));
 		  bfd_set_error (bfd_error_bad_value);
 		  return false;
 		}
@@ -950,7 +941,7 @@ cris_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	    {
 	      (*_bfd_error_handler)
 		(_("%s: No PLT nor GOT for relocation %s against symbol `%s' from %s section"),
-		 bfd_get_filename (input_bfd),
+		 bfd_archive_filename (input_bfd),
 		 cris_elf_howto_table[r_type].name,
 		 symname[0] != '\0' ? symname : _("[whose name is lost]"),
 		 bfd_get_section_name (input_bfd, input_section));
@@ -1069,14 +1060,14 @@ cris_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		if (h == NULL)
 		  (*_bfd_error_handler)
 		    (_("%s: relocation %s with non-zero addend %d against local symbol from %s section"),
-		     bfd_get_filename (input_bfd),
+		     bfd_archive_filename (input_bfd),
 		     cris_elf_howto_table[r_type].name,
 		     rel->r_addend,
 		     bfd_get_section_name (input_bfd, input_section));
 		else
 		  (*_bfd_error_handler)
 		    (_("%s: relocation %s with non-zero addend %d against symbol `%s' from %s section"),
-		     bfd_get_filename (input_bfd),
+		     bfd_archive_filename (input_bfd),
 		     cris_elf_howto_table[r_type].name,
 		     rel->r_addend,
 		     symname[0] != '\0' ? symname : _("[whose name is lost]"),
@@ -1094,7 +1085,7 @@ cris_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	    {
 	      (*_bfd_error_handler)
 		(_("%s: relocation %s is not allowed for global symbol: `%s' from %s section"),
-		 bfd_get_filename (input_bfd),
+		 bfd_archive_filename (input_bfd),
 		 cris_elf_howto_table[r_type].name,
 		 symname,
 		 bfd_get_section_name (input_bfd, input_section));
@@ -1212,7 +1203,7 @@ cris_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		    {
 		      (*_bfd_error_handler)
 			(_("%s: Internal inconsistency; no relocation section %s"),
-			 bfd_get_filename (input_bfd),
+			 bfd_archive_filename (input_bfd),
 			 name);
 
 		      bfd_set_error (bfd_error_bad_value);
@@ -2470,19 +2461,11 @@ cris_elf_check_relocs (abfd, info, sec, relocs)
 	      && (sec->flags & SEC_READONLY) != 0)
 	    {
 	      /* FIXME: How do we make this optionally a warning only?  */
-	      if (abfd->my_archive)
-		(*_bfd_error_handler)
-		  (_("%s(%s), section %s:\n  relocation %s should not be used in a shared object; recompile with -fPIC"),
-		   bfd_get_filename (bfd_my_archive (abfd)),
-		   bfd_get_filename (abfd),
-		   sec->name,
-		   cris_elf_howto_table[r_type].name);
-	      else
-		(*_bfd_error_handler)
-		  (_("%s, section %s:\n  relocation %s should not be used in a shared object; recompile with -fPIC"),
-		   bfd_get_filename (abfd),
-		   sec->name,
-		   cris_elf_howto_table[r_type].name);
+	      (*_bfd_error_handler)
+		(_("%s, section %s:\n  relocation %s should not be used in a shared object; recompile with -fPIC"),
+		 bfd_archive_filename (abfd),
+		 sec->name,
+		 cris_elf_howto_table[r_type].name);
 	    }
 	  /* Fall through.  */
 
@@ -2988,7 +2971,7 @@ cris_elf_merge_private_bfd_data (ibfd, obfd)
 	((new_flags & EF_CRIS_UNDERSCORE)
 	 ? _("%s: uses _-prefixed symbols, but writing file with non-prefixed symbols")
 	 : _("%s: uses non-prefixed symbols, but writing file with _-prefixed symbols"),
-	 bfd_get_filename (ibfd));
+	 bfd_archive_filename (ibfd));
       bfd_set_error (bfd_error_bad_value);
       return false;
     }

@@ -875,7 +875,7 @@ ieee_slurp_external_symbols (abfd)
 		  default:
 		    (*_bfd_error_handler)
 		      (_("%s: unimplemented ATI record  %u for symbol %u"),
-		       bfd_get_filename (abfd), symbol_attribute_def,
+		       bfd_archive_filename (abfd), symbol_attribute_def,
 		       symbol_name_index);
 		    bfd_set_error (bfd_error_bad_value);
 		    return false;
@@ -900,7 +900,7 @@ ieee_slurp_external_symbols (abfd)
 		  {
 		    (*_bfd_error_handler)
 		      (_("%s: unexpected ATN type %d in external part"),
-			 bfd_get_filename (abfd), (int) value);
+			 bfd_archive_filename (abfd), (int) value);
 		    bfd_set_error (bfd_error_bad_value);
 		    return false;
 		  }
@@ -922,7 +922,7 @@ ieee_slurp_external_symbols (abfd)
 		      default:
 			(*_bfd_error_handler)
 			  (_("%s: unexpected type after ATN"),
-			     bfd_get_filename (abfd));
+			     bfd_archive_filename (abfd));
 			bfd_set_error (bfd_error_bad_value);
 			return false;
 		      }

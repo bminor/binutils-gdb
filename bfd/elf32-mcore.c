@@ -371,7 +371,7 @@ mcore_elf_unsupported_reloc (abfd, reloc_entry, symbol, data, input_section,
   BFD_ASSERT (reloc_entry->howto != (reloc_howto_type *)0);
 
   _bfd_error_handler (_("%s: Relocation %s (%d) is not currently supported.\n"),
-		      bfd_get_filename (abfd),
+		      bfd_archive_filename (abfd),
 		      reloc_entry->howto->name,
 		      reloc_entry->howto->type);
 
@@ -428,7 +428,7 @@ mcore_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 #ifdef DEBUG
   fprintf (stderr,
 	   "mcore_elf_relocate_section called for %s section %s, %ld relocations%s\n",
-	   bfd_get_filename (input_bfd),
+	   bfd_archive_filename (input_bfd),
 	   bfd_section_name(input_bfd, input_section),
 	   (long) input_section->reloc_count,
 	   (info->relocateable) ? " (relocatable)" : "");
@@ -456,7 +456,7 @@ mcore_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	  || ! mcore_elf_howto_table [(int)r_type])
 	{
 	  _bfd_error_handler (_("%s: Unknown relocation type %d\n"),
-			      bfd_get_filename (input_bfd),
+			      bfd_archive_filename (input_bfd),
 			      (int) r_type);
 
 	  bfd_set_error (bfd_error_bad_value);
@@ -497,7 +497,7 @@ mcore_elf_relocate_section (output_bfd, info, input_bfd, input_section,
       if (howto->special_function == mcore_elf_unsupported_reloc)
 	{
 	  _bfd_error_handler (_("%s: Relocation %s (%d) is not currently supported.\n"),
-			      bfd_get_filename (input_bfd),
+			      bfd_archive_filename (input_bfd),
 			      howto->name,
 			      (int)r_type);
 

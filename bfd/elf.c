@@ -334,7 +334,7 @@ bfd_elf_string_from_elf_section (abfd, shindex, strindex)
     {
       (*_bfd_error_handler)
 	(_("%s: invalid string offset %u >= %lu for section `%s'"),
-	 bfd_get_filename (abfd), strindex, (unsigned long) hdr->sh_size,
+	 bfd_archive_filename (abfd), strindex, (unsigned long) hdr->sh_size,
 	 ((shindex == elf_elfheader(abfd)->e_shstrndx
 	   && strindex == hdr->sh_name)
 	  ? ".shstrtab"
@@ -1398,7 +1398,7 @@ bfd_section_from_shdr (abfd, shindex)
 	  {
 	    ((*_bfd_error_handler)
 	     (_("%s: invalid link %lu for reloc section %s (index %u)"),
-	      bfd_get_filename (abfd), hdr->sh_link, name, shindex));
+	      bfd_archive_filename (abfd), hdr->sh_link, name, shindex));
 	    return _bfd_elf_make_section_from_shdr (abfd, hdr, name);
 	  }
 
@@ -3595,7 +3595,7 @@ _bfd_elf_symbol_from_bfd_symbol (abfd, asym_ptr_ptr)
          which is used in a relocation entry.  */
       (*_bfd_error_handler)
 	(_("%s: symbol `%s' required but not present"),
-	 bfd_get_filename (abfd), bfd_asymbol_name (asym_ptr));
+	 bfd_archive_filename (abfd), bfd_asymbol_name (asym_ptr));
       bfd_set_error (bfd_error_no_symbols);
       return -1;
     }
@@ -3845,7 +3845,7 @@ copy_private_bfd_data (ibfd, obfd)
 	  if (segment->p_type == PT_LOAD)
 	      _bfd_error_handler
 		(_("%s: warning: Empty loadable segment detected\n"),
-		 bfd_get_filename (ibfd));
+		 bfd_archive_filename (ibfd));
 
 	  map->count = 0;
 	  *pointer_to_map = map;
@@ -5227,7 +5227,7 @@ _bfd_elf_validate_reloc (abfd, areloc)
  fail:
   (*_bfd_error_handler)
     (_("%s: unsupported relocation type %s"),
-     bfd_get_filename (abfd), areloc->howto->name);
+     bfd_archive_filename (abfd), areloc->howto->name);
   bfd_set_error (bfd_error_bad_value);
   return false;
 }

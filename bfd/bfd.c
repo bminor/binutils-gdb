@@ -529,6 +529,54 @@ bfd_get_error_handler ()
 {
   return _bfd_error_handler;
 }
+
+/*
+FUNCTION
+	bfd_archive_filename
+
+SYNOPSIS
+	const char *bfd_archive_filename (bfd *);
+
+DESCRIPTION
+	For a BFD that is a component of an archive, returns a string
+	with both the archive name and file name.  For other BFDs, just
+	returns the file name.
+*/
+
+const char *
+bfd_archive_filename (abfd)
+     bfd *abfd;
+{
+  if (abfd->my_archive)
+    {
+      static size_t curr = 0;
+      static char *buf;
+      size_t needed;
+
+      needed = (strlen (bfd_get_filename (abfd->my_archive))
+		+ strlen (bfd_get_filename (abfd)) + 3);
+      if (needed > curr)
+	{
+	  if (curr)
+	    free (buf);
+	  curr = needed + (needed >> 1);
+	  buf = bfd_malloc (curr);
+	  /* If we can't malloc, fail safe by returning just the file
+	     name. This function is only used when building error
+	     messages.  */
+	  if (!buf)
+	    {
+	      curr = 0;
+	      return bfd_get_filename (abfd);
+	    }
+	}
+      sprintf (buf, "%s(%s)", bfd_get_filename (abfd->my_archive),
+	       bfd_get_filename (abfd));
+      return buf;
+    }
+  else
+    return bfd_get_filename (abfd);
+}
 
 /*
 SECTION

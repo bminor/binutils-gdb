@@ -1096,7 +1096,7 @@ sh_elf_relax_section (abfd, sec, link_info, again)
       if (laddr >= sec->_raw_size)
 	{
 	  (*_bfd_error_handler) (_("%s: 0x%lx: warning: bad R_SH_USES offset"),
-				 bfd_get_filename (abfd),
+				 bfd_archive_filename (abfd),
 				 (unsigned long) irel->r_offset);
 	  continue;
 	}
@@ -1108,7 +1108,7 @@ sh_elf_relax_section (abfd, sec, link_info, again)
 	{
 	  ((*_bfd_error_handler)
 	   (_("%s: 0x%lx: warning: R_SH_USES points to unrecognized insn 0x%x"),
-	    bfd_get_filename (abfd), (unsigned long) irel->r_offset, insn));
+	    bfd_archive_filename (abfd), (unsigned long) irel->r_offset, insn));
 	  continue;
 	}
 
@@ -1125,7 +1125,7 @@ sh_elf_relax_section (abfd, sec, link_info, again)
 	{
 	  ((*_bfd_error_handler)
 	   (_("%s: 0x%lx: warning: bad R_SH_USES load offset"),
-	    bfd_get_filename (abfd), (unsigned long) irel->r_offset));
+	    bfd_archive_filename (abfd), (unsigned long) irel->r_offset));
 	  continue;
 	}
 
@@ -1140,7 +1140,7 @@ sh_elf_relax_section (abfd, sec, link_info, again)
 	{
 	  ((*_bfd_error_handler)
 	   (_("%s: 0x%lx: warning: could not find expected reloc"),
-	    bfd_get_filename (abfd), (unsigned long) paddr));
+	    bfd_archive_filename (abfd), (unsigned long) paddr));
 	  continue;
 	}
 
@@ -1176,7 +1176,7 @@ sh_elf_relax_section (abfd, sec, link_info, again)
 	    {
 	      ((*_bfd_error_handler)
 	       (_("%s: 0x%lx: warning: symbol in unexpected section"),
-		bfd_get_filename (abfd), (unsigned long) paddr));
+		bfd_archive_filename (abfd), (unsigned long) paddr));
 	      continue;
 	    }
 
@@ -1298,7 +1298,7 @@ sh_elf_relax_section (abfd, sec, link_info, again)
 	{
 	  ((*_bfd_error_handler)
 	   (_("%s: 0x%lx: warning: could not find expected COUNT reloc"),
-	    bfd_get_filename (abfd), (unsigned long) paddr));
+	    bfd_archive_filename (abfd), (unsigned long) paddr));
 	  continue;
 	}
 
@@ -1307,7 +1307,7 @@ sh_elf_relax_section (abfd, sec, link_info, again)
       if (irelcount->r_addend == 0)
 	{
 	  ((*_bfd_error_handler) (_("%s: 0x%lx: warning: bad count"),
-				  bfd_get_filename (abfd),
+				  bfd_archive_filename (abfd),
 				  (unsigned long) paddr));
 	  continue;
 	}
@@ -1701,7 +1701,7 @@ sh_elf_relax_delete_bytes (abfd, sec, addr, count)
 	    {
 	      ((*_bfd_error_handler)
 	       (_("%s: 0x%lx: fatal: reloc overflow while relaxing"),
-		bfd_get_filename (abfd), (unsigned long) irel->r_offset));
+		bfd_archive_filename (abfd), (unsigned long) irel->r_offset));
 	      bfd_set_error (bfd_error_bad_value);
 	      return false;
 	    }
@@ -2091,7 +2091,7 @@ sh_elf_swap_insns (abfd, sec, relocs, contents, addr)
 	    {
 	      ((*_bfd_error_handler)
 	       (_("%s: 0x%lx: fatal: reloc overflow while relaxing"),
-		bfd_get_filename (abfd), (unsigned long) irel->r_offset));
+		bfd_archive_filename (abfd), (unsigned long) irel->r_offset));
 	      bfd_set_error (bfd_error_bad_value);
 	      return false;
 	    }
@@ -3103,7 +3103,7 @@ sh_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		{
 		  (*_bfd_error_handler)
 		    (_("%s: warning: unresolvable relocation against symbol `%s' from %s section"),
-		     bfd_get_filename (input_bfd), h->root.root.string,
+		     bfd_archive_filename (input_bfd), h->root.root.string,
 		     bfd_get_section_name (input_bfd, input_section));
 		  relocation = 0;
 		}
@@ -3169,7 +3169,7 @@ sh_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		{
 		  ((*_bfd_error_handler)
 		   (_("%s: 0x%lx: fatal: unaligned branch target for relax-support relocation"),
-		    bfd_get_filename (input_section->owner),
+		    bfd_archive_filename (input_section->owner),
 		    (unsigned long) rel->r_offset));
 		  bfd_set_error (bfd_error_bad_value);
 		  return false;
@@ -4091,7 +4091,7 @@ sh_elf_merge_private_data (ibfd, obfd)
     {
       (*_bfd_error_handler)
 	("%s: uses %s instructions while previous modules use %s instructions",
-	 bfd_get_filename (ibfd),
+	 bfd_archive_filename (ibfd),
 	 EF_SH_HAS_DSP (new_flags) ? "dsp" : "floating point",
 	 EF_SH_HAS_DSP (new_flags) ? "floating point" : "dsp");
       bfd_set_error (bfd_error_bad_value);

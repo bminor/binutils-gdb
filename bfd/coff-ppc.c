@@ -1195,7 +1195,7 @@ coff_ppc_relocate_section (output_bfd, info, input_bfd, input_section,
 	default:
 	  (*_bfd_error_handler)
 	    (_("%s: unsupported relocation type 0x%02x"),
-	     bfd_get_filename (input_bfd), r_type);
+	     bfd_archive_filename (input_bfd), r_type);
 	  bfd_set_error (bfd_error_bad_value);
 	  return false;
 	case IMAGE_REL_PPC_TOCREL16:
@@ -1288,7 +1288,7 @@ coff_ppc_relocate_section (output_bfd, info, input_bfd, input_section,
 		      {
 			(*_bfd_error_handler)
 			  (_("%s: Relocation for %s of %lx exceeds Toc size limit"),
-			   bfd_get_filename (input_bfd), name,
+			   bfd_archive_filename (input_bfd), name,
 			   (unsigned long) our_toc_offset);
 			bfd_set_error (bfd_error_bad_value);
 			return false;
@@ -1345,7 +1345,7 @@ coff_ppc_relocate_section (output_bfd, info, input_bfd, input_section,
 	      {
 		(*_bfd_error_handler)
 		  (_("%s: Relocation exceeds allocated TOC (%lx)"),
-		   bfd_get_filename (input_bfd),
+		   bfd_archive_filename (input_bfd),
 		   (unsigned long) toc_section->_raw_size);
 		bfd_set_error (bfd_error_bad_value);
 		return false;
@@ -1402,7 +1402,7 @@ coff_ppc_relocate_section (output_bfd, info, input_bfd, input_section,
 	    fprintf (stderr,
 		    _("Warning: unsupported reloc %s <file %s, section %s>\n"),
 		    howto->name,
-		    bfd_get_filename(input_bfd),
+		    bfd_archive_filename(input_bfd),
 		    input_section->name);
 
 	    fprintf (stderr,"sym %ld (%s), r_vaddr %ld (%lx)\n",
@@ -1421,7 +1421,7 @@ coff_ppc_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	    (*_bfd_error_handler)
 	      (_("%s: Out of order IMGLUE reloc for %s"),
-	       bfd_get_filename (input_bfd), my_name);
+	       bfd_archive_filename (input_bfd), my_name);
 	    bfd_set_error (bfd_error_bad_value);
 	    return false;
 	  }

@@ -1159,7 +1159,7 @@ xcoff64_ppc_relocate_section (output_bfd, info, input_bfd,
 	default:
 	  (*_bfd_error_handler)
 	    (_("%s: unsupported relocation type 0x%02x"),
-	     bfd_get_filename (input_bfd), (unsigned int) rel->r_type);
+	     bfd_archive_filename (input_bfd), (unsigned int) rel->r_type);
 	  bfd_set_error (bfd_error_bad_value);
 	  return false;
 	case R_POS:
@@ -1205,7 +1205,7 @@ xcoff64_ppc_relocate_section (output_bfd, info, input_bfd,
 		{
 		  (*_bfd_error_handler)
 		    (_("%s: TOC reloc at 0x%x to symbol `%s' with no TOC entry"),
-		     bfd_get_filename (input_bfd), rel->r_vaddr,
+		     bfd_archive_filename (input_bfd), rel->r_vaddr,
 		     h->root.root.string);
 		  bfd_set_error (bfd_error_bad_value);
 		  return false;
@@ -2055,7 +2055,7 @@ xcoff64_create_csect_from_smclas (abfd, aux, symbol_name)
     {
       (*_bfd_error_handler)
 	(_("%s: symbol `%s' has unrecognized smclas %d"),
-	 bfd_get_filename (abfd), symbol_name, aux->x_csect.x_smclas);
+	 bfd_archive_filename (abfd), symbol_name, aux->x_csect.x_smclas);
       bfd_set_error (bfd_error_bad_value);
     }
 

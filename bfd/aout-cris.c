@@ -249,7 +249,7 @@ MY(swap_ext_reloc_in) (abfd, bytes, cache_ptr, symbols, symcount)
   if (r_type > 2)
     {
       (*_bfd_error_handler) (_("%s: Invalid relocation type imported: %d"),
-			     bfd_get_filename (abfd), r_type);
+			     bfd_archive_filename (abfd), r_type);
 
       bfd_set_error(bfd_error_wrong_format);
     }
@@ -260,7 +260,7 @@ MY(swap_ext_reloc_in) (abfd, bytes, cache_ptr, symbols, symcount)
     {
       (*_bfd_error_handler)
         (_("%s: Bad relocation record imported: %d"),
-         bfd_get_filename (abfd), r_index);
+         bfd_archive_filename (abfd), r_index);
 
       bfd_set_error (bfd_error_wrong_format);
 

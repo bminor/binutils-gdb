@@ -388,7 +388,7 @@ tic54x_reloc_processing (relent, reloc, symbols, abfd, section)
         {
           (*_bfd_error_handler)
             (_("%s: warning: illegal symbol index %ld in relocs"),
-             bfd_get_filename (abfd), reloc->r_symndx);
+             bfd_archive_filename (abfd), reloc->r_symndx);
           relent->sym_ptr_ptr = bfd_abs_section_ptr->symbol_ptr_ptr;
           ptr = NULL;
         }

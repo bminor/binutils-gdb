@@ -535,7 +535,7 @@ coff_link_add_symbols (abfd, info)
   			(*_bfd_error_handler)
   			  (_("Warning: type of symbol `%s' changed from %d to %d in %s"),
   			   name, (*sym_hash)->type, sym.n_type,
-  			   bfd_get_filename (abfd));
+  			   bfd_archive_filename (abfd));
 
   		      /* We don't want to change from a meaningful
   			 base type to a null one, but if we know
@@ -2317,7 +2317,7 @@ _bfd_coff_link_input_bfd (finfo, input_bfd)
 	    {
 	      ((*_bfd_error_handler)
 	       (_("%s: relocs in section `%s', but it has no contents"),
-		bfd_get_filename (input_bfd),
+		bfd_archive_filename (input_bfd),
 		bfd_get_section_name (input_bfd, o)));
 	      bfd_set_error (bfd_error_no_contents);
 	      return false;
@@ -2895,7 +2895,7 @@ _bfd_coff_generic_relocate_section (output_bfd, info, input_bfd,
 	{
 	  (*_bfd_error_handler)
 	    ("%s: illegal symbol index %ld in relocs",
-	     bfd_get_filename (input_bfd), symndx);
+	     bfd_archive_filename (input_bfd), symndx);
 	  return false;
 	}
       else
@@ -3017,7 +3017,7 @@ _bfd_coff_generic_relocate_section (output_bfd, info, input_bfd,
 	case bfd_reloc_outofrange:
 	  (*_bfd_error_handler)
 	    (_("%s: bad reloc address 0x%lx in section `%s'"),
-	     bfd_get_filename (input_bfd),
+	     bfd_archive_filename (input_bfd),
 	     (unsigned long) rel->r_vaddr,
 	     bfd_get_section_name (input_bfd, input_section));
 	  return false;

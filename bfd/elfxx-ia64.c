@@ -3434,7 +3434,7 @@ elfNN_ia64_relocate_section (output_bfd, info, input_bfd, input_section,
 	{
 	  (*_bfd_error_handler)
 	    (_("%s: unknown relocation type %d"),
-	     bfd_get_filename (input_bfd), (int)r_type);
+	     bfd_archive_filename (input_bfd), (int)r_type);
 	  bfd_set_error (bfd_error_bad_value);
 	  ret_val = false;
 	  continue;
@@ -3594,7 +3594,7 @@ elfNN_ia64_relocate_section (output_bfd, info, input_bfd, input_section,
 			 shared libraries.  Hork.  */
 		      (*_bfd_error_handler)
 			(_("%s: linking non-pic code in a shared library"),
-			 bfd_get_filename (input_bfd));
+			 bfd_archive_filename (input_bfd));
 		      ret_val = false;
 		      continue;
 		    }
@@ -3627,7 +3627,7 @@ elfNN_ia64_relocate_section (output_bfd, info, input_bfd, input_section,
 	    {
 	      (*_bfd_error_handler)
 		(_("%s: @gprel relocation against dynamic symbol %s"),
-		 bfd_get_filename (input_bfd), h->root.root.string);
+		 bfd_archive_filename (input_bfd), h->root.root.string);
 	      ret_val = false;
 	      continue;
 	    }
@@ -3765,7 +3765,7 @@ elfNN_ia64_relocate_section (output_bfd, info, input_bfd, input_section,
 	    {
 	      (*_bfd_error_handler)
 		(_("%s: dynamic relocation against speculation fixup"),
-		 bfd_get_filename (input_bfd));
+		 bfd_archive_filename (input_bfd));
 	      ret_val = false;
 	      continue;
 	    }
@@ -3773,7 +3773,7 @@ elfNN_ia64_relocate_section (output_bfd, info, input_bfd, input_section,
 	    {
 	      (*_bfd_error_handler)
 		(_("%s: speculation fixup against undefined weak symbol"),
-		 bfd_get_filename (input_bfd));
+		 bfd_archive_filename (input_bfd));
 	      ret_val = false;
 	      continue;
 	    }
@@ -4254,7 +4254,7 @@ elfNN_ia64_merge_private_bfd_data (ibfd, obfd)
     {
       (*_bfd_error_handler)
 	(_("%s: linking trap-on-NULL-dereference with non-trapping files"),
-	 bfd_get_filename (ibfd));
+	 bfd_archive_filename (ibfd));
 
       bfd_set_error (bfd_error_bad_value);
       ok = false;
@@ -4263,7 +4263,7 @@ elfNN_ia64_merge_private_bfd_data (ibfd, obfd)
     {
       (*_bfd_error_handler)
 	(_("%s: linking big-endian files with little-endian files"),
-	 bfd_get_filename (ibfd));
+	 bfd_archive_filename (ibfd));
 
       bfd_set_error (bfd_error_bad_value);
       ok = false;
@@ -4272,7 +4272,7 @@ elfNN_ia64_merge_private_bfd_data (ibfd, obfd)
     {
       (*_bfd_error_handler)
 	(_("%s: linking 64-bit files with 32-bit files"),
-	 bfd_get_filename (ibfd));
+	 bfd_archive_filename (ibfd));
 
       bfd_set_error (bfd_error_bad_value);
       ok = false;
@@ -4281,7 +4281,7 @@ elfNN_ia64_merge_private_bfd_data (ibfd, obfd)
     {
       (*_bfd_error_handler)
 	(_("%s: linking constant-gp files with non-constant-gp files"),
-	 bfd_get_filename (ibfd));
+	 bfd_archive_filename (ibfd));
 
       bfd_set_error (bfd_error_bad_value);
       ok = false;
@@ -4291,7 +4291,7 @@ elfNN_ia64_merge_private_bfd_data (ibfd, obfd)
     {
       (*_bfd_error_handler)
 	(_("%s: linking auto-pic files with non-auto-pic files"),
-	 bfd_get_filename (ibfd));
+	 bfd_archive_filename (ibfd));
 
       bfd_set_error (bfd_error_bad_value);
       ok = false;

@@ -1071,7 +1071,7 @@ styp_to_sec_flags (abfd, hdr, name, section, flags_ptr)
 	{
 	  (*_bfd_error_handler)
 	    (_("%s (%s): Section flag %s (0x%x) ignored"),
-	     bfd_get_filename (abfd), name, unhandled, flag);
+	     bfd_archive_filename (abfd), name, unhandled, flag);
 	  result = false;
 	}
     }
@@ -4194,7 +4194,7 @@ coff_slurp_line_table (abfd, asect)
 		{
 		  (*_bfd_error_handler)
 		    (_("%s: warning: illegal symbol index %ld in line numbers"),
-		     bfd_get_filename (abfd), dst.l_addr.l_symndx);
+		     bfd_archive_filename (abfd), dst.l_addr.l_symndx);
 		  symndx = 0;
 		  warned = true;
 		}
@@ -4208,7 +4208,7 @@ coff_slurp_line_table (abfd, asect)
 		{
 		  (*_bfd_error_handler)
 		    (_("%s: warning: duplicate line number information for `%s'"),
-		     bfd_get_filename (abfd),
+		     bfd_archive_filename (abfd),
 		     bfd_asymbol_name (&sym->symbol));
 		}
 	      sym->lineno = cache_ptr;
@@ -4567,7 +4567,7 @@ coff_slurp_symbol_table (abfd)
 	    default:
 	      (*_bfd_error_handler)
 		(_("%s: Unrecognized storage class %d for %s symbol `%s'"),
-		 bfd_get_filename (abfd), src->u.syment.n_sclass,
+		 bfd_archive_filename (abfd), src->u.syment.n_sclass,
 		 dst->symbol.section->name, dst->symbol.name);
 	      dst->symbol.flags = BSF_DEBUGGING;
 	      dst->symbol.value = (src->u.syment.n_value);
@@ -4698,7 +4698,7 @@ coff_classify_symbol (abfd, syment)
 
       (*_bfd_error_handler)
 	(_("warning: %s: local symbol `%s' has no section"),
-	 bfd_get_filename (abfd),
+	 bfd_archive_filename (abfd),
 	 _bfd_coff_internal_syment_name (abfd, syment, buf));
     }
 
@@ -4805,7 +4805,7 @@ coff_slurp_reloc_table (abfd, asect, symbols)
 	    {
 	      (*_bfd_error_handler)
 		(_("%s: warning: illegal symbol index %ld in relocs"),
-		 bfd_get_filename (abfd), dst.r_symndx);
+		 bfd_archive_filename (abfd), dst.r_symndx);
 	      cache_ptr->sym_ptr_ptr = bfd_abs_section_ptr->symbol_ptr_ptr;
 	      ptr = NULL;
 	    }
@@ -4843,7 +4843,7 @@ coff_slurp_reloc_table (abfd, asect, symbols)
 	{
 	  (*_bfd_error_handler)
 	    (_("%s: illegal relocation type %d at address 0x%lx"),
-	     bfd_get_filename (abfd), dst.r_type, (long) dst.r_vaddr);
+	     bfd_archive_filename (abfd), dst.r_type, (long) dst.r_vaddr);
 	  bfd_set_error (bfd_error_bad_value);
 	  return false;
 	}

@@ -1438,7 +1438,7 @@ _bfd_generic_verify_endian_match (ibfd, obfd)
       else
 	msg = _("%s: compiled for a little endian system and target is big endian");
 
-      (*_bfd_error_handler) (msg, bfd_get_filename (ibfd));
+      (*_bfd_error_handler) (msg, bfd_archive_filename (ibfd));
 
       bfd_set_error (bfd_error_wrong_format);
       return false;

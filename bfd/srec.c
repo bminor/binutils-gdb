@@ -300,7 +300,7 @@ srec_bad_byte (abfd, lineno, c, error)
 	}
       (*_bfd_error_handler)
 	(_("%s:%d: Unexpected character `%s' in S-record file\n"),
-	 bfd_get_filename (abfd), lineno, buf);
+	 bfd_archive_filename (abfd), lineno, buf);
       bfd_set_error (bfd_error_bad_value);
     }
 }

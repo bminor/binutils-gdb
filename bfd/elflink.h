@@ -1485,7 +1485,7 @@ elf_link_add_object_symbols (abfd, info)
 			{
 			  (*_bfd_error_handler)
 			    (_("%s: %s: invalid version %u (max %d)"),
-			     bfd_get_filename (abfd), name, vernum,
+			     bfd_archive_filename (abfd), name, vernum,
 			     elf_tdata (abfd)->dynverdef_hdr.sh_info);
 			  bfd_set_error (bfd_error_bad_value);
 			  goto error_return;
@@ -1526,7 +1526,7 @@ elf_link_add_object_symbols (abfd, info)
 			{
 			  (*_bfd_error_handler)
 			    (_("%s: %s: invalid needed version %d"),
-			     bfd_get_filename (abfd), name, vernum);
+			     bfd_archive_filename (abfd), name, vernum);
 			  bfd_set_error (bfd_error_bad_value);
 			  goto error_return;
 			}
@@ -1647,7 +1647,7 @@ elf_link_add_object_symbols (abfd, info)
 		(*_bfd_error_handler)
 		  (_("Warning: size of symbol `%s' changed from %lu to %lu in %s"),
 		   name, (unsigned long) h->size, (unsigned long) sym.st_size,
-		   bfd_get_filename (abfd));
+		   bfd_archive_filename (abfd));
 
 	      h->size = sym.st_size;
 	    }
@@ -1669,7 +1669,7 @@ elf_link_add_object_symbols (abfd, info)
 		(*_bfd_error_handler)
 		  (_("Warning: type of symbol `%s' changed from %d to %d in %s"),
 		   name, h->type, ELF_ST_TYPE (sym.st_info),
-		   bfd_get_filename (abfd));
+		   bfd_archive_filename (abfd));
 
 	      h->type = ELF_ST_TYPE (sym.st_info);
 	    }
@@ -1892,7 +1892,7 @@ elf_link_add_object_symbols (abfd, info)
                          do in the case above.  */
 		      (*_bfd_error_handler)
 			(_("%s: warning: unexpected redefinition of `%s'"),
-			 bfd_get_filename (abfd), shortname);
+			 bfd_archive_filename (abfd), shortname);
 		    }
 		  else
 		    {
@@ -6009,7 +6009,7 @@ elf_link_input_bfd (finfo, input_bfd)
 		  if (isec->symbol->value != isym->st_value)
 		    (*_bfd_error_handler)
 		      (_("%s: invalid section symbol index 0x%x (%s) ignored"),
-		       bfd_get_filename (input_bfd), isym->st_shndx,
+		       bfd_archive_filename (input_bfd), isym->st_shndx,
 		       name);
 		  continue;
 		}
@@ -7288,7 +7288,7 @@ elf_gc_record_vtinherit (abfd, sec, h, offset)
     }
 
   (*_bfd_error_handler) ("%s: %s+%lu: No symbol found for INHERIT",
-			 bfd_get_filename (abfd), sec->name,
+			 bfd_archive_filename (abfd), sec->name,
 			 (unsigned long) offset);
   bfd_set_error (bfd_error_invalid_operation);
   return false;

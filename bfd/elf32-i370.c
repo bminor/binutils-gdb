@@ -428,7 +428,7 @@ i370_elf_merge_private_bfd_data (ibfd, obfd)
     {
       (*_bfd_error_handler)
 	("%s: uses different e_flags (0x%lx) fields than previous modules (0x%lx)",
-	 bfd_get_filename (ibfd), (long)new_flags, (long)old_flags);
+	 bfd_archive_filename (ibfd), (long) new_flags, (long) old_flags);
 
       bfd_set_error (bfd_error_bad_value);
       return false;
@@ -536,8 +536,8 @@ i370_elf_create_linker_section (abfd, info, which)
 	{
 	default:
 	  (*_bfd_error_handler) ("%s: Unknown special linker type %d",
-				 bfd_get_filename (abfd),
-				 (int)which);
+				 bfd_archive_filename (abfd),
+				 (int) which);
 
 	  bfd_set_error (bfd_error_bad_value);
 	  return (elf_linker_section_t *)0;
@@ -1025,7 +1025,7 @@ i370_elf_check_relocs (abfd, info, sec, relocs)
 #ifdef DEBUG
   fprintf (stderr, "i370_elf_check_relocs called for section %s in %s\n",
 	   bfd_get_section_name (abfd, sec),
-	   bfd_get_filename (abfd));
+	   bfd_archive_filename (abfd));
 #endif
 
   dynobj = elf_hash_table (info)->dynobj;
@@ -1292,9 +1292,9 @@ i370_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 
 #ifdef DEBUG
   fprintf (stderr, "i370_elf_relocate_section called for %s section %s, %ld relocations%s\n",
-	   bfd_get_filename (input_bfd),
+	   bfd_archive_filename (input_bfd),
 	   bfd_section_name(input_bfd, input_section),
-	   (long)input_section->reloc_count,
+	   (long) input_section->reloc_count,
 	   (info->relocateable) ? " (relocatable)" : "");
 #endif
 
@@ -1322,8 +1322,8 @@ i370_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	  || !i370_elf_howto_table[(int)r_type])
 	{
 	  (*_bfd_error_handler) ("%s: unknown relocation type %d",
-				 bfd_get_filename (input_bfd),
-				 (int)r_type);
+				 bfd_archive_filename (input_bfd),
+				 (int) r_type);
 
 	  bfd_set_error (bfd_error_bad_value);
 	  ret = false;
@@ -1420,12 +1420,13 @@ i370_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	    }
 	}
 
-      switch ((int)r_type)
+      switch ((int) r_type)
 	{
 	default:
-	  (*_bfd_error_handler) ("%s: unknown relocation type %d for symbol %s",
-				 bfd_get_filename (input_bfd),
-				 (int)r_type, sym_name);
+	  (*_bfd_error_handler)
+	    ("%s: unknown relocation type %d for symbol %s",
+	     bfd_archive_filename (input_bfd),
+	     (int) r_type, sym_name);
 
 	  bfd_set_error (bfd_error_bad_value);
 	  ret = false;
@@ -1582,10 +1583,11 @@ i370_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	case (int)R_I370_COPY:
 	case (int)R_I370_RELATIVE:
-	  (*_bfd_error_handler) ("%s: Relocation %s is not yet supported for symbol %s.",
-				 bfd_get_filename (input_bfd),
-				 i370_elf_howto_table[ (int)r_type ]->name,
-				 sym_name);
+	  (*_bfd_error_handler)
+	    ("%s: Relocation %s is not yet supported for symbol %s.",
+	     bfd_archive_filename (input_bfd),
+	     i370_elf_howto_table[(int) r_type]->name,
+	     sym_name);
 
 	  bfd_set_error (bfd_error_invalid_operation);
 	  ret = false;

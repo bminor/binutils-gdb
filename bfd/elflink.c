@@ -431,10 +431,10 @@ _bfd_elf_create_linker_section (abfd, info, which, defaults)
 	  s->_raw_size += lsect->hole_size;
 	  if (lsect->hole_offset > lsect->max_hole_offset)
 	    {
-	      (*_bfd_error_handler) (_("%s: Section %s is already to large to put hole of %ld bytes in"),
+	      (*_bfd_error_handler) (_("%s: Section %s is too large to add hole of %ld bytes"),
 				     bfd_get_filename (abfd),
 				     lsect->name,
-				     (long)lsect->hole_size);
+				     (long) lsect->hole_size);
 
 	      bfd_set_error (bfd_error_bad_value);
 	      return (elf_linker_section_t *)0;

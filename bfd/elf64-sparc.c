@@ -1269,7 +1269,7 @@ sparc64_elf_check_relocs (abfd, info, sec, relocs)
 
 	default:
 	  (*_bfd_error_handler) (_("%s: check_relocs: unhandled reloc type %d"),
-				bfd_get_filename(abfd),
+				bfd_archive_filename (abfd),
 				ELF64_R_TYPE_ID (rel->r_info));
 	  return false;
 	}
@@ -1291,7 +1291,7 @@ sparc64_elf_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
      asection **secp ATTRIBUTE_UNUSED;
      bfd_vma *valp ATTRIBUTE_UNUSED;
 {
-  static char *stt_types[] = { "NOTYPE", "OBJECT", "FUNCTION" };
+  static const char *const stt_types[] = { "NOTYPE", "OBJECT", "FUNCTION" };
 
   if (ELF_ST_TYPE (sym->st_info) == STT_REGISTER)
     {
@@ -1306,7 +1306,7 @@ sparc64_elf_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
 	default:
           (*_bfd_error_handler)
             (_("%s: Only registers %%g[2367] can be declared using STT_REGISTER"),
-             bfd_get_filename (abfd));
+             bfd_archive_filename (abfd));
 	  return false;
 	}
 
@@ -1325,11 +1325,12 @@ sparc64_elf_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
       if (p->name != NULL && strcmp (p->name, *namep))
 	{
           (*_bfd_error_handler)
-            (_("Register %%g%d used incompatibly: "
-               "previously declared in %s to %s, in %s redefined to %s"),
-             (int)sym->st_value,
-             bfd_get_filename (p->abfd), *p->name ? p->name : "#scratch",
-             bfd_get_filename (abfd), **namep ? *namep : "#scratch");
+            (_("Register %%g%d used incompatibly: %s in %s"),
+             (int) sym->st_value,
+             **namep ? *namep : "#scratch", bfd_archive_filename (abfd));
+          (*_bfd_error_handler)
+            (_("  previously %s in %s"),
+             *p->name ? p->name : "#scratch", bfd_archive_filename (p->abfd));
 	  return false;
 	}
 
@@ -1346,11 +1347,14 @@ sparc64_elf_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
 		{
 		  unsigned char type = h->type;
 
-		  if (type > STT_FUNC) type = 0;
+		  if (type > STT_FUNC)
+		    type = 0;
 		  (*_bfd_error_handler)
-		    (_("Symbol `%s' has differing types: "
-		       "previously %s, REGISTER in %s"),
-		     *namep, stt_types [type], bfd_get_filename (abfd));
+		    (_("Symbol `%s' has differing types: %s in %s"),
+		     *namep, "REGISTER", bfd_archive_filename (abfd));
+		  (*_bfd_error_handler)
+		    (_("  previously %s in %s"),
+		     stt_types[type], bfd_archive_filename (p->abfd));
 		  return false;
 		}
 
@@ -1392,12 +1396,14 @@ sparc64_elf_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
 	  {
 	    unsigned char type = ELF_ST_TYPE (sym->st_info);
 
-	    if (type > STT_FUNC) type = 0;
+	    if (type > STT_FUNC)
+	      type = 0;
 	    (*_bfd_error_handler)
-	      (_("Symbol `%s' has differing types: "
-		 "REGISTER in %s, %s in %s"),
-	       *namep, bfd_get_filename (p->abfd), stt_types [type],
-	       bfd_get_filename (abfd));
+	      (_("Symbol `%s' has differing types: %s in %s"),
+	       *namep, stt_types[type], bfd_archive_filename (abfd));
+	    (*_bfd_error_handler)
+	      (_("  previously %s in %s"),
+	       "REGISTER", bfd_archive_filename (p->abfd));
 	    return false;
 	  }
     }
@@ -2272,7 +2278,7 @@ sparc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 				BFD_FAIL ();
 				(*_bfd_error_handler)
 				  (_("%s: probably compiled without -fPIC?"),
-				   bfd_get_filename (input_bfd));
+				   bfd_archive_filename (input_bfd));
 				bfd_set_error (bfd_error_bad_value);
 				return false;
 			      }
@@ -3002,7 +3008,7 @@ sparc64_elf_merge_private_bfd_data (ibfd, obfd)
 	      error = true;
 	      (*_bfd_error_handler)
 		(_("%s: linking UltraSPARC specific with HAL specific code"),
-		 bfd_get_filename (ibfd));
+		 bfd_archive_filename (ibfd));
 	    }
 	  /* Choose the most restrictive memory ordering.  */
 	  old_mm = (old_flags & EF_SPARCV9_MM);
@@ -3021,7 +3027,7 @@ sparc64_elf_merge_private_bfd_data (ibfd, obfd)
           error = true;
           (*_bfd_error_handler)
             (_("%s: uses different e_flags (0x%lx) fields than previous modules (0x%lx)"),
-             bfd_get_filename (ibfd), (long)new_flags, (long)old_flags);
+             bfd_archive_filename (ibfd), (long) new_flags, (long) old_flags);
         }
 
       elf_elfheader (obfd)->e_flags = old_flags;

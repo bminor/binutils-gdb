@@ -1667,7 +1667,7 @@ translate_to_native_sym_flags (abfd, cache_ptr, sym_pointer)
 	 file.  */
       (*_bfd_error_handler)
 	("%s: can not represent section for symbol `%s' in a.out object file format",
-	 bfd_get_filename (abfd),
+	 bfd_archive_filename (abfd),
 	 cache_ptr->name != NULL ? cache_ptr->name : "*unknown*");
       bfd_set_error (bfd_error_nonrepresentable_section);
       return false;
@@ -1695,7 +1695,7 @@ translate_to_native_sym_flags (abfd, cache_ptr, sym_pointer)
     {
       (*_bfd_error_handler)
 	("%s: can not represent section `%s' in a.out object file format",
-	 bfd_get_filename (abfd), bfd_get_section_name (abfd, sec));
+	 bfd_archive_filename (abfd), bfd_get_section_name (abfd, sec));
       bfd_set_error (bfd_error_nonrepresentable_section);
       return false;
     }

@@ -1239,7 +1239,7 @@ xcoff_link_add_symbols (abfd, info)
 		{
 		  (*_bfd_error_handler)
 		    (_("%s: `%s' has line numbers but no enclosing section"),
-		     bfd_get_filename (abfd), name);
+		     bfd_archive_filename (abfd), name);
 		  bfd_set_error (bfd_error_bad_value);
 		  goto error_return;
 		}
@@ -1292,7 +1292,7 @@ xcoff_link_add_symbols (abfd, info)
 	{
 	  (*_bfd_error_handler)
 	    (_("%s: class %d symbol `%s' has no aux entries"),
-	     bfd_get_filename (abfd), sym.n_sclass, name);
+	     bfd_archive_filename (abfd), sym.n_sclass, name);
 	  bfd_set_error (bfd_error_bad_value);
 	  goto error_return;
 	}
@@ -1315,7 +1315,7 @@ xcoff_link_add_symbols (abfd, info)
 	default:
 	  (*_bfd_error_handler)
 	    (_("%s: symbol `%s' has unrecognized csect type %d"),
-	     bfd_get_filename (abfd), name, smtyp);
+	     bfd_archive_filename (abfd), name, smtyp);
 	  bfd_set_error (bfd_error_bad_value);
 	  goto error_return;
 
@@ -1327,7 +1327,7 @@ xcoff_link_add_symbols (abfd, info)
 	    {
 	      (*_bfd_error_handler)
 		(_("%s: bad XTY_ER symbol `%s': class %d scnum %d scnlen %d"),
-		 bfd_get_filename (abfd), name, sym.n_sclass, sym.n_scnum,
+		 bfd_archive_filename (abfd), name, sym.n_sclass, sym.n_scnum,
 		 aux.x_csect.x_scnlen.l);
 	      bfd_set_error (bfd_error_bad_value);
 	      goto error_return;
@@ -1363,7 +1363,7 @@ xcoff_link_add_symbols (abfd, info)
 		{
 		  (*_bfd_error_handler)
 		    (_("%s: XMC_TC0 symbol `%s' is class %d scnlen %d"),
-		     bfd_get_filename (abfd), name, sym.n_sclass,
+		     bfd_archive_filename (abfd), name, sym.n_sclass,
 		     aux.x_csect.x_scnlen.l);
 		  bfd_set_error (bfd_error_bad_value);
 		  goto error_return;
@@ -1515,7 +1515,7 @@ xcoff_link_add_symbols (abfd, info)
 	      {
 		(*_bfd_error_handler)
 		  (_("%s: csect `%s' not in enclosing section"),
-		   bfd_get_filename (abfd), name);
+		   bfd_archive_filename (abfd), name);
 		bfd_set_error (bfd_error_bad_value);
 		goto error_return;
 	      }
@@ -1622,7 +1622,7 @@ xcoff_link_add_symbols (abfd, info)
 	      {
 		(*_bfd_error_handler)
 		  (_("%s: misplaced XTY_LD `%s'"),
-		   bfd_get_filename (abfd), name);
+		   bfd_archive_filename (abfd), name);
 		bfd_set_error (bfd_error_bad_value);
 		goto error_return;
 	      }
@@ -1946,7 +1946,7 @@ xcoff_link_add_symbols (abfd, info)
 		{
 		  (*_bfd_error_handler)
 		    (_("%s: reloc %s:%d not in csect"),
-		     bfd_get_filename (abfd), o->name, i);
+		     bfd_archive_filename (abfd), o->name, i);
 		  bfd_set_error (bfd_error_bad_value);
 		  goto error_return;
 		}
@@ -5259,7 +5259,7 @@ xcoff_link_input_bfd (finfo, input_bfd)
 			{
 			  (*_bfd_error_handler)
 			    (_("%s: loader reloc in unrecognized section `%s'"),
-			     bfd_get_filename (input_bfd),
+			     bfd_archive_filename (input_bfd),
 			     sec->name);
 			  bfd_set_error (bfd_error_nonrepresentable_section);
 			  return false;
@@ -5281,7 +5281,7 @@ xcoff_link_input_bfd (finfo, input_bfd)
 			{
 			  (*_bfd_error_handler)
 			    (_("%s: `%s' in loader reloc but not loader sym"),
-			     bfd_get_filename (input_bfd),
+			     bfd_archive_filename (input_bfd),
 			     h->root.root.string);
 			  bfd_set_error (bfd_error_bad_value);
 			  return false;
@@ -5296,7 +5296,7 @@ xcoff_link_input_bfd (finfo, input_bfd)
 		    {
 		      (*_bfd_error_handler)
 			(_("%s: loader reloc in read-only section %s"),
-			 bfd_get_filename (input_bfd),
+			 bfd_archive_filename (input_bfd),
 			 bfd_get_section_name (finfo->output_bfd,
 					       o->output_section));
 		      bfd_set_error (bfd_error_invalid_operation);

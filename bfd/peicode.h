@@ -783,12 +783,12 @@ pe_ILF_build_a_bfd (bfd *           abfd,
     case IMPORT_CONST:
       /* XXX code yet to be written.  */
       _bfd_error_handler (_("%s: Unhandled import type; %x"),
-			  bfd_get_filename (abfd), import_type);
+			  bfd_archive_filename (abfd), import_type);
       return false;
 
     default:
       _bfd_error_handler (_("%s: Unrecognised import type; %x"),
-			  bfd_get_filename (abfd), import_type);
+			  bfd_archive_filename (abfd), import_type);
       return false;
     }
 
@@ -802,7 +802,7 @@ pe_ILF_build_a_bfd (bfd *           abfd,
 
     default:
       _bfd_error_handler (_("%s: Unrecognised import name type; %x"),
-			  bfd_get_filename (abfd), import_name_type);
+			  bfd_archive_filename (abfd), import_name_type);
       return false;
     }
 
@@ -1160,7 +1160,7 @@ pe_ILF_object_p (bfd * abfd)
       _bfd_error_handler
 	(
 _("%s: Unrecognised machine type (0x%x) in Import Library Format archive"),
-         bfd_get_filename (abfd), machine);
+         bfd_archive_filename (abfd), machine);
       bfd_set_error (bfd_error_malformed_archive);
 
       return NULL;
@@ -1172,7 +1172,7 @@ _("%s: Unrecognised machine type (0x%x) in Import Library Format archive"),
       _bfd_error_handler
 	(
 _("%s: Recognised but unhandled machine type (0x%x) in Import Library Format archive"),
-	 bfd_get_filename (abfd), machine);
+	 bfd_archive_filename (abfd), machine);
       bfd_set_error (bfd_error_wrong_format);
 
       return NULL;
@@ -1189,7 +1189,7 @@ _("%s: Recognised but unhandled machine type (0x%x) in Import Library Format arc
     {
       _bfd_error_handler
 	(_("%s: size field is zero in Import Library Format header"),
-	 bfd_get_filename (abfd));
+	 bfd_archive_filename (abfd));
       bfd_set_error (bfd_error_malformed_archive);
 
       return NULL;
@@ -1217,7 +1217,7 @@ _("%s: Recognised but unhandled machine type (0x%x) in Import Library Format arc
     {
       _bfd_error_handler
 	(_("%s: string not null terminated in ILF object file."),
-	 bfd_get_filename (abfd));
+	 bfd_archive_filename (abfd));
       bfd_set_error (bfd_error_malformed_archive);
 
       return NULL;

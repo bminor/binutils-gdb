@@ -1535,7 +1535,7 @@ elf32_sparc_relocate_section (output_bfd, info, input_bfd, input_section,
 			      BFD_FAIL ();
 			      (*_bfd_error_handler)
 				(_("%s: probably compiled without -fPIC?"),
-				 bfd_get_filename (input_bfd));
+				 bfd_archive_filename (input_bfd));
 			      bfd_set_error (bfd_error_bad_value);
 			      return false;
 			    }
@@ -1988,7 +1988,7 @@ elf32_sparc_merge_private_bfd_data (ibfd, obfd)
       error = true;
       (*_bfd_error_handler)
 	(_("%s: compiled for a 64 bit system and target is 32 bit"),
-	 bfd_get_filename (ibfd));
+	 bfd_archive_filename (ibfd));
     }
   else if ((ibfd->flags & DYNAMIC) == 0)
     {
@@ -2002,7 +2002,7 @@ elf32_sparc_merge_private_bfd_data (ibfd, obfd)
     {
       (*_bfd_error_handler)
 	(_("%s: linking little endian files with big endian files"),
-	 bfd_get_filename (ibfd));
+	 bfd_archive_filename (ibfd));
       error = true;
     }
   previous_ibfd_e_flags = elf_elfheader (ibfd)->e_flags & EF_SPARC_LEDATA;

@@ -1010,8 +1010,8 @@ elf64_alpha_relax_with_lituse (info, symval, irel, irelend)
     {
       ((*_bfd_error_handler)
        ("%s: %s+0x%lx: warning: LITERAL relocation against unexpected insn",
-	bfd_get_filename (info->abfd), info->sec->name,
-	(unsigned long)irel->r_offset));
+	bfd_archive_filename (info->abfd), info->sec->name,
+	(unsigned long) irel->r_offset));
       return irel;
     }
 
@@ -1307,7 +1307,7 @@ elf64_alpha_relax_without_lituse (info, symval, irel)
     {
       ((*_bfd_error_handler)
        ("%s: %s+0x%lx: warning: LITERAL relocation against unexpected insn",
-	bfd_get_filename (info->abfd), info->sec->name,
+	bfd_archive_filename (info->abfd), info->sec->name,
 	(unsigned long) irel->r_offset));
       return true;
     }
@@ -2907,7 +2907,7 @@ elf64_alpha_size_got_sections (output_bfd, info)
 	      /* Yikes! A single object file has too many entries.  */
 	      (*_bfd_error_handler)
 	        (_("%s: .got subsegment exceeds 64K (size %d)"),
-	         bfd_get_filename (i),
+	         bfd_archive_filename (i),
 	         alpha_elf_tdata (this_got)->total_got_entries * 8);
 	      return false;
 	    }
@@ -3461,7 +3461,7 @@ elf64_alpha_relocate_section (output_bfd, info, input_bfd, input_section,
             {
               (*_bfd_error_handler)
                 (_("%s: gp-relative relocation against dynamic symbol %s"),
-                 bfd_get_filename (input_bfd), h->root.root.root.string);
+                 bfd_archive_filename (input_bfd), h->root.root.root.string);
               ret_val = false;
             }
 	  BFD_ASSERT(gp != 0);
@@ -3473,7 +3473,7 @@ elf64_alpha_relocate_section (output_bfd, info, input_bfd, input_section,
             {
               (*_bfd_error_handler)
                 (_("%s: gp-relative relocation against dynamic symbol %s"),
-                 bfd_get_filename (input_bfd), h->root.root.root.string);
+                 bfd_archive_filename (input_bfd), h->root.root.root.string);
               ret_val = false;
             }
 	  BFD_ASSERT(gp != 0);

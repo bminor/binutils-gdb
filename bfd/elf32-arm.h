@@ -282,8 +282,8 @@ find_thumb_glue (link_info, name, input_bfd)
 
   if (hash == NULL)
     /* xgettext:c-format */
-    _bfd_error_handler (_("%s: unable to find THUMB glue '%s' for `%s'"),
-			bfd_get_filename (input_bfd), tmp_name, name);
+    (*_bfd_error_handler) (_("%s: unable to find THUMB glue '%s' for `%s'"),
+			   bfd_archive_filename (input_bfd), tmp_name, name);
 
   free (tmp_name);
 
@@ -317,8 +317,8 @@ find_arm_glue (link_info, name, input_bfd)
 
   if (myh == NULL)
     /* xgettext:c-format */
-    _bfd_error_handler (_("%s: unable to find ARM glue '%s' for `%s'"),
-			bfd_get_filename (input_bfd), tmp_name, name);
+    (*_bfd_error_handler) (_("%s: unable to find ARM glue '%s' for `%s'"),
+			   bfd_archive_filename (input_bfd), tmp_name, name);
 
   free (tmp_name);
 
@@ -882,12 +882,12 @@ elf32_thumb_to_arm_stub (info, name, input_bfd, output_bfd, input_section,
 	  && sym_sec->owner != NULL
 	  && !INTERWORK_FLAG (sym_sec->owner))
 	{
-	  _bfd_error_handler
+	  (*_bfd_error_handler)
 	    (_("%s(%s): warning: interworking not enabled."),
-	     bfd_get_filename (sym_sec->owner), name);
-	  _bfd_error_handler
+	     bfd_archive_filename (sym_sec->owner), name);
+	  (*_bfd_error_handler)
 	    (_("  first occurrence: %s: thumb call to arm"),
-	     bfd_get_filename (input_bfd));
+	     bfd_archive_filename (input_bfd));
 
 	  return false;
 	}
@@ -986,12 +986,12 @@ elf32_arm_to_thumb_stub (info, name, input_bfd, output_bfd, input_section,
 	  && sym_sec->owner != NULL
 	  && !INTERWORK_FLAG (sym_sec->owner))
 	{
-	  _bfd_error_handler
+	  (*_bfd_error_handler)
 	    (_("%s(%s): warning: interworking not enabled."),
-	     bfd_get_filename (sym_sec->owner), name);
-	  _bfd_error_handler
+	     bfd_archive_filename (sym_sec->owner), name);
+	  (*_bfd_error_handler)
 	    (_("  first occurrence: %s: arm call to thumb"),
-	     bfd_get_filename (input_bfd));
+	     bfd_archive_filename (input_bfd));
 	}
 
       --my_offset;
@@ -1231,10 +1231,10 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
 	      /* FIXME: Should we translate the instruction into a BL
 		 instruction instead ?  */
 	      if (sym_flags != STT_ARM_TFUNC)
-		_bfd_error_handler (_("\
+		(*_bfd_error_handler) (_("\
 %s: Warning: Arm BLX instruction targets Arm function '%s'."),
-				    bfd_get_filename (input_bfd),
-				    h ? h->root.root.string : "(local)");
+				       bfd_archive_filename (input_bfd),
+				       h ? h->root.root.string : "(local)");
 	    }
 	  else
 #endif
@@ -1427,10 +1427,10 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
 	    /* FIXME: Should we translate the instruction into a BL
 	       instruction instead ?  */
 	    if (sym_flags == STT_ARM_TFUNC)
-	      _bfd_error_handler (_("\
+	      (*_bfd_error_handler) (_("\
 %s: Warning: Thumb BLX instruction targets thumb function '%s'."),
-				  bfd_get_filename (input_bfd),
-				  h ? h->root.root.string : "(local)");
+				     bfd_archive_filename (input_bfd),
+				     h ? h->root.root.string : "(local)");
 	  }
 	else
 #endif
@@ -1924,7 +1924,7 @@ elf32_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 		    {
 		      (*_bfd_error_handler)
 			(_("%s: warning: unresolvable relocation against symbol `%s' from %s section"),
-			 bfd_get_filename (input_bfd), h->root.root.string,
+			 bfd_archive_filename (input_bfd), h->root.root.string,
 			 bfd_get_section_name (input_bfd, input_section));
 		      relocation_needed = 0;
 		    }
@@ -2037,13 +2037,13 @@ elf32_arm_set_private_flags (abfd, flags)
       if (EF_ARM_EABI_VERSION (flags) == EF_ARM_EABI_UNKNOWN)
 	{
 	  if (flags & EF_ARM_INTERWORK)
-	    _bfd_error_handler (_("\
+	    (*_bfd_error_handler) (_("\
 Warning: Not setting interwork flag of %s since it has already been specified as non-interworking"),
-				bfd_get_filename (abfd));
+				   bfd_archive_filename (abfd));
 	  else
-	    _bfd_error_handler (_("\
+	    (*_bfd_error_handler) (_("\
 Warning: Clearing the interwork flag of %s due to outside request"),
-				bfd_get_filename (abfd));
+				   bfd_archive_filename (abfd));
 	}
     }
   else
@@ -2089,9 +2089,12 @@ elf32_arm_copy_private_bfd_data (ibfd, obfd)
       if ((in_flags & EF_ARM_INTERWORK) != (out_flags & EF_ARM_INTERWORK))
 	{
 	  if (out_flags & EF_ARM_INTERWORK)
-	    _bfd_error_handler (_("\
+	    {
+	      (*_bfd_error_handler) (_("\
 Warning: Clearing the interwork flag in %s because non-interworking code in %s has been linked with it"),
-			  bfd_get_filename (obfd), bfd_get_filename (ibfd));
+				     bfd_get_filename (obfd),
+				     bfd_archive_filename (ibfd));
+	    }
 
 	  in_flags &= ~EF_ARM_INTERWORK;
 	}
@@ -2183,12 +2186,12 @@ elf32_arm_merge_private_bfd_data (ibfd, obfd)
   /* Complain about various flag mismatches.  */
   if (EF_ARM_EABI_VERSION (in_flags) != EF_ARM_EABI_VERSION (out_flags))
     {
-      _bfd_error_handler (_("\
+      (*_bfd_error_handler) (_("\
 Error: %s compiled for EABI version %d, whereas %s is compiled for version %d"),
-			 bfd_get_filename (ibfd),
-			 (in_flags & EF_ARM_EABIMASK) >> 24,
-			 bfd_get_filename (obfd),
-			 (out_flags & EF_ARM_EABIMASK) >> 24);
+			     bfd_archive_filename (ibfd),
+			     (in_flags & EF_ARM_EABIMASK) >> 24,
+			     bfd_get_filename (obfd),
+			     (out_flags & EF_ARM_EABIMASK) >> 24);
       return false;
     }
 
@@ -2197,49 +2200,51 @@ Error: %s compiled for EABI version %d, whereas %s is compiled for version %d"),
     {
       if ((in_flags & EF_ARM_APCS_26) != (out_flags & EF_ARM_APCS_26))
 	{
-	  _bfd_error_handler (_("\
+	  (*_bfd_error_handler) (_("\
 Error: %s compiled for APCS-%d, whereas %s is compiled for APCS-%d"),
-			bfd_get_filename (ibfd),
-			in_flags & EF_ARM_APCS_26 ? 26 : 32,
-			bfd_get_filename (obfd),
-			out_flags & EF_ARM_APCS_26 ? 26 : 32);
+				 bfd_archive_filename (ibfd),
+				 in_flags & EF_ARM_APCS_26 ? 26 : 32,
+				 bfd_get_filename (obfd),
+				 out_flags & EF_ARM_APCS_26 ? 26 : 32);
 	  flags_compatible = false;
 	}
 
       if ((in_flags & EF_ARM_APCS_FLOAT) != (out_flags & EF_ARM_APCS_FLOAT))
 	{
-	  _bfd_error_handler (_("\
+	  char *s1 = in_flags & EF_ARM_APCS_FLOAT ? _("float") : _("integer");
+	  char *s2 = out_flags & EF_ARM_APCS_26 ? _("float") : _("integer");
+	  (*_bfd_error_handler) (_("\
 Error: %s passes floats in %s registers, whereas %s passes them in %s registers"),
-			bfd_get_filename (ibfd),
-		     in_flags & EF_ARM_APCS_FLOAT ? _("float") : _("integer"),
-			bfd_get_filename (obfd),
-		      out_flags & EF_ARM_APCS_26 ? _("float") : _("integer"));
+				 bfd_archive_filename (ibfd), s1,
+				 bfd_get_filename (obfd), s2);
 	  flags_compatible = false;
 	}
 
 #ifdef EF_ARM_SOFT_FLOAT
       if ((in_flags & EF_ARM_SOFT_FLOAT) != (out_flags & EF_ARM_SOFT_FLOAT))
 	{
-	  _bfd_error_handler (_ ("\
+	  char *s1 = in_flags & EF_ARM_SOFT_FLOAT ? _("soft") : _("hard");
+	  char *s2 = out_flags & EF_ARM_SOFT_FLOAT ? _("soft") : _("hard");
+	  (*_bfd_error_handler) (_ ("\
 Error: %s uses %s floating point, whereas %s uses %s floating point"),
-			      bfd_get_filename (ibfd),
-			      in_flags & EF_ARM_SOFT_FLOAT ? _("soft") : _("hard"),
-			      bfd_get_filename (obfd),
-			      out_flags & EF_ARM_SOFT_FLOAT ? _("soft") : _("hard"));
+				 bfd_archive_filename (ibfd), s1,
+				 bfd_get_filename (obfd), s2);
 	  flags_compatible = false;
 	}
 #endif
 
       /* Interworking mismatch is only a warning.  */
       if ((in_flags & EF_ARM_INTERWORK) != (out_flags & EF_ARM_INTERWORK))
-	_bfd_error_handler (_("\
+	{
+	  char *s1 = (in_flags & EF_ARM_INTERWORK
+		      ? _("supports") : _("does not support"));
+	  char *s2 = out_flags & EF_ARM_INTERWORK ? _("does") : _("does not");
+	  (*_bfd_error_handler) (_("\
 Warning: %s %s interworking, whereas %s %s"),
-			    bfd_get_filename (ibfd),
-			    in_flags & EF_ARM_INTERWORK ? _("supports") : _("does not support"),
-			    bfd_get_filename (obfd),
-			    out_flags & EF_ARM_INTERWORK ? _("does") : _("does not"));
+				 bfd_archive_filename (ibfd), s1,
+				 bfd_get_filename (obfd), s2);
+	}
     }
-
   return flags_compatible;
 }
 

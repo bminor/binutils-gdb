@@ -282,7 +282,7 @@ mcore_coff_unsupported_reloc (abfd, reloc_entry, symbol, data, input_section,
   BFD_ASSERT (reloc_entry->howto != (reloc_howto_type *)0);
 
   _bfd_error_handler (_("%s: Relocation %s (%d) is not currently supported.\n"),
-		      bfd_get_filename (abfd),
+		      bfd_archive_filename (abfd),
 		      reloc_entry->howto->name,
 		      reloc_entry->howto->type);
 
@@ -396,10 +396,10 @@ coff_mcore_relocate_section (output_bfd, info, input_bfd, input_section,
       && output_bfd->xvec->byteorder != BFD_ENDIAN_UNKNOWN)
     {
       (*_bfd_error_handler)
-	(_("%s: compiled for a %s endian system and target is %s endian.\n"),
-	 bfd_get_filename (input_bfd),
-         bfd_big_endian (input_bfd) ? "big" : "little",
-         bfd_big_endian (output_bfd) ? "big" : "little");
+	(_("%s: compiled for a %s system and target is %s.\n"),
+	 bfd_archive_filename (input_bfd),
+         bfd_big_endian (input_bfd) ? _("big endian") : _("little endian"),
+         bfd_big_endian (output_bfd) ? _("big endian") : _("little endian"));
 
       bfd_set_error (bfd_error_wrong_format);
       return false;
@@ -504,7 +504,7 @@ coff_mcore_relocate_section (output_bfd, info, input_bfd, input_section,
 	{
 	default:
 	  _bfd_error_handler (_("%s: unsupported relocation type 0x%02x"),
-			      bfd_get_filename (input_bfd), r_type);
+			      bfd_archive_filename (input_bfd), r_type);
 	  bfd_set_error (bfd_error_bad_value);
 	  return false;
 
@@ -512,7 +512,7 @@ coff_mcore_relocate_section (output_bfd, info, input_bfd, input_section,
 	  fprintf (stderr,
 		   _("Warning: unsupported reloc %s <file %s, section %s>\n"),
 		   howto->name,
-		   bfd_get_filename (input_bfd),
+		   bfd_archive_filename (input_bfd),
 		   input_section->name);
 
 	  fprintf (stderr,"sym %ld (%s), r_vaddr %ld (%lx)\n",

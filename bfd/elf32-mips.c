@@ -2599,7 +2599,7 @@ _bfd_mips_elf_merge_private_bfd_data (ibfd, obfd)
       old_flags &= ~EF_MIPS_PIC;
       (*_bfd_error_handler)
 	(_("%s: linking PIC files with non-PIC files"),
-	 bfd_get_filename (ibfd));
+	 bfd_archive_filename (ibfd));
       ok = false;
     }
 
@@ -2609,7 +2609,7 @@ _bfd_mips_elf_merge_private_bfd_data (ibfd, obfd)
       old_flags &= ~EF_MIPS_CPIC;
       (*_bfd_error_handler)
 	(_("%s: linking abicalls files with non-abicalls files"),
-	 bfd_get_filename (ibfd));
+	 bfd_archive_filename (ibfd));
       ok = false;
     }
 
@@ -2638,7 +2638,7 @@ _bfd_mips_elf_merge_private_bfd_data (ibfd, obfd)
 	    {
 	      (*_bfd_error_handler)
 	       (_("%s: ISA mismatch (-mips%d) with previous modules (-mips%d)"),
-		bfd_get_filename (ibfd), new_isa, old_isa);
+		bfd_archive_filename (ibfd), new_isa, old_isa);
 	      ok = false;
 	    }
 	}
@@ -2647,7 +2647,7 @@ _bfd_mips_elf_merge_private_bfd_data (ibfd, obfd)
 	{
 	  (*_bfd_error_handler)
 	    (_("%s: ISA mismatch (%d) with previous modules (%d)"),
-	     bfd_get_filename (ibfd),
+	     bfd_archive_filename (ibfd),
 	     elf_mips_mach (new_flags),
 	     elf_mips_mach (old_flags));
 	  ok = false;
@@ -2670,7 +2670,7 @@ _bfd_mips_elf_merge_private_bfd_data (ibfd, obfd)
 	{
 	  (*_bfd_error_handler)
 	    (_("%s: ABI mismatch: linking %s module with previous %s modules"),
-	     bfd_get_filename (ibfd),
+	     bfd_archive_filename (ibfd),
 	     elf_mips_abi_name (ibfd),
 	     elf_mips_abi_name (obfd));
 	  ok = false;
@@ -2684,7 +2684,7 @@ _bfd_mips_elf_merge_private_bfd_data (ibfd, obfd)
     {
       (*_bfd_error_handler)
 	(_("%s: uses different e_flags (0x%lx) fields than previous modules (0x%lx)"),
-	 bfd_get_filename (ibfd), (unsigned long) new_flags,
+	 bfd_archive_filename (ibfd), (unsigned long) new_flags,
 	 (unsigned long) old_flags);
       ok = false;
     }
@@ -6731,7 +6731,7 @@ mips_elf_perform_relocation (info, howto, relocation, value,
 	{
 	  (*_bfd_error_handler)
 	    (_("%s: %s+0x%lx: jump to stub routine which is not jal"),
-	     bfd_get_filename (input_bfd),
+	     bfd_archive_filename (input_bfd),
 	     input_section->name,
 	     (unsigned long) relocation->r_offset);
 	  bfd_set_error (bfd_error_bad_value);
@@ -7720,15 +7720,9 @@ _bfd_mips_elf_check_relocs (abfd, info, sec, relocs)
 	h = NULL;
       else if (r_symndx >= extsymoff + NUM_SHDR_ENTRIES (symtab_hdr))
 	{
-	  if (abfd->my_archive)
-	    (*_bfd_error_handler)
-	      (_("%s(%s) Malformed reloc detected for section %s"),
-	       bfd_get_filename (abfd->my_archive),
-	       bfd_get_filename (abfd), name);
-	  else
-	    (*_bfd_error_handler)
-	      (_("%s: Malformed reloc detected for section %s"),
-	       bfd_get_filename (abfd), name);
+	  (*_bfd_error_handler)
+	    (_("%s: Malformed reloc detected for section %s"),
+	     bfd_archive_filename (abfd), name);
 	  bfd_set_error (bfd_error_bad_value);
 	  return false;
 	}
@@ -7806,7 +7800,7 @@ _bfd_mips_elf_check_relocs (abfd, info, sec, relocs)
 	    {
 	      (*_bfd_error_handler)
 		(_("%s: CALL16 reloc at 0x%lx not against global symbol"),
-		 bfd_get_filename (abfd), (unsigned long) rel->r_offset);
+		 bfd_archive_filename (abfd), (unsigned long) rel->r_offset);
 	      bfd_set_error (bfd_error_bad_value);
 	      return false;
 	    }

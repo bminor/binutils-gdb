@@ -1454,7 +1454,7 @@ ppc64_elf_merge_private_bfd_data (ibfd, obfd)
       else
 	msg = _("%s: compiled for a little endian system and target is big endian");
 
-      (*_bfd_error_handler) (msg, bfd_get_filename (ibfd));
+      (*_bfd_error_handler) (msg, bfd_archive_filename (ibfd));
 
       bfd_set_error (bfd_error_wrong_format);
       return false;
@@ -1488,7 +1488,7 @@ ppc64_elf_merge_private_bfd_data (ibfd, obfd)
 	  error = true;
 	  (*_bfd_error_handler)
 	    (_("%s: compiled with -mrelocatable and linked with modules compiled normally"),
-	     bfd_get_filename (ibfd));
+	     bfd_archive_filename (ibfd));
 	}
       else if ((new_flags & (EF_PPC_RELOCATABLE | EF_PPC_RELOCATABLE_LIB)) == 0
 	       && (old_flags & EF_PPC_RELOCATABLE) != 0)
@@ -1496,7 +1496,7 @@ ppc64_elf_merge_private_bfd_data (ibfd, obfd)
 	  error = true;
 	  (*_bfd_error_handler)
 	    (_("%s: compiled normally and linked with modules compiled with -mrelocatable"),
-	     bfd_get_filename (ibfd));
+	     bfd_archive_filename (ibfd));
 	}
 
       /* The output is -mrelocatable-lib iff both the input files are.  */
@@ -1523,7 +1523,7 @@ ppc64_elf_merge_private_bfd_data (ibfd, obfd)
 	  error = true;
 	  (*_bfd_error_handler)
 	    (_("%s: uses different e_flags (0x%lx) fields than previous modules (0x%lx)"),
-	     bfd_get_filename (ibfd), (long) new_flags, (long) old_flags);
+	     bfd_archive_filename (ibfd), (long) new_flags, (long) old_flags);
 	}
 
       if (error)
@@ -1632,7 +1632,7 @@ ppc64_elf_check_relocs (abfd, info, sec, relocs)
 #ifdef DEBUG
   fprintf (stderr, "ppc64_elf_check_relocs called for section %s in %s\n",
 	   bfd_get_section_name (abfd, sec),
-	   bfd_get_filename (abfd));
+	   bfd_archive_filename (abfd));
 #endif
 
   dynobj = elf_hash_table (info)->dynobj;
@@ -2670,7 +2670,7 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 
 #ifdef DEBUG
   fprintf (stderr, "ppc64_elf_relocate_section called for %s section %s, %ld relocations%s\n",
-	   bfd_get_filename (input_bfd),
+	   bfd_archive_filename (input_bfd),
 	   bfd_section_name (input_bfd, input_section),
 	   (long) input_section->reloc_count,
 	   (info->relocateable) ? " (relocatable)" : "");
@@ -2726,7 +2726,7 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	  || !ppc64_elf_howto_table[(int) r_type])
 	{
 	  (*_bfd_error_handler) (_("%s: unknown relocation type %d"),
-				 bfd_get_filename (input_bfd),
+				 bfd_archive_filename (input_bfd),
 				 (int) r_type);
 	  bfd_set_error (bfd_error_bad_value);
 	  ret = false;
@@ -2879,7 +2879,7 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	  if (((relocation + addend) & 3) != 0)
 	    {
 	      (*_bfd_error_handler) (_("%s: error: relocation %s not a multiple of 4"),
-				     bfd_get_filename (input_bfd),
+				     bfd_archive_filename (input_bfd),
 				     howto->name);
 	      bfd_set_error (bfd_error_bad_value);
 	      ret = false;
@@ -2892,7 +2892,7 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	{
 	default:
 	  (*_bfd_error_handler) (_("%s: unknown relocation type %d for symbol %s"),
-				 bfd_get_filename (input_bfd),
+				 bfd_archive_filename (input_bfd),
 				 (int) r_type, sym_name);
 
 	  bfd_set_error (bfd_error_bad_value);
@@ -3309,7 +3309,7 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	case (int) R_PPC64_PLTGOT16_HI:
 	case (int) R_PPC64_PLTGOT16_HA:
 	  (*_bfd_error_handler) (_("%s: Relocation %s is not yet supported for symbol %s."),
-				 bfd_get_filename (input_bfd),
+				 bfd_archive_filename (input_bfd),
 				 ppc64_elf_howto_table[(int) r_type]->name,
 				 sym_name);
 

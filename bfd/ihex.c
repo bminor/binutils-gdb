@@ -257,7 +257,7 @@ ihex_bad_byte (abfd, lineno, c, error)
 	}
       (*_bfd_error_handler)
 	(_("%s:%d: unexpected character `%s' in Intel Hex file\n"),
-	 bfd_get_filename (abfd), lineno, buf);
+	 bfd_archive_filename (abfd), lineno, buf);
       bfd_set_error (bfd_error_bad_value);
     }
 }
@@ -367,7 +367,7 @@ ihex_scan (abfd)
 	    {
 	      (*_bfd_error_handler)
 		(_("%s:%u: bad checksum in Intel Hex file (expected %u, found %u)"),
-		 bfd_get_filename (abfd), lineno,
+		 bfd_archive_filename (abfd), lineno,
 		 (- chksum) & 0xff, (unsigned int) HEX2 (buf + 2 * i));
 	      bfd_set_error (bfd_error_bad_value);
 	      goto error_return;
@@ -421,7 +421,7 @@ ihex_scan (abfd)
 		{
 		  (*_bfd_error_handler)
 		    (_("%s:%u: bad extended address record length in Intel Hex file"),
-		     bfd_get_filename (abfd), lineno);
+		     bfd_archive_filename (abfd), lineno);
 		  bfd_set_error (bfd_error_bad_value);
 		  goto error_return;
 		}
@@ -438,7 +438,7 @@ ihex_scan (abfd)
 		{
 		  (*_bfd_error_handler)
 		    (_("%s:%u: bad extended start address length in Intel Hex file"),
-		     bfd_get_filename (abfd), lineno);
+		     bfd_archive_filename (abfd), lineno);
 		  bfd_set_error (bfd_error_bad_value);
 		  goto error_return;
 		}
@@ -455,7 +455,7 @@ ihex_scan (abfd)
 		{
 		  (*_bfd_error_handler)
 		    (_("%s:%u: bad extended linear address record length in Intel Hex file"),
-		     bfd_get_filename (abfd), lineno);
+		     bfd_archive_filename (abfd), lineno);
 		  bfd_set_error (bfd_error_bad_value);
 		  goto error_return;
 		}
@@ -472,7 +472,7 @@ ihex_scan (abfd)
 		{
 		  (*_bfd_error_handler)
 		    (_("%s:%u: bad extended linear start address length in Intel Hex file"),
-		     bfd_get_filename (abfd), lineno);
+		     bfd_archive_filename (abfd), lineno);
 		  bfd_set_error (bfd_error_bad_value);
 		  goto error_return;
 		}
@@ -489,7 +489,7 @@ ihex_scan (abfd)
 	    default:
 	      (*_bfd_error_handler)
 		(_("%s:%u: unrecognized ihex type %u in Intel Hex file\n"),
-		 bfd_get_filename (abfd), lineno, type);
+		 bfd_archive_filename (abfd), lineno, type);
 	      bfd_set_error (bfd_error_bad_value);
 	      goto error_return;
 	    }
@@ -609,7 +609,7 @@ ihex_read_section (abfd, section, contents)
 	{
 	  (*_bfd_error_handler)
 	    (_("%s: internal error in ihex_read_section"),
-	     bfd_get_filename (abfd));
+	     bfd_archive_filename (abfd));
 	  bfd_set_error (bfd_error_bad_value);
 	  goto error_return;
 	}
@@ -644,7 +644,7 @@ ihex_read_section (abfd, section, contents)
     {
       (*_bfd_error_handler)
 	(_("%s: bad section length in ihex_read_section"),
-	 bfd_get_filename (abfd));
+	 bfd_archive_filename (abfd));
       bfd_set_error (bfd_error_bad_value);
       goto error_return;
     }

@@ -289,7 +289,7 @@ elf_i386_info_to_howto_rel (abfd, cache_ptr, dst)
 	  >= R_386_vt - R_386_ext))
     {
       (*_bfd_error_handler) (_("%s: invalid relocation type %d"),
-			     bfd_get_filename (abfd), (int) r_type);
+			     bfd_archive_filename (abfd), (int) r_type);
       indx = (unsigned int) R_386_NONE;
     }
   cache_ptr->howto = &elf_howto_table[indx];
@@ -581,15 +581,9 @@ elf_i386_check_relocs (abfd, info, sec, relocs)
 
       if (r_symndx >= NUM_SHDR_ENTRIES (symtab_hdr))
 	{
-	  if (abfd->my_archive)
-	    (*_bfd_error_handler) (_("%s(%s): bad symbol index: %d"),
-				   bfd_get_filename (abfd->my_archive),
-				   bfd_get_filename (abfd),
-				   r_symndx);
-	  else
-	    (*_bfd_error_handler) (_("%s: bad symbol index: %d"),
-				   bfd_get_filename (abfd),
-				   r_symndx);
+	  (*_bfd_error_handler) (_("%s: bad symbol index: %d"),
+				 bfd_archive_filename (abfd),
+				 r_symndx);
 	  return false;
 	}
 
@@ -748,15 +742,9 @@ elf_i386_check_relocs (abfd, info, sec, relocs)
 		      || strcmp (bfd_get_section_name (abfd, sec),
 				 name + 4) != 0)
 		    {
-		      if (abfd->my_archive)
-			(*_bfd_error_handler) (_("%s(%s): bad relocation section name `%s\'"),
-					       bfd_get_filename (abfd->my_archive),
-					       bfd_get_filename (abfd),
-					       name);
-		      else
-			(*_bfd_error_handler) (_("%s: bad relocation section name `%s\'"),
-					       bfd_get_filename (abfd),
-					       name);
+		      (*_bfd_error_handler) (_("%s: bad relocation section name `%s\'"),
+					     bfd_archive_filename (abfd),
+					     name);
 		    }
 
 		  sreloc = bfd_get_section_by_name (dynobj, name);
@@ -1744,17 +1732,9 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
 						       input_section),
 				 name + 4) != 0)
 		    {
-		      if (input_bfd->my_archive)
-			(*_bfd_error_handler)\
-			  (_("%s(%s): bad relocation section name `%s\'"),
-			   bfd_get_filename (input_bfd->my_archive),
-			   bfd_get_filename (input_bfd),
-			   name);
-		      else
-			(*_bfd_error_handler)
-			  (_("%s: bad relocation section name `%s\'"),
-			   bfd_get_filename (input_bfd),
-			   name);
+		      (*_bfd_error_handler)
+			(_("%s: bad relocation section name `%s\'"),
+			 bfd_archive_filename (input_bfd), name);
 		      return false;
 		    }
 
@@ -1836,7 +1816,7 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
 	       && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) != 0))
 	(*_bfd_error_handler)
 	  (_("%s(%s+0x%lx): unresolvable relocation against symbol `%s'"),
-	   bfd_get_filename (input_bfd),
+	   bfd_archive_filename (input_bfd),
 	   bfd_get_section_name (input_bfd, input_section),
 	   (long) rel->r_offset,
 	   h->root.root.string);

@@ -1367,7 +1367,7 @@ elf_hppa_relocate_section (output_bfd, info, input_bfd, input_section,
 		{
 		  (*_bfd_error_handler)
 		    (_("%s: warning: unresolvable relocation against symbol `%s' from %s section"),
-		     bfd_get_filename (input_bfd), h->root.root.string,
+		     bfd_archive_filename (input_bfd), h->root.root.string,
 		     bfd_get_section_name (input_bfd, input_section));
 		  relocation = 0;
 		}
@@ -1400,7 +1400,7 @@ elf_hppa_relocate_section (output_bfd, info, input_bfd, input_section,
 		{
 		  (*_bfd_error_handler)
 		    (_("%s: warning: unresolvable relocation against symbol `%s' from %s section"),
-		     bfd_get_filename (input_bfd), h->root.root.string,
+		     bfd_archive_filename (input_bfd), h->root.root.string,
 		     bfd_get_section_name (input_bfd, input_section));
 		  relocation = 0;
 		}
