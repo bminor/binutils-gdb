@@ -1,3 +1,20 @@
+Tue Oct 26 14:37:37 1993  Ken Raeburn  (raeburn@rover.cygnus.com)
+
+	* configure.in: Produce warning message for subdirectories not
+	configurable for this host/target combination.  Don't try to
+	configure gdb for vms.
+
+Mon Oct 25 11:22:15 1993  Ken Raeburn  (raeburn@rover.cygnus.com)
+
+	* Makefile.in (taz): Replace "byacc" with "bison -y" in the
+	appropriate files before making "diststuff".
+	(DISTBISONFILES): New var: list of files to be edited.
+	(DISTSTUFFDIRS): Add binutils.
+
+Fri Oct 22 20:32:15 1993  david d `zoo' zuhn  (zoo@rtl.cygnus.com)
+
+	* config.sub: also handle mipsel and mips64el (for little endian mips)
+
 Fri Oct 22 07:59:20 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* configure.in: Add * to end of all OS names.
