@@ -104,7 +104,7 @@ DEFUN(a29k_reloc,(abfd, reloc_entry, symbol_in, data, input_section),
 	return(bfd_reloc_dangerous);
     }
 
-    insn = bfd_get_32(abfd, data + reloc_entry->address); 
+    insn = bfd_get_32(abfd, (bfd_byte *)data + reloc_entry->address); 
     sym_value = get_symbol_value(symbol_in);
 
     switch (r_type) 
@@ -194,7 +194,7 @@ DEFUN(a29k_reloc,(abfd, reloc_entry, symbol_in, data, input_section),
 	return (bfd_reloc_dangerous);
     }
 
-    bfd_put_32(abfd, insn, data+reloc_entry->address);
+    bfd_put_32(abfd, insn, (bfd_byte *)data + reloc_entry->address);
     return(bfd_reloc_ok);	
 }
 
