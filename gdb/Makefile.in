@@ -1,5 +1,5 @@
-# Copyright 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
-# 1998, 1999, 2000 Free Software Foundation, Inc.
+# Copyright 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000
+# Free Software Foundation, Inc.
 
 # This file is part of GDB.
 
@@ -342,7 +342,7 @@ RUNTESTFLAGS=
 # part of libiberty) a POSIX interface.  But at least for now the
 # host-dependent makefile fragment might need to use something else
 # besides ser-unix.o
-SER_HARDWIRE = @SER_HARDWIRE@
+SER_HARDWIRE = ser-unix.o ser-pipe.o
 
 # The `remote' debugging target is supported for most architectures,
 # but not all (e.g. 960)
@@ -368,7 +368,6 @@ ANNOTATE_OBS = annotate.o
 FLAGS_TO_PASS = \
 	"prefix=$(prefix)" \
 	"exec_prefix=$(exec_prefix)" \
-	"infodir=$(infodir)" \
 	"against=$(against)" \
 	"AR=$(AR)" \
 	"AR_FLAGS=$(AR_FLAGS)" \
@@ -481,7 +480,7 @@ SFILES = ax-general.c ax-gdb.c bcache.c blockframe.c breakpoint.c \
 	demangle.c dwarfread.c dwarf2read.c elfread.c environ.c eval.c \
 	event-loop.c event-top.c \
 	expprint.c f-exp.y f-lang.c f-typeprint.c f-valprint.c \
-	findvar.c gdbarch.c arch-utils.c gdbtypes.c \
+	findvar.c regcache.c gdbarch.c arch-utils.c gdbtypes.c \
 	inf-loop.c infcmd.c inflow.c infrun.c language.c \
 	kod.c kod-cisco.c \
 	ui-out.c cli-out.c \
@@ -615,10 +614,10 @@ TAGFILES_NO_SRCDIR = $(SFILES) $(HFILES_NO_SRCDIR) $(ALLDEPFILES) \
 	$(POSSLIBS)
 TAGFILES_WITH_SRCDIR = $(HFILES_WITH_SRCDIR)
 
-COMMON_OBS = version.o blockframe.o breakpoint.o findvar.o stack.o thread.o \
+COMMON_OBS = version.o blockframe.o breakpoint.o findvar.o regcache.o \
 	source.o values.o eval.o valops.o valarith.o valprint.o printcmd.o \
 	symtab.o symfile.o symmisc.o infcmd.o infrun.o command.o \
-	expprint.o environ.o \
+	expprint.o environ.o stack.o thread.o \
 	event-loop.o event-top.o inf-loop.o \
 	gdbarch.o arch-utils.o gdbtypes.o copying.o $(DEPFILES) \
 	mem-break.o target.o parse.o language.o $(YYOBJ) buildsym.o \
@@ -1275,6 +1274,8 @@ expprint.o: expprint.c $(defs_h) $(expression_h) $(gdbtypes_h) \
 
 findvar.o: findvar.c $(defs_h) $(gdbcore_h) $(inferior_h) target.h \
 	gdb_string.h
+
+regcache.o: regcache.c $(defs_h) $(inferior_h) target.h 
 
 fork-child.o: fork-child.c gdb_wait.h $(defs_h) $(gdbcore_h) \
 	$(inferior_h) target.h terminal.h gdbthread.h gdb_string.h

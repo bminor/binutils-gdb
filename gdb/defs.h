@@ -587,11 +587,6 @@ enum lval_type
 
 struct frame_info;
 
-void default_get_saved_register (char *raw_buffer, int *optimized,
-				 CORE_ADDR * addrp,
-				 struct frame_info *frame, int regnum,
-				 enum lval_type *lval);
-
 /* From readline (but not in any readline .h files).  */
 
 extern char *tilde_expand (char *);

@@ -1,3 +1,23 @@
+2000-07-07  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* findvar.c (_initialize_findvar, build_findvar, write_fp, read_fp,
+	generic_target_write_fp, generic_target_read_fp, write_sp, read_sp,
+	generic_target_write_sp, generic_target_read_sp, write_pc, read_pc,
+	generic_target_write_pc, generic_target_read_pc, write_pc_pid, 
+	read_pc_pid, supply_register, write_register_pid, write_register,
+	read_register_pid, read_register, write_register_bytes, 
+	read_register_bytes, write_register_gen, read_register_gen, 
+	registers_fetched, registers_changed, find_saved_register, 
+	read_relative_register_raw_bytes, default_get_saved_register, 
+	read_relative_register_raw_bytes_for_frame, get_saved_register):
+	Move from this file into new file regcache.c.
+	(register_valid, registers_pid, registers): Ditto.
+	* regcache.c: New file to hold the register cache.
+	(register_cached): New function to read register_valid array.
+	* value.h (register_cached): Declare.
+	* defs.h (default_get_saved_register): Delete decl of static function.
+	* Makefile.in: Add regcache module.
+	
 Mon Jul 10 15:02:35 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	From 2000-07-05 Pierre Muller <muller@ics.u-strasbg.fr>:

@@ -471,6 +471,8 @@ extern void write_register_pid (int regno, CORE_ADDR val, int pid);
 
 extern void supply_register (int regno, char *val);
 
+extern int register_cached (int regno);
+
 extern void get_saved_register (char *raw_buffer, int *optimized,
 				CORE_ADDR * addrp,
 				struct frame_info *frame,
