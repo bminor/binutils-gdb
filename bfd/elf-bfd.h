@@ -1547,6 +1547,9 @@ extern bfd_boolean _bfd_elf_dynamic_symbol_p
 extern bfd_boolean _bfd_elf_symbol_refs_local_p
   (struct elf_link_hash_entry *, struct bfd_link_info *, bfd_boolean);
 
+extern bfd_boolean _bfd_elf_link_add_archive_symbols
+  (bfd *, struct bfd_link_info *);
+
 extern const bfd_target *bfd_elf32_object_p
   (bfd *);
 extern const bfd_target *bfd_elf32_core_file_p

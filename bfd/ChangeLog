@@ -1,3 +1,18 @@
+2004-02-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf-bfd.h (_bfd_elf_link_add_archive_symbols): New prototype.
+
+	* elflink.h (is_global_data_symbol_definition): Moved to
+	elflink.c.
+	(elf_link_is_defined_archive_symbol): Likewise.
+	(elf_link_add_archive_symbols): Likewise. Renamed to
+	_bfd_elf_link_add_archive_symbols.
+
+	* elflink.c (elf_link_is_defined_archive_symbol): Get the size
+	of ELF symbol table entry from backend.
+	(_bfd_elf_link_add_archive_symbols): Call bfd_link_add_symbols
+	instead of elf_link_add_object_symbols.
+
 2004-02-27  Alexandre Oliva  <aoliva@redhat.com>
 
 	* elf-bfd.h (struct elf_backend_data): Added
