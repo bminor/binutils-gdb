@@ -1,3 +1,8 @@
+Mon Dec 15 15:07:49 1997  Nick Clifton  <nickc@cygnus.com>
+
+	* m32r.h (EF_M32R_ARCH, E_M32R_ARCH, E_M32RX_ARCH): New flags to
+	specify machine architecture.
+
 Fri Dec  5 11:20:08 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* v850.h: New constants: SHN_V850_SCOMMON, SHN_V850_TCOMMON,

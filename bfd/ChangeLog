@@ -1,3 +1,28 @@
+Mon Dec 15 15:01:15 1997  Nick Clifton  <nickc@cygnus.com>
+
+	* elf32-m32r.c (m32r_elf_object_p): New Function.
+	(m32r_elf_final_write_processing):  New Function.
+	(m32r_elf_set_private_flags):  New Function.
+	(m32r_elf_copy_private_bfd_data):  New Function.
+	(m32r_elf_merge_private_bfd_data):  New Function.
+	(m32r_elf_print_private_bfd_data):  New Function.
+	(elf_backend_object_p): Point to m32r_object_p.
+	(elf_backend_final_write_processing): Point to
+	m32r_elf_final_write_processing. 
+	(bfd_elf32_bfd_copy_private_bfd_data): Point to
+	m32r_elf_copy_private_bfd_data. 
+	(bfd_elf32_bfd_merge_private_bfd_data): Point to
+	m32r_elf_merge_private_bfd_data. 
+	(bfd_elf32_bfd_set_private_flags): Point to
+	m32r_elf_set_private_bfd_data. 
+	(bfd_elf32_bfd_print_private_bfd_data): Point to
+	m32r_elf_print_private_bfd_data. 
+
+	* cpu-m32r.c: Add m32rx cpu architecture.
+
+	* bfd-in2.h (bfd_mach_m32r, bfd_mach_m32rx): Add identifiers for
+	M32R and M32RX architecture machines.
+
 Fri Dec 12 11:30:28 1997  Brendan Kehoe  <brendan@canuck.cygnus.com>
 
 	* configure: Only build libbfd shared if --enable-shared's value
