@@ -1,5 +1,9 @@
 2002-07-02  Grace Sainsbury  <graces@redhat.com>
-	
+
+	* MAINTAINERS: Add self under write after approval. 
+
+2002-07-02  Grace Sainsbury  <graces@redhat.com>
+
 	* m68k-tdep.c (m68k_remote_breakpoint_from_pc): Add. Currently not
 	used in architecture vector. The default is
 	m68k_local_breakpoint_from_pc.
