@@ -1,5 +1,13 @@
 2004-01-26  Andrew Cagney  <cagney@redhat.com>
 
+	* breakpoint.c (watchpoint_check): Delete #if0ed variable.
+	(catch_breakpoint): Delete #if0ed function.
+	(disable_catch_breakpoint): Ditto.
+	(delete_catch_breakpoint, enable_catch_breakpoint): Ditto.
+	(disable_catch, enable_catch, delete_catch): Ditto.
+
+2004-01-26  Andrew Cagney  <cagney@redhat.com>
+
 	* remote.c (echo_check, quit_flag): Delete variables.
 	(cisco_kernel_mode): Delete variable.
 	(minitelnet_return, tty_input, escape_count): Delete variables.

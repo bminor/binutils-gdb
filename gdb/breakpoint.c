@@ -2455,9 +2455,6 @@ watchpoint_check (void *p)
   struct breakpoint *b;
   struct frame_info *fr;
   int within_current_scope;
-#if 0
-  struct frame_id current_frame_id;
-#endif
 
   b = bs->breakpoint_at;
 
@@ -5879,30 +5876,6 @@ until_break_command (char *arg, int from_tty, int anywhere)
     do_cleanups (old_chain);
 }
 
-#if 0
-/* These aren't used; I don't konw what they were for.  */
-/* Set a breakpoint at the catch clause for NAME.  */
-static int
-catch_breakpoint (char *name)
-{
-}
-
-static int
-disable_catch_breakpoint (void)
-{
-}
-
-static int
-delete_catch_breakpoint (void)
-{
-}
-
-static int
-enable_catch_breakpoint (void)
-{
-}
-#endif /* 0 */
-
 static void
 ep_skip_leading_whitespace (char **s)
 {
@@ -6482,30 +6455,6 @@ set_breakpoint_sal (struct symtab_and_line sal)
   b->thread = -1;
   return b;
 }
-
-#if 0
-/* These aren't used; I don't know what they were for.  */
-/* Disable breakpoints on all catch clauses described in ARGS.  */
-static void
-disable_catch (char *args)
-{
-  /* Map the disable command to catch clauses described in ARGS.  */
-}
-
-/* Enable breakpoints on all catch clauses described in ARGS.  */
-static void
-enable_catch (char *args)
-{
-  /* Map the disable command to catch clauses described in ARGS.  */
-}
-
-/* Delete breakpoints on all catch clauses in the active scope.  */
-static void
-delete_catch (char *args)
-{
-  /* Map the delete command to catch clauses described in ARGS.  */
-}
-#endif /* 0 */
 
 static void
 catch_command (char *arg, int from_tty)
