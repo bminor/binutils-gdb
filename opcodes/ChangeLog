@@ -1,4 +1,49 @@
+1999-02-09  Doug Evans  <devans@casey.cygnus.com>
+
+	* i960c-asm.c,i960c-dis.c,i960c-opc.c,i960c-opc.h: Delete.
+	* i960-dis.c (print_insn_i960): Rename from print_insn_i960_orig.
+	* Makefile.am: Remove references to them.
+	(HFILES): Add fr30-desc.h,m32r-desc.h.
+	(CFILES): Add fr30-desc.c,fr30-ibld.c,m32r-desc.c,m32r-ibld.c,
+	m32r-opinst.c.
+	(ALL_MACHINES): Update.
+	* configure.in: Redo handling of cgen_files.
+	(bfd_i960_arch): Delete i960c-*.lo files.
+	* configure: Regenerate.
+	* cgen-asm.c (*): CGEN_OPCODE_DESC renamed to CGEN_CPU_DESC.
+	(hash_insn_array): Rewrite.
+	* cgen-dis.c (*): CGEN_OPCODE_DESC renamed to CGEN_CPU_DESC.
+	(hash_insn_array): Rewrite.
+	* cgen-opc.c (*): CGEN_OPCODE_DESC renamed to CGEN_CPU_DESC.
+	(cgen_lookup_insn,cgen_get_insn_operands): Define here.
+	(cgen_lookup_get_insn_operands): Ditto.
+	* fr30-asm.c,fr30-dis.c,fr30-opc.c,fr30-opc.h: Regenerate.
+	* m32r-asm.c,m32r-dis.c,m32r-opc.c,m32r-opc.h: Regenerate.
+	* po/POTFILES.in: Rebuild.
+	* po/opcodes.pot: Rebuild.
+start-sanitize-cygnus
+	* Makefile.am (fr30 cgen dependencies): Add new files.
+	(m32r cgen dependencies): Add new files.
+	(CGENFILES): Update for opcode table reorg.
+	(run-cgen): Pass $(extrafiles).
+	(stamp-m32r): Set extrafiles to "opinst".
+	* cgen-opc.in: Delete.
+	* cgen-ibld.in: New file.
+	* cgen-asm.in: Include @prefix@-desc.h.
+	(insert_1,insert_normal,insert_insn_normal): Moved to cgen-ibld.in.
+	* cgen-dis.in: Include @prefix@-desc.h.
+	(fill_cache,extract_1,extract_normal,extract_insn_normal): Moved to
+	cgen-ibld.in.
+	* cgen.sh: Accept new arg to handle generation of opinst file.
+	Generate arch-desc.[ch],arch-opinst.c,arch-ibld.c files.
+end-sanitize-cygnus
+
 Fri Feb  5 00:04:24 1999  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.am: Rebuild dependencies.
+	(HFILES): Add fr30-opc.h.
+	(CFILES): Add fr30-asm.c, fr30-dis.c, fr30-opc.c.
+	* Makefile.in: Rebuild.
 
 	* configure.in: Change AC_PREREQ to 2.13.  Remove AM_CYGWIN32.
 	Change AM_EXEEXT to AC_EXEEXT and AM_PROG_INSTALL to
