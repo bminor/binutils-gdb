@@ -1,3 +1,19 @@
+Wed May  8 14:07:50 1996  Fred Fish  <fnf@cygnus.com>
+
+	* breakpoint.c (clear_momentary_breakpoints): Remove dead code
+	that is referenced nowhere else.
+	(set_breakpoint): Ditto.
+	(do_enable_breakpoint): Created from enable_once_breakpoint
+	with a couple of changes.
+	(enable_breakpoint): Call do_enable_breakpoint with an appropriate
+	bpdisp enum value to set disposition of breakpoint.
+	(enable_once_breakpoint): Ditto.
+	(enable_delete_breakpoint): Ditto.
+	* breakpoint.h (clear_momentary_breakpoints): Remove prototype.
+	* symtab.c (find_pc_line): Improve comments.
+	* gdbtk.c: Fix a couple of misspellings.
+	* xcoffread.c: Ditto.
+
 Tue May  7 18:37:06 1996  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* target.c (debug_to_xfer_memory): Insert line breaks when

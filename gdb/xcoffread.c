@@ -370,8 +370,8 @@ compare_lte (lte1, lte2)
   return lte1->pc - lte2->pc;
 }
 
-/* Give a line table with function entries are marked, arrange its functions
-   in assending order and strip off function entry markers and return it in
+/* Given a line table with function entries are marked, arrange its functions
+   in ascending order and strip off function entry markers and return it in
    a newly created table. If the old one is good enough, return the old one. */
 /* FIXME: I think all this stuff can be replaced by just passing
    sort_linevec = 1 to end_symtab.  */

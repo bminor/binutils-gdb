@@ -50,7 +50,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #endif
 
 /* Some versions (1.3.79, 1.3.81) of Linux don't support SIOCSPGRP the way
-   gdbtk wants to us it... */
+   gdbtk wants to use it... */
 #ifdef __linux__
 #undef SIOCSPGRP
 #endif
@@ -1235,7 +1235,7 @@ gdbtk_init ()
   discard_cleanups (old_chain);
 }
 
-/* Come here during initialze_all_files () */
+/* Come here during initialize_all_files () */
 
 void
 _initialize_gdbtk ()
