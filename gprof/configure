@@ -894,6 +894,7 @@ esac
 
 
 HLDFLAGS=
+HLDENV=
 # If we have shared libraries, try to set rpath reasonably.
 if test "${shared}" = "true"; then
   case "${host}" in
@@ -908,8 +909,11 @@ if test "${shared}" = "true"; then
   *-*-linux*)
     HLDFLAGS='-Wl,-rpath,$(libdir)'
     ;;
-  *-*-sysv4* | *-*-solaris*)
+  *-*-solaris*)
     HLDFLAGS='-R $(libdir)'
+    ;;
+  *-*-sysv4*)
+    HLDENV='if test -z "$${LD_RUN_PATH}"; then LD_RUN_PATH=$(libdir); else LD_RUN_PATH=$${LD_RUN_PATH}:$(libdir); fi; export LD_RUN_PATH;'
     ;;
   esac
 fi
@@ -935,6 +939,7 @@ case "${host}" in
     rm -f conftest.t conftest.c conftest
     ;;
 esac
+
 
 
 trap '' 1 2 15
@@ -1087,6 +1092,7 @@ s%@build_os@%$build_os%g
 s%@MY_TARGET@%$MY_TARGET%g
 s%@BFDLIB@%$BFDLIB%g
 s%@HLDFLAGS@%$HLDFLAGS%g
+s%@HLDENV@%$HLDENV%g
 
 CEOF
 EOF

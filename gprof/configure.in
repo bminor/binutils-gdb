@@ -60,6 +60,7 @@ esac
 AC_SUBST(BFDLIB)
 
 HLDFLAGS=
+HLDENV=
 # If we have shared libraries, try to set rpath reasonably.
 if test "${shared}" = "true"; then
   case "${host}" in
@@ -74,8 +75,11 @@ if test "${shared}" = "true"; then
   *-*-linux*)
     HLDFLAGS='-Wl,-rpath,$(libdir)'
     ;;
-  *-*-sysv4* | *-*-solaris*)
+  *-*-solaris*)
     HLDFLAGS='-R $(libdir)'
+    ;;
+  *-*-sysv4*)
+    HLDENV='if test -z "$${LD_RUN_PATH}"; then LD_RUN_PATH=$(libdir); else LD_RUN_PATH=$${LD_RUN_PATH}:$(libdir); fi; export LD_RUN_PATH;'
     ;;
   esac
 fi
@@ -102,5 +106,6 @@ case "${host}" in
     ;;
 esac
 AC_SUBST(HLDFLAGS)
+AC_SUBST(HLDENV)
 
 AC_OUTPUT(Makefile)
