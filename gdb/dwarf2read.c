@@ -438,12 +438,6 @@ static int islocal;		/* Variable is at the returned offset
 				   this function, so we can't say
 				   which register it's relative to;
 				   use LOC_LOCAL.  */
-static int is_thread_local;     /* Variable is at a constant offset in the
-                                   thread-local storage block for the
-                                   current thread and the dynamic linker
-                                   module containing this expression.
-                                   decode_locdesc returns the offset from
-                                   that base.  */
 
 /* DW_AT_frame_base values for the current function.
    frame_base_reg is -1 if DW_AT_frame_base is missing, otherwise it
@@ -6788,7 +6782,6 @@ decode_locdesc (struct dwarf_block *blk, struct objfile *objfile,
   offreg = 0;
   isderef = 0;
   islocal = 0;
-  is_thread_local = 0;
   optimized_out = 1;
 
   while (i < size)
@@ -7014,7 +7007,6 @@ decode_locdesc (struct dwarf_block *blk, struct objfile *objfile,
 	  break;
 
         case DW_OP_GNU_push_tls_address:
-          is_thread_local = 1;
 	  /* The top of the stack has the offset from the beginning
 	     of the thread control block at which the variable is located.  */
 	  /* Nothing should follow this operator, so the top of stack would

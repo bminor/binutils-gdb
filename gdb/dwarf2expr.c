@@ -641,6 +641,14 @@ execute_stack_op (struct dwarf_expr_context *ctx, unsigned char *op_ptr,
 	  break;
 
 	case DW_OP_GNU_push_tls_address:
+	  /* Variable is at a constant offset in the thread-local
+	  storage block into the objfile for the current thread and
+	  the dynamic linker module containing this expression. Here
+	  we return returns the offset from that base.  The top of the
+	  stack has the offset from the beginning of the thread
+	  control block at which the variable is located.  Nothing
+	  should follow this operator, so the top of stack would be
+	  returned.  */
 	  result = dwarf_expr_fetch (ctx, 0);
 	  dwarf_expr_pop (ctx);
 	  result = (ctx->get_tls_address) (ctx->baton, result);
