@@ -1,5 +1,12 @@
 2004-01-25  Mark Kettenis  <kettenis@gnu.org>
 
+	* sparcnbsd-tdep.c (sparc32nbsd_supply_gregset): Also sipply the
+	floating-point registers for traditional NetBSD core files.
+	(sparc32nbsd_init_abi): Initialize TDEP->sizeof_gregset and
+	TDEP->sizeof_fpregset here.
+
+2004-01-25  Mark Kettenis  <kettenis@gnu.org>
+
 	* sparc-tdep.h (sparc32nbsd_sigcontext_saved_regs): New prototype.
 	* sparcnbsd-tdep.c (sparc32nbsd_sigcontext_saved_regs): New
 	function with code split out from

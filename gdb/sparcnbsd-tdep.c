@@ -50,16 +50,18 @@ const struct sparc_gregset sparc32nbsd_gregset =
   -1				/* %l0 */
 };
 
-/* Unlike other NetBSD implementations, the SPARC port historically
-   used .reg and .reg2 (see bfd/netbsd-core.c), and as such, we can
-   share one routine for a.out and ELF core files.  */
-
 static void
 sparc32nbsd_supply_gregset (const struct regset *regset,
 			    struct regcache *regcache,
 			    int regnum, const void *gregs, size_t len)
 {
   sparc32_supply_gregset (regset->descr, regcache, regnum, gregs);
+
+  /* Traditional NetBSD core files don't use multiple register sets.
+     Instead, the general-purpose and floating-point registers are
+     lumped together in a single section.  */
+  if (len >= 212)
+    sparc32_supply_fpregset (regcache, regnum, (const char *) gregs + 80);
 }
 
 static void
@@ -261,9 +263,11 @@ sparc32nbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->gregset = XMALLOC (struct regset);
   tdep->gregset->descr = &sparc32nbsd_gregset;
   tdep->gregset->supply_regset = sparc32nbsd_supply_gregset;
+  tdep->sizeof_gregset = 20 * 4;
 
   tdep->fpregset = XMALLOC (struct regset);
   tdep->fpregset->supply_regset = sparc32nbsd_supply_fpregset;
+  tdep->sizeof_fpregset = 33 * 4;
 
   set_gdbarch_pc_in_sigtramp (gdbarch, sparc32nbsd_pc_in_sigtramp);
   frame_unwind_append_sniffer (gdbarch, sparc32nbsd_sigtramp_frame_sniffer);
