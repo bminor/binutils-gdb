@@ -1,3 +1,8 @@
+Tue Jul  4 14:08:28 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* config/tc-d30v.h: Include "write.h" for fixS.
+ 	(d30v_start_line, md_pcrel_from_section): Add function prototypes.
+
 2000-07-05  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-d30v.c (write_2_short): Further changes to warning

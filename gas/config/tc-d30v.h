@@ -19,6 +19,8 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA. */
 
+#include "write.h" /* For the definition of fixS.  */
+
 #define TC_D30V
 
 #ifndef BFD_ASSEMBLER
@@ -35,6 +37,8 @@
 #define MD_APPLY_FIX3
 
 /* call md_pcrel_from_section, not md_pcrel_from */
+
+extern long md_pcrel_from_section PARAMS ((fixS *fixp, segT sec));
 #define MD_PCREL_FROM_SECTION(FIXP, SEC) md_pcrel_from_section(FIXP, SEC)   
 
 /* Permit temporary numeric labels.  */
@@ -51,7 +55,8 @@ int d30v_cleanup PARAMS ((int));
 #define md_after_pass_hook()	     d30v_cleanup (false)
 #define md_cleanup()		     d30v_cleanup (false)
 #define TC_START_LABEL(ch, ptr)      (ch == ':' && d30v_cleanup (false))
-#define md_start_line_hook()	     d30v_start_line (false)
+void d30v_start_line PARAMS ((void));
+#define md_start_line_hook()	     d30v_start_line ()
 
 void d30v_frob_label PARAMS ((symbolS *));
 #define tc_frob_label(sym)	     d30v_frob_label(sym)
