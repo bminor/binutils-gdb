@@ -6,8 +6,8 @@ SYMBOL TABLE:
 0+ l    d  \.text	0+ 
 0+ l    d  \.data	0+ 
 0+ l    d  \.bss	0+ 
-0+ l       \.bss	0+4 comm_symbol3
-0+4 l       \.bss	0+4 comm_symbol4
+0+ l     O \.bss	0+4 comm_symbol3
+0+4 l     O \.bss	0+4 comm_symbol4
 0+ l    d  \.MMIX\.reg_contents	0+ 
 0+4       O \*COM\*	0+4 comm_symbol1
 

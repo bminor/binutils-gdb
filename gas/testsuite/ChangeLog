@@ -1,3 +1,8 @@
+2003-12-14  Alan Modra  <amodra@bigpond.net.au>
+
+	* gas/mmix/basep-8.d: Update for lcomm symbol type change.
+	* gas/mmix/basep-9.d: Likewise.
+
 2003-12-10  Zack Weinberg  <zack@codesourcery.com>
 
 	* gas/ppc/booke.s: Add two more forms of the mbar instruction
