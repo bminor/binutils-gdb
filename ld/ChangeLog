@@ -1,3 +1,14 @@
+Tue Jun 23 15:17:27 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.am (install-data-local): Make ldscripts subdirectory.
+	* Makefile.in: Rebuild.
+
+Tue Jun 23 15:17:04 1998  Mike Stump  <mrs@wrs.com>
+
+	* Makefile.am (install-exec-local): Don't let EXEEXT interfere
+	with the program transform name.
+	* Makefile.in: Rebuild.
+
 Sun Jun 21 23:55:16 1998  Jeffrey A Law  (law@cygnus.com)
 
 	* ld.texinfo: Note that -relax may make symbolic debugging
