@@ -1,0 +1,4 @@
+Sat Jan 22 13:07:02 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* mpw-mh-mpw: New file, host makefile definitions for MPW.
+
