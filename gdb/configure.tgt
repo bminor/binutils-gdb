@@ -81,9 +81,9 @@ hppa*-*-hiux*)		gdb_target=hppahpux ;;
 # OBSOLETE hppa*-*-osf*)		gdb_target=hppaosf ;;
 hppa*-*-*)		gdb_target=hppa ;;
 
-i[3456]86-sequent-bsd*)	gdb_target=symmetry ;;
-i[3456]86-sequent-sysv4*) gdb_target=ptx4 ;;
-i[3456]86-sequent-sysv*) gdb_target=ptx ;;
+# OBSOLETE i[3456]86-sequent-bsd*)	gdb_target=symmetry ;;
+# OBSOLETE i[3456]86-sequent-sysv4*) gdb_target=ptx4 ;;
+# OBSOLETE i[3456]86-sequent-sysv*) gdb_target=ptx ;;
 i[3456]86-ncr-*)	gdb_target=ncr3000 ;;
 i[3456]86-*-bsd*)	gdb_target=i386bsd ;;
 i[3456]86-*-netbsd*)	gdb_target=nbsd ;;

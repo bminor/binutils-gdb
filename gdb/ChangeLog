@@ -1,5 +1,28 @@
 2003-04-09  Andrew Cagney  <cagney@redhat.com>
 
+	* NEWS: Mention that the "Sequent family" is obsolete.
+	* configure.tgt: Obsolete i[3456]86-sequent-bsd*,
+	i[3456]86-sequent-sysv4*, and i[3456]86-sequent-sysv*.
+	* configure.host: Obsolete i[3456]86-sequent-bsd*,
+	i[3456]86-sequent-sysv4*, and i[3456]86-sequent-sysv*.
+	* config/i386/tm-ptx4.h: Obsolete file.
+	* config/i386/tm-ptx.h: Obsolete file.
+	* symm-tdep.c: Obsolete file.
+	* config/i386/symmetry.mt: Obsolete file.
+	* config/i386/tm-symmetry.h: Obsolete file.
+	* symm-nat.c: Obsolete file.
+	* config/i386/nm-symmetry.h: Obsolete file.
+	* config/i386/xm-symmetry.h: Obsolete file.
+	* config/i386/symmetry.mh: Obsolete file.
+	* config/i386/nm-ptx4.h: Obsolete file.
+	* config/i386/ptx4.mh: Obsolete file.
+	* config/i386/ptx.mt: Obsolete file.
+	* config/i386/ptx.mh: Obsolete file.
+	* config/i386/xm-ptx4.h: Obsolete file.
+	* config/i386/xm-ptx.h: Obsolete file.
+
+2003-04-09  Andrew Cagney  <cagney@redhat.com>
+
 	Obsolete mips*-*-mach3*.
 	* NEWS: Mention that mips*-*-mach3* is obsolete.
 	* m3-nat.c: Obsolete file.
