@@ -188,8 +188,12 @@ install:
 	$(INSTALL_DATA) $(TARGETLIB) $(libdir)/libopcodes.a
 	$(RANLIB) $(libdir)/libopcodes.a
 
-Makefile: $(srcdir)/Makefile.in config.status
-	$(SHELL) config.status
+Makefile: Makefile.in config.status
+	CONFIG_FILES=Makefile CONFIG_HEADERS= $(SHELL) ./config.status
+
+config.h: stamp-h ; @true
+stamp-h: config.in config.status
+	CONFIG_FILES= CONFIG_HEADERS=config.h:config.in $(SHELL) ./config.status
 
 config.status : configure $(srcdir)/../bfd/configure.host $(srcdir)/../bfd/config.bfd
 	$(SHELL) config.status --recheck

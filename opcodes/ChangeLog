@@ -1,5 +1,13 @@
 Fri Sep  8 01:07:38 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* Makefile.in (Makefile): Just rebuild Makefile when running
+	config.status.
+	(config.h, stamp-h): New targets.
+	* configure.in: Call AC_CONFIG_HEADER and AC_CANONICAL_SYSTEM
+	earlier.  Don't bother to call AC_ARG_PROGRAM.  Touch stamp-h when
+	rebuilding config.h.
+	* configure: Rebuild.
+
 	* mips-opc.c: Change unaligned loads and stores with "t,A"
 	operands to use "t,A(b)".
 
