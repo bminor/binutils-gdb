@@ -1,5 +1,11 @@
 Fri Oct  3 12:04:25 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* objcopy.c (set_times): New static function, replacing
+	make_same_dates.
+	(strip_main): If preserve_dates, stat the input file before
+	copying it, and call set_times afterward.
+	(copy_main): Likewise.
+
 	* wrstabs.c (write_stabs_in_sections_debugging_info): Cast p to
 	char * when calling strcpy and strlen.
 
