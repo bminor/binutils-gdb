@@ -407,6 +407,8 @@ proc gdb_internal_error_resync {} {
 	    }
 	}
     }
+    perror "Could not resync from internal error (resync count exceeded)"
+    return 0
 }
 
 

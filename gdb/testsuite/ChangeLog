@@ -1,11 +1,14 @@
 2003-11-20  Andrew Cagney  <cagney@redhat.com>
 
+	* lib/gdb.exp (gdb_internal_error_resync): Issue a perror when the
+	resync count exceeded.
+	
 	* gdb.base/maint.exp: Use gdb_internal_error_resync to recover
 	from the internal error.
 	* lib/gdb.exp (gdb_internal_error_resync): New procedure.
 	Original from Jim Blandy.
 	(gdb_test_multiple): Use gdb_internal_error_resync.
-	
+
 2003-11-19  Andrew Cagney  <cagney@redhat.com>
 
 	* gdb.base/callfuncs.exp: Change the XFAILed descriptor test to a
