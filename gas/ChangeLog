@@ -1,5 +1,9 @@
 Sat Nov  6 22:41:57 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
+	* config/tc-hppa.c: (update_subspace): Fix type and name of last
+	parameter.  All callers fixed.
+	(md_begin, pa_chk_field_selector, pa_entry): Lint.
+
 	* config/tc-hppa.c (cons_fix_new_hppa): Reset field selector
 	to default state after it's been used.
 

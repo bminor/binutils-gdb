@@ -594,7 +594,8 @@ static ssd_chain_struct * create_new_subspace PARAMS ((sd_chain_struct *,
 static ssd_chain_struct *update_subspace PARAMS ((sd_chain_struct *,
 						  char *, char, char, char,
 						  char, char, char, int,
-						  int, int, int, subsegT));
+						  int, int, int,
+						  asection *));
 static sd_chain_struct *is_defined_space PARAMS ((char *));
 static ssd_chain_struct *is_defined_subspace PARAMS ((char *));
 static sd_chain_struct *pa_segment_to_space PARAMS ((asection *));
@@ -1375,7 +1376,7 @@ cons_fix_new_hppa (frag, where, size, exp)
 void
 md_begin ()
 {
-  char *retval = NULL;
+  const char *retval = NULL;
   int lose = 0;
   unsigned int i = 0;
 
@@ -1400,7 +1401,7 @@ md_begin ()
   while (i < NUMOPCODES)
     {
       const char *name = pa_opcodes[i].name;
-      retval = hash_insert (op_hash, name, &pa_opcodes[i]);
+      retval = hash_insert (op_hash, name, (struct pa_opcode *)&pa_opcodes[i]);
       if (retval != NULL && *retval != '\0')
 	{
 	  as_fatal ("Internal error: can't hash `%s': %s\n", name, retval);
@@ -3632,7 +3633,7 @@ pa_chk_field_selector (str)
      char **str;
 {
   int selector;
-  struct selector_entry *tablep;
+  const struct selector_entry *tablep;
 
   selector = e_fsel;
 
@@ -4694,7 +4695,7 @@ pa_entry (unused)
     fix_new_hppa (frag_now, where - frag_now->fr_literal, 0, 
 		  last_call_info->start_symbol, (offsetT) 0, NULL,
 		  0, R_HPPA_ENTRY, e_fsel, 0, 0,
-		  &last_call_info->ci_unwind.descriptor);
+		  (char *)&last_call_info->ci_unwind.descriptor);
   }
 #endif
 
@@ -6073,7 +6074,7 @@ create_new_subspace (space, name, loadable, code_only, common,
 
 static ssd_chain_struct *
 update_subspace (space, name, loadable, code_only, common, dup_common, sort,
-		 zero, access, space_index, alignment, quadrant, subseg)
+		 zero, access, space_index, alignment, quadrant, section)
      sd_chain_struct *space;
      char *name;
      char loadable;
@@ -6086,7 +6087,7 @@ update_subspace (space, name, loadable, code_only, common, dup_common, sort,
      int space_index;
      int alignment;
      int quadrant;
-     subsegT subseg;
+     asection *section;
 {
   ssd_chain_struct *chain_entry;
 
@@ -6107,7 +6108,7 @@ update_subspace (space, name, loadable, code_only, common, dup_common, sort,
     chain_entry = NULL;
 
 #ifdef obj_set_subsection_attributes
-  obj_set_subsection_attributes (subseg, space->sd_seg, access, 
+  obj_set_subsection_attributes (section, space->sd_seg, access, 
 				 sort, quadrant);
 #endif
 
