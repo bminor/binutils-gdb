@@ -1,3 +1,7 @@
+Mon Jul 28 21:52:24 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* mips-opc.c: Fix typo/thinko in "eret" instruction.
+
 start-sanitize-r5900
 Mon Jul 28 22:07:14 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
