@@ -27,7 +27,6 @@ Things-to-keep:
 
 ChangeLog
 Makefile.in
-README
 attach.c
 config
 configure.in
