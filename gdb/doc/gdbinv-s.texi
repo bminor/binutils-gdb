@@ -156,6 +156,30 @@ Write this subroutine to write a single character to the serial port.
 It may be identical to @code{putchar} for your target system; a 
 different name is used to allow you to distinguish the two if you wish.
 
+@item void exceptionHandler (int @var{exception_number}, void *@var{exception_address})
+Write this function to install @var{exception_address} in the exception
+handling tables.  You need to do this because the stub does not have any
+way of knowing what the exception handling tables on your target system
+are like (for example, the processor's table might be in @sc{rom},
+containing entries which point to a table in @sc{ram}).
+@var{exception_number} is the exception number which should be changed;
+its meaning is architecture-dependent (for example, different numbers
+might represent divide by zero, misaligned access, etc).  When this
+exception occurs, control should be transferred directly to
+@var{exception_address}, and the processor state (stack, registers,
+etc.) should be just as it is when a processor exception occurs.  So if
+you want to use a jump instruction to reach @var{exception_address}, it
+should be a simple jump, not a jump to subroutine.
+
+@c For the 386, doesn't the interrupt gate contain a privilege level?
+@c If so, what should it be set to?  I suspect the answer is the
+@c privilege level in effect at the time that exceptionHandler is
+@c called, but I'm not sure.  FIXME.
+For the 386, @var{exception_address} should be installed as an interrupt
+gate so that interrupts are masked while the handler runs.  The
+@sc{sparc} and 68k stubs are able to mask interrupts themself without
+help from @code{exceptionHandler}.
+
 @item void flush_i_cache()
 @kindex flush_i_cache
 Write this subroutine to flush the instruction cache, if any, on your
@@ -193,10 +217,11 @@ steps.
 
 @enumerate
 @item
-Make sure you have the supporting low-level routines:
+Make sure you have the supporting low-level routines
+(@pxref{Bootstrapping}):
 @display
 @code{getDebugChar}, @code{putDebugChar},
-@code{flush_i_cache}, @code{memset}.
+@code{flush_i_cache}, @code{memset}, @code{exceptionHandler}.
 @end display
 
 @item
@@ -230,6 +255,8 @@ Make sure you have a serial connection between your target machine and
 the @value{GDBN} host, and identify the serial port used for this on the host.
 
 @item
+@c The "remote" target now provides a `load' command, so we should
+@c document that.  FIXME.
 Download your program to your target machine (or get it there by
 whatever means the manufacturer provides), and start it.
 
