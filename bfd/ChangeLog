@@ -1,5 +1,11 @@
 2001-10-21  H.J. Lu <hjl@gnu.org>
 
+	* configure.in (WIN32LIBADD): Check if PICFLAG is defined in
+	../libiberty/Makefile instead of $enable_shared.
+	* configure: Rebuild.
+
+2001-10-21  H.J. Lu <hjl@gnu.org>
+
 	* elf32-cris.c (cris_reloc_type_lookup): Use int for index.
 
 2001-10-20  H.J. Lu <hjl@gnu.org>

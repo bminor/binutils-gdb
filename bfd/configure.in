@@ -413,7 +413,11 @@ case "${host}" in
 *)
   # We borrow WIN32LIBADD so that the shared libbfd won't depend on
   # libiberty.a.
-  if test "$enable_shared" = "yes"; then
+  PICFLAG=
+  changequote(,)dnl
+  eval `grep "^[ 	]*PICFLAG[ 	]*=" ../libiberty/Makefile | sed -e "s/[ 	]*//g"`
+  changequote([,])dnl
+  if test -n "$PICFLAG"; then
     WIN32LIBADD="-L../libiberty/pic -liberty"
   fi
   ;;
