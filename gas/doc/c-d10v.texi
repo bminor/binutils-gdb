@@ -44,6 +44,7 @@ The differences are detailed below.
 @menu
 * D10V-Regs::                 Register Names
 * D10V-Size::                 Size Modifiers
+* D10V-Subs::                 Sub-Instructions
 * D10V-Chars::                Special Characters
 * D10V-Addressing::           Addressing Modes
 @end menu
@@ -85,7 +86,7 @@ Flag 1
 @item c
 Carry flag
 @end table
- 
+
 @node D10V-Size
 @subsection Size Modifiers
 @cindex D10V size modifiers
@@ -102,6 +103,23 @@ an assembly program and you want to do a branch to a symbol that is defined late
 in your program, you can write @samp{bra.s   foo}.  
 Objdump and GDB will always append @samp{.s} or @samp{.l} to instructions which
 have both short and long forms.
+
+@node D10V-Subs
+@subsection Sub-Instructions
+@cindex D10V sub-instructions
+@cindex sub-instructions, D10V
+The D10V assembler takes as input a series of instructions, either one-per-line,
+or in the special two-per-line format described in the next section.  Some of these
+instructions will be short-form or sub-instructions.  These sub-instructions can be packed
+into a single instruction.  The assembler will do this automatically.  It will also detect
+when it should not pack instructions.  For example, when a label is defined, the next
+instruction will never be packaged with the previous one.  Whenever a branch and link
+instruction is called, it will not be packaged with the next instruction so the return
+address will be valid.  Nops are automatically inserted when necessary.
+
+If you do not want the assembler automatically making these decisions, you can control
+the packaging and execution type (parallel or sequential) with the special execution 
+symbols described in the next section.  
 
 @node D10V-Chars
 @subsection Special Characters
@@ -130,16 +148,16 @@ container and is executed second.
 @item abs       r0      <-      abs     a1
 Execute these reverse-sequentially.  The instruction on the right is in the right
 container, and is executed first.
-@item ld2w    r2,@r8+         ||      mac     a0,r0,r7
+@item ld2w    r2,@@r8+         ||      mac     a0,r0,r7
 Execute these in parallel.
-@item ld2w    r2,@r8+         ||      
+@item ld2w    r2,@@r8+         ||      
 @itemx mac     a0,r0,r7
 Two-line format. Execute these in parallel.
-@item ld2w    r2,@r8+         
+@item ld2w    r2,@@r8+         
 @itemx mac     a0,r0,r7
 Two-line format. Execute these sequentially.  Assembler will
 put them in the proper containers.
-@item ld2w    r2,@r8+         ->
+@item ld2w    r2,@@r8+         ->
 @itemx mac     a0,r0,r7
 Two-line format. Execute these sequentially.  Same as above but
 second instruction will always go into right container.  
@@ -168,8 +186,6 @@ Register indirect with post-decrement
 Register indirect with pre-decrement
 @item @@(@var{disp}, R@var{n})
 Register indirect with displacement
-@item @@(R0, GBR)          
-GBR indexed
 @item @var{addr}
 PC relative address (for branch or rep). 
 @item #@var{imm}
