@@ -1,3 +1,24 @@
+Wed Jul 31 15:41:42 1996  James G. Smith  <jsmith@cygnus.co.uk>
+
+	* config/tc-arm.c: Changed INSN_SIZE to variable insn_size, as
+ 	pre-cursor to adding Thumb support. Also added cpu_variant flag
+ 	information to each of the asm_flg structures.
+	(md_parse_option): Updated ARM7 parsing to allow 't' for
+ 	thumb/halfword support, aswell as 'm' for long multiply.
+	(md_show_usage): Updated help message.
+	(md_assemble): Check that instruction flags are applicated to the
+ 	current cpu variant.
+	(md_apply_fix3, tc_gen_reloc): Add BFD_RELOC_ARM_OFFSET_IMM8 and
+ 	BFD_RELOC_ARM_HWLITERAL relocation support for new halfword and
+ 	signextension instructions.
+	(do_ldst): Generate halfword and signextension variants if
+ 	mnemonic flags match.
+	(ldst_extend): Do not allow shifts in the offset field of halfword
+ 	or signextension instructions.
+	(validate_offset_imm): Provide check on halfword and signextension
+ 	immediate range.
+	(add_to_lit_pool): Merge identical literal pool values.
+
 Tue Jul 30 14:28:23 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* config/tc-hppa.c (selector_table): Add 'E' selector.

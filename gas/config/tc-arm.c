@@ -44,19 +44,21 @@
 /* Types of processor to assemble for.  */
 #define ARM_1		0x00000001
 #define ARM_2		0x00000002
-#define ARM_250		0x00000002	/* Checkme, should this be = ARM_3?  */
 #define ARM_3		0x00000004
+#define ARM_250		0x00000004	/* ARM3 instruction set */
 #define ARM_6		0x00000008
 #define ARM_7		0x00000008
-#define ARM_7DM		0x00000010
+
+/* The following bitmasks control CPU extensions (ARM7 onwards): */
+#define ARM_LONGMUL	0x00000010	/* allow long multiplies */
+#define ARM_HALFWORD    0x00000020      /* allow ARM 16bit memory transfers */
 
 /* Some useful combinations:  */
 #define ARM_ANY		0x00ffffff
 #define ARM_2UP		0x00fffffe
 #define ARM_ALL		ARM_2UP		/* Not arm1 only */
 #define ARM_3UP		0x00fffffc
-#define ARM_6UP		0x00fffff8
-#define ARM_LONGMUL	0x00000010	/* Don't know which will have this.  */
+#define ARM_6UP		0x00fffff8      /* Includes ARM7 */
 
 #define FPU_CORE	0x80000000
 #define FPU_FPA10	0x40000000
@@ -205,93 +207,97 @@ struct asm_flg
 {
   CONST char *template;		/* Basic flag string */
   unsigned long set_bits;	/* Bits to set */
+  unsigned long variants;       /* Which CPU variants this exists for */
 };
 
 static CONST struct asm_flg s_flag[] =
 {
-  {"s", 0x00100000},
-  {NULL, 0}
+  {"s", 0x00100000, ARM_ANY},
+  {NULL, 0, 0}
 };
 
 static CONST struct asm_flg ldst_flags[] =
 {
-  {"b",  0x00400000},
-  {"t",  TRANS_BIT},
-  {"bt", 0x00400000 | TRANS_BIT},
-  {NULL, 0}
+  {"b",  0x00400000, ARM_ANY},
+  {"t",  TRANS_BIT, ARM_ANY},
+  {"bt", 0x00400000 | TRANS_BIT, ARM_ANY},
+  {"h",  0x00000020, ARM_HALFWORD},
+  {"sb", 0x00000040, ARM_HALFWORD},
+  {"sh", 0x00000060, ARM_HALFWORD},
+  {NULL, 0, 0},
 };
 
 static CONST struct asm_flg byte_flag[] =
 {
-  {"b", 0x00400000},
-  {NULL, 0}
+  {"b", 0x00400000, ARM_3UP},
+  {NULL, 0, 0}
 };
 
 static CONST struct asm_flg cmp_flags[] =
 {
-  {"s", 0x00100000},
-  {"p", 0x0010f000},
-  {NULL, 0}
+  {"s", 0x00100000, ARM_ANY},
+  {"p", 0x0010f000, ARM_ANY},
+  {NULL, 0, 0}
 };
 
 static CONST struct asm_flg ldm_flags[] =
 {
-  {"ed", 0x01800000},
-  {"fd", 0x00800000},
-  {"ea", 0x01000000},
-  {"fa", 0x08000000},
-  {"ib", 0x01800000},
-  {"ia", 0x00800000},
-  {"db", 0x01000000},
-  {"da", 0x08000000},
-  {NULL, 0}
+  {"ed", 0x01800000, ARM_ANY},
+  {"fd", 0x00800000, ARM_ANY},
+  {"ea", 0x01000000, ARM_ANY},
+  {"fa", 0x08000000, ARM_ANY},
+  {"ib", 0x01800000, ARM_ANY},
+  {"ia", 0x00800000, ARM_ANY},
+  {"db", 0x01000000, ARM_ANY},
+  {"da", 0x08000000, ARM_ANY},
+  {NULL, 0, 0}
 };
 
 static CONST struct asm_flg stm_flags[] =
 {
-  {"ed", 0x08000000},
-  {"fd", 0x01000000},
-  {"ea", 0x00800000},
-  {"fa", 0x01800000},
-  {"ib", 0x01800000},
-  {"ia", 0x00800000},
-  {"db", 0x01000000},
-  {"da", 0x08000000},
-  {NULL, 0}
+  {"ed", 0x08000000, ARM_ANY},
+  {"fd", 0x01000000, ARM_ANY},
+  {"ea", 0x00800000, ARM_ANY},
+  {"fa", 0x01800000, ARM_ANY},
+  {"ib", 0x01800000, ARM_ANY},
+  {"ia", 0x00800000, ARM_ANY},
+  {"db", 0x01000000, ARM_ANY},
+  {"da", 0x08000000, ARM_ANY},
+  {NULL, 0, 0}
 };
 
 static CONST struct asm_flg lfm_flags[] =
 {
-  {"fd", 0x00800000},
-  {"ea", 0x01000000},
-  {NULL, 0}
+  {"fd", 0x00800000, FPU_MEMMULTI},
+  {"ea", 0x01000000, FPU_MEMMULTI},
+  {NULL, 0, 0}
 };
 
 static CONST struct asm_flg sfm_flags[] =
 {
-  {"fd", 0x01000000},
-  {"ea", 0x00800000},
-  {NULL, 0}
+  {"fd", 0x01000000, FPU_MEMMULTI},
+  {"ea", 0x00800000, FPU_MEMMULTI},
+  {NULL, 0, 0}
 };
 
 static CONST struct asm_flg round_flags[] =
 {
-  {"p", 0x00000020},
-  {"m", 0x00000040},
-  {"z", 0x00000060},
-  {NULL, 0}
+  {"p", 0x00000020, FPU_ALL},
+  {"m", 0x00000040, FPU_ALL},
+  {"z", 0x00000060, FPU_ALL},
+  {NULL, 0, 0}
 };
 
 static CONST struct asm_flg except_flag[] =
 {
-  {"e", 0x00400000},
-  {NULL, 0}
+  {"e", 0x00400000, FPU_ALL},
+  {NULL, 0, 0}
 };
 
 static CONST struct asm_flg cplong_flag[] =
 {
-  {"l", 0x00400000},
-  {NULL, 0}
+  {"l", 0x00400000, ARM_2UP},
+  {NULL, 0, 0}
 };
 
 struct asm_psr
@@ -335,8 +341,9 @@ static void do_swap		PARAMS ((char *operands, unsigned long flags));
 /* ARM 6 */
 static void do_msr		PARAMS ((char *operands, unsigned long flags));
 static void do_mrs		PARAMS ((char *operands, unsigned long flags));
-/* ARM 7DM */
+/* ARM 7M */
 static void do_mull		PARAMS ((char *operands, unsigned long flags));
+
 /* Coprocessor Instructions */
 static void do_cdp		PARAMS ((char *operands, unsigned long flags));
 static void do_lstc		PARAMS ((char *operands, unsigned long flags));
@@ -356,9 +363,9 @@ static void fix_new_arm		PARAMS ((fragS *frag, int where,
 static int arm_reg_parse	PARAMS ((char **ccp));
 static int arm_psr_parse	PARAMS ((char **ccp));
 
-/* All instructions take 4 bytes in the object file */
-
-#define INSN_SIZE	4
+/* ARM instructions take 4bytes in the object file, Thumb instructions
+   take 2. The assembler defaults to ARM code generation: */
+static int insn_size = 4;
 
 /* LONGEST_INST is the longest basic instruction name without conditions or 
  * flags.
@@ -419,7 +426,7 @@ static CONST struct asm_opcode insns[] =
   {"mrs",   0x010f0000, NULL,   NULL,        ARM_6UP,      do_mrs},
   {"msr",   0x0128f000, NULL,   NULL,        ARM_6UP,      do_msr},
 
-/* ARM 7DM long multiplies - need signed/unsigned flags! */
+/* ARM 7M long multiplies - need signed/unsigned flags! */
   {"smull", 0x00c00090, NULL,   s_flag,      ARM_LONGMUL,  do_mull},
   {"umull", 0x00800090, NULL,   s_flag,      ARM_LONGMUL,  do_mull},
   {"smlal", 0x00e00090, NULL,   s_flag,      ARM_LONGMUL,  do_mull},
@@ -474,17 +481,18 @@ static CONST struct asm_opcode insns[] =
   {"fix",   0x0e100110, NULL,   round_flags, FPU_ALL,      do_fp_to_reg},
 
 /* Generic copressor instructions */
-  {"cdp",   0x0e000000, NULL,  NULL,         ARM_ANY,      do_cdp},
-  {"ldc",   0x0c100000, NULL,  cplong_flag,  ARM_ANY,      do_lstc},
-  {"stc",   0x0c000000, NULL,  cplong_flag,  ARM_ANY,      do_lstc},
-  {"mcr",   0x0e000010, NULL,  NULL,         ARM_ANY,      do_co_reg},
-  {"mrc",   0x0e100010, NULL,  NULL,         ARM_ANY,      do_co_reg},
+  {"cdp",   0x0e000000, NULL,  NULL,         ARM_2UP,      do_cdp},
+  {"ldc",   0x0c100000, NULL,  cplong_flag,  ARM_2UP,      do_lstc},
+  {"stc",   0x0c000000, NULL,  cplong_flag,  ARM_2UP,      do_lstc},
+  {"mcr",   0x0e000010, NULL,  NULL,         ARM_2UP,      do_co_reg},
+  {"mrc",   0x0e100010, NULL,  NULL,         ARM_2UP,      do_co_reg},
 };
 
 /* defines for various bits that we will want to toggle */
 
 #define INST_IMMEDIATE	0x02000000
 #define OFFSET_REG	0x02000000
+#define HWOFFSET_IMM    0x00400000
 #define SHIFT_BY_REG	0x00000010
 #define PRE_INDEX	0x01000000
 #define INDEX_UP	0x00800000
@@ -624,18 +632,36 @@ symbolS *symbol_make_empty ();
 static int
 add_to_lit_pool ()
 {
+  int lit_count = 0;
+
   if (current_poolP == NULL)
     current_poolP = symbol_make_empty();
 
-  if (next_literal_pool_place > MAX_LITERAL_POOL_SIZE)
+  /* Check if this literal value is already in the pool: */
+  while (lit_count < next_literal_pool_place)
     {
-      inst.error = "Literal Pool Overflow\n";
-      return FAIL;
+      if (literals[lit_count].exp.X_op == inst.reloc.exp.X_op
+          && inst.reloc.exp.X_op == O_constant
+          && literals[lit_count].exp.X_add_number == inst.reloc.exp.X_add_number
+          && literals[lit_count].exp.X_unsigned == inst.reloc.exp.X_unsigned)
+        break;
+      lit_count++;
     }
 
-  literals[next_literal_pool_place].exp = inst.reloc.exp;
+  if (lit_count == next_literal_pool_place) /* new entry */
+    {
+      if (next_literal_pool_place > MAX_LITERAL_POOL_SIZE)
+        {
+          inst.error = "Literal Pool Overflow\n";
+          return FAIL;
+        }
+
+      literals[next_literal_pool_place].exp = inst.reloc.exp;
+      lit_count = next_literal_pool_place++;
+    }
+
   inst.reloc.exp.X_op = O_symbol;
-  inst.reloc.exp.X_add_number = (next_literal_pool_place++)*4-8;
+  inst.reloc.exp.X_add_number = (lit_count)*4-8;
   inst.reloc.exp.X_add_symbol = current_poolP;
 
   return SUCCESS;
@@ -748,11 +774,13 @@ validate_immediate (val)
 }
 
 static int
-validate_offset_imm (val)
+validate_offset_imm (val, hwse)
      int val;
+     int hwse;
 {
-  if (val < -4095 || val > 4095)
-    as_bad ("bad immediate value for offset (%d)", val);
+  if ((hwse && (val < -255 || val > 255))
+      || (val < -4095 || val > 4095))
+     return FAIL;
   return val;
 }
 
@@ -812,8 +840,7 @@ s_ltorg (internal)
   sprintf (sym_name, "$$lit_\002%x", lit_pool_num++);
 
   symbol_locate (current_poolP, sym_name, now_seg,
-		 (valueT) ((char *)obstack_next_free (&frags)
-			   - frag_now->fr_literal), frag_now);
+		 (valueT) frag_now_fix (), frag_now);
   symbol_table_insert (current_poolP);
 
   while (lit_count < next_literal_pool_place)
@@ -824,6 +851,7 @@ s_ltorg (internal)
   current_poolP = NULL;
 }
 
+#if 0 /* not used */
 static void
 arm_align (power, fill)
      int power;
@@ -835,6 +863,7 @@ arm_align (power, fill)
 
   record_alignment (now_seg, power);
 }
+#endif
 
 static void
 s_align (unused)	/* Same as s_align_ptwo but align 0 => align 2 */
@@ -1234,6 +1263,7 @@ cp_address_required_here (str)
       inst.reloc.exp.X_add_number -= 8;  /* PC rel adjust */
       inst.reloc.pc_rel = 1;
       inst.instruction |= (REG_PC << 16);
+      pre_inc = PRE_INDEX;
     }
 
   inst.instruction |= write_back | pre_inc;
@@ -1573,7 +1603,9 @@ my_get_float_expression (str)
       && exp.X_op == O_big
       && exp.X_add_number < 0)
     {
-      if (gen_to_words (words, 6, (long)15) == 0)
+      /* FIXME: 5 = X_PRECISION, should be #define'd where we can use it.
+	 Ditto for 15.  */
+      if (gen_to_words (words, 5, (long)15) == 0)
 	{
 	  for (i = 0; i < NUM_FLOAT_VALS; i++)
 	    {
@@ -1627,6 +1659,8 @@ my_get_expression (ep, str)
   save_in = input_line_pointer;
   input_line_pointer = *str;
   seg = expression (ep);
+
+#ifdef OBJ_AOUT
   if (seg != absolute_section
       && seg != text_section
       && seg != data_section
@@ -1638,10 +1672,11 @@ my_get_expression (ep, str)
       input_line_pointer = save_in;
       return 1;
     }
+#endif
 
   /* Get rid of any bignums now, so that we don't generate an error for which
      we can't establish a line number later on.  Big numbers are never valid
-     in instructions, which is where is routine is always called.  */
+     in instructions, which is where this routine is always called.  */
   if (ep->X_op == O_big
       || (ep->X_add_symbol
 	  && (walk_no_bignums (ep->X_add_symbol)
@@ -2109,8 +2144,9 @@ do_mov (str, flags)
 }
 
 static int
-ldst_extend (str)
+ldst_extend (str, hwse)
      char **str;
+     int hwse;
 {
   int add = INDEX_UP;
 
@@ -2125,7 +2161,8 @@ ldst_extend (str)
 	{
 	  int value = inst.reloc.exp.X_add_number;
 
-	  if (value < -4095 || value > 4095)
+          if ((hwse && (value < -255 || value > 255))
+               || (value < -4095 || value > 4095))
 	    {
 	      inst.error = "address offset too large";
 	      return FAIL;
@@ -2137,11 +2174,22 @@ ldst_extend (str)
 	      add = 0;
 	    }
 
-	  inst.instruction |= add | value;
+          /* Halfword and signextension instructions have the
+             immediate value split across bits 11..8 and bits 3..0 */
+          if (hwse)
+            inst.instruction |= add | HWOFFSET_IMM | (value >> 4) << 8 | value & 0xF;
+          else
+            inst.instruction |= add | value;
 	}
       else
 	{
-	  inst.reloc.type = BFD_RELOC_ARM_OFFSET_IMM;
+          if (hwse)
+            {
+              inst.instruction |= HWOFFSET_IMM;
+              inst.reloc.type = BFD_RELOC_ARM_OFFSET_IMM8;
+            }
+          else
+            inst.reloc.type = BFD_RELOC_ARM_OFFSET_IMM;
 	  inst.reloc.pc_rel = 0;
 	}
       return SUCCESS;
@@ -2156,8 +2204,15 @@ ldst_extend (str)
 	  inst.error = "Register expected";
 	  return FAIL;
 	}
-      inst.instruction |= add | OFFSET_REG;
-      if (skip_past_comma (str) == SUCCESS)
+
+      if (hwse)
+        inst.instruction |= add;
+      else
+        inst.instruction |= add | OFFSET_REG;
+
+      /* Shifts are not allowed in the halfword and signextension
+         forms of single memory transfers: */
+      if (!hwse && skip_past_comma (str) == SUCCESS)
 	return decode_shift (str, SHIFT_RESTRICT);
       return SUCCESS;
     }
@@ -2168,9 +2223,30 @@ do_ldst (str, flags)
      char *str;
      unsigned long flags;
 {
+  int halfword = 0;
+  int signextend = 0;
   int pre_inc = 0;
   int conflict_reg;
   int value;
+
+  /* This is not ideal, but it is the simplest way of dealing with the
+     ARM7T extension instructions (since they use a different
+     encoding, but the same mnemonic): */
+  halfword = flags & 0x00000020;
+  signextend = flags & 0x00000040;
+  if (halfword || signextend)
+    {
+      /* This is actually a load/store of a halfword, or a
+         signed-extension load */
+      inst.instruction = (inst.instruction & COND_MASK)
+                         | 0x00000090
+                         | (inst.instruction & 0x00100000);
+      if (signextend && !(inst.instruction & 0x00100000))
+        {
+	  inst.error = "Sign-extension not applicable to store instructions";
+	  return;
+        }
+    }
 
   while (*str == ' ')
     str++;
@@ -2215,7 +2291,7 @@ do_ldst (str, flags)
 	  if (skip_past_comma (&str) == SUCCESS)
 	    {
 	      /* [Rn],... (post inc) */
-	      if (ldst_extend (&str) == FAIL)
+	      if (ldst_extend (&str, halfword | signextend) == FAIL)
 		return;
 	      if (conflict_reg)
 		as_warn ("destination register same as write-back base\n");
@@ -2223,7 +2299,23 @@ do_ldst (str, flags)
 	  else
 	    {
 	      /* [Rn] */
+              if (halfword | signextend)
+                inst.instruction |= HWOFFSET_IMM;
+
+              while (*str == ' ')
+               str++;
+
+              if (*str == '!')
+               {
+                 if (conflict_reg)
+                  as_warn ("destination register same as write-back base\n");
+                 str++;
+                 inst.instruction |= WRITE_BACK;
+               }
+
 	      flags |= INDEX_UP;
+	      if (! (flags & TRANS_BIT))
+		pre_inc = 1;
 	    }
 	}
       else
@@ -2236,7 +2328,7 @@ do_ldst (str, flags)
 	    }
 
 	  pre_inc = 1;
-	  if (ldst_extend (&str) == FAIL)
+	  if (ldst_extend (&str, halfword | signextend) == FAIL)
 	    return;
 
 	  while (*str == ' ')
@@ -2299,7 +2391,13 @@ do_ldst (str, flags)
 	    }
 
 	  /* Change the instruction exp to point to the pool */
-	  inst.reloc.type = BFD_RELOC_ARM_LITERAL;
+          if (halfword || signextend)
+            {
+              inst.instruction |= HWOFFSET_IMM;
+              inst.reloc.type = BFD_RELOC_ARM_HWLITERAL;
+            }
+          else
+	    inst.reloc.type = BFD_RELOC_ARM_LITERAL;
 	  inst.reloc.pc_rel = 1;
 	  inst.instruction |= (REG_PC << 16);
 	  pre_inc = 1; 
@@ -2310,7 +2408,13 @@ do_ldst (str, flags)
       if (my_get_expression (&inst.reloc.exp, &str))
 	return;
 
-      inst.reloc.type = BFD_RELOC_ARM_OFFSET_IMM;
+      if (halfword || signextend)
+        {
+          inst.instruction |= HWOFFSET_IMM;
+          inst.reloc.type = BFD_RELOC_ARM_OFFSET_IMM8;
+        }
+      else
+        inst.reloc.type = BFD_RELOC_ARM_OFFSET_IMM;
       inst.reloc.exp.X_add_number -= 8;  /* PC rel adjust */
       inst.reloc.pc_rel = 1;
       inst.instruction |= (REG_PC << 16);
@@ -3230,14 +3334,6 @@ md_begin ()
   set_constant_flonums ();
 }
 
-/* This funciton is called once, before the assembler exits.  It is
-   supposed to do any final cleanup for this part of the assembler.
-   */
-void
-md_end ()
-{
-}
-
 /* Turn an integer of n bytes (in val) into a stream of bytes appropriate
    for use in the a.out file, and stores them in the array pointed to by buf.
    This knows about the endian-ness of the target machine and does
@@ -3285,14 +3381,20 @@ md_chars_to_number (buf, n)
   return result;
 }
 
-/*
-   This is identical to the md_atof in m68k.c.  I think this is right,
-   but I'm not sure.
+/* Turn a string in input_line_pointer into a floating point constant
+   of type TYPE, and store the appropriate bytes in *litP.  The number
+   of LITTLENUMS emitted is stored in *sizeP .  An error message is
+   returned, or NULL on OK.
 
-   Turn a string in input_line_pointer into a floating point constant of type
-   type, and store the appropriate bytes in *litP.  The number of LITTLENUMS
-   emitted is stored in *sizeP .  An error message is returned, or NULL on OK.
-   */
+   Note that fp constants aren't represent in the normal way on the ARM.
+   In big endian mode, things are as expected.  However, in little endian
+   mode fp constants are big-endian word-wise, and little-endian byte-wise
+   within the words.  For example, (double) 1.1 in big endian mode is
+   the byte sequence 3f f1 99 99 99 99 99 9a, and in little endian mode is
+   the byte sequence 99 99 f1 3f 9a 99 99 99.
+
+   ??? The format of 12 byte floats is uncertain according to gcc's arm.h.  */
+
 char *
 md_atof (type, litP, sizeP)
      char type;
@@ -3301,13 +3403,11 @@ md_atof (type, litP, sizeP)
 {
   int prec;
   LITTLENUM_TYPE words[MAX_LITTLENUMS];
-  LITTLENUM_TYPE *wordP;
   char *t;
-  char *atof_ieee ();
+  int i;
 
   switch (type)
     {
-
     case 'f':
     case 'F':
     case 's':
@@ -3336,17 +3436,32 @@ md_atof (type, litP, sizeP)
       *sizeP = 0;
       return "Bad call to MD_ATOF()";
     }
+
   t = atof_ieee (input_line_pointer, type, words);
   if (t)
     input_line_pointer = t;
-  *sizeP = prec * sizeof (LITTLENUM_TYPE);
-  for (wordP = words; prec--;)
+  *sizeP = prec * 2;
+
+  if (target_big_endian)
     {
-      fprintf (stderr, "%02x 02x ", ((*wordP) >> 8) & 255, (*wordP) & 255);
-      md_number_to_chars (litP, (valueT) (*wordP++), sizeof (LITTLENUM_TYPE));
-      litP += sizeof (LITTLENUM_TYPE);
+      for (i = 0; i < prec; i++)
+	{
+	  md_number_to_chars (litP, (valueT) words[i], 2);
+	  litP += 2;
+	}
     }
-  fprintf (stderr, "\n");
+  else
+    {
+      /* For a 4 byte float the order of elements in `words' is 1 0.  For an
+	 8 byte float the order is 1 0 3 2.  */
+      for (i = 0; i < prec; i += 2)
+	{
+	  md_number_to_chars (litP, (valueT) words[i + 1], 2);
+	  md_number_to_chars (litP + 2, (valueT) words[i], 2);
+	  litP += 4;
+	}
+    }
+
   return 0;
 }
 
@@ -3453,9 +3568,10 @@ arm_psr_parse (ccp)
 }
 
 int
-md_apply_fix (fixP, val)
+md_apply_fix3 (fixP, val, seg)
      fixS *fixP;
      valueT *val;
+     segT seg;
 {
   offsetT value = *val;
   offsetT newval, temp;
@@ -3464,17 +3580,27 @@ md_apply_fix (fixP, val)
 
   assert (fixP->fx_r_type < BFD_RELOC_UNUSED);
 
-  fixP->fx_addnumber = value;	/* Remember value for emit_reloc */
-
   /* Note whether this will delete the relocation.  */
   if (fixP->fx_addsy == 0 && !fixP->fx_pcrel)
     fixP->fx_done = 1;
+
+  /* If this symbol is in a different section then we need to leave it for
+     the linker to deal with.  Unfortunately, md_pcrel_from can't tell,
+     so we have to undo it's effects here.  */
+  if (fixP->fx_pcrel)
+    {
+      if (S_IS_DEFINED (fixP->fx_addsy)
+	  && S_GET_SEGMENT (fixP->fx_addsy) != seg)
+	value += md_pcrel_from (fixP);
+    }
+
+  fixP->fx_addnumber = value;	/* Remember value for emit_reloc */
 
   switch (fixP->fx_r_type)
     {
     case BFD_RELOC_ARM_IMMEDIATE:
       newval = validate_immediate (value);
-      temp = md_chars_to_number (buf, INSN_SIZE);
+      temp = md_chars_to_number (buf, insn_size);
 
       /* If the instruction will fail, see if we can fix things up by
 	 changing the opcode.  */
@@ -3487,19 +3613,45 @@ md_apply_fix (fixP, val)
 	}
 
       newval |= (temp & 0xfffff000);
-      md_number_to_chars (buf, newval, INSN_SIZE);
+      md_number_to_chars (buf, newval, insn_size);
       break;
 
-    case BFD_RELOC_ARM_OFFSET_IMM:
+     case BFD_RELOC_ARM_OFFSET_IMM:
       sign = value >= 0;
-      value = validate_offset_imm (value); /* Should be OK ... but .... */
+      if ((value = validate_offset_imm (value, 0)) == FAIL)
+        {
+          as_bad ("bad immediate value for offset (%d)", val);
+          break;
+        }
       if (value < 0)
 	value = -value;
 
-      newval = md_chars_to_number (buf, INSN_SIZE);
+      newval = md_chars_to_number (buf, insn_size);
       newval &= 0xff7ff000;
       newval |= value | (sign ? 0x00800000 : 0);
-      md_number_to_chars (buf, newval, INSN_SIZE);
+      md_number_to_chars (buf, newval, insn_size);
+      break;
+
+     case BFD_RELOC_ARM_OFFSET_IMM8:
+     case BFD_RELOC_ARM_HWLITERAL:
+      sign = value >= 0;
+      if ((value = validate_offset_imm (value, 1)) == FAIL)
+        {
+          if (fixP->fx_r_type == BFD_RELOC_ARM_HWLITERAL)
+	    as_bad_where (fixP->fx_file, fixP->fx_line, 
+			"invalid literal constant: pool needs to be closer\n");
+          else
+            as_bad ("bad immediate value for offset (%d)", value);
+          break;
+        }
+
+      if (value < 0)
+	value = -value;
+
+      newval = md_chars_to_number (buf, insn_size);
+      newval &= 0xff7ff0f0;
+      newval |= ((value >> 4) << 8) | value & 0xf | (sign ? 0x00800000 : 0);
+      md_number_to_chars (buf, newval, insn_size);
       break;
 
     case BFD_RELOC_ARM_LITERAL:
@@ -3507,21 +3659,21 @@ md_apply_fix (fixP, val)
       if (value < 0)
 	value = -value;
 
-      if ((value = validate_immediate (value)) == FAIL)
+      if ((value = validate_offset_imm (value, 0)) == FAIL)
 	{
 	  as_bad_where (fixP->fx_file, fixP->fx_line, 
 			"invalid literal constant: pool needs to be closer\n");
 	  break;
 	}
 
-      newval = md_chars_to_number (buf, INSN_SIZE);
+      newval = md_chars_to_number (buf, insn_size);
       newval &= 0xff7ff000;
       newval |= value | (sign ? 0x00800000 : 0);
-      md_number_to_chars (buf, newval, INSN_SIZE);
+      md_number_to_chars (buf, newval, insn_size);
       break;
 
     case BFD_RELOC_ARM_SHIFT_IMM:
-      newval = md_chars_to_number (buf, INSN_SIZE);
+      newval = md_chars_to_number (buf, insn_size);
       if (((unsigned long) value) > 32
 	  || (value == 32 
 	      && (((newval & 0x60) == 0) || (newval & 0x60) == 0x60)))
@@ -3537,31 +3689,31 @@ md_apply_fix (fixP, val)
 	value = 0;
       newval &= 0xfffff07f;
       newval |= (value & 0x1f) << 7;
-      md_number_to_chars (buf, newval , INSN_SIZE);
+      md_number_to_chars (buf, newval , insn_size);
       break;
 
     case BFD_RELOC_ARM_SWI:
       if (((unsigned long) value) > 0x00ffffff)
 	as_bad_where (fixP->fx_file, fixP->fx_line, "Invalid swi expression");
-      newval = md_chars_to_number (buf, INSN_SIZE) & 0xff000000;
+      newval = md_chars_to_number (buf, insn_size) & 0xff000000;
       newval |= value;
-      md_number_to_chars (buf, newval , INSN_SIZE);
+      md_number_to_chars (buf, newval , insn_size);
       break;
 
     case BFD_RELOC_ARM_MULTI:
       if (((unsigned long) value) > 0xffff)
 	as_bad_where (fixP->fx_file, fixP->fx_line,
 		      "Invalid expression in load/store multiple");
-      newval = value | md_chars_to_number (buf, INSN_SIZE);
-      md_number_to_chars (buf, newval, INSN_SIZE);
+      newval = value | md_chars_to_number (buf, insn_size);
+      md_number_to_chars (buf, newval, insn_size);
       break;
 
     case BFD_RELOC_ARM_PCREL_BRANCH:
       value = (value >> 2) & 0x00ffffff;
-      newval = md_chars_to_number (buf, INSN_SIZE);
+      newval = md_chars_to_number (buf, insn_size);
       value = (value + (newval & 0x00ffffff)) & 0x00ffffff;
       newval = value | (newval & 0xff000000);
-      md_number_to_chars (buf, newval, INSN_SIZE);
+      md_number_to_chars (buf, newval, insn_size);
       break;
 
     case BFD_RELOC_8:
@@ -3574,6 +3726,7 @@ md_apply_fix (fixP, val)
 	md_number_to_chars (buf, value, 2);
       break;
 
+    case BFD_RELOC_RVA:
     case BFD_RELOC_32:
       if (fixP->fx_done || fixP->fx_pcrel)
 	md_number_to_chars (buf, value, 4);
@@ -3586,9 +3739,9 @@ md_apply_fix (fixP, val)
 		      "Illegal value for co-processor offset");
       if (value < 0)
 	value = -value;
-      newval = md_chars_to_number (buf, INSN_SIZE) & 0xff7fff00;
+      newval = md_chars_to_number (buf, insn_size) & 0xff7fff00;
       newval |= (value >> 2) | (sign ?  0x00800000 : 0);
-      md_number_to_chars (buf, newval , INSN_SIZE);
+      md_number_to_chars (buf, newval , insn_size);
       break;
 
     case BFD_RELOC_NONE:
@@ -3622,12 +3775,6 @@ tc_gen_reloc (section, fixp)
   else
     reloc->addend = fixp->fx_offset = reloc->address;
 
-  /* @@ Why fx_addnumber sometimes and fx_offset other times?  */
-  if (fixp->fx_pcrel == 0)
-    reloc->addend = fixp->fx_offset;
-  else
-    reloc->addend = fixp->fx_offset = reloc->address;
-
   switch (fixp->fx_r_type)
     {
     case BFD_RELOC_8:
@@ -3652,10 +3799,12 @@ tc_gen_reloc (section, fixp)
 	}
 
     case BFD_RELOC_ARM_PCREL_BRANCH:
+    case BFD_RELOC_RVA:      
       code = fixp->fx_r_type;
       break;
 
     case BFD_RELOC_ARM_LITERAL:
+    case BFD_RELOC_ARM_HWLITERAL:
       /* If this is called then the a literal has been referenced across
 	 a section boundry - possibly due to an implicit dump */
       as_bad ("Literal referenced across section boundry (Implicit dump?)");
@@ -3668,6 +3817,11 @@ tc_gen_reloc (section, fixp)
 
     case BFD_RELOC_ARM_OFFSET_IMM:
       as_bad ("Internal_relocation (type %d) not fixed up (OFFSET_IMM)"
+	      , fixp->fx_r_type);
+      return NULL;
+
+    case BFD_RELOC_ARM_OFFSET_IMM8:
+      as_bad ("Internal_relocation (type %d) not fixed up (OFFSET_IMM8)"
 	      , fixp->fx_r_type);
       return NULL;
 
@@ -3746,8 +3900,8 @@ output_inst (str)
       return;
     }
 
-  to = frag_more (INSN_SIZE);
-  md_number_to_chars (to, inst.instruction, INSN_SIZE);
+  to = frag_more (insn_size);
+  md_number_to_chars (to, inst.instruction, insn_size);
 
   if (inst.reloc.type != BFD_RELOC_NONE)
     fix_new_arm (frag_now, to - frag_now->fr_literal,
@@ -3774,9 +3928,7 @@ md_assemble (str)
   if (last_label_seen != NULL)
     {
       last_label_seen->sy_frag = frag_now;
-      S_SET_VALUE (last_label_seen,
-		   (valueT) ((char *) obstack_next_free (&frags)
-			     - frag_now->fr_literal));
+      S_SET_VALUE (last_label_seen, (valueT) frag_now_fix ());
       S_SET_SEGMENT (last_label_seen, now_seg);
     }
 
@@ -3898,7 +4050,8 @@ md_assemble (str)
 
 		  for (flagno = 0; flag[flagno].template; flagno++)
 		    {
-		      if (! strcmp (r, flag[flagno].template))
+		      if ((flag[flagno].variants & cpu_variant) != 0
+                          && (! strcmp (r, flag[flagno].template)))
 			{
 			  flag_bits |= flag[flagno].set_bits;
 			  break;
@@ -3981,8 +4134,8 @@ md_assemble (str)
  *            -m[arm]1                Currently not supported.
  *            -m[arm]2, -m[arm]250    Arm 2 and Arm 250 processor
  *            -m[arm]3                Arm 3 processor
- *            -m[arm]6, -m[arm]7      Arm 6 and 7 processors
- *            -m[arm]7dm              Arm 7dm processors
+ *            -m[arm]6,               Arm 6 processors
+ *            -m[arm]7[t][[d]m]       Arm 7 processors
  *            -mall                   All (except the ARM1)
  *    FP variants:
  *            -mfpa10, -mfpa11        FPA10 and 11 co-processor instructions
@@ -4086,12 +4239,30 @@ md_parse_option (c, arg)
 	      break;
 
 	    case '7':
-	      if (! strcmp (str, "7"))
-		cpu_variant = (cpu_variant & ~ARM_ANY) | ARM_7;
-	      else if (! strcmp (str, "7dm"))
-		cpu_variant = (cpu_variant & ~ARM_ANY) | ARM_7DM;
-	      else
-		goto bad;
+              str++; /* eat the '7' */
+              cpu_variant = (cpu_variant & ~ARM_ANY) | ARM_7;
+              for (; *str; str++)
+                {
+                switch (*str)
+                  {
+                  case 't':
+                    cpu_variant |= ARM_HALFWORD;
+                    break;
+
+                  case 'm':
+                    cpu_variant |= ARM_LONGMUL;
+                    break;
+
+                  case 'd': /* debug */
+                  case 'i': /* embedded ice */
+                    /* Included for completeness in ARM processor
+                       naming. */
+                    break;
+
+                  default:
+                    goto bad;
+                  }
+                }
 	      break;
 
 	    default:
@@ -4114,7 +4285,7 @@ md_show_usage (fp)
      FILE *fp;
 {
   fprintf (fp,
-"-m[arm]1, -m[arm]2, -m[arm]250,\n-m[arm]3, -m[arm]6, -m[arm]7, -m[arm]7dm\n\
+"-m[arm]1, -m[arm]2, -m[arm]250,\n-m[arm]3, -m[arm]6, -m[arm]7[t][[d]m]\n\
 \t\t\tselect processor architecture\n\
 -mall\t\t\tallow any instruction\n\
 -mfpa10, -mfpa11\tselect floating point architecture\n\
