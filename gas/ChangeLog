@@ -1,3 +1,13 @@
+2002-11-20  Klee Dienes  <kdienes@apple.com>
+
+	* config/tc-mcore.c (md_begin): Use a const iterator.  Don't
+	coalesce the name fields to use the same pointer.
+
+	* config/tc-sh.c (md_begin): Use a const iterator.  Don't coalesce
+	the name fields to use the same pointer.
+	(get_specific): Check for opcodes with the same name using strcmp
+	as well as comparing the pointer.
+
 2002-11-20  Alan Modra  <amodra@bigpond.net.au>
 
 	* write.c (adjust_reloc_syms): Don't reduce SEC_MERGE fixups with

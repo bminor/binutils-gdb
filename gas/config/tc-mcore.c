@@ -432,7 +432,7 @@ mcore_s_comm (needs_align)
 void
 md_begin ()
 {
-  mcore_opcode_info * opcode;
+  const mcore_opcode_info * opcode;
   char * prev_name = "";
 
   opcode_hash_control = hash_new ();
@@ -440,13 +440,7 @@ md_begin ()
   /* Insert unique names into hash table */
   for (opcode = mcore_table; opcode->name; opcode ++)
     {
-      if (streq (prev_name, opcode->name))
-	{
-	  /* Make all the opcodes with the same name point to the same
-	     string.  */
-	  opcode->name = prev_name;
-	}
-      else
+      if (! streq (prev_name, opcode->name))
 	{
 	  prev_name = opcode->name;
 	  hash_insert (opcode_hash_control, opcode->name, (char *) opcode);

@@ -863,7 +863,7 @@ sh_elf_cons (nbytes)
 void
 md_begin ()
 {
-  sh_opcode_info *opcode;
+  const sh_opcode_info *opcode;
   char *prev_name = "";
   int target_arch;
 
@@ -879,18 +879,12 @@ md_begin ()
   /* Insert unique names into hash table.  */
   for (opcode = sh_table; opcode->name; opcode++)
     {
-      if (strcmp (prev_name, opcode->name))
+      if (strcmp (prev_name, opcode->name) != 0)
 	{
 	  if (! (opcode->arch & target_arch))
 	    continue;
 	  prev_name = opcode->name;
 	  hash_insert (opcode_hash_control, opcode->name, (char *) opcode);
-	}
-      else
-	{
-	  /* Make all the opcodes with the same name point to the same
-	     string.  */
-	  opcode->name = prev_name;
 	}
     }
 }
@@ -1574,7 +1568,7 @@ get_specific (opcode, operands)
   while (opcode->name)
     {
       this_try = opcode++;
-      if (this_try->name != name)
+      if ((this_try->name != name) && (strcmp (this_try->name, name) != 0))
 	{
 	  /* We've looked so far down the table that we've run out of
 	     opcodes with the same name.  */
