@@ -1,7 +1,10 @@
 #define N_GSYM 128
 #define N_LSYM 129
-#define N_BCOMM 135
-#define N_ECOMM 137
+
+/* If we try to use .stabx for common blocks, the AIX assembler (bogusly)
+   complains about the lack of a colon in the stabstring.  */
+#define BEGIN_COMMON(name) .bc name
+#define END_COMMON(name) .ec
 
 #define VAR(name) \
 	.globl name; \

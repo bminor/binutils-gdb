@@ -323,11 +323,11 @@ VAR (_common0)
 VAR (common0)
      .long 24
      .long 22
-STAB ("common0", N_BCOMM, 0)
+BEGIN_COMMON ("common0")
 STAB ("common0var0:S1", N_GSYM, 0)
 STAB ("common0var1:S1", N_GSYM, 4)
 STAB ("common0var2:S1", N_GSYM, 8)
-STAB ("common0", N_ECOMM, 0)
+END_COMMON ("common0")
 
 STAB("attr94:G394=@^ !#$%&'()*+,-./0123456789:<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[]^_`abcdefghijklmnopqrstuvwxyz{|}~;1",N_GSYM, 0)
 STAB("attr95:G395=@_ !#$%&'()*+,-./0123456789:<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[]^_`abcdefghijklmnopqrstuvwxyz{|}~;1",N_GSYM, 0)
