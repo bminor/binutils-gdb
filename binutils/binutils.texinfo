@@ -573,7 +573,7 @@ The GNU @code{ranlib} program is another form of GNU @code{ar}; running
 @smallexample
   size [ -A | -B | +format @var{compatibility} ]
        [ +help ]  [ -d | -o | -x | +radix @var{number} ]
-       [ +target @var{bfdname}  [ -V | +version ]  
+       [ +target @var{bfdname} ]  [ -V | +version ]  
        @var{objfiles}@dots{}
 @end smallexample
 
@@ -593,8 +593,8 @@ The object files to be examined.
 @cindex size display format
 Using one of these options, you can choose whether the output from GNU
 @code{size} resembles output from System V @code{size} (using @samp{-A},
-or @samp{+format sysv}, or Berkeley @code{size} (using @samp{-B}, or
-@samp{+format berkeley}.  The default is the one-line format similar to
+or @samp{+format sysv}), or Berkeley @code{size} (using @samp{-B}, or
+@samp{+format berkeley}).  The default is the one-line format similar to
 Berkeley's.  
 @c Bonus for doc-source readers: you can also say +format=strange (or
 @c anything else that starts with 's') for sysv, and +format=boring (or
