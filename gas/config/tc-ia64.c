@@ -6869,19 +6869,19 @@ ia64_canonicalize_symbol_name (name)
   return name;
 }
 
+/* Return true if idesc is a conditional branch instruction.  */
+
 static int
 is_conditional_branch (idesc)
      struct ia64_opcode *idesc;
 {
-  return (strncmp (idesc->name, "br", 2) == 0
-	  && (strcmp (idesc->name, "br") == 0
-	      || strncmp (idesc->name, "br.cond", 7) == 0
-	      || strncmp (idesc->name, "br.call", 7) == 0
-	      || strncmp (idesc->name, "br.ret", 6) == 0
-	      || strcmp (idesc->name, "brl") == 0
-	      || strncmp (idesc->name, "brl.cond", 7) == 0
-	      || strncmp (idesc->name, "brl.call", 7) == 0
-	      || strncmp (idesc->name, "brl.ret", 6) == 0));
+  /* br is a conditional branch.  Everything that starts with br. except
+     br.ia is a conditional branch.  Everything that starts with brl is a
+     conditional branch.  */
+  return (idesc->name[0] == 'b' && idesc->name[1] == 'r'
+	  && (idesc->name[2] == '\0'
+	      || (idesc->name[2] == '.' && idesc->name[3] != 'i')
+	      || idesc->name[2] == 'l'));
 }
 
 /* Return whether the given opcode is a taken branch.  If there's any doubt,

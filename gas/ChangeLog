@@ -1,3 +1,8 @@
+2001-04-13  Jim Wilson  <wilson@redhat.com>
+
+	* tc-ia64.c (is_conditional_branch): Return true for br, brl, and br.
+	excluding br.i.
+
 2001-04-02  Philip Blundell  <philb@gnu.org>
 
 	From 2001-03-17  Richard Henderson  <rth@redhat.com>
