@@ -1,3 +1,8 @@
+Thu Feb  5 17:18:16 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* remote-sim.c (gdbsim_create_inferior): clear_proceed_status
+ 	before /re/starting the simulator.
+
 Thu Feb  5 15:55:31 1998  C. M. Heard (heard@vvnet.com)
 
         * top.c (do_nothing): Remove signal handler after signal is caught.

@@ -474,6 +474,8 @@ gdbsim_create_inferior (exec_file, args, env)
   inferior_pid = 42;
   insert_breakpoints (); /* Needed to get correct instruction in cache */
 
+  clear_proceed_status ();
+
   /* NB: Entry point already set by sim_create_inferior. */
   proceed ((CORE_ADDR)-1, TARGET_SIGNAL_DEFAULT, 0);
 }
