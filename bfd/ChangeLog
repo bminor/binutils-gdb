@@ -8,6 +8,8 @@
 	messages and add test for Maverick floating point support.
 	(elf32_arm_print_private_bfd_data): Handle
 	EF_ARM_MAVERICK_FLOAT flag.
+	(elf32_arm_object_p): New function.
+	(elf_backend_object_p): Define.
 
 2003-02-10  Alan Modra  <amodra@bigpond.net.au>
 

@@ -1,5 +1,5 @@
 /* 32-bit ELF support for ARM
-   Copyright 1998, 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+   Copyright 1998, 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -86,6 +86,8 @@ static void arm_add_to_rel
 #endif
 static enum elf_reloc_type_class elf32_arm_reloc_type_class
   PARAMS ((const Elf_Internal_Rela *));
+static bfd_boolean elf32_arm_object_p
+  PARAMS ((bfd *));
 
 #ifndef ELFARM_NABI_C_INCLUDED
 static void record_arm_to_thumb_glue
@@ -2108,6 +2110,20 @@ elf32_arm_relocate_section (output_bfd, info, input_bfd, input_section,
   return TRUE;
 }
 
+/* Set the right machine number.  */
+
+static bfd_boolean
+elf32_arm_object_p (abfd)
+     bfd *abfd;
+{
+  /* XXX - we ought to examine a .note section here.  */
+
+  if (elf_elfheader (abfd)->e_flags & EF_ARM_MAVERICK_FLOAT)
+    bfd_default_set_arch_mach (abfd, bfd_arch_arm, bfd_mach_arm_ep9312);
+
+  return TRUE;
+}
+
 /* Function to keep ARM specific flags in the ELF header.  */
 static bfd_boolean
 elf32_arm_set_private_flags (abfd, flags)
@@ -3641,7 +3657,6 @@ elf32_arm_reloc_type_class (rela)
     }
 }
 
-
 #define ELF_ARCH			bfd_arch_arm
 #define ELF_MACHINE_CODE		EM_ARM
 #define ELF_MAXPAGESIZE			0x8000
@@ -3666,6 +3681,7 @@ elf32_arm_reloc_type_class (rela)
 #define elf_backend_size_dynamic_sections	elf32_arm_size_dynamic_sections
 #define elf_backend_post_process_headers	elf32_arm_post_process_headers
 #define elf_backend_reloc_type_class		elf32_arm_reloc_type_class
+#define elf_backend_object_p			elf32_arm_object_p
 
 #define elf_backend_can_gc_sections 1
 #define elf_backend_plt_readonly    1
