@@ -460,7 +460,7 @@ generic_register_byte (int regnum)
   byte = 0;
   for (i = 0; i < regnum; i++)
     {
-      byte += generic_register_size (regnum);
+      byte += generic_register_size (i);
     }
   return byte;
 }

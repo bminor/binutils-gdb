@@ -1,3 +1,8 @@
+2003-03-02  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* arch-utils.c (generic_register_byte): Fix to use the loop index 
+	and not regnum when summing the size of all registers up to regnum.
+
 2003-03-01  Andrew Cagney  <cagney@redhat.com>
 
 	* gdbarch.sh (DEPRECATED_FRAME_INIT_SAVED_REGS): Rename
