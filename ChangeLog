@@ -1,3 +1,7 @@
+Mon Dec 28 12:08:56 1992  Ken Raeburn  (raeburn@cygnus.com)
+
+	* config.sub: (from FSF) Sequent uses a BSD-like OS.
+
 Mon Dec 28 08:32:06 1992  Minh Tran-Le  (mtranle@paris.intellicorp.com)
 
 	* configure.in (i[34]86-*-isc*): added; uses mh-sysv.
