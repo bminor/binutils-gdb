@@ -1,3 +1,8 @@
+2002-08-29  Keith Seitz  <keiths@redhat.com>
+
+	* stack.c (print_frame_info_base): Always set current_source_symtab
+	and current_source_line.
+
 2002-08-29  Donn Terry  <donnte@microsoft.com>
 
 	* proc-api.c (rw_table): Fix typo in #ifdef PCSHOLD (missing S).

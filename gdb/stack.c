@@ -398,6 +398,11 @@ print_frame_info_base (struct frame_info *fi, int level, int source, int args)
     print_frame (fi, level, source, args, sal);
 
   source_print = (source == SRC_LINE || source == SRC_AND_LOC);
+  if (sal.symtab)
+    {
+      current_source_symtab = sal.symtab;
+      current_source_line = sal.line;
+    }
 
   if (source_print && sal.symtab)
     {
@@ -410,10 +415,7 @@ print_frame_info_base (struct frame_info *fi, int level, int source, int args)
       if (!done)
 	{
 	  if (print_frame_info_listing_hook)
-	    {
-	      print_frame_info_listing_hook (sal.symtab, sal.line, sal.line + 1, 0);
-	      current_source_symtab = sal.symtab;
-	    }
+	    print_frame_info_listing_hook (sal.symtab, sal.line, sal.line + 1, 0);
 	  else
 	    {
 	      /* We used to do this earlier, but that is clearly
