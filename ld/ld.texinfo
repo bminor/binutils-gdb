@@ -3396,7 +3396,9 @@ linker to place constructor information in the output section where the
 ignored for other object file formats.
 
 The symbol @w{@code{__CTOR_LIST__}} marks the start of the global
-constructors, and the symbol @w{@code{__DTOR_LIST}} marks the end.  The
+constructors, and the symbol @w{@code{__CTOR_END__}} marks the end.
+Similarly, @w{@code{__DTOR_LIST__}} and @w{@code{__DTOR_END__}} mark
+the start and end of the global destructors.  The
 first word in the list is the number of entries, followed by the address
 of each constructor or destructor, followed by a zero word.  The
 compiler must arrange to actually run the code.  For these object file

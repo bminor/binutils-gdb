@@ -1,5 +1,10 @@
 2005-01-23  Alan Modra  <amodra@bigpond.net.au>
 
+	* ld.texinfo (Output Section Keywords <CONSTRUCTORS>): Correct
+	__DTOR_LIST__ description.
+
+2005-01-23  Alan Modra  <amodra@bigpond.net.au>
+
 	* ld.texinfo (Location Counter <dot outside sections>): Document
 	effects of orphan section placement, and ". = ." workaround.
 	* Makefile.in: Regenerate.
