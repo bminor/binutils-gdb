@@ -96,7 +96,7 @@
     t <<= 1;
     }
 
-  printf("lo %d\n", c);
+  printf("lo %d\n", (int) c);
   GPR[RD] = c;
 }
 

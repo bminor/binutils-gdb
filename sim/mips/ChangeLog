@@ -1,3 +1,17 @@
+Wed Mar 25 10:05:46 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* interp.c (Max, Min): Comment out functions. Not yet used.
+
+start-sanitize-vr4320
+Wed Mar 25 10:04:13 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* vr4320.igen (DCLZ): Pacify GCC, 64 bit arg, int format.
+
+end-sanitize-vr4320
+Wed Mar 18 12:38:12 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+
 Tue Mar 17 19:05:20 1998  Frank Ch. Eigler  <fche@cygnus.com>
 
 	* Makefile.in (MIPS_EXTRA_LIBS, SIM_EXTRA_LIBS): Added
