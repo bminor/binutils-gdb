@@ -1,3 +1,11 @@
+2002-04-27  Alan Modra  <amodra@bigpond.net.au>
+
+	Merge from mainline.
+	2002-04-03  Alan Modra  <amodra@bigpond.net.au>
+	* symbols.c (resolve_symbol_value <O_uminus, O_bit_not,
+	O_logical_not>): Derive final_seg from add_symbol.
+	<O_multiply..O_logical_or>: More final_seg twiddles.
+
 2002-04-24  Andreas Schwab  <schwab@suse.de>
 
 	* config/tc-i386.c (output_jump, output_disp)
