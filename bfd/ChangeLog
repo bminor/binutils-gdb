@@ -1,3 +1,8 @@
+1998-12-01  Nick Clifton  <nickc@cygnus.com>
+
+	* elf32-v850.c (v850_elf_relocate_section): Detect the absence of
+	a hash table.
+
 Mon Nov 30 15:28:09 1998  J"orn Rennecke <amylaar@cygnus.co.uk>
 
 	* elf32-sh.c (elf/sh.h): Include.
