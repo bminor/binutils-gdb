@@ -1,5 +1,9 @@
 Mon Mar  4 12:49:16 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* xcofflink.c (xcoff_mark): Treat undefined imported symbols as
+	though they are defined in a shared library.
+	(xcoff_build_ldsyms): Likewise.
+
 	* coffgen.c (coff_find_nearest_line): Don't look at the line
 	numbers for the section if section->lineno is NULL.
 
