@@ -1,3 +1,7 @@
+Fri Feb 17 15:24:35 1995  Per Bothner  <bothner@kalessin.cygnus.com>
+
+	* gdb.texinfo (Artificial arrays):  Note use of coerce-to-array-type.
+
 Wed Feb 15 11:59:18 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
 
 	* all-cfg.texi: New flag, GDBSERVE, for NetWare's gdbserve.nlm.

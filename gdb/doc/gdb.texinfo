@@ -4078,6 +4078,22 @@ subscripting, and are coerced to pointers when used in expressions.
 Artificial arrays most often appear in expressions via the value history
 (@pxref{Value History, ,Value history}), after printing one out.
 
+Another way to create an artificial array is to use a cast.
+This re-interprets a value as if it were an array.
+The value need not be in memory:
+@example
+(@value{GDBP}) p/x (short[2])0x12345678
+$1 = @{0x1234, 0x5678@}
+@end example
+
+As a convenience, if you leave the array length out (as in
+@samp{(@var{type})[])@var{value}}) gdb calculates the size to fill
+the value (as @samp{sizeof(@var{value})/sizeof(@var{type})}:
+@example
+(@value{GDBP}) p/x (short[])0x12345678
+$2 = @{0x1234, 0x5678@}
+@end example
+
 Sometimes the artificial array mechanism is not quite enough; in
 moderately complex data structures, the elements of interest may not
 actually be adjacent---for example, if you are interested in the values
