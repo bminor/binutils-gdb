@@ -73,9 +73,6 @@ dvi: gdb.dvi refcard.dvi gdbint.dvi
 all-doc: gdb.info gdb.dvi refcard.dvi gdb-internals gdbint.dvi
 
 install-info: info
-	-parent=`echo $(infodir)|sed -e 's@/[^/]*$$@@'`; \
-	if [ -d $$parent ] ; then true ; else mkdir $$parent ; fi
-	-if [ -d $(infodir) ] ; then true ; else mkdir $(infodir) ; fi
 	for i in *.info* ; do \
 		$(INSTALL_DATA) $$i $(infodir)/$$i ; \
 	done
