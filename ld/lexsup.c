@@ -1003,22 +1003,7 @@ parse_args (argc, argv)
 	  version_printed = true;
 	  break;
 	case OPTION_VERSION:
-	  /* This output is intended to follow the GNU standards document.  */
-	  printf ("GNU ld %s\n", ld_program_version);
-	  printf (_("Copyright 2001 Free Software Foundation, Inc.\n"));
-	  printf (_("\
-This program is free software; you may redistribute it under the terms of\n\
-the GNU General Public License.  This program has absolutely no warranty.\n"));
-	  {
-	    ld_emulation_xfer_type **ptr = ld_emulations;
-
-	    printf (_("  Supported emulations:\n"));
-	    while (*ptr)
-	      {
-		printf ("   %s\n", (*ptr)->emulation_name);
-		ptr++;
-	      }
-	  }
+	  ldversion (2);
 	  xexit (0);
 	  break;
 	case OPTION_VERSION_SCRIPT:
