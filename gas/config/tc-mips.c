@@ -216,6 +216,11 @@ static int mips_5900 = -1;
 /* Whether Toshiba r3900 instructions are permitted. */
 static int mips_3900 = -1;
 
+/* start-sanitize-tx49 */
+/* Whether Toshiba r4900 instructions are permitted. */
+static int mips_4900 = -1;
+
+/* end-sanitize-tx49 */
 /* start-sanitize-tx19 */
 /* The tx19 (r1900) is a mips16 decoder with a tx39(r3900) behind it.
    The tx19 related options and configuration bits are handled by 
@@ -227,7 +232,7 @@ static int mips_3900 = -1;
    require nops to be inserted.  */
 #define hilo_interlocks (mips_4010 || mips_cpu == 4300 || mips_3900 \
                          /* start-sanitize-tx49 */                  \
-                         || mips_cpu == 4900                        \
+                         || mips_cpu == 4900 || mips_4900           \
                          /* end-sanitize-tx49 */                    \
 			 /* start-sanitize-vr5400 */		    \
 			 || mips_cpu == 5400			    \
@@ -973,7 +978,11 @@ md_begin ()
   if (mips_3900 < 0)
     mips_3900 = (mips_cpu == 3900);
 
+  /* start-sanitize-tx49 */
+  if (mips_4900 < 0)
+    mips_4900 = (mips_cpu == 4900);
 
+  /* end-sanitize-tx49 */
 
   /* End of TARGET_CPU processing, get rid of malloced memory
      if necessary. */
@@ -2413,6 +2422,10 @@ macro_build (place, counter, ep, name, fmt, va_alist)
 		  && (insn.insn_mo->membership & INSN_4010) != 0)
 	      || (mips_4100
 		  && (insn.insn_mo->membership & INSN_4100) != 0)
+	      /* start-sanitize-tx49 */
+	      || (mips_4900
+		  && (insn.insn_mo->membership & INSN_4900) != 0)
+	      /* end-sanitize-tx49 */
 	      /* start-sanitize-r5900 */
 	      || (mips_5900
 		  && (insn.insn_mo->membership & INSN_5900) != 0)
@@ -6757,6 +6770,9 @@ mips_ip (str, ip)
       else if ((mips_4650 && (insn->membership & INSN_4650) != 0)
 	       || (mips_4010 && (insn->membership & INSN_4010) != 0)
 	       || (mips_4100 && (insn->membership & INSN_4100) != 0)
+	       /* start-sanitize-tx49 */
+	       || (mips_4900 && (insn->membership & INSN_4900) != 0)
+	       /* end-sanitize-tx49 */
 	       /* start-sanitize-r5900 */
 	       || (mips_5900 && (insn->membership & INSN_5900) != 0)
 	       /* end-sanitize-r5900 */
@@ -8570,6 +8586,13 @@ struct option md_longopts[] = {
   {"no-m5400", no_argument, NULL, OPTION_NO_M5400},
 
   /* end-sanitize-vr5400 */
+  /* start-sanitize-tx49 */
+#define OPTION_M4900 (OPTION_MD_BASE + 30)
+  {"m4900", no_argument, NULL, OPTION_M4900},
+#define OPTION_NO_M4900 (OPTION_MD_BASE + 31)
+  {"no-m4900", no_argument, NULL, OPTION_NO_M4900},
+
+  /* end-sanitize-tx49 */
 #define OPTION_CALL_SHARED (OPTION_MD_BASE + 7)
 #define OPTION_NON_SHARED (OPTION_MD_BASE + 8)
 #define OPTION_XGOT (OPTION_MD_BASE + 19)
@@ -8831,6 +8854,16 @@ md_parse_option (c, arg)
       mips_3900 = 0;
       break;
 
+      /* start-sanitize-tx49 */
+    case OPTION_M4900:
+      mips_4900 = 1;
+      break;
+      
+    case OPTION_NO_M4900:
+      mips_4900 = 0;
+      break;
+
+      /* end-sanitize-tx49 */
     case OPTION_MIPS16:
       mips_opts.mips16 = 1;
       mips_no_prev_insn (false);
