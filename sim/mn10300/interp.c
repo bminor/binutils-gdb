@@ -145,7 +145,7 @@ hash(insn)
   return ((insn & 0xff000000) >> 24) & 0x7f;
 }
 
-static void
+static INLINE void
 dispatch (insn, extension, length)
      uint32 insn;
      uint32 extension;

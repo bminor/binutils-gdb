@@ -2931,12 +2931,8 @@ void OP_F020 (insn, extension)
 				    MEMPTR (PARM2), PARM3);
       break;
     case SYS_write:
-      if (PARM1 == 1)
-	RETVAL = (int)mn10300_callback->write_stdout (mn10300_callback,
-						   MEMPTR (PARM2), PARM3);
-      else
-	RETVAL = (int)mn10300_callback->write (mn10300_callback, PARM1,
-					    MEMPTR (PARM2), PARM3);
+      RETVAL = (int)mn10300_callback->write (mn10300_callback, PARM1,
+					     MEMPTR (PARM2), PARM3);
       break;
     case SYS_lseek:
       RETVAL = mn10300_callback->lseek (mn10300_callback, PARM1, PARM2, PARM3);

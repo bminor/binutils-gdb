@@ -1,3 +1,10 @@
+Mon May 19 13:54:22 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* interp.c (dispatch): Make this an inline function.
+
+	* simops.c (syscall): Use callback->write regardless of
+	what file descriptor we're writing too.
+
 Sun May 18 16:46:31 1997  Jeffrey A Law  (law@cygnus.com)
 
 	* interp.c (load_mem_big): Remove function.  It's now a macro
