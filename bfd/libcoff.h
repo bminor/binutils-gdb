@@ -617,6 +617,7 @@ typedef struct
  unsigned int _bfd_relsz;
  unsigned int _bfd_linesz;
  boolean _bfd_coff_long_filenames;
+ boolean _bfd_coff_long_section_names;
  void (*_bfd_coff_swap_filehdr_in) PARAMS ((
        bfd     *abfd,
        PTR     ext,
@@ -768,6 +769,8 @@ typedef struct
 #define bfd_coff_relsz(abfd)  (coff_backend_info (abfd)->_bfd_relsz)
 #define bfd_coff_linesz(abfd) (coff_backend_info (abfd)->_bfd_linesz)
 #define bfd_coff_long_filenames(abfd) (coff_backend_info (abfd)->_bfd_coff_long_filenames)
+#define bfd_coff_long_section_names(abfd) \
+        (coff_backend_info (abfd)->_bfd_coff_long_section_names)
 #define bfd_coff_swap_filehdr_in(abfd, i,o) \
         ((coff_backend_info (abfd)->_bfd_coff_swap_filehdr_in) (abfd, i, o))
 

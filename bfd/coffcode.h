@@ -309,6 +309,7 @@ CODE_FRAGMENT
 #include "coffswap.h"
 #endif
 
+#define STRING_SIZE_SIZE (4)
 
 /* void warning(); */
 
@@ -724,6 +725,7 @@ dependent COFF routines:
 . unsigned int _bfd_relsz;
 . unsigned int _bfd_linesz;
 . boolean _bfd_coff_long_filenames;
+. boolean _bfd_coff_long_section_names;
 . void (*_bfd_coff_swap_filehdr_in) PARAMS ((
 .       bfd     *abfd,
 .       PTR     ext,
@@ -875,6 +877,8 @@ dependent COFF routines:
 .#define bfd_coff_relsz(abfd)  (coff_backend_info (abfd)->_bfd_relsz)
 .#define bfd_coff_linesz(abfd) (coff_backend_info (abfd)->_bfd_linesz)
 .#define bfd_coff_long_filenames(abfd) (coff_backend_info (abfd)->_bfd_coff_long_filenames)
+.#define bfd_coff_long_section_names(abfd) \
+.        (coff_backend_info (abfd)->_bfd_coff_long_section_names)
 .#define bfd_coff_swap_filehdr_in(abfd, i,o) \
 .        ((coff_backend_info (abfd)->_bfd_coff_swap_filehdr_in) (abfd, i, o))
 .
@@ -2267,9 +2271,11 @@ coff_write_object_contents (abfd)
   asection *text_sec = NULL;
   asection *data_sec = NULL;
   asection *bss_sec = NULL;
-
   struct internal_filehdr internal_f;
   struct internal_aouthdr internal_a;
+#ifdef COFF_LONG_SECTION_NAMES
+  size_t string_size = STRING_SIZE_SIZE;
+#endif
 
   bfd_set_error (bfd_error_system_call);
 
@@ -2354,7 +2360,25 @@ coff_write_object_contents (abfd)
 
 #endif
       internal_f.f_nscns++;
-      strncpy (&(section.s_name[0]), current->name, 8);
+
+      strncpy (section.s_name, current->name, SCNNMLEN);
+
+#ifdef COFF_LONG_SECTION_NAMES
+      /* Handle long section names as in PE.  This must be compatible
+         with the code in coff_write_symbols.  */
+      {
+	size_t len;
+
+	len = strlen (current->name);
+	if (len > SCNNMLEN)
+	  {
+	    memset (section.s_name, 0, SCNNMLEN);
+	    sprintf (section.s_name, "/%d", string_size);
+	    string_size += len + 1;
+	  }
+      }
+#endif
+
 #ifdef _LIB
       /* Always set s_vaddr of .lib to 0.  This is right for SVR3.2
 	 Ian Taylor <ian@cygnus.com>.  */
@@ -2831,8 +2855,8 @@ coff_write_object_contents (abfd)
     return false;
   {
     char buff[FILHSZ];
-    coff_swap_filehdr_out (abfd, (PTR) & internal_f, (PTR) & buff);
-    if (bfd_write ((PTR) & buff, 1, FILHSZ, abfd) != FILHSZ)
+    coff_swap_filehdr_out (abfd, (PTR) & internal_f, (PTR) buff);
+    if (bfd_write ((PTR) buff, 1, FILHSZ, abfd) != FILHSZ)
       return false;
   }
   if (abfd->flags & EXEC_P)
@@ -2840,8 +2864,8 @@ coff_write_object_contents (abfd)
       /* Note that peicode.h fills in a PEAOUTHDR, not an AOUTHDR. 
 	 include/coff/pe.h sets AOUTSZ == sizeof(PEAOUTHDR)) */
       char buff[AOUTSZ];
-      coff_swap_aouthdr_out (abfd, (PTR) & internal_a, (PTR) & buff);
-      if (bfd_write ((PTR) & buff, 1, AOUTSZ, abfd) != AOUTSZ)
+      coff_swap_aouthdr_out (abfd, (PTR) & internal_a, (PTR) buff);
+      if (bfd_write ((PTR) buff, 1, AOUTSZ, abfd) != AOUTSZ)
 	return false;
     }
 #ifdef RS6000COFF_C
@@ -3694,6 +3718,11 @@ static CONST bfd_coff_backend_data bfd_coff_std_swap_table =
   coff_swap_scnhdr_out,
   FILHSZ, AOUTSZ, SCNHSZ, SYMESZ, AUXESZ, RELSZ, LINESZ,
 #ifdef COFF_LONG_FILENAMES
+  true,
+#else
+  false,
+#endif
+#ifdef COFF_LONG_SECTION_NAMES
   true,
 #else
   false,
