@@ -1,3 +1,13 @@
+2002-04-16  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-m32r.c (m32r_elf_add_symbol_hook): Check the hash table
+	type rather than just assuming entries are ELF.
+	* elf32-sh64.c (sh64_elf_add_symbol_hook): Likewise.
+	* elf64-sh64.c (sh64_elf64_add_symbol_hook): Likewise.
+	* elf64-sparc.c (sparc64_elf_add_symbol_hook): Likewise.
+	* elf64-mmix.c (mmix_elf_add_symbol_hook): Use bfd_link_hash_entry
+	rather than elf_link_hash_entry.
+
 2002-04-15  Richard Henderson  <rth@redhat.com>
 
 	* elf32-mips.c (mips_elf32_object_p): Revert 0404 fragment: allow
@@ -8,7 +18,7 @@
 	* opncls.c (bfd_close): Write contents if writeable.
 	Minor formatting tidy-ups.
 
-2002-04-15  Alan Modra  <alan@weed.local>
+2002-04-15  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-ppc.c (ppc_elf_add_symbol_hook): Check the hash table type.
 

@@ -1385,9 +1385,8 @@ sparc64_elf_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
       *namep = NULL;
       return true;
     }
-  else if (! *namep || ! **namep)
-    return true;
-  else
+  else if (*namep && **namep
+	   && info->hash->creator->flavour == bfd_target_elf_flavour)
     {
       int i;
       struct sparc64_elf_app_reg *p;

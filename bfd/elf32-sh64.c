@@ -389,7 +389,8 @@ sh64_elf_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
      bfd_vma *valp;
 {
   /* We want to do this for relocatable as well as final linking.  */
-  if (ELF_ST_TYPE (sym->st_info) == STT_DATALABEL)
+  if (ELF_ST_TYPE (sym->st_info) == STT_DATALABEL
+      && info->hash->creator->flavour == bfd_target_elf_flavour)
     {
       struct elf_link_hash_entry *h;
 
