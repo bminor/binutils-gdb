@@ -1,3 +1,9 @@
+start-sanitize-sky
+Thu Jan 22 20:30:24 1998  Doug Evans  <devans@seba.cygnus.com>
+
+	* config/tc-txvu.c (assemble_insn): Commas moved to opcode table.
+
+end-sanitize-sky
 Thu Jan 22 17:51:44 1998  Nick Clifton  <nickc@cygnus.com>
 
 start-sanitize-m32rx
@@ -66,8 +72,10 @@ Thu Jan 15 09:33:11 1998  Gavin Koch  <gavin@cygnus.com>
 end-sanitize-vr4111
 Wed Jan 14 17:52:33 1998  Nick Clifton  <nickc@cygnus.com>
 
+start-sanitize-m32rx
 	* config/tc-m32r.c (md_assemble): Add support for parsing parallel
 	instructions.
+end-sanitize-m32rx
 	* cgen.c: Formatting changes to improve readability.
 
 Wed Jan 14 15:41:41 1998  Jeffrey A Law  (law@cygnus.com)
