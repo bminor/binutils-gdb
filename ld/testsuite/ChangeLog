@@ -1,5 +1,11 @@
 2003-02-18  Alan Modra  <amodra@bigpond.net.au>
 
+	* ld-powerpc/tlsexe.d: Update for changed handling of invalid LD
+	relocs.
+	* ld-powerpc/tlsexe.g: Likewise.
+	* ld-powerpc/tlsexe.r: Likewise.
+	* ld-powerpc/tlsexe.t: Likewise.
+
 	* ld-powerpc/tls32.s: New file.
 	* ld-powerpc/tlslib32.s: New file.
 	* ld-powerpc/tls32.d: New file.
