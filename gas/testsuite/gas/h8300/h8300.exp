@@ -257,7 +257,7 @@ proc do_h8300_bitops4 {} {
     gas_finish
 
     # Did we find what we were looking for?  If not, flunk it.
-    if [expr $x == 12] then { pass $testname } else { fail $testname }
+    if [expr $x == 15] then { pass $testname } else { fail $testname }
 }
 
 proc do_h8300_branches {} {
