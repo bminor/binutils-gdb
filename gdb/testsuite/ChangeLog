@@ -1,3 +1,31 @@
+Fri Sep 12 16:56:38 1997  Bob Manson  <manson@charmed.cygnus.com>
+
+	* lib/gdb.exp(gdb_step_for_stub): New function.
+	(gdb_run_cmd): Look for gdb,do_reload_on_run target feature--if it
+	exists, reload the executable and do a "continue" instead of
+	doing a jump.
+	(runto_main): Use gdb_step_for_stub.
+	
+	* gdb.base/break.exp: Use gdb_step_for_stub. Also, rename certain
+ 	tests to have unique names.
+	* gdb.base/callfuncs.exp: Ditto.
+	* gdb.base/commands.exp: Ditto.
+	* gdb.base/default.exp: Ditto.
+	* gdb.base/help.exp: Ditto.
+	* gdb.base/list.exp: Ditto.
+	* gdb.base/opaque.exp: Ditto.
+	* gdb.base/printcmds.exp: Ditto. Use a loop to emit multiple
+	similar tests.
+	
+	* gdb.base/setshow.c: Add set_debug_traps/breakpoint calls.
+	* gdb.c++/cplusfuncs.cc: Ditto.
+	* gdb.c++/virtfunc.cc: Ditto.
+
+	* config/monitor.exp: Keep track of the last file we saw, rather
+	than trying to get the info from gdb.
+
+	* gdb.fortran/types.exp: Move comment to previous line.
+
 Tue Sep  2 19:55:34 1997  Bob Manson  <manson@charmed.cygnus.com>
 
 	* config/sparclet.exp: Detect gratuitous change to sparclet gdb
