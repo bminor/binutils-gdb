@@ -38,6 +38,9 @@ if ![info exists CHILL_RT0] {
 }
 verbose "using CHILL_RT0 = $CHILL_RT0" 2
 
+if [info exists TOOL_EXECUTABLE] {
+    set GDB $TOOL_EXECUTABLE;
+}
 if ![info exists GDB] {
     if ![is_remote host] {
 	set GDB [findfile $base_dir/../../gdb/gdb "$base_dir/../../gdb/gdb" [transform gdb]]
@@ -171,6 +174,17 @@ proc gdb_run_cmd {args} {
     }
 
     if [target_info exists use_gdb_stub] {
+	if [target_info exists gdb,do_reload_on_run] {
+	    # According to Stu, this will always work.
+	    gdb_load "";
+	    send_gdb "continue\n";
+	    gdb_expect 60 {
+		-re "Continu\[^\r\n\]*\[\r\n\]" {}
+		default {}
+	    }
+	    return;
+	}
+
 	if [target_info exists gdb,start_symbol] {
 	    set start [target_info gdb,start_symbol];
 	} else {
@@ -284,7 +298,7 @@ proc runto { function } {
 #		specially--if it uses stubs, assuming we hit
 #		breakpoint() and just step out of the function.
 #
-proc runto_main {} {
+proc runto_main { } {
     global gdb_prompt
     global decimal
 
@@ -294,13 +308,8 @@ proc runto_main {} {
 
     delete_breakpoints
 
-    send_gdb "step\n"
-    # if use stubs step out of the breakpoint() function.
-    gdb_expect 120 {
-	-re "main.* at .*$gdb_prompt $" {}
-	-re "_start.*$gdb_prompt $" {}
-	timeout { fail "single step at breakpoint() (timeout)" ; return 0 }
-    }
+    gdb_step_for_stub;
+
     return 1
 }
 
@@ -360,7 +369,17 @@ proc gdb_test { args } {
 	}
     }
 
-    gdb_expect 600 {
+    if [info exists timeout] {
+	set tmt $timeout;
+    } else {
+	global timeout;
+	if [info exists timeout] {
+	    set tmt $timeout;
+	} else {
+	    set tmt 60;
+	}
+    }
+    gdb_expect $tmt {
 	 -re "Ending remote debugging.*$gdb_prompt$" {
 	    if ![isnative] then {
 		warning "Can`t communicate to remote target."
@@ -608,6 +627,7 @@ proc default_gdb_exit {} {
 		send_gdb "y\n";
 		exp_continue;
 	    }
+	    -re "DOSEXIT code" { }
 	    default { }
 	}
     }
@@ -1025,3 +1045,61 @@ proc setup_xfail_format { format } {
     return 0
 }    
 
+proc gdb_step_for_stub { } {
+    global gdb_prompt;
+
+    if [target_info exists gdb_stub_step_command] {
+	set command [target_info gdb_stub_step_command];
+    } else {
+	set command "step";
+    }
+    send_gdb "${command}\n";
+    set tries 0;
+    gdb_expect 60 {
+	-re "(main.* at |.*in .*start).*$gdb_prompt" {
+	    return;
+	}
+	-re "libgloss/\[a-z\]*\[0-9\]*/stub.c" {
+	    send_gdb "where\n";
+	    gdb_expect {
+		-re "main\[^\r\n\]*at \(\[^:]+\):\(\[0-9\]+\)" {
+		    set file $expect_out(1,string);
+		    set linenum [expr $expect_out(2,string) + 1];
+		    set breakplace "${file}:${linenum}";
+		}
+		default {}
+	    }
+	    send_gdb "break ${breakplace}\n";
+	    gdb_expect 60 {
+		-re "Breakpoint (\[0-9\]+) at.*$gdb_prompt" {
+		    set breakpoint $expect_out(1,string);
+		}
+		-re "Breakpoint (\[0-9\]+): file.*$gdb_prompt" {
+		    set breakpoint $expect_out(1,string);
+		}
+		default {}
+	    }
+	    send_gdb "continue\n";
+	    gdb_expect 60 {
+		-re "Breakpoint ${breakpoint},.*$gdb_prompt" {
+		    gdb_test "delete $breakpoint" ".*" "";
+		    return;
+		}
+		default {}
+	    }
+	}
+	-re ".*$gdb_prompt" {
+	    incr tries;
+	    if { $tries == 5 } {
+		fail "stepping out of breakpoint function";
+		return;
+	    }
+	    send_gdb "${command}\n";
+	    exp_continue;
+	}
+	default {
+	    fail "stepping out of breakpoint function";
+	    return;
+	}
+    }
+}
