@@ -371,4 +371,6 @@ bfd_elf32_mn10300_reloc (abfd, reloc, symbol, data, isection, obfd, err)
 #define elf_info_to_howto	mn10300_info_to_howto
 #define elf_info_to_howto_rel	0
 
+#define elf_symbol_leading_char '_'
+
 #include "elf32-target.h"
