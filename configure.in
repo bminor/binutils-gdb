@@ -469,7 +469,7 @@ case "${target}" in
     ;;
     # This is temporary until we finish the gdb port.
   powerpcle-*-solaris*)
-    noconfigdirs="$noconfigdirs gdb"
+    noconfigdirs="$noconfigdirs gdb tk tcl"
     ;;
   rs6000-*-lynxos*)
     # The CVS server code doesn't work on the RS/6000

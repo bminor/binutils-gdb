@@ -1,3 +1,8 @@
+Tue Apr 30 13:55:51 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* configure.in (powerpcle-*-solaris*): Turn off tk and tcl
+	temporarily.
+
 Thu Apr 25 11:48:20 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.in: Don't configure --with-gnu-ld on AIX.
