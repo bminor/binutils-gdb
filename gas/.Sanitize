@@ -76,6 +76,8 @@ link.cmd
 listing.c
 listing.h
 literal.c
+macro.c
+macro.h
 messages.c
 mpw-config.in
 mpw-make.in
@@ -84,6 +86,8 @@ output-file.c
 output-file.h
 read.c
 read.h
+sb.c
+sb.h
 stabs.c
 struc-symbol.h
 subsegs.c

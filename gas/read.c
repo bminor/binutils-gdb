@@ -42,6 +42,8 @@ the Free Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307
 
 #include "as.h"
 #include "subsegs.h"
+#include "sb.h"
+#include "macro.h"
 #include "libiberty.h"
 #include "obstack.h"
 #include "listing.h"
@@ -176,7 +178,7 @@ addressT abs_section_offset;
 
 /* If this line had an MRI style label, it is stored in this variable.
    This is used by some of the MRI pseudo-ops.  */
-symbolS *mri_line_label;
+symbolS *line_label;
 
 /* This global variable is used to support MRI common sections.  We
    translate such sections into a common symbol.  This variable is
@@ -197,6 +199,7 @@ int is_it_end_of_statement PARAMS ((void));
 static segT get_segmented_expression PARAMS ((expressionS *expP));
 static segT get_known_segmented_expression PARAMS ((expressionS * expP));
 static void pobegin PARAMS ((void));
+static int get_line_sb PARAMS ((sb *));
 
 
 void
@@ -275,6 +278,7 @@ static const pseudo_typeS potable[] =
 /* endef */
   {"equ", s_set, 0},
 /* err */
+  {"exitm", s_mexit, 0},
 /* extend */
   {"extern", s_ignore, 0},	/* We treat all undef as ext */
   {"appfile", s_app_file, 1},
@@ -288,6 +292,7 @@ static const pseudo_typeS potable[] =
   {"globl", s_globl, 0},
   {"hword", cons, 2},
   {"if", s_if, (int) O_ne},
+  {"ifc", s_ifc, 0},
   {"ifdef", s_ifdef, 0},
   {"ifeq", s_if, (int) O_eq},
   {"ifeqs", s_ifeqs, 0},
@@ -295,18 +300,23 @@ static const pseudo_typeS potable[] =
   {"ifgt", s_if, (int) O_gt},
   {"ifle", s_if, (int) O_le},
   {"iflt", s_if, (int) O_lt},
+  {"ifnc", s_ifc, 1},
   {"ifndef", s_ifdef, 1},
   {"ifne", s_if, (int) O_ne},
   {"ifnes", s_ifeqs, 1},
   {"ifnotdef", s_ifdef, 1},
   {"include", s_include, 0},
   {"int", cons, 4},
+  {"irp", s_irp, 0},
+  {"irpc", s_irp, 1},
   {"lcomm", s_lcomm, 0},
   {"lflags", listing_flags, 0},	/* Listing flags */
   {"list", listing_list, 1},	/* Turn listing on */
   {"llen", listing_psize, 1},
   {"long", cons, 4},
   {"lsym", s_lsym, 0},
+  {"macro", s_macro, 0},
+  {"mexit", s_mexit, 0},
   {"noformat", s_ignore, 0},
   {"nolist", listing_list, 0},	/* Turn listing off */
   {"nopage", listing_nopage, 0},
@@ -319,6 +329,7 @@ static const pseudo_typeS potable[] =
   {"psize", listing_psize, 0},	/* set paper size */
 /* print */
   {"quad", cons, 8},
+  {"rept", s_rept, 0},
   {"sbttl", listing_title, 1},	/* Subtitle of listing */
 /* scl */
 /* sect */
@@ -457,42 +468,46 @@ read_a_source_file (name)
 	      if (input_line_pointer[-1] == '\n')
 		bump_line_counters ();
 
+	      line_label = NULL;
+
 	      if (flag_mri
 #ifdef LABELS_WITHOUT_COLONS
 		  || 1
 #endif
 		  )
 		{
-		  mri_line_label = NULL;
-
 		  /* Text at the start of a line must be a label, we
 		     run down and stick a colon in.  */
 		  if (is_name_beginner (*input_line_pointer))
 		    {
 		      char *line_start = input_line_pointer;
-		      char c = get_symbol_end ();
+		      char c;
 
-		      if (! ignore_input ())
+		      HANDLE_CONDITIONAL_ASSEMBLY ();
+
+		      c = get_symbol_end ();
+
+		      /* In MRI mode, the EQU pseudoop must be
+			 handled specially.  */
+		      if (flag_mri)
 			{
-			  /* In MRI mode, the EQU pseudoop must be
-			     handled specially.  */
-			  if (flag_mri)
-			    {
-			      if (((strncasecmp (input_line_pointer + 1,
-						 "EQU", 3) == 0)
-				   || (strncasecmp (input_line_pointer + 1,
-						    "SET", 3) == 0))
-				  && (input_line_pointer[4] == ' '
-				      || input_line_pointer[4] == '\t'))
-				{
-				  input_line_pointer += 4;
-				  equals (line_start);
-				  continue;
-				}
-			    }
+			  char *rest = input_line_pointer + 1;
 
-			  mri_line_label = colon (line_start);
+			  if (*rest == ':')
+			    ++rest;
+			  if (*rest == ' ' || *rest == '\t')
+			    ++rest;
+			  if ((strncasecmp (rest, "EQU", 3) == 0
+			       || strncasecmp (rest, "SET", 3) == 0)
+			      && (rest[3] == ' ' || rest[3] == '\t'))
+			    {
+			      input_line_pointer = rest + 3;
+			      equals (line_start);
+			      continue;
+			    }
 			}
+
+		      line_label = colon (line_start);
 
 		      *input_line_pointer = c;
 		      if (c == ':')
@@ -544,7 +559,27 @@ read_a_source_file (name)
 	       */
 	      if (TC_START_LABEL(c, input_line_pointer))
 		{
-		  colon (s);	/* user-defined label */
+		  if (flag_mri)
+		    {
+		      char *rest = input_line_pointer + 1;
+
+		      /* In MRI mode, \tsym: set 0 is permitted.  */
+
+		      if (*rest == ':')
+			++rest;
+		      if (*rest == ' ' || *rest == '\t')
+			++rest;
+		      if ((strncasecmp (rest, "EQU", 3) == 0
+			   || strncasecmp (rest, "SET", 3) == 0)
+			  && (rest[3] == ' ' || rest[3] == '\t'))
+			{
+			  input_line_pointer = rest + 3;
+			  equals (s);
+			  continue;
+			}
+		    }
+
+		  line_label = colon (s);	/* user-defined label */
 		  *input_line_pointer++ = ':';	/* Put ':' back for error messages' sake. */
 		  /* Input_line_pointer->after ':'. */
 		  SKIP_WHITESPACE ();
@@ -591,7 +626,8 @@ read_a_source_file (name)
 			pop = NULL;
 		    }
 
-		  if (pop != NULL || *s == '.')
+		  if (pop != NULL
+		      || (! flag_mri && *s == '.'))
 		    {
 		      /*
 		       * PSEUDO - OP.
@@ -683,6 +719,25 @@ read_a_source_file (name)
 			  OBJ_GENERATE_ASM_LINENO (s, lineno);
 		        }
 #endif
+
+		      if (macro_defined)
+			{
+			  sb out;
+			  const char *err;
+
+			  if (check_macro (s, &out, '\0', &err))
+			    {
+			      if (err != NULL)
+				as_bad (err);
+			      *input_line_pointer++ = c;
+			      input_scrub_include_sb (&out,
+						      input_line_pointer);
+			      sb_kill (&out);
+			      buffer_limit =
+				input_scrub_next_buffer (&input_line_pointer);
+			      continue;
+			    }
+			}
 
 		      md_assemble (s);	/* Assemble 1 instruction. */
 
@@ -1076,12 +1131,12 @@ s_mri_common (small)
       c = *input_line_pointer;
       *input_line_pointer = '\0';
 
-      if (mri_line_label != NULL)
+      if (line_label != NULL)
 	{
-	  alc = (char *) xmalloc (strlen (S_GET_NAME (mri_line_label))
+	  alc = (char *) xmalloc (strlen (S_GET_NAME (line_label))
 				  + (input_line_pointer - name)
 				  + 1);
-	  sprintf (alc, "%s%s", name, S_GET_NAME (mri_line_label));
+	  sprintf (alc, "%s%s", name, S_GET_NAME (line_label));
 	  name = alc;
 	}
     }
@@ -1119,13 +1174,13 @@ s_mri_common (small)
     S_SET_ALIGN (sym, align);
 #endif
 
-  if (mri_line_label != NULL)
+  if (line_label != NULL)
     {
-      mri_line_label->sy_value.X_op = O_symbol;
-      mri_line_label->sy_value.X_add_symbol = sym;
-      mri_line_label->sy_value.X_add_number = S_GET_VALUE (sym);
-      mri_line_label->sy_frag = &zero_address_frag;
-      S_SET_SEGMENT (mri_line_label, expr_section);
+      line_label->sy_value.X_op = O_symbol;
+      line_label->sy_value.X_add_symbol = sym;
+      line_label->sy_value.X_add_number = S_GET_VALUE (sym);
+      line_label->sy_frag = &zero_address_frag;
+      S_SET_SEGMENT (line_label, expr_section);
     }
 
   /* FIXME: We just ignore the small argument, which distinguishes
@@ -1343,6 +1398,37 @@ s_globl (ignore)
     }
   while (c == ',');
   demand_empty_rest_of_line ();
+}
+
+/* Handle the MRI IRP and IRPC pseudo-ops.  */
+
+void
+s_irp (irpc)
+     int irpc;
+{
+  char *file;
+  unsigned int line;
+  sb s;
+  const char *err;
+  sb out;
+
+  as_where (&file, &line);
+
+  sb_new (&s);
+  while (! is_end_of_line[(unsigned char) *input_line_pointer])
+    sb_add_char (&s, *input_line_pointer++);
+
+  sb_new (&out);
+
+  err = expand_irp (irpc, 0, &s, &out, get_line_sb, '\0');
+  if (err != NULL)
+    as_bad_where (file, line, "%s", err);
+
+  sb_kill (&s);
+
+  input_scrub_include_sb (&out, input_line_pointer);
+  sb_kill (&out);
+  buffer_limit = input_scrub_next_buffer (&input_line_pointer);
 }
 
 void 
@@ -1569,6 +1655,84 @@ s_lsym (ignore)
   demand_empty_rest_of_line ();
 }				/* s_lsym() */
 
+/* Read a line into an sb.  */
+
+static int
+get_line_sb (line)
+     sb *line;
+{
+  if (input_line_pointer >= buffer_limit)
+    {
+      buffer_limit = input_scrub_next_buffer (&input_line_pointer);
+      if (buffer_limit == 0)
+	return 0;
+    }
+
+  while (! is_end_of_line[(unsigned char) *input_line_pointer])
+    sb_add_char (line, *input_line_pointer++);
+  while (is_end_of_line[(unsigned char) *input_line_pointer])
+    {
+      if (*input_line_pointer == '\n')
+	{
+	  bump_line_counters ();
+	  LISTING_NEWLINE ();
+	}
+      ++input_line_pointer;
+    }
+  return 1;
+}
+
+/* Define a macro.  This is an interface to macro.c, which is shared
+   between gas and gasp.  */
+
+void
+s_macro (ignore)
+     int ignore;
+{
+  char *file;
+  unsigned int line;
+  sb s;
+  sb label;
+  const char *err;
+
+  as_where (&file, &line);
+
+  sb_new (&s);
+  while (! is_end_of_line[(unsigned char) *input_line_pointer])
+    sb_add_char (&s, *input_line_pointer++);
+
+  sb_new (&label);
+  if (line_label != NULL)
+    sb_add_string (&label, S_GET_NAME (line_label));
+
+  demand_empty_rest_of_line ();
+
+  err = define_macro (0, &s, &label, get_line_sb);
+  if (err != NULL)
+    as_bad_where (file, line, "%s", err);
+  else
+    {
+      if (line_label != NULL)
+	{
+	  S_SET_SEGMENT (line_label, undefined_section);
+	  S_SET_VALUE (line_label, 0);
+	  line_label->sy_frag = &zero_address_frag;
+	}
+    }
+
+  sb_kill (&s);
+}
+
+/* Handle the .mexit pseudo-op, which immediately exits a macro
+   expansion.  */
+
+void
+s_mexit (ignore)
+     int ignore;
+{
+  buffer_limit = input_scrub_next_buffer (&input_line_pointer);
+}
+
 /* Handle changing the location counter.  */
 
 static void
@@ -1733,6 +1897,36 @@ s_mri_sect (type)
     input_line_pointer += 2;
 
   demand_empty_rest_of_line ();
+}
+
+/* Handle the .rept pseudo-op.  */
+
+void
+s_rept (ignore)
+     int ignore;
+{
+  int count;
+  sb one;
+  sb many;
+
+  count = get_absolute_expression ();
+
+  sb_new (&one);
+  if (! buffer_and_nest ("REPT", "ENDR", &one, get_line_sb))
+    {
+      as_bad ("rept without endr");
+      return;
+    }
+
+  sb_new (&many);
+  while (count-- > 0)
+    sb_add_sb (&many, &one);
+
+  sb_kill (&one);
+
+  input_scrub_include_sb (&many, input_line_pointer);
+  sb_kill (&many);
+  buffer_limit = input_scrub_next_buffer (&input_line_pointer);
 }
 
 void 

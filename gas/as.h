@@ -519,6 +519,9 @@ COMMON int linkrelax;
 /* TRUE if we should produce a listing.  */
 extern int listing;
 
+/* Maximum level of macro nesting.  */
+extern int max_macro_nest;
+
 struct _pseudo_type
   {
     /* assembler mnemonic, lower case, no '.' */

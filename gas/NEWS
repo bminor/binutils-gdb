@@ -1,5 +1,15 @@
 -*- text -*-
 
+Changes since 2.5:
+
+Gas now directly supports macros, without requiring GASP.
+
+Gas now has an MRI assembler compatibility mode.
+
+Added -mips4 support to MIPS assembler.
+
+Added PIC support to Solaris and SPARC SunOS 4 assembler.
+
 Changes since 2.3:
 
 Converted this directory to use an autoconf-generated configure script.
@@ -18,17 +28,19 @@ used, it should become obvious pretty quickly what the problem is.
 
 Usage message is available with "--help".
 
+The GNU Assembler Preprocessor (gasp) is included.  (Actually, it was in 2.3
+also, but didn't get into the NEWS file.)
+
 Weak symbol support for a.out.
 
 A bug in the listing code which could cause an infinite loop has been fixed.
 Bugs in listings when generating a COFF object file have also been fixed.
 
 Initial i386-svr4 PIC implementation from Eric Youngdale, based on code by Paul
-Kranenburg.  This code was oriented towards gas version 1.xx; in updating some
-aspects of it for version 2, I broke it.
+Kranenburg.
 
 Improved Alpha support.  Immediate constants can have a much larger range now.
-Support for the 21164 has been added.
+Support for the 21164 has been contributed by Digital.
 
 Updated ns32k (pc532-mach, netbsd532) support from Ian Dall.
 

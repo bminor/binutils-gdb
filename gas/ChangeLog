@@ -1,3 +1,67 @@
+Mon Aug 21 13:57:20 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	Add support for macros.
+	* as.c: Include sb.h and macro.h.
+	(max_macro_next): New global variable.
+	(main): Call macro_init.
+	(macro_expr): New static function.
+	* as.h (max_macro_nest): Declare.
+	* read.c (line_label): Rename from mri_line_label.  Change all
+	uses.
+	(potable): Add exitm, irp, irpc, macro, mexit, rept.
+	(read_a_source_file): Always clear line_label at the start of a
+	line, not just when flag_mri or LABELS_WITHOUT_COLONS.  Fixup
+	MRI/LABELS_WITHOUT_COLONS handling.  In MRI mode, permit label:
+	equ val.  Set line_label when calling colon.  In MRI mode, a
+	leading '.' does not imply a pseudo-op.  Check for macro expansion
+	before calling md_assemble.
+	(s_irp): New function.
+	(get_line_sb): New static function.
+	(s_macro): New function.
+	(s_mexit): New function.
+	(s_rept): New function.
+	* read.h (line_label): Rename from mri_line_label.
+	(s_irp, s_rept): Declare.
+	(s_macro, s_mexit): Declare.
+	* input-scrub.c: Include sb.h.
+	(sb_index, from_sb): New static variables.
+	(macro_nest): New static variable.
+	(struct input_save): Add sb_index and from_sb fields.  Change
+	next_saved_file field to be struct input_save *.
+	(next_saved_file): Changed to be struct input_save *.
+	(input_scrub_push): Change to return type struct input_save *.
+	Save sb_index and from_sb.
+	(input_scrub_pop): Change parameter type to struct input_save *.
+	Restore sb_index and from_sb.
+	(input_scrub_include_sb): New function.
+	(input_scrub_next_buffer): Handle reading from from_sb.
+	(bump_line_counters): Only increment lines if not using from_sb.
+	* config/tc-m68k.c (opt_table): Add nest.
+	(opt_nest): New static function.
+	* gasp.c: Include sb.h and macro.h.  Move all sb related functions
+	and definitions to sb.h and sb.c.  Move all macro related
+	functions and definitions to macro.h and macro.c.
+	* sb.h, sb.c: New files, extracted from gasp.c.
+	* macro.h, macro.c: Likewise.
+	* Makefile.in (OBJS): Add sb.o and macro.o
+	(GASPOBJS): Define.
+	(gasp.new): Depend upon $(GASPOBJS).  Use $(GASPOBJS) to link.
+	(TARG_CPU_DEP_m68k): Depend upon subsegs.h.
+	(gasp.o): Depend upon sb.h and macro.h.
+	(sb.o): New target.
+	(macro.o): New target.
+	(as.o): Depend upon sb.h and macro.h.
+	(input-scrub.o): Depend upon sb.h.
+	(read.o): Depend upon sb.h and macro.h.
+
+	* cond.c (get_mri_string): New static function.
+	(s_ifc): New function.
+	* read.c (potable): Add ifc and ifnc.
+	* read.h (s_ifc): Declare.
+
+	* app.c (do_scrub_begin): In MRI mode, set lex of ' to
+	LEX_IS_STRINGQUOTE.
+
 Mon Aug 21 13:41:33 1995  Michael Meissner  <meissner@cygnus.com>
 
 	* config/tc-ppc.c (md_assemble): Allow @HA, @L, and @H suffixes on

@@ -163,6 +163,8 @@ LINKED_HEADERS = \
 
 HEADERS = $(LINKED_HEADERS) $(REAL_HEADERS)
 
+TE_OBJS=
+
 # @target_frag@
 
 OBJS = \
@@ -192,8 +194,16 @@ OBJS = \
 	listing.o \
 	ecoff.o \
 	stabs.o \
+	sb.o \
+	macro.o \
 	@extra_objects@ \
 	$(TE_OBJS)
+
+GASPOBJS = \
+	gasp.o \
+	macro.o \
+	sb.o \
+	hash.o
 
 all: .gdbinit as.new gasp.new
 	@srcroot=`cd $(srcroot); pwd`; export srcroot; \
@@ -245,8 +255,8 @@ $(OBJS): config.h as.h targ-env.h obj-format.h targ-cpu.h flonum.h expr.h \
 	struc-symbol.h write.h frags.h hash.h read.h symbols.h tc.h obj.h \
 	listing.h bignum.h
 
-gasp.new: gasp.o
-	$(CC) $(ALL_CFLAGS) $(LDFLAGS) -o gasp.new gasp.o $(LIBS) $(LOADLIBES)
+gasp.new: $(GASPOBJS)
+	$(CC) $(ALL_CFLAGS) $(LDFLAGS) -o gasp.new $(GASPOBJS) $(LIBS) $(LOADLIBES)
 
 installcheck:
 	@echo No installcheck target is available yet for the GNU assembler.
@@ -291,7 +301,7 @@ TARG_CPU_DEP_i386    = $(srcdir)/../include/opcode/i386.h
 TARG_CPU_DEP_i860    =
 TARG_CPU_DEP_i960    =
 TARG_CPU_DEP_m68k    = $(srcdir)/../include/opcode/m68k.h \
-			$(srcdir)/config/m68k-parse.h
+			$(srcdir)/config/m68k-parse.h subsegs.h
 TARG_CPU_DEP_m88k    = $(srcdir)/config/m88k-opcode.h
 TARG_CPU_DEP_mips    = $(srcdir)/../include/opcode/mips.h
 TARG_CPU_DEP_ns32k   =
@@ -306,9 +316,11 @@ TARG_CPU_DEP_vax     =
 TARG_CPU_DEP_w65     = $(srcdir)/../opcodes/w65-opc.h
 TARG_CPU_DEP_z8k     = $(srcdir)/../opcodes/z8k-opc.h
 
-gasp.o : gasp.c config.h
+gasp.o : gasp.c sb.h macro.h config.h
+sb.o : sb.c sb.h config.h
+macro.o : macro.c macro.h sb.h hash.h config.h
 app.o : app.c write.h
-as.o : as.c output-file.h write.h subsegs.h
+as.o : as.c output-file.h write.h subsegs.h sb.h macro.h
 atof-generic.o : atof-generic.c
 bignum-copy.o : bignum-copy.c
 cond.o : cond.c
@@ -320,12 +332,12 @@ flonum-mult.o : flonum-mult.c
 frags.o : frags.c subsegs.h
 hash.o : hash.c
 input-file.o : input-file.c input-file.h
-input-scrub.o : input-scrub.c input-file.h
+input-scrub.o : input-scrub.c input-file.h sb.h
 listing.o : listing.c input-file.h subsegs.h
 literal.o : literal.c subsegs.h
 messages.o : messages.c
 output-file.o : output-file.c output-file.h
-read.o : read.c
+read.o : read.c sb.h macro.h
 subsegs.o : subsegs.c subsegs.h
 symbols.o : symbols.c subsegs.h
 write.o : write.c subsegs.h output-file.h

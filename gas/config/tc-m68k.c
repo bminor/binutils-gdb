@@ -4243,6 +4243,7 @@ struct opt_action
 /* The table used to handle the MRI OPT pseudo-op.  */
 
 static void skip_to_comma PARAMS ((int, int));
+static void opt_nest PARAMS ((int, int));
 static void opt_chip PARAMS ((int, int));
 static void opt_list PARAMS ((int, int));
 static void opt_list_symbols PARAMS ((int, int));
@@ -4274,6 +4275,7 @@ static const struct opt_action opt_table[] =
   { "mex", 0, 0, 0, 0 },
   { "mc", 0, 0, 0, 0 },
   { "md", 0, 0, 0, 0 },
+  { "nest", opt_nest, 0, 0, 0 },
   { "next", skip_to_comma, 0, 0, 0 },
   { "o", 0, 0, 0, 0 },
   { "old", 0, 0, 0, 0 },
@@ -4373,6 +4375,23 @@ skip_to_comma (arg, on)
     ++input_line_pointer;
 }
 
+/* Handle the OPT NEST=depth option.  */
+
+static void
+opt_nest (arg, on)
+     int arg;
+     int on;
+{
+  if (*input_line_pointer != '=')
+    {
+      as_bad ("bad format of OPT NEST=depth");
+      return;
+    }
+
+  ++input_line_pointer;
+  max_macro_nest = get_absolute_expression ();
+}
+
 /* Handle the OPT P=chip option.  */
 
 static void
@@ -4424,7 +4443,7 @@ s_reg (ignore)
   struct m68k_op rop;
   unsigned long mask;
 
-  if (mri_line_label == NULL)
+  if (line_label == NULL)
     {
       as_bad ("missing label");
       ignore_rest_of_line ();
@@ -4481,9 +4500,9 @@ s_reg (ignore)
       return;
     }
 
-  S_SET_SEGMENT (mri_line_label, absolute_section);
-  S_SET_VALUE (mri_line_label, mask);
-  mri_line_label->sy_frag = &zero_address_frag;
+  S_SET_SEGMENT (line_label, absolute_section);
+  S_SET_VALUE (line_label, mask);
+  line_label->sy_frag = &zero_address_frag;
 
   demand_empty_rest_of_line ();
 }

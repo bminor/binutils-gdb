@@ -15,7 +15,7 @@
 
    You should have received a copy of the GNU General Public License
    along with GAS; see the file COPYING.  If not, write to
-   the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
+   the Free Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 /*
  * Main program for AS; a 32-bit assembler of GNU.
@@ -40,12 +40,19 @@
 #include "as.h"
 #include "subsegs.h"
 #include "output-file.h"
+#include "sb.h"
+#include "macro.h"
 
 static void perform_an_assembly_pass PARAMS ((int argc, char **argv));
+static int macro_expr PARAMS ((const char *, int, sb *, int *));
 
 int listing;			/* true if a listing is wanted */
 
 static char *listing_filename = NULL;	/* Name of listing file.  */
+
+/* Maximum level of macro nesting.  */
+
+int max_macro_nest = 100;
 
 char *myname;			/* argv[0] */
 #ifdef BFD_ASSEMBLER
@@ -94,6 +101,7 @@ Options:\n\
 -K			warn when differences altered for long displacements\n\
 -L			keep local symbols (starting with `L')\n");
   fprintf (stream, "\
+-M,--mri		assemble in MRI compatibility mode\n\
 -nocpp			ignored\n\
 -o OBJFILE		name the object-file output OBJFILE (default a.out)\n\
 -R			fold data section into text section\n\
@@ -224,7 +232,7 @@ parse_args (pargc, pargv)
       /* -K is not meaningful if .word is not being hacked.  */
       'K',
 #endif
-      'L', 'R', 'W', 'Z', 'f', 'a', ':', ':', 'D', 'I', ':', 'o', ':',
+      'L', 'M', 'R', 'W', 'Z', 'f', 'a', ':', ':', 'D', 'I', ':', 'o', ':',
 #ifndef VMS
       /* -v takes an argument on VMS, so we don't make it a generic
          option.  */
@@ -239,6 +247,7 @@ parse_args (pargc, pargv)
   static const struct option std_longopts[] = {
 #define OPTION_HELP (OPTION_STD_BASE)
     {"help", no_argument, NULL, OPTION_HELP},
+    {"mri", no_argument, NULL, 'M'},
 #define OPTION_NOCPP (OPTION_STD_BASE + 1)
     {"nocpp", no_argument, NULL, OPTION_NOCPP},
 #define OPTION_STATISTICS (OPTION_STD_BASE + 2)
@@ -370,6 +379,10 @@ parse_args (pargc, pargv)
 	  flag_keep_locals = 1;
 	  break;
 
+	case 'M':
+	  flag_mri = 1;
+	  break;
+
 	case 'R':
 	  flag_readonly_data_in_text = 1;
 	  break;
@@ -499,9 +512,10 @@ main (argc, argv)
   frag_init ();
   subsegs_begin ();
   read_begin ();
-  input_scrub_begin ();
-  PROGRESS (1);
   parse_args (&argc, &argv);
+  input_scrub_begin ();
+  expr_begin ();
+  macro_init (0, flag_mri, macro_expr);
 
   PROGRESS (1);
 
@@ -682,5 +696,33 @@ perform_an_assembly_pass (argc, argv)
   if (!saw_a_file)
     read_a_source_file ("");
 }				/* perform_an_assembly_pass() */
+
+/* The interface between the macro code and gas expression handling.  */
+
+static int
+macro_expr (emsg, idx, in, val)
+     const char *emsg;
+     int idx;
+     sb *in;
+     int *val;
+{
+  char *hold;
+  expressionS ex;
+
+  sb_terminate (in);
+
+  hold = input_line_pointer;
+  input_line_pointer = in->ptr + idx;
+  expression (&ex);
+  idx = input_line_pointer - in->ptr;
+  input_line_pointer = hold;
+
+  if (ex.X_op != O_constant)
+    as_bad ("%s", emsg);
+
+  *val = (int) ex.X_add_number;
+
+  return idx;
+}
 
 /* end of as.c */
