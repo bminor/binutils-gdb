@@ -1,3 +1,9 @@
+2003-02-03  Michal Ludvig  <mludvig@suse.cz>
+
+	* dwarf2cfi.c (pointer_encoding): Added new parameter.
+	* dwarf2cfi.c, dwarf2read.c: Changed all warnings and
+	error messages to contain BFD filename. 
+
 2003-02-02  Elena Zannoni  <ezannoni@redhat.com>
 
 	Fix PR gdb/742 gdb/743 gdb/877

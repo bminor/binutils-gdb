@@ -199,7 +199,7 @@ static LONGEST read_sleb128 (bfd *abfd, char **p);
 static CORE_ADDR read_pointer (bfd *abfd, char **p);
 static CORE_ADDR read_encoded_pointer (bfd *abfd, char **p,
 				       unsigned char encoding);
-static enum ptr_encoding pointer_encoding (unsigned char encoding);
+static enum ptr_encoding pointer_encoding (unsigned char encoding, struct objfile *objfile);
 
 static LONGEST read_initial_length (bfd *abfd, char *buf, int *bytes_read);
 static ULONGEST read_length (bfd *abfd, char *buf, int *bytes_read,
@@ -462,7 +462,8 @@ read_pointer (bfd *abfd, char **p)
     case 8:
       return read_8u (abfd, p);
     default:
-      error ("dwarf cfi error: unsupported target address length.");
+      error ("dwarf cfi error: unsupported target address length [in module %s]", 
+		      bfd_get_filename (abfd));
     }
 }
 
@@ -509,7 +510,8 @@ read_encoded_pointer (bfd *abfd, char **p, unsigned char encoding)
 
     default:
       internal_error (__FILE__, __LINE__,
-		      "read_encoded_pointer: unknown pointer encoding");
+		      "read_encoded_pointer: unknown pointer encoding [in module %s]",
+		      bfd_get_filename (abfd));
     }
 
   return ret;
@@ -520,12 +522,13 @@ read_encoded_pointer (bfd *abfd, char **p, unsigned char encoding)
    - encoding & 0x70 : type (absolute, relative, ...)
    - encoding & 0x80 : indirect flag (DW_EH_PE_indirect == 0x80).  */
 enum ptr_encoding
-pointer_encoding (unsigned char encoding)
+pointer_encoding (unsigned char encoding, struct objfile *objfile)
 {
   int ret;
 
   if (encoding & DW_EH_PE_indirect)
-    warning ("CFI: Unsupported pointer encoding: DW_EH_PE_indirect");
+    warning ("CFI: Unsupported pointer encoding: DW_EH_PE_indirect [in module %s]",
+		    objfile->name);
 
   switch (encoding & 0x70)
     {
@@ -537,7 +540,8 @@ pointer_encoding (unsigned char encoding)
       ret = encoding & 0x70;
       break;
     default:
-      internal_error (__FILE__, __LINE__, "CFI: unknown pointer encoding");
+      internal_error (__FILE__, __LINE__, "CFI: unknown pointer encoding [in module %s]", 
+		      objfile->name);
     }
   return ret;
 }
@@ -614,8 +618,9 @@ execute_cfa_program (struct objfile *objfile, char *insn_ptr, char *insn_end,
 	    fs->pc = read_encoded_pointer (objfile->obfd, &insn_ptr,
 					   fs->addr_encoding);
 
-	    if (pointer_encoding (fs->addr_encoding) != PE_absptr)
-	      warning ("CFI: DW_CFA_set_loc uses relative addressing");
+	    if (pointer_encoding (fs->addr_encoding, objfile) != PE_absptr)
+	      warning ("CFI: DW_CFA_set_loc uses relative addressing [in module %s]", 
+			      objfile->name);
 
 	    break;
 
@@ -764,7 +769,8 @@ execute_cfa_program (struct objfile *objfile, char *insn_ptr, char *insn_end,
 	    break;
 
 	  default:
-	    error ("dwarf cfi error: unknown cfa instruction %d.", insn);
+	    error ("dwarf cfi error: unknown cfa instruction %d [in module %s]", insn, 
+			    objfile->name);
 	  }
     }
 }
@@ -1027,25 +1033,25 @@ execute_stack_op (struct objfile *objfile,
 
 	case DW_OP_dup:
 	  if (stack_elt < 1)
-	    internal_error (__FILE__, __LINE__, "execute_stack_op error");
+	    internal_error (__FILE__, __LINE__, "execute_stack_op error [in module %s]", objfile->name);
 	  result = stack[stack_elt - 1];
 	  break;
 
 	case DW_OP_drop:
 	  if (--stack_elt < 0)
-	    internal_error (__FILE__, __LINE__, "execute_stack_op error");
+	    internal_error (__FILE__, __LINE__, "execute_stack_op error [in module %s]", objfile->name);
 	  goto no_push;
 
 	case DW_OP_pick:
 	  offset = *op_ptr++;
 	  if (offset >= stack_elt - 1)
-	    internal_error (__FILE__, __LINE__, "execute_stack_op error");
+	    internal_error (__FILE__, __LINE__, "execute_stack_op error [in module %s]", objfile->name);
 	  result = stack[stack_elt - 1 - offset];
 	  break;
 
 	case DW_OP_over:
 	  if (stack_elt < 2)
-	    internal_error (__FILE__, __LINE__, "execute_stack_op error");
+	    internal_error (__FILE__, __LINE__, "execute_stack_op error [in module %s]", objfile->name);
 	  result = stack[stack_elt - 2];
 	  break;
 
@@ -1054,7 +1060,7 @@ execute_stack_op (struct objfile *objfile,
 	    CORE_ADDR t1, t2, t3;
 
 	    if (stack_elt < 3)
-	      internal_error (__FILE__, __LINE__, "execute_stack_op error");
+	      internal_error (__FILE__, __LINE__, "execute_stack_op error [in module %s]", objfile->name);
 	    t1 = stack[stack_elt - 1];
 	    t2 = stack[stack_elt - 2];
 	    t3 = stack[stack_elt - 3];
@@ -1072,7 +1078,7 @@ execute_stack_op (struct objfile *objfile,
 	case DW_OP_plus_uconst:
 	  /* Unary operations.  */
 	  if (--stack_elt < 0)
-	    internal_error (__FILE__, __LINE__, "execute_stack_op error");
+	    internal_error (__FILE__, __LINE__, "execute_stack_op error [in module %s]", objfile->name);
 	  result = stack[stack_elt];
 
 	  switch (op)
@@ -1082,7 +1088,7 @@ execute_stack_op (struct objfile *objfile,
 		int len = TARGET_ADDR_BIT / TARGET_CHAR_BIT;
 		if (len != 4 && len != 8)
 		  internal_error (__FILE__, __LINE__,
-				  "execute_stack_op error");
+				  "execute_stack_op error [in module %s]", objfile->name);
 		result = read_memory_unsigned_integer (result, len);
 	      }
 	      break;
@@ -1092,7 +1098,7 @@ execute_stack_op (struct objfile *objfile,
 		int len = *op_ptr++;
 		if (len != 1 && len != 2 && len != 4 && len != 8)
 		  internal_error (__FILE__, __LINE__,
-				  "execute_stack_op error");
+				  "execute_stack_op error [in module %s]", objfile->name);
 		result = read_memory_unsigned_integer (result, len);
 	      }
 	      break;
@@ -1132,7 +1138,7 @@ execute_stack_op (struct objfile *objfile,
 	    /* Binary operations.  */
 	    CORE_ADDR first, second;
 	    if ((stack_elt -= 2) < 0)
-	      internal_error (__FILE__, __LINE__, "execute_stack_op error");
+	      internal_error (__FILE__, __LINE__, "execute_stack_op error [in module %s]", objfile->name);
 	    second = stack[stack_elt];
 	    first = stack[stack_elt + 1];
 
@@ -1190,7 +1196,7 @@ execute_stack_op (struct objfile *objfile,
 		result = (LONGEST) first != (LONGEST) second;
 		break;
 	      default:
-		error ("execute_stack_op: Unknown DW_OP_ value");
+		error ("execute_stack_op: Unknown DW_OP_ value [in module %s]", objfile->name);
 		break;
 	      }
 	  }
@@ -1203,7 +1209,7 @@ execute_stack_op (struct objfile *objfile,
 
 	case DW_OP_bra:
 	  if (--stack_elt < 0)
-	    internal_error (__FILE__, __LINE__, "execute_stack_op error");
+	    internal_error (__FILE__, __LINE__, "execute_stack_op error [in module %s]", objfile->name);
 	  offset = read_2s (objfile->obfd, &op_ptr);
 	  if (stack[stack_elt] != 0)
 	    op_ptr += offset;
@@ -1213,12 +1219,12 @@ execute_stack_op (struct objfile *objfile,
 	  goto no_push;
 
 	default:
-	  internal_error (__FILE__, __LINE__, "execute_stack_op error");
+	  internal_error (__FILE__, __LINE__, "execute_stack_op error [in module %s]", objfile->name);
 	}
 
       /* Most things push a result value.  */
       if ((size_t) stack_elt >= sizeof (stack) / sizeof (*stack))
-	internal_error (__FILE__, __LINE__, "execute_stack_op error");
+	internal_error (__FILE__, __LINE__, "execute_stack_op error [in module %s]", objfile->name);
       stack[++stack_elt] = result;
     no_push:;
     }
@@ -1226,7 +1232,7 @@ execute_stack_op (struct objfile *objfile,
   /* We were executing this program to get a value.  It should be
      at top of stack.  */
   if (--stack_elt < 0)
-    internal_error (__FILE__, __LINE__, "execute_stack_op error");
+    internal_error (__FILE__, __LINE__, "execute_stack_op error [in module %s]", objfile->name);
   return stack[stack_elt];
 }
 
@@ -1311,7 +1317,8 @@ update_context (struct context *context, struct frame_state *fs, int chain)
 	      orig_context->reg[fs->regs.reg[i].loc.reg].loc.addr;
 	    break;
 	  default:
-	    internal_error (__FILE__, __LINE__, "bad switch");
+	    internal_error (__FILE__, __LINE__, "bad switch 0x%02X", 
+			    orig_context->reg[fs->regs.reg[i].loc.reg].how);
 	  }
 	break;
       case REG_SAVED_EXP:
@@ -1328,7 +1335,8 @@ update_context (struct context *context, struct frame_state *fs, int chain)
 	}
 	break;
       default:
-	internal_error (__FILE__, __LINE__, "bad switch");
+	internal_error (__FILE__, __LINE__, "bad switch 0x%02X",
+			fs->regs.reg[i].how);
       }
   get_reg ((char *) &context->ra, context, fs->retaddr_column);
   unwind_tmp_obstack_free ();
@@ -1540,13 +1548,14 @@ parse_frame_info (struct objfile *objfile, file_ptr frame_offset,
 		      cie = cie->next;
 		    }
 		  if (!cie)
-		    error ("CFI: can't find CIE pointer");
+		    error ("CFI: can't find CIE pointer [in module %s]", 
+				    bfd_get_filename (abfd));
 		}
 
 	      init_loc = read_encoded_pointer (abfd, &start,
 					       cie->addr_encoding);
 
-	      switch (pointer_encoding (cie->addr_encoding))
+	      switch (pointer_encoding (cie->addr_encoding, objfile))
 		{
 		case PE_absptr:
 		  break;
@@ -1556,7 +1565,8 @@ parse_frame_info (struct objfile *objfile, file_ptr frame_offset,
 		  init_loc += curr_section_vma + start - frame_buffer;
 		  break;
 		default:
-		  warning ("CFI: Unsupported pointer encoding\n");
+		  warning ("CFI: Unsupported pointer encoding [in module %s]",
+				  bfd_get_filename (abfd));
 		}
 
 	      /* For relocatable objects we must add an offset telling
@@ -1890,7 +1900,8 @@ cfi_get_saved_register (char *raw_buffer,
 	  break;
 	default:
 	  internal_error (__FILE__, __LINE__,
-			  "cfi_get_saved_register: unknown register rule");
+			  "cfi_get_saved_register: unknown register rule 0x%02X",
+			  UNWIND_CONTEXT (frame)->reg[regnum].how);
 	}
     }
 }
