@@ -1,3 +1,9 @@
+Sun Jan 15 16:32:59 1995  Steve Chamberlain  <sac@splat>
+
+	* configure.in: Add W65 support.
+	* disassemble.c: Likewise.
+	* w65-opc.h, w65-dis.c: New files.
+
 Wed Dec 28 22:15:33 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
 
 	* h8300-dis.c (bfd_h8_disassemble): Add support for 2 bit
