@@ -1,3 +1,11 @@
+Tue Aug 10 13:32:23 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* libnlm.h (struct nlm_backend_data): Added mach field.
+	(nlm_machine): New accessor macro.
+	* nlm.c (nlm_mkobject): Set architecture and machine from backend
+	information.
+	* nlm32-i386.c (nlm32_i386_backend): Initialize new mach field.
+
 Tue Aug 10 09:31:18 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
 
 	* configure.in: Replace calls to sort with shell code
