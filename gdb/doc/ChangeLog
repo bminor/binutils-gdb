@@ -1,3 +1,7 @@
+Tue May  5 12:11:38 1992  K. Richard Pixley  (rich@cygnus.com)
+
+	* Makefile.in: gm4 -> m4.
+
 Fri Apr 10 17:50:43 1992  John Gilmore  (gnu at rtl.cygnus.com)
 
 	* gdb.texinfo:  Update for GDB-4.5.  Move `Formatting

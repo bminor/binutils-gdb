@@ -57,7 +57,7 @@ gdbdir = ..
 # Documentation (gdb.dvi) needs either GNU m4 or SysV m4; 
 # Berkeley/Sun don't have quite enough. 
 #M4=/usr/5bin/m4
-M4=gm4
+M4=m4
 
 # where to find texinfo; GDB dist should include a recent one
 TEXIDIR=$(srcdir)/${gdbdir}/../texinfo/fsf
