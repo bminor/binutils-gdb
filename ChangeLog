@@ -1,3 +1,10 @@
+Wed Jul 27 09:07:14 1994  Fred Fish  (fnf@cygnus.com)
+
+	* Makefile.in (GDB_SUPPORT_FILES): Remove
+	(setup-dirs-gdb, gdb.tar.gz, make-gdb.tar.gz):  Remove old rules.
+	(gdb.tar.gz): Add new rule to use standard distribution building
+	mechanism.
+
 Mon Jul 25 11:10:06 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* configure.in: Warn about use of /usr/ucb/cc on Solaris.  From
