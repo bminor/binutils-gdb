@@ -1,3 +1,13 @@
+start-sanitize-tic80
+Mon Feb 24 14:33:26 1997  Fred Fish  <fnf@cygnus.com>
+
+	* tic80-opc.c (LSI_SCALED): Renamed from this ...
+	(OFF_SL_BR_SCALED): ... to this, and added the flag
+	TIC80_OPERAND_BASEREL to the flags word.
+	(tic80_opcodes): Replace all occurances of LSI_SCALED with
+	OFF_SL_BR_SCALED.
+
+end-sanitize-tic80
 Sat Feb 22 21:25:00 1997  Dawn Perchik  <dawn@cygnus.com>
 
 	* mips-opc.c: Add macros for cop0, cop1 cop2 and cop3.
