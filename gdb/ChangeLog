@@ -1,5 +1,15 @@
 2004-07-29  Andrew Cagney  <cagney@gnu.org>
 
+	* config/powerpc/xm-linux.h: Delete empty file.
+	* config/powerpc/ppc64-linux.mh (XM_FILE): Delete.
+	* config/powerpc/linux.mh (XM_FILE): Delete.
+	* config/m68k/xm-linux.h: Delete empty file.
+	* config/m68k/linux.mh (XM_FILE): Delete.
+	* config/ia64/xm-linux.h: Delete empty file.
+	* config/ia64/linux.mh (XM_FILE): Delete.
+	* config/arm/xm-linux.h: Delete empty file.
+	* config/arm/linux.mh (XM_FILE): Delete.
+	
 	* config/powerpc/xm-linux.h (KERNEL_U_ADDR): Move from here ...
 	* config/powerpc/nm-linux.h (KERNEL_U_ADDR): ... to here.
 	* config/m68k/xm-linux.h (KERNEL_U_ADDR): Move from here ...
