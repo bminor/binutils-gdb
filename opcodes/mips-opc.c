@@ -277,6 +277,9 @@ const struct mips_opcode mips_builtin_opcodes[] = {
 {"c.ngl.s", "M,S,T",	0x4600003b, 0xffe000ff,	RD_S|RD_T|WR_CC|FP_S,	I4	},
 {"c.lt.d",  "S,T",	0x4620003c, 0xffe007ff,	RD_S|RD_T|WR_CC|FP_D,	I1	},
 {"c.lt.d",  "M,S,T",	0x4620003c, 0xffe000ff,	RD_S|RD_T|WR_CC|FP_D,	I4	},
+/* start-sanitize-r5900 */
+{"c.lt.s",  "S,T",	0x46000034, 0xffe007ff,	RD_S|RD_T|WR_CC|FP_S,	T5	},
+/* end-sanitize-r5900 */
 {"c.lt.s",  "S,T",	0x4600003c, 0xffe007ff,	RD_S|RD_T|WR_CC|FP_S,	I1	},
 {"c.lt.s",  "M,S,T",	0x4600003c, 0xffe000ff,	RD_S|RD_T|WR_CC|FP_S,	I4	},
 {"c.nge.d", "S,T",	0x4620003d, 0xffe007ff,	RD_S|RD_T|WR_CC|FP_D,	I1	},
@@ -285,6 +288,9 @@ const struct mips_opcode mips_builtin_opcodes[] = {
 {"c.nge.s", "M,S,T",	0x4600003d, 0xffe000ff,	RD_S|RD_T|WR_CC|FP_S,	I4	},
 {"c.le.d",  "S,T",	0x4620003e, 0xffe007ff,	RD_S|RD_T|WR_CC|FP_D,	I1	},
 {"c.le.d",  "M,S,T",	0x4620003e, 0xffe000ff,	RD_S|RD_T|WR_CC|FP_D,	I4	},
+/* start-sanitize-r5900 */
+{"c.le.s",  "S,T",	0x46000036, 0xffe007ff,	RD_S|RD_T|WR_CC|FP_S,	T5	},
+/* end-santiize-r5900 */
 {"c.le.s",  "S,T",	0x4600003e, 0xffe007ff,	RD_S|RD_T|WR_CC|FP_S,	I1	},
 {"c.le.s",  "M,S,T",	0x4600003e, 0xffe000ff,	RD_S|RD_T|WR_CC|FP_S,	I4	},
 {"c.ngt.d", "S,T",	0x4620003f, 0xffe007ff,	RD_S|RD_T|WR_CC|FP_D,	I1	},

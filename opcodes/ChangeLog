@@ -1,3 +1,10 @@
+start-sanitize-r5900
+Tue Jan 13 09:21:56 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* mips-opc.c (c.lt.s): Add r5900 variant.
+	(c.le.s): Likewise.
+
+end-sanitize-r5900
 Mon Jan 12 14:43:54 1998  Doug Evans  <devans@seba.cygnus.com>
 
 	* cgen-asm.c (build_asm_hash_table): Traverse compiled in table using
