@@ -2,6 +2,8 @@
 
 	* config/monitor.exp (gdb_target_cmd): Add explicit error return.
 	(gdb_target_monitor): Add check of gdb_target_cmd return value.
+	(gdb_load): Add support for additional target_info: gdb_download_size
+	and gdb_load_timeout.
 
 Thu Mar  8 16:06:00 2001  David Taylor  <taylor@redhat.com>
 
