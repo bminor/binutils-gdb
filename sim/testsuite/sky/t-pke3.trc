@@ -88,7 +88,7 @@
 ? 0x10003830 0x00001234 0xffffffff
 #
 #
-# ---- ERROR/ER1 ----
+# ---- bad PKEcode/ER1, interrupts ----
 #
 # A bad PKEcode
 1 0x00000000_00000000_00000000_08000000 0x00000000 PPPP
@@ -101,6 +101,35 @@
 ! 0x10003c10 0x00000001
 # Read STAT register; confirm ER1 no longer set
 ? 0x10003c00 0x00000000 0x00002000
+# 
+# Mask ME1 (ER1 stall) this time
+! 0x10003c20 0x00000004
+# A bad PKEcode with ER1 masked
+1 0x00000000_00000000_00000000_08000000 0x00000000 PPPP
+# should not put PKE into stalled mode, should execute following PKENOPs
+# Read STAT register; confirm ER1 bit set
+? 0x10003c00 0x00002000 0x00002000
+# Read CODE register; confirm PKE went past bad code
+? 0x10003c80 0x00000000 0xffffffff
+# Reset PKE
+! 0x10003c10 0x00000001
+# Read STAT register; confirm ER1 no longer set
+? 0x10003c00 0x00000000 0x00002000
+#
+#
+# A good PKEcode (STMOD) with interrupt
+1 0x00000000_00000000_00000000_85000000 0x00000000 PPPP
+# should put PKE into stalled mode, not executing following PKENOPs
+# Read STAT register; confirm PIS & INT bits set
+? 0x10003c00 0x00000c00 0x00000c00
+# Read CODE register; confirm PKE is stuck at bad code
+? 0x10003c80 0x85000000 0xffffffff
+# Resume PKE with STC
+! 0x10003c10 0x00000008
+# Read STAT register; confirm PIS & INT no longer set
+? 0x10003c00 0x00000000 0x00000c00
+# Read CODE register; confirm PKE executed trailing no-ops
+? 0x10003c80 0x00000000 0xffffffff
 #
 #
 # ---- STMASK/MASK ----
@@ -304,6 +333,37 @@
 # Read STAT register; confirm ER1 not set
 ? 0x10003800 0x00000000 0x00002000
 #
+# Try stopping using STP bit this time
+# Test STCOL instruction; leave operand out for now
+1 0x31000000_00000000_00000000_00000000 0x00000000 PPPP
+# Read STAT register; confirm PPS field set at WAIT
+? 0x10003c00 0x00000001 0x00000003
+# Stop PKE after current instruction with STP bit
+! 0x10003c10 0x00000004
+# Supply operand - four words
+1 0x1234abcd_2345bcde_5432dcba_76543210 0x00000000 ....
+# Check column registers for value
+? 0x10003d40 0x76543210 0xffffffff
+? 0x10003d50 0x5432dcba 0xffffffff
+? 0x10003d60 0x2345bcde 0xffffffff
+? 0x10003d70 0x1234abcd 0xffffffff
+# Now send a new instruction with operands; this should stall
+1 0x31000000_00000000_00000000_00000000 0x00000000 PPPP
+1 0x11111111_22222222_33333333_44444444 0x00000000 ....
+# Confirm that PKE is continuing to stall due to PSS
+? 0x10003c00 0x00000100 0x00000100
+? 0x10003c00 0x00000100 0x00000100
+? 0x10003c00 0x00000100 0x00000100
+# Resume PKE with STC bit; it should process pent-up STCOL
+! 0x10003c10 0x00000008
+# Check column registers for value
+? 0x10003d40 0x44444444 0xffffffff
+? 0x10003d50 0x33333333 0xffffffff
+? 0x10003d60 0x22222222 0xffffffff
+? 0x10003d70 0x11111111 0xffffffff
+# Read STAT register; confirm ER1 not set
+? 0x10003c00 0x00000000 0x00002000
+#
 #
 # ---- MSKPATH3 ----
 #
@@ -330,4 +390,45 @@
 ? 0x10005004 0x00000000 0xffffffff
 ? 0x10005008 0x00000000 0xffffffff
 ? 0x1000500c 0x00000000 0xffffffff
+#
+# Erroneously read PKE1-only registers on PKE0
+? 0x100038a0 0x00000000 0xffffffff
+? 0x100038b0 0x00000000 0xffffffff
+? 0x100038c0 0x00000000 0xffffffff
+? 0x100038e0 0x00000000 0xffffffff
+? 0x100038f0 0x00000000 0xffffffff
+#
+# Erroneously write PKE1-only registers on PKE0
+! 0x100038a0 0x00000000
+! 0x100038b0 0x00000000
+! 0x100038c0 0x00000000
+! 0x100038e0 0x00000000
+! 0x100038f0 0x00000000
+#
+# Erroneously read write-only registers
+? 0x10003810 0x00000000 0xffffffff
+? 0x10003c10 0x00000000 0xffffffff
+#
+# Erroneously write read-only registers
+! 0x10003c00 0x00000000
+! 0x10003c40 0x00000000
+! 0x10003c50 0x00000000
+! 0x10003c60 0x00000000
+! 0x10003c70 0x00000000
+! 0x10003c80 0x00000000
+! 0x10003c90 0x00000000
+! 0x10003ca0 0x00000000
+! 0x10003cb0 0x00000000
+! 0x10003cc0 0x00000000
+! 0x10003cd0 0x00000000
+! 0x10003ce0 0x00000000
+! 0x10003cf0 0x00000000
+! 0x10003d00 0x00000000
+! 0x10003d10 0x00000000
+! 0x10003d20 0x00000000
+! 0x10003d30 0x00000000
+! 0x10003d40 0x00000000
+! 0x10003d50 0x00000000
+! 0x10003d60 0x00000000
+! 0x10003d70 0x00000000
 #
