@@ -63,6 +63,7 @@ CXXFLAGS = -g -O
 RANLIB = ranlib
 NM = nm
 GZIP = gzip
+COMPRESS = compress
 
 # BISON: This line sed'ed to BISON = bison -y for FSF releases, don't remove.
 BISON = `if [ -f $${rootme}/byacc/byacc ] ; \
@@ -872,11 +873,11 @@ make-gdb.tar.Z: $(DEVO_SUPPORT) $(GDB_SUPPORT_DIRS) gdb texinfo/texinfo.tex
 	ln -s ../../texinfo/tex3patch   proto-toplev/texinfo/
 	chmod og=u `find proto-toplev -print`
 	(VER=`sed <gdb/Makefile.in -n 's/VERSION = //p'`; \
-		echo "==> Making gdb-$$VER.tar.Z"; \
 		ln -s proto-toplev gdb-$$VER; \
-		tar cfh - gdb-$$VER \
-		| compress -v >gdb-$$VER.tar.Z)
-	$(GZIP) -d <gdb-$$VER.tar.Z | $(GZIP) -9 -v >gdb-$$VER.tar.z
+		echo "==> Making gdb-$$VER.tar.Z"; \
+		tar cfh - gdb-$$VER | $(COMPRESS) -v >gdb-$$VER.tar.Z; \
+		echo "==> Making gdb-$$VER.tar.z"; \
+		tar cfh - gdb-$$VER | $(GZIP) -v -9 >gdb-$$VER.tar.z)
 
 # When you use `make setup-dirs' or `make taz' you should always redefine
 # this macro.
