@@ -4,14 +4,14 @@
 			Blanket Write Privs
 			   (alphabetic)
 
-Jim Blandy			jimb@cygnus.com
-Andrew Cagney			ac131313@cygnus.com
+Jim Blandy			jimb@redhat.com
+Andrew Cagney			ac131313@redhat.com
 J.T. Conklin			jtc@redback.com
 Fred Fish			fnf@ninemoons.com
 Mark Kettenis           	kettenis@gnu.org
 Peter Schauer			Peter.Schauer@regent.e-technik.tu-muenchen.de
 Stan Shebs			shebs@apple.com
-Michael Snyder			msnyder@cygnus.com
+Michael Snyder			msnyder@redhat.com
 
 
 			Various Maintainers
@@ -58,14 +58,14 @@ maintainer works with the native maintainer when resolving API issues.
 			Maintenance only
 
 	arm		--target=arm-coff,arm-elf,arm-pe -w
-			Fernando Nasser		fnasser@cygnus.com
+			Fernando Nasser		fnasser@redhat.com
 			Scott Bambrough		scottb@netwinder.org
 
 	d10v		--target=d10v-elf ,-Werror
-			Andrew Cagney		cagney@cygnus.com
+			Andrew Cagney		cagney@redhat.com
 
 	d30v		--target=d30v-elf ,-Werror
-			David Taylor		taylor@cygnus.com
+			David Taylor		taylor@redhat.com
 
 	djgpp		--target=i586-pc-msdosdjgpp ,-Werror
 			(See native and host)
@@ -86,10 +86,10 @@ maintainer works with the native maintainer when resolving API issues.
 			Maintenance only
 
 	ia64		--target=ia64-linux ,-Werror
-			Kevin Buettner		kevinb@cygnus.com
+			Kevin Buettner		kevinb@redhat.com
 
 	m32r		--target=m32r-elf -Werror
-			Michael Snyder		msnyder@cygnus.com
+			Michael Snyder		msnyder@redhat.com
 
 	m68hc11		--target=m68hc11-elf ,-Werror
 			Stephane Carrez		Stephane.Carrez@worldnet.fr
@@ -105,7 +105,7 @@ maintainer works with the native maintainer when resolving API issues.
 			Maintenance only
 
 	mips		--target=mips-elf,mips64-elf ,-Werror
-			Andrew Cagney		cagney@cygnus.com
+			Andrew Cagney		cagney@redhat.com
 
 	mn10200		--target=mn10200-elf ,-Werror
 			Maintenance only
@@ -120,17 +120,17 @@ maintainer works with the native maintainer when resolving API issues.
 			Maintenance only
 
 	powerpc		--target=powerpc-eabi,powerpcle-eabi ,-Werror
-			Kevin Buettner		kevinb@cygnus.com
-			Nick Duffek		nsd@cygnus.com
+			Kevin Buettner		kevinb@redhat.com
+			Nick Duffek		nsd@redhat.com
 
 	rs6000		--target=rs6000-ibm-aix3.2,rs6000-ibm-aix4.1 ,-Werror
 			(see rs6000 native and ppc target)
 
 	sh		--target=sh-hms,sh-elf ,-Werror
-			Elena Zannoni		ezannoni@cygnus.com
+			Elena Zannoni		ezannoni@redhat.com
 
 	sparc		--target=sparc-elf,sparc64-elf ,-Werror
-			David Taylor		taylor@cygnus.com
+			David Taylor		taylor@redhat.com
 
 	tic80		(--target=tic80-coff broken)
 			Maintenance only
@@ -183,31 +183,31 @@ The host maintainer ensures that gdb (including mmalloc) can be built
 as a cross debugger on their platform.
 
 AIX			Peter Schauer		Peter.Schauer@regent.e-technik.tu-muenchen.de
-			Kevin Buettner		kevinb@cygnus.com
+			Kevin Buettner		kevinb@redhat.com
 
 djgpp native		Eli Zaretskii		eliz@gnu.org
-			DJ Delorie		dj@cygnus.com
+			DJ Delorie		dj@redhat.com
 MS Windows (NT, CE, '00, 9x, Me) host & native
-			Chris Faylor		cgf@cygnus.com
+			Chris Faylor		cgf@redhat.com
 GNU/Linux/x86 native & host
 			Mark Kettenis		kettenis@gnu.org
-			Jim Blandy		jimb@cygnus.com
-GNU/Linux PPC native	Kevin Buettner		kevinb@cygnus.com
+			Jim Blandy		jimb@redhat.com
+GNU/Linux PPC native	Kevin Buettner		kevinb@redhat.com
 GNU/Linux MIPS native & host
 			Daniel Jacobowitz	dan@debian.org
 FreeBSD native & host	Mark Kettenis		kettenis@gnu.org
 			David O'Brien		obrien@freebsd.org
 hurd native		Mark Kettenis		kettenis@gnu.org
 NetBSD native & host	J.T. Conklin		jtc@redback.com
-SCO/Unixware		Nick Duffek		nsd@cygnus.com
+SCO/Unixware		Nick Duffek		nsd@redhat.com
 			Robert Lipe		rjl@sco.com
 GNU/Linux ARM native	Scott Bambrough		scottb@netwinder.org
 Solaris/x86 native & host (devolved)
-			Nick Duffek		nsd@cygnus.com
+			Nick Duffek		nsd@redhat.com
 			Peter Schauer		Peter.Schauer@regent.e-technik.tu-muenchen.de
 Solaris/SPARC native & host (devolved)
-                        David Taylor            taylor@cygnus.com
-                        Michael Snyder          msnyder@cygnus.com
+                        David Taylor            taylor@redhat.com
+                        Michael Snyder          msnyder@redhat.com
 Mac OS X		Klee Dienes		kdienes@apple.com
 			Jim Ingham		jingham@apple.com
 
@@ -215,58 +215,58 @@ Mac OS X		Klee Dienes		kdienes@apple.com
 
 Core: Generic components used by all of GDB
 
-generic arch support	Andrew Cagney		cagney@cygnus.com
+generic arch support	Andrew Cagney		cagney@redhat.com
 			Any host/target maintainer can add to
 			gdbarch.{c,h,sh}.  Send tricky ones to cagney.
-target vector		Andrew Cagney		cagney@cygnus.com
-main (main.c, top.c)	Elena Zannoni		ezannoni@cygnus.com
-event loop		Elena Zannoni           ezannoni@cygnus.com
+target vector		Andrew Cagney		cagney@redhat.com
+main (main.c, top.c)	Elena Zannoni		ezannoni@redhat.com
+event loop		Elena Zannoni           ezannoni@redhat.com
 
-generic symtabs		Jim Blandy		jimb@cygnus.com
-			Elena Zannoni		ezannoni@cygnus.com
-  dwarf readers		Jim Blandy		jimb@cygnus.com
-			Elena Zannoni		ezannoni@cygnus.com
-  elf reader		Jim Blandy		jimb@cygnus.com
-			Elena Zannoni		ezannoni@cygnus.com
-  stabs reader		Jim Blandy		jimb@cygnus.com
-			Elena Zannoni		ezannoni@cygnus.com
+generic symtabs		Jim Blandy		jimb@redhat.com
+			Elena Zannoni		ezannoni@redhat.com
+  dwarf readers		Jim Blandy		jimb@redhat.com
+			Elena Zannoni		ezannoni@redhat.com
+  elf reader		Jim Blandy		jimb@redhat.com
+			Elena Zannoni		ezannoni@redhat.com
+  stabs reader		Jim Blandy		jimb@redhat.com
+			Elena Zannoni		ezannoni@redhat.com
   coff reader		Philippe De Muyter	phdm@macqel.be
   xcoff reader		Any maintainer can modify this; please send tricky
-			ones to Kevin Buettner <kevinb@cygnus.com>
-  linespec		Jim Blandy		jimb@cygnus.com
-			Elena Zannoni		ezannoni@cygnus.com
-			Fernando Nasser		fnasser@cygnus.com
+			ones to Kevin Buettner <kevinb@redhat.com>
+  linespec		Jim Blandy		jimb@redhat.com
+			Elena Zannoni		ezannoni@redhat.com
+			Fernando Nasser		fnasser@redhat.com
 
-tracing bytecode stuff  Jim Blandy              jimb@cygnus.com
-tracing			Michael Snyder		msnyder@cygnus.com
-threads			Michael Snyder		msnyder@cygnus.com
+tracing bytecode stuff  Jim Blandy              jimb@redhat.com
+tracing			Michael Snyder		msnyder@redhat.com
+threads			Michael Snyder		msnyder@redhat.com
 			Mark Kettenis		kettenis@gnu.org
-breakpoints		Michael Snyder		msnyder@cygnus.com
-			Jim Blandy		jimb@cygnus.com
-language support	David Taylor		taylor@cygnus.com
+breakpoints		Michael Snyder		msnyder@redhat.com
+			Jim Blandy		jimb@redhat.com
+language support	David Taylor		taylor@redhat.com
   Java support (devolved)
 			Per Bothner		per@bothner.com
-			Anthony Green 		green@cygnus.com
+			Anthony Green 		green@redhat.com
   Objective-C/C++	Klee Dienes		kdienes@apple.com
 			Jim Ingham		jimgham@apple.com
-  Pascal support	Pierre Muller		muller@sourceware.cygnus.com
-expression eval		David Taylor		taylor@cygnus.com
-defs.h			David Taylor		taylor@cygnus.com
-utils.c			David Taylor		taylor@cygnus.com
-Scheme support		Jim Blandy		jimb@cygnus.com
+  Pascal support	Pierre Muller		muller@sourceware.redhat.com
+expression eval		David Taylor		taylor@redhat.com
+defs.h			David Taylor		taylor@redhat.com
+utils.c			David Taylor		taylor@redhat.com
+Scheme support		Jim Blandy		jimb@redhat.com
 
-shared libs (devolved)	Jim Blandy		jimb@cygnus.com
-			Kevin Buettner		kevinb@cygnus.com
+shared libs (devolved)	Jim Blandy		jimb@redhat.com
+			Kevin Buettner		kevinb@redhat.com
   xcoffsolib		Peter Schauer		Peter.Schauer@regent.e-technik.tu-muenchen.de
 
-remote.c		Andrew Cagney		cagney@cygnus.com
+remote.c		Andrew Cagney		cagney@redhat.com
 			J.T. Conklin		jtc@redback.com
 include/remote-sim.h, remote-sim.c
-			Andrew Cagney		cagney@cygnus.com
-sds protocol		Fernando Nasser		fnasser@cygnus.com
-rdi/adp protocol	Fernando Nasser		fnasser@cygnus.com
+			Andrew Cagney		cagney@redhat.com
+sds protocol		Fernando Nasser		fnasser@redhat.com
+rdi/adp protocol	Fernando Nasser		fnasser@redhat.com
 documentation		Eli Zaretskii		eliz@gnu.org
-testsuite		Fernando Nasser		fnasser@cygnus.com
+testsuite		Fernando Nasser		fnasser@redhat.com
   config                Mark Salter             msalter@redhat.com
   lib                   Mark Salter             msalter@redhat.com
   gdbtk (gdb.gdbtk)     Keith Seitz             keiths@redhat.com
@@ -277,22 +277,22 @@ testsuite		Fernando Nasser		fnasser@cygnus.com
   threads (gdb.threads) Michael Snyder          msnyder@redhat.com
   trace (gdb.trace)     Michael Snyder          msnyder@redhat.com
   hp tests (gdb.hp)	(vacant)
-  Java tests (gdb.java)	Anthony Green 		green@cygnus.com
-Kernel Object Display	Fernando Nasser		fnasser@cygnus.com
+  Java tests (gdb.java)	Anthony Green 		green@redhat.com
+Kernel Object Display	Fernando Nasser		fnasser@redhat.com
 dcache.c		J.T. Conklin		jtc@redback.com
 
 
 UI: External (user) interfaces.
 
-command interpreter	Fernando Nasser		fnasser@cygnus.com
+command interpreter	Fernando Nasser		fnasser@redhat.com
 gdbtk (c & tcl)		Jim Ingham		jingham@apple.com
-			Fernando Nasser         fnasser@cygnus.com
-			Keith Seitz		keiths@cygnus.com
+			Fernando Nasser         fnasser@redhat.com
+			Keith Seitz		keiths@redhat.com
 libgui (w/foundry, sn)	Jim Ingham              jingham@apple.com
 			Keith Seitz		keiths@redhat.com
-mi (gdb/mi)		Andrew Cagney		cagney@cygnus.com
-			Elena Zannoni           ezannoni@cygnus.com
-			Fernando Nasser		fnasser@cygnus.com
+mi (gdb/mi)		Andrew Cagney		cagney@redhat.com
+			Elena Zannoni           ezannoni@redhat.com
+			Fernando Nasser		fnasser@redhat.com
 tui			(vacant)
 			Technical Contact Point	wdb@cup.hp.com
 
@@ -307,10 +307,10 @@ Makefile.in, configure*	ALL
 mmalloc/		ALL Host maintainers
 
 sim/			See sim/MAINTAINERS, co-ordinated by:
-			Frank Ch. Eigler	fche@cygnus.com
+			Frank Ch. Eigler	fche@redhat.com
 
 readline/		Master version: ftp://ftp.cwru.edu/pub/bash/
-			Elena Zannoni		ezannoni@cygnus.com
+			Elena Zannoni		ezannoni@redhat.com
 			Host maintainers (host dependant parts)
 			(but get your changes into the master version)
 
@@ -326,7 +326,7 @@ David Anderson					davea@sgi.com
 Philip Blundell					philb@gnu.org
 Joel Brobecker					brobecker@act-europe.fr
 Michael Chastain				chastain@redhat.com
-Nick Clifton					nickc@cygnus.com
+Nick Clifton					nickc@redhat.com
 Orjan Friberg					orjanf@axis.com
 Paul Hilfinger					hilfinger@gnat.com
 Matt Hiller					hiller@redhat.com
@@ -340,16 +340,16 @@ Geoff Keating					geoffk@redhat.com
 Jim Kingdon					jkingdon@engr.sgi.com  ++
 Jonathan Larmour				jlarmour@redhat.co.uk
 H.J. Lu						hjl@lucon.org
-Glen McCready					gkm@cygnus.com
-Jason Molenda					jsm@cygnus.com
-Pierre Muller					muller@sourceware.cygnus.com
+Glen McCready					gkm@redhat.com
+Jason Molenda					jsm@redhat.com
+Pierre Muller					muller@sourceware.redhat.com
 Alexandre Oliva					aoliva@redhat.com
 Mark Salter					msalter@redhat.com
-Keith Seitz					keiths@cygnus.com
+Keith Seitz					keiths@redhat.com
 David Smith					dsmith@redhat.com
 Stephen P. Smith				ischis2@home.com
 Gary Thomas					gthomas@redhat.com
-Tom Tromey					tromey@cygnus.com
+Tom Tromey					tromey@redhat.com
 
 
 

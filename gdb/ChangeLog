@@ -1,5 +1,10 @@
 2001-07-28  Andrew Cagney  <ac131313@redhat.com>
 
+	* MAINTAINERS: Update e-mail address of active @cygnus.com
+	maintainers to @redhat.com.
+
+2001-07-28  Andrew Cagney  <ac131313@redhat.com>
+
 	* README (Known bugs): Delete section.
 	(Kernel debugging): Delete section.
 	(Languages other than C): Delete section.
