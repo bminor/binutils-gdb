@@ -3289,6 +3289,7 @@ dump file name (as if it were preceded by @samp{-c}).
 @node Emacs, Remote, Options, Top
 @chapter Using GDB under GNU Emacs
 
+@cindex emacs
 A special interface allows you to use GNU Emacs to view (and
 edit) the source files for the program you are debugging with
 GDB.
