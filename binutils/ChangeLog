@@ -1,3 +1,8 @@
+2003-03-31  Alexandre Oliva  <aoliva@redhat.com>
+
+	* objdump.c (dump_data): Don't truncate the address to long; make
+	the width large enough, and uniform for all entries in a section.
+
 2003-03-31  H.J. Lu <hjl@gnu.org>
 
 	* readelf.c: Include "libiberty.h".

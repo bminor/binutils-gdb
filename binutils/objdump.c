@@ -2227,6 +2227,9 @@ dump_data (abfd)
 	{
 	  if (section->flags & SEC_HAS_CONTENTS)
 	    {
+	      char buf[64];
+	      int count, width;
+	      
 	      printf (_("Contents of section %s:\n"), section->name);
 
 	      if (bfd_section_size (abfd, section) == 0)
@@ -2253,13 +2256,47 @@ dump_data (abfd)
 		  if (stop_offset > bfd_section_size (abfd, section) / opb)
 		    stop_offset = bfd_section_size (abfd, section) / opb;
 		}
+
+	      width = 4;
+
+	      bfd_sprintf_vma (abfd, buf, start_offset + section->vma);
+	      if (strlen (buf) >= sizeof (buf))
+		abort ();
+	      count = 0;
+	      while (buf[count] == '0' && buf[count+1] != '\0')
+		count++;
+	      count = strlen (buf) - count;
+	      if (count > width)
+		width = count;
+
+	      bfd_sprintf_vma (abfd, buf, stop_offset + section->vma - 1);
+	      if (strlen (buf) >= sizeof (buf))
+		abort ();
+	      count = 0;
+	      while (buf[count] == '0' && buf[count+1] != '\0')
+		count++;
+	      count = strlen (buf) - count;
+	      if (count > width)
+		width = count;
+
 	      for (addr_offset = start_offset;
 		   addr_offset < stop_offset; addr_offset += onaline / opb)
 		{
 		  bfd_size_type j;
 
-		  printf (" %04lx ", (unsigned long int)
-			  (addr_offset + section->vma));
+		  bfd_sprintf_vma (abfd, buf, (addr_offset + section->vma));
+		  count = strlen (buf);
+		  if (count >= sizeof (buf))
+		    abort ();
+		  putchar (' ');
+		  while (count < width)
+		    {
+		      putchar ('0');
+		      count++;
+		    }
+		  fputs (buf + count - width, stdout);
+		  putchar (' ');
+
 		  for (j = addr_offset * opb;
 		       j < addr_offset * opb + onaline; j++)
 		    {
