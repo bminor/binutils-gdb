@@ -4056,10 +4056,10 @@ obj_coff_lcomm (ignore)
     }
   *p = 0;
 
-  symbolP = symbol_find_or_make(name);
+  symbolP = symbol_find_or_make (name);
 
-  if (S_GET_SEGMENT(symbolP) == SEG_UNKNOWN &&
-      S_GET_VALUE(symbolP) == 0)
+  if (S_GET_SEGMENT (symbolP) == SEG_UNKNOWN &&
+      S_GET_VALUE (symbolP) == 0)
     {
       if (! need_pass_2)
 	{
@@ -4073,14 +4073,14 @@ obj_coff_lcomm (ignore)
 		       (offsetT) temp, (char *) 0);
 	  *p = 0;
 	  subseg_set (current_seg, current_subseg); /* restore current seg */
-	  S_SET_SEGMENT(symbolP, SEG_E2);
-	  S_SET_STORAGE_CLASS(symbolP, C_STAT);
+	  S_SET_SEGMENT (symbolP, SEG_E2);
+	  S_SET_STORAGE_CLASS (symbolP, C_STAT);
 	}
     }
   else
-    as_bad(_("Symbol %s already defined"), name);
+    as_bad (_("Symbol %s already defined"), name);
 
-  demand_empty_rest_of_line();
+  demand_empty_rest_of_line ();
 #endif
 }
 
