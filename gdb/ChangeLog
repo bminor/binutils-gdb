@@ -1,5 +1,10 @@
 Fri Sep 16 00:14:40 1994  Per Bothner  (bothner@kalessin.cygnus.com)
 
+	* stabsread.c (read_type):  Handle stub types for bitstrings.
+	* stabsread.c (read_array_type):  Check for stub domain type
+	using TYPE_FLAG_STUB, not its length.
+	* gdbtypes.c (create_set_type):  Handle a stub domain type.
+
 	* ch-exp.y:  Get rid of some extra non-terminals, and move
 	their rules into primitive_value.
 	* ch-lang.c (chill_op_print_tab):  Add '->'.

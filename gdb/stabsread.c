@@ -1719,6 +1719,11 @@ read_type (pp, objfile)
     case 'S':
       type1 = read_type (pp, objfile);
       type = create_set_type ((struct type*) NULL, type1);
+      if (TYPE_FLAGS (type1) & TYPE_FLAG_STUB)
+	{
+	  TYPE_FLAGS (type) |= TYPE_FLAG_TARGET_STUB;
+	  add_undefined_type (type);
+	}
       if (is_string)
 	TYPE_CODE (type) = TYPE_CODE_BITSTRING;
       if (typenums[0] != -1)
@@ -2989,12 +2994,8 @@ read_array_type (pp, type, objfile)
 
   /* If we have an array whose element type is not yet known, but whose
      bounds *are* known, record it to be adjusted at the end of the file.  */
-  /* FIXME: Why check for zero length rather than TYPE_FLAG_STUB?  I think
-     the two have the same effect except that the latter is cleaner and the
-     former would be wrong for types which really are zero-length (if we
-     have any).  */
 
-  if (TYPE_LENGTH (element_type) == 0 && !adjustable)
+  if ((TYPE_FLAGS (element_type) & TYPE_FLAG_STUB) && !adjustable)
     {
       TYPE_FLAGS (type) |= TYPE_FLAG_TARGET_STUB;
       add_undefined_type (type);

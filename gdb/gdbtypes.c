@@ -466,24 +466,23 @@ create_set_type (result_type, domain_type)
     {
       result_type = alloc_type (TYPE_OBJFILE (domain_type));
     }
-  domain_type = force_to_range_type (domain_type);
   TYPE_CODE (result_type) = TYPE_CODE_SET;
   TYPE_NFIELDS (result_type) = 1;
   TYPE_FIELDS (result_type) = (struct field *)
     TYPE_ALLOC (result_type, 1 * sizeof (struct field));
   memset (TYPE_FIELDS (result_type), 0, sizeof (struct field));
+
+  if (! (TYPE_FLAGS (domain_type) & TYPE_FLAG_STUB))
+    {
+      domain_type = force_to_range_type (domain_type);
+      low_bound = TYPE_LOW_BOUND (domain_type);
+      high_bound = TYPE_HIGH_BOUND (domain_type);
+      bit_length = high_bound - low_bound + 1;
+      TYPE_LENGTH (result_type)
+	= ((bit_length + TARGET_INT_BIT - 1) / TARGET_INT_BIT)
+	  * TARGET_CHAR_BIT;
+    }
   TYPE_FIELD_TYPE (result_type, 0) = domain_type;
-  low_bound = TYPE_LOW_BOUND (domain_type);
-  high_bound = TYPE_HIGH_BOUND (domain_type);
-  bit_length = high_bound - low_bound + 1;
-  if (bit_length <= TARGET_CHAR_BIT)
-    TYPE_LENGTH (result_type) = 1;
-  else if (bit_length <= TARGET_SHORT_BIT)
-    TYPE_LENGTH (result_type) = TARGET_SHORT_BIT / TARGET_CHAR_BIT;
-  else
-    TYPE_LENGTH (result_type)
-      = ((bit_length + TARGET_INT_BIT - 1) / TARGET_INT_BIT)
-	* TARGET_CHAR_BIT;
   return (result_type);
 }
 
