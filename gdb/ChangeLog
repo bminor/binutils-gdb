@@ -1,3 +1,10 @@
+Wed Apr 22 14:34:49 1998  Michael Meissner  <meissner@cygnus.com>
+
+	* Makefile.in (INTL*): Add support to link in the intl library,
+	and to add -I options to its source and object directories.
+	(INTERNAL_CFLAGS): Ditto.
+	(C{LIBS,DEPS}): Ditto.
+
 start-sanitize-sky
 Wed Tue 21 17:29:48 1998  Jim Lemke  <jlemke@cygnus.com>
 	* configure.in: Add configure option --with-sim-funit.

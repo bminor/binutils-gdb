@@ -41,7 +41,7 @@ man9dir = $(mandir)/man9
 infodir = @infodir@
 includedir = @includedir@
 
-SHELL = /bin/sh
+SHELL = @SHELL@
 EXEEXT = # @EXEEXT@ # This isn't getting substituted in correctly :-(
 
 INSTALL = @INSTALL@
@@ -53,6 +53,7 @@ AR_FLAGS = qv
 RANLIB = @RANLIB@
 AWK = @AWK@
 DLLTOOL = @DLLTOOL@
+WINDRES = @WINDRES@
 
 # Flags that describe where you can find the termcap library.
 # This can be overridden in the host Makefile fragment file.
@@ -69,7 +70,7 @@ CC=@CC@
 srcdir = @srcdir@
 VPATH = @srcdir@
 
-BISON=@BISON@
+BISON=@YACC@
 
 # where to find makeinfo, preferably one designed for texinfo-2
 MAKEINFO=makeinfo
@@ -103,6 +104,12 @@ READLINE_DIR = ../readline
 READLINE = $(READLINE_DIR)/libreadline.a
 READLINE_SRC = $(srcdir)/$(READLINE_DIR)
 READLINE_CFLAGS = -I$(READLINE_SRC)
+
+# Where is the INTL library?  Typically in ../intl.
+INTL_DIR = ../intl
+INTL = $(INTL_DIR)/libintl.a
+INTL_SRC = $(srcdir)/$(INTL_DIR)
+INTL_CFLAGS = -I$(INTL_DIR) -I$(INTL_SRC)
 
 # Opcodes currently live in one of two places.  Either they are in the
 # opcode library, typically ../opcodes, or they are in a header file
@@ -157,11 +164,12 @@ LIBGUI = ../libgui/src/libgui.a
 
 GUI_CFLAGS_X = -I$(srcdir)/../libgui/src
 
-IDE_CFLAGS_X = -I$(srcdir)/../libide/src \
+IDE_CFLAGS_X = -I$(srcdir)/../libidetcl/src -I$(srcdir)/../libide/src \
   `if [ x"$(ENABLE_IDE)" != x ] ; then \
     echo -DIDE -I$(srcdir)/../ilu/runtime/mainloop;\
   fi`
 
+LIBIDETCL = ../libidetcl/src/libidetcl.a
 LIBIDE = ../libide/src/libide.a
 
 IDE_X = ` \
@@ -205,7 +213,8 @@ CXXFLAGS = -g -O
 # INTERNAL_CFLAGS is the aggregate of all other *CFLAGS macros.
 INTERNAL_CFLAGS = $(CFLAGS) $(GLOBAL_CFLAGS) $(PROFILE_CFLAGS) \
 	$(GDB_CFLAGS) $(OPCODES_CFLAGS) $(READLINE_CFLAGS) \
-	$(BFD_CFLAGS) $(MMALLOC_CFLAGS) $(INCLUDE_CFLAGS) $(ENABLE_CFLAGS)
+	$(BFD_CFLAGS) $(MMALLOC_CFLAGS) $(INCLUDE_CFLAGS) \
+	$(INTL_CFLAGS) $(ENABLE_CFLAGS)
 
 # LDFLAGS is specifically reserved for setting from the command line
 # when running make.
@@ -233,12 +242,12 @@ REGEX1 = gnu-regex.o
 # you can use 'CLIBS=$(INSTALLED_LIBS)' 'CDEPS='
 INSTALLED_LIBS=-lbfd -lreadline -lopcodes -liberty \
 	$(TERMCAP) $(XM_CLIBS) $(TM_CLIBS) $(NAT_CLIBS) @LIBS@ \
-	-lmmalloc -liberty
-CLIBS = $(SIM) $(BFD) $(READLINE) $(OPCODES) $(LIBIBERTY) \
+	-lmmalloc -lintl -liberty
+CLIBS = $(SIM) $(BFD) $(READLINE) $(OPCODES) $(INTL) $(LIBIBERTY) \
 	$(TERMCAP) $(XM_CLIBS) $(TM_CLIBS) $(NAT_CLIBS) @LIBS@ \
 	$(MMALLOC) $(LIBIBERTY) $(WIN32LIBS)
 CDEPS = $(XM_CDEPS) $(TM_CDEPS) $(NAT_CDEPS) $(SIM) $(BFD) $(READLINE) \
-	$(OPCODES) $(MMALLOC) $(LIBIBERTY) @CONFIG_DEPS@
+	$(OPCODES) $(MMALLOC) $(INTL) $(LIBIBERTY) @CONFIG_DEPS@
 
 ADD_FILES = $(REGEX) $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 ADD_DEPS = $(REGEX1) $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
@@ -689,6 +698,7 @@ saber_gdb: $(SFILES) $(DEPFILES) copying.c version.c
 	#load ../bfd/libbfd.a
 	#load ../readline/libreadline.a
 	#load ../mmalloc/libmmalloc.a
+	#load ../intl/libintl.a
 	#load -ltermcap 
 	#load `echo " "$(DEPFILES) | sed -e 's/\.o/.c/g' -e 's, , ../,g'`
 	echo "Load .c corresponding to:" $(DEPFILES)
@@ -1132,6 +1142,9 @@ fork-child.o: fork-child.c $(wait_h) $(defs_h) $(gdbcore_h) \
 	$(inferior_h) target.h terminal.h gdbthread.h gdb_string.h
 
 # start-sanitize-gdbtk
+gdbres.o: gdb.rc gdbtool.ico
+	$(WINDRES) --include $(srcdir) $(srcdir)/gdb.rc gdbres.o
+
 gdbtk.o: gdbtk.c $(defs_h) $(symtab_h) $(inferior_h) $(command_h) \
 	$(bfd_h) symfile.h objfiles.h target.h gdb_string.h $(tracepoint_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(IDE_CFLAGS) $(ITCL_CFLAGS) $(TIX_CFLAGS) \
