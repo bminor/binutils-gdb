@@ -1,16 +1,20 @@
+2001-12-04  Alan Modra  <amodra@bigpond.net.au>
+
+	* ldexp.c (exp_print_token): Correct "table" entry for RSHIFT.
+
 2001-12-02  Tom Rix  <trix@redhat.com>
- 
+
 	* configure.tgt : Remove eaixppc64 emulations.
-	* Makefile.in : Remove eaixppc64.c 
+	* Makefile.in : Remove eaixppc64.c
 	* ldemul.c (ldemul_choose_target): New parameters argc, argv.
 	(ldemul_default_target): Same.
 	* emultempl/gld960.em (gld960_choose_target):  Same.
-	* emultempl/gld960c.em (gld960_choose_target):  Same.	
-	* scripttempl/aix.sc: Remove OUTPUT_FORMAT. 
+	* emultempl/gld960c.em (gld960_choose_target):  Same.
+	* scripttempl/aix.sc: Remove OUTPUT_FORMAT.
 	* emultempl/aix.em (is_syscall): syscall_mask now a variable.
 	* emultempl/aix.em (gld*_read_file): symbol_mode_mask now a variable.
 	* emultempl/aix.em (gld*_parse_args): Handle -b32 -b64 emulation.
-	* emultempl/aix.em (choose_target): New function.  Handle emulation of 
+	* emultempl/aix.em (choose_target): New function.  Handle emulation of
 	-b32 and -b64.
 
 2001-11-27  H.J. Lu <hjl@gnu.org>
@@ -24,7 +28,7 @@
 	* emulparams/elf32_sparc.sh (NO_SMALL_DATA): Likewise.
 	* emulparams/elf64_sparc.sh (NO_SMALL_DATA): Likewise.
 
-	* scripttempl/elf.sc (SBSS): New. Define if ${NO_SMALL_DATA} 
+	* scripttempl/elf.sc (SBSS): New. Define if ${NO_SMALL_DATA}
 	is not empty.
 	(SDATA): Likewise.
 	(REL_SDATA): Likewise.
@@ -38,7 +42,7 @@
 
 	* scripttempl/elfm68hc11.sc (CTOR, DTOR): Put constructor and
 	destructor in rom.
-	* scripttempl/elfm68hc12.sc (CTOR, DTOR): Likewise.	
+	* scripttempl/elfm68hc12.sc (CTOR, DTOR): Likewise.
 
 2001-11-22  H.J. Lu  <hjl@gnu.org>
 

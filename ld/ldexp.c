@@ -92,7 +92,7 @@ exp_print_token (code)
     { LE, "<=" },
     { GE, ">=" },
     { LSHIFT, "<<" },
-    { RSHIFT, ">>=" },
+    { RSHIFT, ">>" },
     { ALIGN_K, "ALIGN" },
     { BLOCK, "BLOCK" },
     { QUAD, "QUAD" },
