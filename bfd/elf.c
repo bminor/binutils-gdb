@@ -1394,13 +1394,25 @@ bfd_section_from_phdr (abfd, hdr, index)
 {
   asection *newsect;
   char *name;
+  char *typename;
   char namebuf[64];
   int split;
 
   split = ((hdr->p_memsz > 0)
 	    && (hdr->p_filesz > 0)
 	    && (hdr->p_memsz > hdr->p_filesz));
-  sprintf (namebuf, split ? "segment%da" : "segment%d", index);
+  switch (hdr->p_type)
+    {
+    case PT_NULL: typename = "null"; break;
+    case PT_LOAD: typename = "load"; break;
+    case PT_DYNAMIC: typename = "dynamic"; break;
+    case PT_INTERP: typename = "interp"; break;
+    case PT_NOTE: typename = "note"; break;
+    case PT_SHLIB: typename = "shlib"; break;
+    case PT_PHDR: typename = "phdr"; break;
+    default: typename = "segment"; break;
+    }
+  sprintf (namebuf, "%s%d%s", typename, index, split ? "a" : "");
   name = bfd_alloc (abfd, strlen (namebuf) + 1);
   if (!name)
     return false;
@@ -1431,7 +1443,7 @@ bfd_section_from_phdr (abfd, hdr, index)
 
   if (split)
     {
-      sprintf (namebuf, "segment%db", index);
+      sprintf (namebuf, "%s%db", typename, index);
       name = bfd_alloc (abfd, strlen (namebuf) + 1);
       if (!name)
 	return false;

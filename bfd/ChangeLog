@@ -1,3 +1,9 @@
+1999-09-24  Fred Fish  <fnf@cygnus.com>
+
+	* elf.c (bfd_section_from_phdr): Add typename variable.  Use p_type
+	to initialize it to something meaningful.  Then use it to generate
+	more useful segment names.
+
 Sun Sep 19 12:16:47 1999  Jeffrey A Law  (law@cygnus.com)
 
 	* som.c (NO_PCREL_MODES): Define if the system does not define
@@ -8,8 +14,8 @@ Sun Sep 19 12:16:47 1999  Jeffrey A Law  (law@cygnus.com)
 	* libhppa.h (dis_assemble_22): New function.
 	(bfd_hppa_insn2fmt): Handle long branch.
 
-        * libhppa.h (bfd_hppa_insn2fmt): Decode and handle formats found
-        in PA2.0.
+	* libhppa.h (bfd_hppa_insn2fmt): Decode and handle formats found
+	in PA2.0.
 
 1999-09-17  Alan Modra  <alan@spri.levels.unisa.edu.au>
 
@@ -558,8 +564,8 @@ Tue Aug 10 12:48:09 1999  Jeffrey A Law  (law@cygnus.com)
 	* elf-hppa.h (elf_hppa_fake_sections): New function.
 	* elf32-hppa.c (elf_backend_fake_sections): Define.
 
-        * elf-hppa.h (elf_hppa_final_write_processing): Update for
-        recent changes to the arch_info structure.
+	* elf-hppa.h (elf_hppa_final_write_processing): Update for
+	recent changes to the arch_info structure.
 
 	* elf-hppa.h (_bfd_elf_hppa_gen_reloc_type): Handle
 	R_HPPA_SEGBASE and R_HPPA_SEGREL32.
@@ -567,7 +573,7 @@ Tue Aug 10 12:48:09 1999  Jeffrey A Law  (law@cygnus.com)
 	list.
 
 Tue Aug 10 00:34:29 1999  Mark P. Mitchell  <mark@codesourcery.com>
-                          Ralf Baechle <ralf@uni-koblenz.de>
+	                  Ralf Baechle <ralf@uni-koblenz.de>
 
 	* elf32-mips.c (_bfd_mips_elf_size_dynamic_sections): Always
 	output DT_MIPS_GOTSYM.
@@ -1366,7 +1372,7 @@ Thu Jul  8 12:32:23 1999  John David Anglin <dave@hiauly1.hia.nrc.ca>
 
 Tue Jul  6 10:23:39 1999  Jeffrey A Law  (law@cygnus.com)
 
-        * libhppa.h: Revert July 2, 1999 patch.
+	* libhppa.h: Revert July 2, 1999 patch.
 
 	* elf-hppa.h (_bfd_elf_hppa_gen_reloc_type): T mode selectors
 	need to generate DLTIND relocations, not DLTREL relocations.
@@ -2065,8 +2071,8 @@ Wed Jun  2 11:51:12 1999  Andreas Schwab  <schwab@issan.cs.uni-dortmund.de>
 
 1999-05-25  Catherine Moore  <clm@cygnus.com>
 
-        * coff-arm.c (coff_arm_relocate_section): Don't emit
-        base file entries for pc-relative values.
+	* coff-arm.c (coff_arm_relocate_section): Don't emit
+	base file entries for pc-relative values.
 
 1999-05-25  DJ Delorie  <dj@cygnus.com>
 
@@ -2144,15 +2150,15 @@ Tue May 11 15:51:58 1999  Jeffrey A Law  (law@cygnus.com)
 
 1999-05-10  Catherine Moore  <clm@cygnus.com>
 
-        * bfd-in.h (bfd_arm_allocate_interworking_sections):  Static
-        if COFF_IMAGE_WITH_PE.
-        (bfd_arm_process_before_allocation): Likewise.
-        (bfd_arm_get_bfd_for_interworking): Likewise.
-        * coff-arm.c: Likewise.
-        * bfd-in2.h: Regenerate.
-        * configure.in (armpe_little_vec): Remove coff-arm.lo.
-        (armpe_big_vec): Likewise.
-        * configure: Rebuild.
+	* bfd-in.h (bfd_arm_allocate_interworking_sections):  Static
+	if COFF_IMAGE_WITH_PE.
+	(bfd_arm_process_before_allocation): Likewise.
+	(bfd_arm_get_bfd_for_interworking): Likewise.
+	* coff-arm.c: Likewise.
+	* bfd-in2.h: Regenerate.
+	* configure.in (armpe_little_vec): Remove coff-arm.lo.
+	(armpe_big_vec): Likewise.
+	* configure: Rebuild.
 
 1999-05-10  Nick Clifton  <nickc@cygnus.com>
 
@@ -2172,27 +2178,27 @@ Thu May  6 17:09:09 1999  Fred Fish  <fnf@be.com>
 
 1999-05-05  Catherine Moore  <clm@cygnus.com>
 
-        * coff-arm.c (coff_arm_relocate_section):  Add one to
-        address of ARM_RVA32 thumb functions.
+	* coff-arm.c (coff_arm_relocate_section):  Add one to
+	address of ARM_RVA32 thumb functions.
 
 1999-05-05  Catherine Moore  <clm@cygnus.com>
 
-        * elf32-m68k.c (elf32_m68k_set_private_flags): New.
-        (elf32_m68k_copy_private_bfd_data): New.
-        (elf32_m68k_merge_private_bfd_data): New.
-        (elf32_m68k_print_private_bfd_data): New.
-        (CPU32_FLAG): Define.
-        (PLT_CPU32_ENTRY_SIZE): Define.
-        (elf_cpu32_plt0_entry): Declare.
-        (elf_cpu32_plt_entry): Declare.
-        (elf_m68k_adjust_dynamic_symbol): Generate cpu32 plt entries.
-        (elf_m68k_finish_dynamic_symbol): Likewise.
-        (elf_m68k_finish_dynamic_sections): Likewise.
-        (elf_backend_plt_header_size): Remove definition.
-        (bfd_elf32_bfd_copy_private_bfd_data): Define.
-        (bfd_elf32_bfd_merge_private_bfd_data): Define.
-        (bfd_elf32_bfd_set_private_flags): Define.
-        (bfd_elf32_bfd_print_private_bfd_data): Define.
+	* elf32-m68k.c (elf32_m68k_set_private_flags): New.
+	(elf32_m68k_copy_private_bfd_data): New.
+	(elf32_m68k_merge_private_bfd_data): New.
+	(elf32_m68k_print_private_bfd_data): New.
+	(CPU32_FLAG): Define.
+	(PLT_CPU32_ENTRY_SIZE): Define.
+	(elf_cpu32_plt0_entry): Declare.
+	(elf_cpu32_plt_entry): Declare.
+	(elf_m68k_adjust_dynamic_symbol): Generate cpu32 plt entries.
+	(elf_m68k_finish_dynamic_symbol): Likewise.
+	(elf_m68k_finish_dynamic_sections): Likewise.
+	(elf_backend_plt_header_size): Remove definition.
+	(bfd_elf32_bfd_copy_private_bfd_data): Define.
+	(bfd_elf32_bfd_merge_private_bfd_data): Define.
+	(bfd_elf32_bfd_set_private_flags): Define.
+	(bfd_elf32_bfd_print_private_bfd_data): Define.
 
 Mon May  3 09:24:49 1999  Jeffrey A Law  (law@cygnus.com)
 
@@ -2559,14 +2565,14 @@ Wed Feb 17 12:02:26 1999  Stan Cox  <scox@cygnus.com>
 
 Wed Feb 17 12:07:23 1999  Andreas Schwab  <schwab@issan.cs.uni-dortmund.de>
 
-        * elfarm-oabi.c (bfd_elf32_arm_allocate_interworking_sections,
-        bfd_elf32_arm_get_bfd_for_interworking,
-        bfd_elf32_arm_process_before_allocation): Define to avoid clash
-        with elfarm-nabi.c.
+	* elfarm-oabi.c (bfd_elf32_arm_allocate_interworking_sections,
+	bfd_elf32_arm_get_bfd_for_interworking,
+	bfd_elf32_arm_process_before_allocation): Define to avoid clash
+	with elfarm-nabi.c.
 
-        * elf32-arm.h: Don't declare elf32_arm_info_to_howto.
-        (elf32_thumb_to_arm_stub, elf32_arm_to_thumb_stub,
-        elf32_arm_find_nearest_line): Make them static.
+	* elf32-arm.h: Don't declare elf32_arm_info_to_howto.
+	(elf32_thumb_to_arm_stub, elf32_arm_to_thumb_stub,
+	elf32_arm_find_nearest_line): Make them static.
 
 Tue Feb 16 22:44:37 1999  Ian Lance Taylor  <ian@cygnus.com>
 
@@ -2633,21 +2639,21 @@ Tue Feb  2 21:38:28 1999  Ian Lance Taylor  <ian@cygnus.com>
 
 Tue Feb  2 18:16:43 1999  Catherine Moore  <clm@cygnus.com>
 
-        * elf32-arm.h (elf32_arm_reloc_map):  Removed.
-        (elf32_arm_reloc_type_lookup):  Removed
-        * elfarm-nabi.c (elf32_arm_reloc_map):  New.
-        (elf32_arm_reloc_type_lookup):  New.
-        * elfarm-oabi.c (elf32_arm_reloc_map):  New.
-        (elf32_arm_reloc_type_lookup):  New.
+	* elf32-arm.h (elf32_arm_reloc_map):  Removed.
+	(elf32_arm_reloc_type_lookup):  Removed
+	* elfarm-nabi.c (elf32_arm_reloc_map):  New.
+	(elf32_arm_reloc_type_lookup):  New.
+	* elfarm-oabi.c (elf32_arm_reloc_map):  New.
+	(elf32_arm_reloc_type_lookup):  New.
 
 Mon Feb  1 19:49:21 1999  Catherine Moore  <clm@cygnus.com>
 
-        * elfarm-nabi.c:  Renamed from elf32-arm-newabi.c.
-        * elfarm-oabi.c:  Renamed from elf32-arm-oldabi.c
-        * Makefile.am:  Use new files.
-        * Makefile.in:  Regenerate.
-        * configure.in:  Use new files.
-        * configure:  Regenerate.
+	* elfarm-nabi.c:  Renamed from elf32-arm-newabi.c.
+	* elfarm-oabi.c:  Renamed from elf32-arm-oldabi.c
+	* Makefile.am:  Use new files.
+	* Makefile.in:  Regenerate.
+	* configure.in:  Use new files.
+	* configure:  Regenerate.
 
 1999-02-01  Nick Clifton  <nickc@cygnus.com>
 
@@ -2657,25 +2663,25 @@ Mon Feb  1 19:49:21 1999  Catherine Moore  <clm@cygnus.com>
 
 Mon Feb  1 12:21:47 1999  Catherine Moore  <clm@cygnus.com>
 
-        * targets.c (bfd_target_vector):  Add bfd_elf32_littlearm_oabi_vec
-        and bfd_elf32_bigarm_oabi_vec.
+	* targets.c (bfd_target_vector):  Add bfd_elf32_littlearm_oabi_vec
+	and bfd_elf32_bigarm_oabi_vec.
 
 Mon Feb  1 11:46:31 1999  Catherine Moore  <clm@cygnus.com>
 
-        * Makefile.am (elf32-arm-oldabi.lo):  New.
-        (elf32-arm-newabi.lo):  New.
-        * Makefile.in:  Regenerate.
-        * config.bfd (thumb-*-elf):  Remove definition of targ_underscore.
-        (arm-*-elf):  Likewise.
-        (arm-*-oabi):  New.
-        (thumb-*-oabi):  New.
-        * configure:  Regenerate.
-        * configure.in (bfd_elf32_littlearm_oabi_vec):  New.
-        (bfd_elf32_bigarm_oabi_vec):  New.
-        * elf32-arm-newabi.c:  New.
-        * elf32-arm-oldabi.c:  New.
-        * elf32-arm.c:  Removed.
-        * elf32-arm.h:  New.
+	* Makefile.am (elf32-arm-oldabi.lo):  New.
+	(elf32-arm-newabi.lo):  New.
+	* Makefile.in:  Regenerate.
+	* config.bfd (thumb-*-elf):  Remove definition of targ_underscore.
+	(arm-*-elf):  Likewise.
+	(arm-*-oabi):  New.
+	(thumb-*-oabi):  New.
+	* configure:  Regenerate.
+	* configure.in (bfd_elf32_littlearm_oabi_vec):  New.
+	(bfd_elf32_bigarm_oabi_vec):  New.
+	* elf32-arm-newabi.c:  New.
+	* elf32-arm-oldabi.c:  New.
+	* elf32-arm.c:  Removed.
+	* elf32-arm.h:  New.
 
 Mon Feb  1 11:52:12 1999  Frank Ch. Eigler  <fche@cygnus.com>
 
@@ -2745,9 +2751,9 @@ Mon Jan 18 03:35:35 1999  Ian Lance Taylor  <ian@cygnus.com>
 
 Tue Dec 22 15:21:41 1998  Catherine Moore  <clm@cygnus.com>
 
-        * archures.c (bfd_mach_i386_i386_intel_syntax):  Define.
-        * bfd-in2.h:  Likewise.
-        * cpu-i386.c (bfd_i386_arch_intel_syntax):  New.
+	* archures.c (bfd_mach_i386_i386_intel_syntax):  Define.
+	* bfd-in2.h:  Likewise.
+	* cpu-i386.c (bfd_i386_arch_intel_syntax):  New.
 
 1998-12-16  Gavin Romig-Koch  <gavin@cygnus.com>
 
@@ -3112,16 +3118,16 @@ Tue Nov 10 13:37:36 1998  Felix Lee  <flee@cygnus.com>
 
 Tue Nov 10 14:31:01 1998  Catherine Moore  <clm@cygnus.com>
 
-        * elf32-d10v.c (reloc_type):  Add R_D10V_GNU_VTINHERIT and
-        R_D10V_GNU_VTENTRY relocs.
-        (elf_d10v_howto_table):  Likewise.
-        (d10v_reloc_map d10v_reloc_map):  Likewise.
-        (elf32_d10v_gc_mark_hook):  New.
-        (elf32_d10v_gc_sweep_hook):  New.
-        (elf32_d10v_check_relocs):  New.
-        (elf32_d10v_relocate_section):  New.
-        (elf_backend_relocate_section):  Define.
-        (elf_backend_can_gc_sections):  Define.
+	* elf32-d10v.c (reloc_type):  Add R_D10V_GNU_VTINHERIT and
+	R_D10V_GNU_VTENTRY relocs.
+	(elf_d10v_howto_table):  Likewise.
+	(d10v_reloc_map d10v_reloc_map):  Likewise.
+	(elf32_d10v_gc_mark_hook):  New.
+	(elf32_d10v_gc_sweep_hook):  New.
+	(elf32_d10v_check_relocs):  New.
+	(elf32_d10v_relocate_section):  New.
+	(elf_backend_relocate_section):  Define.
+	(elf_backend_can_gc_sections):  Define.
 
 Sat Nov  7 18:07:51 1998  Peter Schauer  <peter.schauer@regent.e-technik.tu-muenchen.de>
 
@@ -3203,12 +3209,12 @@ Sat Oct 31 20:10:09 1998  Jeffrey A Law  (law@cygnus.com)
 
 Mon Oct 19 20:03:21 1998  Catherine Moore  <clm@cygnus.com>
 
-        * elf32-sh.c:  Add HOWTO entries for R_SH_GNU_VTINHERIT and
-        R_SH_GNU_VTENTRY.
-        (sh_elf_gc_mark_hook):  New.
-        (sh_elf_gc_sweep_hook):  New.
-        (sh_elf_check_relocs):  New.
-        (elf_backend_can_gc_sections):  Define.
+	* elf32-sh.c:  Add HOWTO entries for R_SH_GNU_VTINHERIT and
+	R_SH_GNU_VTENTRY.
+	(sh_elf_gc_mark_hook):  New.
+	(sh_elf_gc_sweep_hook):  New.
+	(sh_elf_check_relocs):  New.
+	(elf_backend_can_gc_sections):  Define.
 
 Mon Oct 19 16:57:05 1998  Felix Lee  <flee@cygnus.com>
 
@@ -3229,13 +3235,13 @@ Mon Oct 19 01:47:21 1998  Felix Lee  <flee@cygnus.com>
 
 Fri Oct 16 14:07:45 1998  Catherine Moore  <clm@cygnus.com>
 
-        * elf32-m32r.c:  Add HOWTO entries for R_M32R_GNU_VTINHERIT
-        and R_M32R_GNU_VTENTRY.
-        (elf_backend_can_gc_sections):  Define.
-        (m32r_elf_check_relocs):  New.
-        (m32r_elf_gc_mark_hook):  New.
-        (m32r_elf_gc_sweep_hook):  New.
-        (m32r_elf_relocate_section):  Handle VT relocs.
+	* elf32-m32r.c:  Add HOWTO entries for R_M32R_GNU_VTINHERIT
+	and R_M32R_GNU_VTENTRY.
+	(elf_backend_can_gc_sections):  Define.
+	(m32r_elf_check_relocs):  New.
+	(m32r_elf_gc_mark_hook):  New.
+	(m32r_elf_gc_sweep_hook):  New.
+	(m32r_elf_relocate_section):  Handle VT relocs.
 
 Mon Oct 12 14:18:40 1998  Nick Clifton  <nickc@cygnus.com>
 
@@ -3252,13 +3258,13 @@ Mon Oct 12 14:18:40 1998  Nick Clifton  <nickc@cygnus.com>
 
 Tue Oct  6 09:20:44 1998  Catherine Moore  <clm@cygnus.com>
 
-        * elf32-sparc.c:  Add HOWTO entries for R_SPARC_GNU_VTINHERIT and
-        R_SPARC_GNU_VTENTRY.
-        (elf32_sparc_check_relocs):  Handle them.
-        (elf32_sparc_reloc_type_lookup):  Likewise.
-        (elf32_sparc_relocate_section):  Likewise.
-        (elf32_sparc_gc_mark_hook):  New.
-        (elf32_sparc_gc_sweep_hook):  New.
+	* elf32-sparc.c:  Add HOWTO entries for R_SPARC_GNU_VTINHERIT and
+	R_SPARC_GNU_VTENTRY.
+	(elf32_sparc_check_relocs):  Handle them.
+	(elf32_sparc_reloc_type_lookup):  Likewise.
+	(elf32_sparc_relocate_section):  Likewise.
+	(elf32_sparc_gc_mark_hook):  New.
+	(elf32_sparc_gc_sweep_hook):  New.
 
 Mon Oct  5 14:55:30 1998  Jeffrey A Law  (law@cygnus.com)
 
@@ -3278,25 +3284,25 @@ Mon Oct  5 12:02:31 1998  Gavin Romig-Koch  <gavin@cygnus.com>
 
 Mon Oct  5 10:06:22 1998  Catherine Moore  <clm@cygnus.com>
 
-        * elflink.h (elf_gc_sections):  Do not allow garbage
-        collection if dynamic sections have been created.
+	* elflink.h (elf_gc_sections):  Do not allow garbage
+	collection if dynamic sections have been created.
 
 Mon Oct  5 09:07:37 1998  Catherine Moore  <clm@cygnus.com>
 
-        * elf32-v850.c: Add HOWTO entries for R_V850_GNU_VTINHERIT and
-        R_V850_GNU_VTENTRY.
-        (v850_elf_check_relocs):  Handle VTINHERIT and VTENTRY relocs.
-        (v850_elf_perform_relocation):  Likewise.
-        (v850_elf_final_link_relocate):  Likewise.
-        (v850_elf_relocate_section):  Likewise.
-        (v850_elf_gc_sweep_hook):  New routine.
-        (v850_elf_gc_mark_hook):  New routine.
-        (elf_backend_can_gc_sections):  Define.
+	* elf32-v850.c: Add HOWTO entries for R_V850_GNU_VTINHERIT and
+	R_V850_GNU_VTENTRY.
+	(v850_elf_check_relocs):  Handle VTINHERIT and VTENTRY relocs.
+	(v850_elf_perform_relocation):  Likewise.
+	(v850_elf_final_link_relocate):  Likewise.
+	(v850_elf_relocate_section):  Likewise.
+	(v850_elf_gc_sweep_hook):  New routine.
+	(v850_elf_gc_mark_hook):  New routine.
+	(elf_backend_can_gc_sections):  Define.
 
 Mon Oct  5 09:04:25 1998  Catherine Moore  <clm@cygnus.com>
 
-        * elf32-m68k.c (elf_m68k_gc_sweep_hook):  Don't assume
-        that dynobj exists.
+	* elf32-m68k.c (elf_m68k_gc_sweep_hook):  Don't assume
+	that dynobj exists.
 
 Sun Oct  4 23:29:34 1998  David Edelsohn  <edelsohn@mhpcc.edu>
 
@@ -3324,19 +3330,19 @@ Sun Oct  4 21:19:09 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 1998-09-27  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
 
-        * elflink.h (elf_link_add_object_symbols): Undo last change.
+	* elflink.h (elf_link_add_object_symbols): Undo last change.
 
 Wed Sep 23 16:09:31 1998  Richard Henderson  <rth@cygnus.com>
 
-        * elflink.h (elf_link_add_object_symbols): Don't record a dynamic
-        symbol for the indirect alias to a versioned symbol.
+	* elflink.h (elf_link_add_object_symbols): Don't record a dynamic
+	symbol for the indirect alias to a versioned symbol.
 
 Mon Sep 21 12:15:22 1998  Catherine Moore  <clm@cygnus.com>
 
-        * elf32-i386.c (elf32_i386_vtinherit_howto): New.
-        (elf32_i386_vtentry_howto): New.
-        (elf_i386_reloc_type_lookup):  Return elf32_i386_vtentry_howto
-        or elf32_i386_vtinherit_howto  on lookup.
+	* elf32-i386.c (elf32_i386_vtinherit_howto): New.
+	(elf32_i386_vtentry_howto): New.
+	(elf_i386_reloc_type_lookup):  Return elf32_i386_vtentry_howto
+	or elf32_i386_vtinherit_howto  on lookup.
 
 Sun Sep 20 00:48:07 1998  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
 
@@ -3370,13 +3376,13 @@ Thu Sep 17 17:20:36 1998  Nick Clifton  <nickc@cygnus.com>
 
 Thu Sep 17 16:03:28 1998  Richard Henderson  <rth@cygnus.com>
 
-        * elf64-alpha.c (elf64_alpha_adjust_dynamic_symbol): Don't
-        transform a defweak into a plt entry.
-        (elf64_alpha_calc_dynrel_sizes): Allow room for secondary
-        plt entry references to receive a RELATIVE reloc.
-        (elf64_alpha_finish_dynamic_symbol): Fill them in.
-        (elf64_alpha_relocate_section): Assert we don't overrun
-        the allocated relocation space.
+	* elf64-alpha.c (elf64_alpha_adjust_dynamic_symbol): Don't
+	transform a defweak into a plt entry.
+	(elf64_alpha_calc_dynrel_sizes): Allow room for secondary
+	plt entry references to receive a RELATIVE reloc.
+	(elf64_alpha_finish_dynamic_symbol): Fill them in.
+	(elf64_alpha_relocate_section): Assert we don't overrun
+	the allocated relocation space.
 
 Wed Sep 16 18:03:13 1998  Nick Clifton  <nickc@cygnus.com>
 
@@ -3393,8 +3399,8 @@ Wed Sep 16 10:34:13 1998  Nick Clifton  <nickc@cygnus.com>
 
 Wed Sep 16 11:26:49 CDT 1998  Catherine Moore  <clm@cygnus.com>
 
-        * elf32-arm.c (elf32_arm_gc_mark_hook):  Remove print
-        statement.
+	* elf32-arm.c (elf32_arm_gc_mark_hook):  Remove print
+	statement.
 
 1998-09-15  Geoff Keating  <geoffk@ozemail.com.au>
 
@@ -3422,8 +3428,8 @@ Tue Sep 15 08:34:40 1998  Catherine Moore  <clm@cygnus.com>
 
 1998-09-10  Geoff Keating  <geoffk@ozemail.com.au>
 
-        * elf32-ppc.c (ppc_elf_relocate_section): If dynobj is NULL,
-        assume there is no PLT or GOT.
+	* elf32-ppc.c (ppc_elf_relocate_section): If dynobj is NULL,
+	assume there is no PLT or GOT.
 
 Wed Sep  9 14:24:12 1998  Nick Clifton  <nickc@cygnus.com>
 
@@ -3460,18 +3466,18 @@ Mon Aug 31 14:49:22 1998  Richard Henderson  <rth@cygnus.com>
 
 Mon Aug 31 10:23:40 1998  Catherine Moore  <clm@cygnus.com>
 
-        * Makefile.am:  Add elf32-arm.c.
-        * Makefile.in:  Rebuild.
-        * elf-bfd.h:  Add elf_backend_get_symbol_type.
-        * elf.c (swap_out_syms):  If defined, call
-        elf_backend_get_symbol_type.
-        * elf32-arm.c: Define elf_backend_get_symbol_type.
-        (elf32_arm_get_symbol-type):  New routine.
-        (record_thumb_to_arm_glue):  Change to use STT_ARM_TFUNC.
-        (bfd_elf32_arm_process_before_allocation):  Change to
-        check for STT_ARM_TFUNC.
-        (elf32_arm_final_link_relocate):  Likewise.
-        * elfxx-target.h:  Add elf_backend_get_symbol_type.
+	* Makefile.am:  Add elf32-arm.c.
+	* Makefile.in:  Rebuild.
+	* elf-bfd.h:  Add elf_backend_get_symbol_type.
+	* elf.c (swap_out_syms):  If defined, call
+	elf_backend_get_symbol_type.
+	* elf32-arm.c: Define elf_backend_get_symbol_type.
+	(elf32_arm_get_symbol-type):  New routine.
+	(record_thumb_to_arm_glue):  Change to use STT_ARM_TFUNC.
+	(bfd_elf32_arm_process_before_allocation):  Change to
+	check for STT_ARM_TFUNC.
+	(elf32_arm_final_link_relocate):  Likewise.
+	* elfxx-target.h:  Add elf_backend_get_symbol_type.
 
 Fri Aug 28 19:44:07 1998  Richard Henderson  <rth@cygnus.com>
 
@@ -3536,17 +3542,17 @@ Wed Aug 19 15:43:26 1998  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 Tue Aug 18 11:48:12 1998  Catherine Moore  <clm@cygnus.com>
 
-        * elf32-arm.c: Add prefix bfd_ to elf32_arm_get_bfd_for_interworking,
-        elf32_arm_allocate_interworking_sections and
-        elf32_arm_process_before_allocation.
+	* elf32-arm.c: Add prefix bfd_ to elf32_arm_get_bfd_for_interworking,
+	elf32_arm_allocate_interworking_sections and
+	elf32_arm_process_before_allocation.
 
 Tue Aug 18 11:46:00 1998  Nick Clifton  <nickc@cygnus.com>
 
-        * bfd-in.h: Ammend prototype for
-        elf32_arm_process_before_allocation to remove surplus third
-        argument.
+	* bfd-in.h: Ammend prototype for
+	elf32_arm_process_before_allocation to remove surplus third
+	argument.
 
-        * bfd-in2.h: Regenerate.
+	* bfd-in2.h: Regenerate.
 
 Sat Aug 15 20:55:08 1998  Richard Henderson  <rth@cygnus.com>
 
@@ -3630,8 +3636,8 @@ Mon Aug 10 17:31:21 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 Sun Aug  9 20:55:44 1998  Catherine Moore  <clm@cygnus.com>
 
-        * elf32-arm.c (elf32_arm_final_link_relocate):  Rework
-        R_ARM_THM_RPC22 relocations.
+	* elf32-arm.c (elf32_arm_final_link_relocate):  Rework
+	R_ARM_THM_RPC22 relocations.
 
 Sat Aug  8 15:15:30 1998  Richard Henderson  <rth@cygnus.com>
 
@@ -3668,16 +3674,16 @@ Sun Aug  2 03:19:23 1998  Richard Henderson  <rth@cygnus.com>
 
 Fri Jul 31 16:38:14 1998  Catherine Moore  <clm@cygnus.com>
 
-        * Makefile.am: Add support for elf32-arm.lo.
-        * Makefile.in: Rebuild.
-        * config.bfd (arm-*-elf):  Define targ_defvec and targ_selvecs.
-        (thumb-*-elf): Define targ_defvec and targ_selvecs.
-        * configure.in:  Handle bfd_elf32_littlearm_vec and bfd_elf32_bigarm_vec.
-        * configure: Regenerate.
-        * elf.c: (prep_headers):  Support arch_type of EM_ARM.
-        * targets.c:  Support new targets bfd_elf32_bigarm_vec and
-        bfd_target bfd_elf32_littlearm_vec.
-        * elf32-arm.c:  New file.
+	* Makefile.am: Add support for elf32-arm.lo.
+	* Makefile.in: Rebuild.
+	* config.bfd (arm-*-elf):  Define targ_defvec and targ_selvecs.
+	(thumb-*-elf): Define targ_defvec and targ_selvecs.
+	* configure.in:  Handle bfd_elf32_littlearm_vec and bfd_elf32_bigarm_vec.
+	* configure: Regenerate.
+	* elf.c: (prep_headers):  Support arch_type of EM_ARM.
+	* targets.c:  Support new targets bfd_elf32_bigarm_vec and
+	bfd_target bfd_elf32_littlearm_vec.
+	* elf32-arm.c:  New file.
 
 Tue Jun 28 19:05:28 1998  Stan Cox  <scox@cygnus.com>
 
@@ -3729,13 +3735,13 @@ Thu Jul 23 11:29:43 1998  Jeffrey A Law  (law@cygnus.com)
 
 
 	* Re-add lost change:
-        * elf-m10300.c (elf32_mn10300_link_hash_entry): Add new field
-        "movm_stack_size".
-        (mn10300_elf_relax_section): Include stack space for register saves
-        in the imm8 field of a "call" instruction.
-        (compute_function_info): Determine how much stack is allocated by
-        the movm instruction.  Fix typo.
-        (elf32_mn10300_link_hash_newfunc): Initialize movm_stack_size.
+	* elf-m10300.c (elf32_mn10300_link_hash_entry): Add new field
+	"movm_stack_size".
+	(mn10300_elf_relax_section): Include stack space for register saves
+	in the imm8 field of a "call" instruction.
+	(compute_function_info): Determine how much stack is allocated by
+	the movm instruction.  Fix typo.
+	(elf32_mn10300_link_hash_newfunc): Initialize movm_stack_size.
 
 Thu Jul 23 11:38:05 1998  Ian Lance Taylor  <ian@cygnus.com>
 
@@ -3797,11 +3803,11 @@ Wed Jul 22 13:46:51 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 Tue Jul 21 09:47:00 1998  Catherine Moore  <clm@cygnus.com>
 
-        * elf-m10200.c (mn10200_elf_final_link_relocate):
-        Modify range test for case R_MN10200_8.
+	* elf-m10200.c (mn10200_elf_final_link_relocate):
+	Modify range test for case R_MN10200_8.
 
-        * elf-m10300.c (mn10300_elf_final_link_relocate):
-        Modify range test for case R_MN10300_8.
+	* elf-m10300.c (mn10300_elf_final_link_relocate):
+	Modify range test for case R_MN10300_8.
 
 Mon Jul 20 18:50:54 1998  Richard Henderson  <rth@cygnus.com>
 
@@ -3950,7 +3956,7 @@ Thu Jul  2 14:59:42 1998  Klaus Kaempf  <kkaempf@rmi.de>
 	Merge of vax/vms (read-only) support
 	* configure.com: Support Vax target.
 	* makefile.vms: Support Vax target.
-        * vms.h: Renamed from evax.h, merged vax/vms (read-only) support.
+	* vms.h: Renamed from evax.h, merged vax/vms (read-only) support.
 	* vms.c: Renamed from evax-alpha.c, merged vax/vms (read-only)
 	support.
 	* vms-hdr.c: Renamed from evax-emh.c, merged vax/vms (read-only)
@@ -4578,7 +4584,7 @@ Tue Apr  7 16:25:31 1998  Gavin Romig-Koch  <gavin@cygnus.com>
 	* dwarf2.c (comp_unit): Move it earlier in the source. Add
 	addr_size.
 	(read_address): Replace 'bdf*' argument with 'comp_unit*' argument.
-        Use addr_size for address size, rather than sizeof(bfd_vma).
+	Use addr_size for address size, rather than sizeof(bfd_vma).
 	(read_attribute): Replace bdf* argument with 'comp_unit*' argument.
 	Fix call to read_address.
 	(decode_line_info): Replace bdf* argument with 'comp_unit*' argument.
