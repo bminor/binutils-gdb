@@ -557,8 +557,16 @@ static int mips_optimize = 2;
    equivalent to seeing no -g option at all.  */
 static int mips_debug = 0;
 
-/* A list of previous instructions, with index 0 being the most recent.  */
-static struct mips_cl_insn history[2];
+/* The maximum number of NOPs needed to satisfy a hardware hazard
+   or processor errata.  */
+#define MAX_NOPS 2
+
+/* A list of previous instructions, with index 0 being the most recent.
+   We need to look back MAX_NOPS instructions when filling delay slots
+   or working around processor errata.  We need to look back one
+   instruction further if we're thinking about using history[0] to
+   fill a branch delay slot.  */
+static struct mips_cl_insn history[1 + MAX_NOPS];
 
 /* Nop instructions used by emit_nop.  */
 static struct mips_cl_insn nop_insn, mips16_nop_insn;
@@ -631,6 +639,24 @@ static const unsigned int mips16_to_32_reg_map[] =
   16, 17, 2, 3, 4, 5, 6, 7
 };
 
+/* Classifies the kind of instructions we're interested in when
+   implementing -mfix-vr4120.  */
+enum fix_vr4120_class {
+  FIX_VR4120_MACC,
+  FIX_VR4120_DMACC,
+  FIX_VR4120_MULT,
+  FIX_VR4120_DMULT,
+  FIX_VR4120_DIV,
+  FIX_VR4120_MTHILO,
+  NUM_FIX_VR4120_CLASSES
+};
+
+/* Given two FIX_VR4120_* values X and Y, bit Y of element X is set if
+   there must be at least one other instruction between an instruction
+   of type X and an instruction of type Y.  */
+static unsigned int vr4120_conflicts[NUM_FIX_VR4120_CLASSES];
+
+/* True if -mfix-vr4120 is in force.  */
 static int mips_fix_vr4120;
 
 /* We don't relax branches by default, since this causes us to expand
@@ -1285,6 +1311,50 @@ emit_nop (void)
   insert_into_history (0, 1, NOP_INSN);
 }
 
+/* Initialize vr4120_conflicts.  There is a bit of duplication here:
+   the idea is to make it obvious at a glance that each errata is
+   included.  */
+
+static void
+init_vr4120_conflicts (void)
+{
+#define CONFLICT(FIRST, SECOND) \
+    vr4120_conflicts[FIX_VR4120_##FIRST] |= 1 << FIX_VR4120_##SECOND
+
+  /* Errata 21 - [D]DIV[U] after [D]MACC */
+  CONFLICT (MACC, DIV);
+  CONFLICT (DMACC, DIV);
+
+  /* Errata 23 - Continuous DMULT[U]/DMACC instructions.  */
+  CONFLICT (DMULT, DMULT);
+  CONFLICT (DMULT, DMACC);
+  CONFLICT (DMACC, DMULT);
+  CONFLICT (DMACC, DMACC);
+
+  /* Errata 24 - MT{LO,HI} after [D]MACC */
+  CONFLICT (MACC, MTHILO);
+  CONFLICT (DMACC, MTHILO);
+
+  /* VR4181A errata MD(1): "If a MULT, MULTU, DMULT or DMULTU
+     instruction is executed immediately after a MACC or DMACC
+     instruction, the result of [either instruction] is incorrect."  */
+  CONFLICT (MACC, MULT);
+  CONFLICT (MACC, DMULT);
+  CONFLICT (DMACC, MULT);
+  CONFLICT (DMACC, DMULT);
+
+  /* VR4181A errata MD(4): "If a MACC or DMACC instruction is
+     executed immediately after a DMULT, DMULTU, DIV, DIVU,
+     DDIV or DDIVU instruction, the result of the MACC or
+     DMACC instruction is incorrect.".  */
+  CONFLICT (DMULT, MACC);
+  CONFLICT (DMULT, DMACC);
+  CONFLICT (DIV, MACC);
+  CONFLICT (DIV, DMACC);
+
+#undef CONFLICT
+}
+
 /* This function is called once, at assembler startup time.  It should
    set up all the tables, etc. that the MD part of the assembler will need.  */
 
@@ -1513,6 +1583,9 @@ md_begin (void)
 
   if (! ECOFF_DEBUGGING)
     md_obj_begin ();
+
+  if (mips_fix_vr4120)
+    init_vr4120_conflicts ();
 }
 
 void
@@ -1604,7 +1677,7 @@ fixup_has_matching_lo_p (fixS *fixp)
    of register.  */
 
 static int
-insn_uses_reg (struct mips_cl_insn *ip, unsigned int reg,
+insn_uses_reg (const struct mips_cl_insn *ip, unsigned int reg,
 	       enum mips_regclass class)
 {
   if (class == MIPS16_REG)
@@ -1773,6 +1846,223 @@ relax_end (void)
   mips_relax.sequence = 0;
 }
 
+/* Classify an instruction according to the FIX_VR4120_* enumeration.
+   Return NUM_FIX_VR4120_CLASSES if the instruction isn't affected
+   by VR4120 errata.  */
+
+static unsigned int
+classify_vr4120_insn (const char *name)
+{
+  if (strncmp (name, "macc", 4) == 0)
+    return FIX_VR4120_MACC;
+  if (strncmp (name, "dmacc", 5) == 0)
+    return FIX_VR4120_DMACC;
+  if (strncmp (name, "mult", 4) == 0)
+    return FIX_VR4120_MULT;
+  if (strncmp (name, "dmult", 5) == 0)
+    return FIX_VR4120_DMULT;
+  if (strstr (name, "div"))
+    return FIX_VR4120_DIV;
+  if (strcmp (name, "mtlo") == 0 || strcmp (name, "mthi") == 0)
+    return FIX_VR4120_MTHILO;
+  return NUM_FIX_VR4120_CLASSES;
+}
+
+/* Return the number of instructions that must separate INSN1 and INSN2,
+   where INSN1 is the earlier instruction.  Return the worst-case value
+   for any INSN2 if INSN2 is null.  */
+
+static unsigned int
+insns_between (const struct mips_cl_insn *insn1,
+	       const struct mips_cl_insn *insn2)
+{
+  unsigned long pinfo1, pinfo2;
+
+  /* This function needs to know which pinfo flags are set for INSN2
+     and which registers INSN2 uses.  The former is stored in PINFO2 and
+     the latter is tested via INSN2_USES_REG.  If INSN2 is null, PINFO2
+     will have every flag set and INSN2_USES_REG will always return true.  */
+  pinfo1 = insn1->insn_mo->pinfo;
+  pinfo2 = insn2 ? insn2->insn_mo->pinfo : ~0U;
+
+#define INSN2_USES_REG(REG, CLASS) \
+   (insn2 == NULL || insn_uses_reg (insn2, REG, CLASS))
+
+  /* For most targets, write-after-read dependencies on the HI and LO
+     registers must be separated by at least two instructions.  */
+  if (!hilo_interlocks)
+    {
+      if ((pinfo1 & INSN_READ_LO) && (pinfo2 & INSN_WRITE_LO))
+	return 2;
+      if ((pinfo1 & INSN_READ_HI) && (pinfo2 & INSN_WRITE_HI))
+	return 2;
+    }
+
+  /* If we're working around r7000 errata, there must be two instructions
+     between an mfhi or mflo and any instruction that uses the result.  */
+  if (mips_7000_hilo_fix
+      && MF_HILO_INSN (pinfo1)
+      && INSN2_USES_REG (EXTRACT_OPERAND (RD, *insn1), MIPS_GR_REG))
+    return 2;
+
+  /* If working around VR4120 errata, check for combinations that need
+     a single intervening instruction.  */
+  if (mips_fix_vr4120)
+    {
+      unsigned int class1, class2;
+
+      class1 = classify_vr4120_insn (insn1->insn_mo->name);
+      if (class1 != NUM_FIX_VR4120_CLASSES && vr4120_conflicts[class1] != 0)
+	{
+	  if (insn2 == NULL)
+	    return 1;
+	  class2 = classify_vr4120_insn (insn2->insn_mo->name);
+	  if (vr4120_conflicts[class1] & (1 << class2))
+	    return 1;
+	}
+    }
+
+  if (!mips_opts.mips16)
+    {
+      /* Check for GPR or coprocessor load delays.  All such delays
+	 are on the RT register.  */
+      /* Itbl support may require additional care here.  */
+      if ((!gpr_interlocks && (pinfo1 & INSN_LOAD_MEMORY_DELAY))
+	  || (!cop_interlocks && (pinfo1 & INSN_LOAD_COPROC_DELAY)))
+	{
+	  know (pinfo1 & INSN_WRITE_GPR_T);
+	  if (INSN2_USES_REG (EXTRACT_OPERAND (RT, *insn1), MIPS_GR_REG))
+	    return 1;
+	}
+
+      /* Check for generic coprocessor hazards.
+
+	 This case is not handled very well.  There is no special
+	 knowledge of CP0 handling, and the coprocessors other than
+	 the floating point unit are not distinguished at all.  */
+      /* Itbl support may require additional care here. FIXME!
+	 Need to modify this to include knowledge about
+	 user specified delays!  */
+      else if ((!cop_interlocks && (pinfo1 & INSN_COPROC_MOVE_DELAY))
+	       || (!cop_mem_interlocks && (pinfo1 & INSN_COPROC_MEMORY_DELAY)))
+	{
+	  /* Handle cases where INSN1 writes to a known general coprocessor
+	     register.  There must be a one instruction delay before INSN2
+	     if INSN2 reads that register, otherwise no delay is needed.  */
+	  if (pinfo1 & INSN_WRITE_FPR_T)
+	    {
+	      if (INSN2_USES_REG (EXTRACT_OPERAND (FT, *insn1), MIPS_FP_REG))
+		return 1;
+	    }
+	  else if (pinfo1 & INSN_WRITE_FPR_S)
+	    {
+	      if (INSN2_USES_REG (EXTRACT_OPERAND (FS, *insn1), MIPS_FP_REG))
+		return 1;
+	    }
+	  else
+	    {
+	      /* Read-after-write dependencies on the control registers
+		 require a two-instruction gap.  */
+	      if ((pinfo1 & INSN_WRITE_COND_CODE)
+		  && (pinfo2 & INSN_READ_COND_CODE))
+		return 2;
+
+	      /* We don't know exactly what INSN1 does.  If INSN2 is
+		 also a coprocessor instruction, assume there must be
+		 a one instruction gap.  */
+	      if (pinfo2 & INSN_COP)
+		return 1;
+	    }
+	}
+
+      /* Check for read-after-write dependencies on the coprocessor
+	 control registers in cases where INSN1 does not need a general
+	 coprocessor delay.  This means that INSN1 is a floating point
+	 comparison instruction.  */
+      /* Itbl support may require additional care here.  */
+      else if (!cop_interlocks
+	       && (pinfo1 & INSN_WRITE_COND_CODE)
+	       && (pinfo2 & INSN_READ_COND_CODE))
+	return 1;
+    }
+
+#undef INSN2_USES_REG
+
+  return 0;
+}
+
+/* Return the number of nops that would be needed if instruction INSN
+   immediately followed the MAX_NOPS instructions given by HISTORY,
+   where HISTORY[0] is the most recent instruction.  If INSN is null,
+   return the worse-case number of nops for any instruction.  */
+
+static int
+nops_for_insn (const struct mips_cl_insn *history,
+	       const struct mips_cl_insn *insn)
+{
+  int i, nops, tmp_nops;
+
+  nops = 0;
+  for (i = 0; i < MAX_NOPS; i++)
+    if (!history[i].noreorder_p)
+      {
+	tmp_nops = insns_between (history + i, insn) - i;
+	if (tmp_nops > nops)
+	  nops = tmp_nops;
+      }
+  return nops;
+}
+
+/* The variable arguments provide NUM_INSNS extra instructions that
+   might be added to HISTORY.  Return the largest number of nops that
+   would be needed after the extended sequence.  */
+
+static int
+nops_for_sequence (int num_insns, const struct mips_cl_insn *history, ...)
+{
+  va_list args;
+  struct mips_cl_insn buffer[MAX_NOPS];
+  struct mips_cl_insn *cursor;
+  int nops;
+
+  va_start (args, history);
+  cursor = buffer + num_insns;
+  memcpy (cursor, history, (MAX_NOPS - num_insns) * sizeof (*cursor));
+  while (cursor > buffer)
+    *--cursor = *va_arg (args, const struct mips_cl_insn *);
+
+  nops = nops_for_insn (buffer, NULL);
+  va_end (args);
+  return nops;
+}
+
+/* Like nops_for_insn, but if INSN is a branch, take into account the
+   worst-case delay for the branch target.  */
+
+static int
+nops_for_insn_or_target (const struct mips_cl_insn *history,
+			 const struct mips_cl_insn *insn)
+{
+  int nops, tmp_nops;
+
+  nops = nops_for_insn (history, insn);
+  if (insn->insn_mo->pinfo & (INSN_UNCOND_BRANCH_DELAY
+			      | INSN_COND_BRANCH_DELAY
+			      | INSN_COND_BRANCH_LIKELY))
+    {
+      tmp_nops = nops_for_sequence (2, history, insn, NOP_INSN);
+      if (tmp_nops > nops)
+	nops = tmp_nops;
+    }
+  else if (mips_opts.mips16 && (insn->insn_mo->pinfo & MIPS16_INSN_BRANCH))
+    {
+      tmp_nops = nops_for_sequence (1, history, insn);
+      if (tmp_nops > nops)
+	nops = tmp_nops;
+    }
+  return nops;
+}
+
 /* Output an instruction.  IP is the instruction information.
    ADDRESS_EXPR is an operand of the instruction to be used with
    RELOC_TYPE.  */
@@ -1782,7 +2072,6 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 	     bfd_reloc_code_real_type *reloc_type)
 {
   register unsigned long prev_pinfo, pinfo;
-  int nops = 0;
   relax_stateT prev_insn_frag_type = 0;
   bfd_boolean relaxed_branch = FALSE;
 
@@ -1792,293 +2081,19 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
   prev_pinfo = history[0].insn_mo->pinfo;
   pinfo = ip->insn_mo->pinfo;
 
-  if (mips_relax.sequence != 2
-      && (!mips_opts.noreorder || prev_nop_frag != NULL))
+  if (mips_relax.sequence != 2 && !mips_opts.noreorder)
     {
-      int prev_prev_nop;
-
-      /* If the previous insn required any delay slots, see if we need
-	 to insert a NOP or two.  There are eight kinds of possible
-	 hazards, of which an instruction can have at most one type.
-	 (1) a load from memory delay
-	 (2) a load from a coprocessor delay
-	 (3) an unconditional branch delay
-	 (4) a conditional branch delay
-	 (5) a move to coprocessor register delay
-	 (6) a load coprocessor register from memory delay
-	 (7) a coprocessor condition code delay
-	 (8) a HI/LO special register delay
-
-	 There are a lot of optimizations we could do that we don't.
+      /* There are a lot of optimizations we could do that we don't.
 	 In particular, we do not, in general, reorder instructions.
 	 If you use gcc with optimization, it will reorder
 	 instructions and generally do much more optimization then we
 	 do here; repeating all that work in the assembler would only
 	 benefit hand written assembly code, and does not seem worth
 	 it.  */
-
-      /* The previous insn might require a delay slot, depending upon
-	 the contents of the current insn.  */
-      if (! mips_opts.mips16
-	  && (((prev_pinfo & INSN_LOAD_MEMORY_DELAY)
-	       && ! gpr_interlocks)
-	      || ((prev_pinfo & INSN_LOAD_COPROC_DELAY)
-		  && ! cop_interlocks)))
-	{
-	  /* A load from a coprocessor or from memory.  All load
-	     delays delay the use of general register rt for one
-	     instruction.  */
-	  /* Itbl support may require additional care here.  */
-	  know (prev_pinfo & INSN_WRITE_GPR_T);
-	  if (mips_optimize == 0
-	      || insn_uses_reg (ip, EXTRACT_OPERAND (RT, history[0]),
-				MIPS_GR_REG))
-	    ++nops;
-	}
-      else if (! mips_opts.mips16
-	       && (((prev_pinfo & INSN_COPROC_MOVE_DELAY)
-		    && ! cop_interlocks)
-		   || ((prev_pinfo & INSN_COPROC_MEMORY_DELAY)
-		       && ! cop_mem_interlocks)))
-	{
-	  /* A generic coprocessor delay.  The previous instruction
-	     modified a coprocessor general or control register.  If
-	     it modified a control register, we need to avoid any
-	     coprocessor instruction (this is probably not always
-	     required, but it sometimes is).  If it modified a general
-	     register, we avoid using that register.
-
-	     This case is not handled very well.  There is no special
-	     knowledge of CP0 handling, and the coprocessors other
-	     than the floating point unit are not distinguished at
-	     all.  */
-          /* Itbl support may require additional care here. FIXME!
-             Need to modify this to include knowledge about
-             user specified delays!  */
-	  if (prev_pinfo & INSN_WRITE_FPR_T)
-	    {
-	      if (mips_optimize == 0
-		  || insn_uses_reg (ip, EXTRACT_OPERAND (FT, history[0]),
-				    MIPS_FP_REG))
-		++nops;
-	    }
-	  else if (prev_pinfo & INSN_WRITE_FPR_S)
-	    {
-	      if (mips_optimize == 0
-		  || insn_uses_reg (ip, EXTRACT_OPERAND (FS, history[0]),
-				    MIPS_FP_REG))
-		++nops;
-	    }
-	  else
-	    {
-	      /* We don't know exactly what the previous instruction
-		 does.  If the current instruction uses a coprocessor
-		 register, we must insert a NOP.  If previous
-		 instruction may set the condition codes, and the
-		 current instruction uses them, we must insert two
-		 NOPS.  */
-              /* Itbl support may require additional care here.  */
-	      if (mips_optimize == 0
-		  || ((prev_pinfo & INSN_WRITE_COND_CODE)
-		      && (pinfo & INSN_READ_COND_CODE)))
-		nops += 2;
-	      else if (pinfo & INSN_COP)
-		++nops;
-	    }
-	}
-      else if (! mips_opts.mips16
-	       && (prev_pinfo & INSN_WRITE_COND_CODE)
-               && ! cop_interlocks)
-	{
-	  /* The previous instruction sets the coprocessor condition
-	     codes, but does not require a general coprocessor delay
-	     (this means it is a floating point comparison
-	     instruction).  If this instruction uses the condition
-	     codes, we need to insert a single NOP.  */
-	  /* Itbl support may require additional care here.  */
-	  if (mips_optimize == 0
-	      || (pinfo & INSN_READ_COND_CODE))
-	    ++nops;
-	}
-
-      /* If we're fixing up mfhi/mflo for the r7000 and the
-	 previous insn was an mfhi/mflo and the current insn
-	 reads the register that the mfhi/mflo wrote to, then
-	 insert two nops.  */
-
-      else if (mips_7000_hilo_fix
-	       && MF_HILO_INSN (prev_pinfo)
-	       && insn_uses_reg (ip, EXTRACT_OPERAND (RD, history[0]),
-				 MIPS_GR_REG))
-	{
-	  nops += 2;
-	}
-
-      /* If we're fixing up mfhi/mflo for the r7000 and the
-	 2nd previous insn was an mfhi/mflo and the current insn
-	 reads the register that the mfhi/mflo wrote to, then
-	 insert one nop.  */
-
-      else if (mips_7000_hilo_fix
-	       && MF_HILO_INSN (history[1].insn_opcode)
-	       && insn_uses_reg (ip, EXTRACT_OPERAND (RD, history[1]),
-				 MIPS_GR_REG))
-
-	{
-	  ++nops;
-	}
-
-      else if (prev_pinfo & INSN_READ_LO)
-	{
-	  /* The previous instruction reads the LO register; if the
-	     current instruction writes to the LO register, we must
-	     insert two NOPS.  Some newer processors have interlocks.
-	     Also the tx39's multiply instructions can be executed
-             immediately after a read from HI/LO (without the delay),
-             though the tx39's divide insns still do require the
-	     delay.  */
-	  if (! (hilo_interlocks
-		 || (mips_opts.arch == CPU_R3900 && (pinfo & INSN_MULT)))
-	      && (mips_optimize == 0
-		  || (pinfo & INSN_WRITE_LO)))
-	    nops += 2;
-	  /* Most mips16 branch insns don't have a delay slot.
-	     If a read from LO is immediately followed by a branch
-	     to a write to LO we have a read followed by a write
-	     less than 2 insns away.  We assume the target of
-	     a branch might be a write to LO, and insert a nop
-	     between a read and an immediately following branch.  */
-	  else if (mips_opts.mips16
-		   && (mips_optimize == 0
-		       || (pinfo & MIPS16_INSN_BRANCH)))
-	    ++nops;
-	}
-      else if (history[0].insn_mo->pinfo & INSN_READ_HI)
-	{
-	  /* The previous instruction reads the HI register; if the
-	     current instruction writes to the HI register, we must
-	     insert a NOP.  Some newer processors have interlocks.
-	     Also the note tx39's multiply above.  */
-	  if (! (hilo_interlocks
-		 || (mips_opts.arch == CPU_R3900 && (pinfo & INSN_MULT)))
-	      && (mips_optimize == 0
-		  || (pinfo & INSN_WRITE_HI)))
-	    nops += 2;
-	  /* Most mips16 branch insns don't have a delay slot.
-	     If a read from HI is immediately followed by a branch
-	     to a write to HI we have a read followed by a write
-	     less than 2 insns away.  We assume the target of
-	     a branch might be a write to HI, and insert a nop
-	     between a read and an immediately following branch.  */
-	  else if (mips_opts.mips16
-		   && (mips_optimize == 0
-		       || (pinfo & MIPS16_INSN_BRANCH)))
-	    ++nops;
-	}
-
-      /* If the previous instruction was in a noreorder section, then
-         we don't want to insert the nop after all.  */
-      /* Itbl support may require additional care here.  */
-      if (history[0].noreorder_p)
-	nops = 0;
-
-      /* There are two cases which require two intervening
-	 instructions: 1) setting the condition codes using a move to
-	 coprocessor instruction which requires a general coprocessor
-	 delay and then reading the condition codes 2) reading the HI
-	 or LO register and then writing to it (except on processors
-	 which have interlocks).  If we are not already emitting a NOP
-	 instruction, we must check for these cases compared to the
-	 instruction previous to the previous instruction.  */
-      if ((! mips_opts.mips16
-	   && (history[1].insn_mo->pinfo & INSN_COPROC_MOVE_DELAY)
-	   && (history[1].insn_mo->pinfo & INSN_WRITE_COND_CODE)
-	   && (pinfo & INSN_READ_COND_CODE)
-	   && ! cop_interlocks)
-	  || ((history[1].insn_mo->pinfo & INSN_READ_LO)
-	      && (pinfo & INSN_WRITE_LO)
-	      && ! (hilo_interlocks
-		    || (mips_opts.arch == CPU_R3900 && (pinfo & INSN_MULT))))
-	  || ((history[1].insn_mo->pinfo & INSN_READ_HI)
-	      && (pinfo & INSN_WRITE_HI)
-	      && ! (hilo_interlocks
-		    || (mips_opts.arch == CPU_R3900 && (pinfo & INSN_MULT)))))
-	prev_prev_nop = 1;
-      else
-	prev_prev_nop = 0;
-
-      if (history[1].noreorder_p)
-	prev_prev_nop = 0;
-
-      if (prev_prev_nop && nops == 0)
-	++nops;
-
-      if (mips_fix_vr4120 && history[0].insn_mo->name)
-	{
-	  /* We're out of bits in pinfo, so we must resort to string
-	     ops here.  Shortcuts are selected based on opcodes being
-	     limited to the VR4120 instruction set.  */
-	  int min_nops = 0;
-	  const char *pn = history[0].insn_mo->name;
-	  const char *tn = ip->insn_mo->name;
-	  if (strncmp (pn, "macc", 4) == 0
-	      || strncmp (pn, "dmacc", 5) == 0)
-	    {
-	      /* Errata 21 - [D]DIV[U] after [D]MACC */
-	      if (strstr (tn, "div"))
-		min_nops = 1;
-
-	      /* VR4181A errata MD(1): "If a MULT, MULTU, DMULT or DMULTU
-		 instruction is executed immediately after a MACC or
-		 DMACC instruction, the result of [either instruction]
-		 is incorrect."  */
-	      if (strncmp (tn, "mult", 4) == 0
-		  || strncmp (tn, "dmult", 5) == 0)
-		min_nops = 1;
-
-	      /* Errata 23 - Continuous DMULT[U]/DMACC instructions.
-		 Applies on top of VR4181A MD(1) errata.  */
-	      if (pn[0] == 'd' && strncmp (tn, "dmacc", 5) == 0)
-		min_nops = 1;
-
-	      /* Errata 24 - MT{LO,HI} after [D]MACC */
-	      if (strcmp (tn, "mtlo") == 0
-		  || strcmp (tn, "mthi") == 0)
-		min_nops = 1;
-	    }
-	  else if (strncmp (pn, "dmult", 5) == 0
-		   && (strncmp (tn, "dmult", 5) == 0
-		       || strncmp (tn, "dmacc", 5) == 0))
-	    {
-	      /* Here is the rest of errata 23.  */
-	      min_nops = 1;
-	    }
-	  else if ((strncmp (pn, "dmult", 5) == 0 || strstr (pn, "div"))
-		   && (strncmp (tn, "macc", 4) == 0
-		       || strncmp (tn, "dmacc", 5) == 0))
-	    {
-	      /* VR4181A errata MD(4): "If a MACC or DMACC instruction is
-		 executed immediately after a DMULT, DMULTU, DIV, DIVU,
-		 DDIV or DDIVU instruction, the result of the MACC or
-		 DMACC instruction is incorrect.".  This partly overlaps
-		 the workaround for errata 23.  */
-	      min_nops = 1;
-	    }
-	  if (nops < min_nops)
-	    nops = min_nops;
-	}
-
-      /* If we are being given a nop instruction, don't bother with
-	 one of the nops we would otherwise output.  This will only
-	 happen when a nop instruction is used with mips_optimize set
-	 to 0.  */
-      if (nops > 0
-	  && ! mips_opts.noreorder
-	  && ip->insn_opcode == (unsigned) (mips_opts.mips16 ? 0x6500 : 0))
-	--nops;
-
-      /* Now emit the right number of NOP instructions.  */
-      if (nops > 0 && ! mips_opts.noreorder)
+      int nops = (mips_optimize == 0
+		  ? nops_for_insn (history, NULL)
+		  : nops_for_insn_or_target (history, ip));
+      if (nops > 0)
 	{
 	  fragS *old_frag;
 	  unsigned long old_frag_offset;
@@ -2123,42 +2138,32 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 	    ecoff_fix_loc (old_frag, old_frag_offset);
 #endif
 	}
-      else if (prev_nop_frag != NULL)
+    }
+  else if (mips_relax.sequence != 2 && prev_nop_frag != NULL)
+    {
+      /* Work out how many nops in prev_nop_frag are needed by IP.  */
+      int nops = nops_for_insn_or_target (history, ip);
+      assert (nops <= prev_nop_frag_holds);
+
+      /* Enforce NOPS as a minimum.  */
+      if (nops > prev_nop_frag_required)
+	prev_nop_frag_required = nops;
+
+      if (prev_nop_frag_holds == prev_nop_frag_required)
 	{
-	  /* We have a frag holding nops we may be able to remove.  If
-             we don't need any nops, we can decrease the size of
-             prev_nop_frag by the size of one instruction.  If we do
-             need some nops, we count them in prev_nops_required.  */
-	  if (prev_nop_frag_since == 0)
-	    {
-	      if (nops == 0)
-		{
-		  prev_nop_frag->fr_fix -= mips_opts.mips16 ? 2 : 4;
-		  --prev_nop_frag_holds;
-		}
-	      else
-		prev_nop_frag_required += nops;
-	    }
-	  else
-	    {
-	      if (prev_prev_nop == 0)
-		{
-		  prev_nop_frag->fr_fix -= mips_opts.mips16 ? 2 : 4;
-		  --prev_nop_frag_holds;
-		}
-	      else
-		++prev_nop_frag_required;
-	    }
-
-	  if (prev_nop_frag_holds <= prev_nop_frag_required)
-	    prev_nop_frag = NULL;
-
-	  ++prev_nop_frag_since;
-
-	  /* Sanity check: by the time we reach the second instruction
-             after prev_nop_frag, we should have used up all the nops
-             one way or another.  */
-	  assert (prev_nop_frag_since <= 1 || prev_nop_frag == NULL);
+	  /* Settle for the current number of nops.  Update the history
+	     accordingly (for the benefit of any future .set reorder code).  */
+	  prev_nop_frag = NULL;
+	  insert_into_history (prev_nop_frag_since,
+			       prev_nop_frag_holds, NOP_INSN);
+	}
+      else
+	{
+	  /* Allow this instruction to replace one of the nops that was
+	     tentatively added to prev_nop_frag.  */
+	  prev_nop_frag->fr_fix -= mips_opts.mips16 ? 2 : 4;
+	  prev_nop_frag_holds--;
+	  prev_nop_frag_since++;
 	}
     }
 
@@ -2511,28 +2516,12 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 	      || (! mips_opts.mips16
 		  && (pinfo & INSN_READ_COND_CODE)
 		  && ! cop_interlocks)
-	      /* We can not swap with an instruction that requires a
-		 delay slot, because the target of the branch might
-		 interfere with that instruction.  */
-	      || (! mips_opts.mips16
-		  && (prev_pinfo
-              /* Itbl support may require additional care here.  */
-		      & (INSN_LOAD_COPROC_DELAY
-			 | INSN_COPROC_MOVE_DELAY
-			 | INSN_WRITE_COND_CODE))
-		  && ! cop_interlocks)
-	      || (! (hilo_interlocks
-		     || (mips_opts.arch == CPU_R3900 && (pinfo & INSN_MULT)))
-		  && (prev_pinfo
-		      & (INSN_READ_LO
-			 | INSN_READ_HI)))
-	      || (! mips_opts.mips16
-		  && (prev_pinfo & INSN_LOAD_MEMORY_DELAY)
-		  && ! gpr_interlocks)
-	      || (! mips_opts.mips16
-                  /* Itbl support may require additional care here.  */
-		  && (prev_pinfo & INSN_COPROC_MEMORY_DELAY)
-		  && ! cop_mem_interlocks)
+	      /* Check for conflicts between the branch and the instructions
+		 before the candidate delay slot.  */
+	      || nops_for_insn (history + 1, ip) > 0
+	      /* Check for conflicts between the swapped sequence and the
+		 target of the branch.  */
+	      || nops_for_sequence (2, history + 1, ip, history) > 0
 	      /* We do not swap with a trap instruction, since it
 		 complicates trap handlers to have the trap
 		 instruction be in a delay slot.  */
@@ -2606,18 +2595,6 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 	      || (mips_opts.mips16
 		  && (pinfo & MIPS16_INSN_WRITE_31)
 		  && insn_uses_reg (&history[0], RA, MIPS_GR_REG))
-	      /* If the previous previous instruction has a load
-		 delay, and sets a register that the branch reads, we
-		 can not swap.  */
-	      || (! mips_opts.mips16
-              /* Itbl support may require additional care here.  */
-		  && (((history[1].insn_mo->pinfo & INSN_LOAD_COPROC_DELAY)
-		       && ! cop_interlocks)
-		      || ((history[1].insn_mo->pinfo
-			   & INSN_LOAD_MEMORY_DELAY)
-			  && ! gpr_interlocks))
-		  && insn_uses_reg (ip, EXTRACT_OPERAND (RT, history[1]),
-				    MIPS_GR_REG))
 	      /* If one instruction sets a condition code and the
                  other one uses a condition code, we can not swap.  */
 	      || ((pinfo & INSN_READ_COND_CODE)
@@ -2739,69 +2716,12 @@ mips_emit_delays (bfd_boolean insns)
 {
   if (! mips_opts.noreorder)
     {
-      int nops;
-
-      nops = 0;
-      if ((! mips_opts.mips16
-	   && ((history[0].insn_mo->pinfo
-		& (INSN_LOAD_COPROC_DELAY
-		   | INSN_COPROC_MOVE_DELAY
-		   | INSN_WRITE_COND_CODE))
-	       && ! cop_interlocks))
-	  || (! hilo_interlocks
-	      && (history[0].insn_mo->pinfo
-		  & (INSN_READ_LO
-		     | INSN_READ_HI)))
-	  || (! mips_opts.mips16
-	      && (history[0].insn_mo->pinfo & INSN_LOAD_MEMORY_DELAY)
-	      && ! gpr_interlocks)
-	  || (! mips_opts.mips16
-	      && (history[0].insn_mo->pinfo & INSN_COPROC_MEMORY_DELAY)
-	      && ! cop_mem_interlocks))
-	{
-	  /* Itbl support may require additional care here.  */
-	  ++nops;
-	  if ((! mips_opts.mips16
-	       && ((history[0].insn_mo->pinfo & INSN_WRITE_COND_CODE)
-		   && ! cop_interlocks))
-	      || (! hilo_interlocks
-		  && ((history[0].insn_mo->pinfo & INSN_READ_HI)
-		      || (history[0].insn_mo->pinfo & INSN_READ_LO))))
-	    ++nops;
-
-	  if (history[0].noreorder_p)
-	    nops = 0;
-	}
-      else if ((! mips_opts.mips16
-		&& ((history[1].insn_mo->pinfo & INSN_WRITE_COND_CODE)
-		    && ! cop_interlocks))
-	       || (! hilo_interlocks
-		   && ((history[1].insn_mo->pinfo & INSN_READ_HI)
-		       || (history[1].insn_mo->pinfo & INSN_READ_LO))))
-	{
-	  /* Itbl support may require additional care here.  */
-	  if (! history[1].noreorder_p)
-	    ++nops;
-	}
-
-      if (mips_fix_vr4120 && history[0].insn_mo->name)
-	{
-	  int min_nops = 0;
-	  const char *pn = history[0].insn_mo->name;
-	  if (strncmp (pn, "macc", 4) == 0
-	      || strncmp (pn, "dmacc", 5) == 0
-	      || strncmp (pn, "dmult", 5) == 0
-	      || strstr (pn, "div"))
-	    min_nops = 1;
-	  if (nops < min_nops)
-	    nops = min_nops;
-	}
-
+      int nops = nops_for_insn (history, NULL);
       if (nops > 0)
 	{
 	  struct insn_label_list *l;
 
-	  if (insns)
+	  if (insns && mips_optimize != 0)
 	    {
 	      /* Record the frag which holds the nop instructions, so
                  that we can remove them if we don't need them.  */
