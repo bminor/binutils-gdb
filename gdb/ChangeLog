@@ -1,3 +1,15 @@
+2004-08-21  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb_ptrace.h: New file.
+	* infptrace.c: Include "gdb_ptrace.h" instead of <ptrace.h> or
+	<sys/ptrace.h>.
+	(PT_READ_I, PT_READ_D, PT_READ_U, PT_WRITE_I, PT_WRITE_D)
+	(PT_WRITE_U, PT_CONTINUE, PT_STEP, PT_KILL): Remove defines.
+	(attach): Don't define PT_ATTACH.
+	(detach): Don't define PT_DETACH.
+	* Makefile.in (gdb_ptrace_h): New variable.
+	(infptrace.o): Update dependencies.
+
 2004-08-16  Mark Kettenis  <kettenis@gnu.org>
 
 	* inferior.h (PTRACE_ARG3_TYPE): Define as PTRACE_TYPE_ARG3

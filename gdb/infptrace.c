@@ -40,41 +40,7 @@
 #include <signal.h>
 #include <sys/ioctl.h>
 
-#ifdef HAVE_PTRACE_H
-#include <ptrace.h>
-#else
-#ifdef HAVE_SYS_PTRACE_H
-#include <sys/ptrace.h>
-#endif
-#endif
-
-#if !defined (PT_READ_I)
-#define PT_READ_I	1	/* Read word from text space */
-#endif
-#if !defined (PT_READ_D)
-#define	PT_READ_D	2	/* Read word from data space */
-#endif
-#if !defined (PT_READ_U)
-#define PT_READ_U	3	/* Read word from kernel user struct */
-#endif
-#if !defined (PT_WRITE_I)
-#define PT_WRITE_I	4	/* Write word to text space */
-#endif
-#if !defined (PT_WRITE_D)
-#define PT_WRITE_D	5	/* Write word to data space */
-#endif
-#if !defined (PT_WRITE_U)
-#define PT_WRITE_U	6	/* Write word to kernel user struct */
-#endif
-#if !defined (PT_CONTINUE)
-#define PT_CONTINUE	7	/* Continue after signal */
-#endif
-#if !defined (PT_STEP)
-#define PT_STEP		9	/* Set flag for single stepping */
-#endif
-#if !defined (PT_KILL)
-#define PT_KILL		8	/* Send child a SIGKILL signal */
-#endif
+#include "gdb_ptrace.h"
 
 #include "gdbcore.h"
 #ifdef HAVE_SYS_FILE_H
@@ -272,13 +238,8 @@ child_resume (ptid_t ptid, int step, enum target_signal signal)
 int
 attach (int pid)
 {
-  errno = 0;
-#ifndef PT_ATTACH
-#ifdef PTRACE_ATTACH
-#define PT_ATTACH PTRACE_ATTACH
-#endif
-#endif
 #ifdef PT_ATTACH
+  errno = 0;
   ptrace (PT_ATTACH, pid, (PTRACE_TYPE_ARG3) 0, 0);
   if (errno)
     perror_with_name ("ptrace");
@@ -296,13 +257,8 @@ attach (int pid)
 void
 detach (int signal)
 {
-  errno = 0;
-#ifndef PT_DETACH
-#ifdef PTRACE_DETACH
-#define PT_DETACH PTRACE_DETACH
-#endif
-#endif
 #ifdef PT_DETACH
+  errno = 0;
   ptrace (PT_DETACH, PIDGET (inferior_ptid), (PTRACE_TYPE_ARG3) 1,
           signal);
   if (errno)
