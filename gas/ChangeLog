@@ -1,3 +1,8 @@
+2001-07-04  Jim Wilson  <wilson@redhat.com>
+
+	* config/tc-ia64.c (is_conditional_branch): Rewrite to exclude mod
+	sched branches.
+
 2001-07-05  Ben Elliston  <bje@redhat.com>
 
 	* read.c (s_fill): Correct spelling error in comments.

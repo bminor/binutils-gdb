@@ -6914,19 +6914,29 @@ ia64_canonicalize_symbol_name (name)
   return name;
 }
 
-/* Return true if idesc is a conditional branch instruction.  */
+/* Return true if idesc is a conditional branch instruction.  This excludes
+   the modulo scheduled branches, and br.ia.  Mod-sched branches are excluded
+   because they always read/write resources regardless of the value of the
+   qualifying predicate.  br.ia must always use p0, and hence is always
+   taken.  Thus this function returns true for branches which can fall
+   through, and which use no resources if they do fall through.  */
 
 static int
 is_conditional_branch (idesc)
      struct ia64_opcode *idesc;
 {
   /* br is a conditional branch.  Everything that starts with br. except
-     br.ia is a conditional branch.  Everything that starts with brl is a
-     conditional branch.  */
+     br.ia, br.c{loop,top,exit}, and br.w{top,exit} is a conditional branch.
+     Everything that starts with brl is a conditional branch.  */
   return (idesc->name[0] == 'b' && idesc->name[1] == 'r'
 	  && (idesc->name[2] == '\0'
-	      || (idesc->name[2] == '.' && idesc->name[3] != 'i')
-	      || idesc->name[2] == 'l'));
+	      || (idesc->name[2] == '.' && idesc->name[3] != 'i'
+		  && idesc->name[3] != 'c' && idesc->name[3] != 'w')
+	      || idesc->name[2] == 'l'
+	      /* br.cond, br.call, br.clr  */
+	      || (idesc->name[2] == '.' && idesc->name[3] == 'c'
+		  && (idesc->name[4] == 'a' || idesc->name[4] == 'o'
+		      || (idesc->name[4] == 'l' && idesc->name[5] == 'r')))));
 }
 
 /* Return whether the given opcode is a taken branch.  If there's any doubt,
