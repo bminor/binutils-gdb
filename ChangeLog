@@ -1,3 +1,12 @@
+Wed Jan 24 12:47:55 1996  Brendan Kehoe  <brendan@lisa.cygnus.com>
+
+	* test-build.mk: Add checking of `hpux9' rather than just `hpux'.
+	Add creation of gconfigargs with `--enable-shared' turned on.
+	($(host)-stamp-stage2-configured): Pass $(gconfigargs).
+	($(host)-stamp-stage3-configured): Likewise.
+	(HOLES): Add chatr and ldd.
+	(i386-ncr-sysv4.3*): Add use of /usr/ccs/bin in the PATH and HOLE_DIRS.
+
 Wed Jan 24 20:32:30 1996  Torbjorn Granlund  <tege@noisy.matematik.su.se>
 
 	* configure: Pass --nfp to recursive configures.
