@@ -385,6 +385,7 @@ blocks of code.
 * Procedures::
 * Nested Procedures::
 * Block Structure::
+* Alternate Entry Points::      Entering procedures except at the beginning.
 @end menu
 
 @node Main Program
@@ -679,6 +680,19 @@ Sun documents the desc field of @code{N_LBRAC} and
 @code{N_RBRAC} symbols as containing the nesting level of the block.
 However, dbx seems to not care, and GCC always sets desc to
 zero.
+
+@node Alternate Entry Points
+@section Alternate Entry Points
+
+Some languages, like Fortran, have the ability to enter procedures at
+some place other than the beginning.  One can declare an alternate entry
+point.  The @code{N_ENTRY} stab is for this; however, the Sun FORTRAN compiler
+doesn't use it.  According to AIX documentation, only the name of a
+@code{C_ENTRY} stab is significant; the address of the alternate entry
+point comes from the corresponding external symbol.  A previous revision
+of this document said that the value of an @code{N_ENTRY} stab was the
+address of the alternate entry point, but I don't know the source for
+that information.
 
 @node Constants
 @chapter Constants
@@ -3189,7 +3203,7 @@ Parameter variable; see @ref{Parameters}.
 End of an include file; see @ref{Include Files}.
 
 @item 0xa4     N_ENTRY
-Alternate entry point; see @ref{N_ENTRY}.
+Alternate entry point; see @ref{Alternate Entry Points}.
 
 @item 0xc0     N_LBRAC
 Beginning of a lexical block; see @ref{Block Structure}.
@@ -3527,7 +3541,6 @@ Finally, any further information.
 * N_MOD2::			Modula2 information "for imc"
 * N_CATCH::			GNU C++ "catch" clause
 * N_SSYM::			Structure or union element
-* N_ENTRY::			Alternate entry point
 * N_SCOPE::			Modula2 scope information (Sun only)
 * Gould::			non-base register symbols used on Gould systems
 * N_LENG::			Length of preceding entry
@@ -3669,16 +3682,6 @@ Structure or union element.
 The value is the offset in the structure.
 
 <<?looking at structs and unions in C I didn't see these>>
-@end deffn
-
-@node N_ENTRY
-@section N_ENTRY
-
-@deffn @code{.stabn} N_ENTRY
-@findex N_ENTRY
-Alternate entry point.
-The value is its address.
-<<?>>
 @end deffn
 
 @node N_SCOPE
