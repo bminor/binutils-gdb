@@ -1,3 +1,28 @@
+Wed Jan  3 22:59:53 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* gas/mips/ulh-svr4pic.d: Update for tc-mips.c load_address
+ 	change.
+
+Fri Nov 17 10:32:25 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* gas/mri/immconst.d: New test.
+	* gas/mri/mri.exp: Run it.
+	* gas/mri/constants.s: Test immediate constants.
+	* gas/mri/constants.d: Corresponding change.
+
+	* gas/m68k/link.s: Add nop to pad to eight byte boundary.
+	* gas/m68k/link.d: Corresponding change.
+
+Sun Nov 12 21:28:11 1995  Jeffrey A Law  (law@cygnus.com)
+
+	* gas/hppa/unsorted/brlenbug.s: New test.
+	* gas/hppa/unsorted/unsorted.exp: Run it.
+
+Sun Nov  5 12:49:27 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* gas/mips/beq.s: Declare text_label global.
+	* gas/mips/jal.s: Likewise.
+
 Fri Nov  3 12:35:07 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* gas/m68k/link.s: Use "&" instead of "#" for immediate values.
