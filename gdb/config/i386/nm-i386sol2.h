@@ -34,6 +34,16 @@
    It will *NOT* be necessary for GDB to step over the watchpoint. */
 #define HAVE_CONTINUABLE_WATCHPOINT
 
+/* Solaris x86 2.6 and 2.7 targets have a kernel bug when stepping
+   over an instruction that causes a page fault without triggering
+   a hardware watchpoint. The kernel properly notices that it shouldn't
+   stop, because the hardware watchpoint is not triggered, but it forgets
+   the step request and continues the program normally.
+   Work around the problem by removing hardware watchpoints if a step is
+   requested, GDB will check for a hardware watchpoint trigger after the
+   step anyway.  */
+#define CANNOT_STEP_HW_WATCHPOINTS
+
 extern int procfs_stopped_by_watchpoint PARAMS ((int));
 #define STOPPED_BY_WATCHPOINT(W) \
   procfs_stopped_by_watchpoint(inferior_pid)

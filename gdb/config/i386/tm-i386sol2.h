@@ -21,6 +21,7 @@
 #ifndef TM_I386SOL2_H
 #define TM_I386SOL2_H 1
 
+#define HAVE_I387_REGS
 #include "i386/tm-i386v4.h"
 
 /* Signal handler frames under Solaris 2 are recognized by a return address
