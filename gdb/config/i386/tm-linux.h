@@ -30,15 +30,6 @@
 #include "i386/tm-i386.h"
 #include "tm-linux.h"
 
-/* Size of sigcontext, from <asm/sigcontext.h>.  */
-#define LINUX_SIGCONTEXT_SIZE (88)
-
-/* Offset to saved PC in sigcontext, from <asm/sigcontext.h>.  */
-#define LINUX_SIGCONTEXT_PC_OFFSET (56)
-
-/* Offset to saved SP in sigcontext, from <asm/sigcontext.h>.  */
-#define LINUX_SIGCONTEXT_SP_OFFSET (28)
-
 #define LOW_RETURN_REGNUM 0	/* holds low four bytes of result */
 #define HIGH_RETURN_REGNUM 2	/* holds high four bytes of result */
 
@@ -108,15 +99,14 @@ extern int i387_store_floating   (PTR addr, int len, long double val);
    order to support backtracing through calls to signal handlers.  */
 
 #define I386_LINUX_SIGTRAMP
-#define IN_SIGTRAMP(pc, name) ((name) == NULL && i386_linux_sigtramp (pc))
-
-extern int i386_linux_sigtramp PARAMS ((CORE_ADDR));
+#define IN_SIGTRAMP(pc, name) i386_linux_in_sigtramp (pc, name)
+extern int i386_linux_in_sigtramp (CORE_ADDR, char *);
 
 /* We need our own version of sigtramp_saved_pc to get the saved PC in
    a sigtramp routine.  */
 
 #define sigtramp_saved_pc i386_linux_sigtramp_saved_pc
-extern CORE_ADDR i386_linux_sigtramp_saved_pc PARAMS ((struct frame_info *));
+extern CORE_ADDR i386_linux_sigtramp_saved_pc (struct frame_info *);
 
 /* Signal trampolines don't have a meaningful frame.  As in tm-i386.h,
    the frame pointer value we use is actually the frame pointer of the
@@ -162,7 +152,7 @@ extern CORE_ADDR i386_linux_sigtramp_saved_pc PARAMS ((struct frame_info *));
       ? read_memory_integer (i386_linux_sigtramp_saved_sp ((FRAME)->next), 4) \
       : read_memory_integer ((FRAME)->frame + 4, 4)))
 
-extern CORE_ADDR i386_linux_sigtramp_saved_sp PARAMS ((struct frame_info *));
+extern CORE_ADDR i386_linux_sigtramp_saved_sp (struct frame_info *);
 
 /* When we call a function in a shared library, and the PLT sends us
    into the dynamic linker to find the function's real address, we

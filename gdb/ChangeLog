@@ -1,3 +1,28 @@
+2000-03-04  Mark Kettenis  <kettenis@gnu.org>
+
+	Fix support for Linux/i386 signal trampolines.  The old approach
+	didn't work for Linux 2.2 and beyond, and didn't work with recent
+	versions of the GNU C library.
+	* i386-tdep.c (LINUX_RT_SIGTRAMP_INSN0, LINUX_RT_SIGTRAMP_OFFSET0,
+	LINUX_RT_SIGTRAMP_INSN1, LINUX_RT_SIGTRAMP_OFFSET1): New defines.
+	(linux_rt_sigtramp_code): New variable.
+	(LINUX_RT_SIGTRAMP_LEN): New define.
+	(i386_linux_rt_sigtramp_start): New function.  Detect start of
+	signal trampolines for RT signals.
+	(i386_linux_sigtramp): Removed.
+	(i386_linux_in_sigtramp): New function.
+	(i386_linux_sigcontext_addr): New function.  Recognize the names
+	of the signal tranmpolines used by recent versions of the GNU C
+	library, and add support for RT signals.
+        (LINUX_SIGCONTEXT_PC_OFFSET, LINUX_SIGCONTEXT_SP_OFFSET):  New
+	defines.  Moved here from config/i386/tm-linux.h.
+	(i386_linux_sigtramp_saved_pc, i386_linux_sigtramp_saved_sp):
+	Reimplement in terms of i386_linux_sigcontext_addr.
+	* config/i386/tm-linux.h (LINUX_SIGCONTEXT_SIZE): Removed.
+        (LINUX_SIGCONTEXT_PC_OFFSET, LINUX_SIGCONTEXT_SP_OFFSET):
+        Moved to i386-tdep.c.
+	(IN_SIGTRAMP): Redefine to call i386_linux_in_sigtramp.
+
 Sat Mar  4 19:38:11 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	By: Sat Mar 4 04:08:58 2000 Alexandre Oliva <oliva@lsd.ic.unicamp.br>
