@@ -56,25 +56,7 @@ typedef struct
       PTR any;
     }
   tc_data;
-  Elf32_External_Sym native_elf_sym;
-} elf32_symbol_type;
-
-typedef struct
-{
-  asymbol symbol;
-  Elf_Internal_Sym internal_elf_sym;
-  /* these are used for the generation of .stabX symbols (?) */
-  short desc;
-  unsigned char type;
-  char other;
-  union
-    {
-      unsigned int hppa_arg_reloc;
-      PTR any;
-    }
-  tc_data;
-  Elf64_External_Sym native_elf_sym;
-} elf64_symbol_type;
+} elf_symbol_type;
 
 struct elf_backend_data
 {
@@ -88,15 +70,8 @@ struct elf_backend_data
   bfd_vma maxpagesize;
   void (*write_relocs) PARAMS ((bfd *, asection *, PTR));
 
-  /* @@ I really don't think this should be here.  I don't know what
-     global_sym is supposed to be used for, but I doubt it's something
-     that would be considered global, e.g., if you've got a program
-     reading and writing many BFDs.  My hunch is that it's specific to
-     the output BFD.  If not, put a comment here explaining why.  */
-  /* @@ Was pointer to elfNAME(symbol_type).  This makes it size-
-     independent.  */
   void (*elf_backend_symbol_processing) PARAMS ((bfd *, asymbol *));
-  boolean (*elf_backend_symbol_table_processing) PARAMS ((bfd *, elf32_symbol_type *, int));
+  boolean (*elf_backend_symbol_table_processing) PARAMS ((bfd *, elf_symbol_type *, int));
   boolean (*elf_backend_section_processing) PARAMS ((bfd *, Elf32_Internal_Shdr *));
   boolean (*elf_backend_section_from_shdr) PARAMS ((bfd *, Elf32_Internal_Shdr *, char *));
   boolean (*elf_backend_fake_sections) PARAMS ((bfd *, Elf32_Internal_Shdr *, asection *));
@@ -147,9 +122,8 @@ struct elf_obj_tdata
   struct strtab *strtab_ptr;
   int num_locals;
   int num_globals;
-  PTR raw_syms;			/* Elf_External_Sym* */
   Elf_Internal_Sym *internal_syms;
-  PTR symbols;			/* elf_symbol_type */
+  elf_symbol_type *symbols;	/* elf_symbol_type */
   Elf_Sym_Extra *sym_extra;
   asymbol **section_syms;	/* STT_SECTION symbols for each section */
   int num_section_syms;		/* number of section_syms allocated */
@@ -174,8 +148,7 @@ struct elf_obj_tdata
 #define elf_num_section_syms(bfd) (elf_tdata(bfd) -> num_section_syms)
 #define core_prpsinfo(bfd)	(elf_tdata(bfd) -> prpsinfo)
 #define core_prstatus(bfd)	(elf_tdata(bfd) -> prstatus)
-#define obj_symbols(bfd)	((elf_symbol_type*)(elf_tdata(bfd) -> symbols))
-#define obj_raw_syms(bfd)	((Elf_External_Sym*)(elf_tdata(bfd) -> raw_syms))
+#define obj_symbols(bfd)	(elf_tdata(bfd) -> symbols)
 #define obj_internal_syms(bfd)	(elf_tdata(bfd) -> internal_syms)
 
 extern char * elf_string_from_elf_section PARAMS ((bfd *, unsigned, unsigned));
