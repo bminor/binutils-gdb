@@ -15053,7 +15053,7 @@ Reserved for future use.
 
 Read @var{length} bytes of memory starting at address @var{addr}.
 Neither @value{GDBN} nor the stub assume that sized memory transfers are
-assumed using word alligned accesses. FIXME: @emph{A word aligned memory
+assumed using word aligned accesses. FIXME: @emph{A word aligned memory
 transfer mechanism is needed.}
 
 Reply:
@@ -15061,7 +15061,7 @@ Reply:
 @item @var{XX@dots{}}
 @var{XX@dots{}} is mem contents. Can be fewer bytes than requested if able
 to read only part of the data.  Neither @value{GDBN} nor the stub assume
-that sized memory transfers are assumed using word alligned
+that sized memory transfers are assumed using word aligned
 accesses. FIXME: @emph{A word aligned memory transfer mechanism is
 needed.}
 @item E@var{NN}
@@ -15353,7 +15353,7 @@ for an error
 @cindex @code{z3} packet
 @cindex @code{Z3} packet
 
-Insert (@code{Z3}) or remove (@code{z3}) a write watchpoint.
+Insert (@code{Z3}) or remove (@code{z3}) a read watchpoint.
 
 Reply:
 @table @samp
@@ -15365,8 +15365,8 @@ not supported
 for an error
 @end table
 
-@item @code{z}@code{4}@code{,}@var{addr}@code{,}@var{length} --- remove read watchpoint @strong{(draft)}
-@item @code{Z}@code{4}@code{,}@var{addr}@code{,}@var{length} --- insert read watchpoint @strong{(draft)}
+@item @code{z}@code{4}@code{,}@var{addr}@code{,}@var{length} --- remove access watchpoint @strong{(draft)}
+@item @code{Z}@code{4}@code{,}@var{addr}@code{,}@var{length} --- insert access watchpoint @strong{(draft)}
 @cindex @code{z4} packet
 @cindex @code{Z4} packet
 

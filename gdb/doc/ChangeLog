@@ -1,3 +1,8 @@
+2002-09-29  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* gdb.texinfo (Packets): Fix typos "alligned".
+	Correct z3/Z3 description.  Correct z4/Z4 title.
+
 2002-09-27  Andrew Cagney  <ac131313@redhat.com>
 
 	* all-cfg.texi: Use @sc for GDB and GCC.  Update copyright.
