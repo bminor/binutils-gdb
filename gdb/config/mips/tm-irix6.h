@@ -1,5 +1,5 @@
 /* Target machine description for SGI Iris under Irix 6.x, for GDB.
-   Copyright 2001
+   Copyright 2001, 2002
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -20,6 +20,7 @@
    Boston, MA 02111-1307, USA.  */
 
 #include "mips/tm-bigmips64.h"
+#include "solib.h"
 
 /* SGI's assembler doesn't grok dollar signs in identifiers.
    So we use dots instead.  This item must be coordinated with G++. */
