@@ -1,3 +1,19 @@
+2002-07-26  Kevin Buettner  <kevinb@redhat.com>
+
+	* rs6000-nat.c (language.h): Include.
+	(special_regs): Delete this array.
+	(regmap): New function.
+	(fetch_register, store_register):  Use regmap() to map gdb
+	register numbers to ptrace register numbers.  Also, use
+	outputs from regmap() to make decisions regarding type of
+	ptrace() call to make.  In particular, don't compare against
+	FIRST_UISA_SP_REGNUM or LAST_UISA_SP_REGNUM.
+	(fetch_inferior_registers, store_inferior_registers): Where
+	possible, obtain register numbers from tdep struct.  Don't
+	refer to FIRST_UISA_SP_REGNUM or LAST_UISA_SP_REGNUM.
+	* config/rs6000/tm-rs6000.h (FIRST_UISA_SP_REGNUM)
+	(LAST_UISA_SP_REGNUM): Delete.
+	
 2002-07-25  Kevin Buettner  <kevinb@redhat.com>
 
 	* rs6000-nat.c (ppc-tdep.h): Include.
