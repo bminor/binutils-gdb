@@ -15,7 +15,7 @@
 
 Do-first:
 
-cygnus_files="release release-info build-all.mk"
+cygnus_files="release release-info build-all.mk COPYING.NEWLIB"
 
 if ( echo $* | grep keep\-cygnus > /dev/null) ; then
 	keep_these_too="${keep_these_too} ${cygnus_files}"
@@ -42,7 +42,6 @@ Things-to-keep:
 .cvsignore
 COPYING
 COPYING.LIB
-COPYING.NEWLIB
 CYGNUS
 ChangeLog
 Makefile.in
