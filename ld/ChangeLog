@@ -1,3 +1,9 @@
+start-sanitize-tx49
+Wed Oct 29 17:50:26 1997  Gavin Koch  <gavin@cygnus.com>
+
+	* configure.tgt: Add tx49 configury.
+
+end-sanitize-tx49
 Thu Oct 23 14:38:18 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* scripttempl/v850.sc: Rename linker symbol '_stack' to '__stack'
