@@ -1,3 +1,9 @@
+1998-08-20  Vladimir N. Makarov  <vmakarov@cygnus.com>
+
+	* expr.c (operand): Check correctly that there is no advance in
+	operand after atof_generic in order to decide "is it label 0f or
+	floating point number".
+
 Wed Aug 19 09:30:16 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-m32r.c: Replace double dash prefix to M32R specific

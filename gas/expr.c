@@ -64,6 +64,7 @@ symbolS *
 make_expr_symbol (expressionP)
      expressionS *expressionP;
 {
+  expressionS zero;
   const char *fake;
   symbolS *symbolP;
   struct expr_symbol_line *n;
@@ -71,6 +72,22 @@ make_expr_symbol (expressionP)
   if (expressionP->X_op == O_symbol
       && expressionP->X_add_number == 0)
     return expressionP->X_add_symbol;
+
+  if (expressionP->X_op == O_big)
+    {
+      /* This won't work, because the actual value is stored in
+         generic_floating_point_number or generic_bignum, and we are
+         going to lose it if we haven't already.  */
+      if (expressionP->X_add_number > 0)
+	as_bad (_("bignum invalid; zero assumed"));
+      else
+	as_bad (_("floating point number invalid; zero assumed"));
+      zero.X_op = O_constant;
+      zero.X_add_number = 0;
+      zero.X_unsigned = 0;
+      clean_up_expression (&zero);
+      expressionP = &zero;
+    }
 
   fake = FAKE_LABEL_NAME;
 
@@ -907,7 +924,7 @@ operand (expressionP)
 		  {
 		  case 0:
 		  case ERROR_EXPONENT_OVERFLOW:
-		    if (*cp == 'f' || *cp == 'b')
+		    if (cp[-1] == 'f' || cp[-1] == 'b')
 		      /* looks like a difference expression */
 		      goto is_0f_label;
 		    else
