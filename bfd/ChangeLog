@@ -1,5 +1,10 @@
 Mon Jul 24 14:17:50 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* ecofflink.c (_bfd_ecoff_locate_line): When handling stabs:
+	correct setting of sym_ptr_end to consider symbols skipped when
+	setting sym_ptr; don't leave loop early unless an N_FUN is found
+	with a larger value.
+
 	* coff-sh.c (sh_coff_howtos): Mark R_SH_PCDISP8BY2 and R_SH_PCDISP
 	as PC relative.  Describe R_SH_IMM16.  Add entries for
 	R_SH_SWITCH16, R_SH_SWITCH32, R_SH_USES, R_SH_COUNT, and
