@@ -818,14 +818,15 @@ rombug_read_inferior_memory (CORE_ADDR memaddr, char *myaddr, int len)
   return len;
 }
 
-/* FIXME-someday!  merge these two.  */
+/* Transfer LEN bytes between GDB address MYADDR and target address
+   MEMADDR.  If WRITE is non-zero, transfer them to the target,
+   otherwise transfer them from the target.  TARGET is unused.
+
+   Returns the number of bytes transferred. */
+
 static int
-rombug_xfer_inferior_memory (memaddr, myaddr, len, write, target)
-     CORE_ADDR memaddr;
-     char *myaddr;
-     int len;
-     int write;
-     struct target_ops *target;	/* ignored */
+rombug_xfer_inferior_memory (CORE_ADDR memaddr, char *myaddr, int len,
+			     int write, struct target_ops *target)
 {
   if (write)
     return rombug_write_inferior_memory (memaddr, myaddr, len);

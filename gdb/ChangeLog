@@ -1,3 +1,9 @@
+2000-10-09  Kevin Buettner  <kevinb@redhat.com>
+
+	* remote-nindy.c (non_dle, nindy_xfer_inferior_memory): Protoize.
+	* remote-os9k.c (rombug_xfer_inferior_memory): Protoize.
+	* remote-rdi.c (arm_rdi_xfer_memory): Protoize.
+
 2000-10-09  Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
 
 	* config/i386/i386sol2.mh:  Add XM_CLIBS definition to resolve

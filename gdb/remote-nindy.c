@@ -240,14 +240,13 @@ nindy_files_info (void)
 		     nindy_initial_brk ? " with initial break" : "");
 }
 
-/* Return the number of characters in the buffer before
-   the first DLE character.  */
+/* Return the number of characters in the buffer BUF before
+   the first DLE character.  N is maximum number of characters to
+   consider.  */
 
 static
 int
-non_dle (buf, n)
-     char *buf;			/* Character buffer; NOT '\0'-terminated */
-     int n;			/* Number of characters in buffer */
+non_dle (char *buf, int n)
 {
   int i;
 
@@ -482,15 +481,12 @@ nindy_store_registers (int regno)
 
 /* Copy LEN bytes to or from inferior's memory starting at MEMADDR
    to debugger memory starting at MYADDR.   Copy to inferior if
-   SHOULD_WRITE is nonzero.  Returns the length copied. */
+   SHOULD_WRITE is nonzero.  Returns the length copied.  TARGET is
+   unused.  */
 
 int
-nindy_xfer_inferior_memory (memaddr, myaddr, len, should_write, target)
-     CORE_ADDR memaddr;
-     char *myaddr;
-     int len;
-     int should_write;
-     struct target_ops *target;	/* ignored */
+nindy_xfer_inferior_memory (CORE_ADDR memaddr, char *myaddr, int len,
+			    int should_write, struct target_ops *target)
 {
   if (len <= 0)
     return 0;
