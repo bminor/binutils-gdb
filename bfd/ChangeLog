@@ -1,5 +1,9 @@
 2002-08-26  Alan Modra  <amodra@bigpond.net.au>
 
+	* coffcode.h (coff_set_arch_mach_hook): Handle W65MAGIC.
+
+2002-08-26  Alan Modra  <amodra@bigpond.net.au>
+
 	* aoutx.h (NAME(aout,reloc_type_lookup)): Handle BFD_RELOC_8.
 
 2002-08-24  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
