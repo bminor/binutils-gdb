@@ -1,3 +1,7 @@
+Thu Feb 13 20:41:22 1997  Philippe De Muyter  <phdm@info.ucl.ac.be>
+
+	* m68k-opc.c (m68k_opcodes): Add swbeg pseudo-instruction.
+
 Thu Feb 13 16:30:02 1997  Jeffrey A Law  (law@cygnus.com)
 
 	* mn10200-opc.c (IMM16_PCREL): This is a signed operand.
