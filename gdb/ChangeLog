@@ -1,3 +1,9 @@
+Wed Jan 17 13:22:27 1996  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* remote-hms.c (hms_ops): Add value for to_thread_alive.
+	* remote-nindy.c (nindy_ops): Ditto.
+	* remote-udi.c (udi_ops): Ditto.
+
 Tue Jan 16 11:22:58 1996  Stu Grossman  (grossman@cygnus.com)
 
 	* Makefile.in (CLIBS):  Add LIBS to allow libraries to be
