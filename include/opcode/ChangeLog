@@ -1,3 +1,13 @@
+start-sanitize-cygnus
+Fri Jan 15 23:38:50 1999  Jeffrey A Law  (law@cygnus.com)
+
+	* Fix mask for PA2.0 floating point load instructions.
+
+Mon Jan 11 13:38:32 1999  Jeffrey A Law  (law@cygnus.com)
+
+	* hppa.h (fcmp): Tweak PA2.0 support.
+
+end-sanitize-cygnus
 1999-01-05  Doug Evans  <devans@casey.cygnus.com>
 
 	* cgen.h (CGEN_ATTR_VALUE_TYPE): New typedef.

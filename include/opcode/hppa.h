@@ -64,9 +64,9 @@ struct pa_opcode
 
    In the args field, the following characters are unused:
 
-	'  "#$%    *+- ./   3      :; =   '
-	' B         L              [\] _'
-	'    e gh   lm   qr        { } '
+	'  "#$%    *+- ./          :;    '
+	'                          [\]  '
+	'                          { } '
 
    Here are all the characters:
 
@@ -160,6 +160,29 @@ And these (PJH) for PA-89 F.P. registers and instructions:
    H    Floating Point Operand Format at 26 for 'fmpyadd' and 'fmpysub'
         (very similar to 'F')
 */
+
+/* start-sanitize-cygnus */
+/* Letters for PA2.0 support
+   We don't want this code to leak just yet.
+   
+   3    fmpyfadd/fmpynfadd ra operand
+   g	Like C, but encoding of the modifier is different.
+   B	Like C, but encoding of the modifier is different.
+   l	Long displacement for PA2.0 fp loads and stores.
+   L	Long displacement for PA2.0 fp loads and stores.
+   e	FP register specification for PA2.0 large displacement loads and stores
+   h	Offset into CA array for fcmp
+   m    Offset into CA array for ftest
+   =    Graphics conditions for ftest
+   q,_	source/dest floating point formats for fcnv
+*/
+
+/* end-sanitize-cygnus */
+
+/* List of characters not to put a space after.  Note that
+   "," is included, as the "spopN" operations use literal
+   commas in their completer sections. */
+static const char *const completer_chars = ",CcY<>?!@+&U~FfGHINnOoZMadu|/=0123%e$m}";
 
 /* The order of the opcodes in this table is significant:
 
@@ -340,34 +363,34 @@ static const struct pa_opcode pa_opcodes[] =
 { "lpa",        0x04001340, 0xfc003fc0, "Zx(b),t", pa10},
 { "lha",        0x04001300, 0xfc003fc0, "Zx(s,b),t", pa10},
 { "lha",        0x04001300, 0xfc003fc0, "Zx(b),t", pa10},
-{ "lci",        0x04001300, 0xfc003fc0, "x(s,b),t", pa10},
-{ "lci",        0x04001300, 0xfc003fc0, "x(b),t", pa10},
+{ "lci",        0x04001300, 0xfc003fe0, "x(s,b),t", pa10},
+{ "lci",        0x04001300, 0xfc003fe0, "x(b),t", pa10},
 { "pdtlb",      0x04001200, 0xfc003fdf, "Zx(s,b)", pa10},
 { "pdtlb",      0x04001200, 0xfc003fdf, "Zx(b)", pa10},
-{ "pitlb",      0x04000200, 0xfc003fdf, "Zx(s,b)", pa10},
-{ "pitlb",      0x04000200, 0xfc003fdf, "Zx(b)", pa10},
+{ "pitlb",      0x04000200, 0xfc001fdf, "Zx(S,b)", pa10},
+{ "pitlb",      0x04000200, 0xfc001fdf, "Zx(b)", pa10},
 { "pdtlbe",     0x04001240, 0xfc003fdf, "Zx(s,b)", pa10},
 { "pdtlbe",     0x04001240, 0xfc003fdf, "Zx(b)", pa10},
-{ "pitlbe",     0x04000240, 0xfc003fdf, "Zx(s,b)", pa10},
-{ "pitlbe",     0x04000240, 0xfc003fdf, "Zx(b)", pa10},
+{ "pitlbe",     0x04000240, 0xfc001fdf, "Zx(S,b)", pa10},
+{ "pitlbe",     0x04000240, 0xfc001fdf, "Zx(b)", pa10},
 { "idtlba",     0x04001040, 0xfc003fff, "x,(s,b)", pa10},
 { "idtlba",     0x04001040, 0xfc003fff, "x,(b)", pa10},
-{ "iitlba",     0x04000040, 0xfc003fff, "x,(s,b)", pa10},
-{ "iitlba",     0x04000040, 0xfc003fff, "x,(b)", pa10},
+{ "iitlba",     0x04000040, 0xfc001fff, "x,(S,b)", pa10},
+{ "iitlba",     0x04000040, 0xfc001fff, "x,(b)", pa10},
 { "idtlbp",     0x04001000, 0xfc003fff, "x,(s,b)", pa10},
 { "idtlbp",     0x04001000, 0xfc003fff, "x,(b)", pa10},
-{ "iitlbp",     0x04000000, 0xfc003fff, "x,(s,b)", pa10},
-{ "iitlbp",     0x04000000, 0xfc003fff, "x,(b)", pa10},
+{ "iitlbp",     0x04000000, 0xfc001fff, "x,(S,b)", pa10},
+{ "iitlbp",     0x04000000, 0xfc001fff, "x,(b)", pa10},
 { "pdc",        0x04001380, 0xfc003fdf, "Zx(s,b)", pa10},
 { "pdc",        0x04001380, 0xfc003fdf, "Zx(b)", pa10},
 { "fdc",        0x04001280, 0xfc003fdf, "Zx(s,b)", pa10},
 { "fdc",        0x04001280, 0xfc003fdf, "Zx(b)", pa10},
-{ "fic",        0x04000280, 0xfc003fdf, "Zx(s,b)", pa10},
-{ "fic",        0x04000280, 0xfc003fdf, "Zx(b)", pa10},
+{ "fic",        0x04000280, 0xfc001fdf, "Zx(S,b)", pa10},
+{ "fic",        0x04000280, 0xfc001fdf, "Zx(b)", pa10},
 { "fdce",       0x040012c0, 0xfc003fdf, "Zx(s,b)", pa10},
 { "fdce",       0x040012c0, 0xfc003fdf, "Zx(b)", pa10},
-{ "fice",       0x040002c0, 0xfc003fdf, "Zx(s,b)", pa10},
-{ "fice",       0x040002c0, 0xfc003fdf, "Zx(b)", pa10},
+{ "fice",       0x040002c0, 0xfc001fdf, "Zx(S,b)", pa10},
+{ "fice",       0x040002c0, 0xfc001fdf, "Zx(b)", pa10},
 { "diag",       0x14000000, 0xfc000000, "D", pa10},
 
 /* gfw and gfr are not in the HP PA 1.1 manual, but they are in either
@@ -389,12 +412,28 @@ static const struct pa_opcode pa_opcodes[] =
 { "fstdx",      0x2c000200, 0xfc001fc0, "cy,x(b)", pa10},
 { "fstqx",      0x3c000200, 0xfc001fc0, "cy,x(s,b)", pa10},
 { "fstqx",      0x3c000200, 0xfc001fc0, "cy,x(b)", pa10},
+/* start-sanitize-cygnus */
+{ "fldws",      0x5c000000, 0xfc000004, "gl(s,b),e", pa20},
+{ "fldws",      0x5c000000, 0xfc000004, "gl(b),e", pa20},
+/* end-sanitize-cygnus */
 { "fldws",      0x24001000, 0xfc001f80, "C5(s,b),v", pa10},
 { "fldws",      0x24001000, 0xfc001f80, "C5(b),v", pa10},
+/* start-sanitize-cygnus */
+{ "fldds",      0x50000002, 0xfc000002, "BL(s,b),x", pa20},
+{ "fldds",      0x50000002, 0xfc000002, "BL(b),x", pa20},
+/* end-sanitize-cygnus */
 { "fldds",      0x2c001000, 0xfc001fc0, "C5(s,b),y", pa10},
 { "fldds",      0x2c001000, 0xfc001fc0, "C5(b),y", pa10},
+/* start-sanitize-cygnus */
+{ "fstws",      0x7c000000, 0xfc000004, "ge,l(s,b)", pa20},
+{ "fstws",      0x7c000000, 0xfc000004, "ge,l(b)", pa20},
+/* end-sanitize-cygnus */
 { "fstws",      0x24001200, 0xfc001f80, "Cv,5(s,b)", pa10},
 { "fstws",      0x24001200, 0xfc001f80, "Cv,5(b)", pa10},
+/* start-sanitize-cygnus */
+{ "fstds",      0x70000002, 0xfc000002, "Bx,L(s,b)", pa20},
+{ "fstds",      0x70000002, 0xfc000002, "Bx,L(b)", pa20},
+/* end-sanitize-cygnus */
 { "fstds",      0x2c001200, 0xfc001fc0, "Cy,5(s,b)", pa10},
 { "fstds",      0x2c001200, 0xfc001fc0, "Cy,5(b)", pa10},
 { "fstqs",      0x3c001200, 0xfc001fc0, "Cy,5(s,b)", pa10},
@@ -425,12 +464,37 @@ static const struct pa_opcode pa_opcodes[] =
 { "fcnvfx",     0x38010200, 0xfc1f8720, "FGJ,v", pa10},
 { "fcnvfxt",    0x30018200, 0xfc1f87e0, "FGE,v", pa10},
 { "fcnvfxt",    0x38018200, 0xfc1f8720, "FGJ,v", pa10},
+/* start-sanitize-cygnus */
+{ "fmpyfadd",   0xb8000000, 0xfc000020, "FE,X,3,v", pa20},
+{ "fmpynfadd",  0xb8000020, 0xfc000020, "FE,X,3,v", pa20},
+{ "fneg",       0x3000c000, 0xfc1fe7e0, "FE,v", pa20},
+{ "fneg",       0x3800c000, 0xfc1fe720, "FJ,v", pa20},
+{ "fnegabs",    0x3000e000, 0xfc1fe7e0, "FE,v", pa20},
+{ "fnegabs",    0x3800e000, 0xfc1fe720, "FJ,v", pa20},
+{ "fcnvuf",     0x30028200, 0xfc1f87e0, "FGE,v", pa20},
+{ "fcnvuf",     0x38028200, 0xfc1f8720, "FGJ,v", pa20},
+{ "fcnvfu",     0x30030200, 0xfc1f87e0, "FGE,v", pa20},
+{ "fcnvfu",     0x38030200, 0xfc1f8720, "FGJ,v", pa20},
+{ "fcnvfut",    0x30038200, 0xfc1f87e0, "FGE,v", pa20},
+{ "fcnvfut",    0x38038200, 0xfc1f8720, "q_J,v", pa20},
+{ "fcnv",       0x30000200, 0xfc1c0720, "q_E,v", pa20},
+{ "fcnv",       0x38000200, 0xfc1c0720, "FGJ,v", pa20},
+{ "fcmp",       0x30000400, 0xfc0007e0, "FME,X,h", pa20},
+/* end-sanitize-cygnus */
 { "fcmp",       0x30000400, 0xfc00e7e0, "FME,X", pa10},
+/* start-sanitize-cygnus */
+{ "fcmp",       0x38000400, 0xfc000720, "IMJ,K,h", pa20},
+/* end-sanitize-cygnus */
 { "fcmp",       0x38000400, 0xfc00e720, "IMJ,K", pa10},
 { "xmpyu",	0x38004700, 0xfc00e720, "E,X,v", pa11},
 { "fmpyadd",	0x18000000, 0xfc000000, "H4,6,7,9,8", pa11},
 { "fmpysub",	0x98000000, 0xfc000000, "H4,6,7,9,8", pa11},
 { "ftest",      0x30002420, 0xffffffff, "", pa10},
+/* start-sanitize-cygnus */
+{ "ftest",      0x30002420, 0xffffffe0, ",=", pa20},
+{ "ftest",      0x30000420, 0xffff1fff, "m", pa20},
+/* end-sanitize-cygnus */
+{ "fid",        0x30000000, 0xffffffff, "", pa11},
 
 
 /* Assist Instructions */
