@@ -1,3 +1,8 @@
+Mon Nov 18 15:58:05 1996  Jim Wilson  <wilson@cygnus.com>
+
+	* config/mips/tm-mips.h (FIX_CALL_DUMMY): Change unsigned LONGEST
+	to ULONGEST.
+
 Fri Nov 15 15:34:18 1996  Fred Fish  <fnf@cygnus.com>
 
 	From Peter Schauer <Peter.Schauer@Regent.E-Technik.TU-Muenchen.DE>
