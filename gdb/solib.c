@@ -852,10 +852,10 @@ locate_base ()
 
    DESCRIPTION
 
-   Read in a copy of the first member in the inferior's dynamic
-   link map from the inferior's dynamic linker structures, and return
-   a pointer to the copy in our address space.
- */
+   Find the first element in the inferior's dynamic link map, and
+   return its address in the inferior.  This function doesn't copy the
+   link map entry itself into our address space; find_solib actually
+   does the reading.  */
 
 static struct link_map *
 first_link_map_member ()
