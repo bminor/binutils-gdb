@@ -70,6 +70,9 @@ static char *find_toplevel_char (char *s, char c);
 static struct symtabs_and_lines decode_line_2 (struct symbol *[],
 					       int, int, char ***);
 
+static struct symtab *symtab_from_filename (char **argptr,
+					    char *p, int is_quote_enclosed);
+
 static struct
 symtabs_and_lines symbol_found (int funfirstline,
 				char ***canonical,
@@ -539,15 +542,15 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
 {
   struct symtabs_and_lines values;
   struct symtab_and_line val;
-  register char *p, *p1;
+  char *p;
   char *q;
-  register struct symtab *s = NULL;
+  struct symtab *s = NULL;
 
-  register struct symbol *sym;
+  struct symbol *sym;
   /* The symtab that SYM was found in.  */
   struct symtab *sym_symtab;
 
-  register struct minimal_symbol *msymbol;
+  struct minimal_symbol *msymbol;
   char *copy;
   /* This is NULL if there are no parens in *ARGPTR, or a pointer to
      the closing parenthesis if there are parens.  */
@@ -591,40 +594,17 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
     {
       if (is_quoted)
 	*argptr = *argptr + 1;
+      
+      /* Is it a C++ or Java compound data structure?  */
+
       if (p[0] == '.' || p[1] == ':')
-	/*  C++ */
-	/*  ... or Java */
 	return decode_compound (argptr, funfirstline, canonical,
 				saved_arg, p);
 
-      /* Extract the file name.  */
-      p1 = p;
-      while (p != *argptr && p[-1] == ' ')
-	--p;
-      if ((*p == '"') && is_quote_enclosed)
-	--p;
-      copy = (char *) alloca (p - *argptr + 1);
-      memcpy (copy, *argptr, p - *argptr);
-      /* It may have the ending quote right after the file name */
-      if (is_quote_enclosed && copy[p - *argptr - 1] == '"')
-	copy[p - *argptr - 1] = 0;
-      else
-	copy[p - *argptr] = 0;
+      /* No, the first part is a filename; set s to be that file's
+	 symtab.  Also, move argptr past the filename.  */
 
-      /* Find that file's data.  */
-      s = lookup_symtab (copy);
-      if (s == 0)
-	{
-	  if (!have_full_symbols () && !have_partial_symbols ())
-	    error ("No symbol table is loaded.  Use the \"file\" command.");
-	  error ("No source file named %s.", copy);
-	}
-
-      /* Discard the file name from the arg.  */
-      p = p1 + 1;
-      while (*p == ' ' || *p == '\t')
-	p++;
-      *argptr = p;
+      s = symtab_from_filename (argptr, p, is_quote_enclosed);
     }
 #if 0
   /* No one really seems to know why this was added. It certainly
@@ -1317,6 +1297,50 @@ decode_compound (char **argptr, int funfirstline, char ***canonical,
 		   "Can't find member of namespace, class, struct, or union named \"%s\"\n",
 		   copy);
 }
+
+
+
+/* Return the symtab associated to the filename given by the substring
+   of *ARGPTR ending at P, and advance ARGPTR past that filename.  */
+
+static struct symtab *
+symtab_from_filename (char **argptr, char *p, int is_quote_enclosed)
+{
+  char *p1;
+  char *copy;
+  struct symtab *s;
+  
+  p1 = p;
+  while (p != *argptr && p[-1] == ' ')
+    --p;
+  if ((*p == '"') && is_quote_enclosed)
+    --p;
+  copy = (char *) alloca (p - *argptr + 1);
+  memcpy (copy, *argptr, p - *argptr);
+  /* It may have the ending quote right after the file name */
+  if (is_quote_enclosed && copy[p - *argptr - 1] == '"')
+    copy[p - *argptr - 1] = 0;
+  else
+    copy[p - *argptr] = 0;
+
+  /* Find that file's data.  */
+  s = lookup_symtab (copy);
+  if (s == 0)
+    {
+      if (!have_full_symbols () && !have_partial_symbols ())
+	error ("No symbol table is loaded.  Use the \"file\" command.");
+      error ("No source file named %s.", copy);
+    }
+
+  /* Discard the file name from the arg.  */
+  p = p1 + 1;
+  while (*p == ' ' || *p == '\t')
+    p++;
+  *argptr = p;
+
+  return s;
+}
+
 
 
 

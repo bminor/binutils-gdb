@@ -1,3 +1,8 @@
+2002-12-09  David Carlton  <carlton@math.stanford.edu>
+
+	* linespec.c (symtab_from_filename): New function.
+	(decode_line_1): Move code into symtab_from_filename.
+
 2002-12-09  Kevin Buettner  <kevinb@redhat.com>
 
 	* lin-lwp.c (strsignal): Make extern declaration match that of glibc.
