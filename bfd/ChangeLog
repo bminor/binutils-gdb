@@ -1,3 +1,10 @@
+Mon Feb 23 16:17:08 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* peicode.h (coff_swap_filehdr_in): Don't set BFD flag HAS_SYMS in
+	COFF filehdr flags.
+	(pe_print_private_bfd_data): Print PE flags.  From Mikey
+	<jeffdb@netzone.com>.
+
 Sun Feb 22 20:39:00 1998  Richard Henderson  <rth@cygnus.com>
 
 	* elf32-sparc.c (elf32_sparc_adjust_dynamic_symbol): Don't create
