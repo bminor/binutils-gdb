@@ -241,7 +241,8 @@
       usp += 4;
     }
 
-  if (STATE_ARCHITECTURE (sd)->mach == bfd_mach_am33)
+  if (STATE_ARCHITECTURE (sd)->mach == bfd_mach_am33
+      )
     {
       if (mask & 0x1)
 	{
@@ -286,7 +287,8 @@
   unsigned32 usp = State.regs[REG_USP];
   unsigned32 mask;
 
-  if (STATE_ARCHITECTURE (sd)->mach == bfd_mach_am33)
+  if (STATE_ARCHITECTURE (sd)->mach == bfd_mach_am33
+      )
     {
       if (mask & 0x4)
 	{
@@ -8698,3 +8700,4 @@
   State.regs[REG_PC] = State.regs[REG_LAR] - 4;
   nia = PC;
 }
+
