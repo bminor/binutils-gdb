@@ -381,7 +381,6 @@ md_begin ()
 /* end-sanitize-m32rx */
 }
 
-/* start-sanitize-m32rx */
 /* Returns non zero if the given instruction writes to a destination register.  */
 static int
 writes_to_dest_reg (insn)
@@ -539,6 +538,7 @@ make_parallel (buffer)
 #endif
 
 
+/* start-sanitize-m32rx */
 static void
 assemble_parallel_insn (str, str2)
      char * str;
@@ -564,7 +564,6 @@ assemble_parallel_insn (str, str2)
       return;
     }
   
-/* start-sanitize-m32rx */
   /* Check to see if this is an allowable parallel insn.  */
   if (CGEN_INSN_ATTR (first.insn, CGEN_INSN_PIPE) == PIPE_NONE)
     {
@@ -578,7 +577,6 @@ assemble_parallel_insn (str, str2)
       as_bad ("instruction '%s' is for the M32RX only", str);
       return;
     }
-/* end-sanitize-m32rx */
   
   *str2 = '|';       /* Restore the original assembly text, just in case it is needed.  */
   str3  = str;       /* Save the original string pointer.  */
@@ -596,7 +594,6 @@ assemble_parallel_insn (str, str2)
       return;
     }
 
-/* start-sanitize-m32rx */
   /* Check it.  */
   if (! enable_m32rx
       && CGEN_INSN_ATTR (second.insn, CGEN_INSN_MACH) == (1 << MACH_M32RX))
@@ -614,7 +611,6 @@ assemble_parallel_insn (str, str2)
 	  return;
 	}
     }
-/* end-sanitize-m32rx */
 
   /* We assume that if the first instruction writes to a register that is
      read by the second instruction it is because the programmer intended
