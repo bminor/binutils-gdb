@@ -1194,7 +1194,8 @@ ref_add (refnum, sym, stabs, value)
     {
       int new_slots = ref_count - ref_chunk * MAX_CHUNK_REFS; 
       int new_chunks = new_slots / MAX_CHUNK_REFS + 1;
-      ref_map = xrealloc (ref_map, REF_MAP_SIZE(ref_chunk + new_chunks));
+      ref_map = (struct ref_map_s *)
+	xrealloc (ref_map, REF_MAP_SIZE(ref_chunk + new_chunks));
       if (!ref_map) 
 	error ("no more free slots in chain\n");
       memset (ref_map + REF_MAP_SIZE(ref_chunk), 0, new_chunks * REF_CHUNK_SIZE);

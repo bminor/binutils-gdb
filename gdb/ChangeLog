@@ -1,3 +1,21 @@
+Thu Apr 23 12:27:43 1998  Philippe De Muyter  <phdm@macqel.be>
+
+        * symfile.c (simple_overlay_update_1): Do not prefix array address
+        by `&'.
+        * bcache.h (BCACHE_DATA_ALIGNMENT): Ditto.
+        * tracepoint.c (encode_actions): Ditto.
+        * language.c, complaints.c, utils.c (varargs.h): Do not include that
+        file here, it is already included indirectly by defs.h.
+        * dbxread.c (dbx_symfile_init, process_one_symbol): Cast xmalloc return
+        value to the appropriate pointer type.
+        * utils.c (floatformat_from_doublest): Ditto.
+        * tracepoint.c (read_actions, _initialize_tracepoint): Ditto.
+        (add_memrange): Likewise with xrealloc return value.
+        * stabsread.c (ref_add): Ditto.
+        * coffread.c (coff_symfile_init): Likewise for xmmalloc return value.
+        * elfread.c (elf_symfile_read): Ditto.
+        * os9kread.c (os9k_symfile_init): Ditto.
+
 Thu Apr 23 00:32:08 1998  Tom Tromey  <tromey@cygnus.com>
 
 	* config.in: Rebuilt.

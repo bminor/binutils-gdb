@@ -842,7 +842,7 @@ read_actions (t)
       if (linetype == BADLINE)
 	continue;	/* already warned -- collect another line */
 
-      temp = xmalloc (sizeof (struct action_line));
+      temp = (struct action_line *) xmalloc (sizeof (struct action_line));
       temp->next = NULL;
       temp->action = line;
 
@@ -1169,7 +1169,7 @@ add_memrange (memranges, type, base, len)
   if (memranges->next_memrange >= memranges->listsize)
     {
       memranges->listsize *= 2;
-      memranges->list = xrealloc (memranges->list, 
+      memranges->list = (struct memrange *) xrealloc (memranges->list, 
 				  memranges->listsize);
     }
 
@@ -1502,8 +1502,8 @@ encode_actions (t, tdp_actions, step_count, stepping_actions)
   memrange_sortmerge (&tracepoint_list); 
   memrange_sortmerge (&stepping_list); 
 
-  *tdp_actions      = stringify_collection_list (&tracepoint_list, &tdp_buff);
-  *stepping_actions = stringify_collection_list (&stepping_list,   &step_buff);
+  *tdp_actions      = stringify_collection_list (&tracepoint_list, tdp_buff);
+  *stepping_actions = stringify_collection_list (&stepping_list,   step_buff);
 }
 
 static char target_buf[2048];
@@ -2435,13 +2435,13 @@ _initialize_tracepoint ()
   if (tracepoint_list.list == NULL)
     {
       tracepoint_list.listsize = 128;
-      tracepoint_list.list = xmalloc 
+      tracepoint_list.list = (struct memrange *) xmalloc 
 	(tracepoint_list.listsize * sizeof (struct memrange));
     }
   if (stepping_list.list == NULL)
     {
       stepping_list.listsize = 128;
-      stepping_list.list = xmalloc 
+      stepping_list.list = (struct memrange *) xmalloc 
 	(stepping_list.listsize * sizeof (struct memrange));
     }
 

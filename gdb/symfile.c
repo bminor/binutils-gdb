@@ -53,6 +53,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #endif
 
 int (*ui_load_progress_hook) PARAMS ((char *, unsigned long));
+void (*pre_add_symbol_hook) PARAMS ((char *));
+void (*post_add_symbol_hook) PARAMS ((void));
 
 /* Global variables owned by this file */
 int readnow_symbol_files;		/* Read full symbols immediately */
@@ -656,9 +658,14 @@ symbol_file_add (name, from_tty, addr, mainline, mapped, readnow)
 	 performed, or need to read an unmapped symbol table. */
       if (from_tty || info_verbose)
 	{
-	  printf_filtered ("Reading symbols from %s...", name);
-	  wrap_here ("");
-	  gdb_flush (gdb_stdout);
+      if (pre_add_symbol_hook)
+        pre_add_symbol_hook (name);
+      else
+        {
+          printf_filtered ("Reading symbols from %s...", name);
+          wrap_here ("");
+          gdb_flush (gdb_stdout);
+        }
 	}
       syms_from_objfile (objfile, addr, mainline, from_tty);
     }      
@@ -687,8 +694,13 @@ symbol_file_add (name, from_tty, addr, mainline, mapped, readnow)
 
   if (from_tty || info_verbose)
     {
-      printf_filtered ("done.\n");
-      gdb_flush (gdb_stdout);
+      if (post_add_symbol_hook)
+        post_add_symbol_hook ();
+      else
+        {
+          printf_filtered ("done.\n");
+          gdb_flush (gdb_stdout);
+        }
     }
 
   new_symfile_objfile (objfile, mainline, from_tty);
@@ -957,6 +969,8 @@ load_command (arg, from_tty)
    to worry about finding it, and (b) On VMS, fork() is very slow and so
    we don't want to run a subprocess.  On the other hand, I'm not sure how
    performance compares.  */
+#define GENERIC_LOAD_CHUNK 256
+#define VALIDATE_DOWNLOAD 0
 void
 generic_load (filename, from_tty)
     char *filename;
@@ -969,7 +983,10 @@ generic_load (filename, from_tty)
   unsigned long data_count = 0;	/* Number of bytes transferred to memory */
   int n; 
   unsigned long load_offset = 0; 	/* offset to add to vma for each section */
-  char buf[128];
+  char buf[GENERIC_LOAD_CHUNK+8];
+#if VALIDATE_DOWNLOAD  
+  char verify_buffer[GENERIC_LOAD_CHUNK+8] ;
+#endif  
 
   /* enable user to specify address for downloading as 2nd arg to load */
   n = sscanf(filename, "%s 0x%lx", buf, &load_offset);
@@ -1009,14 +1026,13 @@ generic_load (filename, from_tty)
               char *buffer;
               struct cleanup *old_chain;
               bfd_vma lma;
-              unsigned long l = size / 100;
+              unsigned long l = size ;
               int err;
               char *sect;
               unsigned long sent;
               unsigned long len;
 	      
-	      l = l > 100 ? l : 100;
-              data_count += size;
+	      l = l > GENERIC_LOAD_CHUNK ? GENERIC_LOAD_CHUNK : l ;
 
               buffer = xmalloc (size);
               old_chain = make_cleanup (free, buffer);
@@ -1034,8 +1050,8 @@ generic_load (filename, from_tty)
 
               bfd_get_section_contents (loadfile_bfd, s, buffer, 0, size);
 
-              sect = bfd_get_section_name (loadfile_bfd, s);
-              sent = 0;          
+              sect = (char *) bfd_get_section_name (loadfile_bfd, s);
+              sent = 0;
               do
                 {            
                   len = (size - sent) < l ? (size - sent) : l;
@@ -1044,9 +1060,24 @@ generic_load (filename, from_tty)
                   if (ui_load_progress_hook)
                     if (ui_load_progress_hook (sect, sent))
 		      error ("Canceled the download");
+#if VALIDATE_DOWNLOAD
+		  /* Broken memories and broken monitors manifest themselves
+		     here when bring new computers to life.
+		     This doubles already slow downloads.
+		  */
+		  if (err) break ;
+		  {
+		    target_read_memory(lma,verify_buffer,len) ;
+		    if (0 != bcmp(buffer,verify_buffer,len))
+		      error("Download verify failed at %08x",
+			    (unsigned long)lma) ;
+		  }
+
+#endif
+		  data_count += len ;
                   lma  += len;
                   buffer += len;
-                }
+                } /* od */
               while (err == 0 && sent < size);
 
               if (err != 0)
@@ -1059,12 +1090,14 @@ generic_load (filename, from_tty)
     }
 
   end_time = time (NULL);
-
-  printf_filtered ("Start address 0x%lx\n", loadfile_bfd->start_address);
-
-  /* We were doing this in remote-mips.c, I suspect it is right
-     for other targets too.  */
-  write_pc (loadfile_bfd->start_address);
+  {
+    unsigned long entry ;
+    entry = bfd_get_start_address(loadfile_bfd) ;
+    printf_filtered ("Start address 0x%lx , load size %d\n", entry,data_count);
+    /* We were doing this in remote-mips.c, I suspect it is right
+       for other targets too.  */
+    write_pc (entry);
+  }
 
   /* FIXME: are we supposed to call symbol_file_add or not?  According to
      a comment from remote-mips.c (where a call to symbol_file_add was
@@ -2401,7 +2434,7 @@ static CORE_ADDR cache_ovly_table_base = 0;
 static CORE_ADDR cache_ovly_region_table_base = 0;
 #endif
 enum   ovly_index { VMA, SIZE, LMA, MAPPED};
-#define TARGET_INT_BYTES (TARGET_INT_BIT / TARGET_CHAR_BIT)
+#define TARGET_LONG_BYTES (TARGET_LONG_BIT / TARGET_CHAR_BIT)
 
 /* Throw away the cached copy of _ovly_table */
 static void
@@ -2430,18 +2463,18 @@ simple_free_overlay_region_table ()
 /* Read an array of ints from the target into a local buffer.
    Convert to host order.  int LEN is number of ints  */
 static void
-read_target_int_array (memaddr, myaddr, len)
+read_target_long_array (memaddr, myaddr, len)
      CORE_ADDR     memaddr;
      unsigned int *myaddr;
      int           len;
 {
-  char *buf = alloca (len * TARGET_INT_BYTES);
+  char *buf = alloca (len * TARGET_LONG_BYTES);
   int           i;
 
-  read_memory (memaddr, buf, len * TARGET_INT_BYTES);
+  read_memory (memaddr, buf, len * TARGET_LONG_BYTES);
   for (i = 0; i < len; i++)
-    myaddr[i] = extract_unsigned_integer (TARGET_INT_BYTES * i + buf, 
-					  TARGET_INT_BYTES);
+    myaddr[i] = extract_unsigned_integer (TARGET_LONG_BYTES * i + buf, 
+					  TARGET_LONG_BYTES);
 }
 
 /* Find and grab a copy of the target _ovly_table
@@ -2464,9 +2497,9 @@ simple_read_overlay_table ()
       if (msym != NULL)
 	{
 	  cache_ovly_table_base = SYMBOL_VALUE_ADDRESS (msym);
-	  read_target_int_array (cache_ovly_table_base, 
-				 (int *) cache_ovly_table, 
-				 cache_novlys * 4);
+	  read_target_long_array (cache_ovly_table_base, 
+				  (int *) cache_ovly_table, 
+				  cache_novlys * 4);
 	}
       else 
 	return 0;	/* failure */
@@ -2497,9 +2530,9 @@ simple_read_overlay_region_table ()
       if (msym != NULL)
 	{
 	  cache_ovly_region_table_base = SYMBOL_VALUE_ADDRESS (msym);
-	  read_target_int_array (cache_ovly_region_table_base, 
-				 (int *) cache_ovly_region_table, 
-				 cache_novly_regions * 3);
+	  read_target_long_array (cache_ovly_region_table_base, 
+				  (int *) cache_ovly_region_table, 
+				  cache_novly_regions * 3);
 	}
       else 
 	return 0;	/* failure */
@@ -2530,8 +2563,8 @@ simple_overlay_update_1 (osect)
 	cache_ovly_table[i][LMA]  == osect->the_bfd_section->lma /* &&
 	cache_ovly_table[i][SIZE] == size */)
       {
-	read_target_int_array (cache_ovly_table_base + i * TARGET_INT_BYTES,
-			       (int *) &cache_ovly_table[i], 4);
+	read_target_long_array (cache_ovly_table_base + i * TARGET_LONG_BYTES,
+				(int *) cache_ovly_table[i], 4);
 	if (cache_ovly_table[i][VMA]  == osect->the_bfd_section->vma &&
 	    cache_ovly_table[i][LMA]  == osect->the_bfd_section->lma /* &&
 	    cache_ovly_table[i][SIZE] == size */)

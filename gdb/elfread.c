@@ -596,7 +596,7 @@ elf_symfile_read (objfile, section_offsets, mainline)
   memset ((char *) &ei, 0, sizeof (ei));
 
   /* Allocate struct to keep track of the symfile */
-  objfile->sym_stab_info = (PTR)
+  objfile->sym_stab_info = (struct dbx_symfile_info *)
     xmmalloc (objfile -> md, sizeof (struct dbx_symfile_info));
   memset ((char *) objfile->sym_stab_info, 0, sizeof (struct dbx_symfile_info));
   make_cleanup (free_elfinfo, (PTR) objfile);

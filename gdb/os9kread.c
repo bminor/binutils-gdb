@@ -400,7 +400,7 @@ os9k_symfile_init (objfile)
   objfile->auxf1 = minfile;
 
   /* Allocate struct to keep track of the symfile */
-  objfile->sym_stab_info = (PTR)
+  objfile->sym_stab_info = (struct dbx_symfile_info *)
     xmmalloc (objfile -> md, sizeof (struct dbx_symfile_info));
   DBX_SYMFILE_INFO (objfile)->stab_section_info = NULL;
 
