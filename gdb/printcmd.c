@@ -1623,6 +1623,11 @@ typedef struct {
   /* Current position in bytes.  */
   unsigned int argindex;
 
+#ifdef MAKEVA_EXTRA_INFO
+  /* For host dependent information.  */
+  MAKEVA_EXTRA_INFO
+#endif
+
   char arg_bytes[1];
 } makeva_list;
 
@@ -1634,7 +1639,9 @@ makeva_size (nargs, max_arg_size)
      unsigned int nargs;
      unsigned int max_arg_size;
 {
-  return sizeof (makeva_list) + nargs * max_arg_size;
+  return sizeof (makeva_list) + nargs * max_arg_size
+    /* The PA might need up to this much for alignment.  */
+    + max_arg_size - 1;
 }
 
 /* Start working on LIST with NARGS arguments and whose largest
