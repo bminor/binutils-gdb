@@ -1,5 +1,8 @@
 2004-02-20  Andrew Cagney  <cagney@redhat.com>
 
+	* m32r.opc, m32r.cpu: New files.  Written by , Doug Evans, Nick
+	Clifton, Ben Elliston, Matthew Green, and Andrew Haley.
+
 	* sh.cpu, sh.opc, sh64-compact.cpu, sh64-media.cpu: New files, all
 	written by Ben Elliston.
 
