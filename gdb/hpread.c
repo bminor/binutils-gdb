@@ -1506,14 +1506,15 @@ hpread_read_struct_type (hp_type, dn_bufp, objfile)
       list = new;
 
       list->field.name = VT (objfile) + fieldp->dfield.name;
-      list->field.bitpos = fieldp->dfield.bitoffset;
+      FIELD_BITPOS (list->field) = fieldp->dfield.bitoffset;
       if (fieldp->dfield.bitlength % 8)
-	list->field.bitsize = fieldp->dfield.bitlength;
+	FIELD_BITSIZE (list->field) = fieldp->dfield.bitlength;
       else
-	list->field.bitsize = 0;
+	FIELD_BITSIZE (list->field) = 0;
       nfields++;
       field = fieldp->dfield.nextfield;
-      list->field.type = hpread_type_lookup (fieldp->dfield.type, objfile);
+      FIELD_TYPE (list->field) = hpread_type_lookup (fieldp->dfield.type,
+						     objfile);
     }
 
   TYPE_NFIELDS (type) = nfields;

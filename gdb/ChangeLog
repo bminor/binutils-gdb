@@ -1,3 +1,8 @@
+Wed Aug  6 00:24:08 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* hpread.c (hpread_read_struct_type): Use accessor macros rather
+	than directly mucking around with data structures.
+
 Tue Aug  5 13:37:14 1997  Per Bothner  <bothner@cygnus.com>
 
 	* gdbtypes.h:  Re-interpret struct field.  Suppport address of static.
