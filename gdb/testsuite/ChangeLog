@@ -1,3 +1,8 @@
+Fri May  3 16:02:55 1996  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* sim-gdb.exp: Make the SH simulator allocate less space when
+	it is targeted.
+
 Thu May  2 12:31:56 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* gdb.base/mips_pro.exp: Expect failure for hppa*-*-* in backtrace

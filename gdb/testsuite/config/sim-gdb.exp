@@ -24,6 +24,16 @@ proc gdb_version {} {
     default_gdb_version
 }
 
+# The SH simulator by default will allocate 16M of memory, which is
+# convenient, but it slows down testing to chew up that much swap;
+# so supply an option that makes the simulator allocate 256K.
+
+set target_sim_options ""
+
+if [istarget "sh*-*-*"] then {
+    set target_sim_options "18"
+}
+
 #
 # gdb_target_sim
 # Set gdb to target the simulator
@@ -33,6 +43,7 @@ proc gdb_target_sim { } {
     global prompt
     global verbose
     global exit_status
+    global target_sim_options
 
     # force the height to "unlimited", so no pagers get used
     send "set height 0\n"
@@ -41,7 +52,7 @@ proc gdb_target_sim { } {
     send "set width 0\n"
     expect -re ".*$prompt $" {}
 
-    send "target sim\n"
+    send "target sim $target_sim_options\n"
     set timeout 60
     expect {
 	-re "Connected to the simulator.*$prompt $"	{
