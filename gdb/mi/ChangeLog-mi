@@ -1,3 +1,9 @@
+Wed Apr 26 18:35:19 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdbmi.texinfo (GDB/MI Output Syntax v2.0): Convert Draft 2.0
+ 	Output Syntax into a new section.  Cross reference.
+	(menu): Fix tipo. GDB/MI Compatibility with CLI.
+
 2000-04-23  Eli Zaretskii  <eliz@is.elta.co.il>
 
 	* gdbmi.texinfo: Lots of changes, to include this document as part
