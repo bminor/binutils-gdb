@@ -1,3 +1,7 @@
+Wed Feb 19 14:42:09 1997  Mark Alexander  <marka@cygnus.com>
+
+	* interp.c (simopen): Add support for LSI MiniRISC PMON vectors.
+
 start-sanitize-r5900
 Tue Feb 18 17:03:47 1997  Gavin Koch  <gavin@cetus.cygnus.com>
 
