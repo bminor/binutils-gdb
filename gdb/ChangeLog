@@ -1,5 +1,7 @@
 Thu Jan 27 15:12:23 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* i386-stub.c: Add ".text" right before "mem_fault:".
+
 	* main.c (baud_rate): Add FIXME comment about printing -1 value.
 
 	* remote-utils.c (usage): Fix message to be accurate and conform
