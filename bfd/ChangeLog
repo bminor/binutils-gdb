@@ -1,3 +1,10 @@
+Thu Aug  5 10:07:43 1993  Fred Fish  (fnf@cygnus.com)
+
+	* nlmcode.h (nlm_get_reloc_upper_bound):  Test return value
+	of nlm_slurp_symbol_table as boolean, not pointer.
+	* nlmcode.h (nlm_canonicalize_reloc):  Test return value
+	of nlm_slurp_reloc_fixups as boolean, not pointer.
+
 Wed Aug  4 16:22:55 1993  david d `zoo' zuhn  (zoo@rtl.cygnus.com)
 
 	* config/go32.mh: remove HDEFINES; since __MSDOS__ and __GO32__

@@ -1245,7 +1245,7 @@ nlm_get_reloc_upper_bound (abfd, sec)
   syms = nlm_get_symbols (abfd);
   if (syms == NULL)
     {
-      if (nlm_slurp_symbol_table (abfd) == NULL)
+      if (nlm_slurp_symbol_table (abfd) == false)
 	return 0;
       syms = nlm_get_symbols (abfd);
     }
@@ -1280,7 +1280,7 @@ nlm_canonicalize_reloc (abfd, sec, relptr, symbols)
   rels = nlm_relocation_fixups (abfd);
   if (rels == NULL)
     {
-      if (nlm_slurp_reloc_fixups (abfd) == NULL)
+      if (nlm_slurp_reloc_fixups (abfd) == false)
 	return 0;
       rels = nlm_relocation_fixups (abfd);
       if (rels == NULL)
