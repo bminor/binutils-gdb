@@ -4410,7 +4410,7 @@ void
 emit_leb128_expr (expressionS *exp, int sign)
 {
   operatorT op = exp->X_op;
-  int nbytes;
+  unsigned int nbytes;
 
   if (op == O_absent || op == O_illegal)
     {
@@ -4442,7 +4442,7 @@ emit_leb128_expr (expressionS *exp, int sign)
 
   /* Let check_eh_frame know that data is being emitted.  nbytes == -1 is
      a signal that this is leb128 data.  It shouldn't optimize this away.  */
-  nbytes = -1;
+  nbytes = (unsigned int) -1;
   if (check_eh_frame (exp, &nbytes))
     abort ();
 

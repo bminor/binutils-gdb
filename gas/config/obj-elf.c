@@ -1936,7 +1936,7 @@ elf_frob_file (void)
 
       size = 4 * (list.elt_count[i] + 1);
       bfd_set_section_size (stdoutput, s, size);
-      s->contents = frag_more (size);
+      s->contents = (unsigned char *) frag_more (size);
       frag_now->fr_fix = frag_now_fix_octets ();
     }
 

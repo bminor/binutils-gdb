@@ -1,3 +1,8 @@
+2005-02-22  Alan Modra  <amodra@bigpond.net.au>
+
+	* read.c: Warning fixes.
+	* config/obj-elf.c: Likewise.
+
 2005-02-22  Maciej W. Rozycki  <macro@mips.com>
 
 	* config/tc-mips.c (append_insn): Call dwarf2_emit_insn() before
