@@ -35,10 +35,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "obstack.h"
 #include "gdb_string.h"
 
-/* FIXME: imported from mdebugread.c */
-
-extern void ecoff_relocate_efi PARAMS ((struct symbol *, CORE_ADDR));
-
 /* Prototypes for local functions */
 
 #if !defined(NO_MMALLOC) && defined(HAVE_MMAP)

@@ -1,3 +1,45 @@
+Sun Jul 28 10:46:39 1996  Fred Fish  <fnf@cygnus.com>
+
+	* config/mips/tm-mips.h (struct frame_info): Forward decl.
+	(struct type): Ditto.
+	(struct value): Ditto.
+
+	* config/mips/tm-mips.h (sigtramp_address): Move extern decl
+ 	from mips-tdep.c to here.
+	(sigtramp_end): Ditto.
+	(fixup_sigtramp): Ditto.
+
+	* config/mips/tm-mips.h (init_extra_frame_info): Add prototype.
+	(mips_frame_chain): Ditto.
+	(mips_step_skips_delay): Ditto.
+	(mips_frame_saved_pc): Ditto.
+	(mips_find_saved_regs): Ditto.
+	(mips_frame_num_args): Ditto.
+	(mips_pop_frame): Ditto.
+	(mips_extract_return_value): Ditto.
+	(mips_store_return_value): Ditto.
+	(mips_push_dummy_frame): Ditto.
+	(mips_push_arguments): Ditto.
+	(mips_do_registers_info): Ditto.
+	(ecoff_relocate_efi): Ditto.
+	(ecoff_relocate_efi): Ditto.
+	* irix4-nat.c (fetch_core_registers): Add prototype.
+	* mips-tdep.c (read_next_frame_reg): Add prototype
+	(heuristic_proc_start): Ditto.
+	(heuristic_proc_desc): Ditto.
+	(mips_print_register): Ditto.
+	* config/mips/nm-irix5.h (procfs_set_watchpoint): Add prototype.
+	(procfs_stopped_by_watchpoint): Ditto.
+	* config/mips/nm-irix4.h (procfs_set_watchpoint): Add prototype.
+	(procfs_stopped_by_watchpoint): Ditto.
+	* config/alpha/tm-alpha.h (ecoff_relocate_efi): Add prototype.
+	(struct symbol): Add forward decl for prototype.
+
+	* breakpoint.c (internal_breakpoint_number): Only needed if
+	GET_LONGJMP_TARGET or SOLIB_ADD is defined.
+
+	* objfiles.c (ecoff_relocate_efi): Remove prototype.
+
 Sat Jul 27 17:47:35 1996  Fred Fish  <fnf@cygnus.com>
 
 	* configure.in: Add test for "long long" support.

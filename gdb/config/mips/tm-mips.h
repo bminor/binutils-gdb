@@ -20,6 +20,13 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
+#ifdef __STDC__
+struct frame_info;
+struct symbol;
+struct type;
+struct value;
+#endif
+
 #include <bfd.h>
 #include "coff/sym.h"		/* Needed for PDR below.  */
 #include "coff/symconst.h"
@@ -72,6 +79,7 @@ extern CORE_ADDR mips_skip_prologue PARAMS ((CORE_ADDR addr, int lenient));
 /* Return non-zero if PC points to an instruction which will cause a step
    to execute both the instruction at PC and an instruction at PC+4.  */
 #define STEP_SKIPS_DELAY(pc) (mips_step_skips_delay (pc))
+extern int mips_step_skips_delay PARAMS ((CORE_ADDR));
 
 /* Immediately after a function call, return the saved pc.
    Can't always go through the frames for this because on some machines
@@ -173,6 +181,7 @@ extern int in_sigtramp PARAMS ((CORE_ADDR, char *));
    of register dumps. */
 
 #define DO_REGISTERS_INFO(_regnum, fp) mips_do_registers_info(_regnum, fp)
+extern void mips_do_registers_info PARAMS ((int, int));
 
 /* Total amount of space needed to store our copies of the machine's
    register state, the array `registers'.  */
@@ -245,12 +254,15 @@ extern int in_sigtramp PARAMS ((CORE_ADDR, char *));
 
 #define EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF) \
   mips_extract_return_value(TYPE, REGBUF, VALBUF)
+extern void
+mips_extract_return_value PARAMS ((struct type *, char [], char *));
 
 /* Write into appropriate registers a function return value
    of type TYPE, given in virtual format.  */
 
 #define STORE_RETURN_VALUE(TYPE,VALBUF) \
   mips_store_return_value(TYPE, VALBUF)
+extern void mips_store_return_value PARAMS ((struct type *, char *));
 
 /* Extract from an array REGBUF containing the (raw) register state
    the address in which a function should return its structure value,
@@ -275,6 +287,7 @@ extern int in_sigtramp PARAMS ((CORE_ADDR, char *));
    and produces the frame's chain-pointer. */
 
 #define FRAME_CHAIN(thisframe) (CORE_ADDR) mips_frame_chain (thisframe)
+extern CORE_ADDR mips_frame_chain PARAMS ((struct frame_info *));
 
 /* Define other aspects of the stack frame.  */
 
@@ -289,6 +302,7 @@ extern int in_sigtramp PARAMS ((CORE_ADDR, char *));
 /* Saved Pc.  */
 
 #define FRAME_SAVED_PC(FRAME)	(mips_frame_saved_pc(FRAME))
+extern int mips_frame_saved_pc PARAMS ((struct frame_info *));
 
 #define FRAME_ARGS_ADDRESS(fi)	(fi)->frame
 
@@ -298,6 +312,7 @@ extern int in_sigtramp PARAMS ((CORE_ADDR, char *));
    Can return -1, meaning no way to tell.  */
 
 #define FRAME_NUM_ARGS(num, fi)	(num = mips_frame_num_args(fi))
+extern int mips_frame_num_args PARAMS ((struct frame_info *));
 
 /* Return number of bytes at start of arglist that are not really args.  */
 
@@ -316,6 +331,7 @@ extern int in_sigtramp PARAMS ((CORE_ADDR, char *));
     (frame_saved_regs) = *(frame_info)->saved_regs; \
     (frame_saved_regs).regs[SP_REGNUM] = (frame_info)->frame; \
   } while (0)
+extern void mips_find_saved_regs PARAMS ((struct frame_info *));
 
 
 /* Things needed for making the inferior call functions.  */
@@ -326,14 +342,18 @@ extern int in_sigtramp PARAMS ((CORE_ADDR, char *));
 
 #define PUSH_ARGUMENTS(nargs, args, sp, struct_return, struct_addr) \
     sp = mips_push_arguments(nargs, args, sp, struct_return, struct_addr)
+extern CORE_ADDR
+mips_push_arguments PARAMS ((int, struct value **, CORE_ADDR, int, CORE_ADDR));
 
 /* Push an empty stack frame, to record the current PC, etc.  */
 
 #define PUSH_DUMMY_FRAME 	mips_push_dummy_frame()
+extern void mips_push_dummy_frame PARAMS ((void));
 
 /* Discard from the stack the innermost frame, restoring all registers.  */
 
 #define POP_FRAME		mips_pop_frame()
+extern void mips_pop_frame PARAMS ((void));
 
 #define MK_OP(op,rs,rt,offset) (((op)<<26)|((rs)<<21)|((rt)<<16)|(offset))
 #ifndef OP_LDFPR
@@ -448,6 +468,7 @@ extern int in_sigtramp PARAMS ((CORE_ADDR, char *));
    mips_extra_func_info_t's off of this.  */
 
 #define MIPS_EFI_SYMBOL_NAME "__GDB_EFI_INFO__"
+extern void ecoff_relocate_efi PARAMS ((struct symbol *, CORE_ADDR));
 
 /* Specific information about a procedure.
    This overlays the MIPS's PDR records, 
@@ -464,6 +485,7 @@ typedef struct mips_extra_func_info {
   struct frame_saved_regs *saved_regs;
 
 #define INIT_EXTRA_FRAME_INFO(fromleaf, fci) init_extra_frame_info(fci)
+extern void init_extra_frame_info PARAMS ((struct frame_info *));
 
 #define	PRINT_EXTRA_FRAME_INFO(fi) \
   { \
@@ -510,3 +532,8 @@ extern struct frame_info *setup_arbitrary_frame PARAMS ((int, CORE_ADDR *));
    probably much more common.  (FIXME). */
 
 #define COERCE_FLOAT_TO_DOUBLE (current_language -> la_language == language_c)
+
+/* These are defined in mdebugread.c and are used in mips-tdep.c  */
+extern CORE_ADDR sigtramp_address, sigtramp_end;
+extern void fixup_sigtramp PARAMS ((void));
+

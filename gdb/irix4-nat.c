@@ -35,6 +35,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 typedef unsigned int greg_t;	/* why isn't this defined? */
 
+static void
+fetch_core_registers PARAMS ((char *, unsigned int, int, unsigned int));
+
 /*
  * See the comment in m68k-tdep.c regarding the utility of these functions.
  */
