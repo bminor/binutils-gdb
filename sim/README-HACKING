@@ -122,5 +122,12 @@ renaming):
 	$  more */new-ChangeLog
 	$  make -f Makefile.in autoconf-install
 
+In a similar vein, both the configure and config.in files can be
+updated using the sequence:
 
-
+	$  cd devo/sim
+	$  make -f Makefile.in autoheader-common
+	$  make -f Makefile.in autoheader-changelog
+	$  more */new-ChangeLog
+	$  make -f Makefile.in autoheader-install
+

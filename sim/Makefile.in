@@ -196,7 +196,7 @@ config.status: configure
 # This is intended to be invoked in $srcdir as
 # "make -f Makefile.in autoconf-common".
 .PHONY: autoconf-common
-autoconf-common:
+autoconf-common autoheader-common:
 	for d in * ; \
 	do \
 	    if [ -d $$d -a -f $$d/configure.in ] ; \
@@ -205,11 +205,16 @@ autoconf-common:
 		then \
 		    echo "Running autoconf in $$d ..." ; \
 		    (cd $$d && autoconf) ; \
+		    if [ $* = autoheader-common ] ; \
+		    then \
+		      echo "Running autoheader in $$d ..." ; \
+		      (cd $$d && autoheader) ; \
+		    fi ; \
 		fi ; \
 	    fi ; \
 	done
 
-autoconf-changelog:
+autoconf-changelog autoheader-changelog:
 	id="`id | sed -e 's/^[^(]*(\([^)]*\).*$$/\1/'`" ; \
 	name=`grep "^$$id:" /etc/passwd | cut -f 5 -d ':'` ; \
 	host="`hostname`" ; \
@@ -225,6 +230,10 @@ autoconf-changelog:
 		    ( echo "$$date  $$name  <$$id@$$host>" ; \
 		      echo "" ; \
 		      echo "	* configure: Regenerated to track ../common/aclocal.m4 changes." ; \
+		      if [ $* = autoheader-changelog ] ; \
+		      then \
+		        echo "	* config.in: Ditto." ; \
+		      fi ; \
 		      echo "" ; \
 		      cat $$d/ChangeLog \
 		    ) > $$d/new-ChangeLog ; \
@@ -232,7 +241,7 @@ autoconf-changelog:
 	    fi ; \
 	done
 
-autoconf-install:
+autoconf-install autoheader-install:
 	for d in * ; \
 	do \
 	    if [ -d $$d -a -f $$d/configure.in ] ; \

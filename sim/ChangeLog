@@ -1,3 +1,8 @@
+Thu Apr  3 12:20:32 1997  Andrew Cagney  <cagney@kremvax.cygnus.com>
+
+	* Makefile.in (autoheader-common, autoheader-changelog,
+ 	autoheader-install): Perform autoheader in addition to autoconf.
+
 Wed Apr  2 15:09:05 1997  Doug Evans  <dje@canuck.cygnus.com>
 
 	* Makefile.in (autoconf-install): New target.
