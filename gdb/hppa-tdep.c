@@ -74,7 +74,7 @@ static void read_unwind_info PARAMS ((struct objfile *));
 static void internalize_unwinds PARAMS ((struct objfile *,
 					 struct unwind_table_entry *,
 					 asection *, unsigned int,
-					 unsigned int, unsigned int *));
+					 unsigned int));
 
 
 /* Routines to extract various sized constants out of hppa 
@@ -274,12 +274,11 @@ compare_unwind_entries (a, b)
 }
 
 static void
-internalize_unwinds (objfile, table, section, entries, size, indexp)
+internalize_unwinds (objfile, table, section, entries, size)
      struct objfile *objfile;
      struct unwind_table_entry *table;
      asection *section;
      unsigned int entries, size;
-     unsigned int *indexp;
 {
   /* We will read the unwind entries into temporary memory, then
      fill in the actual unwind table.  */
