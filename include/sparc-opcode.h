@@ -1046,10 +1046,18 @@ cond ("bz",	"tz",   CONDZ, F_ALIAS), /* for e */
 { "movcc",	F2(2, 0x59)|MCOND(CONDCC)|ICC|IMMED, F2(~2, ~0x59)|MCOND(~CONDCC)|XCC|(1<<12), "z,I,d", 0, v9 },
 { "movcc",	F2(2, 0x59)|MCOND(CONDCC)|XCC, F2(~2, ~0x59)|MCOND(~CONDCC)|IMMED|(1<<12), "Z,2,d", 0, v9 },
 { "movcc",	F2(2, 0x59)|MCOND(CONDCC)|XCC|IMMED, F2(~2, ~0x59)|MCOND(~CONDCC)|(1<<12), "Z,I,d", 0, v9 },
+{ "movgeu",	F2(2, 0x59)|MCOND(CONDGEU)|ICC, F2(~2, ~0x59)|MCOND(~CONDGEU)|IMMED|XCC|(1<<12), "z,2,d", 0, v9 },
+{ "movgeu",	F2(2, 0x59)|MCOND(CONDGEU)|ICC|IMMED, F2(~2, ~0x59)|MCOND(~CONDGEU)|XCC|(1<<12), "z,I,d", 0, v9 },
+{ "movgeu",	F2(2, 0x59)|MCOND(CONDGEU)|XCC, F2(~2, ~0x59)|MCOND(~CONDGEU)|IMMED|(1<<12), "Z,2,d", 0, v9 },
+{ "movgeu",	F2(2, 0x59)|MCOND(CONDGEU)|XCC|IMMED, F2(~2, ~0x59)|MCOND(~CONDGEU)|(1<<12), "Z,I,d", 0, v9 },
 { "movcs",	F2(2, 0x59)|MCOND(CONDCS)|ICC, F2(~2, ~0x59)|MCOND(~CONDCS)|IMMED|XCC|(1<<12), "z,2,d", 0, v9 },
 { "movcs",	F2(2, 0x59)|MCOND(CONDCS)|ICC|IMMED, F2(~2, ~0x59)|MCOND(~CONDCS)|XCC|(1<<12), "z,I,d", 0, v9 },
 { "movcs",	F2(2, 0x59)|MCOND(CONDCS)|XCC, F2(~2, ~0x59)|MCOND(~CONDCS)|IMMED|(1<<12), "Z,2,d", 0, v9 },
 { "movcs",	F2(2, 0x59)|MCOND(CONDCS)|XCC|IMMED, F2(~2, ~0x59)|MCOND(~CONDCS)|(1<<12), "Z,I,d", 0, v9 },
+{ "movlu",	F2(2, 0x59)|MCOND(CONDLU)|ICC, F2(~2, ~0x59)|MCOND(~CONDLU)|IMMED|XCC|(1<<12), "z,2,d", 0, v9 },
+{ "movlu",	F2(2, 0x59)|MCOND(CONDLU)|ICC|IMMED, F2(~2, ~0x59)|MCOND(~CONDLU)|XCC|(1<<12), "z,I,d", 0, v9 },
+{ "movlu",	F2(2, 0x59)|MCOND(CONDLU)|XCC, F2(~2, ~0x59)|MCOND(~CONDLU)|IMMED|(1<<12), "Z,2,d", 0, v9 },
+{ "movlu",	F2(2, 0x59)|MCOND(CONDLU)|XCC|IMMED, F2(~2, ~0x59)|MCOND(~CONDLU)|(1<<12), "Z,I,d", 0, v9 },
 { "move",	F2(2, 0x58)|FCC(0)|MCOND(FCONDE), IMMED|MCOND(~FCONDE)|FCC(~0)|F2(~2, ~0x58), "6,2,d", 0, v9 },
 { "move",	F2(2, 0x58)|FCC(0)|MCOND(FCONDE)|IMMED, MCOND(~FCONDE)|FCC(~0)|F2(~2, ~0x58), "6,I,d", 0, v9 },
 { "move",	F2(2, 0x58)|FCC(1)|MCOND(FCONDE), IMMED|MCOND(~FCONDE)|FCC(~1)|F2(~2, ~0x58), "7,2,d", 0, v9 },
@@ -1582,21 +1590,25 @@ cond ("bz",	"tz",   CONDZ, F_ALIAS), /* for e */
 
 #define brfcx(opcode, mask, lose) /* v9 */ \
  { opcode, FBFCC(0)|(mask), ANNUL|BPRED|FBFCC(~0)|(lose), "6,G",   F_DELAYED, v9 }, \
+ { opcode, FBFCC(0)|(mask)|ANNUL, BPRED|FBFCC(~0)|(lose), ",a6,G",   F_DELAYED, v9 }, \
  { opcode, FBFCC(0)|(mask), ANNUL|BPRED|FBFCC(~0)|(lose), ",N6,G",   F_DELAYED, v9 }, \
  { opcode, FBFCC(0)|(mask)|ANNUL, BPRED|FBFCC(~0)|(lose), ",a,N6,G", F_DELAYED, v9 }, \
  { opcode, FBFCC(0)|(mask)|BPRED, ANNUL|FBFCC(~0)|(lose), ",T6,G",   F_DELAYED, v9 }, \
  { opcode, FBFCC(0)|(mask)|BPRED|ANNUL, FBFCC(~0)|(lose), ",a,T6,G", F_DELAYED, v9 }, \
  { opcode, FBFCC(1)|(mask), ANNUL|BPRED|FBFCC(~1)|(lose), "7,G",   F_DELAYED, v9 }, \
+ { opcode, FBFCC(1)|(mask)|ANNUL, BPRED|FBFCC(~1)|(lose), ",a7,G",   F_DELAYED, v9 }, \
  { opcode, FBFCC(1)|(mask), ANNUL|BPRED|FBFCC(~1)|(lose), ",N7,G",   F_DELAYED, v9 }, \
  { opcode, FBFCC(1)|(mask)|ANNUL, BPRED|FBFCC(~1)|(lose), ",a,N7,G", F_DELAYED, v9 }, \
  { opcode, FBFCC(1)|(mask)|BPRED, ANNUL|FBFCC(~1)|(lose), ",T7,G",   F_DELAYED, v9 }, \
  { opcode, FBFCC(1)|(mask)|BPRED|ANNUL, FBFCC(~1)|(lose), ",a,T7,G", F_DELAYED, v9 }, \
  { opcode, FBFCC(2)|(mask), ANNUL|BPRED|FBFCC(~2)|(lose), "8,G",   F_DELAYED, v9 }, \
+ { opcode, FBFCC(2)|(mask)|ANNUL, BPRED|FBFCC(~2)|(lose), ",a8,G",   F_DELAYED, v9 }, \
  { opcode, FBFCC(2)|(mask), ANNUL|BPRED|FBFCC(~2)|(lose), ",N8,G",   F_DELAYED, v9 }, \
  { opcode, FBFCC(2)|(mask)|ANNUL, BPRED|FBFCC(~2)|(lose), ",a,N8,G", F_DELAYED, v9 }, \
  { opcode, FBFCC(2)|(mask)|BPRED, ANNUL|FBFCC(~2)|(lose), ",T8,G",   F_DELAYED, v9 }, \
  { opcode, FBFCC(2)|(mask)|BPRED|ANNUL, FBFCC(~2)|(lose), ",a,T8,G", F_DELAYED, v9 }, \
  { opcode, FBFCC(3)|(mask), ANNUL|BPRED|FBFCC(~3)|(lose), "9,G",   F_DELAYED, v9 }, \
+ { opcode, FBFCC(3)|(mask)|ANNUL, BPRED|FBFCC(~3)|(lose), ",a9,G",   F_DELAYED, v9 }, \
  { opcode, FBFCC(3)|(mask), ANNUL|BPRED|FBFCC(~3)|(lose), ",N9,G",   F_DELAYED, v9 }, \
  { opcode, FBFCC(3)|(mask)|ANNUL, BPRED|FBFCC(~3)|(lose), ",a,N9,G", F_DELAYED, v9 }, \
  { opcode, FBFCC(3)|(mask)|BPRED, ANNUL|FBFCC(~3)|(lose), ",T9,G",   F_DELAYED, v9 }, \
