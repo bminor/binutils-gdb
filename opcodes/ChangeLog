@@ -1,3 +1,42 @@
+Wed Aug  2 08:23:38 1995  Doug Evans  <dje@canuck.cygnus.com>
+
+	* sparc-dis.c (HASH_SIZE, HASH_INSN): Define.
+	(opcode_bits, opcode_hash_table, sparc64_p): New variables.
+	(opcodes_initialized): Renamed from opcodes_sorted.
+	(build_hash_table): New function.
+	(is_delayed_branch): Use hash table.
+	(print_insn): Renamed from print_insn_sparc, made static.
+	Build and use hash table.
+	(print_insn_sparc, print_insn_sparc64): New functions.
+	(compare_opcodes): If !sparc64, move sparc64 opcodes to end,
+	and vice-versa if sparc64.
+	* sparc-opc.c (all non-v9 insns): Use flag F_NOTV9 instead of F_ALIAS.
+
+Tue Aug  1 00:12:49 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* sh-dis.c (print_insn_shx): Remove unused local dslot.  Use
+	print_address_func for A_BDISP12 and A_BDISP8.  Correct test which
+	avoids printing a delay slot in a delay slot.
+	* sh-opc.h (sh_table): Fully bracket last entry.
+
+Mon Jul 31 12:04:47 1995  Doug Evans  <dje@canuck.cygnus.com>
+
+	* sparc-opc.c (sllx, srax, srlx): Fix disassembly.
+
+Wed Jul 12 00:59:34 1995  Ken Raeburn  <raeburn@kr-pc.cygnus.com>
+
+	* configure.in: Get host_makefile_frag from ${srcdir}.
+
+	* configure.in: Autoconfiscated.  Check for string[s].h.  Create
+	config.h from config.in.  Don't set up sysdep.h link.
+	* sysdep.h: New file.
+	* configure, config.in: New files, generated from configure.in.
+	* Makefile.in: Updated to be processed autoconf-style.
+	(distclean): Keep sysdep.h.  Remove config.log and config.cache.
+	(Makefile): Depend on config.status.
+	(config.status): New rule.
+	* configure.bat: Update Makefile substitutions.
+
 Tue Jul 11 14:23:37 1995  Jeff Spiegel  <jeffs@lsil.com>
 
 	* mips-opc.c (L1): Define.

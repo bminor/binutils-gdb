@@ -1,7 +1,5 @@
-/* to sanitize this file, grep -v v9 < sparc.h > clean-sparc.h */
-
 /* Table of opcodes for the sparc.
-	Copyright 1989, 1991, 1992 Free Software Foundation, Inc.
+   Copyright 1989, 1991, 1992, 1995 Free Software Foundation, Inc.
 
 This file is part of the BFD library.
 
@@ -17,7 +15,8 @@ for more details.
 
 You should have received a copy of the GNU General Public License
 along with this software; see the file COPYING.  If not, write to
-the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.	*/
+the Free Software Foundation, 59 Temple Place - Suite 330,
+Boston, MA 02111-1307, USA.	*/
 
 /* FIXME-someday: perhaps the ,a's and such should be embedded in the
    instruction's name rather than the args.  This would make gas faster, pinsn
@@ -30,7 +29,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.	*/
 #include "ansidecl.h"
 #include "opcode/sparc.h"
 
-CONST char *architecture_pname[] = {
+const char *architecture_pname[] = {
 	"v6",
 	"v7",
 	"v8",
@@ -128,20 +127,18 @@ struct sparc_opcode sparc_opcodes[] = {
 { "ld",	F3(3, 0x21, 1), F3(~3, ~0x21, ~1)|RS1_G0|RD(~0),"[i],F", 0, v6 },
 { "ld",	F3(3, 0x21, 1), F3(~3, ~0x21, ~1)|SIMM13(~0)|RD(~0),"[1],F", 0, v6 }, /* ld [rs1+0],d */
 
-/* FIXME These are marked F_ALIAS, so that they won't conflict with new v9
-   insns when v9 is present.  Otherwise, the F_ALIAS flag is ignored.  */
-{ "ld",	F3(3, 0x30, 0), F3(~3, ~0x30, ~0),		"[1+2],D", F_ALIAS, v6 },
-{ "ld",	F3(3, 0x30, 0), F3(~3, ~0x30, ~0)|RS2_G0,	"[1],D", F_ALIAS, v6 }, /* ld [rs1+%g0],d */
-{ "ld",	F3(3, 0x30, 1), F3(~3, ~0x30, ~1),		"[1+i],D", F_ALIAS, v6 },
-{ "ld",	F3(3, 0x30, 1), F3(~3, ~0x30, ~1),		"[i+1],D", F_ALIAS, v6 },
-{ "ld",	F3(3, 0x30, 1), F3(~3, ~0x30, ~1)|RS1_G0,	"[i],D", F_ALIAS, v6 },
-{ "ld",	F3(3, 0x30, 1), F3(~3, ~0x30, ~1)|SIMM13(~0),	"[1],D", F_ALIAS, v6 }, /* ld [rs1+0],d */
-{ "ld",	F3(3, 0x31, 0), F3(~3, ~0x31, ~0),		"[1+2],C", 0, v6 },
-{ "ld",	F3(3, 0x31, 0), F3(~3, ~0x31, ~0)|RS2_G0,	"[1],C", 0, v6 }, /* ld [rs1+%g0],d */
-{ "ld",	F3(3, 0x31, 1), F3(~3, ~0x31, ~1),		"[1+i],C", 0, v6 },
-{ "ld",	F3(3, 0x31, 1), F3(~3, ~0x31, ~1),		"[i+1],C", 0, v6 },
-{ "ld",	F3(3, 0x31, 1), F3(~3, ~0x31, ~1)|RS1_G0,	"[i],C", 0, v6 },
-{ "ld",	F3(3, 0x31, 1), F3(~3, ~0x31, ~1)|SIMM13(~0),	"[1],C", 0, v6 }, /* ld [rs1+0],d */
+{ "ld",	F3(3, 0x30, 0), F3(~3, ~0x30, ~0),		"[1+2],D", F_NOTV9, v6 },
+{ "ld",	F3(3, 0x30, 0), F3(~3, ~0x30, ~0)|RS2_G0,	"[1],D", F_NOTV9, v6 }, /* ld [rs1+%g0],d */
+{ "ld",	F3(3, 0x30, 1), F3(~3, ~0x30, ~1),		"[1+i],D", F_NOTV9, v6 },
+{ "ld",	F3(3, 0x30, 1), F3(~3, ~0x30, ~1),		"[i+1],D", F_NOTV9, v6 },
+{ "ld",	F3(3, 0x30, 1), F3(~3, ~0x30, ~1)|RS1_G0,	"[i],D", F_NOTV9, v6 },
+{ "ld",	F3(3, 0x30, 1), F3(~3, ~0x30, ~1)|SIMM13(~0),	"[1],D", F_NOTV9, v6 }, /* ld [rs1+0],d */
+{ "ld",	F3(3, 0x31, 0), F3(~3, ~0x31, ~0),		"[1+2],C", F_NOTV9, v6 },
+{ "ld",	F3(3, 0x31, 0), F3(~3, ~0x31, ~0)|RS2_G0,	"[1],C", F_NOTV9, v6 }, /* ld [rs1+%g0],d */
+{ "ld",	F3(3, 0x31, 1), F3(~3, ~0x31, ~1),		"[1+i],C", F_NOTV9, v6 },
+{ "ld",	F3(3, 0x31, 1), F3(~3, ~0x31, ~1),		"[i+1],C", F_NOTV9, v6 },
+{ "ld",	F3(3, 0x31, 1), F3(~3, ~0x31, ~1)|RS1_G0,	"[i],C", F_NOTV9, v6 },
+{ "ld",	F3(3, 0x31, 1), F3(~3, ~0x31, ~1)|SIMM13(~0),	"[1],C", F_NOTV9, v6 }, /* ld [rs1+0],d */
 
 /* The v9 LDUW is the same as the old 'ld' opcode, it is not the same as the
    'ld' pseudo-op in v9.  */
@@ -164,14 +161,13 @@ struct sparc_opcode sparc_opcodes[] = {
 { "ldd",	F3(3, 0x23, 1), F3(~3, ~0x23, ~1),		"[i+1],H", 0, v6 },
 { "ldd",	F3(3, 0x23, 1), F3(~3, ~0x23, ~1)|RS1_G0,	"[i],H", 0, v6 },
 { "ldd",	F3(3, 0x23, 1), F3(~3, ~0x23, ~1)|SIMM13(~0),	"[1],H", 0, v6 }, /* ldd [rs1+0],d */
-/* FIXME These are marked F_ALIAS, so that they won't conflict with new v9
-   insns when v9 is present.  Otherwise, the F_ALIAS flag is ignored.  */
-{ "ldd",	F3(3, 0x33, 0), F3(~3, ~0x33, ~0)|ASI(~0),	"[1+2],D", F_ALIAS, v6 },
-{ "ldd",	F3(3, 0x33, 0), F3(~3, ~0x33, ~0)|ASI_RS2(~0),	"[1],D", F_ALIAS, v6 }, /* ldd [rs1+%g0],d */
-{ "ldd",	F3(3, 0x33, 1), F3(~3, ~0x33, ~1),		"[1+i],D", F_ALIAS, v6 },
-{ "ldd",	F3(3, 0x33, 1), F3(~3, ~0x33, ~1),		"[i+1],D", F_ALIAS, v6 },
-{ "ldd",	F3(3, 0x33, 1), F3(~3, ~0x33, ~1)|RS1_G0,	"[i],D", F_ALIAS, v6 },
-{ "ldd",	F3(3, 0x33, 1), F3(~3, ~0x33, ~1)|SIMM13(~0),	"[1],D", F_ALIAS, v6 }, /* ldd [rs1+0],d */
+
+{ "ldd",	F3(3, 0x33, 0), F3(~3, ~0x33, ~0)|ASI(~0),	"[1+2],D", F_NOTV9, v6 },
+{ "ldd",	F3(3, 0x33, 0), F3(~3, ~0x33, ~0)|ASI_RS2(~0),	"[1],D", F_NOTV9, v6 }, /* ldd [rs1+%g0],d */
+{ "ldd",	F3(3, 0x33, 1), F3(~3, ~0x33, ~1),		"[1+i],D", F_NOTV9, v6 },
+{ "ldd",	F3(3, 0x33, 1), F3(~3, ~0x33, ~1),		"[i+1],D", F_NOTV9, v6 },
+{ "ldd",	F3(3, 0x33, 1), F3(~3, ~0x33, ~1)|RS1_G0,	"[i],D", F_NOTV9, v6 },
+{ "ldd",	F3(3, 0x33, 1), F3(~3, ~0x33, ~1)|SIMM13(~0),	"[1],D", F_NOTV9, v6 }, /* ldd [rs1+0],d */
 
 { "ldq",	F3(3, 0x22, 0), F3(~3, ~0x22, ~0)|ASI(~0),	"[1+2],J", 0, v9 },
 { "ldq",	F3(3, 0x22, 0), F3(~3, ~0x22, ~0)|ASI_RS2(~0),	"[1],J", 0, v9 }, /* ldd [rs1+%g0],d */
@@ -338,20 +334,19 @@ struct sparc_opcode sparc_opcodes[] = {
 { "st",	F3(3, 0x24, 1), F3(~3, ~0x24, ~1),			"g,[i+1]", 0, v6 },
 { "st",	F3(3, 0x24, 1), F3(~3, ~0x24, ~1)|RS1_G0,		"g,[i]", 0, v6 },
 { "st",	F3(3, 0x24, 1), F3(~3, ~0x24, ~1)|SIMM13(~0),		"g,[1]", 0, v6 }, /* st d,[rs1+0] */
-/* FIXME These are marked F_ALIAS, so that they won't conflict with new v9
-   insns when v9 is present.  Otherwise, the F_ALIAS flag is ignored.  */
-{ "st",	F3(3, 0x34, 0), F3(~3, ~0x34, ~0)|ASI(~0),		"D,[1+2]", F_ALIAS, v6 },
-{ "st",	F3(3, 0x34, 0), F3(~3, ~0x34, ~0)|ASI_RS2(~0),		"D,[1]", F_ALIAS, v6 }, /* st d,[rs1+%g0] */
-{ "st",	F3(3, 0x34, 1), F3(~3, ~0x34, ~1),			"D,[1+i]", F_ALIAS, v6 },
-{ "st",	F3(3, 0x34, 1), F3(~3, ~0x34, ~1),			"D,[i+1]", F_ALIAS, v6 },
-{ "st",	F3(3, 0x34, 1), F3(~3, ~0x34, ~1)|RS1_G0,		"D,[i]", F_ALIAS, v6 },
-{ "st",	F3(3, 0x34, 1), F3(~3, ~0x34, ~1)|SIMM13(~0),		"D,[1]", F_ALIAS, v6 }, /* st d,[rs1+0] */
-{ "st",	F3(3, 0x35, 0), F3(~3, ~0x35, ~0)|ASI(~0),		"C,[1+2]", 0, v6 },
-{ "st",	F3(3, 0x35, 0), F3(~3, ~0x35, ~0)|ASI_RS2(~0),		"C,[1]", 0, v6 }, /* st d,[rs1+%g0] */
-{ "st",	F3(3, 0x35, 1), F3(~3, ~0x35, ~1),			"C,[1+i]", 0, v6 },
-{ "st",	F3(3, 0x35, 1), F3(~3, ~0x35, ~1),			"C,[i+1]", 0, v6 },
-{ "st",	F3(3, 0x35, 1), F3(~3, ~0x35, ~1)|RS1_G0,		"C,[i]", 0, v6 },
-{ "st",	F3(3, 0x35, 1), F3(~3, ~0x35, ~1)|SIMM13(~0),		"C,[1]", 0, v6 }, /* st d,[rs1+0] */
+
+{ "st",	F3(3, 0x34, 0), F3(~3, ~0x34, ~0)|ASI(~0),		"D,[1+2]", F_NOTV9, v6 },
+{ "st",	F3(3, 0x34, 0), F3(~3, ~0x34, ~0)|ASI_RS2(~0),		"D,[1]", F_NOTV9, v6 }, /* st d,[rs1+%g0] */
+{ "st",	F3(3, 0x34, 1), F3(~3, ~0x34, ~1),			"D,[1+i]", F_NOTV9, v6 },
+{ "st",	F3(3, 0x34, 1), F3(~3, ~0x34, ~1),			"D,[i+1]", F_NOTV9, v6 },
+{ "st",	F3(3, 0x34, 1), F3(~3, ~0x34, ~1)|RS1_G0,		"D,[i]", F_NOTV9, v6 },
+{ "st",	F3(3, 0x34, 1), F3(~3, ~0x34, ~1)|SIMM13(~0),		"D,[1]", F_NOTV9, v6 }, /* st d,[rs1+0] */
+{ "st",	F3(3, 0x35, 0), F3(~3, ~0x35, ~0)|ASI(~0),		"C,[1+2]", F_NOTV9, v6 },
+{ "st",	F3(3, 0x35, 0), F3(~3, ~0x35, ~0)|ASI_RS2(~0),		"C,[1]", F_NOTV9, v6 }, /* st d,[rs1+%g0] */
+{ "st",	F3(3, 0x35, 1), F3(~3, ~0x35, ~1),			"C,[1+i]", F_NOTV9, v6 },
+{ "st",	F3(3, 0x35, 1), F3(~3, ~0x35, ~1),			"C,[i+1]", F_NOTV9, v6 },
+{ "st",	F3(3, 0x35, 1), F3(~3, ~0x35, ~1)|RS1_G0,		"C,[i]", F_NOTV9, v6 },
+{ "st",	F3(3, 0x35, 1), F3(~3, ~0x35, ~1)|SIMM13(~0),		"C,[1]", F_NOTV9, v6 }, /* st d,[rs1+0] */
 
 { "st",	F3(3, 0x25, 0), F3(~3, ~0x25, ~0)|RD_G0|ASI(~0),	"F,[1+2]", 0, v6 },
 { "st",	F3(3, 0x25, 0), F3(~3, ~0x25, ~0)|RD_G0|ASI_RS2(~0),	"F,[1]", 0, v6 }, /* st d,[rs1+%g0] */
@@ -408,36 +403,32 @@ struct sparc_opcode sparc_opcodes[] = {
 { "std",	F3(3, 0x07, 1), F3(~3, ~0x07, ~1),		"d,[i+1]", 0, v6 },
 { "std",	F3(3, 0x07, 1), F3(~3, ~0x07, ~1)|RS1_G0,	"d,[i]", 0, v6 },
 { "std",	F3(3, 0x07, 1), F3(~3, ~0x07, ~1)|SIMM13(~0),	"d,[1]", 0, v6 }, /* std d,[rs1+0] */
-/* FIXME These are marked F_ALIAS, so that they won't conflict with new v9
-   insns when v9 is present.  Otherwise, the F_ALIAS flag is ignored.  */
-{ "std",	F3(3, 0x26, 0), F3(~3, ~0x26, ~0)|ASI(~0),	"q,[1+2]", F_ALIAS, v6 },
-{ "std",	F3(3, 0x26, 0), F3(~3, ~0x26, ~0)|ASI_RS2(~0),	"q,[1]", F_ALIAS, v6 }, /* std d,[rs1+%g0] */
-{ "std",	F3(3, 0x26, 1), F3(~3, ~0x26, ~1),		"q,[1+i]", F_ALIAS, v6 },
-{ "std",	F3(3, 0x26, 1), F3(~3, ~0x26, ~1),		"q,[i+1]", F_ALIAS, v6 },
-{ "std",	F3(3, 0x26, 1), F3(~3, ~0x26, ~1)|RS1_G0,	"q,[i]", F_ALIAS, v6 },
-{ "std",	F3(3, 0x26, 1), F3(~3, ~0x26, ~1)|SIMM13(~0),	"q,[1]", F_ALIAS, v6 }, /* std d,[rs1+0] */
+
+{ "std",	F3(3, 0x26, 0), F3(~3, ~0x26, ~0)|ASI(~0),	"q,[1+2]", F_NOTV9, v6 },
+{ "std",	F3(3, 0x26, 0), F3(~3, ~0x26, ~0)|ASI_RS2(~0),	"q,[1]", F_NOTV9, v6 }, /* std d,[rs1+%g0] */
+{ "std",	F3(3, 0x26, 1), F3(~3, ~0x26, ~1),		"q,[1+i]", F_NOTV9, v6 },
+{ "std",	F3(3, 0x26, 1), F3(~3, ~0x26, ~1),		"q,[i+1]", F_NOTV9, v6 },
+{ "std",	F3(3, 0x26, 1), F3(~3, ~0x26, ~1)|RS1_G0,	"q,[i]", F_NOTV9, v6 },
+{ "std",	F3(3, 0x26, 1), F3(~3, ~0x26, ~1)|SIMM13(~0),	"q,[1]", F_NOTV9, v6 }, /* std d,[rs1+0] */
 { "std",	F3(3, 0x27, 0), F3(~3, ~0x27, ~0)|ASI(~0),	"H,[1+2]", 0, v6 },
 { "std",	F3(3, 0x27, 0), F3(~3, ~0x27, ~0)|ASI_RS2(~0),	"H,[1]", 0, v6 }, /* std d,[rs1+%g0] */
 { "std",	F3(3, 0x27, 1), F3(~3, ~0x27, ~1),		"H,[1+i]", 0, v6 },
 { "std",	F3(3, 0x27, 1), F3(~3, ~0x27, ~1),		"H,[i+1]", 0, v6 },
 { "std",	F3(3, 0x27, 1), F3(~3, ~0x27, ~1)|RS1_G0,	"H,[i]", 0, v6 },
 { "std",	F3(3, 0x27, 1), F3(~3, ~0x27, ~1)|SIMM13(~0),	"H,[1]", 0, v6 }, /* std d,[rs1+0] */
-/* FIXME These are marked F_ALIAS, so that they won't conflict with new v9
-   insns when v9 is present.  Otherwise, the F_ALIAS flag is ignored.  */
-{ "std",	F3(3, 0x36, 0), F3(~3, ~0x36, ~0)|ASI(~0),	"Q,[1+2]", F_ALIAS, v6 },
-{ "std",	F3(3, 0x36, 0), F3(~3, ~0x36, ~0)|ASI_RS2(~0),	"Q,[1]", F_ALIAS, v6 }, /* std d,[rs1+%g0] */
-{ "std",	F3(3, 0x36, 1), F3(~3, ~0x36, ~1),		"Q,[1+i]", F_ALIAS, v6 },
-{ "std",	F3(3, 0x36, 1), F3(~3, ~0x36, ~1),		"Q,[i+1]", F_ALIAS, v6 },
-{ "std",	F3(3, 0x36, 1), F3(~3, ~0x36, ~1)|RS1_G0,	"Q,[i]", F_ALIAS, v6 },
-{ "std",	F3(3, 0x36, 1), F3(~3, ~0x36, ~1)|SIMM13(~0),	"Q,[1]", F_ALIAS, v6 }, /* std d,[rs1+0] */
-/* FIXME These are marked F_ALIAS, so that they won't conflict with new v9
-   insns when v9 is present.  Otherwise, the F_ALIAS flag is ignored.  */
-{ "std",	F3(3, 0x37, 0), F3(~3, ~0x37, ~0)|ASI(~0),	"D,[1+2]", F_ALIAS, v6 },
-{ "std",	F3(3, 0x37, 0), F3(~3, ~0x37, ~0)|ASI_RS2(~0),	"D,[1]", F_ALIAS, v6 }, /* std d,[rs1+%g0] */
-{ "std",	F3(3, 0x37, 1), F3(~3, ~0x37, ~1),		"D,[1+i]", F_ALIAS, v6 },
-{ "std",	F3(3, 0x37, 1), F3(~3, ~0x37, ~1),		"D,[i+1]", F_ALIAS, v6 },
-{ "std",	F3(3, 0x37, 1), F3(~3, ~0x37, ~1)|RS1_G0,	"D,[i]", F_ALIAS, v6 },
-{ "std",	F3(3, 0x37, 1), F3(~3, ~0x37, ~1)|SIMM13(~0),	"D,[1]", F_ALIAS, v6 }, /* std d,[rs1+0] */
+
+{ "std",	F3(3, 0x36, 0), F3(~3, ~0x36, ~0)|ASI(~0),	"Q,[1+2]", F_NOTV9, v6 },
+{ "std",	F3(3, 0x36, 0), F3(~3, ~0x36, ~0)|ASI_RS2(~0),	"Q,[1]", F_NOTV9, v6 }, /* std d,[rs1+%g0] */
+{ "std",	F3(3, 0x36, 1), F3(~3, ~0x36, ~1),		"Q,[1+i]", F_NOTV9, v6 },
+{ "std",	F3(3, 0x36, 1), F3(~3, ~0x36, ~1),		"Q,[i+1]", F_NOTV9, v6 },
+{ "std",	F3(3, 0x36, 1), F3(~3, ~0x36, ~1)|RS1_G0,	"Q,[i]", F_NOTV9, v6 },
+{ "std",	F3(3, 0x36, 1), F3(~3, ~0x36, ~1)|SIMM13(~0),	"Q,[1]", F_NOTV9, v6 }, /* std d,[rs1+0] */
+{ "std",	F3(3, 0x37, 0), F3(~3, ~0x37, ~0)|ASI(~0),	"D,[1+2]", F_NOTV9, v6 },
+{ "std",	F3(3, 0x37, 0), F3(~3, ~0x37, ~0)|ASI_RS2(~0),	"D,[1]", F_NOTV9, v6 }, /* std d,[rs1+%g0] */
+{ "std",	F3(3, 0x37, 1), F3(~3, ~0x37, ~1),		"D,[1+i]", F_NOTV9, v6 },
+{ "std",	F3(3, 0x37, 1), F3(~3, ~0x37, ~1),		"D,[i+1]", F_NOTV9, v6 },
+{ "std",	F3(3, 0x37, 1), F3(~3, ~0x37, ~1)|RS1_G0,	"D,[i]", F_NOTV9, v6 },
+{ "std",	F3(3, 0x37, 1), F3(~3, ~0x37, ~1)|SIMM13(~0),	"D,[1]", F_NOTV9, v6 }, /* std d,[rs1+0] */
 
 { "stda",	F3(3, 0x17, 0), F3(~3, ~0x17, ~0),		"d,[1+2]A", 0, v6 },
 { "stda",	F3(3, 0x17, 0), F3(~3, ~0x17, ~0)|RS2(~0),	"d,[1]A", 0, v6 }, /* stda d,[rs1+%g0] */
@@ -542,11 +533,11 @@ struct sparc_opcode sparc_opcodes[] = {
 { "jmpl",	F3(2, 0x38, 1), F3(~2, ~0x38, ~1),		"1+i,d", F_JSR|F_DELAYED, v6 },
 { "jmpl",	F3(2, 0x38, 1), F3(~2, ~0x38, ~1),		"i+1,d", F_JSR|F_DELAYED, v6 },
 
-{ "done",	F3(2, 0x3e, 1)|RD(0), F3(~2, ~0x3e, ~1)|RD(~0)|RS1_G0|SIMM13(~0),	"", 0, v9 },
-{ "retry",	F3(2, 0x3e, 1)|RD(1), F3(~2, ~0x3e, ~1)|RD(~1)|RS1_G0|SIMM13(~0),	"", 0, v9 },
-{ "saved",	F3(2, 0x31, 1)|RD(0), F3(~2, ~0x31, ~1)|RD(~0)|RS1_G0|SIMM13(~0),	"", 0, v9 },
-{ "restored",	F3(2, 0x31, 1)|RD(1), F3(~2, ~0x31, ~1)|RD(~1)|RS1_G0|SIMM13(~0),	"", 0, v9 },
-{ "sir",	F3(2, 0x30, 0)|RD(0xf), F3(~2, ~0x30, ~0)|RD(~0xf)|RS1_G0|SIMM13(~0),	"", 0, v9 },
+{ "done",	F3(2, 0x3e, 0)|RD(0), F3(~2, ~0x3e, ~0)|RD(~0)|RS1_G0|SIMM13(~0),	"", 0, v9 },
+{ "retry",	F3(2, 0x3e, 0)|RD(1), F3(~2, ~0x3e, ~0)|RD(~1)|RS1_G0|SIMM13(~0),	"", 0, v9 },
+{ "saved",	F3(2, 0x31, 0)|RD(0), F3(~2, ~0x31, ~0)|RD(~0)|RS1_G0|SIMM13(~0),	"", 0, v9 },
+{ "restored",	F3(2, 0x31, 0)|RD(1), F3(~2, ~0x31, ~0)|RD(~1)|RS1_G0|SIMM13(~0),	"", 0, v9 },
+{ "sir",	F3(2, 0x30, 1)|RD(0xf), F3(~2, ~0x30, ~1)|RD(~0xf)|RS1_G0,		"i", 0, v9 },
 
 { "flush",	F3(2, 0x3b, 0), F3(~2, ~0x3b, ~0)|ASI(~0),	"1+2", 0, v8 },
 { "flush",	F3(2, 0x3b, 0), F3(~2, ~0x3b, ~0)|ASI_RS2(~0),	"1", 0, v8 }, /* flush rs1+%g0 */
@@ -572,7 +563,7 @@ struct sparc_opcode sparc_opcodes[] = {
 
 { "flushw",	F3(2, 0x2b, 0), F3(~2, ~0x2b, ~0)|RD_G0|RS1_G0|ASI_RS2(~0),	"", 0, v9 },
 
-{ "membar",	F3(2, 0x28, 1)|RS1(0xf), F3(~2, ~0x28, ~1)|RD_G0|RS1(~0xf)|ASI(~0), "K", 0, v9 },
+{ "membar",	F3(2, 0x28, 1)|RS1(0xf), F3(~2, ~0x28, ~1)|RD_G0|RS1(~0xf)|SIMM13(~0), "K", 0, v9 },
 { "stbar",	F3(2, 0x28, 0)|RS1(0xf), F3(~2, ~0x28, ~0)|RD_G0|RS1(~0xf)|SIMM13(~0),	"", 0, v8 },
 
 { "prefetch",	F3(3, 0x2d, 0), F3(~3, ~0x2d, ~0),		"[1+2],*", 0, v9 },
@@ -589,6 +580,7 @@ struct sparc_opcode sparc_opcodes[] = {
 { "prefetcha",	F3(3, 0x3d, 1), F3(~3, ~0x3d, ~1)|SIMM13(~0),	"[1]o,d", 0, v9 }, /* prefetcha [rs1+0],d */
 
  /* The 1<<12 is a long story.  It is necessary.  For more info, please contact rich@cygnus.com */
+ /* FIXME: 'i' is wrong, need new letter for 5 bit unsigned constants.  */
 { "sll",	F3(2, 0x25, 0), F3(~2, ~0x25, ~0)|(1<<12)|ASI(~0),	"1,2,d", 0, v6 },
 { "sll",	F3(2, 0x25, 1), F3(~2, ~0x25, ~1)|(1<<12),		"1,i,d", 0, v6 },
 { "sra",	F3(2, 0x27, 0), F3(~2, ~0x27, ~0)|(1<<12)|ASI(~0),	"1,2,d", 0, v6 },
@@ -596,12 +588,13 @@ struct sparc_opcode sparc_opcodes[] = {
 { "srl",	F3(2, 0x26, 0), F3(~2, ~0x26, ~0)|(1<<12)|ASI(~0),	"1,2,d", 0, v6 },
 { "srl",	F3(2, 0x26, 1), F3(~2, ~0x26, ~1)|(1<<12),		"1,i,d", 0, v6 },
 
+ /* FIXME: 'j' is wrong, need new letter for 6 bit unsigned constants.  */
 { "sllx",	F3(2, 0x25, 0)|(1<<12), F3(~2, ~0x25, ~0)|(ASI(~0)^(1<<12)),	"1,2,d", 0, v9 },
-{ "sllx",	F3(2, 0x25, 1)|(1<<12), F3(~2, ~0x25, ~1),		"1,i,d", 0, v9 },
+{ "sllx",	F3(2, 0x25, 1)|(1<<12), F3(~2, ~0x25, ~1)|(0x3f<<6),		"1,j,d", 0, v9 },
 { "srax",	F3(2, 0x27, 0)|(1<<12), F3(~2, ~0x27, ~0)|(ASI(~0)^(1<<12)),	"1,2,d", 0, v9 },
-{ "srax",	F3(2, 0x27, 1)|(1<<12), F3(~2, ~0x27, ~1),		"1,i,d", 0, v9 },
+{ "srax",	F3(2, 0x27, 1)|(1<<12), F3(~2, ~0x27, ~1)|(0x3f<<6),		"1,j,d", 0, v9 },
 { "srlx",	F3(2, 0x26, 0)|(1<<12), F3(~2, ~0x26, ~0)|(ASI(~0)^(1<<12)),	"1,2,d", 0, v9 },
-{ "srlx",	F3(2, 0x26, 1)|(1<<12), F3(~2, ~0x26, ~1),		"1,i,d", 0, v9 },
+{ "srlx",	F3(2, 0x26, 1)|(1<<12), F3(~2, ~0x26, ~1)|(0x3f<<6),		"1,j,d", 0, v9 },
 
 { "mulscc",	F3(2, 0x24, 0), F3(~2, ~0x24, ~0)|ASI(~0),	"1,2,d", 0, v6 },
 { "mulscc",	F3(2, 0x24, 1), F3(~2, ~0x24, ~1),		"1,i,d", 0, v6 },
@@ -654,18 +647,16 @@ struct sparc_opcode sparc_opcodes[] = {
 { "tst",	F3(2, 0x12, 0), F3(~2, ~0x12, ~0)|RD_G0|RS1_G0|ASI(~0),	"2", 0, v6 }, /* orcc %g0, rs2, %g0 */
 { "tst",	F3(2, 0x12, 1), F3(~2, ~0x12, ~1)|RD_G0|SIMM13(~0),	"1", 0, v6 }, /* orcc rs1, 0, %g0 */
 
-/* FIXME These are marked F_ALIAS, so that they won't conflict with new v9
-   insns when v9 is present.  Otherwise, the F_ALIAS flag is ignored.  */
 { "wr",	F3(2, 0x30, 0),		F3(~2, ~0x30, ~0)|ASI(~0),		"1,2,m", 0, v8 }, /* wr r,r,%asrX */
 { "wr",	F3(2, 0x30, 0),		F3(~2, ~0x30, ~0)|RD_G0|ASI(~0),	"1,2,y", 0, v6 }, /* wr r,r,%y */
 { "wr",	F3(2, 0x30, 1),		F3(~2, ~0x30, ~1),			"1,i,m", 0, v8 }, /* wr r,i,%asrX */
 { "wr",	F3(2, 0x30, 1),		F3(~2, ~0x30, ~1)|RD_G0,		"1,i,y", 0, v6 }, /* wr r,i,%y */
-{ "wr",	F3(2, 0x31, 0),		F3(~2, ~0x31, ~0)|RD_G0|ASI(~0),	"1,2,p", F_ALIAS, v6 }, /* wr r,r,%psr */
-{ "wr",	F3(2, 0x31, 1),		F3(~2, ~0x31, ~1)|RD_G0,		"1,i,p", F_ALIAS, v6 }, /* wr r,i,%psr */
-{ "wr",	F3(2, 0x32, 0),		F3(~2, ~0x32, ~0)|RD_G0|ASI(~0),	"1,2,w", F_ALIAS, v6 }, /* wr r,r,%wim */
-{ "wr",	F3(2, 0x32, 1),		F3(~2, ~0x32, ~1)|RD_G0,		"1,i,w", F_ALIAS, v6 }, /* wr r,i,%wim */
-{ "wr",	F3(2, 0x33, 0),		F3(~2, ~0x33, ~0)|RD_G0|ASI(~0),	"1,2,t", F_ALIAS, v6 }, /* wr r,r,%tbr */
-{ "wr",	F3(2, 0x33, 1),		F3(~2, ~0x33, ~1)|RD_G0,		"1,i,t", F_ALIAS, v6 }, /* wr r,i,%tbr */
+{ "wr",	F3(2, 0x31, 0),		F3(~2, ~0x31, ~0)|RD_G0|ASI(~0),	"1,2,p", F_NOTV9, v6 }, /* wr r,r,%psr */
+{ "wr",	F3(2, 0x31, 1),		F3(~2, ~0x31, ~1)|RD_G0,		"1,i,p", F_NOTV9, v6 }, /* wr r,i,%psr */
+{ "wr",	F3(2, 0x32, 0),		F3(~2, ~0x32, ~0)|RD_G0|ASI(~0),	"1,2,w", F_NOTV9, v6 }, /* wr r,r,%wim */
+{ "wr",	F3(2, 0x32, 1),		F3(~2, ~0x32, ~1)|RD_G0,		"1,i,w", F_NOTV9, v6 }, /* wr r,i,%wim */
+{ "wr",	F3(2, 0x33, 0),		F3(~2, ~0x33, ~0)|RD_G0|ASI(~0),	"1,2,t", F_NOTV9, v6 }, /* wr r,r,%tbr */
+{ "wr",	F3(2, 0x33, 1),		F3(~2, ~0x33, ~1)|RD_G0,		"1,i,t", F_NOTV9, v6 }, /* wr r,i,%tbr */
 
 { "wr", F3(2, 0x30, 0)|RD(0), F3(~2, ~0x30, ~0)|RD(~0)|ASI(~0), "1,2,y", 0, v9 }, /* wr r,r,%y */
 { "wr", F3(2, 0x30, 1)|RD(0), F3(~2, ~0x30, ~1)|RD(~0),		"1,i,y", 0, v9 }, /* wr r,i,%y */
@@ -676,19 +667,17 @@ struct sparc_opcode sparc_opcodes[] = {
 { "wr", F3(2, 0x30, 0)|RD(6), F3(~2, ~0x30, ~0)|RD(~6)|ASI(~0), "1,2,s", 0, v9 }, /* wr r,i,%fprs */
 { "wr", F3(2, 0x30, 1)|RD(6), F3(~2, ~0x30, ~1)|RD(~6),		"1,i,s", 0, v9 }, /* wr r,i,%fprs */
 
-/* FIXME These are marked F_ALIAS, so that they won't conflict with new v9
-   insns when v9 is present.  Otherwise, the F_ALIAS flag is ignored.  */
 { "rd",	F3(2, 0x28, 0),			F3(~2, ~0x28, ~0)|SIMM13(~0),		"M,d", 0, v8 }, /* rd %asrX,r */
 { "rd",	F3(2, 0x28, 0),			F3(~2, ~0x28, ~0)|RS1_G0|SIMM13(~0),	"y,d", 0, v6 }, /* rd %y,r */
-{ "rd",	F3(2, 0x29, 0),			F3(~2, ~0x29, ~0)|RS1_G0|SIMM13(~0),	"p,d", F_ALIAS, v6 }, /* rd %psr,r */
-{ "rd",	F3(2, 0x2a, 0),			F3(~2, ~0x2a, ~0)|RS1_G0|SIMM13(~0),	"w,d", F_ALIAS, v6 }, /* rd %wim,r */
-{ "rd",	F3(2, 0x2b, 0),			F3(~2, ~0x2b, ~0)|RS1_G0|SIMM13(~0),	"t,d", F_ALIAS, v6 }, /* rd %tbr,r */
+{ "rd",	F3(2, 0x29, 0),			F3(~2, ~0x29, ~0)|RS1_G0|SIMM13(~0),	"p,d", F_NOTV9, v6 }, /* rd %psr,r */
+{ "rd",	F3(2, 0x2a, 0),			F3(~2, ~0x2a, ~0)|RS1_G0|SIMM13(~0),	"w,d", F_NOTV9, v6 }, /* rd %wim,r */
+{ "rd",	F3(2, 0x2b, 0),			F3(~2, ~0x2b, ~0)|RS1_G0|SIMM13(~0),	"t,d", F_NOTV9, v6 }, /* rd %tbr,r */
 
 { "rd",	F3(2, 0x28, 0)|RS1(2),		F3(~2, ~0x28, ~0)|RS1(~2)|SIMM13(~0),	"E,d", 0, v9 }, /* rd %ccr,r */
 { "rd",	F3(2, 0x28, 0)|RS1(3),		F3(~2, ~0x28, ~0)|RS1(~3)|SIMM13(~0),	"o,d", 0, v9 }, /* rd %asi,r */
 { "rd",	F3(2, 0x28, 0)|RS1(4),		F3(~2, ~0x28, ~0)|RS1(~4)|SIMM13(~0),	"W,d", 0, v9 }, /* rd %tick,r */
 { "rd",	F3(2, 0x28, 0)|RS1(5),		F3(~2, ~0x28, ~0)|RS1(~5)|SIMM13(~0),	"P,d", 0, v9 }, /* rd %pc,r */
-{ "rd",	F3(2, 0x2b, 0)|RS1(6),		F3(~2, ~0x2b, ~0)|RS1(~6)|SIMM13(~0),	"s,d", 0, v9 }, /* rd %fprs,r */
+{ "rd",	F3(2, 0x28, 0)|RS1(6),		F3(~2, ~0x28, ~0)|RS1(~6)|SIMM13(~0),	"s,d", 0, v9 }, /* rd %fprs,r */
 
 { "rdpr",	F3(2, 0x2a, 0),		F3(~2, ~0x2a, ~0)|SIMM13(~0),	"?,d", 0, v9 },   /* rdpr %priv,r */
 { "wrpr",	F3(2, 0x32, 0),		F3(~2, ~0x32, ~0),		"1,2,!", 0, v9 }, /* wrpr r1,r2,%priv */
@@ -714,9 +703,9 @@ struct sparc_opcode sparc_opcodes[] = {
    v9: Methinks we will need some sort of F_NOTFORV9 flag.  */
 { "mov",	F3(2, 0x28, 0),		 F3(~2, ~0x28, ~0)|SIMM13(~0),			"M,d", F_ALIAS, v8 }, /* rd %asr1,r */
 { "mov",	F3(2, 0x28, 0),		 F3(~2, ~0x28, ~0)|RS1_G0|SIMM13(~0),		"y,d", F_ALIAS, v6 }, /* rd %y,r */
-{ "mov",	F3(2, 0x29, 0),		 F3(~2, ~0x29, ~0)|RS1_G0|SIMM13(~0),		"p,d", F_ALIAS, v6 }, /* rd %psr,r */
-{ "mov",	F3(2, 0x2a, 0),		 F3(~2, ~0x2a, ~0)|RS1_G0|SIMM13(~0),		"w,d", F_ALIAS, v6 }, /* rd %wim,r */
-{ "mov",	F3(2, 0x2b, 0),		 F3(~2, ~0x2b, ~0)|RS1_G0|SIMM13(~0),		"t,d", F_ALIAS, v6 }, /* rd %tbr,r */
+{ "mov",	F3(2, 0x29, 0),		 F3(~2, ~0x29, ~0)|RS1_G0|SIMM13(~0),		"p,d", F_ALIAS|F_NOTV9, v6 }, /* rd %psr,r */
+{ "mov",	F3(2, 0x2a, 0),		 F3(~2, ~0x2a, ~0)|RS1_G0|SIMM13(~0),		"w,d", F_ALIAS|F_NOTV9, v6 }, /* rd %wim,r */
+{ "mov",	F3(2, 0x2b, 0),		 F3(~2, ~0x2b, ~0)|RS1_G0|SIMM13(~0),		"t,d", F_ALIAS|F_NOTV9, v6 }, /* rd %tbr,r */
 
 { "mov",	F3(2, 0x30, 0), F3(~2, ~0x30, ~0)|ASI_RS2(~0),	"1,y", F_ALIAS, v6 }, /* wr rs1,%g0,%y */
 { "mov",	F3(2, 0x30, 1), F3(~2, ~0x30, ~1),		"i,y", F_ALIAS, v6 },
@@ -763,17 +752,13 @@ struct sparc_opcode sparc_opcodes[] = {
 { "subcc",	F3(2, 0x14, 0), F3(~2, ~0x14, ~0)|ASI(~0),	"1,2,d", 0, v6 },
 { "subcc",	F3(2, 0x14, 1), F3(~2, ~0x14, ~1),		"1,i,d", 0, v6 },
 
-/* FIXME These are marked F_ALIAS, so that they won't conflict with new v9
-   insns when v9 is present.  Otherwise, the F_ALIAS flag is ignored.  */
-{ "subx",	F3(2, 0x0c, 0), F3(~2, ~0x0c, ~0)|ASI(~0),	"1,2,d", F_ALIAS, v6 },
-{ "subx",	F3(2, 0x0c, 1), F3(~2, ~0x0c, ~1),		"1,i,d", F_ALIAS, v6 },
+{ "subx",	F3(2, 0x0c, 0), F3(~2, ~0x0c, ~0)|ASI(~0),	"1,2,d", F_NOTV9, v6 },
+{ "subx",	F3(2, 0x0c, 1), F3(~2, ~0x0c, ~1),		"1,i,d", F_NOTV9, v6 },
 { "subc",	F3(2, 0x0c, 0), F3(~2, ~0x0c, ~0)|ASI(~0),	"1,2,d", 0, v9 },
 { "subc",	F3(2, 0x0c, 1), F3(~2, ~0x0c, ~1),		"1,i,d", 0, v9 },
 
-/* FIXME These are marked F_ALIAS, so that they won't conflict with new v9
-   insns when v9 is present.  Otherwise, the F_ALIAS flag is ignored.  */
-{ "subxcc",	F3(2, 0x1c, 0), F3(~2, ~0x1c, ~0)|ASI(~0),	"1,2,d", F_ALIAS, v6 },
-{ "subxcc",	F3(2, 0x1c, 1), F3(~2, ~0x1c, ~1),		"1,i,d", F_ALIAS, v6 },
+{ "subxcc",	F3(2, 0x1c, 0), F3(~2, ~0x1c, ~0)|ASI(~0),	"1,2,d", F_NOTV9, v6 },
+{ "subxcc",	F3(2, 0x1c, 1), F3(~2, ~0x1c, ~1),		"1,i,d", F_NOTV9, v6 },
 { "subccc",	F3(2, 0x1c, 0), F3(~2, ~0x1c, ~0)|ASI(~0),	"1,2,d", 0, v9 },
 { "subccc",	F3(2, 0x1c, 1), F3(~2, ~0x1c, ~1),		"1,i,d", 0, v9 },
 
@@ -806,19 +791,17 @@ struct sparc_opcode sparc_opcodes[] = {
 { "addcc",	F3(2, 0x10, 0), F3(~2, ~0x10, ~0)|ASI(~0),	"1,2,d", 0, v6 },
 { "addcc",	F3(2, 0x10, 1), F3(~2, ~0x10, ~1),		"1,i,d", 0, v6 },
 { "addcc",	F3(2, 0x10, 1), F3(~2, ~0x10, ~1),		"i,1,d", 0, v6 },
-/* FIXME These are marked F_ALIAS, so that they won't conflict with new v9
-   insns when v9 is present.  Otherwise, the F_ALIAS flag is ignored.  */
-{ "addx",	F3(2, 0x08, 0), F3(~2, ~0x08, ~0)|ASI(~0),	"1,2,d", F_ALIAS, v6 },
-{ "addx",	F3(2, 0x08, 1), F3(~2, ~0x08, ~1),		"1,i,d", F_ALIAS, v6 },
-{ "addx",	F3(2, 0x08, 1), F3(~2, ~0x08, ~1),		"i,1,d", F_ALIAS, v6 },
+
+{ "addx",	F3(2, 0x08, 0), F3(~2, ~0x08, ~0)|ASI(~0),	"1,2,d", F_NOTV9, v6 },
+{ "addx",	F3(2, 0x08, 1), F3(~2, ~0x08, ~1),		"1,i,d", F_NOTV9, v6 },
+{ "addx",	F3(2, 0x08, 1), F3(~2, ~0x08, ~1),		"i,1,d", F_NOTV9, v6 },
 { "addc",	F3(2, 0x08, 0), F3(~2, ~0x08, ~0)|ASI(~0),	"1,2,d", 0, v9 },
 { "addc",	F3(2, 0x08, 1), F3(~2, ~0x08, ~1),		"1,i,d", 0, v9 },
 { "addc",	F3(2, 0x08, 1), F3(~2, ~0x08, ~1),		"i,1,d", 0, v9 },
-/* FIXME These are marked F_ALIAS, so that they won't conflict with new v9
-   insns when v9 is present.  Otherwise, the F_ALIAS flag is ignored.  */
-{ "addxcc",	F3(2, 0x18, 0), F3(~2, ~0x18, ~0)|ASI(~0),	"1,2,d", F_ALIAS, v6 },
-{ "addxcc",	F3(2, 0x18, 1), F3(~2, ~0x18, ~1),		"1,i,d", F_ALIAS, v6 },
-{ "addxcc",	F3(2, 0x18, 1), F3(~2, ~0x18, ~1),		"i,1,d", F_ALIAS, v6 },
+
+{ "addxcc",	F3(2, 0x18, 0), F3(~2, ~0x18, ~0)|ASI(~0),	"1,2,d", F_NOTV9, v6 },
+{ "addxcc",	F3(2, 0x18, 1), F3(~2, ~0x18, ~1),		"1,i,d", F_NOTV9, v6 },
+{ "addxcc",	F3(2, 0x18, 1), F3(~2, ~0x18, ~1),		"i,1,d", F_NOTV9, v6 },
 { "addccc",	F3(2, 0x18, 0), F3(~2, ~0x18, ~0)|ASI(~0),	"1,2,d", 0, v9 },
 { "addccc",	F3(2, 0x18, 1), F3(~2, ~0x18, ~1),		"1,i,d", 0, v9 },
 { "addccc",	F3(2, 0x18, 1), F3(~2, ~0x18, ~1),		"i,1,d", 0, v9 },
@@ -1297,9 +1280,7 @@ condfc("fbule",	"cb013", 0xe, 0),
 { "tsubcctv",	F3(2, 0x23, 0), F3(~2, ~0x23, ~0)|ASI(~0),	"1,2,d", 0, v6 },
 { "tsubcctv",	F3(2, 0x23, 1), F3(~2, ~0x23, ~1),		"1,i,d", 0, v6 },
 
-/* FIXME This is marked F_ALIAS, so that it won't conflict with new v9
-   insns when v9 is present.  Otherwise, the F_ALIAS flag is ignored.  */
-{ "unimp",	F2(0x0, 0x0), 0xffc00000, "n", F_ALIAS, v6 },
+{ "unimp",	F2(0x0, 0x0), 0xffc00000, "n", F_NOTV9, v6 },
 { "illtrap",	F2(0, 0), F2(~0, ~0)|RD_G0, "n", 0, v9 },
 
 /* This *is* a commutative instruction.  */
@@ -1412,16 +1393,59 @@ condfc("fbule",	"cb013", 0xe, 0),
 { "fcmpes",	CMPFCC(2)|F3F(2, 0x35, 0x055), CMPFCC(~2)|F3F(~2, ~0x35, ~0x055),	 "8,e,f", 0, v9 },
 { "fcmpes",	CMPFCC(3)|F3F(2, 0x35, 0x055), CMPFCC(~3)|F3F(~2, ~0x35, ~0x055),	 "9,e,f", 0, v9 },
 
-/* FIXME These are marked F_ALIAS, so that they won't conflict with new v9
-   insns when v9 is present.  Otherwise, the F_ALIAS flag is ignored.  */
-{ "cpop1",	F3(2, 0x36, 0), F3(~2, ~0x36, ~1), "[1+2],d", F_ALIAS, v6 },
-{ "cpop2",	F3(2, 0x37, 0), F3(~2, ~0x37, ~1), "[1+2],d", F_ALIAS, v6 },
+/* These Extended FPop (FIFO) instructions are new in the Fujitsu
+   MB86934, replacing the CPop instructions from v6 and later
+   processors.  */
 
-{ "impdep1",	F3(2, 0x36, 0), F3(~2, ~0x36, ~0)|ASI(~0), "1,2,d", 0, v9 },
-{ "impdep1",	F3(2, 0x36, 1), F3(~2, ~0x36, ~1),	   "1,i,d", 0, v9 },
-{ "impdep2",	F3(2, 0x37, 0), F3(~2, ~0x37, ~0)|ASI(~0), "1,2,d", 0, v9 },
-{ "impdep2",	F3(2, 0x37, 1), F3(~2, ~0x37, ~1),	   "1,i,d", 0, v9 },
-    
+#define EFPOP1_2(name, op, args) { name, F3F(2, 0x36, op), F3F(~2, ~0x36, ~op)|RS1_G0, args, 0, sparclite }
+#define EFPOP1_3(name, op, args) { name, F3F(2, 0x36, op), F3F(~2, ~0x36, ~op),        args, 0, sparclite }
+#define EFPOP2_2(name, op, args) { name, F3F(2, 0x37, op), F3F(~2, ~0x37, ~op)|RD_G0,  args, 0, sparclite }
+
+EFPOP1_2 ("efitod",	0x0c8, "f,H"),
+EFPOP1_2 ("efitos",	0x0c4, "f,g"),
+EFPOP1_2 ("efdtoi",	0x0d2, "B,g"),
+EFPOP1_2 ("efstoi",	0x0d1, "f,g"),
+EFPOP1_2 ("efstod",	0x0c9, "f,H"),
+EFPOP1_2 ("efdtos",	0x0c6, "B,g"),
+EFPOP1_2 ("efmovs",	0x001, "f,g"),
+EFPOP1_2 ("efnegs",	0x005, "f,g"),
+EFPOP1_2 ("efabss",	0x009, "f,g"),
+EFPOP1_2 ("efsqrtd",	0x02a, "B,H"),
+EFPOP1_2 ("efsqrts",	0x029, "f,g"),
+EFPOP1_3 ("efaddd",	0x042, "v,B,H"),
+EFPOP1_3 ("efadds",	0x041, "e,f,g"),
+EFPOP1_3 ("efsubd",	0x046, "v,B,H"),
+EFPOP1_3 ("efsubs",	0x045, "e,f,g"),
+EFPOP1_3 ("efdivd",	0x04e, "v,B,H"),
+EFPOP1_3 ("efdivs",	0x04d, "e,f,g"),
+EFPOP1_3 ("efmuld",	0x04a, "v,B,H"),
+EFPOP1_3 ("efmuls",	0x049, "e,f,g"),
+EFPOP1_3 ("efsmuld",	0x069, "e,f,H"),
+EFPOP2_2 ("efcmpd",	0x052, "v,B"),
+EFPOP2_2 ("efcmped",	0x056, "v,B"),
+EFPOP2_2 ("efcmps",	0x051, "e,f"),
+EFPOP2_2 ("efcmpes",	0x055, "e,f"),
+
+#undef EFPOP1_2
+#undef EFPOP1_3
+#undef EFPOP2_2
+
+/* These are marked F_ALIAS, so that they won't conflict with sparclite insns
+   present.  Otherwise, the F_ALIAS flag is ignored.  */
+{ "cpop1",	F3(2, 0x36, 0), F3(~2, ~0x36, ~1), "[1+2],d", F_ALIAS|F_NOTV9, v6 },
+{ "cpop2",	F3(2, 0x37, 0), F3(~2, ~0x37, ~1), "[1+2],d", F_ALIAS|F_NOTV9, v6 },
+
+#define IMPDEP(name, code) \
+{ name,	F3(2, code, 0), F3(~2, ~code, ~0)|ASI(~0), "1,2,d", 0, v9 }, \
+{ name,	F3(2, code, 1), F3(~2, ~code, ~1),	   "1,i,d", 0, v9 }, \
+{ name, F3(2, code, 0), F3(~2, ~code, ~0),         "x,1,2,d", 0, v9 }, \
+{ name, F3(2, code, 0), F3(~2, ~code, ~0),         "x,e,f,g", 0, v9 }
+
+IMPDEP ("impdep1", 0x36),
+IMPDEP ("impdep2", 0x37),
+
+#undef IMPDEP
+
 { "casa",	F3(3, 0x3c, 0), F3(~3, ~0x3c, ~0), "[1]A,2,d", 0, v9 },
 { "casa",	F3(3, 0x3c, 1), F3(~3, ~0x3c, ~1), "[1]o,2,d", 0, v9 },
 { "casxa",	F3(3, 0x3e, 0), F3(~3, ~0x3e, ~0), "[1]A,2,d", 0, v9 },
@@ -1429,4 +1453,4 @@ condfc("fbule",	"cb013", 0xe, 0),
 
 };
 
-CONST int bfd_sparc_num_opcodes = ((sizeof sparc_opcodes)/(sizeof sparc_opcodes[0]));
+const int bfd_sparc_num_opcodes = ((sizeof sparc_opcodes)/(sizeof sparc_opcodes[0]));
