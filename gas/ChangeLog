@@ -1,3 +1,8 @@
+2001-06-06  Peter Jakubek <pjak@snafu.de>
+
+	* gas/config/tc-m68k.c (md_show_usage): Add all supported ColdFire
+	options to list (e.g. m5206e, m5307, m5407).
+
 2001-06-06  Martin Schwidefsky <schwidefsky@de.ibm.com>
 
 	* config/tc-s390.h (TC_FORCE_RELOCATION): Always emit relocations

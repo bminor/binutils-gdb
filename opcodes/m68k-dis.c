@@ -268,7 +268,7 @@ print_insn_m68k (memaddr, info)
       arch_mask = mcf5206e;
       break;
     case bfd_mach_mcf5307:
-      arch_mask = mcf5407;
+      arch_mask = mcf5307;
       break;
     case bfd_mach_mcf5407:
       arch_mask = mcf5407;

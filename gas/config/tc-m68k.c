@@ -6887,9 +6887,9 @@ md_show_usage (stream)
   fprintf (stream, _("\
 680X0 options:\n\
 -l			use 1 word for refs to undefined symbols [default 2]\n\
--m68000 | -m68008 | -m68010 | -m68020 | -m68030 | -m68040 | -m68060\n\
- | -m68302 | -m68331 | -m68332 | -m68333 | -m68340 | -m68360\n\
- | -mcpu32 | -m5200\n\
+-m68000 | -m68008 | -m68010 | -m68020 | -m68030 | -m68040 | -m68060 |\n\
+-m68302 | -m68331 | -m68332 | -m68333 | -m68340 | -m68360 | -mcpu32 |\n\
+-m5200  | -m5202  | -m5204  | -m5206  | -m5206e | -m5307  | -m5407\n\
 			specify variant of 680X0 architecture [default 68020]\n\
 -m68881 | -m68882 | -mno-68881 | -mno-68882\n\
 			target has/lacks floating-point coprocessor\n\

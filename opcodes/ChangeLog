@@ -1,3 +1,9 @@
+2001-06-06  Peter Jakubek <pjak@snafu.de>
+
+	* opcodes/m68k-dis.c (print_insn_m68k): Fix typo.
+	* opcodes/m68k-opc.c (m68k_opcodes): Correct allowed operands for
+	mcf (ColdFire) div, rem and moveb instructions.
+
 2001-06-06  Alan Modra  <amodra@bigpond.net.au>
 
 	* i386-dis.c (cond_jump_flag, loop_jcxz_flag): Define.

@@ -305,22 +305,20 @@ const struct m68k_opcode m68k_opcodes[] =
 {"dbvc",	one(0054310),	one(0177770), "DsBw", m68000up },
 {"dbvs",	one(0054710),	one(0177770), "DsBw", m68000up },
 
-{"divsw",	one(0100700),	one(0170700), ";wDd", m68000up },
-{"divsw",	one(0100700),   one(0170700), "vsDd", mcf5307up | mcf5206e },
+{"divsw",	one(0100700),	one(0170700), ";wDd", m68000up | mcf5307up | mcf5206e },
 
 {"divsl", two(0046100,0006000),two(0177700,0107770),";lD3D1", m68020up|cpu32 },
 {"divsl", two(0046100,0004000),two(0177700,0107770),";lDD",   m68020up|cpu32 },
-{"divsl", two(0046100,0004000),two(0177700,0107770),"vsDD",   mcf5307up | mcf5206e },
+{"divsl", two(0046100,0004000),two(0177700,0107770),"qsDD",   mcf5307up | mcf5206e },
 
 {"divsll", two(0046100,0004000),two(0177700,0107770),";lD3D1",m68020up|cpu32 },
 {"divsll", two(0046100,0004000),two(0177700,0107770),";lDD",  m68020up|cpu32 },
 
-{"divuw",	one(0100300),		one(0170700), ";wDd", m68000up },
-{"divuw",	one(0100300),		one(0170700), "vsDd", mcf5307up | mcf5206e },
+{"divuw",	one(0100300),		one(0170700), ";wDd", m68000up | mcf5307up | mcf5206e },
 
 {"divul", two(0046100,0002000),two(0177700,0107770),";lD3D1", m68020up|cpu32 },
 {"divul", two(0046100,0000000),two(0177700,0107770),";lDD",   m68020up|cpu32 },
-{"divul", two(0046100,0000000),two(0177700,0107770),"vsDD",   mcf5307up | mcf5206e },
+{"divul", two(0046100,0000000),two(0177700,0107770),"qsDD",   mcf5307up | mcf5206e },
 
 {"divull", two(0046100,0000000),two(0177700,0107770),";lD3D1",m68020up|cpu32 },
 {"divull", two(0046100,0000000),two(0177700,0107770),";lDD",  m68020up|cpu32 },
@@ -1340,9 +1338,15 @@ const struct m68k_opcode m68k_opcodes[] =
 
 /* The move opcode can generate the movea and moveq instructions.  */
 {"moveb",	one(0010000),	one(0170000), ";b$d", m68000up },
-{"moveb",	one(0010000),	one(0170000), "ms%d", mcf },
-{"moveb",	one(0010000),	one(0170000), "nspd", mcf },
-{"moveb",	one(0010000),	one(0170000), "obmd", mcf },
+{"moveb",	one(0010000),	one(0170070), "Ds$d", mcf },
+{"moveb",	one(0010020),	one(0170070), "as$d", mcf },
+{"moveb",	one(0010030),	one(0170070), "+s$d", mcf },
+{"moveb",	one(0010040),	one(0170070), "-s$d", mcf },
+{"moveb",	one(0010000),	one(0170000), "nsqd", mcf },
+{"moveb",	one(0010000),	one(0170700), "obDd", mcf },
+{"moveb",	one(0010200),	one(0170700), "obad", mcf },
+{"moveb",	one(0010300),	one(0170700), "ob+d", mcf },
+{"moveb",	one(0010400),	one(0170700), "ob-d", mcf },
 {"moveb",	one(0010000),	one(0170000), "obnd", mcf5407 },
 
 {"movew",	one(0030000),	one(0170000), "*w%d", m68000up },
@@ -1732,8 +1736,8 @@ const struct m68k_opcode m68k_opcodes[] =
 {"pvalid",	two(0xf000, 0x2c00),	two(0xffc0, 0xfff8), "A3&s", m68851 },
 
   /* FIXME: don't allow Dw==Dx. */
-{"remsl",       two(0x4c40, 0x0800),    two(0xffc0, 0x8ff8), "vsD3D1", mcf5307up | mcf5206e },
-{"remul",       two(0x4c40, 0x0000),    two(0xffc0, 0x8ff8), "vsD3D1", mcf5307up | mcf5206e },
+{"remsl",       two(0x4c40, 0x0800),    two(0xffc0, 0x8ff8), "qsD3D1", mcf5307up | mcf5206e },
+{"remul",       two(0x4c40, 0x0000),    two(0xffc0, 0x8ff8), "qsD3D1", mcf5307up | mcf5206e },
 
 {"reset",	one(0047160),		one(0177777), "", m68000up },
 
