@@ -1,3 +1,8 @@
+2003-05-20  Kevin Buettner  <kevinb@redhat.com>
+
+	* mips-nat.c (REGISTER_PTRACE_ADDR): Convert macro to function
+	register_ptrace_addr().  Fix all callers.
+
 2003-05-21  Andreas Schwab  <schwab@suse.de>
 
 	* Makefile.in (m68k-tdep.o, m68klinux-tdep.o): Update
