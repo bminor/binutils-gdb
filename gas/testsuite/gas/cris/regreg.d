@@ -1,4 +1,5 @@
 #objdump: -dr
+#as: --no-mul-bug-abort
 #name: @OC@
 
 # Test the @OC@ insn.
