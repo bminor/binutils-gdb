@@ -5,3 +5,4 @@
 	.proc
 	.callinfo
 divu:	stws,ma		%r4,4(%r5)		; save registers on stack
+	.procend

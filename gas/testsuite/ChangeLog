@@ -1,3 +1,14 @@
+Mon Jan 10 09:54:15 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* gas/hppa/more.parse/parse.exp: procbug.s is no longer expected
+	to fail.
+	* gas/hppa/more.parse/procbug.s: Add missing .procend.
+
+Mon Jan  3 10:07:47 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* gas/hppa/more.parse/labelbug.s: Add testcase for bug in last
+	app.c change.
+
 Wed Dec 29 11:32:39 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* gas/hppa/more.parse/labelbug.s: Add more colonless label tests.

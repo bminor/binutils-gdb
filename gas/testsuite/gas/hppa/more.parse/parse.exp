@@ -128,7 +128,6 @@ if [istarget hppa*-*-*] then {
 
     # GAS-2.0 (and 1.36 for that matter) can not handle a .proc which
     # has no label before it.
-    setup_xfail hppa*-*-*
     gas_test "procbug.s" "" "" "Label following .proc"
 
     # One is required to explicitly IMPORT any non-local symbol used
