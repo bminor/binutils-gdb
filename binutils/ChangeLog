@@ -1,3 +1,18 @@
+Thu May  5 11:50:55 1994  Ken Raeburn  (raeburn@kr-pc.cygnus.com)
+
+	* syslex.l (yywrap): Define as function if not defined as a macro.
+
+	* Makefile.in (objdump.o): Deleted special rule.
+	* configure.in: Don't bother building ARCHDEFS variable for
+	Makefile.
+	* objdump.c (ARCH_*): Deleted handling.
+	(disassemble_data): Call `disassembler' from opcodes library.
+
+Thu May  5 13:28:42 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* Makefile.in (install): Correct handling of $(tooldir) and
+	$(bindir) being on different devices.
+
 Fri Apr 29 09:50:38 1994  Steve Chamberlain  (sac@cygnus.com)
 
 	* sysdump.c (h8300, sh): Add declarations.
