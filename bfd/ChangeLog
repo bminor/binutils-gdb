@@ -1,3 +1,11 @@
+2005-03-29  Aaron W. LaFramboise  <aaron98wiridge9@aaronwl.com>
+
+	* configure.in: Check for ffs decl and alphabetize.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+	* sysdep.h [NEED_DECLARATION_FFS] (ffs): Prototype and 
+	alphabetize.
+
 2005-03-29  Fred Fish  <fnf@specifixinc.com>
 
 	* dwarf2.c (struct comp_unit): Fix typo.

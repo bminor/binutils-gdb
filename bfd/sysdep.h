@@ -105,8 +105,16 @@ extern char *strrchr ();
 
 #include "filenames.h"
 
-#ifdef NEED_DECLARATION_STRSTR
-extern char *strstr ();
+#ifdef NEED_DECLARATION_FFS
+extern int ffs (int);
+#endif
+
+#ifdef NEED_DECLARATION_FREE
+extern void free ();
+#endif
+
+#ifdef NEED_DECLARATION_GETENV
+extern char *getenv ();
 #endif
 
 #ifdef NEED_DECLARATION_MALLOC
@@ -117,12 +125,8 @@ extern PTR malloc ();
 extern PTR realloc ();
 #endif
 
-#ifdef NEED_DECLARATION_FREE
-extern void free ();
-#endif
-
-#ifdef NEED_DECLARATION_GETENV
-extern char *getenv ();
+#ifdef NEED_DECLARATION_STRSTR
+extern char *strstr ();
 #endif
 
 /* Define offsetof for those systems which lack it */
