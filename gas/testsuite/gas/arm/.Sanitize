@@ -25,6 +25,7 @@ Do-first:
 
 Things-to-keep:
 
+arch4t.s
 arm.exp
 arm3.s
 arm6.s
@@ -33,9 +34,11 @@ arm7t.d
 arm7t.s
 copro.s
 float.s
+immed.s
 inst.s
 le-fpconst.s
 le-fpconst.d
+thumb.s
 
 Things-to-lose:
 

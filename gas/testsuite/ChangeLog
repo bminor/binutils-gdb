@@ -1,3 +1,10 @@
+Thu Aug 15 16:06:02 1996  James G. Smith  <jsmith@cygnus.co.uk>
+
+	* gas/arm/thumb.s: Added.
+	* gas/arm/immed.s: Added.
+	* gas/arm/arch4t.s: Added.
+	* gas/arm/arm.exp: Updated to run the new tests.
+
 Tue Aug  6 11:06:29 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* gas/h8300/misch.s: Reenable "eepmov.w" test.
