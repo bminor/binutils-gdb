@@ -132,6 +132,8 @@ sparcnbsd.sh
 st2000.sh
 sun3.sh
 sun4.sh
+tic30aout.sh
+tic30coff.sh
 v850.sh
 vanilla.sh
 vax.sh

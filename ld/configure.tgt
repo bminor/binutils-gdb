@@ -201,6 +201,8 @@ powerpcle-*-cygwin32)   targ_emul=ppcpe ;;
 powerpc-*-aix*)		targ_emul=aixppc ;;
 powerpc-*-beos*)	targ_emul=aixppc ;;
 rs6000-*-aix*)		targ_emul=aixrs6 ;;
+tic30-*-*aout*)		targ_emul=tic30aout ;;
+tic30-*-*coff*)		targ_emul=tic30coff ;;
 # start-sanitize-tic80
 tic80-*-*)		targ_emul=tic80coff ;;
 # end-sanitize-tic80

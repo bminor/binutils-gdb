@@ -82,6 +82,8 @@ sh.sc
 sparccoff.sc
 sparclynx.sc
 st2000.sc
+tic30aout.sc
+tic30coff.sc
 v850.sc
 vanilla.sc
 w65.sc

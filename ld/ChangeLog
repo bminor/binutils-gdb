@@ -1,3 +1,16 @@
+Mon Feb  2 19:34:54 1998  Steve Haworth  <steve@pm.cse.rmit.EDU.AU>
+
+	Add tms320c30 support:
+	* configure.tgt (tic30-*-*aout*, tic30-*-*coff*): New targets.
+	* emulparams/tic30aout.sh: New file.
+	* emulparams/tic30coff.sh: New file.
+	* scripttempl/tic30aout.sc: New file.
+	* scripttempl/tic30coff.sc: New file.
+	* Makefile.am (ALL_EMULATIONS): Add etic30aout.o and
+	etic30coff.o.
+	(etic30aout.c, etic30coff.c): New targets.
+	* Makefile.in: Rebuild.
+
 Mon Feb  2 14:10:59 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.host: Correct HOSTING_CRT0 in alpha*-*-linux* case to

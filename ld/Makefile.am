@@ -180,6 +180,8 @@ ALL_EMULATIONS = \
 	est2000.o \
 	esun3.o \
 	esun4.o \
+	etic30aout.o \
+	etic30coff.o \
 	$(start-sanitize-tic80) \
 	etic80coff.o \
 	$(end-sanitize-tic80) \
@@ -522,6 +524,12 @@ esun3.c: $(srcdir)/emulparams/sun3.sh \
 esun4.c: $(srcdir)/emulparams/sun4.sh \
   $(srcdir)/emultempl/sunos.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} sun4 "$(tdir_sun4)"
+etic30aout.c: $(srcdir)/emulparams/tic30aout.sh \
+  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/tic30aout.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} tic30aout "$(tdir_tic30aout)"
+etic30coff.c: $(srcdir)/emulparams/tic30coff.sh \
+  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/tic30coff.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} tic30coff "$(tdir_tic30coff)"
 start-sanitize-tic80:
 etic80coff.c: $(srcdir)/emulparams/tic80coff.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/tic80coff.sc ${GEN_DEPENDS}
