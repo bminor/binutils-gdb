@@ -57,6 +57,7 @@ TARGETS = $(NATIVE) \
 	mips-idt-ecoff	\
 	m68k-aout	m68k-vxworks 	m68k-coff \
 	m88k-coff \
+	sh-hms \
 	sparc-aout	sparc-vxworks	sparclitefrwcompat-aout	sparclite-aout \
 	z8k-sim		
 GCC = gcc -O -pipe
