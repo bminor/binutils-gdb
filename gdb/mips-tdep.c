@@ -850,17 +850,17 @@ mips_write_pc (CORE_ADDR pc, ptid_t ptid)
 static t_inst
 mips_fetch_instruction (CORE_ADDR addr)
 {
-  char buf[MIPS32_INSN_SIZE];
+  char buf[MIPS_INSN32_SIZE];
   int instlen;
   int status;
 
   if (mips_pc_is_mips16 (addr))
     {
-      instlen = MIPS16_INSN_SIZE;
+      instlen = MIPS_INSN16_SIZE;
       addr = unmake_mips16_addr (addr);
     }
   else
-    instlen = MIPS32_INSN_SIZE;
+    instlen = MIPS_INSN32_SIZE;
   status = deprecated_read_memory_nobpt (addr, buf, instlen);
   if (status)
     memory_error (status, addr);
@@ -1455,7 +1455,7 @@ mips16_scan_prologue (CORE_ADDR start_pc, CORE_ADDR limit_pc,
   if (limit_pc > start_pc + 200)
     limit_pc = start_pc + 200;
 
-  for (cur_pc = start_pc; cur_pc < limit_pc; cur_pc += MIPS16_INSN_SIZE)
+  for (cur_pc = start_pc; cur_pc < limit_pc; cur_pc += MIPS_INSN16_SIZE)
     {
       /* Save the previous instruction.  If it's an EXTEND, we'll extract
          the immediate offset extension from it in mips16_get_imm.  */
@@ -1471,7 +1471,7 @@ mips16_scan_prologue (CORE_ADDR start_pc, CORE_ADDR limit_pc,
          over the extend.  */
       if ((inst & 0xf800) == 0xf000)    /* extend */
         {
-          extend_bytes = MIPS16_INSN_SIZE;
+          extend_bytes = MIPS_INSN16_SIZE;
           continue;
         }
 
@@ -1540,7 +1540,7 @@ mips16_scan_prologue (CORE_ADDR start_pc, CORE_ADDR limit_pc,
                && (inst & 0x700) != 0x700)	/* entry */
 	entry_inst = inst;	/* save for later processing */
       else if ((inst & 0xf800) == 0x1800)	/* jal(x) */
-	cur_pc += MIPS16_INSN_SIZE;	/* 32-bit instruction */
+	cur_pc += MIPS_INSN16_SIZE;	/* 32-bit instruction */
       else if ((inst & 0xff1c) == 0x6704)	/* move reg,$a0-$a3 */
         {
           /* This instruction is part of the prologue, but we don't
@@ -1771,7 +1771,7 @@ mips32_scan_prologue (CORE_ADDR start_pc, CORE_ADDR limit_pc,
 restart:
 
   frame_offset = 0;
-  for (cur_pc = start_pc; cur_pc < limit_pc; cur_pc += MIPS32_INSN_SIZE)
+  for (cur_pc = start_pc; cur_pc < limit_pc; cur_pc += MIPS_INSN32_SIZE)
     {
       unsigned long inst, high_word, low_word;
       int reg;
@@ -1891,7 +1891,7 @@ restart:
                    || high_word == 0x3408 /* ori $t0,$zero,n */
                   ))
        {
-          load_immediate_bytes += MIPS32_INSN_SIZE;     	/* FIXME!  */
+          load_immediate_bytes += MIPS_INSN32_SIZE;     	/* FIXME!  */
        }
       else
        {
@@ -2246,7 +2246,7 @@ heuristic_proc_start (CORE_ADDR pc)
   if (heuristic_fence_post == UINT_MAX || fence < VM_MIN_ADDRESS)
     fence = VM_MIN_ADDRESS;
 
-  instlen = mips_pc_is_mips16 (pc) ? MIPS16_INSN_SIZE : MIPS32_INSN_SIZE;
+  instlen = mips_pc_is_mips16 (pc) ? MIPS_INSN16_SIZE : MIPS_INSN32_SIZE;
 
   /* search back for previous return */
   for (start_pc -= instlen;; start_pc -= instlen)
@@ -2313,7 +2313,7 @@ heuristic-fence-post' command.\n", paddr_nz (pc), paddr_nz (pc));
     else if (mips_about_to_return (start_pc))
       {
 	/* Skip return and its delay slot.  */
-	start_pc += 2 * MIPS32_INSN_SIZE;
+	start_pc += 2 * MIPS_INSN32_SIZE;
 	break;
       }
 
@@ -4176,7 +4176,7 @@ is_delayed (unsigned long insn)
 int
 mips_step_skips_delay (CORE_ADDR pc)
 {
-  char buf[MIPS32_INSN_SIZE];
+  char buf[MIPS_INSN32_SIZE];
 
   /* There is no branch delay slot on MIPS16.  */
   if (mips_pc_is_mips16 (pc))
@@ -4545,7 +4545,7 @@ mips_skip_trampoline_code (CORE_ADDR pc)
 	      /* Scan through this _fn_stub_ code for the lui/addiu pair.
 	         The limit on the search is arbitrarily set to 20
 	         instructions.  FIXME.  */
-	      for (i = 0, pc = 0; i < 20; i++, target_pc += MIPS32_INSN_SIZE)
+	      for (i = 0, pc = 0; i < 20; i++, target_pc += MIPS_INSN32_SIZE)
 		{
 		  inst = mips_fetch_instruction (target_pc);
 		  if ((inst & 0xffff0000) == 0x3c010000)	/* lui $at */

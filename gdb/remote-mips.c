@@ -2225,7 +2225,7 @@ static int
 mips_insert_breakpoint (CORE_ADDR addr, char *contents_cache)
 {
   if (monitor_supports_breakpoints)
-    return set_breakpoint (addr, MIPS_INSTLEN, BREAK_FETCH);
+    return set_breakpoint (addr, MIPS_INSN32_SIZE, BREAK_FETCH);
   else
     return memory_insert_breakpoint (addr, contents_cache);
 }
@@ -2234,7 +2234,7 @@ static int
 mips_remove_breakpoint (CORE_ADDR addr, char *contents_cache)
 {
   if (monitor_supports_breakpoints)
-    return clear_breakpoint (addr, MIPS_INSTLEN, BREAK_FETCH);
+    return clear_breakpoint (addr, MIPS_INSN32_SIZE, BREAK_FETCH);
   else
     return memory_remove_breakpoint (addr, contents_cache);
 }

@@ -81,11 +81,13 @@ enum
 /* Defined in mips-tdep.c and used in remote-mips.c */
 extern void deprecated_mips_set_processor_regs_hack (void);
 
-/* Instruction sizes.  */
-enum mips_insn_size
+/* Instruction sizes and other useful constants.  */
+enum
 {
-  MIPS16_INSN_SIZE = 2,
-  MIPS32_INSN_SIZE = 4
+  MIPS_INSN16_SIZE = 2,
+  MIPS_INSN32_SIZE = 4,
+  /* The number of floating-point or integer registers.  */
+  MIPS_NUMREGS = 32
 };
 
 /* Single step based on where the current instruction will take us.  */

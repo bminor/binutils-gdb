@@ -101,9 +101,6 @@ extern struct frame_info *setup_arbitrary_frame (int, CORE_ADDR *);
 extern int mips_ignore_helper (CORE_ADDR pc);
 
 /* Definitions and declarations used by mips-tdep.c and remote-mips.c  */
-#define MIPS_INSTLEN 4		/* Length of an instruction */
-#define MIPS16_INSTLEN 2	/* Length of an instruction on MIPS16 */
-#define MIPS_NUMREGS 32		/* Number of integer or float registers */
 typedef unsigned long t_inst;	/* Integer big enough to hold an instruction */
 
 #endif /* TM_MIPS_H */
