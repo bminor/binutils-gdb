@@ -4,6 +4,9 @@ Thu Jan 26 09:00:12 1995  Steve Chamberlain  <sac@splat>
 
 Thu Jan 26 11:39:21 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* elfcode.h (elf_link_add_object_symbols): Only examine weakdef if
+	we are using an ELF hash table.
+
 	* aoutx.h (NAME(aout,some_aout_object_p)): Always set EXEC_P if
 	the start address is in the .text section, even if STAT_FOR_EXEC
 	is set.  Just use STAT_FOR_EXEC as an additional test.

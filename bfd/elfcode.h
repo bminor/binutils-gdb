@@ -4339,6 +4339,7 @@ elf_link_add_object_symbols (abfd, info)
 	  && definition
 	  && (flags & BSF_WEAK) != 0
 	  && ELF_ST_TYPE (sym.st_info) != STT_FUNC
+	  && info->hash->creator->flavour == bfd_target_elf_flavour
 	  && (*sym_hash)->weakdef == NULL)
 	{
 	  /* Keep a list of all weak defined non function symbols from
