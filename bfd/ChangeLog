@@ -1,3 +1,22 @@
+Tue Feb 14 14:04:22 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* libelf.h (elf_backend_data): Add fields elf_machine_alt1 and
+	elf_machine_alt2 which provide alternate versions of the machine
+	code.
+
+	* elf32-ppc.c (ELF_MACHINE_ALT1, ELF_MACHINE_ALT2): Define to
+	recognize old versions of the PowerPC machine code.
+
+	* elf32-target.h (elf32_bed): Initialize alternate machine code
+	fields defined by ELF_MACHINE_ALT1 and ELF_MACHINE_ALT2.
+
+	* elf64-target.h (elf64_bed): Initialize alternate machine code
+	fields defined by ELF_MACHINE_ALT1 and ELF_MACHINE_ALT2.
+
+	* elfcode.h (elf_object_p, elf_core_file_p): In addition to the
+	main machine code field, check the two alternate machine code
+	fields.
+
 Tue Feb 14 12:46:48 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* aoutf1.h (MACHTYPE_OK): Don't define if already defined.  Don't

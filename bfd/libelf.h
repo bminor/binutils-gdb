@@ -399,6 +399,10 @@ struct elf_backend_data
   /* The swapping table to use when dealing with ECOFF information.
      Used for the MIPS ELF .mdebug section.  */
   const struct ecoff_debug_swap *elf_backend_ecoff_debug_swap;
+
+  /* Alternate EM_xxxx machine codes for this backend.  */
+  int elf_machine_alt1;
+  int elf_machine_alt2;
 };
 
 /* Information stored for each BFD section in an ELF file.  This

@@ -152,6 +152,14 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define elf_backend_ecoff_debug_swap	0
 #endif
 
+#ifndef ELF_MACHINE_ALT1
+#define ELF_MACHINE_ALT1 0
+#endif
+
+#ifndef ELF_MACHINE_ALT2
+#define ELF_MACHINE_ALT2 0
+#endif
+
 static CONST struct elf_backend_data elf64_bed =
 {
 #ifdef USE_REL
@@ -185,7 +193,9 @@ static CONST struct elf_backend_data elf64_bed =
   elf_backend_finish_dynamic_sections,
   elf_backend_begin_write_processing,
   elf_backend_final_write_processing,
-  elf_backend_ecoff_debug_swap
+  elf_backend_ecoff_debug_swap,
+  ELF_MACHINE_ALT1,
+  ELF_MACHINE_ALT2
 };
 
 #ifdef TARGET_BIG_SYM
