@@ -1,3 +1,8 @@
+Mon May 12 11:35:04 1997  Mark Alexander  <marka@cygnus.com>
+
+	* tic80-tdep.c, config/tic80/tm-tic80.h: First cut at getting
+	basic C80 features working.
+
 Thu May  8 08:42:47 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure.in (AC_TYPE_SIGNAL): Add

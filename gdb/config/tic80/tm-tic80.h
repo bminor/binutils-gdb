@@ -51,7 +51,11 @@ struct frame_saved_regs;
    FIXME: Shadow updates in sim/tic80/sim-calls.c */
 
 #define SP_REGNUM 1		/* Contains address of top of stack */
-#define FP_REGNUM 31		/* Contains address of executing stack frame */
+#define ARG0_REGNUM 2		/* Contains argument 1 (r3 has high word) */
+#define RET_REGNUM  2		/* Contains function return value */
+#define ARGLAST_REGNUM 12	/* Contains argument 6 (r13 has high word) */
+#define FP_REGNUM 30		/* Contains address of executing stack frame */
+#define LR_REGNUM 31		/* Contains address of caller (link register) */
 #define PC_REGNUM 32		/* Contains program counter (FIXME?) */
 #define NPC_REGNUM 33		/* Contains the next program counter (FIXME?) */
 #define A0_REGNUM 34		/* Accumulator register 0 */
@@ -119,15 +123,10 @@ struct frame_saved_regs;
 
 #define DECR_PC_AFTER_BREAK	0			/* FIXME! */
 
-/* Push an empty stack frame, to record the current PC, etc.  */
-
-#define PUSH_DUMMY_FRAME 	tic80_push_dummy_frame()
-extern void tic80_push_dummy_frame PARAMS ((void));
-
 /* Discard from the stack the innermost frame, restoring all registers.  */
 
-#define POP_FRAME		tic80_pop_frame()
-extern void tic80_pop_frame PARAMS ((void));
+#define POP_FRAME tic80_pop_frame(get_current_frame ())
+extern struct frame_info *tic80_pop_frame PARAMS ((struct frame_info *frame));
 
 /* Return number of bytes at start of arglist that are not really args.  */
 
@@ -142,6 +141,22 @@ extern void tic80_pop_frame PARAMS ((void));
 #define FRAME_ARGS_SKIP 0
 #define FRAME_ARGS_ADDRESS(fi)   (fi)->frame
 #define FRAME_LOCALS_ADDRESS(fi) (fi)->frame
+
+/* Define other aspects of the stack frame. 
+   We keep the offsets of all saved registers, 'cause we need 'em a lot!
+   We also keep the current size of the stack frame, and the offset of
+   the frame pointer from the stack pointer (for frameless functions, and
+   when we're still in the prologue of a function with a frame) */
+
+#define EXTRA_FRAME_INFO  	\
+  struct frame_saved_regs fsr;	\
+  int framesize;		\
+  int frameoffset;		\
+  int framereg;
+
+extern void tic80_init_extra_frame_info PARAMS ((struct frame_info *fi));
+#define INIT_EXTRA_FRAME_INFO(fromleaf, fi) tic80_init_extra_frame_info (fi)
+#define INIT_FRAME_PC		/* Not necessary */
 
 /* Put here the code to store, into a struct frame_saved_regs,
    the addresses of the saved registers of frame described by FRAME_INFO.
@@ -164,8 +179,7 @@ extern CORE_ADDR tic80_skip_prologue PARAMS ((CORE_ADDR pc));
    the new frame is not set up until the new function executes
    some instructions.  */
 
-#define SAVED_PC_AFTER_CALL(frame)	tic80_saved_pc_after_call(frame)
-extern CORE_ADDR tic80_saved_pc_after_call PARAMS ((struct frame_info *));
+#define SAVED_PC_AFTER_CALL(frame) read_register (LR_REGNUM)
 
 /* Describe the pointer in each stack frame to the previous stack frame
    (its caller).  */
@@ -179,19 +193,64 @@ extern CORE_ADDR tic80_frame_chain PARAMS ((struct frame_info *));
 #define FRAME_SAVED_PC(FRAME)	tic80_frame_saved_pc (FRAME)
 extern CORE_ADDR tic80_frame_saved_pc PARAMS ((struct frame_info *));
 
+/* Store the address of the place in which to copy the structure the
+   subroutine will return.  This is called from call_function. 
+
+   We store structs through a pointer passed in R2 */
+
+#define STORE_STRUCT_RETURN(STRUCT_ADDR, SP)	\
+	write_register (ARG0_REGNUM, STRUCT_ADDR)
+
 /* Extract from an array REGBUF containing the (raw) register state
    a function return value of type TYPE, and copy that, in virtual format,
    into VALBUF.  */
 
 #define EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF) \
-  tic80_extract_return_value((TYPE), (REGBUF), (VALBUF))
-extern void tic80_extract_return_value PARAMS ((struct type *, char *, char *));
+  memcpy ((VALBUF), \
+	  (char *)(REGBUF) + REGISTER_BYTE (RET_REGNUM) + \
+	  ((TYPE_LENGTH (TYPE) > 4 ? 8 : 4) - TYPE_LENGTH (TYPE)), \
+	  TYPE_LENGTH (TYPE))
 
 /* Write into appropriate registers a function return value
    of type TYPE, given in virtual format.  */
 
 #define STORE_RETURN_VALUE(TYPE,VALBUF) \
-  tic80_store_return_value((TYPE), (VALBUF))
-extern void tic80_store_return_value PARAMS ((struct type *, char *));
+  write_register_bytes(REGISTER_BYTE (RET_REGNUM) + \
+		       ((TYPE_LENGTH (TYPE) > 4 ? 8:4) - TYPE_LENGTH (TYPE)),\
+		       (VALBUF), TYPE_LENGTH (TYPE));
+
+
+
+/* PUSH_ARGUMENTS */
+extern CORE_ADDR tic80_push_arguments PARAMS ((int nargs, 
+					       struct value **args, 
+					       CORE_ADDR sp,
+					       unsigned char struct_return,
+					       CORE_ADDR struct_addr));
+
+#define PUSH_ARGUMENTS(NARGS, ARGS, SP, STRUCT_RETURN, STRUCT_ADDR) \
+  (SP) = tic80_push_arguments (NARGS, ARGS, SP, STRUCT_RETURN, STRUCT_ADDR)
+
+/* PUSH_RETURN_ADDRESS */
+extern CORE_ADDR tic80_push_return_address PARAMS ((CORE_ADDR, CORE_ADDR));
+#define PUSH_RETURN_ADDRESS(PC, SP)	tic80_push_return_address (PC, SP)
+
+/* override the standard get_saved_register function with 
+   one that takes account of generic CALL_DUMMY frames */
+#define GET_SAVED_REGISTER
+
+#define USE_GENERIC_DUMMY_FRAMES
+#define CALL_DUMMY                   {0}
+#define CALL_DUMMY_LENGTH            (0)
+#define CALL_DUMMY_START_OFFSET      (0)
+#define CALL_DUMMY_BREAKPOINT_OFFSET (0)
+#define FIX_CALL_DUMMY(DUMMY1, STARTADDR, FUNADDR, NARGS, ARGS, TYPE, GCCP)
+#define CALL_DUMMY_LOCATION          AT_ENTRY_POINT
+#define CALL_DUMMY_ADDRESS()         entry_point_address ()
+
+/* generic dummy frame stuff */
+
+#define PUSH_DUMMY_FRAME             generic_push_dummy_frame ()
+#define PC_IN_CALL_DUMMY(PC, SP, FP) generic_pc_in_call_dummy (PC, SP)
 
 #endif	/* TM_TIC80_H */
