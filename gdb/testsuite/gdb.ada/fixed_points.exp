@@ -21,8 +21,9 @@ if $tracelevel then {
 
 load_lib "ada.exp"
 
-set testfile "fixed_points"
-set srcfile ${testfile}.adb
+set testdir "fixed_points"
+set testfile "${testdir}/fixed_points"
+set srcfile ${srcdir}/${subdir}/${testfile}.adb
 set binfile ${objdir}/${subdir}/${testfile}
 
 if {[gdb_compile_ada "${srcfile}" "${binfile}" executable [list debug ]] != "" } {
@@ -34,8 +35,8 @@ gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
 gdb_load ${binfile}
 
-set bp_location [gdb_get_line_number "Set breakpoint here"]
-runto "${srcfile}:$bp_location"
+set bp_location [gdb_get_line_number "Set breakpoint here" ${testdir}/fixed_points.adb]
+runto "fixed_points.adb:$bp_location"
 
 gdb_test "print base_object" \
          ".* = -50" \

@@ -109,7 +109,7 @@ AC_CHECK_HEADERS(pthread.h)
 AC_EXEEXT
 
 AC_OUTPUT([Makefile \
-  gdb.ada/Makefile gdb.ada/gnat_ada.gpr:gdb.ada/gnat_ada.gin \
+  gdb.ada/Makefile \
   gdb.arch/Makefile gdb.asm/Makefile gdb.base/Makefile \
   gdb.cp/Makefile gdb.disasm/Makefile gdb.dwarf2/Makefile \
   gdb.fortran/Makefile gdb.java/Makefile gdb.mi/Makefile \

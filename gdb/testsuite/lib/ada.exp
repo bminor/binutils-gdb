@@ -409,12 +409,16 @@ if {[info procs find_gnatmake] == ""} {
 
 proc gdb_compile_ada {source dest type options} {
 
+    set srcdir [file dirname $source]
+    set gprdir [file dirname $srcdir]
     set objdir [file dirname $dest]
 
     append options " ada"
-    append options " additional_flags=-P$objdir/gnat_ada"
+    append options " additional_flags=-P$gprdir/gnat_ada"
+    append options " additional_flags=-XSRC=[file tail $srcdir]"
+    append options " additional_flags=-XOBJ=$objdir"
 
-    set result [target_compile $source $dest $type $options]
+    set result [target_compile [file tail $source] $dest $type $options]
 
     # The Ada build always produces some output, even when the build
     # succeeds. Thus, we can not use the output the same way we do in

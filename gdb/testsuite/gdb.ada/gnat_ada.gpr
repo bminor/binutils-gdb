@@ -20,8 +20,7 @@
 
 project Gnat_Ada is
 
-   for Source_Dirs use ("@srcdir@");
-   --  No need to set the Object_Dir, it is set to "." by default
-   --  (which means the same directory as this project file).
+   for Source_Dirs use (external ("SRC"));
+   for Object_Dir use external ("OBJ");
 
 end Gnat_Ada;

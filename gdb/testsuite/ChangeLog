@@ -1,3 +1,20 @@
+2005-02-03  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/gnat_ada.gpr: New file.
+	* gdb.ada/gnat_ada.gin: Delete, no longer used.
+	* lib/ada.exp (gdb_compile_ada): Minor adaptation to new project file.
+	* configure.ac: No longer generate gnat_ada.gpr.
+	* configure: Regenerate.
+	* gdb.ada/Makefile.in: Minor adaptations due to new project file.
+	* gdb.ada/null_record/null_record.adb: Moved here from gdb.ada.
+	* gdb.ada/null_record/bar.ads: Likewise.
+	* gdb.ada/null_record/bar.adb: Likewise.
+	* gdb.ada/fixed_points/fixed_points.adb: Likewise.
+	* gdb.ada/null_record.exp (testdir): New variable.
+	(testfile): executable is now in testdir subdirectory.
+	(srcfile): Use full path to the main compilation unit.
+	* gdb.ada/fixed_points.exp: Same changes as above.
+
 2005-02-03  Nick Roberts  <nickrob@snap.net.nz>
 
 	* gdb.base/interp.exp: New test.

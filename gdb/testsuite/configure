@@ -3084,7 +3084,7 @@ done
 
 
 
-                                                                                                                                                      ac_config_files="$ac_config_files Makefile gdb.ada/Makefile gdb.ada/gnat_ada.gpr:gdb.ada/gnat_ada.gin gdb.arch/Makefile gdb.asm/Makefile gdb.base/Makefile gdb.cp/Makefile gdb.disasm/Makefile gdb.dwarf2/Makefile gdb.fortran/Makefile gdb.java/Makefile gdb.mi/Makefile gdb.objc/Makefile gdb.threads/Makefile gdb.trace/Makefile"
+                                                                                                                                            ac_config_files="$ac_config_files Makefile gdb.ada/Makefile gdb.arch/Makefile gdb.asm/Makefile gdb.base/Makefile gdb.cp/Makefile gdb.disasm/Makefile gdb.dwarf2/Makefile gdb.fortran/Makefile gdb.java/Makefile gdb.mi/Makefile gdb.objc/Makefile gdb.threads/Makefile gdb.trace/Makefile"
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
 # tests run on this system so they can be shared between configure
@@ -3637,7 +3637,6 @@ do
   # Handling of arguments.
   "Makefile" ) CONFIG_FILES="$CONFIG_FILES Makefile" ;;
   "gdb.ada/Makefile" ) CONFIG_FILES="$CONFIG_FILES gdb.ada/Makefile" ;;
-  "gdb.ada/gnat_ada.gpr" ) CONFIG_FILES="$CONFIG_FILES gdb.ada/gnat_ada.gpr:gdb.ada/gnat_ada.gin" ;;
   "gdb.arch/Makefile" ) CONFIG_FILES="$CONFIG_FILES gdb.arch/Makefile" ;;
   "gdb.asm/Makefile" ) CONFIG_FILES="$CONFIG_FILES gdb.asm/Makefile" ;;
   "gdb.base/Makefile" ) CONFIG_FILES="$CONFIG_FILES gdb.base/Makefile" ;;

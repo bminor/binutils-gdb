@@ -21,8 +21,9 @@ if $tracelevel then {
 
 load_lib "ada.exp"
 
-set testfile "null_record"
-set srcfile ${testfile}.adb
+set testdir "null_record"
+set testfile "${testdir}/null_record"
+set srcfile ${srcdir}/${subdir}/${testfile}.adb
 set binfile ${objdir}/${subdir}/${testfile}
 
 if {[gdb_compile_ada "${srcfile}" "${binfile}" executable [list debug ]] != "" } {
