@@ -1375,6 +1375,7 @@ symbol_begin ()
   S_SET_SEGMENT (&abs_symbol, absolute_section);
 #endif
   abs_symbol.sy_value.X_op = O_constant;
+  abs_symbol.sy_frag = &zero_address_frag;
 
   if (LOCAL_LABELS_FB)
     fb_label_init ();
