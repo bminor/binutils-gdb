@@ -3,6 +3,9 @@
 	* ld-elfvers/vers18.dsym: Updated for weak definiton change.
 	* ld-elfvers/vers18.ver: Likewise.
 	* ld-elfvers/vers19.ver: Likewise.
+	* ld-elfweak/dsowdata.dsym: Likewise.
+	* ld-elfweak/elfweak.exp: Likewise.
+	* ld-elfweak/weakdata.dsym: Likewise.
 
 	* ld-elfweak/elfweak.exp: Remove xfail.
 
