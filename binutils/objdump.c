@@ -1736,6 +1736,7 @@ disassemble_data (abfd)
       disasm_info.buffer = data;
       disasm_info.buffer_vma = section->vma;
       disasm_info.buffer_length = datasize;
+      disasm_info.section = section;
       if (start_address == (bfd_vma) -1
 	  || start_address < disasm_info.buffer_vma)
 	addr_offset = 0;

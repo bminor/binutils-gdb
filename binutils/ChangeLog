@@ -1,3 +1,9 @@
+2001-08-03  John Healy  <jhealy@redhat.com>
+
+        Patch suggested by Frank Eigler <fche@redhat.com>.
+        * objdump.c (disassemble_data): Fill in section member of the
+        disasm_info structure.
+
 2001-08-03  Tom Walsh  <tom@cyberiansoftware.com>
 
 	* configure.in: Added --with-windres option.
