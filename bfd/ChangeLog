@@ -1,3 +1,7 @@
+Thu Jun 10 20:36:22 1993  Doug Evans  (dje@canuck.cygnus.com)
+
+	* hosts/std-host.h (int64e_type): Fix definition.
+
 Thu Jun 10 11:48:28 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* coff-mips.c (ecoff_sec_to_styp_flags): Use STYP_MIPS_INIT for
