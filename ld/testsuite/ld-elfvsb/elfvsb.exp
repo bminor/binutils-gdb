@@ -144,6 +144,8 @@ proc visibility_test { visibility progname testname main sh1 sh2 dat args } {
     	    pass "$testname"
 	} else { if { [ string match $visibility "hidden_undef_def" ]
 	     && [regexp ".*/main.c.*: undefined reference to \`visibility\'" $link_output]
+	     && [regexp ".*/main.c.*: undefined reference to \`visibility_def\'" $link_output]
+	     && [regexp ".*/main.c.*: undefined reference to \`visibility_func\'" $link_output]
 	     && [regexp ".*/main.c.*: undefined reference to \`visibility_var\'" $link_output] } {
     	    pass "$testname"
 	} else {

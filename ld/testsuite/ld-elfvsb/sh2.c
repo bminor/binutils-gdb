@@ -5,6 +5,10 @@
    the shared library.  */
 int shlibvar2 = 4;
 
+/* This variable is defined here, and shouldn't be used to resolve a
+   reference with non-default visibility in another shared library.  */
+int visibility_com = 2;
+
 /* This function is called by another file in the shared library.  */
 
 int
@@ -21,4 +25,22 @@ visibility ()
 }
 
 int visibility_var = 2;
+
+int visibility_def = 2;
+
+int
+visibility_func ()
+{
+  return 2;
+}
+#endif
+
+#ifdef HIDDEN_WEAK_TEST
+int visibility_var_weak = 2;
+
+int
+visibility_func_weak ()
+{
+  return 2;
+}
 #endif

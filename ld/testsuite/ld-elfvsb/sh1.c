@@ -323,3 +323,54 @@ asm (".protected visibility");
 asm (".protected visibility_var");
 #endif
 #endif
+
+#ifdef HIDDEN_NORMAL_TEST
+int shlib_visibility_com;
+asm (".hidden shlib_visibility_com");
+
+int
+shlib_visibility_checkcom ()
+{
+  return shlib_visibility_com == 0;
+}
+
+int
+shlib_visibility_checkweak ()
+{
+  return 1;
+}
+#else
+int
+shlib_visibility_checkcom ()
+{
+  return 1;
+}
+
+int
+shlib_visibility_checkweak ()
+{
+  return 1;
+}
+#endif
+
+#ifdef PROTECTED_TEST
+int shared_data = 100;
+ 
+int *
+shared_data_p ()
+{
+  return &shared_data;
+}
+ 
+int
+shared_func ()
+{
+  return 100;
+}
+ 
+void *
+shared_func_p ()
+{
+  return shared_func;
+}
+#endif

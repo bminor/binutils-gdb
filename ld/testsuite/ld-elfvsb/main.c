@@ -42,6 +42,18 @@ extern int visibility_checkvar ();
 extern int visibility_checkvarptr ();
 extern int visibility_varval ();
 extern void *visibility_varptr ();
+extern int shlib_visibility_checkcom ();
+extern int shlib_visibility_checkweak ();
+
+int shlib_visibility_com = 1;
+
+int shlib_visibility_var_weak = 1;
+
+int
+shlib_visibility_func_weak ()
+{
+  return 1;
+}
 
 #ifdef HIDDEN_WEAK_TEST
 #define WEAK_TEST
@@ -81,6 +93,23 @@ main_visibility_checkvar ()
   return visibility_varval () != visibility_var
 	 && visibility_varptr () != &visibility_var;
 }
+
+#ifndef PROTECTED_UNDEF_TEST
+int shared_data = 1;
+asm (".protected shared_data");
+
+int
+shared_func ()
+{
+  return 1;
+}
+
+asm (".protected shared_func");
+
+extern int * shared_data_p ();
+typedef int (*func) ();
+extern func shared_func_p ();
+#endif
 #else
 static int
 main_visibility_check ()
@@ -121,10 +150,57 @@ shlib_overriddencall2 ()
   return 8;
 }
 
+#ifdef HIDDEN_NORMAL_TEST
+int visibility_com;
+asm (".hidden visibility_com");
+
+int
+main_visibility_checkcom ()
+{
+  return visibility_com == 0;
+}
+
+int
+main_visibility_checkweak ()
+{
+  return 1;
+}
+#elif defined (HIDDEN_UNDEF_TEST)
+extern int visibility_def;
+asm (".hidden visibility_def");
+extern int visibility_func ();
+asm (".hidden visibility_func");
+
+int
+main_visibility_checkcom ()
+{
+  return &visibility_def != NULL;
+}
+
+int
+main_visibility_checkweak ()
+{
+  return &visibility_func != NULL;
+}
+#else
+int
+main_visibility_checkcom ()
+{
+  return 1;
+}
+
+int
+main_visibility_checkweak ()
+{
+  return 1;
+}
+#endif
+
 int
 main ()
 {
   int (*p) ();
+  int ret = 0;
 
   printf ("mainvar == %d\n", mainvar);
   printf ("overriddenvar == %d\n", overriddenvar);
@@ -173,6 +249,27 @@ main ()
 	  visibility_checkvarptr ());
   printf ("main_visibility_checkvar () == %d\n",
 	  main_visibility_checkvar ());
-  return 0;
+  printf ("main_visibility_checkcom () == %d\n",
+	  main_visibility_checkcom ());
+  printf ("shlib_visibility_checkcom () == %d\n",
+	  shlib_visibility_checkcom ());
+  printf ("main_visibility_checkweak () == %d\n",
+	  main_visibility_checkweak ());
+  printf ("shlib_visibility_checkweak () == %d\n",
+	  shlib_visibility_checkweak ());
+
+#if !defined (PROTECTED_UNDEF_TEST) && defined (PROTECTED_TEST)
+  if (&shared_data != shared_data_p ())
+    ret = 1;
+  p = shared_func_p ();
+  if (shared_func != p)
+    ret = 1;
+  if (shared_data != *shared_data_p ())
+    ret = 1;
+  if (shared_func () != (*p) () )
+    ret = 1;
+#endif
+
+  return ret;
 }
 #endif
