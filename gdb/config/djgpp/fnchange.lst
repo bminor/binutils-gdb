@@ -157,7 +157,6 @@
 @V@/gdb/mips-linux-tdep.c @V@/gdb/mipslnxtdep.c
 @V@/gdb/mipsnbsd-nat.c @V@/gdb/mipsnbnat.c
 @V@/gdb/mipsnbsd-tdep.c @V@/gdb/mipsnbtdep.c
-@V@/gdb/nindy-share/b.out.h @V@/gdb/nindy-share/b_out.h
 @V@/gdb/ns32knbsd-nat.c @V@/gdb/ns32nb-nat.c
 @V@/gdb/ns32knbsd-tdep.c @V@/gdb/ns32nb-tdep.c
 @V@/gdb/objc-exp.tab.c @V@/gdb/objc-exp_tab.c
@@ -175,7 +174,6 @@
 @V@/gdb/remote-est.c @V@/gdb/rmt-est.c
 @V@/gdb/remote-mips.c @V@/gdb/emt-mips.c
 @V@/gdb/remote-mm.c @V@/gdb/emt-mm.c
-@V@/gdb/remote-nindy.c @V@/gdb/rmt-nindy.c
 @V@/gdb/remote-nrom.c @V@/gdb/rmt-nrom.c
 @V@/gdb/remote-rdi.c @V@/gdb/rmt-rdi.c
 @V@/gdb/remote-rdp.c @V@/gdb/rmt-rdp.c

@@ -780,9 +780,6 @@ HFILES_NO_SRCDIR = bcache.h buildsym.h call-cmds.h coff-solib.h defs.h \
 	jv-lang.h \
 	m2-lang.h  p-lang.h \
 	complaints.h valprint.h \
-	nindy-share/b.out.h \
-	nindy-share/block_io.h nindy-share/coff.h \
-	nindy-share/env.h nindy-share/stop.h \
 	vx-share/dbgRpcLib.h vx-share/ptrace.h vx-share/vxTypes.h \
 	vx-share/vxWorks.h vx-share/wait.h vx-share/xdr_ld.h \
 	vx-share/xdr_ptrace.h vx-share/xdr_rdb.h gdbthread.h \
@@ -960,10 +957,8 @@ init.c: $(INIT_FILES)
 	@rm -f init.c-tmp init.l-tmp
 	@-echo $(INIT_FILES) | \
 	tr ' ' '\012' | \
-	sed -e '/^Onindy.o/d' \
+	sed \
 	    -e '/^init.o/d' \
-	    -e '/^nindy.o/d' \
-	    -e '/ttyflush.o/d' \
 	    -e '/xdr_ld.o/d' \
 	    -e '/xdr_ptrace.o/d' \
 	    -e '/xdr_rdb.o/d' \
@@ -1015,31 +1010,6 @@ libgdb.a: $(LIBGDB_OBS)
 	-rm -f libgdb.a
 	$(AR) q libgdb.a $(LIBGDB_OBS)
 	$(RANLIB) libgdb.a
-
-saber_gdb: $(SFILES) $(DEPFILES) copying.c version.c
-	#setopt load_flags $(CFLAGS) $(BFD_CFLAGS) -DHOST_SYS=SUN4_SYS
-	#load ./init.c $(SFILES)
-	#unload $(srcdir)/c-exp.y
-	#unload $(srcdir)/jv-exp.y
-	#unload $(srcdir)/m2-exp.y
-	#unload $(srcdir)/p-exp.y
-	#unload vx-share/*.h
-	#unload nindy-share/[A-Z]*
-	#load c-exp.tab.c
-	#load jv-exp.tab.c
-	#load m2-exp.tab.c
-	#load p-exp.tab.c
-	#load copying.c version.c
-	#load ../opcodes/libopcodes.a
-	#load ../libiberty/libiberty.a
-	#load ../bfd/libbfd.a
-	#load ../readline/libreadline.a
-	#load ../mmalloc/libmmalloc.a
-	#load ../intl/libintl.a
-	#load -ltermcap 
-	#load `echo " "$(DEPFILES) | sed -e 's/\.o/.c/g' -e 's, , ../,g'`
-	echo "Load .c corresponding to:" $(DEPFILES)
-
 
 # A Mach 3.0 program to force gdb back to command level
 
@@ -1344,7 +1314,7 @@ force_update:
 # will remove them.
 MAKEOVERRIDES=
 
-ALLDEPFILES = a68v-nat.c \
+ALLDEPFILES = \
 	aix-thread.c \
 	alpha-nat.c alphabsd-nat.c \
 	alpha-tdep.c alpha-linux-tdep.c alphabsd-tdep.c alphanbsd-tdep.c \
@@ -1356,7 +1326,7 @@ ALLDEPFILES = a68v-nat.c \
 	core-sol2.c core-regset.c core-aout.c corelow.c \
 	dcache.c delta68-nat.c dpx2-nat.c exec.c fork-child.c \
 	go32-nat.c h8300-tdep.c h8500-tdep.c \
-	hp300ux-nat.c hppa-tdep.c hppa-hpux-tdep.c \
+	hppa-tdep.c hppa-hpux-tdep.c \
 	hppab-nat.c hppah-nat.c hpread.c \
 	i386-tdep.c i386b-nat.c i386v-nat.c i386-linux-nat.c \
 	i386v4-nat.c i386ly-tdep.c \
@@ -1376,8 +1346,6 @@ ALLDEPFILES = a68v-nat.c \
 	mips-tdep.c mipsm3-nat.c mipsv4-nat.c \
 	mipsnbsd-nat.c mipsnbsd-tdep.c \
 	nbsd-tdep.c \
-	nindy-share/Onindy.c nindy-share/nindy.c \
-	nindy-share/ttyflush.c nindy-tdep.c \
 	ns32k-tdep.c solib-osf.c \
 	somread.c somsolib.c $(HPREAD_SOURCE) \
 	ppc-sysv-tdep.o ppc-linux-nat.c ppc-linux-tdep.c \
@@ -1483,7 +1451,6 @@ ada-exp.tab.o: ada-exp.tab.c ada-lex.c ada-lang.h \
 # The dependencies.  In aphabetic order.
 #
 
-a68v-nat.o: a68v-nat.c $(defs_h) $(inferior_h) $(regcache_h)
 abug-rom.o: abug-rom.c $(defs_h) $(gdbcore_h) $(target_h) $(monitor_h) \
 	$(serial_h) $(regcache_h) $(m68k_tdep_h)
 ada-lang.o: ada-lang.c $(gdb_string_h) $(demangle_h) $(defs_h) $(symtab_h) \
@@ -1735,8 +1702,6 @@ h8300-tdep.o: h8300-tdep.c $(defs_h) $(frame_h) $(symtab_h) $(dis_asm_h) \
 	$(regcache_h)
 h8500-tdep.o: h8500-tdep.c $(defs_h) $(frame_h) $(symtab_h) $(gdbtypes_h) \
 	$(gdbcmd_h) $(value_h) $(dis_asm_h) $(gdbcore_h) $(regcache_h)
-hp300ux-nat.o: hp300ux-nat.c $(defs_h) $(frame_h) $(inferior_h) \
-	$(regcache_h)
 hpacc-abi.o: hpacc-abi.c $(defs_h) $(value_h) $(gdb_regex_h) $(gdb_string_h) \
 	$(gdbtypes_h) $(gdbcore_h) $(cp_abi_h)
 hppa-tdep.o: hppa-tdep.c $(defs_h) $(frame_h) $(bfd_h) $(inferior_h) \
@@ -1957,7 +1922,6 @@ monitor.o: monitor.c $(defs_h) $(gdbcore_h) $(target_h) $(gdb_string_h) \
 	$(command_h) $(serial_h) $(monitor_h) $(gdbcmd_h) $(inferior_h) \
 	$(gdb_regex_h) $(srec_h) $(regcache_h)
 nbsd-tdep.o: nbsd-tdep.c $(defs_h) $(gdb_string_h) $(solib_svr4_h)
-nindy-tdep.o: nindy-tdep.c $(defs_h) $(symtab_h) $(frame_h) $(gdbcore_h)
 nlmread.o: nlmread.c $(defs_h) $(bfd_h) $(symtab_h) $(symfile_h) \
 	$(objfiles_h) $(buildsym_h) $(stabsread_h)
 ns32k-tdep.o: ns32k-tdep.c $(defs_h) $(frame_h) $(gdbtypes_h) $(gdbcore_h) \
@@ -2033,8 +1997,6 @@ proc-why.o: proc-why.c $(defs_h) $(proc_utils_h)
 procfs.o: procfs.c $(defs_h) $(inferior_h) $(target_h) $(gdbcore_h) \
 	$(elf_bfd_h) $(gdbcmd_h) $(gdbthread_h) $(gdb_dirent_h) $(X_OK) \
 	$(gdb_stat_h) $(proc_utils_h) $(gregset_h)
-ptx4-nat.o: ptx4-nat.c $(defs_h) $(inferior_h) $(gdbcore_h) $(regcache_h) \
-	$(gregset_h)
 regcache.o: regcache.c $(defs_h) $(inferior_h) $(target_h) $(gdbarch_h) \
 	$(gdbcmd_h) $(regcache_h) $(reggroups_h) $(gdb_assert_h) \
 	$(gdb_string_h) $(gdbcmd_h)
@@ -2544,23 +2506,6 @@ mi-out.o: $(srcdir)/mi/mi-out.c $(defs_h) $(ui_out_h) $(mi_out_h)
 mi-parse.o: $(srcdir)/mi/mi-parse.c $(defs_h) $(mi_cmds_h) $(mi_parse_h) \
 	$(gdb_string_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/mi/mi-parse.c
-
-#
-# nindy-share sub-directory
-#
-# Need to explicitly specify the compile rule as make will do nothing
-# or try to compile the object file into the mi directory.
-
-Onindy.o: nindy-share/Onindy.c $(gdb_wait_h) nindy-share/block_io.h \
-	nindy-share/env.h
-	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/nindy-share/Onindy.c
-
-nindy.o: nindy-share/nindy.c $(gdb_wait_h) nindy-share/block_io.h \
-	nindy-share/env.h
-	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/nindy-share/nindy.c
-
-ttyflush.o: nindy-share/ttyflush.c $(srcdir)/nindy-share/ttyflush.c
-	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/nindy-share/ttyflush.c
 
 #
 # rdi-share sub-directory

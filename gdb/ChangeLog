@@ -1,3 +1,25 @@
+2003-01-31  Andrew Cagney  <ac131313@redhat.com>
+
+	* config/djgpp/fnchange.lst: Delete nindy files.
+	* nindy-share/ttyflush.c, nindy-share/stop.h: Delete files.
+	* nindy-share/nindy.c, nindy-share/env.h: Delete files.
+	* nindy-share/coff.h, nindy-share/block_io.h: Delete files.
+	* nindy-share/b.out.h, nindy-share/VERSION: Delete files.
+	* nindy-share/README, nindy-share/Onindy.c: Delete files.
+	* nindy-tdep.c, nindy-share/Makefile: Delete files.
+	* Makefile.in (init.c): Remove nindy references.
+	(saber_gdb): Delete rule.
+	(ALLDEPFILES): Delete hp300ux-nat.c, nindy-tdep.c,
+	nindy-share/Onindy.c, nindy-share/nindy.c, nindy-share/ttyflush.c,
+	and a68v-nat.c.
+	(hp300ux-nat.o, a68v-nat.o, ptx4-nat.o): Delete rules.
+	(Onindy.o, nindy.o, ttyflush.o, nindy-tdep.o): Delete rules.
+	(HFILES_NO_SRCDIR): Delete nindy-share/b.out.h,
+	nindy-share/block_io.h, nindy-share/coff.h, nindy-share/env.h, and
+	nindy-share/stop.h.
+	* hp300ux-nat.c, a68v-nat.c, ptx4-nat.c: Delete files.
+	* saber.suppress: Delete file.
+
 2003-01-31  Daniel Jacobowitz  <drow@mvista.com>
 
 	* dbxread.c (stabs_data): New static variable.
