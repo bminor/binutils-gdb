@@ -1,3 +1,10 @@
+2002-02-04  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* config/tc-mmix.c (tc_gen_reloc): Don't try and take the value of
+	common and weak symbols.  Handle common and weak symbols as
+	undefined symbols with regards to GREG handling and merging.
+	(mmix_frob_file): Ditto.
+
 2002-02-02  Jason Thorpe  <thorpej@wasabisystems.com>
 
 	* configure.in (hppa-*-netbsd*): New target.

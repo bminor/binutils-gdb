@@ -2587,14 +2587,20 @@ tc_gen_reloc (section, fixP)
      fixS *fixP;
 {
   bfd_signed_vma val
-    = fixP->fx_offset + (fixP->fx_addsy ? S_GET_VALUE (fixP->fx_addsy) : 0);
+    = fixP->fx_offset
+    + (fixP->fx_addsy != NULL
+       && !S_IS_WEAK (fixP->fx_addsy)
+       && !S_IS_COMMON (fixP->fx_addsy)
+       ? S_GET_VALUE (fixP->fx_addsy) : 0);
   arelent *relP;
   bfd_reloc_code_real_type code = BFD_RELOC_NONE;
   char *buf  = fixP->fx_where + fixP->fx_frag->fr_literal;
   symbolS *addsy = fixP->fx_addsy;
   asection *addsec = addsy == NULL ? NULL : S_GET_SEGMENT (addsy);
   asymbol *baddsy = addsy != NULL ? symbol_get_bfdsym (addsy) : NULL;
-  bfd_vma addend = val - (baddsy == NULL ? 0 : bfd_asymbol_value (baddsy));
+  bfd_vma addend
+    = val - (baddsy == NULL || S_IS_COMMON (addsy) || S_IS_WEAK (addsy)
+	     ? 0 : bfd_asymbol_value (baddsy));
 
   /* A single " LOCAL expression" in the wrong section will not work when
      linking to MMO; relocations for zero-content sections are then
@@ -2720,7 +2726,9 @@ tc_gen_reloc (section, fixP)
 	  struct mmix_symbol_gregs *gregs;
 	  struct mmix_symbol_greg_fixes *fix;
 
-	  if (S_IS_DEFINED (addsy))
+	  if (S_IS_DEFINED (addsy) 
+	      && !bfd_is_com_section (addsec)
+	      && !S_IS_WEAK (addsy))
 	    {
 	      if (! symbol_section_p (addsy) && ! bfd_is_abs_section (addsec))
 		as_fatal (_("internal: BFD_RELOC_MMIX_BASE_PLUS_OFFSET not resolved to section"));
@@ -3592,7 +3600,9 @@ mmix_frob_file ()
 
       /* If the symbol is defined, then it must be resolved to a section
 	 symbol at this time, or else we don't know how to handle it.  */
-      if (S_IS_DEFINED (sym))
+      if (S_IS_DEFINED (sym)
+	  && !bfd_is_com_section (S_GET_SEGMENT (sym))
+	  && !S_IS_WEAK (sym))
 	{
 	  if (! symbol_section_p (sym)
 	      && ! bfd_is_abs_section (S_GET_SEGMENT (sym)))
