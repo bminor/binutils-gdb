@@ -674,6 +674,9 @@ create_procinfo (int pid, int tid)
   load_syscalls (pi);
 #endif
 
+  pi->saved_entryset = sysset_t_alloc (pi);
+  pi->saved_exitset = sysset_t_alloc (pi);
+
   /* Chain into list.  */
   if (tid == 0)
     {
@@ -743,6 +746,8 @@ destroy_one_procinfo (procinfo **list, procinfo *pi)
 #ifdef DYNAMIC_SYSCALLS
   free_syscalls (pi);
 #endif
+  xfree (pi->saved_entryset);
+  xfree (pi->saved_exitset);
   xfree (pi);
 }
 
