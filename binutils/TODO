@@ -1,0 +1,11 @@
+o - merge:
+	copy and strip
+	ar and ranlib
+	nm, size, and objdump
+
+o - make the long options more consistent.
+
+o - make ATT and BSD versions -- perhaps the options should be
+    controlled by an environment variable.
+
+o - Calling +help or +version should exit with a successful status (ie 0)

@@ -20,8 +20,11 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
  *  $Id$ 
  *
  *  $Log$
- *  Revision 1.1  1991/03/21 21:28:58  gumby
- *  Initial revision
+ *  Revision 1.1.1.1  1991/03/21 21:28:58  gumby
+ *  Back from Intel with Steve
+ *
+ * Revision 1.1  1991/03/21  21:28:58  gumby
+ * Initial revision
  *
  * Revision 1.1  1991/03/13  00:48:32  chrisb
  * Initial revision
