@@ -37,7 +37,6 @@ extern int fwrite();
 extern int sscanf();
 extern int stat();
 extern int strtol();
-void free();
 char *malloc();
 char *realloc();
 extern char *strrchr();
