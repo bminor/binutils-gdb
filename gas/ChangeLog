@@ -4,8 +4,21 @@
 
 1999-08-03  Alan Modra  <alan@spri.levels.unisa.edu.au>
 
-	* config/tc-i386.c (i386_operand): Add INFER_ADDR_PREFIX code, but
-	don't enable it by default.  White space changes.
+	* config/tc-i386.c: Indentation and white space changes.
+	(i386_index_check): New function.  Add INFER_ADDR_PREFIX code, but
+	don't enable it by default.
+	(i386_intel_operand): Remove redundant prototype.
+	Move check on number of memory operands, and i.mem_operands++
+	(i386_intel_memory_operand): To here.
+	Remove i386_immediate code from here.  Remove special case code
+	for input and output using (%dx).  Remove base/index checks and
+	call i386_index_check instead.  Save initial operand_string
+	argument for error message.
+	(i386_operand): Remove redundant prototype.  Move base/index
+	checks to i386_index_check.
+	(i386_displacement): Move intel mode check for non-zero
+	i.disp_operand
+	(i386_intel_memory_operand): To here.
 
 1999-07-30  Jakub Jelinek  <jj@ultra.linux.cz>
 
