@@ -8,10 +8,12 @@ Thu Jan 29 16:47:24 1998  Ian Carmichael  <iancarm@cygnus.com>
 
 	* dvp-opc.c, MAXIi should be VUOP6(0x1d) instead of 0x2d.
 
+end-sanitize-sky
 Thu Jan 29 13:02:56 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* m32r-opc.h (HAVE_CPU_M32R): Define.
 
+start-sanitize-sky
 Wed Jan 28 13:46:19 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* dvp-dis.c, dvp-opc.c: New files.
@@ -104,13 +106,13 @@ Tue Dec 16 13:24:22 1997  Jeffrey A Law  (law@cygnus.com)
 	* mips-opc.c: Add many missing r5900 instructions.
 
 end-sanitize-r5900
-start-sanitize-r5900
+start-sanitize-d30v
 Tue Dec 16 15:22:51 1997  Michael Meissner  <meissner@cygnus.com>
 
 	* d30v-opc.c (d30v_opcode_table): Set new flags bits
 	FLAG_{2WORD,MUL{16,32},ADDSUBppp}, in appropriate instructions.
 
-end-sanitize-r5900
+end-sanitize-d30v
 1997-12-15  Brendan Kehoe  <brendan@lisa.cygnus.com>
 
 	* configure: Only build libopcodes shared if --enable-shared's value
