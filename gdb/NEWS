@@ -14,15 +14,37 @@ M68K Linux					m68*-*-linux*
 Fujitsu FR30					fr30-*-elf*
 Mitsubishi D30V					d30v-*-*
 
-* PowerPC Variants
-
-PowerPC configurations of GDB now support `set processor' to control
-the register set in use.  Available processor types include
-rs6000, 403, 403GC, 505, 601, 602, 603, 604, 750, and 860.
-
 * Readline 2.2
 
 GDB now uses readline 2.2.
+
+** The PowerPC and RS6000 targets now have a `set processor' command.
+
+When GDB is configured for a powerpc*-*-* or an rs6000*-*-* target,
+you can use the `set processor' command to specify what variant of the
+PowerPC family you are debugging.  The command
+
+	set processor NAME
+
+sets the PowerPC/RS6000 variant to NAME.  GDB knows about the
+following PowerPC and RS6000 variants:
+
+  ppc-uisa  PowerPC UISA - a PPC processor as viewed by user-level code
+  rs6000    IBM RS6000 ("POWER") architecture, user-level view
+  403       IBM PowerPC 403
+  403GC     IBM PowerPC 403GC
+  505       Motorola PowerPC 505
+  860       Motorola PowerPC 860 or 850
+  601       Motorola PowerPC 601
+  602       Motorola PowerPC 602
+  603       Motorola/IBM PowerPC 603 or 603e
+  604       Motorola PowerPC 604 or 604e
+  750       Motorola/IBM PowerPC 750 or 750
+
+At the moment, this command just tells GDB what to name the
+special-purpose processor registers.  Since almost all the affected
+registers are inaccessible to user-level programs, this command is
+only useful for remote debugging in its present form.
 
 * HP-UX Support
 
@@ -62,6 +84,7 @@ can be used to revert to the old behavour.  For existing remote stubs
 the change should not be noticed as the additional address information
 will be discarded.
 
+* Changes to particular targets
 
 *** Changes in GDB-4.17:
 
