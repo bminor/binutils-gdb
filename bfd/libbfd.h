@@ -217,6 +217,8 @@ extern bfd_boolean _bfd_generic_get_section_contents_in_window
   ((bfd_boolean (*) (bfd *, asection *, bfd *, asection *)) bfd_true)
 #define _bfd_generic_bfd_copy_private_symbol_data \
   ((bfd_boolean (*) (bfd *, asymbol *, bfd *, asymbol *)) bfd_true)
+#define _bfd_generic_bfd_copy_private_header_data \
+  ((bfd_boolean (*) (bfd *, bfd *)) bfd_true)
 #define _bfd_generic_bfd_print_private_bfd_data \
   ((bfd_boolean (*) (bfd *, void *)) bfd_true)
 
@@ -696,9 +698,9 @@ struct _bfd_window_internal {
 extern bfd *bfd_last_cache;
 
 #define bfd_cache_lookup(x) \
-    ((x)==bfd_last_cache? \
-      (FILE*) (bfd_last_cache->iostream): \
-       bfd_cache_lookup_worker(x))
+    ((x) == bfd_last_cache ? \
+      (FILE *) (bfd_last_cache->iostream): \
+       bfd_cache_lookup_worker (x))
 bfd_boolean bfd_cache_init (bfd *abfd);
 
 bfd_boolean bfd_cache_close (bfd *abfd);

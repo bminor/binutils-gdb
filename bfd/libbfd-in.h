@@ -212,6 +212,8 @@ extern bfd_boolean _bfd_generic_get_section_contents_in_window
   ((bfd_boolean (*) (bfd *, asection *, bfd *, asection *)) bfd_true)
 #define _bfd_generic_bfd_copy_private_symbol_data \
   ((bfd_boolean (*) (bfd *, asymbol *, bfd *, asymbol *)) bfd_true)
+#define _bfd_generic_bfd_copy_private_header_data \
+  ((bfd_boolean (*) (bfd *, bfd *)) bfd_true)
 #define _bfd_generic_bfd_print_private_bfd_data \
   ((bfd_boolean (*) (bfd *, void *)) bfd_true)
 

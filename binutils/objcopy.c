@@ -377,6 +377,7 @@ extern unsigned long          bfd_external_machine;
 
 /* Forward declarations.  */
 static void setup_section (bfd *, asection *, void *);
+static void setup_bfd_headers (bfd *, bfd *);
 static void copy_section (bfd *, asection *, void *);
 static void get_sections (bfd *, asection *, void *);
 static int compare_section_lma (const void *, const void *);
@@ -1178,6 +1179,8 @@ copy_object (bfd *ibfd, bfd *obfd)
      any output is done.  Thus, we traverse all sections multiple times.  */
   bfd_map_over_sections (ibfd, setup_section, obfd);
 
+  setup_bfd_headers (ibfd, obfd);
+
   if (add_sections != NULL)
     {
       struct section_add *padd;
@@ -1806,6 +1809,32 @@ find_section_rename (bfd * ibfd ATTRIBUTE_UNUSED, sec_ptr isection,
       }
 
   return old_name;
+}
+
+/* Once each of the sections is copied, we may still need to do some
+   finalization work for private section headers.  Do that here.  */
+
+static void
+setup_bfd_headers (bfd *ibfd, bfd *obfd)
+{
+  const char *err;
+
+  /* Allow the BFD backend to copy any private data it understands
+     from the input section to the output section.  */
+  if (! bfd_copy_private_header_data (ibfd, obfd))
+    {
+      err = _("private header data");
+      goto loser;
+    }
+
+  /* All went well.  */
+  return;
+
+loser:
+  non_fatal (_("%s: error in %s: %s"),
+	     bfd_get_filename (ibfd),
+	     err, bfd_errmsg (bfd_get_error ()));
+  status = 1;
 }
 
 /* Create a section in OBFD with the same

@@ -168,6 +168,8 @@ static bfd_boolean vms_bfd_set_private_flags
 #define vms_bfd_link_just_syms _bfd_generic_link_just_syms
 #define vms_bfd_is_group_section bfd_generic_is_group_section
 #define vms_bfd_discard_group bfd_generic_discard_group
+#define vms_bfd_copy_private_header_data \
+  _bfd_generic_bfd_copy_private_header_data
 
 /*===========================================================================*/
 

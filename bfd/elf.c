@@ -5290,24 +5290,6 @@ _bfd_elf_copy_private_section_data (bfd *ibfd,
       || obfd->xvec->flavour != bfd_target_elf_flavour)
     return TRUE;
 
-  if (elf_tdata (obfd)->segment_map == NULL && elf_tdata (ibfd)->phdr != NULL)
-    {
-	asection *s;
-
-	/* Only set up the segments if there are no more SEC_ALLOC
-	   sections.  FIXME: This won't do the right thing if objcopy is
-	   used to remove the last SEC_ALLOC section, since objcopy
-	   won't call this routine in that case.  */
-	for (s = isec->next; s != NULL; s = s->next)
-	  if ((s->flags & SEC_ALLOC) != 0)
-	    break;
-	if (s == NULL)
-	  {
-	    if (! copy_private_bfd_data (ibfd, obfd))
-	      return FALSE;
-	  }
-    }
-
   ihdr = &elf_section_data (isec)->this_hdr;
   ohdr = &elf_section_data (osec)->this_hdr;
 
@@ -5326,6 +5308,29 @@ _bfd_elf_copy_private_section_data (bfd *ibfd,
   elf_group_name (osec) = elf_group_name (isec);
 
   osec->use_rela_p = isec->use_rela_p;
+
+  return TRUE;
+}
+
+/* Copy private header information.  */
+
+bfd_boolean
+_bfd_elf_copy_private_header_data (bfd *ibfd, bfd *obfd)
+{
+  if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour
+      || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
+    return TRUE;
+
+  /* Copy over private BFD data if it has not already been copied.
+     This must be done here, rather than in the copy_private_bfd_data
+     entry point, because the latter is called after the section
+     contents have been set, which means that the program headers have
+     already been worked out.  */
+  if (elf_tdata (obfd)->segment_map == NULL && elf_tdata (ibfd)->phdr != NULL)
+    {
+      if (! copy_private_bfd_data (ibfd, obfd))
+	return FALSE;
+    }
 
   return TRUE;
 }

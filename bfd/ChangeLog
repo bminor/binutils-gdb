@@ -1,3 +1,28 @@
+2004-05-17  David Heine  <dlheine@tensilica.com>
+
+	* aout-target.h (MY_bfd_copy_private_header_data): Define.
+	* aout-tic30.c (MY_bfd_copy_private_header_data): Define.
+	* bfd.c (bfd_copy_private_header_data): Define.
+	* coff-rs6000.c (rs6000coff_vec, pmac_xcoff_vec): Add entries for new
+	interface.
+	* coff64-rs6000.c (rs6000coff64_vec, aix5coff64_vec): Likewise.
+	* coffcode.h (coff_bfd_copy_private_header_data): Define.
+	* elf-bfd.h (_bfd_elf_copy_private_header_data): Declare.
+	* elf.c (_bfd_elf_copy_private_section_data): Remove code to set up
+	segments by calling copy_private_bfd_data.
+	(_bfd_elf_copy_private_header_data): Define.
+	* elfxx-target.h (bfd_elfNN_bfd_copy_private_header_data): Define.
+	* libbfd-in.h (_bfd_generic_bfd_copy_private_header_data): Define.
+	* libecoff.h (_bfd_ecoff_bfd_copy_private_header_data): Define.
+	* mach-o.c (bfd_mach_o_bfd_copy_private_header_data): Define.
+	* mmo.c (mmo_bfd_copy_private_header_data): Define.
+	* ppcboot.c (ppcboot_bfd_copy_private_header_data): Define.
+	* som.c (som_bfd_copy_private_header_data): Define.
+	* targets.c (BFD_JUMP_TABLE_COPY): Add _bfd_copy_private_header_data.
+	* vms.c (vms_bfd_copy_private_header_data): Define.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+
 2004-05-15  Thiemo Seufer  <seufer@csv.ica.uni-stuttgart.de>
 
 	* elfxx-mips.c (MINUS_TWO): Define.

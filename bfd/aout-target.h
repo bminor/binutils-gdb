@@ -559,6 +559,10 @@ MY_bfd_final_link (abfd, info)
 #define MY_bfd_copy_private_symbol_data _bfd_generic_bfd_copy_private_symbol_data
 #endif
 
+#ifndef MY_bfd_copy_private_header_data
+#define MY_bfd_copy_private_header_data _bfd_generic_bfd_copy_private_header_data
+#endif
+
 #ifndef MY_bfd_print_private_bfd_data
 #define MY_bfd_print_private_bfd_data _bfd_generic_bfd_print_private_bfd_data
 #endif

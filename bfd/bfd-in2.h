@@ -3945,6 +3945,11 @@ void bfd_set_gp_size (bfd *abfd, unsigned int i);
 
 bfd_vma bfd_scan_vma (const char *string, const char **end, int base);
 
+bfd_boolean bfd_copy_private_header_data (bfd *ibfd, bfd *obfd);
+
+#define bfd_copy_private_header_data(ibfd, obfd) \
+     BFD_SEND (obfd, _bfd_copy_private_header_data, \
+               (ibfd, obfd))
 bfd_boolean bfd_copy_private_bfd_data (bfd *ibfd, bfd *obfd);
 
 #define bfd_copy_private_bfd_data(ibfd, obfd) \
@@ -4225,6 +4230,7 @@ typedef struct bfd_target
   NAME##_bfd_merge_private_bfd_data, \
   NAME##_bfd_copy_private_section_data, \
   NAME##_bfd_copy_private_symbol_data, \
+  NAME##_bfd_copy_private_header_data, \
   NAME##_bfd_set_private_flags, \
   NAME##_bfd_print_private_bfd_data
 
@@ -4242,6 +4248,10 @@ typedef struct bfd_target
      to another.  */
   bfd_boolean (*_bfd_copy_private_symbol_data)
     (bfd *, asymbol *, bfd *, asymbol *);
+  /* Called to copy BFD private header data from one object file
+     to another.  */
+  bfd_boolean (*_bfd_copy_private_header_data)
+    (bfd *, bfd *);
   /* Called to set private backend flags.  */
   bfd_boolean (*_bfd_set_private_flags) (bfd *, flagword);
 

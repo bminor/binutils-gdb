@@ -1379,6 +1379,8 @@ extern void bfd_elf_set_group_contents
   (bfd *, asection *, void *);
 extern void _bfd_elf_link_just_syms
   (asection *, struct bfd_link_info *);
+extern bfd_boolean _bfd_elf_copy_private_header_data
+  (bfd *, bfd *);
 extern bfd_boolean _bfd_elf_copy_private_symbol_data
   (bfd *, asymbol *, bfd *, asymbol *);
 extern bfd_boolean _bfd_elf_copy_private_section_data

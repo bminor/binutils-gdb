@@ -70,6 +70,7 @@
 #define bfd_mach_o_bfd_merge_sections bfd_generic_merge_sections
 #define bfd_mach_o_bfd_is_group_section bfd_generic_is_group_section
 #define bfd_mach_o_bfd_discard_group bfd_generic_discard_group
+#define bfd_mach_o_bfd_copy_private_header_data _bfd_generic_bfd_copy_private_header_data
 
 static bfd_boolean bfd_mach_o_bfd_copy_private_symbol_data
   PARAMS ((bfd *, asymbol *, bfd *, asymbol *));

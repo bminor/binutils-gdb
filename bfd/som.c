@@ -192,6 +192,8 @@ static bfd_boolean som_bfd_copy_private_section_data
   PARAMS ((bfd *, asection *, bfd *, asection *));
 static bfd_boolean som_bfd_copy_private_bfd_data
   PARAMS ((bfd *, bfd *));
+#define som_bfd_copy_private_header_data \
+  _bfd_generic_bfd_copy_private_header_data
 #define som_bfd_merge_private_bfd_data _bfd_generic_bfd_merge_private_bfd_data
 #define som_bfd_set_private_flags _bfd_generic_bfd_set_private_flags
 static bfd_boolean som_bfd_is_local_label_name

@@ -265,6 +265,7 @@ BFD_JUMP_TABLE macros.
 .  NAME##_bfd_merge_private_bfd_data, \
 .  NAME##_bfd_copy_private_section_data, \
 .  NAME##_bfd_copy_private_symbol_data, \
+.  NAME##_bfd_copy_private_header_data, \
 .  NAME##_bfd_set_private_flags, \
 .  NAME##_bfd_print_private_bfd_data
 .
@@ -282,6 +283,10 @@ BFD_JUMP_TABLE macros.
 .     to another.  *}
 .  bfd_boolean (*_bfd_copy_private_symbol_data)
 .    (bfd *, asymbol *, bfd *, asymbol *);
+.  {* Called to copy BFD private header data from one object file
+.     to another.  *}
+.  bfd_boolean (*_bfd_copy_private_header_data)
+.    (bfd *, bfd *);
 .  {* Called to set private backend flags.  *}
 .  bfd_boolean (*_bfd_set_private_flags) (bfd *, flagword);
 .

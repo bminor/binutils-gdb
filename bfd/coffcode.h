@@ -5511,6 +5511,10 @@ static const bfd_coff_backend_data ticoff1_swap_table =
 #define coff_bfd_copy_private_symbol_data   _bfd_generic_bfd_copy_private_symbol_data
 #endif
 
+#ifndef coff_bfd_copy_private_header_data
+#define coff_bfd_copy_private_header_data   _bfd_generic_bfd_copy_private_header_data
+#endif
+
 #ifndef coff_bfd_copy_private_section_data
 #define coff_bfd_copy_private_section_data  _bfd_generic_bfd_copy_private_section_data
 #endif

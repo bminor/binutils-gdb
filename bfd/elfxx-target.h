@@ -158,6 +158,10 @@
 #define bfd_elfNN_bfd_copy_private_section_data \
   _bfd_elf_copy_private_section_data
 #endif
+#ifndef bfd_elfNN_bfd_copy_private_header_data
+#define bfd_elfNN_bfd_copy_private_header_data \
+  _bfd_elf_copy_private_header_data
+#endif
 #ifndef bfd_elfNN_bfd_copy_private_bfd_data
 #define bfd_elfNN_bfd_copy_private_bfd_data \
   _bfd_elf_copy_private_bfd_data

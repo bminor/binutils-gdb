@@ -1,5 +1,5 @@
 /* BFD ECOFF object file private structure.
-   Copyright 1993, 1994, 1995, 1996, 1999, 2001, 2002, 2003
+   Copyright 1993, 1994, 1995, 1996, 1999, 2001, 2002, 2003, 2004
    Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
 
@@ -248,6 +248,9 @@ extern bfd_boolean _bfd_ecoff_bfd_copy_private_bfd_data
 
 #define _bfd_ecoff_bfd_copy_private_symbol_data \
   _bfd_generic_bfd_copy_private_symbol_data
+
+#define _bfd_ecoff_bfd_copy_private_header_data \
+  _bfd_generic_bfd_copy_private_header_data
 
 #define _bfd_ecoff_bfd_print_private_bfd_data \
   _bfd_generic_bfd_print_private_bfd_data

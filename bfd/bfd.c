@@ -982,6 +982,29 @@ bfd_scan_vma (const char *string, const char **end, int base)
 
 /*
 FUNCTION
+	bfd_copy_private_header_data
+
+SYNOPSIS
+	bfd_boolean bfd_copy_private_header_data (bfd *ibfd, bfd *obfd);
+
+DESCRIPTION
+	Copy private BFD header information from the BFD @var{ibfd} to the
+	the BFD @var{obfd}.  This copies information that may require
+	sections to exist, but does not require symbol tables.  Return
+	<<true>> on success, <<false>> on error.
+	Possible error returns are:
+
+	o <<bfd_error_no_memory>> -
+	Not enough memory exists to create private data for @var{obfd}.
+
+.#define bfd_copy_private_header_data(ibfd, obfd) \
+.     BFD_SEND (obfd, _bfd_copy_private_header_data, \
+.		(ibfd, obfd))
+
+*/
+
+/*
+FUNCTION
 	bfd_copy_private_bfd_data
 
 SYNOPSIS
