@@ -1410,7 +1410,11 @@ frame_saved_regs_register_unwind (struct frame_info *frame, void **cache,
   /* There is always a frame at this point.  And THIS is the frame
      we're interested in.  */
   gdb_assert (frame != NULL);
-  gdb_assert (!PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame));
+  /* If we're using generic dummy frames, we'd better not be in a call
+     dummy.  (generic_call_dummy_register_unwind ought to have been called
+     instead.)  */
+  gdb_assert (!(USE_GENERIC_DUMMY_FRAMES
+                && PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame)));
 
   /* Load the saved_regs register cache.  */
   if (frame->saved_regs == NULL)
