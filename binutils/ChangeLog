@@ -1,3 +1,10 @@
+Wed Jul 12 10:43:05 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* objdump.c (dump_section_stabs): Only print each stabs section
+	once.
+	(compare_relocs): Make it clear to gcc that this always returns a
+	value.
+
 Wed Jul 12 10:40:23 1995  H.J. Lu  <hjl@nynexst.com>
 
 	* objcopy.c (simple_copy): Preserve errno on failure.
