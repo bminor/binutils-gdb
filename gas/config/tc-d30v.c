@@ -181,7 +181,7 @@ reg_name_search (name)
 	  if (symbol_find (name) != NULL)
 	    {
 	      if (warn_register_name_conflicts)
-		as_warn ("Register name %s conflicts with symbol of the same name",
+		as_warn (_("Register name %s conflicts with symbol of the same name"),
 			 name);
 	    }
   
@@ -194,7 +194,7 @@ reg_name_search (name)
 }
 
 /* register_name() checks the string at input_line_pointer
-   to see if it is a valid register name */
+   to see if it is a valid register name.  */
 
 static int
 register_name (expressionP)
@@ -757,18 +757,26 @@ write_2_short (opcode1, insn1, opcode2, insn2, exec_type, fx)
   char *f;
   int i,j, where;
 
-  if (exec_type != EXEC_PARALLEL &&
-     ((opcode1->op->flags_used & (FLAG_JSR | FLAG_DELAY)) == FLAG_JSR))
+  if (exec_type == EXEC_SEQ
+      && (opcode1->op->flags_used & (FLAG_JMP | FLAG_JSR))
+      && ((opcode1->ecc == ECC_AL) || ! Optimizing))
     {
-      /* subroutines must be called from 32-bit boundaries */
-      /* so the return address will be correct */
+      /* Unconditional branches kill instructions in the right bin.
+	 Conditional branches don't always but if we are not
+	 optimizing, then we want to produce an error about such
+	 constructs.  For the purposes of this test, subroutine
+	 calls are considered to be branches.  */
       write_1_short (opcode1, insn1, fx->next, false);
       return 1;
     }
-
+  
+  /* Note: we do not have to worry about subroutine calls occuring
+     in the right hand container.  The return address is always
+     aligned to the next 64 bit boundary, be that 64 or 32 bit away.  */
+  
   switch (exec_type) 
     {
-    case EXEC_UNKNOWN:	/* order not specified */
+    case EXEC_UNKNOWN:	/* Order not specified. */
       if (Optimizing
 	  && parallel_ok (opcode1, insn1, opcode2, insn2, exec_type)
 	  && ! (   (opcode1->op->unit == EITHER_BUT_PREFER_MU
@@ -789,6 +797,14 @@ write_2_short (opcode1, insn1, opcode2, insn2, exec_type, fx)
 	      insn = FM00 | (insn1 << 32) | insn2;  
 	      fx = fx->next;
 	    }
+	}
+      else if (opcode1->op->flags_used & (FLAG_JMP | FLAG_JSR)
+	       && ((opcode1->ecc == ECC_AL) || ! Optimizing))
+	{
+	  /* We must emit branch type instruction on its own with
+	     nothing in the right container.  */
+	  write_1_short (opcode1, insn1, fx->next, false);
+	  return 1;
 	}
       else if (opcode1->op->unit == IU
 	       || (opcode1->op->unit == EITHER
@@ -823,14 +839,14 @@ write_2_short (opcode1, insn1, opcode2, insn2, exec_type, fx)
 	  if (opcode1->op->unit == MU)
 	    as_fatal (_("Two MU instructions may not be executed in parallel"));
 	  else if (opcode1->op->unit == EITHER_BUT_PREFER_MU)
-	    as_warn (_("Executing %s in IU may not work", opcode1->op->name));
+	    as_warn (_("Executing %s in IU may not work"), opcode1->op->name);
 	  as_warn (_("Swapping instruction order"));
 	  insn = FM00 | (insn2 << 32) | insn1;
 	}
       else
 	{
 	  if (opcode2->op->unit == EITHER_BUT_PREFER_MU)
-	    as_warn ("Executing %s in IU may not work", opcode2->op->name);
+	    as_warn (_("Executing %s in IU may not work"), opcode2->op->name);
 	  
 	  insn = FM00 | (insn1 << 32) | insn2;  
 	  fx = fx->next;
@@ -864,7 +880,7 @@ write_2_short (opcode1, insn1, opcode2, insn2, exec_type, fx)
       as_fatal (_("unknown execution type passed to write_2_short()"));
     }
 
-  /*  printf("writing out %llx\n",insn); */
+  /*  printf ("writing out %llx\n",insn); */
   f = frag_more (8);
   d30v_number_to_chars (f, insn, 8);
 

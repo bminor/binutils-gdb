@@ -1,3 +1,9 @@
+Thu Sep 24 09:28:34 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-d30v.c (write_2_short): Do not allow instructions in
+	the right container if the left container holds a branch
+	instruction. 
+
 Wed Sep 23 10:54:29 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-d30v.c (reg_name_search): Only warn if a name matches
