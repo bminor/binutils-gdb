@@ -67,7 +67,6 @@ Wed Apr 24 14:22:21 2002  Andrew Cagney  <cagney@redhat.com>
 	REGISTER_RAW_SIZE of SP_REGNUM not CORE_ADDR.
 	(vx_write_register): Likewise.
 
->>>>>>> 1.2500
 2002-04-23  J. Brobecker  <brobecker@gnat.com>
 
 	* source.c (is_regular_file): New function.
