@@ -8,7 +8,7 @@
 TREE	= devo
 include $(TREE)/release-info
 
-TEST_INSTALL_DISK = /big
+TEST_INSTALL_DISK = /taxes
 
 INSTALLDIR = $(TEST_INSTALL_DISK)/$(TREE)-test/$(RELEASE_TAG)
 
@@ -63,9 +63,10 @@ endif
 
 ifeq ($(canonhost),sparc-sun-sunos4.1.3)
 TARGETS = $(NATIVE) \
+	i386-go32 \
 	a29k-amd-udi 	\
 	h8300-hms 	h8500-hms \
-	i386-aout	i386-go32	i386-coff \
+	i386-aout	i386-coff \
 	i960-intel-nindy		i960-vxworks \
 	mips-idt-ecoff	\
 	m68k-aout	m68k-vxworks 	m68k-coff \
@@ -88,12 +89,14 @@ endif
 
 ifeq ($(canonhost),sparc-sun-solaris2)
 TARGETS = $(NATIVE) \
-	a29k-amd-udi \
 	i386-aout \
-	i960-vxworks 	i960-intel-nindy \
-	m68k-aout 	m68k-coff 	m68k-vxworks \
+	i960-vxworks	i960-intel-nindy \
+	m68k-aout	m68k-coff 	m68k-vxworks \
 	mips-idt-ecoff \
-	sparc-aout	sparc-vxworks	sparclite-aout 
+	sparc-aout	sparc-vxworks	sparclite-aout \
+	h8300-hms	h8500-hms \
+	a29k-amd-udi \
+	i386-coff 
 CC = cc -Xs
 GCC = gcc -O -pipe
 all: all-cygnus
@@ -114,7 +117,16 @@ endif
 ifeq ($(canonhost),rs6000-ibm-aix)
 TARGETS	= $(NATIVE) \
 	i960-vxworks	i960-intel-nindy \
-	m68k-aout 	m68k-vxworks 
+	m68k-aout	m68k-vxworks \
+	a29k-amd-udi 	\
+	h8300-hms 	h8500-hms \
+	i386-aout	i386-coff \
+	mips-idt-ecoff	\
+	m68k-coff \
+	m88k-coff \
+	sh-hms \
+	sparc-aout	sparc-vxworks	sparclite-aout \
+	z8k-sim		z8k-coff
 all: all-cygnus
 endif
 
@@ -123,23 +135,24 @@ TARGETS	= $(NATIVE)	m68k-aout
 TMPDIR := $(shell mkdir $(canonhost)-tmpdir; cd $(canonhost)-tmpdir ; pwd)
 CC = cc -Wp,-P 
 #CFLAGS = +O1000 
-CFLAGS = -g
+CFLAGS = 
 all: all-cygnus
 endif
 
 ifeq ($(canonhost),hppa1.1-hp-hpux)
 TARGETS = \
 	i960-vxworks \
-	m68k-aout	m68k-vxworks
-#	a29k-amd-udi 	\
-#	h8300-hms 	h8500-hms \
-#	i386-aout	i386-go32 \
-#	i960-vxworks 	i960-intel-nindy \
-#	mips-idt-ecoff	\
-#	m68k-aout	m68k-vxworks 	m68k-coff \
-#	m88k-coff \
-#	sparc-aout	sparclite-aout \
-#	z8k-sim		
+	m68k-aout	m68k-vxworks \
+	a29k-amd-udi 	\
+	h8300-hms 	h8500-hms \
+	i386-aout	i386-coff \
+	i960-intel-nindy \
+	mips-idt-ecoff	\
+	m68k-coff \
+	m88k-coff \
+	sparc-aout	sparc-vxworks	sparclite-aout \
+	z8k-coff 
+#	sh-hms		# doesn't work
 CC = cc 
 #CFLAGS = +Obb2000
 CFLAGS = -g
@@ -169,7 +182,17 @@ all: all-cross
 endif
 
 ifeq ($(canonhost),i386-univel-sysv4.2)
-TARGETS	= $(NATIVE) 
+TARGETS = $(NATIVE) \
+	a29k-amd-udi 	\
+	h8300-hms 	h8500-hms \
+	i386-aout	i386-coff \
+	i960-intel-nindy		i960-vxworks \
+	mips-idt-ecoff	\
+	m68k-aout	m68k-vxworks 	m68k-coff \
+	m88k-coff \
+	sh-hms \
+	sparc-aout	sparc-vxworks	sparclite-aout \
+	z8k-sim		z8k-coff
 CC = cc
 all: all-cygnus
 endif
@@ -208,8 +231,7 @@ all-emacs:
 all-cygnus:
 	@echo build started at `date`
 	[ -d $(INSTALLDIR) ] || mkdir $(INSTALLDIR)
-	rm -f $(ROOTING)/$(RELEASE_TAG)
-	ln -s $(INSTALLDIR) $(ROOTING)/$(RELEASE_TAG) 
+	-rm -f $(ROOTING)/$(RELEASE_TAG) && ln -s $(INSTALLDIR) $(ROOTING)/$(RELEASE_TAG) 
 	@for i in $(TARGETS) ; do \
 	  if [ "$$i" = "native" ] ; then \
             if [ ! -f $(canonhost)-stamp-3stage-done ] ; then \
@@ -293,7 +315,7 @@ build:
 	       echo "     completed successfully" ; \
 	  else \
 	    echo "building $(canonhost) cross to $$i" ; \
-            $(MAKE) -f test-build.mk $(FLAGS_TO_PASS) target=$$i build-native $(cyglog) && \
+            $(MAKE) -f test-build.mk $(FLAGS_TO_PASS) target=$$i build-native $(natlog) && \
 	       echo "     completed successfully" ; \
 	  fi ; \
 	done
