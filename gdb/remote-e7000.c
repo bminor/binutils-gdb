@@ -1,7 +1,7 @@
 /* Remote debugging interface for Renesas E7000 ICE, for GDB
 
    Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001,
-   2002, 2003 Free Software Foundation, Inc.
+   2002, 2003, 2004 Free Software Foundation, Inc.
 
    Contributed by Cygnus Support. 
 
@@ -1569,7 +1569,7 @@ e7000_load (char *args, int from_tty)
 	  file_ptr fptr;
 
 	  section_address = bfd_get_section_vma (pbfd, section);
-	  section_size = bfd_get_section_size_before_reloc (section);
+	  section_size = bfd_get_section_size (section);
 
 	  if (!quiet)
 	    printf_filtered ("[Loading section %s at 0x%s (%s bytes)]\n",

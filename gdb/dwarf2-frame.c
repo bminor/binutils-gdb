@@ -1571,8 +1571,7 @@ dwarf2_build_frame_info (struct objfile *objfile)
       unit.dwarf_frame_buffer = dwarf2_read_section (objfile,
 						     dwarf_eh_frame_section);
 
-      unit.dwarf_frame_size
-	= bfd_get_section_size_before_reloc (dwarf_eh_frame_section);
+      unit.dwarf_frame_size = bfd_get_section_size (dwarf_eh_frame_section);
       unit.dwarf_frame_section = dwarf_eh_frame_section;
 
       /* FIXME: kettenis/20030602: This is the DW_EH_PE_datarel base
@@ -1599,8 +1598,7 @@ dwarf2_build_frame_info (struct objfile *objfile)
       unit.cie = NULL;
       unit.dwarf_frame_buffer = dwarf2_read_section (objfile,
 						     dwarf_frame_section);
-      unit.dwarf_frame_size
-	= bfd_get_section_size_before_reloc (dwarf_frame_section);
+      unit.dwarf_frame_size = bfd_get_section_size (dwarf_frame_section);
       unit.dwarf_frame_section = dwarf_frame_section;
 
       frame_ptr = unit.dwarf_frame_buffer;

@@ -1,3 +1,29 @@
+2004-06-15  Alan Modra  <amodra@bigpond.net.au>
+
+	* dsrec.c (load_srec, make_srec): Use bfd_get_section_size instead of
+	bfd_get_section_size_before_reloc or _raw_size.
+	* dwarf2-frame.c (dwarf2_build_frame_info): Likewise.
+	* dwarf2read.c (dwarf2_locate_sections): Likewise.
+	(dwarf2_read_section): Likewise.
+	* elfread.c (elf_locate_sections): Likewise.
+	* gcore.c (derive_heap_segment): Likewise.
+	* mipsread.c (read_alphacoff_dynamic_symtab): Likewise.
+	* remote-e7000.c (e7000_load): Likewise.
+	* remote-m32r-sdi.c (m32r_load): Likewise.
+	* remote-mips.c (mips_load_srec): Likewise.
+	(pmon_load_fast): Likewise.
+	* remote.c (compare_sections_command): Likewise.
+	* symfile.c (add_section_size_callback): Likewise.
+	(load_section_callback): Likewise.
+	(pc_in_unmapped_range): Likewise.
+	(pc_in_mapped_range): Likewise.
+	(sections_overlap): Likewise.
+	(list_overlays_command): Likewise.
+	(simple_overlay_update_1): Likewise.
+	(simple_overlay_update): Likewise.
+	* tracepoint.c (remote_set_transparent_ranges): Likewise.
+	* win32-nat.c (core_section_load_dll_symbols): Likewise.
+
 2004-06-14  Randolph Chung  <tausq@debian.org>
 
 	* Makefile.in (hppa-hpux-tdep.o): Update dependency.

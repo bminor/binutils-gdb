@@ -996,47 +996,47 @@ dwarf2_locate_sections (bfd *ignore_abfd, asection *sectp, void *ignore_ptr)
 {
   if (strcmp (sectp->name, INFO_SECTION) == 0)
     {
-      dwarf2_per_objfile->info_size = bfd_get_section_size_before_reloc (sectp);
+      dwarf2_per_objfile->info_size = bfd_get_section_size (sectp);
       dwarf_info_section = sectp;
     }
   else if (strcmp (sectp->name, ABBREV_SECTION) == 0)
     {
-      dwarf2_per_objfile->abbrev_size = bfd_get_section_size_before_reloc (sectp);
+      dwarf2_per_objfile->abbrev_size = bfd_get_section_size (sectp);
       dwarf_abbrev_section = sectp;
     }
   else if (strcmp (sectp->name, LINE_SECTION) == 0)
     {
-      dwarf2_per_objfile->line_size = bfd_get_section_size_before_reloc (sectp);
+      dwarf2_per_objfile->line_size = bfd_get_section_size (sectp);
       dwarf_line_section = sectp;
     }
   else if (strcmp (sectp->name, PUBNAMES_SECTION) == 0)
     {
-      dwarf2_per_objfile->pubnames_size = bfd_get_section_size_before_reloc (sectp);
+      dwarf2_per_objfile->pubnames_size = bfd_get_section_size (sectp);
       dwarf_pubnames_section = sectp;
     }
   else if (strcmp (sectp->name, ARANGES_SECTION) == 0)
     {
-      dwarf2_per_objfile->aranges_size = bfd_get_section_size_before_reloc (sectp);
+      dwarf2_per_objfile->aranges_size = bfd_get_section_size (sectp);
       dwarf_aranges_section = sectp;
     }
   else if (strcmp (sectp->name, LOC_SECTION) == 0)
     {
-      dwarf2_per_objfile->loc_size = bfd_get_section_size_before_reloc (sectp);
+      dwarf2_per_objfile->loc_size = bfd_get_section_size (sectp);
       dwarf_loc_section = sectp;
     }
   else if (strcmp (sectp->name, MACINFO_SECTION) == 0)
     {
-      dwarf2_per_objfile->macinfo_size = bfd_get_section_size_before_reloc (sectp);
+      dwarf2_per_objfile->macinfo_size = bfd_get_section_size (sectp);
       dwarf_macinfo_section = sectp;
     }
   else if (strcmp (sectp->name, STR_SECTION) == 0)
     {
-      dwarf2_per_objfile->str_size = bfd_get_section_size_before_reloc (sectp);
+      dwarf2_per_objfile->str_size = bfd_get_section_size (sectp);
       dwarf_str_section = sectp;
     }
   else if (strcmp (sectp->name, FRAME_SECTION) == 0)
     {
-      dwarf2_per_objfile->frame_size = bfd_get_section_size_before_reloc (sectp);
+      dwarf2_per_objfile->frame_size = bfd_get_section_size (sectp);
       dwarf_frame_section = sectp;
     }
   else if (strcmp (sectp->name, EH_FRAME_SECTION) == 0)
@@ -1044,13 +1044,13 @@ dwarf2_locate_sections (bfd *ignore_abfd, asection *sectp, void *ignore_ptr)
       flagword aflag = bfd_get_section_flags (ignore_abfd, sectp);
       if (aflag & SEC_HAS_CONTENTS)
         {
-          dwarf2_per_objfile->eh_frame_size = bfd_get_section_size_before_reloc (sectp);
+          dwarf2_per_objfile->eh_frame_size = bfd_get_section_size (sectp);
           dwarf_eh_frame_section = sectp;
         }
     }
   else if (strcmp (sectp->name, RANGES_SECTION) == 0)
     {
-      dwarf2_per_objfile->ranges_size = bfd_get_section_size_before_reloc (sectp);
+      dwarf2_per_objfile->ranges_size = bfd_get_section_size (sectp);
       dwarf_ranges_section = sectp;
     }
 }
@@ -4464,7 +4464,7 @@ dwarf2_read_section (struct objfile *objfile, asection *sectp)
 {
   bfd *abfd = objfile->obfd;
   char *buf, *retbuf;
-  bfd_size_type size = bfd_get_section_size_before_reloc (sectp);
+  bfd_size_type size = bfd_get_section_size (sectp);
 
   if (size == 0)
     return NULL;

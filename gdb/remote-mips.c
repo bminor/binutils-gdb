@@ -1,7 +1,7 @@
 /* Remote debugging interface for MIPS remote debugging protocol.
 
    Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001,
-   2002 Free Software Foundation, Inc.
+   2002, 2003, 2004 Free Software Foundation, Inc.
 
    Contributed by Cygnus Support.  Written by Ian Lance Taylor
    <ian@cygnus.com>.
@@ -2648,12 +2648,12 @@ mips_load_srec (char *args)
 	  /* FIXME!  vma too small????? */
 	  printf_filtered ("%s\t: 0x%4lx .. 0x%4lx  ", s->name,
 			   (long) s->vma,
-			   (long) (s->vma + s->_raw_size));
+			   (long) (s->vma + bfd_get_section_size (s)));
 	  gdb_flush (gdb_stdout);
 
-	  for (i = 0; i < s->_raw_size; i += numbytes)
+	  for (i = 0; i < bfd_get_section_size (s); i += numbytes)
 	    {
-	      numbytes = min (srec_frame, s->_raw_size - i);
+	      numbytes = min (srec_frame, bfd_get_section_size (s) - i);
 
 	      bfd_get_section_contents (abfd, s, buffer, i, numbytes);
 
@@ -3135,11 +3135,11 @@ pmon_load_fast (char *file)
   for (s = abfd->sections; s && !finished; s = s->next)
     if (s->flags & SEC_LOAD)	/* only deal with loadable sections */
       {
-	bintotal += s->_raw_size;
-	final = (s->vma + s->_raw_size);
+	bintotal += bfd_get_section_size (s);
+	final = (s->vma + bfd_get_section_size (s));
 
 	printf_filtered ("%s\t: 0x%4x .. 0x%4x  ", s->name, (unsigned int) s->vma,
-			 (unsigned int) (s->vma + s->_raw_size));
+			 (unsigned int) (s->vma + bfd_get_section_size (s)));
 	gdb_flush (gdb_stdout);
 
 	/* Output the starting address */
@@ -3160,11 +3160,13 @@ pmon_load_fast (char *file)
 
 	    reclen = 0;
 
-	    for (i = 0; ((i < s->_raw_size) && !finished); i += binamount)
+	    for (i = 0;
+		 i < bfd_get_section_size (s) && !finished;
+		 i += binamount)
 	      {
 		int binptr = 0;
 
-		binamount = min (BINCHUNK, s->_raw_size - i);
+		binamount = min (BINCHUNK, bfd_get_section_size (s) - i);
 
 		bfd_get_section_contents (abfd, s, binbuf, i, binamount);
 

@@ -1,7 +1,7 @@
 /* Tracing functionality for remote targets in custom GDB protocol
 
-   Copyright 1997, 1998, 1999, 2000, 2001, 2002, 2003 Free Software
-   Foundation, Inc.
+   Copyright 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -1693,7 +1693,7 @@ remote_set_transparent_ranges (void)
 
       anysecs = 1;
       lma = s->lma;
-      size = bfd_get_section_size_before_reloc (s);
+      size = bfd_get_section_size (s);
       sprintf_vma (tmp1, lma);
       sprintf_vma (tmp2, lma + size);
       sprintf (target_buf + strlen (target_buf), 

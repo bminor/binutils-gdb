@@ -1,6 +1,6 @@
 /* Remote debugging interface for M32R/SDI.
 
-   Copyright 2003 Free Software Foundation, Inc.
+   Copyright 2003, 2004 Free Software Foundation, Inc.
 
    Contributed by Renesas Technology Co.
    Written by Kei Sakamoto <sakamoto.kei@renesas.com>.
@@ -1320,7 +1320,7 @@ m32r_load (char *args, int from_tty)
 	  int n;
 
 	  section_address = bfd_section_lma (pbfd, section);
-	  section_size = bfd_get_section_size_before_reloc (section);
+	  section_size = bfd_get_section_size (section);
 
 	  if (!mmu_on)
 	    {
