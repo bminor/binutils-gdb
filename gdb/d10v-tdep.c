@@ -99,9 +99,7 @@ extern void d10v_frame_init_saved_regs (struct frame_info *);
 static void do_d10v_pop_frame (struct frame_info *fi);
 
 int
-d10v_frame_chain_valid (chain, frame)
-     CORE_ADDR chain;
-     struct frame_info *frame;	/* not used here */
+d10v_frame_chain_valid (CORE_ADDR chain, struct frame_info *frame)
 {
   return ((chain) != 0 && (frame) != 0 && (frame)->pc > IMEM_START);
 }
@@ -1092,10 +1090,8 @@ d10v_push_arguments (int nargs, value_ptr *args, CORE_ADDR sp,
    extract and copy its value into `valbuf'.  */
 
 void
-d10v_extract_return_value (type, regbuf, valbuf)
-     struct type *type;
-     char regbuf[REGISTER_BYTES];
-     char *valbuf;
+d10v_extract_return_value (struct type *type, char regbuf[REGISTER_BYTES],
+			   char *valbuf)
 {
   int len;
   /*    printf("RET: TYPE=%d len=%d r%d=0x%x\n",type->code, TYPE_LENGTH (type), RET1_REGNUM - R0_REGNUM, (int) extract_unsigned_integer (regbuf + REGISTER_BYTE(RET1_REGNUM), REGISTER_RAW_SIZE (RET1_REGNUM)));  */

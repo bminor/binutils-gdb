@@ -97,9 +97,7 @@ static void print_flags_command (char *, int);
 
 
 int
-d30v_frame_chain_valid (chain, fi)
-     CORE_ADDR chain;
-     struct frame_info *fi;	/* not used here */
+d30v_frame_chain_valid (CORE_ADDR chain, struct frame_info *fi)
 {
 #if 0
   return ((chain) != 0 && (fi) != 0 && (fi)->return_pc != 0);
@@ -1028,10 +1026,8 @@ d30v_call_dummy_address (void)
    extract and copy its value into `valbuf'.  */
 
 void
-d30v_extract_return_value (valtype, regbuf, valbuf)
-     struct type *valtype;
-     char regbuf[REGISTER_BYTES];
-     char *valbuf;
+d30v_extract_return_value (struct type *valtype, char regbuf[REGISTER_BYTES],
+			   char *valbuf)
 {
   memcpy (valbuf, regbuf + REGISTER_BYTE (2), TYPE_LENGTH (valtype));
 }

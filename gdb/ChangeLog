@@ -1,3 +1,11 @@
+2000-08-12  Kevin Buettner  <kevinb@redhat.com>
+
+	* cxux-nat.c (fetch_inferior_registers): Protoize.
+	* d10v-tdep.c (d10v_frame_chain_valid, d10v_extract_return_value):
+	Protoize.
+	* d30v-tdep.c (d30v_frame_chain_valid, d30v_extract_return_value):
+	Protoize.
+
 Fri Aug 11 19:00:51 2000  Andrew Cagney  <cagney@makita.cygnus.com>
 
 	* config/mn10300/tm-mn10300.h (REGISTER_SIZE,
