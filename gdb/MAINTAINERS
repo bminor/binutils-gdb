@@ -241,8 +241,6 @@ Solaris/x86 native & host (devolved)
 			Peter Schauer		Peter.Schauer@regent.e-technik.tu-muenchen.de
 Solaris/SPARC native & host (devolved)
                         Michael Snyder          msnyder@redhat.com
-Mac OS X		Klee Dienes		kdienes@apple.com
-			Jim Ingham		jingham@apple.com
 
 
 
@@ -281,10 +279,8 @@ language support	(Blanket Write Privs Maintainers)
   Java support (devolved)
 			Per Bothner		per@bothner.com
 			Anthony Green 		green@redhat.com
-  Objective-C/C++	Klee Dienes		kdienes@apple.com
-			Jim Ingham		jimgham@apple.com
   Pascal support	Pierre Muller		muller@sources.redhat.com
-Scheme support		Jim Blandy		jimb@redhat.com
+  Scheme support	Jim Blandy		jimb@redhat.com
 
 shared libs (devolved)	Jim Blandy		jimb@redhat.com
 			Kevin Buettner		kevinb@redhat.com
