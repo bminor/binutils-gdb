@@ -195,12 +195,12 @@ putDebugChar (c)
   int err;
   LONG put;
 
-  err = AIOWriteData (AIOhandle, (char *) &c, 1, &put);
-  if (err != 0 || put != 1)
+  put = 0;
+  while (put < 1)
     {
-      error_message = "AIOWriteData failed";
-      ResumeThread (mainthread);
-      return 0;
+      err = AIOWriteData (AIOhandle, (char *) &c, 1, &put);
+      if (err != 0)
+	ConsolePrintf ("AIOWriteData: err = %d, put = %d\r\n", err, put);
     }
   return 1;
 }
@@ -212,7 +212,7 @@ frame_to_registers (frame, regs)
      struct StackFrame *frame;
      char *regs;
 {
-  mem2hex (&frame->ExceptionRegs[SF_REG_PC], &regs[PC_REGNUM * 8 * 2], 8, 0);
+  mem2hex (&frame->ExceptionRegs[SF_REG_PC], &regs[PC_REGNUM * 8 * 2], 8 * 1, 0);
 
   mem2hex (&frame->ExceptionRegs[SF_IREG_OFFSET], &regs[V0_REGNUM * 8 * 2], 8 * 64, 0);
 }
@@ -224,7 +224,7 @@ registers_to_frame (regs, frame)
      char *regs;
      struct StackFrame *frame;
 {
-  hex2mem (&regs[PC_REGNUM * 8 * 2], &frame->ExceptionRegs[SF_REG_PC], 8, 0);
+  hex2mem (&regs[PC_REGNUM * 8 * 2], &frame->ExceptionRegs[SF_REG_PC], 8 * 1, 0);
 
   hex2mem (&regs[V0_REGNUM * 8 * 2], &frame->ExceptionRegs[SF_IREG_OFFSET], 8 * 64, 0);
 }
@@ -473,7 +473,7 @@ hex2mem (buf, mem, count, may_fault)
 {
   int i;
   unsigned char ch;
-  char *ptr;
+  char *ptr = mem;
 
   mem_may_fault = may_fault;
   for (i=0;i<count;i++)
@@ -482,7 +482,7 @@ hex2mem (buf, mem, count, may_fault)
       ch = ch + hex(*buf++);
       set_char (ptr++, ch);
       if (may_fault && mem_err)
-	return (mem);
+	return (ptr);
     }
   mem_may_fault = 0;
   return(mem);
@@ -681,7 +681,8 @@ do_status (ptr, frame)
    debugged.  */
 
 static LONG
-handle_exception (struct StackFrame *frame)
+handle_exception (frame)
+     struct StackFrame *frame;
 {
   int addr, length;
   char *ptr;
@@ -1070,8 +1071,8 @@ main (argc, argv)
   mainthread = GetThreadID ();
 
   if (remote_debug > 0)
-    fprintf (stderr, "About to call LoadModule with \"%s\" %08x\r\n",
-	     cmdlin, __GetScreenID (GetCurrentScreen()));
+    ConsolePrintf ("About to call LoadModule with \"%s\" %08x\r\n",
+		   cmdlin, __GetScreenID (GetCurrentScreen()));
 
   /* Start up the module to be debugged.  */
   err = LoadModule ((struct ScreenStruct *) __GetScreenID (GetCurrentScreen()),
@@ -1086,10 +1087,10 @@ main (argc, argv)
 
   /* Wait for the debugger to wake us up.  */
   if (remote_debug > 0)
-    fprintf (stderr, "Suspending main thread (%08x)\r\n", mainthread);
+    ConsolePrintf ("Suspending main thread (%08x)\r\n", mainthread);
   SuspendThread (mainthread);
   if (remote_debug > 0)
-    fprintf (stderr, "Resuming main thread (%08x)\r\n", mainthread);
+    ConsolePrintf ("Resuming main thread (%08x)\r\n", mainthread);
 
   /* If we are woken up, print an optional error message, deregister
      ourselves and exit.  */
