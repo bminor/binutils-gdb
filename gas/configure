@@ -4320,7 +4320,7 @@ for this_target in $target $canon_targets ; do
       i386-*-linux*coff*)		fmt=coff em=linux ;;
       i386-*-linux-gnu*)		fmt=elf em=linux ;;
       x86_64-*-linux-gnu*)		fmt=elf em=linux ;;
-      i386-*-lynxos*)			fmt=coff em=lynx ;;
+      i386-*-lynxos*)			fmt=elf em=lynx bfd_gas=yes ;;
       i386-*-sysv[45]*)			fmt=elf ;;
       i386-*-solaris*)			fmt=elf ;;
       i386-*-freebsdaout*)		fmt=aout em=386bsd ;;
@@ -4491,8 +4491,9 @@ echo "$as_me: error: Solaris must be configured little endian" >&2;}
       ppc-*-rtems*)			fmt=elf ;;
       ppc-*-macos*)			fmt=coff em=macos ;;
       ppc-*-netware*)			fmt=elf em=ppcnw ;;
-      ppc-**-nto*)			fmt=elf ;;
+      ppc-*-nto*)			fmt=elf ;;
       ppc-*-kaos*)			fmt=elf ;;
+      ppc-*-lynxos*)			fmt=elf em=lynx bfd_gas=yes ;;
 
       s390x-*-linux-gnu*)		fmt=elf em=linux ;;
       s390-*-linux-gnu*)		fmt=elf em=linux ;;

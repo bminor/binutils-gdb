@@ -1,3 +1,8 @@
+2004-05-17  Adam Nemet  <anemet@lnxw.com> 
+
+	* configure.in: Add ppc-*-lynxos*.  Update i386-*-lynxos* to ELF.
+	* configure: Regenerate.
+
 2004-05-13  Paul Brook  <paul@codesourcery.com>
 
 	* dw2gencfi.c (output_cie):  Handle dwarf3 format CIE entries.

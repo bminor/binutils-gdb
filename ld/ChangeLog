@@ -1,3 +1,14 @@
+2004-05-17  Adam Nemet  <anemet@lnxw.com> 
+
+	* configure.tgt (powerpc-*-lynxos* case): New case.
+	* configure.host (i[3-7]86-*-lynxos* case): Remove case.
+	* emulparams/ppclynx.sh: New file.
+	* emulparams/i386lynx.sh (SCRIPT_NAME): Update to LynxOS 4.0.
+	* Makefile.am (ALL_EMULATIONS): Add eppclynx.o
+	(ei386lynx.c): Update rule to LynxOS 4.0 ELF.
+	(eppclynx.c): New rule.
+	* Makefile.in: Regenerate.
+
 2004-05-13  Joel Sherrill <joel@oarcorp.com>
 
 	* configure.tgt (or32-*-rtems*): Switch to elf and

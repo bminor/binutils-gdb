@@ -1,3 +1,10 @@
+2004-05-17  Adam Nemet  <anemet@lnxw.com> 
+
+	* config.bfd (sparc-*-lynxos* case): Add to obsolete list.
+	(m68-*-lynxos* case): Likewise.
+	(powerpc-*-lyxnos* case): New case.
+	(i[3-7]86-*-lynxos* case): Update to LynxOS 4.0 ELF.
+
 2004-05-17  David Heine  <dlheine@tensilica.com>
 
 	* aout-target.h (MY_bfd_copy_private_header_data): Define.

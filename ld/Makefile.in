@@ -429,6 +429,7 @@ ALL_EMULATIONS = \
 	eppcmacos.o \
 	eppcnw.o \
 	eppcpe.o \
+	eppclynx.o \
 	eriscix.o \
 	esa29200.o \
 	esh.o \
@@ -1666,7 +1667,7 @@ ei386linux.c: $(srcdir)/emulparams/i386linux.sh \
   $(srcdir)/emultempl/linux.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} i386linux "$(tdir_i386linux)"
 ei386lynx.c: $(srcdir)/emulparams/i386lynx.sh \
-  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/i386lynx.sc ${GEN_DEPENDS}
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} i386lynx "$(tdir_i386lynx)"
 ei386mach.c: $(srcdir)/emulparams/i386mach.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
@@ -2000,6 +2001,9 @@ eppcnw.c:	$(srcdir)/emulparams/ppcnw.sh \
 eppcpe.c: $(srcdir)/emulparams/ppcpe.sh \
   $(srcdir)/emultempl/pe.em $(srcdir)/scripttempl/ppcpe.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} ppcpe "$(tdir_ppcpe)"
+eppclynx.c: $(srcdir)/emulparams/ppclynx.sh \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} ppclynx "$(tdir_ppclynx)"
 eriscix.c: $(srcdir)/emulparams/riscix.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} riscix "$(tdir_riscix)"

@@ -31,8 +31,10 @@ targ_underscore=no
 
 # Catch obsolete configurations.
 case $targ in
- vax-*-vms*			\
- )
+ m68*-*-lynxos* | \
+ sparc-*-lynxos* | \
+ vax-*-vms* | \
+ null)
     if test "x$enable_obsolete" != xyes; then
       echo "*** Configuration $targ is obsolete." >&2
       echo "*** Specify --enable-obsolete to build it anyway." >&2
@@ -519,8 +521,8 @@ case "${targ}" in
     ;;
 #endif
   i[3-7]86-*-lynxos*)
-    targ_defvec=i386lynx_coff_vec
-    targ_selvecs=i386lynx_aout_vec
+    targ_defvec=bfd_elf32_i386_vec
+    targ_selvecs="i386lynx_coff_vec i386lynx_aout_vec"
     ;;
   i[3-7]86-*-gnu*)
     targ_defvec=bfd_elf32_i386_vec
@@ -979,6 +981,11 @@ case "${targ}" in
   powerpc-*-macos*)
     targ_defvec=pmac_xcoff_vec
     ;;
+  powerpc-*-lynxos*)
+    targ_defvec=bfd_elf32_powerpc_vec
+    targ_selvecs="rs6000coff_vec"
+    targ_cflags=-DSMALL_ARCHIVE
+    ;;    
   powerpc-*-netware*)
     targ_defvec=bfd_elf32_powerpc_vec
     targ_selvecs="nlm32_powerpc_vec rs6000coff_vec"

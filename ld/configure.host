@@ -132,11 +132,6 @@ i[3-7]86-*-sco* | i[3-7]86-*-isc*)
   HOSTING_LIBS="$HOSTING_LIBS"' `if [ -f ../gcc/crtend.o ]; then echo ../gcc/crtend.o; else ${CC} -print-file-name=crtend.o; fi` /lib/crtn.o'
   ;;
 
-i[3-7]86-*-lynxos*)
-  HOSTING_CRT0=/lib/init1.o
-  HOSTING_LIBS="$HOSTING_LIBS"' -lm /lib/initn.o'
-  ;;
-
 i[3-7]86-pc-interix*)
   HOSTING_CRT0='$$INTERIX_ROOT/usr/lib/crt0.o'
   HOSTING_LIBS='-L $$X/local_bin -L $$INTERIX_ROOT/usr/lib '"$HOSTING_LIBS"' -lcpsx -lc -lcpsx $$INTERIX_ROOT/usr/lib/psxdll.a $$INTERIX_ROOT/usr/lib/psxdll2.a'
@@ -171,11 +166,6 @@ mips*-*-linux-gnu*)
 
 m68*-*-linux-gnu*)
   HOSTING_CRT0=`echo "$HOSTING_CRT0" | sed -e "s,\\\`egrep.*\"\\\`,/lib/ld.so.1,"`
-  ;;
-
-m68*-*-lynxos*)
-  HOSTING_CRT0=/lib/init1.o
-  HOSTING_LIBS="$HOSTING_LIBS"' -lm /lib/initn.o'
   ;;
 
 m68*-motorola-sysv)

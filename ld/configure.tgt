@@ -534,6 +534,7 @@ powerpc-*-aix5*)	targ_emul=aix5ppc ;;
 powerpc-*-aix*)		targ_emul=aixppc ;;
 powerpc-*-beos*)	targ_emul=aixppc ;;
 powerpc-*-windiss*)	targ_emul=elf32ppcwindiss ;;
+powerpc-*-lynxos*)	targ_emul=ppclynx ;;
 rs6000-*-aix5*)		targ_emul=aix5rs6 ;;
 rs6000-*-aix*)		targ_emul=aixrs6 ;;
 tic30-*-*aout*)		targ_emul=tic30aout ;;
