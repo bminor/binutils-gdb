@@ -1,3 +1,9 @@
+2000-08-23  H.J. Lu  <hjl@gnu.org>
+
+	* emultempl/elf32.em (gld${EMULATION_NAME}_after_open): Get
+	the current runpath list from bfd_elf_get_runpath_list ()
+	before search.
+
 2000-08-22  H.J. Lu  <hjl@gnu.org>
 
 	* emultempl/elf32.em (gld${EMULATION_NAME}_after_open): Search

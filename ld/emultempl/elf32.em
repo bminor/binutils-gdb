@@ -570,33 +570,10 @@ static void
 gld${EMULATION_NAME}_after_open ()
 {
   struct bfd_link_needed_list *needed, *l;
-EOF
-if [ "x${host}" = "x${target}" ] ; then
-  case " ${EMULATION_LIBPATH} " in
-  *" ${EMULATION_NAME} "*)
-cat >>e${EMULATION_NAME}.c <<EOF
-  struct bfd_link_needed_list *run_path;
-EOF
-  ;;
-  esac
-fi
-cat >>e${EMULATION_NAME}.c <<EOF
 
   /* We only need to worry about this when doing a final link.  */
   if (link_info.relocateable || link_info.shared)
     return;
-
-EOF
-if [ "x${host}" = "x${target}" ] ; then
-  case " ${EMULATION_LIBPATH} " in
-  *" ${EMULATION_NAME} "*)
-cat >>e${EMULATION_NAME}.c <<EOF
-  run_path = bfd_elf_get_runpath_list (output_bfd, &link_info);
-EOF
-  ;;
-  esac
-fi
-cat >>e${EMULATION_NAME}.c <<EOF
 
   /* Get the list of files which appear in DT_NEEDED entries in
      dynamic objects included in the link (often there will be none).
@@ -612,18 +589,6 @@ cat >>e${EMULATION_NAME}.c <<EOF
     {
       struct bfd_link_needed_list *ll;
       int force;
-EOF
-if [ "x${host}" = "x${target}" ] ; then
-  case " ${EMULATION_LIBPATH} " in
-  *" ${EMULATION_NAME} "*)
-cat >>e${EMULATION_NAME}.c <<EOF
-      struct bfd_link_needed_list *rp;
-      int found;
-EOF
-  ;;
-  esac
-fi
-cat >>e${EMULATION_NAME}.c <<EOF
 
       /* If we've already seen this file, skip it.  */
       for (ll = needed; ll != l; ll = ll->next)
@@ -658,6 +623,18 @@ cat >>e${EMULATION_NAME}.c <<EOF
 	  const char *lib_path;
 	  size_t len;
 	  search_dirs_type *search;
+EOF
+if [ "x${host}" = "x${target}" ] ; then
+  case " ${EMULATION_LIBPATH} " in
+  *" ${EMULATION_NAME} "*)
+cat >>e${EMULATION_NAME}.c <<EOF
+	  struct bfd_link_needed_list *rp;
+	  int found;
+EOF
+  ;;
+  esac
+fi
+cat >>e${EMULATION_NAME}.c <<EOF
 
 	  if (gld${EMULATION_NAME}_search_needed (command_line.rpath_link,
 						  l->name, force))
@@ -683,7 +660,8 @@ cat >>e${EMULATION_NAME}.c <<EOF
 	    break;
 
 	  found = 0;
-	  for (rp = run_path; !found && rp != NULL; rp = rp->next)
+	  rp = bfd_elf_get_runpath_list (output_bfd, &link_info);
+	  for (; !found && rp != NULL; rp = rp->next)
 	    {
 	      found = (rp->by == l->by
 		       && gld${EMULATION_NAME}_search_needed (rp->name,
