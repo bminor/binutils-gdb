@@ -216,9 +216,7 @@ printf_monitor (char *pattern,...)
  * write_monitor -- send raw data to monitor.
  */
 static void
-write_monitor (data, len)
-     char data[];
-     int len;
+write_monitor (char data[], int len)
 {
   if (SERIAL_WRITE (array_desc, data, len))
     fprintf (stderr, "SERIAL_WRITE failed: %s\n", safe_strerror (errno));
@@ -1020,14 +1018,15 @@ array_read_inferior_memory (CORE_ADDR memaddr, char *myaddr, int len)
   return (count);
 }
 
-/* FIXME-someday!  merge these two.  */
+/* Transfer LEN bytes between GDB address MYADDR and target address
+   MEMADDR.  If WRITE is non-zero, transfer them to the target,
+   otherwise transfer them from the target.  TARGET is unused.
+
+   Returns the number of bytes transferred. */
+
 static int
-array_xfer_memory (memaddr, myaddr, len, write, target)
-     CORE_ADDR memaddr;
-     char *myaddr;
-     int len;
-     int write;
-     struct target_ops *target;	/* ignored */
+array_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
+		   struct target_ops *target)
 {
   if (write)
     return array_write_inferior_memory (memaddr, myaddr, len);

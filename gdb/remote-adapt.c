@@ -1293,10 +1293,14 @@ adapt_read_inferior_memory (CORE_ADDR memaddr, char *myaddr, int len)
 
 #define MAX_BREAKS	8
 static int num_brkpts = 0;
+
+/* Insert a breakpoint at ADDR.  SAVE is normally the address of the
+   pattern buffer where the instruction that the breakpoint overwrites
+   is saved.  It is unused here since the Adapt Monitor is responsible
+   for saving/restoring the original instruction. */
+
 static int
-adapt_insert_breakpoint (addr, save)
-     CORE_ADDR addr;
-     char *save;		/* Throw away, let adapt save instructions */
+adapt_insert_breakpoint (CORE_ADDR addr, char *save)
 {
   if (num_brkpts < MAX_BREAKS)
     {
@@ -1314,10 +1318,13 @@ adapt_insert_breakpoint (addr, save)
     }
 
 }
+
+/* Remove a breakpoint at ADDR.  SAVE is normally the previously
+   saved pattern, but is unused here as the Adapt Monitor is
+   responsible for saving/restoring instructions. */
+
 static int
-adapt_remove_breakpoint (addr, save)
-     CORE_ADDR addr;
-     char *save;		/* Throw away, let adapt save instructions */
+adapt_remove_breakpoint (CORE_ADDR addr, char *save)
 {
   if (num_brkpts > 0)
     {

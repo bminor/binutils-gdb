@@ -1,3 +1,9 @@
+2000-10-01  Kevin Buettner  <kevinb@redhat.com>
+
+	* remote-adapt.c (adapt_insert_breakpoint, adapt_remove_breakpoint):
+	Protoize.
+	* remote-array.c (write_monitor, array_xfer_memory): Protoize.
+
 2000-09-29  Kevin Buettner  <kevinb@redhat.com>
 
 	* ppc-linux-nat.c (supply_gregset, fill_gregset): Change type
