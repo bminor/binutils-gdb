@@ -1,3 +1,9 @@
+Fri Dec 12 11:30:28 1997  Brendan Kehoe  <brendan@canuck.cygnus.com>
+
+	* configure: Only build libbfd shared if --enable-shared's value
+	was `yes', or was set to `*bfd*'.
+	* aclocal.m4: Likewise.
+
 Thu Dec 11 17:48:11 1997  Richard Henderson  <rth@cygnus.com>
 
 	* linker.c (generic_link_add_symbol_list): Always init udata.p so
