@@ -147,7 +147,7 @@ Usage: %s [-[abcDhilLsTvwxyz]] [-[ACeEfFJnNOpPqQZ][name]] [-I dirs]\n\
 	[image-file] [profile-file...]\n",
 	   whoami);
   if (status == 0)
-    fprintf (stream, "Report bugs to bug-gnu-utils@prep.ai.mit.edu\n");
+    fprintf (stream, "Report bugs to bug-gnu-utils@gnu.org\n");
   done (status);
 }
 
