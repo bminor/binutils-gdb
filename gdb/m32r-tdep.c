@@ -33,6 +33,7 @@
 #include "inferior.h"
 #include "symfile.h"
 #include "objfiles.h"
+#include "osabi.h"
 #include "language.h"
 #include "arch-utils.h"
 #include "regcache.h"
@@ -938,7 +939,6 @@ m32r_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_frame_align (gdbarch, m32r_frame_align);
 
-  frame_unwind_append_sniffer (gdbarch, m32r_frame_sniffer);
   frame_base_set_default (gdbarch, &m32r_frame_base);
 
   /* Methods for saving / extracting a dummy frame's ID.  The ID's
@@ -950,6 +950,12 @@ m32r_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_unwind_pc (gdbarch, m32r_unwind_pc);
 
   set_gdbarch_print_insn (gdbarch, print_insn_m32r);
+
+  /* Hook in ABI-specific overrides, if they have been registered.  */
+  gdbarch_init_osabi (info, gdbarch);
+
+  /* Hook in the default unwinders.  */
+  frame_unwind_append_sniffer (gdbarch, m32r_frame_sniffer);
 
   return gdbarch;
 }
