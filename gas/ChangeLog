@@ -1,3 +1,16 @@
+Mon Aug 11 21:48:00 1997  Richard Henderson  <rth@cygnus.com>
+
+	* as.h (enum _relax_state): Add rs_leb128.
+	* read.c (potable): Add sleb128 and uleb128.
+	(sizeof_*leb128, output_*leb128, emit_leb128_expr, s_leb128): New
+	functions.
+	* read.h: Update prototypes.
+	* symbols.c (resolve_symbol_value): Streamline quite a bit.  Return
+	the symbol value, add a second FINALIZE argument that prevents 
+	changes from being comitted.  Update all callers.
+	* write.c (cvt_frag_to_fill, relax_segment): Handle rs_leb128.
+	* doc/as.texinfo: Document the new pseudos.
+
 Sun Aug 10 14:51:49 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.am (MOSTLYCLEANFILES): Add site.bak, site.exp, stage,
