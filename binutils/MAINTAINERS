@@ -127,4 +127,4 @@ burden of maintaining the branch in sync with the mainline becomes too
 great).  If you are uncertain as to whether a patch is appropriate for
 the branch, ask the branch maintainer.  This is:
 
-   Philip Blundell  <philb@gnu.org>
+   Daniel Jacobowitz  <dan@debian.org>
