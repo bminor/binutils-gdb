@@ -1,5 +1,8 @@
 Thu Jul 20 11:40:13 1995  Jeff Law  (law@snake.cs.utah.edu)
 
+	* gdb.chill/chexp.exp: Remove skip_chill_tests check; these tests
+	only depend on gdb's expression code, not the chill runtime.
+
 	* gdb.base/return.c: Put return values into variables so we
 	can have gdb print them rather than depending on the program
 	to print them.

@@ -428,8 +428,6 @@ proc test_arithmetic_expressions {} {
 
 # Start with a fresh gdb.
 
-if [skip_chill_tests] then { continue }
-
 gdb_exit
 gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
