@@ -1,6 +1,6 @@
 /* Target definitions for NN-bit ELF
    Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002,
-   2003 Free Software Foundation, Inc.
+   2003, 2004 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -134,6 +134,10 @@
 #ifndef bfd_elfNN_bfd_merge_sections
 #define bfd_elfNN_bfd_merge_sections \
   _bfd_elf_merge_sections
+#endif
+
+#ifndef bfd_elfNN_bfd_is_group_section
+#define bfd_elfNN_bfd_is_group_section bfd_elf_is_group_section
 #endif
 
 #ifndef bfd_elfNN_bfd_discard_group

@@ -1,6 +1,6 @@
 /* Object file "section" support for the BFD library.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003
+   2000, 2001, 2002, 2003, 2004
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
@@ -945,13 +945,19 @@ bfd_make_section_anyway (bfd *abfd, const char *name)
   newsect = &sh->section;
   if (newsect->name != NULL)
     {
-      /* We are making a section of the same name.  It can't go in
-	 section_htab without generating a unique section name and
-	 that would be pointless;  We don't need to traverse the
-	 hash table.  */
-      newsect = bfd_zalloc (abfd, sizeof (asection));
-      if (newsect == NULL)
+      /* We are making a section of the same name.  Put it in the
+	 section hash table.  Even though we can't find it directly by a
+	 hash lookup, we'll be able to find the section by traversing
+	 sh->root.next quicker than looking at all the bfd sections.  */
+      struct section_hash_entry *new_sh;
+      new_sh = (struct section_hash_entry *)
+	bfd_section_hash_newfunc (NULL, &abfd->section_htab, name);
+      if (new_sh == NULL)
 	return NULL;
+
+      new_sh->root.next = sh->root.next;
+      sh->root.next = &new_sh->root;
+      newsect = &new_sh->section;
     }
 
   newsect->name = name;
@@ -1347,6 +1353,24 @@ _bfd_strip_section_from_output (struct bfd_link_info *info, asection *s)
   /* If the output section is empty, flag it for removal too.
      See ldlang.c:strip_excluded_output_sections for the action.  */
   os->flags |= SEC_EXCLUDE;
+}
+
+/*
+FUNCTION
+	bfd_generic_is_group_section
+
+SYNOPSIS
+	bfd_boolean bfd_generic_is_group_section (bfd *, const asection *sec);
+
+DESCRIPTION
+	Returns TRUE if @var{sec} is a member of a group.
+*/
+
+bfd_boolean
+bfd_generic_is_group_section (bfd *abfd ATTRIBUTE_UNUSED,
+			      const asection *sec ATTRIBUTE_UNUSED)
+{
+  return FALSE;
 }
 
 /*

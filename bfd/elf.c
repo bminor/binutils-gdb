@@ -613,6 +613,12 @@ setup_group (bfd *abfd, Elf_Internal_Shdr *hdr, asection *newsect)
 }
 
 bfd_boolean
+bfd_elf_is_group_section (bfd *abfd ATTRIBUTE_UNUSED, const asection *sec)
+{
+  return elf_next_in_group (sec) != NULL;
+}
+
+bfd_boolean
 bfd_elf_discard_group (bfd *abfd ATTRIBUTE_UNUSED, asection *group)
 {
   asection *first = elf_next_in_group (group);

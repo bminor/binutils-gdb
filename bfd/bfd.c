@@ -1083,6 +1083,9 @@ DESCRIPTION
 .#define bfd_merge_sections(abfd, link_info) \
 .	BFD_SEND (abfd, _bfd_merge_sections, (abfd, link_info))
 .
+.#define bfd_is_group_section(abfd, sec) \
+.	BFD_SEND (abfd, _bfd_is_group_section, (abfd, sec))
+.
 .#define bfd_discard_group(abfd, sec) \
 .	BFD_SEND (abfd, _bfd_discard_group, (abfd, sec))
 .

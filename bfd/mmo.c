@@ -1,5 +1,5 @@
 /* BFD back-end for mmo objects (MMIX-specific object-format).
-   Copyright 2001, 2002, 2003
+   Copyright 2001, 2002, 2003, 2004
    Free Software Foundation, Inc.
    Written by Hans-Peter Nilsson (hp@bitrange.com).
    Infrastructure and other bits originally copied from srec.c and
@@ -3286,6 +3286,7 @@ mmo_canonicalize_reloc (abfd, section, relptr, symbols)
 #define mmo_set_arch_mach bfd_default_set_arch_mach
 #define mmo_bfd_relax_section bfd_generic_relax_section
 #define mmo_bfd_merge_sections bfd_generic_merge_sections
+#define mmo_bfd_is_group_section bfd_generic_is_group_section
 #define mmo_bfd_discard_group bfd_generic_discard_group
 
 /* objcopy will be upset if we return -1 from bfd_get_reloc_upper_bound by

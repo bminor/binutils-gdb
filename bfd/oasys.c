@@ -1,6 +1,6 @@
 /* BFD back-end for oasys objects.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1998, 1999, 2001,
-   2002, 2003 Free Software Foundation, Inc.
+   2002, 2003, 2004 Free Software Foundation, Inc.
    Written by Steve Chamberlain of Cygnus Support, <sac@cygnus.com>.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -1506,6 +1506,7 @@ oasys_sizeof_headers (abfd, exec)
 #define oasys_bfd_relax_section bfd_generic_relax_section
 #define oasys_bfd_gc_sections bfd_generic_gc_sections
 #define oasys_bfd_merge_sections bfd_generic_merge_sections
+#define oasys_bfd_is_group_section bfd_generic_is_group_section
 #define oasys_bfd_discard_group bfd_generic_discard_group
 #define oasys_bfd_link_hash_table_create _bfd_generic_link_hash_table_create
 #define oasys_bfd_link_hash_table_free _bfd_generic_link_hash_table_free

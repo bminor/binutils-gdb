@@ -360,6 +360,9 @@ extern bfd_boolean _bfd_generic_set_section_contents
 #define _bfd_nolink_bfd_merge_sections \
   ((bfd_boolean (*) (bfd *, struct bfd_link_info *)) \
    bfd_false)
+#define _bfd_nolink_bfd_is_group_section \
+  ((bfd_boolean (*) (bfd *, const struct bfd_section *)) \
+   bfd_false)
 #define _bfd_nolink_bfd_discard_group \
   ((bfd_boolean (*) (bfd *, struct bfd_section *)) \
    bfd_false)

@@ -1470,6 +1470,8 @@ bfd_boolean bfd_copy_private_section_data
 void _bfd_strip_section_from_output
    (struct bfd_link_info *info, asection *section);
 
+bfd_boolean bfd_generic_is_group_section (bfd *, const asection *sec);
+
 bfd_boolean bfd_generic_discard_group (bfd *abfd, asection *group);
 
 /* Extracted from archures.c.  */
@@ -3976,6 +3978,9 @@ bfd_boolean bfd_set_private_flags (bfd *abfd, flagword flags);
 #define bfd_merge_sections(abfd, link_info) \
        BFD_SEND (abfd, _bfd_merge_sections, (abfd, link_info))
 
+#define bfd_is_group_section(abfd, sec) \
+       BFD_SEND (abfd, _bfd_is_group_section, (abfd, sec))
+
 #define bfd_discard_group(abfd, sec) \
        BFD_SEND (abfd, _bfd_discard_group, (abfd, sec))
 
@@ -4346,6 +4351,7 @@ typedef struct bfd_target
   NAME##_bfd_link_split_section, \
   NAME##_bfd_gc_sections, \
   NAME##_bfd_merge_sections, \
+  NAME##_bfd_is_group_section, \
   NAME##_bfd_discard_group
 
   int         (*_bfd_sizeof_headers) (bfd *, bfd_boolean);
@@ -4382,6 +4388,9 @@ typedef struct bfd_target
 
   /* Attempt to merge SEC_MERGE sections.  */
   bfd_boolean (*_bfd_merge_sections) (bfd *, struct bfd_link_info *);
+
+  /* Is this section a member of a group?  */
+  bfd_boolean (*_bfd_is_group_section) (bfd *, const struct bfd_section *);
 
   /* Discard members of a group.  */
   bfd_boolean (*_bfd_discard_group) (bfd *, struct bfd_section *);

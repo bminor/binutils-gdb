@@ -1,5 +1,45 @@
 2004-04-30  Alan Modra  <amodra@bigpond.net.au>
 
+	* section.c (bfd_make_section_anyway): Add all sections to hash tab.
+
+	* elf-bfd.h (bfd_elf_is_group_section): Declare.
+	* elf.c (bfd_elf_is_group_section): New function.
+	* elfxx-target.h (bfd_elfNN_bfd_is_group_section
+	* section.c (bfd_generic_is_group_section): New function.
+	* targets.c (struct bfd_target): Add _bfd_is_group_section field.
+	(BFD_JUMP_TABLE_LINK): Adjust.
+	* aout-adobe.c (aout_32_bfd_is_group_section): Define.
+	* aout-target.h (MY_bfd_is_group_section): Define.
+	* aout-tic30.c (MY_bfd_is_group_section): Define.
+	* bfd.c (bfd_is_group_section): Define.
+	* binary.c (binary_bfd_is_group_section): Define.
+	* bout.c (b_out_bfd_is_group_section): Define.
+	* coff-alpha.c (_bfd_ecoff_bfd_is_group_section): Define.
+	* coff-mips.c (_bfd_ecoff_bfd_is_group_section): Define.
+	* coff-rs6000.c (rs6000coff_vec, pmac_xcoff_vec): Adjust.
+	* coff64-rs6000.c (rs6000coff64_vec, aix5coff64_vec): Adjust.
+	* coffcode.h (coff_bfd_is_group_section): Define.
+	* i386msdos.c (msdos_bfd_is_group_section): Define.
+	* i386os9k.c (os9k_bfd_is_group_section): Define.
+	* ieee.c (ieee_bfd_is_group_section): Define.
+	* ihex.c (ihex_bfd_is_group_section): Define.
+	* libbfd-in.h (_bfd_nolink_bfd_is_group_section): Define.
+	* mach-o.c (bfd_mach_o_bfd_is_group_section): Define.
+	* mmo.c (mmo_bfd_is_group_section): Define.
+	* nlm-target.h (nlm_bfd_is_group_section): Define.
+	* oasys.c (oasys_bfd_is_group_section): Define.
+	* pef.c (bfd_pef_bfd_is_group_section): Define.
+	* ppcboot.c (ppcboot_bfd_is_group_section): Define.
+	* srec.c (srec_bfd_is_group_section): Define.
+	* tekhex.c (tekhex_bfd_is_group_section): Define.
+	* versados.c (versados_bfd_is_group_section): Define.
+	* vms.c (vms_bfd_is_group_section): Define.
+	* xsym.c (bfd_sym_bfd_is_group_section): Define.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+
+2004-04-30  Alan Modra  <amodra@bigpond.net.au>
+
 	* elflink.c (elf_gc_mark): Follow indirect and warning syms.
 
 2004-04-30  Hans-Peter Nilsson  <hp@axis.com>

@@ -1,6 +1,6 @@
 /* BFD back-end for Intel 960 b.out binaries.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003
+   2000, 2001, 2002, 2003, 2004
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
@@ -1487,6 +1487,7 @@ b_out_bfd_get_relocated_section_contents (output_bfd, link_info, link_order,
 #define b_out_bfd_link_split_section  _bfd_generic_link_split_section
 #define b_out_bfd_gc_sections  bfd_generic_gc_sections
 #define b_out_bfd_merge_sections  bfd_generic_merge_sections
+#define b_out_bfd_is_group_section bfd_generic_is_group_section
 #define b_out_bfd_discard_group bfd_generic_discard_group
 
 #define aout_32_get_section_contents_in_window \

@@ -1,5 +1,5 @@
 /* BFD back-end for Intel Hex objects.
-   Copyright 1995, 1996, 1998, 1999, 2000, 2001, 2002, 2003
+   Copyright 1995, 1996, 1998, 1999, 2000, 2001, 2002, 2003, 2004
    Free Software Foundation, Inc.
    Written by Ian Lance Taylor of Cygnus Support <ian@cygnus.com>.
 
@@ -988,6 +988,7 @@ ihex_sizeof_headers (abfd, exec)
 #define ihex_bfd_relax_section bfd_generic_relax_section
 #define ihex_bfd_gc_sections bfd_generic_gc_sections
 #define ihex_bfd_merge_sections bfd_generic_merge_sections
+#define ihex_bfd_is_group_section bfd_generic_is_group_section
 #define ihex_bfd_discard_group bfd_generic_discard_group
 #define ihex_bfd_link_hash_table_create _bfd_generic_link_hash_table_create
 #define ihex_bfd_link_hash_table_free _bfd_generic_link_hash_table_free

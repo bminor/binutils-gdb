@@ -406,6 +406,7 @@ BFD_JUMP_TABLE macros.
 .  NAME##_bfd_link_split_section, \
 .  NAME##_bfd_gc_sections, \
 .  NAME##_bfd_merge_sections, \
+.  NAME##_bfd_is_group_section, \
 .  NAME##_bfd_discard_group
 .
 .  int         (*_bfd_sizeof_headers) (bfd *, bfd_boolean);
@@ -442,6 +443,9 @@ BFD_JUMP_TABLE macros.
 .
 .  {* Attempt to merge SEC_MERGE sections.  *}
 .  bfd_boolean (*_bfd_merge_sections) (bfd *, struct bfd_link_info *);
+.
+.  {* Is this section a member of a group?  *}
+.  bfd_boolean (*_bfd_is_group_section) (bfd *, const struct bfd_section *);
 .
 .  {* Discard members of a group.  *}
 .  bfd_boolean (*_bfd_discard_group) (bfd *, struct bfd_section *);

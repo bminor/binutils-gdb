@@ -1,5 +1,5 @@
 /* xSYM symbol-file support for BFD.
-   Copyright 1999, 2000, 2001, 2002, 2003
+   Copyright 1999, 2000, 2001, 2002, 2003, 2004
    Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -42,6 +42,7 @@
 #define bfd_sym_bfd_relax_section bfd_generic_relax_section
 #define bfd_sym_bfd_gc_sections bfd_generic_gc_sections
 #define bfd_sym_bfd_merge_sections bfd_generic_merge_sections
+#define bfd_sym_bfd_is_group_section bfd_generic_is_group_section
 #define bfd_sym_bfd_discard_group bfd_generic_discard_group
 #define bfd_sym_bfd_link_hash_table_create _bfd_generic_link_hash_table_create
 #define bfd_sym_bfd_link_hash_table_free _bfd_generic_link_hash_table_free

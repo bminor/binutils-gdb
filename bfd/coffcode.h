@@ -5564,6 +5564,10 @@ static const bfd_coff_backend_data ticoff1_swap_table =
 #define coff_bfd_merge_sections		    bfd_generic_merge_sections
 #endif
 
+#ifndef coff_bfd_is_group_section
+#define coff_bfd_is_group_section	    bfd_generic_is_group_section
+#endif
+
 #ifndef coff_bfd_discard_group
 #define coff_bfd_discard_group		    bfd_generic_discard_group
 #endif
