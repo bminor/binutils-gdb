@@ -1,5 +1,9 @@
 2001-07-28  Andrew Cagney  <ac131313@redhat.com>
 
+	* version.in: Bump version number to 5.0.90-cvs.
+
+2001-07-28  Andrew Cagney  <ac131313@redhat.com>
+
 	Fix some PID/TPID fallout for HP/UX.
 	From 2001-07-22 Rodney Brown <rbrown64@csc.com.au>:
 	* infttrace.c (ptrace_wait): Match external declaration,
