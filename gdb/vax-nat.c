@@ -1,6 +1,6 @@
 /* Native-dependent code for VAX UNIXen (including older BSD's).
 
-   Copyright 2004 Free Software Foundation, Inc.
+   Copyright 2004, 2005 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -44,6 +44,7 @@
 #endif
 
 #include "vax-tdep.h"
+#include "inf-ptrace.h"
 
 /* Address of the user structure.  This is the the value for 32V; 3BSD
    uses a different value, but hey, who's still using those systems?  */
@@ -66,9 +67,8 @@ vax_register_u_addr (CORE_ADDR u_ar0, int regnum)
   /* Type is `int *u_ar0'.  See <sys/user.h>.  */
   return u_ar0 + vax_register_index[regnum - VAX_R0_REGNUM] * 4;
 }
-
 
-CORE_ADDR
+static CORE_ADDR
 vax_register_u_offset (int regnum)
 {
   size_t u_ar0_offset = offsetof (struct user, u_ar0);
@@ -103,4 +103,6 @@ _initialize_vax_nat (void)
   names[1].n_name = NULL;
   if (nlist (_PATH_UNIX, names) == 0)
     vax_kernel_u_addr = names[0].n_value;
+
+  add_target (inf_ptrace_trad_target (vax_register_u_offset));
 }

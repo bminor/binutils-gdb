@@ -1,5 +1,12 @@
 2005-01-10  Mark Kettenis  <kettenis@gnu.org>
 
+	* vax-nat.c: Update copyright year.  Include "inf-ptrace.h".
+	(vax_register_u_offset): Make statuc.
+	(_initialize_vax_nat): Construct and add target vector.
+	* config/vax/vax.mh (NATDEPFILES): Remove infptrace.o and
+	inftarg.o.  Add inf-ptrace.o.
+	* Makefile.in (vax-nat.o): Update dependencies.
+
 	* inf-ptrace.h: Update copyright year.  Sync comment with
 	inf-ptrace.c.
 	(inf_ptrace_trad_target): New prototype.
