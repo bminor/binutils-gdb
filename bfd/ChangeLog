@@ -1,3 +1,22 @@
+2002-11-07  Graeme Peterson  <gp@qnx.com>
+
+	* Makefile.am: Removed entries for elf32-i386qnx.c and
+	elf32-i386qnx.lo.
+	* Makefile.in: Regenerate.
+	* config.bfd: Changed i[3456]86-*-nto-qnx* targ_defvec from
+	bfd_elf32_i386qnx_vec to bfd_elf32_i386_vec.
+	* configure.in: Removed support for bfd_elf32_i386qnx_vec.
+	* configure: Regenerate.
+	* elf32-i386qnx.c: Removed.
+	* elf.c: Removed calls to QNX specific set_nonloadable_filepos,
+	is_contained_by_filepos, and copy_private_bfd_data_p.
+	* elf32-i386.c: Removed QNX specific #ifdef ELF32_I386_C_INCLUDED.
+	* targets.c: Removed bfd_elf32_i386qnx_vec.
+	* elfxx-target.h: Removed QNX specific elf_backend_set_nonloadable_filepos,
+	elf_backend_is_contained_by_filepos, and elf_backend_copy_private_bfd_data_p.
+	* elf-bfd.h: Removed QNX specific set_nonloadable_filepos,
+	is_contained_by_filepos, and copy_private_bfd_data_p.
+
 2002-11-06  David O'Brien  <obrien@FreeBSD.org>
 	    Alan Modra  <amodra@bigpond.net.au>
 
