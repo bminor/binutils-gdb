@@ -1,3 +1,7 @@
+Tue Jun 22 03:15:38 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* stabsread.c: Include <ctype.h>.
+
 Mon Jun 21 16:09:46 1993  Jim Kingdon  (kingdon@cygnus.com)
 
 	* fork-child.c (fork_inferior): Quote exec_file so it can contain

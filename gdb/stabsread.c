@@ -36,6 +36,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "complaints.h"
 #include "demangle.h"
 
+#include <ctype.h>
+
 /* Ask stabsread.h to define the vars it normally declares `extern'.  */
 #define	EXTERN	/**/
 #include "stabsread.h"		/* Our own declarations */
