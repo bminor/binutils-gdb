@@ -12,15 +12,13 @@ DIST_NAME=binutils-beta-${VERSION}
 
 version=`$(unsubdir)/../gcc$(subdir)/gcc -dumpversion`
 prefix = $(destdir)
-bindir = $(prefix)/bin
-libdir = $(prefix)/lib
-libsubdir = $(libdir)/gcc/$(target)/$(version)
+bindir = $(prefix)/H-$(host_alias)/T-independent/bin
 
 TEXIDIR = $(srcdir)/../texinfo/fsf
 
-INSTALL = install -c
-INSTALL_PROGRAM = $(INSTALL)
-INSTALL_FILE = $(INSTALL)
+#INSTALL = install -c
+#INSTALL_PROGRAM = $(INSTALL)
+#INSTALL_FILE = $(INSTALL)
 
 #CC=gcc -Wall
 # these two are almost the same program
@@ -47,7 +45,7 @@ LIBDIR  = $(unsubdir)/../bfd$(subdir)
 
 INCDIR = $(BASEDIR)/include
 
-CFLAGS  = -g -I$(srcdir)/../include -I$(INCDIR) $(HDEFINES) $(TDEFINES)
+CFLAGS  = -g -I. -I$(INCDIR) $(HDEFINES) $(TDEFINES)
 
 # When adding .o files, to make VPATH work in Sun Make, you have to
 # also add a foo.o: foo.c line at the bottom of the file.
@@ -170,7 +168,8 @@ realclean: clean
 
 install: $(PROGS)
 	for i in $(PROGS) ; do \
-		$(INSTALL_PROGRAM) $$i $(bindir)/$$i ; \
+		cp $$i $(bindir)/$$i.new ; \
+		mv -f $(bindir)/$$i.new $(bindir)/$$i ; \
 	done
 
 dist: $(DIST_NAME).tar.Z
