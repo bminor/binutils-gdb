@@ -5774,7 +5774,10 @@ values without interacting with you, it can do so quickly and
 unobtrusively, hopefully not disturbing the program's behavior.
 
 The tracepoint facility is currently available only for remote
-targets.  @xref{Targets}.
+targets.  @xref{Targets}.  In addition, your remote target must know how
+to collect trace data.  This functionality is implemented in the remote
+stub; however, none of the stubs distributed with @value{GDBN} support
+tracepoints as of this writing.
 
 This chapter describes the tracepoint commands and features.
 
