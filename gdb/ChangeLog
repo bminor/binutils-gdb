@@ -1,5 +1,19 @@
 2004-10-30  Mark Kettenis  <kettenis@gnu.org>
 
+	* mipsnbsd-tdep.c: Include "regset.h" and "gdb_assert.h".
+	(MIPS_PC_REGNUM, MIPS_FP0_REGNUM, MIPS_FSR_REGNUM)
+	(MIPSNBSD_NUM_GREGS, MIPSNBSD_NUM_FPREGS): New defines.
+	(fetch_core_registers, fetch_elfcore_registers): Remove functions.
+	(mipsnbsd_core_fns, mipsnbsd_elfcore_fns): Remove variables.
+	(mipsnbsd_core_osabi_sniffer): New function.
+	(mipsnbsd_init_abi): Set regset_from_core_section.
+	(_initialize_mipsnbsd_tdep): Remove calls to
+	deprecated_add_core_fns.
+	(mipsnbsd_supply_fpregset, mipsnbsd_supply_gregset)
+	(mipsnbsd_regset_from_core_section): New functions.
+	(mipsnbsd_gregset, mipsnbsd_fpregset): New variables.
+	* Makefile.in (mipsnbsd-tdep.o): Update dependencies.
+
 	* procfs.c (procfs_fetch_registers, procfs_store_registers): Like
 	Remove optimization for DEPRECATED_FP_REGNUM.
 

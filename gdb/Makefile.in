@@ -2246,8 +2246,9 @@ mips-mdebug-tdep.o: mips-mdebug-tdep.c $(defs_h) $(frame_h) $(mips_tdep_h) \
 mipsnbsd-nat.o: mipsnbsd-nat.c $(defs_h) $(inferior_h) $(regcache_h) \
 	$(mips_tdep_h) $(mipsnbsd_tdep_h)
 mipsnbsd-tdep.o: mipsnbsd-tdep.c $(defs_h) $(gdbcore_h) $(regcache_h) \
-	$(target_h) $(value_h) $(osabi_h) $(gdb_string_h) $(nbsd_tdep_h) \
-	$(mipsnbsd_tdep_h) $(mips_tdep_h) $(solib_svr4_h)
+	$(regset_h) $(target_h) $(value_h) $(osabi_h) $(gdb_assert_h) \
+	$(gdb_string_h) $(nbsd_tdep_h) $(mipsnbsd_tdep_h) $(mips_tdep_h) \
+	$(solib_svr4_h)
 mipsread.o: mipsread.c $(defs_h) $(gdb_string_h) $(bfd_h) $(symtab_h) \
 	$(objfiles_h) $(buildsym_h) $(stabsread_h) $(coff_sym_h) \
 	$(coff_internal_h) $(coff_ecoff_h) $(libcoff_h) $(libecoff_h) \
