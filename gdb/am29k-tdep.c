@@ -20,7 +20,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "defs.h"
 #include "gdbcore.h"
-#include <stdio.h>
 #include "frame.h"
 #include "value.h"
 /*#include <sys/param.h> */

@@ -1,6 +1,6 @@
 /* Machine-dependent code which would otherwise be in infptrace.c,
    for GDB, the GNU debugger.  This code is for the HP PA-RISC cpu.
-   Copyright (C) 1986, 1987, 1989, 1990, 1991 Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1989, 1990, 1991, 1992 Free Software Foundation, Inc.
 
    Contributed by the Center for Software Science at the
    University of Utah (pa-gdb-bugs@cs.utah.edu).
@@ -24,7 +24,6 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-#include <stdio.h>
 #include "defs.h"
 #include "frame.h"
 #include "inferior.h"
@@ -420,7 +419,3 @@ child_xfer_memory (memaddr, myaddr, len, write, target)
     }
   return len;
 }
-
-
-
-

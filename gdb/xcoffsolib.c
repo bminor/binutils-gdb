@@ -1,16 +1,32 @@
-#include <stdio.h>
+/* Shared library support for RS/6000 (xcoff) object files, for GDB.
+   Copyright 1991, 1992 Free Software Foundation.
+   Contributed by IBM Corporation.
+
+This file is part of GDB.
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+
 #include <sys/types.h>
 #include <sys/ldr.h>
 
 #include "defs.h"
 #include "bfd.h"
-/*#include "libbfd.h"		/* BFD internals (sigh!)  FIXME */
 #include "xcoffsolib.h"
-
 
 extern struct symtab *current_source_symtab;
 extern int	      current_source_line;
-
 
 /* The real work of adding a shared library file to the symtab and
    the section list.  */
@@ -98,7 +114,6 @@ solib_add (arg_string, from_tty, target)
   }
   else if (!matched)
     printf ("No matching shared object found.\n");
-
 }
 
 

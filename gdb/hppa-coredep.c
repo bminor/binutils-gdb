@@ -1,5 +1,5 @@
-/* Extract registers from a "standard" core file, for GDB.
-   Copyright (C) 1988-1991  Free Software Foundation, Inc.
+/* Extract registers from an HP-PA core file, for GDB.
+   Copyright (C) 1988, 1991, 1992  Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -22,9 +22,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "defs.h"
 #include "gdbcore.h"
-#include <stdio.h>
 
 /* These are needed on various systems to expand REGISTER_U_ADDR.  */
+/* FIXME:  Remove any not needed on HP-PA.  */
 #include <sys/types.h>
 #include <sys/param.h>
 #include <sys/dir.h>

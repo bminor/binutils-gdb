@@ -1,3 +1,18 @@
+Thu Jun 25 04:00:10 1992  John Gilmore  (gnu at cygnus.com)
+
+	* tm-hppa.h:  New file, architectural definition of HP PA.
+	* tm-hppabsd.h, tm-hppahpux.h:  Shrink to deltas from tm-hppa.h.
+
+	* am29k-pinsn.c, am29k-tdep.c, copying.awk, copying.c,
+	hppa-coredep.c, hppa-pinsn.c, hppabsd-core.c, hppabsd-tdep.c,
+	hppabsd-xdep.c, hppahpux-tdep.c, hppahpux-xdep.c, remote-udi.c,
+	ser-go32.c, xcoffsolib.c:  Remove <stdio.h> which is already in
+	"defs.h".
+
+	* hppa-coredep.c, hppa-pinsn.c, hppabsd-core.c, hppabsd-tdep.c,
+	hppabsd-xdep.c, hppahpux-tdep.c, hppahpux-xdep.c, xcoffsolib.c,
+	xcoffsolib.h, xm-go32.h, xm-hppabsd.h, xm-hppahpux.h:  Copyrights.
+
 Wed Jun 24 12:53:20 1992  John Gilmore  (gnu at cygnus.com)
 
 	* printcmd.c (output_command):  Thinko.
