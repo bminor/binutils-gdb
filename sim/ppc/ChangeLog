@@ -1,5 +1,9 @@
 2003-06-21  Andrew Cagney  <cagney@redhat.com>
 
+	* interrupts.c: Update copyright.
+	(external_interrupt): Fix test for already pending interrupt.
+	Problem found by Joshua LeVasseur.
+
 	* ppc-instructions: Add missing +8 line.  Found by blofeldus at
 	yahoo.com.
 	
