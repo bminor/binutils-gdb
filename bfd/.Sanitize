@@ -64,7 +64,6 @@ Makefile.in
 PORTING
 README
 TODO
-VERSION
 acconfig.h
 acinclude.m4
 aclocal.m4

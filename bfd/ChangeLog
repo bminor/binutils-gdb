@@ -13,6 +13,7 @@ Thu Jul 31 19:55:36 1997  Ian Lance Taylor  <ian@cygnus.com>
 	* Makefile.in: Now built with automake.
 	* aclocal.m4: Now built with aclocal.
 	* config.in, configure: Rebuild.
+	* VERSION: Remove.
 
 Thu Jul 31 12:09:20 1997  Geoff Keating  <geoffk@ozemail.com.au>
 
