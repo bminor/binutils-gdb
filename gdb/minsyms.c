@@ -76,6 +76,11 @@ static int msym_bunch_index;
 
 static int msym_count;
 
+static struct minimal_symbol *lookup_minimal_symbol_aux (const char *name,
+							 int linkage,
+							 const char *sfile,
+							 struct objfile *objf);
+
 /* Compute a hash code based using the same criteria as `strcmp_iw'.  */
 
 unsigned int
@@ -113,7 +118,8 @@ add_minsym_to_hash_table (struct minimal_symbol *sym,
 {
   if (sym->hash_next == NULL)
     {
-      unsigned int hash = msymbol_hash (DEPRECATED_SYMBOL_NAME (sym)) % MINIMAL_SYMBOL_HASH_SIZE;
+      unsigned int hash
+	= msymbol_hash (SYMBOL_LINKAGE_NAME (sym)) % MINIMAL_SYMBOL_HASH_SIZE;
       sym->hash_next = table[hash];
       table[hash] = sym;
     }
@@ -123,11 +129,13 @@ add_minsym_to_hash_table (struct minimal_symbol *sym,
    TABLE.  */
 static void
 add_minsym_to_demangled_hash_table (struct minimal_symbol *sym,
-                                  struct minimal_symbol **table)
+				    struct minimal_symbol **table)
 {
   if (sym->demangled_hash_next == NULL)
     {
-      unsigned int hash = msymbol_hash_iw (SYMBOL_DEMANGLED_NAME (sym)) % MINIMAL_SYMBOL_HASH_SIZE;
+      unsigned int hash
+	= (msymbol_hash_iw (SYMBOL_NATURAL_NAME (sym))
+	   % MINIMAL_SYMBOL_HASH_SIZE);
       sym->demangled_hash_next = table[hash];
       table[hash] = sym;
     }
@@ -144,11 +152,53 @@ add_minsym_to_demangled_hash_table (struct minimal_symbol *sym,
    Note:  One instance where there may be duplicate minimal symbols with
    the same name is when the symbol tables for a shared library and the
    symbol tables for an executable contain global symbols with the same
-   names (the dynamic linker deals with the duplication).  */
+   names (the dynamic linker deals with the duplication).
+
+   This function first searches for matches via linkage names; if it
+   doesn't find a match there, it then searches via natural names.  */
 
 struct minimal_symbol *
 lookup_minimal_symbol (register const char *name, const char *sfile,
 		       struct objfile *objf)
+{
+  struct minimal_symbol *msymbol;
+
+  msymbol = lookup_minimal_symbol_linkage (name, sfile, objf);
+
+  if (msymbol != NULL)
+    return msymbol;
+  else
+    return lookup_minimal_symbol_natural (name, sfile, objf);
+}
+
+/* Search for a minimal symbol via linkage names; args are as in
+   lookup_minimal_symbol.  */
+
+struct minimal_symbol *
+lookup_minimal_symbol_linkage (const char *name, const char *sfile,
+			       struct objfile *objf)
+{
+  return lookup_minimal_symbol_aux (name, 1, sfile, objf);
+}
+
+/* Search for a minimal symbol via natural names; args are as in
+   lookup_minimal_symbol.  */
+
+struct minimal_symbol *
+lookup_minimal_symbol_natural (const char *name, const char *sfile,
+			       struct objfile *objf)
+{
+  return lookup_minimal_symbol_aux (name, 0, sfile, objf);
+}
+
+/* Helper function for lookup_minimal_symbol and friends, which only
+   searches for matches via linkage names or natural names but not
+   both.  Args are in lookup_minimal_symbol; if LINKAGE is non-zero,
+   search in linkage names, if zero, search in natural names.  */
+
+static struct minimal_symbol *
+lookup_minimal_symbol_aux (const char *name, int linkage,
+			   const char *sfile, struct objfile *objf)
 {
   struct objfile *objfile;
   struct minimal_symbol *msymbol;
@@ -156,8 +206,12 @@ lookup_minimal_symbol (register const char *name, const char *sfile,
   struct minimal_symbol *found_file_symbol = NULL;
   struct minimal_symbol *trampoline_symbol = NULL;
 
-  unsigned int hash = msymbol_hash (name) % MINIMAL_SYMBOL_HASH_SIZE;
-  unsigned int dem_hash = msymbol_hash_iw (name) % MINIMAL_SYMBOL_HASH_SIZE;
+  unsigned int hash;
+
+  if (linkage)
+    hash = msymbol_hash (name) % MINIMAL_SYMBOL_HASH_SIZE;
+  else
+    hash = msymbol_hash_iw (name) % MINIMAL_SYMBOL_HASH_SIZE;
 
 #ifdef SOFUN_ADDRESS_MAYBE_MISSING
   if (sfile != NULL)
@@ -174,66 +228,61 @@ lookup_minimal_symbol (register const char *name, const char *sfile,
     {
       if (objf == NULL || objf == objfile)
 	{
-	  /* Do two passes: the first over the ordinary hash table,
-	     and the second over the demangled hash table.  */
-        int pass;
+	  if (linkage)
+	    msymbol = objfile->msymbol_hash[hash];
+	  else
+	    msymbol = objfile->msymbol_demangled_hash[hash];
 
-        for (pass = 1; pass <= 2 && found_symbol == NULL; pass++)
+	  while (msymbol != NULL && found_symbol == NULL)
 	    {
-            /* Select hash list according to pass.  */
-            if (pass == 1)
-              msymbol = objfile->msymbol_hash[hash];
-            else
-              msymbol = objfile->msymbol_demangled_hash[dem_hash];
-
-            while (msymbol != NULL && found_symbol == NULL)
+	      if (linkage
+		  ? strcmp (SYMBOL_LINKAGE_NAME (msymbol), name) == 0
+		  : SYMBOL_MATCHES_NATURAL_NAME (msymbol, name))
 		{
-                if (DEPRECATED_SYMBOL_MATCHES_NAME (msymbol, name))
+		  switch (MSYMBOL_TYPE (msymbol))
 		    {
-                    switch (MSYMBOL_TYPE (msymbol))
-                      {
-                      case mst_file_text:
-                      case mst_file_data:
-                      case mst_file_bss:
+		    case mst_file_text:
+		    case mst_file_data:
+		    case mst_file_bss:
 #ifdef SOFUN_ADDRESS_MAYBE_MISSING
-                        if (sfile == NULL || STREQ (msymbol->filename, sfile))
-                          found_file_symbol = msymbol;
+		      if (sfile == NULL || STREQ (msymbol->filename, sfile))
+			found_file_symbol = msymbol;
 #else
-                        /* We have neither the ability nor the need to
-                           deal with the SFILE parameter.  If we find
-                           more than one symbol, just return the latest
-                           one (the user can't expect useful behavior in
-                           that case).  */
-                        found_file_symbol = msymbol;
+		      /* We have neither the ability nor the need to
+			 deal with the SFILE parameter.  If we find
+			 more than one symbol, just return the latest
+			 one (the user can't expect useful behavior in
+			 that case).  */
+		      found_file_symbol = msymbol;
 #endif
-                        break;
+		      break;
 
-                      case mst_solib_trampoline:
+		    case mst_solib_trampoline:
 
-                        /* If a trampoline symbol is found, we prefer to
-                           keep looking for the *real* symbol. If the
-                           actual symbol is not found, then we'll use the
-                           trampoline entry. */
-                        if (trampoline_symbol == NULL)
-                          trampoline_symbol = msymbol;
-                        break;
+		      /* If a trampoline symbol is found, we prefer to
+			 keep looking for the *real* symbol. If the
+			 actual symbol is not found, then we'll use the
+			 trampoline entry. */
+		      if (trampoline_symbol == NULL)
+			trampoline_symbol = msymbol;
+		      break;
 
-                      case mst_unknown:
-                      default:
-                        found_symbol = msymbol;
-                        break;
-                      }
+		    case mst_unknown:
+		    default:
+		      found_symbol = msymbol;
+		      break;
 		    }
-
-                /* Find the next symbol on the hash chain.  */
-                if (pass == 1)
-                  msymbol = msymbol->hash_next;
-                else
-                  msymbol = msymbol->demangled_hash_next;
 		}
+
+	      /* Find the next symbol on the hash chain.  */
+	      if (linkage)
+		msymbol = msymbol->hash_next;
+	      else
+		msymbol = msymbol->demangled_hash_next;
 	    }
 	}
     }
+
   /* External symbols are best.  */
   if (found_symbol)
     return found_symbol;
@@ -288,7 +337,7 @@ lookup_minimal_symbol_text (register const char *name, const char *sfile,
 	       msymbol != NULL && found_symbol == NULL;
 	       msymbol = msymbol->hash_next)
 	    {
-	      if (DEPRECATED_SYMBOL_MATCHES_NAME (msymbol, name) &&
+	      if (strcmp (SYMBOL_LINKAGE_NAME (msymbol), name) == 0 &&
 		  (MSYMBOL_TYPE (msymbol) == mst_text ||
 		   MSYMBOL_TYPE (msymbol) == mst_file_text))
 		{
@@ -364,7 +413,7 @@ lookup_minimal_symbol_solib_trampoline (register const char *name,
 	       msymbol != NULL && found_symbol == NULL;
 	       msymbol = msymbol->hash_next)
 	    {
-	      if (DEPRECATED_SYMBOL_MATCHES_NAME (msymbol, name) &&
+	      if (strcmp (SYMBOL_LINKAGE_NAME (msymbol), name) == 0 &&
 		  MSYMBOL_TYPE (msymbol) == mst_solib_trampoline)
 		return msymbol;
 	    }
@@ -659,8 +708,8 @@ compare_minimal_symbols (const void *fn1p, const void *fn2p)
   else
     /* addrs are equal: sort by name */
     {
-      char *name1 = DEPRECATED_SYMBOL_NAME (fn1);
-      char *name2 = DEPRECATED_SYMBOL_NAME (fn2);
+      char *name1 = SYMBOL_LINKAGE_NAME (fn1);
+      char *name2 = SYMBOL_LINKAGE_NAME (fn2);
 
       if (name1 && name2)	/* both have names */
 	return strcmp (name1, name2);
@@ -752,7 +801,8 @@ compact_minimal_symbols (struct minimal_symbol *msymbol, int mcount,
 	{
 	  if (SYMBOL_VALUE_ADDRESS (copyfrom) ==
 	      SYMBOL_VALUE_ADDRESS ((copyfrom + 1)) &&
-	      (STREQ (DEPRECATED_SYMBOL_NAME (copyfrom), DEPRECATED_SYMBOL_NAME ((copyfrom + 1)))))
+	      (STREQ (SYMBOL_LINKAGE_NAME (copyfrom),
+		      SYMBOL_LINKAGE_NAME ((copyfrom + 1)))))
 	    {
 	      if (MSYMBOL_TYPE ((copyfrom + 1)) == mst_unknown)
 		{
@@ -795,9 +845,8 @@ build_minimal_symbol_hash_tables (struct objfile *objfile)
       add_minsym_to_hash_table (msym, objfile->msymbol_hash);
 
       msym->demangled_hash_next = 0;
-      if (SYMBOL_DEMANGLED_NAME (msym) != NULL)
-	add_minsym_to_demangled_hash_table (msym,
-                                            objfile->msymbol_demangled_hash);
+      add_minsym_to_demangled_hash_table (msym,
+					  objfile->msymbol_demangled_hash);
     }
 }
 
@@ -867,9 +916,9 @@ install_minimal_symbols (struct objfile *objfile)
 	  for (bindex = 0; bindex < msym_bunch_index; bindex++, mcount++)
 	    {
 	      msymbols[mcount] = bunch->contents[bindex];
-	      if (DEPRECATED_SYMBOL_NAME (&msymbols[mcount])[0] == leading_char)
+	      if (SYMBOL_LINKAGE_NAME (&msymbols[mcount])[0] == leading_char)
 		{
-		  DEPRECATED_SYMBOL_NAME (&msymbols[mcount])++;
+		  SYMBOL_LINKAGE_NAME (&msymbols[mcount])++;
 		}
 	    }
 	  msym_bunch_index = BUNCH_SIZE;
@@ -898,7 +947,7 @@ install_minimal_symbols (struct objfile *objfile)
          symbol count does *not* include this null symbol, which is why it
          is indexed by mcount and not mcount-1. */
 
-      DEPRECATED_SYMBOL_NAME (&msymbols[mcount]) = NULL;
+      SYMBOL_LINKAGE_NAME (&msymbols[mcount]) = NULL;
       SYMBOL_VALUE_ADDRESS (&msymbols[mcount]) = 0;
       MSYMBOL_INFO (&msymbols[mcount]) = NULL;
       MSYMBOL_TYPE (&msymbols[mcount]) = mst_unknown;
@@ -918,7 +967,7 @@ install_minimal_symbols (struct objfile *objfile)
 
 	for (i = 0; i < mcount; i++)
 	  {
-	    const char *name = DEPRECATED_SYMBOL_NAME (&objfile->msymbols[i]);
+	    const char *name = SYMBOL_LINKAGE_NAME (&objfile->msymbols[i]);
 	    if (name[0] == '_' && name[1] == 'Z')
 	      {
 		set_cp_abi_as_auto_default ("gnu-v3");
@@ -981,7 +1030,8 @@ find_solib_trampoline_target (CORE_ADDR pc)
       ALL_MSYMBOLS (objfile, msymbol)
       {
 	if (MSYMBOL_TYPE (msymbol) == mst_text
-	    && STREQ (DEPRECATED_SYMBOL_NAME (msymbol), DEPRECATED_SYMBOL_NAME (tsymbol)))
+	    && STREQ (SYMBOL_LINKAGE_NAME (msymbol),
+		      SYMBOL_LINKAGE_NAME (tsymbol)))
 	  return SYMBOL_VALUE_ADDRESS (msymbol);
       }
     }

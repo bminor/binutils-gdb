@@ -353,7 +353,7 @@ send_gdb "ptype Bar\n"
 gdb_expect {   
     -re "type = template <(class |)T, (class |)sz> (class |)Bar \\{\r\n\[ \t\]*public:\r\n\[ \t\]*int x;\r\n\[ \t\]*T t;\r\n\\}\r\ntemplate instantiations:\r\n\[ \t\]*(class |)Bar<int,(\\(int\\)|)1>\r\n\[ \t\]*(class |)Bar<int,(\\(int\\)|)33>\r\n$gdb_prompt $" { pass "ptype Bar" }
     -re "type = <(class |)T, (class |)sz> (class |)Bar \\{\r\n\[ \t\]*public:\r\n\[ \t\]*int x;\r\n\[ \t\]*T t;\r\n\\}\r\n$gdb_prompt $" { xfail "ptype Bar" }
-    -re "ptype Bar\r\ntype = class Bar<int,33> {\r\n\[ \t\]*public:\r\n\[ \t\]*int x;\r\n\[ \t\]*int t;\r\n\r\n\[ \t\]*int bar\\(int, int\\);\r\n}\r\n$gdb_prompt $"
+    -re "ptype Bar\r\ntype = class Bar<int, ?33> {\r\n\[ \t\]*public:\r\n\[ \t\]*int x;\r\n\[ \t\]*int t;\r\n\r\n\[ \t\]*int bar\\(int, int\\);\r\n}\r\n$gdb_prompt $"
     { # GCC 3.1, DWARF-2 output.
 	kfail "gdb/57" "ptype Bar" }
     -re "No symbol \"Bar\" in current context.\r\n$gdb_prompt $"
@@ -461,7 +461,7 @@ send_gdb "ptype Spec\n"
 gdb_expect {   
     -re "type = template <(class |)T1, (class |)T2> (class |)Spec \\{\r\n\[ \t\]*public:\r\n\[ \t\]*int x;\r\n\\}\r\ntemplate instantiations:\r\n\[ \t\]*(class |)Spec<int,int \\*>\r\n\[ \t\]*(class |)Spec<int,char>\r\n$gdb_prompt $" { pass "ptype Spec" }
     -re "type = <(class |)T1, (class |)T2> (class |)Spec \\{\r\n\[ \t\]*public:\r\n\[ \t\]*int x;\r\n\\}\r\n$gdb_prompt $" { xfail "ptype Spec" }
-    -re "type = class Spec<int,char> {\r\n\[ \t\]*public:\r\n\[ \t\]*int x;\r\n\r\n\[ \t\]*int spec\\(char\\);\r\n}\r\n$gdb_prompt $"
+    -re "type = class Spec<int, ?char> {\r\n\[ \t\]*public:\r\n\[ \t\]*int x;\r\n\r\n\[ \t\]*int spec\\(char\\);\r\n}\r\n$gdb_prompt $"
     { # GCC 3.1, DWARF-2 output.
 	kfail "gdb/57" "ptype Spec" }
     -re "No symbol \"Spec\" in current context.\r\n$gdb_prompt $"

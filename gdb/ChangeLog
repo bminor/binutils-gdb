@@ -1,3 +1,25 @@
+2003-03-06  David Carlton  <carlton@math.stanford.edu>
+
+	* minsyms.c (add_minsym_to_hash_table): Use SYMBOL_LINKAGE_NAME.
+	(add_minsym_to_demangled_hash_table): Use SYMBOL_NATURAL_NAME.
+	(build_minimal_symbol_hash_tables): Add all minsyms to demangled
+	hash table.
+	(install_minimal_symbols): Use SYMBOL_LINKAGE_NAME.
+	(find_solib_trampoline_target): Ditto.
+	(compare_minimal_symbols): Ditto.
+	(compact_minimal_symbols): Ditto.
+	* symtab.h (DEPRECATED_SYMBOL_MATCHES_NAME): Delete.
+	* minsyms.c (lookup_minimal_symbol_text): Replace use of
+	DEPRECATED_SYMBOL_MATCHES_NAME by strcmp on linkage name.
+	(lookup_minimal_symbol_solib_trampoline): Ditto.
+	* symtab.h: Declare lookup_minimal_symbol_linkage,
+	lookup_minimal_symbol_natural.
+	* minsyms.c (lookup_minimal_symbol_aux): New function.
+	(lookup_minimal_symbol_linkage): Ditto.
+	(lookup_minimal_symbol_natural): Ditto.
+	(lookup_minimal_symbol): Move body into
+	lookup_minimal_symbol_aux.
+
 2003-03-05  Andrew Cagney  <cagney@redhat.com>
 
 	* d10v-tdep.c (struct frame_extra_info): Delete unused structure.

@@ -1,3 +1,8 @@
+2003-03-06  David Carlton  <carlton@math.stanford.edu>
+
+	* gdb.c++/templates.exp (do_tests): Make expressions for 'ptype
+	Bar' and 'ptype Qux' more generous.
+
 2003-03-04  David Carlton  <carlton@math.stanford.edu>
 
 	* gdb.c++/templates.exp (do_tests): Accept valid const in "print
