@@ -1,4 +1,4 @@
-Tue Jun 15 23:09:17 1993  Ken Raeburn  (raeburn@cambridge)
+Tue Jun 15 23:09:17 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	* Makefile.in (.c.o): Look in ../include, not ../bfd, for bfd.h.
 
