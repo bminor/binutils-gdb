@@ -34,18 +34,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    register (i.e. it's the 7th or later argument).  */
 #define REG_STRUCT_HAS_ADDR(gcc_p) (gcc_p != 1)
 
-/* If Pcc says that a parameter is a short, it's a short.  This is
-   because the parameter does get passed in in a register as an int,
-   but pcc puts it onto the stack frame as a short (not nailing
-   whatever else might be there.  I'm not sure that I consider this
-   swift.  Sigh.)
+/* Sun /bin/cc gets this right as of SunOS 4.1.x.  We need to define
+   BELIEVE_PCC_PROMOTION to get this right now that the code which
+   detects gcc2_compiled. is broken.  This loses for SunOS 4.0.x and
+   earlier.  */
 
-   No, don't do this.  The problem here is that pcc says that the
-   argument is in the upper half of the word reserved on the stack,
-   but puts it in the lower half.  */
-/* #define BELIEVE_PCC_PROMOTION 1 */
-/* OK, I've added code to dbxread.c to deal with this case.  */
-#define BELIEVE_PCC_PROMOTION_TYPE
+#define BELIEVE_PCC_PROMOTION 1
 
 /* For acc, there's no need to correct LBRAC entries by guessing how
    they should work.  In fact, this is harmful because the LBRAC

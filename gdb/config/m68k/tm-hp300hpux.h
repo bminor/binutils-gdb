@@ -17,6 +17,12 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
+/* GCC is the only compiler used for stabs on this OS.  So get this
+   right even if the code which detects gcc2_compiled. is still
+   broken.  */
+
+#define BELIEVE_PCC_PROMOTION 1
+
 /* Define BPT_VECTOR if it is different than the default.
    This is the vector number used by traps to indicate a breakpoint. */
 

@@ -348,10 +348,8 @@ extern const struct ext_format ext_format_68881;
    actually exist on this target or not.  */
 
 /* FIXME: Wrong to hardwire this as BPT_VECTOR when sometimes it
-   should be REMOTE_BPT_VECTOR.  We should be using
-   target_insert_breakpoint (but then I think we need
-   target_remove_breakpoint somewhere--easiest way to make this happen
-   is to make this breakpoint a real breakpoint.c type breakpoint).  */
+   should be REMOTE_BPT_VECTOR.  Best way to fix it would be to define
+   CALL_DUMMY_BREAKPOINT_OFFSET.  */
 
 #define CALL_DUMMY {0xf227e0ff, 0x48e7fffc, 0x426742e7, 0x4eb93232, 0x3232dffc, 0x69696969, (0x4e404e71 | (BPT_VECTOR << 16))}
 #define CALL_DUMMY_LENGTH 28		/* Size of CALL_DUMMY */

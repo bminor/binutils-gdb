@@ -22,6 +22,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define	DEFAULT_PROMPT		"(vxgdb) "
 
+/* GCC is probably the only compiler used on this configuration.  So
+   get this right even if the code which detects gcc2_compiled. is
+   still broken.  */
+
+#define BELIEVE_PCC_PROMOTION 1
+
 /* We have more complex, useful breakpoints on the target.  */
 #define	DECR_PC_AFTER_BREAK	0
 

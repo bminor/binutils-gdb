@@ -64,8 +64,12 @@ extern CORE_ADDR m68k_saved_pc_after_call PARAMS ((struct frame_info *));
 #define SAVED_PC_AFTER_CALL(frame) \
   m68k_saved_pc_after_call(frame)
 
-/* If sun3 pcc says that a parameter is a short, it's a short.  */
-#define BELIEVE_PCC_PROMOTION_TYPE
+/* Sun /bin/cc gets this right as of SunOS 4.1.x.  We need to define
+   BELIEVE_PCC_PROMOTION to get this right now that the code which
+   detects gcc2_compiled. is broken.  This loses for SunOS 4.0.x and
+   earlier.  */
+
+#define BELIEVE_PCC_PROMOTION 1
 
 /* The code which tries to deal with this bug is never harmful on a sun3.  */
 #define SUN_FIXED_LBRAC_BUG (0)
