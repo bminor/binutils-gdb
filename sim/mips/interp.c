@@ -45,6 +45,8 @@ code on the hardware.
 #include "sky-libvpe.h"
 #include "sky-pke.h"
 #include "idecode.h"
+#include "support.h"
+#undef SD
 #endif
 /* end-sanitize-sky */
 
@@ -91,8 +93,8 @@ char* pr_uword64 PARAMS ((uword64 addr));
 #endif
 
 /* Within interp.c we refer to the sim_state and sim_cpu directly. */
-#define SD sd
 #define CPU cpu
+#define SD sd
 
 
 /* The following reserved instruction value is used when a simulator
@@ -3239,7 +3241,6 @@ decode_coproc (SIM_DESC sd,
 	typedef unsigned_4 instruction_word;
 	int CIA = cia;
 	int NIA = cia + 4;
-	sim_cpu* CPU_ = cpu;
 
 	handle = 1;
 
@@ -3249,6 +3250,10 @@ decode_coproc (SIM_DESC sd,
 	    SignalException(CoProcessorUnusable,instruction);	    
 	    /* NOTREACHED */
 	  }
+
+#define MY_INDEX  itable_COPz_NORMAL
+#define MY_PREFIX COPz_NORMAL
+#define MY_NAME "COPz_NORMAL"
 
 	/* classify & execute basic COP2 instructions */
 	if(i_25_21 == 0x08 && i_20_16 == 0x00) /* BC2F */
@@ -3418,6 +3423,10 @@ decode_coproc (SIM_DESC sd,
 	
 	/* cleanup for semantic.c-like actions above */
 	PC = NIA;
+
+#undef MY_INDEX
+#undef MY_PREFIX
+#undef MY_NAME
 
 #endif /* TARGET_SKY */
 	/* end-sanitize-sky */
