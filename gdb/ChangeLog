@@ -1,3 +1,8 @@
+Mon Mar 22 12:36:24 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* mipsread.c (compare_blocks): Sort blocks with the same start
+	address by decreasing ending address.
+
 Mon Mar 22 20:36:04 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* mipsread.c (parse_procedure): Save cur_fdr accross call to

@@ -2853,7 +2853,7 @@ compare_blocks (arg1, arg2)
 
   addr_diff = (BLOCK_START ((*b1))) - (BLOCK_START ((*b2)));
   if (addr_diff == 0)
-    return (BLOCK_END ((*b1))) - (BLOCK_END ((*b2)));
+    return (BLOCK_END ((*b2))) - (BLOCK_END ((*b1)));
   return addr_diff;
 }
 
