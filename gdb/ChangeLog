@@ -1,3 +1,22 @@
+Fri Oct 29 08:11:29 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* defs.h, findvar.c (extract_floating, store_floating): New functions.
+	* Move SWAP_TARGET_AND_HOST from defs.h to findvar.c because it is
+	now used only by extract_floating and store_floating.
+	* valprint.c (print_floating): Use unsigned arithmetic.  Use
+	extract_unsigned_integer instead of SWAP_TARGET_AND_HOST.
+	Change sizeof (float) to 4 and sizeof (double) to 8 (those are always
+	the relevant sizes for this code, which is in #ifdef IEEE_FLOAT).
+	* values.c (unpack_long, unpack_double, value_from_double),
+	valarith.c (value_binop), stabsread.c (define_symbol):
+	Use extract_floating and store_floating instead of
+	SWAP_TARGET_AND_HOST.
+	* config/m68k/tm-m68k.h, config/i960/tm-i960.h (REGISTER_CONVERT_*):
+	Use extract_floating and store_floating.
+	* config/m88k/tm-m88k.h: Add comments (it should be doing the same).
+	* i386-tdep.c (i386_extract_return_value),
+	* remote-nindy.c (nindy_store_registers): Use store_floating.
+
 Fri Oct 29 09:31:38 1993  Steve Chamberlain  (sac@rtl.cygnus.com)
 
 	* remote-sim.c (gdbsim_store_register):  Change var name so

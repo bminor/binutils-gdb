@@ -386,10 +386,13 @@ if (!target_is_m88110) \
 
 #define REGISTER_CONVERTIBLE(N) ((N) >= XFP_REGNUM)
 
-  /* Convert data from raw format for register REGNUM
-     to virtual format for register REGNUM.  */
+extern const struct ext_format ext_format_m88110;
 
-  extern const struct ext_format ext_format_m88110;
+/* Convert data from raw format for register REGNUM
+   to virtual format for register REGNUM.  */
+
+/* FIXME: Use store_floating like tm-m68k.h.  */
+
 #define REGISTER_CONVERT_TO_VIRTUAL(REGNUM,FROM,TO) \
 { \
   if ((REGNUM) < XFP_REGNUM) \
@@ -400,6 +403,8 @@ if (!target_is_m88110) \
 
 /* Convert data from virtual format for register REGNUM
    to raw format for register REGNUM.  */
+
+/* FIXME: Use extract_floating like tm-m68k.h.  */
 
 #define REGISTER_CONVERT_TO_RAW(REGNUM,FROM,TO) \
 { \

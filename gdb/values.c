@@ -594,49 +594,33 @@ unpack_long (type, valaddr)
   register int len = TYPE_LENGTH (type);
   register int nosign = TYPE_UNSIGNED (type);
 
-  if (code == TYPE_CODE_ENUM || code == TYPE_CODE_BOOL)
-    code = TYPE_CODE_INT;
-  if (code == TYPE_CODE_FLT)
+  switch (code)
     {
-      if (len == sizeof (float))
-	{
-	  float retval;
-	  memcpy (&retval, valaddr, sizeof (retval));
-	  SWAP_TARGET_AND_HOST (&retval, sizeof (retval));
-	  return retval;
-	}
-
-      if (len == sizeof (double))
-	{
-	  double retval;
-	  memcpy (&retval, valaddr, sizeof (retval));
-	  SWAP_TARGET_AND_HOST (&retval, sizeof (retval));
-	  return retval;
-	}
+    case TYPE_CODE_ENUM:
+    case TYPE_CODE_BOOL:
+    case TYPE_CODE_INT:
+    case TYPE_CODE_CHAR:
+      if (nosign)
+	return extract_unsigned_integer (valaddr, len);
       else
-	{
-	  error ("Unexpected type of floating point number.");
-	}
-    }
-  else if ((code == TYPE_CODE_INT || code == TYPE_CODE_CHAR) && nosign)
-    {
-      return extract_unsigned_integer (valaddr, len);
-    }
-  else if (code == TYPE_CODE_INT || code == TYPE_CODE_CHAR)
-    {
-      return extract_signed_integer (valaddr, len);
-    }
-  /* Assume a CORE_ADDR can fit in a LONGEST (for now).  Not sure
-     whether we want this to be true eventually.  */
-  else if (code == TYPE_CODE_PTR || code == TYPE_CODE_REF)
-    {
-      return extract_address (valaddr, len);
-    }
-  else if (code == TYPE_CODE_MEMBER)
-    error ("not implemented: member types in unpack_long");
+	return extract_signed_integer (valaddr, len);
 
-  error ("Value not integer or pointer.");
-  return 0; 	/* For lint -- never reached */
+    case TYPE_CODE_FLT:
+      return extract_floating (valaddr, len);
+
+    case TYPE_CODE_PTR:
+    case TYPE_CODE_REF:
+      /* Assume a CORE_ADDR can fit in a LONGEST (for now).  Not sure
+	 whether we want this to be true eventually.  */
+      return extract_address (valaddr, len);
+
+    case TYPE_CODE_MEMBER:
+      error ("not implemented: member types in unpack_long");
+
+    default:
+      error ("Value can't be converted to intenot integer or pointer.");
+    }
+  return 0; /* Placate lint.  */
 }
 
 /* Return a double value from the specified type and address.
@@ -663,27 +647,7 @@ unpack_double (type, valaddr, invp)
 	  *invp = 1;
 	  return 1.234567891011121314;
 	}
-
-      if (len == sizeof (float))
-	{
-	  float retval;
-	  memcpy (&retval, valaddr, sizeof (retval));
-	  SWAP_TARGET_AND_HOST (&retval, sizeof (retval));
-	  return retval;
-	}
-
-      if (len == sizeof (double))
-	{
-	  double retval;
-	  memcpy (&retval, valaddr, sizeof (retval));
-	  SWAP_TARGET_AND_HOST (&retval, sizeof (retval));
-	  return retval;
-	}
-      else
-	{
-	  error ("Unexpected type of floating point number.");
-	  return 0; /* Placate lint.  */
-	}
+      return extract_floating (valaddr, TYPE_LENGTH (type));
     }
   else if (nosign) {
    /* Unsigned -- be sure we compensate for signed LONGEST.  */
@@ -1341,19 +1305,10 @@ value_from_double (type, num)
 
   if (code == TYPE_CODE_FLT)
     {
-      if (len == sizeof (float))
-	* (float *) VALUE_CONTENTS_RAW (val) = num;
-      else if (len == sizeof (double))
-	* (double *) VALUE_CONTENTS_RAW (val) = num;
-      else
-	error ("Floating type encountered with unexpected data length.");
+      store_floating (VALUE_CONTENTS_RAW (val), len, num);
     }
   else
     error ("Unexpected type encountered for floating constant.");
-
-  /* num was in host byte order.  So now put the value's contents
-     into target byte order.  */
-  SWAP_TARGET_AND_HOST (VALUE_CONTENTS_RAW (val), len);
 
   return val;
 }

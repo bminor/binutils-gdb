@@ -169,25 +169,31 @@ extern CORE_ADDR saved_pc_after_call ();
 
 extern struct ext_format ext_format_i960;
 
-#define REGISTER_CONVERT_TO_VIRTUAL(REGNUM,FROM,TO)     \
+#define REGISTER_CONVERT_TO_VIRTUAL(REGNUM,FROM,TO)	\
 { \
-  if ((REGNUM) >= FP0_REGNUM)   \
-    ieee_extended_to_double (&ext_format_i960, (FROM), (double *)(TO));     \
-  else                                  \
+  double val; \
+  if ((REGNUM) >= FP0_REGNUM && (REGNUM) < FPC_REGNUM) \
+    { \
+      ieee_extended_to_double (&ext_format_i960, (FROM), &val); \
+      store_floating ((TO), REGISTER_VIRTUAL_SIZE (REGNUM), val); \
+    } \
+  else					\
     memcpy ((TO), (FROM), 4);	\
 }
 
 /* Convert data from virtual format for register REGNUM
    to raw format for register REGNUM.  */
 
-#define REGISTER_CONVERT_TO_RAW(REGNUM,FROM,TO) \
+#define REGISTER_CONVERT_TO_RAW(REGNUM,FROM,TO)	\
 { \
-  if ((REGNUM) >= FP0_REGNUM)   \
-    double_to_ieee_extended (&ext_format_i960, (double *)(FROM), (TO));     \
-  else                                  \
-    memcpy ((TO), (FROM), 4); 	\
+  if ((REGNUM) >= FP0_REGNUM && (REGNUM) < FPC_REGNUM)	\
+    { \
+      double val = extract_floating ((FROM), REGISTER_VIRTUAL_SIZE (REGNUM)); \
+      double_to_ieee_extended (&ext_format_i960, &val, (TO)); \
+    } \
+  else					\
+    memcpy ((TO), (FROM), 4);	\
 }
-
 
 /* Return the GDB type object for the "standard" data type
    of data in register N.  */

@@ -613,11 +613,13 @@ define_symbol (valu, string, desc, type, objfile)
 	    double d = atof (p);
 	    char *dbl_valu;
 
+	    /* FIXME-if-picky-about-floating-accuracy: Should be using
+	       target arithmetic to get the value.  real.c in GCC
+	       probably has the necessary code.  */
+
 	    /* FIXME: lookup_fundamental_type is a hack.  We should be
 	       creating a type especially for the type of float constants.
-	       Problem is, what type should it be?  We currently have to
-	       read this in host floating point format, but what type
-	       represents a host format "double"?
+	       Problem is, what type should it be?
 
 	       Also, what should the name of this type be?  Should we
 	       be using 'S' constants (see stabs.texinfo) instead?  */
@@ -625,11 +627,9 @@ define_symbol (valu, string, desc, type, objfile)
 	    SYMBOL_TYPE (sym) = lookup_fundamental_type (objfile,
 							 FT_DBL_PREC_FLOAT);
 	    dbl_valu = (char *)
-	      obstack_alloc (&objfile -> symbol_obstack, sizeof (double));
-	    memcpy (dbl_valu, &d, sizeof (double));
-	    /* Put it in target byte order, but it's still in host
-	       floating point format.  */
-	    SWAP_TARGET_AND_HOST (dbl_valu, sizeof (double));
+	      obstack_alloc (&objfile -> symbol_obstack,
+			     TYPE_LENGTH (SYMBOL_TYPE (sym)));
+	    store_floating (dbl_valu, TYPE_LENGTH (SYMBOL_TYPE (sym)));
 	    SYMBOL_VALUE_BYTES (sym) = dbl_valu;
 	    SYMBOL_CLASS (sym) = LOC_CONST_BYTES;
 	  }

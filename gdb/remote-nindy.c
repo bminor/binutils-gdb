@@ -472,7 +472,7 @@ nindy_store_registers(regno)
      int regno;
 {
   struct nindy_regs nindy_regs;
-  int regnum, inv;
+  int regnum;
   double dub;
 
   memcpy (nindy_regs.local_regs, &registers[REGISTER_BYTE (R0_REGNUM)], 16*4);
@@ -480,18 +480,14 @@ nindy_store_registers(regno)
   memcpy (nindy_regs.pcw_acw, &registers[REGISTER_BYTE (PCW_REGNUM)], 2*4);
   memcpy (nindy_regs.ip, &registers[REGISTER_BYTE (IP_REGNUM)], 1*4);
   memcpy (nindy_regs.tcw, &registers[REGISTER_BYTE (TCW_REGNUM)], 1*4);
-  /* Float regs.  Only works on IEEE_FLOAT hosts.  FIXME!  */
-  for (regnum = FP0_REGNUM; regnum < FP0_REGNUM + 4; regnum++) {
-    ieee_extended_to_double (&ext_format_i960,
-			     &registers[REGISTER_BYTE (regnum)], &dub);
-    /* dub now in host byte order */
-    /* FIXME-someday, the arguments to unpack_double are backward.
-       It expects a target double and returns a host; we pass the opposite.
-       This mostly works but not quite.  */
-    dub = unpack_double (builtin_type_double, (char *)&dub, &inv);
-    /* dub now in target byte order */
-    memcpy (&nindy_regs.fp_as_double[8 * (regnum - FP0_REGNUM)], &dub, 8);
-  }
+  for (regnum = FP0_REGNUM; regnum < FP0_REGNUM + 4; regnum++)
+    {
+      ieee_extended_to_double (&ext_format_i960,
+			       &registers[REGISTER_BYTE (regnum)], &dub);
+      store_floating (&nindy_regs.fp_as_double[8 * (regnum - FP0_REGNUM)],
+		      REGISTER_VIRTUAL_SIZE (regnum),
+		      dub);
+    }
 
   immediate_quit++;
   ninRegsPut( (char *) &nindy_regs );
