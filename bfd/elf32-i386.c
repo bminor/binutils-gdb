@@ -2328,7 +2328,7 @@ elf_i386_relocate_section (bfd *output_bfd,
 		 This is a hint to unwinders and other consumers of
 		 exception handling info that the FDE is invalid.  */
 	      bfd_put_32 (input_bfd, 0, contents + rel->r_offset);
-	      continue;
+	      break;
 	    }
 
 	  if ((input_section->flags & SEC_ALLOC) == 0)
