@@ -1,5 +1,9 @@
 Tue Oct 17 10:38:53 1995  Jeffrey A Law  (law@cygnus.com)
 
+	* hppa-tdep.c (frame_chain): Fix more obscure problems caused
+	by system calls that core dump processes without saving all
+	the register state.
+
 	* config/pa/hppahpux.mt (XDEPFILES): Remove bogus definition.
 	* config/pa/hppapro.mt (XDEPFILES): Likewise.
 

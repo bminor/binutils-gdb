@@ -1076,8 +1076,11 @@ frame_chain (frame)
 
 	  /* Abominable hack.  */
 	  if (current_target.to_has_execution == 0
-	      && saved_regs.regs[FLAGS_REGNUM]
-	      && (read_memory_integer (saved_regs.regs[FLAGS_REGNUM], 4) & 0x2))
+	      && ((saved_regs.regs[FLAGS_REGNUM]
+	           && (read_memory_integer (saved_regs.regs[FLAGS_REGNUM], 4)
+		       & 0x2))
+		  || (saved_regs.regs[FLAGS_REGNUM] == 0
+		      && read_register (FLAGS_REGNUM) & 0x2)))
 	    {
 	      u = find_unwind_entry (FRAME_SAVED_PC (frame));
 	      if (!u)
@@ -1091,6 +1094,29 @@ frame_chain (frame)
     }
   else
     {
+      struct frame_saved_regs saved_regs;
+
+      /* Get the innermost frame.  */
+      tmp_frame = frame;
+      while (tmp_frame->next != NULL)
+	tmp_frame = tmp_frame->next;
+
+      get_frame_saved_regs (tmp_frame, &saved_regs);
+      /* Abominable hack.  See above.  */
+      if (current_target.to_has_execution == 0
+	  && ((saved_regs.regs[FLAGS_REGNUM]
+	       && (read_memory_integer (saved_regs.regs[FLAGS_REGNUM], 4)
+		   & 0x2))
+	      || (saved_regs.regs[FLAGS_REGNUM] == 0
+		  && read_register (FLAGS_REGNUM)  & 0x2)))
+	{
+	  u = find_unwind_entry (FRAME_SAVED_PC (frame));
+	  if (!u)
+	    return read_memory_integer (saved_regs.regs[FP_REGNUM], 4);
+	   else
+	    return frame_base - (u->Total_frame_size << 3);
+	}
+	
       /* The value in %r3 was never saved into the stack (thus %r3 still
 	 holds the value of the previous frame pointer).  */
       return read_register (FP_REGNUM);
