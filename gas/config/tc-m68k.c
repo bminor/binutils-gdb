@@ -30,9 +30,9 @@
 /* This array holds the chars that always start a comment.  If the
    pre-processor is disabled, these aren't very useful */
 #if defined (OBJ_ELF) || defined (TE_DELTA)
-CONST char comment_chars[] = "|#";
+const char comment_chars[] = "|#";
 #else
-CONST char comment_chars[] = "|";
+const char comment_chars[] = "|";
 #endif
 
 /* This array holds the chars that only start a comment at the beginning of
@@ -42,9 +42,9 @@ CONST char comment_chars[] = "|";
    first line of the input file.  This is because the compiler outputs
    #NO_APP at the beginning of its output. */
 /* Also note that comments like this one will always work. */
-CONST char line_comment_chars[] = "#";
+const char line_comment_chars[] = "#";
 
-CONST char line_separator_chars[] = "";
+const char line_separator_chars[] = "";
 
 /* Chars that can be used to separate mant from exp in floating point nums */
 CONST char EXP_CHARS[] = "eE";
@@ -419,7 +419,7 @@ relax_typeS md_relax_table[] =
    function to call to execute this pseudo-op
    Integer arg to pass to the function
    */
-CONST pseudo_typeS md_pseudo_table[] =
+const pseudo_typeS md_pseudo_table[] =
 {
   {"data1", s_data1, 0},
   {"data2", s_data2, 0},
