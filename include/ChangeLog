@@ -1,3 +1,7 @@
+Thu Nov  5 03:21:32 1992  John Gilmore  (gnu@cygnus.com)
+
+	* bfd.h:  Update to match PARAMS changes in bfd.
+
 Wed Nov  4 07:28:05 1992  Ken Raeburn  (raeburn@cygnus.com)
 
 	* bout.h (N_CALLNAME, N_BALNAME): Define as char-type values, so
