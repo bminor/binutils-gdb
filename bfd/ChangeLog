@@ -1,3 +1,9 @@
+2000-05-16  Szabolcs Szakacsits <szaka@F-Secure.com>
+
+	* peigen.c (pe_print_idata): Undo part of 2000-05-12 change that
+	read idata section only from dataoff.
+	(pe_print_edata): Correctly check for valid eat_member.
+
 Tue May 16 00:04:11 2000  J"orn Rennecke <amylaar@cygnus.co.uk>
 
 	* elf32-sh.c (sh_elf_relax_delete_bytes): Handle R_SH_SWITCH8.

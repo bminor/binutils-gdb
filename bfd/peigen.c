@@ -1108,8 +1108,8 @@ pe_print_idata (abfd, vfile)
 
       offset = abfd->start_address - rel_section->vma;
 
-      start_address = bfd_get_32(abfd, data+offset);
-      loadable_toc_address = bfd_get_32(abfd, data+offset+4);
+      start_address = bfd_get_32 (abfd, data + offset);
+      loadable_toc_address = bfd_get_32 (abfd, data + offset + 4);
       toc_address = loadable_toc_address - 32768;
 
       fprintf(file,
@@ -1134,14 +1134,16 @@ pe_print_idata (abfd, vfile)
   fprintf(file,
 	  _("                 Table   Stamp     Chain    Name      Thunk\n"));
 
-  data = (bfd_byte *) bfd_malloc (datasize);
+  data = (bfd_byte *) bfd_malloc (dataoff + datasize);
   if (data == NULL)
     return false;
 
-  if (! bfd_get_section_contents (abfd, section, (PTR) data, dataoff, datasize))
+  /* Read the whole section.  Some of the fields might be before dataoff.  */
+  if (! bfd_get_section_contents (abfd, section, (PTR) data,
+				  0, dataoff + datasize))
     return false;
 
-  adj = section->vma - extra->ImageBase + dataoff;
+  adj = section->vma - extra->ImageBase;
 
   for (i = 0; i < datasize; i += onaline)
     {
@@ -1155,7 +1157,7 @@ pe_print_idata (abfd, vfile)
       char *dll;
 
       /* print (i + extra->DataDirectory[1].VirtualAddress)  */
-      fprintf (file, " %08lx\t", (unsigned long) (i + adj));
+      fprintf (file, " %08lx\t", (unsigned long) (i + adj + dataoff));
 
       if (i + 20 > datasize)
 	{
@@ -1163,11 +1165,11 @@ pe_print_idata (abfd, vfile)
 	  ;
 	}
 
-      hint_addr = bfd_get_32 (abfd, data + i);
-      time_stamp = bfd_get_32 (abfd, data + i + 4);
-      forward_chain = bfd_get_32 (abfd, data + i + 8);
-      dll_name = bfd_get_32 (abfd, data + i + 12);
-      first_thunk = bfd_get_32 (abfd, data + i + 16);
+      hint_addr = bfd_get_32 (abfd, data + i + dataoff);
+      time_stamp = bfd_get_32 (abfd, data + i + 4 + dataoff);
+      forward_chain = bfd_get_32 (abfd, data + i + 8 + dataoff);
+      dll_name = bfd_get_32 (abfd, data + i + 12 + dataoff);
+      first_thunk = bfd_get_32 (abfd, data + i + 16 + dataoff);
 
       fprintf (file, "%08lx %08lx %08lx %08lx %08lx\n",
 	       (unsigned long) hint_addr,
@@ -1257,8 +1259,7 @@ pe_print_idata (abfd, vfile)
 		    }
 		  else
 		    {
-		      ordinal = bfd_get_16(abfd,
-					   data + iat_member - adj);
+		      ordinal = bfd_get_16 (abfd, data + iat_member - adj);
 		      member_name = (char *) data + iat_member - adj + 2;
 		      fprintf(file, "\t%04lx\t %4d  %s\n",
 			      (unsigned long) iat_member,
@@ -1451,16 +1452,12 @@ pe_print_edata (abfd, vfile)
     {
       bfd_vma eat_member = bfd_get_32 (abfd,
 				       data + edt.eat_addr + (i * 4) - adj);
-      bfd_vma eat_actual = eat_member;
-      bfd_vma edata_start = bfd_get_section_vma (abfd, section);
-      bfd_vma edata_end = edata_start + datasize;
-
       if (eat_member == 0)
 	continue;
 
-      if (edata_start < eat_actual && eat_actual < edata_end)
+      if (eat_member - adj <= datasize)
 	{
-	  /* this rva is to a name (forwarding function) in our section */
+	  /* This rva is to a name (forwarding function) in our section.  */
 	  /* Should locate a function descriptor */
 	  fprintf (file,
 		   "\t[%4ld] +base[%4ld] %04lx %s -- %s\n",
