@@ -292,8 +292,12 @@ mem( memaddr, word1, word2, noprint )
 	 *	-2: 2 operands, store instruction
 	 */
 	static struct tabent *mem_tab = NULL;
-	static struct { int opcode; char *name; char numops; } mem_init[] = {
+/* Opcodes of 0x8X, 9X, aX, bX, and cX must be in the table.  */
 #define MEM_MIN	0x80
+#define MEM_MAX	0xcf
+#define MEM_SIZ	((MEM_MAX-MEM_MIN+1) * sizeof(struct tabent))
+
+	static struct { int opcode; char *name; char numops; } mem_init[] = {
 		0x80,	"ldob",	 2,
 		0x82,	"stob",	-2,
 		0x84,	"bx",	 1,
@@ -314,8 +318,6 @@ mem( memaddr, word1, word2, noprint )
 		0xc2,	"stib",	-2,
 		0xc8,	"ldis",	 2,
 		0xca,	"stis",	-2,
-#define MEM_MAX	0xca
-#define MEM_SIZ	((MEM_MAX-MEM_MIN+1) * sizeof(struct tabent))
 		0,	NULL,	0
 	};
 

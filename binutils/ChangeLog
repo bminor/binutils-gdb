@@ -1,3 +1,7 @@
+Fri Nov  6 00:12:51 1992  John Gilmore  (gnu@cygnus.com)
+
+	* i960-pinsn.c (MEM_MAX, MEM_SIZ):  Set upper bound properly.
+
 Thu Nov  5 03:37:15 1992  John Gilmore  (gnu@cygnus.com)
 
 	Clean up some old BFD ansification macros.
