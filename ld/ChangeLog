@@ -1,3 +1,10 @@
+Tue Jul 13 20:00:30 1993  Doug Evans  (dje@canuck.cygnus.com)
+
+	* configure.in: Accept h8300h for target cpu.
+
+	* ldmisc.c (vfinfo): Have demangle remove leading underscore if
+	present (demangle is smart enough to know whether to do it or not).
+
 Mon Jul 12 11:45:48 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
 
 	* ldmain.c (set_scripts_dir): Check . and <ld bin dir>/../lib for
