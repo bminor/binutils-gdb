@@ -31,6 +31,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "terminal.h"
 #include "bfd.h"
 #include "target.h"
+#include "demangle.h"
 
 /* Prototypes for local functions */
 
@@ -251,10 +252,10 @@ error (va_alist)
   wrap_here("");			/* Force out any buffered output */
   fflush (stdout);
   if (error_pre_print)
-    fprintf (stderr, error_pre_print);
+    fprintf_filtered (stderr, error_pre_print);
   string = va_arg (args, char *);
-  vfprintf (stderr, string, args);
-  fprintf (stderr, "\n");
+  vfprintf_filtered (stderr, string, args);
+  fprintf_filtered (stderr, "\n");
   va_end (args);
   return_to_top_level ();
 }
@@ -391,7 +392,7 @@ print_sys_errmsg (string, errcode)
   strcat (combined, ": ");
   strcat (combined, err);
 
-  printf ("%s.\n", combined);
+  fprintf (stderr, "%s.\n", combined);
 }
 
 /* Control C eventually causes this to be called, at a convenient time.  */
@@ -697,9 +698,9 @@ query (va_alist)
     {
       va_start (args);
       ctlstr = va_arg (args, char *);
-      vfprintf (stdout, ctlstr, args);
+      vfprintf_filtered (stdout, ctlstr, args);
       va_end (args);
-      printf ("(y or n) ");
+      printf_filtered ("(y or n) ");
       fflush (stdout);
       answer = fgetc (stdin);
       clearerr (stdin);		/* in case of C-d */
@@ -718,7 +719,7 @@ query (va_alist)
 	return 1;
       if (answer == 'N')
 	return 0;
-      printf ("Please answer y or n.\n");
+      printf_filtered ("Please answer y or n.\n");
     }
 }
 
@@ -1291,7 +1292,8 @@ fprint_symbol (stream, name)
      char *name;
 {
   char *demangled;
-  if ((!demangle) || NULL == (demangled = cplus_demangle (name, 1)))
+  if ((!demangle)
+      || NULL == (demangled = cplus_demangle (name, DMGL_PARAMS | DMGL_ANSI)))
     fputs_filtered (name, stream);
   else
     {
