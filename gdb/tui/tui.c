@@ -261,6 +261,9 @@ tui_enable (void)
 
   tui_version = 1;
   tui_active = 1;
+  if (selected_frame)
+     tuiShowFrameInfo (selected_frame);
+
   refresh ();
   tui_update_gdb_sizes ();
 }
@@ -327,7 +330,7 @@ tuiGetLowDisassemblyAddress (CORE_ADDR low, CORE_ADDR pc)
 }
 
 void
-strcat_to_buf (char *buf, int buflen, char *itemToAdd)
+strcat_to_buf (char *buf, int buflen, const char *itemToAdd)
 {
   if (itemToAdd != (char *) NULL && buf != (char *) NULL)
     {

@@ -48,8 +48,7 @@ Opaque (*OpaqueFuncPtr) (va_list);
  */
      typedef OpaqueFuncPtr TuiOpaqueFuncPtr;
 
-extern void strcat_to_buf (char *, int, char *);
-extern void strcat_to_buf_with_fmt (char *, int, char *, ...);
+extern void strcat_to_buf (char *, int, const char *);
 
 /* Types of error returns */
      typedef enum

@@ -1,5 +1,12 @@
 2002-08-24  Stephane Carrez  <stcarrez@nerim.fr>
 
+	* tui.c (strcat_to_buf): Use const char* for source item.
+	(tui_enable): Update the windows if there is a selected frame.
+	* tui.h (strcat_to_buf): Update prototype.
+	(strcat_to_buf_with_fmt): Remove.
+
+2002-08-24  Stephane Carrez  <stcarrez@nerim.fr>
+
 	* tuiWin.c (tui_update_gdb_sizes): New function to tell gdb what
 	is the size of command window.
 	(tuiResizeAll): Call it instead of init_page_info.
