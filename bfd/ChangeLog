@@ -1,3 +1,21 @@
+2000-03-10  Geoffrey Keating  <geoffk@cygnus.com>
+
+	* elf32-mips.c (mips_elf_next_relocation): Rename from
+	mips_elf_next_lo16_relocation, and generalize to look
+	for any relocation type.
+	(elf_mips_howto_table): Make R_MIPS_PC16 pcrel_offset.
+	(elf_mips_gnu_rel_hi16): Howto for R_MIPS_GNU_REL_HI16.
+	(elf_mips_gnu_rel_lo16): Howto for R_MIPS_GNU_REL_LO16.
+	(elf_mips_gnu_rel16_s2): Howto for R_MIPS_GNU_REL16_S2.
+	(elf_mips_gnu_pcrel64): Howto for R_MIPS_PC64.
+	(elf_mips_gnu_pcrel32): Howto for R_MIPS_PC32.
+	(bfd_elf32_bfd_reloc_type_lookup): Add new relocs.
+	(mips_rtype_to_howto): Likewise.
+	(mips_elf_calculate_relocation): Handle new relocs.
+	(_bfd_mips_elf_relocate_section): REL_HI16/REL_LO16 relocs
+	are paired.  The addend for R_MIPS_GNU_REL16_S2
+	is shifted right two bits.
+
 2000-03-10  Alan Modra  <alan@spri.levels.unisa.edu.au>
 
 	* reloc.c (bfd_perform_relocation): Undo emacs formatting of

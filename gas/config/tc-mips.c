@@ -2597,7 +2597,6 @@ macro_build (place, counter, ep, name, fmt, va_alist)
 		  || r == BFD_RELOC_MIPS_GOT_LO16
 		  || r == BFD_RELOC_MIPS_CALL_LO16
 		  || (ep->X_op == O_subtract
-		      && now_seg == text_section
 		      && r == BFD_RELOC_PCREL_LO16));
 	  continue;
 
@@ -2611,7 +2610,6 @@ macro_build (place, counter, ep, name, fmt, va_alist)
 			      || r == BFD_RELOC_MIPS_GOT_HI16
 			      || r == BFD_RELOC_MIPS_CALL_HI16))
 		      || (ep->X_op == O_subtract
-			  && now_seg == text_section
 			  && r == BFD_RELOC_PCREL_HI16_S)));
 	  if (ep->X_op == O_constant)
 	    {
@@ -4150,23 +4148,23 @@ macro (ip)
       /* When generating embedded PIC code, we permit expressions of
 	 the form
 	   la	$4,foo-bar
-	 where bar is an address in the .text section.  These are used
+	 where bar is an address in the current section.  These are used
 	 when getting the addresses of functions.  We don't permit
 	 X_add_number to be non-zero, because if the symbol is
 	 external the relaxing code needs to know that any addend is
 	 purely the offset to X_op_symbol.  */
       if (mips_pic == EMBEDDED_PIC
 	  && offset_expr.X_op == O_subtract
-	  && now_seg == text_section
 	  && (symbol_constant_p (offset_expr.X_op_symbol)
-	      ? S_GET_SEGMENT (offset_expr.X_op_symbol) == text_section
+	      ? S_GET_SEGMENT (offset_expr.X_op_symbol) == now_seg
 	      : (symbol_equated_p (offset_expr.X_op_symbol)
 		 && (S_GET_SEGMENT
 		     (symbol_get_value_expression (offset_expr.X_op_symbol)
 		      ->X_add_symbol)
-		     == text_section)))
+		     == now_seg)))
 	  && breg == 0
-	  && offset_expr.X_add_number == 0)
+	  && (offset_expr.X_add_number == 0
+	      || OUTPUT_FLAVOR == bfd_target_elf_flavour))
 	{
 	  macro_build ((char *) NULL, &icnt, &offset_expr, "lui", "t,u",
 		       treg, (int) BFD_RELOC_PCREL_HI16_S);
@@ -7666,11 +7664,15 @@ mips_ip (str, ip)
 		      default: /* unused default case avoids warnings.  */
 		      case 'L':
 			newname = RDATA_SECTION_NAME;
-			if (USE_GLOBAL_POINTER_OPT && g_switch_value >= 8)
+			if ((USE_GLOBAL_POINTER_OPT && g_switch_value >= 8)
+			    || mips_pic == EMBEDDED_PIC)
 			  newname = ".lit8";
 			break;
 		      case 'F':
-			newname = RDATA_SECTION_NAME;
+			if (mips_pic == EMBEDDED_PIC)
+			  newname = ".lit8";
+			else
+			  newname = RDATA_SECTION_NAME;
 			break;
 		      case 'l':
 			assert (!USE_GLOBAL_POINTER_OPT
@@ -7813,9 +7815,8 @@ mips_ip (str, ip)
 		      || offset_expr.X_add_number < -0x8000)
 		  && (mips_pic != EMBEDDED_PIC
 		      || offset_expr.X_op != O_subtract
-		      || now_seg != text_section
 		      || (S_GET_SEGMENT (offset_expr.X_op_symbol)
-			  != text_section)))
+			  != now_seg)))
 		break;
 
 	      if (c == 'h' || c == 'H')
@@ -9495,6 +9496,7 @@ mips_frob_file ()
    fixup requires the special reloc.  */
 #define SWITCH_TABLE(fixp) \
   ((fixp)->fx_r_type == BFD_RELOC_32 \
+   && OUTPUT_FLAVOR != bfd_target_elf_flavour \
    && (fixp)->fx_addsy != NULL \
    && (fixp)->fx_subsy != NULL \
    && S_GET_SEGMENT ((fixp)->fx_addsy) == text_section \
@@ -9542,15 +9544,16 @@ md_apply_fix (fixP, valueP)
      symbol, we need to adjust the value.  */
 #ifdef OBJ_ELF
   if (fixP->fx_addsy != NULL && OUTPUT_FLAVOR == bfd_target_elf_flavour)
+    {
     if (S_GET_OTHER (fixP->fx_addsy) == STO_MIPS16 
         || S_IS_WEAK (fixP->fx_addsy)
         || (symbol_used_in_reloc_p (fixP->fx_addsy)
             && (((bfd_get_section_flags (stdoutput,
-					 S_GET_SEGMENT (fixP->fx_addsy))
-		  & SEC_LINK_ONCE) != 0)
-		|| !strncmp (segment_name (S_GET_SEGMENT (fixP->fx_addsy)),
-			     ".gnu.linkonce",
-			     sizeof (".gnu.linkonce") - 1))))
+                                         S_GET_SEGMENT (fixP->fx_addsy))
+                  & SEC_LINK_ONCE) != 0)
+                || !strncmp (segment_name (S_GET_SEGMENT (fixP->fx_addsy)),
+                             ".gnu.linkonce",
+                             sizeof (".gnu.linkonce") - 1))))
 
       {
         value -= S_GET_VALUE (fixP->fx_addsy);
@@ -9558,12 +9561,29 @@ md_apply_fix (fixP, valueP)
           {
             /* In this case, the bfd_install_relocation routine will
                incorrectly add the symbol value back in.  We just want
-               the addend to appear in the object file.  */
+               the addend to appear in the object file.  
+	       FIXME: If this makes VALUE zero, we're toast.  */
             value -= S_GET_VALUE (fixP->fx_addsy);
           }
       }
-#endif
 
+      /* This code was generated using trial and error and so is
+	 fragile and not trustworthy.  If you change it, you should
+	 rerun the elf-rel, elf-rel2, and empic testcases and ensure
+	 they still pass.  */
+      if (fixP->fx_pcrel || fixP->fx_subsy != NULL)
+	{
+	  value += fixP->fx_frag->fr_address + fixP->fx_where;
+
+	  /* BFD's REL handling, for MIPS, is _very_ weird.
+	     This gives the right results, but it can't possibly
+	     be the way things are supposed to work.  */
+	  if (fixP->fx_r_type != BFD_RELOC_16_PCREL_S2
+	      || S_GET_SEGMENT (fixP->fx_addsy) != undefined_section)
+	    value += fixP->fx_frag->fr_address + fixP->fx_where;
+	}
+    }
+#endif
 
   fixP->fx_addnumber = value;	/* Remember value for tc_gen_reloc */
 
@@ -9601,7 +9621,12 @@ md_apply_fix (fixP, valueP)
     case BFD_RELOC_PCREL_HI16_S:
       /* The addend for this is tricky if it is internal, so we just
 	 do everything here rather than in bfd_install_relocation.  */
-      if ((symbol_get_bfdsym (fixP->fx_addsy)->flags & BSF_SECTION_SYM) == 0)
+      if (OUTPUT_FLAVOR == bfd_target_elf_flavour 
+	  && !fixP->fx_done
+	  && value != 0)
+	break;
+      if (fixP->fx_addsy
+	  && (symbol_get_bfdsym (fixP->fx_addsy)->flags & BSF_SECTION_SYM) == 0)
 	{
 	  /* For an external symbol adjust by the address to make it
 	     pcrel_offset.  We use the address of the RELLO reloc
@@ -9621,7 +9646,12 @@ md_apply_fix (fixP, valueP)
     case BFD_RELOC_PCREL_LO16:
       /* The addend for this is tricky if it is internal, so we just
 	 do everything here rather than in bfd_install_relocation.  */
-      if ((symbol_get_bfdsym (fixP->fx_addsy)->flags & BSF_SECTION_SYM) == 0)
+      if (OUTPUT_FLAVOR == bfd_target_elf_flavour 
+	  && !fixP->fx_done
+	  && value != 0)
+	break;
+      if (fixP->fx_addsy
+	  && (symbol_get_bfdsym (fixP->fx_addsy)->flags & BSF_SECTION_SYM) == 0)
 	value += fixP->fx_frag->fr_address + fixP->fx_where;
       buf = (unsigned char *) fixP->fx_frag->fr_literal + fixP->fx_where;
       if (target_big_endian)
@@ -9704,6 +9734,15 @@ md_apply_fix (fixP, valueP)
       if ((value & 0x3) != 0)
 	as_bad_where (fixP->fx_file, fixP->fx_line,
 		      _("Branch to odd address (%lx)"), value);
+
+      if (!fixP->fx_done && value != 0)
+	break;
+      /* If 'value' is zero, the remaining reloc code won't actually
+	 do the store, so it must be done here.  This is probably
+	 a bug somewhere.  */
+      if (!fixP->fx_done)
+	value -= fixP->fx_frag->fr_address + fixP->fx_where;
+      
       value >>= 2;
 
       /* update old instruction data */
@@ -11064,6 +11103,8 @@ tc_gen_reloc (section, fixp)
 	as_fatal (_("Double check fx_r_type in tc-mips.c:tc_gen_reloc"));
       fixp->fx_r_type = BFD_RELOC_GPREL32;
     }
+  else if (fixp->fx_pcrel == 0 || OUTPUT_FLAVOR == bfd_target_elf_flavour)
+    reloc->addend = fixp->fx_addnumber;
   else if (fixp->fx_r_type == BFD_RELOC_PCREL_LO16)
     {
       /* We use a special addend for an internal RELLO reloc.  */
@@ -11088,8 +11129,6 @@ tc_gen_reloc (section, fixp)
 			 + fixp->fx_next->fx_frag->fr_address
 			 + fixp->fx_next->fx_where);
     }
-  else if (fixp->fx_pcrel == 0)
-    reloc->addend = fixp->fx_addnumber;
   else
     {
       if (OUTPUT_FLAVOR != bfd_target_aout_flavour)
@@ -11228,7 +11267,8 @@ tc_gen_reloc (section, fixp)
   /* To support a PC relative reloc when generating embedded PIC code
      for ECOFF, we use a Cygnus extension.  We check for that here to
      make sure that we don't let such a reloc escape normally.  */
-  if (OUTPUT_FLAVOR == bfd_target_ecoff_flavour
+  if ((OUTPUT_FLAVOR == bfd_target_ecoff_flavour
+       || OUTPUT_FLAVOR == bfd_target_elf_flavour)
       && code == BFD_RELOC_16_PCREL_S2
       && mips_pic != EMBEDDED_PIC)
     reloc->howto = NULL;
@@ -11893,6 +11933,3 @@ s_loc (x)
   symbolP->sy_segment = now_seg;
 }
 #endif
-
-
-  

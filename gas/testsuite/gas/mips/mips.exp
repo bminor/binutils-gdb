@@ -107,5 +107,11 @@ if [istarget mips*-*-*] then {
 	} {
 	    run_dump_test "e32-rel2" 
 	} 
+	run_dump_test "empic"
+	if { !$no_mips16 } { 
+	    run_dump_test "mips16-e" 
+	    setup_xfail "mips*-*-*"
+	    run_dump_test "mips16-f" 
+	}
     }
 }

@@ -159,8 +159,9 @@ static boolean mips_elf_record_global_got_symbol
 	   struct mips_got_info *));
 static bfd_vma mips_elf_got_page
   PARAMS ((bfd *, struct bfd_link_info *, bfd_vma, bfd_vma *));
-static const Elf_Internal_Rela *mips_elf_next_lo16_relocation
-  PARAMS ((const Elf_Internal_Rela *, const Elf_Internal_Rela *));
+static const Elf_Internal_Rela *mips_elf_next_relocation
+  PARAMS ((unsigned int, const Elf_Internal_Rela *, 
+	   const Elf_Internal_Rela *));
 static bfd_reloc_status_type mips_elf_calculate_relocation
   PARAMS ((bfd *, bfd *, asection *, struct bfd_link_info *,
 	   const Elf_Internal_Rela *, bfd_vma, reloc_howto_type *,
@@ -614,7 +615,7 @@ static reloc_howto_type elf_mips_howto_table[] =
 	 true,			/* partial_inplace */
 	 0xffff,		/* src_mask */
 	 0xffff,		/* dst_mask */
-	 false),		/* pcrel_offset */
+	 true),			/* pcrel_offset */
 
   /* 16 bit call through global offset table.  */
   HOWTO (R_MIPS_CALL16,		/* type */
@@ -943,6 +944,87 @@ static reloc_howto_type elf_mips16_gprel_howto =
 	 0x07ff001f,	        /* dst_mask */
 	 false);		/* pcrel_offset */
 
+
+/* GNU extensions for embedded-pic.  */
+/* High 16 bits of symbol value, pc-relative.  */
+static reloc_howto_type elf_mips_gnu_rel_hi16 =
+  HOWTO (R_MIPS_GNU_REL_HI16,	/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 16,			/* bitsize */
+	 true,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 _bfd_mips_elf_hi16_reloc,	/* special_function */
+	 "R_MIPS_GNU_REL_HI16",	/* name */
+	 true,			/* partial_inplace */
+	 0xffff,		/* src_mask */
+	 0xffff,		/* dst_mask */
+	 true);			/* pcrel_offset */
+
+/* Low 16 bits of symbol value, pc-relative.  */
+static reloc_howto_type elf_mips_gnu_rel_lo16 =
+  HOWTO (R_MIPS_GNU_REL_LO16,	/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 16,			/* bitsize */
+	 true,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 _bfd_mips_elf_lo16_reloc,	/* special_function */
+	 "R_MIPS_GNU_REL_LO16",	/* name */
+	 true,			/* partial_inplace */
+	 0xffff,		/* src_mask */
+	 0xffff,		/* dst_mask */
+	 true);			/* pcrel_offset */
+
+/* 16 bit offset for pc-relative branches.  */
+static reloc_howto_type elf_mips_gnu_rel16_s2 =
+  HOWTO (R_MIPS_GNU_REL16_S2,	/* type */
+	 2,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 16,			/* bitsize */
+	 true,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_signed, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_MIPS_GNU_REL16_S2",	/* name */
+	 true,			/* partial_inplace */
+	 0xffff,		/* src_mask */
+	 0xffff,		/* dst_mask */
+	 true);			/* pcrel_offset */
+
+/* 64 bit pc-relative.  */
+static reloc_howto_type elf_mips_gnu_pcrel64 =
+  HOWTO (R_MIPS_PC64,		/* type */
+	 0,			/* rightshift */
+	 4,			/* size (0 = byte, 1 = short, 2 = long) */
+	 64,			/* bitsize */
+	 true,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_signed, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_MIPS_PC64",		/* name */
+	 true,			/* partial_inplace */
+	 MINUS_ONE,		/* src_mask */
+	 MINUS_ONE,		/* dst_mask */
+	 true);			/* pcrel_offset */
+
+/* 32 bit pc-relative.  */
+static reloc_howto_type elf_mips_gnu_pcrel32 =
+  HOWTO (R_MIPS_PC32,		/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 32,			/* bitsize */
+	 true,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_signed, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_MIPS_PC32",		/* name */
+	 true,			/* partial_inplace */
+	 0xffffffff,		/* src_mask */
+	 0xffffffff,		/* dst_mask */
+	 true);			/* pcrel_offset */
 
 /* GNU extension to record C++ vtable hierarchy */
 static reloc_howto_type elf_mips_gnu_vtinherit_howto =
@@ -1882,6 +1964,16 @@ bfd_elf32_bfd_reloc_type_lookup (abfd, code)
       return &elf_mips_gnu_vtinherit_howto;
     case BFD_RELOC_VTABLE_ENTRY:
       return &elf_mips_gnu_vtentry_howto;
+    case BFD_RELOC_PCREL_HI16_S:
+      return &elf_mips_gnu_rel_hi16;
+    case BFD_RELOC_PCREL_LO16:
+      return &elf_mips_gnu_rel_lo16;
+    case BFD_RELOC_16_PCREL_S2:
+      return &elf_mips_gnu_rel16_s2;
+    case BFD_RELOC_64_PCREL:
+      return &elf_mips_gnu_pcrel64;
+    case BFD_RELOC_32_PCREL:
+      return &elf_mips_gnu_pcrel32;
     }
 }
 
@@ -1904,6 +1996,21 @@ mips_rtype_to_howto (r_type)
       break;
     case R_MIPS_GNU_VTENTRY:
       return &elf_mips_gnu_vtentry_howto;
+      break;
+    case R_MIPS_GNU_REL_HI16:
+      return &elf_mips_gnu_rel_hi16;
+      break;
+    case R_MIPS_GNU_REL_LO16:
+      return &elf_mips_gnu_rel_lo16;
+      break;
+    case R_MIPS_GNU_REL16_S2:
+      return &elf_mips_gnu_rel16_s2;
+      break;
+    case R_MIPS_PC64:
+      return &elf_mips_gnu_pcrel64;
+      break;
+    case R_MIPS_PC32:
+      return &elf_mips_gnu_pcrel32;
       break;
 
     default:
@@ -5444,11 +5551,12 @@ mips_elf_got16_entry (abfd, info, value)
   return index;
 }
 
-/* Returns the first R_MIPS_LO16 relocation found, beginning with
+/* Returns the first relocation of type r_type found, beginning with
    RELOCATION.  RELEND is one-past-the-end of the relocation table.  */
 
 static const Elf_Internal_Rela *
-mips_elf_next_lo16_relocation (relocation, relend)
+mips_elf_next_relocation (r_type, relocation, relend)
+     unsigned int r_type;
      const Elf_Internal_Rela *relocation;
      const Elf_Internal_Rela *relend;
 {
@@ -5460,7 +5568,7 @@ mips_elf_next_lo16_relocation (relocation, relend)
      extension in general, as that is useful for GCC.  */
   while (relocation < relend)
     {
-      if (ELF32_R_TYPE (relocation->r_info) == R_MIPS_LO16)
+      if (ELF32_R_TYPE (relocation->r_info) == r_type)
 	return relocation;
 
       ++relocation;
@@ -6006,6 +6114,24 @@ mips_elf_calculate_relocation (abfd,
       value &= howto->dst_mask;
       break;
 
+    case R_MIPS_PC32:
+    case R_MIPS_PC64:
+    case R_MIPS_GNU_REL_LO16:
+      value = symbol + addend - p;
+      value &= howto->dst_mask;
+      break;
+
+    case R_MIPS_GNU_REL16_S2:
+      value = symbol + mips_elf_sign_extend (addend << 2, 18) - p;
+      overflowed_p = mips_elf_overflow_p (value, 18);
+      value = (value >> 2) & howto->dst_mask;
+      break;
+
+    case R_MIPS_GNU_REL_HI16:
+      value = mips_elf_high (addend + symbol - p);
+      value &= howto->dst_mask;
+      break;
+
     case R_MIPS16_26:
       /* The calculation for R_MIPS_26 is just the same as for an
 	 R_MIPS_26.  It's only the storage of the relocated field into
@@ -6484,6 +6610,7 @@ _bfd_mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		 combination of the addend stored in two different
 		 relocations.   */
 	      if (r_type == R_MIPS_HI16
+		  || r_type == R_MIPS_GNU_REL_HI16
 		  || (r_type == R_MIPS_GOT16
 		      && mips_elf_local_relocation_p (input_bfd, rel,
 						      local_sections)))
@@ -6491,6 +6618,7 @@ _bfd_mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		  bfd_vma l;
 		  const Elf_Internal_Rela *lo16_relocation;
 		  reloc_howto_type *lo16_howto;
+		  int lo;
 
 		  /* The combined value is the sum of the HI16 addend,
 		     left-shifted by sixteen bits, and the LO16
@@ -6498,15 +6626,18 @@ _bfd_mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		     a `lui' of the HI16 value, and then an `addiu' of
 		     the LO16 value.)  
 
-		     Scan ahead to find a matching R_MIPS_LO16
-		     relocation.  */
+		     Scan ahead to find a matching LO16 relocation.  */
+		  if (r_type == R_MIPS_GNU_REL_HI16)
+		    lo = R_MIPS_GNU_REL_LO16;
+		  else
+		    lo = R_MIPS_LO16;
 		  lo16_relocation 
-		    = mips_elf_next_lo16_relocation (rel, relend); 
+		    = mips_elf_next_relocation (lo, rel, relend); 
 		  if (lo16_relocation == NULL)
 		    return false;
 
 		  /* Obtain the addend kept there.  */
-		  lo16_howto = mips_rtype_to_howto (R_MIPS_LO16);
+		  lo16_howto = mips_rtype_to_howto (lo);
 		  l = mips_elf_obtain_contents (lo16_howto,
 						lo16_relocation,
 						input_bfd, contents);
@@ -6554,7 +6685,8 @@ _bfd_mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	      || r_type == R_MIPS_LITERAL)
 	    addend -= (_bfd_get_gp_value (output_bfd)
 		       - _bfd_get_gp_value (input_bfd));
-	  else if (r_type == R_MIPS_26 || r_type == R_MIPS16_26)
+	  else if (r_type == R_MIPS_26 || r_type == R_MIPS16_26
+		   || r_type == R_MIPS_GNU_REL16_S2)
 	    /* The addend is stored without its two least
 	       significant bits (which are always zero.)  In a
 	       non-relocateable link, calculate_relocation will do
@@ -6570,17 +6702,19 @@ _bfd_mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	  /* If the relocation is for a R_MIPS_HI16 or R_MIPS_GOT16,
 	     then we only want to write out the high-order 16 bits.
 	     The subsequent R_MIPS_LO16 will handle the low-order bits.  */
-	  if (r_type == R_MIPS_HI16 || r_type == R_MIPS_GOT16)
+	  if (r_type == R_MIPS_HI16 || r_type == R_MIPS_GOT16
+	      || r_type == R_MIPS_GNU_REL_HI16)
 	    addend = mips_elf_high (addend);
 	  /* If the relocation is for an R_MIPS_26 relocation, then
 	     the two low-order bits are not stored in the object file;
 	     they are implicitly zero.  */
-	  else if (r_type == R_MIPS_26 || r_type == R_MIPS16_26)
+	  else if (r_type == R_MIPS_26 || r_type == R_MIPS16_26
+		   || r_type == R_MIPS_GNU_REL16_S2)
 	    addend >>= 2;
 
 	  if (rela_relocation_p)
 	    /* If this is a RELA relocation, just update the addend.
-               We have to cast away constness for REL.  */
+	       We have to cast away constness for REL.  */
 	    rel->r_addend = addend;
 	  else
 	    {
@@ -6631,7 +6765,7 @@ _bfd_mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	case bfd_reloc_undefined:
 	  /* mips_elf_calculate_relocation already called the
-             undefined_symbol callback.  There's no real point in
+	     undefined_symbol callback.  There's no real point in
 	     trying to perform the relocation at this point, so we
 	     just skip ahead to the next relocation.  */
 	  continue;

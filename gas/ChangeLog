@@ -1,3 +1,20 @@
+2000-03-10  Geoffrey Keating  <geoffk@cygnus.com>
+
+	* config/tc-mips.c (mips_ip): Don't put stuff in .rodata
+	when embedded-pic.
+
+	* config/tc-mips.c (SWITCH_TABLE): The ELF embedded-pic
+ 	implementation doesn't have special handling for switch
+ 	statements.
+	(macro_build): Allow for code in sections other than .text.
+	(macro): Likewise.
+	(mips_ip): Likewise.
+	(md_apply_fix): Do pc-relative relocation madness for MIPS ELF.
+  	Don't perform relocs if we will be outputting them.
+	(tc_gen_reloc): For ELF, just use fx_addnumber for pc-relative
+ 	relocations.  Allow BFD_RELOC_16_PCREL_S2 relocs when
+ 	embedded-pic.
+
 2000-03-09  Catherine Moore  <clm@cygnus.com>
  
         * config/tc-m32r.c (m32r_fix_adjustable):  Look up the
