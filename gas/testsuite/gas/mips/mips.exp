@@ -24,7 +24,7 @@ if { [istarget mips*-*-*] } then {
     set gpr_ilocks [expr [istarget mipstx39*-*-*]]
     set addr32 [expr [istarget mipstx39*-*-*]]
 
-    if { [istarget mips*el-*-*] || [istarget "mips*-*-*linux*"] } then {
+    if { [istarget "mips*-*-*linux*"] } then {
 	set tmips "t"
     } else {
 	set tmips ""
@@ -161,7 +161,7 @@ if { [istarget mips*-*-*] } then {
 	run_dump_test "${tmips}${el}empic"
 	if { !$no_mips16 } { 
 	    run_dump_test "${tmips}mips${el}16-e" 
-	    run_dump_test "mips${el}16-f" 
+	    run_dump_test "${tmips}mips${el}16-f" 
 	}
     }
 }

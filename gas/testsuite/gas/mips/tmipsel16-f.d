@@ -11,10 +11,10 @@ SYMBOL TABLE:
 0+0000000 l    d  \.text	0+0000000 
 0+0000000 l    d  \.data	0+0000000 
 0+0000000 l    d  \.bss	0+0000000 
+0+0000002 l       \.text	0+0000000 0xf0 l1
 0+0000000 l    d  foo	0+0000000 
 0+0000000 l    d  \.reginfo	0+0000000 
 0+0000000 l    d  \.(mdebug|pdr)	0+0000000 
-0+0000002 l       \.text	0+0000000 0xf0 l1
 
 
 RELOCATION RECORDS FOR \[foo\]:
