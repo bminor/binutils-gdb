@@ -1,3 +1,11 @@
+Thu Jan 30 12:08:40 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	Ideas from Srinivas Addagarla <srinivas@cdotd.ernet.in>:
+	* read.c (read_a_source_file): After doing an mri_pending_align,
+	adjust the line_label if there is one.
+	(s_space): Set mri_pending_align if an odd number of bytes were
+	output.
+
 start-sanitize-d10v
 Wed Jan 29 15:31:12 1997  Martin M. Hunt  <hunt@pizza.cygnus.com>
 

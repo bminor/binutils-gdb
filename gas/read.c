@@ -648,7 +648,8 @@ read_a_source_file (name)
 
 		}
 	      else if (c == '='
-		       || (input_line_pointer[1] == '='
+		       || ((c == ' ' || c == '\t')
+			   && input_line_pointer[1] == '='
 #ifdef TC_EQUAL_IN_INSN
 			   && ! TC_EQUAL_IN_INSN (c, input_line_pointer)
 #endif
@@ -722,6 +723,11 @@ read_a_source_file (name)
 			{
 			  do_align (1, (char *) NULL, 0);
 			  mri_pending_align = 0;
+			  if (line_label != NULL)
+			    {
+			      line_label->sy_frag = frag_now;
+			      S_SET_VALUE (line_label, frag_now_fix ());
+			    }
 			}
 
 		      /* Print the error msg now, while we still can */
@@ -812,6 +818,11 @@ read_a_source_file (name)
 			{
 			  do_align (1, (char *) NULL, 0);
 			  mri_pending_align = 0;
+			  if (line_label != NULL)
+			    {
+			      line_label->sy_frag = frag_now;
+			      S_SET_VALUE (line_label, frag_now_fix ());
+			    }
 			}
 
 		      md_assemble (s);	/* Assemble 1 instruction. */
@@ -2551,6 +2562,7 @@ s_space (mult)
   char *p = 0;
   char *stop = NULL;
   char stopc;
+  int bytes;
 
 #ifdef md_flush_pending_output
   md_flush_pending_output ();
@@ -2596,6 +2608,8 @@ s_space (mult)
 	}
     }
 
+  bytes = mult;
+
   expression (&exp);
 
   SKIP_WHITESPACE ();
@@ -2623,6 +2637,7 @@ s_space (mult)
 
 	  if (mult == 0)
 	    mult = 1;
+	  bytes = mult * exp.X_add_number;
 	  for (i = 0; i < exp.X_add_number; i++)
 	    emit_expr (&val, mult);
 	}
@@ -2636,6 +2651,7 @@ s_space (mult)
 	  repeat = exp.X_add_number;
 	  if (mult)
 	    repeat *= mult;
+	  bytes = repeat;
 	  if (repeat <= 0)
 	    {
 	      if (! flag_mri || repeat < 0)
@@ -2687,6 +2703,13 @@ s_space (mult)
     }
 
  getout:
+
+  /* In MRI mode, after an odd number of bytes, we must align to an
+     even word boundary, unless the next instruction is a dc.b, ds.b
+     or dcb.b.  */
+  if (flag_mri && (bytes & 1) != 0)
+    mri_pending_align = 1;
+
   if (flag_mri)
     mri_comment_end (stop, stopc);
 
