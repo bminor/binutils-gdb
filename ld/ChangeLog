@@ -1,3 +1,11 @@
+2000-07-27  Ivan Kokshaysky  <ink@jurassic.park.msu.ru>
+
+	* emulparams/elf64alpha.sh: Implement "-taso" emulation
+	specific option to fit 64-bit executable in the lower
+	31-bit address range.  This is done by changing start
+	address of .interp (the very first section of executable)
+	and then setting EF_ALPHA_32BIT elf header flag.
+
 2000-07-21  Michael Sokolov  <msokolov@ivan.Harhan.ORG>
 
 	* emultempl/m68kcoff.em: New file.
