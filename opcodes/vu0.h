@@ -28,7 +28,7 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  *
 {"qmtc2",    "t,2",	0x48a00000, 0xffe007ff,	0, 		T5},
 {"qmtc2.ni", "t,2",	0x48a00000, 0xffe007ff,	0, 		T5},
 {"qmtc2.i", "t,2",	0x48a00001, 0xffe007ff,	0, 		T5},
-{"sqc2",     "1,o(b)",	0xe8000000, 0xfc000000,	0, 		T5},
+{"sqc2",     "1,o(b)",	0xf8000000, 0xfc000000,	0, 		T5},
 {"vabs",   "&1K,2K",	0x4a0001fd, 0xfe0007ff,	0, 		T5},
 {"vadd",   "&3K,2K,1K",	0x4a000028, 0xfe00003f,	0, 		T5},
 {"vaddi",  "&3K,2K,J",	0x4a000022, 0xfe1f003f,	0, 		T5},
