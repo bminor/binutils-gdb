@@ -47,6 +47,16 @@ AC_C_CONST
 
 AC_CHECK_FUNCS(setpgid sbrk)
 
+# If we are configured native on Linux, work around problems with sys/procfs.h
+if test "${target}" = "${host}"; then
+  case "${host}" in
+  i[3456]86-*-linux*)
+	AC_DEFINE(START_INFERIOR_TRAPS_EXPECTED,"2")
+	AC_DEFINE(sys_quotactl)
+	;;
+  esac
+fi
+
 AC_MSG_CHECKING([for gregset_t type])
 AC_CACHE_VAL(gdb_cv_have_gregset_t,
 [AC_TRY_LINK([#include <sys/procfs.h>],[gregset_t *gregsetp = 0],

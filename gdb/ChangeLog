@@ -1,3 +1,23 @@
+Thu Sep 26 23:10:26 1996  Mark Alexander  <marka@cygnus.com>
+
+	* configure.in, config/i386/tm-linux.h: Fix configure
+	problem on older Linux systems that prevented core files
+	from being recognized.
+
+Wed Sep 25 18:31:33 1996  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* dbug-rom.c: New file, support for Motorola's dBUG monitor.
+	* config/m68k/monitor.mt (TDEPFILES): Add it.
+	* NEWS: Mention it.
+
+start-sanitize-d10v
+Mon Sep 23 16:13:50 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
+
+	* config/d10v/tm-d10v.h (SAVED_PC_AFTER_CALL): Fixed.  
+	Now single-steps correctly.
+	* d10v-tdep.c (d10v_pop_frame): Fixed.
+
+end-sanitize-d10v	
 Fri Sep 20 16:10:58 1996  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* config/sh/tm-sh.h (REGISTER_NAMES): Move fp registers to
