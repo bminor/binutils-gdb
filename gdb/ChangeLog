@@ -1,3 +1,12 @@
+Mon Oct 25 14:57:45 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	gcc -Wall lint:
+	* breakpoint.c: Include thread.h.
+	* coffread.c: Include stabsread.h.
+	* Makefile.in: Update dependencies.
+	* breakpoint.c (mention): Add bp_call_dummy to switch.
+	* symmisc.c (dump_symtab): Use %d not %ld for line number.
+
 Sun Oct 24 20:16:38 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* parse.c, parser-defs.h (write_exp_msymbol):  New function to write

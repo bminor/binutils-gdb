@@ -1022,7 +1022,7 @@ blockframe.o: blockframe.c $(defs_h) $(gdbcore_h) $(inferior_h) \
 	objfiles.h symfile.h target.h
 
 breakpoint.o: breakpoint.c $(defs_h) $(gdbcmd_h) $(gdbcore_h) \
-	$(inferior_h) language.h target.h
+	$(inferior_h) language.h target.h thread.h
 
 buildsym.o: buildsym.c $(bfd_h) buildsym.h complaints.h $(defs_h) \
 	objfiles.h symfile.h $(symtab_h)
@@ -1051,7 +1051,7 @@ coff-solib.o: coff-solib.c $(defs_h)
 
 coffread.o: coffread.c $(bfd_h) $(breakpoint_h) buildsym.h \
 	complaints.h $(defs_h) $(expression_h) $(gdbtypes_h) objfiles.h \
-	symfile.h $(symtab_h)
+	symfile.h $(symtab_h) gdb-stabs.h stabsread.h
 
 command.o: command.c $(defs_h) $(expression_h) $(gdbcmd_h) \
 	$(gdbtypes_h) $(symtab_h) $(value_h)
