@@ -1,3 +1,8 @@
+2002-02-18  John David Anglin  <dave@hiauly1.hia.nrc.ca>
+
+	* config/tc-hppa.c (hppa_fix_adjustable): Don't adjust final types
+	that implicitly use LR and RR selectors.
+
 2002-02-16  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* doc/as.texinfo (Machine Dependencies): Fix typo: MMIX used

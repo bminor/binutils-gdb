@@ -1,3 +1,8 @@
+2002-02-18  John David Anglin  <dave@hiauly1.hia.nrc.ca>
+
+	* ld-selective/selective.exp: Link against libgcc on
+	hppa*-*-linux* targets.
+
 2002-02-17  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* ld-mmix/b-nosym.d, ld-mmix/sec-6.d: Tweak for change in symbol

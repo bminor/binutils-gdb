@@ -1,3 +1,12 @@
+2002-02-18  John David Anglin  <dave@hiauly1.hia.nrc.ca>
+
+	* elf-hppa.h (elf_hppa_reloc_final_type): New function stripped
+	from _bfd_elf_hppa_gen_reloc_type.
+	(_bfd_elf_hppa_gen_reloc_type): Remove duplicate prototype.
+	* elf32-hppa.h (elf32_hppa_reloc_final_type): Add protptype.
+	* elf32-hppa.c: Include elf32-hppa.h before elf-hppa.h.
+	* elf64-hppa.h (elf64_hppa_reloc_final_type): Add protptype.
+
 2002-02-17  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* mmo.c: Correct and improve comments.
