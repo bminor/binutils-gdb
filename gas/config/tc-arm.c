@@ -3,6 +3,7 @@
    Free Software Foundation, Inc.
    Contributed by Richard Earnshaw (rwe@pegasus.esprit.ec.org)
 	Modified by David Taylor (dtaylor@armltd.co.uk)
+	Cirrus coprocessor mods by Aldy Hernandez (aldyh@redhat.com)
 
    This file is part of GAS, the GNU Assembler.
 
