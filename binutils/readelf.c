@@ -3566,7 +3566,7 @@ slurp_ia64_unwind_table (file, aux, sec)
 
 	      if (ELF32_ST_TYPE (sym->st_info) != STT_SECTION)
 		{
-		  warn (_("Skipping unexpected symbol type %u"),
+		  warn (_("Skipping unexpected symbol type %u\n"),
 			ELF32_ST_TYPE (sym->st_info));
 		  continue;
 		}
@@ -3578,7 +3578,7 @@ slurp_ia64_unwind_table (file, aux, sec)
 
 	      if (ELF64_ST_TYPE (sym->st_info) != STT_SECTION)
 		{
-		  warn (_("Skipping unexpected symbol type %u"),
+		  warn (_("Skipping unexpected symbol type %u\n"),
 			ELF64_ST_TYPE (sym->st_info));
 		  continue;
 		}
@@ -3586,7 +3586,7 @@ slurp_ia64_unwind_table (file, aux, sec)
 
 	  if (strncmp (relname, "R_IA64_SEGREL", 13) != 0)
 	    {
-	      warn (_("Skipping unexpected relocation type %s"), relname);
+	      warn (_("Skipping unexpected relocation type %s\n"), relname);
 	      continue;
 	    }
 
@@ -5699,7 +5699,7 @@ process_extended_line_op (data, is_stmt, pointer_size)
 
   if (len == 0)
     {
-      warn (_("badly formed extended line op encountered!"));
+      warn (_("badly formed extended line op encountered!\n"));
       return bytes_read;
     }
 
@@ -7062,9 +7062,9 @@ read_and_display_attr_value (attribute, form, data, cu_offset, pointer_size)
 
     case DW_FORM_strp:
       if (debug_str == NULL)
-	warn (_("DW_FORM_strp used but no .debug_str section"));
+	warn (_("DW_FORM_strp used but no .debug_str section\n"));
       else if (uvalue >= debug_str_size)
-	warn (_("DW_FORM_strp %lx points outside of .debug_str section"),
+	warn (_("DW_FORM_strp %lx points outside of .debug_str section\n"),
 	      uvalue);
       else
         printf (" %s", debug_str + uvalue);
@@ -7075,7 +7075,7 @@ read_and_display_attr_value (attribute, form, data, cu_offset, pointer_size)
       break;
 
     default:
-      warn (_("Unrecognised form: %d"), form);
+      warn (_("Unrecognised form: %d\n"), form);
       break;
     }
 
@@ -7337,7 +7337,7 @@ display_debug_info (section, start, file)
 
 		  if (ELF32_ST_TYPE (sym->st_info) != STT_SECTION)
 		    {
-		      warn (_("Skipping unexpected symbol type %u"),
+		      warn (_("Skipping unexpected symbol type %u\n"),
 			    ELF32_ST_TYPE (sym->st_info));
 		      continue;
 		    }
@@ -7348,7 +7348,7 @@ display_debug_info (section, start, file)
 
 		  if (ELF64_ST_TYPE (sym->st_info) != STT_SECTION)
 		    {
-		      warn (_("Skipping unexpected symbol type %u"),
+		      warn (_("Skipping unexpected symbol type %u\n"),
 			    ELF64_ST_TYPE (sym->st_info));
 		      continue;
 		    }
