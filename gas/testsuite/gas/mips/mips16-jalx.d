@@ -8,3 +8,7 @@ Disassembly of section .text:
 			0: R_MIPS16_26	external_label
    4:	6500      	nop
    6:	6500      	nop
+   8:	6500      	nop
+   a:	6500      	nop
+   c:	6500      	nop
+   e:	6500      	nop
