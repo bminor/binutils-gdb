@@ -1,3 +1,9 @@
+2002-07-18  Elena Zannoni  <ezannoni@redhat.com>
+
+	* stabsread.c: Make os9k sections of the code obsolete,
+	for real this time.
+	* stabsread.h: Make os9k sections of the code obsolete.
+
 2002-07-18  Michal Ludvig <mludvig@suse.cz>
 
 	* linux-low.c (regsets_store_inferior_registers): Add free()

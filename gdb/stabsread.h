@@ -154,8 +154,9 @@ extern void end_stabs (void);
 
 extern void finish_global_stabs (struct objfile *objfile);
 
-
-EXTERN int os9k_stabs;
+#if 0 /* OBSOLETE OS9K */
+// OBSOLETE EXTERN int os9k_stabs;
+#endif /* OBSOLETE OS9K */
 
 /* COFF files can have multiple .stab sections, if they are linked
    using --split-by-reloc.  This linked list is used to pass the
