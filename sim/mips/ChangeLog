@@ -1,3 +1,9 @@
+Wed May 13 14:27:53 1998  Gavin Koch  <gavin@cygnus.com>
+
+	* r5900.igen: Replace the calls and the definition of the
+	function check_op_hilo_hi1lo1 with the pair 
+	check_mult_hilo_hi1lo1 and check_mult_hilo_hi1lo1.
+
 Wed May 13 14:11:46 1998  Gavin Koch  <gavin@cygnus.com>
 
 	* tx.igen (madd,maddu):  Replace calls to check_op_hilo
