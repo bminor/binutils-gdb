@@ -66,3 +66,5 @@ Disassembly of section .text:
 [		]*dc:.*fred
 0+e0 <[^>]*> 0000c0de ?	.*
 0+e4 <[^>]*> 0000dead ?	.*
+0+e8 <[^>]*> 3800      	sub	r0, #0
+0+ea <[^>]*> 3000      	add	r0, #0

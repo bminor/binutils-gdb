@@ -7433,11 +7433,11 @@ thumb_add_sub (str, subtract)
 	  int offset = inst.reloc.exp.X_add_number;
 
 	  if (subtract)
-	    offset = -offset;
+	    offset = - offset;
 
 	  if (offset < 0)
 	    {
-	      offset = -offset;
+	      offset = - offset;
 	      subtract = 1;
 
 	      /* Quick check, in case offset is MIN_INT.  */
@@ -7447,7 +7447,9 @@ thumb_add_sub (str, subtract)
 		  return;
 		}
 	    }
-	  else
+	  /* Note - you cannot convert a subtract of 0 into an
+	     add of 0 because the carry flag is set differently.  */
+	  else if (offset > 0)
 	    subtract = 0;
 
 	  if (Rd == REG_SP)

@@ -1,3 +1,9 @@
+2002-05-02  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* gas/arm/arm7t.s: Add thumb mode "sub r?, #0" and "add r?, #0".
+	* gas/arm/arm7t.d: Add expected results.  (Make sure that the
+	subtract is not converted into an add).
+
 2002-04-23  H.J. Lu <hjl@gnu.org>
 
 	* gas/mips/elempic.d: Use empic.l.

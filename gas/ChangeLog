@@ -1,3 +1,8 @@
+2002-05-02  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* config/tc-arm.c (thumb_add_sub): Do not convert a subtract of
+	zero into an add of zero - it is not the same.
+
 2002-05-01  Arati Dikey <aratid@kpit.com>
 
 	* tc-sh.c (get_specific): Generate warning if the same
