@@ -1,5 +1,9 @@
 2003-02-04  Michael Chastain  <mec@shout.net>
 
+	* NEWS: Fix typo: sepcifying -> specifying.
+
+2003-02-04  Michael Chastain  <mec@shout.net>
+
 	* dwarfread.c: Add documentation on the state of dwarf-1,
 	looking towards obsoletion.
 
