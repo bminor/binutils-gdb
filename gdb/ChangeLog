@@ -1,3 +1,9 @@
+Tue Nov  4 13:50:59 1997  Jim Blandy  <jimb@sendai.cygnus.com>
+
+	* jv-exp.y (ArrayAccess): Implement Name [ Expression ]; check the
+ 	code to see why this is not trivial.
+	(copy_exp, insert_exp): New functions.
+
 Fri Oct 24 17:24:00 1997  Dawn Perchik  <dawn@cygnus.com>
 
 	* dwarf2read.c (dwarf2_build_psymtabs_hard): Handle the case
