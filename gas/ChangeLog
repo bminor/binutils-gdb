@@ -1,3 +1,8 @@
+Tue May 16 16:29:58 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* read.c (s_lcomm): Do ELF/ECOFF test at run time, not compile
+	time.
+
 start-sanitize-arc
 Mon May 15 13:39:45 1995  Doug Evans  <dje@canuck.cygnus.com>
 
