@@ -1,5 +1,9 @@
 2001-04-24  Jim Blandy  <jimb@redhat.com>
 
+	* gdb.c++/templates.exp: If we see the prompt for the overload
+	list, but we haven't recognized any of the longer patterns,
+	arrange for this test to fail, not hang.
+
 	* gdb.c++/classes.exp (ptype class A): Tolerate whitespace
 	variations.
 

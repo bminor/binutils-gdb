@@ -114,6 +114,7 @@ proc test_template_breakpoints {} {
 		"canceled" \
 		"constructor breakpoint"
 	}
+        -re ".*\n> $" { fail "constructor breakpoint" }
 	-re ".*$gdb_prompt $" { fail "constructor breakpoint" }
 	default { fail "constructor breakpoint (timeout)" }
     }
