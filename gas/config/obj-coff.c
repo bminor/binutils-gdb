@@ -1,6 +1,6 @@
 /* coff object file format
    Copyright 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
-   1999, 2000, 2001, 2002
+   1999, 2000, 2001, 2002, 2003, 2004
    Free Software Foundation, Inc.
 
    This file is part of GAS.
@@ -1379,7 +1379,7 @@ coff_adjust_section_syms (abfd, sec, x)
 	fixp = fixp->fx_next;
       }
   }
-  if (bfd_get_section_size_before_reloc (sec) == 0
+  if (bfd_get_section_size (sec) == 0
       && nrelocs == 0
       && nlnno == 0
       && sec != text_section
@@ -1554,7 +1554,7 @@ coff_frob_section (sec)
      supposedly because standard COFF has no other way of encoding alignment
      for sections.  If your COFF flavor has a different way of encoding
      section alignment, then skip this step, as TICOFF does.  */
-  size = bfd_get_section_size_before_reloc (sec);
+  size = bfd_get_section_size (sec);
   mask = ((bfd_vma) 1 << align_power) - 1;
 #if !defined(TICOFF)
   if (size & mask)
@@ -1607,9 +1607,9 @@ coff_frob_section (sec)
   strsec = sec;
   sec = subseg_get (STAB_SECTION_NAME, 0);
   /* size is already rounded up, since other section will be listed first */
-  size = bfd_get_section_size_before_reloc (strsec);
+  size = bfd_get_section_size (strsec);
 
-  n_entries = bfd_get_section_size_before_reloc (sec) / 12 - 1;
+  n_entries = bfd_get_section_size (sec) / 12 - 1;
 
   /* Find first non-empty frag.  It should be large enough.  */
   fragp = seg_info (sec)->frchainP->frch_root;

@@ -1,6 +1,6 @@
 /* ELF object file format
    Copyright 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001, 2002, 2003 Free Software Foundation, Inc.
+   2001, 2002, 2003, 2004 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -1887,6 +1887,7 @@ elf_frob_file (void)
       flagword flags;
       struct symbol *sy;
       int has_sym;
+      bfd_size_type size;
 
       flags = SEC_READONLY | SEC_HAS_CONTENTS | SEC_IN_MEMORY | SEC_GROUP;
       for (s = list.head[i]; s != NULL; s = elf_next_in_group (s))
@@ -1927,8 +1928,9 @@ elf_frob_file (void)
       if (has_sym)
 	elf_group_id (s) = sy->bsym;
 
-      s->_raw_size = 4 * (list.elt_count[i] + 1);
-      s->contents = frag_more (s->_raw_size);
+      size = 4 * (list.elt_count[i] + 1);
+      bfd_set_section_size (stdoutput, s, size);
+      s->contents = frag_more (size);
       frag_now->fr_fix = frag_now_fix_octets ();
     }
 
@@ -2037,7 +2039,8 @@ elf_frob_file_after_relocs (void)
 	 to force the ELF backend to allocate a file position, and then
 	 write out the data.  FIXME: Is this really the best way to do
 	 this?  */
-      sec->_raw_size = bfd_ecoff_debug_size (stdoutput, &debug, debug_swap);
+      bfd_set_section_size
+	(stdoutput, sec, bfd_ecoff_debug_size (stdoutput, &debug, debug_swap));
 
       /* Pass BUF to bfd_set_section_contents because this will
 	 eventually become a call to fwrite, and ISO C prohibits

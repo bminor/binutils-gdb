@@ -1,3 +1,12 @@
+2004-06-15  Alan Modra  <amodra@bigpond.net.au>
+
+	* config/obj-coff.c (coff_adjust_section_syms): Use
+	bfd_get_section_size instead of bfd_get_section_size_before_reloc.
+	(coff_frob_section): Likewise.
+	* config/tc-mips.c (md_apply_fix3): Likewise.
+	* config/obj-elf.c (elf_frob_file): Use bfd_set_section_size.
+	(elf_frob_file_after_relocs): Likewise.
+
 2004-06-10  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
 
 	* config/tc-hppa.c (log2): Rename to exact_log2.

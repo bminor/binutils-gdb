@@ -11013,7 +11013,7 @@ md_apply_fix3 (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	       && fixP->fx_done
 	       && fixP->fx_frag->fr_address >= text_section->vma
 	       && (fixP->fx_frag->fr_address
-		   < text_section->vma + text_section->_raw_size)
+		   < text_section->vma + bfd_get_section_size (text_section))
 	       && ((insn & 0xffff0000) == 0x10000000	 /* beq $0,$0 */
 		   || (insn & 0xffff0000) == 0x04010000	 /* bgez $0 */
 		   || (insn & 0xffff0000) == 0x04110000)) /* bgezal $0 */
