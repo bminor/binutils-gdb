@@ -1,3 +1,8 @@
+Tue Nov 16 10:21:57 1993  Rob Savoye  (rob@cygnus.com)
+
+	* lib/gdb.exp: Make GDB and GDBFLAGS global so the scoping work
+	for info.
+
 Sat Nov 13 23:17:48 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* gdb.stabs/hppa.mt: A makefile fragment for the PA.
