@@ -63,7 +63,7 @@ gcore_command (char *args, int from_tty)
 		      "Opening corefile '%s' for output.\n", corefilename);
 
   /* Open the output file. */
-  if (!(obfd = bfd_openw (corefilename, NULL /*default_gcore_target ()*/)))
+  if (!(obfd = bfd_openw (corefilename, default_gcore_target ())))
     {
       error ("Failed to open '%s' for output.", corefilename);
     }
@@ -117,16 +117,20 @@ gcore_command (char *args, int from_tty)
 static unsigned long
 default_gcore_mach (void)
 {
+#if 1	/* See if this even matters... */
+  return 0;
+#else
 #ifdef TARGET_ARCHITECTURE
   const struct bfd_arch_info * bfdarch = TARGET_ARCHITECTURE;
 
   if (bfdarch != NULL)
     return bfdarch->mach;
-#endif
+#endif /* TARGET_ARCHITECTURE */
   if (exec_bfd == NULL)
     error ("Can't find default bfd machine type (need execfile).");
 
   return bfd_get_mach (exec_bfd);
+#endif /* 1 */
 }
 
 static enum bfd_architecture
@@ -149,9 +153,9 @@ default_gcore_target (void)
 {
   /* FIXME -- this may only work for ELF targets.  */
   if (exec_bfd == NULL)
-    error ("Can't find default bfd target for corefile (need execfile).");
-
-  return bfd_get_target (exec_bfd);
+    return NULL;
+  else
+    return bfd_get_target (exec_bfd);
 }
 
 /*
@@ -344,8 +348,8 @@ make_mem_sec (bfd *obfd,
   if (info_verbose)
     {
       fprintf_filtered (gdb_stdout, 
-			"Save segment, %ld bytes at 0x%s\n",
-			size, paddr_nz (addr));
+			"Save segment, %lld bytes at 0x%s\n",
+			(long long) size, paddr_nz (addr));
     }
 
   bfd_set_section_size (obfd, osec, size);

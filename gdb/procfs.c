@@ -5388,7 +5388,7 @@ find_memory_regions_callback (struct prmap *map,
 					   void *),
 			      void *data)
 {
-  return (*func) (host_pointer_to_address ((void *) map->pr_vaddr),
+  return (*func) ((CORE_ADDR) map->pr_vaddr,
 		  map->pr_size, 
 		  (map->pr_mflags & MA_READ) != 0,
 		  (map->pr_mflags & MA_WRITE) != 0,
@@ -5793,6 +5793,7 @@ procfs_make_note_section (bfd *obfd, int *note_size)
   char psargs[80] = {'\0'};
   procinfo *pi = find_procinfo_or_die (PIDGET (inferior_ptid), 0);
   char *note_data = NULL;
+  char *inf_args;
   struct procfs_corefile_thread_data thread_args;
 
   if (get_exec_file (0))
@@ -5800,11 +5801,14 @@ procfs_make_note_section (bfd *obfd, int *note_size)
       strncpy (fname, strrchr (get_exec_file (0), '/') + 1, sizeof (fname));
       strncpy (psargs, get_exec_file (0), 
 	       sizeof (psargs));
-      if (get_inferior_args ())
+
+      inf_args = get_inferior_args ();
+      if (inf_args && *inf_args &&
+	  strlen (inf_args) < ((int) sizeof (psargs) - (int) strlen (psargs)))
 	{
 	  strncat (psargs, " ", 
 		   sizeof (psargs) - strlen (psargs));
-	  strncat (psargs, get_inferior_args (), 
+	  strncat (psargs, inf_args, 
 		   sizeof (psargs) - strlen (psargs));
 	}
     }

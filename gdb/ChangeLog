@@ -1,5 +1,15 @@
 2002-02-13  Michael Snyder  <msnyder@redhat.com>
 
+	* gcore.c (gcore_command): Use gcore_default_target instead of NULL.
+	(default_gcore_mach): Just return 0, work around a problem in bfd.
+	(default_gcore_target): OK to return NULL if exec_bfd is null.
+	(make_mem_sec): Use a cast, avoid a warning.
+
+	* procfs.c (find_memory_regions_callback): Use a cast instead of
+	calling host_pointer_to_address (which complains if 
+	sizeof (host pointer) != sizeof (target pointer)).
+	(procfs_make_note_section): Avoid overflow in psargs string.
+
 	* procfs.c (procfs_make_note_section): Make the default 
 	implementation return an error.
 
