@@ -1,3 +1,16 @@
+start-sanitize-m32rx
+Wed Feb 11 10:32:28 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* doc/c-m32r.texi: Document warning and error messages.  Add
+	descriptions of --warn-explicit-parallel-conflicts.
+
+	* doc/as.texinfo: Add more m32rx command line options.
+end-sanitize-m32rx
+Tue Feb 10 18:31:31 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-i386.c (i386_operand): Change error added Jan 2 1998
+	from as_bad to as_warn.
+
 start-sanitize-sky
 Tue Feb 10 15:15:40 1998  Doug Evans  <devans@canuck.cygnus.com>
 

@@ -1,5 +1,6 @@
 \input texinfo @c                               -*-Texinfo-*-
-@c  Copyright (c) 1991, 92, 93, 94, 95, 96, 1997 Free Software Foundation, Inc.
+@c  Copyright (c) 1991, 92, 93, 94, 95, 96, 97, 1998
+@c  Free Software Foundation, Inc.
 @c UPDATE!!  On future updates--
 @c   (1)   check for new machine-dep cmdline options in
 @c         md_parse_option definitions in config/tc-*.c
@@ -85,7 +86,7 @@ END-INFO-DIR-ENTRY
 @ifinfo
 This file documents the GNU Assembler "@value{AS}".
 
-Copyright (C) 1991, 92, 93, 94, 95, 96, 1997 Free Software Foundation, Inc.
+Copyright (C) 1991, 92, 93, 94, 95, 96, 97, 1998 Free Software Foundation, Inc.
 
 Permission is granted to make and distribute verbatim copies of
 this manual provided the copyright notice and this permission notice
@@ -140,7 +141,7 @@ done.
 @end tex
 
 @vskip 0pt plus 1filll
-Copyright @copyright{} 1991, 92, 93, 94, 95, 96, 1997 Free Software Foundation, Inc.
+Copyright @copyright{} 1991, 92, 93, 94, 95, 96, 97, 1998 Free Software Foundation, Inc.
 
 Permission is granted to make and distribute verbatim copies of
 this manual provided the copyright notice and this permission notice
@@ -246,7 +247,7 @@ Here is a brief summary of how to invoke @code{@value{AS}}.  For details,
 @end ifset
 @c start-sanitize-m32rx
 @ifset M32R
- [ --m32rx ]
+ [ --m32rx | --[no-]warn-explicit-parallel-conflicts ]
 @end ifset
 @c end-sanitize-m32rx
 @ifset M680X0
@@ -469,6 +470,14 @@ Mitsubishi M32R series.
 @item --m32rx
 Specify which processor in the M32R family is the target.  The default
 is normally the M32R, but this option changes it to the M32RX.
+
+@item --warn-explicit-parallel-conflicts
+Produce warning messages when questionable parallel constructs are
+encountered. 
+
+@item --no-warn-explicit-parallel-conflicts
+Do not produce warning messages when questionable parallel constructs are 
+encountered. 
 
 @end table
 @end ifset
@@ -974,6 +983,7 @@ assembler.)
 * o::             -o to name the object file
 * R::             -R to join data and text sections
 * statistics::    --statistics to see statistics about assembly
+* traditional-format:: --traditional-format for compatible output
 * v::             -v to announce version
 * W::             -W to suppress warnings
 * Z::             -Z to make object file even after errors
@@ -1327,6 +1337,17 @@ Use @samp{--statistics} to display two statistics about the resources used by
 @code{@value{AS}}: the maximum amount of space allocated during the assembly
 (in bytes), and the total execution time taken for the assembly (in @sc{cpu}
 seconds).
+
+@node traditional-format
+@section Compatible output: @code{--traditional-format}
+
+@kindex --traditional-format
+For some targets, the output of @code{@value{AS}} is different in some ways
+from the output of some existing assembler.  This switch requests
+@code{@value{AS}} to use the traditional format instead.
+
+For example, it disables the exception frame optimizations which
+@code{@value{AS}} normally does by default on @code{@value{GCC}} output.
 
 @node v
 @section Announce Version: @code{-v}
@@ -4721,9 +4742,11 @@ subject, see the hardware manufacturer's manual.
 @ifset I960
 * i960-Dependent::              Intel 80960 Dependent Features
 @end ifset
+@c start-sanitize-m32rx
 @ifset M32R
 * M32R-Dependent::              M32R Dependent Features
 @end ifset
+@c end-sanitize-m32rx
 @ifset M680X0
 * M68K-Dependent::              M680x0 Dependent Features
 @end ifset
@@ -4892,9 +4915,11 @@ family.
 @include c-i960.texi
 @end ifset
 
+@c start-sanitize-m32rx
 @ifset M32R
 @include c-m32r.texi
 @end ifset
+@c end-sanitize-m32rx
 
 @ifset M680X0
 @include c-m68k.texi
