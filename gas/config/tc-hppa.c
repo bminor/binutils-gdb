@@ -55,6 +55,9 @@ typedef elf_symbol_type obj_symbol_type;
 /* Who knows.  */
 #define obj_version obj_elf_version
 
+/* Use space aliases.  */
+#define USE_ALIASES 1
+
 /* Some local functions only used by ELF.  */
 static void pa_build_symextn_section PARAMS ((void));
 static void hppa_tc_make_symextn_section PARAMS ((void));
@@ -72,6 +75,9 @@ typedef int reloc_type;
 
 /* Who knows.  */
 #define obj_version obj_som_version
+
+/* Do not use space aliases.  */
+#define USE_ALIASES 0
 
 /* How to generate a relocation.  */
 #define hppa_gen_reloc_type hppa_som_gen_reloc_type
@@ -569,7 +575,8 @@ static ssd_chain_struct * create_new_subspace PARAMS ((sd_chain_struct *,
 						       char, char, char,
 						       char, int, int, int,
 						       int, asection *));
-static ssd_chain_struct *update_subspace PARAMS ((char *, char, char, char,
+static ssd_chain_struct *update_subspace PARAMS ((sd_chain_struct *,
+						  char *, char, char, char,
 						  char, char, char, int,
 						  int, int, int, subsegT));
 static sd_chain_struct *is_defined_space PARAMS ((char *));
@@ -1181,7 +1188,7 @@ static label_symbol_struct *
 pa_get_label ()
 {
   label_symbol_struct *label_chain;
-  sd_chain_struct *space_chain = pa_segment_to_space (now_seg);
+  sd_chain_struct *space_chain = current_space;
 
   for (label_chain = label_symbols_rootp;
        label_chain;
@@ -1200,7 +1207,7 @@ pa_define_label (symbol)
      symbolS *symbol;
 {
   label_symbol_struct *label_chain = pa_get_label ();
-  sd_chain_struct *space_chain = pa_segment_to_space (now_seg);
+  sd_chain_struct *space_chain = current_space;
 
   if (label_chain)
     label_chain->lss_label = symbol;
@@ -1228,7 +1235,7 @@ pa_undefine_label ()
 {
   label_symbol_struct *label_chain;
   label_symbol_struct *prev_label_chain = NULL;
-  sd_chain_struct *space_chain = pa_segment_to_space (now_seg);
+  sd_chain_struct *space_chain = current_space;
 
   for (label_chain = label_symbols_rootp;
        label_chain;
@@ -1383,6 +1390,10 @@ md_begin ()
 
   if (lose)
     as_fatal ("Broken assembler.  No assembly attempted.");
+
+  /* SOM will change text_section.  To make sure we never put
+     anything into the old one switch to the new one now.  */
+  subseg_set (text_section, 0);
 }
 
 /* Called at the end of assembling a source file.  Nothing to do
@@ -5100,11 +5111,12 @@ pa_parse_space_stmt (space_name, create_flag)
   char *name, *ptemp, c;
   char loadable, defined, private, sort;
   int spnum;
-  asection *seg;
+  asection *seg = NULL;
   sd_chain_struct *space;
 
   /* load default values */
   spnum = 0;
+  sort = 0;
   loadable = TRUE;
   defined = TRUE;
   private = FALSE;
@@ -5174,6 +5186,9 @@ pa_parse_space_stmt (space_name, create_flag)
       print_errors = TRUE;
     }
 
+  if (create_flag && seg == NULL)
+    seg = subseg_new (space_name, 0);
+    
   /* If create_flag is nonzero, then create the new space with
      the attributes computed above.  Else set the values in 
      an already existing space -- this can only happen for
@@ -5414,7 +5429,7 @@ log2 (value)
     return shift;
 }
 
-/* Handle a .SPACE pseudo-op; this switches the current subspace to the
+/* Handle a .SUBSPACE pseudo-op; this switches the current subspace to the
    given subspace, creating the new subspace if necessary. 
 
    FIXME.  Should mirror pa_space more closely, in particular how 
@@ -5424,11 +5439,12 @@ static void
 pa_subspace (unused)
      int unused;
 {
-  char *name, *ss_name, c;
+  char *name, *ss_name, *alias, c;
   char loadable, code_only, common, dup_common, zero, sort;
-  int i, access, space_index, alignment, quadrant;
+  int i, access, space_index, alignment, quadrant, applicable, flags;
   sd_chain_struct *space;
   ssd_chain_struct *ssd;
+  asection *section;
 
   if (within_procedure)
     {
@@ -5454,8 +5470,9 @@ pa_subspace (unused)
       space_index = ~0;
       alignment = 0;
       quadrant = 0;
+      alias = NULL;
 
-      space = pa_segment_to_space (now_seg);
+      space = current_space;
       ssd = is_defined_subspace (name, space->sd_last_subseg);
       if (ssd)
 	{
@@ -5467,7 +5484,8 @@ pa_subspace (unused)
 	}
       else
 	{
-	  /* A new subspace.  Load default values.  */
+	  /* A new subspace.  Load default values if it matches one of
+	     the builtin subspaces.  */
 	  i = 0;
 	  while (pa_def_subspaces[i].name)
 	    {
@@ -5483,6 +5501,8 @@ pa_subspace (unused)
 		  quadrant = pa_def_subspaces[i].quadrant;
 		  access = pa_def_subspaces[i].access;
 		  sort = pa_def_subspaces[i].sort;
+		  if (USE_ALIASES && pa_def_subspaces[i].alias)
+		    alias = pa_def_subspaces[i].alias;
 		  break;
 		}
 	      i++;
@@ -5561,25 +5581,73 @@ pa_subspace (unused)
 	    }
 	}
 
-      /* Now that all the flags are set, update an existing subspace,
-         or create a new one with the given flags if the subspace does
-         not currently exist.  */
-      space = pa_segment_to_space (now_seg);
+      /* Compute a reasonable set of BFD flags based on the information
+	 in the .subspace directive.  */
+      applicable = bfd_applicable_section_flags (stdoutput);
+      flags = 0;
+      if (loadable)
+	flags |= (SEC_ALLOC | SEC_LOAD);
+      if (code_only)
+	flags |= SEC_CODE;
+      if (common || dup_common)
+	flags |= SEC_IS_COMMON;
+
+      /* This is a zero-filled subspace (eg BSS).  */
+      if (zero)
+	flags &= ~SEC_LOAD;
+
+      flags |= SEC_RELOC | SEC_HAS_CONTENTS;
+      applicable &= flags;
+
+      /* If this is an existing subspace, then we want to use the 
+	 segment already associated with the subspace.
+
+	 FIXME NOW!  ELF BFD doesn't appear to be ready to deal with
+	 lots of sections.  It might be a problem in the PA ELF
+	 code, I do not know yet.  For now avoid creating anything
+	 but the "standard" sections for ELF.  */
       if (ssd)
-	current_subspace = update_subspace (ss_name, loadable, code_only,
-					    common, dup_common, sort, zero,
-					    access, space_index, alignment,
-					    quadrant, ssd->ssd_subseg);
+	section = ssd->ssd_seg;
+      if (alias)
+	section = subseg_new (alias, 0);
+      else if (! alias && USE_ALIASES)
+	{
+	  as_warn ("Ignoring subspace decl due to ELF BFD bugs.");
+	  demand_empty_rest_of_line ();
+	  return;
+	}
+      else 
+	section = subseg_new (ss_name, 0);
+
+      /* Now set the flags.  */
+      bfd_set_section_flags (stdoutput, section, applicable);
+
+      /* Record any alignment request for this section.  */
+      record_alignment (section, log2 (alignment));
+
+      /* Set the starting offset for this section.  */
+      bfd_set_section_vma (stdoutput, section,
+			   pa_subspace_start (space, quadrant));
+	 
+      
+      /* Now that all the flags are set, update an existing subspace,
+         or create a new one.  */
+      if (ssd)
+
+	current_subspace = update_subspace (space, ss_name, loadable,
+					    code_only, common, dup_common,
+					    sort, zero, access, space_index,
+					    alignment, quadrant, 
+					    ssd->ssd_subseg);
       else
 	current_subspace = create_new_subspace (space, ss_name, loadable,
 						code_only, common,
 						dup_common, zero, sort,
 						access, space_index,
-					      alignment, quadrant, now_seg);
-      SUBSPACE_SUBSPACE_START (current_subspace) = pa_subspace_start (space,
-								  quadrant);
+						alignment, quadrant, section);
 
       demand_empty_rest_of_line ();
+      current_subspace->ssd_seg = section;
       subseg_set (current_subspace->ssd_seg, current_subspace->ssd_subseg);
     }
   return;
@@ -5591,7 +5659,6 @@ pa_subspace (unused)
 static void 
 pa_spaces_begin ()
 {
-  sd_chain_struct *space;
   int i;
 
   space_dict_root = NULL;
@@ -5600,12 +5667,15 @@ pa_spaces_begin ()
   i = 0;
   while (pa_def_spaces[i].name)
     {
-      if (pa_def_spaces[i].alias)
-	pa_def_spaces[i].segment = subseg_new (pa_def_spaces[i].alias, 0);
-      else
-	pa_def_spaces[i].segment
-	  = bfd_make_section_old_way (stdoutput, pa_def_spaces[i].name);
+      char *name;
 
+      /* Pick the right name to use for the new section.  */
+      if (pa_def_spaces[i].alias && USE_ALIASES)
+	name = pa_def_spaces[i].alias;
+      else
+        name = pa_def_spaces[i].name;
+
+      pa_def_spaces[i].segment = subseg_new (name, 0);
       create_new_space (pa_def_spaces[i].name, pa_def_spaces[i].spnum,
 			pa_def_spaces[i].loadable, pa_def_spaces[i].defined,
 			pa_def_spaces[i].private, pa_def_spaces[i].sort,
@@ -5616,29 +5686,80 @@ pa_spaces_begin ()
   i = 0;
   while (pa_def_subspaces[i].name)
     {
-      space = pa_segment_to_space (pa_def_spaces[pa_def_subspaces[i].def_space_index].segment);
-      if (space)
+      char *name;
+      int applicable, subsegment;
+      asection *segment = NULL;
+      sd_chain_struct *space;
+
+      /* Pick the right name for the new section and pick the right
+	 subsegment number.  */
+      if (pa_def_subspaces[i].alias && USE_ALIASES)
 	{
-	  char *name = pa_def_subspaces[i].alias;
-	  if (!name)
-	    name = pa_def_subspaces[i].name;
-	  create_new_subspace (space, name,
-			       pa_def_subspaces[i].loadable,
-			       pa_def_subspaces[i].code_only,
-			       pa_def_subspaces[i].common,
-			       pa_def_subspaces[i].dup_common,
-			       pa_def_subspaces[i].zero,
-			       pa_def_subspaces[i].sort,
-			       pa_def_subspaces[i].access,
-			       pa_def_subspaces[i].space_index,
-			       pa_def_subspaces[i].alignment,
-			       pa_def_subspaces[i].quadrant,
-			       pa_def_spaces[pa_def_subspaces[i].def_space_index].segment);
-	  subseg_new (name, pa_def_subspaces[i].subsegment);
+	  name = pa_def_subspaces[i].alias;
+	  subsegment = pa_def_subspaces[i].subsegment;
 	}
       else
-	as_fatal ("Internal error: space missing for subspace \"%s\"\n",
-		  pa_def_subspaces[i].name);
+	{
+	  name = pa_def_subspaces[i].name;
+	  subsegment = 0;
+	}
+  
+      /* Create the new section.  */
+      segment = subseg_new (name, subsegment);
+
+
+      /* For SOM we want to replace the standard .text, .data, and .bss
+	 sections with our own.  */
+      if (! strcmp (pa_def_subspaces[i].name, "$CODE$") && ! USE_ALIASES)
+	{
+	  text_section = segment;
+	  applicable = bfd_applicable_section_flags (stdoutput);
+	  bfd_set_section_flags (stdoutput, text_section,
+				 applicable & (SEC_ALLOC | SEC_LOAD 
+					       | SEC_RELOC | SEC_CODE 
+					       | SEC_READONLY 
+					       | SEC_HAS_CONTENTS));
+	}
+      else if (! strcmp (pa_def_subspaces[i].name, "$DATA$") && ! USE_ALIASES)
+	{
+	  data_section = segment;
+	  applicable = bfd_applicable_section_flags (stdoutput);
+	  bfd_set_section_flags (stdoutput, data_section,
+				 applicable & (SEC_ALLOC | SEC_LOAD 
+					       | SEC_RELOC
+					       | SEC_HAS_CONTENTS));
+	  
+	  
+	}
+      else if (! strcmp (pa_def_subspaces[i].name, "$BSS$") && ! USE_ALIASES)
+	{
+	  bss_section = segment;
+	  applicable = bfd_applicable_section_flags (stdoutput);
+	  bfd_set_section_flags (stdoutput, bss_section,
+				 applicable & SEC_ALLOC);
+	}
+
+      /* Find the space associated with this subspace.  */
+      space = pa_segment_to_space (pa_def_spaces[pa_def_subspaces[i].
+						 def_space_index].segment);
+      if (space == NULL)
+	{
+	  as_fatal ("Internal error: Unable to find containing space for %s.",
+		    pa_def_subspaces[i].name);
+	}
+
+      create_new_subspace (space, name,
+			   pa_def_subspaces[i].loadable,
+			   pa_def_subspaces[i].code_only,
+			   pa_def_subspaces[i].common,
+			   pa_def_subspaces[i].dup_common,
+			   pa_def_subspaces[i].zero,
+			   pa_def_subspaces[i].sort,
+			   pa_def_subspaces[i].access,
+			   pa_def_subspaces[i].space_index,
+			   pa_def_subspaces[i].alignment,
+			   pa_def_subspaces[i].quadrant,
+			   segment);
       i++;
     }
 }
@@ -5758,7 +5879,6 @@ create_new_subspace (space, name, loadable, code_only, common,
      asection *seg;
 {
   ssd_chain_struct *chain_entry;
-  symbolS *start_symbol;
 
   chain_entry = (ssd_chain_struct *) xmalloc (sizeof (ssd_chain_struct));
   if (!chain_entry)
@@ -5779,7 +5899,7 @@ create_new_subspace (space, name, loadable, code_only, common,
   SUBSPACE_SPACE_INDEX (chain_entry) = space_index;
   SUBSPACE_ZERO (chain_entry) = is_zero;
 
-  chain_entry->ssd_subseg = pa_next_subseg (space);
+  chain_entry->ssd_subseg = USE_ALIASES ? pa_next_subseg (space) : 0;
   chain_entry->ssd_seg = seg;
   chain_entry->ssd_last_align = 1;
   chain_entry->ssd_next = NULL;
@@ -5834,8 +5954,9 @@ create_new_subspace (space, name, loadable, code_only, common,
    various arguments.   Return the modified subspace chain entry.  */
 
 static ssd_chain_struct *
-update_subspace (name, loadable, code_only, common, dup_common, sort,
+update_subspace (space, name, loadable, code_only, common, dup_common, sort,
 		 zero, access, space_index, alignment, quadrant, subseg)
+     sd_chain_struct *space;
      char *name;
      char loadable;
      char code_only;
