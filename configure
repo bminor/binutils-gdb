@@ -573,9 +573,9 @@ esac
 case "${build_alias}" in
 "")
 	if result=`${config_shell} ${configsub} ${host_alias}` ; then
-	    build_cpu=`echo $result | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\1/'`
-	    build_vendor=`echo $result | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\2/'`
-	    build_os=`echo $result | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\3/'`
+	    build_cpu=`echo $result | sed 's/^\([^-]*\)-\([^-]*\)-\(.*\)$/\1/'`
+	    build_vendor=`echo $result | sed 's/^\([^-]*\)-\([^-]*\)-\(.*\)$/\2/'`
+	    build_os=`echo $result | sed 's/^\([^-]*\)-\([^-]*\)-\(.*\)$/\3/'`
 	    build=${build_cpu}-${build_vendor}-${build_os}
 	    build_alias=${host_alias}
 	fi
@@ -583,9 +583,9 @@ case "${build_alias}" in
 *)
 	if result=`${config_shell} ${configsub} ${build_alias}` ; then
 	    buildopt="--build=${build_alias}"
-	    build_cpu=`echo $result | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\1/'`
-	    build_vendor=`echo $result | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\2/'`
-	    build_os=`echo $result | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\3/'`
+	    build_cpu=`echo $result | sed 's/^\([^-]*\)-\([^-]*\)-\(.*\)$/\1/'`
+	    build_vendor=`echo $result | sed 's/^\([^-]*\)-\([^-]*\)-\(.*\)$/\2/'`
+	    build_os=`echo $result | sed 's/^\([^-]*\)-\([^-]*\)-\(.*\)$/\3/'`
 	    build=${build_cpu}-${build_vendor}-${build_os}
 	else
 	    echo "Unrecognized build system name ${build_alias}." 1>&2
@@ -600,9 +600,9 @@ else
     echo "Unrecognized host system name ${host_alias}." 1>&2
     exit 1
 fi
-host_cpu=`echo $result | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\1/'`
-host_vendor=`echo $result | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\2/'`
-host_os=`echo $result | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\3/'`
+host_cpu=`echo $result | sed 's/^\([^-]*\)-\([^-]*\)-\(.*\)$/\1/'`
+host_vendor=`echo $result | sed 's/^\([^-]*\)-\([^-]*\)-\(.*\)$/\2/'`
+host_os=`echo $result | sed 's/^\([^-]*\)-\([^-]*\)-\(.*\)$/\3/'`
 host=${host_cpu}-${host_vendor}-${host_os}
 
 . ${tmpfile}.hst
@@ -613,9 +613,9 @@ else
     echo "Unrecognized target system name ${target_alias}." 1>&2
     exit 1
 fi
-target_cpu=`echo $result | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\1/'`
-target_vendor=`echo $result | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\2/'`
-target_os=`echo $result | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\3/'`
+target_cpu=`echo $result | sed 's/^\([^-]*\)-\([^-]*\)-\(.*\)$/\1/'`
+target_vendor=`echo $result | sed 's/^\([^-]*\)-\([^-]*\)-\(.*\)$/\2/'`
+target_os=`echo $result | sed 's/^\([^-]*\)-\([^-]*\)-\(.*\)$/\3/'`
 target=${target_cpu}-${target_vendor}-${target_os}
 
 . ${tmpfile}.tgt
