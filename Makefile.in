@@ -16,7 +16,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #
-# Last Mod Wed Oct 9 23:25:49 PDT 1991, by rich@ok.cygnus.com
+# Last Mod Tue Oct 22 22:00:18 PDT 1991, by rich@cygnus.com
 #
 # $Id$
 
@@ -24,9 +24,6 @@ srcdir = .
 destdir = /usr/local
 
 SHELL=/bin/sh
-
-#CC = gcc -b$(target) # -B$(srcdir)/../gas/Host-$(host)/Target-$(target)/
-#CFLAGS = -g -nostdinc -nostdlib -I- -I/usr/local/lib/gcc/$(target)/1.92/include -I$(srcdir) -I$(srcdir)/../include -I$(OSINCLUDE)
 
 RANLIB = ranlib
 AR = ar
@@ -142,6 +139,9 @@ install: install-dirs install-fixed-includes
 install-dirs: force
 	- mkdir $(destdir)
 	- mkdir $(destdir)/H-$(host_alias)
+	- mkdir $(destdir)/H-$(host_alias)/T-independent
+	- mkdir $(destdir)/H-$(host_alias)/T-independent/bin
+	- mkdir $(destdir)/H-$(host_alias)/T-independent/lib
 	- mkdir $(destdir)/H-$(host_alias)/T-$(target_alias)
 	- mkdir $(destdir)/H-$(host_alias)/T-$(target_alias)/bin
 	- mkdir $(destdir)/H-$(host_alias)/T-$(target_alias)/lib
@@ -208,7 +208,6 @@ GDB_SUPPORT_DIRS= bfd include libiberty readline
 GDB_SUPPORT_FILES= $(GDB_SUPPORT_DIRS) texinfo/fsf/texinfo.tex
 
 setup-dirs: force_update
-	./configure -template=./configure
 	./configure sun4
 	make clean
 	./configure -rm sun4
@@ -240,135 +239,5 @@ make-gdb.tar.Z: $(DEVO_SUPPORT) $(GDB_SUPPORT_DIRS) gdb texinfo/fsf/texinfo.tex
 		| compress -v >gdb-$$VER.tar.Z)
 
 force_update:
-
-#
-# $Log$
-# Revision 1.41  1991/10/10 06:36:30  rich
-# New installed binary layout.
-#
-# Revision 1.40  1991/10/09  00:11:14  rich
-# Getting BISON right.
-#
-# Revision 1.39  1991/10/02  10:03:15  rich
-# Some $(srcdir)'s become $(unsubdir)'s in order to support +objdir.
-#
-# Revision 1.38  1991/10/02  07:21:55  rich
-# no more configure on which to depend
-#
-# Revision 1.37  1991/10/01  13:41:00  gnu
-# Avoid 'v' flag on archive updates, since it just wastes space in the log.
-#
-# Revision 1.36  1991/10/01  03:45:39  rich
-# Exploit the new executable config.status
-#
-# Revision 1.35  1991/09/25  04:34:40  rich
-# Pass command names with absolute paths.  Easier than keeping relative
-# paths right when dealing with sub/sub/directories.
-#
-# Revision 1.34  1991/09/20  09:08:56  gnu
-# Set file permissions on all files when building a distribution.
-#
-# Revision 1.33  1991/09/20  08:41:45  gnu
-# New rules for building distributions.  Normal distribution
-# is built by doing `make -f Makefile.in gdb.tar.Z' in the devo dir.
-#
-# Revision 1.32  1991/09/19  20:56:05  steve
-# More changes for 68k and 386 coff support. (Sorry about the previous
-# log).
-#
-# Revision 1.31  1991/09/03  13:28:38  gnu
-# Add "else true" clauses for really dumb sh's such as Ultrix.
-#
-# Revision 1.30  1991/08/26  06:37:57  rich
-# Correcting configurations and installs.
-#
-# Revision 1.29  1991/08/26  04:45:57  rich
-# Correcting install target when gcc not present.
-#
-# Revision 1.28  1991/08/25  23:40:22  rich
-# rcs enters the soup.
-#
-# Revision 1.27  1991/08/23  07:15:56  gnu
-# Make README stick...
-#
-# Revision 1.26  1991/08/22  09:20:07  gnu
-# Build a top-level README for devo.
-#
-# Revision 1.25  1991/08/22  07:15:49  rich
-# Three part names, etc.
-#
-# Revision 1.24  1991/08/20  01:57:31  rich
-# Another try at passing gnulib's location.
-#
-# Revision 1.23  1991/08/16  21:47:41  rich
-# Pass on BISON as bison only if bison is here.
-#
-# Revision 1.22  1991/08/07  19:15:26  rich
-# +forcesubdirs -> +subdirs
-#
-# Revision 1.21  1991/07/31  18:07:59  gnu
-# Set file permissions the same for everyone before making tar file.
-#
-# Revision 1.20  1991/07/31  02:47:14  gnu
-# Add bfd.ilrt.tar.Z "make" rules.
-#
-# Revision 1.19  1991/07/27  07:46:34  rich
-# Changes to accomodate using the freshly built bison in place.
-#
-# Revision 1.18  1991/07/16  00:01:40  gnu
-# Add back gdb and readline.
-#
-# Revision 1.17  1991/06/18  15:30:55  rich
-# added install-dirs target.
-#
-# Revision 1.16  1991/06/14  13:35:40  rich
-# install fixed include files on install.
-#
-# Revision 1.15  1991/06/09  20:27:01  rich
-# added support for binary comparisons.
-#
-# Revision 1.14  1991/05/31  12:34:55  gnu
-# Avoid error stop from Make if a directory doesn't exist during subdir_do.
-#
-# Revision 1.13  1991/05/27  23:03:20  rich
-# Put gcc/gstdarg.h where gas can find it; gas/stdarg.h.
-#
-# Revision 1.12  1991/05/19  00:36:44  rich
-# Added gdb.
-#
-# Revision 1.11  1991/05/03  21:30:41  gnu
-# Rename getopt to libiberty.
-#
-# Revision 1.10  1991/04/24  16:50:53  rich
-# Three staging checkpoint.
-#
-# Revision 1.9  1991/04/17  01:34:36  rich
-# Added getopt for binutils, fixed problem with host dependancies in
-# configure.template.
-#
-# Revision 1.8  1991/04/15  23:43:45  rich
-# Now handles multiple hosts and targets.
-#
-# Revision 1.7  1991/04/13  13:06:16  tiemann
-# Don't depend `install' on `all'.  Actually, the way things work, all
-# depends on things being incrementally installed, and install depends
-# on everything happening in a topological fashion.
-#
-# This will need to be worked on further, but for now it's ok.
-#
-# Revision 1.6  1991/04/13  10:04:14  rich
-# Now can build gas for a29k on a29k.
-#
-# Revision 1.5  1991/04/13  07:40:41  rich
-# Fixed an ordering bug.  Now everything is built, and then installed.
-#
-# Revision 1.4  1991/04/13  02:11:09  rich
-# Config cut 3.  We now almost install a29k.
-#
-# Revision 1.3  1991/04/11  02:41:53  rich
-# Cut 2 config.  Subdirs.
-#
-#
-#
 
 # end of Makefile.in
