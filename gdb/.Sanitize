@@ -98,10 +98,10 @@ h8300-tdep.c
 hp300ux-xdep.c
 hppa-pinsn.c
 hppab-core.c
+hppab-nat.c
 hppab-tdep.c
-hppab-xdep.c
+hppah-nat.c
 hppah-tdep.c
-hppah-xdep.c
 i386-pinsn.c
 i386-stub.c
 i386-tdep.c
@@ -145,6 +145,8 @@ news-xdep.c
 nindy-share
 nindy-tdep.c
 nm-delta88.h
+nm-hppab.h
+nm-hppah.h
 nm-i386bsd.h
 nm-i386mach.h
 nm-i386v.h

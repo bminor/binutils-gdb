@@ -41,12 +41,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define KERNEL_U_ADDR 0
 
-/* What a coincidence! */
-#define REGISTER_U_ADDR(addr, blockend, regno)				\
-{ addr = (int)(blockend) + REGISTER_BYTE (regno);}
-
-#define U_REGS_OFFSET 0
-
 /* HP uses non-ANSI definitions, but with void * results.  */
 #define	MEM_FNS_DECLARED	/* Some non-ANSI use void *, not char *.  */
 extern void *

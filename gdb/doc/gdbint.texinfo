@@ -1582,6 +1582,10 @@ system.  These macros and their meanings are:
 Eliminate host conditionals from this list as they are identified.}
 
 @table @code
+@item PUSH_DUMMY_FRAME
+Used in @samp{call_function_by_hand} to create an artificial stack frame.
+@item POP_FRAME
+Used in @samp{call_function_by_hand} to remove an artificial stack frame.
 @item ALIGN_SIZE
 alloca.c
 @item BLOCK_ADDRESS_FUNCTION_RELATIVE

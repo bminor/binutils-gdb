@@ -1,3 +1,19 @@
+Tue Oct 20 21:32:18 1992  K. Richard Pixley  (rich@sendai.cygnus.com)
+
+	hppa native support (untested).
+
+	* config/hppahpux.mh, config/hppabsd.mh (XDEPFILES): now empty.
+	  (NAT_FILE, NATDEPFILES): new macros.
+	* config/hppabsd.mt (TDEPFILES): removed exec.o and hppab-core.o.
+	* config/hppahpux.mt (TDEPFILES): removed exec.o.
+	* xm-hppa[bh].h (REGISTER_U_ADDR, U_REGS_OFFSET): removed.
+	* nm-hppa[bh].h, hppa[bh]-nat.c: new files.
+	* hppa[bh]-xdep.c: removed.
+	* hppa[bh]h-tdep.c: do not include ptrace.h.
+	* Makefile.in (HFILES): added nm-hppa[bh].h.
+
+	* doc/gdbint.texinfo: add PUSH_DUMMY_FRAME, POP_FRAME.
+
 Tue Oct 20 00:01:46 1992  Stu Grossman  (grossman at cygnus.com)
 
 	* mips-nat.c:  Straighten out include files.  Work around
