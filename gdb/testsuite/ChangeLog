@@ -1,3 +1,8 @@
+2001-12-17  Jim Blandy  <jimb@redhat.com>
+
+	* gdb.base/corefile.exp: Recognize the message saying that GDB
+ 	can't find the core file's registers as a failure.
+
 2001-12-13  Jackie Smith Cashion  <jsmith@redhat.com>
 
         * gdb.base/commands.exp (user_defined_command_test): Make "show user"
