@@ -1,3 +1,9 @@
+start-sanitize-vr5400
+Mon Dec 22 11:27:12 1997  Jeffrey A Law  (law@cygnus.com)
+
+        * config.sub (mips64vr5xxx-elf): Handle.  Treat as mips64vr5000-elf.
+
+end-sanitize-vr5400
 Thu Dec 18 13:13:03 1997  Doug Evans  <devans@canuck.cygnus.com>
 
 	* mkdep: New file.

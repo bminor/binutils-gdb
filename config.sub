@@ -81,6 +81,11 @@ case $1 in
 		set mips64tx49-unknown-elf
                 ;;
 # end-sanitize-tx49
+# start-sanitize-vr5400
+	mips64vr5xxx-elf)
+		set mips64vr5000-elf
+                ;;
+# end-sanitize-vr5400
 	*)
 		;;
 esac
@@ -194,16 +199,9 @@ case $basic_machine in
 	m88110 | m680[01234]0 | m683?2 | m68360 | z8k | v70 | h8500 | w65) # CYGNUS LOCAL
 		basic_machine=$basic_machine-unknown
 		;;
-# start-sanitize-tx49
-	mips64tx49 | mips64tx49el)
+	thumb) # CYGNUS LOCAL: angela/thumb
 		basic_machine=$basic_machine-unknown
 		;;
-# end-sanitize-tx49
-# start-sanitize-tx19
-        mipstx19 | mipstx19el)
-                basic_machine=$basic_machine-unknown
-                ;;
-# end-sanitize-tx19
 	mips64vr4300 | mips64vr4300el) # CYGNUS LOCAL jsmith/vr4300
 		basic_machine=$basic_machine-unknown
 		;;
@@ -218,6 +216,16 @@ case $basic_machine in
 		basic_machine=$basic_machine-unknown
 		;;
 # end-sanitize-vr5400
+# start-sanitize-tx19
+        mipstx19 | mipstx19el)
+                basic_machine=$basic_machine-unknown
+                ;;
+# end-sanitize-tx19
+# start-sanitize-tx49
+	mips64tx49 | mips64tx49el)
+		basic_machine=$basic_machine-unknown
+		;;
+# end-sanitize-tx49
 # start-sanitize-r5900
 	mips64r5900 | mips64r5900el) # CYGNUS LOCAL gavin/r5900
 		basic_machine=$basic_machine-unknown
@@ -235,7 +243,7 @@ case $basic_machine in
 	v850e)				# CYGNUS LOCAL jtc/v850
 		basic_machine=$basic_machine-unknown
 		;;
-	v850eq)				# CYGNUS LOCAL jtc/v850
+	v850ea)				# CYGNUS LOCAL jtc/v850
 		basic_machine=$basic_machine-unknown
 		;;
 # end-sanitize-v850e
@@ -274,12 +282,14 @@ case $basic_machine in
 		;;
 	m88110-* | m680[01234]0-* | m683?2-* | m68360-* | z8k-* | h8500-* | d10v-*) # CYGNUS LOCAL
 		;;
+	thumb-*) # CYGNUS LOCAL angela/thumb
+		;;
 	v850-*) # CYGNUS LOCAL
 	        ;;
 # start-sanitize-v850e
 	v850e-*) # CYGNUS LOCAL
 	        ;;
-	v850eq-*) # CYGNUS LOCAL
+	v850ea-*) # CYGNUS LOCAL
 	        ;;
 # end-sanitize-v850e
 # start-sanitize-d30v
