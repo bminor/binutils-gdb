@@ -1,3 +1,13 @@
+2004-10-27  Nick Clifton  <nickc@redhat.com>
+
+	* emultempl/alphaelf.em (alpha_after_parse): Add extra, NULL,
+	parameter to invocation of lang_section_start.
+	* emultempl/aix.em (_handle_option): Likewise.
+	
+	* Makefile.am (eelf64alpha.c, eelf64alpha_fbsd.c,
+	eelf64alpha_nbsd.c): Add dependency upon emultempl/alphaelf.em.
+	* Makefile.in: Regenerate.
+
 2004-10-26  Mark Mitchell  <mark@codesourcery.com>
 
 	* emulparams/armelf.sh (OTHER_READONLY_SECTIONS): Do not emit

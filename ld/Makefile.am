@@ -764,15 +764,18 @@ eelf32iq10.c: $(srcdir)/emulparams/elf32iq10.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/iq2000.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32iq10 "$(tdir_iq10)"
 eelf64alpha.c: $(srcdir)/emulparams/elf64alpha.sh \
-  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+  $(srcdir)/emultempl/elf32.em $(srcdir)/emultempl/alphaelf.em \
+  $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf64alpha "$(tdir_elf64alpha)"
 eelf64alpha_fbsd.c: $(srcdir)/emulparams/elf64alpha_fbsd.sh \
   $(srcdir)/emulparams/elf64alpha.sh \
-  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+  $(srcdir)/emultempl/elf32.em $(srcdir)/emultempl/alphaelf.em \
+  $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf64alpha_fbsd "$(tdir_elf64alpha_fbsd)"
 eelf64alpha_nbsd.c: $(srcdir)/emulparams/elf64alpha_nbsd.sh \
   $(srcdir)/emulparams/elf64alpha.sh \
-  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+  $(srcdir)/emultempl/elf32.em $(srcdir)/emultempl/alphaelf.em \
+  $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf64alpha_nbsd "$(tdir_elf64alpha_nbsd)"
 eelf64hppa.c: $(srcdir)/emulparams/elf64hppa.sh \
   $(srcdir)/emulparams/hppa64linux.sh \

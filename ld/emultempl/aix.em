@@ -303,7 +303,7 @@ gld${EMULATION_NAME}_handle_option (int optc)
       if (*end != '\0')
 	einfo ("%P: warning: ignoring invalid -D number %s\n", optarg);
       else if (val != -1)
-	lang_section_start (".data", exp_intop (val));
+	lang_section_start (".data", exp_intop (val), NULL);
       break;
 
     case 'H':
@@ -328,7 +328,7 @@ gld${EMULATION_NAME}_handle_option (int optc)
       val = bfd_scan_vma (optarg, &end, 0);
       if (*end != '\0')
 	return FALSE;
-      lang_section_start (".text", exp_intop (val));
+      lang_section_start (".text", exp_intop (val), NULL);
       break;
 
     case OPTION_IGNORE:
@@ -463,7 +463,7 @@ gld${EMULATION_NAME}_handle_option (int optc)
 	  t = exp_binop ('&',
 			 exp_binop ('+', t, exp_intop (31)),
 			 exp_intop (~(bfd_vma) 31));
-	  lang_section_start (".data", t);
+	  lang_section_start (".data", t, NULL);
 	}
       break;
 
@@ -484,7 +484,7 @@ gld${EMULATION_NAME}_handle_option (int optc)
 	  t = exp_binop ('&',
 			 exp_binop ('+', t, exp_intop (31)),
 			 exp_intop (~(bfd_vma) 31));
-	  lang_section_start (".text", t);
+	  lang_section_start (".text", t, NULL);
 	}
       break;
 
