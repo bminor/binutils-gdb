@@ -712,7 +712,8 @@ elf32_i860_relocate_pc16 (bfd *input_bfd,
   /* Relocate.  */
   value += rello->r_addend;
 
-  /* Separate the fields and insert.  */
+  /* Adjust the value by 4, then separate the fields and insert.  */
+  value = (value - 4) >> howto->rightshift;
   value = (((value & 0xf800) << 5) | (value & 0x7ff)) & howto->dst_mask;
   insn = (insn & ~howto->dst_mask) | value;
 
