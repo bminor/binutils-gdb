@@ -1,3 +1,8 @@
+2002-04-09  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* p-exp.y (yylex): Handle also the fact that is_a_field_of_this
+	is non zero as a found symbol.
+
 2002-04-08  Andrew Cagney  <ac131313@redhat.com>
 
 	* findvar.c: Include "builtin-regs.h".
