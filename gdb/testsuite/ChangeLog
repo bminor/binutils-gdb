@@ -1,3 +1,10 @@
+2003-11-13  Elena Zannoni  <ezannoni@redhat.com>
+
+	* gdb.base/break.c: Add comments to aid finding line numbers for
+	breakpoints.  
+	* gdb.base/break.exp: Remove all references to explicit line
+	numbers.
+
 2003-11-11  Nick Clifton  <nickc@redhat.com>
 
 	* gdb.base/shreloc.exp: Do not run for targets which do not
