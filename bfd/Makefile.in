@@ -107,9 +107,6 @@ OPTIONAL_BACKENDS = trad-core.o sco-core.o aix386-core.o hpux-core.o
 # These are defined by configure.in:
 # WORDSIZE=32
 # BFD_BACKENDS = $(BFD32_BACKENDS)
-# Change this (to MINIMIZE=1) to save space in executables.
-# Currently, all this does is control the target_vector in targets.c.
-# MINIMIZE=0
 
 all:
 
@@ -177,9 +174,8 @@ install-info: force
 
 # Various kinds of .o files to put in libbfd.a:
 # BFD_LIBS	Generic routines, always needed.
-# BFD_BACKENDS	Routines the target needs if it is the configured target.
-# BFD_MACHINES	Architecture-specific routines in cpu-*.o.
-#		Always set to ALL_MACHINES for now.
+# BFD_BACKENDS	Routines the configured targets need.
+# BFD_MACHINES	Architecture-specific routines the configured targets need.
 # HDEPFILES	Routines the host needs, regardless of target.
 # TDEPFILES	Routines the target needs, regardless of host.
 OFILES = $(BFD_LIBS) $(BFD_BACKENDS) $(BFD_MACHINES) $(HDEPFILES) $(TDEPFILES)
@@ -206,10 +202,10 @@ $(TARGETLIB): $(OFILES) ofiles
 
 
 targets.o: targets.c Makefile
-	$(CC) -c $(CFLAGS) $(HDEFINES) $(TDEFINES) $(CSEARCH) $(CSWITCHES) -DMINIMIZE=$(MINIMIZE) $(TDEFAULTS) $<
+	$(CC) -c $(CFLAGS) $(HDEFINES) $(TDEFINES) $(CSEARCH) $(CSWITCHES) $(TDEFAULTS) $<
 
 archures.o: archures.c Makefile
-	$(CC) -c $(CFLAGS) $(HDEFINES) $(TDEFINES) $(CSEARCH) $(CSWITCHES) -DMINIMIZE=$(MINIMIZE) $(TDEFAULTS) $<
+	$(CC) -c $(CFLAGS) $(HDEFINES) $(TDEFINES) $(CSEARCH) $(CSWITCHES) $(TDEFAULTS) $<
 
 subdir_do: force
 	@for i in $(DODIRS); do \

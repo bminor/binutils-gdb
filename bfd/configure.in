@@ -31,6 +31,11 @@ fi
 
 # per-target:
 
+if [ "x$target" = "xall" ]; then
+	echo "*** 'all' can not be the default target" 1>&2
+	exit 1
+fi
+
 # WHEN ADDING ENTRIES TO THIS MATRIX:
 #  Make sure that the left side always has two dashes.  Otherwise you
 #  can get spurious matches.  Even for unambiguous cases, do this as a
@@ -60,6 +65,7 @@ case "${target}" in
   i[34]86-*-elf)	bfd_target=i386-elf ;;
   i[34]86-*-netware*)	bfd_target=i386-nlm ;;
   i[34]86-*-linux*)	bfd_target=i386-linux ;;
+  i[34]86-*-lynx*)	bfd_target=i386-lynx ;;
   i[34]86-none-*)	bfd_target=i386-coff ;;
   i960-*-vxworks)	bfd_target=i960-bout ;;
   i960-*-aout)		bfd_target=i960-bout ;;
@@ -89,7 +95,10 @@ case "${target}" in
   sparc-*-solaris2*)	bfd_target=sparc-elf ;;
   sparc-*-sysv4*)	bfd_target=sparc-elf ;;
 #	start-sanitize-v9
-  sparc64-*-aout*)	bfd_target=sparc-aout ; target64=true ;;
+# Don't set target64=true for sparc64-*-aout*.  Keep it using the 32bit stuff
+# so we continue to have something that works (until the 64 bit support is
+# rock solid).
+  sparc64-*-aout*)	bfd_target=sparc-aout ;;
   sparc64-*-elf*)	bfd_target=sparc64-elf  ; target64=true ;;
 #	end-sanitize-v9
   sparc*-*-*)		bfd_target=sparc-aout ;;
@@ -119,33 +128,38 @@ case "${target}" in
   *-tandem-*)		bfd_target=st2000 ;;
 esac
 
-if [ ! -f ${srcdir}/config/${bfd_target}.mt ] ; then
-	if [ -n "${bfd_target}" ] ; then
-		echo '***' No file ${srcdir}/config/${bfd_target}.mt 1>&2
-	fi
-	echo '***' BFD does not support target ${target} 1>&2
-	echo '***' Look in bfd/configure.in for supported targets 1>&2
-	exit 1
-fi
-target_makefile_frag=config/${bfd_target}.mt
+[ -z "$bfd_target" ] && bfd_target="$target" # For error message.
 
-# We don't do any links based on the target system, just very minor makefile
+all_targets=false
+for targ in $bfd_target `echo $with_bfd_targets | sed 's/,/ /g'`
+do
+    if [ "x$targ" = "xall" ]; then
+        all_targets=true
+    else
+	if [ ! -f ${srcdir}/config/${targ}.mt ] ; then
+	    if [ -n "${targ}" ] ; then
+		echo '***' No file ${srcdir}/config/${targ}.mt 1>&2
+	    fi
+	    echo '***' BFD does not support target ${targ} 1>&2
+	    echo '***' Look in bfd/configure.in for supported targets 1>&2
+	    exit 1
+	fi
+
+	if [ "x$bfd_target" = "x$targ" ]; then
+	    target_makefile_frag=${srcdir}/config/${targ}.mt
+	else
+	    target_extra_frags="$target_extra_frags ${srcdir}/config/${targ}.mt"
+	fi
+    fi
+done
+
+# We don't do any links based on the target system, just minor makefile
 # config.
 
 # post-target:
 
 rm -f Makefile.tmp Makefile.2
 mv Makefile Makefile.tmp
-
-case ${with_minimal_bfd} in
-  yes)		echo MINIMIZE=1 > Makefile.2 ;;
-  no | "")	echo MINIMIZE=0 > Makefile.2 ;;
-  *)
-    echo "*** bad value \"${with_minimal_bfd}\" for minimal-bfd flag; ignored" 1>&2
-    with_minimal_bfd=no
-    echo MINIMIZE=0 > Makefile.2
-    ;;
-esac
 
 case ${with_64_bit_bfd} in
   yes)		want64=true  ;;
@@ -166,19 +180,108 @@ case ${host64}-${target64}-${want64} in
     ;;
 esac
 
-if [ x${with_minimal_bfd} = xyes ] \
-   && grep -s TARGET_BACKENDS ${srcdir}/${target_makefile_frag} ; then
-    echo 'BFD_BACKENDS = $(TARGET_BACKENDS)' >> Makefile.2
-else
-    echo 'BFD_BACKENDS = $(ALL_BACKENDS)' >> Makefile.2
-fi
+# The default vector in the primary target.
+DEFAULT_VECTOR=`sed -n '
+s/DEFAULT_VECTOR[ 	]*=[ 	]*\([^ 	]*\)/\1/p
+' $target_makefile_frag`
 
-if [ x${with_minimal_bfd} = xyes ] \
-   && grep -s TARGET_CPUS ${srcdir}/${target_makefile_frag} ; then
-    echo 'BFD_MACHINES = $(TARGET_CPUS)' >> Makefile.2
-else
+if [ x${all_targets} = xfalse ]; then
+
+    allfrags="$target_makefile_frag $target_extra_frags"
+
+    # The default and selected vectors in all the configured targets.
+    SELECT_VECS=`sed -n '
+    s/DEFAULT_VECTOR[ 	]*=[ 	]*\([^ 	]*\)/\1/p
+    s/SELECT_VECS[ 	]*=[ 	]*\([^ 	]*\)/\1/p
+    ' $allfrags | sort -u`
+
+    # The architectures in all the configured targets.
+    SELECT_ARCHITECTURES=`sed -n '
+    s/SELECT_ARCHITECTURES[ 	]*=[ 	]*//p
+    ' $allfrags | sort -u`
+
+    # Target backend .o files.
+    tb=
+
+    for vec in $SELECT_VECS
+    do
+	case "$vec" in
+	a29kcoff_big_vec)	tb="$tb coff-a29k.o" ;;
+	a_out_adobe_vec)	tb="$tb aout-adobe.o" ;;
+	aout_mips_little_vec)	tb="$tb mipsbsd.o" ;;
+	b_out_vec_big_host)	tb="$tb bout.o" ;;
+	b_out_vec_little_host)	tb="$tb bout.o" ;;
+	bfd_elf32_hppa_vec)	tb="$tb elf32-hppa.o elf32.o elf.o" ;;
+	bfd_elf32_i386_vec)	tb="$tb elf32-i386.o elf32.o elf.o" ;;
+	bfd_elf32_i860_vec)	tb="$tb elf32-i860.o elf32.o elf.o" ;;
+	bfd_elf32_m68k_vec)	tb="$tb elf32-m68k.o elf32.o elf.o" ;;
+	bfd_elf32_sparc_vec)	tb="$tb elf32-sparc.o elf32.o elf.o" ;;
+#	start-sanitize-v9
+	bfd_elf64_sparc_vec)	tb="$tb elf64-sparc.o elf64.o elf.o" ;;
+#	end-sanitize-v9
+	bfd_nlm32_i386_vec)	tb="$tb nlm32-i386.o" ;;
+	ecoff_big_vec)		tb="$tb coff-mips.o" ;;
+	ecoff_little_vec)	tb="$tb coff-mips.o" ;;
+	ecoffalpha_little_vec)	tb="$tb coff-alpha.o" ;;
+	h8300coff_vec)		tb="$tb coff-h8300.o" ;;
+	h8500coff_vec)		tb="$tb coff-h8500.o" ;;
+	host_aout_vec)		tb="$tb host-aout.o" ;;
+	hp300bsd_vec)		tb="$tb hp300bsd.o" ;;
+	hp300hpux_vec)		tb="$tb hp300hpux.o" ;;
+	hppa_vec)		tb="$tb hppa.o" ;;
+	i386aout_vec)		tb="$tb i386aout.o" ;;
+	i386bsd_vec)		tb="$tb i386bsd.o" ;;
+	i386coff_vec)		tb="$tb coff-i386.o" ;;
+	i386linux_vec)		tb="$tb i386linux.o" ;;
+	i386lynx_vec)		tb="$tb i386lynx.o" ;;
+	icoff_big_vec)		tb="$tb coff-i960.o" ;;
+	icoff_little_vec)	tb="$tb coff-i960.o" ;;
+	ieee_vec)		tb="$tb ieee.o" ;;
+	m68kcoff_vec)		tb="$tb coff-m68k.o" ;;
+	m68kcoffun_vec)		tb="$tb coff-u68k.o" ;;
+	m88kbcs_vec)		tb="$tb coff-m88k.o" ;;
+	newsos3_vec)		tb="$tb newsos3.o" ;;
+	rs6000coff_vec)		tb="$tb coff-rs6000.o" ;;
+	shcoff_vec)		tb="$tb coff-sh.o" ;;
+	srec_vec)		tb="$tb srec.o" ;;
+	sunos_big_vec)		tb="$tb sunos.o aout32.o stab-syms.o" ;;
+	symbolsrec_vec)		tb="$tb srec.o" ;;
+	we32kcoff_vec)		tb="$tb coff-we32k.o" ;;
+	z8kcoff_vec)		tb="$tb coff-z8k.o" ;;
+
+	"")			;;
+	*) echo "*** unknown target vector $vec in $f" 1>&2; exit 1 ;;
+	esac
+    done
+
+    # Target architecture .o files.
+    ta=`echo $SELECT_ARCHITECTURES | sed -e s/bfd_/cpu-/g -e s/_arch/.o/g`
+
+    # Weed out duplicate .o files.
+    tb=`echo $tb | tr -s ' ' '\012' | sort -u | tr '\012' ' '`
+    ta=`echo $ta | tr -s ' ' '\012' | sort -u | tr '\012' ' '`
+
+    echo "BFD_BACKENDS = $tb" >> Makefile.2
+    echo "BFD_MACHINES = $ta" >> Makefile.2
+
+    # Only set these if they will be nonempty, for the clever echo.
+    test -n "$SELECT_VECS" &&
+      selvecs=`echo $SELECT_VECS | sed -e 's/^/\&/' -e 's/ \(.\)/,\&\1/g'`
+    test -n "SELECT_ARCHITECTURES" &&
+      selarchs=`echo $SELECT_ARCHITECTURES | sed -e 's/ \(.\)/,\1/g'`
+
+else	# all_targets is true
+    echo 'BFD_BACKENDS = $(ALL_BACKENDS)' >> Makefile.2
     echo 'BFD_MACHINES = $(ALL_MACHINES)' >> Makefile.2
-fi
+fi	# all_targets is true
+
+test -n "$DEFAULT_VECTOR" && defvec="$DEFAULT_VECTOR"
+
+echo "TDEFAULTS = \
+${defvec+-DDEFAULT_VECTOR=$defvec} \
+${selvecs+-DSELECT_VECS='$selvecs'} \
+${selarchs+-DSELECT_ARCHITECTURES='$selarchs'}" \
+  >> Makefile.2
 
 cat Makefile.tmp >> Makefile.2
 rm -f Makefile.tmp

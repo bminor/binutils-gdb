@@ -1,3 +1,34 @@
+Sat Aug  7 09:14:21 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	* PORTING, TODO, config/README: Update to reflect below changes.
+
+	* configure.in: Replace MINIMIZE and --with-minimal-bfd with
+	--with-bfd-targets="target1,target2,..." and the special target
+	"all" to get the previous default behavior.
+	Figure out which architecture and backend .o files are needed from
+	DEFAULT_VECTOR, SELECT_VECS, and SELECT_ARCHITECTURES as set in
+	the .mt files.  Define TDEFAULTS based on them, also.
+
+	* Makefile.in: Remove references to MINIMIZE.
+	* archures.c, targets.c: Ditto.
+
+	* config/*.mt: Define DEFAULT_VECTOR, SELECT_VECS, and
+	SELECT_ARCHITECTURES as variables rather than as -D arguments to
+	TDEFAULTS.
+
+	* config/a29k-coff.mt,alphaosf.mt, i386-sco.mt, i960-bout.mt,
+	i960-coff.mt (TDEFAULTS): Don't put the default vector in
+	SELECT_VECS manually; it's automatic now.
+
+	* config/i386-sco.mt (TDEFAULTS): Don't put &sco_core_vec in
+	SELECT_VECS manually; -DSCO_CORE does it automatically now.
+
+	* config/h8300-coff.mt,h8500-coff.mt,sh-coff.mt,st2000.mt,z8k-coff.mt
+	(TDEFAULTS): Don't define BFD; not used.
+
+	* config/hppaosf.mh (HDEFINES): Don't define SELECT_ARCHITECTURES;
+	this is a host, not a target.
+
 Sat Aug  7 05:28:03 1993  Fred Fish  (fnf@deneb.cygnus.com)
 
 	* elfcode.h (elf_object_p):  Add comment about what this function
@@ -23,7 +54,7 @@ Fri Aug  6 12:00:03 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
 	* config/i386isc.mh (ALLOCA),
 	* config/go32.mh (EXTRALIBS): Don't define; not used.
 	* config/solaris2.mh (HDEFINES): Renamed from H_DEFINES.
-	* config/alphaosf.mt (TDEFINES): alphaosf.mt: Set it, not HDEFINES.
+	* config/alphaosf.mt (TDEFINES): Set it, not HDEFINES.
 	* config/z8k-coff.mt (CC): Don't define.  It's a target, not a host.
 
 	* config/.Sanitize (Things-to-keep): Add README.

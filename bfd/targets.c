@@ -318,31 +318,6 @@ in this structure.
 
 */
 
-/* The default is to define a target_vector containing all the targets.
-   By setting MINIMIZE=1 on the "make" command line, the user can change this
-   to a vector containing just DEFAULT_VECTOR and any required
-   traditional-core-file handler.  (This is to save space in the executables.)
-   The config files can also override the default large vector by giving an
-   explicit SELECT_VECS macro.  */
-
-#if MINIMIZE && defined(DEFAULT_VECTOR) && !defined(SELECT_VECS)
-#ifdef TRAD_CORE
-#define SELECT_VECS &DEFAULT_VECTOR,&trad_core_vec
-#endif
-#ifdef SCO_CORE
-#define SELECT_VECS &DEFAULT_VECTOR,&sco_core_vec
-#endif
-#ifdef AIX386_CORE
-#define SELECT_VECS &DEFAULT_VECTOR,&aix386_core_vec
-#endif
-#ifdef HPUX_CORE
-#define SELECT_VECS &DEFAULT_VECTOR,&hpux_core_vec
-#endif
-#ifndef SELECT_VECS
-#define SELECT_VECS &DEFAULT_VECTOR
-#endif
-#endif
-
 /* All known xvecs.  They are listed a second time below, since
    we can't intermix extern's and initializers.  */
 extern bfd_target i386lynx_vec;
@@ -397,14 +372,7 @@ extern bfd_target we32kcoff_vec;
 extern bfd_target shcoff_vec;
 extern bfd_target hp300hpux_vec;
 extern bfd_target hp300bsd_vec;
-
-#if defined (HOST_HPPAHPUX) || defined (HOST_HPPABSD)
 extern bfd_target hppa_vec;
-#endif
-
-#ifdef DEFAULT_VECTOR
-extern bfd_target DEFAULT_VECTOR;
-#endif
 
 bfd_target *target_vector[] = {
 
@@ -413,10 +381,6 @@ bfd_target *target_vector[] = {
 	SELECT_VECS,
 
 #else /* not SELECT_VECS */
-
-#ifdef DEFAULT_VECTOR
-	&DEFAULT_VECTOR,
-#endif
 
 	&i386coff_vec,
 	&i386aout_vec,
@@ -431,7 +395,7 @@ bfd_target *target_vector[] = {
 	   anymore. If you want to test the stuff yourself, go ahead...
 	   steve@cygnus.com
 	   Worse, since there is no magic number for archives, there
-	   can annoying target mis-matches.  */
+	   can be annoying target mis-matches.  */
 	&oasys_vec,
 #endif
 	&sunos_big_vec,
@@ -443,7 +407,9 @@ bfd_target *target_vector[] = {
 	&m88kbcs_vec,
 	&srec_vec,
 	&symbolsrec_vec,
-/*	&tekhex_vec,*/
+#if 0
+	&tekhex_vec,
+#endif
 	&icoff_little_vec,
 	&icoff_big_vec,
 	&bfd_elf32_sparc_vec,
@@ -478,6 +444,10 @@ bfd_target *target_vector[] = {
 	&hp300bsd_vec,
 	&we32kcoff_vec,
 
+#endif /* not SELECT_VECS */
+
+/* Add any required traditional-core-file-handler.  */
+
 #ifdef	TRAD_CORE
 	&trad_core_vec,
 #endif
@@ -491,8 +461,7 @@ bfd_target *target_vector[] = {
 	&hpux_core_vec,
 #endif
 
-#endif /* not SELECT_VECS */
-	NULL, /* end of list marker */
+	NULL /* end of list marker */
 };
 
 /* default_vector[0] contains either the address of the default vector,
@@ -502,7 +471,7 @@ bfd_target *default_vector[] = {
 #ifdef DEFAULT_VECTOR
 	&DEFAULT_VECTOR,
 #endif
-	0,
+	NULL
 };
 
 
