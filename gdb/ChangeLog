@@ -1,5 +1,18 @@
 2002-05-21  Jason Thorpe  <thorpej@wasabisystems.com>
 
+	* NEWS: Note new MIPS NetBSD native configuration. 
+	* configure.host (mips*-*-netbsd*): New host. 
+	* configure.tgt (mips*-*-netbsd*): New target. 
+	* mipsnbsd-nat.c: New file.
+	* mipsnbsd-tdep.c: New file.
+	* mipsnbsd-tdep.h: New file.
+	* config/mips/nbsd.mh: New file.
+	* config/mips/nbsd.mt: New file.
+	* config/mips/nm-nbsd.h: New file.
+	* config/mips/tm-nbsd.h: New file.
+
+2002-05-21  Jason Thorpe  <thorpej@wasabisystems.com>
+
 	* Makefile.in (SFILES): Add osabi.c.
 	(COMMON_OBS): Add osabi.o.
 	(osabi.o): New dependency list.

@@ -37,6 +37,7 @@ Atmel AVR					avr*-*-*
 
 Alpha NetBSD					alpha*-*-netbsd*
 SH NetBSD					sh*-*-netbsdelf*
+MIPS NetBSD					mips*-*-netbsd*
 
 * OBSOLETE configurations and files
 

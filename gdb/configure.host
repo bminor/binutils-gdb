@@ -118,6 +118,7 @@ mips-sgi-irix5*)	gdb_host=irix5 ;;
 mips-sgi-irix6*)	gdb_host=irix6 ;;
 mips-sony-*)		gdb_host=news-mips ;;
 mips*-*-linux*)		gdb_host=linux ;;
+mips*-*-netbsd*)	gdb_host=nbsd ;;
 mips-*-mach3*)		gdb_host=mipsm3 ;;
 mips-*-sysv4*)		gdb_host=mipsv4 ;;
 mips-*-sysv*)		gdb_host=riscos ;;
