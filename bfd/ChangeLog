@@ -611,7 +611,7 @@ start-sanitize-v850e
 Tue Sep  2 17:43:49 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* elf.c (prep_headers): Remove V850E magic number.
-	* elf.c (prep_headers): Remove V850EQ magic number.
+	* elf.c (prep_headers): Remove V850EA magic number.
 end-sanitize-v850e
 
 Tue Sep  2 17:35:05 1997  Doug Evans  <dje@canuck.cygnus.com>
@@ -692,14 +692,14 @@ start-sanitize-v850e
 	
 	* elf.c (prep_headers): Add support for v850e machine number. 
 
-	* archures.c (bfd_mach_v850eq): Machine value for v850eq.
+	* archures.c (bfd_mach_v850ea): Machine value for v850ea.
 	
-	* bfd-in2.h (bfd_mach_v850eq): Machine value for v850eq.
+	* bfd-in2.h (bfd_mach_v850ea): Machine value for v850ea.
 	
-	* elf32-v850.c (ELF_MACHINE_CODE): Default to v850eq machine
+	* elf32-v850.c (ELF_MACHINE_CODE): Default to v850ea machine
 	number.
 	
-	* elf.c (prep_headers): Add support for v850eq machine number. 
+	* elf.c (prep_headers): Add support for v850ea machine number. 
 end-sanitize-v850e
 
 Mon Aug 25 14:07:33 1997  Ian Lance Taylor  <ian@cygnus.com>
@@ -777,15 +777,15 @@ Mon Aug 18 11:33:56 1997  Nick Clifton  <nickc@cygnus.com>
 
 Mon Aug 18 11:33:56 1997  Nick Clifton  <nickc@cygnus.com>
 
-	* cpu-v850eq: New file.
+	* cpu-v850ea: New file.
 	
-	* elf.c (prep_headers): Add support for v850eq target.
+	* elf.c (prep_headers): Add support for v850ea target.
 	
-	* bfd-in2.h (bfd_architecture): Add support for v850eq target. 
+	* bfd-in2.h (bfd_architecture): Add support for v850ea target. 
 	
-	* config.bfd: Add support for v850eq target.
+	* config.bfd: Add support for v850ea target.
 
-	* archures.c: Add support for v850eq target.
+	* archures.c: Add support for v850ea target.
 end-sanitize-v850e
 
 Fri Aug 15 12:01:28 1997  Ian Lance Taylor  <ian@cygnus.com>

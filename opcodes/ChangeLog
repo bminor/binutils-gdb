@@ -395,8 +395,8 @@ Mon Aug 18 11:08:25 1997  Nick Clifton  <nickc@cygnus.com>
 
 Mon Aug 18 11:08:25 1997  Nick Clifton  <nickc@cygnus.com>
 
-	* configure (cgen_files): Add support for v850eq target.
-	* configure.in (cgen_files):  Add support for v850eq target.
+	* configure (cgen_files): Add support for v850ea target.
+	* configure.in (cgen_files):  Add support for v850ea target.
 end-sanitize-v850e
 
 Fri Aug 15 05:17:48 1997  Doug Evans  <dje@canuck.cygnus.com>
@@ -412,10 +412,10 @@ Fri Aug 15 05:17:48 1997  Doug Evans  <dje@canuck.cygnus.com>
 Wed Aug 13 18:52:11 1997  Nick Clifton  <nickc@cygnus.com>
 
 start-sanitize-v850e
-	* v850-dis.c (disassemble): Add support for v850EQ instructions.
+	* v850-dis.c (disassemble): Add support for v850EA instructions.
 	
 	* v850-opc.c (insert_i5div, extract_i5div): New Functions.
-	(v850_opcodes): Add v850EQ instructions.
+	(v850_opcodes): Add v850EA instructions.
 
 	* v850-dis.c (disassemble): Add support for v850E instructions.
 	

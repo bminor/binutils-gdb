@@ -150,32 +150,6 @@ Do-last:
 
 v850e_files="v850.sh"
 
-if ( echo $* | grep keep\-v850eq > /dev/null ) ; then
-	for i in $v850e_files ; do
-		if test ! -d $i && (grep sanitize-v850eq $i > /dev/null) ; then
-			if [ -n "${verbose}" ] ; then
-				echo Keeping v850eq stuff in $i
-			fi
-		fi
-	done
-else
-	for i in $v850e_files ; do
-		if test ! -d $i && (grep sanitize-v850eq $i > /dev/null) ; then
-			if [ -n "${verbose}" ] ; then
-				echo Removing traces of \"v850eq\" from $i...
-			fi
-			cp $i new
-			sed '/start\-sanitize\-v850eq/,/end-\sanitize\-v850eq/d' < $i > new
-			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
-				if [ -n "${verbose}" ] ; then
-					echo Caching $i in .Recover...
-				fi
-				mv $i .Recover
-			fi
-			mv new $i
-		fi
-	done
-fi
 if ( echo $* | grep keep\-v850e > /dev/null ) ; then
 	for i in $v850e_files ; do
 		if test ! -d $i && (grep sanitize-v850e $i > /dev/null) ; then
@@ -185,9 +159,6 @@ if ( echo $* | grep keep\-v850e > /dev/null ) ; then
 		fi
 	done
 else
-  if ( echo $* | grep keep\-v850eq > /dev/null ) ; then
-    true
-  else
 	for i in $v850e_files ; do
 		if test ! -d $i && (grep sanitize-v850e $i > /dev/null) ; then
 			if [ -n "${verbose}" ] ; then
@@ -204,6 +175,5 @@ else
 			mv new $i
 		fi
 	done
-  fi
 fi
 

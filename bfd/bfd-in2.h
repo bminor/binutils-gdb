@@ -1195,6 +1195,15 @@ enum bfd_architecture
 #define bfd_mach_sparc_v9_p(mach) \
   ((mach) >= bfd_mach_sparc_v8plus && (mach) <= bfd_mach_sparc_v9a)
   bfd_arch_mips,       /* MIPS Rxxxx */
+#define bfd_mach_mips3000		3000
+#define bfd_mach_mips6000		6000
+#define bfd_mach_mips4000		4000
+#define bfd_mach_mips8000		8000
+#define bfd_mach_mips16		  16
+  /* start-sanitize-vr5400 */
+#define bfd_mach_vr5400		5400
+#define bfd_mach_vr5000		5000
+  /* end-sanitize-vr5400 */
   bfd_arch_i386,       /* Intel 386 */
 #define bfd_mach_i386_i386 0
 #define bfd_mach_i386_i8086 1
@@ -1245,7 +1254,7 @@ enum bfd_architecture
 #define bfd_mach_v850          0
   /* start-sanitize-v850e */
 #define bfd_mach_v850e 	'E'
-#define bfd_mach_v850eq	'Q'
+#define bfd_mach_v850ea	'A'
   /* end-sanitize-v850e */
   bfd_arch_arc,        /* Argonaut RISC Core */
 #define bfd_mach_arc_base 0
@@ -1491,7 +1500,7 @@ bfd_check_overflow
  PARAMS ((enum complain_overflow how,
     unsigned int bitsize,
     unsigned int rightshift,
-    bfd_vma value));
+    bfd_vma relocation));
 
 bfd_reloc_status_type
 
