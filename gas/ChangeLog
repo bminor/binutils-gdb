@@ -1,3 +1,8 @@
+Sat May  4 11:26:19 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in: Add subsegs.h to appropriate TARG_CPU_DEP_*
+ 	variables.
+
 Fri May  3 17:58:31 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/obj-coff.c (coff_frob_symbol): Don't merge a symbol with
