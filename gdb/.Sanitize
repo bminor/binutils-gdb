@@ -70,6 +70,7 @@ coredep.c
 cplus-dem.c
 createtags
 dbxread.c
+deblib
 defs.h
 demangle.h
 depend
