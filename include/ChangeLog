@@ -8,6 +8,8 @@ Tue Sep  3 06:29:20 1991  John Gilmore  (gnu at cygint.cygnus.com)
 	order.  Update final table comment.
 	(N_DSLINE, N_BSLINE):  Renumber from 0x66 and 0x68, to 0x46 and 0x48.
 
+	* obstack.h:  GPL2.  Merge.
+
 Fri Aug 23 01:54:23 1991  John Gilmore  (gnu at cygint.cygnus.com)
 
 	* a.out.gnu.h, a.out.sun4.h:  Make SEGMENT_SIZE able to depend
