@@ -1,3 +1,8 @@
+2003-09-11  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-elf/merge2.s: New.
+	* ld-elf/merge2.d: New.
+
 2003-08-16  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* ld-mmix/bpo-9.d, ld-mmix/bpo-10.d, ld-mmix/bpo-11.d: Adjust for
