@@ -41,7 +41,9 @@ extern char *strsignal PARAMS ((int));
 
 #include "progress.h"
 
+#ifndef NO_MMALLOC
 #include "mmalloc.h"
+#endif
 
 /* For BFD64 and bfd_vma.  */
 #include "bfd.h"
@@ -640,16 +642,28 @@ extern void free ();
 #endif /* MALLOC_INCOMPATIBLE */
 
 #ifndef WIN32
+
+#ifndef strchr
 extern char *strchr ();
+#endif
 
+#ifndef strrchr
 extern char *strrchr ();
+#endif
 
+#ifndef strstr
 extern char *strstr ();
+#endif
 
+#ifndef strtok
 extern char *strtok ();
+#endif
 
+#ifndef strerror
 extern char *strerror ();
 #endif
+
+#endif	/* !WIN32 */
 
 /* Various possibilities for alloca.  */
 #ifndef alloca

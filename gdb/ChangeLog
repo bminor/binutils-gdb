@@ -1,3 +1,8 @@
+Sun Sep 10 15:36:21 1995  Fred Fish  <fnf@cygnus.com>
+
+	* defs.h: Only include mmalloc.h if NO_MMALLOC is not
+	defined.
+
 Sun Sep 10 10:24:48 1995  Michael Tiemann  <tiemann@axon.cygnus.com>
 
 	* tm-ppc-eabi.h (PC_IN_CALL_DUMMY): Redefine this to work with the
