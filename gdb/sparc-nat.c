@@ -25,6 +25,9 @@
 #include "gdbcore.h"
 #include "regcache.h"
 
+#ifdef HAVE_SYS_PARAM_H
+#include <sys/param.h>
+#endif
 #include <signal.h>
 #include <sys/ptrace.h>
 #include <sys/wait.h>
