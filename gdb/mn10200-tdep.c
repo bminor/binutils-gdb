@@ -153,14 +153,14 @@ mn10200_analyze_prologue (struct frame_info *fi, CORE_ADDR pc)
       if (status != 0)
 	{
 	  if (fi->next == NULL)
-	    fi->frame = read_sp ();
+	    deprecated_update_frame_base_hack (fi, read_sp ());
 	  return get_frame_pc (fi);
 	}
 
       if (buf[0] == 0xfe)
 	{
 	  if (fi->next == NULL)
-	    fi->frame = read_sp ();
+	    deprecated_update_frame_base_hack (fi, read_sp ());
 	  return get_frame_pc (fi);
 	}
     }
@@ -170,7 +170,7 @@ mn10200_analyze_prologue (struct frame_info *fi, CORE_ADDR pc)
   if (fi && get_frame_pc (fi) == func_addr)
     {
       if (fi->next == NULL)
-	fi->frame = read_sp ();
+	deprecated_update_frame_base_hack (fi, read_sp ());
       return get_frame_pc (fi);
     }
 
@@ -187,7 +187,7 @@ mn10200_analyze_prologue (struct frame_info *fi, CORE_ADDR pc)
   if (status != 0)
     {
       if (fi && fi->next == NULL && fi->status & MY_FRAME_IN_SP)
-	fi->frame = read_sp ();
+	deprecated_update_frame_base_hack (fi, read_sp ());
       return addr;
     }
 
@@ -218,7 +218,7 @@ mn10200_analyze_prologue (struct frame_info *fi, CORE_ADDR pc)
 	  /* We still haven't allocated our local stack.  Handle this
 	     as if we stopped on the first or last insn of a function.   */
 	  if (fi && fi->next == NULL)
-	    fi->frame = read_sp ();
+	    deprecated_update_frame_base_hack (fi, read_sp ());
 	  return addr;
 	}
 
@@ -226,7 +226,7 @@ mn10200_analyze_prologue (struct frame_info *fi, CORE_ADDR pc)
       if (status != 0)
 	{
 	  if (fi && fi->next == NULL)
-	    fi->frame = read_sp ();
+	    deprecated_update_frame_base_hack (fi, read_sp ());
 	  return addr;
 	}
       if (buf[0] == 0xf2 && buf[1] == 0x7e)
@@ -245,7 +245,7 @@ mn10200_analyze_prologue (struct frame_info *fi, CORE_ADDR pc)
       else
 	{
 	  if (fi && fi->next == NULL)
-	    fi->frame = read_sp ();
+	    deprecated_update_frame_base_hack (fi, read_sp ());
 	  return addr;
 	}
     }
@@ -263,7 +263,7 @@ mn10200_analyze_prologue (struct frame_info *fi, CORE_ADDR pc)
   if (status != 0)
     {
       if (fi && fi->next == NULL && (fi->status & MY_FRAME_IN_SP))
-	fi->frame = read_sp ();
+	deprecated_update_frame_base_hack (fi, read_sp ());
       return addr;
     }
   if (buf[0] == 0xd3)
@@ -275,7 +275,7 @@ mn10200_analyze_prologue (struct frame_info *fi, CORE_ADDR pc)
       if (addr >= stop)
 	{
 	  if (fi && fi->next == NULL && (fi->status & MY_FRAME_IN_SP))
-	    fi->frame = read_sp () - stack_size;
+	    deprecated_update_frame_base_hack (fi, read_sp () - stack_size);
 	  return addr;
 	}
     }
@@ -285,7 +285,7 @@ mn10200_analyze_prologue (struct frame_info *fi, CORE_ADDR pc)
       if (status != 0)
 	{
 	  if (fi && fi->next == NULL && (fi->status & MY_FRAME_IN_SP))
-	    fi->frame = read_sp ();
+	    deprecated_update_frame_base_hack (fi, read_sp ());
 	  return addr;
 	}
       stack_size = extract_signed_integer (buf, 2);
@@ -295,7 +295,7 @@ mn10200_analyze_prologue (struct frame_info *fi, CORE_ADDR pc)
       if (addr >= stop)
 	{
 	  if (fi && fi->next == NULL && (fi->status & MY_FRAME_IN_SP))
-	    fi->frame = read_sp () - stack_size;
+	    deprecated_update_frame_base_hack (fi, read_sp () - stack_size);
 	  return addr;
 	}
     }
@@ -305,7 +305,7 @@ mn10200_analyze_prologue (struct frame_info *fi, CORE_ADDR pc)
       if (status != 0)
 	{
 	  if (fi && fi->next == NULL && (fi->status & MY_FRAME_IN_SP))
-	    fi->frame = read_sp ();
+	    deprecated_update_frame_base_hack (fi, read_sp ());
 	  return addr;
 	}
       stack_size = extract_signed_integer (buf, 3);
@@ -315,7 +315,7 @@ mn10200_analyze_prologue (struct frame_info *fi, CORE_ADDR pc)
       if (addr >= stop)
 	{
 	  if (fi && fi->next == NULL && (fi->status & MY_FRAME_IN_SP))
-	    fi->frame = read_sp () - stack_size;
+	    deprecated_update_frame_base_hack (fi, read_sp () - stack_size);
 	  return addr;
 	}
     }
@@ -334,7 +334,7 @@ mn10200_analyze_prologue (struct frame_info *fi, CORE_ADDR pc)
       if (status != 0)
 	{
 	  if (fi && fi->next == NULL && (fi->status & MY_FRAME_IN_SP))
-	    fi->frame = read_sp ();
+	    deprecated_update_frame_base_hack (fi, read_sp ());
 	  return addr;
 	}
 
@@ -346,7 +346,7 @@ mn10200_analyze_prologue (struct frame_info *fi, CORE_ADDR pc)
       if (status == 0)
 	{
 	  if (fi && fi->next == NULL && (fi->status & MY_FRAME_IN_SP))
-	    fi->frame = read_sp ();
+	    deprecated_update_frame_base_hack (fi, read_sp ());
 	  return addr;
 	}
 
@@ -362,7 +362,7 @@ mn10200_analyze_prologue (struct frame_info *fi, CORE_ADDR pc)
 	  if (fi && fi->next == NULL)
 	    {
 	      fi->stack_size -= 16;
-	      fi->frame = read_sp () - fi->stack_size;
+	      deprecated_update_frame_base_hack (fi, read_sp () - fi->stack_size);
 	    }
 	  return addr;
 	}
@@ -375,7 +375,7 @@ mn10200_analyze_prologue (struct frame_info *fi, CORE_ADDR pc)
       if (status != 0)
 	{
 	  if (fi && fi->next == NULL && (fi->status & MY_FRAME_IN_SP))
-	    fi->frame = read_sp ();
+	    deprecated_update_frame_base_hack (fi, read_sp ());
 	  return addr;
 	}
 
@@ -387,7 +387,7 @@ mn10200_analyze_prologue (struct frame_info *fi, CORE_ADDR pc)
       if (status == 0)
 	{
 	  if (fi && fi->next == NULL && (fi->status & MY_FRAME_IN_SP))
-	    fi->frame = read_sp ();
+	    deprecated_update_frame_base_hack (fi, read_sp ());
 	  return addr;
 	}
 
@@ -403,7 +403,7 @@ mn10200_analyze_prologue (struct frame_info *fi, CORE_ADDR pc)
 	  if (fi && fi->next == NULL && (fi->status & MY_FRAME_IN_SP))
 	    {
 	      fi->stack_size -= 16;
-	      fi->frame = read_sp () - fi->stack_size;
+	      deprecated_update_frame_base_hack (fi, read_sp () - fi->stack_size);
 	    }
 	  return addr;
 	}
@@ -421,7 +421,7 @@ mn10200_analyze_prologue (struct frame_info *fi, CORE_ADDR pc)
 
       /* Update fi->frame if necessary.  */
       if (fi && fi->next == NULL)
-	fi->frame = read_sp () - fi->stack_size;
+	deprecated_update_frame_base_hack (fi, read_sp () - fi->stack_size);
 
       /* After the out of line prologue, there may be another
          stack adjustment for the outgoing arguments.
@@ -488,7 +488,7 @@ mn10200_analyze_prologue (struct frame_info *fi, CORE_ADDR pc)
       /* Now that we know the size of the outgoing arguments, fix
          fi->frame again if this is the innermost frame.  */
       if (fi && fi->next == NULL)
-	fi->frame -= outgoing_args_size;
+	deprecated_update_frame_base_hack (fi, fi->frame - outgoing_args_size);
 
       /* Note the register save information and update the stack
          size for this frame too.  */
@@ -510,7 +510,7 @@ mn10200_analyze_prologue (struct frame_info *fi, CORE_ADDR pc)
      need to fix fi->frame so that backtracing, find_frame_saved_regs,
      etc work correctly.  */
   if (fi && fi->next == NULL && (fi->status & MY_FRAME_IN_SP) != 0)
-    fi->frame = read_sp () - fi->stack_size;
+    deprecated_update_frame_base_hack (fi, read_sp () - fi->stack_size);
 
   /* And last we have the register saves.  These are relatively
      simple because they're physically done off the stack pointer,
@@ -639,7 +639,7 @@ mn10200_frame_chain (struct frame_info *fi)
      So we set up a dummy frame and call mn10200_analyze_prologue to
      find stuff for us.  */
   deprecated_update_frame_pc_hack (&dummy_frame, FRAME_SAVED_PC (fi));
-  dummy_frame.frame = fi->frame;
+  deprecated_update_frame_base_hack (&dummy_frame, fi->frame);
   memset (dummy_frame.fsr.regs, '\000', sizeof dummy_frame.fsr.regs);
   dummy_frame.status = 0;
   dummy_frame.stack_size = 0;

@@ -1123,7 +1123,7 @@ v850_frame_init_saved_regs (struct frame_info *fi)
 	  v850_scan_prologue (get_frame_pc (fi), &pi);
 
 	  if (!fi->next && pi.framereg == E_SP_REGNUM)
-	    fi->frame = read_register (pi.framereg) - pi.frameoffset;
+	    deprecated_update_frame_base_hack (fi, read_register (pi.framereg) - pi.frameoffset);
 
 	  for (pifsr = pifsrs; pifsr->framereg; pifsr++)
 	    {

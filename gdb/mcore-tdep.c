@@ -298,7 +298,7 @@ analyze_dummy_frame (CORE_ADDR pc, CORE_ADDR frame)
   dummy->next = NULL;
   dummy->prev = NULL;
   deprecated_update_frame_pc_hack (dummy, pc);
-  dummy->frame = frame;
+  deprecated_update_frame_base_hack (dummy, frame);
   dummy->extra_info->status = 0;
   dummy->extra_info->framesize = 0;
   memset (dummy->saved_regs, '\000', SIZEOF_FRAME_SAVED_REGS);
@@ -385,7 +385,7 @@ mcore_analyze_prologue (struct frame_info *fi, CORE_ADDR pc, int skip_prologue)
     {
       mcore_insn_debug (("MCORE: got jmp r15"));
       if (fi->next == NULL)
-	fi->frame = read_sp ();
+	deprecated_update_frame_base_hack (fi, read_sp ());
       return get_frame_pc (fi);
     }
 
@@ -393,7 +393,7 @@ mcore_analyze_prologue (struct frame_info *fi, CORE_ADDR pc, int skip_prologue)
   if (fi != NULL && get_frame_pc (fi) == func_addr)
     {
       if (fi->next == NULL)
-	fi->frame = read_sp ();
+	deprecated_update_frame_base_hack (fi, read_sp ());
       return get_frame_pc (fi);
     }
 
@@ -615,9 +615,9 @@ mcore_analyze_prologue (struct frame_info *fi, CORE_ADDR pc, int skip_prologue)
       if (fi->next == NULL)
 	{
 	  if (fi->extra_info->status & MY_FRAME_IN_SP)
-	    fi->frame = read_sp () + framesize;
+	    deprecated_update_frame_base_hack (fi, read_sp () + framesize);
 	  else
-	    fi->frame = read_register (fp_regnum) + framesize;
+	    deprecated_update_frame_base_hack (fi, read_register (fp_regnum) + framesize);
 	}
 
       /* Note where saved registers are stored. The offsets in REGISTER_OFFSETS
@@ -1052,7 +1052,7 @@ mcore_init_extra_frame_info (int fromleaf, struct frame_info *fi)
     {
       /* We need to setup fi->frame here because run_stack_dummy gets it wrong
          by assuming it's always FP.  */
-      fi->frame = deprecated_read_register_dummy (get_frame_pc (fi), fi->frame, SP_REGNUM);
+      deprecated_update_frame_base_hack (fi, deprecated_read_register_dummy (get_frame_pc (fi), fi->frame, SP_REGNUM));
     }
   else
     mcore_analyze_prologue (fi, 0, 0);

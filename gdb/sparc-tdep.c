@@ -320,17 +320,17 @@ sparc_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 	{
 	  /* A frameless function interrupted by a signal did not change
 	     the frame pointer, fix up frame pointer accordingly.  */
-	  fi->frame = get_frame_base (fi->next);
+	  deprecated_update_frame_base_hack (fi, get_frame_base (fi->next));
 	  fi->extra_info->bottom = fi->next->extra_info->bottom;
 	}
       else
 	{
 	  /* Should we adjust for stack bias here? */
 	  get_saved_register (buf, 0, 0, fi, FP_REGNUM, 0);
-	  fi->frame = extract_address (buf, REGISTER_RAW_SIZE (FP_REGNUM));
+	  deprecated_update_frame_base_hack (fi, extract_address (buf, REGISTER_RAW_SIZE (FP_REGNUM)));
 
 	  if (GDB_TARGET_IS_SPARC64 && (fi->frame & 1))
-	    fi->frame += 2047;
+	    deprecated_update_frame_base_hack (fi, fi->frame + 2047);
 	}
     }
 
@@ -368,10 +368,10 @@ sparc_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 
 	      /* Overwrite the frame's address with the value in %i7.  */
 	      get_saved_register (buf, 0, 0, fi, I7_REGNUM, 0);
-	      fi->frame = extract_address (buf, REGISTER_RAW_SIZE (I7_REGNUM));
+	      deprecated_update_frame_base_hack (fi, extract_address (buf, REGISTER_RAW_SIZE (I7_REGNUM)));
 
 	      if (GDB_TARGET_IS_SPARC64 && (fi->frame & 1))
-		fi->frame += 2047;
+		deprecated_update_frame_base_hack (fi, fi->frame + 2047);
 
 	      /* Record where the fp got saved.  */
 	      fi->extra_info->fp_addr = 
@@ -413,7 +413,7 @@ sparc_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 	      if (addr >= get_frame_pc (fi))
 		{
 		  fi->extra_info->in_prologue = 1;
-		  fi->frame = read_register (SP_REGNUM);
+		  deprecated_update_frame_base_hack (fi, read_register (SP_REGNUM));
 		}
 	    }
 	}
@@ -421,7 +421,7 @@ sparc_init_extra_frame_info (int fromleaf, struct frame_info *fi)
   if (fi->next && fi->frame == 0)
     {
       /* Kludge to cause init_prev_frame_info to destroy the new frame.  */
-      fi->frame = fi->next->frame;
+      deprecated_update_frame_base_hack (fi, fi->next->frame);
       deprecated_update_frame_pc_hack (fi, get_frame_pc (fi->next));
     }
 }

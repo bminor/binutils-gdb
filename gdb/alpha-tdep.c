@@ -1001,17 +1001,17 @@ alpha_init_extra_frame_info (int fromleaf, struct frame_info *frame)
       /* Fetch the frame pointer for a dummy frame from the procedure
          descriptor.  */
       if (PROC_DESC_IS_DUMMY (proc_desc))
-	frame->frame = (CORE_ADDR) PROC_DUMMY_FRAME (proc_desc);
+	deprecated_update_frame_base_hack (frame, (CORE_ADDR) PROC_DUMMY_FRAME (proc_desc));
 
       /* This may not be quite right, if proc has a real frame register.
          Get the value of the frame relative sp, procedure might have been
          interrupted by a signal at it's very start.  */
       else if (get_frame_pc (frame) == PROC_LOW_ADDR (proc_desc)
 	       && !alpha_proc_desc_is_dyn_sigtramp (proc_desc))
-	frame->frame = read_next_frame_reg (frame->next, SP_REGNUM);
+	deprecated_update_frame_base_hack (frame, read_next_frame_reg (frame->next, SP_REGNUM));
       else
-	frame->frame = read_next_frame_reg (frame->next, PROC_FRAME_REG (proc_desc))
-	  + PROC_FRAME_OFFSET (proc_desc);
+	deprecated_update_frame_base_hack (frame, read_next_frame_reg (frame->next, PROC_FRAME_REG (proc_desc))
+					   + PROC_FRAME_OFFSET (proc_desc));
 
       if (proc_desc == &temp_proc_desc)
 	{

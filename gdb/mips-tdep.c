@@ -2484,7 +2484,7 @@ mips_init_extra_frame_info (int fromleaf, struct frame_info *fci)
          interrupted by a signal at it's very start.  */
       if (get_frame_pc (fci) == PROC_LOW_ADDR (proc_desc)
 	  && !PROC_DESC_IS_DUMMY (proc_desc))
-	fci->frame = read_next_frame_reg (fci->next, SP_REGNUM);
+	deprecated_update_frame_base_hack (fci, read_next_frame_reg (fci->next, SP_REGNUM));
       else if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fci), 0, 0))
 	/* Do not ``fix'' fci->frame.  It will have the value of the
            generic dummy frame's top-of-stack (since the draft
@@ -2494,7 +2494,7 @@ mips_init_extra_frame_info (int fromleaf, struct frame_info *fci)
            part of the dummy frames data.  */
 	/* Do nothing.  */;
       else
-	fci->frame = get_frame_pointer (fci->next, proc_desc);
+	deprecated_update_frame_base_hack (fci, get_frame_pointer (fci->next, proc_desc));
 
       if (proc_desc == &temp_proc_desc)
 	{

@@ -522,7 +522,7 @@ avr_scan_prologue (struct frame_info *fi)
 	      locals |= ((insn & 0xf) | ((insn & 0x0f00) >> 4)) << 8;
 	      if (memcmp (prologue + vpc + 4, img, sizeof (img)) == 0)
 		{
-		  fi->frame = locals;
+		  deprecated_update_frame_base_hack (fi, locals);
 
 		  fi->extra_info->is_main = 1;
 		  return;
@@ -754,18 +754,17 @@ avr_init_extra_frame_info (int fromleaf, struct frame_info *fi)
     {
       /* We need to setup fi->frame here because run_stack_dummy gets it wrong
          by assuming it's always FP.  */
-      fi->frame = deprecated_read_register_dummy (get_frame_pc (fi), fi->frame,
-						  AVR_PC_REGNUM);
+      deprecated_update_frame_base_hack (fi, deprecated_read_register_dummy (get_frame_pc (fi), fi->frame,
+									     AVR_PC_REGNUM));
     }
   else if (!fi->next)		/* this is the innermost frame? */
-    fi->frame = read_register (fi->extra_info->framereg);
+    deprecated_update_frame_base_hack (fi, read_register (fi->extra_info->framereg));
   else if (fi->extra_info->is_main != 1)	/* not the innermost frame, not `main' */
     /* If we have an next frame,  the callee saved it. */
     {
       struct frame_info *next_fi = fi->next;
       if (fi->extra_info->framereg == AVR_SP_REGNUM)
-	fi->frame =
-	  next_fi->frame + 2 /* ret addr */  + next_fi->extra_info->framesize;
+	deprecated_update_frame_base_hack (fi, next_fi->frame + 2 /* ret addr */ + next_fi->extra_info->framesize);
       /* FIXME: I don't analyse va_args functions  */
       else
 	{
@@ -788,7 +787,7 @@ avr_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 	  fp_high =
 	    (fp1 ? read_memory_unsigned_integer (avr_make_saddr (fp1), 1) :
 	     read_register (AVR_FP_REGNUM + 1)) & 0xff;
-	  fi->frame = fp_low | (fp_high << 8);
+	  deprecated_update_frame_base_hack (fi, fp_low | (fp_high << 8));
 	}
     }
 

@@ -1,3 +1,10 @@
+2003-01-03  Andrew Cagney  <cagney@redhat.com>
+
+	* alpha-tdep.c: Use deprecated_update_frame_base_hack.
+	* avr-tdep.c, cris-tdep.c: Ditto.
+	* mcore-tdep.c, mips-tdep.c, mn10200-tdep.c: Ditto.
+	* sh-tdep.c, sparc-tdep.c, v850-tdep.c: Ditto.
+	
 2003-01-03  Mark Kettenis  <kettenis@gnu.org>
 
 	* configure.in: Remove --enable-netrom option.
