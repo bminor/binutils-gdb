@@ -54,6 +54,7 @@ proc gdb_target_sim { } {
 
     send "target sim $target_sim_options\n"
     set timeout 60
+    verbose "Timeout is now $timeout seconds" 2
     expect {
 	-re "Connected to the simulator.*$prompt $"	{
 	    verbose "Set target to sim"
@@ -65,6 +66,7 @@ proc gdb_target_sim { } {
 	}
     }
     set timeout 10
+    verbose "Timeout is now $timeout seconds" 2
 }
 
 #
@@ -84,22 +86,24 @@ proc gdb_load { arg } {
 
     send "load\n"
     set timeout 2400
+    verbose "Timeout is now $timeout seconds" 2
     expect {
 	-re ".*$prompt $" {
 	    if $verbose>1 then {
 		send_user "Loaded $arg into $GDB\n"
 	    }
 	    set timeout 30
+	    verbose "Timeout is now $timeout seconds" 2
 	    return 1
 	}
 	-re "$prompt $"     {
 	    if $verbose>1 then {
-	 perror "GDB couldn't load."
+		perror "GDB couldn't load."
 	    }
 	}
 	timeout {
 	    if $verbose>1 then {
-	 perror "Timed out trying to load $arg."
+		perror "Timed out trying to load $arg."
 	    }
 	}
     }

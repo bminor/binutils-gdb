@@ -44,6 +44,7 @@ proc test_with_self {} {
     global tool
     global det_file
     global decimal
+    global timeout
 
     # load yourself into the debugger
     # This can take a relatively long time, particularly for testing where
@@ -56,6 +57,7 @@ proc test_with_self {} {
     # of this test, and then back to the original value.
 
     set timeout 600
+    verbose "Timeout is now $timeout seconds" 2
     if {[gdb_load "./x$tool"] <0} then {
 	return -1
     }
@@ -118,6 +120,7 @@ proc test_with_self {} {
     # It may take a very long time for the inferior gdb to start (lynx),
     # so we wait until after it's started to reset the timeout value.
     set timeout 30
+    verbose "Timeout is now $timeout seconds" 2
 
     # do we have a version number ?
     send "print version\n"

@@ -1,3 +1,25 @@
+Tue Jun 25 19:59:17 1996  Fred Fish  <fnf@cygnus.com>
+
+	* lib/gdb.exp: Report timeout value for verbosity level 2.
+	* config/gdbserver.exp: Ditto.
+	* config/hppro.exp: Ditto.
+	* config/mips-gdb.exp: Ditto.
+	* config/monitor.exp: Ditto.
+	* config/netware.exp: Ditto.
+	* config/sim-gdb.exp: Ditto.
+	* config/slite-gdb.exp: Ditto.
+	* config/udi-gdb.exp: Ditto.
+	* config/unix-gdb.exp: Ditto.
+	* config/vx-gdb.exp: Ditto.
+	* gdb.base/a1-selftest.exp: Ditto.
+	* gdb.base/a2-run.exp: Ditto.
+	* gdb.base/break.exp: Ditto.
+	* gdb.base/corefile.exp: Ditto.
+	* gdb.base/list.exp: Ditto.
+	* gdb.base/recurse.exp: Ditto.
+	* gdb.base/scope.exp: Ditto.
+	* gdb.base/signals.exp: Ditto.
+
 Tue Jun 25 23:16:58 1996  Jason Molenda  (crash@godzilla.cygnus.co.jp)
 
 	* gdb.threads/Makefile.in (docdir): Removed.

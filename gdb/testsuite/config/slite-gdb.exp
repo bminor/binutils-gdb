@@ -81,6 +81,7 @@ proc gdb_load { arg } {
 
     send "target sparclite $targetname\n"
     set timeout 60
+    verbose "Timeout is now $timeout seconds" 2
     expect {
 	-re ".*SPARClite appears to be alive.*$prompt $"	{
 	    if $verbose>1 then {
@@ -90,6 +91,7 @@ proc gdb_load { arg } {
 	timeout { 
 	    perror "Couldn't set SLITE target."
 	    set timeout 10
+	    verbose "Timeout is now $timeout seconds" 2
 	    return -1
 	}
     }
@@ -99,12 +101,14 @@ proc gdb_load { arg } {
 	send_user "Loading $arg into $GDB\n"
     }
     set timeout 2400
+    verbose "Timeout is now $timeout seconds" 2
     expect {
 	-re "Loading.*$prompt $" {
 	    if $verbose>1 then {
 		send_user "Loaded $arg into $GDB\n"
 	    }
 	    set timeout 30
+	    verbose "Timeout is now $timeout seconds" 2
 	}
 	-re "$prompt $"     {
 	    if $verbose>1 then {
@@ -118,9 +122,11 @@ proc gdb_load { arg } {
 	}
     }
     set timeout 10
+    verbose "Timeout is now $timeout seconds" 2
 
     send "target remote $targetname\n"
     set timeout 60
+    verbose "Timeout is now $timeout seconds" 2
     expect {
 	-re ".*$prompt $"	{
 	    if $verbose>1 then {
@@ -130,6 +136,7 @@ proc gdb_load { arg } {
 	timeout { 
 	    perror "Couldn't set remote target."
 	    set timeout 10
+	    verbose "Timeout is now $timeout seconds" 2
 	    return -1
 	}
     }
@@ -224,6 +231,7 @@ proc gdb_start { } {
 #    }
 #    send "target mips $targetname\n"
 #    set timeout 60
+#    verbose "Timeout is now $timeout seconds" 2
 #    expect {
 #	-re "Remote MIPS debugging.*$prompt $"	{
 #	    if $verbose>1 then {
@@ -233,10 +241,12 @@ proc gdb_start { } {
 #	timeout { 
 #	    perror "Couldn't set MIPS target."
 #	    set timeout 10
+#	    verbose "Timeout is now $timeout seconds" 2
 #	    return -1
 #	}
 #    }
     set timeout 10
+    verbose "Timeout is now $timeout seconds" 2
 }
 
 expect_after {

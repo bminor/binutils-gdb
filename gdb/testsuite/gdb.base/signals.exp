@@ -18,12 +18,14 @@ if  { [compile "${srcdir}/${subdir}/${srcfile} -g -o ${binfile}"] != "" } {
     return -1
 }
 
+# Create and source the file that provides information about the compiler
+# used to compile the test case.
 execute_anywhere "rm -f ${binfile}.ci"
 if  { [compile "-E ${srcdir}/${subdir}/compiler.c > ${binfile}.ci"] != "" } {
-    perror "Couldn't make ${testfile}.ci file"
+    perror "Couldn't make ${binfile}.ci file"
     return -1
 }
-source gdb.base/${testfile}.ci
+source ${binfile}.ci
 
 proc signal_tests_1 {} {
     global prompt
@@ -303,8 +305,8 @@ proc test_handle_all_print {} {
     # Increase timeout and expect input buffer for large output from gdb.
     # Allow blank or TAB as whitespace characters.
     set timeout 30
+    verbose "Timeout is now $timeout seconds" 2
     match_max 8000
-    setup_xfail "alpha-dec-osf2*"
     gdb_test "handle all print" "Signal\[ 	\]+Stop\[ 	\]+Print\[ 	\]+Pass to program\[ 	\]+Description\r\nSIGHUP\[ 	\]+Yes\[ 	\]+Yes\[ 	\]+Yes\[ 	\]+Hangup.*SIG63\[ 	\]+Yes\[ 	\]+Yes\[ 	\]+Yes\[ 	\]+Real-time event 63"
 }
 test_handle_all_print
@@ -365,9 +367,8 @@ if [runto_main] then {
 The program being debugged stopped while in a function called from GDB.*" \
 	"p func1 () #2 in signals.exp"
     # But we should be able to backtrace...
-    # On alpha-*-osf2.0 this test works when run manually but fails when
+    # On alpha-*-osf2.0 this test works when run manually but sometime fails when
     # run under dejagnu, making it very hard to debug the problem.  Weird...
-    if {$gcc_compiled} then { setup_xfail "alpha-*-osf2*" }
     gdb_test "bt" "#0.*handler.*#1.*#2.*main.*" "bt in signals.exp"
     # ...and continue...
     gdb_test "continue" "Continuing\\." "continue in signals.exp"

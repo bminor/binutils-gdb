@@ -28,24 +28,29 @@ set bug_id 0
 
 set testfile "list"
 set binfile ${objdir}/${subdir}/${testfile}
-if  { [compile "${srcdir}/${subdir}/list0.c -g -c -o ${binfile}0.o"] != "" } {
+if  { [compile "-g -c ${srcdir}/${subdir}/list0.c"] != "" } {
     perror "Couldn't compile ${testfile}0.c to object"
     return -1
 }
-if  { [compile "${srcdir}/${subdir}/list1.c -g -c -o ${binfile}1.o"] != "" } {
+execute_anywhere "mv list0.o ${binfile}0.o"
+if  { [compile "-g -c ${srcdir}/${subdir}/list1.c"] != "" } {
     perror "Couldn't compile ${testfile}1.c to object"
     return -1
 }
+execute_anywhere "mv list1.o ${binfile}1.o"
 if  { [compile "${binfile}0.o ${binfile}1.o -o ${binfile}"] != "" } {
     perror "Couldn't link ${testfile}."
     return -1
 }
 
+# Create and source the file that provides information about the compiler
+# used to compile the test case.
 execute_anywhere "rm -f ${binfile}.ci"
 if  { [compile "-E ${srcdir}/${subdir}/compiler.c > ${binfile}.ci"] != "" } {
-    perror "Couldn't make ${testfile}.ci file"
+    perror "Couldn't make ${binfile}.ci file"
     return -1
 }
+source ${binfile}.ci
 
 #
 # Local utility proc just to set and verify listsize
@@ -545,7 +550,6 @@ proc test_list_function {} {
     # Ultrix gdb is the second case, still correct.
     # SunPRO cc is the third case.
     setup_xfail "powerpc-*-*"
-    if {$gcc_compiled} then { setup_xfail "rs6000-*-*" }
     send "list foo\n"
     expect {
 	-re "2\[ \t\]+including file.*11\[ \t\]+bar \[(\]+.*\[)\]+;\r\n$prompt $" {
@@ -894,6 +898,7 @@ proc test_forward_search {} {
 	# being searched is extremely long.
 
 	set timeout 30
+	verbose "Timeout is now $timeout seconds" 2
 	gdb_test "search 1234" ""
 }
 
@@ -903,8 +908,6 @@ gdb_exit
 gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
 gdb_load ${binfile}
-
-source ${binfile}.ci
 
 if $usestubs {
     send "step\n"

@@ -24,6 +24,7 @@
 # When running the tests over NFS, under somewhat heavy load, 10 seconds
 # does not seem to be enough.  Try starting with 30.
 set timeout 30
+verbose "Timeout is now $timeout seconds" 2
 
 load_lib gdb.exp
 

@@ -47,6 +47,7 @@ proc gdb_target_udi { } {
     # set targets hostname
     send "target udi $targetname\n"
     set timeout 60
+    verbose "Timeout is now $timeout seconds" 2
     expect {
 	-re "target udi $targetname\[\r\n\]+" {
 	    exp_continue
@@ -71,6 +72,7 @@ proc gdb_target_udi { } {
 	}
     }
     set timeout 10
+    verbose "Timeout is now $timeout seconds" 2
 }
 
 #

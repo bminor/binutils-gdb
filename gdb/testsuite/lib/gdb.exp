@@ -35,38 +35,39 @@ global CHILL_RT0
 
 if ![info exists CC] {
     set CC [findfile $base_dir/../../gcc/xgcc "$base_dir/../../gcc/xgcc -B$base_dir/../../gcc/" [transform gcc]]
-    verbose "CC defaulting to $CC" 2
 }
+verbose "using CC = $CC" 2
 if ![info exists CXX] {
     set CXX [findfile $base_dir/../../gcc/xgcc "$base_dir/../../gcc/xgcc -B$base_dir/../../gcc/" [transform g++]]
-    verbose "CXX defaulting to $CC" 2
 }
+verbose "using CXX = $CXX" 2
 if ![info exists CHILL_LIB] {
     set CHILL_LIB [findfile $base_dir/../../gcc/ch/runtime/libchill.a "$base_dir/../../gcc/ch/runtime/libchill.a" [transform -lchill]]
-    verbose "CHILL_LIB defaulting to $CHILL_LIB" 2
 }
+verbose "using CHILL_LIB = $CHILL_LIB" 2
 if ![info exists CHILL_RT0] {
     set CHILL_RT0 [findfile $base_dir/../../gcc/ch/runtime/chillrt0.o "$base_dir/../../gcc/ch/runtime/chillrt0.o" ""]
-    verbose "CHILL_RT0 defaulting to $CHILL_RT0" 2
 }
+verbose "using CHILL_RT0 = $CHILL_RT0" 2
 
 if ![info exists LDFLAGS] {
     if [is3way] {
 	append LDFLAGS " [libgloss_flags] [newlib_flags]"
     }
     set LDFLAGS ""
-    verbose "LDFLAGS defaulting to $LDFLAGS" 2
 }
+verbose "using LDFLAGS = $LDFLAGS" 2
 
 if ![info exists GDB] then {
     set GDB [findfile $base_dir/../../gdb/gdb "$base_dir/../../gdb/gdb" [transform gdb]]
 }
-
+verbose "using GDB = $GDB" 2
 
 global GDBFLAGS
 if ![info exists GDBFLAGS] then {
     set GDBFLAGS "-nx"
 }
+verbose "using GDBFLAGS = $GDBFLAGS" 2
 
 # The variable prompt is a regexp which matches the gdb prompt.  Set it if it
 # is not already set.
@@ -92,6 +93,10 @@ if ![info exists nosignals] then {
 
 if ![info exists noinferiorio] then {
     set noinferiorio 0
+}
+
+if ![info exists noresults] then {
+    set noresults 0
 }
 
 #
@@ -185,7 +190,7 @@ proc gdb_run_cmd {} {
 		send "y\n"
 		expect {
 		    -re "Continuing.*$prompt $" {}
-		    timeout { perror "Jump to start() failed"; return }
+		    timeout { perror "Jump to start() failed (timeout)"; return }
 		}
             }
 	    timeout { perror "Jump to start() failed (timeout)"; return }
@@ -521,6 +526,7 @@ proc default_gdb_exit {} {
 
     # This used to be 1 for unix-gdb.exp
     set timeout 5
+    verbose "Timeout is now $timeout seconds" 2
 
     # We used to try to send "quit" to GDB, and wait for it to die.
     # Dealing with all the cases and errors got pretty hairy.  Just close it, 
@@ -614,6 +620,7 @@ proc default_gdb_start { } {
     
     set oldtimeout $timeout
     set timeout [expr "$timeout + 60"]
+    verbose "Timeout is now $timeout seconds" 2
     eval "spawn $GDB -nw $GDBFLAGS"
     expect {
 	-re ".*\r\n$prompt $" {
@@ -629,6 +636,7 @@ proc default_gdb_start { } {
 	}
     }
     set timeout $oldtimeout
+    verbose "Timeout is now $timeout seconds" 2
     # force the height to "unlimited", so no pagers get used
     send "set height 0\n"
     expect {
