@@ -1,3 +1,8 @@
+2002-05-02  Michael Snyder  <msnyder@redhat.com>
+
+	* gdb.base/long_long.exp: Add xscale target.
+	* gdb.base/default.exp: Add xscale target.
+
 2002-05-01  Jim Blandy  <jimb@redhat.com>
 
 	* gdb.c++/hang1.C, gdb.c++/hang2.C, gdb.c++/hang.H,

@@ -348,6 +348,8 @@ gdb_test "info files" "" "info files"
 #test info float
 if [istarget "arm*-*-*"] then {
     gdb_test "info float" "Software FPU type.*mask:.*flags:.*" "info float"
+} elseif [istarget "xscale*-*-*"] then {
+    gdb_test "info float" "Software FPU type.*mask:.*flags:.*" "info float"
 } elseif [istarget "thumb*-*-*"] then {
     gdb_test "info float" "Software FPU type.*mask:.*flags:.*" "info float"
 } elseif [istarget "strongarm*-*-*"] then {

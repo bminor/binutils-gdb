@@ -157,6 +157,11 @@ if { $sizeof_double == 8 } {
 #   assume the long long represents a floating point double in ARM format
      gdb_test "p/f oct" ".*2.1386676354387559e\\+265.*"
 
+  } elseif [ istarget "xscale*-*-*" ] then {
+
+#   assume the long long represents a floating point double in ARM format
+     gdb_test "p/f oct" ".*2.1386676354387559e\\+265.*"
+
   } else {
 
 #   assume the long long represents a floating point double in little
