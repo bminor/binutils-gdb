@@ -1,3 +1,7 @@
+Tue Feb 11 15:45:43 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* configure.host (i386-windows): Don't set host64=true.
+
 Tue Feb 11 15:27:32 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* elf32-mips.c (reloc_type): Add R_MIPS16_GPREL.
