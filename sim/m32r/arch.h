@@ -33,7 +33,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* Macros to determine which cpus are supported.  */
 #define HAVE_CPU_M32R
 /* start-sanitize-m32rx */
-#define HAVE_CPU_M32RX
+/*#define HAVE_CPU_M32RX*/
 /* end-sanitize-m32rx */
 
 /* Enum declaration for mode types.  */
