@@ -45,7 +45,7 @@ INSTALL_PROGRAM = $(INSTALL)
 INSTALL_DATA = $(INSTALL)
 
 AR = ar
-AR_FLAGS = qv
+AR_FLAGS = qc
 RANLIB = ranlib
 
 BISON = `if [ -d $(unsubdir)/../bison ] ; \
@@ -58,7 +58,7 @@ FRESHMAKEINFO = `if [ -d $(unsubdir)/../texinfo/C ] ; \
 	else echo echo ; fi`
 
 #\`(cd $(srcdir)/bison ; \\`pwd\\`)\`
-SUBDIRS = libiberty glob readline bfd gdb binutils ld gas gcc gnulib clib
+SUBDIRS = libiberty glob readline bfd gdb binutils ld gas gcc libg++ gnulib clib
 OTHERS = 
 
 ALL = all.normal
@@ -97,8 +97,10 @@ install-dir.info:
 	$(INSTALL_DATA) dir.info $(infodir)/dir.info
 
 # clib prms
-all.normal: all-texinfo all-bison all-byacc all-flex all-ld all-gnulib \
-	all-gdb all-make all-cvs all-emacs all-ispell all-fileutils
+#	all-gnulib
+all.normal: all-texinfo all-bison all-byacc all-flex all-ld \
+	all-gcc all-gas all-binutils \
+	all-libg++ all-gdb all-make all-cvs all-emacs all-ispell all-fileutils
 all.cross: all-bison all-ld all-gnulib all-gdb
 #	$(MAKE) subdir_do DO=all "DODIRS=$(SUBDIRS) $(OTHERS)"
 
@@ -109,8 +111,8 @@ clean: clean-libiberty clean-texinfo clean-bfd clean-binutils \
 	clean-cvs clean-emacs clean-ispell clean-fileutils
 	rm -rf *.a TEMP errs core *.o *~ \#* TAGS *.E
 
-install: $(INSTALL_TARGET)
-	$(INSTALL_DATA) configure.man $(man1dir)/configure.1
+install: $(INSTALL_TARGET) $(srcdir)/configure.man
+	$(INSTALL_DATA) $(srcdir)/configure.man $(man1dir)/configure.1
 
 install.all: install-dirs install-libiberty install-texinfo \
 	install-binutils install-bison install-byacc install-flex \
@@ -466,7 +468,8 @@ install-bison: force
 ### gcc
 .PHONY: all-gcc just-gcc
 all-gcc: just-gcc
-just-gcc: just-libiberty just-bison just-gnulib1 force
+#just-gcc: just-libiberty just-bison just-gnulib1 force
+just-gcc: just-libiberty just-bison force
 	if [ -d $(unsubdir)/gcc ] ; then \
 		(cd $(unsubdir)/gcc$(subdir); \
 		$(MAKE) \
@@ -791,6 +794,7 @@ install-gnulib1: force
 
 all-gnulib: just-gnulib
 just-gnulib: all-gcc all-gas all-binutils force
+	true
 	if [ -d $(unsubdir)/gnulib ] ; then \
 		(cd $(unsubdir)/gnulib$(subdir); \
 		$(MAKE) \
@@ -1207,7 +1211,7 @@ just-cvs: just-gdbm force
 		true ; \
 	fi
 
-clean-cvs: force
+clean-cvs: clean-gdbm force
 	if [ -d $(unsubdir)/cvs ] ; then \
 		(cd $(unsubdir)/cvs$(subdir); \
 		$(MAKE) \
@@ -1462,6 +1466,75 @@ clean-fileutils: force
 install-fileutils: force
 	if [ -d $(unsubdir)/fileutils ] ; then \
 		(cd $(unsubdir)/fileutils$(subdir); \
+		$(MAKE) \
+			"prefix=$(prefix)" \
+			"datadir=$(datadir)" \
+			"mandir=$(mandir)" \
+			"against=$(against)" \
+			"AR=$(AR)" \
+			"AR_FLAGS=$(AR_FLAGS)" \
+			"CC=$(CC)" \
+			"RANLIB=$(RANLIB)" \
+			"LOADLIBES=$(LOADLIBES)" \
+			"LDFLAGS=$(LDFLAGS)" \
+			"BISON=$(BISON)" \
+			"MAKEINFO=$(MAKEINFO)" \
+			install) ; \
+	else \
+		true ; \
+	fi
+
+### libg++
+.PHONY: all-libg++ just-libg++
+all-libg++: just-libg++
+# NOTE!  We have added GXX= to the $(MAKE) line!!!  Do not clone this one.
+just-libg++: just-gcc force
+	if [ -d $(unsubdir)/libg++ ] ; then \
+		MYGCC="`pwd`/gcc"; \
+		(cd $(unsubdir)/libg++$(subdir); \
+		$(MAKE) \
+			GXX="$(GCCDIR)/gcc -B$(GCCDIR)/" \
+			"prefix=$(prefix)" \
+			"datadir=$(datadir)" \
+			"mandir=$(mandir)" \
+			"against=$(against)" \
+			"AR=$(AR)" \
+			"AR_FLAGS=$(AR_FLAGS)" \
+			"CC=$(CC)" \
+			"RANLIB=$(RANLIB)" \
+			"LOADLIBES=$(LOADLIBES)" \
+			"LDFLAGS=$(LDFLAGS)" \
+			"BISON=$(BISON)" \
+			"MAKEINFO=$(MAKEINFO)" \
+			all) ; \
+	else \
+		true ; \
+	fi
+
+clean-libg++: force
+	if [ -d $(unsubdir)/libg++ ] ; then \
+		(cd $(unsubdir)/libg++$(subdir); \
+		$(MAKE) \
+			"prefix=$(prefix)" \
+			"datadir=$(datadir)" \
+			"mandir=$(mandir)" \
+			"against=$(against)" \
+			"AR=$(AR)" \
+			"AR_FLAGS=$(AR_FLAGS)" \
+			"CC=$(CC)" \
+			"RANLIB=$(RANLIB)" \
+			"LOADLIBES=$(LOADLIBES)" \
+			"LDFLAGS=$(LDFLAGS)" \
+			"BISON=$(BISON)" \
+			"MAKEINFO=$(MAKEINFO)" \
+			clean) ; \
+	else \
+		true ; \
+	fi
+
+install-libg++: force
+	if [ -d $(unsubdir)/libg++ ] ; then \
+		(cd $(unsubdir)/libg++$(subdir); \
 		$(MAKE) \
 			"prefix=$(prefix)" \
 			"datadir=$(datadir)" \
