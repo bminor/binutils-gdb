@@ -166,6 +166,7 @@ corelow.c
 cp-valprint.c
 cpu32bug-rom.c
 cxux-nat.c
+dbug-rom.c
 dbxread.c
 dcache.c
 dcache.h
