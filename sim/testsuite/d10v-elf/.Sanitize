@@ -2,12 +2,17 @@ Do-first:
 
 Things-to-keep:
 
+ChangeLog
 Makefile.in
 configure
 configure.in
 exit47.s
 hello.s
 loop.s
+t-macros.i
+t-rachi.s
+t-rep.s
+t-subi.s
 
 Things-to-lose:
 

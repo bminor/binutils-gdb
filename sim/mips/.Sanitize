@@ -48,7 +48,6 @@ configure.in
 gencode.c
 interp.c
 sim-main.h
-support.h
 tconfig.in
 mips.igen
 m16.igen
