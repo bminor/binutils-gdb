@@ -405,8 +405,6 @@ const struct language_defn m2_language_defn = {
   m2_create_fundamental_type,	/* Create fundamental type in this language */
   m2_print_type,		/* Print a type using appropriate syntax */
   m2_val_print,			/* Print a value using appropriate syntax */
-  &builtin_type_m2_int,		/* longest signed   integral type */
-  &builtin_type_m2_card,	/* longest unsigned integral type */
   &builtin_type_m2_real,	/* longest floating point type */
   {"",      "",   "",   ""},	/* Binary format info */
   {"%loB",   "",   "o",  "B"},	/* Octal format info */

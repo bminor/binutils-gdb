@@ -315,8 +315,6 @@ const struct language_defn chill_language_defn = {
   chill_create_fundamental_type,/* Create fundamental type in this language */
   chill_print_type,		/* Print a type using appropriate syntax */
   chill_val_print,		/* Print a value using appropriate syntax */
-  &BUILTIN_TYPE_LONGEST,	/* longest signed   integral type */
-  &BUILTIN_TYPE_UNSIGNED_LONGEST,/* longest unsigned integral type */
   &builtin_type_chill_real,	/* longest floating point type */
   {"",      "B'",  "",   ""},	/* Binary format info */
   {"O'%lo",  "O'",  "o",  ""},	/* Octal format info */

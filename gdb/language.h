@@ -144,14 +144,6 @@ struct language_defn
   int (*la_val_print) PARAMS ((struct type *, char *,  CORE_ADDR, GDB_FILE *,
 			       int, int, int, enum val_prettyprint));
 
-  /* Longest signed integral type */
-
-  struct type **la_longest_int;
-
-  /* Longest unsigned integral type */
-
-  struct type **la_longest_unsigned_int;
-
   /* Longest floating point type */
 
   struct type **la_longest_float;
@@ -244,8 +236,6 @@ set_language PARAMS ((enum language));
    with the "set language" command. */
 
 /* Returns some built-in types */
-#define	longest_int()		(*current_language->la_longest_int)
-#define	longest_unsigned_int()	(*current_language->la_longest_unsigned_int)
 #define	longest_float()		(*current_language->la_longest_float)
 
 #define create_fundamental_type(objfile,typeid) \
