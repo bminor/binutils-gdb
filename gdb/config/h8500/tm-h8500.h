@@ -19,7 +19,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* Contributed by Steve Chamberlain sac@cygnus.com */
 
-
+#define GDB_TARGET_IS_H8500
 
 #define IEEE_FLOAT 1
 
@@ -83,19 +83,21 @@ extern CORE_ADDR h8500_skip_prologue ();
 
 /* Say how much memory is needed to store a copy of the register set */
 
-#define REGISTER_BYTES    ((NUM_REGS)*4) 
+#define REGISTER_BYTES    (24) 
 
 /* Index within `registers' of the first byte of the space for
    register N.  */
 
-#define REGISTER_BYTE(N)  ((N)*4)
+int regoff[];
+#define REGISTER_BYTE(N)  (regoff[N])
 
 /* Number of bytes of storage in the actual machine representation
    for register N.  */
 
-#define REGISTER_RAW_SIZE(N)  register_raw_size(N)
+#define REGISTER_RAW_SIZE(N) h8500_register_size(N)
+int h8500_register_size PARAMS ((int regno));
 
-#define REGISTER_VIRTUAL_SIZE(N) register_virtual_size(N)
+#define REGISTER_VIRTUAL_SIZE(N) h8500_register_size(N)
 
 /* Largest value REGISTER_RAW_SIZE can have.  */
 
@@ -108,33 +110,31 @@ extern CORE_ADDR h8500_skip_prologue ();
 /* Nonzero if register N requires conversion
    from raw format to virtual format.  */
 
-#define REGISTER_CONVERTIBLE(N) 1
+#define REGISTER_CONVERTIBLE(N) (0)
 
 /* Convert data from raw format for register REGNUM
    to virtual format for register REGNUM.  */
 
 #define REGISTER_CONVERT_TO_VIRTUAL(REGNUM,FROM,TO)  \
-     register_convert_to_virtual(REGNUM, FROM, TO)
+{ memcpy ((TO), (FROM), 4); }
 
 /* Convert data from virtual format for register REGNUM
    to raw format for register REGNUM.  */
 
 #define REGISTER_CONVERT_TO_RAW(REGNUM,FROM,TO)   \
-   register_convert_to_raw(REGNUM, FROM, TO)
+{ memcpy ((TO), (FROM), 4); }
 
 /* Return the GDB type object for the "standard" data type
    of data in register N.  */
-struct type *register_virtual_type();
 
-#define REGISTER_VIRTUAL_TYPE(N) register_virtual_type(N)
-
+#define REGISTER_VIRTUAL_TYPE(N) h8500_register_virtual_type(N)
+struct type *h8500_register_virtual_type PARAMS ((int regno));
 
 /* Initializer for an array of names of registers.
    Entries beyond the first NUM_REGS are ignored.  */
 
 #define REGISTER_NAMES \
   {"r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7", \
-   "pr0", "pr1","pr2","pr3","pr4","pr5","pr6","pr7", \
    "ccr","pc", \
     "cp","dp","ep","tp" }
 
@@ -146,36 +146,27 @@ struct type *register_virtual_type();
    but do serve to get the desired values when passed to read_register.  */
 
 
-#define R0  		0
-#define R1  		1
-#define R2  		2
-#define R3  		3
-#define R4  		4
-#define R5  		5
-#define R6  		6
-#define R7  		7
+#define R0_REGNUM	0
+#define R1_REGNUM	1
+#define R2_REGNUM	2
+#define R3_REGNUM	3
+#define R4_REGNUM	4
+#define R5_REGNUM	5
+#define R6_REGNUM	6
+#define R7_REGNUM	7
 
-#define PR0  		8      /* R0-R7 with seg prefixed */
-#define PR1  		9
-#define PR2  		10
-#define PR3  		11
-#define PR4  		12
-#define PR5  		13
-#define PR6  		14
-#define PR7  		15
+#define SP_REGNUM       R7_REGNUM /* Contains address of top of stack */
+#define FP_REGNUM       R6_REGNUM /* Contains address of executing stack frame */
 
-#define SP_REGNUM       PR7	/* Contains address of top of stack */
-#define FP_REGNUM       PR6	/* Contains address of executing stack frame */
+#define CCR_REGNUM      8	/* Contains processor status */
+#define PC_REGNUM       9	/* Contains program counter */
 
-#define CCR_REGNUM      16	/* Contains processor status */
-#define PC_REGNUM       17	/* Contains program counter */
+#define SEG_C_REGNUM	10	/* Segment registers */
+#define SEG_D_REGNUM	11
+#define SEG_E_REGNUM	12
+#define SEG_T_REGNUM	13
 
-#define SEG_C  		18	/* Segment registers */
-#define SEG_D  		19
-#define SEG_E  		20
-#define SEG_T  		21
-
-#define NUM_REGS 	22
+#define NUM_REGS 	14
 
 #define PTR_SIZE (minimum_mode ? 2: 4)
 #define PTR_MASK (minimum_mode ? 0x0000ffff : 0x00ffffff)
@@ -229,6 +220,14 @@ struct type *register_virtual_type();
    LOCALS1    <-SP POINTS HERE
    
    */
+
+CORE_ADDR h8500_frame_chain PARAMS ((FRAME thisframe));
+
+#define INIT_EXTRA_FRAME_INFO(fromleaf, fci)  \
+       (fci)->frame |= read_register(SEG_T_REGNUM) << 16;
+
+#define FRAME_CHAIN(FRAME) h8500_frame_chain(FRAME)
+
 #define FRAME_SAVED_PC(FRAME) frame_saved_pc(FRAME)
 
 #define FRAME_ARGS_ADDRESS(fi) frame_args_address(fi)
@@ -287,7 +286,17 @@ typedef unsigned short INSN_WORD;
 
 #define	PRINT_REGISTER_HOOK(regno) print_register_hook(regno)
 
-
 int minimum_mode;
 
 #define CALL_DUMMY_LENGTH 10
+
+/* Fake variables to make it easy to use 24 bit register pointers */
+
+int h8500_is_trapped_internalvar PARAMS ((char *name));
+#define IS_TRAPPED_INTERNALVAR h8500_is_trapped_internalvar
+
+PTR h8500_value_of_trapped_internalvar PARAMS ((struct internalvar *var));
+#define VALUE_OF_TRAPPED_INTERNALVAR h8500_value_of_trapped_internalvar
+
+void h8500_set_trapped_internalvar PARAMS ((struct internalvar *var, value newval, int bitpos, int bitsize, int offset));
+#define SET_TRAPPED_INTERNALVAR h8500_set_trapped_internalvar
