@@ -1,3 +1,8 @@
+Wed Mar  1 11:57:39 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in: Rewrite output of TDEFAULTS to avoid relying on
+	semantics of single quotes in parameter substitution.
+
 Tue Feb 28 12:53:09 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* elfcode.h (elf_sort_hdrs): Sort empty sections before non-empty
