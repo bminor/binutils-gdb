@@ -1,3 +1,8 @@
+Mon Aug 31 13:25:07 1998  Richard Henderson  <rth@cygnus.com>
+
+	* gas/vtable/{entry0.d,entry1.d,inherit0.d}: Fix pattern matching
+	of whitespace for 64-bit hosts.
+
 Mon Aug 31 12:45:49 1998  Richard Henderson  <rth@cygnus.com>
 
 	* gas/vtable/vtable.exp: New.

@@ -4,7 +4,7 @@
 .*: +file format .*
 
 RELOCATION RECORDS FOR \[.text\]:
-OFFSET   TYPE              VALUE 
+OFFSET +TYPE +VALUE 
 0+0000000 R_.*_GNU_VTENTRY  vtbl_a\+0x0+10
 
 
