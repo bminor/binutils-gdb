@@ -1,3 +1,8 @@
+2001-06-17  Fernando Nasser  <fnasser@redhat.com>
+
+	From 2001-06-15  Eirik Fuller  <eirik@hackrat.com>
+	* cli/cli-script.c (free_command_lines): Reset list pointer.
+
 2001-06-16  Andrew Cagney  <ac131313@redhat.com>
 
 	* arch-utils.c (init_frame_pc_default): New function
