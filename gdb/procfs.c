@@ -2879,9 +2879,6 @@ proc_set_watchpoint (procinfo *pi, CORE_ADDR addr, int len, int wflags)
  * or zero.
  */
 
-/* FIXME: it's probably a waste to cache this FD. 
-   It doesn't get called that often... and if I open it
-   every time, I don't need to lseek it.  */
 int
 proc_iterate_over_mappings (int (*func) (int, CORE_ADDR))
 {
@@ -5310,18 +5307,142 @@ procfs_find_LDT_entry (ptid_t ptid)
 }
 #endif /* TM_I386SOL2_H */
 
+/*
+ * Function: mappingflags
+ *
+ * Returns an ascii representation of a memory mapping's flags.
+ */
 
+static char *
+mappingflags (flags)
+     long flags;
+{
+  static char asciiflags[8];
+
+  strcpy (asciiflags, "-------");
+#if defined (MA_PHYS)
+  if (flags & MA_PHYS)
+    asciiflags[0] = 'd';
+#endif
+  if (flags & MA_STACK)
+    asciiflags[1] = 's';
+  if (flags & MA_BREAK)
+    asciiflags[2] = 'b';
+  if (flags & MA_SHARED)
+    asciiflags[3] = 's';
+  if (flags & MA_READ)
+    asciiflags[4] = 'r';
+  if (flags & MA_WRITE)
+    asciiflags[5] = 'w';
+  if (flags & MA_EXEC)
+    asciiflags[6] = 'x';
+  return (asciiflags);
+}
+
+/*
+ * Function: info_proc_mappings
+ *
+ * Implement the "info proc mappings" subcommand.
+ */
+
+static void
+info_proc_mappings (procinfo *pi, int summary)
+{
+  char *header_fmt_string, *data_fmt_string;
+  char pathname[MAX_PROC_NAME_SIZE];
+  struct prmap *prmaps;
+  struct prmap *prmap;
+  int map_fd;
+  int nmap;
+#ifdef NEW_PROC_API
+  struct stat sbuf;
+#endif
+
+  if (TARGET_PTR_BIT == 32)
+    {
+      header_fmt_string = "\t%10s %10s %10s %10s %7s\n";
+      data_fmt_string   = "\t%#10lx %#10lx %#10x %#10x %7s\n";
+    }
+  else
+    {
+      header_fmt_string = "  %18s %18s %10s %10s %7s\n";
+      data_fmt_string   = "  %#18lx %#18lx %#10x %#10x %7s\n";
+    }
+
+  if (summary)
+    return;	/* No output for summary mode. */
+
+  /* Get the number of mappings, allocate space, 
+     and read the mappings into prmaps.  */
+#ifdef NEW_PROC_API
+  /* Open map fd. */
+  sprintf (pathname, "/proc/%d/map", pi->pid);
+  if ((map_fd = open (pathname, O_RDONLY)) < 0)
+    return;		/* Can't open map file. */
+  /* Make sure it gets closed again. */
+  make_cleanup_close (map_fd);
+
+  /* Use stat to determine the file size, and compute 
+     the number of prmap_t objects it contains.  */
+  if (fstat (map_fd, &sbuf) != 0)
+    return;		/* Can't stat file.  */
+
+  nmap = sbuf.st_size / sizeof (prmap_t);
+  prmaps = (struct prmap *) alloca ((nmap + 1) * sizeof (*prmaps));
+  if (read (map_fd, (char *) prmaps, nmap * sizeof (*prmaps))
+      != (nmap * sizeof (*prmaps)))
+    return;		/* Can't read file. */
+#else
+  /* Use ioctl command PIOCNMAP to get number of mappings.  */
+  if (ioctl (pi->ctl_fd, PIOCNMAP, &nmap) != 0)
+    return;	/* Can't get number of mappings.  */
+  prmaps = (struct prmap *) alloca ((nmap + 1) * sizeof (*prmaps));
+  if (ioctl (pi->ctl_fd, PIOCMAP, prmaps) != 0)
+    return;	/* Can't read mappings. */
+#endif
+
+  printf_filtered ("Mapped address spaces:\n\n");
+  printf_filtered (header_fmt_string, 
+		   "Start Addr",
+		   "  End Addr",
+		   "      Size",
+		   "    Offset",
+		   "Flags");
+
+  for (prmap = prmaps; nmap > 0; prmap++, nmap--)
+    {
+      printf_filtered (data_fmt_string, 
+		       (unsigned long) prmap->pr_vaddr,
+		       (unsigned long) prmap->pr_vaddr
+		       + prmap->pr_size - 1,
+		       prmap->pr_size,
+#ifdef PCAGENT		/* Gross hack: only defined on Solaris 2.6+ */
+		       (unsigned int) prmap->pr_offset, 
+#else
+		       prmap->pr_off,
+#endif
+		       mappingflags (prmap->pr_mflags));
+    }
+  printf_filtered ("\n");
+}
+
+/*
+ * Function: info_proc_cmd
+ *
+ * Implement the "info proc" command.
+ */
 
 static void
 info_proc_cmd (char *args, int from_tty)
 {
   struct cleanup *old_chain;
-  procinfo *process = NULL;
-  procinfo *thread  = NULL;
-  char    **argv    = NULL;
-  char     *tmp     = NULL;
-  int       pid     = 0;
-  int       tid     = 0;
+  procinfo *process  = NULL;
+  procinfo *thread   = NULL;
+  char    **argv     = NULL;
+  char     *tmp      = NULL;
+  int       pid      = 0;
+  int       tid      = 0;
+  int       mappings = 0;
 
   old_chain = make_cleanup (null_cleanup, 0);
   if (args)
@@ -5342,6 +5463,10 @@ info_proc_cmd (char *args, int from_tty)
       else if (argv[0][0] == '/')
 	{
 	  tid = strtoul (argv[0] + 1, NULL, 10);
+	}
+      else if (strncmp (argv[0], "mappings", strlen (argv[0])) == 0)
+	{
+	  mappings = 1;
 	}
       else
 	{
@@ -5387,6 +5512,11 @@ info_proc_cmd (char *args, int from_tty)
       proc_prettyprint_flags (proc_flags (thread), 1);
       if (proc_flags (thread) & (PR_STOPPED | PR_ISTOP))
 	proc_prettyprint_why (proc_why (thread), proc_what (thread), 1);
+    }
+
+  if (mappings)
+    {
+      info_proc_mappings (process, 0);
     }
 
   do_cleanups (old_chain);
@@ -5466,8 +5596,9 @@ _initialize_procfs (void)
   init_procfs_ops ();
   add_target (&procfs_ops);
   add_info ("proc", info_proc_cmd, 
-	    "Show /proc process information about any running process.\
-Default is the process being debugged.");
+	    "Show /proc process information about any running process.\n\
+Specify process id, or use the program being debugged by default.\n\
+Specify keyword 'mappings' for detailed info on memory mappings.");
   add_com ("proc-trace-entry", no_class, proc_trace_sysentry_cmd, 
 	   "Give a trace of entries into the syscall.");
   add_com ("proc-trace-exit", no_class, proc_trace_sysexit_cmd, 

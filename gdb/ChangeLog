@@ -67,6 +67,14 @@
 	* config/powerpc/aix.mt (TDEPFILES): Add xcoffread.o to fix a build 
 	failure.
 
+2001-12-21  Michael Snyder  <msnyder@redhat.com>
+
+	* procfs.c (info_proc_cmd): Add the 'mappings' sub-command that
+	was dropped a few years ago, when procfs.c was rewritten.
+	(info_proc_mappings): New function, implement 'info proc mappings'.
+	(mappingflags): New function.
+	(_initialize_procfs): Document new option to 'info proc' command.
+
 2001-12-21  Tom Tromey  <tromey@redhat.com>
 
 	* configure, config.in: Rebuilt.
