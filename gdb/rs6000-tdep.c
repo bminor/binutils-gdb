@@ -1048,9 +1048,18 @@ skip_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct rs6000_framedata *fdata)
 
 	  fdata->frameless = 0;
 	  /* Don't skip over the subroutine call if it is not within
-	     the first three instructions of the prologue.  */
+	     the first three instructions of the prologue and either
+	     we have no line table information or the line info tells
+	     us that the subroutine call is not part of the line
+	     associated with the prologue.  */
 	  if ((pc - orig_pc) > 8)
-	    break;
+	    {
+	      struct symtab_and_line prologue_sal = find_pc_line (orig_pc, 0);
+	      struct symtab_and_line this_sal = find_pc_line (pc, 0);
+
+	      if ((prologue_sal.line == 0) || (prologue_sal.line != this_sal.line))
+		break;
+	    }
 
 	  op = read_memory_integer (pc + 4, 4);
 
