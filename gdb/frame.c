@@ -2237,13 +2237,6 @@ deprecated_set_frame_extra_info_hack (struct frame_info *frame,
   frame->extra_info = extra_info;
 }
 
-void
-deprecated_set_frame_next_hack (struct frame_info *fi,
-				struct frame_info *next)
-{
-  fi->next = next;
-}
-
 struct frame_info *
 deprecated_frame_xmalloc (void)
 {

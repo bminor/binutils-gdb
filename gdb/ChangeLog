@@ -1,5 +1,14 @@
 2003-11-22  Andrew Cagney  <cagney@redhat.com>
 
+	* frame.h (deprecated_set_frame_next_hack): Delete declaration.
+	(deprecated_set_frame_prev_hack): Delete declaration.
+	* frame.c (deprecated_set_frame_next_hack): Delete function.
+	(deprecated_set_frame_prev_hack): Delete function.
+	* mcore-tdep.c (analyze_dummy_frame): Delete calls to
+	"deprecated_set_frame_next_hack" and
+	"deprecated_set_frame_prev_hack".
+	* mn10300-tdep.c (analyze_dummy_frame): Ditto.
+
 	* mips-tdep.c (mips_register_convertible): Delete function.
 	(mips_register_convert_to_virtual): Delete function.
 	(mips_register_convert_to_raw): Delete function.
@@ -10,7 +19,7 @@
 	32/64 cooked to raw register conversions.
 
 	* frame.c (deprecated_get_frame_context): Delete function.
-	(deprecated_set_frame_prev_hack): Delete function.
+	(deprecated_set_frame_context): Delete function.
 	(struct frame_info): Delete member "context".
 	* frame.h (deprecated_get_frame_context): Delete declaration.
 	(deprecated_set_frame_context): Delete declaration.
