@@ -69,7 +69,7 @@ static void print_lo
 static void
 print_at (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
 	  PTR dis_info,
-	  CGEN_KEYWORD *names ATTRIBUTE_UNUSED,
+	  long reloc_ann ATTRIBUTE_UNUSED,
 	  long value ATTRIBUTE_UNUSED,
 	  bfd_vma pc ATTRIBUTE_UNUSED,
 	  int length ATTRIBUTE_UNUSED

@@ -1,3 +1,7 @@
+2005-02-11  Nick Clifton  <nickc@redhat.com>
+
+	* frv-dis.c: Regenerate.
+
 2005-02-07  Jim Blandy  <jimb@redhat.com>
 
 	* Makefile.am (CGEN): Load guile.scm before calling the main
