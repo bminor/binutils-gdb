@@ -405,8 +405,9 @@ start_subfile (name, dirname)
   current_subfile = subfile;
 
   /* Save its name and compilation directory name */
-  subfile->name = (name == NULL)? NULL : strdup (name);
-  subfile->dirname = (dirname == NULL) ? NULL : strdup (dirname);
+  subfile->name = (name == NULL) ? NULL : savestring (name, strlen (name));
+  subfile->dirname =
+    (dirname == NULL) ? NULL : savestring (dirname, strlen (dirname));
   
   /* Initialize line-number recording for this subfile.  */
   subfile->line_vector = NULL;
@@ -479,7 +480,7 @@ patch_subfile_names (subfile, name)
       && subfile->name[strlen(subfile->name)-1] == '/')
     {
       subfile->dirname = subfile->name;
-      subfile->name = strdup (name);
+      subfile->name = savestring (name, strlen (name));
 
       /* Default the source language to whatever can be deduced from
 	 the filename.  If nothing can be deduced (such as for a C/C++

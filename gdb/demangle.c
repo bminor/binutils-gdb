@@ -129,7 +129,8 @@ set_demangling_command (ignore, from_tty, c)
 	    {
 	      free (current_demangling_style_string);
 	      current_demangling_style_string =
-		strdup (dem -> demangling_style_name);
+		savestring (dem -> demangling_style_name,
+			    strlen (dem -> demangling_style_name));
 	    }
 	}
       if (current_demangling_style == unknown_demangling)
@@ -139,7 +140,8 @@ set_demangling_command (ignore, from_tty, c)
 	     one as the default. */
 	  current_demangling_style = demanglers[0].demangling_style;
 	  current_demangling_style_string =
-	    strdup (demanglers[0].demangling_style_name);
+	    savestring (demanglers[0].demangling_style_name,
+			strlen (demanglers[0].demangling_style_name));
 	  warning ("`%s' style demangling chosen as the default.\n",
 		   current_demangling_style_string);
 	}
@@ -156,7 +158,7 @@ set_demangling_style (style)
     {
       free (current_demangling_style_string);
     }
-  current_demangling_style_string = strdup (style);
+  current_demangling_style_string = savestring (style, strlen (style));
   set_demangling_command ((char *) NULL, 0);
 }
 
