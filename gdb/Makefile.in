@@ -213,8 +213,8 @@ DIST=gdb
 LINT=/usr/5bin/lint
 LINTFLAGS= $(BFD_CFLAGS)
 
-RUNTEST = `if [ -f ${srcdir}/../dejagnu/runtest ] ; then \
-		echo ${srcdir}/../dejagnu/runtest ; else echo runtest; \
+RUNTEST = `if [ -f $${rootsrc}/../dejagnu/runtest ] ; then \
+		echo $${rootsrc}/../dejagnu/runtest ; else echo runtest; \
 	   fi`
 
 RUNTESTFLAGS=

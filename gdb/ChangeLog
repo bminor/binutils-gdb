@@ -1,3 +1,7 @@
+Wed Jan 24 22:31:37 1996  Doug Evans  <dje@charmed.cygnus.com>
+
+	* Makefile.in (RUNTEST): srcdir renamed to rootsrc.
+
 Wed Jan 24 15:42:24 1996  Tom Tromey  <tromey@creche.cygnus.com>
 
 	* Makefile.in (lint): Close backquotes.
