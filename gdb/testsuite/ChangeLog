@@ -1,3 +1,9 @@
+2002-07-19  Daniel Jacobowitz  <drow@mvista.com>
+
+	* config/gdbserver.exp (gdb_load): Don't use TCL varargs.
+	Improve support for reusing an exec file.  Copy exec file
+	to target, and run gdbserver on the target instead of on the host.
+
 2002-07-18  Jim Blandy  <jimb@redhat.com>
 
 	* gdb.base/ending-run.exp: Don't expect to see the program end in
