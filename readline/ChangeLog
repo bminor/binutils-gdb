@@ -1,3 +1,7 @@
+Tue Sep  7 17:15:37 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* configure.in (m88k-*-sysvr4*): Comment out previous change.
+
 Fri Jul  2 11:05:34 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* configure.in (*-*-riscos*): New entry; use mh-sysv.
