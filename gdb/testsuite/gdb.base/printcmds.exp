@@ -98,8 +98,8 @@ proc test_integer_literals_rejected {} {
     global gdb_prompt
 
     test_print_reject "p 0x" 
-    gdb_test "p ''" "Empty character constant\\."
-    gdb_test "p '''" "Empty character constant\\."
+    gdb_test "p ''" "(Empty character constant\\.|A character constant must contain at least one character\\.)"
+    gdb_test "p '''" "(Empty character constant\\.|A character constant must contain at least one character\\.)"
     test_print_reject "p '\\'"
 
     # Note that this turns into "p '\\\'" at gdb's input.
