@@ -1,3 +1,17 @@
+Thu Aug 12 11:47:58 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* config/tc-mips.c (mips_ip): Suggested by
+	davidj@ICSI.Berkeley.EDU (David Johnson): Don't accept symbolic
+	names for 'E' and 'G' argument types (coprocessor registers) and
+	don't warn if $1 is used on the coprocessor.
+
+Mon Aug  9 12:09:14 1993  Doug Evans  (dje@canuck.cygnus.com)
+
+	* read.c (emit_expr): Use BFD_RELOC_16 for 2-byte values.
+	* config/tc-sparc.c (md_apply_fix, tc_gen_reloc): Handle
+	BFD_RELOC_16.
+	* config/tc-sparc.h (WORKING_DOT_WORD): Define.
+
 Mon Aug  9 13:36:22 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	* write.c (merge_data_into_text): Define only if BFD_ASSEMBLER is

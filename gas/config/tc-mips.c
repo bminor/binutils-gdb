@@ -102,10 +102,11 @@ static symbolS *insn_label;
 /* To output NOP instructions correctly, we need to keep information
    about the previous two instructions.  */
 
-/* Whether we are optimizing.  We always optimize unless -O0 is given.
-   For the very simple optimizations we do, this is compatible with
-   the MIPS assembler.  */
-static int mips_optimize = 1;
+/* Whether we are optimizing.  The default value of 2 means to remove
+   unneeded NOPs and swap branch instructions when possible.  A value
+   of 1 means to not swap branches.  A value of 0 means to always
+   insert NOPs.  */
+static int mips_optimize = 2;
 
 /* The previous instruction.  */
 static struct mips_cl_insn prev_insn;
@@ -460,9 +461,11 @@ append_insn (ip, address_expr, reloc_type)
 	  /* A load delay.  All load delays delay the use of general
 	     register rt for one instruction.  */
 	  know (prev_insn.insn_mo->pinfo & INSN_WRITE_GPR_T);
-	  if (insn_uses_reg (ip,
-			     (prev_insn.insn_opcode >> OP_SH_RT) & OP_MASK_RT,
-			     0))
+	  if (mips_optimize == 0
+	      || insn_uses_reg (ip,
+				((prev_insn.insn_opcode >> OP_SH_RT)
+				 & OP_MASK_RT),
+				0))
 	    ++nops;
 	}
       else if (prev_insn.insn_mo->pinfo & INSN_COPROC_DELAY)
@@ -480,18 +483,20 @@ append_insn (ip, address_expr, reloc_type)
 	     all.  */
 	  if (prev_insn.insn_mo->pinfo & INSN_WRITE_FPR_T)
 	    {
-	      if (insn_uses_reg (ip,
-				 ((prev_insn.insn_opcode >> OP_SH_RT)
-				  & OP_MASK_RT),
-				 1))
+	      if (mips_optimize == 0
+		  || insn_uses_reg (ip,
+				    ((prev_insn.insn_opcode >> OP_SH_RT)
+				     & OP_MASK_RT),
+				    1))
 		++nops;
 	    }
 	  else if (prev_insn.insn_mo->pinfo & INSN_WRITE_FPR_D)
 	    {
-	      if (insn_uses_reg (ip,
-				 ((prev_insn.insn_opcode >> OP_SH_RD)
-				  & OP_MASK_RD),
-				 1))
+	      if (mips_optimize == 0
+		  || insn_uses_reg (ip,
+				    ((prev_insn.insn_opcode >> OP_SH_RD)
+				     & OP_MASK_RD),
+				    1))
 		++nops;
 	    }
 	  else
@@ -502,8 +507,9 @@ append_insn (ip, address_expr, reloc_type)
 		 instruction may set the condition codes, and the
 		 current instruction uses them, we must insert two
 		 NOPS.  */
-	      if ((prev_insn.insn_mo->pinfo & INSN_WRITE_COND_CODE)
-		  && (ip->insn_mo->pinfo & INSN_READ_COND_CODE))
+	      if (mips_optimize == 0
+		  || ((prev_insn.insn_mo->pinfo & INSN_WRITE_COND_CODE)
+		      && (ip->insn_mo->pinfo & INSN_READ_COND_CODE)))
 		nops += 2;
 	      else if (ip->insn_mo->pinfo & INSN_COP)
 		++nops;
@@ -516,7 +522,8 @@ append_insn (ip, address_expr, reloc_type)
 	     (this means it is a floating point comparison
 	     instruction).  If this instruction uses the condition
 	     codes, we need to insert a single NOP.  */
-	  if (ip->insn_mo->pinfo & INSN_READ_COND_CODE)
+	  if (mips_optimize == 0
+	      || ip->insn_mo->pinfo & INSN_READ_COND_CODE)
 	    ++nops;
 	}
       else if (prev_insn.insn_mo->pinfo & INSN_READ_LO)
@@ -524,7 +531,8 @@ append_insn (ip, address_expr, reloc_type)
 	  /* The previous instruction reads the LO register; if the
 	     current instruction writes to the LO register, we must
 	     insert two NOPS.  */
-	  if (ip->insn_mo->pinfo & INSN_WRITE_LO)
+	  if (mips_optimize == 0
+	      || ip->insn_mo->pinfo & INSN_WRITE_LO)
 	    nops += 2;
 	}
       else if (prev_insn.insn_mo->pinfo & INSN_READ_HI)
@@ -532,7 +540,8 @@ append_insn (ip, address_expr, reloc_type)
 	  /* The previous instruction reads the HI register; if the
 	     current instruction writes to the HI register, we must
 	     insert a NOP.  */
-	  if (ip->insn_mo->pinfo & INSN_WRITE_HI)
+	  if (mips_optimize == 0
+	      || ip->insn_mo->pinfo & INSN_WRITE_HI)
 	    nops += 2;
 	}
 
@@ -625,7 +634,7 @@ append_insn (ip, address_expr, reloc_type)
       if ((ip->insn_mo->pinfo & INSN_UNCOND_BRANCH_DELAY)
 	  || (ip->insn_mo->pinfo & INSN_COND_BRANCH_DELAY))
 	{
-	  if (! mips_optimize
+	  if (mips_optimize < 2
 	      /* If we had to emit any NOP instructions, then we
 		 already know we can not swap.  */
 	      || nops != 0
@@ -2469,6 +2478,20 @@ mips_ip (str, ip)
 	      s = expr_end;
 	      continue;
 
+            case 'C':           /* Coprocessor code */
+              my_getExpression (&imm_expr, s);
+	      check_absolute_expr (ip, &imm_expr);
+              if ((unsigned long) imm_expr.X_add_number >= (1<<25))
+		{
+                  as_warn ("Coproccesor code > 25 bits (%d)",
+			   imm_expr.X_add_number);
+                  imm_expr.X_add_number &= ((1<<25) - 1);
+		}
+              ip->insn_opcode |= imm_expr.X_add_number;
+              imm_expr.X_op = O_absent;
+              s = expr_end;
+              continue;
+
 	    case 'b':		/* base register */
 	    case 'd':		/* destination register */
 	    case 's':		/* source register */
@@ -2492,33 +2515,36 @@ mips_ip (str, ip)
 			  ++s;
 			}
 		      while (isdigit (*s));
+		      if (regno > 31)
+			as_bad ("Invalid register number (%d)", regno);
 		    }
-		  else if (s[1] == 'f' && s[2] == 'p')
+		  else if (*args != 'E' && *args != 'G')
 		    {
-		      s += 3;
-		      regno = 30;
+		      if (s[1] == 'f' && s[2] == 'p')
+			{
+			  s += 3;
+			  regno = 30;
+			}
+		      else if (s[1] == 's' && s[2] == 'p')
+			{
+			  s += 3;
+			  regno = 29;
+			}
+		      else if (s[1] == 'g' && s[2] == 'p')
+			{
+			  s += 3;
+			  regno = 28;
+			}
+		      else if (s[1] == 'a' && s[2] == 't')
+			{
+			  s += 3;
+			  regno = 1;
+			}
+		      else
+			goto notreg;
+		      if (regno == AT && ! mips_noat)
+			as_warn ("Used $at without \".set noat\"");
 		    }
-		  else if (s[1] == 's' && s[2] == 'p')
-		    {
-		      s += 3;
-		      regno = 29;
-		    }
-		  else if (s[1] == 'g' && s[2] == 'p')
-		    {
-		      s += 3;
-		      regno = 28;
-		    }
-		  else if (s[1] == 'a' && s[2] == 't')
-		    {
-		      s += 3;
-		      regno = 1;
-		    }
-		  else
-		    goto notreg;
-		  if (regno > 31)
-		    as_bad ("Invalid register number (%d)", regno);
-		  if (regno == AT && !mips_noat)
-		    as_warn ("Used $at without \".set noat\"");
 		  c = *args;
 		  if (*s == ' ')
 		    s++;
@@ -3001,7 +3027,17 @@ md_parse_option (argP, cntP, vecP)
 
   if (**argP == 'O')
     {
-      mips_optimize = (*argP)[1] != '0';
+      if ((*argP)[1] == '0')
+	mips_optimize = 1;
+      else
+	mips_optimize = 2;
+      return 1;
+    }
+
+  if (**argP == 'g')
+    {
+      if ((*argP)[1] == '\0' || (*argP)[1] == '2')
+	mips_optimize = 0;
       return 1;
     }
 
