@@ -323,21 +323,28 @@ SEMOPS_INLINE QI
 SUBWORDSIQI (SI in, int byte)
 {
   assert (byte >= 0 && byte <= 3);
-  return (UQI) (in >> (8 * (3 - byte)));
+  return (UQI) (in >> (8 * (3 - byte))) & 0xFF;
 }
 
 SEMOPS_INLINE UQI
 SUBWORDSIUQI (SI in, int byte)
 {
   assert (byte >= 0 && byte <= 3);
-  return (UQI) (in >> (8 * (3 - byte)));
+  return (UQI) (in >> (8 * (3 - byte))) & 0xFF;
+}
+
+SEMOPS_INLINE QI
+SUBWORDDIQI (DI in, int byte)
+{
+  assert (byte >= 0 && byte <= 7);
+  return (UQI) (in >> (8 * (7 - byte))) & 0xFF;
 }
 
 SEMOPS_INLINE HI
 SUBWORDDIHI (DI in, int word)
 {
   assert (word >= 0 && word <= 3);
-  return (UHI) (in >> (16 * (3 - word)));
+  return (UHI) (in >> (16 * (3 - word))) & 0xFFFF;
 }
 
 SEMOPS_INLINE HI
@@ -450,6 +457,7 @@ HI SUBWORDSIHI (HI);
 SI SUBWORDSFSI (SF);
 SF SUBWORDSISF (SI);
 DF SUBWORDDIDF (DI);
+QI SUBWORDDIQI (DI, int);
 HI SUBWORDDIHI (DI, int);
 SI SUBWORDDISI (DI, int);
 SI SUBWORDDFSI (DF, int);
