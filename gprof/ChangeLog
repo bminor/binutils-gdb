@@ -1,5 +1,9 @@
 2000-05-26  Alan Modra  <alan@linuxcare.com.au>
 
+	* dep-in.sed: Copy from ../binutils.
+	* Makefile.am: Update dependencies with "make dep-am"
+	* Makefile.in: Regenerate.
+
 	* gprof.h: Remove most nls defines.  They are pulled in by
 	bfd/sysdep.h.  #include "ansidecl.h" not <ansidecl.h>
 

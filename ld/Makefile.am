@@ -930,9 +930,10 @@ ldlang.o: ldlang.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   ldmisc.h ldctor.h ldfile.h $(INCDIR)/fnmatch.h $(INCDIR)/demangle.h
 ldmain.o: ldmain.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   sysdep.h config.h $(INCDIR)/fopen-same.h $(INCDIR)/libiberty.h \
-  $(INCDIR)/progress.h $(INCDIR)/bfdlink.h ld.h $(INCDIR)/bin-bugs.h \
-  ldmain.h ldmisc.h ldwrite.h ldgram.h ldexp.h ldlang.h \
-  ldemul.h ldlex.h ldfile.h ldctor.h
+  $(INCDIR)/progress.h $(INCDIR)/bfdlink.h $(INCDIR)/filenames.h \
+  ld.h $(INCDIR)/bin-bugs.h ldmain.h ldmisc.h ldwrite.h \
+  ldgram.h ldexp.h ldlang.h ldemul.h ldlex.h ldfile.h \
+  ldctor.h
 ldmisc.o: ldmisc.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   sysdep.h config.h $(INCDIR)/fopen-same.h $(INCDIR)/libiberty.h \
   $(INCDIR)/demangle.h ld.h $(INCDIR)/bin-bugs.h ldmisc.h \
