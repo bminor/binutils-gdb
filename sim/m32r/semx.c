@@ -3291,7 +3291,7 @@ SEM_FN_NAME (m32rx,maclh1) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_
   EXTRACT_FMT_MACWU1_VARS /* f-op1 f-r1 f-op2 f-r2 */
   EXTRACT_FMT_MACWU1_CODE
 
-m32rx_h_accums_set (current_cpu, 1, SRADI (SLLDI (ADDDI (OPRND (h_accums_1), SRADI (SLLDI (MULDI (EXTSIDI (SRASI (OPRND (src1), 16)), EXTHIDI (TRUNCSIHI (OPRND (src2)))), 32), 16)), 8), 8));
+m32rx_h_accums_set (current_cpu, 1, SRADI (SLLDI (ADDDI (OPRND (h_accums_1), SLLDI (EXTSIDI (MULSI (EXTHISI (TRUNCSIHI (OPRND (src1))), SRASI (OPRND (src2), 16))), 16)), 8), 8));
   TRACE_RESULT (current_cpu, "h-accums-1", 'D', m32rx_h_accums_get (current_cpu, 1));
 
 #if WITH_PROFILE_MODEL_P
