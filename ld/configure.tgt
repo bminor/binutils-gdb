@@ -396,7 +396,11 @@ powerpc-*-freebsd*)	targ_emul=elf32ppc_fbsd;
 powerpc*-*-linux*)
 	case "${targ}" in
 	*64*)	targ_emul=elf64ppc
-		targ_extra_emuls="elf32ppclinux elf32ppc elf32ppcsim" ;;
+		targ_extra_emuls="elf32ppclinux elf32ppc elf32ppcsim"
+		targ_extra_libpath=elf32ppclinux
+		tdir_elf32ppc=`echo "${targ_alias}" | sed -e 's/64//'`
+		tdir_elf32ppclinux=$tdir_elf32ppc
+		tdir_elf32ppcsim=$tdir_elf32ppc ;;
 	*)	targ_emul=elf32ppclinux
 		targ_extra_emuls="elf32ppc elf32ppcsim"
 		targ_extra_libpath=elf32ppc ;;
@@ -405,7 +409,9 @@ powerpc*le-*-elf* | powerpc*le-*-eabi* | powerpc*le-*-solaris* \
   | powerpc*le-*-sysv* | powerpc*le-*-vxworks*)
 	case "${targ}" in
 	*64*)	targ_emul=elf64lppc
-		targ_extra_emuls="elf32lppc elf32ppcsim" ;;
+		targ_extra_emuls="elf32lppc elf32lppcsim"
+		tdir_elf32lppc=`echo "${targ_alias}" | sed -e 's/64//'`
+		tdir_elf32lppcsim=$tdir_elf32lppc ;;
 	*)	targ_emul=elf32lppc
 		targ_extra_emuls="elf32ppcsim" ;;
 	esac ;;
@@ -413,7 +419,10 @@ powerpc*-*-elf* | powerpc*-*-eabi* | powerpc*-*-sysv* \
   | powerpc*-*-netbsd* | powerpc*-*-vxworks*)
 	case "${targ}" in
 	*64*)	targ_emul=elf64ppc
-		targ_extra_emuls="elf32ppc elf32ppclinux elf32ppcsim" ;;
+		targ_extra_emuls="elf32ppc elf32ppclinux elf32ppcsim"
+		tdir_elf32ppc=`echo "${targ_alias}" | sed -e 's/64//'`
+		tdir_elf32ppclinux=$tdir_elf32ppc
+		tdir_elf32ppcsim=$tdir_elf32ppc ;;
 	*)	targ_emul=elf32ppc
 		targ_extra_emuls="elf32ppclinux elf32ppcsim" ;;
 	esac ;;

@@ -1,5 +1,18 @@
 2002-05-22  Alan Modra  <amodra@bigpond.net.au>
 
+	* genscripts.sh (LIB_PATH): For native targets, concatenate $libdir
+	and $NATIVE_LIB_DIRS.  Add $tool_lib before other libs.
+	(LIB_SEARCH_DIRS): No need to use "tr".
+	(COMPILE_IN): Only set for native targets.
+	* configure.host (NATIVE_LIB_DIRS): Specify all native search dirs
+	here, rather than adding lib:/usr/lib:/usr/local/lib in genscripts.sh.
+	* configure.tgt (powerpc*): Set tdir_*.
+	(powerpcle*): Correct targ_extra_emuls.
+	* emulparams/elf32ppc.sh (LIB_PATH): Set up native 64 bit dirs.
+	* emulparams/elf64ppc.sh (LIB_PATH): Likewise.
+
+2002-05-22  Alan Modra  <amodra@bigpond.net.au>
+
 	* emultempl/pe.em (set_pe_subsystem): Don't set "cmdline" when
 	calling lang_add_entry.
 
