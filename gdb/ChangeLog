@@ -1,5 +1,7 @@
 2001-07-14  Mark Kettenis  <kettenis@gnu.org>
 
+	* config/i386/xm-linux.h (HAVE_TERMIOS): Really remove.
+
 	* Makefile.in (ALLDEPFILES): Add i386bsd-nat.c and i386bsd-tdep.c
 	(i386bsd-tdep.o, i386bsd-nat.o): New targets.
 

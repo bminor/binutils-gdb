@@ -1,5 +1,5 @@
 /* Native support for GNU/Linux, for GDB, the GNU debugger.
-   Copyright 1986, 1987, 1989, 1992, 1993, 1994, 1995, 1996, 1999, 2000
+   Copyright 1986, 1987, 1989, 1992, 1993, 1994, 1995, 1996, 1999, 2000, 2001
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -25,8 +25,6 @@
 #define HOST_BYTE_ORDER LITTLE_ENDIAN
 
 #define HOST_LONG_DOUBLE_FORMAT &floatformat_i387_ext
-
-#define HAVE_TERMIOS
 
 /* This is the amount to subtract from u.u_ar0
    to get the offset in the core file of the register values.  */
