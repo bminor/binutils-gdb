@@ -27,10 +27,8 @@
 #include "../opcodes/z8k-opc.h"
 
 #include "as.h"
-#include "read.h"
 #include "bfd.h"
 #include <ctype.h>
-#include "listing.h"
 
 const char comment_chars[] =
 {'!', 0};
@@ -41,7 +39,7 @@ const char line_comment_chars[] = { '#', 0};
 extern int machine;
 extern int coff_flags;
 int segmented_mode;
-int md_reloc_size;
+const int md_reloc_size;
 
 /* This table describes all the machine specific pseudo-ops the assembler
    has to support.  The fields are:
@@ -1170,8 +1168,8 @@ tc_aout_fix_to_chars ()
 void
 md_create_short_jump (ptr, from_addr, to_addr, frag, to_symbol)
      char *ptr;
-     long from_addr;
-     long to_addr;
+     addressT from_addr;
+     addressT to_addr;
      fragS *frag;
      symbolS *to_symbol;
 {
@@ -1181,7 +1179,7 @@ md_create_short_jump (ptr, from_addr, to_addr, frag, to_symbol)
 void
 md_create_long_jump (ptr, from_addr, to_addr, frag, to_symbol)
      char *ptr;
-     long from_addr, to_addr;
+     addressT from_addr, to_addr;
      fragS *frag;
      symbolS *to_symbol;
 {
@@ -1198,10 +1196,10 @@ md_convert_frag (headers, fragP)
   abort ();
 }
 
-long
+valueT
 DEFUN (md_section_align, (seg, size),
        segT seg AND
-       long size)
+       valueT size)
 {
   return ((size + (1 << section_alignment[(int) seg]) - 1) & (-1 << section_alignment[(int) seg]));
 
@@ -1274,7 +1272,7 @@ md_estimate_size_before_relax (fragP, segment_type)
 void
 DEFUN (md_number_to_chars, (ptr, use, nbytes),
        char *ptr AND
-       long use AND
+       valueT use AND
        int nbytes)
 {
   switch (nbytes)

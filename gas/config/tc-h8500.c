@@ -1244,8 +1244,8 @@ tc_aout_fix_to_chars ()
 void
 md_create_short_jump (ptr, from_addr, to_addr, frag, to_symbol)
      char *ptr;
-     long from_addr;
-     long to_addr;
+     addressT from_addr;
+     addressT to_addr;
      fragS *frag;
      symbolS *to_symbol;
 {
@@ -1255,7 +1255,7 @@ md_create_short_jump (ptr, from_addr, to_addr, frag, to_symbol)
 void
 md_create_long_jump (ptr, from_addr, to_addr, frag, to_symbol)
      char *ptr;
-     long from_addr, to_addr;
+     addressT from_addr, to_addr;
      fragS *frag;
      symbolS *to_symbol;
 {
@@ -1402,10 +1402,10 @@ md_convert_frag (headers, fragP)
 
 }
 
-long
+valueT
 DEFUN (md_section_align, (seg, size),
        segT seg AND
-       long size)
+       valueT size)
 {
   return ((size + (1 << section_alignment[(int) seg]) - 1) 
 	  & (-1 << section_alignment[(int) seg]));
@@ -1506,7 +1506,7 @@ md_estimate_size_before_relax (fragP, segment_type)
 void
 md_number_to_chars (ptr, use, nbytes)
      char *ptr;
-     long use;
+     valueT use;
      int nbytes;
 {
   switch (nbytes)

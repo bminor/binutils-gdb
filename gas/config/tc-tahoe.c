@@ -455,11 +455,11 @@ md_parse_option (argP, cntP, vecP)
 void				/* Knows about order of bytes in address. */
 md_number_to_chars (con, value, nbytes)
      char con[];		/* Return 'nbytes' of chars here. */
-     long int value;		/* The value of the bits. */
+     valueT value;		/* The value of the bits. */
      int nbytes;		/* Number of bytes in the output. */
 {
   int n = nbytes;
-  long int v = value;
+  valueT v = value;
 
   con += nbytes - 1;		/* Tahoes is (Bleah!) big endian */
   while (nbytes--)
@@ -595,11 +595,11 @@ const int md_short_jump_size = 3;
 void
 md_create_short_jump (ptr, from_addr, to_addr, frag, to_symbol)
      char *ptr;
-     long from_addr, to_addr;
+     addressT from_addr, to_addr;
      fragS *frag;
      symbolS *to_symbol;
 {
-  long offset;
+  valueT offset;
 
   offset = to_addr - (from_addr + 1);
   *ptr++ = TAHOE_BRW;
@@ -612,11 +612,11 @@ const int md_reloc_size = 8;	/* Size of relocation record */
 void
 md_create_long_jump (ptr, from_addr, to_addr, frag, to_symbol)
      char *ptr;
-     long from_addr, to_addr;
+     addressT from_addr, to_addr;
      fragS *frag;
      symbolS *to_symbol;
 {
-  long offset;
+  valueT offset;
 
   offset = to_addr - (from_addr + 4);
   *ptr++ = TAHOE_JMP;
@@ -2044,10 +2044,10 @@ md_operand (expressionP)
 }				/* md_operand() */
 
 /* Round up a section size to the appropriate boundary. */
-long 
+valueT
 md_section_align (segment, size)
      segT segment;
-     long size;
+     valueT size;
 {
   return ((size + 7) & ~7);	/* Round all sects to multiple of 8 */
 }				/* md_section_align() */

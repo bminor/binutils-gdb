@@ -2161,7 +2161,7 @@ const int md_reloc_size = 8;	/* Size of relocation record */
 void
 md_create_short_jump (ptr, from_addr, to_addr, frag, to_symbol)
      char *ptr;
-     valueT from_addr, to_addr;
+     addressT from_addr, to_addr;
      fragS *frag;
      symbolS *to_symbol;
 {
@@ -2175,7 +2175,7 @@ md_create_short_jump (ptr, from_addr, to_addr, frag, to_symbol)
 void
 md_create_long_jump (ptr, from_addr, to_addr, frag, to_symbol)
      char *ptr;
-     valueT from_addr, to_addr;
+     addressT from_addr, to_addr;
      fragS *frag;
      symbolS *to_symbol;
 {

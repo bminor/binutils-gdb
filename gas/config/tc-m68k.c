@@ -3585,7 +3585,8 @@ md_assemble (str)
 	  current_architecture |= m68881;
 	}
       if (!no_68851
-	  && (cpu_of_arch (current_architecture) & m68020up) != 0)
+	  && (cpu_of_arch (current_architecture) & m68020up) != 0
+	  && cpu_of_arch (current_architecture) != m68040)
 	{
 	  current_architecture |= m68851;
 	}
@@ -3942,7 +3943,7 @@ md_atof (type, litP, sizeP)
 void
 md_number_to_chars (buf, val, n)
      char *buf;
-     long val;
+     valueT val;
      int n;
 {
   switch (n)
@@ -4535,40 +4536,40 @@ CONST int md_long_jump_size = 6;
 void
 md_create_short_jump (ptr, from_addr, to_addr, frag, to_symbol)
      char *ptr;
-     long from_addr, to_addr;
+     addressT from_addr, to_addr;
      fragS *frag;
      symbolS *to_symbol;
 {
-  long offset;
+  valueT offset;
 
   offset = to_addr - (from_addr + 2);
 
-  md_number_to_chars (ptr, (long) 0x6000, 2);
-  md_number_to_chars (ptr + 2, (long) offset, 2);
+  md_number_to_chars (ptr, (valueT) 0x6000, 2);
+  md_number_to_chars (ptr + 2, (valueT) offset, 2);
 }
 
 void
 md_create_long_jump (ptr, from_addr, to_addr, frag, to_symbol)
      char *ptr;
-     long from_addr, to_addr;
+     addressT from_addr, to_addr;
      fragS *frag;
      symbolS *to_symbol;
 {
-  long offset;
+  valueT offset;
 
   if (cpu_of_arch (current_architecture) < m68020)
     {
       offset = to_addr - S_GET_VALUE (to_symbol);
-      md_number_to_chars (ptr, (long) 0x4EF9, 2);
-      md_number_to_chars (ptr + 2, (long) offset, 4);
+      md_number_to_chars (ptr, (valueT) 0x4EF9, 2);
+      md_number_to_chars (ptr + 2, (valueT) offset, 4);
       fix_new (frag, (ptr + 2) - frag->fr_literal, 4, to_symbol, (symbolS *) 0, (long) 0, 0,
 	       NO_RELOC);
     }
   else
     {
       offset = to_addr - (from_addr + 2);
-      md_number_to_chars (ptr, (long) 0x60ff, 2);
-      md_number_to_chars (ptr + 2, (long) offset, 4);
+      md_number_to_chars (ptr, (valueT) 0x60ff, 2);
+      md_number_to_chars (ptr + 2, (valueT) offset, 4);
     }
 }
 
@@ -5095,10 +5096,10 @@ md_operand (expressionP)
 }
 
 /* Round up a section size to the appropriate boundary.  */
-long
+valueT
 md_section_align (segment, size)
      segT segment;
-     long size;
+     valueT size;
 {
   return size;			/* Byte alignment is fine */
 }

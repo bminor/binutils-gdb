@@ -21,15 +21,9 @@
 
 #include <stdio.h>
 #include <ctype.h>
-#ifdef USG
-#include <string.h>
-#else
-#include <strings.h>
-#endif
 #include "opcode/ns32k.h"
 
 #include "as.h"
-#include "read.h"
 
 #include "obstack.h"
 
@@ -1536,7 +1530,7 @@ md_atof (type, litP, sizeP)
 void
 md_number_to_chars (buf, value, nbytes)
      char *buf;
-     long value;
+     valueT value;
      int nbytes;
 {
   while (nbytes--)
@@ -1709,12 +1703,11 @@ tc_aout_fix_to_chars (where, fixP, segment_address_in_file)
      relax_addressT segment_address_in_file;
 {
   /*
-	 * In: length of relocation (or of address) in chars: 1, 2 or 4.
-	 * Out: GNU LD relocation length code: 0, 1, or 2.
-	 */
+   * In: length of relocation (or of address) in chars: 1, 2 or 4.
+   * Out: GNU LD relocation length code: 0, 1, or 2.
+   */
 
-  static unsigned char nbytes_r_length[] =
-  {42, 0, 1, 42, 2};
+  static unsigned char nbytes_r_length[] = {42, 0, 1, 42, 2};
   long r_symbolnum;
 
   know (fixP->fx_addsy != NULL);
@@ -1735,9 +1728,7 @@ tc_aout_fix_to_chars (where, fixP, segment_address_in_file)
 		       | (long) (fixP->fx_bsr << 28)
 		       | (long) (fixP->fx_im_disp << 29)),
 		      4);
-
-  return;
-}				/* tc_aout_fix_to_chars() */
+}
 
 #endif /* OBJ_AOUT */
 
@@ -1977,34 +1968,34 @@ md_estimate_size_before_relax (fragP, segment)
 
 int md_short_jump_size = 3;
 int md_long_jump_size = 5;
-int md_reloc_size = 8;		/* Size of relocation record */
+const int md_reloc_size = 8;	/* Size of relocation record */
 
 void
 md_create_short_jump (ptr, from_addr, to_addr, frag, to_symbol)
      char *ptr;
-     long from_addr, to_addr;
+     addressT from_addr, to_addr;
      fragS *frag;
      symbolS *to_symbol;
 {
-  long offset;
+  valueT offset;
 
   offset = to_addr - from_addr;
-  md_number_to_chars (ptr, (long) 0xEA, 1);
-  md_number_to_disp (ptr + 1, (long) offset, 2);
+  md_number_to_chars (ptr, (valueT) 0xEA, 1);
+  md_number_to_disp (ptr + 1, (valueT) offset, 2);
 }
 
 void
 md_create_long_jump (ptr, from_addr, to_addr, frag, to_symbol)
      char *ptr;
-     long from_addr, to_addr;
+     addressT from_addr, to_addr;
      fragS *frag;
      symbolS *to_symbol;
 {
-  long offset;
+  valueT offset;
 
   offset = to_addr - from_addr;
-  md_number_to_chars (ptr, (long) 0xEA, 2);
-  md_number_to_disp (ptr + 2, (long) offset, 4);
+  md_number_to_chars (ptr, (valueT) 0xEA, 2);
+  md_number_to_disp (ptr + 2, (valueT) offset, 4);
 }
 
 /* JF this is a new function to parse machine-dep options */
@@ -2099,6 +2090,20 @@ fix_new_ns32k (frag, where, size, add_symbol, sub_symbol, offset, pcrel,
   fixP->fx_bsr = bsr;
 }				/* fix_new_ns32k() */
 
+/* This is TC_CONS_FIX_NEW, called by emit_expr in read.c.  */
+
+void
+cons_fix_new_ns32k (frag, where, size, exp)
+     fragS *frag;		/* Which frag? */
+     int where;			/* Where in that frag? */
+     int size;			/* 1, 2  or 4 usually. */
+     expressionS *exp;		/* Expression. */
+{
+  fix_new_ns32k (frag, where, size, exp->X_add_symbol,
+		 exp->X_subtract_symbol, exp->X_add_number,
+		 0, 0, 2, 0, 0);
+}
+
 /* We have no need to default values of symbols.  */
 
 symbolS *
@@ -2120,10 +2125,10 @@ md_operand (expressionP)
 }
 
 /* Round up a section size to the appropriate boundary.  */
-long
+valueT
 md_section_align (segment, size)
      segT segment;
-     long size;
+     valueT size;
 {
   return size;			/* Byte alignment is fine */
 }
