@@ -65,6 +65,7 @@ print_subexp (exp, pos, stream, prec)
   /* Set to 1 for a right-associative operator.  */
   int assoc;
   value val;
+  char *tempstr;
 
   op_print_tab = exp->language_defn->la_op_print_tab;
   pc = (*pos)++;
@@ -76,12 +77,10 @@ print_subexp (exp, pos, stream, prec)
     case OP_SCOPE:
       myprec = PREC_PREFIX;
       assoc = 0;
-      (*pos) += 3;
-      print_subexp (exp, pos, stream,
-		    (enum precedence) ((int) myprec + assoc));
-      fputs_filtered (" :: ", stream);
+      fputs_filtered (type_name_no_tag (exp->elts[pc + 1].type), stream);
+      fputs_filtered ("::", stream);
       nargs = longest_to_int (exp->elts[pc + 2].longconst);
-      (*pos) += 2 + BYTES_TO_EXP_ELEM (nargs + 1);
+      (*pos) += 4 + BYTES_TO_EXP_ELEM (nargs + 1);
       fputs_filtered (&exp->elts[pc + 3].string, stream);
       return;
 
@@ -157,8 +156,60 @@ print_subexp (exp, pos, stream, prec)
       break;
 
     case OP_ARRAY:
-      error ("support for OP_ARRAY unimplemented");
-      break;
+      (*pos) += 3;
+      nargs = longest_to_int (exp->elts[pc + 2].longconst);
+      nargs -= longest_to_int (exp->elts[pc + 1].longconst);
+      nargs++;
+      tem = 0;
+      if (exp->elts[pc + 4].opcode == OP_LONG
+	  && exp->elts[pc + 5].type == builtin_type_char
+	  && exp->language_defn->la_language == language_c)
+	{
+	  /* Attempt to print C character arrays using string syntax.
+	     Walk through the args, picking up one character from each
+	     of the OP_LONG expression elements.  If any array element
+	     does not match our expection of what we should find for
+	     a simple string, revert back to array printing.  Note that
+	     the last expression element is an explicit null terminator
+	     byte, which doesn't get printed. */
+	  tempstr = alloca (nargs);
+	  pc += 4;
+	  while (tem < nargs)
+	    {
+	      if (exp->elts[pc].opcode != OP_LONG
+		  || exp->elts[pc + 1].type != builtin_type_char)
+		{
+		  /* Not a simple array of char, use regular array printing. */
+		  tem = 0;
+		  break;
+		}
+	      else
+		{
+		  tempstr[tem++] =
+		    longest_to_int (exp->elts[pc + 2].longconst);
+		  pc += 4;
+		}
+	    }
+	}
+      if (tem > 0)
+	{
+	  LA_PRINT_STRING (stream, tempstr, nargs - 1, 0);
+	  (*pos) = pc;
+	}
+      else
+	{
+	  fputs_filtered (" {", stream);
+	  for (tem = 0; tem < nargs; tem++)
+	    {
+	      if (tem != 0)
+		{
+		  fputs_filtered (", ", stream);
+		}
+	      print_subexp (exp, pos, stream, PREC_ABOVE_COMMA);
+	    }
+	  fputs_filtered ("}", stream);
+	}
+      return;
 
     case TERNOP_COND:
       if ((int) prec > (int) PREC_COMMA)
@@ -259,6 +310,10 @@ print_subexp (exp, pos, stream, prec)
 	    op_str = op_print_tab[tem].string;
 	    break;
 	  }
+      if (op_print_tab[tem].opcode != opcode)
+	/* Not found; don't try to keep going because we don't know how
+	   to interpret further elements.  */
+	error ("Invalid expression");
       break;
 
     /* C++ ops */
@@ -349,6 +404,11 @@ print_subexp (exp, pos, stream, prec)
 	    assoc = op_print_tab[tem].right_assoc;
 	    break;
 	  }
+      if (op_print_tab[tem].opcode != opcode)
+	/* Not found; don't try to keep going because we don't know how
+	   to interpret further elements.  For example, this happens
+	   if opcode is OP_TYPE.  */
+	error ("Invalid expression");
    }
 
   if ((int) myprec < (int) prec)
@@ -483,6 +543,7 @@ dump_expression (exp, stream, note)
 	  case BINOP_VAL: opcode_name = "BINOP_VAL"; break;
 	  case BINOP_INCL: opcode_name = "BINOP_INCL"; break;
 	  case BINOP_EXCL: opcode_name = "BINOP_EXCL"; break;
+	  case BINOP_CONCAT: opcode_name = "BINOP_CONCAT"; break;
 	  case BINOP_END: opcode_name = "BINOP_END"; break;
 	  case TERNOP_COND: opcode_name = "TERNOP_COND"; break;
 	  case OP_LONG: opcode_name = "OP_LONG"; break;
