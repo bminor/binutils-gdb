@@ -125,7 +125,7 @@ isa_conflict { "-march=sb1 -mgp32" "-mips32r2" } sb1 isa32r2
 
 regsize_conflict { "-mips4 -mgp64" "-mips2" }
 regsize_conflict { "-mips4 -mabi=o64" "-mips4 -mabi=32" }
-regsize_conflict { "-mabi=eabi -mgp32" "-mabi=eabi -mgp64" }
+regsize_conflict { "-mips4 -mabi=eabi -mgp32" "-mips4 -mabi=eabi -mgp64" }
 regsize_conflict { "-march=vr5000 -mgp64" "-march=vr5000 -mgp32" }
 regsize_conflict { "-mips32" "-mips64" }
 regsize_conflict { "-mips32r2" "-mips64" }

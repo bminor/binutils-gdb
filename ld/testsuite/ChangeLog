@@ -1,5 +1,9 @@
 2003-01-02  Richard Sandiford  <rsandifo@redhat.com>
 
+	* ld-mips-elf/mips-elf-flags.exp: Add -mips4 to a -mgp64 test.
+
+2003-01-02  Richard Sandiford  <rsandifo@redhat.com>
+
 	* ld-mips-elf/jr.s: New file.
 	* ld-mips-elf/mips-elf-flags.exp: New test.
 
