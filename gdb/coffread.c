@@ -603,6 +603,15 @@ coff_symfile_read (struct objfile *objfile, int mainline)
   /* Free the installed minimal symbol data.  */
   do_cleanups (cleanup_minimal_symbols);
 
+  /* If we are reinitializing, or if we have not loaded syms yet,
+     empty the psymtab.  "mainline" is cleared so the *_read_psymtab
+     functions do not all re-initialize it.  */
+  if (mainline)
+    {
+      init_psymbol_list (objfile, 0);
+      mainline = 0;
+    }
+
   bfd_map_over_sections (abfd, coff_locate_sections, (void *) info);
 
   if (info->stabsects)
@@ -632,6 +641,8 @@ coff_symfile_read (struct objfile *objfile, int mainline)
       /* DWARF2 sections.  */
       dwarf2_build_psymtabs (objfile, mainline);
     }
+
+  dwarf2_build_frame_info (objfile);
 
   do_cleanups (back_to);
 }

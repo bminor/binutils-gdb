@@ -3376,8 +3376,7 @@ coffstab_build_psymtabs (struct objfile *objfile, int mainline,
 }
 
 /* Scan and build partial symbols for an ELF symbol file.
-   This ELF file has already been processed to get its minimal symbols,
-   and any DWARF symbols that were in it.
+   This ELF file has already been processed to get its minimal symbols.
 
    This routine is the equivalent of dbx_symfile_init and dbx_symfile_read
    rolled into one.

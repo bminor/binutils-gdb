@@ -1,3 +1,10 @@
+2004-06-10  Brian Ford  <ford@vss.fsi.com>
+
+	* coffread.c (coff_symfile_read): Prevent mixed debugging formats
+	from corrupting/reinitializing the psymtab.  Support DWARF 2 frame
+	info.
+	* dbxread.c (elfstab_build_psymtabs): Remove bogus comment.
+
 2004-06-10  Andrew Cagney  <cagney@gnu.org>
 
 	* gdbarch.sh (DEPRECATED_PC_IN_CALL_DUMMY): Delete.
