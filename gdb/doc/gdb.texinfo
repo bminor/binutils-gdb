@@ -28,10 +28,11 @@
 @c readline appendices use @vindex
 @syncodeindex vr cp
 
-@c ===> NOTE! <==
-@c Determine the edition number in *three* places by hand:
-@c      1. First ifinfo section  2. title page  3. top node
-@c To find the locations, search for !!set
+@c !!set GDB manual's edition---not the same as GDB version!
+@set EDITION 4.10
+
+@c !!set GDB manual's revision date
+@set DATE November 1993
 
 @c GDB CHANGELOG CONSULTED BETWEEN:
 @c Fri Oct 11 23:27:06 1991  John Gilmore  (gnu at cygnus.com)
@@ -53,8 +54,8 @@ END-INFO-DIR-ENTRY
 @ifinfo
 This file documents the GNU debugger @value{GDBN}.
 
-@c !!set edition, date, version
-This is Edition 4.09, August 1993, 
+
+This is Edition @value{EDITION}, @value{DATE}, 
 of @cite{Debugging with @value{GDBN}: the GNU Source-Level Debugger}
 for GDB Version @value{GDBVN}.
 
@@ -87,9 +88,8 @@ into another language, under the above conditions for modified versions.
 @subtitle (@value{TARGET})
 @end ifclear
 @sp 1
-@c !!set edition, date, version
-@subtitle Edition 4.09, for @value{GDBN} version @value{GDBVN}
-@subtitle August 1993
+@subtitle Edition @value{EDITION}, for @value{GDBN} version @value{GDBVN}
+@subtitle @value{DATE}
 @author Richard M. Stallman and Roland H. Pesch
 @page
 @tex
@@ -131,8 +131,7 @@ into another language, under the above conditions for modified versions.
 
 This file describes @value{GDBN}, the GNU symbolic debugger.
 
-@c !!set edition, date, version
-This is Edition 4.09, August 1993, for GDB Version @value{GDBVN}.
+This is Edition @value{EDITION}, @value{DATE}, for GDB Version @value{GDBVN}.
 
 @menu
 * Summary::                     Summary of @value{GDBN}
@@ -1373,6 +1372,7 @@ already running process, or kill a child process.
 * Attach::                      Debugging an already-running process
 * Kill Process::                Killing the child process
 * Process Information::         Additional process information
+* Threads::			Debugging programs with multiple threads
 @end ifclear
 @end menu
 
@@ -1804,6 +1804,153 @@ received.
 @item info proc all
 Show all the above information about the process.
 @end table
+
+@node Threads
+@section Debugging programs with multiple threads
+
+@cindex threads of execution
+@cindex multiple threads
+@cindex switching threads
+In some operating systems, a single program may have more than one
+@dfn{thread} of execution.  The precise semantics of threads differ from
+one operating system to another, but in general the threads of a single
+program are akin to multiple processes---except that they share one
+address space (that is, they can all examine and modify the same
+variables).  On the other hand, each thread has its own registers and
+execution stack, and perhaps private memory.
+
+@value{GDBN} provides several facilities for debugging multi-thread
+programs:
+
+@itemize @bullet
+@item automatic notification of new threads
+@item @samp{thread @var{threadno}}, a command to switch among threads
+@item @samp{info threads}, a command to inquire about existing threads
+@item thread-specific breakpoints
+@end itemize
+
+@quotation
+@emph{Warning:} These facilities are not yet available on every
+@value{GDBN} configuration where the operating system supports threads.
+If your @value{GDBN} does not support threads, these commands have no
+effect.  For example, a system without thread support shows no output
+from @samp{info threads}, and always rejects the @code{thread} command,
+like this:
+
+@smallexample
+(@value{GDBP}) info threads
+(@value{GDBP}) thread 1
+Thread ID 1 not known.  Use the "info threads" command to
+see the IDs of currently known threads.
+@end smallexample
+@c FIXME to implementors: how hard would it be to say "sorry, this GDB
+@c                        doesn't support threads"?
+@end quotation
+
+@cindex focus of debugging
+@cindex current thread
+The @value{GDBN} thread debugging facility allows you to observe all
+threads while your program runs---but whenever @value{GDBN} takes
+control, one thread in particular is always the focus of debugging.
+This thread is called the @dfn{current thread}.  Debugging commands show
+program information from the perspective of the current thread.
+
+@kindex New @var{systag}
+@cindex thread identifier (system)
+@c FIXME-implementors!! It would be more helpful if the [New...] message
+@c included GDB's numeric thread handle, so you could just go to that
+@c thread without first checking `info threads'.
+Whenever @value{GDBN} detects a new thread in your program, it displays
+the system's identification for it with a message in the form @samp{[New
+@var{systag}]}.  @var{systag} is a thread identifier whose form varies
+depending on the particular system.  For example, on LynxOS, you might
+see
+
+@example
+[New process 35 thread 27]
+@end example
+
+@noindent
+when @value{GDBN} notices a new thread.  In contrast, on an SGI system,
+the @var{systag} is simply something like @samp{process 368}, with no
+further qualifier.
+
+@c FIXME!! (1) Does the [New...] message appear even for the very first
+@c         thread of a program, or does it only appear for the
+@c         second---i.e., when it becomes obvious we have a multithread
+@c         program?
+@c         (2) *Is* there necessarily a first thread always?  Or do some
+@c         multithread systems permit starting a program with multiple
+@c         threads ab initio?      
+
+@cindex thread number
+@cindex thread identifier (GDB)
+For debugging purposes, @value{GDBN} associates its own thread
+number---always a single integer---with each thread in your program.
+
+@table @code
+@item info threads
+@kindex info threads
+Display a summary of all threads currently in your
+program.  @value{GDBN} displays for each thread (in this order):
+
+@enumerate
+@item the @value{GDBN} thread number
+
+@item the system's @var{systag} thread identifier
+
+@item the current stack frame summary for that thread
+@end enumerate
+
+@noindent
+An asterisk @samp{*} to the left of the @value{GDBN} thread number
+indicates the current thread.
+
+For example, 
+@end table
+@c end table here to get a little more width for example
+
+@smallexample
+(@value{GDBP}) info threads
+  3 process 35 thread 27  0x34e5 in sigpause ()
+  2 process 35 thread 23  0x34e5 in sigpause ()
+* 1 process 35 thread 13  main (argc=1, argv=0x7ffffff8)
+    at threadtest.c:68
+@end smallexample
+
+@table @code
+@item thread @var{threadno}
+Make thread number @var{threadno} the current thread.  The command
+argument @var{threadno} is the internal @value{GDBN} thread number, as
+shown in the first field of the @samp{info threads} display.
+@value{GDBN} responds by displaying the system identifier of the thread
+you selected, and its current stack frame summary:
+
+@smallexample
+@c FIXME!! This example made up; find a GDB w/threads and get real one
+(@value{GDBP}) thread 2
+[Switching to process 35 thread 23]
+0x34e5 in sigpause ()
+@end smallexample
+
+@noindent
+As with the @samp{[New @dots{}]} message, the form of the text after
+@samp{Switching to} depends on your system's conventions for identifying
+threads.  
+@end table
+
+@cindex automatic thread selection
+@cindex switching threads automatically
+@cindex threads, automatic switching
+Whenever @value{GDBN} stops your program, due to a breakpoint or a
+signal, it automatically selects the thread where that breakpoint or
+signal happened.  @value{GDBN} alerts you to the context switch with a
+message of the form @samp{[Switching to @var{systag}]} to identify the
+thread.
+
+@xref{Thread Stops,,Stopping and starting multi-thread programs}, for
+more information about how @value{GDBN} behaves when you stop and start
+programs with multiple threads.
 @end ifclear
 
 @node Stopping
@@ -1849,6 +1996,9 @@ and why it stopped.
 @ifset POSIX
 * Signals::                     Signals
 @end ifset
+@ifclear BARETARGET
+* Thread Stops::		Stopping and starting multi-thread programs
+@end ifclear
 @end menu
 
 @c makeinfo node-defaulting requires adjacency of @node and sectioning cmds
@@ -1873,8 +2023,8 @@ your program should stop by line number, function name or exact address
 in the program.  
 @ifclear CONLY
 In languages with exception handling (such as GNU C++), you can also set
-breakpoints where an exception is raised (@pxref{Exception Handling,
-,Breakpoints and exceptions}).
+breakpoints where an exception is raised (@pxref{Exception Handling,,
+Breakpoints and exceptions}).
 @end ifclear
 
 @cindex watchpoints
@@ -1889,8 +2039,8 @@ any other breakpoint: you enable, disable, and delete both breakpoints
 and watchpoints using the same commands.
 
 You can arrange to have values from your program displayed automatically
-whenever @value{GDBN} stops at a breakpoint.  @xref{Auto Display,
-,Automatic display}.
+whenever @value{GDBN} stops at a breakpoint.  @xref{Auto Display,,
+Automatic display}.
 
 @cindex breakpoint numbers
 @cindex numbers for breakpoints
@@ -2133,6 +2283,21 @@ Set a watchpoint for an expression.
 This command prints a list of watchpoints and breakpoints; it is the
 same as @code{info break}.
 @end table
+
+@ifclear BARETARGET
+@quotation
+@cindex watchpoints and threads
+@cindex threads and watchpoints
+@emph{Warning:} in multi-thread programs, watchpoints have only limited
+usefulness.  With the current watchpoint implementation, @value{GDBN}
+can only watch the value of an expression @emph{in a single thread}.  If
+you are confident that the expression can only change due to the current
+thread's activity (and if you are also confident that the same thread
+will remain current), then you can use watchpoints as usual.  However,
+@value{GDBN} may not notice when a non-current thread's activity changes
+the expression.
+@end quotation
+@end ifclear
 
 @ifclear CONLY
 @node Exception Handling
@@ -2861,6 +3026,61 @@ a result of the fatal signal once it saw the signal.  To prevent this,
 you can continue with @samp{signal 0}.  @xref{Signaling, ,Giving your
 program a signal}. 
 @end ifset
+
+@ifclear BARETARGET
+@node Thread Stops
+@section Stopping and starting multi-thread programs
+
+When your program has multiple threads (@pxref{Threads,, Debugging
+programs with multiple threads}), you can choose whether to set
+breakpoints on all threads, or on a particular thread.
+
+@table @code
+@cindex br
+@kindex break @dots{} thread @var{threadno}
+@item break @var{linespec} thread @var{threadno}
+@itemx break @var{linespec} thread @var{threadno} if @dots{}
+Use the qualifier @samp{thread @var{threadno}} with a breakpoint command
+to specify that you only want @value{GDBN} to stop the program when a
+particular thread reaches this breakpoint.  @var{threadno} is one of
+GDB's numeric thread identifiers, shown in the first column of
+the @samp{info threads} display.
+
+You can use the @code{thread} qualifier on conditional breakpoints as
+well; in this case, place @samp{thread @var{threadno}} before the
+breakpoint condition.
+
+If you do not specify @samp{thread @var{threadno}} when you set a
+breakpoint, the breakpoint applies to @emph{all} threads of your
+program.
+@end table
+
+@cindex stopped threads
+@cindex threads, stopped
+Whenever your program stops under @value{GDBN} for any reason,
+@emph{all} threads of execution stop, not just the current thread.  This
+allows you to examine the overall state of the program, including
+switching between threads, without worrying that things may change
+underfoot.
+
+@cindex continuing threads
+@cindex threads, continuing
+Conversely, whenever you restart the program, @emph{all} threads start
+executing.  @emph{This is true even when single-stepping} with commands
+like @code{step} or @code{next}.  
+
+In particular, @value{GDBN} cannot single-step all threads in lockstep.
+Since thread scheduling is up to your host operating system, rather than
+controlled by @value{GDBN}, other threads may execute more than one
+statement while the current thread completes a single step.
+Moreover, in general other threads stop in the middle of a statement,
+rather than at a clean statement boundary, when the program stops.
+
+You might even find your program stopped in another thread after
+continuing or even single-stepping.  This happens whenever some other
+thread runs into a breakpoint, a signal, or an exception before the
+first thread completes whatever you requested.
+@end ifclear
 
 @node Stack
 @chapter Examining the Stack
