@@ -1749,7 +1749,7 @@ static const struct dis386 grps[][8] = {
     { "incQ",	Ev, XX, XX },
     { "decQ",	Ev, XX, XX },
     { "callP",	indirEv, XX, XX },
-    { "callP",	indirEv, XX, XX },
+    { "lcallP",	indirEv, XX, XX },
     { "jmpP",	indirEv, XX, XX },
     { "ljmpP",	indirEv, XX, XX },
     { "pushQ",	Ev, XX, XX },

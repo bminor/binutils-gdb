@@ -1255,9 +1255,8 @@ md_assemble (line)
      with the template operand types. */
 
 #define MATCH(overlap, given, template) \
-  ((overlap) \
-   && ((given) & BaseIndex) == ((overlap) & BaseIndex) \
-   && ((given) & JumpAbsolute) == ((template) & JumpAbsolute))
+  ((overlap & ~JumpAbsolute) \
+   && ((given) & (BaseIndex|JumpAbsolute)) == ((overlap) & (BaseIndex|JumpAbsolute)))
 
   /* If given types r0 and r1 are registers they must be of the same type
      unless the expected operand type register overlap is null.
@@ -1347,11 +1346,6 @@ md_assemble (line)
 
 	    i.types[xchg1] = temp_type;
 	  }
-	if (!strcmp(mnemonic,"jmp")
-	    || !strcmp (mnemonic, "call"))
-	  if ((i.types[0] & Reg) || i.types[0] & BaseIndex)
-	    i.types[0] |= JumpAbsolute;
-
       }
     overlap0 = 0;
     overlap1 = 0;
@@ -1458,6 +1452,12 @@ md_assemble (line)
 	as_bad (_("suffix or operands invalid for `%s'"),
 		current_templates->start->name);
 	return;
+      }
+
+    if (!intel_syntax
+	&& (i.types[0] & JumpAbsolute) != (t->operand_types[0] & JumpAbsolute))
+      {
+	as_warn (_("Indirect %s without `*'"), t->name);
       }
 
     if ((t->opcode_modifier & (IsPrefix|IgnoreSize)) == (IsPrefix|IgnoreSize))
