@@ -250,6 +250,12 @@ http://sourceware.cygnus.com/ml/gdb-patches/2000-q1/msg00814.html
 
 --
 
+Elimination of ``(catch_errors_ftype *) func''.
+
+Like make_cleanup_func it isn't portable.
+
+--
+
 Re: Various C++ things
 
 value_headof/value_from_vtable_info are worthless, and should be removed.
@@ -348,13 +354,14 @@ Send debug and log output log gdb_stdlog.
 
 GDB still contains many cases where (f)printf or printf_filtered () is
 used when it should be sending the messages to gdb_stderror or
-gdb_stdlog.
+gdb_stdlog.  The thought of #defining printf to something has crossed
+peoples minds ;-)
 
 --
 
 Rationalize the host-endian code (grep for HOST_BYTE_ORDER).
 
-At preent defs.h includes <endian.h> (which is linux specific) yet
+At present defs.h includes <endian.h> (which is linux specific) yet
 almost nothing depends on it.  Suggest "gdb_endian.h" which can also
 handle <machine/endian.h> and only include that where it is really
 needed.

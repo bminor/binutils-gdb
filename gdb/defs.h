@@ -482,9 +482,8 @@ extern char *paddr_nz (CORE_ADDR addr);
 extern char *paddr_u (CORE_ADDR addr);
 extern char *paddr_d (LONGEST addr);
 
-typedef bfd_vma t_reg;
-extern char *preg (t_reg reg);
-extern char *preg_nz (t_reg reg);
+extern char *phex (ULONGEST l, int sizeof_l);
+extern char *phex_nz (ULONGEST l, int sizeof_l);
 
 extern void fprintf_symbol_filtered (struct ui_file *, char *,
 				     enum language, int);

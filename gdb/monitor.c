@@ -1377,7 +1377,8 @@ monitor_store_register (regno)
     }
 
   val = read_register (regno);
-  monitor_debug ("MON storeg %d %s\n", regno, preg (val));
+  monitor_debug ("MON storeg %d %s\n", regno,
+		 phex (val, REGISTER_RAW_SIZE (regno)));
 
   /* send the register deposit command */
 

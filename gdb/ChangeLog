@@ -1,3 +1,16 @@
+Mon May 22 12:05:13 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* defs.h (t_reg): Delete typedef.
+	(preg, preg_nz): Delete function. Replaced by phex and phex_nz.
+	* utils.c (phex, phex_nz): New functions.
+	(paddr, paddr_nz): Use.
+
+	* monitor.c (monitor_store_register): Replace preg with phex.
+
+Mon May 22 11:46:01 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* TODO: Add note on typecast using catch_errors_ftype.
+
 2000-05-21  Mark Kettenis  <kettenis@gnu.org>
 
 	* i387-tdep.c (print_i387_value): Cast &value to (char *) in
