@@ -1,3 +1,8 @@
+2003-04-22  Kevin Buettner  <kevinb@redhat.com>
+
+	* dwarf2loc.c (dwarf2_evaluate_loc_desc): Invoke DWARF2_REG_TO_REGNUM
+	on the DWARF2 register number prior to fetching a register.
+
 2003-04-22  J. Brobecker  <brobecker@gnat.com>
 
 	* config/pa/tm-hppa.h (SOFT_FLOAT): Delete this macro.
