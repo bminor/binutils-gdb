@@ -1,9 +1,16 @@
+Thu Aug 20 23:18:06 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* gas/i386/white.l: Revert patch of August 12.
+
 Wed Aug 12 11:54:37 1998  Jeffrey A Law  (law@cygnus.com)
 
 	* gas/mn10300/udf.s: New test.
 	* gas/mn10300/basic.exp: Run it.
 
 Wed Aug 12 13:25:38 1998  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	* gas/i386/general.l: Test andb $~0x80,foo.
+	* gas/i386/general.s: Update.
 
 	* gas/i386/white.l: Expect warning for stand-alone ss prefix.
 
