@@ -1,6 +1,9 @@
 2000-12-17  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
+        * sh-tdep.c (sh_gdbarch_init): Initialize do_registers_info.
+
 	* config/sh/tm-sh.h: Don't remove SR_REGNUM from enum.
+	(DO_REGISTERS_INFO): Remove macro. Use multiarch version instead.
 
 Fri Dec 15 23:12:15 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 

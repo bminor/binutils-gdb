@@ -66,12 +66,6 @@ enum
     SR_REGNUM = 22
   };
 
-/* Define DO_REGISTERS_INFO() to do machine-specific formatting
-   of register dumps. */
-extern void sh_do_registers_info (int regnum, int fpregs);
-#undef  DO_REGISTERS_INFO
-#define DO_REGISTERS_INFO(REGNUM, FP) sh_do_registers_info(REGNUM, FP)
-
 #define NUM_REALREGS 59 /* used in remote-e7000.c which is not multiarched. */
 
 #define REGISTER_TYPE  long /* used in standalone.c */

@@ -104,6 +104,7 @@ static gdbarch_fetch_pseudo_register_ftype sh_fetch_pseudo_register;
 static gdbarch_store_pseudo_register_ftype sh_store_pseudo_register;
 static int fv_reg_base_num (int);
 static int dr_reg_base_num (int);
+static gdbarch_do_registers_info_ftype sh_do_registers_info;
 static void do_fv_register_info (int fv_regnum);
 static void do_dr_register_info (int dr_regnum);
 static void sh_do_pseudo_register (int regnum);
@@ -1917,6 +1918,7 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_register_bytes (gdbarch, NUM_REGS * 4);
   set_gdbarch_fetch_pseudo_register (gdbarch, sh_fetch_pseudo_register);
   set_gdbarch_store_pseudo_register (gdbarch, sh_store_pseudo_register);
+  set_gdbarch_do_registers_info (gdbarch, sh_do_registers_info);
   print_sh_insn = gdb_print_insn_sh;
 
   switch (info.bfd_arch_info->mach)
