@@ -1,5 +1,10 @@
 2004-06-28  Andrew Cagney  <cagney@gnu.org>
 
+	* rdi-share/ardi.c (angel_RDI_ExecuteOrStep): Revert 2004-06-24
+	change - add back extern deprecated_ui_loop_hook declaration.
+
+2004-06-28  Andrew Cagney  <cagney@gnu.org>
+
 	* xcoffsolib.c (xcoff_solib_address): Replace xasprintf with
 	xstrprintf.
 	* varobj.c (varobj_gen_name, create_child, c_name_of_child)
