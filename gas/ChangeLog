@@ -1,3 +1,25 @@
+2004-03-22  Hans-Peter Nilsson  <hp@axis.com>
+
+	* doc/c-cris.texi (CRIS-Opts): Document --no-mul-bug-abort,
+	--mul-bug-abort and the default behavior.
+	* config/tc-cris.c (cris_insn_kind): New member CRIS_INSN_MUL.
+	(err_for_dangerous_mul_placement): New variable.
+	(STATE_MUL, OPTION_MULBUG_ABORT_ON, OPTION_MULBUG_ABORT_OFF): New
+	macros.
+	(md_cris_relax_table): Have placeholder for STATE_MUL.
+	(md_longopts): New options --mul-bug-abort and --no-mul-bug-abort.
+	(cris_relax_frag) <case ENCODE_RELAX (STATE_MUL, STATE_BYTE)>: New
+	case doing nothing.
+	(md_estimate_size_before_relax) <case ENCODE_RELAX (STATE_MUL,
+	STATE_BYTE)>: Ditto.
+	(md_convert_frag) <ENCODE_RELAX (STATE_MUL, STATE_BYTE)>: Check
+	alignment and position of this frag, emit error message if
+	suspicious.
+	(md_assemble): For a multiply insn and when checking it,
+	transform the current frag into a special frag for that purpose.
+	(md_parse_option) <case OPTION_MULBUG_ABORT_OFF, case
+	OPTION_MULBUG_ABORT_ON>: Handle new options.
+
 2004-03-19  Bob Wilson  <bob.wilson@acm.org>
 
 	* config/tc-xtensa.c (mark_literal_frags): New function.
