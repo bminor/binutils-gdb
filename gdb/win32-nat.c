@@ -1540,7 +1540,7 @@ dll_code_sections_add (const char *dll_name, int base_addr, struct target_ops *t
   char *name;
   if (dll_name == NULL || target == NULL)
     return 0;
-  name = strdup (dll_name);
+  name = xstrdup (dll_name);
   dll_bfd = bfd_openr (name, "pei-i386");
   if (dll_bfd == NULL)
     return 0;
