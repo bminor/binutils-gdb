@@ -554,8 +554,15 @@ sim_fetch_register (SIM_DESC sd, int rn, unsigned char *memory, int length)
       val = 0;
       break;
     }
-  memory[0] = val >> 8;
-  memory[1] = val & 0x0FF;
+  if (size == 1)
+    {
+      memory[0] = val;
+    }
+  else
+    {
+      memory[0] = val >> 8;
+      memory[1] = val & 0x0FF;
+    }
   return size;
 }
 
