@@ -3289,8 +3289,7 @@ startup file (e.g.@: @file{crt0.o}), inside @code{main}, or inside
 See @file{frame.h}.  Determines the address of all registers in the
 current stack frame storing each in @code{frame->saved_regs}.  Space for
 @code{frame->saved_regs} shall be allocated by
-@code{FRAME_INIT_SAVED_REGS} using either
-@code{frame_saved_regs_zalloc} or @code{frame_obstack_alloc}.
+@code{FRAME_INIT_SAVED_REGS} using @code{frame_saved_regs_zalloc}.
 
 @code{FRAME_FIND_SAVED_REGS} and @code{EXTRA_FRAME_INFO} are deprecated.
 
@@ -3395,7 +3394,7 @@ routine that handles inter-space procedure calls on PA-RISC.
 @findex INIT_EXTRA_FRAME_INFO
 If additional information about the frame is required this should be
 stored in @code{frame->extra_info}.  Space for @code{frame->extra_info}
-is allocated using @code{frame_obstack_alloc}.
+is allocated using @code{frame_extra_info_zalloc}.
 
 @item DEPRECATED_INIT_FRAME_PC (@var{fromleaf}, @var{prev})
 @findex DEPRECATED_INIT_FRAME_PC
