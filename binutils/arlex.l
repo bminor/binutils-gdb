@@ -29,6 +29,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "libiberty.h"
 #include "arparse.h"
 
+#define YY_NO_UNPUT
+
+extern int yylex PARAMS ((void));
+
 int linenumber;
 %}
 
