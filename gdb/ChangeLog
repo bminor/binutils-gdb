@@ -1,7 +1,11 @@
+Mon Aug 31 15:42:10 1998  Tom Tromey  <tromey@cygnus.com>
+
+	* top.c (context_hook): Define.
+
 Tue Aug 25 13:21:58 1998  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	* ax-gdb.c (gen_var_ref): Allow for typedef types.
-	(gen_cast, gen_bitfield_ref, gen_expr): ditto.
+	(gen_cast, gen_bitfield_ref, gen_expr, gen_deref): ditto.
 
 Mon Aug 24 18:29:03 1998  Michael Snyder  <msnyder@cleaver.cygnus.com>
 

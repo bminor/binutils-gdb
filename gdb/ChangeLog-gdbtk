@@ -1,3 +1,7 @@
+Mon Aug 31 15:42:10 1998  Tom Tromey  <tromey@cygnus.com>
+
+	* gdbtk-hooks.c (context_hook): Don't define.
+
 1998-08-31  Keith Seitz  <keiths@cygnus.com>
 
 	* gdbtk-cmds.c (gdb_listfuncs): When stripping out "global destructors"

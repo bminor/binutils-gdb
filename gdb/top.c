@@ -460,6 +460,9 @@ int (*target_wait_hook) PARAMS ((int pid, struct target_waitstatus *status));
 void (*call_command_hook) PARAMS ((struct cmd_list_element *c, char *cmd,
 				   int from_tty));
 
+/* Called when the current thread changes.  Argument is thread id.  */
+
+void (*context_hook) PARAMS ((int id));
 
 /* Takes control from error ().  Typically used to prevent longjmps out of the
    middle of the GUI.  Usually used in conjunction with a catch routine.  */

@@ -111,7 +111,6 @@ static void pc_changed PARAMS ((void));
 static void tracepoint_notify PARAMS ((struct tracepoint *, const char *));
 static void gdbtk_selected_frame_changed PARAMS ((int));
 static void gdbtk_context_change PARAMS ((int));
-void (*context_hook) PARAMS ((int));
 
 /*
  * gdbtk_fputs can't be static, because we need to call it in gdbtk.c.
