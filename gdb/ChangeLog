@@ -1,5 +1,8 @@
 2004-05-10  Jim Blandy  <jimb@redhat.com>
 
+	* rs6000-tdep.c (ppc_collect_gregset): When regnum == -1, do
+	collect all the gprs.
+
 	* rs6000-tdep.c (ppc_collect_gregset): Correct off-by-one error in
 	loop collecting gprs.
 

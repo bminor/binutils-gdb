@@ -260,7 +260,7 @@ ppc_collect_gregset (const struct regset *regset,
   for (i = 0; i < 32; i++, offset += 4)
     {
       if (regnum == -1 || regnum == i)
-	ppc_collect_reg (regcache, regnum, gregs, offset);
+	ppc_collect_reg (regcache, i, gregs, offset);
     }
 
   if (regnum == -1 || regnum == PC_REGNUM)
