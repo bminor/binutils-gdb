@@ -22,7 +22,6 @@
 #include "defs.h"
 #include "event-loop.h"
 #include "event-top.h"
-#include "interps.h"
 
 #ifdef HAVE_POLL
 #if defined (HAVE_POLL_H)
