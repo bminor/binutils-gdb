@@ -1,3 +1,8 @@
+Sun Aug  8 14:21:29 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* gdb.t20/inherit.exp: Change message for "print tagless struct"
+	to state that this is a known bug in old versions of g++.
+
 Fri Aug  6 21:40:30 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* gdb.t17/interrupt.exp:  Add xfail for 386 bsd. Accept echoed newline
