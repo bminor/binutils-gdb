@@ -1,3 +1,12 @@
+2002-05-03  H.J. Lu  (hjl@gnu.org)
+
+	* elfxx-mips.c (mips_elf_link_hash_entry): Add forced_local.
+	(mips_elf_link_hash_newfunc): Initialize forced_local to false.
+	(mips_elf_record_global_got_symbol): Call _bfd_mips_elf_hide_symbol
+	to hide a global symbol.
+	(_bfd_mips_elf_hide_symbol): Return if forced_local is true. Set
+	forced_local to true. 
+
 2002-05-02  Richard Henderson  <rth@redhat.com>
 
 	* elf64-alpha.c (elf64_alpha_relocate_section): Force relative relocs

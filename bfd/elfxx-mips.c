@@ -115,6 +115,9 @@ struct mips_elf_link_hash_entry
   /* This is like the call_stub field, but it is used if the function
      being called returns a floating point value.  */
   asection *call_fp_stub;
+
+  /* Are we forced local?  .*/
+  boolean forced_local;
 };
 
 /* MIPS ELF linker hash table.  */
@@ -581,6 +584,7 @@ mips_elf_link_hash_newfunc (entry, table, string)
       ret->need_fn_stub = false;
       ret->call_stub = NULL;
       ret->call_fp_stub = NULL;
+      ret->forced_local = false;
     }
 
   return (struct bfd_hash_entry *) ret;
@@ -1685,9 +1689,18 @@ mips_elf_record_global_got_symbol (h, info, g)
 {
   /* A global symbol in the GOT must also be in the dynamic symbol
      table.  */
-  if (h->dynindx == -1
-      && !bfd_elf32_link_record_dynamic_symbol (info, h))
-    return false;
+  if (h->dynindx == -1)
+    {
+      switch (ELF_ST_VISIBILITY (h->other))
+	{
+	case STV_INTERNAL:
+	case STV_HIDDEN:
+	  _bfd_mips_elf_hide_symbol (info, h, true);
+	  break;
+	}
+      if (!bfd_elf32_link_record_dynamic_symbol (info, h))
+	return false;
+    }
 
   /* If we've already marked this entry as needing GOT space, we don't
      need to do it again.  */
@@ -6384,7 +6397,12 @@ _bfd_mips_elf_hide_symbol (info, entry, force_local)
   asection *got;
   struct mips_got_info *g;
   struct mips_elf_link_hash_entry *h;
+
   h = (struct mips_elf_link_hash_entry *) entry;
+  if (h->forced_local)
+    return;
+  h->forced_local = true;
+
   dynobj = elf_hash_table (info)->dynobj;
   got = bfd_get_section_by_name (dynobj, ".got");
   g = (struct mips_got_info *) elf_section_data (got)->tdata;
