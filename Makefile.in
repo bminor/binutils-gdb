@@ -426,7 +426,7 @@ all-xiberty: all-gcc all-newlib
 		rootme=`pwd` ; export rootme ; \
 		srcroot=`cd $(srcdir); pwd`; export srcroot ; \
 		(cd ./xiberty; \
-		$(MAKE) $(FLAGS_TO_PASS) all) ; \
+		$(MAKE) $(TARGET_FLAGS_TO_PASS) all) ; \
 	else \
 		true ; \
 	fi
@@ -436,7 +436,7 @@ install-xiberty: force
 		rootme=`pwd` ; export rootme ; \
 		srcroot=`cd $(srcdir); pwd`; export srcroot ; \
 		(cd ./xiberty; \
-		$(MAKE) $(FLAGS_TO_PASS) install) ; \
+		$(MAKE) $(TARGET_FLAGS_TO_PASS) install) ; \
 	else \
 		true ; \
 	fi
@@ -940,7 +940,7 @@ all-libm: force
 	@if [ -f ./libm/Makefile ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./libm; \
-		$(MAKE) $(FLAGS_TO_PASS) all) ; \
+		$(MAKE) $(TARGET_FLAGS_TO_PASS) all) ; \
 	else \
 		true ; \
 	fi
@@ -949,7 +949,7 @@ install-libm: force
 	@if [ -f ./libm/Makefile ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./libm; \
-		$(MAKE) $(FLAGS_TO_PASS) install) ; \
+		$(MAKE) $(TARGET_FLAGS_TO_PASS) install) ; \
 	else \
 		true ; \
 	fi
