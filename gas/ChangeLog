@@ -1,3 +1,9 @@
+Wed Oct 18 12:22:59 1995  Ken Raeburn  <raeburn@cygnus.com>
+
+	* stabs.c (aout_process_stab): Insert debug symbol into symbol
+	chain after parsing value expression, if any, to avoid separating
+	continued .stabs lines.
+
 Mon Oct 16 10:56:41 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-mips.c (mips_elf_pseudo_table): Remove.
@@ -5,8 +11,12 @@ Mon Oct 16 10:56:41 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 Mon Oct 16 07:07:37 1995  Michael Meissner  <meissner@wogglebug.tiac.net>
 
-	* config/tc-ppc.c (md_begin): Take -mcom into account for
-	duplicate cmp instructions.
+	* config/tc-ppc.c (md_begin): Use new flags PPC_OPCODE_COMMON for
+	-mcom support and PPC_OPCODE_ANY for -many.
+	(md_parse_option): Ditto.
+	(ppc_arch): Ditto.
+	(md_begin): For duplicate instructions, print all duplicates
+	before aborting.
 
 Sun Oct 15 22:06:14 1995  Michael Meissner  <meissner@cygnus.com>
 
