@@ -3536,12 +3536,11 @@ ppc_stub_name (const asection *input_section,
 static struct ppc_stub_hash_entry *
 ppc_get_stub_entry (const asection *input_section,
 		    const asection *sym_sec,
-		    struct elf_link_hash_entry *hash,
+		    struct ppc_link_hash_entry *h,
 		    const Elf_Internal_Rela *rel,
 		    struct ppc_link_hash_table *htab)
 {
   struct ppc_stub_hash_entry *stub_entry;
-  struct ppc_link_hash_entry *h = (struct ppc_link_hash_entry *) hash;
   const asection *id_sec;
 
   /* If this input section is part of a group of sections sharing one
@@ -8373,8 +8372,9 @@ ppc64_elf_relocate_section (bfd *output_bfd,
       bfd_reloc_status_type r;
       Elf_Internal_Sym *sym;
       asection *sec;
-      struct elf_link_hash_entry *h;
-      struct elf_link_hash_entry *fdh;
+      struct elf_link_hash_entry *h_elf;
+      struct ppc_link_hash_entry *h;
+      struct ppc_link_hash_entry *fdh;
       const char *sym_name;
       unsigned long r_symndx, toc_symndx;
       char tls_mask, tls_gd, tls_type;
@@ -8401,7 +8401,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 
       sym = NULL;
       sec = NULL;
-      h = NULL;
+      h_elf = NULL;
       sym_name = NULL;
       unresolved_reloc = FALSE;
       warned = FALSE;
@@ -8430,11 +8430,12 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	{
 	  RELOC_FOR_GLOBAL_SYMBOL (info, input_bfd, input_section, rel,
 				   r_symndx, symtab_hdr, sym_hashes,
-				   h, sec, relocation,
+				   h_elf, sec, relocation,
 				   unresolved_reloc, warned);
-	  sym_name = h->root.root.string;
-	  sym_type = h->type;
+	  sym_name = h_elf->root.root.string;
+	  sym_type = h_elf->type;
 	}
+      h = (struct ppc_link_hash_entry *) h_elf;
 
       /* TLS optimizations.  Replace instruction sequences and relocs
 	 based on information we collected in tls_optimize.  We edit
@@ -8446,7 +8447,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
       if (IS_PPC64_TLS_RELOC (r_type))
 	{
 	  if (h != NULL)
-	    tls_mask = ((struct ppc_link_hash_entry *) h)->tls_mask;
+	    tls_mask = h->tls_mask;
 	  else if (local_got_ents != NULL)
 	    {
 	      char *lgot_masks;
@@ -8472,8 +8473,8 @@ ppc64_elf_relocate_section (bfd *output_bfd,
       if (r_symndx != 0
 	  && r_type != R_PPC64_NONE
 	  && (h == NULL
-	      || h->root.type == bfd_link_hash_defined
-	      || h->root.type == bfd_link_hash_defweak)
+	      || h->elf.root.type == bfd_link_hash_defined
+	      || h->elf.root.type == bfd_link_hash_defweak)
 	  && IS_PPC64_TLS_RELOC (r_type) != (sym_type == STT_TLS))
 	{
 	  if (r_type == R_PPC64_TLS && tls_mask != 0)
@@ -8829,9 +8830,9 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	  stub_entry = NULL;
 	  fdh = h;
 	  if (((h != NULL
-		&& (((fdh = &((struct ppc_link_hash_entry *) h)->oh->elf) != NULL
-		     && fdh->plt.plist != NULL)
-		    || (fdh = h)->plt.plist != NULL))
+		&& (((fdh = h->oh) != NULL
+		     && fdh->elf.plt.plist != NULL)
+		    || (fdh = h)->elf.plt.plist != NULL))
 	       || (sec != NULL
 		   && sec->output_section != NULL
 		   && sec->id <= htab->top_id
@@ -8870,7 +8871,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 			can_plt_call = TRUE;
 		    }
 		  else if (h != NULL
-			   && strcmp (h->root.root.string,
+			   && strcmp (h->elf.root.root.string,
 				      ".__libc_start_main") == 0)
 		    {
 		      /* Allow crt1 branch to go via a toc adjusting stub.  */
@@ -8936,7 +8937,8 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		  >= 2 * max_br_offset)
 	      && r_type != R_PPC64_ADDR14_BRTAKEN
 	      && r_type != R_PPC64_ADDR14_BRNTAKEN)
-	    stub_entry = ppc_get_stub_entry (input_section, sec, h, rel, htab);
+	    stub_entry = ppc_get_stub_entry (input_section, sec, h, rel,
+					     htab);
 
 	  if (stub_entry != NULL)
 	    {
@@ -8976,7 +8978,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	     We can thus call a weak function without first
 	     checking whether the function is defined.  */
 	  else if (h != NULL
-		   && h->root.type == bfd_link_hash_undefweak
+		   && h->elf.root.type == bfd_link_hash_undefweak
 		   && r_type == R_PPC64_REL24
 		   && relocation == 0
 		   && rel->r_addend == 0)
@@ -9055,7 +9057,8 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 
 	    if (tls_type == (TLS_TLS | TLS_LD)
 		&& (h == NULL
-		    || !(h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC)))
+		    || (h->elf.elf_link_hash_flags
+			& ELF_LINK_HASH_DEF_DYNAMIC) == 0))
 	      offp = &ppc64_tlsld_got (input_bfd)->offset;
 	    else
 	      {
@@ -9064,9 +9067,10 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		if (h != NULL)
 		  {
 		    bfd_boolean dyn = htab->elf.dynamic_sections_created;
-		    if (!WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, info->shared, h)
+		    if (!WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, info->shared,
+							  &h->elf)
 			|| (info->shared
-			    && SYMBOL_REFERENCES_LOCAL (info, h)))
+			    && SYMBOL_REFERENCES_LOCAL (info, &h->elf)))
 		      /* This is actually a static link, or it is a
 			 -Bsymbolic link and the symbol is defined
 			 locally, or the symbol was forced to be local
@@ -9074,10 +9078,10 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		      ;
 		    else
 		      {
-			indx = h->dynindx;
+			indx = h->elf.dynindx;
 			unresolved_reloc = FALSE;
 		      }
-		    ent = h->got.glist;
+		    ent = h->elf.got.glist;
 		  }
 		else
 		  {
@@ -9116,8 +9120,8 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		*offp = off | 1;
 		if ((info->shared || indx != 0)
 		    && (h == NULL
-			|| ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
-			|| h->root.type != bfd_link_hash_undefweak))
+			|| ELF_ST_VISIBILITY (h->elf.other) == STV_DEFAULT
+			|| h->elf.root.type != bfd_link_hash_undefweak))
 		  {
 		    outrel.r_offset = (got->output_section->vma
 				       + got->output_offset
@@ -9225,7 +9229,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	  if (htab->plt != NULL)
 	    {
 	      struct plt_entry *ent;
-	      for (ent = h->plt.plist; ent != NULL; ent = ent->next)
+	      for (ent = h->elf.plt.plist; ent != NULL; ent = ent->next)
 		if (ent->addend == rel->r_addend
 		    && ent->plt.offset != (bfd_vma) -1)
 		  {
@@ -9365,17 +9369,17 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 
 	  if ((info->shared
 	       && (h == NULL
-		   || ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
-		   || h->root.type != bfd_link_hash_undefweak)
+		   || ELF_ST_VISIBILITY (h->elf.other) == STV_DEFAULT
+		   || h->elf.root.type != bfd_link_hash_undefweak)
 	       && (MUST_BE_DYN_RELOC (r_type)
-		   || !SYMBOL_CALLS_LOCAL (info, h)))
+		   || !SYMBOL_CALLS_LOCAL (info, &h->elf)))
 	      || (ELIMINATE_COPY_RELOCS
 		  && !info->shared
 		  && h != NULL
-		  && h->dynindx != -1
-		  && (h->elf_link_hash_flags & ELF_LINK_NON_GOT_REF) == 0
-		  && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) != 0
-		  && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0))
+		  && h->elf.dynindx != -1
+		  && !(h->elf.elf_link_hash_flags & ELF_LINK_NON_GOT_REF)
+		  && (h->elf.elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC)
+		  && !(h->elf.elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR)))
 	    {
 	      Elf_Internal_Rela outrel;
 	      bfd_boolean skip, relocate;
@@ -9414,10 +9418,10 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 
 	      if (skip)
 		memset (&outrel, 0, sizeof outrel);
-	      else if (!SYMBOL_REFERENCES_LOCAL (info, h)
+	      else if (!SYMBOL_REFERENCES_LOCAL (info, &h->elf)
 		       && !is_opd
 		       && r_type != R_PPC64_TOC)
-		outrel.r_info = ELF64_R_INFO (h->dynindx, r_type);
+		outrel.r_info = ELF64_R_INFO (h->elf.dynindx, r_type);
 	      else
 		{
 		  /* This symbol is local, or marked to become local,
@@ -9628,7 +9632,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	 not process them.  */
       if (unresolved_reloc
 	  && !((input_section->flags & SEC_DEBUGGING) != 0
-	       && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) != 0))
+	       && (h->elf.elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC)))
 	{
 	  (*_bfd_error_handler)
 	    (_("%B(%A+0x%lx): unresolvable %s relocation against symbol `%s'"),
@@ -9636,7 +9640,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	     input_section,
 	     (long) rel->r_offset,
 	     ppc64_elf_howto_table[(int) r_type]->name,
-	     h->root.root.string);
+	     h->elf.root.root.string);
 	  ret = FALSE;
 	}
 
@@ -9657,7 +9661,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	      if (warned)
 		continue;
 	      if (h != NULL
-		  && h->root.type == bfd_link_hash_undefweak
+		  && h->elf.root.type == bfd_link_hash_undefweak
 		  && ppc64_elf_howto_table[r_type]->pc_relative)
 		{
 		  /* Assume this is a call protected by other code that

@@ -1,3 +1,10 @@
+2004-08-19  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf64-ppc.c (ppc_get_stub_entry): Change third param to a
+	"struct ppc_link_hash_entry *".
+	(ppc64_elf_relocate_section): Ditto for type of h.  Introduce h_elf
+	to satisfy RELOC_FOR_GLOBAL_SYMBOL.
+
 2004-08-19  Jakub Jelinek  <jakub@redhat.com>
 
 	* elf64-ppc.c (ppc64_elf_edit_opd): Support 16 byte long .opd
