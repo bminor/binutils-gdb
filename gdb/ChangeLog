@@ -1,3 +1,7 @@
+2003-07-03  Joel Brobecker  <brobecker@gnat.com>
+
+	* remote-vx.c (vx_add_symbols): Fix compilation error.
+
 2003-07-03  Daniel Jacobowitz  <drow@mvista.com>
 
 	* cli/cli-interp.c (cli_interpreter_resume): Update the
