@@ -1,5 +1,9 @@
 Sun Dec  5 17:05:29 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
+	* config/tc-hppa.c (tc_gen_reloc, SOM version): Handle relocation
+	expansion due to rounding mode selectors.  Handle R_[RDSN]_MODE
+	relocations for selecting the current rounding mode.
+
 	* config/tc-hppa.c (evaluate_absolute): Support e_rrsel and
 	e_rlsel field selectors.
 

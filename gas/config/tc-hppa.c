@@ -2823,31 +2823,20 @@ tc_gen_reloc (section, fixp)
     }
 #else /* OBJ_SOM */
 
-  /* Preliminary relocation handling for SOM.  Needs to handle
-     COMPLEX relocations (yes, I've seen them occur) and it will
-     need to handle R_ENTRY/R_EXIT relocations in the very near future
-     (for generating unwinds).  */
-  switch (fixp->fx_r_type)
+  /* Walk over reach relocation returned by the BFD backend.  */
+  for (i = 0; i < n_relocs; i++)
     {
-    case R_HPPA_COMPLEX:
-    case R_HPPA_COMPLEX_PCREL_CALL:
-    case R_HPPA_COMPLEX_ABS_CALL:
-      abort ();
-      break;
-    default:
-      assert (n_relocs == 1);
+      code = *codes[i];
 
-      code = *codes[0];
-
-      reloc->sym_ptr_ptr = &fixp->fx_addsy->bsym;
-      reloc->howto = bfd_reloc_type_lookup (stdoutput, code);
-      reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;
+      relocs[i]->sym_ptr_ptr = &fixp->fx_addsy->bsym;
+      relocs[i]->howto = bfd_reloc_type_lookup (stdoutput, code);
+      relocs[i]->address = fixp->fx_frag->fr_address + fixp->fx_where;
 
       switch (code)
 	{
 	case R_PCREL_CALL:
 	case R_ABS_CALL:
-	  reloc->addend = HPPA_R_ADDEND (hppa_fixp->fx_arg_reloc, 0);
+	  relocs[i]->addend = HPPA_R_ADDEND (hppa_fixp->fx_arg_reloc, 0);
 	  break;
 
 	case R_DATA_PLABEL:
@@ -2857,14 +2846,22 @@ tc_gen_reloc (section, fixp)
 	     (static link required).
 
 	     FIXME: We always assume no static link!  */
-	  reloc->addend = 0;
+	  relocs[i]->addend = 0;
+	  break;
+
+	case R_N_MODE:
+	case R_S_MODE:
+	case R_D_MODE:
+	case R_R_MODE:
+	  /* There is no symbol or addend associated with these fixups.  */
+	  relocs[i]->sym_ptr_ptr = 0;
+	  relocs[i]->addend = 0;
 	  break;
 
 	default:
-	  reloc->addend = fixp->fx_addnumber;
+	  relocs[i]->addend = fixp->fx_addnumber;
 	  break;
 	}
-      break;
     }
 #endif
 
