@@ -35,6 +35,7 @@
 #include "frame-unwind.h"
 #include "frame-base.h"
 #include "mips-mdebug-tdep.h"
+#include "mdebugread.h"
 
 #define PROC_LOW_ADDR(proc) ((proc)->pdr.adr)	/* least address */
 #define PROC_FRAME_OFFSET(proc) ((proc)->pdr.frameoffset)

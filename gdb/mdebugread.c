@@ -63,13 +63,6 @@
 
 #ifndef MDEBUG_EFI_SYMBOL_NAME
 #define MDEBUG_EFI_SYMBOL_NAME "__GDB_EFI_INFO__"
-#include "coff/sym.h"
-#include "coff/symconst.h"
-struct mdebug_extra_func_info
-{
-  long numargs;
-  PDR pdr;
-};
 #ifndef RA_REGNUM
 #define RA_REGNUM 0
 #endif

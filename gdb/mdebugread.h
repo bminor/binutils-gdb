@@ -22,6 +22,18 @@
 #ifndef MDEBUGREAD_H
 #define MDEBUGREAD_H
 
+#include "coff/sym.h"		/* Needed for PDR below.  */
+#include "coff/symconst.h"
+
 extern void ecoff_relocate_efi (struct symbol *, CORE_ADDR);
+
+/* Specific information about a procedure.  Architectures (ab)uses
+   this to save memory.  */
+
+struct mdebug_extra_func_info
+{
+  long numargs;		/* number of args to procedure (was iopt) */
+  PDR pdr;			/* Procedure descriptor record */
+};
 
 #endif /* MDEBUGREAD_H */

@@ -727,7 +727,7 @@ macroexp_h = macroexp.h
 macroscope_h = macroscope.h $(macrotab_h) $(symtab_h)
 macrotab_h = macrotab.h
 main_h = main.h
-mdebugread_h = mdebugread.h
+mdebugread_h = mdebugread.h $(coff_sym_h) $(coff_symconst_h)
 memattr_h = memattr.h
 mips_mdebug_tdep_h = mips-mdebug-tdep.h
 mipsnbsd_tdep_h = mipsnbsd-tdep.h
@@ -2222,9 +2222,9 @@ mcore-tdep.o: mcore-tdep.c $(defs_h) $(frame_h) $(symtab_h) $(value_h) \
 mdebugread.o: mdebugread.c $(defs_h) $(symtab_h) $(gdbtypes_h) $(gdbcore_h) \
 	$(objfiles_h) $(gdb_obstack_h) $(buildsym_h) $(stabsread_h) \
 	$(complaints_h) $(demangle_h) $(gdb_assert_h) $(block_h) \
-	$(dictionary_h) $(mdebugread_h) $(coff_sym_h) $(coff_symconst_h) \
-	$(gdb_stat_h) $(gdb_string_h) $(bfd_h) $(coff_ecoff_h) $(libaout_h) \
-	$(aout_aout64_h) $(aout_stab_gnu_h) $(expression_h)
+	$(dictionary_h) $(mdebugread_h) $(gdb_stat_h) $(gdb_string_h) \
+	$(bfd_h) $(coff_ecoff_h) $(libaout_h) $(aout_aout64_h) \
+	$(aout_stab_gnu_h) $(expression_h)
 memattr.o: memattr.c $(defs_h) $(command_h) $(gdbcmd_h) $(memattr_h) \
 	$(target_h) $(value_h) $(language_h) $(gdb_string_h)
 mem-break.o: mem-break.c $(defs_h) $(symtab_h) $(breakpoint_h) $(inferior_h) \
@@ -2243,7 +2243,7 @@ mips-linux-tdep.o: mips-linux-tdep.c $(defs_h) $(gdbcore_h) $(target_h) \
 mips-mdebug-tdep.o: mips-mdebug-tdep.c $(defs_h) $(frame_h) $(mips_tdep_h) \
 	$(trad_frame_h) $(block_h) $(symtab_h) $(objfiles_h) $(elf_mips_h) \
 	$(elf_bfd_h) $(gdb_assert_h) $(frame_unwind_h) $(frame_base_h) \
-	$(mips_mdebug_tdep_h)
+	$(mips_mdebug_tdep_h) $(mdebugread_h)
 mipsnbsd-nat.o: mipsnbsd-nat.c $(defs_h) $(inferior_h) $(regcache_h) \
 	$(mips_tdep_h) $(mipsnbsd_tdep_h)
 mipsnbsd-tdep.o: mipsnbsd-tdep.c $(defs_h) $(gdbcore_h) $(regcache_h) \

@@ -1,5 +1,13 @@
 2004-10-30  Andrew Cagney  <cagney@gnu.org>
 
+	* mdebugread.h: Include "coff/sym.h" and "coff/symconst.h".
+	(struct mdebug_extra_func_info): Define.
+	* config/alpha/tm-alpha.h: Delete same.
+	* config/mips/tm-mips.h: Delete same.
+	* mdebugread.c: Delete same.
+	* Makefile.in: Update dependencies.
+	* mips-mdebug-tdep.c: Include "mdebugread.h".
+
 	* objfiles.c: Include "mdebugread.h".
 	* mdebugread.c: Include "mdebugread.h".
 	(ecoff_relocate_cfi): Delete.

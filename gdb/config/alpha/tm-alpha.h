@@ -24,28 +24,11 @@
 #ifndef TM_ALPHA_H
 #define TM_ALPHA_H
 
-#include "bfd.h"
-#include "coff/sym.h"		/* Needed for PDR below.  */
-#include "coff/symconst.h"
-
-struct frame_info;
-struct symbol;
-
 /* Special symbol found in blocks associated with routines.  We can hang
    alpha_extra_func_info_t's off of this.  */
 
 #define MDEBUG_EFI_SYMBOL_NAME "__GDB_EFI_INFO__"
 
 #define RA_REGNUM 26		/* XXXJRT needed by mdebugread.c */
-
-/* Specific information about a procedure.
-   This overlays the ALPHA's PDR records, 
-   alpharead.c (ab)uses this to save memory */
-
-struct mdebug_extra_func_info
-{
-  long numargs;		/* number of args to procedure (was iopt) */
-  PDR pdr;			/* Procedure descriptor record */
-};
 
 #endif /* TM_ALPHA_H */

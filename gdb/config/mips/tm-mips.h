@@ -33,10 +33,6 @@ struct symbol;
 struct type;
 struct value;
 
-#include <bfd.h>
-#include "coff/sym.h"		/* Needed for PDR below.  */
-#include "coff/symconst.h"
-
 /* Return non-zero if PC points to an instruction which will cause a step
    to execute both the instruction at PC and an instruction at PC+4.  */
 extern int mips_step_skips_delay (CORE_ADDR);
@@ -49,16 +45,6 @@ extern int mips_step_skips_delay (CORE_ADDR);
    hang mdebug_extra_func_info's off of this.  */
 
 #define MDEBUG_EFI_SYMBOL_NAME "__GDB_EFI_INFO__"
-
-/* Specific information about a procedure.
-   This overlays the MIPS's PDR records, 
-   mipsread.c (ab)uses this to save memory */
-
-struct mdebug_extra_func_info
-{
-  long numargs;		/* number of args to procedure (was iopt) */
-  PDR pdr;			/* Procedure descriptor record */
-};
 
 /* Functions for dealing with MIPS16 call and return stubs.  */
 #define DEPRECATED_IGNORE_HELPER_CALL(pc)			mips_ignore_helper (pc)
