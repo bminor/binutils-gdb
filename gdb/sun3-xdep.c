@@ -111,8 +111,8 @@ fetch_core_registers (core_reg_sect, core_reg_size, which, reg_addr)
       error ("Can't find registers in core file");
 
     bcopy ((char *)regs, registers, 16 * 4);
-    supply_register (PS_REGNUM, &regs->r_ps);
-    supply_register (PC_REGNUM, &regs->r_pc);
+    supply_register (PS_REGNUM, (char *)&regs->r_ps);
+    supply_register (PC_REGNUM, (char *)&regs->r_pc);
 
   } else if (which == 2) {
 

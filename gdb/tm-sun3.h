@@ -69,6 +69,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #undef SAVED_PC_AFTER_CALL
 
+#ifdef __STDC__
+struct frame_info;
+#endif
+
 extern CORE_ADDR sun3_saved_pc_after_call PARAMS ((struct frame_info *));
 
 #define SAVED_PC_AFTER_CALL(frame) \
