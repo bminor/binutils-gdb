@@ -1,3 +1,7 @@
+Mon Jul 11 15:59:03 1994  J.T. Conklin  (jtc@phishhead.cygnus.com)
+
+	* nlmheader.y: Null terminate var_hdr->threadName.
+
 Fri Jul  8 17:33:22 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
 	* Makefile.in (syslex.o, sysinfo.o): Permit C source files to be

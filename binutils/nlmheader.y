@@ -29,7 +29,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <ansidecl.h>
 #include <stdio.h>
 #include <ctype.h>
-#include <bfd.h>
+#include "bfd.h"
 #include "sysdep.h"
 #include "bucomm.h"
 #include "nlm/common.h"
@@ -196,6 +196,12 @@ command:
 	    free ($2);
 	    free ($3);
 	    free ($4);
+	    if (version_hdr->month < 1 || version_hdr->month > 12)
+	      nlmheader_warn ("illegal month", -1);
+	    if (version_hdr->day < 1 || version_hdr->day > 31)
+	      nlmheader_warn ("illegal day", -1);
+	    if (version_hdr->year < 1900 || version_hdr->year > 3000)
+	      nlmheader_warn ("illegal year", -1);
 	  }
 	| DEBUG
 	  {
@@ -239,6 +245,11 @@ command:
 	    fixed_hdr->flags &=~ nlmlex_get_number ($2);
 	    free ($2);
 	  }
+	| FULLMAP
+	  {
+	    map_file = "";
+	    full_map = true;
+	  }
 	| FULLMAP STRING
 	  {
 	    map_file = $2;
@@ -259,6 +270,10 @@ command:
 	| INPUT string_list
 	  {
 	    input_files = string_list_append (input_files, $2);
+	  }
+	| MAP
+	  {
+	    map_file = "";
 	  }
 	| MAP STRING
 	  {
@@ -346,7 +361,7 @@ command:
 	      }
 	    var_hdr->threadNameLength = len;
 	    strncpy (var_hdr->threadName, $2, len);
-	    var_hdr->screenName[NLM_MAX_THREAD_NAME_LENGTH] = '\0';
+	    var_hdr->threadName[len] = '\0';
 	    free ($2);
 	  }
 	| TYPE STRING
