@@ -1,3 +1,9 @@
+Mon May  6 11:31:43 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* hw_pal.c (hw_pal_instance_read_callback): If using stdio, use
+	fgets to read line.  If not using stdio, do a simple blocking read
+	of len bytes.
+
 Fri May  3 15:07:42 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* Makefile.in: Correctly build simulator for build machine != host
