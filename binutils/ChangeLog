@@ -1,6 +1,6 @@
 2000-02-25  H.J. Lu  <hjl@gnu.org>
 
-	* configure.in (AC_SEARCH_LIBS): Pass lm, not -lm.
+	* configure.in (AC_SEARCH_LIBS): Pass m, not -lm.
 
 2000-02-24  Nick Clifton  <nickc@cygnus.com>
 
