@@ -184,6 +184,10 @@ h8500-*-hms* | h8500-*-coff*)
 			targ_emul=h8500
 			targ_extra_emuls="h8500s h8500b h8500m h8500c"
 			;;
+sh-*-linux*)
+			targ_emul=shelf_linux
+			targ_extra_emuls=shlelf_linux
+			;;
 sh-*-elf* | sh-*-rtemself*)
 			targ_emul=shelf
 			targ_extra_emuls="shlelf sh shl"

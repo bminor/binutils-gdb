@@ -1,3 +1,11 @@
+2000-09-07  Niibe Yutaka  <gniibe@m17n.org>, Kaz Kojima  <kkojima@rr.iij4u.or.jp>, Alexandre Oliva  <aoliva@redhat.com>
+
+	* configure.tgt (sh-*-linux*): Added.
+	* Makefile.am: Added eshelf_linux and eshlelf_linux.
+	* Makefile.in: Rebuilt.
+	* emulparams/shelf_linux.sh: New file.
+	* emulparams/shlelf_linux.sh: New file.
+
 2000-09-06  Alan Modra  <alan@linuxcare.com.au>
 
 	* emultempl/elf32.em (gld${EMULATION_NAME}_place_orphan): Don't
