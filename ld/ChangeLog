@@ -1,3 +1,8 @@
+2002-01-14  Charles Wilson  <cwilson@ece.gatech.edu>
+
+	* ld/ld.texinfo (node WIN32): Some clarifications
+	and formatting fixups.
+
 2003-01-09  Chris Demetriou  <cgd@broadcom.com>
 
 	* ldmain.c (get_emulation): Sort -mipsNN checks in the usual

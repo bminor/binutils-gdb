@@ -4480,11 +4480,20 @@ The cygwin/mingw @command{ld} has several ways to export symbols for dll's.
 By default @command{ld} exports symbols with the auto-export functionality,
 which is controlled by the following command line options:
 
-@example
---export-all-symbols   [This is the default]
---exclude-symbols
---exclude-libs
-@end example 
+@itemize
+@item --export-all-symbols   [This is the default]
+@item --exclude-symbols
+@item --exclude-libs
+@end itemize
+
+If, however, @samp{--export-all-symbols} is not given explicitly on the 
+command line, then the default auto-export behavior will be @emph{disabled}
+if either of the following are true:
+
+@itemize
+@item A DEF file is used.
+@item Any symbol in any object file was marked with the __declspec(dllexport) attribute.
+@end itemize
 
 @item   using a DEF file 
 @cindex using a DEF file 
@@ -4492,11 +4501,14 @@ Another way of exporting symbols is using a DEF file.  A DEF file is
 an ASCII file containing definitions of symbols which should be
 exported when a dll is created.  Usually it is named @samp{<dll
 name>.def} and is added as any other object file to the linker's
-command line.
+command line.  The file's name must end in @samp{.def} or @samp{.DEF}.
 
 @example
 gcc -o <output> <objectfiles> <dll name>.def
 @end example
+
+Using a DEF file turns off the normal auto-export behavior, unless the
+@samp{--export-all-symbols} option is also used.
 
 Here is an example of a DEF file for a shared library called @samp{xyz.dll}:
 
@@ -4516,6 +4528,40 @@ specification see ld/deffilep.y in the binutils sources.
 @cindex creating a DEF file
 While linking a shared dll, @command{ld} is able to create a DEF file
 with the @samp{--output-def <file>} command line option.
+
+@item   Using decorations
+@cindex Using decorations
+Another way of marking symbols for export is to modify the source code
+itself, so that when building the DLL each symbol to be exported is
+declared as:
+
+@example
+__declspec(dllexport) int a_variable
+__declspec(dllexport) void a_function(int with_args)
+@end example
+
+All such symbols will be exported from the DLL.  If, however,
+any of the object files in the DLL contain symbols decorated in
+this way, then the normal auto-export behavior is disabled, unless
+the @samp{--export-all-symbols} option is also used.
+
+Note that object files that wish to access these symbols must @emph{not}
+decorate them with dllexport.  Instead, they should use dllimport, 
+instead:
+
+@example
+__declspec(dllimport) int a_variable
+__declspec(dllimport) void a_function(int with_args)
+@end example
+
+This complicates the structure of library header files, because 
+when included by the library itself the header must declare the 
+variables and functions as dllexport, but when included by client
+code the header must declare them as dllimport.  There are a number
+of idioms that are typically used to do this; often client code can 
+omit the __declspec() declaration completely.  See
+@samp{--enable-auto-import} and @samp{automatic data imports} for more
+imformation.
 @end table 
 
 @cindex automatic data imports
@@ -4734,8 +4780,17 @@ The line @samp{_foo = foo} maps the exported symbol @samp{foo} to
 @samp{_foo}.
 @end table 
 
-Note: using a DEF file overrides any other symbol defining except you are 
-using the @samp{--export-all-symbols} command line options. 
+Note: using a DEF file disables the default auto-export behavior,
+unless the @samp{--export-all-symbols} command line option is used. 
+If, however, you are trying to rename symbols, then you should list
+@emph{all} desired exports in the DEF file, including the symbols 
+that are not being renamed, and do @emph{not} use the 
+@samp{--export-all-symbols} option.  If you list only the 
+renamed symbols in the DEF file, and use @samp{--export-all-symbols} 
+to handle the other symbols, then the both the new names @emph{and} 
+the original names for the the renamed symbols will be exported.  
+In effect, you'd be aliasing those symbols, not renaming them, 
+which is probably not what you wanted.
 @end table
 
 @ifclear GENERIC
