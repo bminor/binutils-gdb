@@ -1,5 +1,10 @@
 2004-06-09  Andrew Cagney  <cagney@gnu.org>
 
+	* infptrace.c (child_xfer_memory) [CLEAR_INSN_CACHE]: Delete
+	#ifdef CLEAR_INSN_CACHE code.
+	* target.c (generic_mourn_inferior) [CLEAR_DEFERRED_STORES]:
+	Delete #ifdef CLEAR_DEFERRED_STORES code.
+
 	* solib-svr4.c [HANDLE_SVR4_EXEC_EMULATORS]: Delete #ifdef code.
 
 	* config/ia64/tm-linux.h (TARGET_ELF64): Delete macro, Update

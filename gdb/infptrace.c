@@ -606,9 +606,6 @@ child_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
 	  if (errno)
 	    return 0;
 	}
-#ifdef CLEAR_INSN_CACHE
-      CLEAR_INSN_CACHE ();
-#endif
     }
   else
     {

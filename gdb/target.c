@@ -1526,11 +1526,6 @@ generic_mourn_inferior (void)
   breakpoint_init_inferior (inf_exited);
   registers_changed ();
 
-#ifdef CLEAR_DEFERRED_STORES
-  /* Delete any pending stores to the inferior... */
-  CLEAR_DEFERRED_STORES;
-#endif
-
   reopen_exec_file ();
   reinit_frame_cache ();
 
