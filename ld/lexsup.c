@@ -816,7 +816,7 @@ parse_args (argc, argv)
 	  /* Fall through.  */
 	case OPTION_RPATH:
 	  if (command_line.rpath == NULL)
-	    command_line.rpath = buystring (optarg);
+	    command_line.rpath = xstrdup (optarg);
 	  else
 	    {
 	      size_t rpath_len = strlen (command_line.rpath);
@@ -853,7 +853,7 @@ parse_args (argc, argv)
 	  break;
 	case OPTION_RPATH_LINK:
 	  if (command_line.rpath_link == NULL)
-	    command_line.rpath_link = buystring (optarg);
+	    command_line.rpath_link = xstrdup (optarg);
 	  else
 	    {
 	      char *buf;

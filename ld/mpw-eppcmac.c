@@ -843,7 +843,7 @@ gldppcmacos_read_file (filename, import)
 	  n = ((struct export_symbol_list *)
 	       xmalloc (sizeof (struct export_symbol_list)));
 	  n->next = export_symbols;
-	  n->name = buystring (symname);
+	  n->name = xstrdup (symname);
 	  n->syscall = syscall;
 	  export_symbols = n;
 	}

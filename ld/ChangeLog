@@ -1,3 +1,19 @@
+2001-05-02  H.J. Lu  <hjl@gnu.org>
+
+	* ldfile.c: Include "libiberty.h".
+	* ldlex.l: Likewise.
+
+	* ldmisc.c (buystring): Removed.
+	* ldmisc.h: Likewise.
+
+	* ldfile.c: Replace buystring with xstrdup.
+	* ldlang.c: Likewise.
+	* ldlex.l: Likewise.
+	* ldmain.c: Likewise.
+	* ldmisc.c: Likewise.
+	* lexsup.c: Likewise.
+	* mpw-eppcmac.c: Likewise.
+
 2001-04-30  Andreas Jaeger  <aj@suse.de>
 
 	* emulparms/elf_x86_64.sh (MAXPAGESIZE): Fix value.

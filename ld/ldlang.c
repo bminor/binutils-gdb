@@ -623,7 +623,7 @@ lang_memory_region_lookup (name)
     lang_memory_region_type *new =
     (lang_memory_region_type *) stat_alloc (sizeof (lang_memory_region_type));
 
-    new->name = buystring (name);
+    new->name = xstrdup (name);
     new->next = (lang_memory_region_type *) NULL;
 
     *lang_memory_region_list_tail = new;
@@ -1994,7 +1994,7 @@ ldlang_add_undef (name)
   new->next = ldlang_undef_chain_list_head;
   ldlang_undef_chain_list_head = new;
 
-  new->name = buystring (name);
+  new->name = xstrdup (name);
 }
 
 /* Run through the list of undefineds created above and place them

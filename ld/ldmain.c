@@ -1205,7 +1205,7 @@ undefined_symbol (info, name, abfd, section, address, fatal)
       error_count = 0;
       if (error_name != (char *) NULL)
 	free (error_name);
-      error_name = buystring (name);
+      error_name = xstrdup (name);
     }
 
   if (section != NULL)

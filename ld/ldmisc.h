@@ -42,7 +42,6 @@ extern void yyerror PARAMS ((const char *));
 extern PTR xmalloc PARAMS ((size_t));
 extern PTR xrealloc PARAMS ((PTR, size_t));
 extern void xexit PARAMS ((int));
-extern char *buystring PARAMS ((CONST char *CONST));
 
 #define ASSERT(x) \
 do { if (!(x)) info_assert(__FILE__,__LINE__); } while (0)

@@ -33,6 +33,7 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA
 #include "ldgram.h"
 #include "ldlex.h"
 #include "ldemul.h"
+#include "libiberty.h"
 
 #include <ctype.h>
 
@@ -414,7 +415,7 @@ void
 ldfile_add_arch (in_name)
      CONST char *in_name;
 {
-  char *name = buystring (in_name);
+  char *name = xstrdup (in_name);
   search_arch_type *new =
     (search_arch_type *) xmalloc (sizeof (search_arch_type));
 
