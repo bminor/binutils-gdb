@@ -1,5 +1,8 @@
 Mon Nov 10 13:43:33 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/tc-m68k.c (m68k_ip): Call add_fix when needed for '_'
+	case.
+
 	* macro.c (sub_actual): If we don't find a parameter for an &,
 	just substitute &.
 
