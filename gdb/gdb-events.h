@@ -60,6 +60,7 @@ typedef void (gdb_events_tracepoint_delete_ftype) (int number);
 typedef void (gdb_events_tracepoint_modify_ftype) (int number);
 typedef void (gdb_events_architecture_changed_ftype) (void);
 typedef void (gdb_events_target_changed_ftype) (void);
+typedef void (gdb_events_selected_frame_level_changed_ftype) (int level);
 
 
 /* gdb-events: object. */
@@ -74,6 +75,7 @@ struct gdb_events
     gdb_events_tracepoint_modify_ftype *tracepoint_modify;
     gdb_events_architecture_changed_ftype *architecture_changed;
     gdb_events_target_changed_ftype *target_changed;
+    gdb_events_selected_frame_level_changed_ftype *selected_frame_level_changed;
   };
 
 
@@ -88,6 +90,7 @@ extern void tracepoint_delete_event (int number);
 extern void tracepoint_modify_event (int number);
 extern void architecture_changed_event (void);
 extern void target_changed_event (void);
+extern void selected_frame_level_changed_event (int level);
 
 
 /* When GDB_EVENTS are not being used, completly disable them. */
@@ -101,6 +104,7 @@ extern void target_changed_event (void);
 #define tracepoint_modify_event(number) 0
 #define architecture_changed_event() 0
 #define target_changed_event() 0
+#define selected_frame_level_changed_event(level) 0
 #endif
 
 /* Install custom gdb-events hooks. */

@@ -1,3 +1,9 @@
+2002-08-26  Keith Seitz  <keiths@redhat.com>
+
+	* gdb-events.sh: Add selected-frame-level-changed event.
+	* gdb-events.c: Regenerated.
+	* gdb-events.h: Regenerated.
+	
 2002-08-26  Stephane Carrez  <stcarrez@nerim.fr>
 
 	Fix PR gdb/393:
