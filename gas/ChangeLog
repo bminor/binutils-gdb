@@ -1,3 +1,8 @@
+Fri Sep 25 14:12:58 1992  Ken Raeburn  (raeburn@kyriath.cygnus.com)
+
+	* as.h: Test if __STDC__ is defined only, don't test its value.
+	* messages.c: If __STDC__ is not defined, define NO_STDARG.
+
 Thu Sep 24 12:42:32 1992  Brendan Kehoe  (brendan@rtl.cygnus.com)
 
 	* listing.c (debugging_pseudo): Add stabs and stabn as things to

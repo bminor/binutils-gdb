@@ -22,6 +22,12 @@
 
 #include "as.h"
 
+#ifndef __STDC__
+#ifndef NO_STDARG
+#define NO_STDARG
+#endif
+#endif
+
 #ifndef NO_STDARG
 #include <stdarg.h>
 #else
