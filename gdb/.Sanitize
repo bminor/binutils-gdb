@@ -75,6 +75,7 @@ copying.c
 core.c
 coredep.c
 corelow.c
+core-svr4.c
 cp-valprint.c
 createtags
 dbxread.c
