@@ -144,11 +144,8 @@ main (argc, argv)
   ldsym_init ();
   ldfile_add_arch ("");
 
-  set_scripts_dir ();
-
   config.make_executable = true;
   force_make_executable = false;
-
 
   /* Initialize the cumulative counts of symbols.  */
   undefined_global_sym_count = 0;
@@ -166,6 +163,10 @@ main (argc, argv)
   ldemul_before_parse ();
   lang_has_input_file = false;
   parse_args (argc, argv);
+
+  /* This essentially adds another -L directory so this must be done after
+     the -L's in argv have been processed.  */
+  set_scripts_dir ();
 
   if (had_script == false)
     {
@@ -194,12 +195,12 @@ main (argc, argv)
 
   if (lang_has_input_file == false)
     {
-      einfo ("%P%F: No input files\n");
+      einfo ("%P%F: no input files\n");
     }
 
   if (trace_files)
     {
-      info ("%P: mode %s\n", emulation);
+      info_msg ("%P: mode %s\n", emulation);
     }
 
   ldemul_after_parse ();
@@ -255,7 +256,7 @@ main (argc, argv)
     {
       if (trace_files == true)
 	{
-	  einfo ("%P: Link errors found, deleting executable `%s'\n",
+	  einfo ("%P: link errors found, deleting executable `%s'\n",
 		 output_filename);
 	}
 
@@ -316,8 +317,20 @@ get_emulation (argc, argv)
 		}
 	      else
 		{
-		  einfo("%P%F missing argument to -m\n");
+		  einfo("%P%F: missing argument to -m\n");
 		}
+	    }
+	  else if (strcmp (argv[i], "-mips1") == 0
+		   || strcmp (argv[i], "-mips2") == 0
+		   || strcmp (argv[i], "-mips3") == 0)
+	    {
+	      /* FIXME: The arguments -mips1, -mips2 and -mips3 are
+		 passed to the linker by some MIPS compilers.  They
+		 generally tell the linker to use a slightly different
+		 library path.  Perhaps someday these should be
+		 implemented as emulations; until then, we just ignore
+		 the arguments and hope that nobody ever creates
+		 emulations named ips1, ips2 or ips3.  */
 	    }
 	  else
 	    {
@@ -426,7 +439,11 @@ refize (sp, nlist_p)
   asymbol *sym = *nlist_p;
 
   sym->value = 0;
-  sym->flags = 0;
+
+  /* FIXME: Why do we clear the flags here?  This used to set the
+     flags to zero, but we must not clear BSF_WEAK.  */
+  sym->flags &= BSF_WEAK;
+
   sym->section = &bfd_und_section;
   sym->udata = (PTR) (sp->srefs_chain);
   sp->srefs_chain = nlist_p;
@@ -486,7 +503,7 @@ enter_global_ref (nlist_p, name)
     return;
 
 
-  if (flag_is_constructor (this_symbol_flags))
+  if (this_symbol_flags & BSF_CONSTRUCTOR)
     {
       /* Add this constructor to the list we keep */
       ldlang_add_constructor (sp);
@@ -496,6 +513,15 @@ enter_global_ref (nlist_p, name)
 	  refize (sp, sp->scoms_chain);
 	  sp->scoms_chain = 0;
 	}
+    }
+  else if ((sym->flags & BSF_WEAK) != 0
+	   && (sp->sdefs_chain != NULL || sp->scoms_chain != NULL))
+    {
+      /* SYM is a weak symbol for which we already have a definition.
+	 Just ignore it.  The UnixWare linker is order dependent: if a
+	 global symbol follows a weak symbol it gives an error; if a
+	 weak symbol follows a global symbol it does not.  We are
+	 compatible.  */
     }
   else
     {
@@ -578,7 +604,6 @@ enter_global_ref (nlist_p, name)
 	  /* This is the definition of a symbol, add to def chain */
 	  if (sp->sdefs_chain && (*(sp->sdefs_chain))->section != sym->section)
 	    {
-	      /* Multiple definition */
 	      multiple_warn("%X%C: multiple definition of `%s'\n",
 			    sym,
 			    "%X%C: first defined here\n",
@@ -590,8 +615,9 @@ enter_global_ref (nlist_p, name)
 	      sym->udata = (PTR) (sp->sdefs_chain);
 	      sp->sdefs_chain = nlist_p;
 	    }
+
 	  /* A definition overrides a common symbol */
-	  if (sp->scoms_chain)
+	  if (sp->scoms_chain != NULL)
 	    {
 	      if (config.warn_common)
 		multiple_warn("%C: warning: definition of `%s' overriding common\n",
@@ -624,8 +650,6 @@ enter_global_ref (nlist_p, name)
 
   ASSERT (sp->sdefs_chain == 0 || sp->scoms_chain == 0);
   ASSERT (sp->scoms_chain == 0 || (*(sp->scoms_chain))->udata == 0);
-
-
 }
 
 static void
@@ -642,7 +666,7 @@ enter_file_symbols (entry)
 
   if (trace_files || trace_file_tries)
     {
-      info ("%I\n", entry);
+      info_msg ("%I\n", entry);
     }
 
   total_symbols_seen += entry->symbol_count;
@@ -656,7 +680,7 @@ enter_file_symbols (entry)
 	  if (had_y && p->name)
 	    {
 	      /* look up the symbol anyway to see if the trace bit was
-	   set */
+		 set */
 	      ldsym_type *s = ldsym_get (p->name);
 	      if (s->flags & SYM_Y)
 		{
@@ -666,7 +690,8 @@ enter_file_symbols (entry)
 		}
 	    }
 
-	  if (p->section == &bfd_ind_section)
+	  if (p->section == &bfd_ind_section
+	      || (p->flags & BSF_INDIRECT) != 0)
 	    {
 	      add_indirect (q);
 	    }
@@ -674,33 +699,35 @@ enter_file_symbols (entry)
 	    {
 	      add_warning (p);
 	    }
+	  else if (bfd_is_com_section (p->section))
+	    {
+	      enter_global_ref (q, p->name);
+
+	      /* If this is not bfd_com_section, make sure we have a
+		 section of this name in the bfd.  We need this
+		 because some targets that use multiple common
+		 sections do not actually put the common section in
+		 the BFD, but we need it there so that a wildcard
+		 specification in the linker script (e.g.,
+		 *(.scommon)) will find the section and attach it to
+		 the right output section.  When an section is chosed
+		 for the common symbols (in lang_common) that section
+		 must have been correctly given an output section.
+		 For normal common symbols we just use
+		 entry->common_section, initialized above.  */
+	      if (p->section != &bfd_com_section
+		  && p->section->owner != entry->the_bfd)
+		bfd_make_section (entry->the_bfd,
+				  bfd_get_section_name (p->section->owner,
+							p->section));
+	    }
 	  else if (p->section == &bfd_und_section
 		   || (p->flags & BSF_GLOBAL)
-		   || bfd_is_com_section (p->section)
-		   || (p->flags & BSF_CONSTRUCTOR))
-
+		   || (p->flags & BSF_CONSTRUCTOR)
+		   || (p->flags & BSF_WEAK))
 	    {
-
-	      asymbol *p = *q;
-
-	      if (p->flags & BSF_INDIRECT)
-		{
-		  add_indirect (q);
-		}
-	      else if (p->flags & BSF_WARNING)
-		{
-		  add_warning (p);
-		}
-	      else if (p->section == &bfd_und_section
-		       || (p->flags & BSF_GLOBAL)
-		       || bfd_is_com_section (p->section)
-		       || (p->flags & BSF_CONSTRUCTOR))
-		{
-		  enter_global_ref (q, p->name);
-		}
-
+	      enter_global_ref (q, p->name);
 	    }
-
 	}
     }
 }
@@ -1088,7 +1115,8 @@ subfile_wanted_p (entry)
 
       if (bfd_is_com_section (p->section)
 	  || (p->flags & BSF_GLOBAL)
-	  || (p->flags & BSF_INDIRECT))
+	  || (p->flags & BSF_INDIRECT)
+	  || (p->flags & BSF_WEAK))
 	{
 	  register ldsym_type *sp = ldsym_get_soft (p->name);
 
@@ -1097,11 +1125,37 @@ subfile_wanted_p (entry)
 	  if (sp != (ldsym_type *) NULL
 	      && sp->sdefs_chain == (asymbol **) NULL)
 	    {
-	      if (sp->srefs_chain != (asymbol **) NULL
-		  || sp->scoms_chain != (asymbol **) NULL)
+	      int check;
+
+	      /* A weak symbol is not considered to be a reference
+		 when pulling files out of an archive.  An unresolved
+		 weak symbol winds up with a value of zero.  See the
+		 SVR4 ABI, p. 4-27.  */
+	      if (sp->scoms_chain != (asymbol **) NULL)
+		check = 1;
+	      else if (sp->srefs_chain == (asymbol **) NULL)
+		check = 0;
+	      else
+		{
+		  asymbol **ptr;
+
+		  check = 0;
+		  for (ptr = sp->srefs_chain;
+		       ptr != (asymbol **) NULL;
+		       ptr = (asymbol **) ((*ptr)->udata))
+		    {
+		      if (((*ptr)->flags & BSF_WEAK) == 0)
+			{
+			  check = 1;
+			  break;
+			}
+		    }
+		}
+
+	      if (check)
 		{
 		  /* This is a symbol we are looking for.  It is
-		     either not yet defined or common.  If this is a
+		     either common or not yet defined.  If this is a
 		     common symbol, then if the symbol in the object
 		     file is common, we need to combine sizes.  But if
 		     we already have a common symbol, and the symbol
@@ -1168,7 +1222,7 @@ subfile_wanted_p (entry)
 		    {
 		      if (write_map)
 			{
-			  info ("%I needed due to %s\n", entry, sp->name);
+			  info_msg ("%I needed due to %s\n", entry, sp->name);
 			}
 		      return true;
 		    }
