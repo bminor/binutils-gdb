@@ -1041,7 +1041,7 @@ DEFUN(ieee_slurp_section_data,(abfd),
 
 
   for (s = abfd->sections; s != (asection *)NULL; s = s->next) {
-    ieee_per_section_type *per = s->used_by_bfd;
+    ieee_per_section_type *per = (ieee_per_section_type *) s->used_by_bfd;
     per->data = (bfd_byte *) ieee_malloc(abfd, s->size);
     /*SUPPRESS 68*/
     per->reloc_tail_ptr =
@@ -1061,7 +1061,7 @@ DEFUN(ieee_slurp_section_data,(abfd),
 	next_byte(abfd);
 	section_number = must_parse_int(abfd);
 	s = ieee->section_table[section_number];
-	current_map = s->used_by_bfd;
+	current_map = (ieee_per_section_type *) s->used_by_bfd;
 	location_ptr = current_map->data - s->vma;
 	/* The document I have says that Microtec's compilers reset */
 	/* this after a sec section, even though the standard says not */
@@ -1214,7 +1214,7 @@ DEFUN(ieee_new_section_hook,(abfd, newsect),
       bfd *abfd AND
       asection *newsect)
 {
-  newsect->used_by_bfd = (ieee_per_section_type *)
+  newsect->used_by_bfd = (PTR)
     ieee_malloc(abfd, sizeof(ieee_per_section_type));
   ieee_per_section( newsect)->data = (bfd_byte *)NULL;
   ieee_per_section(newsect)->section = newsect;
@@ -1239,7 +1239,7 @@ DEFUN(ieee_get_section_contents,(abfd, section, location, offset, count),
       file_ptr offset AND
       unsigned      int count)
 {
-  ieee_per_section_type *p = section->used_by_bfd;
+  ieee_per_section_type *p = (ieee_per_section_type *) section->used_by_bfd;
   ieee_slurp_section_data(abfd);
   (void)  memcpy(location, p->data + offset, count);
   return true;
@@ -1253,7 +1253,7 @@ DEFUN(ieee_canonicalize_reloc,(abfd, section, relptr, symbols),
       arelent **relptr AND
       asymbol **symbols)
 {
-  ieee_per_section_type *p = section->used_by_bfd;
+  ieee_per_section_type *p = (ieee_per_section_type *) section->used_by_bfd;
   ieee_reloc_type *src = (ieee_reloc_type *)(section->relocation);
   ieee_data_type *ieee = ieee_data(abfd);
 

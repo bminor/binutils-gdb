@@ -607,7 +607,7 @@ DEFUN(oasys_new_section_hook,(abfd, newsect),
       bfd *abfd AND
       asection *newsect)
 {
-  newsect->used_by_bfd = (oasys_per_section_type *)
+  newsect->used_by_bfd = (PTR)
     oasys_malloc(abfd, sizeof(oasys_per_section_type));
   oasys_per_section( newsect)->data = (bfd_byte *)NULL;
   oasys_per_section(newsect)->section = newsect;
@@ -638,7 +638,7 @@ DEFUN(oasys_get_section_contents,(abfd, section, location, offset, count),
       file_ptr offset AND
       unsigned int count)
 {
-  oasys_per_section_type *p = section->used_by_bfd;
+  oasys_per_section_type *p = (oasys_per_section_type *) section->used_by_bfd;
   oasys_slurp_section_data(abfd);
   (void)  memcpy(location, p->data + offset, count);
   return true;
@@ -1144,7 +1144,7 @@ oasys_stat_arch_elt(abfd, buf)
 bfd *abfd;
 struct stat *buf;
 {
-  oasys_module_info_type *mod = abfd->arelt_data;
+  oasys_module_info_type *mod = (oasys_module_info_type *) abfd->arelt_data;
   if (mod == (oasys_module_info_type *)NULL) {
     bfd_error = invalid_operation;
     return -1;
