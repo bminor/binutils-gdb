@@ -1829,8 +1829,6 @@ debug_to_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
 		      (unsigned int) memaddr,	/* possable truncate long long */
 		      len, write ? "write" : "read", retval);
 
-
-
   if (retval > 0)
     {
       int i;
@@ -1839,7 +1837,15 @@ debug_to_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
       for (i = 0; i < retval; i++)
 	{
 	  if ((((long) &(myaddr[i])) & 0xf) == 0)
-	    fprintf_unfiltered (gdb_stdlog, "\n");
+	    {
+	      if (targetdebug < 2 && i > 0)
+		{
+		  fprintf_unfiltered (gdb_stdlog, " ...");
+		  break;
+		}
+	      fprintf_unfiltered (gdb_stdlog, "\n");
+	    }
+	  
 	  fprintf_unfiltered (gdb_stdlog, " %02x", myaddr[i] & 0xff);
 	}
     }
@@ -2431,7 +2437,9 @@ initialize_targets (void)
     (add_set_cmd ("target", class_maintenance, var_zinteger,
 		  (char *) &targetdebug,
 		  "Set target debugging.\n\
-When non-zero, target debugging is enabled.", &setdebuglist),
+When non-zero, target debugging is enabled.  Higher numbers are more\n\
+verbose.  Changes do not take effect until the next \"run\" or \"target\"\n\
+command.", &setdebuglist),
      &showdebuglist);
 
   add_setshow_boolean_cmd ("trust-readonly-sections", class_support, 

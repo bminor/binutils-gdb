@@ -1,3 +1,8 @@
+2004-03-09  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.texinfo (Debugging Output): Document values for "set debug
+	target".
+
 2004-02-28  Andrew Cagney  <cagney@redhat.com>
 
 	* gdb.texinfo (Contributors): Mention GDB 6.1 release engineer.

@@ -1,3 +1,60 @@
+2004-03-09  Steve Ellcey  <sje@cup.hp.com>
+
+	* elfxx-ia64.c (plt_full_entry): Change ld8 to ld8.acq.
+
+2004-03-05  Fred Fish  <fnf@redhat.com>
+
+	* elfxx-mips.c (_bfd_mips_elf_finish_dynamic_symbol): Just force
+	mips16 symbols to be even rather than testing first for even/odd.
+	(_bfd_mips_elf_link_output_symbol_hook): Ditto.
+
+2004-03-05  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* elf.c (map_sections_to_segments): Ignore .tbss sections for
+	layout purposes.
+
+2004-03-03  Alexandre Oliva  <aoliva@redhat.com>
+
+	* elflink.c (bfd_elf_record_link_assignment): Mark undefweak and
+	undefined symbols as hash_new.
+
+2003-03-03  Andrew Stubbs  <andrew.stubbs@superh.com>
+
+	* archures.c: Add bfd_mach_sh4_nommu_nofpu.
+	* cpu-sh.c: Ditto.
+	* elf32-sh.c: Ditto.
+	* bfd-in2.h: Regenerate.
+
+2004-03-02  Alexandre Oliva  <aoliva@redhat.com>
+
+	* elf32-frv.c (struct frv_pic_relocs_info): Added fixups and
+	dynrelocs.
+	(_frv_count_got_plt_entries): Initialize them.
+	(frv_pic_relocs_info_find): Add insert argument.  Adjust all
+	callers.
+	(frv_pic_relocs_info_for_global): Likewise.
+	(frv_pic_relocs_info_for_local): Likewise.
+	(frv_pic_merge_early_relocs_info): New.
+	(_frv_resolve_final_relocs_info): Use it in case one entry maps to
+	another.
+	(_frv_add_dyn_reloc): Add entry argument.  Adjust all callers.
+	Check that we don't exceed the allocated count for entry.
+	(_frv_add_rofixup): Likewise.
+	(_frv_emit_got_relocs_plt_entries): Adjust for coding standards.
+	(elf32_frv_finish_dynamic_sections): Improve error message in case
+	we emit too few rofixup entries.
+
+2004-03-01  Richard Sandiford  <rsandifo@redhat.com>
+
+	* archures.c (bfd_mach_fr450): New.
+	* bfd-in2.h: Regenerate.
+	* cpu-frv.c (arch_info_450): New bfd_arch_info_type.
+	(arch_info_500): Link to it.
+	* elf32-frv.c (elf32_frv_machine, frv_elf_merge_private_bfd_data)
+	(frv_elf_print_private_bfd_data): Handle fr405 and fr450 header flags.
+	(frv_elf_arch_extension_p): New function.
+	(frv_elf_merge_private_bfd_data): Use it.
+
 2004-02-28  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf-bfd.h (_bfd_elf_link_add_archive_symbols): New prototype.

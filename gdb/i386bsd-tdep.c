@@ -163,8 +163,7 @@ _initialize_i386bsd_tdep (void)
   gdbarch_register_osabi_sniffer (bfd_arch_i386, bfd_target_aout_flavour,
 				  i386bsd_aout_osabi_sniffer);
 
-  /* BFD doesn't set the architecture for NetBSD style a.out core
-     files.  */
-  gdbarch_register_osabi_sniffer (bfd_arch_unknown, bfd_target_unknown_flavour,
+  /* BFD doesn't set a flavour for NetBSD style a.out core files.  */
+  gdbarch_register_osabi_sniffer (bfd_arch_i386, bfd_target_unknown_flavour,
 				  i386bsd_core_osabi_sniffer);
 }

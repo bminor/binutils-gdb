@@ -102,9 +102,11 @@ struct target_ops
   /* Read memory from the inferior process.  This should generally be
      called through read_inferior_memory, which handles breakpoint shadowing.
 
-     Read LEN bytes at MEMADDR into a buffer at MYADDR.  */
+     Read LEN bytes at MEMADDR into a buffer at MYADDR.
+  
+     Returns 0 on success and errno on failure.  */
 
-  void (*read_memory) (CORE_ADDR memaddr, char *myaddr, int len);
+  int (*read_memory) (CORE_ADDR memaddr, char *myaddr, int len);
 
   /* Write memory to the inferior process.  This should generally be
      called through write_inferior_memory, which handles breakpoint shadowing.
@@ -160,7 +162,7 @@ void set_target_ops (struct target_ops *);
 
 unsigned char mywait (char *statusp, int connected_wait);
 
-void read_inferior_memory (CORE_ADDR memaddr, char *myaddr, int len);
+int read_inferior_memory (CORE_ADDR memaddr, char *myaddr, int len);
 
 int write_inferior_memory (CORE_ADDR memaddr, const char *myaddr, int len);
 

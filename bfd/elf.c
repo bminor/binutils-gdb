@@ -3360,7 +3360,9 @@ map_sections_to_segments (bfd *abfd)
 	{
 	  if ((hdr->flags & SEC_READONLY) == 0)
 	    writable = TRUE;
-	  last_hdr = hdr;
+	  /* Ignore .tbss section for segment layout purposes.  */
+	  if ((hdr->flags & (SEC_THREAD_LOCAL | SEC_LOAD)) != SEC_THREAD_LOCAL)
+	    last_hdr = hdr;
 	  continue;
 	}
 

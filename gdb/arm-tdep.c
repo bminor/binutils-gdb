@@ -1651,11 +1651,25 @@ thumb_get_next_pc (CORE_ADDR pc)
     {
       nextpc = pc_val + (sbits (inst1, 0, 10) << 1);
     }
-  else if ((inst1 & 0xf800) == 0xf000)	/* long branch with link */
+  else if ((inst1 & 0xf800) == 0xf000)	/* long branch with link, and blx */
     {
       unsigned short inst2 = read_memory_integer (pc + 2, 2);
       offset = (sbits (inst1, 0, 10) << 12) + (bits (inst2, 0, 10) << 1);
       nextpc = pc_val + offset;
+      /* For BLX make sure to clear the low bits.  */
+      if (bits (inst2, 11, 12) == 1)
+	nextpc = nextpc & 0xfffffffc;
+    }
+  else if ((inst1 & 0xff00) == 0x4700)	/* bx REG, blx REG */
+    {
+      if (bits (inst1, 3, 6) == 0x0f)
+	nextpc = pc_val;
+      else
+	nextpc = read_register (bits (inst1, 3, 6));
+
+      nextpc = ADDR_BITS_REMOVE (nextpc);
+      if (nextpc == pc)
+	error ("Infinite loop detected");
     }
 
   return nextpc;
@@ -1696,6 +1710,20 @@ arm_get_next_pc (CORE_ADDR pc)
 	    if (bits (this_instr, 22, 25) == 0
 		&& bits (this_instr, 4, 7) == 9)	/* multiply */
 	      error ("Illegal update to pc in instruction");
+
+	    /* BX <reg>, BLX <reg> */
+	    if (bits (this_instr, 4, 28) == 0x12fff1
+		|| bits (this_instr, 4, 28) == 0x12fff3)
+	      {
+		rn = bits (this_instr, 0, 3);
+		result = (rn == 15) ? pc_val + 8 : read_register (rn);
+		nextpc = (CORE_ADDR) ADDR_BITS_REMOVE (result);
+
+		if (nextpc == pc)
+		  error ("Infinite loop detected");
+
+		return nextpc;
+	      }
 
 	    /* Multiply into PC */
 	    c = (status & FLAG_C) ? 1 : 0;
@@ -1861,6 +1889,10 @@ arm_get_next_pc (CORE_ADDR pc)
 	case 0xa:		/* branch */
 	  {
 	    nextpc = BranchDest (pc, this_instr);
+
+	    /* BLX */
+	    if (bits (this_instr, 28, 31) == INST_NV)
+	      nextpc |= bit (this_instr, 24) << 1;
 
 	    nextpc = ADDR_BITS_REMOVE (nextpc);
 	    if (nextpc == pc)
@@ -2141,6 +2173,8 @@ arm_use_struct_convention (int gcc_p, struct type *type)
   int nRc;
   enum type_code code;
 
+  CHECK_TYPEDEF (type);
+
   /* In the ARM ABI, "integer" like aggregate types are returned in
      registers.  For an aggregate type to be integer like, its size
      must be less than or equal to DEPRECATED_REGISTER_SIZE and the
@@ -2198,7 +2232,7 @@ arm_use_struct_convention (int gcc_p, struct type *type)
       for (i = 0; i < TYPE_NFIELDS (type); i++)
 	{
 	  enum type_code field_type_code;
-	  field_type_code = TYPE_CODE (TYPE_FIELD_TYPE (type, i));
+	  field_type_code = TYPE_CODE (check_typedef (TYPE_FIELD_TYPE (type, i)));
 
 	  /* Is it a floating point type field?  */
 	  if (field_type_code == TYPE_CODE_FLT)

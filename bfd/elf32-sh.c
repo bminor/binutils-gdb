@@ -1,5 +1,5 @@
 /* Renesas / SuperH SH specific support for 32-bit ELF
-   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
+   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004
    Free Software Foundation, Inc.
    Contributed by Ian Lance Taylor, Cygnus Support.
 
@@ -6875,6 +6875,9 @@ sh_elf_set_mach_from_flags (bfd *abfd)
       break;
     case EF_SH4AL_DSP:
       bfd_default_set_arch_mach (abfd, bfd_arch_sh, bfd_mach_sh4al_dsp);
+      break;
+    case EF_SH4_NOMMU_NOFPU:
+      bfd_default_set_arch_mach (abfd, bfd_arch_sh, bfd_mach_sh4_nommu_nofpu);
       break;
     default:
       return FALSE;

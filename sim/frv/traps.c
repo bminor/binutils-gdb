@@ -50,7 +50,8 @@ frv_core_signal (SIM_DESC sd, SIM_CPU *current_cpu, sim_cia cia,
 {
   if (sig == sim_core_unaligned_signal)
     {
-      if (STATE_ARCHITECTURE (sd)->mach == bfd_mach_fr400)
+      if (STATE_ARCHITECTURE (sd)->mach == bfd_mach_fr400
+	  || STATE_ARCHITECTURE (sd)->mach == bfd_mach_fr450)
 	frv_queue_data_access_error_interrupt (current_cpu, addr);
       else
 	frv_queue_mem_address_not_aligned_interrupt (current_cpu, addr);
@@ -591,7 +592,13 @@ frvbf_media_cr_not_aligned (SIM_CPU *current_cpu)
   /* On some machines this generates an illegal_instruction interrupt.  */
   switch (STATE_ARCHITECTURE (sd)->mach)
     {
+      /* Note: there is a discrepancy between V2.2 of the FR400
+	 instruction manual and the various FR4xx LSI specs.  The former
+	 claims that unaligned registers cause an mp_exception while the
+	 latter say it's an illegal_instruction.  The LSI specs appear
+	 to be correct since MTT is fixed at 1.  */
     case bfd_mach_fr400:
+    case bfd_mach_fr450:
     case bfd_mach_fr550:
       frv_queue_program_interrupt (current_cpu, FRV_ILLEGAL_INSTRUCTION);
       break;
@@ -610,7 +617,9 @@ frvbf_media_acc_not_aligned (SIM_CPU *current_cpu)
   /* On some machines this generates an illegal_instruction interrupt.  */
   switch (STATE_ARCHITECTURE (sd)->mach)
     {
+      /* See comment in frvbf_cr_not_aligned().  */
     case bfd_mach_fr400:
+    case bfd_mach_fr450:
     case bfd_mach_fr550:
       frv_queue_program_interrupt (current_cpu, FRV_ILLEGAL_INSTRUCTION);
       break;
@@ -629,7 +638,9 @@ frvbf_media_register_not_aligned (SIM_CPU *current_cpu)
   /* On some machines this generates an illegal_instruction interrupt.  */
   switch (STATE_ARCHITECTURE (sd)->mach)
     {
+      /* See comment in frvbf_cr_not_aligned().  */
     case bfd_mach_fr400:
+    case bfd_mach_fr450:
     case bfd_mach_fr550:
       frv_queue_program_interrupt (current_cpu, FRV_ILLEGAL_INSTRUCTION);
       break;

@@ -43,12 +43,11 @@
 
 struct regset;
 
-/* This file implements the The SPARC 32-bit ABI as defined by the
-   section "Low-Level System Information" of the SPARC Compliance
-   Definition (SCD) 2.4.1, which is the 32-bit System V psABI for
-   SPARC.  The SCD lists changes with respect to the origional 32-bit
-   psABI as defined in the "System V ABI, SPARC Processor
-   Supplement".
+/* This file implements the SPARC 32-bit ABI as defined by the section
+   "Low-Level System Information" of the SPARC Compliance Definition
+   (SCD) 2.4.1, which is the 32-bit System V psABI for SPARC.  The SCD
+   lists changes with respect to the original 32-bit psABI as defined
+   in the "System V ABI, SPARC Processor Supplement".
 
    Note that if we talk about SunOS, we mean SunOS 4.x, which was
    BSD-based, which is sometimes (retroactively?) referred to as
@@ -186,7 +185,7 @@ sparc_integral_or_pointer_p (const struct type *type)
       {
 	/* We have byte, half-word, word and extended-word/doubleword
            integral types.  The doubleword is an extension to the
-           origional 32-bit ABI by the SCD 2.4.x.  */
+           original 32-bit ABI by the SCD 2.4.x.  */
 	int len = TYPE_LENGTH (type);
 	return (len == 1 || len == 2 || len == 4 || len == 8);
       }
@@ -615,14 +614,6 @@ sparc_frame_cache (struct frame_info *next_frame, void **this_cache)
   cache = sparc_alloc_frame_cache ();
   *this_cache = cache;
 
-  /* In priciple, for normal frames, %fp (%i6) holds the frame
-     pointer, which holds the base address for the current stack
-     frame.  */
-
-  cache->base = frame_unwind_register_unsigned (next_frame, SPARC_FP_REGNUM);
-  if (cache->base == 0)
-    return cache;
-
   cache->pc = frame_func_unwind (next_frame);
   if (cache->pc != 0)
     {
@@ -632,10 +623,18 @@ sparc_frame_cache (struct frame_info *next_frame, void **this_cache)
 
   if (cache->frameless_p)
     {
-      /* We didn't find a valid frame, which means that CACHE->base
-	 currently holds the frame pointer for our calling frame.  */
-      cache->base = frame_unwind_register_unsigned (next_frame,
-						    SPARC_SP_REGNUM);
+      /* This function is frameless, so %fp (%i6) holds the frame
+         pointer for our calling frame.  Use %sp (%o6) as this frame's
+         base address.  */
+      cache->base =
+	frame_unwind_register_unsigned (next_frame, SPARC_SP_REGNUM);
+    }
+  else
+    {
+      /* For normal frames, %fp (%i6) holds the frame pointer, the
+         base address for the current stack frame.  */
+      cache->base =
+	frame_unwind_register_unsigned (next_frame, SPARC_FP_REGNUM);
     }
 
   return cache;

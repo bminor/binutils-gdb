@@ -39,6 +39,7 @@ extern const MACH fr550_mach;
 extern const MACH fr500_mach;
 extern const MACH tomcat_mach;
 extern const MACH fr400_mach;
+extern const MACH fr450_mach;
 extern const MACH simple_mach;
 
 #ifndef WANT_CPU

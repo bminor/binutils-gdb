@@ -1,3 +1,32 @@
+2004-03-08  Nick Clifton  <nickc@redhat.com>
+
+	* po/de.po: Updated German translation.
+
+2003-03-03  Andrew Stubbs  <andrew.stubbs@superh.com>
+
+	* sh-dis.c (print_insn_sh): Don't disassemble fp instructions in
+	nofpu mode.  Add BFD type bfd_mach_sh4_nommu_nofpu.
+	* sh-opc.h: Add sh4_nommu_nofpu architecture and adjust instructions
+	accordingly.
+
+2004-03-01  Richard Sandiford  <rsandifo@redhat.com>
+
+	* frv-asm.c: Regenerate.
+	* frv-desc.c: Regenerate.
+	* frv-desc.h: Regenerate.
+	* frv-dis.c: Regenerate.
+	* frv-ibld.c: Regenerate.
+	* frv-opc.c: Regenerate.
+	* frv-opc.h: Regenerate.
+
+2004-03-01  Richard Sandiford  <rsandifo@redhat.com>
+
+	* frv-desc.c, frv-opc.c: Regenerate.
+
+2004-03-01  Richard Sandiford  <rsandifo@redhat.com>
+
+	* frv-desc.c, frv-opc.c, frv-opc.h: Regenerate.
+
 2004-02-26  Andrew Stubbs  <andrew.stubbs@superh.com>
 
 	* sh-opc.h: Move fsca and fsrra instructions from sh4a to sh4.

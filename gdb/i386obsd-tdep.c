@@ -220,7 +220,7 @@ i386obsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_sigtramp_end (gdbarch, i386obsd_sigtramp_end);
 
   /* OpenBSD has a `struct sigcontext' that's different from the
-     origional 4.3 BSD.  */
+     original 4.3 BSD.  */
   tdep->sc_reg_offset = i386obsd_sc_reg_offset;
   tdep->sc_num_regs = ARRAY_SIZE (i386obsd_sc_reg_offset);
 }

@@ -1,6 +1,6 @@
 /* Code to go along with tests in rtti.exp.
    
-   Copyright 2003 Free Software Foundation, Inc.
+   Copyright 2003, 2004 Free Software Foundation, Inc.
 
    Contributed by David Carlton <carlton@bactrian.org> and by Kealia,
    Inc.
@@ -45,4 +45,12 @@ namespace n2 {
   };
 
   extern C2 *create2();
+
+  namespace n3 {
+    class C3 : public C2 {
+    public:
+    };
+  }
+
+  extern n3::C3 *create3();
 }

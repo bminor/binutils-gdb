@@ -462,8 +462,10 @@ main (int argc, char *argv[])
 	      break;
 	    case 'm':
 	      decode_m_packet (&own_buf[1], &mem_addr, &len);
-	      read_inferior_memory (mem_addr, mem_buf, len);
-	      convert_int_to_ascii (mem_buf, own_buf, len);
+	      if (read_inferior_memory (mem_addr, mem_buf, len) == 0)
+		convert_int_to_ascii (mem_buf, own_buf, len);
+	      else
+		write_enn (own_buf);
 	      break;
 	    case 'M':
 	      decode_M_packet (&own_buf[1], &mem_addr, &len, mem_buf);
@@ -571,9 +573,10 @@ main (int argc, char *argv[])
 
 	  if (status == 'W')
 	    fprintf (stderr,
-		     "\nChild exited with status %d\n", sig);
+		     "\nChild exited with status %d\n", signal);
 	  if (status == 'X')
-	    fprintf (stderr, "\nChild terminated with signal = 0x%x\n", sig);
+	    fprintf (stderr, "\nChild terminated with signal = 0x%x\n",
+		     signal);
 	  if (status == 'W' || status == 'X')
 	    {
 	      if (extended_protocol)

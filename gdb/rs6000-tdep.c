@@ -211,6 +211,16 @@ rs6000_frame_init_saved_regs (struct frame_info *fi)
 }
 
 static CORE_ADDR
+rs6000_init_frame_pc_first (int fromleaf, struct frame_info *prev)
+{
+  return (fromleaf
+	  ? DEPRECATED_SAVED_PC_AFTER_CALL (get_next_frame (prev))
+	  : frame_relative_level (prev) > 0
+	  ? DEPRECATED_FRAME_SAVED_PC (get_next_frame (prev))
+	  : read_pc ());
+}
+
+static CORE_ADDR
 rs6000_frame_args_address (struct frame_info *fi)
 {
   struct frame_extra_info *extra_info = get_frame_extra_info (fi);
@@ -2914,6 +2924,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, rs6000_frame_init_saved_regs);
   set_gdbarch_deprecated_init_extra_frame_info (gdbarch, rs6000_init_extra_frame_info);
+  set_gdbarch_deprecated_init_frame_pc_first (gdbarch, rs6000_init_frame_pc_first);
 
   if (!sysv_abi)
     {

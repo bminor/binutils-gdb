@@ -1281,7 +1281,7 @@ linux_store_registers (int regno)
 /* Copy LEN bytes from inferior's memory starting at MEMADDR
    to debugger memory starting at MYADDR.  */
 
-static void
+static int
 linux_read_memory (CORE_ADDR memaddr, char *myaddr, int len)
 {
   register int i;
@@ -1298,11 +1298,16 @@ linux_read_memory (CORE_ADDR memaddr, char *myaddr, int len)
   /* Read all the longwords */
   for (i = 0; i < count; i++, addr += sizeof (PTRACE_XFER_TYPE))
     {
+      errno = 0;
       buffer[i] = ptrace (PTRACE_PEEKTEXT, inferior_pid, (PTRACE_ARG3_TYPE) addr, 0);
+      if (errno)
+	return errno;
     }
 
   /* Copy appropriate bytes out of the buffer.  */
   memcpy (myaddr, (char *) buffer + (memaddr & (sizeof (PTRACE_XFER_TYPE) - 1)), len);
+
+  return 0;
 }
 
 /* Copy LEN bytes of data from debugger memory at MYADDR

@@ -74,12 +74,6 @@ extern void aix_process_linenos (void);
 #define FP0_REGNUM 32		/* Floating point register 0 */
 #define FPLAST_REGNUM 63	/* Last floating point register */
 
-/* Define other aspects of the stack frame.  */
-
-#define DEPRECATED_INIT_FRAME_PC_FIRST(fromleaf, prev) \
-  (fromleaf ? DEPRECATED_SAVED_PC_AFTER_CALL (prev->next) : \
-	      prev->next ? DEPRECATED_FRAME_SAVED_PC (prev->next) : read_pc ())
-
 /* Notice when a new child process is started. */
 
 #define TARGET_CREATE_INFERIOR_HOOK rs6000_create_inferior

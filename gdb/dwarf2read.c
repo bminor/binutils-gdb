@@ -50,6 +50,20 @@
 #include "gdb_assert.h"
 #include <sys/types.h>
 
+/* A note on memory usage for this file.
+   
+   At the present time, this code reads the debug info sections into
+   the objfile's objfile_obstack.  A definite improvement for startup
+   time, on platforms which do not emit relocations for debug
+   sections, would be to use mmap instead.  The object's complete
+   debug information is loaded into memory, partly to simplify
+   absolute DIE references.
+
+   Whether using obstacks or mmap, the sections should remain loaded
+   until the objfile is released, and pointers into the section data
+   can be used for any other data associated to the objfile (symbol
+   names, type names, location expressions to name a few).  */
+
 #ifndef DWARF2_REG_TO_REGNUM
 #define DWARF2_REG_TO_REGNUM(REG) (REG)
 #endif
@@ -205,10 +219,6 @@ struct comp_unit_head
 
     struct comp_unit_head *next;
 
-    /* DWARF abbreviation table associated with this compilation unit */
-
-    struct abbrev_info *dwarf2_abbrevs[ABBREV_HASH_SIZE];
-
     /* Base address of this compilation unit.  */
 
     CORE_ADDR base_address;
@@ -227,8 +237,7 @@ struct dwarf2_cu
   /* The header of the compilation unit.
 
      FIXME drow/2003-11-10: Some of the things from the comp_unit_head
-     should be moved to the dwarf2_cu structure; for instance the abbrevs
-     hash table.  */
+     should logically be moved to the dwarf2_cu structure.  */
   struct comp_unit_head header;
 
   struct function_range *first_fn, *last_fn, *cached_fn;
@@ -258,6 +267,12 @@ struct dwarf2_cu
      FT_NUM_MEMBERS compile time constant, which is the number of predefined
      fundamental types gdb knows how to construct.  */
   struct type *ftypes[FT_NUM_MEMBERS];	/* Fundamental types */
+
+  /* DWARF abbreviation table associated with this compilation unit.  */
+  struct abbrev_info **dwarf2_abbrevs;
+
+  /* Storage for the abbrev table.  */
+  struct obstack abbrev_obstack;
 };
 
 /* The line number information for a compilation unit (found in the
@@ -329,8 +344,8 @@ struct abbrev_info
   {
     unsigned int number;	/* number identifying abbrev */
     enum dwarf_tag tag;		/* dwarf tag */
-    int has_children;		/* boolean */
-    unsigned int num_attrs;	/* number of attributes */
+    unsigned short has_children;		/* boolean */
+    unsigned short num_attrs;	/* number of attributes */
     struct attr_abbrev *attrs;	/* an array of attribute descriptions */
     struct abbrev_info *next;	/* next in chain */
   };
@@ -444,12 +459,11 @@ static int isreg;		/* Object lives in register.
 
 /* We put a pointer to this structure in the read_symtab_private field
    of the psymtab.
-   The complete dwarf information for an objfile is kept in the
-   objfile_obstack, so that absolute die references can be handled.
+
    Most of the information in this structure is related to an entire
-   object file and could be passed via the sym_private field of the objfile.
-   It is however conceivable that dwarf2 might not be the only type
-   of symbols read from an object file.  */
+   object file and could be passed via the sym_private field of the
+   objfile.  It is possible to have both dwarf2 and some other form
+   of debug symbols in one object file.  */
 
 struct dwarf2_pinfo
   {
@@ -673,7 +687,7 @@ char *dwarf2_read_section (struct objfile *, asection *);
 
 static void dwarf2_read_abbrevs (bfd *abfd, struct dwarf2_cu *cu);
 
-static void dwarf2_empty_abbrev_table (void *);
+static void dwarf2_free_abbrev_table (void *);
 
 static struct abbrev_info *dwarf2_lookup_abbrev (unsigned int,
 						 struct dwarf2_cu *);
@@ -719,6 +733,8 @@ static char *read_indirect_string (bfd *, char *, const struct comp_unit_head *,
 static unsigned long read_unsigned_leb128 (bfd *, char *, unsigned int *);
 
 static long read_signed_leb128 (bfd *, char *, unsigned int *);
+
+static char *skip_leb128 (bfd *, char *);
 
 static void set_cu_language (unsigned int, struct dwarf2_cu *);
 
@@ -905,7 +921,7 @@ static void dwarf2_free_tmp_obstack (void *);
 
 static struct dwarf_block *dwarf_alloc_block (void);
 
-static struct abbrev_info *dwarf_alloc_abbrev (void);
+static struct abbrev_info *dwarf_alloc_abbrev (struct dwarf2_cu *);
 
 static struct die_info *dwarf_alloc_die (void);
 
@@ -922,6 +938,9 @@ static int attr_form_is_block (struct attribute *);
 static void
 dwarf2_symbol_mark_computed (struct attribute *attr, struct symbol *sym,
 			     struct dwarf2_cu *cu);
+
+static char *skip_one_die (char *info_ptr, struct abbrev_info *abbrev,
+			   struct dwarf2_cu *cu);
 
 /* Try to locate the sections we need for DWARF 2 debugging
    information and return true if we have enough to do something.  */
@@ -1201,6 +1220,7 @@ dwarf2_build_psymtabs_hard (struct objfile *objfile, int mainline)
      left at all should be sufficient.  */
   while (info_ptr < dwarf_info_buffer + dwarf_info_size)
     {
+      struct cleanup *back_to_inner;
       struct dwarf2_cu cu;
       beg_of_comp_unit = info_ptr;
 
@@ -1238,7 +1258,7 @@ dwarf2_build_psymtabs_hard (struct objfile *objfile, int mainline)
 
       /* Read the abbrevs for this compilation unit into a table */
       dwarf2_read_abbrevs (abfd, &cu);
-      make_cleanup (dwarf2_empty_abbrev_table, cu.header.dwarf2_abbrevs);
+      back_to_inner = make_cleanup (dwarf2_free_abbrev_table, &cu);
 
       /* Read the compilation unit die */
       info_ptr = read_partial_die (&comp_unit_die, abfd, info_ptr,
@@ -1315,6 +1335,8 @@ dwarf2_build_psymtabs_hard (struct objfile *objfile, int mainline)
 
       info_ptr = beg_of_comp_unit + cu.header.length 
                                   + cu.header.initial_length_size;
+
+      do_cleanups (back_to_inner);
     }
   do_cleanups (back_to);
 }
@@ -1748,8 +1770,154 @@ add_partial_enumeration (struct partial_die_info *enum_pdi, char *info_ptr,
   return info_ptr;
 }
 
-/* Locate ORIG_PDI's sibling; INFO_PTR should point to the next DIE
-   after ORIG_PDI.  */
+/* Read the initial uleb128 in the die at INFO_PTR in compilation unit CU.
+   Return the corresponding abbrev, or NULL if the number is zero (indicating
+   an empty DIE).  In either case *BYTES_READ will be set to the length of
+   the initial number.  */
+
+static struct abbrev_info *
+peek_die_abbrev (char *info_ptr, int *bytes_read, struct dwarf2_cu *cu)
+{
+  bfd *abfd = cu->objfile->obfd;
+  unsigned int abbrev_number;
+  struct abbrev_info *abbrev;
+
+  abbrev_number = read_unsigned_leb128 (abfd, info_ptr, bytes_read);
+
+  if (abbrev_number == 0)
+    return NULL;
+
+  abbrev = dwarf2_lookup_abbrev (abbrev_number, cu);
+  if (!abbrev)
+    {
+      error ("Dwarf Error: Could not find abbrev number %d [in module %s]", abbrev_number,
+		      bfd_get_filename (abfd));
+    }
+
+  return abbrev;
+}
+
+/* Scan the debug information for CU starting at INFO_PTR.  Returns a
+   pointer to the end of a series of DIEs, terminated by an empty
+   DIE.  Any children of the skipped DIEs will also be skipped.  */
+
+static char *
+skip_children (char *info_ptr, struct dwarf2_cu *cu)
+{
+  struct abbrev_info *abbrev;
+  unsigned int bytes_read;
+
+  while (1)
+    {
+      abbrev = peek_die_abbrev (info_ptr, &bytes_read, cu);
+      if (abbrev == NULL)
+	return info_ptr + bytes_read;
+      else
+	info_ptr = skip_one_die (info_ptr + bytes_read, abbrev, cu);
+    }
+}
+
+/* Scan the debug information for CU starting at INFO_PTR.  INFO_PTR
+   should point just after the initial uleb128 of a DIE, and the
+   abbrev corresponding to that skipped uleb128 should be passed in
+   ABBREV.  Returns a pointer to this DIE's sibling, skipping any
+   children.  */
+
+static char *
+skip_one_die (char *info_ptr, struct abbrev_info *abbrev,
+	      struct dwarf2_cu *cu)
+{
+  unsigned int bytes_read;
+  struct attribute attr;
+  bfd *abfd = cu->objfile->obfd;
+  unsigned int form, i;
+
+  for (i = 0; i < abbrev->num_attrs; i++)
+    {
+      /* The only abbrev we care about is DW_AT_sibling.  */
+      if (abbrev->attrs[i].name == DW_AT_sibling)
+	{
+	  read_attribute (&attr, &abbrev->attrs[i],
+			  abfd, info_ptr, cu);
+	  if (attr.form == DW_FORM_ref_addr)
+	    complaint (&symfile_complaints, "ignoring absolute DW_AT_sibling");
+	  else
+	    return dwarf_info_buffer + dwarf2_get_ref_die_offset (&attr, cu);
+	}
+
+      /* If it isn't DW_AT_sibling, skip this attribute.  */
+      form = abbrev->attrs[i].form;
+    skip_attribute:
+      switch (form)
+	{
+	case DW_FORM_addr:
+	case DW_FORM_ref_addr:
+	  info_ptr += cu->header.addr_size;
+	  break;
+	case DW_FORM_data1:
+	case DW_FORM_ref1:
+	case DW_FORM_flag:
+	  info_ptr += 1;
+	  break;
+	case DW_FORM_data2:
+	case DW_FORM_ref2:
+	  info_ptr += 2;
+	  break;
+	case DW_FORM_data4:
+	case DW_FORM_ref4:
+	  info_ptr += 4;
+	  break;
+	case DW_FORM_data8:
+	case DW_FORM_ref8:
+	  info_ptr += 8;
+	  break;
+	case DW_FORM_string:
+	  read_string (abfd, info_ptr, &bytes_read);
+	  info_ptr += bytes_read;
+	  break;
+	case DW_FORM_strp:
+	  info_ptr += cu->header.offset_size;
+	  break;
+	case DW_FORM_block:
+	  info_ptr += read_unsigned_leb128 (abfd, info_ptr, &bytes_read);
+	  info_ptr += bytes_read;
+	  break;
+	case DW_FORM_block1:
+	  info_ptr += 1 + read_1_byte (abfd, info_ptr);
+	  break;
+	case DW_FORM_block2:
+	  info_ptr += 2 + read_2_bytes (abfd, info_ptr);
+	  break;
+	case DW_FORM_block4:
+	  info_ptr += 4 + read_4_bytes (abfd, info_ptr);
+	  break;
+	case DW_FORM_sdata:
+	case DW_FORM_udata:
+	case DW_FORM_ref_udata:
+	  info_ptr = skip_leb128 (abfd, info_ptr);
+	  break;
+	case DW_FORM_indirect:
+	  form = read_unsigned_leb128 (abfd, info_ptr, &bytes_read);
+	  info_ptr += bytes_read;
+	  /* We need to continue parsing from here, so just go back to
+	     the top.  */
+	  goto skip_attribute;
+
+	default:
+	  error ("Dwarf Error: Cannot handle %s in DWARF reader [in module %s]",
+		 dwarf_form_name (form),
+		 bfd_get_filename (abfd));
+	}
+    }
+
+  if (abbrev->has_children)
+    return skip_children (info_ptr, cu);
+  else
+    return info_ptr;
+}
+
+/* Locate ORIG_PDI's sibling; INFO_PTR should point to the start of
+   the next DIE after ORIG_PDI.  */
 
 static char *
 locate_pdi_sibling (struct partial_die_info *orig_pdi, char *info_ptr,
@@ -1765,21 +1933,9 @@ locate_pdi_sibling (struct partial_die_info *orig_pdi, char *info_ptr,
   if (!orig_pdi->has_children)
     return info_ptr;
 
-  /* Okay, we don't know the sibling, but we have children that we
-     want to skip.  So read children until we run into one without a
-     tag; return whatever follows it.  */
+  /* Skip the children the long way.  */
 
-  while (1)
-    {
-      struct partial_die_info pdi;
-      
-      info_ptr = read_partial_die (&pdi, abfd, info_ptr, cu);
-
-      if (pdi.tag == 0)
-	return info_ptr;
-      else
-	info_ptr = locate_pdi_sibling (&pdi, info_ptr, abfd, cu);
-    }
+  return skip_children (info_ptr, cu);
 }
 
 /* Expand this partial symbol table into a full symbol table.  */
@@ -1861,7 +2017,7 @@ psymtab_to_symtab_1 (struct partial_symtab *pst)
 
   /* Read the abbrevs for this compilation unit  */
   dwarf2_read_abbrevs (abfd, &cu);
-  make_cleanup (dwarf2_empty_abbrev_table, cu.header.dwarf2_abbrevs);
+  make_cleanup (dwarf2_free_abbrev_table, &cu);
 
   cu.header.offset = offset;
 
@@ -2664,8 +2820,10 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
       attr = dwarf2_attr (die, DW_AT_name, cu);
       if (attr && DW_STRING (attr))
 	fieldname = DW_STRING (attr);
-      fp->name = obsavestring (fieldname, strlen (fieldname),
-			       &objfile->objfile_obstack);
+
+      /* The name is already allocated along with this objfile, so we don't
+	 need to duplicate it for the type.  */
+      fp->name = fieldname;
 
       /* Change accessibility for artificial fields (e.g. virtual table
          pointer or virtual base class pointer) to private.  */
@@ -2696,11 +2854,11 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
       /* Get physical name.  */
       physname = dwarf2_linkage_name (die, cu);
 
-      SET_FIELD_PHYSNAME (*fp, obsavestring (physname, strlen (physname),
-					     &objfile->objfile_obstack));
+      /* The name is already allocated along with this objfile, so we don't
+	 need to duplicate it for the type.  */
+      SET_FIELD_PHYSNAME (*fp, physname ? physname : "");
       FIELD_TYPE (*fp) = die_type (die, cu);
-      FIELD_NAME (*fp) = obsavestring (fieldname, strlen (fieldname),
-				       &objfile->objfile_obstack);
+      FIELD_NAME (*fp) = fieldname;
     }
   else if (die->tag == DW_TAG_inheritance)
     {
@@ -2868,8 +3026,9 @@ dwarf2_add_member_fn (struct field_info *fip, struct die_info *die,
 
   /* Fill in the member function field info.  */
   fnp = &new_fnfield->fnfield;
-  fnp->physname = obsavestring (physname, strlen (physname),
-				&objfile->objfile_obstack);
+  /* The name is already allocated along with this objfile, so we don't
+     need to duplicate it for the type.  */
+  fnp->physname = physname ? physname : "";
   fnp->type = alloc_type (objfile);
   if (die->type && TYPE_CODE (die->type) == TYPE_CODE_FUNC)
     {
@@ -3000,7 +3159,7 @@ read_structure_scope (struct die_info *die, struct dwarf2_cu *cu)
   struct objfile *objfile = cu->objfile;
   struct type *type;
   struct attribute *attr;
-  const char *name = NULL;
+  char *name = NULL;
   const char *previous_prefix = processing_current_prefix;
   struct cleanup *back_to = NULL;
   /* This says whether or not we want to try to update the structure's
@@ -3045,8 +3204,9 @@ read_structure_scope (struct die_info *die, struct dwarf2_cu *cu)
 	}
       else
 	{
-	  TYPE_TAG_NAME (type) = obsavestring (name, strlen (name),
-					       &objfile->objfile_obstack);
+	  /* The name is already allocated along with this objfile, so
+	     we don't need to duplicate it for the type.  */
+	  TYPE_TAG_NAME (type) = name;
 	  need_to_update_name = (cu->language == language_cplus);
 	}
     }
@@ -3251,7 +3411,7 @@ read_enumeration (struct die_info *die, struct dwarf2_cu *cu)
   attr = dwarf2_attr (die, DW_AT_name, cu);
   if (attr && DW_STRING (attr))
     {
-      const char *name = DW_STRING (attr);
+      char *name = DW_STRING (attr);
 
       if (processing_has_namespace_info)
 	{
@@ -3263,8 +3423,9 @@ read_enumeration (struct die_info *die, struct dwarf2_cu *cu)
 	}
       else
 	{
-	  TYPE_TAG_NAME (type) = obsavestring (name, strlen (name),
-					       &objfile->objfile_obstack);
+	  /* The name is already allocated along with this objfile, so
+	     we don't need to duplicate it for the type.  */
+	  TYPE_TAG_NAME (type) = name;
 	}
     }
 
@@ -4170,19 +4331,28 @@ dwarf2_read_abbrevs (bfd *abfd, struct dwarf2_cu *cu)
   struct abbrev_info *cur_abbrev;
   unsigned int abbrev_number, bytes_read, abbrev_name;
   unsigned int abbrev_form, hash_number;
+  struct attr_abbrev *cur_attrs;
+  unsigned int allocated_attrs;
 
   /* Initialize dwarf2 abbrevs */
-  memset (cu_header->dwarf2_abbrevs, 0,
-          ABBREV_HASH_SIZE*sizeof (struct abbrev_info *));
+  obstack_init (&cu->abbrev_obstack);
+  cu->dwarf2_abbrevs = obstack_alloc (&cu->abbrev_obstack,
+				      (ABBREV_HASH_SIZE
+				       * sizeof (struct abbrev_info *)));
+  memset (cu->dwarf2_abbrevs, 0,
+          ABBREV_HASH_SIZE * sizeof (struct abbrev_info *));
 
   abbrev_ptr = dwarf_abbrev_buffer + cu_header->abbrev_offset;
   abbrev_number = read_unsigned_leb128 (abfd, abbrev_ptr, &bytes_read);
   abbrev_ptr += bytes_read;
 
+  allocated_attrs = ATTR_ALLOC_CHUNK;
+  cur_attrs = xmalloc (allocated_attrs * sizeof (struct attr_abbrev));
+  
   /* loop until we reach an abbrev number of 0 */
   while (abbrev_number)
     {
-      cur_abbrev = dwarf_alloc_abbrev ();
+      cur_abbrev = dwarf_alloc_abbrev (cu);
 
       /* read in abbrev header */
       cur_abbrev->number = abbrev_number;
@@ -4198,24 +4368,30 @@ dwarf2_read_abbrevs (bfd *abfd, struct dwarf2_cu *cu)
       abbrev_ptr += bytes_read;
       while (abbrev_name)
 	{
-	  if ((cur_abbrev->num_attrs % ATTR_ALLOC_CHUNK) == 0)
+	  if (cur_abbrev->num_attrs == allocated_attrs)
 	    {
-	      cur_abbrev->attrs = (struct attr_abbrev *)
-		xrealloc (cur_abbrev->attrs,
-			  (cur_abbrev->num_attrs + ATTR_ALLOC_CHUNK)
-			  * sizeof (struct attr_abbrev));
+	      allocated_attrs += ATTR_ALLOC_CHUNK;
+	      cur_attrs
+		= xrealloc (cur_attrs, (allocated_attrs
+					* sizeof (struct attr_abbrev)));
 	    }
-	  cur_abbrev->attrs[cur_abbrev->num_attrs].name = abbrev_name;
-	  cur_abbrev->attrs[cur_abbrev->num_attrs++].form = abbrev_form;
+	  cur_attrs[cur_abbrev->num_attrs].name = abbrev_name;
+	  cur_attrs[cur_abbrev->num_attrs++].form = abbrev_form;
 	  abbrev_name = read_unsigned_leb128 (abfd, abbrev_ptr, &bytes_read);
 	  abbrev_ptr += bytes_read;
 	  abbrev_form = read_unsigned_leb128 (abfd, abbrev_ptr, &bytes_read);
 	  abbrev_ptr += bytes_read;
 	}
 
+      cur_abbrev->attrs = obstack_alloc (&cu->abbrev_obstack,
+					 (cur_abbrev->num_attrs
+					  * sizeof (struct attr_abbrev)));
+      memcpy (cur_abbrev->attrs, cur_attrs,
+	      cur_abbrev->num_attrs * sizeof (struct attr_abbrev));
+
       hash_number = abbrev_number % ABBREV_HASH_SIZE;
-      cur_abbrev->next = cu_header->dwarf2_abbrevs[hash_number];
-      cu_header->dwarf2_abbrevs[hash_number] = cur_abbrev;
+      cur_abbrev->next = cu->dwarf2_abbrevs[hash_number];
+      cu->dwarf2_abbrevs[hash_number] = cur_abbrev;
 
       /* Get next abbreviation.
          Under Irix6 the abbreviations for a compilation unit are not
@@ -4232,32 +4408,19 @@ dwarf2_read_abbrevs (bfd *abfd, struct dwarf2_cu *cu)
       if (dwarf2_lookup_abbrev (abbrev_number, cu) != NULL)
 	break;
     }
+
+  xfree (cur_attrs);
 }
 
-/* Empty the abbrev table for a new compilation unit.  */
+/* Release the memory used by the abbrev table for a compilation unit.  */
 
 static void
-dwarf2_empty_abbrev_table (void *ptr_to_abbrevs_table)
+dwarf2_free_abbrev_table (void *ptr_to_cu)
 {
-  int i;
-  struct abbrev_info *abbrev, *next;
-  struct abbrev_info **abbrevs;
+  struct dwarf2_cu *cu = ptr_to_cu;
 
-  abbrevs = (struct abbrev_info **)ptr_to_abbrevs_table;
-
-  for (i = 0; i < ABBREV_HASH_SIZE; ++i)
-    {
-      next = NULL;
-      abbrev = abbrevs[i];
-      while (abbrev)
-	{
-	  next = abbrev->next;
-	  xfree (abbrev->attrs);
-	  xfree (abbrev);
-	  abbrev = next;
-	}
-      abbrevs[i] = NULL;
-    }
+  obstack_free (&cu->abbrev_obstack, NULL);
+  cu->dwarf2_abbrevs = NULL;
 }
 
 /* Lookup an abbrev_info structure in the abbrev hash table.  */
@@ -4265,12 +4428,11 @@ dwarf2_empty_abbrev_table (void *ptr_to_abbrevs_table)
 static struct abbrev_info *
 dwarf2_lookup_abbrev (unsigned int number, struct dwarf2_cu *cu)
 {
-  struct comp_unit_head *cu_header = &cu->header;
   unsigned int hash_number;
   struct abbrev_info *abbrev;
 
   hash_number = number % ABBREV_HASH_SIZE;
-  abbrev = cu_header->dwarf2_abbrevs[hash_number];
+  abbrev = cu->dwarf2_abbrevs[hash_number];
 
   while (abbrev)
     {
@@ -4925,6 +5087,22 @@ read_signed_leb128 (bfd *abfd, char *buf, unsigned int *bytes_read_ptr)
     }
   *bytes_read_ptr = num_read;
   return result;
+}
+
+/* Return a pointer to just past the end of an LEB128 number in BUF.  */
+
+static char *
+skip_leb128 (bfd *abfd, char *buf)
+{
+  int byte;
+
+  while (1)
+    {
+      byte = bfd_get_8 (abfd, (bfd_byte *) buf);
+      buf++;
+      if ((byte & 128) == 0)
+	return buf;
+    }
 }
 
 static void
@@ -5677,11 +5855,11 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
 		{
 		  /* FIXME: carlton/2003-11-10: Should this use
 		     SYMBOL_SET_NAMES instead?  (The same problem also
-		     arises a further down in the function.)  */
-		  SYMBOL_LINKAGE_NAME (sym)
-		    = obsavestring (TYPE_TAG_NAME (type),
-				    strlen (TYPE_TAG_NAME (type)),
-				    &objfile->objfile_obstack);
+		     arises further down in this function.)  */
+		  /* The type's name is already allocated along with
+		     this objfile, so we don't need to duplicate it
+		     for the symbol.  */
+		  SYMBOL_LINKAGE_NAME (sym) = TYPE_TAG_NAME (type);
 		}
 	    }
 
@@ -5712,11 +5890,11 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
 				 sizeof (struct symbol));
 		*typedef_sym = *sym;
 		SYMBOL_DOMAIN (typedef_sym) = VAR_DOMAIN;
+		/* The symbol's name is already allocated along with
+		   this objfile, so we don't need to duplicate it for
+		   the type.  */
 		if (TYPE_NAME (SYMBOL_TYPE (sym)) == 0)
-		  TYPE_NAME (SYMBOL_TYPE (sym)) =
-		    obsavestring (SYMBOL_NATURAL_NAME (sym),
-				  strlen (SYMBOL_NATURAL_NAME (sym)),
-				  &objfile->objfile_obstack);
+		  TYPE_NAME (SYMBOL_TYPE (sym)) = SYMBOL_NATURAL_NAME (sym);
 		add_symbol_to_list (typedef_sym, list_to_add);
 	      }
 	  }
@@ -7585,11 +7763,12 @@ dwarf_alloc_block (void)
 }
 
 static struct abbrev_info *
-dwarf_alloc_abbrev (void)
+dwarf_alloc_abbrev (struct dwarf2_cu *cu)
 {
   struct abbrev_info *abbrev;
 
-  abbrev = (struct abbrev_info *) xmalloc (sizeof (struct abbrev_info));
+  abbrev = (struct abbrev_info *)
+    obstack_alloc (&cu->abbrev_obstack, sizeof (struct abbrev_info));
   memset (abbrev, 0, sizeof (struct abbrev_info));
   return (abbrev);
 }
