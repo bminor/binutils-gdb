@@ -1,3 +1,33 @@
+2004-03-13  Alan Modra  <amodra@bigpond.net.au>
+
+	Apply the following patches from mainline
+	2004-03-12  Michal Ludvig  <mludvig@suse.cz>
+	* i386-dis.c (GRPPLOCK): Delete.
+	(grps): Delete GRPPLOCK entry.
+
+	2004-03-12  Alan Modra  <amodra@bigpond.net.au>
+	* i386-dis.c (OP_M, OP_0f0e, OP_0fae, NOP_Fixup): New functions.
+	(M, Mp): Use OP_M.
+	(None, PADLOCK_SPECIAL, PADLOCK_0): Delete.
+	(GRPPADLCK): Define.
+	(dis386): Use NOP_Fixup on "nop".
+	(dis386_twobyte): Use GRPPADLCK on opcode 0xa7.
+	(twobyte_has_modrm): Set for 0xa7.
+	(padlock_table): Delete.  Move to..
+	(grps): ..here, using OP_0f07.  Use OP_Ofae on lfence, mfence
+	and clflush.
+	(print_insn): Revert PADLOCK_SPECIAL code.
+	(OP_E): Delete sfence, lfence, mfence checks.
+
+	2004-03-12  Jakub Jelinek  <jakub@redhat.com>
+	* i386-dis.c (grps): Use INVLPG_Fixup instead of OP_E for invlpg.
+	(INVLPG_Fixup): New function.
+	(PNI_Fixup): Remove ATTRIBUTE_UNUSED from sizeflag.
+
+	2004-03-12  Alan Modra  <amodra@bigpond.net.au>
+	* i386-dis.c (grps): Use clflush by default for 0x0fae/7.
+	(OP_E): Twiddle clflush to sfence here.
+
 2004-03-12  Michal Ludvig  <mludvig@suse.cz>
 
 	* i386-dis.c (PADLOCK_SPECIAL, PADLOCK_0): New defines.
