@@ -1,3 +1,8 @@
+2000-09-03  Philip Blundell  <philb@gnu.org>
+
+	* elf32-arm.h (elf32_arm_relocate_section): Don't try to relocate
+	references to undefined symbols in debugging sections.
+
 2000-09-02  H.J. Lu  <hjl@gnu.org>
 
 	* reloc.c (BFD_RELOC_SH_COPY, BFD_RELOC_SH_GLOB_DAT,
