@@ -1,3 +1,9 @@
+Fri Aug 16 17:54:26 1996  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* rs6000-tdep.c (rs6000_fix_call_dummy): Add full set of arguments.
+	* config/rs6000/tm-rs6000.h (FIX_CALL_DUMMY): Pass all arguments
+	to function, declare function correctly.
+
 Fri Aug 16 17:24:35 1996  Dawn Perchik <dawn@critters.cygnus.com>
 
         * symtab.h: changed namespace to _namespace for compiling under 

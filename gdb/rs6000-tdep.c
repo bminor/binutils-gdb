@@ -637,12 +637,14 @@ pop_frame ()
    its argumets will be passed by gdb. */
 
 void
-fix_call_dummy (dummyname, pc, fun, nargs, type)
+rs6000_fix_call_dummy (dummyname, pc, fun, nargs, args, type, gcc_p)
      char *dummyname;
      CORE_ADDR pc;
      CORE_ADDR fun;
-     int nargs;					/* not used */
-     int type;					/* not used */
+     int nargs;
+     value_ptr *args;
+     struct type *type;
+     int gcc_p;
 {
 #define	TOC_ADDR_OFFSET		20
 #define	TARGET_ADDR_OFFSET	28
