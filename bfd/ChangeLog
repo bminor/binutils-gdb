@@ -1,3 +1,8 @@
+2005-01-07  Jakub Jelinek  <jakub@redhat.com>
+
+	* bfd/elf.c (INCLUDE_SECTION_IN_SEGMENT): Don't put empty sections into
+	PT_DYNAMIC segment, unless .dynamic.
+
 2005-01-06  Paul Brook  <paul@codesourcery.com>
 
 	* config.bfd: Add entry for arm-*-vxworks and arm-*-windiss.

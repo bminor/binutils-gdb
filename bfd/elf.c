@@ -4965,7 +4965,9 @@ copy_private_bfd_data (bfd *ibfd, bfd *obfd)
        4. The section has not already been allocated to a previous segment.
        5. PT_GNU_STACK segments do not include any sections.
        6. PT_TLS segment includes only SHF_TLS sections.
-       7. SHF_TLS sections are only in PT_TLS or PT_LOAD segments.  */
+       7. SHF_TLS sections are only in PT_TLS or PT_LOAD segments.
+       8. PT_DYNAMIC should not contain empty sections at the beginning
+          (with the possible exception of .dynamic).  */
 #define INCLUDE_SECTION_IN_SEGMENT(section, segment, bed)		\
   ((((segment->p_paddr							\
       ? IS_CONTAINED_BY_LMA (section, segment, segment->p_paddr)	\
@@ -4979,6 +4981,13 @@ copy_private_bfd_data (bfd *ibfd, bfd *obfd)
    && (segment->p_type == PT_LOAD					\
        || segment->p_type == PT_TLS					\
        || (section->flags & SEC_THREAD_LOCAL) == 0)			\
+   && (segment->p_type != PT_DYNAMIC					\
+       || SECTION_SIZE (section, segment) > 0				\
+       || (segment->p_paddr						\
+           ? segment->p_paddr != section->lma				\
+           : segment->p_vaddr != section->vma)				\
+       || (strcmp (bfd_get_section_name (ibfd, section), ".dynamic")	\
+           == 0))							\
    && ! section->segment_mark)
 
   /* Returns TRUE iff seg1 starts after the end of seg2.  */
