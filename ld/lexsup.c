@@ -32,6 +32,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "ldgram.h"
 #include "ldlex.h"
 #include "ldfile.h"
+#include "ldver.h"
 
 /* Omit args to avoid the possibility of clashing with a system header
    that might disagree about consts.  */

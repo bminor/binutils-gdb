@@ -42,8 +42,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 static int typebits;
 
-static char *dirlist_ptr;
-
 lang_memory_region_type *region;
 
 

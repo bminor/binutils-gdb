@@ -1,3 +1,9 @@
+Fri Feb 25 19:12:03 1994  Ian Lance Taylor  (ian@cygnus.com)
+
+	* ldgram.y (dirlist_ptr): Removed; not used.
+	* lexsup.c: Include ldver.h.
+	* Makefile.in: Rebuilt dependencies.
+
 Fri Feb 25 18:55:54 1994  Ted Lemon  (mellon@pepper.ncd.com)
 
 	* ldlang.c (lookup_name): don't call bfd_set_gp_size.
