@@ -1170,7 +1170,7 @@ done
 
 
 case "${host}" in
-i[345]86-*-msdos* | i[345]86-*-go32* | *-*-cygwin32)
+i[345]86-*-msdos* | i[345]86-*-go32* | i[345]86-*-win32)
   cat >> confdefs.h <<\EOF
 #define USE_BINARY_FOPEN 1
 EOF
@@ -1299,11 +1299,7 @@ EOF
 
 	;;
   i[345]86-*-netbsd*)
-	COREFILE=trad-core.o
-	cat >> confdefs.h <<\EOF
-#define TRAD_HEADER "hosts/i386nbsd.h"
-EOF
-
+	COREFILE=netbsd-core.o
 	;;
   i[345]86-esix-sysv3*)
 	COREFILE=trad-core.o
@@ -1357,11 +1353,7 @@ EOF
 
 	;;
   mips-*-netbsd*)
-	COREFILE=trad-core.o
-	cat >> confdefs.h <<\EOF
-#define TRAD_HEADER "hosts/mipsnbsd.h"
-EOF
-
+	COREFILE=netbsd-core.o
 	;;
   mips-dec-*)
 	COREFILE=trad-core.o
@@ -1424,11 +1416,7 @@ EOF
 
 	;;
   m68*-*-netbsd*)
-	COREFILE=trad-core.o
-	cat >> confdefs.h <<\EOF
-#define TRAD_HEADER "hosts/m68knbsd.h"
-EOF
-
+	COREFILE=netbsd-core.o
 	;;
   m68*-apple-aux*)
 	COREFILE=trad-core.o
@@ -1454,11 +1442,7 @@ EOF
 
 	;;
   ns32k-*-netbsd*)
-	COREFILE=trad-core.o
-	cat >> confdefs.h <<\EOF
-#define TRAD_HEADER "hosts/ns32knbsd.h"
-EOF
-
+	COREFILE=netbsd-core.o
 	;;
   rs6000-*-lynx*)	COREFILE=lynx-core.o ;;
   rs6000-*-aix4*)	COREFILE=rs6000-core.o ;;
@@ -1466,11 +1450,7 @@ EOF
   powerpc-*-aix4*)	COREFILE=rs6000-core.o ;;
   powerpc-*-aix*)	COREFILE=rs6000-core.o ;;
   sparc-*-netbsd*)
-	COREFILE=trad-core.o
-	cat >> confdefs.h <<\EOF
-#define TRAD_HEADER "hosts/sparcnbsd.h"
-EOF
-
+	COREFILE=netbsd-core.o
 	;;
   tahoe-*-*)
 	COREFILE=trad-core.o
@@ -1522,7 +1502,7 @@ EOF
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1526 "configure"
+#line 1506 "configure"
 #include "confdefs.h"
 #include <sys/procfs.h>
 int main() { return 0; }
@@ -1809,7 +1789,7 @@ if eval "test \"`echo '$''{'ac_cv_func_$ac_func'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1813 "configure"
+#line 1793 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char $ac_func(); below.  */
@@ -1861,7 +1841,7 @@ else
   ac_cv_func_mmap=no
 else
 cat > conftest.$ac_ext <<EOF
-#line 1865 "configure"
+#line 1845 "configure"
 #include "confdefs.h"
 
 /* Thanks to Mike Haertel and Jim Avera for this test. */
@@ -1955,7 +1935,7 @@ if eval "test \"`echo '$''{'ac_cv_func_$ac_func'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1959 "configure"
+#line 1939 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char $ac_func(); below.  */

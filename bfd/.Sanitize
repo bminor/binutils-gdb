@@ -203,6 +203,7 @@ mipsbsd.c
 mpw-config.in
 mpw-make.sed
 newsos3.c
+netbsd-core.c
 netbsd.h
 nlm-target.h
 nlm.c

@@ -1,3 +1,12 @@
+Tue Feb  6 14:04:49 1996  J.T. Conklin  <jtc@rtl.cygnus.com>
+
+	* configure.in (*-*-netbsd*): Set COREFILE to netbsd-core.c.
+	don't define TRAD_HEADER.
+	* configure: Rebuild.
+
+	* netbsd-core.c: New file, support for NetBSD core files.
+	* hosts/*nbsd.h: Removed.
+
 Tue Feb  6 11:47:49 1996  Doug Evans  <dje@charmed.cygnus.com>
 
 	* reloc.c (BFD_RELOC_SPARC_[567]): New reloc types.
