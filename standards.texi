@@ -57,6 +57,12 @@ by Free Software Foundation.
 @end titlepage
 
 @ifinfo
+@format
+START-INFO-DIR-ENTRY
+* standards: (standards.info).	GNU Project Coding Standards
+END-INFO-DIR-ENTRY
+@end format
+
 @node Top, Reading Non-Free Code, (dir), (dir)
 @top Version
 
@@ -272,9 +278,55 @@ to avoid trouble on systems where the @code{SHELL} variable might be
 inherited from the environment.
 
 Don't assume that @file{.} is in the path for command execution.  When
-you need to run programs that are files in the current directory, always
-use @file{./} to make sure the proper file is run regardless of the
-current path.
+you need to run programs that are a part of your package during the
+make, please make sure that it uses @file{./} if the program is built as
+part of the make or @file{$(srcdir)/} if the file is an unchanging part
+of the source code.  Without one of these prefixes, the current search
+path is used.  
+
+The distinction between @file{./} and @file{$(srcdir)/} is important
+when using the @samp{--srcdir} option to @file{configure}.  A rule of
+the form:
+
+@example
+foo.1 : foo.man sedscript
+	sed -e sedscript foo.man > foo.1
+@end example
+
+@noindent
+will fail when the current directory is not the source directory,
+because @file{foo.man} and @file{sedscript} are not in the current
+directory.
+
+Relying on @samp{VPATH} to find the source file will work in the case
+where there is a single dependency file, since the @file{make} automatic
+variable @samp{$<} will represent the source file wherever it is.  A
+makefile target like
+
+@example
+foo.o : bar.c
+	$(CC) $(CFLAGS) -I. -I$(srcdir) -c bar.c -o foo.o
+@end example
+
+@noindent
+should instead be written as
+
+@example
+foo.o : bar.c
+	$(CC) $(CFLAGS) $< -o $@
+@end example
+@noindent
+in order to allow @samp{VPATH} to work correctly.  When the target has
+multiple dependencies, using an explicit @samp{$(srcdir)} is the easiest
+way to make the rule work well.  For example, the target above for
+@file{foo.1} is best written as:
+
+@example
+foo.1 : foo.man sedscript
+	sed -s $(srcdir)/sedscript $(srcdir)/foo.man > foo.1
+@end example
+
+
 
 @node Standard Targets
 @section Standard Targets for Users
