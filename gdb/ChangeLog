@@ -1,6 +1,10 @@
+2004-02-23  Roland McGrath  <roland@redhat.com>
+
+	* auxv.c (info_auxv_command): Fix typos in error messages.
+
 2004-02-23  Mark Kettenis  <kettenis@gnu.org>
 
-	* x86-64-tdep.h: Tewak comment.
+	* x86-64-tdep.h: Tweak comment.
 	(enum amd64_regnum): New.
 	(X86_64_RAX_REGNUM, X86_64_RDX_REGNUM, X86_64_RDI_REGNUM)
 	(X86_64_RBP_REGNUM, X86_64_RSP_REGNUM, X86_64_RIP_REGNUM)
@@ -73,7 +77,7 @@
 	(hppa64_push_dummy_call): New function.
 	(hppa_gdbarch_init): Set frame_align and push_dummy_call; keep
 	disabled.
-	
+
 	* infcall.c (legacy_push_dummy_code): Don't call deprecated
 	FIX_CALL_DUMMY when push_dummy_call is available.
 	(call_function_by_hand, push_dummy_code): Ditto.
@@ -396,7 +400,7 @@
 	pc.  Update comments.
 
 2004-02-19  Elena Zannoni  <ezannoni@redhat.com>
-	
+
 	* event-top.c (async_request_quit): Remove uses of REQUEST_QUIT
 	macro, which was part of the now removed Mach 3 port.
 	* utils.c (request_quit): Ditto.
@@ -441,7 +445,7 @@
 	amd64nbsd-tdep.c.
 
 	* i386obsd-tdep.c (i386obsd_aout_regset_from_core_section): Make
-	static.  Remove extraneous whitespace.	
+	static.  Remove extraneous whitespace.
 	* i386nbsd-tdep.c (i386nbsd_aout_regset_from_core_section): Make
 	static.
 
@@ -453,7 +457,7 @@
 
 	Committed by Jim Blandy  <jimb@redhat.com>.
 
-	* eval.c (evaluate_subexp_standard, case OP_OBJC_MSGCALL): Use 
+	* eval.c (evaluate_subexp_standard, case OP_OBJC_MSGCALL): Use
 	CORE_ADDR as type for selectors.  Correct types for GNU run time
 	message lookup function to use double indirection.
 	* objc-lang.c (lookup_child_selector): Use CORE_ADDR as return type.
@@ -476,7 +480,7 @@
 	(S390_SIGCONTEXT_SREGS_OFFSET, S390X_SIGCONTEXT_SREGS_OFFSET,
 	S390_SIGREGS_FP0_OFFSET, S390X_SIGREGS_FP0_OFFSET,
 	S390_UC_MCONTEXT_OFFSET, S390X_UC_MCONTEXT_OFFSET,
-	S390_SIGNAL_FRAMESIZE, 
+	S390_SIGNAL_FRAMESIZE,
 	s390_NR_sigreturn, s390_NR_rt_sigreturn): Remove.
 	(struct frame_extra_info): Remove.
 	(s390_memset_extra_info): Remove.
@@ -564,7 +568,7 @@
 	(s390_extract_return_value, s390_store_return_value): Remove.
 	(s390_return_value_convention, s390_return_value): New functions.
 	(is_float_singleton): Handle typedefs.
-	(is_double_or_float, is_double_arg, is_simple_arg, pass_by_copy_ref): 
+	(is_double_or_float, is_double_arg, is_simple_arg, pass_by_copy_ref):
 	Remove, replace by ...
 	(s390_function_arg_pass_by_reference, s390_function_arg_float,
 	s390_function_arg_integer): ... these new functions.
@@ -589,7 +593,7 @@
 	set_gdbarch_push_dummy_call,
 	set_gdbarch_unwind_dummy_id,
 	set_gdbarch_return_value.
-	
+
 	* config/s390/nm-linux.h: Update comments.
 	(target_insert_watchpoint, target_remove_watchpoint): Redefine.
 	(STOPPED_BY_WATCHPOINT): Redefine.
@@ -601,7 +605,7 @@
 	(watch_area): Remove typedef.
 	Global replace watch_area by struct watch_area.
 	(watch_area_cnt, watch_lo_addr, watch_hi_addr): Remove.
-	(s390_stopped_by_watchpoint): Remove pid argument, 
+	(s390_stopped_by_watchpoint): Remove pid argument,
 	use s390_inferior_tid.  Add short-cut for the no watchpoint case.
 	(s390_fix_watch_points): Remove pid argument,
 	use s390_inferior_tid.  Recompute area spanned by watchpoints.
@@ -611,7 +615,7 @@
 	* config/s390/nm-linux.h: Update comments.  Do not include "solib.h".
 	(KERNEL_U_ADDR, REGISTER_U_ADDR, U_REGS_OFFSET): Remove.
 	(FETCH_INFERIOR_REGISTERS): Define.
-	* config/s390/s390.mh (NATDEPFILES): Remove core-aout.o and 
+	* config/s390/s390.mh (NATDEPFILES): Remove core-aout.o and
 	core-regset.o.
 	* config/s390/s390x.mt: Remove.
 	* config/s390/tm-s390.h: Remove.
@@ -623,7 +627,7 @@
 	* regformats/reg-s390.dat: Remove control registers.
 	* regformats/reg-s390x.dat: Likewise.
 	* s390-tdep.h: New file.
-	* s390-nat.c: Do not include <asm/processor.h> or <value.h>. 
+	* s390-nat.c: Do not include <asm/processor.h> or <value.h>.
 	Include "inferior.h" and "s390-tdep.h".
 	Remove private definition of offsetof.
 	(s390_register_u_addr): Remove.
@@ -671,10 +675,10 @@
 	Replace S390_FP_REGNUM by S390_SP_REGNUM.
 	Remove calls to:
 	set_gdbarch_deprecated_max_register_raw_size,
-	set_gdbarch_deprecated_max_register_virtual_size, 
-	set_gdbarch_deprecated_register_byte, 
+	set_gdbarch_deprecated_max_register_virtual_size,
+	set_gdbarch_deprecated_register_byte,
 	set_gdbarch_cannot_fetch_register,
-	set_gdbarch_cannot_store_register, 
+	set_gdbarch_cannot_store_register,
 	set_gdbarch_deprecated_register_size,
 	set_gdbarch_deprecated_register_raw_size,
 	set_gdbarch_deprecated_register_virtual_size,
@@ -714,7 +718,7 @@
 	END_PROGRESS.
 
 2004-02-17  Elena Zannoni  <ezannoni@redhat.com>
-	
+
 	* objfiles.c (terminate_minimal_symbol_table): Add back
 	initialization of MSYMBOL_TYPE.
 
@@ -903,7 +907,7 @@
 	* infrun.c (_initialize_infrun): Ditto.
 	* mi/mi-main.c (_initialize_mi_main): Ditto.
 	* gdbtypes.c (_initialize_gdbtypes): Ditto.
-	
+
 	* solib.c (solib_map_sections): Use bfd_set_cacheable instead of
 	poking .cacheable directly.
 	* symfile.c (symfile_bfd_open): Ditto.
@@ -932,7 +936,7 @@
 	* gdbarch.sh (DEPRECATED_EXTRA_STACK_ALIGNMENT_NEEDED): Delete.
 	(DEPRECATED_CALL_DUMMY_STACK_ADJUST): Delete.
 	(DEPRECATED_CALL_DUMMY_ADDRESS): Delete.
-	* gdbarch.h, gdbarch.c: Re-generate.	
+	* gdbarch.h, gdbarch.c: Re-generate.
 	* frame.c (deprecated_get_next_frame_hack): Delete function.
 	* frame.h (deprecated_get_next_frame_hack): Delete declaration.
 	* blockframe.c (deprecated_pc_in_call_dummy_at_entry_point):
@@ -942,13 +946,13 @@
 2004-02-14  Elena Zannoni  <ezannoni@redhat.com>
 
 	* symfile.c (init_entry_point_info, entry_point_address): Move
-	from here...  
+	from here...
 	* objfiles.c (init_entry_point_info, entry_point_address):..to
 	here.
 	* symfile.h (init_entry_point_info, entry_point_address): Remove
 	prototypes.
 	* objfiles.h (init_entry_point_info, entry_point_address):Add
-	prototypes.  
+	prototypes.
 	* cris-tdep.c: Remove include of symfile.h. Add include of
 	objfiles.h.
 	* infcall.c: Ditto.
@@ -962,23 +966,23 @@
 	* dbxread.c: Ditto.
 	* dwarf2read.c: Ditto.
 	* dwarfread.c: Ditto.
-	* frv-tdep.c: Ditto.	
+	* frv-tdep.c: Ditto.
 	* ia64-tdep.c: Ditto.
 	* mdebugread.c: Ditto.
 	* mipsread.c: Ditto.
-	* rs6000-tdep.c: Ditto.	
+	* rs6000-tdep.c: Ditto.
 	* s390-tdep.c: Ditto.
 	* sh-tdep.c: Ditto.
-	* xstormy16-tdep.c: Ditto. 
+	* xstormy16-tdep.c: Ditto.
 	* gdbarch.sh: Remove include of symfile.h.
 	* gdbarch.c: Regenerate.
 	* solib-irix.c (enable_break): Use entry_point_address().
 	Add comment about include file.
 	* xcoffread.c: Add comment about include file.
-	* Makefile.in (arm-tdep.o, blockframe.o, coffread.o, cris-tdep.o) 
-	(dbxread.o, dwarf2read.o, dwarfread.o, frv-tdep.o, gdbarch.o) 
-	(ia64-tdep.o, infcall.o, mcore-tdep.o, mdebugread.o, mipsread.o) 
-	(mn10300-tdep.o, rs6000-nat.o, s390-tdep.o, sh64-tdep.o) 
+	* Makefile.in (arm-tdep.o, blockframe.o, coffread.o, cris-tdep.o)
+	(dbxread.o, dwarf2read.o, dwarfread.o, frv-tdep.o, gdbarch.o)
+	(ia64-tdep.o, infcall.o, mcore-tdep.o, mdebugread.o, mipsread.o)
+	(mn10300-tdep.o, rs6000-nat.o, s390-tdep.o, sh64-tdep.o)
 	(sh-tdep.o, v850-tdep.o, xstormy16-tdep.o): Update dependencies.
 
 2004-02-13  Andrew Cagney  <cagney@redhat.com>
@@ -1107,7 +1111,7 @@
 	(SUBDIR_GDBTK_SRCS): Fix path to gdbtk-interp.c.
 
 2004-02-10  Jeff Johnston  <jjohnstn@redhat.com>
-	
+
 	* ia64-tdep.c (ia64_frame_this_id): Fix tracing print statement
 	to use paddr functions to format ia64 addresses and long values.
 	(ia64_frame_prev_register, ia64_sigtramp_frame_this_id): Ditto.
@@ -1157,7 +1161,7 @@
 	* bcache.c (bcache_xmalloc): Use obstack_init instead of
 	obstack_specify_allocation.
 	* objfiles.c (allocate_objfile): Ditto.
-	* solib-sunos.c (solib_add_common_symbols) 
+	* solib-sunos.c (solib_add_common_symbols)
 	(allocate_rt_common_objfile): Ditto.
 	* symfile.c (reread_symbols): Ditto.
 	* gdb_obstack.h: Add comment.
@@ -1291,11 +1295,11 @@
 	* buildsym.c (free_pending_blocks, finish_block)
 	(record_pending_block, make_blockvector, end_symtab): Replace
 	symbol_obstack with objfile_obstack.
-	* coffread.c (process_coff_symbol, coff_read_struct_type) 
+	* coffread.c (process_coff_symbol, coff_read_struct_type)
 	(coff_read_enum_type): Ditto.
-	* cp-namespace.c (initialize_namespace_symtab) 
+	* cp-namespace.c (initialize_namespace_symtab)
 	(check_one_possible_namespace_symbol): Ditto.
-	* dwarf2read.c (new_symbol, dwarf2_const_value, macro_start_file) 
+	* dwarf2read.c (new_symbol, dwarf2_const_value, macro_start_file)
 	(dwarf2_symbol_mark_computed): Ditto.
 	* dwarfread.c (enum_type, new_symbol, synthesize_typedef): Ditto.
 	* elfread.c (elf_symtab_read): Ditto.
@@ -1303,9 +1307,9 @@
 	(hpread_read_enum_type, hpread_read_function_type)
 	(hpread_read_doc_function_type, hpread_process_one_debug_symbol):
 	Ditto.
-	* jv-lang.c (get_java_class_symtab, add_class_symbol) 
+	* jv-lang.c (get_java_class_symtab, add_class_symbol)
 	(java_link_class_type): Ditto.
-	* mdebugread.c (parse_symbol, psymtab_to_symtab_1, new_symtab) 
+	* mdebugread.c (parse_symbol, psymtab_to_symtab_1, new_symtab)
 	(new_symbol): Ditto.
 	* minsyms.c (install_minimal_symbols): Ditto.
 	* objfiles.c (allocate_objfile): Remove init of symbol_obstack.
@@ -1415,7 +1419,7 @@
 	(parse_partial_symbols, new_psymtab, elfmdebug_build_psymtabs):
 	Ditto.
 	* mips-tdep.c (non_heuristic_proc_desc): Ditto.
-	* objfiles.c (add_to_objfile_sections) 
+	* objfiles.c (add_to_objfile_sections)
 	(build_objfile_section_table): Ditto.
 	(allocate_objfile): Remove init of psymbol_obstack.
 	(free_objfile): Remove freeing of psymbol_obstack.
@@ -1449,14 +1453,14 @@
 	read_structure_scope read_enumeration, new_symbol): Replace
 	type_obstack with objfile_obstack.
 	* dwarfread.c (struct_type, enum_type): Ditto.
-	* gdbtypes.c (alloc_type, alloc_type_instance, init_type) 
+	* gdbtypes.c (alloc_type, alloc_type_instance, init_type)
 	(lookup_fundamental_type): Ditto.
 	* gdbtypes.h (TYPE_ALLOC): Ditto.
-	* hpread.c (hpread_read_enum_type, hpread_read_function_type) 
-	(hpread_read_doc_function_type, hpread_read_struct_type) 
-	(fix_static_member_physnames, hpread_read_array_type) 
+	* hpread.c (hpread_read_enum_type, hpread_read_function_type)
+	(hpread_read_doc_function_type, hpread_read_struct_type)
+	(fix_static_member_physnames, hpread_read_array_type)
 	(hpread_read_subrange_type, hpread_type_lookup): Ditto.
-	* jv-lang.c (java_lookup_class, type_from_class, type_from_class) 
+	* jv-lang.c (java_lookup_class, type_from_class, type_from_class)
 	(java_link_class_type): Ditto.
 	* mdebugread.c (parse_type): Ditto.
 	* objfiles.c (allocate_objfile, free_objfile): Ditto.
@@ -1465,7 +1469,7 @@
 	read_cpp_abbrev, read_one_struct_field): Ditto.
 	* symfile.c (reread_symbols): Ditto.
 	* symmisc.c (print_objfile_statistics): Ditto.
-	
+
 2004-02-07  Andrew Cagney  <cagney@redhat.com>
 
 	* tui/tui-data.h (tui_win_element): Rename TuiWinElement.
@@ -1493,7 +1497,7 @@
 	* tui/tui-regs.c, tui/tui-source.c, tui/tui-stack.c: Ditto.
 	* tui/tui-win.c, tui/tui-windata.c, tui/tui-wingeneral.c: Ditto.
 	* tui/tui-winsource.c, tui/tui.c: Ditto.
-	
+
 2004-02-07  Mark Kettenis  <kettenis@gnu.org>
 
 	* dwarf2-frame.h: Update copyright.
@@ -1624,7 +1628,7 @@
 
 	* tui/tui-wingeneral.h: Update copyright.
 	(m_allBeVisible): Delete macro.
-	(m_allBeInvisible): Delete macro.	
+	(m_allBeInvisible): Delete macro.
 	(struct tui_gen_win_info): Declare.
 	(struct tui_win_info): Declare.
 	(tui_unhighlight_win): Rename unhighlightWin.
