@@ -29,15 +29,15 @@
 #include "source.h"
 #include <ctype.h>
 
-#include "tui.h"
-#include "tuiData.h"
-#include "tuiDataWin.h"
-#include "tuiGeneralWin.h"
-#include "tuiStack.h"
-#include "tuiRegs.h"
-#include "tuiWin.h"
-#include "tuiSourceWin.h"
-#include "tuiDisassem.h"
+#include "tui/tui.h"
+#include "tui/tui-data.h"
+#include "tui/tui-windata.h"
+#include "tui/tui-wingeneral.h"
+#include "tui/tui-stack.h"
+#include "tui/tui-regs.h"
+#include "tui/tui-win.h"
+#include "tui/tui-winsource.h"
+#include "tui/tui-disasm.h"
 
 #ifdef HAVE_NCURSES_H       
 #include <ncurses.h>

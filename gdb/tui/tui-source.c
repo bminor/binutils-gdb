@@ -30,11 +30,11 @@
 #include "source.h"
 #include "symtab.h"
 
-#include "tui.h"
-#include "tuiData.h"
-#include "tuiStack.h"
-#include "tuiSourceWin.h"
-#include "tuiSource.h"
+#include "tui/tui.h"
+#include "tui/tui-data.h"
+#include "tui/tui-stack.h"
+#include "tui/tui-winsource.h"
+#include "tui/tui-source.h"
 
 #ifdef HAVE_NCURSES_H       
 #include <ncurses.h>

@@ -30,13 +30,13 @@
 #include "source.h"
 #include "disasm.h"
 
-#include "tui.h"
-#include "tuiData.h"
-#include "tuiWin.h"
-#include "tuiLayout.h"
-#include "tuiSourceWin.h"
-#include "tuiStack.h"
-#include "tui-file.h"
+#include "tui/tui.h"
+#include "tui/tui-data.h"
+#include "tui/tui-win.h"
+#include "tui/tui-layout.h"
+#include "tui/tui-winsource.h"
+#include "tui/tui-stack.h"
+#include "tui/tui-file.h"
 
 #ifdef HAVE_NCURSES_H       
 #include <ncurses.h>

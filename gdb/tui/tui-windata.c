@@ -23,10 +23,10 @@
    Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
-#include "tui.h"
-#include "tuiData.h"
-#include "tuiGeneralWin.h"
-#include "tuiRegs.h"
+#include "tui/tui.h"
+#include "tui/tui-data.h"
+#include "tui/tui-wingeneral.h"
+#include "tui/tui-regs.h"
 
 #ifdef HAVE_NCURSES_H       
 #include <ncurses.h>

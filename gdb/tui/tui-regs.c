@@ -23,8 +23,8 @@
    Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
-#include "tui.h"
-#include "tuiData.h"
+#include "tui/tui.h"
+#include "tui/tui-data.h"
 #include "symtab.h"
 #include "gdbtypes.h"
 #include "gdbcmd.h"
@@ -32,11 +32,11 @@
 #include "regcache.h"
 #include "inferior.h"
 #include "target.h"
-#include "tuiLayout.h"
-#include "tuiWin.h"
-#include "tuiDataWin.h"
-#include "tuiGeneralWin.h"
-#include "tui-file.h"
+#include "tui/tui-layout.h"
+#include "tui/tui-win.h"
+#include "tui/tui-windata.h"
+#include "tui/tui-wingeneral.h"
+#include "tui/tui-file.h"
 
 #ifdef HAVE_NCURSES_H       
 #include <ncurses.h>

@@ -31,13 +31,13 @@
 #include "target.h"
 #include "top.h"
 
-#include "tui.h"
-#include "tuiData.h"
-#include "tuiStack.h"
-#include "tuiGeneralWin.h"
-#include "tuiSource.h"
-#include "tuiSourceWin.h"
-#include "tui-file.h"
+#include "tui/tui.h"
+#include "tui/tui-data.h"
+#include "tui/tui-stack.h"
+#include "tui/tui-wingeneral.h"
+#include "tui/tui-source.h"
+#include "tui/tui-winsource.h"
+#include "tui/tui-file.h"
 
 #ifdef HAVE_NCURSES_H       
 #include <ncurses.h>

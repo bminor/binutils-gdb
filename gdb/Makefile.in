@@ -196,19 +196,40 @@ SUBDIR_MI_UNINSTALL=
 # TUI sub directory definitions
 #
 SUBDIR_TUI_OBS = \
-	tui-file.o tui.o tuiData.o tuiSource.o tuiStack.o tuiIO.o \
+	tui-command.o \
+	tui-data.o \
+	tui-disasm.o \
+	tui-file.o tui.o \
+	tui-hooks.o \
 	tui-interp.o \
-	tuiGeneralWin.o tuiLayout.o tuiWin.o tuiCommand.o \
-	tuiDisassem.o tuiSourceWin.o tuiRegs.o tuiDataWin.o \
-	tui-out.o tui-hooks.o
+	tui-io.o \
+	tui-layout.o \
+	tui-out.o \
+	tui-regs.o \
+	tui-source.o \
+	tui-stack.o \
+	tui-win.o \
+	tui-windata.o \
+	tui-wingeneral.o \
+	tui-winsource.o
 SUBDIR_TUI_SRCS = \
-	tui/tui-file.c tui/tui.c tui/tuiData.c tui/tuiSource.c \
+	tui/tui-command.c \
+	tui/tui-data.c \
+	tui/tui-disasm.c \
+	tui/tui-file.c \
+	tui/tui-hooks.c \
 	tui/tui-interp.c \
-	tui/tuiStack.c tui/tuiIO.c \
-	tui/tuiGeneralWin.c tui/tuiLayout.c \
-	tui/tuiWin.c tui/tuiCommand.c \
-	tui/tuiDisassem.c tui/tuiSourceWin.c \
-	tui/tuiRegs.c tui/tuiDataWin.c tui/tui-out.c tui/tui-hooks.c
+	tui/tui-io.c \
+	tui/tui-layout.c \
+	tui/tui-out.c \
+	tui/tui-regs.c \
+	tui/tui-source.c \
+	tui/tui-stack.c \
+	tui/tui-win.c \
+	tui/tui-windata.c \
+	tui/tui-wingeneral.c \
+	tui/tui-winsource.c \
+	tui/tui.c
 SUBDIR_TUI_DEPS =
 SUBDIR_TUI_INITS = \
 	$(SUBDIR_TUI_SRCS)
@@ -812,20 +833,20 @@ mi_parse_h = $(srcdir)/mi/mi-parse.h
 # gdb/tui/ headers
 #
 
-tuiCommand_h = $(srcdir)/tui/tuiCommand.h
-tuiDataWin_h = $(srcdir)/tui/tuiDataWin.h
-tuiData_h = $(srcdir)/tui/tuiData.h
-tuiDisassem_h = $(srcdir)/tui/tuiDisassem.h
-tuiGeneralWin_h = $(srcdir)/tui/tuiGeneralWin.h
-tuiIO_h = $(srcdir)/tui/tuiIO.h
-tuiLayout_h = $(srcdir)/tui/tuiLayout.h
-tuiRegs_h = $(srcdir)/tui/tuiRegs.h
-tuiSourceWin_h = $(srcdir)/tui/tuiSourceWin.h
-tuiSource_h = $(srcdir)/tui/tuiSource.h $(defs_h)
-tuiStack_h = $(srcdir)/tui/tuiStack.h
-tuiWin_h = $(srcdir)/tui/tuiWin.h
+tui_command_h = $(srcdir)/tui/tui-command.h
+tui_data_h = $(srcdir)/tui/tui-data.h
+tui_disasm_h = $(srcdir)/tui/tui-disasm.h
 tui_file_h = $(srcdir)/tui/tui-file.h
 tui_h = $(srcdir)/tui/tui.h $(ansidecl_h)
+tui_io_h = $(srcdir)/tui/tui-io.h
+tui_layout_h = $(srcdir)/tui/tui-layout.h
+tui_regs_h = $(srcdir)/tui/tui-regs.h
+tui_source_h = $(srcdir)/tui/tui-source.h $(defs_h)
+tui_stack_h = $(srcdir)/tui/tui-stack.h
+tui_windata_h = $(srcdir)/tui/tui-windata.h
+tui_wingeneral_h = $(srcdir)/tui/tui-wingeneral.h
+tui_win_h = $(srcdir)/tui/tui-win.h
+tui_winsource_h = $(srcdir)/tui/tui-winsource.h
 
 # Header files that need to have srcdir added.  Note that in the cases
 # where we use a macro like $(gdbcmd_h), things are carefully arranged
@@ -2785,80 +2806,86 @@ signals.o: $(srcdir)/signals/signals.c $(server_h) $(defs_h) $(target_h) \
 # Need to explicitly specify the compile rule as make will do nothing
 # or try to compile the object file into the sub-directory.
 
-tuiCommand.o: $(srcdir)/tui/tuiCommand.c $(defs_h) $(tui_h) $(tuiData_h) \
-	$(tuiWin_h) $(tuiIO_h)
-	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/tui/tuiCommand.c
-tuiDataWin.o: $(srcdir)/tui/tuiDataWin.c $(defs_h) $(tui_h) $(tuiData_h) \
-	$(tuiGeneralWin_h) $(tuiRegs_h)
-	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/tui/tuiDataWin.c
-tuiData.o: $(srcdir)/tui/tuiData.c $(defs_h) $(symtab_h) $(tui_h) \
-	$(tuiData_h) $(tuiGeneralWin_h)
-	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/tui/tuiData.c
-tuiDisassem.o: $(srcdir)/tui/tuiDisassem.c $(defs_h) $(symtab_h) \
-	$(breakpoint_h) $(frame_h) $(value_h) $(source_h) $(disasm_h) \
-	$(tui_h) $(tuiData_h) $(tuiWin_h) $(tuiLayout_h) $(tuiSourceWin_h) \
-	$(tuiStack_h) $(tui_file_h)
-	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/tui/tuiDisassem.c
-tuiGeneralWin.o: $(srcdir)/tui/tuiGeneralWin.c $(defs_h) $(tui_h) \
-	$(tuiData_h) $(tuiGeneralWin_h) $(tuiWin_h)
-	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/tui/tuiGeneralWin.c
-tuiIO.o: $(srcdir)/tui/tuiIO.c $(defs_h) $(terminal_h) $(target_h) \
-	$(event_loop_h) $(event_top_h) $(command_h) $(top_h) $(readline_h) \
-	$(tui_h) $(tuiData_h) $(tuiIO_h) $(tuiCommand_h) $(tuiWin_h) \
-	$(tuiGeneralWin_h) $(tui_file_h) $(ui_out_h) $(cli_out_h)
-	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/tui/tuiIO.c
-tuiLayout.o: $(srcdir)/tui/tuiLayout.c $(defs_h) $(command_h) $(symtab_h) \
-	$(frame_h) $(source_h) $(tui_h) $(tuiData_h) $(tuiDataWin_h) \
-	$(tuiGeneralWin_h) $(tuiStack_h) $(tuiRegs_h) $(tuiWin_h) \
-	$(tuiSourceWin_h) $(tuiDisassem_h)
-	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/tui/tuiLayout.c
-tuiRegs.o: $(srcdir)/tui/tuiRegs.c $(defs_h) $(tui_h) $(tuiData_h) \
-	$(symtab_h) $(gdbtypes_h) $(gdbcmd_h) $(frame_h) $(regcache_h) \
-	$(inferior_h) $(target_h) $(tuiLayout_h) $(tuiWin_h) $(tuiDataWin_h) \
-	$(tuiGeneralWin_h) $(tui_file_h)
-	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/tui/tuiRegs.c
 tuiSourceWin.o: $(srcdir)/tui/tuiSourceWin.c $(defs_h) $(symtab_h) \
 	$(frame_h) $(breakpoint_h) $(value_h) $(source_h) $(tui_h) \
 	$(tuiData_h) $(tuiStack_h) $(tuiWin_h) $(tuiGeneralWin_h) \
 	$(tuiSourceWin_h) $(tuiSource_h) $(tuiDisassem_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/tui/tuiSourceWin.c
-tuiSource.o: $(srcdir)/tui/tuiSource.c $(defs_h) $(symtab_h) $(frame_h) \
-	$(breakpoint_h) $(source_h) $(symtab_h) $(tui_h) $(tuiData_h) \
-	$(tuiStack_h) $(tuiSourceWin_h) $(tuiSource_h)
-	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/tui/tuiSource.c
-tuiStack.o: $(srcdir)/tui/tuiStack.c $(defs_h) $(symtab_h) $(breakpoint_h) \
-	$(frame_h) $(command_h) $(inferior_h) $(target_h) $(top_h) $(tui_h) \
-	$(tuiData_h) $(tuiStack_h) $(tuiGeneralWin_h) $(tuiSource_h) \
-	$(tuiSourceWin_h) $(tui_file_h)
-	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/tui/tuiStack.c
-tuiWin.o: $(srcdir)/tui/tuiWin.c $(defs_h) $(command_h) $(symtab_h) \
-	$(breakpoint_h) $(frame_h) $(cli_cmds_h) $(top_h) $(source_h) \
-	$(tui_h) $(tuiData_h) $(tuiGeneralWin_h) $(tuiStack_h) $(tuiRegs_h) \
-	$(tuiDisassem_h) $(tuiSource_h) $(tuiSourceWin_h) $(tuiDataWin_h)
-	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/tui/tuiWin.c
-tui.o: $(srcdir)/tui/tui.c $(defs_h) $(gdbcmd_h) $(tui_h) $(tuiData_h) \
-	$(tuiLayout_h) $(tuiIO_h) $(tuiRegs_h) $(tuiStack_h) $(tuiWin_h) \
-	$(tuiSourceWin_h) $(tuiDataWin_h) $(readline_h) $(target_h) \
-	$(frame_h) $(breakpoint_h) $(inferior_h) $(symtab_h) $(source_h)
+tui.o: $(srcdir)/tui/tui.c $(defs_h) $(gdbcmd_h) $(tui_h) $(tui_data_h) \
+	$(tui_layout_h) $(tui_io_h) $(tui_regs_h) $(tui_stack_h) \
+	$(tui_win_h) $(tui_winsource_h) $(tui_windata_h) $(readline_h) \
+	$(target_h) $(frame_h) $(breakpoint_h) $(inferior_h) $(symtab_h) \
+	$(source_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/tui/tui.c
+tui-command.o: $(srcdir)/tui/tui-command.c $(defs_h) $(tui_h) $(tui_data_h) \
+	$(tui_win_h) $(tui_io_h)
+	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/tui/tui-command.c
+tui-data.o: $(srcdir)/tui/tui-data.c $(defs_h) $(symtab_h) $(tui_h) \
+	$(tui_data_h) $(tui_wingeneral_h)
+	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/tui/tui-data.c
+tui-disasm.o: $(srcdir)/tui/tui-disasm.c $(defs_h) $(symtab_h) \
+	$(breakpoint_h) $(frame_h) $(value_h) $(source_h) $(disasm_h) \
+	$(tui_h) $(tui_data_h) $(tui_win_h) $(tui_layout_h) \
+	$(tui_winsource_h) $(tui_stack_h) $(tui_file_h)
+	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/tui/tui-disasm.c
 tui-file.o: $(srcdir)/tui/tui-file.c $(defs_h) $(ui_file_h) $(tui_file_h) \
-	$(tui_tuiIO_h) $(tui_h)
+	$(tui_io_h) $(tui_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/tui/tui-file.c
 tui-hooks.o: $(srcdir)/tui/tui-hooks.c $(defs_h) $(symtab_h) $(inferior_h) \
 	$(command_h) $(bfd_h) $(symfile_h) $(objfiles_h) $(target_h) \
 	$(gdbcore_h) $(event_loop_h) $(event_top_h) $(frame_h) \
 	$(breakpoint_h) $(gdb_events_h) $(ui_out_h) $(top_h) $(tui_h) \
-	$(tuiData_h) $(tuiLayout_h) $(tuiIO_h) $(tuiRegs_h) $(tuiWin_h) \
-	$(tuiStack_h) $(tuiDataWin_h) $(tuiSourceWin_h)
+	$(tui_data_h) $(tui_layout_h) $(tui_io_h) $(tui_regs_h) $(tui_win_h) \
+	$(tui_stack_h) $(tui_windata_h) $(tui_winsource_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/tui/tui-hooks.c
 tui-interp.o: $(srcdir)/tui/tui-interp.c $(defs_h) $(interps_h) $(top_h) \
 	$(event_top_h) $(event_loop_h) $(ui_out_h) $(cli_out_h) \
-	$(tui_tuiData_h) $(readline_h) $(tui_tuiWin_h) $(tui_h) \
-	$(tui_tuiIO_h)
+	$(tui_data_h) $(readline_h) $(tui_win_h) $(tui_h) $(tui_io_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/tui/tui-interp.c
+tui-io.o: $(srcdir)/tui/tui-io.c $(defs_h) $(terminal_h) $(target_h) \
+	$(event_loop_h) $(event_top_h) $(command_h) $(top_h) $(readline_h) \
+	$(tui_h) $(tui_data_h) $(tui_io_h) $(tui_command_h) $(tui_win_h) \
+	$(tui_wingeneral_h) $(tui_file_h) $(ui_out_h) $(cli_out_h)
+	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/tui/tui-io.c
+tui-layout.o: $(srcdir)/tui/tui-layout.c $(defs_h) $(command_h) $(symtab_h) \
+	$(frame_h) $(source_h) $(tui_h) $(tui_data_h) $(tui_windata_h) \
+	$(tui_wingeneral_h) $(tui_stack_h) $(tui_regs_h) $(tui_win_h) \
+	$(tui_winsource_h) $(tui_disasm_h)
+	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/tui/tui-layout.c
 tui-out.o: $(srcdir)/tui/tui-out.c $(defs_h) $(ui_out_h) $(tui_h) \
 	$(gdb_string_h) $(gdb_assert_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/tui/tui-out.c
+tui-regs.o: $(srcdir)/tui/tui-regs.c $(defs_h) $(tui_h) $(tui_data_h) \
+	$(symtab_h) $(gdbtypes_h) $(gdbcmd_h) $(frame_h) $(regcache_h) \
+	$(inferior_h) $(target_h) $(tui_layout_h) $(tui_win_h) \
+	$(tui_windata_h) $(tui_wingeneral_h) $(tui_file_h)
+	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/tui/tui-regs.c
+tui-source.o: $(srcdir)/tui/tui-source.c $(defs_h) $(symtab_h) $(frame_h) \
+	$(breakpoint_h) $(source_h) $(symtab_h) $(tui_h) $(tui_data_h) \
+	$(tui_stack_h) $(tui_winsource_h) $(tui_source_h)
+	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/tui/tui-source.c
+tui-stack.o: $(srcdir)/tui/tui-stack.c $(defs_h) $(symtab_h) $(breakpoint_h) \
+	$(frame_h) $(command_h) $(inferior_h) $(target_h) $(top_h) $(tui_h) \
+	$(tui_data_h) $(tui_stack_h) $(tui_wingeneral_h) $(tui_source_h) \
+	$(tui_winsource_h) $(tui_file_h)
+	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/tui/tui-stack.c
+tui-win.o: $(srcdir)/tui/tui-win.c $(defs_h) $(command_h) $(symtab_h) \
+	$(breakpoint_h) $(frame_h) $(cli_cmds_h) $(top_h) $(source_h) \
+	$(tui_h) $(tui_data_h) $(tui_wingeneral_h) $(tui_stack_h) \
+	$(tui_regs_h) $(tui_disasm_h) $(tui_source_h) $(tui_winsource_h) \
+	$(tui_windata_h)
+	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/tui/tui-win.c
+tui-windata.o: $(srcdir)/tui/tui-windata.c $(defs_h) $(tui_h) $(tui_data_h) \
+	$(tui_wingeneral_h) $(tui_regs_h)
+	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/tui/tui-windata.c
+tui-wingeneral.o: $(srcdir)/tui/tui-wingeneral.c $(defs_h) $(tui_h) \
+	$(tui_data_h) $(tui_wingeneral_h) $(tui_win_h)
+	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/tui/tui-wingeneral.c
+tui-winsource.o: $(srcdir)/tui/tui-winsource.c $(defs_h) $(symtab_h) \
+	$(frame_h) $(breakpoint_h) $(value_h) $(source_h) $(tui_h) \
+	$(tui_data_h) $(tui_stack_h) $(tui_win_h) $(tui_wingeneral_h) \
+	$(tui_winsource_h) $(tui_source_h) $(tui_disasm_h)
+	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/tui/tui-winsource.c
 
 #
 # vx-share sub-directory

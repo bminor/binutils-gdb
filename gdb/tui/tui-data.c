@@ -24,9 +24,9 @@
 
 #include "defs.h"
 #include "symtab.h"
-#include "tui.h"
-#include "tuiData.h"
-#include "tuiGeneralWin.h"
+#include "tui/tui.h"
+#include "tui/tui-data.h"
+#include "tui/tui-wingeneral.h"
 
 #ifdef HAVE_NCURSES_H       
 #include <ncurses.h>

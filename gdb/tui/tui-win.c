@@ -36,15 +36,15 @@
 #include "top.h"
 #include "source.h"
 
-#include "tui.h"
-#include "tuiData.h"
-#include "tuiGeneralWin.h"
-#include "tuiStack.h"
-#include "tuiRegs.h"
-#include "tuiDisassem.h"
-#include "tuiSource.h"
-#include "tuiSourceWin.h"
-#include "tuiDataWin.h"
+#include "tui/tui.h"
+#include "tui/tui-data.h"
+#include "tui/tui-wingeneral.h"
+#include "tui/tui-stack.h"
+#include "tui/tui-regs.h"
+#include "tui/tui-disasm.h"
+#include "tui/tui-source.h"
+#include "tui/tui-winsource.h"
+#include "tui/tui-windata.h"
 
 #ifdef HAVE_NCURSES_H       
 #include <ncurses.h>

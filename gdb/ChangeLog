@@ -1,5 +1,36 @@
 2004-01-18  Andrew Cagney  <cagney@redhat.com>
 
+	* tui/tui-command.c: Rename tui/tuiCommand.c.
+	* tui/tui-command.h: Rename tui/tuiCommand.h.
+	* tui/tui-data.c: Rename tui/tuiData.c.
+	* tui/tui-data.h: Rename tui/tuiData.h.
+	* tui/tui-disasm.c: Rename tui/tuiDisassem.c.
+	* tui/tui-disasm.h: Rename tui/tuiDisassem.h.
+	* tui/tui-io.c: Rename tui/tuiIO.c.
+	* tui/tui-io.h: Rename tui/tuiIO.h.
+	* tui/tui-layout.c: Rename tui/tuiLayout.c.
+	* tui/tui-layout.h: Rename tui/tuiLayout.h.
+	* tui/tui-regs.c: Rename tui/tuiRegs.c.
+	* tui/tui-regs.h: Rename tui/tuiRegs.h.
+	* tui/tui-source.c: Rename tui/tuiSource.c.
+	* tui/tui-source.h: Rename tui/tuiSource.h.
+	* tui/tui-stack.c: Rename tui/tuiStack.c.
+	* tui/tui-stack.h: Rename tui/tuiStack.h.
+	* tui/tui-win.c: Rename tui/tuiWin.c.
+	* tui/tui-win.h: Rename tui/tuiWin.h.
+	* tui/tui-windata.c: Rename tui/tuiDataWin.c.
+	* tui/tui-windata.h: Rename tui/tuiDataWin.h.
+	* tui/tui-wingeneral.c: Rename tui/tuiGeneralWin.c.
+	* tui/tui-wingeneral.h: Rename tui/tuiGeneralWin.h.
+	* tui/tui-winsource.c: Rename tui/tuiSourceWin.c.
+	* tui/tui-winsource.h: Rename tui/tuiSourceWin.h.
+	* tui/tui-file.c: Update includes.
+	* tui/tui-hooks.c: Update includes.
+	* tui/tui-interp.c: Update includes.
+	* tui/tui.c: Update includes.
+	* Makefile.in: Update all tui/ dependencies.
+	(SUBDIR_TUI_OBS, SUBDIR_TUI_SRCS): Update file names.
+
 	* Makefile.in: Update copyright.  Update dependencies.
 
 	* tui/tuiSourceWin.c (tui_update_breakpoint_info): Fix compile

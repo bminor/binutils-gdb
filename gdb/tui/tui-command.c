@@ -24,10 +24,10 @@
 
 #include "defs.h"
 #include <ctype.h>
-#include "tui.h"
-#include "tuiData.h"
-#include "tuiWin.h"
-#include "tuiIO.h"
+#include "tui/tui.h"
+#include "tui/tui-data.h"
+#include "tui/tui-win.h"
+#include "tui/tui-io.h"
 
 #ifdef HAVE_NCURSES_H       
 #include <ncurses.h>
