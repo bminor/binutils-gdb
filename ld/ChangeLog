@@ -1,3 +1,27 @@
+Fri Aug 14 15:34:29 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ldgram.y: Include "ldctor.h".
+	(statement): Accept SORT around CONSTRUCTORS.
+	* ldctor.c: Include <ctype.h>.
+	(constructors_sorted): New global variable.
+	(ctor_prio, ctor_cmp): New static functions.
+	(ldctor_build_sets): Sort constructors if requested.
+	* ldctor.h (constructors_sorted): Declare.
+	* ldlang.c (print_statement): Print sorted CONSTRUCTORS
+	correctly.
+	* scripttempl/elf.sc: Add sort around CONSTRUCTORS.
+	* ld.texinfo (Output Section Keywords): Document SORT
+ 	(CONSTRUCTORS).
+
+start-sanitize-armelf
+Thu Aug 13 12:20:39 1998  Catherine Moore  <clm@cygnus.com>
+ 
+       * emulparams/armelf.sh:  Define TEMPLATE_NAME to armelf.
+       * scripttempl/elfarm.sc:  Include .glue_7t and .glue7 
+       sections.
+       * emultempl/armelf.em: New file.
+ 
+end-sanitize-armelf
 Thu Aug 13 12:52:45 1998  H.J. Lu  <hjl@gnu.org>
 
 	* Makefile.am (ld.dvi): Use " instead of ' for MAKEINFO.

@@ -24,6 +24,7 @@
 #	EMBEDDED - whether this is for an embedded system. 
 #	SHLIB_TEXT_START_ADDR - if set, add to SIZEOF_HEADERS to set
 #		start address of shared library.
+#	INPUT_FILES - INPUT command of files to always include
 #
 # When adding sections, do note that the names of some sections are used
 # when specifying the start address of the next.
@@ -34,6 +35,7 @@ test -z "${BIG_OUTPUT_FORMAT}" && BIG_OUTPUT_FORMAT=${OUTPUT_FORMAT}
 test -z "${LITTLE_OUTPUT_FORMAT}" && LITTLE_OUTPUT_FORMAT=${OUTPUT_FORMAT}
 if [ -z "$MACHINE" ]; then OUTPUT_ARCH=${ARCH}; else OUTPUT_ARCH=${ARCH}:${MACHINE}; fi
 test -z "${ELFSIZE}" && ELFSIZE=32
+test -z "${ALIGNMENT}" && ALIGNMENT="${ELFSIZE} / 8"
 test "$LD_FLAG" = "N" && DATA_ADDR=.
 INTERP=".interp   ${RELOCATING-0} : { *(.interp) 	}"
 PLT=".plt    ${RELOCATING-0} : { *(.plt)	}"
@@ -56,10 +58,12 @@ ${RELOCATING+${LIB_SEARCH_DIRS}}
 ${RELOCATING+/* Do we need any of these for elf?
    __DYNAMIC = 0; ${STACKZERO+${STACKZERO}} ${SHLIB_PATH+${SHLIB_PATH}}  */}
 ${RELOCATING+${EXECUTABLE_SYMBOLS}}
+${RELOCATING+${INPUT_FILES}}
 ${RELOCATING- /* For some reason, the Solaris linker makes bad executables
   if gld -r is used and the intermediate file has sections starting
   at non-zero addresses.  Could be a Solaris ld bug, could be a GNU ld
   bug.  But for now assigning the zero vmas works.  */}
+
 SECTIONS
 {
   /* Read-only sections, merged into text segment: */
@@ -75,17 +79,41 @@ SECTIONS
   .gnu.version_d ${RELOCATING-0} : { *(.gnu.version_d)	}
   .gnu.version_r ${RELOCATING-0} : { *(.gnu.version_r)	}
   .rel.text    ${RELOCATING-0} :
-    { *(.rel.text) ${RELOCATING+*(.rel.gnu.linkonce.t*)} }
+    {
+      *(.rel.text)
+      ${RELOCATING+*(.rel.text.*)}
+      ${RELOCATING+*(.rel.gnu.linkonce.t*)}
+    }
   .rela.text   ${RELOCATING-0} :
-    { *(.rela.text) ${RELOCATING+*(.rela.gnu.linkonce.t*)} }
+    {
+      *(.rela.text)
+      ${RELOCATING+*(.rela.text.*)}
+      ${RELOCATING+*(.rela.gnu.linkonce.t*)}
+    }
   .rel.data    ${RELOCATING-0} :
-    { *(.rel.data) ${RELOCATING+*(.rel.gnu.linkonce.d*)} }
+    {
+      *(.rel.data)
+      ${RELOCATING+*(.rel.data.*)}
+      ${RELOCATING+*(.rel.gnu.linkonce.d*)}
+    }
   .rela.data   ${RELOCATING-0} :
-    { *(.rela.data) ${RELOCATING+*(.rela.gnu.linkonce.d*)} }
+    {
+      *(.rela.data)
+      ${RELOCATING+*(.rela.data.*)}
+      ${RELOCATING+*(.rela.gnu.linkonce.d*)}
+    }
   .rel.rodata  ${RELOCATING-0} :
-    { *(.rel.rodata) ${RELOCATING+*(.rel.gnu.linkonce.r*)} }
+    {
+      *(.rel.rodata)
+      ${RELOCATING+*(.rel.rodata.*)}
+      ${RELOCATING+*(.rel.gnu.linkonce.r*)}
+    }
   .rela.rodata ${RELOCATING-0} :
-    { *(.rela.rodata) ${RELOCATING+*(.rela.gnu.linkonce.r*)} }
+    {
+      *(.rela.rodata)
+      ${RELOCATING+*(.rela.rodata.*)}
+      ${RELOCATING+*(.rela.gnu.linkonce.r*)}
+    }
   .rel.got     ${RELOCATING-0} : { *(.rel.got)		}
   .rela.got    ${RELOCATING-0} : { *(.rela.got)		}
   .rel.ctors   ${RELOCATING-0} : { *(.rel.ctors)	}
@@ -100,12 +128,13 @@ SECTIONS
   .rela.bss    ${RELOCATING-0} : { *(.rela.bss)		}
   .rel.plt     ${RELOCATING-0} : { *(.rel.plt)		}
   .rela.plt    ${RELOCATING-0} : { *(.rela.plt)		}
-  .init        ${RELOCATING-0} : { *(.init)	} =${NOP-0}
+  .init        ${RELOCATING-0} : { KEEP (*(.init))	} =${NOP-0}
   ${DATA_PLT-${PLT}}
   .text    ${RELOCATING-0} :
   {
     ${RELOCATING+${TEXT_START_SYMBOLS}}
     *(.text)
+    ${RELOCATING+*(.text.*)}
     *(.stub)
     /* .gnu.warning sections are handled specially by elf32.em.  */
     *(.gnu.warning)
@@ -114,8 +143,13 @@ SECTIONS
   } =${NOP-0}
   ${RELOCATING+_etext = .;}
   ${RELOCATING+PROVIDE (etext = .);}
-  .fini    ${RELOCATING-0} : { *(.fini)    } =${NOP-0}
-  .rodata  ${RELOCATING-0} : { *(.rodata) ${RELOCATING+*(.gnu.linkonce.r*)} }
+  .fini    ${RELOCATING-0} : { KEEP (*(.fini))		} =${NOP-0}
+  .rodata  ${RELOCATING-0} :
+  {
+    *(.rodata)
+    ${RELOCATING+*(.rodata.*)}
+    ${RELOCATING+*(.gnu.linkonce.r*)}
+  }
   .rodata1 ${RELOCATING-0} : { *(.rodata1) }
   ${RELOCATING+${OTHER_READONLY_SECTIONS}}
 
@@ -128,23 +162,32 @@ SECTIONS
   {
     ${RELOCATING+${DATA_START_SYMBOLS}}
     *(.data)
+    ${RELOCATING+*(.data.*)}
     ${RELOCATING+*(.gnu.linkonce.d*)}
-    ${CONSTRUCTING+CONSTRUCTORS}
+    ${CONSTRUCTING+SORT(CONSTRUCTORS)}
   }
   .data1 ${RELOCATING-0} : { *(.data1) }
   ${RELOCATING+${OTHER_READWRITE_SECTIONS}}
   .ctors       ${RELOCATING-0} :
   {
     ${CONSTRUCTING+${CTOR_START}}
-    *(SORT(.ctors.*))
-    *(.ctors)
+    /* gcc uses crtbegin.o to find the start of the constructors, so
+       we make sure it is first.  Because this is a wildcard, it
+       doesn't matter if the user does not actually link against
+       crtbegin.o; the linker won't look for a file to match a
+       wildcard.  The wildcard also means that it doesn't matter which
+       directory crtbegin.o is in.  */
+    KEEP (*crtbegin.o(.ctors))
+    KEEP (*(SORT(.ctors.*)))
+    KEEP (*(.ctors))
     ${CONSTRUCTING+${CTOR_END}}
   }
   .dtors       ${RELOCATING-0} :
   {
     ${CONSTRUCTING+${DTOR_START}}
-    *(SORT(.dtors.*))
-    *(.dtors)
+    KEEP (*crtbegin.o(.dtors))
+    KEEP (*(SORT(.dtors.*)))
+    KEEP (*(.dtors))
     ${CONSTRUCTING+${DTOR_END}}
   }
   ${DATA_PLT+${PLT}}
@@ -167,7 +210,7 @@ SECTIONS
    *(.bss)
    *(COMMON)
   }
-  ${RELOCATING+. = ALIGN(${ELFSIZE} / 8);}
+  ${RELOCATING+. = ALIGN(${ALIGNMENT});}
   ${RELOCATING+_end = . ;}
   ${RELOCATING+PROVIDE (end = .);}
 
