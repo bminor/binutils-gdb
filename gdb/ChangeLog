@@ -1,3 +1,7 @@
+2001-01-25  Christopher Faylor  <cgf@cygnus.com>
+
+	* win32-nat.c (_initialize_core_win32): Prototype correctly.
+
 2001-01-25  Mark Kettenis  <kettenis@gnu.org>
 
 	* config/alpha/tm-fbsd.h: Update copyright.

@@ -1657,7 +1657,7 @@ static struct core_fns win32_elf_core_fns =
 };
 
 void
-_initialize_core_win32 ()
+_initialize_core_win32 (void)
 {
   add_core_fns (&win32_elf_core_fns);
 }
