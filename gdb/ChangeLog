@@ -1,3 +1,12 @@
+2004-11-08  Andrew Cagney  <cagney@gnu.org>
+
+	* sentinel-frame.c (sentinel_frame_prev_pc): New function.
+	(sentinel_frame_unwinder): Add the prev_pc method.
+	* frame.c (frame_pc_unwind): Use the per-frame pc unwinder when
+	available.  Do not handle the sentinel-frame case.
+	* frame-unwind.h (frame_prev_register_ftype): Define.
+	(struct frame_unwind): Add prev_pc;
+
 2004-11-08  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
 
 	* configure.in: Check for ncurses/term.h.

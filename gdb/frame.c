@@ -390,7 +390,15 @@ frame_pc_unwind (struct frame_info *this_frame)
   if (!this_frame->prev_pc.p)
     {
       CORE_ADDR pc;
-      if (gdbarch_unwind_pc_p (current_gdbarch))
+      if (this_frame->unwind == NULL)
+	this_frame->unwind
+	  = frame_unwind_find_by_frame (this_frame->next,
+					&this_frame->prologue_cache);
+      if (this_frame->unwind->prev_pc != NULL)
+	/* A per-frame unwinder, prefer it.  */
+	pc = this_frame->unwind->prev_pc (this_frame->next,
+					  &this_frame->prologue_cache);
+      else if (gdbarch_unwind_pc_p (current_gdbarch))
 	{
 	  /* The right way.  The `pure' way.  The one true way.  This
 	     method depends solely on the register-unwind code to
@@ -410,17 +418,8 @@ frame_pc_unwind (struct frame_info *this_frame)
 	     different ways that a PC could be unwound.  */
 	  pc = gdbarch_unwind_pc (current_gdbarch, this_frame);
 	}
-      else if (this_frame->level < 0)
-	{
-	  /* FIXME: cagney/2003-03-06: Old code and a sentinel
-             frame.  Do like was always done.  Fetch the PC's value
-             directly from the global registers array (via read_pc).
-             This assumes that this frame belongs to the current
-             global register cache.  The assumption is dangerous.  */
-	  pc = read_pc ();
-	}
       else
-	internal_error (__FILE__, __LINE__, "No gdbarch_unwind_pc method");
+	internal_error (__FILE__, __LINE__, "No unwind_pc method");
       this_frame->prev_pc.value = pc;
       this_frame->prev_pc.p = 1;
       if (frame_debug)

@@ -118,6 +118,14 @@ typedef void (frame_prev_register_ftype) (struct frame_info *next_frame,
 					  CORE_ADDR *addrp,
 					  int *realnump, void *valuep);
 
+/* Assuming the frame chain: (outer) prev <-> this <-> next (inner);
+   use the NEXT frame, and its register unwind method, to return the PREV
+   frame's program-counter.  */
+
+typedef CORE_ADDR (frame_prev_pc_ftype) (struct frame_info *next_frame,
+					 void **this_prologue_cache);
+
+
 struct frame_unwind
 {
   /* The frame's type.  Should this instead be a collection of
@@ -129,6 +137,7 @@ struct frame_unwind
   frame_prev_register_ftype *prev_register;
   const struct frame_data *unwind_data;
   frame_sniffer_ftype *sniffer;
+  frame_prev_pc_ftype *prev_pc;
 };
 
 /* Register a frame unwinder, _prepending_ it to the front of the

@@ -81,11 +81,22 @@ sentinel_frame_this_id (struct frame_info *next_frame,
   internal_error (__FILE__, __LINE__, "sentinel_frame_this_id called");
 }
 
+static CORE_ADDR
+sentinel_frame_prev_pc (struct frame_info *next_frame,
+			void **this_prologue_cache)
+{
+  struct gdbarch *gdbarch = get_frame_arch (next_frame);
+  return gdbarch_unwind_pc (gdbarch, next_frame);
+}
+
 const struct frame_unwind sentinel_frame_unwinder =
 {
   SENTINEL_FRAME,
   sentinel_frame_this_id,
-  sentinel_frame_prev_register
+  sentinel_frame_prev_register,
+  NULL, /* unwind_data */
+  NULL, /* sniffer */
+  sentinel_frame_prev_pc,
 };
 
 const struct frame_unwind *const sentinel_frame_unwind = &sentinel_frame_unwinder;
