@@ -7,8 +7,9 @@ _define__(<_BOUT__>,<1>)
 _define__(<_COFF__>,<1>)
 _define__(<_ELF__>,<1>)
 
+_define__(<_REMOTESTUB__>,<1>)
 _define__(<_AMD29K__>,<1>)
-_define__(<_H8__>,<1>)           Include this when it's stable.
+_define__(<_H8__>,<1>)
 _define__(<_I80386__>,<1>)
 _define__(<_I960__>,<1>)
 _define__(<_M680X0__>,<1>)

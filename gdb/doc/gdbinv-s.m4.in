@@ -5,6 +5,7 @@ _dnl__ M4 FRAGMENT $Id$
 _dnl__ This text diverted to "Remote Debugging" section in general case;
 _dnl__ however, if we're doing a manual specifically for one of these, it
 _dnl__ belongs up front (in "Getting In and Out" chapter).
+_if__(_REMOTESTUB__)
 @node Remote Serial
 @subsection The _GDBN__ remote serial protocol
 
@@ -334,7 +335,7 @@ back and forth across the serial line to the remote machine.  The
 packet-debugging information is printed on the _GDBN__ standard output
 stream.  @code{set remotedebug off} turns it off, and @code{show
 remotedebug} will show you its current state.
-
+_fi__(_REMOTESTUB__)
 
 _if__(_I960__)
 @node i960-Nindy Remote

@@ -152,7 +152,9 @@ This is Edition 4.06, July 1992, for GDB Version _GDB_VN__.
 _if__(_GENERIC__ || !_H8__)
 * New Features::                New features since GDB version 3.5
 _fi__(_GENERIC__ || !_H8__)
+_if__(!_BARE__)
 * Sample Session::              A sample _GDBN__ session
+_fi__(!_BARE__)
 * Invocation::                  Getting in and out of _GDBN__
 * Commands::                    _GDBN__ commands
 * Running::                     Running programs under _GDBN__
@@ -210,8 +212,10 @@ Change things in your program, so you can experiment with correcting the
 effects of one bug and go on to learn about another.
 @end itemize
 
+_if__(!_CONLY__)
 You can use _GDBN__ to debug programs written in C, C++, and Modula-2.
 Fortran support will be added when a GNU Fortran compiler is ready.
+_fi__(!_CONLY__)
 
 @menu
 * Free Software::               Free Software
@@ -233,7 +237,9 @@ Fundamentally, the General Public License is a license which says that
 you have these freedoms and that you cannot take these freedoms away
 from anyone else.
 
+_if__(!_AGGLOMERATION__)
 For full details, @pxref{Copying, ,GNU GENERAL PUBLIC LICENSE}.
+_fi__(!_AGGLOMERATION__)
 
 @node Contributors
 @unnumberedsec Contributors to GDB
@@ -398,6 +404,7 @@ support.
 @end table
 _fi__(_GENERIC__ || !_H8__)
 
+_if__(!_BARE__)
 @node Sample Session
 @chapter A Sample _GDBN__ Session
 
@@ -666,6 +673,7 @@ session with the _GDBN__ @code{quit} command.
 @smallexample
 (_GDBP__) @b{quit}
 _1__@end smallexample
+_fi__(!_BARE__)
 
 @node Invocation
 @chapter Getting In and Out of _GDBN__
@@ -1110,9 +1118,13 @@ command.
 
 If you just want to see the list of alternatives in the first place, you
 can press @kbd{M-?} rather than pressing @key{TAB} twice. @kbd{M-?}
-means @kbd{@key{META} ?}.  You can type this either by holding down a
+means @kbd{@key{META} ?}.  You can type this
+_if__(_GENERIC__||!_DOSHOST__)
+either by holding down a
 key designated as the @key{META} shift on your keyboard (if there is
-one) while typing @kbd{?}, or by typing @key{ESC} followed by @kbd{?}.
+one) while typing @kbd{?}, or
+_fi__(_GENERIC__||!_DOSHOST__)
+as @key{ESC} followed by @kbd{?}.
 
 @cindex quotes in commands
 @cindex completion of quoted strings
@@ -1757,7 +1769,12 @@ running or not, what process it is, and why it stopped.
 @end table
 
 @menu
+_if__(!_CONLY__)
 * Breakpoints::                 Breakpoints, Watchpoints, and Exceptions
+_fi__(!_CONLY__)
+_if__(_CONLY__)
+* Breakpoints::                 Breakpoints and Watchpoints
+_fi__(_CONLY__)
 * Continuing and Stepping::     Resuming Execution
 _if__(_GENERIC__ || !_H8__)
 * Signals::                     Signals
@@ -1765,7 +1782,12 @@ _fi__(_GENERIC__ || !_H8__)
 @end menu
 
 @node Breakpoints
+_if__(!_CONLY__)
 @section Breakpoints, Watchpoints, and Exceptions
+_fi__(!_CONLY__)
+_if__(_CONLY__)
+@section Breakpoints and Watchpoints
+_fi__(_CONLY__)
 
 @cindex breakpoints
 A @dfn{breakpoint} makes your program stop whenever a certain point in
@@ -1774,9 +1796,12 @@ conditions to control in finer detail whether your program will stop.
 You can set breakpoints with the @code{break} command and its variants
 (@pxref{Set Breaks, ,Setting Breakpoints}), to specify the place where
 your program should stop by line number, function name or exact address
-in the program.  In languages with exception handling (such as GNU
-C++), you can also set breakpoints where an exception is raised
-(@pxref{Exception Handling, ,Breakpoints and Exceptions}).
+in the program.  
+_if__(!_CONLY__)
+In languages with exception handling (such as GNU C++), you can also set
+breakpoints where an exception is raised (@pxref{Exception Handling,
+,Breakpoints and Exceptions}).
+_fi__(!_CONLY__)
 
 @cindex watchpoints
 @cindex memory tracing
@@ -1832,10 +1857,12 @@ You have several ways to say where the breakpoint should go.
 
 @table @code
 @item break @var{function}
-Set a breakpoint at entry to function @var{function}.  When using source
-languages that permit overloading of symbols, such as C++,
-@var{function} may refer to more than one possible place to break.
+Set a breakpoint at entry to function @var{function}.  
+_if__(!_CONLY__)
+When using source languages that permit overloading of symbols, such as
+C++, @var{function} may refer to more than one possible place to break.
 @xref{Breakpoint Menus}, for a discussion of that situation.
+_fi__(!_CONLY__)
 
 @item break +@var{offset}
 @itemx break -@var{offset}
@@ -1906,9 +1933,11 @@ breakpoints it set. Once these breakpoints are set, they are treated
 just like the breakpoints set with the @code{break} command.  They can
 be deleted, disabled, made conditional, etc., in the standard ways.
 
+_if__(!_CONLY__)
 When debugging C++ programs, @code{rbreak} is useful for setting
 breakpoints on overloaded functions that are not members of any special
 classes.
+_fi__(!_CONLY__)
 
 @kindex info breakpoints
 @cindex @code{$_} and @code{info breakpoints}
@@ -3533,10 +3562,12 @@ to print a global value of @code{x} defined in @file{f2.c}:
 (_GDBP__) p 'f2.c'::x
 @end example
 
+_if__(!_CONLY__)
 @cindex C++ scope resolution
 This use of @samp{::} is very rarely in conflict with the very similar
 use of the same notation in C++.  _GDBN__ also supports use of the C++
 scope resolution operator in _GDBN__ expressions.
+_fi__(!_CONLY__)
 
 @cindex wrong values
 @cindex variable values, wrong
@@ -4705,14 +4736,9 @@ look to these for a language reference or tutorial.
 
 @node C
 @subsection C and C++
-_fi__(!_CONLY__)
-_if__(_CONLY__)
-@node C
-@chapter C and C++
-_fi__(_CONLY__)
 @cindex C and C++
-
 @cindex expressions in C or C++
+
 Since C and C++ are so closely related, many features of _GDBN__ apply
 to both languages.  Whenever this is the case, we discuss both languages
 together.
@@ -4724,32 +4750,53 @@ The C++ debugging facilities are jointly implemented by the GNU C++
 compiler and _GDBN__.  Therefore, to debug your C++ code effectively,
 you must compile your C++ programs with the GNU C++ compiler,
 @code{g++}.
+_fi__(!_CONLY__)
+_if__(_CONLY__)
+@node C
+@chapter C Language Support
+@cindex C language
+@cindex expressions in C
 
+Information specific to the C language is built into _GDBN__ so that you
+can use C expressions while degugging.  This also permits _GDBN__ to
+output values in a manner consistent with C conventions.
+
+@menu
+* C Operators::                 C Operators
+* C Constants::                 C Constants
+* Debugging C::                 _GDBN__ and C
+@end menu
+_fi__(_CONLY__)
+_if__(!_CONLY__)
 @menu
 * C Operators::                 C and C++ Operators
 * C Constants::                 C and C++ Constants
 * Cplusplus expressions::       C++ Expressions
-_if__(!_CONLY__)
 * C Defaults::                  Default settings for C and C++
-_fi__(!_CONLY__)
 * C Checks::                    C and C++ Type and Range Checks
 * Debugging C::                 _GDBN__ and C
 * Debugging C plus plus::       Special features for C++
 @end menu
+_fi__(!_CONLY__)
 
+_if__(!_CONLY__)
 @cindex C and C++ operators
 @node C Operators
-_if__(!_CONLY__)
 @subsubsection C and C++ Operators
 _fi__(!_CONLY__)
 _if__(_CONLY__)
-@section C and C++ Operators
+@cindex C operators
+@node C Operators
+@section C Operators
 _fi__(_CONLY__)
 
 Operators must be defined on values of specific types.  For instance,
 @code{+} is defined on numbers, but not on structures.  Operators are
-often defined on groups of types.  For the purposes of C and C++, the
-following definitions hold:
+often defined on groups of types.  
+
+_if__(!_CONLY__)
+For the purposes of C and C++, the following definitions hold:
+_fi__(!_CONLY__)
 
 @itemize @bullet
 @item
@@ -4818,7 +4865,7 @@ Defined on scalar types.  The value of these expressions is 0 for false
 and non-zero for true.
 
 @item <<@r{, }>>
-left shift, and right shift.  Defined on integral types.
+left shift, and right shift.  Defined on integral types._1__
 
 @item @@
 The _GDBN__ ``artificial array'' operator (@pxref{Expressions, ,Expressions}).
@@ -4845,11 +4892,13 @@ Pointer dereferencing.  Defined on pointer types.  Same precedence as
 @item &
 Address operator.  Defined on variables.  Same precedence as @code{++}.
 
+_if__(!_CONLY__)
 For debugging C++, _GDBN__ implements a use of @samp{&} beyond what's
 allowed in the C++ language itself: you can use @samp{&(&@var{ref})}
 (or, if you prefer, simply @samp{&&@var{ref}} to examine the address
 where a C++ reference variable (declared with @samp{&@var{ref}}) is
 stored.
+_fi__(!_CONLY__)
 
 @item -
 Negative.  Defined on integral and floating-point types.  Same
@@ -4863,6 +4912,7 @@ Logical negation.  Defined on integral types.  Same precedence as
 Bitwise complement operator.  Defined on integral types.  Same precedence as
 @code{++}.
 
+_0__
 @item .@r{, }->
 Structure member, and pointer-to-structure member.  For convenience,
 _GDBN__ regards the two as equivalent, choosing whether to dereference a
@@ -4874,28 +4924,37 @@ Array indexing.  @code{@var{a}[@var{i}]} is defined as
 @code{*(@var{a}+@var{i})}.  Same precedence as @code{->}.
 
 @item ()
-Function parameter list.  Same precedence as @code{->}.
+Function parameter list.  Same precedence as @code{->}._1__
 
+_if__(!_CONLY__)
 @item ::
 C++ scope resolution operator.  Defined on
 @code{struct}, @code{union}, and @code{class} types.
+_fi__(!_CONLY__)
 
 @item ::
-The _GDBN__ scope operator (@pxref{Expressions, ,Expressions}).  Same precedence as
-@code{::}, above._1__
+The _GDBN__ scope operator (@pxref{Expressions, ,Expressions}).  
+_if__(!_CONLY__)
+Same precedence as @code{::}, above.
+_fi__(!_CONLY__)
 @end table
 
+_if__(!_CONLY__)
 @cindex C and C++ constants
 @node C Constants
-_if__(!_CONLY__)
 @subsubsection C and C++ Constants
-_fi__(!_CONLY__)
-_if__(_CONLY__)
-@section C and C++ Constants
-_fi__(_CONLY__)
 
 _GDBN__ allows you to express the constants of C and C++ in the
 following ways:
+_fi__(!_CONLY__)
+_if__(_CONLY__)
+@cindex C constants
+@node C Constants
+@section C Constants
+
+_GDBN__ allows you to express the constants of C in the
+following ways:
+_fi__(_CONLY__)
 
 @itemize @bullet
 @item
@@ -4934,13 +4993,9 @@ by double quotes (@code{"}).
 Pointer constants are an integral value.
 @end itemize
 
-@node Cplusplus expressions
 _if__(!_CONLY__)
+@node Cplusplus expressions
 @subsubsection C++ Expressions
-_fi__(!_CONLY__)
-_if__(_CONLY__)
-@section C++ Expressions
-_fi__(_CONLY__)
 
 @cindex expressions in C++
 _GDBN__'s expression handling has a number of extensions to
@@ -5018,7 +5073,6 @@ resolving name scope by reference to source files, in both C and C++
 debugging (@pxref{Variables, ,Program Variables}).
 @end enumerate
 
-_if__(!_CONLY__)
 @node C Defaults
 @subsubsection C and C++ Defaults
 @cindex C and C++ defaults
@@ -5033,15 +5087,9 @@ working language to C or C++ on entering code compiled from a source file
 whose name ends with @file{.c}, @file{.C}, or @file{.cc}.
 @xref{Automatically, ,Having _GDBN__ infer the source language}, for
 further details.
-_fi__(!_CONLY__)
 
 @node C Checks
-_if__(!_CONLY__)
 @subsubsection C and C++ Type and Range Checks
-_fi__(!_CONLY__)
-_if__(_CONLY__)
-@section C and C++ Type and Range Checks
-_fi__(_CONLY__)
 @cindex C and C++ checks
 
 @quotation
@@ -5076,6 +5124,7 @@ compilers.)
 Range checking, if turned on, is done on mathematical operations.  Array
 indices are not checked, since they are often used to index a pointer
 that is not itself an array.
+_fi__(!_CONLY__)
 
 @node Debugging C
 _if__(!_CONLY__)
@@ -5093,6 +5142,7 @@ Otherwise, it will appear as @samp{@{...@}}.
 The @code{@@} operator aids in the debugging of dynamic arrays, formed
 with pointers and a memory allocation function.  (@pxref{Expressions, ,Expressions})
 
+_if__(!_CONLY__)
 @node Debugging C plus plus
 _if__(!_CONLY__)
 @subsubsection _GDBN__ Features for C++
@@ -5159,7 +5209,6 @@ available choices, or to finish the type list for you.
 @xref{Completion,, Command Completion}, for details on how to do this.
 @end table
 
-_if__(!_CONLY__)
 @node Modula-2
 @subsection Modula-2
 @cindex Modula-2
@@ -6012,8 +6061,11 @@ repairs.
 @item set write on
 @itemx set write off
 @kindex set write
-If you specify @samp{set write on}, _GDBN__ will open executable and
-core files for both reading and writing; if you specify @samp{set write
+If you specify @samp{set write on}, _GDBN__ will open executable 
+_if__(!_BARE__)
+and core
+_fi__(!_BARE__)
+files for both reading and writing; if you specify @samp{set write
 off} (the default), _GDBN__ will open them read-only.
 
 If you have already loaded a file, you must load it
@@ -6022,8 +6074,11 @@ changing @code{set write}, for your new setting to take effect.
 
 @item show write
 @kindex show write
-Display whether executable files and core files will be opened for
-writing as well as reading.
+Display whether executable files 
+_if__(!_BARE__)
+and core files 
+_fi__(!_BARE__)
+will be opened for writing as well as reading.
 @end table
 
 @node _GDBN__ Files
@@ -6043,10 +6098,10 @@ _fi__(!_BARE__)
 
 @node Files
 @section Commands to Specify Files
-@cindex core dump file
 @cindex symbol table
 
 _if__(!_BARE__)
+@cindex core dump file
 The usual way to specify executable and core dump file names is with
 the command arguments given when you start _GDBN__, (@pxref{Invocation,
 ,Getting In and Out of _GDBN__}.
@@ -6236,6 +6291,7 @@ _fi__(_H8__)
 
 @code{load} will not repeat if you press @key{RET} again after using it.
 
+_if__(!_BARE__)
 @item add-symbol-file @var{filename} @var{address}
 @itemx add-symbol-file @var{filename} @var{address} @r{[} -readnow @r{]} @r{[} -mapped @r{]}
 @kindex add-symbol-file
@@ -6256,7 +6312,8 @@ use the @code{symbol-file} command.
 
 You can use the @samp{-mapped} and @samp{-readnow} options just as with
 the @code{symbol-file} command, to change how _GDBN__ manages the symbol
-tabl einformation for @var{filename}.
+table information for @var{filename}.
+_fi__(!_BARE__)
 
 @item info files
 @itemx info target
@@ -6399,14 +6456,20 @@ _GDBN__ could not parse a type specification output by the compiler.
 @kindex target
 
 A @dfn{target} is the execution environment occupied by your program.
+_if__(!_BARE__)
 Often, _GDBN__ runs in the same host environment as your program; in
 that case, the debugging target is specified as a side effect when you
 use the @code{file} or @code{core} commands.  When you need more
 flexibility---for example, running _GDBN__ on a physically separate
 host, or controlling a standalone system over a serial port or a
-realtime system over a TCP/IP connection---you can use the @code{target}
-command to specify one of the target types configured for _GDBN__
-(@pxref{Target Commands, ,Commands for Managing Targets}).
+realtime system over a TCP/IP connection---you 
+_fi__(!_BARE__)
+_if__(_BARE__)
+You
+_fi__(_BARE__)
+can use the @code{target} command to specify one of the target types
+configured for _GDBN__ (@pxref{Target Commands, ,Commands for Managing
+Targets}).
 
 @menu
 * Active Targets::              Active Targets
@@ -6420,6 +6483,7 @@ command to specify one of the target types configured for _GDBN__
 @cindex active targets
 @cindex multiple targets
 
+_if__(!_BARE__)
 There are three classes of targets: processes, core files, and
 executable files.  _GDBN__ can work concurrently on up to three active
 targets, one in each class.  This allows you to (for example) start a
@@ -6435,11 +6499,15 @@ requests for memory addresses.  (Typically, these two classes of target
 are complementary, since core files contain only a program's
 read-write memory---variables and so on---plus machine status, while
 executable files contain only the program text and initialized data.)
+_fi__(!_BARE__)
 
 When you type @code{run}, your executable file becomes an active process
 target as well.  When a process target is active, all _GDBN__ commands
-requesting memory addresses refer to that target; addresses in an active
-core file or executable file target are obscured while the process
+requesting memory addresses refer to that target; addresses in an 
+_if__(!_BARE__)
+active core file or 
+_fi__(!_BARE__)
+executable file target are obscured while the process
 target is active.
 
 _if__(_BARE__)
@@ -6497,11 +6565,13 @@ An executable file.  @samp{target exec @var{prog}} is the same as
 A core dump file.  @samp{target core @var{filename}} is the same as
 @samp{core-file @var{filename}}.
 
+_if__(_REMOTESTUB__)
 @item target remote @var{dev}
 @kindex target remote
 Remote serial target in GDB-specific protocol.  The argument @var{dev}
 specifies what serial device to use for the connection (e.g.
 @file{/dev/ttya}). @xref{Remote, ,Remote Debugging}.
+_fi__(_REMOTESTUB__)
 
 _if__(_AMD29K__)
 @item target amd-eb @var{dev} @var{speed} @var{PROG}
@@ -7326,13 +7396,13 @@ If you are not sure whether you have found a bug, here are some guidelines:
 
 @itemize @bullet
 @item
-@cindex Fatal Signal
-@cindex Core Dump
+@cindex fatal signal
+@cindex core dump
 If the debugger gets a fatal signal, for any input whatever, that is a
 _GDBN__ bug.  Reliable debuggers never crash.
 
 @item
-@cindex error on Valid Input
+@cindex error on valid input
 If _GDBN__ produces an error message for valid input, that is a bug.
 
 @item
@@ -7349,8 +7419,8 @@ for improvement of _GDBN__ are welcome in any case.
 
 @node Bug Reporting
 @section How to Report Bugs
-@cindex Bug Reports
-@cindex _GDBN__ Bugs, Reporting
+@cindex bug reports
+@cindex _GDBN__ bugs, reporting
 
 A number of companies and individuals offer support for GNU products.
 If you obtained _GDBN__ from a support organization, we recommend you
@@ -7650,6 +7720,7 @@ unset                     &&\rm(No longer an alias for delete)\cr
 @c END TEXI2ROFF-KILL
 _fi__(_GENERIC__||!_H8__)
 
+_if__(!_PRECONFIGURED__)
 @node Formatting Documentation
 @appendix Formatting the Documentation
 
@@ -8028,7 +8099,9 @@ There is no convenient way to generate a list of all available hosts.
 @code{configure} accepts other options, for compatibility with
 configuring other GNU tools recursively; but these are the only
 options that affect GDB or its supporting libraries.
+_fi__(!_PRECONFIGURED__)
 
+_if__(!_AGGLOMERATION__)
 @node Copying
 @unnumbered GNU GENERAL PUBLIC LICENSE
 @center Version 2, June 1991
@@ -8423,6 +8496,7 @@ proprietary programs.  If your program is a subroutine library, you may
 consider it more useful to permit linking proprietary applications with the
 library.  If this is what you want to do, use the GNU Library General
 Public License instead of this License.
+_fi__(!_AGGLOMERATION__)
 
 @node Index
 @unnumbered Index

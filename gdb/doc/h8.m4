@@ -1,6 +1,9 @@
 _divert__(-1)
+_define__(<_REMOTESTUB__>,<0>)
 _define__(<_H8__>,<1>)
 _define__(<_GENERIC__>,<0>)
+_define__(<_AGGLOMERATION__>,<1>)       GPL formatted separately
+_define__(<_PRECONFIGURED__>,<1>)       manual is *only* for preconfigured sw
 _define__(<_BARE__>,<1>)
 _define__(<_CONLY__>,<1>)
 _define__(<_DOSHOST__>,<1>)
