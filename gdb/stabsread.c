@@ -1123,7 +1123,8 @@ resolve_symbol_reference (objfile, sym, p)
 /* Get range symbol reference. eg. "#2),l(#3,#5)"   
    postpone resolve_reference until after we're done reading symbols. */
 struct symbol *
-resolve_reference (char *p)
+resolve_reference (p)
+     char *p;
 {
     char sym_refid[32];
     struct symbol *sym = 0;
@@ -1169,7 +1170,12 @@ static void ref_init ()
    Add pointers to reference definition symbols and/or their values as we 
    find them, using their reference numbers as our index. 
    These will be used later when we resolve references. */
-void ref_add (int refnum, struct symbol *sym, char *stabs, CORE_ADDR value)
+void
+ref_add (refnum, sym, stabs, value)
+     int refnum;
+     struct symbol *sym;
+     char *stabs;
+     CORE_ADDR value;
 {
   if (ref_count == 0)
     ref_init ();
@@ -1186,7 +1192,9 @@ void ref_add (int refnum, struct symbol *sym, char *stabs, CORE_ADDR value)
    This should be called before a new symbol table is read to clear out the 
    previous symbol's reference information. */
 /* FIXME!  not used at the moment. */
-static void ref_rmv (int refnum)
+static void
+ref_rmv (refnum)
+     int refnum;
 {
   if (ref_count < 0)
     error ("slots are empty\n");
@@ -1200,7 +1208,8 @@ static void ref_rmv (int refnum)
 
 /* Return defined sym for the reference "refnum" */
 struct symbol *
-ref_search (int refnum)
+ref_search (refnum)
+     int refnum;
 {
   if (refnum < 0 || refnum > ref_count)
     return 0;
@@ -1209,7 +1218,8 @@ ref_search (int refnum)
 
 /* Return value for the reference "refnum" */
 CORE_ADDR
-ref_search_value (int refnum)
+ref_search_value (refnum)
+     int refnum;
 {
   if (refnum < 0 || refnum > ref_count)
     return 0;
@@ -1221,7 +1231,8 @@ ref_search_value (int refnum)
    Return the reference number. */
 
 static int 
-process_reference (char **string)
+process_reference (string)
+    char **string;
 {
   char *p;
   int refnum = 0;
@@ -1244,7 +1255,8 @@ process_reference (char **string)
    definition for fast lookup when we "process_later",
    and return the reference number. */
 int
-symbol_reference_defined (char **string)
+symbol_reference_defined (string)
+     char **string;
 {
   char *p = *string;
   int refnum = 0;

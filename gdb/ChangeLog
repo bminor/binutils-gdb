@@ -1,7 +1,7 @@
 Tue Sep  9 17:41:41 1997  Jeffrey A Law  (law@cygnus.com)
 
-	* symtab.c (lookup_block_symbol): Add missing PARAMS for
-	function scoped prototype.
+	* symtab.c, dbxread.c, stabsread.c: Fix up ANSI-C isms.  Fix
+	some formatting problems.
 
 Mon Sep  8 16:45:51 1997  Stu Grossman  <grossman@cygnus.com>
 

@@ -773,7 +773,7 @@ struct cont_elem
     int sym_idx;
     int sym_end;
     int symnum;
-    int (*func) (struct objfile *, struct symbol *, char *);
+    int (*func) PARAMS ((struct objfile *, struct symbol *, char *));
     /* other state dependancies include:
        (assumption is that these will not change since process_now FIXME!!)
         stringtab_global
@@ -790,7 +790,7 @@ void
 process_later (sym, p, f)
   struct symbol * sym;
   char * p;
-  int (*f) (struct objfile *, struct symbol *, char *);
+  int (*f) PARAMS ((struct objfile *, struct symbol *, char *));
 {
   if (cont_count >= cont_limit - 1)
     {
@@ -822,7 +822,7 @@ process_now (objfile)
   struct symbol *sym;
   char *stabs;
   int err;
-  int (*func) (struct objfile *, struct symbol *, char *);
+  int (*func) PARAMS ((struct objfile *, struct symbol *, char *));
 
   for (i=0; i<cont_count; i++) 
     {
@@ -2371,9 +2371,9 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
          ahead and add it.  Otherwise, just return sym. */
       char *s;
       int refnum;
-      extern int symbol_reference_defined (char **);
-      extern void ref_add (int, struct symbol *, char *, CORE_ADDR);
-      extern struct symbol * ref_search (int);
+      extern int symbol_reference_defined PARAMS ((char **));
+      extern void ref_add PARAMS ((int, struct symbol *, char *, CORE_ADDR));
+      extern struct symbol * ref_search PARAMS ((int));
 
       /* If defined, store away a pointer to the symbol;
 	 we'll use it later when we resolve references in
