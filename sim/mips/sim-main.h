@@ -703,11 +703,11 @@ struct sim_state {
 #define status_TS        (1 << 21)      /* TLB shutdown has occurred */
 #define status_ERL       (1 <<  2)      /* Error level */
 #define status_RP        (1 << 27)      /* Reduced Power mode */
-/* begin-sanitize-r5900 */
+/* start-sanitize-r5900 */
 #define status_CU0       (1 << 28)      /* COP0 usable */
 #define status_CU1       (1 << 29)      /* COP1 usable */
 #define status_CU2       (1 << 30)      /* COP2 usable */
-/* begin-sanitize-r5900 */
+/* end-sanitize-r5900 */
 
 #define cause_BD        ((unsigned)1 << 31)     /* Exception in branch delay slot */
 
