@@ -1,3 +1,11 @@
+Wed Jul 31 09:53:52 1991  John Gilmore  (gnu at cygint.cygnus.com)
+
+	* all files:  update copyright notices for GPL version 2.
+	Install header comments and attribute most modules to their
+	authors.  BFD's name is now officially "Binary File Descriptor",
+	so remove any conflicting perjoratives.
+	archures.h:  Consists solely of comments; remove it.
+
 Fri Jul 26 18:11:34 1991  Steve Chamberlain  (steve at cygint.cygnus.com)
 
 	* Makefile.in, bfd.c: Made it compile again.
