@@ -1,5 +1,8 @@
 Sun Mar 20 09:24:36 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
+	* trad-core.c (trad_unix_core_file_p): Don't pass abfd to
+	bfd_zmalloc.
+
 	* som.c (som_begin_writing): Fix braino (one call to align
 	space/subspace data was done unconditionally rather than
 	just for executables.)
