@@ -1,5 +1,8 @@
 Wed Mar 26 11:32:51 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/tc-mips.c (insn_uses_reg): Map register numbers in mips16
+	instructions.
+
 	* cond.c (cond_finish_check): New function.
 	* as.h (cond_finish_check): Declare.
 	* as.c (main): Call cond_finish_check.
