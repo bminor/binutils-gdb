@@ -1,2 +1,3 @@
-CFLAGS = -I/s1/cygnus/dejagnu/i386-netware/include 
+CFLAGS = -I/s1/cygnus/dejagnu/i386-netware/include -g
+CXXFLAGS = ${CFLAGS}
 LDFLAGS = -r
