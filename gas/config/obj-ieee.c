@@ -201,7 +201,7 @@ void DEFUN(do_relocs_for,(idx),
 	  if (s) {
 	    if ((s->flags & BSF_UNDEFINED)==0) {
 	      to->section = s->section;
-	      to->addend =  s->value ;
+	      to->addend +=  s->value  ;
 	      to->sym_ptr_ptr  = 0;
 	      if (to->howto->pcrel_offset) {
 		/* This is a pcrel relocation, the addend should be adjusted */
@@ -273,8 +273,8 @@ static void DEFUN(do_symbols, (abfd),
 	  default:
 	    abort();
 	  }
-	  count++;
 	}
+	count++;
       }
   symbol_ptr_vec = (asymbol **)malloc((count+1) * sizeof(asymbol *));
 
