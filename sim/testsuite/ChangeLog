@@ -254,13 +254,11 @@ Wed Feb 25 11:01:17 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* Makefile.in (RUNTEST): Fix path to runtest.
 
-	
 Fri Feb 20 11:00:02 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* sim/m32r/unlock.cgs: Fixed test.
 	* sim/m32r/mvfc.cgs: Fixed test.
 	* sim/m32r/remu.cgs: Fixed test.
-
 	* sim/m32r/bnc24.cgs: Test long BNC instruction.
 	* sim/m32r/bnc8.cgs: Test short BNC instruction.
 	* sim/m32r/ld-plus.cgs: Test LD instruction.
@@ -278,6 +276,7 @@ Fri Feb 20 11:00:02 1998  Nick Clifton  <nickc@cygnus.com>
 	* sim/m32r/neg.cgs: Test NEG instruction.
 	* sim/m32r/not.cgs: Test NOT instruction.
 	* sim/m32r/unlock.cgs: Test UNLOCK instruction.
+
 Thu Feb 19 11:15:45 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* sim/m32r/testutils.inc (mvaddr_h_gr): new macro to load an
@@ -324,6 +323,7 @@ Thu Feb 19 11:15:45 1998  Nick Clifton  <nickc@cygnus.com>
 	* sim/m32r/srli.cgs: Test SRLI instruction.
 	* sim/m32r/xor3.cgs: Test XOR3 instruction.
 	* sim/m32r/xor.cgs: Test XOR instruction.
+
 Tue Feb 17 12:46:05 1998  Doug Evans  <devans@seba.cygnus.com>
 
 	* config/default.exp: New file.
