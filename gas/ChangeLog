@@ -1,5 +1,8 @@
 2001-04-14  Alexandre Oliva  <aoliva@redhat.com>
 
+	* struc-symbol.h (struct local_symbol): New TC_LOCAL_SYMFIELD_TYPE.
+	* symbols.c (local_symbol_convert): Call TC_LOCAL_SYMFIELD_CONVERT.
+
 	* config/tc-mn10300.c (md_assemble): Simplify offset adjustment of
 	pc-relative relocations not placed at the end of the instruction.
 

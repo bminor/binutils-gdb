@@ -139,6 +139,10 @@ struct local_symbol
 
   /* The offset within the frag.  */
   valueT lsy_offset;
+
+#ifdef TC_LOCAL_SYMFIELD_TYPE
+  TC_LOCAL_SYMFIELD_TYPE lsy_tc;
+#endif
 };
 
 #define local_symbol_converted_p(l) ((l)->lsy_section == reg_section)

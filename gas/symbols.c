@@ -255,6 +255,10 @@ local_symbol_convert (locsym)
   /* Local symbols are always either defined or used.  */
   ret->sy_used = 1;
 
+#ifdef TC_LOCAL_SYMFIELD_CONVERT
+  TC_LOCAL_SYMFIELD_CONVERT (locsym, ret);
+#endif
+
   symbol_table_insert (ret);
 
   local_symbol_mark_converted (locsym);
