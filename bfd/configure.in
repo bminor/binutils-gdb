@@ -63,7 +63,7 @@ i386)
 	*)
 		case "${host_os}" in
 		sysv4*)	my_host=i386v4 ;;
-		sysv*)	my_host=i386v ;;
+		sysv* | scosysv*) my_host=i386v ;;
 		mach*)	my_host=i386mach ;;
 		msdos*)	my_host=dose ;;
 		esac
@@ -125,7 +125,7 @@ unknown)
 	case "${target_os}" in
 	bsd) bfd_target=${target_cpu}-aout ;;
 	sysv4*) bfd_target=${target_cpu}-elf ;;
-	sysv*) bfd_target=${target_cpu}-coff ;;
+	sysv* | scosysv*) bfd_target=${target_cpu}-coff ;;
 	none)	case "${target_cpu}" in
 		tahoe | vax)	bfd_target=${target_cpu} ;;
 		esac
