@@ -1,3 +1,7 @@
+Fri Apr 18 13:33:09 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* interp.c (sim_resume): Fix argument to poll_quit.
+
 Fri Apr 18 14:14:49 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* interp.c (sim_stop): New function.

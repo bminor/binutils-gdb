@@ -970,7 +970,7 @@ sim_resume (sd, step, siggnal)
 	{
 	  pollcount = 0;
 	  if ((*callback->poll_quit) != NULL
-	      && (*callback->poll_quit) (sd))
+	      && (*callback->poll_quit) (callback))
 	    {
 	      sim_stop (sd);
 	    }	    
