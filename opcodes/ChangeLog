@@ -1,5 +1,11 @@
 2002-09-04  Nick Clifton  <nickc@redhat.com>
 
+	* disassemble.c (disassembler_usage): Add invocation of
+	print_ppc_disassembler_options.
+        * ppc-dis.c (print_ppc_disassembler_options): New function.
+
+2002-09-04  Nick Clifton  <nickc@redhat.com>
+
 	* ppc-opc.c: The BookE implementations of the TLBWE and TLBRE
 	instructions do not take any arguments.
 
