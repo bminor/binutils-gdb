@@ -1,3 +1,27 @@
+Sun Aug 30 19:54:53 1992  Per Bothner  (bothner@rtl.cygnus.com)
+
+	* gprof.h, gprof.c, printfgprof.c:  Add support for two
+	output styles:  The default is similar to the old FSF gprof,
+	while -T sets the variable bsd_style_output, which causes
+	output matching Berkeley's gprof.  The biggest differences
+	are that with the FSF style output, the flat profile comes
+	before the call graph; numbers come before explanations;
+	and there is less gratuitous white space.
+	* gprof.h, gprof.c, printfgprof.c:  New discard_underscores
+	variable causes discarding of initial underscores when
+	printing symbol names.  It is set unless there is a "main"
+	symbol (without an underscore).
+	* printfgprof.c:  New function printnameonly(), called
+	by printname().  It handles stripping of initial '_',
+	as well as C++ name-demangling.
+	* gprof.callg, gprof.flat, make-c-prog.awk:  Removed.
+	It is just as convenient to edit blurbs.c directly.
+	* Makefile.in:  Removed rule for making blurbs.c.
+	* blurbs.c:  This is now a true source file (as opposed
+	to being generated from gprof.callg and gprof.flat).
+	Change style to use one long string literal, instead of
+	one literal per output line.  Add FSF-style blurb for call graph.
+
 Wed Aug 19 14:36:39 1992  Ian Lance Taylor  (ian@cygnus.com)
 
 	* Makefile.in: always create installation directories.

@@ -38,6 +38,9 @@ char	*whoami = "gprof";
      */
 char	*defaultEs[] = { "mcount" , "__mcleanup" , 0 };
 
+int discard_underscores = 1; /* Should we discard initial underscores? */
+int bsd_style_output = 0; /* As opposed to FSF style output */
+
 main(argc, argv)
     int argc;
     char **argv;
@@ -102,6 +105,9 @@ main(argc, argv)
 	case 's':
 	    sflag = TRUE;
 	    break;
+	case 'T': /* "Traditional" output format */
+	    bsd_style_output = 1;
+	    break;
 	case 'z':
 	    zflag = TRUE;
 	    break;
@@ -165,14 +171,14 @@ main(argc, argv)
 	 *	assemble the dynamic profile
 	 */
     timesortnlp = doarcs();
-	/*
-	 *	print the dynamic profile
-	 */
-    printgprof( timesortnlp );	
-	/*
-	 *	print the flat profile
-	 */
-    printprof();	
+	
+    if (bsd_style_output) {
+	printgprof( timesortnlp );	/* print the dynamic profile */
+	printprof();  /* print the flat profile */
+    } else {
+	printprof();  /* print the flat profile */
+	printgprof( timesortnlp );	/* print the dynamic profile */
+    }
 	/*
 	 *	print the index
 	 */
@@ -230,7 +236,7 @@ bfd	*abfd;
     i = get_symtab_upper_bound (abfd);	/* This will probably give us more
 					 * than we need, but that's ok.
 					 */
-    syms = (asymbol**)malloc (i);
+    syms = (asymbol**)xmalloc (i);
     nosyms = bfd_canonicalize_symtab (abfd, syms);
 
     nname = 0;
@@ -265,8 +271,16 @@ bfd	*abfd;
 #	    endif DEBUG
 	continue;
       }
+      /* Symbol offsets are always section-relative. */
       npe->value = syms[i]->value + syms[i]->section->vma;
       npe->name = syms[i]->name;
+
+      /* If we see "main" without an initial '_', we assume
+	 names are *not* prefixed by '_'. */
+      if (npe->name[0] == 'm' && discard_underscores
+	  && strcmp(npe->name, "main") == 0)
+	  discard_underscores = 0;
+
 #	ifdef DEBUG
       if ( debug & AOUTDEBUG ) {
 	printf( "[getsymtab] %d %s 0x%08x\n" ,

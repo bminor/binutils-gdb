@@ -22,6 +22,7 @@ static char sccsid[] = "@(#)printgprof.c	5.7 (Berkeley) 6/1/90";
 #endif /* not lint */
 
 #include "gprof.h"
+#include <demangle.h>
 
 printprof()
 {
@@ -30,7 +31,15 @@ printprof()
     int			index, timecmp();
 
     actime = 0.0;
-    printf( "\f\n" );
+    if ( bsd_style_output ) {
+	printf( "\f\n" );
+	if ( bflag) {
+	    printf( "\n\n\nflat profile:\n" );
+	    flat_blurb(stdout);
+	}
+    }
+    else
+	printf ("Flat profile:\n");
     flatprofheader();
 	/*
 	 *	Sort the symbol table in by time
@@ -49,6 +58,9 @@ printprof()
     }
     actime = 0.0;
     cfree( sortednlp );
+    if ( bflag && !bsd_style_output ) {
+	flat_blurb(stdout);
+    }
 }
 
 timecmp( npp1 , npp2 )
@@ -76,20 +88,23 @@ timecmp( npp1 , npp2 )
 flatprofheader()
 {
     
-    if ( bflag ) {
-	flat_blurb(stdout);
-    }
-    printf( "\ngranularity: each sample hit covers %d byte(s)" ,
-	    (long) scale * sizeof(UNIT) );
-    if ( totime > 0.0 ) {
-	printf( " for %.2f%% of %.2f seconds\n\n" ,
-		100.0/totime , totime / hz );
-    } else {
-	printf( " no time accumulated\n\n" );
+    if (bsd_style_output) {
+	printf( "\ngranularity: each sample hit covers %d byte(s)" ,
+	       (long) scale * sizeof(UNIT) );
+	if ( totime > 0.0 ) {
+	    printf( " for %.2f%% of %.2f seconds\n\n" ,
+		   100.0/totime , totime / hz );
+	} else {
+	    printf( " no time accumulated\n\n" );
 	    /*
 	     *	this doesn't hurt since all the numerators will be zero.
 	     */
-	totime = 1.0;
+	    totime = 1.0;
+	}
+    }
+    else {
+	printf( "\nEach sample counts as %g seconds.\n",
+	       1.0 / hz);
     }
     printf( "%5.5s %10.10s %8.8s %8.8s %8.8s %8.8s  %-8.8s\n" ,
 	    "%  " , "cumulative" , "self  " , "" , "self  " , "total " , "" );
@@ -106,8 +121,12 @@ flatprofline( np )
 	return;
     }
     actime += np -> time;
-    printf( "%5.1f %10.2f %8.2f" ,
-	100 * np -> time / totime , actime / hz , np -> time / hz );
+    if (bsd_style_output)
+	printf( "%5.1f %10.2f %8.2f" ,
+	       100 * np -> time / totime , actime / hz , np -> time / hz );
+    else
+	printf( "%6.2f %9.2f %8.2f" ,
+	       100 * np -> time / totime , actime / hz , np -> time / hz );
     if ( np -> ncall != 0 ) {
 	printf( " %8d %8.2f %8.2f  " , np -> ncall ,
 	    1000 * np -> time / hz / np -> ncall ,
@@ -115,16 +134,21 @@ flatprofline( np )
     } else {
 	printf( " %8.8s %8.8s %8.8s  " , "" , "" , "" );
     }
-    printname( np );
+    if (bsd_style_output)
+	printname( np );
+    else
+	printnameonly( np );
     printf( "\n" );
 }
 
 gprofheader()
 {
 
-    if ( bflag ) {
-	callg_blurb(stdout);
-    }
+    if (!bsd_style_output)
+	if (bflag)
+	    printf ("\t\t     Call graph (explanation follows)\n\n");
+	else
+	    printf ("\t\t\tCall graph\n\n");
     printf( "\ngranularity: each sample hit covers %d byte(s)" ,
 	    (long) scale * sizeof(UNIT) );
     if ( printtime > 0.0 ) {
@@ -137,14 +161,18 @@ gprofheader()
 	     */
 	printtime = 1.0;
     }
-    printf( "%6.6s %5.5s %7.7s %11.11s %7.7s/%-7.7s     %-8.8s\n" ,
-	"" , "" , "" , "" , "called" , "total" , "parents");
-    printf( "%-6.6s %5.5s %7.7s %11.11s %7.7s+%-7.7s %-8.8s\t%5.5s\n" ,
-	"index" , "%time" , "self" , "descendents" ,
-	"called" , "self" , "name" , "index" );
-    printf( "%6.6s %5.5s %7.7s %11.11s %7.7s/%-7.7s     %-8.8s\n" ,
-	"" , "" , "" , "" , "called" , "total" , "children");
-    printf( "\n" );
+    if (bsd_style_output) {
+	printf( "%6.6s %5.5s %7.7s %11.11s %7.7s/%-7.7s     %-8.8s\n" ,
+	       "" , "" , "" , "" , "called" , "total" , "parents");
+	printf( "%-6.6s %5.5s %7.7s %11.11s %7.7s+%-7.7s %-8.8s\t%5.5s\n" ,
+	       "index" , "%time" , "self" , "descendents" ,
+	       "called" , "self" , "name" , "index" );
+	printf( "%6.6s %5.5s %7.7s %11.11s %7.7s/%-7.7s     %-8.8s\n" ,
+	       "" , "" , "" , "" , "called" , "total" , "children");
+	printf( "\n" );
+    } else {
+	printf( "index %% time    self  children    called     name\n" );
+    }
 }
 
 gprofline( np )
@@ -153,11 +181,13 @@ gprofline( np )
     char	kirkbuffer[ BUFSIZ ];
 
     sprintf( kirkbuffer , "[%d]" , np -> index );
-    printf( "%-6.6s %5.1f %7.2f %11.2f" ,
-	    kirkbuffer ,
-	    100 * ( np -> propself + np -> propchild ) / printtime ,
-	    np -> propself / hz ,
-	    np -> propchild / hz );
+    printf(bsd_style_output
+	   ? "%-6.6s %5.1f %7.2f %11.2f"
+	   : "%-6.6s %5.1f %7.2f %7.2f" ,
+	   kirkbuffer ,
+	   100 * ( np -> propself + np -> propchild ) / printtime ,
+	   np -> propself / hz ,
+	   np -> propchild / hz );
     if ( ( np -> ncall + np -> selfcalls ) != 0 ) {
 	printf( " %7d" , np -> ncall );
 	if ( np -> selfcalls != 0 ) {
@@ -181,6 +211,9 @@ printgprof(timesortnlp)
 	/*
 	 *	Print out the structured profiling list
 	 */
+    if ( bflag && bsd_style_output ) {
+	callg_blurb(stdout);
+    }
     gprofheader();
     for ( index = 0 ; index < nname + ncycle ; index ++ ) {
 	parentp = timesortnlp[ index ];
@@ -205,11 +238,16 @@ printgprof(timesortnlp)
 	    gprofline( parentp );
 	    printchildren( parentp );
 	}
-	printf( "\n" );
+	if (bsd_style_output)
+	    printf( "\n" );
 	printf( "-----------------------------------------------\n" );
-	printf( "\n" );
+	if (bsd_style_output)
+	    printf( "\n" );
     }
     cfree( timesortnlp );
+    if ( bflag && !bsd_style_output) {
+	callg_blurb(stdout);
+    }
 }
 
     /*
@@ -267,7 +305,9 @@ printparents( childp )
 	cycleheadp = childp;
     }
     if ( childp -> parents == 0 ) {
-	printf( "%6.6s %5.5s %7.7s %11.11s %7.7s %7.7s     <spontaneous>\n" ,
+	printf(bsd_style_output 
+	       ? "%6.6s %5.5s %7.7s %11.11s %7.7s %7.7s     <spontaneous>\n"
+	       : "%6.6s %5.5s %7.7s %7.7s %7.7s %7.7s     <spontaneous>\n" ,
 		"" , "" , "" , "" , "" , "" );
 	return;
     }
@@ -279,7 +319,9 @@ printparents( childp )
 		/*
 		 *	selfcall or call among siblings
 		 */
-	    printf( "%6.6s %5.5s %7.7s %11.11s %7d %7.7s     " ,
+	    printf(bsd_style_output
+		   ? "%6.6s %5.5s %7.7s %11.11s %7d %7.7s     "
+		   : "%6.6s %5.5s %7.7s %7.7s %7d %7.7s     " ,
 		    "" , "" , "" , "" ,
 		    arcp -> arc_count , "" );
 	    printname( parentp );
@@ -288,7 +330,9 @@ printparents( childp )
 		/*
 		 *	regular parent of child
 		 */
-	    printf( "%6.6s %5.5s %7.2f %11.2f %7d/%-7d     " ,
+	    printf(bsd_style_output
+		   ? "%6.6s %5.5s %7.2f %11.2f %7d/%-7d     "
+		   : "%6.6s %5.5s %7.2f %7.2f %7d/%-7d     ",
 		    "" , "" ,
 		    arcp -> arc_time / hz , arcp -> arc_childtime / hz ,
 		    arcp -> arc_count , cycleheadp -> ncall );
@@ -313,39 +357,66 @@ printchildren( parentp )
 		/*
 		 *	self call or call to sibling
 		 */
-	    printf( "%6.6s %5.5s %7.7s %11.11s %7d %7.7s     " ,
-		    "" , "" , "" , "" , arcp -> arc_count , "" );
+	    printf(bsd_style_output
+		   ? "%6.6s %5.5s %7.7s %11.11s %7d %7.7s     "
+		   : "%6.6s %5.5s %7.7s %7.7s %7d %7.7s     " ,
+		   "" , "" , "" , "" , arcp -> arc_count , "" );
 	    printname( childp );
 	    printf( "\n" );
 	} else {
 		/*
 		 *	regular child of parent
 		 */
-	    printf( "%6.6s %5.5s %7.2f %11.2f %7d/%-7d     " ,
-		    "" , "" ,
-		    arcp -> arc_time / hz , arcp -> arc_childtime / hz ,
-		    arcp -> arc_count , childp -> cyclehead -> ncall );
+	    printf(bsd_style_output
+		   ? "%6.6s %5.5s %7.2f %11.2f %7d/%-7d     "
+		   : "%6.6s %5.5s %7.2f %7.2f %7d/%-7d     " ,
+		   "" , "" ,
+		   arcp -> arc_time / hz , arcp -> arc_childtime / hz ,
+		   arcp -> arc_count , childp -> cyclehead -> ncall );
 	    printname( childp );
 	    printf( "\n" );
 	}
     }
 }
 
+/* Print name of symbol.  Return number of characters printed. */
+
+int
+printnameonly ( selfp )
+    nltype	*selfp;
+{
+    int size = 0;
+    CONST char *name = selfp->name;
+    if (name != NULL) {
+	char *demangled = NULL;
+	if (!bsd_style_output) {
+	    if (name[0] == '_' && name[1] && discard_underscores)
+		name++;
+	    demangled = cplus_demangle (name, DMGL_ANSI|DMGL_PARAMS);
+	    if (demangled)
+		name = demangled;
+	}
+	printf( "%s" , name );
+	size = strlen (name);
+	if (demangled)
+	    free (demangled);
+#ifdef DEBUG
+	if ( debug & DFNDEBUG ) {
+	    printf( "{%d} " , selfp -> toporder );
+	}
+	if ( debug & PROPDEBUG ) {
+	    printf( "%5.2f%% " , selfp -> propfraction );
+	}
+#endif DEBUG
+    }
+    return size;
+}
+
 printname( selfp )
     nltype	*selfp;
 {
+    printnameonly (selfp);
 
-    if ( selfp -> name != 0 ) {
-	printf( "%s" , selfp -> name );
-#	ifdef DEBUG
-	    if ( debug & DFNDEBUG ) {
-		printf( "{%d} " , selfp -> toporder );
-	    }
-	    if ( debug & PROPDEBUG ) {
-		printf( "%5.2f%% " , selfp -> propfraction );
-	    }
-#	endif DEBUG
-    }
     if ( selfp -> cycleno != 0 ) {
 	printf( " <cycle %d>" , selfp -> cycleno );
     }
@@ -643,7 +714,7 @@ printindex()
     nltype		**namesortnlp;
     register nltype	*nlp;
     int			index, nnames, todo, i, j;
-    char		peterbuffer[ BUFSIZ ];
+    char		peterbuffer[20];
 
 	/*
 	 *	Now, sort regular function name alphbetically
@@ -673,7 +744,13 @@ printindex()
 		sprintf( peterbuffer , "(%d)" , nlp -> index );
 	    }
 	    if ( j < nnames ) {
-		printf( "%6.6s %-19.19s" , peterbuffer , nlp -> name );
+		printf( "%6.6s " , peterbuffer );
+		if (bsd_style_output)
+		    printf ("%-19.19s" , nlp->name);
+		else {
+		    int size = printnameonly(nlp);
+		    for ( ; size < 19; size++) putchar(' ');
+		}
 	    } else {
 		printf( "%6.6s " , peterbuffer );
 		sprintf( peterbuffer , "<cycle %d>" , nlp -> cycleno );
@@ -684,3 +761,29 @@ printindex()
     }
     cfree( namesortnlp );
 }
+
+PTR
+xmalloc (size)
+     long size;
+{
+    PTR val = malloc (size);
+    if (val == NULL) {
+	fprintf (stderr, "virtual memory exhaused\n");
+	exit (1);
+    }
+    return val;
+}
+
+PTR
+xrealloc (oldval, size)
+     PTR oldval;
+     long size;
+{
+    PTR val = realloc (oldval, size);
+    if (val == NULL) {
+	fprintf (stderr, "virtual memory exhaused\n");
+	exit (1);
+    }
+    return val;
+}
+

@@ -36,14 +36,11 @@ dummy.h
 gmon.h
 gprof.1
 gprof.c
-gprof.callg
-gprof.flat
 gprof.h
 hertz.c
 i386.c
 i386.h
 lookup.c
-make-c-prog.awk
 printgprof.c
 printlist.c
 sparc.c

@@ -53,12 +53,6 @@ install: all
 $(PROG):	$(OBJS)
 	$(CC) $(CFLAGS) $(OBJS) -o $(PROG) $(LIBS)
 
-# Make blurbs.c from gprof.callg and gprof.flat
-blurbs.c: $(srcdir)/gprof.callg $(srcdir)/gprof.flat $(srcdir)/make-c-prog.awk
-	awk -f $(srcdir)/make-c-prog.awk > ./blurbs.c \
-		FUNCTION=flat_blurb  $(srcdir)/gprof.flat \
-		FUNCTION=callg_blurb $(srcdir)/gprof.callg \
-
 clean:
 	-rm -f $(OBJS) core gprof nohup.out
 

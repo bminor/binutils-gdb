@@ -68,6 +68,9 @@ char	*gmonname;
 #define	GMONNAME		"gmon.out"
 #define	GMONSUM			"gmon.sum"
 
+extern int bsd_style_output;
+extern int discard_underscores;
+
     /*
      *	a constructed arc,
      *	    with pointers to the namelist entry of the parent and the child,
@@ -92,7 +95,7 @@ typedef struct arcstruct	arctype;
      * its address, the number of calls and compute its share of cpu time.
      */
 struct nl {
-    char		*name;		/* the name */
+    CONST char		*name;		/* the name */
     unsigned long	value;		/* the pc entry point */
     unsigned long	svalue;		/* entry point aligned to histograms */
     double		time;		/* ticks in this routine */
@@ -255,6 +258,7 @@ FILE		*openpfile();
 		printprof();
 		readsamples();
 */
+int		printnameonly();
 unsigned long	reladdr();
 /*
 		sortchildren();
