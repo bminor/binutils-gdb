@@ -1,3 +1,8 @@
+Thu Jul  9 13:08:01 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.am (MAINTAINERCLEANFILES): Define.
+	* Makefile.in: Rebuild.
+
 Tue Jul  7 21:48:54 1998  Jeffrey A Law  (law@cygnus.com)
 
 	* readelf.c (byte_get): Use PARAMS in prototype.
