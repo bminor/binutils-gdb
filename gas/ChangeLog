@@ -1,3 +1,14 @@
+Sun Nov 16 10:05:07 1997  Fred Fish  <fnf@cygnus.com>
+
+	* config/obj-coff.c (fixup_segment): Cast second arg of
+	md_apply_fix3 call to type "valueT *".
+
+Thu Nov 13 13:53:10 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure.in (emulations): Make FreeBSD an aout / i386bsd
+ 	variant.
+	* configure: Re-generate.
+	
 Thu Nov 13 11:07:14 1997  Gavin Koch  <gavin@cygnus.com>
 
 	* config/tc-mips.c (macro_build): Use the membership field
