@@ -1,5 +1,5 @@
 /* Remote debugging interface for MIPS remote debugging protocol.
-   Copyright 1993 Free Software Foundation, Inc.
+   Copyright 1993, 1994 Free Software Foundation, Inc.
    Contributed by Cygnus Support.  Written by Ian Lance Taylor
    <ian@cygnus.com>.
 
@@ -1061,7 +1061,7 @@ mips_wait (pid, status)
     }
   else if ((rstatus & 0x377) == 0x177)
     {
-      status->kind = TARGET_WAIT_KIND_STOPPED;
+      status->kind = TARGET_WAITKIND_STOPPED;
       /* Don't want to use target_signal_from_host because we are converting
 	 from MIPS signal numbers, not host ones.  Our internal numbers
 	 match the MIPS numbers for the signals the board can return, which
