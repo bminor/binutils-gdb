@@ -64,7 +64,7 @@ fetch_data (info, nibble)
      struct disassemble_info *info;
      int nibble;
 {
-  char mybuf[20];
+  unsigned char mybuf[20];
   int status;
   instr_data_s *priv = (instr_data_s *)info->private_data;
   bfd_vma start = priv->insn_start + priv->max_fetched / 2;
@@ -72,13 +72,13 @@ fetch_data (info, nibble)
   if ((nibble % 4) != 0)
     abort ();
   status = (*info->read_memory_func) (start,
-				      mybuf,
+				      (bfd_byte *) mybuf,
 				      (nibble - priv->max_fetched) / 2,
 				      info);
   if (status != 0)
     {
       (*info->memory_error_func) (status, start, info);
-      longjmp (priv->bailout);
+      longjmp (priv->bailout, 1);
     }
 
   {
