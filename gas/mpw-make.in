@@ -8,7 +8,7 @@ C = C -d MPW_C
 
 CROSS = -d CROSS_COMPILE
 
-CFLAGS = -w -mc68020 -mc68881 -model far {CROSS} -d MPW -d TARGET_BYTES_BIG_ENDIAN -d BFD_ASSEMBLER -i "{topsrcdir}"include: -i "{topsrcdir}"bfd:,"{srcdir}",::bfd:
+CFLAGS = -w -mc68020 -mc68881 -model far {CROSS} -d MPW -d TARGET_BYTES_BIG_ENDIAN -d BFD_ASSEMBLER -i "{topsrcdir}"include: -i "{topsrcdir}"bfd:,"{srcdir}",::bfd:,::extra-include,"{srcroot}"include:mpw:
 # debug options: -mbg on -sym on
 
 "{o}" \Option-f : "{s}"
