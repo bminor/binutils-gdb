@@ -80,6 +80,47 @@ generic_init_callback(const device *me,
 }
 
 
+/* DMA a file into memory */
+STATIC_INLINE_DEVICES int
+dma_file(const device *me,
+	 const char *file_name,
+	 unsigned_word addr)
+{
+  int count;
+  int inc;
+  FILE *image;
+  char buf[1024];
+
+  /* get it open */
+  image = fopen(file_name, "r");
+  if (image == NULL)
+    return -1;
+
+  /* read it in slowly */
+  count = 0;
+  while (1) {
+    inc = fread(buf, sizeof(buf), 1, image);
+    if (inc <= 0)
+      break;
+    if (me->parent->callback->dma_write_buffer(me->parent,
+					       buf,
+					       0 /*address-space*/,
+					       addr+count,
+					       inc /*nr-bytes*/,
+					       1 /*violate ro*/) != inc) {
+      fclose(image);
+      return -1;
+    }
+    count += inc;
+  }
+
+  /* close down again */
+  fclose(image);
+
+  return count;
+}
+
+
 
 /* inimplemented versions of each function */
 
@@ -319,7 +360,7 @@ pass_device_interrupt(const device *me,
 
 
 
-/* Simple console device: console@)x<address>,16
+/* Simple console device: console@<address>,16
 
    Input characters are taken from the keyboard, output characters
    sent to the terminal.  Echoing of characters is not disabled.
@@ -423,7 +464,7 @@ console_io_read_buffer_callback(const device *me,
 
   }
 
-  bzero(dest, nr_bytes);
+  memset(dest, 0, nr_bytes);
   *(unsigned_1*)dest = val;
   return nr_bytes;
 }
@@ -438,7 +479,7 @@ console_io_write_buffer_callback(const device *me,
 				 unsigned_word cia)
 {
   console_device *console = (console_device*)me->data;
-  unsigned_1 val = *(unsigned8*)source;
+  unsigned_1 val = *(unsigned_1*)source;
   DTRACE_IO_WRITE_BUFFER(console);
 
   switch ((int)addr) {
@@ -529,7 +570,7 @@ icu_io_read_buffer_callback(const device *me,
   unsigned_1 val;
   DTRACE_IO_READ_BUFFER(icu);
   val = cpu_nr(processor);
-  bzero(dest, nr_bytes);
+  memset(dest, 0, nr_bytes);
   *(unsigned_1*)dest = val;
   return nr_bytes;
 }
@@ -605,7 +646,7 @@ halt_io_write_buffer_callback(const device *me,
 			      unsigned_word cia)
 {
   DTRACE_IO_WRITE_BUFFER(halt);
-  cpu_halt(processor, cia, was_exited, 0);
+  cpu_halt(processor, cia, was_exited, *(unsigned_1*)source);
   return 0;
 }
 
@@ -820,7 +861,7 @@ vm_io_read_buffer_callback(const device *me,
 {
   DTRACE_IO_READ_BUFFER(vm);
   if (add_vm_space(me, addr, nr_bytes, processor, cia) >= nr_bytes) {
-    bzero(dest, nr_bytes); /* always initialized to zero */
+    memset(dest, 0, nr_bytes); /* always initialized to zero */
     return nr_bytes;
   }
   else 
@@ -1062,38 +1103,17 @@ file_init_callback(const device *me,
 		   psim *system)
 {
   unsigned_word addr;
-  unsigned count;
-  char *file_name;
-  char buf;
-  FILE *image;
+  int count;
+  char file_name[1024];
   DTRACE_INIT(file);
 
-  if ((file_name = strchr(me->name, ',')) == NULL
-      || scand_uw(me->name, &addr) != 1)
-    error("file_init_callback() invalid file device %s\n", me->name);
-
-  /* open the file to load */
-  file_name++; /* skip the `,' */
-  image = fopen(file_name, "r");
-  if (image == NULL)
-    error("file_init_callback() file open failed for %s\n", me->name);
-
-  /* read it in slowly */
-  count = 0;
-  while (fread(&buf, 1, 1, image) > 0) {
-    if (me->parent->callback->dma_write_buffer(me->parent,
-					       &buf,
-					       0 /*address-space*/,
-					       addr+count,
-					       1 /*nr-bytes*/,
-					       1 /*violate ro*/) != 1)
-      error("file_init_callback() failed to write to address 0x%x, offset %d\n",
-	    addr+count, count);
-    count++;
-  }
-
-  /* close down again */
-  fclose(image);
+  if (scand_uw_c(me->name, &addr, file_name, sizeof(file_name)) != 2)
+    error("devices/file - Usage: file@<address>,<file-name>\n");
+ 
+  /* load the file */
+  count = dma_file(me, file_name, addr);
+  if (count < 0)
+    error("devices/%s - Problem loading file %s\n", me->name, file_name);
 }
 
 
@@ -1114,8 +1134,9 @@ static device_callbacks const file_callbacks = {
 
 
 
-/* HTAB: htab@0x<address>,<nr_bytes>
-   PTE: pte@0x<effective-address>,0x<real-address>,<nr_bytes>
+/* HTAB: htab@<address>,<nr_bytes>
+   PTE: pte@<virtual-address>,<real-address>,<wimg>,<pp>,<nr_bytes>
+   PTE: pte@<virtual-address>,<real-address>,<wimg>,<pp>,<file>
 
    HTAB defines the location (in physical memory) of a HASH table.
    PTE (as a child of HTAB) defines a mapping that is to be entered
@@ -1131,22 +1152,115 @@ htab_init_callback(const device *me,
 		   psim *system)
 {
   DTRACE_INIT(htab);
+  if (WITH_TARGET_WORD_BITSIZE != 32)
+    error("devices/htab: only 32bit targets currently suported\n");
   /* only the pte does work */
   if (strncmp(me->name, "pte@", strlen("pte@")) == 0) {
-    unsigned_word htab_ra;
+    unsigned32 htab_ra;
     unsigned htab_nr_bytes;
-    unsigned_word pte_ea;
-    unsigned_word pte_ra;
+    signed32 pte_va; /* so that 0xff...0 is make 0xffffff00 */
+    unsigned32 pte_ra;
     unsigned pte_nr_bytes;
+    unsigned pte_wimg;
+    unsigned pte_pp;
+    unsigned32 ra;
+    unsigned64 va;
+    unsigned32 htaborg;
+    unsigned32 htabmask;
+    unsigned32 n;
+
     /* determine the location/size of the hash table */
+    if (me->parent == NULL
+	|| strncmp(me->parent->name, "htab@", strlen("htab@")) != 0)
+      error("devices/%s - Parent is not a htab device\n", me->name);
     if (scand_uw_u(me->parent->name, &htab_ra, &htab_nr_bytes) != 2)
-      error("htab_init_callback() htab entry %s invalid\n",
+      error("devices/%s - Usage: htab@<real-addr>,<nr_bytes>\n",
 	    me->parent->name);
+    htabmask = EXTRACTED32(htab_nr_bytes - 1, 7, 15);
+    for (n = htab_nr_bytes; n > 1; n = n / 2) {
+      if (n % 2 != 0)
+	error("devices/%s - htabmask 0x%x (size 0x%x) not a power of two\n",
+	      me->parent->name, htabmask, htab_nr_bytes);
+    }
+    htaborg = htab_ra;
+    if ((htaborg & INSERTED32(htabmask, 7, 15)) != 0) {
+      error("devices/%s - htaborg 0x%x not aligned to htabmask 0x%x\n",
+	    me->parent->name, htaborg, htabmask);
+    }
+
     /* determine the location/size of the mapping */
-    if (scand_uw_uw_u(me->name, &pte_ea, &pte_ra, &pte_nr_bytes) != 3)
-      error("htab_init_callback() pte entry %s invalid\n", me->name);
-    error("Map ea=0x%x, ra=0x%x, nr_bytes=%d using htab=0x%x, nr_bytes=%d\n",
-	  pte_ea, pte_ra, pte_nr_bytes, htab_ra, htab_nr_bytes);
+    if (scand_uw_uw_u_u_u(me->name, &pte_va, &pte_ra,
+			  &pte_wimg, &pte_pp, &pte_nr_bytes) != 5) {
+      int nr_bytes;
+      char file_name[1024];
+      if (scand_uw_uw_u_u_c(me->name, &pte_va, &pte_ra, &pte_wimg, &pte_pp,
+			    file_name, sizeof(file_name)) != 5)
+	error("devices/%s - Usage: %s\nor\t%s\n",
+	      me->name,
+	      "pte@<virtual-addr>,<real-addr>,<wimg>,<pp>,<nr-bytes>",
+	      "pte@<virtual-addr>,<real-addr>,<wimg>,<pp>,<file>");
+      /* load/validate it */
+      nr_bytes = dma_file(me, file_name, pte_ra);
+      if (nr_bytes < 0)
+	error("devices/%s - problem loading file %s\n", me->name, file_name);
+      pte_nr_bytes = nr_bytes;
+    }
+
+    /* go through all pages and create a pte for each */
+    for (ra = pte_ra, va = (signed32)pte_va;
+	 ra < pte_ra + pte_nr_bytes;
+	 ra += 1024, va += 1024) {
+      unsigned64 vpn = va << 12;
+      unsigned32 vsid = INSERTED32(EXTRACTED64(vpn, 0, 23), 0, 23);
+      unsigned32 page = INSERTED32(EXTRACTED64(vpn, 24, 39), 0, 15);
+      unsigned32 hash = INSERTED32(EXTRACTED32(vsid, 5, 23)
+				   ^ EXTRACTED32(page, 0, 15),
+				   0, 18);
+      int h;
+      for (h = 0; h < 2; h++) {
+	unsigned32 pteg = (htaborg
+			   | INSERTED32(EXTRACTED32(hash, 0, 8) & htabmask, 7, 15)
+			   | INSERTED32(EXTRACTED32(hash, 9, 18), 16, 25));
+	int pti;
+	for (pti = 0; pti < 8; pti++, pteg += 8) {
+	  unsigned32 pte0;
+	  if (me->parent->callback->dma_read_buffer(me->parent,
+						    &pte0,
+						    0, /*space*/
+						    pteg,
+						    sizeof(pte0)) != 4)
+	    error("htab_init_callback() failed to read a pte at 0x%x\n",
+		  pteg);
+	  if (!MASKED32(pte0, 0, 0)) {
+	    /* empty pte fill it */
+	    unsigned32 pte0 = (MASK32(0, 0)
+			       | INSERTED32(EXTRACTED32(vsid, 0, 23), 1, 24)
+			       | INSERTED32(h, 25, 25)
+			       | INSERTED32(EXTRACTED32(page, 0, 5), 26, 31));
+	    unsigned32 pte1 = (INSERTED32(EXTRACTED32(ra, 0, 19), 0, 19)
+			       | INSERTED32(pte_wimg, 25, 28)
+			       | INSERTED32(pte_pp, 30, 31));
+	    if (me->parent->callback->dma_write_buffer(me->parent,
+						       &pte0,
+						       0, /*space*/
+						       pteg,
+						       sizeof(pte0),
+						       1/*ro?*/) != 4
+		|| me->parent->callback->dma_write_buffer(me->parent,
+							  &pte1,
+							  0, /*space*/
+							  pteg + 4,
+							  sizeof(pte1),
+							  1/*ro?*/) != 4)
+	      error("htab_init_callback() failed to write a pte a 0x%x\n",
+		    pteg);
+	    return;
+	  }
+	}
+	/* re-hash */
+	hash = MASKED32(~hash, 0, 18);
+      }
+    }
   }
 }
 
@@ -1194,7 +1308,7 @@ static device_callbacks const sim_callbacks = {
 
 
 
-/* Load device: *binary@<file-name>
+/* Load device: binary@<file-name>
 
    Assuming that <file-name> is an executable file understood by BFD,
    this device loads or maps the relevant text/data segments into
@@ -1281,20 +1395,19 @@ STATIC_INLINE_DEVICES void
 binary_init_callback(const device *me,
 		     psim *system)
 {
-  char file_name[100];
+  char file_name[1024];
   bfd *image;
   DTRACE_INIT(binary);
 
   /* get a file name */
   if (scand_c(me->name, file_name, sizeof(file_name)) != 1)
-    error("load_binary_init_callback() invalid load-binary device %s\n",
-	  me->name);
+    error("devices/binary - Usage: binary@<file-name>\n");
 
   /* open the file */
   image = bfd_openr(file_name, NULL);
   if (image == NULL) {
-    bfd_perror("open failed:");
-    error("nothing loaded\n");
+    bfd_perror("devices/binary");
+    error("devices/%s - the file %s not loaded\n", me->name, file_name);
   }
 
   /* check it is valid */

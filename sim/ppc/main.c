@@ -73,7 +73,7 @@ zalloc(long size)
   void *memory = malloc(size);
   if (memory == NULL)
     error("zmalloc failed\n");
-  bzero(memory, size);
+  memset(memory, 0, size);
   return memory;
 }
 

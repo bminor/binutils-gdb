@@ -464,43 +464,49 @@ device_tree_dump(device_tree *device,
 
 /* Parse a device name, various formats */
 
-#define SCAN_INIT(START, END, COUNT, NAME) \
-  char *START = NULL; \
-  char *END = strchr(NAME, '@'); \
-  int COUNT = 0; \
-  if (END == NULL) \
-    return 0; \
+#define SCAN_INIT(NAME) \
+  char *START = (char*)0; \
+  char *END = (char*)0; \
+  int COUNT = -1; \
+  /* find the first element */ \
+  END = strchr(NAME, '@'); \
+  if (END == (char*)0) \
+    return COUNT; \
+  COUNT += 1; \
   START = END + 1
 
-#define SCAN_U(START, END, COUNT, U) \
+#define SCAN_END \
+  return COUNT
+
+#define SCAN_U(U) \
 do { \
   *U = strtoul(START, &END, 0); \
   if (START == END) \
     return COUNT; \
-  COUNT++; \
+  COUNT += 1; \
   if (*END != ',') \
     return COUNT; \
   START = END + 1; \
 } while (0)
 
-#define SCAN_P(START, END, COUNT, P) \
+#define SCAN_P(P) \
 do { \
-  *P = (void*)(unsigned)strtouq(START, &END, 0); \
+  *P = (void*)(unsigned)strtouq(START, END, 0); \
   if (START == END) \
     return COUNT; \
-  COUNT++; \
+  COUNT += 1; \
   if (*END != ',') \
     return COUNT; \
   START = END + 1; \
 } while (0)
 
-#define SCAN_C(START, END, COUNT, C, SIZE) \
+#define SCAN_C(C, SIZE) \
 do { \
   char *chp = C; \
   END = START; \
   while (*END != '\0' && *END != ',') { \
     if (*END == '\\') \
-      END++; \
+      END += 1; \
     *chp = *END; \
     chp += 1; \
     END += 1; \
@@ -510,19 +516,55 @@ do { \
   *chp = '\0'; \
   if (START == END) \
     return COUNT; \
-  COUNT++; \
+  COUNT += 1; \
   if (*END != ',') \
     return COUNT; \
   START = END + 1; \
 } while (0)
 
 INLINE_DEVICE_TREE int
+scand_c(const char *name,
+	char *c1,
+	unsigned c1size)
+{
+  SCAN_INIT(name);
+  SCAN_C(c1, c1size);
+  SCAN_END;
+}
+
+INLINE_DEVICE_TREE int
+scand_c_uw_u(const char *name,
+	     char *c1,
+	     unsigned c1size,
+	     unsigned_word *uw2,
+	     unsigned *u3)
+{
+  SCAN_INIT(name);
+  SCAN_C(c1, c1size);
+  SCAN_U(uw2);
+  SCAN_U(u3);
+  SCAN_END;
+}
+
+INLINE_DEVICE_TREE int
 scand_uw(const char *name,
 	 unsigned_word *uw1)
 {
-  SCAN_INIT(start, end, count, name);
-  SCAN_U(start, end, count, uw1);
-  return count;
+  SCAN_INIT(name);
+  SCAN_U(uw1);
+  SCAN_END;
+}
+
+INLINE_DEVICE_TREE int
+scand_uw_c(const char *name,
+	   unsigned_word *uw1,
+	   char *c2,
+	   unsigned c2size)
+{
+  SCAN_INIT(name);
+  SCAN_U(uw1);
+  SCAN_C(c2, c2size);
+  SCAN_END;
 }
 
 INLINE_DEVICE_TREE int
@@ -530,10 +572,10 @@ scand_uw_u(const char *name,
 	   unsigned_word *uw1,
 	   unsigned *u2)
 {
-  SCAN_INIT(start, end, count, name);
-  SCAN_U(start, end, count, uw1);
-  SCAN_U(start, end, count, u2);
-  return count;
+  SCAN_INIT(name);
+  SCAN_U(uw1);
+  SCAN_U(u2);
+  SCAN_END;
 }
 
 INLINE_DEVICE_TREE int
@@ -542,11 +584,22 @@ scand_uw_u_u(const char *name,
 	     unsigned *u2,
 	     unsigned *u3)
 {
-  SCAN_INIT(start, end, count, name);
-  SCAN_U(start, end, count, uw1);
-  SCAN_U(start, end, count, u2);
-  SCAN_U(start, end, count, u3);
-  return count;
+  SCAN_INIT(name);
+  SCAN_U(uw1);
+  SCAN_U(u2);
+  SCAN_U(u3);
+  SCAN_END;
+}
+
+INLINE_DEVICE_TREE int
+scand_uw_uw(const char *name,
+	    unsigned_word *uw1,
+	    unsigned_word *uw2)
+{
+  SCAN_INIT(name);
+  SCAN_U(uw1);
+  SCAN_U(uw2);
+  SCAN_END;
 }
 
 INLINE_DEVICE_TREE int
@@ -555,33 +608,46 @@ scand_uw_uw_u(const char *name,
 	      unsigned_word *uw2,
 	      unsigned *u3)
 {
-  SCAN_INIT(start, end, count, name);
-  SCAN_U(start, end, count, uw1);
-  SCAN_U(start, end, count, uw2);
-  SCAN_U(start, end, count, u3);
-  return count;
+  SCAN_INIT(name);
+  SCAN_U(uw1);
+  SCAN_U(uw2);
+  SCAN_U(u3);
+  SCAN_END;
 }
 
 INLINE_DEVICE_TREE int
-scand_c(const char *name,
-	char *c1, int c1size)
+scand_uw_uw_u_u_c(const char *name,
+		  unsigned_word *uw1,
+		  unsigned_word *uw2,
+		  unsigned *u3,
+		  unsigned *u4,
+		  char *c5,
+		  unsigned c5size)
 {
-  SCAN_INIT(start, end, count, name);
-  SCAN_C(start, end, count, c1, c1size);
-  return count;
+  SCAN_INIT(name);
+  SCAN_U(uw1);
+  SCAN_U(uw2);
+  SCAN_U(u3);
+  SCAN_U(u4);
+  SCAN_C(c5, c5size);
+  SCAN_END;
 }
 
 INLINE_DEVICE_TREE int
-scand_c_uw_u(const char *name,
-	     char *c1, int c1size,
-	     unsigned_word *uw2,
-	     unsigned *u3)
+scand_uw_uw_u_u_u(const char *name,
+		  unsigned_word *uw1,
+		  unsigned_word *uw2,
+		  unsigned *u3,
+		  unsigned *u4,
+		  unsigned *u5)
 {
-  SCAN_INIT(start, end, count, name);
-  SCAN_C(start, end, count, c1, c1size);
-  SCAN_U(start, end, count, uw2);
-  SCAN_U(start, end, count, u3);
-  return count;
+  SCAN_INIT(name);
+  SCAN_U(uw1);
+  SCAN_U(uw2);
+  SCAN_U(u3);
+  SCAN_U(u4);
+  SCAN_U(u5);
+  SCAN_END;
 }
 
 
@@ -632,6 +698,43 @@ enum {
   strlen_unsigned = 10,
   strlen_unsigned_word = 18,
 };
+
+INLINE_DEVICE_TREE char *
+printd_c(const char *name,
+	 const char *c1)
+{
+  int sizeof_buf = (strlen(name)
+		    + strlen("@")
+		    + c_strlen(c1)
+		    + 1);
+  char *buf = (char*)zalloc(sizeof_buf);
+  strcpy(buf, name);
+  strcat(buf, "@");
+  c_strcat(buf, c1);
+  ASSERT(strlen(buf) < sizeof_buf);
+  return buf;
+}
+
+INLINE_DEVICE_TREE char *
+printd_c_uw(const char *name,
+	    const char *c1,
+	    unsigned_word uw2)
+{
+  int sizeof_buf = (strlen(name)
+		    + strlen("@")
+		    + c_strlen(c1)
+		    + strlen(",")
+		    + strlen_unsigned_word
+		    + 1);
+  char *buf = (char*)zalloc(sizeof_buf);
+  strcpy(buf, name);
+  strcat(buf, "@");
+  c_strcat(buf, c1);
+  strcat(buf, ",");
+  u_strcat(buf, uw2);
+  ASSERT(strlen(buf) < sizeof_buf);
+  return buf;
+}
 
 INLINE_DEVICE_TREE char *
 printd_uw_u(const char *name,
@@ -707,43 +810,6 @@ printd_uw_u_u_c(const char *name,
   u_strcat(buf, u3);
   strcat(buf, ",");
   c_strcat(buf, c4);
-  ASSERT(strlen(buf) < sizeof_buf);
-  return buf;
-}
-
-INLINE_DEVICE_TREE char *
-printd_c(const char *name,
-	 const char *c1)
-{
-  int sizeof_buf = (strlen(name)
-		    + strlen("@")
-		    + c_strlen(c1)
-		    + 1);
-  char *buf = (char*)zalloc(sizeof_buf);
-  strcpy(buf, name);
-  strcat(buf, "@");
-  c_strcat(buf, c1);
-  ASSERT(strlen(buf) < sizeof_buf);
-  return buf;
-}
-
-INLINE_DEVICE_TREE char *
-printd_c_uw(const char *name,
-	    const char *c1,
-	    unsigned_word uw2)
-{
-  int sizeof_buf = (strlen(name)
-		    + strlen("@")
-		    + c_strlen(c1)
-		    + strlen(",")
-		    + strlen_unsigned_word
-		    + 1);
-  char *buf = (char*)zalloc(sizeof_buf);
-  strcpy(buf, name);
-  strcat(buf, "@");
-  c_strcat(buf, c1);
-  strcat(buf, ",");
-  u_strcat(buf, uw2);
   ASSERT(strlen(buf) < sizeof_buf);
   return buf;
 }

@@ -72,6 +72,7 @@ BSWAP_CFLAGS = @sim_bswap@
 ENDIAN_CFLAGS = @sim_endian@
 HOSTENDIAN_CFLAGS = @sim_hostendian@
 SMP_CFLAGS = @sim_smp@
+XOR_ENDIAN_CFLAGS = @sim_xor_endian@
 BITSIZE_CFLAGS = @sim_bitsize@
 HOSTBITSIZE_CFLAGS = @sim_hostbitsize@
 ENV_CFLAGS = @sim_env@
@@ -89,6 +90,7 @@ CONFIG_CFLAGS = $(BSWAP_CFLAGS) \
   $(ENDIAN_CFLAGS) \
   $(HOSTENDIAN_CFLAGS) \
   $(SMP_CFLAGS) \
+  $(XOR_ENDIAN_CFLAGS) \
   $(BITSIZE_CFLAGS) \
   $(HOSTBITSIZE_CFLAGS) \
   $(ENV_CFLAGS) \
@@ -281,7 +283,7 @@ psim.o: psim.c psim.h $(CPU_H) $(IDECODE_H) $(INLINE) $(LIB_SRC) $(BUILT_SRC)
 bits.o: bits.c $(BASICS_H)
 
 debug.o: debug.c $(BASICS_H)
-filter_filename.o: filter_filename.c config.h ppc-config.h
+filter_filename.o: filter_filename.c filter_filename.h config.h ppc-config.h
 
 sim-endian.o: sim-endian.c sim-endian-n.h $(BASICS_H)
 

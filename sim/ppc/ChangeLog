@@ -1,3 +1,179 @@
+Mon Nov 13 09:14:13 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* igen.c ({insn,model}_table_fields): Spell mnemonic correctly.
+	(gen_itable_h,itable_c_insn): Ditto.
+	(model support): Move model support around, add support for
+	model-data, model-internal.  Use annex field for model-macros
+	now.
+
+	* configure.in (--enable-sim-inline): If --enable-sim-inline=no,
+	also define INLINE as nothing.
+	* configure: Regenerate.
+
+	* std-config.h (INLINE): Rather than nuking INLINE, only define it
+	as __inline__ if any of the INLINE flags are non-zero.
+
+	* options.c (print_options): Print out WITH_XOR_ENDAIN.
+
+Mon Nov 13 23:03:45 1995  Andrew Cagney   <cagneyhighland.com.au>
+
+	* ppc-instructions (rfi): Add missing code.
+
+	* cpu.c (cpu_get_time_base): Fix calculation of current value of
+        time base register.
+
+	* ppc-spr-table (TBL, TBU): Fix TBL/TBU entries - was confusing
+        m[tf]tb with m[tf]spr.
+
+	* ppc-instructions (mtspr, mfspr): Fix mttbl - wasn't storing
+        lower word.
+
+Mon Nov 13 21:35:37 1995  Andrew Cagney   <cagneyhighland.com.au>
+
+	* std-config.h (INLINE, STATIC_INLINE): Was being set to static
+        inline..  Only problem being that with ppc-opcode-simple this gave
+        it the chance to inline all the idecode functions with potentially
+        disasterous results on a 16mb PC.  For moment hobble INLINE.
+
+	* configure.in, std-config.h (WITH_SMP): Make that 5 processors by
+        default ...
+
+	* configure.in: Tweek flags passed to gcc for --with-sim-warnings.
+        Firstly make them errors and secondly remove the options gcc-245
+        doesn't reconize.
+
+Mon Nov 13 17:57:24 1995  Andrew Cagney  <cagney@highland.com.au>
+
+	* misc.c (zalloc), cpu.c (cpu_init), devices
+ 	(console_io_read_buffer_callback, icu_io_read_buffer_callback,
+ 	vm_io_read_buffer_callback), main.c (zalloc), mon.c (memset),
+ 	sim_calls.c (zalloc) : replace bzero() with memset().
+
+	* emul_netbsd.c (write_direntries), psim.c (psim_read_register,
+ 	psim_write_register): replace bcopy() with memcpy().
+	
+Sun Nov 12 20:55:41 1995  Andrew Cagney   <cagneyhighland.com.au>
+
+	* configure.in: for --disable-sim-inline (--enable-sim-inline=no),
+        force DEFAULT_INLINE to 0 rather then trusting the std
+        configuration.
+
+Sun Nov 12 20:55:41 1995  Andrew Cagney   <cagneyhighland.com.au>
+
+	* igen.c (lf_print_idecode_table, idecode_table_leaf): Fix
+        generation of switch entries in tables - treat the same as
+        cracking/semantic functions.
+
+	* igen.c (idecode_switch_end, idecode_switch_leaf): Fix generation
+        of a boolean switch statement (field zero or non-zero).
+
+	* ppc-opcode-test-1, ppc-opcode-test-2: New files.  These test the
+        switch/table generation ability of igen.
+
+	* igen.c (idecode_switch_leaf): Fix code output when a switch
+        statement needs to look up a table.
+
+	* igen.c (idecode_declare_if_switch): New function called from
+        gen_idecode_c - need to declare any idecode switch functions
+        before they are used in idecode tables.
+
+	* igen.c (lf_print_c_cracker_function, idecode_crack_leaf,
+        idecode_crack_insn): Add is_inline_function argument to code
+        printing cracker functions which indicates if STATIC_IDECODE or
+        STATIC_INLINE_IDECODE should be used for definition.  For
+        idecode_crack_insn (which implies not duplicating/expanding) don't
+        declare function as inline - we assume that the only time this is
+        code is generated is when things are being tested.  For
+        idecode_crack_leaf, make static (instead of INLINE) if the
+        instructions parent is a table as function will always be called
+        via a table.
+
+	* igen.c (idecode_expand_if_switch): Declare as STATIC_IDECODE not
+        STATIC_INLINE_IDECODE. Only the outermost idecode switch will be
+        called directly, all others are called via a table.
+
+	* igen.c (lf_print_semantic_function_header, semantics_h_leaf,
+        semantics_h_insn, semantics_h_function,
+        lf_print_c_semantic_function, semantics_c_function): Add
+        is_inline_function argument to lf_print_semantic_function_header
+        to indicate if an inline or static function declaration/definition
+        should be output.  Depending on situtation call accordingly:
+        functions (not instruction semantic routines) are always inline;
+        Semantic routines are made inline when there is no icache (cache
+        will contain the function address) and are duplicating (see above)
+        and the parent of the instruction is a switch statement.
+
+	* igen.c (opcode_field_new): Delete.  Code changed to use ZALLOC
+        and moved to insn_table_find_opcode_field.
+
+	* table.c (table_open): Fix typo (nr_model_fields vs nr_fields).
+
+	* igen.c (model_c_insn): Suggestion - document the name of the
+        instruction on each line of the instruction model table.
+
+Fri Nov 10 00:44:38 1995  Andrew Cagney   <cagneyhighland.com.au>
+
+	* emul_netbsd.c (do_ioctl): Cleanup compilation.
+
+	* sim_callbacks.h (__attribute__): Only define if not defined (was
+        already defined on NetBSD host).
+
+Wed Nov  8 21:49:52 1995  Andrew Cagney   <cagneyhighland.com.au>
+
+	* std-config.h (WITH_XOR_ENDIAN), configure.in, Makefile.in: New
+        macro, indicates if the PowerPC's horrible XOR endian mode should
+        be suported.  Add to configure and make.
+
+	* vm_n.h (vm_data_map_read_N, vm_data_map_write_N), vm.c
+        (vm_instruction_map_read): If XOR endian, xor the address
+	with a value from an xor table (indexed by size of access).
+
+	* vm.c (vm_synchronize_context), cpu.c (cpu_synchronize_context):
+        set up xor table to xor if there is a conflict between the
+        CURRENT_TARGET_ENDIAN and the endian indicated in the MSR.  Move
+        check of suported change of endian mode from cpu.c to vm.c.
+
+	* vm.c (vm_data_map_write_buffer, vm_data_map_read_buffer):
+        Hopefully added correct hack to handle XOR endian mode.
+
+	FIXME: If NONSTRICT alignment and XOR ENDIAN and MSR indicates
+        little endian mode, the model accepts miss aligned transfers.
+
+	FIXME: Need to create an `init' device that, during
+        initializatioin for XOR mode, it mushes (XOR address) all the dma
+        data before passing it on to the core for storage. Just like the
+        real thing really.
+
+Wed Nov  8 21:49:52 1995  Andrew Cagney   <cagneyhighland.com.au>
+
+	* devices.c (halt_io_write_buffer_callback): Use value written to
+        halt device to determine exit status.  Thus allowing
+        success/failure of OEA tests.
+
+Wed Nov  8 00:10:38 1995  Andrew Cagney   <cagneyhighland.com.au>
+
+	* ppc-instructions (icbi): If icache present flush it.
+
+Tue Nov  7 23:36:31 1995  Andrew Cagney   <cagneyhighland.com.au>
+
+	* devices.c (htab_init_callback): Add code to create htab/pte.
+
+	* devices.c (dma_file, file_init_callback, htab_init_callback):
+        New function - Dma the named file into memory at the specified
+        address.  Use.
+
+	* device_tree.h, device_tree.c (scand_*): New functions.
+
+Tue Nov  7 23:36:31 1995  Andrew Cagney   <cagneyhighland.com.au>
+
+	* filter_filename.c, Makefile.in: Change so that only dependant on
+        a very limited nr of files.  Stops an unnecessary dependency.
+
+Tue Nov  7 15:44:33 1995  Andrew Cagney  <cagney@highland.com.au>
+
+	* core.c (core_map_find_mapping): Use cpu_halt rather than error
+ 	to abort an access to an undefined address.
+
 Sun Nov 12 07:58:09 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* igen.c (model_table_insert_{macro,function}): New functions.
@@ -439,7 +615,7 @@ Thu Nov  2 08:54:04 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 	* configure.in: Add support for --enable-sim-opcode=stupid.
 	* configure: Regenerate.
 
-Wed Nov  1 23:46:59 1995  Andrew Cagney - aka Noid  <cagney@highland.com.au>
+Wed Nov  1 23:46:59 1995  Andrew Cagney   <cagney@highland.com.au>
 
 	* std-config (INLINE_DEVICE_TREE): Don't inline either of
         device_tree.c or devices.c.  There is no significant gain.
@@ -447,7 +623,7 @@ Wed Nov  1 23:46:59 1995  Andrew Cagney - aka Noid  <cagney@highland.com.au>
 	* configure.in, Makefile.in: add --enable-sim-icache=[0-9]* and
  	IGEN_ICACHE macro.
 	
-Wed Nov  1 23:46:59 1995  Andrew Cagney - aka Noid  <cagney@highland.com.au>
+Wed Nov  1 23:46:59 1995  Andrew Cagney   <cagney@highland.com.au>
 
 	* igen.c (main), misc.h (target_a2i, i2target), misc.c: Add
         functions to convert between target and igen internal bit numbers.
@@ -455,17 +631,17 @@ Wed Nov  1 23:46:59 1995  Andrew Cagney - aka Noid  <cagney@highland.com.au>
         bit nr) options to igen.  Typical usage would be: ./igen -b 16 -h
         15 for a 16 bit instruction format with the msb given a number 15.
 
-Wed Nov  1 22:17:32 1995  Andrew Cagney - aka Noid  <cagney@highland.com.au>
+Wed Nov  1 22:17:32 1995  Andrew Cagney   <cagney@highland.com.au>
 
 	* dgen.c (main): Was outputting optarg even when it was NULL.
 
-Tue Oct 31 23:48:33 1995  Andrew Cagney - aka Noid  <cagney@highland.com.au>
+Tue Oct 31 23:48:33 1995  Andrew Cagney   <cagney@highland.com.au>
 
 	* vm_n.h (vm_data_map_load_N, vm_data_map_store_n), debug.h,
         debug.c: Add tracing of load/store unit (virtual) with -t
         load-store.
 
-Tue Oct 31 21:44:01 1995  Andrew Cagney - aka Noid  <cagney@highland.com.au>
+Tue Oct 31 21:44:01 1995  Andrew Cagney   <cagney@highland.com.au>
 
         * std-config.h (WITH_ENVIRONMENT): Add USER_ENVIRONMENT which does
         not include things such as the time base and events.
@@ -477,7 +653,7 @@ Tue Oct 31 21:44:01 1995  Andrew Cagney - aka Noid  <cagney@highland.com.au>
         /options/environment-architecture with values user, virtual and
         operating.
 
-Tue Oct 31 21:31:32 1995  Andrew Cagney - aka Noid  <cagney@highland.com.au>
+Tue Oct 31 21:31:32 1995  Andrew Cagney   <cagney@highland.com.au>
 
 	* ppc-opcode-stupid: Third example of use of opcode table - this
         one expands all mtspr/mfspr and branch instructions.  Appears to

@@ -513,16 +513,6 @@ struct _opcode_field {
   opcode_field *parent;
 };
 
-static opcode_field *
-opcode_field_new(void)
-{
-  opcode_field *new_field = (opcode_field*)zalloc(sizeof(opcode_field));
-  ASSERT(new_field != NULL);
-  new_field->first = insn_size;
-  new_field->last = -1;
-  return new_field;
-}
-
 static void
 dump_opcode_field(opcode_field *field, int indent, int levels)
 {
@@ -575,7 +565,7 @@ typedef enum {
   insn_format,
   insn_form,
   insn_flags,
-  insn_nmemonic,
+  insn_mnemonic,
   insn_name,
   insn_comment,
   nr_insn_table_fields
@@ -588,7 +578,8 @@ typedef enum {
 } function_table_fields;
 
 typedef enum {
-  model_name = insn_nmemonic,
+  model_default = insn_form,
+  model_name = insn_mnemonic,
   model_identifer = insn_name,
   model_func = insn_comment,
 } model_table_fields;
@@ -654,6 +645,12 @@ static insn *last_model_macro;
 static insn *model_functions;
 static insn *last_model_function;
 
+static insn *model_internal;
+static insn *last_model_internal;
+
+static insn *model_data;
+static insn *last_model_data;
+
 static void
 insn_table_insert_function(insn_table *table,
 			   table_entry *file_entry)
@@ -669,159 +666,6 @@ insn_table_insert_function(insn_table *table,
     table->functions = new_function;
   table->last_function = new_function;
 }
-
-
-static void
-model_table_insert(insn_table *table,
-		   table_entry *file_entry)
-{
-  /* create a new model */
-  model *new_model = ZALLOC(model);
-  model_func_unit *func_unit;
-  char *ptr, *end, *end_name, *comment, *name;
-  int ch;
-  int name_len;
-  int func_name_len;
-  unsigned unit, mask;
-  int number;
-
-  new_model->name = file_entry->fields[model_identifer];
-  new_model->printable_name = file_entry->fields[model_name];
-  name_len = strlen(new_model->name);
-
-  /* append it to the end of the model list */
-  if (last_model)
-    last_model->next = new_model;
-  else
-    models = new_model;
-  last_model = new_model;
-
-  /* Parse the function units separated by commas */
-  unit = 1;
-  for (ptr = file_entry->fields[model_func];
-       ((ch = *ptr) != '\0') && (ch != '\n');
-       ptr = (*end == ',') ? end+1 : end) {
-
-    while (ch == ' ' || ch == '\t')
-      ch = *++ptr;
-
-    if (!ch || ch == '\n')
-      break;
-
-    /* Search for comma or newline ending field */
-    end = ptr;
-    end_name = (char *)0;
-
-    if (ch == ',')
-      continue;
-
-    while (ch != '\0' && ch != ',' && ch != '\n') {
-      if (end_name == (char *)0 && (ch == '=' || isspace(ch)))
-	end_name = end;
-
-      ch = *++end;
-    }
-    if (!end_name)
-      end_name = end;
-
-    func_unit = ZALLOC(model_func_unit);
-    if (new_model->func_unit_end)
-      new_model->func_unit_end->next = func_unit;
-    else
-      new_model->func_unit_start = func_unit;
-
-    new_model->func_unit_end = func_unit;
-
-    /* Record function unit name as model name _ unit name */
-    func_name_len = name_len + end_name - ptr + 2;
-    if (table->max_func_unit_name_len < func_name_len)
-      table->max_func_unit_name_len = func_name_len;
-
-    func_unit->name = name = (char *)zalloc(func_name_len);
-    memcpy(name, new_model->name, name_len);
-    name[name_len] = '_';
-    memcpy(name + name_len + 1, ptr, end_name - ptr);
-
-    /* See if there are multiple functional units */
-    if (*end_name == '=') {
-      number = 0;
-      for(end_name++; end_name < end && isdigit(*end_name); end_name++)
-	number = number * 10 + (*end_name - '0');
-    } else {
-      number = 1;
-    }
-
-    /* Now figure out the mask for these unit(s) */
-    func_unit->number = number;
-    mask = 0;
-    while (number--) {
-      ASSERT(unit != 0);
-      mask |= unit;
-      unit <<= 1;
-    }
-    func_unit->mask = mask;
-    table->max_func_unit_mask |= mask;
-
-    /* Now figure out comments */
-    for (comment = end_name; comment < end && ((ch = *comment) == ' ' || ch == '\t'); comment++)
-      ;
-
-    if (comment < end) {
-      func_unit->comment = (char *)zalloc(end - comment + 1);
-      memcpy(func_unit->comment, comment, end - comment);
-    }
-  }
-
-  /* Add an 'sentinel' function unit at the end to simpify the loop */
-  func_unit = ZALLOC(model_func_unit);
-  if (new_model->func_unit_end)
-    new_model->func_unit_end->next = func_unit;
-  else
-    new_model->func_unit_start = func_unit;
-
-  new_model->func_unit_end = func_unit;
-
-  /* Record function unit name as model name _ unit name */
-  func_name_len = name_len + sizeof("_SENTINEL");
-  if (table->max_func_unit_name_len < func_name_len)
-    table->max_func_unit_name_len = func_name_len;
-
-  func_unit->name = name = (char *)zalloc(func_name_len);
-  func_unit->number = 0;
-  func_unit->mask = unit;
-  func_unit->comment = "dummy";
-  table->max_func_unit_mask |= unit;
-
-  memcpy(name, new_model->name, name_len);
-  strcpy(name + name_len, "_SENTINEL");
-}
-
-static void
-model_table_insert_macro(insn_table *table,
-			 table_entry *file_entry)
-{
-  insn *macro = ZALLOC(insn);
-  macro->file_entry = file_entry;
-  if (last_model_macro)
-    last_model_macro->next = macro;
-  else
-    model_macros = macro;
-  last_model_macro = macro;
-}
-
-static void
-model_table_insert_function(insn_table *table,
-			    table_entry *file_entry)
-{
-  insn *func = ZALLOC(insn);
-  func->file_entry = file_entry;
-  if (last_model_function)
-    last_model_function->next = func;
-  else
-    model_functions = func;
-  last_model_function = func;
-}
-
 
 static void
 insn_table_insert_insn(insn_table *table,
@@ -877,11 +721,12 @@ insn_table_find_opcode_field(insn *insns,
 			     opcode_rules *rule,
 			     int string_only)
 {
-  opcode_field *curr_opcode = opcode_field_new();
+  opcode_field *curr_opcode = ZALLOC(opcode_field);
   insn *entry;
-
   ASSERT(rule);
 
+  curr_opcode->first = insn_size;
+  curr_opcode->last = -1;
   for (entry = insns; entry != NULL; entry = entry->next) {
     insn_fields *fields = entry->fields;
     opcode_field new_opcode;
@@ -1121,6 +966,147 @@ insn_table_expand_insns(insn_table *table)
 }
 
 
+static void
+model_table_insert(insn_table *table,
+		   table_entry *file_entry)
+{
+  /* create a new model */
+  model *new_model = ZALLOC(model);
+  model_func_unit *func_unit;
+  char *ptr, *end, *end_name, *comment, *name;
+  int ch;
+  int name_len;
+  int func_name_len;
+  unsigned unit, mask;
+  int number;
+
+  new_model->name = file_entry->fields[model_identifer];
+  new_model->printable_name = file_entry->fields[model_name];
+  name_len = strlen(new_model->name);
+
+  /* append it to the end of the model list */
+  if (last_model)
+    last_model->next = new_model;
+  else
+    models = new_model;
+  last_model = new_model;
+
+  /* Parse the function units separated by commas */
+  unit = 1;
+  for (ptr = file_entry->fields[model_func];
+       ((ch = *ptr) != '\0') && (ch != '\n');
+       ptr = (*end == ',') ? end+1 : end) {
+
+    while (ch == ' ' || ch == '\t')
+      ch = *++ptr;
+
+    if (!ch || ch == '\n')
+      break;
+
+    /* Search for comma or newline ending field */
+    end = ptr;
+    end_name = (char *)0;
+
+    if (ch == ',')
+      continue;
+
+    while (ch != '\0' && ch != ',' && ch != '\n') {
+      if (end_name == (char *)0 && (ch == '=' || isspace(ch)))
+	end_name = end;
+
+      ch = *++end;
+    }
+    if (!end_name)
+      end_name = end;
+
+    func_unit = ZALLOC(model_func_unit);
+    if (new_model->func_unit_end)
+      new_model->func_unit_end->next = func_unit;
+    else
+      new_model->func_unit_start = func_unit;
+
+    new_model->func_unit_end = func_unit;
+
+    /* Record function unit name as model name _ unit name */
+    func_name_len = name_len + end_name - ptr + 2;
+    if (table->max_func_unit_name_len < func_name_len)
+      table->max_func_unit_name_len = func_name_len;
+
+    func_unit->name = name = (char *)zalloc(func_name_len);
+    memcpy(name, new_model->name, name_len);
+    name[name_len] = '_';
+    memcpy(name + name_len + 1, ptr, end_name - ptr);
+
+    /* See if there are multiple functional units */
+    if (*end_name == '=') {
+      number = 0;
+      for(end_name++; end_name < end && isdigit(*end_name); end_name++)
+	number = number * 10 + (*end_name - '0');
+    } else {
+      number = 1;
+    }
+
+    /* Now figure out the mask for these unit(s) */
+    func_unit->number = number;
+    mask = 0;
+    while (number--) {
+      ASSERT(unit != 0);
+      mask |= unit;
+      unit <<= 1;
+    }
+    func_unit->mask = mask;
+    table->max_func_unit_mask |= mask;
+
+    /* Now figure out comments */
+    for (comment = end_name; comment < end && ((ch = *comment) == ' ' || ch == '\t'); comment++)
+      ;
+
+    if (comment < end) {
+      func_unit->comment = (char *)zalloc(end - comment + 1);
+      memcpy(func_unit->comment, comment, end - comment);
+    }
+  }
+
+  /* Add an 'sentinel' function unit at the end to simpify the loop */
+  func_unit = ZALLOC(model_func_unit);
+  if (new_model->func_unit_end)
+    new_model->func_unit_end->next = func_unit;
+  else
+    new_model->func_unit_start = func_unit;
+
+  new_model->func_unit_end = func_unit;
+
+  /* Record function unit name as model name _ unit name */
+  func_name_len = name_len + sizeof("_SENTINEL");
+  if (table->max_func_unit_name_len < func_name_len)
+    table->max_func_unit_name_len = func_name_len;
+
+  func_unit->name = name = (char *)zalloc(func_name_len);
+  func_unit->number = 0;
+  func_unit->mask = unit;
+  func_unit->comment = "dummy";
+  table->max_func_unit_mask |= unit;
+
+  memcpy(name, new_model->name, name_len);
+  strcpy(name + name_len, "_SENTINEL");
+}
+
+static void
+model_table_insert_specific(insn_table *table,
+			    table_entry *file_entry,
+			    insn **start_ptr,
+			    insn **end_ptr)
+{
+  insn *ptr = ZALLOC(insn);
+  ptr->file_entry = file_entry;
+  if (*end_ptr)
+    (*end_ptr)->next = ptr;
+  else
+    (*start_ptr) = ptr;
+  (*end_ptr) = ptr;
+}
+
+
 
 static insn_table *
 insn_table_load_insns(char *file_name)
@@ -1139,10 +1125,16 @@ insn_table_load_insns(char *file_name)
       model_table_insert(table, file_entry);
     }
     else if (it_is("model-macro", file_entry->fields[insn_flags])) {
-      model_table_insert_macro(table, file_entry);
+      model_table_insert_specific(table, file_entry, &model_macros, &last_model_macro);
     }
     else if (it_is("model-function", file_entry->fields[insn_flags])) {
-      model_table_insert_function(table, file_entry);
+      model_table_insert_specific(table, file_entry, &model_functions, &last_model_function);
+    }
+    else if (it_is("model-internal", file_entry->fields[insn_flags])) {
+      model_table_insert_specific(table, file_entry, &model_internal, &last_model_internal);
+    }
+    else if (it_is("model-data", file_entry->fields[insn_flags])) {
+      model_table_insert_specific(table, file_entry, &model_data, &last_model_data);
     }
     else {
       insn_fields *fields;
@@ -1367,6 +1359,7 @@ lf_print_idecode_table(lf *file,
     lf_printf(file, "while (1) {\n");
     lf_indent(file, +2);
     {
+      lf_printf(file, "/* nonzero mask -> another table */\n");
       lf_printf(file, "while (table_entry->mask != 0) {\n");
       lf_indent(file, +2);
       {
@@ -1378,24 +1371,26 @@ lf_print_idecode_table(lf *file,
       }
       lf_indent(file, -2);
       lf_printf(file, "}\n");
-      if (!idecode_cache && can_assume_leaf) {
+      lf_printf(file, "ASSERT(table_entry->mask == 0);\n");
+      if (can_assume_leaf)
+	lf_printf(file, "ASSERT(table_entry->shift == 0);\n");
+      else {
+	lf_printf(file, "if (table_entry->shift == 0)\n");
+	lf_indent(file, +2);
+      }
+      if (idecode_cache) {
+	lf_printf(file, "return (((idecode_crack*)\n");
+	lf_printf(file, "         table_entry->function_or_table)\n");
+	lf_printf(file, "        (%s));\n", cache_idecode_actual);
+      }
+      else {
 	lf_printf(file, "return (((idecode_semantic*)\n");
 	lf_printf(file, "         table_entry->function_or_table)\n");
 	lf_printf(file, "        (%s));\n", semantic_actual);
       }
-      else if (!idecode_cache && !can_assume_leaf) {
-	lf_printf(file, "if (table_entry->shift == 0)");
-	lf_printf(file, "  return (((idecode_semantic*)\n");
-	lf_printf(file, "           table_entry->function_or_table)\n");
-	lf_printf(file, "          (%s));\n", semantic_actual);
-      }
-      else {
-	lf_printf(file, "if (table_entry->shift == 0)\n");
-	lf_printf(file, "  return (((idecode_crack*)\n");
-	lf_printf(file, "           table_entry->function_or_table)\n");
-	lf_printf(file, "          (%s));\n", cache_idecode_actual);
-      }
       if (!can_assume_leaf) {
+	lf_indent(file, -2);
+	lf_printf(file, "/* must be a boolean */\n");
 	lf_printf(file, "opcode = (instruction & table_entry->shift) != 0;\n");
 	lf_printf(file, "table = ((idecode_table_entry*)\n");
 	lf_printf(file, "         table_entry->function_or_table);\n");
@@ -1616,9 +1611,11 @@ dump_traverse(insn_table *table)
 
 
 static void
-semantics_h_print_function(lf *file,
-			   char *basename,
-			   insn_bits *expanded_bits)
+lf_print_semantic_function_header(lf *file,
+				  char *basename,
+				  insn_bits *expanded_bits,
+				  int is_function_definition,
+				  int is_inline_function)
 {
   lf_printf(file, "\n");
   lf_printf(file, "STATIC_SEMANTICS unsigned_word ");
@@ -1626,8 +1623,11 @@ semantics_h_print_function(lf *file,
 			 basename,
 			 expanded_bits,
 			 function_name_prefix_semantics);
-  lf_printf(file, "\n(%s);\n", 
+  lf_printf(file, "\n(%s)", 
 	    (idecode_cache ? cache_semantic_formal : semantic_formal));
+  if (!is_function_definition)
+    lf_printf(file, ";");
+  lf_printf(file, "\n");
 }
 
 
@@ -1638,9 +1638,11 @@ semantics_h_leaf(insn_table *entry,
 {
   lf *file = (lf*)data;
   ASSERT(entry->nr_insn == 1);
-  semantics_h_print_function(file,
-			     entry->insns->file_entry->fields[insn_name],
-			     entry->expanded_bits);
+  lf_print_semantic_function_header(file,
+				    entry->insns->file_entry->fields[insn_name],
+				    entry->expanded_bits,
+				    0/* isnt function definition*/,
+				    !idecode_cache && entry->parent->opcode_rule->use_switch);
 }
 
 static void
@@ -1649,9 +1651,11 @@ semantics_h_insn(insn_table *entry,
 		 insn *instruction)
 {
   lf *file = (lf*)data;
-  semantics_h_print_function(file,
-			     instruction->file_entry->fields[insn_name],
-			     NULL);
+  lf_print_semantic_function_header(file,
+				    instruction->file_entry->fields[insn_name],
+				    NULL,
+				    0/*isnt function definition*/,
+				    0/*isnt inline function*/);
 }
 
 static void
@@ -1662,9 +1666,11 @@ semantics_h_function(insn_table *entry,
   lf *file = (lf*)data;
   if (function->fields[function_type] == NULL
       || function->fields[function_type][0] == '\0') {
-    semantics_h_print_function(file,
-			       function->fields[function_name],
-			       NULL);
+    lf_print_semantic_function_header(file,
+				      function->fields[function_name],
+				      NULL,
+				      0/*isnt function definition*/,
+				      1/*is inline function*/);
   }
   else {
     lf_printf(file, "\n");
@@ -2280,13 +2286,16 @@ static void
 lf_print_c_semantic_function(lf *file,
 			     insn *instruction,
 			     insn_bits *expanded_bits,
-			     opcode_field *opcodes)
+			     opcode_field *opcodes,
+			     int is_inline_function)
 {
 
   /* build the semantic routine to execute the instruction */
-  lf_print_c_semantic_function_header(file,
-				      instruction->file_entry->fields[insn_name],
-				      expanded_bits);
+  lf_print_semantic_function_header(file,
+				    instruction->file_entry->fields[insn_name],
+				    expanded_bits,
+				    1/*is-function-definition*/,
+				    is_inline_function);
   lf_print_c_semantic(file,
 		      instruction,
 		      expanded_bits,
@@ -2307,7 +2316,8 @@ semantics_c_leaf(insn_table *entry,
   lf_print_c_semantic_function(file,
 			       entry->insns,
 			       entry->expanded_bits,
-			       entry->parent->opcode);
+			       entry->parent->opcode,
+			       !idecode_cache && entry->parent->opcode_rule->use_switch);
 }
 
 static void
@@ -2317,7 +2327,8 @@ semantics_c_insn(insn_table *table,
 {
   lf *file = (lf*)data;
   lf_print_c_semantic_function(file, instruction,
-			       NULL, NULL);
+			       NULL, NULL,
+			       0/*isnt_inline_function*/);
 }
 
 static void
@@ -2328,9 +2339,11 @@ semantics_c_function(insn_table *table,
   lf *file = (lf*)data;
   if (function->fields[function_type] == NULL
       || function->fields[function_type][0] == '\0') {
-    lf_print_c_semantic_function_header(file,
-					function->fields[function_name],
-					NULL);
+    lf_print_semantic_function_header(file,
+				      function->fields[function_name],
+				      NULL,
+				      1/*is function definition*/,
+				      1/*is inline function*/);
   }
   else {
     lf_printf(file, "\n");
@@ -2468,7 +2481,7 @@ idecode_table_leaf(insn_table *entry,
     }
     else if (entry->opcode_rule->use_switch) {
       /* table calling switch statement */
-      lf_printf(file, "  /*%d*/ { -1, 0, ",
+      lf_printf(file, "  /*%d*/ { 0, 0, ",
 		entry->opcode_nr);
       lf_print_table_name(file, entry);
       lf_printf(file, " },\n");
@@ -2552,8 +2565,13 @@ idecode_switch_leaf(insn_table *entry,
   ASSERT(entry->parent != NULL);
   ASSERT(depth == 0);
   ASSERT(entry->parent->opcode_rule->use_switch);
+  ASSERT(entry->parent->opcode);
 
-  lf_printf(file, "case %d:\n", entry->opcode_nr);
+  if (!entry->parent->opcode->is_boolean
+      || entry->opcode_nr == 0)
+    lf_printf(file, "case %d:\n", entry->opcode_nr);
+  else
+    lf_printf(file, "default:\n");
   lf_indent(file, +2);
   {
     if (entry->opcode == NULL) {
@@ -2575,8 +2593,7 @@ idecode_switch_leaf(insn_table *entry,
       lf_print_idecode_switch(file, entry);
     }
     else {
-      /* switch calling table */
-      lf_printf(file, "return ");
+      /* switch looking up a table */
       lf_print_idecode_table(file, entry);
     }
     lf_printf(file, "break;\n");
@@ -2602,8 +2619,10 @@ idecode_switch_end(insn_table *table,
   lf *file = (lf*)data;
   ASSERT(depth == 0);
   ASSERT(table->opcode_rule->use_switch);
+  ASSERT(table->opcode);
 
-  if (table->opcode_rule->use_switch == 1) {
+  if (table->opcode_rule->use_switch == 1
+      && !table->opcode->is_boolean) {
     lf_printf(file, "default:\n");
     lf_print_idecode_switch_illegal(file);
   }
@@ -2643,6 +2662,47 @@ lf_print_idecode_switch(lf *file,
 
 
 static void
+lf_print_idecode_switch_function_header(lf *file,
+					insn_table *table,
+					int is_function_definition)
+{
+  lf_printf(file, "\n");
+  lf_printf(file, "static ");
+  if (idecode_cache)
+    lf_printf(file, "idecode_semantic *");
+  else
+    lf_printf(file, "unsigned_word");
+  if (is_function_definition)
+    lf_printf(file, "\n");
+  else
+    lf_printf(file, " ");
+  lf_print_table_name(file, table);
+  lf_printf(file, "\n(%s)",
+	    (idecode_cache ? cache_idecode_formal : semantic_formal));
+  if (!is_function_definition)
+    lf_printf(file, ";");
+  lf_printf(file, "\n");
+}
+
+
+static void
+idecode_declare_if_switch(insn_table *table,
+			  void *data,
+			  int depth)
+{
+  lf *file = (lf*)data;
+
+  if (table->opcode_rule->use_switch
+      && table->parent != NULL /* don't declare the top one yet */
+      && !table->parent->opcode_rule->use_switch) {
+    lf_print_idecode_switch_function_header(file,
+					    table,
+					    0/*isnt function definition*/);
+  }
+}
+
+
+static void
 idecode_expand_if_switch(insn_table *table,
 			 void *data,
 			 int depth)
@@ -2652,11 +2712,9 @@ idecode_expand_if_switch(insn_table *table,
   if (table->opcode_rule->use_switch
       && table->parent != NULL /* don't expand the top one yet */
       && !table->parent->opcode_rule->use_switch) {
-    lf_printf(file, "\n");
-    lf_printf(file, "STATIC_INLINE_IDECODE void\n");
-    lf_print_table_name(file, table);
-    lf_printf(file, "\n(%s)\n",
-	      (idecode_cache ? cache_idecode_formal : semantic_formal));
+    lf_print_idecode_switch_function_header(file,
+					    table,
+					    1/*is function definition*/);
     lf_printf(file, "{\n");
     {
       lf_indent(file, +2);
@@ -2672,7 +2730,8 @@ static void
 lf_print_c_cracker_function(lf *file,
 			    insn *instruction,
 			    insn_bits *expanded_bits,
-			    opcode_field *opcodes)
+			    opcode_field *opcodes,
+			    int is_inline_function)
 {
   /* if needed, generate code to enter this routine into a cache */
   lf_printf(file, "\n");
@@ -2698,11 +2757,13 @@ idecode_crack_leaf(insn_table *entry,
   ASSERT(entry->nr_insn == 1
 	 && entry->opcode == NULL
 	 && entry->parent != NULL
-	 && entry->parent->opcode != NULL);
+	 && entry->parent->opcode != NULL
+	 && entry->parent->opcode_rule != NULL);
   lf_print_c_cracker_function(file,
 			      entry->insns,
 			      entry->expanded_bits,
-			      entry->opcode);
+			      entry->opcode,
+			      entry->parent->opcode_rule->use_switch);
 }
 
 static void
@@ -2714,7 +2775,8 @@ idecode_crack_insn(insn_table *entry,
   lf_print_c_cracker_function(file,
 			      instruction,
 			      NULL,
-			      NULL);
+			      NULL,
+			      0/*isnt inline function*/);
 }
 
 static void
@@ -2812,6 +2874,12 @@ gen_idecode_c(insn_table *table, lf *file)
 			       idecode_crack_insn);
   }
 
+  /* output switch function declarations where needed by tables */
+  insn_table_traverse_tree(table,
+			   file,
+			   1,
+			   idecode_declare_if_switch, /* START */
+			   NULL, NULL, NULL);
 
   /* output tables where needed */
   for (depth = insn_table_depth(table);
@@ -2850,7 +2918,7 @@ gen_idecode_c(insn_table *table, lf *file)
   lf_indent(file, -2);
   lf_printf(file, "}\n");
   lf_printf(file, "\n");
-  lf_printf(file, "#endif\n");
+  lf_printf(file, "#endif /* _IDECODE_C_ */\n");
 }
 
 
@@ -2901,7 +2969,7 @@ gen_itable_h(insn_table *table, lf *file)
   lf_printf(file, "  char *format;\n");
   lf_printf(file, "  char *form;\n");
   lf_printf(file, "  char *flags;\n");
-  lf_printf(file, "  char *nmemonic;\n");
+  lf_printf(file, "  char *mnemonic;\n");
   lf_printf(file, "  char *name;\n");
   lf_printf(file, "} itable_info;\n");
   lf_printf(file, "\n");
@@ -2930,7 +2998,7 @@ itable_c_insn(insn_table *entry,
   lf_printf(file, "    \"%s\",\n", fields[insn_format]);
   lf_printf(file, "    \"%s\",\n", fields[insn_form]);
   lf_printf(file, "    \"%s\",\n", fields[insn_flags]);
-  lf_printf(file, "    \"%s\",\n", fields[insn_nmemonic]);
+  lf_printf(file, "    \"%s\",\n", fields[insn_mnemonic]);
   lf_printf(file, "    \"%s\",\n", fields[insn_name]);
   lf_printf(file, "    },\n");
 }
@@ -2967,23 +3035,37 @@ gen_itable_c(insn_table *table, lf *file)
 /****************************************************************/
 
 static void
-model_h_function(insn_table *entry,
-		 lf *file,
-		 table_entry *function)
+model_c_or_h_data(insn_table *table,
+		  lf *file,
+		  table_entry *data)
+{
+  if (data->annex) {
+    table_entry_lf_c_line_nr(file, data);
+    lf_print_c_code(file, data->annex);
+    lf_print_lf_c_line_nr(file);
+    lf_printf(file, "\n");
+  }
+}
+
+static void
+model_c_or_h_function(insn_table *entry,
+		      lf *file,
+		      table_entry *function,
+		      char *prefix)
 {
   if (function->fields[function_type] == NULL
       || function->fields[function_type][0] == '\0') {
-    semantics_h_print_function(file,
-			       function->fields[function_name],
-			       NULL);
+    error("Model function type not specified for %s", function->fields[function_name]);
   }
   else {
     lf_printf(file, "\n");
-    lf_printf(file, "INLINE_MODEL %s %s\n(%s);\n",
+    lf_printf(file, "%s %s %s\n(%s);\n",
+	      prefix,
 	      function->fields[function_type],
 	      function->fields[function_name],
 	      function->fields[function_param]);
   }
+  lf_printf(file, "\n");
 }
 
 static void 
@@ -3001,10 +3083,8 @@ gen_model_h(insn_table *table, lf *file)
   lf_printf(file, "#define _MODEL_H_\n");
   lf_printf(file, "\n");
 
-  if (model_macros) {
-    for(macro = model_macros; macro; macro = macro->next)
-      lf_printf(file, "%s\n", macro->file_entry->fields[insn_comment]);
-    lf_printf(file, "\n");
+  for(macro = model_macros; macro; macro = macro->next) {
+    model_c_or_h_data(table, file, insn_ptr->file_entry);
   }
 
   lf_printf(file, "#ifndef INLINE_MODEL\n");
@@ -3090,7 +3170,7 @@ gen_model_h(insn_table *table, lf *file)
   lf_printf(file, "(const char *name);\n");
 
   for(insn_ptr = model_functions; insn_ptr; insn_ptr = insn_ptr->next) {
-    model_h_function(table, file, insn_ptr->file_entry);
+    model_c_or_h_function(table, file, insn_ptr->file_entry, "INLINE_MODEL");
     lf_printf(file, "\n");
   }
 
@@ -3100,8 +3180,8 @@ gen_model_h(insn_table *table, lf *file)
 
 /****************************************************************/
 
-typedef struct _model_c_data model_c_data;
-struct _model_c_data {
+typedef struct _model_c_passed_data model_c_passed_data;
+struct _model_c_passed_data {
   lf *file;
   model *model_ptr;
 };
@@ -3111,7 +3191,7 @@ model_c_insn(insn_table *entry,
 	      void *data,
 	      insn *instruction)
 {
-  model_c_data *data_ptr = (model_c_data *)data;
+  model_c_passed_data *data_ptr = (model_c_passed_data *)data;
   lf *file = data_ptr->file;
   char *current_name = data_ptr->model_ptr->name;
   table_model_entry *model_ptr = instruction->file_entry->model_first;
@@ -3123,7 +3203,7 @@ model_c_insn(insn_table *entry,
       for(i = insn_model_unit; i < nr_insn_model_table_fields; i++) {
 	lf_printf(file, " %s,", model_ptr->fields[i]);
       }
-      lf_printf(file, " },\n");
+      lf_printf(file, " }, /* %s */\n", instruction->file_entry->fields[insn_name]);
       return;
     }
 
@@ -3136,17 +3216,17 @@ model_c_insn(insn_table *entry,
 static void
 model_c_function(insn_table *table,
 		 lf *file,
-		 table_entry *function)
+		 table_entry *function,
+		 const char *prefix)
 {
   if (function->fields[function_type] == NULL
       || function->fields[function_type][0] == '\0') {
-    lf_print_c_semantic_function_header(file,
-					function->fields[function_name],
-					NULL);
+    error("Model function return type not specified for %s", function->fields[function_name]);
   }
   else {
     lf_printf(file, "\n");
-    lf_printf(file, "INLINE_MODEL %s\n%s(%s)\n",
+    lf_printf(file, "%s %s\n%s(%s)\n",
+	      prefix,
 	      function->fields[function_type],
 	      function->fields[function_name],
 	      function->fields[function_param]);
@@ -3160,6 +3240,7 @@ model_c_function(insn_table *table,
   }
   lf_printf(file, "}\n");
   lf_print_lf_c_line_nr(file);
+  lf_printf(file, "\n");
 }
 
 static void 
@@ -3177,6 +3258,14 @@ gen_model_c(insn_table *table, lf *file)
   lf_printf(file, "\n");
   lf_printf(file, "#include \"cpu.h\"\n");
   lf_printf(file, "\n");
+
+  for(insn_ptr = model_data; insn_ptr; insn_ptr = insn_ptr->next) {
+    model_c_or_h_data(table, file, insn_ptr->file_entry);
+  }
+
+  for(insn_ptr = model_internal; insn_ptr; insn_ptr = insn_ptr->next) {
+    model_c_or_h_function(table, file, insn_ptr->file_entry, "STATIC_INLINE_MODEL");
+  }
 
   lf_printf(file, "/* map model enumeration into printable string */\n");
   lf_printf(file, "const char *model_name[ (int)nr_models ] = {\n");
@@ -3230,7 +3319,7 @@ gen_model_c(insn_table *table, lf *file)
 
   lf_printf(file, "/* Insn functional unit info */\n");
   for(model_ptr = models; model_ptr; model_ptr = model_ptr->next) {
-    model_c_data data;
+    model_c_passed_data data;
 
     lf_printf(file, "static const model_time model_time_%s[] = {\n", model_ptr->name);
     data.file = file;
@@ -3252,9 +3341,12 @@ gen_model_c(insn_table *table, lf *file)
   lf_printf(file, "};\n");
   lf_printf(file, "\n");
 
+  for(insn_ptr = model_internal; insn_ptr; insn_ptr = insn_ptr->next) {
+    model_c_function(table, file, insn_ptr->file_entry, "STATIC_INLINE_MODEL");
+  }
+
   for(insn_ptr = model_functions; insn_ptr; insn_ptr = insn_ptr->next) {
-    model_c_function(table, file, insn_ptr->file_entry);
-    lf_printf(file, "\n");
+    model_c_function(table, file, insn_ptr->file_entry, "INLINE_MODEL");
   }
 
   lf_printf(file, "INLINE_MODEL void\n");

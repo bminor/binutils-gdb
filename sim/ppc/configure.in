@@ -16,7 +16,7 @@ fi],[sim_cflags=""])dnl
 AC_ARG_ENABLE(sim-warnings,
 [  --enable-sim-warnings=opts		Extra CFLAGS for turning on compiler warnings except for idecode.o, semantics.o and psim.o],
 [case "${enableval}" in
-  yes)	sim_warnings="-Wall -Wpointer-arith -Wbad-function-cast -Wmissing-prototypes -Wmissing-declarations";;
+  yes)	sim_warnings="-Werror -Wall -Wpointer-arith -Wmissing-prototypes";;
   no)	sim_warnings="-w";;
   *)	sim_warnings=`echo "${enableval}" | sed -e "s/,/ /g"`;;
 esac
@@ -125,7 +125,7 @@ AC_ARG_ENABLE(sim-inline,
 [  --enable-sim-inline=inlines		Specify which functions should be inlined.],
 [sim_inline=""
 case "$enableval" in
-  no)		sim_inline="";;
+  no)		sim_inline="-DDEFAULT_INLINE=0 -DINLINE=";;
   0)		sim_inline="-DDEFAULT_INLINE=0";;
   yes | 2)	sim_inline="-DDEFAULT_INLINE=2";;
   1)		sim_inline="-DDEFAULT_INLINE=1";;
@@ -198,7 +198,7 @@ fi],[sim_hostendian=""])dnl
 AC_ARG_ENABLE(sim-smp,
 [  --enable-sim-smp=n			Specify number of processors to configure for.],
 [case "${enableval}" in
-  yes)	sim_smp="-DWITH_SMP=2";;
+  yes)	sim_smp="-DWITH_SMP=5";;
   no)	sim_smp="-DWITH_SMP=0";;
   *)	sim_smp="-DWITH_SMP=$enableval";;
 esac
@@ -208,6 +208,14 @@ fi],[sim_smp="-DWITH_SMP=0"
 if test x"$silent" != x"yes"; then
   echo "Setting smp flags = $sim_smp" 6>&1
 fi])dnl
+
+AC_ARG_ENABLE(sim-xor-endian,
+[  --enable-sim-xor-endian=n		Specify number bytes involved in PowerPC XOR bi-endian mode (default 8).],
+[case "${enableval}" in
+  yes)	sim_xor_endian="-DWITH_XOR_ENDIAN=8";;
+  no)	sim_xor_endian="-DWITH_XOR_ENDIAN=0";;
+  *)	sim_xor_endian="-DWITH_XOR_ENDIAN=$enableval";;
+esac],[sim_xor_endian=""])dnl
 
 AC_ARG_ENABLE(sim-bitsize,
 [  --enable-sim-bitsize=n		Specify target bitsize (32 or 64).],
@@ -377,6 +385,7 @@ AC_SUBST(sim_icache)
 AC_SUBST(sim_inline)
 AC_SUBST(sim_bswap)
 AC_SUBST(sim_endian)
+AC_SUBST(sim_xor_endian)
 AC_SUBST(sim_hostendian)
 AC_SUBST(sim_smp)
 AC_SUBST(sim_bitsize)

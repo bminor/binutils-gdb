@@ -116,9 +116,27 @@ INLINE_DEVICE_TREE void device_tree_dump
    u: unsigned
    c: string */
 
+INLINE_DEVICE_TREE int scand_c
+(const char *name,
+ char *c1,
+ unsigned c1size);
+
+INLINE_DEVICE_TREE int scand_c_uw_u
+(const char *name,
+ char *c1,
+ unsigned c1size,
+ unsigned_word *uw2,
+ unsigned *u3);
+ 
 INLINE_DEVICE_TREE int scand_uw
 (const char *name,
  unsigned_word *uw1);
+ 
+INLINE_DEVICE_TREE int scand_uw_c
+(const char *name,
+ unsigned_word *uw1,
+ char *c2,
+ unsigned c2size);
  
 INLINE_DEVICE_TREE int scand_uw_u
 (const char *name,
@@ -131,21 +149,42 @@ INLINE_DEVICE_TREE int scand_uw_u_u
  unsigned *u2,
  unsigned *u3);
  
+INLINE_DEVICE_TREE int scand_uw_uw
+(const char *name,
+ unsigned_word *uw1,
+ unsigned_word *uw2);
+
 INLINE_DEVICE_TREE int scand_uw_uw_u
 (const char *name,
  unsigned_word *uw1,
  unsigned_word *uw2,
  unsigned *u3);
  
-INLINE_DEVICE_TREE int scand_c
+INLINE_DEVICE_TREE int scand_uw_uw_u_u_c
 (const char *name,
- char *c1, int c1size);
-
-INLINE_DEVICE_TREE int scand_c_uw_u
-(const char *name,
- char *c1, int c1size,
+ unsigned_word *uw1,
  unsigned_word *uw2,
- unsigned *u3);
+ unsigned *u3,
+ unsigned *u4,
+ char *c5,
+ unsigned c5size);
+ 
+INLINE_DEVICE_TREE int scand_uw_uw_u_u_u
+(const char *name,
+ unsigned_word *uw1,
+ unsigned_word *uw2,
+ unsigned *u3,
+ unsigned *u4,
+ unsigned *u5);
+ 
+INLINE_DEVICE_TREE char *printd_c
+(const char *name,
+ const char *c1);
+
+INLINE_DEVICE_TREE char *printd_c_uw
+(const char *name,
+ const char *c1,
+ unsigned_word uw2);
 
 INLINE_DEVICE_TREE char *printd_uw_u
 (const char *name,
@@ -164,14 +203,5 @@ INLINE_DEVICE_TREE char *printd_uw_u_u_c
  unsigned u2,
  unsigned u3,
  const char *c4);
-
-INLINE_DEVICE_TREE char *printd_c
-(const char *name,
- const char *c1);
-
-INLINE_DEVICE_TREE char *printd_c_uw
-(const char *name,
- const char *c1,
- unsigned_word uw2);
 
 #endif /* _DEVICE_TREE_H_ */
