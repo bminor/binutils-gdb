@@ -1714,7 +1714,13 @@ mips_frame_saved_pc (struct frame_info *frame)
 }
 
 static struct mips_extra_func_info temp_proc_desc;
-static CORE_ADDR temp_saved_regs[NUM_REGS];
+
+/* This hack will go away once the get_prev_frame() code has been
+   modified to set the frame's type first.  That is BEFORE init extra
+   frame info et.al.  is called.  This is because it will become
+   possible to skip the init extra info call for sigtramp and dummy
+   frames.  */
+static CORE_ADDR *temp_saved_regs;
 
 /* Set a register's saved stack address in temp_saved_regs.  If an address
    has already been set for this register, do nothing; this way we will
@@ -2026,6 +2032,7 @@ mips32_heuristic_proc_desc (CORE_ADDR start_pc, CORE_ADDR limit_pc,
   CORE_ADDR cur_pc;
   CORE_ADDR frame_addr = 0;	/* Value of $r30. Used by gcc for frame-pointer */
 restart:
+  temp_saved_regs = xrealloc (temp_saved_regs, SIZEOF_FRAME_SAVED_REGS);
   memset (temp_saved_regs, '\0', SIZEOF_FRAME_SAVED_REGS);
   PROC_FRAME_OFFSET (&temp_proc_desc) = 0;
   PROC_FRAME_ADJUST (&temp_proc_desc) = 0;	/* offset of FP from SP */
@@ -2134,6 +2141,7 @@ heuristic_proc_desc (CORE_ADDR start_pc, CORE_ADDR limit_pc,
   if (start_pc == 0)
     return NULL;
   memset (&temp_proc_desc, '\0', sizeof (temp_proc_desc));
+  temp_saved_regs = xrealloc (temp_saved_regs, SIZEOF_FRAME_SAVED_REGS);
   memset (&temp_saved_regs, '\0', SIZEOF_FRAME_SAVED_REGS);
   PROC_LOW_ADDR (&temp_proc_desc) = start_pc;
   PROC_FRAME_REG (&temp_proc_desc) = SP_REGNUM;
@@ -5756,6 +5764,11 @@ mips_gdbarch_init (struct gdbarch_info info,
 
   set_gdbarch_elf_make_msymbol_special (gdbarch, 
 					mips_elf_make_msymbol_special);
+
+  if (osabi == GDB_OSABI_IRIX)
+    set_gdbarch_num_regs (gdbarch, 71);
+  else
+    set_gdbarch_num_regs (gdbarch, 90);
 
   switch (mips_abi)
     {

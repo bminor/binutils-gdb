@@ -1,3 +1,13 @@
+2002-12-13  Kevin Buettner  <kevinb@redhat.com>
+
+	* config/mips/tm-mips.h, config/mips/tm-irix3.h,
+	config/mips/tm-irix6.h (NUM_REGS): Delete.
+	* mips-tdep.c (mips_gdbarch_init): Call set_gdbarch_num_regs().
+	(temp_saved_regs): Declare as a pointer rather than an array.
+	(mips32_heuristic_proc_desc, heuristic_proc_desc): Make sure
+	that ``temp_saved_regs'' has storage allocated to it and that
+	it's the correct size.
+
 2002-12-13  Jeff Johnston  <jjohnstn@redhat.com>
 
 	* defs.h (init_last_source_visited): New prototype.

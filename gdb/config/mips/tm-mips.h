@@ -59,12 +59,6 @@ extern int mips_step_skips_delay (CORE_ADDR);
 #define MIPS_REGSIZE 4
 #endif
 
-/* Number of machine registers */
-
-#ifndef NUM_REGS
-#define NUM_REGS 90
-#endif
-
 /* Initializer for an array of names of registers.
    There should be NUM_REGS strings in this initializer.  */
 
