@@ -1,5 +1,6 @@
 /* Native-dependent code for Alpha BSD's.
-   Copyright 2000, 2001, 2002 Free Software Foundation, Inc.
+
+   Copyright 2000, 2001, 2002, 2004 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -76,9 +77,8 @@ static int
 getregs_supplies (int regno)
 {
   return ((regno >= ALPHA_V0_REGNUM && regno <= ALPHA_ZERO_REGNUM)
-	  || regno >= PC_REGNUM);
+	  || regno >= ALPHA_PC_REGNUM);
 }
-
 
 /* Fetch register REGNO from the inferior.  If REGNO is -1, do this
    for all registers (including the floating point registers).  */

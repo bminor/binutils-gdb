@@ -1,3 +1,8 @@
+2004-06-30  Mark Kettenis  <kettenis@gnu.org>
+
+	* alphabsd-nat.c: Update copyright year.
+	(getregs_supplies): Use ALPHA_PC_REGNUM instead of PC_REGNUM.
+
 2004-06-29  Joel Brobecker  <brobecker@gnat.com>
 
 	* i386-cygwin-tdep.c (i386-cygwin-tdep.c): New function.
