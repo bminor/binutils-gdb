@@ -193,7 +193,10 @@ alpha-*-osf*)		gdb_target=alpha-osf1 ;;
 alpha-*-netware*)	gdb_target=alpha-nw
 			configdirs="${configdirs} nlm" ;;
 
+# start-sanitize-arc
 arc-*-*)		gdb_target=arc ;;
+# end-sanitize-arc
+
 arm-*-*)		gdb_target=arm ;;
 
 c1-*-*)			gdb_target=convex ;;
