@@ -1,3 +1,18 @@
+Thu Oct 19 17:47:41 1995  Fred Fish  <fnf@cygnus.com>
+
+	* Makefile.in:  Remove extraneous tab on otherwise empty line,
+	which confuses many non-GNU versions of "make".
+
+Wed Oct 18 16:31:58 1995  steve chamberlain  <sac@slash.cygnus.com>
+
+	* dlltool.c (i386_jtab, arm_jtab): New
+	(gen_lib_file): Rewritten to use bfd.
+
+Fri Oct 13 16:10:07 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* Makefile.in (install): Don't give error message if dlltool
+	wasn't built.
+
 Fri Oct 13 11:04:37 1995  steve chamberlain  <sac@slash.cygnus.com>
 
 	* deflex.l: Allow quoting of IDs.

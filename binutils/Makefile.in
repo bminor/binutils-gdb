@@ -323,7 +323,7 @@ sysinfo.h: sysinfo.c
 syslex.c : syslex.l
 	$(LEX) $(LEX_OPTIONS) $(srcdir)/syslex.l
 	mv lex.yy.c syslex.c
-	
+
 sysinfo: sysinfo.o syslex.o
 	$(CC_FOR_BUILD) $(CFLAGS) $(LDFLAGS) -o $@ sysinfo.o syslex.o 
 
@@ -576,7 +576,7 @@ install: all $(DEMANGLER_PROG).1
 	-if [ -d $(tooldir) ]; then \
 	  if [ -d $(tooldir)/bin ]; then true; else mkdir $(tooldir)/bin; fi; \
 	  for i in $(TOOL_PROGS) ; do \
-	    if [ -f $i ]; then \
+	    if [ -f $$i ]; then \
 	      j=`echo $$i | sed -e 's/.new//'`; \
 	      rm -f $(tooldir)/bin/$$j; \
 	      k=`echo $$j | sed '$(program_transform_name)'`; \
