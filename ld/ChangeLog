@@ -1,3 +1,7 @@
+Thu May 18 10:47:57 2000  Jeffrey A Law  (law@cygnus.com)
+
+	* configure.tgt (hppa*64*-*-*): Enable PA64 target.
+
 2000-05-17 S. Bharadwaj Yadavalli  <sby@scrugs.lkg.dec.com>
 	      Rick Gorton	   <gorton@scrugs.lkg.dec.com>
 	      
