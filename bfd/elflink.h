@@ -6946,6 +6946,7 @@ elf_link_input_bfd (finfo, input_bfd)
 	    {
 	      Elf_Internal_Rela *irela;
 	      Elf_Internal_Rela *irelaend;
+	      bfd_vma last_offset;
 	      struct elf_link_hash_entry **rel_hash;
 	      Elf_Internal_Shdr *input_rel_hdr, *input_rel_hdr2;
 	      unsigned int next_erel;
@@ -6966,6 +6967,9 @@ elf_link_input_bfd (finfo, input_bfd)
 	      rel_hash = (elf_section_data (o->output_section)->rel_hashes
 			  + elf_section_data (o->output_section)->rel_count
 			  + elf_section_data (o->output_section)->rel_count2);
+	      last_offset = o->output_offset;
+	      if (!finfo->info->relocateable)
+		last_offset += o->output_section->vma;
 	      for (next_erel = 0; irela < irelaend; irela++, next_erel++)
 		{
 		  unsigned long r_symndx;
@@ -6983,8 +6987,14 @@ elf_link_input_bfd (finfo, input_bfd)
 							     irela->r_offset);
 		  if (irela->r_offset >= (bfd_vma) -2)
 		    {
-		      /* This is a reloc for a deleted entry or somesuch.  */
-		      memset (irela, 0, sizeof (*irela));
+		      /* This is a reloc for a deleted entry or somesuch.
+			 Turn it into an R_*_NONE reloc, at the same
+			 offset as the last reloc.  elf_eh_frame.c and
+			 elf_bfd_discard_info rely on reloc offsets
+			 being ordered.  */ 
+		      irela->r_offset = last_offset;
+		      irela->r_info = 0;
+		      irela->r_addend = 0;
 		      continue;
 		    }
 
@@ -6994,9 +7004,10 @@ elf_link_input_bfd (finfo, input_bfd)
 		  if (!finfo->info->relocateable)
 		    irela->r_offset += o->output_section->vma;
 
-		  r_symndx = ELF_R_SYM (irela->r_info);
+		  last_offset = irela->r_offset;
 
-		  if (r_symndx == 0)
+		  r_symndx = ELF_R_SYM (irela->r_info);
+		  if (r_symndx == STN_UNDEF)
 		    continue;
 
 		  if (r_symndx >= locsymcount

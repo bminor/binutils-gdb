@@ -1,3 +1,18 @@
+2002-11-26  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf-eh-frame.c (ENSURE_NO_RELOCS): Disregard R_*_NONE relocs.
+	(_bfd_elf_discard_section_eh_frame): Don't discard duplicate CIEs
+	on a relocatable link.  Comment typos.
+	* elf.c (_bfd_elf_link_hash_newfunc): Assign elements of structure
+	in the order they are declared.  Clear elf_hash_value too.
+	(_bfd_elf_link_hash_table_init): Likewise assign in order.  Clear
+	eh_info and tls_segment.
+	* elflink.h (elf_link_input_bfd <emit_relocs>): Keep reloc offsets
+	sorted when discarding relocs by turning them into R_*_NONE.
+
+	* libbfd.c (warn_deprecated): Comment spelling.
+	* po/SRC-POTFILES.in: Regenerate.
+
 2002-11-21  Richard Henderson  <rth@redhat.com>
 
 	* elflink.h (elf_link_add_object_symbols): Don't overwrite the

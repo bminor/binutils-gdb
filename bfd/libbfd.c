@@ -912,7 +912,7 @@ warn_deprecated (what, file, line, func)
 
   if (~(size_t) func & ~mask)
     {
-      /* Note: seperate sentances in order to allow
+      /* Note: separate sentences in order to allow
 	 for translation into other languages.  */
       if (func)
 	fprintf (stderr, _("Deprecated %s called at %s line %d in %s\n"),

@@ -1391,17 +1391,18 @@ _bfd_elf_link_hash_newfunc (entry, table, string)
 
       /* Set local fields.  */
       ret->indx = -1;
-      ret->size = 0;
       ret->dynindx = -1;
       ret->dynstr_index = 0;
+      ret->elf_hash_value = 0;
       ret->weakdef = NULL;
-      ret->got.refcount = htab->init_refcount;
-      ret->plt.refcount = htab->init_refcount;
       ret->linker_section_pointer = NULL;
       ret->verinfo.verdef = NULL;
-      ret->vtable_entries_used = NULL;
       ret->vtable_entries_size = 0;
+      ret->vtable_entries_used = NULL;
       ret->vtable_parent = NULL;
+      ret->got.refcount = htab->init_refcount;
+      ret->plt.refcount = htab->init_refcount;
+      ret->size = 0;
       ret->type = STT_NOTYPE;
       ret->other = 0;
       /* Assume that we have been called by a non-ELF symbol reader.
@@ -1512,13 +1513,16 @@ _bfd_elf_link_hash_table_init (table, abfd, newfunc)
   table->dynstr = NULL;
   table->bucketcount = 0;
   table->needed = NULL;
-  table->runpath = NULL;
-  table->loaded = NULL;
   table->hgot = NULL;
   table->stab_info = NULL;
   table->merge_info = NULL;
+  memset (&table->eh_info, 0, sizeof (table->eh_info));
   table->dynlocal = NULL;
-  ret = _bfd_link_hash_table_init (& table->root, abfd, newfunc);
+  table->runpath = NULL;
+  table->tls_segment = NULL;
+  table->loaded = NULL;
+
+  ret = _bfd_link_hash_table_init (&table->root, abfd, newfunc);
   table->root.type = bfd_link_elf_hash_table;
 
   return ret;

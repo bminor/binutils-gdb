@@ -17,6 +17,8 @@ archive64.c
 archures.c
 armnetbsd.c
 bfd.c
+bfdio.c
+bfdwin.c
 binary.c
 bout.c
 cache.c

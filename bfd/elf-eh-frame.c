@@ -295,7 +295,8 @@ _bfd_elf_discard_section_eh_frame (abfd, info, sec,
 #define ENSURE_NO_RELOCS(buf)				\
   if (cookie->rel < cookie->relend			\
       && (cookie->rel->r_offset				\
-	  < (bfd_size_type) ((buf) - ehbuf)))		\
+	  < (bfd_size_type) ((buf) - ehbuf))		\
+      && cookie->rel->r_info != 0)			\
     goto free_no_table
 
 #define SKIP_RELOCS(buf)				\
@@ -378,11 +379,12 @@ _bfd_elf_discard_section_eh_frame (abfd, info, sec,
 	  /* CIE  */
 	  if (last_cie != NULL)
 	    {
-	      /* Now check if this CIE is identical to last CIE, in which case
-		 we can remove it, provided we adjust all FDEs.
-		 Also, it can be removed if we have removed all FDEs using
-		 that. */
-	      if (cie_compare (&cie, &hdr_info->last_cie) == 0
+	      /* Now check if this CIE is identical to the last CIE,
+		 in which case we can remove it provided we adjust
+		 all FDEs.  Also, it can be removed if we have removed
+		 all FDEs using it.  */
+	      if ((!info->relocateable
+		   && cie_compare (&cie, &hdr_info->last_cie) == 0)
 		  || cie_usage_count == 0)
 		{
 		  new_size -= cie.hdr.length + 4;
@@ -560,7 +562,7 @@ _bfd_elf_discard_section_eh_frame (abfd, info, sec,
 	    goto free_no_table;
 	  if ((*reloc_symbol_deleted_p) (buf - ehbuf, cookie))
 	    {
-	      /* This is a FDE against discarded section, it should
+	      /* This is a FDE against a discarded section.  It should
 		 be deleted.  */
 	      new_size -= hdr.length + 4;
 	      sec_info->entry[sec_info->count].removed = 1;
@@ -572,7 +574,7 @@ _bfd_elf_discard_section_eh_frame (abfd, info, sec,
 		       && cie.make_relative == 0)
 		      || (cie.fde_encoding & 0xf0) == DW_EH_PE_aligned))
 		{
-		  /* If shared library uses absolute pointers
+		  /* If a shared library uses absolute pointers
 		     which we cannot turn into PC relative,
 		     don't create the binary search table,
 		     since it is affected by runtime relocations.  */
