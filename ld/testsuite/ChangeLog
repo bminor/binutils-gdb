@@ -1,3 +1,10 @@
+2002-01-31  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-scripts/crossref.exp: Allow foo to have a leading dot.
+	* ld-scripts/cross1.t: Add .opd.
+	* ld-undefined/undefined.exp: Allow leading dot on sym names.
+	* lib/ld-lib.exp (default_ld_nm): Strip leading dots from syms.
+
 2002-01-29  Chris Demetriou  <cgd@broadcom.com>
 
 	* ld-mips-elf/emrelocs-eb.d: New file to test --embedded-relocs.

@@ -54,7 +54,7 @@ if [string match "" $exec_output] then {
     fail $test1
 } else {
     verbose -log "$exec_output"
-    if [regexp "prohibited cross reference from .* to `foo' in" $exec_output] {
+    if [regexp "prohibited cross reference from .* to `.*foo' in" $exec_output] {
 	pass $test1
     } else {
 	fail $test1

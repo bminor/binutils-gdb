@@ -307,7 +307,7 @@ proc default_ld_nm { nm nmflags object } {
 	set file [open tmpdir/nm.out r]
 	while { [gets $file line] != -1 } {
 	    verbose "$line" 2
-	    if [regexp "^(\[0-9a-fA-F\]+) \[a-zA-Z0-9\] (.+)$" $line whole value name] {
+	    if [regexp "^(\[0-9a-fA-F\]+) \[a-zA-Z0-9\] \\.*(.+)$" $line whole value name] {
                 set name [string trimleft $name "_"]
 		verbose "Setting nm_output($name) to 0x$value" 2
 		set nm_output($name) 0x$value
