@@ -1,5 +1,7 @@
 -*- text -*-
 
+* TI C54x support, by Timothy Wall.
+
 * Added command line switch --section-start to set the start address of any
   specified section. 
 
