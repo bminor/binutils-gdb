@@ -1,6 +1,15 @@
+Wed Dec  3 16:35:24 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* t-rac.s: New files.
+	
+	* t-macros.i: Add macros for checking psw and 2w quantities.
+
+	* Makefile.in (TESTS): Update.
+
 Tue Dec  2 11:01:36 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
-	* t-sub2w.s, t-mulxu.s, t-mac.s, t-mvtac.s, t-msbu.s: New files.
+	* t-sub2w.s, t-mulxu.s, t-mac.s, t-mvtac.s, t-msbu.s, t-sub.s: New
+ 	files.
   	
 	* Makefile.in: Update.
 

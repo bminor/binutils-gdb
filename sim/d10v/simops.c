@@ -1912,18 +1912,20 @@ OP_5201 ()
     }
 
   State.F1 = State.F0;
+  tmp = SEXT56 ((State.a[0] << 16) | (State.a[1] & 0xffff));
   if (shift >=0)
-    tmp = ((State.a[0] << 16) | (State.a[1] & 0xffff)) << shift;
+    tmp <<= shift;
   else
-    tmp = ((State.a[0] << 16) | (State.a[1] & 0xffff)) >> -shift;
-  tmp = ( SEXT60(tmp) + 0x8000 ) >> 16;
-  if (tmp > MAX32)
+    tmp >>= -shift;
+  tmp += 0x8000;
+  tmp >>= 16; /* look at bits 0:43 */
+  if (tmp > SEXT44 (SIGNED64 (0x0007fffffff)))
     {
       State.regs[OP[0]] = 0x7fff;
       State.regs[OP[0]+1] = 0xffff;
       State.F0 = 1;
     } 
-  else if (tmp < MIN32)
+  else if (tmp < SEXT44 (SIGNED64 (0xfff80000000)))
     {
       State.regs[OP[0]] = 0x8000;
       State.regs[OP[0]+1] = 0;
@@ -2429,8 +2431,10 @@ OP_0 ()
   uint16 tmp;
 
   trace_input ("sub", OP_REG, OP_REG, OP_VOID);
+  /* see ../common/sim-alu.h for a more extensive discussion on how to
+     compute the carry/overflow bits. */
   tmp = State.regs[OP[0]] - State.regs[OP[1]];
-  State.C = (tmp > State.regs[OP[0]]);
+  State.C = ((uint16) State.regs[OP[0]] >= (uint16) State.regs[OP[1]]);
   State.regs[OP[0]] = tmp;
   trace_output (OP_REG);
 }

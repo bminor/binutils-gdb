@@ -1,3 +1,4 @@
+#include "config.h"
 #include <stdio.h>
 #include <ctype.h>
 #include <limits.h>
@@ -18,43 +19,14 @@
 
 extern int d10v_debug;
 
-#if UCHAR_MAX == 255
-typedef unsigned char uint8;
-typedef signed char int8;
-#else
-#error "Char is not an 8-bit type"
-#endif
-
-#if SHRT_MAX == 32767
-typedef unsigned short uint16;
-typedef signed short int16;
-#else
-#error "Short is not a 16-bit type"
-#endif
-
-#if INT_MAX == 2147483647
-typedef unsigned int uint32;
-typedef signed int int32;
-
-#elif LONG_MAX == 2147483647
-typedef unsigned long uint32;
-typedef signed long int32;
-
-#else
-#error "Neither int nor long is a 32-bit type"
-#endif
-
-#if LONG_MAX > 2147483647
-typedef unsigned long uint64;
-typedef signed long int64;
-
-#elif __GNUC__
-typedef unsigned long long uint64;
-typedef signed long long int64;
-
-#else
-#error "Can't find an appropriate 64-bit type"
-#endif
+#include "sim-types.h"
+typedef unsigned8 uint8;
+typedef unsigned16 uint16;
+typedef signed16 int16;
+typedef unsigned32 uint32;
+typedef signed32 int32;
+typedef unsigned64 uint64;
+typedef signed64 int64;
 
 /* FIXME: D10V defines */
 typedef uint16 reg_t;
@@ -62,6 +34,7 @@ typedef uint16 reg_t;
 struct simops 
 {
   long opcode;
+  int  is_long;
   long mask;
   int format;
   int cycles;
@@ -118,7 +91,8 @@ struct _state
   uint8 F1;
   uint8 C;
   uint8 exe;
-  int   exception;
+  int	exception;
+  int	pc_changed;
   /* everything below this line is not reset by sim_create_inferior() */
   uint8 *imem;
   uint8 *dmem;
@@ -132,7 +106,7 @@ extern struct simops Simops[];
 extern asection *text;
 extern bfd_vma text_start;
 extern bfd_vma text_end;
-extern bfd *exec_bfd;
+extern bfd *prog_bfd;
 
 #define PC	(State.cregs[2])
 #define PSW	(State.cregs[0])
@@ -160,23 +134,27 @@ extern bfd *exec_bfd;
 #define SEXT16(x)	((((x)&0xffff)^(~0x7fff))+0x8000)
 
 /* sign-extend a 32-bit number */
-#define SEXT32(x)	((((x)&0xffffffffLL)^(~0x7fffffffLL))+0x80000000LL)
+#define SEXT32(x)	((((x)&SIGNED64(0xffffffff))^(~SIGNED64(0x7fffffff)))+SIGNED64(0x80000000))
 
 /* sign extend a 40 bit number */
-#define SEXT40(x)	((((x)&0xffffffffffLL)^(~0x7fffffffffLL))+0x8000000000LL)
+#define SEXT40(x)	((((x)&SIGNED64(0xffffffffff))^(~SIGNED64(0x7fffffffff)))+SIGNED64(0x8000000000))
 
 /* sign extend a 44 bit number */
-#define SEXT44(x)	((((x)&0xfffffffffffLL)^(~0x7ffffffffffLL))+0x80000000000LL)
+#define SEXT44(x)	((((x)&SIGNED64(0xfffffffffff))^(~SIGNED64(0x7ffffffffff)))+SIGNED64(0x80000000000))
+
+/* sign extend a 56 bit number */
+#define SEXT56(x)	((((x)&SIGNED64(0xffffffffffffff))^(~SIGNED64(0x7fffffffffffff)))+SIGNED64(0x80000000000000))
 
 /* sign extend a 60 bit number */
-#define SEXT60(x)	((((x)&0xfffffffffffffffLL)^(~0x7ffffffffffffffLL))+0x800000000000000LL)
+#define SEXT60(x)	((((x)&SIGNED64(0xfffffffffffffff))^(~SIGNED64(0x7ffffffffffffff)))+SIGNED64(0x800000000000000))
 
-#define MAX32	0x7fffffffLL
-#define MIN32	0xff80000000LL
-#define MASK32	0xffffffffLL
-#define MASK40	0xffffffffffLL
+#define MAX32	SIGNED64(0x7fffffff)
+#define MIN32	SIGNED64(0xff80000000)
+#define MASK32	SIGNED64(0xffffffff)
+#define MASK40	SIGNED64(0xffffffffff)
 
-#define INC_ADDR(x,i)	x = ((State.MD && x == MOD_E) ? MOD_S : (x)+(i))
+/* The alignment of MOD_E in the following macro depends upon "i" always being a power of 2. */
+#define INC_ADDR(x,i)	x = ((State.MD && x == (MOD_E & ~((i)-1))) ? MOD_S : (x)+(i))
 
 extern uint8 *dmem_addr PARAMS ((uint32));
 extern bfd_vma decode_pc PARAMS ((void));
@@ -213,3 +191,5 @@ extern void write_longlong PARAMS ((uint8 *addr, int64 data));
 #define SET_IMAP0(x)		SW(0xff00,x)
 #define SET_IMAP1(x)		SW(0xff02,x)
 #define SET_DMAP(x)		SW(0xff04,x)
+
+#define JMP(x)			{ PC = (x); State.pc_changed = 1; }

@@ -44,9 +44,11 @@ TESTS = \
 	t-mvtac.ok \
 	t-msbu.ok \
 	t-mulxu.ok \
+	t-rac.ok \
 	t-rachi.ok \
 	t-rep.ok \
 	t-sub2w.ok \
+	t-sub.ok \
 	t-subi.ok \
 #
 

@@ -12,6 +12,7 @@ loop.s
 t-macros.i
 t-mac.s
 t-msbu.s
+t-rac.s
 t-rachi.s
 t-rep.s
 t-mulxu.s

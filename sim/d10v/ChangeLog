@@ -1,3 +1,13 @@
+Wed Dec  3 17:27:06 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* d10v_sim.h (SEXT56): Define.
+
+	* simops.c (OP_4201): For "rac", sign extend 56 bit value before
+ 	it is shifted.
+
+	* d10v_sim.h (MAX32, MIN32, MASK32, MASK40): Re-define using
+ 	SIGNED64 macro.
+
 Tue Dec  2 15:38:34 1997  Fred Fish  <fnf@cygnus.com>
 
 	* interp.c (sim_resume): Call do_2_short with LEFT_FIRST or
