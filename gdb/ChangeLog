@@ -1,3 +1,33 @@
+2004-01-28  Roland McGrath  <roland@redhat.com>
+
+	* sol-thread.c (sol_thread_xfer_partial): New function.
+	(init_sol_thread_ops): Use that for to_xfer_partial hook.
+	(init_sol_core_ops): Likewise.
+
+	* procfs.c (procfs_xfer_partial): New function.
+	(init_procfs_ops): Use that for procfs_ops.to_xfer_partial.
+	* Makefile.in (procfs.o): Add $(auxv_h) dep.
+
+	* config/nm-linux.h (NATIVE_XFER_AUXV): New macro, uses auxv.c's
+	procfs_xfer_auxv function.
+
+	* procfs.c (procfs_make_note_section): If we can read
+	TARGET_OBJECT_AUXV data, add an NT_AUXV note containing it.
+	* linux-proc.c (linux_make_note_section): Likewise.
+
+	* auxv.h: New file.
+	* auxv.c: New file.
+	* Makefile.in (auxv_h): New variable.
+	(COMMON_OBS): Add auxv.o here.
+	(auxv.o): New target.
+
+	* corelow.c (core_xfer_partial): New function.
+	(init_core_ops): Use it for core_ops.to_xfer_partial.
+
+	* target.h (enum target_object): Add TARGET_OBJECT_AUXV.
+	* inftarg.c (child_xfer_partial): Support it using NATIVE_XFER_AUXV
+	macro if that is defined.
+
 2004-02-01  Daniel Jacobowitz  <drow@mvista.com>
 
 	* breakpoint.c (bpstat_stop_status): Take a ptid_t argument,
