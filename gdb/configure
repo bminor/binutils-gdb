@@ -2917,7 +2917,10 @@ fi
 
 	   # Include some libraries that Tcl and Tk want.
 	   TCL_LIBS='$(TK) $(TCL) $(X11_LDFLAGS) $(X11_LIBS)'
-	   LIBS="${LIBS} ${TK_LIBS} ${TCL_LIBS}"
+	   # Yes, the ordering seems wrong here.  But it isn't.
+	   # TK_LIBS is the list of libraries that need to be linked
+	   # after Tcl/Tk.
+	   LIBS="${LIBS} ${TCL_LIBS} ${TK_LIBS}"
 	   CONFIG_OBS="${CONFIG_OBS} gdbtk.o"
 	fi
     fi
