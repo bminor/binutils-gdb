@@ -1352,7 +1352,6 @@ decode_ARM_machine_flags (e_flags, buf)
 	    }
 	}
     }
-  
 
   if (unknown)
     strcat (buf,", <unknown>");
