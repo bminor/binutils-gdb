@@ -13489,11 +13489,8 @@ static const struct mips_cpu_info mips_cpu_info_table[] =
   { "5kc",            0,      ISA_MIPS64,     CPU_MIPS64 },
   { "20kc",           0,      ISA_MIPS64,     CPU_MIPS64 },
 
-  /* Broadcom SB-1 CPU */
-  { "SB-1",           0,      ISA_MIPS64,     CPU_SB1 },
-  { "sb-1250",        0,      ISA_MIPS64,     CPU_SB1 },
+  /* Broadcom SB-1 CPU core */
   { "sb1",            0,      ISA_MIPS64,     CPU_SB1 },
-  { "sb1250",         0,      ISA_MIPS64,     CPU_SB1 },
 
   /* End marker */
   { NULL, 0, 0, 0 }

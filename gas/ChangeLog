@@ -1,3 +1,8 @@
+2002-07-30  Chris Demetriou  <cgd@broadcom.com>
+
+	* config/tc-mips.c (mips_cpu_info_table): Clean up entries related
+	to Broadcom SB-1 core support.
+
 2002-07-31  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
 	* config/tc-mips.c (mips_target_format): Fix formatting.
