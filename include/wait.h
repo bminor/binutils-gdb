@@ -25,9 +25,9 @@
 #define WIFSTOPPED(w)	(((w)&0377) == 0177)
 #endif
 
-#define WEXITSTATUS(w)	((w) >> 8)	/* same as WRETCODE */
+#define WEXITSTATUS(w)	(((w) >> 8) & 0377) /* same as WRETCODE */
 #define WTERMSIG(w)	((w) & 0177)
-#define WSTOPSIG(w)	((w) >> 8)
+#define WSTOPSIG	WEXITSTATUS
 
 /* These are not defined in POSIX, but are used by our programs.  */
 
