@@ -259,6 +259,7 @@ static const struct op_print chill_op_print_tab[] = {
     {"-",   BINOP_SUB, PREC_ADD, 0},
     {"*",   BINOP_MUL, PREC_MUL, 0},
     {"/",   BINOP_DIV, PREC_MUL, 0},
+    {"//",  BINOP_CONCAT, PREC_PREFIX, 0},	/* FIXME: precedence? */
     {"-",   UNOP_NEG, PREC_PREFIX, 0},
     {NULL,  0, 0, 0}
 };

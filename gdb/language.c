@@ -666,6 +666,28 @@ character_type (type)
    }
 }
 
+/* Returns non-zero if the value is a string type */
+int
+string_type (type)
+   struct type *type;
+{
+   switch(current_language->la_language)
+   {
+    /* start-sanitize-chill */
+   case language_chill:
+    /* end-sanitize-chill */
+   case language_m2:
+      return TYPE_CODE(type) != TYPE_CODE_STRING ? 0 : 1;
+
+   case language_c:
+   case language_cplus:
+      /* C does not have distinct string type. */
+      return (0);
+   default:
+      return (0);
+   }
+}
+
 /* Returns non-zero if the value is a boolean type */
 int
 boolean_type (type)
@@ -869,6 +891,12 @@ binop_type_check(arg1,arg2,op)
 	 type_op_error ("Arguments to %s must be of simple type.",op);
       else if (!same_type(t1,t2))
 	 type_op_error ("Arguments to %s must be of the same type.",op);
+      break;
+
+    case BINOP_CONCAT:
+      if (!(string_type(t1) || character_type(t1))
+	  || !(string_type(t2) || character_type(t2)))
+	  type_op_error ("Arguments to %s must be strings or characters.", op);
       break;
 
    /* Unary checks -- arg2 is null */

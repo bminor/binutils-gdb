@@ -82,6 +82,7 @@ enum type_code
   TYPE_CODE_SET,		/* Pascal sets */
   TYPE_CODE_RANGE,		/* Range (integers within spec'd bounds) */
   TYPE_CODE_STRING,		/* String types, distinct from array of char */
+  TYPE_CODE_BITSTRING,		/* String of bits, distinct from bool array */
   TYPE_CODE_ERROR,              /* Unknown type */
 
   /* C++ */

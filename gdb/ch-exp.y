@@ -759,7 +759,7 @@ operand_3	:	operand_4
 			}
 		|	operand_3 SLASH_SLASH operand_4
 			{
-			  $$ = 0;	/* FIXME */
+			  write_exp_elt_opcode (BINOP_CONCAT);
 			}
 		;
 
@@ -1778,7 +1778,6 @@ yylex ()
 	    case '+':
 	    case '-':
 	    case '*':
-	    case '/':
 	    case '(':
 	    case ')':
 	    case '[':
