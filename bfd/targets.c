@@ -1273,14 +1273,17 @@ bfd_target_list ()
     vec_length++;
 
   amt = (vec_length + 1) * sizeof (char **);
-  name_ptr = name_list = (const char **) bfd_zmalloc (amt);
+  name_ptr = name_list = (const char **) bfd_malloc (amt);
 
   if (name_list == NULL)
     return NULL;
 
   for (target = &bfd_target_vector[0]; *target != NULL; target++)
-    *(name_ptr++) = (*target)->name;
+    if (target == &bfd_target_vector[0]
+	|| *target != bfd_target_vector[0])
+      *name_ptr++ = (*target)->name;
 
+  *name_ptr = NULL;
   return name_list;
 }
 
