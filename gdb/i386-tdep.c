@@ -628,7 +628,7 @@ i386_skip_prologue (CORE_ADDR start_pc)
 
   /* The native cc on SVR4 in -K PIC mode inserts the following code
      to get the address of the global offset table (GOT) into register
-     %ebx
+     %ebx:
 
         call	0x0
 	popl    %ebx
