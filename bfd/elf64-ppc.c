@@ -4384,7 +4384,7 @@ ppc64_elf_finish_dynamic_sections (output_bfd, info)
       /* Fill in the first entry in the global offset table.
 	 We use it to hold the link-time TOCbase.  */
       bfd_put_64 (output_bfd,
-		  elf_gp (output_bfd) - TOC_BASE_OFF,
+		  elf_gp (output_bfd) + TOC_BASE_OFF,
 		  htab->sgot->contents);
 
       /* Set .got entry size.  */
