@@ -106,8 +106,6 @@ mips*-*-netbsd*)	gdb_host=nbsd ;;
 # OBSOLETE mips-*-sysv*)		gdb_host=riscos ;;
 # OBSOLETE mips-*-riscos*)		gdb_host=riscos ;;
 
-none-*-*)		gdb_host=none ;;
-
 ns32k-*-netbsd*)	gdb_host=nbsdaout ;;
 
 powerpc-*-aix3*)	gdb_host=aix ;;

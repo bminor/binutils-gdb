@@ -1,3 +1,14 @@
+2004-02-20  Andrew Cagney  <cagney@redhat.com>
+
+	Fix PR tdep/1372.
+	* configure.tgt: Delete target "none-*-*".
+	* configure.host: Delete host "none-*-*".
+	* config/none/none.mh: Delete file.
+	* config/none/none.mt: Delete file.
+	* config/none/xm-none.h: Delete file.
+	* config/none/tm-none.h: Delete file.
+	* config/none/nm-none.h: Delete file.
+
 2004-02-19  Fred Fish  <fnf@redhat.com>
 
 	* sh-tdep.c (sh_analyze_prologue): Eliminate useless test of

@@ -147,8 +147,6 @@ mips*-*-*)		gdb_target=embed ;;
 
 mn10300-*-*)		gdb_target=mn10300 ;;
 
-none-*-*)		gdb_target=none ;;
-
 ns32k-*-netbsd*)	gdb_target=nbsdaout ;;
 
 powerpc-*-netbsd*)	gdb_target=nbsd ;;
