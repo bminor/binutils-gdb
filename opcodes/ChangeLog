@@ -1,3 +1,8 @@
+2001-07-21  Chris Demetriou  <cgd@broadcom.com>
+
+	* mips-opc.c (mips_builtin_opcodes): Sort c.le.s and c.lt.s
+	into the rest of the surrounding definitions.
+
 2001-07-18  Alan Modra  <amodra@bigpond.net.au>
 
 	* i386-dis.c (grps): Print l or w suffix, and require mem modrm
