@@ -209,14 +209,13 @@ void init_vu(VectorUnitState *state, char* umem_buffer, char* mem_buffer)
 
 	/* read instruction file (mandatory) */
 	if (*ifilename) {
-		if((fp = fopen(ifilename, "r")) == NULL)
-			abend2("%s: can not open\n", ifilename);
-
-		for (i = 0; fread(&data[0], 4, 1, fp) != 0; i++) {
-			fread(&data[1], 4, 1, fp);
-			LoadMMem(state, i, data, 1);
+		if((fp = fopen(ifilename, "r")) != NULL) {
+			for (i = 0; fread(&data[0], 4, 1, fp) != 0; i++) {
+				fread(&data[1], 4, 1, fp);
+				LoadMMem(state, i, data, 1);
+			}
+			fclose(fp);
 		}
-		fclose(fp);
 	}
 	
 	/* PKE dirven simvpe */
