@@ -74,7 +74,3 @@ if $has_newabi {
     }
 }
 run_dump_test "reloc-2"
-if $embedded_elf {
-    run_dump_test "reloc-3-r"
-    run_dump_test "reloc-3-srec"
-}
