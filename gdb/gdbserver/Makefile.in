@@ -113,10 +113,16 @@ LINTFLAGS= $(BFD_CFLAGS)
 
 # All source files that go into linking GDB remote server.
 
-SFILES = $(srcdir)/low-hppabsd.c $(srcdir)/low-linux.c $(srcdir)/low-lynx.c \
-	 $(srcdir)/low-nbsd.c $(srcdir)/low-sim.c $(srcdir)/low-sparc.c \
-	 $(srcdir)/low-sun3.c $(srcdir)/utils.c $(srcdir)/server.c \
-	 $(srcdir)/remote-utils.c
+SFILES=	$(srcdir)/gdbreplay.c $(srcdir)/inferiors.c \
+	$(srcdir)/mem-break.c $(srcdir)/proc-service.c $(srcdir)/regcache.c \
+	$(srcdir)/remote-utils.c $(srcdir)/server.c $(srcdir)/target.c \
+	$(srcdir)/thread-db.c $(srcdir)/utils.c \
+	$(srcdir)/linux-arm-low.c $(srcdir)/linux-i386-low.c \
+	$(srcdir)/i387-fp.c \
+	$(srcdir)/linux-ia64-low.c $(srcdir)/linux-low.c \
+	$(srcdir)/linux-m68k-low.c $(srcdir)/linux-mips-low.c \
+	$(srcdir)/linux-ppc-low.c $(srcdir)/linux-s390-low.c \
+	$(srcdir)/linux-sh-low.c $(srcdir)/linux-x86-64-low.c
 
 DEPFILES = @GDBSERVER_DEPFILES@
 
