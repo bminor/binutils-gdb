@@ -81,10 +81,12 @@ if test "${enable_sim}" != no; then
        mips*-*-*)
            AC_CONFIG_SUBDIRS(mips)
 	   testsuite=yes
+	   common=yes
 	   igen=yes
 	   ;;
        mn10300*-*-*)
            AC_CONFIG_SUBDIRS(mn10300)
+	   common=yes
 	   igen=yes
 	   ;;
        sh*-*-*)
@@ -99,9 +101,6 @@ if test "${enable_sim}" != no; then
        v850*-*-* )
            AC_CONFIG_SUBDIRS(v850)
 	   common=yes
-	   ;;
-       sparc*-*-*)
-           AC_CONFIG_SUBDIRS(erc32)
 	   ;;
    esac
    if test "$testsuite" = yes; then

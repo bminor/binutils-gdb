@@ -1,3 +1,8 @@
+2005-01-17  Andrew Cagney  <cagney@gnu.org>
+
+	* configure.ac: For mips*-*-* and mn10300*-*-* configure the
+	common directory.  Remove sparc*-*-* from list.
+	
 2005-01-11  Andrew Cagney  <cagney@gnu.org>
 
 	* Makefile.in (autoconf-common autoheader-common): Add --force to
