@@ -1,6 +1,11 @@
+2001-10-16  Vassili Karpov  <malc@pulsesoft.com>
+
+	* emultempl/elf32.em (gld*_list_options): Remove extra '\t' from
+	-z nocopyreloc and -z nocombreloc usage strings.
+
 2001-10-12  Vassili Karpov  <malc@pulsesoft.com>
 
-	* emultempl/elf32.em (gld_*_listoptions): Include -z nocopyreloc 
+	* emultempl/elf32.em (gld*_list_options): Include -z nocopyreloc
 	in usage.
 
 2001-10-11  Aleksey Romanov <aromanov@ennovatenetworks.com>
@@ -98,10 +103,10 @@
 	DLL_SUPPORT controlled code.
 
 2001-09-24  Charles Wilson  <cwilson@ece.gatech.edu>
- 
+
 	* emultempl/pe.em(pe_data_import_dll): Make static.
 	(pe_get_data_import_dll_name): New accessor function.
-	* pe-dll.c(pe_create_import_fixup): call 
+	* pe-dll.c(pe_create_import_fixup): call
 	pe_get_data_import_dll_name() from pe.em, instead of
 	directly accessing pe_data_import_dll variable from pe.em.
 
@@ -192,7 +197,7 @@
 
 	* emultempl/pe.em(make_import_fixup): change signature to
 	take asection as well as arelec; we need this for proper
-	error reporting.  Only call pe_create_import_fixup() if 
+	error reporting.  Only call pe_create_import_fixup() if
 	there is no attempt to add a constant addend to the reloc;
 	otherwise, report error condition.
 	* pe-dll.c(pe_walk_relocs_of_symbol): change signature,
@@ -204,12 +209,12 @@
 2001-09-12  Charles Wilson  <cwilson@ece.gatech.edu>
 
 	* ld.texinfo: add verbose documentation for auto-import
-	direct-addressing workaround, to compliment the terse 
+	direct-addressing workaround, to compliment the terse
 	error message.
 
 2001-09-12  Andrew MacLeod  <amacleod@redhat.com>
 
-     * scripttempl/v850.sc: Add gcc_except_table sections.
+	* scripttempl/v850.sc: Add gcc_except_table sections.
 
 Fri Sep  7 11:34:24 2001  Jeffrey A Law  (law@cygnus.com)
 
@@ -224,7 +229,7 @@ Fri Sep  7 11:34:24 2001  Jeffrey A Law  (law@cygnus.com)
 2001-09-05  Tom Rix <trix@redhat.com>
 
 	* emultempl/aix.em : Handle import file XMC_XO and syscall symbols.
-	
+
 2001-09-03  Andreas Jaeger  <aj@suse.de>
 
 	* emultempl/beos.em: Declare prototypes for comparions functions,
@@ -455,10 +460,10 @@ Wed Aug 28 13:37:20 2001  J"orn Rennecke <amylaar@redhat.com>
 	scripttempl/v850.sc: Keep .jcr data.
 
 2001-08-12  H.J. Lu  <hjl@gnu.org>
-            Andrew Haley  <aph@cambridge.redhat.com>
-            Nick Clifton  <nickc@redhat.com>
+	    Andrew Haley  <aph@cambridge.redhat.com>
+	    Nick Clifton  <nickc@redhat.com>
 
-        * ldgram.y (had_script): Change name to saved_script_handle.
+	* ldgram.y (had_script): Change name to saved_script_handle.
 	Change type to file handle.
 	* ld.h (had_script): Rename and retype.
 	* ldfile.c (ldfile_open_command_file): Save the file handle
@@ -870,7 +875,7 @@ Wed Aug 28 13:37:20 2001  J"orn Rennecke <amylaar@redhat.com>
 	* configure.tgt : same
 
 	* scripttempl/aix.sc : default text section offset to 0x10000000
-	 default data section offset to 0x20000000
+	default data section offset to 0x20000000
 	add .sv3264 and .sv64 pseudo sections
 	loader and debug sections use the currect section offset.
 
@@ -1081,7 +1086,7 @@ Wed Aug 28 13:37:20 2001  J"orn Rennecke <amylaar@redhat.com>
 2001-03-23  Mark Elbrecht <snowball3@bigfoot.com>
 
 	* scripttempl/i386go32.sc: Support the GCC flags '-ffunction-sections'
-	  and '-fdata-sections'. Set the VMA of STABS sections to zero.
+	and '-fdata-sections'. Set the VMA of STABS sections to zero.
 
 2001-03-17  Ulrich Drepper  <drepper@redhat.com>
 
