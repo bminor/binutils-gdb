@@ -1,3 +1,9 @@
+Thu May 16 18:06:05 1991  Roland H. Pesch  (pesch at fowanton.cygnus.com)
+
+	* doc/gdb.texinfo: (1) Updated w/ref to RMS comments through
+	chapter 9; (2) documented 'break' command's menu mode for
+	overloaded names, in response to hgs problem report C++ p-31
+
 Wed May 15 11:02:48 1991  Roland H. Pesch  (pesch at fowanton.cygnus.com)
 
 	* doc/gdb.texinfo: (1) better introductory example; (2) more
