@@ -72,13 +72,10 @@ deprecated_inside_entry_file (CORE_ADDR addr)
 	  addr < symfile_objfile->ei.deprecated_entry_file_highpc);
 }
 
-/* Test a specified PC value to see if it is in the range of addresses
-   that correspond to the main() function.  See comments above for why
-   we might want to do this.
+/* Test whether PC is in the range of addresses that corresponds to
+   the "main" function.
 
-   Typically called from DEPRECATED_FRAME_CHAIN_VALID.
-
-   A PC of zero is always considered to be the bottom of the stack. */
+   A PC of zero is always considered to be the bottom of the stack.  */
 
 int
 inside_main_func (CORE_ADDR pc)
@@ -87,30 +84,30 @@ inside_main_func (CORE_ADDR pc)
 
   if (pc == 0)
     return 1;
+
   if (symfile_objfile == 0)
     return 0;
 
   msymbol = lookup_minimal_symbol (main_name (), NULL, symfile_objfile);
 
-  /* If the addr range is not set up at symbol reading time, set it up
-     now.  This is for DEPRECATED_FRAME_CHAIN_VALID_ALTERNATE. I do
-     this for coff, because it is unable to set it up and symbol
-     reading time. */
+  /* If the address range hasn't been set up at symbol reading time,
+     set it up now.  */
 
   if (msymbol != NULL
       && symfile_objfile->ei.main_func_lowpc == INVALID_ENTRY_LOWPC
       && symfile_objfile->ei.main_func_highpc == INVALID_ENTRY_HIGHPC)
     {
-      /* brobecker/2003-10-10: We used to rely on lookup_symbol() to search
-         the symbol associated to the main function.  Unfortunately,
-         lookup_symbol() uses the current-language la_lookup_symbol_nonlocal
-         function to do the global symbol search.  Depending on the language,
-         this can introduce certain side-effects, because certain languages
-         such as Ada for instance may find more than one match.  So we prefer
-         to search the main function symbol using its address rather than
-         its name.  */
-      struct symbol *mainsym
-        = find_pc_function (SYMBOL_VALUE_ADDRESS (msymbol));
+      /* brobecker/2003-10-10: We used to rely on lookup_symbol() to
+	 search the symbol associated to the "main" function.
+	 Unfortunately, lookup_symbol() uses the current-language
+	 la_lookup_symbol_nonlocal function to do the global symbol
+	 search.  Depending on the language, this can introduce
+	 certain side-effects, because certain languages, for instance
+	 Ada, may find more than one match.  Therefore we prefer to
+	 search the "main" function symbol using its address rather
+	 than its name.  */
+      struct symbol *mainsym =
+	find_pc_function (SYMBOL_VALUE_ADDRESS (msymbol));
 
       if (mainsym && SYMBOL_CLASS (mainsym) == LOC_BLOCK)
 	{
@@ -123,44 +120,45 @@ inside_main_func (CORE_ADDR pc)
 
   /* Not in the normal symbol tables, see if "main" is in the partial
      symbol table.  If it's not, then give up.  */
-  {
-    if (msymbol != NULL && MSYMBOL_TYPE (msymbol) == mst_text)
-      {
-	struct obj_section *osect
-	  = find_pc_sect_section (SYMBOL_VALUE_ADDRESS (msymbol),
-				  msymbol->ginfo.bfd_section);
-	if (osect != NULL)
-	  {
-	    int i;
-	    /* Step over other symbols at this same address, and
-	       symbols in other sections, to find the next symbol in
-	       this section with a different address.  */
-	    for (i = 1; SYMBOL_LINKAGE_NAME (msymbol + i) != NULL; i++)
-	      {
-		if (SYMBOL_VALUE_ADDRESS (msymbol + i) != SYMBOL_VALUE_ADDRESS (msymbol)
-		    && SYMBOL_BFD_SECTION (msymbol + i) == SYMBOL_BFD_SECTION (msymbol))
-		  break;
-	      }
+  if (msymbol != NULL && MSYMBOL_TYPE (msymbol) == mst_text)
+    {
+      CORE_ADDR maddr = SYMBOL_VALUE_ADDRESS (msymbol);
+      asection *msect = SYMBOL_BFD_SECTION (msymbol);
+      struct obj_section *osect = find_pc_sect_section (maddr, msect);
 
-	    symfile_objfile->ei.main_func_lowpc = SYMBOL_VALUE_ADDRESS (msymbol);
+      if (osect != NULL)
+	{
+	  int i;
 
-	    /* Use the lesser of the next minimal symbol in the same
-	       section, or the end of the section, as the end of the
-	       function.  */
-	    if (SYMBOL_LINKAGE_NAME (msymbol + i) != NULL
-		&& SYMBOL_VALUE_ADDRESS (msymbol + i) < osect->endaddr)
-	      symfile_objfile->ei.main_func_highpc = SYMBOL_VALUE_ADDRESS (msymbol + i);
-	    else
-	      /* We got the start address from the last msymbol in the
-		 objfile.  So the end address is the end of the
-		 section.  */
-	      symfile_objfile->ei.main_func_highpc = osect->endaddr;
-	  }
-      }
-  }
+	  /* Step over other symbols at this same address, and symbols
+	     in other sections, to find the next symbol in this
+	     section with a different address.  */
+	  for (i = 1; SYMBOL_LINKAGE_NAME (msymbol + i) != NULL; i++)
+	    {
+	      if (SYMBOL_VALUE_ADDRESS (msymbol + i) != maddr
+		  && SYMBOL_BFD_SECTION (msymbol + i) == msect)
+		break;
+	    }
 
-  return (symfile_objfile->ei.main_func_lowpc <= pc &&
-	  symfile_objfile->ei.main_func_highpc > pc);
+	  symfile_objfile->ei.main_func_lowpc = maddr;
+
+	  /* Use the lesser of the next minimal symbol in the same
+	     section, or the end of the section, as the end of the
+	     function.  */
+	  if (SYMBOL_LINKAGE_NAME (msymbol + i) != NULL
+	      && SYMBOL_VALUE_ADDRESS (msymbol + i) < osect->endaddr)
+	    symfile_objfile->ei.main_func_highpc =
+	      SYMBOL_VALUE_ADDRESS (msymbol + i);
+	  else
+	    /* We got the start address from the last msymbol in the
+	       objfile.  So the end address is the end of the
+	       section.  */
+	    symfile_objfile->ei.main_func_highpc = osect->endaddr;
+	}
+    }
+
+  return (symfile_objfile->ei.main_func_lowpc <= pc
+	  && symfile_objfile->ei.main_func_highpc > pc);
 }
 
 /* Test a specified PC value to see if it is in the range of addresses

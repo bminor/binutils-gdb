@@ -1,3 +1,9 @@
+2003-12-13  Mark Kettenis  <kettenis@gnu.org>
+
+	* blockframe.c (inside_main_func): Reformat.  Introduce new local
+	variables to prevent long lines.  Update comments to reflect
+	reality.
+
 2003-12-12  Kevin Buettner  <kevinb@redhat.com>
 
 	From David Mosberger  <davidm@hpl.hp.com>:
