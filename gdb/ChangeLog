@@ -1,5 +1,9 @@
 Wed Jan  3 19:49:54 1996  steve chamberlain  <sac@slash.cygnus.com>
 
+	* config/i386/tm-win32.h (IN_SOLIB_CALL_TRAMPOLINE): New.
+	(SKIP_TRAMPOLINE_CODE): New.
+	* config/i386/xm-win32.h (CANT_FORK): Deleted.
+	(SLASH*) Changed to use unix style slash.
 	* symtab.h (namespace enum): becomes typedef to avoid namespace
 	collision in C++. 
 	* infcmd.c (path_command): Use empty string if PATH name not set.

@@ -1,5 +1,5 @@
 /* Macro definitions for i386 running under the win32 API Unix.
-   Copyright 1995 Free Software Foundation, Inc.
+   Copyright 1995, 1996 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -118,3 +118,8 @@ double_to_i387 PARAMS ((char *, char *));
    builtin_type_double)
 
 #define NAMES_HAVE_UNDERSCORE
+
+
+#define IN_SOLIB_CALL_TRAMPOLINE(pc, name) skip_trampoline_code (pc, name)
+#define SKIP_TRAMPOLINE_CODE(pc)           skip_trampoline_code (pc, 0)
+extern CORE_ADDR skip_trampoline_code PARAMS ((CORE_ADDR pc, char *name));
