@@ -941,106 +941,6 @@ ppc64_call_dummy_address (void)
 }
 
 
-/* Return the unrelocated code address at which execution begins for
-   ABFD, under the 64-bit PowerPC Linux ABI.  On that system, the ELF
-   header e_entry field (which is what bfd_get_start_address gives
-   you) is the address of the function descriptor for the startup
-   function, not the address of the actual machine instruction you
-   jump to.
-
-   This function doesn't just go and read the entry point from the
-   function descriptor.  We need it to work when ABFD is the dynamic
-   linker, immediately after an exec.  But ld.so is a dynamic
-   executable itself on PPC64 Linux, so it appears in memory whereever
-   the kernel drops it; this means that bfd_get_start_address's result
-   needs to be adjusted --- by some offset we don't know.  So we can't
-   find the descriptor's address in memory to read the entry point
-   from it.
-
-   Instead, we do it all based on ABFD's symbol table.  We take the
-   address from bfd_get_start_address, find each symbol at that
-   address, stick a '.' on the front of its name to get the entry
-   point symbol name, try to look that up, and return the value of
-   what we find, if anything.  We never touch memory, or talk with the
-   kernel about the inferior at all.
-
-   Now, this address we return is straight from the symbol table, so
-   it hasn't been adjusted to take into account where ABFD was loaded.
-   But that's okay --- our job is just to return the unrelocated code
-   address.  */
-static CORE_ADDR
-ppc64_linux_bfd_entry_point (struct gdbarch *gdbarch, bfd *abfd)
-{
-  long storage_needed;
-
-  storage_needed = bfd_get_symtab_upper_bound (abfd);
-
-  if (storage_needed > 0)
-    {
-      asymbol **symbol_table;
-      unsigned int symbol_table_len;
-      struct cleanup *back_to;
-      unsigned int i;
-      CORE_ADDR start_address;
-
-      symbol_table = (asymbol **) xmalloc (storage_needed);
-      back_to = make_cleanup (xfree, symbol_table);
-      symbol_table_len = bfd_canonicalize_symtab (abfd, symbol_table);
-
-      /* Find the symbol naming the start function's descriptor.  Its
-         value must be the BFD's start address, and it must be in a
-         data section.
-
-         Also, the symbol's name must be non-empty.  A lot of symtabs
-         seem to contain a bunch of symbols with no name whose value
-         is zero relative to the start of the data section; if the
-         start function descriptor is the first thing in the data
-         section, we'll get more false positives than we'd like.  */
-      start_address = bfd_get_start_address (abfd);
-      for (i = 0; i < symbol_table_len; i++)
-        if (bfd_asymbol_value (symbol_table[i]) == start_address
-            && symbol_table[i]->section->flags & SEC_DATA
-            && bfd_asymbol_name (symbol_table[i])[0] != '\0')
-          {
-            /* Okay, we've found a symbol whose value and section are
-               right.  Construct the name of the corresponding entry
-               point symbol and see if we can find a symbol with that
-               name in a code section.  */
-            const char *desc_name = bfd_asymbol_name (symbol_table[i]);
-            char *entry_pt_name = alloca (strlen (desc_name) + 2);
-            int j;
-
-            entry_pt_name[0] = '.';
-            strcpy (entry_pt_name + 1, desc_name);
-
-            for (j = 0; j < symbol_table_len; j++)
-              if ((strcmp (bfd_asymbol_name (symbol_table[j]), entry_pt_name)
-                   == 0)
-                  && symbol_table[j]->section->flags & SEC_CODE)
-                /* Yay!  What a coincidence.  Let's assume this is the
-                   entry point symbol.  */
-                {
-                  CORE_ADDR entry_point = bfd_asymbol_value (symbol_table[j]);
-                  do_cleanups (back_to);
-                  return entry_point;
-                }
-            
-            /* No good --- there's no symbol by that name.  Perhaps
-               symbol_table[i] is just coincidentally equal to the
-               start address; after all, there could be many symbols
-               with the same value.  Continue the search.  */
-          }
-
-      /* No good --- there's no symbol pointing at the start
-         address.  */
-      do_cleanups (back_to);
-    }
-  
-  /* No good --- this BFD has no symbols at all.  We give up!  */
-  return 0;
-}
-
-
 enum {
   ELF_NGREG = 48,
   ELF_NFPREG = 33,
@@ -1168,8 +1068,6 @@ ppc_linux_init_abi (struct gdbarch_info info,
         (gdbarch, ppc64_linux_convert_from_func_ptr_addr);
 
       set_gdbarch_call_dummy_address (gdbarch, ppc64_call_dummy_address);
-      
-      set_gdbarch_bfd_entry_point (gdbarch, ppc64_linux_bfd_entry_point);
 
       set_gdbarch_in_solib_call_trampoline
         (gdbarch, ppc64_in_solib_call_trampoline);
