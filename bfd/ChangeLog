@@ -1,3 +1,8 @@
+Thu Jan 25 12:14:16 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config.bfd (i[345]86-*-sco*elf*): Use bfd_elf32_i386_vec.  From
+	Robert Lipe <robertl@arnet.com>.
+
 Thu Jan 25 12:08:51 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* elf32-ppc.c (ppc_elf_size_dynamic_sections): Add .rela.sdata{,2}
