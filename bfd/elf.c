@@ -4265,7 +4265,9 @@ assign_file_positions_except_relocs (bfd *abfd,
 	      off = _bfd_elf_assign_file_position_for_section (hdr, off,
 							       FALSE);
 	    }
-	  else if (hdr == i_shdrpp[tdata->symtab_section]
+	  else if (hdr->sh_type == SHT_REL
+		   || hdr->sh_type == SHT_RELA
+		   || hdr == i_shdrpp[tdata->symtab_section]
 		   || hdr == i_shdrpp[tdata->symtab_shndx_section]
 		   || hdr == i_shdrpp[tdata->strtab_section])
 	    hdr->sh_offset = -1;
