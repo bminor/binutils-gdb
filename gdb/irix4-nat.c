@@ -117,7 +117,7 @@ fill_fpregset (fpregsetp, regno)
       if ((regno == -1) || (regno == regi))
 	{
 	  from = (char *) &registers[REGISTER_BYTE (regi)];
-	  to = (char *) &(fpregsetp->fp_r.fp_regs[regi]);
+	  to = (char *) &(fpregsetp->fp_r.fp_regs[regi - FP0_REGNUM]);
 	  bcopy(from, to, REGISTER_RAW_SIZE (regi));
 	}
     }
