@@ -1,3 +1,7 @@
+Tue Jan  5 19:14:51 1999  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* gdb.base/help.exp: Update to reflect current text.
+
 Tue Jan  5 13:05:32 1999  David Taylor  <taylor@texas.cygnus.com>
 
 	* gdb.c++/anon-union.cc: make foo and bar global, otherwise
