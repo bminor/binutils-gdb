@@ -1,6 +1,7 @@
 Fri Oct  6 10:54:13 1995  Doug Evans  <dje@canuck.cygnus.com>
 
 	* gas/arm/arm.exp: Renamed from gas.exp.
+	* gas/arm/le-fpconst.[sd]: New testcase.
 
 Fri Sep 29 15:12:10 1995  Ian Lance Taylor  <ian@cygnus.com>
 
