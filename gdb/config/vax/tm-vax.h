@@ -51,7 +51,7 @@ extern CORE_ADDR vax_skip_prologue (CORE_ADDR);
 
 /* Stack grows downward.  */
 
-#define INNER_THAN(lhs,rhs) ((lhs) < (rhs))
+#define INNER_THAN(lhs,rhs) core_addr_lessthan ((lhs), (rhs))
 
 /* Sequence of bytes for breakpoint instruction.  */
 
@@ -173,37 +173,21 @@ extern struct type *vax_register_virtual_type (int);
 /* Saved Pc.  Get it from sigcontext if within sigtramp.  */
 
 /* Offset to saved PC in sigcontext, from <sys/signal.h>.  */
+/* XXXJRT should go away */
 #define SIGCONTEXT_PC_OFFSET 12
 
-#define FRAME_SAVED_PC(FRAME) \
-  (((FRAME)->signal_handler_caller \
-    ? sigtramp_saved_pc (FRAME) \
-    : read_memory_integer ((FRAME)->frame + 16, 4)) \
-   )
+#define FRAME_SAVED_PC(FRAME) vax_frame_saved_pc ((FRAME))
+extern CORE_ADDR vax_frame_saved_pc (struct frame_info *);
 
-/* Cannot find the AP register value directly from the FP value.  Must
-   find it saved in the frame called by this one, or in the AP
-   register for the innermost frame.  However, there is no way to tell
-   the difference between the innermost frame and a frame for which we
-   just don't know the frame that it called (e.g. "info frame
-   0x7ffec789").  For the sake of argument suppose that the stack is
-   somewhat trashed (which is one reason that "info frame" exists).
-   So return 0 (indicating we don't know the address of
-   the arglist) if we don't know what frame this frame calls.  */
-#define FRAME_ARGS_ADDRESS_CORRECT(fi) \
- (((fi)->next                                  \
-   ? read_memory_integer ((fi)->next->frame + 8, 4)   \
-   : /* read_register (AP_REGNUM) */ 0))
+/* XXXJRT not yet under gdbarch control */
+#define FRAME_ARGS_ADDRESS_CORRECT(fi) vax_frame_args_address ((fi))
+extern CORE_ADDR vax_frame_args_address (struct frame_info *);
 
-/* In most of GDB, getting the args address is too important to
-   just say "I don't know".  This is sometimes wrong for functions
-   that aren't on top of the stack, but c'est la vie.  */
-#define FRAME_ARGS_ADDRESS(fi) \
- (((fi)->next                                  \
-   ? read_memory_integer ((fi)->next->frame + 8, 4)   \
-   : read_register (AP_REGNUM) /* 0 */))
+#define FRAME_ARGS_ADDRESS(fi) vax_frame_args_address ((fi))
+extern CORE_ADDR vax_frame_args_address (struct frame_info *);
 
-#define FRAME_LOCALS_ADDRESS(fi) ((fi)->frame)
+#define FRAME_LOCALS_ADDRESS(fi) vax_frame_locals_address ((fi))
+extern CORE_ADDR vax_frame_locals_address (struct frame_info *);
 
 /* Return number of args passed to a frame.
    Can return -1, meaning no way to tell.  */

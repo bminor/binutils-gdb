@@ -126,6 +126,57 @@ vax_frame_init_saved_regs (struct frame_info *frame)
   frame->saved_regs[AP_REGNUM] = frame->frame + 8;
   frame->saved_regs[PS_REGNUM] = frame->frame + 4;
 }
+
+CORE_ADDR
+vax_frame_saved_pc (struct frame_info *frame)
+{
+  if (frame->signal_handler_caller)
+    return (sigtramp_saved_pc (frame)); /* XXXJRT */
+
+  return (read_memory_integer (frame->frame + 16, 4));
+}
+
+CORE_ADDR
+vax_frame_args_address_correct (struct frame_info *frame)
+{
+  /* Cannot find the AP register value directly from the FP value.  Must
+     find it saved in the frame called by this one, or in the AP register
+     for the innermost frame.  However, there is no way to tell the
+     difference between the innermost frame and a frame for which we
+     just don't know the frame that it called (e.g. "info frame 0x7ffec789").
+     For the sake of argument, suppose that the stack is somewhat trashed
+     (which is one reason that "info frame" exists).  So, return 0 (indicating
+     we don't know the address of the arglist) if we don't know what frame
+     this frame calls.  */
+  if (frame->next)
+    return (read_memory_integer (frame->next->frame + 8, 4));
+
+  return (0);
+}
+
+CORE_ADDR
+vax_frame_args_address (struct frame_info *frame)
+{
+  /* In most of GDB, getting the args address is too important to
+     just say "I don't know".  This is sometimes wrong for functions
+     that aren't on top of the stack, but c'est la vie.  */
+  if (frame->next)
+    return (read_memory_integer (frame->next->frame + 8, 4));
+
+  return (read_register (AP_REGNUM));
+}
+
+CORE_ADDR
+vax_frame_locals_address (struct frame_info *frame)
+{
+  return (frame->frame);
+}
+
+int
+vax_frame_num_args (struct frame_info *fi)
+{
+  return (0xff & read_memory_integer (FRAME_ARGS_ADDRESS (fi), 1));
+}
 
 /* Advance PC across any function entry prologue instructions
    to reach some "real" code.  */
@@ -155,16 +206,6 @@ vax_skip_prologue (CORE_ADDR pc)
     pc += 7;			/* skip movab */
   return pc;
 }
-
-/* Return number of args passed to a frame.
-   Can return -1, meaning no way to tell.  */
-
-int
-vax_frame_num_args (struct frame_info *fi)
-{
-  return (0xff & read_memory_integer (FRAME_ARGS_ADDRESS (fi), 1));
-}
-
 
 
 /* Print the vax instruction at address MEMADDR in debugged memory,

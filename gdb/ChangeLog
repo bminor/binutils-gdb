@@ -1,3 +1,17 @@
+2002-04-22  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* vax-tdep.c (vax_frame_saved_pc): New function.
+	(vax_frame_args_address_correct): Ditto.
+	(vax_frame_args_address): Ditto.
+	(vax_frame_locals_address): Ditto.
+	(vax_frame_num_args): Move code to be in proximity to
+	other frame-related functions.
+	* config/vax/tm-vax.h (INNER_THAN): Use core_addr_lessthan.
+	(FRAME_SAVED_PC): Use vax_frame_saved_pc.
+	(FRAME_ARGS_ADDRESS_CORRECT): Use vax_frame_args_address_correct.
+	(FRAME_ARGS_ADDRESS): Use vax_frame_args_address.
+	(FRAME_LOCALS_ADDRESS): Use vax_frame_locals_address.
+
 2002-04-22  H.J. Lu  (hjl@gnu.org)
 
 	* Makefile.in (FLAGS_TO_PASS): Add libdir, mandir, datadir and
