@@ -1,5 +1,14 @@
 2002-07-26  Kevin Buettner  <kevinb@redhat.com>
 
+	* aix-thread.c (special_register_p, supply_sprs64, supply_sprs32)
+	(fetch_regs_user_thread, fetch_regs_kernel_thread, fill_sprs64)
+	(fill_sprs32, store_regs_user_thread, store_regs_kernel_thread):
+	Add support for the fpscr register.
+	* rs6000-nat.c (regmap, fetch_inferior_registers)
+	(store_inferior_registers, fetch_core_registers): Likewise.
+
+2002-07-26  Kevin Buettner  <kevinb@redhat.com>
+
 	* rs6000-nat.c (language.h): Include.
 	(special_regs): Delete this array.
 	(regmap): New function.
