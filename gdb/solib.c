@@ -271,7 +271,25 @@ solib_map_sections (so)
    * Just record the name of the minimal symbol and lazily patch the
    addresses.
 
-   * Tell everyone to switch to Solaris2.  */
+   * Tell everyone to switch to Solaris2.  
+
+(1)  Move the call to special_symbol_handling out of the find_solib
+loop in solib_add.  This will call it once, rather than 35 times, when
+you have 35 shared libraries.  It's in the loop to pass the current
+solib's objfile so the symbols are added to that objfile's minsym.
+But since the symbols are in common (BSS), it doesn't really matter
+which objfile's minsyms they are added to, I think.
+
+(2)  Indeed, it might be best to create an objfile just for common minsyms,
+thus not needing any objfile argument to solib_add_common_symbols.
+
+(3)  Remove the call to lookup_minimal_symbol from
+solib_add_common_symbols.  If a symbol appears multiple times in the
+minsyms, we probably cope, more or less.  Note that if we had an
+objfile for just minsyms, install_minimal_symbols would automatically
+remove duplicates caused by running solib_add_common_symbols several
+times.
+*/
 
 static void
 solib_add_common_symbols (rtc_symp, objfile)
