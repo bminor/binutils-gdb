@@ -70,6 +70,7 @@ obstack.h
 pn-opcode.h
 pyr-opcode.h
 ranlib.h
+rs6000coff.h
 reloc.h
 sparc-opcode.h
 stab.def
@@ -103,7 +104,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.18  1991/10/24 18:12:14  fnf
+# Revision 1.19  1991/10/25 07:59:50  gnu
+# rs6000
+#
+# Revision 1.18  1991/10/24  18:12:14  fnf
 # Add "dwarf.h".
 #
 # Revision 1.17  1991/10/16  01:08:08  gnu
