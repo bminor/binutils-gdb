@@ -1,3 +1,13 @@
+1999-05-28  Ian Lance Taylor  <ian@zembu.com>
+
+	* configure.in: Check whether getuid and getgid exist.
+	* archive.c: Define getuid and getgid as macros if HAVE_GETUID or
+	HAVE_GETGID are not defined, respectively.
+	(bfd_write_armap): Don't special case on _WIN32 for getuid and
+	getgid.
+	* configure.host: Set ac_cv_func_get{ug}id for *-*-windows*.
+	* configure, config.in: Rebuild.
+
 1999-05-28  Martin Dorey  <mdorey@madge.com>
 
 	* elf32-i960.c: New file.

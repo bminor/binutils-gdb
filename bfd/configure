@@ -4460,7 +4460,7 @@ fi
 
 fi
 
-for ac_func in fcntl getpagesize setitimer sysconf fdopen
+for ac_func in fcntl getpagesize setitimer sysconf fdopen getuid getgid
 do
 echo $ac_n "checking for $ac_func""... $ac_c" 1>&6
 echo "configure:4467: checking for $ac_func" >&5
