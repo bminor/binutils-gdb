@@ -1,3 +1,8 @@
+2003-05-29  Mark Kettenis  <kettenis@gnu.org>
+
+	* i386-nto-tdep.c (i386nto_sigcontext_addr): Adapt for new frame
+	unwinder.
+
 2003-05-29  Michal Ludvig  <mludvig@suse.cz>
 
 	* x86-64-linux-nat.c: Fix nested comments.
