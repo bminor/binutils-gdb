@@ -1,5 +1,8 @@
 2005-02-07  Hans-Peter Nilsson  <hp@axis.com>
 
+	* ld-discard/extern.d, ld-discard/start.d, ld-discard/static.d:
+	Adjust for being identified as warnings.
+
 	* ld-cris/stabs1.s: New file.
 	* ld-cris/undef2.d, ld-cris/undef3.d: New tests.
 
