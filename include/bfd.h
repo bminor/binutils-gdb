@@ -212,6 +212,10 @@ typedef enum bfd_error {
 	      file_ambiguously_recognized, no_contents,
 	      bfd_error_nonrepresentable_section,
 	      no_debug_section, bad_value,
+
+	      /* An input file is shorter than expected.  */
+	      file_truncated,
+	      
 	      invalid_error_code} bfd_ec;
 
 extern bfd_ec bfd_error;

@@ -1,4 +1,16 @@
+Thu Apr 15 09:24:21 1993  Jim Kingdon  (kingdon@cygnus.com)
+
+	* bfd.h: Updated for file_truncated error.
+
+Thu Apr  8 10:53:47 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* ansidecl.h: If no ANSI, define const to be empty.
+
 Thu Apr  1 09:00:10 1993  Jim Kingdon  (kingdon@cygnus.com)
+
+	* dis-asm.h: Declare a29k and i960 print_insn_*.
+
+	* dis-asm.h: Add print_address_func and related stuff.
 
 	* dis-asm.h (dis_asm_read_memory): Fix prototype.
 
