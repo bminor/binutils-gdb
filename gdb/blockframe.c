@@ -997,7 +997,9 @@ generic_frame_chain_valid (fp, fi)
   if (PC_IN_CALL_DUMMY(FRAME_SAVED_PC(fi), fp, fp))
     return 1;   /* don't prune CALL_DUMMY frames */
   else          /* fall back to default algorithm (see frame.h) */
-    return (fp != 0 && !inside_entry_file (FRAME_SAVED_PC(fi)));
+    return (fp != 0
+	    && fi->frame INNER_THAN fp
+	    && !inside_entry_file (FRAME_SAVED_PC(fi)));
 }
  
 /* Function: get_saved_register
