@@ -1,3 +1,8 @@
+Tue Jul 13 16:48:56 1993  Frederic Pierresteguy (F.Pierresteguy@frcl.bull.fr)
+
+	* configure.in: Add new target m68k-coffun to the dpx/2.
+	* config/m68k-coffun.mt: New file, renamed from config/dpx2.mt.
+
 Mon Jul 12 10:42:49 1993  Ken Raeburn  (raeburn@deneb.cygnus.com)
 
 	* reloc.c (enum bfd_reloc_code_real): Move SPARC_BASE13 reloc into

@@ -62,6 +62,7 @@ case "${target}" in
   i960-*-vxworks)	bfd_target=i960-bout ;;
   i960-*-aout)		bfd_target=i960-bout ;;
   i960-*-bout)		bfd_target=i960-bout ;;
+  m68*-bull-sysv*)	bfd_target=m68k-coffun ;;
   m68*-hp-bsd*)		bfd_target=hp300bsd ;;
   m68*-*-aout)		bfd_target=m68k-aout ;;
   m68*-*-coff)		bfd_target=m68k-coff ;;
