@@ -34,19 +34,16 @@ void ppc_linux_init_extra_frame_info (int fromleaf, struct frame_info *);
 int ppc_linux_frameless_function_invocation (struct frame_info *);
 void ppc_linux_frame_init_saved_regs (struct frame_info *);
 CORE_ADDR ppc_linux_frame_chain (struct frame_info *);
-int ppc_sysv_abi_use_struct_convention (int, struct type *);
-void ppc_sysv_abi_store_return_value (struct type *type,
-				      struct regcache *regcache,
-				      const void *valbuf);
-void ppc_sysv_abi_extract_return_value (struct type *type,
-					struct regcache *regcache,
-					void *valbuf);
-void ppc_sysv_abi_broken_store_return_value (struct type *type,
-					     struct regcache *regcache,
-					     const void *valbuf);
-void ppc_sysv_abi_broken_extract_return_value (struct type *type,
-					       struct regcache *regcache,
-					       void *valbuf);
+enum return_value_convention ppc_sysv_abi_return_value (struct gdbarch *gdbarch,
+							struct type *valtype,
+							struct regcache *regcache,
+							const void *inval,
+							void *outval);
+enum return_value_convention ppc_sysv_abi_broken_return_value (struct gdbarch *gdbarch,
+							       struct type *valtype,
+							       struct regcache *regcache,
+							       const void *inval,
+							       void *outval);
 CORE_ADDR ppc_sysv_abi_push_dummy_call (struct gdbarch *gdbarch,
 					CORE_ADDR func_addr,
 					struct regcache *regcache,
@@ -68,14 +65,11 @@ struct link_map_offsets *ppc_linux_svr4_fetch_link_map_offsets (void);
 void ppc_linux_supply_gregset (char *buf);
 void ppc_linux_supply_fpregset (char *buf);
 
-int ppc64_sysv_abi_use_struct_convention (int gcc_p, struct type *value_type);
-void ppc64_sysv_abi_extract_return_value (struct type *valtype,
-					  struct regcache *regbuf,
-					  void *valbuf);
-void ppc64_sysv_abi_store_return_value (struct type *valtype,
-					struct regcache *regbuf,
-					const void *valbuf);
-
+enum return_value_convention ppc64_sysv_abi_return_value (struct gdbarch *gdbarch,
+							  struct type *valtype,
+							  struct regcache *regcache,
+							  const void *inval,
+							  void *outval);
 
 /* From rs6000-tdep.c... */
 CORE_ADDR rs6000_frame_saved_pc (struct frame_info *fi);

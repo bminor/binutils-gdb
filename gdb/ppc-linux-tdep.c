@@ -596,13 +596,17 @@ ppc_linux_memory_remove_breakpoint (CORE_ADDR addr, char *contents_cache)
    structures, no matter their size, are put in memory.  Vectors,
    which were added later, do get returned in a register though.  */
 
-static int     
-ppc_linux_use_struct_convention (int gcc_p, struct type *value_type)
+static enum return_value_convention
+ppc_linux_return_value (struct gdbarch *gdbarch, struct type *valtype,
+			struct regcache *regcache, const void *inval, void *outval)
 {  
-  if ((TYPE_LENGTH (value_type) == 16 || TYPE_LENGTH (value_type) == 8)
-      && TYPE_VECTOR (value_type))
-    return 0;                            
-  return 1;
+  if ((TYPE_CODE (valtype) == TYPE_CODE_STRUCT
+       || TYPE_CODE (valtype) == TYPE_CODE_UNION)
+      && !((TYPE_LENGTH (valtype) == 16 || TYPE_LENGTH (valtype) == 8)
+	   && TYPE_VECTOR (valtype)))
+    return RETURN_VALUE_STRUCT_CONVENTION;
+  else
+    return ppc_sysv_abi_return_value (gdbarch, valtype, regcache, inval, outval);
 }
 
 /* Fetch (and possibly build) an appropriate link_map_offsets
@@ -1043,7 +1047,7 @@ ppc_linux_init_abi (struct gdbarch_info info,
 	 (well ignoring vectors that is).  When this was corrected, it
 	 wasn't fixed for GNU/Linux native platform.  Use the
 	 PowerOpen struct convention.  */
-      set_gdbarch_use_struct_convention (gdbarch, ppc_linux_use_struct_convention);
+      set_gdbarch_return_value (gdbarch, ppc_linux_return_value);
 
       /* Note: kevinb/2002-04-12: See note in rs6000_gdbarch_init regarding
 	 *_push_arguments().  The same remarks hold for the methods below.  */

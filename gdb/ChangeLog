@@ -1,3 +1,42 @@
+2003-11-07  Andrew Cagney  <cagney@redhat.com>
+
+	* ppc-linux-tdep.c (ppc_linux_init_abi): When 32-bit GNU/Linux,
+	set "return_value" instead of "use_struct_convention".
+	(ppc_linux_use_struct_convention): Delete function.
+	(ppc_linux_return_value): New function.
+	* ppc-sysv-tdep.c (ppc_sysv_abi_return_value): New function.
+	(ppc_sysv_abi_broken_return_value): New function.
+	(do_ppc_sysv_return_value): Add "gdbarch" parameter.
+	(ppc64_sysv_abi_push_dummy_call): Add "gdbarch" parameter, drop
+	static.
+	(ppc_sysv_abi_extract_return_value): Delete function.
+	(ppc_sysv_abi_broken_extract_return_value): Delete function.
+	(ppc_sysv_abi_store_return_value): Delete function.
+	(ppc_sysv_abi_broken_store_return_value): Delete function.
+	(ppc_sysv_abi_use_struct_convention): Delete function.
+	(ppc64_sysv_abi_use_struct_convention): Delete function.
+	(ppc64_sysv_abi_extract_return_value): Delete function.
+	(ppc64_sysv_abi_store_return_value): Delete function.
+	* ppcnbsd-tdep.c (ppcnbsd_return_value): New function.
+	(ppcnbsd_init_abi): Set "return_value", instead of
+	"use_struct_convention", "extract_return_value", and
+	"store_return_value".
+	(ppcnbsd_use_struct_convention): Delete function.
+	* ppc-tdep.h (ppc64_sysv_abi_return_value): Declare.
+	(ppc_sysv_abi_return_value): Declare.
+	(ppc_sysv_abi_broken_return_value): Declare.
+	(ppc_sysv_abi_use_struct_convention): Delete.
+	(ppc_sysv_abi_store_return_value): Delete.
+	(ppc_sysv_abi_extract_return_value): Delete.
+	(ppc_sysv_abi_broken_store_return_value): Delete.
+	(ppc_sysv_abi_broken_extract_return_value): Delete.
+	(ppc64_sysv_abi_use_struct_convention): Delete.
+	(ppc64_sysv_abi_extract_return_value): Delete.
+	(ppc64_sysv_abi_store_return_value): Delete.
+	* rs6000-tdep.c (rs6000_gdbarch_init): For 32-bit and 64-bit SYSV,
+	set "return_value" instead of "extract_return_value",
+	"store_return_value", and "use_struct_convention".
+
 2003-11-07  Mark Kettenis  <kettenis@gnu.org>
 
 	* dwarf2-frame.c (dwarf2_build_frame_info): Wrap comment.

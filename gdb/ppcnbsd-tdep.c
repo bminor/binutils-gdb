@@ -208,17 +208,22 @@ ppcnbsd_pc_in_sigtramp (CORE_ADDR pc, char *func_name)
    convention but, 1.6 switched to the below broken convention.  For
    the moment use the broken convention.  Ulgh!.  */
 
-static int     
-ppcnbsd_use_struct_convention (int gcc_p, struct type *value_type)
-{  
-  if ((TYPE_LENGTH (value_type) == 16 || TYPE_LENGTH (value_type) == 8)
-      && TYPE_VECTOR (value_type))
-    return 0;                            
-
-  return !(TYPE_LENGTH (value_type) == 1
-	   || TYPE_LENGTH (value_type) == 2
-	   || TYPE_LENGTH (value_type) == 4
-	   || TYPE_LENGTH (value_type) == 8);
+static enum return_value_convention
+ppcnbsd_return_value (struct gdbarch *gdbarch, struct type *valtype,
+		      struct regcache *regcache, const void *inval, void *outval)
+{
+  if ((TYPE_CODE (valtype) == TYPE_CODE_STRUCT
+       || TYPE_CODE (valtype) == TYPE_CODE_UNION)
+      && !((TYPE_LENGTH (valtype) == 16 || TYPE_LENGTH (valtype) == 8)
+	    && TYPE_VECTOR (valtype))
+      && !(TYPE_LENGTH (valtype) == 1
+	   || TYPE_LENGTH (valtype) == 2
+	   || TYPE_LENGTH (valtype) == 4
+	   || TYPE_LENGTH (valtype) == 8))
+    return RETURN_VALUE_STRUCT_CONVENTION;
+  else
+    return ppc_sysv_abi_broken_return_value (gdbarch, valtype, regcache,
+					     inval, outval);
 }
 
 static void
@@ -228,9 +233,7 @@ ppcnbsd_init_abi (struct gdbarch_info info,
   set_gdbarch_pc_in_sigtramp (gdbarch, ppcnbsd_pc_in_sigtramp);
   /* For NetBSD, this is an on again, off again thing.  Some systems
      do use the broken struct convention, and some don't.  */
-  set_gdbarch_use_struct_convention (gdbarch, ppcnbsd_use_struct_convention);
-  set_gdbarch_extract_return_value (gdbarch, ppc_sysv_abi_broken_extract_return_value);
-  set_gdbarch_store_return_value (gdbarch, ppc_sysv_abi_broken_store_return_value);
+  set_gdbarch_return_value (gdbarch, ppcnbsd_return_value);
   set_solib_svr4_fetch_link_map_offsets (gdbarch,
                                 nbsd_ilp32_solib_svr4_fetch_link_map_offsets);
 }

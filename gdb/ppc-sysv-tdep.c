@@ -322,22 +322,22 @@ ppc_sysv_abi_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
    when returned in general-purpose registers.  */
 
 static enum return_value_convention
-do_ppc_sysv_return_value (struct type *type, struct regcache *regcache,
-			  const void *inval, void *outval, int broken_gcc)
+do_ppc_sysv_return_value (struct gdbarch *gdbarch, struct type *type,
+			  struct regcache *regcache, const void *inval,
+			  void *outval, int broken_gcc)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   gdb_assert (tdep->wordsize == 4);
   if (TYPE_CODE (type) == TYPE_CODE_FLT
       && TYPE_LENGTH (type) <= 8
-      && ppc_floating_point_unit_p (current_gdbarch))
+      && ppc_floating_point_unit_p (gdbarch))
     {
       if (outval)
 	{
 	  /* Floats and doubles stored in "f1".  Convert the value to
 	     the required type.  */
 	  char regval[MAX_REGISTER_SIZE];
-	  struct type *regtype = register_type (current_gdbarch,
-						FP0_REGNUM + 1);
+	  struct type *regtype = register_type (gdbarch, FP0_REGNUM + 1);
 	  regcache_cooked_read (regcache, FP0_REGNUM + 1, regval);
 	  convert_typed_floating (regval, regtype, outval, type);
 	}
@@ -346,7 +346,7 @@ do_ppc_sysv_return_value (struct type *type, struct regcache *regcache,
 	  /* Floats and doubles stored in "f1".  Convert the value to
 	     the register's "double" type.  */
 	  char regval[MAX_REGISTER_SIZE];
-	  struct type *regtype = register_type (current_gdbarch, FP0_REGNUM);
+	  struct type *regtype = register_type (gdbarch, FP0_REGNUM);
 	  convert_typed_floating (inval, type, regval, regtype);
 	  regcache_cooked_write (regcache, FP0_REGNUM + 1, regval);
 	}
@@ -510,43 +510,19 @@ do_ppc_sysv_return_value (struct type *type, struct regcache *regcache,
   return RETURN_VALUE_STRUCT_CONVENTION;
 }
 
-void
-ppc_sysv_abi_extract_return_value (struct type *type,
-				   struct regcache *regcache, void *valbuf)
+enum return_value_convention
+ppc_sysv_abi_return_value (struct gdbarch *gdbarch, struct type *valtype,
+			   struct regcache *regcache, const void *inval, void *outval)
 {
-  do_ppc_sysv_return_value (type, regcache, NULL, valbuf, 0);
+  return do_ppc_sysv_return_value (gdbarch, valtype, regcache, inval, outval, 0);
 }
 
-void
-ppc_sysv_abi_broken_extract_return_value (struct type *type,
-					  struct regcache *regcache,
-					  void *valbuf)
+enum return_value_convention
+ppc_sysv_abi_broken_return_value (struct gdbarch *gdbarch, struct type *valtype,
+				  struct regcache *regcache, const void *inval,
+				  void *outval)
 {
-  do_ppc_sysv_return_value (type, regcache, NULL, valbuf, 1);
-}
-
-void
-ppc_sysv_abi_store_return_value (struct type *type, struct regcache *regcache,
-				 const void *valbuf)
-{
-  do_ppc_sysv_return_value (type, regcache, valbuf, NULL, 0);
-}
-
-void
-ppc_sysv_abi_broken_store_return_value (struct type *type,
-					struct regcache *regcache,
-					const void *valbuf)
-{
-  do_ppc_sysv_return_value (type, regcache, valbuf, NULL, 1);
-}
-
-/* Structures 8 bytes or less long are returned in the r3 & r4
-   registers, according to the SYSV ABI. */
-int
-ppc_sysv_abi_use_struct_convention (int gcc_p, struct type *value_type)
-{
-  return (do_ppc_sysv_return_value (value_type, NULL, NULL, NULL, 0)
-	  == RETURN_VALUE_STRUCT_CONVENTION);
+  return do_ppc_sysv_return_value (gdbarch, valtype, regcache, inval, outval, 1);
 }
 
 /* Pass the arguments in either registers, or in the stack. Using the
@@ -849,16 +825,17 @@ ppc64_sysv_abi_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
    copy the buffer to the corresponding register return-value location
    location; when OUTVAL is non-NULL, fill the buffer from the
    corresponding register return-value location.  */
-static enum return_value_convention
-ppc64_sysv_abi_return_value (struct type *valtype, struct regcache *regcache,
-			     const void *inval, void *outval)
+enum return_value_convention
+ppc64_sysv_abi_return_value (struct gdbarch *gdbarch, struct type *valtype,
+			     struct regcache *regcache, const void *inval,
+			     void *outval)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   /* Floats and doubles in F1.  */
   if (TYPE_CODE (valtype) == TYPE_CODE_FLT && TYPE_LENGTH (valtype) <= 8)
     {
       char regval[MAX_REGISTER_SIZE];
-      struct type *regtype = register_type (current_gdbarch, FP0_REGNUM);
+      struct type *regtype = register_type (gdbarch, FP0_REGNUM);
       if (inval != NULL)
 	{
 	  convert_typed_floating (inval, valtype, regval, regtype);
@@ -907,7 +884,7 @@ ppc64_sysv_abi_return_value (struct type *valtype, struct regcache *regcache,
       && TYPE_LENGTH (TYPE_TARGET_TYPE (valtype)) == 1)
     {
       /* Small character arrays are returned, right justified, in r3.  */
-      int offset = (register_size (current_gdbarch, tdep->ppc_gp0_regnum + 3)
+      int offset = (register_size (gdbarch, tdep->ppc_gp0_regnum + 3)
 		    - TYPE_LENGTH (valtype));
       if (inval != NULL)
 	regcache_cooked_write_part (regcache, tdep->ppc_gp0_regnum + 3,
@@ -988,31 +965,6 @@ ppc64_sysv_abi_return_value (struct type *valtype, struct regcache *regcache,
       return RETURN_VALUE_REGISTER_CONVENTION;
     }
   return RETURN_VALUE_STRUCT_CONVENTION;
-}
-
-int
-ppc64_sysv_abi_use_struct_convention (int gcc_p, struct type *value_type)
-{
-  return (ppc64_sysv_abi_return_value (value_type, NULL, NULL, NULL)
-	  == RETURN_VALUE_STRUCT_CONVENTION);
-}
-
-void
-ppc64_sysv_abi_extract_return_value (struct type *valtype,
-				     struct regcache *regbuf, void *valbuf)
-{
-  if (ppc64_sysv_abi_return_value (valtype, regbuf, NULL, valbuf)
-      != RETURN_VALUE_REGISTER_CONVENTION)
-    error ("Function return value unknown");
-}
-
-void
-ppc64_sysv_abi_store_return_value (struct type *valtype,
-				   struct regcache *regbuf,
-				   const void *valbuf)
-{
-  if (!ppc64_sysv_abi_return_value (valtype, regbuf, valbuf, NULL))
-    error ("Function return value location unknown");
 }
 
 CORE_ADDR
