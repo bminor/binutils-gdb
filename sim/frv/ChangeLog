@@ -1,3 +1,8 @@
+2004-08-27  Richard Sandiford  <rsandifo@redhat.com>
+
+	* cpu.[ch], arch.[ch], decode.[ch]: Regenerated.
+	* cpuall.h, model.c, sem.c: Regenerated.
+
 2004-03-01  Richard Sandiford  <rsandifo@redhat.com>
 
 	* Makefile.in (SIM_OBJS): Add profile-fr450.o.
