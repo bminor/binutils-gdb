@@ -1,4 +1,10 @@
+Tue Nov 14 20:03:54 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ld-sh/sh2.c (__main): Define.
+
 Mon Nov  6 14:39:18 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ld-empic/empic.exp: Accept a . in the address symbol.
 
 	* ld-shared/shared.exp: Run tests on rs6000*-*-aix* and
 	powerpc*-*-aix*.  Add code to create appropriate exports files,
