@@ -1,3 +1,7 @@
+Tue Sep 22 16:40:52 1998  Jim Wilson  <wilson@cygnus.com>
+
+	* config/obj-elf.h (ECOFF_DEBUGGING): Add missing parens.
+
 Tue Sep 22 15:44:21 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-d30v.c (find_format): Do not accept flag registers as
