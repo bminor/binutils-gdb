@@ -382,7 +382,7 @@ case "${host}" in
   i[3456]86-*-go32)
     noconfigdirs="tcl tk expect dejagnu make texinfo bison patch flex byacc send-pr gprof uudecode dejagnu diff guile perl apache inet"
 	;;
-  *-*-cygwin32)
+  *-*-cygwin32 | *-*-windows*)
      noconfigdirs="tk tcl expect dejagnu cvs autoconf bison send-pr gprof rcs guile perl texinfo apache inet"
     ;;
   ppc*-*-pe)

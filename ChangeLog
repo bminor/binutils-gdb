@@ -1,3 +1,13 @@
+Wed Sep  4 17:26:13 1996  Stu Grossman  (grossman@critters.cygnus.com)
+
+	* configure.in:  Don't config lots of things for *-*-windows*.
+
+Sat Aug 31 11:45:57 1996  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* mpw-config.in: Test for mpw-true, true, and null-command scripts.
+	(host_libs, host_tools): Copy from configure.in.
+	* mpw-configure: Don't complain about directories not found.
+
 Thu Aug 29 16:44:58 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* configure.in (i[345]86): Recognize i686 for pentium pro.
