@@ -31,6 +31,7 @@ COPYING
 ChangeLog
 Makefile.in
 chardefs.h
+config.sub
 configure
 configure.in
 emacs_keymap.c
@@ -55,7 +56,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.1  1991/05/23 17:44:08  rich
+# Revision 1.2  1991/08/22 09:02:14  gnu
+# add config.sub
+#
+# Revision 1.1  1991/05/23  17:44:08  rich
 # Initial revision
 #
 #
