@@ -323,6 +323,10 @@ the VxWorks shell can also be debugged.  _GDBN__ uses code that runs on
 both the UNIX host and on the VxWorks target.  The program
 @code{_GDBP__} is installed and executed on the UNIX host.
 
+The following information on connecting to VxWorks was current when
+this manual was produced; newer releases of VxWorks may use revised
+procedures.
+
 The remote debugging interface (RDB) routines are installed and executed
 on the VxWorks target.  These routines are included in the VxWorks library
 @file{rdb.a} and are incorporated into the system image when source-level
