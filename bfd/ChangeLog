@@ -1,3 +1,8 @@
+Thu Mar  2 15:58:24 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* aoutx.h (NAME(aout,set_section_contents)): Double check that the
+	caller is writing to a valid section.
+
 Thu Mar  2 14:37:57 1995  Bryan Ford  <baford@cs.utah.edu>
 
 	* binary.c: Add support for reading binary files.  Loads the raw

@@ -1166,26 +1166,32 @@ NAME(aout,set_section_contents) (abfd, section, location, offset, count)
   file_ptr text_end;
   bfd_size_type text_size;
 
-  if (abfd->output_has_begun == false)
-      {
-	if (NAME(aout,adjust_sizes_and_vmas) (abfd,
-					      &text_size,
-					      &text_end) == false)
-	  return false;
-      }
+  if (! abfd->output_has_begun)
+    {
+      if (! NAME(aout,adjust_sizes_and_vmas) (abfd, &text_size, &text_end))
+	return false;
+    }
 
-  /* regardless, once we know what we're doing, we might as well get going */
-  if (section != obj_bsssec(abfd))
-      {
-	if (bfd_seek (abfd, section->filepos + offset, SEEK_SET) != 0)
-	  return false;
+  if (section == obj_bsssec (abfd))
+    {
+      bfd_set_error (bfd_error_no_contents);
+      return false;
+    }
 
-	if (count) {
-	  return (bfd_write ((PTR)location, 1, count, abfd) == count) ?
-	    true : false;
-	}
-	return true;
-      }
+  if (section != obj_textsec (abfd)
+      && section != obj_datasec (abfd))
+    {
+      bfd_set_error (bfd_error_nonrepresentable_section);
+      return false;
+    }
+
+  if (count != 0)
+    {
+      if (bfd_seek (abfd, section->filepos + offset, SEEK_SET) != 0
+	  || bfd_write (location, 1, count, abfd) != count)
+	return false;
+    }
+
   return true;
 }
 
@@ -2140,6 +2146,14 @@ NAME(aout,swap_ext_reloc_in) (abfd, bytes, cache_ptr, symbols)
 				      >> RELOC_EXT_BITS_TYPE_SH_LITTLE;
   }
 
+  if (r_extern && r_index > bfd_get_symcount (abfd))
+    {
+      /* We could arrange to return an error, but it might be useful
+         to see the file even if it is bad.  */
+      r_extern = 0;
+      r_index = N_ABS;
+    }
+
   cache_ptr->howto =  howto_table_ext + r_type;
   MOVE_ADDRESS(GET_SWORD(abfd, bytes->r_addend));
 }
@@ -2191,6 +2205,14 @@ NAME(aout,swap_std_reloc_in) (abfd, bytes, cache_ptr, symbols)
   BFD_ASSERT (howto_idx < TABLE_SIZE (howto_table_std));
   cache_ptr->howto =  howto_table_std + howto_idx;
   BFD_ASSERT (cache_ptr->howto->type != -1);
+
+  if (r_extern && r_index > bfd_get_symcount (abfd))
+    {
+      /* We could arrange to return an error, but it might be useful
+         to see the file even if it is bad.  */
+      r_extern = 0;
+      r_index = N_ABS;
+    }
 
   MOVE_ADDRESS(0);
 }
@@ -2955,13 +2977,13 @@ aout_link_check_ar_symbols (abfd, info, pneeded)
 		  /* Turn the current link symbol into a common
 		     symbol.  It is already on the undefs list.  */
 		  h->type = bfd_link_hash_common;
+		  h->u.c.p = ((struct bfd_link_hash_common_entry *)
+			      bfd_hash_allocate (&info->hash->table,
+				  sizeof (struct bfd_link_hash_common_entry)));
+		  if (h->u.c.p == NULL)
+		    return false;
+
 		  h->u.c.size = value;
-		  if (h->u.c.size != value)
-		    {
-		      /* The size did not fit in the bitfield.  */
-		      bfd_set_error (bfd_error_bad_value);
-		      return false;
-		    }
 
 		  /* FIXME: This isn't quite right.  The maximum
 		     alignment of a common symbol should be set by the
@@ -2970,10 +2992,10 @@ aout_link_check_ar_symbols (abfd, info, pneeded)
 		  power = bfd_log2 (value);
 		  if (power > bfd_get_arch_info (abfd)->section_align_power)
 		    power = bfd_get_arch_info (abfd)->section_align_power;
-		  h->u.c.alignment_power = power;
+		  h->u.c.p->alignment_power = power;
 
-		  h->u.c.section = bfd_make_section_old_way (symbfd,
-							     "COMMON");
+		  h->u.c.p->section = bfd_make_section_old_way (symbfd,
+								"COMMON");
 		}
 	      else
 		{
@@ -3208,9 +3230,9 @@ aout_link_add_symbols (abfd, info)
 	 This isn't quite right: it should use the architecture of the
 	 output file, not the input files.  */
       if ((*sym_hash)->root.type == bfd_link_hash_common
-	  && ((*sym_hash)->root.u.c.alignment_power >
+	  && ((*sym_hash)->root.u.c.p->alignment_power >
 	      bfd_get_arch_info (abfd)->section_align_power))
-	(*sym_hash)->root.u.c.alignment_power =
+	(*sym_hash)->root.u.c.p->alignment_power =
 	  bfd_get_arch_info (abfd)->section_align_power;
 
       /* If this is a set symbol, and we are not building sets, then
