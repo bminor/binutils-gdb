@@ -1,3 +1,7 @@
+2005-02-07  Maciej W. Rozycki  <macro@mips.com>
+
+	* elfn32-mips.c (elf_mips_howto_table_rela): Fix a comment typo.
+
 2005-02-07  Alexandre Oliva  <aoliva@redhat.com>
 
 	* elf32-frv.c (FRVFDPIC_SYM_LOCAL): Remove special handling for

@@ -502,7 +502,7 @@ static reloc_howto_type elf_mips_howto_table_rel[] =
        a) It means building the addend from a R_MIPS_HIGHEST/R_MIPS_HIGHER/
 	  R_MIPS_HI16/R_MIPS_LO16 sequence with varying ordering, using
 	  fallable heuristics.
-       b) No other NEwABI toolchain actually emits such relocations.  */
+       b) No other NewABI toolchain actually emits such relocations.  */
   EMPTY_HOWTO (R_MIPS_HIGHER),
   EMPTY_HOWTO (R_MIPS_HIGHEST),
 
