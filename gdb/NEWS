@@ -17,6 +17,7 @@ PowerPC Netware					powerpc-*-netware*
 Harris/CXUX m88k				m88*-harris-cxux*
 Most ns32k hosts and targets			ns32k-*-mach3* ns32k-umax-*
 						ns32k-utek-sysv* ns32k-utek-*
+SunOS 4.0.Xi on i386				i[3456]86-*-sunos*
 
 * Changes to command line processing
 

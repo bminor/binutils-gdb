@@ -2062,8 +2062,6 @@ ax-gdb.o: ax-gdb.c $(defs_h) $(symtab_h) $(symfile_h) $(gdbtypes_h) \
 
 sun3-nat.o: sun3-nat.c $(defs_h) $(gdbcore_h) $(inferior_h) $(regcache_h)
 
-# OBSOLETE sun386-nat.o: sun386-nat.c $(defs_h) $(inferior_h) $(gdbcore_h) $(regcache_h)
-
 symfile.o: symfile.c $(breakpoint_h) $(complaints_h) $(defs_h) \
 	$(expression_h) $(gdb_stabs_h) $(gdbcmd_h) $(gdbcore_h) \
 	$(gdbtypes_h) $(language_h) $(objfiles_h) $(symfile_h) $(symtab_h) \

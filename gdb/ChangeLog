@@ -1,5 +1,16 @@
 2001-12-01  Andrew Cagney  <ac131313@redhat.com>
 
+	* NEWS: Note that i[3456]86-*-sunos* was deleted.
+	* Makefile.in (sun386-nat.o): Delete.
+	* configure.tgt: Delete i[3456]86-*-sunos* target.
+	* configure.host: Delete i[3456]86-*-sunos* host.
+	* sun386-nat.c: Delete.file.
+	* config/i386/nm-sun386.h: Delete file.
+	* config/i386/sun386.mh: Delete file.
+	* config/i386/sun386.mt: Delete file.
+	* config/i386/tm-sun386.h: Delete file.
+	* config/i386/xm-sun386.h: Delete file.
+
 	* NEWS: Note that ns32k-*-mach3*, ns32k-umax-*, ns32k-utek-sysv*
 	and ns32k-utek-* were deleted.
 	* Makefile.in (ultra3-nat.o, ultra3-xdep.o): Delete.
