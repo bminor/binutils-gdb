@@ -1,5 +1,9 @@
 2001-06-23  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf32-i386.c (elf_i386_relocate_section): Replace ugly
+	complicated tests for unresolvable relocs with a simple direct
+	scheme using "unresolved_reloc" var.
+
 	* elf32-i386.c (struct elf_i386_pcrel_relocs_copied): Rename to
 	elf_i386_dyn_relocs.  Update comment.
 	(struct elf_i386_link_hash_entry): Rename pcrel_relocs_copied to

@@ -625,7 +625,7 @@ elf_i386_check_relocs (abfd, info, sec, relocs)
 	    }
 	  else
 	    {
-     	      /* This is a global offset table entry for a local symbol.  */
+	      /* This is a global offset table entry for a local symbol.  */
 	      if (local_got_refcounts == NULL)
 		{
 		  size_t size;
@@ -647,14 +647,14 @@ elf_i386_check_relocs (abfd, info, sec, relocs)
 
 	case R_386_PLT32:
 	  /* This symbol requires a procedure linkage table entry.  We
-             actually build the entry in adjust_dynamic_symbol,
-             because this might be a case of linking PIC code which is
-             never referenced by a dynamic object, in which case we
-             don't need to generate a procedure linkage table entry
-             after all.  */
+	     actually build the entry in adjust_dynamic_symbol,
+	     because this might be a case of linking PIC code which is
+	     never referenced by a dynamic object, in which case we
+	     don't need to generate a procedure linkage table entry
+	     after all.  */
 
 	  /* If this is a local symbol, we resolve it directly without
-             creating a procedure linkage table entry.  */
+	     creating a procedure linkage table entry.  */
 	  if (h == NULL)
 	    continue;
 
@@ -1316,7 +1316,7 @@ elf_i386_size_dynamic_sections (output_bfd, info)
 	      asection *target;
 
 	      /* Remember whether there are any reloc sections other
-                 than .rel.plt.  */
+		 than .rel.plt.  */
 	      if (s != htab->srelplt)
 		{
 		  const char *outname;
@@ -1448,6 +1448,7 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
       asection *sec;
       bfd_vma off;
       bfd_vma relocation;
+      boolean unresolved_reloc;
       bfd_reloc_status_type r;
       unsigned int indx;
 
@@ -1494,6 +1495,7 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
       h = NULL;
       sym = NULL;
       sec = NULL;
+      unresolved_reloc = false;
       if (r_symndx < symtab_hdr->sh_info)
 	{
 	  sym = local_syms + r_symndx;
@@ -1514,51 +1516,12 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
 	      || h->root.type == bfd_link_hash_defweak)
 	    {
 	      sec = h->root.u.def.section;
-	      if (r_type == R_386_GOTPC
-		  || (r_type == R_386_PLT32
-		      && htab->splt != NULL
-		      && h->plt.offset != (bfd_vma) -1)
-		  || (r_type == R_386_GOT32
-		      && (WILL_CALL_FINISH_DYNAMIC_SYMBOL
-			  (htab->root.dynamic_sections_created, info, h))
-		      && !(info->shared
-			   && (info->symbolic
-			       || h->dynindx == -1
-			       || (h->elf_link_hash_flags
-				   & ELF_LINK_FORCED_LOCAL))
-			   && (h->elf_link_hash_flags
-			       & ELF_LINK_HASH_DEF_REGULAR)))
-		  || ((r_type == R_386_32
-		       || r_type == R_386_PC32)
-		      && ((info->shared
-			   && ((!info->symbolic && h->dynindx != -1)
-			       || (h->elf_link_hash_flags
-				   & ELF_LINK_HASH_DEF_REGULAR) == 0))
-			  || (!info->shared
-			      && h->dynindx != -1
-			      && (h->elf_link_hash_flags
-				  & ELF_LINK_NON_GOT_REF) == 0
-			      && (h->elf_link_hash_flags
-				  & ELF_LINK_HASH_DEF_REGULAR) == 0))
-		      && ((input_section->flags & SEC_ALLOC) != 0
-			  /* DWARF will emit R_386_32 relocations in its
-			     sections against symbols defined externally
-			     in shared libraries.  We can't do anything
-			     with them here.  */
-			  || ((input_section->flags & SEC_DEBUGGING) != 0
-			      && (h->elf_link_hash_flags
-				  & ELF_LINK_HASH_DEF_DYNAMIC) != 0))))
-		/* In these cases, we don't need the relocation
-		   value.  We check specially because in some
-		   obscure cases sec->output_section will be NULL.  */
-		;
-	      else if (sec->output_section == NULL)
-		(*_bfd_error_handler)
-		  (_("%s(%s+0x%lx): unresolvable relocation against symbol `%s'"),
-		   bfd_get_filename (input_bfd),
-		   bfd_get_section_name (input_bfd, input_section),
-		   (long) rel->r_offset,
-		   h->root.root.string);
+	      if (sec->output_section == NULL)
+		/* Set a flag that will be cleared later if we find a
+		   relocation value for this symbol.  output_section
+		   is typically NULL for symbols satisfied by a shared
+		   library.  */
+		unresolved_reloc = true;
 	      else
 		relocation = (h->root.u.def.value
 			      + sec->output_section->vma
@@ -1632,8 +1595,8 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
 	      off = local_got_offsets[r_symndx];
 
 	      /* The offset must always be a multiple of 4.  We use
-                 the least significant bit to record whether we have
-                 already generated the necessary reloc.  */
+		 the least significant bit to record whether we have
+		 already generated the necessary reloc.  */
 	      if ((off & 1) != 0)
 		off &= ~1;
 	      else
@@ -1669,6 +1632,7 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
 	    abort ();
 
 	  relocation = htab->sgot->output_offset + off;
+	  unresolved_reloc = false;
 	  break;
 
 	case R_386_GOTOFF:
@@ -1686,6 +1650,7 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
 	case R_386_GOTPC:
 	  /* Use global offset table as symbol value.  */
 	  relocation = htab->sgot->output_section->vma;
+	  unresolved_reloc = false;
 	  break;
 
 	case R_386_PLT32:
@@ -1693,7 +1658,7 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
 	     procedure linkage table.  */
 
 	  /* Resolve a PLT32 reloc against a local symbol directly,
-             without using the procedure linkage table.  */
+	     without using the procedure linkage table.  */
 	  if (h == NULL)
 	    break;
 
@@ -1701,14 +1666,15 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
 	      || htab->splt == NULL)
 	    {
 	      /* We didn't make a PLT entry for this symbol.  This
-                 happens when statically linking PIC code, or when
-                 using -Bsymbolic.  */
+		 happens when statically linking PIC code, or when
+		 using -Bsymbolic.  */
 	      break;
 	    }
 
 	  relocation = (htab->splt->output_section->vma
 			+ htab->splt->output_offset
 			+ h->plt.offset);
+	  unresolved_reloc = false;
 	  break;
 
 	case R_386_32:
@@ -1806,7 +1772,7 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
 	      else
 		{
 		  /* h->dynindx may be -1 if this symbol was marked to
-                     become local.  */
+		     become local.  */
 		  if (h == NULL
 		      || (info->shared
 			  && (info->symbolic || h->dynindx == -1)
@@ -1843,6 +1809,14 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
 	default:
 	  break;
 	}
+
+      if (unresolved_reloc)
+	(*_bfd_error_handler)
+	  (_("%s(%s+0x%lx): unresolvable relocation against symbol `%s'"),
+	   bfd_get_filename (input_bfd),
+	   bfd_get_section_name (input_bfd, input_section),
+	   (long) rel->r_offset,
+	   h->root.root.string);
 
       r = _bfd_final_link_relocate (howto, input_bfd, input_section,
 				    contents, rel->r_offset,
@@ -2238,6 +2212,6 @@ elf_i386_fake_sections (abfd, hdr, sec)
 #define elf_backend_gc_sweep_hook	      elf_i386_gc_sweep_hook
 #define elf_backend_relocate_section	      elf_i386_relocate_section
 #define elf_backend_size_dynamic_sections     elf_i386_size_dynamic_sections
-#define elf_backend_fake_sections 	      elf_i386_fake_sections
+#define elf_backend_fake_sections	      elf_i386_fake_sections
 
 #include "elf32-target.h"
