@@ -1,3 +1,8 @@
+Fri Apr 10 23:02:27 1992  Fred Fish  (fnf@cygnus.com)
+
+	* configure.in:  Recognize new ncr3000 config.
+	* config/mh-ncr3000:  New NCR 3000 config file.
+
 Wed Mar 25 10:46:30 1992  John Gilmore  (gnu at cygnus.com)
 
 	* history.c (stifle_history):  Negative arg treated as zero.
