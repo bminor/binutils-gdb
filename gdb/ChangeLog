@@ -1,3 +1,13 @@
+2004-11-07  Mark Kettenis  <kettenis@gnu.org>
+
+	* mips64obsd-tdep.c: Include "trad-frame.h", "tramp-frame.h" and
+	"gdb_assert.h".
+	(mips64obsd_sigframe_init): New function.
+	(mips64obsd_sigframe): New variable.
+	(mips64obsd_init_abi): Add comments.  Prepend mips64obsd_sigrame
+	unwinder.
+	* Makefile.in (mips64obsd-tdep.o): Update dependencies.
+
 2004-11-06  Joel Brobecker  <brobecker@gnat.com>
 
 	* alpha-mdebug-tdep.c: #include mdebugread.h.

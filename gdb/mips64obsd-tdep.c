@@ -23,7 +23,10 @@
 #include "osabi.h"
 #include "regcache.h"
 #include "regset.h"
+#include "trad-frame.h"
+#include "tramp-frame.h"
 
+#include "gdb_assert.h"
 #include "gdb_string.h"
 
 #include "mips-tdep.h"
@@ -74,14 +77,72 @@ mips64obsd_regset_from_core_section (struct gdbarch *gdbarch,
 }
 
 
+/* Signal trampolines.  */
+
+static void
+mips64obsd_sigframe_init (const struct tramp_frame *self,
+			  struct frame_info *next_frame,
+			  struct trad_frame_cache *cache,
+			  CORE_ADDR func)
+{
+  struct gdbarch *gdbarch = get_frame_arch (next_frame);
+  CORE_ADDR sp, sigcontext_addr, addr;
+  int regnum;
+
+  /* We find the appropriate instance of `struct sigcontext' at a
+     fixed offset in the signal frame.  */
+  sp = frame_unwind_register_signed (next_frame, MIPS_SP_REGNUM + NUM_REGS);
+  sigcontext_addr = sp + 32;
+
+  /* PC.  */
+  regnum = mips_regnum (gdbarch)->pc;
+  trad_frame_set_reg_addr (cache, regnum + NUM_REGS, sigcontext_addr + 16);
+
+  /* GPRs.  */
+  for (regnum = MIPS_AT_REGNUM, addr = sigcontext_addr + 32;
+       regnum <= MIPS_RA_REGNUM; regnum++, addr += 8)
+    trad_frame_set_reg_addr (cache, regnum + NUM_REGS, addr);
+
+  /* HI and LO.  */
+  regnum = mips_regnum (gdbarch)->lo;
+  trad_frame_set_reg_addr (cache, regnum + NUM_REGS, sigcontext_addr + 280);
+  regnum = mips_regnum (gdbarch)->hi;
+  trad_frame_set_reg_addr (cache, regnum + NUM_REGS, sigcontext_addr + 288);
+
+  /* TODO: Handle the floating-point registers.  */
+
+  trad_frame_set_id (cache, frame_id_build (sp, func));
+}
+
+static const struct tramp_frame mips64obsd_sigframe =
+{
+  SIGTRAMP_FRAME,
+  MIPS_INSN32_SIZE,
+  {
+    { 0x67a40020, -1 },		/* daddiu  a0,sp,32 */
+    { 0x24020067, -1 },		/* li      v0,103 */
+    { 0x0000000c, -1 },		/* syscall */
+    { 0x0000000d, -1 },		/* break */
+    { TRAMP_SENTINEL_INSN, -1 }
+  },
+  mips64obsd_sigframe_init
+};
+
+
 static void
 mips64obsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
+  /* OpenBSD/mips64 only supports the n64 ABI, but the braindamaged
+     way GDB works, forces us to pretend we can handle them all.  */
+
   set_gdbarch_regset_from_core_section
     (gdbarch, mips64obsd_regset_from_core_section);
 
+  tramp_frame_prepend_unwinder (gdbarch, &mips64obsd_sigframe);
+
   set_gdbarch_software_single_step (gdbarch, mips_software_single_step);
 
+  /* OpenBSD/mips64 has SVR4-style shared libraries.  */
   set_solib_svr4_fetch_link_map_offsets
     (gdbarch, svr4_lp64_fetch_link_map_offsets);
 }
