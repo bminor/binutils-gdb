@@ -44,19 +44,17 @@ asymbol *symbol;
 {                                             
   long relocation = 0;
 
-  if (symbol != (asymbol *)NULL) {              
-      if (symbol->section == &bfd_com_section) 
-      {
-	
-      relocation = 0;                           
-    } else {                                      
-      relocation = symbol->value;               
-    }                                           
-    if (symbol->section != (asection *)NULL) {    
-      relocation += symbol->section->output_section->vma +
-        	symbol->section->output_offset;           
-    }                                             
+  if (symbol->section == &bfd_com_section) 
+  {
+    relocation = 0;                           
   }
+  else 
+  {                                      
+    relocation = symbol->value +
+     symbol->section->output_section->vma +
+      symbol->section->output_offset;
+  }                                           
+
   return(relocation);
 }
 
@@ -70,132 +68,145 @@ DEFUN(a29k_reloc,(abfd, reloc_entry, symbol_in, data, input_section),
       PTR data AND
       asection *input_section)
 {
-    /* the consth relocation comes in two parts, we have to remember
-       the state between calls, in these variables */
-    static boolean part1_consth_active = false;
-    static unsigned long part1_consth_value;
+  /* the consth relocation comes in two parts, we have to remember
+     the state between calls, in these variables */
+  static boolean part1_consth_active = false;
+  static unsigned long part1_consth_value;
 
-    unsigned long insn;
-    unsigned long sym_value;
-    unsigned long unsigned_value;
-    unsigned short r_type;
-    long signed_value;
+  unsigned long insn;
+  unsigned long sym_value;
+  unsigned long unsigned_value;
+  unsigned short r_type;
+  long signed_value;
 
+  unsigned long addr = reloc_entry->address + input_section->vma;
+  bfd_byte  *hit_data =addr + (bfd_byte *)(data);
 	
-    r_type = reloc_entry->howto->type;
+  r_type = reloc_entry->howto->type;
 
-    /* FIXME: Do we need to check for partial linking here */
-    if (symbol_in && (symbol_in->section == &bfd_und_section))
+  /* FIXME: Do we need to check for partial linking here */
+  if (symbol_in && (symbol_in->section == &bfd_und_section))
+  {
+    /* Keep the state machine happy in case we're called again */
+    if (r_type == R_IHIHALF) 
     {
-	/* Keep the state machine happy in case we're called again */
-	if (r_type == R_IHIHALF) 
-	{
-	    part1_consth_active = true;
-	    part1_consth_value  = 0;
-	}
-	return(bfd_reloc_undefined);
+      part1_consth_active = true;
+      part1_consth_value  = 0;
+    }
+    return(bfd_reloc_undefined);
+  }
+
+  if ((part1_consth_active) && (r_type != R_IHCONST)) 
+  {
+    fprintf(stderr,"Relocation problem : ");
+    fprintf(stderr,"Missing IHCONST in module %s\n",abfd->filename);
+    part1_consth_active = false;
+    return(bfd_reloc_dangerous);
+  }
+
+
+  sym_value = get_symbol_value(symbol_in);
+
+  switch (r_type) 
+  {
+   case R_IREL: 	
+    insn = bfd_get_32(abfd, hit_data); 
+    /* Take the value in the field and sign extend it */
+    signed_value = EXTRACT_HWORD(insn) << 2;
+    signed_value = SIGN_EXTEND_HWORD(signed_value);
+    signed_value +=  sym_value + reloc_entry->addend;
+    if ((signed_value&~0x3ffff) == 0) 
+    {				/* Absolute jmp/call */
+      insn |= (1<<24);		/* Make it absolute */
+      /* FIXME: Should we change r_type to R_IABS */
+      signed_value /= 2;
+    } 
+    else 
+    {
+      /* Relative jmp/call, so subtract from the value the
+	 address of the place we're coming from */
+      signed_value -= reloc_entry->address + 
+       input_section->output_section->vma + 
+	input_section->output_offset;
+      if (signed_value>0x1ffff || signed_value<-0x20000) 
+       return(bfd_reloc_outofrange);
+
+      signed_value /= 2;
+    }
+    insn = INSERT_HWORD(insn, signed_value);
+    bfd_put_32(abfd, insn ,hit_data); 
+    break;
+   case R_ILOHALF: 
+    insn = bfd_get_32(abfd, hit_data); 
+    unsigned_value = EXTRACT_HWORD(insn);
+    unsigned_value +=  sym_value + reloc_entry->addend;
+    insn = INSERT_HWORD(insn, unsigned_value);
+    bfd_put_32(abfd, insn, hit_data); 
+    break;
+   case R_IHIHALF:
+    insn = bfd_get_32(abfd, hit_data); 
+    /* consth, part 1 
+       Just get the symbol value that is referenced */
+    part1_consth_active = true;
+    part1_consth_value = sym_value + reloc_entry->addend;
+    /* Don't modify insn until R_IHCONST */
+    break;
+   case R_IHCONST:	
+    insn = bfd_get_32(abfd, hit_data); 
+    /* consth, part 2 
+       Now relocate the reference */
+    if (part1_consth_active == false) {
+      fprintf(stderr,"Relocation problem : ");
+      fprintf(stderr,"IHIHALF missing in module %s\n",
+	      abfd->filename); 
+      return(bfd_reloc_dangerous);
+    }
+    /* sym_ptr_ptr = r_symndx, in coff_slurp_reloc_table() */
+    unsigned_value = 0;		/*EXTRACT_HWORD(insn) << 16;*/
+    unsigned_value += reloc_entry->addend; /* r_symndx */
+    unsigned_value += part1_consth_value;
+    unsigned_value = unsigned_value >> 16;
+    insn = INSERT_HWORD(insn, unsigned_value);
+    part1_consth_active = false;
+    bfd_put_32(abfd, insn, hit_data); 
+    break;
+   case R_BYTE:
+    insn = bfd_get_8(abfd, hit_data); 
+    unsigned_value = insn + sym_value + reloc_entry->addend;	
+    if (unsigned_value & 0xffffff00) {
+      fprintf(stderr,"Relocation problem : ");
+      fprintf(stderr,"byte value too large in module %s\n",
+	      abfd->filename); 
+      return(bfd_reloc_overflow);
+    }
+    bfd_put_8(abfd, insn, hit_data); 
+    break;
+   case R_HWORD:
+    insn = bfd_get_16(abfd, hit_data); 
+    unsigned_value = insn + sym_value + reloc_entry->addend;	
+    if (unsigned_value & 0xffff0000) {
+      fprintf(stderr,"Relocation problem : ");
+      fprintf(stderr,"hword value too large in module %s\n",
+	      abfd->filename); 
+      return(bfd_reloc_overflow);
     }
 
-    if ((part1_consth_active) && (r_type != R_IHCONST)) 
-    {
-	fprintf(stderr,"Relocation problem : ");
-	fprintf(stderr,"Missing IHCONST in module %s\n",abfd->filename);
-	part1_consth_active = false;
-	return(bfd_reloc_dangerous);
-    }
+     bfd_put_16(abfd, insn, hit_data); 
+    break;
+   case R_WORD:
+    insn = bfd_get_32(abfd, hit_data); 
+    insn += sym_value + reloc_entry->addend;  
+    bfd_put_32(abfd, insn, hit_data);
+    break;
+   default:
+    fprintf(stderr,"Relocation problem : ");
+    fprintf(stderr,"Unrecognized reloc type %d, in module %s\n",
+	    r_type,abfd->filename); 
+    return (bfd_reloc_dangerous);
+  }
 
-    insn = bfd_get_32(abfd, (bfd_byte *)data + reloc_entry->address); 
-    sym_value = get_symbol_value(symbol_in);
 
-    switch (r_type) 
-    {
-      case R_IREL: 	
-	/* Take the value in the field and sign extend it */
-	signed_value = EXTRACT_HWORD(insn) << 2;
-	signed_value = SIGN_EXTEND_HWORD(signed_value);
-	signed_value +=  sym_value + reloc_entry->addend;
-	if ((signed_value&~0x3ffff) == 0) 
-	{			/* Absolute jmp/call */
-	    insn |= (1<<24);	/* Make it absolute */
-	    /* FIXME: Should we change r_type to R_IABS */
-	    signed_value /= 2;
-	} 
-	else 
-	{
-	    /* Relative jmp/call, so subtract from the value the
-	       address of the place we're coming from */
-	    signed_value -= reloc_entry->address + 
-	     input_section->output_section->vma + 
-	      input_section->output_offset;
-	    if (signed_value>0x1ffff || signed_value<-0x20000) 
-	     return(bfd_reloc_outofrange);
-
-	    signed_value /= 2;
-	}
-	insn = INSERT_HWORD(insn, signed_value);
-	break;
-      case R_ILOHALF: 
-	unsigned_value = EXTRACT_HWORD(insn);
-	unsigned_value +=  sym_value + reloc_entry->addend;
-	insn = INSERT_HWORD(insn, unsigned_value);
-	break;
-      case R_IHIHALF:
-	/* consth, part 1 
-	  Just get the symbol value that is referenced */
-	part1_consth_active = true;
-	part1_consth_value = sym_value + reloc_entry->addend;
-	/* Don't modify insn until R_IHCONST */
-	return(bfd_reloc_ok);
-	break;
-      case R_IHCONST:	
-	/* consth, part 2 
-	   Now relocate the reference */
-	if (part1_consth_active == false) {
-	    fprintf(stderr,"Relocation problem : ");
-	    fprintf(stderr,"IHIHALF missing in module %s\n",
-		    abfd->filename); 
-	    return(bfd_reloc_dangerous);
-	}
-	/* sym_ptr_ptr = r_symndx, in coff_slurp_reloc_table() */
-	unsigned_value = 0;	/*EXTRACT_HWORD(insn) << 16;*/
-	unsigned_value += reloc_entry->addend; /* r_symndx */
-	unsigned_value += part1_consth_value;
-	unsigned_value = unsigned_value >> 16;
-	insn = INSERT_HWORD(insn, unsigned_value);
-	part1_consth_active = false;
-	break;
-      case R_BYTE:
-	unsigned_value = (insn >> 24) + sym_value + reloc_entry->addend;	
-	if (unsigned_value & 0xffffff00) {
-	    fprintf(stderr,"Relocation problem : ");
-	    fprintf(stderr,"byte value too large in module %s\n",
-		    abfd->filename); 
-	    return(bfd_reloc_overflow);
-	}
-	insn = (insn & 0x00ffffff) | (unsigned_value << 24);
-	break;
-      case R_HWORD:
-	unsigned_value = (insn >> 16) + sym_value + reloc_entry->addend;	
-	if (unsigned_value & 0xffff0000) {
-	    fprintf(stderr,"Relocation problem : ");
-	    fprintf(stderr,"hword value too large in module %s\n",
-		    abfd->filename); 
-	    return(bfd_reloc_overflow);
-	}
-	insn = (insn & 0x0000ffff) | (unsigned_value<<16); 
-	break;
-      case R_WORD:
-	insn += sym_value + reloc_entry->addend;  
-	break;
-      default:
-	fprintf(stderr,"Relocation problem : ");
-	fprintf(stderr,"Unrecognized reloc type %d, in module %s\n",
-		r_type,abfd->filename); 
-	return (bfd_reloc_dangerous);
-    }
-
-    bfd_put_32(abfd, insn, (bfd_byte *)data + reloc_entry->address);
-    return(bfd_reloc_ok);	
+  return(bfd_reloc_ok);	
 }
 
 /*      type	   rightshift
@@ -259,17 +270,16 @@ static void DEFUN(reloc_processing,(relent,reloc, symbols, abfd, section) ,
 
       if (ptr 
 	  && ptr->the_bfd == abfd		
-	  && ptr->section != (asection *) NULL	
+
 	  && ((ptr->flags & BSF_OLD_COMMON)== 0))	
       {						
-	  relent->addend = -(ptr->section->vma + ptr->value);	
+	  relent->addend = 0;
       }						
       else
       {					
 	  relent->addend = 0;			
       }			
       relent->address-= section->vma;
-/*      relent->section = 0;*/
   }
 }
 

@@ -556,14 +556,15 @@ DEFUN(coff_swap_sym_out,(abfd, inp, extp),
 }
 
 static void
-DEFUN(coff_swap_aux_in,(abfd, ext1, type, class, in),
+DEFUN(coff_swap_aux_in,(abfd, ext1, type, class, in1),
       bfd            *abfd AND
       PTR 	      ext1 AND
       int             type AND
       int             class AND
-      union internal_auxent *in)
+      PTR 	      in1)
 {
   AUXENT    *ext = (AUXENT *)ext1;
+  union internal_auxent *in = (union internal_auxent *)in1;
 
   switch (class) {
     case C_FILE:
@@ -693,7 +694,7 @@ DEFUN(coff_swap_aux_out,(abfd, inp, type, class, extp),
   default:
     PUTWORD(abfd, in->x_sym.x_tagndx.l, (bfd_byte *) ext->x_sym.x_tagndx);
 #ifndef NO_TVNDX
-    PUTWORD(abfd, in->x_sym.x_tvndx , (bfd_byte *) ext->x_sym.x_tvndx);
+    bfd_h_put_16(abfd, in->x_sym.x_tvndx , (bfd_byte *) ext->x_sym.x_tvndx);
 #endif
 
     if (ISFCN(type)) {
@@ -1497,7 +1498,7 @@ unsigned int written)
 
   coff_swap_sym_out(abfd, &native->u.syment, &buf);
   bfd_write((PTR)& buf, 1, SYMESZ, abfd);
-  for (j = 0; j <= native->u.syment.n_numaux;  j++)
+  for (j = 0; j < native->u.syment.n_numaux;  j++)
   {
     AUXENT buf1;
     bzero((PTR)&buf, AUXESZ);
@@ -2434,12 +2435,12 @@ DEFUN(coff_write_object_contents,(abfd),
    return false;
 {
   FILHDR buff;
-  coff_swap_filehdr_out(abfd, &internal_f, &buff);
+  coff_swap_filehdr_out(abfd, (PTR)&internal_f, (PTR)&buff);
   bfd_write((PTR) &buff, 1, FILHSZ, abfd);
 }
   if (abfd->flags & EXEC_P) {
       AOUTHDR buff;
-      coff_swap_aouthdr_out(abfd, &internal_a, &buff);
+      coff_swap_aouthdr_out(abfd, (PTR)&internal_a, (PTR)&buff);
       bfd_write((PTR) &buff, 1, AOUTSZ, abfd);
     }
   return true;
@@ -2704,7 +2705,7 @@ bfd            *abfd)
        raw_src++, internal_ptr++) {
 
       unsigned int i;
-      coff_swap_sym_in(abfd, (char *)raw_src, (char *)&internal_ptr->u.syment);
+      coff_swap_sym_in(abfd, (PTR)raw_src, (PTR)&internal_ptr->u.syment);
       internal_ptr->fix_tag = 0;
       internal_ptr->fix_end = 0;
       symbol_ptr = internal_ptr;
@@ -2722,12 +2723,17 @@ bfd            *abfd)
 			 symbol_ptr->u.syment.n_type,
 			 symbol_ptr->u.syment.n_sclass,
 			 &(internal_ptr->u.auxent));
-
+	/* Remember that bal entries arn't pointerized */
+	if (i != 1 || symbol_ptr->u.syment.n_sclass != C_LEAFPROC)
+	{
+	  
 	coff_pointerize_aux(abfd,
 			    internal,
 			    symbol_ptr->u.syment.n_type,
 			    symbol_ptr->u.syment.n_sclass,
 			    internal_ptr);
+      }
+	
       }
     }
 
@@ -2835,6 +2841,7 @@ DEFUN(section_from_bfd_index,(abfd, index),
       answer = answer->next;
     }
   BFD_ASSERT(0);
+  return &bfd_und_section;	/* For gcc -W and lint.  Never executed. */
 }
 
 #ifndef NO_COFF_LINENOS
@@ -2970,6 +2977,9 @@ DEFUN(coff_slurp_symbol_table,(abfd),
       src->u.syment._n._n_n._n_zeroes = (int) dst;
       dst->symbol.section = section_from_bfd_index(abfd,
 						   src->u.syment.n_scnum);
+      dst->symbol.flags = 0;
+      dst->done_lineno = false;
+      
       switch (src->u.syment.n_sclass) {
 #ifdef I960
       case C_LEAFEXT:
@@ -3227,7 +3237,6 @@ SUBSUBSECTION
 #ifndef CALC_ADDEND
 #define CALC_ADDEND(abfd, ptr, reloc, cache_ptr) 	\
 	    if (ptr && ptr->the_bfd == abfd		\
-		&& ptr->section != (asection *) NULL	\
 		&& ((ptr->flags & BSF_OLD_COMMON)== 0))	\
 	    {						\
 		cache_ptr->addend = -(ptr->section->vma + ptr->value);	\
@@ -3305,8 +3314,8 @@ DEFUN(coff_slurp_reloc_table,(abfd, asect, symbols),
       }
       else 
       {
-	  cache_ptr->sym_ptr_ptr = 0;
-	  ptr = 0;
+	cache_ptr->sym_ptr_ptr= bfd_abs_section.symbol_ptr_ptr;
+        ptr = 0;
 	      
       }
 
@@ -3703,19 +3712,10 @@ DEFUN(bfd_coff_get_relocated_section_contents,(in_abfd, seclet),
       bfd_seclet_type *seclet)
 
 {
-  asymbol **symbols = 0;
-  extern bfd *output_bfd;
-
   /* Get enough memory to hold the stuff */
   bfd *input_bfd = seclet->u.indirect.section->owner;
   asection *input_section = seclet->u.indirect.section;
-
   bfd_byte  *data = (bfd_byte *)malloc(input_section->_raw_size);
-  bfd_byte *dst = data;
-  bfd_byte *prev_dst = data;
-
-  unsigned int gap = 0;
-
   bfd_size_type reloc_size = bfd_get_reloc_upper_bound(input_bfd,
 						       input_section);
   arelent **reloc_vector = (arelent **)bfd_xmalloc(reloc_size);

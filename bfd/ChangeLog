@@ -1,3 +1,9 @@
+Fri May  1 12:58:34 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* coff-a29k.c: various changes to the way relocations work to cope
+	with the "new order" and latent bugs.
+	* coffcode.h: lint
+
 Wed Apr 29 12:37:07 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* aoutx.h (aout_swap_ext_reloc_out, aout_swap_std_reloc_out)
