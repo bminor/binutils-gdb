@@ -163,7 +163,7 @@ struct mips_elf_hash_sort_data
   long min_got_dynindx;
   /* The greatest dynamic symbol table index corresponding to a symbol
      with a GOT entry that is not referenced (e.g., a dynamic symbol
-     with dynamic relocations pointing to it from non-primary     GOTs).  */
+     with dynamic relocations pointing to it from non-primary GOTs).  */
   long max_unref_got_dynindx;
   /* The greatest dynamic symbol table index not corresponding to a
      symbol without a GOT entry.  */
@@ -245,7 +245,8 @@ struct mips_elf_link_hash_table
 
 struct extsym_info
 {
-  bfd *abfd;  struct bfd_link_info *info;
+  bfd *abfd;
+  struct bfd_link_info *info;
   struct ecoff_debug_info *debug;
   const struct ecoff_debug_swap *swap;
   bfd_boolean failed;
