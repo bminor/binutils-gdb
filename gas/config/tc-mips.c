@@ -4620,9 +4620,10 @@ mips_ip (str, ip)
 		 fashion is that the macro function doesn't expect to
 		 see anything which can be handled in a single
 		 constant instruction.  */
-	      if ((offset_expr.X_op != O_constant
-		   || offset_expr.X_add_number >= 0x8000
-		   || offset_expr.X_add_number < -0x8000)
+	      if (c == 0
+		  && (offset_expr.X_op != O_constant
+		      || offset_expr.X_add_number >= 0x8000
+		      || offset_expr.X_add_number < -0x8000)
 		  && (mips_pic != EMBEDDED_PIC
 		      || offset_expr.X_op != O_subtract
 		      || ! S_IS_LOCAL (offset_expr.X_add_symbol)
@@ -5101,7 +5102,8 @@ MIPS options:\n\
 -EL			generate little endian output\n\
 -g, -g2			do not remove uneeded NOPs or swap branches\n\
 -G NUM			allow referencing objects up to NUM bytes\n\
-			implicitly with the gp register [default 8]\n\
+			implicitly with the gp register [default 8]\n");
+  fprintf(stream, "\
 -mips1, -mcpu=r{2,3}000	generate code for r2000 and r3000\n\
 -mips2, -mcpu=r6000	generate code for r6000\n\
 -mips3, -mcpu=r4000	generate code for r4000\n\
