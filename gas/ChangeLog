@@ -1,3 +1,8 @@
+Sat Dec 30 23:42:51 1995  Jeffrey A Law  (law@cygnus.com)
+
+	* ecoff.c (ecoff_stab): Simplify.  Correctly handle sym + offset
+	addresses for static variables.
+
 Thu Dec 21 12:54:32 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* config/tc-ppc.c (mapping): Make @got give a real GOT relocation,
