@@ -1,3 +1,9 @@
+2005-04-04  Ramana Radhakrishnan  <ramana.radhakrishnan@codito.com>
+
+	PR binutils/813
+	* objdump.c (dump_symbols): Add a check to see if the section for
+	the symbol is chosen using process_section_p.
+
 2005-04-01  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* NEWS: Mention new readelf options, "-N/--full-section-name"
