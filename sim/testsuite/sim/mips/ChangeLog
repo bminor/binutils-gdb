@@ -1,5 +1,11 @@
 2004-04-10  Chris Demetriou  <cgd@broadcom.com>
 
+	* fpu64-ps-sb1.s: New file.
+	* basic.exp: Recognize mipsisa64sb1 targets, and run fpu64-ps-sb1.s
+	if appropriate.
+
+2004-04-10  Chris Demetriou  <cgd@broadcom.com>
+
 	* fpu64-ps.s: New file.
 	* basic.exp: Run fpu64-ps.s.
 

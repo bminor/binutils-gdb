@@ -192,3 +192,53 @@
   check_mdmx_fmtsel (SD_, instruction_0, FMTSEL);
   StoreFPR(VD,fmt_mdmx,MX_Avg(ValueFPR(VS,fmt_mdmx),VT,FMTSEL));
 }
+
+
+//  Paired-Single Extension Instructions
+//  ------------------------------------
+//
+//  The SB-1 implements several .PS format instructions that are
+//  extensions to the MIPS64 architecture.
+
+010001,10,3.FMT=6,5.FT,5.FS,5.FD,000011:COP1:32,f::DIV.PS
+"div.%s<FMT> f<FD>, f<FS>, f<FT>"
+*sb1:
+{
+  int fmt = FMT;
+  check_fpu (SD_);
+  check_sbx (SD_, instruction_0);
+  StoreFPR (FD, fmt, Divide (ValueFPR (FS, fmt), ValueFPR (FT, fmt), fmt));
+}
+
+
+010001,10,3.FMT=6,00000,5.FS,5.FD,010101:COP1:32,f::RECIP.PS
+"recip.%s<FMT> f<FD>, f<FS>"
+*sb1:
+{
+  int fmt = FMT;
+  check_fpu (SD_);
+  check_sbx (SD_, instruction_0);
+  StoreFPR (FD, fmt, Recip (ValueFPR (FS, fmt), fmt));
+}
+
+
+010001,10,3.FMT=6,00000,5.FS,5.FD,010110:COP1:32,f::RSQRT.PS
+"rsqrt.%s<FMT> f<FD>, f<FS>"
+*sb1:
+{
+  int fmt = FMT;
+  check_fpu (SD_);
+  check_sbx (SD_, instruction_0);
+  StoreFPR (FD, fmt, RSquareRoot (ValueFPR (FS, fmt), fmt));
+}
+
+
+010001,10,3.FMT=6,00000,5.FS,5.FD,000100:COP1:32,f::SQRT.PS
+"sqrt.%s<FMT> f<FD>, f<FS>"
+*sb1:
+{
+  int fmt = FMT;
+  check_fpu (SD_);
+  check_sbx (SD_, instruction_0);
+  StoreFPR (FD, fmt,  (SquareRoot (ValueFPR (FS, fmt), fmt)));
+}

@@ -36,7 +36,10 @@ proc run_hilo_test {testfile models nops} {
 # board really is a simulator (sim tests don't work on real HW).
 if {[istarget mips*-elf] && [board_info target exists is_simulator]} {
 
-    if {[istarget mipsisa64*-elf]} {
+    if {[istarget mipsisa64sb1*-elf]} {
+	set models "sb1"
+	set submodels "mips1 mips2 mips3 mips4 mips32 mips64"
+    } elseif {[istarget mipsisa64*-elf]} {
 	set models "mips32 mips64"
 	set submodels "mips1 mips2 mips3 mips4"
     } elseif {[istarget mipsisa32*-elf]} {
@@ -64,4 +67,5 @@ if {[istarget mips*-elf] && [board_info target exists is_simulator]} {
     run_hilo_test hilo-hazard-3.s $models 2
 
     run_sim_test fpu64-ps.s $submodels
+    run_sim_test fpu64-ps-sb1.s $submodels
 }

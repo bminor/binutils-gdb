@@ -1,3 +1,7 @@
+2004-04-10  Chris Demetriou  <cgd@broadcom.com>
+
+	* sb1.igen (DIV.PS, RECIP.PS, RSQRT.PS, SQRT.PS): New.
+
 2004-04-09  Chris Demetriou  <cgd@broadcom.com>
 
 	* mips.igen (check_fmt): Remove.
