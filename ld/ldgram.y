@@ -111,7 +111,7 @@ boolean ldgram_in_defsym = false;
 %token <token> ALIGN_K BLOCK LONG SHORT BYTE
 %token SECTIONS  
 %token '{' '}'
-%token ALIGNMENT SIZEOF_HEADERS
+%token ALIGNMENT SIZEOF_HEADERS OUTPUT_FORMAT FORCE_COMMON_ALLOCATION
 %token NEXT SIZEOF ADDR  SCRIPT ENDSCRIPT
 %token MEMORY 
 %token DSECT NOLOAD COPY INFO OVERLAY 
@@ -305,7 +305,7 @@ script_file:
 
 ifile_list:
        ifile_list ifile_p1 
-  |
+        |
 	;
 
 
@@ -324,6 +324,10 @@ ifile_p1:
 		{ ldfile_add_library_path($3); }
 	|	OUTPUT '(' filename ')'
 		{ lang_add_output($3); }
+        |       OUTPUT_FORMAT '(' NAME ')'
+		  { lang_add_output_format($3); }
+	|	FORCE_COMMON_ALLOCATION
+		{ command_line.force_common_definition = true ; }
 	|	INPUT '(' input_list ')'
      	|	MAP '(' filename ')'
 		{ lang_add_map($3); }
@@ -390,7 +394,9 @@ input_section_spec:
 statement:
 		statement assignment end
 	|	statement CREATE_OBJECT_SYMBOLS
-		{ lang_add_attribute(lang_object_symbols_statement_enum); }
+		{
+ 		  lang_add_attribute(lang_object_symbols_statement_enum); }
+
 	|	statement input_section_spec
         |       statement length '(' exp_head ')'
         	        {
