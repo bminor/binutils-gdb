@@ -1,3 +1,8 @@
+Wed Feb 11 16:28:13 1998  Richard Henderson  <rth@cygnus.com>
+
+	* read.c (s_fill): Handle non-constant repeat counts by creating
+	an rs_space fragment.
+
 start-sanitize-m32rx
 Wed Feb 11 10:32:28 1998  Nick Clifton  <nickc@cygnus.com>
 
@@ -5,6 +10,7 @@ Wed Feb 11 10:32:28 1998  Nick Clifton  <nickc@cygnus.com>
 	descriptions of --warn-explicit-parallel-conflicts.
 
 	* doc/as.texinfo: Add more m32rx command line options.
+
 end-sanitize-m32rx
 Tue Feb 10 18:31:31 1998  Ian Lance Taylor  <ian@cygnus.com>
 
