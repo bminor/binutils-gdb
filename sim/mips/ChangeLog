@@ -1,3 +1,7 @@
+Fri Apr 28 20:48:36 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* mips.igen (DMxC1): Fix format arguments for sim_io_eprintf call.
+
 Mon Apr 10 00:07:09 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* interp.c (decode_coproc): Output long using %lx and not %s.

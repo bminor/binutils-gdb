@@ -3064,7 +3064,8 @@
 	{
 	  if (STATE_VERBOSE_P(SD))
 	    sim_io_eprintf (SD, 
-	      "Warning: PC 0x%x: DMxC1 32-bit use of odd FPR number\n", CIA);
+	      "Warning: PC 0x%lx: DMxC1 32-bit use of odd FPR number\n",
+			    (long) CIA);
 	  GPR[RT] = SET64HI (0xDEADC0DE) | 0xBAD0BAD0;
 	}
     }
