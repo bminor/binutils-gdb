@@ -655,7 +655,7 @@ usage (FILE *stream, int status)
   -f --print-file-name      Print the name of the file before each string\n\
   -n --bytes=[number]       Locate & print any NUL-terminated sequence of at\n\
   -<number>                 least [number] characters (default 4).\n\
-  -t --radix={o,x,d}        Print the location of the string in base 8, 10 or 16\n\
+  -t --radix={o,d,x}        Print the location of the string in base 8, 10 or 16\n\
   -o                        An alias for --radix=o\n\
   -T --target=<BFDNAME>     Specify the binary file format\n\
   -e --encoding={s,S,b,l,B,L} Select character size and endianness:\n\

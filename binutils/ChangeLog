@@ -1,3 +1,18 @@
+2004-10-18  Tommy Pettersson <ptp@lysator.liu.se>
+	    Nick Clifton  <nickc@redhat.com>
+
+	* strings.c (usage): Place radix values for -t option into the
+	correct order.
+
+	* objcopy.c (add_redefine_syms_file): Change error messages to use
+	<filename>:<linenumber>: format for easier parsing by automatic
+	tools.
+
+	* srconv.c (show_usage): Fix spelling typo.
+
+	* windres.c (format_from_filename): Suggest the use of -J instead
+	of -I if the file type cannot be determined.
+
 2004-10-18  Aaron W. LaFramboise  <aaron98wiridge9@aaronwl.com>
 
 	* strings.c: Include <sys/stat.h>.

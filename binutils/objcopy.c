@@ -700,8 +700,8 @@ add_specific_symbols (const char *filename, struct symlist **list)
 	    ;
 
 	  if (! IS_LINE_TERMINATOR (* extra))
-	    non_fatal (_("Ignoring rubbish found on line %d of %s"),
-		       line_count, filename);
+	    non_fatal (_("%s:%d: Ignoring rubbish found on this line"),
+		       filename, line_count);
 	}
 
       * name_end = '\0';
@@ -1068,10 +1068,10 @@ add_redefine_syms_file (const char *filename)
 	  continue;
 	}
       else
-	fatal (_("%s: garbage at end of line %d"), filename, lineno);
+	fatal (_("%s:%d: garbage found at end of line"), filename, lineno);
  comment:
       if (len != 0 && (outsym_off == 0 || outsym_off == len))
-	fatal (_("%s: missing new symbol name at line %d"), filename, lineno);
+	fatal (_("%s:%d: missing new symbol name"), filename, lineno);
       buf[len++] = '\0';
 
       /* Eat the rest of the line and finish it.  */
@@ -1081,7 +1081,7 @@ add_redefine_syms_file (const char *filename)
     }
 
   if (len != 0)
-    fatal (_("%s: premature end of file at line %d"), filename, lineno);
+    fatal (_("%s:%d: premature end of file"), filename, lineno);
 
   free (buf);
 }

@@ -1856,7 +1856,7 @@ show_usage (FILE *file, int status)
   fprintf (file, _("Usage: %s [option(s)] in-file [out-file]\n"), program_name);
   fprintf (file, _("Convert a COFF object file into a SYSROFF object file\n"));
   fprintf (file, _(" The options are:\n\
-  -q --quick       (Obsolete - ignoerd)\n\
+  -q --quick       (Obsolete - ignored)\n\
   -n --noprescan   Do not perform a scan to convert commons into defs\n\
   -d --debug       Display information about what is being done\n\
   -h --help        Display this information\n\

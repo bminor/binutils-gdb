@@ -620,7 +620,7 @@ format_from_filename (const char *filename, int input)
     return RES_FORMAT_RC;
 
   /* Otherwise, we give up.  */
-  fatal (_("can not determine type of file `%s'; use the -I option"),
+  fatal (_("can not determine type of file `%s'; use the -J option"),
 	 filename);
 
   /* Return something to silence the compiler warning.  */
