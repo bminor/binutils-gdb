@@ -274,7 +274,7 @@ proc test_scalar_returns { } {
 		    # Need to step off the function call
 		    gdb_test "next" "zed.*" "${test}"
 		}
-		-re "L[expr  + 1] *= fun[expr  + 1].*${gdb_prompt} $" {
+		-re "zed \\(\\);.*$gdb_prompt $" {
 		    pass "${test}"
 		}
 	    }
