@@ -17,6 +17,6 @@ Idx Name          Size      VMA               LMA               File off  Algn
 Contents of section \.text:
  0100 e3fd0001                             .*
 Contents of section \.data:
- 0004 0000012c                             .*
+ 2000000000000004 0000012c                             .*
 Contents of section \.other:
- 0000 0000000c 00000022 00000001           .*
+ 1000000000000000 0000000c 00000022 00000001           .*

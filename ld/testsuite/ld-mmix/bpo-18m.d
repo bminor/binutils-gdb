@@ -19,7 +19,7 @@ SYMBOL TABLE:
 Contents of section \.text:
  0100 232dfc00 232dfd00                    .*
 Contents of section \.text\.away:
- 1060 e3fd0001 232afe1e 2321fe00           .*
+ 4000000000001060 e3fd0001 232afe1e 2321fe00           .*
 Contents of section \.MMIX\.reg_contents:
  07e0 00000000 00001168 00000000 0000a514  .*
  07f0 40000000 00001070                    .*
