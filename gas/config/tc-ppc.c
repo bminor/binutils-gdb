@@ -667,7 +667,7 @@ PowerPC options:\n\
 -mppc, -mppc32, -m403, -m603, -m604\n\
 			generate code for Motorola PowerPC 603/604\n\
 -mppc64, -m620		generate code for Motorola PowerPC 620\n\
--mcom			generate code Power/PowerPC common instructions\n
+-mcom			generate code Power/PowerPC common instructions\n\
 -many			generate code for any architecture (PWR/PWRX/PPC)\n");
 #ifdef OBJ_ELF
   fprintf(stream, "\
