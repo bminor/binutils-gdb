@@ -1,5 +1,7 @@
 Wed May 27 11:16:25 1998  Ian Lance Taylor  <ian@cygnus.com>
 
+	* read.c (s_org): Call md_flush_pending_output if it is defined.
+
 	* config/tc-sparc.c (md_show_usage): Add \n\ to new string.
 
 Tue May 26 19:27:52 1998  Stan Cox  <scox@equinox.cygnus.com>
@@ -12,6 +14,13 @@ Tue May 26 19:27:52 1998  Stan Cox  <scox@equinox.cygnus.com>
 
 	* config/tc-sparc.h (cons_fix_new_sparc): Added.
 	
+start-sanitize-sky
+Fri May 22 11:47:01 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* config/tc-dvp.c (assemble_one_insn): Parse suffix operands
+	even when missing in input string.
+
+end-sanitize-sky
 Thu May 21 15:02:41 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-arm.c (find_real_start): Relax definition of local
