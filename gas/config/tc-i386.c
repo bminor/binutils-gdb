@@ -1303,6 +1303,7 @@ md_assemble (line)
 	    /* If we are in 16-bit mode, do not allow addr16 or data16.
 	       Similarly, in 32-bit mode, do not allow addr32 or data32.  */
 	    if ((current_templates->start->opcode_modifier & (Size16 | Size32))
+		&& flag_code != CODE_64BIT
 		&& (((current_templates->start->opcode_modifier & Size32) != 0)
 		    ^ (flag_code == CODE_16BIT)))
 	      {
@@ -2268,6 +2269,14 @@ md_assemble (line)
 	      return;
 	  }
 
+	if (i.suffix != QWORD_MNEM_SUFFIX && (flag_code == CODE_64BIT)
+	    && !(i.tm.opcode_modifier & IgnoreSize)
+	    && (i.tm.opcode_modifier & JumpByte))
+	  {
+	    if (! add_prefix (ADDR_PREFIX_OPCODE))
+	      return;
+	  }
+
 	/* Set mode64 for an operand.  */
 	if (i.suffix == QWORD_MNEM_SUFFIX
 	    && !(i.tm.opcode_modifier & NoRex64))
@@ -2420,13 +2429,15 @@ md_assemble (line)
 			if (! i.index_reg)
 			  {
 			    /* Operand is just <disp>  */
-			    if ((flag_code == CODE_16BIT) ^ (i.prefix[ADDR_PREFIX] != 0))
+			    if ((flag_code == CODE_16BIT) ^ (i.prefix[ADDR_PREFIX] != 0)
+				&& (flag_code != CODE_64BIT))
 			      {
 				i.rm.regmem = NO_BASE_REGISTER_16;
 				i.types[op] &= ~Disp;
 				i.types[op] |= Disp16;
 			      }
-			    else if (flag_code != CODE_64BIT)
+			    else if (flag_code != CODE_64BIT
+				     || (i.prefix[ADDR_PREFIX] != 0))
 			      {
 				i.rm.regmem = NO_BASE_REGISTER;
 				i.types[op] &= ~Disp;
@@ -3443,10 +3454,13 @@ i386_displacement (disp_start, disp_end)
 #endif
   int bigdisp = Disp32;
 
-  if ((flag_code == CODE_16BIT) ^ (i.prefix[ADDR_PREFIX] != 0))
-    bigdisp = Disp16;
   if (flag_code == CODE_64BIT)
-    bigdisp = Disp64;
+    {
+      if (!i.prefix[ADDR_PREFIX])
+        bigdisp = Disp64;
+    }
+  else if ((flag_code == CODE_16BIT) ^ (i.prefix[ADDR_PREFIX] != 0))
+    bigdisp = Disp16;
   i.types[this_operand] |= bigdisp;
 
   exp = &disp_expressions[i.disp_operands];
@@ -3601,15 +3615,28 @@ i386_index_check (operand_string)
   ok = 1;
   if (flag_code == CODE_64BIT)
     {
-      /* 64bit checks.  */
-      if ((i.base_reg
-	   && ((i.base_reg->reg_type & Reg64) == 0)
-	       && (i.base_reg->reg_type != BaseIndex
-		   || i.index_reg))
-	  || (i.index_reg
-	      && ((i.index_reg->reg_type & (Reg64|BaseIndex))
-		  != (Reg64|BaseIndex))))
-	ok = 0;
+      if (i.prefix[ADDR_PREFIX] == 0)
+	{
+	  /* 64bit checks.  */
+	  if ((i.base_reg
+	       && ((i.base_reg->reg_type & Reg64) == 0)
+		   && (i.base_reg->reg_type != BaseIndex
+		       || i.index_reg))
+	      || (i.index_reg
+		  && ((i.index_reg->reg_type & (Reg64|BaseIndex))
+		      != (Reg64|BaseIndex))))
+	    ok = 0;
+	}
+      else
+	{
+	  /* 32bit checks.  */
+	  if ((i.base_reg
+	       && (i.base_reg->reg_type & (Reg32 | RegRex)) != Reg32)
+	      || (i.index_reg
+		  && ((i.index_reg->reg_type & (Reg32|BaseIndex|RegRex))
+		      != (Reg32|BaseIndex))))
+	    ok = 0;
+	}
     }
   else
     {
