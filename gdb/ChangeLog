@@ -1,3 +1,11 @@
+Sun Feb 12 09:03:47 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* buildsym.c (start_subfile): Set language for f2c like for cfront.
+
+Thu Feb  9 20:20:11 1995  Rob Savoye  <rob@darkstar.cygnus.com>
+
+	* op50n-rom.c: Add the control registers.
+
 Thu Feb  9 15:46:39 1995  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* Makefile.in (CLIBS): Add $(LIBIBERTY) before, in addition to

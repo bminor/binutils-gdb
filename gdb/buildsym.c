@@ -439,23 +439,26 @@ start_subfile (name, dirname)
      of any pending subfiles from C to C++.  We also accept any other C++
      suffixes accepted by deduce_language_from_filename (in particular,
      some people use .cxx with cfront).  */
+  /* Likewise for f2c.  */
 
   if (subfile->name)
     {
       struct subfile *s;
+      enum language sublang = deduce_language_from_filename (subfile->name);
 
-      if (deduce_language_from_filename (subfile->name) == language_cplus)
+      if (sublang == language_cplus || sublang == language_fortran)
 	for (s = subfiles; s != NULL; s = s->next)
 	  if (s->language == language_c)
-	    s->language = language_cplus;
+	    s->language = sublang;
     }
 
   /* And patch up this file if necessary.  */
   if (subfile->language == language_c
       && subfile->next != NULL
-      && subfile->next->language == language_cplus)
+      && (subfile->next->language == language_cplus
+	  || subfile->next->language == language_fortran))
     {
-      subfile->language = language_cplus;
+      subfile->language = subfile->next->language;
     }
 }
 
