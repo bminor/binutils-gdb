@@ -42,8 +42,8 @@ a68v-nat.c
 alldeps.mak
 alloca.c
 altos-xdep.c
-am29k-pinsn.c
-am29k-tdep.c
+a29k-pinsn.c
+a29k-tdep.c
 arm-convert.s
 arm-pinsn.c
 arm-tdep.c
