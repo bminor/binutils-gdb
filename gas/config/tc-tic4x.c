@@ -23,30 +23,41 @@
   TODOs:
   ------
   
-  o .align cannot handle fill-data larger than 0xFF/8-bits
+  o .align cannot handle fill-data-width larger than 0xFF/8-bits. It
+    should be possible to define a 32-bits pattern.
 
   o .align fills all section with NOP's when used regardless if has
     been used in .text or .data. (However the .align is primarely
     intended used in .text sections. If you require something else,
     use .align <size>,0x00)
 
-  o .align: Implement a 'bu' insn if the number of nop's exeeds 4 within
-    the align frag. if(fragsize>4words) insert bu fragend+1 first. 
+  o .align: Implement a 'bu' insn if the number of nop's exeeds 4
+    within the align frag. if(fragsize>4words) insert bu fragend+1
+    first.
 
   o .usect if has symbol on previous line not implemented
 
   o .sym, .eos, .stag, .etag, .member not implemented
 
-  o Evaluation of constant floating point expressions (expr.c needs work!)
+  o Evaluation of constant floating point expressions (expr.c needs
+    work!)
 
-  o Warnings issued if parallel load of same register
+  o Warnings issued if parallel load of same register. Applies to LL
+    class. Can be applied to destination of the LS class as well, but
+    the test will be more complex.
 
   o Support 'abc' constants?
 
-  o Support new opcodes and implement a silicon version switch (maybe -mpg)
+  o Support new opcodes and implement a silicon version switch (maybe
+    -mpg)
 
-  o Disallow non-float registers in float instructions. Make as require
-    'fx' notation on floats, while 'rx' on the rest
+  o Disallow non-float registers in float instructions.
+
+  o Make sure the source and destination register is NOT equal when
+    the C4X LDA insn is used (arg mode Q,Y)
+
+  o Merge the C3x op-table and the c4x op-table, and adhere to the
+    last argument when parsing the hash.
 */
 
 #include <stdio.h>
@@ -154,8 +165,6 @@ static void c4x_set
 static void c4x_usect
   PARAMS ((int));
 static void c4x_version
-  PARAMS ((int));
-static void c4x_pseudo_ignore
   PARAMS ((int));
 static void c4x_init_regtable
   PARAMS ((void));
@@ -1792,9 +1801,19 @@ c4x_operands_match (inst, insn)
 	     use an immediate mode form of ldiu or ldpk instruction.  */
 	  if (exp->X_op == O_constant)
 	    {
-	      /* Maybe for C3x we should check for 8 bit number.  */
-	      INSERTS (opcode, exp->X_add_number, 15, 0);
-	      continue;
+              if( ( IS_CPU_C4X (c4x_cpu) && exp->X_add_number <= 65535 )
+                  || ( IS_CPU_C3X (c4x_cpu) && exp->X_add_number <= 255 ) )
+                {
+                  INSERTS (opcode, exp->X_add_number, 15, 0);
+                  continue;
+                }
+              else
+                {
+		  as_bad ("LDF's immediate value of %ld is too large",
+			  (long) exp->X_add_number);
+		  ret = -1;
+		  continue;
+                }
 	    }
 	  else if (exp->X_op == O_symbol)
 	    {
@@ -1809,9 +1828,19 @@ c4x_operands_match (inst, insn)
 	    break;
 	  if (exp->X_op == O_constant)
 	    {
-	      /* Store only the 16 LSBs of the number.  */
-	      INSERTS (opcode, exp->X_add_number, 15, 0);
-	      continue;
+              if(exp->X_add_number <= 65535)
+                {
+                  /* Store only the 16 LSBs of the number.  */
+                  INSERTS (opcode, exp->X_add_number, 15, 0);
+                  continue;
+                }
+              else
+                {
+		  as_bad ("Direct value of %ld is too large",
+			  (long) exp->X_add_number);
+		  ret = -1;
+		  continue;
+                }
 	    }
 	  else if (exp->X_op == O_symbol)
 	    {
@@ -1871,6 +1900,7 @@ c4x_operands_match (inst, insn)
 	    break;
 	  if (operand->mode != M_INDIRECT)
 	    break;
+	  /* Require either *+ARn(disp) or *ARn.  */
 	  if (operand->expr.X_add_number != 0
 	      && operand->expr.X_add_number != 0x18)
 	    {
@@ -1887,6 +1917,20 @@ c4x_operands_match (inst, insn)
 	    break;
 	  INSERTU (opcode, exp->X_add_number, 7, 0);
 	  continue;
+
+        case 'e':
+          if (!(operand->mode == M_REGISTER))
+            break;
+	  reg = exp->X_add_number;
+	  if ( (reg >= REG_R0 && reg <= REG_R7) 
+               || (IS_CPU_C4X (c4x_cpu) && reg >= REG_R8 && reg <= REG_R11) )
+	    INSERTU (opcode, reg, 7, 0);
+	  else
+	    {
+	      as_bad ("Register must be Rn");
+	      ret = -1;
+	    }
+          continue;
 
 	case 'F':
 	  if (operand->mode != M_IMMED_F
@@ -1912,6 +1956,20 @@ c4x_operands_match (inst, insn)
 	    break;
 	  INSERTU (opcode, exp->X_add_number, 15, 8);
 	  continue;
+
+        case 'g':
+	  if (operand->mode != M_REGISTER)
+	    break;
+	  reg = exp->X_add_number;
+	  if ( (reg >= REG_R0 && reg <= REG_R7) 
+               || (IS_CPU_C4X (c4x_cpu) && reg >= REG_R8 && reg <= REG_R11) )
+	    INSERTU (opcode, reg, 15, 8);
+	  else
+	    {
+	      as_bad ("Register must be Rn");
+	      ret = -1;
+	    }
+          continue;
 
 	case 'H':
 	  if (operand->mode != M_REGISTER)
@@ -2058,12 +2116,40 @@ c4x_operands_match (inst, insn)
 	  INSERTU (opcode, reg, 15, 0);
 	  continue;
 
+        case 'q':
+	  if (operand->mode != M_REGISTER)
+	    break;
+	  reg = exp->X_add_number;
+	  if ( (reg >= REG_R0 && reg <= REG_R7) 
+               || (IS_CPU_C4X (c4x_cpu) && reg >= REG_R8 && reg <= REG_R11) )
+	    INSERTU (opcode, reg, 15, 0);
+	  else
+	    {
+	      as_bad ("Register must be Rn");
+	      ret = -1;
+	    }
+          continue;
+
 	case 'R':
 	  if (operand->mode != M_REGISTER)
 	    break;
 	  reg = exp->X_add_number;
 	  INSERTU (opcode, reg, 20, 16);
 	  continue;
+
+        case 'r':
+	  if (operand->mode != M_REGISTER)
+	    break;
+	  reg = exp->X_add_number;
+	  if ( (reg >= REG_R0 && reg <= REG_R7) 
+               || (IS_CPU_C4X (c4x_cpu) && reg >= REG_R8 && reg <= REG_R11) )
+	    INSERTU (opcode, reg, 20, 16);
+	  else
+	    {
+	      as_bad ("Register must be Rn");
+	      ret = -1;
+	    }
+          continue;
 
 	case 'S':		/* Short immediate int.  */
 	  if (operand->mode != M_IMMED && operand->mode != M_HI)

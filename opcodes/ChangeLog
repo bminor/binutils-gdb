@@ -1,3 +1,8 @@
+2002-11-16  Svein E. Seldal  <Svein.Seldal@solidas.com>
+
+	* tic4x-dis.c: (c4x_print_op): Add support for the new argument
+	  format. Fix bug in 'N' register printer.
+
 2002-11-12  Segher Boessenkool  <segher@koffie.nl>
 
 	* ppc-dis.c (print_insn_powerpc): Correct condition register display.

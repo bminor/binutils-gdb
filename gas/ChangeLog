@@ -1,3 +1,10 @@
+2002-11-16  Svein E. Seldal  <Svein.Seldal@solidas.com>
+
+	* config/tc-tic4x.c: Remove c4x_pseudo_ignore function.
+	  (c4x_operands_match): Added check for 8-bits LDF insn. Give
+	  warning when using constant direct bigger than 2^16. Add the new
+	  arguments.
+
 2002-11-11  Christopher Faylor  <cgf@redhat.com>
 
 	* configure.in: Use .gdbinit under Cygwin.

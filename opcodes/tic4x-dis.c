@@ -479,6 +479,7 @@ c4x_print_op (info, instruction, p, pc)
 	  break;
 
 	case 'E': /* register 0--7 */
+        case 'e':
 	  if (! c4x_print_register (info, EXTRU (instruction, 7, 0)))
 	    return 0;
 	  break;
@@ -501,6 +502,7 @@ c4x_print_op (info, instruction, p, pc)
 	  break;
 
 	case 'G': /* register 8--15 */
+        case 'g':
 	  if (! c4x_print_register (info, EXTRU (instruction, 15, 8)))
 	    return 0;
 	  break;
@@ -525,7 +527,7 @@ c4x_print_op (info, instruction, p, pc)
 	  break;
 
 	case 'N': /* register 23--23 */
-	  c4x_print_register (info, EXTRU (instruction, 22, 22) + REG_R0);
+	  c4x_print_register (info, EXTRU (instruction, 23, 23) + REG_R0);
 	  break;
 
 	case 'O': /* indirect (short C4x) 8--15 */
@@ -542,11 +544,13 @@ c4x_print_op (info, instruction, p, pc)
 	  break;
 
 	case 'Q': /* register 0--15 */
+        case 'q':
 	  if (! c4x_print_register (info, EXTRU (instruction, 15, 0)))
 	    return 0;
 	  break;
 
 	case 'R': /* register 16--20 */
+        case 'r':
 	  if (! c4x_print_register (info, EXTRU (instruction, 20, 16)))
 	    return 0;
 	  break;
