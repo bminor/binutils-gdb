@@ -1,3 +1,9 @@
+2005-02-19  Alan Modra  <amodra@bigpond.net.au>
+
+	* config/tc-hppa.h (TC_EQUAL_IN_INSN): Delete.
+	* read.c (read_a_source_file): Remove TC_EQUAL_IN_INSN test.
+	* doc/internals.texi (TC_EQUAL_IN_INSN): Delete.
+
 2005-02-18  Thiemo Seufer  <seufer@csv.ica.uni-stuttgart.de>
 
 	* config/tc-mips.c (macro_build_ldst_constoffset): Fail on $at

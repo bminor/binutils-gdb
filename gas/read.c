@@ -710,11 +710,7 @@ read_a_source_file (char *name)
 		}
 	      else if (c == '='
 		       || ((c == ' ' || c == '\t')
-			   && input_line_pointer[1] == '='
-#ifdef TC_EQUAL_IN_INSN
-			   && !TC_EQUAL_IN_INSN (c, input_line_pointer)
-#endif
-			   ))
+			   && input_line_pointer[1] == '='))
 		{
 		  equals (s, 1);
 		  demand_empty_rest_of_line ();

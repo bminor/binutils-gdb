@@ -1024,14 +1024,6 @@ LABELS_WITHOUT_COLONS is defined.
 If you define this macro, GAS will not require pseudo-ops to start with a
 @kbd{.} character.
 
-@item TC_EQUAL_IN_INSN
-@cindex TC_EQUAL_IN_INSN
-If you define this macro, it should return nonzero if the instruction is
-permitted to contain an @kbd{=} character.  GAS will call it with two
-arguments, the character before the @kbd{=} character, and the value of
-@code{input_line_pointer} at that point.  GAS uses this macro to decide if a
-@kbd{=} is an assignment or an instruction.
-
 @item TC_EOL_IN_INSN
 @cindex TC_EOL_IN_INSN
 If you define this macro, it should return nonzero if the current input line
