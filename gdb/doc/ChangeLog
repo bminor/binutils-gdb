@@ -1,3 +1,10 @@
+2004-10-08  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* gdbint.texinfo (target_stopped_data_address): Update to
+	new prototype.
+	(i386_stopped_data_address): Update prototype and description.
+	(i386_stopped_by_watchpoint): New function and description.
+
 2004-10-03  Paul N. Hilfinger  <hilfinger@gnat.com>
 
 	* gdb.texinfo (Filenames): Add Ada suffixes.

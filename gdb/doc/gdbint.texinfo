@@ -476,9 +476,10 @@ no other code touches these values, the implementations of the above
 two macros can use them for their internal purposes.
 
 @findex target_stopped_data_address
-@item target_stopped_data_address ()
-If the inferior has some watchpoint that triggered, return the address
-associated with that watchpoint.  Otherwise, return zero.
+@item target_stopped_data_address (@var{addr_p})
+If the inferior has some watchpoint that triggered, place the address
+associated with the watchpoint at the location pointed to by
+@var{addr_p} and return non-zero.  Otherwise, return zero.
 
 @findex HAVE_STEPPABLE_WATCHPOINT
 @item HAVE_STEPPABLE_WATCHPOINT
@@ -598,14 +599,24 @@ less than 4, the number of debug registers available to x86
 processors.
 
 @findex i386_stopped_data_address
-@item i386_stopped_data_address (void)
-The macros @code{STOPPED_BY_WATCHPOINT} and
-@code{target_stopped_data_address} are set to call this function.  The
-argument passed to @code{STOPPED_BY_WATCHPOINT} is ignored.  This
+@item i386_stopped_data_address (@var{addr_p})
+The target function
+@code{target_stopped_data_address} is set to call this function.
+This
 function examines the breakpoint condition bits in the DR6 Debug
 Status register, as returned by the @code{I386_DR_LOW_GET_STATUS}
 macro, and returns the address associated with the first bit that is
 set in DR6.
+
+@findex i386_stopped_by_watchpoint
+@item i386_stopped_by_watchpoint (void)
+The macro @code{STOPPED_BY_WATCHPOINT}
+is set to call this function.  The
+argument passed to @code{STOPPED_BY_WATCHPOINT} is ignored.  This
+function examines the breakpoint condition bits in the DR6 Debug
+Status register, as returned by the @code{I386_DR_LOW_GET_STATUS}
+macro, and returns true if any bit is set.  Otherwise, false is
+returned.
 
 @findex i386_insert_watchpoint
 @findex i386_remove_watchpoint
@@ -654,7 +665,7 @@ register.
 @item i386_stopped_by_hwbp (void)
 This function returns non-zero if the inferior has some watchpoint or
 hardware breakpoint that triggered.  It works like
-@code{i386_stopped_data_address}, except that it doesn't return the
+@code{i386_stopped_data_address}, except that it doesn't record the
 address whose watchpoint triggered.
 
 @findex i386_cleanup_dregs
