@@ -309,7 +309,7 @@ serial_close (scb, really_close)
       serial_current_type = 0;
 
       /* XXX - What if serial_logfp == gdb_stdout or gdb_stderr? */
-      gdb_fclose (serial_logfp); 
+      gdb_fclose (&serial_logfp); 
       serial_logfp = NULL;
     }
 

@@ -1,3 +1,10 @@
+Mon Jan 18 12:03:47 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* serial.c (serial_close): gdb_fclose tages gdb_file** arg, not
+ 	gdb_file*.
+
+	* f-valprint.c, target.c, gdbarch.c: Pass gdb_stderr not stderr.
+
 Mon Jan 18 10:46:12 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* stack.c (print_frame_info_base): Don't cast call to

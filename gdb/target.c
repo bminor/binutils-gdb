@@ -2487,7 +2487,7 @@ debug_to_query (type, req, resp, siz)
 
   retval = debug_target.to_query (type, req, resp, siz);
 
-  fprintf_unfiltered (stderr, "target_query (%c, %s, %s,  %d) = %d\n", type, req, resp, *siz, retval);
+  fprintf_unfiltered (gdb_stderr, "target_query (%c, %s, %s,  %d) = %d\n", type, req, resp, *siz, retval);
 
   return retval;
 }

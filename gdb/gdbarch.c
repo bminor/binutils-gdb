@@ -374,7 +374,7 @@ register_gdbarch_init (bfd_architecture, init)
     }
   /* log it */
   if (gdbarch_debug)
-    fprintf_unfiltered (stderr, "register_gdbarch_init (%s, 0x%08lx)\n",
+    fprintf_unfiltered (gdb_stderr, "register_gdbarch_init (%s, 0x%08lx)\n",
 			bfd_arch_info->printable_name,
 			(long) init);
   /* Append it */
@@ -474,31 +474,31 @@ gdbarch_update (info)
   if (rego == NULL)
     {
       if (gdbarch_debug)
-	fprintf_unfiltered (stderr, "gdbarch_update: No matching architecture\n");
+	fprintf_unfiltered (gdb_stderr, "gdbarch_update: No matching architecture\n");
       return 0;
     }
 
   if (gdbarch_debug)
     {
-      fprintf_unfiltered (stderr,
+      fprintf_unfiltered (gdb_stderr,
 			  "gdbarch_update: info.bfd_architecture %d (%s)\n",
 			  info.bfd_architecture,
 			  bfd_lookup_arch (info.bfd_architecture, 0)->printable_name);
-      fprintf_unfiltered (stderr,
+      fprintf_unfiltered (gdb_stderr,
 			  "gdbarch_update: info.bfd_arch_info %s\n",
 			  (info.bfd_arch_info != NULL
 			   ? info.bfd_arch_info->printable_name
 			   : "(null)"));
-      fprintf_unfiltered (stderr,
+      fprintf_unfiltered (gdb_stderr,
 			  "gdbarch_update: info.byte_order %d (%s)\n",
 			  info.byte_order,
 			  (info.byte_order == BIG_ENDIAN ? "big"
 			   : info.byte_order == LITTLE_ENDIAN ? "little"
 			   : "default"));
-      fprintf_unfiltered (stderr,
+      fprintf_unfiltered (gdb_stderr,
 			  "gdbarch_update: info.abfd 0x%lx\n",
 			  (long) info.abfd);
-      fprintf_unfiltered (stderr,
+      fprintf_unfiltered (gdb_stderr,
 			  "gdbarch_update: info.tdep_info 0x%lx\n",
 			  (long) info.tdep_info);
     }
@@ -510,7 +510,7 @@ gdbarch_update (info)
   if (new_gdbarch == NULL)
     {
       if (gdbarch_debug)
-	fprintf_unfiltered (stderr, "gdbarch_update: Target rejected architecture\n");
+	fprintf_unfiltered (gdb_stderr, "gdbarch_update: Target rejected architecture\n");
       return 0;
     }
 
@@ -518,7 +518,7 @@ gdbarch_update (info)
   if (current_gdbarch == new_gdbarch)
     {
       if (gdbarch_debug)
-	fprintf_unfiltered (stderr, "gdbarch_update: Architecture 0x%08lx (%s) unchanged\n",
+	fprintf_unfiltered (gdb_stderr, "gdbarch_update: Architecture 0x%08lx (%s) unchanged\n",
 			    (long) new_gdbarch,
 			    new_gdbarch->bfd_arch_info->printable_name);
       return 1;
@@ -535,7 +535,7 @@ gdbarch_update (info)
       if ((*list)->gdbarch == new_gdbarch)
 	{
 	  if (gdbarch_debug)
-	    fprintf_unfiltered (stderr, "gdbarch_update: Previous architecture 0x%08lx (%s) selected\n",
+	    fprintf_unfiltered (gdb_stderr, "gdbarch_update: Previous architecture 0x%08lx (%s) selected\n",
 				(long) new_gdbarch,
 				new_gdbarch->bfd_arch_info->printable_name);
 	  current_gdbarch = new_gdbarch;
@@ -553,23 +553,23 @@ gdbarch_update (info)
   current_gdbarch = new_gdbarch;
   if (gdbarch_debug)
     {
-      fprintf_unfiltered (stderr,
+      fprintf_unfiltered (gdb_stderr,
 			  "gdbarch_update: New architecture 0x%08lx (%s) selected\n",
 			  (long) new_gdbarch,
 			  new_gdbarch->bfd_arch_info->printable_name);
-      fprintf_unfiltered (stderr,
+      fprintf_unfiltered (gdb_stderr,
 			  "gdbarch_update: TARGET_BYTE_ORDER = %d (%s)\n",
 			  TARGET_BYTE_ORDER,
 			  (TARGET_BYTE_ORDER == BIG_ENDIAN ? "big"
 			   : TARGET_BYTE_ORDER == LITTLE_ENDIAN ? "little"
 			   : "default"));
-      fprintf_unfiltered (stderr,
+      fprintf_unfiltered (gdb_stderr,
 			  "gdbarch_update: TARGET_LONG_BIT = %d\n",
 			  TARGET_LONG_BIT);
-      fprintf_unfiltered (stderr,
+      fprintf_unfiltered (gdb_stderr,
 			  "gdbarch_update: TARGET_LONG_LONG_BIT = %d\n",
 			  TARGET_LONG_LONG_BIT);
-      fprintf_unfiltered (stderr,
+      fprintf_unfiltered (gdb_stderr,
 			  "gdbarch_update: TARGET_PTR_BIT = %d\n",
 			  TARGET_PTR_BIT);
     }

@@ -681,7 +681,7 @@ info_common_command (comname, from_tty)
       while (entry != NULL)
 	{
 	  printf_filtered ("%s = ",SYMBOL_NAME(entry->symbol)); 
-	  print_variable_value (entry->symbol,fi,stdout); 
+	  print_variable_value (entry->symbol, fi, gdb_stdout); 
 	  printf_filtered ("\n"); 
 	  entry = entry->next; 
 	}
