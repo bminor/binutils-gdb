@@ -1,3 +1,10 @@
+2001-02-28  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c: (struct unw_aux_info): Remove const modifier for
+	'strtab' field.
+	(process_unwind): Remove non-K&R compliant LHS type cast in call
+	to GET_DATA_ALLOC macro.
+
 2001-02-28  Philip Blundell  <pb@futuretv.com>
 
 	* readelf.c (decode_ARM_machine_flags): Explicitly mention which

@@ -3138,7 +3138,7 @@ struct unw_aux_info
     bfd_vma               seg_base;	/* Starting address of segment.  */
     Elf_Internal_Sym *    symtab;	/* The symbol table.  */
     unsigned              long nsyms;	/* Number of symbols.  */
-    const char *          strtab;	/* The string table.  */
+    char *                strtab;	/* The string table.  */
     unsigned long         strtab_size;	/* Size of string table.  */
   };
 
@@ -3425,7 +3425,7 @@ process_unwind (file)
 	  strsec = section_headers + sec->sh_link;
 	  aux.strtab_size = strsec->sh_size;
 	  GET_DATA_ALLOC (strsec->sh_offset, aux.strtab_size,
-			  (char *) aux.strtab, char *, "string table");
+			  aux.strtab, const char *, "string table");
 	}
       else if (sec->sh_type == SHT_IA_64_UNWIND)
 	unwsec = sec;
