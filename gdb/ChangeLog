@@ -1,5 +1,23 @@
 2004-01-26  Andrew Cagney  <cagney@redhat.com>
 
+	* remote.c (echo_check, quit_flag): Delete variables.
+	(cisco_kernel_mode): Delete variable.
+	(minitelnet_return, tty_input, escape_count): Delete variables.
+	(remote_cisco_mode): Delete variable.
+	(remote_cisco_open, remote_cisco_close): Delete function.
+	(remote_cisco_mourn, remote_cisco_wait): Delete function.
+	(init_remote_cisco_ops): Delete function.
+	(_initialize_remote): Do not install "remote cisco" code.
+	(read_frame): Delete cisco specific code.
+	(remote_info_process): Delete function.
+	(remote_wait): Delete cisco specific code.
+	(remote_cisco_section_offsets): Delete function.
+	(remote_cisco_objfile_relocate): Delete function.
+	(remote_async_wait): Delete cisco specific code.
+	(minitelnet, readtty, readsocket): Delete function.
+
+2004-01-26  Andrew Cagney  <cagney@redhat.com>
+
 	* gdbarch.sh (EXTRACT_STRUCT_VALUE_ADDRESS): Deprecate.  Add
 	comments mentioning extract_returned_value_address.
 	* infcmd.c (print_return_value): Update.  Add comments on

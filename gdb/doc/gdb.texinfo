@@ -19488,10 +19488,6 @@ where @code{n >=3} (which is where rle starts to win).  The printable
 characters @samp{$}, @samp{#}, @samp{+} and @samp{-} or with a numeric
 value greater than 126 should not be used.
 
-Some remote systems have used a different run-length encoding mechanism
-loosely refered to as the cisco encoding.  Following the @samp{*}
-character are two hex digits that indicate the size of the packet.
-
 So:
 @smallexample
 "@code{0* }"
@@ -20160,15 +20156,6 @@ applicable to certain targets.
 @item X@var{AA}
 
 The process terminated with signal @var{AA}.
-
-@item N@var{AA};@var{t@dots{}};@var{d@dots{}};@var{b@dots{}} @strong{(obsolete)}
-
-@var{AA} = signal number; @var{t@dots{}} = address of symbol
-@code{_start}; @var{d@dots{}} = base of data section; @var{b@dots{}} =
-base of bss section.  @emph{Note: only used by Cisco Systems targets.
-The difference between this reply and the @samp{qOffsets} query is that
-the @samp{N} packet may arrive spontaneously whereas the @samp{qOffsets}
-is a query initiated by the host debugger.}
 
 @item O@var{XX@dots{}}
 

@@ -1,5 +1,10 @@
 2004-01-26  Andrew Cagney  <cagney@redhat.com>
 
+	* gdb.texinfo (Overview): Delete references to the cisco protocol
+	including the "N" response.
+
+2004-01-26  Andrew Cagney  <cagney@redhat.com>
+
 	* gdbint.texinfo (Target Architecture Definition): Rename
 	EXTRACT_STRUCT_VALUE_ADDRESS to
 	DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS.
