@@ -1,3 +1,12 @@
+Tue Jun 29 09:22:29 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* gdb.t10/Makefile.in (clean): Remove $(EXECUTABLES) too.
+
+Mon Jun 28 11:25:59 1993  Fred Fish  (fnf@cygnus.com)
+
+	* gdb.t20/classes.exp:  Add clear_xfail's before printing summary
+	pass counts, to counteract any existing or future setup_xfails.
+
 Mon Jun 28 09:15:17 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* gdb.stabs/wierd{.def,-aout.S,-xcoff.S}: Use new macros
