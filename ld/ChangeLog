@@ -1,3 +1,10 @@
+start-sanitize-sky
+Fri Jun  5 15:55:26 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* emultempl/elf32.em (gld${EMULATION_NAME}_place_orphan): Set vma to 0
+	for .DVP.overlay.*.
+
+end-sanitize-sky
 Fri Jun  5 18:19:59 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* emultempl/aix.em (gld${EMULATION_NAME}_before_parse): Set
