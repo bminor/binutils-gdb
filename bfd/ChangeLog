@@ -1,3 +1,7 @@
+2003-05-21  Stuart F. Downing  <sdowning@fame.com>
+
+	* som.h: Define PA_2_0 before including a.out.h
+
 2003-05-07  Eric Christopher  <echristo@redhat.com>
 	    Alexandre Oliva   <aoliva@redhat.com>
 
