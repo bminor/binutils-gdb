@@ -1,3 +1,10 @@
+Tue Sep 16 10:08:27 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* config/v850/tm-v850.h (BREAKPOINT): Set to a truely illegal
+ 	instruction.
+
+	* exec.c (exec_file_command): Call set_architecture_from_file.
+
 Mon Sep 15 13:01:22 1997  Mark Alexander  <marka@cygnus.com>
 
 	* dbxread.c (MSYMBOL_SIZE): New macro.
