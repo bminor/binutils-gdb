@@ -14,6 +14,8 @@
 
 host_callback *mn10300_callback;
 int mn10300_debug;
+static SIM_OPEN_KIND sim_kind;
+static char *myname;
 
 static struct hash_entry *lookup_hash PARAMS ((uint32 ins, int));
 static long hash PARAMS ((long));
@@ -269,11 +271,12 @@ static void
 init_system ()
 {
   if (!State.mem)
-    sim_size(18);
+    sim_size(19);
 }
 
 int
-sim_write (addr, buffer, size)
+sim_write (sd, addr, buffer, size)
+     SIM_DESC sd;
      SIM_ADDR addr;
      unsigned char *buffer;
      int size;
@@ -288,20 +291,29 @@ sim_write (addr, buffer, size)
   return size;
 }
 
-void
-sim_open (args)
-     char *args;
+SIM_DESC
+sim_open (kind,argv)
+     SIM_OPEN_KIND kind;
+     char **argv;
 {
   struct simops *s;
   struct hash_entry *h;
-  if (args != NULL)
+  char **p;
+
+  sim_kind = kind;
+  myname = argv[0];
+
+  for (p = argv + 1; *p; ++p)
     {
+      if (strcmp (*p, "-E") == 0)
+	++p; /* ignore endian spec */
+      else
 #ifdef DEBUG
-      if (strcmp (args, "-t") == 0)
+      if (strcmp (*p, "-t") == 0)
 	mn10300_debug = DEBUG;
       else
 #endif
-	(*mn10300_callback->printf_filtered) (mn10300_callback, "ERROR: unsupported option(s): %s\n",args);
+	(*mn10300_callback->printf_filtered) (mn10300_callback, "ERROR: unsupported option(s): %s\n",*p);
     }
 
   /* put all the opcodes in the hash table */
@@ -322,11 +334,15 @@ sim_open (args)
       h->mask = s->mask;
       h->opcode = s->opcode;
     }
+
+  /* fudge our descriptor for now */
+  return (SIM_DESC) 1;
 }
 
 
 void
-sim_close (quitting)
+sim_close (sd, quitting)
+     SIM_DESC sd;
      int quitting;
 {
   /* nothing to do */
@@ -347,7 +363,8 @@ sim_set_profile_size (n)
 }
 
 void
-sim_resume (step, siggnal)
+sim_resume (sd, step, siggnal)
+     SIM_DESC sd;
      int step, siggnal;
 {
   uint32 inst;
@@ -389,7 +406,8 @@ sim_resume (step, siggnal)
 	  || (inst & 0xfc) == 0xd0
 	  || (inst & 0xfc) == 0xd4
 	  || (inst & 0xfc) == 0xd8
-	  || (inst & 0xf0) == 0xe0)
+	  || (inst & 0xf0) == 0xe0
+	  || (inst & 0xff) == 0xff)
 	{
 	  insn = inst;
 	  h = lookup_hash (insn, 1);
@@ -447,7 +465,20 @@ sim_resume (step, siggnal)
 	  insn = load_mem_big (PC, 3);
 	  h = lookup_hash (insn, 3);
 	  extension = 0;
-	  (h->ops->func)(insn, extension);
+	  /* If it's a format D1 insn, "ret", or "retf" insn, then
+	     there's no need to worry about endianness.  Others have
+	     a 16bit immediate in little endian form that we need to
+	     extract.  */
+	  if (h->ops->format == FMT_D1
+	      || h->opcode == 0xdf0000
+	      || h->opcode == 0xde0000)
+	    (h->ops->func)(insn, extension);
+	  else
+	    {
+	      insn &= 0xff0000;
+	      insn |= load_mem (PC + 1, 2);
+	      (h->ops->func)(insn, extension);
+	    }
 	  PC += 3;
 	}
 
@@ -458,7 +489,19 @@ sim_resume (step, siggnal)
 	  insn = load_mem_big (PC, 4);
 	  h = lookup_hash (insn, 4);
 	  extension = 0;
-	  (h->ops->func)();
+	  /* This must be a format D2 insn; a small number of such insns
+	     don't have any 16bit immediates (they instead have two 8 bit
+	     immediates).  */
+ 	  if (h->opcode == 0xfaf80000
+	      || h->opcode == 0xfaf00000
+	      || h->opcode == 0xfaf40000)
+	    (h->ops->func)(insn, extension);
+	  else
+	    {
+	      insn &= 0xffff0000;
+	      insn |= load_mem (PC + 2, 2);
+	      (h->ops->func)(insn, extension);
+	    }
 	  PC += 4;
 	}
 
@@ -468,7 +511,28 @@ sim_resume (step, siggnal)
 	{
 	  insn = load_mem_big (PC, 4);
 	  h = lookup_hash (insn, 5);
-	  extension = load_mem_big (PC + 4, 1);
+
+	  /* This must be a format S4 insn.  */
+	  if (h->opcode == 0xdc000000)
+	    {
+	      /* A "jmp" instruction with a 32bit immediate stored
+	    	 in little endian form.  */
+	      unsigned long temp;
+	      temp = load_mem (PC + 1, 4);
+	      insn &= 0xff000000;
+	      insn |= (temp & 0xffffff00) >> 8;
+	      extension = temp & 0xff;
+	    }
+	  else
+	    {
+	      /* A "call" instruction with a 16bit immediate in little
+		 endian form.  */
+	      unsigned long temp;
+	      temp = load_mem (PC + 1, 2);
+	      insn &= 0xff0000ff;
+	      insn |= temp << 8;
+	      extension = load_mem (PC + 4, 1);
+	    }
 	  (h->ops->func)(insn, extension);
 	  PC += 5;
 	}
@@ -477,9 +541,15 @@ sim_resume (step, siggnal)
       else if ((inst & 0xff) == 0xfd
 	       || (inst & 0xff) == 0xfc)
 	{
+	  unsigned long temp;
+
 	  insn = load_mem_big (PC, 4);
 	  h = lookup_hash (insn, 6);
-	  extension = load_mem_big (PC + 4, 2);
+
+	  temp = load_mem (PC + 2, 4);
+	  insn &= 0xffff0000;
+	  insn |= (temp >> 16) & 0xffff;
+	  extension = temp & 0xffff;
 	  (h->ops->func)(insn, extension);
 	  PC += 6;
 	}
@@ -489,7 +559,29 @@ sim_resume (step, siggnal)
 	{
 	  insn = load_mem_big (PC, 4);
 	  h = lookup_hash (insn, 7);
-	  extension = load_mem_big (PC + 4, 3);
+
+	  if (h->ops->format == FMT_S6)
+	    {
+	      unsigned long temp;
+
+	      temp = load_mem (PC + 1, 4);
+	      insn &= 0xff000000;
+	      insn |= (temp >> 8) & 0xffffff;
+
+	      extension = (temp & 0xff) << 16;
+	      extension |= load_mem (PC + 5, 1) << 8;
+	      extension |= load_mem (PC + 6, 1);
+	    }
+	  else
+	    {
+	      unsigned long temp;
+
+	      temp = load_mem (PC + 2, 4);
+	      insn &= 0xffff0000;
+	      insn |= (temp >> 16) & 0xffff;
+	      extension = (temp & 0xffff) << 8;
+	      extension = load_mem (PC + 6, 1);
+	    }
 	  (h->ops->func)(insn, extension);
 	  PC += 7;
 	}
@@ -498,39 +590,43 @@ sim_resume (step, siggnal)
 }
 
 int
-sim_trace ()
+sim_trace (sd)
+     SIM_DESC sd;
 {
 #ifdef DEBUG
   mn10300_debug = DEBUG;
 #endif
-  sim_resume (0, 0);
+  sim_resume (sd, 0, 0);
   return 1;
 }
 
 void
-sim_info (verbose)
+sim_info (sd, verbose)
+     SIM_DESC sd;
      int verbose;
 {
   (*mn10300_callback->printf_filtered) (mn10300_callback, "sim_info\n");
 }
 
-void
-sim_create_inferior (start_address, argv, env)
-     SIM_ADDR start_address;
+SIM_RC
+sim_create_inferior (sd, argv, env)
+     SIM_DESC sd;
      char **argv;
      char **env;
 {
-  PC = start_address;
+  return SIM_RC_OK;
 }
 
 void
-sim_kill ()
+sim_kill (sd)
+     SIM_DESC sd;
 {
   /* nothing to do */
 }
 
 void
-sim_set_callbacks (p)
+sim_set_callbacks (sd, p)
+     SIM_DESC sd;
      host_callback *p;
 {
   mn10300_callback = p;
@@ -541,7 +637,8 @@ sim_set_callbacks (p)
    This is enough to get c-torture limping though.  */
 
 void
-sim_stop_reason (reason, sigrc)
+sim_stop_reason (sd, reason, sigrc)
+     SIM_DESC sd;
      enum sim_stop *reason;
      int *sigrc;
 {
@@ -553,7 +650,8 @@ sim_stop_reason (reason, sigrc)
 }
 
 void
-sim_fetch_register (rn, memory)
+sim_fetch_register (sd, rn, memory)
+     SIM_DESC sd;
      int rn;
      unsigned char *memory;
 {
@@ -561,7 +659,8 @@ sim_fetch_register (rn, memory)
 }
  
 void
-sim_store_register (rn, memory)
+sim_store_register (sd, rn, memory)
+     SIM_DESC sd;
      int rn;
      unsigned char *memory;
 {
@@ -569,7 +668,8 @@ sim_store_register (rn, memory)
 }
 
 int
-sim_read (addr, buffer, size)
+sim_read (sd, addr, buffer, size)
+     SIM_DESC sd;
      SIM_ADDR addr;
      unsigned char *buffer;
      int size;
@@ -582,17 +682,29 @@ sim_read (addr, buffer, size)
 } 
 
 void
-sim_do_command (cmd)
+sim_do_command (sd, cmd)
+     SIM_DESC sd;
      char *cmd;
 {
   (*mn10300_callback->printf_filtered) (mn10300_callback, "\"%s\" is not a valid mn10300 simulator command.\n", cmd);
 }
 
-int
-sim_load (prog, from_tty)
+SIM_RC
+sim_load (sd, prog, abfd, from_tty)
+     SIM_DESC sd;
      char *prog;
+     bfd *abfd;
      int from_tty;
 {
-  /* Return nonzero so GDB will handle it.  */
-  return 1;
+  extern bfd *sim_load_file (); /* ??? Don't know where this should live.  */
+  bfd *prog_bfd;
+
+  prog_bfd = sim_load_file (sd, myname, mn10300_callback, prog, abfd,
+			    sim_kind == SIM_OPEN_DEBUG);
+  if (prog_bfd == NULL)
+    return SIM_RC_FAIL;
+  PC = bfd_get_start_address (prog_bfd);
+  if (abfd == NULL)
+    bfd_close (prog_bfd);
+  return SIM_RC_OK;
 } 

@@ -1,3 +1,12 @@
+Thu Apr 17 03:26:59 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* Makefile.in (SIM_OBJS): Add sim-load.o.
+	* interp.c (sim_kind, myname): New static locals.
+	(sim_open): Set sim_kind, myname.  Ignore -E arg.
+	(sim_load): Return SIM_RC.  New arg abfd.  Call sim_load_file to
+	load file into simulator.  Set start address from bfd.
+	(sim_create_inferior): Return SIM_RC.  Delete arg start_address.
+
 Wed Apr 16 19:30:44 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* simops.c (OP_F020): SYS_execv, SYS_time, SYS_times, SYS_utime
