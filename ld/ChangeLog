@@ -1,5 +1,7 @@
 Fri Jan 12 14:56:19 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* scripttempl/sh.sc: Only build constructors when CONSTRUCTING.
+
 	* ldmisc.c: Include <stdarg.h> rather than <varargs.h> if
 	ANSI_PROTOTYPES is defined.  Remove special handling of
 	WINDOWS_NT.  Various indendation fixes.
