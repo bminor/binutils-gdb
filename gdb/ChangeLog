@@ -1,3 +1,7 @@
+2003-03-21  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* MAINTAINERS (tui): Maintainer of tui code.
+
 2003-03-21  Corinna Vinschen  <vinschen@redhat.com>
 
 	* Makefile.in (ALLDEPFILES): Add i386-cygwin-tdep.c.
