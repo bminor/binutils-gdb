@@ -1,5 +1,8 @@
 2004-01-22  Mark Kettenis  <kettenis@gnu.org>
 
+	* sparcnbsd-tdep.c (sparcnbsd_core_osabi_sniffer): New function.
+	(_initialize_sparnbsd_tdep): Register sparcnbsd_core_osabi_sniffer.
+
 	* ser-pipe.c (pipe_open): Use proper null pointer in execl call.
 	* cli/cli-cmds.c (shell_escape): Likewise.
 
