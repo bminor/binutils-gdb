@@ -24,6 +24,11 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <stdio.h>
 #include "opcode/m68k.h"
 
+#ifndef GDB
+#define fprintf_filtered fprintf
+#define fputs_filtered fputs
+#endif
+
 /* Sign-extend an (unsigned char). */
 #if __STDC__ == 1
 #define COERCE_SIGNED_CHAR(ch) ((signed char)(ch))
@@ -57,11 +62,24 @@ static int fetch_arg ();
 #define NEXTLONG(p)  \
   (p += 4, (((((p[-4] << 8) + p[-3]) << 8) + p[-2]) << 8) + p[-1])
 
-#define NEXTSINGLE(p) \
-  (p += 4, *((float *)(p - 4)))
+/* NEXTSINGLE and NEXTDOUBLE handle alignment problems, but not
+ * byte-swapping or other float format differences.  FIXME! */
 
-#define NEXTDOUBLE(p) \
-  (p += 8, *((double *)(p - 8)))
+union number {
+    double d;
+    float f;
+    char c[10];
+};
+
+#define NEXTSINGLE(val, p) \
+  { int i; union number u;\
+    for (i = 0; i < sizeof(float); i++) u.c[i] = *p++; \
+    val = u.f; }
+
+#define NEXTDOUBLE(val, p) \
+  { int i; union number u;\
+    for (i = 0; i < sizeof(double); i++) u.c[i] = *p++; \
+    val = u.d; }
 
 #define NEXTEXTEND(p) \
   (p += 12, 0.0)	/* Need a function to convert from extended to double
@@ -127,11 +145,11 @@ unsigned    char *buffer;
   /* Handle undefined instructions.  */
   if (best < 0)
     {
-      fprintf (stream, "0%o", (unsigned) (buffer[0] << 8) + buffer[1]);
+      fprintf_filtered (stream, "0%o", (unsigned) (buffer[0] << 8) + buffer[1]);
       return 2;
     }
 
-  fprintf (stream, "%s", m68k_opcodes[best].name);
+  fprintf_filtered (stream, "%s", m68k_opcodes[best].name);
 
   /* Point at first word of argument data,
      and at descriptor for first argument.  */
@@ -158,14 +176,14 @@ unsigned    char *buffer;
   d = m68k_opcodes[best].args;
 
   if (*d)
-    fputs (" ", stream);
+    fputs_filtered (" ", stream);
 
   while (*d)
     {
       p = print_insn_arg (d, buffer, p, addr + p - buffer, stream);
       d += 2;
       if (*d && *(d - 2) != 'I' && *d != 'k')
-	fputs (",", stream);
+	fputs_filtered (",", stream);
     }
   return p - buffer;
 }
@@ -189,15 +207,15 @@ print_insn_arg (d, buffer, p, addr, stream)
   switch (*d)
     {
     case 'C':
-      fprintf (stream, "ccr");
+      fprintf_filtered (stream, "ccr");
       break;
 
     case 'S':
-      fprintf (stream, "sr");
+      fprintf_filtered (stream, "sr");
       break;
 
     case 'U':
-      fprintf (stream, "usp");
+      fprintf_filtered (stream, "usp");
       break;
 
     case 'J':
@@ -211,79 +229,81 @@ print_insn_arg (d, buffer, p, addr, stream)
 	for (regno = sizeof names / sizeof names[0] - 1; regno >= 0; regno--)
 	  if (names[regno].value == val)
 	    {
-	      fprintf (stream, names[regno].name);
+	      fprintf_filtered (stream, names[regno].name);
 	      break;
 	    }
 	if (regno < 0)
-	  fprintf (stream, "%d", val);
+	  fprintf_filtered (stream, "%d", val);
       }
       break;
 
     case 'Q':
       val = fetch_arg (buffer, place, 3);
-      if (val == 0) val = 8;
-      fprintf (stream, "#%d", val);
+      /* 0 means 8, except for the bkpt instruction... */
+      if (val == 0 && d[1] != 's')
+	  val = 8;
+      fprintf_filtered (stream, "#%d", val);
       break;
 
     case 'M':
       val = fetch_arg (buffer, place, 8);
       if (val & 0x80)
 	val = val - 0x100;
-      fprintf (stream, "#%d", val);
+      fprintf_filtered (stream, "#%d", val);
       break;
 
     case 'T':
       val = fetch_arg (buffer, place, 4);
-      fprintf (stream, "#%d", val);
+      fprintf_filtered (stream, "#%d", val);
       break;
 
     case 'D':
-      fprintf (stream, "%s", reg_names[fetch_arg (buffer, place, 3)]);
+      fprintf_filtered (stream, "%s", reg_names[fetch_arg (buffer, place, 3)]);
       break;
 
     case 'A':
-      fprintf (stream, "%s",
+      fprintf_filtered (stream, "%s",
 			reg_names[fetch_arg (buffer, place, 3) + 010]);
       break;
 
     case 'R':
-      fprintf (stream, "%s", reg_names[fetch_arg (buffer, place, 4)]);
+      fprintf_filtered (stream, "%s", reg_names[fetch_arg (buffer, place, 4)]);
       break;
 
     case 'F':
-      fprintf (stream, "fp%d", fetch_arg (buffer, place, 3));
+      fprintf_filtered (stream, "fp%d", fetch_arg (buffer, place, 3));
       break;
 
     case 'O':
       val = fetch_arg (buffer, place, 6);
       if (val & 0x20)
-	fprintf (stream, "%s", reg_names [val & 7]);
+	fprintf_filtered (stream, "%s", reg_names [val & 7]);
       else
-	fprintf (stream, "%d", val);
+	fprintf_filtered (stream, "%d", val);
       break;
 
     case '+':
-      fprintf (stream, "%s@+",
+      fprintf_filtered (stream, "%s@+",
 			reg_names[fetch_arg (buffer, place, 3) + 8]);
       break;
 
     case '-':
-      fprintf (stream, "%s@-",
+      fprintf_filtered (stream, "%s@-",
 	       reg_names[fetch_arg (buffer, place, 3) + 8]);
       break;
 
     case 'k':
       if (place == 'k')
-	fprintf (stream, "{%s}", reg_names[fetch_arg (buffer, place, 3)]);
+	fprintf_filtered (stream, "{%s}", reg_names[fetch_arg (buffer, place, 3)]);
       else if (place == 'C')
 	{
 	  val = fetch_arg (buffer, place, 7);
 	  if ( val > 63 )		/* This is a signed constant. */
 	    val -= 128;
-	  fprintf (stream, "{#%d}", val);
+	  fprintf_filtered (stream, "{#%d}", val);
 	}
       else
-	fprintf(stderr, "Invalid arg format in opcode table: \"%c%c\".",
+	fprintf_filtered(stderr, "Invalid arg format in opcode table: \"%c%c\".",
 	       *d, place);
       break;
 
@@ -305,9 +325,9 @@ print_insn_arg (d, buffer, p, addr, stream)
       else if (place == 'l')
 	val = NEXTLONG (p1);
       else
-	fprintf(stderr, "Invalid arg format in opcode table: \"%c%c\".",
+	fprintf_filtered(stderr, "Invalid arg format in opcode table: \"%c%c\".",
 	       *d, place);
-      fprintf (stream, "#%d", val);
+      fprintf_filtered (stream, "#%d", val);
       break;
 
     case 'B':
@@ -335,26 +355,26 @@ print_insn_arg (d, buffer, p, addr, stream)
 	    val = NEXTWORD (p);
 	}
       else
-	fprintf(stderr, "Invalid arg format in opcode table: \"%c%c\".",
+	fprintf_filtered(stderr, "Invalid arg format in opcode table: \"%c%c\".",
 	       *d, place);
       print_address (addr + val, stream);
       break;
 
     case 'd':
       val = NEXTWORD (p);
-      fprintf (stream, "%s@(%d)",
+      fprintf_filtered (stream, "%s@(%d)",
 			reg_names[fetch_arg (buffer, place, 3)], val);
       break;
 
     case 's':
-      fprintf (stream, "%s",
+      fprintf_filtered (stream, "%s",
 			fpcr_names[fetch_arg (buffer, place, 3)]);
       break;
 
     case 'I':
       val = fetch_arg (buffer, 'd', 3);		  /* Get coprocessor ID... */
       if (val != 1)				/* Unusual coprocessor ID? */
-	fprintf (stream, "(cpid=%d) ", val);
+	fprintf_filtered (stream, "(cpid=%d) ", val);
       if (place == 'i')
 	p += 2;			     /* Skip coprocessor extended operands */
       break;
@@ -384,28 +404,28 @@ print_insn_arg (d, buffer, p, addr, stream)
       switch (val >> 3)
 	{
 	case 0:
-	  fprintf (stream, "%s", reg_names[val]);
+	  fprintf_filtered (stream, "%s", reg_names[val]);
 	  break;
 
 	case 1:
-	  fprintf (stream, "%s", regname);
+	  fprintf_filtered (stream, "%s", regname);
 	  break;
 
 	case 2:
-	  fprintf (stream, "%s@", regname);
+	  fprintf_filtered (stream, "%s@", regname);
 	  break;
 
 	case 3:
-	  fprintf (stream, "%s@+", regname);
+	  fprintf_filtered (stream, "%s@+", regname);
 	  break;
 
 	case 4:
-	  fprintf (stream, "%s@-", regname);
+	  fprintf_filtered (stream, "%s@-", regname);
 	  break;
 
 	case 5:
 	  val = NEXTWORD (p);
-	  fprintf (stream, "%s@(%d)", regname, val);
+	  fprintf_filtered (stream, "%s@(%d)", regname, val);
 	  break;
 
 	case 6:
@@ -417,13 +437,13 @@ print_insn_arg (d, buffer, p, addr, stream)
 	    {
 	    case 0:
 	      val = NEXTWORD (p);
-	      fprintf (stream, "@#");
+	      fprintf_filtered (stream, "@#");
 	      print_address (val, stream);
 	      break;
 
 	    case 1:
 	      val = NEXTLONG (p);
-	      fprintf (stream, "@#");
+	      fprintf_filtered (stream, "@#");
 	      print_address (val, stream);
 	      break;
 
@@ -456,11 +476,11 @@ print_insn_arg (d, buffer, p, addr, stream)
 		  break;
 
 		case 'f':
-		  flval = NEXTSINGLE(p);
+		  NEXTSINGLE(flval, p);
 		  break;
 
 		case 'F':
-		  flval = NEXTDOUBLE(p);
+		  NEXTDOUBLE(flval, p);
 		  break;
 
 		case 'x':
@@ -472,17 +492,17 @@ print_insn_arg (d, buffer, p, addr, stream)
 		  break;
 
 		default:
-		  fprintf(stderr, "Invalid arg format in opcode table: \"%c%c\".",
+		  fprintf_filtered(stderr, "Invalid arg format in opcode table: \"%c%c\".",
 		       *d, place);
 	      }
 	      if ( flt_p )	/* Print a float? */
-		fprintf (stream, "#%g", flval);
+		fprintf_filtered (stream, "#%g", flval);
 	      else
-		fprintf (stream, "#%d", val);
+		fprintf_filtered (stream, "#%d", val);
 	      break;
 
 	    default:
-	      fprintf (stream, "<invalid address mode 0%o>", (unsigned) val);
+	      fprintf_filtered (stream, "<invalid address mode 0%o>", (unsigned) val);
 	    }
 	}
       break;
@@ -499,7 +519,7 @@ print_insn_arg (d, buffer, p, addr, stream)
 	    p = p1 > p ? p1 : p;
 	    if (val == 0)
 	      {
-		fputs ("#0", stream);
+		fputs_filtered ("#0", stream);
 		break;
 	      }
 	    if (*d == 'l')
@@ -517,14 +537,14 @@ print_insn_arg (d, buffer, p, addr, stream)
 		{
 		  int first_regno;
 		  if (doneany)
-		    fputs ("/", stream);
+		    fputs_filtered ("/", stream);
 		  doneany = 1;
-		  fprintf (stream, "%s", reg_names[regno]);
+		  fprintf_filtered (stream, "%s", reg_names[regno]);
 		  first_regno = regno;
 		  while (val & (1 << (regno + 1)))
 		    ++regno;
 		  if (regno > first_regno)
-		    fprintf (stream, "-%s", reg_names[regno]);
+		    fprintf_filtered (stream, "-%s", reg_names[regno]);
 		}
 	  }
 	else if (place == '3')
@@ -534,7 +554,7 @@ print_insn_arg (d, buffer, p, addr, stream)
 	    val = fetch_arg (buffer, place, 8);
 	    if (val == 0)
 	      {
-		fputs ("#0", stream);
+		fputs_filtered ("#0", stream);
 		break;
 	      }
 	    if (*d == 'l')
@@ -552,22 +572,22 @@ print_insn_arg (d, buffer, p, addr, stream)
 		{
 		  int first_regno;
 		  if (doneany)
-		    fputs ("/", stream);
+		    fputs_filtered ("/", stream);
 		  doneany = 1;
-		  fprintf (stream, "fp%d", regno);
+		  fprintf_filtered (stream, "fp%d", regno);
 		  first_regno = regno;
 		  while (val & (1 << (regno + 1)))
 		    ++regno;
 		  if (regno > first_regno)
-		    fprintf (stream, "-fp%d", regno);
+		    fprintf_filtered (stream, "-fp%d", regno);
 		}
 	  }
 	else
-	  abort ();
+	  goto de_fault;
       break;
 
-    default:
-      fprintf(stderr, "Invalid arg format in opcode table: \"%c\".", *d);
+    default:  de_fault:
+      fprintf_filtered(stderr, "Invalid arg format in opcode table: \"%c\".", *d);
     }
 
   return (unsigned char *) p;
@@ -708,7 +728,7 @@ bfd_vma addr;
 		  ((word & 0x80) ? word | 0xff00 : word & 0xff)
 		  + ((basereg == -1) ? addr : 0),
 		  stream);
-      fputs (buf, stream);
+      fputs_filtered (buf, stream);
       return p;
     }
 
@@ -736,7 +756,7 @@ bfd_vma addr;
   if ((word & 7) == 0)
     {
       print_base (basereg, base_disp, stream);
-      fputs (buf, stream);
+      fputs_filtered (buf, stream);
       return p;
     }
 
@@ -752,15 +772,15 @@ bfd_vma addr;
       outer_disp = NEXTLONG (p);
     }
 
-  fprintf (stream, "%d(", outer_disp);
+  fprintf_filtered (stream, "%d(", outer_disp);
   print_base (basereg, base_disp, stream);
 
   /* If postindexed, print the closeparen before the index.  */
   if (word & 4)
-    fprintf (stream, ")%s", buf);
+    fprintf_filtered (stream, ")%s", buf);
   /* If preindexed, print the closeparen after the index.  */
   else
-    fprintf (stream, "%s)", buf);
+    fprintf_filtered (stream, "%s)", buf);
 
   return p;
 }
@@ -775,9 +795,9 @@ print_base (regno, disp, stream)
      FILE *stream;
 {
   if (regno == -2)
-    fprintf (stream, "%d", disp);
+    fprintf_filtered (stream, "%d", disp);
   else if (regno == -1)
-    fprintf (stream, "0x%x", (unsigned) disp);
+    fprintf_filtered (stream, "0x%x", (unsigned) disp);
   else
-    fprintf (stream, "%d(%s)", disp, reg_names[regno]);
+    fprintf_filtered (stream, "%d(%s)", disp, reg_names[regno]);
 }
