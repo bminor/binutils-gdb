@@ -1,4 +1,12 @@
+Wed Jun 22 00:24:55 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* config/tc-hppa.h (obj_frob_symbol): Define for OBJ_ELF.
+	More gas/bfd lossage exposed by the new linker code.
+
 Tue Jun 21 11:32:18 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* subsegs.c (subseg_change): Clear seginfo after allocating it.
+	(subseg_get): Pass actual size of seginfo to memset.
 
 	* subsegs.c (abs_seg_info, und_seg_info): Define if BFD_ASSEMBLER.
 	(subseg_change): Store seg_info for bfd_abs_section_ptr in
