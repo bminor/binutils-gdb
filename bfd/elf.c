@@ -665,11 +665,12 @@ _bfd_elf_make_section_from_shdr (abfd, hdr, name)
 		  && (hdr->sh_offset + hdr->sh_size
 		      <= phdr->p_offset + phdr->p_memsz)
 		  && ((flags & SEC_LOAD) == 0
-		      || (phdr->p_offset + phdr->p_filesz
-			  >= hdr->sh_offset + hdr->sh_size)))
+		      || (hdr->sh_offset + hdr->sh_size
+			  <= phdr->p_offset + phdr->p_filesz)))
 		{
 		  if ((flags & SEC_LOAD) == 0)
-		    newsect->lma += phdr->p_paddr - phdr->p_vaddr;
+		    newsect->lma = (phdr->p_paddr
+				    + hdr->sh_addr - phdr->p_vaddr);
 		  else
 		    /* We used to use the same adjustment for SEC_LOAD
 		       sections, but that doesn't work if the segment
@@ -680,7 +681,15 @@ _bfd_elf_make_section_from_shdr (abfd, hdr, name)
 		       LMAs, even if the VMAs are not.  */
 		    newsect->lma = (phdr->p_paddr
 				    + hdr->sh_offset - phdr->p_offset);
-		  break;
+
+		  /* With contiguous segments, we can't tell from file
+		     offsets whether a section with zero size should
+		     be placed at the end of one segment or the
+		     beginning of the next.  Decide based on vaddr.  */
+		  if (hdr->sh_addr >= phdr->p_vaddr
+		      && (hdr->sh_addr + hdr->sh_size
+			  <= phdr->p_vaddr + phdr->p_memsz))
+		    break;
 		}
 	    }
 	}

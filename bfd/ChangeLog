@@ -1,3 +1,9 @@
+2002-04-03  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf.c (_bfd_elf_make_section_from_shdr): When setting section
+	LMAs, loop over segments until p_vaddr and p_memsz specify an
+	extent enclosing the section.
+
 2002-04-02  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* ihex.c (ihex_write_object_contents): Do not allow records to
