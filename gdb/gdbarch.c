@@ -197,7 +197,7 @@ struct gdbarch
   gdbarch_memory_insert_breakpoint_ftype *memory_insert_breakpoint;
   gdbarch_memory_remove_breakpoint_ftype *memory_remove_breakpoint;
   CORE_ADDR decr_pc_after_break;
-  CORE_ADDR function_start_offset;
+  CORE_ADDR deprecated_function_start_offset;
   gdbarch_remote_translate_xfer_address_ftype *remote_translate_xfer_address;
   CORE_ADDR frame_args_skip;
   gdbarch_deprecated_frameless_function_invocation_ftype *deprecated_frameless_function_invocation;
@@ -343,7 +343,7 @@ struct gdbarch startup_gdbarch =
   0,  /* memory_insert_breakpoint */
   0,  /* memory_remove_breakpoint */
   0,  /* decr_pc_after_break */
-  0,  /* function_start_offset */
+  0,  /* deprecated_function_start_offset */
   generic_remote_translate_xfer_address,  /* remote_translate_xfer_address */
   0,  /* frame_args_skip */
   0,  /* deprecated_frameless_function_invocation */
@@ -621,7 +621,7 @@ verify_gdbarch (struct gdbarch *current_gdbarch)
   /* Skip verify of memory_insert_breakpoint, invalid_p == 0 */
   /* Skip verify of memory_remove_breakpoint, invalid_p == 0 */
   /* Skip verify of decr_pc_after_break, invalid_p == 0 */
-  /* Skip verify of function_start_offset, invalid_p == 0 */
+  /* Skip verify of deprecated_function_start_offset, invalid_p == 0 */
   /* Skip verify of remote_translate_xfer_address, invalid_p == 0 */
   /* Skip verify of frame_args_skip, invalid_p == 0 */
   /* Skip verify of deprecated_frameless_function_invocation, has predicate */
@@ -1084,6 +1084,14 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
                       (long) current_gdbarch->deprecated_frame_saved_pc
                       /*DEPRECATED_FRAME_SAVED_PC ()*/);
 #endif
+#ifdef DEPRECATED_FUNCTION_START_OFFSET
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: DEPRECATED_FUNCTION_START_OFFSET # %s\n",
+                      XSTRING (DEPRECATED_FUNCTION_START_OFFSET));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: DEPRECATED_FUNCTION_START_OFFSET = %ld\n",
+                      (long) DEPRECATED_FUNCTION_START_OFFSET);
+#endif
 #ifdef DEPRECATED_GET_SAVED_REGISTER_P
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
@@ -1525,14 +1533,6 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: FRAME_RED_ZONE_SIZE = %d\n",
                       FRAME_RED_ZONE_SIZE);
-#endif
-#ifdef FUNCTION_START_OFFSET
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: FUNCTION_START_OFFSET # %s\n",
-                      XSTRING (FUNCTION_START_OFFSET));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: FUNCTION_START_OFFSET = %ld\n",
-                      (long) FUNCTION_START_OFFSET);
 #endif
 #ifdef GET_LONGJMP_TARGET_P
   fprintf_unfiltered (file,
@@ -3760,20 +3760,20 @@ set_gdbarch_decr_pc_after_break (struct gdbarch *gdbarch,
 }
 
 CORE_ADDR
-gdbarch_function_start_offset (struct gdbarch *gdbarch)
+gdbarch_deprecated_function_start_offset (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  /* Skip verify of function_start_offset, invalid_p == 0 */
+  /* Skip verify of deprecated_function_start_offset, invalid_p == 0 */
   if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_function_start_offset called\n");
-  return gdbarch->function_start_offset;
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_function_start_offset called\n");
+  return gdbarch->deprecated_function_start_offset;
 }
 
 void
-set_gdbarch_function_start_offset (struct gdbarch *gdbarch,
-                                   CORE_ADDR function_start_offset)
+set_gdbarch_deprecated_function_start_offset (struct gdbarch *gdbarch,
+                                              CORE_ADDR deprecated_function_start_offset)
 {
-  gdbarch->function_start_offset = function_start_offset;
+  gdbarch->deprecated_function_start_offset = deprecated_function_start_offset;
 }
 
 void

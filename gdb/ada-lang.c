@@ -5596,7 +5596,7 @@ ada_finish_decode_line_1 (char **spec, struct symtab *file_table,
           val.section = SYMBOL_BFD_SECTION (msymbol);
           if (funfirstline)
             {
-              val.pc += FUNCTION_START_OFFSET;
+              val.pc += DEPRECATED_FUNCTION_START_OFFSET;
               SKIP_PROLOGUE (val.pc);
             }
           selected.sals = (struct symtab_and_line *)

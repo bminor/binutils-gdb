@@ -1817,7 +1817,7 @@ handle_inferior_event (struct execution_control_state *ecs)
      will both be 0 if it doesn't work.  */
   find_pc_partial_function (stop_pc, &ecs->stop_func_name,
 			    &ecs->stop_func_start, &ecs->stop_func_end);
-  ecs->stop_func_start += FUNCTION_START_OFFSET;
+  ecs->stop_func_start += DEPRECATED_FUNCTION_START_OFFSET;
   ecs->another_trap = 0;
   bpstat_clear (&stop_bpstat);
   stop_step = 0;

@@ -3260,20 +3260,20 @@ function end symbol is 0.  For such targets, you must define
 @code{FUNCTION_EPILOGUE_SIZE} to expand into the standard size of a
 function's epilogue.
 
-@item FUNCTION_START_OFFSET
-@findex FUNCTION_START_OFFSET
+@item DEPRECATED_FUNCTION_START_OFFSET
+@findex DEPRECATED_FUNCTION_START_OFFSET
 An integer, giving the offset in bytes from a function's address (as
 used in the values of symbols, function pointers, etc.), and the
 function's first genuine instruction.
 
 This is zero on almost all machines: the function's address is usually
-the address of its first instruction.  However, on the VAX, for example,
-each function starts with two bytes containing a bitmask indicating
-which registers to save upon entry to the function.  The VAX @code{call}
-instructions check this value, and save the appropriate registers
-automatically.  Thus, since the offset from the function's address to
-its first instruction is two bytes, @code{FUNCTION_START_OFFSET} would
-be 2 on the VAX.
+the address of its first instruction.  However, on the VAX, for
+example, each function starts with two bytes containing a bitmask
+indicating which registers to save upon entry to the function.  The
+VAX @code{call} instructions check this value, and save the
+appropriate registers automatically.  Thus, since the offset from the
+function's address to its first instruction is two bytes,
+@code{DEPRECATED_FUNCTION_START_OFFSET} would be 2 on the VAX.
 
 @item GCC_COMPILED_FLAG_SYMBOL
 @itemx GCC2_COMPILED_FLAG_SYMBOL

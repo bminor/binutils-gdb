@@ -1,3 +1,17 @@
+2004-06-18  Andrew Cagney  <cagney@gnu.org>
+
+	* gdbarch.sh (DEPRECATED_FUNCTION_START_OFFSET): Deprecated.
+	* gdbarch.h, gdbarch.c: Re-generate.
+	* ada-lang.c (ada_finish_decode_line_1): Update.
+	* infrun.c (handle_inferior_event): Update.
+	* infcall.c (find_function_addr): Update.
+	* linespec.c (minsym_found): Update.
+	* symtab.c (find_function_start_sal, skip_prologue_using_sal):
+	Update.
+	* blockframe.c (legacy_frameless_look_for_prologue): Update.
+	* cli/cli-cmds.c (disassemble_command): Update.
+	* vax-tdep.c (vax_gdbarch_init): Update.
+
 2004-06-18  Mark Kettenis  <kettenis@gnu.org>
 
 	* i386-tdep.c (i386_collect_fpregset): Fix comment.

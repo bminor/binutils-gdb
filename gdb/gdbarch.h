@@ -1312,13 +1312,21 @@ extern void set_gdbarch_decr_pc_after_break (struct gdbarch *gdbarch, CORE_ADDR 
 #define DECR_PC_AFTER_BREAK (gdbarch_decr_pc_after_break (current_gdbarch))
 #endif
 
-extern CORE_ADDR gdbarch_function_start_offset (struct gdbarch *gdbarch);
-extern void set_gdbarch_function_start_offset (struct gdbarch *gdbarch, CORE_ADDR function_start_offset);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (FUNCTION_START_OFFSET)
-#error "Non multi-arch definition of FUNCTION_START_OFFSET"
+/* A function can be addressed by either it's "pointer" (possibly a
+   descriptor address) or "entry point" (first executable instruction).
+   The method "convert_from_func_ptr_addr" converting the former to the
+   latter.  DEPRECATED_FUNCTION_START_OFFSET is being used to implement
+   a simplified subset of that functionality - the function's address
+   corresponds to the "function pointer" and the function's start
+   corresponds to the "function entry point" - and hence is redundant. */
+
+extern CORE_ADDR gdbarch_deprecated_function_start_offset (struct gdbarch *gdbarch);
+extern void set_gdbarch_deprecated_function_start_offset (struct gdbarch *gdbarch, CORE_ADDR deprecated_function_start_offset);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_FUNCTION_START_OFFSET)
+#error "Non multi-arch definition of DEPRECATED_FUNCTION_START_OFFSET"
 #endif
-#if !defined (FUNCTION_START_OFFSET)
-#define FUNCTION_START_OFFSET (gdbarch_function_start_offset (current_gdbarch))
+#if !defined (DEPRECATED_FUNCTION_START_OFFSET)
+#define DEPRECATED_FUNCTION_START_OFFSET (gdbarch_deprecated_function_start_offset (current_gdbarch))
 #endif
 
 typedef void (gdbarch_remote_translate_xfer_address_ftype) (struct gdbarch *gdbarch, struct regcache *regcache, CORE_ADDR gdb_addr, int gdb_len, CORE_ADDR *rem_addr, int *rem_len);

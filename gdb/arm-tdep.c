@@ -291,7 +291,7 @@ arm_frameless_function_invocation (struct frame_info *fi)
 	stmdb sp!, {}
 	sub sp, ip, #4.  */
 
-  func_start = (get_frame_func (fi) + FUNCTION_START_OFFSET);
+  func_start = (get_frame_func (fi) + DEPRECATED_FUNCTION_START_OFFSET);
   after_prologue = SKIP_PROLOGUE (func_start);
 
   /* There are some frameless functions whose first two instructions

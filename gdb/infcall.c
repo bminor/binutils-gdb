@@ -207,7 +207,7 @@ find_function_addr (struct value *function, struct type **retval_type)
 
   if (retval_type != NULL)
     *retval_type = value_type;
-  return funaddr + FUNCTION_START_OFFSET;
+  return funaddr + DEPRECATED_FUNCTION_START_OFFSET;
 }
 
 /* Call breakpoint_auto_delete on the current contents of the bpstat

@@ -506,7 +506,7 @@ vax_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_breakpoint_from_pc (gdbarch, vax_breakpoint_from_pc);
 
   /* Misc info */
-  set_gdbarch_function_start_offset (gdbarch, 2);
+  set_gdbarch_deprecated_function_start_offset (gdbarch, 2);
   set_gdbarch_believe_pcc_promotion (gdbarch, 1);
 
   set_gdbarch_print_insn (gdbarch, print_insn_vax);

@@ -147,7 +147,7 @@ legacy_frameless_look_for_prologue (struct frame_info *frame)
   func_start = get_frame_func (frame);
   if (func_start)
     {
-      func_start += FUNCTION_START_OFFSET;
+      func_start += DEPRECATED_FUNCTION_START_OFFSET;
       /* NOTE: cagney/2004-02-09: Eliminated per-architecture
          PROLOGUE_FRAMELESS_P call as architectures with custom
          implementations had all been deleted.  Eventually even this

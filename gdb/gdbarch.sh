@@ -583,8 +583,17 @@ M:ADJUST_BREAKPOINT_ADDRESS:CORE_ADDR:adjust_breakpoint_address:CORE_ADDR bpaddr
 f:MEMORY_INSERT_BREAKPOINT:int:memory_insert_breakpoint:CORE_ADDR addr, char *contents_cache:addr, contents_cache::0:default_memory_insert_breakpoint::0
 f:MEMORY_REMOVE_BREAKPOINT:int:memory_remove_breakpoint:CORE_ADDR addr, char *contents_cache:addr, contents_cache::0:default_memory_remove_breakpoint::0
 v:DECR_PC_AFTER_BREAK:CORE_ADDR:decr_pc_after_break::::0:::0
-v:FUNCTION_START_OFFSET:CORE_ADDR:function_start_offset::::0:::0
-#
+
+# A function can be addressed by either it's "pointer" (possibly a
+# descriptor address) or "entry point" (first executable instruction).
+# The method "convert_from_func_ptr_addr" converting the former to the
+# latter.  DEPRECATED_FUNCTION_START_OFFSET is being used to implement
+# a simplified subset of that functionality - the function's address
+# corresponds to the "function pointer" and the function's start
+# corresponds to the "function entry point" - and hence is redundant.
+
+v:DEPRECATED_FUNCTION_START_OFFSET:CORE_ADDR:deprecated_function_start_offset::::0:::0
+
 m:REMOTE_TRANSLATE_XFER_ADDRESS:void:remote_translate_xfer_address:struct regcache *regcache, CORE_ADDR gdb_addr, int gdb_len, CORE_ADDR *rem_addr, int *rem_len:regcache, gdb_addr, gdb_len, rem_addr, rem_len:::generic_remote_translate_xfer_address::0
 #
 v:FRAME_ARGS_SKIP:CORE_ADDR:frame_args_skip::::0:::0
