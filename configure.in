@@ -44,7 +44,7 @@ amd)
 esac
 
 case "${target_cpu}" in
-	mips)  configdirs=`echo ${configdirs} | sed -e 's/bfd//;s/ld//;s/binutils//;s/gas//'`
+	mips)  configdirs=`echo ${configdirs} | sed -e 's/ld//;s/binutils//;s/gas//'`
 	;;
 esac
 
