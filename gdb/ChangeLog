@@ -1,3 +1,10 @@
+2001-06-06  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* source.c (mod_path, openp): Use #ifdef HAVE_DOS_BASED_FILE_SYSTEM
+	instead of #if HAVE_DOS_BASED_FILE_SYSTEM.
+	* completer.c: Ditto.
+	* cli/cli-cmds.c (cd_command): Ditto.
+
 2001-06-04  Eli Zaretskii  <eliz@is.elta.co.il>
 
 	* mips-tdep.c (show_mipsfpu_command): Remove unused variable msg.

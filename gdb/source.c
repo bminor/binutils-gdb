@@ -332,7 +332,7 @@ mod_path (char *dirname, char **which_path)
       }
 
       if (!(IS_DIR_SEPARATOR (*name) && p <= name + 1)	 /* "/" */
-#if HAVE_DOS_BASED_FILE_SYSTEM
+#ifdef HAVE_DOS_BASED_FILE_SYSTEM
       /* On MS-DOS and MS-Windows, h:\ is different from h: */
 	  && !(p == name + 3 && name[1] == ':') 	 /* "d:/" */
 #endif
@@ -371,7 +371,7 @@ mod_path (char *dirname, char **which_path)
 
       if (name[0] == '~')
 	name = tilde_expand (name);
-#if HAVE_DOS_BASED_FILE_SYSTEM
+#ifdef HAVE_DOS_BASED_FILE_SYSTEM
       else if (IS_ABSOLUTE_PATH (name) && p == name + 2) /* "d:" => "d:." */
 	name = concat (name, ".", NULL);
 #endif

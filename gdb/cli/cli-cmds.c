@@ -293,7 +293,7 @@ cd_command (char *dir, int from_tty)
   if (chdir (dir) < 0)
     perror_with_name (dir);
 
-#if HAVE_DOS_BASED_FILE_SYSTEM
+#ifdef HAVE_DOS_BASED_FILE_SYSTEM
   /* There's too much mess with DOSish names like "d:", "d:.",
      "d:./foo" etc.  Instead of having lots of special #ifdef'ed code,
      simply get the canonicalized name of the current directory.  */
@@ -306,7 +306,7 @@ cd_command (char *dir, int from_tty)
       /* Remove the trailing slash unless this is a root directory
          (including a drive letter on non-Unix systems).  */
       if (!(len == 1)		/* "/" */
-#if HAVE_DOS_BASED_FILE_SYSTEM
+#ifdef HAVE_DOS_BASED_FILE_SYSTEM
 	  && !(len == 3 && dir[1] == ':') /* "d:/" */
 #endif
 	  )

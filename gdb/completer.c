@@ -64,7 +64,7 @@ static char *gdb_completer_command_word_break_characters =
    break characters any characters that are commonly used in file
    names, such as '-', '+', '~', etc.  Otherwise, readline displays
    incorrect completion candidates.  */
-#if HAVE_DOS_BASED_FILE_SYSTEM
+#ifdef HAVE_DOS_BASED_FILE_SYSTEM
 /* MS-DOS and MS-Windows use colon as part of the drive spec, and most
    programs support @foo style response files.  */
 static char *gdb_completer_file_name_break_characters = " \t\n*|\"';?><@";
