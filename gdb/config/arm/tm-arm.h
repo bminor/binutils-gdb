@@ -22,6 +22,10 @@
 #ifndef TM_ARM_H
 #define TM_ARM_H
 
+#ifndef GDB_MULTI_ARCH
+#define GDB_MULTI_ARCH 1
+#endif
+
 #include "regcache.h"
 #include "floatformat.h"
 
@@ -30,7 +34,7 @@ struct type;
 struct value;
 
 /* IEEE format floating point.  */
-#define TARGET_DOUBLE_FORMAT  (target_byte_order == BFD_ENDIAN_BIG \
+#define TARGET_DOUBLE_FORMAT  (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG \
 			       ? &floatformat_ieee_double_big	 \
 			       : &floatformat_ieee_double_littlebyte_bigword)
 
@@ -324,10 +328,6 @@ CORE_ADDR arm_target_read_fp (void);
 CORE_ADDR arm_frame_chain (struct frame_info *);
 #define FRAME_CHAIN(thisframe) arm_frame_chain (thisframe)
 
-int arm_frame_chain_valid (CORE_ADDR, struct frame_info *);
-#define FRAME_CHAIN_VALID(chain, thisframe) \
-     arm_frame_chain_valid (chain, thisframe)
-
 /* Define other aspects of the stack frame.  */
 
 int arm_frameless_function_invocation (struct frame_info *fi);
@@ -359,12 +359,6 @@ void arm_frame_init_saved_regs (struct frame_info *);
 #define FRAME_INIT_SAVED_REGS(frame_info) \
 	arm_frame_init_saved_regs (frame_info);
 
-/* Things needed for making the inferior call functions.  */
-
-CORE_ADDR arm_push_arguments (int, struct value **, CORE_ADDR, int, CORE_ADDR);
-#define PUSH_ARGUMENTS(nargs, args, sp, struct_return, struct_addr) \
-     arm_push_arguments ((nargs), (args), (sp), (struct_return), (struct_addr))
-
 /* Push an empty stack frame, to record the current PC, etc.  */
 
 void arm_push_dummy_frame (void);
@@ -376,8 +370,6 @@ void arm_push_dummy_frame (void);
 void arm_pop_frame (void);
 
 #define POP_FRAME arm_pop_frame ()
-
-#define CALL_DUMMY_P (1)
 
 #define CALL_DUMMY_WORDS arm_call_dummy_words
 extern LONGEST arm_call_dummy_words[];

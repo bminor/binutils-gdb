@@ -1,3 +1,17 @@
+2002-02-08  Richard Earnshaw  <rearnsha@arm.com>
+
+	* arm-tdep.c (arm_frame_chain_valid): Make static.
+	(arm_push_arguments): Likewise.
+	(arm_gdbarch_init): New function.
+	(_initialize_arm_tdep): Call it.
+	* config/arm/tm-arm.h (GDB_MULTI_ARCH): Set to 1.
+	(TARGET_DOUBLE_FORMAT): Test TARGET_BYTE_ORDER, not target_byte_order.
+	(FRAME_CHAIN_VALID): Delete.
+	(arm_frame_chain_valid): Delete declaration.
+	(PUSH_ARGUMENTS): Delete.
+	(arm_push_arguments): Delete declaration.
+	(CALL_DUMMY_P): Delete.
+
 2002-02-08  Andrew Cagney  <ac131313@redhat.com>
 	    Corinna Vinschen  <vinschen@redhat.com>
 

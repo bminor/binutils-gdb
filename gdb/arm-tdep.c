@@ -235,7 +235,7 @@ arm_use_struct_convention (int gcc_p, struct type *type)
   return nRc;
 }
 
-int
+static int
 arm_frame_chain_valid (CORE_ADDR chain, struct frame_info *thisframe)
 {
   return (chain != 0 && (FRAME_SAVED_PC (thisframe) >= LOWEST_PC));
@@ -1417,7 +1417,7 @@ arm_call_dummy_breakpoint_offset (void)
    variant of the APCS.  It passes any floating point arguments in the
    general registers and/or on the stack.  */
 
-CORE_ADDR
+static CORE_ADDR
 arm_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 		    int struct_return, CORE_ADDR struct_addr)
 {
@@ -2341,6 +2341,35 @@ arm_coff_make_msymbol_special(int val, struct minimal_symbol *msym)
     MSYMBOL_SET_SPECIAL (msym);
 }
 
+static struct gdbarch *
+arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
+{
+  struct gdbarch *gdbarch;
+
+  if (arches != NULL)
+    return arches->gdbarch;
+
+  /* XXX We'll probably need to set the tdep field soon.  */
+  gdbarch = gdbarch_alloc (&info, NULL);
+
+  set_gdbarch_use_generic_dummy_frames (gdbarch, 0);
+
+  /* Call dummy code.  */
+  set_gdbarch_call_dummy_location (gdbarch, ON_STACK);
+  set_gdbarch_call_dummy_breakpoint_offset_p (gdbarch, 1);
+  set_gdbarch_call_dummy_p (gdbarch, 1);
+  set_gdbarch_call_dummy_stack_adjust_p (gdbarch, 0);
+
+  set_gdbarch_pc_in_call_dummy (gdbarch, pc_in_call_dummy_on_stack);
+
+  set_gdbarch_get_saved_register (gdbarch, generic_get_saved_register);
+  set_gdbarch_push_arguments (gdbarch, arm_push_arguments);
+
+  set_gdbarch_frame_chain_valid (gdbarch, arm_frame_chain_valid);
+
+  return gdbarch;
+}
+
 void
 _initialize_arm_tdep (void)
 {
@@ -2352,6 +2381,9 @@ _initialize_arm_tdep (void)
   const char **regnames;
   int numregs, i, j;
   static char *helptext;
+
+  if (GDB_MULTI_ARCH)
+    register_gdbarch_init (bfd_arch_arm, arm_gdbarch_init);
 
   tm_print_insn = gdb_print_insn_arm;
 
