@@ -1,5 +1,13 @@
 Mon Oct 19 15:09:57 1992  Stu Grossman  (grossman at cygnus.com)
 
+	* mips-nat.c (fetch_core_registers, register_addr):  Copy from
+	coredep.c, but zero out FP_REGNUM & ZERO_REGNUM so that stack
+	backtraces from core files work.
+	* config/decstation.mh, config/irix3.mh:  Remove coredep.o.
+	Functions are now defined in mips-nat.c.
+
+	* tm-irix3.h:  Put MIPS_EFI_SYMBOL_NAME in here too.
+
 	* remote-hms.c:  Disable all uses of serial_nextbaudrate and
 	serial_default_name().
 

@@ -314,3 +314,8 @@ typedef struct mips_extra_func_info {
   struct frame_saved_regs *saved_regs;
 
 #define INIT_EXTRA_FRAME_INFO(fromleaf, fci) init_extra_frame_info(fci)
+
+/* Special symbol found in blocks associated with routines.  We can hang
+   mips_extra_func_info_t's off of this.  */
+
+#define MIPS_EFI_SYMBOL_NAME "__GDB_EFI_INFO__"
