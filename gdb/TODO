@@ -7,6 +7,9 @@ General To Do List
 This to do list is probably not up to date, and opinions may vary
 about the importance or even desirability of some of the items.
 
+START_INFERIOR_TRAPS_EXPECTED need never be defined to 2, since that
+is its default value.  Clean this up.
+
 It should be possible to use symbols from shared libraries before we know
 exactly where the libraries will be loaded.  E.g. "b perror" before running
 the program.  This could maybe be done as an extension of the "breakpoint

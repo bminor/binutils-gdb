@@ -283,7 +283,7 @@ static serial_t mips_desc;
    all hell to break loose--the rest of GDB will tend to get left in an
    inconsistent state.  */
 
-static void NORETURN
+static NORETURN void
 mips_error (va_alist)
      va_dcl
 {
