@@ -1773,23 +1773,6 @@ unconditionally_kill_inferior (pi)
   procfs_write_pckill (pi);
 #endif /* PROCFS_NEED_PIOCSSIG_FOR_KILL */
 
-#ifdef PR_DEAD
-  /* With Alpha OSF/1 procfs, the process remains stopped after the inferior
-     gets killed. After some time, the stop reason of the inferior changes
-     to PR_DEAD and a PIOCRUN ioctl must be used to finally terminate the
-     process.  While the stop reason has not yet changed to PR_DEAD,
-     the PIOCRUN will return with EAGAIN, and we keep trying.
-     Any other errors are silently ignored as the inferior might have
-     died already.  */
-  while (procfs_read_status (pi) && (pi->prstatus.pr_flags & PR_STOPPED))
-    {
-      pi->prrun.pr_flags = PRCFAULT;
-      if (ioctl (pi->ctl_fd, PIOCRUN, &pi->prrun) >= 0 || errno != EAGAIN)
-        break;
-      sleep (1);
-    }
-#endif
-
   close_proc_file (pi);
 
 /* Only wait() for our direct children.  Our grandchildren zombies are killed
@@ -2350,10 +2333,10 @@ static void
 procfs_set_inferior_syscall_traps (pip)
      struct procinfo *pip;
 {
-#ifndef PIOCSSPCACT
   procfs_set_syscall_trap (pip, SYS_exit, PROCFS_SYSCALL_ENTRY,
 			   procfs_exit_handler);
 
+#ifndef PRFS_STOPEXEC
 #ifdef SYS_exec
   procfs_set_syscall_trap (pip, SYS_exec, PROCFS_SYSCALL_EXIT,
 			   procfs_exec_handler);
@@ -2366,7 +2349,7 @@ procfs_set_inferior_syscall_traps (pip)
   procfs_set_syscall_trap (pip, SYS_execve, PROCFS_SYSCALL_EXIT,
 			   procfs_exec_handler);
 #endif
-#endif  /* PIOCSSPCACT */
+#endif  /* PRFS_STOPEXEC */
 
   /* Setup traps on exit from sproc() */
 
@@ -2581,12 +2564,9 @@ proc_set_exec_trap ()
   premptyset (&exitset.sysset);
   premptyset (&entryset.sysset);
 
-#ifdef PIOCSSPCACT
+#ifdef PRFS_STOPEXEC
   /* Under Alpha OSF/1 we have to use a PIOCSSPCACT ioctl to trace
-     exits from exec system calls because of the user level loader.
-     Starting with OSF/1-4.0, tracing the entry to the exit system
-     call no longer works. So we have to use PRFS_STOPTERM to trace
-     termination of the inferior.  */
+     exits from exec system calls because of the user level loader.  */
   {
     int prfs_flags;
 
@@ -2596,7 +2576,7 @@ proc_set_exec_trap ()
 	gdb_flush (gdb_stderr);
 	_exit (127);
       }
-    prfs_flags |= PRFS_STOPEXEC | PRFS_STOPTERM;
+    prfs_flags |= PRFS_STOPEXEC;
     if (ioctl (fd, PIOCSSPCACT, &prfs_flags) < 0)
       {
 	perror (procname);
@@ -2604,7 +2584,7 @@ proc_set_exec_trap ()
 	_exit (127);
       }
   }
-#else /* PIOCSSPCACT */
+#else /* PRFS_STOPEXEC */
   /* GW: Rationale...
      Not all systems with /proc have all the exec* syscalls with the same
      names.  On the SGI, for example, there is no SYS_exec, but there
@@ -2631,6 +2611,7 @@ proc_set_exec_trap ()
       gdb_flush (gdb_stderr);
       _exit (127);
     }
+#endif /* PRFS_STOPEXEC */
 
   praddset (&entryset.sysset, SYS_exit);
 
@@ -2645,7 +2626,6 @@ proc_set_exec_trap ()
       gdb_flush (gdb_stderr);
       _exit (126);
     }
-#endif /* PIOCSSPCACT */
 
   /* Turn off inherit-on-fork flag so that all grand-children of gdb
      start with tracing flags cleared. */
@@ -3361,32 +3341,6 @@ procfs_wait (pid, ourstatus)
 		error ("PR_SYSEXIT, unhandled system call %d", what);
 	  }
 	  break;
-#ifdef PR_DEAD
-	case (short)PR_DEAD:
-	  {
-	    int dummy;
-
-	    /* The inferior process is about to terminate.
-	       pr_what has the process's exit or return value.
-	       A PIOCRUN ioctl must be used to restart the process so it
-	       can finish exiting.  */
-
-#ifdef PROCFS_USE_READ_WRITE
-            pctl.cmd = PCRUN;
-            pctl.data = PRCFAULT;
-            if (write (pi->ctl_fd, (char *) &pctl, sizeof (struct proc_ctl)) < 0)
-#else
-	    pi->prrun.pr_flags = PRCFAULT;
-	    if (ioctl (pi->ctl_fd, PIOCRUN, &pi->prrun) != 0)
-#endif
-	      perror_with_name (pi->pathname);
-
-	    if (wait (&dummy) < 0)
-	      rtnval = -1;
-	    statval = pi->prstatus.pr_what;
-	  }
-	  break;
-#endif
 	case PR_REQUESTED:
 	  statval = (SIGSTOP << 8) | 0177;
 	  break;

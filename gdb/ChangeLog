@@ -1,3 +1,12 @@
+Tue Jun 17 13:30:12 1997  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* procfs.c (proc_set_exec_trap, procfs_init_inferior, procfs_wait,
+	unconditionally_kill_inferior):  Undo Oct 26 1996 and Apr 26 1997
+	changes to trace PRFS_STOPTERM and handle PR_DEAD.
+	These changes tried to work around a problem with an early DU 4.0
+	release, but they trigger subtle timing dependent kernel bugs
+	in older OSF/1 releases.
+
 Tue Jun 17 06:52:47 1997  Fred Fish  <fnf@cygnus.com>
 
 	* dwarfread.c (new_symbol): Use SYMBOL_VALUE_ADDRESS, instead of
