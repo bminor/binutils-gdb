@@ -50,38 +50,57 @@ parse_args (argc, argv)
      the ordering of the two.  We describe each non-option ARGV-element
      as if it were the argument of an option with character code 1.  */
 
-  const char *shortopts = "-A:B::b:cde:F::G:giL:l:Mm:NnO:o:R:rSsT:tu:VvXxy:";
+  const char *shortopts = "-A:B::b:cde:F::G:giL:l:Mm:NnO:o:R:rSsT:tu:VvXxY:y:";
 
-  static struct option longopts[] =
-  {
-    {"call_shared", no_argument, NULL, 158},
+  /* 150 isn't special; it's just an arbitrary non-ASCII char value.  */
+
+  static struct option longopts[] = {
+#define OPTION_CALL_SHARED 150
+    {"call_shared", no_argument, NULL, OPTION_CALL_SHARED},
     {"dc", no_argument, NULL, 'd'},
-    {"defsym", required_argument, NULL, 160},
-    {"dn", no_argument, NULL, 158},
+#define OPTION_DEFSYM 151
+    {"defsym", required_argument, NULL, OPTION_DEFSYM},
+    {"dn", no_argument, NULL, OPTION_CALL_SHARED},
     {"dp", no_argument, NULL, 'd'},
-    {"EB", no_argument, NULL, 150},
-    {"EL", no_argument, NULL, 151},
+#define OPTION_EB 152
+    {"EB", no_argument, NULL, OPTION_EB},
+#define OPTION_EL 153
+    {"EL", no_argument, NULL, OPTION_EL},
     {"format", required_argument, NULL, 'b'},
-    {"help", no_argument, NULL, 164},
-    {"Map", required_argument, NULL, 152},
-    {"no-keep-memory", no_argument, NULL, 168},
-    {"noinhibit-exec", no_argument, NULL, 169},
-    {"noinhibit_exec", no_argument, NULL, 169},
-    {"non_shared", no_argument, NULL, 158},
-    {"oformat", required_argument, NULL, 172},
-    {"Qy", no_argument, NULL, 158},
-    {"relax", no_argument, NULL, 173},
-    {"retain-symbols-file", no_argument, NULL, 174},
-    {"sort-common", no_argument, NULL, 175},
-    {"sort_common", no_argument, NULL, 175},
-    {"stats", no_argument, NULL, 176},
-    {"Tbss", required_argument, NULL, 154},
-    {"Tdata", required_argument, NULL, 155},
-    {"Ttext", required_argument, NULL, 156},
-    {"Ur", no_argument, NULL, 157},
-    {"version", no_argument, NULL, 178},
-    {"warn-common", no_argument, NULL, 177},
-    {"YP,", required_argument, NULL, 158},
+#define OPTION_HELP 154
+    {"help", no_argument, NULL, OPTION_HELP},
+#define OPTION_MAP 155
+    {"Map", required_argument, NULL, OPTION_MAP},
+#define OPTION_NO_KEEP_MEMORY 156
+    {"no-keep-memory", no_argument, NULL, OPTION_NO_KEEP_MEMORY},
+#define OPTION_NOINHIBIT_EXEC 157
+    {"noinhibit-exec", no_argument, NULL, OPTION_NOINHIBIT_EXEC},
+    {"noinhibit_exec", no_argument, NULL, OPTION_NOINHIBIT_EXEC},
+    {"non_shared", no_argument, NULL, OPTION_CALL_SHARED},
+#define OPTION_OFORMAT 158
+    {"oformat", required_argument, NULL, OPTION_OFORMAT},
+    {"Qy", no_argument, NULL, OPTION_CALL_SHARED},
+#define OPTION_RELAX 159
+    {"relax", no_argument, NULL, OPTION_RELAX},
+#define OPTION_RETAIN_SYMBOLS_FILE 160
+    {"retain-symbols-file", no_argument, NULL, OPTION_RETAIN_SYMBOLS_FILE},
+#define OPTION_SORT_COMMON 161
+    {"sort-common", no_argument, NULL, OPTION_SORT_COMMON},
+    {"sort_common", no_argument, NULL, OPTION_SORT_COMMON},
+#define OPTION_STATS 162
+    {"stats", no_argument, NULL, OPTION_STATS},
+#define OPTION_TBSS 163
+    {"Tbss", required_argument, NULL, OPTION_TBSS},
+#define OPTION_TDATA 164
+    {"Tdata", required_argument, NULL, OPTION_TDATA},
+#define OPTION_TTEXT 165
+    {"Ttext", required_argument, NULL, OPTION_TTEXT},
+#define OPTION_UR 166
+    {"Ur", no_argument, NULL, OPTION_UR},
+#define OPTION_VERSION 167
+    {"version", no_argument, NULL, OPTION_VERSION},
+#define OPTION_WARN_COMMON 168
+    {"warn-common", no_argument, NULL, OPTION_WARN_COMMON},
     {NULL, no_argument, NULL, 0}
   };
 
@@ -89,8 +108,9 @@ parse_args (argc, argv)
     {
       /* getopt_long_only is like getopt_long, but '-' as well as '--' can
 	 indicate a long option.  */
-      int optc = getopt_long_only (argc, argv, shortopts, longopts,
-				   (int *) NULL);
+      int longind;
+      int optc = getopt_long_only (argc, argv, shortopts, longopts, &longind);
+
       if (optc == -1)
 	break;
 
@@ -117,23 +137,23 @@ parse_args (argc, argv)
 	  parser_input = input_mri_script;
 	  yyparse ();
 	  break;
-	case 158:		/* call_shared, dn, non_shared, Qy, YP */
-	  set_default_dirlist (optarg);
+	case OPTION_CALL_SHARED:
+	  set_default_dirlist ((char *) longopts[longind].name);
 	  break;
 	case 'd':
 	  command_line.force_common_definition = true;
 	  break;
-	case 160:		/* defsym */
+	case OPTION_DEFSYM:
 	  lex_redirect (optarg);
 	  parser_input = input_defsym;
 	  yyparse ();
 	  break;
-	case 150:		/* EB */
+	case OPTION_EB:
 	  /* FIXME: This is currently ignored.  It means
 	     ``produce a big-endian object file''.  It could
 	     be used to select an output format.  */
 	  break;
-	case 151:		/* EL */
+	case OPTION_EL:
 	  /* FIXME: This is currently ignored.  It means
 	     ``produce a little-endian object file''.  It could
 	     be used to select an output format.  */
@@ -155,7 +175,7 @@ parse_args (argc, argv)
 	case 'g':
 	  /* Ignore.  */
 	  break;
-	case 164:		/* help */
+	case OPTION_HELP:
 	  help ();
 	  xexit (0);
 	  break;
@@ -172,7 +192,7 @@ parse_args (argc, argv)
 	case 'm':
 	  /* Ignore.  Was handled in a pre-parse.   */
 	  break;
-	case 152:		/* Map */
+	case OPTION_MAP:
 	  write_map = true;
 	  config.map_filename = optarg;
 	  break;
@@ -183,10 +203,10 @@ parse_args (argc, argv)
 	case 'n':
 	  config.magic_demand_paged = false;
 	  break;
-	case 168:		/* no-keep-memory */
+	case OPTION_NO_KEEP_MEMORY:
 	  link_info.keep_memory = false;
 	  break;
-	case 169:		/* noinhibit-exec */
+	case OPTION_NOINHIBIT_EXEC:
 	  force_make_executable = true;
 	  break;
 	case 'O':
@@ -200,7 +220,7 @@ parse_args (argc, argv)
 	case 'o':
 	  lang_add_output (optarg, 0); 
 	  break;
-	case 172:		/* oformat */
+	case OPTION_OFORMAT:
 	  lang_add_output_format (optarg, 0);
 	  break;
 	case 'r':
@@ -214,10 +234,10 @@ parse_args (argc, argv)
 			       lang_input_file_is_symbols_only_enum,
 			       (char *) NULL);
 	  break;
-	case 173:		/* relax */
+	case OPTION_RELAX:
 	  command_line.relax = true;
 	  break;
-	case 174:		/* retain-symbols-file */
+	case OPTION_RETAIN_SYMBOLS_FILE:
 	  add_keepsyms_file (optarg);
 	  break;
 	case 'S':
@@ -226,10 +246,10 @@ parse_args (argc, argv)
 	case 's':
 	  link_info.strip = strip_all;
 	  break;
-	case 175:		/* sort-common */
+	case OPTION_SORT_COMMON:
 	  config.sort_common = true;
 	  break;
-	case 176:		/* stats */
+	case OPTION_STATS:
 	  config.stats = true;
 	  break;
 	case 't':
@@ -240,16 +260,16 @@ parse_args (argc, argv)
 	  parser_input = input_script;
 	  yyparse ();
 	  break;
-	case 154:		/* Tbss */
+	case OPTION_TBSS:
 	  set_section_start (".bss", optarg);
 	  break;
-	case 155:		/* Tdata */
+	case OPTION_TDATA:
 	  set_section_start (".data", optarg);
 	  break;
-	case 156:		/* Ttext */
+	case OPTION_TTEXT:
 	  set_section_start (".text", optarg);
 	  break;
-	case 157:		/* Ur */
+	case OPTION_UR:
 	  link_info.relocateable = true;
 	  config.build_constructors = true;
 	  config.magic_demand_paged = false;
@@ -267,11 +287,11 @@ parse_args (argc, argv)
 	  ldversion (0);
 	  version_printed = true;
 	  break;
-	case 178:		/* version */
+	case OPTION_VERSION:
 	  ldversion (0);
 	  version_printed = true;
 	  break;
-	case 177:		/* warn-common */
+	case OPTION_WARN_COMMON:
 	  config.warn_common = true;
 	  break;
 	case 'X':
@@ -279,6 +299,9 @@ parse_args (argc, argv)
 	  break;
 	case 'x':
 	  link_info.discard = discard_all;
+	  break;
+	case 'Y':
+	  set_default_dirlist (optarg);
 	  break;
 	case 'y':
 	  add_ysym (optarg);
@@ -317,6 +340,6 @@ set_section_start (sect, valstr)
   char *end;
   unsigned long val = strtoul (valstr, &end, 16);
   if (*end)
-    einfo ("%P%F: invalid hex number `%s'", valstr);
+    einfo ("%P%F: invalid hex number `%s'\n", valstr);
   lang_section_start (sect, exp_intop (val));
 }

@@ -10,6 +10,9 @@ Thu Feb 24 16:47:33 1994  Ian Lance Taylor  (ian@cygnus.com)
 
 Thu Feb 24 12:27:07 1994  David J. Mackenzie  (djm@rtl.cygnus.com)
 
+	* lexsup.c (parse_args): Use symbolic numbers for long options.
+	Fix misunderstanding in -Y and -call_shared et al.
+
 	Use getopt instead of lex and yacc to parse the command line.
 
 	* ld.texinfo (Options): Document changes to option syntax.
