@@ -81,6 +81,8 @@ static void float_info (char *, int);
 
 static void detach_command (char *, int);
 
+static void disconnect_command (char *, int);
+
 static void unset_environment_command (char *, int);
 
 static void set_environment_command (char *, int);
@@ -1876,6 +1878,26 @@ detach_command (char *args, int from_tty)
     detach_hook ();
 }
 
+/* Disconnect from the current target without resuming it (leaving it
+   waiting for a debugger).
+
+   We'd better not have left any breakpoints in the program or the
+   next debugger will get confused.  Currently only supported for some
+   remote targets, since the normal attach mechanisms don't work on
+   stopped processes on some native platforms (e.g. GNU/Linux).  */
+
+static void
+disconnect_command (char *args, int from_tty)
+{
+  dont_repeat ();		/* Not for the faint of heart */
+  target_disconnect (args, from_tty);
+#if defined(SOLIB_RESTART)
+  SOLIB_RESTART ();
+#endif
+  if (detach_hook)
+    detach_hook ();
+}
+
 /* Stop the execution of the target while running in async mode, in
    the backgound. */
 void
@@ -2013,6 +2035,11 @@ to specify the program, and to load its symbol table.");
 	   "Detach a process or file previously attached.\n\
 If a process, it is no longer traced, and it continues its execution.  If\n\
 you were debugging a file, the file is closed and gdb no longer accesses it.");
+
+  add_com ("disconnect", class_run, disconnect_command,
+	   "Disconnect from a target.\n\
+The target will wait for another debugger to connect.  Not available for\n\
+all targets.");
 
   add_com ("signal", class_run, signal_command,
 	   "Continue program giving it signal specified by the argument.\n\

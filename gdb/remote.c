@@ -126,7 +126,6 @@ static void remote_async_kill (void);
 static int tohex (int nib);
 
 static void remote_detach (char *args, int from_tty);
-static void remote_async_detach (char *args, int from_tty);
 
 static void remote_interrupt (int signo);
 
@@ -2421,25 +2420,25 @@ remote_detach (char *args, int from_tty)
   strcpy (buf, "D");
   remote_send (buf, (rs->remote_packet_size));
 
+  /* Unregister the file descriptor from the event loop. */
+  if (target_is_async_p ())
+    serial_async (remote_desc, NULL, 0);
+
   target_mourn_inferior ();
   if (from_tty)
     puts_filtered ("Ending remote debugging.\n");
-
 }
 
-/* Same as remote_detach, but with async support. */
+/* Same as remote_detach, but don't send the "D" packet; just disconnect.  */
+
 static void
-remote_async_detach (char *args, int from_tty)
+remote_disconnect (char *args, int from_tty)
 {
   struct remote_state *rs = get_remote_state ();
   char *buf = alloca (rs->remote_packet_size);
 
   if (args)
     error ("Argument given to \"detach\" when remotely debugging.");
-
-  /* Tell the remote target to detach.  */
-  strcpy (buf, "D");
-  remote_send (buf, (rs->remote_packet_size));
 
   /* Unregister the file descriptor from the event loop. */
   if (target_is_async_p ())
@@ -5438,6 +5437,7 @@ Specify the serial device it is connected to\n\
   remote_ops.to_open = remote_open;
   remote_ops.to_close = remote_close;
   remote_ops.to_detach = remote_detach;
+  remote_ops.to_disconnect = remote_disconnect;
   remote_ops.to_resume = remote_resume;
   remote_ops.to_wait = remote_wait;
   remote_ops.to_fetch_registers = remote_fetch_registers;
@@ -5858,6 +5858,7 @@ Specify the serial device it is connected to (e.g. host:2020).";
   remote_cisco_ops.to_open = remote_cisco_open;
   remote_cisco_ops.to_close = remote_cisco_close;
   remote_cisco_ops.to_detach = remote_detach;
+  remote_cisco_ops.to_disconnect = remote_disconnect;
   remote_cisco_ops.to_resume = remote_resume;
   remote_cisco_ops.to_wait = remote_cisco_wait;
   remote_cisco_ops.to_fetch_registers = remote_fetch_registers;
@@ -5953,7 +5954,8 @@ init_remote_async_ops (void)
 Specify the serial device it is connected to (e.g. /dev/ttya).";
   remote_async_ops.to_open = remote_async_open;
   remote_async_ops.to_close = remote_close;
-  remote_async_ops.to_detach = remote_async_detach;
+  remote_async_ops.to_detach = remote_detach;
+  remote_async_ops.to_disconnect = remote_disconnect;
   remote_async_ops.to_resume = remote_async_resume;
   remote_async_ops.to_wait = remote_async_wait;
   remote_async_ops.to_fetch_registers = remote_fetch_registers;

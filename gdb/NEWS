@@ -3,6 +3,12 @@
 
 *** Changes since GDB 5.3:
 
+* The meaning of "detach" has changed for gdbserver
+
+The "detach" command will now resume the application, as documented.  To
+disconnect from gdbserver and leave it stopped, use the new "disconnect"
+command.
+
 * d10v `regs' command deprecated
 
 The `info registers' command has been updated so that it displays the

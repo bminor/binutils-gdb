@@ -198,6 +198,7 @@ struct target_ops
     void (*to_attach) (char *, int);
     void (*to_post_attach) (int);
     void (*to_detach) (char *, int);
+    void (*to_disconnect) (char *, int);
     void (*to_resume) (ptid_t, int, enum target_signal);
     ptid_t (*to_wait) (ptid_t, struct target_waitstatus *);
     void (*to_post_wait) (ptid_t, int);
@@ -413,6 +414,11 @@ extern struct target_stack_item *target_stack;
    says whether to be verbose or not.  */
 
 extern void target_detach (char *, int);
+
+/* Disconnect from the current target without resuming it (leaving it
+   waiting for a debugger).  */
+
+extern void target_disconnect (char *, int);
 
 /* Resume execution of the target process PTID.  STEP says whether to
    single-step or to run free; SIGGNAL is the signal to be given to

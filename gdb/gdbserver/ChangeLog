@@ -1,3 +1,12 @@
+2003-06-17  Daniel Jacobowitz  <drow@mvista.com>
+
+	* linux-low.c: Move comment to linux_thread_alive where it belonged.
+	(linux_detach_one_process, linux_detach): New functions.
+	(linux_target_ops): Add linux_detach.
+	* server.c (main): Handle 'D' packet.
+	* target.h (struct target_ops): Add "detach" member.
+	(detach_inferior): Define.
+
 2003-06-13  Mark Kettenis  <kettenis@gnu.org>
 
 	From Kelley Cook  <kelleycook@wideopenwest.com>:

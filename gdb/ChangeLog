@@ -1,5 +1,23 @@
 2003-06-17  Daniel Jacobowitz  <drow@mvista.com>
 
+        * NEWS: Mention gdbserver detach change and "disconnect" command.
+        * infcmd.c (disconnect_command): New function.
+        (_initialize_infcmd): Add ``disconnect'' command.
+        * remote.c (remote_async_detach): Delete.
+        (remote_detach): Merge remote_async_detach.
+        (remote_disconnect): New.
+        (init_remote_ops): Set to_disconnect.
+        (init_remote_cisco_ops): Likewise.
+        (init_remote_async_ops): Likewise.  Use remote_detach.
+        * target.c (cleanup_target): Default to_disconnect.
+        (update_current_target): Inherit to_disconnect.
+        (target_disconnect, debug_to_disconnect): New functions.
+        (setup_target_debug): Set to_disconnect.
+        * target.h (struct target_ops): Add to_disconnect.
+        (target_disconnect): Add prototype.
+
+2003-06-17  Daniel Jacobowitz  <drow@mvista.com>
+
 	* breakpoint.c (insert_catchpoint): New function.
 	(insert_breakpoints): Use catch_exceptions to call
 	insert_catchpoint.  Disable catchpoints if they fail to insert.
