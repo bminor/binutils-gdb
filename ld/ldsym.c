@@ -26,8 +26,39 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
    Written by Steve Chamberlain steve@cygnus.com
  
    All symbol handling for the linker
- */
 
+
+
+
+   We keep a hash table of global symbols. Each entry in a hash table
+   is called an ldsym_type. Each has three chains; a pointer to a
+   chain of definitions for the symbol (hopefully one long), a pointer
+   to a chain of references to the symbol, and a pointer to a chain of
+   common symbols. Each pointer points into the canonical symbol table
+   provided by bfd, each one of which points to an asymbol. Duringing
+   linkage, the linker uses the udata field to point to the next entry
+   in a canonical table....
+
+
+   ld_sym
+			|          |
+   +----------+		+----------+
+   | defs     |      a canonical symbol table
+   +----------+         +----------+
+   | refs     | ----->  | one entry|  -----> asymbol
+   +----------+		+----------+	   |   	     |
+   | coms     |		|          |	   +---------+
+   +----------+		+----------+	   | udata   |-----> another canonical symbol
+					   +---------+				     
+
+
+
+   It is very simple to make all the symbol pointers point to the same
+   definition - just run down the chain and make the asymbols pointers
+   within the canonical table point to the asymbol attacthed to the
+   definition of the symbol.
+
+*/
 
 #include "sysdep.h"
 #include "bfd.h"
@@ -61,12 +92,15 @@ extern boolean option_longmap ;
 static ldsym_type *global_symbol_hash_table[TABSIZE];
 
 /* Compute the hash code for symbol name KEY.  */
-
+static 
+#ifdef __GNUC__
+inline
+#endif
 int
-hash_string (key)
-     char *key;
+DEFUN(hash_string,(key),
+      CONST char *key)
 {
-  register char *cp;
+  register CONST char *cp;
   register int k;
 
   cp = key;
@@ -76,6 +110,28 @@ hash_string (key)
 
   return k;
 }
+
+static
+#ifdef __GNUC__
+inline
+#endif ldsym_type *bp;
+ldsym_type *
+DEFUN(search,(key,hashval) ,
+      CONST char *key AND
+      int hashval)
+{
+  ldsym_type *bp;				   
+  for (bp = global_symbol_hash_table[hashval]; bp; bp = bp->link)
+    if (! strcmp (key, bp->name)) {
+      if (bp->flags & SYM_INDIRECT) {	
+	/* Use the symbol we're aliased to instead */
+	return (ldsym_type *)(bp->sdefs_chain);
+      }
+      return bp;
+    }
+  return 0;
+}
+
 
 /* Get the symbol table entry for the global symbol named KEY.
    Create one if there is none.  */
@@ -91,10 +147,10 @@ DEFUN(ldsym_get,(key),
   hashval = hash_string (key) % TABSIZE;
 
   /* Search the bucket.  */
-
-  for (bp = global_symbol_hash_table[hashval]; bp; bp = bp->link)
-    if (! strcmp (key, bp->name))
-      return bp;
+  bp = search(key, hashval);
+  if(bp) {
+    return bp;
+  }
 
   /* Nothing was found; create a new symbol table entry.  */
 
@@ -132,12 +188,7 @@ DEFUN(ldsym_get_soft,(key),
   hashval = hash_string (key) % TABSIZE;
 
   /* Search the bucket.  */
-
-  for (bp = global_symbol_hash_table[hashval]; bp; bp = bp->link)
-    if (! strcmp (key, bp->name))
-      return bp;
-
-  return 0;
+return search(key, hashval);
 }
 
 
@@ -214,6 +265,11 @@ ldsym_print_symbol_table ()
 
     for (sp = symbol_head; sp; sp = sp->next)
       {
+	if (sp->flags & SYM_INDIRECT) {
+	  fprintf(stdout,"indirect %s to %s\n",
+		  sp->name, (((ldsym_type *)(sp->sdefs_chain))->name));
+      }
+    else {
 	if (sp->sdefs_chain) 
 	  {
 	    asymbol *defsym = *(sp->sdefs_chain);
@@ -247,7 +303,9 @@ ldsym_print_symbol_table ()
 	else {
 	  printf("undefined                     ");
 	  printf("%s ",sp->name);
+
 	}
+      }
 	print_nl();
 
       }
@@ -352,7 +410,7 @@ asymbol **symbol_table;
 {
   FOR_EACH_LDSYM(sp)
     {
-      if (sp->sdefs_chain != (asymbol **)NULL) {
+      if ((sp->flags & SYM_INDIRECT) == 0 && sp->sdefs_chain != (asymbol **)NULL) {
 	asymbol *bufp = (*(sp->sdefs_chain));
 
 	if ((bufp->flags & BSF_KEEP) ==0) {
