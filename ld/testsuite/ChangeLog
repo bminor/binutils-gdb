@@ -1,3 +1,8 @@
+2001-04-28  Andreas Jaeger  <aj@suse.de>
+
+	* ld-scripts/phdrs.exp: x86-64 is a 64 bit ELF platform, handle it
+	special.
+
 2001-04-01  David O'Brien  <obrien@FreeBSD.org>
 	* ld-undefined/undefined.exp: XFAIL on FreeBSD/i386 for the usual (even
 	though it doesn't use DWARF2 yet (but its output is identical).
@@ -332,16 +337,16 @@ Wed Jun  9 12:02:33 1999  Andreas Schwab  <schwab@issan.cs.uni-dortmund.de>
 	* ld-srec/srec.exp: Add expected failures for StrongARM targets.
 
 	* ld-selective/selective.exp: Add expected failure for ARM-COFF
-	targets. 
+	targets.
 
 1999-02-16  Nick Clifton  <nickc@cygnus.com>
 
 	* ld-checks/asm.s: Use .long instead of .word.
 	Replace custom section names with .text, .data and .bss.
 	* ld-checks/script: Replace custom section names with .text, .data
-	and .bss. 
+	and .bss.
 	* ld-checks/checks.exp: Replace custom section names with .text,
-	.data and .bss. 
+	.data and .bss.
 
 1999-02-11  Nick Clifton  <nickc@cygnus.com>
 
@@ -399,7 +404,7 @@ Fri Oct 23 16:28:29 1998 Catherine Moore  <clm@cygnus.com>
        selective linking.
 
        * lib/ld-lib.exp (ld_nm):  Strip leading underscore from $name.
-     
+
 Sun Oct  4 22:17:05 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ld-elfvers/vers16.dsym: Work correctly on a system without
@@ -430,7 +435,7 @@ Wed Sep  9 14:10:15 1998  Nick Clifton  <nickc@cygnus.com>
 Wed Aug 19 11:59:19 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* ld-srec/srec.exp: Add arm/thumb-elf expected failures.
-	
+
 Thu Aug 13 12:41:58 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ld-bootstrap/bootstrap.exp: Don't run the --static bootstrap
@@ -489,7 +494,7 @@ Tue Jun 16 12:40:38 1998  Geoff Keating  <geoffk@ozemail.com.au>
 Fri May 29 15:02:50 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ld-srec/srec.exp: Add xfails for powerpc*-*-eabi.
- 	(run_srec_test): On mn10200, define __truncsipsi2_do_d2.
+	(run_srec_test): On mn10200, define __truncsipsi2_do_d2.
 	* ld-srec/sr1.c (__main): Change return type to void.
 	* ld-srec/sr3.cc (__main): Likewise.
 	(__builtin_delete, __builtin_new): Likewise.
@@ -560,7 +565,7 @@ Mon Nov 10 14:25:43 1997  Ian Lance Taylor  <ian@cygnus.com>
 Mon Oct 20 14:36:39 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ld-srec/sr3.cc: Add definitions for terminate, __terminate, and
- 	__throw, since the current g++ expects them to be defined.
+	__throw, since the current g++ expects them to be defined.
 
 Fri Oct  3 12:24:03 1997  Ian Lance Taylor  <ian@cygnus.com>
 
@@ -697,7 +702,7 @@ Wed May  1 16:45:13 1996  Ian Lance Taylor  <ian@cygnus.com>
 Mon Apr 29 10:33:10 1996  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
 
 	* ld-shared/shared.exp: Run the shared library tests on
- 	Linux/m68k.
+	Linux/m68k.
 
 Fri Apr  5 16:20:55 1996  Ian Lance Taylor  <ian@cygnus.com>
 
