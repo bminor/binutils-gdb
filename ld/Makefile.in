@@ -29,11 +29,13 @@ BISONFLAGS = -v
 SCRIPTS = ldgld68k.script ldgld68kUr.script ldgld68kr.script \
 	ldgld.script ldgldUr.script ldgldr.script ldlnk960.script \
 	ldlnk960r.script ldgld960.script \
-	ldgldm88kbcs.script ldgldm88kbcsUr.script ldgldm88kbcsr.script
+	ldgldm88kbcs.script ldgldm88kbcsUr.script ldgldm88kbcsr.script \
+	ldglda29k.script ldglda29kUr.script ldglda29kr.script
 
 PROCESSED_SCRIPTS = ldgld68k.x ldgld68kUr.x ldgld68kr.x ldgld.x \
 	ldgldUr.x ldgldr.x ldlnk960.x ldlnk960r.x ldgld960.x \
-	ldgldm88kbcs.x ldgldm88kbcsUr.x ldgldm88kbcsr.x
+	ldgldm88kbcs.x ldgldm88kbcsUr.x ldgldm88kbcsr.x \
+	ldglda29k.x ldglda29kUr.x ldglda29kr.x
 
 #### target and host dependent Makefile fragments come in here.
 ###
@@ -59,7 +61,7 @@ BFDLIB=$(srcdir)/../bfd$(subdir)/libbfd.a
 LIBIBERTY=$(srcdir)/../libiberty$(subdir)/libiberty.a
 
 OFILES= ldgram.o ldlex.o ldlang.o ldmain.o ldwrite.o ldexp.o ldlnk960.o ldgld68k.o \
-	ldgldm88kbcs.o \
+	ldgldm88kbcs.o ldglda29k.o \
 	ldgld.o ldgld960.o ldemul.o ldver.o ldmisc.o ldsym.o ldvanilla.o ldfile.o
 
 HEADERS=config.h ldmain.h ldmain.h ldmisc.h ldsym.h ldlang.h ldexp.h \
@@ -68,7 +70,7 @@ HEADERS=config.h ldmain.h ldmain.h ldmisc.h ldsym.h ldlang.h ldexp.h \
 MANSOURCES=ld.tex
 
 LDCSOURCES=ldlang.c ldmain.c ldwrite.c ldlnk960.c ldgld.c ldgld68k.c \
-	ldgldm88kbcs.c \
+	ldgldm88kbcs.c ldgld29k.c \
 	ldgld960.c ldemul.c ldver.c ldmisc.c ldexp.c ldsym.c ldfile.c ldvanilla.c
 
 GENERATED_SOURCES=ldgram.c ldlex.c ldgram.h 
@@ -122,6 +124,7 @@ ld.dvi:ld.tex
 	tex ld.tex
 
 mkscript: mkscript.c
+	$(CC) -o mkscript mkscript.c
 
 
 ldgld.o: $(PROCESSED_SCRIPTS) ldgld.c 
@@ -144,6 +147,9 @@ ldgldm88kbcs.x :ldgldm88kbcs.script
 ldgldm88kbcsUr.x :ldgldm88kbcsUr.script 
 ldgldm88kbcsr.x:ldgldm88kbcsr.script
 ldgld68k.x:ldgld68k.script
+ldglda29k.x :ldglda29k.script 
+ldglda29kr.x :ldglda29kr.script 
+ldglda29kUr.x :ldglda29kUr.script 
 
 stage1:	force
 	- mkdir stage1
