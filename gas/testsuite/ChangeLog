@@ -1,7 +1,12 @@
 2004-04-13  Kazuhiro Inaoka  <inaoka.kazuhiro@renesas.com>
 
-	* gas/m32r/parallel-2.s, gas/m32r/parallel-2.d: Add a new test
-	case for parallel code.
+	* gas/m32r/parallel-2.s: New file: Test	case for parallel code.
+	* gas/m32r/parallel-2.d: New file: Expected results.
+	* gas/m32r/m32r2.exp: Run the test.
+	
+	* gas/m32r/seth.s: New file: Test for seth.
+	* gas/m32r/seth.d: New file: Expected results.
+	* gas/m32r/m32r.exp: Run the new test.
 
 2004-04-01  Asgari Jinia  <asgarij@kpitcummins.com>
 
