@@ -34,7 +34,7 @@ Disassembly of section .text:
   20:	50 e4 f0 00 	sadd || nop
 
 00000024 <satb>:
-  24:	8d 0d 01 00 	satb fp,fp
+  24:	8d 6d 01 00 	satb fp,fp
 
 00000028 <mulhi>:
   28:	3d 8d f0 00 	mulhi fp, fp, a1 || nop
@@ -142,7 +142,7 @@ Disassembly of section .text:
 
 000000d8 <lock__or>:
   d8:	2d dd 82 ed 	lock fp,@fp || or r2,fp
-  dc:	2d dd 82 ed 	lock fp,@fp || or r2,fp
+  dc:	2d dd 02 ed 	lock fp,@fp -> or r2,fp
 
 000000e0 <mvfc__sub>:
   e0:	1d 91 82 2d 	mvfc fp,cbr || sub r2,fp
