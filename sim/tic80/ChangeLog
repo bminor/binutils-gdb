@@ -1,3 +1,18 @@
+Tue May  6 15:22:58 1997  Mike Meissner  <meissner@cygnus.com>
+
+	* cpu.h ({,v}{S,D}P_FPR): Delete unused macros that won't work on
+	big endian hosts.
+	(tic80_trace_{alu{2,3},nop,sink{1,2},{,u}cond_br,ldst}): Declare
+	new functions.
+	(TRACE_{ALU{2,3},NOP,SINK{1,2},{,U}COND_BR,LD,ST}): New macros to
+	trace various instruction types.
+
+	* insns: Modify all instructions to support semantic tracing.
+
+	* interp.c (toplevel): Include itable.h.
+	(tic80_trace_{alu{2,3},nop,sink{1,2},{,u}cond_br,ldst}): New
+	functions to provide semantic level tracing information.
+
 Mon May  5 11:50:43 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* alu.h: Update usage of core object to reflect recent changes in

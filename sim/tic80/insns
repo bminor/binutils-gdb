@@ -25,118 +25,137 @@
 	engine_error (SD, CPU, cia, "illegal instruction at 0x%lx", cia.ip);
 
 // Signed Integer Add - add source1, source2, dest
-void::function::do_add:signed32 *rDest, signed32 Source1, signed32 Source2
+void::function::do_add:signed32 *rDest, signed32 Source1, signed32 Source2, int indx
 	ALU_BEGIN (Source1);
 	ALU_ADD (Source2);
 	ALU_END (*rDest);
+	TRACE_ALU3 (indx, *rDest, Source1, Source2);
 	/* FIXME - a signed add may cause an exception */
 31.Dest,26.Source2,21.0b101100,15.0,14.SignedImmediate::::add i
-	do_add (_SD, rDest, vSource1, rSource2);
+	do_add (_SD, rDest, vSource1, rSource2, MY_INDEX);
 31.Dest,26.Source2,21.0b11101100,13.0,12.0,11./,4.Source1::::add r
-	do_add (_SD, rDest, rSource1, rSource2);
+	do_add (_SD, rDest, rSource1, rSource2, MY_INDEX);
 31.Dest,26.Source2,21.0b11101100,13.0,12.1,11./::::add l
 	long_immediate (LongSignedImmediate);
-	do_add (_SD, rDest, LongSignedImmediate, rSource2);
+	do_add (_SD, rDest, LongSignedImmediate, rSource2, MY_INDEX);
 
 
 // Unsigned Integer Add - addu source1, source2, dest
-void::function::do_addu:unsigned32 *rDest, unsigned32 Source1, unsigned32 Source2
-	*rDest = Source1 + Source2;
+void::function::do_addu:unsigned32 *rDest, unsigned32 Source1, unsigned32 Source2, int indx
+	unsigned32 result = Source1 + Source2;
+	TRACE_ALU3 (indx, result, Source1, Source2);
+	*rDest = result;
+
 31.Dest,26.Source2,21.0b101100,15.1,14.SignedImmediate::::addu i
-	do_addu (_SD, rDest, vSource1, rSource2);
+	do_addu (_SD, rDest, vSource1, rSource2, MY_INDEX);
 31.Dest,26.Source2,21.0b11101100,13.1,12.0,11./,4.Source1::::addu r
-	do_addu (_SD, rDest, rSource1, rSource2);
+	do_addu (_SD, rDest, rSource1, rSource2, MY_INDEX);
 31.Dest,26.Source2,21.0b11101100,13.1,12.1,11./::::addu l
 	long_immediate (LongSignedImmediate);
-	do_addu (_SD, rDest, LongSignedImmediate, rSource2);
+	do_addu (_SD, rDest, LongSignedImmediate, rSource2, MY_INDEX);
 
 
-void::function::do_and:signed32 *rDest, signed32 Source1, signed32 Source2
-	*rDest = Source1 & Source2;
+void::function::do_and:signed32 *rDest, signed32 Source1, signed32 Source2, int indx
+	unsigned32 result = Source1 & Source2;
+	TRACE_ALU3 (indx, result, Source1, Source2);
+	*rDest = result;
 
 
 // and, and.tt
 31.Dest,26.Source2,21.0b0010001,14.SignedImmediate::::and.tt i
-	do_and (_SD, rDest, vSource1, rSource2);
+	do_and (_SD, rDest, vSource1, rSource2, MY_INDEX);
 31.Dest,26.Source2,21.0b110010001,12.0,11./,4.Source1::::and.tt r
-	do_and (_SD, rDest, rSource1, rSource2);
+	do_and (_SD, rDest, rSource1, rSource2, MY_INDEX);
 31.Dest,26.Source2,21.0b110010001,12.1,11./::::and.tt l
 	long_immediate (LongSignedImmediate);
-	do_and (_SD, rDest, LongSignedImmediate, rSource2);
+	do_and (_SD, rDest, LongSignedImmediate, rSource2, MY_INDEX);
 
 
 // and.ff
 31.Dest,26.Source2,21.0b0011000,14.SignedImmediate::::and.ff i
-	do_and (_SD, rDest, ~vSource1, ~rSource2);
+	do_and (_SD, rDest, ~vSource1, ~rSource2, MY_INDEX);
 31.Dest,26.Source2,21.0b110011000,12.0,11./,4.Source1::::and.ff r
-	do_and (_SD, rDest, ~rSource1, ~rSource2);
+	do_and (_SD, rDest, ~rSource1, ~rSource2, MY_INDEX);
 31.Dest,26.Source2,21.0b110011000,12.1,11./::::and.ff l
 	long_immediate (LongSignedImmediate);
-	do_and (_SD, rDest, ~LongSignedImmediate, ~rSource2);
+	do_and (_SD, rDest, ~LongSignedImmediate, ~rSource2, MY_INDEX);
 
 
 // and.ft
 31.Dest,26.Source2,21.0b0010100,14.SignedImmediate::::and.ft i
-	do_and (_SD, rDest, ~vSource1, rSource2);
+	do_and (_SD, rDest, ~vSource1, rSource2, MY_INDEX);
 31.Dest,26.Source2,21.0b110010100,12.0,11./,4.Source1::::and.ft r
-	do_and (_SD, rDest, ~rSource1, rSource2);
+	do_and (_SD, rDest, ~rSource1, rSource2, MY_INDEX);
 31.Dest,26.Source2,21.0b110010100,12.1,11./::::and.ft l
 	long_immediate (LongSignedImmediate);
-	do_and (_SD, rDest, ~LongSignedImmediate, rSource2);
+	do_and (_SD, rDest, ~LongSignedImmediate, rSource2, MY_INDEX);
 
 
 // and.tf
 31.Dest,26.Source2,21.0b0010010,14.SignedImmediate::::and.tf i
-	do_and (_SD, rDest, vSource1, ~rSource2);
+	do_and (_SD, rDest, vSource1, ~rSource2, MY_INDEX);
 31.Dest,26.Source2,21.0b110010010,12.0,11./,4.Source1::::and.tf r
-	do_and (_SD, rDest, rSource1, ~rSource2);
+	do_and (_SD, rDest, rSource1, ~rSource2, MY_INDEX);
 31.Dest,26.Source2,21.0b110010010,12.1,11./::::and.tf l
 	long_immediate (LongSignedImmediate);
-	do_and (_SD, rDest, LongSignedImmediate, ~rSource2);
+	do_and (_SD, rDest, LongSignedImmediate, ~rSource2, MY_INDEX);
 
 
 // bbo.[a]
-instruction_address::function::do_bbo:instruction_address nia, int bitnum, unsigned32 source, int annul, unsigned32 offset
+instruction_address::function::do_bbo:instruction_address nia, int bitnum, unsigned32 source, int annul, unsigned32 offset, int indx
+	int jump_p;
+	unsigned32 target = cia.ip + 4 * offset;
 	if (MASKED32 (source, bitnum, bitnum))
 	  {
 	    if (annul)
 	      nia.ip = -1;
-	    nia.dp = cia.ip + 4 * offset;
+	    nia.dp = target;
+	    jump_p = 1;
 	  }
+	else
+	  jump_p = 0;
+	TRACE_COND_BR(indx, jump_p, bitnum, target);
 	return nia;
 31.BITNUM,26.Source,21.0b100101,15.A,14.SignedOffset::::bbo i
-	nia = do_bbo (_SD, nia, BITNUM, rSource, A, vSignedOffset);
+	nia = do_bbo (_SD, nia, BITNUM, rSource, A, vSignedOffset, MY_INDEX);
 31.BITNUM,26.Source,21.0b11100101,13.A,12.0,11./,4.IndOff::::bbo r
-	nia = do_bbo (_SD, nia, BITNUM, rSource, A, rIndOff);
+	nia = do_bbo (_SD, nia, BITNUM, rSource, A, rIndOff, MY_INDEX);
 31.BITNUM,26.Source,21.0b11100101,13.A,12.1,11./::::bbo l
 	long_immediate (LongSignedImmediate);
-	nia = do_bbo (_SD, nia, BITNUM, rSource, A, LongSignedImmediate);
+	nia = do_bbo (_SD, nia, BITNUM, rSource, A, LongSignedImmediate, MY_INDEX);
 
 
 // bbz[.a]
-instruction_address::function::do_bbz:instruction_address nia, int bitnum, unsigned32 source, int annul, unsigned32 offset
+instruction_address::function::do_bbz:instruction_address nia, int bitnum, unsigned32 source, int annul, unsigned32 offset, int indx
+	int jump_p;
+	unsigned32 target = cia.ip + 4 * offset;
 	if (!MASKED32 (source, bitnum, bitnum))
 	  {
 	    if (annul)
 	      nia.ip = -1;
-	    nia.dp = cia.ip + 4 * offset;
+	    nia.dp = target;
+	    jump_p = 1;
 	  }
+	else
+	  jump_p = 0;
+	TRACE_COND_BR(indx, jump_p, bitnum, target);
 	return nia;
 31.BITNUM,26.Source,21.0b100100,15.A,14.SignedOffset::::bbz i
-	nia = do_bbz (_SD, nia, BITNUM, rSource, A, vSignedOffset);
+	nia = do_bbz (_SD, nia, BITNUM, rSource, A, vSignedOffset, MY_INDEX);
 31.BITNUM,26.Source,21.0b11100100,13.A,12.0,11./,4.IndOff::::bbz r
-	nia = do_bbz (_SD, nia, BITNUM, rSource, A, rIndOff);
+	nia = do_bbz (_SD, nia, BITNUM, rSource, A, rIndOff, MY_INDEX);
 31.BITNUM,26.Source,21.0b11100100,13.A,12.1,11./::::bbz l
 	long_immediate (LongSignedImmediate);
-	nia = do_bbz (_SD, nia, BITNUM, rSource, A, LongSignedImmediate);
+	nia = do_bbz (_SD, nia, BITNUM, rSource, A, LongSignedImmediate, MY_INDEX);
 
 
 // bcnd[.a]
-instruction_address::function::do_bcnd:instruction_address nia, int Cond, unsigned32 source, int annul, unsigned32 offset
+instruction_address::function::do_bcnd:instruction_address nia, int Cond, unsigned32 source, int annul, unsigned32 offset, int indx
 	int condition;
 	int size = EXTRACTED32 (Cond, 31 - 27, 30 - 27);
 	int code = EXTRACTED32 (Cond, 29 - 27, 27 - 27);
 	signed32 val = 0;
+	unsigned32 target = cia.ip + 4 * offset;
 	switch (size)
 	  {
 	  case 0: val = SEXT32 (source, 7); break;
@@ -159,16 +178,17 @@ instruction_address::function::do_bcnd:instruction_address nia, int Cond, unsign
 	  {
 	    if (annul)
 	      nia.ip = -1;
-	    nia.dp = cia.ip + 4 * offset;
+	    nia.dp = target;
 	  }
+	TRACE_COND_BR(indx, condition, source, target);
 	return nia;
 31.Code,26.Source,21.0b100110,15.A,14.SignedOffset::::bcnd i
-	nia = do_bcnd (_SD, nia, Code, rSource, A, vSignedOffset);
+	nia = do_bcnd (_SD, nia, Code, rSource, A, vSignedOffset, MY_INDEX);
 31.Code,26.Source,21.0b11100110,13.A,12.0,11./,4.IndOff::::bcnd r
-	nia = do_bcnd (_SD, nia, Code, rSource, A, rIndOff);
+	nia = do_bcnd (_SD, nia, Code, rSource, A, rIndOff, MY_INDEX);
 31.Code,26.Source,21.0b11100110,13.A,12.1,11./::::bcnd l
 	long_immediate (LongSignedImmediate);
-	nia = do_bcnd (_SD, nia, Code, rSource, A, LongSignedImmediate);
+	nia = do_bcnd (_SD, nia, Code, rSource, A, LongSignedImmediate, MY_INDEX);
 
 
 // br[.a] - see bbz[.a]
@@ -186,7 +206,7 @@ instruction_address::function::do_bcnd:instruction_address nia, int Cond, unsign
 
 
 // bsr[.a]
-instruction_address::function::do_bsr:instruction_address nia, signed32 *rLink, int annul, unsigned32 offset
+instruction_address::function::do_bsr:instruction_address nia, signed32 *rLink, int annul, unsigned32 offset, int indx
 	if (annul)
 	  {
 	    *rLink = nia.ip;
@@ -195,18 +215,19 @@ instruction_address::function::do_bsr:instruction_address nia, signed32 *rLink, 
 	else
 	  *rLink = cia.dp + sizeof (instruction_word);
 	nia.dp = cia.ip + 4 * offset;
+	TRACE_UCOND_BR (indx, nia.dp);
 	return nia;
 31.Link,26./,21.0b100000,15.A,14.SignedOffset::::bsr i
-	nia = do_bsr (_SD, nia, rLink, A, vSignedOffset);
+	nia = do_bsr (_SD, nia, rLink, A, vSignedOffset, MY_INDEX);
 31.Link,26./,21.0b11100000,13.A,12.0,11./,4.IndOff::::bsr r
-	nia = do_bsr (_SD, nia, rLink, A, rIndOff);
+	nia = do_bsr (_SD, nia, rLink, A, rIndOff, MY_INDEX);
 31.Link,26./,21.0b11100000,13.A,12.1,11./::::bsr l
 	long_immediate (LongSignedImmediate);
-	nia = do_bsr (_SD, nia, rLink, A, LongSignedImmediate);
+	nia = do_bsr (_SD, nia, rLink, A, LongSignedImmediate, MY_INDEX);
 
 
 // cmnd
-void::function::do_cmnd:signed32 source
+void::function::do_cmnd:signed32 source, int indx
 	int Reset = EXTRACTED32 (source, 31, 31);
 	int Halt = EXTRACTED32 (source, 30, 30);
 	int Unhalt = EXTRACTED32 (source, 29, 29);
@@ -243,13 +264,14 @@ void::function::do_cmnd:signed32 source
 	      engine_error (SD, CPU, cia, "0x%lx: cmnd - Msg to MP not suported",
 	                    (unsigned long) cia.ip);
 	  }
+	TRACE_SINK1 (indx, source);
 31./,21.0b0000010,14.UI::::cmnd i
-	do_cmnd (_SD, UI);
+	do_cmnd (_SD, UI, MY_INDEX);
 31./,21.0b110000010,12.0,11./,4.Source::::cmnd r
-	do_cmnd (_SD, rSource);
+	do_cmnd (_SD, rSource, MY_INDEX);
 31./,21.0b110000010,12.1,11./::::cmnd l
 	long_immediate (LongUnsignedImmediate);
-	do_cmnd (_SD, LongUnsignedImmediate);
+	do_cmnd (_SD, LongUnsignedImmediate, MY_INDEX);
 
 // cmp
 unsigned32::function::cmp_vals:signed32 s1, unsigned32 u1, signed32 s2, unsigned32 u2
@@ -265,7 +287,7 @@ unsigned32::function::cmp_vals:signed32 s1, unsigned32 u1, signed32 s2, unsigned
 	if (u1 <  u2) field |= BIT32 (8);
 	if (u1 >= u2) field |= BIT32 (9);
 	return field;
-void::function::do_cmp:unsigned32 *rDest, unsigned32 Source1, unsigned32 Source2
+void::function::do_cmp:unsigned32 *rDest, unsigned32 Source1, unsigned32 Source2, int indx
 	unsigned32 field = 0;
 	field |= INSERTED32 (cmp_vals (_SD, Source2, Source1, Source2, Source2),
 	                     29, 20);
@@ -275,60 +297,63 @@ void::function::do_cmp:unsigned32 *rDest, unsigned32 Source1, unsigned32 Source2
 	field |= INSERTED32 (cmp_vals (_SD, (signed8)Source1, (unsigned8)Source1,
 	                               (signed8)Source2, (unsigned8)Source2),
 	                     9, 0);
+	TRACE_ALU3 (indx, field, Source1, Source2);
 	*rDest = field;
 31.Dest,26.Source2,21.0b1010000,14.SignedImmediate::::cmp i
-	do_cmp (_SD, rDest, vSource1, rSource2);
+	do_cmp (_SD, rDest, vSource1, rSource2, MY_INDEX);
 31.Dest,26.Source2,21.0b111010000,12.0,11./,4.Source1::::cmp r
-	do_cmp (_SD, rDest, rSource1, rSource2);
+	do_cmp (_SD, rDest, rSource1, rSource2, MY_INDEX);
 31.Dest,26.Source2,21.0b111010000,12.1,11./::::cmp l
 	long_immediate (LongSignedImmediate);
-	do_cmp (_SD, rDest, LongSignedImmediate, rSource2);
+	do_cmp (_SD, rDest, LongSignedImmediate, rSource2, MY_INDEX);
 
 
 // dcache
 31./,27.F,26.Source2,21.0b0111,17.M,16.0b00,14.SignedOffset::::dcache i
+	TRACE_NOP (MY_INDEX);
 	/* NOP */
 31./,27.F,26.Source2,21.0b110111,15.M,14.0b00,12.0,11./,4.Source1::::dcache r
+	TRACE_NOP (MY_INDEX);
 	/* NOP */
 31./,27.F,26.Source2,21.0b110111,15.M,14.0b00,12.1,11./::::dcache l
 	long_immediate (LongSignedImmediate);
 	LongSignedImmediate++;
+	TRACE_NOP (MY_INDEX);
 	/* NOP */
 
 
 // dld[{.b|.h|.d}]
-void::function::do_dld:int Dest, unsigned32 Base, unsigned32 *rBase, int m , int sz, int S, unsigned32 Offset
-	do_ld (_SD, Dest, Base, rBase, m, sz, S, Offset);
+void::function::do_dld:int Dest, unsigned32 Base, unsigned32 *rBase, int m , int sz, int S, unsigned32 Offset, int indx
+	do_ld (_SD, Dest, Base, rBase, m, sz, S, Offset, indx);
 31.Dest,26.Base,21.0b110100,15.m,14.sz,12.0,11.S,10.1,9./,4.IndOff::::dld r
-	do_dld (_SD, Dest, rBase, &GPR(Base), m, sz, S, rIndOff);
+	do_dld (_SD, Dest, rBase, &GPR(Base), m, sz, S, rIndOff, MY_INDEX);
 31.Dest,26.Base,21.0b110100,15.m,14.sz,12.1,11.S,10.1,9./::::dld l
 	long_immediate (LongSignedImmediateOffset);
-	do_dld (_SD, Dest, rBase, &GPR(Base), m, sz, S, LongSignedImmediateOffset);
+	do_dld (_SD, Dest, rBase, &GPR(Base), m, sz, S, LongSignedImmediateOffset, MY_INDEX);
 
 
 // dld.u[{.b|.h|.d}]
-void::function::do_dld_u:unsigned32 *rDest, unsigned32 Base, unsigned32 *rBase, int m , int sz, int S, unsigned32 Offset
-	do_ld_u (_SD, rDest, Base, rBase, m, sz, S, Offset);
+void::function::do_dld_u:unsigned32 *rDest, unsigned32 Base, unsigned32 *rBase, int m , int sz, int S, unsigned32 Offset, int indx
+	do_ld_u (_SD, rDest, Base, rBase, m, sz, S, Offset, indx);
 31.Dest,26.Base,21.0b110101,15.m,14.sz,12.0,11.S,10.1,9./,4.IndOff::::dld.u r
-	do_dld_u (_SD, rDest, rBase, &GPR(Base), m, sz, S, rIndOff);
+	do_dld_u (_SD, rDest, rBase, &GPR(Base), m, sz, S, rIndOff, MY_INDEX);
 31.Dest,26.Base,21.0b110101,15.m,14.sz,12.1,11.S,10.1,9./::::dld.u l
 	long_immediate (LongSignedImmediateOffset);
-	do_dld_u (_SD, rDest, rBase, &GPR(Base), m, sz, S, LongSignedImmediateOffset);
+	do_dld_u (_SD, rDest, rBase, &GPR(Base), m, sz, S, LongSignedImmediateOffset, MY_INDEX);
 
 
 // dst[{.b|.h|.d}]
-void::function::do_dst:int Source, unsigned32 Base, unsigned32 *rBase, int m , int sz, int S, unsigned32 Offset
-	do_st (_SD, Source, Base, rBase, m, sz, S, Offset);
+void::function::do_dst:int Source, unsigned32 Base, unsigned32 *rBase, int m , int sz, int S, unsigned32 Offset, int indx
+	do_st (_SD, Source, Base, rBase, m, sz, S, Offset, indx);
 31.Source,26.Base,21.0b110110,15.m,14.sz,12.0,11.S,10.1,9./,4.IndOff::::dst r
-	do_dst (_SD, Source, rBase, &GPR(Base), m, sz, S, rIndOff);
+	do_dst (_SD, Source, rBase, &GPR(Base), m, sz, S, rIndOff, MY_INDEX);
 31.Source,26.Base,21.0b110110,15.m,14.sz,12.1,11.S,10.1,9./::::dst l
 	long_immediate (LongSignedImmediateOffset);
-	do_dst (_SD, Source, rBase, &GPR(Base), m, sz, S, LongSignedImmediateOffset);
+	do_dst (_SD, Source, rBase, &GPR(Base), m, sz, S, LongSignedImmediateOffset, MY_INDEX);
 
 
 // estop
 31./,21.0b1111111,14.1,13.0,12.0,11./::::estop
-
 
 // etrap
 31./,27.1,26./,21.0b0000001,14.UTN::::etrap i
@@ -584,7 +609,8 @@ void::function::do_fsub:int Dest, int PD, sim_fpu s1, sim_fpu s2
 
 
 // jsr[.a]
-instruction_address::function::do_jsr:instruction_address nia, signed32 *rLink, int annul, unsigned32 offset, unsigned32 base
+instruction_address::function::do_jsr:instruction_address nia, signed32 *rLink, int annul, unsigned32 offset, unsigned32 base, int indx
+	TRACE_UCOND_BR (indx, nia.ip);
 	if (annul)
 	  {
 	    *rLink = nia.ip;
@@ -600,16 +626,16 @@ instruction_address::function::do_jsr:instruction_address nia, signed32 *rLink, 
 	                (unsigned long) nia.dp);
 	return nia;
 31.Link,26.Base,21.0b100010,15.A,14.SignedOffset::::jsr i
-	nia = do_jsr (_SD, nia, rLink, A, vSignedOffset, rBase);
+	nia = do_jsr (_SD, nia, rLink, A, vSignedOffset, rBase, MY_INDEX);
 31.Link,26.Base,21.0b11100010,13.A,12.0,11./,4.Source1::::jsr r
-	nia = do_jsr (_SD, nia, rLink, A, rSource1, rBase);
+	nia = do_jsr (_SD, nia, rLink, A, rSource1, rBase, MY_INDEX);
 31.Link,26.Base,21.0b11100010,13.A,12.1,11./::::jsr l
 	long_immediate (LongSignedImmediate);
-	nia = do_jsr (_SD, nia, rLink, A, LongSignedImmediate, rBase);
+	nia = do_jsr (_SD, nia, rLink, A, LongSignedImmediate, rBase, MY_INDEX);
 
 
 // ld[{.b.h.d}]
-void::function::do_ld:int Dest, unsigned32 Base, unsigned32 *rBase, int m , int sz, int S, unsigned32 Offset
+void::function::do_ld:int Dest, unsigned32 Base, unsigned32 *rBase, int m , int sz, int S, unsigned32 Offset, int indx
 	unsigned32 addr;
 	switch (sz)
 	  {
@@ -644,17 +670,18 @@ void::function::do_ld:int Dest, unsigned32 Base, unsigned32 *rBase, int m , int 
 	    addr = -1;
 	    engine_error (SD, CPU, cia, "ld - invalid sz %d", sz);
 	  }
+	TRACE_LD (indx, m, S, GPR(Dest), Base, Offset);
 31.Dest,26.Base,21.0b0100,17.m,16.sz,14.SignedOffset::::ld i
-	do_ld (_SD, Dest, rBase, &GPR(Base), m, sz, 0, vSignedOffset);
+	do_ld (_SD, Dest, rBase, &GPR(Base), m, sz, 0, vSignedOffset, MY_INDEX);
 31.Dest,26.Base,21.0b110100,15.m,14.sz,12.0,11.S,10.0,9./,4.IndOff::::ld r
-	do_ld (_SD, Dest, rBase, &GPR(Base), m, sz, S, rIndOff);
+	do_ld (_SD, Dest, rBase, &GPR(Base), m, sz, S, rIndOff, MY_INDEX);
 31.Dest,26.Base,21.0b110100,15.m,14.sz,12.1,11.S,10.0,9./::::ld l
 	long_immediate (LongSignedImmediateOffset);
-	do_ld (_SD, Dest, rBase, &GPR(Base), m, sz, S, LongSignedImmediateOffset);
+	do_ld (_SD, Dest, rBase, &GPR(Base), m, sz, S, LongSignedImmediateOffset, MY_INDEX);
 
 
 // ld.u[{.b.h.d}]
-void::function::do_ld_u:unsigned32 *rDest, unsigned32 Base, unsigned32 *rBase, int m , int sz, int S, unsigned32 Offset
+void::function::do_ld_u:unsigned32 *rDest, unsigned32 Base, unsigned32 *rBase, int m , int sz, int S, unsigned32 Offset, int indx
 	unsigned32 addr;
 	switch (sz)
 	  {
@@ -672,13 +699,14 @@ void::function::do_ld_u:unsigned32 *rDest, unsigned32 Base, unsigned32 *rBase, i
 	  }
 	if (m)
 	  *rBase = addr;
+	TRACE_LD (indx, m, S, *rDest, Base, Offset);
 31.Dest,26.Base,21.0b0101,17.m,16.sz,14.SignedOffset::::ld.u i
-	do_ld_u (_SD, rDest, rBase, &GPR(Base), m, sz, 0, vSignedOffset);
+	do_ld_u (_SD, rDest, rBase, &GPR(Base), m, sz, 0, vSignedOffset, MY_INDEX);
 31.Dest,26.Base,21.0b110101,15.m,14.sz,12.0,11.S,10.0,9./,4.IndOff::::ld.u r
-	do_ld_u (_SD, rDest, rBase, &GPR(Base), m, sz, S, rIndOff);
+	do_ld_u (_SD, rDest, rBase, &GPR(Base), m, sz, S, rIndOff, MY_INDEX);
 31.Dest,26.Base,21.0b110101,15.m,14.sz,12.1,11.S,10.0,9./::::ld.u l
 	long_immediate (LongSignedImmediateOffset);
-	do_ld_u (_SD, rDest, rBase, &GPR(Base), m, sz, S, LongSignedImmediateOffset);
+	do_ld_u (_SD, rDest, rBase, &GPR(Base), m, sz, S, LongSignedImmediateOffset, MY_INDEX);
 
 
 // lmo
@@ -688,61 +716,64 @@ void::function::do_ld_u:unsigned32 *rDest, unsigned32 Base, unsigned32 *rBase, i
 // nop - see rdcr 0, r0
 
 
-void::function::do_or:unsigned32 *rDest, unsigned32 Source1, unsigned32 Source2
-	*rDest = Source1 | Source2;
+void::function::do_or:unsigned32 *rDest, unsigned32 Source1, unsigned32 Source2, int indx
+	unsigned32 result = Source1 | Source2;
+	TRACE_ALU3 (indx, result, Source1, Source2);
+	*rDest = result;
 
 
 // or, or.tt
 31.Dest,26.Source2,21.0b0010111,14.UnsignedImmediate::::or.tt i
-	do_or (_SD, rDest, vSource1, rSource2);
+	do_or (_SD, rDest, vSource1, rSource2, MY_INDEX);
 31.Dest,26.Source2,21.0b110010111,12.0,11./,4.Source1::::or.tt r
-	do_or (_SD, rDest, rSource1, rSource2);
+	do_or (_SD, rDest, rSource1, rSource2, MY_INDEX);
 31.Dest,26.Source2,21.0b110010111,12.1,11./::::or.tt l
 	long_immediate (LongUnsignedImmediate);
-	do_or (_SD, rDest, LongUnsignedImmediate, rSource2);
+	do_or (_SD, rDest, LongUnsignedImmediate, rSource2, MY_INDEX);
 
 
 // or.ff
 31.Dest,26.Source2,21.0b0011110,14.UnsignedImmediate::::or.ff i
-	do_or (_SD, rDest, ~vSource1, ~rSource2);
+	do_or (_SD, rDest, ~vSource1, ~rSource2, MY_INDEX);
 31.Dest,26.Source2,21.0b110011110,12.0,11./,4.Source1::::or.ff r
-	do_or (_SD, rDest, ~rSource1, ~rSource2);
+	do_or (_SD, rDest, ~rSource1, ~rSource2, MY_INDEX);
 31.Dest,26.Source2,21.0b110011110,12.1,11./::::or.ff l
 	long_immediate (LongUnsignedImmediate);
-	do_or (_SD, rDest, ~LongUnsignedImmediate, ~rSource2);
+	do_or (_SD, rDest, ~LongUnsignedImmediate, ~rSource2, MY_INDEX);
 
 
 // or.ft
 31.Dest,26.Source2,21.0b0011101,14.UnsignedImmediate::::or.ft i
-	do_or (_SD, rDest, ~vSource1, rSource2);
+	do_or (_SD, rDest, ~vSource1, rSource2, MY_INDEX);
 31.Dest,26.Source2,21.0b110011101,12.0,11./,4.Source1::::or.ft r
-	do_or (_SD, rDest, ~rSource1, rSource2);
+	do_or (_SD, rDest, ~rSource1, rSource2, MY_INDEX);
 31.Dest,26.Source2,21.0b110011101,12.1,11./::::or.ft l
 	long_immediate (LongUnsignedImmediate);
-	do_or (_SD, rDest, ~LongUnsignedImmediate, rSource2);
+	do_or (_SD, rDest, ~LongUnsignedImmediate, rSource2, MY_INDEX);
 
 
 // or.tf
 31.Dest,26.Source2,21.0b0011011,14.UnsignedImmediate::::or.tf i
-	do_or (_SD, rDest, vSource1, ~rSource2);
+	do_or (_SD, rDest, vSource1, ~rSource2, MY_INDEX);
 31.Dest,26.Source2,21.0b110011011,12.0,11./,4.Source1::::or.tf r
-	do_or (_SD, rDest, rSource1, ~rSource2);
+	do_or (_SD, rDest, rSource1, ~rSource2, MY_INDEX);
 31.Dest,26.Source2,21.0b110011011,12.1,11./::::or.tf l
 	long_immediate (LongUnsignedImmediate);
-	do_or (_SD, rDest, LongUnsignedImmediate, ~rSource2);
+	do_or (_SD, rDest, LongUnsignedImmediate, ~rSource2, MY_INDEX);
 
 
 // rdcr
-void::function::do_rdcr:unsigned32 Dest, int cr
+void::function::do_rdcr:unsigned32 Dest, int cr, int indx
+	TRACE_SINK2 (indx, Dest, cr);
 	if (Dest != 0)
 	  engine_error (SD, CPU, cia, "rdcr unimplement");
 31.Dest,26.0,21.0b0000100,14.UCRN::::rdcr i
-	do_rdcr (_SD, Dest, UCRN);
+	do_rdcr (_SD, Dest, UCRN, MY_INDEX);
 31.Dest,26.0,21.0b110000100,12.0,11./,4.INDCR::::rdcr r
-	do_rdcr (_SD, Dest, UCRN);
+	do_rdcr (_SD, Dest, UCRN, MY_INDEX);
 31.Dest,26.0,21.0b110000100,12.1,11./::::rdcr l
 	long_immediate (UnsignedControlRegisterNumber);
-	do_rdcr (_SD, Dest, UnsignedControlRegisterNumber);
+	do_rdcr (_SD, Dest, UnsignedControlRegisterNumber, MY_INDEX);
 
 
 // rmo
@@ -759,8 +790,9 @@ void::function::do_rdcr:unsigned32 Dest, int cr
 
 
 // sl.{d|e|i}{m|s|z}
-void::function::do_shift:int Dest, int Source, int Merge, int i, int n, int EndMask, int Rotate
+void::function::do_shift:int Dest, int Source, int Merge, int i, int n, int EndMask, int Rotate, int indx
 	/* see 10-30 for a reasonable description */
+	unsigned32 input = GPR (Source);
 	unsigned32 rotated;
 	unsigned32 endmask;
 	unsigned32 shiftmask;
@@ -829,8 +861,9 @@ void::function::do_shift:int Dest, int Source, int Merge, int i, int n, int EndM
 	                  cia.ip, Source);
 
 	  }
+	TRACE_ALU2 (indx, GPR (Dest), input);
 31.Dest,26.Source,21.0b0001,17.Merge,14./,11.i,10.n,9.EndMask,4.Rotate::::sl i
-	do_shift (_SD, Dest, Source, Merge, i, n, EndMask, Rotate);
+	do_shift (_SD, Dest, Source, Merge, i, n, EndMask, Rotate, MY_INDEX);
 31.Dest,26.Source,21.0b110001,15.Merge,12.0,11.i,10.n,9.EndMask,4.RotReg::::sl r
 	int endmask;
 	if (EndMask == 0)
@@ -843,7 +876,7 @@ void::function::do_shift:int Dest, int Source, int Merge, int i, int n, int EndM
 	                    cia.ip, Source);
 	    endmask = GPR (Source + 1) & 31;
 	  }
-	do_shift (_SD, Dest, Source, Merge, i, n, endmask, GPR (RotReg) & 31);
+	do_shift (_SD, Dest, Source, Merge, i, n, endmask, GPR (RotReg) & 31, MY_INDEX);
 
 
 // sli.{d|e|i}{m|s|z}
@@ -868,7 +901,7 @@ void::function::do_shift:int Dest, int Source, int Merge, int i, int n, int EndM
 
 
 // st[{.b|.h|.d}]
-void::function::do_st:int Source, unsigned32 Base, unsigned32 *rBase, int m , int sz, int S, unsigned32 Offset
+void::function::do_st:int Source, unsigned32 Base, unsigned32 *rBase, int m , int sz, int S, unsigned32 Offset, int indx
 	unsigned32 addr;
 	switch (sz)
 	  {
@@ -897,54 +930,59 @@ void::function::do_st:int Source, unsigned32 Base, unsigned32 *rBase, int m , in
 	  }
 	if (m)
 	  *rBase = addr;
+	TRACE_ST (indx, m, S, Source, Base, Offset);
 31.Source,26.Base,21.0b0110,17.m,16.sz,14.SignedOffset::::st i
-	do_st (_SD, Source, rBase, &GPR(Base), m, sz, 0, vSignedOffset);
+	do_st (_SD, Source, rBase, &GPR(Base), m, sz, 0, vSignedOffset, MY_INDEX);
 31.Source,26.Base,21.0b110110,15.m,14.sz,12.0,11.S,10.0,9./,4.IndOff::::st r
-	do_st (_SD, Source, rBase, &GPR(Base), m, sz, S, rIndOff);
+	do_st (_SD, Source, rBase, &GPR(Base), m, sz, S, rIndOff, MY_INDEX);
 31.Source,26.Base,21.0b110110,15.m,14.sz,12.1,11.S,10.0,9./::::st l
 	long_immediate (LongSignedImmediateOffset);
-	do_st (_SD, Source, rBase, &GPR(Base), m, sz, S, LongSignedImmediateOffset);
+	do_st (_SD, Source, rBase, &GPR(Base), m, sz, S, LongSignedImmediateOffset, MY_INDEX);
 
 
 // sub
-void::function::do_sub:signed32 *rDest, signed32 Source1, signed32 Source2
+void::function::do_sub:signed32 *rDest, signed32 Source1, signed32 Source2, int indx
 	ALU_BEGIN (Source1);
 	ALU_SUB (Source2);
-	ALU_END (*rDest);	
+	ALU_END (*rDest);
+	TRACE_ALU3 (indx, *rDest, Source1, Source2);
 31.Dest,26.Source2,21.0b101101,15.0,14.SignedImmediate::::sub i
-	do_sub (_SD, rDest, vSource1, rSource2);
+	do_sub (_SD, rDest, vSource1, rSource2, MY_INDEX);
 31.Dest,26.Source2,21.0b11101101,13.0,12.0,11./,4.Source1::::sub r
-	do_sub (_SD, rDest, rSource1, rSource2);
+	do_sub (_SD, rDest, rSource1, rSource2, MY_INDEX);
 31.Dest,26.Source2,21.0b11101101,13.0,12.1,11./::::sub l
 	long_immediate (LongSignedImmediate);
-	do_sub (_SD, rDest, LongSignedImmediate, rSource2);
+	do_sub (_SD, rDest, LongSignedImmediate, rSource2, MY_INDEX);
 
 
 // subu
-void::function::do_subu:signed32 *rDest, signed32 Source1, signed32 Source2
-	*rDest = Source1 - Source2;
+void::function::do_subu:signed32 *rDest, signed32 Source1, signed32 Source2, int indx
+	unsigned32 result = Source1 - Source2;
+	TRACE_ALU3 (indx, result, Source1, Source2);
+	*rDest = result;
 // NOTE - the book has 15.1 which conflicts with subu.
 31.Dest,26.Source2,21.0b101101,15.1,14.SignedImmediate::::subu i
-	do_subu (_SD, rDest, vSource1, rSource2);
+	do_subu (_SD, rDest, vSource1, rSource2, MY_INDEX);
 31.Dest,26.Source2,21.0b11101101,13.1,12.0,11./,4.Source1::::subu r
-	do_subu (_SD, rDest, rSource1, rSource2);
+	do_subu (_SD, rDest, rSource1, rSource2, MY_INDEX);
 31.Dest,26.Source2,21.0b11101101,13.1,12.1,11./::::subu l
 	long_immediate (LongSignedImmediate);
-	do_subu (_SD, rDest, LongSignedImmediate, rSource2);
+	do_subu (_SD, rDest, LongSignedImmediate, rSource2, MY_INDEX);
 
 
 // swcr
-#void::function::do_swcr:signed32 *rDest, signed32 Source1, signed32 Source2
+#void::function::do_swcr:signed32 *rDest, signed32 Source1, signed32 Source2, int indx
 31.Dest,26.Source,21.0b000010,15.1,14.SignedImmediate::::swcr i
-#	do_swcr (_SD, rDest, SI, rSource2);
+#	do_swcr (_SD, rDest, SI, rSource2, MY_INDEX);
 31.Dest,26.Source,21.0b11000010,13.1,12.0,11./,4.INDCR::::swcr r
-#	do_swcr (_SD, rDest, rSource1, rSource2);
+#	do_swcr (_SD, rDest, rSource1, rSource2, MY_INDEX);
 31.Dest,26.Source,21.0b11000010,13.1,12.1,11./::::swcr l
-#	do_swcr (_SD, rDest, LongSignedImmediate, rSource2);
+#	do_swcr (_SD, rDest, LongSignedImmediate, rSource2, MY_INDEX);
 
 
 // trap
-void::function::do_trap:unsigned32 trap_number
+void::function::do_trap:unsigned32 trap_number, int indx
+	TRACE_SINK1 (indx, trap_number);
 	switch (trap_number)
 	  {
 	  case 72:
@@ -993,12 +1031,12 @@ void::function::do_trap:unsigned32 trap_number
 	                  (unsigned long) cia.ip, trap_number);
 	  }
 31./,27.0,26./,21.0b0000001,14.UTN::::trap i
-	do_trap (_SD, UTN);
+	do_trap (_SD, UTN, MY_INDEX);
 31./,27.0,26./,21.0b110000001,12.0,11./,4.INDTR::::trap r
-	do_trap (_SD, UTN);
+	do_trap (_SD, UTN, MY_INDEX);
 31./,27.0,26./,21.0b110000001,12.1,11./::::trap l
 	long_immediate (UTN);
-	do_trap (_SD, UTN);
+	do_trap (_SD, UTN, MY_INDEX);
 
 
 // vadd.{s|d}{s|d}
@@ -1057,24 +1095,28 @@ void::function::do_trap:unsigned32 trap_number
 
 
 // xnor
-void::function::do_xnor:signed32 *rDest, signed32 Source1, signed32 Source2
-	*rDest = ~ (Source1 ^ Source2);
+void::function::do_xnor:signed32 *rDest, signed32 Source1, signed32 Source2, int indx
+	unsigned32 result = ~ (Source1 ^ Source2);
+	TRACE_ALU3 (indx, result, Source1, Source2);
+	*rDest = result;
 31.Dest,26.Source2,21.0b0011001,14.UnsignedImmediate::::xnor i
-	do_xnor (_SD, rDest, vSource1, rSource2);
+	do_xnor (_SD, rDest, vSource1, rSource2, MY_INDEX);
 31.Dest,26.Source2,21.0b110011001,12.0,11./,4.Source1::::xnor r
-	do_xnor (_SD, rDest, rSource1, rSource2);
+	do_xnor (_SD, rDest, rSource1, rSource2, MY_INDEX);
 31.Dest,26.Source2,21.0b110011001,12.1,11./::::xnor l
 	long_immediate (LongUnsignedImmediate);
-	do_xnor (_SD, rDest, LongUnsignedImmediate, rSource2);
+	do_xnor (_SD, rDest, LongUnsignedImmediate, rSource2, MY_INDEX);
 
 
 // xor
-void::function::do_xor:signed32 *rDest, signed32 Source1, signed32 Source2
-	*rDest = Source1 ^ Source2;
+void::function::do_xor:signed32 *rDest, signed32 Source1, signed32 Source2, int indx
+	unsigned32 result = Source1 ^ Source2;
+	TRACE_ALU3 (indx, result, Source1, Source2);
+	*rDest = result;
 31.Dest,26.Source2,21.0b0010110,14.UnsignedImmediate::::xor i
-	do_xor (_SD, rDest, vSource1, rSource2);
+	do_xor (_SD, rDest, vSource1, rSource2, MY_INDEX);
 31.Dest,26.Source2,21.0b110010110,13.0,12.0,11./,4.Source1::::xor r
-	do_xor (_SD, rDest, rSource1, rSource2);
+	do_xor (_SD, rDest, rSource1, rSource2, MY_INDEX);
 31.Dest,26.Source2,21.0b110010110,13.0,12.1,11./::::xor l
 	long_immediate (LongUnsignedImmediate);
-	do_xor (_SD, rDest, LongUnsignedImmediate, rSource2);
+	do_xor (_SD, rDest, LongUnsignedImmediate, rSource2, MY_INDEX);

@@ -31,6 +31,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #endif
 #endif
 
+#ifndef SIZE_PHASE
+#define SIZE_PHASE 8
+#endif
+
 #ifndef SIZE_LOCATION
 #define SIZE_LOCATION 20
 #endif
@@ -47,17 +51,21 @@ static MODULE_UNINSTALL_FN trace_uninstall;
 
 static DECLARE_OPTION_HANDLER (trace_option_handler);
 
-#define OPTION_TRACE_INSN	(OPTION_START + 0)
-#define OPTION_TRACE_DECODE	(OPTION_START + 1)
-#define OPTION_TRACE_EXTRACT	(OPTION_START + 2)
-#define OPTION_TRACE_LINENUM	(OPTION_START + 3)
-#define OPTION_TRACE_MEMORY	(OPTION_START + 4)
-#define OPTION_TRACE_MODEL	(OPTION_START + 5)
-#define OPTION_TRACE_ALU	(OPTION_START + 6)
-#define OPTION_TRACE_CORE	(OPTION_START + 7)
-#define OPTION_TRACE_EVENTS	(OPTION_START + 8)
-#define OPTION_TRACE_FPU	(OPTION_START + 9)
-#define OPTION_TRACE_FILE	(OPTION_START + 10)
+enum {
+  OPTION_TRACE_INSN	= OPTION_START,
+  OPTION_TRACE_DECODE,
+  OPTION_TRACE_EXTRACT,
+  OPTION_TRACE_LINENUM,
+  OPTION_TRACE_MEMORY,
+  OPTION_TRACE_MODEL,
+  OPTION_TRACE_ALU,
+  OPTION_TRACE_CORE,
+  OPTION_TRACE_EVENTS,
+  OPTION_TRACE_FPU,
+  OPTION_TRACE_BRANCH,
+  OPTION_TRACE_SEMANTICS,
+  OPTION_TRACE_FILE
+};
 
 static const OPTION trace_options[] =
 {
@@ -93,6 +101,12 @@ static const OPTION trace_options[] =
       trace_option_handler },
   { {"trace-fpu", no_argument, NULL, OPTION_TRACE_FPU},
       '\0', NULL, "Perform FPU tracing",
+      trace_option_handler },
+  { {"trace-branch", no_argument, NULL, OPTION_TRACE_BRANCH},
+      '\0', NULL, "Perform branch tracing",
+      trace_option_handler },
+  { {"trace-semantics", no_argument, NULL, OPTION_TRACE_SEMANTICS},
+      '\0', NULL, "Perform ALU, FPU, and MEMORY tracing",
       trace_option_handler },
   { {"trace-file", required_argument, NULL, OPTION_TRACE_FILE},
       '\0', "FILE NAME", "Specify tracing output file",
@@ -212,6 +226,27 @@ trace_option_handler (sd, opt, arg)
 	sim_io_eprintf (sd, "FPU tracing not compiled in, `--trace-fpu' ignored\n");
       break;
 
+    case OPTION_TRACE_BRANCH :
+      if (WITH_TRACE_BRANCH_P)
+	for (n = 0; n < MAX_NR_PROCESSORS; ++n)
+	  CPU_TRACE_FLAGS (STATE_CPU (sd, n))[TRACE_FPU_IDX] = 1;
+      else
+	sim_io_eprintf (sd, "Branch tracing not compiled in, `--trace-branch' ignored\n");
+      break;
+
+    case OPTION_TRACE_SEMANTICS :
+      if (WITH_TRACE_ALU_P && WITH_TRACE_FPU_P && WITH_TRACE_MEMORY_P)
+	for (n = 0; n < MAX_NR_PROCESSORS; ++n)
+	  {
+	    CPU_TRACE_FLAGS (STATE_CPU (sd, n))[TRACE_ALU_IDX] = 1;
+	    CPU_TRACE_FLAGS (STATE_CPU (sd, n))[TRACE_FPU_IDX] = 1;
+	    CPU_TRACE_FLAGS (STATE_CPU (sd, n))[TRACE_MEMORY_IDX] = 1;
+	    CPU_TRACE_FLAGS (STATE_CPU (sd, n))[TRACE_BRANCH_IDX] = 1;
+	  }
+      else
+	sim_io_eprintf (sd, "Alu, fpu, and/or memory tracing not compiled in, `--trace-semantics' ignored\n");
+      break;
+
     case OPTION_TRACE_FILE :
       if (! WITH_TRACE)
 	sim_io_eprintf (sd, "Tracing not compiled in, `--trace-file' ignored\n");
@@ -263,15 +298,21 @@ trace_uninstall (SIM_DESC sd)
 
 void
 trace_one_insn (SIM_DESC sd, sim_cpu *cpu, address_word pc,
-		int line_p, const TRACE_INSN_DATA *insn_data)
+		int line_p, const char *filename, int linenum,
+		const char *phase_wo_colon, const char *name)
 {
+  char phase[SIZE_PHASE+2];
+
+  strncpy (phase, phase_wo_colon, SIZE_PHASE);
+  strcat (phase, ":");
+
   if (!line_p)
-    trace_printf(sd, cpu, "trace-%s: %s:%-*d 0x%.*lx %s\n",
-		 insn_data->phase,
-		 *(insn_data->p_filename),
-		 SIZE_LINE_NUMBER, insn_data->linenum,
+    trace_printf(sd, cpu, "%-*s %s:%-*d 0x%.*lx %s\n",
+		 SIZE_PHASE+1, phase,
+		 filename,
+		 SIZE_LINE_NUMBER, linenum,
 		 SIZE_PC, (long)pc,
-		 *(insn_data->p_name));
+		 name);
 
   else
     {
@@ -321,13 +362,11 @@ trace_one_insn (SIM_DESC sd, sim_cpu *cpu, address_word pc,
 	    }
 	}
 
-      trace_printf (sd, cpu, "trace-%s: %s:%-*d 0x%.*x %-*.*s %s\n",
-		    insn_data->phase,
-		    *(insn_data->p_filename),
-		    SIZE_LINE_NUMBER, insn_data->linenum,
+      trace_printf (sd, cpu, "%-*s 0x%.*x %-*.*s %s\n",
+		    SIZE_PHASE+1, phase,
 		    SIZE_PC, (unsigned) pc,
 		    SIZE_LOCATION, SIZE_LOCATION, buf,
-		    *(insn_data->p_name));
+		    name);
     }
 }
 

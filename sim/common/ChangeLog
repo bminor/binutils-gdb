@@ -2,13 +2,18 @@ Tue May  6 06:14:01 1997  Mike Meissner  <meissner@cygnus.com>
 
 	* sim-trace.c (toplevel): Include bfd.h.
 	(trace_options): Note that --trace-linenum also turns on
-	--trace-insn.
+	--trace-insn.  Add --trace-{branch,semantics}.
 	(trace_option_handler): If --trace-linenum, also turn on
-	--trace-insn.
+	--trace-insn.  Add --trace-branch support.  If --trace-semantics,
+	turn on ALU, FPU, branch, and memory tracing.
 	(trace_one_insn): New function to trace an instruction.  Support
 	--trace-linenum.
+	(OPTION_TRACE_*): Use an enum, rather than lots of defines.
 
-	* sim-trace.h (TRACE_LINENUM_P): Define macro.
+	* sim-trace.h (TRACE_{SEMANTICS,BRANCH}_IDX): Add new macros.
+	(MAX_TRACE_VALUES): Use 32, not 12 by default.
+	(TRACE_branch): Add new mask.
+	(TRACE_*_P): Define all possible trace_p macros.
 	(trace_one_insn): Declare function.
 
 Mon May  5 14:08:34 1997  Mike Meissner  <meissner@cygnus.com>

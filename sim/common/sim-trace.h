@@ -29,12 +29,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #endif
 #endif
 
-/* Maximum number of traceable entities.  */
-#ifndef MAX_TRACE_VALUES
-#define MAX_TRACE_VALUES 12
-#endif
-
 /* Standard traceable entities.  */
+#define TRACE_SEMANTICS_IDX -1	/* set ALU, FPU, MEMORY tracing */
 #define TRACE_INSN_IDX 0
 #define TRACE_DECODE_IDX 1
 #define TRACE_EXTRACT_IDX 2
@@ -45,7 +41,13 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define TRACE_CORE_IDX 7
 #define TRACE_EVENTS_IDX 8
 #define TRACE_FPU_IDX 9
+#define TRACE_BRANCH_IDX 10
 #define TRACE_NEXT_IDX 16 /* simulator specific trace bits begin here */
+
+/* Maximum number of traceable entities.  */
+#ifndef MAX_TRACE_VALUES
+#define MAX_TRACE_VALUES 32
+#endif
 
 /* Masks so WITH_TRACE can have symbolic values.  */
 #define TRACE_insn 1
@@ -58,18 +60,20 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define TRACE_core 128
 #define TRACE_events 256
 #define TRACE_fpu 512
+#define TRACE_branch 1024
 
 /* Preprocessor macros to simplify tests of WITH_TRACE.  */
-#define WITH_TRACE_INSN_P (WITH_TRACE & TRACE_insn)
-#define WITH_TRACE_DECODE_P (WITH_TRACE & TRACE_decode)
-#define WITH_TRACE_EXTRACT_P (WITH_TRACE & TRACE_extract)
-#define WITH_TRACE_LINENUM_P (WITH_TRACE & TRACE_linenum)
-#define WITH_TRACE_MEMORY_P (WITH_TRACE & TRACE_memory)
-#define WITH_TRACE_MODEL_P (WITH_TRACE & TRACE_model)
-#define WITH_TRACE_ALU_P (WITH_TRACE & TRACE_alu)
-#define WITH_TRACE_CORE_P (WITH_TRACE & TRACE_core)
-#define WITH_TRACE_EVENTS_P (WITH_TRACE & TRACE_events)
-#define WITH_TRACE_FPU_P (WITH_TRACE & TRACE_fpu)
+#define WITH_TRACE_INSN_P	(WITH_TRACE & TRACE_insn)
+#define WITH_TRACE_DECODE_P	(WITH_TRACE & TRACE_decode)
+#define WITH_TRACE_EXTRACT_P	(WITH_TRACE & TRACE_extract)
+#define WITH_TRACE_LINENUM_P	(WITH_TRACE & TRACE_linenum)
+#define WITH_TRACE_MEMORY_P	(WITH_TRACE & TRACE_memory)
+#define WITH_TRACE_MODEL_P	(WITH_TRACE & TRACE_model)
+#define WITH_TRACE_ALU_P	(WITH_TRACE & TRACE_alu)
+#define WITH_TRACE_CORE_P	(WITH_TRACE & TRACE_core)
+#define WITH_TRACE_EVENTS_P	(WITH_TRACE & TRACE_events)
+#define WITH_TRACE_FPU_P	(WITH_TRACE & TRACE_fpu)
+#define WITH_TRACE_BRANCH_P	(WITH_TRACE & TRACE_branch)
 
 /* Tracing install handler.  */
 MODULE_INSTALL_FN trace_install;
@@ -89,15 +93,6 @@ typedef struct {
   FILE *trace_file;
 #define TRACE_FILE(t) ((t)->trace_file)
 } TRACE_DATA;
-
-/* Structure containing constant stuff to pass to trace_one_insn */
-
-typedef struct {
-  const char *phase;		/* which phase this in (decode,insn) */
-  char **p_filename;		/* ptr to filename insns where defined in */
-  char **p_name;		/* ptr to instruction name */
-  int linenum;			/* line number of line where insn is defined */
-} TRACE_INSN_DATA;
 
 /* Usage macros.  */
 
@@ -113,18 +108,23 @@ struct _sim_cpu;
 ((WITH_TRACE & (1 << (idx))) != 0 \
  && CPU_TRACE_FLAGS (cpu)[idx] != 0)
 
-/* Non-zero if "--trace-insn" specified for CPU.  */
-#define TRACE_INSN_P(cpu) TRACE_P (cpu, TRACE_INSN_IDX)
-/* Non-zero if "--trace-linenum" specified for CPU.  */
-#define TRACE_LINENUM_P(cpu) TRACE_P (cpu, TRACE_LINENUM_IDX)
-/* Non-zero if "--trace-decode" specified for CPU.  */
-#define TRACE_DECODE_P(cpu) TRACE_P (cpu, TRACE_DECODE_IDX)
-/* Non-zero if "--trace-fpu" specified for CPU. */
-#define TRACE_FPU_P(cpu) TRACE_P (cpu, TRACE_FPU_IDX)
+/* Non-zero if  a certain --trace-<xxxx> was specified for CPU.  */
+#define TRACE_INSN_P(cpu)	TRACE_P (cpu, TRACE_INSN_IDX)
+#define TRACE_DECODE_P(cpu)	TRACE_P (cpu, TRACE_DECODE_IDX)
+#define TRACE_EXTRACT_P(cpu)	TRACE_P (cpu, TRACE_EXTRACT_IDX)
+#define TRACE_LINENUM_P(cpu)	TRACE_P (cpu, TRACE_LINENUM_IDX)
+#define TRACE_MEMORY_P(cpu)	TRACE_P (cpu, TRACE_MEMORY_IDX)
+#define TRACE_MODEL_P(cpu)	TRACE_P (cpu, TRACE_MODEL_IDX)
+#define TRACE_ALU_P(cpu)	TRACE_P (cpu, TRACE_ALU_IDX)
+#define TRACE_CORE_P(cpu)	TRACE_P (cpu, TRACE_CORE_IDX)
+#define TRACE_EVENTS_P(cpu)	TRACE_P (cpu, TRACE_EVENTS_IDX)
+#define TRACE_FPU_P(cpu)	TRACE_P (cpu, TRACE_FPU_IDX)
+#define TRACE_BRANCH_P(cpu)	TRACE_P (cpu, TRACE_BRANCH_IDX)
 
 extern void trace_one_insn PARAMS ((SIM_DESC, sim_cpu *,
 				    address_word, int,
-				    const TRACE_INSN_DATA *));
+				    const char *, int,
+				    const char *, const char *));
 
 extern void trace_printf PARAMS ((SIM_DESC, sim_cpu *, const char *, ...))
      __attribute__((format (printf, 3, 4)));
