@@ -1,5 +1,8 @@
 1999-08-23  Nick Clifton  <nickc@cygnus.com>
 
+	* emulparams/elf32mcore.sh (PARSE_AND_LIST_ARGS): Define.
+	Implement --base-file command line switch.
+
 	* emultempl/elf32.em: Add ability for individual targets to have
 	their own command line switches by defining PARSE_AND_LIST_ARGS.
 

@@ -30,3 +30,68 @@ OTHER_RELOCATING_SECTIONS='.stack 0x80000 : { _stack = .; *(.stack) }'
 
 TEMPLATE_NAME=elf32
 GENERATE_SHLIB_SCRIPT=yes
+
+# This code gets inserted into the generic elf32.sc linker script
+# and allows us to define our own command line switches.
+PARSE_AND_LIST_ARGS='
+
+#define OPTION_BASE_FILE		300
+
+static struct option longopts[] =
+{
+  {"base-file", required_argument, NULL, OPTION_BASE_FILE},
+  {NULL, no_argument, NULL, 0}
+};
+
+static void
+gld_elf32mcore_list_options (file)
+     FILE * file;
+{
+  fprintf (file, _("  --base_file <basefile>      Generate a base file for relocatable DLLs\n"));
+}
+
+static int
+gld_elf32mcore_parse_args (argc, argv)
+     int argc;
+     char ** argv;
+{
+  int        longind;
+  int        optc;
+  int        prevoptind = optind;
+  int        prevopterr = opterr;
+  int        wanterror;
+  static int lastoptind = -1;
+
+  if (lastoptind != optind)
+    opterr = 0;
+  
+  wanterror  = opterr;
+  lastoptind = optind;
+
+  optc   = getopt_long_only (argc, argv, "-", longopts, & longind);
+  opterr = prevopterr;
+
+  switch (optc)
+    {
+    default:
+      if (wanterror)
+	xexit (1);
+      optind =  prevoptind;
+      return 0;
+
+    case OPTION_BASE_FILE:
+      link_info.base_file = (PTR) fopen (optarg, FOPEN_WB);
+      if (link_info.base_file == NULL)
+	{
+	  /* xgettext:c-format */
+	  fprintf (stderr, _("%s: Cannot open base file %s\n"),
+		   program_name, optarg);
+	  xexit (1);
+	}
+      break;
+    }
+  
+  return 1;
+}
+
+'
