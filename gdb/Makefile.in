@@ -166,7 +166,7 @@ ADD_FILES = ${REGEX} ${ALLOCA}  ${XM_ADD_FILES} ${TM_ADD_FILES} \
 ADD_DEPS = ${REGEX1} ${ALLOCA1} ${XM_ADD_FILES} ${TM_ADD_FILES} \
 	${NAT_ADD_FILES}
 
-VERSION = 4.8.5
+VERSION = 4.8.6
 DIST=gdb
 
 LINT=/usr/5bin/lint
@@ -565,16 +565,18 @@ depend: $(SOURCES) Makefile.in
 	  -e 's; ./tm.h; tm.h config.status;g'  \
 	  -e 's; ./nm.h; nm.h config.status;g'  \
 	  >depend.tm3;
-# OK, get your sed manual out.  This script makes all the rules in
+# OK, get your sed manual out.  This script makes the rules in
 # depend explicitly state the rule, rather than relying on VPATH
 # or a .c.o implicit rule.  This is needed for Sun make, and should
-# be portable to any make worthy of the name.  I suspect that we no
-# longer need to set VPATH.
+# be portable to any make worthy of the name.
+# There is one exception: the *.tab.c files can exist either in srcdir
+# or in ., so make sure not to use an explicit rule for them.
 	<depend.tm3 sed \
 	  -e '/:/h' \
 	  -e '/\\$$/b end' \
 	  -e 'p' \
 	  -e 'g' \
+	  -e '/:.*\.tab\.c/d' \
 	  -e 's/.*:\(.*\.c\).*/	$${CC} -c $${INTERNAL_CFLAGS} \1/' \
 	  -e ': end' \
 	  >depend.tm4;
