@@ -1,3 +1,7 @@
+Tue Mar 29 19:15:05 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* config.guess: Recognize NCR running SVR4.3.
+
 Mon Mar 28 14:55:15 1994  Per Bothner  (bothner@kalessin.cygnus.com)
 
 	* config.guess:  Make BSDI generate i386-unknown-bsd386.
