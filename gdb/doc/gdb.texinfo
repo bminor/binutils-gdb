@@ -11859,11 +11859,29 @@ messages when used in a user-defined command.
 @section User-defined command hooks
 @cindex command hooks
 @cindex hooks, for commands
+@cindex hooks, pre-command
 
-You may define @emph{hooks}, which are a special kind of user-defined
+@kindex hook
+@kindex hook-
+You may define @dfn{hooks}, which are a special kind of user-defined
 command.  Whenever you run the command @samp{foo}, if the user-defined
 command @samp{hook-foo} exists, it is executed (with no arguments)
 before that command.
+
+@cindex hooks, post-command
+@kindex hookpost
+@kindex hookpost-
+A hook may also be defined which is run after the command you executed.
+Whenever you run the command @samp{foo}, if the user-defined command
+@samp{hookpost-foo} exists, it is executed (with no arguments) after
+that command.  Post-execution hooks may exist simultaneously with
+pre-execution hooks, for the same command.
+
+It is valid for a hook to call the command which it hooks.  If this
+occurs, the hook is not re-executed, thereby avoiding infinte recursion.
+
+@c It would be nice if hookpost could be passed a parameter indicating
+@c if the command it hooks executed properly or not.  FIXME!
 
 @kindex stop@r{, a pseudo-command}
 In addition, a pseudo-command, @samp{stop} exists.  Defining
@@ -11887,6 +11905,25 @@ end
 define hook-continue
 handle SIGLARM pass
 end
+@end example
+
+As a further example, to hook at the begining and end of the @code{echo}
+command, and to add extra text to the beginning and end of the message, 
+you could define:
+
+@example
+define hook-echo
+echo <<<---
+end
+
+define hookpost-echo
+echo --->>>\n
+end
+
+(@value{GDBP}) echo Hello World
+<<<---Hello World--->>>
+(@value{GDBP})
+
 @end example
 
 You can define a hook for any single-word command in @value{GDBN}, but

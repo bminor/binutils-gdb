@@ -1,3 +1,8 @@
+2000-09-26  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* gdb.texinfo (Hooks): Document the new post-hook functionality.
+	From Steven Johnson <sbjohnson@ozemail.com.au>.
+
 2000-08-10  Mark Kettenis  <kettenis@gnu.org>
 
 	* gdbint.texinfo (Overall Structure): Spelling fix.
