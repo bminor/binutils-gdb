@@ -7,4 +7,4 @@
 # Or run native on an Ultracomputer.
 TDEPFILES= exec.o am29k-pinsn.o am29k-tdep.o remote-eb.o remote-mm.o remote-adapt.o 
 TM_FILE= tm-29k.h
-TM_CFLAGS = -DNO_HIF_SUPPORT
+MT_CFLAGS = -DNO_HIF_SUPPORT

@@ -3,5 +3,5 @@ CC=u3cc
 MUNCH_DEFINE="MUNCH_NM=u3nm"
 XDEPFILES= ultra3-xdep.o infptrace.o
 XM_FILE= xm-ultra3.h
-XM_CFLAGS = -DSYM1
+MH_CFLAGS = -DSYM1
 XM_CLIBS = -lsysv -ljobs -ltermlib 

@@ -2,4 +2,4 @@
 TDEPFILES= exec.o am29k-pinsn.o am29k-tdep.o
 TM_FILE= tm-ultra3.h
 # SYM1 is some OS they have.
-TM_CFLAGS = -DSYM1
+MT_CFLAGS = -DSYM1

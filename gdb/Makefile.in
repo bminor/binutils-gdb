@@ -74,9 +74,7 @@ srcdir = .
 # CFLAGS section if your system doesn't have fcntl.h in /usr/include (which 
 # is where it should be according to Posix).
 
-BISON=bison -y
-BISONFLAGS=
-YACC=$(BISON) $(BISONFLAGS)
+YACC=byacc
 # YACC=yacc
 MAKE=make
 
@@ -131,9 +129,9 @@ RL_LIB = ./../readline${subdir}/libreadline.a
 # -I${srcdir} possibly for regex.h also.
 INCLUDE_CFLAGS = -I. -I${srcdir} -I$(INCLUDE_DIR) -I$(READLINE_DIR)
 
-# {X,T}M_CFLAGS, if defined, has system-dependent CFLAGS.
-# CFLAGS for GDB
-GLOBAL_CFLAGS = ${TM_CFLAGS} ${XM_CFLAGS}
+# M{H,T}_CFLAGS, if defined, has host- and target-dependent CFLAGS
+# from the config/ directory.
+GLOBAL_CFLAGS = ${MT_CFLAGS} ${MH_CFLAGS}
 #PROFILE_CFLAGS = -pg
 
 # CFLAGS is specifically reserved for setting from the command line
@@ -165,7 +163,7 @@ CDEPS = ${XM_CDEPS} ${TM_CDEPS} ${BFD_LIB} ${MMALLOC_LIB} ${LIBIBERTY} \
 ADD_FILES = ${REGEX} ${ALLOCA} ${XM_ADD_FILES} ${TM_ADD_FILES}
 ADD_DEPS = ${REGEX1} ${ALLOCA1} ${XM_ADD_FILES} ${TM_ADD_FILES}
 
-VERSION = 4.5.3
+VERSION = 4.5.4
 DIST=gdb
 
 LINT=/usr/5bin/lint
@@ -642,7 +640,7 @@ gdb.info: ./doc/gdb-all.texi
 copying.c: ${srcdir}/COPYING ${srcdir}/copying.awk
 	awk -f ${srcdir}/copying.awk < ${srcdir}/COPYING > copying.c
 
-version.c: Makefile.in
+version.c: Makefile
 	echo 'char *version = "$(VERSION)";' >version.c
 
 # c-exp.tab.c is generated in target dir from c-exp.y if it doesn't exist

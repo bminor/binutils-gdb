@@ -1,3 +1,10 @@
+Mon Jun  8 21:59:08 1992  John Gilmore  (gnu at cygnus.com)
+
+	* Makefile.in:  Roll VERSION to 4.5.4.
+	* Makefile.in, config/*.mh, config/*.mt:  Rename TM_CFLAGS
+	to MT_CFLAGS, XM_CFLAGS to MH_CFLAGS to match file names.
+	* config/sun4os5.mh:  Add MH_CFLAGS=-xs to save debug info.
+
 Mon Jun  8 14:17:42 1992  Stu Grossman  (grossman at cygnus.com)
 
 	* configure.in:  Tandem debug monitor (st2000) support.

@@ -7,4 +7,4 @@
 # the upage.
 TDEPFILES= exec.o am29k-pinsn.o am29k-tdep.o remote-mm.o remote-adapt.o
 TM_FILE= tm-ultra3.h
-TM_CFLAGS = -DKERNEL_DEBUGGING -DNO_HIF_SUPPORT
+MT_CFLAGS = -DKERNEL_DEBUGGING -DNO_HIF_SUPPORT

@@ -19,3 +19,8 @@ REGEX1=regex.o
 # old termcap descriptions are incomplete.  So ensure that we use the
 # new terminfo interface and latest terminal descriptions.
 TERMCAP=-ltermlib
+
+# Sun's compilers require the -xs option to produce debug information
+# in the final linked executable.  Otherwise they leave it in the .o
+# files only, with undocumented pointers to it in the linked executable.
+MH_CFLAGS=-xs
