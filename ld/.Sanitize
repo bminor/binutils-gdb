@@ -30,6 +30,7 @@ ChangeLog
 Makefile.dos
 Makefile.in
 README
+TODO
 a29k.sc-sh
 a29k.sh
 aout.sc-sh
@@ -122,7 +123,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.42  1992/09/01 22:14:49  bothner
+# Revision 1.43  1992/09/03 22:56:45  bothner
+# Add TODO.
+#
+# Revision 1.42  1992/09/01  22:14:49  bothner
 # Add scripts.
 #
 # Revision 1.41  1992/08/31  01:14:44  bothner
