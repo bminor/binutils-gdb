@@ -1,3 +1,7 @@
+2001-06-09  Alexandre Oliva  <aoliva@redhat.com>
+
+	* sh-opc.h (sh_table): Don't use empty initializers.
+
 2001-06-06  Christian Groessler <cpg@aladdin.de>
 
         * z8k-dis.c: Fix formatting.
