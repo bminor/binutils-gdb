@@ -1,5 +1,5 @@
 /* Perform non-arithmetic operations on values, for GDB.
-   Copyright 1986, 1987, 1989, 1991 Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1989, 1991, 1992 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -239,7 +239,7 @@ value_assign (toval, fromval)
 	  int v;		/* FIXME, this won't work for large bitfields */
 	  read_memory (VALUE_ADDRESS (toval) + VALUE_OFFSET (toval),
 		       &v, sizeof v);
-	  modify_field (&v, (int) value_as_long (fromval),
+	  modify_field ((char *) &v, (int) value_as_long (fromval),
 			VALUE_BITPOS (toval), VALUE_BITSIZE (toval));
 	  write_memory (VALUE_ADDRESS (toval) + VALUE_OFFSET (toval),
 			(char *)&v, sizeof v);
@@ -258,11 +258,11 @@ value_assign (toval, fromval)
 	  int v;
 
 	  read_register_bytes (VALUE_ADDRESS (toval) + VALUE_OFFSET (toval),
-			       &v, sizeof v);
-	  modify_field (&v, (int) value_as_long (fromval),
+			       (char *) &v, sizeof v);
+	  modify_field ((char *) &v, (int) value_as_long (fromval),
 			VALUE_BITPOS (toval), VALUE_BITSIZE (toval));
 	  write_register_bytes (VALUE_ADDRESS (toval) + VALUE_OFFSET (toval),
-				&v, sizeof v);
+				(char *) &v, sizeof v);
 	}
       else if (use_buffer)
 	write_register_bytes (VALUE_ADDRESS (toval) + VALUE_OFFSET (toval),
@@ -450,6 +450,7 @@ value
 value_addr (arg1)
      value arg1;
 {
+  extern value value_copy ();
   struct type *type = VALUE_TYPE (arg1);
   if (TYPE_CODE (type) == TYPE_CODE_REF)
     {
@@ -684,6 +685,9 @@ call_function_by_hand (function, nargs, args)
   struct cleanup *old_chain;
   CORE_ADDR funaddr;
   int using_gcc;
+
+  if (!target_has_execution)
+    noprocess();
 
   save_inferior_status (&inf_status, 1);
   old_chain = make_cleanup (restore_inferior_status, &inf_status);
@@ -949,7 +953,7 @@ value_string (ptr, len)
     }
 
   blocklen = value_from_longest (builtin_type_int, (LONGEST) (len + 1));
-  val = target_call_function (val, 1, &blocklen);
+  val = call_function_by_hand (val, 1, &blocklen);
   if (value_zerop (val))
     error ("No memory available for string constant.");
   write_memory (value_as_pointer (val), copy, len + 1);

@@ -1,5 +1,5 @@
 /* Memory-access and commands for remote NINDY process, for GDB.
-   Copyright (C) 1990-1991 Free Software Foundation, Inc.
+   Copyright 1990, 1991, 1992 Free Software Foundation, Inc.
    Contributed by Intel Corporation.  Modified from remote.c by Chris Benenati.
 
 GDB is distributed in the hope that it will be useful, but WITHOUT ANY
@@ -123,7 +123,6 @@ extern char *getenv();
 extern char *mktemp();
 
 extern char *coffstrip();
-extern value call_function_by_hand ();
 extern void generic_mourn_inferior ();
 
 extern struct target_ops nindy_ops;
@@ -941,7 +940,6 @@ specified when you started GDB.",
 	0, 0, 0, 0, 0,	/* Terminal crud */
 	nindy_kill,
 	nindy_load,
-	call_function_by_hand,
 	0, /* lookup_symbol */
 	nindy_create_inferior,
 	nindy_mourn_inferior,

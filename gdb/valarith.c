@@ -1,5 +1,5 @@
 /* Perform arithmetic and other operations on values, for GDB.
-   Copyright 1986, 1989, 1991 Free Software Foundation, Inc.
+   Copyright 1986, 1989, 1991, 1992 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -273,11 +273,11 @@ value_x_binop (arg1, arg2, op, otherop)
 	  argvec[1] = argvec[0];
 	  argvec++;
 	}
-      return target_call_function (argvec[0], 2 - static_memfuncp, argvec + 1);
+      return call_function_by_hand (argvec[0], 2 - static_memfuncp, argvec + 1);
     }
   error ("member function %s not found", tstr);
 #ifdef lint
-  return target_call_function (argvec[0], 2 - static_memfuncp, argvec + 1);
+  return call_function_by_hand (argvec[0], 2 - static_memfuncp, argvec + 1);
 #endif
 }
 
@@ -332,7 +332,7 @@ value_x_unop (arg1, op)
 	  argvec[1] = argvec[0];
 	  argvec++;
 	}
-      return target_call_function (argvec[0], 1 - static_memfuncp, argvec + 1);
+      return call_function_by_hand (argvec[0], 1 - static_memfuncp, argvec + 1);
     }
   error ("member function %s not found", tstr);
   return 0;  /* For lint -- never reached */

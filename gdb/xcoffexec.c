@@ -1,5 +1,5 @@
 /* Execute AIXcoff files, for GDB.
-   Copyright (C) 1988, 1989, 1991 Free Software Foundation, Inc.
+   Copyright 1988, 1989, 1991, 1992 Free Software Foundation, Inc.
    Derived from exec.c.  Modified by IBM Corporation.
    Donated by IBM Corporation and Cygnus Support.
 
@@ -892,7 +892,7 @@ Specify the filename of the executable file.",
 	0, 0, /* insert_breakpoint, remove_breakpoint, */
 	0, 0, 0, 0, 0, /* terminal stuff */
 	0, 0, /* kill, load */
-	0, 0, /* call fn, lookup sym */
+	0, /* lookup sym */
 	child_create_inferior,
 	0, /* mourn_inferior */
 	file_stratum, 0, /* next */

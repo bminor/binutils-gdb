@@ -1,5 +1,5 @@
 /* Evaluate expressions for GDB.
-   Copyright (C) 1986, 1987, 1989, 1991 Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1989, 1991, 1992 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -406,7 +406,7 @@ evaluate_subexp (expect_type, exp, pos, noside)
 	  else
 	    error ("Expression of type other than \"Function returning ...\" used as function");
 	}
-      return target_call_function (argvec[0], nargs, argvec + 1);
+      return call_function_by_hand (argvec[0], nargs, argvec + 1);
 
     case STRUCTOP_STRUCT:
       tem = strlen (&exp->elts[pc + 1].string);
@@ -924,6 +924,7 @@ evaluate_subexp_for_address (exp, pos, noside)
 {
   enum exp_opcode op;
   register int pc;
+  struct symbol *var;
 
   pc = (*pos);
   op = exp->elts[pc].opcode;
@@ -940,13 +941,19 @@ evaluate_subexp_for_address (exp, pos, noside)
 			 evaluate_subexp (NULL_TYPE, exp, pos, noside));
 
     case OP_VAR_VALUE:
+      var = exp->elts[pc + 1].symbol;
+
+      /* C++: The "address" of a reference should yield the address
+       * of the object pointed to. Let value_addr() deal with it. */
+      if (TYPE_CODE (SYMBOL_TYPE (var)) == TYPE_CODE_REF)
+        goto default_case;
+
       (*pos) += 3;
       if (noside == EVAL_AVOID_SIDE_EFFECTS)
 	{
 	  struct type *type =
-	    lookup_pointer_type (SYMBOL_TYPE (exp->elts[pc + 1].symbol));
-	  enum address_class sym_class =
-	    SYMBOL_CLASS (exp->elts[pc + 1].symbol);
+	    lookup_pointer_type (SYMBOL_TYPE (var));
+	  enum address_class sym_class = SYMBOL_CLASS (var);
 
 	  if (sym_class == LOC_CONST
 	      || sym_class == LOC_CONST_BYTES
@@ -958,9 +965,10 @@ evaluate_subexp_for_address (exp, pos, noside)
 	  value_zero (type, not_lval);
 	}
       else
-	return locate_var_value (exp->elts[pc + 1].symbol, (FRAME) 0);
+	return locate_var_value (var, (FRAME) 0);
 
     default:
+    default_case:
       if (noside == EVAL_AVOID_SIDE_EFFECTS)
 	{
 	  value x = evaluate_subexp (NULL_TYPE, exp, pos, noside);
@@ -988,6 +996,7 @@ evaluate_subexp_with_coercion (exp, pos, noside)
   register enum exp_opcode op;
   register int pc;
   register value val;
+  struct symbol *var;
 
   pc = (*pos);
   op = exp->elts[pc].opcode;
@@ -995,11 +1004,12 @@ evaluate_subexp_with_coercion (exp, pos, noside)
   switch (op)
     {
     case OP_VAR_VALUE:
-      if (TYPE_CODE (SYMBOL_TYPE (exp->elts[pc + 1].symbol)) == TYPE_CODE_ARRAY)
+      var = exp->elts[pc + 1].symbol;
+      if (TYPE_CODE (SYMBOL_TYPE (var)) == TYPE_CODE_ARRAY)
 	{
 	  (*pos) += 3;
-	  val = locate_var_value (exp->elts[pc + 1].symbol, (FRAME) 0);
-	  return value_cast (lookup_pointer_type (TYPE_TARGET_TYPE (SYMBOL_TYPE (exp->elts[pc + 1].symbol))),
+	  val = locate_var_value (var, (FRAME) 0);
+	  return value_cast (lookup_pointer_type (TYPE_TARGET_TYPE (SYMBOL_TYPE (var))),
 			     val);
 	}
       default:

@@ -52,7 +52,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <value.h>
 #include <symtab.h>
  
-extern value call_function_by_hand ();
 extern void symbol_file_command ();
 extern int stop_soon_quietly;		/* for wait_for_inferior */
 
@@ -187,7 +186,7 @@ vx_remove_breakpoint (addr)
 #ifdef FIXME
 /* FIXME, function calls are really fried.  GO back to manual method. */
 value
-vx_call_function (function, nargs, args)
+call_function (function, nargs, args)
      value function;
      int nargs;
      value *args;
@@ -269,7 +268,7 @@ vx_call_function (function, nargs, args)
     start_sp = text_end;
     errcode = target_write_memory (start_sp, dummy1, sizeof dummy);
     if (errcode != 0)
-      error ("Cannot write text segment -- call_function failed");
+      error ("Cannot write text segment -- vx_call_function failed");
   }
 #endif /* After text_end.  */
 #endif /* Not on stack.  */
@@ -1504,7 +1503,6 @@ Specify the name of the machine to connect to.",
 	0, 0, 0, 0, 0,	/* terminal stuff */
 	0, /* vx_kill, */
 	vx_add_file_command,
-	call_function_by_hand,  /* FIXME, calling fns is maybe botched? */
 	vx_lookup_symbol,
 	vx_create_inferior, 0,  /* mourn_inferior */
 	core_stratum, 0, /* next */
@@ -1526,7 +1524,6 @@ struct target_ops vx_run_ops = {
 	0, 0, 0, 0, 0,	/* terminal stuff */
 	0, /* vx_kill, */
 	vx_add_file_command,
-	call_function_by_hand,  /* FIXME, calling fns is maybe botched? */
 	vx_lookup_symbol,
 	vx_create_inferior, vx_mourn_inferior,
 	process_stratum, 0, /* next */

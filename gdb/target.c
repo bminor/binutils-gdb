@@ -1,22 +1,22 @@
 /* Select target systems and architectures at runtime for GDB.
-   Copyright (C) 1990 Free Software Foundation, Inc.
+   Copyright 1990, 1992 Free Software Foundation, Inc.
    Contributed by Cygnus Support.
 
 This file is part of GDB.
 
-GDB is free software; you can redistribute it and/or modify
+This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 1, or (at your option)
-any later version.
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
 
-GDB is distributed in the hope that it will be useful,
+This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with GDB; see the file COPYING.  If not, write to
-the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+along with this program; if not, write to the Free Software
+Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include <stdio.h>
 #include <errno.h>
@@ -29,9 +29,10 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "bfd.h"
 #include "symfile.h"
 
+extern int errno;
+
 extern int memory_insert_breakpoint(), memory_remove_breakpoint();
 extern void host_convert_to_virtual(), host_convert_from_virtual();
-extern void add_syms_addr_command();
 
 static void cleanup_target ();
 
@@ -55,11 +56,11 @@ struct target_ops dummy_target = {"None", "None", "",
     0, 0, 		/* bkpts */
     0, 0, 0, 0, 0, 	/* terminal */
     0, 0, 		/* kill, load */
-    add_syms_addr_command,	/* add_syms */
-    0, 0, 		/* call_function, lookup_symbol */
+    0, 			/* lookup_symbol */
     0, 0,		/* create_inferior, mourn_inferior */
     dummy_stratum, 0,	/* stratum, next */
     0, 0, 0, 0, 0,	/* all mem, mem, stack, regs, exec */
+    0, 0,		/* section pointers */
     OPS_MAGIC,
 };
 
@@ -213,16 +214,12 @@ static void
 kill_or_be_killed (from_tty)
      int from_tty;
 {
-  /* FIXME: What is savecur for?  Why isn't it used?  */
-  struct target_ops *savecur;
-
   if (target_has_execution)
     {
       printf ("You are already running a program:\n");
       target_files_info ();
       if (query ("Kill it? ")) {
-	savecur = current_target;
-	target_kill (0, from_tty);
+	target_kill ();
 	if (target_has_execution)
 	  error ("Killing the program did not help.");
 	return;
@@ -280,8 +277,8 @@ cleanup_target (t)
   de_fault (to_detach, 			(void (*)())ignore);
   de_fault (to_resume, 			(void (*)())noprocess);
   de_fault (to_wait, 			noprocess);
-  de_fault (to_fetch_registers, 	noprocess);
-  de_fault (to_store_registers,		noprocess);
+  de_fault (to_fetch_registers, 	ignore);
+  de_fault (to_store_registers,		(void (*)())noprocess);
   de_fault (to_prepare_to_store,	(void (*)())noprocess);
   de_fault (to_convert_to_virtual,	host_convert_to_virtual);
   de_fault (to_convert_from_virtual,	host_convert_from_virtual);
@@ -296,8 +293,6 @@ cleanup_target (t)
   de_fault (to_terminal_info,		default_terminal_info);
   de_fault (to_kill,			(void (*)())noprocess);
   de_fault (to_load,			tcomplain);
-  de_fault (to_add_syms,		tcomplain);
-  de_fault (to_call_function,		(struct value *(*)())noprocess);
   de_fault (to_lookup_symbol,		nosymbol);
   de_fault (to_create_inferior,		maybe_kill_then_create_inferior);
   de_fault (to_mourn_inferior,		(void (*)())noprocess);
@@ -390,6 +385,48 @@ pop_target ()
     push_target (&dummy_target);
 }
 
+#define MIN(A, B) (((A) <= (B)) ? (A) : (B))
+
+/* target_read_string -- read a null terminated string from MEMADDR in target.
+   The read may also be terminated early by getting an error from target_xfer_
+   memory.
+   LEN is the size of the buffer pointed to by MYADDR.  Note that a terminating
+   null will only be written if there is sufficient room.  The return value is
+   is the number of bytes (including the null) actually transferred.
+*/
+
+int
+target_read_string (memaddr, myaddr, len)
+     CORE_ADDR memaddr;
+     char *myaddr;
+     int len;
+{
+  int tlen, origlen, offset, i;
+  char buf[4];
+
+  origlen = len;
+
+  while (len > 0)
+    {
+      tlen = MIN (len, 4 - (memaddr & 3));
+      offset = memaddr & 3;
+
+      if (target_xfer_memory (memaddr & ~3, buf, 4, 0))
+	return origlen - len;
+
+      for (i = 0; i < tlen; i++)
+	{
+	  *myaddr++ = buf[i + offset];
+	  if (buf[i + offset] == '\000')
+	    return (origlen - len) + i + 1;
+	}
+
+      memaddr += tlen;
+      len -= tlen;
+    }
+  return origlen;
+}
+
 /* Move memory to or from the targets.  Iterate until all of it has
    been moved, if necessary.  The top target gets priority; anything
    it doesn't want, is offered to the next one down, etc.  Note the
@@ -430,7 +467,8 @@ target_xfer_memory (memaddr, myaddr, len, write)
   struct target_ops *t;
   
   /* The quick case is that the top target does it all.  */
-  res = current_target->to_xfer_memory(memaddr, myaddr, len, write);
+  res = current_target->to_xfer_memory
+			(memaddr, myaddr, len, write, current_target);
   if (res == len)
     return 0;
 
@@ -445,7 +483,7 @@ target_xfer_memory (memaddr, myaddr, len, write)
 	   t;
 	   t = t->to_has_all_memory? 0: t->to_next)
 	{
-	  res = t->to_xfer_memory(memaddr, myaddr, curlen, write);
+	  res = t->to_xfer_memory(memaddr, myaddr, curlen, write, t);
 	  if (res > 0) break;	/* Handled all or part of xfer */
 	  if (res == 0) continue;	/* Handled none */
 	  curlen = -res;	/* Could handle once we get past res bytes */
@@ -456,7 +494,10 @@ target_xfer_memory (memaddr, myaddr, len, write)
 	     read zeros if reading, or do nothing if writing.  Return error. */
 	  if (!write)
 	    bzero (myaddr, len);
-	  return EIO;
+	  if (errno == 0)
+	    return EIO;
+	  else
+	    return errno;
 	}
 bump:
       memaddr += res;
@@ -476,8 +517,8 @@ target_info (args, from_tty)
   struct target_ops *t;
   int has_all_mem = 0;
   
-  if (symfile != 0)
-    printf ("Symbols from \"%s\".\n", symfile);
+  if (symfile_objfile != 0)
+    printf ("Symbols from \"%s\".\n", symfile_objfile->name);
 
 #ifdef FILES_INFO_HOOK
   if (FILES_INFO_HOOK ())
@@ -493,7 +534,7 @@ target_info (args, from_tty)
       if (has_all_mem)
 	printf("\tWhile running this, gdb does not access memory from...\n");
       printf("%s:\n", t->to_longname);
-      (t->to_files_info)();
+      (t->to_files_info)(t);
       has_all_mem = t->to_has_all_memory;
     }
 }
@@ -510,7 +551,7 @@ target_preopen (from_tty)
   if (target_has_execution)
     {   
       if (query ("A program is being debugged already.  Kill it? "))
-        target_kill ((char *)0, from_tty);
+        target_kill ();
       else
         error ("Program not killed.");
     }

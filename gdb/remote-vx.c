@@ -1,5 +1,5 @@
 /* Memory-access and commands for remote VxWorks processes, for GDB.
-   Copyright (C) 1990-1991  Free Software Foundation, Inc.
+   Copyright 1990, 1991, 1992 Free Software Foundation, Inc.
    Contributed by Wind River Systems and Cygnus Support.
 
 This file is part of GDB.
@@ -51,7 +51,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <value.h>
 #include <symtab.h>
  
-extern value call_function_by_hand ();
 extern void symbol_file_command ();
 extern int stop_soon_quietly;		/* for wait_for_inferior */
 
@@ -1434,7 +1433,6 @@ Specify the name of the machine to connect to.",
 	0, 0, 0, 0, 0,	/* terminal stuff */
 	0, /* vx_kill, */
 	vx_load_command,
-	0,  /* call_function */
 	vx_lookup_symbol,
 	vx_create_inferior, 0,  /* mourn_inferior */
 	core_stratum, 0, /* next */
@@ -1457,7 +1455,6 @@ struct target_ops vx_run_ops = {
 	0, 0, 0, 0, 0,	/* terminal stuff */
 	vx_kill,
 	vx_load_command,
-	call_function_by_hand,  /* FIXME, calling fns is maybe botched? */
 	vx_lookup_symbol,
 	0, vx_mourn_inferior,
 	process_stratum, 0, /* next */

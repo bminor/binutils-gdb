@@ -1,5 +1,5 @@
 /* Remote debugging interface for Am290*0 running MiniMON monitor, for GDB.
-   Copyright (C) 1990, 1991 Free Software Foundation, Inc.
+   Copyright 1990, 1991, 1992 Free Software Foundation, Inc.
    Originally written by Daniel Mann at AMD.
 
 This file is part of GDB.
@@ -58,8 +58,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define DRAIN_INPUT()	(msg_recv_serial((union msg_t*)0))
 
 extern int stop_soon_quietly;           /* for wait_for_inferior */
-
-extern struct value *call_function_by_hand();
 
 static void mm_resume();
 static void mm_fetch_registers ();
@@ -1681,7 +1679,6 @@ struct target_ops mm_ops = {
         0, 0, 0, 0, 0,          /* Terminal handling */
         mm_kill,             	/* FIXME, kill */
         mm_load, 
-        call_function_by_hand,
         0,                      /* lookup_symbol */
         mm_create_inferior,  /* create_inferior */
         mm_mourn,            /* mourn_inferior FIXME */

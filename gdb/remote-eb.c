@@ -1,5 +1,5 @@
 /* Remote debugging interface for AMD 29000 EBMON on IBM PC, for GDB.
-   Copyright 1990, 1991 Free Software Foundation, Inc.
+   Copyright 1990, 1991, 1992 Free Software Foundation, Inc.
    Contributed by Cygnus Support.  Written by Jim Kingdon for Cygnus.
 
 This file is part of GDB.
@@ -42,8 +42,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "terminal.h"
 #include "target.h"
 #include "gdbcore.h"
-
-extern struct value *call_function_by_hand();
 
 extern struct target_ops eb_ops;		/* Forward declaration */
 
@@ -989,7 +987,6 @@ executable as it exists on the remote computer.  For example,\n\
 	0, 0, 0, 0, 0,	/* Terminal handling */
 	eb_kill,
 	0,	/* load */
-	call_function_by_hand,
 	0, /* lookup_symbol */
 	eb_create_inferior,
 	eb_mourn_inferior,

@@ -1,21 +1,21 @@
 /* Definitions for values of C expressions, for GDB.
-   Copyright (C) 1986, 1987, 1989 Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1989, 1992 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
-GDB is free software; you can redistribute it and/or modify
+This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 1, or (at your option)
-any later version.
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
 
-GDB is distributed in the hope that it will be useful,
+This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with GDB; see the file COPYING.  If not, write to
-the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+along with this program; if not, write to the Free Software
+Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #if !defined (VALUE_H)
 #define VALUE_H 1
@@ -38,7 +38,7 @@ enum lval_type {
   /* In a register series in a frame not the current one, which may have been
      partially saved or saved in different places (otherwise would be
      lval_register or lval_memory).  */
-  lval_reg_frame_relative,
+  lval_reg_frame_relative
 };
 
 struct value
@@ -138,7 +138,7 @@ extern int value_fetch_lazy ();
 /* Convert a REF to the object referenced. */
 
 #define COERCE_REF(arg)    \
-{ if (TYPE_CODE ( VALUE_TYPE (arg)) == TYPE_CODE_REF)			\
+{ if (TYPE_CODE (VALUE_TYPE (arg)) == TYPE_CODE_REF)			\
     arg = value_at_lazy (TYPE_TARGET_TYPE (VALUE_TYPE (arg)),		\
 			 unpack_long (VALUE_TYPE (arg),			\
 				      VALUE_CONTENTS (arg)));}
@@ -163,7 +163,7 @@ extern int value_fetch_lazy ();
 /* If ARG is an enum, convert it to an integer.  */
 
 #define COERCE_ENUM(arg)    \
-{ if (TYPE_CODE ( VALUE_TYPE (arg)) == TYPE_CODE_REF)			\
+{ if (TYPE_CODE (VALUE_TYPE (arg)) == TYPE_CODE_REF)			\
     arg = value_ind (arg);						\
   if (TYPE_CODE (VALUE_TYPE (arg)) == TYPE_CODE_ENUM)			\
     arg = value_cast (builtin_type_unsigned_int, arg);			\
@@ -180,12 +180,38 @@ struct internalvar
 };
 
 #include "symtab.h"
-LONGEST value_as_long ();
-double value_as_double ();
-LONGEST unpack_long ();
-double unpack_double ();
+LONGEST value_as_long (
+#ifdef __STDC__
+		       value
+#endif
+		       );
+double value_as_double (
+#ifdef __STDC__
+			value
+#endif
+			);
+CORE_ADDR value_as_pointer (
+#ifdef __STDC__
+			    value
+#endif
+			    );
+LONGEST unpack_long (
+#ifdef __STDC__
+		     struct type *, char *
+#endif
+		     );
+double unpack_double (
+#ifdef __STDC__
+		      struct type *, char *, int *
+#endif
+		      );
+CORE_ADDR unpack_pointer (
+#ifdef __STDC__
+			  struct type *, char *
+#endif
+			  );
 long unpack_field_as_long ();
-value value_from_long ();
+value value_from_longest ();
 value value_from_double ();
 value value_at ();
 value value_at_lazy ();
@@ -226,6 +252,7 @@ value evaluate_expression ();
 value evaluate_type ();
 value parse_and_eval ();
 value parse_to_comma_and_eval ();
+struct type *parse_and_eval_type ();
 extern CORE_ADDR parse_and_eval_address ();
 extern CORE_ADDR parse_and_eval_address_1 ();
 
@@ -284,8 +311,12 @@ void print_floating ();
 int value_print ();
 int val_print ();
 void print_variable_value ();
+void typedef_print ();
 char *internalvar_name ();
 void clear_value_history ();
 void clear_internalvars ();
+
+extern value
+call_function_by_hand PARAMS ((value, int value *));
 
 #endif /* value.h not already included.  */

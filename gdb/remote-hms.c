@@ -1,9 +1,7 @@
 /* Remote debugging interface for Hitachi HMS Monitor Version 1.0
-
    Copyright 1992 Free Software Foundation, Inc.
-
-   Contributed by Steve Chamberlain sac@cygnus.com
-
+   Contributed by Cygnus Support.  Written by Steve Chamberlain
+   (sac@cygnus.com).
 
 This file is part of GDB.
 
@@ -21,14 +19,12 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-
-
 #include <stdio.h>
-#include <string.h>
 #include "defs.h"
 #include "inferior.h"
 #include "wait.h"
 #include "value.h"
+#include <string.h>
 #include <ctype.h>
 #include <fcntl.h>
 #include <signal.h>
@@ -40,9 +36,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* External data declarations */
 extern int stop_soon_quietly;           /* for wait_for_inferior */
-
-/* External function declarations */
-extern struct value *call_function_by_hand();
 
 /* Forward data declarations */
 extern struct target_ops hms_ops;		/* Forward declaration */
@@ -1604,7 +1597,6 @@ by a serial line.",
 	0, 0, 0, 0, 0,		/* Terminal handling */
 	hms_kill, 		/* FIXME, kill */
 	hms_load, 
-	call_function_by_hand,
 	0, 			/* lookup_symbol */
 	hms_create_inferior, 	/* create_inferior */ 
 	hms_mourn, 		/* mourn_inferior FIXME */
