@@ -1,3 +1,8 @@
+Fri Oct  4 18:49:31 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* scripttempl/m68kcoff.sc: Only set the address of .text if
+	RELOCATING.
+
 Fri Oct  4 10:59:52 1996  Doug Evans  <dje@canuck.cygnus.com>
 
 	* emulparams/sparcaout.sh ({BIG,LITTLE}_OUTPUT_FORMAT): Define.
