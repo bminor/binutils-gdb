@@ -1,4 +1,14 @@
+2002-01-10  Michael Snyder  <msnyder@redhat.com>
+
+	* linux-proc.c: Add "info proc" command, a la procfs.c.
+	(read_mapping): New function, abstract and re-use code.
+	(linux_find_memory_regions): Use new func read_mapping.
+	(linux_info_proc_cmd): New function, implement "info proc".
+	(_initialize_linux_proc): Add new command "info proc".
+
 2002-01-15  Michael Snyder  <msnyder@redhat.com>
+
+	* NEWS: Add item for new 'gcore' command.
 
 	* symfile.c (generic_load): Use bfd_map_over_sections method
 	instead of manipulating bfd structure members directly.
