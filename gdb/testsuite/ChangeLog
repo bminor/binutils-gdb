@@ -1,3 +1,11 @@
+2004-02-16  Fred Fish  <fnf@redhat.com>
+
+	* gdb.arch/gdb1291.c: Remove
+	* gdb.arch/gdb1291.s: New test input file.
+	* gdb.arch/gdb1291.exp: Expand test to check case that should not
+	fail.  Test for correct result, known incorrect result, other
+	failures and timeouts.
+
 2004-02-16  Andrew Cagney  <cagney@redhat.com>
 
 	* gdb.base/bigcore.exp: New file.
