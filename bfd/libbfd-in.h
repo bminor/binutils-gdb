@@ -82,8 +82,8 @@ char *bfd_zmalloc PARAMS ((bfd_size_type size));
 extern PTR xmalloc PARAMS ((size_t));
 /* SIZE is bfd_size_type.  */
 #define bfd_xmalloc(size) xmalloc ((size_t) size)
-/* SIZE is size_t.  */
-#define bfd_xmalloc_by_size_t(size) xmalloc (size)
+/* Defined without an argument so its address can be used.  */
+#define bfd_xmalloc_by_size_t xmalloc
 
 /* These routines allocate and free things on the BFD's obstack.  Note
    that realloc can never occur in place.  */
