@@ -621,6 +621,8 @@ static void set_cu_language PARAMS ((unsigned int));
 static struct attribute *dwarf_attr PARAMS ((struct die_info *,
 					     unsigned int));
 
+static int die_is_declaration (struct die_info *);
+
 static void dwarf_decode_lines PARAMS ((unsigned int, char *, bfd *));
 
 static void dwarf2_start_subfile PARAMS ((char *, char *));
@@ -2202,7 +2204,7 @@ read_structure_scope (die, objfile)
      type within the structure itself. */
   die->type = type;
 
-  if (die->has_children)
+  if (die->has_children && ! die_is_declaration (die))
     {
       struct field_info fi;
       struct die_info *child_die;
@@ -3698,6 +3700,13 @@ dwarf_attr (die, name)
     }
 
   return NULL;
+}
+
+static int
+die_is_declaration (struct die_info *die)
+{
+  return (dwarf_attr (die, DW_AT_declaration)
+	  && ! dwarf_attr (die, DW_AT_specification));
 }
 
 /* Decode the line number information for the compilation unit whose
