@@ -1,3 +1,7 @@
+Mon Feb 21 15:15:29 1994  Ian Lance Taylor  (ian@cygnus.com)
+
+	* ldlang.c (new_afile): Pass NULL as last argument to concat.
+
 Thu Feb 17 15:51:23 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* ldlang.c, ldmain.c: Include libiberty.h.

@@ -338,7 +338,7 @@ new_afile (name, file_type, target)
       p->is_archive = true;
       p->filename = name;
       p->real = true;
-      p->local_sym_name = concat ("-l", name, "");
+      p->local_sym_name = concat ("-l", name, (const char *) NULL);
       p->just_syms_flag = false;
       p->search_dirs_flag = true;
       break;
