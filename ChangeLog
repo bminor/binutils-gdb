@@ -1,3 +1,9 @@
+Tue Dec  2 06:51:40 1997  Keith Seitz  <keiths@onions.cygnus.com>
+
+	* configure (GDB_TK): add all-libide to dependency list
+
+	* Makefile.in: remove sanitization for ALL libide references
+
 Tue Dec  2 09:04:13 1997  Michael Meissner  <meissner@cygnus.com>
 
 	* configure.in (host_libs): Build libide all of the time, remove ide
@@ -7,8 +13,6 @@ Tue Dec  2 09:04:13 1997  Michael Meissner  <meissner@cygnus.com>
 	* Makefile.in (all-libide): Remove sanitization markers for libide.
 
 Mon Dec  1 10:53:40 1997  Keith Seitz  <keiths@onions.cygnus.com>
-
-	* configure: add all-libide to GDB_TK
 
 	* Makefile.in (all-vmake): remove double dependency on all-libide
 

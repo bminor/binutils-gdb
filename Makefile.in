@@ -514,9 +514,7 @@ ALL_MODULES = \
 	$(end-sanitize-ide) \
 	all-ld \
 	all-libiberty \
-	$(start-sanitize-ide) \
 	all-libide \
-	$(end-sanitize-ide) \
 	all-m4 \
 	all-make \
 	all-mmalloc \
@@ -590,9 +588,7 @@ CROSS_CHECK_MODULES = \
 	$(end-sanitize-ide) \
 	check-ld \
 	check-libiberty \
-	$(start-sanitize-ide) \
 	check-libide \
-	$(end-sanitize-ide) \
 	check-m4 \
 	check-make \
 	check-mmcheckoc \
@@ -667,9 +663,7 @@ INSTALL_MODULES = \
 	$(end-sanitize-ide) \
 	install-ld \
 	install-libiberty \
-	$(start-sanitize-ide) \
 	install-libide \
-	$(end-sanitize-ide) \
 	install-m4 \
 	install-make \
 	install-mmalloc \
@@ -827,9 +821,7 @@ CLEAN_MODULES = \
 	$(end-sanitize-ide) \
 	clean-ld \
 	clean-libiberty \
-	$(start-sanitize-ide) \
 	clean-libide \
-	$(end-sanitize-ide) \
 	clean-m4 \
 	clean-make \
 	clean-mmalloc \
