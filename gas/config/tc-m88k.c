@@ -135,9 +135,6 @@ static struct hash_control *op_hash = NULL;
 /* These bits should be turned off in the first address of every segment */
 int md_seg_align = 7;
 
-/* This is the number to put at the beginning of the a.out file */
-long omagic = OMAGIC;
-
 /* These chars start a comment anywhere in a source file (except inside
    another comment */
 const char comment_chars[] = ";";

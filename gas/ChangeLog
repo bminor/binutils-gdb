@@ -8,6 +8,7 @@ Thu Jul 15 11:51:03 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 	need md_pcrel_from for a PC relative relocation within the same
 	file).
 	* config/tc-m88k.c (md_pcrel_from): Corrected return value.
+	(omagic): Removed unused variable.
 
 	* Preliminary support for m88k-coff.
 	* configure.in (m88k-*-coff*): New target.  Use coffbfd and
