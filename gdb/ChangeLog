@@ -1,3 +1,8 @@
+2003-06-01  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* mipsnbsd-tdep.c: Update copyright years.
+	(fetch_core_registers): Correct arguments to mipsnbsd_supply_fpreg.
+
 2003-06-01  Richard Henderson  <rth@redhat.com>
 
         * Makefile.in (ALLDEPFILES): Add alpha-mdebug-tdep.c.

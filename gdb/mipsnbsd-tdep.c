@@ -1,5 +1,5 @@
 /* Target-dependent code for MIPS systems running NetBSD.
-   Copyright 2002 Free Software Foundation, Inc.
+   Copyright 2002, 2003 Free Software Foundation, Inc.
    Contributed by Wasabi Systems, Inc.
 
    This file is part of GDB.
@@ -105,7 +105,7 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size, int which,
   mipsnbsd_supply_reg (regs, -1);
 
   /* Floating point registers.  */
-  mipsnbsd_supply_fpreg (regs, -1);
+  mipsnbsd_supply_fpreg (fpregs, -1);
 }
 
 static void
