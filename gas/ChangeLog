@@ -1,3 +1,8 @@
+Thu Jul 24 17:51:29 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* macro.c (define_macro): Make sure the index is in range before
+	checking for '('.
+
 start-sanitize-tic80
 Thu Jul 24 12:13:19 1997  Fred Fish  <fnf@cygnus.com>
 
