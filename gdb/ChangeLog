@@ -1,3 +1,37 @@
+2002-01-05  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* acconfig.h (HAVE_PT_GETXMMREGS): New.
+	* config.in: Regenerate.
+	* configure.in: Update copyright years.
+	Add test for PT_GETXMMREGS supplied by <sys/ptrace.h>.
+	* configure: Regenerate.
+	* i386bsd-nat.c: Update copyright years.
+	(fill_gregset): Use regcache_collect.
+	(fetch_inferior_registers): Only fetch integer registers
+	if requested to do so.  Add support for XMM registers
+	using PT_GETXMMREGS.
+	(store_inferior_registers): Only store integer registers
+	if requested to do so.  Add support for XMM registers
+	using PT_SETXMMREGS.
+	* i386nbsd-nat.c (fetch_inferior_registers): Remove.
+	(store_inferior_registers): Remove.
+	(fetch_core_registers): Use supply_gregset and i387_supply_fsave.
+	(fetch_elfcore_registers): New function.
+	(i386nbsd_elfcore_fns): New.
+	(_initialize_i386nbsd_nat): Register i386nbsd_elfcore_fns.
+	* config/i386/nbsd.mh (NATDEPFILES): Add i387-nat.o and
+	i386bsd-nat.o.
+	* config/i386/nbsdelf.mh (NATDEPFILES): Likewise.
+	* config/i386/nbsd.mt (TDEPFILES): Add i386bsd-nat.o.
+	* config/i386/nbsdelf.mt (TDEPFILES): Likewise.
+	* config/i386/tm-nbsd.h: Update copyright years.
+	(HAVE_SSE_REGS): Define.
+	(IN_SIGTRAMP): Define as i386bsd_in_sigtramp.
+	(SIGTRAMP_START): Redefine as i386bsd_sigtramp_start.
+	(SIGTRAMP_END): Redefine as i386bsd_sigtramp_end.
+	(SIGCONTEXT_PC_OFFSET): Remove.
+	(FRAME_SAVED_PC): Define as i386bsd_frame_saved_pc.
+
 2002-01-05  Andrew Cagney  <ac131313@redhat.com>
 
 	* configure.tgt: Remove powerpc-*-macos* target.

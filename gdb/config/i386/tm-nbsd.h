@@ -1,5 +1,5 @@
 /* Macro definitions for i386 running under NetBSD.
-   Copyright 1994, 1996, 2000 Free Software Foundation, Inc.
+   Copyright 1994, 1996, 2000, 2002 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -22,6 +22,7 @@
 #define TM_NBSD_H
 
 #define HAVE_I387_REGS
+#define HAVE_SSE_REGS
 
 #include "i386/tm-i386.h"
 #include "config/tm-nbsd.h"
@@ -46,13 +47,24 @@ extern int get_longjmp_target (CORE_ADDR *);
 
 /* Support for signal handlers.  */
 
-/* The sigtramp is above the user stack and immediately below the 
-   user area.  Using constants here allows for cross debugging. */
+#define IN_SIGTRAMP(pc, name) i386bsd_in_sigtramp (pc, name)
+extern int i386bsd_in_sigtramp (CORE_ADDR pc, char *name);
 
-#define SIGTRAMP_START(pc)	0xbfbfdf20
-#define SIGTRAMP_END(pc)	0xbfbfdff0
+/* These defines allow the recognition of sigtramps as a function name
+   <sigtramp>.
 
-/* Offset to saved PC in sigcontext, from <sys/signal.h>.  */
-#define SIGCONTEXT_PC_OFFSET 20
+   FIXME: kettenis/2001-07-13: These should be added to the target
+   vector and turned into functions when we go "multi-arch".  */
+
+#define SIGTRAMP_START(pc) i386bsd_sigtramp_start
+#define SIGTRAMP_END(pc) i386bsd_sigtramp_end
+extern CORE_ADDR i386bsd_sigtramp_start;
+extern CORE_ADDR i386bsd_sigtramp_end;
+
+/* Override FRAME_SAVED_PC to enable the recognition of signal handlers.  */
+
+#undef FRAME_SAVED_PC
+#define FRAME_SAVED_PC(frame) i386bsd_frame_saved_pc (frame)
+extern CORE_ADDR i386bsd_frame_saved_pc (struct frame_info *frame);
 
 #endif /* TM_NBSD_H */

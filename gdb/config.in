@@ -160,6 +160,9 @@
 /* Define if <sys/ptrace.h> defines the PT_GETDBREGS request.  */
 #undef HAVE_PT_GETDBREGS
 
+/* Define if <sys/ptrace.h> defines the PT_GETXMMREGS request.  */
+#undef HAVE_PT_GETXMMREGS
+
 /* Define if gnu-regex.c included with GDB should be used. */
 #undef USE_INCLUDED_REGEX
 
@@ -343,11 +346,11 @@
 /* Define if you have the <sys/file.h> header file.  */
 #undef HAVE_SYS_FILE_H
 
-/* Define if you have the <sys/ioctl.h> header file.  */
-#undef HAVE_SYS_IOCTL_H
-
 /* Define if you have the <sys/filio.h> header file.  */
 #undef HAVE_SYS_FILIO_H
+
+/* Define if you have the <sys/ioctl.h> header file.  */
+#undef HAVE_SYS_IOCTL_H
 
 /* Define if you have the <sys/ndir.h> header file.  */
 #undef HAVE_SYS_NDIR_H

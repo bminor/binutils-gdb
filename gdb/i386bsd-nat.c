@@ -1,5 +1,5 @@
 /* Native-dependent code for modern i386 BSD's.
-   Copyright 2000, 2001 Free Software Foundation, Inc.
+   Copyright 2000, 2001, 2002 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -96,6 +96,16 @@ static int reg_offset[] =
 
 #define REG_ADDR(regset, regno) ((char *) (regset) + reg_offset[regno])
 
+/* Macro to determine if a register is fetched with PT_GETREGS.  */
+#define GETREGS_SUPPLIES(regno) \
+  ((0 <= (regno) && (regno) <= 15))
+
+#ifdef HAVE_PT_GETXMMREGS
+/* Set to 1 if the kernel supports PT_GETXMMREGS.  Initialized to -1
+   so that we try PT_GETXMMREGS the first time around.  */
+static int have_ptrace_xmmregs = -1;
+#endif
+
 /* Return nonzero if we shouldn't try to fetch register REGNO.  */
 
 static int
@@ -135,8 +145,7 @@ fill_gregset (gregset_t *gregsetp, int regno)
 
   for (i = 0; i < NUM_GREGS; i++)
     if ((regno == -1 || regno == i) && ! CANNOT_STORE_REGISTER (i))
-      memcpy (REG_ADDR (gregsetp, i), &registers[REGISTER_BYTE (i)],
-	      REGISTER_RAW_SIZE (i));
+      regcache_collect (i, REG_ADDR (gregsetp, i));
 }
 
 #include "i387-nat.h"
@@ -166,23 +175,48 @@ fill_fpregset (fpregset_t *fpregsetp, int regno)
 void
 fetch_inferior_registers (int regno)
 {
-  gregset_t gregs;
 
-  if (ptrace (PT_GETREGS, PIDGET (inferior_ptid),
-              (PTRACE_ARG3_TYPE) &gregs, 0) == -1)
-    perror_with_name ("Couldn't get registers");
+  if (regno == -1 || GETREGS_SUPPLIES (regno))
+    {
+      gregset_t gregs;
 
-  supply_gregset (&gregs);
+      if (ptrace (PT_GETREGS, PIDGET (inferior_ptid),
+		  (PTRACE_ARG3_TYPE) &gregs, 0) == -1)
+	perror_with_name ("Couldn't get registers");
+
+      supply_gregset (&gregs);
+      if (regno != -1)
+	return;
+    }
 
   if (regno == -1 || regno >= FP0_REGNUM)
     {
       fpregset_t fpregs;
+#ifdef HAVE_PT_GETXMMREGS
+      char xmmregs[512];
 
+      if (have_ptrace_xmmregs != 0 &&
+	  ptrace(PT_GETXMMREGS, PIDGET (inferior_ptid),
+		 (PTRACE_ARG3_TYPE) xmmregs, 0) == 0)
+	{
+	  have_ptrace_xmmregs = 1;
+	  i387_supply_fxsave (xmmregs);
+	}
+      else
+	{
+          if (ptrace (PT_GETFPREGS, PIDGET (inferior_ptid),
+		      (PTRACE_ARG3_TYPE) &fpregs, 0) == -1)
+	    perror_with_name ("Couldn't get floating point status");
+
+	  supply_fpregset (&fpregs);
+	}
+#else
       if (ptrace (PT_GETFPREGS, PIDGET (inferior_ptid),
 		  (PTRACE_ARG3_TYPE) &fpregs, 0) == -1)
 	perror_with_name ("Couldn't get floating point status");
 
       supply_fpregset (&fpregs);
+#endif
     }
 }
 
@@ -192,31 +226,59 @@ fetch_inferior_registers (int regno)
 void
 store_inferior_registers (int regno)
 {
-  gregset_t gregs;
 
-  if (ptrace (PT_GETREGS, PIDGET (inferior_ptid),
-              (PTRACE_ARG3_TYPE) &gregs, 0) == -1)
-    perror_with_name ("Couldn't get registers");
+  if (regno == -1 || GETREGS_SUPPLIES (regno))
+    {
+      gregset_t gregs;
 
-  fill_gregset (&gregs, regno);
+      if (ptrace (PT_GETREGS, PIDGET (inferior_ptid),
+                  (PTRACE_ARG3_TYPE) &gregs, 0) == -1)
+        perror_with_name ("Couldn't get registers");
 
-  if (ptrace (PT_SETREGS, PIDGET (inferior_ptid),
-	      (PTRACE_ARG3_TYPE) &gregs, 0) == -1)
-    perror_with_name ("Couldn't write registers");
+      fill_gregset (&gregs, regno);
+
+      if (ptrace (PT_SETREGS, PIDGET (inferior_ptid),
+	          (PTRACE_ARG3_TYPE) &gregs, 0) == -1)
+        perror_with_name ("Couldn't write registers");
+
+      if (regno != -1)
+	return;
+    }
 
   if (regno == -1 || regno >= FP0_REGNUM)
     {
       fpregset_t fpregs;
+#ifdef HAVE_PT_GETXMMREGS
+      char xmmregs[512];
 
-      if (ptrace (PT_GETFPREGS, PIDGET (inferior_ptid),
-		  (PTRACE_ARG3_TYPE) &fpregs, 0) == -1)
-	perror_with_name ("Couldn't get floating point status");
+      if (have_ptrace_xmmregs != 0 &&
+	  ptrace(PT_GETXMMREGS, PIDGET (inferior_ptid),
+		 (PTRACE_ARG3_TYPE) xmmregs, 0) == 0)
+	{
+	  have_ptrace_xmmregs = 1;
 
-      fill_fpregset (&fpregs, regno);
+	  i387_fill_fxsave (xmmregs, regno);
+
+	  if (ptrace (PT_SETXMMREGS, PIDGET (inferior_ptid),
+		      (PTRACE_ARG3_TYPE) xmmregs, 0) == -1)
+            perror_with_name ("Couldn't write XMM registers");
+	}
+      else
+	{
+	  have_ptrace_xmmregs = 0;
+#endif
+          if (ptrace (PT_GETFPREGS, PIDGET (inferior_ptid),
+		      (PTRACE_ARG3_TYPE) &fpregs, 0) == -1)
+	    perror_with_name ("Couldn't get floating point status");
+
+          fill_fpregset (&fpregs, regno);
   
-      if (ptrace (PT_SETFPREGS, PIDGET (inferior_ptid),
-		  (PTRACE_ARG3_TYPE) &fpregs, 0) == -1)
-	perror_with_name ("Couldn't write floating point status");
+          if (ptrace (PT_SETFPREGS, PIDGET (inferior_ptid),
+		      (PTRACE_ARG3_TYPE) &fpregs, 0) == -1)
+	    perror_with_name ("Couldn't write floating point status");
+#ifdef HAVE_PT_GETXMMREGS
+        }
+#endif
     }
 }
 
