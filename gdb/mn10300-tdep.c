@@ -30,6 +30,7 @@
 #include "gdbcore.h"
 #include "symfile.h"
 #include "regcache.h"
+#include "arch-utils.h"
 
 extern void _initialize_mn10300_tdep (void);
 static CORE_ADDR mn10300_analyze_prologue (struct frame_info *fi,
@@ -727,12 +728,11 @@ mn10300_push_return_address (CORE_ADDR pc, CORE_ADDR sp)
    Store the structure value return address for an inferior function
    call.  */
 
-CORE_ADDR
+void
 mn10300_store_struct_return (CORE_ADDR addr, CORE_ADDR sp)
 {
   /* The structure return address is passed as the first argument.  */
   write_register (0, addr);
-  return sp;
 }
 
 /* Function: frame_saved_pc 
@@ -777,7 +777,7 @@ mn10300_frame_saved_pc (struct frame_info *fi)
    pointer just prior to calling the target function (see run_stack_dummy).  */
 
 void
-mn10300_init_extra_frame_info (struct frame_info *fi)
+mn10300_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 {
   if (fi->next)
     fi->pc = FRAME_SAVED_PC (fi->next);
@@ -791,6 +791,14 @@ mn10300_init_extra_frame_info (struct frame_info *fi)
 
   mn10300_analyze_prologue (fi, 0);
 }
+
+
+/* This function's job is handled by init_extra_frame_info.  */
+void
+mn10300_frame_init_saved_regs (struct frame_info *frame)
+{
+}
+
 
 /* Function: mn10300_virtual_frame_pointer
    Return the register that the function uses for a frame pointer, 
@@ -944,6 +952,7 @@ static struct gdbarch *
 mn10300_gdbarch_init (struct gdbarch_info info,
 		      struct gdbarch_list *arches)
 {
+  static LONGEST mn10300_call_dummy_words[] = { 0 };
   struct gdbarch *gdbarch;
   struct gdbarch_tdep *tdep = NULL;
   int am33_mode;
@@ -1000,6 +1009,44 @@ mn10300_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_save_dummy_frame_tos (gdbarch, generic_save_dummy_frame_tos);
   set_gdbarch_num_regs (gdbarch, num_regs);
   set_gdbarch_do_registers_info (gdbarch, mn10300_do_registers_info);
+
+  set_gdbarch_fp_regnum (gdbarch, 31);
+  set_gdbarch_max_register_virtual_size (gdbarch, 4);
+  set_gdbarch_register_bytes (gdbarch, 
+                              num_regs * gdbarch_register_size (gdbarch));
+  set_gdbarch_breakpoint_from_pc (gdbarch, mn10300_breakpoint_from_pc);
+  set_gdbarch_function_start_offset (gdbarch, 0);
+  set_gdbarch_decr_pc_after_break (gdbarch, 0);
+  set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
+  set_gdbarch_frame_chain_valid (gdbarch, generic_file_frame_chain_valid);
+  set_gdbarch_saved_pc_after_call (gdbarch, mn10300_saved_pc_after_call);
+  set_gdbarch_init_extra_frame_info (gdbarch, mn10300_init_extra_frame_info);
+  set_gdbarch_frame_init_saved_regs (gdbarch, mn10300_frame_init_saved_regs);
+  set_gdbarch_frame_chain (gdbarch, mn10300_frame_chain);
+  set_gdbarch_frame_saved_pc (gdbarch, mn10300_frame_saved_pc);
+  set_gdbarch_extract_return_value (gdbarch, mn10300_extract_return_value);
+  set_gdbarch_extract_struct_value_address
+    (gdbarch, mn10300_extract_struct_value_address);
+  set_gdbarch_store_return_value (gdbarch, mn10300_store_return_value);
+  set_gdbarch_store_struct_return (gdbarch, mn10300_store_struct_return);
+  set_gdbarch_skip_prologue (gdbarch, mn10300_skip_prologue);
+  set_gdbarch_frame_args_skip (gdbarch, 0);
+  set_gdbarch_frame_args_address (gdbarch, default_frame_address);
+  set_gdbarch_frame_locals_address (gdbarch, default_frame_address);
+  set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
+  /* That's right, we're using the stack pointer as our frame pointer.  */
+  set_gdbarch_read_fp (gdbarch, generic_target_read_sp);
+  set_gdbarch_call_dummy_location (gdbarch, AT_ENTRY_POINT);
+  set_gdbarch_call_dummy_address (gdbarch, entry_point_address);
+  set_gdbarch_call_dummy_words (gdbarch, mn10300_call_dummy_words);
+  set_gdbarch_sizeof_call_dummy_words (gdbarch, 
+                                       sizeof (mn10300_call_dummy_words));
+  set_gdbarch_call_dummy_length (gdbarch, 0);
+  set_gdbarch_fix_call_dummy (gdbarch, generic_fix_call_dummy);
+  set_gdbarch_call_dummy_start_offset (gdbarch, 0);
+  set_gdbarch_pc_in_call_dummy (gdbarch, generic_pc_in_call_dummy);
+  set_gdbarch_push_dummy_frame (gdbarch, generic_push_dummy_frame);
+  set_gdbarch_use_struct_convention (gdbarch, mn10300_use_struct_convention);
 
   tdep->am33_mode = am33_mode;
 
