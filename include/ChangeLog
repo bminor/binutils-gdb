@@ -1,3 +1,10 @@
+Thu Oct 15 21:43:22 1992  K. Richard Pixley  (rich@sendai.cygnus.com)
+
+	* demangle.h (AUTO_DEMANGLING, GNU_DEMANGLING,
+	  LUCID_DEMANGLING): ultrix compilers require enums to be
+	  enums and ints to be ints and casts where they meet.  cast some
+	  enums into ints.
+
 Thu Oct 15 04:35:51 1992  John Gilmore  (gnu@cygnus.com)
 
 	* bfd.h:  Update after comment changes.
