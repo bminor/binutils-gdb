@@ -1,3 +1,9 @@
+2004-06-24  Alexandre Oliva  <aoliva@redhat.com>
+
+	2004-06-17  Alexandre Oliva  <aoliva@redhat.com>
+	* band.s, biand.s: imm3_abs16 is not available on h8300h.
+	* bset.s: Likewise.  Ditto for rn_abs32.
+
 2003-07-22  Michael Snyder  <msnyder@redhat.com>
 
 	* cmpw.s: Add test for less-than-zero immediate.
