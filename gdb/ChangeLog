@@ -1,3 +1,13 @@
+2001-06-07  Keith Seitz  <keiths@redhat.com>
+
+	* gdb-events.sh: Make if statements and tests
+	a little more portable.
+	Don't use shell's echo command to put strings containing
+	escaped characeters into a file -- different flavors of /bin/sh
+	require differnt levels of escaping. Use cat <<EOF instead.
+	Our internal field separator is a colon. Change all
+	commands which assume it is a space.
+
 2001-06-06  Mark Kettenis  <kettenis@gnu.org>
 
 	* lin-lwp.c (struct lwp_info): Add member `resumed'.
