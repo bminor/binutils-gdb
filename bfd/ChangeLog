@@ -1,3 +1,8 @@
+1998-09-10  Geoff Keating  <geoffk@ozemail.com.au>
+
+        * elf32-ppc.c (ppc_elf_relocate_section): If dynobj is NULL,
+        assume there is no PLT or GOT.
+
 Wed Sep  9 14:24:12 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* elf32-arm.c (elf32_arm_find_nearest_line): New function:  just

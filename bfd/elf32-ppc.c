@@ -953,7 +953,7 @@ ppc_elf_reloc_type_lookup (abfd, code)
      bfd *abfd;
      bfd_reloc_code_real_type code;
 {
-  enum ppc_reloc_type ppc_reloc = R_PPC_NONE;
+  enum elf_ppc_reloc_type ppc_reloc = R_PPC_NONE;
 
   if (!ppc_elf_howto_table[R_PPC_ADDR32])
     /* Initialize howto table if needed */
@@ -1431,27 +1431,26 @@ ppc_elf_adjust_dynamic_symbol (info, h)
   if (h->type == STT_FUNC
       || (h->elf_link_hash_flags & ELF_LINK_HASH_NEEDS_PLT) != 0)
     {
-      if (! info->shared
-	  && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) == 0
-	  && (h->elf_link_hash_flags & ELF_LINK_HASH_REF_DYNAMIC) == 0)
+      if (! elf_hash_table (info)->dynamic_sections_created
+	  || ((!info->shared || info->symbolic || h->dynindx == -1)
+	      && (h->elf_link_hash_flags
+		  & ELF_LINK_HASH_DEF_REGULAR) != 0)
+	  || (info->shared && h->plt.refcount <= 0))
 	{
-	  /* This case can occur if we saw a PLT32 reloc in an input
-             file, but the symbol was never referred to by a dynamic
-             object.  In such a case, we don't actually need to build
-             a procedure linkage table, and we can just do a PC32
-             reloc instead.  */
-	  BFD_ASSERT ((h->elf_link_hash_flags & ELF_LINK_HASH_NEEDS_PLT) != 0);
-	  return true;
-	}
+	  /* A PLT entry is not required/allowed when:
 
-      /* GC may have rendered this entry unused.  Note, however, that in
-	 an executable all references to the symbol go to the PLT, so we
-	 can't turn it off in that case.
-	 ??? The correct thing to do here is to reference count all uses
-	 of the symbol, not just those to the GOT or PLT.  */
+	     1. We are not using ld.so; because then the PLT entry
+	     can't be set up, so we can't use one.
 
-      if (h->plt.refcount <= 0 && info->shared)
-	{
+	     2. We know for certain that a symbol is defined in
+	     this object, because this object is the application,
+	     is linked with -Bsymbolic, or because the symbol is local.
+
+	     3. GC has rendered the entry unused.
+	     Note, however, that in an executable all references to the
+	     symbol go to the PLT, so we can't turn it off in that case.
+	     ??? The correct thing to do here is to reference count
+	     all uses of the symbol, not just those to the GOT or PLT.  */
 	  h->plt.offset = (bfd_vma) -1;
 	  h->elf_link_hash_flags &= ~ELF_LINK_HASH_NEEDS_PLT;
 	  return true;
@@ -1860,7 +1859,7 @@ ppc_elf_check_relocs (abfd, info, sec, relocs)
   elf_linker_section_t *sdata;
   elf_linker_section_t *sdata2;
   asection *sreloc;
-  asection *sgot;
+  asection *sgot = NULL;
   asection *srelgot = NULL;
 
   if (info->relocateable)
@@ -1913,6 +1912,22 @@ ppc_elf_check_relocs (abfd, info, sec, relocs)
       else
 	h = sym_hashes[r_symndx - symtab_hdr->sh_info];
 
+      /* If a relocation refers to _GLOBAL_OFFSET_TABLE_, create the .got.
+	 This shows up in particular in an R_PPC_ADDR32 in the eabi
+	 startup code.  */
+      if (h && strcmp (h->root.root.string, "_GLOBAL_OFFSET_TABLE_") == 0)
+	{
+	  if (sgot == NULL)
+	    {
+	      if (dynobj == NULL)
+		elf_hash_table (info)->dynobj = dynobj = abfd;
+	      if (! _bfd_elf_create_got_section (dynobj, info))
+		return false;
+	      sgot = bfd_get_section_by_name (dynobj, ".got");
+	      BFD_ASSERT (sgot != NULL);
+	    }
+	}
+
       switch (ELF32_R_TYPE (rel->r_info))
 	{
 	/* GOT16 relocations */
@@ -1925,11 +1940,9 @@ ppc_elf_check_relocs (abfd, info, sec, relocs)
 	  if (sgot == NULL)
 	    {
 	      if (dynobj == NULL)
-		{
-		  elf_hash_table (info)->dynobj = dynobj = abfd;
-		  if (! _bfd_elf_create_got_section (dynobj, info))
-		    return false;
-		}
+		elf_hash_table (info)->dynobj = dynobj = abfd;
+	      if (! _bfd_elf_create_got_section (dynobj, info))
+		return false;
 	      sgot = bfd_get_section_by_name (dynobj, ".got");
 	      BFD_ASSERT (sgot != NULL);
 	    }
@@ -2720,8 +2733,8 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
   Elf_Internal_Rela *rel		  = relocs;
   Elf_Internal_Rela *relend		  = relocs + input_section->reloc_count;
   asection *sreloc			  = NULL;
-  asection *splt                          = NULL;
-  asection *sgot                          = NULL;
+  asection *splt;
+  asection *sgot;
   bfd_vma *local_got_offsets;
   boolean ret				  = true;
   long insn;
@@ -2739,9 +2752,16 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 
   local_got_offsets = elf_local_got_offsets (input_bfd);
 
+  splt = sgot = NULL;
+  if (dynobj != NULL)
+    {
+      splt = bfd_get_section_by_name (dynobj, ".plt");
+      sgot = bfd_get_section_by_name (dynobj, ".got");
+    }
+
   for (; rel < relend; rel++)
     {
-      enum ppc_reloc_type r_type	= (enum ppc_reloc_type)ELF32_R_TYPE (rel->r_info);
+      enum elf_ppc_reloc_type r_type	= (enum ppc_reloc_type)ELF32_R_TYPE (rel->r_info);
       bfd_vma offset			= rel->r_offset;
       bfd_vma addend			= rel->r_addend;
       bfd_reloc_status_type r		= bfd_reloc_other;
@@ -3126,11 +3146,7 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	case (int)R_PPC_GOT16_HA:
 	  /* Relocation is to the entry for this symbol in the global
              offset table.  */
-	  if (sgot == NULL)
-	    {
-	      sgot = bfd_get_section_by_name (dynobj, ".got");
-	      BFD_ASSERT (sgot != NULL);
-	    }
+	  BFD_ASSERT (sgot != NULL);
 
 	  if (h != NULL)
 	    {
@@ -3248,18 +3264,13 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
              procedure linkage table.  */
 	  BFD_ASSERT (h != NULL);
 
-	  if (h->plt.offset == (bfd_vma) -1)
+	  if (h->plt.offset == (bfd_vma) -1
+	      || splt == NULL)
 	    {
 	      /* We didn't make a PLT entry for this symbol.  This
                  happens when statically linking PIC code, or when
                  using -Bsymbolic.  */
 	      break;
-	    }
-
-	  if (splt == NULL)
-	    {
-	      splt = bfd_get_section_by_name (dynobj, ".plt");
-	      BFD_ASSERT (splt != NULL);
 	    }
 
 	  relocation = (splt->output_section->vma
@@ -3269,46 +3280,53 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	/* relocate against _SDA_BASE_ */
 	case (int)R_PPC_SDAREL16:
-	  BFD_ASSERT (sec != (asection *)0);
-	  if (strcmp (bfd_get_section_name (abfd, sec), ".sdata") != 0
-	      && strcmp (bfd_get_section_name (abfd, sec), ".dynsbss") != 0
-	      && strcmp (bfd_get_section_name (abfd, sec), ".sbss") != 0)
-	    {
-	      (*_bfd_error_handler) (_("%s: The target (%s) of a %s relocation is in the wrong section (%s)"),
-				     bfd_get_filename (input_bfd),
-				     sym_name,
-				     ppc_elf_howto_table[ (int)r_type ]->name,
-				     bfd_get_section_name (abfd, sec));
+	  {
+	    const char *name;
 
-	      bfd_set_error (bfd_error_bad_value);
-	      ret = false;
-	      continue;
-	    }
-	  addend -= (sdata->sym_hash->root.u.def.value
-		     + sdata->sym_hash->root.u.def.section->output_section->vma
-		     + sdata->sym_hash->root.u.def.section->output_offset);
+	    BFD_ASSERT (sec != (asection *)0);
+	    name = bfd_get_section_name (abfd, sec->output_section);
+	    if (strcmp (name, ".sdata") != 0
+		&& strcmp (name, ".dynsbss") != 0
+		&& strcmp (name, ".sbss") != 0)
+	      {
+		(*_bfd_error_handler) (_("%s: The target (%s) of a %s relocation is in the wrong output section (%s)"),
+				       bfd_get_filename (input_bfd),
+				       sym_name,
+				       ppc_elf_howto_table[ (int)r_type ]->name,
+				       name);
+		
+		bfd_set_error (bfd_error_bad_value);
+		ret = false;
+		continue;
+	      }
+	    addend -= (sdata->sym_hash->root.u.def.value
+		       + sec->output_section->vma);
+	  }
 	  break;
 
 
 	/* relocate against _SDA2_BASE_ */
 	case (int)R_PPC_EMB_SDA2REL:
-	  BFD_ASSERT (sec != (asection *)0);
-	  if (strcmp (bfd_get_section_name (abfd, sec), ".sdata2") != 0
-	      && strcmp (bfd_get_section_name (abfd, sec), ".sbss2") != 0)
-	    {
-	      (*_bfd_error_handler) (_("%s: The target (%s) of a %s relocation is in the wrong section (%s)"),
-				     bfd_get_filename (input_bfd),
-				     sym_name,
-				     ppc_elf_howto_table[ (int)r_type ]->name,
-				     bfd_get_section_name (abfd, sec));
+	  {
+	    const char *name;
 
-	      bfd_set_error (bfd_error_bad_value);
-	      ret = false;
-	      continue;
-	    }
-	  addend -= (sdata2->sym_hash->root.u.def.value
-		     + sdata2->sym_hash->root.u.def.section->output_section->vma
-		     + sdata2->sym_hash->root.u.def.section->output_offset);
+	    BFD_ASSERT (sec != (asection *)0);
+	    name = bfd_get_section_name (abfd, sec->output_section);
+	    if (strcmp (name, ".sdata2") != 0 && strcmp (name, ".sbss2") != 0)
+	      {
+		(*_bfd_error_handler) (_("%s: The target (%s) of a %s relocation is in the wrong output section (%s)"),
+				       bfd_get_filename (input_bfd),
+				       sym_name,
+				       ppc_elf_howto_table[ (int)r_type ]->name,
+				       name);
+		
+		bfd_set_error (bfd_error_bad_value);
+		ret = false;
+		continue;
+	      }
+	    addend -= (sdata2->sym_hash->root.u.def.value
+		       + sec->output_section->vma);
+	  }
 	  break;
 
 
@@ -3316,24 +3334,23 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	case (int)R_PPC_EMB_SDA21:
 	case (int)R_PPC_EMB_RELSDA:
 	  {
-	    const char *name = bfd_get_section_name (abfd, sec);
+	    const char *name;
 	    int reg;
 
 	    BFD_ASSERT (sec != (asection *)0);
+	    name = bfd_get_section_name (abfd, sec->output_section);
 	    if (strcmp (name, ".sdata") == 0 || strcmp (name, ".sbss") == 0)
 	      {
 		reg = 13;
 		addend -= (sdata->sym_hash->root.u.def.value
-			   + sdata->sym_hash->root.u.def.section->output_section->vma
-			   + sdata->sym_hash->root.u.def.section->output_offset);
+			   + sec->output_section->vma);
 	      }
 
 	    else if (strcmp (name, ".sdata2") == 0 || strcmp (name, ".sbss2") == 0)
 	      {
 		reg = 2;
 		addend -= (sdata2->sym_hash->root.u.def.value
-			   + sdata2->sym_hash->root.u.def.section->output_section->vma
-			   + sdata2->sym_hash->root.u.def.section->output_offset);
+			   + sec->output_section->vma);
 	      }
 
 	    else if (strcmp (name, ".PPC.EMB.sdata0") == 0 || strcmp (name, ".PPC.EMB.sbss0") == 0)
@@ -3343,11 +3360,11 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	    else
 	      {
-		(*_bfd_error_handler) (_("%s: The target (%s) of a %s relocation is in the wrong section (%s)"),
+		(*_bfd_error_handler) (_("%s: The target (%s) of a %s relocation is in the wrong output section (%s)"),
 				       bfd_get_filename (input_bfd),
 				       sym_name,
 				       ppc_elf_howto_table[ (int)r_type ]->name,
-				       bfd_get_section_name (abfd, sec));
+				       name);
 
 		bfd_set_error (bfd_error_bad_value);
 		ret = false;
