@@ -1,3 +1,7 @@
+2003-02-03  Michael Snyder  <msnyder@redhat.com>
+
+	* arm-tdep.c: Fix spell-o in comment.
+
 2003-02-03  Michal Ludvig  <mludvig@suse.cz>
 
 	* dwarf2cfi.c (pointer_encoding): Added new parameter.
