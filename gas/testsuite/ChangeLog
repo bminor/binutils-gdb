@@ -1,3 +1,14 @@
+Wed Aug 12 13:25:38 1998  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	* gas/i386/white.l: Expect warning for stand-alone ss prefix.
+
+start-sanitize-m32rx
+Tue Jul 28 10:11:22 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* gas/m32r/m32rx.s: Test new insns.
+	* gas/m32r/m32rx.d: Ditto.
+
+end-sanitize-m32rx
 start-sanitize-am33
 Thu Jul 23 09:22:09 1998  Jeffrey A Law  (law@cygnus.com)
 
@@ -414,14 +425,14 @@ Mon Mar  2 13:30:40 1998  Doug Evans  <devans@seba.cygnus.com>
 	(ldi16): Improve test.
 	(nop): Fix test.
 
-start-sanitize-vr5400
+start-sanitize-cygnus
 Mon Feb 23 10:31:05 1998  Jeffrey A Law  (law@cygnus.com)
 
         * gas/mips/vr5400.s: Use absolute expression for performance
         register number.
 	* gas/mips/vr5400.d: Corresponding changes.
 
-end-sanitize-vr5400
+end-sanitize-cygnus
 start-sanitize-r5900
 Mon Feb 23 10:31:05 1998  Jeffrey A Law  (law@cygnus.com)
 
@@ -625,21 +636,21 @@ Tue Dec 16 12:54:30 1997  Jeffrey A Law  (law@cygnus.com)
 	* gas/mips/mips.exp: Run r5900 tests too.
 
 end-sanitize-r5900
-start-sanitize-vr5400
+start-sanitize-cygnus
 Mon Dec 15 10:34:15 1997  Jeffrey A Law  (law@cygnus.com)
 
         * gas/mips/vr5400.s: Tweak mfpc, mtpc, mfps, mfps, and mtps for
         better testing coverage.
         * gas/mips/vr5400.d: Corresponding changes.
 
-end-sanitize-vr5400
+end-sanitize-cygnus
 start-sanitize-tx49
 Thu Dec 11 09:23:05 1997  Gavin Koch  <gavin@cygnus.com>
 
 	* gas/mips/mips.exp: Don't run the mips16 test for tx49.
 
 end-sanitize-tx49
-start-sanitize-vr5400
+start-sanitize-cygnus
 Tue Dec  9 13:19:58 1997  Jeffrey A Law  (law@cygnus.com)
 
         * gas/mips/vr5400.d: Minor tweaks for more accurate matching.
@@ -650,7 +661,7 @@ Fri Nov  7 21:32:01 1997  Ken Raeburn  <raeburn@cygnus.com>
 	VR5400-specific instructions.
 	* gas/mips/mips.exp: Run it.
 
-end-sanitize-vr5400
+end-sanitize-cygnus
 	* gas/ieee-fp/x930509a.exp: Don't run IEEE FP tests for Vax
 	targets.
 
