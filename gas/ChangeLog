@@ -1,5 +1,9 @@
 2002-12-13  Alan Modra  <amodra@bigpond.net.au>
 
+	* config/e-criself.c: Fix typo in last change.
+
+2002-12-13  Alan Modra  <amodra@bigpond.net.au>
+
 	* write.c (write_object_file): Fix signed/unsigned warning.
 	* config/e-crisaout.c (crisaout_bfd_name): Prototype.
 	* config/e-criself.c (criself_bfd_name): Prototype.
@@ -379,8 +383,8 @@
 	* macro.h: Update prototypes to remove comment_char parameter.
 	Fix formatting.
 	* read.c (read_a_source_file, s_irp): Remove comment_char
-	parameter from invocation of functions in macro.c	
-	
+	parameter from invocation of functions in macro.c
+
 2002-12-02  Hans-Peter Nilsson  <hp@axis.com>
 
 	* read.c (emit_expr) [!WORKING_DOT_WORD]: Initialize x->use_jump.
