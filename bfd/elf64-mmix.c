@@ -2226,8 +2226,12 @@ bpo_reloc_request_sort_fn (p1, p2)
   if (r1->value != r2->value)
     return r1->value > r2->value ? 1 : -1;
 
-  /* As a last re-sort, use the address so we get a stable sort.  */
-  return r1 > r2 ? 1 : (r1 < r2 ? -1 : 0);
+  /* As a last re-sort, use the relocation number, so we get a stable
+     sort.  The *addresses* aren't stable since items are swapped during
+     sorting.  It depends on the qsort implementation if this actually
+     happens.  */
+  return r1->bpo_reloc_no > r2->bpo_reloc_no
+    ? 1 : (r1->bpo_reloc_no < r2->bpo_reloc_no ? -1 : 0);
 }
 
 /* For debug use only.  Dumps the global register allocations resulting

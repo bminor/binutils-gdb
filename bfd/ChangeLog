@@ -1,3 +1,8 @@
+2002-06-16  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* elf64-mmix.c (bpo_reloc_request_sort_fn): Use member
+	bpo_reloc_no to break sort order ties, not address of items.
+
 2002-06-16  John David Anglin  <dave@hiauly1.hia.nrc.ca>
 
 	* elf-hppa.h (elf_hppa_final_link): Fix formatting in comment.
