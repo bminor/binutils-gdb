@@ -1,3 +1,10 @@
+start-sanitize-m32rx
+Wed Feb 18 18:11:42 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-m32r.c (first_writes_to_seconds_operands): Special
+	handling of updates to the condition bit as this is shadow by
+	several registers.
+end-sanitize-m32rx
 start-sanitize-sky
 Wed Feb 18 15:49:56 1998  Doug Evans  <devans@canuck.cygnus.com>
 
