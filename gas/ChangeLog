@@ -1,3 +1,26 @@
+Mon Feb 13 14:44:32 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-sparc.h (tc_fix_adjustable): Define if OBJ_ELF.
+	* config/tc-sparc.c (md_apply_fix): If OBJ_ELF, subtract out the
+	value of a defined symbol; the value was added in by
+	fixup_segment.  This was previously corrected, if the reloc was
+	changed to be against a section symbol, in tc_gen_reloc.
+
+start-sanitize-arc
+Mon Feb 13 10:02:35 1995  Doug Evans  <dje@canuck.cygnus.com>
+
+	* config/tc-arc.h (TC_PARSE_CONS_EXPRESSION): Define.
+	(TC_CONS_FIX_NEW): Define.
+	* config/tc-arc.c (get_arc_exp_operand_type): New function.
+	(init_opcode_tables): Insert registers into global symbol table.
+	(md_assemble): Call `expression' to parse all expressions.
+	Call `get_arc_exp_operand_type'.
+	(md_operand): Recognize %st(foo).
+	(arc_parse_cons_expression): New function.
+	(arc_cons_fix_new): New function.
+	(md_apply_fix): Handle new reloc BFD_RELOC_ARC_B26.
+end-sanitize-arc
+
 Fri Feb 10 14:04:04 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-i386.c (tc_i386_fix_adjustable): Use S_IS_EXTERN
