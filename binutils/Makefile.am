@@ -398,9 +398,6 @@ objdump.o: objdump.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/getopt.h $(INCDIR)/progress.h bucomm.h config.h \
   $(INCDIR)/fopen-same.h $(INCDIR)/dis-asm.h $(INCDIR)/libiberty.h \
   $(INCDIR)/demangle.h debug.h budbg.h $(INCDIR)/aout/aout64.h
-readelf.o: readelf.c $(INCDIR)/ansidecl.h ./readelf.h \
-  $(INCDIR)/progress.h config.h $(INCDIR)/fopen-same.h ../bfd/bfd.h \
-  $(INCDIR)/getopt.h $(INCDIR)/libiberty.h $(INCDIR)/elf/common.h
 prdbg.o: prdbg.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   bucomm.h config.h $(INCDIR)/fopen-same.h $(INCDIR)/libiberty.h \
   debug.h budbg.h
@@ -444,6 +441,10 @@ rescoff.o: rescoff.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
 resbin.o: resbin.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   bucomm.h config.h $(INCDIR)/fopen-same.h $(INCDIR)/libiberty.h \
   windres.h
+readelf.o: readelf.c readelf.h ../bfd/bfd.h $(INCDIR)/ansidecl.h \
+  $(INCDIR)/elf/common.h $(INCDIR)/elf/ppc.h $(INCDIR)/elf/m32r.h \
+  $(INCDIR)/elf/mips.h bucomm.h config.h $(INCDIR)/fopen-same.h \
+  $(INCDIR)/getopt.h
 underscore.o: underscore.c
 arparse.o: arparse.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   bucomm.h config.h $(INCDIR)/fopen-same.h arsup.h
