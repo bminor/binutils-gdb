@@ -1,3 +1,7 @@
+2000-11-28  Hans-Peter Nilsson  <hp@axis.com>
+
+	* binutils-all/readelf.s: Adjust to readelf.c formatting changes.
+
 2000-11-02  Chris Demetriou  <cgd@sibyte.com>
 
         * binutils-all/readelf.exp (regexp_diff): Add code
