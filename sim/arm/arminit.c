@@ -157,6 +157,11 @@ ARMul_SelectProcessor (ARMul_State * state, unsigned properties)
   state->is_v5 = (properties & ARM_v5_Prop) ? HIGH : LOW;
   state->is_v5e = (properties & ARM_v5e_Prop) ? HIGH : LOW;
   state->is_XScale = (properties & ARM_XScale_Prop) ? HIGH : LOW;
+  state->is_ep9312 = (properties & ARM_ep9312_Prop) ? HIGH : LOW;
+
+  /* Only initialse the coprocessor support once we
+     know what kind of chip we are dealing with.  */
+  ARMul_CoProInit (state);
 }
 
 /***************************************************************************\

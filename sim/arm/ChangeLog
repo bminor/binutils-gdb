@@ -1,3 +1,27 @@
+2003-02-10  Nick Clifton  <nickc@redhat.com>
+
+	* Contribute support for Cirrus Maverick ARM co-processor,
+        written by Aldy Hernandez  <aldyh@redhat.com> and
+        Andrew Cagney  <cagney@redhat.com>:
+
+	* maverick.c: New file: Support for Maverick floating point
+	co-processor. 
+        * Makefile.in: Add maverick.o target.
+        * configure.in (COPRO): Add maverick.o.
+        * configure: Regenerate.
+        * armcopro.c (ARMul_CoProInit): Only initialise co-processors
+	available on target processor.  Add code to initialse Maverick
+	co-processor support code.
+        * armdefs.h (ARMul_state): Add is_ep9312 field.
+        (ARM_ep9312_Prop): Define.
+        * armemu.h: Add prototypes for Maverick co-processor
+	functions.
+        * arminit.c (ARMul_SelectProcessor): Initialise the
+	co-processor support once the chip has been selected.
+        * wrapper.c: Add support for Maverick co-processor.
+        (init): Do not call ARMul_CoProInit.  Delays this until the
+	chip has been selected.
+
 2003-03-02  Nick Clifton  <nickc@redhat.com>
 
 	* armos.c (SWIWrite0): Catch big-endian bug when printing
