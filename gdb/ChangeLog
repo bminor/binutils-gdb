@@ -1,5 +1,12 @@
 2002-04-21  Jason Thorpe  <thorpej@wasabisystems.com>
 
+	* alpha-linux-tdep.c: New file.  Move alpha_linux_sigtramp_offset
+	to here...
+	* alpha-tdep.c: ...from here.
+	* config/alpha/alpha-linux.mt (TDEPFILES): Add alpha-linux-tdep.o.
+
+2002-04-21  Jason Thorpe  <thorpej@wasabisystems.com>
+
 	* config/alpha/tm-alpha.h: Move alpha_software_single_step
 	prototype from here...
 	* alpha-tdep.h: ...to here.
