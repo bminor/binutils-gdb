@@ -1082,8 +1082,12 @@ values, you can use @samp{show} with no arguments; you may also use
 @c FIXME: "info set" violates the rule that "info" is for state of
 @c FIXME...program.  Ck w/ GNU: "info set" to be called something else,
 @c FIXME...or change desc of rule---eg "state of prog and debugging session"?
+@end table
 
+Here are three miscellaneous @samp{show} subcommands, all of which are
+exceptional in lacking corresponding @samp{set} commands:
 
+@table @code
 @kindex show version
 @item show version
 Show what version of _GDBN__ is running.  You should include this
@@ -1093,8 +1097,13 @@ of _GDBN__ you're running; as _GDBN__ evolves, new commands are
 introduced, and old ones may wither away.  The version number is also
 announced when you start _GDBN__ with no arguments.
 
-This @samp{show} subcommand is one of those with no corresponding
-@samp{set} subcommand.
+@kindex show copying
+@item show copying
+Display information about permission for copying _GDBN__.
+
+@kindex show warranty
+@item show warranty
+Display the GNU ``NO WARRANTY'' statement.
 @end table
 
 @node Running,,,
