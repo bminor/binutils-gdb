@@ -1,5 +1,7 @@
 Thu Oct 14 11:40:30 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* gdb.t00/help.exp: Don't test "help set".
+
 	* gdb.t20/inherit.exp, gdb.t22/virtfunc.exp: Remove all xfails
 	from within expect statements.  None of these happen anymore and
 	they cause regressions to be silently unnoticed.
