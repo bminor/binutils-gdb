@@ -1,3 +1,15 @@
+2003-09-14  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* ld-mmix/bpo-1.d, ld-mmix/bpo-10.d, ld-mmix/bpo-11.d,
+	ld-mmix/bpo-14.d, ld-mmix/bpo-16.d, ld-mmix/bpo-17.d,
+	ld-mmix/bpo-18.d, ld-mmix/bpo-19.d, ld-mmix/bpo-2.d,
+	ld-mmix/bpo-22.d, ld-mmix/bpo-3.d, ld-mmix/bpo-4.d,
+	ld-mmix/bpo-5.d, ld-mmix/bpo-6.d, ld-mmix/bpo-9.d,
+	ld-mmix/greg-19.d, ld-mmix/loc1.d, ld-mmix/loc2.d, ld-mmix/loc3.d,
+	ld-mmix/loc4.d, ld-mmix/loc6.d, ld-mmix/local12.d,
+	ld-mmix/locdo-1.d, ld-mmix/loct-1.d, ld-mmix/locto-1.d: Adjust for
+	objdump -d change.
+
 2003-09-11  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-elf/merge2.s: New.
