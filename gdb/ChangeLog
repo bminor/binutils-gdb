@@ -1,5 +1,9 @@
 2002-12-04  David Carlton  <carlton@math.stanford.edu>
 
+	* Makefile.in (f-exp.tab.c): Don't depend on c-exp.tab.c.
+
+2002-12-04  David Carlton  <carlton@math.stanford.edu>
+
 	* symtab.c (lookup_symbol_aux): Move minsym code into a separate
 	function.
 	(lookup_symbol_aux_minsyms): New function.
