@@ -2381,15 +2381,18 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	      /* This symbol is local, or marked to become local.  */
 	      relocate = TRUE;
 	      if (globals->symbian_p)
-		/* On Symbian OS, the data segment and text segement
-		   can be relocated independently.  Therefore, we must
-		   indicate the segment to which this relocation is
-		   relative.  The BPABI allows us to use any symbol in
-		   the right segment; we just use the section symbol
-		   as it is convenient.  (We cannot use the symbol
-		   given by "h" directly as it will not appear in the
-		   dynamic symbol table.)  */
-		symbol = input_section->output_section->target_index;
+		{
+		  /* On Symbian OS, the data segment and text segement
+		     can be relocated independently.  Therefore, we
+		     must indicate the segment to which this
+		     relocation is relative.  The BPABI allows us to
+		     use any symbol in the right segment; we just use
+		     the section symbol as it is convenient.  (We
+		     cannot use the symbol given by "h" directly as it
+		     will not appear in the dynamic symbol table.)  */
+		  symbol = elf_section_data (sym_sec->output_section)->dynindx;
+		  BFD_ASSERT (symbol != 0);
+		}
 	      else
 		/* On SVR4-ish systems, the dynamic loader cannot
 		   relocate the text and data segments independently,

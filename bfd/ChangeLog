@@ -1,3 +1,8 @@
+2004-11-11  Mark Mitchell  <mark@codesourcery.com>
+
+	* elf32-arm.c (elf32_arm_final_link_relocate): Correct logic for
+	R_ARM_RELATIVE on Symbian OS.
+
 2004-11-09  Mark Mitchell  <mark@codesourcery.com>
 
 	* som.c (som_bfd_print_private_bfd_data): New function.
