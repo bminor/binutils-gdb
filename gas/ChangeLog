@@ -19,6 +19,7 @@ Mon Jan 22 09:21:36 1996  Doug Evans  <dje@charmed.cygnus.com>
 	* configure: Regenerated.
 	* acconfig.h (SPARC_V9): Renamed from sparcv9.
 	(SPARC_ARCH64): Add.
+	* conf.in: Regenerated.
 	* config/vmsconf.h: Update.
 
 Mon Jan 22 17:24:47 1996  James G. Smith  <jsmith@cygnus.co.uk>
