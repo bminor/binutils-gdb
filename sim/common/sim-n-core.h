@@ -62,10 +62,13 @@ sim_core_trace_M (sim_cpu *cpu,
 {
   char *transfer = (type == read_transfer ? "read" : "write");
   char *direction = (type == read_transfer ? "->" : "<-");
+
+  if (TRACE_DEBUG_P (cpu))
+    trace_printf (CPU_STATE (cpu), cpu, "sim-n-core.h:%d: ", line_nr);
+
 #if (M == 16)
   trace_printf (CPU_STATE (cpu), cpu,
-		"sim-n-core.h:%d: %s-%d %s:0x%08lx %s 0x%08lx%08lx%08lx%08lx\n",
-		line_nr,
+		"%s-%d %s:0x%08lx %s 0x%08lx%08lx%08lx%08lx\n",
 		transfer, nr_bytes,
 		sim_core_map_to_str (map),
 		(unsigned long) addr,
@@ -77,8 +80,7 @@ sim_core_trace_M (sim_cpu *cpu,
 #endif
 #if (M == 8)
   trace_printf (CPU_STATE (cpu), cpu,
-		"sim-n-core.h:%d: %s-%d %s:0x%08lx %s 0x%08lx%08lx\n",
-		line_nr,
+		"%s-%d %s:0x%08lx %s 0x%08lx%08lx\n",
 		transfer, nr_bytes,
 		sim_core_map_to_str (map),
 		(unsigned long) addr,
@@ -88,8 +90,7 @@ sim_core_trace_M (sim_cpu *cpu,
 #endif
 #if (M == 4)
   trace_printf (CPU_STATE (cpu), cpu,
-		"sim-n-core.h:%d: %s-%d %s:0x%08lx %s 0x%08lx\n",
-		line_nr,
+		"%s-%d %s:0x%08lx %s 0x%08lx\n",
 		transfer,
 		nr_bytes,
 		sim_core_map_to_str (map),
@@ -99,8 +100,7 @@ sim_core_trace_M (sim_cpu *cpu,
 #endif
 #if (M == 2)
   trace_printf (CPU_STATE (cpu), cpu,
-		"sim-n-core.h:%d: %s-%d %s:0x%08lx %s 0x%04lx\n",
-		line_nr,
+		"%s-%d %s:0x%08lx %s 0x%04lx\n",
 		transfer,
 		nr_bytes,
 		sim_core_map_to_str (map),
@@ -110,8 +110,7 @@ sim_core_trace_M (sim_cpu *cpu,
 #endif
 #if (M == 1)
   trace_printf (CPU_STATE (cpu), cpu,
-		"sim-n-core.h:%d: %s-%d %s:0x%08lx %s 0x%02lx\n",
-		line_nr,
+		"%s-%d %s:0x%08lx %s 0x%02lx\n",
 		transfer,
 		nr_bytes,
 		sim_core_map_to_str (map),

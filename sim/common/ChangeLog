@@ -1,3 +1,26 @@
+Thu Nov 13 11:49:41 1997  Doug Evans  <devans@seba.cygnus.com>
+
+	* sim-base.h (sim_state_base): Move `magic' to end of struct.
+
+	* sim-base.h (sim_state_base): Add member trace_data.
+	(STATE_TRACE_DATA): New macro.
+	* sim-trace.h (TRACE_DEBUG_IDX,TRACE_debug): New macros.
+	({WITH_,}TRACE_DEBUG_P): New macros.
+	(STATE_TRACE_FLAGS,STRACE_P,STRACE_DEBUG_P): New macros.
+	(_sim_cpu): Delete forward reference.
+	(debug_printf): Update.
+	* sim-trace.c (OPTION_TRACE_DEBUG): Define.
+	(trace_options): Add --trace-debug.
+	(set_trace_options): Handle it.
+	(trace_option_handler): Likewise.
+	(trace_install): Init state trace_data struct.
+	(trace_uninstall): Close state trace file.
+	* sim-events.c (ETRACE): Only print source file and line number if
+	--trace-debug.
+	* sim-n-core.h (sim_core_trace_M): Likewise.
+
+	* sim-core.c (sim_core_signal): Add missing "\n" in message.
+
 1997-11-13  Felix Lee  <flee@cygnus.com>
 
 	* sim-n-core.h (sim_core_read_unaligned_N): illegal empty
