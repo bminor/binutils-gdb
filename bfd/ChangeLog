@@ -1,3 +1,14 @@
+2003-10-21  Alexandre Oliva  <aoliva@redhat.com>,
+	    Michael Snyder  <msnyder@redhat.com>
+
+	* archures.c (bfd_mach_sh4a, bfd_mach_sh4al_dsp, bfd_mach_sh4_nofpu,
+	bfd_mach_sh4a_nofpu): New machine types.
+	* bfd-in2.h: Rebuilt.
+	* cpu-sh.c (compatible): Remove unused function.
+	(SH4A_NEXT, SH4AL_DSP_NEXT, SH4_NOFPU_NEXT, SH4A_NOFPU_NEXT): New.
+	(arch_info_struct): Add sh4a, sh4al_dsp, sh4-nofpu and sh4a-nofpu.
+	* elf32-sh.c (sh_elf_set_mach_from_flags): Handle them.
+
 2003-10-21  Wouter van Heyst <wouter@vidicode.nl>
 
 	* elf32-arm.h (elf32_arm_merge_private_bfd_data): Correct text

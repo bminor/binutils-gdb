@@ -6863,6 +6863,18 @@ sh_elf_set_mach_from_flags (bfd *abfd)
     case EF_SH4:
       bfd_default_set_arch_mach (abfd, bfd_arch_sh, bfd_mach_sh4);
       break;
+    case EF_SH4_NOFPU:
+      bfd_default_set_arch_mach (abfd, bfd_arch_sh, bfd_mach_sh4_nofpu);
+      break;
+    case EF_SH4A:
+      bfd_default_set_arch_mach (abfd, bfd_arch_sh, bfd_mach_sh4a);
+      break;
+    case EF_SH4A_NOFPU:
+      bfd_default_set_arch_mach (abfd, bfd_arch_sh, bfd_mach_sh4a_nofpu);
+      break;
+    case EF_SH4AL_DSP:
+      bfd_default_set_arch_mach (abfd, bfd_arch_sh, bfd_mach_sh4al_dsp);
+      break;
     default:
       return FALSE;
     }

@@ -229,6 +229,10 @@ DESCRIPTION
 .#define bfd_mach_sh3_dsp    0x3d
 .#define bfd_mach_sh3e       0x3e
 .#define bfd_mach_sh4        0x40
+.#define bfd_mach_sh4_nofpu  0x41
+.#define bfd_mach_sh4a       0x4a
+.#define bfd_mach_sh4a_nofpu 0x4b
+.#define bfd_mach_sh4al_dsp  0x4d
 .#define bfd_mach_sh5        0x50
 .  bfd_arch_alpha,     {* Dec Alpha *}
 .#define bfd_mach_alpha_ev4  0x10
