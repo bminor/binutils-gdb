@@ -1,3 +1,22 @@
+Wed Jun 15 12:10:10 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* Makefile.in (site.exp): Don't insert host_os, etc.
+	(just-check): Just use RUNTEST with RUNTESTFLAGS only.
+	(distclean): Check existence of subdir.
+	* gdb.base/configure.in (hppa*-*-hpux*): Recognize.
+	* gdb.base/Makefile.in: General cleanup and simplification.
+	Use CC, CFLAGS, and LDFLAGS instead of ..._FOR_TARGET versions
+	to build executables.	Use default rule to build .o files.
+	(EXPECT, RUNTEST, CC): Fix relative pathname.
+	(site.exp): Don't insert host_os, etc.
+	* gdb.base/signals.c (main): Don't call signal unless SIGALRM
+	and/or SIGUSR1 defined.
+	* gdb.base/watchpoint.c: Don't include stdio.h a second time.
+	* gdb.c++/Makefile.in: General cleanup and simplification.
+	Use CC, CFLAGS, and LDFLAGS instead of ..._FOR_TARGET versions
+	(CFLAGS): Remove.
+	(EXPECT, RUNTEST_FOR_TARGET, CXX): Fix relative pathname.
+
 Fri Jun 10 10:55:09 1994  Jeff Law  (law@snake.cs.utah.edu)
 
 	* gdb.base/recurse.exp: Misc changes to get tests running again
