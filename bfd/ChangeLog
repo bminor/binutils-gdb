@@ -1,7 +1,7 @@
 2001-11-02  Hans-Peter Nilsson  <hp@axis.com>
 
 	* elf32-cris.c (cris_elf_grok_prstatus): New function.
-	(cris_elf_grok_prstatus): New function.
+	(cris_elf_grok_psinfo): New function.
 	(elf_backend_grok_prstatus): Define.
 	(elf_backend_grok_psinfo): Define.
 
