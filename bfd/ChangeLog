@@ -7,6 +7,17 @@ Mon Jul  3 13:55:18 1995  Steve Chamberlain  <sac@slash.cygnus.com>
 
 Mon Jul  3 11:30:45 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* targets.c (enum bfd_flavour): Add bfd_target_msdos_flavour here,
+	rather than in bfd-in2.h.
+
+	* bfd.c (enum bfd_error): Define bfd_error_no_armap.
+	(bfd_errmsgs): Add string for bfd_error_no_armap.
+	* bfd-in2.h: Rebuild.
+	* ecoff.c (ecoff_link_add_archive_symbols): If an archive has no
+	armap, set bfd_error_no_armap rather than bfd_error_no_symbols.
+	* elfcode.h (elf_link_add_archive_symbols): Likewise.
+	* linker.c (_bfd_generic_link_add_archive_symbols): Likewise.
+
 	* elfcode.h (elf_link_add_object_symbols): Permit common and
 	indirect symbols in weakdefs BFD_ASSERT.
 	* elf32-i386.c (elf_i386_adjust_dynamic_symbol): Simplify
@@ -18,8 +29,9 @@ Mon Jul  3 11:30:45 1995  Ian Lance Taylor  <ian@cygnus.com>
 	(BFD32_BACKENDS): Add versados.o.
 	(CFILES): Add pe-i386.c, pei-i386.c, and versados.c.
 start-sanitize-arc
-	(elf32-arc.o): New target.  This should be removed when
-	elf32-arc.c can be added to CFILES.
+	(elf32-arc.o): New target.  This target should be removed when
+	elf32-arc.c can be added to CFILES, after which the automatic
+	dependency building will handle it.
 end-sanitize-arc
 
 Sun Jul  2 17:49:32 1995  Ian Lance Taylor  <ian@cygnus.com>
