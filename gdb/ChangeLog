@@ -1,5 +1,7 @@
 Fri Jun 25 11:22:28 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* README (Reporting Bugs): Refer people to the GDB manual.
+
 	* c-valprint.c (c_val_print): Handle TYPE_CODE_BOOLEAN.
 	* stabsread.c: Type -16 is 4 bytes.
 
