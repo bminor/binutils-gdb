@@ -1,3 +1,11 @@
+Sun Jun 12 20:21:03 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* som.c (EXEC_AUX_ID): Define based on availablity of HPUX_AUX_ID
+	or HIUX_AUX_ID.
+	(som_begin_writing): Use EXEC_AUX_ID instead of HPUX_AUX_ID.
+	(som_write_armap): Use CPU_PA_RISC1_0 as the magic number.  Note
+	som.c is careful to always define CPU_PA_RISC1_0.
+
 Sat Jun 11 16:32:30 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	Add weak symbols as an extension to a.out.

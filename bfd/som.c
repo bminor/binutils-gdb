@@ -64,6 +64,22 @@
      ((__m_num) >= _PA_RISC1_1_ID && (__m_num) <= _PA_RISC_MAXID))
 #endif /* _PA_RISC_ID */
 
+
+/* HIUX in it's infinite stupidity changed the names for several "well
+   known" constants.  Work around such braindamage.  Try the HPUX version
+   first, then the HIUX version, and finally provide a default.  */
+#ifdef HPUX_AUX_ID
+#define EXEC_AUX_ID HPUX_AUX_ID
+#endif
+
+#if !defined (EXEC_AUX_ID) && defined (HIUX_AUX_ID)
+#define EXEC_AUX_ID HIUX_AUX_ID
+#endif
+
+#ifndef EXEC_AUX_ID
+#define EXEC_AUX_ID 0
+#endif
+
 /* Size (in chars) of the temporary buffers used during fixup and string
    table writes.   */
    
@@ -2767,7 +2783,7 @@ som_begin_writing (abfd)
       current_offset += sizeof (exec_header);
       obj_som_file_hdr (abfd)->aux_header_size += sizeof (exec_header);
       memset (&exec_header, 0, sizeof (exec_header));
-      exec_header.som_auxhdr.type = HPUX_AUX_ID;
+      exec_header.som_auxhdr.type = EXEC_AUX_ID;
       exec_header.som_auxhdr.length = 40;
     }
   if (obj_som_version_hdr (abfd) != NULL)
@@ -3312,6 +3328,10 @@ som_write_headers (abfd)
   else
     obj_som_file_hdr(abfd)->system_id = CPU_PA_RISC1_0;
 
+  /* Compute the checksum for the file header just before writing
+     the header to disk.  */
+  obj_som_file_hdr (abfd)->checksum = som_compute_checksum (abfd);
+
   /* Only thing left to do is write out the file header.  It is always
      at location zero.  Seek there and write it.  */
   if (bfd_seek (abfd, (file_ptr) 0, SEEK_SET) < 0)
@@ -3527,9 +3547,6 @@ som_write_object_contents (abfd)
   if (som_build_and_write_symbol_table (abfd) == false)
     return false;
 
-  /* Compute the checksum for the file header just before writing
-     the header to disk.  */
-  obj_som_file_hdr (abfd)->checksum = som_compute_checksum (abfd);
   return (som_write_headers (abfd));
 }
 
@@ -5377,7 +5394,7 @@ som_write_armap (abfd, elength, map, orl_count, stridx)
   lst_size = sizeof (struct lst_header);
 
   /* Start building the LST header.  */
-  lst.system_id = HP9000S800_ID;
+  lst.system_id = CPU_PA_RISC1_0;
   lst.a_magic = LIBMAGIC;
   lst.version_id = VERSION_ID;
   lst.file_time.secs = 0;
