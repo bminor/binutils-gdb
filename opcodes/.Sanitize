@@ -133,12 +133,12 @@ Things-to-lose:
 Do-last:
 never_files="Makefile.am Makefile.in"
 for i in $never_files ; do
-        if test ! -d $i && (grep sanitize-cygnus-never $i > /dev/null) ; then
+        if test ! -d $i && (grep sanitize-never $i > /dev/null) ; then
                 if [ -n "${verbose}" ] ; then
-                        echo Removing traces of \"cygnus-never\" from $i...
+                        echo Removing traces of \"never\" from $i...
                 fi
                 cp $i new
-                sed '/start\-sanitize\-cygnus-never/,/end\-sanitize\-cygnus-never/d' < $i > new
+                sed '/start\-sanitize\-never/,/end\-sanitize\-never/d' < $i > new
                 if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
                         if [ -n "${verbose}" ] ; then
                                 echo Caching $i in .Recover...

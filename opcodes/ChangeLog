@@ -1,3 +1,7 @@
+1999-02-10  Doug Evans  <devans@casey.cygnus.com>
+
+	* Makefile.in: Rebuild.
+
 1999-02-09  Doug Evans  <devans@casey.cygnus.com>
 
 	* i960c-asm.c,i960c-dis.c,i960c-opc.c,i960c-opc.h: Delete.
@@ -27,6 +31,7 @@ start-sanitize-cygnus
 	(CGENFILES): Update for opcode table reorg.
 	(run-cgen): Pass $(extrafiles).
 	(stamp-m32r): Set extrafiles to "opinst".
+	* Makefile.in: Rebuild.
 	* cgen-opc.in: Delete.
 	* cgen-ibld.in: New file.
 	* cgen-asm.in: Include @prefix@-desc.h.
