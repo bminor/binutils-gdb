@@ -37,6 +37,11 @@
 
 2004-11-01  Andrew Cagney  <cagney@gnu.org>
 
+	* gdb/NEWS: Mention internationalization, m32r-*-linux-gnu, 'p'
+	packet, obsolete configurations, end-of-life deprecated_registers.
+
+2004-11-01  Andrew Cagney  <cagney@gnu.org>
+
 	* configure.tgt: Mark d10v-*-* as obsolete.
 	* config/d10v/d10v.mt, d10v-tdep.c: Obsolete files.
 
