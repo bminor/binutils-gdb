@@ -1,4 +1,19 @@
 start-sanitize-sky
+Tue Jun 16 09:03:37 1998  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* t-cop2.s: Reorder instruction blocks to prevent "Out of bounds"
+	messages during test execution.  Added dummy branch labels for BC2*
+ 	instructions.
+	* t-cop2.brn: Use --sky-debug option instead of env var.
+	* t-cop2.vuexpect: Updated for with new disassembly format.
+	
+	* sky_sce_fast.exp: Don't compare GIF outputs for
+ 	--float-type=fast.
+	* sce_test{17,33,49}.dvpasm: Use ".DmaPackVif 1" option to
+	exercise assembler / PKE.
+	
+	* rw-vureg.c: Cast memcpy operand to allay warning.
+
 Mon Jun 15 15:34:10 1998 Frank Ch. Eigler <fche@cygnus.com>
 
 	* sim/sky/sky_sce_fast.exp: New file for fast floating point mode of
