@@ -1,5 +1,8 @@
 Wed Jul  7 14:30:00 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* eval.c (evaluate_subexp): Add comment about calling a member
+	function of a variable in a register.
+
 	* expression.h: Clean up comment about string in STRUCT_STRUCT etc.
 
 	* config/{rs6000/tm-rs6000.h,sparc/tm-sparc.h,pyr/tm-pyr.h},
