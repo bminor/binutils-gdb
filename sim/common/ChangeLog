@@ -1,3 +1,12 @@
+Wed Apr 30 11:34:14 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* Make-common.in (clean targets): Undo patch of Apr. 22.
+
+Fri Apr 25 15:28:32 1997  Mike Meissner  <meissner@cygnus.com>
+
+	* sim-n-bits.h (signed): If we have a standard compiler, undef
+	signed, so that signedN is defined correctly.
+
 Thu Apr 24 00:00:07 1997  Doug Evans  <dje@canuck.cygnus.com>
 
 	* sim-module.h, sim-model.h, sim-profile.h: New files.
