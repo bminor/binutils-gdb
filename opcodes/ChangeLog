@@ -1,3 +1,12 @@
+Fri Nov  3 12:45:31 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* m68k-opc.c (m68k_opcodes): Correct fmoveml operands.
+	* m68k-dis.c (NEXTSINGLE): Change i to unsigned int.
+	(NEXTDOUBLE): Likewise.
+	(print_insn_m68k): Don't match fmoveml if there is more than one
+	register in the list.
+	(print_insn_arg): Handle a place of '8' for a type of 'L'.
+
 Thu Nov  2 23:06:33 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* m68k-opc.c: Use #W rather than #w.
