@@ -19,6 +19,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* $Id$ */
 
 #define I960 1
+#include <ansidecl.h>
 #include "sysdep.h"
 #include "bfd.h"
 #include "libbfd.h"
