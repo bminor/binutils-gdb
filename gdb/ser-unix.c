@@ -30,11 +30,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #ifdef HAVE_TERMIOS
 #include <termios.h>
 #include <unistd.h>
-#include <poll.h>
 #endif
 #ifdef HAVE_TERMIO
 #include <termio.h>
-#include <poll.h>
 #endif
 #ifdef HAVE_SGTTY
 #include <sgtty.h>
@@ -124,9 +122,16 @@ hardwire_raw(scb)
   if (ioctl (scb->fd, TIOCSETP, &sgttyb))
     fprintf(stderr, "TIOCSETP failed: %s\n", safe_strerror(errno));
 #endif
+
+  scb->current_timeout = 0;
 }
 
-/* Wait for input on scb, with timeout seconds */
+/* Wait for input on scb, with timeout seconds.  Returns 0 on success,
+   otherwise SERIAL_TIMEOUT or SERIAL_ERROR.
+
+   For termio{s}, we actually just setup VTIME if necessary, and let the
+   timeout occur in the read() in hardwire_read().
+ */
 
 static int
 wait_for(scb, timeout)
@@ -151,26 +156,49 @@ wait_for(scb, timeout)
   else
     numfds = select(scb->fd+1, &readfds, 0, 0, 0);
 
-#endif	/* HAVE_SGTTY */
-
-#if defined HAVE_TERMIO || defined HAVE_TERMIOS
-  struct pollfd pollfd;
-
-  pollfd.fd = scb->fd;
-  pollfd.events = POLLIN | POLLPRI;
-
-  if (timeout > 0)
-    timeout *= 1000;
-
-  numfds = poll(&pollfd, 1, timeout);
-
-#endif	/* defined HAVE_TERMIO || defined HAVE_TERMIOS */
-
   if (numfds <= 0)
     if (numfds == 0)
       return SERIAL_TIMEOUT;
     else
       return SERIAL_ERROR;	/* Got an error from select or poll */
+
+  return 0;
+
+#endif	/* HAVE_SGTTY */
+
+#if defined HAVE_TERMIO || defined HAVE_TERMIOS
+  if (timeout == scb->current_timeout)
+    return 0;
+
+  {
+#ifdef HAVE_TERMIOS
+    struct termios termios;
+
+    if (tcgetattr(scb->fd, &termios))
+      fprintf(stderr, "wait_for() tcgetattr failed: %s\n", safe_strerror(errno));
+
+  termios.c_cc[VTIME] = timeout * 10;
+
+  if (tcsetattr(scb->fd, TCSANOW, &termios))
+    fprintf(stderr, "wait_for() tcsetattr failed: %s\n", safe_strerror(errno));
+#endif	/* HAVE_TERMIOS */
+
+#ifdef HAVE_TERMIO
+  struct termio termio;
+
+  if (ioctl (scb->fd, TCGETA, &termio))
+    fprintf(stderr, "wait_for() TCGETA failed: %s\n", safe_strerror(errno));
+
+  termio.c_cc[VTIME] = timeout * 10;
+
+  if (ioctl (scb->fd, TCSETA, &termio))
+      fprintf(stderr, "TCSETA failed: %s\n", safe_strerror(errno));
+#endif	/* HAVE_TERMIO */
+
+    scb->current_timeout = timeout;
+    return 0;
+  }
+#endif	/* HAVE_TERMIO || HAVE_TERMIOS */
 }
 
 /* Read a character with user-specified timeout.  TIMEOUT is number of seconds
@@ -197,7 +225,9 @@ hardwire_readchar(scb, timeout)
 
   if (scb->bufcnt <= 0)
     if (scb->bufcnt == 0)
-      return SERIAL_EOF;	/* 0 chars means end of file */
+      return SERIAL_TIMEOUT;	/* 0 chars means timeout [may need to
+				   distinguish between EOF & timeouts
+				   someday] */
     else
       return SERIAL_ERROR;	/* Got an error from read */
 
