@@ -295,10 +295,8 @@ frame_id_eq (struct frame_id l, struct frame_id r)
     /* The .stack and .code are identical, the ID's are identical.  */
     eq = 1;
   else
-    /* FIXME: cagney/2003-04-06: This should be zero.  Can't yet do
-       this because most frame ID's are not being initialized
-       correctly.  */
-    eq = 1;
+    /* No luck.  */
+    eq = 0;
   if (frame_debug)
     {
       fprintf_unfiltered (gdb_stdlog, "{ frame_id_eq (l=");
