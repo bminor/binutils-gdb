@@ -226,14 +226,7 @@ extern int value_fetch_lazy (struct value *val);
 
 /* Convert a REF to the object referenced.  */
 
-#define COERCE_REF(arg) \
-  do {									\
-    struct type *value_type_arg_tmp = check_typedef (VALUE_TYPE (arg));	\
-    if (TYPE_CODE (value_type_arg_tmp) == TYPE_CODE_REF)		\
-      arg = value_at_lazy (TYPE_TARGET_TYPE (value_type_arg_tmp),	\
-                           unpack_pointer (VALUE_TYPE (arg),		\
-                                           VALUE_CONTENTS (arg)));	\
-  } while (0)
+extern struct value *coerce_ref (struct value *value);
 
 /* If ARG is an array, convert it to a pointer.
    If ARG is an enum, convert it to an integer.
@@ -241,26 +234,12 @@ extern int value_fetch_lazy (struct value *val);
 
    References are dereferenced.  */
 
-#define COERCE_ARRAY(arg) \
-  do {									\
-    COERCE_REF(arg);							\
-    if (current_language->c_style_arrays				\
-        && TYPE_CODE (VALUE_TYPE (arg)) == TYPE_CODE_ARRAY)		\
-      arg = value_coerce_array (arg);					\
-    if (TYPE_CODE (VALUE_TYPE (arg)) == TYPE_CODE_FUNC)			\
-      arg = value_coerce_function (arg);				\
-  } while (0)
-
-#define COERCE_NUMBER(arg) \
-  do { COERCE_ARRAY(arg); COERCE_ENUM(arg); } while (0)
+extern struct value *coerce_array (struct value *value);
+extern struct value *coerce_number (struct value *value);
 
 /* If ARG is an enum, convert it to an integer.  */
 
-#define COERCE_ENUM(arg) \
-  do {									\
-    if (TYPE_CODE (check_typedef (VALUE_TYPE (arg))) == TYPE_CODE_ENUM)	\
-      arg = value_cast (builtin_type_unsigned_int, arg);		\
-  } while (0)
+extern struct value *coerce_enum (struct value *value);
 
 /* Internal variables (variables for convenience of use of debugger)
    are recorded as a chain of these structures.  */

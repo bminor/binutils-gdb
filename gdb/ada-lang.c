@@ -2006,7 +2006,7 @@ ada_value_assign (struct value *toval, struct value *fromval)
   if (!toval->modifiable)
     error ("Left operand of assignment is not a modifiable lvalue.");
 
-  COERCE_REF (toval);
+  toval = coerce_ref (toval);
 
   if (VALUE_LVAL (toval) == lval_memory
       && bits > 0
@@ -5479,7 +5479,7 @@ ada_value_struct_elt (struct value *arg, char *name, char *err)
       t1 = ada_check_typedef (t1);
       if (TYPE_CODE (t1) == TYPE_CODE_PTR)
         {
-          COERCE_REF (arg);
+          arg = coerce_ref (arg);
           t = t1;
         }
     }
@@ -5766,7 +5766,7 @@ ada_coerce_ref (struct value *val0)
   if (TYPE_CODE (VALUE_TYPE (val0)) == TYPE_CODE_REF)
     {
       struct value *val = val0;
-      COERCE_REF (val);
+      val = coerce_ref (val);
       val = unwrap_value (val);
       return ada_to_fixed_value (val);
     }
@@ -7030,8 +7030,8 @@ ada_value_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
   struct type *type1, *type2;
   LONGEST v, v1, v2;
 
-  COERCE_REF (arg1);
-  COERCE_REF (arg2);
+  arg1 = coerce_ref (arg1);
+  arg2 = coerce_ref (arg2);
   type1 = base_type (ada_check_typedef (VALUE_TYPE (arg1)));
   type2 = base_type (ada_check_typedef (VALUE_TYPE (arg2)));
 
@@ -7406,8 +7406,8 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
           evaluate_subexp (NULL_TYPE, exp, pos, noside);
         LONGEST low_bound;
         LONGEST high_bound;
-        COERCE_REF (low_bound_val);
-        COERCE_REF (high_bound_val);
+        low_bound_val = coerce_ref (low_bound_val);
+        high_bound_val = coerce_ref (high_bound_val);
         low_bound = pos_atr (low_bound_val);
         high_bound = pos_atr (high_bound_val);
 

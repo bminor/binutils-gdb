@@ -867,7 +867,7 @@ evaluate_subexp_java (struct type *expect_type, struct expression *exp,
          array or pointer type (like a plain int variable for example),
          then report this as an error. */
 
-      COERCE_REF (arg1);
+      arg1 = coerce_ref (arg1);
       type = check_typedef (VALUE_TYPE (arg1));
       if (TYPE_CODE (type) == TYPE_CODE_PTR)
 	type = check_typedef (TYPE_TARGET_TYPE (type));

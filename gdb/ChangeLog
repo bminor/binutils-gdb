@@ -1,3 +1,21 @@
+2004-11-10  Andrew Cagney  <cagney@gnu.org>
+
+	* value.h (COERCE_REF, COERCE_ARRAY, COERCE_NUMBER, COERCE_ENUM)
+	(coerce_ref, coerce_array, coerce_number, coerce_enum): Replace
+	macros with function declarations.
+	* value.c (coerce_ref, coerce_array, coerce_number)
+	(coerce_enum): New functions.
+	(value_as_long, value_as_address): Update.
+	* ada-lang.c (ada_coerce_ref, ada_value_binop) 
+	(ada_evaluate_subexp, ada_value_assign, ada_value_struct_elt): Update.
+	* jv-lang.c (evaluate_subexp_java): Update.
+	* valarith.c (value_less, value_neg, value_complement)
+	(value_binop, value_add, value_subscript, value_x_binop) 
+	(value_logical_not, value_sub): Update.
+	* valops.c (check_field, value_struct_elt, value_ind)
+	(value_find_oload_method_list, value_cast, value_assign): Update.
+	* eval.c (evaluate_subexp_standard): Update.
+
 2004-11-10  Mark Kettenis  <kettenis@gnu.org>
 
 	* mips-tdep.c (mips32_relative_offset): Change return type to

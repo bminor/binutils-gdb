@@ -212,7 +212,7 @@ value_cast (struct type *type, struct value *arg2)
 
   CHECK_TYPEDEF (type);
   code1 = TYPE_CODE (type);
-  COERCE_REF (arg2);
+  arg2 = coerce_ref (arg2);
   type2 = check_typedef (VALUE_TYPE (arg2));
 
   /* A cast to an undetermined-length array_type, such as (TYPE [])OBJECT,
@@ -524,13 +524,13 @@ value_assign (struct value *toval, struct value *fromval)
   if (!toval->modifiable)
     error ("Left operand of assignment is not a modifiable lvalue.");
 
-  COERCE_REF (toval);
+  toval = coerce_ref (toval);
 
   type = VALUE_TYPE (toval);
   if (VALUE_LVAL (toval) != lval_internalvar)
     fromval = value_cast (type, fromval);
   else
-    COERCE_ARRAY (fromval);
+    fromval = coerce_array (fromval);
   CHECK_TYPEDEF (type);
 
   /* Since modifying a register can trash the frame chain, and modifying memory
@@ -896,7 +896,7 @@ value_ind (struct value *arg1)
   struct type *base_type;
   struct value *arg2;
 
-  COERCE_ARRAY (arg1);
+  arg1 = coerce_array (arg1);
 
   base_type = check_typedef (VALUE_TYPE (arg1));
 
@@ -1589,7 +1589,7 @@ value_struct_elt (struct value **argp, struct value **args,
   struct type *t;
   struct value *v;
 
-  COERCE_ARRAY (*argp);
+  *argp = coerce_array (*argp);
 
   t = check_typedef (VALUE_TYPE (*argp));
 
@@ -1600,7 +1600,7 @@ value_struct_elt (struct value **argp, struct value **args,
       *argp = value_ind (*argp);
       /* Don't coerce fn pointer to fn and then back again!  */
       if (TYPE_CODE (VALUE_TYPE (*argp)) != TYPE_CODE_FUNC)
-	COERCE_ARRAY (*argp);
+	*argp = coerce_array (*argp);
       t = check_typedef (VALUE_TYPE (*argp));
     }
 
@@ -1799,7 +1799,7 @@ value_find_oload_method_list (struct value **argp, char *method, int offset,
       *argp = value_ind (*argp);
       /* Don't coerce fn pointer to fn and then back again!  */
       if (TYPE_CODE (VALUE_TYPE (*argp)) != TYPE_CODE_FUNC)
-	COERCE_ARRAY (*argp);
+	*argp = coerce_array (*argp);
       t = check_typedef (VALUE_TYPE (*argp));
     }
 
@@ -2320,7 +2320,7 @@ check_field (struct value *arg1, const char *name)
 {
   struct type *t;
 
-  COERCE_ARRAY (arg1);
+  arg1 = coerce_array (arg1);
 
   t = VALUE_TYPE (arg1);
 

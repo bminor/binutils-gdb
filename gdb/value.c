@@ -526,7 +526,7 @@ value_as_long (struct value *val)
   /* This coerces arrays and functions, which is necessary (e.g.
      in disassemble_command).  It also dereferences references, which
      I suspect is the most logical thing to do.  */
-  COERCE_ARRAY (val);
+  val = coerce_array (val);
   return unpack_long (VALUE_TYPE (val), VALUE_CONTENTS (val));
 }
 
@@ -597,7 +597,7 @@ value_as_address (struct value *val)
       || TYPE_CODE (VALUE_TYPE (val)) == TYPE_CODE_METHOD)
     return VALUE_ADDRESS (val);
 
-  COERCE_ARRAY (val);
+  val = coerce_array (val);
 
   /* Some architectures (e.g. Harvard), map instruction and data
      addresses onto a single large unified address space.  For
@@ -1196,6 +1196,45 @@ value_from_double (struct type *type, DOUBLEST num)
     error ("Unexpected type encountered for floating constant.");
 
   return val;
+}
+
+struct value *
+coerce_ref (struct value *arg)
+{
+  struct type *value_type_arg_tmp = check_typedef (VALUE_TYPE (arg));
+  if (TYPE_CODE (value_type_arg_tmp) == TYPE_CODE_REF)
+    arg = value_at_lazy (TYPE_TARGET_TYPE (value_type_arg_tmp),
+			 unpack_pointer (VALUE_TYPE (arg),		
+					 VALUE_CONTENTS (arg)));
+  return arg;
+}
+
+struct value *
+coerce_array (struct value *arg)
+{
+  arg = coerce_ref (arg);
+  if (current_language->c_style_arrays
+      && TYPE_CODE (VALUE_TYPE (arg)) == TYPE_CODE_ARRAY)
+    arg = value_coerce_array (arg);
+  if (TYPE_CODE (VALUE_TYPE (arg)) == TYPE_CODE_FUNC)
+    arg = value_coerce_function (arg);
+  return arg;
+}
+
+struct value *
+coerce_number (struct value *arg)
+{
+  arg = coerce_array (arg);
+  arg = coerce_enum (arg);
+  return arg;
+}
+
+struct value *
+coerce_enum (struct value *arg)
+{
+  if (TYPE_CODE (check_typedef (VALUE_TYPE (arg))) == TYPE_CODE_ENUM)
+    arg = value_cast (builtin_type_unsigned_int, arg);
+  return arg;
 }
 
 

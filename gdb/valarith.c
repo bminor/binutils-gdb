@@ -91,8 +91,8 @@ value_add (struct value *arg1, struct value *arg2)
   LONGEST sz;
   struct type *type1, *type2, *valptrtype;
 
-  COERCE_ARRAY (arg1);
-  COERCE_ARRAY (arg2);
+  arg1 = coerce_array (arg1);
+  arg2 = coerce_array (arg2);
   type1 = check_typedef (VALUE_TYPE (arg1));
   type2 = check_typedef (VALUE_TYPE (arg2));
 
@@ -132,8 +132,8 @@ struct value *
 value_sub (struct value *arg1, struct value *arg2)
 {
   struct type *type1, *type2;
-  COERCE_ARRAY (arg1);
-  COERCE_ARRAY (arg2);
+  arg1 = coerce_array (arg1);
+  arg2 = coerce_array (arg2);
   type1 = check_typedef (VALUE_TYPE (arg1));
   type2 = check_typedef (VALUE_TYPE (arg2));
 
@@ -182,7 +182,7 @@ value_subscript (struct value *array, struct value *idx)
   int c_style = current_language->c_style_arrays;
   struct type *tarray;
 
-  COERCE_REF (array);
+  array = coerce_ref (array);
   tarray = check_typedef (VALUE_TYPE (array));
 
   if (TYPE_CODE (tarray) == TYPE_CODE_ARRAY
@@ -346,10 +346,10 @@ value_x_binop (struct value *arg1, struct value *arg2, enum exp_opcode op,
   char tstr[13];
   int static_memfuncp;
 
-  COERCE_REF (arg1);
-  COERCE_REF (arg2);
-  COERCE_ENUM (arg1);
-  COERCE_ENUM (arg2);
+  arg1 = coerce_ref (arg1);
+  arg2 = coerce_ref (arg2);
+  arg1 = coerce_enum (arg1);
+  arg2 = coerce_enum (arg2);
 
   /* now we know that what we have to do is construct our
      arg vector and find the right function to call it with.  */
@@ -508,8 +508,8 @@ value_x_unop (struct value *arg1, enum exp_opcode op, enum noside noside)
   char tstr[13], mangle_tstr[13];
   int static_memfuncp, nargs;
 
-  COERCE_REF (arg1);
-  COERCE_ENUM (arg1);
+  arg1 = coerce_ref (arg1);
+  arg1 = coerce_enum (arg1);
 
   /* now we know that what we have to do is construct our
      arg vector and find the right function to call it with.  */
@@ -747,8 +747,8 @@ value_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
   struct value *val;
   struct type *type1, *type2;
 
-  COERCE_REF (arg1);
-  COERCE_REF (arg2);
+  arg1 = coerce_ref (arg1);
+  arg2 = coerce_ref (arg2);
   type1 = check_typedef (VALUE_TYPE (arg1));
   type2 = check_typedef (VALUE_TYPE (arg2));
 
@@ -1155,7 +1155,7 @@ value_logical_not (struct value *arg1)
   char *p;
   struct type *type1;
 
-  COERCE_NUMBER (arg1);
+  arg1 = coerce_number (arg1);
   type1 = check_typedef (VALUE_TYPE (arg1));
 
   if (TYPE_CODE (type1) == TYPE_CODE_FLT)
@@ -1216,8 +1216,8 @@ value_equal (struct value *arg1, struct value *arg2)
   enum type_code code2;
   int is_int1, is_int2;
 
-  COERCE_ARRAY (arg1);
-  COERCE_ARRAY (arg2);
+  arg1 = coerce_array (arg1);
+  arg2 = coerce_array (arg2);
 
   type1 = check_typedef (VALUE_TYPE (arg1));
   type2 = check_typedef (VALUE_TYPE (arg2));
@@ -1275,8 +1275,8 @@ value_less (struct value *arg1, struct value *arg2)
   struct type *type1, *type2;
   int is_int1, is_int2;
 
-  COERCE_ARRAY (arg1);
-  COERCE_ARRAY (arg2);
+  arg1 = coerce_array (arg1);
+  arg2 = coerce_array (arg2);
 
   type1 = check_typedef (VALUE_TYPE (arg1));
   type2 = check_typedef (VALUE_TYPE (arg2));
@@ -1317,7 +1317,7 @@ value_neg (struct value *arg1)
   struct type *type;
   struct type *result_type = VALUE_TYPE (arg1);
 
-  COERCE_REF (arg1);
+  arg1 = coerce_ref (arg1);
 
   type = check_typedef (VALUE_TYPE (arg1));
 
@@ -1345,7 +1345,7 @@ value_complement (struct value *arg1)
   struct type *type;
   struct type *result_type = VALUE_TYPE (arg1);
 
-  COERCE_REF (arg1);
+  arg1 = coerce_ref (arg1);
 
   type = check_typedef (VALUE_TYPE (arg1));
 
