@@ -13,7 +13,7 @@
 
 	* configure.host (ia64-*-aix*): New host.
 	* configure.tgt (ia64-*-aix*): New target.
-	
+
 2001-03-05  Andrew Cagney  <ac131313@redhat.com>
 
 	* TODO (GDB 5.1 Known Problems): Document z8k as broken.
