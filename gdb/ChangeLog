@@ -1,3 +1,8 @@
+Fri Oct  6 11:56:49 1995  Jim Wilson  <wilson@chestnut.cygnus.com>
+
+	* remote-sim.c (gdbsim_open): Put callback initializations here.
+	(_initalize_remote_sim): Not here.
+
 Fri Oct  6 17:08:49 1995  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* top.c (execute_control_command): Use 0/1 instead of BFD's

@@ -218,6 +218,10 @@ gdbsim_open (args, from_tty)
   if (sr_get_debug ())
     printf_filtered ("gdbsim_open: args \"%s\"\n", args ? args : "(null)");
   sim_open (args);
+
+  sim_set_callbacks (&default_callback);
+  default_callback.init (&default_callback);
+
   push_target (&gdbsim_ops);
   target_fetch_registers (-1);
   printf_filtered ("Connected to the simulator.\n");
@@ -460,7 +464,4 @@ _initialize_remote_sim ()
 
   add_com ("sim <command>", class_obscure, simulator_command,
 	   "Send a command to the simulator."); 
-
-  sim_set_callbacks (&default_callback);
-  default_callback.init (&default_callback);
 }
