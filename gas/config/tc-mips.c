@@ -11556,6 +11556,10 @@ mips_elf_final_processing ()
       else
 	elf_elfheader (stdoutput)->e_flags |= E_MIPS_ABI_EABI32;
     }
+  else if (strcmp (mips_abi_string, "n32") == 0)
+    elf_elfheader (stdoutput)->e_flags |= EF_MIPS_ABI2;
+
+  /* Nothing to do for "64".  */
 
   if (mips_32bitmode)
     elf_elfheader (stdoutput)->e_flags |= EF_MIPS_32BITMODE;
