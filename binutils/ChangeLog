@@ -1,3 +1,7 @@
+2001-07-11  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* MAINTAINERS: Add notes about branch checkins.
+
 2001-07-05  Daniel Berlin  <dan@cgsoftware.com>
 
 	* readelf.c (display_debug_macinfo): New function, display

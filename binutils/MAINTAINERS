@@ -91,3 +91,15 @@ spelling mistakes, blatantly incorrect code (where the correct code is
 also blatantly obvious), and so on.  Obvious fixes should always be
 small, the larger they are, the more likely it is that they contain
 some un-obvious side effect or consequence.
+
+	       --------- Branch Checkins ---------
+
+If a patch is approved for check in to the mainline sources, it can
+also be checked into the current release branch.  Normally however
+only bug fixes should be applied to the branch.  New features, new
+ports, etc, should be restricted to the mainline.  (Otherwise the
+burden of maintaining the branch in sync with the mainline becomes too 
+great).  If you are uncertain as to whether a patch is appropriate for
+the branch, ask the branch maintainer.  This is:
+
+ Philip Blundell  <philb@gnu.org>
