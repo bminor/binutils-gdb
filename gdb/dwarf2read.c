@@ -4569,7 +4569,7 @@ read_subroutine_type (struct die_info *die, struct dwarf2_cu *cu)
       return;
     }
   type = die_type (die, cu);
-  ftype = lookup_function_type (type);
+  ftype = make_function_type (type, (struct type **) 0);
 
   /* All functions in C++ and Java have prototypes.  */
   attr = dwarf2_attr (die, DW_AT_prototyped, cu);
