@@ -40,7 +40,7 @@ struct fix;
 
 
 /* Maximum number of opcode slots in a VLIW instruction.  */
-#define MAX_SLOTS 31
+#define MAX_SLOTS 15
 
 
 /* For all xtensa relax states except RELAX_DESIRE_ALIGN and

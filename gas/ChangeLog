@@ -1,5 +1,44 @@
 2004-10-12  Bob Wilson  <bob.wilson@acm.org>
 
+	* config/tc-xtensa.c (xtensa_frequency_pseudo): Use set_subseg_freq.
+	(is_entry_opcode, is_movi_opcode, is_the_loop_opcode, is_jx_opcode,
+	is_windowed_return_opcode): Delete.
+	(xtensa_frob_label): Use get_subseg_target_freq.
+	(md_assemble): Inline call to is_entry_opcode.
+	(xtensa_handle_align): Inline call to get_frag_is_literal.
+	(relaxation_requirements): Inline call to is_jx_opcode.
+	(emit_single_op): Inline call to is_movi_opcode.
+	(xg_assemble_vliw_tokens): Inline calls to get_frag_is_insn,
+	get_frag_is_no_transform, is_entry_opcode, and
+	set_frag_is_specific_opcode.  Use get_subseg_total_freq.
+	(xtensa_fix_a0_b_retw_frags, xtensa_fix_b_j_loop_end_frags,
+	xtensa_fix_close_loop_end_frags, relax_frag_immed, convert_frag_immed):
+	Inline calls to get_frag_is_no_transform.
+	(next_instrs_are_b_retw): Inline call to is_windowed_return_opcode.
+	(xtensa_fix_short_loop_frags): Inline calls to is_the_loop_opcode and
+	get_frag_is_no_transform.
+	(convert_frag_immed_finish_loop): Inline calls to get_expression_value
+	and set_frag_is_no_transform.
+	(get_expression_value): Delete.
+	(subseg_map struct): Rename cur_total_freq to total_freq.  Rename
+	cur_target_freq to target_freq.
+	(get_subseg_info): Split out code to create a new map entry into ...
+	(add_subseg_info): ... this new function.
+	(get_last_insn_flags): Check if get_subseg_info succeeded.
+	(set_last_insn_flags): Call add_subseg_info if needed.
+	(get_subseg_total_freq, get_subseg_target_freq, set_subseg_freq): New.
+	(xtensa_reorder_segments): Compute last_sec while counting sections.
+	Remove call to get_last_sec.
+	(get_last_sec): Delete.
+	(cache_literal_section): Inline call to retrieve_literal_seg and its
+	callees, seg_present and add_seg_list.
+	(retrieve_literal_seg, seg_present, add_seg_list): Delete.
+	(get_frag_is_insn, get_frag_is_no_transform,
+	set_frag_is_specific_opcode, set_frag_is_no_transform): Delete.
+	* config/tc-xtensa.h (MAX_SLOTS): Reduce from 31 to 15.
+
+2004-10-12  Bob Wilson  <bob.wilson@acm.org>
+
 	* config/tc-xtensa.c: Use ISO C90 formatting.
 	* config/tc-xtensa.h: Likewise.
 	* config/xtensa-istack.h: Likewise.

@@ -37,8 +37,6 @@
 
 #define XTENSA_NO_NOP_REMOVAL 0
 
-extern flagword elf_xtensa_get_private_bfd_flags (bfd *);
-
 /* Local helper functions.  */
 
 static bfd_boolean add_extra_plt_sections (bfd *, int);
@@ -2767,13 +2765,6 @@ elf_xtensa_set_private_flags (bfd *abfd, flagword flags)
 }
 
 
-extern flagword
-elf_xtensa_get_private_bfd_flags (bfd *abfd)
-{
-  return elf_elfheader (abfd)->e_flags;
-}
-
-
 static bfd_boolean
 elf_xtensa_print_private_bfd_data (bfd *abfd, void *farg)
 {
@@ -3641,7 +3632,6 @@ narrow_instruction (bfd_byte *contents,
 	      || xtensa_format_length (isa, o_fmt) != 2)
 	    return FALSE;
 
-	  xtensa_format_encode (isa, o_fmt, o_slotbuf);
 	  xtensa_format_encode (isa, o_fmt, o_insnbuf);
 	  operand_count = xtensa_opcode_num_operands (isa, opcode);
 	  o_operand_count = xtensa_opcode_num_operands (isa, o_opcode);
@@ -3789,7 +3779,6 @@ widen_instruction (bfd_byte *contents,
 	      || xtensa_format_length (isa, o_fmt) != 3)
 	    return FALSE;
 
-	  xtensa_format_encode (isa, o_fmt, o_slotbuf);
 	  xtensa_format_encode (isa, o_fmt, o_insnbuf);
 	  operand_count = xtensa_opcode_num_operands (isa, opcode);
 	  o_operand_count = xtensa_opcode_num_operands (isa, o_opcode);
@@ -5595,8 +5584,6 @@ insn_block_decodable_len (bfd_byte *contents,
 }
 
 
-static void ebb_add_proposed_action (ebb_constraint *, proposed_action *);
-
 static void
 ebb_propose_action (ebb_constraint *c,
 		    bfd_vma alignment_pow,
@@ -5606,24 +5593,13 @@ ebb_propose_action (ebb_constraint *c,
 		    int removed_bytes,
 		    bfd_boolean do_action)
 {
-  proposed_action paction;
-  paction.align_type = align_type;
-  paction.alignment_pow = alignment_pow;
-  paction.action = action;
-  paction.offset = offset;
-  paction.removed_bytes = removed_bytes;
-  paction.do_action = do_action;
-  ebb_add_proposed_action (c, &paction);
-}
+  proposed_action *act;
 
-
-static void
-ebb_add_proposed_action (ebb_constraint *c, proposed_action *action)
-{
-  unsigned i;
   if (c->action_allocated <= c->action_count)
     {
-      unsigned new_allocated = (c->action_count + 2) * 2;
+      unsigned new_allocated, i;
+
+      new_allocated = (c->action_count + 2) * 2;
       proposed_action *new_actions = (proposed_action *)
 	bfd_zmalloc (sizeof (proposed_action) * new_allocated);
 
@@ -5634,7 +5610,15 @@ ebb_add_proposed_action (ebb_constraint *c, proposed_action *action)
       c->actions = new_actions;
       c->action_allocated = new_allocated;
     }
-  c->actions[c->action_count] = *action;
+
+  act = &c->actions[c->action_count];
+  act->align_type = align_type;
+  act->alignment_pow = alignment_pow;
+  act->action = action;
+  act->offset = offset;
+  act->removed_bytes = removed_bytes;
+  act->do_action = do_action;
+
   c->action_count++;
 }
 

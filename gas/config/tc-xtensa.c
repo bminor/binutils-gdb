@@ -308,29 +308,6 @@ typedef struct emit_state_struct
 } emit_state;
 
 
-/* A map that keeps information on a per-subsegment basis.  This is
-   maintained during initial assembly, but is invalid once the
-   subsegments are smashed together.  I.E., it cannot be used during
-   the relaxation.  */
-
-typedef struct subseg_map_struct
-{
-  /* the key */
-  segT seg;
-  subsegT subseg;
-
-  /* the data */
-  unsigned flags;
-  /* the fall-through frequency + the branch target frequency
-     typically used for the instruction after a call */
-  float cur_total_freq;
-  /* the branch target frequency alone */
-  float cur_target_freq;
-
-  struct subseg_map_struct *next;
-} subseg_map;
-
-
 /* Opcode placement information */
 
 typedef unsigned long long bitfield;
@@ -475,11 +452,13 @@ static addressT get_text_align_max_fill_size (int, bfd_boolean, bfd_boolean);
 
 static long relax_frag_add_nop (fragS *);
 
-/* Flags for the Last Instruction in Each Subsegment.  */
+/* Accessors for additional per-subsegment information.  */
 
-static subseg_map *get_subseg_info (segT, subsegT);
 static unsigned get_last_insn_flags (segT, subsegT);
 static void set_last_insn_flags (segT, subsegT, unsigned, bfd_boolean);
+static float get_subseg_total_freq (segT, subsegT);
+static float get_subseg_target_freq (segT, subsegT);
+static void set_subseg_freq (segT, subsegT, float, float);
 
 /* Segment list functions.  */
 
@@ -491,14 +470,6 @@ static void xtensa_switch_section_emit_state (emit_state *, segT, subsegT);
 static void xtensa_restore_emit_state (emit_state *);
 static void cache_literal_section
   (seg_list *, const char *, segT *, bfd_boolean);
-
-/* Property flags on fragments and conversion to object file flags.  */
-
-static bfd_boolean get_frag_is_literal (const fragS *);
-static bfd_boolean get_frag_is_insn (const fragS *);
-static bfd_boolean get_frag_is_no_transform (fragS *);
-static void set_frag_is_specific_opcode (fragS *, bfd_boolean);
-static void set_frag_is_no_transform (fragS *, bfd_boolean);
 
 /* Import from elf32-xtensa.c in BFD library.  */
 
@@ -1585,7 +1556,7 @@ xtensa_literal_prefix (char const *start, int len)
       strcpy (newname4 + suffix_pos, ".lit4");
     }
 
-  /* Note that retrieve_literal_seg does not create a segment if
+  /* Note that cache_literal_section does not create a segment if
      it already exists.  */
   default_lit_sections.lit_seg = NULL;
   default_lit_sections.lit4_seg = NULL;
@@ -1605,7 +1576,6 @@ static void
 xtensa_frequency_pseudo (int ignored ATTRIBUTE_UNUSED)
 {
   float fall_through_f, target_f;
-  subseg_map *seginfo;
 
   fall_through_f = (float) strtod (input_line_pointer, &input_line_pointer);
   if (fall_through_f < 0)
@@ -1623,9 +1593,7 @@ xtensa_frequency_pseudo (int ignored ATTRIBUTE_UNUSED)
       return;
     }
 
-  seginfo = get_subseg_info (now_seg, now_subseg);
-  seginfo->cur_target_freq = target_f;
-  seginfo->cur_total_freq = target_f + fall_through_f;
+  set_subseg_freq (now_seg, now_subseg, target_f + fall_through_f, target_f);
 
   demand_empty_rest_of_line ();
 }
@@ -2683,67 +2651,6 @@ is_direct_call_opcode (xtensa_opcode opcode)
 	return TRUE;
     }
   return FALSE;
-}
-
-
-/* Return TRUE if the opcode is an entry opcode.  This is used because
-   "entry" adds an implicit ".align 4" and also the entry instruction
-   has an extra check for an operand value.  */
-
-static bfd_boolean
-is_entry_opcode (xtensa_opcode opcode)
-{
-  if (opcode == XTENSA_UNDEFINED)
-    return FALSE;
-
-  return (opcode == xtensa_entry_opcode);
-}
-
-
-/* Return TRUE if the opcode is a movi or movi.n opcode.  This is 
-   so we can relax "movi aX, foo" in the front end.  */
-
-static bfd_boolean
-is_movi_opcode (xtensa_opcode opcode)
-{
-  if (opcode == XTENSA_UNDEFINED)
-    return FALSE;
-
-  return (opcode == xtensa_movi_opcode) 
-    || (opcode == xtensa_movi_n_opcode);
-}
-
-
-static bfd_boolean
-is_the_loop_opcode (xtensa_opcode opcode)
-{
-  if (opcode == XTENSA_UNDEFINED)
-    return FALSE;
-
-  return (opcode == xtensa_loop_opcode);
-}
-
-
-static bfd_boolean
-is_jx_opcode (xtensa_opcode opcode)
-{
-  if (opcode == XTENSA_UNDEFINED)
-    return FALSE;
-
-  return (opcode == xtensa_jx_opcode);
-}
-
-
-/* Return TRUE if the opcode is a retw or retw.n.
-   Needed to add nops to avoid a hardware interlock issue.  */
-
-static bfd_boolean
-is_windowed_return_opcode (xtensa_opcode opcode)
-{
-  if (opcode == XTENSA_UNDEFINED)
-    return FALSE;
-
-  return (opcode == xtensa_retw_opcode || opcode == xtensa_retw_n_opcode);
 }
 
 
@@ -5231,7 +5138,7 @@ xtensa_frob_label (symbolS *sym)
       && !is_unaligned_label (sym)
       && !generating_literals)
     {
-      float freq = get_subseg_info (now_seg, now_subseg)->cur_target_freq;
+      float freq = get_subseg_target_freq (now_seg, now_subseg);
       xtensa_set_frag_assembly_state (frag_now);
 
       /* The only time this type of frag grows is when there is a
@@ -5459,7 +5366,7 @@ md_assemble (char *str)
   xg_add_branch_and_loop_targets (&orig_insn);
 
   /* Special-case for "entry" instruction.  */
-  if (is_entry_opcode (orig_insn.opcode))
+  if (orig_insn.opcode == xtensa_entry_opcode)
     {
       /* Check that the third opcode (#2) is >= 16.  */
       if (orig_insn.ntok >= 3)
@@ -5511,7 +5418,7 @@ void
 xtensa_handle_align (fragS *fragP)
 {
   if (linkrelax
-      && !get_frag_is_literal (fragP)
+      && ! fragP->tc_frag_data.is_literal
       && (fragP->fr_type == rs_align
 	  || fragP->fr_type == rs_align_code)
       && fragP->fr_address + fragP->fr_fix > 0
@@ -6733,7 +6640,8 @@ relaxation_requirements (vliw_insn *vinsn)
 	}
       else
 	{
-	  if (workaround_b_j_loop_end && is_jx_opcode (tinsn->opcode) 
+	  if (workaround_b_j_loop_end
+	      && tinsn->opcode == xtensa_jx_opcode
 	      && use_transform ())
 	    {
 	      /* Add 2 of these.  */
@@ -6818,7 +6726,9 @@ emit_single_op (TInsn *orig_insn)
      Because the scheduling and bundling characteristics of movi and 
      l32r or const16 are so different, we can do much better if we relax 
      it prior to scheduling and bundling, rather than after.  */
-  if (is_movi_opcode (orig_insn->opcode) && !cur_vinsn.inside_bundle
+  if ((orig_insn->opcode == xtensa_movi_opcode 
+       || orig_insn->opcode == xtensa_movi_n_opcode)
+      && !cur_vinsn.inside_bundle
       && (orig_insn->tok[1].X_op == O_symbol
 	  || orig_insn->tok[1].X_op == O_pltrel))
     xg_assembly_relax (&istack, orig_insn, now_seg, frag_now, 0, 1, 0);
@@ -6894,9 +6804,9 @@ xg_assemble_vliw_tokens (vliw_insn *vinsn)
     }
 
   if (frag_now_fix () != 0
-      && (!get_frag_is_insn (frag_now)
+      && (! frag_now->tc_frag_data.is_insn
  	  || (vinsn_has_specific_opcodes (vinsn) && use_transform ())
- 	  || !use_transform () != get_frag_is_no_transform (frag_now)
+ 	  || !use_transform () != frag_now->tc_frag_data.is_no_transform
  	  || (directive_state[directive_absolute_literals]
 	      != frag_now->tc_frag_data.use_absolute_literals)))
     {
@@ -6970,7 +6880,7 @@ xg_assemble_vliw_tokens (vliw_insn *vinsn)
       xtensa_move_labels (frag_now, 0, FALSE);
     }
 
-  if (is_entry_opcode (vinsn->slots[0].opcode) 
+  if (vinsn->slots[0].opcode == xtensa_entry_opcode
       && !vinsn->slots[0].is_specific_opcode)
     {
       xtensa_mark_literal_pool_location ();
@@ -7034,7 +6944,7 @@ xg_assemble_vliw_tokens (vliw_insn *vinsn)
     }
 
   if (vinsn_has_specific_opcodes (vinsn) && use_transform ())
-    set_frag_is_specific_opcode (frag_now, TRUE);
+    frag_now->tc_frag_data.is_specific_opcode = TRUE;
 
   if (finish_frag)
     {
@@ -7109,7 +7019,7 @@ xg_assemble_vliw_tokens (vliw_insn *vinsn)
   if (do_align_targets ()
       && xtensa_opcode_is_call (isa, vinsn->slots[0].opcode) == 1)
     {
-      float freq = get_subseg_info (now_seg, now_subseg)->cur_total_freq;
+      float freq = get_subseg_total_freq (now_seg, now_subseg);
       frag_now->tc_frag_data.is_insn = TRUE;
       frag_var (rs_machine_dependent, 4, (int) freq, RELAX_DESIRE_ALIGN,
 		frag_now->fr_symbol, frag_now->fr_offset, NULL);
@@ -7438,7 +7348,7 @@ xtensa_fix_a0_b_retw_frags (void)
 	    {
 	      if (next_instrs_are_b_retw (fragP))
 		{
-		  if (get_frag_is_no_transform (fragP))
+		  if (fragP->tc_frag_data.is_no_transform)
 		    as_bad (_("instruction sequence (write a0, branch, retw) may trigger hardware errata"));
 		  else
 		    relax_frag_add_nop (fragP);
@@ -7513,7 +7423,7 @@ next_instrs_are_b_retw (fragS *fragP)
   xtensa_format_get_slot (isa, fmt, 0, insnbuf, slotbuf);
   opcode = xtensa_opcode_decode (isa, fmt, 0, slotbuf);
 
-  if (is_windowed_return_opcode (opcode))
+  if (opcode == xtensa_retw_opcode || opcode == xtensa_retw_n_opcode)
     return TRUE;
 
   return FALSE;
@@ -7546,7 +7456,7 @@ xtensa_fix_b_j_loop_end_frags (void)
 	    {
 	      if (next_instr_is_loop_end (fragP))
 		{
-		  if (get_frag_is_no_transform (fragP))
+		  if (fragP->tc_frag_data.is_no_transform)
 		    as_bad (_("branching or jumping to a loop end may trigger hardware errata"));
 		  else
 		    relax_frag_add_nop (fragP);
@@ -7644,7 +7554,7 @@ xtensa_fix_close_loop_end_frags (void)
 
 	      if (min_bytes < REQUIRED_LOOP_DIVIDING_BYTES)
 		{
-		  if (get_frag_is_no_transform (fragP))
+		  if (fragP->tc_frag_data.is_no_transform)
 		    as_bad (_("loop end too close to another loop end may trigger hardware errata"));
 		  else
 		    {
@@ -7824,9 +7734,9 @@ xtensa_fix_short_loop_frags (void)
 		  && (branch_before_loop_end (fragP->fr_next)
 		      || (workaround_all_short_loops
 			  && current_opcode != XTENSA_UNDEFINED
-			  && !is_the_loop_opcode (current_opcode))))
+			  && current_opcode != xtensa_loop_opcode)))
 		{
-		  if (get_frag_is_no_transform (fragP))
+		  if (fragP->tc_frag_data.is_no_transform)
 		    as_bad (_("loop containing less than three instructions may trigger hardware errata"));
 		  else
 		    relax_frag_add_nop (fragP);
@@ -9116,7 +9026,7 @@ relax_frag_immed (segT segP,
   if (estimate_only && xtensa_opcode_is_loop (isa, tinsn.opcode))
     return 0;
 
-  if (workaround_b_j_loop_end && !get_frag_is_no_transform (fragP))
+  if (workaround_b_j_loop_end && ! fragP->tc_frag_data.is_no_transform)
     branch_jmp_to_next = is_branch_jmp_to_next (&tinsn, fragP);
 
   negatable_branch = (xtensa_opcode_is_branch (isa, tinsn.opcode) == 1);
@@ -9487,7 +9397,7 @@ convert_frag_immed (segT segP,
 
   is_loop = xtensa_opcode_is_loop (xtensa_default_isa, orig_tinsn.opcode) == 1;
 
-  if (workaround_b_j_loop_end && !get_frag_is_no_transform (fragP))
+  if (workaround_b_j_loop_end && ! fragP->tc_frag_data.is_no_transform)
     branch_jmp_to_next = is_branch_jmp_to_next (&orig_tinsn, fragP);
 
   if (branch_jmp_to_next && !next_frag_is_loop_target (fragP))
@@ -9796,8 +9706,6 @@ fix_new_exp_in_seg (segT new_seg,
           label:
 */
 
-static offsetT get_expression_value (segT, expressionS *);
-
 static void
 convert_frag_immed_finish_loop (segT segP, fragS *fragP, TInsn *tinsn)
 {
@@ -9831,7 +9739,21 @@ convert_frag_immed_finish_loop (segT segP, fragS *fragP, TInsn *tinsn)
   addmi_offset += loop_offset;
 
   assert (tinsn->ntok == 2);
-  target = get_expression_value (segP, &tinsn->tok[1]);
+  if (tinsn->tok[1].X_op == O_constant)
+    target = tinsn->tok[1].X_add_number;
+  else if (tinsn->tok[1].X_op == O_symbol)
+    {
+      /* Find the fragment.  */
+      symbolS *sym = tinsn->tok[1].X_add_symbol;
+      assert (S_GET_SEGMENT (sym) == segP
+	      || S_GET_SEGMENT (sym) == absolute_section);
+      target = (S_GET_VALUE (sym) + tinsn->tok[1].X_add_number);
+    }
+  else
+    {
+      as_bad (_("invalid expression evaluation type %d"), tinsn->tok[1].X_op);
+      target = 0;
+    }
 
   know (symbolP);
   know (symbolP->sy_frag);
@@ -9878,7 +9800,7 @@ convert_frag_immed_finish_loop (segT segP, fragS *fragP, TInsn *tinsn)
   for (next_fragP = fragP; next_fragP != NULL;
        next_fragP = next_fragP->fr_next)
     {
-      set_frag_is_no_transform (next_fragP, TRUE);
+      next_fragP->tc_frag_data.is_no_transform = TRUE;
       if (next_fragP->tc_frag_data.is_loop_target)
 	target_count++;
       if (target_count == 2)
@@ -9886,27 +9808,27 @@ convert_frag_immed_finish_loop (segT segP, fragS *fragP, TInsn *tinsn)
     }
 }
 
-
-static offsetT
-get_expression_value (segT segP, expressionS *exp)
-{
-  if (exp->X_op == O_constant)
-    return exp->X_add_number;
-  if (exp->X_op == O_symbol)
-    {
-      /* Find the fragment.  */
-      symbolS *sym = exp->X_add_symbol;
-
-      assert (S_GET_SEGMENT (sym) == segP
-	      || S_GET_SEGMENT (sym) == absolute_section);
-
-      return (S_GET_VALUE (sym) + exp->X_add_number);
-    }
-  as_bad (_("invalid expression evaluation type %d"), exp->X_op);
-  return 0;
-}
-
 
+/* A map that keeps information on a per-subsegment basis.  This is
+   maintained during initial assembly, but is invalid once the
+   subsegments are smashed together.  I.E., it cannot be used during
+   the relaxation.  */
+
+typedef struct subseg_map_struct
+{
+  /* the key */
+  segT seg;
+  subsegT subseg;
+
+  /* the data */
+  unsigned flags;
+  float total_freq;	/* fall-through + branch target frequency */
+  float target_freq;	/* branch target frequency alone */
+
+  struct subseg_map_struct *next;
+} subseg_map;
+
+
 static subseg_map *sseg_map = NULL;
 
 static subseg_map *
@@ -9917,20 +9839,25 @@ get_subseg_info (segT seg, subsegT subseg)
   for (subseg_e = sseg_map; subseg_e; subseg_e = subseg_e->next)
     {
       if (seg == subseg_e->seg && subseg == subseg_e->subseg)
-	return subseg_e;
+	break;
     }
-  
-  subseg_e = (subseg_map *) xmalloc (sizeof (subseg_map));
+  return subseg_e;
+}
+
+
+static subseg_map *
+add_subseg_info (segT seg, subsegT subseg)
+{
+  subseg_map *subseg_e = (subseg_map *) xmalloc (sizeof (subseg_map));
   memset (subseg_e, 0, sizeof (subseg_map));
   subseg_e->seg = seg;
   subseg_e->subseg = subseg;
   subseg_e->flags = 0;
   /* Start off considering every branch target very important.  */
-  subseg_e->cur_target_freq = 1.0;
-  subseg_e->cur_total_freq = 1.0;
+  subseg_e->target_freq = 1.0;
+  subseg_e->total_freq = 1.0;
   subseg_e->next = sseg_map;
   sseg_map = subseg_e;
-  
   return subseg_e;
 }
 
@@ -9939,7 +9866,9 @@ static unsigned
 get_last_insn_flags (segT seg, subsegT subseg)
 {
   subseg_map *subseg_e = get_subseg_info (seg, subseg);
-  return subseg_e->flags;
+  if (subseg_e)
+    return subseg_e->flags;
+  return 0;
 }
 
 
@@ -9950,10 +9879,43 @@ set_last_insn_flags (segT seg,
 		     bfd_boolean val)
 {
   subseg_map *subseg_e = get_subseg_info (seg, subseg);
+  if (! subseg_e)
+    subseg_e = add_subseg_info (seg, subseg);
   if (val)
     subseg_e->flags |= fl;
   else
     subseg_e->flags &= ~fl;
+}
+
+
+static float
+get_subseg_total_freq (segT seg, subsegT subseg)
+{
+  subseg_map *subseg_e = get_subseg_info (seg, subseg);
+  if (subseg_e)
+    return subseg_e->total_freq;
+  return 1.0;
+}
+
+
+static float
+get_subseg_target_freq (segT seg, subsegT subseg)
+{
+  subseg_map *subseg_e = get_subseg_info (seg, subseg);
+  if (subseg_e)
+    return subseg_e->target_freq;
+  return 1.0;
+}
+
+
+static void
+set_subseg_freq (segT seg, subsegT subseg, float total_f, float target_f)
+{
+  subseg_map *subseg_e = get_subseg_info (seg, subseg);
+  if (! subseg_e)
+    subseg_e = add_subseg_info (seg, subseg);
+  subseg_e->total_freq = total_f;
+  subseg_e->target_freq = target_f;
 }
 
 
@@ -10182,22 +10144,22 @@ xtensa_reorder_seg_list (seg_list *head, segT after)
 
 /* Push all the literal segments to the end of the gnu list.  */
 
-static segT get_last_sec (void);
-
 static void
 xtensa_reorder_segments (void)
 {
   segT sec;
-  segT last_sec;
+  segT last_sec = 0;
   int old_count = 0;
   int new_count = 0;
 
   for (sec = stdoutput->sections; sec != NULL; sec = sec->next)
-    old_count++;
+    {
+      last_sec = sec;
+      old_count++;
+    }
 
   /* Now that we have the last section, push all the literal
      sections to the end.  */
-  last_sec = get_last_sec ();
   xtensa_reorder_seg_list (literal_head, last_sec);
   xtensa_reorder_seg_list (init_literal_head, last_sec);
   xtensa_reorder_seg_list (fini_literal_head, last_sec);
@@ -10206,17 +10168,6 @@ xtensa_reorder_segments (void)
   for (sec = stdoutput->sections; sec != NULL; sec = sec->next)
     new_count++;
   assert (new_count == old_count);
-}
-
-
-static segT
-get_last_sec (void)
-{
-  segT last_sec = stdoutput->sections;
-  while (last_sec->next != NULL)
-    last_sec = last_sec->next;
-
-  return last_sec;
 }
 
 
@@ -10345,82 +10296,46 @@ xtensa_restore_emit_state (emit_state *state)
 /* Get a segment of a given name.  If the segment is already
    present, return it; otherwise, create a new one.  */
 
-static segT retrieve_literal_seg (seg_list *, const char *, bfd_boolean);
-
 static void
 cache_literal_section (seg_list *head,
 		       const char *name,
-		       segT *seg,
+		       segT *pseg,
 		       bfd_boolean is_code)
 {
   segT current_section = now_seg;
   int current_subsec = now_subseg;
-
-  if (*seg != 0)
-    return;
-  *seg = retrieve_literal_seg (head, name, is_code);
-  subseg_set (current_section, current_subsec);
-}
-
-
-/* Get a segment of a given name.  If the segment is already
-   present, return it; otherwise, create a new one.  */
-
-static segT seg_present (const char *);
-static void add_seg_list (seg_list *, segT);
-
-static segT
-retrieve_literal_seg (seg_list *head, const char *name, bfd_boolean is_code)
-{
-  segT ret = 0;
-
-  ret = seg_present (name);
-  if (!ret)
-    {
-      ret = subseg_new (name, (subsegT) 0);
-      if (head)
-	add_seg_list (head, ret);
-      bfd_set_section_flags (stdoutput, ret, SEC_HAS_CONTENTS |
-			     SEC_READONLY | SEC_ALLOC | SEC_LOAD
-			     | (is_code ? SEC_CODE : SEC_DATA));
-      bfd_set_section_alignment (stdoutput, ret, 2);
-    }
-
-  return ret;
-}
-
-
-/* Return a segment of a given name if it is present.  */
-
-static segT
-seg_present (const char *name)
-{
   segT seg;
-  seg = stdoutput->sections;
 
-  while (seg)
+  if (*pseg != 0)
+    return;
+
+  /* Check if the named section exists.  */
+  for (seg = stdoutput->sections; seg; seg = seg->next)
     {
       if (!strcmp (segment_name (seg), name))
-	return seg;
-      seg = seg->next;
+	break;
     }
 
-  return 0;
-}
+  if (!seg)
+    {
+      /* Create a new literal section.  */
+      seg = subseg_new (name, (subsegT) 0);
+      if (head)
+	{
+	  /* Add the newly created literal segment to the specified list.  */
+	  seg_list *n = (seg_list *) xmalloc (sizeof (seg_list));
+	  n->seg = seg;
+	  n->next = head->next;
+	  head->next = n;
+	}
+      bfd_set_section_flags (stdoutput, seg, SEC_HAS_CONTENTS |
+			     SEC_READONLY | SEC_ALLOC | SEC_LOAD
+			     | (is_code ? SEC_CODE : SEC_DATA));
+      bfd_set_section_alignment (stdoutput, seg, 2);
+    }
 
-
-/* Add a segment to a segment list.  */
-
-static void
-add_seg_list (seg_list *head, segT seg)
-{
-  seg_list *n;
-  n = (seg_list *) xmalloc (sizeof (seg_list));
-  assert (n);
-
-  n->seg = seg;
-  n->next = head->next;
-  head->next = n;
+  *pseg = seg;
+  subseg_set (current_section, current_subsec);
 }
 
 
@@ -10433,6 +10348,7 @@ add_seg_list (seg_list *head, segT seg)
 typedef bfd_boolean (*frag_predicate) (const fragS *);
 typedef void (*frag_flags_fn) (const fragS *, frag_flags *);
 
+static bfd_boolean get_frag_is_literal (const fragS *);
 static void xtensa_create_property_segments
   (frag_predicate, frag_predicate, const char *, xt_section_type);
 static void xtensa_create_xproperty_segments
@@ -10483,35 +10399,6 @@ get_frag_is_literal (const fragS *fragP)
 {
   assert (fragP != NULL);
   return fragP->tc_frag_data.is_literal;
-}
-
-
-static bfd_boolean
-get_frag_is_insn (const fragS *fragP)
-{
-  assert (fragP != NULL);
-  return fragP->tc_frag_data.is_insn;
-}
-
-
-static bfd_boolean
-get_frag_is_no_transform (fragS *fragP)
-{
-  return fragP->tc_frag_data.is_no_transform;
-}
-
-
-static void
-set_frag_is_specific_opcode (fragS *fragP, bfd_boolean is_specific_opcode)
-{
-  fragP->tc_frag_data.is_specific_opcode = is_specific_opcode;
-}
- 
-
-static void
-set_frag_is_no_transform (fragS *fragP, bfd_boolean is_no_transform)
-{
-  fragP->tc_frag_data.is_no_transform = is_no_transform;
 }
 
 

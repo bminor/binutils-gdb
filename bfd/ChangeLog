@@ -1,5 +1,13 @@
 2004-10-12  Bob Wilson  <bob.wilson@acm.org>
 
+	* elf32-xtensa.c (elf_xtensa_get_private_bfd_flags): Delete.
+	(narrow_instruction, widen_instruction): Remove unnecessary calls to
+	xtensa_format_encode.
+	(ebb_propose_action): Inline call to ebb_add_proposed_action.
+	(ebb_add_proposed_action): Delete.
+
+2004-10-12  Bob Wilson  <bob.wilson@acm.org>
+
 	* elf32-xtensa.c: Use ISO C90 formatting.
 
 2004-10-12  Paul Brook  <paul@codesourcery.com>
