@@ -1,3 +1,13 @@
+2000-04-05  Scott Bambrough <scottb@netwinder.org>
+
+	* arm-linux-tdep.c: New file.
+	* arm-linux-nat.c (fetch_fpregs): Remove unused code.
+	  (arm_get_longjmp_target): Moved it and all defines 
+	  it uses to arm-linux-tdep.c.
+	  (arm_linux_extract_return_value): Moved to
+	  arm-linux-tdep.c.
+	* config/arm/linux.mt: Add arm-linux-tdep.c to TDEPFILES.
+
 2000-04-04  Nick Duffek  <nsd@cygnus.com>
 
 	* infrun.c (handle_inferior_event): Call target_mourn_inferior
