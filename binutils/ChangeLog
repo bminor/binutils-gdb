@@ -1,5 +1,8 @@
 Tue Oct 18 11:12:01 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
+	* nm.c (print_symdef_entry): Call print_symname to print the
+	symbol name, so that --demangle works.
+
 	* Makefile.in (mostlyclean): Remove tmpdir.
 
 	* objcopy.c (struct section_list): Add fields used, adjust, val.
