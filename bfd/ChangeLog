@@ -1,5 +1,8 @@
 2004-12-09  Ian Lance Taylor  <ian@wasabisystems.com>
 
+	* elfn32-mips.c (elf_mips_howto_table_rela): Change dst_mask of
+	R_MIPS_JALR entry to 0.
+
 	* archures.c: Define bfd_mach_mips9000.
 	* elfxx-mips.c (_bfd_elf_mips_mach): Handle E_MIPS_MACH_9000.
 	(mips_set_isa_flags): Handle bfd_mach_mips9000.

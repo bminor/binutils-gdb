@@ -1115,7 +1115,7 @@ static reloc_howto_type elf_mips_howto_table_rela[] =
 	 "R_MIPS_JALR",	        /* name */
 	 FALSE,			/* partial_inplace */
 	 0,			/* src_mask */
-	 0xffffffff,		/* dst_mask */
+	 0,			/* dst_mask */
 	 FALSE),		/* pcrel_offset */
 };
 
