@@ -1,5 +1,8 @@
 2003-11-22  Andrew Cagney  <cagney@redhat.com>
 
+	* mips-tdep.c (mips_frame_chain): Delete call to
+	deprecated_inside_entry_file.
+
 	* frame.h (deprecated_set_frame_next_hack): Delete declaration.
 	(deprecated_set_frame_prev_hack): Delete declaration.
 	* frame.c (deprecated_set_frame_next_hack): Delete function.

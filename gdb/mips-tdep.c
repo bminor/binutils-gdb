@@ -2517,9 +2517,6 @@ mips_frame_chain (struct frame_info *frame)
   CORE_ADDR tmp;
   CORE_ADDR saved_pc = DEPRECATED_FRAME_SAVED_PC (frame);
 
-  if (saved_pc == 0 || deprecated_inside_entry_file (saved_pc))
-    return 0;
-
   /* Check if the PC is inside a call stub.  If it is, fetch the
      PC of the caller of that stub.  */
   if ((tmp = SKIP_TRAMPOLINE_CODE (saved_pc)) != 0)
