@@ -889,7 +889,7 @@ pseudo-ops which are specific to the CPU.
 If this macro is defined, GAS will call it with a @code{pseudo_typeS} argument.
 It should return non-zero if the pseudo-op is a conditional which controls
 whether code is assembled, such as @samp{.if}.  GAS knows about the normal
-conditional pseudo-ops,and you should normally not have to define this macro.
+conditional pseudo-ops, and you should normally not have to define this macro.
 
 @item comment_chars
 @cindex comment_chars
@@ -1189,7 +1189,7 @@ If you define this macro, and the global variable @samp{linkrelax} is set
 @samp{.align} directive will cause extra space to be allocated.  The linker can
 then discard this space when relaxing the section.
 
-@item TC_LINKRELAX_FIXUP ($var{segT})
+@item TC_LINKRELAX_FIXUP (@var{segT})
 @cindex TC_LINKRELAX_FIXUP
 If defined, this macro allows control over whether fixups for a
 given section will be processed when the @var{linkrelax} variable is

@@ -1,3 +1,8 @@
+2000-12-29  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* doc/internals.texi (tc_conditional_pseudoop,
+	TC_LINKRELAX_FIXUP): Fix typos.
+
 2000-12-28  Richard Henderson  <rth@redhat.com>
 
 	* write.c (subsegs_finish): Fix thinko last change -- don't
