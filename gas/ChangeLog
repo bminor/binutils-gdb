@@ -1,3 +1,9 @@
+Tue Mar 24 19:48:09 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/obj-coff.c (obj_coff_bss): Compile unconditionally.  Call
+	s_lcomm rather than obj_coff_lcomm.
+	(obj_pseudo_table): Compile .bss pseudo-op unconditionally.
+
 Tue Mar 24 18:30:58 1998  H.J. Lu  <hjl@gnu.org>
 
 	* config/tc-i386.h (LinearAddress): Define.
