@@ -241,7 +241,7 @@ BFD_NEED_DECLARATION(free)
 BFD_NEED_DECLARATION(strerror)
 BFD_NEED_DECLARATION(strdup)
 BFD_NEED_DECLARATION(strstr)
-
+BFD_NEED_DECLARATION(canonicalize_file_name)
 
 # The following save_state_t checkery is only necessary for HPUX 
 # versions earlier than 10.20.  When those fade from memory, this 
