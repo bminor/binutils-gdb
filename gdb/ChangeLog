@@ -1,3 +1,24 @@
+Tue Apr 21 12:00:47 1992  K. Richard Pixley  (rich@cygnus.com)
+
+	* Makefile.in: rework CFLAGS so that they can be set from the
+	  command line to make.  CFLAGS -> INTERNAL_CFLAGS.
+	  USER_CFLAGS -> CFLAGS.  Remove MINUS_G.  Default CFLAGS to -g.
+	  Pass CFLAGS on recusions.
+
+Fri Apr 17 19:25:57 1992  Fred Fish  (fnf@cygnus.com)
+
+	* gdbtypes.h, c-exp.y, m2-exp.y, mipsread.c, gdbtypes.c:  Back
+	out of change on 4/14/92 and remove TYPE_FLAG_FUND_TYPE.  It was
+	overkill for the problem it solved.
+	* valprint.c (type_print_base):  Remove TYPE_FLAG_FUND_TYPE test
+	and default to simply printing type names as appropriate.
+	* main.c (main):  Remove one of the leading newlines from
+	warning_pre_print initialization.
+	* objfiles.c (open_existing_mapped_file):  Add function and
+	prototype.
+	* objfiles.c (open_mapped_file):  Rewrite to use new function
+	open_existing_mapped_file.
+
 Thu Apr 16 23:50:12 1992  John Gilmore  (gnu at cygnus.com)
 
 	* sun3-xdep.c (fetch_core_registers):  Lint.
