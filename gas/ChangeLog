@@ -1,3 +1,8 @@
+2003-12-17  Mark Mitchell  <mark@codesourcery.com>
+
+	* config/tc-arm.c (arm_archs): Change "armv6" to "armv6j".
+	* doc/c-arm.texi (ARM Options): Likewise.
+
 2003-12-17  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-m32r.c (error_explicit_parallel_conflicts): Rename
