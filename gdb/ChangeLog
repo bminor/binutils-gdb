@@ -1,3 +1,20 @@
+Sat Nov 30 21:29:55 1991  Steve Chamberlain  (sac at cygnus.com)
+	Changes due to include file renaming:
+
+	* xcoffread.c:	internalcoff.h	->coff/internal.c,
+	  		coff-rs6000.h	->coff/rs6000.h
+	* mipsread.c:	coff-mips.h	->coff/mips.h
+	* elfread.c:    elf-common.h	->elf/common.h 
+			elf-external.h	->elf/external.h,
+			elf-internal.h	->elf/internal.h
+	* dwarfread.c	dwarf.h		->elf/dwarf.h
+	* dbxread.c:	aout64.h	->aout/aout64.h
+			stab.gnu.h	->aout/stab_gnu.h
+		   
+	* coffread.c:   internalcoff.h	->coff/internal.h
+	* buildsym.c:   stab.gnu.h	->aout/stab_gnu.h
+	* depend        Updated to take the above into account.
+
 Fri Nov 29 16:59:25 1991  Fred Fish  (fnf at cygnus.com)
 
 	* configure.in:  Add SVR4 i386 configurations.

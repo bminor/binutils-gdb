@@ -28,7 +28,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <obstack.h>
 #include <string.h>
 
-#include "internalcoff.h"	/* Internal format of COFF symbols in BFD */
+#include "coff/internal.h"	/* Internal format of COFF symbols in BFD */
 #include "libcoff.h"		/* FIXME secret internal data from BFD */
 
 static void add_symbol_to_list ();

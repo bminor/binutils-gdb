@@ -75,7 +75,7 @@ other things to work on, if you get bored. :-)
 #include "bfd.h"
 #include "symtab.h"
 #include "symfile.h"
-#include "dwarf.h"
+#include "elf/dwarf.h"
 #include "ansidecl.h"
 
 #ifdef MAINTENANCE	/* Define to 1 to compile in some maintenance stuff */

@@ -31,7 +31,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "breakpoint.h"
 #include "gdbcore.h"		/* for bfd stuff for symfile.h */
 #include "symfile.h"		/* Needed for "struct complaint" */
-#include "stab.gnu.h"		/* We always use GNU stabs, not native */
+#include "aout/stab_gnu.h"		/* We always use GNU stabs, not native */
 #include <string.h>
 #include <ctype.h>
 

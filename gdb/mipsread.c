@@ -49,7 +49,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <sym.h>
 #endif /* not CMUCS */
 
-#include "coff-mips.h"
+#include "coff/mips.h"
 
 struct coff_exec {
 	struct external_filehdr f;

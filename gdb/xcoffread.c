@@ -39,9 +39,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "symfile.h"
 #include "buildsym.h"
 
-#include "internalcoff.h"	/* FIXME, internal data from BFD */
+#include "coff/internal.h"	/* FIXME, internal data from BFD */
 #include "libcoff.h"		/* FIXME, internal data from BFD */
-#include "coff-rs6000.h"	/* FIXME, raw file-format guts of xcoff */
+#include "coff/rs6000.h"	/* FIXME, raw file-format guts of xcoff */
 
 extern char *index();
 
