@@ -827,8 +827,9 @@ called after relaxing, change the frags so they know how big they are
 */
 #ifndef BFD_ASSEMBLER
 void
-md_convert_frag (headers, fragP)
+md_convert_frag (headers, seg, fragP)
      object_headers *headers;
+     segT seg;
      register fragS *fragP;
 #else
 void

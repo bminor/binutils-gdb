@@ -69,11 +69,7 @@ struct reloc_info_m88k
 /* Don't warn on word overflow; it happens on %hi relocs.  */
 #undef WARN_SIGNED_OVERFLOW_WORD
 
-#ifndef BFD_ASSEMBLER
-#define md_convert_frag(h,f)		{as_fatal ("m88k convert_frag\n");}
-#else
 #define md_convert_frag(b,s,f)		{as_fatal ("m88k convert_frag\n");}
-#endif
 
 /* We don't need to do anything special for undefined symbols.  */
 #define md_undefined_symbol(s) 0

@@ -28,7 +28,7 @@
 #define TC_COUNT_RELOC(x) ((x)->fx_addsy||(x)->fx_subsy)
 #define IGNORE_NONSTANDARD_ESCAPES
 
-#define TC_RELOC_MANGLE(a,b,c) tc_reloc_mangle(a,b,c)
+#define TC_RELOC_MANGLE(s,a,b,c) tc_reloc_mangle(a,b,c)
 
 #define DO_NOT_STRIP 0
 #define DO_STRIP 0

@@ -912,10 +912,10 @@ md_create_long_jump (ptr, from_Nddr, to_Nddr, frag, to_symbol)
 called after relaxing, change the frags so they know how big they are
 */
 void
-md_convert_frag (headers, fragP)
+md_convert_frag (headers, seg, fragP)
      object_headers *headers;
+     segT seg;
      fragS *fragP;
-
 {
   int disp_size = 0;
   int inst_size = 0;

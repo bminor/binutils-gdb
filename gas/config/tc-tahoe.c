@@ -732,8 +732,9 @@ md_estimate_size_before_relax (fragP, segment_type)
  *	Caller will turn frag into a ".space 0".
  */
 void
-md_convert_frag (headers, fragP)
+md_convert_frag (headers, seg, fragP)
      object_headers *headers;
+     segT seg;
      register fragS *fragP;
 {
   register char *addressP;	/* -> _var to change. */

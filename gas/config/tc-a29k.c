@@ -925,8 +925,9 @@ md_create_short_jump (ptr, from_addr, to_addr, frag, to_symbol)
 
 /* should never be called for 29k */
 void
-md_convert_frag (headers, fragP)
+md_convert_frag (headers, seg, fragP)
      object_headers *headers;
+     segT seg;
      register fragS *fragP;
 {
   as_fatal ("a29k_convert_frag\n");

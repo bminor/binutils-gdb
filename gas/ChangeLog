@@ -1,3 +1,66 @@
+Wed Jul 19 11:49:25 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-sh.c (sh_relax): Rename from relax, and make global.
+	Renamed all uses.
+	(insert): Pass a size of 2, not 4.
+	(build_relax): Remove unused len variable.
+	(md_show_usage): Mention -little option.
+	(md_convert_frag): Add segT argument.  Rewrite to generate relocs
+	rather than to generate complete instructions here.
+	(md_apply_fix): Adjust and clarify R_SH_PCRELIMM8BY4 case for
+	changes in insert and md_pcrel_from.  Add cases for R_SH_PCDISP
+	and R_SH_PCDISP8BY2.
+	(md_pcrel_from): Don't subtract 1, add 2.
+	(tc_coff_fix2rtype): Remove.
+	(sh_coff_reloc_mangle): New function.
+	* config/tc-sh.h (TC_COFF_FIX2RTYPE): Just return fx_r_type.
+	(sh_relax): Declare.
+	(TC_COUNT_RELOC): If relaxing, count PC relative relocs.
+	(TC_RELOC_MANGLE): Define.
+	(sh_coff_reloc_mangle): Declare.
+	(tc_coff_sizemachdep): Declare.
+	* tc.h (md_convert_frag): Add segT parameter to non BFD_ASSEMBLER
+	declaration.
+	* write.c (cvt_frag_to_fill): Add sec argument to non
+	BFD_ASSEMBLER version.  Pass it to md_convert_frag.
+	(write_object_file): Pass SEG_TEXT to cvs_frag_to_fill.
+	* config/obj-coff.c (do_relocs_for): Pass segment info to
+	TC_RELOC_MANGLE.
+	(fixup_mdeps): Pass segment type to md_convert_frag.
+	* config/tc-a29k.c (md_convert_frag): Add segT argument.
+	* config/tc-h8300.c (md_convert_frag): Likewise.
+	* config/tc-h8500.c (md_convert_frag): Likewise.
+	* config/tc-i386.c (md_convert_frag): Likewise.
+	* config/tc-i860.c (md_convert_frag): Likewise.
+	* config/tc-i960.c (md_convert_frag): Likewise.
+	* config/tc-m68k.c (md_convert_frag): Likewise.
+	* config/tc-m88k.h (md_convert_frag): Likewise.
+	* config/tc-ns32k.c (md_convert_frag): Likewise.
+	* config/tc-rce.c (md_convert_frag): Likewise.
+	* config/tc-tahoe.c (md_convert_frag): Likewise.
+	* config/tc-vax.c (md_convert_frag): Likewise.
+	* config/tc-w65.c (md_convert_frag): Likewise.
+	* config/tc-z8k.c (md_convert_frag): Likewise.
+	* config/tc-h8300.h (TC_RELOC_MANGLE): Add segment argument.
+	* config/tc-h8500.h (TC_RELOC_MANGLE): Likewise.
+	* config/tc-rce.h (TC_RELOC_MANGLE): Likewise.
+	* config/tc-w65.h (TC_RELOC_MANGLE): Likewise.
+	* config/tc-z8k.h (TC_RELOC_MANGLE): Likewise.
+
+Mon Jul 17 15:02:54 1995  Pat Rankin  <rankin@eql.caltech.edu>
+
+	* config/obj-vms.c (Current_Routine, Text_Psect): Delete as file
+	scope variables.
+	(Define_Routine, Define_Local_Symbols): Take Current_Routine and
+	Text_Psect as arguments.
+	(VMS_DBG_Define_Routine): Delete.
+	(VMS_TBT_Block_End): Change `Size' argument from int to valueT.
+	(vms_write_object_file: text and data fixup loops): Difference
+	of two symbols has type offsetT rather than int; convert with
+	md_number_to_chars before passing to VMS_Store_Immediate_Data.
+	(vms_write_object_file: debug symbol loop): Call Define_Routine
+	instead of VMS_DBG_Define_Routine.
+
 Sat Jul 15 00:01:35 1995  Michael Meissner  <meissner@cygnus.com>
 
 	* config/tc-ppc.c (ppc_elf_suffix): Add @fixup so that the
