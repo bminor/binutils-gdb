@@ -23,7 +23,7 @@ srcdir = .
 destdir = /usr/local
 
 # Distribution version
-VERSION=1.90
+VERSION=1.91
 # Distribution name
 DIST_NAME=binutils-beta-${VERSION}
 
@@ -224,11 +224,11 @@ install: $(PROGS)
 dist: $(DIST_NAME).tar.Z
 
 $(DIST_NAME).tar.Z:
-	cd ../..; rm -f $(DISTNAME); ln -s devo $(DIST_NAME)
-	cd ..; Sanitize test
-	cd binutils; make binutils.mm -f Makefile.in
+	cd ../..; rm -f $(DIST_NAME); ln -s devo $(DIST_NAME)
+	make binutils.mm -f Makefile.in
 	cd ../ld; make ld.mm -f Makefile.in
 	cd ../..; tar chf - $(DIST_NAME) | compress >$(DIST_NAME).tar.Z
+	rm -rf ../../$(DIST_NAME)
 
 # These get around a bug in Sun Make in SunOS 4.1.1
 alloca.o:alloca.c

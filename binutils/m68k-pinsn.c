@@ -20,14 +20,25 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* $Id$
    $Log$
-   Revision 1.4  1991/10/16 18:56:56  bothner
-   	* Makefile.in, ar.c, bucomm.c, copy.c, cplus-dem.c, filemode.c,
-   	i960-pinsn.c, m68k-pinsn.c, nm.c, objdump.c, size.c, sparc-pinsn.c,
-   	* strip.c: Add or update Copyright notice.
-   	* TODO:  Add note on 'nm -a'.
-   	* version.c: Update version number to 1.90.
-   	* Makefile.in: Fix making of documentation for dist.
+   Revision 1.5  1991/11/03 22:58:44  bothner
+   	* Makefile.in ($(DIST_NAME).tar.Z), TODO:  Various fixes.
+   	* ar.c (get_pos_bfd): Fix to handling of before/after
+   	positioning options.
+   	* bucomm.c (fatal):  MISSING_VFPRINTF is no longer an issue,
+   	since libiberty contains vfprintf etc if otherwise missing.
+   	* m68k-pinsn.c (print_insn_arg):  Support BB/BW/BL
+   	type operands, as used by branch instructions.
+   	* nm.c:  Delegate printing of symbols to BFD,
+   	by using bfd_print_symbol to do the formatting.
 
+ * Revision 1.4  1991/10/16  18:56:56  bothner
+ * 	* Makefile.in, ar.c, bucomm.c, copy.c, cplus-dem.c, filemode.c,
+ * 	i960-pinsn.c, m68k-pinsn.c, nm.c, objdump.c, size.c, sparc-pinsn.c,
+ * 	* strip.c: Add or update Copyright notice.
+ * 	* TODO:  Add note on 'nm -a'.
+ * 	* version.c: Update version number to 1.90.
+ * 	* Makefile.in: Fix making of documentation for dist.
+ *
  * Revision 1.3  1991/10/11  11:22:00  gnu
  * Include bfd.h before sysdep.h, so ansidecl and PROTO() get defined first.
  *
@@ -354,9 +365,11 @@ print_insn_arg (d, buffer, p, addr, stream)
     case 'B':
       if (place == 'b')
 	val = NEXTBYTE (p);
-      else if (place == 'w')
+      else if (place == 'B')
+	val = buffer[1];
+      else if (place == 'w' || place == 'W')
 	val = NEXTWORD (p);
-      else if (place == 'l')
+      else if (place == 'l' || place == 'L')
 	val = NEXTLONG (p);
       else if (place == 'g')
 	{
