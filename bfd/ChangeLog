@@ -1,3 +1,19 @@
+2002-07-12  Hans-Peter Nilsson  <hp@axis.com>
+
+	* elf32-cris.c (cris_elf_relocate_section): Drop nonsensical
+	dynamic reference test in assertion when initializing GOT with
+	static contents.  Just assert that there are either no dynamic
+	sections, the symbol is defined in the regular objects or that the
+	symbol is undef weak.  Tweak comment.
+	(elf_cris_finish_dynamic_symbol): Emit .got reloc for a program
+	only if the symbol isn't defined in the program and isn't undef
+	weak.
+	(elf_cris_adjust_dynamic_symbol): Simplify condition for getting
+	rid of PLT entry: only do it if the symbol isn't defined in a DSO.
+	When doing so, clear ELF_LINK_HASH_NEEDS_PLT.  Tweak comments.
+	(elf_cris_discard_excess_program_dynamics): Don't consider
+	ELF_LINK_HASH_REF_DYNAMIC when omitting .got runtime relocs.
+
 2002-07-11  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-i386.c (elf_i386_relocate_section): Don't complain about

@@ -1046,29 +1046,28 @@ cris_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 			&& (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR)))
 		  {
 		    /* This wasn't checked above for ! info->shared, but
-		       must hold there if we get here; the symbol must not
-		       be used in, or defined by a DSO.  (Note that
-		       checking for ELF_LINK_HASH_DEF_REGULAR doesn't
-		       catch all cases.)  */
-		    BFD_ASSERT (info->shared
+		       must hold there if we get here; the symbol must be
+		       defined in the regular program, or be undefweak.  */
+		    BFD_ASSERT (!elf_hash_table (info)->dynamic_sections_created
+				|| info->shared
 				|| (h->elf_link_hash_flags
-				    & (ELF_LINK_HASH_REF_DYNAMIC
-				       | ELF_LINK_HASH_DEF_DYNAMIC)) == 0);
+				    & ELF_LINK_HASH_DEF_REGULAR) != 0
+				|| h->root.type == bfd_link_hash_undefweak);
 
 		    /* This is actually a static link, or it is a
-		       -Bsymbolic link and the symbol is defined
-		       locally, or the symbol was forced to be local
-		       because of a version file, or we're not creating a
-		       dynamic object and the symbol isn't referred to by
-		       a dynamic object.  We must initialize
-		       this entry in the global offset table.  Since
-		       the offset must always be a multiple of 4, we
-		       use the least significant bit to record whether
-		       we have initialized it already.
+		       -Bsymbolic link and the symbol is defined locally,
+		       or is undefweak, or the symbol was forced to be
+		       local because of a version file, or we're not
+		       creating a dynamic object.  We must initialize this
+		       entry in the global offset table.  Since the offset
+		       must always be a multiple of 4, we use the least
+		       significant bit to record whether we have
+		       initialized it already.
 
-		       When doing a dynamic link, we create a .rela.got
-		       relocation entry to initialize the value.  This
-		       is done in the finish_dynamic_symbol routine.  */
+		       If this GOT entry should be runtime-initialized, we
+		       will create a .rela.got relocation entry to
+		       initialize the value.  This is done in the
+		       finish_dynamic_symbol routine.  */
 		    if ((off & 1) != 0)
 		      off &= ~1;
 		    else
@@ -1561,9 +1560,13 @@ elf_cris_finish_dynamic_symbol (output_bfd, info, h, sym)
     }
 
   /* We don't emit .got relocs for symbols that aren't in the
-     dynamic-symbols table for an ordinary program.  */
+     dynamic-symbols table for an ordinary program and are either defined
+     by the program or are undefined weak symbols.  */
   if (h->got.offset != (bfd_vma) -1
-      && (info->shared || h->dynindx != -1))
+      && (info->shared
+	  || (h->dynindx != -1
+	      && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0
+	      && h->root.type != bfd_link_hash_undefweak)))
     {
       asection *sgot;
       asection *srela;
@@ -2067,23 +2070,23 @@ elf_cris_adjust_dynamic_symbol (info, h)
   if (h->type == STT_FUNC
       || (h->elf_link_hash_flags & ELF_LINK_HASH_NEEDS_PLT) != 0)
     {
+      /* If we link a program (not a DSO), we'll get rid of unnecessary
+	 PLT entries; we point to the actual symbols -- even for pic
+	 relocs, because a program built with -fpic should have the same
+	 result as one built without -fpic, specifically considering weak
+	 symbols.
+	 FIXME: m68k and i386 differ here, for unclear reasons.  */
       if (! info->shared
-	  && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) == 0
-	  && (h->elf_link_hash_flags & ELF_LINK_HASH_REF_DYNAMIC) == 0
-	  /* We must always create the plt entry if it was referenced by a
-	     PLT relocation.  In this case we already recorded it as a
-	     dynamic symbol.  */
-	  /* FIXME: m68k and i386 differ here, for unclear reasons.  */
-	  && h->dynindx == -1)
+	  && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) == 0)
 	{
 	  /* This case can occur if we saw a PLT reloc in an input file,
-	     but the symbol was never referred to by a dynamic object.  In
-	     such a case, we don't actually need to build a procedure
-	     linkage table, and we can just do a PC reloc instead, or
+	     but the symbol was not defined by a dynamic object.  In such
+	     a case, we don't actually need to build a procedure linkage
+	     table, and we can just do an absolute or PC reloc instead, or
 	     change a .got.plt index to a .got index for GOTPLT relocs.  */
 	  BFD_ASSERT ((h->elf_link_hash_flags & ELF_LINK_HASH_NEEDS_PLT) != 0);
+	  h->elf_link_hash_flags &= ~ELF_LINK_HASH_NEEDS_PLT;
 	  h->plt.offset = (bfd_vma) -1;
-
 	  return
 	    elf_cris_adjust_gotplt_to_got ((struct
 					    elf_cris_link_hash_entry *) h,
@@ -2121,9 +2124,7 @@ elf_cris_adjust_dynamic_symbol (info, h)
 
       /* If this symbol is not defined in a regular file, and we are
 	 not generating a shared library, then set the symbol to this
-	 location in the .plt.  This is required to make function
-	 pointers compare as equal between the normal executable and
-	 the shared library.  */
+	 location in the .plt.  */
       if (!info->shared
 	  && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0)
 	{
@@ -2907,10 +2908,9 @@ elf_cris_discard_excess_program_dynamics (h, inf)
 
   /* If we're not creating a shared library and have a symbol which is
      referred to by .got references, but the symbol is defined locally,
-     (or rather, not referred to by a DSO and not defined by a DSO) then
-     lose the reloc for the .got (don't allocate room for it).  */
-  if ((h->root.elf_link_hash_flags
-       & (ELF_LINK_HASH_REF_DYNAMIC | ELF_LINK_HASH_DEF_DYNAMIC)) == 0)
+     (or rather, not not defined by a DSO) then lose the reloc for the
+     .got (don't allocate room for it).  */
+  if ((h->root.elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) == 0)
     {
       if (h->root.got.refcount > 0
 	  /* The size of this section is only valid and in sync with the
