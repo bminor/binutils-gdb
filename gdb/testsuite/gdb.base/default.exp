@@ -260,15 +260,15 @@ gdb_test "finish" "The program is not running." "finish"
 # vary on different systems.
 gdb_test "forward-search" "No previous regular expression.*|There is no previous regular expression.*" "forward-search"
 #test help "h" abbreviation
-gdb_test "h" "List of classes of commands:.*\[\r\n\]+aliases -- Aliases of other commands.*\[\r\n\]+breakpoints -- Making program stop at certain points.*\[\r\n\]+data -- Examining data.*\[\r\n\]+files -- Specifying and examining files.*\[\r\n\]+obscure -- Obscure features.*\[\r\n\]+running -- Running the program.*\[\r\n\]+stack -- Examining the stack.*\[\r\n\]+status -- Status inquiries.*\[\r\n\]+support -- Support facilities.*\[\r\n\]+user-defined -- User-defined commands.*\[\r\n\]+Type \"help\" followed by a class name for a list of commands in that class..*\[\r\n\]+Type \"help\" followed by command name for full documentation..*\[\r\n\]+Command name abbreviations are allowed if unambiguous." "help \"h\" abbreviation"
+gdb_test "h" "List of classes of commands:(\[^\r\n\]*\[\r\n\])+aliases -- Aliases of other commands(\[^\r\n\]*\[\r\n\])+breakpoints -- Making program stop at certain points(\[^\r\n\]*\[\r\n\])+data -- Examining data(\[^\r\n\]*\[\r\n\])+files -- Specifying and examining files(\[^\r\n\]*\[\r\n\])+obscure -- Obscure features(\[^\r\n\]*\[\r\n\])+running -- Running the program(\[^\r\n\]*\[\r\n\])+stack -- Examining the stack(\[^\r\n\]*\[\r\n\])+status -- Status inquiries(\[^\r\n\]*\[\r\n\])+support -- Support facilities(\[^\r\n\]*\[\r\n\])+user-defined -- User-defined commands(\[^\r\n\]*\[\r\n\])+Type \"help\" followed by a class name for a list of commands in that class.(\[^\r\n\]*\[\r\n\])+Type \"help\" followed by command name for full documentation.(\[^\r\n\]*\[\r\n\])+Command name abbreviations are allowed if unambiguous." "help \"h\" abbreviation"
 #test help
-gdb_test "help" "List of classes of commands:.*\[\r\n\]+aliases -- Aliases of other commands.*\[\r\n\]+breakpoints -- Making program stop at certain points.*\[\r\n\]+data -- Examining data.*\[\r\n\]+files -- Specifying and examining files.*\[\r\n\]+obscure -- Obscure features.*\[\r\n\]+running -- Running the program.*\[\r\n\]+stack -- Examining the stack.*\[\r\n\]+status -- Status inquiries.*\[\r\n\]+support -- Support facilities.*\[\r\n\]+user-defined -- User-defined commands.*\[\r\n\]+Type \"help\" followed by a class name for a list of commands in that class..*\[\r\n\]+Type \"help\" followed by command name for full documentation..*\[\r\n\]+Command name abbreviations are allowed if unambiguous." "help"
+gdb_test "help" "List of classes of commands:(\[^\r\n\]*\[\r\n\])+aliases -- Aliases of other commands(\[^\r\n\]*\[\r\n\])+breakpoints -- Making program stop at certain points(\[^\r\n\]*\[\r\n\])+data -- Examining data(\[^\r\n\]*\[\r\n\])+files -- Specifying and examining files(\[^\r\n\]*\[\r\n\])+obscure -- Obscure features(\[^\r\n\]*\[\r\n\])+running -- Running the program(\[^\r\n\]*\[\r\n\])+stack -- Examining the stack(\[^\r\n\]*\[\r\n\])+status -- Status inquiries(\[^\r\n\]*\[\r\n\])+support -- Support facilities(\[^\r\n\]*\[\r\n\])+user-defined -- User-defined commands(\[^\r\n\]*\[\r\n\])+Type \"help\" followed by a class name for a list of commands in that class.(\[^\r\n\]*\[\r\n\])+Type \"help\" followed by command name for full documentation.(\[^\r\n\]*\[\r\n\])+Command name abbreviations are allowed if unambiguous." "help"
 #test handle
 gdb_test "handle" "Argument required .signal to handle.*" "handle"
 #test info "i" abbreviation 
-gdb_test "i" "\"info\" must be followed by the name of an info command..*\[\r\n\]+List of info subcommands:.*\[\r\n\]+Type \"help info\" followed by info subcommand name for full documentation..*\[\r\n\]+Command name abbreviations are allowed if unambiguous." "info \"i\" abbreviation"
+gdb_test "i" "\"info\" must be followed by the name of an info command.(\[^\r\n\]*\[\r\n\])+List of info subcommands:(\[^\r\n\]*\[\r\n\])+Type \"help info\" followed by info subcommand name for full documentation.(\[^\r\n\]*\[\r\n\])+Command name abbreviations are allowed if unambiguous." "info \"i\" abbreviation"
 #test info
-gdb_test "info" "\"info\" must be followed by the name of an info command..*\[\r\n\]+List of info subcommands:.*\[\r\n\]+Type \"help info\" followed by info subcommand name for full documentation..*\[\r\n\]+Command name abbreviations are allowed if unambiguous." "info"
+gdb_test "info" "\"info\" must be followed by the name of an info command.(\[^\r\n\]*\[\r\n\])+List of info subcommands:(\[^\r\n\]*\[\r\n\])+Type \"help info\" followed by info subcommand name for full documentation.(\[^\r\n\]*\[\r\n\])+Command name abbreviations are allowed if unambiguous." "info"
 #test ignore
 gdb_test "ignore" "Argument required .a breakpoint number.*" "ignore"
 #test info address
@@ -332,7 +332,7 @@ gdb_test "info stack" "No stack." "info stack"
 # FIXME -- needs to match the entire output
 # FIXME -- on native solaris 2.8, this test fails due to this line:
 #  prompt:  Gdb's prompt is "(gdb) ".^M
-gdb_test "info set" "confirm:  Whether to confirm potentially dangerous operations is o\[a-z\]*..*\[\r\n\]+history filename:  The filename in which to record the command history is .*\[\r\n\]+listsize:  Number of source lines gdb will list by default is 10.*" "info set"
+gdb_test "info set" "confirm:  Whether to confirm potentially dangerous operations is o\[a-z\]*.(\[^\r\n\]*\[\r\n\])+history filename:  The filename in which to record the command history is (\[^\r\n\]*\[\r\n\])+listsize:  Number of source lines gdb will list by default is 10.*" "info set"
 gdb_test "info symbol" "Argument required .address.."
 #test info source
 gdb_test  "info source" "No current source file..*" "info source"
@@ -347,7 +347,7 @@ gdb_test "info types" "All defined types:" "info types"
 #test info variables
 gdb_test "info variables" "All defined variables:" "info variables"
 #test info warranty
-gdb_test "info warranty" "NO WARRANTY.*\[\r\n\]+  *11.  *BECAUSE THE PROGRAM IS LICENSED FREE OF CHARGE, THERE IS NO WARRANTY.*\[\r\n\]+FOR THE PROGRAM, TO THE EXTENT PERMITTED BY APPLICABLE LAW.  EXCEPT WHEN.*\[\r\n\]+OTHERWISE STATED IN WRITING THE COPYRIGHT HOLDERS AND/OR OTHER PARTIES.*\[\r\n\]+PROVIDE THE PROGRAM \"AS IS\" WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED.*\[\r\n\]+OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF.*\[\r\n\]+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.  THE ENTIRE RISK AS.*\[\r\n\]+TO THE QUALITY AND PERFORMANCE OF THE PROGRAM IS WITH YOU.  SHOULD THE.*\[\r\n\]+PROGRAM PROVE DEFECTIVE, YOU ASSUME THE COST OF ALL NECESSARY SERVICING,.*\[\r\n\]+REPAIR OR CORRECTION..*\[\r\n\]+  *12.  *IN NO EVENT UNLESS REQUIRED BY APPLICABLE LAW OR AGREED TO IN WRITING.*\[\r\n\]+WILL ANY COPYRIGHT HOLDER, OR ANY OTHER PARTY WHO MAY MODIFY AND/OR.*\[\r\n\]+REDISTRIBUTE THE PROGRAM AS PERMITTED ABOVE, BE LIABLE TO YOU FOR DAMAGES,.*\[\r\n\]+INCLUDING ANY GENERAL, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES ARISING.*\[\r\n\]+OUT OF THE USE OR INABILITY TO USE THE PROGRAM .INCLUDING BUT NOT LIMITED.*\[\r\n\]+TO LOSS OF DATA OR DATA BEING RENDERED INACCURATE OR LOSSES SUSTAINED BY.*\[\r\n\]+YOU OR THIRD PARTIES OR A FAILURE OF THE PROGRAM TO OPERATE WITH ANY OTHER.*\[\r\n\]+PROGRAMS., EVEN IF SUCH HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE.*\[\r\n\]+POSSIBILITY OF SUCH DAMAGES.*" "info warranty"
+gdb_test "info warranty" "NO WARRANTY(\[^\r\n\]*\[\r\n\])+  *11.  *BECAUSE THE PROGRAM IS LICENSED FREE OF CHARGE, THERE IS NO WARRANTY(\[^\r\n\]*\[\r\n\])+FOR THE PROGRAM, TO THE EXTENT PERMITTED BY APPLICABLE LAW.  EXCEPT WHEN(\[^\r\n\]*\[\r\n\])+OTHERWISE STATED IN WRITING THE COPYRIGHT HOLDERS AND/OR OTHER PARTIES(\[^\r\n\]*\[\r\n\])+PROVIDE THE PROGRAM \"AS IS\" WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED(\[^\r\n\]*\[\r\n\])+OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF(\[^\r\n\]*\[\r\n\])+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.  THE ENTIRE RISK AS(\[^\r\n\]*\[\r\n\])+TO THE QUALITY AND PERFORMANCE OF THE PROGRAM IS WITH YOU.  SHOULD THE(\[^\r\n\]*\[\r\n\])+PROGRAM PROVE DEFECTIVE, YOU ASSUME THE COST OF ALL NECESSARY SERVICING,(\[^\r\n\]*\[\r\n\])+REPAIR OR CORRECTION.(\[^\r\n\]*\[\r\n\])+  *12.  *IN NO EVENT UNLESS REQUIRED BY APPLICABLE LAW OR AGREED TO IN WRITING(\[^\r\n\]*\[\r\n\])+WILL ANY COPYRIGHT HOLDER, OR ANY OTHER PARTY WHO MAY MODIFY AND/OR(\[^\r\n\]*\[\r\n\])+REDISTRIBUTE THE PROGRAM AS PERMITTED ABOVE, BE LIABLE TO YOU FOR DAMAGES,(\[^\r\n\]*\[\r\n\])+INCLUDING ANY GENERAL, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES ARISING(\[^\r\n\]*\[\r\n\])+OUT OF THE USE OR INABILITY TO USE THE PROGRAM .INCLUDING BUT NOT LIMITED(\[^\r\n\]*\[\r\n\])+TO LOSS OF DATA OR DATA BEING RENDERED INACCURATE OR LOSSES SUSTAINED BY(\[^\r\n\]*\[\r\n\])+YOU OR THIRD PARTIES OR A FAILURE OF THE PROGRAM TO OPERATE WITH ANY OTHER(\[^\r\n\]*\[\r\n\])+PROGRAMS., EVEN IF SUCH HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE(\[^\r\n\]*\[\r\n\])+POSSIBILITY OF SUCH DAMAGES.*" "info warranty"
 #test info watchpoints
 gdb_test "info watchpoints" "No breakpoints or watchpoints." "info watchpoints"
 #test inspect
@@ -493,11 +493,11 @@ gdb_test "set annotate" "Argument required .integer to set it to.*" "set annotat
 #test set args
 gdb_test "set args" "" "set args"
 #test set check "c" abbreviation
-gdb_test "set c" "\"set check\" must be followed by the name of a check subcommand..*\[\r\n\]+List of set check subcommands:.*\[\r\n\]+set check range -- Set range checking.*\[\r\n\]+set check type -- Set type checking.*\[\r\n\]+Type \"help set check\" followed by set check subcommand name for full documentation..*\[\r\n\]+Command name abbreviations are allowed if unambiguous." "set check \"c\" abbreviation"
+gdb_test "set c" "\"set check\" must be followed by the name of a check subcommand.(\[^\r\n\]*\[\r\n\])+List of set check subcommands:(\[^\r\n\]*\[\r\n\])+set check range -- Set range checking(\[^\r\n\]*\[\r\n\])+set check type -- Set type checking(\[^\r\n\]*\[\r\n\])+Type \"help set check\" followed by set check subcommand name for full documentation.(\[^\r\n\]*\[\r\n\])+Command name abbreviations are allowed if unambiguous." "set check \"c\" abbreviation"
 #test set check "ch" abbreviation
-gdb_test "set ch" "\"set check\" must be followed by the name of a check subcommand..*\[\r\n\]+List of set check subcommands:.*\[\r\n\]+set check range -- Set range checking.*\[\r\n\]+set check type -- Set type checking.*\[\r\n\]+Type \"help set check\" followed by set check subcommand name for full documentation..*\[\r\n\]+Command name abbreviations are allowed if unambiguous." "set check \"ch\" abbreviation"
+gdb_test "set ch" "\"set check\" must be followed by the name of a check subcommand.(\[^\r\n\]*\[\r\n\])+List of set check subcommands:(\[^\r\n\]*\[\r\n\])+set check range -- Set range checking(\[^\r\n\]*\[\r\n\])+set check type -- Set type checking(\[^\r\n\]*\[\r\n\])+Type \"help set check\" followed by set check subcommand name for full documentation.(\[^\r\n\]*\[\r\n\])+Command name abbreviations are allowed if unambiguous." "set check \"ch\" abbreviation"
 #test set check
-gdb_test "set check" "\"set check\" must be followed by the name of a check subcommand..*\[\r\n\]+List of set check subcommands:.*\[\r\n\]+set check range -- Set range checking.*\[\r\n\]+set check type -- Set type checking.*\[\r\n\]+Type \"help set check\" followed by set check subcommand name for full documentation..*\[\r\n\]+Command name abbreviations are allowed if unambiguous." "set check"
+gdb_test "set check" "\"set check\" must be followed by the name of a check subcommand.(\[^\r\n\]*\[\r\n\])+List of set check subcommands:(\[^\r\n\]*\[\r\n\])+set check range -- Set range checking(\[^\r\n\]*\[\r\n\])+set check type -- Set type checking(\[^\r\n\]*\[\r\n\])+Type \"help set check\" followed by set check subcommand name for full documentation.(\[^\r\n\]*\[\r\n\])+Command name abbreviations are allowed if unambiguous." "set check"
 #test set check range
 gdb_test "set check range" "" "set check range"
 #test set check type
@@ -523,17 +523,17 @@ gdb_test "set history save" "" "set history save"
 #test set history size
 gdb_test "set history size" "Argument required .integer to set it to.*" "set history size"
 #test set history
-gdb_test "set history" "\"set history\" must be followed by the name of a history subcommand..*\[\r\n\]+List of set history subcommands:.*\[\r\n\]+set history expansion -- Set history expansion on command input.*\[\r\n\]+set history filename -- Set the filename in which to record the command history.*\[\r\n\]+set history save -- Set saving of the history record on exit.*\[\r\n\]+set history size -- Set the size of the command history.*\[\r\n\]+Type \"help set history\" followed by set history subcommand name for full documentation..*\[\r\n\]+Command name abbreviations are allowed if unambiguous." "set history"
+gdb_test "set history" "\"set history\" must be followed by the name of a history subcommand.(\[^\r\n\]*\[\r\n\])+List of set history subcommands:(\[^\r\n\]*\[\r\n\])+set history expansion -- Set history expansion on command input(\[^\r\n\]*\[\r\n\])+set history filename -- Set the filename in which to record the command history(\[^\r\n\]*\[\r\n\])+set history save -- Set saving of the history record on exit(\[^\r\n\]*\[\r\n\])+set history size -- Set the size of the command history(\[^\r\n\]*\[\r\n\])+Type \"help set history\" followed by set history subcommand name for full documentation.(\[^\r\n\]*\[\r\n\])+Command name abbreviations are allowed if unambiguous." "set history"
 #test set language
-gdb_test "set language" "The currently understood settings are:.*\[\r\n\]+local or auto  *Automatic setting based on source file.*\[\r\n\]+c  *Use the C language.*\[\r\n\]+c\[+\]+  *Use the C\[+\]+ language.*\[\r\n\]+modula-2  *Use the Modula-2 language.*" "set language"
+gdb_test "set language" "The currently understood settings are:(\[^\r\n\]*\[\r\n\])+local or auto  *Automatic setting based on source file(\[^\r\n\]*\[\r\n\])+c  *Use the C language(\[^\r\n\]*\[\r\n\])+c\[+\]+  *Use the C\[+\]+ language(\[^\r\n\]*\[\r\n\])+modula-2  *Use the Modula-2 language.*" "set language"
 #test set listsize
 gdb_test "set listsize" "Argument required .integer to set it to.*" "set listsize"
 #test set print "p" abbreviation
-gdb_test "set p" "\"set print\" must be followed by the name of a print subcommand..*\[\r\n\]+List of set print subcommands:.*\[\r\n\]+Type \"help set print\" followed by set print subcommand name for full documentation..*\[\r\n\]+Command name abbreviations are allowed if unambiguous." "set print \"p\" abbreviation"
+gdb_test "set p" "\"set print\" must be followed by the name of a print subcommand.(\[^\r\n\]*\[\r\n\])+List of set print subcommands:(\[^\r\n\]*\[\r\n\])+Type \"help set print\" followed by set print subcommand name for full documentation.(\[^\r\n\]*\[\r\n\])+Command name abbreviations are allowed if unambiguous." "set print \"p\" abbreviation"
 #test set print "pr" abbreviation
-gdb_test "set pr" "\"set print\" must be followed by the name of a print subcommand..*\[\r\n\]+List of set print subcommands:.*\[\r\n\]+Type \"help set print\" followed by set print subcommand name for full documentation..*\[\r\n\]+Command name abbreviations are allowed if unambiguous." "set print \"pr\" abbreviation"
+gdb_test "set pr" "\"set print\" must be followed by the name of a print subcommand.(\[^\r\n\]*\[\r\n\])+List of set print subcommands:(\[^\r\n\]*\[\r\n\])+Type \"help set print\" followed by set print subcommand name for full documentation.(\[^\r\n\]*\[\r\n\])+Command name abbreviations are allowed if unambiguous." "set print \"pr\" abbreviation"
 #test set print
-gdb_test "set print" "\"set print\" must be followed by the name of a print subcommand..*\[\r\n\]+List of set print subcommands:.*\[\r\n\]+Type \"help set print\" followed by set print subcommand name for full documentation..*\[\r\n\]+Command name abbreviations are allowed if unambiguous." "set print"
+gdb_test "set print" "\"set print\" must be followed by the name of a print subcommand.(\[^\r\n\]*\[\r\n\])+List of set print subcommands:(\[^\r\n\]*\[\r\n\])+Type \"help set print\" followed by set print subcommand name for full documentation.(\[^\r\n\]*\[\r\n\])+Command name abbreviations are allowed if unambiguous." "set print"
 #test set print address
 gdb_test "set print address" "" "set print address"
 #test set print array
@@ -577,11 +577,11 @@ gdb_test "show annotate" "Annotation_level is 0." 	 "show annotate"
 #test show args
 gdb_test "show args" "Argument list to give program being debugged when it is started is \"\"." "show args"
 #test show check "c" abbreviation
-gdb_test "show c" "range:  *Range checking is \"auto; currently off\"..*\[\r\n\]+type:  *Type checking is \"auto; currently off\".*" "show check \"c\" abbreviation"
+gdb_test "show c" "range:  *Range checking is \"auto; currently off\".(\[^\r\n\]*\[\r\n\])+type:  *Type checking is \"auto; currently off\".*" "show check \"c\" abbreviation"
 #test show check "ch" abbreviation
-gdb_test "show ch" "range: *Range checking is \"auto; currently off\"..*\[\r\n\]+type:  *Type checking is \"auto; currently off\"." "show check \"ch\" abbreviation"
+gdb_test "show ch" "range: *Range checking is \"auto; currently off\".(\[^\r\n\]*\[\r\n\])+type:  *Type checking is \"auto; currently off\"." "show check \"ch\" abbreviation"
 #test show check
-gdb_test "show check" "range:  *Range checking is \"auto; currently off\"..*\[\r\n\]+type:  *Type checking is \"auto; currently off\"." "show check"
+gdb_test "show check" "range:  *Range checking is \"auto; currently off\".(\[^\r\n\]*\[\r\n\])+type:  *Type checking is \"auto; currently off\"." "show check"
 #test show check range
 gdb_test "show check range" "Range checking is \"auto; currently off\"." "show check range"
 #test show check type
@@ -593,7 +593,7 @@ gdb_test "show complaints" "Max number of complaints about incorrect symbols is 
 #test show confirm
 gdb_test "show confirm" "Whether to confirm potentially dangerous operations is o\[a-z\]*." "show confirm"
 #test show convenience
-gdb_test "show convenience" "No debugger convenience variables now defined..*\[\r\n\]+Convenience variables have names starting with \".\";.*\[\r\n\]+use \"set\" as in \"set .foo = 5\" to define them." "show convenience"
+gdb_test "show convenience" "No debugger convenience variables now defined.(\[^\r\n\]*\[\r\n\])+Convenience variables have names starting with \".\";(\[^\r\n\]*\[\r\n\])+use \"set\" as in \"set .foo = 5\" to define them." "show convenience"
 #test show directories
 gdb_test "show directories" "Source directories searched: .cdir:.cwd" "show directories"
 #test show editing
@@ -609,7 +609,7 @@ gdb_test "show history save" "Saving of the history record on exit is on." "show
 #test show history size
 gdb_test "show history size" "The size of the command history is.*" "show history size"
 #test show history
-gdb_test "show history" "expansion:  *History expansion on command input is o.*\[\r\n\]+filename:  *The filename in which to record the command history is.*.gdb_history.*\[\r\n\]+save: *Saving of the history record on exit is o.*\[\r\n\]+size: * The size of the command history is.*" "show history"
+gdb_test "show history" "expansion:  *History expansion on command input is o(\[^\r\n\]*\[\r\n\])+filename:  *The filename in which to record the command history is.*.gdb_history(\[^\r\n\]*\[\r\n\])+save: *Saving of the history record on exit is o(\[^\r\n\]*\[\r\n\])+size: * The size of the command history is.*" "show history"
 #test show language
 gdb_test "show language" "The current source language is \"auto; currently c\"." "show language"
 #test show listsize
@@ -658,14 +658,14 @@ gdb_test "show values" "" "show values"
 #test show verbose
 gdb_test "show verbose" "Verbose printing of informational messages is o.*|Verbosity is off.*" "show verbose"
 #test show version
-gdb_test "show version" "GNU gdb \[0-9\.\]*.*\[\r\n\]+Copyright \[0-9\]* Free Software Foundation, Inc.*\[\r\n\]+GDB is free software, covered by the GNU General Public License, and you are.*\[\r\n\]+welcome to change it and/or distribute copies of it under certain conditions.*\[\r\n\]+Type \"show copying\" to see the conditions.*\[\r\n\]+There is absolutely no warranty for GDB.  Type \"show warranty\" for details.*\[\r\n\]+This GDB was configured as .*|GDB is free software and you are welcome to distribute copies of it.*\[\r\n\]+ under certain conditions; type \"show copying\" to see the conditions..*\[\r\n\]+There is absolutely no warranty for GDB; type \"show warranty\" for details..*\[\r\n\]+GDB.*Copyright \[0-9\]* Free Software Foundation, Inc.*" "show version"
+gdb_test "show version" "GNU gdb \[0-9\.\]*(\[^\r\n\]*\[\r\n\])+Copyright \[0-9\]* Free Software Foundation, Inc(\[^\r\n\]*\[\r\n\])+GDB is free software, covered by the GNU General Public License, and you are(\[^\r\n\]*\[\r\n\])+welcome to change it and/or distribute copies of it under certain conditions(\[^\r\n\]*\[\r\n\])+Type \"show copying\" to see the conditions(\[^\r\n\]*\[\r\n\])+There is absolutely no warranty for GDB.  Type \"show warranty\" for details(\[^\r\n\]*\[\r\n\])+This GDB was configured as .*|GDB is free software and you are welcome to distribute copies of it(\[^\r\n\]*\[\r\n\])+ under certain conditions; type \"show copying\" to see the conditions.(\[^\r\n\]*\[\r\n\])+There is absolutely no warranty for GDB; type \"show warranty\" for details.(\[^\r\n\]*\[\r\n\])+GDB.*Copyright \[0-9\]* Free Software Foundation, Inc.*" "show version"
 #test show width
 gdb_test "show width" "Number of characters gdb thinks are in a line is.*" "show width"
 #test show write
 # This is only supported on targets which use exec.o.
 gdb_test "show write" "Writing into executable and core files is o.*" "show write"
 #test show
-gdb_test "show" "confirm:  *Whether to confirm potentially dangerous operations is on..*\[\r\n\]+history filename:  *The filename in which to record the command history is .*\[\r\n\]+history save:  *Saving of the history record on exit is on..*\[\r\n\]+history size:  *The size of the command history is.*\[\r\n\]+listsize:  *Number of source lines gdb will list by default is 10.*\[\r\n\]+print elements:  *Limit on string chars or array elements to print is 200..*" "show"
+gdb_test "show" "confirm:  *Whether to confirm potentially dangerous operations is on.(\[^\r\n\]*\[\r\n\])+history filename:  *The filename in which to record the command history is (\[^\r\n\]*\[\r\n\])+history save:  *Saving of the history record on exit is on.(\[^\r\n\]*\[\r\n\])+history size:  *The size of the command history is(\[^\r\n\]*\[\r\n\])+listsize:  *Number of source lines gdb will list by default is 10(\[^\r\n]*\[\r\n\])+print elements:  *Limit on string chars or array elements to print is 200..*" "show"
 #test stepi "si" abbreviation
 # OBSOLETE setup_xfail "a29k-*-udi"
 gdb_test  "si" "The program is not being run." "stepi \"si\" abbreviation"
@@ -789,7 +789,7 @@ gdb_expect {
 }
 
 #test unset
-gdb_test "unset" "\"unset\" must be followed by the name of an unset subcommand..*\[\r\n\]+List of unset subcommands:.*\[\r\n\]+unset environment -- Cancel environment variable VAR for the program.*\[\r\n\]+Type \"help unset\" followed by unset subcommand name for full documentation..*\[\r\n\]+Command name abbreviations are allowed if unambiguous." "unset"
+gdb_test "unset" "\"unset\" must be followed by the name of an unset subcommand.(\[^\r\n\]*\[\r\n\])+List of unset subcommands:(\[^\r\n\]*\[\r\n\])+unset environment -- Cancel environment variable VAR for the program(\[^\r\n\]*\[\r\n\])+Type \"help unset\" followed by unset subcommand name for full documentation.(\[^\r\n\]*\[\r\n\])+Command name abbreviations are allowed if unambiguous." "unset"
 #test up
 #test up-silently
 gdb_test "up-silently" "No stack." "up-silently"
