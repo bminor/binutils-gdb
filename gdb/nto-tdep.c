@@ -270,8 +270,6 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size,
 {
   nto_regset_t regset;
 
-  nto_init_solib_absolute_prefix ();
-
   if (which == NTO_REG_GENERAL)
     {
       memcpy ((char *) &regset, core_reg_sect,
