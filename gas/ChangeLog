@@ -1,3 +1,7 @@
+2001-11-15  H.J. Lu  <hjl@gnu.org>
+
+	* config/tc-alpha.c (md_apply_fix3): Fix a typo.
+
 2001-11-15  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* write.c (fixup_segment): Remove referrences to md_apply_fix and

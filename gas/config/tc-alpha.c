@@ -1119,7 +1119,7 @@ md_pcrel_from (fixP)
    GPDISP.  */
 
 void
-md_apply_fix3 (fixP, valueP, seg)
+md_apply_fix3 (fixP, valP, seg)
      fixS *fixP;
      valueT * valP;
      segT seg;
