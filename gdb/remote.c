@@ -4864,6 +4864,31 @@ remote_xfer_partial (struct target_ops *ops, enum target_object object,
   char *p2 = &buf2[0];
   char query_type;
 
+  /* Handle memory using remote_xfer_memory.  */
+  if (object == TARGET_OBJECT_MEMORY)
+    {
+      int xfered;
+      errno = 0;
+
+      if (writebuf != NULL)
+	{
+	  void *buffer = xmalloc (len);
+	  struct cleanup *cleanup = make_cleanup (xfree, buffer);
+	  memcpy (buffer, writebuf, len);
+	  xfered = remote_xfer_memory (offset, buffer, len, 1, NULL, ops);
+	  do_cleanups (cleanup);
+	}
+      else
+	xfered = remote_xfer_memory (offset, readbuf, len, 0, NULL, ops);
+
+      if (xfered > 0)
+	return xfered;
+      else if (xfered == 0 && errno == 0)
+	return 0;
+      else
+	return -1;
+    }
+
   /* Only handle reads.  */
   if (writebuf != NULL || readbuf == NULL)
     return -1;
