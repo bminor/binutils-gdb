@@ -1,3 +1,7 @@
+Wed Oct 25 14:59:22 1995  Per Bothner  <bothner@kalessin.cygnus.com>
+
+	* Makefile.in (diststuff):  Don't make headers.
+
 Wed Oct 25 11:32:54 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.in: Rebuild dependencies.

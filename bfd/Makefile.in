@@ -314,7 +314,7 @@ clean-info:
 install-info: force
 	@$(MAKE) subdir_do DO=install-info "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS)
 
-diststuff: info headers
+diststuff: info
 
 # Various kinds of .o files to put in libbfd.a:
 # BFD_LIBS	Generic routines, always needed.
