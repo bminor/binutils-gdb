@@ -1141,16 +1141,17 @@ tc_i386_fix_adjustable (fixP)
   return 1;
 }
 #else
-#define reloc(SIZE,PCREL,OTHER)	0
-#define BFD_RELOC_16		0
-#define BFD_RELOC_32		0
-#define BFD_RELOC_16_PCREL	0
-#define BFD_RELOC_32_PCREL	0
-#define BFD_RELOC_386_PLT32	0
-#define BFD_RELOC_386_GOT32	0
-#define BFD_RELOC_386_GOTOFF	0
-#define BFD_RELOC_X86_64_PLT32	0
-#define BFD_RELOC_X86_64_GOT32	0
+#define reloc(SIZE,PCREL,SIGN,OTHER)	0
+#define BFD_RELOC_16			0
+#define BFD_RELOC_32			0
+#define BFD_RELOC_16_PCREL		0
+#define BFD_RELOC_32_PCREL		0
+#define BFD_RELOC_386_PLT32		0
+#define BFD_RELOC_386_GOT32		0
+#define BFD_RELOC_386_GOTOFF		0
+#define BFD_RELOC_X86_64_PLT32		0
+#define BFD_RELOC_X86_64_GOT32		0
+#define BFD_RELOC_X86_64_GOTPCREL	0
 #endif
 
 static int intel_float_operand PARAMS ((char *mnemonic));

@@ -1,5 +1,11 @@
 2000-12-22  H.J. Lu  <hjl@gnu.org>
 
+	* config/tc-i386.c (reloc): Update the macro for non-bfd
+	assembler.
+	(BFD_RELOC_X86_64_GOTPCREL): Set to 0 for non-bfd assembler.
+
+2000-12-22  H.J. Lu  <hjl@gnu.org>
+
 	* dwarf2dbg.c (dwarf2_finish): Remove #if BFD_ASSEMBLER.
 
 Wed Dec 20 14:21:22 MET 2000  Jan Hubicka  <jh@suse.cz>
