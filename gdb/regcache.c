@@ -378,7 +378,7 @@ read_register_bytes (int inregbyte, char *myaddr, int inlen)
       if (regno < NUM_REGS)
 	target_fetch_registers (regno);
       else if (regno < NUM_REGS + NUM_PSEUDO_REGS)
-	ARCH_FETCH_PSEUDO_REGISTERS (regno);
+	FETCH_PSEUDO_REGISTER (regno);
 
       if (!register_valid[regno])
 	error ("read_register_bytes:  Couldn't update register %d.", regno);
@@ -407,7 +407,7 @@ read_register_gen (int regno, char *myaddr)
       if (regno < NUM_REGS)
 	target_fetch_registers (regno);
       else if (regno < NUM_REGS + NUM_PSEUDO_REGS)
-	ARCH_FETCH_PSEUDO_REGISTERS (regno);
+	FETCH_PSEUDO_REGISTER (regno);
     }
   memcpy (myaddr, &registers[REGISTER_BYTE (regno)],
 	  REGISTER_RAW_SIZE (regno));
@@ -456,7 +456,7 @@ write_register_gen (int regno, char *myaddr)
   if (regno < NUM_REGS)
     target_store_registers (regno);
   else if (regno < NUM_REGS + NUM_PSEUDO_REGS)
-    ARCH_STORE_PSEUDO_REGISTERS (regno);
+    STORE_PSEUDO_REGISTER (regno);
 }
 
 /* Copy INLEN bytes of consecutive data from memory at MYADDR
@@ -510,7 +510,7 @@ write_register_bytes (int myregstart, char *myaddr, int inlen)
 	  if (regno < NUM_REGS)
 	    target_store_registers (regno);
 	  else if (regno < NUM_REGS + NUM_PSEUDO_REGS)
-	    ARCH_STORE_PSEUDO_REGISTERS (regno);
+	    STORE_PSEUDO_REGISTER (regno);
 	}
     }
 }
@@ -533,7 +533,7 @@ read_register (int regno)
       if (regno < NUM_REGS)
 	target_fetch_registers (regno);
       else if (regno < NUM_REGS + NUM_PSEUDO_REGS)
-	ARCH_FETCH_PSEUDO_REGISTERS (regno);
+	FETCH_PSEUDO_REGISTER (regno);
     }
 
   return (extract_unsigned_integer (&registers[REGISTER_BYTE (regno)],
@@ -639,7 +639,7 @@ write_register (int regno, LONGEST val)
   if (regno < NUM_REGS)
     target_store_registers (regno);
   else if (regno < NUM_REGS + NUM_PSEUDO_REGS)
-    ARCH_STORE_PSEUDO_REGISTERS (regno);
+    STORE_PSEUDO_REGISTER (regno);
 }
 
 void
