@@ -252,7 +252,7 @@ Makefile: $(srcdir)/Makefile.in $(host_makefile_frag) $(target_makefile_frag)
 #
 # Build GDB distributions that contain BFD, Include, Libiberty, Readline, etc
 
-DEVO_SUPPORT= README README.configure Makefile.in configure configure.in \
+DEVO_SUPPORT= README DOC.configure Makefile.in configure configure.in \
 	config.sub config
 GDB_SUPPORT_DIRS= bfd include libiberty readline
 GDB_SUPPORT_FILES= $(GDB_SUPPORT_DIRS) texinfo/fsf/texinfo.tex
