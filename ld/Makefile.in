@@ -1766,6 +1766,10 @@ install-data-local:
 	for f in ldscripts/*; do \
 	  $(INSTALL_DATA) $$f $(scriptdir)/$$f ; \
 	done
+
+# We want install to imply install-info as per GNU standards, despite the
+# cygnus option.
+install: install-info
 diststuff: info $(EXTRA_DIST)
 distclean-local:
 	rm -rf ldscripts

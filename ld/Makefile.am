@@ -1066,6 +1066,10 @@ install-data-local:
 	  $(INSTALL_DATA) $$f $(scriptdir)/$$f ; \
 	done
 
+# We want install to imply install-info as per GNU standards, despite the
+# cygnus option.
+install: install-info
+
 # Stuff that should be included in a distribution.  The diststuff
 # target is run by the taz target in ../Makefile.in.
 EXTRA_DIST = ldgram.c ldgram.h ldlex.c $(man_MANS)
