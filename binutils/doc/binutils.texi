@@ -2864,7 +2864,7 @@ readelf [@option{-a}|@option{--all}]
         [@option{-V}|@option{--version-info}]
         [@option{-D}|@option{--use-dynamic}]
         [@option{-x} <number>|@option{--hex-dump=}<number>]
-        [@option{-w[liaprmfs]}|@option{--debug-dump}[=line,=info,=abbrev,=pubnames,=ranges,=macro,=frames,=str]]
+        [@option{-w[liaprmfFso]}|@option{--debug-dump}[=line,=info,=abbrev,=pubnames,=ranges,=macro,=frames,=str,=loc]]
         [@option{-histogram}]
         [@option{-v}|@option{--version}]
         [@option{-W}|@option{--wide}]
@@ -2966,8 +2966,8 @@ symbols section.
 @itemx --hex-dump=<number>
 Displays the contents of the indicated section as a hexadecimal dump.
 
-@item -w[liaprmfs]
-@itemx --debug-dump[=line,=info,=abbrev,=pubnames,=ranges,=macro,=frames,=str]
+@item -w[liaprmfFso]
+@itemx --debug-dump[=line,=info,=abbrev,=pubnames,=ranges,=macro,=frames,=str,=loc]
 Displays the contents of the debug sections in the file, if any are
 present.  If one of the optional letters or words follows the switch
 then only data found in those specific sections will be dumped.
