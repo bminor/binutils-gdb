@@ -31,14 +31,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define	gregset_t	prgregset_t
 #define	fpregset_t	prfpregset_t
 
-/* The native Sun compiler complains about using volatile
-   to indicate functions that never return.  So shut it up by simply
-   defining away "NORETURN", which is normally defined to "volatile". */
-
-#ifndef __GNUC__
-# define NORETURN /**/
-#endif
-
 /* If you expect to use the mmalloc package to obtain mapped symbol files,
    for now you have to specify some parameters that determine how gdb places
    the mappings in it's address space.  See the comments in map_to_address()
