@@ -1,3 +1,9 @@
+Mon Mar 23 15:49:14 1992  Per Bothner  (bothner@cygnus.com)
+
+	* valops.c (value_struct_elt_for_reference):  Added 'offset'
+	parameter to handle multiple inheritance.
+	* eval.c, value.h:  Update accordingly.
+
 Fri Mar 20 17:43:27 1992  Fred Fish  (fnf@cygnus.com)
 
 	* objfiles.h: New file
