@@ -58,6 +58,28 @@
 /* Needed only for sparc configuration */
 #undef sparcv9
 
+/* Needed only for some configurations that can produce multiple output
+   formats.  */
+#undef DEFAULT_EMULATION
+#undef EMULATIONS
+#undef USE_EMULATIONS
+#undef OBJ_MAYBE_AOUT
+#undef OBJ_MAYBE_BOUT
+#undef OBJ_MAYBE_COFF
+#undef OBJ_MAYBE_ECOFF
+#undef OBJ_MAYBE_ELF
+#undef OBJ_MAYBE_GENERIC
+#undef OBJ_MAYBE_HP300
+#undef OBJ_MAYBE_IEEE
+#undef OBJ_MAYBE_SOM
+#undef OBJ_MAYBE_VMS
+
+/* Used for some of the COFF configurations, when the COFF code needs
+   to select something based on the CPU type before it knows it... */
+#undef I386COFF
+#undef M68KCOFF
+#undef M88KCOFF
+
 /* Define if you have the remove function.  */
 #undef HAVE_REMOVE
 

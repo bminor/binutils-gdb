@@ -17,11 +17,16 @@
    License along with GAS; see the file COPYING.  If not, write
    to the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
 
+#define OBJ_HEADER "obj-elf.h"
 #include "as.h"
 #include "subsegs.h"
 #include "obstack.h"
 
-#ifdef ECOFF_DEBUGGING
+#ifndef ECOFF_DEBUGGING
+#define ECOFF_DEBUGGING 0
+#endif
+
+#if ECOFF_DEBUGGING
 #include "ecoff.h"
 #endif
 
@@ -29,7 +34,7 @@
 #include "elf/mips.h"
 #endif
 
-#ifdef ECOFF_DEBUGGING
+#if ECOFF_DEBUGGING
 static boolean elf_get_extr PARAMS ((asymbol *, EXTR *));
 static void elf_set_index PARAMS ((asymbol *, bfd_size_type));
 #endif
@@ -45,7 +50,7 @@ static void obj_elf_common PARAMS ((int));
 static void obj_elf_data PARAMS ((int));
 static void obj_elf_text PARAMS ((int));
 
-const pseudo_typeS obj_pseudo_table[] =
+static const pseudo_typeS elf_pseudo_table[] =
 {
   {"comm", obj_elf_common, 0},
   {"ident", obj_elf_ident, 0},
@@ -69,7 +74,12 @@ const pseudo_typeS obj_pseudo_table[] =
   {"data", obj_elf_data, 0},
   {"text", obj_elf_text, 0},
 
-#ifdef ECOFF_DEBUGGING
+  /* End sentinel.  */
+  {NULL},
+};
+
+static const pseudo_typeS ecoff_debug_pseudo_table[] =
+{
   /* COFF style debugging information for ECOFF. .ln is not used; .loc
      is used instead.  */
   { "def",	ecoff_directive_def,	0 },
@@ -104,13 +114,64 @@ const pseudo_typeS obj_pseudo_table[] =
   { "noalias",	s_ignore,		0 },
   { "verstamp",	s_ignore,		0 },
   { "vreg",	s_ignore,		0 },
-#endif /* ECOFF_DEBUGGING */
 
   {NULL}			/* end sentinel */
 };
 
 #undef NO_RELOC
 #include "aout/aout64.h"
+
+void
+elf_pop_insert ()
+{
+  pop_insert (elf_pseudo_table);
+  if (ECOFF_DEBUGGING)
+    pop_insert (ecoff_debug_pseudo_table);
+}
+
+static bfd_vma
+elf_s_get_size (sym)
+     symbolS *sym;
+{
+  return S_GET_SIZE (sym);
+}
+
+static void
+elf_s_set_size (sym, sz)
+     symbolS *sym;
+     bfd_vma sz;
+{
+  S_SET_SIZE (sym, sz);
+}
+
+static bfd_vma
+elf_s_get_align (sym)
+     symbolS *sym;
+{
+  return S_GET_ALIGN (sym);
+}
+
+static void
+elf_s_set_align (sym, align)
+     symbolS *sym;
+     bfd_vma align;
+{
+  S_SET_ALIGN (sym, align);
+}
+
+static void
+elf_copy_symbol_attributes (dest, src)
+     symbolS *dest, *src;
+{
+  OBJ_COPY_SYMBOL_ATTRIBUTES (dest, src);
+}
+
+static int
+elf_sec_sym_ok_for_reloc (sec)
+     asection *sec;
+{
+  return obj_sec_sym_ok_for_reloc (sec);
+}
 
 void
 elf_file_symbol (s)
@@ -231,9 +292,10 @@ obj_elf_common (ignore)
 	{
 	allocate_common:
 	  S_SET_VALUE (symbolP, (valueT) size);
+	  S_SET_ALIGN (symbolP, temp);
 	  S_SET_EXTERNAL (symbolP);
 	  /* should be common, but this is how gas does it for now */
-	  S_SET_SEGMENT (symbolP, &bfd_und_section);
+	  S_SET_SEGMENT (symbolP, bfd_und_section_ptr);
 	}
     }
   else
@@ -410,6 +472,10 @@ obj_elf_section (xxx)
   int i;
   flagword flags;
 
+#ifdef md_flush_pending_output
+  md_flush_pending_output ();
+#endif
+
   /* Get name of section.  */
   SKIP_WHITESPACE ();
   if (*input_line_pointer == '"')
@@ -455,6 +521,11 @@ obj_elf_section (xxx)
       while (! is_end_of_line[(unsigned char) *input_line_pointer])
 	++input_line_pointer;
       ++input_line_pointer;
+
+#ifdef md_elf_section_change_hook
+      md_elf_section_change_hook ();
+#endif
+
       return;
     }
 
@@ -591,15 +662,22 @@ obj_elf_section (xxx)
 	   | ((attr & SHF_WRITE) ? 0 : SEC_READONLY)
 	   | ((attr & SHF_ALLOC) ? SEC_ALLOC | SEC_LOAD : 0)
 	   | ((attr & SHF_EXECINSTR) ? SEC_CODE : 0));
-  if (type == SHT_PROGBITS)
-    flags |= SEC_ALLOC | SEC_LOAD;
-  else if (type == SHT_NOBITS)
+  if (special_sections[i].name == NULL)
     {
-      flags |= SEC_ALLOC;
-      flags &=~ SEC_LOAD;
+      if (type == SHT_PROGBITS)
+	flags |= SEC_ALLOC | SEC_LOAD;
+      else if (type == SHT_NOBITS)
+	{
+	  flags |= SEC_ALLOC;
+	  flags &=~ SEC_LOAD;
+	}
     }
 
   bfd_set_section_flags (stdoutput, sec, flags);
+
+#ifdef md_elf_section_change_hook
+  md_elf_section_change_hook ();
+#endif
 
   demand_empty_rest_of_line ();
 }
@@ -652,28 +730,18 @@ obj_elf_line (ignore)
 void 
 obj_read_begin_hook ()
 {
-#ifdef ECOFF_DEBUGGING
-  ecoff_read_begin_hook ();
-#endif
+  if (ECOFF_DEBUGGING)
+    ecoff_read_begin_hook ();
 }
 
 void 
 obj_symbol_new_hook (symbolP)
      symbolS *symbolP;
 {
-#if 0 /* BFD already takes care of this */
-  elf32_symbol_type *esym = (elf32_symbol_type *) symbolP;
+  symbolP->sy_obj = 0;
 
-  /* There is an Elf_Internal_Sym and an Elf_External_Sym.  For now,
-     just zero them out.  */
-
-  bzero ((char *) &esym->internal_elf_sym, sizeof (esym->internal_elf_sym));
-  bzero ((char *) &esym->native_elf_sym, sizeof (esym->native_elf_sym));
-  bzero ((char *) &esym->tc_data, sizeof (esym->tc_data));
-#endif
-#ifdef ECOFF_DEBUGGING
-  ecoff_symbol_new_hook (symbolP);
-#endif
+  if (ECOFF_DEBUGGING)
+    ecoff_symbol_new_hook (symbolP);
 }
 
 void 
@@ -779,64 +847,65 @@ obj_elf_size (ignore)
     S_SET_SIZE (sym, exp.X_add_number);
   else
     {
-#if 0
-      static int warned;
-      if (!warned)
-	{
-	  as_tsktsk (".size expressions not yet supported, ignored");
-	  warned++;
-	}
-#endif
+      sym->sy_obj = (expressionS *) xmalloc (sizeof (expressionS));
+      *sym->sy_obj = exp;
     }
   demand_empty_rest_of_line ();
 }
+
+/* Handle the ELF .type pseudo-op.  This sets the type of a symbol.
+   There are three syntaxes.  The first (used on Solaris) is
+       .type SYM,#function
+   The second (used on UnixWare) is
+       .type SYM,@function
+   The third (reportedly to be used on Irix 6.0) is
+       .type SYM STT_FUNC
+
+   FIXME: We do not fully support this pseudo-op.  In fact, the only
+   case we do support is setting the type to STT_FUNC, which we do by
+   setting the BSF_FUNCTION flag.  */
 
 static void
 obj_elf_type (ignore)
      int ignore;
 {
-  char *name = input_line_pointer;
-  char c = get_symbol_end ();
-  char *p;
-  int type = 0;
+  char *name;
+  char c;
+  int type;
+  const char *typename;
   symbolS *sym;
 
-  p = input_line_pointer;
-  *p = c;
-  SKIP_WHITESPACE ();
-  if (*input_line_pointer != ',')
-    {
-      as_bad ("expected comma after name in .type directive");
-    egress:
-      ignore_rest_of_line ();
-      return;
-    }
-  input_line_pointer++;
-  SKIP_WHITESPACE ();
-  if (*input_line_pointer != '#' && *input_line_pointer != '@')
-    {
-      as_bad ("expected `#' or `@' after comma in .type directive");
-      goto egress;
-    }
-  input_line_pointer++;
-  if (!strncmp ("function", input_line_pointer, sizeof ("function") - 1))
-    {
-      type = BSF_FUNCTION;
-      input_line_pointer += sizeof ("function") - 1;
-    }
-  else if (!strncmp ("object", input_line_pointer, sizeof ("object") - 1))
-    {
-      input_line_pointer += sizeof ("object") - 1;
-    }
-  else
-    {
-      as_bad ("unrecognized symbol type, ignored");
-      goto egress;
-    }
-  demand_empty_rest_of_line ();
-  *p = 0;
+  name = input_line_pointer;
+  c = get_symbol_end ();
   sym = symbol_find_or_make (name);
+  *input_line_pointer = c;
+
+  SKIP_WHITESPACE ();
+  if (*input_line_pointer == ',')
+    ++input_line_pointer;
+
+  SKIP_WHITESPACE ();
+  if (*input_line_pointer == '#' || *input_line_pointer == '@')
+    ++input_line_pointer;
+
+  typename = input_line_pointer;
+  c = get_symbol_end ();
+
+  type = 0;
+  if (strcmp (typename, "function") == 0
+      || strcmp (typename, "STT_FUNC") == 0)
+    type = BSF_FUNCTION;
+  else if (strcmp (typename, "object") == 0
+	   || strcmp (typename, "STT_OBJECT") == 0)
+    ;
+  else
+    as_bad ("ignoring unrecognized symbol type \"%s\"", typename);
+
+  *input_line_pointer = c;
+
   sym->bsym->flags |= type;
+
+  demand_empty_rest_of_line ();
 }
 
 static void
@@ -879,7 +948,10 @@ obj_elf_init_stab_section (seg)
      UnixWare ar crashes.  */
   bfd_set_section_alignment (stdoutput, seg, 2);
 
+  /* Make space for this first symbol. */
   p = frag_more (12);
+  /* Zero it out. */
+  memset (p, 0, 12);
   as_where (&file, (unsigned int *) NULL);
   stabstr_name = (char *) alloca (strlen (segment_name (seg)) + 4);
   strcpy (stabstr_name, segment_name (seg));
@@ -927,7 +999,7 @@ adjust_stab_sections (abfd, sec, xxx)
   bfd_h_put_32 (abfd, (bfd_vma) strsz, (bfd_byte *) p + 8);
 }
 
-#ifdef ECOFF_DEBUGGING
+/* #ifdef ECOFF_DEBUGGING */
 
 /* This function is called by the ECOFF code.  It is supposed to
    record the external symbol information so that the backend can
@@ -936,11 +1008,11 @@ adjust_stab_sections (abfd, sec, xxx)
    in the symbol.  */
 
 void
-obj_ecoff_set_ext (sym, ext)
+elf_ecoff_set_ext (sym, ext)
      symbolS *sym;
-     EXTR *ext;
+     struct ecoff_extr *ext;
 {
-  sym->bsym->udata = (PTR) ext;
+  sym->bsym->udata.p = (PTR) ext;
 }
 
 /* This function is called by bfd_ecoff_debug_externals.  It is
@@ -952,9 +1024,9 @@ elf_get_extr (sym, ext)
      asymbol *sym;
      EXTR *ext;
 {
-  if (sym->udata == NULL)
+  if (sym->udata.p == NULL)
     return false;
-  *ext = *(EXTR *) sym->udata;
+  *ext = *(EXTR *) sym->udata.p;
   return true;
 }
 
@@ -969,94 +1041,140 @@ elf_set_index (sym, indx)
 {
 }
 
-#endif /* ECOFF_DEBUGGING */
+/* #endif /* ECOFF_DEBUGGING */
+
+void
+elf_frob_symbol (symp, puntp)
+     symbolS *symp;
+     int *puntp;
+{
+  if (ECOFF_DEBUGGING)
+    ecoff_frob_symbol (symp);
+
+  if (symp->sy_obj)
+    {
+      switch (symp->sy_obj->X_op)
+	{
+	case O_subtract:
+	  S_SET_SIZE (symp,
+		      (S_GET_VALUE (symp->sy_obj->X_add_symbol)
+		       + symp->sy_obj->X_add_number
+		       - S_GET_VALUE (symp->sy_obj->X_op_symbol)));
+	  break;
+	case O_constant:
+	  S_SET_SIZE (symp,
+		      (S_GET_VALUE (symp->sy_obj->X_add_symbol)
+		       + symp->sy_obj->X_add_number));
+	  break;
+	default:
+	  as_bad (".size expression too complicated to fix up");
+	  break;
+	}
+    }
+  free (symp->sy_obj);
+  symp->sy_obj = 0;
+
+  /* Double check weak symbols.  */
+  if (symp->bsym->flags & BSF_WEAK)
+    {
+      if (S_IS_COMMON (symp))
+	as_bad ("Symbol `%s' can not be both weak and common",
+		S_GET_NAME (symp));
+    }
+}
 
 void 
 elf_frob_file ()
 {
   bfd_map_over_sections (stdoutput, adjust_stab_sections, (PTR) 0);
 
-#ifdef elf_tc_symbol
-  {
-    int i;
-
-    for (i = 0; i < stdoutput->symcount; i++)
-      elf_tc_symbol (stdoutput, (PTR) (stdoutput->outsymbols[i]),
-		     i + 1);
-  }
-#endif
-
 #ifdef elf_tc_final_processing
   elf_tc_final_processing ();
 #endif
 
-  /* Finally, we must make any target-specific sections. */
+  if (ECOFF_DEBUGGING)
+    /* Generate the ECOFF debugging information.  */
+    {
+      const struct ecoff_debug_swap *debug_swap;
+      struct ecoff_debug_info debug;
+      char *buf;
+      asection *sec;
 
-#ifdef elf_tc_make_sections
-  elf_tc_make_sections (stdoutput);
-#endif
+      debug_swap
+	= get_elf_backend_data (stdoutput)->elf_backend_ecoff_debug_swap;
+      know (debug_swap != (const struct ecoff_debug_swap *) NULL);
+      ecoff_build_debug (&debug.symbolic_header, &buf, debug_swap);
 
-#ifdef ECOFF_DEBUGGING
-  /* Generate the ECOFF debugging information.  */
-  {
-    const struct ecoff_debug_swap *debug_swap;
-    struct ecoff_debug_info debug;
-    char *buf;
-    asection *sec;
-
-    debug_swap
-      = get_elf_backend_data (stdoutput)->elf_backend_ecoff_debug_swap;
-    know (debug_swap != (const struct ecoff_debug_swap *) NULL);
-    ecoff_build_debug (&debug.symbolic_header, &buf, debug_swap);
-
-    /* Set up the pointers in debug.  */
+      /* Set up the pointers in debug.  */
 #define SET(ptr, offset, type) \
     debug.ptr = (type) (buf + debug.symbolic_header.offset)
 
-    SET (line, cbLineOffset, unsigned char *);
-    SET (external_dnr, cbDnOffset, PTR);
-    SET (external_pdr, cbPdOffset, PTR);
-    SET (external_sym, cbSymOffset, PTR);
-    SET (external_opt, cbOptOffset, PTR);
-    SET (external_aux, cbAuxOffset, union aux_ext *);
-    SET (ss, cbSsOffset, char *);
-    SET (external_fdr, cbFdOffset, PTR);
-    SET (external_rfd, cbRfdOffset, PTR);
-    /* ssext and external_ext are set up just below.  */
+	SET (line, cbLineOffset, unsigned char *);
+      SET (external_dnr, cbDnOffset, PTR);
+      SET (external_pdr, cbPdOffset, PTR);
+      SET (external_sym, cbSymOffset, PTR);
+      SET (external_opt, cbOptOffset, PTR);
+      SET (external_aux, cbAuxOffset, union aux_ext *);
+      SET (ss, cbSsOffset, char *);
+      SET (external_fdr, cbFdOffset, PTR);
+      SET (external_rfd, cbRfdOffset, PTR);
+      /* ssext and external_ext are set up just below.  */
 
 #undef SET    
 
-    /* Set up the external symbols.  */
-    debug.ssext = debug.ssext_end = NULL;
-    debug.external_ext = debug.external_ext_end = NULL;
-    if (! bfd_ecoff_debug_externals (stdoutput, &debug, debug_swap, true,
-				     elf_get_extr, elf_set_index))
-      as_fatal ("Failed to set up debugging information: %s",
-		bfd_errmsg (bfd_error));
+      /* Set up the external symbols.  */
+      debug.ssext = debug.ssext_end = NULL;
+      debug.external_ext = debug.external_ext_end = NULL;
+      if (! bfd_ecoff_debug_externals (stdoutput, &debug, debug_swap, true,
+				       elf_get_extr, elf_set_index))
+	as_fatal ("Failed to set up debugging information: %s",
+		  bfd_errmsg (bfd_get_error ()));
 
-    sec = bfd_get_section_by_name (stdoutput, ".mdebug");
-    assert (sec != NULL);
+      sec = bfd_get_section_by_name (stdoutput, ".mdebug");
+      assert (sec != NULL);
 
-    know (stdoutput->output_has_begun == false);
+      know (stdoutput->output_has_begun == false);
 
-    /* We set the size of the section, call bfd_set_section_contents
-       to force the ELF backend to allocate a file position, and then
-       write out the data.  FIXME: Is this really the best way to do
-       this?  */
-    sec->_raw_size = bfd_ecoff_debug_size (stdoutput, &debug, debug_swap);
+      /* We set the size of the section, call bfd_set_section_contents
+	 to force the ELF backend to allocate a file position, and then
+	 write out the data.  FIXME: Is this really the best way to do
+	 this?  */
+      sec->_raw_size = bfd_ecoff_debug_size (stdoutput, &debug, debug_swap);
 
-    if (! bfd_set_section_contents (stdoutput, sec, (PTR) NULL,
-				    (file_ptr) 0, (bfd_size_type) 0))
-      as_fatal ("Can't start writing .mdebug section: %s",
-		bfd_errmsg (bfd_error));
+      if (! bfd_set_section_contents (stdoutput, sec, (PTR) NULL,
+				      (file_ptr) 0, (bfd_size_type) 0))
+	as_fatal ("Can't start writing .mdebug section: %s",
+		  bfd_errmsg (bfd_get_error ()));
 
-    know (stdoutput->output_has_begun == true);
-    know (sec->filepos != 0);
+      know (stdoutput->output_has_begun == true);
+      know (sec->filepos != 0);
 
-    if (! bfd_ecoff_write_debug (stdoutput, &debug, debug_swap,
-				 sec->filepos))
-      as_fatal ("Could not write .mdebug section: %s",
-		bfd_errmsg (bfd_error));
-  }
-#endif /* ECOFF_DEBUGGING */
+      if (! bfd_ecoff_write_debug (stdoutput, &debug, debug_swap,
+				   sec->filepos))
+	as_fatal ("Could not write .mdebug section: %s",
+		  bfd_errmsg (bfd_get_error ()));
+    }
 }
+
+const struct format_ops elf_format_ops =
+{
+  bfd_target_elf_flavour,
+  0,
+  1,
+  elf_frob_symbol,
+  elf_frob_file,
+  elf_s_get_size, elf_s_set_size,
+  elf_s_get_align, elf_s_set_align,
+  elf_copy_symbol_attributes,
+#ifdef ECOFF_DEBUGGING
+  ecoff_generate_asm_lineno,
+#else
+  0,
+#endif
+  0,				/* process_stab */
+  elf_sec_sym_ok_for_reloc,
+  elf_pop_insert,
+  elf_ecoff_set_ext,
+  obj_read_begin_hook,
+  obj_symbol_new_hook,
+};

@@ -1,3 +1,106 @@
+Wed May 10 18:09:12 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* Makefile.in (OBJS): Include @extra_objects@.
+	(obj-elf.o, obj-ecoff.o, e-mipself.o, e-mipsecoff.o): New rules
+	for building these independently.
+	* emul-target.h, config/e-mipself.c, config/e-mipsecoff.c: New
+	files.
+
+	* acconfig.h (DEFAULT_EMULATION, EMULATIONS, USE_EMULATIONS,
+	OBJ_MAYBE_*, I386COFF, M68KCOFF, M88KCOFF): New macros.
+	* aclocal.m4 (GAS_UNIQ): New macro.
+
+	* as.c (emulations, n_emulations) [USE_EMULATIONS]: New variable.
+	(select_emulation_mode, default_emul_bfd_name, common_emul_init)
+	[USE_EMULATIONS]: New functions.
+	(main) [USE_EMULATIONS]: Call select_emulation_mode before other
+	initialization.
+	* emul.h: New file.
+	* as.h [USE_EMULATIONS]: Include it.
+
+	* configure.in: Handle enable-targets option.  Iterate over target
+	list, building up a list of object file formats and emulation
+	configurations.  (Only supports emulations for MIPS CPU so far.)
+	If multiple formats are needed, set obj_format to multi and add
+	format config files to extra_files.  If emulation modes are
+	needed, add the relevant files to extra_files.
+
+	* configure.in: Define I386COFF, M68KCOFF, M88KCOFF for those
+	configurations.
+
+	* ecoff.c (ecoff_generate_asm_lineno): Filename argument now
+	points to const.
+	* ecoff.h (ecoff_generate_asm_lineno): Updated declaration.
+
+	* obj.h (obj_read_begin_hook): Don't declare function if it's
+	already a macro.
+
+	* read.c (s_space, cons, stringer): If md_flush_pending_output is
+	defined, call it on entry.
+	* config/obj-elf.c (obj_elf_section): If md_flush_pending_output
+	is defined, call it on entry.  If md_elf_section_change_hook is
+	defined, call it before returning normally.
+
+	* read.h (target_big_endian): Declare.
+
+	* obj.h (struct format_ops): Added new function pointer fields
+	ecoff_set_ext, read_begin_hook, symbol_new_hook.
+	(ecoff_format_ops, elf_format_ops): Declare.
+	* config/obj-elf.c (elf_s_get_size, elf_s_set_size,
+	elf_s_get_align, elf_s_set_align, elf_copy_symbol_attributes,
+	elf_sec_sym_ok_for_reloc): New functions.
+	(elf_format_ops): New variable.
+	(elf_frob_symbol): Now takes additional int* argument.
+	* config/obj-elf.h (elf_frob_symbol): Update declaration.
+	(elf_pop_insert): Declare.
+	(obj_pop_insert): Define to call elf_pop_insert.
+	* config/obj-ecoff.c (ecoff_sec_sym_ok_for_reloc,
+	obj_ecoff_frob_symbol): New functions.
+	(ecoff_format_ops): New variable.
+
+	* config/te-generic.h: If OBJ_HEADER is defined, use it as the
+	filename to include in place of obj-format.h.
+	* config/te-multi.h: New file, copied from te-generic.h.
+	* config/obj-elf.c (OBJ_HEADER): Define it to "obj-elf.h".
+	* config/obj-ecoff.c (OBJ_HEADER): Define it to "obj-ecoff.h".
+
+	* config/obj-elf.c (ECOFF_DEBUGGING): Default to 0.
+	(obj_read_begin_hook, obj_symbol_new_hook, elf_frob_symbol,
+	elf_frob_file): Test it at run time.
+	(obj_ecoff_set_ext, elf_get_extr, elf_set_index): Define
+	unconditionally.
+	(elf_pseudo_table): Renamed from obj_pseudo_table, now static.
+	(ecoff_debug_pseudo_table): Split off into separate table.  Define
+	it unconditionally.
+	(elf_pop_insert): New function.
+	* config/obj-elf.h (elf_pop_insert): Declare.
+	(obj_pop_insert): New macro.
+	(obj_ecoff_set_ext) [!OBJ_MAYBE_ELF]: Define to elf_ecoff_set_ext.
+	* config/obj-ecoff.h (obj_ecoff_set_ext): Define to ecoff_set_ext.
+
+	* config/tc-mips.h: Protect against multiple inclusions.
+	(mips_pop_insert): Declare.
+	(md_pop_insert): Call it.
+
+	* config/tc-mips.c: If OBJ_MAYBE_ELF is defined, include
+	obj-elf.h, but preserve OUTPUT_FLAVOR and protect some other
+	macros from redefinition.
+	(ECOFF_DEBUGGING): Default to 0.  All references changed to
+	run-time tests or made unconditional.
+	(s_stringer, s_mips_space, s_elf_section): Deleted.
+	(md_pseudo_table): Don't refer to them.  Split table into three
+	sections, for MIPS, non-ECOFF_DEBUGGING, and ELF.
+	(mips_pop_insert): New function.
+	(mips_flush_pending_output): New function.
+	(mips_enable_auto_align): New function.
+	* config/tc-mips.h (mips_pop_insert): Declare.
+	(md_pop_insert): New macro.
+	(mips_flush_pending_output): Declare.
+	(md_flush_pending_output): New macro.
+	(mips_enable_auto_align): Declare.
+	(md_elf_section_change_hook): New macro, calls
+	mips_enable_auto_align.
+
 Tue May  9 17:07:41 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* configure.in: Add little endian PowerPC support.
