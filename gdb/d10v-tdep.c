@@ -654,8 +654,17 @@ d10v_extract_return_value (type, regbuf, valbuf)
 	  unsigned short c = extract_unsigned_integer (regbuf + REGISTER_BYTE (RET1_REGNUM), REGISTER_RAW_SIZE (RET1_REGNUM));
 	  store_unsigned_integer (valbuf, 1, c);
 	}
-      else
+      else if ((len & 1) == 0)
 	memcpy (valbuf, regbuf + REGISTER_BYTE (RET1_REGNUM), len);
+      else
+	{
+	  /* For return values of odd size, the first byte is in the
+             least significant part of the first register.  The
+             remaining bytes in remaining registers. Interestingly,
+             when such values are passed in, the last byte is in the
+             most significant byte of that same register - wierd. */
+	  memcpy (valbuf, regbuf + REGISTER_BYTE (RET1_REGNUM) + 1, len);
+	}
     }
 }
 

@@ -1,3 +1,12 @@
+Mon Feb 16 14:05:54 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* d10v-tdep.c (d10v_extract_return_value): Wierd.  GCC wants to
+ 	return odd sized register quantities with only half of the first
+ 	register used!
+
+	* config/d10v/tm-d10v.h (USE_STRUCT_CONVENTION): Use stack when
+ 	size > 8.
+
 Mon Mar 30 16:42:12 1998  Jason Molenda  (crash@bugshack.cygnus.com)
 
 	* rdi-share/Makefile.am, rdi-share/aclocal.m4,

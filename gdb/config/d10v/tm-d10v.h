@@ -187,7 +187,7 @@ extern CORE_ADDR d10v_skip_prologue ();
    registers. */
 
 #define USE_STRUCT_CONVENTION(gcc_p, type) \
-   (TYPE_LENGTH (type) > 1)
+   (TYPE_LENGTH (type) > 8)
 
 
 
