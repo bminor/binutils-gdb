@@ -1,3 +1,22 @@
+Tue Aug  1 11:41:30 1995  steve chamberlain  <sac@slash.cygnus.com>
+
+	* Makefile.in: Remove superfluous runtest gasp.
+
+Thu Jul 20 18:56:48 1995  Jeff Law  (law@snake.cs.utah.edu)
+
+	* gas/all/gas.exp: Disable tests that are not appropriate for
+	the PA.
+
+Thu Jul 13 18:22:49 1995  Ken Raeburn  <raeburn@cygnus.com>
+
+	* gas/m68k/all.exp: Run schwab test for m68k vxworks5.1.
+
+Wed Jun 21 21:28:57 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* gas/m68k/schwab.*: New test based on a test case from Andreas
+	Schwab.
+	* gas/m68k/all.exp: Run it for some aout configurations.
+
 Mon Jun 12 22:27:18 1995  Jeff Law  (law@snake.cs.utah.edu)
 
 	* gas/hppa/parse/badfmpyadd.s: New test.

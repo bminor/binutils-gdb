@@ -106,7 +106,6 @@ check:  site.exp
 	   TCL_LIBRARY=$${srcdir}/../../tcl/library ; \
 	   export TCL_LIBRARY ; fi ; \
 	$(RUNTEST) $(RUNTESTFLAGS) --tool gas 
-	$(RUNTEST) $(RUNTESTFLAGS) --tool gasp
 
 force:
 
