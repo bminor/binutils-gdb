@@ -1,5 +1,5 @@
 # Expect script for ld linkonce tests
-#   Copyright 2001 Free Software Foundation, Inc.
+#   Copyright 2001, 2002 Free Software Foundation, Inc.
 #
 # This file is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -25,6 +25,11 @@ if { ![istarget *-*-linux*] \
      && ![istarget *-*-gnu] \
      && ![istarget hppa*64*-*-hpux*] \
      && ![istarget *-*-elf] } {
+    return
+}
+
+if { [istarget *-*-linux*aout*] \
+     || [istarget *-*-linux*oldld*] } {
     return
 }
 
