@@ -86,6 +86,7 @@ struct ui_out_impl mi_ui_out_impl =
   mi_message,
   mi_wrap_hint,
   mi_flush,
+  NULL,
   1, /* Needs MI hacks.  */
 };
 

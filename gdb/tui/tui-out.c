@@ -90,6 +90,7 @@ static struct ui_out_impl tui_ui_out_impl =
   tui_message,
   tui_wrap_hint,
   tui_flush,
+  NULL,
   0, /* Does not need MI hacks (i.e. needs CLI hacks).  */
 };
 
