@@ -1,3 +1,8 @@
+2003-05-29  Richard Henderson  <rth@redhat.com>
+
+	* gdb.asm/alpha.inc: New file.
+	* gdb.asm/asm-source.exp: Use it.
+
 2003-05-29  Jim Blandy  <jimb@redhat.com>
 
 	* gdb.base/corefile.exp: Find corefiles on Linux, which names them
