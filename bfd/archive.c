@@ -1594,14 +1594,11 @@ compute_and_write_armap (arch, elength)
 		}
 	      symcount = bfd_canonicalize_symtab (current, syms);
 
-
 	      /* Now map over all the symbols, picking out the ones we want */
 	      for (src_count = 0; src_count < symcount; src_count++)
 		{
-		  flagword flags =
-		  (syms[src_count])->flags;
-		  asection *sec =
-		  syms[src_count]->section;
+		  flagword flags = (syms[src_count])->flags;
+		  asection *sec = syms[src_count]->section;
 
 		  if ((flags & BSF_GLOBAL ||
 		       flags & BSF_WEAK ||
@@ -1680,7 +1677,7 @@ bsd_write_armap (arch, elength, map, orl_count, stridx)
     if (((char *) (&hdr))[i] == '\0')
       (((char *) (&hdr))[i]) = ' ';
   bfd_write ((char *) &hdr, 1, sizeof (struct ar_hdr), arch);
-  bfd_h_put_32 (arch, (bfd_vma) ranlibsize, (PTR) & temp);
+  bfd_h_put_32 (arch, (bfd_vma) ranlibsize, (PTR) &temp);
   bfd_write (&temp, 1, sizeof (temp), arch);
 
   for (count = 0; count < orl_count; count++)
@@ -1700,16 +1697,17 @@ bsd_write_armap (arch, elength, map, orl_count, stridx)
 	}			/* if new archive element */
 
       last_elt = current;
-      bfd_h_put_32 (arch, ((map[count]).namidx), (PTR) & outs.s.string_offset);
-      bfd_h_put_32 (arch, firstreal, (PTR) & outs.file_offset);
+      bfd_h_put_32 (arch, ((map[count]).namidx), (PTR) &outs.s.string_offset);
+      bfd_h_put_32 (arch, firstreal, (PTR) &outs.file_offset);
       bfd_write ((char *) outp, 1, sizeof (outs), arch);
     }
 
   /* now write the strings themselves */
-  bfd_h_put_32 (arch, stringsize, (PTR) & temp);
-  bfd_write ((PTR) & temp, 1, sizeof (temp), arch);
+  bfd_h_put_32 (arch, stringsize, (PTR) &temp);
+  bfd_write ((PTR) &temp, 1, sizeof (temp), arch);
   for (count = 0; count < orl_count; count++)
-    bfd_write (*((map[count]).name), 1, strlen (*((map[count]).name)) + 1, arch);
+    bfd_write (*((map[count]).name), 1,
+	       strlen (*((map[count]).name)) + 1, arch);
 
   /* The spec sez this should be a newline.  But in order to be
      bug-compatible for sun's ar we use a null. */
@@ -1826,7 +1824,7 @@ coff_write_armap (arch, elength, map, symbol_count, stridx)
 
   /* Write the ar header for this item and the number of symbols */
 
-  bfd_write ((PTR) & hdr, 1, sizeof (struct ar_hdr), arch);
+  bfd_write ((PTR) &hdr, 1, sizeof (struct ar_hdr), arch);
 
   bfd_write_bigendian_4byte_int (arch, symbol_count);
 
@@ -1849,8 +1847,8 @@ coff_write_armap (arch, elength, map, symbol_count, stridx)
 	  count++;
 	}
       /* Add size of this archive entry */
-      archive_member_file_ptr += arelt_size (current) + sizeof (struct
-								ar_hdr);
+      archive_member_file_ptr += (arelt_size (current)
+				  + sizeof (struct ar_hdr));
       /* remember aboout the even alignment */
       archive_member_file_ptr += archive_member_file_ptr % 2;
       current = current->next;
