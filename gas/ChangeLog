@@ -1,5 +1,8 @@
 Mon Aug  1 02:40:43 1994  Jeff Law  (law@snake.cs.utah.edu)
 
+	* config/tc-hppa.c (create_new_space): Initialize sd_subspaces
+	field in the space chain.
+
 	* config/tc-hppa.c (tc_gen_reloc): Cast return value from
 	hppa_gen_reloc_type.
 

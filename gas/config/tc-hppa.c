@@ -5642,6 +5642,7 @@ create_new_space (name, spnum, loadable, defined, private,
 
   chain_entry->sd_seg = seg;
   chain_entry->sd_last_subseg = -1;
+  chain_entry->sd_subspaces = NULL;
   chain_entry->sd_next = NULL;
 
   /* Find spot for the new space based on its sort key.  */
