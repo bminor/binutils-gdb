@@ -26,6 +26,7 @@ Things-to-keep:
 CONTRIBUTORS
 COPYING
 ChangeLog
+ChangeLog.1
 Makefile.in
 NEWS
 NOTES
@@ -106,7 +107,7 @@ Things-to-lose:
 
 Do-last:
 
-i960xl_files=ChangeLog
+i960xl_files="ChangeLog ChangeLog.1"
 if ( echo $* | grep keep\-i960xl > /dev/null ) ; then
 	if [ -n "${verbose}" ] ; then
 		echo Keeping i960xl stuff in $i960xl_files.
@@ -130,7 +131,7 @@ else
 	fi
 fi
 
-sh3e_files="ChangeLog"
+sh3e_files="ChangeLog ChangeLog.1"
 if ( echo $* | grep keep\-sh3e > /dev/null ) ; then
 	if [ -n "${verbose}" ] ; then
 		echo Keeping sh3e stuff in $sh3e_files.
@@ -154,7 +155,7 @@ else
 	fi
 fi
 
-rce_files="configure.in as.c configure ChangeLog Makefile.in"
+rce_files="configure.in as.c configure ChangeLog Makefile.in ChangeLog.1"
 
 if ( echo $* | grep keep\-rce > /dev/null ) ; then
 	for i in $rce_files ; do
@@ -183,7 +184,7 @@ else
 	done
 fi
 
-arc_files="ChangeLog configure.in configure Makefile.in"
+arc_files="ChangeLog configure.in configure Makefile.in ChangeLog.1"
 if ( echo $* | grep keep\-arc > /dev/null ) ; then
 	for i in $arc_files ; do
 		if test ! -d $i && (grep sanitize-arc $i > /dev/null) ; then
