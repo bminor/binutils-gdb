@@ -1,3 +1,8 @@
+Thu Dec 30 07:41:36 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* section.c (bfd_get_section_contents):  Return zero filled buffer
+	if section has no contents.
+
 Tue Dec 28 12:43:54 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* elf.c (bfd_elf_generic_reloc): If this is not an inplace reloc,

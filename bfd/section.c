@@ -39,7 +39,7 @@ SECTION
 INODE
 Section Input, Section Output, Sections, Sections
 SUBSECTION
-	Section Input
+	Section input
 
 	When a BFD is opened for reading, the section structures are
 	created and attached to the BFD.
@@ -73,7 +73,7 @@ INODE
 Section Output, typedef asection, Section Input, Sections
 
 SUBSECTION
-	Section Output
+	Section output
 
 	To write a new object style BFD, the various sections to be
 	written have to be created. They are attached to the BFD in
@@ -114,7 +114,7 @@ SUBSECTION
 SUBSECTION
 	Seclets
 
-	The data within a section is stored in a <<seclet>>.  These
+	The data within a section is stored in a @dfn{seclet}.  These
 	are much like the fixups in <<gas>>.  The seclet abstraction
 	allows a section to grow and shrink within itself.
 
@@ -420,10 +420,9 @@ DOCDD
 INODE
 section prototypes,  , typedef asection, Sections
 SUBSECTION
-	section prototypes
+	Section prototypes
 
-These are the functions exported by the section handling part of
-<<libbfd>>.
+These are the functions exported by the section handling part of BFD.
 */
 
 /*
@@ -434,13 +433,13 @@ SYNOPSIS
 	asection *bfd_get_section_by_name(bfd *abfd, CONST char *name);
 
 DESCRIPTION
-	Run through the provided @var{abfd} and return the one of the
-	<<asection>>s whose name matches @var{name}, otherwise NULL.
+	Run through @var{abfd} and return the one of the
+	<<asection>>s whose name matches @var{name}, otherwise <<NULL>>.
 	@xref{Sections}, for more information.
 
 	This should only be used in special cases; the normal way to process
-	all sections of a given name is to use bfd_map_over_sections and
-	strcmp on the name (or better yet, base it on the section flags
+	all sections of a given name is to use <<bfd_map_over_sections>> and
+	<<strcmp>> on the name (or better yet, base it on the section flags
 	or something else) for each section.
 */
 
@@ -468,16 +467,16 @@ DESCRIPTION
 	Create a new empty section called @var{name}
 	and attach it to the end of the chain of sections for the
 	BFD @var{abfd}. An attempt to create a section with a name which
-	is already in use, returns its pointer without changing the
+	is already in use returns its pointer without changing the
 	section chain.
 
 	It has the funny name since this is the way it used to be
 	before it was rewritten....
 
 	Possible errors are:
-	o invalid_operation -
+	o <<invalid_operation>> -
 	If output has already started for this BFD.
-	o no_memory -
+	o <<no_memory>> -
 	If obstack alloc fails.
 
 */
@@ -508,9 +507,9 @@ DESCRIPTION
    the chain of sections for @var{abfd}.  Create a new section even if there
    is already a section with that name.  
 
-   Returns NULL and sets bfd_error on error; possible errors are:
-   o invalid_operation - If output has already started for @var{abfd}.
-   o no_memory - If obstack alloc fails.
+   Return <<NULL>> and set <<bfd_error>> on error; possible errors are:
+   o <<invalid_operation>> - If output has already started for @var{abfd}.
+   o <<no_memory>> - If obstack alloc fails.
 */
 
 sec_ptr
@@ -578,10 +577,10 @@ SYNOPSIS
 	asection *bfd_make_section(bfd *, CONST char *name);
 
 DESCRIPTION
-   Like <<bfd_make_section_anyway>>, but return NULL (without setting
+   Like <<bfd_make_section_anyway>>, but return <<NULL>> (without setting
    bfd_error) without changing the section chain if there is already a
-   section named @var{name}.  If there is an error, return NULL and set
-   bfd_error.
+   section named @var{name}.  If there is an error, return <<NULL>> and set
+   <<bfd_error>>.
 */
 
 sec_ptr
@@ -628,10 +627,10 @@ SYNOPSIS
 
 DESCRIPTION
 	Set the attributes of the section @var{sec} in the BFD
-	@var{abfd} to the value @var{flags}. Returns <<true>> on success,
+	@var{abfd} to the value @var{flags}. Return <<true>> on success,
 	<<false>> on error. Possible error returns are:
 
-	o invalid operation -
+	o <<invalid_operation>> -
 	The section cannot have one or more of the attributes
 	requested. For example, a .bss section in <<a.out>> may not
 	have the <<SEC_HAS_CONTENTS>> field set.
@@ -719,8 +718,8 @@ DESCRIPTION
 	ok, then <<true>> is returned, else <<false>>. 
 
 	Possible error returns:
-	o invalid_operation -
-	Writing has started to the BFD, so setting the size is invalid
+	o <<invalid_operation>> -
+	Writing has started to the BFD, so setting the size is invalid.
 
 */
 
@@ -767,7 +766,7 @@ DESCRIPTION
 
 	Normally <<true>> is returned, else <<false>>. Possible error
 	returns are:
-	o no_contents -
+	o <<no_contents>> -
 	The output section does not have the <<SEC_HAS_CONTENTS>>
 	attribute, so nothing can be written to it.
 	o and some more too
@@ -854,9 +853,10 @@ DESCRIPTION
 	offset of @var{offset} from the start of the input section,
 	and is read for @var{count} bytes.
 
-	If the contents of a constuctor with the <<SEC_CONSTUCTOR>>
-	flag set are requested, then the @var{location} is filled with
-	zeroes. If no errors occur, <<true>> is returned, else
+	If the contents of a constructor with the <<SEC_CONSTRUCTOR>>
+	flag set are requested or if the section does not have the
+	<<SEC_HAS_CONTENTS>> flag set, then the @var{location} is filled
+	with zeroes. If no errors occur, <<true>> is returned, else
 	<<false>>.
 
 
@@ -893,6 +893,12 @@ DEFUN(bfd_get_section_contents,(abfd, section, location, offset, count),
   if (count == 0)
     /* Don't bother.  */
     return true;
+
+  if ((section->flags & SEC_HAS_CONTENTS) == 0)
+    {
+      memset(location, 0, (unsigned)count);
+      return true;
+    }
 
   return BFD_SEND (abfd, _bfd_get_section_contents,
 		   (abfd, section, location, offset, count));
