@@ -145,7 +145,22 @@ insert_normal (cd, value, attrs, word_offset, start, length, word_length,
     }
 
   /* Ensure VALUE will fit.  */
-  if (! CGEN_BOOL_ATTR (attrs, CGEN_IFLD_SIGNED))
+  if (CGEN_BOOL_ATTR (attrs, CGEN_IFLD_SIGN_OPT))
+    {
+      long minval = - (1L << (length - 1));
+      unsigned long maxval = mask;
+      
+      if ((value > 0 && (unsigned long) value > maxval)
+	  || value < minval)
+	{
+	  /* xgettext:c-format */
+	  sprintf (errbuf,
+		   _("operand out of range (%ld not between %ld and %lu)"),
+		   value, minval, maxval);
+	  return errbuf;
+	}
+    }
+  else if (! CGEN_BOOL_ATTR (attrs, CGEN_IFLD_SIGNED))
     {
       unsigned long maxval = mask;
       

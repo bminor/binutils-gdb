@@ -1,3 +1,7 @@
+2001-06-30  Geoffrey Keating  <geoffk@redhat.com>
+
+	* cgen-ibld.in (insert_normal): Support CGEN_IFLD_SIGN_OPT.
+
 2001-06-28  Geoffrey Keating  <geoffk@redhat.com>
 
 	* cgen-asm.c (cgen_parse_keyword): Allow any first character.
