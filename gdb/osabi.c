@@ -232,13 +232,8 @@ gdbarch_init_osabi (struct gdbarch_info info, struct gdbarch *gdbarch,
 
   if (osabi == GDB_OSABI_UNKNOWN)
     {
-      /* Don't complain about not knowing the OS ABI if we don't
-	 have an inferior.  */
-      if (info.abfd)
-	fprintf_filtered
-	  (gdb_stderr, "GDB doesn't recognize the OS ABI of the inferior.  "
-	   "Attempting to continue with the default %s settings",
-	   bfd_printable_arch_mach (arch_info->arch, arch_info->mach));
+      /* Don't complain about an unknown OSABI.  Assume the user knows
+         what they are doing.  */
       return;
     }
 
