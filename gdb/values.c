@@ -557,6 +557,9 @@ value_as_pointer (val)
    to member which reaches here is considered to be equivalent
    to an INT (or some size).  After all, it is only an offset.  */
 
+/* FIXME:  This should be rewritten as a switch statement for speed and
+   ease of comprehension.  */
+
 LONGEST
 unpack_long (type, valaddr)
      struct type *type;
@@ -566,7 +569,7 @@ unpack_long (type, valaddr)
   register int len = TYPE_LENGTH (type);
   register int nosign = TYPE_UNSIGNED (type);
 
-  if (code == TYPE_CODE_ENUM)
+  if (code == TYPE_CODE_ENUM || code == TYPE_CODE_BOOL)
     code = TYPE_CODE_INT;
   if (code == TYPE_CODE_FLT)
     {
@@ -699,6 +702,8 @@ unpack_long (type, valaddr)
     }
   else if (code == TYPE_CODE_MEMBER)
     error ("not implemented: member types in unpack_long");
+  else if (code == TYPE_CODE_CHAR)
+    return *(unsigned char *)valaddr;
 
   error ("Value not integer or pointer.");
   return 0; 	/* For lint -- never reached */
@@ -1408,7 +1413,8 @@ value_from_longest (type, num)
 
   /* FIXME, we assume that pointers have the same form and byte order as
      integers, and that all pointers have the same form.  */
-  if (code == TYPE_CODE_INT || code == TYPE_CODE_ENUM || code == TYPE_CODE_PTR)
+  if (code == TYPE_CODE_INT  || code == TYPE_CODE_ENUM || 
+      code == TYPE_CODE_CHAR || code == TYPE_CODE_PTR)
     {
       if (len == sizeof (char))
 	* (char *) VALUE_CONTENTS_RAW (val) = num;
