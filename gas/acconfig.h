@@ -78,6 +78,9 @@
 /* Needed only for SCO 5.  */
 #undef SCO_ELF
 
+/* needed for non irix ELF targets */
+#undef MIPS_STABS_ELF
+
 /* Define to 1 if NLS is requested.  */
 #undef ENABLE_NLS
 

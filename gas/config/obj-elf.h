@@ -36,6 +36,9 @@
 
 /* Additional information we keep for each symbol.  */
 
+/* FIXME: For some reason, this structure is needed both here and in
+   obj-multi.h.  */
+#ifndef OBJ_SYMFIELD_TYPE
 struct elf_obj_sy
 {
   /* Use this to keep track of .size expressions that involve
@@ -45,6 +48,7 @@ struct elf_obj_sy
   /* The name specified by the .symver directive.  */
   char *versioned_name;
 };
+#endif
 
 #define OBJ_SYMFIELD_TYPE struct elf_obj_sy
 
@@ -90,6 +94,8 @@ extern void elf_frob_file_after_relocs PARAMS ((void));
 #define obj_app_file elf_file_symbol
 extern void elf_file_symbol PARAMS ((char *));
 
+extern void obj_elf_section_change_hook PARAMS ((void));
+
 extern void obj_elf_section PARAMS ((int));
 extern void obj_elf_previous PARAMS ((int));
 extern void obj_elf_version PARAMS ((int));
@@ -101,12 +107,25 @@ extern void obj_elf_version PARAMS ((int));
 /* When setting one symbol equal to another, by default we probably
    want them to have the same "size", whatever it means in the current
    context.  */
-#define OBJ_COPY_SYMBOL_ATTRIBUTES(DEST,SRC)		\
-do							\
-  {							\
-    S_SET_SIZE ((DEST), S_GET_SIZE (SRC));		\
-    S_SET_OTHER ((DEST), S_GET_OTHER (SRC));		\
-  }							\
+#define OBJ_COPY_SYMBOL_ATTRIBUTES(DEST,SRC)			\
+do								\
+  {								\
+    if ((SRC)->sy_obj.size)					\
+      {								\
+	if ((DEST)->sy_obj.size == NULL)			\
+	  (DEST)->sy_obj.size =					\
+	    (expressionS *) xmalloc (sizeof (expressionS));	\
+	*(DEST)->sy_obj.size = *(SRC)->sy_obj.size;		\
+      }								\
+    else							\
+      {								\
+	if ((DEST)->sy_obj.size != NULL)			\
+	  free ((DEST)->sy_obj.size);				\
+	(DEST)->sy_obj.size = NULL;				\
+      }								\
+    S_SET_SIZE ((DEST), S_GET_SIZE (SRC));			\
+    S_SET_OTHER ((DEST), S_GET_OTHER (SRC));			\
+  }								\
 while (0)
 
 /* Stabs go in a separate section.  */
@@ -124,10 +143,14 @@ extern void obj_elf_init_stab_section PARAMS ((segT));
 
 /* For now, always set ECOFF_DEBUGGING for a MIPS target.  */
 #ifdef TC_MIPS
+#ifdef MIPS_STABS_ELF
+#define ECOFF_DEBUGGING 0
+#else
 #define ECOFF_DEBUGGING 1
-#endif
+#endif /* MIPS_STABS_ELF */
+#endif /* TC_MIPS */
 
-#if ECOFF_DEBUGGING
+#if (ECOFF_DEBUGGING == 1) || defined(MIPS_STABS_ELF)
 
 /* If we are generating ECOFF debugging information, we need some
    additional fields for each symbol.  */
@@ -138,6 +161,7 @@ extern void obj_elf_init_stab_section PARAMS ((segT));
   struct localsym *ecoff_symbol; \
   valueT ecoff_extern_size;
 
+#ifndef MIPS_STABS_ELF
 /* We smuggle stabs in ECOFF rather than using a separate section.
    The Irix linker can not handle a separate stabs section.  */
 #undef SEPARATE_STAB_SECTIONS
@@ -148,6 +172,7 @@ extern void obj_elf_init_stab_section PARAMS ((segT));
 #define OBJ_GENERATE_ASM_LINENO(filename, lineno) \
   ecoff_generate_asm_lineno ((filename), (lineno))
 
+#endif /* MIPS_STABS_ELF */
 #endif /* ECOFF_DEBUGGING */
 
 extern void elf_frob_symbol PARAMS ((struct symbol *, int *));
@@ -158,7 +183,10 @@ extern void elf_pop_insert PARAMS ((void));
 
 #ifndef OBJ_MAYBE_ELF
 #define obj_ecoff_set_ext elf_ecoff_set_ext
-extern void elf_ecoff_set_ext ();
+#ifdef ANSI_PROTOTYPES
+struct ecoff_extr;
+#endif
+extern void elf_ecoff_set_ext PARAMS ((struct symbol *, struct ecoff_extr *));
 #endif
 
 #endif /* _OBJ_ELF_H */

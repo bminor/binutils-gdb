@@ -1,9 +1,13 @@
-start-sanitize-armelf
-Fri Jul 31 16:40:34 1998  Catherine Moore  <clm@cygnus.com>
+Fri Jul 31 16:45:54 1998  Ron Unrau <runrau@cygnus.com>
 
-        * config/tc-arm.h:  Add definitions for OBJ_ELF.
+	Start of changes to remove mdebug section from mips*-elf
+	Based on MIPS_STAB_ELF definition
+	* acconfig.h: undef if not configured
+	* config.in: undef if not configured
+	* config/mips-elf.h: only set ECOFF debugging if not stabs-in-elf
+	* config/tc-mips.c (s_ent): set BSF_FUNCTION
+	* stabs.c (s_stab_generic): flush frag
 
-end-sanitize-armelf
 start-sanitize-armelf
 Fri Jul 31 16:14:45 1998  Catherine Moore  <clm@cygnus.com>
 
