@@ -68,6 +68,15 @@ extern enum mips_fpu_type mips_fpu;
 
 #define DEFAULT_MIPS_TYPE "generic"
 
+/* Remove useless bits from an instruction address.  */
+
+#define ADDR_BITS_REMOVE(addr) mips_addr_bits_remove(addr)
+CORE_ADDR mips_addr_bits_remove PARAMS ((CORE_ADDR addr));
+
+/* Remove useless bits from the stack pointer.  */
+
+#define TARGET_READ_SP() ADDR_BITS_REMOVE (read_register (SP_REGNUM))
+
 /* Offset from address of function to start of its code.
    Zero on most machines.  */
 
