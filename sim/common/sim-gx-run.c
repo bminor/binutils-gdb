@@ -34,8 +34,9 @@ sim_engine_run (SIM_DESC sd,
       sim_gx_compiled_block* compiled_block;
       sim_gx_function f;
       sim_cia cia = CIA_GET(cpu);
-      int optimized;
-      int pre_checksum, post_checksum;
+      int optimized = 0;
+      int pre_checksum = 0;
+      int post_checksum = 0;
 
       /* find optimized gx block that includes this PC */
       block = sim_gx_block_find(cia);
@@ -43,6 +44,7 @@ sim_engine_run (SIM_DESC sd,
 	{
 	  /* start new learning block */
 	  block = sim_gx_block_create(cia);
+          sim_gx_write_block_list();
 	}
       ASSERT(block != NULL);
 
@@ -59,6 +61,7 @@ sim_engine_run (SIM_DESC sd,
 	    {
 	      block->opt_compile_count ++;
 	      sim_gx_block_translate(block, 1 /* optimized */);
+              sim_gx_write_block_list();
 	      compiled_block = block->optimized_block;
 	      optimized = 1;
 	    }

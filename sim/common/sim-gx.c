@@ -50,13 +50,27 @@ sim_gx_compiled_block_f(sim_gx_compiled_block* gx)
 {
   sim_gx_function f = gx->function_dlhandle;
   SIM_DESC sd = current_state;
-  int rc;
+  static int dlopened_main = 0;
 
   if(f == NULL)
     {
       /* load object */
       if(gx->object_dlhandle == NULL && gx->object_name != NULL)
 	{
+	  if(! dlopened_main)
+	    {
+	      /* dlopen executable itself first to share symbols with shared library */
+	      void* exec_handle = dlopen(NULL, RTLD_LAZY | RTLD_GLOBAL);
+	      if(exec_handle == NULL)
+		{
+		  sim_io_error(sd, "Load error for executable: %s", 
+			       dlerror());
+		}
+
+	      dlopened_main = 1;
+	    }
+
+	  /* dlopen the gx block dso itself */
 	  gx->object_dlhandle = dlopen(gx->object_name, RTLD_NOW);
 	  if(gx->object_dlhandle == NULL)
 	    {
@@ -199,7 +213,7 @@ sim_gx_write_block_list()
       int age;
 
       age = time(NULL) - gx->learn_last_change; /* store interval */
-      fprintf(f, "BLOCK 0x%lx 0x%lx %u %u\n", gx->origin, gx->length, gx->divisor, age);
+      fprintf(f, "BLOCK 0x%x 0x%x %u %u\n", (unsigned)gx->origin, (unsigned)gx->length, gx->divisor, age);
       fprintf(f, "FLAGS ");
       for(j=0; j<GX_PC_FLAGS_INDEX(gx, gx->origin + gx->length); j++)
 	{
@@ -266,7 +280,7 @@ sim_gx_read_block_list()
   SIM_DESC sd = current_state;
   FILE* f;
   char state_file_name[PATH_MAX];
-  char *exec_name;
+  const char *exec_name;
 
   /* check for block */
   if(STATE_PROG_BFD(sd) == NULL)
@@ -301,7 +315,7 @@ sim_gx_read_block_list()
       unsigned age;
       int j;
 
-      rc = fscanf(f, "BLOCK 0x%0lx 0x%lx %u %u\n", & origin, & length, & divisor, & age);
+      rc = fscanf(f, "BLOCK 0x%0x 0x%x %u %u\n", (unsigned*)& origin, (unsigned*)& length, & divisor, & age);
       if(rc != 4) /* not all fields matched - assume EOF */
 	break;
 
@@ -326,9 +340,9 @@ sim_gx_read_block_list()
       block->source_name = zalloc(PATH_MAX);
       block->object_name = zalloc(PATH_MAX);
       block->symbol_name = zalloc(PATH_MAX);
-      fscanf(f, "LEARNING %s %s %s %lu %u\n",
+      fscanf(f, "LEARNING %s %s %s %u %u\n",
 	     block->source_name, block->object_name, block->symbol_name,
-	     & gx->compile_time, & gx->opt_compile_count);
+	     (unsigned*) & gx->compile_time, & gx->opt_compile_count);
 
       /* read optimized mode info */
       block = zalloc(sizeof(sim_gx_compiled_block));
@@ -485,7 +499,7 @@ sim_gx_block_translate(sim_gx_block* gx, int optimized)
   char dir_name[PATH_MAX];
   char base_name[PATH_MAX];
   char compile_command[PATH_MAX*4];
-  char* exec_name;
+  const char* exec_name;
   SIM_DESC sd = current_state;
   int rc;
   sim_cia gx_cia;
@@ -529,9 +543,9 @@ sim_gx_block_translate(sim_gx_block* gx, int optimized)
 
   /* compute base name */
   if(optimized)
-    sprintf(base_name, "%08lx_opt%d", gx->origin, gx->opt_compile_count);
+    sprintf(base_name, "%08x_opt%d", (unsigned) gx->origin, gx->opt_compile_count);
   else
-    sprintf(base_name, "%08lx", gx->origin);
+    sprintf(base_name, "%08x", (unsigned) gx->origin);
 
   /* generate source/object file names */ 
   block->source_name = zalloc(PATH_MAX);
@@ -635,6 +649,8 @@ sim_gx_block_translate(sim_gx_block* gx, int optimized)
   fprintf(block->source_file, "#else /* ! __GNUC__*/\n");
   fprintf(block->source_file, "    default:\n");
   fprintf(block->source_file, "#endif /*__GNUC__*/\n");
+  fprintf(block->source_file, "      pc_flags[%d] |= %d;\n",
+          GX_PC_FLAGS_INDEX(gx, gx_cia), GX_PCF_INSTRUCTION);
   fprintf(block->source_file, "      rc = %d;\n", GX_F_NONPC);
   fprintf(block->source_file, "      npc = pc;\n");
   fprintf(block->source_file, "      goto save;\n");
@@ -664,6 +680,8 @@ sim_gx_block_translate(sim_gx_block* gx, int optimized)
 	    {
 	      fprintf(block->source_file, "    /* prevent fall-through */\n");
 	      fprintf(block->source_file, "    npc = 0x%08x;\n", gx_cia);  
+              fprintf(block->source_file, "    pc_flags[%d] |= %d;\n",
+                      GX_PC_FLAGS_INDEX(gx, gx_cia), GX_PCF_INSTRUCTION);
 	      fprintf(block->source_file, "    rc = %d;\n", GX_F_NONPC);  
 	      fprintf(block->source_file, "    goto save;\n");
 	    }
@@ -676,10 +694,10 @@ sim_gx_block_translate(sim_gx_block* gx, int optimized)
       if((! optimized) ||
 	 (GX_PC_FLAGS(gx, gx_cia) & GX_PCF_JUMPTARGET))
 	{
-	  fprintf(block->source_file, "    gx_label_%ld:\n",
+	  fprintf(block->source_file, "    gx_label_%d:\n",
 		  ((gx_cia - gx->origin) / gx->divisor));
 	  fprintf(block->source_file, "#ifndef __GNUC__\n");
-	  fprintf(block->source_file, "    case %ld:\n",
+	  fprintf(block->source_file, "    case %d:\n",
 		  ((gx_cia - gx->origin) / gx->divisor));
 	  fprintf(block->source_file, "#endif /* !__GNUC__ */\n");
 	}
@@ -687,7 +705,7 @@ sim_gx_block_translate(sim_gx_block* gx, int optimized)
       /* translate breakpoint check & exit */
       if(GX_PC_FLAGS(gx, gx_cia) & GX_PCF_COND_HALT)
 	{
-	  fprintf(block->source_file, "      if(pc_flags[%ld] & %d)\n",
+	  fprintf(block->source_file, "      if(pc_flags[%d] & %d)\n",
 		  GX_PC_FLAGS_INDEX(gx, gx_cia),
 		  GX_PCF_HALT);
 	  fprintf(block->source_file, "        {\n");
@@ -703,7 +721,7 @@ sim_gx_block_translate(sim_gx_block* gx, int optimized)
       /* mark traversed instructions */
       if(! optimized)
 	{
-	  fprintf(block->source_file, "      pc_flags[%ld] |= %d;\n",
+	  fprintf(block->source_file, "      pc_flags[%d] |= %d;\n",
 		  GX_PC_FLAGS_INDEX(gx, gx_cia),
 		  GX_PCF_INSTRUCTION);
 	}
@@ -729,8 +747,8 @@ sim_gx_block_translate(sim_gx_block* gx, int optimized)
   /* unknown length jump */
   fprintf(block->source_file, "\n");
   fprintf(block->source_file, "unknownjump:\n");
-  fprintf(block->source_file, "  if(npc >= 0x%08lx && npc < 0x%08lx)\n",
-	  gx->origin, gx->origin + gx->length);
+  fprintf(block->source_file, "  if(npc >= 0x%08x && npc < 0x%08x)\n",
+	  (unsigned)gx->origin, (unsigned)gx->origin + gx->length);
   fprintf(block->source_file, "    goto shortjump;\n");
 
   /* long jump */
@@ -758,30 +776,39 @@ sim_gx_block_translate(sim_gx_block* gx, int optimized)
 
   /* compile source & produce shared object */
 
-  sprintf(compile_command, 
-	  "gxtool --silent --mode=compile gcc -c %s %s",
-	  (optimized ? "-O9 -fomit-frame-pointer" : "-O"), block->source_name);
-
-  rc = system(compile_command);
-  if(rc != 0)
-    {
-      sim_io_error(sd, "Error during compiling: `%s' rc %d",
-		   compile_command, rc);
-    }
-
-  /* link source */
-
-  sprintf(compile_command,
-	  "gxtool --silent --mode=link gcc -export-dynamic -rpath %s -o lib%s.la %s.lo",
-	  dir_name, base_name, base_name);
-
-  rc = system(compile_command);
-  if(rc != 0)
-    {
-      sim_io_error(sd, "Error during linking: `%s' rc %d",
-		   compile_command, rc);
-    }
-
+  {
+    char* extra_flags = NULL;
+#ifdef HAVE_GETENV
+    extra_flags = getenv("GX_FLAGS");
+#endif
+    if (extra_flags == NULL) extra_flags = "";
+ 
+    sprintf(compile_command, 
+ 	    "gxtool --silent --mode=compile gcc %s %s -c %s",
+	    (optimized ? "-O9 -fomit-frame-pointer" : "-O"),
+            extra_flags,
+            block->source_name);
+    
+    rc = system(compile_command);
+    if(rc != 0)
+      {
+	sim_io_error(sd, "Error during compiling: `%s' rc %d",
+		     compile_command, rc);
+      }
+    
+    /* link source */
+    
+    sprintf(compile_command,
+	    "gxtool --silent --mode=link gcc -export-dynamic -rpath %s %s -o lib%s.la %s.lo",
+	    dir_name, extra_flags, base_name, base_name);
+    
+    rc = system(compile_command);
+    if(rc != 0)
+      {
+	sim_io_error(sd, "Error during linking: `%s' rc %d",
+		     compile_command, rc);
+      }
+  }
 
   /* install */
 

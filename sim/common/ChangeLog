@@ -1,3 +1,16 @@
+start-sanitize-gxsim
+1999-01-11  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* sim-gx-run.c (sim_engine_run): Allay warnings.  Write out updated
+	gx block list after each successful compilation job.
+	* sim-gx.c (sim_gx_compiled_block_f): dlopen the main executable
+	image, to allow gx block DLLs to resolve symbols there.
+	(sim_gx_{read,write}_block_list): Allay warnings.
+	(sim_gx_block_translate): Allay warnings.  Add $GX_FLAGS to
+	gx compilation/link jobs.
+	* sim-gx.h: Allay warnings.
+
+end-sanitize-gxsim
 1999-01-05  Doug Evans  <devans@casey.cygnus.com>
 
 	* Make-common.in (CGEN_INCLUDE_DEPS): Add cgen-defs.h, cgen-engine.h.

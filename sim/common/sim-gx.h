@@ -114,8 +114,8 @@ void sim_gx_block_add(sim_gx_block* block);
 void sim_gx_block_remove(sim_gx_block* block);
 
 /* State save/restore */
-void sim_gx_write_block_list();
-void sim_gx_read_block_list();
+void sim_gx_write_block_list(void);
+void sim_gx_read_block_list(void);
 
 sim_gx_function sim_gx_compiled_block_f(sim_gx_compiled_block* gx);
 void sim_gx_compiled_block_dispose(sim_gx_compiled_block* gx);
