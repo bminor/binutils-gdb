@@ -1,3 +1,46 @@
+2004-02-26  Orjan Friberg  <orjanf@axis.com>
+
+	* cris-tdep.c (frame_unwind.h, frame-base.h, trad-frame.h)
+	(dwarf2-frame.h): Include.
+	(enum cris_regnums): New enum CRIS_FP_REGNUM.
+	Remove static variables related to ABI setting.
+	(struct gdbarch_tdep): Remove cris_abi member.
+	(struct frame_extra_info): Remove.
+	(cris_unwind_cache, stack_item): New structs.
+	(cris_frame_unwind, cris_frame_base): New variables.
+	(push_stack_item, pop_stack_item)
+	(cris_frame_unwind_cache, cris_frame_this_id)
+	(cris_frame_prev_register, cris_unwind_dummy_id, cris_frame_align)
+	(cris_push_dummy_code, cris_push_dummy_call, cris_frame_sniffer)
+	(cris_frame_base_address, cris_scan_prologue, cris_unwind_pc)
+	(cris_unwind_sp, cris_store_return_value, cris_extract_return_value)
+	(cris_reg_struct_has_addr): New functions.
+	(cris_examine, cris_frame_init_saved_regs, cris_frame_chain)
+	(cris_frame_saved_pc, cris_saved_pc_after_call, 
+	(cris_store_struct_return, cris_frameless_function_invocation)
+	(cris_pop_frame, cris_skip_prologue_main)
+	(cris_abi_original_store_return_value)
+	(cris_abi_v2_store_return_value)
+	(cris_abi_original_extract_return_value)
+	(cris_abi_v2_extract_return_value)
+	(cris_abi_original_reg_struct_has_addr)
+	(cris_abi_v2_reg_struct_has_addr)
+	(cris_abi_original_push_arguments, cris_abi_v2_push_arguments)
+	(cris_push_return_address, cris_abi_update): Remove.
+	(_initialize_cris_tdep): Remove ABI command.
+	(cris_dump_tdep): Ditto.
+	(cris_gdbarch_init): Remove ABI command.  
+	Set store_return_value, extract_return_value, push_dummy_code,
+	push_dummy_call, frame_align, unwind_pc, unwind_sp, unwind_dummy_id,
+	frame_unwind_append_sniffer, frame_base_set_default.
+	Clear deprecated init_frame_pc, push_arguments, store_return_value,
+	extract_return_value, fp_regnum, pc_in_call_dummy, call_dummy_words,
+	sizeof_call_dummy_words, get_saved_register, push_return_address,
+	pop_frame, store_struct_return, frame_init_saved_regs, 
+	init_extra_frame_info, frameless_function_invocation, frame_chain,
+	frame_saved_pc, saved_pc_after_call, save_dummy_frame_tos,
+	dummy_write_sp.
+	
 2004-02-26  Jeff Johnston  <jjohnstn@redhat.com>
 
 	* valprint.h (print_hex_chars, print_char_chars): New prototypes.
