@@ -1,5 +1,7 @@
 1999-06-03  Ian Lance Taylor  <ian@zembu.com>
 
+	* config/tc-m32r.c: Update for symbol handling changes.
+
 	* config/tc-hppa.h: Update for symbol handling changes.
 	* config/tc-hppa.c: Likewise.
 

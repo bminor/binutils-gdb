@@ -336,7 +336,7 @@ debug_sym (ignore)
       link->symbol = symbolP;
       link->next = debug_sym_link;
       debug_sym_link = link;
-      symbolP->local = 1;
+      symbol_get_obj (symbolP)->local = 1;
     }
 
   *end_name = delim;
@@ -694,7 +694,7 @@ m32r_scomm (ignore)
       return;
     }
 
-  if (symbolP->local)
+  if (symbol_get_obj (symbolP)->local)
     {
       segT   old_sec    = now_seg;
       int    old_subsec = now_subseg;
@@ -707,9 +707,9 @@ m32r_scomm (ignore)
 	frag_align (align2, 0, 0);
       
       if (S_GET_SEGMENT (symbolP) == sbss_section)
-	symbolP->sy_frag->fr_symbol = 0;
+	symbol_get_frag (symbolP)->fr_symbol = 0;
       
-      symbolP->sy_frag = frag_now;
+      symbol_set_frag (symbolP, frag_now);
       
       pfrag = frag_var (rs_org, 1, 1, (relax_substateT) 0, symbolP, size,
 			(char *) 0);
@@ -936,7 +936,7 @@ md_convert_frag (abfd, sec, fragP)
     {
       /* Address we want to reach in file space.  */
       target_address = S_GET_VALUE (fragP->fr_symbol) + fragP->fr_offset;
-      target_address += fragP->fr_symbol->sy_frag->fr_address;
+      target_address += symbol_get_frag (fragP->fr_symbol)->fr_address;
       addend = (target_address - (opcode_address & -4)) >> 2;
     }
 
