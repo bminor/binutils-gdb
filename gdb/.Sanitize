@@ -127,7 +127,6 @@ a29k-tdep.c
 a68v-nat.c
 abug-rom.c
 acconfig.h
-acinclude.m4
 aclocal.m4
 alpha-nat.c
 alpha-tdep.c
