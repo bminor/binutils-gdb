@@ -50,11 +50,12 @@ struct sim_state simulation = { 0 };
 
 
 SIM_DESC
-sim_open (SIM_OPEN_KIND kind, char **argv)
+sim_open (SIM_OPEN_KIND kind, struct host_callback_struct *callback, char **argv)
 {
   SIM_DESC sd = &simulation;
   STATE_OPEN_KIND (sd) = kind;
   STATE_MAGIC (sd) = SIM_MAGIC_NUMBER;
+  STATE_CALLBACK (&simulation) = callback;
 
   if (sim_pre_argv_init (sd, argv[0]) != SIM_RC_OK)
     return 0;
@@ -240,11 +241,4 @@ sim_do_command (SIM_DESC sd, char *cmd)
 {
   if (sim_args_command (sd, cmd) != SIM_RC_OK)
     sim_io_eprintf (sd, "Unknown command `%s'\n", cmd);
-}
-
-
-void
-sim_set_callbacks (SIM_DESC sd, host_callback *callback)
-{
-  STATE_CALLBACK (sd) = callback;
 }

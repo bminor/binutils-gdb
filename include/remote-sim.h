@@ -61,13 +61,14 @@ struct _bfd;
    is selected from the gdb command line.
    KIND specifies how the simulator will be used.  Currently there are only
    two kinds: standalone and debug.
+   CALLBACK provides a standard host callback.
    ARGV is passed from the command line and can be used to select whatever
    run time options the simulator provides.  It is the standard NULL
    terminated array of pointers, with argv[0] being the program name.
    The result is a descriptor that must be passed back to the other sim_foo
    functions.  */
 
-SIM_DESC sim_open PARAMS ((SIM_OPEN_KIND kind, char **argv));
+SIM_DESC sim_open PARAMS ((SIM_OPEN_KIND kind, struct host_callback_struct *callback, char **argv));
 
 
 /* Terminate usage of the simulator.  This may involve freeing target memory
@@ -163,7 +164,10 @@ void sim_do_command PARAMS ((SIM_DESC sd, char *cmd));
 
 /* Provide simulator with a standard host_callback_struct.
    If SD is NULL, the command is to be interpreted as refering to
-   the global state, however the simulator defines that.  */
+   the global state, however the simulator defines that.
+
+   This function is depreciated. Callbacks are set as part of
+   sim_open. */
 
 void sim_set_callbacks PARAMS ((SIM_DESC sd, struct host_callback_struct *));
 

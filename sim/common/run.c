@@ -56,9 +56,6 @@ extern host_callback default_callback;
 
 static char *myname;
 
-/* bfd descriptor of the executable.  Same name as gdb uses.  */
-bfd *exec_bfd;
-
 
 /* NOTE: sim_size() and sim_trace() are going away */
 extern void sim_size PARAMS ((int i));
@@ -102,8 +99,10 @@ main (ac, av)
 
   /* The first element of sim_open's argv is the program name.  */
   no_args[0] = av[0];
+#ifdef SIM_HAVE_BIENDIAN
   no_args[1] = "-E";
   no_args[2] = "set-later";
+#endif
 
   /* FIXME: This is currently being rewritten to have each simulator
      do all argv processing.  */
@@ -120,10 +119,13 @@ main (ac, av)
 	{
 	  int len = strlen (av[0]) + strlen (optarg);
 	  char *argbuf = (char *) alloca (len + 2 + 50);
+	  sprintf (argbuf, "%s %s", av[0], optarg);
+#ifdef SIM_HAVE_BIENDIAN
 	  /* The desired endianness must be passed to sim_open.
 	     The value for "set-later" is set when we know what it is.
-	     -e support isn't yet part of the published interface.  */
-	  sprintf (argbuf, "%s %s -E set-later", av[0], optarg);
+	     -E support isn't yet part of the published interface.  */
+	  strcat (argbuf, " -E set-later");
+#endif
 	  sim_argv = buildargv (argbuf);
 	}
 	break;
@@ -179,10 +181,7 @@ main (ac, av)
       printf ("%s %s\n", myname, name);
     }
 
-  sim_set_callbacks (NULL, &default_callback);
-  default_callback.init (&default_callback);
-
-  exec_bfd = abfd = bfd_openr (name, 0);
+  abfd = bfd_openr (name, 0);
   if (!abfd) 
     {
       fprintf (stderr, "%s: can't open %s: %s\n", 
@@ -197,6 +196,7 @@ main (ac, av)
       exit (1);
     }
 
+#ifdef SIM_HAVE_BIENDIAN
   /* The endianness must be passed to sim_open because one may wish to
      examine/set registers before calling sim_load [which is the other
      place where one can determine endianness].  We previously passed the
@@ -208,10 +208,12 @@ main (ac, av)
     sim_argv[i] = "big";
   else
     sim_argv[i] = "little";
+#endif
 
   /* Ensure that any run-time initialisation that needs to be
      performed by the simulator can occur. */
-  sd = sim_open (SIM_OPEN_STANDALONE, sim_argv);
+  default_callback.init (&default_callback);
+  sd = sim_open (SIM_OPEN_STANDALONE, &default_callback, sim_argv);
   if (sd == 0)
     exit (1);
 

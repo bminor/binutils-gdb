@@ -161,8 +161,6 @@ init_callbacks ()
       gdb_callback.error = gdb_os_error;
       gdb_callback.poll_quit = gdb_os_poll_quit;
       gdb_callback.magic = HOST_CALLBACK_MAGIC;
-      sim_set_callbacks (gdbsim_desc, &gdb_callback);
-      
       callbacks_initialized = 1;
     }
 }
@@ -497,8 +495,6 @@ gdbsim_open (args, from_tty)
   if (gdbsim_desc != NULL)
     unpush_target (&gdbsim_ops);
 
-  init_callbacks ();
-
   len = 7 + 1 + (args ? strlen (args) : 0) + 50;
   arg_buf = (char *) alloca (len);
   sprintf (arg_buf, "gdbsim%s%s",
@@ -514,7 +510,9 @@ gdbsim_open (args, from_tty)
     error ("Insufficient memory available to allocate simulator arg list.");
   make_cleanup (freeargv, (char *) argv);
 
-  gdbsim_desc = sim_open (SIM_OPEN_DEBUG, argv);
+  init_callbacks ();
+  gdbsim_desc = sim_open (SIM_OPEN_DEBUG, &gdb_callback, argv);
+
   if (gdbsim_desc == 0)
     error ("unable to create simulator instance");
 

@@ -1,3 +1,7 @@
+Tue May 20 09:32:22 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* remote-sim.h (sim_open): Add callback struct.
+
 Mon May 19 19:14:44 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* remote-sim.h: Pass SD into sim_size.
