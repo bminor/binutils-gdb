@@ -1,5 +1,13 @@
 2000-09-03  Mark Kettenis  <kettenis@gnu.org>
 
+	* config/i386/nm-linux.h (PREPARE_TO_PROCEED, ATTCH_LWP,
+	GET_THREAD_SIGNALS): New defines.
+	* config/i386/linux.mh (NATDEPFILES): Remove lin-thread.o and
+	linux-threads.o.  Add proc-service.o, thread-db.o and lin-lwp.o.
+	* proc-service.c: New file.
+	* thread-db.c: New file.
+	* lin-lwp.c: New file.
+
 	* gdb_assert.h: New file.
 
 	* gdb_thread_db.h [HAVE_THREAD_DB_H]: Include <thread_db.h>.
