@@ -1,10 +1,11 @@
 dnl Process this file with autoconf to produce a configure script.
 dnl
 
-AC_PREREQ(2.13)
-AC_INIT(libbfd.c)
+AC_PREREQ(2.59)
+AC_INIT
+AC_CONFIG_SRCDIR([libbfd.c])
 
-AC_CANONICAL_SYSTEM
+AC_CANONICAL_TARGET
 AC_ISC_POSIX
 
 AM_INIT_AUTOMAKE(bfd, 2.15.91)
@@ -30,7 +31,7 @@ esac],[want64=false])dnl
 AC_ARG_ENABLE(targets,
 [  --enable-targets        alternative target configurations],
 [case "${enableval}" in
-  yes | "") AC_ERROR(enable-targets option must specify target names or 'all')
+  yes | "") AC_MSG_ERROR([enable-targets option must specify target names or 'all'])
             ;;
   no)       enable_targets= ;;
   *)        enable_targets=$enableval ;;
@@ -106,9 +107,7 @@ BFD_HOST_U_64_BIT=
 
 AC_MSG_CHECKING([for long long])
 AC_CACHE_VAL(bfd_cv_has_long_long,
-[AC_TRY_COMPILE(,
-[unsigned long long ll = 18446744073709551615ULL;],
-bfd_cv_has_long_long=yes, bfd_cv_has_long_long=no)])
+[AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[]], [[unsigned long long ll = 18446744073709551615ULL;]])],[bfd_cv_has_long_long=yes],[bfd_cv_has_long_long=no])])
 AC_MSG_RESULT($bfd_cv_has_long_long)
 if test $bfd_cv_has_long_long = yes; then
   BFD_HOST_LONG_LONG=1
@@ -343,9 +342,7 @@ changequote([,])dnl
 	# Not all versions of AIX with -DAIX_CORE_DUMPX_CORE
 	# have c_impl as a member of struct core_dumpx
 	AC_MSG_CHECKING([for c_impl in struct core_dumpx])
-	AC_TRY_COMPILE([#include <core.h>],
-	  [struct core_dumpx c; c.c_impl = 0;],
-	  [AC_DEFINE(HAVE_ST_C_IMPL, 1,
+	AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <core.h>]], [[struct core_dumpx c; c.c_impl = 0;]])],[AC_DEFINE(HAVE_ST_C_IMPL, 1,
 	    [Define if struct core_dumpx has member c_impl])
 	  AC_MSG_RESULT(yes)],[AC_MSG_RESULT(no)])
 	;;
@@ -886,7 +883,7 @@ case ${host64}-${target64}-${want64} in
 		    AC_MSG_RESULT([yes: egcs-1.1.2 on ix86 spotted]),
 		    AC_MSG_RESULT(no))
        if test $bad_64bit_gcc = yes ; then
-	 AC_ERROR([A newer version of gcc is needed for the requested 64-bit BFD configuration])
+	 AC_MSG_ERROR([A newer version of gcc is needed for the requested 64-bit BFD configuration])
        fi
     fi
     ;;
@@ -942,6 +939,7 @@ case ${want_mmap}+${ac_cv_func_mmap_fixed_mapped} in
 esac
 
 rm -f doc/config.status
-AC_OUTPUT(Makefile doc/Makefile bfd-in3.h:bfd-in2.h po/Makefile.in:po/Make-in,
-[sed -e '/SRC-POTFILES =/r po/SRC-POTFILES' -e '/BLD-POTFILES =/r po/BLD-POTFILES' po/Makefile.in > po/Makefile])
+AC_CONFIG_FILES([Makefile doc/Makefile bfd-in3.h:bfd-in2.h po/Makefile.in:po/Make-in])
+AC_CONFIG_COMMANDS([default],[[sed -e '/SRC-POTFILES =/r po/SRC-POTFILES' -e '/BLD-POTFILES =/r po/BLD-POTFILES' po/Makefile.in > po/Makefile]],[[]])
+AC_OUTPUT
 

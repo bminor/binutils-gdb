@@ -1,3 +1,15 @@
+2004-08-30  Nathanael Nerode  <neroden@gcc.gnu.org>
+
+	* acinclude.m4: Require AC_CANONICAL_TARGET, not AC_CANONICAL_SYSTEM.
+	Include ../config/acx.m4 and use ACX_NONCANONICAL_* where appropriate;
+	replace uses of *_alias with *_noncanonical.
+	* aclocal.m4: Rebuild with aclocal 1.4p6.
+	* Makefile.in: Rebuild with automake 1.4p6.
+	* doc/Makefile.in: Rebuild with automake 1.4p6.
+	* configure.in: Autoupdate with autoupdate 2.59.
+	* config.in: Regenerate with autoheader 2.59.
+	* configure: Regnerate with autoconf 2.59.
+
 2004-08-28  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf64-ppc.c (ppc64_elf_get_synthetic_symtab): Copy input

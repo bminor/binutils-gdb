@@ -1,4 +1,4 @@
-# Makefile.in generated automatically by automake 1.4-p5 from Makefile.am
+# Makefile.in generated automatically by automake 1.4-p6 from Makefile.am
 
 # Copyright (C) 1994, 1995-8, 1999, 2001 Free Software Foundation, Inc.
 # This Makefile.in is free software; the Free Software Foundation
@@ -57,12 +57,8 @@ POST_INSTALL = :
 NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
-build_alias = @build_alias@
-build_triplet = @build@
 host_alias = @host_alias@
 host_triplet = @host@
-target_alias = @target_alias@
-target_triplet = @target@
 AR = @AR@
 AS = @AS@
 BFD_HOST_64BIT_LONG = @BFD_HOST_64BIT_LONG@
@@ -76,6 +72,7 @@ CC = @CC@
 CC_FOR_BUILD = @CC_FOR_BUILD@
 COREFILE = @COREFILE@
 COREFLAG = @COREFLAG@
+CPP = @CPP@
 CXX = @CXX@
 CXXCPP = @CXXCPP@
 DATADIRNAME = @DATADIRNAME@
@@ -86,16 +83,21 @@ GCJ = @GCJ@
 GCJFLAGS = @GCJFLAGS@
 GMOFILES = @GMOFILES@
 GMSGFMT = @GMSGFMT@
+GNATBIND = @GNATBIND@
 GT_NO = @GT_NO@
 GT_YES = @GT_YES@
+HAVE_LIB = @HAVE_LIB@
 HDEFINES = @HDEFINES@
 INCLUDE_LOCALE_H = @INCLUDE_LOCALE_H@
 INSTOBJEXT = @INSTOBJEXT@
 INTLDEPS = @INTLDEPS@
 INTLLIBS = @INTLLIBS@
 INTLOBJS = @INTLOBJS@
+LIB = @LIB@
 LIBTOOL = @LIBTOOL@
+LN = @LN@
 LN_S = @LN_S@
+LTLIB = @LTLIB@
 MAINT = @MAINT@
 MAKEINFO = @MAKEINFO@
 MKINSTALLDIRS = @MKINSTALLDIRS@
@@ -123,27 +125,24 @@ bfd_machines = @bfd_machines@
 bfd_ufile_ptr = @bfd_ufile_ptr@
 bfdincludedir = @bfdincludedir@
 bfdlibdir = @bfdlibdir@
+build_noncanonical = @build_noncanonical@
+build_subdir = @build_subdir@
+do_compare = @do_compare@
+host_noncanonical = @host_noncanonical@
+host_subdir = @host_subdir@
 l = @l@
+ncn_cv_ = @ncn_cv_@
+target_noncanonical = @target_noncanonical@
+target_subdir = @target_subdir@
 tdefaults = @tdefaults@
 wordsize = @wordsize@
 
 AUTOMAKE_OPTIONS = cygnus
 
-DOCFILES = aoutx.texi  archive.texi archures.texi \
-	bfdt.texi  cache.texi coffcode.texi \
-	core.texi elf.texi elfcode.texi  format.texi \
-	libbfd.texi bfdwin.texi bfdio.texi \
-	opncls.texi  reloc.texi  section.texi  \
-	syms.texi  targets.texi init.texi hash.texi linker.texi \
-	mmo.texi
+DOCFILES = aoutx.texi  archive.texi archures.texi 	bfdt.texi  cache.texi coffcode.texi 	core.texi elf.texi elfcode.texi  format.texi 	libbfd.texi bfdwin.texi bfdio.texi 	opncls.texi  reloc.texi  section.texi  	syms.texi  targets.texi init.texi hash.texi linker.texi 	mmo.texi
 
 
-PROTOS = archive.p archures.p bfd.p \
-	 core.p format.p \
-	bfdio.p bfdwin.p \
-	libbfd.p opncls.p reloc.p \
-	section.p syms.p targets.p  \
-	format.p  core.p init.p
+PROTOS = archive.p archures.p bfd.p 	 core.p format.p 	bfdio.p bfdwin.p 	libbfd.p opncls.p reloc.p 	section.p syms.p targets.p  	format.p  core.p init.p
 
 
 IPROTOS = cache.ip libbfd.ip reloc.ip init.ip archures.ip coffcode.ip
@@ -151,33 +150,13 @@ IPROTOS = cache.ip libbfd.ip reloc.ip init.ip archures.ip coffcode.ip
 # SRCDOC, SRCPROT, SRCIPROT only used to sidestep Sun Make bug in interaction 
 # between VPATH and suffix rules.  If you use GNU Make, perhaps other Makes,
 # you don't need these three:
-SRCDOC = $(srcdir)/../aoutx.h  $(srcdir)/../archive.c \
-	$(srcdir)/../archures.c $(srcdir)/../bfd.c \
-	$(srcdir)/../bfdio.c $(srcdir)/../bfdwin.c \
-	$(srcdir)/../cache.c $(srcdir)/../coffcode.h \
-	$(srcdir)/../corefile.c $(srcdir)/../elf.c \
-	$(srcdir)/../elfcode.h  $(srcdir)/../format.c \
-	$(srcdir)/../libbfd.c $(srcdir)/../opncls.c \
-	$(srcdir)/../reloc.c  $(srcdir)/../section.c \
-	$(srcdir)/../syms.c  $(srcdir)/../targets.c \
-	$(srcdir)/../hash.c $(srcdir)/../linker.c \
-	$(srcdir)/../mmo.c
+SRCDOC = $(srcdir)/../aoutx.h  $(srcdir)/../archive.c 	$(srcdir)/../archures.c $(srcdir)/../bfd.c 	$(srcdir)/../bfdio.c $(srcdir)/../bfdwin.c 	$(srcdir)/../cache.c $(srcdir)/../coffcode.h 	$(srcdir)/../corefile.c $(srcdir)/../elf.c 	$(srcdir)/../elfcode.h  $(srcdir)/../format.c 	$(srcdir)/../libbfd.c $(srcdir)/../opncls.c 	$(srcdir)/../reloc.c  $(srcdir)/../section.c 	$(srcdir)/../syms.c  $(srcdir)/../targets.c 	$(srcdir)/../hash.c $(srcdir)/../linker.c 	$(srcdir)/../mmo.c
 
 
-SRCPROT = $(srcdir)/../archive.c $(srcdir)/../archures.c \
-	$(srcdir)/../bfd.c $(srcdir)/../coffcode.h $(srcdir)/../corefile.c \
-	$(srcdir)/../format.c $(srcdir)/../libbfd.c \
-	$(srcdir)/../bfdio.c $(srcdir)/../bfdwin.c \
-	$(srcdir)/../opncls.c $(srcdir)/../reloc.c \
-	$(srcdir)/../section.c $(srcdir)/../syms.c \
-	$(srcdir)/../targets.c $(srcdir)/../init.c
+SRCPROT = $(srcdir)/../archive.c $(srcdir)/../archures.c 	$(srcdir)/../bfd.c $(srcdir)/../coffcode.h $(srcdir)/../corefile.c 	$(srcdir)/../format.c $(srcdir)/../libbfd.c 	$(srcdir)/../bfdio.c $(srcdir)/../bfdwin.c 	$(srcdir)/../opncls.c $(srcdir)/../reloc.c 	$(srcdir)/../section.c $(srcdir)/../syms.c 	$(srcdir)/../targets.c $(srcdir)/../init.c
 
 
-SRCIPROT = $(srcdir)/../cache.c $(srcdir)/../libbfd.c \
-	$(srcdir)/../bfdio.c $(srcdir)/../bfdwin.c \
-	$(srcdir)/../reloc.c $(srcdir)/../cpu-h8300.c \
-	$(srcdir)/../cpu-i960.c $(srcdir)/../archures.c \
-	$(srcdir)/../init.c
+SRCIPROT = $(srcdir)/../cache.c $(srcdir)/../libbfd.c 	$(srcdir)/../bfdio.c $(srcdir)/../bfdwin.c 	$(srcdir)/../reloc.c $(srcdir)/../cpu-h8300.c 	$(srcdir)/../cpu-i960.c $(srcdir)/../archures.c 	$(srcdir)/../init.c
 
 
 TEXIDIR = $(srcdir)/../../texinfo/fsf
@@ -186,51 +165,13 @@ info_TEXINFOS = bfd.texinfo
 
 MKDOC = chew$(EXEEXT_FOR_BUILD)
 
-LIBBFD_H_DEP = \
-	$(srcdir)/../libbfd-in.h	\
-	$(srcdir)/../init.c		\
-	$(srcdir)/../libbfd.c		\
-	$(srcdir)/../bfdio.c		\
-	$(srcdir)/../bfdwin.c		\
-	$(srcdir)/../cache.c		\
-	$(srcdir)/../reloc.c		\
-	$(srcdir)/../archures.c		\
-	$(srcdir)/../elf.c		\
-	$(srcdir)/header.sed		\
-	$(srcdir)/proto.str		\
-	$(MKDOC)
+LIBBFD_H_DEP =  	$(srcdir)/../libbfd-in.h		$(srcdir)/../init.c			$(srcdir)/../libbfd.c			$(srcdir)/../bfdio.c			$(srcdir)/../bfdwin.c			$(srcdir)/../cache.c			$(srcdir)/../reloc.c			$(srcdir)/../archures.c			$(srcdir)/../elf.c			$(srcdir)/header.sed			$(srcdir)/proto.str			$(MKDOC)
 
 
-LIBCOFF_H_DEP = \
-	$(srcdir)/../libcoff-in.h	\
-	$(srcdir)/../coffcode.h		\
-	$(srcdir)/header.sed		\
-	$(srcdir)/proto.str		\
-	$(MKDOC)
+LIBCOFF_H_DEP =  	$(srcdir)/../libcoff-in.h		$(srcdir)/../coffcode.h			$(srcdir)/header.sed			$(srcdir)/proto.str			$(MKDOC)
 
 
-BFD_H_DEP = \
-	$(srcdir)/../bfd-in.h 		\
-	$(srcdir)/../init.c 		\
-	$(srcdir)/../opncls.c 		\
-	$(srcdir)/../libbfd.c 		\
-	$(srcdir)/../bfdio.c		\
-	$(srcdir)/../bfdwin.c		\
-	$(srcdir)/../section.c 		\
-	$(srcdir)/../archures.c		\
-	$(srcdir)/../reloc.c		\
-	$(srcdir)/../syms.c		\
-	$(srcdir)/../bfd.c		\
-	$(srcdir)/../archive.c		\
-	$(srcdir)/../corefile.c		\
-	$(srcdir)/../targets.c		\
-	$(srcdir)/../format.c		\
-	$(srcdir)/../linker.c		\
-	$(srcdir)/../simple.c		\
-	$(srcdir)/header.sed		\
-	$(srcdir)/proto.str		\
-	$(srcdir)/../version.h		\
-	$(MKDOC)
+BFD_H_DEP =  	$(srcdir)/../bfd-in.h 			$(srcdir)/../init.c 			$(srcdir)/../opncls.c 			$(srcdir)/../libbfd.c 			$(srcdir)/../bfdio.c			$(srcdir)/../bfdwin.c			$(srcdir)/../section.c 			$(srcdir)/../archures.c			$(srcdir)/../reloc.c			$(srcdir)/../syms.c			$(srcdir)/../bfd.c			$(srcdir)/../archive.c			$(srcdir)/../corefile.c			$(srcdir)/../targets.c			$(srcdir)/../format.c			$(srcdir)/../linker.c			$(srcdir)/../simple.c			$(srcdir)/header.sed			$(srcdir)/proto.str			$(srcdir)/../version.h			$(MKDOC)
 
 
 noinst_TEXINFOS = bfdint.texi
@@ -255,7 +196,7 @@ DIST_COMMON =  ChangeLog Makefile.am Makefile.in
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
-TAR = gtar
+TAR = tar
 GZIP_ENV = --best
 all: all-redirect
 .SUFFIXES:
