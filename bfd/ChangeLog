@@ -1,3 +1,8 @@
+2002-03-26  H.J. Lu  (hjl@gnu.org)
+
+	* elflink.h (elf_link_input_bfd): Complain about relocations
+	against local symbols in discarded sections.
+
 2002-03-26  Alan Modra  <amodra@bigpond.net.au>
 
 	* elflink.h (elf_gc_mark): Don't recurse into non-ELF sections.
