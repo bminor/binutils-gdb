@@ -65,7 +65,7 @@ static boolean elf_link_read_relocs_from_section
   PARAMS ((bfd *, Elf_Internal_Shdr *, PTR, Elf_Internal_Rela *));
 static size_t compute_bucket_count
   PARAMS ((struct bfd_link_info *));
-static void elf_link_output_relocs
+static boolean elf_link_output_relocs
   PARAMS ((bfd *, asection *, Elf_Internal_Shdr *, Elf_Internal_Rela *));
 static boolean elf_link_size_reloc_section
   PARAMS ((bfd *, Elf_Internal_Shdr *, asection *));
@@ -6254,7 +6254,7 @@ elf_link_output_extsym (h, data)
    originated from the section given by INPUT_REL_HDR) to the
    OUTPUT_BFD.  */
 
-static void
+static boolean
 elf_link_output_relocs (output_bfd, input_section, input_rel_hdr,
 			internal_relocs)
      bfd *output_bfd;
@@ -6286,8 +6286,16 @@ elf_link_output_relocs (output_bfd, input_section, input_rel_hdr,
       output_rel_hdr = elf_section_data (output_section)->rel_hdr2;
       rel_countp = &elf_section_data (output_section)->rel_count2;
     }
-
-  BFD_ASSERT (output_rel_hdr != NULL);
+  else
+    {
+      (*_bfd_error_handler) (
+        _("%s: relocation size mismatch in %s section %s"),
+        bfd_get_filename (output_bfd),
+        bfd_archive_filename (input_section->owner),
+        input_section->name);
+      bfd_set_error (bfd_error_wrong_object_format);
+      return false;
+    }
 
   bed = get_elf_backend_data (output_bfd);
   irela = internal_relocs;
@@ -6344,6 +6352,8 @@ elf_link_output_relocs (output_bfd, input_section, input_rel_hdr,
   /* Bump the counter, so that we know where to add the next set of
      relocations.  */
   *rel_countp += NUM_SHDR_ENTRIES (input_rel_hdr);
+
+  return true;
 }
 
 /* Link an input file into the linker output file.  This function
@@ -6754,9 +6764,9 @@ elf_link_input_bfd (finfo, input_bfd)
 	      struct elf_link_hash_entry **rel_hash;
 	      Elf_Internal_Shdr *input_rel_hdr;
 	      unsigned int next_erel;
-	      void (*reloc_emitter) PARAMS ((bfd *, asection *,
-					     Elf_Internal_Shdr *,
-					     Elf_Internal_Rela *));
+	      boolean (*reloc_emitter) PARAMS ((bfd *, asection *,
+						Elf_Internal_Shdr *,
+						Elf_Internal_Rela *));
 	      boolean rela_normal;
 
 	      input_rel_hdr = &elf_section_data (o)->rel_hdr;
@@ -6913,15 +6923,18 @@ elf_link_input_bfd (finfo, input_bfd)
 	      else
 		reloc_emitter = elf_link_output_relocs;
 
-	      (*reloc_emitter) (output_bfd, o, input_rel_hdr, internal_relocs);
+	      if (! (*reloc_emitter) (output_bfd, o, input_rel_hdr,
+				      internal_relocs))
+		return false;
 
 	      input_rel_hdr = elf_section_data (o)->rel_hdr2;
 	      if (input_rel_hdr)
 		{
 		  internal_relocs += (NUM_SHDR_ENTRIES (input_rel_hdr)
 				      * bed->s->int_rels_per_ext_rel);
-		  (*reloc_emitter) (output_bfd, o, input_rel_hdr,
-				    internal_relocs);
+		  if (! (*reloc_emitter) (output_bfd, o, input_rel_hdr,
+					  internal_relocs))
+		    return false;
 		}
 
 	    }

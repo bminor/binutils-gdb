@@ -706,7 +706,7 @@ struct elf_backend_data
 
   /* Emit relocations.  Overrides default routine for emitting relocs,
      except during a relocatable link, or if all relocs are being emitted.  */
-  void (*elf_backend_emit_relocs)
+  boolean (*elf_backend_emit_relocs)
     PARAMS ((bfd *, asection *, Elf_Internal_Shdr *, Elf_Internal_Rela *));
 
   /* Count relocations.  Not called for relocatable links
