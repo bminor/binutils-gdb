@@ -3198,8 +3198,6 @@ static const bfd_coff_backend_data bfd_coff_small_swap_table =
   false,
 #endif
   2,
-  false,
-  2,
 #ifdef COFF_FORCE_SYMBOLS_IN_STRINGS
   true,
 #else

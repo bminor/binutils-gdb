@@ -1,3 +1,7 @@
+2000-05-01  Alan Modra  <alan@linuxcare.com.au>
+
+	* coff-sh.c (bfd_coff_small_swap_table): Fix Fri Apr 28 change.
+
 Fri Apr 28 21:34:44 2000  Clinton Popetz  <cpopetz@cygnus.com>
 
 	* coffcode.h Copy changes mistakenly done to libcoff.h in
