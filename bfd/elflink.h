@@ -416,8 +416,8 @@ elf_link_add_object_symbols (abfd, info)
 	    goto error_return;
 
 	  if (bfd_seek (abfd, verdefhdr->sh_offset, SEEK_SET) != 0
-	      || (bfd_read ((PTR) dynver, 1, hdr->sh_size, abfd)
-		  != hdr->sh_size))
+	      || (bfd_read ((PTR) dynver, 1, verdefhdr->sh_size, abfd)
+		  != verdefhdr->sh_size))
 	    goto error_return;
 
 	  extverdef = (const Elf_External_Verdef *) dynver;
@@ -431,7 +431,7 @@ elf_link_add_object_symbols (abfd, info)
 
 	      /* Pick up the name of the version.  */
 	      extverdaux = ((const Elf_External_Verdaux *)
-			    (bfd_byte *) extverdef + intverdef->vd_aux);
+			    ((bfd_byte *) extverdef + intverdef->vd_aux));
 	      _bfd_elf_swap_verdaux_in (abfd, extverdaux, &intverdaux);
 
 	      intverdef->vd_bfd = abfd;
@@ -440,7 +440,7 @@ elf_link_add_object_symbols (abfd, info)
 						 intverdaux.vda_name);
 
 	      extverdef = ((const Elf_External_Verdef *)
-			   (bfd_byte *) extverdef + intverdef->vd_next);
+			   ((bfd_byte *) extverdef + intverdef->vd_next));
 	    }
 
 	  free (dynver);
