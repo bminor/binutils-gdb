@@ -1,3 +1,8 @@
+2004-10-05  Jim Blandy  <jimb@redhat.com>
+
+	* linux-nat.c (_initialize_linux_nat): Rename child_ops.
+	(Previous change missed some uses.)
+
 2004-10-05  Andrew Cagney  <cagney@gnu.org>
 
 	* target.h (deprecated_child_ops): Rename child_ops.
