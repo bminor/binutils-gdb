@@ -799,7 +799,8 @@ unexport CHILLFLAGS CHILL_LIB CHILL_FOR_TARGET :
 ALLDEPFILES = 29k-share/udi/udip2soc.c 29k-share/udi/udr.c \
 	a29k-pinsn.c a29k-tdep.c a68v-nat.c altos-xdep.c arm-convert.s \
 	arm-pinsn.c arm-tdep.c arm-xdep.c convex-pinsn.c convex-tdep.c \
-	convex-xdep.c core-svr4.c coredep.c corelow.c exec.c fork-child.c \
+	convex-xdep.c core-svr4.c coredep.c corelow.c delta68-nat.c exec.c \
+	fork-child.c \
 	go32-xdep.c gould-pinsn.c gould-xdep.c h8300-tdep.c h8500-tdep.c \
 	hp300ux-nat.c hppa-pinsn.c hppa-tdep.c hppab-nat.c hppah-nat.c \
 	i386-pinsn.c i386-tdep.c i386b-nat.c i386mach-nat.c i386v-nat.c \
@@ -1001,6 +1002,8 @@ dbxread.o: dbxread.c $(breakpoint_h) buildsym.h $(command_h) \
 	complaints.h $(defs_h) $(expression_h) gdb-stabs.h $(gdbcore_h) \
 	$(gdbtypes_h) language.h objfiles.h partial-stab.h stabsread.h \
 	symfile.h $(symtab_h) target.h
+
+delta68-nat.o: delta68-nat.c $(defs_h)
 
 demangle.o: demangle.c $(defs_h) $(gdbcmd_h)
 
