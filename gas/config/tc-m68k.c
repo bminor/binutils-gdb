@@ -1184,6 +1184,43 @@ m68k_ip (instring)
 		    }
                   break;
 
+		case 'q':
+		  switch (opP->mode)
+		    {
+		    case DREG:
+		    case AINDR:
+		    case AINC:
+		    case ADEC:
+		      break;
+		    case DISP:
+		      if (opP->reg == PC || opP->reg == ZPC)
+                        losing++;
+		      break;
+		    default:
+		      losing++;
+		      break;
+		    }
+                  break;
+
+		case 'v':
+		  switch (opP->mode)
+		    {
+		    case DREG:
+		    case AINDR:
+		    case AINC:
+		    case ADEC:
+		    case ABSL:
+		      break;
+		    case DISP:
+		      if (opP->reg == PC || opP->reg == ZPC)
+                        losing++;
+		      break;
+		    default:
+		      losing++;
+		      break;
+		    }
+		  break;
+
 		case '#':
 		  if (opP->mode != IMMED)
 		    losing++;
@@ -1788,6 +1825,8 @@ m68k_ip (instring)
 	case 'n':
 	case 'o':
 	case 'p':
+	case 'q':
+	case 'v':
 #ifndef NO_68851
 	case '|':
 #endif
@@ -2289,6 +2328,9 @@ m68k_ip (instring)
 		  addword (nextword);
 		  break;
 
+		case SIZE_BYTE:
+		  as_bad ("unsupported byte value; use a different suffix");
+		  /* Fall through.  */
 		case SIZE_WORD:	/* Word */
 		  if (isvar (&opP->disp))
 		    add_fix ('w', &opP->disp, 0, 0);
@@ -4016,8 +4058,14 @@ md_apply_fix_2 (fixP, val)
 
   /* A one byte PC-relative reloc means a short branch.  We can't use
      a short branch with a value of 0 or -1, because those indicate
-     different opcodes (branches with longer offsets).  */
-  if (fixP->fx_pcrel
+     different opcodes (branches with longer offsets).  fixup_segment
+     in write.c may have clobbered fx_pcrel, so we need to examine the
+     reloc type.  */
+  if ((fixP->fx_pcrel
+#ifdef BFD_ASSEMBLER
+       || fixP->fx_r_type == BFD_RELOC_8_PCREL
+#endif
+       )
       && fixP->fx_size == 1
       && (fixP->fx_addsy == NULL
 	  || S_IS_DEFINED (fixP->fx_addsy))

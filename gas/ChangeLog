@@ -5,6 +5,8 @@ Wed Sep 24 16:54:40 1997  Joel Sherrill  <joel@oarcorp.com>
 
 Wed Sep 24 11:30:25 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/tc-m68k.c (m68k_ip): Handle q and v operand specifiers.
+
 	* doc/c-i386.texi (i386-Float): Remove incorrect assertion that
 	fn* instructions do not insert implicit fwait.  This was changed
 	Jan 29, 1996.
