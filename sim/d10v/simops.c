@@ -2483,7 +2483,7 @@ OP_1000 ()
   /* see ../common/sim-alu.h for a more extensive discussion on how to
      compute the carry/overflow bits */
   tmp = a - b;
-  State.C = (a < b);
+  State.C = (a >= b);
   State.regs[OP[0]] = (tmp >> 16) & 0xffff;
   State.regs[OP[0]+1] = tmp & 0xffff;
   trace_output (OP_DREG);
@@ -2585,7 +2585,8 @@ OP_1 ()
 
   trace_input ("subi", OP_REG, OP_CONSTANT16, OP_VOID);
   /* see ../common/sim-alu.h for a more extensive discussion on how to
-     compute the carry/overflow bits */
+     compute the carry/overflow bits. */
+  /* since OP[1] is never <= 0, -OP[1] == ~OP[1]+1 can never overflow */
   tmp = ((unsigned)(unsigned16) State.regs[OP[0]]
 	 + (unsigned)(unsigned16) ( - OP[1]));
   State.C = (tmp >= (1 << 16));
