@@ -35,8 +35,6 @@ MINUS_G=-g
 
 SUBDIRS = doc
 
-#### host and target dependent Makefile fragments come in here.
-###
 
 # Change this (to MINIMIZE=1) to save space in executables.
 # Currently, all this does is control the target_vector in targets.c.
@@ -58,6 +56,9 @@ BFD_BACKENDS = oasys.o ieee.o srec.o elf.o stab-syms.o\
 	coff-mips.o coff-rs6000.o coff-h8300.o
 
 OPTIONAL_BACKENDS = trad-core.o
+
+#### host and target dependent Makefile fragments come in here.
+###
 
 BFD_H=$(INCDIR)/bfd.h
 
