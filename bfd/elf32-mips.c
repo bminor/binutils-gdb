@@ -2750,7 +2750,8 @@ mips_elf32_section_processing (abfd, hdr)
      bfd *abfd;
      Elf32_Internal_Shdr *hdr;
 {
-  if (hdr->sh_type == SHT_MIPS_REGINFO)
+  if (hdr->sh_type == SHT_MIPS_REGINFO
+      && hdr->sh_size > 0)
     {
       bfd_byte buf[4];
 

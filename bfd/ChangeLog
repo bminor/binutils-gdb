@@ -1,3 +1,8 @@
+1999-06-12  Ian Lance Taylor  <ian@zembu.com>
+
+	* elf32-mips.c (mips_elf32_section_processing): Permit a
+	SHT_MIPS_REGINFO section to have a size of 0.
+
 1999-06-12  David O'Brien  <obrien@freebsd.org>
 
 	* config.bfd (alpha*-*-freebsd*): New target.
