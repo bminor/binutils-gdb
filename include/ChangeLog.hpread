@@ -1,6 +1,0 @@
-Fri Aug 19 09:56:31 1994  Jeff Law  (law@snake.cs.utah.edu)
-
-	* hpux-symtab.h: New file describing the debug symbols emitted by
-	the HP C compilers.
-
-

@@ -1,3 +1,18 @@
+Fri Nov 25 00:14:05 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* hp-symtab.h: New file describing the debug symbols emitted
+	by the HP C compilers.  
+
+Fri Nov 11 15:48:37 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* bfdlink.h (struct bfd_link_hash_entry): Change u.c.size from 24
+	to 26 bits, and change u.c.alignment_power from 8 to 6 bits.  6
+	bit in the alignment power is enough for a 64 bit address space.
+
+Mon Oct 31 13:02:51 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* demangle.h (cplus_mangle_opname): Declare.
+
 Tue Oct 25 11:38:02 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
 	* bfdlink.h (struct bfd_link_callbacks): Fix comments for

@@ -21,12 +21,6 @@ else
 	lose_these_too="${lose_these_too} mpw"
 fi
 
-if ( echo $* | grep keep\-hpread > /dev/null ) ; then
-	keep_these_too="${keep_these_too} hpux-symtab.h ChangeLog.hpread"
-else
-	lose_these_too="${lose_these_too} hpux-symtab.h ChangeLog.hpread"
-fi
-
 # All files listed between the "Things-to-keep:" line and the
 # "Files-to-sed:" line will be kept.  All other files will be removed.
 # Directories listed in this section will have their own Sanitize
@@ -50,6 +44,7 @@ fopen-bin.h
 fopen-same.h
 gdbm.h
 getopt.h
+hp-symtab.h
 ieee.h
 libiberty.h
 nlm
