@@ -1,3 +1,8 @@
+Mon Aug 23 12:43:11 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* mips.h (M_ABSU): Removed (absolute value of unsigned number??).
+	(M_DABS): Added.
+
 Thu Aug 19 15:08:37 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* mips.h (INSN_*): Changed values.  Removed unused definitions.
