@@ -388,7 +388,7 @@ i387_print_float_info (struct gdbarch *gdbarch, struct ui_file *file,
       fputs_filtered ("\n", file);
     }
 
-  puts_filtered ("\n");
+  fputs_filtered ("\n", file);
 
   print_i387_status_word (fstat, file);
   print_i387_control_word (fctrl, file);
