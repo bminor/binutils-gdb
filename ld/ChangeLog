@@ -1,3 +1,8 @@
+2002-12-30  Ralf Habacker  <ralf.habacker@freenet.de>
+
+	* ld.texinfo: New win32 topics: 'symbol aliasing' and 'export dll
+	symbols'.
+
 2002-12-23  Alan Modra  <amodra@bigpond.net.au>
 
 	* ldmain.c (main): Init "strip_discarded".

@@ -4449,6 +4449,8 @@ top page of memory).
 @section @command{ld} and WIN32 (cygwin/mingw)
 
 This section describes some of the win32 specific @command{ld} issues. 
+See @ref{Options,,Command Line Options} for detailed decription of the
+command line options mentioned here.
 
 @table @emph
 @cindex import libraries 
@@ -4459,6 +4461,54 @@ regular static archives and are handled as any other static
 archive.  The cygwin and mingw ports of @command{ld} have specific
 support for creating such libraries provided with the
 @samp{--out-implib} command line option.
+
+@item   exporting DLL symbols 
+@cindex exporting DLL symbols 
+The cygwin/mingw @command{ld} has several ways to export symbols for dll's.
+
+@table @emph
+@item   using auto-export functionality
+@cindex using auto-export functionality
+By default @command{ld} exports symbols with the auto-export functionality,
+which is controlled by the following command line options:
+
+@example
+--export-all-symbols   [This is the default]
+--exclude-symbols
+--exclude-libs
+@end example 
+
+@item   using a DEF file 
+@cindex using a DEF file 
+Another way of exporting symbols is using a DEF file.  A DEF file is
+an ASCII file containing definitions of symbols which should be
+exported when a dll is created.  Usually it is named @samp{<dll
+name>.def} and is added as any other object file to the linker's
+command line.
+
+@example
+gcc -o <output> <objectfiles> <dll name>.def
+@end example
+
+Here is an example of a DEF file for a shared library called @samp{xyz.dll}:
+
+@example
+LIBRARY "xyz.dll" BASE=0x10000000
+
+EXPORTS
+foo
+bar
+_bar = bar
+@end example 
+
+This example defines a base address and three symbols.  The third
+symbol is an alias for the second.  For the complete format
+specification see ld/deffilep.y in the binutils sources.
+
+@cindex creating a DEF file
+While linking a shared dll, @command{ld} is able to create a DEF file
+with the @samp{--output-def <file>} command line option.
+@end table 
 
 @cindex automatic data imports
 @item automatic data imports
@@ -4604,27 +4654,21 @@ lib/
 	libxxx.dll.a -> ../bin/cygxxx-5.dll 
 @end example
 
-Linking directly to a dll without using an import lib will work 
+Linking directly to a dll without using an import lib will work
 even when auto-import features are exercised, and even when
 @samp{--enable-runtime-pseudo-relocs} is used.
 
 Given the improvements in speed and memory usage, one might justifiably
-wonder why import libraries are used at all.  There are three reasons:
+wonder why import libraries are used at all.  There are two reasons:
 
 1. Until recently, the link-directly-to-dll functionality did @emph{not}
 work with auto-imported data.
 
-2. Sometimes, it is useful to rename exports.  For instance, the cygwin
-kernel does this regularly: a symbol @samp{_foo} will be exported as 
-@samp{_foo}, but also as @samp{foo} by using special directives in the
-DEF file when creating the import library.  This ability is not
-present without import libs.
-
-3. Also, it's sometimes necessary to include pure static objects 
-within the import library (which otherwise contains only bfd's for
-indirection symbols that point to the exports of a dll).  Again, 
-the import lib for the cygwin kernel makes use of this ability, and
-it is not possible to do this without an import lib.
+2. Sometimes it is necessary to include pure static objects within the
+import library (which otherwise contains only bfd's for indirection
+symbols that point to the exports of a dll).  Again, the import lib
+for the cygwin kernel makes use of this ability, and it is not
+possible to do this without an import lib.
 
 So, import libs are not going away.  But the ability to replace
 true import libs with a simple symbolic link to (or a copy of) 
@@ -4633,6 +4677,57 @@ binutils makes available to the win32 developer.  Given the
 massive improvements in memory requirements during linking, storage
 requirements, and linking speed, we expect that many developers
 will soon begin to use this feature whenever possible.
+
+@item symbol aliasing  
+@table @emph
+@item adding additional names 
+Sometimes, it is useful to export symbols with additional names.  
+A symbol @samp{foo} will be exported as @samp{foo}, but it can also be
+exported as @samp{_foo} by using special directives in the DEF file
+when creating the dll.  This will affect also the optional created
+import library.  Consider the following DEF file: 
+
+@example 
+LIBRARY "xyz.dll" BASE=0x61000000
+
+EXPORTS
+foo 
+_foo = foo
+@end example 
+
+The line @samp{_foo = foo} maps the symbol @samp{foo} to @samp{_foo}.
+
+Another method for creating a symbol alias is to create it in the
+source code using the "weak" attribute:
+
+@example 
+void foo () @{ /* Do something.  */; @} 
+void _foo () __attribute__ ((weak, alias ("foo")));
+@end example 
+
+See the gcc manual for more information about attributes and weak
+symbols.
+
+@item renaming symbols
+Sometimes it is useful to rename exports.  For instance, the cygwin
+kernel does this regularly.  A symbol @samp{_foo} can be exported as 
+@samp{foo} but not as @samp{_foo} by using special directives in the
+DEF file. (This will also affect the import library, if it is
+created).  In the following example: 
+
+@example 
+LIBRARY "xyz.dll" BASE=0x61000000
+
+EXPORTS
+_foo = foo
+@end example 
+
+The line @samp{_foo = foo} maps the exported symbol @samp{foo} to
+@samp{_foo}.
+@end table 
+
+Note: using a DEF file overrides any other symbol defining except you are 
+using the @samp{--export-all-symbols} command line options. 
 @end table
 
 @ifclear GENERIC
