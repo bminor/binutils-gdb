@@ -428,7 +428,7 @@ define_symbol (valu, string, desc, type, objfile)
 
   /* We would like to eliminate nameless symbols, but keep their types.
      E.g. stab entry ":t10=*2" should produce a type 10, which is a pointer
-     to type 2, but, should not creat a symbol to address that type. Since
+     to type 2, but, should not create a symbol to address that type. Since
      the symbol will be nameless, there is no way any user can refer to it. */
 
   int nameless;
@@ -442,8 +442,8 @@ define_symbol (valu, string, desc, type, objfile)
     return 0;
 
   /* If a nameless stab entry, all we need is the type, not the symbol.
-     e.g. ":t10=*2" */
-  nameless = (p == string);
+     e.g. ":t10=*2" or a nameless enum like " :T16=ered:0,green:1,blue:2,;" */
+  nameless = (p == string || ((string[0] == ' ') && (string[1] == ':')));
 
   sym = (struct symbol *) 
     obstack_alloc (&objfile -> symbol_obstack, sizeof (struct symbol));

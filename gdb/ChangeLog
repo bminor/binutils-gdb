@@ -16,6 +16,9 @@ Sun Nov 29 15:22:42 1992  Fred Fish  (fnf@cygnus.com)
 	* stabsread.c (read_type):  Retain function local copy of type
 	descriptor.  Rearrange code calling read_struct_type() to match
 	new conventions.
+	* stabsread.c (define_symbol):  For the sake of dbx, gcc emits
+	a single blank as the name of nameless enumerations.  Recognize
+	this special case and set nameless flag.
 	**** start-sanitize-chill ****
 	* ch-exp.y (GENERAL_PROCEDURE_NAME, LOCATION_NAME):  New
 	terminal tokens.
