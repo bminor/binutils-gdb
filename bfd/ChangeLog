@@ -1,5 +1,7 @@
 Thu Jan  6 14:37:42 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* hp300hpux.c (ARCH_SIZE): Define before including aoutx.h.
+
 	* linker.c (_bfd_generic_link_add_one_symbol): Add constructor and
 	bitsize arguments.  Changed all callers (aoutx.h).
 	* libbfd-in.h (_bfd_generic_link_add_one_symbol): Add constructor
