@@ -1,3 +1,12 @@
+Wed Sep  4 18:02:45 1996  Stu Grossman  (grossman@critters.cygnus.com)
+
+	* configure configure.in:  Don't default CC to cc.  It causes problems
+	when starting a compile in the mmalloc directory.
+
+Wed Jul 24 00:53:34 1996  Fred Fish  <fnf@cygnus.com>
+
+	* mmalloc.h (mmalloc_findbase): Add prototype.
+
 Fri Jul 12 18:35:34 1996  Fred Fish  <fnf@cygnus.com>
 
 	* mmap-sup.c (mmalloc_findbase): Change to not require /dev/zero
