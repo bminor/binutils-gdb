@@ -26,7 +26,7 @@
 #include "opcode/d10v.h"
 #include "elf/ppc.h"
 
-const char comment_chars[] = "#;";
+const char comment_chars[] = ";";
 const char line_comment_chars[] = "#";
 const char line_separator_chars[] = "";
 const char *md_shortopts = "O";
@@ -35,6 +35,8 @@ const char FLT_CHARS[] = "dD";
 
 int Optimizing = 0;
 
+#define AT_WORD (-1)
+
 /* fixups */
 #define MAX_INSN_FIXUPS (5)
 struct d10v_fixup
@@ -42,6 +44,8 @@ struct d10v_fixup
   expressionS exp;
   int operand;
   int pcrel;
+  int size;
+  bfd_reloc_code_real_type reloc;
 };
 
 typedef struct _fixups
@@ -79,9 +83,12 @@ struct option md_longopts[] = {
 };
 size_t md_longopts_size = sizeof(md_longopts);       
 
+static void d10v_dot_word PARAMS ((int));
+
 /* The target specific pseudo-ops which we support.  */
 const pseudo_typeS md_pseudo_table[] =
 {
+  { "word",	d10v_dot_word,	2 },
   { NULL,       NULL,           0 }
 };
 
@@ -362,6 +369,7 @@ get_reloc (op)
   return (BFD_RELOC_16);
 }
 
+
 /* get_operands parses a string of operands and returns
    an array of expressions */
 
@@ -412,7 +420,6 @@ get_operands (exp)
 
       input_line_pointer = p;
 
-
       /* check to see if it might be a register name */
       if (!register_name (&exp[numops]))
 	{
@@ -420,6 +427,20 @@ get_operands (exp)
 	  expression (&exp[numops]);
 	}
 
+      if (!strncasecmp (input_line_pointer, "@word", 5))
+	{
+	  if (exp[numops].X_op == O_register)
+	    {
+	      /* if it looked like a register name but was followed by "@word" */
+	      /* then it was really a symbol, so change it to one */
+	      exp[numops].X_op = O_symbol;
+	      exp[numops].X_add_symbol = symbol_find_or_make ((char *)exp[numops].X_op_symbol);
+	      exp[numops].X_op_symbol = NULL;
+	    }
+	  exp[numops].X_add_number = AT_WORD;
+	  input_line_pointer += 5;
+	}
+      
       if (exp[numops].X_op == O_illegal) 
 	as_bad ("illegal operand");
       else if (exp[numops].X_op == O_absent) 
@@ -519,6 +540,21 @@ build_insn (opcode, opers, insn)
 
 	  if (fixups->fc >= MAX_INSN_FIXUPS)
 	    as_fatal ("too many fixups");
+
+	  if (opers[i].X_op == O_symbol && number == AT_WORD)
+	    {
+	      number = opers[i].X_add_number = 0;
+	      fixups->fix[fixups->fc].reloc = BFD_RELOC_D10V_18;
+	    } else
+	      fixups->fix[fixups->fc].reloc = 
+		get_reloc((struct d10v_operand *)&d10v_operands[opcode->operands[i]]);
+
+	  if (fixups->fix[fixups->fc].reloc == BFD_RELOC_16 || 
+	      fixups->fix[fixups->fc].reloc == BFD_RELOC_D10V_18)
+	    fixups->fix[fixups->fc].size = 2; 	    
+	  else
+	    fixups->fix[fixups->fc].size = 4;
+ 	    
 	  fixups->fix[fixups->fc].exp = opers[i];
 	  fixups->fix[fixups->fc].operand = opcode->operands[i];
 	  fixups->fix[fixups->fc].pcrel = (flags & OPERAND_ADDR) ? true : false;
@@ -548,7 +584,7 @@ write_long (opcode, insn, fx)
      unsigned long insn;
      Fixups *fx;
 {
-  int i;
+  int i, where;
   char *f = frag_more(4);
 
   insn |= FM11;
@@ -557,17 +593,23 @@ write_long (opcode, insn, fx)
 
   for (i=0; i < fx->fc; i++) 
     {
-      if (get_reloc((struct d10v_operand *)&d10v_operands[fx->fix[i].operand]))
+      if (fx->fix[i].reloc)
 	{ 
+	  where = f - frag_now->fr_literal; 
+	  if (fx->fix[i].size == 2)
+	    where += 2;
 	  /*
-	  printf("fix_new_exp: where:%x size:4\n    ",f - frag_now->fr_literal);
+	  printf("fix_new_exp: where:%x size:%d\n    ",where,fx->fix[i].size);
 	  print_expr_1(stdout,&(fx->fix[i].exp));
 	  printf("\n");
 	  */
 
+	  if (fx->fix[i].reloc == BFD_RELOC_D10V_18)
+	    fx->fix[i].operand |= 4096;	  
+
 	  fix_new_exp (frag_now,
-		       f - frag_now->fr_literal, 
-		       4,
+		       where,
+		       fx->fix[i].size,
 		       &(fx->fix[i].exp),
 		       fx->fix[i].pcrel,
 		       fx->fix[i].operand|2048);
@@ -585,7 +627,7 @@ write_1_short (opcode, insn, fx)
      Fixups *fx;
 {
   char *f = frag_more(4);
-  int i;
+  int i, where;
 
   if (opcode->exec_type & PARONLY)
     as_fatal ("Instruction must be executed in parallel with another instruction.");
@@ -602,23 +644,28 @@ write_1_short (opcode, insn, fx)
   number_to_chars_bigendian (f, insn, 4);
   for (i=0; i < fx->fc; i++) 
     {
-      bfd_reloc_code_real_type reloc;
-      reloc = get_reloc((struct d10v_operand *)&d10v_operands[fx->fix[i].operand]);
-      if (reloc)
+      if (fx->fix[i].reloc)
 	{ 
+	  where = f - frag_now->fr_literal; 
+	  if (fx->fix[i].size == 2)
+	    where += 2;
+
 	  /*
-	  printf("fix_new_exp: where:%x size:4\n    ",f - frag_now->fr_literal);
+	  printf("fix_new_exp: where:%x size:%d\n    ",where, fx->fix[i].size);
 	  print_expr_1(stdout,&(fx->fix[i].exp));
 	  printf("\n");
 	  */
 
+	  if (fx->fix[i].reloc == BFD_RELOC_D10V_18)
+	    fx->fix[i].operand |= 4096;	  
+
 	  /* if it's an R reloc, we may have to switch it to L */
-	  if ( (reloc == BFD_RELOC_D10V_10_PCREL_R) && (opcode->unit != IU) )
+	  if ( (fx->fix[i].reloc == BFD_RELOC_D10V_10_PCREL_R) && (opcode->unit != IU) )
 	    fx->fix[i].operand |= 1024;
 
 	  fix_new_exp (frag_now,
-		       f - frag_now->fr_literal, 
-		       4,
+		       where, 
+		       fx->fix[i].size,
 		       &(fx->fix[i].exp),
 		       fx->fix[i].pcrel,
 		       fx->fix[i].operand|2048);
@@ -638,7 +685,7 @@ write_2_short (opcode1, insn1, opcode2, insn2, exec_type, fx)
 {
   unsigned long insn;
   char *f;
-  int i,j;
+  int i,j, where;
 
   if ( (exec_type != 1) && ((opcode1->exec_type & PARONLY)
 	                || (opcode2->exec_type & PARONLY)))
@@ -729,23 +776,29 @@ write_2_short (opcode1, insn1, opcode2, insn2, exec_type, fx)
 
   for (j=0; j<2; j++) 
     {
-      bfd_reloc_code_real_type reloc;
       for (i=0; i < fx->fc; i++) 
 	{
-	  reloc = get_reloc((struct d10v_operand *)&d10v_operands[fx->fix[i].operand]);
-	  if (reloc)
+	  if (fx->fix[i].reloc)
 	    {
-	      if ( (reloc == BFD_RELOC_D10V_10_PCREL_R) && (j == 0) )
+	      where = f - frag_now->fr_literal; 
+	      if (fx->fix[i].size == 2)
+		where += 2;
+	      
+	      if ( (fx->fix[i].reloc == BFD_RELOC_D10V_10_PCREL_R) && (j == 0) )
 		fx->fix[i].operand |= 1024;
 	      
+	      if (fx->fix[i].reloc == BFD_RELOC_D10V_18)
+		fx->fix[i].operand |= 4096;	  
+
 	      /*
-		printf("fix_new_exp: where:%x reloc:%d\n    ",f - frag_now->fr_literal,fx->fix[i].operand);
+		printf("fix_new_exp: where:%x reloc:%d\n    ",where,fx->fix[i].operand);
 		print_expr_1(stdout,&(fx->fix[i].exp));
 		printf("\n");
 		*/
+
 	      fix_new_exp (frag_now,
-			   f - frag_now->fr_literal, 
-			   4,
+			   where, 
+			   fx->fix[i].size,
 			   &(fx->fix[i].exp),
 			   fx->fix[i].pcrel,
 			   fx->fix[i].operand|2048);
@@ -1013,7 +1066,7 @@ do_assemble (str, opcode)
   input_line_pointer = save;
 
   insn = build_insn ((*opcode), myops, 0); 
-  /* printf("sub-insn = %lx\n",insn); */
+  /* printf("sub-insn = %lx\n",insn);  */
   return (insn);
 }
 
@@ -1037,7 +1090,7 @@ find_opcode (opcode, myops)
   if (opcode->format == OPCODE_FAKE)
     {
       int opnum = opcode->operands[0];
-
+			 
       if (myops[opnum].X_op == O_register)
 	{
 	  myops[opnum].X_op = O_symbol;
@@ -1064,9 +1117,29 @@ find_opcode (opcode, myops)
 		}
 	      else
 		{
-		  int value = obstack_next_free(&frchain_now->frch_obstack) - frag_now->fr_literal - 
-		    S_GET_VALUE(myops[opnum].X_add_symbol);
-		  if (!check_range (value, bits, flags))
+		  fragS *f;
+		  long value;
+		  /* calculate the current address by running through the previous frags */
+		  /* and adding our current offset */
+		  for (value = 0, f = frchain_now->frch_root; f; f = f->fr_next)
+		    value += f->fr_fix;
+
+		  if (flags & OPERAND_ADDR)
+		    value = S_GET_VALUE(myops[opnum].X_add_symbol) - value -
+		      (obstack_next_free(&frchain_now->frch_obstack) - frag_now->fr_literal);
+		  else
+		    value = S_GET_VALUE(myops[opnum].X_add_symbol);		    
+
+		  if (myops[opnum].X_add_number == AT_WORD)
+		    {
+		      if (bits > 4)
+			{
+			  bits += 2;
+			  if (!check_range (value, bits, flags)) 
+			    return next_opcode;
+			}
+		    }
+		  else if (!check_range (value, bits, flags)) 
 		    return next_opcode;
 		}
 	      next_opcode++;
@@ -1092,7 +1165,7 @@ find_opcode (opcode, myops)
 	      int flags = d10v_operands[opcode->operands[i]].flags;
 	      int X_op = myops[i].X_op;
 	      int num = myops[i].X_add_number;
-	      
+
 	      if (X_op==0) 
 		{
 		  match=0;
@@ -1121,12 +1194,13 @@ find_opcode (opcode, myops)
 		  break;
 		}	      
 	    }
-	  
 	  /* we're only done if the operands matched so far AND there
 	     are no more to check */
 	  if (match && myops[i].X_op==0) 
 	    break;
-	  
+	  else
+	    match = 0;
+
 	  next_opcode = opcode+1;
 	  if (next_opcode->opcode == 0) 
 	    break;
@@ -1237,14 +1311,14 @@ md_apply_fix3 (fixp, valuep, seg)
 	  else
 	    {
 	      /* We don't actually support subtracting a symbol.  */
-	      as_bad_where (fixp->fx_file, fixp->fx_line,
+ 	      as_bad_where (fixp->fx_file, fixp->fx_line,
 			    "expression too complex");
 	    }
 	}
     }
   
   /* printf("md_apply_fix: value=0x%x  type=0x%x  where=0x%x size=%d line=%d\n", value, fixp->fx_r_type,fixp->fx_where,fixp->fx_size, fixp->fx_line); */
-
+  
   op_type = fixp->fx_r_type;
   if (op_type & 2048)
     {
@@ -1254,6 +1328,11 @@ md_apply_fix3 (fixp, valuep, seg)
 	  op_type -= 1024;
 	  fixp->fx_r_type = BFD_RELOC_D10V_10_PCREL_L;
 	  left = 1;
+	}
+      else if (op_type & 4096)
+	{
+	  op_type -= 4096;
+	  fixp->fx_r_type = BFD_RELOC_D10V_18;
 	}
       else
 	fixp->fx_r_type = get_reloc((struct d10v_operand *)&d10v_operands[op_type]); 
@@ -1269,33 +1348,29 @@ md_apply_fix3 (fixp, valuep, seg)
     case BFD_RELOC_D10V_10_PCREL_L:
     case BFD_RELOC_D10V_10_PCREL_R:
     case BFD_RELOC_D10V_18_PCREL:
+    case BFD_RELOC_D10V_18:
       /* instruction addresses are always right-shifted by 2 */
       value >>= 2;
+      if (fixp->fx_size == 2)
+	bfd_putb16 ((bfd_vma) value, (unsigned char *) where);
+      else
+	{
+	  /* printf("   insn=%x  value=%x where=%x  pcrel=%x\n",insn,value,fixp->fx_where,fixp->fx_pcrel); */
+	  insn = d10v_insert_operand (insn, op_type, (offsetT)value, left, fixp);
+	  /* printf("   new insn=%x\n",insn); */
+	  bfd_putb32 ((bfd_vma) insn, (unsigned char *) where);  
+	}
       break;
     case BFD_RELOC_32:
       bfd_putb32 ((bfd_vma) value, (unsigned char *) where);
-      return 1;
-    case BFD_RELOC_16:
-      if (fixp->fx_size == 2)
-	{
-	  bfd_putb16 ((bfd_vma) value, (unsigned char *) where);
-	  return 1;
-	}
-    default:
       break;
+    case BFD_RELOC_16:
+      bfd_putb16 ((bfd_vma) value, (unsigned char *) where);
+      break;
+    default:
+      as_fatal ("line %d: unknown relocation type: 0x%x",fixp->fx_line,fixp->fx_r_type);
     }
-
-  /* printf("   insn=%x  value=%x where=%x  pcrel=%x\n",insn,value,fixp->fx_where,fixp->fx_pcrel); */
-  insn = d10v_insert_operand (insn, op_type, (offsetT)value, left, fixp);
-  /* printf("   new insn=%x\n",insn); */
-  
-  bfd_putb32 ((bfd_vma) insn, (unsigned char *) where);
-  
-  if (fixp->fx_done)
-    return 1;
-
-  fixp->fx_addnumber = value;
-  return 1;
+  return 0;
 }
 
 
@@ -1321,3 +1396,64 @@ d10v_cleanup (done)
     }
   return 1;
 }
+
+/* Like normal .word, except support @word */
+/* clobbers input_line_pointer, checks end-of-line. */
+static void
+d10v_dot_word (nbytes)
+     register int nbytes;	/* 1=.byte, 2=.word, 4=.long */
+{
+  expressionS exp;
+  bfd_reloc_code_real_type reloc;
+  char *p;
+  int offset;
+
+  if (is_it_end_of_statement ())
+    {
+      demand_empty_rest_of_line ();
+      return;
+    }
+
+  do
+    {
+      expression (&exp);
+      if (!strncasecmp (input_line_pointer, "@word", 5))
+	{
+	  exp.X_add_number = 0;
+	  input_line_pointer += 5;
+	
+	  p = frag_more (2);
+	  fix_new_exp (frag_now, p - frag_now->fr_literal, 2, 
+		       &exp, 0, BFD_RELOC_D10V_18);
+	}
+      else
+	emit_expr (&exp, 2);
+    }
+  while (*input_line_pointer++ == ',');
+
+  input_line_pointer--;		/* Put terminator back into stream. */
+  demand_empty_rest_of_line ();
+}
+
+
+/* Mitsubishi asked that we support some old syntax that apparently */
+/* had immediate operands starting with '#'.  This is in some of their */
+/* sample code but is not documented (although it appears in some  */
+/* examples in their assembler manual). For now, we'll solve this */
+/* compatibility problem by simply ignoring any '#' at the beginning */
+/* of an operand. */
+
+/* operands that begin with '#' should fall through to here */
+/* from expr.c */
+
+void 
+md_operand (expressionP)
+     expressionS *expressionP;
+{
+  if (*input_line_pointer == '#')
+    {
+      input_line_pointer++;
+      expression (expressionP);
+    }
+}
+
