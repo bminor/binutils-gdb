@@ -47,6 +47,7 @@ sparc-ll.h
 sparc.h
 stratus.h
 sun3.h
+sysv4.h
 tahoe.h
 ultra3.h
 vaxbsd.h
