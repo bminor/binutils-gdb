@@ -1,5 +1,10 @@
 2004-07-26  Andrew Cagney  <cagney@gnu.org>
 
+	Problem reported by Ashley Pittman <ashley@quadrics.com>.
+	* main.c (captured_main): When in batch mode always detach.
+
+2004-07-26  Andrew Cagney  <cagney@gnu.org>
+
 	* MAINTAINERS: Mark the xstormy16, sh64, ns32k, mn10300, mcore,
 	and h8300 as broken.
 	* NEWS: END-OF-LIFE frame compatibility module.

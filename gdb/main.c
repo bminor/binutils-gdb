@@ -729,6 +729,13 @@ extern int gdbtk_test (char *);
 
   if (batch)
     {
+      if (attach_flag)
+	/* Either there was a problem executing the command in the
+	   batch file aborted early, or the batch file forgot to do an
+	   explicit detach.  Explicitly detach the inferior ensuring
+	   that there are no zombies.  */
+	target_detach (NULL, 0);
+      
       /* We have hit the end of the batch file.  */
       exit (0);
     }
