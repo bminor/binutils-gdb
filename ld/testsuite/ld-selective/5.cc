@@ -20,6 +20,10 @@ A a;					// keep
 B b;
 A *getme() { return &a; }		// keep
 
+extern B* dropme2();
+void dropme1() { dropme2()->foo(); }	// lose
+B *dropme2() { return &b; }		// lose
+
 void _start()
 {
   getme()->bar();

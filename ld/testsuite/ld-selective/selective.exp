@@ -32,6 +32,7 @@ set test2 "selective2"
 set test3 "selective3"
 set test4 "selective4"
 set test5 "selective5"
+set test6 "selective6"
 
 set cflags "-w -O2 -ffunction-sections -fdata-sections"
 set cxxflags "-fvtable-gc -fno-exceptions -fno-rtti"
@@ -43,6 +44,7 @@ if { [which $CXX] == 0 } {
     untested $test3
     untested $test4
     untested $test5
+    untested $test6
     return
 }
 
@@ -191,3 +193,50 @@ if ![ld_simple_link $ld tmpdir/4.x "$ldflags tmpdir/4.o"] {
 	}
     }
 }
+
+if { ![ld_compile "$CC $cflags $cxxflags" $srcdir/$subdir/5.cc tmpdir/5.o]} {
+    unresolved $test6
+    return
+}
+
+# Exposes a bug, currently.  FIXME: Fix it.
+# FIXME: Break out the nesting to a function that takes two lists, one
+# with expected present symbols, one with expected absent symbols, and
+# iterates over nm output.  Use that function in all tests here.
+
+setup_xfail "*-*-*"
+
+if ![ld_simple_link $ld tmpdir/5.x "$ldflags tmpdir/5.o"] {
+    fail $test6
+} else {
+    if ![ld_nm $nm tmpdir/5.x] {
+	unresolved $test6
+    } else {
+	if {[info exists nm_output(foo__1B)]} {
+            send_log "foo__1B == $nm_output(foo__1B)\n"
+            verbose "foo__1B == $nm_output(foo__1B)"
+	    fail $test6
+	} else {
+	    if {[info exists nm_output(foo__1A)]} {
+	        send_log "foo__1A == $nm_output(foo__1A)\n"
+		verbose "foo__1A == $nm_output(foo__1A)"
+		fail $test6
+	    } else {
+		if {[info exists nm_output(dropme1__Fv)]} {
+		    send_log "dropme1__Fv == $nm_output(dropme1__Fv)\n"
+		    verbose "dropme1__Fv == $nm_output(dropme1__Fv)"
+		    fail $test6
+		} else {
+		    if {[info exists nm_output(dropme2__Fv)]} {
+			send_log "dropme2__Fv == $nm_output(dropme2__Fv)\n"
+			verbose "dropme2__Fv == $nm_output(dropme2__Fv)"
+			fail $test6
+		    } else {
+			pass $test6
+		    }
+		}
+	    }
+	}
+    }
+}
+

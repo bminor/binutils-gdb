@@ -1,3 +1,10 @@
+2000-09-29  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* ld-selective/5.cc: New test.
+	* ld-selective/selective.exp: Run it as xfailed.
+
+	* ld-selective/4.cc: Correct spelling of "lose".
+
 2000-09-05  Alan Modra  <alan@linuxcare.com.au>
 
 	* ld-selective/selective.exp: Remove the xfails for hppa.
