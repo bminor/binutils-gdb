@@ -1,6 +1,15 @@
+2000-09-06  Scott Bambrough <scottb@netwinder.org>
+
+	* arm-linux-tdep.c (arm_linux_skip_solib_resolver):
+	Removed debug print statement.  Removed arm_pc_is_thumb prototype.
+	* config/arm/tm-arm.h (arm_pc_is_thumb, arm_pc_is_thumb_dummy):
+	Move prototypes here from tm-embed.h.
+	* config/arm/tm-embed.h (arm_pc_is_thumb, arm_pc_is_thumb_dummy):
+	Remove prototypes.  Moved to tm-arm.h.
+
 2000-09-06  H.J. Lu  <hjl@gnu.org>
 
-	* TODO: Add hardware watchpint problems on x86 OSes for 5.1.
+	* TODO: Add hardware watchpoint problems on x86 OSes for 5.1.
 
 2000-09-06  Kevin Buettner  <kevinb@redhat.com>
 

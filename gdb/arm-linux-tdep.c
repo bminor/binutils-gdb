@@ -31,10 +31,6 @@
 #include "symfile.h"
 #include "objfiles.h"
 
-/* FIXME: Put in common header file shared between arm-tdep.c and
-   arm-linux-tdep.c */
-int arm_pc_is_thumb (CORE_ADDR memaddr);
-
 #ifdef GET_LONGJMP_TARGET
 
 /* Figure out where the longjmp will land.  We expect that we have
@@ -431,10 +427,9 @@ arm_linux_skip_solib_resolver (CORE_ADDR pc)
 
   /* Plug in functions for other kinds of resolvers here.  */
   result = skip_hurd_resolver (pc);
-  printf ("Result = 0x%08lx\n", result);
+
   if (result)
     return result;
-
   
   return 0;
 }
