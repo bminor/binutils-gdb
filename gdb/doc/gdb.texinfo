@@ -1,5 +1,6 @@
 \input texinfo      @c -*-texinfo-*-
-@c Copyright 1988 1989 1990 1991 1992 1993 1994 Free Software Foundation, Inc.
+@c Copyright 1988 1989 1990 1991 1992 1993 1994 1995
+@c Free Software Foundation, Inc.
 @c
 @c %**start of header 
 @c makeinfo ignores cmds prev to setfilename, so its arg cannot make use
@@ -59,7 +60,8 @@ This is Edition @value{EDITION}, @value{DATE},
 of @cite{Debugging with @value{GDBN}: the GNU Source-Level Debugger}
 for GDB Version @value{GDBVN}.
 
-Copyright (C) 1988, '89, '90, '91, '92, '93 Free Software Foundation, Inc.
+Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995
+Free Software Foundation, Inc.
 
 Permission is granted to make and distribute verbatim copies of
 this manual provided the copyright notice and this permission notice
@@ -102,8 +104,8 @@ into another language, under the above conditions for modified versions.
 @end tex
 
 @vskip 0pt plus 1filll
-Copyright @copyright{} 1988, '89, '90, '91, '92, '93 Free Software
-Foundation, Inc. 
+Copyright @copyright{} 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995
+Free Software Foundation, Inc. 
 @sp 2
 Published by the Free Software Foundation @*
 675 Massachusetts Avenue, @*
@@ -274,7 +276,8 @@ omitted from this list, we would like to add your names!
 
 So that they may not regard their long labor as thankless, we
 particularly thank those who shepherded GDB through major releases:
-Fred Fish (releases 4.12, 4.11, 4.10, and 4.9),
+Stan Shebs (release 4.14),
+Fred Fish (releases 4.13, 4.12, 4.11, 4.10, and 4.9),
 Stu Grossman and John Gilmore (releases 4.8, 4.7, 4.6, 4.5, and 4.4),
 John Gilmore (releases 4.3, 4.2, 4.1, 4.0, and 3.9);
 Jim Kingdon (releases 3.5, 3.4, and 3.3);
@@ -499,7 +502,7 @@ GDB is free software and you are welcome to distribute copies
  the conditions.
 There is absolutely no warranty for GDB; type "show warranty" 
  for details.
-GDB @value{GDBVN}, Copyright 1993 Free Software Foundation, Inc...
+GDB @value{GDBVN}, Copyright 1995 Free Software Foundation, Inc...
 (@value{GDBP})
 @end smallexample
 
@@ -2329,16 +2332,9 @@ Watchpoints currently execute two orders of magnitude more slowly than
 other breakpoints, but this can be well worth it to catch errors where
 you have no clue what part of your program is the culprit.
 
-@ignore
-@c this "future releases" promise has been in too long, is getting
-@c embarrassing.  But...
-@c FIXME: in future updates, check whether hardware watchpoints in on any
-@c platforms yet.  As of 26jan94, they're very close on HPPA running
-@c Berkeley and on Irix 4.
 Some processors provide special hardware to support watchpoint
-evaluation; future releases of @value{GDBN} will use such hardware if it
-is available.
-@end ignore
+evaluation; @value{GDBN} will use such hardware if it is available,
+and if the support code has been added for that configuration.
 
 @table @code
 @kindex watch
@@ -4991,8 +4987,7 @@ processors.
 @section Floating point hardware
 @cindex floating point
 
-@c FIXME! Really host, not target?
-Depending on the host machine architecture, @value{GDBN} may be able to give
+Depending on the configuration, @value{GDBN} may be able to give
 you more information about the status of the floating point hardware.
 
 @table @code
@@ -7087,9 +7082,9 @@ Print the names of the shared libraries which are currently loaded.
 @itemx share @var{regex}
 @kindex sharedlibrary
 @kindex share
-This is an obsolescent command; you can use it to explicitly load shared
-object library symbols for files matching a Unix regular expression, but
-as with files loaded automatically, it only loads shared libraries
+Load shared object library symbols for files matching a
+Unix regular expression.
+As with files loaded automatically, it only loads shared libraries
 required by your program for a core file or after typing @code{run}.  If
 @var{regex} is omitted all shared libraries required by your program are
 loaded.
