@@ -244,6 +244,44 @@ read_memory_integer (memaddr, len)
   error ("Cannot handle integers of %d bytes.", len);
   return -1;	/* for lint */
 }
+
+
+unsigned long
+read_memory_unsigned_integer (memaddr, len)
+     CORE_ADDR memaddr;
+     int len;
+{
+  unsigned char cbuf;
+  unsigned short sbuf;
+  unsigned int ibuf;
+  unsigned long lbuf;
+
+  if (len == sizeof (char))
+    {
+      read_memory (memaddr, &cbuf, len);
+      return cbuf;
+    }
+  if (len == sizeof (short))
+    {
+      read_memory (memaddr, (char *)&sbuf, len);
+      SWAP_TARGET_AND_HOST (&sbuf, sizeof (short));
+      return sbuf;
+    }
+  if (len == sizeof (int))
+    {
+      read_memory (memaddr, (char *)&ibuf, len);
+      SWAP_TARGET_AND_HOST (&ibuf, sizeof (int));
+      return ibuf;
+    }
+  if (len == sizeof (lbuf))
+    {
+      read_memory (memaddr, (char *)&lbuf, len);
+      SWAP_TARGET_AND_HOST (&lbuf, sizeof (lbuf));
+      return lbuf;
+    }
+  error ("Cannot handle unsigned integers of %d bytes.", len);
+  return -1;	/* for lint */
+}
 
 void
 _initialize_core()
