@@ -1,3 +1,9 @@
+2002-03-02  Tom Rix  <trix@redhat.com>
+
+	* coff64-rs6000.c (xcoff64_howto_table): Replace howto types with 
+	symbolic equiv. 
+	* coff-rs6000.c (xcoff_howto_table): Same.
+
 2002-03-01  David Mosberger  <davidm@hpl.hp.com>
 
 	* elflink.h (size_dynamic_sections): If section named
