@@ -313,10 +313,10 @@ obj_elf_section (xxx)
       input_line_pointer = p;
     }
   if (!strcmp (string, ".rodata"))
-    default_flags = SEC_ALLOC | SEC_READONLY | SEC_RELOC;
+    default_flags = SEC_ALLOC | SEC_READONLY | SEC_RELOC | SEC_LOAD;
   else if (!strcmp (string, ".init")
 	   || !strcmp (string, ".fini"))
-    default_flags = SEC_ALLOC | SEC_READONLY | SEC_RELOC | SEC_CODE;
+    default_flags = SEC_ALLOC | SEC_READONLY | SEC_RELOC | SEC_CODE | SEC_LOAD;
 
   SKIP_WHITESPACE ();
   if (*input_line_pointer != ',')

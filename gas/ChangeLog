@@ -1,3 +1,8 @@
+Wed Sep  8 15:09:17 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* config/obj-elf.c (obj_elf_section): Set SEC_LOAD when using
+	default flag values.
+
 Tue Sep  7 10:22:52 1993  Stan Shebs  (shebs@rtl.cygnus.com)
 
 	* read.c: (change_to_section): Don't include body if not MANY_SECTIONS.
