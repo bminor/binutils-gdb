@@ -163,12 +163,6 @@ tag_find_or_make (name)
 
 static void SA_SET_SYM_TAGNDX PARAMS ((symbolS *, symbolS *));
 
-struct line_no {
-  struct line_no *next;
-  fragS *frag;
-  alent l;
-};
-
 #define GET_FILENAME_STRING(X) \
 ((char*)(&((X)->sy_symbol.ost_auxent->x_file.x_n.x_offset))[1])
 
@@ -284,8 +278,7 @@ c_dot_file_symbol (filename)
 {
   symbolS *symbolP;
 
-  symbolP = symbol_new (filename, &bfd_abs_section, 0,
-			&zero_address_frag);
+  symbolP = symbol_new (filename, bfd_abs_section_ptr, 0, &zero_address_frag);
 
   S_SET_STORAGE_CLASS (symbolP, C_FILE);
   S_SET_NUMBER_AUXILIARY (symbolP, 1);
@@ -357,6 +350,12 @@ c_section_symbol (name, value, length, nreloc, nlnno)
 
 /* Line number handling */
 
+struct line_no {
+  struct line_no *next;
+  fragS *frag;
+  alent l;
+};
+
 int coff_line_base;
 
 /* Symbol of last function, which we should hang line#s off of.  */
@@ -396,6 +395,8 @@ obj_symbol_new_hook (symbolP)
 
 static symbolS *current_lineno_sym;
 static struct line_no *line_nos;
+/* @@ Blindly assume all .ln directives will be in the .text section...  */
+static int n_line_nos;
 
 static void
 add_lineno (frag, offset, num)
@@ -414,6 +415,7 @@ add_lineno (frag, offset, num)
   new_line->l.line_number = num;
   new_line->l.u.offset = offset;
   line_nos = new_line;
+  n_line_nos++;
 }
 
 void
@@ -422,8 +424,8 @@ coff_add_linesym (sym)
 {
   if (line_nos)
     {
-      add_lineno (0, 0, 0);
       coffsymbol (current_lineno_sym->bsym)->lineno = (alent *) line_nos;
+      n_line_nos++;
       line_nos = 0;
     }
   current_lineno_sym = sym;
@@ -745,7 +747,7 @@ obj_coff_line (ignore)
     }
 
   this_base = get_absolute_expression ();
-  if (this_base > coff_line_base)
+  if (!strcmp (".bf", S_GET_NAME (def_symbol_in_progress)))
     coff_line_base = this_base;
 
   S_SET_NUMBER_AUXILIARY (def_symbol_in_progress, 1);
@@ -1033,6 +1035,44 @@ coff_frob_symbol (symp, punt)
     }
 }
 
+void
+coff_adjust_section_syms (abfd, sec, x)
+     bfd *abfd;
+     asection *sec;
+     PTR x;
+{
+  symbolS *secsym;
+  segment_info_type *seginfo = seg_info (sec);
+  int nlnno, nrelocs = 0;
+
+  if (!strcmp (sec->name, ".text"))
+    nlnno = n_line_nos;
+  else
+    nlnno = 0;
+  {
+    /* @@ Hope that none of the fixups expand to more than one reloc
+       entry...  */
+    fixS *fixp = seginfo->fix_root;
+    while (fixp)
+      {
+	fixp = fixp->fx_next;
+	nrelocs++;
+      }
+  }
+  if (bfd_get_section_size_before_reloc (sec) == 0
+      && nrelocs == 0 && nlnno == 0)
+    return;
+  secsym = section_symbol (sec);
+  SA_SET_SCN_NRELOC (secsym, nrelocs);
+  SA_SET_SCN_NLINNO (secsym, nlnno);
+}
+
+void
+coff_frob_file ()
+{
+  bfd_map_over_sections (stdoutput, coff_adjust_section_syms, (char*) 0);
+}
+
 /*
  * implement the .section pseudo op:
  *	.section name {, "flags"}
@@ -1148,10 +1188,25 @@ coff_frob_section (sec)
      rounded up to multiples of the corresponding section alignments.
      Seems kinda silly to me, but that's the way it is.  */
   size = bfd_get_section_size_before_reloc (sec);
-  assert (sec->alignment_power >= stdoutput->xvec->align_power_min);
   mask = ((bfd_vma) 1 << (bfd_vma) sec->alignment_power) - 1;
   if (size & mask)
-    bfd_set_section_size (stdoutput, sec, (size + mask) & ~mask);
+    {
+      size = (size + mask) & ~mask;
+      bfd_set_section_size (stdoutput, sec, size);
+    }
+
+  /* If the section size is non-zero, the section symbol needs an aux
+     entry associated with it, indicating the size.  We don't know
+     all the values yet; coff_frob_symbol will fill them in later.  */
+  if (size)
+    {
+      symbolS *secsym = section_symbol (sec);
+
+      S_SET_STORAGE_CLASS (secsym, C_STAT);
+      S_SET_NUMBER_AUXILIARY (secsym, 1);
+      SF_SET_STATICS (secsym);
+      SA_SET_SCN_SCNLEN (secsym, size);
+    }
 
   /* @@ these should be in a "stabs.h" file, or maybe as.h */
 #ifndef STAB_SECTION_NAME
@@ -1522,7 +1577,7 @@ do_relocs_for (abfd, h, file_cursor)
 		      intr.r_vaddr =
 			base + fix_ptr->fx_frag->fr_address + fix_ptr->fx_where;
 
-#if defined(TC_M88K) || TC_KEEP_FX_OFFSET
+#ifdef TC_KEEP_FX_OFFSET
 		      intr.r_offset = fix_ptr->fx_offset;
 #else
 		      intr.r_offset = 0;
@@ -1846,9 +1901,8 @@ obj_coff_ln (appline)
       return;
     }				/* wrong context */
 
-  c_line_new (0,
-	      obstack_next_free (&frags) - frag_now->fr_literal,
-	      l = get_absolute_expression (),
+  l = get_absolute_expression ();
+  c_line_new (0, obstack_next_free (&frags) - frag_now->fr_literal, l,
 	      frag_now);
 #ifndef NO_LISTING
   {
@@ -2153,6 +2207,7 @@ obj_coff_line (ignore)
      int ignore;
 {
   int this_base;
+  const char *name;
 
   if (def_symbol_in_progress == NULL)
     {
@@ -2160,21 +2215,32 @@ obj_coff_line (ignore)
       return;
     }
 
+  name = S_GET_NAME (def_symbol_in_progress);
   this_base = get_absolute_expression ();
-  if (this_base > line_base)
+
+  /* Only .bf symbols indicate the use of a new base line number; the
+     line numbers associated with .ef, .bb, .eb are relative to the
+     start of the containing function.  */
+  if (!strcmp (".bf", name))
     {
-      line_base = this_base;
-    }
+#if 0 /* XXX Can we ever have line numbers going backwards?  */
+      if (this_base > line_base)
+#endif
+	{
+	  line_base = this_base;
+	}
 
 #ifndef NO_LISTING
-  {
-    extern int listing;
-    if (listing && 0)
       {
-	listing_source_line ((unsigned int) line_base);
+	extern int listing;
+	if (listing && 0)
+	  {
+	    listing_source_line ((unsigned int) line_base);
+	  }
       }
-  }
 #endif
+    }
+
   S_SET_NUMBER_AUXILIARY (def_symbol_in_progress, 1);
   SA_SET_SYM_LNNO (def_symbol_in_progress, this_base);
 
@@ -3253,11 +3319,9 @@ w_symbols (abfd, where, symbol_rootP)
       symbolP = segment_info[i].dot;
       if (symbolP)
 	{
-
 	  SA_SET_SCN_SCNLEN (symbolP, segment_info[i].scnhdr.s_size);
 	  SA_SET_SCN_NRELOC (symbolP, segment_info[i].scnhdr.s_nreloc);
 	  SA_SET_SCN_NLINNO (symbolP, segment_info[i].scnhdr.s_nlnno);
-
 	}
     }
 
