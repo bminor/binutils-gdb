@@ -1,3 +1,7 @@
+2004-03-15  Aldy Hernandez  <aldyh@redhat.com>
+ 
+        * ppc-opc.c (powerpc_opcodes): Add BOOKE versions of mfsprg.
+
 2004-03-16  Alan Modra  <amodra@bigpond.net.au>
 
 	* ppc-dis.c (print_insn_powerpc): Don't print tabs.  Handle
