@@ -2,6 +2,7 @@ Fri Jul 24 13:32:46 1998  Mark Alexander  <marka@cygnus.com>
 
 	* config/i386/tm-i386.h (STORE_STRUCT_RETURN): Make it
 	work on hosts of any endianness.
+	* config/i386/tm-i386v.h: Ditto.
 
 Fri Jul 24 07:41:12 1998  Mark Alexander  <marka@cygnus.com>
 
