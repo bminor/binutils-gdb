@@ -1,9 +1,15 @@
+2002-06-25  Jason Eckhardt  <jle@rice.edu>
+
+	* dwarf2.c (decode_line_info): Check unit->addr_size
+	to read in the proper number of prologue bytes.
+
 2002-06-25  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* config.bfd (powerpc-*-aix5*): Only create a selvecs for
 	aix5coff64_vec if 64-bit bfd support has been enabled.
         (powerpc64-*-aix5*): Only define if 64-bit bfd support has
-	been enabled.
+	been enabled.	
+
 	* targets.c (_bfd_target_vector[]): Only include
 	aix5coff64_vec if 64-bit bfd support has been enabled.
 
