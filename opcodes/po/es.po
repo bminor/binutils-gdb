@@ -1,12 +1,12 @@
-# Mensajes en español para opcodes-2.12.1
+# Mensajes en español para opcodes-2.12.91
 # Copyright (C) 2002 Free Software Foundation, Inc.
 # Cristian Othón Martínez Vera <cfuga@itam.mx>, 2002.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: opcodes 2.12.1\n"
-"POT-Creation-Date: 2002-02-08 03:24-0200\n"
-"PO-Revision-Date: 2002-07-22 20:56-0500\n"
+"Project-Id-Version: opcodes 2.12.91\n"
+"POT-Creation-Date: 2002-07-23 15:55-0400\n"
+"PO-Revision-Date: 2002-07-24 02:03-0500\n"
 "Last-Translator: Cristian Othón Martínez Vera <cfuga@itam.mx>\n"
 "Language-Team: Spanish <es@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -25,16 +25,16 @@ msgstr "pista de salto sin alinear"
 msgid "Illegal limm reference in last instruction!\n"
 msgstr "¡Referencia limm ilegal en la última instrucción!\n"
 
-#: arm-dis.c:502
+#: arm-dis.c:507
 msgid "<illegal precision>"
 msgstr "<precisión ilegal>"
 
-#: arm-dis.c:1012
+#: arm-dis.c:1010
 #, c-format
 msgid "Unrecognised register name set: %s\n"
 msgstr "Conjunto de nombres de registro no reconocido: %s\n"
 
-#: arm-dis.c:1019
+#: arm-dis.c:1017
 #, c-format
 msgid "Unrecognised disassembler option: %s\n"
 msgstr "Opción de desensamblador no reconocida: %s\n"
@@ -62,7 +62,8 @@ msgstr "Error interno del desensamblador"
 msgid "unknown constraint `%c'"
 msgstr "restricción `%c' desconocida"
 
-#: cgen-asm.c:346 fr30-ibld.c:195 m32r-ibld.c:195 openrisc-ibld.c:195 xstormy16-ibld.c:195
+#: cgen-asm.c:346 fr30-ibld.c:195 frv-ibld.c:195 m32r-ibld.c:195
+#: openrisc-ibld.c:195 xstormy16-ibld.c:195
 #, c-format
 msgid "operand out of range (%ld not between %ld and %ld)"
 msgstr "operando fuera de rango (%ld no está entre %ld y %ld)"
@@ -88,104 +89,126 @@ msgstr "Error desconocido %d\n"
 msgid "Address 0x%x is out of bounds.\n"
 msgstr "La dirección 0x%x está fuera de los límites.\n"
 
-#: fr30-asm.c:323 m32r-asm.c:325 openrisc-asm.c:244 xstormy16-asm.c:231
+#: fr30-asm.c:323 frv-asm.c:595 m32r-asm.c:325 openrisc-asm.c:244
+#: xstormy16-asm.c:231
 #, c-format
 msgid "Unrecognized field %d while parsing.\n"
 msgstr "No se reconoció el campo %d durante la decodificación.\n"
 
-#: fr30-asm.c:373 m32r-asm.c:375 openrisc-asm.c:294 xstormy16-asm.c:281
+#: fr30-asm.c:373 frv-asm.c:645 m32r-asm.c:375 openrisc-asm.c:294
+#: xstormy16-asm.c:281
 msgid "missing mnemonic in syntax string"
 msgstr "falta el mnemónico en la cadena sintáctica"
 
 #. We couldn't parse it.
-#: fr30-asm.c:509 fr30-asm.c:513 fr30-asm.c:600 fr30-asm.c:702 m32r-asm.c:511 m32r-asm.c:515 m32r-asm.c:602 m32r-asm.c:704 openrisc-asm.c:430 openrisc-asm.c:434 openrisc-asm.c:521 openrisc-asm.c:623 xstormy16-asm.c:417 xstormy16-asm.c:421 xstormy16-asm.c:508 xstormy16-asm.c:610
+#: fr30-asm.c:509 fr30-asm.c:513 fr30-asm.c:600 fr30-asm.c:702 frv-asm.c:781
+#: frv-asm.c:785 frv-asm.c:872 frv-asm.c:974 m32r-asm.c:511 m32r-asm.c:515
+#: m32r-asm.c:602 m32r-asm.c:704 openrisc-asm.c:430 openrisc-asm.c:434
+#: openrisc-asm.c:521 openrisc-asm.c:623 xstormy16-asm.c:417
+#: xstormy16-asm.c:421 xstormy16-asm.c:508 xstormy16-asm.c:610
 msgid "unrecognized instruction"
 msgstr "instrucción no reconocida"
 
-#: fr30-asm.c:556 m32r-asm.c:558 openrisc-asm.c:477 xstormy16-asm.c:464
+#: fr30-asm.c:556 frv-asm.c:828 m32r-asm.c:558 openrisc-asm.c:477
+#: xstormy16-asm.c:464
 #, c-format
 msgid "syntax error (expected char `%c', found `%c')"
 msgstr "error sintáctico (se esperaba el carácter `%c', se encontró `%c')"
 
-#: fr30-asm.c:566 m32r-asm.c:568 openrisc-asm.c:487 xstormy16-asm.c:474
+#: fr30-asm.c:566 frv-asm.c:838 m32r-asm.c:568 openrisc-asm.c:487
+#: xstormy16-asm.c:474
 #, c-format
 msgid "syntax error (expected char `%c', found end of instruction)"
 msgstr "error sintáctico (se esperaba el carácter `%c', se encontró el final de la instrucción)"
 
-#: fr30-asm.c:594 m32r-asm.c:596 openrisc-asm.c:515 xstormy16-asm.c:502
+#: fr30-asm.c:594 frv-asm.c:866 m32r-asm.c:596 openrisc-asm.c:515
+#: xstormy16-asm.c:502
 msgid "junk at end of line"
 msgstr "basura al final de la línea"
 
-#: fr30-asm.c:701 m32r-asm.c:703 openrisc-asm.c:622 xstormy16-asm.c:609
+#: fr30-asm.c:701 frv-asm.c:973 m32r-asm.c:703 openrisc-asm.c:622
+#: xstormy16-asm.c:609
 msgid "unrecognized form of instruction"
 msgstr "forma de instrucción no reconocida"
 
-#: fr30-asm.c:713 m32r-asm.c:715 openrisc-asm.c:634 xstormy16-asm.c:621
+#: fr30-asm.c:713 frv-asm.c:985 m32r-asm.c:715 openrisc-asm.c:634
+#: xstormy16-asm.c:621
 #, c-format
 msgid "bad instruction `%.50s...'"
 msgstr "instrucción errónea `%.50s...'"
 
-#: fr30-asm.c:716 m32r-asm.c:718 openrisc-asm.c:637 xstormy16-asm.c:624
+#: fr30-asm.c:716 frv-asm.c:988 m32r-asm.c:718 openrisc-asm.c:637
+#: xstormy16-asm.c:624
 #, c-format
 msgid "bad instruction `%.50s'"
 msgstr "instrucción errónea `%.50s'"
 
 #. Default text to print if an instruction isn't recognized.
-#: fr30-dis.c:39 m32r-dis.c:39 mmix-dis.c:282 openrisc-dis.c:39 xstormy16-dis.c:39
+#: fr30-dis.c:39 frv-dis.c:39 m32r-dis.c:39 mmix-dis.c:282 openrisc-dis.c:39
+#: xstormy16-dis.c:39
 msgid "*unknown*"
 msgstr "*desconocida*"
 
-#: fr30-dis.c:318 m32r-dis.c:249 openrisc-dis.c:136 xstormy16-dis.c:169
+#: fr30-dis.c:318 frv-dis.c:360 m32r-dis.c:249 openrisc-dis.c:136
+#: xstormy16-dis.c:169
 #, c-format
 msgid "Unrecognized field %d while printing insn.\n"
 msgstr "No se reconoció el campo %d al mostrar insn.\n"
 
-#: fr30-ibld.c:166 m32r-ibld.c:166 openrisc-ibld.c:166 xstormy16-ibld.c:166
+#: fr30-ibld.c:166 frv-ibld.c:166 m32r-ibld.c:166 openrisc-ibld.c:166
+#: xstormy16-ibld.c:166
 #, c-format
 msgid "operand out of range (%ld not between %ld and %lu)"
 msgstr "operando fuera de rango (%ld no está entre %ld y %lu)"
 
-#: fr30-ibld.c:179 m32r-ibld.c:179 openrisc-ibld.c:179 xstormy16-ibld.c:179
+#: fr30-ibld.c:179 frv-ibld.c:179 m32r-ibld.c:179 openrisc-ibld.c:179
+#: xstormy16-ibld.c:179
 #, c-format
 msgid "operand out of range (%lu not between 0 and %lu)"
 msgstr "operando fuera de rango (%lu no está entre 0 y %lu)"
 
-#: fr30-ibld.c:730 m32r-ibld.c:659 openrisc-ibld.c:633 xstormy16-ibld.c:678
+#: fr30-ibld.c:730 frv-ibld.c:820 m32r-ibld.c:659 openrisc-ibld.c:633
+#: xstormy16-ibld.c:678
 #, c-format
 msgid "Unrecognized field %d while building insn.\n"
 msgstr "No se reconoció el campo %d al construir insn.\n"
 
-#: fr30-ibld.c:937 m32r-ibld.c:792 openrisc-ibld.c:735 xstormy16-ibld.c:826
+#: fr30-ibld.c:937 frv-ibld.c:1103 m32r-ibld.c:792 openrisc-ibld.c:735
+#: xstormy16-ibld.c:826
 #, c-format
 msgid "Unrecognized field %d while decoding insn.\n"
 msgstr "No se reconoció el campo %d al decodificar insn.\n"
 
-#: fr30-ibld.c:1086 m32r-ibld.c:902 openrisc-ibld.c:815 xstormy16-ibld.c:939
+#: fr30-ibld.c:1086 frv-ibld.c:1348 m32r-ibld.c:902 openrisc-ibld.c:815
+#: xstormy16-ibld.c:939
 #, c-format
 msgid "Unrecognized field %d while getting int operand.\n"
 msgstr "No se reconoció el campo %d al obtener el operando int.\n"
 
-#: fr30-ibld.c:1215 m32r-ibld.c:992 openrisc-ibld.c:875 xstormy16-ibld.c:1032
+#: fr30-ibld.c:1215 frv-ibld.c:1573 m32r-ibld.c:992 openrisc-ibld.c:875
+#: xstormy16-ibld.c:1032
 #, c-format
 msgid "Unrecognized field %d while getting vma operand.\n"
 msgstr "No se reconoció el campo %d al obtener el operando vma.\n"
 
-#: fr30-ibld.c:1349 m32r-ibld.c:1090 openrisc-ibld.c:944 xstormy16-ibld.c:1134
+#: fr30-ibld.c:1349 frv-ibld.c:1807 m32r-ibld.c:1090 openrisc-ibld.c:944
+#: xstormy16-ibld.c:1134
 #, c-format
 msgid "Unrecognized field %d while setting int operand.\n"
 msgstr "No se reconoció el campo %d al establecer el operando int.\n"
 
-#: fr30-ibld.c:1471 m32r-ibld.c:1176 openrisc-ibld.c:1001 xstormy16-ibld.c:1224
+#: fr30-ibld.c:1471 frv-ibld.c:2029 m32r-ibld.c:1176 openrisc-ibld.c:1001
+#: xstormy16-ibld.c:1224
 #, c-format
 msgid "Unrecognized field %d while setting vma operand.\n"
 msgstr "No se reconoció el campo %d al establecer el operando vma.\n"
 
-#: h8300-dis.c:384
+#: h8300-dis.c:385
 #, c-format
 msgid "Hmmmm %x"
 msgstr "Hmmmm %x"
 
-#: h8300-dis.c:395
+#: h8300-dis.c:396
 #, c-format
 msgid "Don't understand %x \n"
 msgstr "No se entiende %x \n"
@@ -235,12 +258,12 @@ msgstr "<código de función %d>"
 msgid "# <dis error: %08x>"
 msgstr "# <error de desensamblador: %08x>"
 
-#: mips-dis.c:290
+#: mips-dis.c:337
 #, c-format
 msgid "# internal error, undefined modifier(%c)"
 msgstr "# error interno, modificador(%c) sin definir"
 
-#: mips-dis.c:1154
+#: mips-dis.c:1209
 #, c-format
 msgid "# internal disassembler error, unrecognised modifier (%c)"
 msgstr "# error interno del desensamblador, modificador (%c) no reconocido"
@@ -274,43 +297,43 @@ msgstr "*tipo de operandos operandos desconocido: %d*"
 msgid "$<undefined>"
 msgstr "$<sin definir>"
 
-#: ppc-opc.c:765 ppc-opc.c:798
+#: ppc-opc.c:777 ppc-opc.c:810
 msgid "invalid conditional option"
 msgstr "opción condicional inválida"
 
-#: ppc-opc.c:800
+#: ppc-opc.c:812
 msgid "attempt to set y bit when using + or - modifier"
 msgstr "intento de establecer el bit y cuando se usaba el modificador + ó -"
 
-#: ppc-opc.c:832 ppc-opc.c:884
+#: ppc-opc.c:844 ppc-opc.c:896
 msgid "offset not a multiple of 4"
 msgstr "el desplazamiento no es un múltiplo de 4"
 
-#: ppc-opc.c:857
+#: ppc-opc.c:869
 msgid "offset not between -2048 and 2047"
 msgstr "el desplazamiento no está entre -2048 y 2047"
 
-#: ppc-opc.c:882
+#: ppc-opc.c:894
 msgid "offset not between -8192 and 8191"
 msgstr "el desplazamiento no está entre -8192 y 8191"
 
-#: ppc-opc.c:910
+#: ppc-opc.c:922
 msgid "ignoring least significant bits in branch offset"
 msgstr "ignorando los bits menos significativos en el desplazamiento de la rama"
 
-#: ppc-opc.c:944 ppc-opc.c:981
+#: ppc-opc.c:956 ppc-opc.c:993
 msgid "illegal bitmask"
 msgstr "máscara de bits ilegal"
 
-#: ppc-opc.c:1054
+#: ppc-opc.c:1066
 msgid "value out of range"
 msgstr "valor fuera de rango"
 
-#: ppc-opc.c:1130
+#: ppc-opc.c:1142
 msgid "index register in load range"
 msgstr "registro índice en el rango de carga"
 
-#: ppc-opc.c:1146
+#: ppc-opc.c:1158
 msgid "invalid register operand when updating"
 msgstr "operando de registro inválido mientras se actualizaba"
 
