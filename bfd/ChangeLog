@@ -1,5 +1,18 @@
 Wed Oct  1 14:03:44 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* Makefile.am ($(BFD_H)): Change stmp-bfd.h to stmp-bfd-h.
+ 	(stmp-bfd-h): Rename from stmp-bfd.h.
+ 	(BFD_H_FILES, LIBBFD_H_FILES, LIBCOFF_H_FILES): New variables.
+	($(srcdir)/bfd-in2.h): Just depend upon stmp-bin2-h.
+	(stmp-bin2-h): New target.
+	($(srcdir)/libbfd.h): Just depend upon stmp-lbfd-h.
+	(stmp-lbfd-h): New target.
+	($(srcdir)/libcoff.h): Just depend upon stmp-lcoff-h.
+	(stmp-lcoff-h): New target.
+	(CLEANFILES): Change stmp-bfd.h to stmp-bfd-h.  Add stmp-bin2.h,
+	stmp-lbfd-h, and stmp-lcoff-h.
+	* Makefile.in: Rebuild.
+
 	* configure.in: Use a diversion to set enable_shared before the
 	arguments are parsed.
 	* configure: Rebuild.
