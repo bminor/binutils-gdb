@@ -94,62 +94,115 @@ queue_fixup (opindex, opinfo, expP)
   ++ num_fixups;
 }
 
-/* The following three functions allow a backup of the fixup chain to be made,
-   and to have this backup be swapped with the current chain.  This allows
-   certain ports, eg the m32r, to swap two instructions and swap their fixups
-   at the same time.  */
-/* ??? I think with cgen_asm_finish_insn (or something else) there is no
-   more need for this.  */
+/* The following functions allow fixup chains to be stored, retrieved,
+   and swapped.  They are a generalization of a pre-existing scheme
+   for storing, restoring and swapping fixup chains that was used by
+   the m32r port.  The functionality is essentially the same, only
+   instead of only being able to store a single fixup chain, an entire
+   array of fixup chains can be stored.  It is the user's responsibility
+   to keep track of how many fixup chains have been stored and which
+   elements of the array they are in.
 
-static struct fixup saved_fixups[GAS_CGEN_MAX_FIXUPS];
-static int saved_num_fixups;
+   The algorithms used are the same as in the old scheme.  Other than the 
+   "array-ness" of the whole thing, the functionality is identical to the 
+   old scheme.
 
-void
-gas_cgen_save_fixups ()
+   gas_cgen_initialize_saved_fixups_array():
+      Sets num_fixups_in_chain to 0 for each element. Call this from
+      md_begin() if you plan to use these functions and you want the
+      fixup count in each element to be set to 0 intially.  This is
+      not necessary, but it's included just in case.  It performs
+      the same function for each element in the array of fixup chains
+      that gas_init_parse() performs for the current fixups.
+
+   gas_cgen_save_fixups (element):
+      element - element number of the array you wish to store the fixups
+                to.  No mechanism is built in for tracking what element
+                was last stored to.
+
+   gas_cgen_restore_fixups (element):
+      element - element number of the array you wish to restore the fixups
+                from.
+
+   gas_cgen_swap_fixups(int element):
+       element - swap the current fixups with those in this element number.
+*/
+
+struct saved_fixups {
+     struct fixup fixup_chain[GAS_CGEN_MAX_FIXUPS];
+     int num_fixups_in_chain;
+};
+
+static struct saved_fixups stored_fixups[MAX_SAVED_FIXUP_CHAINS];
+
+void 
+gas_cgen_initialize_saved_fixups_array ()
 {
-  saved_num_fixups = num_fixups;
-
-  memcpy (saved_fixups, fixups, sizeof (fixups[0]) * num_fixups);
-
-  num_fixups = 0;
+   int i = 0;
+   while (i < MAX_SAVED_FIXUP_CHAINS)
+      stored_fixups[i++].num_fixups_in_chain = 0;
 }
 
-void
-gas_cgen_restore_fixups ()
+void 
+gas_cgen_save_fixups (int i)
 {
-  num_fixups = saved_num_fixups;
-
-  memcpy (fixups, saved_fixups, sizeof (fixups[0]) * num_fixups);
-
-  saved_num_fixups = 0;
+      if (i < 0 || i >= MAX_SAVED_FIXUP_CHAINS)
+      {
+          as_fatal("Index into stored_fixups[] out of bounds.");
+          return;
+      }
+      stored_fixups[i].num_fixups_in_chain = num_fixups;
+      memcpy(stored_fixups[i].fixup_chain, fixups,
+                    sizeof (fixups[0])*num_fixups);
+      num_fixups = 0;
 }
 
-void
-gas_cgen_swap_fixups ()
+void 
+gas_cgen_restore_fixups (int i)
 {
-  int tmp;
-  struct fixup tmp_fixup;
+      if (i < 0 || i >= MAX_SAVED_FIXUP_CHAINS)
+      {
+          as_fatal("Index into stored_fixups[] out of bounds.");
+          return;
+      }
+      num_fixups = stored_fixups[i].num_fixups_in_chain;
+      memcpy(fixups,stored_fixups[i].fixup_chain,
+                    (sizeof (stored_fixups[i].fixup_chain[0]))*num_fixups);
+      stored_fixups[i].num_fixups_in_chain = 0;
+}
 
-  if (num_fixups == 0)
-    {
-      gas_cgen_restore_fixups ();
-    }
-  else if (saved_num_fixups == 0)
-    {
-      gas_cgen_save_fixups ();
-    }
-  else
-    {
-      tmp = saved_num_fixups;
-      saved_num_fixups = num_fixups;
-      num_fixups = tmp;
+void 
+gas_cgen_swap_fixups (int i)
+{
+     int tmp;
+     struct fixup tmp_fixup;
 
-      for (tmp = GAS_CGEN_MAX_FIXUPS; tmp--;)
-	{
-	  tmp_fixup          = saved_fixups [tmp];
-	  saved_fixups [tmp] = fixups [tmp];
-	  fixups [tmp]       = tmp_fixup;
-	}
+     if (i < 0 || i >= MAX_SAVED_FIXUP_CHAINS)
+     {
+         as_fatal("Index into stored_fixups[] out of bounds.");
+         return;
+     }
+
+     if (num_fixups == 0)
+     {
+       gas_cgen_restore_fixups (i);
+     }
+     else if (stored_fixups[i].num_fixups_in_chain == 0)
+     {
+       gas_cgen_save_fixups (i);
+     }
+     else
+     {
+       tmp = stored_fixups[i].num_fixups_in_chain;
+       stored_fixups[i].num_fixups_in_chain = num_fixups;
+       num_fixups = tmp;
+
+       for (tmp = GAS_CGEN_MAX_FIXUPS; tmp--;)
+       {
+         tmp_fixup          = stored_fixups[i].fixup_chain [tmp];
+         stored_fixups[i].fixup_chain[tmp] = fixups [tmp];
+         fixups [tmp]       = tmp_fixup;
+       }
     }
 }
 

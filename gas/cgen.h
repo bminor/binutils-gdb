@@ -53,9 +53,12 @@ extern const char * gas_cgen_parse_operand
 /* Call this from md_assemble to initialize the assembler callback.  */
 extern void gas_cgen_init_parse PARAMS ((void));
 
-extern void gas_cgen_save_fixups PARAMS ((void));
-extern void gas_cgen_restore_fixups PARAMS ((void));
-extern void gas_cgen_swap_fixups PARAMS ((void));
+/* Routines and macros for saving fixup chains. */
+extern void gas_cgen_save_fixups PARAMS ((int));
+extern void gas_cgen_restore_fixups PARAMS ((int));
+extern void gas_cgen_swap_fixups PARAMS ((int));
+extern void gas_cgen_initialize_saved_fixups_array PARAMS ((void));
+#define MAX_SAVED_FIXUP_CHAINS 50
 
 /* Add a register to the assembler's hash table.
    This makes lets GAS parse registers for us.

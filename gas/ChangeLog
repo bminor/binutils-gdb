@@ -1,3 +1,18 @@
+2001-07-06  John Healy  <jhealy@redhat.com>
+
+	* cgen.c (gas_cgen_save_fixups): Modified to allow more than one
+	set of fixups to be stored.
+	(gas_cgen_restore_fixups): Modified to allow the fixup chain to be
+	restored to be chosen from any that are saved.
+	(gas_cgen_swap_fixups): Modified to allow the current set of
+	fixups to be swapped with any other set that has been saved.
+	(gas_cgen_initialize_saved_fixups_array): New routine.
+	* cgen.h: Modifed prototypes for gas_cgen_save_fixups,
+	gas_cgen_restore_fixups, and gas_cgen_swap_fixups.  Added definitions
+	or MAX_SAVED_FIXUP_CHAINS.
+	* config/tc-m32r.c (assemble_two_insns): Changed calls to fixup
+	store, swap and restore fuctions to reflect the new interface.
+
 2001-07-06  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* config/tc-m68k.c (md_estimate_size_before_relax): Catch and

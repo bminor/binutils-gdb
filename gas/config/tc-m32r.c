@@ -554,6 +554,8 @@ md_begin ()
   scom_symbol.section         = &scom_section;
 
   allow_m32rx (enable_m32rx);
+
+  gas_cgen_initialize_saved_fixups_array();
 }
 
 #define OPERAND_IS_COND_BIT(operand, indices, index) \
@@ -832,7 +834,7 @@ assemble_two_insns (str, str2, parallel_p)
 
   /* Preserve any fixups that have been generated and reset the list
      to empty.  */
-  gas_cgen_save_fixups ();
+  gas_cgen_save_fixups (0);
 
   /* Get the indices of the operands of the instruction.  */
   /* FIXME: CGEN_FIELDS is already recorded, but relying on that fact
@@ -941,7 +943,7 @@ assemble_two_insns (str, str2, parallel_p)
       || (errmsg = (char *) can_make_parallel (&first, &second)) == NULL)
     {
       /* Get the fixups for the first instruction.  */
-      gas_cgen_swap_fixups ();
+      gas_cgen_swap_fixups (0);
 
       /* Write it out.  */
       expand_debug_syms (first.debug_sym_link, 1);
@@ -953,7 +955,7 @@ assemble_two_insns (str, str2, parallel_p)
 	make_parallel (second.buffer);
 
       /* Get its fixups.  */
-      gas_cgen_restore_fixups ();
+      gas_cgen_restore_fixups (0);
 
       /* Write it out.  */
       expand_debug_syms (second.debug_sym_link, 1);
@@ -972,7 +974,7 @@ assemble_two_insns (str, str2, parallel_p)
       make_parallel (first.buffer);
 
       /* Get the fixups for the first instruction.  */
-      gas_cgen_restore_fixups ();
+      gas_cgen_restore_fixups (0);
 
       /* Write out the first instruction.  */
       expand_debug_syms (first.debug_sym_link, 1);
