@@ -1,3 +1,20 @@
+Fri Oct 23 10:32:36 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* seclet.c (rel): don't load sections without the SEC_LOAD bit.
+
+Thu Oct 15 10:16:35 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* coff-m68k.c (m68k_howto2type, SELECT_RELOC): new function to
+	work out a coff relocation type from a howto's attributes rather
+	than using the input r_type field. This fixes PR1677 and allows 
+	conversion of a.out relocs to coff relocs.
+
+	* coffcode.h (coff_write_relocs): if supplied a relocation
+	relative to an absolute symbol, use the right symbol index.
+
+	* reloc.c (bfd_perform_relocation): do a partial link for coff
+	relocs right.
+
 Fri Oct 23 08:15:56 1992  Ian Lance Taylor  (ian@cygnus.com)
 
 	* changes to support i386-sysv with shared libraries:

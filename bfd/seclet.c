@@ -81,6 +81,7 @@ DEFUN(rel,(abfd, seclet, output_section, data),
 
   if (output_section->flags & SEC_HAS_CONTENTS 
       && !(output_section->flags & SEC_NEVER_LOAD)
+      && (output_section->flags & SEC_LOAD)
       && seclet->size)
   {
     data = (PTR) bfd_get_relocated_section_contents(abfd, seclet, data);

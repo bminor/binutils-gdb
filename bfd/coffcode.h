@@ -1852,13 +1852,26 @@ DEFUN(coff_write_relocs,(abfd),
       else
 #endif
 
-      if (q->sym_ptr_ptr) {
-	n.r_symndx = get_index((*(q->sym_ptr_ptr)));
-	/* Take notice if the symbol reloc points to a symbol we don't have
-	   in our symbol table.  What should we do for this??  */
-	if (n.r_symndx > obj_conv_table_size (abfd))
-	  abort ();
+
+      if (q->sym_ptr_ptr) 
+      {
+	if (q->sym_ptr_ptr == bfd_abs_section.symbol_ptr_ptr) 
+	{
+	  /* This is a relocation relative to the absolute symbol */
+	  n.r_symndx = -1;
+	}
+	else 
+	{
+	  n.r_symndx = get_index((*(q->sym_ptr_ptr)));
+	  /* Take notice if the symbol reloc points to a symbol we don't have
+	     in our symbol table.  What should we do for this??  */
+	  if (n.r_symndx > obj_conv_table_size (abfd))
+	   abort ();
+	}
+
+
       }
+
 #ifdef SELECT_RELOC
       /* Work out reloc type from what is required */
       SELECT_RELOC(n.r_type, q->howto);
