@@ -1,5 +1,8 @@
 Wed Jan 28 14:51:18 1998  Ian Lance Taylor  <ian@cygnus.com>
 
+	* symbols.c (resolve_symbol_value): Don't set the segment if it
+	hasn't changed, and this is OBJ_AOUT without BFD_ASSEMBLER.
+
 	* config/obj-aout.h (S_IS_LOCAL): Correct typo--pass argument to
 	S_GET_SEGMENT.
 
