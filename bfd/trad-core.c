@@ -173,13 +173,13 @@ trad_unix_core_file_p (abfd)
   core_datasec (abfd)->flags = SEC_ALLOC + SEC_LOAD + SEC_HAS_CONTENTS;
   core_regsec (abfd)->flags = SEC_HAS_CONTENTS;
 
-  core_datasec (abfd)->_raw_size =  NBPG * u.u_dsize
+  core_datasec (abfd)->size =  NBPG * u.u_dsize
 #ifdef TRAD_CORE_DSIZE_INCLUDES_TSIZE
     - NBPG * u.u_tsize
 #endif
       ;
-  core_stacksec (abfd)->_raw_size = NBPG * u.u_ssize;
-  core_regsec (abfd)->_raw_size = NBPG * UPAGES; /* Larger than sizeof struct u */
+  core_stacksec (abfd)->size = NBPG * u.u_ssize;
+  core_regsec (abfd)->size = NBPG * UPAGES; /* Larger than sizeof struct u */
 
   /* What a hack... we'd like to steal it from the exec file,
      since the upage does not seem to provide it.  FIXME.  */

@@ -845,11 +845,11 @@ xcoff64_write_object_contents (abfd)
 
       section.s_vaddr = current->vma;
       section.s_paddr = current->lma;
-      section.s_size =  current->_raw_size;
+      section.s_size =  current->size;
 
       /* If this section has no size or is unloadable then the scnptr
 	 will be 0 too.  */
-      if (current->_raw_size == 0
+      if (current->size == 0
 	  || (current->flags & (SEC_LOAD | SEC_HAS_CONTENTS)) == 0)
 	{
 	  section.s_scnptr = 0;
@@ -965,19 +965,19 @@ xcoff64_write_object_contents (abfd)
 
   if (text_sec)
     {
-      internal_a.tsize = bfd_get_section_size (text_sec);
+      internal_a.tsize = text_sec->size;
       internal_a.text_start = internal_a.tsize ? text_sec->vma : 0;
     }
 
   if (data_sec)
     {
-      internal_a.dsize = bfd_get_section_size (data_sec);
+      internal_a.dsize = data_sec->size;
       internal_a.data_start = internal_a.dsize ? data_sec->vma : 0;
     }
 
   if (bss_sec)
     {
-      internal_a.bsize = bfd_get_section_size (bss_sec);
+      internal_a.bsize = bss_sec->size;
       if (internal_a.bsize && bss_sec->vma < internal_a.data_start)
 	internal_a.data_start = bss_sec->vma;
     }
@@ -1127,8 +1127,7 @@ xcoff64_reloc_type_br (input_bfd, input_section, output_bfd, rel, sym, howto,
      cror.  */
   if (NULL != h
       && bfd_link_hash_defined == h->root.type
-      && (rel->r_vaddr - input_section->vma + 8
-	  <= input_section->_cooked_size))
+      && rel->r_vaddr - input_section->vma + 8 <= input_section->size)
     {
       bfd_byte *pnext;
       unsigned long next;
@@ -1301,7 +1300,7 @@ xcoff64_ppc_relocate_section (output_bfd, info, input_bfd,
       address = rel->r_vaddr - input_section->vma;
       location = contents + address;
 
-      if (address > input_section->_raw_size)
+      if (address > input_section->size)
 	abort ();
 
       /* Get the value we are going to relocate.  */

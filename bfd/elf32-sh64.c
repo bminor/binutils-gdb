@@ -605,6 +605,7 @@ sh64_find_section_for_address (bfd *abfd ATTRIBUTE_UNUSED,
 {
   bfd_vma vma;
   bfd_size_type size;
+
   struct sh64_find_section_vma_data *fsec_datap
     = (struct sh64_find_section_vma_data *) data;
 
@@ -620,9 +621,7 @@ sh64_find_section_for_address (bfd *abfd ATTRIBUTE_UNUSED,
   if (fsec_datap->addr < vma)
     return;
 
-  size
-    = section->_cooked_size ? section->_cooked_size : section->_raw_size;
-
+  size = section->size;
   if (fsec_datap->addr >= vma + size)
     return;
 
@@ -653,9 +652,7 @@ sh64_elf_final_write_processing (bfd *abfd,
 	  = sh64_elf_section_data (cranges)->sh64_info->cranges_growth) != 0)
     {
       bfd_vma incoming_cranges_size
-	= ((cranges->_cooked_size != 0
-	    ? cranges->_cooked_size : cranges->_raw_size)
-	   - ld_generated_cranges_size);
+	= cranges->size - ld_generated_cranges_size;
 
       if (! bfd_set_section_contents (abfd, cranges,
 				      cranges->contents
@@ -698,9 +695,7 @@ sh64_elf_final_write_processing (bfd *abfd,
       /* If we have a .cranges section, sort the entries.  */
       if (cranges != NULL)
 	{
-	  bfd_size_type cranges_size
-	    = (cranges->_cooked_size != 0
-	       ? cranges->_cooked_size : cranges->_raw_size);
+	  bfd_size_type cranges_size = cranges->size;
 
 	  /* We know we always have these in memory at this time.  */
 	  BFD_ASSERT (cranges->contents != NULL);

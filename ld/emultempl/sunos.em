@@ -744,7 +744,7 @@ gld${EMULATION_NAME}_before_allocation (void)
 	 dynamic object.  */
       ASSERT (need_entries != 0);
 
-      sneed->_raw_size = need_size;
+      sneed->size = need_size;
       sneed->contents = (bfd_byte *) xmalloc (need_size);
 
       need_contents = sneed->contents;
@@ -764,7 +764,7 @@ gld${EMULATION_NAME}_before_allocation (void)
 	 option.  */
       if (command_line.rpath)
 	{
-	  srules->_raw_size = strlen (command_line.rpath);
+	  srules->size = strlen (command_line.rpath);
 	  srules->contents = (bfd_byte *) command_line.rpath;
 	}
       else
@@ -776,7 +776,7 @@ gld${EMULATION_NAME}_before_allocation (void)
 	  for (search = search_head; search != NULL; search = search->next)
 	    if (search->cmdline)
 	      size += strlen (search->name) + 1;
-	  srules->_raw_size = size;
+	  srules->size = size;
 	  if (size > 0)
 	    {
 	      char *p;

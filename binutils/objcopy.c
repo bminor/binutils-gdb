@@ -2070,8 +2070,6 @@ copy_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
 	free (relpp);
     }
 
-  isection->_cooked_size = isection->_raw_size;
-
   if (bfd_get_section_flags (ibfd, isection) & SEC_HAS_CONTENTS
       && bfd_get_section_flags (obfd, osection) & SEC_HAS_CONTENTS)
     {

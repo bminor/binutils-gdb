@@ -74,19 +74,18 @@ static unsigned int ecoff_armap_hash
   PARAMS ((const char *, unsigned int *, unsigned int, unsigned int));
 
 /* This stuff is somewhat copied from coffcode.h.  */
-
 static asection bfd_debug_section =
 {
-  /* name,   id,  index, next, flags, user_set_vma,                */
-  "*DEBUG*", 0,   0,     NULL, 0,     0,
+  /* name,      id,  index, next, flags, user_set_vma,             */
+     "*DEBUG*", 0,   0,     NULL, 0,     0,
   /* linker_mark, linker_has_input, gc_mark, segment_mark,         */
      0,           0,                0,       0,
   /* sec_info_type, use_rela_p, has_tls_reloc, has_gp_reloc,       */
      0,		    0,		0,	       0,
   /* need_finalize_relax, reloc_done,                              */
      0,			  0,
-  /* vma, lma, _cooked_size, _raw_size,                            */
-     0,   0,   0,            0,
+  /* vma, lma, size, rawsize,                                      */
+     0,   0,   0,    0,
   /* output_offset, output_section, alignment_power,               */
      0,             NULL,           0,
   /* relocation, orelocation, reloc_count, filepos, rel_filepos,   */
@@ -906,7 +905,7 @@ ecoff_set_symbol_info (abfd, ecoff_sym, asym, ext, weak)
 	      return FALSE;
 	    reloc_chain->relent.sym_ptr_ptr =
 	      bfd_get_section (asym)->symbol_ptr_ptr;
-	    reloc_chain->relent.address = section->_raw_size;
+	    reloc_chain->relent.address = section->size;
 	    reloc_chain->relent.addend = asym->value;
 	    reloc_chain->relent.howto =
 	      ecoff_backend (abfd)->constructor_reloc;
@@ -926,7 +925,7 @@ ecoff_set_symbol_info (abfd, ecoff_sym, asym, ext, weak)
 
 	    reloc_chain->next = section->constructor_chain;
 	    section->constructor_chain = reloc_chain;
-	    section->_raw_size += bitsize / 8;
+	    section->size += bitsize / 8;
 
 #endif /* 0 */
 
@@ -2116,7 +2115,7 @@ ecoff_compute_section_file_positions (abfd)
 	 really in the section.  Each entry is 8 bytes.  We store this
 	 away in line_filepos before increasing the section size.  */
       if (strcmp (current->name, _PDATA) == 0)
-	current->line_filepos = current->_raw_size / 8;
+	current->line_filepos = current->size / 8;
 
       alignment_power = current->alignment_power;
 
@@ -2177,16 +2176,16 @@ ecoff_compute_section_file_positions (abfd)
       if ((current->flags & (SEC_HAS_CONTENTS | SEC_LOAD)) != 0)
 	current->filepos = file_sofar;
 
-      sofar += current->_raw_size;
+      sofar += current->size;
       if ((current->flags & SEC_HAS_CONTENTS) != 0)
-	file_sofar += current->_raw_size;
+	file_sofar += current->size;
 
       /* Make sure that this section is of the right size too.  */
       old_sofar = sofar;
       sofar = BFD_ALIGN (sofar, 1 << alignment_power);
       if ((current->flags & SEC_HAS_CONTENTS) != 0)
 	file_sofar = BFD_ALIGN (file_sofar, 1 << alignment_power);
-      current->_raw_size += sofar - old_sofar;
+      current->size += sofar - old_sofar;
     }
 
   free (sorted_hdrs);
@@ -2548,7 +2547,7 @@ _bfd_ecoff_write_object_contents (abfd)
 	section.s_vaddr = vma;
 
       section.s_paddr = current->lma;
-      section.s_size = bfd_get_section_size (current);
+      section.s_size = current->size;
 
       /* If this section is unloadable then the scnptr will be 0.  */
       if ((current->flags & (SEC_LOAD | SEC_HAS_CONTENTS)) == 0)
@@ -2599,7 +2598,7 @@ _bfd_ecoff_write_object_contents (abfd)
 	  || (section.s_flags & STYP_ECOFF_FINI) != 0
 	  || section.s_flags == STYP_RCONST)
 	{
-	  text_size += bfd_get_section_size (current);
+	  text_size += current->size;
 	  if (! set_text_start || text_start > vma)
 	    {
 	      text_start = vma;
@@ -2615,7 +2614,7 @@ _bfd_ecoff_write_object_contents (abfd)
 	       || section.s_flags == STYP_XDATA
 	       || (section.s_flags & STYP_GOT) != 0)
 	{
-	  data_size += bfd_get_section_size (current);
+	  data_size += current->size;
 	  if (! set_data_start || data_start > vma)
 	    {
 	      data_start = vma;
@@ -2624,7 +2623,7 @@ _bfd_ecoff_write_object_contents (abfd)
 	}
       else if ((section.s_flags & STYP_BSS) != 0
 	       || (section.s_flags & STYP_SBSS) != 0)
-	bss_size += bfd_get_section_size (current);
+	bss_size += current->size;
       else if (section.s_flags == 0
 	       || (section.s_flags & STYP_ECOFF_LIB) != 0
 	       || section.s_flags == STYP_COMMENT)
@@ -4524,13 +4523,10 @@ ecoff_indirect_link_order (output_bfd, info, output_section, link_order)
 {
   asection *input_section;
   bfd *input_bfd;
-  bfd_size_type raw_size;
-  bfd_size_type cooked_size;
   bfd_byte *contents = NULL;
   bfd_size_type external_reloc_size;
   bfd_size_type external_relocs_size;
   PTR external_relocs = NULL;
-  bfd_size_type amt;
 
   BFD_ASSERT ((output_section->flags & SEC_HAS_CONTENTS) != 0);
 
@@ -4540,25 +4536,12 @@ ecoff_indirect_link_order (output_bfd, info, output_section, link_order)
   input_section = link_order->u.indirect.section;
   input_bfd = input_section->owner;
 
-  raw_size = input_section->_raw_size;
-  cooked_size = input_section->_cooked_size;
-  if (cooked_size == 0)
-    cooked_size = raw_size;
-
   BFD_ASSERT (input_section->output_section == output_section);
   BFD_ASSERT (input_section->output_offset == link_order->offset);
-  BFD_ASSERT (cooked_size == link_order->size);
+  BFD_ASSERT (input_section->size == link_order->size);
 
-  /* Get the section contents.  We allocate memory for the larger of
-     the size before relocating and the size after relocating.  */
-  amt = raw_size >= cooked_size ? raw_size : cooked_size;
-  contents = (bfd_byte *) bfd_malloc (amt);
-  if (contents == NULL && amt != 0)
-    goto error_return;
-
-  if (! bfd_get_section_contents (input_bfd, input_section,
-				  (PTR) contents,
-				  (file_ptr) 0, raw_size))
+  /* Get the section contents.  */
+  if (!bfd_malloc_and_get_section (input_bfd, input_section, &contents))
     goto error_return;
 
   /* Get the relocs.  If we are relaxing MIPS code, they will already
@@ -4584,9 +4567,9 @@ ecoff_indirect_link_order (output_bfd, info, output_section, link_order)
   /* Write out the relocated section.  */
   if (! bfd_set_section_contents (output_bfd,
 				  output_section,
-				  (PTR) contents,
-				  (file_ptr) input_section->output_offset,
-				  cooked_size))
+				  contents,
+				  input_section->output_offset,
+				  input_section->size))
     goto error_return;
 
   /* If we are producing relocatable output, the relocs were

@@ -462,8 +462,8 @@ alpha_ecoff_object_p (abfd)
 	  bfd_size_type size;
 
 	  size = sec->line_filepos * 8;
-	  BFD_ASSERT (size == bfd_section_size (abfd, sec)
-		      || size + 8 == bfd_section_size (abfd, sec));
+	  BFD_ASSERT (size == sec->size
+		      || size + 8 == sec->size);
 	  if (! bfd_set_section_size (abfd, sec, size))
 	    return NULL;
 	}
@@ -768,6 +768,7 @@ alpha_ecoff_get_relocated_section_contents (abfd, link_info, link_order,
   long reloc_count;
   bfd *output_bfd = relocatable ? abfd : (bfd *) NULL;
   bfd_vma gp;
+  bfd_size_type sz;
   bfd_boolean gp_undefined;
   bfd_vma stack[RELOC_STACKSIZE];
   int tos = 0;
@@ -778,12 +779,9 @@ alpha_ecoff_get_relocated_section_contents (abfd, link_info, link_order,
   if (reloc_vector == NULL && reloc_size != 0)
     goto error_return;
 
-  if (! bfd_get_section_contents (input_bfd, input_section, data,
-				  (file_ptr) 0, input_section->_raw_size))
+  sz = input_section->rawsize ? input_section->rawsize : input_section->size;
+  if (! bfd_get_section_contents (input_bfd, input_section, data, 0, sz))
     goto error_return;
-
-  /* The section size is not going to change.  */
-  input_section->_cooked_size = input_section->_raw_size;
 
   reloc_count = bfd_canonicalize_reloc (input_bfd, input_section,
 					reloc_vector, symbols);
@@ -1469,9 +1467,7 @@ alpha_relocate_section (output_bfd, info, input_bfd, input_section,
 	  bfd_size_type lita_size;
 
 	  lita_vma = lita_sec->output_offset + lita_sec->output_section->vma;
-	  lita_size = lita_sec->_cooked_size;
-	  if (lita_size == 0)
-	    lita_size = lita_sec->_raw_size;
+	  lita_size = lita_sec->size;
 
 	  if (gp == 0
 	      || lita_vma <  gp - 0x8000

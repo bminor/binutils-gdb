@@ -749,11 +749,6 @@ elfNN_ia64_relax_section (abfd, sec, link_info, again)
 	  && sec->need_finalize_relax == 0))
     return TRUE;
 
-  /* If this is the first time we have been called for this section,
-     initialize the cooked size.  */
-  if (sec->_cooked_size == 0)
-    sec->_cooked_size = sec->_raw_size;
-
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
 
   /* Load the relocations for this section.  */
@@ -771,12 +766,7 @@ elfNN_ia64_relax_section (abfd, sec, link_info, again)
     contents = elf_section_data (sec)->this_hdr.contents;
   else
     {
-      contents = (bfd_byte *) bfd_malloc (sec->_raw_size);
-      if (contents == NULL)
-	goto error_return;
-
-      if (! bfd_get_section_contents (abfd, sec, contents,
-				      (file_ptr) 0, sec->_raw_size))
+      if (!bfd_malloc_and_get_section (abfd, sec, &contents))
 	goto error_return;
     }
 
@@ -1006,7 +996,7 @@ elfNN_ia64_relax_section (abfd, sec, link_info, again)
 		size = oor_branch_size;
 
 	      /* Resize the current section to make room for the new branch. */
-	      trampoff = (sec->_cooked_size + 15) & (bfd_vma) -16;
+	      trampoff = (sec->size + 15) & (bfd_vma) -16;
 
 	      /* If trampoline is out of range, there is nothing we
 		 can do.  */
@@ -1018,7 +1008,7 @@ elfNN_ia64_relax_section (abfd, sec, link_info, again)
 	      contents = (bfd_byte *) bfd_realloc (contents, amt);
 	      if (contents == NULL)
 		goto error_return;
-	      sec->_cooked_size = amt;
+	      sec->size = amt;
 
 	      if (tsec == ia64_info->plt_sec)
 		{
@@ -1174,8 +1164,7 @@ elfNN_ia64_relax_section (abfd, sec, link_info, again)
       elfNN_ia64_dyn_sym_traverse (ia64_info, allocate_global_data_got, &data);
       elfNN_ia64_dyn_sym_traverse (ia64_info, allocate_global_fptr_got, &data);
       elfNN_ia64_dyn_sym_traverse (ia64_info, allocate_local_got, &data);
-      ia64_info->got_sec->_raw_size = data.ofs;
-      ia64_info->got_sec->_cooked_size = data.ofs;
+      ia64_info->got_sec->size = data.ofs;
 
       /* ??? Resize .rela.got too.  */
     }
@@ -2824,7 +2813,7 @@ allocate_dynrel_entries (dyn_i, data)
 	}
       if (rent->reltext)
 	ia64_info->reltext = 1;
-      rent->srel->_raw_size += sizeof (ElfNN_External_Rela) * count;
+      rent->srel->size += sizeof (ElfNN_External_Rela) * count;
     }
 
   /* Take care of the GOT and PLT relocations.  */
@@ -2840,18 +2829,18 @@ allocate_dynrel_entries (dyn_i, data)
 	  || !x->info->pie
 	  || dyn_i->h == NULL
 	  || dyn_i->h->root.type != bfd_link_hash_undefweak)
-	ia64_info->rel_got_sec->_raw_size += sizeof (ElfNN_External_Rela);
+	ia64_info->rel_got_sec->size += sizeof (ElfNN_External_Rela);
     }
   if ((dynamic_symbol || shared) && dyn_i->want_tprel)
-    ia64_info->rel_got_sec->_raw_size += sizeof (ElfNN_External_Rela);
+    ia64_info->rel_got_sec->size += sizeof (ElfNN_External_Rela);
   if (dynamic_symbol && dyn_i->want_dtpmod)
-    ia64_info->rel_got_sec->_raw_size += sizeof (ElfNN_External_Rela);
+    ia64_info->rel_got_sec->size += sizeof (ElfNN_External_Rela);
   if (dynamic_symbol && dyn_i->want_dtprel)
-    ia64_info->rel_got_sec->_raw_size += sizeof (ElfNN_External_Rela);
+    ia64_info->rel_got_sec->size += sizeof (ElfNN_External_Rela);
   if (ia64_info->rel_fptr_sec && dyn_i->want_fptr)
     {
       if (dyn_i->h == NULL || dyn_i->h->root.type != bfd_link_hash_undefweak)
-	ia64_info->rel_fptr_sec->_raw_size += sizeof (ElfNN_External_Rela);
+	ia64_info->rel_fptr_sec->size += sizeof (ElfNN_External_Rela);
     }
 
   if (!resolved_zero && dyn_i->want_pltoff)
@@ -2866,7 +2855,7 @@ allocate_dynrel_entries (dyn_i, data)
       else if (shared)
 	t = 2 * sizeof (ElfNN_External_Rela);
 
-      ia64_info->rel_pltoff_sec->_raw_size += t;
+      ia64_info->rel_pltoff_sec->size += t;
     }
 
   return TRUE;
@@ -2926,7 +2915,7 @@ elfNN_ia64_size_dynamic_sections (output_bfd, info)
       sec = bfd_get_section_by_name (dynobj, ".interp");
       BFD_ASSERT (sec != NULL);
       sec->contents = (bfd_byte *) ELF_DYNAMIC_INTERPRETER;
-      sec->_raw_size = strlen (ELF_DYNAMIC_INTERPRETER) + 1;
+      sec->size = strlen (ELF_DYNAMIC_INTERPRETER) + 1;
     }
 
   /* Allocate the GOT entries.  */
@@ -2937,7 +2926,7 @@ elfNN_ia64_size_dynamic_sections (output_bfd, info)
       elfNN_ia64_dyn_sym_traverse (ia64_info, allocate_global_data_got, &data);
       elfNN_ia64_dyn_sym_traverse (ia64_info, allocate_global_fptr_got, &data);
       elfNN_ia64_dyn_sym_traverse (ia64_info, allocate_local_got, &data);
-      ia64_info->got_sec->_raw_size = data.ofs;
+      ia64_info->got_sec->size = data.ofs;
     }
 
   /* Allocate the FPTR entries.  */
@@ -2946,7 +2935,7 @@ elfNN_ia64_size_dynamic_sections (output_bfd, info)
     {
       data.ofs = 0;
       elfNN_ia64_dyn_sym_traverse (ia64_info, allocate_fptr, &data);
-      ia64_info->fptr_sec->_raw_size = data.ofs;
+      ia64_info->fptr_sec->size = data.ofs;
     }
 
   /* Now that we've seen all of the input files, we can decide which
@@ -2976,12 +2965,12 @@ elfNN_ia64_size_dynamic_sections (output_bfd, info)
 
       BFD_ASSERT (ia64_info->root.dynamic_sections_created);
 
-      ia64_info->plt_sec->_raw_size = data.ofs;
+      ia64_info->plt_sec->size = data.ofs;
 
       /* If we've got a .plt, we need some extra memory for the dynamic
 	 linker.  We stuff these in .got.plt.  */
       sec = bfd_get_section_by_name (dynobj, ".got.plt");
-      sec->_raw_size = 8 * PLT_RESERVED_WORDS;
+      sec->size = 8 * PLT_RESERVED_WORDS;
     }
 
   /* Allocate the PLTOFF entries.  */
@@ -2990,7 +2979,7 @@ elfNN_ia64_size_dynamic_sections (output_bfd, info)
     {
       data.ofs = 0;
       elfNN_ia64_dyn_sym_traverse (ia64_info, allocate_pltoff_entries, &data);
-      ia64_info->pltoff_sec->_raw_size = data.ofs;
+      ia64_info->pltoff_sec->size = data.ofs;
     }
 
   if (ia64_info->root.dynamic_sections_created)
@@ -2999,7 +2988,7 @@ elfNN_ia64_size_dynamic_sections (output_bfd, info)
 	 required.  */
 
       if (info->shared && ia64_info->self_dtpmod_offset != (bfd_vma) -1)
-	ia64_info->rel_got_sec->_raw_size += sizeof (ElfNN_External_Rela);
+	ia64_info->rel_got_sec->size += sizeof (ElfNN_External_Rela);
       elfNN_ia64_dyn_sym_traverse (ia64_info, allocate_dynrel_entries, &data);
     }
 
@@ -3020,7 +3009,7 @@ elfNN_ia64_size_dynamic_sections (output_bfd, info)
 	 function which decides whether anything needs to go into
 	 these sections.  */
 
-      strip = (sec->_raw_size == 0);
+      strip = (sec->size == 0);
 
       if (sec == ia64_info->got_sec)
 	strip = FALSE;
@@ -3097,8 +3086,8 @@ elfNN_ia64_size_dynamic_sections (output_bfd, info)
       else
 	{
 	  /* Allocate memory for the section contents.  */
-	  sec->contents = (bfd_byte *) bfd_zalloc (dynobj, sec->_raw_size);
-	  if (sec->contents == NULL && sec->_raw_size != 0)
+	  sec->contents = (bfd_byte *) bfd_zalloc (dynobj, sec->size);
+	  if (sec->contents == NULL && sec->size != 0)
 	    return FALSE;
 	}
     }
@@ -3409,8 +3398,7 @@ elfNN_ia64_install_dyn_reloc (abfd, info, sec, srel, offset, type,
   loc = srel->contents;
   loc += srel->reloc_count++ * sizeof (ElfNN_External_Rela);
   bfd_elfNN_swap_reloca_out (abfd, &outrel, loc);
-  BFD_ASSERT (sizeof (ElfNN_External_Rela) * srel->reloc_count
-	      <= srel->_cooked_size);
+  BFD_ASSERT (sizeof (ElfNN_External_Rela) * srel->reloc_count <= srel->size);
 }
 
 /* Store an entry for target address TARGET_ADDR in the linkage table
@@ -3726,7 +3714,7 @@ elfNN_ia64_choose_gp (abfd, info)
 	continue;
 
       lo = os->vma;
-      hi = os->vma + os->_raw_size;
+      hi = os->vma + os->size;
       if (hi < lo)
 	hi = (bfd_vma) -1;
 
@@ -3862,7 +3850,7 @@ elfNN_ia64_final_link (abfd, info)
 	{
 	  unwind_output_sec = s->output_section;
 	  unwind_output_sec->contents
-	    = bfd_malloc (unwind_output_sec->_raw_size);
+	    = bfd_malloc (unwind_output_sec->size);
 	  if (unwind_output_sec->contents == NULL)
 	    return FALSE;
 	}
@@ -3876,13 +3864,13 @@ elfNN_ia64_final_link (abfd, info)
     {
       elfNN_ia64_unwind_entry_compare_bfd = abfd;
       qsort (unwind_output_sec->contents,
-	     (size_t) (unwind_output_sec->_raw_size / 24),
+	     (size_t) (unwind_output_sec->size / 24),
 	     24,
 	     elfNN_ia64_unwind_entry_compare);
 
       if (! bfd_set_section_contents (abfd, unwind_output_sec,
 				      unwind_output_sec->contents, (bfd_vma) 0,
-				      unwind_output_sec->_raw_size))
+				      unwind_output_sec->size))
 	return FALSE;
     }
 
@@ -4687,7 +4675,7 @@ elfNN_ia64_finish_dynamic_sections (abfd, info)
       sgotplt = bfd_get_section_by_name (dynobj, ".got.plt");
       BFD_ASSERT (sdyn != NULL);
       dyncon = (ElfNN_External_Dyn *) sdyn->contents;
-      dynconend = (ElfNN_External_Dyn *) (sdyn->contents + sdyn->_raw_size);
+      dynconend = (ElfNN_External_Dyn *) (sdyn->contents + sdyn->size);
 
       gp_val = _bfd_get_gp_value (abfd);
 

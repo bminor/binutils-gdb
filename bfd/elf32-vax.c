@@ -777,7 +777,7 @@ elf_vax_check_relocs (abfd, info, sec, relocs)
 		    info->flags |= DF_TEXTREL;
 		}
 
-	      sreloc->_raw_size += sizeof (Elf32_External_Rela);
+	      sreloc->size += sizeof (Elf32_External_Rela);
 
 	      /* If we are linking with -Bsymbolic, we count the number of
 		 PC relative relocations we have entered for this symbol,
@@ -1015,9 +1015,9 @@ elf_vax_adjust_dynamic_symbol (info, h)
 
       /* If this is the first .plt entry, make room for the special
 	 first entry.  */
-      if (s->_raw_size == 0)
+      if (s->size == 0)
 	{
-	  s->_raw_size += PLT_ENTRY_SIZE;
+	  s->size += PLT_ENTRY_SIZE;
 	}
 
       /* If this symbol is not defined in a regular file, and we are
@@ -1029,26 +1029,26 @@ elf_vax_adjust_dynamic_symbol (info, h)
 	  && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0)
 	{
 	  h->root.u.def.section = s;
-	  h->root.u.def.value = s->_raw_size;
+	  h->root.u.def.value = s->size;
 	}
 
-      h->plt.offset = s->_raw_size;
+      h->plt.offset = s->size;
 
       /* Make room for this entry.  */
-      s->_raw_size += PLT_ENTRY_SIZE;
+      s->size += PLT_ENTRY_SIZE;
 
       /* We also need to make an entry in the .got.plt section, which
 	 will be placed in the .got section by the linker script.  */
 
       s = bfd_get_section_by_name (dynobj, ".got.plt");
       BFD_ASSERT (s != NULL);
-      s->_raw_size += 4;
+      s->size += 4;
 
       /* We also need to make an entry in the .rela.plt section.  */
 
       s = bfd_get_section_by_name (dynobj, ".rela.plt");
       BFD_ASSERT (s != NULL);
-      s->_raw_size += sizeof (Elf32_External_Rela);
+      s->size += sizeof (Elf32_External_Rela);
 
       return TRUE;
     }
@@ -1102,7 +1102,7 @@ elf_vax_adjust_dynamic_symbol (info, h)
 
       srel = bfd_get_section_by_name (dynobj, ".rela.bss");
       BFD_ASSERT (srel != NULL);
-      srel->_raw_size += sizeof (Elf32_External_Rela);
+      srel->size += sizeof (Elf32_External_Rela);
       h->elf_link_hash_flags |= ELF_LINK_HASH_NEEDS_COPY;
     }
 
@@ -1113,8 +1113,7 @@ elf_vax_adjust_dynamic_symbol (info, h)
     power_of_two = 3;
 
   /* Apply the required alignment.  */
-  s->_raw_size = BFD_ALIGN (s->_raw_size,
-			    (bfd_size_type) (1 << power_of_two));
+  s->size = BFD_ALIGN (s->size, (bfd_size_type) (1 << power_of_two));
   if (power_of_two > bfd_get_section_alignment (dynobj, s))
     {
       if (!bfd_set_section_alignment (dynobj, s, power_of_two))
@@ -1123,10 +1122,10 @@ elf_vax_adjust_dynamic_symbol (info, h)
 
   /* Define the symbol as being at this point in the section.  */
   h->root.u.def.section = s;
-  h->root.u.def.value = s->_raw_size;
+  h->root.u.def.value = s->size;
 
   /* Increment the section size to make room for the symbol.  */
-  s->_raw_size += h->size;
+  s->size += h->size;
 
   return TRUE;
 }
@@ -1154,7 +1153,7 @@ elf_vax_size_dynamic_sections (output_bfd, info)
 	{
 	  s = bfd_get_section_by_name (dynobj, ".interp");
 	  BFD_ASSERT (s != NULL);
-	  s->_raw_size = sizeof ELF_DYNAMIC_INTERPRETER;
+	  s->size = sizeof ELF_DYNAMIC_INTERPRETER;
 	  s->contents = (unsigned char *) ELF_DYNAMIC_INTERPRETER;
 	}
     }
@@ -1167,13 +1166,13 @@ elf_vax_size_dynamic_sections (output_bfd, info)
 	 file below.  */
       s = bfd_get_section_by_name (dynobj, ".rela.got");
       if (s != NULL)
-	s->_raw_size = 0;
+	s->size = 0;
       s = bfd_get_section_by_name (dynobj, ".got.plt");
       if (s != NULL)
-	s->_raw_size = 0;
+	s->size = 0;
       s = bfd_get_section_by_name (dynobj, ".got");
       if (s != NULL)
-	s->_raw_size = 0;
+	s->size = 0;
     }
 
   /* If this is a -Bsymbolic shared link, then we need to discard all PC
@@ -1214,7 +1213,7 @@ elf_vax_size_dynamic_sections (output_bfd, info)
 
       if (strcmp (name, ".plt") == 0)
 	{
-	  if (s->_raw_size == 0)
+	  if (s->size == 0)
 	    {
 	      /* Strip this section if we don't need it; see the
                  comment below.  */
@@ -1228,7 +1227,7 @@ elf_vax_size_dynamic_sections (output_bfd, info)
 	}
       else if (strncmp (name, ".rela", 5) == 0)
 	{
-	  if (s->_raw_size == 0)
+	  if (s->size == 0)
 	    {
 	      /* If we don't need this section, strip it from the
 		 output file.  This is mostly to handle .rela.bss and
@@ -1284,8 +1283,8 @@ elf_vax_size_dynamic_sections (output_bfd, info)
 	}
 
       /* Allocate memory for the section contents.  */
-      s->contents = (bfd_byte *) bfd_alloc (dynobj, s->_raw_size);
-      if (s->contents == NULL && s->_raw_size != 0)
+      s->contents = (bfd_byte *) bfd_alloc (dynobj, s->size);
+      if (s->contents == NULL && s->size != 0)
 	return FALSE;
     }
 
@@ -1354,7 +1353,7 @@ elf_vax_discard_copies (h, ignore)
     return TRUE;
 
   for (s = h->pcrel_relocs_copied; s != NULL; s = s->next)
-    s->section->_raw_size -= s->count * sizeof (Elf32_External_Rela);
+    s->section->size -= s->count * sizeof (Elf32_External_Rela);
 
   return TRUE;
 }
@@ -1405,8 +1404,8 @@ elf_vax_instantiate_got_entries (h, infoptr)
 	}
 
       /* Allocate space in the .got and .rela.got sections.  */
-      sgot->_raw_size += 4;
-      srelgot->_raw_size += sizeof (Elf32_External_Rela);
+      sgot->size += 4;
+      srelgot->size += sizeof (Elf32_External_Rela);
     }
 
   return TRUE;
@@ -1555,7 +1554,7 @@ elf_vax_relocate_section (output_bfd, info, input_bfd, input_section,
 	    BFD_ASSERT (h != NULL);
 	    off = h->got.offset;
 	    BFD_ASSERT (off != (bfd_vma) -1);
-	    BFD_ASSERT (off < sgot->_raw_size);
+	    BFD_ASSERT (off < sgot->size);
 
 	    if (info->shared
 		&& h->dynindx == -1
@@ -2030,7 +2029,7 @@ elf_vax_finish_dynamic_sections (output_bfd, info)
       BFD_ASSERT (splt != NULL && sdyn != NULL);
 
       dyncon = (Elf32_External_Dyn *) sdyn->contents;
-      dynconend = (Elf32_External_Dyn *) (sdyn->contents + sdyn->_raw_size);
+      dynconend = (Elf32_External_Dyn *) (sdyn->contents + sdyn->size);
       for (; dyncon < dynconend; dyncon++)
 	{
 	  Elf_Internal_Dyn dyn;
@@ -2059,10 +2058,7 @@ elf_vax_finish_dynamic_sections (output_bfd, info)
 	    case DT_PLTRELSZ:
 	      s = bfd_get_section_by_name (output_bfd, ".rela.plt");
 	      BFD_ASSERT (s != NULL);
-	      if (s->_cooked_size != 0)
-		dyn.d_un.d_val = s->_cooked_size;
-	      else
-		dyn.d_un.d_val = s->_raw_size;
+	      dyn.d_un.d_val = s->size;
 	      bfd_elf32_swap_dyn_out (output_bfd, &dyn, dyncon);
 	      break;
 
@@ -2076,19 +2072,14 @@ elf_vax_finish_dynamic_sections (output_bfd, info)
 		 about changing the DT_RELA entry.  */
 	      s = bfd_get_section_by_name (output_bfd, ".rela.plt");
 	      if (s != NULL)
-		{
-		  if (s->_cooked_size != 0)
-		    dyn.d_un.d_val -= s->_cooked_size;
-		  else
-		    dyn.d_un.d_val -= s->_raw_size;
-		}
+		dyn.d_un.d_val -= s->size;
 	      bfd_elf32_swap_dyn_out (output_bfd, &dyn, dyncon);
 	      break;
 	    }
 	}
 
       /* Fill in the first entry in the procedure linkage table.  */
-      if (splt->_raw_size > 0)
+      if (splt->size > 0)
 	{
 	  memcpy (splt->contents, elf_vax_plt0_entry, PLT_ENTRY_SIZE);
 	  bfd_put_32 (output_bfd,
@@ -2107,7 +2098,7 @@ elf_vax_finish_dynamic_sections (output_bfd, info)
     }
 
   /* Fill in the first three entries in the global offset table.  */
-  if (sgot->_raw_size > 0)
+  if (sgot->size > 0)
     {
       if (sdyn == NULL)
 	bfd_put_32 (output_bfd, (bfd_vma) 0, sgot->contents);

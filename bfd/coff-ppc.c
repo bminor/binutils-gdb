@@ -1,6 +1,6 @@
 /* BFD back-end for PowerPC Microsoft Portable Executable files.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003
+   2000, 2001, 2002, 2003, 2004
    Free Software Foundation, Inc.
 
    Original version pieced together by Kim Knuttila (krk@cygnus.com)
@@ -1330,12 +1330,12 @@ coff_ppc_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	    /* FIXME: this test is conservative.  */
 	    if ((r_flags & IMAGE_REL_PPC_TOCDEFN) != IMAGE_REL_PPC_TOCDEFN
-		&& (bfd_vma) our_toc_offset > toc_section->_raw_size)
+		&& (bfd_vma) our_toc_offset > toc_section->size)
 	      {
 		(*_bfd_error_handler)
 		  (_("%s: Relocation exceeds allocated TOC (%lx)"),
 		   bfd_archive_filename (input_bfd),
-		   (unsigned long) toc_section->_raw_size);
+		   (unsigned long) toc_section->size);
 		bfd_set_error (bfd_error_bad_value);
 		return FALSE;
 	      }
@@ -1690,7 +1690,7 @@ ppc_allocate_toc_section (info)
   foo = (bfd_byte *) bfd_alloc (bfd_of_toc_owner, amt);
   memset(foo, test_char, (size_t) global_toc_size);
 
-  s->_raw_size = s->_cooked_size = global_toc_size;
+  s->size = global_toc_size;
   s->contents = foo;
 
   return TRUE;
@@ -2328,8 +2328,8 @@ ppc_bfd_coff_final_link (abfd, info)
 	      if (info->relocatable)
 		o->reloc_count += sec->reloc_count;
 
-	      if (sec->_raw_size > max_contents_size)
-		max_contents_size = sec->_raw_size;
+	      if (sec->size > max_contents_size)
+		max_contents_size = sec->size;
 	      if (sec->lineno_count > max_lineno_count)
 		max_lineno_count = sec->lineno_count;
 	      if (sec->reloc_count > max_reloc_count)

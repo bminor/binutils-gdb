@@ -3023,7 +3023,7 @@ coff_compute_section_file_positions (abfd)
 	  dsec = bfd_make_section_old_way (abfd, DOT_DEBUG);
 	  if (dsec == NULL)
 	    abort ();
-	  dsec->_raw_size = sz;
+	  dsec->size = sz;
 	  dsec->flags |= SEC_HAS_CONTENTS;
 	}
     }
@@ -3122,7 +3122,7 @@ coff_compute_section_file_positions (abfd)
 	   a zero size and having real contents are different
 	   concepts: .bss has no contents, but (usually) non-zero
 	   size.  */
-	if (current->_raw_size == 0)
+	if (current->size == 0)
 	  {
 	    /* Discard.  However, it still might have (valid) symbols
 	       in it, so arbitrarily set it to section 1 (indexing is
@@ -3173,7 +3173,7 @@ coff_compute_section_file_positions (abfd)
 	    return FALSE;
 	}
       if (pei_section_data (abfd, current)->virt_size == 0)
-	pei_section_data (abfd, current)->virt_size = current->_raw_size;
+	pei_section_data (abfd, current)->virt_size = current->size;
 #endif
 
       /* Only deal with sections which have contents.  */
@@ -3182,7 +3182,7 @@ coff_compute_section_file_positions (abfd)
 
 #ifdef COFF_IMAGE_WITH_PE
       /* Make sure we skip empty sections in a PE image.  */
-      if (current->_raw_size == 0)
+      if (current->size == 0)
 	continue;
 #endif
 
@@ -3230,7 +3230,7 @@ coff_compute_section_file_positions (abfd)
 	    }
 #endif
 	  if (previous != (asection *) NULL)
-	    previous->_raw_size += sofar - old_sofar;
+	    previous->size += sofar - old_sofar;
 	}
 
 #endif
@@ -3246,10 +3246,10 @@ coff_compute_section_file_positions (abfd)
 
 #ifdef COFF_IMAGE_WITH_PE
       /* Set the padded size.  */
-      current->_raw_size = (current->_raw_size + page_size -1) & -page_size;
+      current->size = (current->size + page_size -1) & -page_size;
 #endif
 
-      sofar += current->_raw_size;
+      sofar += current->size;
 
 #ifdef ALIGN_SECTIONS_IN_FILE
       /* Make sure that this section is of the right size too.  */
@@ -3257,26 +3257,26 @@ coff_compute_section_file_positions (abfd)
 	{
 	  bfd_size_type old_size;
 
-	  old_size = current->_raw_size;
-	  current->_raw_size = BFD_ALIGN (current->_raw_size,
-					  1 << current->alignment_power);
-	  align_adjust = current->_raw_size != old_size;
-	  sofar += current->_raw_size - old_size;
+	  old_size = current->size;
+	  current->size = BFD_ALIGN (current->size,
+				     1 << current->alignment_power);
+	  align_adjust = current->size != old_size;
+	  sofar += current->size - old_size;
 	}
       else
 	{
 	  old_sofar = sofar;
 	  sofar = BFD_ALIGN (sofar, 1 << current->alignment_power);
 	  align_adjust = sofar != old_sofar;
-	  current->_raw_size += sofar - old_sofar;
+	  current->size += sofar - old_sofar;
 	}
 #endif
 
 #ifdef COFF_IMAGE_WITH_PE
       /* For PE we need to make sure we pad out to the aligned
-         _raw_size, in case the caller only writes out data to the
-         unaligned _raw_size.  */
-      if (pei_section_data (abfd, current)->virt_size < current->_raw_size)
+         size, in case the caller only writes out data to the
+         unaligned size.  */
+      if (pei_section_data (abfd, current)->virt_size < current->size)
 	align_adjust = TRUE;
 #endif
 
@@ -3648,7 +3648,7 @@ coff_write_object_contents (abfd)
 #endif
       section.s_vaddr = current->vma;
       section.s_paddr = current->lma;
-      section.s_size =  current->_raw_size;
+      section.s_size =  current->size;
 #ifdef coff_get_section_load_page
       section.s_page = coff_get_section_load_page (current);
 #endif
@@ -3667,8 +3667,8 @@ coff_write_object_contents (abfd)
 
       /* If this section has no size or is unloadable then the scnptr
 	 will be 0 too.  */
-      if (current->_raw_size == 0 ||
-	  (current->flags & (SEC_LOAD | SEC_HAS_CONTENTS)) == 0)
+      if (current->size == 0
+	  || (current->flags & (SEC_LOAD | SEC_HAS_CONTENTS)) == 0)
 	section.s_scnptr = 0;
       else
 	section.s_scnptr = current->filepos;
@@ -4140,17 +4140,17 @@ coff_write_object_contents (abfd)
 
   if (text_sec)
     {
-      internal_a.tsize = bfd_get_section_size (text_sec);
+      internal_a.tsize = text_sec->size;
       internal_a.text_start = internal_a.tsize ? text_sec->vma : 0;
     }
   if (data_sec)
     {
-      internal_a.dsize = bfd_get_section_size (data_sec);
+      internal_a.dsize = data_sec->size;
       internal_a.data_start = internal_a.dsize ? data_sec->vma : 0;
     }
   if (bss_sec)
     {
-      internal_a.bsize = bfd_get_section_size (bss_sec);
+      internal_a.bsize = bss_sec->size;
       if (internal_a.bsize && bss_sec->vma < internal_a.data_start)
 	internal_a.data_start = bss_sec->vma;
     }

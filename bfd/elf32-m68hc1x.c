@@ -534,8 +534,7 @@ elf32_m68hc11_size_stubs (bfd *output_bfd, bfd *stub_bfd,
            stub_sec != NULL;
            stub_sec = stub_sec->next)
         {
-          stub_sec->_raw_size = 0;
-          stub_sec->_cooked_size = 0;
+          stub_sec->size = 0;
         }
 
       bfd_hash_traverse (htab->stub_hash_table, htab->size_one_stub, htab);
@@ -629,11 +628,11 @@ elf32_m68hc11_build_stubs (bfd *abfd, struct bfd_link_info *info)
       bfd_size_type size;
 
       /* Allocate memory to hold the linker stubs.  */
-      size = stub_sec->_raw_size;
+      size = stub_sec->size;
       stub_sec->contents = (unsigned char *) bfd_zalloc (htab->stub_bfd, size);
       if (stub_sec->contents == NULL && size != 0)
 	return FALSE;
-      stub_sec->_raw_size = 0;
+      stub_sec->size = 0;
     }
 
   /* Build the stubs as directed by the stub hash table.  */
@@ -791,6 +790,8 @@ m68hc11_elf_special_reloc (bfd *abfd ATTRIBUTE_UNUSED,
                            bfd *output_bfd,
                            char **error_message ATTRIBUTE_UNUSED)
 {
+  bfd_size_type sz;
+
   if (output_bfd != (bfd *) NULL
       && (symbol->flags & BSF_SECTION_SYM) == 0
       && (! reloc_entry->howto->partial_inplace
@@ -803,7 +804,8 @@ m68hc11_elf_special_reloc (bfd *abfd ATTRIBUTE_UNUSED,
   if (output_bfd != NULL)
     return bfd_reloc_continue;
 
-  if (reloc_entry->address > input_section->_cooked_size)
+  sz = input_section->rawsize ? input_section->rawsize : input_section->size;
+  if (reloc_entry->address > sz)
     return bfd_reloc_outofrange;
 
   abort();

@@ -81,11 +81,11 @@ struct hppabsd_core_struct
 #define core_regsec(bfd) (core_hdr(bfd)->reg_section)
 
 static asection *
-make_bfd_asection (abfd, name, flags, _raw_size, offset, alignment_power)
+make_bfd_asection (abfd, name, flags, size, offset, alignment_power)
      bfd *abfd;
      const char *name;
      flagword flags;
-     bfd_size_type _raw_size;
+     bfd_size_type size;
      file_ptr offset;
      unsigned int alignment_power;
 {
@@ -96,7 +96,7 @@ make_bfd_asection (abfd, name, flags, _raw_size, offset, alignment_power)
     return NULL;
 
   asect->flags = flags;
-  asect->_raw_size = _raw_size;
+  asect->size = size;
   asect->filepos = offset;
   asect->alignment_power = alignment_power;
 

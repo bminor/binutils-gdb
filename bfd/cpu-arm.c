@@ -1,5 +1,6 @@
 /* BFD support for the ARM processor
-   Copyright 1994, 1997, 1999, 2000, 2002, 2003 Free Software Foundation, Inc.
+   Copyright 1994, 1997, 1999, 2000, 2002, 2003, 2004
+   Free Software Foundation, Inc.
    Contributed by Richard Earnshaw (rwe@pegasus.esprit.ec.org)
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -286,7 +287,7 @@ bfd_arm_update_notes (abfd, note_section)
 {
   asection *     arm_arch_section;
   bfd_size_type  buffer_size;
-  char *         buffer;
+  bfd_byte *     buffer;
   char *         arch_string;
   char *         expected;
 
@@ -298,16 +299,11 @@ bfd_arm_update_notes (abfd, note_section)
   if (arm_arch_section == NULL)
     return TRUE;
 
-  buffer_size = arm_arch_section->_raw_size;
+  buffer_size = arm_arch_section->size;
   if (buffer_size == 0)
     return FALSE;
 
-  buffer = bfd_malloc (buffer_size);
-  if (buffer == NULL)
-    return FALSE;
-  
-  if (! bfd_get_section_contents (abfd, arm_arch_section, buffer,
-				  (file_ptr) 0, buffer_size))
+  if (!bfd_malloc_and_get_section (abfd, arm_arch_section, &buffer))
     goto FAIL;
 
   /* Parse the note.  */
@@ -351,7 +347,8 @@ bfd_arm_update_notes (abfd, note_section)
   return TRUE;
 
  FAIL:
-  free (buffer);
+  if (buffer != NULL)
+    free (buffer);
   return FALSE;
 }
 
@@ -385,7 +382,7 @@ bfd_arm_get_mach_from_notes (abfd, note_section)
 {
   asection *     arm_arch_section;
   bfd_size_type  buffer_size;
-  char *         buffer;
+  bfd_byte *     buffer;
   char *         arch_string;
   int            i;
 
@@ -397,16 +394,11 @@ bfd_arm_get_mach_from_notes (abfd, note_section)
   if (arm_arch_section == NULL)
     return bfd_mach_arm_unknown;
 
-  buffer_size = arm_arch_section->_raw_size;
+  buffer_size = arm_arch_section->size;
   if (buffer_size == 0)
     return bfd_mach_arm_unknown;
 
-  buffer = bfd_malloc (buffer_size);
-  if (buffer == NULL)
-    return bfd_mach_arm_unknown;
-  
-  if (! bfd_get_section_contents (abfd, arm_arch_section, buffer,
-				  (file_ptr) 0, buffer_size))
+  if (!bfd_malloc_and_get_section (abfd, arm_arch_section, &buffer))
     goto FAIL;
 
   /* Parse the note.  */
@@ -422,6 +414,7 @@ bfd_arm_get_mach_from_notes (abfd, note_section)
       }
 
  FAIL:
-  free (buffer);
+  if (buffer != NULL)
+    free (buffer);
   return bfd_mach_arm_unknown;
 }

@@ -934,7 +934,7 @@ _frvfdpic_add_dyn_reloc (bfd *output_bfd, asection *sreloc, bfd_vma offset,
   outrel.r_addend = addend;
 
   reloc_offset = sreloc->reloc_count * sizeof (Elf32_External_Rel);
-  BFD_ASSERT (reloc_offset < sreloc->_raw_size);
+  BFD_ASSERT (reloc_offset < sreloc->size);
   bfd_elf32_swap_reloc_out (output_bfd, &outrel,
 			    sreloc->contents + reloc_offset);
   sreloc->reloc_count++;
@@ -969,7 +969,7 @@ _frvfdpic_add_rofixup (bfd *output_bfd, asection *rofixup, bfd_vma offset,
   fixup_offset = rofixup->reloc_count * 4;
   if (rofixup->contents)
     {
-      BFD_ASSERT (fixup_offset < rofixup->_raw_size);
+      BFD_ASSERT (fixup_offset < rofixup->size);
       bfd_put_32 (output_bfd, offset, rofixup->contents + fixup_offset);
     }
   rofixup->reloc_count++;
@@ -2778,7 +2778,7 @@ _frv_create_got_section (bfd *abfd, struct bfd_link_info *info)
     }
 
   /* The first bit of the global offset table is the header.  */
-  s->_raw_size += bed->got_header_size + bed->got_symbol_offset;
+  s->size += bed->got_header_size + bed->got_symbol_offset;
 
   /* This is the machine-specific part.  Create and initialize section
      data for the got.  */
@@ -3354,7 +3354,7 @@ _frvfdpic_assign_plt_entries (void **entryp, void *info_)
 
       /* We use the section's raw size to mark the location of the
 	 next PLT entry.  */
-      entry->plt_entry = frvfdpic_plt_section (dinfo->g.info)->_raw_size;
+      entry->plt_entry = frvfdpic_plt_section (dinfo->g.info)->size;
 
       /* Figure out the length of this PLT entry based on the
 	 addressing mode we need to reach the function descriptor.  */
@@ -3368,7 +3368,7 @@ _frvfdpic_assign_plt_entries (void **entryp, void *info_)
       else
 	size = 16;
 
-      frvfdpic_plt_section (dinfo->g.info)->_raw_size += size;
+      frvfdpic_plt_section (dinfo->g.info)->size += size;
     }
 
   if (entry->lazyplt)
@@ -3463,7 +3463,7 @@ elf32_frvfdpic_size_dynamic_sections (bfd *output_bfd,
 	{
 	  s = bfd_get_section_by_name (dynobj, ".interp");
 	  BFD_ASSERT (s != NULL);
-	  s->_raw_size = sizeof ELF_DYNAMIC_INTERPRETER;
+	  s->size = sizeof ELF_DYNAMIC_INTERPRETER;
 	  s->contents = (bfd_byte *) ELF_DYNAMIC_INTERPRETER;
 	}
     }
@@ -3530,24 +3530,24 @@ elf32_frvfdpic_size_dynamic_sections (bfd *output_bfd,
   htab_traverse (frvfdpic_relocs_info (info), _frvfdpic_assign_got_entries,
 		 &gpinfo);
 
-  frvfdpic_got_section (info)->_raw_size = gpinfo.gothilo.max
+  frvfdpic_got_section (info)->size = gpinfo.gothilo.max
     - gpinfo.gothilo.min
     /* If an odd word is the last word of the GOT, we don't need this
        word to be part of the GOT.  */
     - (odd + 4 == gpinfo.gothilo.max ? 4 : 0);
-  if (frvfdpic_got_section (info)->_raw_size == 0)
+  if (frvfdpic_got_section (info)->size == 0)
     frvfdpic_got_section (info)->flags |= SEC_EXCLUDE;
-  else if (frvfdpic_got_section (info)->_raw_size == 12
+  else if (frvfdpic_got_section (info)->size == 12
 	   && ! elf_hash_table (info)->dynamic_sections_created)
     {
       frvfdpic_got_section (info)->flags |= SEC_EXCLUDE;
-      frvfdpic_got_section (info)->_raw_size = 0;
+      frvfdpic_got_section (info)->size = 0;
     }
   else
     {
       frvfdpic_got_section (info)->contents =
 	(bfd_byte *) bfd_zalloc (dynobj,
-				 frvfdpic_got_section (info)->_raw_size);
+				 frvfdpic_got_section (info)->size);
       if (frvfdpic_got_section (info)->contents == NULL)
 	return FALSE;
     }
@@ -3555,46 +3555,45 @@ elf32_frvfdpic_size_dynamic_sections (bfd *output_bfd,
   if (elf_hash_table (info)->dynamic_sections_created)
     /* Subtract the number of lzplt entries, since those will generate
        relocations in the pltrel section.  */
-    frvfdpic_gotrel_section (info)->_raw_size =
+    frvfdpic_gotrel_section (info)->size =
       (gpinfo.g.relocs - gpinfo.g.lzplt / 8)
       * get_elf_backend_data (output_bfd)->s->sizeof_rel;
   else
     BFD_ASSERT (gpinfo.g.relocs == 0);
-  if (frvfdpic_gotrel_section (info)->_raw_size == 0)
+  if (frvfdpic_gotrel_section (info)->size == 0)
     frvfdpic_gotrel_section (info)->flags |= SEC_EXCLUDE;
   else
     {
       frvfdpic_gotrel_section (info)->contents =
 	(bfd_byte *) bfd_zalloc (dynobj,
-				 frvfdpic_gotrel_section (info)->_raw_size);
+				 frvfdpic_gotrel_section (info)->size);
       if (frvfdpic_gotrel_section (info)->contents == NULL)
 	return FALSE;
     }
 
-  frvfdpic_gotfixup_section (info)->_raw_size = (gpinfo.g.fixups + 1) * 4;
-  if (frvfdpic_gotfixup_section (info)->_raw_size == 0)
+  frvfdpic_gotfixup_section (info)->size = (gpinfo.g.fixups + 1) * 4;
+  if (frvfdpic_gotfixup_section (info)->size == 0)
     frvfdpic_gotfixup_section (info)->flags |= SEC_EXCLUDE;
   else
     {
       frvfdpic_gotfixup_section (info)->contents =
 	(bfd_byte *) bfd_zalloc (dynobj,
-				 frvfdpic_gotfixup_section (info)->_raw_size);
+				 frvfdpic_gotfixup_section (info)->size);
       if (frvfdpic_gotfixup_section (info)->contents == NULL)
 	return FALSE;
     }
   
   if (elf_hash_table (info)->dynamic_sections_created)
     {
-      frvfdpic_pltrel_section (info)->_raw_size =
+      frvfdpic_pltrel_section (info)->size =
 	gpinfo.g.lzplt / 8 * get_elf_backend_data (output_bfd)->s->sizeof_rel;
-      if (frvfdpic_pltrel_section (info)->_raw_size == 0)
+      if (frvfdpic_pltrel_section (info)->size == 0)
 	frvfdpic_pltrel_section (info)->flags |= SEC_EXCLUDE;
       else
 	{
 	  frvfdpic_pltrel_section (info)->contents =
 	    (bfd_byte *) bfd_zalloc (dynobj,
-				     frvfdpic_pltrel_section (info)
-				     ->_raw_size);
+				     frvfdpic_pltrel_section (info)->size);
 	  if (frvfdpic_pltrel_section (info)->contents == NULL)
 	    return FALSE;
 	}
@@ -3607,7 +3606,7 @@ elf32_frvfdpic_size_dynamic_sections (bfd *output_bfd,
      block size.  */
   if (elf_hash_table (info)->dynamic_sections_created)
     {
-      frvfdpic_plt_section (info)->_raw_size = gpinfo.g.lzplt
+      frvfdpic_plt_section (info)->size = gpinfo.g.lzplt
 	+ ((gpinfo.g.lzplt + (FRVFDPIC_LZPLT_BLOCK_SIZE - 4) - 8)
 	   / (FRVFDPIC_LZPLT_BLOCK_SIZE - 4) * 4);
     }
@@ -3626,7 +3625,7 @@ elf32_frvfdpic_size_dynamic_sections (bfd *output_bfd,
 
   if (elf_hash_table (info)->dynamic_sections_created)
     frvfdpic_plt_initial_offset (info) =
-      frvfdpic_plt_section (info)->_raw_size;
+      frvfdpic_plt_section (info)->size;
 
   htab_traverse (frvfdpic_relocs_info (info), _frvfdpic_assign_plt_entries,
 		 &gpinfo);
@@ -3636,13 +3635,13 @@ elf32_frvfdpic_size_dynamic_sections (bfd *output_bfd,
      non-lazy PLT entries.  */
   if (elf_hash_table (info)->dynamic_sections_created)
     {
-      if (frvfdpic_plt_section (info)->_raw_size == 0)
+      if (frvfdpic_plt_section (info)->size == 0)
 	frvfdpic_plt_section (info)->flags |= SEC_EXCLUDE;
       else
 	{
 	  frvfdpic_plt_section (info)->contents =
 	    (bfd_byte *) bfd_zalloc (dynobj,
-				     frvfdpic_plt_section (info)->_raw_size);
+				     frvfdpic_plt_section (info)->size);
 	  if (frvfdpic_plt_section (info)->contents == NULL)
 	    return FALSE;
 	}
@@ -3650,17 +3649,17 @@ elf32_frvfdpic_size_dynamic_sections (bfd *output_bfd,
 
   if (elf_hash_table (info)->dynamic_sections_created)
     {
-      if (frvfdpic_got_section (info)->_raw_size)
+      if (frvfdpic_got_section (info)->size)
 	if (!_bfd_elf_add_dynamic_entry (info, DT_PLTGOT, 0))
 	  return FALSE;
 
-      if (frvfdpic_pltrel_section (info)->_raw_size)
+      if (frvfdpic_pltrel_section (info)->size)
 	if (!_bfd_elf_add_dynamic_entry (info, DT_PLTRELSZ, 0)
 	    || !_bfd_elf_add_dynamic_entry (info, DT_PLTREL, DT_REL)
 	    || !_bfd_elf_add_dynamic_entry (info, DT_JMPREL, 0))
 	  return FALSE;
 
-      if (frvfdpic_gotrel_section (info)->_raw_size)
+      if (frvfdpic_gotrel_section (info)->size)
 	if (!_bfd_elf_add_dynamic_entry (info, DT_REL, 0)
 	    || !_bfd_elf_add_dynamic_entry (info, DT_RELSZ, 0)
 	    || !_bfd_elf_add_dynamic_entry (info, DT_RELENT,
@@ -3749,9 +3748,9 @@ elf32_frvfdpic_modify_segment_map (bfd *output_bfd,
 	  /* Set the section size from the symbol value.  We
 	     intentionally ignore the symbol section.  */
 	  if (h->root.type == bfd_link_hash_defined)
-	    sec->_raw_size = h->root.u.def.value;
+	    sec->size = h->root.u.def.value;
 	  else
-	    sec->_raw_size = DEFAULT_STACK_SIZE;
+	    sec->size = DEFAULT_STACK_SIZE;
 
 	  /* Add the stack section to the PT_GNU_STACK segment,
 	     such that its size and alignment requirements make it
@@ -3785,7 +3784,7 @@ elf32_frvfdpic_finish_dynamic_sections (bfd *output_bfd,
 
   if (frvfdpic_got_section (info))
     {
-      BFD_ASSERT (frvfdpic_gotrel_section (info)->_raw_size
+      BFD_ASSERT (frvfdpic_gotrel_section (info)->size
 		  == (frvfdpic_gotrel_section (info)->reloc_count
 		      * sizeof (Elf32_External_Rel)));
 
@@ -3799,7 +3798,7 @@ elf32_frvfdpic_finish_dynamic_sections (bfd *output_bfd,
 	  _frvfdpic_add_rofixup (output_bfd, frvfdpic_gotfixup_section (info),
 				 got_value, 0);
 
-	  if (frvfdpic_gotfixup_section (info)->_raw_size
+	  if (frvfdpic_gotfixup_section (info)->size
 	      != (frvfdpic_gotfixup_section (info)->reloc_count * 4))
 	    {
 	      (*_bfd_error_handler)
@@ -3810,7 +3809,7 @@ elf32_frvfdpic_finish_dynamic_sections (bfd *output_bfd,
     }
   if (elf_hash_table (info)->dynamic_sections_created)
     {
-      BFD_ASSERT (frvfdpic_pltrel_section (info)->_raw_size
+      BFD_ASSERT (frvfdpic_pltrel_section (info)->size
 		  == (frvfdpic_pltrel_section (info)->reloc_count
 		      * sizeof (Elf32_External_Rel)));
     }
@@ -3825,7 +3824,7 @@ elf32_frvfdpic_finish_dynamic_sections (bfd *output_bfd,
       BFD_ASSERT (sdyn != NULL);
 
       dyncon = (Elf32_External_Dyn *) sdyn->contents;
-      dynconend = (Elf32_External_Dyn *) (sdyn->contents + sdyn->_raw_size);
+      dynconend = (Elf32_External_Dyn *) (sdyn->contents + sdyn->size);
 
       for (; dyncon < dynconend; dyncon++)
 	{
@@ -3853,10 +3852,7 @@ elf32_frvfdpic_finish_dynamic_sections (bfd *output_bfd,
 	      break;
 
 	    case DT_PLTRELSZ:
-	      if (frvfdpic_pltrel_section (info)->_cooked_size != 0)
-		dyn.d_un.d_val = frvfdpic_pltrel_section (info)->_cooked_size;
-	      else
-		dyn.d_un.d_val = frvfdpic_pltrel_section (info)->_raw_size;
+	      dyn.d_un.d_val = frvfdpic_pltrel_section (info)->size;
 	      bfd_elf32_swap_dyn_out (output_bfd, &dyn, dyncon);
 	      break;
 	    }

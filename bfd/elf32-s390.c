@@ -398,6 +398,7 @@ s390_elf_ldisp_reloc (abfd, reloc_entry, symbol, data, input_section,
   reloc_howto_type *howto = reloc_entry->howto;
   bfd_vma relocation;
   bfd_vma insn;
+  bfd_size_type sz;
   
   if (output_bfd != (bfd *) NULL
       && (symbol->flags & BSF_SECTION_SYM) == 0
@@ -411,7 +412,8 @@ s390_elf_ldisp_reloc (abfd, reloc_entry, symbol, data, input_section,
   if (output_bfd != NULL)
     return bfd_reloc_continue;
   
-  if (reloc_entry->address > input_section->_cooked_size)
+  sz = input_section->rawsize ? input_section->rawsize : input_section->size;
+  if (reloc_entry->address > sz)
     return bfd_reloc_outofrange;
   
   relocation = (symbol->value
@@ -1687,7 +1689,7 @@ elf_s390_adjust_dynamic_symbol (info, h)
      runtime process image.  */
   if ((h->root.u.def.section->flags & SEC_ALLOC) != 0)
     {
-      htab->srelbss->_raw_size += sizeof (Elf32_External_Rela);
+      htab->srelbss->size += sizeof (Elf32_External_Rela);
       h->elf_link_hash_flags |= ELF_LINK_HASH_NEEDS_COPY;
     }
 
@@ -1699,7 +1701,7 @@ elf_s390_adjust_dynamic_symbol (info, h)
 
   /* Apply the required alignment.  */
   s = htab->sdynbss;
-  s->_raw_size = BFD_ALIGN (s->_raw_size, (bfd_size_type) (1 << power_of_two));
+  s->size = BFD_ALIGN (s->size, (bfd_size_type) (1 << power_of_two));
   if (power_of_two > bfd_get_section_alignment (htab->elf.dynobj, s))
     {
       if (! bfd_set_section_alignment (htab->elf.dynobj, s, power_of_two))
@@ -1708,10 +1710,10 @@ elf_s390_adjust_dynamic_symbol (info, h)
 
   /* Define the symbol as being at this point in the section.  */
   h->root.u.def.section = s;
-  h->root.u.def.value = s->_raw_size;
+  h->root.u.def.value = s->size;
 
   /* Increment the section size to make room for the symbol.  */
-  s->_raw_size += h->size;
+  s->size += h->size;
 
   return TRUE;
 }
@@ -1762,10 +1764,10 @@ allocate_dynrelocs (h, inf)
 
 	  /* If this is the first .plt entry, make room for the special
 	     first entry.  */
-	  if (s->_raw_size == 0)
-	    s->_raw_size += PLT_FIRST_ENTRY_SIZE;
+	  if (s->size == 0)
+	    s->size += PLT_FIRST_ENTRY_SIZE;
 
-	  h->plt.offset = s->_raw_size;
+	  h->plt.offset = s->size;
 
 	  /* If this symbol is not defined in a regular file, and we are
 	     not generating a shared library, then set the symbol to this
@@ -1780,14 +1782,14 @@ allocate_dynrelocs (h, inf)
 	    }
 
 	  /* Make room for this entry.  */
-	  s->_raw_size += PLT_ENTRY_SIZE;
+	  s->size += PLT_ENTRY_SIZE;
 
 	  /* We also need to make an entry in the .got.plt section, which
 	     will be placed in the .got section by the linker script.  */
-	  htab->sgotplt->_raw_size += GOT_ENTRY_SIZE;
+	  htab->sgotplt->size += GOT_ENTRY_SIZE;
 
 	  /* We also need to make an entry in the .rela.plt section.  */
-	  htab->srelplt->_raw_size += sizeof (Elf32_External_Rela);
+	  htab->srelplt->size += sizeof (Elf32_External_Rela);
 	}
       else
 	{
@@ -1817,8 +1819,8 @@ allocate_dynrelocs (h, inf)
 	   to be stored somewhere. The immediate value in the instruction
 	   is not bit enough so the value is stored in the got.  */
 	{
-	  h->got.offset = htab->sgot->_raw_size;
-	  htab->sgot->_raw_size += GOT_ENTRY_SIZE;
+	  h->got.offset = htab->sgot->size;
+	  htab->sgot->size += GOT_ENTRY_SIZE;
 	}
       else
 	h->got.offset = (bfd_vma) -1;
@@ -1839,24 +1841,24 @@ allocate_dynrelocs (h, inf)
 	}
 
       s = htab->sgot;
-      h->got.offset = s->_raw_size;
-      s->_raw_size += GOT_ENTRY_SIZE;
+      h->got.offset = s->size;
+      s->size += GOT_ENTRY_SIZE;
       /* R_390_TLS_GD32 needs 2 consecutive GOT slots.  */
       if (tls_type == GOT_TLS_GD)
-	s->_raw_size += GOT_ENTRY_SIZE;
+	s->size += GOT_ENTRY_SIZE;
       dyn = htab->elf.dynamic_sections_created;
       /* R_390_TLS_IE32 needs one dynamic relocation,
 	 R_390_TLS_GD32 needs one if local symbol and two if global.  */
       if ((tls_type == GOT_TLS_GD && h->dynindx == -1)
 	  || tls_type >= GOT_TLS_IE)
-	htab->srelgot->_raw_size += sizeof (Elf32_External_Rela);
+	htab->srelgot->size += sizeof (Elf32_External_Rela);
       else if (tls_type == GOT_TLS_GD)
-	htab->srelgot->_raw_size += 2 * sizeof (Elf32_External_Rela);
+	htab->srelgot->size += 2 * sizeof (Elf32_External_Rela);
       else if ((ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
 		|| h->root.type != bfd_link_hash_undefweak)
 	       && (info->shared
 		   || WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, 0, h)))
-	htab->srelgot->_raw_size += sizeof (Elf32_External_Rela);
+	htab->srelgot->size += sizeof (Elf32_External_Rela);
     }
   else
     h->got.offset = (bfd_vma) -1;
@@ -1932,7 +1934,7 @@ allocate_dynrelocs (h, inf)
     {
       asection *sreloc = elf_section_data (p->sec)->sreloc;
 
-      sreloc->_raw_size += p->count * sizeof (Elf32_External_Rela);
+      sreloc->size += p->count * sizeof (Elf32_External_Rela);
     }
 
   return TRUE;
@@ -1995,7 +1997,7 @@ elf_s390_size_dynamic_sections (output_bfd, info)
 	  s = bfd_get_section_by_name (dynobj, ".interp");
 	  if (s == NULL)
 	    abort ();
-	  s->_raw_size = sizeof ELF_DYNAMIC_INTERPRETER;
+	  s->size = sizeof ELF_DYNAMIC_INTERPRETER;
 	  s->contents = (unsigned char *) ELF_DYNAMIC_INTERPRETER;
 	}
     }
@@ -2034,7 +2036,7 @@ elf_s390_size_dynamic_sections (output_bfd, info)
 	      else if (p->count != 0)
 		{
 		  srela = elf_section_data (p->sec)->sreloc;
-		  srela->_raw_size += p->count * sizeof (Elf32_External_Rela);
+		  srela->size += p->count * sizeof (Elf32_External_Rela);
 		  if ((p->sec->output_section->flags & SEC_READONLY) != 0)
 		    info->flags |= DF_TEXTREL;
 		}
@@ -2055,12 +2057,12 @@ elf_s390_size_dynamic_sections (output_bfd, info)
 	{
 	  if (*local_got > 0)
 	    {
-	      *local_got = s->_raw_size;
-	      s->_raw_size += GOT_ENTRY_SIZE;
+	      *local_got = s->size;
+	      s->size += GOT_ENTRY_SIZE;
 	      if (*local_tls_type == GOT_TLS_GD)
-		s->_raw_size += GOT_ENTRY_SIZE;
+		s->size += GOT_ENTRY_SIZE;
 	      if (info->shared)
-		srela->_raw_size += sizeof (Elf32_External_Rela);
+		srela->size += sizeof (Elf32_External_Rela);
 	    }
 	  else
 	    *local_got = (bfd_vma) -1;
@@ -2071,9 +2073,9 @@ elf_s390_size_dynamic_sections (output_bfd, info)
     {
       /* Allocate 2 got entries and 1 dynamic reloc for R_390_TLS_LDM32
 	 relocs.  */
-      htab->tls_ldm_got.offset = htab->sgot->_raw_size;
-      htab->sgot->_raw_size += 2 * GOT_ENTRY_SIZE;
-      htab->srelgot->_raw_size += sizeof (Elf32_External_Rela);
+      htab->tls_ldm_got.offset = htab->sgot->size;
+      htab->sgot->size += 2 * GOT_ENTRY_SIZE;
+      htab->srelgot->size += sizeof (Elf32_External_Rela);
     }
   else
     htab->tls_ldm_got.offset = -1;
@@ -2099,7 +2101,7 @@ elf_s390_size_dynamic_sections (output_bfd, info)
 	}
       else if (strncmp (bfd_get_section_name (dynobj, s), ".rela", 5) == 0)
 	{
-	  if (s->_raw_size != 0)
+	  if (s->size != 0)
 	    relocs = TRUE;
 
 	  /* We use the reloc_count field as a counter if we need
@@ -2112,7 +2114,7 @@ elf_s390_size_dynamic_sections (output_bfd, info)
 	  continue;
 	}
 
-      if (s->_raw_size == 0)
+      if (s->size == 0)
 	{
 	  /* If we don't need this section, strip it from the
 	     output file.  This is to handle .rela.bss and
@@ -2133,7 +2135,7 @@ elf_s390_size_dynamic_sections (output_bfd, info)
 	 section's contents are written out.  This should not happen,
 	 but this way if it does, we get a R_390_NONE reloc instead
 	 of garbage.  */
-      s->contents = (bfd_byte *) bfd_zalloc (dynobj, s->_raw_size);
+      s->contents = (bfd_byte *) bfd_zalloc (dynobj, s->size);
       if (s->contents == NULL)
 	return FALSE;
     }
@@ -2154,7 +2156,7 @@ elf_s390_size_dynamic_sections (output_bfd, info)
 	    return FALSE;
 	}
 
-      if (htab->splt->_raw_size != 0)
+      if (htab->splt->size != 0)
 	{
 	  if (!add_dynamic_entry (DT_PLTGOT, 0)
 	      || !add_dynamic_entry (DT_PLTRELSZ, 0)
@@ -3330,7 +3332,7 @@ elf_s390_finish_dynamic_sections (output_bfd, info)
 	abort ();
 
       dyncon = (Elf32_External_Dyn *) sdyn->contents;
-      dynconend = (Elf32_External_Dyn *) (sdyn->contents + sdyn->_raw_size);
+      dynconend = (Elf32_External_Dyn *) (sdyn->contents + sdyn->size);
       for (; dyncon < dynconend; dyncon++)
 	{
 	  Elf_Internal_Dyn dyn;
@@ -3353,10 +3355,7 @@ elf_s390_finish_dynamic_sections (output_bfd, info)
 
 	    case DT_PLTRELSZ:
 	      s = htab->srelplt->output_section;
-	      if (s->_cooked_size != 0)
-		dyn.d_un.d_val = s->_cooked_size;
-	      else
-		dyn.d_un.d_val = s->_raw_size;
+	      dyn.d_un.d_val = s->size;
 	      break;
 	    }
 
@@ -3364,7 +3363,7 @@ elf_s390_finish_dynamic_sections (output_bfd, info)
 	}
 
       /* Fill in the special first entry in the procedure linkage table.  */
-      if (htab->splt && htab->splt->_raw_size > 0)
+      if (htab->splt && htab->splt->size > 0)
 	{
 	  memset (htab->splt->contents, 0, PLT_FIRST_ENTRY_SIZE);
 	  if (info->shared)
@@ -3408,7 +3407,7 @@ elf_s390_finish_dynamic_sections (output_bfd, info)
   if (htab->sgotplt)
     {
       /* Fill in the first three entries in the global offset table.  */
-      if (htab->sgotplt->_raw_size > 0)
+      if (htab->sgotplt->size > 0)
 	{
 	  bfd_put_32 (output_bfd,
 		      (sdyn == NULL ? (bfd_vma) 0
@@ -3432,7 +3431,7 @@ elf_s390_grok_prstatus (abfd, note)
      Elf_Internal_Note * note;
 {
   int offset;
-  unsigned int raw_size;
+  unsigned int size;
 
   switch (note->descsz)
     {
@@ -3448,13 +3447,13 @@ elf_s390_grok_prstatus (abfd, note)
 
 	/* pr_reg */
 	offset = 72;
-	raw_size = 144;
+	size = 144;
 	break;
     }
 
   /* Make a ".reg/999" section.  */
   return _bfd_elfcore_make_pseudosection (abfd, ".reg",
-					  raw_size, note->descpos + offset);
+					  size, note->descpos + offset);
 }
 
 /* Return address for Ith PLT stub in section PLT, for relocation REL

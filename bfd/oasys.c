@@ -507,7 +507,7 @@ oasys_object_p (abfd)
 		BFD_FAIL ();
 	      }
 
-	    s->_raw_size = H_GET_32 (abfd, record.section.value);
+	    s->size = H_GET_32 (abfd, record.section.value);
 	    s->vma = H_GET_32 (abfd, record.section.vma);
 	    s->flags = 0;
 	    had_usefull = TRUE;
@@ -657,7 +657,7 @@ oasys_slurp_section_data (abfd)
 
 	    if (! per->initialized)
 	      {
-		per->data = (bfd_byte *) bfd_zalloc (abfd, section->_raw_size);
+		per->data = (bfd_byte *) bfd_zalloc (abfd, section->size);
 		if (!per->data)
 		  return FALSE;
 		per->reloc_tail_ptr
@@ -1055,7 +1055,7 @@ oasys_write_sections (abfd)
 	  return FALSE;
 	}
       out.relb = RELOCATION_TYPE_REL | s->target_index;
-      H_PUT_32 (abfd, s->_cooked_size, out.value);
+      H_PUT_32 (abfd, s->size, out.value);
       H_PUT_32 (abfd, s->vma, out.vma);
 
       if (! oasys_write_record (abfd,
@@ -1159,7 +1159,7 @@ oasys_write_data (abfd)
 	  current_byte_index = 0;
 	  processed_data.relb = s->target_index | RELOCATION_TYPE_REL;
 
-	  while (current_byte_index < s->_cooked_size)
+	  while (current_byte_index < s->size)
 	    {
 	      /* Scan forwards by eight bytes or however much is left and see if
 	       there are any relocations going on */
@@ -1180,7 +1180,7 @@ oasys_write_data (abfd)
  	       1 modification byte + 2 data = 8 bytes total).  That's where
  	       the magic number 8 comes from.
  	    */
-	      while (current_byte_index < s->_raw_size && dst <=
+	      while (current_byte_index < s->size && dst <=
 		     &processed_data.data[sizeof (processed_data.data) - 8])
 		{
 
@@ -1355,7 +1355,7 @@ oasys_set_section_contents (abfd, section, location, offset, count)
       if (oasys_per_section (section)->data == (bfd_byte *) NULL)
 	{
 	  oasys_per_section (section)->data =
-	    (bfd_byte *) (bfd_alloc (abfd, section->_cooked_size));
+	    (bfd_byte *) (bfd_alloc (abfd, section->size));
 	  if (!oasys_per_section (section)->data)
 	    return FALSE;
 	}

@@ -589,7 +589,7 @@ bfd_elf32_arm_allocate_interworking_sections (info)
       foo = (bfd_byte *) bfd_alloc (globals->bfd_of_glue_owner,
 				    globals->arm_glue_size);
 
-      s->_raw_size = s->_cooked_size = globals->arm_glue_size;
+      s->size = globals->arm_glue_size;
       s->contents = foo;
     }
 
@@ -605,7 +605,7 @@ bfd_elf32_arm_allocate_interworking_sections (info)
       foo = (bfd_byte *) bfd_alloc (globals->bfd_of_glue_owner,
 				    globals->thumb_glue_size);
 
-      s->_raw_size = s->_cooked_size = globals->thumb_glue_size;
+      s->size = globals->thumb_glue_size;
       s->contents = foo;
     }
 
@@ -916,12 +916,7 @@ bfd_elf32_arm_process_before_allocation (abfd, link_info,
 	      else
 		{
 		  /* Go get them off disk.  */
-		  contents = (bfd_byte *) bfd_malloc (sec->_raw_size);
-		  if (contents == NULL)
-		    goto error_return;
-
-		  if (!bfd_get_section_contents (abfd, sec, contents,
-						 (file_ptr) 0, sec->_raw_size))
+		  if (!bfd_malloc_and_get_section (abfd, sec, &contents))
 		    goto error_return;
 		}
 	    }
@@ -3331,7 +3326,7 @@ elf32_arm_adjust_dynamic_symbol (info, h)
 
       srel = bfd_get_section_by_name (dynobj, ".rel.bss");
       BFD_ASSERT (srel != NULL);
-      srel->_raw_size += sizeof (Elf32_External_Rel);
+      srel->size += sizeof (Elf32_External_Rel);
       h->elf_link_hash_flags |= ELF_LINK_HASH_NEEDS_COPY;
     }
 
@@ -3342,8 +3337,7 @@ elf32_arm_adjust_dynamic_symbol (info, h)
     power_of_two = 3;
 
   /* Apply the required alignment.  */
-  s->_raw_size = BFD_ALIGN (s->_raw_size,
-			    (bfd_size_type) (1 << power_of_two));
+  s->size = BFD_ALIGN (s->size, (bfd_size_type) (1 << power_of_two));
   if (power_of_two > bfd_get_section_alignment (dynobj, s))
     {
       if (! bfd_set_section_alignment (dynobj, s, power_of_two))
@@ -3352,10 +3346,10 @@ elf32_arm_adjust_dynamic_symbol (info, h)
 
   /* Define the symbol as being at this point in the section.  */
   h->root.u.def.section = s;
-  h->root.u.def.value = s->_raw_size;
+  h->root.u.def.value = s->size;
 
   /* Increment the section size to make room for the symbol.  */
-  s->_raw_size += h->size;
+  s->size += h->size;
 
   return TRUE;
 }
@@ -3404,10 +3398,10 @@ allocate_dynrelocs (h, inf)
 
 	  /* If this is the first .plt entry, make room for the special
 	     first entry.  */
-	  if (s->_raw_size == 0)
-	    s->_raw_size += PLT_HEADER_SIZE;
+	  if (s->size == 0)
+	    s->size += PLT_HEADER_SIZE;
 
-	  h->plt.offset = s->_raw_size;
+	  h->plt.offset = s->size;
 
 	  /* If this symbol is not defined in a regular file, and we are
 	     not generating a shared library, then set the symbol to this
@@ -3422,14 +3416,14 @@ allocate_dynrelocs (h, inf)
 	    }
 
 	  /* Make room for this entry.  */
-	  s->_raw_size += PLT_ENTRY_SIZE;
+	  s->size += PLT_ENTRY_SIZE;
 
 	  /* We also need to make an entry in the .got.plt section, which
 	     will be placed in the .got section by the linker script.  */
-	  htab->sgotplt->_raw_size += 4;
+	  htab->sgotplt->size += 4;
 
 	  /* We also need to make an entry in the .rel.plt section.  */
-	  htab->srelplt->_raw_size += sizeof (Elf32_External_Rel);
+	  htab->srelplt->size += sizeof (Elf32_External_Rel);
 	}
       else
 	{
@@ -3458,14 +3452,14 @@ allocate_dynrelocs (h, inf)
 	}
 
       s = htab->sgot;
-      h->got.offset = s->_raw_size;
-      s->_raw_size += 4;
+      h->got.offset = s->size;
+      s->size += 4;
       dyn = htab->root.dynamic_sections_created;
       if ((ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
 	   || h->root.type != bfd_link_hash_undefweak)
 	  && (info->shared
 	      || WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, 0, h)))
-	htab->srelgot->_raw_size += sizeof (Elf32_External_Rel);
+	htab->srelgot->size += sizeof (Elf32_External_Rel);
     }
   else
     h->got.offset = (bfd_vma) -1;
@@ -3525,7 +3519,7 @@ allocate_dynrelocs (h, inf)
   for (p = eh->relocs_copied; p != NULL; p = p->next)
     {
       asection *sreloc = elf_section_data (p->section)->sreloc;
-      sreloc->_raw_size += p->count * sizeof (Elf32_External_Rel);
+      sreloc->size += p->count * sizeof (Elf32_External_Rel);
     }
 
   return TRUE;
@@ -3556,7 +3550,7 @@ elf32_arm_size_dynamic_sections (output_bfd, info)
 	{
 	  s = bfd_get_section_by_name (dynobj, ".interp");
 	  BFD_ASSERT (s != NULL);
-	  s->_raw_size = sizeof ELF_DYNAMIC_INTERPRETER;
+	  s->size = sizeof ELF_DYNAMIC_INTERPRETER;
 	  s->contents = (unsigned char *) ELF_DYNAMIC_INTERPRETER;
 	}
     }
@@ -3595,7 +3589,7 @@ elf32_arm_size_dynamic_sections (output_bfd, info)
 	      else if (p->count != 0)
 		{
 		  srel = elf_section_data (p->section)->sreloc;
-		  srel->_raw_size += p->count * sizeof (Elf32_External_Rel);
+		  srel->size += p->count * sizeof (Elf32_External_Rel);
 		  if ((p->section->output_section->flags & SEC_READONLY) != 0)
 		    info->flags |= DF_TEXTREL;
 		}
@@ -3615,10 +3609,10 @@ elf32_arm_size_dynamic_sections (output_bfd, info)
 	{
 	  if (*local_got > 0)
 	    {
-	      *local_got = s->_raw_size;
-	      s->_raw_size += 4;
+	      *local_got = s->size;
+	      s->size += 4;
 	      if (info->shared)
-		srel->_raw_size += sizeof (Elf32_External_Rel);
+		srel->size += sizeof (Elf32_External_Rel);
 	    }
 	  else
 	    *local_got = (bfd_vma) -1;
@@ -3650,7 +3644,7 @@ elf32_arm_size_dynamic_sections (output_bfd, info)
 
       if (strcmp (name, ".plt") == 0)
 	{
-	  if (s->_raw_size == 0)
+	  if (s->size == 0)
 	    {
 	      /* Strip this section if we don't need it; see the
                  comment below.  */
@@ -3664,7 +3658,7 @@ elf32_arm_size_dynamic_sections (output_bfd, info)
 	}
       else if (strncmp (name, ".rel", 4) == 0)
 	{
-	  if (s->_raw_size == 0)
+	  if (s->size == 0)
 	    {
 	      /* If we don't need this section, strip it from the
 		 output file.  This is mostly to handle .rel.bss and
@@ -3702,8 +3696,8 @@ elf32_arm_size_dynamic_sections (output_bfd, info)
 	}
 
       /* Allocate memory for the section contents.  */
-      s->contents = (bfd_byte *) bfd_zalloc (dynobj, s->_raw_size);
-      if (s->contents == NULL && s->_raw_size != 0)
+      s->contents = (bfd_byte *) bfd_zalloc (dynobj, s->size);
+      if (s->contents == NULL && s->size != 0)
 	return FALSE;
     }
 
@@ -3947,7 +3941,7 @@ elf32_arm_finish_dynamic_sections (output_bfd, info)
       BFD_ASSERT (splt != NULL && sdyn != NULL);
 
       dyncon = (Elf32_External_Dyn *) sdyn->contents;
-      dynconend = (Elf32_External_Dyn *) (sdyn->contents + sdyn->_raw_size);
+      dynconend = (Elf32_External_Dyn *) (sdyn->contents + sdyn->size);
 
       for (; dyncon < dynconend; dyncon++)
 	{
@@ -3977,10 +3971,7 @@ elf32_arm_finish_dynamic_sections (output_bfd, info)
 	    case DT_PLTRELSZ:
 	      s = bfd_get_section_by_name (output_bfd, ".rel.plt");
 	      BFD_ASSERT (s != NULL);
-	      if (s->_cooked_size != 0)
-		dyn.d_un.d_val = s->_cooked_size;
-	      else
-		dyn.d_un.d_val = s->_raw_size;
+	      dyn.d_un.d_val = s->size;
 	      bfd_elf32_swap_dyn_out (output_bfd, &dyn, dyncon);
 	      break;
 
@@ -3996,12 +3987,7 @@ elf32_arm_finish_dynamic_sections (output_bfd, info)
 		 about changing the DT_REL entry.  */
 	      s = bfd_get_section_by_name (output_bfd, ".rel.plt");
 	      if (s != NULL)
-		{
-		  if (s->_cooked_size != 0)
-		    dyn.d_un.d_val -= s->_cooked_size;
-		  else
-		    dyn.d_un.d_val -= s->_raw_size;
-		}
+		dyn.d_un.d_val -= s->size;
 	      bfd_elf32_swap_dyn_out (output_bfd, &dyn, dyncon);
 	      break;
 
@@ -4033,7 +4019,7 @@ elf32_arm_finish_dynamic_sections (output_bfd, info)
 	}
 
       /* Fill in the first entry in the procedure linkage table.  */
-      if (splt->_raw_size > 0)
+      if (splt->size > 0)
 	{
 	  bfd_vma got_displacement;
 
@@ -4063,7 +4049,7 @@ elf32_arm_finish_dynamic_sections (output_bfd, info)
     }
 
   /* Fill in the first three entries in the global offset table.  */
-  if (sgot->_raw_size > 0)
+  if (sgot->size > 0)
     {
       if (sdyn == NULL)
 	bfd_put_32 (output_bfd, (bfd_vma) 0, sgot->contents);
@@ -4243,7 +4229,7 @@ elf32_arm_write_section (bfd *output_bfd ATTRIBUTE_UNUSED, asection *sec,
   for (i = 0; i < mapcount; i++)
     {
       if (i == mapcount - 1)
-	end = bfd_section_size (output_bfd, sec);
+	end = sec->size;
       else
 	end = map[i + 1].vma - offset;
       

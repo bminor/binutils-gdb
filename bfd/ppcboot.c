@@ -210,7 +210,7 @@ ppcboot_object_p (abfd)
     return NULL;
   sec->flags = SEC_ALLOC | SEC_LOAD | SEC_DATA | SEC_CODE | SEC_HAS_CONTENTS;
   sec->vma = 0;
-  sec->_raw_size = statbuf.st_size - sizeof (ppcboot_hdr_t);
+  sec->size = statbuf.st_size - sizeof (ppcboot_hdr_t);
   sec->filepos = sizeof (ppcboot_hdr_t);
 
   ppcboot_mkobject (abfd);
@@ -311,7 +311,7 @@ ppcboot_canonicalize_symtab (abfd, alocation)
   /* End symbol.  */
   syms[1].the_bfd = abfd;
   syms[1].name = mangle_name (abfd, "end");
-  syms[1].value = sec->_raw_size;
+  syms[1].value = sec->size;
   syms[1].flags = BSF_GLOBAL;
   syms[1].section = sec;
   syms[1].udata.p = NULL;
@@ -319,7 +319,7 @@ ppcboot_canonicalize_symtab (abfd, alocation)
   /* Size symbol.  */
   syms[2].the_bfd = abfd;
   syms[2].name = mangle_name (abfd, "size");
-  syms[2].value = sec->_raw_size;
+  syms[2].value = sec->size;
   syms[2].flags = BSF_GLOBAL;
   syms[2].section = bfd_abs_section_ptr;
   syms[2].udata.p = NULL;

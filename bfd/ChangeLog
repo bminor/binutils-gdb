@@ -1,3 +1,364 @@
+2004-06-24  Alan Modra  <amodra@bigpond.net.au>
+
+	* section.c (struct sec): Rename "_cooked_size" to "size".
+	Rename "_raw_size" to "rawsize".
+	(STD_SECTION): Adjust comments.
+	(bfd_set_section_size, bfd_get_section_contents): Use size.
+	(bfd_malloc_and_get_section): New function.
+	* bfd-in.h (bfd_section_size, bfd_get_section_size): Use size.
+	* coff-sh.c (sh_relax_section): Alloc coff_section_data struct early.
+	Correctly free reloc and contents memory.
+	* elf-eh-frame.c (_bfd_elf_discard_section_eh_frame): Delete FIXME
+	and fake CIE now that we can shink section size to zero.
+	(_bfd_elf_write_section_eh_frame): Likewise..
+	* elf32-ppc.c (ppc_elf_relax_section): Delay reading section contents.
+	* elf-m10300.c (mn10300_elf_final_link_relocate): Don't use
+	_bfd_stab_section_offset.  Use _bfd_elf_section_offset.
+	* stabs.c (_bfd_stab_section_offset_): Remove unused args and
+	unneeded indirection.
+	* elf.c (_bfd_elf_section_offset): .. and update call.
+	* libbfd-in.h (_bfd_stab_section_offset): Update prototype.
+	* libbfd.h: Regenerate.
+	* bfd-in2.h: Regenerate.
+
+	Replace occurrences of "_raw_size" and "_cooked_size" in most places
+	with "size".  Set new "rawsize" for stabs, eh_frame, and SEC_MERGE
+	sections.  Use "rawsize", if non-zero, for bfd_get_section_contents
+	calls if the section might be a stabs, eh_frame, or SEC_MERGE section.
+	Similarly use "rawsize", if non-zero, in reloc functions to validate
+	reloc addresses.  Use new bfd_malloc_and_get_section in most places
+	where bfd_get_section_contents was called.  Expand all occurrences of
+	bfd_section_size and bfd_get_section_size.  Rename "raw_size" var in
+	grok_prstatus and similar functions to "size".
+	* aix386-core.c (aix386_core_file_p): ..
+	* aix5ppc-core.c (xcoff64_core_p): ..
+	* aout-adobe.c (aout_adobe_callback, aout_adobe_write_object_contents,
+	aout_adobe_set_section_contents): ..
+	* aout-target.h (callback): ..
+	* aout-tic30.c (tic30_aout_callback, tic30_aout_final_link_relocate,
+	MY_bfd_final_link): ..
+	* aoutf1.h (sunos4_core_file_p): ..
+	* aoutx.h (some_aout_object_p, adjust_o_magic, adjust_z_magic,
+	adjust_n_magic, adjust_sizes_and_vmas, translate_from_native_sym_flags,
+	final_link, aout_link_input_section): ..
+	* binary.c (binary_object_p, binary_canonicalize_symtab,
+	binary_set_section_contents): ..
+	* bout.c (b_out_callback, b_out_write_object_contents,
+	b_out_set_section_contents, b_out_bfd_relax_section,
+	b_out_bfd_get_relocated_section_contents): ..
+	* cisco-core.c (cisco_core_file_validate): ..
+	* coff-alpha.c (alpha_ecoff_object_p,
+	alpha_ecoff_get_relocated_section_conten, alpha_relocate_section): ..
+	* coff-arm.c (coff_arm_relocate_section,
+	bfd_arm_allocate_interworking_sections): ..
+	* coff-h8300.c (h8300_reloc16_extra_cases,
+	h8300_bfd_link_add_symbols): ..
+	* coff-mips.c (mips_refhi_reloc, mips_gprel_reloc): ..
+	* coff-ppc.c (coff_ppc_relocate_section, ppc_allocate_toc_section,
+	ppc_bfd_coff_final_link): ..
+	* coff-rs6000.c (xcoff_reloc_type_br, xcoff_ppc_relocate_section): ..
+	* coff-sh.c (sh_relax_section, sh_relax_delete_bytes,
+	sh_align_loads, sh_coff_get_relocated_section_contents): ..
+	* coff64-rs6000.c (xcoff64_write_object_contents,
+	xcoff64_reloc_type_br, xcoff64_ppc_relocate_section): ..
+	* coffcode.h (coff_compute_section_file_positions,
+	coff_write_object_contents): ..
+	* coffgen.c (make_a_section_from_file, coff_write_symbols,
+	coff_section_symbol, build_debug_section): ..
+	* cofflink.c (coff_link_add_symbols, _bfd_coff_final_link,
+	process_embedded_commands, _bfd_coff_link_input_bfd,
+	_bfd_coff_write_global_sym): ..
+	* cpu-arm.c (bfd_arm_update_notes, bfd_arm_get_mach_from_notes): ..
+	* cpu-ns32k.c (do_ns32k_reloc, _bfd_ns32k_final_link_relocate): ..
+	* dwarf1.c (parse_line_table, _bfd_dwarf1_find_nearest_line): ..
+	* dwarf2.c (read_indirect_string, read_abbrevs, decode_line_info,
+	_bfd_dwarf2_find_nearest_line): ..
+	* ecoff.c (bfd_debug_section, ecoff_set_symbol_info,
+	ecoff_compute_section_file_positions,
+	_bfd_ecoff_write_object_contents, ecoff_indirect_link_order): ..
+	* elf-eh-frame.c (_bfd_elf_discard_section_eh_frame,
+	_bfd_elf_discard_section_eh_frame_hdr,
+	_bfd_elf_maybe_strip_eh_frame_hdr, _bfd_elf_eh_frame_section_offset,
+	_bfd_elf_write_section_eh_frame,
+	_bfd_elf_write_section_eh_frame_hdr): ..
+	* elf-hppa.h (elf_hppa_sort_unwind): ..
+	* elf-m10200.c (mn10200_elf_relax_section,
+	mn10200_elf_relax_delete_bytes,
+	mn10200_elf_get_relocated_section_contents): ..
+	* elf-m10300.c (_bfd_mn10300_elf_create_got_section,
+	mn10300_elf_check_relocs, mn10300_elf_relax_section,
+	mn10300_elf_relax_delete_bytes,
+	mn10300_elf_get_relocated_section_contents,
+	_bfd_mn10300_elf_adjust_dynamic_symbol,
+	_bfd_mn10300_elf_discard_copies,
+	_bfd_mn10300_elf_size_dynamic_sections,
+	_bfd_mn10300_elf_finish_dynamic_sections): ..
+	* elf.c (_bfd_elf_print_private_bfd_data, bfd_elf_get_bfd_needed_list,
+	_bfd_elf_make_section_from_phdr, elf_fake_sections,
+	bfd_elf_set_group_contents, map_sections_to_segments,
+	elf_sort_sections, assign_file_positions_for_segments,
+	SECTION_SIZE, copy_private_bfd_data,
+	_bfd_elf_get_dynamic_reloc_upper_bound,
+	_bfd_elf_canonicalize_dynamic_reloc, elfcore_maybe_make_sect,
+	_bfd_elfcore_make_pseudosection, elfcore_grok_prstatus,
+	elfcore_grok_lwpstatus, elfcore_grok_win32pstatus,
+	elfcore_grok_note, elfcore_grok_nto_status, elfcore_grok_nto_gregs,
+	_bfd_elf_rel_local_sym, _bfd_elf_get_synthetic_symtab): ..
+	* elf32-arm.h (bfd_elf32_arm_allocate_interworking_sect,
+	bfd_elf32_arm_process_before_allocation,
+	elf32_arm_adjust_dynamic_symbol, allocate_dynrelocs,
+	elf32_arm_size_dynamic_sections, elf32_arm_finish_dynamic_sections,
+	elf32_arm_write_section): ..
+	* elf32-cris.c (cris_elf_grok_prstatus,
+	elf_cris_finish_dynamic_sections, cris_elf_gc_sweep_hook,
+	elf_cris_adjust_gotplt_to_got, elf_cris_adjust_dynamic_symbol,
+	cris_elf_check_relocs, elf_cris_size_dynamic_sections,
+	elf_cris_discard_excess_dso_dynamics,
+	elf_cris_discard_excess_program_dynamics): ..
+	* elf32-d30v.c (bfd_elf_d30v_reloc, bfd_elf_d30v_reloc_21): ..
+	* elf32-dlx.c (_bfd_dlx_elf_hi16_reloc): ..
+	* elf32-frv.c (_frvfdpic_add_dyn_reloc, _frvfdpic_add_rofixup,
+	_frv_create_got_section, _frvfdpic_assign_plt_entries,
+	elf32_frvfdpic_size_dynamic_sections,
+	elf32_frvfdpic_modify_segment_map,
+	elf32_frvfdpic_finish_dynamic_sections): ..
+	* elf32-h8300.c (elf32_h8_relax_section, elf32_h8_relax_delete_bytes,
+	elf32_h8_get_relocated_section_contents): ..
+	* elf32-hppa.c (hppa_build_one_stub, hppa_size_one_stub,
+	elf32_hppa_adjust_dynamic_symbol, allocate_plt_static,
+	allocate_dynrelocs, elf32_hppa_size_dynamic_sections, group_sections,
+	elf32_hppa_size_stubs, elf32_hppa_set_gp, elf32_hppa_build_stubs,
+	elf32_hppa_finish_dynamic_sections): ..
+	* elf32-i370.c (i370_elf_adjust_dynamic_symbol,
+	i370_elf_size_dynamic_sections, i370_elf_check_relocs,
+	i370_elf_finish_dynamic_sections): ..
+	* elf32-i386.c (elf_i386_grok_prstatus, elf_i386_adjust_dynamic_symbol,
+	allocate_dynrelocs, elf_i386_size_dynamic_sections,
+	elf_i386_relocate_section, elf_i386_finish_dynamic_sections): ..
+	* elf32-i860.c (i860_howto_pc26_reloc, i860_howto_pc16_reloc,
+	i860_howto_highadj_reloc, i860_howto_splitn_reloc): ..
+	* elf32-ip2k.c (ip2k_is_switch_table_128,
+	ip2k_relax_switch_table_128, ip2k_is_switch_table_256,
+	ip2k_relax_switch_table_256, ip2k_elf_relax_section,
+	adjust_all_relocations, ip2k_elf_relax_delete_bytes): ..
+	* elf32-m32r.c (m32r_elf_do_10_pcrel_reloc, m32r_elf_hi16_reloc,
+	m32r_elf_generic_reloc, m32r_elf_adjust_dynamic_symbol,
+	allocate_dynrelocs, m32r_elf_size_dynamic_sections,
+	m32r_elf_relocate_section, m32r_elf_finish_dynamic_sections,
+	m32r_elf_relax_section, m32r_elf_relax_delete_bytes,
+	m32r_elf_get_relocated_section_contents): ..
+	* elf32-m68hc11.c (m68hc11_elf_build_one_stub,
+	m68hc11_elf_size_one_stub, m68hc11_elf_relax_section,
+	m68hc11_elf_relax_delete_bytes): ..
+	* elf32-m68hc12.c (m68hc12_elf_build_one_stub,
+	m68hc12_elf_size_one_stub): ..
+	* elf32-m68hc1x.c (elf32_m68hc11_size_stubs,
+	elf32_m68hc11_build_stubs, m68hc11_elf_special_reloc): ..
+	* elf32-m68k.c (elf_m68k_check_relocs, elf_m68k_gc_sweep_hook,
+	elf_m68k_adjust_dynamic_symbol, elf_m68k_size_dynamic_sections,
+	elf_m68k_discard_copies, elf_m68k_finish_dynamic_sections): ..
+	* elf32-mips.c (gprel32_with_gp, mips16_gprel_reloc,
+	elf32_mips_grok_prstatus): ..
+	* elf32-or32.c (or32_elf_consth_reloc): ..
+	* elf32-ppc.c (ppc_elf_relax_section, ppc_elf_addr16_ha_reloc,
+	elf_create_pointer_linker_section, ppc_elf_create_linker_section,
+	ppc_elf_additional_program_headers, ppc_elf_adjust_dynamic_symbol,
+	allocate_dynrelocs, ppc_elf_size_dynamic_sections,
+	ppc_elf_finish_dynamic_sections, ppc_elf_grok_prstatus,
+	ppc_elf_final_write_processing): ..
+	* elf32-s390.c (s390_elf_ldisp_reloc, elf_s390_adjust_dynamic_symbol,
+	allocate_dynrelocs, elf_s390_size_dynamic_sections,
+	elf_s390_finish_dynamic_sections, elf_s390_grok_prstatus): ..
+	* elf32-sh.c (sh_elf_reloc_loop, sh_elf_relax_section,
+	sh_elf_relax_delete_bytes, sh_elf_align_loads,
+	sh_elf_adjust_dynamic_symbol, allocate_dynrelocs,
+	sh_elf_size_dynamic_sections, sh_elf_get_relocated_section_contents,
+	sh_elf_finish_dynamic_sections, elf32_shlin_grok_prstatus): ..
+	* elf32-sh64-com.c (sh64_address_in_cranges,
+	sh64_get_contents_type): ..
+	* elf32-sh64.c (sh64_find_section_for_address,
+	sh64_elf_final_write_processing): ..
+	* elf32-sparc.c (sparc_elf_wdisp16_reloc, sparc_elf_hix22_reloc,
+	sparc_elf_lox10_reloc, elf32_sparc_adjust_dynamic_symbol,
+	allocate_dynrelocs, elf32_sparc_size_dynamic_sections,
+	elf32_sparc_relocate_section, elf32_sparc_finish_dynamic_sections): ..
+	* elf32-v850.c (v850_elf_reloc, v850_elf_relax_section): ..
+	* elf32-vax.c (elf_vax_check_relocs, elf_vax_adjust_dynamic_symbol,
+	elf_vax_size_dynamic_sections, elf_vax_discard_copies,
+	elf_vax_instantiate_got_entries, elf_vax_relocate_section,
+	elf_vax_finish_dynamic_sections): ..
+	* elf32-xstormy16.c (xstormy16_elf_24_reloc,
+	xstormy16_elf_check_relocs, xstormy16_relax_plt_check,
+	xstormy16_elf_relax_section, xstormy16_elf_always_size_sections,
+	xstormy16_elf_finish_dynamic_sections): ..
+	* elf32-xtensa.c (xtensa_read_table_entries,
+	elf_xtensa_allocate_got_size, elf_xtensa_allocate_local_got_size,
+	elf_xtensa_size_dynamic_sections, elf_xtensa_do_reloc,
+	bfd_elf_xtensa_reloc, elf_xtensa_relocate_section,
+	elf_xtensa_combine_prop_entries, elf_xtensa_finish_dynamic_sections,
+	elf_xtensa_discard_info_for_section, elf_xtensa_grok_prstatus,
+	get_relocation_opcode, retrieve_contents, find_relaxable_sections,
+	collect_source_relocs, is_resolvable_asm_expansion, remove_literals,
+	relax_section, shrink_dynamic_reloc_sections, relax_property_section,
+	xtensa_callback_required_dependence): ..
+	* elf64-alpha.c (elf64_alpha_reloc_gpdisp, elf64_alpha_relax_section,
+	elf64_alpha_check_relocs, elf64_alpha_adjust_dynamic_symbol,
+	elf64_alpha_calc_got_offsets_for_symbol, elf64_alpha_calc_got_offsets,
+	elf64_alpha_size_plt_section, elf64_alpha_size_plt_section_1,
+	elf64_alpha_always_size_sections, elf64_alpha_calc_dynrel_sizes,
+	elf64_alpha_size_rela_got_section, elf64_alpha_size_rela_got_1,
+	elf64_alpha_size_dynamic_sections, elf64_alpha_emit_dynrel,
+	elf64_alpha_finish_dynamic_sections, elf64_alpha_final_link): ..
+	* elf64-hppa.c (allocate_dynrel_entries,
+	elf64_hppa_size_dynamic_sections,
+	elf64_hppa_finish_dynamic_sections): ..
+	* elf64-mips.c (mips_elf64_gprel32_reloc, mips16_gprel_reloc,
+	mips_elf64_canonicalize_dynamic_reloc, mips_elf64_slurp_reloc_table,
+	elf64_mips_grok_prstatus): ..
+	* elf64-mmix.c (mmix_elf_perform_relocation, mmix_elf_reloc,
+	mmix_elf_relocate_section, mmix_elf_final_link,
+	mmix_set_relaxable_size, _bfd_mmix_after_linker_allocation,
+	mmix_elf_relax_section, mmix_elf_get_section_contents): ..
+	* elf64-ppc.c (ppc64_elf_object_p, ppc64_elf_grok_prstatus,
+	ppc64_elf_check_relocs, ppc64_elf_func_desc_adjust,
+	ppc64_elf_adjust_dynamic_symbol, ppc64_elf_edit_opd,
+	allocate_dynrelocs, ppc64_elf_size_dynamic_sections,
+	ppc_build_one_stub, ppc_size_one_stub, ppc64_elf_next_toc_section,
+	toc_adjusting_stub_needed, group_sections, ppc64_elf_size_stubs,
+	ppc64_elf_build_stubs, ppc64_elf_relocate_section,
+	ppc64_elf_finish_dynamic_sections): ..
+	* elf64-s390.c (s390_elf_ldisp_reloc, elf_s390_adjust_dynamic_symbol,
+	allocate_dynrelocs, elf_s390_size_dynamic_sections,
+	elf_s390_finish_dynamic_sections): ..
+	* elf64-sh64.c (sh_elf64_get_relocated_section_contents,
+	sh_elf64_check_relocs, sh64_elf64_adjust_dynamic_symbol,
+	sh64_elf64_discard_copies, sh64_elf64_size_dynamic_sections,
+	sh64_elf64_finish_dynamic_sections): ..
+	* elf64-sparc.c (sparc64_elf_slurp_reloc_table, init_insn_reloc,
+	sparc64_elf_check_relocs, sparc64_elf_adjust_dynamic_symbol,
+	sparc64_elf_size_dynamic_sections, sparc64_elf_relocate_section,
+	sparc64_elf_finish_dynamic_symbol,
+	sparc64_elf_finish_dynamic_sections): ..
+	* elf64-x86-64.c (elf64_x86_64_grok_prstatus,
+	elf64_x86_64_adjust_dynamic_symbol, allocate_dynrelocs,
+	elf64_x86_64_size_dynamic_sections, elf64_x86_64_relocate_section,
+	elf64_x86_64_finish_dynamic_sections): ..
+	* elfarm-nabi.c (elf32_arm_nabi_grok_prstatus): ..
+	* elfcode.h (elf_slurp_reloc_table): ..
+	* elflink.c (_bfd_elf_create_got_section, elf_add_dt_needed_tag,
+	elf_finalize_dynstr, elf_link_add_object_symbols,
+	bfd_elf_size_dynamic_sections, elf_link_sort_relocs,
+	elf_link_input_bfd, bfd_elf_final_link, bfd_elf_discard_info): ..
+	* elfn32-mips.c (gprel32_with_gp, mips16_gprel_reloc,
+	elf32_mips_grok_prstatus): ..
+	* elfxx-ia64.c (elfNN_ia64_relax_section, allocate_dynrel_entries,
+	elfNN_ia64_size_dynamic_sections, elfNN_ia64_install_dyn_reloc,
+	elfNN_ia64_choose_gp, elfNN_ia64_final_link,
+	elfNN_ia64_finish_dynamic_sections): ..
+	* elfxx-mips.c (mips_elf_create_procedure_table,
+	mips_elf_check_mips16_stubs, _bfd_mips_elf_gprel16_with_gp,
+	_bfd_mips_elf_hi16_reloc, _bfd_mips_elf_generic_reloc,
+	mips_elf_global_got_index, mips_elf_multi_got,
+	mips_elf_create_compact_rel_section, mips_elf_calculate_relocation,
+	mips_elf_allocate_dynamic_relocations,
+	mips_elf_create_dynamic_relocation, _bfd_mips_elf_fake_sections,
+	_bfd_mips_relax_section, _bfd_mips_elf_adjust_dynamic_symbol,
+	_bfd_mips_elf_always_size_sections,
+	_bfd_mips_elf_size_dynamic_sections,
+	_bfd_mips_elf_finish_dynamic_symbol,
+	_bfd_mips_elf_finish_dynamic_sections,
+	_bfd_mips_elf_modify_segment_map, _bfd_mips_elf_discard_info,
+	_bfd_mips_elf_write_section, _bfd_mips_elf_set_section_contents,
+	_bfd_elf_mips_get_relocated_section_contents,
+	_bfd_mips_elf_final_link, _bfd_mips_elf_merge_private_bfd_data): ..
+	* hp300hpux.c (callback): ..
+	* hppabsd-core.c (make_bfd_asection): ..
+	* hpux-core.c (make_bfd_asection): ..
+	* i386linux.c (linux_link_create_dynamic_sections,
+	bfd_i386linux_size_dynamic_sections, linux_finish_dynamic_link): ..
+	* i386msdos.c (msdos_write_object_contents): ..
+	* i386os9k.c (os9k_callback, os9k_write_object_contents,
+	os9k_set_section_contents): ..
+	* ieee.c (parse_expression, ieee_slurp_external_symbols,
+	ieee_slurp_sections, ieee_slurp_debug, ieee_slurp_section_data,
+	ieee_write_section_part, do_with_relocs, do_as_repeat,
+	do_without_relocs, ieee_write_debug_part, init_for_output,
+	ieee_set_section_contents): ..
+	* ihex.c (ihex_scan, ihex_read_section, ihex_get_section_contents): ..
+	* irix-core.c (do_sections, make_bfd_asection): ..
+	* libaout.h (aout_section_merge_with_text_p): ..
+	* libbfd.c (_bfd_generic_get_section_contents,
+	_bfd_generic_get_section_contents_in_window): ..
+	* linker.c (default_indirect_link_order): ..
+	* lynx-core.c (make_bfd_asection): ..
+	* m68klinux.c (linux_link_create_dynamic_sections,
+	bfd_m68klinux_size_dynamic_sections, linux_finish_dynamic_link): ..
+	* mach-o.c (bfd_mach_o_make_bfd_section,
+	bfd_mach_o_scan_read_dylinker, bfd_mach_o_scan_read_dylib,
+	bfd_mach_o_scan_read_thread, bfd_mach_o_scan_read_symtab,
+	bfd_mach_o_scan_read_segment): ..
+	* merge.c (_bfd_add_merge_section, record_section, merge_strings,
+	_bfd_merge_sections): ..
+	* mmo.c (mmo_find_sec_w_addr, mmo_get_spec_section, mmo_get_loc,
+	mmo_map_set_sizes, mmo_canonicalize_symtab,
+	mmo_internal_write_section, mmo_write_object_contents): ..
+	* netbsd-core.c (netbsd_core_file_p): ..
+	* nlm32-alpha.c (nlm_alpha_read_reloc, nlm_alpha_write_import,
+	nlm_alpha_set_public_section): ..
+	* nlm32-ppc.c (nlm_powerpc_read_reloc, nlm_powerpc_write_reloc): ..
+	* nlm32-sparc.c (nlm_sparc_write_import): ..
+	* nlmcode.h (add_bfd_section, nlm_swap_auxiliary_headers_in,
+	nlm_compute_section_file_positions): ..
+	* oasys.c (oasys_object_p, oasys_slurp_section_data,
+	oasys_write_sections, oasys_write_data, oasys_set_section_contents): ..
+	* opncls.c (get_debug_link_info): ..
+	* osf-core.c (make_bfd_asection): ..
+	* pdp11.c (some_aout_object_p, adjust_o_magic, adjust_z_magic,
+	adjust_n_magic, adjust_sizes_and_vmas, squirt_out_relocs,
+	final_link, aout_link_input_section): ..
+	* peXXigen.c (_bfd_XXi_swap_sym_in, _bfd_XXi_swap_aouthdr_out,
+	pe_print_idata, pe_print_edata, pe_print_pdata, pe_print_reloc): ..
+	* pef.c (bfd_pef_make_bfd_section, bfd_pef_print_loader_section,
+	bfd_pef_scan_start_address, bfd_pef_parse_symbols): ..
+	* ppcboot.c (ppcboot_object_p, ppcboot_canonicalize_symtab): ..
+	* ptrace-core.c (ptrace_unix_core_file_p): ..
+	* reloc.c (bfd_perform_relocation, bfd_install_relocation,
+	_bfd_final_link_relocate, bfd_generic_relax_section,
+	bfd_generic_get_relocated_section_contents): ..
+	* reloc16.c (bfd_coff_reloc16_relax_section,
+	bfd_coff_reloc16_get_relocated_section_c): ..
+	* riscix.c (riscix_some_aout_object_p): ..
+	* rs6000-core.c (read_hdr, make_bfd_asection): ..
+	* sco5-core.c (make_bfd_asection): ..
+	* simple.c (bfd_simple_get_relocated_section_contents): ..
+	* som.c (som_object_setup, setup_sections, som_prep_headers,
+	som_write_fixups, som_begin_writing, bfd_section_from_som_symbol,
+	som_set_reloc_info, som_get_section_contents,
+	som_bfd_link_split_section): ..
+	* sparclinux.c (linux_link_create_dynamic_sections,
+	bfd_sparclinux_size_dynamic_sections, linux_finish_dynamic_link): ..
+	* srec.c (srec_scan, srec_read_section, srec_get_section_contents): ..
+	* stabs.c (_bfd_link_section_stabs, _bfd_discard_section_stabs,
+	_bfd_write_stab_strings, _bfd_stab_section_offset): ..
+	* sunos.c (sunos_read_dynamic_info, sunos_create_dynamic_sections,
+	bfd_sunos_size_dynamic_sections, sunos_scan_std_relocs,
+	sunos_scan_ext_relocs, sunos_scan_dynamic_symbol,
+	sunos_write_dynamic_symbol, sunos_check_dynamic_reloc,
+	sunos_finish_dynamic_link): ..
+	* syms.c (_bfd_stab_section_find_nearest_line): ..
+	* tekhex.c (first_phase, tekhex_set_section_contents,
+	tekhex_write_object_contents): ..
+	* trad-core.c (trad_unix_core_file_p): ..
+	* versados.c (process_esd, process_otr, process_otr): ..
+	* vms-gsd.c (_bfd_vms_slurp_gsd, _bfd_vms_write_gsd): ..
+	* vms-misc.c (add_new_contents): ..
+	* vms-tir.c (check_section, new_section, _bfd_vms_write_tir): ..
+	* vms.c (vms_set_section_contents): ..
+	* xcofflink.c (xcoff_get_section_contents, xcoff_link_add_symbols,
+	xcoff_sweep, bfd_xcoff_size_dynamic_sections, xcoff_build_ldsyms,
+	_bfd_xcoff_bfd_final_link, xcoff_link_input_bfd): ..
+	* xsym.c (bfd_sym_scan): .. See above.
+
 2004-06-21  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elfxx-ia64.c (elfNN_ia64_relax_section): Add addend when
@@ -295,7 +656,7 @@
 	section names by inserting a new substring after .gnu.linkonce, except
 	for .gnu.linkonce.t.* where the "t." is replaced.
 
-2004-05-17  Adam Nemet  <anemet@lnxw.com> 
+2004-05-17  Adam Nemet  <anemet@lnxw.com>
 
 	* config.bfd (sparc-*-lynxos* case): Add to obsolete list.
 	(m68-*-lynxos* case): Likewise.
@@ -390,7 +751,7 @@
 	(_frvfdpic_add_rofixup): Likewise.
 
 2004-05-07  Brian Ford  <ford@vss.fsi.com>
-            DJ Delorie  <dj@redhat.com>
+	    DJ Delorie  <dj@redhat.com>
 
 	* coffcode.h (coff_write_object_contents) [COFF_IMAGE_WITH_PE]:
 	Propagate IMAGE_FILE_LARGE_ADDRESS_AWARE.

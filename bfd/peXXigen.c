@@ -189,8 +189,7 @@ _bfd_XXi_swap_sym_in (abfd, ext1, in1)
 
 	  sec->vma = 0;
 	  sec->lma = 0;
-	  sec->_cooked_size = 0;
-	  sec->_raw_size = 0;
+	  sec->size = 0;
 	  sec->filepos = 0;
 	  sec->rel_filepos = 0;
 	  sec->reloc_count = 0;
@@ -664,7 +663,7 @@ _bfd_XXi_swap_aouthdr_out (abfd, in, out)
 
     for (sec = abfd->sections; sec; sec = sec->next)
       {
-	int rounded = FA(sec->_raw_size);
+	int rounded = FA(sec->size);
 
 	/* The first non-zero section filepos is the header size.
 	   Sections without contents will have a filepos of 0.  */
@@ -1109,7 +1108,6 @@ pe_print_idata (abfd, vfile)
   bfd_size_type datasize = 0;
   bfd_size_type dataoff;
   bfd_size_type i;
-  bfd_size_type amt;
   int onaline = 20;
 
   pe_data_type *pe = pe_data (abfd);
@@ -1127,7 +1125,7 @@ pe_print_idata (abfd, vfile)
 	return TRUE;
 
       addr = section->vma;
-      datasize = bfd_section_size (abfd, section);
+      datasize = section->size;
       if (datasize == 0)
 	return TRUE;
     }
@@ -1136,7 +1134,7 @@ pe_print_idata (abfd, vfile)
       addr += extra->ImageBase;
       for (section = abfd->sections; section != NULL; section = section->next)
 	{
-	  datasize = bfd_section_size (abfd, section);
+	  datasize = section->size;
 	  if (addr >= section->vma && addr < section->vma + datasize)
 	    break;
 	}
@@ -1156,7 +1154,7 @@ pe_print_idata (abfd, vfile)
   datasize -= dataoff;
 
 #ifdef POWERPC_LE_PE
-  if (rel_section != 0 && bfd_section_size (abfd, rel_section) != 0)
+  if (rel_section != 0 && rel_section->size != 0)
     {
       /* The toc address can be found by taking the starting address,
 	 which on the PPC locates a function descriptor. The
@@ -1168,16 +1166,15 @@ pe_print_idata (abfd, vfile)
       bfd_vma loadable_toc_address;
       bfd_vma toc_address;
       bfd_vma start_address;
-      bfd_byte *data = 0;
+      bfd_byte *data;
       int offset;
 
-      amt = bfd_section_size (abfd, rel_section);
-      data = (bfd_byte *) bfd_malloc (amt);
-      if (data == NULL && amt != 0)
-	return FALSE;
-
-      bfd_get_section_contents (abfd, rel_section, (PTR) data, (bfd_vma) 0,
-				amt);
+      if (!bfd_malloc_and_get_section (abfd, rel_section, &data))
+	{
+	  if (data != NULL)
+	    free (data);
+	  return FALSE;
+	}
 
       offset = abfd->start_address - rel_section->vma;
 
@@ -1191,6 +1188,8 @@ pe_print_idata (abfd, vfile)
       fprintf (file,
 	       _("\tcode-base %08lx toc (loadable/actual) %08lx/%08lx\n"),
 	       start_address, loadable_toc_address, toc_address);
+      if (data != NULL)
+	free (data);
     }
   else
     {
@@ -1207,14 +1206,13 @@ pe_print_idata (abfd, vfile)
  vma:            Hint    Time      Forward  DLL       First\n\
                  Table   Stamp     Chain    Name      Thunk\n"));
 
-  amt = dataoff + datasize;
-  data = (bfd_byte *) bfd_malloc (amt);
-  if (data == NULL)
-    return FALSE;
-
   /* Read the whole section.  Some of the fields might be before dataoff.  */
-  if (! bfd_get_section_contents (abfd, section, (PTR) data, (bfd_vma) 0, amt))
-    return FALSE;
+  if (!bfd_malloc_and_get_section (abfd, section, &data))
+    {
+      if (data != NULL)
+	free (data);
+      return FALSE;
+    }
 
   adj = section->vma - extra->ImageBase;
 
@@ -1281,7 +1279,7 @@ pe_print_idata (abfd, vfile)
 		   ft_section != NULL;
 		   ft_section = ft_section->next)
 		{
-		  ft_datasize = bfd_section_size (abfd, ft_section);
+		  ft_datasize = ft_section->size;
 		  if (ft_addr >= ft_section->vma
 		      && ft_addr < ft_section->vma + ft_datasize)
 		    break;
@@ -1411,7 +1409,7 @@ pe_print_edata (abfd, vfile)
 	return TRUE;
 
       addr = section->vma;
-      datasize = bfd_section_size (abfd, section);
+      datasize = section->size;
       if (datasize == 0)
 	return TRUE;
     }
@@ -1421,7 +1419,7 @@ pe_print_edata (abfd, vfile)
 
       for (section = abfd->sections; section != NULL; section = section->next)
 	{
-	  datasize = bfd_section_size (abfd, section);
+	  datasize = section->size;
 
 	  if (addr >= section->vma && addr < section->vma + datasize)
 	    break;
@@ -1632,16 +1630,16 @@ pe_print_pdata (abfd, vfile)
      \t\tAddress  Address  Handler  Data     Address    Mask\n"));
 #endif
 
-  datasize = bfd_section_size (abfd, section);
+  datasize = section->size;
   if (datasize == 0)
     return TRUE;
 
-  data = (bfd_byte *) bfd_malloc (datasize);
-  if (data == NULL && datasize != 0)
-    return FALSE;
-
-  bfd_get_section_contents (abfd, section, (PTR) data, (bfd_vma) 0,
-			    datasize);
+  if (!bfd_malloc_and_get_section (abfd, section, &data))
+    {
+      if (data != NULL)
+	free (data);
+      return FALSE;
+    }
 
   start = 0;
 
@@ -1751,23 +1749,23 @@ pe_print_reloc (abfd, vfile)
   if (section == NULL)
     return TRUE;
 
-  if (bfd_section_size (abfd, section) == 0)
+  if (section->size == 0)
     return TRUE;
 
   fprintf (file,
 	   _("\n\nPE File Base Relocations (interpreted .reloc section contents)\n"));
 
-  datasize = bfd_section_size (abfd, section);
-  data = (bfd_byte *) bfd_malloc (datasize);
-  if (data == NULL && datasize != 0)
-    return FALSE;
-
-  bfd_get_section_contents (abfd, section, (PTR) data, (bfd_vma) 0,
-			    datasize);
+  datasize = section->size;
+  if (!bfd_malloc_and_get_section (abfd, section, &data))
+    {
+      if (data != NULL)
+	free (data);
+      return FALSE;
+    }
 
   start = 0;
 
-  stop = bfd_section_size (abfd, section);
+  stop = section->size;
 
   for (i = start; i < stop;)
     {

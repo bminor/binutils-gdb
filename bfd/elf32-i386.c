@@ -351,7 +351,7 @@ static bfd_boolean
 elf_i386_grok_prstatus (bfd *abfd, Elf_Internal_Note *note)
 {
   int offset;
-  size_t raw_size;
+  size_t size;
 
   if (note->namesz == 8 && strcmp (note->namedata, "FreeBSD") == 0)
     {
@@ -368,7 +368,7 @@ elf_i386_grok_prstatus (bfd *abfd, Elf_Internal_Note *note)
 
       /* pr_reg */
       offset = 28;
-      raw_size = bfd_get_32 (abfd, note->descdata + 8);
+      size = bfd_get_32 (abfd, note->descdata + 8);
     }
   else
     {
@@ -386,7 +386,7 @@ elf_i386_grok_prstatus (bfd *abfd, Elf_Internal_Note *note)
 
 	  /* pr_reg */
 	  offset = 72;
-	  raw_size = 68;
+	  size = 68;
 
 	  break;
 	}
@@ -394,7 +394,7 @@ elf_i386_grok_prstatus (bfd *abfd, Elf_Internal_Note *note)
 
   /* Make a ".reg/999" section.  */
   return _bfd_elfcore_make_pseudosection (abfd, ".reg",
-					  raw_size, note->descpos + offset);
+					  size, note->descpos + offset);
 }
 
 static bfd_boolean
@@ -1429,7 +1429,7 @@ elf_i386_adjust_dynamic_symbol (struct bfd_link_info *info,
      runtime process image.  */
   if ((h->root.u.def.section->flags & SEC_ALLOC) != 0)
     {
-      htab->srelbss->_raw_size += sizeof (Elf32_External_Rel);
+      htab->srelbss->size += sizeof (Elf32_External_Rel);
       h->elf_link_hash_flags |= ELF_LINK_HASH_NEEDS_COPY;
     }
 
@@ -1441,7 +1441,7 @@ elf_i386_adjust_dynamic_symbol (struct bfd_link_info *info,
 
   /* Apply the required alignment.  */
   s = htab->sdynbss;
-  s->_raw_size = BFD_ALIGN (s->_raw_size, (bfd_size_type) (1 << power_of_two));
+  s->size = BFD_ALIGN (s->size, (bfd_size_type) (1 << power_of_two));
   if (power_of_two > bfd_get_section_alignment (htab->elf.dynobj, s))
     {
       if (! bfd_set_section_alignment (htab->elf.dynobj, s, power_of_two))
@@ -1450,10 +1450,10 @@ elf_i386_adjust_dynamic_symbol (struct bfd_link_info *info,
 
   /* Define the symbol as being at this point in the section.  */
   h->root.u.def.section = s;
-  h->root.u.def.value = s->_raw_size;
+  h->root.u.def.value = s->size;
 
   /* Increment the section size to make room for the symbol.  */
-  s->_raw_size += h->size;
+  s->size += h->size;
 
   return TRUE;
 }
@@ -1500,10 +1500,10 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 
 	  /* If this is the first .plt entry, make room for the special
 	     first entry.  */
-	  if (s->_raw_size == 0)
-	    s->_raw_size += PLT_ENTRY_SIZE;
+	  if (s->size == 0)
+	    s->size += PLT_ENTRY_SIZE;
 
-	  h->plt.offset = s->_raw_size;
+	  h->plt.offset = s->size;
 
 	  /* If this symbol is not defined in a regular file, and we are
 	     not generating a shared library, then set the symbol to this
@@ -1518,14 +1518,14 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	    }
 
 	  /* Make room for this entry.  */
-	  s->_raw_size += PLT_ENTRY_SIZE;
+	  s->size += PLT_ENTRY_SIZE;
 
 	  /* We also need to make an entry in the .got.plt section, which
 	     will be placed in the .got section by the linker script.  */
-	  htab->sgotplt->_raw_size += 4;
+	  htab->sgotplt->size += 4;
 
 	  /* We also need to make an entry in the .rel.plt section.  */
-	  htab->srelplt->_raw_size += sizeof (Elf32_External_Rel);
+	  htab->srelplt->size += sizeof (Elf32_External_Rel);
 	}
       else
 	{
@@ -1562,11 +1562,11 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	}
 
       s = htab->sgot;
-      h->got.offset = s->_raw_size;
-      s->_raw_size += 4;
+      h->got.offset = s->size;
+      s->size += 4;
       /* R_386_TLS_GD needs 2 consecutive GOT slots.  */
       if (tls_type == GOT_TLS_GD || tls_type == GOT_TLS_IE_BOTH)
-	s->_raw_size += 4;
+	s->size += 4;
       dyn = htab->elf.dynamic_sections_created;
       /* R_386_TLS_IE_32 needs one dynamic relocation,
 	 R_386_TLS_IE resp. R_386_TLS_GOTIE needs one dynamic relocation,
@@ -1574,17 +1574,17 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	 need two), R_386_TLS_GD needs one if local symbol and two if
 	 global.  */
       if (tls_type == GOT_TLS_IE_BOTH)
-	htab->srelgot->_raw_size += 2 * sizeof (Elf32_External_Rel);
+	htab->srelgot->size += 2 * sizeof (Elf32_External_Rel);
       else if ((tls_type == GOT_TLS_GD && h->dynindx == -1)
 	       || (tls_type & GOT_TLS_IE))
-	htab->srelgot->_raw_size += sizeof (Elf32_External_Rel);
+	htab->srelgot->size += sizeof (Elf32_External_Rel);
       else if (tls_type == GOT_TLS_GD)
-	htab->srelgot->_raw_size += 2 * sizeof (Elf32_External_Rel);
+	htab->srelgot->size += 2 * sizeof (Elf32_External_Rel);
       else if ((ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
 		|| h->root.type != bfd_link_hash_undefweak)
 	       && (info->shared
 		   || WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, 0, h)))
-	htab->srelgot->_raw_size += sizeof (Elf32_External_Rel);
+	htab->srelgot->size += sizeof (Elf32_External_Rel);
     }
   else
     h->got.offset = (bfd_vma) -1;
@@ -1665,7 +1665,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
   for (p = eh->dyn_relocs; p != NULL; p = p->next)
     {
       asection *sreloc = elf_section_data (p->sec)->sreloc;
-      sreloc->_raw_size += p->count * sizeof (Elf32_External_Rel);
+      sreloc->size += p->count * sizeof (Elf32_External_Rel);
     }
 
   return TRUE;
@@ -1725,7 +1725,7 @@ elf_i386_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	  s = bfd_get_section_by_name (dynobj, ".interp");
 	  if (s == NULL)
 	    abort ();
-	  s->_raw_size = sizeof ELF_DYNAMIC_INTERPRETER;
+	  s->size = sizeof ELF_DYNAMIC_INTERPRETER;
 	  s->contents = (unsigned char *) ELF_DYNAMIC_INTERPRETER;
 	}
     }
@@ -1764,7 +1764,7 @@ elf_i386_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	      else if (p->count != 0)
 		{
 		  srel = elf_section_data (p->sec)->sreloc;
-		  srel->_raw_size += p->count * sizeof (Elf32_External_Rel);
+		  srel->size += p->count * sizeof (Elf32_External_Rel);
 		  if ((p->sec->output_section->flags & SEC_READONLY) != 0)
 		    info->flags |= DF_TEXTREL;
 		}
@@ -1785,19 +1785,19 @@ elf_i386_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	{
 	  if (*local_got > 0)
 	    {
-	      *local_got = s->_raw_size;
-	      s->_raw_size += 4;
+	      *local_got = s->size;
+	      s->size += 4;
 	      if (*local_tls_type == GOT_TLS_GD
 		  || *local_tls_type == GOT_TLS_IE_BOTH)
-		s->_raw_size += 4;
+		s->size += 4;
 	      if (info->shared
 		  || *local_tls_type == GOT_TLS_GD
 		  || (*local_tls_type & GOT_TLS_IE))
 		{
 		  if (*local_tls_type == GOT_TLS_IE_BOTH)
-		    srel->_raw_size += 2 * sizeof (Elf32_External_Rel);
+		    srel->size += 2 * sizeof (Elf32_External_Rel);
 		  else
-		    srel->_raw_size += sizeof (Elf32_External_Rel);
+		    srel->size += sizeof (Elf32_External_Rel);
 		}
 	    }
 	  else
@@ -1809,9 +1809,9 @@ elf_i386_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
     {
       /* Allocate 2 got entries and 1 dynamic reloc for R_386_TLS_LDM
 	 relocs.  */
-      htab->tls_ldm_got.offset = htab->sgot->_raw_size;
-      htab->sgot->_raw_size += 8;
-      htab->srelgot->_raw_size += sizeof (Elf32_External_Rel);
+      htab->tls_ldm_got.offset = htab->sgot->size;
+      htab->sgot->size += 8;
+      htab->srelgot->size += sizeof (Elf32_External_Rel);
     }
   else
     htab->tls_ldm_got.offset = -1;
@@ -1837,7 +1837,7 @@ elf_i386_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	}
       else if (strncmp (bfd_get_section_name (dynobj, s), ".rel", 4) == 0)
 	{
-	  if (s->_raw_size != 0 && s != htab->srelplt)
+	  if (s->size != 0 && s != htab->srelplt)
 	    relocs = TRUE;
 
 	  /* We use the reloc_count field as a counter if we need
@@ -1850,7 +1850,7 @@ elf_i386_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	  continue;
 	}
 
-      if (s->_raw_size == 0)
+      if (s->size == 0)
 	{
 	  /* If we don't need this section, strip it from the
 	     output file.  This is mostly to handle .rel.bss and
@@ -1871,7 +1871,7 @@ elf_i386_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	 section's contents are written out.  This should not happen,
 	 but this way if it does, we get a R_386_NONE reloc instead
 	 of garbage.  */
-      s->contents = bfd_zalloc (dynobj, s->_raw_size);
+      s->contents = bfd_zalloc (dynobj, s->size);
       if (s->contents == NULL)
 	return FALSE;
     }
@@ -1892,7 +1892,7 @@ elf_i386_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	    return FALSE;
 	}
 
-      if (htab->splt->_raw_size != 0)
+      if (htab->splt->size != 0)
 	{
 	  if (!add_dynamic_entry (DT_PLTGOT, 0)
 	      || !add_dynamic_entry (DT_PLTRELSZ, 0)
@@ -2449,7 +2449,7 @@ elf_i386_relocate_section (bfd *output_bfd,
 		  BFD_ASSERT (rel->r_offset >= 2);
 		  type = bfd_get_8 (input_bfd, contents + rel->r_offset - 2);
 		  BFD_ASSERT (type == 0x8d || type == 0x04);
-		  BFD_ASSERT (rel->r_offset + 9 <= input_section->_raw_size);
+		  BFD_ASSERT (rel->r_offset + 9 <= input_section->size);
 		  BFD_ASSERT (bfd_get_8 (input_bfd,
 					 contents + rel->r_offset + 4)
 			      == 0xe8);
@@ -2475,7 +2475,7 @@ elf_i386_relocate_section (bfd *output_bfd,
 		  else
 		    {
 		      BFD_ASSERT ((val & 0xf8) == 0x80 && (val & 7) != 4);
-		      if (rel->r_offset + 10 <= input_section->_raw_size
+		      if (rel->r_offset + 10 <= input_section->size
 			  && bfd_get_8 (input_bfd,
 					contents + rel->r_offset + 9) == 0x90)
 			{
@@ -2518,7 +2518,7 @@ elf_i386_relocate_section (bfd *output_bfd,
 		     addl $foo, %reg.  */
 		  BFD_ASSERT (rel->r_offset >= 1);
 		  val = bfd_get_8 (input_bfd, contents + rel->r_offset - 1);
-		  BFD_ASSERT (rel->r_offset + 4 <= input_section->_raw_size);
+		  BFD_ASSERT (rel->r_offset + 4 <= input_section->size);
 		  if (val == 0xa1)
 		    {
 		      /* movl foo, %eax.  */
@@ -2575,7 +2575,7 @@ elf_i386_relocate_section (bfd *output_bfd,
 		  BFD_ASSERT (rel->r_offset >= 2);
 		  type = bfd_get_8 (input_bfd, contents + rel->r_offset - 2);
 		  val = bfd_get_8 (input_bfd, contents + rel->r_offset - 1);
-		  BFD_ASSERT (rel->r_offset + 4 <= input_section->_raw_size);
+		  BFD_ASSERT (rel->r_offset + 4 <= input_section->size);
 		  BFD_ASSERT ((val & 0xc0) == 0x80 && (val & 7) != 4);
 		  if (type == 0x8b)
 		    {
@@ -2724,7 +2724,7 @@ elf_i386_relocate_section (bfd *output_bfd,
 	      BFD_ASSERT (rel->r_offset >= 2);
 	      type = bfd_get_8 (input_bfd, contents + rel->r_offset - 2);
 	      BFD_ASSERT (type == 0x8d || type == 0x04);
-	      BFD_ASSERT (rel->r_offset + 9 <= input_section->_raw_size);
+	      BFD_ASSERT (rel->r_offset + 9 <= input_section->size);
 	      BFD_ASSERT (bfd_get_8 (input_bfd, contents + rel->r_offset + 4)
 			  == 0xe8);
 	      BFD_ASSERT (rel + 1 < relend);
@@ -2748,7 +2748,7 @@ elf_i386_relocate_section (bfd *output_bfd,
 		  /* leal foo(%reg), %eax; call ___tls_get_addr; nop
 		     Change it into:
 		     movl %gs:0, %eax; subl $foo@gottpoff(%reg), %eax.  */
-		  BFD_ASSERT (rel->r_offset + 10 <= input_section->_raw_size);
+		  BFD_ASSERT (rel->r_offset + 10 <= input_section->size);
 		  BFD_ASSERT ((val & 0xf8) == 0x80 && (val & 7) != 4);
 		  BFD_ASSERT (bfd_get_8 (input_bfd,
 					 contents + rel->r_offset + 9)
@@ -2796,7 +2796,7 @@ elf_i386_relocate_section (bfd *output_bfd,
 			  == 0x8d);
 	      val = bfd_get_8 (input_bfd, contents + rel->r_offset - 1);
 	      BFD_ASSERT ((val & 0xf8) == 0x80 && (val & 7) != 4);
-	      BFD_ASSERT (rel->r_offset + 9 <= input_section->_raw_size);
+	      BFD_ASSERT (rel->r_offset + 9 <= input_section->size);
 	      BFD_ASSERT (bfd_get_8 (input_bfd, contents + rel->r_offset + 4)
 			  == 0xe8);
 	      BFD_ASSERT (rel + 1 < relend);
@@ -3160,7 +3160,7 @@ elf_i386_finish_dynamic_sections (bfd *output_bfd,
 	abort ();
 
       dyncon = (Elf32_External_Dyn *) sdyn->contents;
-      dynconend = (Elf32_External_Dyn *) (sdyn->contents + sdyn->_raw_size);
+      dynconend = (Elf32_External_Dyn *) (sdyn->contents + sdyn->size);
       for (; dyncon < dynconend; dyncon++)
 	{
 	  Elf_Internal_Dyn dyn;
@@ -3185,7 +3185,7 @@ elf_i386_finish_dynamic_sections (bfd *output_bfd,
 
 	    case DT_PLTRELSZ:
 	      s = htab->srelplt;
-	      dyn.d_un.d_val = s->_raw_size;
+	      dyn.d_un.d_val = s->size;
 	      break;
 
 	    case DT_RELSZ:
@@ -3198,7 +3198,7 @@ elf_i386_finish_dynamic_sections (bfd *output_bfd,
 	      s = htab->srelplt;
 	      if (s == NULL)
 		continue;
-	      dyn.d_un.d_val -= s->_raw_size;
+	      dyn.d_un.d_val -= s->size;
 	      break;
 
 	    case DT_REL:
@@ -3210,7 +3210,7 @@ elf_i386_finish_dynamic_sections (bfd *output_bfd,
 		continue;
 	      if (dyn.d_un.d_ptr != s->output_section->vma + s->output_offset)
 		continue;
-	      dyn.d_un.d_ptr += s->_raw_size;
+	      dyn.d_un.d_ptr += s->size;
 	      break;
 	    }
 
@@ -3218,7 +3218,7 @@ elf_i386_finish_dynamic_sections (bfd *output_bfd,
 	}
 
       /* Fill in the first entry in the procedure linkage table.  */
-      if (htab->splt && htab->splt->_raw_size > 0)
+      if (htab->splt && htab->splt->size > 0)
 	{
 	  if (info->shared)
 	    memcpy (htab->splt->contents,
@@ -3249,7 +3249,7 @@ elf_i386_finish_dynamic_sections (bfd *output_bfd,
   if (htab->sgotplt)
     {
       /* Fill in the first three entries in the global offset table.  */
-      if (htab->sgotplt->_raw_size > 0)
+      if (htab->sgotplt->size > 0)
 	{
 	  bfd_put_32 (output_bfd,
 		      (sdyn == NULL ? 0
@@ -3262,7 +3262,7 @@ elf_i386_finish_dynamic_sections (bfd *output_bfd,
       elf_section_data (htab->sgotplt->output_section)->this_hdr.sh_entsize = 4;
     }
 
-  if (htab->sgot && htab->sgot->_raw_size > 0)
+  if (htab->sgot && htab->sgot->size > 0)
     elf_section_data (htab->sgot->output_section)->this_hdr.sh_entsize = 4;
 
   return TRUE;

@@ -131,7 +131,7 @@ make_a_section_from_file (abfd, hdr, target_index)
 
   return_section->vma = hdr->s_vaddr;
   return_section->lma = hdr->s_paddr;
-  return_section->_raw_size = hdr->s_size;
+  return_section->size = hdr->s_size;
   return_section->filepos = hdr->s_scnptr;
   return_section->rel_filepos = hdr->s_relptr;
   return_section->reloc_count = hdr->s_nreloc;
@@ -1344,7 +1344,7 @@ coff_write_symbols (abfd)
 	      || (debug_string_section != (asection *) NULL
 		  && (BFD_ALIGN (debug_string_size,
 				 1 << debug_string_section->alignment_power)
-		      == bfd_section_size (abfd, debug_string_section))));
+		      == debug_string_section->size)));
 
   return TRUE;
 }
@@ -1455,7 +1455,7 @@ coff_section_symbol (abfd, name)
   csym[0].u.syment.n_sclass = C_STAT;
   csym[0].u.syment.n_numaux = 1;
 /*  SF_SET_STATICS (sym);       @@ ??? */
-  csym[1].u.auxent.x_scn.x_scnlen = sec->_raw_size;
+  csym[1].u.auxent.x_scn.x_scnlen = sec->size;
   csym[1].u.auxent.x_scn.x_nreloc = sec->reloc_count;
   csym[1].u.auxent.x_scn.x_nlinno = sec->lineno_count;
 
@@ -1537,7 +1537,7 @@ build_debug_section (abfd)
       return NULL;
     }
 
-  sec_size = bfd_get_section_size (sect);
+  sec_size = sect->size;
   debug_section = (PTR) bfd_alloc (abfd, sec_size);
   if (debug_section == NULL)
     return NULL;

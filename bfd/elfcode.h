@@ -1,6 +1,6 @@
 /* ELF executable support for BFD.
    Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001, 2002, 2003 Free Software Foundation, Inc.
+   2001, 2002, 2003, 2004 Free Software Foundation, Inc.
 
    Written by Fred Fish @ Cygnus Support, from information published
    in "UNIX System V Release 4, Programmers Guide: ANSI C and
@@ -1355,7 +1355,7 @@ elf_slurp_reloc_table (bfd *abfd,
 	 case because relocations against this section may use the
 	 dynamic symbol table, and in that case bfd_section_from_shdr
 	 in elf.c does not update the RELOC_COUNT.  */
-      if (asect->_raw_size == 0)
+      if (asect->size == 0)
 	return TRUE;
 
       rel_hdr = &d->this_hdr;

@@ -564,11 +564,11 @@ srec_scan (abfd)
 		bytes -= 2;
 
 		if (sec != NULL
-		    && sec->vma + sec->_raw_size == address)
+		    && sec->vma + sec->size == address)
 		  {
 		    /* This data goes at the end of the section we are
 		       currently building.  */
-		    sec->_raw_size += bytes;
+		    sec->size += bytes;
 		  }
 		else
 		  {
@@ -586,7 +586,7 @@ srec_scan (abfd)
 		    sec->flags = SEC_HAS_CONTENTS | SEC_LOAD | SEC_ALLOC;
 		    sec->vma = address;
 		    sec->lma = address;
-		    sec->_raw_size = bytes;
+		    sec->size = bytes;
 		    sec->filepos = pos;
 		  }
 
@@ -763,7 +763,7 @@ srec_read_section (abfd, section, contents)
       switch (hdr[0])
 	{
 	default:
-	  BFD_ASSERT (sofar == section->_raw_size);
+	  BFD_ASSERT (sofar == section->size);
 	  if (buf != NULL)
 	    free (buf);
 	  return TRUE;
@@ -788,7 +788,7 @@ srec_read_section (abfd, section, contents)
 	  if (address != section->vma + sofar)
 	    {
 	      /* We've come to the end of this section.  */
-	      BFD_ASSERT (sofar == section->_raw_size);
+	      BFD_ASSERT (sofar == section->size);
 	      if (buf != NULL)
 		free (buf);
 	      return TRUE;
@@ -811,7 +811,7 @@ srec_read_section (abfd, section, contents)
   if (error)
     goto error_return;
 
-  BFD_ASSERT (sofar == section->_raw_size);
+  BFD_ASSERT (sofar == section->size);
 
   if (buf != NULL)
     free (buf);
@@ -836,8 +836,8 @@ srec_get_section_contents (abfd, section, location, offset, count)
 {
   if (section->used_by_bfd == NULL)
     {
-      section->used_by_bfd = bfd_alloc (abfd, section->_raw_size);
-      if (section->used_by_bfd == NULL && section->_raw_size != 0)
+      section->used_by_bfd = bfd_alloc (abfd, section->size);
+      if (section->used_by_bfd == NULL && section->size != 0)
 	return FALSE;
 
       if (! srec_read_section (abfd, section, section->used_by_bfd))

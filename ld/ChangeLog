@@ -1,3 +1,29 @@
+2004-06-24  Alan Modra  <amodra@bigpond.net.au>
+
+	* ldlang.c (print_output_section_statement): Don't print size before
+	relaxation.
+	(IGNORE_SECTION): Remove bfd arg.  Update all callers.
+
+	* ldexp.c (fold_name): .. See below.
+	* ldlang.c (section_already_linked, print_output_section_statement,
+	print_input_section, insert_pad, size_input_section,
+	lang_check_section_addresses, lang_size_sections_1,
+	lang_size_sections, lang_do_assignments_1, lang_set_startof,
+	lang_one_common, lang_reset_memory_regions, lang_process,
+	lang_abs_symbol_at_end_of, lang_do_version_exports_section): ..
+	* ldwrite.c (build_link_order, clone_section, ds, split_sections): ..
+	* pe-dll.c (process_def_file, generate_reloc): ..
+	* emultempl/elf32.em (gld${EMULATION_NAME}_find_statement_assignment,
+	gld${EMULATION_NAME}_before_allocation): ..
+	* emultempl/mmix-elfnmmo.em (mmix_after_allocation): ..
+	* emultempl/sh64elf.em (sh64_elf_${EMULATION_NAME}_before_allocation,
+	sh64_elf_${EMULATION_NAME}_after_allocation): ..
+	* emultempl/sunos.em (gld${EMULATION_NAME}_before_allocation): ..
+	* emultempl/xtensaelf.em (ld_assign_relative_paged_dot,
+	ld_local_file_relocations_fit, ld_xtensa_insert_page_offsets): Use
+	"size" instead of "_raw_size" and "_cooked_size".  Expand
+	bfd_section_size macro invocations.
+
 2004-06-22  Aaron W. LaFramboise <aaron98wiridge9@aaronwl.com>
 
 	* ld/scripttemp/pe.sc (.CRT): Define ___crt_xc_start__,
@@ -10,10 +36,10 @@
 
 	* emulparams/elf32frvfd.sh (GENERATE_PIE_SCRIPT): Set to yes.
 
-2004-06-18  Adam Nemet  <anemet@lnxw.com> 
+2004-06-18  Adam Nemet  <anemet@lnxw.com>
 
-	* configure.in: Set EXTRA_SHLIB_EXTENSION to .a for LynxOS. 
-	* configure: Regenerate. 
+	* configure.in: Set EXTRA_SHLIB_EXTENSION to .a for LynxOS.
+	* configure: Regenerate.
 
 2004-06-15  Jakub Jelinek  <jakub@redhat.com>
 
@@ -181,7 +207,7 @@
 	* scripttempl/elf.sc (.eh_frame, .gcc_except_table): Move into text
 	segment if all input sections are readonly.
 
-2004-05-19  Adam Nemet  <anemet@lnxw.com> 
+2004-05-19  Adam Nemet  <anemet@lnxw.com>
 
 	* scripttempl/i386lynx.sc: Remove file.
 
@@ -189,7 +215,7 @@
 
 	* ld.texinfo (Output Section Address): Correct subsection name.
 
-2004-05-17  Adam Nemet  <anemet@lnxw.com> 
+2004-05-17  Adam Nemet  <anemet@lnxw.com>
 
 	* configure.tgt (powerpc-*-lynxos* case): New case.
 	* configure.host (i[3-7]86-*-lynxos* case): Remove case.
@@ -248,7 +274,7 @@
 	before printing it with %W.
 
 2004-05-07  Brian Ford  <ford@vss.fsi.com>
-            DJ Delorie  <dj@redhat.com>
+	    DJ Delorie  <dj@redhat.com>
 
 	* emultempl/pe.em (real_flags): New static.
 	(OPTION_LARGE_ADDRESS_AWARE): New define.
@@ -278,7 +304,7 @@
 
 2004-04-30  Eric Botcazou  <ebotcazou@act-europe.fr>
 
-	* ld.texinfo (--gc-sections): Remove restriction for 
+	* ld.texinfo (--gc-sections): Remove restriction for
 	dynamic linking.
 
 2004-04-29  Brian Ford  <ford@vss.fsi.com>

@@ -840,7 +840,7 @@ if test x"$LDEMUL_BEFORE_ALLOCATION" != xgld"$EMULATION_NAME"_before_allocation;
   if (sinterp != NULL)
     {
       sinterp->contents = ${ELF_INTERPRETER_NAME};
-      sinterp->_raw_size = strlen (sinterp->contents) + 1;
+      sinterp->size = strlen (sinterp->contents) + 1;
     }
 
 "
@@ -883,7 +883,7 @@ ${ELF_INTERPRETER_SET_DEFAULT}
       && sinterp != NULL)
     {
       sinterp->contents = (bfd_byte *) command_line.interpreter;
-      sinterp->_raw_size = strlen (command_line.interpreter) + 1;
+      sinterp->size = strlen (command_line.interpreter) + 1;
     }
 
   /* Look for any sections named .gnu.warning.  As a GNU extensions,
@@ -908,7 +908,7 @@ ${ELF_INTERPRETER_SET_DEFAULT}
 	if (s == NULL)
 	  continue;
 
-	sz = bfd_section_size (is->the_bfd, s);
+	sz = s->size;
 	prefix_len = strlen (gnu_warning_prefix);
 	msg = xmalloc ((size_t) (prefix_len + sz + 1));
 	strcpy (msg, gnu_warning_prefix);
@@ -926,7 +926,7 @@ ${ELF_INTERPRETER_SET_DEFAULT}
 
 	/* Clobber the section size, so that we don't waste copying the
 	   warning into the output file.  */
-	s->_raw_size = 0;
+	s->size = 0;
       }
   }
 }

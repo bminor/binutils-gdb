@@ -991,8 +991,7 @@ section_already_linked (bfd *abfd, asection *sec, void *data)
                  either.  */
 	      /* Fall through.  */
 	    case SEC_LINK_DUPLICATES_SAME_SIZE:
-	      if (bfd_section_size (abfd, sec)
-		  != bfd_section_size (l->sec->owner, l->sec))
+	      if (sec->size != l->sec->size)
 		einfo (_("%P: %B: warning: duplicate section `%s'"
 			 " has different size\n"),
 		       abfd, name);
@@ -2339,7 +2338,7 @@ print_output_section_statement
 	      ++len;
 	    }
 
-	  minfo ("0x%V %W", section->vma, section->_raw_size);
+	  minfo ("0x%V %W", section->vma, section->size);
 
 	  if (output_section_statement->load_base != NULL)
 	    {
@@ -2451,7 +2450,7 @@ static void
 print_input_section (lang_input_section_type *in)
 {
   asection *i = in->section;
-  bfd_size_type size = i->_cooked_size != 0 ? i->_cooked_size : i->_raw_size;
+  bfd_size_type size = i->size;
 
   init_opb ();
   if (size != 0)
@@ -2484,7 +2483,7 @@ print_input_section (lang_input_section_type *in)
 
       minfo ("0x%V %W %B\n", addr, TO_ADDR (size), i->owner);
 
-      if (size != i->_raw_size)
+      if (size != i->rawsize && i->rawsize != 0)
 	{
 	  len = SECTION_NAME_MAP_LENGTH + 3;
 #ifdef BFD64
@@ -2498,7 +2497,7 @@ print_input_section (lang_input_section_type *in)
 	      --len;
 	    }
 
-	  minfo (_("%W (size before relaxing)\n"), i->_raw_size);
+	  minfo (_("%W (size before relaxing)\n"), i->rawsize);
 	}
 
       if (i->output_section != NULL && (i->flags & SEC_EXCLUDE) == 0)
@@ -2867,7 +2866,7 @@ insert_pad (lang_statement_union_type **ptr,
     }
   pad->padding_statement.output_offset = dot - output_section->vma;
   pad->padding_statement.size = alignment_needed;
-  output_section->_raw_size += alignment_needed;
+  output_section->size += alignment_needed;
 }
 
 /* Work out how much this section will move the dot point.  */
@@ -2912,11 +2911,8 @@ size_input_section
       i->output_offset = dot - o->vma;
 
       /* Mark how big the output section must be to contain this now.  */
-      if (i->_cooked_size != 0)
-	dot += TO_ADDR (i->_cooked_size);
-      else
-	dot += TO_ADDR (i->_raw_size);
-      o->_raw_size = TO_SIZE (dot - o->vma);
+      dot += TO_ADDR (i->size);
+      o->size = TO_SIZE (dot - o->vma);
     }
   else
     {
@@ -2926,11 +2922,11 @@ size_input_section
   return dot;
 }
 
-#define IGNORE_SECTION(bfd, s) \
+#define IGNORE_SECTION(s) \
   (((s->flags & SEC_THREAD_LOCAL) != 0				\
     ? (s->flags & (SEC_LOAD | SEC_NEVER_LOAD)) != SEC_LOAD	\
     : (s->flags & (SEC_ALLOC | SEC_NEVER_LOAD)) != SEC_ALLOC)	\
-   || bfd_section_size (bfd, s) == 0)
+   || s->size == 0)
 
 /* Check to see if any allocated sections overlap with other allocated
    sections.  This can happen when the linker script specifically specifies
@@ -2947,7 +2943,7 @@ lang_check_section_addresses (void)
       asection *os;
 
       /* Ignore sections which are not loaded or which have no contents.  */
-      if (IGNORE_SECTION (output_bfd, s))
+      if (IGNORE_SECTION (s))
 	continue;
 
       /* Once we reach section 's' stop our seach.  This prevents two
@@ -2961,7 +2957,7 @@ lang_check_section_addresses (void)
 	  bfd_vma os_end;
 
 	  /* Only consider loadable sections with real contents.  */
-	  if (IGNORE_SECTION (output_bfd, os))
+	  if (IGNORE_SECTION (os))
 	    continue;
 
 	  /* We must check the sections' LMA addresses not their
@@ -2969,8 +2965,8 @@ lang_check_section_addresses (void)
 	     overlapping VMAs but they must have distinct LMAs.  */
 	  s_start = bfd_section_lma (output_bfd, s);
 	  os_start = bfd_section_lma (output_bfd, os);
-	  s_end = s_start + TO_ADDR (bfd_section_size (output_bfd, s)) - 1;
-	  os_end = os_start + TO_ADDR (bfd_section_size (output_bfd, os)) - 1;
+	  s_end = s_start + TO_ADDR (s->size) - 1;
+	  os_end = os_start + TO_ADDR (os->size) - 1;
 
 	  /* Look for an overlap.  */
 	  if ((s_end < os_start) || (s_start > os_end))
@@ -3070,7 +3066,7 @@ lang_size_sections_1
 		bfd_set_section_vma (os->bfd_section->owner,
 				     os->bfd_section,
 				     bfd_section_vma (input->owner, input));
-		os->bfd_section->_raw_size = input->_raw_size;
+		os->bfd_section->size = input->size;
 		break;
 	      }
 
@@ -3097,7 +3093,7 @@ lang_size_sections_1
 		    /* If a loadable section is using the default memory
 		       region, and some non default memory regions were
 		       defined, issue an error message.  */
-		    if (!IGNORE_SECTION (output_bfd, os->bfd_section)
+		    if (!IGNORE_SECTION (os->bfd_section)
 			&& ! link_info.relocatable
 			&& check_regions
 			&& strcmp (os->region->name,
@@ -3180,14 +3176,14 @@ lang_size_sections_1
 	    /* Put the section within the requested block size, or
 	       align at the block boundary.  */
 	    after = ((os->bfd_section->vma
-		      + TO_ADDR (os->bfd_section->_raw_size)
+		      + TO_ADDR (os->bfd_section->size)
 		      + os->block_value - 1)
 		     & - (bfd_vma) os->block_value);
 
 	    if (bfd_is_abs_section (os->bfd_section))
 	      ASSERT (after == os->bfd_section->vma);
 	    else
-	      os->bfd_section->_raw_size
+	      os->bfd_section->size
 		= TO_SIZE (after - os->bfd_section->vma);
 
 	    dot = os->bfd_section->vma;
@@ -3195,7 +3191,7 @@ lang_size_sections_1
 	    if ((os->bfd_section->flags & SEC_HAS_CONTENTS) != 0
 		|| (os->bfd_section->flags & SEC_THREAD_LOCAL) == 0
 		|| link_info.relocatable)
-	      dot += TO_ADDR (os->bfd_section->_raw_size);
+	      dot += TO_ADDR (os->bfd_section->size);
 
 	    os->processed = 1;
 
@@ -3232,7 +3228,7 @@ lang_size_sections_1
 		    /* Set load_base, which will be handled later.  */
 		    os->load_base = exp_intop (os->lma_region->current);
 		    os->lma_region->current +=
-		      TO_ADDR (os->bfd_section->_raw_size);
+		      TO_ADDR (os->bfd_section->size);
 		    if (check_regions)
 		      os_region_check (os, os->lma_region, NULL,
 				       os->bfd_section->lma);
@@ -3283,7 +3279,7 @@ lang_size_sections_1
 	    if (size < TO_SIZE ((unsigned) 1))
 	      size = TO_SIZE ((unsigned) 1);
 	    dot += TO_ADDR (size);
-	    output_section_statement->bfd_section->_raw_size += size;
+	    output_section_statement->bfd_section->size += size;
 	    /* The output section gets contents, and then we inspect for
 	       any flags set in the input script which override any ALLOC.  */
 	    output_section_statement->bfd_section->flags |= SEC_HAS_CONTENTS;
@@ -3305,7 +3301,7 @@ lang_size_sections_1
 	      output_section_statement->bfd_section;
 	    size = bfd_get_reloc_size (s->reloc_statement.howto);
 	    dot += TO_ADDR (size);
-	    output_section_statement->bfd_section->_raw_size += size;
+	    output_section_statement->bfd_section->size += size;
 	  }
 	  break;
 
@@ -3330,12 +3326,7 @@ lang_size_sections_1
 	    asection *i;
 
 	    i = (*prev)->input_section.section;
-	    if (! relax)
-	      {
-		if (i->_cooked_size == 0)
-		  i->_cooked_size = i->_raw_size;
-	      }
-	    else
+	    if (relax)
 	      {
 		bfd_boolean again;
 
@@ -3447,7 +3438,6 @@ lang_size_sections
    bfd_boolean check_regions)
 {
   bfd_vma result;
-  asection *o;
 
   /* Callers of exp_fold_tree need to increment this.  */
   lang_statement_iteration++;
@@ -3487,14 +3477,6 @@ lang_size_sections
 	}
     }
 
-  /* Some backend relaxers want to refer to the output section size.  Give
-     them a section size that does not change on the next call while they
-     relax.  We can't set this at top because lang_reset_memory_regions
-     which is called before we get here, sets _raw_size to 0 on relaxing
-     rounds.  */
-  for (o = output_bfd->sections; o != NULL; o = o->next)
-    o->_cooked_size = o->_raw_size;
-
   return result;
 }
 
@@ -3531,7 +3513,7 @@ lang_do_assignments_1
 		if ((os->bfd_section->flags & SEC_HAS_CONTENTS) != 0
 		    || (os->bfd_section->flags & SEC_THREAD_LOCAL) == 0
 		    || link_info.relocatable)
-		  dot += TO_ADDR (os->bfd_section->_raw_size);
+		  dot += TO_ADDR (os->bfd_section->size);
 	      }
 	    if (os->load_base)
 	      {
@@ -3618,12 +3600,7 @@ lang_do_assignments_1
 	    asection *in = s->input_section.section;
 
 	    if ((in->flags & SEC_EXCLUDE) == 0)
-	      {
-		if (in->_cooked_size != 0)
-		  dot += TO_ADDR (in->_cooked_size);
-		else
-		  dot += TO_ADDR (in->_raw_size);
-	      }
+	      dot += TO_ADDR (in->size);
 	  }
 	  break;
 
@@ -3714,10 +3691,7 @@ lang_set_startof (void)
       if (h != NULL && h->type == bfd_link_hash_undefined)
 	{
 	  h->type = bfd_link_hash_defined;
-	  if (s->_cooked_size != 0)
-	    h->u.def.value = TO_ADDR (s->_cooked_size);
-	  else
-	    h->u.def.value = TO_ADDR (s->_raw_size);
+	  h->u.def.value = TO_ADDR (s->size);
 	  h->u.def.section = bfd_abs_section_ptr;
 	}
 
@@ -3931,8 +3905,8 @@ lang_one_common (struct bfd_link_hash_entry *h, void *info)
   section = h->u.c.p->section;
 
   /* Increase the size of the section to align the common sym.  */
-  section->_cooked_size += ((bfd_vma) 1 << (power_of_two + opb_shift)) - 1;
-  section->_cooked_size &= (- (bfd_vma) 1 << (power_of_two + opb_shift));
+  section->size += ((bfd_vma) 1 << (power_of_two + opb_shift)) - 1;
+  section->size &= (- (bfd_vma) 1 << (power_of_two + opb_shift));
 
   /* Adjust the alignment if necessary.  */
   if (power_of_two > section->alignment_power)
@@ -3941,10 +3915,10 @@ lang_one_common (struct bfd_link_hash_entry *h, void *info)
   /* Change the symbol from common to defined.  */
   h->type = bfd_link_hash_defined;
   h->u.def.section = section;
-  h->u.def.value = section->_cooked_size;
+  h->u.def.value = section->size;
 
   /* Increase the size of the section.  */
-  section->_cooked_size += size;
+  section->size += size;
 
   /* Make sure the section is allocated in memory, and make sure that
      it is no longer a common section.  */
@@ -4261,7 +4235,7 @@ lang_reset_memory_regions (void)
     }
 
   for (o = output_bfd->sections; o != NULL; o = o->next)
-    o->_raw_size = 0;
+    o->size = 0;
 }
 
 /* Worker for lang_gc_sections_1.  */
@@ -4466,7 +4440,7 @@ lang_process (void)
 			       NULL, 0);
 
 	  /* We must do this after lang_do_assignments, because it uses
-	     _raw_size.  */
+	     size.  */
 	  lang_reset_memory_regions ();
 
 	  /* Perform another relax pass - this time we know where the
@@ -4801,7 +4775,7 @@ lang_abs_symbol_at_end_of (const char *secname, const char *name)
 	h->u.def.value = 0;
       else
 	h->u.def.value = (bfd_get_section_vma (output_bfd, sec)
-			  + TO_ADDR (bfd_section_size (output_bfd, sec)));
+			  + TO_ADDR (sec->size));
 
       h->u.def.section = bfd_abs_section_ptr;
     }
@@ -5640,7 +5614,7 @@ lang_do_version_exports_section (void)
       if (sec == NULL)
 	continue;
 
-      len = bfd_section_size (is->the_bfd, sec);
+      len = sec->size;
       contents = xmalloc (len);
       if (!bfd_get_section_contents (is->the_bfd, sec, contents, 0, len))
 	einfo (_("%X%P: unable to read .exports section contents\n"), sec);

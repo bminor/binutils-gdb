@@ -200,7 +200,7 @@ b_out_callback (abfd)
   obj_datasec (abfd)->lma = obj_datasec (abfd)->vma;
 
   /* And reload the sizes, since the aout module zaps them.  */
-  obj_textsec (abfd)->_raw_size = execp->a_text;
+  obj_textsec (abfd)->size = execp->a_text;
 
   bss_start = execp->a_dload + execp->a_data; /* BSS = end of data section */
   obj_bsssec (abfd)->vma = align_power (bss_start, execp->a_balign);
@@ -294,9 +294,9 @@ b_out_write_object_contents (abfd)
 
   exec_hdr (abfd)->a_info = BMAGIC;
 
-  exec_hdr (abfd)->a_text = obj_textsec (abfd)->_raw_size;
-  exec_hdr (abfd)->a_data = obj_datasec (abfd)->_raw_size;
-  exec_hdr (abfd)->a_bss = obj_bsssec (abfd)->_raw_size;
+  exec_hdr (abfd)->a_text = obj_textsec (abfd)->size;
+  exec_hdr (abfd)->a_data = obj_datasec (abfd)->size;
+  exec_hdr (abfd)->a_bss = obj_bsssec (abfd)->size;
   exec_hdr (abfd)->a_syms = bfd_get_symcount (abfd) * sizeof (struct nlist);
   exec_hdr (abfd)->a_entry = bfd_get_start_address (abfd);
   exec_hdr (abfd)->a_trsize = ((obj_textsec (abfd)->reloc_count) *
@@ -995,7 +995,7 @@ b_out_set_section_contents (abfd, section, location, offset, count)
 
       obj_textsec (abfd)->filepos = sizeof (struct internal_exec);
       obj_datasec(abfd)->filepos = obj_textsec(abfd)->filepos
-	+  obj_textsec (abfd)->_raw_size;
+	+  obj_textsec (abfd)->size;
     }
 
   /* Regardless, once we know what we're doing, we might as well get going.  */
@@ -1285,7 +1285,7 @@ b_out_bfd_relax_section (abfd, i, link_info, again)
 	    }
 	}
     }
-  input_section->_cooked_size = input_section->_raw_size - shrink;
+  input_section->size -= shrink;
 
   if (reloc_vector != NULL)
     free (reloc_vector);
@@ -1333,7 +1333,7 @@ b_out_bfd_get_relocated_section_contents (output_bfd, link_info, link_order,
 					input_section,
 					data,
 					(bfd_vma) 0,
-					input_section->_raw_size));
+					input_section->size));
 
   reloc_count = bfd_canonicalize_reloc (input_bfd,
 					input_section,
@@ -1402,7 +1402,7 @@ b_out_bfd_get_relocated_section_contents (output_bfd, link_info, link_order,
 		case ALIGNDONE:
 		  BFD_ASSERT (reloc->addend >= src_address);
 		  BFD_ASSERT ((bfd_vma) reloc->addend
-			      <= input_section->_raw_size);
+			      <= input_section->size);
 		  src_address = reloc->addend;
 		  dst_address = ((dst_address + reloc->howto->size)
 				 & ~reloc->howto->size);

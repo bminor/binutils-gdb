@@ -2948,8 +2948,7 @@ xcoff_reloc_type_br (input_bfd, input_section, output_bfd, rel, sym, howto,
      cror.  */
   if (NULL != h
       && bfd_link_hash_defined == h->root.type
-      && (rel->r_vaddr - input_section->vma + 8
-	  <= input_section->_cooked_size))
+      && rel->r_vaddr - input_section->vma + 8 <= input_section->size)
     {
       bfd_byte *pnext;
       unsigned long next;
@@ -3449,7 +3448,7 @@ xcoff_ppc_relocate_section (output_bfd, info, input_bfd,
       address = rel->r_vaddr - input_section->vma;
       location = contents + address;
 
-      if (address > input_section->_raw_size)
+      if (address > input_section->size)
 	abort ();
 
       /* Get the value we are going to relocate.  */

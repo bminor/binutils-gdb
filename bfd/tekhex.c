@@ -429,7 +429,7 @@ first_phase (abfd, type, src)
 	    case '1':		/* section range */
 	      src++;
 	      section->vma = getvalue (&src);
-	      section->_raw_size = getvalue (&src) - section->vma;
+	      section->size = getvalue (&src) - section->vma;
 	      section->flags = SEC_HAS_CONTENTS | SEC_LOAD | SEC_ALLOC;
 	      break;
 	    case '0':
@@ -688,7 +688,7 @@ tekhex_set_section_contents (abfd, section, locationp, offset, bytes_to_do)
 	  if (s->flags & SEC_LOAD)
 	    {
 	      for (vma = s->vma & ~(bfd_vma) CHUNK_MASK;
-		   vma < s->vma + s->_raw_size;
+		   vma < s->vma + s->size;
 		   vma += CHUNK_MASK)
 		find_chunk (abfd, vma);
 	    }
@@ -862,7 +862,7 @@ tekhex_write_object_contents (abfd)
       writesym (&dst, s->name);
       *dst++ = '1';
       writevalue (&dst, s->vma);
-      writevalue (&dst, s->vma + s->_raw_size);
+      writevalue (&dst, s->vma + s->size);
       out (abfd, '3', buffer, dst);
     }
 

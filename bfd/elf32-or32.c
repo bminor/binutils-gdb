@@ -1,5 +1,5 @@
 /* OR32-specific support for 32-bit ELF
-   Copyright 2002 Free Software Foundation, Inc.
+   Copyright 2002, 2004 Free Software Foundation, Inc.
    Contributed by Ivan Guzvinec  <ivang@opencores.org>
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -400,6 +400,7 @@ or32_elf_consth_reloc (abfd, reloc_entry, symbol, data, input_section,
 {
   bfd_reloc_status_type ret;
   bfd_vma relocation;
+  bfd_size_type sz;
   struct or32_consth *n;
 
   ret = bfd_reloc_ok;
@@ -417,7 +418,8 @@ or32_elf_consth_reloc (abfd, reloc_entry, symbol, data, input_section,
   relocation += symbol->section->output_offset;
   relocation += reloc_entry->addend;
 
-  if (reloc_entry->address > input_section->_cooked_size)
+  sz = input_section->rawsize ? input_section->rawsize : input_section->size;
+  if (reloc_entry->address > sz)
     return bfd_reloc_outofrange;
 
   /* Save the information, and let LO16 do the actual relocation.  */

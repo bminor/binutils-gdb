@@ -511,7 +511,7 @@ i370_elf_adjust_dynamic_symbol (info, h)
 
   s = bfd_get_section_by_name (dynobj, ".rela.text");
   BFD_ASSERT (s != NULL);
-  s->_raw_size += sizeof (Elf32_External_Rela);
+  s->size += sizeof (Elf32_External_Rela);
 
   /* If this is a weak symbol, and there is a real definition, the
      processor independent code will have arranged for us to see the
@@ -568,7 +568,7 @@ i370_elf_adjust_dynamic_symbol (info, h)
       else
 	srel = bfd_get_section_by_name (dynobj, ".rela.bss");
       BFD_ASSERT (srel != NULL);
-      srel->_raw_size += sizeof (Elf32_External_Rela);
+      srel->size += sizeof (Elf32_External_Rela);
       h->elf_link_hash_flags |= ELF_LINK_HASH_NEEDS_COPY;
     }
 
@@ -579,8 +579,7 @@ i370_elf_adjust_dynamic_symbol (info, h)
     power_of_two = 4;
 
   /* Apply the required alignment.  */
-  s->_raw_size = BFD_ALIGN (s->_raw_size,
-			    (bfd_size_type) (1 << power_of_two));
+  s->size = BFD_ALIGN (s->size, (bfd_size_type) (1 << power_of_two));
   if (power_of_two > bfd_get_section_alignment (dynobj, s))
     {
       if (! bfd_set_section_alignment (dynobj, s, power_of_two))
@@ -589,10 +588,10 @@ i370_elf_adjust_dynamic_symbol (info, h)
 
   /* Define the symbol as being at this point in the section.  */
   h->root.u.def.section = s;
-  h->root.u.def.value = s->_raw_size;
+  h->root.u.def.value = s->size;
 
   /* Increment the section size to make room for the symbol.  */
-  s->_raw_size += h->size;
+  s->size += h->size;
 
   return TRUE;
 }
@@ -657,7 +656,7 @@ i370_elf_size_dynamic_sections (output_bfd, info)
 	{
 	  s = bfd_get_section_by_name (dynobj, ".interp");
 	  BFD_ASSERT (s != NULL);
-	  s->_raw_size = sizeof ELF_DYNAMIC_INTERPRETER;
+	  s->size = sizeof ELF_DYNAMIC_INTERPRETER;
 	  s->contents = (unsigned char *) ELF_DYNAMIC_INTERPRETER;
 	}
     }
@@ -677,7 +676,7 @@ i370_elf_size_dynamic_sections (output_bfd, info)
 	{
 	  s = bfd_get_section_by_name (dynobj, *p);
 	  if (s != NULL)
-	    s->_raw_size = 0;
+	    s->size = 0;
 	}
     }
 
@@ -702,7 +701,7 @@ i370_elf_size_dynamic_sections (output_bfd, info)
 
       if (strcmp (name, ".plt") == 0)
 	{
-	  if (s->_raw_size == 0)
+	  if (s->size == 0)
 	    {
 	      /* Strip this section if we don't need it; see the
                  comment below.  */
@@ -716,7 +715,7 @@ i370_elf_size_dynamic_sections (output_bfd, info)
 	}
       else if (strncmp (name, ".rela", 5) == 0)
 	{
-	  if (s->_raw_size == 0)
+	  if (s->size == 0)
 	    {
 	      /* If we don't need this section, strip it from the
 		 output file.  This is mostly to handle .rela.bss and
@@ -778,8 +777,8 @@ i370_elf_size_dynamic_sections (output_bfd, info)
 	  continue;
 	}
       /* Allocate memory for the section contents.  */
-      s->contents = (bfd_byte *) bfd_zalloc (dynobj, s->_raw_size);
-      if (s->contents == NULL && s->_raw_size != 0)
+      s->contents = (bfd_byte *) bfd_zalloc (dynobj, s->size);
+      if (s->contents == NULL && s->size != 0)
 	return FALSE;
     }
 
@@ -955,7 +954,7 @@ i370_elf_check_relocs (abfd, info, sec, relocs)
 		}
 	    }
 
-	  sreloc->_raw_size += sizeof (Elf32_External_Rela);
+	  sreloc->size += sizeof (Elf32_External_Rela);
 
 	  /* FIXME: We should here do what the m68k and i386
 	     backends do: if the reloc is pc-relative, record it
@@ -999,7 +998,7 @@ i370_elf_finish_dynamic_sections (output_bfd, info)
       BFD_ASSERT (splt != NULL && sdyn != NULL);
 
       dyncon = (Elf32_External_Dyn *) sdyn->contents;
-      dynconend = (Elf32_External_Dyn *) (sdyn->contents + sdyn->_raw_size);
+      dynconend = (Elf32_External_Dyn *) (sdyn->contents + sdyn->size);
       for (; dyncon < dynconend; dyncon++)
 	{
 	  Elf_Internal_Dyn dyn;
@@ -1028,12 +1027,7 @@ i370_elf_finish_dynamic_sections (output_bfd, info)
 		  if (! size)
 		    dyn.d_un.d_ptr = s->vma;
 		  else
-		    {
-		      if (s->_cooked_size != 0)
-			dyn.d_un.d_val = s->_cooked_size;
-		      else
-			dyn.d_un.d_val = s->_raw_size;
-		    }
+		    dyn.d_un.d_val = s->size;
 		}
 	      bfd_elf32_swap_dyn_out (output_bfd, &dyn, dyncon);
 	    }

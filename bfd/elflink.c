@@ -98,7 +98,7 @@ _bfd_elf_create_got_section (bfd *abfd, struct bfd_link_info *info)
     }
 
   /* The first bit of the global offset table is the header.  */
-  s->_raw_size += bed->got_header_size + bed->got_symbol_offset;
+  s->size += bed->got_header_size + bed->got_symbol_offset;
 
   return TRUE;
 }
@@ -2653,16 +2653,16 @@ _bfd_elf_add_dynamic_entry (struct bfd_link_info *info,
   s = bfd_get_section_by_name (hash_table->dynobj, ".dynamic");
   BFD_ASSERT (s != NULL);
 
-  newsize = s->_raw_size + bed->s->sizeof_dyn;
+  newsize = s->size + bed->s->sizeof_dyn;
   newcontents = bfd_realloc (s->contents, newsize);
   if (newcontents == NULL)
     return FALSE;
 
   dyn.d_tag = tag;
   dyn.d_un.d_val = val;
-  bed->s->swap_dyn_out (hash_table->dynobj, &dyn, newcontents + s->_raw_size);
+  bed->s->swap_dyn_out (hash_table->dynobj, &dyn, newcontents + s->size);
 
-  s->_raw_size = newsize;
+  s->size = newsize;
   s->contents = newcontents;
 
   return TRUE;
@@ -2698,7 +2698,7 @@ elf_add_dt_needed_tag (struct bfd_link_info *info,
       BFD_ASSERT (sdyn != NULL);
 
       for (extdyn = sdyn->contents;
-	   extdyn < sdyn->contents + sdyn->_raw_size;
+	   extdyn < sdyn->contents + sdyn->size;
 	   extdyn += bed->s->sizeof_dyn)
 	{
 	  Elf_Internal_Dyn dyn;
@@ -2787,7 +2787,7 @@ elf_finalize_dynstr (bfd *output_bfd, struct bfd_link_info *info)
 
   /* Update all .dynamic entries referencing .dynstr strings.  */
   for (extdyn = sdyn->contents;
-       extdyn < sdyn->contents + sdyn->_raw_size;
+       extdyn < sdyn->contents + sdyn->size;
        extdyn += bed->s->sizeof_dyn)
     {
       Elf_Internal_Dyn dyn;
@@ -2987,12 +2987,12 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 		      /* We don't want to issue this warning.  Clobber
 			 the section size so that the warning does not
 			 get copied into the output file.  */
-		      s->_raw_size = 0;
+		      s->size = 0;
 		      continue;
 		    }
 		}
 
-	      sz = bfd_section_size (abfd, s);
+	      sz = s->size;
 	      prefix_len = strlen (gnu_warning_prefix);
 	      msg = bfd_alloc (abfd, prefix_len + sz + 1);
 	      if (msg == NULL)
@@ -3013,7 +3013,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 		{
 		  /* Clobber the section size so that the warning does
 		     not get copied into the output file.  */
-		  s->_raw_size = 0;
+		  s->size = 0;
 		}
 	    }
 	}
@@ -3066,11 +3066,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	  int elfsec;
 	  unsigned long shlink;
 
-	  dynbuf = bfd_malloc (s->_raw_size);
-	  if (dynbuf == NULL)
-	    goto error_return;
-
-	  if (! bfd_get_section_contents (abfd, s, dynbuf, 0, s->_raw_size))
+	  if (!bfd_malloc_and_get_section (abfd, s, &dynbuf))
 	    goto error_free_dyn;
 
 	  elfsec = _bfd_elf_section_from_bfd_section (abfd, s);
@@ -3079,7 +3075,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	  shlink = elf_elfsections (abfd)[elfsec]->sh_link;
 
 	  for (extdyn = dynbuf;
-	       extdyn < dynbuf + s->_raw_size;
+	       extdyn < dynbuf + s->size;
 	       extdyn += bed->s->sizeof_dyn)
 	    {
 	      Elf_Internal_Dyn dyn;
@@ -5027,9 +5023,9 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
 		size += sizeof (Elf_External_Verdaux);
 	    }
 
-	  s->_raw_size = size;
-	  s->contents = bfd_alloc (output_bfd, s->_raw_size);
-	  if (s->contents == NULL && s->_raw_size != 0)
+	  s->size = size;
+	  s->contents = bfd_alloc (output_bfd, s->size);
+	  if (s->contents == NULL && s->size != 0)
 	    return FALSE;
 
 	  /* Fill in the version definition section.  */
@@ -5226,8 +5222,8 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
 		  size += sizeof (Elf_External_Vernaux);
 	      }
 
-	    s->_raw_size = size;
-	    s->contents = bfd_alloc (output_bfd, s->_raw_size);
+	    s->size = size;
+	    s->contents = bfd_alloc (output_bfd, s->size);
 	    if (s->contents == NULL)
 	      return FALSE;
 
@@ -5312,8 +5308,8 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
 	}
       else
 	{
-	  s->_raw_size = dynsymcount * sizeof (Elf_External_Versym);
-	  s->contents = bfd_zalloc (output_bfd, s->_raw_size);
+	  s->size = dynsymcount * sizeof (Elf_External_Versym);
+	  s->contents = bfd_zalloc (output_bfd, s->size);
 	  if (s->contents == NULL)
 	    return FALSE;
 
@@ -5329,9 +5325,9 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
 	 section as we went along in elf_link_add_object_symbols.  */
       s = bfd_get_section_by_name (dynobj, ".dynsym");
       BFD_ASSERT (s != NULL);
-      s->_raw_size = dynsymcount * bed->s->sizeof_sym;
-      s->contents = bfd_alloc (output_bfd, s->_raw_size);
-      if (s->contents == NULL && s->_raw_size != 0)
+      s->size = dynsymcount * bed->s->sizeof_sym;
+      s->contents = bfd_alloc (output_bfd, s->size);
+      if (s->contents == NULL && s->size != 0)
 	return FALSE;
 
       if (dynsymcount != 0)
@@ -5355,8 +5351,8 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
       s = bfd_get_section_by_name (dynobj, ".hash");
       BFD_ASSERT (s != NULL);
       hash_entry_size = elf_section_data (s)->this_hdr.sh_entsize;
-      s->_raw_size = ((2 + bucketcount + dynsymcount) * hash_entry_size);
-      s->contents = bfd_zalloc (output_bfd, s->_raw_size);
+      s->size = ((2 + bucketcount + dynsymcount) * hash_entry_size);
+      s->contents = bfd_zalloc (output_bfd, s->size);
       if (s->contents == NULL)
 	return FALSE;
 
@@ -5371,7 +5367,7 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
 
       elf_finalize_dynstr (output_bfd, info);
 
-      s->_raw_size = _bfd_elf_strtab_size (elf_hash_table (info)->dynstr);
+      s->size = _bfd_elf_strtab_size (elf_hash_table (info)->dynstr);
 
       for (dtagcount = 0; dtagcount <= info->spare_dynamic_tags; ++dtagcount)
 	if (!_bfd_elf_add_dynamic_entry (info, DT_NULL, 0))
@@ -5581,10 +5577,10 @@ elf_link_sort_relocs (bfd *abfd, struct bfd_link_info *info, asection **psec)
   bfd_vma r_sym_mask;
 
   reldyn = bfd_get_section_by_name (abfd, ".rela.dyn");
-  if (reldyn == NULL || reldyn->_raw_size == 0)
+  if (reldyn == NULL || reldyn->size == 0)
     {
       reldyn = bfd_get_section_by_name (abfd, ".rel.dyn");
-      if (reldyn == NULL || reldyn->_raw_size == 0)
+      if (reldyn == NULL || reldyn->size == 0)
 	return 0;
       ext_size = bed->s->sizeof_rel;
       swap_in = bed->s->swap_reloc_in;
@@ -5596,17 +5592,17 @@ elf_link_sort_relocs (bfd *abfd, struct bfd_link_info *info, asection **psec)
       swap_in = bed->s->swap_reloca_in;
       swap_out = bed->s->swap_reloca_out;
     }
-  count = reldyn->_raw_size / ext_size;
+  count = reldyn->size / ext_size;
 
   size = 0;
   for (lo = reldyn->link_order_head; lo != NULL; lo = lo->next)
     if (lo->type == bfd_indirect_link_order)
       {
 	asection *o = lo->u.indirect.section;
-	size += o->_raw_size;
+	size += o->size;
       }
 
-  if (size != reldyn->_raw_size)
+  if (size != reldyn->size)
     return 0;
 
   sort_elt = (sizeof (struct elf_link_sort_rela)
@@ -5631,7 +5627,7 @@ elf_link_sort_relocs (bfd *abfd, struct bfd_link_info *info, asection **psec)
 	asection *o = lo->u.indirect.section;
 
 	erel = o->contents;
-	erelend = o->contents + o->_raw_size;
+	erelend = o->contents + o->size;
 	p = sort + o->output_offset / ext_size * sort_elt;
 	while (erel < erelend)
 	  {
@@ -5673,7 +5669,7 @@ elf_link_sort_relocs (bfd *abfd, struct bfd_link_info *info, asection **psec)
 	asection *o = lo->u.indirect.section;
 
 	erel = o->contents;
-	erelend = o->contents + o->_raw_size;
+	erelend = o->contents + o->size;
 	p = sort + o->output_offset / ext_size * sort_elt;
 	while (erel < erelend)
 	  {
@@ -6497,7 +6493,7 @@ elf_link_input_bfd (struct elf_final_link_info *finfo, bfd *input_bfd)
 	}
 
       if ((o->flags & SEC_HAS_CONTENTS) == 0
-	  || (o->_raw_size == 0 && (o->flags & SEC_RELOC) == 0))
+	  || (o->size == 0 && (o->flags & SEC_RELOC) == 0))
 	continue;
 
       if ((o->flags & SEC_LINKER_CREATED) != 0)
@@ -6515,9 +6511,10 @@ elf_link_input_bfd (struct elf_final_link_info *finfo, bfd *input_bfd)
 	contents = elf_section_data (o)->this_hdr.contents;
       else
 	{
+	  bfd_size_type amt = o->rawsize ? o->rawsize : o->size;
+
 	  contents = finfo->contents;
-	  if (! bfd_get_section_contents (input_bfd, o, contents, 0,
-					  o->_raw_size))
+	  if (! bfd_get_section_contents (input_bfd, o, contents, 0, amt))
 	    return FALSE;
 	}
 
@@ -6587,7 +6584,7 @@ elf_link_input_bfd (struct elf_final_link_info *finfo, bfd *input_bfd)
 			      /* Try to preserve debug information.  */
 			      if ((o->flags & SEC_DEBUGGING) != 0
 				  && sec->kept_section != NULL
-				  && sec->_raw_size == sec->kept_section->_raw_size)
+				  && sec->size == sec->kept_section->size)
 				h->root.u.def.section
 				  = sec->kept_section;
 			      else
@@ -6616,7 +6613,7 @@ elf_link_input_bfd (struct elf_final_link_info *finfo, bfd *input_bfd)
 			      /* Try to preserve debug information.  */
 			      if ((o->flags & SEC_DEBUGGING) != 0
 				  && sec->kept_section != NULL
-				  && sec->_raw_size == sec->kept_section->_raw_size)
+				  && sec->size == sec->kept_section->size)
 				finfo->sections[r_symndx]
 				  = sec->kept_section;
 			      else
@@ -6934,14 +6931,11 @@ elf_link_input_bfd (struct elf_final_link_info *finfo, bfd *input_bfd)
 	  break;
 	default:
 	  {
-	    bfd_size_type sec_size;
-
-	    sec_size = (o->_cooked_size != 0 ? o->_cooked_size : o->_raw_size);
 	    if (! (o->flags & SEC_EXCLUDE)
 		&& ! bfd_set_section_contents (output_bfd, o->output_section,
 					       contents,
 					       (file_ptr) o->output_offset,
-					       sec_size))
+					       o->size))
 	      return FALSE;
 	  }
 	  break;
@@ -7248,10 +7242,10 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 		    free (relocs);
 		}
 
-	      if (sec->_raw_size > max_contents_size)
-		max_contents_size = sec->_raw_size;
-	      if (sec->_cooked_size > max_contents_size)
-		max_contents_size = sec->_cooked_size;
+	      if (sec->rawsize > max_contents_size)
+		max_contents_size = sec->rawsize;
+	      if (sec->size > max_contents_size)
+		max_contents_size = sec->size;
 
 	      /* We are interested in just local symbols, not all
 		 symbols.  */
@@ -7559,7 +7553,7 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	   sec && (sec->flags & SEC_THREAD_LOCAL);
 	   sec = sec->next)
 	{
-	  bfd_vma size = sec->_raw_size;
+	  bfd_vma size = sec->size;
 
 	  if (size == 0 && (sec->flags & SEC_HAS_CONTENTS) == 0)
 	    {
@@ -7835,7 +7829,7 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
       BFD_ASSERT (o != NULL);
 
       dyncon = o->contents;
-      dynconend = o->contents + o->_raw_size;
+      dynconend = o->contents + o->size;
       for (; dyncon < dynconend; dyncon += bed->s->sizeof_dyn)
 	{
 	  Elf_Internal_Dyn dyn;
@@ -7911,10 +7905,10 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 		     bfd_get_filename (abfd), name);
 		  goto error_return;
 		}
-	      if (o->_raw_size == 0)
+	      if (o->size == 0)
 		(*_bfd_error_handler)
 		  (_("warning: %s section has zero size"), name);
-	      dyn.d_un.d_val = o->_raw_size;
+	      dyn.d_un.d_val = o->size;
 	      break;
 
 	    case DT_PREINIT_ARRAY:
@@ -7998,7 +7992,7 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
       for (o = dynobj->sections; o != NULL; o = o->next)
 	{
 	  if ((o->flags & SEC_HAS_CONTENTS) == 0
-	      || o->_raw_size == 0
+	      || o->size == 0
 	      || o->output_section == bfd_abs_section_ptr)
 	    continue;
 	  if ((o->flags & SEC_LINKER_CREATED) == 0)
@@ -8007,6 +8001,8 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 		 created by _bfd_elf_link_create_dynamic_sections.  */
 	      continue;
 	    }
+	  if (elf_hash_table (info)->eh_info.hdr_sec == o)
+	    continue;
 	  if ((elf_section_data (o->output_section)->this_hdr.sh_type
 	       != SHT_STRTAB)
 	      || strcmp (bfd_get_section_name (abfd, o), ".dynstr") != 0)
@@ -8014,7 +8010,7 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	      if (! bfd_set_section_contents (abfd, o->output_section,
 					      o->contents,
 					      (file_ptr) o->output_offset,
-					      o->_raw_size))
+					      o->size))
 		goto error_return;
 	    }
 	  else
@@ -8865,13 +8861,13 @@ bfd_elf_discard_info (bfd *output_bfd, struct bfd_link_info *info)
       eh = bfd_get_section_by_name (abfd, ".eh_frame");
       if (info->relocatable
 	  || (eh != NULL
-	      && (eh->_raw_size == 0
+	      && (eh->size == 0
 		  || bfd_is_abs_section (eh->output_section))))
 	eh = NULL;
 
       stab = bfd_get_section_by_name (abfd, ".stab");
       if (stab != NULL
-	  && (stab->_raw_size == 0
+	  && (stab->size == 0
 	      || bfd_is_abs_section (stab->output_section)
 	      || stab->sec_info_type != ELF_INFO_TYPE_STABS))
 	stab = NULL;

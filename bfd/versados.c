@@ -320,7 +320,7 @@ process_esd (abfd, esd, pass)
 	case ESD_STD_REL_SEC:
 	case ESD_SHRT_REL_SEC:
 	  {
-	    sec->_raw_size = get_4 (&ptr);
+	    sec->size = get_4 (&ptr);
 	    sec->flags |= SEC_ALLOC;
 	  }
 	  break;
@@ -470,7 +470,7 @@ process_otr (abfd, otr, pass)
       else
 	{
 	  need_contents = 1;
-	  if (dst_idx < esdid->section->_raw_size)
+	  if (dst_idx < esdid->section->size)
 	    if (pass == 2)
 	      {
 		/* absolute code, comes in 16 bit lumps */
@@ -485,7 +485,7 @@ process_otr (abfd, otr, pass)
 
   if (!contents && need_contents)
     {
-      bfd_size_type size = esdid->section->_raw_size;
+      bfd_size_type size = esdid->section->size;
       esdid->contents = (unsigned char *) bfd_alloc (abfd, size);
     }
 }

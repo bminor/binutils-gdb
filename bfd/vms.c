@@ -1670,7 +1670,7 @@ vms_set_section_contents (abfd, section, location, offset, count)
 #if VMS_DEBUG
   vms_debug (1, "vms_set_section_contents(%p, sec %s, loc %p, off %ld, count %d)\n",
 					abfd, section->name, location, (long int)offset, (int)count);
-  vms_debug (2, "secraw %d, seccooked %d\n", (int)section->_raw_size, (int)section->_cooked_size);
+  vms_debug (2, "size %d\n", (int) section->size);
 #endif
   return _bfd_save_vms_section(abfd, section, location, offset, count);
 }

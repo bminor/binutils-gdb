@@ -666,8 +666,8 @@ extern bfd_boolean NAME(aout,bfd_free_cached_info)
    && obj_textsec (abfd) != NULL					\
    && obj_datasec (abfd) != NULL					\
    && (sec)->vma >= (obj_textsec (abfd)->vma +				\
-		     obj_textsec (abfd)->_cooked_size)			\
-   && ((sec)->vma + (sec)->_cooked_size) <= obj_datasec (abfd)->vma	\
+		     obj_textsec (abfd)->size)				\
+   && ((sec)->vma + (sec)->size) <= obj_datasec (abfd)->vma		\
    && ((abfd)->flags & D_PAGED) != 0)
 
 #endif /* ! defined (LIBAOUT_H) */

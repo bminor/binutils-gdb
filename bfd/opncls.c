@@ -1,6 +1,6 @@
 /* opncls.c -- open and close a BFD.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 2000,
-   2001, 2002, 2003
+   2001, 2002, 2003, 2004
    Free Software Foundation, Inc.
 
    Written by Cygnus Support.
@@ -976,12 +976,10 @@ DESCRIPTION
 static char *
 get_debug_link_info (bfd *abfd, unsigned long *crc32_out)
 {
-  asection * sect;
-  bfd_size_type debuglink_size;
+  asection *sect;
   unsigned long crc32;
-  char * contents;
+  bfd_byte *contents;
   int crc_offset;
-  bfd_boolean ret;
 
   BFD_ASSERT (abfd);
   BFD_ASSERT (crc32_out);
@@ -991,16 +989,10 @@ get_debug_link_info (bfd *abfd, unsigned long *crc32_out)
   if (sect == NULL)
     return NULL;
 
-  debuglink_size = bfd_section_size (abfd, sect);  
-
-  contents = malloc (debuglink_size);
-  if (contents == NULL)
-    return NULL;
-
-  ret = bfd_get_section_contents (abfd, sect, contents, 0, debuglink_size);
-  if (! ret)
+  if (!bfd_malloc_and_get_section (abfd, sect, &contents))
     {
-      free (contents);
+      if (contents != NULL)
+	free (contents);
       return NULL;
     }
 

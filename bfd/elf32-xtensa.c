@@ -504,8 +504,7 @@ xtensa_read_table_entries (abfd, section, table_p, sec_name)
   table_section = bfd_get_section_by_name (abfd, table_section_name);
   free (table_section_name);
   if (table_section != NULL)
-    table_size = (table_section->_cooked_size
-		  ? table_section->_cooked_size : table_section->_raw_size);
+    table_size = table_section->size;
   
   if (table_size == 0) 
     {
@@ -562,7 +561,7 @@ xtensa_read_table_entries (abfd, section, table_p, sec_name)
 	  bfd_vma address = bfd_get_32 (abfd, table_data + off);
 
 	  if (address >= section_addr
-	      && address < ( section_addr + section->_raw_size))
+	      && address < section_addr + section->size)
 	    {
 	      blocks[block_count].address = address;
 	      blocks[block_count].size =
@@ -1056,7 +1055,7 @@ elf_xtensa_allocate_plt_size (h, arg)
     h = (struct elf_link_hash_entry *) h->root.u.i.link;
 
   if (h->plt.refcount > 0)
-    srelplt->_raw_size += (h->plt.refcount * sizeof (Elf32_External_Rela));
+    srelplt->size += (h->plt.refcount * sizeof (Elf32_External_Rela));
 
   return TRUE;
 }
@@ -1073,7 +1072,7 @@ elf_xtensa_allocate_got_size (h, arg)
     h = (struct elf_link_hash_entry *) h->root.u.i.link;
 
   if (h->got.refcount > 0)
-    srelgot->_raw_size += (h->got.refcount * sizeof (Elf32_External_Rela));
+    srelgot->size += (h->got.refcount * sizeof (Elf32_External_Rela));
 
   return TRUE;
 }
@@ -1102,8 +1101,8 @@ elf_xtensa_allocate_local_got_size (info, srelgot)
       for (j = 0; j < cnt; ++j)
 	{
 	  if (local_got_refcounts[j] > 0)
-	    srelgot->_raw_size += (local_got_refcounts[j]
-				   * sizeof (Elf32_External_Rela));
+	    srelgot->size += (local_got_refcounts[j]
+			      * sizeof (Elf32_External_Rela));
 	}
     }
 }
@@ -1137,7 +1136,7 @@ elf_xtensa_size_dynamic_sections (output_bfd, info)
 	  s = bfd_get_section_by_name (dynobj, ".interp");
 	  if (s == NULL)
 	    abort ();
-	  s->_raw_size = sizeof ELF_DYNAMIC_INTERPRETER;
+	  s->size = sizeof ELF_DYNAMIC_INTERPRETER;
 	  s->contents = (unsigned char *) ELF_DYNAMIC_INTERPRETER;
 	}
 
@@ -1145,7 +1144,7 @@ elf_xtensa_size_dynamic_sections (output_bfd, info)
       s = bfd_get_section_by_name (dynobj, ".got");
       if (s == NULL)
 	abort ();
-      s->_raw_size = 4;
+      s->size = 4;
 
       /* Adjust refcounts for symbols that we now know are not "dynamic".  */
       elf_link_hash_traverse (elf_hash_table (info),
@@ -1184,7 +1183,7 @@ elf_xtensa_size_dynamic_sections (output_bfd, info)
       if (spltlittbl == NULL)
 	abort ();
 
-      plt_entries = srelplt->_raw_size / sizeof (Elf32_External_Rela);
+      plt_entries = srelplt->size / sizeof (Elf32_External_Rela);
       plt_chunks =
 	(plt_entries + PLT_ENTRIES_PER_CHUNK - 1) / PLT_ENTRIES_PER_CHUNK;
 
@@ -1210,15 +1209,15 @@ elf_xtensa_size_dynamic_sections (output_bfd, info)
 
 	  if (chunk_entries != 0)
 	    {
-	      sgotplt->_raw_size = 4 * (chunk_entries + 2);
-	      splt->_raw_size = PLT_ENTRY_SIZE * chunk_entries;
-	      srelgot->_raw_size += 2 * sizeof (Elf32_External_Rela);
-	      spltlittbl->_raw_size += 8;
+	      sgotplt->size = 4 * (chunk_entries + 2);
+	      splt->size = PLT_ENTRY_SIZE * chunk_entries;
+	      srelgot->size += 2 * sizeof (Elf32_External_Rela);
+	      spltlittbl->size += 8;
 	    }
 	  else
 	    {
-	      sgotplt->_raw_size = 0;
-	      splt->_raw_size = 0;
+	      sgotplt->size = 0;
+	      splt->size = 0;
 	    }
 	}
 
@@ -1227,7 +1226,7 @@ elf_xtensa_size_dynamic_sections (output_bfd, info)
       sgotloc = bfd_get_section_by_name (dynobj, ".got.loc");
       if (sgotloc == NULL)
 	abort ();
-      sgotloc->_raw_size = spltlittbl->_raw_size;
+      sgotloc->size = spltlittbl->size;
       for (abfd = info->input_bfds; abfd != NULL; abfd = abfd->link_next)
 	{
 	  if (abfd->flags & DYNAMIC)
@@ -1237,7 +1236,7 @@ elf_xtensa_size_dynamic_sections (output_bfd, info)
 	      if (! elf_discarded_section (s)
 		  && xtensa_is_littable_section (s)
 		  && s != spltlittbl)
-		sgotloc->_raw_size += s->_raw_size;
+		sgotloc->size += s->size;
 	    }
 	}
     }
@@ -1273,7 +1272,7 @@ elf_xtensa_size_dynamic_sections (output_bfd, info)
       else if (strncmp (name, ".plt.", 5) == 0
 	       || strncmp (name, ".got.plt.", 9) == 0)
 	{
-	  if (s->_raw_size == 0)
+	  if (s->size == 0)
 	    {
 	      /* If we don't need this section, strip it from the output
 		 file.  We must create the ".plt*" and ".got.plt*"
@@ -1302,8 +1301,8 @@ elf_xtensa_size_dynamic_sections (output_bfd, info)
       else
 	{
 	  /* Allocate memory for the section contents.  */
-	  s->contents = (bfd_byte *) bfd_zalloc (dynobj, s->_raw_size);
-	  if (s->contents == NULL && s->_raw_size != 0)
+	  s->contents = (bfd_byte *) bfd_zalloc (dynobj, s->size);
+	  if (s->contents == NULL && s->size != 0)
 	    return FALSE;
 	}
     }
@@ -1439,7 +1438,7 @@ elf_xtensa_do_reloc (howto, abfd, input_section, relocation,
 	  /* Check for windowed CALL across a 1GB boundary.  */
 	  xtensa_opcode opcode =
 	    get_expanded_call_opcode (contents + address,
-				      input_section->_raw_size - address);
+				      input_section->size - address);
 	  if (is_windowed_call_opcode (opcode))
 	    {
 	      self_address = (input_section->output_section->vma
@@ -1460,8 +1459,7 @@ elf_xtensa_do_reloc (howto, abfd, input_section, relocation,
       { 
         /* Convert the L32R/CALLX to CALL.  */
 	bfd_reloc_status_type retval = 
-	  elf_xtensa_do_asm_simplify (contents, address,
-				      input_section->_raw_size);
+	  elf_xtensa_do_asm_simplify (contents, address, input_section->size);
 	if (retval != bfd_reloc_ok)
 	  return retval;
 
@@ -1652,6 +1650,7 @@ bfd_elf_xtensa_reloc (abfd, reloc_entry, symbol, data, input_section,
   bfd_vma relocation;
   bfd_reloc_status_type flag;
   bfd_size_type octets = reloc_entry->address * bfd_octets_per_byte (abfd);
+  bfd_size_type sz;
   bfd_vma output_base = 0;
   reloc_howto_type *howto = reloc_entry->howto;
   asection *reloc_target_output_section;
@@ -1676,8 +1675,8 @@ bfd_elf_xtensa_reloc (abfd, reloc_entry, symbol, data, input_section,
     }
 
   /* Is the address of the relocation really within the section?  */
-  if (reloc_entry->address > (input_section->_cooked_size
-			      / bfd_octets_per_byte (abfd)))
+  sz = input_section->rawsize ? input_section->rawsize : input_section->size;
+  if (reloc_entry->address > sz / bfd_octets_per_byte (abfd))
     return bfd_reloc_outofrange;
 
   /* Work out which section the relocation is targeted at and the
@@ -1895,7 +1894,7 @@ elf_xtensa_relocate_section (output_bfd, info, input_bfd,
 	    {
 	      /* Convert ASM_SIMPLIFY into the simpler relocation
 		 so that they never escape a relaxing link.  */
-	      contract_asm_expansion (contents, input_section->_raw_size, rel);
+	      contract_asm_expansion (contents, input_section->size, rel);
 	      r_type = ELF32_R_TYPE (rel->r_info);
 	    }
 
@@ -1991,7 +1990,7 @@ elf_xtensa_relocate_section (output_bfd, info, input_bfd,
 	}
 
       /* Sanity check the address.  */
-      if (rel->r_offset >= input_section->_raw_size
+      if (rel->r_offset >= input_section->size
 	  && ELF32_R_TYPE (rel->r_info) != R_XTENSA_NONE)
 	{
 	  bfd_set_error (bfd_error_bad_value);
@@ -2095,7 +2094,7 @@ elf_xtensa_relocate_section (output_bfd, info, input_bfd,
 		     + srel->reloc_count++ * sizeof (Elf32_External_Rela));
 	      bfd_elf32_swap_reloca_out (output_bfd, &outrel, loc);
 	      BFD_ASSERT (sizeof (Elf32_External_Rela) * srel->reloc_count
-			  <= srel->_cooked_size);
+			  <= srel->size);
 	    }
 	}
 
@@ -2201,13 +2200,11 @@ elf_xtensa_combine_prop_entries (output_bfd, sxtlit, sgotloc)
   bfd_vma offset;
   int n, m, num;
 
-  section_size = (sxtlit->_cooked_size != 0
-		  ? sxtlit->_cooked_size : sxtlit->_raw_size);
+  section_size = sxtlit->size;
   BFD_ASSERT (section_size % 8 == 0);
   num = section_size / 8;
 
-  sgotloc_size = (sgotloc->_cooked_size != 0
-		  ? sgotloc->_cooked_size : sgotloc->_raw_size);
+  sgotloc_size = sgotloc->size;
   if (sgotloc_size != section_size)
     {
       (*_bfd_error_handler)
@@ -2215,20 +2212,22 @@ elf_xtensa_combine_prop_entries (output_bfd, sxtlit, sgotloc)
       return -1;
     }
 
-  contents = (bfd_byte *) bfd_malloc (section_size);
-  table = (property_table_entry *)
-    bfd_malloc (num * sizeof (property_table_entry));
-  if (contents == 0 || table == 0)
+  table = bfd_malloc (num * sizeof (property_table_entry));
+  if (table == 0)
     return -1;
 
   /* The ".xt.lit.plt" section has the SEC_IN_MEMORY flag set and this
      propagates to the output section, where it doesn't really apply and
-     where it breaks the following call to bfd_get_section_contents.  */
+     where it breaks the following call to bfd_malloc_and_get_section.  */
   sxtlit->flags &= ~SEC_IN_MEMORY;
 
-  if (! bfd_get_section_contents (output_bfd, sxtlit, contents, 0,
-				  section_size))
-    return -1;
+  if (!bfd_malloc_and_get_section (output_bfd, sxtlit, &contents))
+    {
+      if (contents != 0)
+	free (contents);
+      free (table);
+      return -1;
+    }
 
   /* There should never be any relocations left at this point, so this
      is quite a bit easier than what is done during relaxation.  */
@@ -2282,7 +2281,7 @@ elf_xtensa_combine_prop_entries (output_bfd, sxtlit, sgotloc)
   if ((bfd_size_type) (num * 8) < section_size)
     {
       memset (&contents[num * 8], 0, section_size - num * 8);
-      sxtlit->_cooked_size = num * 8;
+      sxtlit->size = num * 8;
     }
 
   if (! bfd_set_section_contents (output_bfd, sxtlit, contents, 0,
@@ -2322,7 +2321,7 @@ elf_xtensa_finish_dynamic_sections (output_bfd, info)
   sgot = bfd_get_section_by_name (dynobj, ".got");
   if (sgot)
     {
-      BFD_ASSERT (sgot->_raw_size == 4);
+      BFD_ASSERT (sgot->size == 4);
       if (sdyn == NULL)
 	bfd_put_32 (output_bfd, (bfd_vma) 0, sgot->contents);
       else
@@ -2332,7 +2331,7 @@ elf_xtensa_finish_dynamic_sections (output_bfd, info)
     }
 
   srelplt = bfd_get_section_by_name (dynobj, ".rela.plt");
-  if (srelplt != NULL && srelplt->_raw_size != 0)
+  if (srelplt != NULL && srelplt->size != 0)
     {
       asection *sgotplt, *srelgot, *spltlittbl;
       int chunk, plt_chunks, plt_entries;
@@ -2357,7 +2356,7 @@ elf_xtensa_finish_dynamic_sections (output_bfd, info)
 	}
       BFD_ASSERT (rtld_reloc < srelgot->reloc_count);
 
-      plt_entries = (srelplt->_raw_size / sizeof (Elf32_External_Rela));
+      plt_entries = srelplt->size / sizeof (Elf32_External_Rela);
       plt_chunks =
 	(plt_entries + PLT_ENTRIES_PER_CHUNK - 1) / PLT_ENTRIES_PER_CHUNK;
 
@@ -2399,7 +2398,7 @@ elf_xtensa_finish_dynamic_sections (output_bfd, info)
 	  else
 	    chunk_entries = plt_entries - (chunk * PLT_ENTRIES_PER_CHUNK);
 
-	  BFD_ASSERT ((unsigned) (chunk + 1) * 8 <= spltlittbl->_cooked_size);
+	  BFD_ASSERT ((unsigned) (chunk + 1) * 8 <= spltlittbl->size);
 	  bfd_put_32 (output_bfd,
 		      sgotplt->output_section->vma + sgotplt->output_offset,
 		      spltlittbl->contents + (chunk * 8) + 0);
@@ -2410,10 +2409,10 @@ elf_xtensa_finish_dynamic_sections (output_bfd, info)
 
       /* All the dynamic relocations have been emitted at this point.
 	 Make sure the relocation sections are the correct size.  */
-      if (srelgot->_cooked_size != (sizeof (Elf32_External_Rela)
-				    * srelgot->reloc_count)
-	  || srelplt->_cooked_size != (sizeof (Elf32_External_Rela)
-				       * srelplt->reloc_count))
+      if (srelgot->size != (sizeof (Elf32_External_Rela)
+			    * srelgot->reloc_count)
+	  || srelplt->size != (sizeof (Elf32_External_Rela)
+			       * srelplt->reloc_count))
 	abort ();
 
      /* The .xt.lit.plt section has just been modified.  This must
@@ -2424,7 +2423,7 @@ elf_xtensa_finish_dynamic_sections (output_bfd, info)
 				      spltlittbl->output_section,
 				      spltlittbl->contents,
 				      spltlittbl->output_offset,
-				      spltlittbl->_raw_size))
+				      spltlittbl->size))
 	return FALSE;
       /* Clear SEC_HAS_CONTENTS so the contents won't be output again.  */
       spltlittbl->flags &= ~SEC_HAS_CONTENTS;
@@ -2441,7 +2440,7 @@ elf_xtensa_finish_dynamic_sections (output_bfd, info)
     return FALSE;
 
   dyncon = (Elf32_External_Dyn *) sdyn->contents;
-  dynconend = (Elf32_External_Dyn *) (sdyn->contents + sdyn->_raw_size);
+  dynconend = (Elf32_External_Dyn *) (sdyn->contents + sdyn->size);
   for (; dyncon < dynconend; dyncon++)
     {
       Elf_Internal_Dyn dyn;
@@ -2476,7 +2475,7 @@ elf_xtensa_finish_dynamic_sections (output_bfd, info)
 	case DT_PLTRELSZ:
 	  s = bfd_get_section_by_name (output_bfd, ".rela.plt");
 	  BFD_ASSERT (s);
-	  dyn.d_un.d_val = (s->_cooked_size ? s->_cooked_size : s->_raw_size);
+	  dyn.d_un.d_val = s->size;
 	  break;
 
 	case DT_RELASZ:
@@ -2488,10 +2487,7 @@ elf_xtensa_finish_dynamic_sections (output_bfd, info)
 	     don't have to worry about changing the DT_RELA entry.  */
 	  s = bfd_get_section_by_name (output_bfd, ".rela.plt");
 	  if (s)
-	    {
-	      dyn.d_un.d_val -=
-		(s->_cooked_size ? s->_cooked_size : s->_raw_size);
-	    }
+	    dyn.d_un.d_val -= s->size;
 	  break;
 	}
 
@@ -2687,7 +2683,7 @@ elf_xtensa_discard_info_for_section (abfd, cookie, info, sec)
   bfd_vma offset, actual_offset;
   size_t removed_bytes = 0;
 
-  section_size = (sec->_cooked_size ? sec->_cooked_size : sec->_raw_size);
+  section_size = sec->size;
   if (section_size == 0 || section_size % 8 != 0)
     return FALSE;
 
@@ -2775,9 +2771,8 @@ elf_xtensa_discard_info_for_section (abfd, cookie, info, sec)
       pin_contents (sec, contents);
       pin_internal_relocs (sec, cookie->rels);
 
-      sec->_cooked_size = section_size - removed_bytes;
-      /* Also shrink _raw_size.  See comments in relax_property_section.  */
-      sec->_raw_size = sec->_cooked_size;
+      /* Shrink size.  */
+      sec->size = section_size - removed_bytes;
 
       if (xtensa_is_littable_section (sec))
 	{
@@ -2787,13 +2782,7 @@ elf_xtensa_discard_info_for_section (abfd, cookie, info, sec)
 	      asection *sgotloc =
 		bfd_get_section_by_name (dynobj, ".got.loc");
 	      if (sgotloc)
-		{
-		  bfd_size_type sgotloc_size =
-		    (sgotloc->_cooked_size ? sgotloc->_cooked_size
-		     : sgotloc->_raw_size);
-		  sgotloc->_cooked_size = sgotloc_size - removed_bytes;
-		  sgotloc->_raw_size = sgotloc_size - removed_bytes;
-		}
+		sgotloc->size -= removed_bytes;
 	    }
 	}
     }
@@ -2845,7 +2834,7 @@ elf_xtensa_grok_prstatus (abfd, note)
      Elf_Internal_Note *note;
 {
   int offset;
-  unsigned int raw_size;
+  unsigned int size;
 
   /* The size for Xtensa is variable, so don't try to recognize the format
      based on the size.  Just assume this is GNU/Linux.  */
@@ -2858,11 +2847,11 @@ elf_xtensa_grok_prstatus (abfd, note)
 
   /* pr_reg */
   offset = 72;
-  raw_size = note->descsz - offset - 4;
+  size = note->descsz - offset - 4;
 
   /* Make a ".reg/999" section.  */
   return _bfd_elfcore_make_pseudosection (abfd, ".reg",
-					  raw_size, note->descpos + offset);
+					  size, note->descpos + offset);
 }
 
 
@@ -3024,7 +3013,7 @@ get_relocation_opcode (sec, contents, irel)
   if (contents == NULL)
     return XTENSA_UNDEFINED;
 
-  if (sec->_raw_size <= irel->r_offset)
+  if (sec->size <= irel->r_offset)
     return XTENSA_UNDEFINED;
 
   if (ibuff == NULL)
@@ -3958,20 +3947,16 @@ retrieve_contents (abfd, sec, keep_memory)
 
   contents = elf_section_data (sec)->this_hdr.contents;
   
-  if (contents == NULL && sec->_raw_size != 0)
+  if (contents == NULL && sec->size != 0)
     {
-      contents = (bfd_byte *) bfd_malloc (sec->_raw_size);
-      if (contents != NULL)
+      if (!bfd_malloc_and_get_section (abfd, sec, &contents))
 	{
-	  if (! bfd_get_section_contents (abfd, sec, contents,
-					  (file_ptr) 0, sec->_raw_size))
-	    {
-	      free (contents);
-	      return NULL;
-	    }
-	  if (keep_memory) 
-	    elf_section_data (sec)->this_hdr.contents = contents;
+	  if (contents != NULL)
+	    free (contents);
+	  return NULL;
 	}
+      if (keep_memory) 
+	elf_section_data (sec)->this_hdr.contents = contents;
     }
   return contents;
 }
@@ -4197,7 +4182,7 @@ find_relaxable_sections (abfd, sec, link_info, is_relaxable_p)
     return ok;
 
   contents = retrieve_contents (abfd, sec, link_info->keep_memory);
-  if (contents == NULL && sec->_raw_size != 0)
+  if (contents == NULL && sec->size != 0)
     {
       ok = FALSE;
       goto error_return;
@@ -4258,7 +4243,7 @@ collect_source_relocs (abfd, sec, link_info)
     return ok;
 
   contents = retrieve_contents (abfd, sec, link_info->keep_memory);
-  if (contents == NULL && sec->_raw_size != 0)
+  if (contents == NULL && sec->size != 0)
     {
       ok = FALSE;
       goto error_return;
@@ -4406,7 +4391,7 @@ is_resolvable_asm_expansion (abfd, sec, contents, irel, link_info,
     return FALSE;
   
   opcode = get_expanded_call_opcode (contents + irel->r_offset,
-				     sec->_raw_size - irel->r_offset);
+				     sec->size - irel->r_offset);
   
   direct_call_opcode = swap_callx_for_call_opcode (opcode);
   if (direct_call_opcode == XTENSA_UNDEFINED)
@@ -4509,7 +4494,7 @@ remove_literals (abfd, sec, link_info, values)
 					      link_info->keep_memory);
 
   contents = retrieve_contents (abfd, sec, link_info->keep_memory);
-  if (contents == NULL && sec->_raw_size != 0)
+  if (contents == NULL && sec->size != 0)
     {
       ok = FALSE;
       goto error_return;
@@ -4567,7 +4552,7 @@ remove_literals (abfd, sec, link_info, values)
 
       /* Find the literal value.  */
       r_reloc_init (&val.r_rel, abfd, irel);
-      BFD_ASSERT (rel->r_rel.target_offset < sec->_raw_size);
+      BFD_ASSERT (rel->r_rel.target_offset < sec->size);
       val.value = bfd_get_32 (abfd, contents + rel->r_rel.target_offset);
           
       /* Check if we've seen another literal with the same value.  */
@@ -4723,7 +4708,7 @@ relax_section (abfd, sec, link_info)
   internal_relocs = retrieve_internal_relocs (abfd, sec, 
 					      link_info->keep_memory);
   contents = retrieve_contents (abfd, sec, link_info->keep_memory);
-  if (contents == NULL && sec->_raw_size != 0)
+  if (contents == NULL && sec->size != 0)
     {
       ok = FALSE;
       goto error_return;
@@ -4802,13 +4787,13 @@ relax_section (abfd, sec, link_info)
       /* Walk through the contents and delete literals that are not needed 
          anymore.  */
 
-      unsigned long size = sec->_cooked_size;
+      unsigned long size = sec->size;
       unsigned long removed = 0;
 
       removed_literal *reloc = relax_info->removed_list.head;
       for (; reloc; reloc = reloc->next) 
 	{
-	  unsigned long upper = sec->_raw_size;
+	  unsigned long upper = sec->size;
 	  bfd_vma start = reloc->from.target_offset + 4;
 	  if (reloc->next)
 	    upper = reloc->next->from.target_offset;
@@ -4825,13 +4810,7 @@ relax_section (abfd, sec, link_info)
 	}
 
       /* Change the section size.  */
-      sec->_cooked_size = size;
-      /* Also shrink _raw_size.  (The code in relocate_section that
-	 checks that relocations are within the section must use
-	 _raw_size because of the way the stabs sections are relaxed;
-	 shrinking _raw_size means that these checks will not be
-	 unnecessarily lax.)  */
-      sec->_raw_size = size;
+      sec->size = size;
     }
   
  error_return:
@@ -4957,13 +4936,8 @@ shrink_dynamic_reloc_sections (info, abfd, input_section, rel)
       /* Reduce size of the .rela.* section by one reloc.  */
       srel = bfd_get_section_by_name (dynobj, srel_name);
       BFD_ASSERT (srel != NULL);
-      BFD_ASSERT (srel->_cooked_size >= sizeof (Elf32_External_Rela));
-      srel->_cooked_size -= sizeof (Elf32_External_Rela);
-
-      /* Also shrink _raw_size.  (This seems wrong but other bfd code seems
-	 to assume that linker-created sections will never be relaxed and
-	 hence _raw_size must always equal _cooked_size.) */
-      srel->_raw_size = srel->_cooked_size;
+      BFD_ASSERT (srel->size >= sizeof (Elf32_External_Rela));
+      srel->size -= sizeof (Elf32_External_Rela);
 
       if (is_plt)
 	{
@@ -4976,7 +4950,7 @@ shrink_dynamic_reloc_sections (info, abfd, input_section, rel)
 	     = size - 1" since the index starts at zero, but in this
 	     context, the size has just been decremented so there's no
 	     need to subtract one.  */
-	  reloc_index = srel->_cooked_size / sizeof (Elf32_External_Rela);
+	  reloc_index = srel->size / sizeof (Elf32_External_Rela);
 
 	  chunk = reloc_index / PLT_ENTRIES_PER_CHUNK;
 	  splt = elf_xtensa_get_plt_section (dynobj, chunk);
@@ -4990,27 +4964,20 @@ shrink_dynamic_reloc_sections (info, abfd, input_section, rel)
 	      srelgot = bfd_get_section_by_name (dynobj, ".rela.got");
 	      BFD_ASSERT (srelgot != NULL);
 	      srelgot->reloc_count -= 2;
-	      srelgot->_cooked_size -= 2 * sizeof (Elf32_External_Rela);
-	      /* Shrink _raw_size (see comment above).  */
-	      srelgot->_raw_size = srelgot->_cooked_size;
-
-	      sgotplt->_cooked_size -= 8;
+	      srelgot->size -= 2 * sizeof (Elf32_External_Rela);
+	      sgotplt->size -= 8;
 
 	      /* There should be only one entry left (and it will be
 		 removed below).  */
-	      BFD_ASSERT (sgotplt->_cooked_size == 4);
-	      BFD_ASSERT (splt->_cooked_size == PLT_ENTRY_SIZE);
+	      BFD_ASSERT (sgotplt->size == 4);
+	      BFD_ASSERT (splt->size == PLT_ENTRY_SIZE);
 	    }
 
-	  BFD_ASSERT (sgotplt->_cooked_size >= 4);
-	  BFD_ASSERT (splt->_cooked_size >= PLT_ENTRY_SIZE);
+	  BFD_ASSERT (sgotplt->size >= 4);
+	  BFD_ASSERT (splt->size >= PLT_ENTRY_SIZE);
 
-	  sgotplt->_cooked_size -= 4;
-	  splt->_cooked_size -= PLT_ENTRY_SIZE;
-
-	  /* Shrink _raw_sizes (see comment above).  */
-	  sgotplt->_raw_size = sgotplt->_cooked_size;
-	  splt->_raw_size = splt->_cooked_size;
+	  sgotplt->size -= 4;
+	  splt->size -= PLT_ENTRY_SIZE;
 	}
     }
 }
@@ -5035,7 +5002,7 @@ relax_property_section (abfd, sec, link_info)
   internal_relocs = retrieve_internal_relocs (abfd, sec, 
 					      link_info->keep_memory);
   contents = retrieve_contents (abfd, sec, link_info->keep_memory);
-  if (contents == NULL && sec->_raw_size != 0)
+  if (contents == NULL && sec->size != 0)
     {
       ok = FALSE;
       goto error_return;
@@ -5126,7 +5093,7 @@ relax_property_section (abfd, sec, link_info)
       pin_contents (sec, contents);
 
       last_irel_offset = (bfd_vma) -1;
-      section_size = (sec->_cooked_size ? sec->_cooked_size : sec->_raw_size);
+      section_size = sec->size;
       BFD_ASSERT (section_size % 8 == 0);
 
       for (offset = 0; offset < section_size; offset += 8)
@@ -5258,13 +5225,7 @@ relax_property_section (abfd, sec, link_info)
 	  /* Clear the removed bytes.  */
 	  memset (&contents[section_size - removed_bytes], 0, removed_bytes);
 
-	  sec->_cooked_size = section_size - removed_bytes;
-	  /* Also shrink _raw_size.  (The code in relocate_section that
-	     checks that relocations are within the section must use
-	     _raw_size because of the way the stabs sections are
-	     relaxed; shrinking _raw_size means that these checks will
-	     not be unnecessarily lax.)  */
-	  sec->_raw_size = sec->_cooked_size;
+	  sec->size = section_size - removed_bytes;
 
 	  if (xtensa_is_littable_section (sec))
 	    {
@@ -5274,13 +5235,7 @@ relax_property_section (abfd, sec, link_info)
 		  asection *sgotloc =
 		    bfd_get_section_by_name (dynobj, ".got.loc");
 		  if (sgotloc)
-		    {
-		      bfd_size_type sgotloc_size =
-			(sgotloc->_cooked_size ? sgotloc->_cooked_size
-			 : sgotloc->_raw_size);
-		      sgotloc->_cooked_size = sgotloc_size - removed_bytes;
-		      sgotloc->_raw_size = sgotloc_size - removed_bytes;
-		    }
+		    sgotloc->size -= removed_bytes;
 		}
 	    }
 	}
@@ -5739,7 +5694,7 @@ xtensa_callback_required_dependence (abfd, sec, link_info, callback, closure)
       /* Assume worst-case offsets: L32R at the very end of the ".plt"
 	 section referencing a literal at the very beginning of
 	 ".got.plt".  This is very close to the real dependence, anyway.  */
-      (*callback) (sec, sec->_raw_size, sgotplt, 0, closure);
+      (*callback) (sec, sec->size, sgotplt, 0, closure);
     }
 
   internal_relocs = retrieve_internal_relocs (abfd, sec, 
@@ -5750,7 +5705,7 @@ xtensa_callback_required_dependence (abfd, sec, link_info, callback, closure)
 
   /* Cache the contents for the duration of this scan.  */
   contents = retrieve_contents (abfd, sec, link_info->keep_memory);
-  if (contents == NULL && sec->_raw_size != 0)
+  if (contents == NULL && sec->size != 0)
     {
       ok = FALSE;
       goto error_return;

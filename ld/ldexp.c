@@ -618,7 +618,7 @@ fold_name (etree_type *tree,
 
 	  os = lang_output_section_find (tree->name.name);
 	  if (os && os->processed > 0)
-	    result = new_abs (os->bfd_section->_raw_size / opb);
+	    result = new_abs (os->bfd_section->size / opb);
 	}
       break;
 

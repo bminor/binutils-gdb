@@ -515,7 +515,7 @@ process_def_file (bfd *abfd ATTRIBUTE_UNUSED, struct bfd_link_info *info)
       s = bfd_get_section_by_name (b, ".drectve");
       if (s)
 	{
-	  int size = bfd_get_section_size (s);
+	  long size = s->size;
 	  char *buf = xmalloc (size);
 
 	  bfd_get_section_contents (b, s, buf, 0, size);
@@ -1252,7 +1252,7 @@ generate_reloc (bfd *abfd, struct bfd_link_info *info)
   if (page_ptr != (unsigned long) -1)
     bfd_put_32 (abfd, reloc_sz - page_ptr, reloc_d + page_ptr + 4);
 
-  while (reloc_sz < reloc_s->_raw_size)
+  while (reloc_sz < reloc_s->size)
     reloc_d[reloc_sz++] = 0;
 }
 

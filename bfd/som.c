@@ -1836,7 +1836,7 @@ som_object_setup (abfd, file_hdrp, aux_hdrp, current_offset)
 	continue;
       entry = aux_hdrp->exec_entry;
       if (entry >= section->vma
-	  && entry < section->vma + section->_cooked_size)
+	  && entry < section->vma + section->size)
 	found = 1;
     }
   if (aux_hdrp->exec_entry == 0
@@ -2098,8 +2098,7 @@ setup_sections (abfd, file_hdr, current_offset)
 	    save_subspace = subspace;
 
 	  subspace_asect->vma = subspace.subspace_start;
-	  subspace_asect->_cooked_size = subspace.subspace_length;
-	  subspace_asect->_raw_size = subspace.subspace_length;
+	  subspace_asect->size = subspace.subspace_length;
 	  subspace_asect->filepos = (subspace.file_loc_init_value
 				     + current_offset);
 	  subspace_asect->alignment_power = exact_log2 (subspace.alignment);
@@ -2110,21 +2109,13 @@ setup_sections (abfd, file_hdr, current_offset)
       /* This can happen for a .o which defines symbols in otherwise
 	 empty subspaces.  */
       if (!save_subspace.file_loc_init_value)
-	{
-	  space_asect->_cooked_size = 0;
-	  space_asect->_raw_size = 0;
-	}
+	space_asect->size = 0;
       else
-	{
-	  /* Setup the sizes for the space section based upon the info in the
-	     last subspace of the space.  */
-	  space_asect->_cooked_size = (save_subspace.subspace_start
-				       - space_asect->vma
-				       + save_subspace.subspace_length);
-	  space_asect->_raw_size = (save_subspace.file_loc_init_value
-				    - space_asect->filepos
-				    + save_subspace.initialization_length);
-	}
+	/* Setup the size for the space section based upon the info in the
+	   last subspace of the space.  */
+	space_asect->size = (save_subspace.subspace_start
+			     - space_asect->vma
+			     + save_subspace.subspace_length);
     }
   /* Now that we've read in all the subspace records, we need to assign
      a target index to each subspace.  */
@@ -2429,9 +2420,9 @@ som_prep_headers (abfd)
 	  som_section_data (section)->subspace_dict->subspace_start =
 	    section->vma;
 	  som_section_data (section)->subspace_dict->subspace_length =
-	    bfd_section_size (abfd, section);
+	    section->size;
 	  som_section_data (section)->subspace_dict->initialization_length =
-	    bfd_section_size (abfd, section);
+	    section->size;
 	  som_section_data (section)->subspace_dict->alignment =
 	    1 << section->alignment_power;
 
@@ -3069,8 +3060,7 @@ som_write_fixups (abfd, current_offset, total_reloc_sizep)
 
 	  /* Last BFD relocation for a subspace has been processed.
 	     Map the rest of the subspace with R_NO_RELOCATION fixups.  */
-	  p = som_reloc_skip (abfd, (bfd_section_size (abfd, subsection)
-				     - reloc_offset),
+	  p = som_reloc_skip (abfd, subsection->size - reloc_offset,
 			      p, &subspace_reloc_size, reloc_queue);
 
 	  /* Scribble out the relocations.  */
@@ -3611,22 +3601,22 @@ som_begin_writing (abfd)
 	      /* Update the size of the code & data.  */
 	      if (abfd->flags & (EXEC_P | DYNAMIC)
 		  && subsection->flags & SEC_CODE)
-		exec_header->exec_tsize += subsection->_cooked_size;
+		exec_header->exec_tsize += subsection->size;
 	      else if (abfd->flags & (EXEC_P | DYNAMIC)
 		       && subsection->flags & SEC_DATA)
-		exec_header->exec_dsize += subsection->_cooked_size;
+		exec_header->exec_dsize += subsection->size;
 	      som_section_data (subsection)->subspace_dict->file_loc_init_value
 		= current_offset;
 	      subsection->filepos = current_offset;
-	      current_offset += bfd_section_size (abfd, subsection);
-	      subspace_offset += bfd_section_size (abfd, subsection);
+	      current_offset += subsection->size;
+	      subspace_offset += subsection->size;
 	    }
 	  /* Looks like uninitialized data.  */
 	  else
 	    {
 	      /* Update the size of the bss section.  */
 	      if (abfd->flags & (EXEC_P | DYNAMIC))
-		exec_header->exec_bsize += subsection->_cooked_size;
+		exec_header->exec_bsize += subsection->size;
 
 	      som_section_data (subsection)->subspace_dict->file_loc_init_value
 		= 0;
@@ -3676,7 +3666,7 @@ som_begin_writing (abfd)
 	      som_section_data (subsection)->subspace_dict->file_loc_init_value
 		= current_offset;
 	      subsection->filepos = current_offset;
-	      current_offset += bfd_section_size (abfd, subsection);
+	      current_offset += subsection->size;
 	    }
 	  /* Looks like uninitialized data.  */
 	  else
@@ -3684,7 +3674,7 @@ som_begin_writing (abfd)
 	      som_section_data (subsection)->subspace_dict->file_loc_init_value
 		= 0;
 	      som_section_data (subsection)->subspace_dict->
-		initialization_length = bfd_section_size (abfd, subsection);
+		initialization_length = subsection->size;
 	    }
 	}
       /* Goto the next section.  */
@@ -4373,7 +4363,7 @@ bfd_section_from_som_symbol (abfd, symbol)
       for (section = abfd->sections; section; section = section->next)
 	{
 	  if (value >= section->vma
-	      && value <= section->vma + section->_cooked_size
+	      && value <= section->vma + section->size
 	      && som_is_subspace (section))
 	    return section;
 	}
@@ -4963,16 +4953,16 @@ som_set_reloc_info (fixup, end, internal_relocs, section, symbols, just_count)
 		      /* Got to read the damn contents first.  We don't
 			 bother saving the contents (yet).  Add it one
 			 day if the need arises.  */
-		      section->contents = bfd_malloc (section->_raw_size);
-		      if (section->contents == NULL)
-			return (unsigned) -1;
-
+		      bfd_bute *contents;
+		      if (!bfd_malloc_and_get_section (section->owner, section,
+						       &contents))
+			{
+			  if (contents != NULL)
+			    free (contents);
+			  return (unsigned) -1;
+			}
+		      section->contents = contents;
 		      deallocate_contents = 1;
-		      bfd_get_section_contents (section->owner,
-						section,
-						section->contents,
-						(bfd_vma) 0,
-						section->_raw_size);
 		    }
 		  else if (rptr->addend == 0)
 		    rptr->addend = bfd_get_32 (section->owner,
@@ -5407,7 +5397,7 @@ som_get_section_contents (abfd, section, location, offset, count)
 {
   if (count == 0 || ((section->flags & SEC_HAS_CONTENTS) == 0))
     return TRUE;
-  if ((bfd_size_type) (offset+count) > section->_raw_size
+  if ((bfd_size_type) (offset+count) > section->size
       || bfd_seek (abfd, (file_ptr) (section->filepos + offset), SEEK_SET) != 0
       || bfd_bread (location, count, abfd) != count)
     return FALSE; /* On error.  */
@@ -6378,7 +6368,7 @@ som_bfd_link_split_section (abfd, sec)
      bfd *abfd ATTRIBUTE_UNUSED;
      asection *sec;
 {
-  return (som_is_subspace (sec) && sec->_raw_size > 240000);
+  return (som_is_subspace (sec) && sec->size > 240000);
 }
 
 #define	som_close_and_cleanup		som_bfd_free_cached_info

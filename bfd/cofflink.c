@@ -1,6 +1,6 @@
 /* COFF specific linker code.
-   Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
-   Free Software Foundation, Inc.
+   Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003,
+   2004 Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -551,8 +551,8 @@ coff_link_add_symbols (bfd *abfd,
 		 For example, it won't help objdump.  This needs to be
 		 done when we swap in the section header.  */
 	      BFD_ASSERT ((*sym_hash)->numaux == 1);
-	      if (section->_raw_size == 0)
-		section->_raw_size = (*sym_hash)->aux[0].x_scn.x_scnlen;
+	      if (section->size == 0)
+		section->size = (*sym_hash)->aux[0].x_scn.x_scnlen;
 
 	      /* FIXME: We could test whether the section sizes
                  matches the size in the aux entry, but apparently
@@ -714,8 +714,10 @@ _bfd_coff_final_link (bfd *abfd,
 	      if (info->relocatable)
 		o->reloc_count += sec->reloc_count;
 
-	      if (sec->_raw_size > max_contents_size)
-		max_contents_size = sec->_raw_size;
+	      if (sec->rawsize > max_contents_size)
+		max_contents_size = sec->rawsize;
+	      if (sec->size > max_contents_size)
+		max_contents_size = sec->size;
 	      if (sec->lineno_count > max_lineno_count)
 		max_lineno_count = sec->lineno_count;
 	      if (sec->reloc_count > max_reloc_count)
@@ -1208,21 +1210,18 @@ process_embedded_commands (bfd *output_bfd,
   asection *sec = bfd_get_section_by_name (abfd, ".drectve");
   char *s;
   char *e;
-  char *copy;
+  bfd_byte *copy;
 
   if (!sec)
     return 1;
 
-  copy = bfd_malloc (sec->_raw_size);
-  if (!copy)
-    return 0;
-
-  if (! bfd_get_section_contents (abfd, sec, copy, (bfd_vma) 0, sec->_raw_size))
+  if (!bfd_malloc_and_get_section (abfd, sec, &copy))
     {
-      free (copy);
+      if (copy != NULL)
+	free (copy);
       return 0;
     }
-  e = copy + sec->_raw_size;
+  e = copy + sec->size;
 
   for (s = copy;  s < e ; )
     {
@@ -2284,7 +2283,7 @@ _bfd_coff_link_input_bfd (struct coff_final_link_info *finfo, bfd *input_bfd)
 	continue;
 
       if ((o->flags & SEC_HAS_CONTENTS) == 0
-	  || (o->_raw_size == 0 && (o->flags & SEC_RELOC) == 0))
+	  || (o->size == 0 && (o->flags & SEC_RELOC) == 0))
 	{
 	  if ((o->flags & SEC_RELOC) != 0
 	      && o->reloc_count != 0)
@@ -2305,8 +2304,8 @@ _bfd_coff_link_input_bfd (struct coff_final_link_info *finfo, bfd *input_bfd)
 	contents = secdata->contents;
       else
 	{
-	  if (! bfd_get_section_contents (input_bfd, o, finfo->contents,
-					  (file_ptr) 0, o->_raw_size))
+	  bfd_size_type x = o->rawsize ? o->rawsize : o->size;
+	  if (! bfd_get_section_contents (input_bfd, o, finfo->contents, 0, x))
 	    return FALSE;
 	  contents = finfo->contents;
 	}
@@ -2431,10 +2430,8 @@ _bfd_coff_link_input_bfd (struct coff_final_link_info *finfo, bfd *input_bfd)
       if (secdata == NULL || secdata->stab_info == NULL)
 	{
 	  file_ptr loc = o->output_offset * bfd_octets_per_byte (output_bfd);
-	  bfd_size_type amt = (o->_cooked_size != 0
-			       ? o->_cooked_size : o->_raw_size);
 	  if (! bfd_set_section_contents (output_bfd, o->output_section,
-					  contents, loc, amt))
+					  contents, loc, o->size))
 	    return FALSE;
 	}
       else
@@ -2616,9 +2613,7 @@ _bfd_coff_write_global_sym (struct coff_link_hash_entry *h, void *data)
 	  sec = h->root.u.def.section->output_section;
 	  if (sec != NULL)
 	    {
-	      auxp->x_scn.x_scnlen = (sec->_cooked_size != 0
-				      ? sec->_cooked_size
-				      : sec->_raw_size);
+	      auxp->x_scn.x_scnlen = sec->size;
 
 	      /* For PE, an overflow on the final link reportedly does
                  not matter.  FIXME: Why not?  */

@@ -139,7 +139,7 @@ netbsd_core_file_p (abfd)
 	goto punt;
 
       asect->flags = flags;
-      asect->_raw_size = coreseg.c_size;
+      asect->size = coreseg.c_size;
       asect->vma = coreseg.c_addr;
       asect->filepos = offset;
       asect->alignment_power = 2;
@@ -149,7 +149,7 @@ netbsd_core_file_p (abfd)
 	  && coreseg.c_size > CORE_WCOOKIE_OFFSET)
 	{
 	  /* Truncate the .reg section.  */
-	  asect->_raw_size = CORE_WCOOKIE_OFFSET;
+	  asect->size = CORE_WCOOKIE_OFFSET;
 
 	  /* And create the .wcookie section.  */
 	  asect = bfd_make_section_anyway (abfd, ".wcookie");
@@ -157,7 +157,7 @@ netbsd_core_file_p (abfd)
 	    goto punt;
 
 	  asect->flags = SEC_ALLOC + SEC_HAS_CONTENTS;
-	  asect->_raw_size = 4;
+	  asect->size = 4;
 	  asect->vma = 0;
 	  asect->filepos = offset + CORE_WCOOKIE_OFFSET;
 	  asect->alignment_power = 2;

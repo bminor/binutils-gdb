@@ -729,7 +729,7 @@ elf32_arm_nabi_grok_prstatus (abfd, note)
      Elf_Internal_Note *note;
 {
   int offset;
-  size_t raw_size;
+  size_t size;
 
   switch (note->descsz)
     {
@@ -745,14 +745,14 @@ elf32_arm_nabi_grok_prstatus (abfd, note)
 
 	/* pr_reg */
 	offset = 72;
-	raw_size = 72;
+	size = 72;
 
 	break;
     }
 
   /* Make a ".reg/999" section.  */
   return _bfd_elfcore_make_pseudosection (abfd, ".reg",
-					  raw_size, note->descpos + offset);
+					  size, note->descpos + offset);
 }
 
 static bfd_boolean

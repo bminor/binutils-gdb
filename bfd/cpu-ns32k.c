@@ -1,5 +1,5 @@
 /* BFD support for the ns32k architecture.
-   Copyright 1990, 1991, 1994, 1995, 1998, 2000, 2001, 2002, 2003
+   Copyright 1990, 1991, 1994, 1995, 1998, 2000, 2001, 2002, 2003, 2004
    Free Software Foundation, Inc.
    Almost totally rewritten by Ian Dall from initial work
    by Andrew Cagney.
@@ -170,6 +170,7 @@ do_ns32k_reloc (abfd, reloc_entry, symbol, data, input_section, output_bfd,
   bfd_vma relocation;
   bfd_reloc_status_type flag = bfd_reloc_ok;
   bfd_size_type addr = reloc_entry->address;
+  bfd_size_type sz;
   bfd_vma output_base = 0;
   reloc_howto_type *howto = reloc_entry->howto;
   asection *reloc_target_output_section;
@@ -191,7 +192,8 @@ do_ns32k_reloc (abfd, reloc_entry, symbol, data, input_section, output_bfd,
     flag = bfd_reloc_undefined;
 
   /* Is the address of the relocation really within the section?  */
-  if (reloc_entry->address > input_section->_cooked_size)
+  sz = input_section->rawsize ? input_section->rawsize : input_section->size;
+  if (reloc_entry->address > sz)
     return bfd_reloc_outofrange;
 
   /* Work out which section the relocation is targeted at and the
@@ -802,9 +804,11 @@ _bfd_ns32k_final_link_relocate (howto, input_bfd, input_section, contents,
      bfd_vma addend;
 {
   bfd_vma relocation;
+  bfd_size_type sz;
 
   /* Sanity check the address.  */
-  if (address > input_section->_cooked_size)
+  sz = input_section->rawsize ? input_section->rawsize : input_section->size;
+  if (address > sz)
     return bfd_reloc_outofrange;
 
   /* This function assumes that we are dealing with a basic relocation

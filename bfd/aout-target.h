@@ -46,7 +46,7 @@ MY(callback) (abfd)
   unsigned long arch_align;
 
   /* Calculate the file positions of the parts of a newly read aout header */
-  obj_textsec (abfd)->_raw_size = N_TXTSIZE(*execp);
+  obj_textsec (abfd)->size = N_TXTSIZE(*execp);
 
   /* The virtual memory addresses of the sections */
   obj_textsec (abfd)->vma = N_TXTADDR(*execp);
@@ -110,12 +110,12 @@ MY(callback) (abfd)
      of the section.  */
   arch_align_power = bfd_get_arch_info (abfd)->section_align_power;
   arch_align = 1 << arch_align_power;
-  if ((BFD_ALIGN (obj_textsec (abfd)->_raw_size, arch_align)
-       == obj_textsec (abfd)->_raw_size)
-      && (BFD_ALIGN (obj_datasec (abfd)->_raw_size, arch_align)
-	  == obj_datasec (abfd)->_raw_size)
-      && (BFD_ALIGN (obj_bsssec (abfd)->_raw_size, arch_align)
-	  == obj_bsssec (abfd)->_raw_size))
+  if ((BFD_ALIGN (obj_textsec (abfd)->size, arch_align)
+       == obj_textsec (abfd)->size)
+      && (BFD_ALIGN (obj_datasec (abfd)->size, arch_align)
+	  == obj_datasec (abfd)->size)
+      && (BFD_ALIGN (obj_bsssec (abfd)->size, arch_align)
+	  == obj_bsssec (abfd)->size))
     {
       obj_textsec (abfd)->alignment_power = arch_align_power;
       obj_datasec (abfd)->alignment_power = arch_align_power;

@@ -1,6 +1,6 @@
 /* BFD back-end for ARM COFF files.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003
+   2000, 2001, 2002, 2003, 2004
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
@@ -1635,8 +1635,12 @@ coff_arm_relocate_section (output_bfd, info, input_bfd, input_section,
              code.  */
 
           bfd_vma address = rel->r_vaddr - input_section->vma;
+	  bfd_size_type sz;
 
-          if (address > input_section->_raw_size)
+	  sz = (input_section->rawsize
+		? input_section->rawsize
+		: input_section->size);
+          if (address > sz)
 	    rstat = bfd_reloc_outofrange;
           else
             {
@@ -1858,7 +1862,7 @@ bfd_arm_allocate_interworking_sections (info)
       memset (foo, test_char, (size_t) globals->arm_glue_size);
 #endif
 
-      s->_raw_size = s->_cooked_size = globals->arm_glue_size;
+      s->size = globals->arm_glue_size;
       s->contents = foo;
     }
 
@@ -1877,7 +1881,7 @@ bfd_arm_allocate_interworking_sections (info)
       memset (foo, test_char, (size_t) globals->thumb_glue_size);
 #endif
 
-      s->_raw_size = s->_cooked_size = globals->thumb_glue_size;
+      s->size = globals->thumb_glue_size;
       s->contents = foo;
     }
 

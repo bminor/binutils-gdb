@@ -518,7 +518,7 @@ extern bfd_boolean _bfd_write_stab_strings
    sections.  */
 
 extern bfd_vma _bfd_stab_section_offset
-  (bfd *, void **, asection *, void **, bfd_vma);
+  (asection *, void *, bfd_vma);
 
 /* Register a SEC_MERGE section as a candidate for merging.  */
 

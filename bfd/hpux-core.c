@@ -115,11 +115,11 @@ static void swap_abort
   PARAMS ((void));
 
 static asection *
-make_bfd_asection (abfd, name, flags, _raw_size, vma, alignment_power)
+make_bfd_asection (abfd, name, flags, size, vma, alignment_power)
      bfd *abfd;
      const char *name;
      flagword flags;
-     bfd_size_type _raw_size;
+     bfd_size_type size;
      bfd_vma vma;
      unsigned int alignment_power;
 {
@@ -137,7 +137,7 @@ make_bfd_asection (abfd, name, flags, _raw_size, vma, alignment_power)
     return NULL;
 
   asect->flags = flags;
-  asect->_raw_size = _raw_size;
+  asect->size = size;
   asect->vma = vma;
   asect->filepos = bfd_tell (abfd);
   asect->alignment_power = alignment_power;

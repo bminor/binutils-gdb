@@ -584,7 +584,7 @@ bfd_mach_o_make_bfd_section (abfd, section)
 
   bfdsec->vma = section->addr;
   bfdsec->lma = section->addr;
-  bfdsec->_raw_size = section->size;
+  bfdsec->size = section->size;
   bfdsec->filepos = section->offset;
   bfdsec->alignment_power = section->align;
 
@@ -1032,7 +1032,7 @@ bfd_mach_o_scan_read_dylinker (abfd, command)
 
   bfdsec->vma = 0;
   bfdsec->lma = 0;
-  bfdsec->_raw_size = command->len - 8;
+  bfdsec->size = command->len - 8;
   bfdsec->filepos = command->offset + 8;
   bfdsec->alignment_power = 0;
   bfdsec->flags = SEC_HAS_CONTENTS;
@@ -1090,7 +1090,7 @@ bfd_mach_o_scan_read_dylib (abfd, command)
 
   bfdsec->vma = 0;
   bfdsec->lma = 0;
-  bfdsec->_raw_size = command->len - 8;
+  bfdsec->size = command->len - 8;
   bfdsec->filepos = command->offset + 8;
   bfdsec->alignment_power = 0;
   bfdsec->flags = SEC_HAS_CONTENTS;
@@ -1213,7 +1213,7 @@ bfd_mach_o_scan_read_thread (abfd, command)
 
       bfdsec->vma = 0;
       bfdsec->lma = 0;
-      bfdsec->_raw_size = cmd->flavours[i].size;
+      bfdsec->size = cmd->flavours[i].size;
       bfdsec->filepos = cmd->flavours[i].offset;
       bfdsec->alignment_power = 0x0;
       bfdsec->flags = SEC_HAS_CONTENTS;
@@ -1320,7 +1320,7 @@ bfd_mach_o_scan_read_symtab (abfd, command)
 
   bfdsec->vma = 0;
   bfdsec->lma = 0;
-  bfdsec->_raw_size = seg->nsyms * 12;
+  bfdsec->size = seg->nsyms * 12;
   bfdsec->filepos = seg->symoff;
   bfdsec->alignment_power = 0;
   bfdsec->flags = SEC_HAS_CONTENTS;
@@ -1339,7 +1339,7 @@ bfd_mach_o_scan_read_symtab (abfd, command)
 
   bfdsec->vma = 0;
   bfdsec->lma = 0;
-  bfdsec->_raw_size = seg->strsize;
+  bfdsec->size = seg->strsize;
   bfdsec->filepos = seg->stroff;
   bfdsec->alignment_power = 0;
   bfdsec->flags = SEC_HAS_CONTENTS;
@@ -1390,7 +1390,7 @@ bfd_mach_o_scan_read_segment (abfd, command)
 
   bfdsec->vma = seg->vmaddr;
   bfdsec->lma = seg->vmaddr;
-  bfdsec->_raw_size = seg->filesize;
+  bfdsec->size = seg->filesize;
   bfdsec->filepos = seg->fileoff;
   bfdsec->alignment_power = 0x0;
   bfdsec->flags = SEC_HAS_CONTENTS | SEC_LOAD | SEC_ALLOC | SEC_CODE;

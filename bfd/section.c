@@ -421,13 +421,17 @@ CODE_FRAGMENT
 .
 .  {* The size of the section in octets, as it will be output.
 .     Contains a value even if the section has no contents (e.g., the
-.     size of <<.bss>>).  This will be filled in after relocation.  *}
-.  bfd_size_type _cooked_size;
+.     size of <<.bss>>).  *}
+.  bfd_size_type size;
 .
-.  {* The original size on disk of the section, in octets.  Normally this
-.     value is the same as the size, but if some relaxing has
-.     been done, then this value will be bigger.  *}
-.  bfd_size_type _raw_size;
+.  {* The original size on disk of the section, in octets.  This field
+.     is used by the linker relaxation code.  It is currently only set
+.     for sections where the linker relaxation scheme doesn't cache
+.     altered section and reloc contents (stabs, eh_frame, SEC_MERGE),
+.     and thus the original size needs to be kept to read the section
+.     multiple times.  If non-zero, rawsize will be used in address
+.     checks during relocation and to read section contents.  *}
+.  bfd_size_type rawsize;
 .
 .  {* If this section is going to be output, then this value is the
 .     offset in *bytes* into the output section of the first byte in the
@@ -617,10 +621,10 @@ static const asymbol global_syms[] =
     /* need_finalize_relax, reloc_done,                              */ \
        0,		    0,						\
 									\
-    /* vma, lma, _cooked_size, _raw_size,                            */	\
-       0,   0,   0,            0,					\
+    /* vma, lma, size, rawsize                                       */	\
+       0,   0,   0,    0,						\
 									\
-    /* output_offset, output_section,      alignment_power,          */	\
+    /* output_offset, output_section,              alignment_power,  */	\
        0,             (struct bfd_section *) &SEC, 0,			\
 									\
     /* relocation, orelocation, reloc_count, filepos, rel_filepos,   */	\
@@ -1196,9 +1200,7 @@ bfd_set_section_size (bfd *abfd, sec_ptr ptr, bfd_size_type val)
       return FALSE;
     }
 
-  ptr->_cooked_size = val;
-  ptr->_raw_size = val;
-
+  ptr->size = val;
   return TRUE;
 }
 
@@ -1244,7 +1246,7 @@ bfd_set_section_contents (bfd *abfd,
       return FALSE;
     }
 
-  sz = section->_cooked_size != 0 ? section->_cooked_size : section->_raw_size;
+  sz = section->size;
   if ((bfd_size_type) offset > sz
       || count > sz
       || offset + count > sz
@@ -1324,7 +1326,7 @@ bfd_get_section_contents (bfd *abfd,
       return TRUE;
     }
 
-  sz = section->_raw_size;
+  sz = section->rawsize ? section->rawsize : section->size;
   if ((bfd_size_type) offset > sz
       || count > sz
       || offset + count > sz
@@ -1354,6 +1356,36 @@ bfd_get_section_contents (bfd *abfd,
 		   (abfd, section, location, offset, count));
 }
 
+/*
+FUNCTION
+	bfd_malloc_and_get_section
+
+SYNOPSIS
+	bfd_boolean bfd_malloc_and_get_section
+	  (bfd *abfd, asection *section, bfd_byte **buf);
+
+DESCRIPTION
+	Read all data from @var{section} in BFD @var{abfd}
+	into a buffer, *@var{buf}, malloc'd by this function.
+*/
+
+bfd_boolean
+bfd_malloc_and_get_section (bfd *abfd, sec_ptr sec, bfd_byte **buf)
+{
+  bfd_size_type sz = sec->rawsize ? sec->rawsize : sec->size;
+  bfd_byte *p = NULL;
+
+  *buf = p;
+  if (sz == 0)
+    return TRUE;
+
+  p = bfd_malloc (sz);
+  if (p == NULL)
+    return FALSE;
+  *buf = p;
+
+  return bfd_get_section_contents (abfd, sec, p, 0, sz);
+}
 /*
 FUNCTION
 	bfd_copy_private_section_data

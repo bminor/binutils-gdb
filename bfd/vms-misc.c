@@ -1,6 +1,6 @@
 /* vms-misc.c -- Miscellaneous functions for VAX (openVMS/VAX) and
    EVAX (openVMS/Alpha) files.
-   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
+   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004
    Free Software Foundation, Inc.
 
    Written by Klaus K"ampf (kkaempf@rmi.de)
@@ -595,11 +595,11 @@ add_new_contents (abfd, section)
 				      (bfd_size_type) sizeof (vms_section));
   if (newptr == (vms_section *) NULL)
     return NULL;
-  newptr->contents = (unsigned char *) bfd_alloc (abfd, section->_raw_size);
+  newptr->contents = (unsigned char *) bfd_alloc (abfd, section->size);
   if (newptr->contents == (unsigned char *) NULL)
     return NULL;
   newptr->offset = 0;
-  newptr->size = section->_raw_size;
+  newptr->size = section->size;
   newptr->next = 0;
   PRIV (vms_section_table)[section->index] = newptr;
   return newptr;

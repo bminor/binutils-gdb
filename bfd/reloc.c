@@ -587,6 +587,7 @@ bfd_perform_relocation (bfd *abfd,
 {
   bfd_vma relocation;
   bfd_reloc_status_type flag = bfd_reloc_ok;
+  bfd_size_type sz;
   bfd_size_type octets = reloc_entry->address * bfd_octets_per_byte (abfd);
   bfd_vma output_base = 0;
   reloc_howto_type *howto = reloc_entry->howto;
@@ -623,8 +624,8 @@ bfd_perform_relocation (bfd *abfd,
     }
 
   /* Is the address of the relocation really within the section?  */
-  if (reloc_entry->address > (input_section->_cooked_size
-			      / bfd_octets_per_byte (abfd)))
+  sz = input_section->rawsize ? input_section->rawsize : input_section->size;
+  if (reloc_entry->address > sz / bfd_octets_per_byte (abfd))
     return bfd_reloc_outofrange;
 
   /* Work out which section the relocation is targeted at and the
@@ -980,6 +981,7 @@ bfd_install_relocation (bfd *abfd,
 {
   bfd_vma relocation;
   bfd_reloc_status_type flag = bfd_reloc_ok;
+  bfd_size_type sz;
   bfd_size_type octets = reloc_entry->address * bfd_octets_per_byte (abfd);
   bfd_vma output_base = 0;
   reloc_howto_type *howto = reloc_entry->howto;
@@ -1013,8 +1015,8 @@ bfd_install_relocation (bfd *abfd,
     }
 
   /* Is the address of the relocation really within the section?  */
-  if (reloc_entry->address > (input_section->_cooked_size
-			      / bfd_octets_per_byte (abfd)))
+  sz = input_section->rawsize ? input_section->rawsize : input_section->size;
+  if (reloc_entry->address > sz / bfd_octets_per_byte (abfd))
     return bfd_reloc_outofrange;
 
   /* Work out which section the relocation is targeted at and the
@@ -1348,9 +1350,11 @@ _bfd_final_link_relocate (reloc_howto_type *howto,
 			  bfd_vma addend)
 {
   bfd_vma relocation;
+  bfd_size_type sz;
 
   /* Sanity check the address.  */
-  if (address > input_section->_raw_size)
+  sz = input_section->rawsize ? input_section->rawsize : input_section->size;
+  if (address > sz)
     return bfd_reloc_outofrange;
 
   /* This function assumes that we are dealing with a basic relocation
@@ -4176,8 +4180,7 @@ SYNOPSIS
 
 DESCRIPTION
 	Provides default handling for relaxing for back ends which
-	don't do relaxing -- i.e., does nothing except make sure that the
-	final size of the section is set.
+	don't do relaxing.
 */
 
 bfd_boolean
@@ -4186,11 +4189,6 @@ bfd_generic_relax_section (bfd *abfd ATTRIBUTE_UNUSED,
 			   struct bfd_link_info *link_info ATTRIBUTE_UNUSED,
 			   bfd_boolean *again)
 {
-  /* We're not relaxing the section, so just copy the size info if it's
-     zero.  Someone else, like bfd_merge_sections, might have set it, so
-     don't overwrite a non-zero value.  */
-  if (section->_cooked_size == 0)
-    section->_cooked_size = section->_raw_size;
   *again = FALSE;
   return TRUE;
 }
@@ -4269,6 +4267,7 @@ bfd_generic_get_relocated_section_contents (bfd *abfd,
   long reloc_size = bfd_get_reloc_upper_bound (input_bfd, input_section);
   arelent **reloc_vector = NULL;
   long reloc_count;
+  bfd_size_type sz;
 
   if (reloc_size < 0)
     goto error_return;
@@ -4278,19 +4277,9 @@ bfd_generic_get_relocated_section_contents (bfd *abfd,
     goto error_return;
 
   /* Read in the section.  */
-  if (!bfd_get_section_contents (input_bfd,
-				 input_section,
-				 data,
-				 0,
-				 input_section->_raw_size))
+  sz = input_section->rawsize ? input_section->rawsize : input_section->size;
+  if (!bfd_get_section_contents (input_bfd, input_section, data, 0, sz))
     goto error_return;
-
-  /* Don't set input_section->_cooked_size here.  The caller has set
-     _cooked_size or called bfd_relax_section, which sets _cooked_size.
-     Despite using this generic relocation function, some targets perform
-     target-specific relaxation or string merging, which happens before
-     this function is called.  We do not want to clobber the _cooked_size
-     they computed.  */
 
   reloc_count = bfd_canonicalize_reloc (input_bfd,
 					input_section,

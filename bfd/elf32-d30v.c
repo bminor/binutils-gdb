@@ -1,5 +1,5 @@
 /* D30V-specific support for 32-bit ELF
-   Copyright 1997, 1998, 1999, 2000, 2001, 2002
+   Copyright 1997, 1998, 1999, 2000, 2001, 2002, 2004
    Free Software Foundation, Inc.
    Contributed by Martin Hunt (hunt@cygnus.com).
 
@@ -266,6 +266,7 @@ bfd_elf_d30v_reloc (abfd, reloc_entry, symbol, data, input_section, output_bfd, 
   bfd_reloc_status_type r;
   asection *reloc_target_output_section;
   bfd_size_type addr = reloc_entry->address;
+  bfd_size_type sz;
   bfd_reloc_status_type flag = bfd_reloc_ok;
   bfd_vma output_base = 0;
   reloc_howto_type *howto = reloc_entry->howto;
@@ -290,7 +291,8 @@ bfd_elf_d30v_reloc (abfd, reloc_entry, symbol, data, input_section, output_bfd, 
     flag = bfd_reloc_undefined;
 
   /* Is the address of the relocation really within the section?  */
-  if (reloc_entry->address > input_section->_cooked_size)
+  sz = input_section->rawsize ? input_section->rawsize : input_section->size;
+  if (reloc_entry->address > sz)
     return bfd_reloc_outofrange;
 
   /* Work out which section the relocation is targeted at and the
@@ -375,6 +377,7 @@ bfd_elf_d30v_reloc_21 (abfd, reloc_entry, symbol, data, input_section, output_bf
   bfd_reloc_status_type r;
   asection *reloc_target_output_section;
   bfd_size_type addr = reloc_entry->address;
+  bfd_size_type sz;
   bfd_reloc_status_type flag = bfd_reloc_ok;
   bfd_vma output_base = 0;
   reloc_howto_type *howto = reloc_entry->howto;
@@ -399,7 +402,8 @@ bfd_elf_d30v_reloc_21 (abfd, reloc_entry, symbol, data, input_section, output_bf
     flag = bfd_reloc_undefined;
 
   /* Is the address of the relocation really within the section?  */
-  if (reloc_entry->address > input_section->_cooked_size)
+  sz = input_section->rawsize ? input_section->rawsize : input_section->size;
+  if (reloc_entry->address > sz)
     return bfd_reloc_outofrange;
 
   /* Work out which section the relocation is targeted at and the

@@ -1,5 +1,5 @@
 # This shell script emits a C file. -*- C -*-
-#   Copyright 2003
+#   Copyright 2003, 2004
 #   Free Software Foundation, Inc.
 #
 # This file is part of GLD, the Gnu Linker.
@@ -1252,7 +1252,7 @@ ld_assign_relative_paged_dot (bfd_vma dot,
 		bfd_boolean sec_is_target = section_is_target (deps, l);
 		bfd_boolean sec_is_source = section_is_source (deps, l);
 
-		if (section->_raw_size != 0
+		if (section->size != 0
 		    && (first_section
 			|| (in_literals && !sec_is_target)
 			|| (!in_literals && sec_is_target)))
@@ -1260,7 +1260,7 @@ ld_assign_relative_paged_dot (bfd_vma dot,
 		    do_xtensa_alignment = TRUE;
 		  }
 		first_section = FALSE;
-		if (section->_raw_size != 0)
+		if (section->size != 0)
 		  in_literals = (sec_is_target && !sec_is_source);
 	      }
 
@@ -1269,7 +1269,7 @@ ld_assign_relative_paged_dot (bfd_vma dot,
 
 	    dot = align_power (dot, align_pow);
 	    section->output_offset = dot;
-	    dot += section->_raw_size;
+	    dot += section->size;
 	  }
 	  break;
 	case lang_fill_statement_enum:
@@ -1336,7 +1336,7 @@ ld_local_file_relocations_fit (lang_statement_union_type *statement,
 		  && e->tgt->output_offset != 0)
 		{
 		  bfd_vma l32r_addr =
-		    align_power (e->src->output_offset + e->src->_raw_size, 2);
+		    align_power (e->src->output_offset + e->src->size, 2);
 		  bfd_vma target_addr = e->tgt->output_offset & ~3;
 		  if (l32r_addr < target_addr)
 		    {
@@ -1386,7 +1386,7 @@ ld_xtensa_insert_page_offsets (bfd_vma dot,
 
 	    if (lit_align)
 	      {
-		if (section->_raw_size != 0
+		if (section->size != 0
 		    && (first_section
 			|| (in_literals && !section_is_target (deps, l))
 			|| (!in_literals && section_is_target (deps, l))))
@@ -1394,7 +1394,7 @@ ld_xtensa_insert_page_offsets (bfd_vma dot,
 		    do_xtensa_alignment = TRUE;
 		  }
 		first_section = FALSE;
-		if (section->_raw_size != 0)
+		if (section->size != 0)
 		  {
 		    in_literals = (section_is_target (deps, l)
 				   && !section_is_source (deps, l));

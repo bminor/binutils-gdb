@@ -140,11 +140,10 @@ bfd_simple_get_relocated_section_contents (bfd *abfd,
   bfd_byte *contents, *data;
   int storage_needed;
   void *saved_offsets;
-  bfd_size_type old_cooked_size;
 
   if (! (sec->flags & SEC_RELOC))
     {
-      bfd_size_type size = bfd_section_size (abfd, sec);
+      bfd_size_type size = sec->rawsize ? sec->rawsize : sec->size;
 
       if (outbuf == NULL)
 	contents = bfd_malloc (size);
@@ -176,13 +175,13 @@ bfd_simple_get_relocated_section_contents (bfd *abfd,
   link_order.next = NULL;
   link_order.type = bfd_indirect_link_order;
   link_order.offset = 0;
-  link_order.size = bfd_section_size (abfd, sec);
+  link_order.size = sec->size;
   link_order.u.indirect.section = sec;
 
   data = NULL;
   if (outbuf == NULL)
     {
-      data = bfd_malloc (bfd_section_size (abfd, sec));
+      data = bfd_malloc (sec->size);
       if (data == NULL)
 	return NULL;
       outbuf = data;
@@ -218,12 +217,6 @@ bfd_simple_get_relocated_section_contents (bfd *abfd,
   else
     storage_needed = 0;
 
-  /* This function might be called before _cooked_size has been set, and
-     bfd_perform_relocation needs _cooked_size to be valid.  */
-  old_cooked_size = sec->_cooked_size;
-  if (old_cooked_size == 0)
-    sec->_cooked_size = sec->_raw_size;
-
   contents = bfd_get_relocated_section_contents (abfd,
 						 &link_info,
 						 &link_order,
@@ -247,7 +240,6 @@ bfd_simple_get_relocated_section_contents (bfd *abfd,
     free (symbol_table);
 #endif
 
-  sec->_cooked_size = old_cooked_size;
   bfd_map_over_sections (abfd, simple_restore_output_info, saved_offsets);
   free (saved_offsets);
 

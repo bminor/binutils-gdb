@@ -224,7 +224,7 @@ _bfd_elf_discard_section_eh_frame
   bfd_size_type new_size;
   unsigned int ptr_size;
 
-  if (sec->_raw_size == 0)
+  if (sec->size == 0)
     {
       /* This file does not contain .eh_frame information.  */
       return FALSE;
@@ -243,14 +243,10 @@ _bfd_elf_discard_section_eh_frame
 
   /* Read the frame unwind information from abfd.  */
 
-  ehbuf = bfd_malloc (sec->_raw_size);
-  if (ehbuf == NULL)
+  if (!bfd_malloc_and_get_section (abfd, sec, &ehbuf))
     goto free_no_table;
 
-  if (! bfd_get_section_contents (abfd, sec, ehbuf, 0, sec->_raw_size))
-    goto free_no_table;
-
-  if (sec->_raw_size >= 4
+  if (sec->size >= 4
       && bfd_get_32 (abfd, ehbuf) == 0
       && cookie->rel == cookie->relend)
     {
@@ -261,7 +257,7 @@ _bfd_elf_discard_section_eh_frame
 
   /* If .eh_frame section size doesn't fit into int, we cannot handle
      it (it would need to use 64-bit .eh_frame format anyway).  */
-  if (sec->_raw_size != (unsigned int) sec->_raw_size)
+  if (sec->size != (unsigned int) sec->size)
     goto free_no_table;
 
   ptr_size = (elf_elfheader (abfd)->e_ident[EI_CLASS]
@@ -271,13 +267,14 @@ _bfd_elf_discard_section_eh_frame
   last_cie_ndx = 0;
   memset (&cie, 0, sizeof (cie));
   cie_usage_count = 0;
-  new_size = sec->_raw_size;
+  new_size = sec->size;
   make_relative = hdr_info->last_cie.make_relative;
   make_lsda_relative = hdr_info->last_cie.make_lsda_relative;
   sec_info = bfd_zmalloc (sizeof (struct eh_frame_sec_info)
 			  + 99 * sizeof (struct eh_cie_fde));
   if (sec_info == NULL)
     goto free_no_table;
+
   sec_info->alloced = 100;
 
 #define ENSURE_NO_RELOCS(buf)				\
@@ -320,11 +317,11 @@ _bfd_elf_discard_section_eh_frame
       last_fde = buf;
       /* If we are at the end of the section, we still need to decide
 	 on whether to output or discard last encountered CIE (if any).  */
-      if ((bfd_size_type) (buf - ehbuf) == sec->_raw_size)
+      if ((bfd_size_type) (buf - ehbuf) == sec->size)
 	hdr.id = (unsigned int) -1;
       else
 	{
-	  if ((bfd_size_type) (buf + 4 - ehbuf) > sec->_raw_size)
+	  if ((bfd_size_type) (buf + 4 - ehbuf) > sec->size)
 	    /* No space for CIE/FDE header length.  */
 	    goto free_no_table;
 
@@ -333,7 +330,7 @@ _bfd_elf_discard_section_eh_frame
 	    /* 64-bit .eh_frame is not supported.  */
 	    goto free_no_table;
 	  buf += 4;
-	  if ((bfd_size_type) (buf - ehbuf) + hdr.length > sec->_raw_size)
+	  if ((bfd_size_type) (buf - ehbuf) + hdr.length > sec->size)
 	    /* CIE/FDE not contained fully in this .eh_frame input section.  */
 	    goto free_no_table;
 
@@ -343,7 +340,7 @@ _bfd_elf_discard_section_eh_frame
 	  if (hdr.length == 0)
 	    {
 	      /* CIE with length 0 must be only the last in the section.  */
-	      if ((bfd_size_type) (buf - ehbuf) < sec->_raw_size)
+	      if ((bfd_size_type) (buf - ehbuf) < sec->size)
 		goto free_no_table;
 	      ENSURE_NO_RELOCS (buf);
 	      sec_info->count++;
@@ -640,18 +637,14 @@ _bfd_elf_discard_section_eh_frame
       hdr_info->last_cie_offset = sec_info->entry[last_cie_ndx].new_offset;
     }
 
-  /* FIXME: Currently it is not possible to shrink sections to zero size at
-     this point, so build a fake minimal CIE.  */
-  if (new_size == 0)
-    new_size = 16;
-
   /* Shrink the sec as needed.  */
-  sec->_cooked_size = new_size;
-  if (sec->_cooked_size == 0)
+  sec->rawsize = sec->size;
+  sec->size = new_size;
+  if (sec->size == 0)
     sec->flags |= SEC_EXCLUDE;
 
   free (ehbuf);
-  return new_size != sec->_raw_size;
+  return new_size != sec->rawsize;
 
 free_no_table:
   if (ehbuf)
@@ -680,9 +673,9 @@ _bfd_elf_discard_section_eh_frame_hdr (bfd *abfd, struct bfd_link_info *info)
   if (sec == NULL)
     return FALSE;
 
-  sec->_cooked_size = EH_FRAME_HDR_SIZE;
+  sec->size = EH_FRAME_HDR_SIZE;
   if (hdr_info->table)
-    sec->_cooked_size += 4 + hdr_info->fde_count * 8;
+    sec->size += 4 + hdr_info->fde_count * 8;
 
   /* Request program headers to be recalculated.  */
   elf_tdata (abfd)->program_header_size = 0;
@@ -721,7 +714,7 @@ _bfd_elf_maybe_strip_eh_frame_hdr (struct bfd_link_info *info)
 	/* Count only sections which have at least a single CIE or FDE.
 	   There cannot be any CIE or FDE <= 8 bytes.  */
 	o = bfd_get_section_by_name (abfd, ".eh_frame");
-	if (o && o->_raw_size > 8 && !bfd_is_abs_section (o->output_section))
+	if (o && o->size > 8 && !bfd_is_abs_section (o->output_section))
 	  break;
       }
 
@@ -753,8 +746,8 @@ _bfd_elf_eh_frame_section_offset (bfd *output_bfd ATTRIBUTE_UNUSED,
     return offset;
   sec_info = elf_section_data (sec)->sec_info;
 
-  if (offset >= sec->_raw_size)
-    return offset - (sec->_cooked_size - sec->_raw_size);
+  if (offset >= sec->rawsize)
+    return offset - sec->rawsize + sec->size;
 
   lo = 0;
   hi = sec_info->count;
@@ -819,7 +812,7 @@ _bfd_elf_write_section_eh_frame (bfd *abfd,
 
   if (sec->sec_info_type != ELF_INFO_TYPE_EH_FRAME)
     return bfd_set_section_contents (abfd, sec->output_section, contents,
-				     sec->output_offset, sec->_raw_size);
+				     sec->output_offset, sec->size);
   sec_info = elf_section_data (sec)->sec_info;
   htab = elf_hash_table (info);
   hdr_info = &htab->eh_info;
@@ -1022,27 +1015,15 @@ _bfd_elf_write_section_eh_frame (bfd *abfd,
       p += sec_info->entry[i].size;
     }
 
-  /* FIXME: Once _bfd_elf_discard_section_eh_frame will be able to
-     shrink sections to zero size, this won't be needed any more.  */
-  if (p == contents && sec->_cooked_size == 16)
-    {
-      bfd_put_32 (abfd, 12, p);		/* Fake CIE length */
-      bfd_put_32 (abfd, 0, p + 4);	/* Fake CIE id */
-      p[8] = 1;				/* Fake CIE version */
-      memset (p + 9, 0, 7);		/* Fake CIE augmentation, 3xleb128
-					   and 3xDW_CFA_nop as pad  */
-      p += 16;
-    }
-  else
     {
       unsigned int alignment = 1 << sec->alignment_power;
-      unsigned int pad = sec->_cooked_size % alignment;
+      unsigned int pad = sec->size % alignment;
 
       /* Don't pad beyond the raw size of the output section. It
 	 can happen at the last input section.  */
       if (pad
-	  && ((sec->output_offset + sec->_cooked_size + pad)
-	      <= sec->output_section->_raw_size))
+	  && ((sec->output_offset + sec->size + pad)
+	      <= sec->output_section->size))
 	{
 	  /* Find the last CIE/FDE.  */
 	  for (i = sec_info->count - 1; i > 0; i--)
@@ -1066,15 +1047,15 @@ _bfd_elf_write_section_eh_frame (bfd *abfd,
 	  memset (p, 0, pad);
 	  p += pad;
 
-	  sec->_cooked_size += pad;
+	  sec->size += pad;
 	}
     }
 
-  BFD_ASSERT ((bfd_size_type) (p - contents) == sec->_cooked_size);
+  BFD_ASSERT ((bfd_size_type) (p - contents) == sec->size);
 
   return bfd_set_section_contents (abfd, sec->output_section,
                                    contents, (file_ptr) sec->output_offset,
-                                   sec->_cooked_size);
+                                   sec->size);
 }
 
 /* Helper function used to sort .eh_frame_hdr search table by increasing
@@ -1185,7 +1166,7 @@ _bfd_elf_write_section_eh_frame_hdr (bfd *abfd, struct bfd_link_info *info)
 
   retval = bfd_set_section_contents (abfd, sec->output_section,
 				     contents, (file_ptr) sec->output_offset,
-				     sec->_cooked_size);
+				     sec->size);
   free (contents);
   return retval;
 }

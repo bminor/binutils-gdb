@@ -315,8 +315,8 @@ typedef struct bfd_section *sec_ptr;
 #define bfd_get_section_lma(bfd, ptr) ((ptr)->lma + 0)
 #define bfd_get_section_alignment(bfd, ptr) ((ptr)->alignment_power + 0)
 #define bfd_section_name(bfd, ptr) ((ptr)->name)
-#define bfd_section_size(bfd, ptr) ((ptr)->_raw_size)
-#define bfd_get_section_size(ptr) ((ptr)->_raw_size)
+#define bfd_section_size(bfd, ptr) ((ptr)->size)
+#define bfd_get_section_size(ptr) ((ptr)->size)
 #define bfd_section_vma(bfd, ptr) ((ptr)->vma)
 #define bfd_section_lma(bfd, ptr) ((ptr)->lma)
 #define bfd_section_alignment(bfd, ptr) ((ptr)->alignment_power)
@@ -1270,13 +1270,17 @@ typedef struct bfd_section
 
   /* The size of the section in octets, as it will be output.
      Contains a value even if the section has no contents (e.g., the
-     size of <<.bss>>).  This will be filled in after relocation.  */
-  bfd_size_type _cooked_size;
+     size of <<.bss>>).  */
+  bfd_size_type size;
 
-  /* The original size on disk of the section, in octets.  Normally this
-     value is the same as the size, but if some relaxing has
-     been done, then this value will be bigger.  */
-  bfd_size_type _raw_size;
+  /* The original size on disk of the section, in octets.  This field
+     is used by the linker relaxation code.  It is currently only set
+     for sections where the linker relaxation scheme doesn't cache
+     altered section and reloc contents (stabs, eh_frame, SEC_MERGE),
+     and thus the original size needs to be kept to read the section
+     multiple times.  If non-zero, rawsize will be used in address
+     checks during relocation and to read section contents.  */
+  bfd_size_type rawsize;
 
   /* If this section is going to be output, then this value is the
      offset in *bytes* into the output section of the first byte in the
@@ -1468,6 +1472,9 @@ bfd_boolean bfd_set_section_contents
 bfd_boolean bfd_get_section_contents
    (bfd *abfd, asection *section, void *location, file_ptr offset,
     bfd_size_type count);
+
+bfd_boolean bfd_malloc_and_get_section
+   (bfd *abfd, asection *section, bfd_byte **buf);
 
 bfd_boolean bfd_copy_private_section_data
    (bfd *ibfd, asection *isec, bfd *obfd, asection *osec);

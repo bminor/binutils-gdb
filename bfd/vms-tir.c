@@ -1,6 +1,6 @@
 /* vms-tir.c -- BFD back-end for VAX (openVMS/VAX) and
    EVAX (openVMS/Alpha) files.
-   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002
+   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2004
    Free Software Foundation, Inc.
 
    TIR record handling functions
@@ -93,7 +93,7 @@ check_section (abfd, size)
   bfd_size_type offset;
 
   offset = PRIV (image_ptr) - PRIV (image_section)->contents;
-  if (offset + size > PRIV (image_section)->_raw_size)
+  if (offset + size > PRIV (image_section)->size)
     {
       PRIV (image_section)->contents
 	= bfd_realloc (PRIV (image_section)->contents, offset + size);
@@ -102,7 +102,7 @@ check_section (abfd, size)
 	  (*_bfd_error_handler) (_("No Mem !"));
 	  return -1;
 	}
-      PRIV (image_section)->_raw_size = offset + size;
+      PRIV (image_section)->size = offset + size;
       PRIV (image_ptr) = PRIV (image_section)->contents + offset;
     }
 
@@ -951,10 +951,9 @@ new_section (abfd, idx)
       return 0;
     }
 
-  section->_raw_size = 0;
+  section->size = 0;
   section->vma = 0;
   section->contents = 0;
-  section->_cooked_size = 0;
   section->name = name;
   section->index = idx;
 
@@ -2031,7 +2030,7 @@ _bfd_vms_write_tir (abfd, objtype)
 #if VMS_DEBUG
       _bfd_vms_debug (4, "writing %d. section '%s' (%d bytes)\n",
 		      section->index, section->name,
-		      (int) (section->_raw_size));
+		      (int) (section->size));
 #endif
 
       if (section->flags & SEC_RELOC)

@@ -2346,7 +2346,7 @@ bfd_sym_scan (abfd, version, mdata)
 
   bfdsec->vma = 0;
   bfdsec->lma = 0;
-  bfdsec->_raw_size = 0;
+  bfdsec->size = 0;
   bfdsec->filepos = 0;
   bfdsec->alignment_power = 0;
 

@@ -1,5 +1,5 @@
 /* SEC_MERGE support.
-   Copyright 2001, 2002, 2003 Free Software Foundation, Inc.
+   Copyright 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
    Written by Jakub Jelinek <jakub@redhat.com>.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -340,7 +340,7 @@ _bfd_add_merge_section (bfd *abfd, void **psinfo, asection *sec,
       || (sec->flags & SEC_MERGE) == 0)
     abort ();
 
-  if (sec->_raw_size == 0
+  if (sec->size == 0
       || (sec->flags & SEC_EXCLUDE) != 0
       || sec->entsize == 0)
     return TRUE;
@@ -391,7 +391,7 @@ _bfd_add_merge_section (bfd *abfd, void **psinfo, asection *sec,
 
   /* Read the section from abfd.  */
 
-  amt = sizeof (struct sec_merge_sec_info) + sec->_raw_size - 1;
+  amt = sizeof (struct sec_merge_sec_info) + sec->size - 1;
   *psecinfo = bfd_alloc (abfd, amt);
   if (*psecinfo == NULL)
     goto error_return;
@@ -410,8 +410,9 @@ _bfd_add_merge_section (bfd *abfd, void **psinfo, asection *sec,
   secinfo->htab = sinfo->htab;
   secinfo->first_str = NULL;
 
+  sec->rawsize = sec->size;
   if (! bfd_get_section_contents (sec->owner, sec, secinfo->contents,
-				  0, sec->_raw_size))
+				  0, sec->size))
     goto error_return;
 
   return TRUE;
@@ -434,7 +435,7 @@ record_section (struct sec_merge_info *sinfo,
   unsigned int align, i;
 
   align = sec->alignment_power;
-  end = secinfo->contents + sec->_raw_size;
+  end = secinfo->contents + sec->size;
   nul = FALSE;
   mask = ((bfd_vma) 1 << align) - 1;
   if (sec->flags & SEC_STRINGS)
@@ -638,7 +639,7 @@ alloc_failure:
     {
       if (e->secinfo != secinfo)
 	{
-	  secinfo->sec->_cooked_size = size;
+	  secinfo->sec->size = size;
 	  secinfo = e->secinfo;
 	}
       if (e->alignment)
@@ -653,7 +654,7 @@ alloc_failure:
 	  size += e->len;
 	}
     }
-  secinfo->sec->_cooked_size = size;
+  secinfo->sec->size = size;
 
   /* And now adjust the rest, removing them from the chain (but not hashtable)
      at the same time.  */
@@ -725,7 +726,7 @@ _bfd_merge_sections (bfd *abfd ATTRIBUTE_UNUSED, struct bfd_link_info *info,
 	      if (e->secinfo->first_str == NULL)
 		{
 		  if (secinfo)
-		    secinfo->sec->_cooked_size = size;
+		    secinfo->sec->size = size;
 		  e->secinfo->first_str = e;
 		  size = 0;
 		}
@@ -735,7 +736,7 @@ _bfd_merge_sections (bfd *abfd ATTRIBUTE_UNUSED, struct bfd_link_info *info,
 	      size += e->len;
 	      secinfo = e->secinfo;
 	    }
-	  secinfo->sec->_cooked_size = size;
+	  secinfo->sec->size = size;
 	}
 
 	/* Finally remove all input sections which have not made it into
@@ -786,15 +787,15 @@ _bfd_merged_section_offset (bfd *output_bfd ATTRIBUTE_UNUSED, asection **psec,
 
   secinfo = (struct sec_merge_sec_info *) psecinfo;
 
-  if (offset >= sec->_raw_size)
+  if (offset >= sec->rawsize)
     {
-      if (offset > sec->_raw_size)
+      if (offset > sec->rawsize)
 	{
 	  (*_bfd_error_handler)
 	    (_("%s: access beyond end of merged section (%ld)"),
 	     bfd_get_filename (sec->owner), (long) offset);
 	}
-      return (secinfo->first_str ? sec->_cooked_size : 0);
+      return secinfo->first_str ? sec->size : 0;
     }
 
   if (secinfo->htab->strings)

@@ -1,5 +1,5 @@
 /* DLX specific support for 32-bit ELF
-   Copyright 2002, 2003 Free Software Foundation, Inc.
+   Copyright 2002, 2003, 2004 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -257,6 +257,7 @@ _bfd_dlx_elf_hi16_reloc (abfd, reloc_entry, symbol, data,
 {
   bfd_reloc_status_type ret;
   bfd_vma relocation;
+  bfd_size_type sz;
 
   /* If the skip flag is set then we simply do the generic relocating, this
      is more of a hack for dlx gas/gld, so we do not need to do the %hi/%lo
@@ -307,7 +308,8 @@ _bfd_dlx_elf_hi16_reloc (abfd, reloc_entry, symbol, data,
   relocation += reloc_entry->addend;
   relocation += bfd_get_16 (abfd, (bfd_byte *)data + reloc_entry->address);
 
-  if (reloc_entry->address > input_section->_cooked_size)
+  sz = input_section->rawsize ? input_section->rawsize : input_section->size;
+  if (reloc_entry->address > sz)
     return bfd_reloc_outofrange;
 
 #if 0

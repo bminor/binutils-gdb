@@ -83,12 +83,11 @@ msdos_write_object_contents (abfd)
   /* Find the total size of the program on disk and in memory.  */
   for (sec = abfd->sections; sec != (asection *) NULL; sec = sec->next)
     {
-      if (bfd_get_section_size (sec) == 0)
+      if (sec->size == 0)
         continue;
       if (bfd_get_section_flags (abfd, sec) & SEC_ALLOC)
         {
-	  bfd_vma sec_vma = (bfd_get_section_vma (abfd, sec)
-			     + bfd_get_section_size (sec));
+	  bfd_vma sec_vma = bfd_get_section_vma (abfd, sec) + sec->size;
 	  if (sec_vma > high_vma)
 	    high_vma = sec_vma;
 	}
@@ -96,7 +95,7 @@ msdos_write_object_contents (abfd)
         {
 	  file_ptr sec_end = (sizeof (hdr)
 			      + bfd_get_section_vma (abfd, sec)
-			      + bfd_get_section_size (sec));
+			      + sec->size);
 	  if (sec_end > outfile_size)
 	    outfile_size = sec_end;
 	}

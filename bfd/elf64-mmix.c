@@ -991,10 +991,10 @@ mmix_elf_perform_relocation (isec, howto, datap, addr, value)
 	goto pcrel_mmix_reloc_fits;
       else
 	{
-	  bfd_size_type raw_size
-	    = (isec->_raw_size
-	       - mmix_elf_section_data (isec)->pjs.n_pushj_relocs
-	       * MAX_PUSHJ_STUB_SIZE);
+	  bfd_size_type size
+	    = (isec->size
+	       - (mmix_elf_section_data (isec)->pjs.n_pushj_relocs
+		  * MAX_PUSHJ_STUB_SIZE));
 
 	  /* We have the bytes at the PUSHJ insn and need to get the
 	     position for the stub.  There's supposed to be room allocated
@@ -1002,7 +1002,7 @@ mmix_elf_perform_relocation (isec, howto, datap, addr, value)
 	  bfd_byte *stubcontents
 	    = ((char *) datap
 	       - (addr - (isec->output_section->vma + isec->output_offset))
-	       + raw_size
+	       + size
 	       + mmix_elf_section_data (isec)->pjs.stub_offset);
 	  bfd_vma stubaddr;
 
@@ -1015,7 +1015,7 @@ mmix_elf_perform_relocation (isec, howto, datap, addr, value)
 					   addr,
 					   isec->output_section->vma
 					   + isec->output_offset
-					   + raw_size
+					   + size
 					   + (mmix_elf_section_data (isec)
 					      ->pjs.stub_offset)
 					   - addr);
@@ -1025,7 +1025,7 @@ mmix_elf_perform_relocation (isec, howto, datap, addr, value)
 	  stubaddr
 	    = (isec->output_section->vma
 	       + isec->output_offset
-	       + raw_size
+	       + size
 	       + mmix_elf_section_data (isec)->pjs.stub_offset);
 
 	  /* We generate a simple JMP if that suffices, else the whole 5
@@ -1045,9 +1045,8 @@ mmix_elf_perform_relocation (isec, howto, datap, addr, value)
 					       value + addr - stubaddr);
 	      mmix_elf_section_data (isec)->pjs.stub_offset += 4;
 
-	      if (raw_size
-		  + mmix_elf_section_data (isec)->pjs.stub_offset
-		  > isec->_cooked_size)
+	      if (size + mmix_elf_section_data (isec)->pjs.stub_offset
+		  > isec->size)
 		abort ();
 
 	      return r;
@@ -1262,6 +1261,7 @@ mmix_elf_reloc (abfd, reloc_entry, symbol, data, input_section,
   bfd_reloc_status_type flag = bfd_reloc_ok;
   bfd_vma output_base = 0;
   bfd_vma addr;
+  bfd_size_type sz;
 
   r = bfd_elf_generic_reloc (abfd, reloc_entry, symbol, data,
 			     input_section, output_bfd, error_message);
@@ -1277,7 +1277,8 @@ mmix_elf_reloc (abfd, reloc_entry, symbol, data, input_section,
     return bfd_reloc_undefined;
 
   /* Is the address of the relocation really within the section?  */
-  if (reloc_entry->address > input_section->_cooked_size)
+  sz = input_section->rawsize ? input_section->rawsize : input_section->size;
+  if (reloc_entry->address > sz)
     return bfd_reloc_outofrange;
 
   /* Work out which section the relocation is targeted at and the
@@ -1342,10 +1343,10 @@ mmix_elf_relocate_section (output_bfd, info, input_bfd, input_section,
   struct elf_link_hash_entry **sym_hashes;
   Elf_Internal_Rela *rel;
   Elf_Internal_Rela *relend;
-  bfd_size_type raw_size
-    = (input_section->_raw_size
-       - mmix_elf_section_data (input_section)->pjs.n_pushj_relocs
-       * MAX_PUSHJ_STUB_SIZE);
+  bfd_size_type size
+    = (input_section->size
+       - (mmix_elf_section_data (input_section)->pjs.n_pushj_relocs
+	  * MAX_PUSHJ_STUB_SIZE));
   size_t pjsno = 0;
 
   symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
@@ -1421,7 +1422,7 @@ mmix_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 						input_section
 						->output_section->vma
 						+ input_section->output_offset
-						+ raw_size
+						+ size
 						+ mmix_elf_section_data (input_section)
 						->pjs.stub_offset,
 						NULL, NULL) != bfd_reloc_ok)
@@ -1431,7 +1432,7 @@ mmix_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		     R_MMIX_JMP reloc.  */
 		  bfd_put_32 (output_bfd, JMP_INSN_BYTE << 24,
 			      contents
-			      + raw_size
+			      + size
 			      + mmix_elf_section_data (input_section)
 			      ->pjs.stub_offset);
 
@@ -1439,7 +1440,7 @@ mmix_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		     R_MMIX_JMP reloc.  */
 		  rel->r_info = ELF64_R_INFO (r_symndx, R_MMIX_JMP);
 		  rel->r_offset
-		    = (raw_size
+		    = (size
 		       + mmix_elf_section_data (input_section)
 		       ->pjs.stub_offset);
 
@@ -2287,21 +2288,14 @@ mmix_elf_final_link (abfd, info)
 				     greg_section->output_section,
 				     greg_section->contents,
 				     (file_ptr) greg_section->output_offset,
-				     greg_section->_cooked_size))
+				     greg_section->size))
 	return FALSE;
     }
   return TRUE;
 }
 
 /* We need to include the maximum size of PUSHJ-stubs in the initial
-   section size.  This is expected to shrink during linker relaxation.
-
-   You might think that we should set *only* _cooked_size, but that
-   won't work: section contents allocation will be using _raw_size in
-   mixed format linking and not enough storage will be allocated.
-   FIXME: That's a major bug.  The relaxation functions set _cooked
-   size.  Relaxation happens before relocation.  All functions
-   *after relaxation* should be using _cooked size.  */
+   section size.  This is expected to shrink during linker relaxation.  */
 
 static void
 mmix_set_relaxable_size (abfd, sec, ptr)
@@ -2316,11 +2310,8 @@ mmix_set_relaxable_size (abfd, sec, ptr)
   if (mmix_elf_section_data (sec)->pjs.n_pushj_relocs == 0)
     return;
 
-  sec->_cooked_size
-    = (sec->_raw_size
-       + mmix_elf_section_data (sec)->pjs.n_pushj_relocs
-       * MAX_PUSHJ_STUB_SIZE);
-  sec->_raw_size = sec->_cooked_size;
+  sec->size += (mmix_elf_section_data (sec)->pjs.n_pushj_relocs
+		* MAX_PUSHJ_STUB_SIZE);
 
   /* For use in relocatable link, we start with a max stubs size.  See
      mmix_elf_relax_section.  */
@@ -2450,11 +2441,8 @@ _bfd_mmix_after_linker_allocation (abfd, link_info)
 
   n_gregs = gregdata->n_allocated_bpo_gregs;
 
-  /* We need to have a _raw_size contents even though there's only
-     _cooked_size worth of data, since the generic relocation machinery
-     will allocate and copy that much temporarily.  */
   bpo_gregs_section->contents
-    = contents = bfd_alloc (bpo_greg_owner, bpo_gregs_section->_raw_size);
+    = contents = bfd_alloc (bpo_greg_owner, bpo_gregs_section->size);
   if (contents == NULL)
     return FALSE;
 
@@ -2601,20 +2589,14 @@ mmix_elf_relax_section (abfd, sec, link_info, again)
   size_t pjsno = 0;
   bfd *bpo_greg_owner;
   Elf_Internal_Sym *isymbuf = NULL;
-  bfd_size_type raw_size
-    = (sec->_raw_size
-       - mmix_elf_section_data (sec)->pjs.n_pushj_relocs
-       * MAX_PUSHJ_STUB_SIZE);
+  bfd_size_type size = (sec->size
+			- (mmix_elf_section_data (sec)->pjs.n_pushj_relocs
+			   * MAX_PUSHJ_STUB_SIZE));
 
   mmix_elf_section_data (sec)->pjs.stubs_size_sum = 0;
 
   /* Assume nothing changes.  */
   *again = FALSE;
-
-  /* If this is the first time we have been called for this section,
-     initialize the cooked size.  */
-  if (sec->_cooked_size == 0 && sec->_raw_size != 0)
-    abort ();
 
   /* We don't have to do anything if this section does not have relocs, or
      if this is not a code section.  */
@@ -2687,7 +2669,7 @@ mmix_elf_relax_section (abfd, sec, link_info, again)
 				      0,
 				      bfd_arch_bits_per_address (abfd),
 				      /* Output-stub location.  */
-				      sec->output_section->_cooked_size
+				      sec->output_section->size
 				      + (mmix_elf_section_data (sec
 							       ->output_section)
 					 ->pjs.stubs_size_sum)
@@ -2780,7 +2762,7 @@ mmix_elf_relax_section (abfd, sec, link_info, again)
 	  bfd_vma stubaddr
 	    = (sec->output_section->vma
 	       + sec->output_offset
-	       + raw_size
+	       + size
 	       + mmix_elf_section_data (sec)->pjs.stubs_size_sum);
 
 	  if ((value & 3) == 0
@@ -2891,7 +2873,7 @@ mmix_elf_relax_section (abfd, sec, link_info, again)
 	  *again = TRUE;
 	}
 
-      bpo_gregs_section->_cooked_size = (regindex + 1) * 8;
+      bpo_gregs_section->size = (regindex + 1) * 8;
     }
 
   if (isymbuf != NULL && (unsigned char *) isymbuf != symtab_hdr->contents)
@@ -2909,15 +2891,12 @@ mmix_elf_relax_section (abfd, sec, link_info, again)
       && elf_section_data (sec)->relocs != internal_relocs)
     free (internal_relocs);
 
-  if (sec->_cooked_size
-      < raw_size + mmix_elf_section_data (sec)->pjs.stubs_size_sum)
+  if (sec->size < size + mmix_elf_section_data (sec)->pjs.stubs_size_sum)
     abort ();
 
-  if (sec->_cooked_size
-      > raw_size + mmix_elf_section_data (sec)->pjs.stubs_size_sum)
+  if (sec->size > size + mmix_elf_section_data (sec)->pjs.stubs_size_sum)
     {
-      sec->_cooked_size
-	= raw_size + mmix_elf_section_data (sec)->pjs.stubs_size_sum;
+      sec->size = size + mmix_elf_section_data (sec)->pjs.stubs_size_sum;
       *again = TRUE;
     }
 
@@ -2932,9 +2911,9 @@ mmix_elf_relax_section (abfd, sec, link_info, again)
   return FALSE;
 }
 
-/* Because we set _raw_size to include the max size of pushj stubs,
+/* Because we set size to include the max size of pushj stubs,
    i.e. larger than the actual section input size (see
-   mmix_set_relaxable_raw_size), we have to take care of that when reading
+   mmix_set_relaxablesize), we have to take care of that when reading
    the section.  */
 
 static bfd_boolean
@@ -2945,32 +2924,31 @@ mmix_elf_get_section_contents (abfd, section, location, offset, count)
      file_ptr offset;
      bfd_size_type count;
 {
-  bfd_size_type raw_size
-    = (section->_raw_size
-       - mmix_elf_section_data (section)->pjs.n_pushj_relocs
-       * MAX_PUSHJ_STUB_SIZE);
+  bfd_size_type size = (section->size
+			- (mmix_elf_section_data (section)->pjs.n_pushj_relocs
+			   * MAX_PUSHJ_STUB_SIZE));
 
-  if (offset + count > section->_raw_size)
+  if (offset + count > section->size)
     {
       abort();
       bfd_set_error (bfd_error_invalid_operation);
       return FALSE;
     }
 
-  /* Check bounds against the faked raw_size.  */
-  if (offset + count > raw_size)
+  /* Check bounds against the faked size.  */
+  if (offset + count > size)
     {
       /* Clear the part in the faked area.  */
-      memset (location + raw_size - offset, 0, count - (raw_size - offset));
+      memset (location + size - offset, 0, count - (size - offset));
 
       /* If there's no initial part within the "real" contents, we're
          done.  */
-      if ((bfd_size_type) offset >= raw_size)
+      if ((bfd_size_type) offset >= size)
 	return TRUE;
 
       /* Else adjust the count and fall through to call the generic
          function.  */
-      count = raw_size - offset;
+      count = size - offset;
     }
 
   return

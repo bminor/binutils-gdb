@@ -338,7 +338,7 @@ tic30_aout_callback (abfd)
   unsigned long arch_align;
 
   /* Calculate the file positions of the parts of a newly read aout header.  */
-  obj_textsec (abfd)->_raw_size = N_TXTSIZE (*execp);
+  obj_textsec (abfd)->size = N_TXTSIZE (*execp);
 
   /* The virtual memory addresses of the sections.  */
   obj_textsec (abfd)->vma = N_TXTADDR (*execp);
@@ -376,12 +376,12 @@ tic30_aout_callback (abfd)
      of the section.  */
   arch_align_power = bfd_get_arch_info (abfd)->section_align_power;
   arch_align = 1 << arch_align_power;
-  if ((BFD_ALIGN (obj_textsec (abfd)->_raw_size, arch_align)
-       == obj_textsec (abfd)->_raw_size)
-      && (BFD_ALIGN (obj_datasec (abfd)->_raw_size, arch_align)
-	  == obj_datasec (abfd)->_raw_size)
-      && (BFD_ALIGN (obj_bsssec (abfd)->_raw_size, arch_align)
-	  == obj_bsssec (abfd)->_raw_size))
+  if ((BFD_ALIGN (obj_textsec (abfd)->size, arch_align)
+       == obj_textsec (abfd)->size)
+      && (BFD_ALIGN (obj_datasec (abfd)->size, arch_align)
+	  == obj_datasec (abfd)->size)
+      && (BFD_ALIGN (obj_bsssec (abfd)->size, arch_align)
+	  == obj_bsssec (abfd)->size))
     {
       obj_textsec (abfd)->alignment_power = arch_align_power;
       obj_datasec (abfd)->alignment_power = arch_align_power;
@@ -402,8 +402,10 @@ tic30_aout_final_link_relocate (howto, input_bfd, input_section, contents,
      bfd_vma addend;
 {
   bfd_vma relocation;
+  bfd_size_type sz;
 
-  if (address > input_section->_raw_size)
+  sz = input_section->rawsize ? input_section->rawsize : input_section->size;
+  if (address > sz)
     return bfd_reloc_outofrange;
 
   relocation = value + addend;
@@ -757,8 +759,8 @@ MY_bfd_final_link (abfd, info)
   obj_textsec (abfd)->filepos = pos;
   obj_textsec (abfd)->vma = vma;
   obj_textsec (abfd)->user_set_vma = 1;
-  pos += obj_textsec (abfd)->_raw_size;
-  vma += obj_textsec (abfd)->_raw_size;
+  pos += obj_textsec (abfd)->size;
+  vma += obj_textsec (abfd)->size;
 
   /* Data.  */
   if (abfd->flags & D_PAGED)
@@ -780,14 +782,14 @@ MY_bfd_final_link (abfd, info)
   vma = obj_datasec (abfd)->vma;
   obj_datasec (abfd)->filepos = vma + adata (abfd).exec_bytes_size;
   execp->a_text = vma - obj_textsec (abfd)->vma;
-  obj_textsec (abfd)->_raw_size = execp->a_text;
+  obj_textsec (abfd)->size = execp->a_text;
 
   /* Since BSS follows data immediately, see if it needs alignment.  */
-  vma += obj_datasec (abfd)->_raw_size;
+  vma += obj_datasec (abfd)->size;
   pad = align_power (vma, obj_bsssec (abfd)->alignment_power) - vma;
-  obj_datasec (abfd)->_raw_size += pad;
-  pos += obj_datasec (abfd)->_raw_size;
-  execp->a_data = obj_datasec (abfd)->_raw_size;
+  obj_datasec (abfd)->size += pad;
+  pos += obj_datasec (abfd)->size;
+  execp->a_data = obj_datasec (abfd)->size;
 
   /* BSS.  */
   obj_bsssec (abfd)->vma = vma;
