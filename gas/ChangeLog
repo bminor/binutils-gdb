@@ -1,3 +1,7 @@
+2003-07-29  Jakub Jelinek  <jakub@redhat.com>
+
+	* config/tc-ppc.c (md_apply_fix3): Fix check for lq insns.
+
 2003-07-28  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/obj-elf.c (obj_elf_section_type): Also accept "note".

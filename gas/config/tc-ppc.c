@@ -5742,7 +5742,7 @@ md_apply_fix3 (fixP, valP, seg)
 	    mask = 0xfffc;
 	    /* lq insns reserve the four lsbs.  */
 	    if ((ppc_cpu & PPC_OPCODE_POWER4) != 0
-		&& (val & (0x3f << 26)) == (56 << 26))
+		&& (val & (0x3f << 26)) == (56u << 26))
 	      mask = 0xfff0;
 	    val |= value & mask;
 	    if (target_big_endian)
