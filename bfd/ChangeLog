@@ -1,3 +1,9 @@
+2001-09-30  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf.c (_bfd_elf_link_hash_copy_indirect): Set ind refcounts to
+	the old dir refcount, so we indirectly set them to init_refcount.
+	Short-circuit asserts when we've just verified they are true.
+
 2001-09-29  Alan Modra  <amodra@bigpond.net.au>
 
 	* section.c (struct sec): Remove kept_section.

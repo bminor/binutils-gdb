@@ -992,6 +992,8 @@ void
 _bfd_elf_link_hash_copy_indirect (dir, ind)
      struct elf_link_hash_entry *dir, *ind;
 {
+  bfd_signed_vma tmp;
+
   /* Copy down any references that we may have already seen to the
      symbol which just became indirect.  */
 
@@ -1004,19 +1006,23 @@ _bfd_elf_link_hash_copy_indirect (dir, ind)
 
   /* Copy over the global and procedure linkage table refcount entries.
      These may have been already set up by a check_relocs routine.  */
-  if (dir->got.refcount <= 0)
+  tmp = dir->got.refcount;
+  if (tmp <= 0)
     {
       dir->got.refcount = ind->got.refcount;
-      ind->got.refcount = 0;
+      ind->got.refcount = tmp;
     }
-  BFD_ASSERT (ind->got.refcount <= 0);
+  else
+    BFD_ASSERT (ind->got.refcount <= 0);
 
-  if (dir->plt.refcount <= 0)
+  tmp = dir->plt.refcount;
+  if (tmp <= 0)
     {
       dir->plt.refcount = ind->plt.refcount;
-      ind->plt.refcount = 0;
+      ind->plt.refcount = tmp;
     }
-  BFD_ASSERT (ind->plt.refcount <= 0);
+  else
+    BFD_ASSERT (ind->plt.refcount <= 0);
 
   if (dir->dynindx == -1)
     {
@@ -1025,7 +1031,8 @@ _bfd_elf_link_hash_copy_indirect (dir, ind)
       ind->dynindx = -1;
       ind->dynstr_index = 0;
     }
-  BFD_ASSERT (ind->dynindx == -1);
+  else
+    BFD_ASSERT (ind->dynindx == -1);
 }
 
 void
