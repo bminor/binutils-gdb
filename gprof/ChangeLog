@@ -1,3 +1,8 @@
+1999-07-11  Ian Lance Taylor  <ian@zembu.com>
+
+	* corefile.c (core_create_function_syms): Add ATTRIBUTED_UNUSED.
+	* sym-ids.c (non_existent_file): Fully initialize structure.
+
 1999-07-01  Ian Lance Taylor  <ian@zembu.com>
 
 	* Many files: Add casts in many print statements to cast bfd_vma

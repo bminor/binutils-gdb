@@ -392,7 +392,8 @@ DEFUN (get_src_info, (addr, filename, name, line_num),
  * entered.
  */
 void
-DEFUN (core_create_function_syms, (core_bfd), bfd * core_bfd)
+core_create_function_syms (core_bfd)
+     bfd *core_bfd ATTRIBUTE_UNUSED;
 {
   bfd_vma min_vma = ~0, max_vma = 0;
   int class;

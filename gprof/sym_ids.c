@@ -46,7 +46,7 @@ static Sym_Table right_ids;
 
 static Source_File non_existent_file =
 {
-  0, "<non-existent-file>"
+  0, "<non-existent-file>", 0, 0, 0, NULL
 };
 
 
