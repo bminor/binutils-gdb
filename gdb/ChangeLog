@@ -1,5 +1,9 @@
 2004-10-10  Joel Brobecker  <brobecker@gnat.com>
 
+	* mips-tdep.c (mips16_scan_prologue): Remove redundant code.
+
+2004-10-10  Joel Brobecker  <brobecker@gnat.com>
+
 	* mips-tdep.c (mips16_scan_prologue): Renames
 	mips16_heuristic_proc_desc. Update comment.
 	(mips32_scan_prologue): Renames mips32_heuristic_proc_desc.

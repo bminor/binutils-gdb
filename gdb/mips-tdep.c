@@ -2396,36 +2396,6 @@ mips16_scan_prologue (CORE_ADDR start_pc, CORE_ADDR limit_pc, CORE_ADDR sp,
       this_cache->saved_regs[NUM_REGS + mips_regnum (current_gdbarch)->pc]
         = this_cache->saved_regs[NUM_REGS + RA_REGNUM];
     }
-
-  /* The MIPS16 entry instruction saves $s0 and $s1 in the reverse
-     order of that normally used by gcc.  Therefore, we have to fetch
-     the first instruction of the function, and if it's an entry
-     instruction that saves $s0 or $s1, correct their saved addresses.  */
-  /* FIXME: brobecker/2004-10-10: This code was moved here from
-     mips_insn16_frame_cache(), but can be merged with the block above
-     handling entry_inst.  Will be done in a separate pass, to make changes
-     more atomic.  Actually, this code seems completely redundant!  */
-    {
-      ULONGEST inst = mips16_fetch_instruction (start_pc);
-      if ((inst & 0xf81f) == 0xe809 && (inst & 0x700) != 0x700) /* entry */
-	{
-	  int reg;
-	  int sreg_count = (inst >> 6) & 3;
-	  CORE_ADDR reg_position = (this_cache->base);
-
-	  /* Check if the ra register was pushed on the stack.  */
-	  if (inst & 0x20)
-	    reg_position -= mips_abi_regsize (current_gdbarch);
-
-	  /* Check if the s0 and s1 registers were pushed on the stack.  */
-	  /* NOTE: cagney/2004-02-08: Huh?  This is doing no such check.  */
-	  for (reg = 16; reg < sreg_count + 16; reg++)
-	    {
-	      this_cache->saved_regs[NUM_REGS + reg].addr = reg_position;
-	      reg_position -= mips_abi_regsize (current_gdbarch);
-	    }
-	}
-    }
 }
 
 /* Mark all the registers as unset in the saved_regs array
