@@ -1,3 +1,10 @@
+2004-12-21  Kris Warkentin  <kewarken@qnx.com>
+
+	* elf.c (elfcore_grok_nto_gregs): Change name to elfcore_grok_nto_regs.
+	Add 'base' argument for constructing register sections.  Reformat.
+	(elfcore_grok_nto_note): Call elfcore_grok_nto_regs for both
+	gp and fp regs.  Reformat.
+	
 2004-12-22  Klaus Rudolph  <lts-rudolph@gmx.de>
 
 	* reloc.c: Add new relocs R_AVR_LDI, R_AVR_6, R_AVR_6_ADIW.

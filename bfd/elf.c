@@ -7382,14 +7382,17 @@ elfcore_grok_nto_status (bfd *abfd, Elf_Internal_Note *note, pid_t *tid)
 }
 
 static bfd_boolean
-elfcore_grok_nto_gregs (bfd *abfd, Elf_Internal_Note *note, pid_t tid)
+elfcore_grok_nto_regs (bfd *abfd,
+		       Elf_Internal_Note *note,
+		       pid_t tid,
+		       char *base)
 {
   char buf[100];
   char *name;
   asection *sect;
 
-  /* Make a ".reg/%d" section.  */
-  sprintf (buf, ".reg/%d", tid);
+  /* Make a "(base)/%d" section.  */
+  sprintf (buf, "%s/%d", base, tid);
 
   name = bfd_alloc (abfd, strlen (buf) + 1);
   if (name == NULL)
@@ -7407,7 +7410,7 @@ elfcore_grok_nto_gregs (bfd *abfd, Elf_Internal_Note *note, pid_t tid)
 
   /* This is the current thread.  */
   if (elf_tdata (abfd)->core_lwpid == tid)
-    return elfcore_maybe_make_sect (abfd, ".reg", sect);
+    return elfcore_maybe_make_sect (abfd, base, sect);
 
   return TRUE;
 }
@@ -7427,11 +7430,16 @@ elfcore_grok_nto_note (bfd *abfd, Elf_Internal_Note *note)
 
   switch (note->type)
     {
-    case BFD_QNT_CORE_INFO:   return elfcore_make_note_pseudosection (abfd, ".qnx_core_info", note);
-    case BFD_QNT_CORE_STATUS: return elfcore_grok_nto_status (abfd, note, &tid);
-    case BFD_QNT_CORE_GREG:   return elfcore_grok_nto_gregs (abfd, note, tid);
-    case BFD_QNT_CORE_FPREG:  return elfcore_grok_prfpreg (abfd, note);
-    default:                  return TRUE;
+    case BFD_QNT_CORE_INFO:
+      return elfcore_make_note_pseudosection (abfd, ".qnx_core_info", note);
+    case BFD_QNT_CORE_STATUS:
+      return elfcore_grok_nto_status (abfd, note, &tid);
+    case BFD_QNT_CORE_GREG:
+      return elfcore_grok_nto_regs (abfd, note, tid, ".reg");
+    case BFD_QNT_CORE_FPREG:
+      return elfcore_grok_nto_regs (abfd, note, tid, ".reg2");
+    default:
+      return TRUE;
     }
 }
 
