@@ -66,6 +66,7 @@ responsibility among the other maintainers.
   ix86		   H.J.Lu <hjl@gnu.org>
   ix86 INTEL MODE  Diego Novillo <dnovillo@redhat.com>
   M68HC11 M68HC12  Stephane Carrez <stcarrez@nerim.fr>
+  M68k		   Ben Elliston <bje@redhat.com>
   M88k		   Ben Elliston <bje@redhat.com>
   MIPS		   Eric Christopher <echristo@redhat.com>
   MMIX		   Hans-Peter Nilsson <hp@bitrange.com>

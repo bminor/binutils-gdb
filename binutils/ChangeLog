@@ -1,3 +1,7 @@
+2002-05-29  Ben Elliston  <bje@redhat.com>
+
+	* MAINTAINERS: Add self as M68k maintainer.
+
 2002-05-28  Kuang Hwa Lin <kuang@sbcglobal.net>
 
 	* readelf.c: Modified/Added DLX elf support.
