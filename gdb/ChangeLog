@@ -1,5 +1,11 @@
 2003-10-06  Andrew Cagney  <cagney@redhat.com>
 
+	* Makefile.in (ALLDEPFILES): Remove "z8k-tdep.c" and
+	"h8500-tdep.c".
+	(z8k-tdep.o): Delete custom build rule.
+
+2003-10-06  Andrew Cagney  <cagney@redhat.com>
+
 	* Makefile.in: Update all dependencies.
 
 	* MAINTAINERS: Mention that h8500, mn10200, and z8k were deleted.

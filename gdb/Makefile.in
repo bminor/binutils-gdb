@@ -1260,7 +1260,7 @@ ALLDEPFILES = \
 	coff-solib.c \
 	core-sol2.c core-regset.c core-aout.c corelow.c \
 	dcache.c delta68-nat.c dpx2-nat.c exec.c fork-child.c \
-	go32-nat.c h8300-tdep.c h8500-tdep.c \
+	go32-nat.c h8300-tdep.c \
 	hppa-tdep.c hppa-hpux-tdep.c \
 	hppab-nat.c hppah-nat.c hpread.c \
 	i386-tdep.c i386b-nat.c i386v-nat.c i386-linux-nat.c \
@@ -1304,8 +1304,7 @@ ALLDEPFILES = \
 	vx-share/xdr_ld.c vx-share/xdr_ptrace.c vx-share/xdr_rdb.c \
 	win32-nat.c \
 	xcoffread.c xcoffsolib.c \
-	xstormy16-tdep.c \
-	z8k-tdep.c
+	xstormy16-tdep.c
 
 # Some files need explict build rules (due to -Werror problems) or due
 # to sub-directory fun 'n' games.
@@ -1362,13 +1361,6 @@ v850ice.o: $(srcdir)/v850ice.c
 # that's a mess.  It needs a serious overhaul.
 valprint.o: $(srcdir)/valprint.c
 	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(NO_WERROR_CFLAGS) $(srcdir)/valprint.c
-
-# FIXME: z8k-tdep.c calls _initialize_gdbtypes().  Since that isn't
-# declared -Wimplicit fails. It should be using the GDBARCH framework.
-# cagney 1999-09-02.
-z8k-tdep.o: $(srcdir)/z8k-tdep.c
-	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(NO_WERROR_CFLAGS) \
-		$(srcdir)/z8k-tdep.c
 
 #
 # YACC/LEX dependencies
