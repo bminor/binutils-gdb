@@ -87,6 +87,7 @@ boolean delete_output_file_on_failure = false;
 /* IMPORTS */
 extern char *default_target;
 
+extern CONST char *output_filename;
 extern char *current_file;
 extern bfd *output_bfd;
 extern enum bfd_architecture ldfile_output_architecture;
@@ -785,7 +786,6 @@ open_output (name)
   extern unsigned long ldfile_output_machine;
   extern enum bfd_architecture ldfile_output_architecture;
 
-  extern CONST char *output_filename;
   bfd *output;
 
   if (output_target == (char *) NULL)
@@ -796,7 +796,6 @@ open_output (name)
 	output_target = default_target;
     }
   output = bfd_openw (name, output_target);
-  output_filename = name;
 
   if (output == (bfd *) NULL)
     {
@@ -2131,9 +2130,11 @@ lang_common ()
 						       com->section);
 			  newsec = bfd_get_section_by_name (symbfd,
 							    name);
-			  /* BFD backend must provide this section. */
+			  /* This section should have been created by
+			     enter_file_symbols if it did not already
+			     exist.  */
 			  if (newsec == (asection *) NULL)
-			    einfo ("%P%F: no output section %s", name);
+			    einfo ("%P%F: no output section %s\n", name);
 			  com->section = newsec;
 			}
 
@@ -2329,14 +2330,16 @@ ldlang_add_file (entry)
 }
 
 void
-lang_add_output (name)
+lang_add_output (name, from_script)
      CONST char *name;
+     int from_script;
 {
-  lang_output_statement_type *new = new_stat (lang_output_statement,
-					      stat_ptr);
-
-  new->name = name;
-  had_output_filename = true;
+  /* Make -o on command line override OUTPUT in script.  */
+  if (had_output_filename == false || !from_script)
+    {
+      output_filename = name;
+      had_output_filename = true;
+    }
 }
 
 
@@ -2409,12 +2412,10 @@ lang_enter_output_section_statement (output_section_statement_name,
 void
 lang_final ()
 {
-  if (had_output_filename == false)
-    {
-      extern CONST char *output_filename;
+  lang_output_statement_type *new =
+    new_stat (lang_output_statement, stat_ptr);
 
-      lang_add_output (output_filename);
-    }
+  new->name = output_filename;
 }
 
 /* Reset the current counters in the regions */
@@ -2570,10 +2571,17 @@ lang_process ()
   /* Final stuffs */
 
   ldemul_finish ();
+
+#if 0
+  /* DO NOT REENABLE THIS CALL.  IF THIS CALL IS MADE, THE SUN4 LINKER
+     CAN NOT BOOTSTRAP!!  No, I don't know why, but don't change it
+     unless you fix it.  */
   /* Size up the sections.  */
   lang_size_sections (statement_list.head,
 		      abs_output_section,
 		      &(statement_list.head), 0, (bfd_vma) 0, false);
+#endif
+
   lang_finish ();
 }
 
@@ -2801,6 +2809,6 @@ lang_add_output_format (format, from_script)
      CONST char *format;
      int from_script;
 {
-  if (!from_script || output_target == NULL)
+  if (output_target == NULL || !from_script)
     output_target = format;
 }

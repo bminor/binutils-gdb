@@ -1,3 +1,13 @@
+Sat Dec 11 14:43:44 1993  Ian Lance Taylor  (ian@deneb.cygnus.com)
+
+	* ldlang.c (lang_process): Ifdef out final call to
+	lang_size_sections again (reverting change of Nove 2), since it
+	breaks the Sun4 linker.
+
+Thu Dec  2 16:31:47 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* configure.in (alpha-*-netware*): New target; use alpha.
+
 Wed Dec  1 14:04:20 1993  Ken Raeburn  (raeburn@cygnus.com)
 
 	* configure.in: Group targets by CPU.  Merge some m68k target
