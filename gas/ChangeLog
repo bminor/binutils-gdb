@@ -1,3 +1,7 @@
+Mon Aug 24 13:40:21 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-arm.c (md_show_usage): Improve formatting of --help output.
+
 Fri Aug 21 18:43:48 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-d30v.c (md_assemble): Copy previous opcode over

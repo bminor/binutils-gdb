@@ -6193,6 +6193,7 @@ md_show_usage (fp)
 {
   fprintf (fp,
 _("\
+ ARM Specific Assembler Options:\n\
   -m[arm][<processor name>] select processor variant\n\
   -m[arm]v[2|2a|3|3m|4|4t]  select architecture variant\n\
   -mthumb                   only allow Thumb instructions\n\
@@ -6204,13 +6205,13 @@ _("\
 #if defined OBJ_COFF || defined OBJ_ELF
   fprintf (fp,
 _("\
-  -mapcs-32, -mapcs-26      specify which ARM Procedure Calling Standard is in use\n"));
+  -mapcs-32, -mapcs-26      specify which ARM Procedure Calling Standard to use\n"));
   fprintf (fp,
 _("\
-  -mapcs-float              floating point args are passed in floating point regs\n"));
+  -mapcs-float              floating point args are passed in FP regs\n"));
   fprintf (fp,
 _("\
-  -mapcs-reentrant          position independent/reentrant code has been generated\n"));
+  -mapcs-reentrant          the code is position independent/reentrant\n"));
 #endif
 #ifdef ARM_BI_ENDIAN
   fprintf (fp,
