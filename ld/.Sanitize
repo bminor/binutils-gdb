@@ -36,7 +36,6 @@ TODO
 a29k.sc-sh
 a29k.sh
 aout.sc-sh
-aout-mipsbsd.sc-sh
 cdtest-foo.cc
 cdtest-foo.h
 cdtest-func.cc
@@ -113,6 +112,7 @@ m88kbcs.sc-sh
 m88kbcs.sh
 mips.sc-sh
 mipsbig.sh
+mipsbsd.sc-sh
 mipsbsd.sh
 mipsidt.sh
 mipslit.sh
