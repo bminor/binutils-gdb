@@ -200,14 +200,12 @@ maintainer-clean realclean: distclean
 
 # GDB QUICK REFERENCE (dvi output)
 refcard.dvi : refcard.tex $(REFEDITS)
-	if [ -z "$(REFEDITS)" ]; then \
-		cp $(srcdir)/refcard.tex sedref.tex ; \
-	else \
-		echo > tmp.sed ; \
-		for f in $(REFEDITS) ; do \
-			cat $(srcdir)/$$f >>tmp.sed ; done ; \
-		sed -f tmp.sed $(srcdir)/refcard.tex >sedref.tex ; \
-	fi
+	echo > tmp.sed
+	for f in x $(REFEDITS) ; do \
+		test x$$f = xx && continue ; \
+		cat $(srcdir)/$$f >>tmp.sed ; \
+	done
+	sed -f tmp.sed $(srcdir)/refcard.tex >sedref.tex
 	$(SET_TEXINPUTS) $(TEX) sedref.tex
 	mv sedref.dvi refcard.dvi
 	rm -f sedref.log sedref.tex tmp.sed
