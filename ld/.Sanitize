@@ -15,10 +15,12 @@
 
 Do-first:
 
+mpw_files="mpw-make.in mpw-config.in ChangeLog.mpw"
+
 if ( echo $* | grep keep\-mpw > /dev/null ) ; then
-	keep_these_too="mpw-config.in mpw-make.in ChangeLog.mpw ${keep_these_too}"
+	keep_these_too="${mpw_files} ${keep_these_too}"
 else
-	lose_these_too="mpw-config.in mpw-make.in ChangeLog.mpw ${lose_these_too}"
+	lose_these_too="${mpw_files} ${lose_these_too}"
 fi
 
 if ( echo $* | grep keep\-gm > /dev/null ) ; then

@@ -11,14 +11,16 @@
 
 # The lines between the "Do-first:" line and the "Things-to-keep:"
 # line are executed as a /bin/sh shell script before anything else is
-# done in this 
+# done in this directory.
 
 Do-first:
 
+mpw_files="mpw-make.in mpw-config.in ChangeLog.mpw"
+
 if ( echo $* | grep keep\-mpw > /dev/null ) ; then
-	keep_these_too="mpw-make.in mpw-config.in ChangeLog.mpw"
+	keep_these_too="${mpw_files} ${keep_these_too}"
 else
-	lose_these_too="mpw-make.in mpw-config.in ChangeLog.mpw"
+	lose_these_too="${mpw_files} ${lose_these_too}"
 fi
 
 # All files listed between the "Things-to-keep:" line and the
