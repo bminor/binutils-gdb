@@ -1,5 +1,11 @@
 2002-11-24  Andrew Cagney  <ac131313@redhat.com>
 
+	* frame.c (set_unwind_by_pc): Revert change below, use
+	PC_IN_CALL_DUMMY.
+	(get_prev_frame): Ditto.
+
+2002-11-24  Andrew Cagney  <ac131313@redhat.com>
+
 	* dummy-frame.c (pc_in_dummy_frame): New function.
 	(generic_pc_in_call_dummy): Call pc_in_dummy_frame.
 	(find_dummy_frame): Update comment.
