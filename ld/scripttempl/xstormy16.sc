@@ -117,6 +117,8 @@ SECTIONS
 {
   .data  ${RELOCATING-0} :
   {
+    ${RELOCATING+__rdata = .;}
+    ${RELOCATING+__data = .;}
     ${RELOCATING+${DATA_START_SYMBOLS}}
     *(.data)
     ${RELOCATING+*(.data.*)}
