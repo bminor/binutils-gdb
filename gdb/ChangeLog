@@ -1,5 +1,9 @@
 2003-06-02  Richard Henderson  <rth@redhat.com>
 
+        * alpha-tdep.c (alpha_push_dummy_call): Handle COMPLEX types.
+        (alpha_extract_return_value): Likewise.
+        (alpha_store_return_value): Likewise.
+
         * alpha-tdep.c (alpha_extract_return_value): Handle IEEE Quad floats.
         (alpha_store_return_value): Error on IEEE Quad floats.
 

@@ -282,6 +282,7 @@ alpha_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
 	      arg = value_cast (arg_type, arg);
 	    }
 	  break;
+
 	case TYPE_CODE_FLT:
 	  /* "float" arguments loaded in registers must be passed in
 	     register format, aka "double".  */
@@ -306,6 +307,28 @@ alpha_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
 	      arg = value_from_pointer (arg_type, sp);
 	    }
 	  break;
+
+	case TYPE_CODE_COMPLEX:
+	  /* ??? The ABI says that complex values are passed as two
+	     separate scalar values.  This distinction only matters
+	     for complex float.  However, GCC does not implement this.  */
+
+	  /* Tru64 5.1 has a 128-bit long double, and passes this by
+	     invisible reference.  */
+	  if (TYPE_LENGTH (arg_type) == 32)
+	    {
+	      /* Allocate aligned storage.  */
+	      sp = (sp & -16) - 16;
+
+	      /* Write the real data into the stack.  */
+	      write_memory (sp, VALUE_CONTENTS (arg), 32);
+
+	      /* Construct the indirection.  */
+	      arg_type = lookup_pointer_type (arg_type);
+	      arg = value_from_pointer (arg_type, sp);
+	    }
+	  break;
+
 	default:
 	  break;
 	}
@@ -384,13 +407,14 @@ static void
 alpha_extract_return_value (struct type *valtype, struct regcache *regcache,
 			    void *valbuf)
 {
+  int length = TYPE_LENGTH (valtype);
   char raw_buffer[ALPHA_REGISTER_SIZE];
   ULONGEST l;
 
   switch (TYPE_CODE (valtype))
     {
     case TYPE_CODE_FLT:
-      switch (TYPE_LENGTH (valtype))
+      switch (length)
 	{
 	case 4:
 	  regcache_cooked_read (regcache, ALPHA_FP0_REGNUM, raw_buffer);
@@ -411,10 +435,34 @@ alpha_extract_return_value (struct type *valtype, struct regcache *regcache,
 	}
       break;
 
+    case TYPE_CODE_COMPLEX:
+      switch (length)
+	{
+	case 8:
+	  /* ??? This isn't correct wrt the ABI, but it's what GCC does.  */
+	  regcache_cooked_read (regcache, ALPHA_FP0_REGNUM, valbuf);
+	  break;
+
+	case 16:
+	  regcache_cooked_read (regcache, ALPHA_FP0_REGNUM, valbuf);
+	  regcache_cooked_read (regcache, ALPHA_FP0_REGNUM+1,
+				(char *)valbuf + 8);
+	  break;
+
+	case 32:
+	  regcache_cooked_read_signed (regcache, ALPHA_V0_REGNUM, &l);
+	  read_memory (l, valbuf, 32);
+	  break;
+
+	default:
+	  abort ();
+	}
+      break;
+
     default:
       /* Assume everything else degenerates to an integer.  */
       regcache_cooked_read_unsigned (regcache, ALPHA_V0_REGNUM, &l);
-      store_unsigned_integer (valbuf, TYPE_LENGTH (valtype), l);
+      store_unsigned_integer (valbuf, length, l);
       break;
     }
 }
@@ -456,6 +504,31 @@ alpha_store_return_value (struct type *valtype, struct regcache *regcache,
 	  break;
 
 	case 16:
+	  /* FIXME: 128-bit long doubles are returned like structures:
+	     by writing into indirect storage provided by the caller
+	     as the first argument.  */
+	  error ("Cannot set a 128-bit long double return value.");
+
+	default:
+	  abort ();
+	}
+      break;
+
+    case TYPE_CODE_COMPLEX:
+      switch (length)
+	{
+	case 8:
+	  /* ??? This isn't correct wrt the ABI, but it's what GCC does.  */
+	  regcache_cooked_write (regcache, ALPHA_FP0_REGNUM, valbuf);
+	  break;
+
+	case 16:
+	  regcache_cooked_write (regcache, ALPHA_FP0_REGNUM, valbuf);
+	  regcache_cooked_write (regcache, ALPHA_FP0_REGNUM+1,
+				 (const char *)valbuf + 8);
+	  break;
+
+	case 32:
 	  /* FIXME: 128-bit long doubles are returned like structures:
 	     by writing into indirect storage provided by the caller
 	     as the first argument.  */
