@@ -1,3 +1,7 @@
+Thu Mar  7 15:18:51 1996  James G. Smith  <jsmith@cygnus.co.uk>
+
+	* symfile.c (generic_load): Avoid division by zero.
+
 Wed Mar  6 17:57:59 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* breakpoint.c (bfd_lookup_symbol): Provide for all SVR4 systems,
