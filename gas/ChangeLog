@@ -1,5 +1,8 @@
 2001-10-02  Alan Modra  <amodra@bigpond.net.au>
 
+	* config/tc-ppc.c (md_apply_fix3 <BFD_RELOC_CTOR>): Make it 64
+	bits if target is 64 bit.
+
 	* doc/as.texinfo (listing): Fix typo.
 
 	* as.c (print_version_id): Use BFD_VERSION_STRING in place of

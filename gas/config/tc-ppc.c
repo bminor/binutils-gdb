@@ -5207,8 +5207,9 @@ md_apply_fix3 (fixp, valuep, seg)
 #endif
       switch (fixp->fx_r_type)
 	{
+#if BFD_DEFAULT_TARGET_SIZE != 64
 	case BFD_RELOC_CTOR:
-	  /* FIXME: 32 bits even for 64-bit targets?  */
+#endif
 	case BFD_RELOC_32:
 	  if (fixp->fx_pcrel)
 	    fixp->fx_r_type = BFD_RELOC_32_PCREL;
@@ -5222,6 +5223,9 @@ md_apply_fix3 (fixp, valuep, seg)
 			      value, 4);
 	  break;
 
+#if BFD_DEFAULT_TARGET_SIZE == 64
+	case BFD_RELOC_CTOR:
+#endif
 	case BFD_RELOC_64:
 	  if (fixp->fx_pcrel)
 	    fixp->fx_r_type = BFD_RELOC_64_PCREL;
