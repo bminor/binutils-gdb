@@ -1,3 +1,13 @@
+Wed Apr  7 11:51:24 1993  Jim Kingdon  (kingdon@cygnus.com)
+
+	* internal.h: Change n_sclass to unsigned char.
+	Change C_EFCN to 0xff, change RS/6000 dbx symbols
+	to no longer be signed.
+
+Fri Mar 19 14:52:56 1993  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* internal.h: Add H8/500 reloc types.
+
 Wed Mar 17 09:46:03 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* ecoff-ext.h (AUX_PUT_ANY): Don't use void values in branches of

@@ -79,7 +79,8 @@ struct internal_aouthdr
 
 /********************** STORAGE CLASSES **********************/
 
-#define C_EFCN		-1	/* physical end of function	*/
+/* This used to be defined as -1, but now n_sclass is unsigned.  */
+#define C_EFCN		0xff	/* physical end of function	*/
 #define C_NULL		0
 #define C_AUTO		1	/* automatic variable		*/
 #define C_EXT		2	/* external symbol		*/
@@ -128,21 +129,21 @@ struct internal_aouthdr
 #define C_EINCL         109	/* Marks ending of include file */
 
  /* storage classes for stab symbols for RS/6000 */
-#define C_GSYM          ((signed char)0x80)
-#define C_LSYM          ((signed char)0x81)
-#define C_PSYM          ((signed char)0x82)
-#define C_RSYM          ((signed char)0x83)
-#define C_RPSYM         ((signed char)0x84)
-#define C_STSYM         ((signed char)0x85)
-#define C_TCSYM         ((signed char)0x86)
-#define C_BCOMM         ((signed char)0x87)
-#define C_ECOML         ((signed char)0x88)
-#define C_ECOMM         ((signed char)0x89)
-#define C_DECL          ((signed char)0x8c)
-#define C_ENTRY         ((signed char)0x8d)
-#define C_FUN           ((signed char)0x8e)
-#define C_BSTAT         ((signed char)0x8f)
-#define C_ESTAT         ((signed char)0x90)
+#define C_GSYM          (0x80)
+#define C_LSYM          (0x81)
+#define C_PSYM          (0x82)
+#define C_RSYM          (0x83)
+#define C_RPSYM         (0x84)
+#define C_STSYM         (0x85)
+#define C_TCSYM         (0x86)
+#define C_BCOMM         (0x87)
+#define C_ECOML         (0x88)
+#define C_ECOMM         (0x89)
+#define C_DECL          (0x8c)
+#define C_ENTRY         (0x8d)
+#define C_FUN           (0x8e)
+#define C_BSTAT         (0x8f)
+#define C_ESTAT         (0x90)
 
 /********************** SECTION HEADER **********************/
 struct internal_scnhdr
@@ -227,7 +228,7 @@ struct internal_syment
   short n_scnum;		/* section number		*/
   unsigned short n_flags;	/* copy of flags from filhdr	*/
   unsigned short n_type;	/* type and derived type	*/
-  signed char n_sclass;		/* storage class		*/
+  unsigned char n_sclass;		/* storage class		*/
   char n_numaux;		/* number of aux. entries	*/
 };
 
@@ -464,11 +465,9 @@ struct internal_reloc
 #define R_MOVB1    0x41		/* Special h8 16bit or 8 bit reloc for  mov.b */
 #define R_MOVB2    0x42		/* Special h8 opcode for 8bit which could
 							      be 16 */
-#define R_JMP1     0x43		/* Special h8 16bit jmp which could be
-							      pcrel */
+#define R_JMP1     0x43		/* Special h8 16bit jmp which could be pcrel */
 #define R_JMP2 0x44		/* a branch which used to be a jmp */
 #define R_RELLONG_NEG  0x45
-
 
 /* Z8k modes */
 #define R_IMM16   0x01		/* 16 bit abs */
@@ -482,3 +481,15 @@ struct internal_reloc
 #define R_CALLR	  0x05		/* callr 12 bit disp */
 #define R_SEG     0x10		/* set if in segmented mode */
 #define R_IMM4H   0x24		/* high nibble */
+
+
+/* H8500 modes */
+
+#define R_H8500_IMM8  	1		/*  8 bit immediate 	*/
+#define R_H8500_IMM16 	2		/* 16 bit immediate	*/
+#define R_H8500_PCREL8 	3		/*  8 bit pcrel 	*/
+#define R_H8500_PCREL16 4		/* 16 bit pcrel 	*/
+#define R_H8500_HIGH8  	5		/* high 8 bits of 24 bit address */
+#define R_H8500_LOW16 	7		/* low 16 bits of 24 bit immediate */
+#define R_H8500_IMM24	6		/* 24 bit immediate */
+#define R_H8500_IMM32   8               /* 32 bit immediate */
