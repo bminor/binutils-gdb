@@ -138,7 +138,7 @@ static int parse_opt_untyped_expr ();
 static void parse_if_expression_body PARAMS((void));
 static void write_lower_upper_value PARAMS ((enum exp_opcode, struct type *));
 static enum ch_terminal ch_lex ();
-static void calculate_array_length (struct type *);
+static void calculate_array_length PARAMS ((struct type *));
 
 #define MAX_LOOK_AHEAD 2
 static enum ch_terminal terminal_buffer[MAX_LOOK_AHEAD+1] = {
