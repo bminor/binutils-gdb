@@ -1,3 +1,11 @@
+Fri Oct 15 11:52:56 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* symtab.c (lookup_partial_symtab):  If filename is not found and
+	contains no slashes, try again and compare without leading path
+	components.
+	* symtab.c (lookup_symtab_1):  Replace open coded version of
+	lookup_partial_symtab with a function call.
+
 Thu Oct 14 20:34:15 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* fork-child.c (fork_inferior), remote-eb.c (eb_create_inferior),
