@@ -1,3 +1,13 @@
+2004-04-22  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
+
+	* hpux-core.c (hpux_core_core_file_p): Add cast in call to 
+	make_bfd_asection.
+	* som.c (som_set_section_contents): Constantify second argument.
+	(hppa_som_gen_reloc_type): Abort for unsupported selectors.
+	(som_object_setup): Rework to avoid warning.
+	(setup_sections, som_write_fixups, bfd_section_from_som_symbol):
+	Likewise.
+
 2004-04-22  Andrew Cagney  <cagney@redhat.com>
 
 	* cache.c (bfd_cache_close): Check for a previously closed file.

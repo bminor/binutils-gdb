@@ -194,7 +194,7 @@ static bfd_boolean som_bfd_copy_private_bfd_data
 static bfd_boolean som_bfd_is_local_label_name
   PARAMS ((bfd *, const char *));
 static bfd_boolean som_set_section_contents
-  PARAMS ((bfd *, sec_ptr, PTR, file_ptr, bfd_size_type));
+  PARAMS ((bfd *, sec_ptr, const PTR, file_ptr, bfd_size_type));
 static bfd_boolean som_get_section_contents
   PARAMS ((bfd *, sec_ptr, PTR, file_ptr, bfd_size_type));
 static bfd_boolean som_set_arch_mach
@@ -1589,6 +1589,11 @@ hppa_som_gen_reloc_type (abfd, base_type, format, field, sym_diff, sym)
       final_types[3] = NULL;
       *final_type = base_type;
       break;
+
+    /* FIXME: These two field selectors are not currently supported.  */
+    case e_ltpsel:
+    case e_rtpsel:
+      abort ();
     }
 
   switch (base_type)
@@ -1820,10 +1825,13 @@ som_object_setup (abfd, file_hdrp, aux_hdrp, current_offset)
   found = 0;
   for (section = abfd->sections; section; section = section->next)
     {
+      bfd_vma entry;
+
       if ((section->flags & SEC_CODE) == 0)
 	continue;
-      if (aux_hdrp->exec_entry >= section->vma
-	  && aux_hdrp->exec_entry < section->vma + section->_cooked_size)
+      entry = aux_hdrp->exec_entry;
+      if (entry >= section->vma
+	  && entry < section->vma + section->_cooked_size)
 	found = 1;
     }
   if (aux_hdrp->exec_entry == 0
@@ -1898,7 +1906,7 @@ setup_sections (abfd, file_hdr, current_offset)
     {
       struct space_dictionary_record space;
       struct subspace_dictionary_record subspace, save_subspace;
-      int subspace_index;
+      unsigned int subspace_index;
       asection *space_asect;
       char *newname;
 
@@ -2725,7 +2733,7 @@ som_write_fixups (abfd, current_offset, total_reloc_sizep)
 	  int reloc_offset;
 	  unsigned int current_rounding_mode;
 #ifndef NO_PCREL_MODES
-	  int current_call_mode;
+	  unsigned int current_call_mode;
 #endif
 
 	  /* Find a subspace of this space.  */
@@ -4298,7 +4306,7 @@ bfd_section_from_som_symbol (abfd, symbol)
 	  && symbol->symbol_type != ST_SEC_PROG
 	  && symbol->symbol_type != ST_MILLICODE))
     {
-      unsigned int index = symbol->symbol_info;
+      int index = symbol->symbol_info;
       for (section = abfd->sections; section != NULL; section = section->next)
 	if (section->target_index == index && som_is_subspace (section))
 	  return section;
@@ -5358,7 +5366,7 @@ static bfd_boolean
 som_set_section_contents (abfd, section, location, offset, count)
      bfd *abfd;
      sec_ptr section;
-     PTR location;
+     const PTR location;
      file_ptr offset;
      bfd_size_type count;
 {
@@ -5385,7 +5393,7 @@ som_set_section_contents (abfd, section, location, offset, count)
   if (bfd_seek (abfd, offset, SEEK_SET) != 0)
     return FALSE;
 
-  if (bfd_bwrite ((PTR) location, count, abfd) != count)
+  if (bfd_bwrite (location, count, abfd) != count)
     return FALSE;
   return TRUE;
 }
