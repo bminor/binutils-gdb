@@ -591,9 +591,10 @@ check_stub_method (type, i, j)
 
       p += 1;
     }
-  /* We need one more slot for the void [...] or NULL [end of arglist] */
+  /* We need two more slots: one for the THIS pointer, and one for the
+     NULL [...] or void [end of arglist].  */
   argtypes = (struct type **) obstack_alloc (symbol_obstack,
-				(argcount+1) * sizeof (struct type *));
+				(argcount+2) * sizeof (struct type *));
   p = argtypetext;
   argtypes[0] = lookup_pointer_type (type);
   argcount = 1;
@@ -2905,7 +2906,7 @@ _initialize_symtab ()
      I also think "ptype" or "whatis" is more likely to be useful (but if
      there is much disagreement "info types" can be fixed).  */
   add_info ("types", types_info,
-	    "All types names, or those matching REGEXP.");
+	    "All type names, or those matching REGEXP.");
 
 #if 0
   add_info ("methods", methods_info,
