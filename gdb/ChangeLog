@@ -1,3 +1,8 @@
+2000-08-03  Kevin Buettner  <kevinb@redhat.com>
+
+	* breakpoint.c (bpstat_alloc, map_catch_names,
+	map_breakpoint_numbers): Protoize.
+
 Thu Aug  3 15:02:23 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* remote-mips.c (mips_expect, mips_expect_timeout, common_open,

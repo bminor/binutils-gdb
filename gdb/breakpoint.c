@@ -2246,9 +2246,7 @@ breakpoint_cond_eval (PTR exp)
 /* Allocate a new bpstat and chain it to the current one.  */
 
 static bpstat
-bpstat_alloc (b, cbs)
-     register struct breakpoint *b;
-     bpstat cbs;		/* Current "bs" value */
+bpstat_alloc (struct breakpoint *b, bpstat cbs /* Current "bs" value */ )
 {
   bpstat bs;
 
@@ -5661,9 +5659,7 @@ struct sal_chain
 /* For each catch clause identified in ARGS, run FUNCTION
    with that clause as an argument.  */
 static struct symtabs_and_lines
-map_catch_names (args, function)
-     char *args;
-     int (*function) ();
+map_catch_names (char *args, int (*function) ())
 {
   register char *p = args;
   register char *p1;
@@ -7209,9 +7205,7 @@ ignore_command (char *args, int from_tty)
    whose numbers are given in ARGS.  */
 
 static void
-map_breakpoint_numbers (args, function)
-     char *args;
-     void (*function) (struct breakpoint *);
+map_breakpoint_numbers (char *args, void (*function) (struct breakpoint *))
 {
   register char *p = args;
   char *p1;
