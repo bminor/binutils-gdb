@@ -165,7 +165,10 @@ static const int mappings[] =
   context_offset (FloatSave.ErrorOffset),
   context_offset (FloatSave.DataSelector),
   context_offset (FloatSave.DataOffset),
+  context_offset (FloatSave.ErrorSelector)
 };
+
+#undef context_offset
 
 /* This vector maps the target's idea of an exception (extracted
    from the DEBUG_EVENT structure) to GDB's idea. */
@@ -297,7 +300,7 @@ do_child_fetch_inferior_registers (int r)
       supply_register (r, (char *) &l);
     }
   else if (r >= 0)
-    supply_register (r, ((char *) &current_thread->context) + mappings[r]);
+    supply_register (r, context_offset);
   else
     {
       for (r = 0; r < NUM_REGS; r++)
@@ -529,11 +532,12 @@ handle_output_debug_string (struct target_waitstatus *ourstatus)
       || !s || !*s)
     return gotasig;
 
-  if (strncmp (s, CYGWIN_SIGNAL_STRING, sizeof (CYGWIN_SIGNAL_STRING) - 1))
+  if (strncmp (s, CYGWIN_SIGNAL_STRING, sizeof (CYGWIN_SIGNAL_STRING) - 1) != 0)
     {
-      if (strncmp (s, "cYg", 3))
+      if (strncmp (s, "cYg", 3) != 0)
 	warning (s);
     }
+  else
     {
       char *p;
       int sig = strtol (s + sizeof (CYGWIN_SIGNAL_STRING) - 1, &p, 0);
@@ -592,9 +596,11 @@ handle_exception (struct target_waitstatus *ourstatus)
     default:
       /* This may be a structured exception handling exception.  In
          that case, we want to let the program try to handle it, and
-         only break if we see the exception a second time.  */
+         only break if we see the exception a second time.
       if (current_event.u.Exception.dwFirstChance)
+
 	return 0;
+*/
 
       printf_unfiltered ("gdb: unknown target exception 0x%08x at 0x%08x\n",
 		    current_event.u.Exception.ExceptionRecord.ExceptionCode,
@@ -1017,6 +1023,9 @@ child_create_inferior (exec_file, allargs, env)
     get_child_debug_event (inferior_pid, &dummy, &event_code, &ret);
   while (event_code != EXCEPTION_DEBUG_EVENT);
 
+  SymSetOptions (SYMOPT_DEFERRED_LOADS);
+  SymInitialize (current_process_handle, NULL, TRUE);
+
   proceed ((CORE_ADDR) - 1, TARGET_SIGNAL_0, 0);
 }
 
@@ -1170,6 +1179,7 @@ init_child_ops (void)
   child_ops.to_can_run = child_can_run;
   child_ops.to_notice_signals = 0;
   child_ops.to_thread_alive = win32_child_thread_alive;
+  child_ops.to_pid_to_str = cygwin_pid_to_str;
   child_ops.to_stop = child_stop;
   child_ops.to_stratum = process_stratum;
   child_ops.DONT_USE = 0;
@@ -1255,40 +1265,60 @@ cygwin_pid_to_str (int pid)
     sprintf (buf, "thread %d.0x%x", current_event.dwProcessId, pid);
   return buf;
 }
-#ifdef NOTYET
-CORE_ADDR
-win32_read_fp ()
+
+static LPVOID __stdcall
+sfta(HANDLE h, DWORD d)
 {
-  STACKFRAME *sf = current_thread->sf;
-  
-  memset (&sf, 0, sizeof(sf));
-  sf->AddrPC.Offset = current_thread->context.Eip;
-  sf->AddrPC.Mode = AddrModeFlat;
-  sf->AddrStack.Offset = current_thread->context.Esp;
-  sf->AddrStack.Mode = AddrModeFlat;
-  sf->AddrFrame.Offset = current_thread->context.Ebp;
-  if (!StackWalk (IMAGE_FILE_MACHINE_I386, current_process_handle,
-		  current->thread->h, sf, NULL, NULL,
-		  SymFunctionTableAccess, SymGetModuleBase, NULL))
-    return NULL;
-  return (CORE_ADDR) sf.AddrFrame.Offset;
+  return NULL;
+}
+
+static DWORD __stdcall
+sgmb(HANDLE h, DWORD d)
+{
+#if 0
+  return 4;
+#else
+  return SymGetModuleBase (h, d) ?: 4;
+#endif
 }
 
 CORE_ADDR
-child_frame_chain(struct frame_info *thisframe)
+child_frame_chain(struct frame_info *f)
 {
-  STACKFRAME *sf = current->thread->sf;
-#if 0
-  sf.AddrPC.Offset = thisframe->pc;
-  sf.AddrPC.Mode = AddrModeFlat;
-  sf.AddrStack.Offset = thisframe->;
-  sf.AddrStack.Mode = AddrModeFlat;
-  sf.AddrFrame.Offset = cx->Ebp;
-#endif
+  STACKFRAME *sf = (STACKFRAME *) f->extra_info;
   if (!StackWalk (IMAGE_FILE_MACHINE_I386, current_process_handle,
-		  current->thread->h, &sf, NULL, NULL,
-		  SymFunctionTableAccess, SymGetModuleBase, NULL))
-    return NULL;
-  return (CORE_ADDR) sf->AddrFrame.Offset;
+		  current_thread->h, sf, NULL, NULL, SymFunctionTableAccess, sgmb, NULL) ||
+      !sf->AddrReturn.Offset)
+    return 0;
+  return sf->AddrFrame.Offset;
 }
-#endif
+
+CORE_ADDR
+child_frame_saved_pc(struct frame_info *f)
+{
+  STACKFRAME *sf = (STACKFRAME *) f->extra_info;
+  return sf->AddrReturn.Offset;
+}
+
+void
+child_init_frame(int leaf, struct frame_info *f)
+{
+  STACKFRAME *sf;
+
+  if (f->next && f->next->extra_info)
+    f->extra_info = f->next->extra_info;
+  else if (f->prev && f->prev->extra_info)
+    f->extra_info = f->prev->extra_info;
+  else
+    {
+      sf = (STACKFRAME *) frame_obstack_alloc (sizeof (*sf));
+      f->extra_info = (struct frame_extra_info *) sf;
+      memset (sf, 0, sizeof(*sf));
+      sf->AddrPC.Offset = f->pc;
+      sf->AddrPC.Mode = AddrModeFlat;
+      sf->AddrStack.Offset = current_thread->context.Esp;
+      sf->AddrStack.Mode = AddrModeFlat;
+      sf->AddrFrame.Offset = f->frame;
+      sf->AddrFrame.Mode = AddrModeFlat;
+    }
+}
