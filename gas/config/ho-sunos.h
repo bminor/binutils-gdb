@@ -9,7 +9,7 @@
 #else
 extern int memset();
 #endif
-
+#include <stddef.h>
 #include <ctype.h>
 #include <string.h>
 
@@ -21,11 +21,11 @@ extern char *realloc();
 extern char *strrchr();
 extern int _filbuf();
 extern int _flsbuf();
-extern int abort();
+/*extern int abort();*/
 extern int bcopy();
 extern int bzero();
 extern int bzero();
-extern int exit();
+/*extern int exit();*/
 extern int fclose();
 extern int fprintf();
 extern int fread();

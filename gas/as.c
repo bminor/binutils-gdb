@@ -5,7 +5,7 @@ This file is part of GAS, the GNU Assembler.
 
 GAS is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 1, or (at your option)
+the Free Software Foundation; either version 2, or (at your option)
 any later version.
 
 GAS is distributed in the hope that it will be useful,
@@ -45,7 +45,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
 #define COMMON
 
 #include "as.h"
-
+#include "subsegs.h"
 #ifdef __STDC__
 
  /* This prototype for got_sig() is ansi.  If you want
@@ -76,6 +76,8 @@ static void perform_an_assembly_pass();
 static char * gdb_symbol_file_name;
 long gdb_begin();
 #endif
+
+int listing; /* true if a listing is wanted */
 
 char *myname;		/* argv[0] */
 extern char version_string[];
@@ -139,10 +141,42 @@ char **argv;
 		while ((a = * arg) != '\0')  {/* scan all the 1-char flags */
 			arg ++;	/* arg->after letter. */
 			a &= 0x7F;	/* ascii only please */
-			if (flagseen[a])
-				as_tsktsk("%s: Flag option - %c has already been seen.", myname, a);
+			/* if (flagseen[a])
+				as_tsktsk("%s: Flag option - %c has already been seen.", myname, a); */
 			flagseen[a] = 1;
 			switch (a) {
+			    
+			  case 'a': 
+			  {
+			    int loop =1;
+			    
+			    while (loop) {
+				switch (*arg) 
+				{
+				case 'l':
+				  listing |= LISTING_LISTING;
+				  arg++;
+				  break;
+				case 's':
+				  listing |= LISTING_SYMBOLS;
+				  arg++;
+				  break;
+				case 'n':
+				  listing |= LISTING_NOFORM;
+				  arg++;
+				  break;
+				default:
+				  if (!listing)
+				   listing= LISTING_DEFAULT;
+				  loop = 0;
+				  break;
+				}
+			      }
+			  }
+			  
+			    break;
+			    
+			    
 			case 'f':
 				break;	/* -f means fast - no need for "app" preprocessor. */
 
@@ -167,7 +201,7 @@ char **argv;
 
 			case 'I': { /* Include file directory */
 				
-				char *temp;
+				char *temp = NULL;
 				if (*arg)
 				    temp = stralloc (arg);
 				else if (work_argc) {
@@ -264,6 +298,10 @@ char **argv;
 	input_scrub_end();
 	md_end();			/* MACHINE.c */
 
+#ifndef NO_LISTING
+	listing_print();
+#endif
+
 #ifndef	VMS
 	return((had_warnings() && flagseen['Z'])
 	       || had_errors() > 0);			/* WIN */
@@ -290,26 +328,43 @@ static void perform_an_assembly_pass(argc, argv)
 int argc;
 char **argv;
 {
-	int saw_a_file = 0;
+  int saw_a_file = 0;
+  unsigned int i;
+  need_pass_2		= 0;
 
-	text_fix_root		= NULL;
-	data_fix_root		= NULL;
-	need_pass_2		= 0;
+#ifdef MANY_SEGMENTS
 
-	subseg_new (SEG_TEXT, 0);
+  for (i= SEG_E0; i < SEG_UNKNOWN; i++) 
+      {
+	segment_info[i].fix_root = 0;
+      }
+  /* Create the three fixed ones */
+  subseg_new (SEG_E0, 0);
+  subseg_new (SEG_E1, 0);
+  subseg_new (SEG_E2, 0);
+  strcpy(segment_info[SEG_E0].scnhdr.s_name,".text");
+  strcpy(segment_info[SEG_E1].scnhdr.s_name,".data");
+  strcpy(segment_info[SEG_E2].scnhdr.s_name,".bss");
+  
+  subseg_new (SEG_E0, 0);
+#else
+  text_fix_root		= NULL;
+  data_fix_root		= NULL;
 
-	argv++;			/* skip argv[0] */
-	argc--;			/* skip argv[0] */
-	while (argc--) {
-		if (*argv) {		/* Is it a file-name argument? */
-			saw_a_file++;
-			/* argv->"" if stdin desired, else->filename */
-			read_a_source_file(*argv);
-		}
-		argv++;			/* completed that argv */
-	}
-	if(!saw_a_file)
-		read_a_source_file("");
+  subseg_new (SEG_TEXT, 0);
+#endif
+  argv++; /* skip argv[0] */
+  argc--; /* skip argv[0] */
+  while (argc--) {
+    if (*argv) { /* Is it a file-name argument? */
+      saw_a_file++;
+      /* argv->"" if stdin desired, else->filename */
+      read_a_source_file(*argv);
+    }
+    argv++; /* completed that argv */
+  }
+  if(!saw_a_file)
+    read_a_source_file("");
 } /* perform_an_assembly_pass() */
 
 /*
