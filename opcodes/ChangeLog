@@ -1,3 +1,25 @@
+2002-12-31  Chris Demetriou  <cgd@broadcom.com>
+
+	* mips-dis.c (mips_cp0sel_name): New structure.
+	(mips_cp0sel_names_mips3264, mips_cp0sel_names_mips3264r2)
+	(mips_cp0sel_names_sb1): New arrays.
+	(mips_arch_choice): New structure members "cp0sel_names" and
+	"cp0sel_names_len".
+	(mips_arch_choices): Add references to new cp0sel_names arrays
+	as appropriate, and make all existing entries reference
+	appropriate mips_XXX_names_numeric arrays rather than simply
+	using NULL.
+	(mips_cp0sel_names, mips_cp0sel_names_len): New variables.
+	(lookup_mips_cp0sel_name): New function.
+	(set_default_mips_dis_options): Set mips_cp0sel_names and
+	mips_cp0sel_names_len as appropriate.  Remove now-unnecessary
+	checks for NULL register name arrays.
+	(parse_mips_dis_option): Likewise.
+	(print_insn_arg): Handle "+D" operand type.
+	* mips-opc.c (mips_builtin_opcodes): Add new "+D" variants
+	of mfc0, mtc0, dmfc0, and dmtc0 to print CP0+sel register
+	names symbolically.
+
 2002-12-30  Chris Demetriou  <cgd@broadcom.com>
 
 	* mips-dis.c (mips_cp0_names_mips3264r2, mips_hwr_names_numeric)

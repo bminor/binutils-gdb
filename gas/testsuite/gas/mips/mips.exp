@@ -631,6 +631,12 @@ if { [istarget mips*-*-*] } then {
     run_dump_test "cp0-names-mips64"
     run_dump_test "cp0-names-sb1"
 
+    run_dump_test "cp0sel-names-numeric"
+    run_dump_test "cp0sel-names-mips32"
+    run_dump_test "cp0sel-names-mips32r2"
+    run_dump_test "cp0sel-names-mips64"
+    run_dump_test "cp0sel-names-sb1"
+
     run_dump_test "hwr-names-numeric"
     run_dump_test "hwr-names-mips32r2"
 }

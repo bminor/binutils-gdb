@@ -1,3 +1,8 @@
+2002-12-31  Chris Demetriou  <cgd@broadcom.com>
+
+	* config/tc-mips.c (validate_mips_insn, mips_ip): Recognize
+	the "+D" operand, which will be used only by the disassembler.
+
 2002-12-30  Chris Demetriou  <cgd@broadcom.com>
 
 	* configure.in: Recognize mipsisa32r2, mipsisa32r2el, and

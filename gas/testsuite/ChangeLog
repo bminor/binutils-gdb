@@ -1,3 +1,13 @@
+2002-12-31  Chris Demetriou  <cgd@broadcom.com>
+
+	* gas/mips/cp0sel-names-mips32.d: New test.
+	* gas/mips/cp0sel-names-mips32r2.d: New test.
+	* gas/mips/cp0sel-names-mips64.d: New test.
+	* gas/mips/cp0sel-names-numeric.d: New test.
+	* gas/mips/cp0sel-names-sb1.d: New test.
+	* gas/mips/cp0sel-names.s: New test source file.
+	* gas/mips/mips.exp: Run new tests.
+
 2002-12-30  Chris Demetriou  <cgd@broadcom.com>
 
 	* gas/mips/elf_arch_mips1.d: New test.

@@ -8022,6 +8022,8 @@ validate_mips_insn (opc)
 	  case 'A': USE_BITS (OP_MASK_SHAMT,	OP_SH_SHAMT);	break;
 	  case 'B': USE_BITS (OP_MASK_INSMSB,	OP_SH_INSMSB);	break;
 	  case 'C': USE_BITS (OP_MASK_EXTMSBD,	OP_SH_EXTMSBD);	break;
+	  case 'D': USE_BITS (OP_MASK_RD,	OP_SH_RD);
+		    USE_BITS (OP_MASK_SEL,	OP_SH_SEL);	break;
 	  default:
 	    as_bad (_("internal: bad mips opcode (unknown extension operand type `+%c'): %s %s"),
 		    c, opc->name, opc->args);
@@ -8336,6 +8338,10 @@ mips_ip (str, ip)
 		    imm_expr.X_op = O_absent;
 		    s = expr_end;
 		    continue;
+
+		case 'D':
+		  /* +D is for disassembly only; never match.  */
+		  break;
 
 		default:
 		  as_bad (_("internal: bad mips opcode (unknown extension operand type `+%c'): %s %s"),
