@@ -34,7 +34,6 @@ extern char *memchr();
 extern char *strrchr();
 extern int chmod();
 extern int fstat();
-extern int sscanf();
 extern int stat();
 extern int strtol();
 #ifndef DONTDECLARE_MALLOC
@@ -46,7 +45,6 @@ extern char *strrchr();
 extern char *ctime();
 extern int _flsbuf();
 extern int fclose();
-extern int time();
 extern int utimes();
 extern int vfprintf();
 extern long atol();

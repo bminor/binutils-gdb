@@ -1,3 +1,7 @@
+Mon Aug  2 12:18:03 1993  david d `zoo' zuhn  (zoo@rtl.cygnus.com)
+
+	* hosts/sun3.h: remove some more conflicting decls
+
 Mon Aug  2 11:48:23 1993  Stu Grossman  (grossman at cygnus.com)
 
 	* i386lynx.c:  Remove unnecessary def of N_HEADER_IN_TEXT,
