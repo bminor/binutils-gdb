@@ -1,4 +1,4 @@
-# Copyright 2002 Free Software Foundation, Inc.
+# Copyright 1999, 2000, 2002 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -115,31 +115,6 @@ proc test_rwatch_creation_and_listing {} {
 	    "delete read watchpoint"
 }
 
-proc test_running_the_program {} {
-    global mi_gdb_prompt
-    global hex
-
-    # Run the program without args, then specify srgs and rerun the program
-    # Tests:
-    # -exec-run
-
-    mi_gdb_test "300-break-insert callee4" \
-             "300\\^done,bkpt=\{number=\"1\",type=\"breakpoint\",disp=\"keep\",enabled=\"y\",addr=\"$hex\",func=\"callee4\",file=\".*basics.c\",line=\"8\",times=\"0\"\}" \
-             "insert breakpoint at callee4"
-
-    # mi_gdb_test cannot be used for asynchronous commands because there are
-    # two prompts involved and this can lead to a race condition.
-    # The following is equivalent to a send_gdb "000-exec-run\n"
-    mi_run_cmd
-    # The running part has been checked already by mi_run_cmd
-        gdb_expect {
-	    -re "\[\r\n\]*000\\*stopped,reason=\"breakpoint-hit\",bkptno=\"1\",thread-id=\"\[01\]\",frame=\{addr=\"$hex\",func=\"callee4\",args=\\\[\\\],file=\".*basics.c\",line=\"8\"\}\r\n$mi_gdb_prompt$" \
-		    { pass "run to callee4" }
-          -re ".*$mi_gdb_prompt$" {fail "run to callee4 (2)"}
-          timeout {fail "run to callee4 (timeout 2)"}
-        }
-}
-
 proc test_watchpoint_triggering {} {
     global mi_gdb_prompt
     global hex
@@ -181,7 +156,7 @@ proc test_watchpoint_triggering {} {
     }
 }
 
-test_running_the_program
+mi_runto callee4
 test_watchpoint_creation_and_listing
 #test_rwatch_creation_and_listing
 #test_awatch_creation_and_listing

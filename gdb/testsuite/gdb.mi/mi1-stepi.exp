@@ -1,4 +1,4 @@
-# Copyright 2002 Free Software Foundation, Inc.
+# Copyright 1999, 2000, 2002 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -46,29 +46,6 @@ mi_gdb_reinitialize_dir $srcdir/$subdir
 mi_gdb_reinitialize_dir $srcdir/$subdir
 mi_gdb_load ${binfile}
 
-proc test_running_to_main {} {
-    global mi_gdb_prompt
-    global hex
-
-    mi_gdb_test "200-break-insert main" \
-             "200\\^done,bkpt=\{number=\"1\",type=\"breakpoint\",disp=\"keep\",enabled=\"y\",addr=\"$hex\",func=\"main\",file=\".*basics.c\",line=\"32\",times=\"0\"\}" \
-             "break-insert operation"
-
-    mi_run_cmd
-
-    gdb_expect {
-	-re "000\\*stopped,reason=\"breakpoint-hit\",bkptno=\"1\",thread-id=\"\[01\]\",frame=\{addr=\"$hex\",func=\"main\",args=\\\[\\\],file=\".*basics.c\",line=\"32\"\}\r\n$mi_gdb_prompt$" {
-	    pass "run to main"
-	}
-	-re ".*$mi_gdb_prompt$" {
-	    fail "run to main (2)"
-	}
-	timeout {
-	    fail "run to main (timeout)"
-	}
-    }
-}
-
 proc test_stepi_nexti {} {
     global mi_gdb_prompt
     global hex
@@ -102,7 +79,7 @@ proc test_stepi_nexti {} {
     }
 }
 
-test_running_to_main
+mi_run_to_main
 test_stepi_nexti
 
 mi_gdb_exit

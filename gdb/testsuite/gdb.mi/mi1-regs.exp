@@ -1,4 +1,4 @@
-# Copyright 2002 Free Software Foundation, Inc.
+# Copyright 1999, 2000, 2002 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -44,51 +44,6 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {deb
 mi_delete_breakpoints
 mi_gdb_reinitialize_dir $srcdir/$subdir
 mi_gdb_load ${binfile}
-
-proc test_breakpoints_creation_and_listing {} {
-    global mi_gdb_prompt
-    global srcfile
-    global hex
-
-    # Insert some breakpoints and list them
-    # Also, disable some so they do not interfere with other tests
-    # Tests:
-    # -break-insert
-    # -break-list
-    # -break-disable
-    # -break-info
-
-    mi_gdb_test "200-break-insert main" \
-             "200\\^done,bkpt=\{number=\"1\",type=\"breakpoint\",disp=\"keep\",enabled=\"y\",addr=\"$hex\",func=\"main\",file=\".*basics.c\",line=\"32\",times=\"0\"\}" \
-             "break-insert operation"
-
-    mi_gdb_test "204-break-list" \
-                "204\\^done,BreakpointTable=\{nr_rows=\".\",nr_cols=\".\",hdr=\\\[.*\\\],body=\\\[bkpt=\{number=\"1\",type=\"breakpoint\",disp=\"keep\",enabled=\"y\",addr=\"$hex\",func=\"main\",file=\".*basics.c\",line=\"32\",times=\"0\"\}\\\]\}" \
-                "list of breakpoints"
-}
-
-proc test_running_the_program {} {
-    global mi_gdb_prompt
-    global hex
-
-    # Run the program without args
-    # Tests:
-    # -exec-run
-
-    # mi_gdb_test cannot be used for asynchronous commands because there are
-    # two prompts involved and this can lead to a race condition.
-    # FIXME: We are accepting a duplicate file and line info temporarely.
-    # The following is equivalent to a send_gdb "000-exec-run\n"
-    mi_run_cmd
-    # The running part has been checked already by mi_run_cmd
-        gdb_expect {
-	    -re "\[\r\n\]*000\\*stopped,reason=\"breakpoint-hit\",bkptno=\"1\",thread-id=\"\[01\]\",frame=\{addr=\"$hex\",func=\"main\",args=\\\[\\\],file=\".*basics.c\",line=\"32\"\}\r\n$mi_gdb_prompt$" {
-            pass "run to main"
-          }
-          -re ".*$mi_gdb_prompt$" {fail "run to main (2)"}
-          timeout {fail "run to main (timeout 2)"}
-        }
-}
 
 proc sparc_register_tests_no_exec { } {
 	# Test the generic IDT chip.
@@ -164,8 +119,7 @@ proc sparc_register_tests { } {
 
 if [istarget "sparc-*-*"] then {
     sparc_register_tests_no_exec
-    test_breakpoints_creation_and_listing
-    test_running_the_program
+    mi_run_to_main
     sparc_register_tests
 } else {
     verbose "mi-regs.exp tests ignored for this target"
