@@ -1,3 +1,10 @@
+2002-12-11  Mark Kettenis  <kettenis@gnu.org>
+
+	* i386-tdep.c: Include "dummy-frame.h".
+	(i386_frame_chain, i386_frame_saved_pc): Replace
+	DEPRECATED_PC_IN_CALL_DUMMY with call to pc_in_dummy_frame.
+	(i386_gdbarch_init): Don't set deprecated_pc_in_call_dummy.
+
 2002-12-10  Andrew Cagney  <cagney@redhat.com>
 
 	* gdbarch.sh (DEPRECATED_INIT_FRAME_PC): Rename INIT_FRAME_PC.
