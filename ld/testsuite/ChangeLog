@@ -1,3 +1,7 @@
+1999-09-12  Ian Lance Taylor  <ian@zembu.com>
+
+	* ld-scripts/script.exp: Add --image-base 0 for PE targets.
+
 1999-08-17  H.J. Lu  <hjl@gnu.org>
 
 	* ld-cdtest/cdtest-foo.cc (Foo::init_foo): Use "%ld" for sizeof.
