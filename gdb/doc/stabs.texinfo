@@ -2138,8 +2138,7 @@ ios my_ios;
 
 The relevant part of the assembly code is:
 @example
-.stabs "'ios::io_state':T20=ebadbit:4,failbit:2,eofbit:1,goodbit:0,;",128,0,0,0
-.stabs "'ios::io_state':t20",128,0,0,0
+.stabs ":t20=ebadbit:4,failbit:2,eofbit:1,goodbit:0,;",128,0,0,0
 .stabs "ios:T21=s4state:20,0,32;io_state:/220:!'ios::io_state';;",128,0,0,0
 .stabs "ios:Tt21",128,0,0,0
 .stabs "Fail__Fv:F20",36,0,0,_Fail__Fv
@@ -2148,29 +2147,20 @@ The relevant part of the assembly code is:
 @end example
 
 The first line declares type 20 to be an enum.  It gives it the
-name @code{ios::io_state}.  Single quotes surround the name,
-because of the embedded @code{::}.  (The name is needed when printing
-the type.)
+name @code{ios::io_state}.  The name is suppressed because @code{io_state}
+is not a globally visible name.)
 
-The second line enters the same name into the typedef name space.
-(This is useless - only @code{ios} is a real global name.)
-
-The third line defined the @code{ios} type.
+The second line defines the @code{ios} type.
 The text @code{io_state:/220:!'ios::io_state';} declares that
 @code{io_state} is a type "member".  The @code{/2} specifies
 public visibility, just like a regular member.
 This is followed by the type being defined (type 20), the
 magic characters @code{:!} to indicate that we're declaring a nested
-type, followed by the complete name of the type (again, in single quotes).
+type, followed by the complete name of the type.
+Single quotes surrond the name, because of the embedded @code{::}.
 
-Possible optimization:  Replace first 3 lines by:
-@example
-.stabs ":T20=ebadbit:4,failbit:2,eofbit:1,goodbit:0,;",128,0,0,0
-.stabs "ios:T21=s4state:20,0,32;io_state:/220:!'ios::io_state';;",128,0,0,0
-@end example
-This makes type 20 an anonymous type, until the @code{io_state} field
-for type 21 is seen; that allows the debugger to back-patch the name of
-type 20 to @code{ios::io_state}.
+Teh debugger uses the name @code{ios::io_state} to back-patch the name
+of type 20.
 
 @node Example2.c
 @appendix Example2.c - source code for extended example

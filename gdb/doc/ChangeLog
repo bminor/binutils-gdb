@@ -1,3 +1,7 @@
+Fri Sep  4 00:46:50 1992  Per Bothner  (bothner@rtl.cygnus.com)
+
+	* stabs.texinfo:  Document the format for C++ nested types.
+
 Mon Aug 24 01:17:55 1992  John Gilmore  (gnu@cygnus.com)
 
 	* gdbint.texinfo:  Make a start at documenting all the #if macros
