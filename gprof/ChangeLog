@@ -1,3 +1,12 @@
+2003-10-29  Nick Clifton  <nickc@redhat.com>
+
+	* gprof.texi: Apply patch supplied by Eric S Raymond via RMS.
+	(Compiling): Mention that -pg must be passed to both the compiler
+	and the linker.
+	Mention that -a is now deprecated.
+	(How do I?): Add an entry describing how to get more information
+	about program hotspots.
+
 2003-10-11  Alan Modra  <amodra@bigpond.net.au>
 
 	* corefile.c (core_create_function_syms): Don't refer directly to

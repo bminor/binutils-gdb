@@ -1,6 +1,6 @@
 \input texinfo @c -*-texinfo-*-
 @setfilename gprof.info
-@c Copyright 1988, 1992, 1993, 1998, 1999, 2000, 2001
+@c Copyright 1988, 1992, 1993, 1998, 1999, 2000, 2001, 2003
 @c Free Software Foundation, Inc.
 @settitle GNU gprof
 @setchapternewpage odd
@@ -19,7 +19,7 @@ END-INFO-DIR-ENTRY
 This file documents the gprof profiler of the GNU system.
 
 @c man begin COPYRIGHT
-Copyright (C) 1988, 92, 97, 98, 99, 2000, 2001 Free Software Foundation, Inc.
+Copyright (C) 1988, 92, 97, 98, 99, 2000, 2001, 2003 Free Software Foundation, Inc.
 
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.1
@@ -53,9 +53,10 @@ This manual describes the @sc{gnu} profiler, @code{gprof}, and how you
 can use it to determine which parts of a program are taking most of the
 execution time.  We assume that you know how to write, compile, and
 execute programs.  @sc{gnu} @code{gprof} was written by Jay Fenlason.
+Eric S. Raymond made some minor corrections and additions in 2003.
 
 @vskip 0pt plus 1filll
-Copyright @copyright{} 1988, 92, 97, 98, 99, 2000 Free Software Foundation, Inc.
+Copyright @copyright{} 1988, 92, 97, 98, 99, 2000, 2003 Free Software Foundation, Inc.
 
       Permission is granted to copy, distribute and/or modify this document
       under the terms of the GNU Free Documentation License, Version 1.1
@@ -278,6 +279,14 @@ The @samp{-pg} option also works with a command that both compiles and links:
 cc -o myprog myprog.c utils.c -g -pg
 @end example
 
+Note: The @samp{-pg} option must be part of your compilation options
+as well as your link options.  If it is not, when you run @code{gprof}
+you will get no profile report and an error message like this:
+
+@example
+gprof: gmon.out file is missing call-graph data
+@end example
+
 If you run the linker @code{ld} directly instead of through a compiler
 such as @code{cc}, you may have to specify a profiling startup file
 @file{gcrt0.o} as the first input file instead of the usual startup
@@ -307,10 +316,13 @@ instructing the compiler to insert debugging symbols into the program
 that match program addresses to source code lines.
 @xref{Line-by-line}.
 
-In addition to the @samp{-pg} and @samp{-g} options,
-you may also wish to specify the @samp{-a} option when compiling.
-This will instrument
-the program to perform basic-block counting.  As the program runs,
+In addition to the @samp{-pg} and @samp{-g} options, older versions of
+GCC required you to specify the @samp{-a} option when compiling in
+order to instrument it to perform basic-block counting.  Newer
+versions do not require this option and will not accept it;
+basic-block counting is always enabled when @samp{-pg} is on.
+
+When basic-block counting is enabled, as the program runs
 it will count how many times it executed each branch of each @samp{if}
 statement, each iteration of each @samp{do} loop, etc.  This will
 enable @code{gprof} to construct an annotated source code
@@ -337,7 +349,7 @@ Your program will write the profile data into a file called @file{gmon.out}
 just before exiting.  If there is already a file called @file{gmon.out},
 its contents are overwritten.  There is currently no way to tell the
 program to write the profile data under a different name, but you can rename
-the file afterward if you are concerned that it may be overwritten.
+the file afterwards if you are concerned that it may be overwritten.
 
 In order to write the @file{gmon.out} file properly, your program must exit
 normally: by returning from @code{main} or by calling @code{exit}.  Calling
@@ -1627,6 +1639,14 @@ nonce, the estimated figures are usually more useful than misleading.
 @chapter Answers to Common Questions
 
 @table @asis
+@item How can I get more exact information about hot spots in my program?
+
+Looking at the per-line call counts only tells part of the story.
+Because @code{gprof} can only report call times and counts by function,
+the best way to get finer-grained information on where the program
+is spending its time is to re-factor large functions into sequences
+of calls to smaller ones.
+
 @item How do I find which lines in my program were executed the most times?
 
 Compile your program with basic-block counting enabled, run it, then
