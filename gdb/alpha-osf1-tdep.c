@@ -42,7 +42,7 @@ alpha_osf1_skip_sigtramp_frame (struct frame_info *frame, CORE_ADDR pc)
 static int
 alpha_osf1_pc_in_sigtramp (CORE_ADDR pc, char *func_name)
 {
-  return (func_name != NULL && STREQ ("__sigtramp", func_name));
+  return (func_name != NULL && strcmp ("__sigtramp", func_name) == 0);
 }
 
 static CORE_ADDR

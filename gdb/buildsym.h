@@ -233,7 +233,7 @@ extern void finish_block (struct symbol *symbol,
 			  CORE_ADDR start, CORE_ADDR end,
 			  struct objfile *objfile);
 
-extern void really_free_pendings (PTR dummy);
+extern void really_free_pendings (void *dummy);
 
 extern void start_subfile (char *name, char *dirname);
 

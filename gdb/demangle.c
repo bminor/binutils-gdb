@@ -87,8 +87,8 @@ set_demangling_command (char *ignore, int from_tty, struct cmd_list_element *c)
        dem->demangling_style != unknown_demangling; 
        dem++)
     {
-      if (STREQ (current_demangling_style_string,
-		 dem->demangling_style_name))
+      if (strcmp (current_demangling_style_string,
+		  dem->demangling_style_name) == 0)
 	{
 	  current_demangling_style = dem->demangling_style;
 	  break;

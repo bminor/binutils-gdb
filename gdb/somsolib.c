@@ -418,7 +418,8 @@ som_solib_add (char *arg_string, int from_tty, struct target_ops *target, int re
   int threshold_warning_given = 0;
 
   /* First validate our arguments.  */
-  if ((re_err = re_comp (arg_string ? arg_string : ".")) != NULL)
+  re_err = re_comp (arg_string ? arg_string : ".");
+  if (re_err != NULL)
     {
       error ("Invalid regexp: %s", re_err);
     }

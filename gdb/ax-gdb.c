@@ -1157,7 +1157,7 @@ find_field (struct type *type, char *name)
     {
       char *this_name = TYPE_FIELD_NAME (type, i);
 
-      if (this_name && STREQ (name, this_name))
+      if (this_name && strcmp (name, this_name) == 0)
 	return i;
 
       if (this_name[0] == '\0')

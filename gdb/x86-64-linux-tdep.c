@@ -147,7 +147,7 @@ int
 x86_64_linux_in_sigtramp (CORE_ADDR pc, char *name)
 {
   if (name)
-    return STREQ ("__restore_rt", name);
+    return strcmp ("__restore_rt", name) == 0;
 
   return (x86_64_linux_sigtramp_start (pc) != 0);
 }

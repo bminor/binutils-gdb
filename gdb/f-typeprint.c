@@ -355,7 +355,7 @@ f_type_print_base (struct type *type, struct ui_file *stream, int show,
          through as TYPE_CODE_INT since dbxstclass.h is so
          C-oriented, we must change these to "character" from "char".  */
 
-      if (STREQ (TYPE_NAME (type), "char"))
+      if (strcmp (TYPE_NAME (type), "char") == 0)
 	fprintf_filtered (stream, "character");
       else
 	goto default_case;

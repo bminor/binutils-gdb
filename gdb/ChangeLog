@@ -1,5 +1,12 @@
 2003-01-09  Andrew Cagney  <ac131313@redhat.com>
 
+	* somsolib.h: Fix function indentation.
+	* disasm.c, buildsym.c, buildsym.h: Eliminate PTR.
+	* gnu-v2-abi.c, f-typeprint.c, x86-64-linux-tdep.c: Eliminate STREQ.
+	* demangle.c, ax-gdb.c, c-valprint.c: Eliminate STREQ.
+	* alpha-osf1-tdep.c, corefile.c: Eliminate STREQ.
+	* somsolib.c, inftarg.c: Remove assignment in if conditional.
+
 	* infrun.c (follow_fork): Use ISO C definition.
 	* expprint.c (print_subexp): Use xfree instead of free.
 	* charset.c: Include "gdb_string.h" instead of <string.h>.
