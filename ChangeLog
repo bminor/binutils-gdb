@@ -1,3 +1,12 @@
+Sat Feb  6 14:05:09 1993  Per Bothner  (bothner@rtl.cygnus.com)
+
+	* config.guess:  Recognize BSDI and BSDJ (Jolitz 386bsd).
+
+Thu Feb  4 20:49:18 1993  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
+
+	* Makefile.in (info): remove dependency on all-texinfo.  The
+	problem was really in texinfo/C, not at this level.
+
 Thu Feb  4 13:38:41 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* Makefile.in (info): Added dependency on all-texinfo (PR 2112).
