@@ -39,7 +39,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define LIR_REGNUM 12
 #define LAR_REGNUM 13
 
-#define FP_REGNUM 7 /* needs to be virtual register ??? */
+#define FP_REGNUM 7
 
 #define REGISTER_VIRTUAL_TYPE(REG) builtin_type_int
 
@@ -68,10 +68,6 @@ struct value;
 #endif
 
 #define EXTRA_FRAME_INFO struct frame_saved_regs fsr;
-
-extern void mn10300_init_extra_frame_info PARAMS ((struct frame_info *fi));
-#define INIT_EXTRA_FRAME_INFO(fromleaf, fi) mn10300_init_extra_frame_info (fi)
-#define INIT_FRAME_PC		/* Not necessary */
 
 extern void mn10300_frame_find_saved_regs PARAMS ((struct frame_info *fi, struct frame_saved_regs *regaddr));
 #define FRAME_FIND_SAVED_REGS(fi, regaddr) regaddr = fi->fsr
