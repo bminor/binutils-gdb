@@ -75,7 +75,6 @@
 
 	* gas/mmix: New testsuite directory.
 
->>>>>>> 1.244
 2001-10-24  Chris Demetriou  <cgd@broadcom.com>
 
 	* gas/mips/ld-empic.d: Remove extra whitespace at beginning of
