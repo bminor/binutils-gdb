@@ -917,7 +917,13 @@ select_frame (struct frame_info *fi)
      source language of this frame, and switch to it if desired.  */
   if (fi)
     {
-      s = find_pc_symtab (get_frame_pc (fi));
+      /* We retrieve the frame's symtab by using the frame PC.  However
+         we cannot use the frame pc as is, because it usually points to
+         the instruction following the "call", which is sometimes the
+         first instruction of another function.  So we rely on
+         get_frame_address_in_block() which provides us with a PC which
+         is guaranteed to be inside the frame's code block.  */
+      s = find_pc_symtab (get_frame_address_in_block (fi));
       if (s
 	  && s->language != current_language->la_language
 	  && s->language != language_unknown

@@ -1,3 +1,9 @@
+2003-12-10  J. Brobecker  <brobecker@gnat.com>
+
+	* frame.c (select_frame): Get the current frame PC using
+	get_frame_address_in_block() instead of get_frame_pc().
+	* stack.c (get_frame_language): Likewise.
+
 2003-12-08  Kevin Buettner  <kevinb@redhat.com>
 
 	* remote.c (remote_open_1, remote_cisco_open): Avoid closing

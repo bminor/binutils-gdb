@@ -2036,7 +2036,14 @@ get_frame_language (void)
 
   if (deprecated_selected_frame)
     {
-      s = find_pc_symtab (get_frame_pc (deprecated_selected_frame));
+      /* We determine the current frame language by looking up its
+         associated symtab.  To retrieve this symtab, we use the frame PC.
+         However we cannot use the frame pc as is, because it usually points
+         to the instruction following the "call", which is sometimes the first
+         instruction of another function.  So we rely on
+         get_frame_address_in_block(), it provides us with a PC which is
+         guaranteed to be inside the frame's code block.  */
+      s = find_pc_symtab (get_frame_address_in_block (deprecated_selected_frame));
       if (s)
 	flang = s->language;
       else
