@@ -1,3 +1,9 @@
+2000-07-03  Jim Wilson  <wilson@cygnus.com>
+
+	* elf64-alpha.c (alpha_elf_size_info): New.
+	(elf_backend_size_info): Define to alpha_elf_size_info.
+	* elfcode.h (elf_size_info): Change hash bucket size to 4.
+
 2000-07-03  Ulf Carlsson  <ulfc@engr.sgi.com>
 
 	* elf32-mips.c: Include elf32-target.h again for the traditional

@@ -4643,6 +4643,36 @@ elf64_alpha_ecoff_debug_swap =
   elf64_alpha_read_ecoff_info
 };
 
+/* Use a non-standard hash bucket size of 8.  */
+
+const struct elf_size_info alpha_elf_size_info =
+{
+  sizeof (Elf64_External_Ehdr),
+  sizeof (Elf64_External_Phdr),
+  sizeof (Elf64_External_Shdr),
+  sizeof (Elf64_External_Rel),
+  sizeof (Elf64_External_Rela),
+  sizeof (Elf64_External_Sym),
+  sizeof (Elf64_External_Dyn),
+  sizeof (Elf_External_Note),
+  8,
+  1,
+  64, 8,
+  ELFCLASS64, EV_CURRENT,
+  bfd_elf64_write_out_phdrs,
+  bfd_elf64_write_shdrs_and_ehdr,
+  bfd_elf64_write_relocs,
+  bfd_elf64_swap_symbol_out,
+  bfd_elf64_slurp_reloc_table,
+  bfd_elf64_slurp_symbol_table,
+  bfd_elf64_swap_dyn_in,
+  bfd_elf64_swap_dyn_out,
+  NULL,
+  NULL,
+  NULL,
+  NULL
+};
+
 #define TARGET_LITTLE_SYM	bfd_elf64_alpha_vec
 #define TARGET_LITTLE_NAME	"elf64-alpha"
 #define ELF_ARCH		bfd_arch_alpha
@@ -4697,6 +4727,9 @@ elf64_alpha_ecoff_debug_swap =
 
 #define elf_backend_ecoff_debug_swap \
   &elf64_alpha_ecoff_debug_swap
+
+#define elf_backend_size_info \
+  alpha_elf_size_info
 
 /*
  * A few constants that determine how the .plt section is set up.

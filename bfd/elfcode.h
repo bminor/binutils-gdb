@@ -1525,7 +1525,7 @@ const struct elf_size_info NAME(_bfd_elf,size_info) = {
   sizeof (Elf_External_Sym),
   sizeof (Elf_External_Dyn),
   sizeof (Elf_External_Note),
-  ARCH_SIZE / 8,
+  4,
   1,
   ARCH_SIZE, FILE_ALIGN,
   ELFCLASS, EV_CURRENT,
