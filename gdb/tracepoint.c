@@ -497,7 +497,7 @@ tracepoints_info (tpnum_exp, from_tty)
 			 t->enabled == enabled ? "y" : "n");
 	if (addressprint)
 	  printf_filtered ("%s ", 
-			   local_hex_string_custom ((unsigned long) t->address, 
+			   local_hex_string_custom ((unsigned long) t->address,
 						    "08l"));
 	printf_filtered ("%-5d %-5d ", t->pass_count, t->step_count);
 
@@ -1831,7 +1831,7 @@ finish_tfind_command (msg, from_tty)
   while (reply && *reply)
     switch (*reply) {
     case 'F':
-      if ((target_frameno = strtol (++reply, &reply, 16)) == -1)
+      if ((target_frameno = (int) strtol (++reply, &reply, 16)) == -1)
 	{ 
 	  /* A request for a non-existant trace frame has failed.
 	     Our response will be different, depending on FROM_TTY:
@@ -1868,7 +1868,7 @@ finish_tfind_command (msg, from_tty)
 	}
       break;
     case 'T':
-      if ((target_tracept = strtol (++reply, &reply, 16)) == -1)
+      if ((target_tracept = (int) strtol (++reply, &reply, 16)) == -1)
 	error ("Target failed to find requested trace frame.");
       break;
     case 'O':	/* "OK"? */
@@ -1940,7 +1940,6 @@ trace_find_command (args, from_tty)
 { /* STUB_COMM PART_IMPLEMENTED */
   /* this should only be called with a numeric argument */
   int frameno = -1;
-  int target_frameno = -1, target_tracept = -1, target_stepfrm = 0;
   char *tmp;
 
   if (target_is_remote ())
@@ -2008,7 +2007,6 @@ trace_find_pc_command (args, from_tty)
      int from_tty;
 { /* STUB_COMM PART_IMPLEMENTED */
   CORE_ADDR pc;
-  int target_frameno;
   char *tmp;
 
   if (target_is_remote ())
@@ -2031,7 +2029,7 @@ trace_find_tracepoint_command (args, from_tty)
      char *args;
      int from_tty;
 { /* STUB_COMM PART_IMPLEMENTED */
-  int target_frameno, tdp;
+  int tdp;
   char buf[40], *tmp;
 
   if (target_is_remote ())
@@ -2067,7 +2065,6 @@ trace_find_line_command (args, from_tty)
   static CORE_ADDR start_pc, end_pc;
   struct symtabs_and_lines sals;
   struct symtab_and_line sal;
-  int target_frameno;
   char *tmp;
   struct cleanup *old_chain;
 
@@ -2154,7 +2151,6 @@ trace_find_range_command (args, from_tty)
      int from_tty;
 { /* STUB_COMM PART_IMPLEMENTED */
   static CORE_ADDR start, stop;
-  int target_frameno;
   char *tmp;
 
   if (target_is_remote ())
@@ -2193,7 +2189,6 @@ trace_find_outside_command (args, from_tty)
      int from_tty;
 { /* STUB_COMM PART_IMPLEMENTED */
   CORE_ADDR start, stop;
-  int target_frameno;
   char *tmp;
 
   if (target_is_remote ())
