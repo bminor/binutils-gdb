@@ -1,3 +1,8 @@
+Mon Apr 14 11:21:38 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure: Use ${config_shell} with ${moveifchange}.  From Thomas
+	Graichen <graichen@rzpd.de>.
+
 Fri Apr 11 16:37:10 1997  Niklas Hallqvist  <niklas@appli.se>
 
 	* config.guess: Recognize OpenBSD systems correctly.
