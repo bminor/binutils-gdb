@@ -1,5 +1,14 @@
 2001-07-05  Jim Blandy  <jimb@redhat.com>
 
+	* d10v-tdep.c (d10v_frame_chain, d10v_frame_init_saved_regs,
+	show_regs, d10v_read_pc, d10v_write_pc, d10v_read_sp,
+	d10v_write_sp, d10v_write_fp, d10v_read_fp,
+	d10v_push_return_address): Call the functions d10v_make_daddr,
+	d10v_make_iaddr, d10v_convert_iaddr_to_raw, and
+	d10v_convert_daddr_to_raw, not the global macros D10V_MAKE_DADDR,
+	D10V_MAKE_IADDR, D10V_CONVERT_IADDR_TO_RAW, and
+	D10V_CONVERT_DADDR_TO_RAW.
+
 	* dwarf2read (dwarf2_build_psymtabs_hard): Doc fix.
 
 2001-07-05  Mark Kettenis  <kettenis@gnu.org>

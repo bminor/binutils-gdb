@@ -636,7 +636,7 @@ d10v_frame_chain (struct frame_info *fi)
 				     REGISTER_RAW_SIZE (FP_REGNUM)))
     return (CORE_ADDR) 0;
 
-  return D10V_MAKE_DADDR (read_memory_unsigned_integer (fi->saved_regs[FP_REGNUM],
+  return d10v_make_daddr (read_memory_unsigned_integer (fi->saved_regs[FP_REGNUM],
 					    REGISTER_RAW_SIZE (FP_REGNUM)));
 }
 
@@ -780,7 +780,7 @@ d10v_frame_init_saved_regs (struct frame_info *fi)
   fi->extra_info->size = -next_addr;
 
   if (!(fp & 0xffff))
-    fp = D10V_MAKE_DADDR (read_register (SP_REGNUM));
+    fp = d10v_make_daddr (read_register (SP_REGNUM));
 
   for (i = 0; i < NUM_REGS - 1; i++)
     if (fi->saved_regs[i])
@@ -791,11 +791,11 @@ d10v_frame_init_saved_regs (struct frame_info *fi)
   if (fi->saved_regs[LR_REGNUM])
     {
       CORE_ADDR return_pc = read_memory_unsigned_integer (fi->saved_regs[LR_REGNUM], REGISTER_RAW_SIZE (LR_REGNUM));
-      fi->extra_info->return_pc = D10V_MAKE_IADDR (return_pc);
+      fi->extra_info->return_pc = d10v_make_iaddr (return_pc);
     }
   else
     {
-      fi->extra_info->return_pc = D10V_MAKE_IADDR (read_register (LR_REGNUM));
+      fi->extra_info->return_pc = d10v_make_iaddr (read_register (LR_REGNUM));
     }
 
   /* th SP is not normally (ever?) saved, but check anyway */
@@ -843,7 +843,7 @@ show_regs (char *args, int from_tty)
   int a;
   printf_filtered ("PC=%04lx (0x%lx) PSW=%04lx RPT_S=%04lx RPT_E=%04lx RPT_C=%04lx\n",
 		   (long) read_register (PC_REGNUM),
-		   (long) D10V_MAKE_IADDR (read_register (PC_REGNUM)),
+		   (long) d10v_make_iaddr (read_register (PC_REGNUM)),
 		   (long) read_register (PSW_REGNUM),
 		   (long) read_register (24),
 		   (long) read_register (25),
@@ -908,7 +908,7 @@ d10v_read_pc (ptid_t ptid)
   inferior_ptid = ptid;
   pc = (int) read_register (PC_REGNUM);
   inferior_ptid = save_ptid;
-  retval = D10V_MAKE_IADDR (pc);
+  retval = d10v_make_iaddr (pc);
   return retval;
 }
 
@@ -919,32 +919,32 @@ d10v_write_pc (CORE_ADDR val, ptid_t ptid)
 
   save_ptid = inferior_ptid;
   inferior_ptid = ptid;
-  write_register (PC_REGNUM, D10V_CONVERT_IADDR_TO_RAW (val));
+  write_register (PC_REGNUM, d10v_convert_iaddr_to_raw (val));
   inferior_ptid = save_ptid;
 }
 
 static CORE_ADDR
 d10v_read_sp (void)
 {
-  return (D10V_MAKE_DADDR (read_register (SP_REGNUM)));
+  return (d10v_make_daddr (read_register (SP_REGNUM)));
 }
 
 static void
 d10v_write_sp (CORE_ADDR val)
 {
-  write_register (SP_REGNUM, D10V_CONVERT_DADDR_TO_RAW (val));
+  write_register (SP_REGNUM, d10v_convert_daddr_to_raw (val));
 }
 
 static void
 d10v_write_fp (CORE_ADDR val)
 {
-  write_register (FP_REGNUM, D10V_CONVERT_DADDR_TO_RAW (val));
+  write_register (FP_REGNUM, d10v_convert_daddr_to_raw (val));
 }
 
 static CORE_ADDR
 d10v_read_fp (void)
 {
-  return (D10V_MAKE_DADDR (read_register (FP_REGNUM)));
+  return (d10v_make_daddr (read_register (FP_REGNUM)));
 }
 
 /* Function: push_return_address (pc)
@@ -954,7 +954,7 @@ d10v_read_fp (void)
 static CORE_ADDR
 d10v_push_return_address (CORE_ADDR pc, CORE_ADDR sp)
 {
-  write_register (LR_REGNUM, D10V_CONVERT_IADDR_TO_RAW (CALL_DUMMY_ADDRESS ()));
+  write_register (LR_REGNUM, d10v_convert_iaddr_to_raw (CALL_DUMMY_ADDRESS ()));
   return sp;
 }
 
@@ -1021,12 +1021,12 @@ d10v_push_arguments (int nargs, value_ptr *args, CORE_ADDR sp,
 	      && (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_FUNC))
 	    {
 	      /* function pointer */
-	      val = D10V_CONVERT_IADDR_TO_RAW (val);
+	      val = d10v_convert_iaddr_to_raw (val);
 	    }
-	  else if (D10V_IADDR_P (val))
+	  else if (d10v_iaddr_p (val))
 	    {
 	      /* also function pointer! */
-	      val = D10V_CONVERT_DADDR_TO_RAW (val);
+	      val = d10v_convert_daddr_to_raw (val);
 	    }
 	  else
 	    {
@@ -1106,7 +1106,7 @@ d10v_extract_return_value (struct type *type, char regbuf[REGISTER_BYTES],
       int num;
       short snum;
       snum = extract_address (regbuf + REGISTER_BYTE (RET1_REGNUM), REGISTER_RAW_SIZE (RET1_REGNUM));
-      store_address (valbuf, 4, D10V_MAKE_IADDR (snum));
+      store_address (valbuf, 4, d10v_make_iaddr (snum));
     }
   else if (TYPE_CODE (type) == TYPE_CODE_PTR)
     {
@@ -1114,7 +1114,7 @@ d10v_extract_return_value (struct type *type, char regbuf[REGISTER_BYTES],
       int num;
       short snum;
       snum = extract_address (regbuf + REGISTER_BYTE (RET1_REGNUM), REGISTER_RAW_SIZE (RET1_REGNUM));
-      store_address (valbuf, 4, D10V_MAKE_DADDR (snum));
+      store_address (valbuf, 4, d10v_make_daddr (snum));
     }
   else
     {
