@@ -26,15 +26,15 @@ Things-to-keep:
 .cvsignore
 CYGNUS
 ChangeLog
+INSTALL
 Makefile.in
 README
+SUPPORTED
 autoconf
 bfd
 binutils
-bison
 byacc
 cfg-paper.texi
-clib
 config
 config.sub
 configure
@@ -55,6 +55,7 @@ glob
 gprof
 grep
 include
+install.texinfo
 ispell
 ld
 libg++
