@@ -107,16 +107,6 @@ typedef enum mach_attr {
  , MACH_MAX
 } MACH_ATTR;
 
-/* Enum declaration for instructions which modify the link register as a side effect.  */
-typedef enum write_lr_attr {
-  WRITE_LR_NO, WRITE_LR_YES
-} WRITE_LR_ATTR;
-
-/* Enum declaration for instructions which modify their source register as a side effect.  */
-typedef enum write_src_attr {
-  WRITE_SRC_NO, WRITE_SRC_YES
-} WRITE_SRC_ATTR;
-
 /* start-sanitize-m32rx */
 /* Enum declaration for parallel execution pipeline selection.  */
 typedef enum pipe_attr {
@@ -151,9 +141,8 @@ typedef enum cgen_insn_attr {
 /* start-sanitize-m32rx */
  , CGEN_INSN_PIPE
 /* end-sanitize-m32rx */
- , CGEN_INSN_WRITE_LR, CGEN_INSN_WRITE_SRC, CGEN_INSN_ALIAS, CGEN_INSN_COND_CTI
- , CGEN_INSN_FILL_SLOT, CGEN_INSN_PARALLEL, CGEN_INSN_RELAX, CGEN_INSN_RELAXABLE
- , CGEN_INSN_UNCOND_CTI
+ , CGEN_INSN_ALIAS, CGEN_INSN_COND_CTI, CGEN_INSN_FILL_SLOT, CGEN_INSN_PARALLEL
+ , CGEN_INSN_RELAX, CGEN_INSN_RELAXABLE, CGEN_INSN_UNCOND_CTI
 } CGEN_INSN_ATTR;
 
 /* Number of non-boolean elements in cgen_insn.  */

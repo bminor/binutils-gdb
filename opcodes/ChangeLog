@@ -1,3 +1,8 @@
+Fri Feb 13 09:50:32 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* m32r-opc.c: Regenerate. 
+	* m32r-opc.h: Regenerate. 
+
 Thu Feb 12 11:01:40 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* cgen-opc.in (@arch@_cgen_lookup_insn): New argument alias_p.
