@@ -25,4 +25,22 @@ if ![info exists OBJDUMPFLAGS] then {
     set OBJDUMPFLAGS {}
 }
 
+if ![info exists NM] then {
+    set NM [findfile $base_dir/../../binutils/nm-new \
+		     $base_dir/../../binutils/nm-new \
+		     [transform nm]]
+}
+
+if ![info exists NMFLAGS] then {
+    set NMFLAGS {}
+}
+
+if ![info exists OBJCOPY] then {
+    set OBJCOPY [findfile $base_dir/../../binutils/objcopy]
+}
+
+if ![info exists OBJCOPYFLAGS] then {
+    set OBJCOPYFLAGS {}
+}
+
 gas_init
