@@ -1,3 +1,7 @@
+2000-03-28  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* Makefile.in: anchor tui-file.h dependency to $srcdir.
+
 2000-03-28  Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
 
 	* procfs.c (proc_set_watchpoint):  Declare addr parameter as
