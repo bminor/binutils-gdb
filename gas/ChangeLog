@@ -1,3 +1,8 @@
+Mon Sep 21 10:42:57 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-m32r.c (m32r_do_align): After inserting NOPs, reset
+	the previous insn to empty.
+
 1998-09-20  Michael Meissner  <meissner@cygnus.com>
 
 	* config/tc-ppc.c (md_apply_fix3): Do not break string into two
