@@ -1,3 +1,8 @@
+Mon Oct 10 13:50:30 1994  J.T. Conklin  (jtc@rtl.cygnus.com)
+
+	* nlmconv.c (link_inputs): Pass -Ur flag to ld so that the
+	  ctor/dtor tables needed by C++ programs are built.
+
 Sun Oct  9 18:04:00 1994  Jim Wilson  (wilson@sphagnum.cygnus.com)
 
 	* Makefile.in (srconv.o): Add dependence on sysroff.c.
