@@ -1,3 +1,7 @@
+Fri Sep 18 17:01:23 1992  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* Makefile.in (install): Fix typo.
+
 Fri Sep 18 02:04:24 1992  John Gilmore  (gnu@cygnus.com)
 
 	* Makefile.in (make):  Remove obsolete crud.
