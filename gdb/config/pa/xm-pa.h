@@ -3,16 +3,18 @@
 #define MAKEVA_START(list) \
   list->argindex = list->nargs * list->max_arg_size;
 
-/* In addition to having the arguments passed with the first ones at the
-   highest memory addresses, the pa also apparently aligns each argument
-   to the size of that argument.  This only works because the caller only
-   deals in 4 and 8 byte arguments.  If we wanted to handle args > 8 bytes,
-   we would have to pass the address by reference.  */
 #define MAKEVA_ARG(list, argaddr, argsize) \
-  list->argindex = (list->argindex - argsize) & ~ (argsize - 1); \
-  memcpy (&list->arg_bytes[list->argindex], argaddr, argsize);
+  if (argsize > 8) \
+    /* Currently this never happens; printf_command only uses argsize */ \
+    /* of sizeof (int), sizeof (double), or sizeof (long long).  */ \
+    error ("MAKEVA_ARG not fully written for hp-pa"); \
+  memcpy (&list->arg_bytes[list->argindex - argsize], argaddr, argsize); \
+  if (argsize <= 4) \
+    list->argindex -= 4; \
+  else if (argsize <= 8) \
+    list->argindex -= 8; \
 
-/* Apparently the address of the arglist is the address right after the args
+/* The address of the arglist is the address right after the args
    (which is what you'd expect).  */
 #define MAKEVA_END(list) \
   return (va_list) (list->arg_bytes \
