@@ -33,6 +33,7 @@
 #include "gdb_string.h"
 #include "c-lang.h"
 #include "target.h"
+#include "cp-abi.h"
 
 /* Indication of presence of HP-compiled object files */
 extern int hp_som_som_object_present;	/* defined in symtab.c */
@@ -504,6 +505,8 @@ cp_print_value (struct type *type, struct type *real_type, char *valaddr,
   struct type **last_dont_print
     = (struct type **) obstack_next_free (&dont_print_vb_obstack);
   int i, n_baseclasses = TYPE_N_BASECLASSES (type);
+  int thisoffset;
+  struct type *thistype;
 
   if (dont_print_vb == 0)
     {
@@ -538,6 +541,8 @@ cp_print_value (struct type *type, struct type *real_type, char *valaddr,
 	  obstack_ptr_grow (&dont_print_vb_obstack, baseclass);
 	}
 
+      thisoffset = offset;
+      thistype = real_type;
       if (TYPE_HAS_VTABLE (type) && BASETYPE_VIA_VIRTUAL (type, i))
 	{
 	  /* Assume HP/Taligent runtime convention */
@@ -566,9 +571,12 @@ cp_print_value (struct type *type, struct type *real_type, char *valaddr,
 		      || (boffset + offset) >= TYPE_LENGTH (type)))
 		{
 		  base_valaddr = (char *) alloca (TYPE_LENGTH (baseclass));
-		  if (target_read_memory (address + boffset, base_valaddr,
+		  if (target_read_memory (address + offset + boffset, base_valaddr,
 					  TYPE_LENGTH (baseclass)) != 0)
 		    skip = 1;
+		  thisoffset = 0;
+		  boffset = 0;
+		  thistype = baseclass;
 		}
 	      else
 		base_valaddr = valaddr;
@@ -593,8 +601,8 @@ cp_print_value (struct type *type, struct type *real_type, char *valaddr,
       if (skip >= 1)
 	fprintf_filtered (stream, "<invalid address>");
       else
-	cp_print_value_fields (baseclass, real_type, base_valaddr,
-			       offset + boffset, address, stream, format,
+	cp_print_value_fields (baseclass, thistype, base_valaddr,
+			       thisoffset + boffset, address, stream, format,
 			       recurse, pretty,
 			       ((struct type **)
 				obstack_base (&dont_print_vb_obstack)),

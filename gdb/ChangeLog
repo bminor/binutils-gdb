@@ -1,5 +1,10 @@
 2001-12-07  Daniel Jacobowitz  <drow@mvista.com>
 
+	* cp-valprint.c (cp_print_value): Preserve offset if
+	the virtual base is outside of this object.
+
+2001-12-07  Daniel Jacobowitz  <drow@mvista.com>
+
 	* gdbtypes.c (finish_cv_type): New function.
 	(check_typedef): Remove ``register'' keyword from argument. 
 	Preserve const and volatile attributes across filling in
