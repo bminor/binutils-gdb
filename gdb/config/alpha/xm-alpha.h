@@ -43,7 +43,7 @@ extern void free PARAMS ((void *));
 #define MAKEVA_END(list)  		\
 { 					\
   va_list ret;				\
-  ret.a0 = (char *)(list)->arg_bytes;	\
+  ret.a0 = (char *)(list)->aligner.arg_bytes;	\
   ret.offset = (list)->argindex;	\
   return ret;				\
 }
