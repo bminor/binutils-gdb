@@ -209,6 +209,8 @@ main (argc, argv)
 	  ld_sysroot = TARGET_SYSTEM_ROOT;
 	}
     }
+  else
+    ld_sysroot = TARGET_SYSTEM_ROOT;
 #else
   ld_sysroot = TARGET_SYSTEM_ROOT;
 #endif
