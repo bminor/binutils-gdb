@@ -1,3 +1,8 @@
+Wed Feb 26 11:56:11 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in (itbl-parse.c itbl-parse.h): Use $(BISON) and
+	$(BISONFLAGS), not $(YACC) and $(YACCFLAGS).
+
 Tue Feb 25 22:02:23 1997  Philippe De Muyter  <phdm@info.ucl.ac.be>
 
 	* config/tc-m68k.c (instring): Useless local declaration of
