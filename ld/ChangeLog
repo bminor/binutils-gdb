@@ -1,3 +1,8 @@
+2001-02-26  Timothy Wall  <twall@cygnus.com>
+
+	* emulparams/elf64_aix.sh: Add additional read-only sections;
+	uncomment lines which are now required.
+
 2001-02-26  H.J. Lu  <hjl@gnu.org>
 
 	* ldlang.c (open_input_bfds): Set the bfd error handler so
