@@ -1,3 +1,11 @@
+Sun Oct  4 21:17:51 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* i386.h (R_386_max): Change from 252 to 24.
+
+Mon Sep 21 12:24:44 1998  Catherine Moore  <clm@cygnus.com>
+
+        * i386.h:  Change vtable reloc numbers.
+
 Sun Sep 20 00:54:22 1998  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
 
 	* m68k.h: Add vtable relocs and R_68K_max.
