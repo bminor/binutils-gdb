@@ -1,3 +1,10 @@
+Thu Sep 11 17:35:10 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* sparc-opc.c (sparc_opcodes): Fix assembler args to
+	fzeros, fones, fsrc1, fsrc1s, fsrc2s, fnot1, fnot1s, fnot2s,
+	fors, fnors, fands, fnands, fxors, fxnors, fornot1s, fornot2s,
+	fandnot1s, fandnot2s.
+
 Tue Sep  9 10:03:49 1997  Doug Evans  <dje@canuck.cygnus.com>
 
 	* sparc-opc.c (sparc_opcodes): Fix op3 field for fcmpq/fcmpeq.
