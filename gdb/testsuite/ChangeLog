@@ -1,3 +1,8 @@
+2003-10-10  Kei Sakamoto  <sakamoto.kei@renesas.com>
+
+	* config/hmsirom.exp: Replace "Hitachi" with "Renesas".
+	* gdb.disasm/sh3.s: Ditto.
+
 2003-10-07  Daniel Jacobowitz  <drow@mvista.com>
 
 	* gdb.threads/switch-threads.exp: New test.
