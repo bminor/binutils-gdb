@@ -1,7 +1,13 @@
+Tue Aug 22 07:36:58 1995  steve chamberlain  <sac@slash.cygnus.com>
+
+	* scripttempl/pe.sc: Keep .edata, don't base stabs at 0.
+	* emulparams/armpe.sh: Run PE script.
+
 Mon Aug 21 18:30:42 1995  steve chamberlain  <sac@slash.cygnus.com>
 
 	* ldmain.c (main): Remove PE stuff.
 	* lexsup.c (options): Load more PE options.
+	(set_pe_value): New function.
 
 Thu Aug 17 13:35:49 1995  steve chamberlain  <sac@slash.cygnus.com>
 	
