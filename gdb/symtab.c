@@ -79,8 +79,6 @@ static struct partial_symbol *lookup_partial_symbol (struct partial_symtab *,
 						     const char *, int,
 						     namespace_enum);
 
-static struct symtab *lookup_symtab_1 (const char *);
-
 static struct symbol *lookup_symbol_aux (const char *name, const
 					 struct block *block, const
 					 namespace_enum namespace, int
@@ -137,8 +135,8 @@ cplusplus_hint (char *name)
    psymtabs.  *If* there is no '/' in the name, a match after a '/'
    in the symtab filename will also work.  */
 
-static struct symtab *
-lookup_symtab_1 (const char *name)
+struct symtab *
+lookup_symtab (const char *name)
 {
   register struct symtab *s;
   register struct partial_symtab *ps;
@@ -186,42 +184,6 @@ got_symtab:
      XXX - This is a crock, and should be fixed inside of the the
      symbol parsing routines. */
   goto got_symtab;
-}
-
-/* Lookup the symbol table of a source file named NAME.  Try a couple
-   of variations if the first lookup doesn't work.  */
-
-struct symtab *
-lookup_symtab (const char *name)
-{
-  register struct symtab *s;
-#if 0
-  register char *copy;
-#endif
-
-  s = lookup_symtab_1 (name);
-  if (s)
-    return s;
-
-#if 0
-  /* This screws c-exp.y:yylex if there is both a type "tree" and a symtab
-     "tree.c".  */
-
-  /* If name not found as specified, see if adding ".c" helps.  */
-  /* Why is this?  Is it just a user convenience?  (If so, it's pretty
-     questionable in the presence of C++, FORTRAN, etc.).  It's not in
-     the GDB manual.  */
-
-  copy = (char *) alloca (strlen (name) + 3);
-  strcpy (copy, name);
-  strcat (copy, ".c");
-  s = lookup_symtab_1 (copy);
-  if (s)
-    return s;
-#endif /* 0 */
-
-  /* We didn't find anything; die.  */
-  return 0;
 }
 
 /* Lookup the partial symbol table of a source file named NAME.

@@ -1,3 +1,8 @@
+2001-10-11  Tom Tromey  <tromey@redhat.com>
+
+	* symtab.c (lookup_symtab): Removed.
+	(lookup_symtab_1): Renamed to lookup_symtab.
+
 2001-10-10  Christopher Faylor  <cgf@redhat.com>
 
 	* win32-nat.c (get_child_debug_event): Close file handles created after
