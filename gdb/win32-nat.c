@@ -435,12 +435,26 @@ struct safe_symbol_file_add_args
   struct objfile *ret;
 };
 
+/* Maintain a linked list of "so" information. */
+struct so_stuff
+{
+  struct so_stuff *next, **last;
+  DWORD load_addr;
+  char name[0];
+}
+solib_start, *solib_end;
+
 /* Call symbol_file_add with stderr redirected.  We don't care if there
    are errors. */
 static int
 safe_symbol_file_add_stub (void *argv)
 {
 #define p ((struct safe_symbol_file_add_args *)argv)
+  struct so_stuff *so = solib_start.next;
+
+  while ((so = so->next))
+    if (strcasecmp (so->name, p->name) == 0)
+      return 0;
   p->ret = symbol_file_add (p->name, p->from_tty, p->addrs, p->mainline, p->flags);
   return !!p->ret;
 #undef p
@@ -453,9 +467,9 @@ safe_symbol_file_add_cleanup (void *p)
 #define sp ((struct safe_symbol_file_add_args *)p)
   gdb_flush (gdb_stderr);
   gdb_flush (gdb_stdout);
-  ui_file_delete (gdb_stderr);
+  /* ui_file_delete (gdb_stderr); */
   ui_file_delete (gdb_stdout);
-  gdb_stderr = sp->err;
+  /* gdb_stderr = sp->err; */
   gdb_stdout = sp->out;
 #undef sp
 }
@@ -475,7 +489,7 @@ safe_symbol_file_add (char *name, int from_tty,
   p.out = gdb_stdout;
   gdb_flush (gdb_stderr);
   gdb_flush (gdb_stdout);
-  gdb_stderr = ui_file_new ();
+  /* gdb_stderr = ui_file_new (); */
   gdb_stdout = ui_file_new ();
   p.name = name;
   p.from_tty = from_tty;
@@ -487,15 +501,6 @@ safe_symbol_file_add (char *name, int from_tty,
   do_cleanups (cleanup);
   return p.ret;
 }
-
-/* Maintain a linked list of "so" information. */
-struct so_stuff
-{
-  struct so_stuff *next, **last;
-  DWORD load_addr;
-  char name[0];
-}
-solib_start, *solib_end;
 
 /* Remember the maximum DLL length for printing in info dll command. */
 int max_dll_name_len;
@@ -630,8 +635,8 @@ child_clear_solibs (void)
 }
 
 /* Add DLL symbol information. */
-void
-solib_symbols_add (char *name, CORE_ADDR load_addr)
+static void
+solib_symbols_add (char *name, int from_tty, CORE_ADDR load_addr)
 {
   struct section_addr_info section_addrs;
 
@@ -645,7 +650,7 @@ solib_symbols_add (char *name, CORE_ADDR load_addr)
   memset (&section_addrs, 0, sizeof (section_addrs));
   section_addrs.other[0].name = ".text";
   section_addrs.other[0].addr = load_addr;
-  safe_symbol_file_add (name, 0, &section_addrs, 0, OBJF_SHARED);
+  safe_symbol_file_add (name, from_tty, 0, 0, OBJF_SHARED);
 
   return;
 }
@@ -777,6 +782,8 @@ handle_exception (struct target_waitstatus *ourstatus)
       last_sig = SIGILL;
       break;
     default:
+      if (current_event.u.Exception.dwFirstChance)
+	return 0;
       printf_unfiltered ("gdb: unknown target exception 0x%08lx at 0x%08lx\n",
 		    current_event.u.Exception.ExceptionRecord.ExceptionCode,
 	(DWORD) current_event.u.Exception.ExceptionRecord.ExceptionAddress);
@@ -918,8 +925,8 @@ get_child_debug_event (int pid ATTRIBUTE_UNUSED, struct target_waitstatus *ourst
 		     (unsigned) current_event.dwProcessId,
 		     (unsigned) current_event.dwThreadId,
 		     "EXCEPTION_DEBUG_EVENT"));
-      handle_exception (ourstatus);
-      retval = current_event.dwThreadId;
+      if (handle_exception (ourstatus))
+	retval = current_event.dwThreadId;
       break;
 
     case OUTPUT_DEBUG_STRING_EVENT:	/* message from the kernel */
@@ -1494,7 +1501,7 @@ core_dll_symbols_add (char *dll_name, DWORD base_addr)
   }
 
   register_loaded_dll (dll_name, base_addr + 0x1000);
-  solib_symbols_add (dll_name, (CORE_ADDR) base_addr + 0x1000);
+  solib_symbols_add (dll_name, 0, (CORE_ADDR) base_addr + 0x1000);
 
 out:
   return 1;
@@ -1637,7 +1644,7 @@ out:
 }
 
 void
-child_solib_add (char *filename ATTRIBUTE_UNUSED, int from_tty ATTRIBUTE_UNUSED, struct target_ops *target)
+child_solib_add (char *filename ATTRIBUTE_UNUSED, int from_tty, struct target_ops *target)
 {
   if (core_bfd)
     {
@@ -1647,7 +1654,7 @@ child_solib_add (char *filename ATTRIBUTE_UNUSED, int from_tty ATTRIBUTE_UNUSED,
   else
     {
       if (solib_end && solib_end->name)
-	solib_symbols_add (solib_end->name, solib_end->load_addr);
+	solib_symbols_add (solib_end->name, from_tty, solib_end->load_addr);
     }
 }
 

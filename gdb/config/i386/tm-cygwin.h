@@ -23,7 +23,7 @@
 #undef HAVE_SSE_REGS	/* FIXME! win32-nat.c needs to support XMMi registers */
 #define HAVE_I387_REGS
 
-#include "i386/tm-i386v.h"
+#include "i386/tm-i386.h"
 
 #if 0
 #define IN_SOLIB_CALL_TRAMPOLINE(pc, name) skip_trampoline_code (pc, name)
