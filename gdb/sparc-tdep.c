@@ -37,7 +37,6 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <fcntl.h>
 
 #include <sys/ptrace.h>
-#include <machine/reg.h>
 
 #include <sys/file.h>
 #include <sys/stat.h>

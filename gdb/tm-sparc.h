@@ -290,9 +290,9 @@ extern CORE_ADDR skip_prologue ();
 /* Describe the pointer in each stack frame to the previous stack frame
    (its caller).  */
 
-/* I don't know whether this will work for cross-debugging, even if you
-   do get the right reg.h.  */
-#include <machine/reg.h>
+/* If you're not compiling this on a sun, you'll have to get a copy
+   of <sun4/reg.h> (also known as <machine/reg.h>).  */
+#include <sun4/reg.h>
 
 #define GET_RWINDOW_REG(FRAME, REG) \
   (read_memory_integer ((CORE_ADDR)&((struct rwindow *)FRAME)->REG, 4))

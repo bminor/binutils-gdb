@@ -1,6 +1,18 @@
 Mon Apr 22 00:02:43 1991  Jim Kingdon  (kingdon at cygint.cygnus.com)
 
-	* Shared libaray/corefile changes from Peter Schauer:
+	* dbxread.c (end_psymtab): Initialize pst->symtab.
+
+	* core.c (core_open): Call ADD_SOLIB.
+
+	* tm-sparc.h: Include <sun4/reg.h> not <machine/reg.h>.
+	sparc-tdep.c: Don't include <machine/reg.h>.
+
+	* sun3-xdep.c [!TARGET_SUN3]: Just provide empty functions which
+	don't do anything.
+
+	* core.c (core_open): Add make_cleanup (pop_target, 0).
+
+	* Shared library/corefile changes from Peter Schauer:
 	core.c (core_close): Call CLEAR_SOLIB.
 	(core_open): Remove comment about "should deal with shared lib".
 	(core_xfer_memory): If we can't xfer the usual way, try the

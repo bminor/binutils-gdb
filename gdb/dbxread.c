@@ -2497,6 +2497,7 @@ end_psymtab (pst, include_list, num_includes, capping_symbol_offset,
 	    subpst->n_static_syms = 0;
 
       subpst->readin = 0;
+      subpst->symtab = 0;
       subpst->read_symtab = dbx_psymtab_to_symtab;
 
       subpst->next = partial_symtab_list;
