@@ -112,6 +112,7 @@ m10300-opc.c
 mpw-config.in
 mpw-make.sed
 ns32k-dis.c
+opintl.h
 ppc-dis.c
 ppc-opc.c
 sh-opc.h
