@@ -58,7 +58,7 @@ struct fp_status {
 
 /* To be used by function_frame_info. */
 
-struct aix_framedata {
+struct rs6000_framedata {
   int	offset;				/* # of bytes in gpr's and fpr's are saved */
   int	saved_gpr;			/* smallest # of saved gpr */
   int	saved_fpr;			/* smallest # of saved fpr */
@@ -68,7 +68,7 @@ struct aix_framedata {
 };
 
 void 
-function_frame_info PARAMS ((CORE_ADDR, struct aix_framedata *));
+function_frame_info PARAMS ((CORE_ADDR, struct rs6000_framedata *));
 
 /* Define the byte order of the machine.  */
 
@@ -151,6 +151,15 @@ function_frame_info PARAMS ((CORE_ADDR, struct aix_framedata *));
 
 #define BIG_BREAKPOINT { 0x7d, 0x82, 0x10, 0x08 }
 #define LITTLE_BREAKPOINT { 0x08, 0x10, 0x82, 0x7d }
+
+#if TARGET_BYTE_ORDER == BIG_ENDIAN
+#define BREAKPOINT BIG_BREAKPOINT
+
+#else
+#if TARGET_BYTE_ORDER == LITTLE_ENDIAN
+#define BREAKPOINT LITTLE_BREAKPOINT
+#endif
+#endif
 
 /* Amount PC must be decremented by after a breakpoint.
    This is often the number of bytes in BREAKPOINT
@@ -460,7 +469,7 @@ CORE_ADDR rs6000_frame_chain PARAMS ((struct frame_info *));
 {									\
   int ii;								\
   CORE_ADDR frame_addr, func_start;					\
-  struct aix_framedata fdata;						\
+  struct rs6000_framedata fdata;					\
 									\
   /* find the start of the function and collect info about its frame. */\
 									\

@@ -1,3 +1,9 @@
+Tue Jul 25 10:43:27 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* config/rs6000/tm-rs6000.h (rs6000_framedata): Rename from
+	aix_framedata.  Change all uses.
+	* rs6000-tdep.c: Change all aix_framedata -> rs6000_framedata.	
+
 Sat Jul 22 23:44:18 1995  Jeff Law  (law@snake.cs.utah.edu)
 
 	* defs.h (ATTR_FORMAT): Disable if ANSI_PROTOTYPES is not defined.

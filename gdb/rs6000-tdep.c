@@ -55,7 +55,7 @@ branch_dest PARAMS ((int opcode, int instr, CORE_ADDR pc, CORE_ADDR safety));
 
 static void
 frame_get_cache_fsr PARAMS ((struct frame_info *fi,
-			     struct aix_framedata *fdatap));
+			     struct rs6000_framedata *fdatap));
 
 /*
  * Calculate the destination of a branch/jump.  Return -1 if not a branch.
@@ -476,7 +476,7 @@ void
 pop_frame ()
 {
   CORE_ADDR pc, lr, sp, prev_sp;		/* %pc, %lr, %sp */
-  struct aix_framedata fdata;
+  struct rs6000_framedata fdata;
   struct frame_info *frame = get_current_frame ();
   int addr, ii;
 
@@ -570,7 +570,7 @@ fix_call_dummy(dummyname, pc, fun, nargs, type)
 
 
 /* return information about a function frame.
-   in struct aix_frameinfo fdata:
+   in struct rs6000_frameinfo fdata:
     - frameless is TRUE, if function does not have a frame.
     - nosavedpc is TRUE, if function does not save %pc value in its frame.
     - offset is the number of bytes used in the frame to save registers.
@@ -582,7 +582,7 @@ fix_call_dummy(dummyname, pc, fun, nargs, type)
 void
 function_frame_info (pc, fdata)
   CORE_ADDR pc;
-  struct aix_framedata *fdata;
+  struct rs6000_framedata *fdata;
 {
   unsigned int tmp;
   register unsigned int op;
@@ -975,7 +975,7 @@ struct frame_info *fi;
 int pcsaved;
 {
   CORE_ADDR func_start;
-  struct aix_framedata fdata;
+  struct rs6000_framedata fdata;
 
   if (fi->next != NULL)
     /* Don't even think about framelessness except on the innermost frame.  */
@@ -997,17 +997,17 @@ int pcsaved;
 
 
 /* If saved registers of frame FI are not known yet, read and cache them.
-   &FDATAP contains aix_framedata; TDATAP can be NULL,
+   &FDATAP contains rs6000_framedata; TDATAP can be NULL,
    in which case the framedata are read.  */
 
 static void
 frame_get_cache_fsr (fi, fdatap)
      struct frame_info *fi;
-     struct aix_framedata *fdatap;
+     struct rs6000_framedata *fdatap;
 {
   int ii;
   CORE_ADDR frame_addr; 
-  struct aix_framedata work_fdata;
+  struct rs6000_framedata work_fdata;
 
   if (fi->cache_fsr)
     return;
@@ -1054,7 +1054,7 @@ frame_initial_stack_address (fi)
      struct frame_info *fi;
 {
   CORE_ADDR tmpaddr;
-  struct aix_framedata fdata;
+  struct rs6000_framedata fdata;
   struct frame_info *callee_fi;
 
   /* if the initial stack pointer (frame address) of this frame is known,
