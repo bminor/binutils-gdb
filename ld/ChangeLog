@@ -1,4 +1,8 @@
 start-sanitize-d10v
+	Wed Jul 24 12:16:38 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
+
+	* emulparams/d10velf.sh (SCRIPT_NAME): Change to elf.
+
 Wed Jul 24 13:38:22 1996  Michael Meissner  <meissner@wogglebug.tiac.net>
 
 	* configure.tgt (d10v-*-*): Don't require the -elf, allow plain d10v.
