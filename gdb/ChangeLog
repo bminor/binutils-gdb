@@ -1,3 +1,9 @@
+Mon Feb  7 08:44:17 1994  Jim Kingdon  (kingdon@deneb.cygnus.com)
+
+	* config/m68k/{m68k-em.mt,tm-m68k-em.h}: Remove; no longer used.
+	* configure.in: Remove comment about m68k-em.mt.
+	* Makefile.in: Remove references.
+
 Mon Feb  7 08:22:42 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* defs.h [BFD64]: Use BFD_HOST_64_BIT, not nonexistent

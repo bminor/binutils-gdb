@@ -41,7 +41,6 @@ hp300hpux.mh
 hp300hpux.mt
 isi.mh
 isi.mt
-m68k-em.mt
 m68klynx.mh
 m68klynx.mt
 monitor.mt
@@ -71,7 +70,6 @@ sun3os4.mt
 tm-3b1.h
 tm-apollo68b.h
 tm-delta68.h
-tm-m68k-em.h
 tm-m68k.h
 tm-m68klynx.h
 tm-altos.h
