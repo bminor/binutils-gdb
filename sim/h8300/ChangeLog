@@ -2,6 +2,10 @@
 
 	* compile.c (sim_info): Fix typo in output.
 
+	* h8300/compile.c (set_h8300h): Replace 'flag' arguments
+	with a bfd_machine argument, and decode it inline.
+	Check for bfd_mach_h8300hn and bfd_mach_h8300sn.
+
 2003-06-03  Michael Snyder  <msnyder@redhat.com>
 
 	* compile.c: Add h8300sx insns and addressing modes.

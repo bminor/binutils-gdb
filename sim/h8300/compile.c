@@ -4748,15 +4748,20 @@ sim_info (SIM_DESC sd, int verbose)
    FLAG is non-zero for the H8/300H.  */
 
 void
-set_h8300h (int h_flag, int s_flag, int sx_flag)
+set_h8300h (unsigned long machine)
 {
   /* FIXME: Much of the code in sim_load can be moved to sim_open.
      This function being replaced by a sim_open:ARGV configuration
      option.  */
 
-  h8300hmode  = h_flag;
-  h8300smode  = s_flag;
-  h8300sxmode = sx_flag;
+  if (machine == bfd_mach_h8300sx)
+    h8300sxmode = 1;
+
+  if (machine == bfd_mach_h8300s || machine == bfd_mach_h8300sn || h8300sxmode)
+    h8300smode = 1;
+
+  if (machine == bfd_mach_h8300h || machine == bfd_mach_h8300hn || h8300smode)
+    h8300hmode = 1;
 }
 
 /* Cover function of sim_state_free to free the cpu buffers as well.  */
@@ -4873,14 +4878,7 @@ sim_load (SIM_DESC sd, char *prog, bfd *abfd, int from_tty)
 	 and bfd_openr as sim_load_file checks too.  */
       if (bfd_check_format (prog_bfd, bfd_object))
 	{
-	  unsigned long mach = bfd_get_mach (prog_bfd);
-
-	  set_h8300h (mach == bfd_mach_h8300h || 
-		      mach == bfd_mach_h8300s ||
-		      mach == bfd_mach_h8300sx,
-		      mach == bfd_mach_h8300s ||
-		      mach == bfd_mach_h8300sx,
-		      mach == bfd_mach_h8300sx);
+	  set_h8300h (bfd_get_mach (prog_bfd));
 	}
     }
 
