@@ -1,3 +1,8 @@
+Tue Nov 17 16:57:51 1998  Geoffrey Noer  <noer@cygnus.com>
+
+        * Makefile.in: modify CC_FOR_TARGET and CXX_FOR_TARGET so that
+        they include winsup/include when it's a cygwin target.
+
 1998-11-12  Tom Tromey  <tromey@cygnus.com>
 
 	* configure.in (host_tools): Added zip.
