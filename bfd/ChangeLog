@@ -1,3 +1,9 @@
+Tue May  5 14:18:24 1992  Per Bothner  (bothner@rtl.cygnus.com)
+
+	* bfd-in.h:  Increase version number to 1.97, for consistency
+	with ../binutils.
+	* Makefile.in:  docdir is ./doc, not ${srcdir}/doc.
+
 Mon May  4 11:49:15 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
         * bfd-in.h: bump version to 1.96
