@@ -1,3 +1,7 @@
+Tue Oct 18 15:25:24 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* configure.in: Don't build emacs on Irix 5.
+
 Mon Oct 17 16:22:12 1994  J.T. Conklin  (jtc@phishhead.cygnus.com)
 
 	* configure.in (*-*-netware*): Add libio.
