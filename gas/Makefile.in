@@ -442,7 +442,7 @@ dvi info install-info clean-info:
 make-gas.com: stamp-mk.com
 stamp-mk.com: vmsconf.sh Makefile
 	sh $(srcdir)/vmsconf.sh $(OBJS) > new-make.com
-	$(srcdir)/../move-if-change new-make.com $(srcdir)/make-gas.com
+	$(SHELL) $(srcdir)/../move-if-change new-make.com $(srcdir)/make-gas.com
 	touch stamp-mk.com
 
 # Now figure out from those variables how to compile and link.
@@ -551,7 +551,7 @@ config-stamp: Makefile conf
 	echo ''						>> config.new
 	cat conf					>> config.new
 	echo '#endif /* GAS_VERSION */'			>> config.new
-	$(srcdir)/../move-if-change config.new config.h
+	$(SHELL) $(srcdir)/../move-if-change config.new config.h
 	touch config-stamp
 
 # The implicit .c.o rule doesn't work for these, perhaps because of
@@ -814,7 +814,7 @@ DEP_FILE_DEPS =  $(CFILES) $(HFILES) $(TARGET_CPU_CFILES) \
 	echo '$$(TARG_CPU_O): $$(TCDEP_@target''_cpu_type@_@obj''_format@)' >> .depa
 	echo '$$(OBJ_FORMAT_O): $$(OBJDEP_@target''_cpu_type@_@obj''_format@)' >> .depa
 	echo '# IF YOU PUT ANYTHING HERE IT WILL GO AWAY' >> .depa
-	$(srcdir)/../move-if-change .depa .dep
+	$(SHELL) $(srcdir)/../move-if-change .depa .dep
 
 # This rule needs a mkdep that runs "gcc -MM".
 # FIXME: This only works correctly if $(srcdir) is an absolute path.
@@ -967,12 +967,12 @@ dep.sed: dep-in.sed config.status
 dep: .dep
 	sed -e '/^..DO NOT DELETE THIS LINE/,$$d' < Makefile > tmp-Makefile
 	cat .dep >> tmp-Makefile
-	$(srcdir)/../move-if-change tmp-Makefile Makefile
+	$(SHELL) $(srcdir)/../move-if-change tmp-Makefile Makefile
 
 dep-in: .dep
 	sed -e '/^..DO NOT DELETE THIS LINE/,$$d' < $(srcdir)/Makefile.in > tmp-Makefile.in
 	cat .dep >> tmp-Makefile.in
-	$(srcdir)/../move-if-change tmp-Makefile.in $(srcdir)/Makefile.in
+	$(SHELL) $(srcdir)/../move-if-change tmp-Makefile.in $(srcdir)/Makefile.in
 
 .PHONY: dep dep-in
 

@@ -1,3 +1,12 @@
+Mon Apr 14 11:59:08 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* symbols.c (resolve_symbol_value): Check for division by zero.
+
+	From Thomas Graichen <graichen@rzpd.de>:
+	* Makefile.in: Always use $(SHELL) when running move-if-change.
+	* configure.in: Use ${CONFIG_SHELL} when running $ac_config_sub.
+	* configure: Rebuild.
+
 Thu Apr 10 14:40:00 1997  Doug Evans  <dje@canuck.cygnus.com>
 
 	* cgen.c (cgen_parse_operand): Renamed from cgen_asm_parse_operand.
