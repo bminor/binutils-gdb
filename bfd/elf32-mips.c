@@ -1928,16 +1928,16 @@ elf_mips_abi_name (abfd)
 {
   flagword flags;
 
-  if (ABI_N32_P (abfd))
-    return "N32";
-  else if (ABI_64_P (abfd))
-    return "64";
-
   flags = elf_elfheader (abfd)->e_flags;
   switch (flags & EF_MIPS_ABI)
     {
     case 0:
-      return "none";
+      if (ABI_N32_P (abfd))
+	return "N32";
+      else if (ABI_64_P (abfd))
+	return "64";
+      else
+	return "none";
     case E_MIPS_ABI_O32:
       return "O32";
     case E_MIPS_ABI_O64:

@@ -1,3 +1,8 @@
+2001-08-25  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
+	* elf32-mips.c (elf_mips_abi_name): Return the right ABI string for
+	E_MIPS_ABI_O64 and E_MIPS_ABI_EABI64
+
 2001-08-24  H.J. Lu  <hjl@gnu.org>
 
 	* elf.c (_bfd_elf_merge_sections): Fail if not using an ELF
