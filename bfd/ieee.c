@@ -855,8 +855,8 @@ uint8e_type buffer[512];
   next_byte(&(ieee->h));
   library= read_id(&(ieee->h));
   if (strcmp(library , "LIBRARY") != 0) {
-   bfd_release(abfd, ieee);
-   ieee_ar_data(abfd)= save;
+    bfd_release(abfd, ieee);
+    set_tdata (abfd, save);
     return (bfd_target *)NULL;
   }
   /* Throw away the filename */
