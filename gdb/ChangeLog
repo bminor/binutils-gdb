@@ -1,8 +1,5 @@
 Wed Jun 23 15:04:54 1993  K. Richard Pixley  (rich@sendai.cygnus.com)
 
-	* Makefile.in (BFD_CFLAGS): -I$(BFD_DIR) rather than including
-	from the library proper.  Hmph.
-
 	Makefile overhaul dropping autodepend features.
 	* Makefile.in: many comment changes.  forced consistent use of $()
 	  for makefile variables references.  dropped leading ./ in file
