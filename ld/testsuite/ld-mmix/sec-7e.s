@@ -1,4 +1,4 @@
- .section .debug_info
+ .section .di
  .byte 50
  .rept 32767
  .byte 0

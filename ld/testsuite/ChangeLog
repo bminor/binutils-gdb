@@ -1,3 +1,16 @@
+2002-08-31  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* ld-mmix/bpo-10.d: Tweak for change in symbols handling.
+	* ld-mmix/bpo-11.d: Ditto.
+
+	* ld-mmix/b-nosym.d: Adjust for changed output for absence of
+	symbols.
+
+	* ld-mmix/sec-7m.d: Rename tested section from .debug_info to
+	.di.
+	* ld-mmix/sec-7a.s, ld-mmix/sec-7b.s, ld-mmix/sec-7c.s,
+	ld-mmix/sec-7d.s, ld-mmix/sec-7e.s: Ditto.
+
 2002-08-28  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-discard/discard.exp: xfail m6812.

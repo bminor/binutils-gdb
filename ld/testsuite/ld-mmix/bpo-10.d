@@ -19,8 +19,6 @@ SYMBOL TABLE:
 0+ l    d  \*ABS\*	0+ 
 0+ l    d  \*ABS\*	0+ 
 0+ l       \.init	0+ _start
-0+ g       \*ABS\*	0+ 
-0+ g       \*ABS\*	0+ 
 2000000000000000 g       \*ABS\*	0+ __bss_start
 2000000000000000 g       \*ABS\*	0+ _edata
 2000000000000000 g       \*ABS\*	0+ _end
