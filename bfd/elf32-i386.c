@@ -1558,7 +1558,9 @@ allocate_dynrelocs (h, inf)
   htab = elf_i386_hash_table (info);
 
   if (htab->elf.dynamic_sections_created
-      && h->plt.refcount > 0)
+      && h->plt.refcount > 0
+      && (ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
+	  || h->root.type != bfd_link_hash_undefweak))
     {
       /* Make sure this symbol is output as a dynamic symbol.
 	 Undefined weak syms won't yet be marked as dynamic.  */
@@ -1569,10 +1571,8 @@ allocate_dynrelocs (h, inf)
 	    return FALSE;
 	}
 
-      if ((ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
-	   || h->root.type != bfd_link_hash_undefweak)
-	  && (info->shared
-	      || WILL_CALL_FINISH_DYNAMIC_SYMBOL (1, 0, h)))
+      if (info->shared
+	  || WILL_CALL_FINISH_DYNAMIC_SYMBOL (1, 0, h))
 	{
 	  asection *s = htab->splt;
 
@@ -1695,6 +1695,12 @@ allocate_dynrelocs (h, inf)
 		pp = &p->next;
 	    }
 	}
+
+      /* Also discard relocs on undefined weak syms with non-default
+	 visibility.  */
+      if (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT
+	  && h->root.type == bfd_link_hash_undefweak)
+	eh->dyn_relocs = NULL;
     }
   else if (ELIMINATE_COPY_RELOCS)
     {

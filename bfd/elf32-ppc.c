@@ -2694,7 +2694,9 @@ allocate_dynrelocs (h, inf)
 
   htab = ppc_elf_hash_table (info);
   if (htab->elf.dynamic_sections_created
-      && h->plt.refcount > 0)
+      && h->plt.refcount > 0
+      && (ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
+	  || h->root.type != bfd_link_hash_undefweak))
     {
       /* Make sure this symbol is output as a dynamic symbol.  */
       if (h->dynindx == -1
@@ -2789,8 +2791,10 @@ allocate_dynrelocs (h, inf)
 	  else
 	    htab->got->_raw_size += 4;
 	  dyn = htab->elf.dynamic_sections_created;
-	  if (info->shared
-	      || WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, 0, &eh->elf))
+	  if ((info->shared
+	       || WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, 0, &eh->elf))
+	      && (ELF_ST_VISIBILITY (eh->elf.other) == STV_DEFAULT
+		  || eh->elf.root.type != bfd_link_hash_undefweak))
 	    {
 	      /* All the entries we allocated need relocs.  */
 	      htab->relgot->_raw_size
@@ -2831,6 +2835,12 @@ allocate_dynrelocs (h, inf)
 		pp = &p->next;
 	    }
 	}
+
+      /* Also discard relocs on undefined weak syms with non-default
+	 visibility.  */
+      if (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT
+	  && h->root.type == bfd_link_hash_undefweak)
+	eh->dyn_relocs = NULL;
     }
   else if (ELIMINATE_COPY_RELOCS)
     {
@@ -4793,7 +4803,10 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		      }
 
 		    /* Generate relocs for the dynamic linker.  */
-		    if (info->shared || indx != 0)
+		    if ((info->shared || indx != 0)
+			&& (h == NULL
+			    || ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
+			    || h->root.type != bfd_link_hash_undefweak))
 		      {
 			outrel.r_offset = (htab->got->output_section->vma
 					   + htab->got->output_offset
@@ -4995,6 +5008,9 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	  /* Fall thru.  */
 
 	  if ((info->shared
+	       && (h == NULL
+		   || ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
+		   || h->root.type != bfd_link_hash_undefweak)
 	       && (MUST_BE_DYN_RELOC (r_type)
 		   || (h != NULL
 		       && h->dynindx != -1

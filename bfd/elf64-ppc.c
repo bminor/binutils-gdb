@@ -5497,7 +5497,9 @@ allocate_dynrelocs (h, inf)
 
   if (htab->elf.dynamic_sections_created
       && h->dynindx != -1
-      && WILL_CALL_FINISH_DYNAMIC_SYMBOL (1, info->shared, h))
+      && WILL_CALL_FINISH_DYNAMIC_SYMBOL (1, info->shared, h)
+      && (ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
+	  || h->root.type != bfd_link_hash_undefweak))
     {
       struct plt_entry *pent;
       bfd_boolean doneone = FALSE;
@@ -5597,8 +5599,10 @@ allocate_dynrelocs (h, inf)
 	s->_raw_size
 	  += (gent->tls_type & eh->tls_mask & (TLS_GD | TLS_LD)) ? 16 : 8;
 	dyn = htab->elf.dynamic_sections_created;
-	if (info->shared
-	    || WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, 0, h))
+	if ((info->shared
+	     || WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, 0, h))
+	    && (ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
+		|| h->root.type != bfd_link_hash_undefweak))
 	  htab->srelgot->_raw_size
 	    += (gent->tls_type & eh->tls_mask & TLS_GD
 		? 2 * sizeof (Elf64_External_Rela)
@@ -5634,6 +5638,12 @@ allocate_dynrelocs (h, inf)
 		pp = &p->next;
 	    }
 	}
+
+      /* Also discard relocs on undefined weak syms with non-default
+	 visibility.  */
+      if (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT
+	  && h->root.type == bfd_link_hash_undefweak)
+	eh->dyn_relocs = NULL;
     }
   else if (ELIMINATE_COPY_RELOCS)
     {
@@ -7640,7 +7650,10 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		   the case of TLSLD where we'll use one entry per
 		   module.  */
 		*offp = off | 1;
-		if (info->shared || indx != 0)
+		if ((info->shared || indx != 0)
+		    && (h == NULL
+			|| ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
+			|| h->root.type != bfd_link_hash_undefweak))
 		  {
 		    outrel.r_offset = (htab->sgot->output_section->vma
 				       + htab->sgot->output_offset
@@ -7864,6 +7877,9 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	    break;
 
 	  if ((info->shared
+	       && (h == NULL
+		   || ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
+		   || h->root.type != bfd_link_hash_undefweak)
 	       && (MUST_BE_DYN_RELOC (r_type)
 		   || (h != NULL
 		       && h->dynindx != -1
