@@ -33,7 +33,6 @@ a.out.encap.h
 a.out.gnu.h
 a.out.host.h
 a.out.sun4.h
-a.out.vax.h
 a29k-opcode.h
 h8300-opcode.h
 amdcoff.h
@@ -105,7 +104,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.15  1991/10/03 22:24:27  gnu
+# Revision 1.16  1991/10/05 06:18:24  gnu
+# a.out.vax.h gone.
+#
+# Revision 1.15  1991/10/03  22:24:27  gnu
 # Add elf-*.h files.
 #
 # Revision 1.14  1991/09/26  22:46:53  steve
