@@ -27,7 +27,6 @@
 /* Define BPT_VECTOR if it is different than the default.
    This is the vector number used by traps to indicate a breakpoint. */
 #define BPT_VECTOR		0xf
-#define REMOTE_BPT_VECTOR	0xf
 
 /* Address of end of stack space.  */
 #define STACK_END_ADDR USRSTACK

@@ -1,3 +1,8 @@
+2004-04-30  Mark Kettenis  <kettenis@gnu.org>
+
+	* m68k-tdep.c (REMOTE_BPT_VECTOR): Remove define.
+	* config/m68k/tm-nbsd.h (REMOTE_BPT_VECTOR): Remove define.
+
 2004-04-30  Brian Ford  <ford@vss.fsi.com>
 
 	Revert 2004-04-16 change.

@@ -64,11 +64,6 @@
 #define BPT_VECTOR 0xf
 #endif
 
-#if !defined (REMOTE_BPT_VECTOR)
-#define REMOTE_BPT_VECTOR 1
-#endif
-
-
 static const unsigned char *
 m68k_local_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
 {
