@@ -11,15 +11,15 @@
 #include <stdio.h>
 
 #ifndef DONTDECLARE_MALLOC
-extern PROTO(PTR,malloc,(unsigned));
-extern PROTO(PTR ,realloc, (PTR, unsigned));
+extern PTR EXFUN(malloc,(unsigned));
+extern PTR  EXFUN(realloc, (PTR, unsigned));
 #endif
-extern PROTO(int, abort,(void));
-extern PROTO(int, free,(PTR));
-extern PROTO(void, bcopy,(char*,char*,int));
-extern PROTO(void, exit,(int));
+extern int EXFUN( abort,(void));
+extern int EXFUN( free,(PTR));
+extern void EXFUN( bcopy,(char*,char*,int));
+extern void EXFUN( exit,(int));
 extern int strtol();
-extern PROTO(void, bzero,(char *, int));
+extern void EXFUN( bzero,(char *, int));
 
 /* EXACT TYPES */
 typedef char int8e_type;

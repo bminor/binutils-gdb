@@ -31,7 +31,7 @@ extern void EXFUN(bzero,(char *, int));
 #ifndef __GNUC__
 PTR EXFUN(memcpy,(PTR,CONST PTR,unsigned int));
 #else
-/* PROTO(char *, memcpy,(char *,CONST char *,unsigned int)); */
+/* char * EXFUN( memcpy,(char *,CONST char *,unsigned int)); */
 #endif
 
 PTR EXFUN(memset,(PTR, int, int));

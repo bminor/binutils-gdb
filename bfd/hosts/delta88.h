@@ -11,36 +11,36 @@
 #include <stdio.h>
 
 #ifndef DONTDECLARE_MALLOC
-extern PROTO(PTR,malloc,(unsigned));
-extern PROTO(PTR ,realloc, (PTR, unsigned));
+extern PTR EXFUN(malloc,(unsigned));
+extern PTR  EXFUN(realloc, (PTR, unsigned));
 #endif
-extern PROTO(int, abort,(void));
-extern PROTO(int, free,(PTR));
-extern PROTO(void, bcopy,(char*,char*,int));
-extern PROTO(void, exit,(int));
+extern int EXFUN( abort,(void));
+extern int EXFUN( free,(PTR));
+extern void EXFUN( bcopy,(char*,char*,int));
+extern void EXFUN( exit,(int));
 extern int strtol();
-extern PROTO(void, bzero,(char *, int));
+extern void EXFUN( bzero,(char *, int));
 #define NO_STDARG 1
 
 
 
-extern PROTO(int, abort,(void));
-extern PROTO(int, close,(int));
-extern PROTO(int, fcntl,(int des, int cmd, int e));
+extern int EXFUN( abort,(void));
+extern int EXFUN( close,(int));
+extern int EXFUN( fcntl,(int des, int cmd, int e));
 
 
-extern PROTO(int, qsort,(void *data,int els, int siz, int func()));
-extern PROTO(unsigned short,getuid,(void));
-extern PROTO(unsigned short,getgid,(void));
-extern PROTO(int, fseek,(FILE*, int, int));
-extern PROTO(int, fclose,(FILE*));
-extern PROTO(void, bcopy,(char*,char*,int));
-extern PROTO(int, bcmp,(char *, char *, int));
-extern PROTO(void, bzero,(char *, int));
+extern int EXFUN( qsort,(void *data,int els, int siz, int func()));
+extern unsigned short EXFUN(getuid,(void));
+extern unsigned short EXFUN(getgid,(void));
+extern int EXFUN( fseek,(FILE*, int, int));
+extern int EXFUN( fclose,(FILE*));
+extern void EXFUN( bcopy,(char*,char*,int));
+extern int EXFUN( bcmp,(char *, char *, int));
+extern void EXFUN( bzero,(char *, int));
 extern char * strchr();
-extern PROTO(void, perror,(CONST char *));
+extern void EXFUN( perror,(CONST char *));
 extern char *getenv();
-extern PROTO(PTR, memchr,(const void *, int, unsigned ));
+extern PTR EXFUN( memchr,(const void *, int, unsigned ));
 extern char *strrchr();
 extern int chmod();
 extern int fread();
