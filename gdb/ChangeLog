@@ -1,3 +1,22 @@
+Sat Feb 19 03:17:32 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* mdebugread.c (new_psymtab):  Pass in section_offsets and set
+	them in the pst.
+	* mdebugread.c (handle_psymbol_enumerators):  New function to enter
+	the enumerators of an ecoff enum into the partial symbol table.
+	* mdebugread.c (parse_partial_symbols):  Call it.
+	* symfile.c (reread_symbols):  Initialize objfile->*_psymbols.next.
+	* symmisc.c (dump_psymtab):  Fix typo, clean up output of section
+	offsets. Cast psymtab->read_symtab to PTR before passing it to
+	gdb_print_address.
+	* i386-tdep.c (i386_skip_prologue):  Skip over instructions that
+	set up the global offset table pointer in pic compiled code.
+	* config/mips/tm-mips.h (FIX_CALL_DUMMY):  For big endian targets,
+	error() on TYPE_CODE_FLT arguments whose size is greater than 8,
+	swap all other TYPE_CODE_FLT arguments as mips_push_arguments
+	ensures that floats are promoted to doubles before they are pushed
+	on the stack.
+
 Fri Feb 18 23:12:59 1994  Stu Grossman  (grossman at cygnus.com)
 
 	* sparclite/Makefile.in, sparclite/salib.c, sparclite/sparclite.h:

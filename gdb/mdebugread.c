@@ -337,7 +337,7 @@ static int
 compare_blocks PARAMS ((const void *, const void *));
 
 static struct partial_symtab *
-new_psymtab PARAMS ((char *, struct objfile *));
+new_psymtab PARAMS ((char *, struct objfile *, struct section_offsets *));
 
 static void
 psymtab_to_symtab_1 PARAMS ((struct partial_symtab *, char *));
@@ -353,6 +353,9 @@ add_line PARAMS ((struct linetable *, int, CORE_ADDR, int));
 
 static struct linetable *
 shrink_linetable PARAMS ((struct linetable *));
+
+static void
+handle_psymbol_enumerators PARAMS ((struct objfile *, FDR *, int));
 
 static char *
 mdebug_next_symbol_text PARAMS ((void));
@@ -2060,7 +2063,7 @@ parse_partial_symbols (objfile, section_offsets)
   old_chain = make_cleanup (free, fdr_to_pst);
   fdr_to_pst++;
   {
-    struct partial_symtab *pst = new_psymtab ("", objfile);
+    struct partial_symtab *pst = new_psymtab ("", objfile, section_offsets);
     fdr_to_pst[-1].pst = pst;
     FDR_IDX (pst) = -1;
   }
@@ -2425,6 +2428,8 @@ parse_partial_symbols (objfile, section_offsets)
 					   sh.value,
 					   psymtab_language, objfile);
 		    }
+		  handle_psymbol_enumerators (objfile, fh, sh.st);
+
 		  /* Skip over the block */
 		  new_sdx = sh.index;
 		  if (new_sdx <= cur_sdx)
@@ -2575,6 +2580,68 @@ parse_partial_symbols (objfile, section_offsets)
   do_cleanups (old_chain);
 }
 
+/* If the current psymbol has an enumerated type, we need to add
+   all the the enum constants to the partial symbol table.  */
+
+static void
+handle_psymbol_enumerators (objfile, fh, stype)
+     struct objfile *objfile;
+     FDR *fh;
+     int stype;
+{
+  const bfd_size_type external_sym_size = debug_swap->external_sym_size;
+  void (* const swap_sym_in) PARAMS ((bfd *, PTR, SYMR *))
+    = debug_swap->swap_sym_in;
+  char *ext_sym = ((char *) debug_info->external_sym
+		  + ((fh->isymBase + cur_sdx + 1) * external_sym_size));
+  SYMR sh;
+  TIR tir;
+
+  switch (stype)
+    {
+    case stEnum:
+      break;
+
+    case stBlock:
+      /* It is an enumerated type if the next symbol entry is a stMember
+	 and its auxiliary index is indexNil or its auxiliary entry
+	 is a plain btNil or btVoid.  */
+      (*swap_sym_in) (cur_bfd, ext_sym, &sh);
+      if (sh.st != stMember)
+	return;
+
+      if (sh.index == indexNil)
+	break;
+      ecoff_swap_tir_in (fh->fBigendian,
+			 &(debug_info->external_aux
+			   + fh->iauxBase + sh.index)->a_ti,
+			 &tir);
+      if ((tir.bt != btNil && tir.bt != btVoid) || tir.tq0 != tqNil)
+	return;
+      break;
+
+    default:
+      return;
+    }
+
+  for (;;)
+    {
+      char *name;
+
+      (*swap_sym_in) (cur_bfd, ext_sym, &sh);
+      if (sh.st != stMember)
+	break;
+      name = debug_info->ss + cur_fdr->issBase + sh.iss;
+
+      /* Note that the value doesn't matter for enum constants
+	 in psymtabs, just in symtabs.  */
+      ADD_PSYMBOL_TO_LIST (name, strlen (name),
+			   VAR_NAMESPACE, LOC_CONST,
+			   objfile->static_psymbols, 0,
+			   psymtab_language, objfile);
+      ext_sym += external_sym_size;
+    }
+}
 
 static char *
 mdebug_next_symbol_text ()
@@ -3355,13 +3422,15 @@ new_symtab (name, maxsyms, maxlines, objfile)
 /* Allocate a new partial_symtab NAME */
 
 static struct partial_symtab *
-new_psymtab (name, objfile)
+new_psymtab (name, objfile, section_offsets)
      char *name;
      struct objfile *objfile;
+     struct section_offsets *section_offsets;
 {
   struct partial_symtab *psymtab;
 
   psymtab = allocate_psymtab (name, objfile);
+  psymtab->section_offsets = section_offsets;
 
   /* Keep a backpointer to the file's symbols */
 
