@@ -276,6 +276,7 @@ f77_create_arrayprint_offset_tbl (struct type *type, struct ui_file *stream)
 
 /* Actual function which prints out F77 arrays, Valaddr == address in 
    the superior.  Address == the address in the inferior.  */
+
 static void
 f77_print_array_1 (int nss, int ndimensions, struct type *type, char *valaddr,
 		   CORE_ADDR address, struct ui_file *stream, int format,
@@ -295,13 +296,13 @@ f77_print_array_1 (int nss, int ndimensions, struct type *type, char *valaddr,
 			     stream, format, deref_ref, recurse, pretty, elts);
 	  fprintf_filtered (stream, ") ");
 	}
-      if (*elts >= print_max && i < F77_DIM_SIZE (nss)) {
+      if (*elts >= print_max && i < F77_DIM_SIZE (nss)) 
 	fprintf_filtered (stream, "...");
-      }
     }
   else
     {
-      for (i = 0; (i < F77_DIM_SIZE (nss) && (*elts) < print_max); i++, (*elts)++)
+      for (i = 0; i < F77_DIM_SIZE (nss) && (*elts) < print_max; 
+	   i++, (*elts)++)
 	{
 	  val_print (TYPE_TARGET_TYPE (type),
 		     valaddr + i * F77_DIM_OFFSET (ndimensions),
@@ -312,7 +313,7 @@ f77_print_array_1 (int nss, int ndimensions, struct type *type, char *valaddr,
 	  if (i != (F77_DIM_SIZE (nss) - 1))
 	    fprintf_filtered (stream, ", ");
 
-	  if ((( *elts) == print_max - 1) && (i != (F77_DIM_SIZE (nss) - 1)))
+	  if ((*elts == print_max - 1) && (i != (F77_DIM_SIZE (nss) - 1)))
 	    fprintf_filtered (stream, "...");
 	}
     }
