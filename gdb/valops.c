@@ -962,7 +962,7 @@ CORE_ADDR
 push_word (CORE_ADDR sp, ULONGEST word)
 {
   register int len = DEPRECATED_REGISTER_SIZE;
-  char buffer[MAX_REGISTER_SIZE]);
+  char buffer[MAX_REGISTER_SIZE];
 
   store_unsigned_integer (buffer, len, word);
   if (INNER_THAN (1, 2))

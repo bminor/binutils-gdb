@@ -1,3 +1,7 @@
+2003-05-08  David Carlton  <carlton@math.stanford.edu>
+
+	* valops.c (push_word): Fix typo.
+
 2003-05-08  Andrew Cagney  <cagney@redhat.com>
 
 	* gdbarch.sh: Delete references to MAX_REGISTER_RAW_SIZE.
