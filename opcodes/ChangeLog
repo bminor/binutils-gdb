@@ -1,3 +1,8 @@
+Mon Jan 17 20:05:49 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* hppa-dis.c (print_insn_hppa): Handle 'N' in assembler template.
+	No space before 'u', 'f', or 'N'. 
+
 Sun Jan 16 14:20:16 1994  Jim Kingdon  (kingdon@deneb.cygnus.com)
 
 	* i386-dis.c (print_insn_i386): Add FIXME comment regarding reading
