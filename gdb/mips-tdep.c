@@ -3871,6 +3871,12 @@ mips_gdbarch_init (struct gdbarch_info info,
   int elf_flags;
   enum mips_abi mips_abi;
 
+  /* Reset the disassembly info, in case it was set to something
+     non-default.  */
+  tm_print_insn_info.flavour = bfd_target_unknown_flavour;
+  tm_print_insn_info.arch = bfd_arch_unknown;
+  tm_print_insn_info.mach = 0;
+
   /* Extract the elf_flags if available */
   if (info.abfd != NULL
       && bfd_get_flavour (info.abfd) == bfd_target_elf_flavour)
@@ -3915,6 +3921,10 @@ mips_gdbarch_init (struct gdbarch_info info,
 	case bfd_mach_mips5000:
 	  mips_abi = MIPS_ABI_EABI64;
 	  break;
+	case bfd_mach_mips8000:
+	case bfd_mach_mips10000:
+	  mips_abi = MIPS_ABI_N32;
+	  break;
 	}
     }
 #ifdef MIPS_DEFAULT_ABI
@@ -3958,6 +3968,7 @@ mips_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_double_bit (gdbarch, 64);
   set_gdbarch_long_double_bit (gdbarch, 64);
   tdep->mips_abi = mips_abi;
+
   switch (mips_abi)
     {
     case MIPS_ABI_O32:
@@ -4029,6 +4040,17 @@ mips_gdbarch_init (struct gdbarch_info info,
       set_gdbarch_long_bit (gdbarch, 32);
       set_gdbarch_ptr_bit (gdbarch, 32);
       set_gdbarch_long_long_bit (gdbarch, 64);
+
+      /* Set up the disassembler info, so that we get the right
+	 register names from libopcodes.  */
+      tm_print_insn_info.flavour = bfd_target_elf_flavour;
+      tm_print_insn_info.arch = bfd_arch_mips;
+      if (info.bfd_arch_info != NULL
+	  && info.bfd_arch_info->arch == bfd_arch_mips
+	  && info.bfd_arch_info->mach)
+	tm_print_insn_info.mach = info.bfd_arch_info->mach;
+      else
+	tm_print_insn_info.mach = bfd_mach_mips8000;
       break;
     default:
       tdep->mips_abi_string = "default";

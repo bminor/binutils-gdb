@@ -1,3 +1,24 @@
+2001-06-07  Eli Zaretskii  <elis@is.elta.co.il>
+
+	* config/mips/tm-irix6.h: New file.
+
+	* config/mips/irix6.mh: New file.
+
+	* config/mips/irix6.mt: New file.
+
+	* config/mips/xm-irix6.h: New file.
+
+	* config/mips/nm-irix6.h: New file.
+
+	* mips-tdep.c (mips_gdbarch_init) <MIPS_ABI_N32>: Set up the
+	disassembler info in tm_print_insn_info as appropriate for the N32
+	ABI.  Force N32 ABI to be the default if the CPU is R8000 or
+	R10000.
+
+	* configure.tgt (mips*-sgi-irix6*): Map to irix6.
+
+	* configure.host (mips*-sgi-irix6*): Ditto.
+
 2001-06-07  Andrew Cagney  <ac131313@redhat.com>
 
 	* gnu-v3-abi.c: Include "gdb_assert.h".
