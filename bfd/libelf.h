@@ -490,6 +490,12 @@ struct elf_obj_tdata
 
   /* Records the result of `get_program_header_size'.  */
   bfd_size_type program_header_size;
+
+  /* Used by MIPS ELF find_nearest_line entry point.  The structure
+     could be included directly in this one, but there's no point to
+     wasting the memory just for the infrequently called
+     find_nearest_line.  */
+  struct mips_elf_find_line *find_line_info;
 };
 
 #define elf_tdata(bfd)		((bfd) -> tdata.elf_obj_data)
