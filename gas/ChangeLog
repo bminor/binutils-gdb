@@ -1,3 +1,8 @@
+Fri Nov 22 15:42:26 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-sh.c (md_convert_frag): Improve warning when branch is
+	converted into branch around branch.
+
 Thu Nov 21 11:56:11 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* config/tc-mn10300.h (DIFF_EXPR_OK): Don't define this.
