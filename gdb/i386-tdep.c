@@ -600,80 +600,6 @@ i386_saved_pc_after_call (struct frame_info *frame)
   return read_memory_unsigned_integer (read_register (SP_REGNUM), 4);
 }
 
-/* Return number of args passed to a frame.
-   Can return -1, meaning no way to tell.  */
-
-static int
-i386_frame_num_args (struct frame_info *fi)
-{
-#if 1
-  return -1;
-#else
-  /* This loses because not only might the compiler not be popping the
-     args right after the function call, it might be popping args from
-     both this call and a previous one, and we would say there are
-     more args than there really are.  */
-
-  int retpc;
-  unsigned char op;
-  struct frame_info *pfi;
-
-  /* On the i386, the instruction following the call could be:
-     popl %ecx        -  one arg
-     addl $imm, %esp  -  imm/4 args; imm may be 8 or 32 bits
-     anything else    -  zero args.  */
-
-  int frameless;
-
-  frameless = FRAMELESS_FUNCTION_INVOCATION (fi);
-  if (frameless)
-    /* In the absence of a frame pointer, GDB doesn't get correct
-       values for nameless arguments.  Return -1, so it doesn't print
-       any nameless arguments.  */
-    return -1;
-
-  pfi = get_prev_frame (fi);
-  if (pfi == 0)
-    {
-      /* NOTE: This can happen if we are looking at the frame for
-         main, because DEPRECATED_FRAME_CHAIN_VALID won't let us go
-         into start.  If we have debugging symbols, that's not really
-         a big deal; it just means it will only show as many arguments
-         to main as are declared.  */
-      return -1;
-    }
-  else
-    {
-      retpc = pfi->pc;
-      op = read_memory_integer (retpc, 1);
-      if (op == 0x59)		/* pop %ecx */
-	return 1;
-      else if (op == 0x83)
-	{
-	  op = read_memory_integer (retpc + 1, 1);
-	  if (op == 0xc4)
-	    /* addl $<signed imm 8 bits>, %esp */
-	    return (read_memory_integer (retpc + 2, 1) & 0xff) / 4;
-	  else
-	    return 0;
-	}
-      else if (op == 0x81)	/* `add' with 32 bit immediate.  */
-	{
-	  op = read_memory_integer (retpc + 1, 1);
-	  if (op == 0xc4)
-	    /* addl $<imm 32>, %esp */
-	    return read_memory_integer (retpc + 2, 4) / 4;
-	  else
-	    return 0;
-	}
-      else
-	{
-	  return 0;
-	}
-    }
-#endif
-}
-
 /* Parse the first few instructions the function to see what registers
    were stored.
    
@@ -1606,7 +1532,7 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_frame_chain (gdbarch, i386_frame_chain);
   set_gdbarch_deprecated_frame_saved_pc (gdbarch, i386_frame_saved_pc);
   set_gdbarch_deprecated_saved_pc_after_call (gdbarch, i386_saved_pc_after_call);
-  set_gdbarch_frame_num_args (gdbarch, i386_frame_num_args);
+  set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
   set_gdbarch_pc_in_sigtramp (gdbarch, i386_pc_in_sigtramp);
 
   /* Wire in the MMX registers.  */

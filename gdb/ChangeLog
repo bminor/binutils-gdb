@@ -1,5 +1,8 @@
 2003-04-19  Mark Kettenis  <kettenis@gnu.org>
 
+	* i386-tdep.c (i386_frame_num_args): Remove function.
+	(i386_gdbarch_init): Set frame_num_args to frame_num_args_unknown.
+
 	* i386-tdep.c (i386_mmx_regnum_to_fp_regnum): Renamed from
 	mmx_regnum_to_fp_regnum.  Adjust all callers.
 
