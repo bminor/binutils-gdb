@@ -1,5 +1,8 @@
 2003-08-29  Mark Kettenis  <kettenis@gnu.org>
 
+	* x86-64-linux-tdep.c (user_to_gdb_regmap): Remove USER_CS and
+	USER_DS.  We haven't given them a register number yet.
+
 	* amd64-nat.h: New file.
 	* amd64-nat.c: New file.
 	* amd64fbsd-nat.c: Include "amd64-nat.h".
