@@ -111,3 +111,8 @@ CORE_ADDR frv_fdpic_find_global_pointer (CORE_ADDR addr);
    for that function, if one exists.  If no canonical descriptor could
    be found, return 0.  */
 CORE_ADDR frv_fdpic_find_canonical_descriptor (CORE_ADDR entry_point);
+
+
+/* Given an objfile, return the address of its link map.  This value is
+   needed for TLS support.  */
+CORE_ADDR frv_fetch_objfile_link_map (struct objfile *objfile);

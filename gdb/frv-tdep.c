@@ -1564,6 +1564,10 @@ frv_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Set the fallback (prologue based) frame sniffer.  */
   frame_unwind_append_sniffer (gdbarch, frv_frame_sniffer);
 
+  /* Enable TLS support.  */
+  set_gdbarch_fetch_tls_load_module_address (gdbarch,
+                                             frv_fetch_objfile_link_map);
+
   return gdbarch;
 }
 
