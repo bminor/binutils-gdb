@@ -1,5 +1,7 @@
 Thu Jul 16 16:05:28 1992  K. Richard Pixley  (rich@rtl.cygnus.com)
 
+	* configure.in: add libm.
+
 	* .cvsignore: ignore some stuff that comes from test-build.mk.
 
 Wed Jul  8 00:01:30 1992  Stu Grossman  (grossman at cygnus.com)
