@@ -514,6 +514,7 @@ ALL_TARGET_MODULES = \
 	all-librx \
 	all-libg++ \
 	all-newlib \
+	all-libgloss \
 	all-xiberty
 
 # This is a list of the check targets for all of the modules which are
@@ -538,6 +539,7 @@ INSTALL_TARGET_MODULES = \
 	install-libstdc++ \
 	install-libg++ \
 	install-newlib \
+	install-libgloss \
 	install-xiberty
 
 # This is a shell case of all modules which are compiled using
@@ -1010,13 +1012,15 @@ Makefile: Makefile.in configure.in $(host_makefile_frag) $(target_makefile_frag)
 # distribution (perhaps it would be better to include it anyway).
 DEVO_SUPPORT= README Makefile.in configure configure.in \
 	config.guess config.sub config move-if-change \
-	COPYING COPYING.LIB install.sh
+	COPYING COPYING.LIB install.sh \
+	configure.bat makeall.bat
 
 # Files in devo/etc used in any net release.
 # ChangeLog omitted because it may refer to files which are not in this
 # distribution (perhaps it would be better to include it anyway).
 ETC_SUPPORT= Makefile.in cfg-paper.texi configure.in configure.man \
 	configure.texi standards.texi make-stds.texi
+ETC_SUPPORT_PFX=configure.info standards.info cfg-paper.info
 
 # When you use `make setup-dirs' or `make taz' you should always redefine
 # this macro.
@@ -1026,7 +1030,7 @@ DISTSTUFFDIRS= ld gprof gdb libg++ binutils gnats gas
 # Files where "byacc" (Cygnus version) should be changed to "bison -y" (FSF).
 DISTBISONFILES= binutils/Makefile.in gas/Makefile.in gdb/Makefile.in
 # Directories where "info" should be built.
-DISTDOCDIRS= ld gprof binutils gas bfd libg++ libio gdb gnats send-pr
+DISTDOCDIRS= ld gprof binutils gas bfd libg++ libio gdb gnats send-pr etc
 
 .PHONY: taz
 
@@ -1081,9 +1085,13 @@ taz: $(DEVO_SUPPORT) $(SUPPORT_FILES) \
 	$(MAKE) distclean
 	#
 	mkdir proto-toplev/etc
-	(cd proto-toplev/etc; for i in $(ETC_SUPPORT); do \
+	(cd proto-toplev/etc; \
+	 for i in $(ETC_SUPPORT); do \
 		ln -s ../../etc/$$i . ; \
-	done)
+	 done ; \
+	 for i in $(ETC_SUPPORT_PFX); do \
+		ln -s ../../etc/$$i* . ; \
+	 done)
 	#
 	# Take out texinfo and glob from configurable dirs
 	rm proto-toplev/configure.in

@@ -1,3 +1,12 @@
+Thu Nov  3 16:32:30 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* Makefile.in (DEVO_SUPPORT): Include configure.bat and
+	makeall.bat.
+	(DISTDOCDIRS): Add `etc'.
+	(ETC_SUPPORT_PFX): New variable.
+	(taz): Include anything from etc starting with a word in
+	ETC_SUPPORT_PFX.
+
 Wed Oct 26 16:19:35 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
 	* config.sub: Update for recent FSF changes.  Remove obsolete
