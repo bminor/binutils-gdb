@@ -1,3 +1,10 @@
+2002-02-19  Martin Schwidefsky  <schwidefsky@de.ibm.com>
+
+	* config/tc-s390.c (md_parse_option): Add switches -m31 and -m64.
+	Make bit size independent of architecture switch.
+	(md_begin): Add warning for -m64 with -Aesa.
+	(s390_md_end): Use renamed architecture defines.
+
 2002-02-18  Daniel Jacobowitz  <drow@mvista.com>
 
 	* config/obj-coff.h: Check !target_big_endian, not shl, for coff-sh.
