@@ -1,5 +1,15 @@
 Tue Nov 14 11:52:23 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* peicode.h (coff_swap_aouthdr_out): For PPC PE, start isize at 0,
+	not at the file position of the first section.
+	* coffcode.h (coff_compute_section_file_positions): Avoid using
+	unportable #elif.
+	(coff_write_object_contents): When generating a PPC PE executable
+	with no symbols, round up the file size to a COFF_PAGE_SIZE
+	boundary.
+	* cofflink.c (_bfd_coff_final_link): If there are no symbols,
+	don't write out a string table.
+
 	* elf.c (bfd_section_from_shdr): When using a different section
 	header, pass the new one to _bfd_elf_make_section_from_shdr.
 	(elf_fake_sections): Don't set sh_info and sh_entsize fields.
