@@ -1,3 +1,9 @@
+2002-02-10  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gprof.c: Include "getopt.h" after other includes, so that
+	the proper macros are defined.
+	* gen-c-prog.awk: Emit a prototype for the generated function.
+
 2002-02-01  Alan Modra  <amodra@bigpond.net.au>
 
 	* configure.in (build_warnings): Add -Wstrict-prototypes
