@@ -1,5 +1,11 @@
 2003-06-03  J. Brobecker  <brobecker@gnat.com>
 
+	* alphanbsd-tdep.c (alphanbsd_sigcontext_addr):  Replace
+	references to struct frame_info fields by calls to the equivalent
+	accessors. Necessary now that frame_info is opaque.
+
+2003-06-03  J. Brobecker  <brobecker@gnat.com>
+
 	* alphanbsd-tdep.c (alphanbsd_skip_sigtramp_frame): Delete.
 	(alphanbsd_init_abi): Do not set skip_sigtramp_frame in tdep
 	structure, field no longer exists.
