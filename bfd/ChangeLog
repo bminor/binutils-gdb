@@ -1,3 +1,8 @@
+Thu May 30 12:38:49 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* elf32-mips.c (mips_elf_object_p): Handle E_MIPS_ARCH_4.
+	(mips_elf_final_write_processing): Likewise.
+
 Wed May 29 16:15:29 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	64-bit MIPS ELF ABI objdump support:

@@ -1465,6 +1465,10 @@ mips_elf_object_p (abfd)
     case E_MIPS_ARCH_3:
       (void) bfd_default_set_arch_mach (abfd, bfd_arch_mips, 4000);
       break;
+
+    case E_MIPS_ARCH_4:
+      (void) bfd_default_set_arch_mach (abfd, bfd_arch_mips, 8000);
+      break;
     }
 
   /* Irix 5 is broken.  Object file symbol tables are not always
@@ -1501,6 +1505,10 @@ mips_elf_final_write_processing (abfd, linker)
 
     case 4000:
       val = E_MIPS_ARCH_3;
+      break;
+
+    case 8000:
+      val = E_MIPS_ARCH_4;
       break;
 
     default:
