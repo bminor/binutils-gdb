@@ -78,11 +78,11 @@ static int lmode_ours;
 # ifdef SHORT_PGRP
 static short pgrp_inferior;
 static short pgrp_ours;
-# else
+# else /* not def SHORT_PGRP */
 static int pgrp_inferior;
 static int pgrp_ours;
-# endif
-#else
+# endif /* not def SHORT_PGRP */
+#else /* not def TIOCGPGRP */
 static void (*sigint_ours) ();
 static void (*sigquit_ours) ();
 #endif /* TIOCGPGRP */
@@ -165,7 +165,12 @@ terminal_inferior ()
 
 #ifdef TIOCGPGRP
       result = ioctl (0, TIOCSPGRP, &pgrp_inferior);
-      OOPSY ("ioctl TIOCSPGRP");
+      /* If we attached to the process, we might or might not be sharing
+	 a terminal.  Avoid printing error msg if we are unable to set our
+	 terminal's process group to his process group ID.  */
+      if (!attach_flag) {
+	OOPSY ("ioctl TIOCSPGRP");
+      }
 #else
       sigint_ours = (void (*) ()) signal (SIGINT, SIG_IGN);
       sigquit_ours = (void (*) ()) signal (SIGQUIT, SIG_IGN);
@@ -298,10 +303,12 @@ child_terminal_info (args, from_tty)
     return;
   }
 
+#ifdef TIOCGPGRP
   printf_filtered ("Inferior's terminal status (currently saved by GDB):\n");
 
   printf_filtered ("owner pgrp = %d, fcntl flags = 0x%x.\n",
 	  pgrp_inferior, tflags_inferior);
+#endif /* TIOCGPGRP */
 
 #ifdef HAVE_TERMIO
 
