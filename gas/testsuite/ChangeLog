@@ -1,3 +1,8 @@
+2001-02-08  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+
+	* gas/mri/mri.exp: Don't execute the M68K specific tests 
+	on m6811-elf and m6812-elf targets, still run the generic MRI tests.
+
 2001-02-04  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
 
 	* gas/m68hc11/malis.s: New test to verify compliance with Motorola
