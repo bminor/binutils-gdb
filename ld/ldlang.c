@@ -3474,8 +3474,11 @@ lang_check ()
 		   bfd_printable_name (input_bfd), input_bfd,
 		   bfd_printable_name (output_bfd));
 	}
-      else
+      else if (bfd_count_sections (input_bfd))
 	{
+	  /* If the input bfd has no contents, it shouldn't set the
+	     private data of the output bfd. */
+
 	  bfd_error_handler_type pfn = NULL;
 
 	  /* If we aren't supposed to warn about mismatched input

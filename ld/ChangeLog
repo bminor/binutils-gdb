@@ -1,3 +1,8 @@
+2001-01-16  H.J. Lu  <hjl@gnu.org>
+
+	* ldlang.c (lang_check): Merge the private data only if the
+	input file has contents.
+
 2001-01-14  Alan Modra  <alan@linuxcare.com.au>
 
 	* emulparams/hppalinux.sh (OUTPUT_FORMAT): Set to elf32-hppa-linux.
