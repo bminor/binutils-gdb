@@ -1903,6 +1903,79 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 	  *again = true;
 	}
 
+      /* Try to turn a 24 immediate, displacement or absolute address
+	 into a 8 immediate, displacement or absolute address.  */
+      if (ELF32_R_TYPE (irel->r_info) == (int) R_MN10300_24)
+	{
+	  bfd_vma value = symval;
+	  value += irel->r_addend;
+
+	  /* See if the value will fit in 8 bits.  */
+	  if ((long)value < 0x7f && (long)value > -0x80)
+	    {
+	      unsigned char code;
+
+	      /* AM33 insns which have 24 operands are 6 bytes long and
+		 will have 0xfd as the first byte.  */
+
+	      /* Get the first opcode.  */
+	      code = bfd_get_8 (abfd, contents + irel->r_offset - 3);
+
+	      if (code == 0xfd)
+		{
+	          /* Get the second opcode.  */
+	          code = bfd_get_8 (abfd, contents + irel->r_offset - 2);
+
+		  /* We can not relax 0x6b, 0x7b, 0x8b, 0x9b as no 24bit
+		     equivalent instructions exists.  */
+	          if (code != 0x6b && code != 0x7b
+		      && code != 0x8b && code != 0x9b
+		      && ((code & 0x0f) == 0x09 || (code & 0x0f) == 0x08
+			  || (code & 0x0f) == 0x0a || (code & 0x0f) == 0x0b
+			  || (code & 0x0f) == 0x0e))
+		    {
+		      /* Not safe if the high bit is on as relaxing may
+		         move the value out of high mem and thus not fit
+		         in a signed 8bit value.  This is currently over
+		         conservative.  */
+		      if ((value & 0x80) == 0)
+			{
+			  /* Note that we've changed the relocation contents,
+			     etc.  */
+			  elf_section_data (sec)->relocs = internal_relocs;
+			  free_relocs = NULL;
+
+			  elf_section_data (sec)->this_hdr.contents = contents;
+			  free_contents = NULL;
+
+			  symtab_hdr->contents = (bfd_byte *) extsyms;
+			  free_extsyms = NULL;
+
+			  /* Fix the opcode.  */
+			  bfd_put_8 (abfd, 0xfb, contents + irel->r_offset - 3);
+			  bfd_put_8 (abfd, code, contents + irel->r_offset - 2);
+
+			  /* Fix the relocation's type.  */
+			  irel->r_info
+			    = ELF32_R_INFO (ELF32_R_SYM (irel->r_info),
+						         R_MN10300_8);
+
+			  /* Delete two bytes of data.  */
+			  if (!mn10300_elf_relax_delete_bytes (abfd, sec,
+							       irel->r_offset + 1, 2))
+			    goto error_return;
+
+			  /* That will change things, so, we should relax
+			     again.  Note that this is not required, and it
+			      may be slow.  */
+			  *again = true;
+			  break;
+			}
+		    }
+
+		}
+	    }
+	}
 
       /* Try to turn a 32bit immediate, displacement or absolute address
 	 into a 16bit immediate, displacement or absolute address.  */
@@ -1911,6 +1984,74 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 	  bfd_vma value = symval;
 	  value += irel->r_addend;
 
+	  /* See if the value will fit in 24 bits.
+	     We allow any 16bit match here.  We prune those we can't
+	     handle below.  */
+	  if ((long)value < 0x7fffff && (long)value > -0x800000)
+	    {
+	      unsigned char code;
+
+	      /* AM33 insns which have 32bit operands are 7 bytes long and
+		 will have 0xfe as the first byte.  */
+
+	      /* Get the first opcode.  */
+	      code = bfd_get_8 (abfd, contents + irel->r_offset - 3);
+
+	      if (code == 0xfe)
+		{
+	          /* Get the second opcode.  */
+	          code = bfd_get_8 (abfd, contents + irel->r_offset - 2);
+
+		  /* All the am33 32 -> 24 relaxing possibilities.  */
+		  /* We can not relax 0x6b, 0x7b, 0x8b, 0x9b as no 24bit
+		     equivalent instructions exists.  */
+	          if (code != 0x6b && code != 0x7b
+		      && code != 0x8b && code != 0x9b
+		      && ((code & 0x0f) == 0x09 || (code & 0x0f) == 0x08
+			  || (code & 0x0f) == 0x0a || (code & 0x0f) == 0x0b
+			  || (code & 0x0f) == 0x0e))
+		    {
+		      /* Not safe if the high bit is on as relaxing may
+		         move the value out of high mem and thus not fit
+		         in a signed 16bit value.  This is currently over
+		         conservative.  */
+		      if ((value & 0x8000) == 0)
+			{
+			  /* Note that we've changed the relocation contents,
+			     etc.  */
+			  elf_section_data (sec)->relocs = internal_relocs;
+			  free_relocs = NULL;
+
+			  elf_section_data (sec)->this_hdr.contents = contents;
+			  free_contents = NULL;
+
+			  symtab_hdr->contents = (bfd_byte *) extsyms;
+			  free_extsyms = NULL;
+
+			  /* Fix the opcode.  */
+			  bfd_put_8 (abfd, 0xfd, contents + irel->r_offset - 3);
+			  bfd_put_8 (abfd, code, contents + irel->r_offset - 2);
+
+			  /* Fix the relocation's type.  */
+			  irel->r_info
+			    = ELF32_R_INFO (ELF32_R_SYM (irel->r_info),
+						         R_MN10300_24);
+
+			  /* Delete one byte of data.  */
+			  if (!mn10300_elf_relax_delete_bytes (abfd, sec,
+							       irel->r_offset + 3, 1))
+			    goto error_return;
+
+			  /* That will change things, so, we should relax
+			     again.  Note that this is not required, and it
+			      may be slow.  */
+			  *again = true;
+			  break;
+			}
+		    }
+
+		}
+	    }
 
 	  /* See if the value will fit in 16 bits.
 	     We allow any 16bit match here.  We prune those we can't
@@ -2333,6 +2474,20 @@ compute_function_info (abfd, hash, addr, contents)
       if (hash->movm_args & 0x08)
 	hash->movm_stack_size += 8 * 4;
 
+      if (bfd_get_mach (abfd) == bfd_mach_am33)
+	{
+	  /* "exother" space.  e0, e1, mdrq, mcrh, mcrl, mcvf */
+	  if (hash->movm_args & 0x1)
+	    hash->movm_stack_size += 6 * 4;
+
+	  /* exreg1 space.  e4, e5, e6, e7 */
+	  if (hash->movm_args & 0x2)
+	    hash->movm_stack_size += 4 * 4;
+
+	  /* exreg0 space.  e2, e3  */
+	  if (hash->movm_args & 0x4)
+	    hash->movm_stack_size += 2 * 4;
+	}
     }
 
   /* Now look for the two stack adjustment variants.  */
@@ -2724,6 +2879,8 @@ elf_mn10300_mach (flags)
       default:
         return bfd_mach_mn10300;
 
+      case E_MN10300_MACH_AM33:
+        return bfd_mach_am33;
     }
 }
 
@@ -2746,6 +2903,9 @@ _bfd_mn10300_elf_final_write_processing (abfd, linker)
 	val = E_MN10300_MACH_MN10300;
 	break;
 
+      case bfd_mach_am33:
+	val = E_MN10300_MACH_AM33;
+	break;
     }
 
   elf_elfheader (abfd)->e_flags &= ~ (EF_MN10300_MACH);

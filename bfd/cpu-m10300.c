@@ -21,7 +21,21 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "sysdep.h"
 #include "libbfd.h"
 
-#define NEXT NULL
+const bfd_arch_info_type bfd_am33_arch =
+  {
+    32, /* 16 bits in a word */
+    32, /* 16 bits in an address */
+    8,  /* 8 bits in a byte */
+    bfd_arch_mn10300,
+    330,
+    "am33",
+    "am33",
+    2,
+    false,
+    bfd_default_compatible,
+    bfd_default_scan ,
+    0,
+  };
 
 const bfd_arch_info_type bfd_mn10300_arch =
   {
@@ -36,6 +50,5 @@ const bfd_arch_info_type bfd_mn10300_arch =
     true, /* the one and only */
     bfd_default_compatible,
     bfd_default_scan ,
-    NEXT,
+    &bfd_am33_arch,
   };
-

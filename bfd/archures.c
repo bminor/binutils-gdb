@@ -188,6 +188,7 @@ DESCRIPTION
 .  bfd_arch_mn10200,   {* Matsushita MN10200 *}
 .  bfd_arch_mn10300,   {* Matsushita MN10300 *}
 .#define bfd_mach_mn10300		300
+.#define bfd_mach_am33		330
 .  bfd_arch_fr30,
 .#define bfd_mach_fr30		0x46523330
 .  bfd_arch_mcore,
