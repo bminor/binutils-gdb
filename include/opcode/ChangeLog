@@ -1,3 +1,11 @@
+start-sanitize-sky
+Wed Mar 25 13:18:36 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* dvp.h (DVP_OPERAND_UNPACK_ADDRESS): New macro.
+	(vif_unpack_len_value): Update prototype.
+	(vif_get_var_data,vif_get_wl_cl): Add prototypes.
+
+end-sanitize-sky
 Tue Mar 24 18:32:47 1998  H.J. Lu  <hjl@gnu.org>
 
 	* i386.h: Set LinearAddress for lidt and lgdt.
