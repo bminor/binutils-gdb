@@ -15,7 +15,7 @@ TREE	= devo
 
 NATIVE  = native
 
-DATE	= 921127
+DATE	= 921203
 
 TAG	= latest-$(DATE)
 
@@ -122,7 +122,7 @@ build-cygnus:
 	         echo "     completed successfully" ; \
 	    fi \
 	  else \
-	    echo "building $(canonhost) cross to $$i" ; \
+	    echo "building $(canonhost) cross to $$i:" `date` ; \
             $(MAKE) -f test-build.mk $(FLAGS_TO_PASS) target=$$i build-cygnus $(tlog) && \
 	       echo "     completed successfully" ; \
 	  fi ; \
