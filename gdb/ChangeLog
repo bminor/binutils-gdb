@@ -1,3 +1,7 @@
+Wed Mar 25 15:21:44 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* configure.in:  fix iris/iris3.
+
 Wed Mar 25 14:55:48 1992  Per Bothner  (bothner@cygnus.com)
 
 	* command.c, main.c (various places):  Use ctype.h macros

@@ -82,7 +82,7 @@ mips)
 	little)	gdb_host=littlemips ;;
 	sgi)
 		case "${host_os}" in
-		sysv)	gdb_host=irix3 ;;
+		irix3)	gdb_host=irix3 ;;
 		irix4)	gdb_host=irix4 ;;
 		esac
 		;;
