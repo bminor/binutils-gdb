@@ -4091,9 +4091,12 @@ elf32_arm_post_process_headers (abfd, link_info)
   i_ehdrp->e_ident[EI_OSABI]      = ARM_ELF_OS_ABI_VERSION;
   i_ehdrp->e_ident[EI_ABIVERSION] = ARM_ELF_ABI_VERSION;
 
-  globals = elf32_arm_hash_table (link_info);
-  if (globals->byteswap_code)
-    i_ehdrp->e_flags |= EF_ARM_BE8;
+  if (link_info)
+    {
+      globals = elf32_arm_hash_table (link_info);
+      if (globals->byteswap_code)
+	i_ehdrp->e_flags |= EF_ARM_BE8;
+    }
 }
 
 static enum elf_reloc_type_class
@@ -4275,7 +4278,7 @@ elf32_arm_write_section (bfd *output_bfd ATTRIBUTE_UNUSED, asection *sec,
 	}
       ptr = end;
     }
-  bfd_free (map);
+  free (map);
   return FALSE;
 }
 
