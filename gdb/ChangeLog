@@ -1,5 +1,13 @@
 2004-08-07  Andrew Cagney  <cagney@gnu.org>
 
+	* gdbtypes.h (struct builtin_type): Delete builtin_int0 through to
+	builtin_uint128.
+	* gdbtypes.c (gdbtypes_post_init): Update.
+	(build_gdbtypes): Move initialization of builtin_type_int0
+	through to builtin_type_uint128 from here ...
+	(_initialize_gdbtypes): ... to here.
+	* d10v-tdep.c (d10v_register_type): Update.
+
 	* doublest.c: Update copyright.
 	(floatformat_from_length): Call error when floatformat is NULL.
 	(extract_floating_by_length): Remove NULL fmt check.

@@ -287,9 +287,9 @@ d10v_register_type (struct gdbarch *gdbarch, int reg_nr)
     return builtin_type (gdbarch)->builtin_data_ptr;
   else if (reg_nr >= a0_regnum (gdbarch)
 	   && reg_nr < (a0_regnum (gdbarch) + NR_A_REGS))
-    return builtin_type (gdbarch)->builtin_int64;
+    return builtin_type_int64;
   else
-    return builtin_type (gdbarch)->builtin_int16;
+    return builtin_type_int16;
 }
 
 static int

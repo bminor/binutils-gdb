@@ -946,25 +946,6 @@ struct builtin_type
 
   /* Integral types.  */
 
-  /* Explicit sizes.  These are assumed to be 2's complement and in
-     the architecture's byte order.  The "int0" is for when an ISA
-     needs to describe a register that has no size.  The naming schema
-     is based on C9X <intypes.h>.  */
-  /* FIXME: cagney/2004-07-26: As with floating-point, there should be
-     explicit big, little and little-byte-big-word endian types that
-     exist outside of the architecture vector.  */
-  struct type *builtin_int0;
-  struct type *builtin_int8;
-  struct type *builtin_uint8;
-  struct type *builtin_int16;
-  struct type *builtin_uint16;
-  struct type *builtin_int32;
-  struct type *builtin_uint32;
-  struct type *builtin_int64;
-  struct type *builtin_uint64;
-  struct type *builtin_int128;
-  struct type *builtin_uint128;
-
   /* We use this for the '/c' print format, because c_char is just a
      one-byte integral type, which languages less laid back than C
      will print as ... well, a one-byte integral type.  */

@@ -3215,50 +3215,6 @@ build_gdbtypes (void)
     init_type (TYPE_CODE_STRING, TARGET_CHAR_BIT / TARGET_CHAR_BIT,
 	       0,
 	       "string", (struct objfile *) NULL);
-  builtin_type_int0 =
-    init_type (TYPE_CODE_INT, 0 / 8,
-	       0,
-	       "int0_t", (struct objfile *) NULL);
-  builtin_type_int8 =
-    init_type (TYPE_CODE_INT, 8 / 8,
-	       0,
-	       "int8_t", (struct objfile *) NULL);
-  builtin_type_uint8 =
-    init_type (TYPE_CODE_INT, 8 / 8,
-	       TYPE_FLAG_UNSIGNED,
-	       "uint8_t", (struct objfile *) NULL);
-  builtin_type_int16 =
-    init_type (TYPE_CODE_INT, 16 / 8,
-	       0,
-	       "int16_t", (struct objfile *) NULL);
-  builtin_type_uint16 =
-    init_type (TYPE_CODE_INT, 16 / 8,
-	       TYPE_FLAG_UNSIGNED,
-	       "uint16_t", (struct objfile *) NULL);
-  builtin_type_int32 =
-    init_type (TYPE_CODE_INT, 32 / 8,
-	       0,
-	       "int32_t", (struct objfile *) NULL);
-  builtin_type_uint32 =
-    init_type (TYPE_CODE_INT, 32 / 8,
-	       TYPE_FLAG_UNSIGNED,
-	       "uint32_t", (struct objfile *) NULL);
-  builtin_type_int64 =
-    init_type (TYPE_CODE_INT, 64 / 8,
-	       0,
-	       "int64_t", (struct objfile *) NULL);
-  builtin_type_uint64 =
-    init_type (TYPE_CODE_INT, 64 / 8,
-	       TYPE_FLAG_UNSIGNED,
-	       "uint64_t", (struct objfile *) NULL);
-  builtin_type_int128 =
-    init_type (TYPE_CODE_INT, 128 / 8,
-	       0,
-	       "int128_t", (struct objfile *) NULL);
-  builtin_type_uint128 =
-    init_type (TYPE_CODE_INT, 128 / 8,
-	       TYPE_FLAG_UNSIGNED,
-	       "uint128_t", (struct objfile *) NULL);
   builtin_type_bool =
     init_type (TYPE_CODE_BOOL, TARGET_CHAR_BIT / TARGET_CHAR_BIT,
 	       0,
@@ -3444,50 +3400,6 @@ gdbtypes_post_init (struct gdbarch *gdbarch)
     init_type (TYPE_CODE_STRING, TARGET_CHAR_BIT / TARGET_CHAR_BIT,
 	       0,
 	       "string", (struct objfile *) NULL);
-  builtin_type->builtin_int0 =
-    init_type (TYPE_CODE_INT, 0 / 8,
-	       0,
-	       "int0_t", (struct objfile *) NULL);
-  builtin_type->builtin_int8 =
-    init_type (TYPE_CODE_INT, 8 / 8,
-	       0,
-	       "int8_t", (struct objfile *) NULL);
-  builtin_type->builtin_uint8 =
-    init_type (TYPE_CODE_INT, 8 / 8,
-	       TYPE_FLAG_UNSIGNED,
-	       "uint8_t", (struct objfile *) NULL);
-  builtin_type->builtin_int16 =
-    init_type (TYPE_CODE_INT, 16 / 8,
-	       0,
-	       "int16_t", (struct objfile *) NULL);
-  builtin_type->builtin_uint16 =
-    init_type (TYPE_CODE_INT, 16 / 8,
-	       TYPE_FLAG_UNSIGNED,
-	       "uint16_t", (struct objfile *) NULL);
-  builtin_type->builtin_int32 =
-    init_type (TYPE_CODE_INT, 32 / 8,
-	       0,
-	       "int32_t", (struct objfile *) NULL);
-  builtin_type->builtin_uint32 =
-    init_type (TYPE_CODE_INT, 32 / 8,
-	       TYPE_FLAG_UNSIGNED,
-	       "uint32_t", (struct objfile *) NULL);
-  builtin_type->builtin_int64 =
-    init_type (TYPE_CODE_INT, 64 / 8,
-	       0,
-	       "int64_t", (struct objfile *) NULL);
-  builtin_type->builtin_uint64 =
-    init_type (TYPE_CODE_INT, 64 / 8,
-	       TYPE_FLAG_UNSIGNED,
-	       "uint64_t", (struct objfile *) NULL);
-  builtin_type->builtin_int128 =
-    init_type (TYPE_CODE_INT, 128 / 8,
-	       0,
-	       "int128_t", (struct objfile *) NULL);
-  builtin_type->builtin_uint128 =
-    init_type (TYPE_CODE_INT, 128 / 8,
-	       TYPE_FLAG_UNSIGNED,
-	       "uint128_t", (struct objfile *) NULL);
   builtin_type->builtin_bool =
     init_type (TYPE_CODE_BOOL, TARGET_CHAR_BIT / TARGET_CHAR_BIT,
 	       0,
@@ -3538,6 +3450,52 @@ void
 _initialize_gdbtypes (void)
 {
   struct cmd_list_element *c;
+
+  builtin_type_int0 =
+    init_type (TYPE_CODE_INT, 0 / 8,
+	       0,
+	       "int0_t", (struct objfile *) NULL);
+  builtin_type_int8 =
+    init_type (TYPE_CODE_INT, 8 / 8,
+	       0,
+	       "int8_t", (struct objfile *) NULL);
+  builtin_type_uint8 =
+    init_type (TYPE_CODE_INT, 8 / 8,
+	       TYPE_FLAG_UNSIGNED,
+	       "uint8_t", (struct objfile *) NULL);
+  builtin_type_int16 =
+    init_type (TYPE_CODE_INT, 16 / 8,
+	       0,
+	       "int16_t", (struct objfile *) NULL);
+  builtin_type_uint16 =
+    init_type (TYPE_CODE_INT, 16 / 8,
+	       TYPE_FLAG_UNSIGNED,
+	       "uint16_t", (struct objfile *) NULL);
+  builtin_type_int32 =
+    init_type (TYPE_CODE_INT, 32 / 8,
+	       0,
+	       "int32_t", (struct objfile *) NULL);
+  builtin_type_uint32 =
+    init_type (TYPE_CODE_INT, 32 / 8,
+	       TYPE_FLAG_UNSIGNED,
+	       "uint32_t", (struct objfile *) NULL);
+  builtin_type_int64 =
+    init_type (TYPE_CODE_INT, 64 / 8,
+	       0,
+	       "int64_t", (struct objfile *) NULL);
+  builtin_type_uint64 =
+    init_type (TYPE_CODE_INT, 64 / 8,
+	       TYPE_FLAG_UNSIGNED,
+	       "uint64_t", (struct objfile *) NULL);
+  builtin_type_int128 =
+    init_type (TYPE_CODE_INT, 128 / 8,
+	       0,
+	       "int128_t", (struct objfile *) NULL);
+  builtin_type_uint128 =
+    init_type (TYPE_CODE_INT, 128 / 8,
+	       TYPE_FLAG_UNSIGNED,
+	       "uint128_t", (struct objfile *) NULL);
+
   build_gdbtypes ();
 
   gdbtypes_data = gdbarch_data_register_post_init (gdbtypes_post_init);
