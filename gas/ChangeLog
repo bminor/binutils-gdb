@@ -1,3 +1,8 @@
+Thu Jan 26 18:38:01 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-ppc.c (md_begin): Permit mfdec to be duplicated on the
+	601.  Check that the error return from hash_insert is "exists".
+
 Thu Jan 26 11:35:33 1995  Michael Meissner  <meissner@cygnus.com>
 
 	* configure: Add support for configuring powerpc-*-eabi.
