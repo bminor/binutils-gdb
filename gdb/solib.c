@@ -180,9 +180,7 @@ solib_map_sections (PTR arg)
       /* Relocate the section binding addresses as recorded in the shared
          object's file by the base address to which the object was actually
          mapped. */
-      p->addr += TARGET_SO_LM_ADDR (so);
-      p->endaddr += TARGET_SO_LM_ADDR (so);
-      so->lmend = max (p->endaddr, so->lmend);
+      TARGET_SO_RELOCATE_SECTION_ADDRESSES (so, p);
       if (STREQ (p->the_bfd_section->name, ".text"))
 	{
 	  so->textsection = p;
@@ -248,9 +246,6 @@ symbol_add_stub (PTR arg)
 {
   register struct so_list *so = (struct so_list *) arg;  /* catch_errs bogon */
   struct section_addr_info *sap;
-  CORE_ADDR lowest_addr = 0;
-  int lowest_index;
-  asection *lowest_sect = NULL;
 
   /* Have we already loaded this shared object?  */
   ALL_OBJFILES (so->objfile)
@@ -259,34 +254,8 @@ symbol_add_stub (PTR arg)
 	return 1;
     }
 
-  /* Find the shared object's text segment.  */
-  if (so->textsection)
-    {
-      lowest_addr = so->textsection->addr;
-      lowest_sect = bfd_get_section_by_name (so->abfd, ".text");
-      lowest_index = lowest_sect->index;
-    }
-  else if (so->abfd != NULL)
-    {
-      /* If we didn't find a mapped non zero sized .text section, set
-         up lowest_addr so that the relocation in symbol_file_add does
-         no harm.  */
-      lowest_sect = bfd_get_section_by_name (so->abfd, ".text");
-      if (lowest_sect == NULL)
-	bfd_map_over_sections (so->abfd, find_lowest_section,
-			       (PTR) &lowest_sect);
-      if (lowest_sect)
-	{
-	  lowest_addr = bfd_section_vma (so->abfd, lowest_sect)
-	    + TARGET_SO_LM_ADDR (so);
-	  lowest_index = lowest_sect->index;
-	}
-    }
-
   sap = build_section_addr_info_from_section_table (so->sections,
                                                     so->sections_end);
-
-  sap->other[lowest_index].addr = lowest_addr;
 
   so->objfile = symbol_file_add (so->so_name, so->from_tty,
 				 sap, 0, OBJF_SHARED);
@@ -610,12 +579,17 @@ info_sharedlibrary_command (char *ignore, int from_tty)
 	    }
 
 	  printf_unfiltered ("%-*s", addr_width,
-                             local_hex_string_custom (
-			       (unsigned long) TARGET_SO_LM_ADDR (so),
-	                       addr_fmt));
+			     so->textsection != NULL 
+			       ? local_hex_string_custom (
+			           (unsigned long) so->textsection->addr,
+	                           addr_fmt)
+			       : "");
 	  printf_unfiltered ("%-*s", addr_width,
-			 local_hex_string_custom ((unsigned long) so->lmend,
-						  addr_fmt));
+			     so->textsection != NULL 
+			       ? local_hex_string_custom (
+			           (unsigned long) so->textsection->endaddr,
+	                           addr_fmt)
+			       : "");
 	  printf_unfiltered ("%-12s", so->symbols_loaded ? "Yes" : "No");
 	  printf_unfiltered ("%s\n", so->so_name);
 	}
@@ -640,10 +614,7 @@ info_sharedlibrary_command (char *ignore, int from_tty)
 
    Provides a hook for other gdb routines to discover whether or
    not a particular address is within the mapped address space of
-   a shared library.  Any address between the base mapping address
-   and the first address beyond the end of the last mapping, is
-   considered to be within the shared library address space, for
-   our purposes.
+   a shared library.
 
    For example, this routine is called at one point to disable
    breakpoints which are in shared libraries that are not currently
@@ -657,8 +628,13 @@ solib_address (CORE_ADDR address)
 
   for (so = so_list_head; so; so = so->next)
     {
-      if (TARGET_SO_LM_ADDR (so) <= address && address < so->lmend)
-	return (so->so_name);
+      struct section_table *p;
+
+      for (p = so->sections; p < so->sections_end; p++)
+	{
+	  if (p->addr <= address && address < p->endaddr)
+	    return (so->so_name);
+	}
     }
 
   return (0);

@@ -54,7 +54,6 @@ struct so_list
        are initialized when we actually add it to our symbol tables.  */
 
     bfd *abfd;
-    CORE_ADDR lmend;		/* upper addr bound of mapped object */
     char symbols_loaded;	/* flag: symbols read in yet? */
     char from_tty;		/* flag: print msgs? */
     struct objfile *objfile;	/* objfile for loaded lib */
@@ -65,12 +64,30 @@ struct so_list
 
 struct target_so_ops
   {
-    CORE_ADDR (*lm_addr) (struct so_list *so);
+    /* Adjust the section binding addresses by the base address at
+       which the object was actually mapped.  */
+    void (*relocate_section_addresses) (struct so_list *so,
+                                        struct section_table *);
+
+    /* Free the the link map info and any other private data
+       structures associated with a so_list entry.  */
     void (*free_so) (struct so_list *so);
+
+    /* Reset or free private data structures not associated with
+       so_list entries.  */
     void (*clear_solib) (void);
+
+    /* Target dependent code to run after child process fork.  */
     void (*solib_create_inferior_hook) (void);
+
+    /* Do additional symbol handling, lookup, etc. after symbols
+       for a shared object have been loaded.  */
     void (*special_symbol_handling) (void);
+
+    /* Construct a list of the currently loaded shared objects.  */
     struct so_list *(*current_sos) (void);
+
+    /* Find, open, and read the symbols for the main executable.  */
     int (*open_symbol_file_object) (void *from_ttyp);
   };
 
@@ -79,7 +96,8 @@ void free_so (struct so_list *so);
 /* FIXME: gdbarch needs to control this variable */
 extern struct target_so_ops *current_target_so_ops;
 
-#define TARGET_SO_LM_ADDR (current_target_so_ops->lm_addr)
+#define TARGET_SO_RELOCATE_SECTION_ADDRESSES \
+  (current_target_so_ops->relocate_section_addresses)
 #define TARGET_SO_FREE_SO (current_target_so_ops->free_so)
 #define TARGET_SO_CLEAR_SOLIB (current_target_so_ops->clear_solib)
 #define TARGET_SO_SOLIB_CREATE_INFERIOR_HOOK \

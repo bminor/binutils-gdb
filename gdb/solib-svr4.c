@@ -1567,12 +1567,20 @@ svr4_free_so (struct so_list *so)
   free (so->lm_info);
 }
 
+static void
+svr4_relocate_section_addresses (struct so_list *so,
+                                 struct section_table *sec)
+{
+  sec->addr += LM_ADDR (so);
+  sec->endaddr += LM_ADDR (so);
+}
+
 static struct target_so_ops svr4_so_ops;
 
 void
 _initialize_svr4_solib (void)
 {
-  svr4_so_ops.lm_addr = LM_ADDR;
+  svr4_so_ops.relocate_section_addresses = svr4_relocate_section_addresses;
   svr4_so_ops.free_so = svr4_free_so;
   svr4_so_ops.clear_solib = svr4_clear_solib;
   svr4_so_ops.solib_create_inferior_hook = svr4_solib_create_inferior_hook;

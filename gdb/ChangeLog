@@ -1,3 +1,29 @@
+2000-10-30  Kevin Buettner  <kevinb@redhat.com>
+
+	Changes based on analysis from Peter Schauer:
+	* solist.h (struct so_list): Remove field lmend.
+	(struct target_so_ops): Remove field lm_addr.  Add field
+	relocate_section_addresses.  Add comments for all fields
+	in this structure
+	(TARGET_SO_LM_ADDR): Remove.
+	(TARGET_SO_RELOCATE_SECTION_ADDRESSES): New macro.
+	* solib-svr4.c (svr4_relocate_section_addresses): New function.
+	(_initialize_svr4_solib): Remove lm_addr initialization.  Add
+	initialization for relocate_section_addresses.
+	* solib.c (solib_map_sections): Invoke 
+	TARGET_SO_RELOCATE_SECTION_ADDRESSES instead of using now
+	defunct TARGET_SO_LM_ADDR to relocate the section addresses.
+	Also, eliminate assignment to the lmend field since this
+	field no longer exists.
+	(symbol_add_stub): Remove machinery for determining the lowest
+	section.
+	(info_sharedlibrary_command): Print the text section starting
+	and ending addresses.
+	(solib_address): Don't use TARGET_SO_LM_ADDR, nor so->lmend to
+	determine if an address is in a shared object.  Instead, scan
+	the section table and test against the starting and ending
+	addresses for each section.
+
 2000-10-30  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	* config/m68k/linux.mh: Remove solib.c, solib-svr4.c from NATDEPFILES.
