@@ -1,3 +1,10 @@
+Wed Mar  1 13:14:42 1995  Kung Hsu  <kung@mexican.cygnus.com>
+
+	* remote-vx960.c: new file for target specific register packaging.
+	* remote-vx68.c: ditto.
+	* config/i960/vxworks960.mt: add remote-vx960.o.
+	* config/m68k/vxworks68.mt: add remote-vx68.o.
+
 Wed Mar  1 13:42:49 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* remote.c (remote_wait): Make calls to strtol be type correct by
