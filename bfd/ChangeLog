@@ -1,3 +1,8 @@
+1999-06-21  Ian Lance Taylor  <ian@zembu.com>
+
+	* coff-arm.c (arm_emit_base_file_entry): Explicitly declare return
+	type.
+
 Sun Jun 20 14:13:57 1999  Richard Henderson  <rth@cygnus.com>
 
 	* section.c (_bfd_strip_section_from_output): Ignore sections

@@ -783,7 +783,7 @@ coff_arm_link_hash_table_create (abfd)
   return & ret->root.root;
 }
 
-static
+static void
 arm_emit_base_file_entry (info, output_bfd, input_section, reloc_offset)
       struct bfd_link_info *info;
       bfd *output_bfd;
