@@ -1,3 +1,8 @@
+2001-10-06  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-arc.c (elf_arc_howto_table): Set partial_inplace for all
+	relocs.
+
 2001-10-05  Jeff Law <law@redhat.com>
 
 	* som.h (som_exec_data): New field "version_id".

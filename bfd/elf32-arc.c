@@ -53,7 +53,7 @@ static reloc_howto_type elf_arc_howto_table[] =
 	 complain_overflow_bitfield, /* complain_on_overflow  */
 	 bfd_elf_generic_reloc,	/* special_function  */
 	 "R_ARC_NONE",		/* name  */
-	 false,			/* partial_inplace  */
+	 true,			/* partial_inplace  */
 	 0,			/* src_mask  */
 	 0,			/* dst_mask  */
 	 false),		/* pcrel_offset  */
@@ -68,7 +68,7 @@ static reloc_howto_type elf_arc_howto_table[] =
 	 complain_overflow_bitfield, /* complain_on_overflow  */
 	 bfd_elf_generic_reloc,	/* special_function  */
 	 "R_ARC_32",		/* name  */
-	 false,			/* partial_inplace  */
+	 true,			/* partial_inplace  */
 	 0xffffffff,		/* src_mask  */
 	 0xffffffff,		/* dst_mask  */
 	 false),		/* pcrel_offset  */
@@ -83,7 +83,7 @@ static reloc_howto_type elf_arc_howto_table[] =
 	 complain_overflow_bitfield, /* complain_on_overflow  */
 	 bfd_elf_generic_reloc,	/* special_function  */
 	 "R_ARC_B26",		/* name  */
-	 false,			/* partial_inplace  */
+	 true,			/* partial_inplace  */
 	 0x00ffffff,		/* src_mask  */
 	 0x00ffffff,		/* dst_mask  */
 	 false),		/* pcrel_offset  */
