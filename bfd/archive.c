@@ -1476,7 +1476,7 @@ _bfd_write_archive_contents (arch)
 					      (char *) arch_hdr (current)));
 	}
 
-      if (makemap)
+      if (makemap && ! hasobjects)
 	{			/* don't bother if we won't make a map! */
 	  if ((bfd_check_format (current, bfd_object))
 #if 0				/* FIXME -- these are not set correctly */
@@ -1705,6 +1705,11 @@ compute_and_write_armap (arch, elength)
 		    }
 		}
 	    }
+
+	  /* Now ask the BFD to free up any cached information, so we
+	     don't fill all of memory with symbol tables.  */
+	  if (! bfd_free_cached_info (current))
+	    goto error_return;
 	}
     }
 

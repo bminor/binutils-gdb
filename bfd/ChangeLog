@@ -1,5 +1,44 @@
 Fri Apr  1 12:40:58 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* archive.c (_bfd_write_archive_contents): Once we've found an
+	object, don't bother to look for more when deciding whether to
+	build a map.
+	(compute_and_write_armap): After adding the symbols for a BFD,
+	call bfd_free_cached_info on it.
+
+	Add bfd_free_cached_info support to a.out backends.
+	* aoutx.h (aout_get_external_symbols): Renamed from
+	aout_link_get_symbols.  Read strings even if symbols have been
+	read.  Store string size in obj_aout_string_size.
+	(NAME(aout,slurp_symbol_table)): Call aout_get_external_symbols to
+	read the symbols.  Allocate the cached symbols with malloc, not
+	bfd_alloc.
+	(NAME(aout,slurp_reloc_table)): Allocate the cached relocs with
+	malloc, not bfd_alloc.
+	(NAME(aout,bfd_free_cached_info)): New function; free cached
+	symbols and relocs.
+	* libaout.h (struct aoutdata): Add external_string_size field.
+	(obj_aout_external_string_size): New accessor macro.
+	(NAME(aout,close_and_cleanup)): Don't declare.
+	(NAME(aout,bfd_free_cached_info)): Declare.
+	(aout_32_close_and_cleanup): Don't define.
+	(aout_64_close_and_cleanup): Don't define.
+	* aout-target.h (MY_bfd_free_cached_info): If not already defined,
+	define as NAME(aout,free_cached_info).
+	(MY_close_and_cleanup): If not already defined, define as
+	MY_bfd_free_cached_info.
+	* aout-adobe.c (aout_32_close_and_cleanup): Define.
+	(aout_32_bfd_free_cached_info): Don't define.
+	* bout.c (aout_32_close_and_cleanup): Define.
+	(aout_32_bfd_free_cached_info): Don't define.
+	* hp300hpux.c (MY_bfd_free_cached_info): Define as bfd_true.
+	(MY_close_and_cleanup): Don't define.
+	* i386lynx.c (NAME(lynx,slurp_reloc_table)): Allocate the cached
+	relocs with malloc, not bfd_alloc.
+	* i386os9k.c (aout_32_close_and_cleanup): Define.
+	(aout_32_bfd_free_cached_info): Don't define.
+
+	Add a new entry point to free memory cached by a BFD.
 	* targets.c (bfd_target): Add _bfd_free_cached_info field.
 	* bfd.c (bfd_free_cached_info): Define.
 	* bfd-in.h (JUMP_TABLE): Add _bfd_free_cached_info.
