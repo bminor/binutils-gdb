@@ -4,9 +4,9 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: GNU bfd 2.11\n"
+"Project-Id-Version: GNU bfd 2.12-pre020121\n"
 "POT-Creation-Date: 2002-01-17 12:55+0000\n"
-"PO-Revision-Date: 2001-09-19 08:00-0500\n"
+"PO-Revision-Date: 2002-01-24 08:00-0500\n"
 "Last-Translator: Michel Robitaille <robitail@IRO.UMontreal.CA>\n"
 "Language-Team: French <traduc@traduc.org>\n"
 "MIME-Version: 1.0\n"
@@ -36,16 +36,12 @@ msgstr "%s: mauvais enregistrement de relocalisation importé: %d"
 #: aoutx.h:1282 aoutx.h:1699
 #, c-format
 msgid "%s: can not represent section `%s' in a.out object file format"
-msgstr ""
-"%s: ne peut représenter la section `%s' dans le fichier format objet a.out"
+msgstr "%s: ne peut représenter la section `%s' dans le fichier format objet a.out"
 
 #: aoutx.h:1669
 #, c-format
-msgid ""
-"%s: can not represent section for symbol `%s' in a.out object file format"
-msgstr ""
-"%s: ne peut représenter la section pour le symbole `%s' dans le fichier "
-"format objet a.out"
+msgid "%s: can not represent section for symbol `%s' in a.out object file format"
+msgstr "%s: ne peut représenter la section pour le symbole `%s' dans le fichier format objet a.out"
 
 #: aoutx.h:1671
 msgid "*unknown*"
@@ -58,9 +54,7 @@ msgstr "%s: relocalisation de liens de %s vers %s n'est pas supporté"
 
 #: archive.c:1826
 msgid "Warning: writing archive was slow: rewriting timestamp\n"
-msgstr ""
-"AVERTISSEMENT: l'écriture de l'archive était lente: réécriture du cachet de "
-"date-heure\n"
+msgstr "AVERTISSEMENT: l'écriture de l'archive était lente: réécriture du cachet de date-heure\n"
 
 #: archive.c:2093
 msgid "Reading archive file mod timestamp"
@@ -88,9 +82,8 @@ msgid "File in wrong format"
 msgstr "Fichier dans un mauvais format"
 
 #: bfd.c:285
-#, fuzzy
 msgid "Archive object file in wrong format"
-msgstr "Fichier dans un mauvais format"
+msgstr "Fichier objet d'archive dans un mauvais format"
 
 #: bfd.c:286
 msgid "Invalid operation"
@@ -153,19 +146,19 @@ msgid "#<Invalid error code>"
 msgstr "#<Code d'erreur invalide>"
 
 #: bfd.c:707
-#, fuzzy, c-format
+#, c-format
 msgid "BFD %s assertion fail %s:%d"
-msgstr "échec d'assertion bfd %s:%d"
+msgstr "BFD assertion %s a échoué %s:%d"
 
 #: bfd.c:726
-#, fuzzy, c-format
+#, c-format
 msgid "BFD %s internal error, aborting at %s line %d in %s\n"
-msgstr "Erreur interne BFD, abandon à %s, ligne %d dans %s\n"
+msgstr "BFD erreur interne %s, abandon à %s, ligne %d dans %s\n"
 
 #: bfd.c:730
-#, fuzzy, c-format
+#, c-format
 msgid "BFD %sinternal error, aborting at %s line %d\n"
-msgstr "Erreur interne BFD, abandon à %s, ligne %d\n"
+msgstr "BFD erreur interne %s, abandon à %s, ligne %d\n"
 
 #: bfd.c:732
 msgid "Please report this bug.\n"
@@ -174,9 +167,7 @@ msgstr "SVP rapporter cette anomalie.\n"
 #: binary.c:306
 #, c-format
 msgid "Warning: Writing section `%s' to huge (ie negative) file offset 0x%lx."
-msgstr ""
-"AVERTISSEMENT: écriture de la section `%s' vers un énorme décalage (ie "
-"negatif) dans le fichier 0x%lx."
+msgstr "AVERTISSEMENT: écriture de la section `%s' vers un énorme décalage (ie négatif) dans le fichier 0x%lx."
 
 #: coff-a29k.c:119
 msgid "Missing IHCONST"
@@ -256,55 +247,33 @@ msgstr "%s: ERREUR: compilé pour APCS-%d alors que la cible %s utilise APCS-%d"
 
 #: coff-arm.c:2250
 #, c-format
-msgid ""
-"%s: ERROR: passes floats in float registers whereas target %s uses integer "
-"registers"
-msgstr ""
-"%s: ERREUR: passage de valeurs en virgule flottante dans des registreen "
-"virgule flottance alors que la cible %s utilise des registres de "
-"valeursentières"
+msgid "%s: ERROR: passes floats in float registers whereas target %s uses integer registers"
+msgstr "%s: ERREUR: passage de valeurs en virgule flottante dans des registreen virgule flottance alors que la cible %s utilise des registres de valeursentières"
 
 #: coff-arm.c:2253
 #, c-format
-msgid ""
-"%s: ERROR: passes floats in integer registers whereas target %s uses float "
-"registers"
-msgstr ""
-"%s: ERREUR: passage de valeurs en virgule flottante dans des registreen "
-"valeur entière alors que la cible %s utilise des registres de valeursen "
-"virgule flottante"
+msgid "%s: ERROR: passes floats in integer registers whereas target %s uses float registers"
+msgstr "%s: ERREUR: passage de valeurs en virgule flottante dans des registreen valeur entière alors que la cible %s utilise des registres de valeursen virgule flottante"
 
 #: coff-arm.c:2268
 #, c-format
-msgid ""
-"%s: ERROR: compiled as position independent code, whereas target %s is "
-"absolute position"
-msgstr ""
-"%s: ERREUR: compilé en code indépendant de la position, alors que la cible %"
-"s esten position absolue"
+msgid "%s: ERROR: compiled as position independent code, whereas target %s is absolute position"
+msgstr "%s: ERREUR: compilé en code indépendant de la position, alors que la cible %s esten position absolue"
 
 #: coff-arm.c:2271
 #, c-format
-msgid ""
-"%s: ERROR: compiled as absolute position code, whereas target %s is position "
-"independent"
-msgstr ""
-"%s: ERREUR: compilé en code à position abolsu, alors que la cible %s "
-"estindépendant de la position"
+msgid "%s: ERROR: compiled as absolute position code, whereas target %s is position independent"
+msgstr "%s: ERREUR: compilé en code à position abolsu, alors que la cible %s estindépendant de la position"
 
 #: coff-arm.c:2300
 #, c-format
 msgid "Warning: input file %s supports interworking, whereas %s does not."
-msgstr ""
-"AVERTISSEMENT: file d'entrée %s supporte l'inter-réseautage, contrairement à "
-"%s."
+msgstr "AVERTISSEMENT: file d'entrée %s supporte l'inter-réseautage, contrairement à %s."
 
 #: coff-arm.c:2303
 #, c-format
 msgid "Warning: input file %s does not support interworking, whereas %s does."
-msgstr ""
-"AVERTISSEMENT: fichier d'entrée %s ne supporte pas l'inter-réseautage, "
-"contrairement à %s."
+msgstr "AVERTISSEMENT: fichier d'entrée %s ne supporte pas l'inter-réseautage, contrairement à %s."
 
 #: coff-arm.c:2330
 #, c-format
@@ -313,15 +282,11 @@ msgstr "fanions privés = %x"
 
 #: coff-arm.c:2338 elf32-arm.h:2408
 msgid " [floats passed in float registers]"
-msgstr ""
-" [valeurs en virgule flottante passées dans des registres de valeurs en "
-"virgule flottante]"
+msgstr " [valeurs en virgule flottante passées dans des registres de valeurs en virgule flottante]"
 
 #: coff-arm.c:2340
 msgid " [floats passed in integer registers]"
-msgstr ""
-" [valeurs en virgule flottante passées dans des registres de valeurs "
-"entières]"
+msgstr " [valeurs en virgule flottante passées dans des registres de valeurs entières]"
 
 #: coff-arm.c:2343 elf32-arm.h:2411
 msgid " [position independent]"
@@ -345,19 +310,13 @@ msgstr " [inter-réseautage non supporté]"
 
 #: coff-arm.c:2401
 #, c-format
-msgid ""
-"Warning: Not setting interworking flag of %s, since it has already been "
-"specified as non-interworking"
-msgstr ""
-"AVERTISSEMENT: pas d'initialisation du fanion d'inter-réseautage %s, "
-"puisqu'il a déjà été spécifié comme sans inter-réseautage"
+msgid "Warning: Not setting interworking flag of %s, since it has already been specified as non-interworking"
+msgstr "AVERTISSEMENT: pas d'initialisation du fanion d'inter-réseautage %s, puisqu'il a déjà été spécifié comme sans inter-réseautage"
 
 #: coff-arm.c:2405
 #, c-format
 msgid "Warning: Clearing the interworking flag of %s due to outside request"
-msgstr ""
-"AVERTISSEMENT: mise à zéro du fanion d'inter-réseautage %s en raison d'une "
-"requête externe"
+msgstr "AVERTISSEMENT: mise à zéro du fanion d'inter-réseautage %s en raison d'une requête externe"
 
 #: coff-i960.c:136 coff-i960.c:485
 msgid "uncertain calling convention for non-COFF symbol"
@@ -389,9 +348,7 @@ msgstr "%s: type de relocalisation non supporté 0x%02x"
 #: coff-rs6000.c:2756 coff64-rs6000.c:1210
 #, c-format
 msgid "%s: TOC reloc at 0x%x to symbol `%s' with no TOC entry"
-msgstr ""
-"%s: table des matières des relocalisation à 0x%x pour les symboles `%s' sans "
-"aucune entrée dans la table des matières"
+msgstr "%s: table des matières des relocalisation à 0x%x pour les symboles `%s' sans aucune entrée dans la table des matières"
 
 #: coff-rs6000.c:3006 coff64-rs6000.c:2060
 #, c-format
@@ -414,9 +371,9 @@ msgid "ignoring reloc %s\n"
 msgstr "relocalisation de %s ignorée\n"
 
 #: coffcode.h:1081
-#, fuzzy, c-format
+#, c-format
 msgid "%s (%s): Section flag %s (0x%x) ignored"
-msgstr "bfd_set_section_flags (%s, %x) a échoué"
+msgstr "%s (%s): fanion de section %s (0x%x) ignoré"
 
 #: coffcode.h:2125
 #, c-format
@@ -476,33 +433,25 @@ msgstr "%s: %s: débordement de relocalisation: 0x%lx > 0xffff"
 #: cofflink.c:2662 coffswap.h:876
 #, c-format
 msgid "%s: warning: %s: line number overflow: 0x%lx > 0xffff"
-msgstr ""
-"%s: AVERTISSEMENT: %s: débordement du compteur de numéro de ligne: 0x%lx > "
-"0xffff"
+msgstr "%s: AVERTISSEMENT: %s: débordement du compteur de numéro de ligne: 0x%lx > 0xffff"
 
 #: dwarf2.c:381
-#, fuzzy
 msgid "Dwarf Error: Can't find .debug_str section."
-msgstr "Erreur DWARF: ne peut repérer la section .debug_abbrev"
+msgstr "Erreur DWARF: ne peut repérer la section .debug_str"
 
 #: dwarf2.c:398
-#, fuzzy, c-format
-msgid ""
-"Dwarf Error: DW_FORM_strp offset (%u) greater than or equal to .debug_str "
-"size (%u)."
-msgstr ""
-"Erreur DWARF: décalage abrégé (%u) est plus grand que la taille abrégée (%u)."
+#, c-format
+msgid "Dwarf Error: DW_FORM_strp offset (%u) greater than or equal to .debug_str size (%u)."
+msgstr "Erreur DWARF: décalage DW_FORM_strp (%u) est > ou = à la taille de .debug_str (%u)."
 
 #: dwarf2.c:542
 msgid "Dwarf Error: Can't find .debug_abbrev section."
 msgstr "Erreur DWARF: ne peut repérer la section .debug_abbrev"
 
 #: dwarf2.c:559
-#, fuzzy, c-format
-msgid ""
-"Dwarf Error: Abbrev offset (%u) greater than or equal to abbrev size (%u)."
-msgstr ""
-"Erreur DWARF: décalage abrégé (%u) est plus grand que la taille abrégée (%u)."
+#, c-format
+msgid "Dwarf Error: Abbrev offset (%u) greater than or equal to abbrev size (%u)."
+msgstr "Erreur DWARF: décalage Abbrev (%u) est > ou = à la taille abbrev (%u)."
 
 #: dwarf2.c:756
 #, c-format
@@ -511,18 +460,16 @@ msgstr "Erreur DWARF: valeur de FORME invalide ou mal traitée: %d"
 
 #: dwarf2.c:843
 msgid "Dwarf Error: mangled line number section (bad file number)."
-msgstr ""
-"Erreur DWARF: numéro mutilé de ligne de section (mauvais no. de fichier)"
+msgstr "Erreur DWARF: numéro mutilé de ligne de section (mauvais no. de fichier)"
 
 #: dwarf2.c:929
 msgid "Dwarf Error: Can't find .debug_line section."
 msgstr "Erreur DWARF: ne peut repérer la section .debug_line"
 
 #: dwarf2.c:952
-#, fuzzy, c-format
+#, c-format
 msgid "Dwarf Error: Line offset (%u) greater than or equal to line size (%u)."
-msgstr ""
-"Erreur DWARF: décalage de ligne (%u) plus grand que la taille de ligne (%u)"
+msgstr "Erreur DWARF: décalage de ligne (%u) est > ou = à la taille de ligne (%u)"
 
 #: dwarf2.c:1143
 msgid "Dwarf Error: mangled line number section."
@@ -535,21 +482,13 @@ msgstr "Erreur DWARF: ne peut repérer le numéro abrégé %d"
 
 #: dwarf2.c:1493
 #, c-format
-msgid ""
-"Dwarf Error: found dwarf version '%hu', this reader only handles version 2 "
-"information."
-msgstr ""
-"Erreur DWARF: version DWARF retrouvée '%hu', ce lecteur ne supporte que les "
-"informations de la version 2."
+msgid "Dwarf Error: found dwarf version '%hu', this reader only handles version 2 information."
+msgstr "Erreur DWARF: version DWARF retrouvée '%hu', ce lecteur ne supporte que les informations de la version 2."
 
 #: dwarf2.c:1500
 #, c-format
-msgid ""
-"Dwarf Error: found address size '%u', this reader can not handle sizes "
-"greater than '%u'."
-msgstr ""
-"Erreur DWARF: taille d'adresse obtenue '%u', ce lecteur ne peut traiter des "
-"tailles plus grandes que '%u'."
+msgid "Dwarf Error: found address size '%u', this reader can not handle sizes greater than '%u'."
+msgstr "Erreur DWARF: taille d'adresse obtenue '%u', ce lecteur ne peut traiter des tailles plus grandes que '%u'."
 
 #: dwarf2.c:1523
 #, c-format
@@ -563,84 +502,49 @@ msgstr "type de base inconnu %d"
 
 #: ecoff.c:1597
 #, c-format
-msgid ""
-"\n"
-"      End+1 symbol: %ld"
-msgstr ""
-"\n"
-"      Dernier+1 symbole: %ld"
+msgid "\n      End+1 symbol: %ld"
+msgstr "\n      Dernier+1 symbole: %ld"
 
 #: ecoff.c:1604 ecoff.c:1607
 #, c-format
-msgid ""
-"\n"
-"      First symbol: %ld"
-msgstr ""
-"\n"
-"      Premier symbole: %ld"
+msgid "\n      First symbol: %ld"
+msgstr "\n      Premier symbole: %ld"
 
 #: ecoff.c:1619
-#, fuzzy, c-format
-msgid ""
-"\n"
-"      End+1 symbol: %-7ld   Type:  %s"
-msgstr ""
-"\n"
-"      Dernier+1 symbole: %-7ld   Type:  %s"
+#, c-format
+msgid "\n      End+1 symbol: %-7ld   Type:  %s"
+msgstr "\n      Dernier+1 symbole: %-7ld   Type:  %s"
 
 #: ecoff.c:1626
 #, c-format
-msgid ""
-"\n"
-"      Local symbol: %ld"
-msgstr ""
-"\n"
-"      Symbole local: %ld"
+msgid "\n      Local symbol: %ld"
+msgstr "\n      Symbole local: %ld"
 
 #: ecoff.c:1634
 #, c-format
-msgid ""
-"\n"
-"      struct; End+1 symbol: %ld"
-msgstr ""
-"\n"
-"      struct; Symbole Fin+1: %ld"
+msgid "\n      struct; End+1 symbol: %ld"
+msgstr "\n      struct; Symbole Fin+1: %ld"
 
 #: ecoff.c:1639
 #, c-format
-msgid ""
-"\n"
-"      union; End+1 symbol: %ld"
-msgstr ""
-"\n"
-"      union; Dernier+1 symbole: %ld"
+msgid "\n      union; End+1 symbol: %ld"
+msgstr "\n      union; Dernier+1 symbole: %ld"
 
 #: ecoff.c:1644
 #, c-format
-msgid ""
-"\n"
-"      enum; End+1 symbol: %ld"
-msgstr ""
-"\n"
-"      enum; Dernier+1 symbol: %ld"
+msgid "\n      enum; End+1 symbol: %ld"
+msgstr "\n      enum; Dernier+1 symbol: %ld"
 
 #: ecoff.c:1650
 #, c-format
-msgid ""
-"\n"
-"      Type: %s"
-msgstr ""
-"\n"
-"      Type: %s"
+msgid "\n      Type: %s"
+msgstr "\n      Type: %s"
 
 #: elf-hppa.h:1366 elf-hppa.h:1399 elf32-ppc.c:3062 elf32-sh.c:3201
 #: elf64-x86-64.c:1275
 #, c-format
-msgid ""
-"%s: warning: unresolvable relocation against symbol `%s' from %s section"
-msgstr ""
-"%s: AVERTISSEMENT: relocalisation sans solution vers le symbole `%s' de la "
-"section %s"
+msgid "%s: warning: unresolvable relocation against symbol `%s' from %s section"
+msgstr "%s: AVERTISSEMENT: relocalisation sans solution vers le symbole `%s' de la section %s"
 
 #: elf-m10200.c:463 elf-m10300.c:673 elf32-arm.h:2074 elf32-avr.c:835
 #: elf32-cris.c:1392 elf32-d10v.c:482 elf32-fr30.c:653 elf32-h8300.c:547
@@ -676,44 +580,28 @@ msgstr "%s: chaîne de décalage invalide %u >= %lu pour la section `%s'"
 #: elf.c:450
 #, c-format
 msgid "%s: invalid SHT_GROUP entry"
-msgstr ""
+msgstr "%s: entrée SHT_GROUP invalide"
 
 #: elf.c:531
-#, fuzzy, c-format
+#, c-format
 msgid "%s: no group info for section %s"
-msgstr "%s: chargeur de relocalisation dans un section en lecture seulement %s"
+msgstr "%s: aucune info de groupe pour la section %s"
 
 #: elf.c:842
-msgid ""
-"\n"
-"Program Header:\n"
-msgstr ""
-"\n"
-"En-tête de programme:\n"
+msgid "\nProgram Header:\n"
+msgstr "\nEn-tête de programme:\n"
 
 #: elf.c:891
-msgid ""
-"\n"
-"Dynamic Section:\n"
-msgstr ""
-"\n"
-"Section dynamique:\n"
+msgid "\nDynamic Section:\n"
+msgstr "\nSection dynamique:\n"
 
 #: elf.c:1020
-msgid ""
-"\n"
-"Version definitions:\n"
-msgstr ""
-"\n"
-"Définitions des versions:\n"
+msgid "\nVersion definitions:\n"
+msgstr "\nDéfinitions des versions:\n"
 
 #: elf.c:1043
-msgid ""
-"\n"
-"Version References:\n"
-msgstr ""
-"\n"
-"Références de version:\n"
+msgid "\nVersion References:\n"
+msgstr "\nRéférences de version:\n"
 
 #: elf.c:1048
 #, c-format
@@ -728,23 +616,17 @@ msgstr "%s: lien invalide %lu pour la section de relocalisation %s (index %u)"
 #: elf.c:3289
 #, c-format
 msgid "%s: Not enough room for program headers (allocated %u, need %u)"
-msgstr ""
-"%s: pas suffisamment d'espace pour les en-têtes du programme (alloué %u, "
-"besoin de %u)"
+msgstr "%s: pas suffisamment d'espace pour les en-têtes du programme (alloué %u, besoin de %u)"
 
 #: elf.c:3393
 #, c-format
 msgid "%s: Not enough room for program headers, try linking with -N"
-msgstr ""
-"%s: pas suffisamment d'espace pour les en-têtes du programme, essayer "
-"l'option -N"
+msgstr "%s: pas suffisamment d'espace pour les en-têtes du programme, essayer l'option -N"
 
 #: elf.c:3518
-#, fuzzy, c-format
-msgid ""
-"Error: First section in segment (%s) starts at 0x%x whereas the segment "
-"starts at 0x%x"
-msgstr "Erreur: première section dans le segment (%s) débute à 0x%x"
+#, c-format
+msgid "Error: First section in segment (%s) starts at 0x%x whereas the segment starts at 0x%x"
+msgstr "Erreur: première section dans le segment (%s) débute à 0x%x alors que le segment débute à 0x%x"
 
 #: elf.c:3804
 #, c-format
@@ -758,12 +640,8 @@ msgstr "%s: symbole `%s' requis mais absent"
 
 #: elf.c:4147
 #, c-format
-msgid ""
-"elf_symbol_from_bfd_symbol 0x%.8lx, name = %s, sym num = %d, flags = 0x%.8lx%"
-"s\n"
-msgstr ""
-"elf_symbol_from_bfd_symbol 0x%.8lx, nom = %s, no. de symbole = %d, fanions = "
-"0x%.8lx%s\n"
+msgid "elf_symbol_from_bfd_symbol 0x%.8lx, name = %s, sym num = %d, flags = 0x%.8lx%s\n"
+msgstr "elf_symbol_from_bfd_symbol 0x%.8lx, nom = %s, no. de symbole = %d, fanions = 0x%.8lx%s\n"
 
 #: elf.c:4391
 #, c-format
@@ -783,121 +661,82 @@ msgstr "%s: AVERTISSEMENT: instruction Arm BLX vise la fonction Arm '%s'."
 #: elf32-arm.h:1420
 #, c-format
 msgid "%s: Warning: Thumb BLX instruction targets thumb function '%s'."
-msgstr ""
-"%s: AVERTISSEMENT: instruction de repérage BLX vise la function de repérage "
-"'%s'."
+msgstr "%s: AVERTISSEMENT: instruction de repérage BLX vise la function de repérage '%s'."
 
 #: elf32-arm.h:1904 elf32-i386.c:1776 elf32-sh.c:3133
 #, c-format
 msgid "%s(%s+0x%lx): %s relocation against SEC_MERGE section"
-msgstr ""
+msgstr "%s(%s+0x%lx): %s relocation vers une section SEC_MERGE"
 
 #: elf32-arm.h:1998
-#, fuzzy, c-format
-msgid ""
-"%s: warning: unresolvable relocation %d against symbol `%s' from %s section"
-msgstr ""
-"%s: AVERTISSEMENT: relocalisation sans solution vers le symbole `%s' de la "
-"section %s"
+#, c-format
+msgid "%s: warning: unresolvable relocation %d against symbol `%s' from %s section"
+msgstr "%s: AVERTISSEMENT: relocalisation sans solution %d vers le symbole `%s' de la section %s"
 
 #: elf32-arm.h:2114
 #, c-format
-msgid ""
-"Warning: Not setting interwork flag of %s since it has already been "
-"specified as non-interworking"
-msgstr ""
-"AVERTISSEMENT: pas d'initialisation du fanion d'inter-réseautage %s alors "
-"qu'il a déjè été spécifié sans inter-réseautage"
+msgid "Warning: Not setting interwork flag of %s since it has already been specified as non-interworking"
+msgstr "AVERTISSEMENT: pas d'initialisation du fanion d'inter-réseautage %s alors qu'il a déjè été spécifié sans inter-réseautage"
 
 #: elf32-arm.h:2118
 #, c-format
 msgid "Warning: Clearing the interwork flag of %s due to outside request"
-msgstr ""
-"AVERTISSEMENT: mise à zéro du fanion d'inter-réseautage %s en raison d'une "
-"requête externe"
+msgstr "AVERTISSEMENT: mise à zéro du fanion d'inter-réseautage %s en raison d'une requête externe"
 
 #: elf32-arm.h:2166
 #, c-format
-msgid ""
-"Warning: Clearing the interwork flag in %s because non-interworking code in %"
-"s has been linked with it"
-msgstr ""
-"AVERTISSEMENT: mise à zéro du fanion d'inter-réseautage %s en raison du code "
-"sans inter-réseautage dans %s qui a été lié avec lui"
+msgid "Warning: Clearing the interwork flag in %s because non-interworking code in %s has been linked with it"
+msgstr "AVERTISSEMENT: mise à zéro du fanion d'inter-réseautage %s en raison du code sans inter-réseautage dans %s qui a été lié avec lui"
 
 #: elf32-arm.h:2261
 #, c-format
-msgid ""
-"Error: %s compiled for EABI version %d, whereas %s is compiled for version %d"
-msgstr ""
-"Erreur: %s compilé pour une version EABI %d, alors que %s a été compilé pour "
-"la version %d"
+msgid "Error: %s compiled for EABI version %d, whereas %s is compiled for version %d"
+msgstr "Erreur: %s compilé pour une version EABI %d, alors que %s a été compilé pour la version %d"
 
 #: elf32-arm.h:2275
 #, c-format
 msgid "Error: %s compiled for APCS-%d, whereas %s is compiled for APCS-%d"
-msgstr ""
-"Erreur: %s compilé pour APCS-%d, alors que %s a été compilé pour APCS-%d"
+msgstr "Erreur: %s compilé pour APCS-%d, alors que %s a été compilé pour APCS-%d"
 
 #: elf32-arm.h:2287
-#, fuzzy, c-format
-msgid ""
-"Error: %s passes floats in FP registers, whereas %s passes them in integer "
-"registers"
-msgstr ""
-"Erreur: %s passage de valeurs en virgule flottante dans les registres %s, "
-"alors que %s les passe dans les registres %s"
+#, c-format
+msgid "Error: %s passes floats in FP registers, whereas %s passes them in integer registers"
+msgstr "Erreur: %s passage de valeurs en virgule flottante dans les registres FP, alors que %s les passe dans les registres entiers"
 
 #: elf32-arm.h:2292
-#, fuzzy, c-format
-msgid ""
-"Error: %s passes floats in integer registers, whereas %s passes them in FP "
-"registers"
-msgstr ""
-"Erreur: %s passage de valeurs en virgule flottante dans les registres %s, "
-"alors que %s les passe dans les registres %s"
+#, c-format
+msgid "Error: %s passes floats in integer registers, whereas %s passes them in FP registers"
+msgstr "Erreur: %s passage de valeurs en virgule flottante dans les registres entiers, alors que %s les passe dans les registres FP"
 
 #: elf32-arm.h:2303
-#, fuzzy, c-format
+#, c-format
 msgid "Error: %s uses VFP instructions, whereas %s FPA instructions"
-msgstr ""
-"Erreur: %s utilise %s en virgule flottante, alors que %s utilise %s en "
-"virgule flottante"
+msgstr "Erreur: %s utilise les instructions VFP, alors que %s utilise les instructions FPA"
 
 #: elf32-arm.h:2308
-#, fuzzy, c-format
+#, c-format
 msgid "Error: %s uses FPA instructions, whereas %s VFP instructions"
-msgstr ""
-"Erreur: %s utilise %s en virgule flottante, alors que %s utilise %s en "
-"virgule flottante"
+msgstr "Erreur: %s utilise les instructions FPA, alors que %s utilise les instructions VFP"
 
 #: elf32-arm.h:2328
-#, fuzzy, c-format
+#, c-format
 msgid "Error: %s uses software FP, whereas %s uses hardware FP"
-msgstr ""
-"Erreur: %s utilise %s en virgule flottante, alors que %s utilise %s en "
-"virgule flottante"
+msgstr "Erreur: %s utilise le logiciel pour virgule flottante, alors que %s utilise le matériel pour virgule flottante"
 
 #: elf32-arm.h:2333
-#, fuzzy, c-format
+#, c-format
 msgid "Error: %s uses hardware FP, whereas %s uses software FP"
-msgstr ""
-"Erreur: %s utilise %s en virgule flottante, alors que %s utilise %s en "
-"virgule flottante"
+msgstr "Erreur: %s utilise le matériel pour virgule flottante, alors que %s utilise le logiciel pour virgule flottante"
 
 #: elf32-arm.h:2348
-#, fuzzy, c-format
+#, c-format
 msgid "Warning: %s supports interworking, whereas %s does not"
-msgstr ""
-"AVERTISSEMENT: file d'entrée %s supporte l'inter-réseautage, contrairement à "
-"%s."
+msgstr "AVERTISSEMENT: %s supporte l'inter-réseautage, contrairement à %s."
 
 #: elf32-arm.h:2355
-#, fuzzy, c-format
+#, c-format
 msgid "Warning: %s does not support interworking, whereas %s does"
-msgstr ""
-"AVERTISSEMENT: fichier d'entrée %s ne supporte pas l'inter-réseautage, "
-"contrairement à %s."
+msgstr "AVERTISSEMENT: %s ne supporte pas l'inter-réseautage, contrairement à %s."
 
 #. Ignore init flag - it may not be set, despite the flags field
 #. containing valid data.
@@ -920,11 +759,11 @@ msgstr " [APCS-32]"
 
 #: elf32-arm.h:2403
 msgid " [VFP float format]"
-msgstr ""
+msgstr " [format flottant VFP]"
 
 #: elf32-arm.h:2405
 msgid " [FPA float format]"
-msgstr ""
+msgstr " [format flottant FPA]"
 
 #: elf32-arm.h:2414
 msgid " [new ABI]"
@@ -951,17 +790,16 @@ msgid " [unsorted symbol table]"
 msgstr " [table des symboles non triés]"
 
 #: elf32-arm.h:2439
-#, fuzzy
 msgid " [Version2 EABI]"
-msgstr " [Version 1 EABI]"
+msgstr " [Version2 EABI]"
 
 #: elf32-arm.h:2447
 msgid " [dynamic symbols use segment index]"
-msgstr ""
+msgstr " [symboles dynamiques utilisent un index de segment]"
 
 #: elf32-arm.h:2450
 msgid " [mapping symbols precede others]"
-msgstr ""
+msgstr " [mapping de symboles précèdes les autres]"
 
 #: elf32-arm.h:2457
 msgid " <EABI version unrecognised>"
@@ -985,60 +823,47 @@ msgid "internal error: dangerous relocation"
 msgstr "erreur interne: relocalisation dangereuse"
 
 #: elf32-cris.c:949
-#, fuzzy, c-format
+#, c-format
 msgid "%s: unresolvable relocation %s against symbol `%s' from %s section"
-msgstr ""
-"%s: AVERTISSEMENT: relocalisation sans solution vers le symbole `%s' de la "
-"section %s"
+msgstr "%s: relocalisation %s sans solution vers le symbole `%s' à partir de la section %s"
 
 #: elf32-cris.c:1012
-#, fuzzy, c-format
-msgid ""
-"%s: No PLT nor GOT for relocation %s against symbol `%s' from %s section"
-msgstr ""
-"%s: AVERTISSEMENT: relocalisation sans solution vers le symbole `%s' de la "
-"section %s"
+#, c-format
+msgid "%s: No PLT nor GOT for relocation %s against symbol `%s' from %s section"
+msgstr "%s: pas de relocalisation %s PLT ni GOT vers le symbole `%s' à partir de la section %s"
 
 #: elf32-cris.c:1015 elf32-cris.c:1142
 msgid "[whose name is lost]"
-msgstr ""
+msgstr "[où le nom est perdu]"
 
 #: elf32-cris.c:1131
-#, fuzzy, c-format
-msgid ""
-"%s: relocation %s with non-zero addend %d against local symbol from %s "
-"section"
-msgstr ""
-"%s: AVERTISSEMENT: relocalisation sans solution vers le symbole `%s' de la "
-"section %s"
+#, c-format
+msgid "%s: relocation %s with non-zero addend %d against local symbol from %s section"
+msgstr "%s: relocalisation %s sans zéro ajoute %d vers le symbole local à partir de la section %s"
 
 #: elf32-cris.c:1138
-#, fuzzy, c-format
-msgid ""
-"%s: relocation %s with non-zero addend %d against symbol `%s' from %s section"
-msgstr ""
-"%s: AVERTISSEMENT: relocalisation sans solution vers le symbole `%s' de la "
-"section %s"
+#, c-format
+msgid "%s: relocation %s with non-zero addend %d against symbol `%s' from %s section"
+msgstr "%s: relocalisation %s sans zéro ajoute %d vers le symbole `%s' à partir de la section %s"
 
 #: elf32-cris.c:1156
-#, fuzzy, c-format
-msgid ""
-"%s: relocation %s is not allowed for global symbol: `%s' from %s section"
-msgstr "%s: relocalisation %s n'est pas encore supporté pour le symbole %s."
+#, c-format
+msgid "%s: relocation %s is not allowed for global symbol: `%s' from %s section"
+msgstr "%s: relocalisation %s n'est pas permise pour le symbole global: `%s' de la section %s."
 
 #: elf32-cris.c:1275
-#, fuzzy, c-format
+#, c-format
 msgid "%s: Internal inconsistency; no relocation section %s"
-msgstr "Ne peut repérer la section de relocalisation pour %s"
+msgstr "%s: inconsistence interne; pas de section de relocalisation %s"
 
 #: elf32-cris.c:2508
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "%s, section %s:\n"
 "  relocation %s should not be used in a shared object; recompile with -fPIC"
 msgstr ""
-"%s: relocalisation %s ne doit pas être utilisée lors de la création d'un "
-"objet partagé; recompiler avec -fPIC"
+"%s, section %s:\n"
+" relocalisation %s devrait être utilisée dans un objet partagé; recompiler avec -fPIC"
 
 #: elf32-cris.c:2973
 msgid " [symbols have a _ prefix]"
@@ -1047,21 +872,17 @@ msgstr " [symboles sont préfixés par `_']"
 #: elf32-cris.c:3012
 #, c-format
 msgid "%s: uses _-prefixed symbols, but writing file with non-prefixed symbols"
-msgstr ""
-"%s: utilise  _-prefixed symbols, mais avec écriture au fichier avec des "
-"symboles sans préfixes"
+msgstr "%s: utilise  _-prefixed symbols, mais avec écriture au fichier avec des symboles sans préfixes"
 
 #: elf32-cris.c:3013
 #, c-format
 msgid "%s: uses non-prefixed symbols, but writing file with _-prefixed symbols"
-msgstr ""
-"%s: utilise des symboles sans préfixes, mais avec écriture au fichier avec "
-"des symboles ayant des préfixes_-prefixed"
+msgstr "%s: utilise des symboles sans préfixes, mais avec écriture au fichier avec des symboles ayant des préfixes_-prefixed"
 
 #: elf32-gen.c:82 elf64-gen.c:82
 #, c-format
 msgid "%s: Relocations in generic ELF (EM: %d)"
-msgstr ""
+msgstr "%s: relocalisation en format ELF générique (EM: %d)"
 
 #: elf32-hppa.c:646
 #, c-format
@@ -1071,26 +892,17 @@ msgstr "%s: ne peut créer l'entrée du talon %s"
 #: elf32-hppa.c:937 elf32-hppa.c:3540
 #, c-format
 msgid "%s(%s+0x%lx): cannot reach %s, recompile with -ffunction-sections"
-msgstr ""
-"%s(%s+0x%lx): ne peut atteindre %s, recompiler avec -ffunction-sections"
+msgstr "%s(%s+0x%lx): ne peut atteindre %s, recompiler avec -ffunction-sections"
 
 #: elf32-hppa.c:1312
 #, c-format
-msgid ""
-"%s: relocation %s can not be used when making a shared object; recompile "
-"with -fPIC"
-msgstr ""
-"%s: relocalisation de %s ne peut être utilisée lors de la création d'un "
-"objet partagé; recompiler avec -fPIC"
+msgid "%s: relocation %s can not be used when making a shared object; recompile with -fPIC"
+msgstr "%s: relocalisation de %s ne peut être utilisée lors de la création d'un objet partagé; recompiler avec -fPIC"
 
 #: elf32-hppa.c:1332
 #, c-format
-msgid ""
-"%s: relocation %s should not be used when making a shared object; recompile "
-"with -fPIC"
-msgstr ""
-"%s: relocalisation %s ne doit pas être utilisée lors de la création d'un "
-"objet partagé; recompiler avec -fPIC"
+msgid "%s: relocation %s should not be used when making a shared object; recompile with -fPIC"
+msgstr "%s: relocalisation %s ne doit pas être utilisée lors de la création d'un objet partagé; recompiler avec -fPIC"
 
 #: elf32-hppa.c:1525
 #, c-format
@@ -1122,26 +934,24 @@ msgid "%s: invalid relocation type %d"
 msgstr "%s: type de relocalisation invalide %d"
 
 #: elf32-i386.c:718 elf32-s390.c:636 elf64-s390.c:595
-#, fuzzy, c-format
+#, c-format
 msgid "%s: bad symbol index: %d"
-msgstr "%s: symbole index illégal dans la relocalisation: %d"
+msgstr "%s: symbole index erroné: %d"
 
 #: elf32-i386.c:863 elf32-s390.c:790 elf64-ppc.c:2085 elf64-s390.c:759
-#, fuzzy, c-format
+#, c-format
 msgid "%s: bad relocation section name `%s'"
-msgstr "%s: nom illégal de section `%s'"
+msgstr "%s: nom de section de relocalisation erroné `%s'"
 
 #: elf32-i386.c:2067 elf32-s390.c:1949 elf64-ppc.c:3908 elf64-s390.c:1953
-#, fuzzy, c-format
+#, c-format
 msgid "%s(%s+0x%lx): unresolvable relocation against symbol `%s'"
-msgstr ""
-"%s: AVERTISSEMENT: relocalisation sans solution vers le symbole `%s' de la "
-"section %s"
+msgstr "%s(%s+0x%lx): relocalisation sans solution vers le symbole `%s'"
 
 #: elf32-i386.c:2105 elf32-s390.c:1987 elf64-s390.c:1991
-#, fuzzy, c-format
+#, c-format
 msgid "%s(%s+0x%lx): reloc against `%s': error %d"
-msgstr "%s(%s+0x%lx): ne traiter %s pour %s"
+msgstr "%s(%s+0x%lx): relocalisation vers `%s': erreur %d"
 
 #: elf32-m32r.c:924
 msgid "SDA relocation when _SDA_BASE_ not defined"
@@ -1155,8 +965,7 @@ msgstr "%s: type de relocalisation inconnu %d"
 #: elf32-m32r.c:1224
 #, c-format
 msgid "%s: The target (%s) of an %s relocation is in the wrong section (%s)"
-msgstr ""
-"%s: la cible (%s) de la relocalisation %s est dans la mauvaise section (%s)"
+msgstr "%s: la cible (%s) de la relocalisation %s est dans la mauvaise section (%s)"
 
 #: elf32-m32r.c:2001
 #, c-format
@@ -1207,14 +1016,12 @@ msgstr "%s: édition de liens des fichiers PIC avec des fichiers non PIC"
 #: elf32-mips.c:3129
 #, c-format
 msgid "%s: linking abicalls files with non-abicalls files"
-msgstr ""
-"%s: édition de liens des fichier abicalls avec des fichiers non abicalls"
+msgstr "%s: édition de liens des fichier abicalls avec des fichiers non abicalls"
 
 #: elf32-mips.c:3158
 #, c-format
 msgid "%s: ISA mismatch (-mips%d) with previous modules (-mips%d)"
-msgstr ""
-"%s: ISA ne concorde pas (-mips%d) avec les modules précédents (-mips%d)"
+msgstr "%s: ISA ne concorde pas (-mips%d) avec les modules précédents (-mips%d)"
 
 #: elf32-mips.c:3167
 #, c-format
@@ -1224,16 +1031,12 @@ msgstr "%s: ISA ne concorde pas (%d) avec les modules précédents (%d)"
 #: elf32-mips.c:3190
 #, c-format
 msgid "%s: ABI mismatch: linking %s module with previous %s modules"
-msgstr ""
-"%s: ABI ne concorde pas: édition de lien du module %s avec les modules "
-"précédents %s"
+msgstr "%s: ABI ne concorde pas: édition de lien du module %s avec les modules précédents %s"
 
 #: elf32-mips.c:3204 elf32-ppc.c:1470 elf64-ppc.c:1538 elf64-sparc.c:3033
 #, c-format
 msgid "%s: uses different e_flags (0x%lx) fields than previous modules (0x%lx)"
-msgstr ""
-"%s: utilise differents champs e_flags (0x%lx) que les modules précédents (0x%"
-"lx)"
+msgstr "%s: utilise differents champs e_flags (0x%lx) que les modules précédents (0x%lx)"
 
 #: elf32-mips.c:3235
 msgid " [abi=O32]"
@@ -1323,37 +1126,27 @@ msgstr "pas suffisamment d'espace GOT pour les entrées locales GOT"
 #: elf32-mips.c:7238 elf64-mips.c:4203
 #, c-format
 msgid "%s: %s+0x%lx: jump to stub routine which is not jal"
-msgstr ""
-"%s: %s+0x%lx: saut vers la routine dans la partie du talon (stub) qui n'est "
-"pas jal"
+msgstr "%s: %s+0x%lx: saut vers la routine dans la partie du talon (stub) qui n'est pas jal"
 
 #: elf32-mips.c:8237 elf64-mips.c:5891
-#, fuzzy, c-format
+#, c-format
 msgid "%s: Malformed reloc detected for section %s"
-msgstr "Relocalisation mal composée détectée dans la section %s"
+msgstr "%s: relocalisation mal composée détectée dans la section %s"
 
 #: elf32-mips.c:8315 elf64-mips.c:5969
 #, c-format
 msgid "%s: CALL16 reloc at 0x%lx not against global symbol"
-msgstr ""
-"%s: appel CALL16 de relocalisation à 0x%lx qui n'est pas pourun symbole "
-"global"
+msgstr "%s: appel CALL16 de relocalisation à 0x%lx qui n'est pas pourun symbole global"
 
 #: elf32-ppc.c:1436 elf64-ppc.c:1503
 #, c-format
-msgid ""
-"%s: compiled with -mrelocatable and linked with modules compiled normally"
-msgstr ""
-"%s: compilé avec -mrelocatable et fait l'édition de lien avec les modules "
-"compilés normalement"
+msgid "%s: compiled with -mrelocatable and linked with modules compiled normally"
+msgstr "%s: compilé avec -mrelocatable et fait l'édition de lien avec les modules compilés normalement"
 
 #: elf32-ppc.c:1444 elf64-ppc.c:1511
 #, c-format
-msgid ""
-"%s: compiled normally and linked with modules compiled with -mrelocatable"
-msgstr ""
-"%s: compilé normalement et fait l'édition de lien avec les modules compilés "
-"avec -mrelocatable"
+msgid "%s: compiled normally and linked with modules compiled with -mrelocatable"
+msgstr "%s: compilé normalement et fait l'édition de lien avec les modules compilés avec -mrelocatable"
 
 #: elf32-ppc.c:1568
 #, c-format
@@ -1363,9 +1156,7 @@ msgstr "%s: type d'édition spécial de lien inconnu %d"
 #: elf32-ppc.c:2218 elf32-ppc.c:2252 elf32-ppc.c:2287
 #, c-format
 msgid "%s: relocation %s cannot be used when making a shared object"
-msgstr ""
-"%s: relocalisation %s ne peut être utilisée lors de la création d'un objet "
-"partagé"
+msgstr "%s: relocalisation %s ne peut être utilisée lors de la création d'un objet partagé"
 
 #: elf32-ppc.c:3097 elf64-ppc.c:3500
 #, c-format
@@ -1374,11 +1165,8 @@ msgstr "%s: type de relocalisation inconnue %d pour le symbole %s"
 
 #: elf32-ppc.c:3452 elf32-ppc.c:3473 elf32-ppc.c:3523
 #, c-format
-msgid ""
-"%s: The target (%s) of a %s relocation is in the wrong output section (%s)"
-msgstr ""
-"%s: la cible (%s) d'une relocalisation %s est dans la mauvaise section de "
-"sortie (%s)"
+msgid "%s: The target (%s) of a %s relocation is in the wrong output section (%s)"
+msgstr "%s: la cible (%s) d'une relocalisation %s est dans la mauvaise section de sortie (%s)"
 
 #: elf32-ppc.c:3589
 #, c-format
@@ -1413,9 +1201,7 @@ msgstr "%s: 0x%lx: AVERTISSEMENT: symbole dans une section inattendue"
 #: elf32-sh.c:1323
 #, c-format
 msgid "%s: 0x%lx: warning: could not find expected COUNT reloc"
-msgstr ""
-"%s: 0x%lx: AVERTISSEMENT: ne peut repérer le compteur de relocalisation "
-"attendu"
+msgstr "%s: 0x%lx: AVERTISSEMENT: ne peut repérer le compteur de relocalisation attendu"
 
 #: elf32-sh.c:1332
 #, c-format
@@ -1425,13 +1211,12 @@ msgstr "%s: 0x%lx: AVERTISSEMENT: mauvais décompte"
 #: elf32-sh.c:1741 elf32-sh.c:2132
 #, c-format
 msgid "%s: 0x%lx: fatal: reloc overflow while relaxing"
-msgstr ""
-"%s: 0x%lx: erreur fatale: débordement de relocalisation lors de relâches"
+msgstr "%s: 0x%lx: erreur fatale: débordement de relocalisation lors de relâches"
 
 #: elf32-sh.c:3267
 #, c-format
 msgid "%s: 0x%lx: fatal: unaligned branch target for relax-support relocation"
-msgstr ""
+msgstr "%s: 0x%lx: fatal: cible de branchement non aligné pour une relocalisatin de type relax-support"
 
 #: elf32-sparc.c:1554 elf64-sparc.c:2286
 #, c-format
@@ -1457,35 +1242,23 @@ msgstr "Variable `%s' ne peut occuper de multiples petites régions de données"
 
 #: elf32-v850.c:685
 #, c-format
-msgid ""
-"Variable `%s' can only be in one of the small, zero, and tiny data regions"
-msgstr ""
-"Variable `%s' peut seulement être dans une région de données petite, zéro ou "
-"minuscule"
+msgid "Variable `%s' can only be in one of the small, zero, and tiny data regions"
+msgstr "Variable `%s' peut seulement être dans une région de données petite, zéro ou minuscule"
 
 #: elf32-v850.c:688
 #, c-format
-msgid ""
-"Variable `%s' cannot be in both small and zero data regions simultaneously"
-msgstr ""
-"Variable `%s' ne peut être dans une région de données petite et zéro à la "
-"fois"
+msgid "Variable `%s' cannot be in both small and zero data regions simultaneously"
+msgstr "Variable `%s' ne peut être dans une région de données petite et zéro à la fois"
 
 #: elf32-v850.c:691
 #, c-format
-msgid ""
-"Variable `%s' cannot be in both small and tiny data regions simultaneously"
-msgstr ""
-"Variable `%s' ne peut être dans une région de données petite et minuscule "
-"zéro à la fois"
+msgid "Variable `%s' cannot be in both small and tiny data regions simultaneously"
+msgstr "Variable `%s' ne peut être dans une région de données petite et minuscule zéro à la fois"
 
 #: elf32-v850.c:694
 #, c-format
-msgid ""
-"Variable `%s' cannot be in both zero and tiny data regions simultaneously"
-msgstr ""
-"Variable `%s' ne peut être dans une région de données zéro et minuscule zéro "
-"à la fois"
+msgid "Variable `%s' cannot be in both zero and tiny data regions simultaneously"
+msgstr "Variable `%s' ne peut être dans une région de données zéro et minuscule zéro à la fois"
 
 #: elf32-v850.c:1072
 msgid "FAILED to find previous HI16 reloc\n"
@@ -1535,50 +1308,42 @@ msgid "%s: .got subsegment exceeds 64K (size %d)"
 msgstr "%s: le sous-segment .got excède 64K (taille %d)"
 
 #: elf64-alpha.c:3518 elf64-alpha.c:3530
-#, fuzzy, c-format
+#, c-format
 msgid "%s: gp-relative relocation against dynamic symbol %s"
-msgstr "relocalisation relative gp 32bits est survenue pour un symbole externe"
+msgstr "%s: relocalisation relative gp vers le symbole dynamique %s"
 
 #: elf64-hppa.c:2070
 #, c-format
 msgid "stub entry for %s cannot load .plt, dp offset = %ld"
-msgstr ""
+msgstr "entrée du talon pour %s ne peut charger .plt, décalage dp = %ld"
 
 #: elf64-mmix.c:1268
-#, fuzzy, c-format
+#, c-format
 msgid "%s: register relocation against non-register symbol: %s in %s"
-msgstr ""
-"%s: AVERTISSEMENT: relocalisation sans solution vers le symbole `%s' de la "
-"section %s"
+msgstr "%s: relocalisation de registre vers le symbole non-registre: %s dans %s"
 
 #: elf64-mmix.c:1270
-#, fuzzy
 msgid "(unknown)"
-msgstr "*inconnu*"
+msgstr "(inconnu)"
 
 #: elf64-mmix.c:1305
 #, c-format
 msgid "%s: directive LOCAL valid only with a register or absolute value"
-msgstr ""
+msgstr "%s: directive LOCAL valide seulement avec un registre ou une valeur absolue"
 
 #: elf64-mmix.c:1333
 #, c-format
-msgid ""
-"%s: LOCAL directive: Register $%ld is not a local register.  First global "
-"register is $%ld."
-msgstr ""
+msgid "%s: LOCAL directive: Register $%ld is not a local register.  First global register is $%ld."
+msgstr "%s: directive LOCAL: registre $%ld n'est pas un registre local.  Premier registre global est $%ld."
 
 #: elf64-mmix.c:1609
 #, c-format
-msgid ""
-"%s: Error: multiple definition of `%s'; start of %s is set in a earlier "
-"linked file\n"
-msgstr ""
+msgid "%s: Error: multiple definition of `%s'; start of %s is set in a earlier linked file\n"
+msgstr "%s: erreur: multiple définitions de `%s'; début de %s est initialisé dans un précédent fichier lié\n"
 
 #: elf64-mmix.c:1668
-#, fuzzy
 msgid "Register section has contents\n"
-msgstr "Section sans contenu"
+msgstr "Registre de section contient\n"
 
 #: elf64-ppc.c:1466 libbfd.c:1436
 #, c-format
@@ -1597,21 +1362,21 @@ msgstr ""
 #: elf64-ppc.c:3166
 #, c-format
 msgid "linkage table overflow against `%s'"
-msgstr ""
+msgstr "débordement de la table de liaison vers `%s'"
 
 #: elf64-ppc.c:3244
 msgid "stub section size doesn't match calculated size"
-msgstr ""
+msgstr "taille de la section du talon ne concorde pas avec la taille calculée"
 
 #: elf64-ppc.c:3845
-#, fuzzy, c-format
+#, c-format
 msgid "%s: Relocation %s is not supported for symbol %s."
-msgstr "%s: relocalisation %s n'est pas encore supporté pour le symbole %s."
+msgstr "%s: relocalisation %s n'est pas supportée pour le symbole %s."
 
 #: elf64-ppc.c:3889
 #, c-format
 msgid "%s: error: relocation %s not a multiple of 4"
-msgstr ""
+msgstr "%s: erreur: relocalisation %s n'est pas un multiple de 4"
 
 #: elf64-sparc.c:1277
 #, c-format
@@ -1621,45 +1386,37 @@ msgstr "%s: check_relocs: type de relocalisation non traitée %d"
 #: elf64-sparc.c:1314
 #, c-format
 msgid "%s: Only registers %%g[2367] can be declared using STT_REGISTER"
-msgstr ""
-"%s: seuls les registres %%g[2367] peuvent être déclarés en utilisant les "
-"registres STT_REGISTER"
+msgstr "%s: seuls les registres %%g[2367] peuvent être déclarés en utilisant les registres STT_REGISTER"
 
 #: elf64-sparc.c:1334
-#, fuzzy, c-format
+#, c-format
 msgid "Register %%g%d used incompatibly: %s in %s"
-msgstr ""
-"Registre %%g%d utilisé de manière incompatible: déclaré précédemment dans %s "
-"vers %s, dans %s redéfini comme %s"
+msgstr "Registre %%g%d utilisé de manière incompatible: %s dans %s"
 
 #: elf64-sparc.c:1338 elf64-sparc.c:1362 elf64-sparc.c:1411
 #, c-format
 msgid "  previously %s in %s"
-msgstr ""
+msgstr " précédemment %s dans %s"
 
 #: elf64-sparc.c:1359 elf64-sparc.c:1408
-#, fuzzy, c-format
+#, c-format
 msgid "Symbol `%s' has differing types: %s in %s"
-msgstr "Symbole `%s' a des types qui diffèrent: ENREGISTRÉ dans %s, %s dans %s"
+msgstr "Symbole `%s' a des types qui diffèrent: %s dans %s"
 
 #: elf64-sparc.c:3014
 #, c-format
 msgid "%s: linking UltraSPARC specific with HAL specific code"
-msgstr ""
-"%s: édition de liens spécifiques pour UltraSPARC avec du code spécifique HAL"
+msgstr "%s: édition de liens spécifiques pour UltraSPARC avec du code spécifique HAL"
 
 #: elfcode.h:1218
 #, c-format
 msgid "%s: version count (%ld) does not match symbol count (%ld)"
-msgstr ""
-"%s: compteur de version (%ld) ne concorde pas avec le symbole du compteur (%"
-"ld)"
+msgstr "%s: compteur de version (%ld) ne concorde pas avec le symbole du compteur (%ld)"
 
 #: elflink.c:434
-#, fuzzy, c-format
+#, c-format
 msgid "%s: Section %s is too large to add hole of %ld bytes"
-msgstr ""
-"%s: section %s est déjà trop grande pour un faire un trou de %ld octets dans"
+msgstr "%s: section %s est trop grande pour ajouter un trou de %ld octets"
 
 #: elflink.h:1113
 #, c-format
@@ -1684,8 +1441,7 @@ msgstr "AVERTISSEMENT: taille du symbole `%s' a changé de %lu à %lu dans %s"
 #: elflink.h:4020
 #, c-format
 msgid "warning: type and size of dynamic symbol `%s' are not defined"
-msgstr ""
-"AVERTISSEMENT: type et taille du symbole dynamique `%s' ne sont pas définis"
+msgstr "AVERTISSEMENT: type et taille du symbole dynamique `%s' ne sont pas définis"
 
 #: elflink.h:4329
 #, c-format
@@ -1694,36 +1450,29 @@ msgstr "%s: nom symbole avec version indéfinie %s"
 
 #: elflink.h:4559 elflink.h:4567 elflink.h:6218 elflink.h:7295
 msgid "Error: out of memory"
-msgstr ""
+msgstr "Erreur: mémoire épuisée"
 
 #: elflink.h:4729
 msgid "Not enough memory to sort relocations"
-msgstr ""
+msgstr "Pas assez de mémoire pour effectuer le trie des relocalisations"
 
 #: elflink.h:5995
 #, c-format
 msgid "%s: could not find output section %s for input section %s"
-msgstr ""
-"%s: ne peut repérer la section de sortie %s pour la section d'entrée %s"
+msgstr "%s: ne peut repérer la section de sortie %s pour la section d'entrée %s"
 
 #: elflink.h:6568
-#, fuzzy
 msgid "warning: relocation against removed section; zeroing"
-msgstr ""
-"%s: AVERTISSEMENT: relocalisation sans solution vers le symbole `%s' de la "
-"section %s"
+msgstr "AVERTISSEMENT: relocalisation vers une section qui a été enlevée; mise à zéro"
 
 #: elflink.h:6598
-#, fuzzy
 msgid "warning: relocation against removed section"
-msgstr ""
-"%s: AVERTISSEMENT: relocalisation sans solution vers le symbole `%s' de la "
-"section %s"
+msgstr "AVERTISSEMENT: relocalisation vers une section enlevée"
 
 #: elflink.h:6611
 #, c-format
 msgid "local symbols in discarded section %s"
-msgstr ""
+msgstr "symboles locaux de la section mise à l'écart %s"
 
 #: i386linux.c:455 m68klinux.c:459 sparclinux.c:456
 #, c-format
@@ -1776,44 +1525,34 @@ msgid "%s:%d: unexpected character `%s' in Intel Hex file\n"
 msgstr "%s:%d: caractères inattendue `%s' dans le fichier Intel hexadécimal\n"
 
 #: ihex.c:368
-#, fuzzy, c-format
+#, c-format
 msgid "%s:%u: bad checksum in Intel Hex file (expected %u, found %u)"
-msgstr ""
-"%s:%d: somme de contrôle erronée dans le fichier Intel hexadécimal (attendu %"
-"u, obtenu %u)"
+msgstr "%s:%u: somme de contrôle erronée dans le fichier Intel hexadécimal (attendu %u, obtenu %u)"
 
 #: ihex.c:422
-#, fuzzy, c-format
+#, c-format
 msgid "%s:%u: bad extended address record length in Intel Hex file"
-msgstr ""
-"%s:%d: longueur erronée de l'enregistrement d'adresse étendue dans le "
-"fichier Intel hexadécimal"
+msgstr "%s:%u: longueur erronée de l'enregistrement d'adresse étendue dans le fichier Intel hexadécimal"
 
 #: ihex.c:439
-#, fuzzy, c-format
+#, c-format
 msgid "%s:%u: bad extended start address length in Intel Hex file"
-msgstr ""
-"%s:%d: longueur erronée d'adresse étendue de début dans le fichier Intel "
-"hexadécimal"
+msgstr "%s:%u: longueur erronée d'adresse étendue de début dans le fichier Intel hexadécimal"
 
 #: ihex.c:456
-#, fuzzy, c-format
+#, c-format
 msgid "%s:%u: bad extended linear address record length in Intel Hex file"
-msgstr ""
-"%s:%d: longueur erronée de l'enregistrement d'adresse étendue linéaire dans "
-"le fichier Intel hexadécimal"
+msgstr "%s:%u: longueur erronée de l'enregistrement d'adresse étendue linéaire dans le fichier Intel hexadécimal"
 
 #: ihex.c:473
-#, fuzzy, c-format
+#, c-format
 msgid "%s:%u: bad extended linear start address length in Intel Hex file"
-msgstr ""
-"%s:%d: longueur erronée d'adresse étendue linéraire de début dans le fichier "
-"Intel hexadécimal"
+msgstr "%s:%u: longueur erronée d'adresse étendue linéraire de début dans le fichier Intel hexadécimal"
 
 #: ihex.c:490
-#, fuzzy, c-format
+#, c-format
 msgid "%s:%u: unrecognized ihex type %u in Intel Hex file\n"
-msgstr "%s:%d: type ihex non reconnu %u dans le fichier Intel hexadécimal\n"
+msgstr "%s:%u: type ihex non reconnu %u dans le fichier Intel hexadécimal\n"
 
 #: ihex.c:610
 #, c-format
@@ -1842,170 +1581,152 @@ msgstr "pas de table de projection: variable d'environnement pas initialisée\n"
 #: libbfd.c:1463
 #, c-format
 msgid "Deprecated %s called"
-msgstr ""
+msgstr "%s appel déprécié"
 
 #: libbfd.c:1465
-#, fuzzy, c-format
+#, c-format
 msgid " at %s line %d in %s\n"
-msgstr "Erreur interne BFD, abandon à %s, ligne %d dans %s\n"
+msgstr " à %s ligne %d dans %s\n"
 
 #: linker.c:1849
 #, c-format
 msgid "%s: indirect symbol `%s' to `%s' is a loop"
-msgstr ""
+msgstr "%s: symbole indirect `%s' vers `%s' est une boucle"
 
 #: linker.c:2745
 #, c-format
 msgid "Attempt to do relocateable link with %s input and %s output"
-msgstr ""
-"Tentative de relocalisation d'un lien avec %s à l'entrée et %s à la sortie"
+msgstr "Tentative de relocalisation d'un lien avec %s à l'entrée et %s à la sortie"
 
 #: merge.c:897
 #, c-format
 msgid "%s: access beyond end of merged section (%ld + %ld)"
-msgstr ""
+msgstr "%s: accès au-delà de la fin de la section fusionnée (%ld + %ld)"
 
 #: mmo.c:460
-#, fuzzy, c-format
+#, c-format
 msgid "%s: No core to allocate section name %s\n"
-msgstr "%s: nom illégal de section `%s'"
+msgstr "%s: pas de corps pour allouer un nom de section %s\n"
 
 #: mmo.c:537
 #, c-format
 msgid "%s: No core to allocate a symbol %d bytes long\n"
-msgstr ""
+msgstr "%s: pas de corps pour allouer un symbole %d octets de longueur\n"
 
 #: mmo.c:1190
 #, c-format
 msgid "%s: invalid mmo file: initialization value for $255 is not `Main'\n"
-msgstr ""
+msgstr "%s: fichier mmo invalide: valeur d'initialisation pour $255 n'est pas `Main'\n"
 
 #: mmo.c:1336
 #, c-format
-msgid ""
-"%s: unsupported wide character sequence 0x%02X 0x%02X after symbol name "
-"starting with `%s'\n"
-msgstr ""
+msgid "%s: unsupported wide character sequence 0x%02X 0x%02X after symbol name starting with `%s'\n"
+msgstr "%s: séquence de caractères large 0x%02X 0x%02X non supportée après le nom de symbole débutant avec `%s'\n"
 
 #: mmo.c:1571
 #, c-format
 msgid "%s: invalid mmo file: unsupported lopcode `%d'\n"
-msgstr ""
+msgstr "%s: fichier mmo invalide: lopcode non supporté `%d'\n"
 
 #: mmo.c:1581
 #, c-format
 msgid "%s: invalid mmo file: expected YZ = 1 got YZ = %d for lop_quote\n"
-msgstr ""
+msgstr "%s: fichier mmo invalide: attendu YZ = 1 obtenu YZ = %d pour lop_quote\n"
 
 #: mmo.c:1617
 #, c-format
 msgid "%s: invalid mmo file: expected z = 1 or z = 2, got z = %d for lop_loc\n"
-msgstr ""
+msgstr "%s: fichier mmo invalide: attendu z = 1 ou z = 2, obtenu z = %d pour lop_loc\n"
 
 #: mmo.c:1663
 #, c-format
-msgid ""
-"%s: invalid mmo file: expected z = 1 or z = 2, got z = %d for lop_fixo\n"
-msgstr ""
+msgid "%s: invalid mmo file: expected z = 1 or z = 2, got z = %d for lop_fixo\n"
+msgstr "%s: fichier mmo invalide: attendu z = 1 ou z = 2, obtenu z = %d pour lop_fixo\n"
 
 #: mmo.c:1702
 #, c-format
 msgid "%s: invalid mmo file: expected y = 0, got y = %d for lop_fixrx\n"
-msgstr ""
+msgstr "%s: fichier mmo invalide: attendu y = 0, obtenu y = %d pour lop_fixrx\n"
 
 #: mmo.c:1711
 #, c-format
-msgid ""
-"%s: invalid mmo file: expected z = 16 or z = 24, got z = %d for lop_fixrx\n"
-msgstr ""
+msgid "%s: invalid mmo file: expected z = 16 or z = 24, got z = %d for lop_fixrx\n"
+msgstr "%s: fichier mmo invalide: attendu z = 16 ou z = 24, obtenu z = %d pour lop_fixrx\n"
 
 #: mmo.c:1734
 #, c-format
-msgid ""
-"%s: invalid mmo file: leading byte of operand word must be 0 or 1, got %d "
-"for lop_fixrx\n"
-msgstr ""
+msgid "%s: invalid mmo file: leading byte of operand word must be 0 or 1, got %d for lop_fixrx\n"
+msgstr "%s: fichier mmo invalide: octet de tête du mot de l'opérande doit être 0 ou 1, obtenu %d pour lop_fixrx\n"
 
 #: mmo.c:1757
 #, c-format
 msgid "%s: cannot allocate file name for file number %d, %d bytes\n"
-msgstr ""
+msgstr "%s: ne allouer un nom de ficheir pour le no. de fichier %d, %d octets\n"
 
 #: mmo.c:1777
 #, c-format
-msgid ""
-"%s: invalid mmo file: file number %d `%s', was already entered as `%s'\n"
-msgstr ""
+msgid "%s: invalid mmo file: file number %d `%s', was already entered as `%s'\n"
+msgstr "%s: fichier mmo invalide: no. de fichier %d `%s', a déjà été entré comme `%s'\n"
 
 #: mmo.c:1790
 #, c-format
-msgid ""
-"%s: invalid mmo file: file name for number %d was not specified before use\n"
-msgstr ""
+msgid "%s: invalid mmo file: file name for number %d was not specified before use\n"
+msgstr "%s: fichier mmo invalide: nom de fichier %d n'a pas été spécifié avant son utilisation\n"
 
 #: mmo.c:1896
 #, c-format
-msgid ""
-"%s: invalid mmo file: fields y and z of lop_stab non-zero, y: %d, z: %d\n"
-msgstr ""
+msgid "%s: invalid mmo file: fields y and z of lop_stab non-zero, y: %d, z: %d\n"
+msgstr "%s: fichier mmo invalide: champs y et z de lop_stab non null, y: %d, z: %d\n"
 
 #: mmo.c:1932
 #, c-format
 msgid "%s: invalid mmo file: lop_end not last item in file\n"
-msgstr ""
+msgstr "%s: fichier mmo invalide: lop_end N,est pas le dernier item dans le fichier\n"
 
 #: mmo.c:1945
 #, c-format
-msgid ""
-"%s: invalid mmo file: YZ of lop_end (%ld) not equal to the number of tetras "
-"to the preceding lop_stab (%ld)\n"
-msgstr ""
+msgid "%s: invalid mmo file: YZ of lop_end (%ld) not equal to the number of tetras to the preceding lop_stab (%ld)\n"
+msgstr "%s: fichier mmo invalide: YZ de lop_end (%ld) n'est pas égal au nombre de teras du lop_stab précédent (%ld)\n"
 
 #: mmo.c:2610
 #, c-format
 msgid "%s: invalid symbol table: duplicate symbol `%s'\n"
-msgstr ""
+msgstr "%s: table de symboles invalides: duplication du symbole `%s'\n"
 
 #: mmo.c:2898
 #, c-format
-msgid ""
-"%s: Bad symbol definition: `Main' set to %s rather than the start address %"
-"s\n"
-msgstr ""
+msgid "%s: Bad symbol definition: `Main' set to %s rather than the start address %s\n"
+msgstr "%s: définition de symbole erronée: `Main' initialisé à %s au lieu de l'adresse de départ %s\n"
 
 #: mmo.c:2932
 #, c-format
-msgid ""
-"%s: warning: symbol table too large for mmo, larger than 65535 32-bit words: "
-"%d.  Only `Main' will be emitted.\n"
-msgstr ""
+msgid "%s: warning: symbol table too large for mmo, larger than 65535 32-bit words: %d.  Only `Main' will be emitted.\n"
+msgstr "%s: avertissement: table de symboles trop grande pour mmo, plus grande que 65535 mots de 32 bits: %d. Seul `Main' sera produit.\n"
 
 #: mmo.c:2977
-#, fuzzy, c-format
+#, c-format
 msgid "%s: internal error, symbol table changed size from %d to %d words\n"
-msgstr "AVERTISSEMENT: type de symbole `%s' a changé de %d à %d dans %s"
+msgstr "%s: erreur interne, table de symbole a changé de taille de %d à %d mots\n"
 
 #: mmo.c:3032
-#, fuzzy, c-format
+#, c-format
 msgid "%s: internal error, internal register section %s had contents\n"
-msgstr "%s: erreur interne dans ihex_read_section"
+msgstr "%s: erreur interne, registre interne de section %s a du contenu\n"
 
 #: mmo.c:3084
 #, c-format
 msgid "%s: no initialized registers; section length 0\n"
-msgstr ""
+msgstr "%s: pas de registres initialisés; section de longeur 0\n"
 
 #: mmo.c:3090
 #, c-format
 msgid "%s: too many initialized registers; section length %ld\n"
-msgstr ""
+msgstr "%s: trop de resigstres initialisés; longueur de section %ld\n"
 
 #: mmo.c:3095
 #, c-format
-msgid ""
-"%s: invalid start address for initialized registers of length %ld: 0x%lx%"
-"08lx\n"
-msgstr ""
+msgid "%s: invalid start address for initialized registers of length %ld: 0x%lx%08lx\n"
+msgstr "%s: adresse de départ invalide pour des registres initialisés de longueur %ld: 0x%lx%08lx\n"
 
 #: oasys.c:1036
 #, c-format
@@ -2061,25 +1782,17 @@ msgstr "%s: type de nom d'importation non reconnu: %x"
 #: peicode.h:1162
 #, c-format
 msgid "%s: Unrecognised machine type (0x%x) in Import Library Format archive"
-msgstr ""
-"%s: type de machine non reconnue (0x%x) dans l'archive de librairie "
-"d'importation"
+msgstr "%s: type de machine non reconnue (0x%x) dans l'archive de librairie d'importation"
 
 #: peicode.h:1174
 #, c-format
-msgid ""
-"%s: Recognised but unhandled machine type (0x%x) in Import Library Format "
-"archive"
-msgstr ""
-"%s: type de machine reconnue mais non traitée (0x%x) dans l'archive da la "
-"librairie de formats d'importation"
+msgid "%s: Recognised but unhandled machine type (0x%x) in Import Library Format archive"
+msgstr "%s: type de machine reconnue mais non traitée (0x%x) dans l'archive da la librairie de formats d'importation"
 
 #: peicode.h:1191
 #, c-format
 msgid "%s: size field is zero in Import Library Format header"
-msgstr ""
-"%s: taille du champ est zéro dans l'en-tête de la librairie de formats "
-"d'importation"
+msgstr "%s: taille du champ est zéro dans l'en-tête de la librairie de formats d'importation"
 
 #: peicode.h:1219
 #, c-format
@@ -2087,12 +1800,8 @@ msgid "%s: string not null terminated in ILF object file."
 msgstr "%s: chaîne n'est pas terminée par un nulle dans le fichier objet ILF."
 
 #: ppcboot.c:416
-msgid ""
-"\n"
-"ppcboot header:\n"
-msgstr ""
-"\n"
-"En-têtes ppcboot:\n"
+msgid "\nppcboot header:\n"
+msgstr "\nEn-têtes ppcboot:\n"
 
 #: ppcboot.c:417
 #, c-format
@@ -2116,12 +1825,8 @@ msgstr "Nom de partition    = \"%s\"\n"
 
 #: ppcboot.c:446
 #, c-format
-msgid ""
-"\n"
-"Partition[%d] start  = { 0x%.2x, 0x%.2x, 0x%.2x, 0x%.2x }\n"
-msgstr ""
-"\n"
-"Début de partition[%d] = { 0x%.2x, 0x%.2x, 0x%.2x, 0x%.2x }\n"
+msgid "\nPartition[%d] start  = { 0x%.2x, 0x%.2x, 0x%.2x, 0x%.2x }\n"
+msgstr "\nDébut de partition[%d] = { 0x%.2x, 0x%.2x, 0x%.2x, 0x%.2x }\n"
 
 #: ppcboot.c:452
 #, c-format
@@ -2450,7 +2155,7 @@ msgstr "%s: pas de tel symbole"
 
 #: xcofflink.c:2890
 msgid "error: undefined symbol __rtinit"
-msgstr ""
+msgstr "erreur: symbole __rtinit indéfini"
 
 #: xcofflink.c:3458
 #, c-format
@@ -2460,9 +2165,7 @@ msgstr "AVERTISSEMENT: tentative d'exportation d'un symbole indéfini `%s'"
 #: xcofflink.c:4452
 #, c-format
 msgid "TOC overflow: 0x%lx > 0x10000; try -mminimal-toc when compiling"
-msgstr ""
-"Débordement de la table des entrées: 0x%lx > 0x10000; essayer l'option -"
-"mminimal-toc"
+msgstr "Débordement de la table des entrées: 0x%lx > 0x10000; essayer l'option -mminimal-toc"
 
 #: xcofflink.c:5292 xcofflink.c:5754 xcofflink.c:5816 xcofflink.c:6117
 #, c-format
@@ -2472,9 +2175,7 @@ msgstr "%s: chargeur de relocalisation dans une section non reconnnue `%s'"
 #: xcofflink.c:5314 xcofflink.c:6128
 #, c-format
 msgid "%s: `%s' in loader reloc but not loader sym"
-msgstr ""
-"%s: `%s' est dans le chargeur de relocalisation mais pas dans celui des "
-"symboles"
+msgstr "%s: `%s' est dans le chargeur de relocalisation mais pas dans celui des symboles"
 
 #: xcofflink.c:5329
 #, c-format
@@ -2482,81 +2183,73 @@ msgid "%s: loader reloc in read-only section %s"
 msgstr "%s: chargeur de relocalisation dans un section en lecture seulement %s"
 
 #: elf32-ia64.c:2190 elf64-ia64.c:2190
-#, fuzzy
 msgid "@pltoff reloc against local symbol"
-msgstr ""
-"%s: appel CALL16 de relocalisation à 0x%lx qui n'est pas pourun symbole "
-"global"
+msgstr "relocalisation @pltoff vers un symbole local"
 
 #: elf32-ia64.c:2248 elf64-ia64.c:2248
 msgid "non-zero addend in @fptr reloc"
-msgstr ""
+msgstr "ajout non null dans la relocalisation @fptr"
 
 #: elf32-ia64.c:3414 elf64-ia64.c:3414
 #, c-format
 msgid "%s: short data segment overflowed (0x%lx >= 0x400000)"
-msgstr ""
+msgstr "%s: débordement du segment de données court (0x%lx >= 0x400000)"
 
 #: elf32-ia64.c:3425 elf64-ia64.c:3425
 #, c-format
 msgid "%s: __gp does not cover short data segment"
-msgstr ""
+msgstr "%s: __gp ne couvre pas ce segment de données court"
 
 #: elf32-ia64.c:3729 elf64-ia64.c:3729
 #, c-format
 msgid "%s: linking non-pic code in a shared library"
-msgstr ""
+msgstr "%s: liaison de code non-pic dans une librairie partagée"
 
 #: elf32-ia64.c:3762 elf64-ia64.c:3762
-#, fuzzy, c-format
+#, c-format
 msgid "%s: @gprel relocation against dynamic symbol %s"
-msgstr "%s: type de relocalisation inconnue %d pour le symbole %s"
+msgstr "%s: relocalisation @gprel vers le symbole dynamique %s"
 
 #: elf32-ia64.c:3901 elf64-ia64.c:3901
-#, fuzzy, c-format
+#, c-format
 msgid "%s: dynamic relocation against speculation fixup"
-msgstr "%s: objet dynamique sans section .loader"
+msgstr "%s: relocalisation dynamique vers un correctif spéculé"
 
 #: elf32-ia64.c:3909 elf64-ia64.c:3909
 #, c-format
 msgid "%s: speculation fixup against undefined weak symbol"
-msgstr ""
+msgstr "%s: correctif spéculé vers un symbole faible indéfini"
 
 #: elf32-ia64.c:4093 elf64-ia64.c:4093
-#, fuzzy
 msgid "unsupported reloc"
-msgstr "type de relocalisation non supporté"
+msgstr "relocalisation non supporté"
 
 #: elf32-ia64.c:4373 elf64-ia64.c:4373
-#, fuzzy, c-format
+#, c-format
 msgid "%s: linking trap-on-NULL-dereference with non-trapping files"
-msgstr ""
-"%s: édition de liens des fichier abicalls avec des fichiers non abicalls"
+msgstr "%s: édition de liens trap-on-NULL-dereference avec des fichiers non-trapping"
 
 #: elf32-ia64.c:4382 elf64-ia64.c:4382
-#, fuzzy, c-format
+#, c-format
 msgid "%s: linking big-endian files with little-endian files"
 msgstr ""
-"%s: édition de liens pour des fichiers en système à octets de poids faibles\n"
-"avec des fichiers pour des systèmes à octets de poids fort"
+"%s: édition de liens pour des fichiers en système à octets de poids fort\n"
+"avec des fichiers pour des systèmes à octets de poids faible"
 
 #: elf32-ia64.c:4391 elf64-ia64.c:4391
-#, fuzzy, c-format
+#, c-format
 msgid "%s: linking 64-bit files with 32-bit files"
-msgstr ""
-"%s: édition de liens des fichier abicalls avec des fichiers non abicalls"
+msgstr "%s: édition de liens de fichiers de 64 bits avec des fichiers de 32 bits"
 
 #: elf32-ia64.c:4400 elf64-ia64.c:4400
-#, fuzzy, c-format
+#, c-format
 msgid "%s: linking constant-gp files with non-constant-gp files"
-msgstr ""
-"%s: édition de liens des fichier abicalls avec des fichiers non abicalls"
+msgstr "%s: édition de liens de fichiers constant-gp avec des fichier non-constant-gp"
 
 #: elf32-ia64.c:4410 elf64-ia64.c:4410
-#, fuzzy, c-format
+#, c-format
 msgid "%s: linking auto-pic files with non-auto-pic files"
-msgstr ""
-"%s: édition de liens des fichier abicalls avec des fichiers non abicalls"
+msgstr "%s: édition de liens de fichiers auto-pic avec des fichiers non-auto-pic"
 
 #: peigen.c:964 pepigen.c:964
 #, c-format
@@ -2604,7 +2297,6 @@ msgstr "Répertoire de description"
 msgid "Special Directory"
 msgstr "Répertoire spécial"
 
-# peigen.c:1033 MRO
 #: peigen.c:1004 pepigen.c:1004
 msgid "Thread Storage Directory [.tls]"
 msgstr "Répertoire des files de stockage [.tls]"
@@ -2630,31 +2322,18 @@ msgid "Reserved"
 msgstr "Réservé"
 
 #: peigen.c:1073 pepigen.c:1073
-msgid ""
-"\n"
-"There is an import table, but the section containing it could not be found\n"
-msgstr ""
-"\n"
-"Il y a une table d'importation, mais la section la contenant ne peut être "
-"repérée\n"
+msgid "\nThere is an import table, but the section containing it could not be found\n"
+msgstr "\nIl y a une table d'importation, mais la section la contenant ne peut être repérée\n"
 
 #: peigen.c:1078 pepigen.c:1078
 #, c-format
-msgid ""
-"\n"
-"There is an import table in %s at 0x%lx\n"
-msgstr ""
-"\n"
-"Il y a une table d'importation dans %s à 0x%lx\n"
+msgid "\nThere is an import table in %s at 0x%lx\n"
+msgstr "\nIl y a une table d'importation dans %s à 0x%lx\n"
 
 #: peigen.c:1115 pepigen.c:1115
 #, c-format
-msgid ""
-"\n"
-"Function descriptor located at the start address: %04lx\n"
-msgstr ""
-"\n"
-"Descripteur de fonction localisé à l'adresse de départ: %04lx\n"
+msgid "\nFunction descriptor located at the start address: %04lx\n"
+msgstr "\nDescripteur de fonction localisé à l'adresse de départ: %04lx\n"
 
 #: peigen.c:1118 pepigen.c:1118
 #, c-format
@@ -2662,42 +2341,27 @@ msgid "\tcode-base %08lx toc (loadable/actual) %08lx/%08lx\n"
 msgstr "\tcode-base %08lx tab. des entrées (chargeable/actuel) %08lx/%08lx\n"
 
 #: peigen.c:1124 pepigen.c:1124
-msgid ""
-"\n"
-"No reldata section! Function descriptor not decoded.\n"
-msgstr ""
-"\n"
-"Pas de section reldata! Descripteur de fonction n'a pas été décodé.\n"
+msgid "\nNo reldata section! Function descriptor not decoded.\n"
+msgstr "\nPas de section reldata! Descripteur de fonction n'a pas été décodé.\n"
 
 #: peigen.c:1129 pepigen.c:1129
 #, c-format
-msgid ""
-"\n"
-"The Import Tables (interpreted %s section contents)\n"
-msgstr ""
-"\n"
-"Les tables d'importation (contenus interprétés de la section %s)\n"
+msgid "\nThe Import Tables (interpreted %s section contents)\n"
+msgstr "\nLes tables d'importation (contenus interprétés de la section %s)\n"
 
-# peigen.c:1164 MRO
 #: peigen.c:1132 pepigen.c:1132
 msgid " vma:            Hint    Time      Forward  DLL       First\n"
 msgstr " vma:            Hint    Heure     Forward  DLL       Premier\n"
 
-# peigen.c:1166 MRO
 #: peigen.c:1134 pepigen.c:1134
 msgid "                 Table   Stamp     Chain    Name      Thunk\n"
 msgstr "                 Table   Tampon    Chaîne   Nom       Thunk\n"
 
 #: peigen.c:1182 pepigen.c:1182
 #, c-format
-msgid ""
-"\n"
-"\tDLL Name: %s\n"
-msgstr ""
-"\n"
-"\tNom DLL: %s\n"
+msgid "\n\tDLL Name: %s\n"
+msgstr "\n\tNom DLL: %s\n"
 
-# peigen.c:1220 peigen.c:1283 MRO
 #: peigen.c:1186 peigen.c:1249 pepigen.c:1186 pepigen.c:1249
 msgid "\tvma:  Hint/Ord Member-Name\n"
 msgstr "\tvma:  Hint/Nom-de-membre nombre ordinal\n"
@@ -2715,33 +2379,18 @@ msgid "\tThe Import Address Table is identical\n"
 msgstr "\tL'adresse de la table d'importation est identique\n"
 
 #: peigen.c:1345 pepigen.c:1345
-msgid ""
-"\n"
-"There is an export table, but the section containing it could not be found\n"
-msgstr ""
-"\n"
-"Il y a une table d'exportation, mais la section la contenant n'a pu être "
-"repérée\n"
+msgid "\nThere is an export table, but the section containing it could not be found\n"
+msgstr "\nIl y a une table d'exportation, mais la section la contenant n'a pu être repérée\n"
 
 #: peigen.c:1350 pepigen.c:1350
 #, c-format
-msgid ""
-"\n"
-"There is an export table in %s at 0x%lx\n"
-msgstr ""
-"\n"
-"Il y a une table d'exportation dans %s à 0x%lx\n"
+msgid "\nThere is an export table in %s at 0x%lx\n"
+msgstr "\nIl y a une table d'exportation dans %s à 0x%lx\n"
 
 #: peigen.c:1381 pepigen.c:1381
 #, c-format
-msgid ""
-"\n"
-"The Export Tables (interpreted %s section contents)\n"
-"\n"
-msgstr ""
-"\n"
-"Les tables d'exportation (contenus interprétés de la section %s)\n"
-"\n"
+msgid "\nThe Export Tables (interpreted %s section contents)\n\n"
+msgstr "\nLes tables d'exportation (contenus interprétés de la section %s)\n\n"
 
 #: peigen.c:1385 pepigen.c:1385
 #, c-format
@@ -2799,12 +2448,8 @@ msgstr "\tTable des ordinals \t\t\t"
 
 #: peigen.c:1441 pepigen.c:1441
 #, c-format
-msgid ""
-"\n"
-"Export Address Table -- Ordinal Base %ld\n"
-msgstr ""
-"\n"
-"Table d'adresses d'exportation -- base de nombre ordinal %ld\n"
+msgid "\nExport Address Table -- Ordinal Base %ld\n"
+msgstr "\nTable d'adresses d'exportation -- base de nombre ordinal %ld\n"
 
 #: peigen.c:1460 pepigen.c:1460
 msgid "Forwarder RVA"
@@ -2815,27 +2460,17 @@ msgid "Export RVA"
 msgstr "Exportation RVA"
 
 #: peigen.c:1478 pepigen.c:1478
-msgid ""
-"\n"
-"[Ordinal/Name Pointer] Table\n"
-msgstr ""
-"\n"
-"Table [Ordinal/Nom de pointeurs]\n"
+msgid "\n[Ordinal/Name Pointer] Table\n"
+msgstr "\nTable [Ordinal/Nom de pointeurs]\n"
 
 #: peigen.c:1533 pepigen.c:1533
 #, c-format
 msgid "Warning, .pdata section size (%ld) is not a multiple of %d\n"
-msgstr ""
-"AVERTISSEMENT, taille de la section .pdata (%ld) n'est pas un multiple de %"
-"d\n"
+msgstr "AVERTISSEMENT, taille de la section .pdata (%ld) n'est pas un multiple de %d\n"
 
 #: peigen.c:1537 pepigen.c:1537
-msgid ""
-"\n"
-"The Function Table (interpreted .pdata section contents)\n"
-msgstr ""
-"\n"
-"La table de fonctions (interprétation du contenu de la section .pdata)\n"
+msgid "\nThe Function Table (interpreted .pdata section contents)\n"
+msgstr "\nLa table de fonctions (interprétation du contenu de la section .pdata)\n"
 
 #: peigen.c:1540 pepigen.c:1540
 msgid " vma:\t\t\tBegin Address    End Address      Unwind Info\n"
@@ -2862,25 +2497,13 @@ msgid " Glue code sequence"
 msgstr " Séquence du code de liants"
 
 #: peigen.c:1671 pepigen.c:1671
-msgid ""
-"\n"
-"\n"
-"PE File Base Relocations (interpreted .reloc section contents)\n"
-msgstr ""
-"\n"
-"\n"
-"Fichier de base des relocalisation PE (contenus interprétés de la section ."
-"reloc)\n"
+msgid "\n\nPE File Base Relocations (interpreted .reloc section contents)\n"
+msgstr "\n\nFichier de base des relocalisation PE (contenus interprétés de la section .reloc)\n"
 
 #: peigen.c:1701 pepigen.c:1701
 #, c-format
-msgid ""
-"\n"
-"Virtual Address: %08lx Chunk size %ld (0x%lx) Number of fixups %ld\n"
-msgstr ""
-"\n"
-"Adresse virtuelle: %08lx taille des morceaux %ld (0x%lx) nombre de "
-"correctifs %ld\n"
+msgid "\nVirtual Address: %08lx Chunk size %ld (0x%lx) Number of fixups %ld\n"
+msgstr "\nAdresse virtuelle: %08lx taille des morceaux %ld (0x%lx) nombre de correctifs %ld\n"
 
 #: peigen.c:1714 pepigen.c:1714
 #, c-format
@@ -2892,12 +2515,8 @@ msgstr "\trelocalisation %4d décalage %4x [%4lx] %s"
 #. emulate it here.
 #: peigen.c:1754 pepigen.c:1754
 #, c-format
-msgid ""
-"\n"
-"Characteristics 0x%x\n"
-msgstr ""
-"\n"
-"Caractéristiques 0x%x\n"
+msgid "\nCharacteristics 0x%x\n"
+msgstr "\nCaractéristiques 0x%x\n"
 
 #~ msgid "float"
 #~ msgstr "flottant"
@@ -2930,20 +2549,13 @@ msgstr ""
 #~ msgstr "%s(%s+0x%lx): ne peut repérer l'entrée du talon %s"
 
 #~ msgid "%s(%s+0x%lx): cannot relocate %s, recompile with -ffunction-sections"
-#~ msgstr ""
-#~ "%s(%s+0x%lx): ne peut relocaliser %s, recompiler avec -ffunction-sections"
+#~ msgstr "%s(%s+0x%lx): ne peut relocaliser %s, recompiler avec -ffunction-sections"
 
 #~ msgid "Symbol `%s' has differing types: previously %s, REGISTER in %s"
-#~ msgstr ""
-#~ "Symbole `%s' a des types qui diffèrent: précédemment %s, ENREGISTRÉ dans %"
-#~ "s"
+#~ msgstr "Symbole `%s' a des types qui diffèrent: précédemment %s, ENREGISTRÉ dans %s"
 
-#~ msgid ""
-#~ "creating section symbol, name = %s, value = 0x%.8lx, index = %d, section "
-#~ "= 0x%.8lx\n"
-#~ msgstr ""
-#~ "création de la section des symboles, nom = %s, valeur = 0x%.8lx, index = %"
-#~ "d, section = 0x%.8lx\n"
+#~ msgid "creating section symbol, name = %s, value = 0x%.8lx, index = %d, section = 0x%.8lx\n"
+#~ msgstr "création de la section des symboles, nom = %s, valeur = 0x%.8lx, index = %d, section = 0x%.8lx\n"
 
 #~ msgid "       whereas segment starts at 0x%x"
 #~ msgstr "       alors que le segment débute à 0x%x"
