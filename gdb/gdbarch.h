@@ -2579,6 +2579,22 @@ extern void set_gdbarch_name_of_malloc (struct gdbarch *gdbarch, const char * na
 #endif
 #endif
 
+/* Default (value) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (CANNOT_STEP_BREAKPOINT)
+#define CANNOT_STEP_BREAKPOINT (0)
+#endif
+
+extern int gdbarch_cannot_step_breakpoint (struct gdbarch *gdbarch);
+extern void set_gdbarch_cannot_step_breakpoint (struct gdbarch *gdbarch, int cannot_step_breakpoint);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (CANNOT_STEP_BREAKPOINT)
+#error "Non multi-arch definition of CANNOT_STEP_BREAKPOINT"
+#endif
+#if GDB_MULTI_ARCH
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (CANNOT_STEP_BREAKPOINT)
+#define CANNOT_STEP_BREAKPOINT (gdbarch_cannot_step_breakpoint (current_gdbarch))
+#endif
+#endif
+
 extern struct gdbarch_tdep *gdbarch_tdep (struct gdbarch *gdbarch);
 
 

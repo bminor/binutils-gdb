@@ -1,3 +1,9 @@
+2002-10-02  Andrew Cagney  <ac131313@redhat.com>
+
+	* infrun.c (resume): Convert #ifdef CANNOT_STEP_BREAKPOINT into C.
+	* gdbarch.sh (CANNOT_STEP_BREAKPOINT): Add.
+	* gdbarch.h, gdbarch.c: Re-generate.
+
 2002-10-02  Daniel Jacobowitz  <drow@mvista.com>
 
 	Fix PR gdb/778

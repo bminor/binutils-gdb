@@ -269,6 +269,7 @@ struct gdbarch
   gdbarch_elf_make_msymbol_special_ftype *elf_make_msymbol_special;
   gdbarch_coff_make_msymbol_special_ftype *coff_make_msymbol_special;
   const char * name_of_malloc;
+  int cannot_step_breakpoint;
 };
 
 
@@ -427,6 +428,7 @@ struct gdbarch startup_gdbarch =
   0,
   0,
   "malloc",
+  0,
   /* startup_gdbarch() */
 };
 
@@ -804,6 +806,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of elf_make_msymbol_special, invalid_p == 0 */
   /* Skip verify of coff_make_msymbol_special, invalid_p == 0 */
   /* Skip verify of name_of_malloc, invalid_p == 0 */
+  /* Skip verify of cannot_step_breakpoint, invalid_p == 0 */
   buf = ui_file_xstrdup (log, &dummy);
   make_cleanup (xfree, buf);
   if (strlen (buf) > 0)
@@ -992,6 +995,14 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         "gdbarch_dump: CANNOT_FETCH_REGISTER = 0x%08lx\n",
                         (long) current_gdbarch->cannot_fetch_register
                         /*CANNOT_FETCH_REGISTER ()*/);
+#endif
+#ifdef CANNOT_STEP_BREAKPOINT
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: CANNOT_STEP_BREAKPOINT # %s\n",
+                      XSTRING (CANNOT_STEP_BREAKPOINT));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: CANNOT_STEP_BREAKPOINT = %d\n",
+                      CANNOT_STEP_BREAKPOINT);
 #endif
 #ifdef CANNOT_STORE_REGISTER
   fprintf_unfiltered (file,
@@ -5022,6 +5033,23 @@ set_gdbarch_name_of_malloc (struct gdbarch *gdbarch,
                             const char * name_of_malloc)
 {
   gdbarch->name_of_malloc = name_of_malloc;
+}
+
+int
+gdbarch_cannot_step_breakpoint (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  /* Skip verify of cannot_step_breakpoint, invalid_p == 0 */
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_cannot_step_breakpoint called\n");
+  return gdbarch->cannot_step_breakpoint;
+}
+
+void
+set_gdbarch_cannot_step_breakpoint (struct gdbarch *gdbarch,
+                                    int cannot_step_breakpoint)
+{
+  gdbarch->cannot_step_breakpoint = cannot_step_breakpoint;
 }
 
 

@@ -870,13 +870,14 @@ resume (int step, enum target_signal sig)
 	  resume_ptid = inferior_ptid;
 	}
 
-#ifdef CANNOT_STEP_BREAKPOINT
-      /* Most targets can step a breakpoint instruction, thus executing it
-         normally.  But if this one cannot, just continue and we will hit
-         it anyway.  */
-      if (step && breakpoints_inserted && breakpoint_here_p (read_pc ()))
-	step = 0;
-#endif
+      if (CANNOT_STEP_BREAKPOINT)
+	{
+	  /* Most targets can step a breakpoint instruction, thus
+	     executing it normally.  But if this one cannot, just
+	     continue and we will hit it anyway.  */
+	  if (step && breakpoints_inserted && breakpoint_here_p (read_pc ()))
+	    step = 0;
+	}
       target_resume (resume_ptid, step, sig);
     }
 
