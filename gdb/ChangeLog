@@ -1,3 +1,10 @@
+Tue Mar  3 14:37:02 1998  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+        * alpha-nat.c (fetch_osf_core_registers):  Renamed from
+        fetch_aout_core_registers.
+        (alpha_osf_core_fns):  Renamed from alpha_aout_core_fns, change
+        flavour to bfd_target_unknown_flavour for OSF core files.
+
 start-sanitize-vr4320
 Tue Mar  3 11:12:39 1998  Gavin Koch  <gavin@cygnus.com>
 

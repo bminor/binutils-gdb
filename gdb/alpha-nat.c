@@ -1,5 +1,5 @@
 /* Low level Alpha interface, for GDB when running native.
-   Copyright 1993, 1995, 1996 Free Software Foundation, Inc.
+   Copyright 1993, 1995, 1996, 1998 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -30,7 +30,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #endif
 #include <sys/user.h>
 
-static void fetch_core_registers PARAMS ((char *, unsigned, int, CORE_ADDR));
+static void fetch_osf_core_registers PARAMS ((char *,
+					      unsigned, int, CORE_ADDR));
+static void fetch_elf_core_registers PARAMS ((char *,
+					      unsigned, int, CORE_ADDR));
 
 /* Size of elements in jmpbuf */
 
@@ -81,7 +84,7 @@ get_longjmp_target (pc)
  */
 
 static void
-fetch_aout_core_registers (core_reg_sect, core_reg_size, which, reg_addr)
+fetch_osf_core_registers (core_reg_sect, core_reg_size, which, reg_addr)
      char *core_reg_sect;
      unsigned core_reg_size;
      int which;
@@ -268,10 +271,12 @@ fill_fpregset (fpregsetp, regno)
 
 /* Register that we are able to handle alpha core file formats. */
 
-static struct core_fns alpha_aout_core_fns =
+static struct core_fns alpha_osf_core_fns =
 {
-  bfd_target_aout_flavour,
-  fetch_aout_core_registers,
+  /* This really is bfd_target_unknown_flavour.  */
+
+  bfd_target_unknown_flavour,
+  fetch_osf_core_registers,
   NULL
 };
 
@@ -285,6 +290,6 @@ static struct core_fns alpha_elf_core_fns =
 void
 _initialize_core_alpha ()
 {
-  add_core_fns (&alpha_aout_core_fns);
+  add_core_fns (&alpha_osf_core_fns);
   add_core_fns (&alpha_elf_core_fns);
 }
