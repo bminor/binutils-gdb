@@ -164,8 +164,8 @@
 #include "libiberty.h"
 #include "bucomm.h"
 #include "getopt.h"
-
 #include <sys/types.h>
+#include "demangle.h"
 
 #ifdef HAVE_SYS_WAIT_H
 #include <sys/wait.h>
@@ -184,16 +184,18 @@
 #endif
 #endif
 
+
 char *ar_name = "ar";
 char *as_name = "as";
 char *ranlib_name = "ranlib";
 
 char *exp_name;
 char *imp_name;
+char *imp_name_lab;
 char *dll_name;
 
 int add_indirect = 0;
-
+int add_underscore = 0;
 int dontdeltemps = 0;
 
 int yydebug;
@@ -204,9 +206,9 @@ char *strrchr ();
 char *strdup ();
 
 static int machine;
-int suckunderscore;
 int killat;
 static int verbose;
+FILE *output_def;
 FILE *base_file;
 #ifdef DLLTOOL_ARM
 static char *mname = "arm";
@@ -236,7 +238,7 @@ mtable[]
 {
   {
 #define MARM 0
-    "arm", ".byte", ".short", ".long", ".asciz", "@", "ldr\tip,[pc]\n\tldr\tpc,[ip]\n\t.long", ".global", ".space", ".align\t2", 
+    "arm", ".byte", ".short", ".long", ".asciz", "@", "ldr\tip,[pc]\n\tldr\tpc,[ip]\n\t.long", ".global", ".space", ".align\t2",
   }
   ,
   {
@@ -244,24 +246,26 @@ mtable[]
     "i386", ".byte", ".short", ".long", ".asciz", "#", "jmp *", ".global", ".space", ".align\t2",
   }
   ,
-  0
+    0
 };
 
 
-char *rvaafter (machine)
-int machine;
+char *
+rvaafter (machine)
+     int machine;
 {
   switch (machine)
     {
     case MARM:
       return "";
     case M386:
-      return  "";
+      return "";
     }
 }
 
-char *rvabefore (machine)
-int machine;
+char *
+rvabefore (machine)
+     int machine;
 {
   switch (machine)
     {
@@ -272,7 +276,8 @@ int machine;
     }
 }
 
-char *asm_prefix (machine)
+char *
+asm_prefix (machine)
 {
   switch (machine)
     {
@@ -509,7 +514,7 @@ def_data (attr)
 
 /**********************************************************************/
 
-void 
+void
 run (what, args)
      char *what;
      char *args;
@@ -524,22 +529,23 @@ run (what, args)
 
   /* Count the args */
   i = 0;
-  for (s = args; *s ; s++)
+  for (s = args; *s; s++)
     if (*s == ' ')
       i++;
   i++;
-  argv = alloca (sizeof (char *) * (i + 3)); 
+  argv = alloca (sizeof (char *) * (i + 3));
   i = 0;
   argv[i++] = what;
   s = args;
-  while (1) {
-    argv[i++] = s;
-    while (*s != ' ' && *s != 0)
-      s++;
-    if (*s == 0)
-      break;
-    *s++ = 0;
-  }
+  while (1)
+    {
+      argv[i++] = s;
+      while (*s != ' ' && *s != 0)
+	s++;
+      if (*s == 0)
+	break;
+      *s++ = 0;
+    }
   argv[i++] = 0;
 
 
@@ -550,26 +556,26 @@ run (what, args)
       fprintf (stderr, "%s: can't exec %s\n", program_name, what);
       exit (1);
     }
-  else if (pid == -1) 
+  else if (pid == -1)
     {
       extern int errno;
       fprintf (stderr, "%s: vfork failed, %d\n", program_name, errno);
       exit (1);
     }
-  else 
+  else
     {
       int status;
       waitpid (pid, &status, 0);
-      if (status) 
+      if (status)
 	{
-	  if (WIFSIGNALED (status)) 
+	  if (WIFSIGNALED (status))
 	    {
 	      fprintf (stderr, "%s: %s %s terminated with signal %d\n",
-		       program_name, what, args,  WTERMSIG (status));
+		       program_name, what, args, WTERMSIG (status));
 	      exit (1);
 	    }
 
-	  if (WIFEXITED (status)) 
+	  if (WIFEXITED (status))
 	    {
 	      fprintf (stderr, "%s: %s %s terminated with exit status %d\n",
 		       program_name, what, args, WEXITSTATUS (status));
@@ -755,6 +761,24 @@ flush_page (f, need, page_addr, on_page)
 
 
 void
+gen_def_file ()
+{
+  int i;
+  export_type *exp;
+  fprintf (output_def, ";");
+  for (i = 0; oav[i]; i++)
+    fprintf (output_def, " %s", oav[i]);
+
+  fprintf (output_def, "\nEXPORTS\n");
+  for (i = 0, exp = d_exports; exp; i++, exp = exp->next)
+    {
+      fprintf (output_def, "\t%s @ %d; %s\n",
+	       exp->name,
+	       exp->ordinal,
+	       cplus_demangle (exp->internal_name, DMGL_ANSI | DMGL_PARAMS));
+    }
+}
+void
 gen_exp_file ()
 {
   FILE *f;
@@ -782,127 +806,129 @@ gen_exp_file ()
     }
 
   dump_def_info (f);
-  if (d_exports) {
-    fprintf (f, "\t.section	.edata\n\n");
-    fprintf (f, "\t%s	0	%s Allways 0\n", ASM_LONG, ASM_C);
-    fprintf (f, "\t%s	0	%s Time and date\n", ASM_LONG,  ASM_C);
-    fprintf (f, "\t%s	0	%s Major and Minor version\n", ASM_LONG, ASM_C);
-    fprintf (f, "\t%sname%s	%s Ptr to name of dll\n", ASM_RVA_BEFORE, ASM_RVA_AFTER, ASM_C);
-    fprintf (f, "\t%s	%d	%s Starting ordinal of exports\n", ASM_LONG, d_ord, ASM_C);
-    fprintf (f, "\t%s The next field is documented as being the number of functions\n", ASM_C);
-    fprintf (f, "\t%s yet it doesn't look like that in real PE dlls\n", ASM_C);
-    fprintf (f, "\t%s But it shouldn't be a problem, causes there's\n", ASM_C);
-    fprintf (f, "\t%s always the number of names field\n", ASM_C);
-    fprintf (f, "\t%s	%d	%s Number of functions\n", ASM_LONG, d_nfuncs, ASM_C);
-    fprintf (f, "\t%s	%d	%s Number of names\n", ASM_LONG, d_nfuncs, ASM_C);
-    fprintf (f, "\t%safuncs%s  %s Address of functions\n", ASM_RVA_BEFORE, ASM_RVA_AFTER, ASM_C);
-    fprintf (f, "\t%sanames%s	%s Address of names\n", ASM_RVA_BEFORE, ASM_RVA_AFTER, ASM_C);
-    fprintf (f, "\t%sanords%s	%s Address of ordinals\n", ASM_RVA_BEFORE, ASM_RVA_AFTER, ASM_C);
+  if (d_exports)
+    {
+      fprintf (f, "\t.section	.edata\n\n");
+      fprintf (f, "\t%s	0	%s Allways 0\n", ASM_LONG, ASM_C);
+      fprintf (f, "\t%s	0	%s Time and date\n", ASM_LONG, ASM_C);
+      fprintf (f, "\t%s	0	%s Major and Minor version\n", ASM_LONG, ASM_C);
+      fprintf (f, "\t%sname%s	%s Ptr to name of dll\n", ASM_RVA_BEFORE, ASM_RVA_AFTER, ASM_C);
+      fprintf (f, "\t%s	%d	%s Starting ordinal of exports\n", ASM_LONG, d_ord, ASM_C);
+      fprintf (f, "\t%s The next field is documented as being the number of functions\n", ASM_C);
+      fprintf (f, "\t%s yet it doesn't look like that in real PE dlls\n", ASM_C);
+      fprintf (f, "\t%s But it shouldn't be a problem, causes there's\n", ASM_C);
+      fprintf (f, "\t%s always the number of names field\n", ASM_C);
+      fprintf (f, "\t%s	%d	%s Number of functions\n", ASM_LONG, d_nfuncs, ASM_C);
+      fprintf (f, "\t%s	%d	%s Number of names\n", ASM_LONG, d_nfuncs, ASM_C);
+      fprintf (f, "\t%safuncs%s  %s Address of functions\n", ASM_RVA_BEFORE, ASM_RVA_AFTER, ASM_C);
+      fprintf (f, "\t%sanames%s	%s Address of names\n", ASM_RVA_BEFORE, ASM_RVA_AFTER, ASM_C);
+      fprintf (f, "\t%sanords%s	%s Address of ordinals\n", ASM_RVA_BEFORE, ASM_RVA_AFTER, ASM_C);
 
-    fprintf (f, "name:	%s	\"%s\"\n", ASM_TEXT, dll_name);
+      fprintf (f, "name:	%s	\"%s\"\n", ASM_TEXT, dll_name);
 
-    fprintf (f, "afuncs:\n");
-    i = d_ord;
-    for (exp = d_exports; exp; exp = exp->next)
-      {
+      fprintf (f, "afuncs:\n");
+      i = d_ord;
+      for (exp = d_exports; exp; exp = exp->next)
+	{
 #if 0
-	/* This seems necessary in the doc, but in real
-	   life it's not used.. */
-	if (exp->ordinal != i)
-	  {
-	    fprintf (f, "%s\t%s\t%d\t@ %d..%d missing\n", ASM_C, ASM_SPACE,
-		     (exp->ordinal - i) * 4,
-		     i, exp->ordinal - 1);
-	    i = exp->ordinal;
-	  }
+	  /* This seems necessary in the doc, but in real
+	     life it's not used.. */
+	  if (exp->ordinal != i)
+	    {
+	      fprintf (f, "%s\t%s\t%d\t@ %d..%d missing\n", ASM_C, ASM_SPACE,
+		       (exp->ordinal - i) * 4,
+		       i, exp->ordinal - 1);
+	      i = exp->ordinal;
+	    }
 #endif
-	fprintf (f, "\t%s%s%s%s\t%s %d\n",ASM_RVA_BEFORE,
-		ASM_PREFIX,
-		 exp->internal_name, ASM_RVA_AFTER, ASM_C, exp->ordinal);
-	i++;
-      }
+	  fprintf (f, "\t%s%s%s%s\t%s %d\n", ASM_RVA_BEFORE,
+		   ASM_PREFIX,
+		   exp->internal_name, ASM_RVA_AFTER, ASM_C, exp->ordinal);
+	  i++;
+	}
 
 
-    fprintf (f, "anames:\n");
-    for (i = 0, exp = d_exports; exp; i++, exp = exp->next)
-      {
+      fprintf (f, "anames:\n");
+      for (i = 0, exp = d_exports; exp; i++, exp = exp->next)
+	{
+	  if (exp->noname)
+	    {
+	      had_noname = 1;
+	      fprintf (f, "\t%s	nNoname\n", ASM_LONG, ASM_C);
+	    }
+	  else
+	    {
+	      fprintf (f, "\t%sn%d%s\n", ASM_RVA_BEFORE, i, ASM_RVA_AFTER);
+	    }
+	}
+
+      fprintf (f, "anords:\n");
+      for (exp = d_exports; exp; exp = exp->next)
+	fprintf (f, "\t%s	%d\n", ASM_SHORT, exp->ordinal - d_ord);
+
+      for (i = 0, exp = d_exports; exp; i++, exp = exp->next)
 	if (exp->noname)
-	  {
-	    had_noname = 1;
-	    fprintf (f, "\t%s	nNoname\n", ASM_LONG, ASM_C);
-	  }
+	  fprintf (f, "@n%d:	%s	\"%s\"\n", i, ASM_TEXT, exp->name);
 	else
-	  {
-	    fprintf (f, "\t%sn%d%s\n",  ASM_RVA_BEFORE, i, ASM_RVA_AFTER);
-	  }
-      }
+	  fprintf (f, "n%d:	%s	\"%s\"\n", i, ASM_TEXT, exp->name);
 
-    fprintf (f, "anords:\n");
-    for (exp = d_exports; exp; exp = exp->next)
-      fprintf (f, "\t%s	%d\n", ASM_SHORT, exp->ordinal - d_ord);
+      if (had_noname)
+	fprintf (f, "nNoname:	%s	\"__noname__\"\n", ASM_TEXT);
 
-    for (i = 0, exp = d_exports; exp; i++, exp = exp->next)
-      if (exp->noname)
-	fprintf (f, "@n%d:	%s	\"%s\"\n", i, ASM_TEXT, exp->name);
-      else
-	fprintf (f, "n%d:	%s	\"%s\"\n", i, ASM_TEXT, exp->name);
+      if (a_list)
+	{
+	  fprintf (f, "\t.section .drectve\n");
+	  for (dl = a_list; dl; dl = dl->next)
+	    {
+	      fprintf (f, "\t%s\t\"%s\"\n", ASM_TEXT, dl->text);
+	    }
+	}
+      if (d_list)
+	{
+	  fprintf (f, "\t.section .rdata\n");
+	  for (dl = d_list; dl; dl = dl->next)
+	    {
+	      char *p;
+	      int l;
+	      /* We dont output as ascii 'cause there can
+	         be quote characters in the string */
 
-    if (had_noname)
-      fprintf (f, "nNoname:	%s	\"__noname__\"\n", ASM_TEXT);
-
-    if (a_list)
-      {
-	fprintf (f, "\t.section .drectve\n");
-	for (dl = a_list; dl; dl = dl->next)
-	  {
-	    fprintf (f, "\t%s\t\"%s\"\n", ASM_TEXT, dl->text);
-	  }
-      }
-    if (d_list)
-      {
-	fprintf (f, "\t.section .rdata\n");
-	for (dl = d_list; dl; dl = dl->next)
-	  {
-	    char *p;
-	    int l;
-	    /* We dont output as ascii 'cause there can
-	       be quote characters in the string */
-
-	    l = 0;
-	    for (p = dl->text; *p; p++)
-	      {
-		if (l == 0)
-		  fprintf (f, "\t%s\t", ASM_BYTE);
-		else
-		  fprintf (f, ",");
-		fprintf (f, "%d", *p);
-		if (p[1] == 0)
-		  {
-		    fprintf (f, ",0\n");
-		    break;
-		  }
-		if (++l == 10)
-		  {
-		    fprintf (f, "\n");
-		    l = 0;
-		  }
-	      }
-	  }
-      }
-  }
+	      l = 0;
+	      for (p = dl->text; *p; p++)
+		{
+		  if (l == 0)
+		    fprintf (f, "\t%s\t", ASM_BYTE);
+		  else
+		    fprintf (f, ",");
+		  fprintf (f, "%d", *p);
+		  if (p[1] == 0)
+		    {
+		      fprintf (f, ",0\n");
+		      break;
+		    }
+		  if (++l == 10)
+		    {
+		      fprintf (f, "\n");
+		      l = 0;
+		    }
+		}
+	    }
+	}
+    }
 
 
   /* Add to the output file a way of getting to the exported names
      without using the import library. */
   if (add_indirect)
     {
-      fprintf (f,"\t.section\t.rdata\n");
+      fprintf (f, "\t.section\t.rdata\n");
       for (i = 0, exp = d_exports; exp; i++, exp = exp->next)
-	if (!exp->noname) {
-	  fprintf (f, "\t%s\t__imp_%s\n", ASM_GLOBAL, exp->name);
-	  fprintf (f, "__imp_%s:\n", exp->name);
-	  fprintf (f,"\t%s\t%s\n", ASM_LONG, exp->name);
-	}
+	if (!exp->noname)
+	  {
+	    fprintf (f, "\t%s\t__imp_%s\n", ASM_GLOBAL, exp->name);
+	    fprintf (f, "__imp_%s:\n", exp->name);
+	    fprintf (f, "\t%s\t%s\n", ASM_LONG, exp->name);
+	  }
     }
 
   /* Dump the reloc section if a base file is provided */
@@ -916,8 +942,8 @@ gen_exp_file ()
       long *copy;
       int j;
       int on_page;
-      fprintf (f,"\t.section\t.init\n");
-      fprintf (f,"lab:\n");
+      fprintf (f, "\t.section\t.init\n");
+      fprintf (f, "lab:\n");
 
       fseek (base_file, 0, SEEK_END);
       numbytes = ftell (base_file);
@@ -926,38 +952,40 @@ gen_exp_file ()
       fread (copy, 1, numbytes, base_file);
       num_entries = numbytes / sizeof (long);
 
-      if (num_entries) {
-	fprintf (f, "\t.section\t.reloc\n");
-	qsort (copy, num_entries, sizeof (long), sfunc);
 
-	addr = copy[0];
-	page_addr = addr & PAGE_MASK; /* work out the page addr */
-	on_page = 0;
-	for (j = 0; j < num_entries; j++)
-	  {
-	    addr = copy[j];
-	    if ((addr & PAGE_MASK) != page_addr)
-	      {
-		flush_page (f, need, page_addr, on_page);
-		on_page = 0;
-		page_addr = addr & PAGE_MASK;
-	      }
-	    need[on_page++] = addr;
-	  }
-	flush_page (f, need, page_addr, on_page);
+      fprintf (f, "\t.section\t.reloc\n");
+      if (num_entries)
+	{
+	  qsort (copy, num_entries, sizeof (long), sfunc);
 
-	fprintf (f, "\t%s\t0,0\t%s End\n", ASM_LONG, ASM_C);
-      }
+	  addr = copy[0];
+	  page_addr = addr & PAGE_MASK;		/* work out the page addr */
+	  on_page = 0;
+	  for (j = 0; j < num_entries; j++)
+	    {
+	      addr = copy[j];
+	      if ((addr & PAGE_MASK) != page_addr)
+		{
+		  flush_page (f, need, page_addr, on_page);
+		  on_page = 0;
+		  page_addr = addr & PAGE_MASK;
+		}
+	      need[on_page++] = addr;
+	    }
+	  flush_page (f, need, page_addr, on_page);
+
+	  fprintf (f, "\t%s\t0,0\t%s End\n", ASM_LONG, ASM_C);
+	}
     }
 
   fclose (f);
 
   /* assemble the file */
-  sprintf (outfile,"-o %s t%s", exp_name, exp_name);
+  sprintf (outfile, "-o %s t%s", exp_name, exp_name);
   run (as_name, outfile);
-  if (dontdeltemps==0) 
+  if (dontdeltemps == 0)
     {
-      sprintf (outfile,"t%s", exp_name);
+      sprintf (outfile, "t%s", exp_name);
       unlink (outfile);
     }
 }
@@ -965,12 +993,14 @@ gen_exp_file ()
 static char *
 xlate (char *name)
 {
+  if (add_underscore)
+    {
+      char *copy = malloc (strlen (name) + 2);
+      copy[0] = '_';
+      strcpy (copy + 1, name);
+      name = copy;
+    }
 
-  if (!suckunderscore)
-    return name;
-
-  if (name[0] == '_')
-    name++;
   if (killat)
     {
       char *p;
@@ -1005,19 +1035,19 @@ gen_lib_file ()
   fprintf (f, "%s IMAGE_IMPORT_DESCRIPTOR\n", ASM_C);
   fprintf (f, "\t.section	.idata$2\n");
 
-  fprintf (f, "\t%s\t__%s_head\n", ASM_GLOBAL, imp_name);
-  fprintf (f, "__%s_head:\n", imp_name);
+  fprintf (f, "\t%s\t__%s_head\n", ASM_GLOBAL, imp_name_lab);
+  fprintf (f, "__%s_head:\n", imp_name_lab);
 
   fprintf (f, "\t%shname%s\t%sPtr to image import by name list\n",
 	   ASM_RVA_BEFORE, ASM_RVA_AFTER, ASM_C);
 
   fprintf (f, "\t%sthis should be the timestamp, but NT sometimes\n", ASM_C);
   fprintf (f, "\t%sdoesn't load DLLs when this is set.\n", ASM_C);
-  fprintf (f, "\t%s\t0\t%s loaded time\n", ASM_LONG,  ASM_C);
+  fprintf (f, "\t%s\t0\t%s loaded time\n", ASM_LONG, ASM_C);
   fprintf (f, "\t%s\t0\t%s Forwarder chain\n", ASM_LONG, ASM_C);
   fprintf (f, "\t%s__%s_iname%s\t%s imported dll's name\n",
 	   ASM_RVA_BEFORE,
-	   imp_name,
+	   imp_name_lab,
 	   ASM_RVA_AFTER,
 	   ASM_C);
   fprintf (f, "\t%sfthunk%s\t%s pointer to firstthunk\n",
@@ -1049,7 +1079,7 @@ gen_lib_file ()
 	       exp->name, ASM_JUMP, exp->name);
 
       fprintf (f, "\t.section\t.idata$7\t%s To force loading of head\n", ASM_C);
-      fprintf (f, "\t%s\t__%s_head\n", ASM_LONG, imp_name);
+      fprintf (f, "\t%s\t__%s_head\n", ASM_LONG, imp_name_lab);
       fprintf (f, "\t.section	.idata$5\n");
 
 
@@ -1061,7 +1091,7 @@ gen_lib_file ()
 
       fprintf (f, "\n%s Hint name array\n", ASM_C);
       fprintf (f, "\t.section	.idata$4\n");
-      fprintf (f, "\t%sID%d%s\n",  ASM_RVA_BEFORE,
+      fprintf (f, "\t%sID%d%s\n", ASM_RVA_BEFORE,
 	       i,
 	       ASM_RVA_AFTER);
 
@@ -1074,16 +1104,16 @@ gen_lib_file ()
       fclose (f);
 
 
-      sprintf (outfile, "-o %ss%d.o %ss%d.s",    prefix, i, prefix, i);
+      sprintf (outfile, "-o %ss%d.o %ss%d.s", prefix, i, prefix, i);
       run (as_name, outfile);
     }
 
   sprintf (outfile, "%st.s", prefix);
   f = fopen (outfile, "w");
   fprintf (f, "\t.section	.idata$7\n");
-  fprintf (f, "\t%s\t__%s_iname\n", ASM_GLOBAL, imp_name);
+  fprintf (f, "\t%s\t__%s_iname\n", ASM_GLOBAL, imp_name_lab);
   fprintf (f, "__%s_iname:\t%s\t\"%s\"\n",
-	   imp_name, ASM_TEXT, dll_name);
+	   imp_name_lab, ASM_TEXT, dll_name);
 
 
   fprintf (f, "\t.section	.idata$4\n");
@@ -1115,7 +1145,7 @@ gen_lib_file ()
       sprintf (outfile + sol, " %ss%d.o", prefix, i);
       sol = strlen (outfile);
 
-      if (sol >100)
+      if (sol > 100)
 	{
 	  run (ar_name, outfile);
 	  sol = 0;
@@ -1364,7 +1394,7 @@ mangle_defs ()
 
 
   /* Work out exec prefix from the name of this file */
-void 
+void
 workout_prefix ()
 {
   char *ps = 0;
@@ -1406,9 +1436,9 @@ workout_prefix ()
 	  if (strncmp (p, "dlltool", 7) == 0)
 	    {
 	      int len = p - program_name;
-	      ar_name = xmalloc (len + strlen ("ar") +1);
-	      ranlib_name = xmalloc (len + strlen ("ranlib")+1);
-	      as_name = xmalloc (len + strlen ("as")+1);
+	      ar_name = xmalloc (len + strlen ("ar") + 1);
+	      ranlib_name = xmalloc (len + strlen ("ranlib") + 1);
+	      as_name = xmalloc (len + strlen ("as") + 1);
 
 	      memcpy (ar_name, program_name, len);
 	      strcpy (ar_name + len, "ar");
@@ -1436,9 +1466,10 @@ usage (file, status)
   fprintf (file, "   --add-indirect         Add dll indirects to export file.\n");
   fprintf (file, "   --dllname <name>       Name of input dll to put into output lib.\n");
   fprintf (file, "   --def <deffile>        Name input .def file\n");
+  fprintf (file, "   --output-def <deffile> Name output .def file\n");
   fprintf (file, "   --base-file <basefile> Read linker generated base file\n");
   fprintf (file, "   -v                     Verbose\n");
-  fprintf (file, "   -u                     Remove leading underscore from .lib\n");
+  fprintf (file, "   -U                     Add underscores to .lib\n");
   fprintf (file, "   -k                     Kill @<n> from exported names\n");
   fprintf (file, "   --nodelete             Keep temp files.\n");
   exit (status);
@@ -1446,12 +1477,13 @@ usage (file, status)
 
 static struct option long_options[] =
 {
-  {"nodelete", no_argument, NULL,'n'},
-  {"dllname", required_argument, NULL,'D'},
+  {"nodelete", no_argument, NULL, 'n'},
+  {"dllname", required_argument, NULL, 'D'},
   {"output-exp", required_argument, NULL, 'e'},
+  {"output-def", required_argument, NULL, 'z'},
   {"output-lib", required_argument, NULL, 'l'},
   {"def", required_argument, NULL, 'd'},
-  {"underscore", no_argument, NULL, 'u'},
+  {"add-underscore", no_argument, NULL, 'U'},
   {"killat", no_argument, NULL, 'k'},
   {"help", no_argument, NULL, 'h'},
   {"machine", required_argument, NULL, 'm'},
@@ -1472,12 +1504,18 @@ main (ac, av)
   program_name = av[0];
   oav = av;
 
-  while ((c = getopt_long (ac, av, "aD:l:e:nkvbuh?m:yd:", long_options, 0)) != EOF)
+  while ((c = getopt_long (ac, av, "uaD:l:e:nkvbUh?m:yd:", long_options, 0)) != EOF)
     {
       switch (c)
 	{
+	  /* ignored for compatibility */
+	case 'u':
+	  break;
 	case 'a':
 	  add_indirect = 1;
+	  break;
+	case 'z':
+	  output_def = fopen (optarg, "w");
 	  break;
 	case 'D':
 	  dll_name = optarg;
@@ -1501,8 +1539,8 @@ main (ac, av)
 	case 'y':
 	  yydebug = 1;
 	  break;
-	case 'u':
-	  suckunderscore = 1;
+	case 'U':
+	  add_underscore = 1;
 	  break;
 	case 'k':
 	  killat = 1;
@@ -1571,8 +1609,19 @@ main (ac, av)
   if (exp_name)
     gen_exp_file ();
   if (imp_name)
-    gen_lib_file ();
+    {
+      /* Make imp_name safe for use as a label. */
+      char *p;
+      imp_name_lab = strdup (imp_name);
+      for (p = imp_name_lab; *p; *p++)
+	{
+	  if (!isalpha (*p) && !isdigit (*p))
+	    *p = '_';
+	}
+      gen_lib_file ();
+    }
+  if (output_def)
+    gen_def_file ();
 
   return 0;
 }
-

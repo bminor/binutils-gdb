@@ -1,3 +1,9 @@
+Mon Oct  9 13:06:31 1995  steve chamberlain  <sac@slash.cygnus.com>
+
+	* dlltool.c (add_underscore): New.
+	(xlate): Use new name.
+	(main, usage): Update.
+
 Fri Oct  6 14:08:51 1995  Ken Raeburn  <raeburn@cygnus.com>
 
 	* sysinfo.y: Eliminate unused terminals "[" and "]" and unused
