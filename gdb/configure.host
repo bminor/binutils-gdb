@@ -12,7 +12,7 @@ case "${host_cpu}" in
 
 c[12])			gdb_host_cpu=convex ;;
 hppa*)			gdb_host_cpu=pa ;;
-i[3456]86)		gdb_host_cpu=i386 ;;
+i[3456]86*)		gdb_host_cpu=i386 ;;
 m68*)			gdb_host_cpu=m68k ;;
 m88*)			gdb_host_cpu=m88k ;;
 np1)			gdb_host_cpu=gould ;;
@@ -59,6 +59,7 @@ i[3456]86-*-mach3*)	gdb_host=i386m3 ;;
 i[3456]86-*-mach*)	gdb_host=i386mach ;;
 i[3456]86-*-gnu*)	gdb_host=i386gnu ;;
 i[3456]86-*-osf1mk*)	gdb_host=osf1mk ;;
+i[3456]86-*-pc-linux-gnu) gdb_host=linux ;;
 i[3456]86-*-sco3.2v5*)	gdb_host=i386sco5 ;;
 i[3456]86-*-sco3.2v4*)	gdb_host=i386sco4 ;;
 i[3456]86-*-sco*)	gdb_host=i386sco ;;

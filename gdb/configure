@@ -2663,7 +2663,7 @@ if test "${shared}" = "true"; then
     ;;
   *-*-linux*aout*)
     ;;
-  *-*-linux*)
+  *-*-linux* | *-pc-linux-gnu)
     HLDFLAGS='-Wl,-rpath,$(libdir)'
     ;;
   *-*-solaris*)
