@@ -1,3 +1,10 @@
+2003-02-27  David Carlton  <carlton@math.stanford.edu>
+
+	* symfile.c (compare_symbols): Use SYMBOL_NATURAL_NAME, not
+	SYMBOL_PRINT_NAME.
+	(compare_psymbols): Ditto.
+	* symtab.c (lookup_partial_symbol, lookup_block_symbol): Ditto.
+
 2003-02-27  Michael Snyder  <msnyder@redhat.com>
 
 	* f-lang.c (build_fortran_types): New function.

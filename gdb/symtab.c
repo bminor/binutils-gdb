@@ -1411,7 +1411,7 @@ lookup_partial_symbol (struct partial_symtab *pst, const char *name, int global,
 	    {
 	      do_linear_search = 1;
 	    }
-	  if (strcmp_iw_ordered (SYMBOL_PRINT_NAME (*center), name) >= 0)
+	  if (strcmp_iw_ordered (SYMBOL_NATURAL_NAME (*center), name) >= 0)
 	    {
 	      top = center;
 	    }
@@ -1657,15 +1657,15 @@ lookup_block_symbol (register const struct block *block, const char *name,
 	    {
 	      do_linear_search = 1;
 	    }
-	  if (SYMBOL_PRINT_NAME (sym)[0] < name[0])
+	  if (SYMBOL_NATURAL_NAME (sym)[0] < name[0])
 	    {
 	      bot = inc;
 	    }
-	  else if (SYMBOL_PRINT_NAME (sym)[0] > name[0])
+	  else if (SYMBOL_NATURAL_NAME (sym)[0] > name[0])
 	    {
 	      top = inc;
 	    }
-	  else if (strcmp (SYMBOL_PRINT_NAME (sym), name) < 0)
+	  else if (strcmp (SYMBOL_NATURAL_NAME (sym), name) < 0)
 	    {
 	      bot = inc;
 	    }
