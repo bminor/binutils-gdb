@@ -20,7 +20,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #define TARGET_BYTE_ORDER LITTLE_ENDIAN
 
-#define NUM_REGS 64
+#define NUM_REGS 65
 
 #define REGISTER_NAMES \
 { "r0", "r1", "r2", "sp", "gp", "r5", "r6", "r7", \
@@ -31,7 +31,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
   "eipc", "eipsw", "fepc", "fepsw", "ecr", "psw", "sr6", "sr7", \
   "sr8", "sr9", "sr10", "sr11", "sr12", "sr13", "sr14", "sr15", \
   "sr16", "sr17", "sr18", "sr19", "sr20", "sr21", "sr22", "sr23", \
-  "sr24", "sr25", "sr26", "sr27", "sr28", "sr29", "sr30", "sr31" }
+  "sr24", "sr25", "sr26", "sr27", "sr28", "sr29", "sr30", "sr31", \
+  "pc" }
 
 #define REGISTER_BYTES (NUM_REGS * 4)
 
@@ -41,7 +42,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define SP_REGNUM 3
 #define FP_REGNUM 2
 #define RP_REGNUM 31
-#define PC_REGNUM 32
+#define PC_REGNUM 64
 
 #define REGISTER_VIRTUAL_TYPE(REG) builtin_type_int
 
