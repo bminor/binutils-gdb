@@ -387,7 +387,6 @@ s_common ()
 #endif
     }
   know (symbolP->sy_frag == &zero_address_frag);
-#ifdef OBJ_ELF
   if (*input_line_pointer != ',')
     {
       as_bad ("Expected comma after common length");
@@ -411,11 +410,15 @@ s_common ()
 	}
       if (symbolP->local)
 	{
-	  segT old_sec = now_seg;
-	  int old_subsec = now_subseg;
+	  segT old_sec;
+	  int old_subsec;
 	  char *p;
-	  int align = temp;
+	  int align;
 
+	allocate_bss:
+	  old_sec = now_seg;
+	  old_subsec = now_subseg;
+	  align = temp;
 	  record_alignment (bss_section, align);
 	  subseg_set (bss_section, 0);
 	  if (align)
@@ -432,6 +435,7 @@ s_common ()
 	}
       else
 	{
+	allocate_common:
 	  S_SET_VALUE (symbolP, size);
 	  S_SET_EXTERNAL (symbolP);
 	  /* should be common, but this is how gas does it for now */
@@ -441,35 +445,39 @@ s_common ()
   else
     {
       input_line_pointer++;
+      /* @@ Some use the dot, some don't.  Can we get some consistency??  */
+      if (*input_line_pointer == '.')
+	input_line_pointer++;
+      /* @@ Some say data, some say bss.  */
       if (strncmp (input_line_pointer, "bss\"", 4)
-	  && strncmp (input_line_pointer, ".bss\"", 5))
+	  && strncmp (input_line_pointer, "data\"", 5))
 	{
-	  input_line_pointer -= 2;
+	  while (*--input_line_pointer != '"')
+	    ;
+	  input_line_pointer--;
 	  goto bad_common_segment;
 	}
       while (*input_line_pointer++ != '"')
 	;
-      demand_empty_rest_of_line ();
-      return;
+      goto allocate_common;
     }
-#endif
-  if (strncmp (input_line_pointer, ",\"bss\"", 6) != 0
-      && strncmp (input_line_pointer, ",\"data\"", 7) != 0)
-    {
-    bad_common_segment:
-      p = input_line_pointer;
-      while (*p && *p != '\n')
-	p++;
-      c = *p;
-      *p = '\0';
-      as_bad ("bad .common segment %s", input_line_pointer + 1);
-      *p = c;
-      return;
-    }
-  input_line_pointer += 6 + (input_line_pointer[2] == 'd');	/* Skip either */
   demand_empty_rest_of_line ();
   return;
-}				/* s_common() */
+
+  {
+  bad_common_segment:
+    p = input_line_pointer;
+    while (*p && *p != '\n')
+      p++;
+    c = *p;
+    *p = '\0';
+    as_bad ("bad .common segment %s", input_line_pointer + 1);
+    *p = c;
+    input_line_pointer = p;
+    ignore_rest_of_line ();
+    return;
+  }
+}
 
 static void
 s_seg ()
