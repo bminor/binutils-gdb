@@ -16,29 +16,23 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-/*
- * $Id$ 
-*/
-
-
-
 #include <stdio.h>
 #include "bfd.h"
 #include "sysdep.h"
 
+#include "ld.h"
 #include "ldver.h"
 #include "ldemul.h"
+#include "ldmain.h"
 
 void
-DEFUN(ldversion,(noisy),
-      int noisy)
-
+ldversion (noisy)
+     int noisy;
 {
-  fprintf(stdout,"ld version 1.97 (with BFD %s)\n", BFD_VERSION);
+  fprintf(stdout,"ld version 2.4.1 (with BFD %s)\n", BFD_VERSION);
 
   if (noisy) 
   {
-    extern ld_emulation_xfer_type *ld_emulations[];
     ld_emulation_xfer_type **ptr = ld_emulations;
     
     printf("  Supported emulations:\n");
@@ -48,4 +42,26 @@ DEFUN(ldversion,(noisy),
       ptr++;
     }
   }
+}
+
+void
+help ()
+{
+  printf ("\
+Usage: %s [-o output] objfile...\n\
+Options:\n\
+       [-A architecture] [-b input-format] [-Bstatic]\n\
+       [-c MRI-commandfile] [-d | -dc | -dp]\n\
+       [-defsym symbol=expression] [-e entry] [-F] [-Fformat]\n",
+	  program_name);
+  puts ("\
+       [-format input-format] [-g] [-G size] [-help] [-i]\n\
+       [-l archive] [-L searchdir] [-M] [-Map mapfile]\n\
+       [-m emulation] [-N | -n] [-noinhibit-exec]\n\
+       [-oformat output-format] [-R filename] [-relax]");
+  puts ("\
+       [-r | -Ur] [-S] [-s] [-sort-common] [-T commandfile]\n\
+       [-Ttext textorg] [-Tdata dataorg] [-Tbss bssorg] [-t]\n\
+       [-u symbol] [-V] [-v] [-version] [-warn-common]\n\
+       [-X] [-x] [-y symbol]");
 }

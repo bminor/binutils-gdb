@@ -1,5 +1,5 @@
 // Class Foo
-//#pragma implementation
+#pragma implementation
 
 
 // We don't use header files, since we only want to see, whether the

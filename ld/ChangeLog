@@ -1,3 +1,12 @@
+Wed May 11 18:16:46 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* ldver.c (ldversion): Updated version number.
+
+	* cdtest-foo.cc: Use explicit "#pragma implementation".
+	* cdtest-bar.cc: Renamed from cdtest-func.cc.
+	* Makefile.in: References to cdtest-func.o changed to
+	cdtest-bar.o.
+
 Wed May 11 16:24:19 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	Don't create unnecessary output sections.
