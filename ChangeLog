@@ -1,3 +1,8 @@
+Thu Oct 20 18:41:56 1994  Per Bothner  <bothner@kalessin.cygnus.com>
+
+	* config.guess:  Merge with FSF.
+	* configure.in:  Match on i?86-ncr-sysv4.3, not i?86-ncr-sysv43.
+
 Thu Oct 20 19:26:56 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* configure: Since the "trap 0" handler will override the exit

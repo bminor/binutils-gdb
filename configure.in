@@ -103,7 +103,7 @@ case "${host}" in
   mips*-sgi-irix3*)       host_makefile_frag=config/mh-sysv ;;
   mips*-*-sysv4*)	  host_makefile_frag=config/mh-sysv4 ;;
   mips*-*-sysv*)	  host_makefile_frag=config/mh-riscos ;;
-  i[345]86-ncr-sysv43)    host_makefile_frag=config/mh-ncrsvr43 ;;
+  i[345]86-ncr-sysv4.3)   host_makefile_frag=config/mh-ncrsvr43 ;;
   i[345]86-ncr-sysv4*)    host_makefile_frag=config/mh-ncr3000 ;;
   i[345]86-*-sco*)        host_makefile_frag=config/mh-sco ;;
   i[345]86-*-isc*)	  host_makefile_frag=config/mh-sysv ;;
