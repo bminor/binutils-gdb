@@ -37,7 +37,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <sys/ioctl.h>
 #include <sgtty.h>
 #include <fcntl.h>
-#include "/usr/include/wait.h"
+#include <sys/wait.h>
 
 char registers[REGISTER_BYTES];
 

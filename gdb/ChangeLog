@@ -1,3 +1,7 @@
+Fri Jan 14 21:55:39 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* gdbserver/low-lynx.c: Include <sys/wait.h> not "/usr/include/wait.h".
+
 Fri Jan 14 14:17:06 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* utils.c (request_quit): Re-establish signal handler regardless
