@@ -1,5 +1,12 @@
 2003-05-29  Mark Kettenis  <kettenis@gnu.org>
 
+	* i386-cygwin-tdep.c: Don't include "gdbcore.h", "frame.h" and
+	"dummy-frame.h".
+	(i386_cygwin_frame_chain_valid, i386_cygwin_frame_chain): Removed.
+	(_initialize_i386_cygwin_tdep): New prototype.
+	(i386_cygwin_init_abi): Don't set deprecated_frame_chain and
+	deprecated_frame_chain_valid.
+
 	* i386-tdep.c (i386_frame_this_id): Remove inside_entry_file
 	check.  The majority of i386 targets shouldn't need this, and it
 	hurts Cygwin.
