@@ -1,3 +1,8 @@
+Wed Aug 31 14:40:33 1994  Jason Molenda (crash@phydeaux.cygnus.com)
+
+	* remote-udi.c (udi_read_inferior_memory,udi_write_inferior_memory): 
+	change typeo in error msg (`inferrior' -> `inferior').
+
 Wed Aug 31 09:17:02 1994  Jim Kingdon  (kingdon@cygnus.com)
 
 	* inflow.c (set_sigint_trap, clear_sigint_trap): Check for

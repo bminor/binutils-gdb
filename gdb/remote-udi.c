@@ -1325,7 +1325,7 @@ udi_write_inferior_memory (memaddr, myaddr, len)
 	if (Count > MAXDATA) Count = MAXDATA;
   	To.Offset = memaddr + nwritten;
         if(UDIWrite(From, To, Count, Size, &CountDone, HostEndian))
-    	{  error("UDIWrite() failed in udi_write_inferrior_memory");
+    	{  error("UDIWrite() failed in udi_write_inferior_memory");
 	   break;	
 	}
 	else
@@ -1362,7 +1362,7 @@ udi_read_inferior_memory(memaddr, myaddr, len)
 	if (Count > MAXDATA) Count = MAXDATA;
   	From.Offset = memaddr + nread;
         if(err = UDIRead(From, To, Count, Size, &CountDone, HostEndian))
-    	{  error("UDIRead() failed in udi_read_inferrior_memory");
+    	{  error("UDIRead() failed in udi_read_inferior_memory");
 	   break;	
 	}
 	else
