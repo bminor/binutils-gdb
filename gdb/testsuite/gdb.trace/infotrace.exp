@@ -64,7 +64,7 @@ if { $c_test_num <= 0 || $asm_test_num <= 0 } then {
 
 # 2.1 info tracepoints (all)
 gdb_test "info tracepoints" \
-    "Num Enb Address    PassC StepC What.*$c_test_num\[\t \]+y\[\t \]+0x\[0-9a-fA-F\]+.*in gdb_c_test.*$asm_test_num\[\t \]+y\[\t \]+0x\[0-9a-fA-F\]+.*gdb_asm_test.*" \
+    "Num Enb Address\[ \]+PassC StepC What.*$c_test_num\[\t \]+y\[\t \]+0x\[0-9a-fA-F\]+.*in gdb_c_test.*$asm_test_num\[\t \]+y\[\t \]+0x\[0-9a-fA-F\]+.*gdb_asm_test.*" \
     "2.1: info tracepoints (all)"
 
 # 2.2 info tracepoint (specific)

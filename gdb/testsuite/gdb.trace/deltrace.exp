@@ -70,7 +70,7 @@ gdb_test "trace gdb_asm_test" "Tracepoint \[0-9\]+ at .*" "set tracepoint 2"
 gdb_test "trace $testline1"   "Tracepoint \[0-9\]+ at .*" "set tracepoint 3"
 
 gdb_test "info tracepoints" \
-    "Num Enb Address    PassC StepC What.*\[0-9\]+\[\t \]+y\[\t \]+0x\[0-9a-fA-F\]+.*in gdb_c_test.*\[0-9\]+\[\t \]+y\[\t \]+0x\[0-9a-fA-F\]+.*gdb_asm_test.*\[0-9\]+\[\t \]+y\[\t \]+0x\[0-9a-fA-F\]+.*in gdb_recursion_test.*" \
+    "Num Enb Address\[ \]+PassC StepC What.*\[0-9\]+\[\t \]+y\[\t \]+0x\[0-9a-fA-F\]+.*in gdb_c_test.*\[0-9\]+\[\t \]+y\[\t \]+0x\[0-9a-fA-F\]+.*gdb_asm_test.*\[0-9\]+\[\t \]+y\[\t \]+0x\[0-9a-fA-F\]+.*in gdb_recursion_test.*" \
 			"3.1a: set three tracepoints"
 
 send_gdb "delete tracepoints\n"
@@ -101,7 +101,7 @@ if { $trcpt1 <= 0 || $trcpt2 <= 0 || $trcpt3 <= 0 } then {
 }
 
 gdb_test "info tracepoints" \
-    "Num Enb Address    PassC StepC What.*$trcpt1\[\t \]+y\[\t \]+0x\[0-9a-fA-F\]+.*in.*gdb_c_test.*$trcpt2\[\t \]+y\[\t \]+0x\[0-9a-fA-F\]+.*gdb_asm_test.*$trcpt3\[\t \]+y\[\t \]+0x\[0-9a-fA-F\]+.*in.*gdb_recursion_test.*" \
+    "Num Enb Address\[ \]+PassC StepC What.*$trcpt1\[\t \]+y\[\t \]+0x\[0-9a-fA-F\]+.*in.*gdb_c_test.*$trcpt2\[\t \]+y\[\t \]+0x\[0-9a-fA-F\]+.*gdb_asm_test.*$trcpt3\[\t \]+y\[\t \]+0x\[0-9a-fA-F\]+.*in.*gdb_recursion_test.*" \
 			"3.2a: set three tracepoints"
 
 #gdb_test "delete tracepoint $trcpt1" "" ""
@@ -215,7 +215,7 @@ if { $trcpt1 <= 0 || $trcpt2 <= 0 || $trcpt3 <= 0 } then {
 }
 
 gdb_test "info tracepoints" \
-    "Num Enb Address    PassC StepC What.*$trcpt1\[\t \]+y\[\t \]+0x\[0-9a-fA-F\]+.*in gdb_c_test.*$trcpt2\[\t \]+y\[\t \]+0x\[0-9a-fA-F\]+.*gdb_asm_test.*$trcpt3\[\t \]+y\[\t \]+0x\[0-9a-fA-F\]+.*in gdb_recursion_test.*" \
+    "Num Enb Address\[ \]+PassC StepC What.*$trcpt1\[\t \]+y\[\t \]+0x\[0-9a-fA-F\]+.*in gdb_c_test.*$trcpt2\[\t \]+y\[\t \]+0x\[0-9a-fA-F\]+.*gdb_asm_test.*$trcpt3\[\t \]+y\[\t \]+0x\[0-9a-fA-F\]+.*in gdb_recursion_test.*" \
 			"3.3a: set three tracepoints"
 
 #gdb_test "delete tracepoint $trcpt1 $trcpt2 $trcpt3" "" ""

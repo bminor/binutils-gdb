@@ -478,19 +478,38 @@ tracepoints_info (char *tpnum_exp, int from_tty)
 	{
 	  printf_filtered ("Num Enb ");
 	  if (addressprint)
-	    printf_filtered ("Address    ");
+	    {
+	      if (TARGET_ADDR_BIT <= 32)
+		printf_filtered ("Address    ");
+	      else
+		printf_filtered ("Address            ");
+	    }
 	  printf_filtered ("PassC StepC What\n");
 	}
       strcpy (wrap_indent, "                           ");
       if (addressprint)
-	strcat (wrap_indent, "           ");
+	{
+	  if (TARGET_ADDR_BIT <= 32)
+	    strcat (wrap_indent, "           ");
+	  else
+	    strcat (wrap_indent, "                   ");
+	}
 
       printf_filtered ("%-3d %-3s ", t->number,
 		       t->enabled == enabled ? "y" : "n");
       if (addressprint)
-	printf_filtered ("%s ",
-			 local_hex_string_custom ((unsigned long) t->address,
-						  "08l"));
+	{
+	  char *tmp;
+
+	  if (TARGET_ADDR_BIT <= 32)
+	    tmp = longest_local_hex_string_custom (t->address
+						   & (CORE_ADDR) 0xffffffff, 
+						   "08l");
+	  else
+	    tmp = longest_local_hex_string_custom (t->address, "016l");
+
+	  printf_filtered ("%s ", tmp);
+	}
       printf_filtered ("%-5d %-5ld ", t->pass_count, t->step_count);
 
       if (t->source_file)
@@ -1542,7 +1561,8 @@ encode_actions (struct tracepoint *t, char ***tdp_actions,
 		  struct cleanup *old_chain1 = NULL;
 		  struct agent_reqs areqs;
 
-		  exp = parse_exp_1 (&action_exp, block_for_pc (t->address), 1);
+		  exp = parse_exp_1 (&action_exp, 
+				     block_for_pc (t->address), 1);
 		  old_chain = make_cleanup (free_current_contents, &exp);
 
 		  switch (exp->elts[0].opcode)

@@ -1,4 +1,13 @@
 2001-04-17  Michael Snyder  <msnyder@redhat.com>
+	
+	* breakpoint.c (print_one_breakpoint): Handle 64-bit addresses.
+	* tracepoint.c (tracepoints_info): Handle 64-bit addresses.
+	* testsuite/gdb.trace/deltrace.exp: Allow for 64-bit addresses.
+	* testsuite/gdb.trace/infotrace.exp: Ditto.
+	* testsuite/gdb.trace/passcount.exp: Ditto.
+	* testsuite/gdb.trace/while-stepping.exp: Ditto.
+
+2001-04-17  Michael Snyder  <msnyder@redhat.com>
 
 	* thread-db.c (check_thread_signals): When looping over all
 	signals, ignore signal zero.

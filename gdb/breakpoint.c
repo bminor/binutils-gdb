@@ -3148,7 +3148,12 @@ print_one_breakpoint (struct breakpoint *b,
   /* 5 and 6 */
   strcpy (wrap_indent, "                           ");
   if (addressprint)
-    strcat (wrap_indent, "           ");
+    {
+      if (TARGET_ADDR_BIT <= 32)
+	strcat (wrap_indent, "           ");
+      else
+	strcat (wrap_indent, "                   ");
+    }
   switch (b->type)
     {
     case bp_none:
@@ -3322,12 +3327,18 @@ print_one_breakpoint (struct breakpoint *b,
 #else
       if (addressprint)
 	{
+	  char *tmp;
+
 	  annotate_field (4);
-	  /* FIXME-32x64: need a print_address_numeric with
-	     field width */
-	  printf_filtered ("%s ",
-			   local_hex_string_custom
-			   ((unsigned long) b->address, "08l"));
+
+	  if (TARGET_ADDR_BIT <= 32)
+	    tmp = longest_local_hex_string_custom (b->address
+						   & (CORE_ADDR) 0xffffffff, 
+						   "08l");
+	  else
+	    tmp = longest_local_hex_string_custom (b->address, "016l");
+
+	  printf_filtered ("%s ", tmp);
 	}
       annotate_field (5);
       *last_addr = b->address;
@@ -3562,7 +3573,10 @@ breakpoint_1 (int bnum, int allflag)
 	    if (addressprint)
 	      {
 		annotate_field (4);
-		ui_out_table_header (uiout, 10, ui_left, "Address");	/* 5 */
+		if (TARGET_ADDR_BIT <= 32)
+		  ui_out_table_header (uiout, 10, ui_left, "Address");	/* 5 */
+		else
+		  ui_out_table_header (uiout, 18, ui_left, "Address");	/* 5 */
 	      }
 	    annotate_field (5);
 	    ui_out_table_header (uiout, 40, ui_noalign, "What");	/* 6 */
@@ -3579,7 +3593,10 @@ breakpoint_1 (int bnum, int allflag)
 	    if (addressprint)
 	      {
 		annotate_field (4);
-		printf_filtered ("Address    ");
+		if (TARGET_ADDR_BIT <= 32)
+		  printf_filtered ("Address    ");
+		else
+		  printf_filtered ("Address            ");
 	      }
 	    annotate_field (5);
 	    printf_filtered ("What\n");
