@@ -1,3 +1,9 @@
+2000-03-08  H.J. Lu  (hjl@gnu.org)
+
+	* Makefile.am (install-exec-tooldir): Depend on
+	install-exec-bindir for parallel make.
+	* Makefile.in: Regenerated.
+
 2000-03-06  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-m32r.c (struct md_longopts): Add -m32r command line

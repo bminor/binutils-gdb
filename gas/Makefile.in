@@ -2209,7 +2209,7 @@ install-exec-bindir: $(noinst_PROGRAMS)
 	  else :; fi; \
 	done
 
-install-exec-tooldir: $(noinst_PROGRAMS)
+install-exec-tooldir: install-exec-bindir $(noinst_PROGRAMS)
 	$(mkinstalldirs) $(tooldir)/bin
 	n=`echo as | sed '$(transform)'`; \
 	if [ "$(bindir)/$$n$(EXEEXT)" != "$(tooldir)/bin/as$(EXEEXT)" ]; then \
