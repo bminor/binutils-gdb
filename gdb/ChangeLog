@@ -1,3 +1,23 @@
+Thu Jul  9 18:44:26 1992  Ken Raeburn  (raeburn@cygnus.com)
+
+	* remote-vx.c (vx_kill): Don't look for arguments; they aren't
+	being passed.
+	(vx_read_register): Declare inferior_fp_regs.  Delete code for
+	copying "inferior_registers" around; the values are already in var
+	"registers".  Use correct size for register set.
+
+	* remote-vx.c (vx_write_register): Don't try writing FP regs; the
+	target doesn't support it.
+	(vx_read_register): Don't try reading them either.
+
+	* tm-i960.h (IP_REGNUM): Move to end of non-FP list, since the
+	VxWorks back end reads them in one contiguous set except for this
+	one.
+	(register_names): Change "pc" to "pcw" to avoid confusion printing
+	"$pc".
+	* tm-vx960.h (PC_REGNUM): Use RIP_REGNUM, since that's where we
+	find the PC under VxWorks.
+
 Wed Jul  8 21:34:30 1992  Fred Fish  (fnf@cygnus.com)
 
 	* dwarfread.c (alloc_utype, decode_subscr_data):  Call alloc_type
