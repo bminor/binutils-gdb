@@ -36,7 +36,6 @@
 
 /* Prototypes for supply_gregset etc. */
 #include "gregset.h"
-#include "mips-tdep.h"
 
 static void fetch_core_registers (char *, unsigned int, int, CORE_ADDR);
 
@@ -56,23 +55,19 @@ supply_gregset (gregset_t *gregsetp)
 {
   int regi;
   greg_t *regp = &(*gregsetp)[0];
-  int gregoff = sizeof (greg_t) - mips_regsize (current_gdbarch);
+  int gregoff = sizeof (greg_t) - MIPS_REGSIZE;
   static char zerobuf[32] = {0};
 
   for (regi = 0; regi <= CTX_RA; regi++)
     supply_register (regi, (char *) (regp + regi) + gregoff);
 
-  supply_register (mips_regnum (current_gdbarch)->pc,
-		   (char *) (regp + CTX_EPC) + gregoff);
-  supply_register (mips_regnum (current_gdbarch)->hi,
-		   (char *) (regp + CTX_MDHI) + gregoff);
-  supply_register (mips_regnum (current_gdbarch)->lo,
-		   (char *) (regp + CTX_MDLO) + gregoff);
-  supply_register (mips_regnum (current_gdbarch)->cause,
-		   (char *) (regp + CTX_CAUSE) + gregoff);
+  supply_register (PC_REGNUM, (char *) (regp + CTX_EPC) + gregoff);
+  supply_register (HI_REGNUM, (char *) (regp + CTX_MDHI) + gregoff);
+  supply_register (LO_REGNUM, (char *) (regp + CTX_MDLO) + gregoff);
+  supply_register (CAUSE_REGNUM, (char *) (regp + CTX_CAUSE) + gregoff);
 
   /* Fill inaccessible registers with zero.  */
-  supply_register (mips_regnum (current_gdbarch)->badvaddr, zerobuf);
+  supply_register (BADVADDR_REGNUM, zerobuf);
 }
 
 void
@@ -93,24 +88,23 @@ fill_gregset (gregset_t *gregsetp, int regno)
 
   if ((regno == -1) || (regno == PC_REGNUM))
     *(regp + CTX_EPC) =
-      extract_signed_integer (&deprecated_registers[DEPRECATED_REGISTER_BYTE (mips_regnum (current_gdbarch)->pc)],
-			      DEPRECATED_REGISTER_RAW_SIZE (mips_regnum (current_gdbarch)->pc));
+      extract_signed_integer (&deprecated_registers[DEPRECATED_REGISTER_BYTE (PC_REGNUM)],
+			      DEPRECATED_REGISTER_RAW_SIZE (PC_REGNUM));
 
-  if ((regno == -1) || (regno == mips_regnum (current_gdbarch)->cause))
+  if ((regno == -1) || (regno == CAUSE_REGNUM))
     *(regp + CTX_CAUSE) =
-      extract_signed_integer (&deprecated_registers[DEPRECATED_REGISTER_BYTE (mips_regnum (current_gdbarch)->cause)],
-			      DEPRECATED_REGISTER_RAW_SIZE (mips_regnum (current_gdbarch)->cause));
+      extract_signed_integer (&deprecated_registers[DEPRECATED_REGISTER_BYTE (CAUSE_REGNUM)],
+			      DEPRECATED_REGISTER_RAW_SIZE (CAUSE_REGNUM));
 
-  if ((regno == -1)
-      || (regno == mips_regnum (current_gdbarch)->hi))
+  if ((regno == -1) || (regno == HI_REGNUM))
     *(regp + CTX_MDHI) =
-      extract_signed_integer (&deprecated_registers[DEPRECATED_REGISTER_BYTE (mips_regnum (current_gdbarch)->hi)],
-			      DEPRECATED_REGISTER_RAW_SIZE (mips_regnum (current_gdbarch)->hi));
+      extract_signed_integer (&deprecated_registers[DEPRECATED_REGISTER_BYTE (HI_REGNUM)],
+			      DEPRECATED_REGISTER_RAW_SIZE (HI_REGNUM));
 
-  if ((regno == -1) || (regno == mips_regnum (current_gdbarch)->lo))
+  if ((regno == -1) || (regno == LO_REGNUM))
     *(regp + CTX_MDLO) =
-      extract_signed_integer (&deprecated_registers[DEPRECATED_REGISTER_BYTE (mips_regnum (current_gdbarch)->lo)],
-			      DEPRECATED_REGISTER_RAW_SIZE (mips_regnum (current_gdbarch)->lo));
+      extract_signed_integer (&deprecated_registers[DEPRECATED_REGISTER_BYTE (LO_REGNUM)],
+			      DEPRECATED_REGISTER_RAW_SIZE (LO_REGNUM));
 }
 
 /*
@@ -133,12 +127,10 @@ supply_fpregset (fpregset_t *fpregsetp)
     supply_register (FP0_REGNUM + regi,
 		     (char *) &fpregsetp->fp_r.fp_regs[regi]);
 
-  supply_register (mips_regnum (current_gdbarch)->fp_control_status,
-		   (char *) &fpregsetp->fp_csr);
+  supply_register (FCRCS_REGNUM, (char *) &fpregsetp->fp_csr);
 
-  /* FIXME: how can we supply FCRIR?  SGI doesn't tell us. */
-  supply_register (mips_regnum (current_gdbarch)->fp_implementation_revision,
-		   zerobuf);
+  /* FIXME: how can we supply FCRIR_REGNUM?  SGI doesn't tell us. */
+  supply_register (FCRIR_REGNUM, zerobuf);
 }
 
 void
@@ -159,9 +151,8 @@ fill_fpregset (fpregset_t *fpregsetp, int regno)
 	}
     }
 
-  if ((regno == -1)
-      || (regno == mips_regnum (current_gdbarch)->fp_control_status))
-    fpregsetp->fp_csr = *(unsigned *) &deprecated_registers[DEPRECATED_REGISTER_BYTE (mips_regnum (current_gdbarch)->fp_control_status)];
+  if ((regno == -1) || (regno == FCRCS_REGNUM))
+    fpregsetp->fp_csr = *(unsigned *) &deprecated_registers[DEPRECATED_REGISTER_BYTE (FCRCS_REGNUM)];
 }
 
 
@@ -209,8 +200,8 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size,
     {
       memcpy ((char *) deprecated_registers, core_reg_sect, core_reg_size);
     }
-  else if (mips_regsize (current_gdbarch) == 4 &&
-	   core_reg_size == (2 * mips_regsize (current_gdbarch)) * NUM_REGS)
+  else if (MIPS_REGSIZE == 4 &&
+	   core_reg_size == (2 * MIPS_REGSIZE) * NUM_REGS)
     {
       /* This is a core file from a N32 executable, 64 bits are saved
          for all registers.  */

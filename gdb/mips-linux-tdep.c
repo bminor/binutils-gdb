@@ -85,8 +85,8 @@ mips_linux_get_longjmp_target (CORE_ADDR *pc)
   return 1;
 }
 
-/* Transform the bits comprising a 32-bit register to the right size
-   for supply_register().  This is needed when mips_regsize() is 8.  */
+/* Transform the bits comprising a 32-bit register to the right
+   size for supply_register().  This is needed when MIPS_REGSIZE is 8.  */
 
 static void
 supply_32bit_reg (int regnum, const void *addr)
@@ -111,18 +111,13 @@ supply_gregset (elf_gregset_t *gregsetp)
   for (regi = EF_REG0; regi <= EF_REG31; regi++)
     supply_32bit_reg ((regi - EF_REG0), (char *)(regp + regi));
 
-  supply_32bit_reg (mips_regnum (current_gdbarch)->lo,
-		    (char *)(regp + EF_LO));
-  supply_32bit_reg (mips_regnum (current_gdbarch)->hi,
-		    (char *)(regp + EF_HI));
+  supply_32bit_reg (LO_REGNUM, (char *)(regp + EF_LO));
+  supply_32bit_reg (HI_REGNUM, (char *)(regp + EF_HI));
 
-  supply_32bit_reg (mips_regnum (current_gdbarch)->pc,
-		    (char *)(regp + EF_CP0_EPC));
-  supply_32bit_reg (mips_regnum (current_gdbarch)->badvaddr,
-		    (char *)(regp + EF_CP0_BADVADDR));
+  supply_32bit_reg (PC_REGNUM, (char *)(regp + EF_CP0_EPC));
+  supply_32bit_reg (BADVADDR_REGNUM, (char *)(regp + EF_CP0_BADVADDR));
   supply_32bit_reg (PS_REGNUM, (char *)(regp + EF_CP0_STATUS));
-  supply_32bit_reg (mips_regnum (current_gdbarch)->cause,
-		    (char *)(regp + EF_CP0_CAUSE));
+  supply_32bit_reg (CAUSE_REGNUM, (char *)(regp + EF_CP0_CAUSE));
 
   /* Fill inaccessible registers with zero.  */
   supply_register (UNUSED_REGNUM, zerobuf);
@@ -144,12 +139,12 @@ fill_gregset (elf_gregset_t *gregsetp, int regno)
       memset (regp, 0, sizeof (elf_gregset_t));
       for (regi = 0; regi < 32; regi++)
         fill_gregset (gregsetp, regi);
-      fill_gregset (gregsetp, mips_regnum (current_gdbarch)->lo);
-      fill_gregset (gregsetp, mips_regnum (current_gdbarch)->hi);
-      fill_gregset (gregsetp, mips_regnum (current_gdbarch)->pc);
-      fill_gregset (gregsetp, mips_regnum (current_gdbarch)->badvaddr);
+      fill_gregset (gregsetp, LO_REGNUM);
+      fill_gregset (gregsetp, HI_REGNUM);
+      fill_gregset (gregsetp, PC_REGNUM);
+      fill_gregset (gregsetp, BADVADDR_REGNUM);
       fill_gregset (gregsetp, PS_REGNUM);
-      fill_gregset (gregsetp, mips_regnum (current_gdbarch)->cause);
+      fill_gregset (gregsetp, CAUSE_REGNUM);
 
       return;
    }
@@ -161,20 +156,28 @@ fill_gregset (elf_gregset_t *gregsetp, int regno)
       return;
     }
 
-  if (regno == mips_regnum (current_gdbarch)->lo)
-    regaddr = EF_LO;
-  else if (regno == mips_regnum (current_gdbarch)->hi)
-    regaddr = EF_HI;
-  else if (regno == mips_regnum (current_gdbarch)->pc)
-    regaddr = EF_CP0_EPC;
-  else if (regno == mips_regnum (current_gdbarch)->badvaddr)
-    regaddr = EF_CP0_BADVADDR;
-  else if (regno == PS_REGNUM)
-    regaddr = EF_CP0_STATUS;
-  else if (regno == mips_regnum (current_gdbarch)->cause)
-    regaddr = EF_CP0_CAUSE;
-  else
-    regaddr = -1;
+  regaddr = -1;
+  switch (regno)
+    {
+      case LO_REGNUM:
+	regaddr = EF_LO;
+	break;
+      case HI_REGNUM:
+	regaddr = EF_HI;
+	break;
+      case PC_REGNUM:
+	regaddr = EF_CP0_EPC;
+	break;
+      case BADVADDR_REGNUM:
+	regaddr = EF_CP0_BADVADDR;
+	break;
+      case PS_REGNUM:
+	regaddr = EF_CP0_STATUS;
+	break;
+      case CAUSE_REGNUM:
+	regaddr = EF_CP0_CAUSE;
+	break;
+    }
 
   if (regaddr != -1)
     {
@@ -197,12 +200,10 @@ supply_fpregset (elf_fpregset_t *fpregsetp)
     supply_register (FP0_REGNUM + regi,
 		     (char *)(*fpregsetp + regi));
 
-  supply_register (mips_regnum (current_gdbarch)->fp_control_status,
-		   (char *)(*fpregsetp + 32));
+  supply_register (FCRCS_REGNUM, (char *)(*fpregsetp + 32));
 
-  /* FIXME: how can we supply FCRIR?  The ABI doesn't tell us. */
-  supply_register (mips_regnum (current_gdbarch)->fp_implementation_revision,
-		   zerobuf);
+  /* FIXME: how can we supply FCRIR_REGNUM?  The ABI doesn't tell us. */
+  supply_register (FCRIR_REGNUM, zerobuf);
 }
 
 /* Likewise, pack one or all floating point registers into an
@@ -219,7 +220,7 @@ fill_fpregset (elf_fpregset_t *fpregsetp, int regno)
       to = (char *) (*fpregsetp + regno - FP0_REGNUM);
       memcpy (to, from, DEPRECATED_REGISTER_RAW_SIZE (regno - FP0_REGNUM));
     }
-  else if (regno == mips_regnum (current_gdbarch)->fp_control_status)
+  else if (regno == FCRCS_REGNUM)
     {
       from = (char *) &deprecated_registers[DEPRECATED_REGISTER_BYTE (regno)];
       to = (char *) (*fpregsetp + 32);
@@ -231,7 +232,7 @@ fill_fpregset (elf_fpregset_t *fpregsetp, int regno)
 
       for (regi = 0; regi < 32; regi++)
 	fill_fpregset (fpregsetp, FP0_REGNUM + regi);
-      fill_fpregset(fpregsetp, mips_regnum (current_gdbarch)->fp_control_status);
+      fill_fpregset(fpregsetp, FCRCS_REGNUM);
     }
 }
 
@@ -248,22 +249,21 @@ mips_linux_register_addr (int regno, CORE_ADDR blockend)
 
   if (regno < 32)
     regaddr = regno;
-  else if ((regno >= mips_regnum (current_gdbarch)->fp0)
-	   && (regno < mips_regnum (current_gdbarch)->fp0 + 32))
-    regaddr = FPR_BASE + (regno - mips_regnum (current_gdbarch)->fp0);
-  else if (regno == mips_regnum (current_gdbarch)->pc)
+  else if ((regno >= FP0_REGNUM) && (regno < FP0_REGNUM + 32))
+    regaddr = FPR_BASE + (regno - FP0_REGNUM);
+  else if (regno == PC_REGNUM)
     regaddr = PC;
-  else if (regno == mips_regnum (current_gdbarch)->cause)
+  else if (regno == CAUSE_REGNUM)
     regaddr = CAUSE;
-  else if (regno == mips_regnum (current_gdbarch)->badvaddr)
+  else if (regno == BADVADDR_REGNUM)
     regaddr = BADVADDR;
-  else if (regno == mips_regnum (current_gdbarch)->lo)
+  else if (regno == LO_REGNUM)
     regaddr = MMLO;
-  else if (regno == mips_regnum (current_gdbarch)->hi)
+  else if (regno == HI_REGNUM)
     regaddr = MMHI;
-  else if (regno == mips_regnum (current_gdbarch)->fp_control_status)
+  else if (regno == FCRCS_REGNUM)
     regaddr = FPC_CSR;
-  else if (regno == mips_regnum (current_gdbarch)->fp_implementation_revision)
+  else if (regno == FCRIR_REGNUM)
     regaddr = FPC_EIR;
   else
     error ("Unknowable register number %d.", regno);
@@ -386,18 +386,13 @@ mips64_supply_gregset (mips64_elf_gregset_t *gregsetp)
   for (regi = MIPS64_EF_REG0; regi <= MIPS64_EF_REG31; regi++)
     supply_register ((regi - MIPS64_EF_REG0), (char *)(regp + regi));
 
-  supply_register (mips_regnum (current_gdbarch)->lo,
-		   (char *)(regp + MIPS64_EF_LO));
-  supply_register (mips_regnum (current_gdbarch)->hi,
-		   (char *)(regp + MIPS64_EF_HI));
+  supply_register (LO_REGNUM, (char *)(regp + MIPS64_EF_LO));
+  supply_register (HI_REGNUM, (char *)(regp + MIPS64_EF_HI));
 
-  supply_register (mips_regnum (current_gdbarch)->pc,
-		   (char *)(regp + MIPS64_EF_CP0_EPC));
-  supply_register (mips_regnum (current_gdbarch)->badvaddr,
-		   (char *)(regp + MIPS64_EF_CP0_BADVADDR));
+  supply_register (PC_REGNUM, (char *)(regp + MIPS64_EF_CP0_EPC));
+  supply_register (BADVADDR_REGNUM, (char *)(regp + MIPS64_EF_CP0_BADVADDR));
   supply_register (PS_REGNUM, (char *)(regp + MIPS64_EF_CP0_STATUS));
-  supply_register (mips_regnum (current_gdbarch)->cause,
-		   (char *)(regp + MIPS64_EF_CP0_CAUSE));
+  supply_register (CAUSE_REGNUM, (char *)(regp + MIPS64_EF_CP0_CAUSE));
 
   /* Fill inaccessible registers with zero.  */
   supply_register (UNUSED_REGNUM, zerobuf);
@@ -419,12 +414,12 @@ mips64_fill_gregset (mips64_elf_gregset_t *gregsetp, int regno)
       memset (regp, 0, sizeof (mips64_elf_gregset_t));
       for (regi = 0; regi < 32; regi++)
         mips64_fill_gregset (gregsetp, regi);
-      mips64_fill_gregset (gregsetp, mips_regnum (current_gdbarch)->lo);
-      mips64_fill_gregset (gregsetp, mips_regnum (current_gdbarch)->hi);
-      mips64_fill_gregset (gregsetp, mips_regnum (current_gdbarch)->pc);
-      mips64_fill_gregset (gregsetp, mips_regnum (current_gdbarch)->badvaddr);
+      mips64_fill_gregset (gregsetp, LO_REGNUM);
+      mips64_fill_gregset (gregsetp, HI_REGNUM);
+      mips64_fill_gregset (gregsetp, PC_REGNUM);
+      mips64_fill_gregset (gregsetp, BADVADDR_REGNUM);
       mips64_fill_gregset (gregsetp, PS_REGNUM);
-      mips64_fill_gregset (gregsetp, mips_regnum (current_gdbarch)->cause);
+      mips64_fill_gregset (gregsetp, CAUSE_REGNUM);
 
       return;
    }
@@ -436,20 +431,28 @@ mips64_fill_gregset (mips64_elf_gregset_t *gregsetp, int regno)
       return;
     }
 
-  if (regno == mips_regnum (current_gdbarch)->lo)
-    regaddr = MIPS64_EF_LO;
-  else if (regno == mips_regnum (current_gdbarch)->hi)
-    regaddr = MIPS64_EF_HI;
-  else if (regno == mips_regnum (current_gdbarch)->pc)
-    regaddr = MIPS64_EF_CP0_EPC;
-  else if (regno == mips_regnum (current_gdbarch)->badvaddr)
-    regaddr = MIPS64_EF_CP0_BADVADDR;
-  else if (regno == PS_REGNUM)
-    regaddr = MIPS64_EF_CP0_STATUS;
-  else if (regno == mips_regnum (current_gdbarch)->cause)
-    regaddr = MIPS64_EF_CP0_CAUSE;
-  else
-    regaddr = -1;
+  regaddr = -1;
+  switch (regno)
+    {
+      case LO_REGNUM:
+	regaddr = MIPS64_EF_LO;
+	break;
+      case HI_REGNUM:
+	regaddr = MIPS64_EF_HI;
+	break;
+      case PC_REGNUM:
+	regaddr = MIPS64_EF_CP0_EPC;
+	break;
+      case BADVADDR_REGNUM:
+	regaddr = MIPS64_EF_CP0_BADVADDR;
+	break;
+      case PS_REGNUM:
+	regaddr = MIPS64_EF_CP0_STATUS;
+	break;
+      case CAUSE_REGNUM:
+	regaddr = MIPS64_EF_CP0_CAUSE;
+	break;
+    }
 
   if (regaddr != -1)
     {
@@ -472,12 +475,10 @@ mips64_supply_fpregset (mips64_elf_fpregset_t *fpregsetp)
     supply_register (FP0_REGNUM + regi,
 		     (char *)(*fpregsetp + regi));
 
-  supply_register (mips_regnum (current_gdbarch)->fp_control_status,
-		   (char *)(*fpregsetp + 32));
+  supply_register (FCRCS_REGNUM, (char *)(*fpregsetp + 32));
 
-  /* FIXME: how can we supply FCRIR?  The ABI doesn't tell us. */
-  supply_register (mips_regnum (current_gdbarch)->fp_implementation_revision,
-		   zerobuf);
+  /* FIXME: how can we supply FCRIR_REGNUM?  The ABI doesn't tell us. */
+  supply_register (FCRIR_REGNUM, zerobuf);
 }
 
 /* Likewise, pack one or all floating point registers into an
@@ -494,7 +495,7 @@ mips64_fill_fpregset (mips64_elf_fpregset_t *fpregsetp, int regno)
       to = (char *) (*fpregsetp + regno - FP0_REGNUM);
       memcpy (to, from, DEPRECATED_REGISTER_RAW_SIZE (regno - FP0_REGNUM));
     }
-  else if (regno == mips_regnum (current_gdbarch)->fp_control_status)
+  else if (regno == FCRCS_REGNUM)
     {
       from = (char *) &deprecated_registers[DEPRECATED_REGISTER_BYTE (regno)];
       to = (char *) (*fpregsetp + 32);
@@ -506,8 +507,7 @@ mips64_fill_fpregset (mips64_elf_fpregset_t *fpregsetp, int regno)
 
       for (regi = 0; regi < 32; regi++)
 	mips64_fill_fpregset (fpregsetp, FP0_REGNUM + regi);
-      mips64_fill_fpregset(fpregsetp,
-			   mips_regnum (current_gdbarch)->fp_control_status);
+      mips64_fill_fpregset(fpregsetp, FCRCS_REGNUM);
     }
 }
 
@@ -525,22 +525,21 @@ mips64_linux_register_addr (int regno, CORE_ADDR blockend)
 
   if (regno < 32)
     regaddr = regno;
-  else if ((regno >= mips_regnum (current_gdbarch)->fp0)
-	   && (regno < mips_regnum (current_gdbarch)->fp0 + 32))
+  else if ((regno >= FP0_REGNUM) && (regno < FP0_REGNUM + 32))
     regaddr = MIPS64_FPR_BASE + (regno - FP0_REGNUM);
-  else if (regno == mips_regnum (current_gdbarch)->pc)
+  else if (regno == PC_REGNUM)
     regaddr = MIPS64_PC;
-  else if (regno == mips_regnum (current_gdbarch)->cause)
+  else if (regno == CAUSE_REGNUM)
     regaddr = MIPS64_CAUSE;
-  else if (regno == mips_regnum (current_gdbarch)->badvaddr)
+  else if (regno == BADVADDR_REGNUM)
     regaddr = MIPS64_BADVADDR;
-  else if (regno == mips_regnum (current_gdbarch)->lo)
+  else if (regno == LO_REGNUM)
     regaddr = MIPS64_MMLO;
-  else if (regno == mips_regnum (current_gdbarch)->hi)
+  else if (regno == HI_REGNUM)
     regaddr = MIPS64_MMHI;
-  else if (regno == mips_regnum (current_gdbarch)->fp_control_status)
+  else if (regno == FCRCS_REGNUM)
     regaddr = MIPS64_FPC_CSR;
-  else if (regno == mips_regnum (current_gdbarch)->fp_implementation_revision)
+  else if (regno == FCRIR_REGNUM)
     regaddr = MIPS64_FPC_EIR;
   else
     error ("Unknowable register number %d.", regno);

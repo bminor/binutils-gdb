@@ -1,6 +1,6 @@
 /* BFD support for handling relocation entries.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003, 2004
+   2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
@@ -319,7 +319,7 @@ CODE_FRAGMENT
 .
 .  {* If this field is non null, then the supplied function is
 .     called rather than the normal function.  This allows really
-.     strange relocation methods to be accommodated (e.g., i960 callj
+.     strange relocation methods to be accomodated (e.g., i960 callj
 .     instructions).  *}
 .  bfd_reloc_status_type (*special_function)
 .    (bfd *, arelent *, struct bfd_symbol *, void *, asection *,
@@ -627,7 +627,7 @@ bfd_perform_relocation (bfd *abfd,
 			      / bfd_octets_per_byte (abfd)))
     return bfd_reloc_outofrange;
 
-  /* Work out which section the relocation is targeted at and the
+  /* Work out which section the relocation is targetted at and the
      initial relocation command value.  */
 
   /* Get symbol value.  (Common symbols are special.)  */
@@ -1017,7 +1017,7 @@ bfd_install_relocation (bfd *abfd,
 			      / bfd_octets_per_byte (abfd)))
     return bfd_reloc_outofrange;
 
-  /* Work out which section the relocation is targeted at and the
+  /* Work out which section the relocation is targetted at and the
      initial relocation command value.  */
 
   /* Get symbol value.  (Common symbols are special.)  */
@@ -2139,34 +2139,6 @@ ENUMX
   BFD_RELOC_FRV_GPRELHI
 ENUMX
   BFD_RELOC_FRV_GPRELLO
-ENUMX
-  BFD_RELOC_FRV_GOT12
-ENUMX
-  BFD_RELOC_FRV_GOTHI
-ENUMX
-  BFD_RELOC_FRV_GOTLO
-ENUMX
-  BFD_RELOC_FRV_FUNCDESC
-ENUMX
-  BFD_RELOC_FRV_FUNCDESC_GOT12
-ENUMX
-  BFD_RELOC_FRV_FUNCDESC_GOTHI
-ENUMX
-  BFD_RELOC_FRV_FUNCDESC_GOTLO
-ENUMX
-  BFD_RELOC_FRV_FUNCDESC_VALUE
-ENUMX
-  BFD_RELOC_FRV_FUNCDESC_GOTOFF12
-ENUMX
-  BFD_RELOC_FRV_FUNCDESC_GOTOFFHI
-ENUMX
-  BFD_RELOC_FRV_FUNCDESC_GOTOFFLO
-ENUMX
-  BFD_RELOC_FRV_GOTOFF12
-ENUMX
-  BFD_RELOC_FRV_GOTOFFHI
-ENUMX
-  BFD_RELOC_FRV_GOTOFFLO
 ENUMDOC
   Fujitsu Frv Relocations.
 COMMENT
@@ -2535,7 +2507,7 @@ ENUMDOC
 ENUM
   BFD_RELOC_CTOR
 ENUMDOC
-  The type of reloc used to build a constructor table - at the moment
+  The type of reloc used to build a contructor table - at the moment
   probably a 32 bit wide absolute relocation, but the target can choose.
   It generally does map to one of the other relocation types.
 
@@ -2939,37 +2911,6 @@ ENUM
 ENUMDOC
   This is a 16-bit reloc containing the small data area offset for use in
   add3, load, and store instructions.
-ENUM
-  BFD_RELOC_M32R_GOT24
-ENUMX
-  BFD_RELOC_M32R_26_PLTREL
-ENUMX
-  BFD_RELOC_M32R_COPY
-ENUMX
-  BFD_RELOC_M32R_GLOB_DAT
-ENUMX
-  BFD_RELOC_M32R_JMP_SLOT
-ENUMX
-  BFD_RELOC_M32R_RELATIVE
-ENUMX
-  BFD_RELOC_M32R_GOTOFF
-ENUMX
-  BFD_RELOC_M32R_GOTPC24
-ENUMX
-  BFD_RELOC_M32R_GOT16_HI_ULO
-ENUMX
-  BFD_RELOC_M32R_GOT16_HI_SLO
-ENUMX
-  BFD_RELOC_M32R_GOT16_LO
-ENUMX
-  BFD_RELOC_M32R_GOTPC_HI_ULO
-ENUMX
-  BFD_RELOC_M32R_GOTPC_HI_SLO
-ENUMX
-  BFD_RELOC_M32R_GOTPC_LO
-ENUMDOC
-  For PIC.
-
 
 ENUM
   BFD_RELOC_V850_9_PCREL
@@ -3030,12 +2971,12 @@ ENUM
   BFD_RELOC_V850_SDA_16_16_SPLIT_OFFSET
 ENUMDOC
   This is a 16 bit offset from the short data area pointer, with the
-  bits placed non-contiguously in the instruction.
+  bits placed non-contigously in the instruction.
 ENUM
   BFD_RELOC_V850_ZDA_16_16_SPLIT_OFFSET
 ENUMDOC
   This is a 16 bit offset from the zero data area pointer, with the
-  bits placed non-contiguously in the instruction.
+  bits placed non-contigously in the instruction.
 ENUM
   BFD_RELOC_V850_CALLT_6_7_OFFSET
 ENUMDOC
@@ -3541,7 +3482,7 @@ ENUMDOC
   included in the output.
 
   VTABLE_INHERIT is a zero-space relocation used to describe to the
-  linker the inheritance tree of a C++ virtual function table.  The
+  linker the inheritence tree of a C++ virtual function table.  The
   relocation's symbol should be the parent class' vtable, and the
   relocation should be located at the child vtable.
 
@@ -3734,7 +3675,7 @@ ENUMDOC
   Motorola 68HC11 reloc.
   This reloc marks the beginning of a jump/call instruction.
   It is used for linker relaxation to correctly identify beginning
-  of instruction and change some branches to use PC-relative
+  of instruction and change some branchs to use PC-relative
   addressing mode.
 ENUM
   BFD_RELOC_M68HC11_RL_GROUP
@@ -3764,11 +3705,6 @@ ENUMDOC
   This is a 24-bit reloc that represents the address with a 16-bit
   value and a 8-bit page number.  The symbol address is transformed
   to follow the 16K memory bank of 68HC12 (seen as mapped in the window).
-ENUM
-  BFD_RELOC_M68HC12_5B
-ENUMDOC
-  Motorola 68HC12 reloc.
-  This is the 5 bits of a value.
 
 ENUM
   BFD_RELOC_CRIS_BDISP8

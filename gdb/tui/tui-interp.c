@@ -26,11 +26,11 @@
 #include "event-loop.h"
 #include "ui-out.h"
 #include "cli-out.h"
-#include "tui/tui-data.h"
+#include "tui/tuiData.h"
 #include "readline/readline.h"
-#include "tui/tui-win.h"
+#include "tui/tuiWin.h"
 #include "tui/tui.h"
-#include "tui/tui-io.h"
+#include "tui/tuiIO.h"
 
 /* Set to 1 when the TUI mode must be activated when we first start gdb.  */
 static int tui_start_enabled = 0;

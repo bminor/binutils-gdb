@@ -598,8 +598,7 @@ ppc_linux_memory_remove_breakpoint (CORE_ADDR addr, char *contents_cache)
 
 static enum return_value_convention
 ppc_linux_return_value (struct gdbarch *gdbarch, struct type *valtype,
-			struct regcache *regcache, void *readbuf,
-			const void *writebuf)
+			struct regcache *regcache, const void *inval, void *outval)
 {  
   if ((TYPE_CODE (valtype) == TYPE_CODE_STRUCT
        || TYPE_CODE (valtype) == TYPE_CODE_UNION)
@@ -607,8 +606,7 @@ ppc_linux_return_value (struct gdbarch *gdbarch, struct type *valtype,
 	   && TYPE_VECTOR (valtype)))
     return RETURN_VALUE_STRUCT_CONVENTION;
   else
-    return ppc_sysv_abi_return_value (gdbarch, valtype, regcache, readbuf,
-				      writebuf);
+    return ppc_sysv_abi_return_value (gdbarch, valtype, regcache, inval, outval);
 }
 
 /* Fetch (and possibly build) an appropriate link_map_offsets
@@ -1083,9 +1081,6 @@ ppc_linux_init_abi (struct gdbarch_info info,
       set_gdbarch_in_solib_call_trampoline
         (gdbarch, ppc64_in_solib_call_trampoline);
       set_gdbarch_skip_trampoline_code (gdbarch, ppc64_skip_trampoline_code);
-
-      /* PPC64 malloc's entry-point is called ".malloc".  */
-      set_gdbarch_name_of_malloc (gdbarch, ".malloc");
     }
 }
 

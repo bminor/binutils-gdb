@@ -133,9 +133,9 @@ SUBSECTION
 |	nm foo
 |	00012345 A dummy_symbol
 
-	Many formats cannot represent arbitrary symbol information; for
+	Many formats cannot represent arbitary symbol information; for
  	instance, the <<a.out>> object format does not allow an
-	arbitrary number of sections. A symbol pointing to a section
+	arbitary number of sections. A symbol pointing to a section
 	which is not one  of <<.text>>, <<.data>> or <<.bss>> cannot
 	be described.
 
@@ -222,7 +222,7 @@ CODE_FRAGMENT
 .     <<BSF_LOCAL>>, <<BSF_FORT_COMM>>,  <<BSF_UNDEFINED>> or
 .     <<BSF_GLOBAL>>.  *}
 .
-.  {* The symbol is a debugging record. The value has an arbitrary
+.  {* The symbol is a debugging record. The value has an arbitary
 .     meaning, unless BSF_DEBUGGING_RELOC is also set.  *}
 .#define BSF_DEBUGGING	0x08
 .
@@ -1222,7 +1222,7 @@ _bfd_stab_section_find_nearest_line (bfd *abfd,
       long low, high;
       long mid = -1;
 
-      /* Cache non-existent or invalid.  Do binary search on
+      /* Cache non-existant or invalid.  Do binary search on
          indextable.  */
       indexentry = NULL;
 

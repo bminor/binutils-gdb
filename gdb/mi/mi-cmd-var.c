@@ -257,29 +257,17 @@ mi_cmd_var_list_children (char *command, char **argv, int argc)
   struct cleanup *cleanup_children;
   int numchild;
   char *type;
-  enum print_values print_values;
 
-  if (argc != 1 && argc != 2)
-    error ("mi_cmd_var_list_children: Usage: [PRINT_VALUES] NAME");
+  if (argc != 1)
+    error ("mi_cmd_var_list_children: Usage: NAME.");
 
   /* Get varobj handle, if a valid var obj name was specified */
-  if (argc == 1) var = varobj_get_handle (argv[0]);
-  else var = varobj_get_handle (argv[1]);
+  var = varobj_get_handle (argv[0]);
   if (var == NULL)
-    error ("Variable object not found");
+    error ("mi_cmd_var_list_children: Variable object not found");
 
   numchild = varobj_list_children (var, &childlist);
   ui_out_field_int (uiout, "numchild", numchild);
-  if (argc == 2)
-    if (strcmp (argv[0], "0") == 0
-	|| strcmp (argv[0], "--no-values") == 0)
-      print_values = PRINT_NO_VALUES;
-    else if (strcmp (argv[0], "1") == 0
-	     || strcmp (argv[0], "--all-values") == 0)
-      print_values = PRINT_ALL_VALUES;
-    else
-     error ("Unknown value for PRINT_VALUES: must be: 0 or \"--no-values\", 1 or \"--all-values\"");
-  else print_values = PRINT_NO_VALUES;
 
   if (numchild <= 0)
     return MI_CMD_DONE;
@@ -296,8 +284,6 @@ mi_cmd_var_list_children (char *command, char **argv, int argc)
       ui_out_field_string (uiout, "name", varobj_get_objname (*cc));
       ui_out_field_string (uiout, "exp", varobj_get_expression (*cc));
       ui_out_field_int (uiout, "numchild", varobj_get_num_children (*cc));
-      if (print_values)
-	ui_out_field_string (uiout, "value", varobj_get_value (*cc));
       type = varobj_get_type (*cc);
       /* C++ pseudo-variables (public, private, protected) do not have a type */
       if (type)

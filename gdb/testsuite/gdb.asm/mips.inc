@@ -58,5 +58,7 @@
 
 	comment "crt0 startup"
 	.macro gdbasm_startup
+	.global __start
+__start:
 	move	$fp, $sp
 	.endm

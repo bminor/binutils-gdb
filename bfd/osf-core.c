@@ -164,6 +164,7 @@ osf_core_core_file_failing_command (abfd)
   return core_command (abfd);
 }
 
+/* ARGSUSED */
 static int
 osf_core_core_file_failing_signal (abfd)
      bfd *abfd;
@@ -171,6 +172,7 @@ osf_core_core_file_failing_signal (abfd)
   return core_signal (abfd);
 }
 
+/* ARGSUSED */
 static bfd_boolean
 osf_core_core_file_matches_executable_p (core_bfd, exec_bfd)
      bfd *core_bfd ATTRIBUTE_UNUSED;

@@ -36,7 +36,6 @@
 #include "gdb_stat.h"
 #include "regcache.h"
 #include <ctype.h>
-#include "mips-tdep.h"
 
 
 /* Breakpoint types.  Values 0, 1, and 2 must agree with the watch
@@ -597,6 +596,35 @@ static int
 mips_expect (const char *string)
 {
   return mips_expect_timeout (string, remote_timeout);
+}
+
+/* Read the required number of characters into the given buffer (which
+   is assumed to be large enough). The only failure is a timeout. */
+static int
+mips_getstring (char *string, int n)
+{
+  char *p = string;
+  int c;
+
+  immediate_quit++;
+  while (n > 0)
+    {
+      c = serial_readchar (mips_desc, remote_timeout);
+
+      if (c == SERIAL_TIMEOUT)
+	{
+	  fprintf_unfiltered (gdb_stderr,
+		 "Failed to read %d characters from target (TIMEOUT)\n", n);
+	  immediate_quit--;
+	  return 0;
+	}
+
+      *p++ = c;
+      n--;
+    }
+
+  immediate_quit--;
+  return 1;
 }
 
 /* Read a character from the remote, aborting on error.  Returns
@@ -1578,7 +1606,9 @@ device is attached to the target board (e.g., /dev/ttya).\n"
   /* FIXME: Should we call start_remote here?  */
 
   /* Try to figure out the processor model if possible.  */
-  deprecated_mips_set_processor_regs_hack ();
+  ptype = mips_read_processor_type ();
+  if (ptype)
+    mips_set_processor_type_command (xstrdup (ptype), 0);
 
   /* This is really the job of start_remote however, that makes an
      assumption that the target is about to print out a status message
@@ -1872,24 +1902,26 @@ mips_map_regno (int regno)
 {
   if (regno < 32)
     return regno;
-  if (regno >= mips_regnum (current_gdbarch)->fp0
-      && regno < mips_regnum (current_gdbarch)->fp0 + 32)
-    return regno - mips_regnum (current_gdbarch)->fp0 + 32;
-  else if (regno == mips_regnum (current_gdbarch)->pc)
-    return REGNO_OFFSET + 0;
-  else if (regno == mips_regnum (current_gdbarch)->cause)
-    return REGNO_OFFSET + 1;
-  else if (regno == mips_regnum (current_gdbarch)->hi)
-    return REGNO_OFFSET + 2;
-  else if (regno == mips_regnum (current_gdbarch)->lo)
-    return REGNO_OFFSET + 3;
-  else if (regno == mips_regnum (current_gdbarch)->fp_control_status)
-    return REGNO_OFFSET + 4;
-  else if (regno == mips_regnum (current_gdbarch)->fp_implementation_revision)
-    return REGNO_OFFSET + 5;
-  else
-    /* FIXME: Is there a way to get the status register?  */
-    return 0;
+  if (regno >= FP0_REGNUM && regno < FP0_REGNUM + 32)
+    return regno - FP0_REGNUM + 32;
+  switch (regno)
+    {
+    case PC_REGNUM:
+      return REGNO_OFFSET + 0;
+    case CAUSE_REGNUM:
+      return REGNO_OFFSET + 1;
+    case HI_REGNUM:
+      return REGNO_OFFSET + 2;
+    case LO_REGNUM:
+      return REGNO_OFFSET + 3;
+    case FCRCS_REGNUM:
+      return REGNO_OFFSET + 4;
+    case FCRIR_REGNUM:
+      return REGNO_OFFSET + 5;
+    default:
+      /* FIXME: Is there a way to get the status register?  */
+      return 0;
+    }
 }
 
 /* Fetch the remote registers.  */
@@ -2241,6 +2273,129 @@ mips_remove_breakpoint (CORE_ADDR addr, char *contents_cache)
     return memory_remove_breakpoint (addr, contents_cache);
 }
 
+#if 0				/* currently not used */
+/* PMON does not currently provide support for the debug mode 'b'
+   commands to manipulate breakpoints. However, if we wanted to use
+   the monitor breakpoints (rather than the GDB BREAK_INSN version)
+   then this code performs the work needed to leave debug mode,
+   set/clear the breakpoint, and then return to debug mode. */
+
+#define PMON_MAX_BP (33)	/* 32 SW, 1 HW */
+static CORE_ADDR mips_pmon_bp_info[PMON_MAX_BP];
+/* NOTE: The code relies on this vector being zero-initialised by the system */
+
+static int
+pmon_insert_breakpoint (CORE_ADDR addr, char *contents_cache)
+{
+  int status;
+
+  if (monitor_supports_breakpoints)
+    {
+      char tbuff[12];		/* space for breakpoint command */
+      int bpnum;
+      CORE_ADDR bpaddr;
+
+      /* PMON does not support debug level breakpoint set/remove: */
+      if (mips_exit_debug ())
+	mips_error ("Failed to exit debug mode");
+
+      sprintf (tbuff, "b %08x\r", addr);
+      mips_send_command (tbuff, 0);
+
+      mips_expect ("Bpt ");
+
+      if (!mips_getstring (tbuff, remote_timeout))
+	return 1;
+      tbuff[2] = '\0';		/* terminate the string */
+      if (sscanf (tbuff, "%d", &bpnum) != 1)
+	{
+	  fprintf_unfiltered (gdb_stderr,
+	      "Invalid decimal breakpoint number from target: %s\n", tbuff);
+	  return 1;
+	}
+
+      mips_expect (" = ");
+
+      /* Lead in the hex number we are expecting: */
+      tbuff[0] = '0';
+      tbuff[1] = 'x';
+
+      /* FIXME!! only 8 bytes!  need to expand for Bfd64; 
+         which targets return 64-bit addresses?  PMON returns only 32! */
+      if (!mips_getstring (&tbuff[2], 8))
+	return 1;
+      tbuff[10] = '\0';		/* terminate the string */
+
+      if (sscanf (tbuff, "0x%08x", &bpaddr) != 1)
+	{
+	  fprintf_unfiltered (gdb_stderr,
+			    "Invalid hex address from target: %s\n", tbuff);
+	  return 1;
+	}
+
+      if (bpnum >= PMON_MAX_BP)
+	{
+	  fprintf_unfiltered (gdb_stderr,
+			      "Error: Returned breakpoint number %d outside acceptable range (0..%d)\n",
+			      bpnum, PMON_MAX_BP - 1);
+	  return 1;
+	}
+
+      if (bpaddr != addr)
+	fprintf_unfiltered (gdb_stderr, "Warning: Breakpoint addresses do not match: 0x%x != 0x%x\n", addr, bpaddr);
+
+      mips_pmon_bp_info[bpnum] = bpaddr;
+
+      mips_expect ("\r\n");
+      mips_expect (mips_monitor_prompt);
+
+      mips_enter_debug ();
+
+      return 0;
+    }
+
+  return mips_store_word (addr, BREAK_INSN, contents_cache);
+}
+
+static int
+pmon_remove_breakpoint (CORE_ADDR addr, char *contents_cache)
+{
+  if (monitor_supports_breakpoints)
+    {
+      int bpnum;
+      char tbuff[7];		/* enough for delete breakpoint command */
+
+      for (bpnum = 0; bpnum < PMON_MAX_BP; bpnum++)
+	if (mips_pmon_bp_info[bpnum] == addr)
+	  break;
+
+      if (bpnum >= PMON_MAX_BP)
+	{
+	  fprintf_unfiltered (gdb_stderr,
+			      "pmon_remove_breakpoint: Failed to find breakpoint at address 0x%s\n",
+			      paddr_nz (addr));
+	  return 1;
+	}
+
+      if (mips_exit_debug ())
+	mips_error ("Failed to exit debug mode");
+
+      sprintf (tbuff, "db %02d\r", bpnum);
+
+      mips_send_command (tbuff, -1);
+      /* NOTE: If the breakpoint does not exist then a "Bpt <dd> not
+         set" message will be returned. */
+
+      mips_enter_debug ();
+
+      return 0;
+    }
+
+  return target_write_memory (addr, contents_cache, BREAK_INSN_SIZE);
+}
+#endif
+
+
 /* Tell whether this target can support a hardware breakpoint.  CNT
    is the number of hardware breakpoints already installed.  This
    implements the TARGET_CAN_USE_HARDWARE_WATCHPOINT macro.  */
@@ -2274,6 +2429,31 @@ calculate_mask (CORE_ADDR addr, int len)
   return mask;
 }
 
+
+/* Insert a hardware breakpoint.  This works only on LSI targets, which
+   implement ordinary breakpoints using hardware facilities.  */
+
+static int
+remote_mips_insert_hw_breakpoint (CORE_ADDR addr, char *contents_cache)
+{
+  if (strcmp (target_shortname, "lsi") == 0)
+    return mips_insert_breakpoint (addr, contents_cache);
+  else
+    return -1;
+}
+
+
+/* Remove a hardware breakpoint.  This works only on LSI targets, which
+   implement ordinary breakpoints using hardware facilities.  */
+
+static int
+remote_mips_remove_hw_breakpoint (CORE_ADDR addr, char *contents_cache)
+{
+  if (strcmp (target_shortname, "lsi") == 0)
+    return mips_remove_breakpoint (addr, contents_cache);
+  else
+    return -1;
+}
 
 /* Set a data watchpoint.  ADDR and LEN should be obvious.  TYPE is 0
    for a write watchpoint, 1 for a read watchpoint, or 2 for a read/write

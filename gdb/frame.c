@@ -1,7 +1,7 @@
 /* Cache and manage frames for GDB, the GNU debugger.
 
    Copyright 1986, 1987, 1989, 1991, 1994, 1995, 1996, 1998, 2000,
-   2001, 2002, 2003, 2004 Free Software Foundation, Inc.
+   2001, 2002, 2003 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -85,6 +85,10 @@ struct frame_info
   /* Allocated by frame_extra_info_zalloc () which is called /
      initialized by DEPRECATED_INIT_EXTRA_FRAME_INFO */
   struct frame_extra_info *extra_info;
+
+  /* If dwarf2 unwind frame informations is used, this structure holds
+     all related unwind data.  */
+  struct context *context;
 
   /* The frame's low-level unwinder and corresponding cache.  The
      low-level unwinder is responsible for unwinding register values
@@ -664,6 +668,15 @@ get_frame_register_unsigned (struct frame_info *frame, int regnum)
 }
 
 void
+frame_unwind_signed_register (struct frame_info *frame, int regnum,
+			      LONGEST *val)
+{
+  char buf[MAX_REGISTER_SIZE];
+  frame_unwind_register (frame, regnum, buf);
+  (*val) = extract_signed_integer (buf, DEPRECATED_REGISTER_VIRTUAL_SIZE (regnum));
+}
+
+void
 frame_unwind_unsigned_register (struct frame_info *frame, int regnum,
 				ULONGEST *val)
 {
@@ -917,13 +930,7 @@ select_frame (struct frame_info *fi)
      source language of this frame, and switch to it if desired.  */
   if (fi)
     {
-      /* We retrieve the frame's symtab by using the frame PC.  However
-         we cannot use the frame pc as is, because it usually points to
-         the instruction following the "call", which is sometimes the
-         first instruction of another function.  So we rely on
-         get_frame_address_in_block() which provides us with a PC which
-         is guaranteed to be inside the frame's code block.  */
-      s = find_pc_symtab (get_frame_address_in_block (fi));
+      s = find_pc_symtab (get_frame_pc (fi));
       if (s
 	  && s->language != current_language->la_language
 	  && s->language != language_unknown
@@ -1726,12 +1733,7 @@ legacy_get_prev_frame (struct frame_info *this_frame)
 
 /* Return a structure containing various interesting information
    about the frame that called THIS_FRAME.  Returns NULL
-   if there is no such frame.
-
-   This function tests some target-independent conditions that should
-   terminate the frame chain, such as unwinding past main().  It
-   should not contain any target-dependent tests, such as checking
-   whether the program-counter is zero.  */
+   if there is no such frame.  */
 
 struct frame_info *
 get_prev_frame (struct frame_info *this_frame)
@@ -1788,13 +1790,9 @@ get_prev_frame (struct frame_info *this_frame)
      get_current_frame().  */
   gdb_assert (this_frame != NULL);
 
-  /* Make sure we pass an address within THIS_FRAME's code block to
-     inside_main_func.  Otherwise, we might stop unwinding at a
-     function which has a call instruction as its last instruction if
-     that function immediately precedes main().  */
   if (this_frame->level >= 0
       && !backtrace_past_main
-      && inside_main_func (get_frame_address_in_block (this_frame)))
+      && inside_main_func (get_frame_pc (this_frame)))
     /* Don't unwind past main(), bug always unwind the sentinel frame.
        Note, this is done _before_ the frame has been marked as
        previously unwound.  That way if the user later decides to
@@ -1947,6 +1945,37 @@ get_prev_frame (struct frame_info *this_frame)
      allocation calls.  */
   prev_frame = FRAME_OBSTACK_ZALLOC (struct frame_info);
   prev_frame->level = this_frame->level + 1;
+
+  /* Try to unwind the PC.  If that doesn't work, assume we've reached
+     the oldest frame and simply return.  Is there a better sentinal
+     value?  The unwound PC value is then used to initialize the new
+     previous frame's type.
+
+     Note that the pc-unwind is intentionally performed before the
+     frame chain.  This is ok since, for old targets, both
+     frame_pc_unwind (nee, FRAME_SAVED_PC) and
+     DEPRECATED_FRAME_CHAIN()) assume THIS_FRAME's data structures
+     have already been initialized (using
+     DEPRECATED_INIT_EXTRA_FRAME_INFO) and hence the call order
+     doesn't matter.
+
+     By unwinding the PC first, it becomes possible to, in the case of
+     a dummy frame, avoid also unwinding the frame ID.  This is
+     because (well ignoring the PPC) a dummy frame can be located
+     using THIS_FRAME's frame ID.  */
+
+  if (frame_pc_unwind (this_frame) == 0)
+    {
+      /* The allocated PREV_FRAME will be reclaimed when the frame
+	 obstack is next purged.  */
+      if (frame_debug)
+	{
+	  fprintf_unfiltered (gdb_stdlog, "-> ");
+	  fprint_frame (gdb_stdlog, NULL);
+	  fprintf_unfiltered (gdb_stdlog, " // unwound PC zero }\n");
+	}
+      return NULL;
+    }
 
   /* Don't yet compute ->unwind (and hence ->type).  It is computed
      on-demand in get_frame_type, frame_register_unwind, and
@@ -2194,13 +2223,61 @@ deprecated_update_frame_base_hack (struct frame_info *frame, CORE_ADDR base)
   frame->this_id.value.stack_addr = base;
 }
 
+void
+deprecated_set_frame_saved_regs_hack (struct frame_info *frame,
+				      CORE_ADDR *saved_regs)
+{
+  frame->saved_regs = saved_regs;
+}
+
+void
+deprecated_set_frame_extra_info_hack (struct frame_info *frame,
+				      struct frame_extra_info *extra_info)
+{
+  frame->extra_info = extra_info;
+}
+
+void
+deprecated_set_frame_next_hack (struct frame_info *fi,
+				struct frame_info *next)
+{
+  fi->next = next;
+}
+
+void
+deprecated_set_frame_prev_hack (struct frame_info *fi,
+				struct frame_info *prev)
+{
+  fi->prev = prev;
+}
+
+struct context *
+deprecated_get_frame_context (struct frame_info *fi)
+{
+  return fi->context;
+}
+
+void
+deprecated_set_frame_context (struct frame_info *fi,
+			      struct context *context)
+{
+  fi->context = context;
+}
+
 struct frame_info *
-deprecated_frame_xmalloc_with_cleanup (long sizeof_saved_regs,
-				       long sizeof_extra_info)
+deprecated_frame_xmalloc (void)
 {
   struct frame_info *frame = XMALLOC (struct frame_info);
   memset (frame, 0, sizeof (*frame));
   frame->this_id.p = 1;
+  return frame;
+}
+
+struct frame_info *
+deprecated_frame_xmalloc_with_cleanup (long sizeof_saved_regs,
+				       long sizeof_extra_info)
+{
+  struct frame_info *frame = deprecated_frame_xmalloc ();
   make_cleanup (xfree, frame);
   if (sizeof_saved_regs > 0)
     {

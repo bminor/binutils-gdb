@@ -46,7 +46,7 @@ mipsnbsd_supply_reg (char *regs, int regno)
 	  if (CANNOT_FETCH_REGISTER (i))
 	    supply_register (i, NULL);
 	  else
-            supply_register (i, regs + (i * mips_regsize (current_gdbarch)));
+            supply_register (i, regs + (i * MIPS_REGSIZE));
         }
     }
 }
@@ -58,7 +58,7 @@ mipsnbsd_fill_reg (char *regs, int regno)
 
   for (i = 0; i <= PC_REGNUM; i++)
     if ((regno == i || regno == -1) && ! CANNOT_STORE_REGISTER (i))
-      regcache_collect (i, regs + (i * mips_regsize (current_gdbarch)));
+      regcache_collect (i, regs + (i * MIPS_REGSIZE));
 }
 
 void
@@ -66,16 +66,14 @@ mipsnbsd_supply_fpreg (char *fpregs, int regno)
 {
   int i;
 
-  for (i = FP0_REGNUM;
-       i <= mips_regnum (current_gdbarch)->fp_implementation_revision;
-       i++)
+  for (i = FP0_REGNUM; i <= FCRIR_REGNUM; i++)
     {
       if (regno == i || regno == -1)
 	{
 	  if (CANNOT_FETCH_REGISTER (i))
 	    supply_register (i, NULL);
 	  else
-            supply_register (i, fpregs + ((i - FP0_REGNUM) * mips_regsize (current_gdbarch)));
+            supply_register (i, fpregs + ((i - FP0_REGNUM) * MIPS_REGSIZE));
 	}
     }
 }
@@ -85,10 +83,9 @@ mipsnbsd_fill_fpreg (char *fpregs, int regno)
 {
   int i;
 
-  for (i = FP0_REGNUM; i <= mips_regnum (current_gdbarch)->fp_control_status;
-       i++)
+  for (i = FP0_REGNUM; i <= FCRCS_REGNUM; i++)
     if ((regno == i || regno == -1) && ! CANNOT_STORE_REGISTER (i))
-      regcache_collect (i, fpregs + ((i - FP0_REGNUM) * mips_regsize (current_gdbarch)));
+      regcache_collect (i, fpregs + ((i - FP0_REGNUM) * MIPS_REGSIZE));
 }
 
 static void
@@ -235,7 +232,7 @@ mipsnbsd_pc_in_sigtramp (CORE_ADDR pc, char *func_name)
    success.  */
 
 #define NBSD_MIPS_JB_PC			(2 * 4)
-#define NBSD_MIPS_JB_ELEMENT_SIZE	mips_regsize (current_gdbarch)
+#define NBSD_MIPS_JB_ELEMENT_SIZE	MIPS_REGSIZE
 #define NBSD_MIPS_JB_OFFSET		(NBSD_MIPS_JB_PC * \
 					 NBSD_MIPS_JB_ELEMENT_SIZE)
 
@@ -262,14 +259,14 @@ static int
 mipsnbsd_cannot_fetch_register (int regno)
 {
   return (regno == ZERO_REGNUM
-	  || regno == mips_regnum (current_gdbarch)->fp_implementation_revision);
+	  || regno == FCRIR_REGNUM);
 }
 
 static int
 mipsnbsd_cannot_store_register (int regno)
 {
   return (regno == ZERO_REGNUM
-	  || regno == mips_regnum (current_gdbarch)->fp_implementation_revision);
+	  || regno == FCRIR_REGNUM);
 }
 
 /* NetBSD/mips uses a slightly different link_map structure from the

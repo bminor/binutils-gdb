@@ -1,7 +1,7 @@
 /* Generic symbol file reading for the GNU debugger, GDB.
 
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
-   1999, 2000, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
+   1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
 
    Contributed by Cygnus Support, using pieces from other GDB modules.
 
@@ -198,6 +198,20 @@ int auto_solib_add = 1;
 
 int auto_solib_limit;
 
+
+/* Since this function is called from within qsort, in an ANSI environment
+   it must conform to the prototype for qsort, which specifies that the
+   comparison function takes two "void *" pointers. */
+
+static int
+compare_symbols (const void *s1p, const void *s2p)
+{
+  struct symbol **s1, **s2;
+
+  s1 = (struct symbol **) s1p;
+  s2 = (struct symbol **) s2p;
+  return (strcmp (SYMBOL_NATURAL_NAME (*s1), SYMBOL_NATURAL_NAME (*s2)));
+}
 
 /* This compares two partial symbols by names, using strcmp_iw_ordered
    for the comparison.  */
@@ -847,22 +861,43 @@ symbol_file_add_with_addrs_or_offsets (char *name, int from_tty,
 	orig_addrs->other[i] = addrs->other[i];
     }
 
-  /* We either created a new mapped symbol table, mapped an existing
-     symbol table file which has not had initial symbol reading
-     performed, or need to read an unmapped symbol table. */
-  if (from_tty || info_verbose)
+  /* If the objfile uses a mapped symbol file, and we have a psymtab for
+     it, then skip reading any symbols at this time. */
+
+  if ((objfile->flags & OBJF_MAPPED) && (objfile->flags & OBJF_SYMS))
     {
-      if (pre_add_symbol_hook)
-	pre_add_symbol_hook (name);
-      else
+      /* We mapped in an existing symbol table file that already has had
+         initial symbol reading performed, so we can skip that part.  Notify
+         the user that instead of reading the symbols, they have been mapped.
+       */
+      if (from_tty || info_verbose)
 	{
-	  printf_unfiltered ("Reading symbols from %s...", name);
+	  printf_unfiltered ("Mapped symbols for %s...", name);
 	  wrap_here ("");
 	  gdb_flush (gdb_stdout);
 	}
+      init_entry_point_info (objfile);
+      find_sym_fns (objfile);
     }
-  syms_from_objfile (objfile, addrs, offsets, num_offsets,
-		     mainline, from_tty);
+  else
+    {
+      /* We either created a new mapped symbol table, mapped an existing
+         symbol table file which has not had initial symbol reading
+         performed, or need to read an unmapped symbol table. */
+      if (from_tty || info_verbose)
+	{
+	  if (pre_add_symbol_hook)
+	    pre_add_symbol_hook (name);
+	  else
+	    {
+	      printf_unfiltered ("Reading symbols from %s...", name);
+	      wrap_here ("");
+	      gdb_flush (gdb_stdout);
+	    }
+	}
+      syms_from_objfile (objfile, addrs, offsets, num_offsets,
+                         mainline, from_tty);
+    }
 
   /* We now have at least a partial symbol table.  Check to see if the
      user requested that all symbols be read on initial access via either
@@ -1188,16 +1223,20 @@ symbol_file_command (char *args, int from_tty)
       cleanups = make_cleanup_freeargv (argv);
       while (*argv != NULL)
 	{
-	  if (strcmp (*argv, "-readnow") == 0)
-	    flags |= OBJF_READNOW;
-	  else if (**argv == '-')
-	    error ("unknown option `%s'", *argv);
-	  else
-	    {
-	      name = *argv;
-	      
-	      symbol_file_add_main_1 (name, from_tty, flags);
-	    }
+	  if (strcmp (*argv, "-mapped") == 0)
+	    flags |= OBJF_MAPPED;
+	  else 
+	    if (STREQ (*argv, "-readnow"))
+	      flags |= OBJF_READNOW;
+	    else 
+	      if (**argv == '-')
+		error ("unknown option `%s'", *argv);
+	      else
+		{
+                  name = *argv;
+
+		  symbol_file_add_main_1 (name, from_tty, flags);
+		}
 	  argv++;
 	}
 
@@ -1712,13 +1751,17 @@ add_symbol_file_command (char *args, int from_tty)
 
 	    if (*arg == '-')
 	      {
-		if (strcmp (arg, "-readnow") == 0)
-		  flags |= OBJF_READNOW;
-		else if (strcmp (arg, "-s") == 0)
-		  {
-		    expecting_sec_name = 1;
-		    expecting_sec_addr = 1;
-		  }
+		if (strcmp (arg, "-mapped") == 0)
+		  flags |= OBJF_MAPPED;
+		else 
+		  if (strcmp (arg, "-readnow") == 0)
+		    flags |= OBJF_READNOW;
+		  else 
+		    if (strcmp (arg, "-s") == 0)
+		      {
+			expecting_sec_name = 1;
+			expecting_sec_addr = 1;
+		      }
 	      }
 	    else
 	      {
@@ -2067,7 +2110,8 @@ reread_separate_symbols (struct objfile *objfile)
             0, /* No addr table.  */
             objfile->section_offsets, objfile->num_sections,
             0, /* Not mainline.  See comments about this above.  */
-            objfile->flags & (OBJF_REORDERED | OBJF_SHARED | OBJF_READNOW
+            objfile->flags & (OBJF_MAPPED | OBJF_REORDERED
+                              | OBJF_SHARED | OBJF_READNOW
                               | OBJF_USERLOADED)));
       objfile->separate_debug_objfile->separate_debug_objfile_backlink
         = objfile;
@@ -2636,8 +2680,7 @@ add_psymbol_to_list (char *name, int namelength, domain_enum domain,
   SYMBOL_SET_NAMES (&psymbol, buf, namelength, objfile);
 
   /* Stash the partial symbol away in the cache */
-  psym = deprecated_bcache (&psymbol, sizeof (struct partial_symbol),
-			    objfile->psymbol_cache);
+  psym = bcache (&psymbol, sizeof (struct partial_symbol), objfile->psymbol_cache);
 
   /* Save pointer to partial symbol in psymtab, growing symtab if needed. */
   if (list->next >= list->list + list->size)
@@ -2674,8 +2717,7 @@ add_psymbol_with_dem_name_to_list (char *name, int namelength, char *dem_name,
 
   memcpy (buf, name, namelength);
   buf[namelength] = '\0';
-  DEPRECATED_SYMBOL_NAME (&psymbol) = deprecated_bcache (buf, namelength + 1,
-							 objfile->psymbol_cache);
+  DEPRECATED_SYMBOL_NAME (&psymbol) = bcache (buf, namelength + 1, objfile->psymbol_cache);
 
   buf = alloca (dem_namelength + 1);
   memcpy (buf, dem_name, dem_namelength);
@@ -2686,7 +2728,7 @@ add_psymbol_with_dem_name_to_list (char *name, int namelength, char *dem_name,
     case language_c:
     case language_cplus:
       SYMBOL_CPLUS_DEMANGLED_NAME (&psymbol) =
-	deprecated_bcache (buf, dem_namelength + 1, objfile->psymbol_cache);
+	bcache (buf, dem_namelength + 1, objfile->psymbol_cache);
       break;
       /* FIXME What should be done for the default case? Ignoring for now. */
     }
@@ -2707,8 +2749,7 @@ add_psymbol_with_dem_name_to_list (char *name, int namelength, char *dem_name,
   SYMBOL_INIT_LANGUAGE_SPECIFIC (&psymbol, language);
 
   /* Stash the partial symbol away in the cache */
-  psym = deprecated_bcache (&psymbol, sizeof (struct partial_symbol),
-			    objfile->psymbol_cache);
+  psym = bcache (&psymbol, sizeof (struct partial_symbol), objfile->psymbol_cache);
 
   /* Save pointer to partial symbol in psymtab, growing symtab if needed. */
   if (list->next >= list->list + list->size)

@@ -92,7 +92,6 @@ static bfd_reloc_status_type ppc64_elf_unhandled_reloc
 #define elf_backend_finish_dynamic_symbol     ppc64_elf_finish_dynamic_symbol
 #define elf_backend_reloc_type_class	      ppc64_elf_reloc_type_class
 #define elf_backend_finish_dynamic_sections   ppc64_elf_finish_dynamic_sections
-#define elf_backend_link_output_symbol_hook   ppc64_elf_output_symbol_hook
 #define elf_backend_special_sections	      ppc64_elf_special_sections
 
 /* The name of the dynamic interpreter.  This is put in the .interp
@@ -2642,7 +2641,7 @@ struct plt_entry
    pointers must reference the descriptor.  Thus, a function pointer
    initialized to the address of a function in a shared library will
    either require a copy reloc, or a dynamic reloc.  Using a copy reloc
-   redefines the function descriptor symbol to point to the copy.  This
+   redefines the function desctriptor symbol to point to the copy.  This
    presents a problem as a plt entry for that function is also
    initialized from the function descriptor symbol and the copy reloc
    may not be initialized first.  */
@@ -2762,9 +2761,6 @@ struct ppc_link_hash_entry
   unsigned int is_func:1;
   unsigned int is_func_descriptor:1;
   unsigned int is_entry:1;
-
-  /* Whether global opd sym has been adjusted or not.  */
-  unsigned int adjust_done:1;
 
   /* Contexts in which symbol is used in the GOT (or TOC).
      TLS_GD .. TLS_EXPLICIT bits are or'd into the mask as the
@@ -2975,7 +2971,6 @@ link_hash_newfunc (struct bfd_hash_entry *entry,
       eh->is_func = 0;
       eh->is_func_descriptor = 0;
       eh->is_entry = 0;
-      eh->adjust_done = 0;
       eh->tls_mask = 0;
     }
 
@@ -3364,8 +3359,7 @@ ppc64_elf_copy_indirect_symbol
   edir->tls_mask |= eind->tls_mask;
 
   mask = (ELF_LINK_HASH_REF_DYNAMIC | ELF_LINK_HASH_REF_REGULAR
-	  | ELF_LINK_HASH_REF_REGULAR_NONWEAK | ELF_LINK_NON_GOT_REF
-	  | ELF_LINK_HASH_NEEDS_PLT);
+	  | ELF_LINK_HASH_REF_REGULAR_NONWEAK | ELF_LINK_NON_GOT_REF);
   /* If called to transfer flags for a weakdef during processing
      of elf_adjust_dynamic_symbol, don't copy ELF_LINK_NON_GOT_REF.
      We clear it ourselves for ELIMINATE_COPY_RELOCS.  */
@@ -3588,15 +3582,6 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
   asection **opd_sym_map;
 
   if (info->relocatable)
-    return TRUE;
-
-  /* Don't do anything special with non-loaded, non-alloced sections.
-     In particular, any relocs in such sections should not affect GOT
-     and PLT reference counting (ie. we don't allow them to create GOT
-     or PLT entries), there's no possibility or desire to optimize TLS
-     relocs, and there's not much point in propagating relocs to shared
-     libs that the dynamic linker won't relocate.  */
-  if ((sec->flags & SEC_ALLOC) == 0)
     return TRUE;
 
   htab = ppc_hash_table (info);
@@ -3956,6 +3941,10 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	  if (NO_OPD_RELOCS && opd_sym_map != NULL)
 	    break;
 
+	  /* Don't propagate relocs that the dynamic linker won't relocate.  */
+	  if ((sec->flags & SEC_ALLOC) == 0)
+	    break;
+
 	  /* If we are creating a shared library, and this is a reloc
 	     against a global symbol, or a non PC relative reloc
 	     against a local symbol, then we need to copy the reloc
@@ -4170,9 +4159,6 @@ ppc64_elf_gc_sweep_hook (bfd *abfd, struct bfd_link_info *info,
   struct elf_link_hash_entry **sym_hashes;
   struct got_entry **local_got_ents;
   const Elf_Internal_Rela *rel, *relend;
-
-  if ((sec->flags & SEC_ALLOC) == 0)
-    return TRUE;
 
   elf_section_data (sec)->local_dynrel = NULL;
 
@@ -4888,53 +4874,10 @@ get_tls_mask (char **tls_maskp, unsigned long *toc_symndx,
   return 1;
 }
 
-/* Adjust all global syms defined in opd sections.  In gcc generated
-   code these will already have been done, but I suppose we have to
-   cater for all sorts of hand written assembly.  */
-
-static bfd_boolean
-adjust_opd_syms (struct elf_link_hash_entry *h, void *inf ATTRIBUTE_UNUSED)
-{
-  struct ppc_link_hash_entry *eh;
-  asection *sym_sec;
-  long *opd_adjust;
-
-  if (h->root.type == bfd_link_hash_indirect)
-    return TRUE;
-
-  if (h->root.type == bfd_link_hash_warning)
-    h = (struct elf_link_hash_entry *) h->root.u.i.link;
-
-  if (h->root.type != bfd_link_hash_defined
-      && h->root.type != bfd_link_hash_defweak)
-    return TRUE;
-
-  eh = (struct ppc_link_hash_entry *) h;
-  if (eh->adjust_done)
-    return TRUE;
-
-  sym_sec = eh->elf.root.u.def.section;
-  if (sym_sec != NULL
-      && elf_section_data (sym_sec) != NULL
-      && (opd_adjust = ppc64_elf_section_data (sym_sec)->opd.adjust) != NULL)
-    {
-      eh->elf.root.u.def.value += opd_adjust[eh->elf.root.u.def.value / 24];
-      eh->adjust_done = 1;
-    }
-  return TRUE;
-}
-
-/* Remove unused Official Procedure Descriptor entries.  Currently we
-   only remove those associated with functions in discarded link-once
-   sections, or weakly defined functions that have been overridden.  It
-   would be possible to remove many more entries for statically linked
-   applications.  */
-
 bfd_boolean
 ppc64_elf_edit_opd (bfd *obfd, struct bfd_link_info *info)
 {
   bfd *ibfd;
-  bfd_boolean some_edited = FALSE;
 
   for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link_next)
     {
@@ -5135,24 +5078,22 @@ ppc64_elf_edit_opd (bfd *obfd, struct bfd_link_info *info)
 
 		      if (h != NULL)
 			{
-			  /* Redefine the function descriptor symbol to
-			     this location in the opd section.  It is
-			     necessary to update the value here rather
-			     than using an array of adjustments as we do
-			     for local symbols, because various places
-			     in the generic ELF code use the value
-			     stored in u.def.value.  */
+			  /* Redefine the function descriptor symbol
+			     to this location in the opd section.
+			     We've checked above that opd relocs are
+			     ordered.  */
 			  fdh->elf.root.u.def.value = wptr - sec->contents;
-			  fdh->adjust_done = 1;
 			}
-
-		      /* Local syms are a bit tricky.  We could
-			 tweak them as they can be cached, but
-			 we'd need to look through the local syms
-			 for the function descriptor sym which we
-			 don't have at the moment.  So keep an
-			 array of adjustments.  */
-		      adjust[rel->r_offset / 24] = wptr - rptr;
+		      else
+			{
+			  /* Local syms are a bit tricky.  We could
+			     tweak them as they can be cached, but
+			     we'd need to look through the local syms
+			     for the function descriptor sym which we
+			     don't have at the moment.  So keep an
+			     array of adjustments.  */
+			  adjust[rel->r_offset / 24] = wptr - rptr;
+			}
 
 		      if (wptr != rptr)
 			memcpy (wptr, rptr, 24);
@@ -5211,7 +5152,6 @@ ppc64_elf_edit_opd (bfd *obfd, struct bfd_link_info *info)
 	  elf_section_data (sec)->rel_hdr.sh_size
 	    = sec->reloc_count * elf_section_data (sec)->rel_hdr.sh_entsize;
 	  BFD_ASSERT (elf_section_data (sec)->rel_hdr2 == NULL);
-	  some_edited = TRUE;
 	}
       else if (elf_section_data (sec)->relocs != relstart)
 	free (relstart);
@@ -5225,9 +5165,6 @@ ppc64_elf_edit_opd (bfd *obfd, struct bfd_link_info *info)
 	    symtab_hdr->contents = (unsigned char *) local_syms;
 	}
     }
-
-  if (some_edited)
-    elf_link_hash_traverse (elf_hash_table (info), adjust_opd_syms, NULL);
 
   return TRUE;
 }
@@ -5324,17 +5261,7 @@ ppc64_elf_tls_optimize (bfd *obfd ATTRIBUTE_UNUSED, struct bfd_link_info *info)
 		    value = h->root.u.def.value;
 		  }
 		else
-		  {
-		    value = sym->st_value;
-
-		    if (elf_section_data (sym_sec) != NULL)
-		      {
-			long *adjust;
-			adjust = ppc64_elf_section_data (sym_sec)->opd.adjust;
-			if (adjust != NULL)
-			  value += adjust[value / 24];
-		      }
-		  }
+		  value = sym->st_value;
 
 		ok_tprel = FALSE;
 		is_local = FALSE;
@@ -6009,7 +5936,7 @@ ppc64_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	}
 
       /* .plt is in the bss section.  We don't initialise it.  */
-      if (s == htab->plt)
+      if ((s->flags & SEC_LOAD) == 0)
 	continue;
 
       /* Allocate memory for the section contents.  We use bfd_zalloc
@@ -6142,9 +6069,8 @@ ppc_type_of_stub (asection *input_sec,
 	      }
 	}
 
-      if (!(h->elf.root.type == bfd_link_hash_defined
-	    || h->elf.root.type == bfd_link_hash_defweak)
-	  || h->elf.root.u.def.section->output_section == NULL)
+      if (h->elf.root.type != bfd_link_hash_defined
+	  && h->elf.root.type != bfd_link_hash_defweak)
 	return ppc_stub_none;
     }
 
@@ -6637,9 +6563,6 @@ toc_adjusting_stub_needed (struct bfd_link_info *info, asection *isec)
 
   /* We know none of our code bearing sections will need toc stubs.  */
   if ((isec->flags & SEC_LINKER_CREATED) != 0)
-    return 0;
-
-  if (isec->_raw_size == 0)
     return 0;
 
   /* Hack for linux kernel.  .fixup contains branches, but only back to
@@ -7474,7 +7397,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	      long *opd_sym_adjust;
 
 	      opd_sym_adjust = ppc64_elf_section_data (sec)->opd.adjust;
-	      if (opd_sym_adjust != NULL)
+	      if (opd_sym_adjust != NULL && sym->st_value % 24 == 0)
 		relocation += opd_sym_adjust[sym->st_value / 24];
 	    }
 	}
@@ -8743,32 +8666,6 @@ ppc64_elf_relocate_section (bfd *output_bfd,
     }
 
   return ret;
-}
-
-/* Adjust the value of any local symbols in opd sections.  */
-
-static bfd_boolean
-ppc64_elf_output_symbol_hook (struct bfd_link_info *info,
-			      const char *name ATTRIBUTE_UNUSED,
-			      Elf_Internal_Sym *elfsym,
-			      asection *input_sec,
-			      struct elf_link_hash_entry *h)
-{
-  long *adjust;
-  bfd_vma value;
-
-  if (h != NULL
-      || input_sec == NULL
-      || ppc64_elf_section_data (input_sec) == NULL
-      || (adjust = ppc64_elf_section_data (input_sec)->opd.adjust) == NULL)
-    return TRUE;
-
-  value = elfsym->st_value - input_sec->output_offset;
-  if (!info->relocatable)
-    value -= input_sec->output_section->vma;
-
-  elfsym->st_value += adjust[value / 24];
-  return TRUE;
 }
 
 /* Finish up dynamic symbol handling.  We set the contents of various

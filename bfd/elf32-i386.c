@@ -1,5 +1,5 @@
 /* Intel 80386/80486-specific support for 32-bit ELF
-   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004
+   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -346,50 +346,29 @@ elf_i386_is_local_label_name (bfd *abfd, const char *name)
 }
 
 /* Support for core dump NOTE sections.  */
-
 static bfd_boolean
 elf_i386_grok_prstatus (bfd *abfd, Elf_Internal_Note *note)
 {
   int offset;
   size_t raw_size;
 
-  if (note->namesz == 8 && strcmp (note->namedata, "FreeBSD") == 0)
+  switch (note->descsz)
     {
-      int pr_version = bfd_get_32 (abfd, note->descdata);
+      default:
+	return FALSE;
 
-      if (pr_version != 1)
- 	return FALSE;
+      case 144:		/* Linux/i386 */
+	/* pr_cursig */
+	elf_tdata (abfd)->core_signal = bfd_get_16 (abfd, note->descdata + 12);
 
-      /* pr_cursig */
-      elf_tdata (abfd)->core_signal = bfd_get_32 (abfd, note->descdata + 20);
+	/* pr_pid */
+	elf_tdata (abfd)->core_pid = bfd_get_32 (abfd, note->descdata + 24);
 
-      /* pr_pid */
-      elf_tdata (abfd)->core_pid = bfd_get_32 (abfd, note->descdata + 24);
+	/* pr_reg */
+	offset = 72;
+	raw_size = 68;
 
-      /* pr_reg */
-      offset = 28;
-      raw_size = bfd_get_32 (abfd, note->descdata + 8);
-    }
-  else
-    {
-      switch (note->descsz)
-	{
-	default:
-	  return FALSE;
-
-	case 144:		/* Linux/i386 */
-	  /* pr_cursig */
-	  elf_tdata (abfd)->core_signal = bfd_get_16 (abfd, note->descdata + 12);
-
-	  /* pr_pid */
-	  elf_tdata (abfd)->core_pid = bfd_get_32 (abfd, note->descdata + 24);
-
-	  /* pr_reg */
-	  offset = 72;
-	  raw_size = 68;
-
-	  break;
-	}
+	break;
     }
 
   /* Make a ".reg/999" section.  */
@@ -400,36 +379,22 @@ elf_i386_grok_prstatus (bfd *abfd, Elf_Internal_Note *note)
 static bfd_boolean
 elf_i386_grok_psinfo (bfd *abfd, Elf_Internal_Note *note)
 {
-  if (note->namesz == 8 && strcmp (note->namedata, "FreeBSD") == 0)
+  switch (note->descsz)
     {
-      int pr_version = bfd_get_32 (abfd, note->descdata);
-
-      if (pr_version != 1)
+      default:
 	return FALSE;
 
-      elf_tdata (abfd)->core_program
-	= _bfd_elfcore_strndup (abfd, note->descdata + 8, 17);
-      elf_tdata (abfd)->core_command
-	= _bfd_elfcore_strndup (abfd, note->descdata + 25, 81);
-    }
-  else
-    {
-      switch (note->descsz)
-	{
-	default:
-	  return FALSE;
-
-	case 124:		/* Linux/i386 elf_prpsinfo.  */
-	  elf_tdata (abfd)->core_program
-	    = _bfd_elfcore_strndup (abfd, note->descdata + 28, 16);
-	  elf_tdata (abfd)->core_command
-	    = _bfd_elfcore_strndup (abfd, note->descdata + 44, 80);
-	}
+      case 124:		/* Linux/i386 elf_prpsinfo */
+	elf_tdata (abfd)->core_program
+	  = _bfd_elfcore_strndup (abfd, note->descdata + 28, 16);
+	elf_tdata (abfd)->core_command
+	  = _bfd_elfcore_strndup (abfd, note->descdata + 44, 80);
     }
 
   /* Note that for some reason, a spurious space is tacked
      onto the end of the args in some (at least one anyway)
      implementations, so strip it off if it exists.  */
+
   {
     char *command = elf_tdata (abfd)->core_command;
     int n = strlen (command);
@@ -578,6 +543,20 @@ elf_i386_mkobject (bfd *abfd)
   abfd->tdata.any = bfd_zalloc (abfd, amt);
   if (abfd->tdata.any == NULL)
     return FALSE;
+  return TRUE;
+}
+
+static bfd_boolean
+elf_i386_object_p (bfd *abfd)
+{
+  /* Allocate our special target data.  */
+  struct elf_i386_obj_tdata *new_tdata;
+  bfd_size_type amt = sizeof (struct elf_i386_obj_tdata);
+  new_tdata = bfd_zalloc (abfd, amt);
+  if (new_tdata == NULL)
+    return FALSE;
+  new_tdata->root = *abfd->tdata.elf_obj_data;
+  abfd->tdata.any = new_tdata;
   return TRUE;
 }
 
@@ -791,9 +770,7 @@ elf_i386_copy_indirect_symbol (const struct elf_backend_data *bed,
     dir->elf_link_hash_flags |=
       (ind->elf_link_hash_flags & (ELF_LINK_HASH_REF_DYNAMIC
 				   | ELF_LINK_HASH_REF_REGULAR
-				   | ELF_LINK_HASH_REF_REGULAR_NONWEAK
-				   | ELF_LINK_HASH_NEEDS_PLT
-				   | ELF_LINK_POINTER_EQUALITY_NEEDED));
+				   | ELF_LINK_HASH_REF_REGULAR_NONWEAK));
   else
     _bfd_elf_link_hash_copy_indirect (bed, dir, ind);
 }
@@ -1023,8 +1000,6 @@ elf_i386_check_relocs (bfd *abfd,
 	      /* We may need a .plt entry if the function this reloc
 		 refers to is in a shared lib.  */
 	      h->plt.refcount += 1;
-	      if (r_type != R_386_PC32)
-		h->elf_link_hash_flags |= ELF_LINK_POINTER_EQUALITY_NEEDED;
 	    }
 
 	  /* If we are creating a shared library, and this is a reloc
@@ -3028,16 +3003,11 @@ elf_i386_finish_dynamic_symbol (bfd *output_bfd,
       if ((h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0)
 	{
 	  /* Mark the symbol as undefined, rather than as defined in
-	     the .plt section.  Leave the value if there were any
-	     relocations where pointer equality matters (this is a clue
+	     the .plt section.  Leave the value alone.  This is a clue
 	     for the dynamic linker, to make function pointer
 	     comparisons work between an application and shared
-	     library), otherwise set it to zero.  If a function is only
-	     called from a binary, there is no need to slow down
-	     shared libraries because of that.  */
+	     library.  */
 	  sym->st_shndx = SHN_UNDEF;
-	  if ((h->elf_link_hash_flags & ELF_LINK_POINTER_EQUALITY_NEEDED) == 0)
-	    sym->st_value = 0;
 	}
     }
 
@@ -3274,6 +3244,7 @@ elf_i386_finish_dynamic_sections (bfd *output_bfd,
 #define elf_info_to_howto_rel		      elf_i386_info_to_howto_rel
 
 #define bfd_elf32_mkobject		      elf_i386_mkobject
+#define elf_backend_object_p		      elf_i386_object_p
 
 #define bfd_elf32_bfd_is_local_label_name     elf_i386_is_local_label_name
 #define bfd_elf32_bfd_link_hash_table_create  elf_i386_link_hash_table_create

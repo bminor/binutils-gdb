@@ -1,8 +1,7 @@
 /* Intel 386 target-dependent stuff.
 
    Copyright 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996,
-   1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004 Free Software
-   Foundation, Inc.
+   1997, 1998, 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -509,13 +508,9 @@ i386_analyze_frame_setup (CORE_ADDR pc, CORE_ADDR current_pc,
 	    subl %edx, %edx
 	    subl %eax, %eax
 
-	 Because of the symmetry, there are actually two ways to
-	 encode these instructions; with opcode bytes 0x29 and 0x2b
-	 for `subl' and opcode bytes 0x31 and 0x33 for `xorl'.
-
 	 Make sure we only skip these instructions if we later see the
 	 `movl %esp, %ebp' that actually sets up the frame.  */
-      while (op == 0x29 || op == 0x2b || op == 0x31 || op == 0x33)
+      while (op == 0x29 || op == 0x31)
 	{
 	  op = read_memory_unsigned_integer (pc + skip + 2, 1);
 	  switch (op)
@@ -1156,16 +1151,25 @@ i386_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
 #define LOW_RETURN_REGNUM	I386_EAX_REGNUM /* %eax */
 #define HIGH_RETURN_REGNUM	I386_EDX_REGNUM /* %edx */
 
-/* Read, for architecture GDBARCH, a function return value of TYPE
-   from REGCACHE, and copy that into VALBUF.  */
+/* Extract from an array REGBUF containing the (raw) register state, a
+   function return value of TYPE, and copy that, in virtual format,
+   into VALBUF.  */
 
 static void
-i386_extract_return_value (struct gdbarch *gdbarch, struct type *type,
-			   struct regcache *regcache, void *valbuf)
+i386_extract_return_value (struct type *type, struct regcache *regcache,
+			   void *dst)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (get_regcache_arch (regcache));
+  bfd_byte *valbuf = dst;
   int len = TYPE_LENGTH (type);
   char buf[I386_MAX_REGISTER_SIZE];
+
+  if (TYPE_CODE (type) == TYPE_CODE_STRUCT
+      && TYPE_NFIELDS (type) == 1)
+    {
+      i386_extract_return_value (TYPE_FIELD_TYPE (type, 0), regcache, valbuf);
+      return;
+    }
 
   if (TYPE_CODE (type) == TYPE_CODE_FLT)
     {
@@ -1198,7 +1202,7 @@ i386_extract_return_value (struct gdbarch *gdbarch, struct type *type,
 	  regcache_raw_read (regcache, LOW_RETURN_REGNUM, buf);
 	  memcpy (valbuf, buf, low_size);
 	  regcache_raw_read (regcache, HIGH_RETURN_REGNUM, buf);
-	  memcpy ((char *) valbuf + low_size, buf, len - low_size);
+	  memcpy (valbuf + low_size, buf, len - low_size);
 	}
       else
 	internal_error (__FILE__, __LINE__,
@@ -1206,19 +1210,26 @@ i386_extract_return_value (struct gdbarch *gdbarch, struct type *type,
     }
 }
 
-/* Write, for architecture GDBARCH, a function return value of TYPE
-   from VALBUF into REGCACHE.  */
+/* Write into the appropriate registers a function return value stored
+   in VALBUF of type TYPE, given in virtual format.  */
 
 static void
-i386_store_return_value (struct gdbarch *gdbarch, struct type *type,
-			 struct regcache *regcache, const void *valbuf)
+i386_store_return_value (struct type *type, struct regcache *regcache,
+			 const void *valbuf)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (get_regcache_arch (regcache));
   int len = TYPE_LENGTH (type);
 
   /* Define I387_ST0_REGNUM such that we use the proper definitions
      for the architecture.  */
 #define I387_ST0_REGNUM I386_ST0_REGNUM
+
+  if (TYPE_CODE (type) == TYPE_CODE_STRUCT
+      && TYPE_NFIELDS (type) == 1)
+    {
+      i386_store_return_value (TYPE_FIELD_TYPE (type, 0), regcache, valbuf);
+      return;
+    }
 
   if (TYPE_CODE (type) == TYPE_CODE_FLT)
     {
@@ -1275,6 +1286,19 @@ i386_store_return_value (struct gdbarch *gdbarch, struct type *type,
 
 #undef I387_ST0_REGNUM
 }
+
+/* Extract from REGCACHE, which contains the (raw) register state, the
+   address in which a function should return its structure value, as a
+   CORE_ADDR.  */
+
+static CORE_ADDR
+i386_extract_struct_value_address (struct regcache *regcache)
+{
+  char buf[4];
+
+  regcache_cooked_read (regcache, I386_EAX_REGNUM, buf);
+  return extract_unsigned_integer (buf, 4);
+}
 
 
 /* This is the variable that is set with "set struct-convention", and
@@ -1291,62 +1315,20 @@ static const char *valid_conventions[] =
 };
 static const char *struct_convention = default_struct_convention;
 
-/* Return non-zero if TYPE, which is assumed to be a structure or
-   union type, should be returned in registers for architecture
-   GDBARCH.  */
-
 static int
-i386_reg_struct_return_p (struct gdbarch *gdbarch, struct type *type)
+i386_use_struct_convention (int gcc_p, struct type *type)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-  enum type_code code = TYPE_CODE (type);
-  int len = TYPE_LENGTH (type);
+  enum struct_return struct_return;
 
-  gdb_assert (code == TYPE_CODE_STRUCT || code == TYPE_CODE_UNION);
+  if (struct_convention == default_struct_convention)
+    struct_return = gdbarch_tdep (current_gdbarch)->struct_return;
+  else if (struct_convention == pcc_struct_convention)
+    struct_return = pcc_struct_return;
+  else
+    struct_return = reg_struct_return;
 
-  if (struct_convention == pcc_struct_convention
-      || (struct_convention == default_struct_convention
-	  && tdep->struct_return == pcc_struct_return))
-    return 0;
-
-  return (len == 1 || len == 2 || len == 4 || len == 8);
-}
-
-/* Determine, for architecture GDBARCH, how a return value of TYPE
-   should be returned.  If it is supposed to be returned in registers,
-   and READBUF is non-zero, read the appropriate value from REGCACHE,
-   and copy it into READBUF.  If WRITEBUF is non-zero, write the value
-   from WRITEBUF into REGCACHE.  */
-
-static enum return_value_convention
-i386_return_value (struct gdbarch *gdbarch, struct type *type,
-		   struct regcache *regcache, void *readbuf,
-		   const void *writebuf)
-{
-  enum type_code code = TYPE_CODE (type);
-
-  if ((code == TYPE_CODE_STRUCT || code == TYPE_CODE_UNION)
-      && !i386_reg_struct_return_p (gdbarch, type))
-    return RETURN_VALUE_STRUCT_CONVENTION;
-
-  /* This special case is for structures consisting of a single
-     `float' or `double' member.  These structures are returned in
-     %st(0).  For these structures, we call ourselves recursively,
-     changing TYPE into the type of the first member of the structure.
-     Since that should work for all structures that have only one
-     member, we don't bother to check the member's type here.  */
-  if (code == TYPE_CODE_STRUCT && TYPE_NFIELDS (type) == 1)
-    {
-      type = check_typedef (TYPE_FIELD_TYPE (type, 0));
-      return i386_return_value (gdbarch, type, regcache, readbuf, writebuf);
-    }
-
-  if (readbuf)
-    i386_extract_return_value (gdbarch, type, regcache, readbuf);
-  if (writebuf)
-    i386_store_return_value (gdbarch, type, regcache, writebuf);
-
-  return RETURN_VALUE_REGISTER_CONVENTION;
+  return generic_use_struct_convention (struct_return == reg_struct_return,
+					type);
 }
 
 
@@ -1566,7 +1548,7 @@ i386_value_to_register (struct frame_info *frame, int regnum,
    to register cache REGCACHE.  If REGNUM is -1, do this for all
    registers in REGSET.  */
 
-void
+static void
 i386_supply_gregset (const struct regset *regset, struct regcache *regcache,
 		     int regnum, const void *gregs, size_t len)
 {
@@ -1982,7 +1964,11 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_register_to_value (gdbarch,  i386_register_to_value);
   set_gdbarch_value_to_register (gdbarch, i386_value_to_register);
 
-  set_gdbarch_return_value (gdbarch, i386_return_value);
+  set_gdbarch_extract_return_value (gdbarch, i386_extract_return_value);
+  set_gdbarch_store_return_value (gdbarch, i386_store_return_value);
+  set_gdbarch_extract_struct_value_address (gdbarch,
+					    i386_extract_struct_value_address);
+  set_gdbarch_use_struct_convention (gdbarch, i386_use_struct_convention);
 
   set_gdbarch_skip_prologue (gdbarch, i386_skip_prologue);
 
@@ -1991,6 +1977,7 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_breakpoint_from_pc (gdbarch, i386_breakpoint_from_pc);
   set_gdbarch_decr_pc_after_break (gdbarch, 1);
+  set_gdbarch_function_start_offset (gdbarch, 0);
 
   set_gdbarch_frame_args_skip (gdbarch, 8);
   set_gdbarch_pc_in_sigtramp (gdbarch, i386_pc_in_sigtramp);

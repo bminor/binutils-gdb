@@ -1,7 +1,5 @@
 /* Target-machine dependent code for Motorola MCore for GDB, the GNU debugger
-
-   Copyright 1999, 2000, 2001, 2002, 2003, 2004 Free Software
-   Foundation, Inc.
+   Copyright 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -248,16 +246,27 @@ mcore_reg_struct_has_addr (int gcc_p, struct type *type)
 static struct frame_info *
 analyze_dummy_frame (CORE_ADDR pc, CORE_ADDR frame)
 {
-  struct cleanup *old_chain = make_cleanup (null_cleanup, NULL);
-  struct frame_info *dummy
-    = deprecated_frame_xmalloc_with_cleanup (SIZEOF_FRAME_SAVED_REGS,
-					     sizeof (struct frame_extra_info));
+  static struct frame_info *dummy = NULL;
+
+  if (dummy == NULL)
+    {
+      struct frame_extra_info *extra_info;
+      CORE_ADDR *saved_regs;
+      dummy = deprecated_frame_xmalloc ();
+      saved_regs = (CORE_ADDR *) xmalloc (SIZEOF_FRAME_SAVED_REGS);
+      deprecated_set_frame_saved_regs_hack (dummy, saved_regs);
+      extra_info = XMALLOC (struct frame_extra_info);
+      deprecated_set_frame_extra_info_hack (dummy, extra_info);
+    }
+
+  deprecated_set_frame_next_hack (dummy, NULL);
+  deprecated_set_frame_prev_hack (dummy, NULL);
   deprecated_update_frame_pc_hack (dummy, pc);
   deprecated_update_frame_base_hack (dummy, frame);
   get_frame_extra_info (dummy)->status = 0;
   get_frame_extra_info (dummy)->framesize = 0;
+  memset (deprecated_get_frame_saved_regs (dummy), '\000', SIZEOF_FRAME_SAVED_REGS);
   mcore_analyze_prologue (dummy, 0, 0);
-  do_cleanups (old_chain);
   return dummy;
 }
 
@@ -919,18 +928,31 @@ mcore_push_return_address (CORE_ADDR pc, CORE_ADDR sp)
    argument.
 
    For gdb, this leaves us two routes, based on what
-   USE_STRUCT_CONVENTION (mcore_use_struct_convention) returns.  If
-   this macro returns 1, gdb will call STORE_STRUCT_RETURN to store
-   the return value.
+   USE_STRUCT_CONVENTION (mcore_use_struct_convention) returns.
+   If this macro returns 1, gdb will call STORE_STRUCT_RETURN and
+   EXTRACT_STRUCT_VALUE_ADDRESS.
 
-   If USE_STRUCT_CONVENTION returns 0, then gdb uses
-   STORE_RETURN_VALUE and EXTRACT_RETURN_VALUE to store/fetch the
-   functions return value.  */
+   If USE_STRUCT_CONVENTION retruns 0, then gdb uses STORE_RETURN_VALUE
+   and EXTRACT_RETURN_VALUE to store/fetch the functions return value. */
+
+/* Should we use EXTRACT_STRUCT_VALUE_ADDRESS instead of
+   EXTRACT_RETURN_VALUE?  GCC_P is true if compiled with gcc
+   and TYPE is the type (which is known to be struct, union or array). */
 
 static int
 mcore_use_struct_convention (int gcc_p, struct type *type)
 {
   return (TYPE_LENGTH (type) > 8);
+}
+
+/* Where is the return value saved? For MCore, a pointer to 
+   this buffer was passed as a hidden first argument, so
+   just return that address. */
+
+static CORE_ADDR
+mcore_extract_struct_value_address (char *regbuf)
+{
+  return extract_unsigned_integer (regbuf + DEPRECATED_REGISTER_BYTE (FIRST_ARGREG), DEPRECATED_REGISTER_SIZE);
 }
 
 /* Given a function which returns a value of type TYPE, extract the
@@ -1060,6 +1082,8 @@ mcore_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_sizeof_call_dummy_words (gdbarch, 0);
   set_gdbarch_deprecated_save_dummy_frame_tos (gdbarch, generic_save_dummy_frame_tos);
   set_gdbarch_deprecated_saved_pc_after_call (gdbarch, mcore_saved_pc_after_call);
+  set_gdbarch_function_start_offset (gdbarch, 0);
+  set_gdbarch_decr_pc_after_break (gdbarch, 0);
   set_gdbarch_breakpoint_from_pc (gdbarch, mcore_breakpoint_from_pc);
   set_gdbarch_deprecated_push_return_address (gdbarch, mcore_push_return_address);
   set_gdbarch_deprecated_push_arguments (gdbarch, mcore_push_arguments);
@@ -1074,6 +1098,8 @@ mcore_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_extract_return_value (gdbarch, 
 					       mcore_extract_return_value);
   set_gdbarch_deprecated_store_struct_return (gdbarch, mcore_store_struct_return);
+  set_gdbarch_deprecated_extract_struct_value_address (gdbarch, 
+						       mcore_extract_struct_value_address);
   set_gdbarch_skip_prologue (gdbarch, mcore_skip_prologue);
   set_gdbarch_frame_args_skip (gdbarch, 0);
   set_gdbarch_deprecated_frame_args_address (gdbarch, mcore_frame_args_address);

@@ -1,3 +1,3 @@
-# OBSOLETE # Target: Sun 3, running SunOS 4, as a target system
-# OBSOLETE TDEPFILES= solib.o solib-sunos.o m68k-tdep.o
-# OBSOLETE TM_FILE= tm-sun3os4.h
+# Target: Sun 3, running SunOS 4, as a target system
+TDEPFILES= solib.o solib-sunos.o m68k-tdep.o
+TM_FILE= tm-sun3os4.h

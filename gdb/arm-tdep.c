@@ -1,6 +1,6 @@
 /* Common target dependent code for GDB on ARM systems.
    Copyright 1988, 1989, 1991, 1992, 1993, 1995, 1996, 1998, 1999, 2000,
-   2001, 2002, 2003, 2004 Free Software Foundation, Inc.
+   2001, 2002, 2003 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -81,10 +81,15 @@ static int arm_debug;
 
 /* Macros for setting and testing a bit in a minimal symbol that marks
    it as Thumb function.  The MSB of the minimal symbol's "info" field
-   is used for this purpose.
+   is used for this purpose. This field is already being used to store
+   the symbol size, so the assumption is that the symbol size cannot
+   exceed 2^31.
 
    MSYMBOL_SET_SPECIAL	Actually sets the "special" bit.
-   MSYMBOL_IS_SPECIAL   Tests the "special" bit in a minimal symbol.  */
+   MSYMBOL_IS_SPECIAL   Tests the "special" bit in a minimal symbol.
+   MSYMBOL_SIZE         Returns the size of the minimal symbol,
+   			i.e. the "info" field with the "special" bit
+   			masked out.  */
 
 #define MSYMBOL_SET_SPECIAL(msym)					\
 	MSYMBOL_INFO (msym) = (char *) (((long) MSYMBOL_INFO (msym))	\
@@ -92,6 +97,9 @@ static int arm_debug;
 
 #define MSYMBOL_IS_SPECIAL(msym)				\
 	(((long) MSYMBOL_INFO (msym) & 0x80000000) != 0)
+
+#define MSYMBOL_SIZE(msym)				\
+	((long) MSYMBOL_INFO (msym) & 0x7fffffff)
 
 /* The list of available "set arm ..." and "show arm ..." commands.  */
 static struct cmd_list_element *setarmcmdlist = NULL;
@@ -2689,21 +2697,6 @@ arm_coff_make_msymbol_special(int val, struct minimal_symbol *msym)
     MSYMBOL_SET_SPECIAL (msym);
 }
 
-static void
-arm_write_pc (CORE_ADDR pc, ptid_t ptid)
-{
-  write_register_pid (ARM_PC_REGNUM, pc, ptid);
-
-  /* If necessary, set the T bit.  */
-  if (arm_apcs_32)
-    {
-      CORE_ADDR val = read_register_pid (ARM_PS_REGNUM, ptid);
-      if (arm_pc_is_thumb (pc))
-	write_register_pid (ARM_PS_REGNUM, val | 0x20, ptid);
-      else
-	write_register_pid (ARM_PS_REGNUM, val & ~(CORE_ADDR) 0x20, ptid);
-    }
-}
 
 static enum gdb_osabi
 arm_elf_osabi_sniffer (bfd *abfd)
@@ -2866,8 +2859,6 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_push_dummy_call (gdbarch, arm_push_dummy_call);
 
-  set_gdbarch_write_pc (gdbarch, arm_write_pc);
-
   /* Frame handling.  */
   set_gdbarch_unwind_dummy_id (gdbarch, arm_unwind_dummy_id);
   set_gdbarch_unwind_pc (gdbarch, arm_unwind_pc);
@@ -2883,6 +2874,9 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_smash_text_address (gdbarch, arm_smash_text_address);
   set_gdbarch_addr_bits_remove (gdbarch, arm_addr_bits_remove);
 
+  /* Offset from address of function to start of its code.  */
+  set_gdbarch_function_start_offset (gdbarch, 0);
+
   /* Advance PC across function entry code.  */
   set_gdbarch_skip_prologue (gdbarch, arm_skip_prologue);
 
@@ -2894,6 +2888,7 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Breakpoint manipulation.  */
   set_gdbarch_breakpoint_from_pc (gdbarch, arm_breakpoint_from_pc);
+  set_gdbarch_decr_pc_after_break (gdbarch, 0);
 
   /* Information about registers, etc.  */
   set_gdbarch_print_float_info (gdbarch, arm_print_float_info);

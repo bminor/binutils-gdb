@@ -4930,8 +4930,6 @@ set_h8300h (unsigned long machine)
      This function being replaced by a sim_open:ARGV configuration
      option.  */
 
-  h8300hmode = h8300smode = h8300sxmode = h8300_normal_mode = 0;
-
   if (machine == bfd_mach_h8300sx || machine == bfd_mach_h8300sxn)
     h8300sxmode = 1;
 
@@ -5052,7 +5050,7 @@ sim_load (SIM_DESC sd, char *prog, bfd *abfd, int from_tty)
   if (abfd != NULL)
     prog_bfd = abfd;
   else
-    prog_bfd = bfd_openr (prog, NULL);
+    prog_bfd = bfd_openr (prog, "coff-h8300");
   if (prog_bfd != NULL)
     {
       /* Set the cpu type.  We ignore failure from bfd_check_format

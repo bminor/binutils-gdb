@@ -42,7 +42,6 @@
 #include "regcache.h"
 #include "gdb_assert.h"
 #include "sim-regno.h"
-#include "arch-utils.h"
 
 /* Prototypes */
 
@@ -505,23 +504,27 @@ gdbsim_open (char *args, int from_tty)
   strcpy (arg_buf, "gdbsim");	/* 7 */
   /* Specify the byte order for the target when it is both selectable
      and explicitly specified by the user (not auto detected). */
-  switch (selected_byte_order ())
+  if (!TARGET_BYTE_ORDER_AUTO)
     {
-    case BFD_ENDIAN_BIG:
-      strcat (arg_buf, " -E big");
-      break;
-    case BFD_ENDIAN_LITTLE:
-      strcat (arg_buf, " -E little");
-      break;
-    case BFD_ENDIAN_UNKNOWN:
-      break;
+      switch (TARGET_BYTE_ORDER)
+	{
+	case BFD_ENDIAN_BIG:
+	  strcat (arg_buf, " -E big");
+	  break;
+	case BFD_ENDIAN_LITTLE:
+	  strcat (arg_buf, " -E little");
+	  break;
+	default:
+	  internal_error (__FILE__, __LINE__,
+			  "Value of TARGET_BYTE_ORDER unknown");
+	}
     }
   /* Specify the architecture of the target when it has been
      explicitly specified */
-  if (selected_architecture_name () != NULL)
+  if (!TARGET_ARCHITECTURE_AUTO)
     {
       strcat (arg_buf, " --architecture=");
-      strcat (arg_buf, selected_architecture_name ());
+      strcat (arg_buf, TARGET_ARCHITECTURE->printable_name);
     }
   /* finally, any explicit args */
   if (args)

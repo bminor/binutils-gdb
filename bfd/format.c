@@ -425,7 +425,7 @@ bfd_format_string (bfd_format format)
   switch (format)
     {
     case bfd_object:
-      return "object";		/* Linker/assembler/compiler output.  */
+      return "object";		/* Linker/assember/compiler output.  */
     case bfd_archive:
       return "archive";		/* Object archive file.  */
     case bfd_core:

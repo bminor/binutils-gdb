@@ -283,13 +283,8 @@ disassemble.lo: disassemble.c $(INCDIR)/dis-asm.h
 	$(LIBTOOL) --mode=compile $(COMPILE) -c @archdefs@ $(srcdir)/disassemble.c
 
 libopcodes_la_SOURCES =  dis-buf.c disassemble.c dis-init.c
-# It's desirable to list ../bfd/libbfd.la in DEPENDENCIES and LIBADD.
-# Unfortunately this causes libtool to add -L$(libdir), referring to the
-# planned install directory of libbfd.  This can cause us to pick up an
-# old version of libbfd, or to pick up libbfd for the wrong architecture
-# if host != build.
-libopcodes_la_DEPENDENCIES = $(OFILES)
-libopcodes_la_LIBADD = $(OFILES) @WIN32LIBADD@
+libopcodes_la_DEPENDENCIES = $(OFILES) ../bfd/libbfd.la
+libopcodes_la_LIBADD = $(OFILES) @WIN32LIBADD@ ../bfd/libbfd.la
 libopcodes_la_LDFLAGS = -release $(VERSION) @WIN32LDFLAGS@
 
 # libtool will build .libs/libopcodes.a.  We create libopcodes.a in
@@ -563,7 +558,7 @@ dlx-dis.lo: dlx-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
 dis-buf.lo: dis-buf.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/symcat.h opintl.h
 dis-init.lo: dis-init.c sysdep.h config.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/symcat.h
+  $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/symcat.h opintl.h
 disassemble.lo: disassemble.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/symcat.h
 fr30-asm.lo: fr30-asm.c sysdep.h config.h $(INCDIR)/ansidecl.h \

@@ -1,8 +1,7 @@
 /* Support routines for decoding "stabs" debugging information format.
-
-   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994,
-   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004 Free
-   Software Foundation, Inc.
+   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
+   1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -90,6 +89,8 @@ static void
 read_one_struct_field (struct field_info *, char **, char *,
 		       struct type *, struct objfile *);
 
+static char *get_substring (char **, int);
+
 static struct type *dbx_alloc_type (int[2], struct objfile *);
 
 static long read_huge_number (char **, int, int *);
@@ -157,6 +158,8 @@ static char *find_name_end (char *name);
 
 static int process_reference (char **string);
 
+static CORE_ADDR ref_search_value (int refnum);
+
 void stabsread_clear_cache (void);
 
 static const char vptr_name[] = "_vptr$";
@@ -187,6 +190,12 @@ reg_value_complaint (int arg1, int arg2, const char *arg3)
 
 static void
 stabs_general_complaint (const char *arg1)
+{
+  complaint (&symfile_complaints, "%s", arg1);
+}
+
+static void
+lrs_general_complaint (const char *arg1)
 {
   complaint (&symfile_complaints, "%s", arg1);
 }
@@ -522,6 +531,16 @@ ref_search (int refnum)
   if (refnum < 0 || refnum > ref_count)
     return 0;
   return ref_map[refnum].sym;
+}
+
+/* Return value for the reference REFNUM.  */
+
+static CORE_ADDR
+ref_search_value (int refnum)
+{
+  if (refnum < 0 || refnum > ref_count)
+    return 0;
+  return ref_map[refnum].value;
 }
 
 /* Parse a reference id in STRING and return the resulting
@@ -1099,8 +1118,11 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
 
 	  if (local_symbols
 	      && local_symbols->nsyms > 0
+#ifndef USE_REGISTER_NOT_ARG
 	      && gdbarch_stabs_argument_has_addr (current_gdbarch,
-						  SYMBOL_TYPE (sym)))
+						  SYMBOL_TYPE (sym))
+#endif
+	    )
 	    {
 	      struct symbol *prev_sym;
 	      prev_sym = local_symbols->symbol[local_symbols->nsyms - 1];
@@ -1540,9 +1562,11 @@ again:
 	  *pp = from + 1;
 	}
 
-        /* If this type has already been declared, then reuse the same
-           type, rather than allocating a new one.  This saves some
-           memory.  */
+	/* Now check to see whether the type has already been
+	   declared.  This was written for arrays of cross-referenced
+	   types before we had TYPE_CODE_TARGET_STUBBED, so I'm pretty
+	   sure it is not necessary anymore.  But it might be a good
+	   idea, to save a little memory.  */
 
 	for (ppt = file_symbols; ppt; ppt = ppt->next)
 	  for (i = 0; i < ppt->nsyms; i++)
@@ -1556,8 +1580,6 @@ again:
 		{
 		  obstack_free (&objfile->type_obstack, type_name);
 		  type = SYMBOL_TYPE (sym);
-	          if (typenums[0] != -1)
-	            *dbx_lookup_type (typenums) = type;
 		  return type;
 		}
 	    }

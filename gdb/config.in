@@ -79,9 +79,6 @@
 /* Define if your struct reg has r_fs.  */
 #undef HAVE_STRUCT_REG_R_FS
 
-/* Define if your struct stat has st_blocks.  */
-#undef HAVE_STRUCT_STAT_ST_BLOCKS
-
 /* Define if your struct reg has r_gs.  */
 #undef HAVE_STRUCT_REG_R_GS
 
@@ -136,6 +133,15 @@
 /* Define if you have HPUX threads */
 #undef HAVE_HPUX_THREAD_SUPPORT
 
+/* Define if you want to use the memory mapped malloc package (mmalloc). */
+#undef USE_MMALLOC
+
+/* Define if the runtime uses a routine from mmalloc before gdb has a chance
+   to initialize mmalloc, and we want to force checking to be used anyway.
+   This may cause spurious memory corruption messages if the runtime tries
+   to explicitly deallocate that memory when gdb calls exit. */
+#undef MMCHECK_FORCE
+
 /* Define if <proc_service.h> on solaris uses int instead of
    size_t, and assorted other type changes. */
 #undef PROC_SERVICE_IS_OLD
@@ -160,9 +166,6 @@
 
 /* Define if <sys/ptrace.h> defines the PT_GETXMMREGS request.  */
 #undef HAVE_PT_GETXMMREGS
-
-/* Define if libunwind library is being used.  */
-#undef HAVE_LIBUNWIND
 
 /* hostfile */
 #undef GDB_XM_FILE
@@ -266,12 +269,6 @@
 /* Define if you have the <dirent.h> header file.  */
 #undef HAVE_DIRENT_H
 
-/* Define if you have the <libunwind-ia64.h> header file.  */
-#undef HAVE_LIBUNWIND_IA64_H
-
-/* Define if you have the <libunwind.h> header file.  */
-#undef HAVE_LIBUNWIND_H
-
 /* Define if you have the <limits.h> header file.  */
 #undef HAVE_LIMITS_H
 
@@ -280,9 +277,6 @@
 
 /* Define if you have the <locale.h> header file.  */
 #undef HAVE_LOCALE_H
-
-/* Define if you have the <machine/reg.h> header file.  */
-#undef HAVE_MACHINE_REG_H
 
 /* Define if you have the <malloc.h> header file.  */
 #undef HAVE_MALLOC_H
@@ -452,9 +446,6 @@
 
 /* Define to 1 if the regex included in libiberty should be used. */
 #undef USE_INCLUDED_REGEX
-
-/* Define to 1 if your system has struct reg in <machine/reg.h>. */
-#undef HAVE_STRUCT_REG
 
 /* Define if <stdint.h> provides the uintptr_t type. */
 #undef HAVE_UINTPTR_T

@@ -1,9 +1,7 @@
 /* Read a symbol table in ECOFF format (Third-Eye).
-
-   Copyright 1986, 1987, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
-   1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004 Free Software
-   Foundation, Inc.
-
+   Copyright 1986, 1987, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996,
+   1997, 1998, 1999, 2000, 2001, 2002, 2003
+   Free Software Foundation, Inc.
    Original version contributed by Alessandro Forin (af@cs.cmu.edu) at
    CMU.  Major work by Per Bothner, John Gilmore and Ian Lance Taylor
    at Cygnus Support.
@@ -795,8 +793,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
       else
 	{
 	  t = parse_type (cur_fd, ax, sh->index + 1, 0, bigend, name);
-	  if (strcmp (name, "malloc") == 0
-	      && TYPE_CODE (t) == TYPE_CODE_VOID)
+	  if (STREQ (name, "malloc") && TYPE_CODE (t) == TYPE_CODE_VOID)
 	    {
 	      /* I don't know why, but, at least under Alpha GNU/Linux,
 	         when linking against a malloc without debugging
@@ -1670,8 +1667,7 @@ parse_type (int fd, union aux_ext *ax, unsigned int aux_index, int *bs,
 	      bad_tag_guess_complaint (sym_name);
 	      TYPE_CODE (tp) = type_code;
 	    }
-	  if (TYPE_NAME (tp) == NULL
-	      || strcmp (TYPE_NAME (tp), name) != 0)
+	  if (TYPE_NAME (tp) == NULL || !STREQ (TYPE_NAME (tp), name))
 	    TYPE_NAME (tp) = obsavestring (name, strlen (name),
 					   &current_objfile->type_obstack);
 	}
@@ -1991,8 +1987,7 @@ parse_procedure (PDR *pr, struct symtab *search_symtab,
 
       /* Correct incorrect setjmp procedure descriptor from the library
          to make backtrace through setjmp work.  */
-      if (e->pdr.pcreg == 0
-	  && strcmp (sh_name, "setjmp") == 0)
+      if (e->pdr.pcreg == 0 && STREQ (sh_name, "setjmp"))
 	{
 	  complaint (&symfile_complaints, "fixing bad setjmp PDR from libc");
 	  e->pdr.pcreg = RA_REGNUM;
@@ -2613,8 +2608,7 @@ parse_partial_symbols (struct objfile *objfile)
 			  ((char *) debug_info->external_sym
 			   + (fh->isymBase + 1) * external_sym_size),
 			  &sh);
-	  if (strcmp (debug_info->ss + fh->issBase + sh.iss,
-		      stabs_symbol) == 0)
+	  if (STREQ (debug_info->ss + fh->issBase + sh.iss, stabs_symbol))
 	    processing_gcc_compilation = 2;
 	}
 
@@ -2935,13 +2929,12 @@ parse_partial_symbols (struct objfile *objfile)
 			 things like "break c-exp.y:435" need to work (I
 			 suppose the psymtab_include_list could be hashed or put
 			 in a binary tree, if profiling shows this is a major hog).  */
-		      if (pst && strcmp (namestring, pst->filename) == 0)
+		      if (pst && STREQ (namestring, pst->filename))
 			continue;
 		      {
 			int i;
 			for (i = 0; i < includes_used; i++)
-			  if (strcmp (namestring,
-				      psymtab_include_list[i]) == 0)
+			  if (STREQ (namestring, psymtab_include_list[i]))
 			    {
 			      i = -1;
 			      break;
@@ -3868,8 +3861,8 @@ psymtab_to_symtab_1 (struct partial_symtab *pst, char *filename)
 		      ((char *) debug_info->external_sym
 		       + (fh->isymBase + 1) * external_sym_size),
 		      &sh);
-      if (strcmp (debug_info->ss + fh->issBase + sh.iss,
-		  stabs_symbol) == 0)
+      if (STREQ (debug_info->ss + fh->issBase + sh.iss,
+		 stabs_symbol))
 	{
 	  /* We indicate that this is a GCC compilation so that certain
 	     features will be enabled in stabsread/dbxread.  */
@@ -4509,7 +4502,7 @@ add_line (struct linetable *lt, int lineno, CORE_ADDR adr, int last)
 static int
 compare_blocks (const void *arg1, const void *arg2)
 {
-  LONGEST addr_diff;
+  int addr_diff;
   struct block **b1 = (struct block **) arg1;
   struct block **b2 = (struct block **) arg2;
 

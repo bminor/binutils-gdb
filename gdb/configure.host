@@ -22,7 +22,6 @@ s390*)			gdb_host_cpu=s390 ;;
 sh*)			gdb_host_cpu=sh ;;
 x86_64*)		gdb_host_cpu=i386 ;;
 xscale*)		gdb_host_cpu=arm ;;
-m32r*)			gdb_host_cpu=m32r ;;
 *)			gdb_host_cpu=$host_cpu ;;
 
 esac
@@ -78,31 +77,31 @@ i[34567]86-*-cygwin*)	gdb_host=cygwin ;;
 ia64-*-aix*)		gdb_host=aix ;;
 ia64-*-linux*)		gdb_host=linux ;;
 
-# OBSOLETE m680[01]0-sun-sunos3*)	gdb_host=sun2os3 ;;
-# OBSOLETE m680[01]0-sun-sunos4*)	gdb_host=sun2os4 ;;
+m680[01]0-sun-sunos3*)	gdb_host=sun2os3 ;;
+m680[01]0-sun-sunos4*)	gdb_host=sun2os4 ;;
 
-# OBSOLETE m68*-att-*)		gdb_host=3b1 ;;
-# OBSOLETE m68*-bull*-sysv*)	gdb_host=dpx2 ;;
+m68*-att-*)		gdb_host=3b1 ;;
+m68*-bull*-sysv*)	gdb_host=dpx2 ;;
 m68*-*-linux*)		gdb_host=linux ;;
-# OBSOLETE m68*-*-lynxos*)		gdb_host=m68klynx ;;
+m68*-*-lynxos*)		gdb_host=m68klynx ;;
 m68*-*-netbsd*)		gdb_host=nbsdaout ;;
-# OBSOLETE m68*-*-sysv4*)		gdb_host=m68kv4 ;;
-# OBSOLETE m68*-motorola-*)	gdb_host=delta68 ;;
-# OBSOLETE m68*-sun-sunos3*)	gdb_host=sun3os3 ;;
-# OBSOLETE m68*-sun-sunos4*)	gdb_host=sun3os4 ;;
-# OBSOLETE m68*-sun-*)		gdb_host=sun3os4 ;;
+m68*-*-sysv4*)		gdb_host=m68kv4 ;;
+m68*-motorola-*)	gdb_host=delta68 ;;
+m68*-sun-sunos3*)	gdb_host=sun3os3 ;;
+m68*-sun-sunos4*)	gdb_host=sun3os4 ;;
+m68*-sun-*)		gdb_host=sun3os4 ;;
 
-# OBSOLETE mips-dec-*)		gdb_host=decstation ;;
-# OBSOLETE mips-little-*)		gdb_host=littlemips ;;
+mips-dec-*)		gdb_host=decstation ;;
+mips-little-*)		gdb_host=littlemips ;;
 mips-sgi-irix5*)	gdb_host=irix5 ;;
 mips-sgi-irix6*)	gdb_host=irix6 ;;
-# OBSOLETE mips-sony-*)		gdb_host=news-mips ;;
+mips-sony-*)		gdb_host=news-mips ;;
 mips*-*-linux*)		gdb_host=linux ;;
 mips*-*-netbsd*)	gdb_host=nbsd ;;
-# OBSOLETE mips-*-mach3*)		gdb_host=mipsm3 ;;
-# OBSOLETE mips-*-sysv4*)		gdb_host=mipsv4 ;;
-# OBSOLETE mips-*-sysv*)		gdb_host=riscos ;;
-# OBSOLETE mips-*-riscos*)		gdb_host=riscos ;;
+mips-*-mach3*)		gdb_host=mipsm3 ;;
+mips-*-sysv4*)		gdb_host=mipsv4 ;;
+mips-*-sysv*)		gdb_host=riscos ;;
+mips-*-riscos*)		gdb_host=riscos ;;
 
 none-*-*)		gdb_host=none ;;
 
@@ -125,16 +124,20 @@ s390*-*-*)		gdb_host=s390 ;;
 
 sh*-*-netbsdelf*)	gdb_host=nbsd ;;
 
-sparc64-*-freebsd*)	gdb_host=fbsd ;;
 sparc-*-linux*)		gdb_host=linux ;;
-sparc64-*-linux*)	gdb_host=linux64 ;;
+sparc-*-lynxos*)	gdb_host=sparclynx ;;
 sparc-*-netbsdelf*)	gdb_host=nbsdelf ;;
 sparc-*-netbsdaout*)	gdb_host=nbsdaout ;;
 sparc-*-netbsd*)	gdb_host=nbsdaout ;;
+sparc-*-solaris2*)	gdb_host=sun4sol2 ;;
+sparc-*-sunos4*)	gdb_host=sun4os4 ;;
+sparc-*-sunos5*)	gdb_host=sun4sol2 ;;
+sparc-*-*)		gdb_host=sun4os4 ;;
+sparc64-*-freebsd*|ultrasparc-*-freebsd*|sparcv9-*-freebsd*)
+			gdb_host=fbsd ;;
+sparc64-*-linux*)	gdb_host=linux ;;
 sparc64-*-netbsd*)	gdb_host=nbsd64 ;;
-sparc-*-solaris2* | sparcv9-*-solaris2* | sparc64-*-solaris2*)
-			gdb_host=sol2
-			;;
+sparcv9-*-* | sparc64-*-*) gdb_host=sun4sol2 ;;
 
 vax-*-bsd*)		gdb_host=vaxbsd ;;
 vax-*-ultrix2*)		gdb_host=vaxult2 ;;
@@ -143,7 +146,5 @@ vax-*-ultrix*)		gdb_host=vaxult ;;
 x86_64-*-linux*)	gdb_host=x86-64linux ;;
 x86_64-*-freebsd*)	gdb_host=fbsd64 ;;
 x86_64-*-netbsd*)	gdb_host=nbsd64 ;;
-
-m32r*-*-linux*)          gdb_host=linux ;;
 
 esac

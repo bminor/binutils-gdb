@@ -107,7 +107,7 @@ generic_strcat_address (addr, buf, len)
 }
 #endif
 
-/* Just return true.  */
+/* Just return the given address.  */
 
 int
 generic_symbol_at_address (addr, info)
@@ -115,13 +115,4 @@ generic_symbol_at_address (addr, info)
      struct disassemble_info *info ATTRIBUTE_UNUSED;
 {
   return 1;
-}
-
-/* Just return TRUE.  */
-
-bfd_boolean
-generic_symbol_is_valid (asymbol * sym ATTRIBUTE_UNUSED,
-			 struct disassemble_info *info ATTRIBUTE_UNUSED)
-{
-  return TRUE;
 }

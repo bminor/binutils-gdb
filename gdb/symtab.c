@@ -2314,6 +2314,10 @@ find_function_start_sal (struct symbol *sym, int funfirstline)
     }
   sal = find_pc_sect_line (pc, SYMBOL_BFD_SECTION (sym), 0);
 
+#ifdef PROLOGUE_FIRSTLINE_OVERLAP
+  /* Convex: no need to suppress code on first line, if any */
+  sal.pc = pc;
+#else
   /* Check if SKIP_PROLOGUE left us in mid-line, and the next
      line is still part of the same function.  */
   if (sal.pc != pc
@@ -2326,6 +2330,7 @@ find_function_start_sal (struct symbol *sym, int funfirstline)
       sal = find_pc_sect_line (pc, SYMBOL_BFD_SECTION (sym), 0);
     }
   sal.pc = pc;
+#endif
 
   return sal;
 }
@@ -3868,7 +3873,7 @@ decode_line_spec (char *string, int funfirstline)
   
   sals = decode_line_1 (&string, funfirstline,
 			cursal.symtab, cursal.line,
-			(char ***) NULL, NULL);
+			(char ***) NULL);
 
   if (*string)
     error ("Junk at end of line specification: %s", string);

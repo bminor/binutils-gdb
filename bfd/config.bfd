@@ -329,7 +329,7 @@ case "${targ}" in
     targ_defvec=bfd_elf32_fr30_vec
     ;;
 
-  frv-*-elf | frv-*-*linux*)
+  frv-*-elf)
     targ_defvec=bfd_elf32_frv_vec
     ;;
 
@@ -597,21 +597,6 @@ case "${targ}" in
     targ_defvec=bfd_elf32_iq2000_vec
     ;;
 
-  m32r*le-*-linux*)
-    targ_defvec=bfd_elf32_m32rlelin_vec
-    targ_selvecs="bfd_elf32_m32rlin_vec  bfd_elf32_m32rlelin_vec"
-    ;;
-                                                                                
-  m32r*-*-linux*)
-    targ_defvec=bfd_elf32_m32rlin_vec
-    targ_selvecs="bfd_elf32_m32rlin_vec  bfd_elf32_m32rlelin_vec"
-    ;;
-                                                                                
-  m32r*le-*-*)
-    targ_defvec=bfd_elf32_m32rle_vec
-    targ_selvecs="bfd_elf32_m32r_vec bfd_elf32_m32rle_vec"
-    ;;
-
   m32r-*-*)
     targ_defvec=bfd_elf32_m32r_vec
     ;;
@@ -651,7 +636,7 @@ case "${targ}" in
     targ_defvec=m68kcoff_vec
     targ_selvecs="m68kcoff_vec versados_vec ieee_vec aout0_big_vec"
     ;;
-  m68*-*-elf* | m68*-*-sysv4* | m68*-*-uclinux*)
+  m68*-*-elf* | m68*-*-sysv4*)
     targ_defvec=bfd_elf32_m68k_vec
     targ_selvecs="m68kcoff_vec ieee_vec"
     ;;
@@ -899,27 +884,13 @@ case "${targ}" in
     targ_selvecs="bfd_elf32_pjl_vec bfd_elf32_pj_vec bfd_elf32_i386_vec"
     ;;
 
-  powerpc-*-aix5.[01])
-    targ_defvec=rs6000coff_vec
-    targ_selvecs="aix5coff64_vec"
-    want64=true
-    ;;
-#ifdef BFD64
-  powerpc64-*-aix5.[01])
-    targ_defvec=aix5coff64_vec
-    targ_selvecs="rs6000coff_vec"
-    want64=true
-    ;;
-#endif
   powerpc-*-aix5*)
-    targ_cflags=-DAIX_WEAK_SUPPORT
     targ_defvec=rs6000coff_vec
     targ_selvecs="aix5coff64_vec"
     want64=true
     ;;
 #ifdef BFD64
   powerpc64-*-aix5*)
-    targ_cflags=-DAIX_WEAK_SUPPORT
     targ_defvec=aix5coff64_vec
     targ_selvecs="rs6000coff_vec"
     want64=true
@@ -932,6 +903,7 @@ case "${targ}" in
     case "${targ}" in
         *-*-aix4.[3456789]* | *-*-aix[56789]*)
 	want64=true;;
+	
 	*)
 	targ_cflags=-DSMALL_ARCHIVE;;
     esac
@@ -1255,10 +1227,6 @@ case "${targ}" in
   vax-*-openbsd*)
     targ_defvec=vaxnetbsd_vec
     targ_underscore=yes
-    ;;
-
-  vax-*-linux-gnu*)
-    targ_defvec=bfd_elf32_vax_vec
     ;;
 
   vax*-*-*vms*)

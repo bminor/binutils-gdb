@@ -71,6 +71,7 @@ static void swap_abort PARAMS ((void));
 
 /* Handle 4.2-style (and perhaps also sysV-style) core dump file.  */
 
+/* ARGSUSED */
 const bfd_target *
 trad_unix_core_file_p (abfd)
      bfd *abfd;
@@ -247,6 +248,7 @@ trad_unix_core_file_failing_command (abfd)
     return 0;
 }
 
+/* ARGSUSED */
 int
 trad_unix_core_file_failing_signal (ignore_abfd)
      bfd *ignore_abfd ATTRIBUTE_UNUSED;
@@ -258,6 +260,7 @@ trad_unix_core_file_failing_signal (ignore_abfd)
 #endif
 }
 
+/* ARGSUSED */
 bfd_boolean
 trad_unix_core_file_matches_executable_p  (core_bfd, exec_bfd)
      bfd *core_bfd ATTRIBUTE_UNUSED;

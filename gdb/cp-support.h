@@ -1,5 +1,5 @@
 /* Helper routines for C++ support in GDB.
-   Copyright 2002, 2003, 2004 Free Software Foundation, Inc.
+   Copyright 2002, 2003 Free Software Foundation, Inc.
 
    Contributed by MontaVista Software.
    Namespace support contributed by David Carlton.
@@ -34,7 +34,6 @@ struct symbol;
 struct obstack;
 struct block;
 struct objfile;
-struct type;
 
 /* This struct is designed to store data from using directives.  It
    says that names from namespace INNER should be visible within
@@ -62,14 +61,11 @@ extern unsigned int cp_entire_prefix_len (const char *name);
 
 extern struct symbol **make_symbol_overload_list (struct symbol *);
 
-extern struct type *cp_lookup_rtti_type (const char *name,
-					 struct block *block);
-
 /* Functions/variables from cp-namespace.c.  */
 
 extern unsigned char processing_has_namespace_info;
 
-extern const char *processing_current_prefix;
+extern const char *processing_current_namespace;
 
 extern int cp_is_anonymous (const char *namespace);
 

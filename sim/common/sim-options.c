@@ -154,13 +154,13 @@ static const OPTION standard_options[] =
 
 #ifdef SIM_H8300 /* FIXME: Should be movable to h8300 dir.  */
   { {"h8300h", no_argument, NULL, OPTION_H8300H},
-      'h', NULL, "Indicate the CPU is H8/300H",
+      'h', NULL, "Indicate the CPU is h8/300h",
       standard_option_handler },
   { {"h8300s", no_argument, NULL, OPTION_H8300S},
-      'S', NULL, "Indicate the CPU is H8S",
+      'S', NULL, "Indicate the CPU is h8/300s",
       standard_option_handler },
   { {"h8300sx", no_argument, NULL, OPTION_H8300SX},
-      'x', NULL, "Indicate the CPU is H8SX",
+      'x', NULL, "Indicate the CPU is h8/300sx",
       standard_option_handler },
 #endif
 

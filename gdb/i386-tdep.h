@@ -27,7 +27,6 @@ struct frame_info;
 struct gdbarch;
 struct reggroup;
 struct regset;
-struct regcache;
 
 /* GDB's i386 target supports both the 32-bit Intel Architecture
    (IA-32) and the 64-bit AMD x86-64 architecture.  Internally it uses
@@ -165,8 +164,6 @@ enum i386_regnum
   I386_EDI_REGNUM,		/* %edi */
   I386_EIP_REGNUM,		/* %eip */
   I386_EFLAGS_REGNUM,		/* %eflags */
-  I386_CS_REGNUM,		/* %cs */
-  I386_SS_REGNUM,		/* %ss */
   I386_ST0_REGNUM = 16,		/* %st(0) */
 };
 
@@ -190,13 +187,6 @@ extern char const *i386_register_name (int reg);
 /* Return non-zero if REGNUM is a member of the specified group.  */
 extern int i386_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
 				     struct reggroup *group);
-
-/* Supply register REGNUM from the general-purpose register set REGSET
-   to register cache REGCACHE.  If REGNUM is -1, do this for all
-   registers in REGSET.  */
-extern void i386_supply_gregset (const struct regset *regset,
-				 struct regcache *regcache, int regnum,
-				 const void *gregs, size_t len);
 
 /* Return the appropriate register set for the core section identified
    by SECT_NAME and SECT_SIZE.  */

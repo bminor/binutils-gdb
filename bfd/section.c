@@ -1025,6 +1025,7 @@ DESCRIPTION
 
 */
 
+/*ARGSUSED*/
 bfd_boolean
 bfd_set_section_flags (bfd *abfd ATTRIBUTE_UNUSED,
 		       sec_ptr section,
@@ -1064,7 +1065,7 @@ DESCRIPTION
 
 |	func (abfd, the_section, obj);
 
-	This is the preferred method for iterating over sections; an
+	This is the prefered method for iterating over sections; an
 	alternative would be to use a loop:
 
 |	   section *p;
@@ -1073,6 +1074,7 @@ DESCRIPTION
 
 */
 
+/*VARARGS2*/
 void
 bfd_map_over_sections (bfd *abfd,
 		       void (*operation) (bfd *, asection *, void *),

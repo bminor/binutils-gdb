@@ -1,4 +1,4 @@
-# Copyright 1998, 2000, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
+# Copyright 1998, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
 # 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -32,9 +32,8 @@ set prms_id 0
 set bug_id 0
 
 set asm-arch ""
-set asm-note "empty"
 set asm-flags ""
-set link-flags "--entry _start"
+set link-flags ""
 
 switch -glob -- [istarget] {
     "alpha*-*-*" {
@@ -52,9 +51,6 @@ switch -glob -- [istarget] {
     "d10v-*-*" {
         set asm-arch d10v
     }
-    "frv-*-*" {
-	set asm-arch frv
-    }
     "s390-*-*" {
         set asm-arch s390
     }
@@ -67,10 +63,13 @@ switch -glob -- [istarget] {
     }
     "i\[3456\]86-*-*" {
         set asm-arch i386
+        if [istarget "*-*-cygwin*"] then {
+            set link-flags "--entry _start"
+        }
     }
     "m32r*-*" {
         set asm-arch m32r
-        append link-flags " -Wl,--whole-archive -lgloss -Wl,--no-whole-archive"
+        set link-flags "-Wl,--whole-archive -lgloss -Wl,--no-whole-archive"
     }
     "m6811-*-*" {
         set asm-arch m68hc11
@@ -89,6 +88,7 @@ switch -glob -- [istarget] {
     "sh*-*-*" {
         set asm-arch sh
         set asm-flags "-gdwarf2 -I${srcdir}/${subdir} -I${objdir}/${subdir}"
+        set link-flags "--entry _start"
     }
     "sparc-*-*" {
         set asm-arch sparc
@@ -118,24 +118,13 @@ if { "${asm-arch}" == "" } {
     gdb_suppress_entire_file "Assembly source test -- not implemented for this target."
 }
 
-# On FreeBSD and NetBSD, the final link will fail because of
-# unresolved symbols.  It turns out that libc.so references symbols
-# that are normally provided by crt1.o, which isn't linked in since we
-# specify -nostartfiles.  Using -nostdlib doesn't help since
-# target_compile automatically adds -lm.  Linking statically avoids
-# this mess.
-#
-# On Solaris, linking dynamically results in a binary that dumps core.
-#
-if {[istarget "*-*-freebsd*"] || [istarget "*-*-netbsd*"]
-    || [istarget "*-*-solaris2*"]} then {
-    append link-flags " -static"
-}
-
-# On NetBSD/ELF we need a special NetBSD-identifying note section.
-if { [istarget "*-*-netbsdelf*"]
-     || [istarget "x86_64-*-netbsd*"] } then {
-    set asm-note "netbsd"
+# On FreeBSD, crt1.o the final link will fail because of unresolved
+# symbols.  It turns out that libc.so references symbols that are
+# normally provided by crt1.o, which isn't linked in since we specify
+# -nostartfiles.  Using -nostdlib doesn't help since target_compile
+# automatically adds -lm.  Linking statically avoids this mess.
+if [istarget "*-*-freebsd*"] then {
+    set link-flags "-static"
 }
 
 # Watch out, we are invoking the assembler, but the testsuite sets multilib
@@ -160,8 +149,6 @@ set srcfile2 asmsrc2.s
 
 remote_exec build "rm -f ${subdir}/arch.inc"
 remote_download host ${srcdir}/${subdir}/${asm-arch}.inc ${subdir}/arch.inc
-remote_exec build "rm -f ${subdir}/note.inc"
-remote_download host ${srcdir}/${subdir}/${asm-note}.inc ${subdir}/note.inc
 
 if { "${asm-flags}" == "" } {
     #set asm-flags "-Wa,-gstabs,-I${srcdir}/${subdir},-I${objdir}/${subdir}"
@@ -375,4 +362,3 @@ gdb_test "disassem foostatic" ".*<foostatic\\+0>:.*End of assembler dump." \
 	"look at static function"
 
 remote_exec build "rm -f ${subdir}/arch.inc"
-remote_exec build "rm -f ${subdir}/note.inc"

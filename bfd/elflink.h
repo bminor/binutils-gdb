@@ -437,9 +437,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
       /* You can't use -r against a dynamic object.  Also, there's no
 	 hope of using a dynamic object which does not exactly match
 	 the format of the output file.  */
-      if (info->relocatable
-	  || !is_elf_hash_table (hash_table)
-	  || hash_table->root.creator != abfd->xvec)
+      if (info->relocatable || info->hash->creator != abfd->xvec)
 	{
 	  bfd_set_error (bfd_error_invalid_operation);
 	  goto error_return;
@@ -477,7 +475,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 		 fix is to keep track of what warnings we are supposed
 		 to emit, and then handle them all at the end of the
 		 link.  */
-	      if (dynamic)
+	      if (dynamic && abfd->xvec == info->hash->creator)
 		{
 		  struct elf_link_hash_entry *h;
 
@@ -533,15 +531,15 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	 format.  FIXME: If there are no input BFD's of the same
 	 format as the output, we can't make a shared library.  */
       if (info->shared
-	  && is_elf_hash_table (hash_table)
-	  && hash_table->root.creator == abfd->xvec
-	  && ! hash_table->dynamic_sections_created)
+	  && is_elf_hash_table (info)
+	  && ! hash_table->dynamic_sections_created
+	  && abfd->xvec == info->hash->creator)
 	{
 	  if (! _bfd_elf_link_create_dynamic_sections (abfd, info))
 	    goto error_return;
 	}
     }
-  else if (!is_elf_hash_table (hash_table))
+  else if (! is_elf_hash_table (info))
     goto error_return;
   else
     {
@@ -725,8 +723,9 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 
       /* If this is the first dynamic object found in the link, create
 	 the special sections required for dynamic linking.  */
-      if (! _bfd_elf_link_create_dynamic_sections (abfd, info))
-	goto error_return;
+      if (! hash_table->dynamic_sections_created)
+	if (! _bfd_elf_link_create_dynamic_sections (abfd, info))
+	  goto error_return;
 
       if (add_needed)
 	{
@@ -876,7 +875,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	{
 	  /* This should be impossible, since ELF requires that all
 	     global symbols follow all local symbols, and that sh_info
-	     point to the first global symbol.  Unfortunately, Irix 5
+	     point to the first global symbol.  Unfortunatealy, Irix 5
 	     screws this up.  */
 	  continue;
 	}
@@ -969,7 +968,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
       old_alignment = 0;
       old_bfd = NULL;
 
-      if (is_elf_hash_table (hash_table))
+      if (info->hash->creator->flavour == bfd_target_elf_flavour)
 	{
 	  Elf_Internal_Versym iver;
 	  unsigned int vernum = 0;
@@ -1132,7 +1131,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	  && definition
 	  && (flags & BSF_WEAK) != 0
 	  && ELF_ST_TYPE (isym->st_info) != STT_FUNC
-	  && is_elf_hash_table (hash_table)
+	  && info->hash->creator->flavour == bfd_target_elf_flavour
 	  && h->weakdef == NULL)
 	{
 	  /* Keep a list of all weak defined non function symbols from
@@ -1168,14 +1167,14 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	    h->root.u.c.p->alignment_power = old_alignment;
 	}
 
-      if (is_elf_hash_table (hash_table))
+      if (info->hash->creator->flavour == bfd_target_elf_flavour)
 	{
 	  int old_flags;
 	  bfd_boolean dynsym;
 	  int new_flag;
 
 	  /* Check the alignment when a common symbol is involved. This
-	     can change when a common symbol is overridden by a normal
+	     can change when a common symbol is overriden by a normal
 	     definition or a common symbol is ignored due to the old
 	     normal definition. We need to make sure the maximum
 	     alignment is maintained.  */
@@ -1381,6 +1380,9 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	      bfd_size_type oldsize;
 	      bfd_size_type strindex;
 
+	      if (! is_elf_hash_table (info))
+		goto error_free_vers;
+
 	      /* The symbol from a DT_NEEDED object is referenced from
 		 the regular object to create a dynamic executable. We
 		 have to make sure there is a DT_NEEDED entry for it.  */
@@ -1444,7 +1446,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	  shortname[amt] = '\0';
 
 	  hi = (struct elf_link_hash_entry *)
-	       bfd_link_hash_lookup (&hash_table->root, shortname,
+	       bfd_link_hash_lookup (info->hash, shortname,
 				     FALSE, FALSE, FALSE);
 	  if (hi != NULL
 	      && hi->root.type == h->root.type
@@ -1571,8 +1573,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
      different format.  It probably can't be done.  */
   check_relocs = get_elf_backend_data (abfd)->check_relocs;
   if (! dynamic
-      && is_elf_hash_table (hash_table)
-      && hash_table->root.creator == abfd->xvec
+      && abfd->xvec == info->hash->creator
       && check_relocs != NULL)
     {
       asection *o;
@@ -1608,7 +1609,8 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
      of the .stab/.stabstr sections.  */
   if (! dynamic
       && ! info->traditional_format
-      && is_elf_hash_table (hash_table)
+      && info->hash->creator->flavour == bfd_target_elf_flavour
+      && is_elf_hash_table (info)
       && (info->strip != strip_all && info->strip != strip_debugger))
     {
       asection *stabstr;
@@ -1641,9 +1643,8 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	}
     }
 
-  if (! info->relocatable
-      && ! dynamic
-      && is_elf_hash_table (hash_table))
+  if (! info->relocatable && ! dynamic
+      && is_elf_hash_table (info))
     {
       asection *s;
 
@@ -1663,7 +1664,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	  }
     }
 
-  if (is_elf_hash_table (hash_table))
+  if (is_elf_hash_table (info))
     {
       /* Add this bfd to the loaded list.  */
       struct elf_link_loaded_list *n;
@@ -1701,7 +1702,7 @@ elf_add_dynamic_entry (struct bfd_link_info *info, bfd_vma tag, bfd_vma val)
   bfd_size_type newsize;
   bfd_byte *newcontents;
 
-  if (! is_elf_hash_table (info->hash))
+  if (! is_elf_hash_table (info))
     return FALSE;
 
   dynobj = elf_hash_table (info)->dynobj;
@@ -1831,7 +1832,7 @@ compute_bucket_count (struct bfd_link_info *info)
 
 # if 1
 	  /* Variant 1: optimize for short chains.  We add the squares
-	     of all the chain lengths (which favors many small chain
+	     of all the chain lengths (which favous many small chain
 	     over a few long chains).  */
 	  for (j = 0; j < i; ++j)
 	    max += counts[j] * counts[j];
@@ -1906,7 +1907,10 @@ NAME(bfd_elf,size_dynamic_sections) (bfd *output_bfd,
 
   soname_indx = (bfd_size_type) -1;
 
-  if (!is_elf_hash_table (info->hash))
+  if (info->hash->creator->flavour != bfd_target_elf_flavour)
+    return TRUE;
+
+  if (! is_elf_hash_table (info))
     return TRUE;
 
   if (info->execstack)
@@ -2052,7 +2056,7 @@ NAME(bfd_elf,size_dynamic_sections) (bfd *output_bfd,
 	    return FALSE;
 	}
 
-      /* Make all global versions with definition.  */
+      /* Make all global versions with definiton.  */
       for (t = verdefs; t != NULL; t = t->next)
 	for (d = t->globals.list; d != NULL; d = d->next)
 	  if (!d->symver && d->symbol)
@@ -2117,7 +2121,7 @@ NAME(bfd_elf,size_dynamic_sections) (bfd *output_bfd,
 
       if (!info->allow_undefined_version)
 	{
-	  /* Check if all global versions have a definition.  */
+	  /* Check if all global versions have a definiton.  */
 	  all_defined = TRUE;
 	  for (t = verdefs; t != NULL; t = t->next)
 	    for (d = t->globals.list; d != NULL; d = d->next)
@@ -2833,8 +2837,7 @@ struct elf_final_link_info
 };
 
 static bfd_boolean elf_link_output_sym
-  (struct elf_final_link_info *, const char *, Elf_Internal_Sym *, asection *,
-   struct elf_link_hash_entry *);
+  (struct elf_final_link_info *, const char *, Elf_Internal_Sym *, asection *);
 static bfd_boolean elf_link_flush_output_syms
   (struct elf_final_link_info *);
 static bfd_boolean elf_link_output_extsym
@@ -3109,7 +3112,7 @@ elf_bfd_final_link (bfd *abfd, struct bfd_link_info *info)
   asection *reldyn = 0;
   bfd_size_type amt;
 
-  if (! is_elf_hash_table (info->hash))
+  if (! is_elf_hash_table (info))
     return FALSE;
 
   if (info->shared)
@@ -3408,8 +3411,7 @@ elf_bfd_final_link (bfd *abfd, struct bfd_link_info *info)
       elfsym.st_info = 0;
       elfsym.st_other = 0;
       elfsym.st_shndx = SHN_UNDEF;
-      if (! elf_link_output_sym (&finfo, NULL, &elfsym, bfd_und_section_ptr,
-				 NULL))
+      if (! elf_link_output_sym (&finfo, NULL, &elfsym, bfd_und_section_ptr))
 	goto error_return;
     }
 
@@ -3425,7 +3427,7 @@ elf_bfd_final_link (bfd *abfd, struct bfd_link_info *info)
   elfsym.st_other = 0;
   elfsym.st_shndx = SHN_ABS;
   if (! elf_link_output_sym (&finfo, bfd_get_filename (abfd),
-			     &elfsym, bfd_abs_section_ptr, NULL))
+			     &elfsym, bfd_abs_section_ptr))
     goto error_return;
 #endif
 
@@ -3450,7 +3452,7 @@ elf_bfd_final_link (bfd *abfd, struct bfd_link_info *info)
 	    elfsym.st_value = 0;
 	  else
 	    elfsym.st_value = o->vma;
-	  if (! elf_link_output_sym (&finfo, NULL, &elfsym, o, NULL))
+	  if (! elf_link_output_sym (&finfo, NULL, &elfsym, o))
 	    goto error_return;
 	  if (i == SHN_LORESERVE - 1)
 	    i += SHN_HIRESERVE + 1 - SHN_LORESERVE;
@@ -3704,8 +3706,7 @@ elf_bfd_final_link (bfd *abfd, struct bfd_link_info *info)
   if (bed->elf_backend_output_arch_syms)
     {
       typedef bfd_boolean (*out_sym_func)
-	(void *, const char *, Elf_Internal_Sym *, asection *,
-	 struct elf_link_hash_entry *);
+	(void *, const char *, Elf_Internal_Sym *, asection *);
 
       if (! ((*bed->elf_backend_output_arch_syms)
 	     (abfd, info, &finfo, (out_sym_func) elf_link_output_sym)))
@@ -4089,20 +4090,20 @@ static bfd_boolean
 elf_link_output_sym (struct elf_final_link_info *finfo,
 		     const char *name,
 		     Elf_Internal_Sym *elfsym,
-		     asection *input_sec,
-		     struct elf_link_hash_entry *h)
+		     asection *input_sec)
 {
   Elf_External_Sym *dest;
   Elf_External_Sym_Shndx *destshndx;
   bfd_boolean (*output_symbol_hook)
-    (struct bfd_link_info *, const char *, Elf_Internal_Sym *, asection *,
-     struct elf_link_hash_entry *);
+    (bfd *, struct bfd_link_info *info, const char *,
+     Elf_Internal_Sym *, asection *);
 
   output_symbol_hook = get_elf_backend_data (finfo->output_bfd)->
     elf_backend_link_output_symbol_hook;
   if (output_symbol_hook != NULL)
     {
-      if (! (*output_symbol_hook) (finfo->info, name, elfsym, input_sec, h))
+      if (! ((*output_symbol_hook)
+	     (finfo->output_bfd, finfo->info, name, elfsym, input_sec)))
 	return FALSE;
     }
 
@@ -4187,7 +4188,7 @@ elf_link_check_versioned_symbol (struct bfd_link_info *info,
   bfd *abfd;
   struct elf_link_loaded_list *loaded;
 
-  if (!is_elf_hash_table (info->hash))
+  if (info->hash->creator->flavour != bfd_target_elf_flavour)
     return FALSE;
 
   switch (h->root.type)
@@ -4643,7 +4644,7 @@ elf_link_output_extsym (struct elf_link_hash_entry *h, void *data)
 
   h->indx = bfd_get_symcount (finfo->output_bfd);
 
-  if (! elf_link_output_sym (finfo, h->root.root.string, &sym, input_sec, h))
+  if (! elf_link_output_sym (finfo, h->root.root.string, &sym, input_sec))
     {
       eoinfo->failed = TRUE;
       return FALSE;
@@ -4848,7 +4849,7 @@ elf_link_input_bfd (struct elf_final_link_info *finfo, bfd *input_bfd)
 	    }
 	}
 
-      if (! elf_link_output_sym (finfo, name, &osym, isec, NULL))
+      if (! elf_link_output_sym (finfo, name, &osym, isec))
 	return FALSE;
     }
 
@@ -5210,8 +5211,7 @@ elf_link_input_bfd (struct elf_final_link_info *finfo, bfd *input_bfd)
 			  finfo->indices[r_symndx]
 			    = bfd_get_symcount (output_bfd);
 
-			  if (! elf_link_output_sym (finfo, name, &sym, sec,
-						     NULL))
+			  if (! elf_link_output_sym (finfo, name, &sym, sec))
 			    return FALSE;
 			}
 
@@ -5674,7 +5674,7 @@ elf_gc_sweep_symbol (struct elf_link_hash_entry *h, void *idxptr)
   return TRUE;
 }
 
-/* Propagate collected vtable information.  This is called through
+/* Propogate collected vtable information.  This is called through
    elf_link_hash_traverse.  */
 
 static bfd_boolean
@@ -5797,14 +5797,9 @@ elf_gc_sections (bfd *abfd, struct bfd_link_info *info)
      struct elf_link_hash_entry *h, Elf_Internal_Sym *);
 
   if (!get_elf_backend_data (abfd)->can_gc_sections
-      || info->relocatable
-      || info->emitrelocations
-      || !is_elf_hash_table (info->hash)
+      || info->relocatable || info->emitrelocations
       || elf_hash_table (info)->dynamic_sections_created)
-    {
-      (*_bfd_error_handler)(_("Warning: gc-sections option ignored"));
-      return TRUE;
-    }
+    return TRUE;
 
   /* Apply transitive closure to the vtable entry usage info.  */
   elf_link_hash_traverse (elf_hash_table (info),
@@ -5845,7 +5840,7 @@ elf_gc_sections (bfd *abfd, struct bfd_link_info *info)
   return TRUE;
 }
 
-/* Called from check_relocs to record the existence of a VTINHERIT reloc.  */
+/* Called from check_relocs to record the existance of a VTINHERIT reloc.  */
 
 bfd_boolean
 elf_gc_record_vtinherit (bfd *abfd,
@@ -5901,7 +5896,7 @@ elf_gc_record_vtinherit (bfd *abfd,
   return TRUE;
 }
 
-/* Called from check_relocs to record the existence of a VTENTRY reloc.  */
+/* Called from check_relocs to record the existance of a VTENTRY reloc.  */
 
 bfd_boolean
 elf_gc_record_vtentry (bfd *abfd ATTRIBUTE_UNUSED,
@@ -5977,9 +5972,6 @@ elf_gc_common_finalize_got_offsets (bfd *abfd,
   bfd *i;
   const struct elf_backend_data *bed = get_elf_backend_data (abfd);
   bfd_vma gotoff;
-
-  if (! is_elf_hash_table (info->hash))
-    return FALSE;
 
   /* The GOT offset is relative to the .got section, but the GOT header is
      put into the .got.plt section, if the backend uses it.  */
@@ -6187,7 +6179,8 @@ elf_bfd_discard_info (bfd *output_bfd, struct bfd_link_info *info)
   bfd_boolean ret = FALSE;
 
   if (info->traditional_format
-      || !is_elf_hash_table (info->hash))
+      || info->hash->creator->flavour != bfd_target_elf_flavour
+      || ! is_elf_hash_table (info))
     return FALSE;
 
   for (abfd = info->input_bfds; abfd != NULL; abfd = abfd->link_next)

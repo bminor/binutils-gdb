@@ -1,9 +1,7 @@
 /* *INDENT-OFF* */ /* THIS FILE IS GENERATED */
 
 /* Dynamic architecture support for GDB, the GNU debugger.
-
-   Copyright 1998, 1999, 2000, 2001, 2002, 2003, 2004 Free
-   Software Foundation, Inc.
+   Copyright 1998, 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -376,6 +374,18 @@ extern void set_gdbarch_fp0_regnum (struct gdbarch *gdbarch, int fp0_regnum);
 #endif
 #if !defined (FP0_REGNUM)
 #define FP0_REGNUM (gdbarch_fp0_regnum (current_gdbarch))
+#endif
+
+/* Replace DEPRECATED_NPC_REGNUM with an implementation of WRITE_PC
+   that updates PC, NPC and even NNPC. */
+
+extern int gdbarch_deprecated_npc_regnum (struct gdbarch *gdbarch);
+extern void set_gdbarch_deprecated_npc_regnum (struct gdbarch *gdbarch, int deprecated_npc_regnum);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_NPC_REGNUM)
+#error "Non multi-arch definition of DEPRECATED_NPC_REGNUM"
+#endif
+#if !defined (DEPRECATED_NPC_REGNUM)
+#define DEPRECATED_NPC_REGNUM (gdbarch_deprecated_npc_regnum (current_gdbarch))
 #endif
 
 /* Convert stab register number (from `r' declaration) to a gdb REGNUM. */
@@ -1538,6 +1548,31 @@ extern void set_gdbarch_extract_struct_value_address (struct gdbarch *gdbarch, g
 #define EXTRACT_STRUCT_VALUE_ADDRESS(regcache) (gdbarch_extract_struct_value_address (current_gdbarch, regcache))
 #endif
 
+#if defined (DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS)
+/* Legacy for systems yet to multi-arch DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS */
+#if !defined (DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS_P)
+#define DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS_P() (1)
+#endif
+#endif
+
+extern int gdbarch_deprecated_extract_struct_value_address_p (struct gdbarch *gdbarch);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS_P)
+#error "Non multi-arch definition of DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS"
+#endif
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS_P)
+#define DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS_P() (gdbarch_deprecated_extract_struct_value_address_p (current_gdbarch))
+#endif
+
+typedef CORE_ADDR (gdbarch_deprecated_extract_struct_value_address_ftype) (char *regbuf);
+extern CORE_ADDR gdbarch_deprecated_extract_struct_value_address (struct gdbarch *gdbarch, char *regbuf);
+extern void set_gdbarch_deprecated_extract_struct_value_address (struct gdbarch *gdbarch, gdbarch_deprecated_extract_struct_value_address_ftype *deprecated_extract_struct_value_address);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS)
+#error "Non multi-arch definition of DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS"
+#endif
+#if !defined (DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS)
+#define DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS(regbuf) (gdbarch_deprecated_extract_struct_value_address (current_gdbarch, regbuf))
+#endif
+
 #if defined (DEPRECATED_FRAME_INIT_SAVED_REGS)
 /* Legacy for systems yet to multi-arch DEPRECATED_FRAME_INIT_SAVED_REGS */
 #if !defined (DEPRECATED_FRAME_INIT_SAVED_REGS_P)
@@ -2103,9 +2138,15 @@ extern void set_gdbarch_skip_trampoline_code (struct gdbarch *gdbarch, gdbarch_s
    evaluates non-zero, this is the address where the debugger will place
    a step-resume breakpoint to get us past the dynamic linker. */
 
-typedef CORE_ADDR (gdbarch_skip_solib_resolver_ftype) (struct gdbarch *gdbarch, CORE_ADDR pc);
+typedef CORE_ADDR (gdbarch_skip_solib_resolver_ftype) (CORE_ADDR pc);
 extern CORE_ADDR gdbarch_skip_solib_resolver (struct gdbarch *gdbarch, CORE_ADDR pc);
 extern void set_gdbarch_skip_solib_resolver (struct gdbarch *gdbarch, gdbarch_skip_solib_resolver_ftype *skip_solib_resolver);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (SKIP_SOLIB_RESOLVER)
+#error "Non multi-arch definition of SKIP_SOLIB_RESOLVER"
+#endif
+#if !defined (SKIP_SOLIB_RESOLVER)
+#define SKIP_SOLIB_RESOLVER(pc) (gdbarch_skip_solib_resolver (current_gdbarch, pc))
+#endif
 
 /* For SVR4 shared libraries, each call goes through a small piece of
    trampoline code in the ".plt" section.  IN_SOLIB_CALL_TRAMPOLINE evaluates
@@ -2568,7 +2609,6 @@ extern void set_gdbarch_data (struct gdbarch *gdbarch,
 extern void *gdbarch_data (struct gdbarch *gdbarch, struct gdbarch_data *);
 
 
-
 /* Register per-architecture memory region.
 
    Provide a memory-region swap mechanism.  Per-architecture memory
@@ -2585,6 +2625,33 @@ typedef void (gdbarch_swap_ftype) (void);
 extern void register_gdbarch_swap (void *data, unsigned long size, gdbarch_swap_ftype *init);
 #define REGISTER_GDBARCH_SWAP(VAR) register_gdbarch_swap (&(VAR), sizeof ((VAR)), NULL)
 
+
+
+/* The target-system-dependent byte order is dynamic */
+
+extern int target_byte_order;
+#ifndef TARGET_BYTE_ORDER
+#define TARGET_BYTE_ORDER (target_byte_order + 0)
+#endif
+
+extern int target_byte_order_auto;
+#ifndef TARGET_BYTE_ORDER_AUTO
+#define TARGET_BYTE_ORDER_AUTO (target_byte_order_auto + 0)
+#endif
+
+
+
+/* The target-system-dependent BFD architecture is dynamic */
+
+extern int target_architecture_auto;
+#ifndef TARGET_ARCHITECTURE_AUTO
+#define TARGET_ARCHITECTURE_AUTO (target_architecture_auto + 0)
+#endif
+
+extern const struct bfd_arch_info *target_architecture;
+#ifndef TARGET_ARCHITECTURE
+#define TARGET_ARCHITECTURE (target_architecture + 0)
+#endif
 
 
 /* Set the dynamic target-system-dependent parameters (architecture,

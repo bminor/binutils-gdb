@@ -60,7 +60,7 @@ long
 openrisc_sign_extend_16bit (value)
      long value;
 {
-  return ((value & 0xffff) ^ 0x8000) - 0x8000;
+  return (long) (short) value;
 }
 
 /* Handle hi().  */
@@ -74,16 +74,15 @@ parse_hi16 (cd, strp, opindex, valuep)
 {
   const char *errmsg;
   enum cgen_parse_operand_result result_type;
-  unsigned long ret;
+  bfd_vma value;
 
   if (**strp == '#')
     ++*strp;
 
   if (strncasecmp (*strp, "hi(", 3) == 0)
     {
-      bfd_vma value;
-
       *strp += 3;
+
 #if 0
       errmsg = cgen_parse_signed_integer (cd, strp, opindex, valuep);
       if (errmsg != NULL)
@@ -93,31 +92,23 @@ parse_hi16 (cd, strp, opindex, valuep)
         errmsg = cgen_parse_address (cd, strp, opindex, BFD_RELOC_HI16,
                                      &result_type, &value);
       if (**strp != ')')
-        return _("missing `)'");
-
+        return "missing `)'";
       ++*strp;
       if (errmsg == NULL
           && result_type == CGEN_PARSE_OPERAND_RESULT_NUMBER)
         value >>= 16;
-      ret = value;
+      *valuep = (long) (short) value;
+
+      return errmsg;
     }
   else
     {
       if (**strp == '-')
-	{
-	  long value;
-	  errmsg = cgen_parse_signed_integer (cd, strp, opindex, &value);
-	  ret = value;
-	}
+        errmsg = cgen_parse_signed_integer (cd, strp, opindex, (long *) &value);
       else
-	{
-	  unsigned long value;
-	  errmsg = cgen_parse_unsigned_integer (cd, strp, opindex, &value);
-	  ret = value;
-	}
+        errmsg = cgen_parse_unsigned_integer (cd, strp, opindex, (unsigned long *) &value);
     }
-
-  *valuep = ((ret & 0xffff) ^ 0x8000) - 0x8000;
+  *valuep = (long) (short) (value & 0xffff);
   return errmsg;
 }
 
@@ -132,16 +123,15 @@ parse_lo16 (cd, strp, opindex, valuep)
 {
   const char *errmsg;
   enum cgen_parse_operand_result result_type;
-  unsigned long ret;
+  bfd_vma value;
 
   if (**strp == '#')
     ++*strp;
 
   if (strncasecmp (*strp, "lo(", 3) == 0)
     {
-      bfd_vma value;
-
       *strp += 3;
+
 #if 0 
       errmsg = cgen_parse_signed_integer (cd, strp, opindex, valuep);
       if (errmsg != NULL)
@@ -152,28 +142,21 @@ parse_lo16 (cd, strp, opindex, valuep)
         errmsg = cgen_parse_address (cd, strp, opindex, BFD_RELOC_LO16,
                                      &result_type, &value);
       if (**strp != ')')
-        return _("missing `)'");
-
+        return "missing `)'";
       ++*strp;
-      ret = value;
-    }
-  else
-    {
-      if (**strp == '-')
-	{
-	  long value;
-	  errmsg = cgen_parse_signed_integer (cd, strp, opindex, &value);
-	  ret = value;
-	}
-      else
-	{
-	  unsigned long value;
-	  errmsg = cgen_parse_unsigned_integer (cd, strp, opindex, &value);
-	  ret = value;
-	}
+      if (errmsg == NULL
+          && result_type == CGEN_PARSE_OPERAND_RESULT_NUMBER)
+        value &= 0xffff;
+      *valuep = (long) (short) value;
+
+      return errmsg;
     }
 
-  *valuep = ((ret & 0xffff) ^ 0x8000) - 0x8000;
+  if (**strp == '-')
+    errmsg = cgen_parse_signed_integer (cd, strp, opindex, (long *) &value);
+  else
+    errmsg = cgen_parse_unsigned_integer (cd, strp, opindex, (unsigned long *) &value);
+  *valuep = (long) (short) (value & 0xffff);
   return errmsg;
 }
 

@@ -1,6 +1,6 @@
 /* Read hp debug symbols and convert to internal format, for GDB.
-   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001,
-   2002, 2003, 2004 Free Software Foundation, Inc.
+   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -3897,7 +3897,7 @@ hpread_read_struct_type (dnttpointer hp_type, union dnttentry *dn_bufp,
 	      fn_p = fn_list;
 	      while (fn_p)
 		{
-		  if (DEPRECATED_STREQ (fn_p->field.name, method_name))
+		  if (STREQ (fn_p->field.name, method_name))
 		    break;
 		  fn_p = fn_p->next;
 		}
@@ -4160,19 +4160,16 @@ hpread_read_struct_type (dnttpointer hp_type, union dnttentry *dn_bufp,
 	  list->field.name = VT (objfile) + fieldp->dfield.name;
 
 
-	  /* A FIELD by itself (without a GENFIELD) can also be a static
-	     member.  Mark it as static with a physname of NULL.
-	     fix_static_member_physnames will assign the physname later. */
+	  /* A FIELD by itself (without a GENFIELD) can also be a static member */
+	  FIELD_STATIC_KIND (list->field) = 0;
 	  if (fieldp->dfield.staticmem)
 	    {
-	      SET_FIELD_PHYSNAME (list->field, NULL);
-	      FIELD_BITPOS (list->field) = 0;
+	      FIELD_BITPOS (list->field) = -1;
 	      FIELD_BITSIZE (list->field) = 0;
 	    }
 	  else
 	    /* Non-static data member */
 	    {
-	      FIELD_STATIC_KIND (list->field) = 0;
 	      FIELD_BITPOS (list->field) = fieldp->dfield.bitoffset;
 	      if (fieldp->dfield.bitlength % 8)
 		FIELD_BITSIZE (list->field) = fieldp->dfield.bitlength;
@@ -6306,7 +6303,7 @@ hpread_get_next_skip_over_anon_unions (int skip_fields, dnttpointer field,
       /* Do we have another anonymous union? If so, adjust the bitoffsets
          of its members and skip over its members. */
       if ((TYPE_CODE (anon_type) == TYPE_CODE_UNION) &&
-	  (!name || DEPRECATED_STREQ (name, "")))
+	  (!name || STREQ (name, "")))
 	{
 	  hpread_adjust_bitoffsets (anon_type, bitoffset);
 	  field = hpread_get_next_skip_over_anon_unions (TYPE_NFIELDS (anon_type), field, fieldp, objfile);

@@ -892,21 +892,20 @@ elf_vax_gc_sweep_hook (abfd, info, sec, relocs)
   Elf_Internal_Shdr *symtab_hdr;
   struct elf_link_hash_entry **sym_hashes;
   const Elf_Internal_Rela *rel, *relend;
+  unsigned long r_symndx;
+  struct elf_link_hash_entry *h;
   bfd *dynobj;
+
+  symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
+  sym_hashes = elf_sym_hashes (abfd);
 
   dynobj = elf_hash_table (info)->dynobj;
   if (dynobj == NULL)
     return TRUE;
 
-  symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
-  sym_hashes = elf_sym_hashes (abfd);
-
   relend = relocs + sec->reloc_count;
   for (rel = relocs; rel < relend; rel++)
     {
-      unsigned long r_symndx;
-      struct elf_link_hash_entry *h;
-
       switch (ELF32_R_TYPE (rel->r_info))
 	{
 	case R_VAX_GOT32:
@@ -1339,6 +1338,7 @@ elf_vax_size_dynamic_sections (output_bfd, info)
    in regular objects.  We allocated space for them in the check_relocs
    routine, but we won't fill them in in the relocate_section routine.  */
 
+/*ARGSUSED*/
 static bfd_boolean
 elf_vax_discard_copies (h, ignore)
      struct elf_vax_link_hash_entry *h;
@@ -1366,6 +1366,7 @@ elf_vax_discard_copies (h, ignore)
    creating a shared object or executable, space in the .got and .rela.got
    will be reserved for the symbol.  */
 
+/*ARGSUSED*/
 static bfd_boolean
 elf_vax_instantiate_got_entries (h, infoptr)
      struct elf_link_hash_entry *h;

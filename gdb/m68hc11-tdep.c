@@ -1,8 +1,5 @@
 /* Target-dependent code for Motorola 68HC11 & 68HC12
-
-   Copyright 1999, 2000, 2001, 2002, 2003, 2004 Free Software
-   Foundation, Inc.
-
+   Copyright 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
    Contributed by Stephane Carrez, stcarrez@nerim.fr
 
 This file is part of GDB.
@@ -53,11 +50,16 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
    analysis to compute correct stack frame layout.
    
    The MSB of the minimal symbol's "info" field is used for this purpose.
+   This field is already being used to store the symbol size, so the
+   assumption is that the symbol size cannot exceed 2^30.
 
    MSYMBOL_SET_RTC	Actually sets the "RTC" bit.
    MSYMBOL_SET_RTI	Actually sets the "RTI" bit.
    MSYMBOL_IS_RTC       Tests the "RTC" bit in a minimal symbol.
-   MSYMBOL_IS_RTI       Tests the "RTC" bit in a minimal symbol.  */
+   MSYMBOL_IS_RTI       Tests the "RTC" bit in a minimal symbol.
+   MSYMBOL_SIZE         Returns the size of the minimal symbol,
+   			i.e. the "info" field with the "special" bit
+   			masked out.  */
 
 #define MSYMBOL_SET_RTC(msym)                                           \
         MSYMBOL_INFO (msym) = (char *) (((long) MSYMBOL_INFO (msym))	\
@@ -72,6 +74,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #define MSYMBOL_IS_RTI(msym)				\
 	(((long) MSYMBOL_INFO (msym) & 0x40000000) != 0)
+
+#define MSYMBOL_SIZE(msym)				\
+	((long) MSYMBOL_INFO (msym) & 0x3fffffff)
 
 enum insn_return_kind {
   RETURN_RTS,
@@ -1552,11 +1557,15 @@ m68hc11_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_return_value_on_stack (gdbarch, m68hc11_return_value_on_stack);
 
   set_gdbarch_store_return_value (gdbarch, m68hc11_store_return_value);
+  set_gdbarch_extract_struct_value_address (gdbarch, m68hc11_extract_struct_value_address);
+
   set_gdbarch_store_return_value (gdbarch, m68hc11_store_return_value);
   set_gdbarch_extract_struct_value_address (gdbarch, m68hc11_extract_struct_value_address);
   set_gdbarch_use_struct_convention (gdbarch, m68hc11_use_struct_convention);
   set_gdbarch_skip_prologue (gdbarch, m68hc11_skip_prologue);
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
+  set_gdbarch_decr_pc_after_break (gdbarch, 0);
+  set_gdbarch_function_start_offset (gdbarch, 0);
   set_gdbarch_breakpoint_from_pc (gdbarch, m68hc11_breakpoint_from_pc);
   set_gdbarch_deprecated_stack_align (gdbarch, m68hc11_stack_align);
   set_gdbarch_print_insn (gdbarch, gdb_print_insn_m68hc11);

@@ -1,6 +1,6 @@
 /* Parser for linespec for the GNU debugger, GDB.
    Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
-   1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004
+   1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -100,8 +100,7 @@ static struct symtabs_and_lines decode_line_2 (struct symbol *[],
 					       int, int, char ***);
 
 static struct symtab *symtab_from_filename (char **argptr,
-					    char *p, int is_quote_enclosed,
-					    int *not_found_ptr);
+					    char *p, int is_quote_enclosed);
 
 static struct
 symtabs_and_lines decode_all_digits (char **argptr,
@@ -120,8 +119,7 @@ static struct symtabs_and_lines decode_dollar (char *copy,
 static struct symtabs_and_lines decode_variable (char *copy,
 						 int funfirstline,
 						 char ***canonical,
-						 struct symtab *file_symtab,
-						 int *not_found_ptr);
+						 struct symtab *file_symtab);
 
 static struct
 symtabs_and_lines symbol_found (int funfirstline,
@@ -639,12 +637,7 @@ decode_line_2 (struct symbol *sym_arr[], int nelts, int funfirstline,
 
    Note that it is possible to return zero for the symtab
    if no file is validly specified.  Callers must check that.
-   Also, the line number returned may be invalid.  
- 
-   If NOT_FOUND_PTR is not null, store a boolean true/false value at the location, based
-   on whether or not failure occurs due to an unknown function or file.  In the case
-   where failure does occur due to an unknown function or file, do not issue an error
-   message.  */
+   Also, the line number returned may be invalid.  */
 
 /* We allow single quotes in various places.  This is a hideous
    kludge, which exists because the completer can't yet deal with the
@@ -653,7 +646,7 @@ decode_line_2 (struct symbol *sym_arr[], int nelts, int funfirstline,
 
 struct symtabs_and_lines
 decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
-	       int default_line, char ***canonical, int *not_found_ptr)
+	       int default_line, char ***canonical)
 {
   char *p;
   char *q;
@@ -671,9 +664,6 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
   int is_quote_enclosed;
   int is_objc_method = 0;
   char *saved_arg = *argptr;
-
-  if (not_found_ptr)
-    *not_found_ptr = 0;
 
   /* Defaults have defaults.  */
 
@@ -732,8 +722,7 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
       /* No, the first part is a filename; set s to be that file's
 	 symtab.  Also, move argptr past the filename.  */
 
-      file_symtab = symtab_from_filename (argptr, p, is_quote_enclosed, 
-		      			  not_found_ptr);
+      file_symtab = symtab_from_filename (argptr, p, is_quote_enclosed);
     }
 #if 0
   /* No one really seems to know why this was added. It certainly
@@ -838,8 +827,7 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
   /* Look up that token as a variable.
      If file specified, use that file's per-file block to start with.  */
 
-  return decode_variable (copy, funfirstline, canonical,
-			  file_symtab, not_found_ptr);
+  return decode_variable (copy, funfirstline, canonical, file_symtab);
 }
 
 
@@ -1434,14 +1422,10 @@ collect_methods (char *copy, struct type *t,
 
 
 /* Return the symtab associated to the filename given by the substring
-   of *ARGPTR ending at P, and advance ARGPTR past that filename.  If
-   NOT_FOUND_PTR is not null and the source file is not found, store
-   boolean true at the location pointed to and do not issue an
-   error message.  */
+   of *ARGPTR ending at P, and advance ARGPTR past that filename.  */
 
 static struct symtab *
-symtab_from_filename (char **argptr, char *p, int is_quote_enclosed, 
-		      int *not_found_ptr)
+symtab_from_filename (char **argptr, char *p, int is_quote_enclosed)
 {
   char *p1;
   char *copy;
@@ -1466,18 +1450,6 @@ symtab_from_filename (char **argptr, char *p, int is_quote_enclosed,
     {
       if (!have_full_symbols () && !have_partial_symbols ())
 	error ("No symbol table is loaded.  Use the \"file\" command.");
-      if (not_found_ptr)
-	{
-	  *not_found_ptr = 1;
-	  /* The caller has indicated that it wishes quiet notification of any
-	     error where the function or file is not found.  A call to 
-	     error_silent causes an error to occur, but it does not issue 
-	     the supplied message.  The message can be manually output by
-	     the caller, if desired.  This is used, for example, when 
-	     attempting to set breakpoints for functions in shared libraries 
-	     that have not yet been loaded.  */
-	  error_silent ("No source file named %s.", copy);
-	}
       error ("No source file named %s.", copy);
     }
 
@@ -1654,13 +1626,11 @@ decode_dollar (char *copy, int funfirstline, struct symtab *default_symtab,
 
 
 /* Decode a linespec that's a variable.  If FILE_SYMTAB is non-NULL,
-   look in that symtab's static variables first.  If NOT_FOUND_PTR is not NULL and
-   the function cannot be found, store boolean true in the location pointed to
-   and do not issue an error message.  */ 
+   look in that symtab's static variables first.  */
 
 static struct symtabs_and_lines
 decode_variable (char *copy, int funfirstline, char ***canonical,
-		 struct symtab *file_symtab, int *not_found_ptr)
+		 struct symtab *file_symtab)
 {
   struct symbol *sym;
   /* The symtab that SYM was found in.  */
@@ -1688,19 +1658,6 @@ decode_variable (char *copy, int funfirstline, char ***canonical,
       !have_partial_symbols () && !have_minimal_symbols ())
     error ("No symbol table is loaded.  Use the \"file\" command.");
 
-  if (not_found_ptr)
-    {
-      *not_found_ptr = 1;
-      /* The caller has indicated that it wishes quiet notification of any
-	 error where the function or file is not found.  A call to 
-	 error_silent causes an error to occur, but it does not issue 
-	 the supplied message.  The message can be manually output by
-	 the caller, if desired.  This is used, for example, when 
-	 attempting to set breakpoints for functions in shared libraries 
-	 that have not yet been loaded.  */
-      error_silent ("Function \"%s\" not defined.", copy);
-    }
-  
   error ("Function \"%s\" not defined.", copy);
 }
 

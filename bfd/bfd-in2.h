@@ -192,7 +192,7 @@ typedef unsigned char bfd_byte;
 typedef enum bfd_format
 {
   bfd_unknown = 0,	/* File format is unknown.  */
-  bfd_object,		/* Linker/assembler/compiler output.  */
+  bfd_object,		/* Linker/assember/compiler output.  */
   bfd_archive,		/* Object archive file.  */
   bfd_core,		/* Core dump.  */
   bfd_type_end		/* Marks the end; don't use it!  */
@@ -1710,7 +1710,6 @@ enum bfd_architecture
   bfd_arch_m32r,      /* Renesas M32R (formerly Mitsubishi M32R/D) */
 #define bfd_mach_m32r          1 /* For backwards compatibility.  */
 #define bfd_mach_m32rx         'x'
-#define bfd_mach_m32r2         '2'
   bfd_arch_mn10200,   /* Matsushita MN10200 */
   bfd_arch_mn10300,   /* Matsushita MN10300 */
 #define bfd_mach_mn10300               300
@@ -1933,7 +1932,7 @@ struct reloc_howto_struct
 
   /* If this field is non null, then the supplied function is
      called rather than the normal function.  This allows really
-     strange relocation methods to be accommodated (e.g., i960 callj
+     strange relocation methods to be accomodated (e.g., i960 callj
      instructions).  */
   bfd_reloc_status_type (*special_function)
     (bfd *, arelent *, struct bfd_symbol *, void *, asection *,
@@ -2356,20 +2355,6 @@ to compensate for the borrow when the low bits are added.  */
   BFD_RELOC_FRV_GPREL32,
   BFD_RELOC_FRV_GPRELHI,
   BFD_RELOC_FRV_GPRELLO,
-  BFD_RELOC_FRV_GOT12,
-  BFD_RELOC_FRV_GOTHI,
-  BFD_RELOC_FRV_GOTLO,
-  BFD_RELOC_FRV_FUNCDESC,
-  BFD_RELOC_FRV_FUNCDESC_GOT12,
-  BFD_RELOC_FRV_FUNCDESC_GOTHI,
-  BFD_RELOC_FRV_FUNCDESC_GOTLO,
-  BFD_RELOC_FRV_FUNCDESC_VALUE,
-  BFD_RELOC_FRV_FUNCDESC_GOTOFF12,
-  BFD_RELOC_FRV_FUNCDESC_GOTOFFHI,
-  BFD_RELOC_FRV_FUNCDESC_GOTOFFLO,
-  BFD_RELOC_FRV_GOTOFF12,
-  BFD_RELOC_FRV_GOTOFFHI,
-  BFD_RELOC_FRV_GOTOFFLO,
 
 
 /* This is a 24bit GOT-relative reloc for the mn10300.  */
@@ -2566,7 +2551,7 @@ in the instruction.  */
 /* IBM 370/390 relocations  */
   BFD_RELOC_I370_D12,
 
-/* The type of reloc used to build a constructor table - at the moment
+/* The type of reloc used to build a contructor table - at the moment
 probably a 32 bit wide absolute relocation, but the target can choose.
 It generally does map to one of the other relocation types.  */
   BFD_RELOC_CTOR,
@@ -2821,22 +2806,6 @@ used when the lower 16 bits are treated as signed.  */
 add3, load, and store instructions.  */
   BFD_RELOC_M32R_SDA16,
 
-/* For PIC.  */
-  BFD_RELOC_M32R_GOT24,
-  BFD_RELOC_M32R_26_PLTREL,
-  BFD_RELOC_M32R_COPY,
-  BFD_RELOC_M32R_GLOB_DAT,
-  BFD_RELOC_M32R_JMP_SLOT,
-  BFD_RELOC_M32R_RELATIVE,
-  BFD_RELOC_M32R_GOTOFF,
-  BFD_RELOC_M32R_GOTPC24,
-  BFD_RELOC_M32R_GOT16_HI_ULO,
-  BFD_RELOC_M32R_GOT16_HI_SLO,
-  BFD_RELOC_M32R_GOT16_LO,
-  BFD_RELOC_M32R_GOTPC_HI_ULO,
-  BFD_RELOC_M32R_GOTPC_HI_SLO,
-  BFD_RELOC_M32R_GOTPC_LO,
-
 /* This is a 9-bit reloc  */
   BFD_RELOC_V850_9_PCREL,
 
@@ -2879,11 +2848,11 @@ data area pointer.  */
   BFD_RELOC_V850_TDA_4_4_OFFSET,
 
 /* This is a 16 bit offset from the short data area pointer, with the
-bits placed non-contiguously in the instruction.  */
+bits placed non-contigously in the instruction.  */
   BFD_RELOC_V850_SDA_16_16_SPLIT_OFFSET,
 
 /* This is a 16 bit offset from the zero data area pointer, with the
-bits placed non-contiguously in the instruction.  */
+bits placed non-contigously in the instruction.  */
   BFD_RELOC_V850_ZDA_16_16_SPLIT_OFFSET,
 
 /* This is a 6 bit offset from the call table base pointer.  */
@@ -3240,7 +3209,7 @@ that are not used, so that the code for those functions need not be
 included in the output.
 
 VTABLE_INHERIT is a zero-space relocation used to describe to the
-linker the inheritance tree of a C++ virtual function table.  The
+linker the inheritence tree of a C++ virtual function table.  The
 relocation's symbol should be the parent class' vtable, and the
 relocation should be located at the child vtable.
 
@@ -3349,7 +3318,7 @@ This is the 3 bit of a value.  */
 /* Motorola 68HC11 reloc.
 This reloc marks the beginning of a jump/call instruction.
 It is used for linker relaxation to correctly identify beginning
-of instruction and change some branches to use PC-relative
+of instruction and change some branchs to use PC-relative
 addressing mode.  */
   BFD_RELOC_M68HC11_RL_JUMP,
 
@@ -3376,10 +3345,6 @@ This is a 24-bit reloc that represents the address with a 16-bit
 value and a 8-bit page number.  The symbol address is transformed
 to follow the 16K memory bank of 68HC12 (seen as mapped in the window).  */
   BFD_RELOC_M68HC11_24,
-
-/* Motorola 68HC12 reloc.
-This is the 5 bits of a value.  */
-  BFD_RELOC_M68HC12_5B,
 
 /* These relocs are only used within the CRIS assembler.  They are not
 (at present) written to any object files.  */
@@ -3565,7 +3530,7 @@ typedef struct bfd_symbol
      <<BSF_LOCAL>>, <<BSF_FORT_COMM>>,  <<BSF_UNDEFINED>> or
      <<BSF_GLOBAL>>.  */
 
-  /* The symbol is a debugging record. The value has an arbitrary
+  /* The symbol is a debugging record. The value has an arbitary
      meaning, unless BSF_DEBUGGING_RELOC is also set.  */
 #define BSF_DEBUGGING  0x08
 

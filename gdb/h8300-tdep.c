@@ -49,14 +49,7 @@ enum
   h8300h_reg_size = 4,
   h8300_max_reg_size = 4,
 };
-
-static int is_h8300hmode (struct gdbarch *gdbarch);
-static int is_h8300smode (struct gdbarch *gdbarch);
-static int is_h8300sxmode (struct gdbarch *gdbarch);
-static int is_h8300_normal_mode (struct gdbarch *gdbarch);
-
-#define BINWORD (is_h8300hmode (current_gdbarch) && \
-		  !is_h8300_normal_mode (current_gdbarch) ? h8300h_reg_size : h8300_reg_size)
+#define BINWORD (h8300hmode && !h8300_normal_mode ? h8300h_reg_size : h8300_reg_size)
 
 enum gdb_regnum
 {
@@ -357,8 +350,7 @@ h8300_examine_prologue (CORE_ADDR ip, CORE_ADDR limit,
     }
 
   /* If the PC isn't valid, quit now.  */
-  if (ip == 0 || ip & (is_h8300hmode (current_gdbarch) &&
-			 !is_h8300_normal_mode (current_gdbarch) ? ~0xffffff : ~0xffff))
+  if (ip == 0 || ip & (h8300hmode && !h8300_normal_mode ? ~0xffffff : ~0xffff))
     return 0;
 
   next_ip = h8300_next_prologue_insn (ip, limit, &insn_word);
@@ -955,8 +947,7 @@ h8300_print_register (struct gdbarch *gdbarch, struct ui_file *file,
   rval = get_frame_register_signed (frame, regno);
 
   fprintf_filtered (file, "%-14s ", name);
-  if (regno == E_PSEUDO_CCR_REGNUM ||
-       (regno == E_PSEUDO_EXR_REGNUM && is_h8300smode (current_gdbarch)))
+  if (regno == E_PSEUDO_CCR_REGNUM || (regno == E_PSEUDO_EXR_REGNUM && h8300smode))
     {
       fprintf_filtered (file, "0x%02x        ", (unsigned char)rval);
       print_longest (file, 'u', 1, rval);
@@ -1005,7 +996,7 @@ h8300_print_register (struct gdbarch *gdbarch, struct ui_file *file,
       if ((Z | (N ^ V)) == 1)
 	fprintf_filtered (file, "<= ");
     }
-  else if (regno == E_PSEUDO_EXR_REGNUM && is_h8300smode (current_gdbarch))
+  else if (regno == E_PSEUDO_EXR_REGNUM && h8300smode)
     {
       /* EXR register */
       unsigned char l = rval & 0xff;
@@ -1028,10 +1019,10 @@ h8300_print_registers_info (struct gdbarch *gdbarch, struct ui_file *file,
 	h8300_print_register (gdbarch, file, frame, regno);
       h8300_print_register (gdbarch, file, frame, E_PSEUDO_CCR_REGNUM);
       h8300_print_register (gdbarch, file, frame, E_PC_REGNUM);
-      if (is_h8300smode (current_gdbarch))
+      if (h8300smode)
         {
 	  h8300_print_register (gdbarch, file, frame, E_PSEUDO_EXR_REGNUM);
-	  if (is_h8300sxmode (current_gdbarch))
+	  if (h8300sxmode)
 	    {
 	      h8300_print_register (gdbarch, file, frame, E_SBR_REGNUM);
 	      h8300_print_register (gdbarch, file, frame, E_VBR_REGNUM);
@@ -1053,7 +1044,7 @@ h8300_print_registers_info (struct gdbarch *gdbarch, struct ui_file *file,
     {
       if (regno == E_CCR_REGNUM)
         h8300_print_register (gdbarch, file, frame, E_PSEUDO_CCR_REGNUM);
-      else if (regno == E_PSEUDO_EXR_REGNUM && is_h8300smode (current_gdbarch))
+      else if (regno == E_PSEUDO_EXR_REGNUM && h8300smode)
 	h8300_print_register (gdbarch, file, frame, E_PSEUDO_EXR_REGNUM);
       else
 	h8300_print_register (gdbarch, file, frame, regno);
@@ -1087,7 +1078,7 @@ h8300_register_type (struct gdbarch *gdbarch, int regno)
 	      return builtin_type_uint8;
 	    else if (regno == E_PSEUDO_EXR_REGNUM)
 	      return builtin_type_uint8;
-	    else if (is_h8300hmode (current_gdbarch))
+	    else if (h8300hmode)
 	      return builtin_type_int32;
 	    else
 	      return builtin_type_int16;
@@ -1201,6 +1192,9 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   switch (info.bfd_arch_info->mach)
     {
     case bfd_mach_h8300:
+      h8300sxmode = 0;
+      h8300smode = 0;
+      h8300hmode = 0;
       set_gdbarch_num_regs (gdbarch, 13);
       set_gdbarch_num_pseudo_regs (gdbarch, 1);
       set_gdbarch_ecoff_reg_to_regnum (gdbarch, h8300_dbg_reg_to_regnum);
@@ -1216,6 +1210,9 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       break;
     case bfd_mach_h8300h:
     case bfd_mach_h8300hn:
+      h8300sxmode = 0;
+      h8300smode = 0;
+      h8300hmode = 1;
       set_gdbarch_num_regs (gdbarch, 13);
       set_gdbarch_num_pseudo_regs (gdbarch, 1);
       set_gdbarch_ecoff_reg_to_regnum (gdbarch, h8300_dbg_reg_to_regnum);
@@ -1225,11 +1222,13 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_register_name (gdbarch, h8300_register_name);
       if(info.bfd_arch_info->mach != bfd_mach_h8300hn)
         {
+          h8300_normal_mode = 0;
           set_gdbarch_ptr_bit (gdbarch, 4 * TARGET_CHAR_BIT);
           set_gdbarch_addr_bit (gdbarch, 4 * TARGET_CHAR_BIT);
         }
       else
         {
+          h8300_normal_mode = 1;
           set_gdbarch_ptr_bit (gdbarch, 2 * TARGET_CHAR_BIT);
           set_gdbarch_addr_bit (gdbarch, 2 * TARGET_CHAR_BIT);
         }
@@ -1239,6 +1238,9 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       break;
     case bfd_mach_h8300s:
     case bfd_mach_h8300sn:
+      h8300sxmode = 0;
+      h8300smode = 1;
+      h8300hmode = 1;
       set_gdbarch_num_regs (gdbarch, 16);
       set_gdbarch_num_pseudo_regs (gdbarch, 2);
       set_gdbarch_ecoff_reg_to_regnum (gdbarch, h8300s_dbg_reg_to_regnum);
@@ -1248,11 +1250,13 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_register_name (gdbarch, h8300s_register_name);
       if(info.bfd_arch_info->mach != bfd_mach_h8300sn)
         {
+          h8300_normal_mode = 0;
           set_gdbarch_ptr_bit (gdbarch, 4 * TARGET_CHAR_BIT);
           set_gdbarch_addr_bit (gdbarch, 4 * TARGET_CHAR_BIT);
         }
       else
         {
+          h8300_normal_mode = 1;
           set_gdbarch_ptr_bit (gdbarch, 2 * TARGET_CHAR_BIT);
           set_gdbarch_addr_bit (gdbarch, 2 * TARGET_CHAR_BIT);
         }
@@ -1262,6 +1266,9 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       break;
     case bfd_mach_h8300sx:
     case bfd_mach_h8300sxn:
+      h8300sxmode = 1;
+      h8300smode = 1;
+      h8300hmode = 1;
       set_gdbarch_num_regs (gdbarch, 18);
       set_gdbarch_num_pseudo_regs (gdbarch, 2);
       set_gdbarch_ecoff_reg_to_regnum (gdbarch, h8300s_dbg_reg_to_regnum);
@@ -1271,11 +1278,13 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_register_name (gdbarch, h8300sx_register_name);
       if(info.bfd_arch_info->mach != bfd_mach_h8300sxn)
         {
+          h8300_normal_mode = 0;
           set_gdbarch_ptr_bit (gdbarch, 4 * TARGET_CHAR_BIT);
           set_gdbarch_addr_bit (gdbarch, 4 * TARGET_CHAR_BIT);
         }
       else
         {
+          h8300_normal_mode = 1;
           set_gdbarch_ptr_bit (gdbarch, 2 * TARGET_CHAR_BIT);
           set_gdbarch_addr_bit (gdbarch, 2 * TARGET_CHAR_BIT);
         }
@@ -1323,6 +1332,11 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
    */
   /* Stack grows up. */
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
+  /* PC stops zero byte after a trap instruction
+     (which means: exactly on trap instruction). */
+  set_gdbarch_decr_pc_after_break (gdbarch, 0);
+  /* This value is almost never non-zero... */
+  set_gdbarch_function_start_offset (gdbarch, 0);
   /* This value is almost never non-zero... */
   set_gdbarch_frame_args_skip (gdbarch, 0);
   set_gdbarch_frameless_function_invocation (gdbarch,
@@ -1356,39 +1370,3 @@ _initialize_h8300_tdep (void)
 {
   register_gdbarch_init (bfd_arch_h8300, h8300_gdbarch_init);
 }
-
-static int
-is_h8300hmode (struct gdbarch *gdbarch)
-{
-  return gdbarch_bfd_arch_info (gdbarch)->mach == bfd_mach_h8300sx
-	 || gdbarch_bfd_arch_info (gdbarch)->mach == bfd_mach_h8300sxn
-	 || gdbarch_bfd_arch_info (gdbarch)->mach == bfd_mach_h8300s
-	 || gdbarch_bfd_arch_info (gdbarch)->mach == bfd_mach_h8300sn
-	 || gdbarch_bfd_arch_info (gdbarch)->mach == bfd_mach_h8300h
-	 || gdbarch_bfd_arch_info (gdbarch)->mach == bfd_mach_h8300hn;
-}
-
-static int
-is_h8300smode (struct gdbarch *gdbarch)
-{
-  return gdbarch_bfd_arch_info (gdbarch)->mach == bfd_mach_h8300sx
-	 || gdbarch_bfd_arch_info (gdbarch)->mach == bfd_mach_h8300sxn
-	 || gdbarch_bfd_arch_info (gdbarch)->mach == bfd_mach_h8300s
-	 || gdbarch_bfd_arch_info (gdbarch)->mach == bfd_mach_h8300sn;
-}
-
-static int
-is_h8300sxmode (struct gdbarch *gdbarch)
-{
-  return gdbarch_bfd_arch_info (gdbarch)->mach == bfd_mach_h8300sx
-	 || gdbarch_bfd_arch_info (gdbarch)->mach == bfd_mach_h8300sxn;
-}
-
-static int
-is_h8300_normal_mode (struct gdbarch *gdbarch)
-{
-  return gdbarch_bfd_arch_info (gdbarch)->mach == bfd_mach_h8300sxn
-	 || gdbarch_bfd_arch_info (gdbarch)->mach == bfd_mach_h8300sn
-	 || gdbarch_bfd_arch_info (gdbarch)->mach == bfd_mach_h8300hn;
-}
-

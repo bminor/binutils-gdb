@@ -344,7 +344,7 @@ const struct powerpc_operand powerpc_operands[] =
 
   /* The MO field in an mbar instruction.  */
 #define MO MB6 + 1
-  { 5, 21, 0, 0, PPC_OPERAND_OPTIONAL },
+  { 5, 21, 0, 0, 0 },
 
   /* The NB field in an X form instruction.  The value 32 is stored as
      0.  */
@@ -384,12 +384,8 @@ const struct powerpc_operand powerpc_operands[] =
 #define RAS RAM + 1
   { 5, 16, insert_ras, 0, PPC_OPERAND_GPR },
 
-  /* The RA field of the tlbwe instruction, which is optional.  */
-#define RAO RAS + 1
-  { 5, 16, 0, 0, PPC_OPERAND_GPR|PPC_OPERAND_OPTIONAL },
-
   /* The RB field in an X, XO, M, or MDS form instruction.  */
-#define RB RAO + 1
+#define RB RAS + 1
 #define RB_MASK (0x1f << 11)
   { 5, 11, 0, 0, PPC_OPERAND_GPR },
 
@@ -417,12 +413,8 @@ const struct powerpc_operand powerpc_operands[] =
 #define RTQ RSQ + 1
   { 5, 21, insert_rtq, 0, PPC_OPERAND_GPR },
 
-  /* The RS field of the tlbwe instruction, which is optional.  */
-#define RSO RTQ + 1
-  { 5, 21, 0, 0, PPC_OPERAND_GPR|PPC_OPERAND_OPTIONAL },
-
   /* The SH field in an X or M form instruction.  */
-#define SH RSO + 1
+#define SH RTQ + 1
 #define SH_MASK (0x1f << 11)
   { 5, 11, 0, 0, 0 },
 
@@ -431,12 +423,8 @@ const struct powerpc_operand powerpc_operands[] =
 #define SH6_MASK ((0x1f << 11) | (1 << 1))
   { 6, 1, insert_sh6, extract_sh6, 0 },
 
-  /* The SH field of the tlbwe instruction, which is optional.  */
-#define SHO SH6 + 1
-  { 5, 11,0, 0, PPC_OPERAND_OPTIONAL },
-
   /* The SI field in a D form instruction.  */
-#define SI SHO + 1
+#define SI SH6 + 1
   { 16, 0, 0, 0, PPC_OPERAND_SIGNED },
 
   /* The SI field in a D form instruction when we accept a wide range
@@ -560,6 +548,7 @@ const struct powerpc_operand powerpc_operands[] =
    and the extraction function just checks that the fields are the
    same.  */
 
+/*ARGSUSED*/
 static unsigned long
 insert_bat (unsigned long insn,
 	    long value ATTRIBUTE_UNUSED,
@@ -585,6 +574,7 @@ extract_bat (unsigned long insn,
    and the extraction function just checks that the fields are the
    same.  */
 
+/*ARGSUSED*/
 static unsigned long
 insert_bba (unsigned long insn,
 	    long value ATTRIBUTE_UNUSED,
@@ -607,6 +597,7 @@ extract_bba (unsigned long insn,
 /* The BD field in a B form instruction.  The lower two bits are
    forced to zero.  */
 
+/*ARGSUSED*/
 static unsigned long
 insert_bd (unsigned long insn,
 	   long value,
@@ -616,6 +607,7 @@ insert_bd (unsigned long insn,
   return insn | (value & 0xfffc);
 }
 
+/*ARGSUSED*/
 static long
 extract_bd (unsigned long insn,
 	    int dialect ATTRIBUTE_UNUSED,
@@ -637,6 +629,7 @@ extract_bd (unsigned long insn,
    in BO field, the "a" bit is 00010 for branch on CR(BI) and 01000
    for branch on CTR.  We only handle the taken/not-taken hint here.  */
 
+/*ARGSUSED*/
 static unsigned long
 insert_bdm (unsigned long insn,
 	    long value,
@@ -682,6 +675,7 @@ extract_bdm (unsigned long insn,
    This is like BDM, above, except that the branch is expected to be
    taken.  */
 
+/*ARGSUSED*/
 static unsigned long
 insert_bdp (unsigned long insn,
 	    long value,
@@ -835,6 +829,7 @@ extract_boe (unsigned long insn,
 /* The DQ field in a DQ form instruction.  This is like D, but the
    lower four bits are forced to zero. */
 
+/*ARGSUSED*/
 static unsigned long
 insert_dq (unsigned long insn,
 	   long value,
@@ -846,6 +841,7 @@ insert_dq (unsigned long insn,
   return insn | (value & 0xfff0);
 }
 
+/*ARGSUSED*/
 static long
 extract_dq (unsigned long insn,
 	    int dialect ATTRIBUTE_UNUSED,
@@ -920,6 +916,7 @@ extract_ev8 (unsigned long insn,
 /* The DS field in a DS form instruction.  This is like D, but the
    lower two bits are forced to zero.  */
 
+/*ARGSUSED*/
 static unsigned long
 insert_ds (unsigned long insn,
 	   long value,
@@ -931,6 +928,7 @@ insert_ds (unsigned long insn,
   return insn | (value & 0xfffc);
 }
 
+/*ARGSUSED*/
 static long
 extract_ds (unsigned long insn,
 	    int dialect ATTRIBUTE_UNUSED,
@@ -941,6 +939,7 @@ extract_ds (unsigned long insn,
 
 /* The DE field in a DE form instruction.  */
 
+/*ARGSUSED*/
 static unsigned long
 insert_de (unsigned long insn,
 	   long value,
@@ -952,6 +951,7 @@ insert_de (unsigned long insn,
   return insn | ((value << 4) & 0xfff0);
 }
 
+/*ARGSUSED*/
 static long
 extract_de (unsigned long insn,
 	    int dialect ATTRIBUTE_UNUSED,
@@ -962,6 +962,7 @@ extract_de (unsigned long insn,
 
 /* The DES field in a DES form instruction.  */
 
+/*ARGSUSED*/
 static unsigned long
 insert_des (unsigned long insn,
 	    long value,
@@ -975,6 +976,7 @@ insert_des (unsigned long insn,
   return insn | ((value << 2) & 0xfff0);
 }
 
+/*ARGSUSED*/
 static long
 extract_des (unsigned long insn,
 	     int dialect ATTRIBUTE_UNUSED,
@@ -1047,6 +1049,7 @@ extract_fxm (unsigned long insn,
 /* The LI field in an I form instruction.  The lower two bits are
    forced to zero.  */
 
+/*ARGSUSED*/
 static unsigned long
 insert_li (unsigned long insn,
 	   long value,
@@ -1058,6 +1061,7 @@ insert_li (unsigned long insn,
   return insn | (value & 0x3fffffc);
 }
 
+/*ARGSUSED*/
 static long
 extract_li (unsigned long insn,
 	    int dialect ATTRIBUTE_UNUSED,
@@ -1157,6 +1161,7 @@ extract_mbe (unsigned long insn,
 /* The MB or ME field in an MD or MDS form instruction.  The high bit
    is wrapped to the low end.  */
 
+/*ARGSUSED*/
 static unsigned long
 insert_mb6 (unsigned long insn,
 	    long value,
@@ -1166,6 +1171,7 @@ insert_mb6 (unsigned long insn,
   return insn | ((value & 0x1f) << 6) | (value & 0x20);
 }
 
+/*ARGSUSED*/
 static long
 extract_mb6 (unsigned long insn,
 	     int dialect ATTRIBUTE_UNUSED,
@@ -1190,6 +1196,7 @@ insert_nb (unsigned long insn,
   return insn | ((value & 0x1f) << 11);
 }
 
+/*ARGSUSED*/
 static long
 extract_nb (unsigned long insn,
 	    int dialect ATTRIBUTE_UNUSED,
@@ -1208,6 +1215,7 @@ extract_nb (unsigned long insn,
    invalid, since we never want to recognize an instruction which uses
    a field of this type.  */
 
+/*ARGSUSED*/
 static unsigned long
 insert_nsi (unsigned long insn,
 	    long value,
@@ -1259,6 +1267,7 @@ insert_ram (unsigned long insn,
 /* The RA field in the DQ form lq instruction, which has special 
    value restrictions.  */
 
+/*ARGSUSED*/
 static unsigned long
 insert_raq (unsigned long insn,
 	    long value,
@@ -1293,6 +1302,7 @@ insert_ras (unsigned long insn,
    function just copies the BT field into the BA field, and the
    extraction function just checks that the fields are the same.  */
 
+/*ARGSUSED*/
 static unsigned long
 insert_rbs (unsigned long insn,
 	    long value ATTRIBUTE_UNUSED,
@@ -1315,6 +1325,7 @@ extract_rbs (unsigned long insn,
 /* The RT field of the DQ form lq instruction, which has special
    value restrictions.  */
 
+/*ARGSUSED*/
 static unsigned long
 insert_rtq (unsigned long insn,
 	    long value,
@@ -1329,6 +1340,7 @@ insert_rtq (unsigned long insn,
 /* The RS field of the DS form stq instruction, which has special 
    value restrictions.  */
 
+/*ARGSUSED*/
 static unsigned long
 insert_rsq (unsigned long insn,
 	    long value ATTRIBUTE_UNUSED,
@@ -1342,6 +1354,7 @@ insert_rsq (unsigned long insn,
 
 /* The SH field in an MD form instruction.  This is split.  */
 
+/*ARGSUSED*/
 static unsigned long
 insert_sh6 (unsigned long insn,
 	    long value,
@@ -1351,6 +1364,7 @@ insert_sh6 (unsigned long insn,
   return insn | ((value & 0x1f) << 11) | ((value & 0x20) >> 4);
 }
 
+/*ARGSUSED*/
 static long
 extract_sh6 (unsigned long insn,
 	     int dialect ATTRIBUTE_UNUSED,
@@ -4268,7 +4282,8 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 
 { "tlbwehi", XTLB(31,978,0), XTLB_MASK,	PPC403,		{ RT, RA } },
 { "tlbwelo", XTLB(31,978,1), XTLB_MASK,	PPC403,		{ RT, RA } },
-{ "tlbwe",   X(31,978),	X_MASK,		PPC403|BOOKE,	{ RSO, RAO, SHO } },
+{ "tlbwe",   X(31,978),	X_MASK,		BOOKE,		{ 0 } },
+{ "tlbwe",   X(31,978),	X_MASK,		PPC403,		{ RS, RA, SH } },
 { "tlbld",   X(31,978),	XRTRA_MASK,	PPC,		{ RB } },
 
 { "icbi",    X(31,982),	XRT_MASK,	PPC,		{ RA, RB } },

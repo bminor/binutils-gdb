@@ -110,6 +110,7 @@ read_uarea(abfd, filepos)
   return &rawptr->u;
 }
 
+/* ARGSUSED */
 const bfd_target *
 sco5_core_file_p (abfd)
      bfd *abfd;
@@ -337,6 +338,7 @@ sco5_core_file_failing_command (abfd)
     return NULL;
 }
 
+/* ARGSUSED */
 int
 sco5_core_file_failing_signal (ignore_abfd)
      bfd *ignore_abfd;
@@ -346,6 +348,7 @@ sco5_core_file_failing_signal (ignore_abfd)
 	  : -1);
 }
 
+/* ARGSUSED */
 bfd_boolean
 sco5_core_file_matches_executable_p  (core_bfd, exec_bfd)
      bfd *core_bfd ATTRIBUTE_UNUSED;
