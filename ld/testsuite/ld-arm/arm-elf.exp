@@ -41,6 +41,9 @@ set armelftests {
     {"Simple dynamic application" "tmpdir/arm-lib.so" "" {arm-app.s}
      {{objdump -fdw arm-app.d} {objdump -Rw arm-app.r}}
      "arm-app"}
+    {"Simple static application" "" "" {arm-static-app.s}
+     {{objdump -fdw arm-static-app.d} {objdump -rw arm-static-app.r}}
+     "arm-static-app"}
 }
 
 run_ld_link_tests $armelftests

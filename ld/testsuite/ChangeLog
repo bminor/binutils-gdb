@@ -1,3 +1,9 @@
+2004-01-13  Daniel Jacobowitz  <drow@mvista.com>
+
+	* ld-arm/arm-elf.exp: Add arm-static-app test.
+	* ld-arm/arm-static-app.s, ld-arm/arm-static-app.d,
+	ld-arm/arm-static-app.r: New files.
+
 2004-01-12  Anil Paranjpe  <anilp1@KPITCummins.com>
 	
 	* ld-h8300/h8300-exp:  Run the relax-4 test.
