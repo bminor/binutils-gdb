@@ -1,3 +1,8 @@
+Sun Feb 19 14:31:57 1995  Jim Kingdon  <kingdon@rtl.cygnus.com>
+
+	* Makefile.in (CC_FOR_TARGET,CXX_FOR_TARGET): Look for newlib in
+	`..' not in `../..'.
+
 Sun Feb 19 11:05:28 1995  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* procfs.c (unconditionally_kill_inferior):  Don't issue a PIOCKILL
