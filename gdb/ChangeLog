@@ -1,3 +1,8 @@
+2003-01-29  Brian Ford <ford@vss.fsi.com>
+
+	* win32-nat.c (cygwin_pid): Removed as unused.
+	(child_attach): Try fall back to Cygwin pid.
+
 2003-01-29  Jim Blandy  <jimb@redhat.com>
 
 	* objfiles.h (struct objfile): Doc fix.
@@ -331,6 +336,7 @@
 	(_initialize_infcmd): Update help string for 'until' command.
 	Add new 'advance' command.
 
+>>>>>>> 1.3752
 2003-01-14  David Carlton  <carlton@math.stanford.edu>
 
 	* linespec.c (decode_line_1): Normalize comments.
