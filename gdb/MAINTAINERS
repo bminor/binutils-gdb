@@ -130,7 +130,7 @@ maintainer works with the native maintainer when resolving API issues.
 	tic80		(--target=tic80-coff broken)
 			Maintenance only
 
-	v850		(--target=v850-elf broken)
+	v850		--target=v850-elf
 			Maintenance only
 
 	vax		--target=vax-dec-vms5.5 ,-Werror
