@@ -1,3 +1,8 @@
+2004-02-26  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* gdb.base/langs.exp: Update query string to match the
+	new nquery format used for pending breakpoints.
+
 2004-02-26  Andrew Cagney  <cagney@redhat.com>
 
 	Fix PR i18n/1570.
