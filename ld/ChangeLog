@@ -1,3 +1,14 @@
+Thu Aug 17 13:35:49 1995  steve chamberlain  <sac@slash.cygnus.com>
+	
+
+	* emultempl/{armpe.sc, i386pe.sc}: Deleted.
+	* emultempl/pe.sc: New file performs generic PE support and sorts
+	archive members.
+	* emulparams/{armpe.sh,i386pe.sh}: Use new file.
+	* scripttempl/{armpe.sc, i386pe.sc}: Deleted
+	* scripttempl/pe.sc: New.
+	* Makefile.in: Use new files.
+
 Thu Aug 17 14:46:34 1995  Doug Evans  <dje@canuck.cygnus.com>
 
 	* scripttempl/h8500s.sc (.rdata): All data must go in data segment.

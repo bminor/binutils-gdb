@@ -1,30 +1,36 @@
-# Linker script for ARM PE.
+# Linker script for PE.
 # These are substituted in as variables in order to get '}' in a shell
 # conditional expansion.
 INIT='.init : { *(.init) }'
 FINI='.fini : { *(.fini) }'
 cat <<EOF
-OUTPUT_FORMAT($OUTPUT_FORMAT)
+OUTPUT_FORMAT(${OUTPUT_FORMAT})
 ${LIB_SEARCH_DIRS}
 
 ENTRY(_mainCRTStartup)
 
 SECTIONS
 {
-  .text  0x401000 : 
+
+  .text ${RELOCATING+ 0x401000} : 
 	{
 	    ${RELOCATING+ *(.init);}
 	    *(.text)
+	    ${CONSTRUCTING+ ___CTOR_LIST__ = .; LONG (-1); *(.ctor); LONG (0); }
+            ${CONSTRUCTING+ ___DTOR_LIST__ = .; LONG (-1); *(.dtor); LONG (0); }
 	    ${RELOCATING+ *(.fini);}
 	    ${RELOCATING+ etext  =  .};
 	  }
 
+  .bss BLOCK(0x1000)  :
+	{
+	*(.bss)
+	*(COMMON);
+	}
 
   .rdata BLOCK(0x1000) :
   { 					
-	*(.rdata)
-	${CONSTRUCTING+ __CTOR_LIST__ = .; LONG (-1); *(.ctors); LONG (0); }
-	${CONSTRUCTING+ __DTOR_LIST__ = .; LONG (-1); *(.dtors); LONG (0); }
+    *(.rdata)
     ;
   }
   .data BLOCK(0x1000) : {
@@ -42,7 +48,6 @@ SECTIONS
     *(.idata\$7)
     ;
   }
-
   .CRT BLOCK(0x1000) :
   { 					
     *(.CRT\$XCA)
@@ -71,37 +76,22 @@ SECTIONS
     *(.reloc)
     ;
   }
-
-  .drectve BLOCK (0x1000) :
-	{
-	   ${RELOCATING+ *(.drectve); }
-	}
   .junk BLOCK(0x1000) :
   { 					
     *(.debug\$S)
     *(.debug\$T)
     *(.debug\$F)
+    *(.drectve)
     ;
   }
-
-
-  .bss BLOCK(0x1000)  :
-	{
-	*(.bss)
-	*(COMMON);
-	end = . ;
-	}
-
-  .stab  0 :
+  .stab  0 ${RELOCATING+(NOLOAD)} : 
   {
     [ .stab ]
   }
 
-  .stabstr  0 :
+  .stabstr  0 ${RELOCATING+(NOLOAD)} :
   {
     [ .stabstr ]
   }
-
-${RELOCATING+ stack =  0x800000 ;}
 }
 EOF

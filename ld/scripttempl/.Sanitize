@@ -34,7 +34,6 @@ Things-to-keep:
 README
 a29k.sc
 alpha.sc
-armpe.sc
 armaout.sc
 aout.sc
 ebmon29k.sc
@@ -50,7 +49,6 @@ h8500m.sc
 h8500s.sc
 hppaelf.sc
 i386coff.sc
-i386pe.sc
 i386go32.sc
 i386lynx.sc
 i386msdos.sc
@@ -61,6 +59,7 @@ m88kbcs.sc
 mips.sc
 mipsbsd.sc
 nw.sc
+pe.sc
 riscix.sc
 sa29200.sc
 sh.sc
