@@ -1,3 +1,7 @@
+Mon Feb 20 23:54:38 1995  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* Makefile.in (ALL_MACHINES):  Add w65-dis.o.
+
 start-sanitize-arc
 Fri Feb 17 12:42:25 1995  Doug Evans  <dje@chestnut.cygnus.com>
 
