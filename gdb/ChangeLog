@@ -1,5 +1,8 @@
 Mon Apr 12 10:53:50 1993  Jim Kingdon  (kingdon@cygnus.com)
 
+	* breakpoint.c (within_scope): New function.
+	(enable_breakpoint, watchpoint_check): Use it.
+
 	* source.c (openp): Handle "exec-file ./ls" correctly.
 
 	* breakpoint.c (breakpoint_1): Use wrap_here before "at".
