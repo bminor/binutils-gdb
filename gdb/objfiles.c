@@ -283,6 +283,8 @@ terminate_minimal_symbol_table (struct objfile *objfile)
       = &objfile->msymbols[objfile->minimal_symbol_count];
 
     memset (m, 0, sizeof (*m));
+    /* Don't rely on these enumeration values being 0's.  */
+    MSYMBOL_TYPE (m) = mst_unknown;
     SYMBOL_INIT_LANGUAGE_SPECIFIC (m, language_unknown);
   }
 }

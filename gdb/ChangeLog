@@ -1,3 +1,8 @@
+2004-02-17  Elena Zannoni  <ezannoni@redhat.com>
+
+	* objfiles.c (terminate_minimal_symbol_table): Add back
+	initialization of MSYMBOL_TYPE.
+
 2004-02-17  David Mosberger  <davidm@hpl.hp.com>
 
 	Committed by Andrew Cagney.
