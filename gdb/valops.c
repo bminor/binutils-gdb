@@ -3340,7 +3340,7 @@ value_of_local (const char *name, int complain)
   if (i <= 0)
     {
       if (complain)
-	error ("no args, no %s", name);
+	error ("no args, no '%s'", name);
       else
 	return 0;
     }
