@@ -52,7 +52,6 @@ ho-sunos.h
 ho-sysv.h
 ho-vax.h
 ho-vms.h
-i386aix.mt
 i386coff.mt
 m68k.mt
 m68kcoff.mt
@@ -140,7 +139,76 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.30  1992/12/08 09:42:06  raeburn
+# Revision 1.31  1992/12/30 20:34:14  ian
+# Wed Dec 30 10:18:57 1992  Ian Lance Taylor  (ian@cygnus.com)
+#
+# 	* app.c, config/tc-*.c: Don't include read.h, since it is already
+# 	included by as.h.
+#
+# 	* These are based on patches from Minh Tran-le
+# 	<mtranle@paris.intellicorp.com>.
+# 	* configure.in (i[34]86-ibm-aix*): Accept i486 for host.  Use
+# 	obj_format coffbfd and gas_target i386coff for target.
+# 	(i[34]86-*-isc*): New host (uses sysv).
+# 	* config/i386aix.mt: Removed (no longer used).
+# 	* config/mh-i386aix (RANLIB): Use true rather than /bin/true.
+# 	(MINUS_G): Removed.
+# 	(LDFLAGS): Added, defined as -shlib.
+# 	* config/te-i386aix.h (REVERSE_SORT_RELOCS): Undefine.
+# 	* config/te-sco386.h (LOCAL_LABEL): Don't define.
+# 	(DOT_LABEL_PREFIX): Define.
+# 	* expr.c (operand): If DOT_LABEL_PREFIX, use .L0\001 as a label
+# 	name rather than L0\001.
+# 	* read.c (s_lcomm): Make a frag in SEG_BSS rather than using
+# 	local_bss_counter.
+# 	* symbols.c, symbols.h (local_bss_counter): Removed.
+# 	* write.c (write_object_file): bss no longer uses
+# 	local_bss_counter.  Pass correct data and bss size to
+# 	VMS_write_object_file.
+# 	* config/obj-vms.c (VMS_write_object_file): Accept bss size as
+# 	argument, rather than using local_bss_counter.
+# 	* config/tc-m88k.c (s_bss): Don't use local_bss_counter.
+# 	* config/tc-sparc.c (s_reserve): Don't use local_bss_counter.
+# 	* config/obj-coffbfd.c (had_lineno, had_reloc): Removed.
+# 	(size_section): Restored sanity check.
+# 	(do_relocs_for): Base section address on s_paddr rather than
+# 	computing it.  Adjust a29k R_IHIHALF special case to account for
+# 	section paddr (used to require paddr to be zero).  If there are no
+# 	reclos, set s_relptr to 0.  Set relocation size in object_headers.
+# 	(fill_section): Always set s_vaddr here, removing
+# 	ZERO_BASED_SEGMENTS case.  Force s_scnptr for bss to 0.  Don't set
+# 	NOLOAD for i386 .bss, because it confuses the SVR3 native linker.
+# 	Set STYP_INFO for .comment.
+# 	(coff_header_append): Use object headers and H_{SET,GET}_* macros.
+# 	Make aouthdr writing depend on OBJ_COFF_OMIT_OPTIONAL_HEADER.
+# 	(crawl_symbols): Handle 8 character section name correctly.  Use
+# 	H_{SET,GET}_* macros.
+# 	(do_linenos_for): Set lineno size in object_headers.
+# 	(write_object_file): Use H_{SET,GET}_* macros.  Don't bother to
+# 	set s_vaddr here.  If string_byte_count remains 4, set it back to
+# 	0, and only write strings out if there are some.  Call
+# 	fill_section before do_relocs_for and do_linenos_for.
+# 	(obj_coff_section): Handle optional quoted second argument giving
+# 	section characteristics.
+# 	(obj_coff_bss): Added to handle .bss.
+# 	(obj_coff_ident): Added to handle .ident (puts string in .comment
+# 	section).
+# 	(obj_coff_lcomm): Put common symbols in .bss, not .data.
+# 	(fixup_mdeps): Change to segment.  Call frag_wane after
+# 	md_convert_frag.
+# 	(fixup_segment): Explicitly check S_IS_COMMON before making 386
+# 	adjustment (already happened only for common symbols, but this is
+# 	clearer).
+# 	* config/obj-coffbfd.h (OBJ_COFF_OMIT_OPTIONAL_HEADER): Define.
+# 	* config/tc-i386.c (s_bss): Don't use if I386COFF.
+# 	(md_pseudo_table): Ignore .optim and .noopt.
+# 	(tc_coff_sizemachdep): New function.
+# 	* config/tc-i386.h (REVERSE_SORT_RELOCS): Undef, for SVR3
+# 	compatibility.
+# 	(LOCAL_LABEL): Removed definition.
+# 	(DOT_LABEL_PREFIX): Defined.
+#
+# Revision 1.30  1992/12/08  09:42:06  raeburn
 # missed tc-tahoe files
 #
 # Revision 1.29  1992/12/08  09:30:28  raeburn

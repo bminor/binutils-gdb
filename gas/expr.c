@@ -567,13 +567,17 @@ operand (expressionP)
     case '.':
       if (!is_part_of_name (*input_line_pointer))
 	{
+	  char *fake;
 	  extern struct obstack frags;
 
-	  /*
-	JF:  '.' is pseudo symbol with value of current location in current
-	segment. . .
-	*/
-	  symbolP = symbol_new ("L0\001",
+	  /* JF: '.' is pseudo symbol with value of current location
+	     in current segment.  */
+#ifdef DOT_LABEL_PREFIX
+	  fake = ".L0\001";
+#else
+	  fake = "L0\001";
+#endif
+	  symbolP = symbol_new (fake,
 				now_seg,
 	       (valueT) (obstack_next_free (&frags) - frag_now->fr_literal),
 				frag_now);

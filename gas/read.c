@@ -587,7 +587,7 @@ read_a_source_file (name)
 		     that goes with this #APP  There is one.  The specs
 		     guarentee it. . . */
 		  tmp_len = buffer_limit - s;
-		  tmp_buf = xmalloc (tmp_len);
+		  tmp_buf = xmalloc (tmp_len + 1);
 		  bcopy (s, tmp_buf, tmp_len);
 		  do
 		    {
@@ -1147,19 +1147,28 @@ s_lcomm (needs_align)
        S_GET_OTHER (symbolP) == 0 &&
        S_GET_DESC (symbolP) == 0 &&
 #endif /* OBJ_AOUT or OBJ_BOUT */
-       (((S_GET_SEGMENT (symbolP) == SEG_BSS) && (S_GET_VALUE (symbolP) == local_bss_counter))
+       (S_GET_SEGMENT (symbolP) == SEG_BSS
 	|| (!S_IS_DEFINED (symbolP) && S_GET_VALUE (symbolP) == 0)))
     {
-      if (needs_align)
-	{
-	  /* Align */
-	  align = ~((~0) << align);	/* Convert to a mask */
-	  local_bss_counter =
-	    (local_bss_counter + align) & (~align);
-	}
+      char *p;
+      segT current_seg = now_seg;
+      subsegT current_subseg = now_subseg;
 
-      S_SET_VALUE (symbolP, local_bss_counter);
+      subseg_new (SEG_BSS, 1);
+
+      if (align)
+	frag_align (align, 0);
+					/* detach from old frag	*/
+      if (S_GET_SEGMENT (symbolP) == SEG_BSS)
+	symbolP->sy_frag->fr_symbol = NULL;
+
+      symbolP->sy_frag = frag_now;
+      p = frag_var (rs_org, 1, 1, (relax_substateT)0, symbolP,
+		    temp, (char *)0);
+      *p = 0;
+
       S_SET_SEGMENT (symbolP, SEG_BSS);
+
 #ifdef OBJ_COFF
       /* The symbol may already have been created with a preceding
 		 * ".globl" directive -- be careful not to step on storage
@@ -1170,13 +1179,11 @@ s_lcomm (needs_align)
 	  S_SET_STORAGE_CLASS (symbolP, C_STAT);
 	}
 #endif /* OBJ_COFF */
-      symbolP->sy_frag = &bss_address_frag;
-      local_bss_counter += temp;
+      subseg_new (current_seg, current_subseg);
     }
   else
     {
-      as_bad ("Ignoring attempt to re-define symbol from %d. to %d.",
-	      S_GET_VALUE (symbolP), local_bss_counter);
+      as_bad ("Ignoring attempt to re-define symbol %s.", name);
     }
   demand_empty_rest_of_line ();
 

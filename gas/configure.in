@@ -37,14 +37,21 @@ configdirs=doc
 gas_host=generic
 
 case "${host}" in
-  a29k-*-* | rs6000-*-* | vax-*-*)  
-    gas_host=${host_cpu} 
+  a29k-*-* | rs6000-*-* | vax-*-*)
+    case "${host_os}" in
+    vms*)	gas_host=vms ;;
+    bsd*)	gas_host=bsd ;;
+    *)		gas_host=${host_cpu} ;;
+    esac
     ;;	
   mips-dec-ultrix) 
     gas_host=decstation 
     ;;
-  i386-ibm-aix)	
+  i[34]86-ibm-aix*)
     gas_host=i386aix
+    ;;
+  i[34]86-*-isc*)
+    gas_host=sysv
     ;;
   m68k-sun-sunos*)
     gas_host=sun3 
@@ -98,14 +105,15 @@ case ${target} in
     gas_target=ebmon29k
     ;;
   i[34]86-ibm-aix*)
-    obj_format=coff
-    gas_target=i386aix
+    obj_format=coffbfd
+    need_bfd="./../bfd/libbfd.a"
+    gas_target=i386coff
     emulation=i386aix
     ;;
   i[34]86-*-bsd*) 
     obj_format=aout 
     ;;
-  i[34]86-*-coff | i[34]86-*-sysv* | i[34]86-*-sco*)
+  i[34]86-*-coff | i[34]86-*-sysv* | i[34]86-*-sco* | i[34]86-*-isc*)
     obj_format=coffbfd
     need_bfd="./../bfd/libbfd.a"
     gas_target=i386coff
@@ -136,7 +144,7 @@ case ${target} in
   sparclite-fujitsu-none)
     obj_format=aout
     ;;
-  *-*-aout | *-*-scout)
+  *-*-aout | *-*-scout | *-*-linux)
     obj_format=aout
     ;;
   *-*-bout* | *-*-nindy*)
@@ -174,12 +182,16 @@ case ${target} in
   *-*-coff)
     obj_format=coff
     ;;
+  *-*-vms)
+    obj_format=vms
+    ;;
 esac
 
 # assign floating point type
 case ${target_cpu} in
   ns32k) atof=ns32k ;;
   vax)	 atof=vax ;;
+  tahoe) atof=tahoe ;;
   *)	 atof=ieee ;;
 esac
 

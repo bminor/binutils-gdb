@@ -37,7 +37,6 @@ struct hash_control *
   sy_hash;			/* symbol-name => struct symbol pointer */
 
 /* Below are commented in "symbols.h". */
-unsigned int local_bss_counter;
 symbolS *symbol_rootP;
 symbolS *symbol_lastP;
 symbolS abs_symbol;
@@ -48,11 +47,7 @@ symbolS *dot_bss_symbol;
 
 struct obstack notes;
 
-#if __STDC__ == 1
-static void fb_label_init (void);
-#else /* not __STDC__ */
-static void fb_label_init ();
-#endif /* not __STDC__ */
+static void fb_label_init PARAMS ((void));
 
 void
 symbol_begin ()
@@ -62,7 +57,6 @@ symbol_begin ()
   sy_hash = hash_new ();
   memset ((char *) (&abs_symbol), '\0', sizeof (abs_symbol));
   S_SET_SEGMENT (&abs_symbol, SEG_ABSOLUTE);	/* Can't initialise a union. Sigh. */
-  local_bss_counter = 0;
 #ifdef LOCAL_LABELS_FB
   fb_label_init ();
 #endif /* LOCAL_LABELS_FB */
@@ -280,10 +274,8 @@ colon (sym_name)		/* just seen "x:" - rattle symbols & frags */
 		    }
 		  else
 		    {
-		      /*
-						 *	It is a .comm/.lcomm being converted
-						 *	to initialized data.
-						 */
+		      /* It is a .comm/.lcomm being converted to initialized
+			 data.  */
 		      symbolP->sy_frag = frag_now;
 #ifdef VMS
 		      symbolP->sy_other = const_flag;
@@ -794,7 +786,6 @@ static void
 fb_label_init ()
 {
   memset ((void *) fb_low_counter, '\0', sizeof (fb_low_counter));
-  return;
 }				/* fb_label_init() */
 
 /* add one to the instance number of this fb label */
@@ -976,13 +967,5 @@ decode_local_label_name (s)
 
   return (symbol_decode);
 }				/* decode_local_label_name() */
-
-
-/*
- * Local Variables:
- * comment-column: 0
- * fill-column: 131
- * End:
- */
 
 /* end of symbols.c */

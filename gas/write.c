@@ -152,7 +152,6 @@ write_object_file ()
   register fragS *fragP;	/* Track along all frags. */
   register struct frchain *next_frchainP;
   register fragS **prev_fragPP;
-  unsigned int data_siz;
 
   long object_file_size;
 
@@ -286,7 +285,6 @@ write_object_file ()
   else
     {
       H_SET_DATA_SIZE (&headers, 0);
-      data_siz = 0;
     }
 
 #ifdef OBJ_BOUT
@@ -308,7 +306,7 @@ write_object_file ()
   /* Slide all the frags */
   if (bss_frag_root)
     {
-      relax_addressT slide = bss_address_frag.fr_address + local_bss_counter;
+      relax_addressT slide = bss_address_frag.fr_address;
 
       for (fragP = bss_frag_root; fragP; fragP = fragP->fr_next)
 	{
@@ -317,11 +315,12 @@ write_object_file ()
     }
 
 #endif
+
   if (bss_last_frag)
-    {
-      local_bss_counter += bss_last_frag->fr_address - bss_frag_root->fr_address;
-    }
-  H_SET_BSS_SIZE (&headers, local_bss_counter);
+    H_SET_BSS_SIZE (&headers,
+		    bss_last_frag->fr_address - bss_frag_root->fr_address);
+  else
+    H_SET_BSS_SIZE (&headers, 0);
 
   /*
    *
@@ -660,7 +659,9 @@ write_object_file ()
   /*
    *	Now do the VMS-dependent part of writing the object file
    */
-  VMS_write_object_file (H_GET_TEXT_SIZE (&headers), data_siz,
+  VMS_write_object_file (H_GET_TEXT_SIZE (&headers),
+			 H_GET_DATA_SIZE (&headers),
+			 H_GET_BSS_SIZE (&headers),
 			 text_frag_root, data_frag_root);
 #endif /* VMS */
 }				/* write_object_file() */
