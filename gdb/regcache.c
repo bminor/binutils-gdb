@@ -345,7 +345,7 @@ make_cleanup_regcache_xfree (struct regcache *regcache)
 /* Return  a pointer to register REGNUM's buffer cache.  */
 
 static char *
-register_buffer (struct regcache *regcache, int regnum)
+register_buffer (const struct regcache *regcache, int regnum)
 {
   return regcache->registers + regcache->descr->register_offset[regnum];
 }
@@ -1201,6 +1201,10 @@ write_register_pid (int regnum, CORE_ADDR val, ptid_t ptid)
   inferior_ptid = save_ptid;
 }
 
+/* FIXME: kettenis/20030828: We should get rid of supply_register and
+   regcache_collect in favour of regcache_raw_supply and
+   regcache_raw_collect.  */
+
 /* SUPPLY_REGISTER()
 
    Record that register REGNUM contains VAL.  This is used when the
@@ -1250,6 +1254,55 @@ regcache_collect (int regnum, void *buf)
 {
   memcpy (buf, register_buffer (current_regcache, regnum),
 	  REGISTER_RAW_SIZE (regnum));
+}
+
+/* Supply register REGNUM, whose contents are store in BUF, to REGCACHE.  */
+
+void
+regcache_raw_supply (struct regcache *regcache, int regnum, const void *buf)
+{
+  void *regbuf;
+  size_t size;
+
+  gdb_assert (regcache != NULL && buf != NULL);
+  gdb_assert (regnum >= 0 && regnum < regcache->descr->nr_raw_registers);
+  gdb_assert (!regcache->readonly_p);
+
+  /* FIXME: kettenis/20030828: It shouldn't be necessary to handle
+     CURRENT_REGCACHE specially here.  */
+  if (regcache == current_regcache
+      && !ptid_equal (registers_ptid, inferior_ptid))
+    {
+      registers_changed ();
+      registers_ptid = inferior_ptid;
+    }
+
+  regbuf = register_buffer (regcache, regnum);
+  size = regcache->descr->sizeof_register[regnum];
+
+  if (buf)
+    memcpy (regbuf, buf, size);
+  else
+    memset (regbuf, 0, size);
+
+  /* Mark the register as cached.  */
+  regcache->register_valid_p[regnum] = 1;
+}
+
+/* Collect register REGNUM from REGCACHE and store its contents in BUF.  */
+
+void
+regcache_raw_collect (const struct regcache *regcache, int regnum, void *buf)
+{
+  const void *regbuf;
+  size_t size;
+
+  gdb_assert (regcache != NULL && buf != NULL);
+  gdb_assert (regnum >= 0 && regnum < regcache->descr->nr_raw_registers);
+
+  regbuf = register_buffer (regcache, regnum);
+  size = regcache->descr->sizeof_register[regnum];
+  memcpy (buf, regbuf, size);
 }
 
 

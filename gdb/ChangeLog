@@ -1,3 +1,9 @@
+2003-08-28  Mark Kettenis  <kettenis@gnu.org>
+
+	* regcache.c (register_buffer): Consitify first argument.
+	(regcache_raw_supply, regcache_raw_collect): New
+	functions.
+
 2003-08-28  Daniel Jacobowitz  <drow@mvista.com>
 
 	* config/powerpc/tm-nbsd.h: Undefine IBM6000_TARGET.  Suggested
