@@ -1,5 +1,6 @@
 Fri Nov 12 16:51:47 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
+	* config/tc-hppa.[ch]: Fix assorted trivial indention problems.
 	* config/obj-som.c (obj_som_version): Add missing ';'.
 	(som_frob_file): Delete whitespace at EOL.
 
