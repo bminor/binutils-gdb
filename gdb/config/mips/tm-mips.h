@@ -42,6 +42,10 @@ struct value;
 #define GDB_TARGET_IS_MIPS64 0
 #endif
 
+#if !defined (MIPS_EABI)
+#define MIPS_EABI 0
+#endif
+
 #if !defined (TARGET_MONITOR_PROMPT)
 #define TARGET_MONITOR_PROMPT "<IDT>"
 #endif
@@ -173,11 +177,11 @@ extern int in_sigtramp PARAMS ((CORE_ADDR, char *));
 #define V0_REGNUM 2		/* Function integer return value */
 #define A0_REGNUM 4		/* Loc of first arg during a subr call */
 #if MIPS_EABI
-  #define MIPS_LAST_ARG_REGNUM 11 /* EABI uses R4 through R11 for args */
-  #define MIPS_NUM_ARG_REGS 8
+#  define MIPS_LAST_ARG_REGNUM 11 /* EABI uses R4 through R11 for args */
+#  define MIPS_NUM_ARG_REGS 8
 #else
-  #define MIPS_LAST_ARG_REGNUM 7  /* old ABI uses R4 through R7 for args */
-  #define MIPS_NUM_ARG_REGS 4
+#  define MIPS_LAST_ARG_REGNUM 7  /* old ABI uses R4 through R7 for args */
+#  define MIPS_NUM_ARG_REGS 4
 #endif
 #define SP_REGNUM 29		/* Contains address of top of stack */
 #define RA_REGNUM 31		/* Contains return address value */
@@ -188,6 +192,14 @@ extern int in_sigtramp PARAMS ((CORE_ADDR, char *));
 #define CAUSE_REGNUM 36		/* describes last exception */
 #define PC_REGNUM 37		/* Contains program counter */
 #define FP0_REGNUM 38           /* Floating point register 0 (single float) */
+#define FPA0_REGNUM (FP0_REGNUM+12) /* First float argument register */
+#if MIPS_EABI			/* EABI uses F12 through F19 for args */
+#  define MIPS_LAST_FP_ARG_REGNUM (FP0_REGNUM+19)
+#  define MIPS_NUM_FP_ARG_REGS 8
+#else				/* old ABI uses F12 through F15 for args */
+#  define MIPS_LAST_FP_ARG_REGNUM (FP0_REGNUM+15)
+#  define MIPS_NUM_FP_ARG_REGS 4
+#endif
 #define FCRCS_REGNUM 70         /* FP control/status */
 #define FCRIR_REGNUM 71         /* FP implementation/revision */
 #define FP_REGNUM 72		/* Pseudo register that contains true address of executing stack frame */
@@ -374,105 +386,20 @@ extern void mips_push_dummy_frame PARAMS ((void));
 #define POP_FRAME		mips_pop_frame()
 extern void mips_pop_frame PARAMS ((void));
 
-#define MK_OP(op,rs,rt,offset) (((op)<<26)|((rs)<<21)|((rt)<<16)|(offset))
-#ifndef OP_LDFPR
-#define OP_LDFPR 061	/* lwc1 */
-#endif
-#ifndef OP_LDGPR
-#define OP_LDGPR 043	/* lw */
-#endif
-#define CALL_DUMMY_SIZE (16*4)
-#define Dest_Reg 2
-#define CALL_DUMMY {\
- MK_OP(0,RA_REGNUM,0,8),	/* jr $ra # Fake ABOUT_TO_RETURN ...*/\
- 0,				/* nop 	  #  ... to stop raw backtrace*/\
- 0x27bd0000,			/* addu	sp,?0 # Pseudo prologue */\
-/* Start here; reload FP regs, then GP regs: */\
- MK_OP(OP_LDFPR,SP_REGNUM,12,0             ), /* l[wd]c1 $f12,0(sp) */\
- MK_OP(OP_LDFPR,SP_REGNUM,13,  MIPS_REGSIZE), /* l[wd]c1 $f13,{4,8}(sp) */\
- MK_OP(OP_LDFPR,SP_REGNUM,14,2*MIPS_REGSIZE), /* l[wd]c1 $f14,{8,16}(sp) */\
- MK_OP(OP_LDFPR,SP_REGNUM,15,3*MIPS_REGSIZE), /* l[wd]c1 $f15,{12,24}(sp) */\
- MK_OP(OP_LDGPR,SP_REGNUM, 4,0             ), /* l[wd] $r4,0(sp) */\
- MK_OP(OP_LDGPR,SP_REGNUM, 5,  MIPS_REGSIZE), /* l[wd] $r5,{4,8}(sp) */\
- MK_OP(OP_LDGPR,SP_REGNUM, 6,2*MIPS_REGSIZE), /* l[wd] $r6,{8,16}(sp) */\
- MK_OP(OP_LDGPR,SP_REGNUM, 7,3*MIPS_REGSIZE), /* l[wd] $r7,{12,24}(sp) */\
- (017<<26)| (Dest_Reg << 16),	/* lui $r31,<target upper 16 bits>*/\
- MK_OP(13,Dest_Reg,Dest_Reg,0),	/* ori $r31,$r31,<lower 16 bits>*/ \
- (Dest_Reg<<21) | (31<<11) | 9,	/* jalr $r31 */\
- MK_OP(OP_LDGPR,SP_REGNUM, 7,3*MIPS_REGSIZE), /* l[wd] $r7,{12,24}(sp) */\
- 0x5000d,			/* bpt */\
-}
+#define CALL_DUMMY { 0 }
 
-#define CALL_DUMMY_START_OFFSET 12
+#define CALL_DUMMY_START_OFFSET (0)
 
-#define CALL_DUMMY_BREAKPOINT_OFFSET (CALL_DUMMY_START_OFFSET + (12 * 4))
+#define CALL_DUMMY_BREAKPOINT_OFFSET (0)
 
-/* Insert the specified number of args and function address
-   into a call sequence of the above form stored at DUMMYNAME.  */
+#define FIX_CALL_DUMMY(dummyname, start_sp, fun, nargs, args, rettype, gcc_p)
 
-/* For big endian mips machines we need to switch the order of the
-   words with a floating-point value (it was already coerced to a double
-   by mips_push_arguments).  */
-#define FIX_CALL_DUMMY(dummyname, start_sp, fun, nargs, args, rettype, gcc_p) \
-  do									\
-    {									\
-      store_unsigned_integer						\
-	(dummyname + 11 * 4, 4,						\
-	 (extract_unsigned_integer (dummyname + 11 * 4, 4)		\
-	  | (((fun) >> 16) & 0xffff)));					\
-      store_unsigned_integer						\
-	(dummyname + 12 * 4, 4,						\
-	 (extract_unsigned_integer (dummyname + 12 * 4, 4)		\
-	  | ((fun) & 0xffff)));						\
-      if (mips_fpu == MIPS_FPU_NONE)					\
-	{								\
-	  store_unsigned_integer (dummyname + 3 * 4, 4,			\
-				  (ULONGEST) 0);			\
-	  store_unsigned_integer (dummyname + 4 * 4, 4,			\
-				  (ULONGEST) 0);			\
-	  store_unsigned_integer (dummyname + 5 * 4, 4,			\
-				  (ULONGEST) 0);			\
-	  store_unsigned_integer (dummyname + 6 * 4, 4,			\
-				  (ULONGEST) 0);			\
-	}								\
-      else if (mips_fpu == MIPS_FPU_SINGLE)				\
-	{								\
-	  /* This isn't right.  mips_push_arguments will call		\
-             value_arg_coerce, which will convert all float arguments	\
-             to doubles.  If the function prototype is float, though,	\
-             it will be expecting a float argument in a float		\
-             register.  */						\
-	  store_unsigned_integer (dummyname + 4 * 4, 4,			\
-				  (ULONGEST) 0);			\
-	  store_unsigned_integer (dummyname + 6 * 4, 4,			\
-				  (ULONGEST) 0);			\
-	}								\
-      else if (TARGET_BYTE_ORDER == BIG_ENDIAN				\
-	       && ! GDB_TARGET_IS_MIPS64)				\
-	{								\
-	  if (nargs > 0							\
-	      && TYPE_CODE (VALUE_TYPE (args[0])) == TYPE_CODE_FLT)	\
-	    {								\
-	      if (TYPE_LENGTH (VALUE_TYPE (args[0])) > 8)		\
-		error ("floating point value too large to pass to function");\
-	      store_unsigned_integer					\
-		(dummyname + 3 * 4, 4, MK_OP (OP_LDFPR, SP_REGNUM, 12, 4));\
-	      store_unsigned_integer					\
-		(dummyname + 4 * 4, 4, MK_OP (OP_LDFPR, SP_REGNUM, 13, 0));\
-	    }								\
-	  if (nargs > 1							\
-	      && TYPE_CODE (VALUE_TYPE (args[1])) == TYPE_CODE_FLT)	\
-	    {								\
-	      if (TYPE_LENGTH (VALUE_TYPE (args[1])) > 8)		\
-		error ("floating point value too large to pass to function");\
-	      store_unsigned_integer					\
-		(dummyname + 5 * 4, 4, MK_OP (OP_LDFPR, SP_REGNUM, 14, 12));\
-	      store_unsigned_integer					\
-		(dummyname + 6 * 4, 4, MK_OP (OP_LDFPR, SP_REGNUM, 15, 8));\
-	    }								\
-	}								\
-    }									\
-  while (0)
+#define CALL_DUMMY_LOCATION AT_ENTRY_POINT
+
+#define CALL_DUMMY_ADDRESS() (entry_point_address ())
+
+extern int mips_pc_in_call_dummy PARAMS ((CORE_ADDR pc));
+#define PC_IN_CALL_DUMMY(PC, SP, FP) mips_pc_in_call_dummy (PC)
 
 /* There's a mess in stack frame creation.  See comments in blockframe.c
    near reference to INIT_FRAME_PC_FIRST.  */
