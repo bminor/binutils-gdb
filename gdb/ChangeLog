@@ -1,3 +1,35 @@
+Thu Jul 28 14:37:36 1994  Stu Grossman  (grossman@cygnus.com)
+
+	* Makefile.in (INSTALLED_LIBS, CLIBS, DEPFILES):  Add support for
+	--enable-xxx configure option by adding ENABLE_{CLIBS DEPFILES}
+	where appropriate.
+
+	* General hackery to support alternate user-interface.
+	* breakpoint.c (mention, delete_breakpoint, enable_breakpoint,
+	disable_breakpoint):  Call hooks for alternate user-interface.
+	* defs.h:  Add declarations for alternate user-interface hooks.
+	* main.c (main):  Add --nw (and --nowindows) options to disable
+	the GUI.
+	* (near call to command_loop):  Call command_loop_hook if set.
+	* (fputs_unfiltered):  Call fputs_unfiltered_hook if set.
+	* stack.c:  Call print_frame_info_listing_hook if set.
+	* top.c (gdb_init):  Initialize targets.c and utils.c prior to
+	other files to make sure that calls to error and warning will
+	work.  Call init_ui_hook after everything else.
+	* utils.c (query):  Call query_hook if set.
+	* (gdb_flush):  Call flush_hook if set.
+	* Change _initialize_utils to initialize_utils cuz we don't use
+	automatic initialization of utils.c anymore.
+
+	* Support for TK GUI.
+	* Makefile.in:  Add rule for gdbtk.o.
+	* configure.in:  Add support for --enable-gdbtk.
+	* gdbtk.c:  New file.  Contains support routines for TK interface.
+	* gdbtk.tcl:  New file.  Implements GUI policy.
+
+	* remote.c:  Get rid of #ifdef DONT_USE_REMOTE.  It's no longer
+	necessary.
+
 Thu Jul 28 14:52:01 1994  J.T. Conklin  (jtc@phishhead.cygnus.com)
 
 	* Makefile.in (CC_FOR_TARGET, CXX_FOR_TARGET): Use newlib if it is

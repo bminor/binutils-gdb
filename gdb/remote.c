@@ -122,6 +122,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 	general set	QXXXX=yyyy	Set value of XXXX to yyyy.
 	query sect offs	qOffsets	Get section offsets.  Reply is
 					Text=xxx;Data=yyy;Bss=zzz
+	console output	Otext		Send text to stdout.  Only comes from
+					remote target.
 
 	Responses can be run-length encoded to save space.  A '*' means that
 	the next two characters are hex digits giving a repeat count which
@@ -145,7 +147,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "dcache.h"
 
-#if !defined(DONT_USE_REMOTE)
 #ifdef USG
 #include <sys/types.h>
 #endif
@@ -199,7 +200,7 @@ static void
 remote_send PARAMS ((char *buf));
 
 static int
-readchar PARAMS ((void));
+readchar PARAMS ((int timeout));
 
 static int remote_wait PARAMS ((int pid, struct target_waitstatus *status));
 
@@ -227,7 +228,7 @@ extern struct target_ops remote_ops;	/* Forward decl */
    Unless this is going though some terminal server or multiplexer or
    other form of hairy serial connection, I would think 2 seconds would
    be plenty.  */
-static int timeout = 2;
+static int remote_timeout = 2;
 
 #if 0
 int icache;
@@ -448,7 +449,6 @@ fromhex (a)
     return a - 'a' + 10;
   else
     error ("Reply contains invalid hex digit");
-  return -1;
 }
 
 /* Convert number NIB to a hex digit.  */
@@ -558,75 +558,82 @@ remote_wait (pid, status)
       getpkt ((char *) buf, 1);
       signal (SIGINT, ofunc);
 
-      if (buf[0] == 'E')
-	warning ("Remote failure reply: %s", buf);
-      else if (buf[0] == 'T')
+      switch (buf[0])
 	{
-	  int i;
-	  long regno;
-	  char regs[MAX_REGISTER_RAW_SIZE];
+	case 'E':		/* Error of some sort */
+	  warning ("Remote failure reply: %s", buf);
+	  continue;
+	case 'T':		/* Status with PC, SP, FP, ... */
+	  {
+	    int i;
+	    long regno;
+	    char regs[MAX_REGISTER_RAW_SIZE];
 
-	  /* Expedited reply, containing Signal, {regno, reg} repeat */
-	  /*  format is:  'Tssn...:r...;n...:r...;n...:r...;#cc', where
-	      ss = signal number
-	      n... = register number
-	      r... = register contents
-	      */
+	    /* Expedited reply, containing Signal, {regno, reg} repeat */
+	    /*  format is:  'Tssn...:r...;n...:r...;n...:r...;#cc', where
+		ss = signal number
+		n... = register number
+		r... = register contents
+		*/
 
-	  p = &buf[3];		/* after Txx */
+	    p = &buf[3];	/* after Txx */
 
-	  while (*p)
-	    {
-	      unsigned char *p1;
+	    while (*p)
+	      {
+		unsigned char *p1;
 
-	      regno = strtol (p, &p1, 16); /* Read the register number */
+		regno = strtol (p, &p1, 16); /* Read the register number */
 
-	      if (p1 == p)
-		warning ("Remote sent badly formed register number: %s\nPacket: '%s'\n",
-			 p1, buf);
+		if (p1 == p)
+		  warning ("Remote sent badly formed register number: %s\nPacket: '%s'\n",
+			   p1, buf);
 
-	      p = p1;
+		p = p1;
 
-	      if (*p++ != ':')
-		warning ("Malformed packet (missing colon): %s\nPacket: '%s'\n",
-			 p, buf);
+		if (*p++ != ':')
+		  warning ("Malformed packet (missing colon): %s\nPacket: '%s'\n",
+			   p, buf);
 
-	      if (regno >= NUM_REGS)
-		warning ("Remote sent bad register number %d: %s\nPacket: '%s'\n",
-			 regno, p, buf);
+		if (regno >= NUM_REGS)
+		  warning ("Remote sent bad register number %d: %s\nPacket: '%s'\n",
+			   regno, p, buf);
 
-	      for (i = 0; i < REGISTER_RAW_SIZE (regno); i++)
-		{
-		  if (p[0] == 0 || p[1] == 0)
-		    warning ("Remote reply is too short: %s", buf);
-		  regs[i] = fromhex (p[0]) * 16 + fromhex (p[1]);
-		  p += 2;
-		}
+		for (i = 0; i < REGISTER_RAW_SIZE (regno); i++)
+		  {
+		    if (p[0] == 0 || p[1] == 0)
+		      warning ("Remote reply is too short: %s", buf);
+		    regs[i] = fromhex (p[0]) * 16 + fromhex (p[1]);
+		    p += 2;
+		  }
 
-	      if (*p++ != ';')
-		warning ("Remote register badly formatted: %s", buf);
+		if (*p++ != ';')
+		  warning ("Remote register badly formatted: %s", buf);
 
-	      supply_register (regno, regs);
-	    }
-	  break;
-	}
-      else if (buf[0] == 'W')
-	{
-	  /* The remote process exited.  */
-	  status->kind = TARGET_WAITKIND_EXITED;
-	  status->value.integer = (fromhex (buf[1]) << 4) + fromhex (buf[2]);
+		supply_register (regno, regs);
+	      }
+	  }
+	  /* fall through */
+	case 'S':		/* Old style status, just signal only */
+	  status->kind = TARGET_WAITKIND_STOPPED;
+	  status->value.sig = (enum target_signal)
+	    (((fromhex (buf[1])) << 4) + (fromhex (buf[2])));
+
 	  return 0;
+	case 'W':		/* Target exited */
+	  {
+	    /* The remote process exited.  */
+	    status->kind = TARGET_WAITKIND_EXITED;
+	    status->value.integer = (fromhex (buf[1]) << 4) + fromhex (buf[2]);
+	    return 0;
+	  }
+	case 'O':		/* Console output */
+	  fputs_filtered (buf + 1, gdb_stdout);
+	  continue;
+	default:
+	  warning ("Invalid remote reply: %s", buf);
+	  continue;
 	}
-      else if (buf[0] == 'S')
-	break;
-      else
-	warning ("Invalid remote reply: %s", buf);
     }
-
-  status->kind = TARGET_WAITKIND_STOPPED;
-  status->value.sig = (enum target_signal)
-    (((fromhex (buf[1])) << 4) + (fromhex (buf[2])));
-
   return 0;
 }
 
@@ -1039,16 +1046,24 @@ remote_files_info (ignore)
 /* Read a single character from the remote end, masking it down to 7 bits. */
 
 static int
-readchar ()
+readchar (timeout)
+     int timeout;
 {
   int ch;
 
   ch = SERIAL_READCHAR (remote_desc, timeout);
 
-  if (ch < 0)
-    return ch;
-
-  return ch & 0x7f;
+  switch (ch)
+    {
+    case SERIAL_EOF:
+      error ("Remote connection closed");
+    case SERIAL_ERROR:
+      perror_with_name ("Remote communication error");
+    case SERIAL_TIMEOUT:
+      return ch;
+    default:
+      return ch & 0x7f;
+    }
 }
 
 /* Send the command in BUF to the remote machine,
@@ -1117,7 +1132,7 @@ putpkt (buf)
       /* read until either a timeout occurs (-2) or '+' is read */
       while (1)
 	{
-	  ch = readchar ();
+	  ch = readchar (remote_timeout);
 
 	  if (remote_debug)
 	    {
@@ -1125,8 +1140,6 @@ putpkt (buf)
 		{
 		case '+':
 		case SERIAL_TIMEOUT:
-		case SERIAL_ERROR:
-		case SERIAL_EOF:
 		case '$':
 		  if (started_error_output)
 		    {
@@ -1144,10 +1157,6 @@ putpkt (buf)
 	      return;
 	    case SERIAL_TIMEOUT:
 	      break;		/* Retransmit buffer */
-	    case SERIAL_ERROR:
-	      perror_with_name ("putpkt: couldn't read ACK");
-	    case SERIAL_EOF:
-	      error ("putpkt: EOF while trying to read ACK");
 	    case '$':
 	      {
 		unsigned char junkbuf[PBUFSIZ];
@@ -1187,151 +1196,157 @@ putpkt (buf)
     }
 }
 
+/* Come here after finding the start of the frame.  Collect the rest into BUF,
+   verifying the checksum, length, and handling run-length compression.
+   Returns 0 on any error, 1 on success.  */
+
+static int
+read_frame (buf)
+     char *buf;
+{
+  unsigned char csum;
+  char *bp;
+  int c;
+
+  csum = 0;
+  bp = buf;
+
+  while (1)
+    {
+      c = readchar (remote_timeout);
+
+      switch (c)
+	{
+	case SERIAL_TIMEOUT:
+	  if (remote_debug)
+	    puts_filtered ("Timeout in mid-packet, retrying\n");
+	  return 0;
+	case '$':
+	  if (remote_debug)
+	    puts_filtered ("Saw new packet start in middle of old one\n");
+	  return 0;		/* Start a new packet, count retries */
+	case '#':
+	  {
+	    unsigned char pktcsum;
+
+	    *bp = '\000';
+
+	    pktcsum = fromhex (readchar (remote_timeout)) << 4
+	      | fromhex (readchar (remote_timeout));
+
+	    if (csum == pktcsum)
+	      return 1;
+
+	    printf_filtered ("Bad checksum, sentsum=0x%x, csum=0x%x, buf=",
+			     pktcsum, csum);
+	    puts_filtered (buf);
+	    puts_filtered ("\n");
+
+	    return 0;
+	  }
+	case '*':		/* Run length encoding */
+	  c = readchar (remote_timeout);
+	  csum += c;
+	  c = c - ' ' + 3;	/* Compute repeat count */
+
+	  if (bp + c - 1 < buf + PBUFSIZ - 1)
+	    {
+	      memset (bp, *(bp - 1), c);
+	      bp += c;
+	      continue;
+	    }
+
+	  *bp = '\0';
+	  printf_filtered ("Repeat count %d too large for buffer: ", c);
+	  puts_filtered (buf);
+	  puts_filtered ("\n");
+
+	  return 0;
+	default:
+	  if (bp < buf + PBUFSIZ - 1)
+	    {
+	      *bp++ = c;
+	      csum += c;
+	      continue;
+	    }
+
+	  *bp = '\0';
+	  puts_filtered ("Remote packet too long: ");
+	  puts_filtered (buf);
+	  puts_filtered ("\n");
+
+	  return 0;
+	}
+    }
+}
+
 /* Read a packet from the remote machine, with error checking,
    and store it in BUF.  BUF is expected to be of size PBUFSIZ.
    If FOREVER, wait forever rather than timing out; this is used
    while the target is executing user code.  */
 
 static void
-getpkt (retbuf, forever)
-     char *retbuf;
+getpkt (buf, forever)
+     char *buf;
      int forever;
 {
   char *bp;
-  unsigned char csum;
-  int c = 0;
-  unsigned char c1, c2;
-  int retries = 0;
-  char buf[PBUFSIZ];
+  int c;
+  int tries;
+  int timeout;
+  int val;
 
-#define MAX_RETRIES	10
+  if (forever)
+    timeout = -1;
+  else
+    timeout = remote_timeout;
 
-  while (1)
+#define MAX_TRIES 10
+
+  for (tries = 1; tries <= MAX_TRIES; tries++)
     {
-#if 0
-      /* This is wrong.  If doing a long backtrace, the user should be
-	 able to get out time next we call QUIT, without anything as violent
-	 as interrupt_query.  If we want to provide a way out of here
-	 without getting to the next QUIT, it should be based on hitting
-	 ^C twice as in remote_wait.  */
-      if (quit_flag)
-	{
-	  quit_flag = 0;
-	  interrupt_query ();
-	}
-#endif
-
       /* This can loop forever if the remote side sends us characters
 	 continuously, but if it pauses, we'll get a zero from readchar
 	 because of timeout.  Then we'll count that as a retry.  */
 
-      c = readchar();
-      if (c > 0 && c != '$')
-	continue;
+      /* Note that we will only wait forever prior to the start of a packet.
+	 After that, we expect characters to arrive at a brisk pace.  They
+	 should show up within remote_timeout intervals.  */
 
-      if (c == SERIAL_TIMEOUT)
+      do
 	{
-	  if (forever)
-	    continue;
-	  if (remote_debug)
-	    puts_filtered ("Timed out.\n");
-	  goto whole;
-	}
+	  c = readchar (timeout);
 
-      if (c == SERIAL_EOF)
-	error ("Remote connection closed");
-      if (c == SERIAL_ERROR)
-	perror_with_name ("Remote communication error");
-
-      /* Force csum to be zero here because of possible error retry.  */
-      csum = 0;
-      bp = buf;
-
-      while (1)
-	{
-	  c = readchar ();
 	  if (c == SERIAL_TIMEOUT)
 	    {
 	      if (remote_debug)
-		puts_filtered ("Timeout in mid-packet, retrying\n");
-	      goto whole;		/* Start a new packet, count retries */
-	    } 
-	  if (c == '$')
-	    {
-	      if (remote_debug)
-		puts_filtered ("Saw new packet start in middle of old one\n");
-	      goto whole;		/* Start a new packet, count retries */
+		puts_filtered ("Timed out.\n");
+	      goto retry;
 	    }
-	  if (c == '#')
-	    break;
-	  if (bp >= buf+PBUFSIZ-1)
-	  {
-	    *bp = '\0';
-	    puts_filtered ("Remote packet too long: ");
-	    puts_filtered (buf);
-	    puts_filtered ("\n");
-	    goto whole;
-	  }
-	  *bp++ = c;
-	  csum += c;
 	}
-      *bp = 0;
+      while (c != '$');
 
-      c1 = fromhex (readchar ());
-      c2 = fromhex (readchar ());
-      if ((csum & 0xff) == (c1 << 4) + c2)
-	break;
-      printf_filtered ("Bad checksum, sentsum=0x%x, csum=0x%x, buf=",
-	      (c1 << 4) + c2, csum & 0xff);
-      puts_filtered (buf);
-      puts_filtered ("\n");
+      /* We've found the start of a packet, now collect the data.  */
+
+      val = read_frame (buf);
+
+      if (val == 1)
+	{
+	  if (remote_debug)
+	    fprintf_unfiltered (gdb_stderr, "Packet received: %s\n", buf);
+	  SERIAL_WRITE (remote_desc, "+", 1);
+	  return;
+	}
 
       /* Try the whole thing again.  */
-whole:
-      if (++retries < MAX_RETRIES)
-	{
-	  SERIAL_WRITE (remote_desc, "-", 1);
-	}
-      else
-	{
-	  printf_unfiltered ("Ignoring packet error, continuing...\n");
-	  break;
-	}
+retry:
+      SERIAL_WRITE (remote_desc, "-", 1);
     }
 
-  /* Deal with run-length encoding.  */
-  {
-    char *src = buf;
-    char *dest = retbuf;
-    int i;
-    int repeat;
-    do {
-      if (*src == '*')
-	{
-	  if (src[1] == '\0' || src[2] == '\0')
-	    {
-	      if (remote_debug)
-		puts_filtered ("Packet too short, retrying\n");
-	      goto whole;
-	    }
-	  repeat = (fromhex (src[1]) << 4) + fromhex (src[2]);
-	  for (i = 0; i < repeat; ++i)
-	    {
-	      *dest++ = src[-1];
-	    }
-	  src += 2;
-	}
-      else
-	{
-	  *dest++ = *src;
-	}
-    } while (*src++ != '\0');
-  }
+  /* We have tried hard enough, and just can't receive the packet.  Give up. */
 
+  printf_unfiltered ("Ignoring packet error, continuing...\n");
   SERIAL_WRITE (remote_desc, "+", 1);
-
-  if (remote_debug)
-    fprintf_unfiltered (gdb_stderr,"Packet received: %s\n", buf);
 }
 
 static void
@@ -1443,12 +1458,9 @@ Specify the serial device it is connected to (e.g. /dev/ttya).",  /* to_doc */
   NULL,				/* sections_end */
   OPS_MAGIC			/* to_magic */
 };
-#endif /* Use remote.  */
 
 void
 _initialize_remote ()
 {
-#if !defined(DONT_USE_REMOTE)
   add_target (&remote_ops);
-#endif
 }

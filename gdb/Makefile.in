@@ -169,9 +169,10 @@ REGEX1 = regex.o
 # If you have the Cygnus libraries installed,
 # you can use 'CLIBS=$(INSTALLED_LIBS)' 'CDEPS='
 INSTALLED_LIBS=-lbfd -lreadline $(TERMCAP) -lopcodes -lmmalloc \
-	-liberty $(XM_CLIBS) $(TM_CLIBS) $(NAT_CLIBS)
+	-liberty $(XM_CLIBS) $(TM_CLIBS) $(NAT_CLIBS) $(ENABLE_CLIBS)
 CLIBS = $(BFD) $(READLINE) $(OPCODES) $(MMALLOC) \
-	$(LIBIBERTY) $(TERMCAP) $(XM_CLIBS) $(TM_CLIBS) $(NAT_CLIBS)
+	$(LIBIBERTY) $(TERMCAP) $(XM_CLIBS) $(TM_CLIBS) $(NAT_CLIBS) \
+	$(ENABLE_CLIBS)
 CDEPS = $(XM_CDEPS) $(TM_CDEPS) $(NAT_CDEPS) \
 	$(BFD) $(READLINE) $(OPCODES) $(MMALLOC) $(LIBIBERTY)
 
@@ -454,7 +455,8 @@ TARDIRS = doc gdbserver sparclite
 # variables analogous to SER_HARDWIRE which get defaulted in this
 # Makefile.in
 
-DEPFILES = $(TDEPFILES) $(XDEPFILES) $(SER_HARDWIRE) $(NATDEPFILES) $(REMOTE_O)
+DEPFILES = $(TDEPFILES) $(XDEPFILES) $(SER_HARDWIRE) $(NATDEPFILES) $(REMOTE_O) \
+	   $(ENABLE_DEPFILES)
 
 SOURCES = $(SFILES) $(ALLDEPFILES) $(YYFILES)
 # Don't include YYFILES (*.tab.c) because we already include *.y in SFILES,
@@ -1203,6 +1205,11 @@ findvar.o: findvar.c $(defs_h) $(gdbcore_h) $(inferior_h) target.h
 
 fork-child.o: fork-child.c $(wait_h) $(defs_h) $(gdbcore_h) \
 	$(inferior_h) target.h terminal.h thread.h
+
+gdbtk.o: gdbtk.c $(defs_h) $(symtab_h) $(inferior_h) $(command_h) \
+	$(bfd_h) symfile.h objfiles.h target.h
+	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/gdbtk.c \
+		 -DGDBTK_FILENAME=\"$(libdir)/gdbtk.tcl\"
 
 gdbtypes.o: gdbtypes.c $(bfd_h) complaints.h $(defs_h) $(expression_h) \
 	$(gdbtypes_h) language.h objfiles.h symfile.h $(symtab_h) target.h \

@@ -2149,6 +2149,9 @@ mention (b)
 {
   int say_where = 0;
 
+  if (create_breakpoint_hook)
+    create_breakpoint_hook (b);
+
   switch (b->type)
     {
     case bp_watchpoint:
@@ -3181,6 +3184,9 @@ delete_breakpoint (bpt)
   register struct breakpoint *b;
   register bpstat bs;
 
+  if (delete_breakpoint_hook)
+    delete_breakpoint_hook (bpt);
+
   if (bpt->inserted)
     remove_breakpoint (bpt);
       
@@ -3539,6 +3545,9 @@ enable_breakpoint (bpt)
   int target_resources_ok, other_type_used;
   struct value *mark;
   
+  if (enable_breakpoint_hook)
+    enable_breakpoint_hook (bpt);
+
   if (bpt->type == bp_hardware_breakpoint)
     {
       int i;
@@ -3643,6 +3652,9 @@ disable_breakpoint (bpt)
      watchpoint and its scope breakpoint at that time.  */
   if (bpt->type == bp_watchpoint_scope)
     return;
+
+  if (disable_breakpoint_hook)
+    disable_breakpoint_hook (bpt);
 
   bpt->enable = disabled;
 

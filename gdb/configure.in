@@ -397,6 +397,12 @@ else
 	links="${links} nm.h"
 fi
 
+# Make it possible to use the GUI without doing a full install
+if [ "${enable_gdbtk}" = "yes" ] ; then
+	files="${files} gdbtk.tcl"
+	links="${links} gdbtk.tcl"
+fi
+
 # post-target:
 
 case ${srcdir} in
@@ -410,6 +416,15 @@ esac
 if [ "${nativefile}" = "" ] ; then
 	sed -e '/^NATDEPFILES= /s//# NATDEPFILES= /' \
 		< Makefile > Makefile.tem
+	mv -f Makefile.tem Makefile
+fi
+
+if [ "${enable_gdbtk}" = "yes" ] ; then
+	sed -e '/# End of host and/i\
+\
+ENABLE_DEPFILES = gdbtk.o\
+ENABLE_CLIBS = -ltcl -ltk -lX11 -lm
+' < Makefile > Makefile.tem
 	mv -f Makefile.tem Makefile
 fi
 

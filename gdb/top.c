@@ -146,6 +146,10 @@ source_cleanup PARAMS ((FILE *));
 char gdbinit[] = GDBINIT_FILENAME;
 int inhibit_gdbinit = 0;
 
+/* Disable windows if non-zero */
+
+int no_windows = 0;
+
 /* Version number of GDB, as a string.  */
 
 extern char *version;
@@ -488,6 +492,8 @@ gdb_init ()
   current_directory = gdb_dirbuf;
 
   init_cmd_lists ();	/* This needs to be done first */
+  initialize_targets (); /* Setup target_terminal macros for utils.c */
+  initialize_utils ();	/* Make errors and warnings possible */
   initialize_all_files ();
   init_main ();		/* But that omits this file!  Do it now */
   init_signals ();
@@ -499,6 +505,9 @@ gdb_init ()
      or implicitly set by reading an executable during startup. */
   set_language (language_c);
   expected_language = current_language;	/* don't warn about the change.  */
+
+  if (init_ui_hook)
+    init_ui_hook ();
 }
 
 void

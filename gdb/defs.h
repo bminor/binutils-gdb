@@ -92,7 +92,8 @@ enum language
    language_c, 			/* C */
    language_cplus, 		/* C++ */
    language_chill,		/* Chill */
-   language_m2			/* Modula-2 */
+   language_m2,			/* Modula-2 */
+   language_asm			/* Assembly language */
 };
 
 /* the cleanup list records things that have to be undone
@@ -343,9 +344,6 @@ extern void
 print_prompt PARAMS ((void));
 
 extern int
-batch_mode PARAMS ((void));
-
-extern int
 input_from_terminal_p PARAMS ((void));
 
 /* From printcmd.c */
@@ -357,7 +355,7 @@ extern void
 print_address_symbolic PARAMS ((CORE_ADDR, GDB_FILE *, int, char *));
 
 extern void
-print_address_numeric PARAMS ((CORE_ADDR, GDB_FILE *));
+print_address_numeric PARAMS ((CORE_ADDR, int, GDB_FILE *));
 
 extern void
 print_address PARAMS ((CORE_ADDR, GDB_FILE *));
@@ -940,5 +938,28 @@ push_word PARAMS ((CORE_ADDR, unsigned LONGEST));
 #ifndef MAINTENANCE_CMDS
 #define MAINTENANCE_CMDS 1
 #endif
+
+/* Hooks for alternate command interfaces.  */
+
+#ifdef __STDC__
+struct symtab;
+struct breakpoint;
+#endif
+
+void (*init_ui_hook) PARAMS ((void));
+void (*command_loop_hook) PARAMS ((void));
+void (*fputs_unfiltered_hook) PARAMS ((const char *linebuffer));
+void (*print_frame_info_listing_hook) PARAMS ((struct symtab *s, int line,
+					       int stopline, int noerror));
+int (*query_hook) PARAMS (());
+void (*flush_hook) PARAMS ((FILE *stream));
+void (*create_breakpoint_hook) PARAMS ((struct breakpoint *b));
+void (*delete_breakpoint_hook) PARAMS ((struct breakpoint *bpt));
+void (*enable_breakpoint_hook) PARAMS ((struct breakpoint *bpt));
+void (*disable_breakpoint_hook) PARAMS ((struct breakpoint *bpt));
+
+/* Inhibit window interface if non-zero. */
+
+extern int no_windows;
 
 #endif /* !defined (DEFS_H) */

@@ -174,6 +174,8 @@ main (argc, argv)
 	{"tty", required_argument, 0, 't'},
 	{"baud", required_argument, 0, 'b'},
 	{"b", required_argument, 0, 'b'},
+	{"nw", no_argument, &no_windows, 1},
+	{"nowindows", no_argument, &no_windows, 1},
 /* Allow machine descriptions to add more options... */
 #ifdef ADDITIONAL_OPTIONS
 	ADDITIONAL_OPTIONS
@@ -350,6 +352,7 @@ Options:\n\
   -b BAUDRATE        Set serial port baud rate used for remote debugging.\n\
   --mapped           Use mapped symbol files if supported on this system.\n\
   --readnow          Fully read symbol files on first access.\n\
+  --nw		     Do not use a window interface.\n\
 ", gdb_stdout);
 /* start-sanitize-mpw */
 #endif /* MPW_C */
@@ -410,7 +413,7 @@ GDB manual (available as on-line info or a printed manual).\n", gdb_stdout);
       stat (gdbinit, &cwdbuf); /* We'll only need this if
 				       homedir was set.  */
     }
-  
+
   /* Now perform all the actions indicated by the arguments.  */
   if (cdarg != NULL)
     {
@@ -526,18 +529,13 @@ GDB manual (available as on-line info or a printed manual).\n", gdb_stdout);
       if (!SET_TOP_LEVEL ())
 	{
 	  do_cleanups (ALL_CLEANUPS);		/* Do complete cleanup */
-/* start-sanitize-mpw */
-#ifdef MPW
-	  /* If we're being a Mac application, go into a Mac-specific
-	     event-handling loop instead.  We still want to be inside
-	     the outer loop, because that will catch longjmps resulting
-	     from some command executions. */
-	  if (mac_app)
-	    mac_command_loop ();
+	  /* GUIs generally have their own command loop, mainloop, or whatever.
+	     This is a good place to gain control because many error
+	     conditions will end up here via longjmp(). */
+	  if (command_loop_hook)
+	    command_loop_hook ();
 	  else
-#endif /* MPW */
-/* end-sanitize-mpw */
-	  command_loop ();
+	    command_loop ();
           quit_command ((char *)0, instream == stdin);
 	}
     }
@@ -570,5 +568,11 @@ fputs_unfiltered (linebuffer, stream)
      const char *linebuffer;
      FILE *stream;
 {
+  if (fputs_unfiltered_hook)
+    {
+      fputs_unfiltered_hook (linebuffer);
+      return;
+    }
+
   fputs (linebuffer, stream);
 }
