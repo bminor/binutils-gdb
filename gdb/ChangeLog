@@ -1,4 +1,14 @@
-Sun Mar 23 12:47:13 1997  Stan Shebs  <shebs@andros.cygnus.com>
+Sun Mar 23 15:43:27 1997  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* remote.c (target_resume_hook, target_wait_loop_hook): New
+ 	globals.
+ 	(remote_resume, remote_wait): Use them.
+	* d10v-tdep.c: Set the above hooks.
+	(tracesource): New GDB variable, controls source display in
+ 	traces.
+	(display_trace): Find and display source line if requested.
+	(trace_info): Mention empty trace buffer if appropriate.
+	(tdisassemble_command): Robustify argument handling.
 
 	* configure.host: Remove extra bogus Linux case.
 

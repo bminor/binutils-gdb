@@ -1,14 +1,18 @@
-/* Target-dependent code for MItsubishi D10V, for GDB.
-   Copyright (C) 1996 Free Software Foundation, Inc.
+/* Target-dependent code for Mitsubishi D10V, for GDB.
+   Copyright (C) 1996, 1997 Free Software Foundation, Inc.
+
 This file is part of GDB.
+
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation; either version 2 of the License, or
 (at your option) any later version.
+
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
+
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
@@ -29,11 +33,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "symfile.h"
 #include "objfiles.h"
 
-void d10v_frame_find_saved_regs PARAMS ((struct frame_info *fi, struct frame_saved_regs *fsr));
+void d10v_frame_find_saved_regs PARAMS ((struct frame_info *fi,
+					 struct frame_saved_regs *fsr));
 static void d10v_pop_dummy_frame PARAMS ((struct frame_info *fi));
 
-/* Discard from the stack the innermost frame,
-   restoring all saved registers.  */
+/* Discard from the stack the innermost frame, restoring all saved
+   registers.  */
 
 void
 d10v_pop_frame ()
@@ -650,7 +655,7 @@ d10v_extract_return_value (valtype, regbuf, valbuf)
 /* The following code implements access to, and display of, the D10V's
    instruction trace buffer.  The buffer consists of 64K or more
    4-byte words of data, of which each words includes an 8-bit count,
-   and 8-bit segment number, and a 16-bit instruction address.
+   an 8-bit segment number, and a 16-bit instruction address.
 
    In theory, the trace buffer is continuously capturing instruction
    data that the CPU presents on its "debug bus", but in practice, the
@@ -691,7 +696,13 @@ static int tracing;
 
 static CORE_ADDR last_pc;
 
+/* True when trace output should be displayed whenever program stops.  */
+
 static int trace_display;
+
+/* True when trace listing should include source lines.  */
+
+static int default_trace_show_source = 1;
 
 struct trace_buffer {
   int size;
@@ -733,15 +744,20 @@ trace_info (args, from_tty)
 {
   int i;
 
-  printf_filtered ("%d entries in trace buffer:\n", trace_data.size);
-
-  for (i = 0; i < trace_data.size; ++i)
+  if (trace_data.size)
     {
-      printf_filtered ("%d: %d instruction%s at 0x%x\n",
-		       i, trace_data.counts[i],
-		       (trace_data.counts[i] == 1 ? "" : "s"),
-		       trace_data.addrs[i]);
+      printf_filtered ("%d entries in trace buffer:\n", trace_data.size);
+
+      for (i = 0; i < trace_data.size; ++i)
+	{
+	  printf_filtered ("%d: %d instruction%s at 0x%x\n",
+			   i, trace_data.counts[i],
+			   (trace_data.counts[i] == 1 ? "" : "s"),
+			   trace_data.addrs[i]);
+	}
     }
+  else
+    printf_filtered ("No entries in trace buffer.\n");
 
   printf_filtered ("Tracing is currently %s.\n", (tracing ? "on" : "off"));
 }
@@ -792,11 +808,6 @@ d10v_eva_get_trace_data ()
 
   last_trace = read_memory_unsigned_integer (DBBC_ADDR, 2) << 2;
 
-#if 0
-  printf_filtered("Last pc is %x, is now %x\n",
-		  last_pc, read_register (PC_REGNUM));
-#endif
-
   /* Collect buffer contents from the target, stopping when we reach
      the word recorded when execution resumed.  */
 
@@ -807,12 +818,6 @@ d10v_eva_get_trace_data ()
       trace_word =
 	read_memory_unsigned_integer (TRACE_BUFFER_BASE + last_trace, 4);
       trace_addr = trace_word & 0xffff;
-#if 0
-      trace_seg = (trace_word >> 16) & 0xff;
-      trace_cnt = (trace_word >> 24) & 0xff;
-      printf_filtered("Trace word at %x is %x %x %x\n", last_trace,
-		      trace_cnt, trace_seg, trace_addr);
-#endif
       last_trace -= 4;
       /* Ignore an apparently nonsensical entry.  */
       if (trace_addr == 0xffd5)
@@ -844,14 +849,6 @@ d10v_eva_get_trace_data ()
 
   free (tmpspace);
 
-#if 0
-  for (i = 0; i < trace_data.size; ++i)
-    {
-      printf_filtered("%d insns after %x\n",
-		      trace_data.counts[i], trace_data.addrs[i]);
-    }
-#endif
-
   if (trace_display)
     display_trace (oldsize, trace_data.size);
 }
@@ -881,14 +878,11 @@ tdisassemble_command (arg, from_tty)
       *space_index = '\0';
       low = parse_and_eval_address (arg);
       high = parse_and_eval_address (space_index + 1);
+      if (high < low)
+	high = low;
     }
 
-  printf_filtered ("Dump of trace ");
-  printf_filtered ("from ");
-  print_address_numeric (low, 1, gdb_stdout);
-  printf_filtered (" to ");
-  print_address_numeric (high, 1, gdb_stdout);
-  printf_filtered (":\n");
+  printf_filtered ("Dump of trace from %d to %d:\n", low, high);
 
   display_trace (low, high);
 
@@ -900,9 +894,19 @@ static void
 display_trace (low, high)
      int low, high;
 {
-  int i, count;
+  int i, count, trace_show_source, first, suppress;
   CORE_ADDR next_address;
 
+  trace_show_source = default_trace_show_source;
+  if (!have_full_symbols () && !have_partial_symbols())
+    {
+      trace_show_source = 0;
+      printf_filtered ("No symbol table is loaded.  Use the \"file\" command.\n");
+      printf_filtered ("Trace will not display any source.\n");
+    }
+
+  first = 1;
+  suppress = 0;
   for (i = low; i < high; ++i)
     {
       next_address = trace_data.addrs[i];
@@ -910,6 +914,29 @@ display_trace (low, high)
       while (count-- > 0)
 	{
 	  QUIT;
+	  if (trace_show_source)
+	    {
+	      struct symtab_and_line sal, sal_prev;
+
+	      sal_prev = find_pc_line (next_address - 4, 0);
+	      sal = find_pc_line (next_address, 0);
+
+	      if (sal.symtab)
+		{
+		  if (first || sal.line != sal_prev.line)
+		    print_source_lines (sal.symtab, sal.line, sal.line + 1, 0);
+		  suppress = 0;
+		}
+	      else
+		{
+		  if (!suppress)
+		    /* FIXME-32x64--assumes sal.pc fits in long.  */
+		    printf_filtered ("No source file for address %s.\n",
+				     local_hex_string((unsigned long) sal.pc));
+		  suppress = 1;
+		}
+	    }
+	  first = 0;
 	  print_address (next_address, gdb_stdout);
 	  printf_filtered (":");
 	  printf_filtered ("\t");
@@ -921,10 +948,16 @@ display_trace (low, high)
     }
 }
 
+extern void (*target_resume_hook) PARAMS ((void));
+extern void (*target_wait_loop_hook) PARAMS ((void));
+
 void
 _initialize_d10v_tdep ()
 {
   tm_print_insn = print_insn_d10v;
+
+  target_resume_hook = d10v_eva_prepare_to_trace;
+  target_wait_loop_hook = d10v_eva_get_trace_data;
 
   add_com ("regs", class_vars, show_regs, "Print all registers");
 
@@ -945,6 +978,10 @@ as reported by info trace (NOT addresses!).");
   add_show_from_set (add_set_cmd ("tracedisplay", no_class,
 				  var_integer, (char *)&trace_display,
 				  "Set automatic display of trace.\n", &setlist),
+		     &showlist);
+  add_show_from_set (add_set_cmd ("tracesource", no_class,
+				  var_integer, (char *)&default_trace_show_source,
+				  "Set display of source code with trace.\n", &setlist),
 		     &showlist);
 
 } 
