@@ -1622,30 +1622,6 @@ coff_set_section_contents(abfd, section, location, offset, count)
     return true;
 }
 
-static          boolean
-coff_close_and_cleanup(abfd)
-    bfd            *abfd;
-{
-  if (!bfd_read_p(abfd))
-    switch (abfd->format) {
-    case bfd_archive:
-      if (!_bfd_write_archive_contents(abfd))
-	return false;
-      break;
-    case bfd_object:
-      if (!coff_write_object_contents(abfd))
-	return false;
-      break;
-    default:
-      bfd_error = invalid_operation;
-      return false;
-    }
-
-  /* We depend on bfd_close to free all the memory on the obstack.  */
-  /* FIXME if bfd_release is not using obstacks! */
-  return true;
-}
-
 
 static PTR 
 buy_and_read(abfd, where, seek_direction, size)
@@ -2538,3 +2514,4 @@ DEFUN(coff_sizeof_headers,(abfd, reloc),
 #define coff_openr_next_archived_file	bfd_generic_openr_next_archived_file
 #define coff_generic_stat_arch_elt	bfd_generic_stat_arch_elt
 #define	coff_get_section_contents	bfd_generic_get_section_contents
+#define	coff_close_and_cleanup		bfd_generic_close_and_cleanup
