@@ -912,7 +912,7 @@ _bfd_merged_section_offset (output_bfd, psec, psecinfo, offset, addend)
       if (sec->entsize == 1)
 	{
 	  p = secinfo->contents + offset + addend - 1;
-	  while (*p && p >= secinfo->contents)
+	  while (p >= secinfo->contents && *p)
 	    --p;
 	  ++p;
 	}
