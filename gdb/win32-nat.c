@@ -54,8 +54,11 @@ extern int (*ui_loop_hook) (int signo);
    following which never should have been in the generic Win32 API
    headers in the first place since they were our own invention... */
 #ifndef _GNU_H_WINDOWS_H
-#define FLAG_TRACE_BIT 0x100
-#define CONTEXT_DEBUGGER (CONTEXT_FULL | CONTEXT_FLOATING_POINT)
+enum
+{
+  FLAG_TRACE_BIT = 0x100,
+  CONTEXT_DEBUGGER = (CONTEXT_FULL | CONTEXT_FLOATING_POINT)
+};
 #endif
 
 /* The string sent by cygwin when it processes a signal.
@@ -441,13 +444,14 @@ safe_symbol_file_add_stub (void *argv)
 static void
 safe_symbol_file_add_cleanup (void *p)
 {
-#define sp ((struct safe_symbol_file_add_args *)p)
+# define sp ((struct safe_symbol_file_add_args *)p)
   gdb_flush (gdb_stderr);
   gdb_flush (gdb_stdout);
   ui_file_delete (gdb_stderr);
   ui_file_delete (gdb_stdout);
   gdb_stderr = sp->err;
-  gdb_stdout = sp->err;
+  gdb_stdout = sp->out;
+# undef sp
 }
 
 /* symbol_file_add wrapper that prevents errors from being displayed. */
@@ -499,9 +503,8 @@ handle_load_dll (PTR dummy ATTRIBUTE_UNUSED)
   DWORD dll_name_ptr;
   DWORD done;
   char dll_buf[MAX_PATH + 1];
-  struct so_stuff *so, *solast;
+  struct so_stuff *so;
   char *dll_name = NULL;
-  DWORD dll_base = 0;
   int len;
   char *p;
 
@@ -593,7 +596,7 @@ handle_load_dll (PTR dummy ATTRIBUTE_UNUSED)
 
 /* Return name of last loaded DLL. */
 char *
-child_solib_loaded_library_pathname (int pid)
+child_solib_loaded_library_pathname (int pid ATTRIBUTE_UNUSED)
 {
   return !solib_end || !solib_end->name[0]? NULL : solib_end->name;
 }
@@ -617,7 +620,7 @@ child_clear_solibs (void)
 
 /* Add DLL symbol information. */
 void
-child_solib_add (char *filename, int from_tty, struct target_ops *t)
+child_solib_add (char *filename ATTRIBUTE_UNUSED, int from_tty ATTRIBUTE_UNUSED, struct target_ops *t ATTRIBUTE_UNUSED)
 {
   struct section_addr_info section_addrs;
 
@@ -638,21 +641,19 @@ child_solib_add (char *filename, int from_tty, struct target_ops *t)
 
 /* Load DLL symbol info. */
 void
-dll_symbol_command (char *args, int from_tty)
+dll_symbol_command (char *args, int from_tty ATTRIBUTE_UNUSED)
 {
-  struct section_addr_info section_addrs;
-
   dont_repeat ();
   
   if (args == NULL)
     error ("dll-symbols requires a file name");
 
-  safe_symbol_file_add (args, 0, NULL, 0, OBJF_SHARED);
+  safe_symbol_file_add (args, 0, NULL, 0, OBJF_SHARED | OBJF_USERLOADED);
 } 
 
 /* List currently loaded DLLs. */
 void
-info_dll_command (char *ignore, int from_tty)
+info_dll_command (char *ignore ATTRIBUTE_UNUSED, int from_tty ATTRIBUTE_UNUSED)
 {
   struct so_stuff *so = &solib_start;
 
@@ -709,8 +710,6 @@ handle_exception (struct target_waitstatus *ourstatus)
 
   /* Record the context of the current thread */
   th = thread_rec (current_event.dwThreadId, -1);
-
-  last_sig = 0;
 
   switch (code)
     {
@@ -800,12 +799,13 @@ child_continue (DWORD continue_status, int id)
 static int
 get_child_debug_event (int pid ATTRIBUTE_UNUSED, struct target_waitstatus *ourstatus)
 {
-  int breakout = 0;
   BOOL debug_event;
   DWORD continue_status, event_code;
   thread_info *th = NULL;
   static thread_info dummy_thread_info;
   int retval = 0;
+
+  last_sig = 0;
 
   if (!(debug_event = WaitForDebugEvent (&current_event, 1000)))
     goto out;
@@ -848,13 +848,15 @@ get_child_debug_event (int pid ATTRIBUTE_UNUSED, struct target_waitstatus *ourst
 		     "CREATE_PROCESS_DEBUG_EVENT"));
       current_process_handle = current_event.u.CreateProcessInfo.hProcess;
 
-      main_thread_id = inferior_pid = current_event.dwThreadId;
+      main_thread_id = current_event.dwThreadId;
       /* Add the main thread */
+#if 0
       th = child_add_thread (current_event.dwProcessId,
 			     current_event.u.CreateProcessInfo.hProcess);
-      th = child_add_thread (inferior_pid,
+#endif
+      th = child_add_thread (main_thread_id,
 			     current_event.u.CreateProcessInfo.hThread);
-      retval = ourstatus->value.related_pid = current_event.dwProcessId;
+      retval = ourstatus->value.related_pid = current_event.dwThreadId;
       break;
 
     case EXIT_PROCESS_DEBUG_EVENT:
@@ -865,7 +867,7 @@ get_child_debug_event (int pid ATTRIBUTE_UNUSED, struct target_waitstatus *ourst
       ourstatus->kind = TARGET_WAITKIND_EXITED;
       ourstatus->value.integer = current_event.u.ExitProcess.dwExitCode;
       CloseHandle (current_process_handle);
-      retval = current_event.dwProcessId;
+      retval = main_thread_id;
       break;
 
     case LOAD_DLL_DEBUG_EVENT:
@@ -877,7 +879,7 @@ get_child_debug_event (int pid ATTRIBUTE_UNUSED, struct target_waitstatus *ourst
       registers_changed ();	/* mark all regs invalid */
       ourstatus->kind = TARGET_WAITKIND_LOADED;
       ourstatus->value.integer = 0;
-      retval = current_event.dwProcessId;
+      retval = main_thread_id;
       break;
 
     case UNLOAD_DLL_DEBUG_EVENT:
@@ -902,8 +904,9 @@ get_child_debug_event (int pid ATTRIBUTE_UNUSED, struct target_waitstatus *ourst
 		     (unsigned) current_event.dwThreadId,
 		     "OUTPUT_DEBUG_STRING_EVENT"));
       if (handle_output_debug_string ( ourstatus))
-	retval = current_event.dwProcessId;
+	retval = main_thread_id;
       break;
+
     default:
       printf_unfiltered ("gdb: kernel event for pid=%ld tid=%ld\n",
 			 (DWORD) current_event.dwProcessId,
@@ -916,7 +919,10 @@ get_child_debug_event (int pid ATTRIBUTE_UNUSED, struct target_waitstatus *ourst
   if (!retval)
     CHECK (child_continue (continue_status, -1));
   else
-    current_thread = th ?: thread_rec (current_event.dwThreadId, TRUE);
+    {
+      current_thread = th ?: thread_rec (current_event.dwThreadId, TRUE);
+      inferior_pid = retval;
+    }
 
 out:
   return retval;
@@ -950,28 +956,53 @@ child_wait (int pid, struct target_waitstatus *ourstatus)
     }
 }
 
+static void
+do_initial_child_stuff (DWORD pid)
+{
+  extern int stop_after_trap;
+
+  last_sig = 0;
+  event_count = 0;
+  exception_count = 0;
+  current_event.dwProcessId = pid;
+  memset (&current_event, 0, sizeof (current_event));
+  push_target (&child_ops);
+  child_init_thread_list ();
+  child_clear_solibs ();
+  clear_proceed_status ();
+  init_wait_for_inferior ();
+
+  target_terminal_init ();
+  target_terminal_inferior ();
+
+  while (1)
+    {
+      stop_after_trap = 1;
+      wait_for_inferior ();
+      if (stop_signal != TARGET_SIGNAL_TRAP)
+	resume (0, stop_signal);
+      else
+	break;
+    }
+  stop_after_trap = 0;
+  return;
+}
+
 /* Attach to process PID, then initialize for debugging it.  */
 
 static void
 child_attach (char *args, int from_tty)
 {
   BOOL ok;
+  DWORD pid = strtoul (args, 0, 0);
 
   if (!args)
     error_no_arg ("process-id to attach");
 
-  current_event.dwProcessId = strtoul (args, 0, 0);
-
-  ok = DebugActiveProcess (current_event.dwProcessId);
+  ok = DebugActiveProcess (pid);
 
   if (!ok)
     error ("Can't attach to process.");
-
-  exception_count = 0;
-  event_count = 0;
-
-  child_init_thread_list ();
-  child_clear_solibs ();
 
   if (from_tty)
     {
@@ -979,15 +1010,16 @@ child_attach (char *args, int from_tty)
 
       if (exec_file)
 	printf_unfiltered ("Attaching to program `%s', %s\n", exec_file,
-			   target_pid_to_str (current_event.dwProcessId));
+			   target_pid_to_str (pid));
       else
 	printf_unfiltered ("Attaching to %s\n",
-			   target_pid_to_str (current_event.dwProcessId));
+			   target_pid_to_str (pid));
 
       gdb_flush (gdb_stdout);
     }
 
-  push_target (&child_ops);
+  do_initial_child_stuff (pid);
+  target_terminal_ours ();
 }
 
 static void
@@ -1037,11 +1069,9 @@ child_create_inferior (char *exec_file, char *allargs, char **env)
   int i;
   STARTUPINFO si;
   PROCESS_INFORMATION pi;
-  struct target_waitstatus dummy;
   BOOL ret;
   DWORD flags;
   char *args;
-  extern int stop_after_trap;
 
   if (!exec_file)
     error ("No executable specified, use `target exec'.\n");
@@ -1152,32 +1182,7 @@ child_create_inferior (char *exec_file, char *allargs, char **env)
   if (!ret)
     error ("Error creating process %s, (error %d)\n", exec_file, GetLastError ());
 
-  exception_count = 0;
-  event_count = 0;
-
-  current_process_handle = pi.hProcess;
-  current_event.dwProcessId = pi.dwProcessId;
-  memset (&current_event, 0, sizeof (current_event));
-  inferior_pid = current_event.dwThreadId = pi.dwThreadId;
-  push_target (&child_ops);
-  child_init_thread_list ();
-  child_clear_solibs ();
-  clear_proceed_status ();
-  init_wait_for_inferior ();
-  target_terminal_init ();
-  target_terminal_inferior ();
-  last_sig = 0;
-
-  while (1)
-    {
-      stop_after_trap = 1;
-      wait_for_inferior ();
-      if (stop_signal != TARGET_SIGNAL_TRAP)
-	resume (0, stop_signal);
-      else
-	break;
-    }
-  stop_after_trap = 0;
+  do_initial_child_stuff (pi.dwProcessId);
 
   /* child_continue (DBG_CONTINUE, -1);*/
   proceed ((CORE_ADDR) - 1, TARGET_SIGNAL_0, 0);
@@ -1296,7 +1301,7 @@ child_can_run (void)
 }
 
 static void
-child_close (void)
+child_close (int x ATTRIBUTE_UNUSED)
 {
   DEBUG_EVENTS (("gdb: child_close, inferior_pid=%d\n", inferior_pid));
 }

@@ -2,5 +2,5 @@ MH_CFLAGS=
 XM_FILE=xm-cygwin.h
 XDEPFILES=
 NATDEPFILES= win32-nat.o
-NAT_FILE=../nm-empty.h
+NAT_FILE=../none/nm-none.h
 XM_CLIBS=

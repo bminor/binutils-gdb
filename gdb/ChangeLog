@@ -1,3 +1,18 @@
+2000-08-06  Christopher Faylor  <cgf@cygnus.com>
+
+	* win32-nat.c: Perform various gcc warning cleanups.
+	(safe_symbol_file_add_cleanup): Reset stdout to saved stdout, not
+	stderr.
+	(dll_symbol_command): Pass OBJF_USERLOADED to safe_symbol_file_add.
+	(get_child_debug_event): Always reset last_sig.  Always reset inferior
+	pid appropriately.
+	(do_initial_child_stuff): New function.  Called when attaching or starting
+	a new inferior process.
+	(child_attach): Use do_initial_child_stuff.
+	(child_create_inferior): Ditto.
+	* config/i386/cygwin.mh (NAT_FILE): Set to modern location.
+	* config/i386/tm-cygwin.h: Define ATTACH_NO_WAIT.
+
 2000-08-05  Eli Zaretskii <eliz@is.elta.co.il>
 
 	* go32-nat.c: (go32_wait): If child_cwd[] is empty, initialize

@@ -30,6 +30,7 @@
 extern CORE_ADDR skip_trampoline_code (CORE_ADDR pc, char *name);
 #endif
 
+#define ATTACH_NO_WAIT
 #define SOLIB_ADD(filename, from_tty, targ) child_solib_add(filename, from_tty, targ)
 #define SOLIB_LOADED_LIBRARY_PATHNAME(pid) child_solib_loaded_library_pathname(pid)
 #define CLEAR_SOLIB child_clear_solib
