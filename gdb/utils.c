@@ -593,29 +593,6 @@ warning (const char *string,...)
   va_end (args);
 }
 
-/* Start the printing of an error message.  Way to use this is to call
-   this, output the error message (use filtered output to gdb_stderr
-   (FIXME: Some callers, like memory_error, use gdb_stdout)), ending
-   in a newline, and then call return_to_top_level (RETURN_ERROR).
-   error() provides a convenient way to do this for the special case
-   that the error message can be formatted with a single printf call,
-   but this is more general.  */
-static void
-error_begin (void)
-{
-  if (error_begin_hook)
-    error_begin_hook ();
-
-  target_terminal_ours ();
-  wrap_here ("");		/* Force out any buffered output */
-  gdb_flush (gdb_stdout);
-
-  annotate_error_begin ();
-
-  if (error_pre_print)
-    fprintf_filtered (gdb_stderr, error_pre_print);
-}
-
 /* Print an error message and return to command level.
    The first argument STRING is the error message, used as a fprintf string,
    and the remaining args are passed as arguments to it.  */
@@ -623,29 +600,10 @@ error_begin (void)
 NORETURN void
 verror (const char *string, va_list args)
 {
-  char *err_string;
-  struct cleanup *err_string_cleanup;
-  /* FIXME: cagney/1999-11-10: All error calls should come here.
-     Unfortunately some code uses the sequence: error_begin(); print
-     error message; return_to_top_level.  That code should be
-     flushed. */
-  error_begin ();
-  /* NOTE: It's tempting to just do the following...
-	vfprintf_filtered (gdb_stderr, string, args);
-     and then follow with a similar looking statement to cause the message
-     to also go to gdb_lasterr.  But if we do this, we'll be traversing the
-     va_list twice which works on some platforms and fails miserably on
-     others. */
-  /* Save it as the last error */
-  ui_file_rewind (gdb_lasterr);
-  vfprintf_filtered (gdb_lasterr, string, args);
-  /* Retrieve the last error and print it to gdb_stderr */
-  err_string = error_last_message ();
-  err_string_cleanup = make_cleanup (xfree, err_string);
-  fputs_filtered (err_string, gdb_stderr);
-  fprintf_filtered (gdb_stderr, "\n");
-  do_cleanups (err_string_cleanup);
-  return_to_top_level (RETURN_ERROR);
+  struct ui_file *tmp_stream = mem_fileopen ();
+  make_cleanup_ui_file_delete (tmp_stream);
+  vfprintf_unfiltered (tmp_stream, string, args);
+  error_stream (tmp_stream);
 }
 
 NORETURN void
@@ -657,13 +615,33 @@ error (const char *string,...)
   va_end (args);
 }
 
+static void
+do_write (void *data, const char *buffer, long length_buffer)
+{
+  ui_file_write (data, buffer, length_buffer);
+}
+
 NORETURN void
 error_stream (struct ui_file *stream)
 {
-  long size;
-  char *msg = ui_file_xstrdup (stream, &size);
-  make_cleanup (xfree, msg);
-  error ("%s", msg);
+  if (error_begin_hook)
+    error_begin_hook ();
+
+  /* Copy the stream into the GDB_LASTERR buffer.  */
+  ui_file_rewind (gdb_lasterr);
+  ui_file_put (stream, do_write, gdb_lasterr);
+
+  /* Write the message plus any error_pre_print to gdb_stderr.  */
+  target_terminal_ours ();
+  wrap_here ("");		/* Force out any buffered output */
+  gdb_flush (gdb_stdout);
+  annotate_error_begin ();
+  if (error_pre_print)
+    fprintf_filtered (gdb_stderr, error_pre_print);
+  ui_file_put (stream, do_write, gdb_stderr);
+  fprintf_filtered (gdb_stderr, "\n");
+
+  return_to_top_level (RETURN_ERROR);
 }
 
 /* Get the last error message issued by gdb */

@@ -1,5 +1,13 @@
 2002-02-01  Andrew Cagney  <ac131313@redhat.com>
 
+	* utils.c (do_write): New function.
+	(error_stream): Rewrite combining the code from error_begin and
+	verror.
+	(verror): Rewrite using error_stream.
+	(error_begin): Delete function.
+
+2002-02-01  Andrew Cagney  <ac131313@redhat.com>
+
 	* utils.c (error_begin): Make static.
 	* defs.h (error_begin): Delete declaration.
 
