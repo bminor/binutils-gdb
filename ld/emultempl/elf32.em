@@ -1250,7 +1250,7 @@ fi
 
 if test -n "$PARSE_AND_LIST_ARGS_CASES" -o x"$GENERATE_SHLIB_SCRIPT" = xyes; then
 
-if test x"$LDEMUL_PARSE_ARGS" != xgld_"$EMULATION_NAME"_parse_args; then
+if test x"$LDEMUL_PARSE_ARGS" != xgld"$EMULATION_NAME"_parse_args; then
 
 if test -n "$PARSE_AND_LIST_PROLOGUE" ; then
 cat >>e${EMULATION_NAME}.c <<EOF
@@ -1291,23 +1291,25 @@ cat >>e${EMULATION_NAME}.c <<EOF
 };
 
 
-static int gld_${EMULATION_NAME}_parse_args PARAMS ((int, char **));
+static int gld${EMULATION_NAME}_parse_args PARAMS ((int, char **));
 
 static int
-gld_${EMULATION_NAME}_parse_args (argc, argv)
+gld${EMULATION_NAME}_parse_args (argc, argv)
      int argc;
      char ** argv;
 {
-  int longind, optc;
-  int prevoptind = optind;
+  int longind;
+  int optc;
+  static int prevoptind = -1;
   int prevopterr = opterr;
   int wanterror;
-  static int lastoptind = -1;
 
-  if (lastoptind != optind)
+  if (prevoptind != optind)
     opterr = 0;
 
-  wanterror  = opterr;
+  wanterror = opterr;
+  prevoptind = optind;
+
   optc = getopt_long_only (argc, argv,
 			   "-${PARSE_AND_LIST_SHORTOPTS}z:", longopts,
 			   &longind);
@@ -1318,7 +1320,7 @@ gld_${EMULATION_NAME}_parse_args (argc, argv)
     default:
       if (wanterror)
 	xexit (1);
-      optind =  prevoptind;
+      optind = prevoptind;
       return 0;
 
 EOF
@@ -1378,13 +1380,13 @@ cat >>e${EMULATION_NAME}.c <<EOF
 EOF
 fi
 
-if test x"$LDEMUL_LIST_OPTIONS" != xgld_"$EMULATION_NAME"_list_options; then
+if test x"$LDEMUL_LIST_OPTIONS" != xgld"$EMULATION_NAME"_list_options; then
 cat >>e${EMULATION_NAME}.c <<EOF
 
-static void gld_${EMULATION_NAME}_list_options PARAMS ((FILE * file));
+static void gld${EMULATION_NAME}_list_options PARAMS ((FILE * file));
 
 static void
-gld_${EMULATION_NAME}_list_options (file)
+gld${EMULATION_NAME}_list_options (file)
      FILE * file;
 {
 EOF
@@ -1424,14 +1426,14 @@ EOF
 fi
 fi
 else
-if test x"$LDEMUL_PARSE_ARGS" != xgld_"$EMULATION_NAME"_parse_args; then
+if test x"$LDEMUL_PARSE_ARGS" != xgld"$EMULATION_NAME"_parse_args; then
 cat >>e${EMULATION_NAME}.c <<EOF
-#define gld_${EMULATION_NAME}_parse_args   NULL
+#define gld${EMULATION_NAME}_parse_args   NULL
 EOF
 fi
-if test x"$LDEMUL_LIST_OPTIONS" != xgld_"$EMULATION_NAME"_list_options; then
+if test x"$LDEMUL_LIST_OPTIONS" != xgld"$EMULATION_NAME"_list_options; then
 cat >>e${EMULATION_NAME}.c <<EOF
-#define gld_${EMULATION_NAME}_list_options NULL
+#define gld${EMULATION_NAME}_list_options NULL
 EOF
 fi
 fi
@@ -1457,9 +1459,9 @@ struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
   ${LDEMUL_OPEN_DYNAMIC_ARCHIVE-gld${EMULATION_NAME}_open_dynamic_archive},
   ${LDEMUL_PLACE_ORPHAN-gld${EMULATION_NAME}_place_orphan},
   ${LDEMUL_SET_SYMBOLS-NULL},
-  ${LDEMUL_PARSE_ARGS-gld_${EMULATION_NAME}_parse_args},
+  ${LDEMUL_PARSE_ARGS-gld${EMULATION_NAME}_parse_args},
   ${LDEMUL_UNRECOGNIZED_FILE-NULL},
-  ${LDEMUL_LIST_OPTIONS-gld_${EMULATION_NAME}_list_options},
+  ${LDEMUL_LIST_OPTIONS-gld${EMULATION_NAME}_list_options},
   ${LDEMUL_RECOGNIZED_FILE-NULL},
   ${LDEMUL_FIND_POTENTIAL_LIBRARIES-NULL},
 };

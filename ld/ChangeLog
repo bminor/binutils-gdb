@@ -1,3 +1,11 @@
+2000-08-04  Alan Modra  <alan@linuxcare.com.au>
+
+	* emultempl/elf32.em (gld_${EMULATION_NAME}_parse_args): Rename to
+	gld${EMULATION_NAME}_parse_args for consistency.  Combine
+	lastoptind and prevoptind vars, and keep track of last optind.
+	(gld_${EMULATION_NAME}_list_options): Rename to
+	gld${EMULATION_NAME}_list_options.
+
 2000-08-03  Rodney Brown  <RodneyBrown@pmsc.com>
 
 	* configure.tgt: Select targ_emul=elf_i386 for Unixware 7
