@@ -2440,7 +2440,7 @@ md_convert_frag (headers, seg, fragP)
 	/* Toggle the true/false bit of the bcond.  */
 	buffer[highbyte] ^= 0x2;
 
-	/* If this is a dalayed branch, we may not put the the bra in the
+	/* If this is a dalayed branch, we may not put the bra in the
 	   slot.  So we change it to a non-delayed branch, like that:
 	   b! cond slot_label; bra disp; slot_label: slot_insn
 	   ??? We should try if swapping the conditional branch and

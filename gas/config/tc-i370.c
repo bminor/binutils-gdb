@@ -316,7 +316,7 @@ reg_name_search (regs, regcount, name)
  *
  * in:        Input_line_pointer points to 1st char of operand.
  *
- * out:        A expressionS.
+ * out:        An expressionS.
  *      The operand may have been a register: in this case, X_op == O_register,
  *      X_add_number is set to the register number, and truth is returned.
  *        Input_line_pointer->(next non-blank) char after operand, or is in its
@@ -2183,7 +2183,7 @@ md_assemble (str)
             }
         }
 
-      /* check for a address constant expression */
+      /* Check for an address constant expression.  */
       /* We will put PSW-relative addresses in the text section,
        * and adress literals in the .data (or other) section.  */
       else if (i370_addr_cons (&ex))

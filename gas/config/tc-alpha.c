@@ -1368,7 +1368,7 @@ alpha_define_label (sym)
 }
 
 /* Return true if we must always emit a reloc for a type and false if
-   there is some hope of resolving it a assembly time.  */
+   there is some hope of resolving it at assembly time.  */
 
 int
 alpha_force_relocation (f)

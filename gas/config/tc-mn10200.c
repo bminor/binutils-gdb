@@ -175,7 +175,7 @@ reg_name_search (regs, regcount, name)
  *
  * in: Input_line_pointer points to 1st char of operand.
  *
- * out: A expressionS.
+ * out: An expressionS.
  *	The operand may have been a register: in this case, X_op == O_register,
  *	X_add_number is set to the register number, and truth is returned.
  *	Input_line_pointer->(next non-blank) char after operand, or is in
@@ -222,7 +222,7 @@ data_register_name (expressionP)
  *
  * in: Input_line_pointer points to 1st char of operand.
  *
- * out: A expressionS.
+ * out: An expressionS.
  *	The operand may have been a register: in this case, X_op == O_register,
  *	X_add_number is set to the register number, and truth is returned.
  *	Input_line_pointer->(next non-blank) char after operand, or is in
@@ -269,7 +269,7 @@ address_register_name (expressionP)
  *
  * in: Input_line_pointer points to 1st char of operand.
  *
- * out: A expressionS.
+ * out: An expressionS.
  *	The operand may have been a register: in this case, X_op == O_register,
  *	X_add_number is set to the register number, and truth is returned.
  *	Input_line_pointer->(next non-blank) char after operand, or is in

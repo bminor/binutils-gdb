@@ -311,7 +311,7 @@ static int mips_big_got;
 static int mips_trap;
 
 /* 1 if double width floating point constants should not be constructed
-   by a assembling two single width halves into two single width floating
+   by assembling two single width halves into two single width floating
    point registers which just happen to alias the double width destination
    register.  On some architectures this aliasing can be disabled by a bit
    in the status register, and the setting of this bit cannot be determined
@@ -1992,7 +1992,7 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
 				      || *reloc_type == BFD_RELOC_16_PCREL_S2),
 				     reloc_type[0]);
 
-	      /* These relocations can have a addend that won't fit in
+	      /* These relocations can have an addend that won't fit in
 	         4 octets for 64bit assembly.  */
 	      if (HAVE_64BIT_GPRS &&
 		  (*reloc_type == BFD_RELOC_16
@@ -2038,7 +2038,7 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
 					 4, address_expr, false,
 					 reloc_type[1]);
 
-		  /* These relocations can have a addend that won't fit in
+		  /* These relocations can have an addend that won't fit in
 		     4 octets for 64bit assembly.  */
 		  if (HAVE_64BIT_GPRS &&
 		      (*reloc_type == BFD_RELOC_16
@@ -2070,7 +2070,7 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
 					     address_expr, false,
 					     reloc_type[2]);
 
-		      /* These relocations can have a addend that won't fit in
+		      /* These relocations can have an addend that won't fit in
 			 4 octets for 64bit assembly.  */
 		      if (HAVE_64BIT_GPRS &&
 			  (*reloc_type == BFD_RELOC_16
@@ -7512,8 +7512,8 @@ mips_ip (str, ip)
 	    case '<':		/* must be at least one digit */
 	      /*
 	       * According to the manual, if the shift amount is greater
-	       * than 31 or less than 0 the the shift amount should be
-	       * mod 32. In reality the mips assembler issues an error.
+	       * than 31 or less than 0, then the shift amount should be
+	       * mod 32.  In reality the mips assembler issues an error.
 	       * We issue a warning and mask out all but the low 5 bits.
 	       */
 	      my_getExpression (&imm_expr, s);
@@ -9235,7 +9235,7 @@ my_getSmallExpression (ep, str)
   /* A percent_op was encountered.  */
   if (nest_level)
     {
-      /* Don't try to get a expression if it is already blanked out.  */
+      /* Don't try to get an expression if it is already blanked out.  */
       if (*(str + strspn (str + 1, " )")) != ')')
 	{
 	  char save;
@@ -10657,7 +10657,7 @@ s_change_sec (sec)
 #ifdef OBJ_ELF
   /* The ELF backend needs to know that we are changing sections, so
      that .previous works correctly.  We could do something like check
-     for a obj_section_change_hook macro, but that might be confusing
+     for an obj_section_change_hook macro, but that might be confusing
      as it would not be appropriate to use it in the section changing
      functions in read.c, since obj-elf.c intercepts those.  FIXME:
      This should be cleaner, somehow.  */
@@ -11100,7 +11100,7 @@ s_cpload (ignore)
       return;
     }
 
-  /* .cpload should be a in .set noreorder section.  */
+  /* .cpload should be in .set noreorder section.  */
   if (mips_opts.noreorder == 0)
     as_warn (_(".cpload not in noreorder section"));
 

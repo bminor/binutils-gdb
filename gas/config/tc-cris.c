@@ -2570,7 +2570,7 @@ cris_get_pic_suffix (cPP, relocp, exprP)
 		break;
 
 	      /* Allow complex expressions as the constant part.  It still
-		 has to be a assembly-time constant or there will be an
+		 has to be an assembly-time constant or there will be an
 		 error emitting the reloc.  This makes the PIC qualifiers
 		 idempotent; foo:GOTOFF+32 == foo+32:GOTOFF.  The former we
 		 recognize here; the latter is parsed in the incoming

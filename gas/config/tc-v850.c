@@ -770,7 +770,7 @@ reg_name_search (regs, regcount, name, accept_numbers)
  *
  * in: Input_line_pointer points to 1st char of operand.
  *
- * out: A expressionS.
+ * out: An expressionS.
  *	The operand may have been a register: in this case, X_op == O_register,
  *	X_add_number is set to the register number, and truth is returned.
  *	Input_line_pointer->(next non-blank) char after operand, or is in
@@ -825,7 +825,7 @@ register_name (expressionP)
  *      ACCEPT_LIST_NAMES is true iff the special names PS and SR may be
  *      accepted.
  *
- * out: A expressionS structure in expressionP.
+ * out: An expressionS structure in expressionP.
  *	The operand may have been a register: in this case, X_op == O_register,
  *	X_add_number is set to the register number, and truth is returned.
  *	Input_line_pointer->(next non-blank) char after operand, or is in
@@ -906,7 +906,7 @@ system_register_name (expressionP, accept_numbers, accept_list_names)
  *
  * in: INPUT_LINE_POINTER points to 1st char of operand.
  *
- * out: A expressionS.
+ * out: An expressionS.
  *	The operand may have been a register: in this case, X_op == O_register,
  *	X_add_number is set to the register number, and truth is returned.
  *	Input_line_pointer->(next non-blank) char after operand, or is in

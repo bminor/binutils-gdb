@@ -1245,10 +1245,10 @@ tip_op (optex, topP)
 
 	default:
 	  /*
-	   * Major bug. We can't handle the case of a operator
+	   * Major bug. We can't handle the case of an operator
 	   * expression in a synthetic opcode variable-length
 	   * instruction.  We don't have a frag type that is smart
-	   * enough to relax a operator, and so we just force all
+	   * enough to relax an operator, and so we just force all
 	   * operators to behave like SEG_PASS1s.  Clearly, if there is
 	   * a demand we can invent a new or modified frag type and
 	   * then coding up a frag for this case will be easy.
@@ -1864,7 +1864,7 @@ md_assemble (instruction_string)
 		    }
 		  else
 		    {
-		      /* It's a integer, and I know it's size.  */
+		      /* It's an integer, and I know it's size.  */
 		      if ((unsigned) this_add_number < 0x40)
 			{
 			  /* Will it fit in a literal? */

@@ -6827,7 +6827,7 @@ pa_import (unused)
 	{
 	  /* Sigh.  To be compatable with the HP assembler and to help
 	     poorly written assembly code, we assign a type based on
-	     the the current segment.  Note only BSF_FUNCTION really
+	     the current segment.  Note only BSF_FUNCTION really
 	     matters, we do not need to set the full SYMBOL_TYPE_* info.  */
 	  if (now_seg == text_section)
 	    symbol_get_bfdsym (symbol)->flags |= BSF_FUNCTION;
@@ -8494,7 +8494,7 @@ hppa_force_relocation (fixp)
     return 1;
 
   /* It is necessary to force PC-relative calls/jumps to have a relocation
-     entry if they're going to need either a argument relocation or long
+     entry if they're going to need either an argument relocation or long
      call stub.  */
   if (fixp->fx_pcrel
       && arg_reloc_stub_needed (symbol_arg_reloc_info (fixp->fx_addsy),
