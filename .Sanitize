@@ -488,9 +488,20 @@ fi
 
 if ( echo $* | grep lose\-gdbtk > /dev/null ) ; then
 	echo Catering to RMS by removing traces of \"gdbtk\"...
-	if [ -n "${verbose}" ] ; then
-		echo Removing traces of \"gdbtk\" from Makefile.in...
-	fi
+	for i in * ; do
+		if test ! -d $i && (grep sanitize-gdbtk $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Removing traces of \"gdbtk\" from $i...
+			fi
+			cp $i new
+			sed '/start\-sanitize\-gdbtk/,/end-\sanitize\-gdbtk/d' < $i > new
+			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
+				echo Caching $i in .Recover...
+				mv $i .Recover
+			fi
+			mv new $i
+		fi
+	done
 	cp Makefile.in new
 	sed -e '/GDBTK_SUPPORT_DIRS=/d' -e 's/ $(GDBTK_SUPPORT_DIRS)//' < Makefile.in > new
 	if [ -n "${safe}" -a ! -f .Recover/Makefile.in ] ; then
@@ -500,6 +511,22 @@ if ( echo $* | grep lose\-gdbtk > /dev/null ) ; then
 		mv Makefile.in .Recover
 	fi
 	mv new Makefile.in
+else
+	echo Leaving \"gdbtk\" in the sources...
+	for i in * ; do
+		if test ! -d $i && (grep sanitize-gdbtk $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Keeping \"gdbtk\" stuff in $i, but editing out sanitize lines...
+			fi
+			cp $i new
+			sed -e '/start\-sanitize\-gdbtk/d' -e '/end\-sanitize\-gdbtk/d' < $i > new
+			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
+				echo Caching $i in .Recover...
+				mv $i .Recover
+			fi
+			mv new $i
+		fi
+	done
 fi
 
 vr5400_files="ChangeLog config.sub"
