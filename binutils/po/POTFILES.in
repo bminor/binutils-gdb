@@ -1,4 +1,3 @@
-readelf.c
 addr2line.c
 ar.c
 arsup.c
@@ -10,6 +9,7 @@ coffdump.c
 coffgrok.c
 coffgrok.h
 debug.c
+debug.c
 debug.h
 dlltool.c
 dlltool.h
@@ -17,6 +17,7 @@ dllwrap.c
 dyn-string.c
 dyn-string.h
 filemode.c
+ieee.c
 ieee.c
 is-ranlib.c
 is-strip.c
@@ -31,7 +32,10 @@ objcopy.c
 objdump.c
 prdbg.c
 rdcoff.c
+rdcoff.c
 rddbg.c
+rddbg.c
+readelf.c
 rename.c
 resbin.c
 rescoff.c
@@ -39,6 +43,7 @@ resrc.c
 resres.c
 size.c
 srconv.c
+stabs.c
 stabs.c
 strings.c
 sysdump.c
@@ -48,5 +53,3 @@ windres.h
 winduni.c
 winduni.h
 wrstabs.c
-testsuite/binutils-all/readelf.h
-testsuite/binutils-all/testprog.c

@@ -1,8 +1,6 @@
 a29k-dis.c
 alpha-dis.c
 alpha-opc.c
-arc-dis.c
-arc-opc.c
 arm-dis.c
 arm-opc.h
 cgen-asm.c
@@ -48,7 +46,6 @@ mips-dis.c
 mips-opc.c
 mips16-opc.c
 ns32k-dis.c
-opintl.h
 ppc-dis.c
 ppc-opc.c
 sh-dis.c
@@ -59,8 +56,6 @@ sysdep.h
 tic30-dis.c
 tic80-dis.c
 tic80-opc.c
-v850-dis.c
-v850-opc.c
 vax-dis.c
 w65-dis.c
 w65-opc.h

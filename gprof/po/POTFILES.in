@@ -1,7 +1,6 @@
 alpha.c
 basic_blocks.c
 basic_blocks.h
-bb_exit_func.c
 call_graph.c
 call_graph.h
 cg_arcs.c
