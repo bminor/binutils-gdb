@@ -1,6 +1,6 @@
 2005-03-20  Mark Kettenis  <kettenis@gnu.org>
 
-	* cp-names.y: Add prototype for yylex.
+	* cp-names.y: Add prototype for yyparse.
 
 2005-03-19  Daniel Jacobowitz  <dan@codesourcery.com>
 
