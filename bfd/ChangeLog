@@ -1,3 +1,9 @@
+Tue Feb 15 09:00:16 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* som.c (som_bfd_prep_for_ar_write): Iterate through the SOM
+	symbols, not the BFD symbols.
+	(som_bfd_ar_write_symbol_stuff): Likewise.
+
 Mon Feb 14 22:55:20 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* som.c (som_slurp_symbol_table): Do not die if a BFD doesn't

@@ -4613,7 +4613,7 @@ som_bfd_prep_for_ar_write (abfd, num_syms, stringsize)
   while (curr_bfd != NULL)
     {
       unsigned int curr_count, i;
-      asymbol *sym;
+      som_symbol_type *sym;
 
       /* Make sure the symbol table has been read, then snag a pointer
 	 to it.  It's a little slimey to grab the symbols via obj_som_symtab,
@@ -4621,7 +4621,7 @@ som_bfd_prep_for_ar_write (abfd, num_syms, stringsize)
       if (som_slurp_symbol_table (curr_bfd) == false)
 	return false;
 
-      sym = (asymbol *)obj_som_symtab (curr_bfd);
+      sym = obj_som_symtab (curr_bfd);
       curr_count = bfd_get_symcount (curr_bfd);
 
       /* Examine each symbol to determine if it belongs in the
@@ -4631,7 +4631,7 @@ som_bfd_prep_for_ar_write (abfd, num_syms, stringsize)
 	  struct som_misc_symbol_info info;
 
 	  /* Derive SOM information from the BFD symbol.  */
-	  som_bfd_derive_misc_symbol_info (curr_bfd, sym, &info);
+	  som_bfd_derive_misc_symbol_info (curr_bfd, &sym->symbol, &info);
 
 	  /* Should we include this symbol?  */
 	  if (info.symbol_type == ST_NULL
@@ -4645,13 +4645,13 @@ som_bfd_prep_for_ar_write (abfd, num_syms, stringsize)
 	    continue;
 
 	  /* Do no include undefined symbols.  */
-	  if (sym->section == &bfd_und_section)
+	  if (sym->symbol.section == &bfd_und_section)
 	    continue;
 
 	  /* Bump the various counters, being careful to honor
 	     alignment considerations in the string table.  */
 	  (*num_syms)++;
-	  *stringsize = *stringsize + strlen (sym->name) + 5;
+	  *stringsize = *stringsize + strlen (sym->symbol.name) + 5;
 	  while (*stringsize % 4)
 	    (*stringsize)++;
 	}
@@ -4725,7 +4725,7 @@ som_bfd_ar_write_symbol_stuff (abfd, nsyms, string_size, lst)
   while (curr_bfd != NULL)
     {
       unsigned int curr_count, i;
-      asymbol *sym;
+      som_symbol_type *sym;
 
       /* Make sure the symbol table has been read, then snag a pointer
 	 to it.  It's a little slimey to grab the symbols via obj_som_symtab,
@@ -4733,7 +4733,7 @@ som_bfd_ar_write_symbol_stuff (abfd, nsyms, string_size, lst)
       if (som_slurp_symbol_table (curr_bfd) == false)
 	return false;
 
-      sym = (asymbol *)obj_som_symtab (curr_bfd);
+      sym = obj_som_symtab (curr_bfd);
       curr_count = bfd_get_symcount (curr_bfd);
 
       for (i = 0; i < curr_count; i++, sym++)
@@ -4741,7 +4741,7 @@ som_bfd_ar_write_symbol_stuff (abfd, nsyms, string_size, lst)
 	  struct som_misc_symbol_info info;
 
 	  /* Derive SOM information from the BFD symbol.  */
-	  som_bfd_derive_misc_symbol_info (curr_bfd, sym, &info);
+	  som_bfd_derive_misc_symbol_info (curr_bfd, &sym->symbol, &info);
 
 	  /* Should we include this symbol?  */
 	  if (info.symbol_type == ST_NULL
@@ -4755,7 +4755,7 @@ som_bfd_ar_write_symbol_stuff (abfd, nsyms, string_size, lst)
 	    continue;
 
 	  /* Do no include undefined symbols.  */
-	  if (sym->section == &bfd_und_section)
+	  if (sym->symbol.section == &bfd_und_section)
 	    continue;
 
 	  /* If this is the first symbol from this SOM, then update
@@ -4775,7 +4775,7 @@ som_bfd_ar_write_symbol_stuff (abfd, nsyms, string_size, lst)
 	  curr_lst_sym->must_qualify = 0;
 	  curr_lst_sym->initially_frozen = 0;
 	  curr_lst_sym->memory_resident = 0;
-	  curr_lst_sym->is_common = (sym->section == &bfd_com_section);
+	  curr_lst_sym->is_common = (sym->symbol.section == &bfd_com_section);
 	  curr_lst_sym->dup_common = 0;
 	  curr_lst_sym->xleast = 0;
 	  curr_lst_sym->arg_reloc = info.arg_reloc;
@@ -4786,7 +4786,7 @@ som_bfd_ar_write_symbol_stuff (abfd, nsyms, string_size, lst)
 	  curr_lst_sym->symbol_descriptor = 0;
 	  curr_lst_sym->reserved = 0;
 	  curr_lst_sym->som_index = som_index;
-	  curr_lst_sym->symbol_key = som_bfd_ar_symbol_hash (sym);
+	  curr_lst_sym->symbol_key = som_bfd_ar_symbol_hash (&sym->symbol);
 	  curr_lst_sym->next_entry = 0;
 
 	  /* Insert into the hash table.  */
@@ -4820,10 +4820,10 @@ som_bfd_ar_write_symbol_stuff (abfd, nsyms, string_size, lst)
 
 
 	  /* Update the string table.  */
-	  bfd_put_32 (abfd, strlen (sym->name), p);
+	  bfd_put_32 (abfd, strlen (sym->symbol.name), p);
 	  p += 4;
-	  strcpy (p, sym->name);
-	  p += strlen (sym->name) + 1;
+	  strcpy (p, sym->symbol.name);
+	  p += strlen (sym->symbol.name) + 1;
 	  while ((int)p % 4)
 	    {
 	      bfd_put_8 (abfd, 0, p);
