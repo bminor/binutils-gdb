@@ -1,3 +1,8 @@
+2003-06-01  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbint.texinfo (Target Architecture Definition): Add "func_addr"
+	parameter to "push_dummy_call".  Rename "dummy_addr" to "bp_addr".
+
 2003-05-21  Andrew Cagney  <cagney@redhat.com>
 
 	* gdbint.texinfo (Target Architecture Definition): Delete
