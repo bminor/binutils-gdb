@@ -79,7 +79,7 @@ setup_xfail "hppa*64*-*-*"
 setup_xfail "mn10300-*-elf"
 setup_xfail "sh-*-*"
 
-set mf "tmpdir/undefined.o: In function `function':"
+set mf "tmpdir/undefined.o* In function `function':"
 checkund $mf $testfn
 
 # COFF SH gets this test wrong--it reports line 10, because although

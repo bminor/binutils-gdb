@@ -1,3 +1,7 @@
+2002-09-21  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-undefined/undefined.exp: Adjust function test.
+
 2002-09-20  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-i386/i386.exp: Only run tests on ELF targets.
