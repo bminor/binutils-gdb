@@ -1,3 +1,11 @@
+2003-05-16  Ian Lance Taylor  <ian@airs.com>
+
+	* vax-tdep.c (INVALID_FLOAT, MAXLEN, NOPCODES): Don't define.
+	(vax_print_insn, print_insn_arg): Remove static functions.
+	(vax_gdbarch_init): Call set_gdbarch_print_insn with
+	print_insn_vax from opcodes library.
+	(_initialize_vax_tdep): Don't set deprecated_tm_print_insn.
+
 2003-05-15  Andrew Cagney  <cagney@redhat.com>
 
 	* arch-utils.h (legacy_breakpoint_from_pc): Delete declaration.
