@@ -3,9 +3,7 @@
 @include gdb-cfg.texi
 @dircategory Programming & development tools.
 @direntry
-START-INFO-DIR-ENTRY
 * Gdb-Internals: (gdbint).	The GNU debugger's internals.
-END-INFO-DIR-ENTRY
 @end direntry
 
 @ifinfo
