@@ -1,3 +1,24 @@
+Tue Apr 25 11:12:04 1995  Rob Savoye  <rob@thepub.cygnus.com>
+
+	* configure, configure.in: Look for m68k-*-vxworks* rather than
+	just m68k-wrs-vxworks so gas can be configured for
+	m68k-vxworks5.1.
+
+Fri Apr 21 15:19:06 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* config/tc-sh.c (md_apply_fix): If fx_r_type is zero, handle
+	fx_size of 1, and abort on unrecognized sizes.
+
+	* config/tc-m68k.c (m68k_ip): Fix bug in last change regarding
+	non-isvar case.
+
+Sun Apr 16 01:52:52 1995  Ken Raeburn  <raeburn@kr-laptop.cygnus.com>
+
+	* config/tc-m68k.h (md_relax_table, TC_GENERIC_RELAX_TABLE):
+	Missed this one in 11 Apr changes.
+
+	* config/tc-i386.h (TC_GENERIC_RELAX_TABLE): Fix typo.
+
 Thu Apr 13 18:18:08 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* config/tc-sh.c (md_convert_frag): Instead of aborting on large
