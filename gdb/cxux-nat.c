@@ -398,8 +398,6 @@ add_shared_symbol_files ()
   reinit_frame_cache ();
 }
 
-int target_is_m88110;
-
 #if defined(_ES_MP)
 
 #include <sys/regset.h>

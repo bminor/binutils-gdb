@@ -1,5 +1,7 @@
 Sun Sep  4 16:06:34 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
+	* cxux-nat.c (target_is_m88110): Remove definition.
+
 	* configure.in (config/nm-empty.h): If cross only, use instead
 	of config/nm-trash.h.
 	* config/nm-trash.h: Remove.
