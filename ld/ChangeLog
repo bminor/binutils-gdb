@@ -1,5 +1,9 @@
 Tue Jan 25 13:19:41 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
+	* Makefile.in: Format variable definitions consistently.
+	(LD_PROG): Remove unnecessary variables from link command,
+	change variable LOADLIBES to EXTRALIBS.
+
 	* ldmain.c (main): Compute and display total execution time.
 	* ld.texinfo (-stats): Document the option.
 

@@ -1,5 +1,5 @@
 # Makefile for the GNU linker ld (version 2)
-# Copyright (C) 1989,1990,1991,1992,1993 Free Software Foundation, Inc.
+# Copyright (C) 1989, 90, 91, 92, 93, 1994 Free Software Foundation, Inc.
 
 # This file is part of GNU ld..
 
@@ -103,9 +103,9 @@ TEXI2ROFF=texi2roff
 ROFF = groff
 
 #stuff for self hosting (can be overridden in config file).
-HOSTING_CRT0=/lib/crt0.o
-HOSTING_LIBS=`if [ -f ../gcc/libgcc.a ] ; then echo ../gcc/libgcc.a ; else gcc -print-libgcc-file-name; fi`  -lc
-HOSTING_EMU=-m $(EMUL)
+HOSTING_CRT0 = /lib/crt0.o
+HOSTING_LIBS = `if [ -f ../gcc/libgcc.a ] ; then echo ../gcc/libgcc.a ; else gcc -print-libgcc-file-name; fi`  -lc
+HOSTING_EMU = -m $(EMUL)
 
 CXX = `if [ -f ../gcc/xgcc ] ; then \
 	        echo ../gcc/xgcc -B../gcc/; \
@@ -114,7 +114,7 @@ CXX = `if [ -f ../gcc/xgcc ] ; then \
 CXXFLAGS = -fgnu-linker
 
 # FIX_ME: using ../gcc/xgcc breaks the cdtest. 
-CXX= g++
+CXX = g++
 
 # Setup the testing framework, if you have one
 RUNTEST = runtest
@@ -143,7 +143,7 @@ all: $(LD_PROG)
 ### Host, target, and site specific Makefile fragments come in here.
 ####
 
-LINTFLAGS =  $(INCLUDES) $(EXTRA_DEF) 
+LINTFLAGS = $(INCLUDES) $(EXTRA_DEF) 
 
 # The .cc suffix is used by `make check'.
 
@@ -156,7 +156,7 @@ LINTFLAGS =  $(INCLUDES) $(EXTRA_DEF)
 .cc.o:
 	$(CXX) -c -I$(srcdir) $(CXXFLAGS) $(CFLAGS) $<
 
-ALL_CFLAGS=$(INCLUDES) $(HDEFINES) $(TDEFINES) $(CDEFINES) $(CFLAGS)
+ALL_CFLAGS = $(INCLUDES) $(HDEFINES) $(TDEFINES) $(CDEFINES) $(CFLAGS)
 .c.o:
 	$(CC) -c $(ALL_CFLAGS) $<
 
@@ -164,7 +164,7 @@ ALL_CFLAGS=$(INCLUDES) $(HDEFINES) $(TDEFINES) $(CDEFINES) $(CFLAGS)
 BFDLIB = ../bfd/libbfd.a
 LIBIBERTY = ../libiberty/libiberty.a
 
-ALL_EMULATIONS=em_lnk960.o em_sun3.o em_i386aout.o em_go32.o em_vsta.o \
+ALL_EMULATIONS = em_lnk960.o em_sun3.o em_i386aout.o em_go32.o em_vsta.o \
 	em_m88kbcs.o em_a29k.o em_news.o em_hp300bsd.o em_hp3hpux.o \
 	em_h8300.o em_h8300h.o em_ebmon29k.o em_sun4.o em_gld960.o \
 	em_m68kcoff.o em_st2000.o em_sa29200.o em_i386mach.o \
@@ -176,24 +176,25 @@ ALL_EMULATIONS=em_lnk960.o em_sun3.o em_i386aout.o em_go32.o em_vsta.o \
 	$(OTHER_EMULATIONS)
 
 # This is now set by configure.in.
-#EMULATION_OFILES=${ALL_EMULATIONS}
+#EMULATION_OFILES = ${ALL_EMULATIONS}
 
-CFILES= ldctor.c ldemul.c ldexp.c ldfile.c ldlang.c \
+CFILES = ldctor.c ldemul.c ldexp.c ldfile.c ldlang.c \
 	ldmain.c ldmisc.c ldver.c ldwrite.c lexsup.c \
 	mri.c
 
-HFILES=	config.h ld.h ldctor.h ldemul.h ldexp.h ldfile.h \
+
+HFILES = config.h ld.h ldctor.h ldemul.h ldexp.h ldfile.h \
 	ldlang.h ldlex.h ldmain.h ldmisc.h ldver.h \
 	ldwrite.h mri.h
 
-GENERATED_CFILES= ldgram.c ldlex.c
-GENERATED_HFILES= ldgram.h ldemul-list.h
+GENERATED_CFILES = ldgram.c ldlex.c
+GENERATED_HFILES = ldgram.h ldemul-list.h
 
-OFILES= ldgram.o ldlex.o lexsup.o ldlang.o mri.o ldctor.o ldmain.o \
+OFILES = ldgram.o ldlex.o lexsup.o ldlang.o mri.o ldctor.o ldmain.o \
 	ldwrite.o ldexp.o  ldemul.o ldver.o ldmisc.o \
 	ldfile.o ${EMULATION_OFILES}
 
-LINTSOURCES= $(CFILES) $(GENERATED_CFILES) em_*.c
+LINTSOURCES = $(CFILES) $(GENERATED_CFILES) em_*.c
 
 STAGESTUFF = *.o ldscripts/* em_*.c $(GENERATED_CFILES) $(GENERATED_HFILES)
 
@@ -240,8 +241,8 @@ ldlex.c: ldlex.l
 
 # These all start with em_ so 'make clean' can find them.
 
-GENSCRIPTS=$(SHELL) $(srcdir)/genscripts.sh ${srcdir} ${libdir} ${host_alias} ${target_alias} ${EMUL} "$(NATIVE_LIB_DIRS)"
-GEN_DEPENDS=$(srcdir)/genscripts.sh
+GENSCRIPTS = $(SHELL) $(srcdir)/genscripts.sh ${srcdir} ${libdir} ${host_alias} ${target_alias} ${EMUL} "$(NATIVE_LIB_DIRS)"
+GEN_DEPENDS = $(srcdir)/genscripts.sh
 
 em_sun4.c: $(srcdir)/emulparams/sun4.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
@@ -365,7 +366,7 @@ em_coff_sparc.c: $(srcdir)/emulparams/coff_sparc.sh \
 	${GENSCRIPTS} coff_sparc
 
 $(LD_PROG): $(OFILES) $(BFDLIB) $(LIBIBERTY)
-	$(CC) $(INCLUDES) $(HDEFINES) $(TDEFINES) $(CDEFINES) $(CFLAGS) $(LDFLAGS) -o $(LD_PROG) $(OFILES) $(BFDLIB) $(LIBIBERTY) $(LOADLIBES)
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $(LD_PROG) $(OFILES) $(BFDLIB) $(LIBIBERTY) $(EXTRALIBS)
 
 # The generated emulation files mostly have the same dependencies.
 $(EMULATION_OFILES): ../bfd/bfd.h ../bfd/sysdep.h $(INCDIR)/bfdlink.h \
@@ -581,7 +582,7 @@ stage3:	force
 	-mv -f $(STAGESTUFF) $(LD_PROG) stage3
 	-(cd stage3 ; ln -s $(LD_PROG) ld)
 
-against=stage2
+against = stage2
 
 comparison: force
 	for i in $(STAGESTUFF) $(LD_PROG) ; do cmp $$i $(against)/$$i ; done
@@ -604,7 +605,7 @@ de-stage3: force
 .PHONY: stage1 stage2 stage3 comparison de-stage1 de-stage2 de-stage3
 
 # Stuff that should be included in a distribution:
-LDDISTSTUFF=ldgram.c ldgram.h ldlex.c
+LDDISTSTUFF = ldgram.c ldgram.h ldlex.c
 diststuff: $(LDDISTSTUFF)
 
 mostlyclean:
