@@ -50,6 +50,9 @@ bfd-in2.h
 bfd.c
 bout.c
 cache.c
+cf-i386lynx.c
+cf-m68klynx.c
+cf-sparclynx.c
 coff-a29k.c
 coff-alpha.c
 coff-apollo.c
@@ -62,6 +65,7 @@ coff-m88k.c
 coff-mips.c
 coff-rs6000.c
 coff-sh.c
+coff-sparc.c
 coff-u68k.c
 coff-we32k.c
 coff-z8k.c
@@ -124,7 +128,6 @@ hpux-core.c
 i386aout.c
 i386bsd.c
 i386linux.c
-i386lynx-cf.c
 i386lynx.c
 i386mach3.c
 ieee.c
@@ -142,7 +145,6 @@ libieee.h
 libnlm.h
 liboasys.h
 lynx-core.c
-m68klynx-cf.c
 m68klynx.c
 mipsbsd.c
 newsos3.c
@@ -166,6 +168,7 @@ seclet.h
 section.c
 som.c
 som.h
+sparclynx.c
 srec.c
 stab-syms.c
 sunos.c

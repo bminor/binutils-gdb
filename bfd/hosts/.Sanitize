@@ -65,6 +65,7 @@ rtbsd.h
 solaris2.h
 sparc-ll.h
 sparc.h
+sparclynx.h
 std-host.h
 stratus.h
 sun3.h
