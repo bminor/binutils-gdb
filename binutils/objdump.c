@@ -451,8 +451,8 @@ disassemble_data (abfd)
   struct disassemble_info disasm_info;
   struct objdump_disasm_info aux;
 
-  int prevline;
-  CONST char *prev_function = "";
+  int prevline = 0;
+  char *prev_function = NULL;
 
   asection *section;
 
@@ -561,11 +561,16 @@ disassemble_data (abfd)
 					     &functionname,
 					     &line))
 		    {
-		      if (functionname && *functionname
-			  && strcmp(functionname, prev_function))
+		      if (functionname
+			  && *functionname != '\0'
+			  && (prev_function == NULL
+			      || strcmp (functionname, prev_function) != 0))
 			{
 			  printf ("%s():\n", functionname);
-			  prev_function = functionname;
+			  if (prev_function != NULL)
+			    free (prev_function);
+			  prev_function = xmalloc (strlen (functionname) + 1);
+			  strcpy (prev_function, functionname);
 			}
 		      if (!filename)
 			filename = "???";

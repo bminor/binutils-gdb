@@ -1,5 +1,10 @@
 Wed Sep 14 12:19:07 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
+	* objdump.c (disassemble_data): Initialize prevline to 0.  Make
+	prev_function non const.  Copy functionname into an malloc buffer
+	when setting prev_function, instead of assuming that the string
+	will last forever.
+
 	* nm.c: Include libiberty.h.
 	(sort_by_size): New static variable.
 	(long_options): Add --size-sort.
