@@ -185,7 +185,6 @@ evax-emh.c
 evax-etir.c
 evax-misc.c
 evax.h
-filemode.c
 format.c
 freebsd.h
 gen-aout.c
