@@ -1,3 +1,37 @@
+Mon Dec 30 06:09:53 1991  John Gilmore  (gnu at cygnus.com)
+
+	* Makefile.in:  Make `make' output more readable.
+
+Wed Dec 18 15:04:45 1991  Per Bothner  (bothner at cygnus.com)
+
+	* Makefile.in:  Bump to version 1.94.
+
+Wed Dec 11 16:48:09 1991  Steve Chamberlain  (sac at cygnus.com)
+
+	* ar.c: added "b" to fopens for dos
+	* configdj.bat, makefile.dos new files from DJ
+
+Tue Dec 10 04:07:26 1991  K. Richard Pixley  (rich at rtl.cygnus.com)
+
+	* Makefile.in: infodir belongs in datadir.
+
+Sat Dec  7 17:09:37 1991  Steve Chamberlain  (sac at rtl.cygnus.com)
+
+	* bucomm.h: created to hold prototypes of bucomm.c
+	* objdump.h: created to hold prototyes of objdump.c
+	* am29k-pinsn.c: include objdump.h
+	* ar.c: include bucomm.h, get ar.h from the right place and
+	include libbfd.h
+	* bucomm.c: defunize bfd_fatal
+	* copy.c: include bucomm.h, lint.
+	* i960-pinsn.h: include bucomm.h
+	* m68k-pinsn.h: lint
+	* nm.c: include bucomm.h, lint
+	* objdump.c: lint
+	* sparc-pinsn.c: include objdump.h
+
+	
+
 Fri Dec  6 23:02:14 1991  K. Richard Pixley  (rich at rtl.cygnus.com)
 
 	* Makefile.in: added standards.text support.  install using
