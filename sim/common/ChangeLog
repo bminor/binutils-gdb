@@ -1,3 +1,33 @@
+1998-12-24  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* dv-sockser.c (DEFAULT_TIMEOUT): Increase to 1 ms.
+	
+	* nrun.c (main): Remain in simulation loop for traps and
+ 	exceptions when in operating environment mode.
+	(ui_loop_hook): New stub hook for standalone use.
+	* sim-events.c (sim_events_process): Call ui_loop_hook
+	periodically on CYGWIN host.
+	* sim-engine.c (sim_engine_halt): Call SIM_CPU_EXCEPTION_SUSPEND
+ 	hook just before longjmp.
+	* sim-resume.c (sim_resume): Call SIM_CPU_EXCEPTION_RESUME
+ 	hook just before sim_engine_run.
+
+	* sim-n-core.h (sim_core_trace_M): Allay const warning.
+	* sim-trace.h (trace_generic): Ditto.
+	* sim-trace.c (trace_generic): Ditto.
+	
+	* sim-reason.c (sim_stop_reason): Return host signal numbers
+	to gdb on sim_stopped and sim_signalled cases.
+	
+1998-12-14  Doug Evans  <devans@casey.cygnus.com>
+
+	* Make-common.in (SIM_MAIN_DEPS): New var.
+	(CGEN_MAIN_CPU_DEPS): New var.
+	* aclocal.m4: Add --enable-cgen-maint option.
+	* cgen-mem.h (GETMEM*): New arg `pc'.  Pass to sim_core routine.
+	(SETMEM*): Ditto.
+	(GETIMEM*): Pass pc value to sim_core routine.
+
 Fri Dec 11 16:58:36 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* hw-handles.c (hw_handle_add_ihandle, hw_handle_add_phandle):
@@ -3871,5 +3901,3 @@ Tue Oct 10 12:03:13 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
 Thu Sep 28 15:40:36 1995  steve chamberlain  <sac@slash.cygnus.com>
 
 	* run.c, run.1: From sh directory.
-
-
