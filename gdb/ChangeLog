@@ -1,3 +1,8 @@
+Sun Feb 19 11:05:28 1995  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* procfs.c (unconditionally_kill_inferior):  Don't issue a PIOCKILL
+	in addition to a PIOCSSIG to kill the inferior.
+
 Thu Feb 16 15:06:12 1995  Per Bothner  <bothner@kalessin.cygnus.com>
 
 	* parse.c (follow_types):  Given (TYPE[]) (i.e. with no length),

@@ -1250,12 +1250,11 @@ unconditionally_kill_inferior (pi)
   ppid = pi->prstatus.pr_ppid;
 
   signo = SIGKILL;
-  ioctl (pi->fd, PIOCKILL, &signo);
 
 #ifdef PROCFS_NEED_PIOCSSIG_FOR_KILL
-  /* Alpha OSF/1 procfs needs an additional PIOCSSIG call with
-     a SIGKILL signal to kill the inferior, otherwise it might remain
-     stopped with a pending SIGKILL.
+  /* Alpha OSF/1 procfs needs a PIOCSSIG call with a SIGKILL signal
+     to kill the inferior, otherwise it might remain stopped with a
+     pending SIGKILL.
      We do not check the result of the PIOCSSIG, the inferior might have
      died already.  */
   {
@@ -1269,6 +1268,8 @@ unconditionally_kill_inferior (pi)
     newsiginfo.si_uid = getuid ();
     ioctl (pi->fd, PIOCSSIG, &newsiginfo);
   }
+#else
+  ioctl (pi->fd, PIOCKILL, &signo);
 #endif
 
   close_proc_file (pi);
