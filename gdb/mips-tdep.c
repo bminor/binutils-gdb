@@ -6097,16 +6097,16 @@ This option can be set to one of:\n\
   /* We really would like to have both "0" and "unlimited" work, but
      command.c doesn't deal with that.  So make it a var_zinteger
      because the user can always use "999999" or some such for unlimited.  */
-  c = add_set_cmd ("heuristic-fence-post", class_support, var_zinteger,
-		   (char *) &heuristic_fence_post, "\
-Set the distance searched for the start of a function.\n\
+  add_setshow_zinteger_cmd ("heuristic-fence-post", class_support,
+			    &heuristic_fence_post, "\
+Set the distance searched for the start of a function.\n", "\
+Show the distance searched for the start of a function.\n", "\
 If you are debugging a stripped executable, GDB needs to search through the\n\
 program for the start of a function.  This command sets the distance of the\n\
-search.  The only need to set it is when debugging a stripped executable.", &setlist);
-  /* We need to throw away the frame cache when we set this, since it
-     might change our ability to get backtraces.  */
-  set_cmd_sfunc (c, reinit_frame_cache_sfunc);
-  deprecated_add_show_from_set (c, &showlist);
+search.  The only need to set it is when debugging a stripped executable.", "\
+The distance searched for the start of a function is %s.\n",
+			    reinit_frame_cache_sfunc, NULL,
+			    &setlist, &showlist);
 
   /* Allow the user to control whether the upper bits of 64-bit
      addresses should be zeroed.  */
@@ -6131,9 +6131,12 @@ Compatibility with 64-bit MIPS target that transfers 32-bit quantities is %s.",
  set_mips64_transfers_32bit_regs, NULL, &setlist, &showlist);
 
   /* Debug this files internals. */
-  deprecated_add_show_from_set
-    (add_set_cmd ("mips", class_maintenance, var_zinteger,
-		  &mips_debug, "Set mips debugging.\n\
-When non-zero, mips specific debugging is enabled.", &setdebuglist),
-     &showdebuglist);
+  add_setshow_zinteger_cmd ("mips", class_maintenance,
+			    &mips_debug, "\
+Set mips debugging.\n", "\
+Show mips debugging.\n", "\
+When non-zero, mips specific debugging is enabled.\n", "\
+Mips debugging is currently %s.\n",
+			    NULL, NULL,
+			    &setdebuglist, &showdebuglist);
 }

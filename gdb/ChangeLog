@@ -1,5 +1,8 @@
 2004-10-30  Andrew Cagney  <cagney@gnu.org>
 
+	* mips-tdep.c (_initialize_mips_tdep): Use
+	add_setshow_zinteger_cmd.
+	
 	* mips-tdep.c (mips_eabi_extract_return_value)
 	(mips_o64_extract_return_value, mips_o64_store_return_value)
 	(return_value_location, mips_eabi_reg_struct_has_addr)
@@ -10,8 +13,6 @@
 	(mips_gdbarch_init): For O64 and EABI, delete
 	extract_return_value, store_return_value, use_struct_convention
 	and reg_struct_has_addr, add return_value.
-
-2004-10-30  Andrew Cagney  <cagney@gnu.org>
 
 	* mips-tdep.c (read_signed_register): Use
 	regcache_cooked_read_signed.
