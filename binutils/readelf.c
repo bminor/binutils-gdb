@@ -699,7 +699,7 @@ dump_relocations (file, rel_offset, rel_size, symtab, nsyms, strtab, is_rela)
 	  break;
 
 	case EM_PARISC:
-	  rtype = elf32_hppa_reloc_type (type);
+	  rtype = elf_hppa_reloc_type (type);
 	  break;
 	}
 
