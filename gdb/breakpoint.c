@@ -947,9 +947,9 @@ top:
     {
       while (bs->commands)
 	{
-	  char *line = bs->commands->line;
+	  struct command_line *cmd = bs->commands;
 	  bs->commands = bs->commands->next;
-	  execute_command (line, 0);
+	  execute_control_command (cmd);
 	  /* If the inferior is proceeded by the command, bomb out now.
 	     The bpstat chain has been blown away by wait_for_inferior.
 	     But since execution has stopped again, there is a new bpstat
@@ -1793,9 +1793,7 @@ breakpoint_1 (bnum, allflag)
 
 	    while (l)
 	      {
-		fputs_filtered ("\t", gdb_stdout);
-		fputs_filtered (l->line, gdb_stdout);
-		fputs_filtered ("\n", gdb_stdout);
+		print_command_line (l, 4);
 		l = l->next;
 	      }
 	  }

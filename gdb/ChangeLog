@@ -1,3 +1,30 @@
+Thu Dec 29 22:40:00 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* Allow up to 10 whitespace separated arguments to user defined
+	commands.
+	* top.c (struct user_args): Structure for holding arguments to
+	user defined commands.
+	(print_command_line): Delete unused "tmp_chain" variable.  Clean
+	up flow control by having cases exit in the same manner.
+	Before executing a command or evaluating an expression, substitute
+	the current $arg0..$arg9 values if the command/expression uses them.
+	(arg_cleanup): New function.
+	(setup_user_args, locate_arg, insert_args): Likewise.
+	(execute_user_command): Allow arguments to user defined commands.
+
+	* Allow if/while commands to be used within a breakpoint command
+	list.
+	* breakpoint.c (bpstat_do_actions): Call execute_control_command
+	rather than execute_command (passes entire command structure rather
+	than just the command line text).
+	(breakpoint_1): Use "print_command_line" to print a breakpoint
+	command line (including control structures).
+	* gdbcmd.h (execute_control_command): Provide extern decl.
+	(print_command_line): Likewise.
+	* top.c (execute_control_command): No longer static.
+	(print_command_line): New function to recursively print a command
+	line, including control structures.
+
 Thu Dec 29 18:18:31 1994  Rob Savoye  <rob@darkstar.cygnus.com>
 
 	* hppa-tdep.c (pa_print_registers): Extract register values stored

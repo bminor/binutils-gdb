@@ -68,9 +68,6 @@ static void while_command PARAMS ((char *, int));
 
 static void if_command PARAMS ((char *, int));
 
-static enum command_control_type 
-execute_control_command PARAMS ((struct command_line *));
-
 static struct command_line *
 build_command_line PARAMS ((enum command_control_type, char *));
 
@@ -83,6 +80,14 @@ static enum misc_command_type read_next_line PARAMS ((struct command_line **));
 
 static enum command_control_type
 recurse_read_control_structure PARAMS ((struct command_line *));
+
+static struct cleanup * setup_user_args PARAMS ((char *));
+
+static char * locate_arg PARAMS ((char *));
+
+static char * insert_args PARAMS ((char *));
+
+static void arg_cleanup PARAMS ((void));
 
 static void init_main PARAMS ((void));
 
@@ -317,6 +322,19 @@ int remote_debug = 0;
 
 /* Level of control structure.  */
 static int control_level;
+
+/* Structure for arguments to user defined functions.  */
+#define MAXUSERARGS 10
+struct user_args
+{
+  struct user_args *next;
+  struct
+    {
+      char *arg;
+      int len;
+    } a[MAXUSERARGS];
+  int count;
+} *user_args;
 
 /* Signal to catch ^Z typed while reading a command: SIGTSTP or SIGCONT.  */
 
@@ -646,41 +664,130 @@ get_command_line (type, arg)
   return cmd;
 }
 
+/* Recursively print a command (including full control structures).  */
+void
+print_command_line (cmd, depth)
+     struct command_line *cmd;
+     unsigned int depth;
+{
+  unsigned int i;
+
+  if (depth)
+    {
+      for (i = 0; i < depth; i++)
+	fputs_filtered ("  ", gdb_stdout);
+    }
+
+  /* A simple command, print it and return.  */
+  if (cmd->control_type == simple_control)
+    {
+      fputs_filtered (cmd->line, gdb_stdout);
+      fputs_filtered ("\n", gdb_stdout);
+      return;
+    }
+
+  /* loop_continue to jump to the start of a while loop, print it
+     and return. */
+  if (cmd->control_type == continue_control)
+    {
+      fputs_filtered ("loop_continue\n", gdb_stdout);
+      return;
+    }
+
+  /* loop_break to break out of a while loop, print it and return.  */
+  if (cmd->control_type == break_control)
+    {
+      fputs_filtered ("loop_break\n", gdb_stdout);
+      return;
+    }
+
+  /* A while command.  Recursively print its subcommands before returning.  */
+  if (cmd->control_type == while_control)
+    {
+      struct command_line *list;
+      fputs_filtered ("while ", gdb_stdout);
+      fputs_filtered (cmd->line, gdb_stdout);
+      fputs_filtered ("\n", gdb_stdout);
+      list = *cmd->body_list;
+      while (list)
+	{
+	  print_command_line (list, depth + 1);
+	  list = list->next;
+	}
+    }
+
+  /* An if command.  Recursively print both arms before returning.  */
+  if (cmd->control_type == if_control)
+    {
+      fputs_filtered ("if ", gdb_stdout);
+      fputs_filtered (cmd->line, gdb_stdout);
+      fputs_filtered ("\n", gdb_stdout);
+      /* The true arm. */
+      print_command_line (cmd->body_list[0], depth + 1);
+
+      /* Show the false arm if it exists.  */
+      if (cmd->body_count == 2)
+	  {
+	    if (depth)
+	      {
+		for (i = 0; i < depth; i++)
+		  fputs_filtered ("  ", gdb_stdout);
+	      }
+	    fputs_filtered ("else\n", gdb_stdout);
+	    print_command_line (cmd->body_list[1], depth + 1);
+	  }
+      if (depth)
+	{
+	  for (i = 0; i < depth; i++)
+	    fputs_filtered ("  ", gdb_stdout);
+	}
+      fputs_filtered ("end\n", gdb_stdout);
+    }
+}
+
 /* Execute the command in CMD.  */
 
-static enum command_control_type
+enum command_control_type
 execute_control_command (cmd)
      struct command_line *cmd;
 {
   struct expression *expr;
   struct command_line *current;
   struct cleanup *old_chain = 0;
-  struct cleanup *tmp_chain;
   value_ptr val;
   int loop;
   enum command_control_type ret;
+  char *new_line;
 
   switch (cmd->control_type)
     {
     case simple_control:
       /* A simple command, execute it and return.  */
-      execute_command (cmd->line, 0);
-      return cmd->control_type;
+      new_line = insert_args (cmd->line);
+      if (!new_line)
+	return invalid_control;
+      old_chain = make_cleanup (free_current_contents, &new_line);
+      execute_command (new_line, 0);
+      ret = cmd->control_type;
+      break;
 
     case continue_control:
     case break_control:
       /* Return for "continue", and "break" so we can either
 	 continue the loop at the top, or break out.  */
-      return cmd->control_type;
+      ret = cmd->control_type;
+      break;
 
     case while_control:
       {
 	/* Parse the loop control expression for the while statement.  */
-	expr = parse_expression (cmd->line);
-	tmp_chain = make_cleanup (free_current_contents, &expr);
-	if (!old_chain)
-	  old_chain = tmp_chain;
-
+	new_line = insert_args (cmd->line);
+	if (!new_line)
+	  return invalid_control;
+	old_chain = make_cleanup (free_current_contents, &new_line);
+	expr = parse_expression (new_line);
+	make_cleanup (free_current_contents, &expr);
+	
 	ret = simple_control;
 	loop = true;
 
@@ -727,9 +834,13 @@ execute_control_command (cmd)
 
     case if_control:
       {
+	new_line = insert_args (cmd->line);
+	if (!new_line)
+	  return invalid_control;
+	old_chain = make_cleanup (free_current_contents, &new_line);
 	/* Parse the conditional for the if statement.  */
-	expr = parse_expression (cmd->line);
-	old_chain = make_cleanup (free_current_contents, &expr);
+	expr = parse_expression (new_line);
+	make_cleanup (free_current_contents, &expr);
 
 	current = NULL;
 	ret = simple_control;
@@ -756,6 +867,7 @@ execute_control_command (cmd)
 	    /* Get the next statement in the body.  */
 	    current = current->next;
 	  }
+
 	break;
       }
 
@@ -810,6 +922,149 @@ if_command (arg, from_tty)
   free_command_lines (&command);
 }
 
+/* Cleanup */
+static void
+arg_cleanup ()
+{
+  struct user_args *oargs = user_args;
+  if (!user_args)
+    fatal ("Internal error, arg_cleanup called with no user args.\n");
+
+  user_args = user_args->next;
+  free (oargs);
+}
+
+/* Bind the incomming arguments for a user defined command to
+   $arg0, $arg1 ... $argMAXUSERARGS.  */
+
+static struct cleanup *
+setup_user_args (p)
+     char *p;
+{
+  struct user_args *args;
+  struct cleanup *old_chain;
+  unsigned int arg_count = 0;
+
+  args = (struct user_args *)xmalloc (sizeof (struct user_args));
+  memset (args, 0, sizeof (struct user_args));
+
+  args->next = user_args;
+  user_args = args;
+
+  old_chain = make_cleanup (arg_cleanup, 0);
+
+  if (p == NULL)
+    return old_chain;
+
+  while (*p)
+    {
+      char *start_arg;
+
+      if (arg_count >= MAXUSERARGS)
+	{
+	  error ("user defined function may only have %d arguments.\n",
+		 MAXUSERARGS);
+	  return old_chain;
+	}
+
+      /* Strip whitespace.  */
+      while (*p == ' ' || *p == '\t')
+	p++;
+
+      /* P now points to an argument.  */
+      start_arg = p;
+      user_args->a[arg_count].arg = p;
+
+      /* Get to the end of this argument.  */
+      while (*p && *p != ' ' && *p != '\t')
+	p++;
+
+      user_args->a[arg_count].len = p - start_arg;
+      arg_count++;
+      user_args->count++;
+    }
+  return old_chain;
+}
+
+/* Given character string P, return a point to the first argument ($arg),
+   or NULL if P contains no arguments.  */
+
+static char *
+locate_arg (p)
+     char *p;
+{
+  while (p = index (p, '$'))
+    {
+      if (strncmp (p, "$arg", 4) == 0 && isdigit (p[4]))
+	return p;
+      p++;
+    }
+  return NULL;
+}
+
+/* Insert the user defined arguments stored in user_arg into the $arg
+   arguments found in line, with the updated copy being placed into nline.  */
+
+static char *
+insert_args (line)
+     char *line;
+{
+  char *p, *save_line, *new_line;
+  unsigned len, i;
+
+  /* First we need to know how much memory to allocate for the new line.  */
+  save_line = line;
+  len = 0;
+  while (p = locate_arg (line))
+    {
+      len += p - line;
+      i = p[4] - '0';
+      
+      if (i >= user_args->count)
+	{
+	  error ("Missing argument %d in user function.\n", i);
+	  return NULL;
+	}
+      len += user_args->a[i].len;
+      line = p + 5;
+    }
+
+  /* Don't forget the tail.  */
+  len += strlen (line);
+
+  /* Allocate space for the new line and fill it in.  */
+  new_line = (char *)xmalloc (len + 1);
+  if (new_line == NULL)
+    return NULL;
+
+  /* Restore pointer to beginning of old line.  */
+  line = save_line;
+
+  /* Save pointer to beginning of new line.  */
+  save_line = new_line;
+
+  while (p = locate_arg (line))
+    {
+      int i, len;
+
+      memcpy (new_line, line, p - line);
+      new_line += p - line;
+      i = p[4] - '0';
+
+      if (len = user_args->a[i].len)
+	{
+	  memcpy (new_line, user_args->a[i].arg, len);
+	  new_line += len;
+	}
+      line = p + 5;
+    }
+  /* Don't forget the tail.  */
+  strcpy (new_line, line);
+
+  /* Return a pointer to the beginning of the new line.  */
+  return save_line;
+}
+
 void
 execute_user_command (c, args)
      struct cmd_list_element *c;
@@ -819,8 +1074,7 @@ execute_user_command (c, args)
   struct cleanup *old_chain;
   enum command_control_type ret;
 
-  if (args)
-    error ("User-defined commands cannot take arguments.");
+  old_chain = setup_user_args (args);
 
   cmdlines = c->user_commands;
   if (cmdlines == 0)

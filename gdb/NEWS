@@ -1,6 +1,19 @@
 		What has changed since GDB-3.5?
 		(Organized release by release)
 
+* User commands may accept up to 10 arguments separated by whitespace.
+Arguments are accessed within the user command via $arg0..$arg0.
+A trivial example:
+define adder
+  print $arg0 + $arg1 + $arg2
+
+To execute the command use:
+adder 1 2 3
+
+Defines the command "adder" which prints the sum of its three arguments.
+Note the arguments are text substitutions, so they may reference variables,
+use complex expressions, or even perform inferior function calls.
+
 * New "if" and "while" commands.  This makes it possible to write
 somewhat more sophisticated user-defined commands.
 
