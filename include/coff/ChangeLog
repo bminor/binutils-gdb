@@ -1,3 +1,12 @@
+Fri Mar 25 17:16:55 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* ecoff.h (struct ecoff_debug_info): Add adjust field.
+	(struct ecoff_value_adjust): Define.
+
+Tue Mar 22 13:22:47 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* mips.h (MIPS_R_PCREL16): Define.
+
 Sat Feb 26 10:26:38 1994  Ian Lance Taylor  (ian@cygnus.com)
 
 	* ecoff.h: Add casts to avoid warnings from SVR4 cc.
@@ -375,6 +384,7 @@ Sat Nov 30 20:38:35 1991  Steve Chamberlain  (sac at rtl.cygnus.com)
 	* ChangeLog, a29k.h, h8300.h, i386.h, i960.h, internal.h, m68k.h,
 	m88k.h, mips.h, rs6000.h: move from above coff-<foo>.h
 
-
-
-
+
+Local Variables:
+version-control: never
+End:

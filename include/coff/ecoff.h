@@ -158,42 +158,42 @@ struct tir_ext {
 	unsigned char	t_tq23[1];
 };
 
-#define	TIR_BITS1_FBITFIELD_BIG		0x80
-#define	TIR_BITS1_FBITFIELD_LITTLE	0x01
+#define	TIR_BITS1_FBITFIELD_BIG		((unsigned int) 0x80)
+#define	TIR_BITS1_FBITFIELD_LITTLE	((unsigned int) 0x01)
 
-#define	TIR_BITS1_CONTINUED_BIG		0x40
-#define	TIR_BITS1_CONTINUED_LITTLE	0x02
+#define	TIR_BITS1_CONTINUED_BIG		((unsigned int) 0x40)
+#define	TIR_BITS1_CONTINUED_LITTLE	((unsigned int) 0x02)
 
-#define	TIR_BITS1_BT_BIG		0x3F
+#define	TIR_BITS1_BT_BIG		((unsigned int) 0x3F)
 #define	TIR_BITS1_BT_SH_BIG		0
-#define	TIR_BITS1_BT_LITTLE		0xFC
+#define	TIR_BITS1_BT_LITTLE		((unsigned int) 0xFC)
 #define	TIR_BITS1_BT_SH_LITTLE		2
 
-#define	TIR_BITS_TQ4_BIG		0xF0
+#define	TIR_BITS_TQ4_BIG		((unsigned int) 0xF0)
 #define	TIR_BITS_TQ4_SH_BIG		4
-#define	TIR_BITS_TQ5_BIG		0x0F
+#define	TIR_BITS_TQ5_BIG		((unsigned int) 0x0F)
 #define	TIR_BITS_TQ5_SH_BIG		0
-#define	TIR_BITS_TQ4_LITTLE		0x0F
+#define	TIR_BITS_TQ4_LITTLE		((unsigned int) 0x0F)
 #define	TIR_BITS_TQ4_SH_LITTLE		0
-#define	TIR_BITS_TQ5_LITTLE		0xF0
+#define	TIR_BITS_TQ5_LITTLE		((unsigned int) 0xF0)
 #define	TIR_BITS_TQ5_SH_LITTLE		4
 
-#define	TIR_BITS_TQ0_BIG		0xF0
+#define	TIR_BITS_TQ0_BIG		((unsigned int) 0xF0)
 #define	TIR_BITS_TQ0_SH_BIG		4
-#define	TIR_BITS_TQ1_BIG		0x0F
+#define	TIR_BITS_TQ1_BIG		((unsigned int) 0x0F)
 #define	TIR_BITS_TQ1_SH_BIG		0
-#define	TIR_BITS_TQ0_LITTLE		0x0F
+#define	TIR_BITS_TQ0_LITTLE		((unsigned int) 0x0F)
 #define	TIR_BITS_TQ0_SH_LITTLE		0
-#define	TIR_BITS_TQ1_LITTLE		0xF0
+#define	TIR_BITS_TQ1_LITTLE		((unsigned int) 0xF0)
 #define	TIR_BITS_TQ1_SH_LITTLE		4
 
-#define	TIR_BITS_TQ2_BIG		0xF0
+#define	TIR_BITS_TQ2_BIG		((unsigned int) 0xF0)
 #define	TIR_BITS_TQ2_SH_BIG		4
-#define	TIR_BITS_TQ3_BIG		0x0F
+#define	TIR_BITS_TQ3_BIG		((unsigned int) 0x0F)
 #define	TIR_BITS_TQ3_SH_BIG		0
-#define	TIR_BITS_TQ2_LITTLE		0x0F
+#define	TIR_BITS_TQ2_LITTLE		((unsigned int) 0x0F)
 #define	TIR_BITS_TQ2_SH_LITTLE		0
-#define	TIR_BITS_TQ3_LITTLE		0xF0
+#define	TIR_BITS_TQ3_LITTLE		((unsigned int) 0xF0)
 #define	TIR_BITS_TQ3_SH_LITTLE		4
 
 /* Relative symbol external record */
@@ -203,19 +203,19 @@ struct rndx_ext {
 };
 
 #define	RNDX_BITS0_RFD_SH_LEFT_BIG	4
-#define	RNDX_BITS1_RFD_BIG		0xF0
+#define	RNDX_BITS1_RFD_BIG		((unsigned int) 0xF0)
 #define	RNDX_BITS1_RFD_SH_BIG		4
 
 #define	RNDX_BITS0_RFD_SH_LEFT_LITTLE	0
-#define	RNDX_BITS1_RFD_LITTLE		0x0F
+#define	RNDX_BITS1_RFD_LITTLE		((unsigned int) 0x0F)
 #define	RNDX_BITS1_RFD_SH_LEFT_LITTLE	8
 
-#define	RNDX_BITS1_INDEX_BIG		0x0F
+#define	RNDX_BITS1_INDEX_BIG		((unsigned int) 0x0F)
 #define	RNDX_BITS1_INDEX_SH_LEFT_BIG	16
 #define	RNDX_BITS2_INDEX_SH_LEFT_BIG	8
 #define	RNDX_BITS3_INDEX_SH_LEFT_BIG	0
 
-#define	RNDX_BITS1_INDEX_LITTLE		0xF0
+#define	RNDX_BITS1_INDEX_LITTLE		((unsigned int) 0xF0)
 #define	RNDX_BITS1_INDEX_SH_LITTLE	4
 #define	RNDX_BITS2_INDEX_SH_LEFT_LITTLE	4
 #define	RNDX_BITS3_INDEX_SH_LEFT_LITTLE	12
@@ -338,7 +338,9 @@ struct ecoff_debug_info
      structure provides the sizes of the structures and the functions
      needed to swap the information in and out.  These pointers are
      all pointers to arrays, not single structures.  They will be NULL
-     if there are no instances of the relevant structure.  */
+     if there are no instances of the relevant structure.  These
+     fields are also used by the assembler to output ECOFF debugging
+     information.  */
   unsigned char *line;
   PTR external_dnr;	/* struct dnr_ext */
   PTR external_pdr;	/* struct pdr_ext */
@@ -351,30 +353,49 @@ struct ecoff_debug_info
   PTR external_rfd;	/* struct rfd_ext */
   PTR external_ext;	/* struct ext_ext */
 
-  /* When we are linking, the above pointers point to growing buffers.
-     This set of pointers point to the end of the buffers.  */
-  unsigned char *line_end;
-  PTR external_dnr_end;	/* struct dnr_ext */
-  PTR external_pdr_end;	/* struct pdr_ext */
-  PTR external_sym_end;	/* struct sym_ext */
-  PTR external_opt_end;	/* struct opt_ext */
-  union aux_ext *external_aux_end;
-  char *ss_end;
+  /* These fields are used when linking.  They may disappear at some
+     point.  */
   char *ssext_end;
-  PTR external_fdr_end;	/* struct fdr_ext */
-  PTR external_rfd_end;	/* struct rfd_ext */
-  PTR external_ext_end;	/* struct ext_ext */
+  PTR external_ext_end;
 
-  /* When linking, this field is set to the base FDR index for an
-     input BFD in the output FDR information, and is used when writing
-     out the xternal symbols.  */
-  bfd_size_type ifdbase;
+  /* When linking, this field holds a mapping from the input FDR
+     numbers to the output numbers, and is used when writing out the
+     external symbols.  It is NULL if no mapping is required.  */
+  RFDT *ifdmap;
 
   /* The swapped FDR information.  Currently this is never NULL, but
      code using this structure should probably double-check in case
      this changes in the future.  This is a pointer to an array, not a
      single structure.  */
   FDR *fdr;
+
+  /* When relaxing MIPS embedded PIC code, we may need to adjust
+     symbol values when they are output.  This is a linked list of
+     structures indicating how values should be adjusted.  There is no
+     requirement that the entries be in any order, or that they not
+     overlap.  This field is normally NULL, in which case no
+     adjustments need to be made.  */
+  struct ecoff_value_adjust *adjust;
+};
+
+/* This structure describes how to adjust symbol values when
+   outputting MIPS embedded PIC code.  These adjustments only apply to
+   the internal symbols, as the external symbol values will come from
+   the hash table and have already been adjusted.  */
+
+struct ecoff_value_adjust
+{
+  /* Next entry on adjustment list.  */
+  struct ecoff_value_adjust *next;
+  /* Starting VMA of adjustment.  This is the VMA in the ECOFF file,
+     not the offset from the start of the section.  Thus it should
+     indicate a particular section.  */
+  bfd_vma start;
+  /* Ending VMA of adjustment.  */
+  bfd_vma end;
+  /* Adjustment.  This should be added to the value of the symbol, or
+     FDR.  This is zero for the last entry in the array.  */
+  long adjust;
 };
 
 #endif /* ! defined (ECOFF_H) */
