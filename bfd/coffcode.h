@@ -3905,7 +3905,7 @@ static CONST bfd_coff_backend_data bfd_coff_std_swap_table =
 #endif
 
 #ifndef coff_bfd_is_local_label_name
-#define coff_bfd_is_local_label_name bfd_generic_is_local_label_name
+#define coff_bfd_is_local_label_name _bfd_coff_is_local_label_name
 #endif
 #ifndef coff_read_minisymbols
 #define coff_read_minisymbols _bfd_generic_read_minisymbols
