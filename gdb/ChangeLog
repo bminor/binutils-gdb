@@ -1,3 +1,16 @@
+2000-02-26  Kevin Buettner  <kevinb@redhat.com>
+
+	* ppc-linux-tdep.c (ppc_linux_memory_remove_breakpoint): Add
+	comment explaining motivation behind this function and why
+	the generic facilities won't work for this platform.
+	* rs6000-tdep.c (skip_prologue): Always test to make sure
+	that an instruction is read successfully from the target's
+	memory.  Introduce notion of instructions which may appear in
+	the prologue, but may not end the prologue.  Added explicit
+	check for nop instruction.  Use memset() to zero the frame
+	data instead of assignment from a statically allocated,
+	uninitialized structure.
+
 Sat Feb 26 17:15:16 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* MAINTAINERS: Chris Faylor is responsible for all MS Windows
