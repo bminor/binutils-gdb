@@ -1,3 +1,9 @@
+Fri Feb 17 14:50:08 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/obj-elf.c (elf_frob_symbol): Warn if a symbol is both
+	weak and common.
+	* config/obj-aout.c (obj_aout_frob_symbol): Likewise.
+
 Fri Feb 17 12:43:47 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* config/tc-ppc.c (md_pseudo_table): Don't redefine byte under
