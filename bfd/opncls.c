@@ -1,3 +1,5 @@
+/* opncls.c -- open and close a bfd. */
+
 /* Copyright (C) 1990, 1991 Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Diddler.
@@ -18,13 +20,9 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* $Id$ */
 
-/*** opncls.c -- open and close a bfd. */
-
 #include "sysdep.h"
 #include "bfd.h"
 #include "libbfd.h"
-
-
 
 extern void bfd_cache_init();
 FILE *bfd_open_file();
@@ -52,10 +50,11 @@ FILE *bfd_open_file();
 
    Perhaps, since unix has so many different kinds of locking anyway,
    we should use the emacs lock scheme?... */
-
 
 #define obstack_chunk_alloc malloc
 #define obstack_chunk_free free
+
+/* Return a new BFD.  All BFD's are allocated through this routine.  */
 
 bfd *new_bfd()
 {
@@ -64,6 +63,8 @@ bfd *new_bfd()
   obstack_begin(&tmp,128);
   
   nbfd = (bfd *)obstack_alloc(&tmp,sizeof(bfd));
+  memset((PTR)nbfd, 0, sizeof (bfd));		/* Clear it */
+
   nbfd->memory = tmp;
 
   nbfd->direction = no_direction;
@@ -80,8 +81,12 @@ bfd *new_bfd()
   nbfd->sections = (asection *)NULL;
   nbfd->cacheable = false;
   nbfd->flags = NO_FLAGS;
+  nbfd->mtime_set = 0;
   return nbfd;
 }
+
+/* Allocate a new BFD as a member of archive OBFD.  */
+
 bfd *new_bfd_contained_in(obfd)
 bfd *obfd;
 {
@@ -179,7 +184,7 @@ DEFUN(bfd_fdopenr,(filename, target, fd),
   /* if the fd were open for read only, this still would not hurt: */
   nbfd->iostream = (char *) fdopen (fd, "r+"); 
   if (nbfd->iostream == NULL) {
-    free (nbfd);
+    (void) obstack_free (&nbfd->memory, (PTR)0);
     return NULL;
   }
   
@@ -240,7 +245,7 @@ DEFUN(bfd_openw,(filename, target),
 
   if (bfd_open_file (nbfd) == NULL) {
     bfd_error = system_call_error;	/* File not writeable, etc */
-    free (nbfd);
+    (void) obstack_free (&nbfd->memory, (PTR)0);
     return NULL;
   }
   return nbfd;
@@ -264,12 +269,12 @@ bfd_close (abfd)
     stat(abfd->filename, &buf);
     chmod(abfd->filename,buf.st_mode | S_IXUSR | S_IXGRP | S_IXOTH);
   }
-  obstack_free(&abfd->memory, (PTR)0);
+  (void) obstack_free (&abfd->memory, (PTR)0);
   return true;
 }
-/* 
- called to create a bfd with no ascociated file or target 
- */
+
+/* Create a bfd with no associated file or target.  */
+
 bfd *
 DEFUN(bfd_create,(filename, template),
       CONST char *filename AND
@@ -287,40 +292,39 @@ DEFUN(bfd_create,(filename, template),
   nbfd->direction = no_direction;
   bfd_set_format(nbfd, bfd_object);
   return nbfd;
-
-
-
 }
+
+/* Memory allocation */
 
 DEFUN(PTR bfd_alloc, (abfd, size),
       bfd *abfd AND
-      size_t size)
+      bfd_size_type size)
 {
-  PTR res = obstack_alloc(&(abfd->memory),size);
+  PTR res = obstack_alloc(&(abfd->memory), (int)size);
   return res;
 }
 
 DEFUN(PTR bfd_zalloc,(abfd, size),
       bfd *abfd AND
-      size_t size)
+      bfd_size_type size)
 {
   PTR res = bfd_alloc(abfd, size);
-  memset(res, 0, size);
+  memset(res, 0, (size_t)size);
   return res;
 }
 
 DEFUN(PTR bfd_realloc,(abfd, old, size),
       bfd *abfd AND
       PTR old AND
-      size_t size)
+      bfd_size_type size)
 {
   PTR res = bfd_alloc(abfd, size);
-  memcpy(res, old, size);
+  memcpy(res, old, (size_t)size);
   return res;
 }
 
 
-DEFUN(size_t bfd_alloc_size,(abfd),
+DEFUN(bfd_size_type bfd_alloc_size,(abfd),
       bfd *abfd)
 {
   struct _obstack_chunk *chunk = abfd->memory.chunk;

@@ -59,6 +59,12 @@ typedef struct icofdata
   long int relocbase;
 } coff_data_type;
 
-/* We cast the address of the first element of a asymbol to ensure that the
+/* We take the address of the first element of a asymbol to ensure that the
  * macro is only ever applied to an asymbol.  */
 #define coffsymbol(asymbol) ((coff_symbol_type *)(&((asymbol)->the_bfd)))
+
+
+/* Generic COFF swapping routines -- also used by GDB.  */
+PROTO (void, bfd_coff_swap_sym, (bfd *, SYMENT *));
+PROTO (void, bfd_coff_swap_aux, (bfd *, AUXENT *, int, int));
+PROTO (void, bfd_coff_swap_lineno, (bfd *, LINENO *));

@@ -5,9 +5,9 @@ typedef struct
   asymbol symbol;
 } oasys_symbol_type;
 
-typedef struct oasys_reloc_struct {
+typedef struct oasys_reloc {
   arelent relent;
-  struct oasys_reloc_struct *next;
+  struct oasys_reloc *next;
   unsigned int symbol;
 } oasys_reloc_type;
 
@@ -15,7 +15,7 @@ typedef struct oasys_reloc_struct {
 #define oasys_symbol(x) ((oasys_symbol_type *)(x))
 #define oasys_per_section(x) ((oasys_per_section_type *)(x->used_by_bfd))
 
-typedef struct oasys_per_section_struct
+typedef struct oasys_per_section
 {
   asection *section;
   bfd_byte *data;

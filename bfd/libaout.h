@@ -65,9 +65,8 @@ struct sunexdata {
 
 
 
-/* We case the address of the first element of a asymbol to ensure that the
- * macro is only every applied to an asymbol
- */
+/* We take the address of the first element of an asymbol to ensure that the
+ * macro is only ever applied to an asymbol */
 #define aout_symbol(asymbol) ((aout_symbol_type *)(&(asymbol)->the_bfd))
 
 /*#define obj_symbols(bfd) ((((struct sunexdata *) ((bfd)->tdata))->symbols))*/
@@ -75,6 +74,3 @@ struct sunexdata {
 #define obj_arch_flags(bfd) ((((struct sunexdata *) (bfd)->tdata))->arch_flags)
 
 #define get_tdata(x)  ((struct sunexdata *)((x)->tdata))
-#define set_tdata(x,y)  ((x)->tdata = (PTR) (y))
-
-

@@ -27,9 +27,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
    o - all arch headers are the same size (across architectures).
 */
 
-/* $Id$ 
- */
-
+/* $Id$ */
 
 #include "sysdep.h"
 #include "bfd.h"
@@ -59,16 +57,14 @@ struct ar_cache {
 
 #define arch_hdr(bfd) ((struct ar_hdr *)   \
 		       (((struct areltdata *)((bfd)->arelt_data))->arch_header))
-
 
-
 boolean
 _bfd_generic_mkarchive (abfd)
      bfd *abfd;
 {
-  abfd->tdata = bfd_zalloc(abfd, sizeof (struct artdata));
+  set_tdata (abfd, bfd_zalloc(abfd, sizeof (struct artdata)));
 
-  if (abfd->tdata == NULL) {
+  if (bfd_ardata (abfd) == NULL) {
     bfd_error = no_memory;
     return false;
   }
@@ -79,7 +75,7 @@ _bfd_generic_mkarchive (abfd)
 symindex
 bfd_get_next_mapent (abfd, prev, entry)
      bfd *abfd;
-   symindex prev;
+     symindex prev;
      carsym **entry;
 {
   if (!bfd_has_map (abfd)) {
@@ -88,7 +84,7 @@ bfd_get_next_mapent (abfd, prev, entry)
   }
   
   if (prev == BFD_NO_MORE_SYMBOLS) prev = 0;
-  else if (++prev >= (symindex)(bfd_ardata (abfd)->symdef_count))
+  else if (++prev >= bfd_ardata (abfd)->symdef_count)
     return BFD_NO_MORE_SYMBOLS;
 
   *entry = (bfd_ardata (abfd)->symdefs + prev);
@@ -115,7 +111,7 @@ boolean
 bfd_set_archive_head (output_archive, new_head)
      bfd *output_archive, *new_head;
 {
- 
+
   output_archive->archive_head = new_head;
   return true;
 }
@@ -140,7 +136,8 @@ add_bfd_to_cache (arch_bfd, filepos, new_elt)
      bfd *arch_bfd, *new_elt;
      file_ptr filepos;
 {
-  struct ar_cache *new_cache = ((struct ar_cache *)bfd_zalloc(arch_bfd,sizeof (struct ar_cache)));
+  struct ar_cache *new_cache = (struct ar_cache *)
+				bfd_zalloc(arch_bfd, sizeof (struct ar_cache));
 
   if (new_cache == NULL) {
     bfd_error = no_memory;
@@ -172,7 +169,6 @@ get_extended_arelt_filename (arch, name)
      bfd *arch;
      char *name;
 {
-    extern int errno;
     unsigned long index = 0;
 
     /* Should extract string so that I can guarantee not to overflow into
@@ -296,6 +292,7 @@ get_elt_at_filepos (archive, filepos)
   
   n_nfd = _bfd_create_empty_archive_element_shell (archive);
   if (n_nfd == NULL) {
+    bfd_release (archive, (PTR)new_areldata);
     return NULL;
   }
   n_nfd->origin = bfd_tell (archive);
@@ -306,6 +303,8 @@ get_elt_at_filepos (archive, filepos)
     return n_nfd;
 
   /* huh? */
+  bfd_release (archive, (PTR)n_nfd);
+  bfd_release (archive, (PTR)new_areldata);
   return NULL;
 }
 
@@ -349,11 +348,10 @@ bfd *bfd_generic_openr_next_archived_file(archive, last_file)
   if (!last_file)
     filestart = bfd_ardata (archive)->first_file_filepos;
   else {
-  unsigned int size = arelt_size(last_file);
-    filestart = last_file->origin +size + size %2;
-}
-
-
+    unsigned int size = arelt_size(last_file);
+    /* Pad to an even boundary... */
+    filestart = last_file->origin + size + size%2;
+  }
 
   return get_elt_at_filepos (archive, filestart);
 }
@@ -376,7 +374,9 @@ bfd_generic_archive_p (abfd)
   if (strncmp (armag, ARMAG, SARMAG)) return 0;
 #endif
 
-  bfd_set_ardata(abfd, (struct artdata *) bfd_zalloc(abfd,sizeof (struct artdata)));
+  /* We are setting bfd_ardata(abfd) here, but since bfd_ardata
+     involves a cast, we can't do it as the left operand of assignment. */
+  set_tdata (abfd, bfd_zalloc(abfd,sizeof (struct artdata)));
 
   if (bfd_ardata (abfd)  == NULL) {
     bfd_error = no_memory;
@@ -391,7 +391,6 @@ bfd_generic_archive_p (abfd)
     return 0;
   }
 
-  /* armap could be left ungc'd! FIXME -- potential storage leak */
   if (!BFD_SEND (abfd, _bfd_slurp_extended_name_table, (abfd))) {
     bfd_release(abfd, bfd_ardata (abfd));
     abfd->tdata = NULL;
@@ -413,6 +412,9 @@ bfd_slurp_bsd_armap (abfd)
   struct artdata *ardata = bfd_ardata (abfd);
   char *stringbase;
 
+  /* FIXME, if the read fails, this routine quietly returns "true"!!
+     It should probably do that if the read gives 0 bytes (empty archive),
+     but fail for any other size... */
   if (bfd_read ((PTR)nextname, 1, 16, abfd) == 16) {
       /* The archive has at least 16 bytes in it */
       bfd_seek (abfd, -16L, SEEK_CUR);
@@ -431,22 +433,24 @@ bfd_slurp_bsd_armap (abfd)
       if (raw_armap == NULL) {
 	  bfd_error = no_memory;
   byebye:
+	  bfd_release (abfd, (PTR)mapdata);
 	  return false;
       }
 
       if (bfd_read ((PTR)raw_armap, 1, mapdata->parsed_size, abfd) !=
 	  mapdata->parsed_size) {
 	  bfd_error = malformed_archive;
+	  bfd_release (abfd, (PTR)raw_armap);
 	  goto byebye;
       }
 
-      ardata->symdef_count = *(raw_armap) / sizeof (struct symdef);
+      ardata->symdef_count = *raw_armap / sizeof (struct symdef);
       ardata->cache = 0;
       rbase = raw_armap+1;
       ardata->symdefs = (carsym *) rbase;
       stringbase = ((char *) (ardata->symdefs + ardata->symdef_count)) + 4;
 
-      for (;counter < (unsigned)( ardata->symdef_count); counter++) {
+      for (;counter < ardata->symdef_count; counter++) {
 	  struct symdef *sym = ((struct symdef *) rbase) + counter;
 	  sym->s.name = sym->s.string_offset + stringbase;
       }
@@ -454,6 +458,9 @@ bfd_slurp_bsd_armap (abfd)
       ardata->first_file_filepos = bfd_tell (abfd);
       /* Pad to an even boundary if you have to */
       ardata->first_file_filepos += (ardata-> first_file_filepos) %2;
+      /* FIXME, we should provide some way to free raw_ardata when
+	 we are done using the strings from it.  For now, it seems
+	 to be allocated on an obstack anyway... */
       bfd_has_map (abfd) = true;
   }
   return true;
@@ -471,15 +478,12 @@ bfd_slurp_coff_armap (abfd)
   char *stringbase;
   unsigned int stringsize;
   carsym *carsyms;
+  int result;
 
-  if (bfd_read ((PTR)&nextname, 1, 1, abfd) != 1) {
-  bfd_seek (abfd, -1L, SEEK_CUR);
-    bfd_has_map(abfd) = false;
-    return true;
-  }
+  result = bfd_read ((PTR)&nextname, 1, 1, abfd);
   bfd_seek (abfd, -1L, SEEK_CUR);
 
-  if (nextname != '/') {
+  if (result != 1 || nextname != '/') {
     /* Actually I think this is an error for a COFF archive */
     bfd_has_map (abfd) = false;
     return true;
@@ -492,7 +496,7 @@ bfd_slurp_coff_armap (abfd)
   if (raw_armap == NULL) {
     bfd_error = no_memory;
   byebye:
-
+    bfd_release (abfd, (PTR)mapdata);
     return false;
   }
 
@@ -500,7 +504,7 @@ bfd_slurp_coff_armap (abfd)
       mapdata->parsed_size) {
     bfd_error = malformed_archive;
   oops:
-
+    bfd_release (abfd, (PTR)raw_armap);
     goto byebye;
   }
 
@@ -540,11 +544,11 @@ bfd_slurp_coff_armap (abfd)
   ardata->first_file_filepos = bfd_tell (abfd);
   /* Pad to an even boundary if you have to */
   ardata->first_file_filepos += (ardata->first_file_filepos) %2;
-
+  bfd_release (abfd, (PTR)raw_armap);
+  bfd_release (abfd, (PTR)mapdata);
   bfd_has_map (abfd) = true;
   return true;
 }
-
 
 /** Extended name table.
 
@@ -562,6 +566,8 @@ _bfd_slurp_extended_name_table (abfd)
   char nextname[17];
   struct areltdata *namedata;
 
+  /* FIXME:  Formatting sucks here, and in case of failure of BFD_READ,
+     we probably don't want to return true.  */
   if (bfd_read ((PTR)nextname, 1, 16, abfd) == 16) {
 
   bfd_seek (abfd, -16L, SEEK_CUR);
@@ -574,19 +580,18 @@ _bfd_slurp_extended_name_table (abfd)
   namedata = snarf_ar_hdr (abfd);
   if (namedata == NULL) return false;
   
-  
   bfd_ardata (abfd)->extended_names = bfd_zalloc(abfd,namedata->parsed_size);
   if (bfd_ardata (abfd)->extended_names == NULL) {
     bfd_error = no_memory;
   byebye:
-
+    bfd_release (abfd, (PTR)namedata);
     return false;
   }
 
   if (bfd_read ((PTR)bfd_ardata (abfd)->extended_names, 1,
 		namedata->parsed_size, abfd) != namedata->parsed_size) {
     bfd_error = malformed_archive;
-
+    bfd_release (abfd, (PTR)(bfd_ardata (abfd)->extended_names));
     bfd_ardata (abfd)->extended_names = NULL;
     goto byebye;
   }
@@ -604,7 +609,9 @@ _bfd_slurp_extended_name_table (abfd)
   bfd_ardata (abfd)->first_file_filepos +=
     (bfd_ardata (abfd)->first_file_filepos) %2;
 
-
+  /* FIXME, we can't release namedata here because it was allocated
+     below extended_names on the obstack... */
+  /* bfd_release (abfd, namedata); */
 }
   return true;
 }
@@ -791,7 +798,7 @@ bfd_dont_truncate_arname (abfd, pathname, arhdr)
      char *pathname;
      char *arhdr;
 {
-  /* This interacts unpleasantly with ar's quick-append option.
+  /* FIXME: This interacts unpleasantly with ar's quick-append option.
      Fortunately ic960 users will never use that option.  Fixing this
      is very hard; fortunately I know how to do it and will do so once
      intel's release is out the door. */
@@ -901,7 +908,6 @@ _bfd_write_archive_contents (arch)
   boolean hasobjects = false;	/* if no .o's, don't bother to make a map */
   unsigned int i;
 
-
   /* Verify the viability of all entries; if any of them live in the
      filesystem (as opposed to living in an archive open for input)
      then construct a fresh ar_hdr for them.
@@ -995,8 +1001,6 @@ return true;
 }
 
 /* Note that the namidx for the first symbol is 0 */
-
-  
 
 boolean
 compute_and_write_armap (arch, elength)

@@ -1,3 +1,5 @@
+/* Intel 960 COFF support for BFD.  */
+
 /* Copyright (C) 1990, 1991 Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Diddler.
@@ -19,6 +21,8 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* $Id$ */
 
 #define I960 1
+#define BADMAG(x) I960BADMAG(x)
+
 #include <ansidecl.h>
 #include "sysdep.h"
 #include "bfd.h"
@@ -26,9 +30,6 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "obstack.h"
 #include "intel-coff.h"
 #include "libcoff.h"		/* to allow easier abstraction-breaking */
-
-
-
 
 
 #define CALLS	 0x66003800	/* Template for 'calls' instruction	*/
@@ -49,9 +50,8 @@ asection *ignore_input_section;
   bfd_reloc_status_enum_type result;
   coff_symbol_type *cs = coffsymbol(symbol_in);
 
-  /* So the target symbol has to be off coff type, and the symbol 
-     has to have the correct native information within it
-     */
+  /* So the target symbol has to be of coff type, and the symbol 
+     has to have the correct native information within it */
   if ((cs->symbol.the_bfd->xvec->flavour != bfd_target_coff_flavour_enum)
       || (cs->native == (struct syment *)NULL)) {
      /* This is interesting, consider the case where we're outputting */
@@ -60,7 +60,6 @@ asection *ignore_input_section;
      /* I complain ? - This will only work if the bout symbol is non */
      /* leaf. */
      result = bfd_reloc_dangerous;
-
   }
   else  {
     switch (cs->native->n_sclass) 
@@ -139,9 +138,8 @@ static reloc_howto_type howto_table[] =
 
 };
 
+/* The real code is in coff-code.h */
 
-
-#define BADMAG(x) I960BADMAG(x)
 #include "coff-code.h"
 
 bfd_target icoff_little_vec =
@@ -166,7 +164,8 @@ bfd_target icoff_little_vec =
      bfd_generic_archive_p, _bfd_dummy_target},
   {bfd_false, coff_mkobject,	/* bfd_set_format */
      _bfd_generic_mkarchive, bfd_false},
-JUMP_TABLE(coff)
+
+  JUMP_TABLE(coff)
 };
 
 
@@ -190,8 +189,9 @@ bfd_target icoff_big_vec =
   _do_getllong, _do_putllong, _do_getlshort, _do_putlshort, /* data */
   _do_getblong, _do_putblong, _do_getbshort, _do_putbshort, /* hdrs */
 
-    {_bfd_dummy_target, coff_object_p,  bfd_generic_archive_p, _bfd_dummy_target},
-    {bfd_false, coff_mkobject, _bfd_generic_mkarchive,     bfd_false},
+  {_bfd_dummy_target, coff_object_p,  bfd_generic_archive_p, _bfd_dummy_target},
+  {bfd_false, coff_mkobject, _bfd_generic_mkarchive,     bfd_false},
+
   JUMP_TABLE(coff)
-  };
+};
 

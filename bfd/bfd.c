@@ -31,14 +31,10 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 short _bfd_host_big_endian = 0x0100;
 	/* Accessing the above as (*(char*)&_bfd_host_big_endian), will
-	 * return 1 if the host is big-endian, 0 otherwise.
-	 * (See HOST_IS_BIG_ENDIAN_P in bfd.h.)
-	 */
-
-
-
+	   return 1 if the host is big-endian, 0 otherwise.
+	   (assuming that a short is two bytes long!!!  FIXME)
+	   (See HOST_IS_BIG_ENDIAN_P in bfd.h.)  */
 
-
 /** Error handling
     o - Most functions return nonzero on success (check doc for
 	precise semantics); 0 or NULL on error.
@@ -49,24 +45,23 @@ short _bfd_host_big_endian = 0x0100;
 
 bfd_ec bfd_error = no_error;
 
-char *bfd_errmsgs[] = {"No error",
-		       "System call error",
-		       "Invalid target",
-		       "File in wrong format",
-		       "Invalid operation",
-		       "Memory exhausted",
-		       "No symbols",
-		       "No relocation info",
-		       "No more archived files",
-		       "Malformed archive",
-		       "Symbol not found",
-		       "File format not recognized",
-		       "File format is ambiguous",
-			   "Section has no contents",
-  		 "Nonrepresentable section on output",
-		       "#<Invalid error code>"
+char *bfd_errmsgs[] = {	"No error",
+			"System call error",
+			"Invalid target",
+			"File in wrong format",
+			"Invalid operation",
+			"Memory exhausted",
+			"No symbols",
+			"No relocation info",
+			"No more archived files",
+			"Malformed archive",
+			"Symbol not found",
+			"File format not recognized",
+			"File format is ambiguous",
+			"Section has no contents",
+			"Nonrepresentable section on output",
+			"#<Invalid error code>"
 		       };
-
 
 static 
 void 
@@ -80,6 +75,7 @@ DEFUN(bfd_nonrepresentable_section,(abfd, name),
 	 name);
   exit(1);
 }
+
 bfd_error_vector_type bfd_error_vector = 
   {
   bfd_nonrepresentable_section 
@@ -99,12 +95,10 @@ strerror (code)
 #endif /* not ANSI_LIBRARIES */
 
 
-
 char *
 bfd_errmsg (error_tag)
      bfd_ec error_tag;
 {
-	extern int errno;
 
   if (error_tag == system_call_error)
     return strerror (errno);
@@ -125,12 +119,13 @@ bfd_ec error_tag;
 
 void (*bfd_error_trap)() = bfd_default_error_trap;
 void (*bfd_error_nonrepresentabltrap)() = bfd_default_error_trap;
+
 void
 DEFUN(bfd_perror,(message),
       CONST char *message)
 {
   if (bfd_error == system_call_error)
-    perror(message);		/* must be system error then... */
+    perror((char *)message);		/* must be system error then... */
   else {
     if (message == NULL || *message == '\0')
       fprintf (stderr, "%s\n", bfd_errmsg (bfd_error));
@@ -228,9 +223,6 @@ bfd_check_format (abfd, format)
      bfd *abfd;
      bfd_format format;
 {
-#if obsolete
-  file_ptr filepos;
-#endif
   bfd_target **target, *save_targ, *right_targ;
   int match_count;
 
@@ -246,11 +238,7 @@ bfd_check_format (abfd, format)
   /* presume the answer is yes */
   abfd->format = format;
 
-#if obsolete
-  filepos = bfd_tell (abfd);
-#endif
-  bfd_seek (abfd, (file_ptr)0, SEEK_SET);	/* instead, rewind! */
-
+  bfd_seek (abfd, (file_ptr)0, SEEK_SET);	/* rewind! */
 
   right_targ = BFD_SEND_FMT (abfd, _bfd_check_format, (abfd));
   if (right_targ) {
@@ -270,9 +258,6 @@ bfd_check_format (abfd, format)
     bfd_target *temp;
 
     abfd->xvec = *target;	/* Change BFD's target temporarily */
-#if obsolete
-    bfd_seek (abfd, filepos, SEEK_SET);	/* Restore original file position */
-#endif
     bfd_seek (abfd, (file_ptr)0, SEEK_SET);
     temp = BFD_SEND_FMT (abfd, _bfd_check_format, (abfd));
     if (temp) {				/* This format checks out as ok! */
@@ -299,9 +284,6 @@ bfd_check_format (abfd, format)
   abfd->format = bfd_unknown;		/* Restore original format */
   bfd_error = ((match_count == 0) ? file_not_recognized :
 	       file_ambiguously_recognized);
-#if  obsolete
-  bfd_seek (abfd, filepos, SEEK_SET);	/* Restore original file position */
-#endif
   return false;
 }
 
@@ -310,7 +292,6 @@ bfd_set_format (abfd, format)
      bfd *abfd;
      bfd_format format;
 {
-
 
   if (bfd_read_p (abfd) ||
       ((int)abfd->format < (int)bfd_unknown) ||
@@ -324,11 +305,8 @@ bfd_set_format (abfd, format)
   /* presume the answer is yes */
   abfd->format = format;
 
-/*  filepos = bfd_tell (abfd);*/
-
   if (!BFD_SEND_FMT (abfd, _bfd_set_format, (abfd))) {
     abfd->format = bfd_unknown;
-/*    bfd_seek (abfd, filepos, SEEK_SET);*/
     return false;
   }
 
@@ -380,7 +358,6 @@ DEFUN(bfd_make_section,(abfd, name),
   newsect->name = name;
   newsect->index = abfd->section_count++;
   newsect->flags = SEC_NO_FLAGS;
-
 
   newsect->userdata = 0;
   newsect->next = (asection *)NULL;
@@ -674,7 +651,7 @@ bfd *output_bfd;
   bfd_vma relocation_before;
   bfd_vma addr = reloc_entry->address ;
   bfd_vma output_base = 0;
-  CONST struct rint_struct *howto = reloc_entry->howto;
+  reloc_howto_type *howto = reloc_entry->howto;
   asection *reloc_target_output_section;
   asection *reloc_target_input_section;
   asymbol *symbol;

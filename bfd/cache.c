@@ -23,13 +23,6 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "bfd.h"
 #include "libbfd.h"
 
-/* These declarations should not be needed; libbfd.h's inclusion should
-   have handled it.
-   int fclose();
-   int fseek();
-*/
-
-
 /* The maximum number of FDs opened by bfd */
 #define BFD_CACHE_MAX_OPEN 10
 
@@ -38,10 +31,14 @@ static int open_files;
 
 static bfd *cache_sentinel;	/* Chain of bfds with active fds we've
 				   opened */
-static void
-bfd_cache_delete();
 
-bfd *bfd_last_cache;
+bfd *bfd_last_cache;		/* Zero, or a pointer to the topmost
+				   bfd on the chain.  This is used by the
+				   bfd_cache_lookup() macro in libbfd.h
+				   to determine when it can avoid a function
+				   call.  */
+
+static void bfd_cache_delete();
 
 
 static void
@@ -60,8 +57,8 @@ DEFUN_VOID(close_one)
 
     kill->where = ftell((FILE *)(kill->iostream));
     bfd_cache_delete(kill);
-
 }
+
 /* Cuts the bfd abfd out of the chain in the cache */
 static void 
 DEFUN(snip,(abfd),
@@ -135,12 +132,12 @@ DEFUN(bfd_open_file, (abfd),
 	close_one();
     }
     switch (abfd->direction) {
- case read_direction:
- case no_direction:
+      case read_direction:
+      case no_direction:
 	abfd->iostream = (char *) fopen(abfd->filename, "r");
 	break;
- case both_direction:
- case write_direction:
+      case both_direction:
+      case write_direction:
 	if (abfd->opened_once == true) {
 	    abfd->iostream = (char *) fopen(abfd->filename, "r+");
 	    if (!abfd->iostream) {

@@ -55,8 +55,6 @@ struct arch_print {
 	{bfd_arch_pyramid,	"pyramid",	prt_num_mach,	scan_num_mach},
 	{bfd_arch_h8_300,       "H8/300",       prt_num_mach,   scan_num_mach},
 	{bfd_arch_unknown,	(char *)0,	prt_num_mach,   scan_num_mach},
-
-
 };
 
 /* Return a printable string representing the architecture and machine
@@ -310,36 +308,33 @@ bfd_arch_compatible (abfd, bbfd, archp, machinep)
       /* If particular machine types of one architecture are not
 	 compatible with each other, this is the place to put those tests
 	 (returning false if incompatible).  */
-    case bfd_arch_i960:
-      /* The i960 has to distinct subspecies which may not interbreed:
-	 CORE CA          
-	 CORE KA KB MC
-	 Any architecture on the same line is compatible, the one on
-	 the right is the least restrictive.
-	 */
-      /* So, if either is a ca then the other must be a be core or ca */
-      if (macha == bfd_mach_i960_ca) {
-	if (machb != bfd_mach_i960_ca &&
-	    machb != bfd_mach_i960_core) {
-	  return false;
-	}
-	pick_a = 1;
-      }
-      else      if (machb == bfd_mach_i960_ca) {
-	if (macha != bfd_mach_i960_ca &&
-	    macha != bfd_mach_i960_core) {
-	  return false;
-	}
-	pick_a = 0;
-      }
-      else {
-	/* This must be from the bottom row, so take the higest */
-	pick_a = (macha > machb);
-      }
-	 
-	 
 
-      break;
+      case bfd_arch_i960:
+	/* The i960 has two distinct subspecies which may not interbreed:
+	   CORE CA          
+	   CORE KA KB MC
+	   Any architecture on the same line is compatible, the one on
+	   the right is the least restrictive.  */
+	/* So, if either is a ca then the other must be a be core or ca */
+	if (macha == bfd_mach_i960_ca) {
+	  if (machb != bfd_mach_i960_ca &&
+	      machb != bfd_mach_i960_core) {
+	    return false;
+	  }
+	  pick_a = 1;
+	}
+	else      if (machb == bfd_mach_i960_ca) {
+	  if (macha != bfd_mach_i960_ca &&
+	      macha != bfd_mach_i960_core) {
+	    return false;
+	  }
+	  pick_a = 0;
+	}
+	else {
+	  /* This must be from the bottom row, so take the higest */
+	  pick_a = (macha > machb);
+	}
+	break;
 
       /* For these chips, as far as we care, "lower" numbers are included
 	 by "higher" numbers, e.g. merge 68010 and 68020 into 68020,

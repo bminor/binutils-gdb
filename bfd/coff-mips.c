@@ -565,12 +565,12 @@ unsigned int size;
 }
 
 static
-struct sec_struct *section_from_bfd_index(abfd, index)
+struct sec *section_from_bfd_index(abfd, index)
 bfd *abfd;
 int index;
 {
 if (index > 0) {
-  struct sec_struct *answer = abfd->sections;
+  struct sec *answer = abfd->sections;
 
   while (--index) {
     answer = answer->next;

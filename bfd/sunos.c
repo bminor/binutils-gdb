@@ -1,4 +1,5 @@
 /*** bfd backend for sunos binaries */
+/** a.out files */
 
 /* Copyright (C) 1990, 1991 Free Software Foundation, Inc.
 
@@ -18,37 +19,23 @@ You should have received a copy of the GNU General Public License
 along with BFD; see the file COPYING.  If not, write to
 the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-/* $Id$
- *
- */
-
-#define TARGET_BYTE_ORDER_BIG_P 1
+/* $Id$ */
 
 #include <ansidecl.h>
 #include "sysdep.h"
 #include "bfd.h"
 #include "libbfd.h"
 
-
-void (*bfd_error_trap)();
-
-/*SUPPRESS558*/
-/*SUPPRESS529*/
-
-
-
-
-
-/* These values are correct for the SPARC.  I dunno about anything else */
-#define PAGE_SIZE 0x02000
-#define SEGMENT_SIZE PAGE_SIZE
-#define TEXT_START_ADDR PAGE_SIZE
+#include "a.out.sun4.h"
 #include "a.out.gnu.h"
 #include "stab.gnu.h"
 #include "ar.h"
 #include "liba.out.h"           /* BFD a.out internal data structures */
 
-#include "a.out.sun4.h"
+void (*bfd_error_trap)();
+
+/*SUPPRESS558*/
+/*SUPPRESS529*/
 
 #define CTOR_TABLE_RELOC_IDX 2
 static  reloc_howto_type howto_table_ext[] = 
@@ -85,7 +72,7 @@ static  reloc_howto_type howto_table_ext[] =
 /* Convert standard reloc records to "arelent" format (incl byte swap).  */
 
 static  reloc_howto_type howto_table_std[] = {
-  /* type                   rs   size bsz  pcrel bitpos  abs ovrf sf name*/
+  /* type           rs   size bsz  pcrel bitpos  abs ovrf sf name    part_inpl   readmask  setmask  pcdone */
 HOWTO( 0,	       0,  0,  	8,  false, 0, true,  true,0,"8",	true, 0x000000ff,0x000000ff, false),
 HOWTO( 1,	       0,  1, 	16, false, 0, true,  true,0,"16",	true, 0x0000ffff,0x0000ffff, false),
 HOWTO( 2,	       0,  2, 	32, false, 0, true,  true,0,"32",	true, 0xffffffff,0xffffffff, false),
@@ -98,8 +85,6 @@ HOWTO( 7,	       0,  3, 	64, true,  0, false, true,0,"DISP64",   true, 0xfeedfac
 
 
 bfd_error_vector_type bfd_error_vector;
-/** a.out files */
-
 
 PROTO (void , sunos4_write_syms, ());
 PROTO (static boolean,sunos4_squirt_out_relocs,(bfd *abfd, asection *section));
@@ -156,45 +141,6 @@ DEFUN(bfd_aout_swap_exec_header_out,(abfd, execp, raw_bytes),
   bfd_h_putlong (abfd, execp->a_drsize, bytes->a_drsize);
 }
 
-/* Steve wants some way to frob this stuff from Saber while he's debugging
-   ld, so we have these funny shadow functions */
-/* ZMAGIC's start at 0 (making the exec part of the text section),
-  other formats start after the exec
-*/
-static unsigned int n_txtoff(ptr)
-struct exec *ptr;
-{return N_MAGIC(*ptr)== ZMAGIC ? 0: sizeof(struct exec);}
-
-static unsigned int n_datoff(ptr)
-struct exec *ptr;
-{return n_txtoff(ptr) + ptr->a_text;}
-
-static unsigned int n_treloff(ptr)
-struct exec *ptr;
-{return n_datoff(ptr) + ptr->a_data;}
-
-static unsigned int n_dreloff(ptr)
-struct exec *ptr;
-{return n_treloff(ptr) + ptr->a_trsize;}
-
-static unsigned int n_symoff(ptr)
-struct exec *ptr;
-{return n_dreloff(ptr) + ptr->a_drsize;}
-
-static unsigned int n_stroff(ptr)
-struct exec *ptr;
-{return n_symoff(ptr) + ptr->a_syms;}
-
-static
-unsigned int n_badmag(ptr)
-     struct exec *ptr;
-{
-  switch (N_MAGIC(*ptr)) {
-  case OMAGIC: case NMAGIC: case ZMAGIC: return 0;
-  default: return 1;
-  }
-}
-
 bfd_target *
 sunos4_object_p (abfd)
      bfd *abfd;
@@ -212,9 +158,7 @@ sunos4_object_p (abfd)
     return 0;
   magic = bfd_h_getlong (abfd, magicbuf);
 
-  /* Baroque syntax to mask deficiencies of the Sun compiler */
-  /* if (N_BADMAG (*((struct exec *) &magic))) return 0; */
-  if (n_badmag ((struct exec *) &magic)) return 0;
+  if (N_BADMAG (*((struct exec *) &magic))) return 0;
 
   if (bfd_seek (abfd, 0L, false) < 0) return 0;
 
@@ -288,9 +232,11 @@ sunos4_object_p (abfd)
 
   bfd_get_start_address (abfd) = execp->a_entry;
 
+  bfd_get_symcount (abfd) = execp->a_syms / sizeof (struct nlist);
+
   /* Remember the positions of the string table and symbol table.  */
-  obj_str_filepos (abfd) = n_stroff (execp);
-  obj_sym_filepos (abfd) = n_symoff (execp);
+  obj_str_filepos (abfd) = N_STROFF (*execp);
+  obj_sym_filepos (abfd) = N_SYMOFF (*execp);
 
   /* create the sections.  This is raunchy, but bfd_close wants to reclaim
      them */
@@ -339,14 +285,14 @@ sunos4_mkobject (abfd)
   bfd_error = system_call_error;
 
   /* Use an intermediate variable for clarity */
-  rawptr =  bfd_zalloc (abfd,sizeof (struct sunexdata) + sizeof (struct exec));
+  rawptr = bfd_zalloc (abfd, sizeof (struct sunexdata) + sizeof (struct exec));
 
   if (rawptr == NULL) {
     bfd_error = no_memory;
     return false;
   }
 
-  abfd->tdata = (PTR)((struct sunexdata *) rawptr);
+  set_tdata (abfd, (struct sunexdata *) rawptr);
   exec_hdr (abfd) = (struct exec *) (rawptr + sizeof (struct sunexdata));
 
   /* For simplicity's sake we just make all the sections right here. */
@@ -459,6 +405,8 @@ sunos4_write_object_contents (abfd)
 
   N_SET_MAGIC (*execp, OMAGIC);
   if (abfd->flags & D_PAGED) {
+    /* This is not strictly true, but will probably do for the default
+	case.  FIXME.  */
     execp->a_text = obj_textsec (abfd)->size + sizeof(struct exec);
     N_SET_MAGIC (*execp, ZMAGIC);
   } else if (abfd->flags & WP_TEXT) {
@@ -515,9 +463,8 @@ sunos4_write_object_contents (abfd)
     }
   return true;
 }
-
-/** core files */
-/** core files */
+
+/* core files */
 
 #define CORE_MAGIC 0x080456
 #define CORE_NAMELEN 16
@@ -640,7 +587,7 @@ sunos4_core_file_p (abfd)
 
   if ((bfd_read ((PTR) core, 1, core_size, abfd)) != core_size) {
     bfd_error = system_call_error;
-    free ((PTR)rawptr);
+    bfd_release (abfd, rawptr);
     return 0;
   }
 
@@ -654,24 +601,24 @@ sunos4_core_file_p (abfd)
   if (core_stacksec (abfd) == NULL) {
 loser:
     bfd_error = no_memory;
-    free ((PTR)rawptr);
+    bfd_release (abfd, rawptr);
     return 0;
   }
   core_datasec (abfd) = (asection *) bfd_zalloc (abfd, sizeof (asection));
   if (core_datasec (abfd) == NULL) {
 loser1:
-    free ((PTR)core_stacksec (abfd));
+    bfd_release (abfd, core_stacksec (abfd));
     goto loser;
   }
   core_regsec (abfd) = (asection *) bfd_zalloc (abfd, sizeof (asection));
   if (core_regsec (abfd) == NULL) {
 loser2:
-    free ((PTR)core_datasec (abfd));
+    bfd_release (abfd, core_datasec (abfd));
     goto loser1;
   }
   core_reg2sec (abfd) = (asection *) bfd_zalloc (abfd, sizeof (asection));
   if (core_reg2sec (abfd) == NULL) {
-    free ((PTR)core_regsec (abfd));
+    bfd_release (abfd, core_regsec (abfd));
     goto loser2;
   }
 
@@ -809,31 +756,15 @@ sunos4_set_section_contents (abfd, section, location, offset, count)
 {
   if (abfd->output_has_begun == false)
       {				/* set by bfd.c handler */
-	if ((obj_textsec (abfd) == NULL) || (obj_datasec (abfd) == NULL)
-	  
-	    /*||
-	      (obj_textsec (abfd)->size == 0) || (obj_datasec (abfd)->size=
-	      0)*/
-	    ) 
+	if ((obj_textsec (abfd) == NULL) || (obj_datasec (abfd) == NULL)) 
 	    {
 	      bfd_error = invalid_operation;
 	      return false;
 	    }
 
-
-#if 0
-	if (abfd->flags & D_PAGED)
-	    {
-	      obj_textsec (abfd)->filepos = sizeof(struct exec);
-	      obj_datasec(abfd)->filepos =  obj_textsec (abfd)->size;
-	    }
-	else 
-#endif
-	    {
-	      obj_textsec (abfd)->filepos = sizeof(struct exec);
-	      obj_datasec(abfd)->filepos = obj_textsec(abfd)->filepos  + obj_textsec (abfd)->size;
-
-	    }
+	  obj_textsec (abfd)->filepos = sizeof(struct exec);
+	  obj_datasec(abfd)->filepos = obj_textsec (abfd)->filepos 
+				     + obj_textsec (abfd)->size;
       }
   /* regardless, once we know what we're doing, we might as well get going */
   if (section != obj_bsssec(abfd)) {
@@ -847,6 +778,7 @@ sunos4_set_section_contents (abfd, section, location, offset, count)
   }
   return true;
 }
+
 boolean
 sunos4_get_section_contents (abfd, section, location, offset, count)
      bfd *abfd;
@@ -944,14 +876,12 @@ translate_from_native_sym_flags (sym_pointer, cache_ptr, abfd)
       }
       cache_ptr->symbol.section = reloc->relent.section;
       reloc->relent.addend = cache_ptr->symbol.value ;
-      /* 
-	 We modify the symbol to belong to a section depending upon the
+
+      /* We modify the symbol to belong to a section depending upon the
 	 name of the symbol - probably __CTOR__ or __DTOR__ but we don't
 	 really care, and add to the size of the section to contain a
 	 pointer to the symbol. Build a reloc entry to relocate to this
-	 symbol attached to this section.
-	 */
-
+	 symbol attached to this section.  */
 
       section->flags = SEC_CONSTRUCTOR;
       section->reloc_count++;
@@ -1050,7 +980,7 @@ translate_to_native_sym_flags (sym_pointer, cache_ptr_g, abfd)
 {
   asymbol *cache_ptr = (asymbol *)cache_ptr_g;
 
-  /* FIXME check for wrigin bss */
+  /* FIXME check for writing bss */
   if (bfd_get_section(cache_ptr)) {
     if (bfd_get_output_section(cache_ptr) == obj_bsssec (abfd)) {
       sym_pointer->n_type |= N_BSS;
@@ -1062,9 +992,8 @@ translate_to_native_sym_flags (sym_pointer, cache_ptr_g, abfd)
       sym_pointer->n_type |= N_TEXT;
     }
     else {
-
-      bfd_error_vector.nonrepresentable_section(abfd, bfd_get_output_section(cache_ptr)->name);
-
+      bfd_error_vector.nonrepresentable_section(abfd,
+				 bfd_get_output_section(cache_ptr)->name);
     }
     /* Turn the symbol from section relative to absolute again */
     sym_pointer->n_value +=
@@ -1090,7 +1019,6 @@ translate_to_native_sym_flags (sym_pointer, cache_ptr_g, abfd)
   if (cache_ptr->flags & BSF_DEBUGGING) {
     sym_pointer->n_type = ((aout_symbol_type *)cache_ptr)->type;
   }
-  
 }
 
 /* Native-level interface to symbols. */
@@ -1114,9 +1042,9 @@ boolean
 DEFUN(sunos4_slurp_symbol_table, (abfd),
       bfd *abfd)
 {
-  unsigned int symbol_count;
   size_t symbol_size;
   size_t string_size;
+  unsigned char string_chars[LONG_SIZE];
   struct nlist *syms;
   char *strings;
   aout_symbol_type *cached;
@@ -1130,20 +1058,22 @@ DEFUN(sunos4_slurp_symbol_table, (abfd),
   }
 
   bfd_seek (abfd, obj_str_filepos (abfd), SEEK_SET);
-  if (bfd_read ((PTR)&string_size, 4, 1, abfd) != 4)
+  if (bfd_read ((PTR)string_chars, LONG_SIZE, 1, abfd) != LONG_SIZE)
     return false;
-  string_size = bfd_h_getlong (abfd, (unsigned char *)&string_size);
-
-  symbol_count = symbol_size / sizeof (struct nlist);
+  string_size = bfd_h_getlong (abfd, string_chars);
 
   strings = bfd_alloc(abfd, string_size + 1);
   cached = (aout_symbol_type *)
-	   bfd_zalloc(abfd, symbol_count * sizeof(aout_symbol_type));
+	   bfd_zalloc(abfd, bfd_get_symcount (abfd) * sizeof(aout_symbol_type));
+  /* Alloc this last, so we can free it if obstack is in use.  */
   syms = (struct nlist *) bfd_alloc(abfd, symbol_size);
 
   bfd_seek (abfd, obj_sym_filepos (abfd), SEEK_SET);
   if (bfd_read ((PTR)syms, 1, symbol_size, abfd) != symbol_size) {
   bailout:
+    if (syms) 	bfd_release (abfd, syms);
+    if (cached)	bfd_release (abfd, cached);
+    if (strings)bfd_release (abfd, strings);
     return false;
   }
 
@@ -1155,7 +1085,7 @@ DEFUN(sunos4_slurp_symbol_table, (abfd),
   /* OK, now walk the new symtable, cacheing symbol properties */
     {
       register struct nlist *sym_pointer;
-      register struct nlist *sym_end = syms + symbol_count;
+      register struct nlist *sym_end = syms + bfd_get_symcount (abfd);
       register aout_symbol_type *cache_ptr = cached;
 
       /* run through the table and byte swap if needed */
@@ -1170,7 +1100,6 @@ DEFUN(sunos4_slurp_symbol_table, (abfd),
 	  bfd_h_get_x(abfd, &sym_pointer->n_other);
 	sym_pointer->n_type = (char)
 	  bfd_h_get_x(abfd, &sym_pointer->n_type);
-
       }
 
       /* Run through table and copy values */
@@ -1193,7 +1122,6 @@ DEFUN(sunos4_slurp_symbol_table, (abfd),
     }
 
   obj_aout_symbols (abfd) =  cached;
-  bfd_get_symcount (abfd) = symbol_count;
   bfd_release (abfd, (PTR)syms);
 
   return true;
@@ -1258,7 +1186,7 @@ DEFUN(sunos4_write_syms,(abfd),
     {
       asymbol *g = *(generic++);
 
-      if (g->name != (char *)NULL) 
+      if (g->name)
 	{
 	  size_t length = strlen(g->name)+1;
 	  bfd_write((PTR)g->name, 1, length, abfd);
@@ -1307,11 +1235,10 @@ sunos4_get_symtab (abfd, location)
 /* Output standard relocation information to a file in target byte order. */
 
 void
-swap_std_reloc_out (abfd, p, natptr, count)
+swap_std_reloc_out (abfd, g, natptr)
      bfd *abfd;
-     arelent **p;		/* Generic relocation struct */
+     arelent *g;		/* Generic relocation struct */
      struct reloc_std_bytes *natptr;
-     unsigned int count;
 {
   int r_index;
   int r_extern;
@@ -1319,83 +1246,77 @@ swap_std_reloc_out (abfd, p, natptr, count)
   int r_pcrel;
   int r_baserel, r_jmptable, r_relative;
   unsigned int r_addend;
-  unsigned int idx;
-  for (idx = 0; idx < count; idx++, p++, natptr++) 
+
+  bfd_h_putlong (abfd, g->address, natptr->r_address);
+
+  r_length = g->howto->size; /* Size as a power of two */
+  r_pcrel  = (int) g->howto->pc_relative;	/* Relative to PC? */
+  /* r_baserel, r_jmptable, r_relative???  FIXME-soon */
+  r_baserel = 0;
+  r_jmptable = 0;
+  r_relative = 0;
+
+  r_addend = g->addend;	/* Start here, see how it goes */
+
+  /* name was clobbered by sunos4_write_syms to be symbol index */
+
+  if (g->sym_ptr_ptr != NULL) 
     {
-      arelent *g = *p;
-      bfd_h_putlong (abfd, g->address, natptr->r_address);
-
-      r_length = g->howto->size; /* Size as a power of two */
-      r_pcrel  = (int) g->howto->pc_relative;	/* Relative to PC? */
-      /* r_baserel, r_jmptable, r_relative???  FIXME-soon */
-      r_baserel = 0;
-      r_jmptable = 0;
-      r_relative = 0;
-
-      r_addend = g->addend;	/* Start here, see how it goes */
-
-      /* name was clobbered by sunos4_write_syms to be symbol index */
-
-      if (g->sym_ptr_ptr != NULL) 
-	{
-	  if ((*(g->sym_ptr_ptr))->section) {
-	    /* put the section offset into the addend for output */
-	    r_addend += (*(g->sym_ptr_ptr))->section->vma;
-	  }
-
-	  r_index = stoi((*(g->sym_ptr_ptr))->name);
-	  r_extern = 1;
-	}
-      else {
-	r_extern = 0;
-	if (g->section == NULL) {
-	  BFD_ASSERT(0);
-	  r_index = N_ABS | N_EXT;
-	}
-	else  if(g->section->output_section == obj_textsec(abfd)) {
-	  r_index = N_TEXT | N_EXT;
-	  r_addend += g->section->output_section->vma;
-	}
-	else if (g->section->output_section == obj_datasec(abfd)) {
-	  r_index = N_DATA | N_EXT;
-	  r_addend += g->section->output_section->vma;
-	}
-	else if (g->section->output_section == obj_bsssec(abfd)) {
-	  r_index = N_BSS | N_EXT ;
-	  r_addend += g->section->output_section->vma;
-	}
-	else {
-	  BFD_ASSERT(0);
-	}
+      if ((*(g->sym_ptr_ptr))->section) {
+	/* put the section offset into the addend for output */
+	r_addend += (*(g->sym_ptr_ptr))->section->vma;
       }
 
-      /* now the fun stuff */
-      if (abfd->xvec->header_byteorder_big_p != false) {
-	natptr->r_index[0] = r_index >> 16;
-	natptr->r_index[1] = r_index >> 8;
-	natptr->r_index[2] = r_index;
-	natptr->r_bits[0] =
-	  (r_extern?    RELOC_STD_BITS_EXTERN_BIG: 0)
-	    | (r_pcrel?     RELOC_STD_BITS_PCREL_BIG: 0)
-	      | (r_baserel?   RELOC_STD_BITS_BASEREL_BIG: 0)
-		| (r_jmptable?  RELOC_STD_BITS_JMPTABLE_BIG: 0)
-		  | (r_relative?  RELOC_STD_BITS_RELATIVE_BIG: 0)
-		    | (r_length <<  RELOC_STD_BITS_LENGTH_SH_BIG);
-      } else {
-	natptr->r_index[2] = r_index >> 16;
-	natptr->r_index[1] = r_index >> 8;
-	natptr->r_index[0] = r_index;
-	natptr->r_bits[0] =
-	  (r_extern?    RELOC_STD_BITS_EXTERN_LITTLE: 0)
-	    | (r_pcrel?     RELOC_STD_BITS_PCREL_LITTLE: 0)
-	      | (r_baserel?   RELOC_STD_BITS_BASEREL_LITTLE: 0)
-		| (r_jmptable?  RELOC_STD_BITS_JMPTABLE_LITTLE: 0)
-		  | (r_relative?  RELOC_STD_BITS_RELATIVE_LITTLE: 0)
-		    | (r_length <<  RELOC_STD_BITS_LENGTH_SH_LITTLE);
-      }
-
-
+      r_index = stoi((*(g->sym_ptr_ptr))->name);
+      r_extern = 1;
     }
+  else {
+    r_extern = 0;
+    if (g->section == NULL) {
+      BFD_ASSERT(0);
+      r_index = N_ABS | N_EXT;
+    }
+    else  if(g->section->output_section == obj_textsec(abfd)) {
+      r_index = N_TEXT | N_EXT;
+      r_addend += g->section->output_section->vma;
+    }
+    else if (g->section->output_section == obj_datasec(abfd)) {
+      r_index = N_DATA | N_EXT;
+      r_addend += g->section->output_section->vma;
+    }
+    else if (g->section->output_section == obj_bsssec(abfd)) {
+      r_index = N_BSS | N_EXT ;
+      r_addend += g->section->output_section->vma;
+    }
+    else {
+      BFD_ASSERT(0);
+    }
+  }
+
+  /* now the fun stuff */
+  if (abfd->xvec->header_byteorder_big_p != false) {
+    natptr->r_index[0] = r_index >> 16;
+    natptr->r_index[1] = r_index >> 8;
+    natptr->r_index[2] = r_index;
+    natptr->r_bits[0] =
+      (r_extern?    RELOC_STD_BITS_EXTERN_BIG: 0)
+	| (r_pcrel?     RELOC_STD_BITS_PCREL_BIG: 0)
+	  | (r_baserel?   RELOC_STD_BITS_BASEREL_BIG: 0)
+	    | (r_jmptable?  RELOC_STD_BITS_JMPTABLE_BIG: 0)
+	      | (r_relative?  RELOC_STD_BITS_RELATIVE_BIG: 0)
+		| (r_length <<  RELOC_STD_BITS_LENGTH_SH_BIG);
+  } else {
+    natptr->r_index[2] = r_index >> 16;
+    natptr->r_index[1] = r_index >> 8;
+    natptr->r_index[0] = r_index;
+    natptr->r_bits[0] =
+      (r_extern?    RELOC_STD_BITS_EXTERN_LITTLE: 0)
+	| (r_pcrel?     RELOC_STD_BITS_PCREL_LITTLE: 0)
+	  | (r_baserel?   RELOC_STD_BITS_BASEREL_LITTLE: 0)
+	    | (r_jmptable?  RELOC_STD_BITS_JMPTABLE_LITTLE: 0)
+	      | (r_relative?  RELOC_STD_BITS_RELATIVE_LITTLE: 0)
+		| (r_length <<  RELOC_STD_BITS_LENGTH_SH_LITTLE);
+  }
 }
 
 
@@ -1403,84 +1324,79 @@ swap_std_reloc_out (abfd, p, natptr, count)
 /* Output extended relocation information to a file in target byte order. */
 
 void
-swap_ext_reloc_out (abfd, p, natptr, count)
+swap_ext_reloc_out (abfd, g, natptr)
      bfd *abfd;
-     arelent **p;		/* Generic relocation struct */
+     arelent *g;		/* Generic relocation struct */
      register struct reloc_ext_bytes *natptr;
-     unsigned int count;
 {
-
   int r_index;
   int r_extern;
   unsigned int r_type;
   unsigned int r_addend;
-  unsigned int idx;
-  for (idx = 0; idx < count; idx++, p++, natptr++) {
-    arelent *g = *p;
 
-    bfd_h_putlong (abfd, g->address, natptr->r_address);
+  bfd_h_putlong (abfd, g->address, natptr->r_address);
 
-    /* Find a type in the output format which matches the input howto - 
-       at the moment we assume input format == output format FIXME!! */
-    r_type = (enum reloc_type) g->howto->type;
+  /* Find a type in the output format which matches the input howto - 
+     at the moment we assume input format == output format FIXME!! */
+  r_type = (enum reloc_type) g->howto->type;
 
-    r_addend = g->addend;	/* Start here, see how it goes */
+  r_addend = g->addend;	/* Start here, see how it goes */
 
-    /* name was clobbered by sunos4_write_syms to be symbol index*/
+  /* name was clobbered by sunos4_write_syms to be symbol index*/
 
-    if (g->sym_ptr_ptr != NULL) 
-      {
-	if ((*(g->sym_ptr_ptr))->section) {
-	  /* put the section offset into the addend for output */
-	  r_addend += (*(g->sym_ptr_ptr))->section->vma;
-	}
-
-	r_index = stoi((*(g->sym_ptr_ptr))->name);
-	r_extern = 1;
+  if (g->sym_ptr_ptr != NULL) 
+    {
+      if ((*(g->sym_ptr_ptr))->section) {
+	/* put the section offset into the addend for output */
+	r_addend += (*(g->sym_ptr_ptr))->section->vma;
       }
+
+      r_index = stoi((*(g->sym_ptr_ptr))->name);
+      r_extern = 1;
+    }
+  else {
+    r_extern = 0;
+    if (g->section == NULL) {
+      BFD_ASSERT(0);
+      r_index = N_ABS | N_EXT;
+    }
+    else  if(g->section->output_section == obj_textsec(abfd)) {
+      r_index = N_TEXT | N_EXT;
+      r_addend += g->section->output_section->vma;
+    }
+    else if (g->section->output_section == obj_datasec(abfd)) {
+      r_index = N_DATA | N_EXT;
+      r_addend += g->section->output_section->vma;
+    }
+    else if (g->section->output_section == obj_bsssec(abfd)) {
+      r_index = N_BSS | N_EXT ;
+      r_addend += g->section->output_section->vma;
+    }
     else {
-      r_extern = 0;
-      if (g->section == NULL) {
-	BFD_ASSERT(0);
-	r_index = N_ABS | N_EXT;
-      }
-      else  if(g->section->output_section == obj_textsec(abfd)) {
-	r_index = N_TEXT | N_EXT;
-	r_addend += g->section->output_section->vma;
-      }
-      else if (g->section->output_section == obj_datasec(abfd)) {
-	r_index = N_DATA | N_EXT;
-	r_addend += g->section->output_section->vma;
-      }
-      else if (g->section->output_section == obj_bsssec(abfd)) {
-	r_index = N_BSS | N_EXT ;
-	r_addend += g->section->output_section->vma;
-      }
-      else {
-	BFD_ASSERT(0);
-      }
+      BFD_ASSERT(0);
     }
-
-    /* now the fun stuff */
-    if (abfd->xvec->header_byteorder_big_p != false) {
-      natptr->r_index[0] = r_index >> 16;
-      natptr->r_index[1] = r_index >> 8;
-      natptr->r_index[2] = r_index;
-      natptr->r_bits[0] =
-	(r_extern? RELOC_EXT_BITS_EXTERN_BIG: 0)
-	  || (r_type << RELOC_EXT_BITS_TYPE_SH_BIG);
-    } else {
-      natptr->r_index[2] = r_index >> 16;
-      natptr->r_index[1] = r_index >> 8;
-      natptr->r_index[0] = r_index;
-      natptr->r_bits[0] =
-	(r_extern? RELOC_EXT_BITS_EXTERN_LITTLE: 0)
-	  || (r_type << RELOC_EXT_BITS_TYPE_SH_LITTLE);
-    }
-
-    bfd_h_putlong (abfd, r_addend, natptr->r_addend);
   }
+
+  /* now the fun stuff */
+  if (abfd->xvec->header_byteorder_big_p != false) {
+    natptr->r_index[0] = r_index >> 16;
+    natptr->r_index[1] = r_index >> 8;
+    natptr->r_index[2] = r_index;
+    natptr->r_bits[0] =
+      (r_extern? RELOC_EXT_BITS_EXTERN_BIG: 0)
+	|| (r_type << RELOC_EXT_BITS_TYPE_SH_BIG);
+  } else {
+    natptr->r_index[2] = r_index >> 16;
+    natptr->r_index[1] = r_index >> 8;
+    natptr->r_index[0] = r_index;
+    natptr->r_bits[0] =
+      (r_extern? RELOC_EXT_BITS_EXTERN_LITTLE: 0)
+	|| (r_type << RELOC_EXT_BITS_TYPE_SH_LITTLE);
+  }
+
+  bfd_h_putlong (abfd, r_addend, natptr->r_addend);
 }
+
 #define MOVE_ADDRESS(ad)       						\
   if (r_extern) {							\
     cache_ptr->sym_ptr_ptr = symbols + r_index;				\
@@ -1506,9 +1422,13 @@ swap_ext_reloc_out (abfd, p, natptr, count)
       break;								\
     case N_ABS:								\
     case N_ABS | N_EXT:							\
+      cache_ptr->section = NULL;	/* No section */		\
+      cache_ptr->addend = ad;		/* FIXME, is this right? */	\
       BFD_ASSERT(1);							\
       break;								\
     default:								\
+      cache_ptr->section = NULL;	/* No section */		\
+      cache_ptr->addend = ad;		/* FIXME, is this right? */	\
       BFD_ASSERT(1);							\
       break;								\
     }									\
@@ -1547,13 +1467,12 @@ swap_ext_reloc_in (abfd, bytes, cache_ptr, symbols)
 
   cache_ptr->howto =  howto_table_ext + r_type;
   MOVE_ADDRESS(bfd_h_getlong(abfd,bytes->r_addend));
-									 
 }
 
 void
 swap_std_reloc_in (abfd, bytes, cache_ptr, symbols)
      bfd *abfd;
- struct reloc_std_bytes *bytes;
+     struct reloc_std_bytes *bytes;
      arelent *cache_ptr;
      asymbol **symbols;
 {
@@ -1563,6 +1482,7 @@ swap_std_reloc_in (abfd, bytes, cache_ptr, symbols)
   int r_pcrel;
   int r_baserel, r_jmptable, r_relative;
   struct sunexdata *su = (struct sunexdata *)(abfd->tdata);
+
   cache_ptr->address = bfd_h_getlong (abfd, bytes->r_address);
 
   /* now the fun stuff */
@@ -1576,7 +1496,7 @@ swap_std_reloc_in (abfd, bytes, cache_ptr, symbols)
     r_jmptable= (0 != (bytes->r_bits[0] & RELOC_STD_BITS_JMPTABLE_BIG));
     r_relative= (0 != (bytes->r_bits[0] & RELOC_STD_BITS_RELATIVE_BIG));
     r_length  =       (bytes->r_bits[0] & RELOC_STD_BITS_LENGTH_BIG) 
-      >> RELOC_STD_BITS_LENGTH_SH_BIG;
+      			>> RELOC_STD_BITS_LENGTH_SH_BIG;
   } else {
     r_index =  (bytes->r_index[2] << 16)
       | (bytes->r_index[1] << 8)
@@ -1587,7 +1507,7 @@ swap_std_reloc_in (abfd, bytes, cache_ptr, symbols)
     r_jmptable= (0 != (bytes->r_bits[0] & RELOC_STD_BITS_JMPTABLE_LITTLE));
     r_relative= (0 != (bytes->r_bits[0] & RELOC_STD_BITS_RELATIVE_LITTLE));
     r_length  =       (bytes->r_bits[0] & RELOC_STD_BITS_LENGTH_LITTLE) 
-      >> RELOC_STD_BITS_LENGTH_SH_LITTLE;
+      			>> RELOC_STD_BITS_LENGTH_SH_LITTLE;
   }
 
   cache_ptr->howto =  howto_table_std + r_length + 4 * r_pcrel;
@@ -1636,24 +1556,34 @@ sunos4_slurp_reloc_table (abfd, asect, symbols)
 
   reloc_cache = (arelent *) bfd_zalloc (abfd, (size_t)(count * sizeof
 						       (arelent)));
-  relocs =  bfd_alloc (abfd, reloc_size);
+  if (!reloc_cache) {
+nomem:
+    bfd_error = no_memory;
+    return false;
+  }
 
-  if (bfd_read ( relocs, 1, reloc_size, abfd) != reloc_size) {
+  relocs =  bfd_alloc (abfd, reloc_size);
+  if (!relocs) {
+    bfd_release (abfd, reloc_cache);
+    goto nomem;
+  }
+
+  if (bfd_read (relocs, 1, reloc_size, abfd) != reloc_size) {
+    bfd_release (abfd, relocs);
+    bfd_release (abfd, reloc_cache);
     bfd_error = system_call_error;
     return false;
   }
 
-  if (each_size == RELOC_EXT_SIZE)
-    {
-      register struct reloc_ext_bytes *rptr = (struct reloc_ext_bytes *) relocs;
-      unsigned int counter = 0;
-      arelent *cache_ptr = reloc_cache;
+  if (each_size == RELOC_EXT_SIZE) {
+    register struct reloc_ext_bytes *rptr = (struct reloc_ext_bytes *) relocs;
+    unsigned int counter = 0;
+    arelent *cache_ptr = reloc_cache;
 
-      for (; counter < count; counter++, rptr++, cache_ptr++) {
-	swap_ext_reloc_in(abfd, rptr, cache_ptr, symbols);
-      }
+    for (; counter < count; counter++, rptr++, cache_ptr++) {
+      swap_ext_reloc_in(abfd, rptr, cache_ptr, symbols);
     }
-  else {
+  } else {
     register struct reloc_std_bytes *rptr = (struct reloc_std_bytes *) relocs;
     unsigned int counter = 0;
     arelent *cache_ptr = reloc_cache;
@@ -1663,7 +1593,8 @@ sunos4_slurp_reloc_table (abfd, asect, symbols)
     }
 
   }
-bfd_release (abfd,relocs);
+
+  bfd_release (abfd,relocs);
   asect->relocation = reloc_cache;
   asect->reloc_count = count;
   return true;
@@ -1679,7 +1610,7 @@ sunos4_squirt_out_relocs (abfd, section)
      asection *section;
 {
   arelent **generic;
-  unsigned char *native;
+  unsigned char *native, *natptr;
   size_t each_size;
 
   unsigned int count = section->reloc_count;
@@ -1699,14 +1630,17 @@ sunos4_squirt_out_relocs (abfd, section)
 
   if (each_size == RELOC_EXT_SIZE) 
     {
-      swap_ext_reloc_out (abfd,
-			  generic,
-			  (struct reloc_ext_bytes *)native,
-			  count);
+      for (natptr = native;
+	   count != 0;
+	   --count, natptr += each_size, ++generic)
+	swap_ext_reloc_out (abfd, generic, (struct reloc_ext_bytes *)native);
     }
   else 
     {
-      swap_std_reloc_out(abfd, generic, native, count);
+      for (natptr = native;
+	   count != 0;
+	   --count, natptr += each_size, ++generic)
+	swap_std_reloc_out(abfd, generic, (struct reloc_std_bytes *)native);
     }
 
   if ( bfd_write ((PTR) native, 1, natsize, abfd) != natsize) {
@@ -1811,7 +1745,7 @@ bfd_print_symbol_enum_type how;
     break;
   case bfd_print_symbol_type_enum:
     fprintf(file,"%4x %2x %2x",(unsigned)(aout_symbol(symbol)->desc & 0xffff),
-	    (unsigned)(   aout_symbol(symbol)->other  & 0xff),
+	    (unsigned)(aout_symbol(symbol)->other & 0xff),
 	    (unsigned)(aout_symbol(symbol)->type));
     break;
   case bfd_print_symbol_all_enum:
@@ -1824,7 +1758,7 @@ bfd_print_symbol_enum_type how;
       fprintf(file," %-5s %04x %02x %02x %s",
 	      section_name,
 	      (unsigned)(aout_symbol(symbol)->desc & 0xffff),
-	      (unsigned)(aout_symbol(symbol)->other  & 0xff),
+	      (unsigned)(aout_symbol(symbol)->other & 0xff),
 	      (unsigned)(aout_symbol(symbol)->type  & 0xff),
 	      symbol->name);
     }

@@ -1,5 +1,6 @@
-/*
-   Copyright (C) 1990, 1991 Free Software Foundation, Inc.
+/* Support for Intel 960 COFF and Motorola 88k BCS COFF (and maybe others) */
+
+/* Copyright (C) 1990, 1991 Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Diddler.
 
@@ -18,37 +19,37 @@ You should have received a copy of the GNU General Public License along with
 */
 
 /* $Id$ */
-/*
-Most of this hacked by Steve Chamberlain, steve@cygnus.com
-(All the ugly bits by rich :)
-*/
+/* Most of this hacked by Steve Chamberlain, steve@cygnus.com */
 
 #include "archures.h"		/* Machine architectures and types */
-
 
 /* SUPPRESS 558 */
 /* SUPPRESS 590 */
 /* SUPPRESS 529 */
 /* SUPPRESS 530 */
 
+/* Align an address upward to a boundary, expressed as a number of bytes.
+   E.g. align to an 8-byte boundary with argument of 8.  */
 #define ALIGN(this, boundary) \
   ((( (this) + ((boundary) -1)) & (~((boundary)-1))))
 
-#define sp(x) bfd_h_put_x(abfd, x, &x)
-
-
-
-/*
-   Align an address by rounding it up to a power of two.  It leaves the
-   address unchanged if align == 0 (2^0 = alignment of 1 byte)
-*/
+/* Align an address upward to a power of two.  Argument is the power
+   of two, e.g. 8-byte alignment uses argument of 3 (8 == 2^3).  */
 #define	i960_align(addr, align)	\
 	( ((addr) + ((1<<(align))-1)) & (-1 << (align)))
 
+#define sp(x) bfd_h_put_x(abfd, x, &x)
 
 PROTO(static void,force_indices_file_symbol_relative,(bfd *abfd, SYMENT *symtab));
 
-/* All the swapping routines */
+/* All the swapping routines:
+
+   FIXME, these routines assume that the sizes, alignments, and offsets of
+   these fields are the same in the host and target.  This is an invalid
+   assumption, which in particular breaks on the 386 and SPARC.  Fix this
+   the same way that a.out.h and sunos.c were fixed:  define char arrays
+   that represent the headers in the target systems' file, and have these
+   functions translate in from that format, and out to that format.  */
 
 static void 
 DEFUN(swap_reloc,(abfd, reloc),
@@ -114,100 +115,9 @@ DEFUN(swap_scnhdr,(abfd, scnhdr),
     sp(scnhdr->s_align);
 #endif
 }
-
-static void 
-DEFUN(swap_name,(abfd, ptr),
-      bfd            *abfd AND
-      long           *ptr)
-{
-    if (ptr[0] == 0) {
-	/* There is an index which needs to be swapped */
-	bfd_h_put_x(abfd, ptr[1], (ptr + 1));
-    }
-    else {
-	/* This is a string .. leave it alone */
-    }
-}
-
-static void 
-DEFUN(bfd_coff_swap_sym,(abfd, se),
-      bfd            *abfd AND
-      SYMENT         *se)
-{
-    swap_name(abfd, (long*)(se->n_name));
-    bfd_h_put_x(abfd, se->n_value, &se->n_value);
-    bfd_h_put_x(abfd, se->n_scnum, &se->n_scnum);
-    bfd_h_put_x(abfd, se->n_type, &se->n_type);
-    bfd_h_put_x(abfd, se->n_sclass, &se->n_sclass);
-    bfd_h_put_x(abfd, se->n_numaux, &se->n_numaux);
-}
-
-#ifndef I960
-static
-#endif
-void
-DEFUN(bfd_coff_swap_aux,(abfd, au, type, class),
-      bfd            *abfd AND
-      AUXENT         *au AND
-      int             type AND
-      int             class)
-{
-    switch (class) {
-    case C_FILE:
-	swap_name(abfd, (long *)(&au->x_file.x_n));
-	break;
-    case C_STAT:
-#ifdef C_LEAFSTAT
-    case C_LEAFSTAT:
-#endif
-    case C_HIDDEN:
-	if (type == T_NULL) {
-	    sp(au->x_scn.x_scnlen);
-	    sp(au->x_scn.x_nreloc);
-	    sp(au->x_scn.x_nlinno);
-	    break;
-	}
-    default:
-	sp(au->x_sym.x_tagndx);
-	sp(au->x_sym.x_tvndx);
-
-	if (ISARY(type)) {
-	    sp(au->x_sym.x_fcnary.x_ary.x_dimen[0]);
-	    sp(au->x_sym.x_fcnary.x_ary.x_dimen[1]);
-	    sp(au->x_sym.x_fcnary.x_ary.x_dimen[2]);
-	    sp(au->x_sym.x_fcnary.x_ary.x_dimen[3]);
-	}
-	else {
-	    sp(au->x_sym.x_fcnary.x_fcn.x_lnnoptr);
-	    sp(au->x_sym.x_fcnary.x_fcn.x_endndx);
-	}
-	if (ISFCN(type)) {
-	    sp(au->x_sym.x_misc.x_fsize);
-	}
-	else {
-	    sp(au->x_sym.x_misc.x_lnsz.x_lnno);
-	    sp(au->x_sym.x_misc.x_lnsz.x_size);
-	}
-    }
-}
-
-#ifndef I960
-static
-#endif
-void
-DEFUN(bfd_coff_swap_lineno,(abfd, lineno),
-      bfd            *abfd AND
-      LINENO         *lineno)
-{
-    sp(lineno->l_addr.l_symndx);
-    sp(lineno->l_lnno);
-}
-
-
+
 /* void warning(); */
 extern asection abs_section;
-
-
 
 static int
 DEFUN(get_index,(symbol),
@@ -235,12 +145,17 @@ DEFUN(coff_new_section_hook,(abfd_ignore, section_ignore),
       asection       *section_ignore)
 {
 #ifdef MC88MAGIC
+  /* FIXME, shouldn't this ifdef be on something that says we are
+     actually COMPILING FOR an 88K coff file, rather than simply
+     knowing its magic number? */
   /* Align to at least 16 bytes */
   section_ignore->alignment_power = 4;
 #endif
   return true;
 }
-/* actually it makes itself and its children from the file headers */
+
+/* Take a section header read from a coff file (in HOST byte order),
+   and make a BFD "section" out of it.  */
 static          boolean
 DEFUN(make_a_section_from_file,(abfd, hdr),
       bfd            *abfd AND
@@ -248,16 +163,18 @@ DEFUN(make_a_section_from_file,(abfd, hdr),
 
 {
     asection       *return_section;
+
     {
-	char           *name = bfd_alloc(abfd, 9);
+	/* Assorted wastage to null-terminate the name, thanks AT&T! */
+	char *name = bfd_alloc(abfd, sizeof (hdr->s_name)+1);
 	if (name == NULL) {
 	    bfd_error = no_memory;
 	    return false;
-	}			/* on error */
-	strncpy(name, (char *) &hdr->s_name[0], 8);
+	}
+	strncpy(name, (char *) &hdr->s_name[0], sizeof (hdr->s_name));
+	name[sizeof (hdr->s_name)] = 0;
 
 	return_section = bfd_make_section(abfd, name);
-	(return_section->name)[8] = 0;
     }
 
     /* s_paddr is presumed to be = to s_vaddr */
@@ -270,7 +187,7 @@ DEFUN(make_a_section_from_file,(abfd, hdr),
     assign(reloc_count, s_nreloc);
 #ifdef I960
     {
-
+	/* FIXME, use a temp var rather than alignment_power */
 	assign(alignment_power, s_align);
 	{
 	    unsigned int    i;
@@ -308,13 +225,13 @@ static          boolean
 DEFUN(coff_mkobject,(abfd),
       bfd            *abfd)
 {
-  coff_data_type *coff;
-  coff_data(abfd) = 
-    (coff_data_type*)bfd_alloc(abfd,sizeof(coff_data_type));
-  coff = coff_data(abfd);
-  coff->relocbase = 0;
+  set_tdata (abfd, bfd_alloc (abfd,sizeof(coff_data_type)));
+  if (coff_data(abfd) == 0) {
+    bfd_error = no_memory;
+    return false;
+  }
+  coff_data(abfd)->relocbase = 0;
   return true;
-
 }
 
 static
@@ -331,25 +248,33 @@ DEFUN(coff_real_object_p,(abfd, nscns, opthdr),
   struct scnhdr  *sections;	/* points into file_info */
 
   /* Build a play area */
-  (void)   coff_mkobject(abfd);
+  if (coff_mkobject(abfd) != true)
+    return 0;
   coff = coff_data(abfd);
-  /*
-    OK, now we know the format, read in the filehdr, soi-disant "optional
-    header", and all the sections.
-    */
+
+  /* OK, now we know the format, read in the filehdr, soi-disant "optional
+    header", and all the sections.  */
+
   readsize = sizeof(struct filehdr)
     + opthdr
       + (nscns * sizeof(struct scnhdr));
 
   file_info = (PTR) bfd_alloc(abfd, readsize);
-  if (bfd_seek(abfd, 0L, SEEK_SET) < 0)
+  if (file_info == NULL) {
+    bfd_error = no_memory;
     goto fail;
+  }
 
-  if (bfd_read((PTR) file_info, 1, readsize, abfd) != readsize)
+  if (bfd_seek(abfd, 0L, SEEK_SET) < 0) {
+    bfd_release (abfd, (PTR)file_info);
     goto fail;
+  }
+  if (bfd_read((PTR) file_info, 1, readsize, abfd) != readsize) {
+    bfd_release (abfd, (PTR)file_info);
+    goto fail;
+  }
   filehdr = (struct filehdr *) file_info;
   sections = (struct scnhdr *) (file_info + sizeof(struct filehdr) + opthdr);
-
 
   swap_filehdr(abfd, filehdr);
 
@@ -492,9 +417,9 @@ DEFUN(coff_object_p,(abfd),
     nscns = bfd_h_getshort(abfd, (unsigned char *) &nscns);
     if (bfd_seek(abfd, (file_ptr) & (((struct filehdr *) NULL)->f_opthdr), SEEK_SET)
 	< 0)
-	return (bfd_target *) NULL;
+	return 0;
     if (bfd_read((PTR) &opthdr, 1, sizeof(opthdr), abfd) != sizeof(opthdr))
-	return (bfd_target *) NULL;
+	return 0;
     opthdr = bfd_h_getshort(abfd, (unsigned char *) &opthdr);
 
     /* if the optional header is NULL or not the correct size then
@@ -564,14 +489,10 @@ DEFUN(uses_x_sym_x_tagndx_p,(native),
       SYMENT *native)
 {
     if (BTYPE(native->n_type) == T_STRUCT) return true;
-    if (BTYPE(native->n_type) == T_UNION) return true;
-    if (BTYPE(native->n_type) == T_ENUM)return true;
+    if (BTYPE(native->n_type) == T_UNION)  return true;
+    if (BTYPE(native->n_type) == T_ENUM)   return true;
     return false;
 }
-
-
-
-
 
 
 /* 
@@ -608,10 +529,8 @@ differences between to items, used to work out the true index of the
 target. 
 
 We store in the name field of each syment the actual native index
-applied so we can dig it out through a pointer.
+applied so we can dig it out through a pointer.  */
 
-
-*/
 static void 
 coff_mangle_symbols(bfd_ptr)
 bfd *bfd_ptr;
@@ -781,12 +700,7 @@ bfd *bfd_ptr;
     }
   }
 }
-	  
-	  
-	  
 
-	  
-	  
 
 static void 
 coff_write_symbols(abfd)
@@ -1001,6 +915,7 @@ coff_write_relocs(abfd)
 	}
     }
 }
+
 static void 
 coff_write_linenumbers(abfd)
     bfd            *abfd;
@@ -1085,6 +1000,7 @@ coff_print_symbol(ignore_abfd, file, symbol, how)
 	break;
     }
 }
+
 static alent   *
 coff_get_lineno(ignore_abfd, symbol)
     bfd            *ignore_abfd;
@@ -1092,6 +1008,7 @@ coff_get_lineno(ignore_abfd, symbol)
 {
     return coffsymbol(symbol)->lineno;
 }
+
 /*
    Set flags and magic number of a coff file from architecture and machine
    type.  Result is true if we can represent the arch&type, false if not.
@@ -1102,7 +1019,6 @@ coff_set_flags(abfd, magicp, flagsp)
     unsigned       *magicp,
                    *flagsp;
 {
-
 
     switch (abfd->obj_arch) {
 
@@ -1144,11 +1060,13 @@ coff_set_flags(abfd, magicp, flagsp)
 	}
 	break;
 #endif
+
 #ifdef MC68MAGIC
     case bfd_arch_m68k:
 	*magicp = MC68MAGIC;
 	return true;
 #endif
+
 #ifdef MC88MAGIC
     case bfd_arch_m88k:
 	*magicp = MC88OMAGIC;
@@ -1204,15 +1122,24 @@ coff_compute_section_file_positions(abfd)
 
     for (current = abfd->sections; current != NULL; current =
 	 current->next) {
-#ifdef MC88MAGIC
-      sofar =   current->filepos = ALIGN(sofar, 1<<
-					 current->alignment_power);
-#else
-	current->filepos = sofar;
+      /* Only deal with sections which have contents */
+      if (!(current->flags & SEC_HAS_CONTENTS))
+	continue;
+
+      /* Align the sections in the file to the same boundary on 
+	 which they are aligned in virtual memory.  I960 doesn't
+	 do this (FIXME) so we can stay in sync with Intel.  960
+	 doesn't yet page from files... */
+#ifndef I960
+      sofar = ALIGN(sofar, 1 << current->alignment_power);
 #endif
-	/* Only add sections which have contents */
-	if (current->flags & SEC_HAS_CONTENTS)
-	    sofar += current->size;
+      /* FIXME, in demand paged files, the low order bits of the file
+	 offset must match the low order bits of the virtual address.
+	 "Low order" is apparently implementation defined.  Add code
+	 here to round sofar up to match the virtual address.  */
+
+      current->filepos = sofar;
+      sofar += current->size;
     }
     obj_relocbase(abfd) = sofar;
 }
@@ -1290,7 +1217,6 @@ coff_write_object_contents(abfd)
       current->line_filepos = lineno_base;
       current->moving_line_filepos = lineno_base;
       lineno_base += current->lineno_count * sizeof(struct lineno);
-
     }
     else {
       current->line_filepos = 0;
@@ -1304,74 +1230,72 @@ coff_write_object_contents(abfd)
     }
   }
 
-
+  /* Write section headers to the file.  */
 
   bfd_seek(abfd,
 	   (file_ptr) ((abfd->flags & EXEC_P) ?
 		       (FILHSZ + AOUTSZ) : FILHSZ),
 	   SEEK_SET);
-    {
+
+  {
 #if 0
-      unsigned int    pad = abfd->flags & D_PAGED ? data_base : 0;
+    unsigned int    pad = abfd->flags & D_PAGED ? data_base : 0;
 #endif
-      unsigned int    pad = 0;
-      for (current = abfd->sections; current != NULL; current = current->next) {
-	SCNHDR          section;
-	strncpy(&(section.s_name[0]), current->name, 8);
-	section.s_vaddr = current->vma + pad;
-	section.s_paddr = current->vma + pad;
-	section.s_size = current->size - pad;
-	/*
-	  If this section has no size or is unloadable then the scnptr
-	  will be 0 too
-	  */
-	if (current->size - pad == 0 ||
-	    (current->flags & SEC_LOAD) == 0) {
-	  section.s_scnptr = 0;
+    unsigned int    pad = 0;
 
-	}
-	else {
-	  section.s_scnptr = current->filepos;
-	}
-	section.s_relptr = current->rel_filepos;
-	section.s_lnnoptr = current->line_filepos;
-	section.s_nreloc = current->reloc_count;
-	section.s_nlnno = current->lineno_count;
-	if (current->reloc_count != 0)
-	  hasrelocs = true;
-	if (current->lineno_count != 0)
-	  haslinno = true;
+    for (current = abfd->sections; current != NULL; current = current->next) {
+      SCNHDR          section;
+      strncpy(&(section.s_name[0]), current->name, 8);
+      section.s_vaddr = current->vma + pad;
+      section.s_paddr = current->vma + pad;
+      section.s_size = current->size - pad;
+      /*
+	If this section has no size or is unloadable then the scnptr
+	will be 0 too
+	*/
+      if (current->size - pad == 0 ||
+	  (current->flags & SEC_LOAD) == 0) {
+	section.s_scnptr = 0;
 
-	if (!strcmp(current->name, _TEXT)) {
-	  text_sec = current;
-	  section.s_flags = STYP_TEXT; /* kind stupid optimisation */
-	}
-	else {
+      }
+      else {
+	section.s_scnptr = current->filepos;
+      }
+      section.s_relptr = current->rel_filepos;
+      section.s_lnnoptr = current->line_filepos;
+      section.s_nreloc = current->reloc_count;
+      section.s_nlnno = current->lineno_count;
+      if (current->reloc_count != 0)
+	hasrelocs = true;
+      if (current->lineno_count != 0)
+	haslinno = true;
 
-	  if (!strcmp(current->name, _DATA)) {
-	    data_sec = current;
-	    section.s_flags = STYP_DATA; /* kind stupid
-					    optimisation */
-	  }
-	  else if (!strcmp(current->name, _BSS)) {
-	    bss_sec = current;
-	    section.s_flags = STYP_BSS; /* kind stupid optimisation */
-	  }
-	}
+      if (!strcmp(current->name, _TEXT)) {
+	text_sec = current;
+	section.s_flags = STYP_TEXT; /* kinda stupid */
+      }
+      else if (!strcmp(current->name, _DATA)) {
+	data_sec = current;
+	section.s_flags = STYP_DATA; /* kinda stupid */
+      }
+      else if (!strcmp(current->name, _BSS)) {
+	bss_sec = current;
+	section.s_flags = STYP_BSS; /* kinda stupid */
+      }
 
 
 #ifdef I960
-	section.s_align = (current->alignment_power
-			   ? 1 << current->alignment_power
-			   : 0);
+      section.s_align = (current->alignment_power
+			 ? 1 << current->alignment_power
+			 : 0);
 
 #endif
-	swap_scnhdr(abfd, &section);
-	bfd_write((PTR) (&section), 1, SCNHSZ, abfd);
-	pad = 0;
-      }
-
+      swap_scnhdr(abfd, &section);
+      bfd_write((PTR) (&section), 1, SCNHSZ, abfd);
+      pad = 0;
     }
+  }
+
   /* OK, now set up the filehdr... */
 
   bfd_h_put_x(abfd, abfd->section_count, &file_header.f_nscns);
@@ -1465,24 +1389,21 @@ coff_write_object_contents(abfd)
   if (bss_sec) {
     bfd_h_put_x(abfd, bss_sec->size, &coff->hdr.bsize);
   }
-  bfd_h_put_x(abfd, bfd_get_start_address(abfd), &coff->hdr.entry);
 
+  bfd_h_put_x(abfd, bfd_get_start_address(abfd), &coff->hdr.entry);
+  bfd_h_put_x(abfd, bfd_get_symcount(abfd), &file_header.f_nsyms);
 
   /* now write them */
-  bfd_h_put_x(abfd, bfd_get_symcount(abfd), &file_header.f_nsyms);
   if (bfd_seek(abfd, 0L, SEEK_SET) != 0)
     return false;
 
   bfd_write((PTR) &file_header, 1, FILHSZ, abfd);
 
   if (abfd->flags & EXEC_P) {
-
     bfd_write((PTR) &coff->hdr, 1, AOUTSZ, abfd);
   }
   return true;
 }
-
-
 
 static          boolean
 coff_set_section_contents(abfd, section, location, offset, count)
@@ -1502,6 +1423,7 @@ coff_set_section_contents(abfd, section, location, offset, count)
     }
     return true;
 }
+
 static          boolean
 coff_get_section_contents(abfd, section, location, offset, count)
     bfd            *abfd;
@@ -1539,19 +1461,10 @@ coff_close_and_cleanup(abfd)
       return false;
     }
 
-#define cleaner(ptr) if (abfd->ptr) free (abfd->ptr)
-  cleaner(tdata);
-
-  if (abfd->my_archive)
-    cleaner(filename);
-
-#undef cleaner
+  /* We depend on bfd_close to free all the memory on the obstack.  */
+  /* FIXME if bfd_release is not using obstacks! */
   return true;
 }
-
-
-
-
 
 
 static PTR 
@@ -1633,6 +1546,7 @@ offset_symbol_indices(symtab, count, offset)
 
   return;
 }				/* offset_symbol_indices() */
+
 /* swap the entire symbol table */
 static void 
 swap_raw_symtab(abfd, raw_symtab)
@@ -1654,6 +1568,7 @@ swap_raw_symtab(abfd, raw_symtab)
 
     return;
 }				/* swap_raw_symtab() */
+
 /*
    read a symbol table into freshly mallocated memory, swap it, and knit the
    symbol names into a normalized form. By normalized here I mean that all
@@ -1673,13 +1588,12 @@ get_normalized_symtab(abfd)
     unsigned long   size;
     unsigned long   string_table_size = 0;
 
-
     if ((size = bfd_get_symcount(abfd) * sizeof(SYMENT)) == 0) {
 	bfd_error = no_symbols;
 	return (NULL);
     }				/* no symbols */
-    /*
-       This is a hack.  Some tool chains fail to put a C_FILE symbol at the
+
+    /* This is a hack.  Some tool chains fail to put a C_FILE symbol at the
        beginning of the symbol table.  To make life simpler for our users, we
        inject one if it wasn't there originally.
     
@@ -1849,7 +1763,7 @@ get_normalized_symtab(abfd)
 
 #ifndef GNU960
 	/* I'm not sure of the repercussions of this, so the Intel
-	   folks will always to the force
+	   folks will always do the force
 	   */
     if (obj_symbol_slew(abfd) > 0) 
       force_indices_file_symbol_relative(abfd, retval);
@@ -1860,19 +1774,17 @@ get_normalized_symtab(abfd)
     obj_raw_syments(abfd) = retval;
     obj_string_table(abfd) = string_table;
 
-
-
     return (retval);
 }				/* get_normalized_symtab() */
 
 static
-struct sec_struct *
+struct sec *
 section_from_bfd_index(abfd, index)
     bfd            *abfd;
     int             index;
 {
     if (index > 0) {
-	struct sec_struct *answer = abfd->sections;
+	struct sec *answer = abfd->sections;
 	while (--index) {
 	    answer = answer->next;
 	}
@@ -1884,16 +1796,15 @@ section_from_bfd_index(abfd, index)
 
 
 
-static
-                boolean
+static boolean
 coff_slurp_line_table(abfd, asect)
     bfd            *abfd;
     asection       *asect;
 {
     struct lineno  *native_lineno;
     alent          *lineno_cache;
-    BFD_ASSERT(asect->lineno == (alent *) NULL);
 
+    BFD_ASSERT(asect->lineno == (alent *) NULL);
 
     native_lineno = (struct lineno *) buy_and_read(abfd,
 						   asect->line_filepos,
@@ -1905,10 +1816,11 @@ coff_slurp_line_table(abfd, asect)
     if (lineno_cache == NULL) {
 	bfd_error = no_memory;
 	return false;
-    } {				/* on error */
+    } else {	
 	unsigned int    counter = 0;
 	alent          *cache_ptr = lineno_cache;
 	struct lineno  *src = native_lineno;
+
 	while (counter < asect->lineno_count) {
 	    bfd_coff_swap_lineno(abfd, src);
 	    cache_ptr->line_number = src->l_lnno;
@@ -1934,6 +1846,7 @@ coff_slurp_line_table(abfd, asect)
 
     }
     asect->lineno = lineno_cache;
+    /* FIXME, free native_lineno here, or use alloca or something. */
     return true;
 }				/* coff_slurp_line_table() */
 
@@ -1942,7 +1855,6 @@ find_next_file_symbol(current, end)
     SYMENT         *current;
     SYMENT         *end;
 {
-  unsigned int next = current->n_value;
   current += current->n_numaux + 1;
 
   while (current < end) {
@@ -2019,7 +1931,7 @@ coff_slurp_symbol_table(abfd)
     if (table_ptr == NULL) {
 	bfd_error = no_memory;
 	return false;
-    } {				/* on error */
+    } else {
 	coff_symbol_type *dst = cached_area;
 	unsigned int    last_native_index = bfd_get_symcount(abfd);
 	unsigned int    this_index = 0;
@@ -2148,9 +2060,6 @@ coff_slurp_symbol_table(abfd)
 		break;
 	    }
 
-
-
-
 	    BFD_ASSERT(dst->symbol.flags != 0);
 
 	    dst->native = src;
@@ -2161,7 +2070,6 @@ coff_slurp_symbol_table(abfd)
 	    dst++;
 	    number_of_symbols++;
 	}			/* walk the native symtab */
-
     }				/* bfdize the native symtab */
 
     obj_symbols(abfd) = cached_area;
@@ -2306,7 +2214,6 @@ coff_slurp_reloc_table(abfd, asect, symbols)
 
   }
 
-
   asect->relocation = reloc_cache;
   return true;
 }
@@ -2335,9 +2242,6 @@ coff_canonicalize_reloc(abfd, section, relptr, symbols)
 
     return section->reloc_count;
 }
-
-
-
 
 
 /*
@@ -2387,7 +2291,6 @@ DEFUN(coff_find_nearest_line,(abfd,
   if (cof == (struct icofdata *)NULL)
     return false;
 
-      
   p = cof->raw_syments;
   /*
      I don't know for sure what's right, but this isn't it. First off, an
@@ -2406,8 +2309,6 @@ DEFUN(coff_find_nearest_line,(abfd,
   return false;
 #endif
 
-
-
   for (i = 0; i < cof->raw_syment_count; i++) {
     if (p->n_sclass == C_FILE) {
       /* File name is embeded in auxent */
@@ -2424,10 +2325,6 @@ DEFUN(coff_find_nearest_line,(abfd,
     p += 1 + p->n_numaux;
   }
   /* Now wander though the raw linenumbers of the section */
-
-
-
-
   /*
      If this is the same bfd as we were previously called with and this is
      the same section, and the offset we want is further down then we can

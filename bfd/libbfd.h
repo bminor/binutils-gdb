@@ -1,3 +1,6 @@
+/* libbfd.h -- Declarations used by bfd library implementation.
+   This include file is not for users of the library */
+
 /* Copyright (C) 1990, 1991 Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Diddler.
@@ -18,20 +21,16 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* $Id$ */
 
-/*** libbfd.h -- Declarations used by bfd library implementation.
-   This include file is not for users of the library */
-
-
-
-
-
 /* If you want to read and write large blocks, you might want to do it
    in quanta of this amount */
 #define DEFAULT_BUFFERSIZE 8192
 
-/* tdata for an archive.  For an input archive cache
-   needs to be free()'d.  For an output archive, symdefs do.
-*/
+/* Set a tdata field.  Can't use the other macros for this, since they
+   do casts, and casting to the left of assignment isn't portable.  */
+#define set_tdata(bfd, v) ((bfd)->tdata = (PTR) (v))
+
+/* tdata for an archive.  For an input archive, cache
+   needs to be free()'d.  For an output archive, symdefs do.  */
 
 struct artdata {
   file_ptr first_file_filepos;
@@ -44,7 +43,6 @@ struct artdata {
 };
 
 #define bfd_ardata(bfd) ((struct artdata *) ((bfd)->tdata))
-#define bfd_set_ardata(bfd, v) ((bfd)->tdata = (PTR) (v))
 
 /* Goes in bfd's arelt_data slot */
 struct areltdata {
@@ -59,13 +57,19 @@ struct areltdata {
    This can't always work, because of alignment restrictions.  We should change
    it before it becomes a problem -- Gumby */
 
-PROTO (char *, zalloc, (size_t size));
+PROTO (char *, zalloc, (bfd_size_type size));
+
+/* These routines allocate and free things on the BFD's obstack.  Note
+   that realloc can never occur in place.  */
+
+PROTO(PTR, bfd_alloc, (bfd *abfd, bfd_size_type size));
+PROTO(PTR, bfd_zalloc,(bfd *abfd, bfd_size_type size));
+PROTO(PTR, bfd_realloc,(bfd *abfd, PTR orig, bfd_size_type new));
+#define bfd_release(x,y) (void) obstack_free(&(x->memory),y)
 
 PROTO (bfd_target *, bfd_find_target, (CONST char *target_name));
-PROTO (size_t, bfd_read, (PTR ptr, size_t size, size_t nitems, bfd *abfd));
-PROTO (size_t, bfd_write, (PTR ptr, size_t size, size_t nitems, bfd *abfd));
-
-
+PROTO (bfd_size_type, bfd_read, (PTR ptr, bfd_size_type size, bfd_size_type nitems, bfd *abfd));
+PROTO (bfd_size_type, bfd_write, (PTR ptr, bfd_size_type size, bfd_size_type nitems, bfd *abfd));
 
 PROTO (FILE *, bfd_cache_lookup, (bfd *));
 PROTO (void, bfd_cache_close, (bfd *));
@@ -103,7 +107,6 @@ PROTO (int, bfd_0, (bfd *ignore));
 PROTO (unsigned int, bfd_0u, (bfd *ignore));
 PROTO (void, bfd_void, (bfd *ignore));
 
-
 PROTO (bfd *,new_bfd_contained_in,(bfd *));
 PROTO (boolean, _bfd_dummy_new_section_hook, (bfd *ignore, asection *newsect));
 PROTO (char *, _bfd_dummy_core_file_failing_command, (bfd *abfd));
@@ -125,6 +128,7 @@ PROTO (boolean, coff_write_armap, (bfd *arch, unsigned int elength,
 PROTO ( bfd *,bfd_generic_openr_next_archived_file, (bfd *archive, bfd *last_file));
 
 PROTO(int, bfd_generic_stat_arch_elt, (bfd *, struct stat *));
+
 /* Macros to tell if bfds are read or write enabled.
 
    Note that bfds open for read may be scribbled into if the fd passed

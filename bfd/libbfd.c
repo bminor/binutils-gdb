@@ -56,12 +56,14 @@ bfd *ignore;
 {
   return (void *)NULL;
 }
+
 int 
 bfd_0(ignore)
 bfd *ignore;
 {
   return 0;
 }
+
 unsigned int 
 bfd_0u(ignore)
 bfd *ignore;
