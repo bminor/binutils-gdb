@@ -1340,6 +1340,10 @@ The C @code{void} type is defined as a signed integral type 0 bits long:
 @example
 .stabs "void:t19=bs0;0;0",128,0,0,0
 @end example
+The Solaris compiler seems to omit the trailing semicolon in this case.
+Getting sloppy in this way is not a swift move because if a type is
+embedded in a more complex expression it is necessary to be able to tell
+where it ends.
 
 I'm not sure how a boolean type is represented.
 
