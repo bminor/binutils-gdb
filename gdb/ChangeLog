@@ -1,3 +1,8 @@
+2004-03-23  Daniel Jacobowitz  <drow@mvista.com>
+
+	* infcmd.c (attach_command): Reread symbols if we already have
+	an exec file.
+
 2004-03-23  Andrew Cagney  <cagney@redhat.com>
 
 	* rs6000-tdep.c (frame_get_saved_regs): Delete unused function.
