@@ -1,3 +1,9 @@
+2003-06-02  Fabrizio Gennari  <fabrizio.ge@tiscalinet.it>
+
+	* pe-dll.c (fill_edata): Scan table pe_dll->exports, which is
+	sorted alphabetically, instead of exported_symbols, which is
+	sorted by ordinal.
+
 2003-05-30  Ulrich Drepper  <drepper@redhat.com>
 	    Jakub Jelinek  <jakub@redhat.com>
 

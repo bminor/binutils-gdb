@@ -959,7 +959,7 @@ fill_edata (abfd, info)
      bfd *abfd;
      struct bfd_link_info *info ATTRIBUTE_UNUSED;
 {
-  int i, hint;
+  int s, hint;
   unsigned char *edirectory;
   unsigned long *eaddresses;
   unsigned long *enameptrs;
@@ -1000,13 +1000,16 @@ fill_edata (abfd, info)
 
   fill_exported_offsets (abfd, info);
 
-  /* Ok, now for the filling in part.  */
+  /* Ok, now for the filling in part.
+     Scan alphabetically - ie the ordering in the exports[] table,
+     rather than by ordinal - the ordering in the exported_symbol[]
+     table.  See dlltool.c and:
+        http://sources.redhat.com/ml/binutils/2003-04/msg00379.html
+     for more information.  */  
   hint = 0;
-  for (i = 0; i < export_table_size; i++)
+  for (s = 0; s < NE; s++)
     {
-      int s = exported_symbols[i];
-
-      if (s != -1)
+      if (pe_def_file->exports[s].ordinal != -1)
 	{
 	  struct sec *ssec = exported_symbol_sections[s];
 	  unsigned long srva = (exported_symbol_offsets[s]
@@ -1020,6 +1023,7 @@ fill_edata (abfd, info)
 	  if (!pe_def_file->exports[s].flag_noname)
 	    {
 	      char *ename = pe_def_file->exports[s].name;
+
 	      bfd_put_32 (abfd, ERVA (enamestr), (void *) enameptrs);
 	      enameptrs++;
 	      strcpy (enamestr, ename);
