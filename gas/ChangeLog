@@ -1,3 +1,11 @@
+Wed Aug 23 10:40:41 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* config/tc-ppc.c (set_target_endian): New static to say whether
+	we've initialized target_big_endian or not.
+	(md_parse_option): Set set_target_endian if we set the variable
+	target_big_endian.
+	(md_begin): Only set target_big_endian if !set_target_endian.
+
 Tue Aug 22 03:00:33 1995  Ken Raeburn  <raeburn@kr-laptop.cygnus.com>
 
 	Sat Aug 19 18:08:16 1995  Pat Rankin  <rankin@eql.caltech.edu>
