@@ -1,3 +1,7 @@
+Tue Jan 23 09:53:54 1996  Doug Evans  <dje@charmed.cygnus.com>
+
+	* objdump.c (disassemble_data): Handle unknown endianness.
+
 Mon Jan 22 16:46:43 1996  Doug Evans  <dje@charmed.cygnus.com>
 
 	Add new option --show-raw-insn.

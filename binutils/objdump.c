@@ -863,8 +863,12 @@ disassemble_data (abfd)
   disasm_info.mach = bfd_get_mach (abfd);
   if (bfd_big_endian (abfd))
     disasm_info.endian = BFD_ENDIAN_BIG;
-  else
+  else if (bfd_little_endian (abfd))
     disasm_info.endian = BFD_ENDIAN_LITTLE;
+  else
+    /* ??? Aborting here seems too drastic.  We could default to big or little
+       instead.  */
+    disasm_info.endian = BFD_ENDIAN_UNKNOWN;
 
   for (section = abfd->sections;
        section != (asection *) NULL;
