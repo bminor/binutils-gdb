@@ -2421,7 +2421,7 @@ search_symbols (char *regexp, namespace_enum kind, int nfiles, char *files[],
 	  /* If wrong number of spaces, fix it. */
 	  if (fix >= 0)
 	    {
-	      char *tmp = (char *) alloca (strlen (regexp) + fix);
+	      char *tmp = (char *) alloca (8 + fix + strlen (opname) + 1);
 	      sprintf (tmp, "operator%.*s%s", fix, " ", opname);
 	      regexp = tmp;
 	    }

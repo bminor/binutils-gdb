@@ -1,3 +1,7 @@
+2001-12-03  Michael Snyder  <msnyder@redhat.com>
+
+	* symtab.c (search_symbols): Make sure alloca size is big enough.
+
 2001-12-03  Andrew Cagney  <ac131313@redhat.com>
 
 	* MAINTAINERS: Prune m68k targets down to just m68k-elf.
