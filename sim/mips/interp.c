@@ -44,6 +44,7 @@ code on the hardware.
 #include "sim-main.h"
 #include "sim-utils.h"
 #include "sim-options.h"
+#include "sim-assert.h"
 
 #include "config.h"
 
@@ -91,9 +92,7 @@ char* pr_uword64 PARAMS ((uword64 addr));
 #include "engine.c"
 #undef SIM_MANIFESTS
 
-struct sim_state simulator = { 0 };
-static char *myname;
-static int big_endian_p;
+struct sim_state simulator;
 
 /* The following reserved instruction value is used when a simulator
    trap is required. NOTE: Care must be taken, since this value may be
@@ -189,7 +188,9 @@ typedef enum {
    and then going back to the point where the context was saved and
    changing some state before continuing. i.e. the ability to perform
    UNDOs on simulations. It would also allow the simulation of
-   shared-memory multi-processor systems. */
+   shared-memory multi-processor systems.
+
+   [NOTE: This is now partially implemented] */
 
 static host_callback *callback = NULL; /* handle onto the current callback structure */
 
@@ -498,10 +499,6 @@ static int HIACCESS = 0;
 static int LOACCESS = 0;
 static int HI1ACCESS = 0;
 static int LO1ACCESS = 0;
-/* The HIACCESS and LOACCESS counts are used to ensure that
-   corruptions caused by using the HI or LO register to close to a
-   following operation are spotted. */
-static ut_reg HLPC = 0;
 
 /* ??? The 4300 and a few other processors have interlocks on hi/lo register
    reads, and hence do not have this problem.  To avoid spurious warnings,
@@ -509,6 +506,10 @@ static ut_reg HLPC = 0;
 #if 1
 #define CHECKHILO(s)
 #else
+/* The HIACCESS and LOACCESS counts are used to ensure that
+   corruptions caused by using the HI or LO register to close to a
+   following operation are spotted. */
+static ut_reg HLPC = 0;
 /* If either of the preceding two instructions have accessed the HI or
    LO registers, then the values they see should be
    undefined. However, to keep the simulator world simple, we just let
@@ -531,11 +532,12 @@ static ut_reg HLPC = 0;
 /* Hardware configuration. Affects endianness of LoadMemory and
    StoreMemory and the endianness of Kernel and Supervisor mode
    execution. The value is 0 for little-endian; 1 for big-endian. */
-#define BigEndianMem    ((state & simBE) ? 1 : 0)
+#define BigEndianMem    (CURRENT_TARGET_BYTE_ORDER == BIG_ENDIAN)
+/*(state & simBE) ? 1 : 0)*/
 
 /* ByteSwapMem */
 /* This is true if the host and target have different endianness.  */
-#define ByteSwapMem (!(state & simHOSTBE) != !(state & simBE))
+#define ByteSwapMem (CURRENT_TARGET_BYTE_ORDER != CURRENT_HOST_BYTE_ORDER)
 
 /* ReverseEndian */
 /* This mode is selected if in User mode with the RE bit being set in
@@ -556,40 +558,21 @@ static ut_reg HLPC = 0;
    engine. */
 static unsigned int instruction_fetches = 0;
 static unsigned int instruction_fetch_overflow = 0;
-static unsigned int pipeline_ticks = 0;
 #endif
 
 /* Flags in the "state" variable: */
-#if 0
-#define simSTOP         (1 << 0)  /* 0 = execute; 1 = stop simulation */
-#define simSTEP         (1 << 1)  /* 0 = run; 1 = single-step */
-#endif
 #define simHALTEX       (1 << 2)  /* 0 = run; 1 = halt on exception */
 #define simHALTIN       (1 << 3)  /* 0 = run; 1 = halt on interrupt */
 #define simTRACE        (1 << 8)  /* 0 = do nothing; 1 = trace address activity */
 #define simPROFILE      (1 << 9)  /* 0 = do nothing; 1 = gather profiling samples */
-#define simHOSTBE       (1 << 10) /* 0 = little-endian; 1 = big-endian (host endianness) */
-/* Whilst simSTOP is not set, the simulator control loop should just
-   keep simulating instructions. The simSTEP flag is used to force
-   single-step execution. */
-#define simBE           (1 << 16) /* 0 = little-endian; 1 = big-endian (target endianness) */
 #define simPCOC0        (1 << 17) /* COC[1] from current */
 #define simPCOC1        (1 << 18) /* COC[1] from previous */
 #define simDELAYSLOT    (1 << 24) /* 0 = do nothing; 1 = delay slot entry exists */
 #define simSKIPNEXT     (1 << 25) /* 0 = do nothing; 1 = skip instruction */
-#if 0
-#define simEXCEPTION    (1 << 26) /* 0 = no exception; 1 = exception has occurred */
-#endif
-#if 0
-#define simEXIT         (1 << 27) /* 0 = do nothing; 1 = run-time exit() processing */
-#endif
 #define simSIGINT	(1 << 28)  /* 0 = do nothing; 1 = SIGINT has occured */
 #define simJALDELAYSLOT	(1 << 29) /* 1 = in jal delay slot */
 
 static unsigned int state = 0;
-#if 0
-static unsigned int rcexit = 0; /* _exit() reason code holder */
-#endif
 
 #define DELAYSLOT()     {\
                           if (state & simDELAYSLOT)\
@@ -615,15 +598,6 @@ static unsigned int rcexit = 0; /* _exit() reason code holder */
 #define K1BASE  (0xA0000000)
 #define K1SIZE  (0x20000000)
 
-/* Very simple memory model to start with: */
-static unsigned char *membank = NULL;
-static ut_reg membank_base = K1BASE;
-/* The ddb.ld linker script loads text at K1BASE+1MB, and the idt.ld linker
-   script loads text at K1BASE+128KB.  We allocate 2MB, so that we have a
-   minimum of 1 MB available for the user process.  We must have memory
-   above _end in order for sbrk to work.  */
-static unsigned membank_size = (2 << 20);
-
 /* Simple run-time monitor support */
 static unsigned char *monitor = NULL;
 static ut_reg monitor_base = 0xBFC00000;
@@ -647,40 +621,137 @@ static ut_reg profile_maxpc;
 static int profile_shift = 0; /* address shift amount */
 #endif /* PROFILE */
 
-#if 0
-/* The following are used to provide shortcuts to the required version
-   of host<->target copying. This avoids run-time conditionals, which
-   would slow the simulator throughput. */
-typedef unsigned int (*fnptr_read_word) PARAMS((unsigned char *memory));
-typedef unsigned int (*fnptr_swap_word) PARAMS((unsigned int data));
-typedef uword64 (*fnptr_read_long) PARAMS((unsigned char *memory));
-typedef uword64 (*fnptr_swap_long) PARAMS((uword64 data));
-#endif
 
-static unsigned int
-host_read_word (unsigned char *memory)
+static SIM_RC
+mips_option_handler (sd, opt, arg)
+     SIM_DESC sd;
+     int opt;
+     char *arg;
 {
-  /* actuall target->host */
-  return T2H_4 (*(unsigned int*)memory);
+  switch (opt)
+    {
+    case 'l':
+      if (arg != NULL) {
+	char *tmp;
+	tmp = (char *)malloc(strlen(arg) + 1);
+	if (tmp == NULL)
+	  callback->printf_filtered(callback,"Failed to allocate buffer for logfile name \"%s\"\n",optarg);
+	else {
+	  strcpy(tmp,optarg);
+	  logfile = tmp;
+	}
+      }
+      return SIM_RC_OK;
+
+    case 'n': /* OK */
+      callback->printf_filtered(callback,"Explicit model selection not yet available (Ignoring \"%s\")\n",optarg);
+      return SIM_RC_FAIL;
+
+    case 't': /* ??? */
+#if defined(TRACE)
+      /* Eventually the simTRACE flag could be treated as a toggle, to
+	 allow external control of the program points being traced
+	 (i.e. only from main onwards, excluding the run-time setup,
+	 etc.). */
+      if (arg == NULL)
+	state |= simTRACE;
+      else if (strcmp (arg, "yes") == 0)
+	state |= simTRACE;
+      else if (strcmp (arg, "no") == 0)
+	state &= ~simTRACE;
+      else
+	{
+	  fprintf (stderr, "Unreconized trace option `%s'\n", arg);
+	  return SIM_RC_FAIL;
+	}
+      return SIM_RC_OK;
+#else /* !TRACE */
+      fprintf(stderr,"\
+Simulator constructed without tracing support (for performance).\n\
+Re-compile simulator with \"-DTRACE\" to enable this option.\n");
+      return SIM_RC_FAIL;
+#endif /* !TRACE */
+
+    case 'z':
+#if defined(TRACE)
+      if (optarg != NULL) {
+	char *tmp;
+	tmp = (char *)malloc(strlen(optarg) + 1);
+	if (tmp == NULL)
+	  {
+	    callback->printf_filtered(callback,"Failed to allocate buffer for tracefile name \"%s\"\n",optarg);
+	    return SIM_RC_FAIL;
+	  }
+	else {
+	  strcpy(tmp,optarg);
+	  tracefile = tmp;
+	  callback->printf_filtered(callback,"Placing trace information into file \"%s\"\n",tracefile);
+	}
+      }
+#endif /* TRACE */
+      return SIM_RC_OK;
+
+    case 'p':
+#if defined(PROFILE)
+      state |= simPROFILE;
+      return SIM_RC_OK;
+#else /* !PROFILE */
+      fprintf(stderr,"\
+Simulator constructed without profiling support (for performance).\n\
+Re-compile simulator with \"-DPROFILE\" to enable this option.\n");
+      return SIM_RC_FAIL;
+#endif /* !PROFILE */
+
+    case 'x':
+#if defined(PROFILE)
+      profile_nsamples = (unsigned)getnum(optarg);
+#endif /* PROFILE */
+      return SIM_RC_OK;
+
+    case 'y':
+#if defined(PROFILE)
+      sim_set_profile((int)getnum(optarg));
+#endif /* PROFILE */
+      return SIM_RC_OK;
+
+    }
+
+  return SIM_RC_OK;
 }
-static uword64
-host_read_long (unsigned char *memory)
+
+static const OPTION mips_options[] =
 {
-  /* actuall target->host */
-  return T2H_8 (*(uword64*)memory);
-}
-static unsigned int
-host_swap_word (unsigned int val)
+  { {"log",      required_argument, NULL,'l'},
+      'l', "FILE", "Log file",
+      mips_option_handler },
+  { {"name",     required_argument, NULL,'n'},
+      'n', "MODEL", "Select arch model",
+      mips_option_handler },
+  { {"profile",  optional_argument, NULL,'p'},
+      'p', "on|off", "Enable profiling",
+      mips_option_handler },
+  { {"trace",    optional_argument, NULL,'t'},
+      't', "on|off", "Enable tracing",
+      mips_option_handler },
+  { {"tracefile",required_argument, NULL,'z'},
+      'z', "FILE", "Write trace to file",
+      mips_option_handler },
+  { {"frequency",required_argument, NULL,'y'},
+      'y', "FREQ", "Profile frequency",
+      mips_option_handler },
+  { {"samples",  required_argument, NULL,'x'},
+      'y', "SIZE", "Profile sample size",
+      mips_option_handler },
+  { {NULL, no_argument, NULL, 0}, '\0', NULL, NULL, NULL }
+};
+
+
+static void
+interrupt_event (SIM_DESC sd, void *data)
 {
-  /* actuall host->target */
-  return H2T_4 (val);
+  SignalException (Interrupt);
 }
-static uword64
-host_swap_long (uword64 val)
-{
-  /* actuall host->target */
-  return H2T_8 (val);
-}
+
 
 
 /*---------------------------------------------------------------------------*/
@@ -688,28 +759,40 @@ host_swap_long (uword64 val)
 /*---------------------------------------------------------------------------*/
 
 SIM_DESC
-sim_open (kind,argv)
+sim_open (kind,cb,argv)
      SIM_OPEN_KIND kind;
+     host_callback *cb;
      char **argv;
 {
   SIM_DESC sd = &simulator;
+
   STATE_OPEN_KIND (sd) = kind;
   STATE_MAGIC (sd) = SIM_MAGIC_NUMBER;
+  STATE_CALLBACK (sd) = cb;
+  callback = cb;
   CPU_STATE (STATE_CPU (sd, 0)) = sd;
+
+  /* FIXME: watchpoints code shouldn't need this */
+  STATE_WATCHPOINTS (sd)->pc = &(PC);
+  STATE_WATCHPOINTS (sd)->sizeof_pc = sizeof (PC);
+  STATE_WATCHPOINTS (sd)->interrupt_handler = interrupt_event;
+
+  /* memory defaults (unless sim_size was here first) */
+  if (STATE_MEM_SIZE (sd) == 0)
+    STATE_MEM_SIZE (sd) = (2 << 20);
+  STATE_MEM_BASE (sd) = K1BASE;
 
   if (callback == NULL) {
     fprintf(stderr,"SIM Error: sim_open() called without callbacks attached\n");
     return 0;
   }
 
-  /* The following ensures that the standard file handles for stdin,
-     stdout and stderr are initialised: */
-  callback->init(callback);
-
+  state = 0;
+  
   if (sim_pre_argv_init (sd, argv[0]) != SIM_RC_OK)
     return 0;
+  sim_add_option_table (sd, mips_options);
 
-#if 0
   /* getopt will print the error message so we just have to exit if this fails.
      FIXME: Hmmm...  in the case of gdb we need getopt to call
      print_filtered.  */
@@ -720,7 +803,6 @@ sim_open (kind,argv)
       sim_module_uninstall (sd);
       return 0;
     }
-#endif
 
   if (sim_post_argv_init (sd) != SIM_RC_OK)
     {
@@ -730,40 +812,35 @@ sim_open (kind,argv)
       return 0;
     }
 
-  myname = argv[0];
-
-  state = 0;
-  
-  /* doesn't return if a problem occures */
+  /* verify assumptions the simulator made about the host type system.
+     This macro does not return if there is a problem */
   CHECKSIM();
-
-  /* check endianness */
-  {
-    int data = 0x12;
-    if (*((char *)&data) != 0x12)
-     state |= simHOSTBE; /* big-endian host */
-  }
 
 #if defined(HASFPU)
   /* Check that the host FPU conforms to IEEE 754-1985 for the SINGLE
      and DOUBLE binary formats. This is a bit nasty, requiring that we
      trust the explicit manifests held in the source: */
+  /* TODO: We need to cope with the simulated target and the host not
+     having the same endianness. This will require the high and low
+     words of a (double) to be swapped when converting between the
+     host and the simulated target. */
   {
-    unsigned int s[2];
-    s[state & simHOSTBE ? 0 : 1] = 0x40805A5A;
-    s[state & simHOSTBE ? 1 : 0] = 0x00000000;
+    union {
+      unsigned int i[2];
+      double d;
+      float f[2];
+    } s;
 
-    /* TODO: We need to cope with the simulated target and the host
-       not having the same endianness. This will require the high and
-       low words of a (double) to be swapped when converting between
-       the host and the simulated target. */
+    s.d = (double)523.2939453125;
 
-    if (((float)4.01102924346923828125 != *(float *)(s + ((state & simHOSTBE) ? 0 : 1))) || ((double)523.2939453125 != *(double *)s)) {
-      fprintf(stderr,"The host executing the simulator does not seem to have IEEE 754-1985 std FP\n");
-      fprintf(stderr,"*(float *)s = %.20f (4.01102924346923828125)\n",*(float *)s);
-      fprintf(stderr,"*(double *)s = %.20f (523.2939453125)\n",*(double *)s);
-      exit(1);
-    }
+    if ((s.i[0] == 0 && (s.f[1] != (float)4.01102924346923828125
+			 || s.i[1] != 0x40805A5A))
+	|| (s.i[1] == 0 && (s.f[0] != (float)4.01102924346923828125
+			    || s.i[0] != 0x40805A5A)))
+      {
+	fprintf(stderr,"The host executing the simulator does not seem to have IEEE 754-1985 std FP\n");
+	return 0;
+      }
   }
 #endif /* HASFPU */
 
@@ -785,146 +862,6 @@ sim_open (kind,argv)
     }
   }
 
-  /* It would be good if we could select particular named MIPS
-     architecture simulators. However, having a pre-built, fixed
-     engine would mean including multiple engines. If the simulator is
-     changed to a run-time conditional version, then the ability to
-     select a particular architecture would be straightforward. */
-  {
-    int c;
-    char *cline;
-    int argc;
-    static struct option cmdline[] = {
-      {"help",     0,0,'h'},
-      {"log",      1,0,'l'},
-      {"name",     1,0,'n'},
-      {"profile",  0,0,'p'},
-      {"size",     1,0,'s'},
-      {"trace",    0,0,'t'},
-      {"tracefile",1,0,'z'},
-      {"frequency",1,0,'y'},
-      {"samples",  1,0,'x'},
-      {0,     0,0,0}
-    };
-
-    for (argc = 0; argv[argc]; argc++);
-
-    /* Ensure getopt is reset [don't know whether caller used it].  */
-    optind = 0;
-
-    while (1) {
-      int option_index = 0;
-
-      c = getopt_long(argc,argv,"E:hn:s:tp",cmdline,&option_index);
-      if (c == -1)
-       break;
-
-      switch (c) {
-       case 'E' :
-	 big_endian_p = strcmp (optarg, "big") == 0;
-         break;
-
-       case 'h':
-        callback->printf_filtered(callback,"Usage:\n\t\
-target sim [-h] [--log=<file>] [--name=<model>] [--size=<amount>]");
-#if defined(TRACE)
-        callback->printf_filtered(callback," [-t [--tracefile=<name>]]");
-#endif /* TRACE */
-#if defined(PROFILE)
-        callback->printf_filtered(callback," [-p [--frequency=<count>] [--samples=<count>]]");
-#endif /* PROFILE */
-        callback->printf_filtered(callback,"\n");
-        break;
-
-       case 'l':
-        if (optarg != NULL) {
-          char *tmp;
-          tmp = (char *)malloc(strlen(optarg) + 1);
-          if (tmp == NULL)
-           callback->printf_filtered(callback,"Failed to allocate buffer for logfile name \"%s\"\n",optarg);
-          else {
-            strcpy(tmp,optarg);
-            logfile = tmp;
-          }
-        }
-        break;
-
-       case 'n':
-        callback->printf_filtered(callback,"Explicit model selection not yet available (Ignoring \"%s\")\n",optarg);
-        break;
-
-       case 's':
-        membank_size = (unsigned)getnum(optarg);
-        break;
-
-       case 't':
-#if defined(TRACE)
-        /* Eventually the simTRACE flag could be treated as a toggle, to
-           allow external control of the program points being traced
-           (i.e. only from main onwards, excluding the run-time setup,
-           etc.). */
-        state |= simTRACE;
-#else /* !TRACE */
-        fprintf(stderr,"\
-Simulator constructed without tracing support (for performance).\n\
-Re-compile simulator with \"-DTRACE\" to enable this option.\n");
-#endif /* !TRACE */
-        break;
-
-       case 'z':
-#if defined(TRACE)
-        if (optarg != NULL) {
-          char *tmp;
-          tmp = (char *)malloc(strlen(optarg) + 1);
-          if (tmp == NULL)
-           callback->printf_filtered(callback,"Failed to allocate buffer for tracefile name \"%s\"\n",optarg);
-          else {
-            strcpy(tmp,optarg);
-            tracefile = tmp;
-            callback->printf_filtered(callback,"Placing trace information into file \"%s\"\n",tracefile);
-          }
-        }
-#endif /* TRACE */
-        break;
-
-       case 'p':
-#if defined(PROFILE)
-        state |= simPROFILE;
-#else /* !PROFILE */
-        fprintf(stderr,"\
-Simulator constructed without profiling support (for performance).\n\
-Re-compile simulator with \"-DPROFILE\" to enable this option.\n");
-#endif /* !PROFILE */
-        break;
-
-       case 'x':
-#if defined(PROFILE)
-        profile_nsamples = (unsigned)getnum(optarg);
-#endif /* PROFILE */
-        break;
-
-       case 'y':
-#if defined(PROFILE)
-        sim_set_profile((int)getnum(optarg));
-#endif /* PROFILE */
-        break;
-
-       default:
-        callback->printf_filtered(callback,"Warning: Simulator getopt returned unrecognised code 0x%08X\n",c);
-       case '?':
-        break;
-      }
-    }
-
-#if 0
-    if (optind < argc) {
-      callback->printf_filtered(callback,"Warning: Ignoring spurious non-option arguments ");
-      while (optind < argc)
-       callback->printf_filtered(callback,"\"%s\" ",argv[optind++]);
-      callback->printf_filtered(callback,"\n");
-    }
-#endif
-  }
 
   if (logfile != NULL) {
     if (strcmp(logfile,"-") == 0)
@@ -938,104 +875,28 @@ Re-compile simulator with \"-DPROFILE\" to enable this option.\n");
     }
   }
 
-  sim_config (sd, big_endian_p ? BIG_ENDIAN : LITTLE_ENDIAN);
+  /* FIXME: In the future both of these malloc's can be replaced by
+     calls to sim-core.  */
 
   /* If the host has "mmap" available we could use it to provide a
      very large virtual address space for the simulator, since memory
      would only be allocated within the "mmap" space as it is
      accessed. This can also be linked to the architecture specific
      support, required to simulate the MMU. */
-  sim_size(sd, membank_size);
-  /* NOTE: The above will also have enabled any profiling state */
+  sim_size(STATE_MEM_SIZE (sd));
+  /* NOTE: The above will also have enabled any profiling state! */
 
-  ColdReset();
-  /* If we were providing a more complete I/O, co-processor or memory
-     simulation, we should perform any "device" initialisation at this
-     point. This can include pre-loading memory areas with particular
-     patterns (e.g. simulating ROM monitors). */
-
-  /* We can start writing to the memory, now that the processor has
-     been reset: */
+  /* Create the monitor address space as well */
   monitor = (unsigned char *)calloc(1,monitor_size);
-  if (!monitor) {
-    fprintf(stderr,"Not enough VM for monitor simulation (%d bytes)\n",monitor_size);
-  } else {
-    unsigned loop;
-    /* Entry into the IDT monitor is via fixed address vectors, and
-       not using machine instructions. To avoid clashing with use of
-       the MIPS TRAP system, we place our own (simulator specific)
-       "undefined" instructions into the relevant vector slots. */
-    for (loop = 0; (loop < monitor_size); loop += 4) {
-      uword64 vaddr = (monitor_base + loop);
-      uword64 paddr;
-      int cca;
-      if (AddressTranslation(vaddr,isDATA,isSTORE,&paddr,&cca,isTARGET,isRAW))
-       StoreMemory(cca,AccessLength_WORD,(RSVD_INSTRUCTION | (((loop >> 2) & RSVD_INSTRUCTION_ARG_MASK) << RSVD_INSTRUCTION_ARG_SHIFT)),0,paddr,vaddr,isRAW);
-    }
-    /* The PMON monitor uses the same address space, but rather than
-       branching into it the address of a routine is loaded. We can
-       cheat for the moment, and direct the PMON routine to IDT style
-       instructions within the monitor space. This relies on the IDT
-       monitor not using the locations from 0xBFC00500 onwards as its
-       entry points.*/
-    for (loop = 0; (loop < 24); loop++)
-      {
-        uword64 vaddr = (monitor_base + 0x500 + (loop * 4));
-        uword64 paddr;
-        int cca;
-        unsigned int value = ((0x500 - 8) / 8); /* default UNDEFINED reason code */
-        switch (loop)
-          {
-            case 0: /* read */
-              value = 7;
-              break;
-
-            case 1: /* write */
-              value = 8;
-              break;
-
-            case 2: /* open */
-              value = 6;
-              break;
-
-            case 3: /* close */
-              value = 10;
-              break;
-
-            case 5: /* printf */
-              value = ((0x500 - 16) / 8); /* not an IDT reason code */
-              break;
-
-            case 8: /* cliexit */
-              value = 17;
-              break;
-
-            case 11: /* flush_cache */
-              value = 28;
-              break;
-          }
-	    /* FIXME - should monitor_base be SIM_ADDR?? */
-        value = ((unsigned int)monitor_base + (value * 8));
-        if (AddressTranslation(vaddr,isDATA,isSTORE,&paddr,&cca,isTARGET,isRAW))
-          StoreMemory(cca,AccessLength_WORD,value,0,paddr,vaddr,isRAW);
-        else
-          sim_error("Failed to write to monitor space 0x%s",pr_addr(vaddr));
-
-	/* The LSI MiniRISC PMON has its vectors at 0x200, not 0x500.  */
-	vaddr -= 0x300;
-        if (AddressTranslation(vaddr,isDATA,isSTORE,&paddr,&cca,isTARGET,isRAW))
-          StoreMemory(cca,AccessLength_WORD,value,0,paddr,vaddr,isRAW);
-        else
-          sim_error("Failed to write to monitor space 0x%s",pr_addr(vaddr));
-      }
-  }
+  if (!monitor)
+    fprintf(stderr,"Not enough VM for monitor simulation (%d bytes)\n",
+	    monitor_size);
 
 #if defined(TRACE)
   if (state & simTRACE)
     open_trace();
 #endif /* TRACE */
 
-  /* fudge our descriptor for now */
   return sd;
 }
 
@@ -1066,7 +927,7 @@ writeout32(fh,val)
   char buff[4];
   int res = 1;
 
-  if (state & simHOSTBE) {
+  if (CURRENT_HOST_BYTE_ORDER == BIG_ENDIAN) {
     buff[3] = ((val >>  0) & 0xFF);
     buff[2] = ((val >>  8) & 0xFF);
     buff[1] = ((val >> 16) & 0xFF);
@@ -1091,7 +952,7 @@ writeout16(fh,val)
 {
   char buff[2];
   int res = 1;
-  if (state & simHOSTBE) {
+  if (CURRENT_HOST_BYTE_ORDER == BIG_ENDIAN) {
     buff[1] = ((val >>  0) & 0xFF);
     buff[0] = ((val >>  8) & 0xFF);
   } else {
@@ -1123,7 +984,6 @@ sim_close (sd, quitting)
 
 #if defined(PROFILE)
   if ((state & simPROFILE) && (profile_hist != NULL)) {
-    unsigned short *p = profile_hist;
     FILE *pf = fopen("gmon.out","wb");
     unsigned loop;
 
@@ -1169,9 +1029,9 @@ sim_close (sd, quitting)
    fclose(logfh);
   logfh = NULL;
 
-  if (membank)
-   free(membank); /* cfree not available on all hosts */
-  membank = NULL;
+  if (STATE_MEMORY (sd) != NULL)
+    free(STATE_MEMORY (sd)); /* cfree not available on all hosts */
+  STATE_MEMORY (sd) = NULL;
 
   return;
 }
@@ -1326,6 +1186,8 @@ sim_store_register (sd,rn,memory)
      int rn;
      unsigned char *memory;
 {
+  /* NOTE: gdb (the client) stores registers in target byte order
+     while the simulator uses host byte order */
 #ifdef DEBUG
   callback->printf_filtered(callback,"sim_store_register(%d,*memory=0x%s);\n",rn,pr_addr(*((SIM_ADDR *)memory)));
 #endif /* DEBUG */
@@ -1333,14 +1195,16 @@ sim_store_register (sd,rn,memory)
   /* Unfortunately this suffers from the same problem as the register
      numbering one. We need to know what the width of each logical
      register number is for the architecture being simulated. */
+
   if (register_widths[rn] == 0)
-   sim_warning("Invalid register width for %d (register store ignored)",rn);
-  else {
-    if (register_widths[rn] == 32)
-     registers[rn] = host_read_word(memory);
-    else
-     registers[rn] = host_read_long(memory);
-  }
+    sim_warning("Invalid register width for %d (register store ignored)",rn);
+  else
+    {
+      if (register_widths[rn] == 32)
+	registers[rn] = T2H_4 (*(unsigned int*)memory);
+      else
+	registers[rn] = T2H_8 (*(uword64*)memory);
+    }
 
   return;
 }
@@ -1351,96 +1215,25 @@ sim_fetch_register (sd,rn,memory)
      int rn;
      unsigned char *memory;
 {
+  /* NOTE: gdb (the client) stores registers in target byte order
+     while the simulator uses host byte order */
 #ifdef DEBUG
   callback->printf_filtered(callback,"sim_fetch_register(%d=0x%s,mem) : place simulator registers into memory\n",rn,pr_addr(registers[rn]));
 #endif /* DEBUG */
 
   if (register_widths[rn] == 0)
-   sim_warning("Invalid register width for %d (register fetch ignored)",rn);
-  else {
-    if (register_widths[rn] == 32)
-     *((unsigned int *)memory) = host_swap_word((unsigned int)(registers[rn] & 0xFFFFFFFF));
-    else /* 64bit register */
-     *((uword64 *)memory) = host_swap_long(registers[rn]);
-  }
-  return;
-}
-
-#if 0
-void
-sim_stop_reason (sd,reason,sigrc)
-     SIM_DESC sd;
-     enum sim_stop *reason;
-     int *sigrc;
-{
-/* We can have "*reason = {sim_exited, sim_stopped, sim_signalled}", so
-	sim_exited        *sigrc = argument to exit()
-	sim_stopped       *sigrc = exception number
-	sim_signalled     *sigrc = signal number
-*/
-  if (state & simEXCEPTION) {
-    /* If "sim_signalled" is used, GDB expects normal SIGNAL numbers,
-       and not the MIPS specific exception codes. */
-#if 1
-    /* For some reason, sending GDB a sim_signalled reason cause it to
-       terminate out. */
-    *reason = sim_stopped;
-#else
-    *reason = sim_signalled;
-#endif
-    switch ((CAUSE >> 2) & 0x1F) {
-      case Interrupt:
-       *sigrc = SIGINT; /* wrong type of interrupt, but it will do for the moment */
-       break;
-
-      case TLBModification:
-      case TLBLoad:
-      case TLBStore:
-      case AddressLoad:
-      case AddressStore:
-      case InstructionFetch:
-      case DataReference:
-       *sigrc = SIGBUS;
-       break;
-
-      case ReservedInstruction:
-      case CoProcessorUnusable:
-       *sigrc = SIGILL;
-       break;
-
-      case IntegerOverflow:
-      case FPE:
-       *sigrc = SIGFPE;
-       break;
-
-      case Trap:
-      case Watch:
-      case SystemCall:
-      case BreakPoint:
-       *sigrc = SIGTRAP;
-       break;
-
-      default : /* Unknown internal exception */
-       *sigrc = SIGQUIT;
-       break;
+    sim_warning("Invalid register width for %d (register fetch ignored)",rn);
+  else
+    {
+      if (register_widths[rn] == 32)
+	*((unsigned int *)memory) = H2T_4 ((unsigned int)(registers[rn] & 0xFFFFFFFF));
+      else /* 64bit register */
+	*((uword64 *)memory) = H2T_8 (registers[rn]);
     }
-  } else if (state & simEXIT) {
-#if DEBUG
-    printf("DBG: simEXIT (%d)\n",rcexit);
-#endif
-    *reason = sim_exited;
-    *sigrc = rcexit;
-  } else if (state & simSIGINT) {
-    *reason = sim_stopped;
-    *sigrc = SIGINT;
-  } else { /* assume single-stepping */
-    *reason = sim_stopped;
-    *sigrc = SIGTRAP;
-  }
-  state &= ~(simEXCEPTION | simEXIT | simSIGINT);
+
   return;
 }
-#endif
+
 
 void
 sim_info (sd,verbose)
@@ -1451,16 +1244,21 @@ sim_info (sd,verbose)
 
   callback->printf_filtered(callback,"MIPS %d-bit simulator\n",(PROCESSOR_64BIT ? 64 : 32));
 
-  callback->printf_filtered(callback,"%s endian memory model\n",(state & simBE ? "Big" : "Little"));
+  callback->printf_filtered(callback,"%s endian memory model\n",
+			    (CURRENT_TARGET_BYTE_ORDER == BIG_ENDIAN
+			     ? "Big" : "Little"));
 
-  callback->printf_filtered(callback,"0x%08X bytes of memory at 0x%s\n",(unsigned int)membank_size,pr_addr(membank_base));
+  callback->printf_filtered(callback,"0x%08X bytes of memory at 0x%s\n",
+			    STATE_MEM_SIZE (sd),
+			    pr_addr (STATE_MEM_BASE (sd)));
 
 #if !defined(FASTSIM)
   if (instruction_fetch_overflow != 0)
     callback->printf_filtered(callback,"Instruction fetches = 0x%08X%08X\n",instruction_fetch_overflow,instruction_fetches);
   else
     callback->printf_filtered(callback,"Instruction fetches = %d\n",instruction_fetches);
-  callback->printf_filtered(callback,"Pipeline ticks = %d\n",pipeline_ticks);
+  callback->printf_filtered(callback,"Pipeline ticks = %ld\n",
+			    (long) sim_events_time (sd));
   /* It would be a useful feature, if when performing multi-cycle
      simulations (rather than single-stepping) we keep the start and
      end times of the execution, so that we can give a performance
@@ -1491,7 +1289,7 @@ sim_load (sd,prog,abfd,from_tty)
   bfd *prog_bfd;
 
   prog_bfd = sim_load_file (sd,
-			    myname,
+			    STATE_MY_NAME (sd),
 			    callback,
 			    prog,
 			    /* pass NULL for abfd, we always open our own */
@@ -1500,6 +1298,87 @@ sim_load (sd,prog,abfd,from_tty)
   if (prog_bfd == NULL)
     return SIM_RC_FAIL;
   sim_analyze_program (sd, prog_bfd);
+
+  /* Configure/verify the target byte order and other runtime
+     configuration options */
+  sim_config (sd, PREFERED_TARGET_BYTE_ORDER(prog_bfd));
+
+  /* (re) Write the monitor trap address handlers into the monitor
+     (eeprom) address space.  This can only be done once the target
+     endianness has been determined. */
+  {
+    unsigned loop;
+    /* Entry into the IDT monitor is via fixed address vectors, and
+       not using machine instructions. To avoid clashing with use of
+       the MIPS TRAP system, we place our own (simulator specific)
+       "undefined" instructions into the relevant vector slots. */
+    for (loop = 0; (loop < monitor_size); loop += 4) {
+      uword64 vaddr = (monitor_base + loop);
+      uword64 paddr;
+      int cca;
+      if (AddressTranslation(vaddr, isDATA, isSTORE, &paddr, &cca, isTARGET, isRAW))
+	StoreMemory(cca, AccessLength_WORD,
+		    (RSVD_INSTRUCTION | (((loop >> 2) & RSVD_INSTRUCTION_ARG_MASK) << RSVD_INSTRUCTION_ARG_SHIFT)),
+		    0, paddr, vaddr, isRAW);
+    }
+    /* The PMON monitor uses the same address space, but rather than
+       branching into it the address of a routine is loaded. We can
+       cheat for the moment, and direct the PMON routine to IDT style
+       instructions within the monitor space. This relies on the IDT
+       monitor not using the locations from 0xBFC00500 onwards as its
+       entry points.*/
+    for (loop = 0; (loop < 24); loop++)
+      {
+        uword64 vaddr = (monitor_base + 0x500 + (loop * 4));
+        uword64 paddr;
+        int cca;
+        unsigned int value = ((0x500 - 8) / 8); /* default UNDEFINED reason code */
+        switch (loop)
+          {
+            case 0: /* read */
+              value = 7;
+              break;
+
+            case 1: /* write */
+              value = 8;
+              break;
+
+            case 2: /* open */
+              value = 6;
+              break;
+
+            case 3: /* close */
+              value = 10;
+              break;
+
+            case 5: /* printf */
+              value = ((0x500 - 16) / 8); /* not an IDT reason code */
+              break;
+
+            case 8: /* cliexit */
+              value = 17;
+              break;
+
+            case 11: /* flush_cache */
+              value = 28;
+              break;
+          }
+	    /* FIXME - should monitor_base be SIM_ADDR?? */
+        value = ((unsigned int)monitor_base + (value * 8));
+        if (AddressTranslation(vaddr,isDATA,isSTORE,&paddr,&cca,isTARGET,isRAW))
+          StoreMemory(cca,AccessLength_WORD,value,0,paddr,vaddr,isRAW);
+        else
+          sim_error("Failed to write to monitor space 0x%s",pr_addr(vaddr));
+
+	/* The LSI MiniRISC PMON has its vectors at 0x200, not 0x500.  */
+	vaddr -= 0x300;
+        if (AddressTranslation(vaddr,isDATA,isSTORE,&paddr,&cca,isTARGET,isRAW))
+          StoreMemory(cca,AccessLength_WORD,value,0,paddr,vaddr,isRAW);
+        else
+          sim_error("Failed to write to monitor space 0x%s",pr_addr(vaddr));
+      }
+  }
+
   return SIM_RC_OK;
 }
 
@@ -1509,10 +1388,17 @@ sim_create_inferior (sd, argv,env)
      char **argv;
      char **env;
 {
+
 #ifdef DEBUG
   printf("DBG: sim_create_inferior entered: start_address = 0x%s\n",
 	 pr_addr(PC));
 #endif /* DEBUG */
+
+  ColdReset();
+  /* If we were providing a more complete I/O, co-processor or memory
+     simulation, we should perform any "device" initialisation at this
+     point. This can include pre-loading memory areas with particular
+     patterns (e.g. simulating ROM monitors). */
 
 #if 1
   PC = (uword64) STATE_START_ADDR(sd);
@@ -1556,27 +1442,6 @@ sim_kill (sd)
   /* This would also be the point where any memory mapped areas used
      by the simulator should be released. */
 #endif
-  return;
-}
-
-ut_reg
-sim_get_quit_code ()
-{
-  /* The standard MIPS PCS (Procedure Calling Standard) uses V0(r2) as
-     the function return value. However, it may be more correct for
-     this to return the argument to the exit() function (if
-     called). */
-  return(V0);
-}
-
-void
-sim_set_callbacks (sd,p)
-     SIM_DESC sd;
-     host_callback *p;
-{
-  /* NOTE - sd may be NULL! */
-  STATE_CALLBACK (&simulator) = p;
-  callback = p;
   return;
 }
 
@@ -1625,7 +1490,7 @@ sim_do_command (sd,cmd)
        case e_setmemsize: /* memory size argument */
         {
           unsigned int newsize = (unsigned int)getnum(cmd);
-          sim_size(sd, newsize);
+          sim_size(newsize);
         }
         break;
 
@@ -1670,22 +1535,23 @@ void
 sim_set_profile_size (n)
      int n;
 {
+  SIM_DESC sd = &simulator;
 #if defined(PROFILE)
   if (state & simPROFILE) {
     int bsize;
 
     /* Since we KNOW that the memory banks are a power-of-2 in size: */
     profile_nsamples = power2(n);
-    profile_minpc = membank_base;
-    profile_maxpc = (membank_base + membank_size);
+    profile_minpc = STATE_MEM_BASE (sd);
+    profile_maxpc = (STATE_MEM_BASE (sd) + STATE_MEM_SIZE (sd));
 
     /* Just in-case we are sampling every address: NOTE: The shift
        right of 2 is because we only have word-aligned PC addresses. */
-    if (profile_nsamples > (membank_size >> 2))
-     profile_nsamples = (membank_size >> 2);
+    if (profile_nsamples > (STATE_MEM_SIZE (sd) >> 2))
+     profile_nsamples = (STATE_MEM_SIZE (sd) >> 2);
 
     /* Since we are dealing with power-of-2 values: */
-    profile_shift = (((membank_size >> 2) / profile_nsamples) - 1);
+    profile_shift = (((STATE_MEM_SIZE (sd) >> 2) / profile_nsamples) - 1);
 
     bsize = (profile_nsamples * sizeof(unsigned short));
     if (profile_hist == NULL)
@@ -1703,29 +1569,29 @@ sim_set_profile_size (n)
 }
 
 void
-sim_size(sd, newsize)
-     SIM_DESC sd;
+sim_size(newsize)
      int newsize;
 {
+  SIM_DESC sd = &simulator;
   char *new;
   /* Used by "run", and internally, to set the simulated memory size */
   if (newsize == 0) {
-    callback->printf_filtered(callback,"Zero not valid: Memory size still 0x%08X bytes\n",membank_size);
+    callback->printf_filtered(callback,"Zero not valid: Memory size still 0x%08X bytes\n",STATE_MEM_SIZE (sd));
     return;
   }
   newsize = power2(newsize);
-  if (membank == NULL)
-   new = (char *)calloc(64,(membank_size / 64));
+  if (STATE_MEMORY (sd) == NULL)
+   new = (char *)calloc(64,(STATE_MEM_SIZE (sd) / 64));
   else
-   new = (char *)realloc(membank,newsize);
+   new = (char *)realloc(STATE_MEMORY (sd),newsize);
   if (new == NULL) {
-    if (membank == NULL)
-     sim_error("Not enough VM for simulation memory of 0x%08X bytes",membank_size);
+    if (STATE_MEMORY (sd) == NULL)
+     sim_error("Not enough VM for simulation memory of 0x%08X bytes",STATE_MEM_SIZE (sd));
     else
-     sim_warning("Failed to resize memory (still 0x%08X bytes)",membank_size);
+     sim_warning("Failed to resize memory (still 0x%08X bytes)",STATE_MEM_SIZE (sd));
   } else {
-    membank_size = (unsigned)newsize;
-    membank = new;
+    STATE_MEM_SIZE (sd) = (unsigned)newsize;
+    STATE_MEMORY (sd) = new;
 #if defined(PROFILE)
     /* Ensure that we sample across the new memory range */
     sim_set_profile_size(profile_nsamples);
@@ -1849,10 +1715,6 @@ sim_monitor(reason)
 
     case 17: /* void _exit() */
       sim_warning("sim_monitor(17): _exit(int reason) to be coded");
-#if 0
-      state |= (simSTOP | simEXIT); /* stop executing code */
-      rcexit = (unsigned int)(A0 & 0xFFFFFFFF));
-#endif
       sim_engine_halt (sd, STATE_CPU (sd, 0), NULL, NULL_CIA, sim_exited,
 		       (unsigned int)(A0 & 0xFFFFFFFF));
       break;
@@ -1877,7 +1739,7 @@ sim_monitor(reason)
 
         /* Memory size */
         if (AddressTranslation(vaddr,isDATA,isSTORE,&paddr,&cca,isTARGET,isREAL)) {
-          value = (uword64)membank_size;
+          value = (uword64)STATE_MEM_SIZE (sd);
           StoreMemory(cca,AccessLength_WORD,value,0,paddr,vaddr,isRAW);
           /* We re-do the address translations, in-case the block
              overlaps a memory boundary: */
@@ -1922,7 +1784,6 @@ sim_monitor(reason)
               char tmp[40];
               enum {FMT_RJUST, FMT_LJUST, FMT_RJUST0, FMT_CENTER} fmt = FMT_RJUST;
               int width = 0, trunc = 0, haddot = 0, longlong = 0;
-              int base = 10;
               s++;
               for (; *s; s++) {
                 if (strchr ("dobxXulscefg%", *s))
@@ -2381,6 +2242,7 @@ AddressTranslation(vAddr,IorD,LorS,pAddr,CCA,host,raw)
      int host;
      int raw;
 {
+  SIM_DESC sd = &simulator;
   int res = -1; /* TRUE : Assume good return */
 
 #ifdef DEBUG
@@ -2394,7 +2256,7 @@ AddressTranslation(vAddr,IorD,LorS,pAddr,CCA,host,raw)
   vAddr &= 0xFFFFFFFF;
 
   /* Treat the kernel memory spaces identically for the moment: */
-  if ((membank_base == K1BASE) && (vAddr >= K0BASE) && (vAddr < (K0BASE + K0SIZE)))
+  if ((STATE_MEM_BASE (sd) == K1BASE) && (vAddr >= K0BASE) && (vAddr < (K0BASE + K0SIZE)))
     vAddr += (K1BASE - K0BASE);
 
   /* Also assume that the K1BASE memory wraps. This is required to
@@ -2403,7 +2265,7 @@ AddressTranslation(vAddr,IorD,LorS,pAddr,CCA,host,raw)
      around the fact that the monitor memory is currently held in the
      K1BASE space. */
   if (((vAddr < monitor_base) || (vAddr >= (monitor_base + monitor_size))) && (vAddr >= K1BASE && vAddr < (K1BASE + K1SIZE)))
-    vAddr = (K1BASE | (vAddr & (membank_size - 1)));
+    vAddr = (K1BASE | (vAddr & (STATE_MEM_SIZE (sd) - 1)));
 
   *pAddr = vAddr; /* default for isTARGET */
   *CCA = Uncached; /* not used for isHOST */
@@ -2411,9 +2273,9 @@ AddressTranslation(vAddr,IorD,LorS,pAddr,CCA,host,raw)
   /* NOTE: This is a duplicate of the code that appears in the
      LoadMemory and StoreMemory functions. They should be merged into
      a single function (that can be in-lined if required). */
-  if ((vAddr >= membank_base) && (vAddr < (membank_base + membank_size))) {
+  if ((vAddr >= STATE_MEM_BASE (sd)) && (vAddr < (STATE_MEM_BASE (sd) + STATE_MEM_SIZE (sd)))) {
     if (host)
-     *pAddr = (int)&membank[((unsigned int)(vAddr - membank_base) & (membank_size - 1))];
+     *pAddr = (int)&STATE_MEMORY (sd)[((unsigned int)(vAddr - STATE_MEM_BASE (sd)) & (STATE_MEM_SIZE (sd) - 1))];
   } else if ((vAddr >= monitor_base) && (vAddr < (monitor_base + monitor_size))) {
     if (host)
      *pAddr = (int)&monitor[((unsigned int)(vAddr - monitor_base) & (monitor_size - 1))];
@@ -2443,7 +2305,8 @@ AddressTranslation(vAddr,IorD,LorS,pAddr,CCA,host,raw)
    which an implementation specific action is taken. The action taken
    may increase performance, but must not change the meaning of the
    program, or alter architecturally-visible state. */
-static void
+
+static void UNUSED
 Prefetch(CCA,pAddr,vAddr,DATA,hint)
      int CCA;
      uword64 pAddr;
@@ -2485,11 +2348,12 @@ LoadMemory(memvalp,memval1p,CCA,AccessLength,pAddr,vAddr,IorD,raw)
      int IorD;
      int raw;
 {
-  uword64 value;
-  uword64 value1;
+  SIM_DESC sd = &simulator;
+  uword64 value = 0;
+  uword64 value1 = 0;
 
 #ifdef DEBUG
-  if (membank == NULL)
+  if (STATE_MEMORY (sd) == NULL)
    callback->printf_filtered(callback,"DBG: LoadMemory(%p,%p,%d,%d,0x%s,0x%s,%s,%s)\n",memvalp,memval1p,CCA,AccessLength,pr_addr(pAddr),pr_addr(vAddr),(IorD ? "isDATA" : "isINSTRUCTION"),(raw ? "isRAW" : "isREAL"));
 #endif /* DEBUG */
 
@@ -2517,7 +2381,7 @@ LoadMemory(memvalp,memval1p,CCA,AccessLength,pAddr,vAddr,IorD,raw)
       && (((pAddr & 0x1) != 0) || ((vAddr & 0x1) == 0)))
    SignalException(InstructionFetch);
   else {
-    unsigned int index;
+    unsigned int index = 0;
     unsigned char *mem = NULL;
 
 #if defined(TRACE)
@@ -2528,9 +2392,9 @@ LoadMemory(memvalp,memval1p,CCA,AccessLength,pAddr,vAddr,IorD,raw)
     /* NOTE: Quicker methods of decoding the address space can be used
        when a real memory map is being simulated (i.e. using hi-order
        address bits to select device). */
-    if ((pAddr >= membank_base) && (pAddr < (membank_base + membank_size))) {
-      index = ((unsigned int)(pAddr - membank_base) & (membank_size - 1));
-      mem = membank;
+    if ((pAddr >= STATE_MEM_BASE (sd)) && (pAddr < (STATE_MEM_BASE (sd) + STATE_MEM_SIZE (sd)))) {
+      index = ((unsigned int)(pAddr - STATE_MEM_BASE (sd)) & (STATE_MEM_SIZE (sd) - 1));
+      mem = STATE_MEMORY (sd);
     } else if ((pAddr >= monitor_base) && (pAddr < (monitor_base + monitor_size))) {
       index = ((unsigned int)(pAddr - monitor_base) & (monitor_size - 1));
       mem = monitor;
@@ -2543,8 +2407,6 @@ LoadMemory(memvalp,memval1p,CCA,AccessLength,pAddr,vAddr,IorD,raw)
          accesses. However, without that information we must perform
          slow transfer, and hope that the compiler optimisation will
          merge successive loads. */
-      value = 0; /* no data loaded yet */
-      value1 = 0;
 
       /* In reality we should always be loading a doubleword value (or
          word value in 32bit memory worlds). The external code then
@@ -2658,7 +2520,8 @@ if (memval1p) *memval1p = value1;
 }
 
 
-/* Description from page A-23 of the "MIPS IV Instruction Set" manual (revision 3.1) */
+/* Description from page A-23 of the "MIPS IV Instruction Set" manual
+   (revision 3.1) */
 /* Store a value to memory. The specified data is stored into the
    physical location pAddr using the memory hierarchy (data caches and
    main memory) as specified by the Cache Coherence Algorithm
@@ -2680,6 +2543,7 @@ StoreMemory(CCA,AccessLength,MemElem,MemElem1,pAddr,vAddr,raw)
      uword64 vAddr;
      int raw;
 {
+  SIM_DESC sd = &simulator;
 #ifdef DEBUG
   callback->printf_filtered(callback,"DBG: StoreMemory(%d,%d,0x%s,0x%s,0x%s,0x%s,%s)\n",CCA,AccessLength,pr_uword64(MemElem),pr_uword64(MemElem1),pr_addr(pAddr),pr_addr(vAddr),(raw ? "isRAW" : "isREAL"));
 #endif /* DEBUG */
@@ -2703,12 +2567,12 @@ StoreMemory(CCA,AccessLength,MemElem,MemElem1,pAddr,vAddr,raw)
      routine. However, this would slow the simulator down with
      run-time conditionals. */
   {
-    unsigned int index;
+    unsigned int index = 0;
     unsigned char *mem = NULL;
 
-    if ((pAddr >= membank_base) && (pAddr < (membank_base + membank_size))) {
-      index = ((unsigned int)(pAddr - membank_base) & (membank_size - 1));
-      mem = membank;
+    if ((pAddr >= STATE_MEM_BASE (sd)) && (pAddr < (STATE_MEM_BASE (sd) + STATE_MEM_SIZE (sd)))) {
+      index = ((unsigned int)(pAddr - STATE_MEM_BASE (sd)) & (STATE_MEM_SIZE (sd) - 1));
+      mem = STATE_MEMORY (sd);
     } else if ((pAddr >= monitor_base) && (pAddr < (monitor_base + monitor_size))) {
       index = ((unsigned int)(pAddr - monitor_base) & (monitor_size - 1));
       mem = monitor;
@@ -2856,9 +2720,7 @@ SyncOperation(stype)
 /* Description from page A-26 of the "MIPS IV Instruction Set" manual (revision 3.1) */
 /* Signal an exception condition. This will result in an exception
    that aborts the instruction. The instruction operation pseudocode
-   will never see a return from this function call.
-   
-   The above code was bogus. */
+   will never see a return from this function call. */
 
 static void
 SignalException (int exception,...)
@@ -2898,9 +2760,6 @@ SignalException (int exception,...)
             instruction was used to enter the vector (which is the
             case with the current IDT monitor). */
 	 sim_engine_restart (sd, STATE_CPU (sd, 0), NULL, NULL_CIA);
-#if 0
-         break; /* out of the switch statement */
-#endif
        }
        /* Look for the mips16 entry and exit instructions, and
           simulate a handler for them.  */
@@ -2909,9 +2768,6 @@ SignalException (int exception,...)
 		&& (instruction & 0x0c0) != 0x0c0) {
 	 mips16_entry (instruction);
 	 sim_engine_restart (sd, STATE_CPU (sd, 0), NULL, NULL_CIA);
-#if 0
-	 break;
-#endif
        } /* else fall through to normal exception processing */
        sim_warning("ReservedInstruction 0x%08X at IPC = 0x%s",instruction,pr_addr(IPC));
      }
@@ -2940,11 +2796,6 @@ SignalException (int exception,...)
        if ((instruction & 0x03FFFFC0) == 0x03ff0000) {
 	 sim_engine_halt (sd, STATE_CPU (sd, 0), NULL, NULL_CIA,
 			  sim_exited, (unsigned int)(A0 & 0xFFFFFFFF));
-#if 0
-         rcexit = (unsigned int)(A0 & 0xFFFFFFFF);
-         state &= ~simEXCEPTION;
-         state |= simEXIT;
-#endif
        }
      }
 
@@ -2959,9 +2810,44 @@ SignalException (int exception,...)
      /* The following is so that the simulator will continue from the
         exception address on breakpoint operations. */
      PC = EPC;
-     sim_engine_halt (sd, STATE_CPU (sd, 0), NULL, NULL_CIA,
-		      sim_stopped, SIGILL);
-     break;
+     switch ((CAUSE >> 2) & 0x1F)
+       {
+       case Interrupt:
+	 sim_engine_halt (sd, STATE_CPU (sd, 0), NULL, NULL_CIA,
+			  sim_stopped, SIGINT);
+	 
+       case TLBModification:
+       case TLBLoad:
+       case TLBStore:
+       case AddressLoad:
+       case AddressStore:
+       case InstructionFetch:
+       case DataReference:
+	 sim_engine_halt (sd, STATE_CPU (sd, 0), NULL, NULL_CIA,
+			  sim_stopped, SIGBUS);
+
+       case ReservedInstruction:
+       case CoProcessorUnusable:
+	 sim_engine_halt (sd, STATE_CPU (sd, 0), NULL, NULL_CIA,
+			  sim_stopped, SIGILL);
+
+       case IntegerOverflow:
+       case FPE:
+	 sim_engine_halt (sd, STATE_CPU (sd, 0), NULL, NULL_CIA,
+			  sim_stopped, SIGFPE);
+
+       case Trap:
+       case Watch:
+       case SystemCall:
+       case BreakPoint:
+	 sim_engine_halt (sd, STATE_CPU (sd, 0), NULL, NULL_CIA,
+			  sim_stopped, SIGTRAP);
+
+       default : /* Unknown internal exception */
+	 sim_engine_halt (sd, STATE_CPU (sd, 0), NULL, NULL_CIA,
+			  sim_stopped, SIGQUIT);
+
+       }
 
     case SimulatorFault:
      {
@@ -2969,16 +2855,10 @@ SignalException (int exception,...)
        char *msg;
        va_start(ap,exception);
        msg = va_arg(ap,char *);
+       va_end(ap);
        sim_engine_abort (sd, STATE_CPU (sd, 0), NULL_CIA,
 			 "FATAL: Simulator error \"%s\"\n",msg);
-#if 0
-       fprintf(stderr,"FATAL: Simulator error \"%s\"\n",msg);
-#endif
-       va_end(ap);
      }
-#if 0
-     exit(1);
-#endif
    }
 
   return;
@@ -3004,7 +2884,7 @@ UndefinedResult()
 }
 #endif /* WARN_RESULT */
 
-static void
+static void UNUSED
 CacheOp(op,pAddr,vAddr,instruction)
      int op;
      uword64 pAddr;
@@ -3150,7 +3030,7 @@ ValueFPR(fpr,fmt)
          int fpr;
          FP_formats fmt;
 {
-  uword64 value;
+  uword64 value = 0;
   int err = 0;
 
   /* Treat unused register values, as fixed-point 64bit values: */
@@ -3351,6 +3231,9 @@ NaN(op,fmt)
    case fmt_long:
     boolean = (op == FPQNaN_LONG);
     break;
+   default:
+    fprintf (stderr, "Bad switch\n");
+    abort ();
   }
 
 #ifdef DEBUG
@@ -3419,6 +3302,9 @@ Less(op1,op2,fmt)
    case fmt_double:
     boolean = (*(double *)&op1 < *(double *)&op2);
     break;
+   default:
+    fprintf (stderr, "Bad switch\n");
+    abort ();
   }
 
 #ifdef DEBUG
@@ -3450,6 +3336,9 @@ Equal(op1,op2,fmt)
    case fmt_double:
     boolean = (op1 == op2);
     break;
+   default:
+    fprintf (stderr, "Bad switch\n");
+    abort ();
   }
 
 #ifdef DEBUG
@@ -3464,7 +3353,7 @@ AbsoluteValue(op,fmt)
      uword64 op;
      FP_formats fmt; 
 {
-  uword64 result;
+  uword64 result = 0;
 
 #ifdef DEBUG
   printf("DBG: AbsoluteValue: %s: op = 0x%s\n",DOFMT(fmt),pr_addr(op));
@@ -3484,6 +3373,9 @@ AbsoluteValue(op,fmt)
       double tmp = (fabs(*(double *)&op));
       result = *(uword64 *)&tmp;
     }
+   default:
+    fprintf (stderr, "Bad switch\n");
+    abort ();
   }
 
   return(result);
@@ -3494,7 +3386,7 @@ Negate(op,fmt)
      uword64 op;
      FP_formats fmt; 
 {
-  uword64 result;
+  uword64 result = 0;
 
 #ifdef DEBUG
   printf("DBG: Negate: %s: op = 0x%s\n",DOFMT(fmt),pr_addr(op));
@@ -3515,6 +3407,9 @@ Negate(op,fmt)
       result = *(uword64 *)&tmp;
     }
     break;
+   default:
+    fprintf (stderr, "Bad switch\n");
+    abort ();
   }
 
   return(result);
@@ -3526,7 +3421,7 @@ Add(op1,op2,fmt)
      uword64 op2;
      FP_formats fmt; 
 {
-  uword64 result;
+  uword64 result = 0;
 
 #ifdef DEBUG
   printf("DBG: Add: %s: op1 = 0x%s : op2 = 0x%s\n",DOFMT(fmt),pr_addr(op1),pr_addr(op2));
@@ -3551,6 +3446,9 @@ Add(op1,op2,fmt)
       result = *(uword64 *)&tmp;
     }
     break;
+   default:
+    fprintf (stderr, "Bad switch\n");
+    abort ();
   }
 
 #ifdef DEBUG
@@ -3566,7 +3464,7 @@ Sub(op1,op2,fmt)
      uword64 op2;
      FP_formats fmt; 
 {
-  uword64 result;
+  uword64 result = 0;
 
 #ifdef DEBUG
   printf("DBG: Sub: %s: op1 = 0x%s : op2 = 0x%s\n",DOFMT(fmt),pr_addr(op1),pr_addr(op2));
@@ -3591,6 +3489,9 @@ Sub(op1,op2,fmt)
       result = *(uword64 *)&tmp;
     }
     break;
+   default:
+    fprintf (stderr, "Bad switch\n");
+    abort ();
   }
 
 #ifdef DEBUG
@@ -3606,7 +3507,7 @@ Multiply(op1,op2,fmt)
      uword64 op2;
      FP_formats fmt; 
 {
-  uword64 result;
+  uword64 result = 0;
 
 #ifdef DEBUG
   printf("DBG: Multiply: %s: op1 = 0x%s : op2 = 0x%s\n",DOFMT(fmt),pr_addr(op1),pr_addr(op2));
@@ -3631,6 +3532,9 @@ Multiply(op1,op2,fmt)
       result = *(uword64 *)&tmp;
     }
     break;
+   default:
+    fprintf (stderr, "Bad switch\n");
+    abort ();
   }
 
 #ifdef DEBUG
@@ -3646,7 +3550,7 @@ Divide(op1,op2,fmt)
      uword64 op2;
      FP_formats fmt; 
 {
-  uword64 result;
+  uword64 result = 0;
 
 #ifdef DEBUG
   printf("DBG: Divide: %s: op1 = 0x%s : op2 = 0x%s\n",DOFMT(fmt),pr_addr(op1),pr_addr(op2));
@@ -3671,6 +3575,9 @@ Divide(op1,op2,fmt)
       result = *(uword64 *)&tmp;
     }
     break;
+   default:
+    fprintf (stderr, "Bad switch\n");
+    abort ();
   }
 
 #ifdef DEBUG
@@ -3680,12 +3587,12 @@ Divide(op1,op2,fmt)
   return(result);
 }
 
-static uword64
+static uword64 UNUSED
 Recip(op,fmt)
      uword64 op;
      FP_formats fmt; 
 {
-  uword64 result;
+  uword64 result = 0;
 
 #ifdef DEBUG
   printf("DBG: Recip: %s: op = 0x%s\n",DOFMT(fmt),pr_addr(op));
@@ -3709,6 +3616,9 @@ Recip(op,fmt)
       result = *(uword64 *)&tmp;
     }
     break;
+   default:
+    fprintf (stderr, "Bad switch\n");
+    abort ();
   }
 
 #ifdef DEBUG
@@ -3723,7 +3633,7 @@ SquareRoot(op,fmt)
      uword64 op;
      FP_formats fmt; 
 {
-  uword64 result;
+  uword64 result = 0;
 
 #ifdef DEBUG
   printf("DBG: SquareRoot: %s: op = 0x%s\n",DOFMT(fmt),pr_addr(op));
@@ -3757,6 +3667,9 @@ SquareRoot(op,fmt)
 #endif
     }
     break;
+   default:
+    fprintf (stderr, "Bad switch\n");
+    abort ();
   }
 
 #ifdef DEBUG
@@ -3773,7 +3686,7 @@ Convert(rm,op,from,to)
      FP_formats from; 
      FP_formats to; 
 {
-  uword64 result;
+  uword64 result = 0;
 
 #ifdef DEBUG
   printf("DBG: Convert: mode %s : op 0x%s : from %s : to %s : (PC = 0x%s)\n",RMMODE(rm),pr_addr(op),DOFMT(from),DOFMT(to),pr_addr(IPC));
@@ -3800,6 +3713,9 @@ Convert(rm,op,from,to)
        case fmt_long:
         tmp = (float)((word64)op);
         break;
+       default:
+	fprintf (stderr, "Bad switch\n");
+	abort ();
       }
 
 #if 0
@@ -3868,6 +3784,10 @@ Convert(rm,op,from,to)
        case fmt_long:
         tmp = (double)((word64)op);
         break;
+
+       default:
+        fprintf (stderr, "Bad switch\n");
+        abort ();
       }
 
 #if 0
@@ -3913,7 +3833,7 @@ Convert(rm,op,from,to)
       SignalException(FPE);
     } else {
       if (to == fmt_word) {
-        int tmp;
+        int tmp = 0;
         switch (from) {
          case fmt_single:
           {
@@ -3927,10 +3847,13 @@ Convert(rm,op,from,to)
           printf("DBG: from double %.30f (0x%s) to word: 0x%08X\n",*((double *)&op),pr_addr(op),tmp);
 #endif /* DEBUG */
           break;
+	 default:
+	  fprintf (stderr, "Bad switch\n");
+	  abort ();
         }
         result = (uword64)tmp;
       } else { /* fmt_long */
-	word64 tmp;
+	word64 tmp = 0;
         switch (from) {
          case fmt_single:
           {
@@ -3941,11 +3864,17 @@ Convert(rm,op,from,to)
          case fmt_double:
           tmp = (word64)*((double *)&op);
           break;
+	 default:
+	  fprintf (stderr, "Bad switch\n");
+	  abort ();
         }
 	result = (uword64)tmp;
       }
     }
     break;
+   default:
+    fprintf (stderr, "Bad switch\n");
+    abort ();
   }
 
 #ifdef DEBUG
@@ -4138,7 +4067,9 @@ decode_coproc(instruction)
         */
         if (((code == 0x00) || (code == 0x04)) && ((instruction & 0x7FF) == 0)) {
           int rt = ((instruction >> 16) & 0x1F);
+#if 0
           int rd = ((instruction >> 11) & 0x1F);
+#endif
           if (code == 0x00) { /* MF : move from */
 #if 0 /* message should be controlled by configuration option */
             callback->printf_filtered(callback,"Warning: MFC0 %d,%d not handled yet (architecture specific)\n",rt,rd);
@@ -4179,10 +4110,12 @@ sim_engine_run (sd, next_cpu_nr, siggnal)
      int next_cpu_nr; /* ignore */
      int siggnal; /* ignore */
 {
+#if !defined(FASTSIM)
   unsigned int pipeline_count = 1;
+#endif
 
 #ifdef DEBUG
-  if (membank == NULL) {
+  if (STATE_MEMORY (sd) == NULL) {
     printf("DBG: simulate() entered with no memory\n");
     exit(1);
   }
@@ -4315,7 +4248,9 @@ sim_engine_run (sd, next_cpu_nr, siggnal)
        treated as using a single cycle. NOTE: A standard system is not
        provided by the default simulator because different MIPS
        architectures have different cycle counts for the same
-       instructions. */
+       instructions.
+
+       [NOTE: pipeline_count has been replaced the event queue] */
 
 #if defined(HASFPU)
     /* Set previous flag, depending on current: */
@@ -4441,14 +4376,18 @@ sim_engine_run (sd, next_cpu_nr, siggnal)
     }
 
 #if !defined(FASTSIM)
-    pipeline_ticks += pipeline_count;
-#endif /* FASTSIM */
-
+    if (sim_events_tickn (sd, pipeline_count))
+      {
+	/* cpu->cia = cia; */
+	sim_events_process (sd);
+      }
+#else
     if (sim_events_tick (sd))
       {
 	/* cpu->cia = cia; */
 	sim_events_process (sd);
       }
+#endif /* FASTSIM */
   }
 }
 
@@ -4480,11 +4419,11 @@ pr_addr(addr)
   switch (sizeof(addr))
     {
       case 8:
-        sprintf(paddr_str,"%08x%08x",
+        sprintf(paddr_str,"%08lx%08lx",
 		(unsigned long)(addr>>thirty_two),(unsigned long)(addr&0xffffffff));
 	break;
       case 4:
-        sprintf(paddr_str,"%08x",(unsigned long)addr);
+        sprintf(paddr_str,"%08lx",(unsigned long)addr);
 	break;
       case 2:
         sprintf(paddr_str,"%04x",(unsigned short)(addr&0xffff));
@@ -4500,7 +4439,7 @@ pr_uword64(addr)
   uword64 addr;
 {
   char *paddr_str=get_cell();
-  sprintf(paddr_str,"%08x%08x",
+  sprintf(paddr_str,"%08lx%08lx",
           (unsigned long)(addr>>thirty_two),(unsigned long)(addr&0xffffffff));
   return paddr_str;
 }

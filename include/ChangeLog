@@ -1,6 +1,13 @@
+Wed May 21 16:47:53 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* remote-sim.h (sim_set_profile_size): Add prototype, document as
+ 	depreciated.
+
 Tue May 20 09:32:22 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* remote-sim.h (sim_open): Add callback struct.
+	(sim_set_callbacks): Drop SIM_DESC argument. Document.
+	(sim_size): Remove recently added SIM_DESC argument. Document.
 
 Mon May 19 19:14:44 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 

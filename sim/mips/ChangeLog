@@ -1,3 +1,79 @@
+Wed May 21 09:08:10 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* interp.c (interrupt_event): New function.  Pass exception event
+ 	onto exception handler.
+
+	* configure.in: Check for stdlib.h.
+	* configure: Regenerate.
+
+	* gencode.c (build_instruction): Add UNUSED attribute to tempS
+ 	variable declaration.
+	(build_instruction): Initialize memval1.
+	(build_instruction): Add UNUSED attribute to byte, bigend,
+ 	reverse.
+	(build_operands): Ditto.
+
+	* interp.c: Fix GCC warnings.
+	(sim_get_quit_code): Delete.
+
+	* configure.in: Add INLINE, ENDIAN, HOSTENDIAN and WARNINGS.
+	* Makefile.in: Ditto.
+	* configure: Re-generate.
+	
+	* Makefile.in (SIM_OBJS): Add sim-watch.o module.
+
+Tue May 20 15:08:56 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* interp.c (mips_option_handler): New function parse argumes using
+ 	sim-options.
+	(myname): Replace with STATE_MY_NAME.
+	(sim_open): Delete check for host endianness - performed by
+ 	sim_config.
+	(simHOSTBE, simBE): Delete, replaced by sim-endian flags.
+	(sim_open): Move much of the initialization from here.
+	(sim_load): To here.  After the image has been loaded and
+ 	endianness set.
+	(sim_open): Move ColdReset from here.
+	(sim_create_inferior): To here.
+	(sim_open): Make FP check less dependant on host endianness.
+
+	* Makefile.in (SIM_RUN_OBJS): Set to nrun.o - use new version or
+ 	run.
+	* interp.c (sim_set_callbacks): Delete.
+
+	* interp.c (membank, membank_base, membank_size): Replace with
+ 	STATE_MEMORY, STATE_MEM_SIZE, STATE_MEM_BASE.
+	(sim_open): Remove call to callback->init. gdb/run do this.
+
+	* interp.c: Update
+
+	* sim-main.h (SIM_HAVE_FLATMEM): Define.
+
+	* interp.c (big_endian_p): Delete, replaced by
+ 	current_target_byte_order.
+
+Tue May 20 13:55:00 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* interp.c (host_read_long, host_read_word, host_swap_word,
+ 	host_swap_long): Delete. Using common sim-endian.
+	(sim_fetch_register, sim_store_register): Use H2T.
+	(pipeline_ticks): Delete.  Handled by sim-events.
+	(sim_info): Update.
+	(sim_engine_run): Update.
+
+Tue May 20 13:42:03 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* interp.c (sim_stop_reason): Move code determining simEXCEPTION
+ 	reason from here.
+	(SignalException): To here. Signal using sim_engine_halt.
+	(sim_stop_reason): Delete, moved to common.
+	
+Tue May 20 10:19:48 1997  Andrew Cagney  <cagney@b2.cygnus.com>
+
+	* interp.c (sim_open): Add callback argument.
+	(sim_set_callbacks): Delete SIM_DESC argument.
+	(sim_size): Ditto.
+
 Mon May 19 18:20:38 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* Makefile.in (SIM_OBJS): Add common modules.

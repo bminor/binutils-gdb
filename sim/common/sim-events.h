@@ -75,15 +75,19 @@ typedef struct _sim_event sim_event;
 
 typedef struct _sim_events sim_events;
 struct _sim_events {
-  int processing;
+  int nr_ticks_to_process;
   sim_event *queue;
   sim_event *watchpoints;
   sim_event *watchedpoints;
+  sim_event *free_list;
   /* flag additional work needed */
   volatile int work_pending;
   /* the asynchronous event queue */
-  sim_event *volatile held;
-  sim_event *volatile *volatile held_end;
+#ifndef MAX_NR_SIGNAL_SIM_EVENTS
+#define MAX_NR_SIGNAL_SIM_EVENTS 2
+#endif
+  sim_event *held;
+  volatile int nr_held;
   /* timekeeping */
   SIM_ELAPSED_TIME initial_wallclock;
   signed64 time_of_event;
@@ -131,21 +135,20 @@ EXTERN_SIM_EVENTS\
  void *data);
 
 EXTERN_SIM_EVENTS\
-(sim_event *) sim_events_schedule_after_signal
+(void) sim_events_schedule_after_signal
 (SIM_DESC sd,
  signed64 delta_time,
  sim_event_handler *handler,
  void *data);
 
 
-/* Schedule an event WALLCLOCK milli-seconds from the start of the
-   simulation.  The exact interpretation of wallclock is host
-   dependant. */
+/* Schedule an event milli-seconds from NOW.  The exact interpretation
+   of wallclock is host dependant. */
 
 EXTERN_SIM_EVENTS\
 (sim_event *) sim_events_watch_clock
 (SIM_DESC sd,
- unsigned wallclock_ms_time,
+ unsigned delta_ms_time,
  sim_event_handler *handler,
  void *data);
 
@@ -186,7 +189,6 @@ EXTERN_SIM_EVENTS\
  sim_event_handler *handler,
  void *data);
 
-
 /* Deschedule the specified event */
 
 EXTERN_SIM_EVENTS\
@@ -212,16 +214,32 @@ INLINE_SIM_EVENTS\
 
 
 /* Progress time - separated into two parts so that the main loop can
-   save its context before the event queue is processed */
+   save its context before the event queue is processed.
+
+   sim_events_tickn advances the clock by N cycles. */
 
 INLINE_SIM_EVENTS\
 (int) sim_events_tick
 (SIM_DESC sd);
 
 INLINE_SIM_EVENTS\
+(int) sim_events_tickn
+(SIM_DESC sd,
+ unsigned n);
+
+INLINE_SIM_EVENTS\
 (void) sim_events_process
 (SIM_DESC sd);
 
+
+/* Progress time such that an event shall occure upon the next call to
+   sim_events tick */
+
+#if 0
+INLINE_SIM_EVENTS\
+(void) sim_events_timewarp
+(SIM_DESC sd);
+#endif
 
 
 /* local concept of time */

@@ -29,13 +29,14 @@ with this program; if not, write to the Free Software Foundation, Inc.,
    sim_open handles the large majority of them and it also parses the
    options when invoked by gdb [or any external program].
 
-   Per getopt: arg#2 is the option index; arg#3 is the option's
-   argument, NULL if optional and missing. */
+   arg#2 is the option index; arg#3 is the option's argument, NULL if
+   optional and missing; arg#4 is nonzero if being called as a
+   command. */
 
-typedef SIM_RC (OPTION_HANDLER) PARAMS ((SIM_DESC, int, char *));
+typedef SIM_RC (OPTION_HANDLER) PARAMS ((SIM_DESC, int, char *, int));
 
 /* Declare option handlers with a macro so it's usable on k&r systems.  */
-#define DECLARE_OPTION_HANDLER(fn) SIM_RC fn PARAMS ((SIM_DESC, int, char *))
+#define DECLARE_OPTION_HANDLER(fn) SIM_RC fn PARAMS ((SIM_DESC, int, char *, int))
 
 typedef struct {
   /* The long option information.  */
@@ -49,6 +50,12 @@ typedef struct {
   const char *doc;
   /* A function to process the option.  */
   OPTION_HANDLER *handler;
+  /* The documented name of the option.  If this is NULL, opt.name is
+     listed; otherwize this is listed as the name of the option.
+     Ex: given the options --set-pc, set-sp, et.al. the first option
+     would have doc_opt set to `--set-REGNAME' with the others set to
+     "".  Only --set-REGNAME would then be listed.   */
+  const char *doc_name;
 } OPTION;
 
 /* All options that don't have a short form equivalent begin with this for

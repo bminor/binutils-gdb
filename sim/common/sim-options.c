@@ -26,10 +26,15 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <strings.h>
 #endif
 #endif
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+#include <ctype.h>
 #include "libiberty.h"
 #include "../libiberty/alloca-conf.h"
 #include "sim-options.h"
 #include "sim-io.h"
+#include "sim-assert.h"
 
 /* Add a set of options to the simulator.
    TABLE is an array of OPTIONS terminated by a NULL `opt.name' entry.
@@ -115,7 +120,7 @@ static const OPTION standard_options[] =
 #endif
 
   { {"do-command", required_argument, NULL, OPTION_DO_COMMAND},
-      '\0', "COMMAND", "Perform a builtin command",
+      '\0', "COMMAND", ""/*undocumented*/,
       standard_option_handler },
 
   { {"help", no_argument, NULL, 'H'},
@@ -126,10 +131,11 @@ static const OPTION standard_options[] =
 };
 
 static SIM_RC
-standard_option_handler (sd, opt, arg)
+standard_option_handler (sd, opt, arg, is_command)
      SIM_DESC sd;
      int opt;
      char *arg;
+     int is_command;
 {
   int i,n;
 
@@ -149,6 +155,7 @@ standard_option_handler (sd, opt, arg)
 	      return SIM_RC_FAIL;
 	    }
 	  /* FIXME:wip: Need to set something in STATE_CONFIG.  */
+	  current_target_byte_order = BIG_ENDIAN;
 	}
       else if (strcmp (arg, "little") == 0)
 	{
@@ -158,6 +165,7 @@ standard_option_handler (sd, opt, arg)
 	      return SIM_RC_FAIL;
 	    }
 	  /* FIXME:wip: Need to set something in STATE_CONFIG.  */
+	  current_target_byte_order = LITTLE_ENDIAN;
 	}
       else
 	{
@@ -246,6 +254,7 @@ standard_option_handler (sd, opt, arg)
 SIM_RC
 standard_install (SIM_DESC sd)
 {
+  SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
   if (sim_add_option_table (sd, standard_options) != SIM_RC_OK)
     return SIM_RC_FAIL;
   return SIM_RC_OK;
@@ -372,7 +381,7 @@ sim_parse_args (sd, argv)
       if (optc == '?')
 	return SIM_RC_FAIL;
 
-      if ((*handlers[optc]) (sd, orig_val[optc], optarg) == SIM_RC_FAIL)
+      if ((*handlers[optc]) (sd, orig_val[optc], optarg, 0/*!is_command*/) == SIM_RC_FAIL)
 	return SIM_RC_FAIL;
     }
 
@@ -406,6 +415,9 @@ sim_print_help (sd)
 	  continue;
 
 	if (opt->doc == NULL)
+	  continue;
+
+	if (opt->doc_name != NULL && opt->doc_name [0] == '\0')
 	  continue;
 
 	sim_io_printf (sd, "  ");
@@ -442,14 +454,19 @@ sim_print_help (sd)
 	o = opt;
 	do
 	  {
-	    if (o->opt.name != NULL)
+	    const char *name;
+	    if (o->doc_name != NULL)
+	      name = o->doc_name;
+	    else
+	      name = o->opt.name;
+	    if (name != NULL)
 	      {
 		sim_io_printf (sd, "%s--%s",
 			       comma ? ", " : "",
-			       o->opt.name);
+			       name);
 		len += ((comma ? 2 : 0)
 			+ 2
-			+ strlen (o->opt.name));
+			+ strlen (name));
 		if (o->arg != NULL)
 		  {
 		    if (o->opt.has_arg == optional_argument)
@@ -515,40 +532,77 @@ sim_args_command (sd, cmd)
       const struct option_list *ol;
       const OPTION *opt;
       char **argv = buildargv (cmd);
-      for (ol = STATE_OPTIONS (sd); ol != NULL; ol = ol->next)
-	for (opt = ol->options; opt->opt.name != NULL; ++opt)
-	  {
-	    if (strcmp (argv[0], opt->opt.name) == 0)
-	      {
-		switch (opt->opt.has_arg)
-		  {
-		  case no_argument:
-		    if (argv[1] == NULL)
-		      opt->handler (sd, opt->opt.val, NULL);
-		    else
-		      sim_io_eprintf (sd, "Command `%s' takes no arguments\n", opt->opt.name);
+      /* most recent option match */
+      const OPTION *matching_opt = NULL;
+      int matching_argi = -1;
+      if (argv [0] != NULL)
+	for (ol = STATE_OPTIONS (sd); ol != NULL; ol = ol->next)
+	  for (opt = ol->options; opt->opt.name != NULL; ++opt)
+	    {
+	      int argi = 0;
+	      const char *name = opt->opt.name;
+	      while (strncmp (name, argv [argi], strlen (argv [argi])) == 0)
+		{
+		  name = &name [strlen (argv[argi])];
+		  if (name [0] == '-')
+		    {
+		      /* leading match ...<a-b-c>-d-e-f - continue search */
+		      name ++; /* skip `-' */
+		      argi ++;
+		      continue;
+		    }
+		  else if (name [0] == '\0')
+		    {
+		      /* exact match ...<a-b-c-d-e-f> - better than before? */
+		      if (argi > matching_argi)
+			{
+			  matching_argi = argi;
+			  matching_opt = opt;
+			}
+		      break;
+		    }
+		  else
 		    break;
-		  case optional_argument:
-		    if (argv[1] == NULL)
-		      opt->handler (sd, opt->opt.val, NULL);
-		    else if (argv[2] == NULL)
-		      opt->handler (sd, opt->opt.val, argv[1]);
-		    else
-		      sim_io_eprintf (sd, "Command `%s' requires no more than one argument\n", opt->opt.name);
-		    break;
-		  case required_argument:
-		    if (argv[1] == NULL)
-		      sim_io_eprintf (sd, "Command `%s' requires an argument\n", opt->opt.name);
-		    else if (argv[2] == NULL)
-		      opt->handler (sd, opt->opt.val, argv[1]);
-		    else
-		      sim_io_eprintf (sd, "Command `%s' requires only one argument\n", opt->opt.name);
-		  }
-		return SIM_RC_OK;
-	      }
-	  }
+		}
+	    }
+      if (matching_opt != NULL)
+	{
+	  switch (matching_opt->opt.has_arg)
+	    {
+	    case no_argument:
+	      if (argv [matching_argi + 1] == NULL)
+		matching_opt->handler (sd, matching_opt->opt.val,
+				       NULL, 1/*is_command*/);
+	      else
+		sim_io_eprintf (sd, "Command `%s' takes no arguments\n",
+				matching_opt->opt.name);
+	      break;
+	    case optional_argument:
+	      if (argv [matching_argi + 1] == NULL)
+		matching_opt->handler (sd, matching_opt->opt.val,
+				       NULL, 1/*is_command*/);
+	      else if (argv [matching_argi + 2] == NULL)
+		matching_opt->handler (sd, matching_opt->opt.val,
+				       argv [matching_argi + 1], 1/*is_command*/);
+	      else
+		sim_io_eprintf (sd, "Command `%s' requires no more than one argument\n",
+				matching_opt->opt.name);
+	      break;
+	    case required_argument:
+	      if (argv [matching_argi + 1] == NULL)
+		sim_io_eprintf (sd, "Command `%s' requires an argument\n",
+				matching_opt->opt.name);
+	      else if (argv [matching_argi + 2] == NULL)
+		matching_opt->handler (sd, matching_opt->opt.val,
+				       argv [matching_argi + 1], 1/*is_command*/);
+	      else
+		sim_io_eprintf (sd, "Command `%s' requires only one argument\n",
+				matching_opt->opt.name);
+	    }
+	  return SIM_RC_OK;
+	}
     }
-
-  /* didn't find anything that matched */
+      
+  /* didn't find anything that remotly matched */
   return SIM_RC_FAIL;
 }

@@ -5,6 +5,13 @@ AC_INIT(Makefile.in)
 
 SIM_AC_COMMON
 
+dnl Options available in this module
+SIM_AC_OPTION_INLINE(0)
+SIM_AC_OPTION_ENDIAN(BIG_ENDIAN)
+SIM_AC_OPTION_HOSTENDIAN
+SIM_AC_OPTION_WARNINGS
+
+
 # Ensure a reasonable default simulator is constructed:
 case "${target}" in
 # start-sanitize-r5900
@@ -17,7 +24,7 @@ case "${target}" in
 esac
 AC_SUBST(SIMCONF)
 
-AC_CHECK_HEADERS(string.h strings.h stdlib.h)
+AC_CHECK_HEADERS(string.h strings.h stdlib.h stdlib.h)
 AC_CHECK_LIB(m, fabs)
 AC_CHECK_FUNCS(aint anint sqrt)
 

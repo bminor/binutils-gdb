@@ -23,6 +23,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "sim-options.h"
 #include "bfd.h"
 
+#include "sim-assert.h"
+
 #ifdef HAVE_STRING_H
 #include <string.h>
 #else
@@ -69,44 +71,46 @@ enum {
 
 static const OPTION trace_options[] =
 {
-  { {"trace", no_argument, NULL, 't'},
-      't', NULL, "Perform tracing",
+  { {"trace", optional_argument, NULL, 't'},
+      't', "on|off", "Perform tracing",
       trace_option_handler },
-  { {"trace-insn", no_argument, NULL, OPTION_TRACE_INSN},
-      '\0', NULL, "Perform instruction tracing",
+  { {"trace-insn", optional_argument, NULL, OPTION_TRACE_INSN},
+      '\0', "on|off", "Perform instruction tracing",
       trace_option_handler },
-  { {"trace-decode", no_argument, NULL, OPTION_TRACE_DECODE},
-      '\0', NULL, "Perform instruction decoding tracing",
+  { {"trace-decode", optional_argument, NULL, OPTION_TRACE_DECODE},
+      '\0', "on|off", "Perform instruction decoding tracing",
       trace_option_handler },
-  { {"trace-extract", no_argument, NULL, OPTION_TRACE_EXTRACT},
-      '\0', NULL, "Perform instruction extraction tracing",
+  { {"trace-extract", optional_argument, NULL, OPTION_TRACE_EXTRACT},
+      '\0', "on|off", "Perform instruction extraction tracing",
       trace_option_handler },
-  { {"trace-linenum", no_argument, NULL, OPTION_TRACE_LINENUM},
-      '\0', NULL, "Perform line number tracing (implies --trace-insn)",
+  { {"trace-linenum", optional_argument, NULL, OPTION_TRACE_LINENUM},
+      '\0', "on|off", "Perform line number tracing (implies --trace-insn)",
       trace_option_handler },
-  { {"trace-memory", no_argument, NULL, OPTION_TRACE_MEMORY},
-      '\0', NULL, "Perform memory tracing",
+  { {"trace-memory", optional_argument, NULL, OPTION_TRACE_MEMORY},
+      '\0', "on|off", "Perform memory tracing",
       trace_option_handler },
-  { {"trace-model", no_argument, NULL, OPTION_TRACE_MODEL},
-      '\0', NULL, "Perform model tracing",
+  { {"trace-model", optional_argument, NULL, OPTION_TRACE_MODEL},
+      '\0', "on|off", "Perform model tracing",
       trace_option_handler },
-  { {"trace-alu", no_argument, NULL, OPTION_TRACE_ALU},
-      '\0', NULL, "Perform ALU tracing",
+  { {"trace-alu", optional_argument, NULL, OPTION_TRACE_ALU},
+      '\0', "on|off", "Perform ALU tracing",
       trace_option_handler },
-  { {"trace-core", no_argument, NULL, OPTION_TRACE_CORE},
-      '\0', NULL, "Perform CORE tracing",
+#if (WITH_CORE)
+  { {"trace-core", optional_argument, NULL, OPTION_TRACE_CORE},
+      '\0', "on|off", "Perform CORE tracing",
       trace_option_handler },
-  { {"trace-events", no_argument, NULL, OPTION_TRACE_EVENTS},
-      '\0', NULL, "Perform EVENTS tracing",
+#endif
+  { {"trace-events", optional_argument, NULL, OPTION_TRACE_EVENTS},
+      '\0', "on|off", "Perform EVENTS tracing",
       trace_option_handler },
-  { {"trace-fpu", no_argument, NULL, OPTION_TRACE_FPU},
-      '\0', NULL, "Perform FPU tracing",
+  { {"trace-fpu", optional_argument, NULL, OPTION_TRACE_FPU},
+      '\0', "on|off", "Perform FPU tracing",
       trace_option_handler },
-  { {"trace-branch", no_argument, NULL, OPTION_TRACE_BRANCH},
-      '\0', NULL, "Perform branch tracing",
+  { {"trace-branch", optional_argument, NULL, OPTION_TRACE_BRANCH},
+      '\0', "on|off", "Perform branch tracing",
       trace_option_handler },
-  { {"trace-semantics", no_argument, NULL, OPTION_TRACE_SEMANTICS},
-      '\0', NULL, "Perform ALU, FPU, and MEMORY tracing",
+  { {"trace-semantics", optional_argument, NULL, OPTION_TRACE_SEMANTICS},
+      '\0', "on|off", "Perform ALU, FPU, MEMORY, and BRANCH tracing",
       trace_option_handler },
   { {"trace-file", required_argument, NULL, OPTION_TRACE_FILE},
       '\0', "FILE NAME", "Specify tracing output file",
@@ -114,13 +118,69 @@ static const OPTION trace_options[] =
   { {NULL, no_argument, NULL, 0}, '\0', NULL, NULL, NULL }
 };
 
+
+/* Set FIRST_TRACE .. LAST_TRACE according to arg.  At least
+   FIRST_TRACE is always set */
+
 static SIM_RC
-trace_option_handler (sd, opt, arg)
+set_trace_options (sd, name, first_trace, last_trace, arg)
+     SIM_DESC sd;
+     const char *name;
+     int first_trace;
+     int last_trace;
+     const char *arg;
+{
+  int trace_nr;
+  int cpu_nr;
+  int trace_val = 1;
+  if (arg != NULL)
+    {
+      if (strcmp (arg, "yes") == 0
+	  || strcmp (arg, "on") == 0
+	  || strcmp (arg, "1") == 0)
+	trace_val = 1;
+      else if (strcmp (arg, "no") == 0
+	       || strcmp (arg, "off") == 0
+	       || strcmp (arg, "0") == 0)
+	trace_val = 0;
+      else
+	{
+	  sim_io_eprintf (sd, "Argument `%s' for `--trace%s' invalid, one of `on', `off', `yes', `no' expected\n", arg, name);
+	  return SIM_RC_FAIL;
+	}
+    }
+  trace_nr = first_trace;
+  do
+    {
+      switch (trace_nr)
+	{
+#if (WITH_CORE)
+	case TRACE_CORE_IDX:
+	  STATE_CORE(sd)->trace = trace_val;
+	  break;
+#endif
+	case TRACE_EVENTS_IDX:
+	  STATE_EVENTS(sd)->trace = trace_val;
+	  break;
+	}
+      for (cpu_nr = 0; cpu_nr < MAX_NR_PROCESSORS; cpu_nr++)
+	{
+	  CPU_TRACE_FLAGS (STATE_CPU (sd, cpu_nr))[trace_nr] = trace_val;
+	}
+    }
+  while (++trace_nr < last_trace);
+  return SIM_RC_OK;
+}
+
+
+static SIM_RC
+trace_option_handler (sd, opt, arg, is_command)
      SIM_DESC sd;
      int opt;
      char *arg;
+     int is_command;
 {
-  int i,n;
+  int n;
 
   switch (opt)
     {
@@ -128,123 +188,104 @@ trace_option_handler (sd, opt, arg)
       if (! WITH_TRACE)
 	sim_io_eprintf (sd, "Tracing not compiled in, `-t' ignored\n");
       else
-	{
-	  for (n = 0; n < MAX_NR_PROCESSORS; ++n)
-	    for (i = 0; i < MAX_TRACE_VALUES; ++i)
-	      CPU_TRACE_FLAGS (STATE_CPU (sd, n))[i] = 1;
-	  STATE_CORE(sd)->trace = 1;
-	  STATE_EVENTS(sd)->trace = 1;
-	}
+	return set_trace_options (sd, "trace", 0, MAX_TRACE_VALUES, arg);
       break;
 
     case OPTION_TRACE_INSN :
       if (WITH_TRACE_INSN_P)
-	for (n = 0; n < MAX_NR_PROCESSORS; ++n)
-	  CPU_TRACE_FLAGS (STATE_CPU (sd, n))[TRACE_INSN_IDX] = 1;
+	return set_trace_options (sd, "-insn", TRACE_INSN_IDX, -1, arg);
       else
 	sim_io_eprintf (sd, "Instruction tracing not compiled in, `--trace-insn' ignored\n");
       break;
 
     case OPTION_TRACE_DECODE :
       if (WITH_TRACE_DECODE_P)
-	for (n = 0; n < MAX_NR_PROCESSORS; ++n)
-	  CPU_TRACE_FLAGS (STATE_CPU (sd, n))[TRACE_DECODE_IDX] = 1;
+	return set_trace_options (sd, "-decode", TRACE_DECODE_IDX, -1, arg);
       else
 	sim_io_eprintf (sd, "Decode tracing not compiled in, `--trace-decode' ignored\n");
       break;
 
     case OPTION_TRACE_EXTRACT :
       if (WITH_TRACE_EXTRACT_P)
-	for (n = 0; n < MAX_NR_PROCESSORS; ++n)
-	  CPU_TRACE_FLAGS (STATE_CPU (sd, n))[TRACE_EXTRACT_IDX] = 1;
+	return set_trace_options (sd, "-extract", TRACE_EXTRACT_IDX, -1, arg);
       else
 	sim_io_eprintf (sd, "Extract tracing not compiled in, `--trace-extract' ignored\n");
       break;
 
     case OPTION_TRACE_LINENUM :
       if (WITH_TRACE_LINENUM_P && WITH_TRACE_INSN_P)
-	for (n = 0; n < MAX_NR_PROCESSORS; ++n)
-	  {
-	    CPU_TRACE_FLAGS (STATE_CPU (sd, n))[TRACE_LINENUM_IDX] = 1;
-	    CPU_TRACE_FLAGS (STATE_CPU (sd, n))[TRACE_INSN_IDX] = 1;
-	  }
+	{
+	  if (set_trace_options (sd, "-linenum", TRACE_LINENUM_IDX, -1, arg) != SIM_RC_OK
+	      || set_trace_options (sd, "-linenum", TRACE_INSN_IDX, -1, arg) != SIM_RC_OK)
+	    return SIM_RC_FAIL;
+	}
       else
 	sim_io_eprintf (sd, "Line number or instruction tracing not compiled in, `--trace-linenum' ignored\n");
       break;
 
     case OPTION_TRACE_MEMORY :
       if (WITH_TRACE_MEMORY_P)
-	for (n = 0; n < MAX_NR_PROCESSORS; ++n)
-	  CPU_TRACE_FLAGS (STATE_CPU (sd, n))[TRACE_MEMORY_IDX] = 1;
+	return set_trace_options (sd, "-memory", TRACE_MEMORY_IDX, -1, arg);
       else
 	sim_io_eprintf (sd, "Memory tracing not compiled in, `--trace-memory' ignored\n");
       break;
 
     case OPTION_TRACE_MODEL :
       if (WITH_TRACE_MODEL_P)
-	for (n = 0; n < MAX_NR_PROCESSORS; ++n)
-	  CPU_TRACE_FLAGS (STATE_CPU (sd, n))[TRACE_MODEL_IDX] = 1;
+	return set_trace_options (sd, "-model", TRACE_MODEL_IDX, -1, arg);
       else
 	sim_io_eprintf (sd, "Model tracing not compiled in, `--trace-model' ignored\n");
       break;
 
     case OPTION_TRACE_ALU :
       if (WITH_TRACE_ALU_P)
-	for (n = 0; n < MAX_NR_PROCESSORS; ++n)
-	  CPU_TRACE_FLAGS (STATE_CPU (sd, n))[TRACE_ALU_IDX] = 1;
+	return set_trace_options (sd, "-alu", TRACE_ALU_IDX, -1, arg);
       else
 	sim_io_eprintf (sd, "ALU tracing not compiled in, `--trace-alu' ignored\n");
       break;
 
     case OPTION_TRACE_CORE :
       if (WITH_TRACE_CORE_P)
-	{
-	  for (n = 0; n < MAX_NR_PROCESSORS; ++n)
-	    CPU_TRACE_FLAGS (STATE_CPU (sd, n))[TRACE_CORE_IDX] = 1;
-	  STATE_CORE(sd)->trace = 1;
-	}
+	return set_trace_options (sd, "-core", TRACE_CORE_IDX, -1, arg);
       else
 	sim_io_eprintf (sd, "CORE tracing not compiled in, `--trace-core' ignored\n");
       break;
 
     case OPTION_TRACE_EVENTS :
       if (WITH_TRACE_EVENTS_P)
-	{
-	  for (n = 0; n < MAX_NR_PROCESSORS; ++n)
-	    CPU_TRACE_FLAGS (STATE_CPU (sd, n))[TRACE_EVENTS_IDX] = 1;
-	  STATE_EVENTS(sd)->trace = 1;
-	}
+	return set_trace_options (sd, "-events", TRACE_EVENTS_IDX, -1, arg);
       else
 	sim_io_eprintf (sd, "EVENTS tracing not compiled in, `--trace-events' ignored\n");
       break;
 
     case OPTION_TRACE_FPU :
       if (WITH_TRACE_FPU_P)
-	for (n = 0; n < MAX_NR_PROCESSORS; ++n)
-	  CPU_TRACE_FLAGS (STATE_CPU (sd, n))[TRACE_FPU_IDX] = 1;
+	return set_trace_options (sd, "-fpu", TRACE_FPU_IDX, -1, arg);
       else
 	sim_io_eprintf (sd, "FPU tracing not compiled in, `--trace-fpu' ignored\n");
       break;
 
     case OPTION_TRACE_BRANCH :
       if (WITH_TRACE_BRANCH_P)
-	for (n = 0; n < MAX_NR_PROCESSORS; ++n)
-	  CPU_TRACE_FLAGS (STATE_CPU (sd, n))[TRACE_FPU_IDX] = 1;
+	return set_trace_options (sd, "-branch", TRACE_BRANCH_IDX, -1, arg);
       else
 	sim_io_eprintf (sd, "Branch tracing not compiled in, `--trace-branch' ignored\n");
       break;
 
     case OPTION_TRACE_SEMANTICS :
-      if (WITH_TRACE_ALU_P && WITH_TRACE_FPU_P && WITH_TRACE_MEMORY_P)
-	for (n = 0; n < MAX_NR_PROCESSORS; ++n)
-	  {
-	    CPU_TRACE_FLAGS (STATE_CPU (sd, n))[TRACE_ALU_IDX] = 1;
-	    CPU_TRACE_FLAGS (STATE_CPU (sd, n))[TRACE_FPU_IDX] = 1;
-	    CPU_TRACE_FLAGS (STATE_CPU (sd, n))[TRACE_MEMORY_IDX] = 1;
-	    CPU_TRACE_FLAGS (STATE_CPU (sd, n))[TRACE_BRANCH_IDX] = 1;
-	  }
+      if (WITH_TRACE_ALU_P
+	  && WITH_TRACE_FPU_P
+	  && WITH_TRACE_MEMORY_P
+	  && WITH_TRACE_BRANCH_P)
+	{
+	  if (set_trace_options (sd, "-semantics", TRACE_ALU_IDX, -1, arg) != SIM_RC_OK
+	      || set_trace_options (sd, "-semantics", TRACE_FPU_IDX, -1, arg) != SIM_RC_OK
+	      || set_trace_options (sd, "-semantics", TRACE_MEMORY_IDX, -1, arg) != SIM_RC_OK
+	      || set_trace_options (sd, "-semantics", TRACE_BRANCH_IDX, -1, arg) != SIM_RC_OK)
+	    return SIM_RC_FAIL;
+	}
       else
-	sim_io_eprintf (sd, "Alu, fpu, and/or memory tracing not compiled in, `--trace-semantics' ignored\n");
+	sim_io_eprintf (sd, "Alu, fpu, memory, and/or branch tracing not compiled in, `--trace-semantics' ignored\n");
       break;
 
     case OPTION_TRACE_FILE :
@@ -274,6 +315,8 @@ SIM_RC
 trace_install (SIM_DESC sd)
 {
   int i;
+
+  SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
 
   sim_add_option_table (sd, trace_options);
   for (i = 0; i < MAX_NR_PROCESSORS; ++i)

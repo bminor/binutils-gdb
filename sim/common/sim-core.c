@@ -34,6 +34,7 @@ EXTERN_SIM_CORE\
 (SIM_RC)
 sim_core_install (SIM_DESC sd)
 {
+  SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
   sim_module_add_uninstall_fn (sd, sim_core_uninstall);
   sim_module_add_init_fn (sd, sim_core_init);
   return SIM_RC_OK;
@@ -77,6 +78,40 @@ sim_core_init (SIM_DESC sd)
 
 
 
+#ifndef SIM_CORE_SIGNAL
+#define SIM_CORE_SIGNAL(SD,CPU,CIA,MAP,NR_BYTES,ADDR,TRANSFER,ERROR) \
+sim_core_signal ((SD), (CPU), (CIA), (MAP), (NR_BYTES), (ADDR), (TRANSFER), (ERROR))
+
+static void
+sim_core_signal (SIM_DESC sd,
+		 sim_cpu *cpu,
+		 sim_cia cia,
+		 sim_core_maps map,
+		 int nr_bytes,
+		 address_word addr,
+		 transfer_type transfer,
+		 sim_core_signals sig)
+{
+  const char *copy = (transfer == read_transfer ? "read" : "write");
+  switch (sig)
+    {
+    case sim_core_unmapped_signal:
+      sim_engine_abort (sd, cpu, cia, "sim-core: %d byte %s to unmaped address 0x%lx",
+			nr_bytes, copy, (unsigned long) addr);
+      break;
+    case sim_core_unaligned_signal:
+      sim_engine_abort (sd, cpu, cia, "sim-core: %d byte misaligned %s to address 0x%lx",
+			nr_bytes, copy, (unsigned long) addr);
+      break;
+    default:
+      sim_engine_abort (sd, cpu, cia, "sim_core_signal - internal error - bad switch");
+    }
+}
+
+
+
+#endif
+
 STATIC_INLINE_SIM_CORE\
 (const char *)
 sim_core_map_to_str (sim_core_maps map)
@@ -94,13 +129,13 @@ sim_core_map_to_str (sim_core_maps map)
 STATIC_INLINE_SIM_CORE\
 (sim_core_mapping *)
 new_sim_core_mapping(SIM_DESC sd,
-		 attach_type attach,
-		 int space,
-		 unsigned_word addr,
-		 unsigned nr_bytes,
-		 device *device,
-		 void *buffer,
-		 int free_buffer)
+		     attach_type attach,
+		     int space,
+		     unsigned_word addr,
+		     unsigned nr_bytes,
+		     device *device,
+		     void *buffer,
+		     int free_buffer)
 {
   sim_core_mapping *new_mapping = ZALLOC(sim_core_mapping);
   /* common */
@@ -292,6 +327,7 @@ sim_core_find_mapping(sim_core *core,
 		      sim_core_maps map,
 		      unsigned_word addr,
 		      unsigned nr_bytes,
+		      transfer_type transfer,
 		      int abort, /*either 0 or 1 - hint to inline/-O */
 		      sim_cpu *cpu, /* abort => cpu != NULL */
 		      sim_cia cia)
@@ -309,12 +345,8 @@ sim_core_find_mapping(sim_core *core,
     }
   if (abort)
     {
-      if (cpu == NULL)
-	sim_io_error (NULL, "sim_core_find_map - internal error - can not abort without a processor");
-      else
-	engine_error (CPU_STATE (cpu), cpu, cia,
-		      "access to unmaped address 0x%lx (%d bytes)\n",
-		      (unsigned long) addr, nr_bytes);
+      SIM_CORE_SIGNAL (CPU_STATE (cpu), cpu, cia, map, nr_bytes, addr, transfer,
+		       sim_core_unmapped_signal);
     }
   return NULL;
 }
@@ -342,7 +374,8 @@ sim_core_read_buffer(SIM_DESC sd,
     unsigned_word raddr = addr + count;
     sim_core_mapping *mapping =
       sim_core_find_mapping(STATE_CORE (sd), map,
-			    raddr, 1,
+			    raddr, /*nr-bytes*/1,
+			    read_transfer,
 			    0, NULL, NULL_CIA); /*dont-abort*/
     if (mapping == NULL)
       break;
@@ -383,7 +416,8 @@ sim_core_write_buffer(SIM_DESC sd,
   while (count < len) {
     unsigned_word raddr = addr + count;
     sim_core_mapping *mapping = sim_core_find_mapping(STATE_CORE (sd), map,
-						      raddr, 1,
+						      raddr, /*nr-bytes*/1,
+						      write_transfer,
 						      0, NULL, NULL_CIA); /*dont-abort*/
     if (mapping == NULL)
       break;

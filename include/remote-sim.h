@@ -163,23 +163,22 @@ void sim_do_command PARAMS ((SIM_DESC sd, char *cmd));
 
 
 /* NOTE: sim_set_callbacks () is depreciated.
-
    Provide simulator with a default (global) host_callback_struct. */
-
 void sim_set_callbacks PARAMS ((struct host_callback_struct *));
 
 
 /* NOTE: sim_size() is depreciated.
-
    sim_size() does not take a SIM_DESC argument as this function is
    used before sim_open() has been called. */
-
 void sim_size PARAMS ((int i));
 
 
 /* NOTE: sim_trace() is depreciated. */
-
 int sim_trace PARAMS ((SIM_DESC sd));
+
+
+/* NOTE: sim_set_profile_size is depreciated */
+void sim_set_profile_size PARAMS ((int n));
 
 
 #endif /* !defined (REMOTE_SIM_H) */

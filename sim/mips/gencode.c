@@ -1249,7 +1249,7 @@ build_operands(doisa,features,insn)
 
             any_operand = 1;
 
-            printf("  %s %s = ",opfields[opindex].type,opfields[opindex].name);
+            printf("  %s %s UNUSED = ",opfields[opindex].type,opfields[opindex].name);
 
             if (opfields[opindex].flags & OP_SIGNX)
               printf("SIGNEXTEND((%s)",opfields[opindex].type);
@@ -2158,7 +2158,7 @@ build_instruction (doisa, features, mips16, insn)
 
        if ((insn->type) == ADD) {
 	 printf("   %s temp = (%s)(op1 + op2);\n", unsigned_basetype, unsigned_basetype);
-	 printf("   %s tempS = (%s)temp;\n", signed_basetype, signed_basetype);
+	 printf("   %s tempS UNUSED = (%s)temp;\n", signed_basetype, signed_basetype);
 	 if (insn->flags & OVERFLOW) {
 	   printf("   if (((op1 < 0) == (op2 < 0)) && ((tempS < 0) != (op1 < 0)))\n");
 	   printf("    SignalException(IntegerOverflow);\n");
@@ -2170,7 +2170,7 @@ build_instruction (doisa, features, mips16, insn)
 	  printf("   GPR[destreg] = SIGNEXTEND(((%s)temp),32);\n",regtype);
        } else { /* SUB */
 	 printf("   %s temp = (%s)(op1 - op2);\n", unsigned_basetype, unsigned_basetype);
-	 printf("   %s tempS = (%s)temp;\n", signed_basetype, signed_basetype);
+	 printf("   %s tempS UNUSED = (%s)temp;\n", signed_basetype, signed_basetype);
 	 if (insn->flags & OVERFLOW) { /* different signs => overflow if result_sign != arg_sign */
 	   printf("   if (((op1 < 0) != (op2 < 0)) && ((tempS < 0) == (op1 < 0)))\n");
 	   printf("    SignalException(IntegerOverflow);\n");
@@ -2641,8 +2641,8 @@ build_instruction (doisa, features, mips16, insn)
        printf("     Prefetch(uncached,paddr,vaddr,isDATA,hint);\n");
       else {
 	printf("    {\n");
-	printf("     uword64 memval;\n");
-        printf("     uword64 memval1;\n");
+	printf("     uword64 memval = 0;\n");
+        printf("     uword64 memval1 = 0;\n");
 
 	if ((insn->flags & COPROC) && ((datalen != 4) && (datalen != 8))) {
 	  fprintf(stderr,"Co-processor transfer operation not WORD or DOUBLEWORD in length \"%s\"\n",insn->name);
@@ -2773,9 +2773,9 @@ build_instruction (doisa, features, mips16, insn)
 	    printf("     uword64 mask = %d;\n",(proc64 ? 0x7 : 0x3));
 #endif
 	    printf("     unsigned int shift = %d;\n",(datalen >> 1));
-	    printf("     unsigned int reverse = (ReverseEndian ? (mask >> shift) : 0);\n");
-	    printf("     unsigned int bigend = (BigEndianCPU ? (mask >> shift) : 0);\n");
-	    printf("     unsigned int byte;\n");
+	    printf("     unsigned int reverse UNUSED = (ReverseEndian ? (mask >> shift) : 0);\n");
+	    printf("     unsigned int bigend UNUSED = (BigEndianCPU ? (mask >> shift) : 0);\n");
+	    printf("     unsigned int byte UNUSED;\n");
 
 /* TODO: This should really also check for 32bit world performing 32bit access */
 	    if (datalen < 8) /* not for DOUBLEWORD or QUADWORD*/

@@ -1,3 +1,9 @@
+Tue May 20 10:18:25 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-if.c (sim_open): Add callback argument.
+	(sim_set_callbacks, sim_callback): Delete.
+	(sim_load): Set STATE_LOADED_P.
+
 Mon May 19 12:55:42 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* Makefile.in (SIM_OBJS): Link in sim-abort.o as a stub for

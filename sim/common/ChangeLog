@@ -1,3 +1,64 @@
+Wed May 21 08:47:30 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* cgen-scache.c (scache_option_handler): Add is_command arg.
+
+	* sim-model.c (model_option_handler): Add is_command argument.
+
+	* sim-profile.c (profile_option_handler): Add is_command arg.
+
+	* sim-events.c (sim_watch_valid): Use ub64, lb64 when 64bit value
+ 	involved.
+
+	* sim-module.c (sim_module_add_init_fn): Call init fn in the same
+ 	order that they are registered.
+
+	* sim-options.h (OPTION_HANDLER): Add argument to differentiate
+ 	between option and command line processing.
+
+	* sim-options.c: Include stdlib.h, ctype.h.
+
+	* Make-common.in (sim-watch.o): Add rule.
+	(sim_main_headers): Assume sim-assert.h included.
+	(sim-*.o): Simplify make rule.
+	
+	* sim-module.c: Add sim_watch_install to module list.
+
+Tue May 20 14:15:23 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-base.h (STATE_LOADED_P): New predicate. Set once everything
+ 	has been loaded.
+
+	* sim-trace.c (trace_install): Check magic. Include sim-assert.h.
+	* sim-events.c (sim_events_install): Ditto.
+	* sim-core.c (sim_core_install): Ditto.
+	* sim-model.c (model_install): Ditto.
+	* sim-options.c (standard_install): Ditto.
+	* sim-profile.c (profile_install): Ditto.
+	* sim-reason.c (sim_stop_reason): Ditto.
+	* sim-run.c (sim_engine_run): Ditto.
+	* sim-utils.c (sim_analyze_program): Ditto.
+
+	* sim-module.c (modules): Make profile_install and trace_install
+ 	optional.
+
+	* sim-base.h (STATE_MEM_BASE): Define for flat memory systems.
+
+	* sim-options.c (standard_option_handler): Set the byte order.
+
+	* sim-events.c (sim_events_process): Allow multi tick processing.
+	(sim_events_tickn): New function - multi cycle tick.
+	
+	* sim-events.h (sim_events_tickn, sim_events_timewarp): Add
+ 	prototypes.  Under development.
+	(sim_events): Replace processing with nr_ticks_to_process.
+
+Tue May 20 09:39:22 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* nrun.c (main): Pass callbacks to sim_open instead of using
+ 	sim_set_callbacks.
+
+	* run.c (main): Ditto.
+
 Mon May 19 12:07:22 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim-events.c (sim_events_zalloc): Signal save memory allocator -

@@ -1,5 +1,7 @@
 Tue May 20 09:33:31 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
+	* sim-calls.c (sim_load): Set STATE_LOADED_P.
+
 	* sim-main.h: Include <unistd.h>.
 
 	* sim-calls.c (sim_set_callback): Delete.

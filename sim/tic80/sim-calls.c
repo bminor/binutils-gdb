@@ -50,7 +50,9 @@ struct sim_state simulation = { 0 };
 
 
 SIM_DESC
-sim_open (SIM_OPEN_KIND kind, struct host_callback_struct *callback, char **argv)
+sim_open (SIM_OPEN_KIND kind,
+	  host_callback *callback,
+	  char **argv)
 {
   SIM_DESC sd = &simulation;
   STATE_OPEN_KIND (sd) = kind;
