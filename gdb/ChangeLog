@@ -1,3 +1,8 @@
+2004-03-07  Andrew Cagney  <cagney@redhat.com>
+
+	* ppc-linux-nat.c (ppc_ptrace_cannot_fetch_store_register): Delete
+	unused function.
+
 2004-03-07  Daniel Jacobowitz  <drow@mvista.com>
 
 	* arm-tdep.c (thumb_get_next_pc): Handle BX.

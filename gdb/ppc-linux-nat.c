@@ -164,12 +164,6 @@ ppc_register_u_addr (int regno)
   return u_addr;
 }
 
-static int
-ppc_ptrace_cannot_fetch_store_register (int regno)
-{
-  return (ppc_register_u_addr (regno) == -1);
-}
-
 /* The Linux kernel ptrace interface for AltiVec registers uses the
    registers set mechanism, as opposed to the interface for all the
    other registers, that stores/fetches each register individually.  */
