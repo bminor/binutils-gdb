@@ -1,3 +1,8 @@
+2002-03-07  H.J. Lu  (hjl@gnu.org)
+
+	* coff-sh.c (shcoff_reloc_map): Use bfd_reloc_code_real_type
+	as the type for bfd_reloc_val.
+
 2002-03-05  John David Anglin  <dave@hiauly1.hia.nrc.ca>
 
 	* elf-hppa.h (elf_hppa_is_dynamic_loader_symbol): New function.
