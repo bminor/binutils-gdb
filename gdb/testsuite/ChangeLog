@@ -1,5 +1,9 @@
 2003-01-14  Daniel Jacobowitz  <drow@mvista.com>
 
+	* gdb.threads/killed.exp: Use KFAIL for gdb/568.
+
+2003-01-14  Daniel Jacobowitz  <drow@mvista.com>
+
 	* gdb.base/constvars.exp: Remove two extra XFAILs.  Update copyright
 	dates.
 
