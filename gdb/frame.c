@@ -31,6 +31,7 @@
 #include "builtin-regs.h"
 #include "gdb_obstack.h"
 #include "dummy-frame.h"
+#include "sentinel-frame.h"
 #include "gdbcore.h"
 #include "annotate.h"
 #include "language.h"
@@ -179,29 +180,11 @@ frame_register_unwind (struct frame_info *frame, int regnum,
   gdb_assert (realnump != NULL);
   /* gdb_assert (bufferp != NULL); */
 
-  /* NOTE: cagney/2002-04-14: It would be nice if, instead of a
-     special case, there was always an inner frame dedicated to the
-     hardware registers.  Unfortunatly, there is too much unwind code
-     around that looks up/down the frame chain while making the
-     assumption that each frame level is using the same unwind code.  */
-
-  if (frame == NULL)
-    {
-      /* We're in the inner-most frame, get the value direct from the
-	 register cache.  */
-      *optimizedp = 0;
-      *lvalp = lval_register;
-      /* ULGH!  Code uses the offset into the raw register byte array
-         as a way of identifying a register.  */
-      *addrp = REGISTER_BYTE (regnum);
-      /* Should this code test ``register_cached (regnum) < 0'' and do
-         something like set realnum to -1 when the register isn't
-         available?  */
-      *realnump = regnum;
-      if (bufferp)
-	deprecated_read_register_gen (regnum, bufferp);
-      return;
-    }
+  /* NOTE: cagney/2002-11-27: A program trying to unwind a NULL frame
+     is broken.  There is always a frame.  If there, for some reason,
+     isn't, there is some pretty busted code as it should have
+     detected the problem before calling here.  */
+  gdb_assert (frame != NULL);
 
   /* Ask this frame to unwind its register.  */
   frame->unwind->reg (frame, &frame->unwind_cache, regnum,
@@ -247,25 +230,11 @@ frame_register (struct frame_info *frame, int regnum,
       return;
     }
 
-  /* Reached the the bottom (youngest, inner most) of the frame chain
-     (youngest, inner most) frame, go direct to the hardware register
-     cache (do not pass go, do not try to cache the value, ...).  The
-     unwound value would have been cached in frame->next but that
-     doesn't exist.  This doesn't matter as the hardware register
-     cache is stopping any unnecessary accesses to the target.  */
-
-  /* NOTE: cagney/2002-04-14: It would be nice if, instead of a
-     special case, there was always an inner frame dedicated to the
-     hardware registers.  Unfortunatly, there is too much unwind code
-     around that looks up/down the frame chain while making the
-     assumption that each frame level is using the same unwind code.  */
-
-  if (frame == NULL)
-    frame_register_unwind (NULL, regnum, optimizedp, lvalp, addrp, realnump,
-			   bufferp);
-  else
-    frame_register_unwind (frame->next, regnum, optimizedp, lvalp, addrp,
-			   realnump, bufferp);
+  /* Obtain the register value by unwinding the register from the next
+     (more inner frame).  */
+  gdb_assert (frame != NULL && frame->next != NULL);
+  frame_register_unwind (frame->next, regnum, optimizedp, lvalp, addrp,
+			 realnump, bufferp);
 }
 
 void
@@ -317,17 +286,17 @@ frame_read_unsigned_register (struct frame_info *frame, int regnum,
      tests like ``if get_next_frame() == NULL'' and instead just rely
      on recursive frame calls (like the below code) when manipulating
      a frame chain.  */
-  gdb_assert (frame != NULL);
-  frame_unwind_unsigned_register (get_next_frame (frame), regnum, val);
+  gdb_assert (frame != NULL && frame->next != NULL);
+  frame_unwind_unsigned_register (frame->next, regnum, val);
 }
 
 void
 frame_read_signed_register (struct frame_info *frame, int regnum,
 			    LONGEST *val)
 {
-  /* See note in frame_read_unsigned_register().  */
-  gdb_assert (frame != NULL);
-  frame_unwind_signed_register (get_next_frame (frame), regnum, val);
+  /* See note above in frame_read_unsigned_register().  */
+  gdb_assert (frame != NULL && frame->next != NULL);
+  frame_unwind_signed_register (frame->next, regnum, val);
 }
 
 static void
@@ -355,25 +324,9 @@ generic_unwind_get_saved_register (char *raw_buffer,
   if (addrp == NULL)
     addrp = &addrx;
 
-  /* Reached the the bottom (youngest, inner most) of the frame chain
-     (youngest, inner most) frame, go direct to the hardware register
-     cache (do not pass go, do not try to cache the value, ...).  The
-     unwound value would have been cached in frame->next but that
-     doesn't exist.  This doesn't matter as the hardware register
-     cache is stopping any unnecessary accesses to the target.  */
-
-  /* NOTE: cagney/2002-04-14: It would be nice if, instead of a
-     special case, there was always an inner frame dedicated to the
-     hardware registers.  Unfortunatly, there is too much unwind code
-     around that looks up/down the frame chain while making the
-     assumption that each frame level is using the same unwind code.  */
-
-  if (frame == NULL)
-    frame_register_unwind (NULL, regnum, optimizedp, lvalp, addrp, &realnumx,
-			   raw_buffer);
-  else
-    frame_register_unwind (frame->next, regnum, optimizedp, lvalp, addrp,
-			   &realnumx, raw_buffer);
+  gdb_assert (frame != NULL && frame->next != NULL);
+  frame_register_unwind (frame->next, regnum, optimizedp, lvalp, addrp,
+			 &realnumx, raw_buffer);
 }
 
 void
@@ -463,6 +416,32 @@ frame_map_regnum_to_name (int regnum)
   return builtin_reg_map_regnum_to_name (regnum);
 }
 
+/* Create a sentinel frame.  */
+
+struct frame_info *
+create_sentinel_frame (struct regcache *regcache)
+{
+  struct frame_info *frame = FRAME_OBSTACK_ZALLOC (struct frame_info);
+  frame->type = NORMAL_FRAME;
+  frame->level = -1;
+  /* Explicitly initialize the sentinel frame's cache.  Provide it
+     with the underlying regcache.  In the future additional
+     information, such as the frame's thread will be added.  */
+  frame->unwind_cache = sentinel_frame_cache (regcache);
+  /* For the moment there is only one sentinel frame implementation.  */
+  frame->unwind = sentinel_frame_unwind;
+  /* Link this frame back to itself.  The frame is self referential
+     (the unwound PC is the same as the pc), so make it so.  */
+  frame->next = frame;
+  /* Always unwind the PC as part of creating this frame.  This
+     ensures that the frame's PC points at something valid.  */
+  /* FIXME: cagney/2003-01-10: Problem here.  Unwinding a sentinel
+     frame's PC may require information such as the frame's thread's
+     stop reason.  Is it possible to get to that?  */
+  frame->pc = frame_pc_unwind (frame);
+  return frame;
+}
+
 /* Info about the innermost stack frame (contents of FP register) */
 
 static struct frame_info *current_frame;
@@ -495,17 +474,43 @@ get_frame_saved_regs (struct frame_info *fi)
   return fi->saved_regs;
 }
 
-/* Return the innermost (currently executing) stack frame.  */
+/* Return the innermost (currently executing) stack frame.  This is
+   split into two functions.  The function unwind_to_current_frame()
+   is wrapped in catch exceptions so that, even when the unwind of the
+   sentinel frame fails, the function still returns a stack frame.  */
+
+static int
+unwind_to_current_frame (struct ui_out *ui_out, void *args)
+{
+  struct frame_info *frame = get_prev_frame (args);
+  /* A sentinel frame can fail to unwind, eg, because it's PC value
+     lands in somewhere like start.  */
+  if (frame == NULL)
+    return 1;
+  current_frame = frame;
+  return 0;
+}
 
 struct frame_info *
 get_current_frame (void)
 {
+  if (!target_has_stack)
+    error ("No stack.");
+  if (!target_has_registers)
+    error ("No registers.");
+  if (!target_has_memory)
+    error ("No memory.");
   if (current_frame == NULL)
     {
-      if (target_has_stack)
-	current_frame = create_new_frame (read_fp (), read_pc ());
-      else
-	error ("No stack.");
+      struct frame_info *sentinel_frame =
+	create_sentinel_frame (current_regcache);
+      if (catch_exceptions (uiout, unwind_to_current_frame, sentinel_frame,
+			    NULL, RETURN_MASK_ERROR) != 0)
+	{
+	  /* Oops! Fake a current frame?  Is this useful?  It has a PC
+             of zero, for instance.  */
+	  current_frame = sentinel_frame;
+	}
     }
   return current_frame;
 }
@@ -593,11 +598,11 @@ frame_saved_regs_register_unwind (struct frame_info *frame, void **cache,
   gdb_assert (FRAME_INIT_SAVED_REGS_P ());
 
   /* Load the saved_regs register cache.  */
-  if (frame->saved_regs == NULL)
+  if (get_frame_saved_regs (frame) == NULL)
     FRAME_INIT_SAVED_REGS (frame);
 
-  if (frame->saved_regs != NULL
-      && frame->saved_regs[regnum] != 0)
+  if (get_frame_saved_regs (frame) != NULL
+      && get_frame_saved_regs (frame)[regnum] != 0)
     {
       if (regnum == SP_REGNUM)
 	{
@@ -608,7 +613,7 @@ frame_saved_regs_register_unwind (struct frame_info *frame, void **cache,
 	  *realnump = -1;
 	  if (bufferp != NULL)
 	    store_address (bufferp, REGISTER_RAW_SIZE (regnum),
-			   frame->saved_regs[regnum]);
+			   get_frame_saved_regs (frame)[regnum]);
 	}
       else
 	{
@@ -616,7 +621,7 @@ frame_saved_regs_register_unwind (struct frame_info *frame, void **cache,
              a local copy of its value.  */
 	  *optimizedp = 0;
 	  *lvalp = lval_memory;
-	  *addrp = frame->saved_regs[regnum];
+	  *addrp = get_frame_saved_regs (frame)[regnum];
 	  *realnump = -1;
 	  if (bufferp != NULL)
 	    {
@@ -635,13 +640,13 @@ frame_saved_regs_register_unwind (struct frame_info *frame, void **cache,
 		{
 		  regs[regnum]
 		    = frame_obstack_zalloc (REGISTER_RAW_SIZE (regnum));
-		  read_memory (frame->saved_regs[regnum], regs[regnum],
+		  read_memory (get_frame_saved_regs (frame)[regnum], regs[regnum],
 			       REGISTER_RAW_SIZE (regnum));
 		}
 	      memcpy (bufferp, regs[regnum], REGISTER_RAW_SIZE (regnum));
 #else
 	      /* Read the value in from memory.  */
-	      read_memory (frame->saved_regs[regnum], bufferp,
+	      read_memory (get_frame_saved_regs (frame)[regnum], bufferp,
 			   REGISTER_RAW_SIZE (regnum));
 #endif
 	    }
@@ -650,21 +655,11 @@ frame_saved_regs_register_unwind (struct frame_info *frame, void **cache,
     }
 
   /* No luck, assume this and the next frame have the same register
-     value.  If a value is needed, pass the request on down the chain;
-     otherwise just return an indication that the value is in the same
-     register as the next frame.  */
-  if (bufferp == NULL)
-    {
-      *optimizedp = 0;
-      *lvalp = lval_register;
-      *addrp = 0;
-      *realnump = regnum;
-    }
-  else
-    {
-      frame_register_unwind (frame->next, regnum, optimizedp, lvalp, addrp,
-			     realnump, bufferp);
-    }
+     value.  Pass the request down the frame chain to the next frame.
+     Hopefully that will find the register's location, either in a
+     register or in memory.  */
+  frame_register (frame, regnum, optimizedp, lvalp, addrp, realnump,
+		  bufferp);
 }
 
 static CORE_ADDR
@@ -684,7 +679,7 @@ frame_saved_regs_id_unwind (struct frame_info *next_frame, void **cache,
   /* Start out by assuming it's NULL.  */
   (*id) = null_frame_id;
 
-  if (next_frame->next == NULL)
+  if (frame_relative_level (next_frame) <= 0)
     /* FIXME: 2002-11-09: Frameless functions can occure anywhere in
        the frame chain, not just the inner most frame!  The generic,
        per-architecture, frame code should handle this and the below
@@ -797,44 +792,50 @@ deprecated_generic_get_saved_register (char *raw_buffer, int *optimized,
      the current frame itself: otherwise, we would be getting the
      previous frame's registers which were saved by the current frame.  */
 
-  while (frame && ((frame = frame->next) != NULL))
+  if (frame != NULL)
     {
-      if (get_frame_type (frame) == DUMMY_FRAME)
+      for (frame = get_next_frame (frame);
+	   frame_relative_level (frame) >= 0;
+	   frame = get_next_frame (frame))
 	{
-	  if (lval)		/* found it in a CALL_DUMMY frame */
-	    *lval = not_lval;
-	  if (raw_buffer)
-	    /* FIXME: cagney/2002-06-26: This should be via the
-	       gdbarch_register_read() method so that it, on the fly,
-	       constructs either a raw or pseudo register from the raw
-	       register cache.  */
-	    regcache_raw_read (generic_find_dummy_frame (frame->pc,
-							 frame->frame),
-			       regnum, raw_buffer);
-	  return;
-	}
-
-      FRAME_INIT_SAVED_REGS (frame);
-      if (frame->saved_regs != NULL
-	  && frame->saved_regs[regnum] != 0)
-	{
-	  if (lval)		/* found it saved on the stack */
-	    *lval = lval_memory;
-	  if (regnum == SP_REGNUM)
+	  if (get_frame_type (frame) == DUMMY_FRAME)
 	    {
-	      if (raw_buffer)	/* SP register treated specially */
-		store_address (raw_buffer, REGISTER_RAW_SIZE (regnum),
-			       frame->saved_regs[regnum]);
-	    }
-	  else
-	    {
-	      if (addrp)	/* any other register */
-		*addrp = frame->saved_regs[regnum];
+	      if (lval)		/* found it in a CALL_DUMMY frame */
+		*lval = not_lval;
 	      if (raw_buffer)
-		read_memory (frame->saved_regs[regnum], raw_buffer,
-			     REGISTER_RAW_SIZE (regnum));
+		/* FIXME: cagney/2002-06-26: This should be via the
+		   gdbarch_register_read() method so that it, on the
+		   fly, constructs either a raw or pseudo register
+		   from the raw register cache.  */
+		regcache_raw_read
+		  (generic_find_dummy_frame (get_frame_pc (frame),
+					     get_frame_base (frame)),
+		   regnum, raw_buffer);
+	      return;
 	    }
-	  return;
+
+	  FRAME_INIT_SAVED_REGS (frame);
+	  if (get_frame_saved_regs (frame) != NULL
+	      && get_frame_saved_regs (frame)[regnum] != 0)
+	    {
+	      if (lval)		/* found it saved on the stack */
+		*lval = lval_memory;
+	      if (regnum == SP_REGNUM)
+		{
+		  if (raw_buffer)	/* SP register treated specially */
+		    store_address (raw_buffer, REGISTER_RAW_SIZE (regnum),
+				   get_frame_saved_regs (frame)[regnum]);
+		}
+	      else
+		{
+		  if (addrp)	/* any other register */
+		    *addrp = get_frame_saved_regs (frame)[regnum];
+		  if (raw_buffer)
+		    read_memory (get_frame_saved_regs (frame)[regnum], raw_buffer,
+				 REGISTER_RAW_SIZE (regnum));
+		}
+	      return;
+	    }
 	}
     }
 
@@ -884,6 +885,7 @@ create_new_frame (CORE_ADDR addr, CORE_ADDR pc)
 
   fi->frame = addr;
   fi->pc = pc;
+  fi->next = create_sentinel_frame (current_regcache);
   fi->type = frame_type_from_pc (pc);
 
   if (INIT_EXTRA_FRAME_INFO_P ())
@@ -896,12 +898,16 @@ create_new_frame (CORE_ADDR addr, CORE_ADDR pc)
 }
 
 /* Return the frame that FRAME calls (NULL if FRAME is the innermost
-   frame).  */
+   frame).  Be careful to not fall off the bottom of the frame chain
+   and onto the sentinel frame.  */
 
 struct frame_info *
 get_next_frame (struct frame_info *frame)
 {
-  return frame->next;
+  if (frame->level > 0)
+    return frame->next;
+  else
+    return NULL;
 }
 
 /* Flush the entire frame cache.  */
@@ -1415,6 +1421,7 @@ void
 deprecated_update_frame_pc_hack (struct frame_info *frame, CORE_ADDR pc)
 {
   /* See comment in "frame.h".  */
+  gdb_assert (frame->next != NULL);
   frame->pc = pc;
 }
 

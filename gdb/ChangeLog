@@ -1,3 +1,30 @@
+2003-01-27  Andrew Cagney  <ac131313@redhat.com>
+
+	* sentinel-frame.h, sentinel-frame.c: New files.
+	* Makefile.in (frame.o): Update dependencies.
+	(SFILES): Add sentinel-frame.c.
+	(sentinel_frame_h): Define.
+	(COMMON_OBS): Add sentinel-frame.o.
+	(sentinel-frame.o): Specify dependencies.
+	* frame.c: Include "sentinel-frame.h".
+	(frame_register_unwind): Rewrite assuming that there is always a a
+	->next frame.
+	(frame_register, generic_unwind_get_saved_register): Ditto.
+	(frame_read_unsigned_register, frame_read_signed_register): Ditto.
+	(create_sentinel_frame, unwind_to_current_frame): New functions.
+	(get_current_frame): Rewrite using create_sentinel_frame and
+	unwind_to_current_frame.  When possible, always create a frame.
+	(create_new_frame): Set next to the sentinel frame.
+	(get_next_frame): Rewrite.  Don't go below the level 0 frame.
+	(deprecated_update_frame_pc_hack): Update the next frame's PC and
+	ID cache when necessary.
+	(frame_saved_regs_id_unwind): Use frame_relative_level.
+	(deprecated_generic_get_saved_register): Use frame_relative_level,
+	get_frame_saved_regs, get_frame_pc, get_frame_base and
+	get_next_frame.
+	(frame_saved_regs_register_unwind): Use get_frame_saved_regs and
+	frame_register.
+
 2003-01-27  Daniel Jacobowitz  <drow@mvista.com>
 
 	* gdb_indent.sh: Add -T bfd and -T asection to the indent arguments.
