@@ -1213,8 +1213,9 @@ enum bfd_architecture
 #define bfd_mach_sparc_sparclite       3
 #define bfd_mach_sparc_v8plus          4
 #define bfd_mach_sparc_v8plusa         5  /* with ultrasparc add'ns */
-#define bfd_mach_sparc_v9              6
-#define bfd_mach_sparc_v9a             7  /* with ultrasparc add'ns */
+#define bfd_mach_sparc_sparclite_le    6
+#define bfd_mach_sparc_v9              7
+#define bfd_mach_sparc_v9a             8  /* with ultrasparc add'ns */
  /* Nonzero if MACH has the v9 instruction set.  */
 #define bfd_mach_sparc_v9_p(mach) \
   ((mach) >= bfd_mach_sparc_v8plus && (mach) <= bfd_mach_sparc_v9a)
@@ -1710,6 +1711,9 @@ relocation types already defined. */
   BFD_RELOC_SPARC_M44,
   BFD_RELOC_SPARC_L44,
   BFD_RELOC_SPARC_REGISTER,
+
+/* SPARC little endian relocation */
+  BFD_RELOC_SPARC_32LE,
 
 /* Alpha ECOFF and ELF relocations.  Some of these treat the symbol or
 "addend" in some special way.

@@ -7,14 +7,12 @@ Tue May 26 19:37:47 1998  Stan Cox  <scox@equinox.cygnus.com>
 	endian objects with big endian objects.
 	(elf32_sparc_object_p): Set bfd_mach_sparc_sparclite_le.
 	(elf32_sparc_final_write_processing): Set EF_SPARC_LEDATA in e_flags.
-
 	* libbfd.h (bfd_reloc_code_real_names): Added BFD_RELOC_SPARC_32LE.
 	* reloc.c: Same.
-	
 	* cpu-sparc.c (arch_info_struct): Added sparc:sparclite_le
-
 	* archures.c (bfd_mach_sparc_sparclite_le): New.
-	
+	* bfd-in2.h (BFD_RELOC_SPARC_32LE, bfd_mach_sparc_sparclite_le): New.
+
 Thu May 21 16:59:28 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* peicode.h (add_data_entry): Fix precedence of operators in if ()
