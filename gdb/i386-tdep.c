@@ -1547,7 +1547,7 @@ i386_value_to_register (struct frame_info *frame, int regnum,
    to register cache REGCACHE.  If REGNUM is -1, do this for all
    registers in REGSET.  */
 
-static void
+void
 i386_supply_gregset (const struct regset *regset, struct regcache *regcache,
 		     int regnum, const void *gregs, size_t len)
 {

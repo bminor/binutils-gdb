@@ -1,3 +1,8 @@
+2003-11-16  Mark Kettenis  <kettenis@gnu.org>
+
+	* i386-tdep.h (i386_supply_gregset): Provide prototype.
+	* i386-tdep.c (i386_supply_gregset): Make public.
+
 2003-11-16  Andrew Cagney  <cagney@redhat.com>
 
 	* mips-tdep.c (mips_register_byte): Delete function.
