@@ -1,5 +1,9 @@
 2003-05-04  Mark Kettenis  <kettenis@gnu.org>
 
+	* i386-tdep.c (i386_gdbarch_init): Don't set deprecated_fp_regnum.
+
+2003-05-04  Mark Kettenis  <kettenis@gnu.org>
+
 	Merge from mainline.
 
 2003-05-04  Mark Kettenis  <kettenis@gnu.org>

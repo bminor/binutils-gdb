@@ -1656,7 +1656,6 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Register numbers of various important registers.  */
   set_gdbarch_sp_regnum (gdbarch, I386_ESP_REGNUM); /* %esp */
-  set_gdbarch_deprecated_fp_regnum (gdbarch, I386_EBP_REGNUM); /* %ebp */
   set_gdbarch_pc_regnum (gdbarch, I386_EIP_REGNUM); /* %eip */
   set_gdbarch_ps_regnum (gdbarch, I386_EFLAGS_REGNUM); /* %eflags */
   set_gdbarch_fp0_regnum (gdbarch, I386_ST0_REGNUM); /* %st(0) */
