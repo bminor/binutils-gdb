@@ -80,9 +80,9 @@ extern int mips_fpu;
 
 #define ABOUT_TO_RETURN(pc) (read_memory_integer (pc, 4) == 0x3e00008)
 
-/* Return 1 if P points to an invalid floating point value. */
+/* This is taken care of in print_floating [IEEE_FLOAT].  */
 
-#define INVALID_FLOAT(p,l)	isa_NAN(p,l)
+#define INVALID_FLOAT(p,l) 0
 
 /* Say how long (all) registers are.  */
 
