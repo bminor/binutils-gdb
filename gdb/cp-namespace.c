@@ -30,7 +30,7 @@
 #include "objfiles.h"
 #include "gdbtypes.h"
 #include "dictionary.h"
-#include "gdbcmd.h"
+#include "command.h"
 #include "frame.h"
 
 /* When set, the file that we're processing seems to have debugging
@@ -76,10 +76,10 @@ static struct type *lookup_transparent_type_namespace_loop (const char *name,
 							    const char *scope,
 							    int scope_len);
 
-/* This block exists only to store symbols associated to namespaces.
-   Normally, try to avoid accessing it directly: instead, use
-   get_namespace_block if you can.  Similarly with
-   possible_namespace_block and namespace_objfile.  */
+/* The next three variables are used to store symbols associated to
+   namespaces.  Don't refer to them directly: use
+   get_namespace_block(), get_possible_namespace_block(), and
+   get_namespace_objfile() instead.  */
 
 static struct block *namespace_block = NULL;
 
@@ -93,15 +93,22 @@ static struct block *get_namespace_block (void);
 
 static struct block *get_possible_namespace_block (void);
 
+static void free_namespace_blocks (struct symtab *symtab);
+
 static struct objfile *get_namespace_objfile (void);
 
-static void free_namespace_blocks (struct symtab *symtab);
+static int check_namespace_symbol_block (const char *name, int len,
+					 struct block *block);
+
+static struct symbol *lookup_namespace_symbol (const char *name);
+
+static int check_possible_namespace_symbols_loop (const char *name,
+						  int len);
 
 static int check_one_possible_namespace_symbol (const char *name,
 						int len);
 
-static int check_possible_namespace_symbols_loop (const char *name,
-						  int len);
+static struct symbol *lookup_possible_namespace_symbol (const char *name);
 
 static void maintenance_print_namespace (char *args, int from_tty);
 
@@ -485,7 +492,11 @@ lookup_symbol_file (const char *name,
 				       domain, symtab);
 
       if (sym == NULL || global_block == NULL)
-	sym = cp_lookup_namespace_symbol (name);
+	{
+	  sym = lookup_namespace_symbol (name);
+	  if (sym != NULL && symtab != NULL)
+	    *symtab = NULL;
+	}
     }
   else
     {
@@ -495,7 +506,7 @@ lookup_symbol_file (const char *name,
   if (sym != NULL)
     return sym;
 
-  /* Now call "cp_lookup_possible_namespace_symbol".  Symbols in here
+  /* Now call "lookup_possible_namespace_symbol".  Symbols in here
      claim to be associated to namespaces, whereas the names in
      question might actually correspond to either namespaces or to
      classes.  But if they correspond to classes, then we should have
@@ -514,7 +525,7 @@ lookup_symbol_file (const char *name,
 
   if (domain == VAR_DOMAIN)
     {
-      sym = cp_lookup_possible_namespace_symbol (name);
+      sym = lookup_possible_namespace_symbol (name);
       if (sym != NULL)
 	{
 	  if (symtab != NULL)
@@ -578,6 +589,25 @@ lookup_transparent_type_namespace_loop (const char *name, const char *scope,
   return lookup_transparent_type_aux (full_name);
 }
 
+/* Now come functions for dealing with symbols associated to
+   namespaces.  (They're used to store the namespaces themselves, not
+   objects that live in the namespaces.)  Since namespaces span files,
+   we create special blocks to store those symbols in instead of
+   storing them in blocks associated to actual files.  That avoids
+   duplication of symbols, among other issues.
+
+   Unfortunately, versions of GCC through at least 3.3 don't generate
+   debugging information to tell us about the existence of namespaces.
+   Our solution is to try to guess their existence by looking at
+   demangled names.  This might cause us to misidentify classes as
+   namespaces, however.  So we put those symbols in
+   'possible_namespace_block' instead of 'namespace_block', and we
+   only search that block as a last resort.  */
+
+/* FIXME: carlton/2003-06-12: Once versions of GCC that generate
+   DW_TAG_namespace have been out for a year or two, we should get rid
+   of possible_namespace_block and everything associated to it.  */
+
 /* Allocate everything necessary for namespace_block and
    possible_namespace_block.  */
 
@@ -594,9 +624,9 @@ initialize_namespace_blocks (void)
   namespace_symtab->free_code = free_nothing;
   namespace_symtab->dirname = NULL;
 
-  /* 2 = 3 blocks (global = namespace_block, static = NULL,
-     possible_namespace_block) - 1 block that's always part of struct
-     blockvector.  */
+  /* 2 = three blocks (global = namespace_block, static = NULL, third
+     block = possible_namespace_block), minus the one block that's
+     always part of struct blockvector.  */
   bv = obstack_alloc (&objfile->symbol_obstack,
 		      sizeof (struct blockvector)
 		      + 2 * sizeof (struct block *));
@@ -671,82 +701,37 @@ get_namespace_objfile (void)
     {
       namespace_objfile = allocate_objfile (NULL, 0);
       namespace_objfile->name
-	= mstrsave (namespace_objfile->md, "<C++-namespaces>");
+	= mstrsave (namespace_objfile->md, "<<C++-namespaces>>");
     }
 
   return namespace_objfile;
 }
 
-/* Check to see if there's already a namespace symbol corresponding to
-   the initial substring of NAME whose length is LEN; if there isn't
-   one, allocate one and add it to the namespace symtab.  Return the
-   symbol in question.  */
+/* Check to see if there's already a namespace symbol whose name is
+   NAME.  If there isn't one, allocate one and add it to the namespace
+   symtab.  */
 
-struct symbol *
-cp_check_namespace_symbol (const char *name, int len)
+void
+cp_check_namespace_symbol (const char *name)
 {
-  struct objfile *objfile = get_namespace_objfile ();
-  char *name_copy = obsavestring (name, len, &objfile->symbol_obstack);
-  struct symbol *sym = cp_lookup_namespace_symbol (name_copy);
-
-  if (sym == NULL)
-    {
-      struct type *type = init_type (TYPE_CODE_NAMESPACE, 0, 0,
-				     name_copy, objfile);
-      TYPE_TAG_NAME (type) = TYPE_NAME (type);
-
-      sym = obstack_alloc (&objfile->symbol_obstack, sizeof (struct symbol));
-      memset (sym, 0, sizeof (struct symbol));
-      SYMBOL_LANGUAGE (sym) = language_cplus;
-      DEPRECATED_SYMBOL_NAME (sym) = name_copy;
-      SYMBOL_CLASS (sym) = LOC_TYPEDEF;
-      SYMBOL_TYPE (sym) = type;
-      SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
-
-      dict_add_symbol (BLOCK_DICT (get_namespace_block ()), sym);
-    }
-  else
-    {
-      obstack_free (&objfile->symbol_obstack, name_copy);
-    }
-
-  return sym;
+  check_namespace_symbol_block (name, strlen (name),
+				get_namespace_block ());
 }
 
-/* Look for a symbol in namespace_block named NAME.  */
-
-struct symbol *
-cp_lookup_namespace_symbol (const char *name)
-{
-  return lookup_block_symbol (get_namespace_block (), name, NULL,
-			      VAR_DOMAIN);
-}
-
-/* The next few functions deal with "possible namespace symbols".
-   These are symbols that claim to be associated to namespaces,
-   whereas in fact we don't know if the object of that name is a
-   namespace or a class.  So don't trust them until you've searched
-   through all the global symbols to see if there's a class of that
-   name or not.  */
-
-/* FIXME: carlton/2002-12-18: This concept is a hack.  But it seems to
-   be the easiest way to deal with our desire for namespace symbols,
-   given the commonness of compilers that don't generate debugging
-   info for them.  Once such compilers are more common, we should
-   delete all the possible namespace stuff.  */
-
-/* Check to see if there's already a possible namespace symbol whose
-   name is the initial substring of NAME of length LEN.  If not,
-   create one and return 0; otherwise, return 1.  */
+/* A helper function used by cp_check_namespace_symbol and
+   check_one_possible_namespace_symbol.  Looks to see if there is a
+   symbol whose name is the initial substring of NAME of length LEN in
+   block BLOCK; if not, adds it.  Return 1 if the symbol was already
+   in there, 0 otherwise.  */
 
 static int
-check_one_possible_namespace_symbol (const char *name, int len)
+check_namespace_symbol_block (const char *name, int len,
+			      struct block *block)
 {
   struct objfile *objfile = get_namespace_objfile ();
   char *name_copy = obsavestring (name, len, &objfile->symbol_obstack);
-  const struct block *block = get_possible_namespace_block ();
-  struct symbol *sym = lookup_block_symbol (block, name_copy,
-					    NULL, VAR_DOMAIN);
+  struct symbol *sym = lookup_block_symbol (block, name_copy, NULL,
+					    VAR_DOMAIN);
 
   if (sym == NULL)
     {
@@ -757,26 +742,60 @@ check_one_possible_namespace_symbol (const char *name, int len)
       sym = obstack_alloc (&objfile->symbol_obstack, sizeof (struct symbol));
       memset (sym, 0, sizeof (struct symbol));
       SYMBOL_LANGUAGE (sym) = language_cplus;
-      DEPRECATED_SYMBOL_NAME (sym) = name_copy;
+      SYMBOL_SET_NAMES (sym, name_copy, len, objfile);
       SYMBOL_CLASS (sym) = LOC_TYPEDEF;
       SYMBOL_TYPE (sym) = type;
       SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
 
       dict_add_symbol (BLOCK_DICT (block), sym);
+
       return 0;
     }
   else
     {
       obstack_free (&objfile->symbol_obstack, name_copy);
+
       return 1;
     }
 }
 
+/* Look for a symbol in namespace_block named NAME.  */
+
+static struct symbol *
+lookup_namespace_symbol (const char *name)
+{
+  return lookup_block_symbol (get_namespace_block (), name, NULL,
+			      VAR_DOMAIN);
+}
+
+/* Ensure that there are symbols in possible_namespace_block for all
+   initial substrings of NAME that look like namespaces or classes.
+   NAME should end in a member variable: it shouldn't consist solely
+   of namespaces.  */
+
+void
+cp_check_possible_namespace_symbols (const char *name)
+{
+  check_possible_namespace_symbols_loop (name,
+					 cp_find_first_component (name));
+}
+
 /* This is a helper loop for cp_check_possible_namespace_symbols; it
    ensures that there are namespace symbols for all namespaces that
-   are initial substrings of NAME of length LEN.  It returns 1 if a
-   previous loop had already created the shortest such symbol and 0
-   otherwise.  */
+   are initial substrings of NAME of length at least LEN.  It returns
+   1 if a previous loop had already created the shortest such symbol
+   and 0 otherwise.
+
+   This function assumes that if there is already a symbol associated
+   to a substring of NAME of a given length, then there are already
+   symbols associated to all substrings of NAME whose length is less
+   than that length.  So if cp_check_possible_namespace_symbols has
+   been called once with argument "A::B::C::member", then that will
+   create symbols "A", "A::B", and "A::B::C".  If it is then later
+   called with argument "A::B::D::member", then the new call will
+   generate a new symbol for "A::B::D", but once it sees that "A::B"
+   has already been created, it doesn't bother checking to see if "A"
+   has also been created.  */
 
 static int
 check_possible_namespace_symbols_loop (const char *name, int len)
@@ -800,21 +819,21 @@ check_possible_namespace_symbols_loop (const char *name, int len)
     return 0;
 }
 
-/* Ensure that there are symbols in possible_namespace_block for all
-   initial substrings of NAME that look like namespaces or
-   classes.  */
+/* Check to see if there's already a possible namespace symbol whose
+   name is the initial substring of NAME of length LEN.  If not,
+   create one and return 0; otherwise, return 1.  */
 
-void
-cp_check_possible_namespace_symbols (const char *name)
+static int
+check_one_possible_namespace_symbol (const char *name, int len)
 {
-  check_possible_namespace_symbols_loop (name,
-					 cp_find_first_component (name));
+  return check_namespace_symbol_block (name, len,
+				       get_possible_namespace_block ());
 }
 
 /* Look for a symbol in possible_namespace_block named NAME.  */
 
-struct symbol *
-cp_lookup_possible_namespace_symbol (const char *name)
+static struct symbol *
+lookup_possible_namespace_symbol (const char *name)
 {
   return lookup_block_symbol (get_possible_namespace_block (),
 			      name, NULL, VAR_DOMAIN);

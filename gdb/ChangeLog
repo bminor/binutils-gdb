@@ -1,3 +1,35 @@
+2003-06-16  David Carlton  <carlton@kealia.com>
+
+	* symfile.h: Change formatting.
+	* block.c (allocate_block): Rephrase comment.
+	* block.h (BLOCK_GCC_COMPILED): Move definition.
+	* cp-namespace.c: Include command.h instead of gdbcmd.h.  Update
+	comments, reorder functions.
+	(lookup_symbol_file): Set symtab when looking for namespace
+	symbols.  Update call to lookup_possible_namespace_symbol.
+	(initialize_namespace_blocks): Change comment.
+	(get_namespace_objfile): Change objfile name.
+	(cp_check_namespace_symbol): Extract body into
+	check_namespace_symbol_block.
+	(check_namespace_symbol_block): New.
+	(lookup_namespace_symbol): Make static, rename from
+	cp_lookup_symbol.
+	(check_possible_namespace_symbols_loop): Update comment.
+	(check_one_possible_namespace_symbol): Call
+	check_namespace_symbol_block.
+	(lookup_possible_namespace_symbol): Make static; rename from
+	cp_lookup_possible_namespace_symbol.
+	* cp-support.h: Update declarations.
+	* Makefile.in (c-typeprint.o): Don't depend on gdb_assert_h.
+	(cp-namespace.o): Depend on command_h, not gdbcmd_h.
+	* c-typeprint.c: Don't include gdb_assert.h.
+	(c_type_print_base): Delete assertion.  Use TYPE_TAG_NAME.
+	* dwarf2read.c: Delete double include of cp-support.h.
+	(add_partial_symbol): Look at psym for static variables.
+	(add_partial_namespace): Update call to
+	cp_check_namespace_symbol.
+	(locate_pdi_sibling): Update comment.
+
 2003-06-12  David Carlton  <carlton@kealia.com>
 
 	* dwarf2read.c (die_specification): New.

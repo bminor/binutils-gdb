@@ -37,7 +37,6 @@
 
 #include "gdb_string.h"
 #include <errno.h>
-#include "gdb_assert.h"
 
 /* Flag indicating target was compiled by HP compiler */
 extern int hp_som_som_object_present;
@@ -1186,9 +1185,8 @@ c_type_print_base (struct type *type, struct ui_file *stream, int show,
       break;
 
     case TYPE_CODE_NAMESPACE:
-      gdb_assert (TYPE_NAME (type) != NULL);
       fputs_filtered ("namespace ", stream);
-      fputs_filtered (TYPE_NAME (type), stream);
+      fputs_filtered (TYPE_TAG_NAME (type), stream);
       break;
 
     default:

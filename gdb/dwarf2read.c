@@ -49,7 +49,6 @@
 #include "gdb_string.h"
 #include "gdb_assert.h"
 #include <sys/types.h>
-#include "cp-support.h"
 
 #ifndef DWARF2_REG_TO_REGNUM
 #define DWARF2_REG_TO_REGNUM(REG) (REG)
@@ -1610,10 +1609,11 @@ add_partial_symbol (struct partial_die_info *pdi, struct objfile *objfile,
 	  addr = decode_locdesc (pdi->locdesc, objfile, cu_header);
 	  /*prim_record_minimal_symbol (actual_name, addr + baseaddr,
 	     mst_file_data, objfile); */
-	  add_psymbol_to_list (actual_name, strlen (actual_name),
-			       VAR_DOMAIN, LOC_STATIC,
-			       &objfile->static_psymbols,
-			       0, addr + baseaddr, cu_language, objfile);
+	  psym = add_psymbol_to_list (actual_name, strlen (actual_name),
+				      VAR_DOMAIN, LOC_STATIC,
+				      &objfile->static_psymbols,
+				      0, addr + baseaddr,
+				      cu_language, objfile);
 	}
       break;
     case DW_TAG_typedef:
@@ -1720,7 +1720,7 @@ add_partial_namespace (struct partial_die_info *pdi, char *info_ptr,
 
   /* Make sure that there's a symbol associated to that namespace.  */
 
-  cp_check_namespace_symbol (full_name, strlen (full_name));
+  cp_check_namespace_symbol (full_name);
 
   /* Now scan partial symbols in that namespace.  */
 
@@ -1817,8 +1817,8 @@ add_partial_enumeration (struct partial_die_info *enum_pdi, char *info_ptr,
   return info_ptr;
 }
 
-/* Locate ORIG_PDI's sibling; INFO_PTR points to the next PDI after
-   ORIG_PDI.  */
+/* Locate ORIG_PDI's sibling; INFO_PTR should point to the next PDI
+   after ORIG_PDI.  */
 
 static char *
 locate_pdi_sibling (struct partial_die_info *orig_pdi, char *info_ptr,

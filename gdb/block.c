@@ -268,13 +268,13 @@ block_global_block (const struct block *block)
   return block;
 }
 
-/* This allocates a block on OBSTACK, and initializes its elements to
+/* Allocate a block on OBSTACK, and initialize its elements to
    zero/NULL.  This is useful for creating "dummy" blocks that don't
    correspond to actual source files.
 
    Warning: it sets the block's BLOCK_DICT to NULL, which isn't a
-   valid value.  If you don't want the block to have a dictiionary,
-   then you should subsequently set its BLOCK_DICT to
+   valid value.  If you really don't want the block to have a
+   dictionary, then you should subsequently set its BLOCK_DICT to
    dict_create_linear (obstack, NULL).  */
 
 struct block *

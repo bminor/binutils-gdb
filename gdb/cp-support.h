@@ -57,16 +57,7 @@ extern unsigned int cp_find_first_component (const char *name);
 
 extern unsigned int cp_entire_prefix_len (const char *name);
 
-extern struct symbol *cp_check_namespace_symbol (const char *name, int len);
-
-extern struct symbol *cp_lookup_namespace_symbol (const char *name);
-
-extern void cp_check_possible_namespace_symbols (const char *name);
-
-extern struct symbol *cp_lookup_possible_namespace_symbol (const char *name);
-
 extern char *cp_func_name (const char *full_name);
-
 
 /* Functions/variables from cp-namespace.c.  */
 
@@ -103,6 +94,10 @@ extern struct symbol *cp_lookup_symbol_namespace (const char *namespace,
 						  const struct block *block,
 						  const domain_enum domain,
 						  struct symtab **symtab);
+
+extern void cp_check_namespace_symbol (const char *name);
+
+extern void cp_check_possible_namespace_symbols (const char *name);
 
 struct type *lookup_transparent_type_namespace (const char *name);
 

@@ -88,9 +88,7 @@ proc test_first_component {} {
 }
 
 proc test_namespace {} {
-    # FIXME: carlton/2003-04-28: I should think of more tests to add
-    # here.  Unfortunately, it's hard to predict exactly what will be
-    # picked up from the library, or what order it will be in.
+    # There are some more tests for this command in namespace.exp.
 
     gdb_test "maint cp namespace" "Definite namespaces:\r\nPossible namespaces:"
 }

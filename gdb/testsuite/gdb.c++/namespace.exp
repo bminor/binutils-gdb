@@ -313,3 +313,18 @@ setup_kfail "c++/831" "*-*-*"
 gdb_test "print r1" "\\$\[0-9\].* = 19"
 setup_kfail "c++/831" "*-*-*"
 gdb_test "print r2" "No symbol \"r2\" in current context."
+
+# Test to make sure that 'maint cplus namespace' is at least picking
+# up one of the namespaces in this file.
+
+# FIXME: carlton/2003-06-16: We should check to make sure it picks up
+# all of the namespaces.  Unfortunately, I can't guarantee what order
+# they'll be listed in when you do 'maint cplus namespace'.  Probably
+# I should stash the output of that command in a variable somewhere
+# and examine that variable for all of the relevant namespaces.
+
+# FIXME: carlton/2003-06-16: This test (like many others in this file,
+# doubtless) will fail in non-DWARF-2 situations; I need to go through
+# and audit the tests accordingly at some point.
+
+gdb_test "maint cplus namespace" ".*C::C.*"

@@ -1,3 +1,8 @@
+2003-06-16  David Carlton  <carlton@kealia.com>
+
+	* gdb.c++/namespace.exp: Add 'maint cp namespace' test.
+	* gdb.c++/maint.exp (test_namespace): Change comment.
+
 2003-05-22  Jim Blandy  <jimb@redhat.com>
 
 	* gdb.base/corefile.exp: Tolerate stuff after argument parens in

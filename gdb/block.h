@@ -115,9 +115,9 @@ struct block
 #define BLOCK_END(bl)		(bl)->endaddr
 #define BLOCK_FUNCTION(bl)	(bl)->function
 #define BLOCK_SUPERBLOCK(bl)	(bl)->superblock
+#define BLOCK_GCC_COMPILED(bl)	(bl)->gcc_compile_flag
 #define BLOCK_DICT(bl)		(bl)->dict
 #define BLOCK_NAMESPACE(bl)   (bl)->language_specific.cplus_specific.namespace
-#define BLOCK_GCC_COMPILED(bl)	(bl)->gcc_compile_flag
 
 /* Macro to loop through all symbols in a block BL, in no particular
    order.  ITER helps keep track of the iteration, and should be a
