@@ -1,3 +1,10 @@
+2001-07-15  Elena Zannoni  <ezannoni@redhat.com>
+
+	* top.c (quit_cover, float_handler): Move definition up before use.
+	(gdb_init): Move to end of file, to avoid calls to not yet defined
+	functions.  
+	Delete prototypes.
+	
 2001-07-14  Andrew Cagney  <ac131313@redhat.com>
 
 	* serial.h (SERIAL_ASYNC): Delete.

@@ -73,47 +73,6 @@ extern void execute_user_command (struct cmd_list_element *c, char *args);
 
 extern void do_setshow_command (char *, int, struct cmd_list_element *);
 
-/* Exported to CLI cli/cli-cmds.c. */
-
-void set_verbose (char *, int, struct cmd_list_element *);
-
-void show_history (char *, int);
-
-void set_history (char *, int);
-
-void show_commands (char *, int);
-
-void do_restore_instream_cleanup (void *stream);
-
-/* Prototypes for local functions */
-
-static void dont_repeat_command (char *, int);
-
-static void init_signals (void);
-
-#ifdef STOP_SIGNAL
-static void stop_sig (int);
-#endif
-
-static void init_main (void);
-
-static void float_handler (int);
-
-static void init_signals (void);
-
-static void set_history_size_command (char *, int, struct cmd_list_element *);
-
-static void do_nothing (int);
-
-#ifdef SIGHUP
-/* NOTE 1999-04-29: This function will be static again, once we modify
-   gdb to use the event loop as the default command loop and we merge
-   event-top.c into this file, top.c */
-/* static */ int quit_cover (PTR);
-
-static void disconnect (int);
-#endif
-
 /* Default command line prompt.  This is overriden in some configs. */
 
 #ifndef DEFAULT_PROMPT
@@ -560,15 +519,6 @@ catch_command_errors (catch_command_errors_ftype * command,
 /* Handler for SIGHUP.  */
 
 #ifdef SIGHUP
-static void
-disconnect (int signo)
-{
-  catch_errors (quit_cover, NULL,
-	      "Could not kill the program being debugged", RETURN_MASK_ALL);
-  signal (SIGHUP, SIG_DFL);
-  kill (getpid (), SIGHUP);
-}
-
 /* Just a little helper function for disconnect().  */
 
 /* NOTE 1999-04-29: This function will be static again, once we modify
@@ -581,6 +531,15 @@ quit_cover (PTR s)
 				   This prevents asking the user dumb questions.  */
   quit_command ((char *) 0, 0);
   return 0;
+}
+
+static void
+disconnect (int signo)
+{
+  catch_errors (quit_cover, NULL,
+	      "Could not kill the program being debugged", RETURN_MASK_ALL);
+  signal (SIGHUP, SIG_DFL);
+  kill (getpid (), SIGHUP);
 }
 #endif /* defined SIGHUP */
 
@@ -645,67 +604,6 @@ do_chdir_cleanup (void *old_dir)
   xfree (old_dir);
 }
 #endif
-
-void
-gdb_init (char *argv0)
-{
-  if (pre_init_ui_hook)
-    pre_init_ui_hook ();
-
-  /* Run the init function of each source file */
-
-  getcwd (gdb_dirbuf, sizeof (gdb_dirbuf));
-  current_directory = gdb_dirbuf;
-
-#ifdef __MSDOS__
-  /* Make sure we return to the original directory upon exit, come
-     what may, since the OS doesn't do that for us.  */
-  make_final_cleanup (do_chdir_cleanup, xstrdup (current_directory));
-#endif
-
-  init_cmd_lists ();		/* This needs to be done first */
-  initialize_targets ();	/* Setup target_terminal macros for utils.c */
-  initialize_utils ();		/* Make errors and warnings possible */
-  initialize_all_files ();
-  initialize_current_architecture ();
-  init_cli_cmds();
-  init_main ();			/* But that omits this file!  Do it now */
-
-  /* The signal handling mechanism is different depending whether or
-     not the async version is run. NOTE: in the future we plan to make
-     the event loop be the default engine of gdb, and this difference
-     will disappear. */
-  if (event_loop_p)
-    async_init_signals ();
-  else
-    init_signals ();
-
-  /* We need a default language for parsing expressions, so simple things like
-     "set width 0" won't fail if no language is explicitly set in a config file
-     or implicitly set by reading an executable during startup. */
-  set_language (language_c);
-  expected_language = current_language;		/* don't warn about the change.  */
-
-#ifdef UI_OUT
-  /* Install the default UI */
-  if (!init_ui_hook)
-    {
-      uiout = cli_out_new (gdb_stdout);
-
-      /* All the interpreters should have had a look at things by now.
-	 Initialize the selected interpreter. */
-      if (interpreter_p)
-	{
-	  fprintf_unfiltered (gdb_stderr, "Interpreter `%s' unrecognized.\n",
-			      interpreter_p);
-	  exit (1);
-	}
-    }
-#endif
-
-  if (init_ui_hook)
-    init_ui_hook (argv0);
-}
 
 /* Execute the line P as a command.
    Pass FROM_TTY as second argument to the defining function.  */
@@ -1055,6 +953,15 @@ stop_sig (int signo)
 #endif /* STOP_SIGNAL */
 
 /* Initialize signal handlers. */
+static void
+float_handler (int signo)
+{
+  /* This message is based on ANSI C, section 4.7.  Note that integer
+     divide by zero causes this, so "float" is a misnomer.  */
+  signal (SIGFPE, float_handler);
+  error ("Erroneous arithmetic operation.");
+}
+
 static void
 do_nothing (int signo)
 {
@@ -1868,15 +1775,6 @@ set_verbose (char *args, int from_tty, struct cmd_list_element *c)
     }
 }
 
-static void
-float_handler (int signo)
-{
-  /* This message is based on ANSI C, section 4.7.  Note that integer
-     divide by zero causes this, so "float" is a misnomer.  */
-  signal (SIGFPE, float_handler);
-  error ("Erroneous arithmetic operation.");
-}
-
 /* Init the history buffer.  Note that we are called after the init file(s)
  * have been read so that the user can change the history file via his
  * .gdbinit file (for instance).  The GDBHISTFILE environment variable
@@ -2074,4 +1972,65 @@ ie. the number of previous commands to keep a record of.", &sethistlist);
 Use \"on\" to enable the notification, and \"off\" to disable it.", &setlist),
 	 &showlist);
     }
+}
+
+void
+gdb_init (char *argv0)
+{
+  if (pre_init_ui_hook)
+    pre_init_ui_hook ();
+
+  /* Run the init function of each source file */
+
+  getcwd (gdb_dirbuf, sizeof (gdb_dirbuf));
+  current_directory = gdb_dirbuf;
+
+#ifdef __MSDOS__
+  /* Make sure we return to the original directory upon exit, come
+     what may, since the OS doesn't do that for us.  */
+  make_final_cleanup (do_chdir_cleanup, xstrdup (current_directory));
+#endif
+
+  init_cmd_lists ();		/* This needs to be done first */
+  initialize_targets ();	/* Setup target_terminal macros for utils.c */
+  initialize_utils ();		/* Make errors and warnings possible */
+  initialize_all_files ();
+  initialize_current_architecture ();
+  init_cli_cmds();
+  init_main ();			/* But that omits this file!  Do it now */
+
+  /* The signal handling mechanism is different depending whether or
+     not the async version is run. NOTE: in the future we plan to make
+     the event loop be the default engine of gdb, and this difference
+     will disappear. */
+  if (event_loop_p)
+    async_init_signals ();
+  else
+    init_signals ();
+
+  /* We need a default language for parsing expressions, so simple things like
+     "set width 0" won't fail if no language is explicitly set in a config file
+     or implicitly set by reading an executable during startup. */
+  set_language (language_c);
+  expected_language = current_language;		/* don't warn about the change.  */
+
+#ifdef UI_OUT
+  /* Install the default UI */
+  if (!init_ui_hook)
+    {
+      uiout = cli_out_new (gdb_stdout);
+
+      /* All the interpreters should have had a look at things by now.
+	 Initialize the selected interpreter. */
+      if (interpreter_p)
+	{
+	  fprintf_unfiltered (gdb_stderr, "Interpreter `%s' unrecognized.\n",
+			      interpreter_p);
+	  exit (1);
+	}
+    }
+#endif
+
+  if (init_ui_hook)
+    init_ui_hook (argv0);
 }
