@@ -724,6 +724,34 @@ No input-file is stdin, default rc.  No output-file is stdout, default rc.\n"));
   exit (status);
 }
 
+/* Quote characters that will confuse the shell when we run the preprocessor */
+static const char *quot (string)
+     const char *string;
+{
+  static char *buf = 0;
+  static int buflen = 0;
+  int slen = strlen (string);
+  const char *src;
+  char *dest;
+
+  if ((buflen < slen * 2 + 2) || !buf)
+    {
+      buflen = slen * 2 + 2;
+      if (buf)
+	free (buf);
+      buf = (char *) xmalloc (buflen);
+    }
+
+  for (src=string, dest=buf; *src; src++, dest++)
+    {
+      if (*src == '(' || *src == ')' || *src == ' ')
+	*dest++ = '\\';
+      *dest = *src;
+    }
+  *dest = 0;
+  return buf;
+}
+
 /* The main function.  */
 
 int
@@ -739,6 +767,7 @@ main (argc, argv)
   char *target;
   char *preprocessor;
   char *preprocargs;
+  const char *quotedarg;
   int language;
   struct res_directory *resources;
 
@@ -765,7 +794,7 @@ main (argc, argv)
   preprocargs = NULL;
   language = -1;
 
-  while ((c = getopt_long (argc, argv, "i:o:I:O:F:", long_options,
+  while ((c = getopt_long (argc, argv, "i:o:I:O:F:D:", long_options,
 			   (int *) 0)) != EOF)
     {
       switch (c)
@@ -794,18 +823,21 @@ main (argc, argv)
 	  preprocessor = optarg;
 	  break;
 
+	case 'D':
 	case OPTION_DEFINE:
 	  if (preprocargs == NULL)
 	    {
-	      preprocargs = xmalloc (strlen (optarg) + 3);
-	      sprintf (preprocargs, "-D%s", optarg);
+	      quotedarg = quot (optarg);
+	      preprocargs = xmalloc (strlen (quotedarg) + 3);
+	      sprintf (preprocargs, "-D%s", quotedarg);
 	    }
 	  else
 	    {
 	      char *n;
 
-	      n = xmalloc (strlen (preprocargs) + strlen (optarg) + 4);
-	      sprintf (n, "%s -D%s", preprocargs, optarg);
+	      quotedarg = quot (optarg);
+	      n = xmalloc (strlen (preprocargs) + strlen (quotedarg) + 4);
+	      sprintf (n, "%s -D%s", preprocargs, quotedarg);
 	      free (preprocargs);
 	      preprocargs = n;
 	    }
@@ -814,15 +846,17 @@ main (argc, argv)
 	case OPTION_INCLUDE_DIR:
 	  if (preprocargs == NULL)
 	    {
-	      preprocargs = xmalloc (strlen (optarg) + 3);
-	      sprintf (preprocargs, "-I%s", optarg);
+	      quotedarg = quot (optarg);
+	      preprocargs = xmalloc (strlen (quotedarg) + 3);
+	      sprintf (preprocargs, "-I%s", quotedarg);
 	    }
 	  else
 	    {
 	      char *n;
 
-	      n = xmalloc (strlen (preprocargs) + strlen (optarg) + 4);
-	      sprintf (n, "%s -I%s", preprocargs, optarg);
+	      quotedarg = quot (optarg);
+	      n = xmalloc (strlen (preprocargs) + strlen (quotedarg) + 4);
+	      sprintf (n, "%s -I%s", preprocargs, quotedarg);
 	      free (preprocargs);
 	      preprocargs = n;
 	    }

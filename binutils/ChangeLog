@@ -1,3 +1,17 @@
+1999-05-10  DJ Delorie  <dj@cygnus.com>
+
+	* windres.c (quot): Quote shell metacharacters in a string
+	(main): quote parameters to cpp that might have metacharacters in
+	them.  Allow -D as an alias for --define to allow for sharing make
+	macros with gcc.
+
+	* objdump.c (dump_reloc_set): don't core if howto->name is NULL
+
+	* Makefile.am: Give rescoff.c a cpu-specific -D so it can set
+	the correct BFD.
+	* Makefile.in: ditto
+	* rescoff.c (write_coff_file): Set the correct BFD
+
 1999-05-06  Ian Lance Taylor  <ian@zembu.com>
 
 	* rename.c (smart_rename): Fix test of whether file exists.

@@ -2468,7 +2468,10 @@ dump_reloc_set (abfd, sec, relpp, relcount)
       if (sym_name)
 	{
 	  printf_vma (q->address);
-	  printf (" %-16s  ", q->howto->name);
+	  if (q->howto->name)
+	    printf (" %-16s  ", q->howto->name);
+	  else
+	    printf (" %-16d  ", q->howto->type);
 	  objdump_print_symname (abfd, (struct disassemble_info *) NULL,
 				 *q->sym_ptr_ptr);
 	}
