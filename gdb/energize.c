@@ -260,7 +260,7 @@ send_stack_info()
 {
   struct pclist *pclist = 0, *pli, *opli;
   static struct pclist *old_pclist;
-  FRAME frame;
+  struct frame_info *frame;
   int height, similar;
 
   if (stack_info_valid)

@@ -220,12 +220,12 @@ findarg(frame)
  *    1.) stored in the code function header xA(Br1).
  *    2.) must be careful of recurssion.
  */
-FRAME_ADDR
+CORE_ADDR
 findframe(thisframe)
-    FRAME thisframe;
+    struct frame_info *thisframe;
 {
-    register FRAME_ADDR pointer;
-    FRAME_ADDR framechain();
+    register CORE_ADDR pointer;
+    CORE_ADDR framechain();
 #if 0    
     struct frame_info *frame;
 
@@ -258,7 +258,7 @@ findframe(thisframe)
  * Gdb front-end and internal framechain routine.
  * Go back up stack one level.  Tricky...
  */
-FRAME_ADDR
+CORE_ADDR
 framechain(frame)
     register struct frame_info *frame;
 {

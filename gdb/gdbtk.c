@@ -243,13 +243,7 @@ gdb_loc (clientData, interp, argc, argv)
 
   if (argc == 1)
     {
-      struct frame_info *frame;
-      struct symbol *func;
-
-      frame = get_frame_info (selected_frame);
-
-      pc = frame ? frame->pc : stop_pc;
-
+      pc = selected_frame ? selected_frame->pc : stop_pc;
       sal = find_pc_line (pc, 0);
     }
   else if (argc == 2)
