@@ -1,8 +1,10 @@
 #
 # Makefile for directory with subdirs to build.
 #
-# Last Mod Fri Apr 12 15:58:12 PDT 1991, by rich@sendai
+# Last Mod Sat Apr 13 00:40:04 PDT 1991, by rich@cygint.cygnus.com
 #
+
+# $Id$
 
 srcdir = .
 destdir = /usr/local
@@ -46,7 +48,7 @@ clean:
 	rm -rf *.a TEMP errs core *.o *~ \#* TAGS *.E
 	$(MAKE) subdir_do DO=clean
 
-install:
+install: all
 	$(MAKE) subdir_do DO=install
 
 # When installing include files, be sure that machine-dependent
@@ -88,11 +90,16 @@ FORCE:
 
 Makefile: $(srcdir)/Makefile.in $(srcdir)/configure
 	(cd $(srcdir) ; \
-		./configure +norecurse `if [ "$(srcdir)" != "." ] ; then echo +f; fi` +host=$(host) $(target))
+		./configure +destdir=$(destdir) +norecurse \
+		 `if [ "$(srcdir)" != "." ] ; then echo +f; fi` \
+		+host=$(host) $(target))
 
 #
 # $Log$
-# Revision 1.4  1991/04/13 02:11:09  rich
+# Revision 1.5  1991/04/13 07:40:41  rich
+# Fixed an ordering bug.  Now everything is built, and then installed.
+#
+# Revision 1.4  1991/04/13  02:11:09  rich
 # Config cut 3.  We now almost install a29k.
 #
 # Revision 1.3  1991/04/11  02:41:53  rich
