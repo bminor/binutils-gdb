@@ -123,6 +123,22 @@ enum hppa_reloc_expr_type_alt
   };
 
 
+/* Relocations for function calls must be accompanied by parameter
+   relocation bits.  These bits describe exactly where the caller has
+   placed the function's arguments and where it expects to find a return
+   value.
+
+   Both ELF and SOM encode this information within the addend field
+   of the call relocation.  (Note this could break very badly if one
+   was to make a call like bl foo + 0x12345678).
+
+   The high order 10 bits contain parameter relocation information,
+   the low order 22 bits contain the constant offset.  */
+   
+#define HPPA_R_ARG_RELOC(a)	(((a) >> 22) & 0x3FF)
+#define HPPA_R_CONSTANT(a)	((((int)(a)) << 10) >> 10)
+#define HPPA_R_ADDEND(r,c)	(((r) << 22) + ((c) & 0x3FFFFF))
+
 /* Some functions to manipulate PA instructions.  */
 static INLINE unsigned int
 assemble_3 (x)
@@ -291,7 +307,6 @@ hppa_field_adjust (value, constant_value, r_field)
      unsigned long constant_value;
      unsigned short r_field;
 {
-  unsigned long init_value = value;
   value += constant_value;
   switch (r_field)
     {
@@ -346,4 +361,174 @@ hppa_field_adjust (value, constant_value, r_field)
   return value;
 
 }
+
+/* PA-RISC OPCODES */
+#define get_opcode(insn)	((insn) & 0xfc000000) >> 26
+
+/* FIXME: this list is incomplete.  It should also be an enumerated
+   type rather than #defines.  */
+
+#define LDO	0x0d
+#define LDB	0x10
+#define LDH	0x11
+#define LDW	0x12
+#define LDWM	0x13
+#define STB	0x18
+#define STH	0x19
+#define STW	0x1a
+#define STWM	0x1b
+#define COMICLR	0x24
+#define SUBI	0x25
+#define SUBIO	0x25
+#define ADDIT	0x2c
+#define ADDITO	0x2c
+#define ADDI	0x2d
+#define ADDIO	0x2d
+#define LDIL	0x08
+#define ADDIL	0x0a
+
+#define MOVB	0x32
+#define MOVIB	0x33
+#define COMBT	0x20
+#define COMBF	0x22
+#define COMIBT	0x21
+#define COMIBF	0x23
+#define ADDBT	0x28
+#define ADDBF	0x2a
+#define ADDIBT	0x29
+#define ADDIBF	0x2b
+#define BVB	0x30
+#define BB	0x31
+
+#define BL	0x3a
+#define BLE	0x39
+#define BE	0x38
+
+  
+/* Given a machine instruction, return its format.
+
+   FIXME:  opcodes which do not map to a known format
+   should return an error of some sort.  */
+
+static char
+bfd_hppa_insn2fmt (insn)
+     unsigned long insn;
+{
+  char fmt = -1;
+  unsigned char op = get_opcode (insn);
+  
+  switch (op)
+    {
+    case ADDI:
+    case ADDIT:
+    case SUBI:
+      fmt = 11;
+      break;
+    case MOVB:
+    case MOVIB:
+    case COMBT:
+    case COMBF:
+    case COMIBT:
+    case COMIBF:
+    case ADDBT:
+    case ADDBF:
+    case ADDIBT:
+    case ADDIBF:
+    case BVB:
+    case BB:
+      fmt = 12;
+      break;
+    case LDO:
+    case LDB:
+    case LDH:
+    case LDW:
+    case LDWM:
+    case STB:
+    case STH:
+    case STW:
+    case STWM:
+      fmt = 14;
+      break;
+    case BL:
+    case BE:
+    case BLE:
+      fmt = 17;
+      break;
+    case LDIL:
+    case ADDIL:
+      fmt = 21;
+      break;
+    default:
+      fmt = 32;
+      break;
+    }
+  return fmt;
+}
+
+
+/* Insert VALUE into INSN using R_FORMAT to determine exactly what
+   bits to change.  */
+   
+static unsigned long
+hppa_rebuild_insn (abfd, insn, value, r_format)
+     bfd *abfd;
+     unsigned long insn;
+     unsigned long value;
+     unsigned long r_format;
+{
+  unsigned long const_part;
+  unsigned long rebuilt_part;
+
+  switch (r_format)
+    {
+    case 11:
+      {
+	unsigned w1, w;
+
+	const_part = insn & 0xffffe002;
+	dis_assemble_12 (value, &w1, &w);
+	rebuilt_part = (w1 << 2) | w;
+	return const_part | rebuilt_part;
+      }
+
+    case 12:
+      {
+	unsigned w1, w;
+
+	const_part = insn & 0xffffe002;
+	dis_assemble_12 (value, &w1, &w);
+	rebuilt_part = (w1 << 2) | w;
+	return const_part | rebuilt_part;
+      }
+
+    case 14:
+      const_part = insn & 0xffffc000;
+      low_sign_unext (value, 14, &rebuilt_part);
+      return const_part | rebuilt_part;
+
+    case 17:
+      {
+	unsigned w1, w2, w;
+
+	const_part = insn & 0xffe0e002;
+	dis_assemble_17 (value, &w1, &w2, &w);
+	rebuilt_part = (w2 << 2) | (w1 << 16) | w;
+	return const_part | rebuilt_part;
+      }
+
+    case 21:
+      const_part = insn & 0xffe00000;
+      dis_assemble_21 (value, &rebuilt_part);
+      return const_part | rebuilt_part;
+
+    case 32:
+      const_part = 0;
+      return value;
+
+    default:
+      abort ();
+    }
+  return insn;
+}
+
 #endif /* _HPPA_H */
