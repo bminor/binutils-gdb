@@ -1223,8 +1223,6 @@ extern struct type *check_typedef (struct type *);
 
 extern void check_stub_method_group (struct type *, int);
 
-extern struct type *lookup_primitive_typename (char *);
-
 extern char *gdb_mangle_name (struct type *, int, int);
 
 extern struct type *lookup_typename (char *, struct block *, int);

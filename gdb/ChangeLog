@@ -1,5 +1,12 @@
 2004-07-28  Andrew Cagney  <cagney@gnu.org>
 
+	* gdbtypes.c (lookup_primitive_typename): Delete function.
+	* gdbtypes.h (lookup_primitive_typename): Delete declaration.
+	* ada-lex.l: Use language_lookup_primitive_type_by_name.
+	* gdbtypes.c (lookup_typename): Ditto.
+	* f-exp.y (yylex): Ditto.
+	* c-exp.y (yylex): Ditto, eliminate assignment in "if".
+
 	* scm-lang.c (c_builtin_types): Delete extern declaration.
 	(scm_language_defn): Replace
 	string_char_type and primitive_type_vector with

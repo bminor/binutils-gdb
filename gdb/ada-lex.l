@@ -741,7 +741,9 @@ name_lookup (char *name0, char *err_name, int *token_type, int depth)
 
       if (segments == 0)
 	{
-	  type = lookup_primitive_typename (name);
+	  type = language_lookup_primitive_type_by_name (current_language,
+                                                         current_gdbarch,
+                                                         name);
 	  if (type == NULL && strcmp ("system__address", name) == 0)
 	    type = builtin_type_ada_system_address;
 	  if (type != NULL)

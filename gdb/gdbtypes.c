@@ -1030,17 +1030,6 @@ type_name_no_tag (const struct type *type)
   return TYPE_NAME (type);
 }
 
-/* Lookup a primitive type named NAME. 
-   Return zero if NAME is not a primitive type. */
-
-struct type *
-lookup_primitive_typename (char *name)
-{
-  return language_lookup_primitive_type_by_name (current_language,
-						 current_gdbarch,
-						 name);
-}
-
 /* Lookup a typedef or primitive type named NAME,
    visible in lexical block BLOCK.
    If NOERR is nonzero, return zero if NAME is not suitably defined.  */
@@ -1054,7 +1043,9 @@ lookup_typename (char *name, struct block *block, int noerr)
   sym = lookup_symbol (name, block, VAR_DOMAIN, 0, (struct symtab **) NULL);
   if (sym == NULL || SYMBOL_CLASS (sym) != LOC_TYPEDEF)
     {
-      tmp = lookup_primitive_typename (name);
+      tmp = language_lookup_primitive_type_by_name (current_language,
+						    current_gdbarch,
+						    name);
       if (tmp)
 	{
 	  return (tmp);
