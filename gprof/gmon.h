@@ -37,6 +37,8 @@
 
 struct raw_phdr
   {
+    /* FIXME: This is wrong; bfd_vma need not correspond any
+       particular size on the target.  */
     char low_pc[sizeof (bfd_vma)];	/* base pc address of sample buffer */
     char high_pc[sizeof (bfd_vma)];	/* max pc address of sampled buffer */
     char ncnt[4];		/* size of sample buffer (plus this header) */
