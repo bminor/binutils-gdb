@@ -25,16 +25,32 @@ as.dvi:	as-${CONFIG}.texinfo
 	mv as-${CONFIG}.dvi as.dvi
 	rm as-${CONFIG}.?? as-${CONFIG}.???
 
-# roff output (-ms)
-#edit instances of "ms" to "me" or "mm" to suit your preferences.
+# ROFF doc targets as.ms, as.mm, as.me
 # (we don't use a variable because we don't trust all makes to handle
 # a var in the target name right).
+# roff output (-ms)
 as.ms: as-${CONFIG}.texinfo
 	sed -e '/\\input texinfo/d' \
 		-e '/@c TEXI2ROFF-KILL/,/@c END TEXI2ROFF-KILL/d' \
 		-e 's/{.*,,/{/' \
 		as-${CONFIG}.texinfo | \
 	texi2roff -ms >as.ms 
+
+# roff output (-mm)
+as.mm: as-${CONFIG}.texinfo
+	sed -e '/\\input texinfo/d' \
+		-e '/@c TEXI2ROFF-KILL/,/@c END TEXI2ROFF-KILL/d' \
+		-e 's/{.*,,/{/' \
+		as-${CONFIG}.texinfo | \
+	texi2roff -mm >as.mm 
+
+# roff output (-me)
+as.me: as-${CONFIG}.texinfo
+	sed -e '/\\input texinfo/d' \
+		-e '/@c TEXI2ROFF-KILL/,/@c END TEXI2ROFF-KILL/d' \
+		-e 's/{.*,,/{/' \
+		as-${CONFIG}.texinfo | \
+	texi2roff -me >as.me 
 
 
 
