@@ -1810,6 +1810,7 @@ pa_ip (str)
 		{
 
 		/* Handle a completer for an indexing load or store.  */
+		case 'X':
 		case 'x':
 		  {
 		    int uu = 0;
@@ -1848,6 +1849,7 @@ pa_ip (str)
 		  }
 
 		/* Handle a short load/store completer.  */
+		case 'M':
 		case 'm':
 		case 'q':
 		case 'J':
@@ -1887,9 +1889,9 @@ pa_ip (str)
 		    else if (*args == 'e')
 		      break;
 
-		   /* 'J', 'm' and 'q' are the same, except for where they
+		   /* 'J', 'm', 'M' and 'q' are the same, except for where they
 		       encode the before/after field.  */
-		   if (*args == 'm')
+		   if (*args == 'm' || *args == 'M')
 		      {
 			opcode |= m << 5;
 			INSERT_FIELD_AND_CONTINUE (opcode, a, 13);
@@ -1915,6 +1917,7 @@ pa_ip (str)
 		  }
 
 		/* Handle a stbys completer.  */
+		case 'A':
 		case 's':
 		  {
 		    int a = 0;
