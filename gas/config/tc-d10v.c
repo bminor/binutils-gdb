@@ -801,7 +801,7 @@ parallel_ok (op1, insn1, op2, insn2)
 	  ins = insn2;
 	}
       mod[j] = used[j] = 0;
-      for (i = 0; op1->operands[i]; i++)
+      for (i = 0; op->operands[i]; i++)
 	{
 	  flags = d10v_operands[op->operands[i]].flags;
 	  shift = d10v_operands[op->operands[i]].shift;
@@ -834,17 +834,17 @@ parallel_ok (op1, insn1, op2, insn2)
 		    used[j] |= 1 << (regno + 1);
 		}
 	    }
-	  else if (op->exec_type & RMEM)
-	    used[j] |= 1 << 20;
-	  else if (op->exec_type & WMEM)
-	    mod[j] |= 1 << 20;
-	  else if (op->exec_type & RF0)
-	    used[j] |= 1 << 19;
-	  else if (op->exec_type & WF0)
-	    mod[j] |= 1 << 19;
-	  else if (op->exec_type & WCAR)
-	    mod[j] |= 1 << 19;
-	} 
+	}
+      if (op->exec_type & RMEM)
+	used[j] |= 1 << 20;
+      else if (op->exec_type & WMEM)
+	mod[j] |= 1 << 20;
+      else if (op->exec_type & RF0)
+	used[j] |= 1 << 19;
+      else if (op->exec_type & WF0)
+	mod[j] |= 1 << 19;
+      else if (op->exec_type & WCAR)
+	mod[j] |= 1 << 19;
     }
   if ((mod[0] & mod[1]) == 0 && (mod[0] & used[1]) == 0 && (mod[1] & used[0]) == 0)
     return 1;
@@ -1045,7 +1045,9 @@ find_opcode (opcode, myops)
 	  myops[opnum].X_op_symbol = NULL;
 	}
 
-      if (myops[opnum].X_op == O_constant || S_IS_DEFINED(myops[opnum].X_add_symbol))
+      if (myops[opnum].X_op == O_constant || (myops[opnum].X_op == O_symbol &&
+	  S_IS_DEFINED(myops[opnum].X_add_symbol) &&
+	  (S_GET_SEGMENT(myops[opnum].X_add_symbol) == now_seg)))
 	{
 	  next_opcode=opcode+1;
 	  for (i=0; opcode->operands[i+1]; i++)
@@ -1294,7 +1296,7 @@ d10v_cleanup (done)
       seg = now_seg;
       subseg = now_subseg;
       subseg_set (prev_seg, prev_subseg);
-      write_1_short (prev_opcode, prev_insn, fixups);
+      write_1_short (prev_opcode, prev_insn, fixups->next);
       subseg_set (seg, subseg);
       prev_opcode = NULL;
     }
