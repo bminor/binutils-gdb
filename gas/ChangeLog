@@ -1,5 +1,7 @@
 2004-08-16  Nick Clifton  <nickc@redhat.com>
 
+	* macro.c (macro_set_alternate): Use ISO C90 formatting.
+
 	* configure.in: Sort architecture based tables alphabetically.
 	* configure: Regenerate.
 
