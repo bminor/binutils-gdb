@@ -1,3 +1,7 @@
+Wed Jan 31 14:17:10 1996  Richard Henderson  <rth@tamu.edu>
+
+	* config.guess, config.sub: Recognize A/UX.
+
 Wed Jan 31 13:52:14 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config.sub: Merge with gcc/config.sub.

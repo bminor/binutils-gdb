@@ -130,12 +130,17 @@ case "${UNAME_MACHINE}:${UNAME_SYSTEM}:${UNAME_RELEASE}:${UNAME_VERSION}" in
 	echo m88k-motorola-sysv3
 	exit 0 ;;
     AViiON:dgux:*:*)
+        # DG/UX returns AViiON for all architectures
+        UNAME_PROCESSOR=`uname -p`
+        if [ $UNAME_PROCESSOR = mc88100 -o $UNAME_PROCESSOR = mc88100 ] ; then
 	if [ ${TARGET_BINARY_INTERFACE}x = m88kdguxelfx \
 	     -o ${TARGET_BINARY_INTERFACE}x = x ] ; then
 		echo m88k-dg-dgux${UNAME_RELEASE}
 	else
 		echo m88k-dg-dguxbcs${UNAME_RELEASE}
 	fi
+        else echo i586-dg-dgux${UNAME_RELEASE}
+        fi
  	exit 0 ;;
     M88*:DolphinOS:*:*)	# DolphinOS (SVR3)
 	echo m88k-dolphin-sysv3
@@ -219,7 +224,7 @@ EOF
 	case "${UNAME_MACHINE}" in
 	    9000/31? )            HP_ARCH=m68000 ;;
 	    9000/[34]?? )         HP_ARCH=m68k ;;
-	    9000/7?? | 9000/8?[79] ) HP_ARCH=hppa1.1 ;;
+	    9000/7?? | 9000/8?[679] ) HP_ARCH=hppa1.1 ;;
 	    9000/8?? )            HP_ARCH=hppa1.0 ;;
 	esac
 	HPUX_REV=`echo ${UNAME_RELEASE}|sed -e 's/[^.]*.[0B]*//'`
@@ -425,6 +430,9 @@ EOF
 	else
 		echo ns32k-sni-sysv
 	fi
+	exit 0 ;;
+    mc68*:A/UX:*:*)
+	echo m68k-apple-aux${UNAME_RELEASE}
 	exit 0 ;;
 esac
 
