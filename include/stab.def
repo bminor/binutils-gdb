@@ -38,6 +38,12 @@ __define_stab (N_LCSYM, 0x28, "LCSYM")
    This is not used in C.  */
 __define_stab (N_MAIN, 0x2a, "MAIN")
 
+/* Number of symbols:  0, files,,funcs,lines according to Ultrix V4.0. */
+__define_stab (N_NSYMS, 0x32, "NSYMS")
+
+/* "No DST map for sym: name, ,0,type,ignored"  according to Ultrix V4.0. */
+__define_stab (N_NOMAP, 0x34, "NOMAP")
+
 /* Register variable.  Value is number of register.  */
 __define_stab (N_RSYM, 0x40, "RSYM")
 
@@ -59,7 +65,7 @@ __define_stab (N_ENTRY, 0xa4, "ENTRY")
    Value is starting text address of the compilation.  */
 __define_stab (N_SO, 0x64, "SO")
 
-/* Name of sub-source file.
+/* Name of sub-source file (#include file).
    Value is starting text address of the compilation.  */
 __define_stab (N_SOL, 0x84, "SOL")
 
@@ -120,8 +126,13 @@ __define_stab (N_BROWS, 0x48, "BROWS")
 
 /* GNU C++ exception stabs.  */
 
+/* THE FOLLOWING TWO STAB VALUES CONFLICT.  Happily, one is for Modula-2
+   and one is for C++.   Still,... */
 /* GNU C++ exception variable.  Name is variable name.  */
 __define_stab (N_EHDECL, 0x50, "EHDECL")
+/* Modula2 info "for imc":  name,,0,0,0  according to Ultrix V4.0.  */
+__define_stab (N_MOD2, 0x50, "MOD2")
+
 
 /* GNU C++ `catch' clause.  Value is its address.  Desc is nonzero if
    this entry is immediately followed by a CAUGHT stab saying what exception
@@ -138,7 +149,6 @@ __define_stab (N_NBDATA, 0xF2, "NBDATA")
 __define_stab (N_NBBSS,  0xF4, "NBBSS")
 __define_stab (N_NBSTS,  0xF6, "NBSTS")
 __define_stab (N_NBLCS,  0xF8, "NBLCS")
-__define_stab (N_NSYMS,  0xFA, "NSYMS")
 
 /* The above information, in matrix format.
 
@@ -151,11 +161,11 @@ __define_stab (N_NSYMS,  0xFA, "NSYMS")
 	|_______________________________________________|
 	| 20 GSYM   | 22 FNAME	| 24 FUN    | 26 STSYM	|
 	| 28 LCSYM  | 2A MAIN	| 2C	    | 2E	|
-	| 30 PC	    | 32	| 34	    | 36	|
+	| 30 PC	    | 32 NSYMS	| 34 NOMAP  | 36	|
 	| 38	    | 3A	| 3C	    | 3E	|
 	| 40 RSYM   | 42 M2C	| 44 SLINE  | 46        |
 	| 48 BROWS  | 4A	| 4C        | 4E	|
-	| 50 EHDECL | 52	| 54 CATCH  | 56        |
+	| 50 EHDECL*| 52	| 54 CATCH  | 56        |
 	| 58        | 5A        | 5C        | 5E	|
 	| 60 SSYM   | 62	| 64 SO	    | 66 DSLINE	|
 	| 68 BSLINE | 6A	| 6C	    | 6E	|
@@ -178,5 +188,6 @@ __define_stab (N_NSYMS,  0xFA, "NSYMS")
 	| F0	    | F2	| F4	    | F6	|
 	| F8	    | FA	| FC	    | FE LENG	|
 	+-----------------------------------------------+
+ * 50 EHDECL is also MOD2.
 
 */

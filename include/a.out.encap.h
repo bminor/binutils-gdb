@@ -1,3 +1,6 @@
+/* This file is obsolete.  It needs to be converted to just define a bunch
+   of stuff that BFD can use to do coff-encapsulated files.  --gnu@cygnus.com */
+
 /* Another try at encapsulating bsd object files in coff.
    Copyright (C) 1988, 1989, Free Software Foundation, Inc.
    Written by Pace Willisson 12/9/88
@@ -37,9 +40,6 @@
 #define A_OUT_ENCAP_H_SEEN
 
 #include "a.out.gnu.h"
-
-/* Figure out what our target machine is */
-#include "target.h"
 
 #define N_FLAGS_COFF_ENCAPSULATE 0x20 /* coff header precedes bsd header */
 

@@ -1,11 +1,31 @@
 #ifndef __A_OUT_GNU_H__
 #define __A_OUT_GNU_H__
 
-#include "target.h"		/* Figure out which target and host systems */
+#include "reloc.h"
 
 #define __GNU_EXEC_MACROS__
 
 #ifndef __STRUCT_EXEC_OVERRIDE__
+
+/* This is the layout on disk of a Unix V7, Berkeley, SunOS, Vax Ultrix
+   "struct exec".  Don't assume that on this machine, the "struct exec"
+   will lay out the same sizes or alignments.  */
+
+struct exec_bytes {
+  unsigned char a_info[4];
+  unsigned char a_text[4];
+  unsigned char a_data[4];
+  unsigned char a_bss[4];
+  unsigned char a_syms[4];
+  unsigned char a_entry[4];
+  unsigned char a_trsize[4];
+  unsigned char a_drsize[4];
+};
+
+/* How big the "struct exec" is on disk */
+#define	EXEC_BYTES_SIZE	(8 * 4)
+
+/* This is the layout in memory of a "struct exec" while we process it.  */
 
 struct exec
 {
@@ -23,12 +43,12 @@ struct exec
 
 /* these go in the N_MACHTYPE field */
 /* These symbols could be defined by code from Suns...punt 'em */
-#undef M_OLDSUN2
+#undef M_UNKNOWN
 #undef M_68010
 #undef M_68020
 #undef M_SPARC
 enum machine_type {
-  M_OLDSUN2 = 0,
+  M_UNKNOWN = 0,
   M_68010 = 1,
   M_68020 = 2,
   M_SPARC = 3,
@@ -62,41 +82,30 @@ enum machine_type {
 /* Code indicating demand-paged executable.  */
 #define ZMAGIC 0413
 
-#define N_BADMAG(x)					\
- (N_MAGIC(x) != OMAGIC && N_MAGIC(x) != NMAGIC		\
-  && N_MAGIC(x) != ZMAGIC)
-
-#define _N_BADMAG(x)					\
- (N_MAGIC(x) != OMAGIC && N_MAGIC(x) != NMAGIC		\
-  && N_MAGIC(x) != ZMAGIC)
-
-#define _N_HDROFF(x) (1024 - sizeof (struct exec))
-
-#define N_TXTOFF(x) \
- (N_MAGIC(x) == ZMAGIC ? _N_HDROFF((x)) + sizeof (struct exec) : sizeof (struct exec))
-
-#define N_DATOFF(x) (N_TXTOFF(x) + (x).a_text)
-
-#define N_TRELOFF(x) (N_DATOFF(x) + (x).a_data)
-
-#define N_DRELOFF(x) (N_TRELOFF(x) + (x).a_trsize)
-
-#define N_SYMOFF(x) (N_DRELOFF(x) + (x).a_drsize)
-
-#define N_STROFF(x) (N_SYMOFF(x) + (x).a_syms)
-
 /* Address of text segment in memory after it is loaded.  */
 /* Don't load things at zero, it encourages zero-pointer bugs */
 #ifndef TEXT_START_ADDR
 #define	TEXT_START_ADDR 0x10000
 #endif
-#define N_TXTADDR(x) TEXT_START_ADDR
+
+/* Virtual Address of text segment from the a.out file.  For OMAGIC,
+   (almost always "unlinked .o's" these days), should be zero.
+   Sun added a kludge so that shared libraries linked ZMAGIC get
+   an address of zero if a_entry (!!!) is lower than the otherwise
+   expected text address.  These kludges have gotta go!
+   For linked files, should reflect reality if we know it.  */
+
+#ifndef N_TXTADDR
+#define N_TXTADDR(x) \
+    (N_MAGIC(x)==OMAGIC? 0 \
+     : (N_MAGIC(x) == ZMAGIC && (x).a_entry < TEXT_START_ADDR)? 0 \
+     : TEXT_START_ADDR)
+#endif
 
 /* Address of data segment in memory after it is loaded.
    Note that it is up to you to define SEGMENT_SIZE
    on machines not listed here.  */
-#ifndef SEGMENT_SIZE
-#if defined(vax) || defined(hp300) || defined(pyr)
+#if defined(hp300) || defined(pyr)
 #define SEGMENT_SIZE page_size
 #endif
 #ifdef	sony
@@ -109,16 +118,11 @@ enum machine_type {
 #define PAGE_SIZE 0x400
 #define SEGMENT_SIZE PAGE_SIZE
 #endif
-#endif
-
-#define _N_SEGMENT_ROUND(x) (((x) + SEGMENT_SIZE - 1) & ~(SEGMENT_SIZE - 1))
-
-#define _N_TXTENDADDR(x) (N_TXTADDR(x)+(x).a_text)
 
 #ifndef N_DATADDR
 #define N_DATADDR(x) \
-    (N_MAGIC(x)==OMAGIC? (_N_TXTENDADDR(x)) \
-     : (_N_SEGMENT_ROUND (_N_TXTENDADDR(x))))
+    (N_MAGIC(x)==OMAGIC? (N_TXTADDR(x)+(x).a_text) \
+     :  (SEGMENT_SIZE + ((N_TXTADDR(x)+(x).a_text-1) & ~(SEGMENT_SIZE-1))))
 #endif
 
 /* Address of bss segment in memory after it is loaded.  */
@@ -182,38 +186,29 @@ struct nlist {
    all of which apply to the text section.
    Likewise, the data-relocation section applies to the data section.  */
 
-#if TARGET == TARGET_SPARC || TARGET == TARGET_AM29K
-/*
- * The following enum and struct were borrowed from
- * sunOS  /usr/include/sun4/a.out.h  and extended to handle
- * other machines.
- */
+/* The following enum and struct were borrowed from SunOS's
+   /usr/include/sun4/a.out.h  and extended to handle
+   other machines.  It is currently used on SPARC and AMD 29000.
 
-enum reloc_type
-{
-    RELOC_8,        RELOC_16,        RELOC_32,       RELOC_DISP8,
-    RELOC_DISP16,   RELOC_DISP32,    RELOC_WDISP30,  RELOC_WDISP22,
-    RELOC_HI22,     RELOC_22,        RELOC_13,       RELOC_LO10,
-    RELOC_SFA_BASE, RELOC_SFA_OFF13, RELOC_BASE10,   RELOC_BASE13,
-    RELOC_BASE22,   RELOC_PC10,      RELOC_PC22,     RELOC_JMP_TBL,
-    RELOC_SEGOFF16, RELOC_GLOB_DAT,  RELOC_JMP_SLOT, RELOC_RELATIVE,
+   reloc_ext_bytes is how it looks on disk.  reloc_info_extended is
+   how we might process it on a native host.  */
 
-/* 29K relocation types */
-    RELOC_JUMPTARG, RELOC_CONST,     RELOC_CONSTH,
-
-    NO_RELOC
+struct reloc_ext_bytes {
+  unsigned char	r_address[4];
+  unsigned char r_index[3];
+  unsigned char r_bits[1];
+  unsigned char r_addend[4];
 };
 
-#define	RELOC_TYPE_NAMES \
-"8",		"16",		"32",		"DISP8",	\
-"DISP16",	"DISP32",	"WDISP30",	"WDISP22",	\
-"HI22",		"22",		"13",		"LO10",		\
-"SFA_BASE",	"SFAOFF13",	"BASE10",	"BASE13",	\
-"BASE22",	"PC10",		"PC22",		"JMP_TBL",	\
-"SEGOFF16",	"GLOB_DAT",	"JMP_SLOT",	"RELATIVE",	\
-"JUMPTARG",	"CONST",	"CONSTH",			\
-"NO_RELOC",							\
-"XXX_28", "XXX_29", "XXX_30", "XXX_31"
+#define	RELOC_EXT_BITS_EXTERN_BIG	0x80
+#define	RELOC_EXT_BITS_EXTERN_LITTLE	0x01
+
+#define	RELOC_EXT_BITS_TYPE_BIG		0x1F
+#define	RELOC_EXT_BITS_TYPE_SH_BIG	0
+#define	RELOC_EXT_BITS_TYPE_LITTLE	0xF8
+#define	RELOC_EXT_BITS_TYPE_SH_LITTLE	3
+
+#define	RELOC_EXT_SIZE	12		/* Bytes per relocation entry */
 
 struct reloc_info_extended
 {
@@ -226,69 +221,35 @@ struct reloc_info_extended
   long int	r_addend;
 };
 
-/* Let programs know what they're dealing with */
-#define	RELOC_EXTENDED			1
+/* The standard, old-fashioned, Berkeley compatible relocation struct */
 
-#undef relocation_info
-#define relocation_info	                reloc_info_extended
-#define RELOC_ADDRESS(r)		((r)->r_address)
-#define RELOC_EXTERN_P(r)               ((r)->r_extern)
-#define RELOC_TYPE(r)                   ((r)->r_index)
-#define	RELOC_EXTENDED_TYPE(r)		((r)->r_type)
-#define RELOC_SYMBOL(r)                 ((r)->r_index)
-#define RELOC_MEMORY_SUB_P(r)		0
-#define RELOC_MEMORY_ADD_P(r)           0
-#define RELOC_ADD_EXTRA(r)              ((r)->r_addend)
-#define RELOC_PCREL_P(r)             \
-        (  ((r)->r_type >= RELOC_DISP8 && (r)->r_type <= RELOC_WDISP22) \
-	 || (r)->r_type == RELOC_JUMPTARG )
-#define RELOC_VALUE_RIGHTSHIFT(r)       (reloc_target_rightshift[(r)->r_type])
-#define RELOC_TARGET_SIZE(r)            (reloc_target_size[(r)->r_type])
-#define RELOC_TARGET_BITPOS(r)          0
-#define RELOC_TARGET_BITSIZE(r)         (reloc_target_bitsize[(r)->r_type])
-
-/* Note that these are very dependent on the order of the enums in
-   enum reloc_type (in a.out.h); if they change the following must be
-   changed */
-/* Also note that some of these may be incorrect; I have no information */
-#ifndef __STDC__
-#define const	/**/
-#endif
-static const int reloc_target_rightshift[] = {
-  0, 0, 0, 0,
-  0, 0, 2, 2,
- 10, 0, 0, 0,
-  0, 0, 0, 0,
-  0, 0, 0, 0,
-  0, 0, 0, 0,
-  2, 0,16,	/* 29K jumptarg, const, consth */
-  0,
-};
-#define RELOC_SIZE_SPLIT16	13
-static const int reloc_target_size[] = {
-  0, 1, 2, 0,
-  1, 2, 2, 2,
-  2, 2, 2, 2,
-  2, 2, 2, 2,
-  2, 2, 2, 2,
-  2, 2, 2, 2,
-  RELOC_SIZE_SPLIT16, RELOC_SIZE_SPLIT16, RELOC_SIZE_SPLIT16,
-  0,
-};
-static const int reloc_target_bitsize[] = {
-  8, 16, 32, 8,
- 16, 32, 30, 22,
- 22, 22, 13, 10,
- 32, 32, 16,  0,
-  0,  0,  0,  0,	/* dunno */
-  0,  0,  0,  0,
- 16, 16, 16,		/* 29K jumptarg, const, consth */
-  0,
+struct reloc_std_bytes {
+  unsigned char	r_address[4];
+  unsigned char r_index[3];
+  unsigned char r_bits[1];
 };
 
-#define	MAX_ALIGNMENT	(sizeof (double))
+#define	RELOC_STD_BITS_PCREL_BIG	0x80
+#define	RELOC_STD_BITS_PCREL_LITTLE	0x01
 
-#else  /* Not SPARC or AM29K */
+#define	RELOC_STD_BITS_LENGTH_BIG	0x60
+#define	RELOC_STD_BITS_LENGTH_SH_BIG	5	/* To shift to units place */
+#define	RELOC_STD_BITS_LENGTH_LITTLE	0x06
+#define	RELOC_STD_BITS_LENGTH_SH_LITTLE	1
+
+#define	RELOC_STD_BITS_EXTERN_BIG	0x10
+#define	RELOC_STD_BITS_EXTERN_LITTLE	0x08
+
+#define	RELOC_STD_BITS_BASEREL_BIG	0x08
+#define	RELOC_STD_BITS_BASEREL_LITTLE	0x08
+
+#define	RELOC_STD_BITS_JMPTABLE_BIG	0x04
+#define	RELOC_STD_BITS_JMPTABLE_LITTLE	0x04
+
+#define	RELOC_STD_BITS_RELATIVE_BIG	0x02
+#define	RELOC_STD_BITS_RELATIVE_LITTLE	0x02
+
+#define	RELOC_STD_SIZE	8		/* Bytes per relocation entry */
 
 struct relocation_info
 {
@@ -310,152 +271,13 @@ struct relocation_info
           r_symbolnum is N_TEXT, N_DATA, N_BSS or N_ABS
 	  (the N_EXT bit may be set also, but signifies nothing).  */
   unsigned int r_extern:1;
-  /* Four bits that aren't used, but when writing an object file
-     it is desirable to clear them.  */
-  unsigned int r_pad:4;
+  /* The next three bits are for SunOS shared libraries, and seem to
+     be undocumented.  */
+  unsigned int r_baserel:1;	/* Linkage table relative */
+  unsigned int r_jmptable:1;	/* pc-relative to jump table */
+  unsigned int r_relative:1;	/* "relative relocation" */
+  /* unused */
+  unsigned int r_pad:1;		/* Padding -- set to zero */
 };
-#endif
-
-/*
- * Ok.  Following are the relocation information macros.  If your
- * system should not be able to use the default set (below), you must
- * define the following:
-
- *   relocation_info: This must be typedef'd (or #define'd) to the type
- * of structure that is stored in the relocation info section of your
- * a.out files.  Often this is defined in the a.out.h for your system.
- *
- *   RELOC_ADDRESS (rval): Offset into the current section of the
- * <whatever> to be relocated.  *Must be an lvalue*.
- *
- *   RELOC_EXTERN_P (rval):  Is this relocation entry based on an
- * external symbol (1), or was it fully resolved upon entering the
- * loader (0) in which case some combination of the value in memory
- * (if RELOC_MEMORY_ADD_P) and the extra (if RELOC_ADD_EXTRA) contains
- * what the value of the relocation actually was.  *Must be an lvalue*.
- *
- *   RELOC_TYPE (rval): If this entry was fully resolved upon
- * entering the loader, what type should it be relocated as?
- *
- *   RELOC_EXTENDED_TYPE (rval): If this entry is for a machine using
- * extended relocatino, what type of field is it?  (For example, on RISC
- * machines, odd-sized displacements or split displacements occur.)
- *
- *   RELOC_SYMBOL (rval): If this entry was not fully resolved upon
- * entering the loader, what is the index of it's symbol in the symbol
- * table?  *Must be a lvalue*.
- *
- *   RELOC_MEMORY_ADD_P (rval): This should return true if the final
- * relocation value output here should be added to memory, or if the
- * section of memory described should simply be set to the relocation
- * value.
- *
- *   RELOC_ADD_EXTRA (rval): (Optional) This macro, if defined, gives
- * an extra value to be added to the relocation value based on the
- * individual relocation entry.  *Must be an lvalue if defined*.
- *
- *   RELOC_PCREL_P (rval): True if the relocation value described is
- * pc relative.
- *
- *   RELOC_VALUE_RIGHTSHIFT (rval): Number of bits right to shift the
- * final relocation value before putting it where it belongs.
- *
- *   RELOC_TARGET_SIZE (rval): log to the base 2 of the number of
- * bytes of size this relocation entry describes; 1 byte == 0; 2 bytes
- * == 1; 4 bytes == 2, and etc.  This is somewhat redundant (we could
- * do everything in terms of the bit operators below), but having this
- * macro could end up producing better code on machines without fancy
- * bit twiddling.  Also, it's easier to understand/code big/little
- * endian distinctions with this macro.
- *
- *   RELOC_TARGET_BITPOS (rval): The starting bit position within the
- * object described in RELOC_TARGET_SIZE in which the relocation value
- * will go.
- *
- *   RELOC_TARGET_BITSIZE (rval): How many bits are to be replaced
- * with the bits of the relocation value.  It may be assumed by the
- * code that the relocation value will fit into this many bits.  This
- * may be larger than RELOC_TARGET_SIZE if such be useful.
- *
- *
- *		Things I haven't implemented
- *		----------------------------
- *
- *    Values for RELOC_TARGET_SIZE other than 0, 1, or 2.
- *
- *    Pc relative relocation for External references.
- */
-#if TARGET == TARGET_SEQUENT
-#define RELOC_ADDRESS(r)		((r)->r_address)
-#define RELOC_EXTERN_P(r)		((r)->r_extern)
-#define RELOC_TYPE(r)		((r)->r_symbolnum)
-#define RELOC_SYMBOL(r)		((r)->r_symbolnum)
-#define RELOC_MEMORY_SUB_P(r)	((r)->r_bsr)
-#define RELOC_MEMORY_ADD_P(r)	1
-#undef RELOC_ADD_EXTRA
-#define RELOC_PCREL_P(r)		((r)->r_pcrel || (r)->r_bsr)
-#define RELOC_VALUE_RIGHTSHIFT(r)	0
-#define RELOC_TARGET_SIZE(r)		((r)->r_length)
-#define RELOC_TARGET_BITPOS(r)	0
-#define RELOC_TARGET_BITSIZE(r)	32
-#endif
-
-/* Default macros */
-#ifndef RELOC_ADDRESS
-#define RELOC_ADDRESS(r)		((r)->r_address)
-#define RELOC_EXTERN_P(r)		((r)->r_extern)
-#define RELOC_TYPE(r)			((r)->r_symbolnum)
-#define RELOC_SYMBOL(r)			((r)->r_symbolnum)
-#define RELOC_MEMORY_SUB_P(r)		0
-#define RELOC_MEMORY_ADD_P(r)		1
-#undef RELOC_ADD_EXTRA
-#define RELOC_PCREL_P(r)		((r)->r_pcrel)
-#define RELOC_VALUE_RIGHTSHIFT(r)	0
-#define RELOC_TARGET_SIZE(r)		((r)->r_length)
-#define RELOC_TARGET_BITPOS(r)		0
-#define RELOC_TARGET_BITSIZE(r)		32
-#endif
-
-/* Maximum alignment required of a common'd variable.  If a var of this
-   size or larger is allocated in BSS when nobody defines it, it gets
-   this alignment.  */
-
-#ifndef MAX_ALIGNMENT
-#define	MAX_ALIGNMENT	(sizeof (int))
-#endif
-
-
-/* Definitions for routines that read and write GNU a.out files */
-
-enum objfile_kind {
-	OBJFILE_ERROR,
-	OBJFILE_UNKNOWN,
-	OBJFILE_SINGLE,
-	OBJFILE_ARCHIVE,
-};
-
-enum objfile_kind read_aout_header();	/* (desc, &header)  read&swap header */
-
-/* Read an a.out header from DESC and call rel_fn(DESC, header)
-   if it is an object file, lib_fn(DESC) if it is a library, else
-   call err_fn("msg") */
-void handle_aout_header();		/* (desc, rel_fn, lib_fn, err_fn) */
-
-/* Byte-swapping definitions */
-
-void swap_aoutheader();		/* BSD a.out header */
-short swap_getshort ();
-void swap_putshort();
-long swap_getlong ();
-void swap_putlong();
-void swap_reloc_info_in();	/* BSD relocation information */
-void swap_reloc_info_out();	/* BSD relocation information */
-void swap_nlists();		/* BSD symbol name lists */
-void swap_root_updates();	/* GDB Symseg */
-
-/* Bring on the encapsulation, if configured in! */
-#ifdef COFF_ENCAPSULATE
-#include "a.out.encap.h"
-#endif
 
 #endif /* __A_OUT_GNU_H__ */

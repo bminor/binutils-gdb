@@ -30,6 +30,9 @@
   	9		; byte count of string table
   	"foo\0_bar\0"	; string table  */
 
+#define	RANLIBMAG	"__.SYMDEF"	/* Archive file name containing index */
+#define	RANLIBSKEW	3		/* Creation time offset */
+
 /* Format of __.SYMDEF:
    First, a longword containing the size of the 'symdef' data that follows.
    Second, zero or more 'symdef' structures.
@@ -43,6 +46,9 @@ struct symdef
 	unsigned long string_offset;	/* In the file */
 	char *name;			/* In memory, sometimes */
       } s;
+    /* this points to the front of the file header (AKA member header --
+       a struct ar_hdr), not to the front of the file or into the file).
+       in other words it only tells you which file to read */       
     unsigned long file_offset;
   };
 
@@ -50,6 +56,6 @@ struct symdef
 
 #define	ranlib	symdef
 #define	ran_un	s
-#define	ran_str	string_offset
+#define	ran_strx string_offset
 #define	ran_name name
 #define	ran_off	file_offset
