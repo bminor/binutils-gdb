@@ -2907,6 +2907,14 @@ lang_size_sections_1 (s, output_section_statement, prev, fill, dot, relax)
 	      /* This section was never actually created.  */
 	      break;
 
+	    /* The section might have been removed after its statement was
+	       added.  For example, ldemul_before_allocation can remove
+	       dynamic sections if they turn out not to be needed.  */
+	    if (!link_info.relocateable
+		&& (bfd_get_section_flags (output_bfd, os->bfd_section)
+		    & SEC_EXCLUDE) != 0)
+	      break;
+
 	    /* If this is a COFF shared library section, use the size and
 	       address from the input section.  FIXME: This is COFF
 	       specific; it would be cleaner if there were some other way

@@ -1,3 +1,7 @@
+2002-06-10  Richard Sandiford  <rsandifo@redhat.com>
+
+	* ldlang.c (lang_size_sections_1): Skip removed output sections.
+
 2002-06-08  Alan Modra  <amodra@bigpond.net.au>
 
 	* ldexp.c: Replace CONST with const.
