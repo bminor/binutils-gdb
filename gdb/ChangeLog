@@ -1,5 +1,11 @@
 2003-05-17  Mark Kettenis  <kettenis@gnu.org>
 
+	Revise the x86_64 (sub)taget.
+	* x86-64-tdep.c, x86-64-linux-tdep.c, x86-64-linux-nat.c,
+	config/i386/tm-x86-64linux.h, config/i386/nm-x86-64linux.h,
+	config/i386/x86-64-linux.mt, config/i386/x86-64linux.mh: Extensive
+	changes.
+
 	* dwarf-frame.c: Add and fix some comments.
 
 	* i386-tdep.c (i386_frame_cache, i386_sigtramp_frame_cache,
