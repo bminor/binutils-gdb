@@ -40,7 +40,7 @@ Do-last:
 v850e_files="interp.c simops.c v850_sim.h"
 if ( echo $* | grep keep\-v850e > /dev/null ) ; then
         for i in $v850e_files ; do
-                if test ! -d $i && (grep sanitize-v850e $i > /dev/null) ; then
+                if test -r $i && (grep sanitize-v850e $i > /dev/null) ; then
                         if [ -n "${verbose}" ] ; then
                                 echo Keeping v850e stuff in $i
                         fi
@@ -48,7 +48,7 @@ if ( echo $* | grep keep\-v850e > /dev/null ) ; then
         done
 else
         for i in $v850e_files ; do
-                if test ! -d $i && (grep sanitize-v850e $i > /dev/null) ; then
+                if test -r $i && (grep sanitize-v850e $i > /dev/null) ; then
                         if [ -n "${verbose}" ] ; then
                                 echo Removing traces of \"v850e\" from $i...
                         fi
@@ -66,7 +66,7 @@ else
 fi
 if ( echo $* | grep keep\-v850eq > /dev/null ) ; then
         for i in $v850e_files ; do
-                if test ! -d $i && (grep sanitize-v850eq $i > /dev/null) ; then
+                if test -r $i && (grep sanitize-v850eq $i > /dev/null) ; then
                         if [ -n "${verbose}" ] ; then
                                 echo Keeping v850eq stuff in $i
                         fi
@@ -74,7 +74,7 @@ if ( echo $* | grep keep\-v850eq > /dev/null ) ; then
         done
 else
         for i in $v850e_files ; do
-                if test ! -d $i && (grep sanitize-v850eq $i > /dev/null) ; then
+                if test -r $i && (grep sanitize-v850eq $i > /dev/null) ; then
                         if [ -n "${verbose}" ] ; then
                                 echo Removing traces of \"v850eq\" from $i...
                         fi
