@@ -317,6 +317,11 @@ struct blockvector
   struct block *block[1];
 };
 
+/* Special block numbers */
+#define GLOBAL_BLOCK	0
+#define	STATIC_BLOCK	1
+#define	FIRST_LOCAL_BLOCK	2
+
 struct block
 {
   /* Addresses in the executable code that are in this block.
