@@ -1,3 +1,13 @@
+2000-02-14  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+	* arm-dis.c: Change flavor name from atpcs-special to
+	special-atpcs to prevent name conflict in gdb.
+	(get_arm_regname_num_options, set_arm_regname_option,
+	get_arm_regnames): New functions.  API to access the several
+	flavor of register names.  Note: Used by gdb.
+	(print_insn_thumb): Use the register name entry from the currently
+	selected flavor for LR and PC.
+
 2000-02-10  Nick Clifton  <nickc@cygnus.com>
 
 	* mcore-opc.h (enum mcore_opclass): Add MULSH and OPSR
