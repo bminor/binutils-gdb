@@ -3231,8 +3231,8 @@ decode_coproc (SIM_DESC sd,
 		/* 30 = ErrorEPC           R4000   VR4100  VR4300 */
 		if (STATE_VERBOSE_P(SD))
 		  sim_io_eprintf (SD, 
-		    "Warning: PC 0x%s:interp.c decode_coproc DEADC0DE\n",
-		      (unsigned)cia);
+				  "Warning: PC 0x%lx:interp.c decode_coproc DEADC0DE\n",
+				  (unsigned long)cia);
 		GPR[rt] = 0xDEADC0DE; /* CPR[0,rd] */
 		/* CPR[0,rd] = GPR[rt]; */
 	      default:

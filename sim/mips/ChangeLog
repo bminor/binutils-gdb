@@ -1,3 +1,7 @@
+Mon Apr 10 00:07:09 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* interp.c (decode_coproc): Output long using %lx and not %s.
+
 2000-03-21  Frank Ch. Eigler  <fche@redhat.com>
 
 	* interp.c (sim_open): Sort & extend dummy memory regions for
