@@ -1,5 +1,10 @@
 2001-11-15  Andrew Cagney  <ac131313@redhat.com>
 
+	* remote.c (_initialize_remote): Don't multi-arch swap tty_input.
+	Second attempt.
+
+2001-11-15  Andrew Cagney  <ac131313@redhat.com>
+
 	* utils.c (phex_nz): For default case, set str to phex_nz return
 	value.
 	(phex): Ditto.

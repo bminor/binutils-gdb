@@ -5887,7 +5887,6 @@ _initialize_remote (void)
 
   /* Old tacky stuff.  NOTE: This comes after the remote protocol so
      that the remote protocol has been initialized.  */
-  register_gdbarch_swap (&tty_input, sizeof (&tty_input), NULL);
   register_gdbarch_swap (&remote_address_size, 
                          sizeof (&remote_address_size), NULL);
   register_gdbarch_swap (NULL, 0, build_remote_gdbarch_data);
