@@ -1,3 +1,15 @@
+2004-09-18  Paul N. Hilfinger  <hilfingr@otisco.mckusick.com>
+
+	* ada-lang.c: (ada_main_name, ada_value_slice_ptr, ada_value_slice,
+	ada_breakpoint_rewrite, ada_template_to_fixed_record_type_1): 
+	Minor formatting changes.
+	(empty_array): Slight rewrite for formatting.
+	(emit_char,parse,ada_language_defn,build_ada_types,
+	ada_is_exception_sym, _initialize_ada_language): Move 
+	definitions around.
+	(ada_dump_symtab): Remove unused definition.
+	(ada_maybe_exception_partial_symbol): Remove unused definition.
+
 2004-09-16  Andrew Cagney  <cagney@gnu.org>
 
 	* inf-child.c: Include "gdb_string.h".
