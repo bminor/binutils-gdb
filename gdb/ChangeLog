@@ -1,5 +1,10 @@
 2002-08-26  Mark Kettenis  <kettenis@gnu.org>
 
+	* i386-tdep.c (i386_store_return_value): Undeprecate.  Convert to
+	use regcache_* functions.
+	(i386_gdbarch_init): Set store_return_value instead of
+	deprecated_store_return_value.
+
 	* regcache.c (regcache_raw_write_signed,
 	regcache_raw_write_unsigned): New functions.
 	* regcache.h (regcache_raw_write_signed,
