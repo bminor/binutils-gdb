@@ -37,7 +37,7 @@ DEFUN(ld_undefined_symbol,(relent, seclet),
 	error_symbol = s;
       }
     if (error_count < MAX_ERRORS_IN_A_ROW) {
-	einfo("%C: undefined reference to `%T'\n",
+	einfo("%X%C: undefined reference to `%T'\n",
 	      abfd,section, seclet->u.indirect.symbols,
 	      relent->address, s);
 	config.make_executable = false;
@@ -55,7 +55,7 @@ DEFUN(ld_undefined_symbol,(relent, seclet),
   }
   else 
   {
-    einfo("undefined reference to %s\n", (*(relent->sym_ptr_ptr))->name);
+    einfo("%Xundefined reference to %s\n", (*(relent->sym_ptr_ptr))->name);
   }
 }
 static void
