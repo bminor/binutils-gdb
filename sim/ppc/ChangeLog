@@ -1,6 +1,6 @@
 Mon Oct  2 11:46:37 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
-	* cpu.c (struct _cpu): Add number_of_insns field to tract how many
+	* cpu.c (struct _cpu): Add number_of_insns field to trace how many
 	instructions are executed.
 	(cpu_increment_number_of_insns): New function to increment the
 	number of instructions issued.
