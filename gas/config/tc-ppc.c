@@ -2126,29 +2126,25 @@ ppc_section_letter (letter, ptr_msg)
 }
 
 int
-ppc_section_word (ptr_str)
-     char **ptr_str;
+ppc_section_word (str, len)
+     char *str;
+     size_t len;
 {
-  if (strncmp (*ptr_str, "exclude", sizeof ("exclude")-1) == 0)
-    {
-      *ptr_str += sizeof ("exclude")-1;
-      return SHF_EXCLUDE;
-    }
+  if (len == 7 && strncmp (str, "exclude", 7) == 0)
+    return SHF_EXCLUDE;
 
-  return 0;
+  return -1;
 }
 
 int
-ppc_section_type (ptr_str)
-     char **ptr_str;
+ppc_section_type (str, len)
+     char *str;
+     size_t len;
 {
-  if (strncmp (*ptr_str, "ordered", sizeof ("ordered")-1) == 0)
-    {
-      *ptr_str += sizeof ("ordered")-1;
-      return SHT_ORDERED;
-    }
+  if (len == 7 && strncmp (str, "ordered", 7) == 0)
+    return SHT_ORDERED;
 
-  return 0;
+  return -1;
 }
 
 int

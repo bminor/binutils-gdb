@@ -116,14 +116,8 @@ typedef struct expressionS
   symbolS *X_op_symbol;
   /* A number to add.  */
   offsetT X_add_number;
-  /* The type of the expression.  We can't assume that an arbitrary
-     compiler can handle a bitfield of enum type.  FIXME: We could
-     check this using autoconf.  */
-#ifdef __GNUC__
-  operatorT X_op : 5;
-#else
-  unsigned X_op : 5;
-#endif
+  /* The type of the expression.  */
+  operatorT X_op;
   /* Non-zero if X_add_number should be regarded as unsigned.  This is
      only valid for O_constant expressions.  It is only used when an
      O_constant must be extended into a bignum (i.e., it is not used

@@ -4,7 +4,7 @@
    Written by Alessandro Forin, based on earlier gas-1.38 target CPU files.
    Modified by Ken Raeburn for gas-2.x and ECOFF support.
    Modified by Richard Henderson for ELF support.
-   Modified by Klaus K"ampf for EVAX (openVMS/Alpha) support.
+   Modified by Klaus K"ampf for EVAX (OpenVMS/Alpha) support.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -1081,7 +1081,7 @@ md_apply_fix (fixP, valueP)
 #endif
 
     do_reloc_gp:
-      fixP->fx_addsy = section_symbol (absolute_section);
+      fixP->fx_addsy = section_symbol (now_seg);
       md_number_to_chars (fixpos, value, 2);
       break;
 
@@ -2110,9 +2110,6 @@ FIXME
   expressionS newtok[3];
   expressionS addend;
 
-  /* We're going to need this symbol in md_apply_fix().  */
-  (void) section_symbol (absolute_section);
-
 #ifdef OBJ_ECOFF
   if (regno (tok[2].X_add_number) == AXP_REG_PV)
     ecoff_set_gp_prolog_size (0);
@@ -2499,7 +2496,8 @@ load_expression (targreg, exp, pbasereg, poffset)
 	}
       insn.nfixups++;
       insn.fixups[0].reloc = BFD_RELOC_ALPHA_LITUSE;
-      insn.fixups[0].exp.X_op = O_constant;
+      insn.fixups[0].exp.X_op = O_symbol;
+      insn.fixups[0].exp.X_add_symbol = section_symbol (now_seg);
       insn.fixups[0].exp.X_add_number = 1;
       emit_lituse = 0;
 
@@ -2650,7 +2648,8 @@ emit_ir_load (tok, ntok, opname)
 	}
       insn.nfixups++;
       insn.fixups[0].reloc = BFD_RELOC_ALPHA_LITUSE;
-      insn.fixups[0].exp.X_op = O_constant;
+      insn.fixups[0].exp.X_op = O_symbol;
+      insn.fixups[0].exp.X_add_symbol = section_symbol (now_seg);
       insn.fixups[0].exp.X_add_number = 1;
     }
 
@@ -2703,7 +2702,8 @@ emit_loadstore (tok, ntok, opname)
 	}
       insn.nfixups++;
       insn.fixups[0].reloc = BFD_RELOC_ALPHA_LITUSE;
-      insn.fixups[0].exp.X_op = O_constant;
+      insn.fixups[0].exp.X_op = O_symbol;
+      insn.fixups[0].exp.X_add_symbol = section_symbol (now_seg);
       insn.fixups[0].exp.X_add_number = 1;
     }
 
@@ -3288,7 +3288,8 @@ emit_jsrjmp (tok, ntok, vopname)
 	}
       insn.nfixups++;
       insn.fixups[0].reloc = BFD_RELOC_ALPHA_LITUSE;
-      insn.fixups[0].exp.X_op = O_constant;
+      insn.fixups[0].exp.X_op = O_symbol;
+      insn.fixups[0].exp.X_add_symbol = section_symbol (now_seg);
       insn.fixups[0].exp.X_add_number = 3;
     }
 
@@ -3458,7 +3459,7 @@ s_alpha_comm (ignore)
       p = frag_more (temp);
       new_seg->flags |= SEC_IS_COMMON;
       if (! S_IS_DEFINED (symbolP))
-	symbolP->bsym->section = new_seg;
+	S_SET_SEGMENT (symbolP, new_seg);
 #else
       S_SET_VALUE (symbolP, (valueT) temp);
 #endif
@@ -3767,7 +3768,7 @@ s_alpha_ent (ignore)
     }
 
   symbol = make_expr_symbol (&symexpr);
-  symbol->bsym->flags |= BSF_FUNCTION;
+  symbol_get_bfdsym (symbol)->flags |= BSF_FUNCTION;
   alpha_evax_proc.symbol = symbol;
 
   demand_empty_rest_of_line ();
@@ -3851,7 +3852,8 @@ s_alpha_pdesc (ignore)
 
   entry_sym = make_expr_symbol (&exp);
   /* Save bfd symbol of proc desc in function symbol.  */
-  alpha_evax_proc.symbol->bsym->udata.p = (PTR)entry_sym->bsym;
+  symbol_get_bfdsym (alpha_evax_proc.symbol)->udata.p
+    = symbol_get_bfdsym (entry_sym);
 
   SKIP_WHITESPACE ();
   if (*input_line_pointer++ != ',')
@@ -4142,14 +4144,14 @@ s_alpha_file (ignore)
   extern char *demand_copy_string PARAMS ((int *lenP));
 
   sprintf (case_hack, "<CASE:%01d%01d>",
-	    alpha_flag_hash_long_names, alpha_flag_show_after_trunc);
+	   alpha_flag_hash_long_names, alpha_flag_show_after_trunc);
 
   s = symbol_find_or_make (case_hack);
-  s->bsym->flags |= BSF_FILE;
+  symbol_get_bfdsym (s)->flags |= BSF_FILE;
 
   get_absolute_expression ();
   s = symbol_find_or_make (demand_copy_string (&length));
-  s->bsym->flags |= BSF_FILE;
+  symbol_get_bfdsym (s)->flags |= BSF_FILE;
   demand_empty_rest_of_line ();
 
   return;

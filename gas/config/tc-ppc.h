@@ -208,13 +208,13 @@ extern void ppc_adjust_symtab PARAMS ((void));
 
 /* Support for SHF_EXCLUDE and SHT_ORDERED */
 extern int ppc_section_letter PARAMS ((int, char **));
-extern int ppc_section_type PARAMS ((char **));
-extern int ppc_section_word PARAMS ((char **));
+extern int ppc_section_type PARAMS ((char *, size_t));
+extern int ppc_section_word PARAMS ((char *, size_t));
 extern int ppc_section_flags PARAMS ((int, int, int));
 
 #define md_elf_section_letter(LETTER, PTR_MSG)	ppc_section_letter (LETTER, PTR_MSG)
-#define md_elf_section_type(PTR_STR)		ppc_section_type (PTR_STR)
-#define md_elf_section_word(PTR_STR)		ppc_section_word (PTR_STR)
+#define md_elf_section_type(STR, LEN)		ppc_section_type (STR, LEN)
+#define md_elf_section_word(STR, LEN)		ppc_section_word (STR, LEN)
 #define md_elf_section_flags(FLAGS, ATTR, TYPE)	ppc_section_flags (FLAGS, ATTR, TYPE)
 
 /* Add extra PPC sections -- Note, for now, make .sbss2 and .PPC.EMB.sbss0 a

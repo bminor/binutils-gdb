@@ -1,5 +1,29 @@
 1999-06-05  Richard Henderson  <rth@cygnus.com>
 
+	* dwarf2dbg.c (dwarf2_gen_line_info): Mirror the section symbol
+	creation logic from obj_elf_create_section.
+
+	* config/obj-elf.c (elf_pseudo_tab): Add pushsection/popsection.
+	(section_stack): New.
+	(special_sections): Make const.
+	(obj_elf_section): Gut and rewrite parsing.
+	(obj_elf_change_section): New function broken out of obj_elf_section.
+	(obj_elf_parse_section_letters): Likewise.
+	(obj_elf_section_word): Likewise.
+	(obj_elf_section_type): Likewise.
+	(obj_elf_previous): Treat as a toggle.
+	(obj_elf_popsection): New.
+	* config/tc-ppc.c (ppc_section_word): Take str+len not ptr_str.
+	(ppc_section_type): Likewise.
+	* config/tc-ppc.h: Likewise.
+
+	* expr.h (struct expressionS): Don't make X_op a bitfield.
+	* config/tc-alpha.c: Update for symbol handling changes.
+	(md_apply_fix) [case GPREL]: Use now_seg instead of absolute_section.
+	(load_expression, emit_ir_load, emit_loadstore, emit_jsrjmp): Likewise.
+
+1999-06-05  Richard Henderson  <rth@cygnus.com>
+
 	* dwarf2dbg.c (*): Convert to K&R + prototypes.
 	(dwarf2_gen_line_info): Kill unused variables.
 	(dwarf2_finish): Likewise.
