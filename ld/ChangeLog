@@ -1,3 +1,8 @@
+Thu Nov 16 11:23:42 1995  Doug Evans  <dje@canuck.cygnus.com>
+
+	* scripttempl/pe.sc (.endjunk): Move definition of `end' to here
+	so the malloc heap begins at a sane place.
+
 Thu Nov 16 03:09:32 1995  Ken Raeburn  <raeburn@cygnus.com>
 
 	Version 2.6 released.
