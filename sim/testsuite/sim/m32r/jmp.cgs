@@ -1,0 +1,16 @@
+# m32r testcase for jmp $sr
+# mach(): m32r m32rx
+
+	.include "testutils.inc"
+
+	start
+
+	.global jmp
+jmp:
+	seth r4, high (ok)
+	or3  r4, r4, low (ok)
+	jmp  r4
+
+	fail
+ok:
+	pass

@@ -1,5 +1,16 @@
 Thu Feb 19 11:15:45 1998  Nick Clifton  <nickc@cygnus.com>
 
+	* sim/m32r/bl24.cgs: Test long BL instruction.
+	* sim/m32r/bl8.cgs: Test short BL instruction.
+	* sim/m32r/blez.cgs: Test BLEZ instruction.
+	* sim/m32r/bltz.cgs: Test BLTZ instruction.
+	* sim/m32r/bne.cgs: Test BNE instruction.
+	* sim/m32r/bnez.cgs: Test BNEZ instruction.
+	* sim/m32r/bra24.cgs: Test long BRA instruction.
+	* sim/m32r/bra8.cgs: Test short BRA instruction.
+	* sim/m32r/jl.cgs: Test JL instruction.
+	* sim/m32r/or.cgs: Test OR instruction.
+	* sim/m32r/jmp.cgs: Test JMP instruction.
 	* sim/m32r/and.cgs: Test AND instruction.
 	* sim/m32r/and3.cgs: Test AND3 instruction.
 	* sim/m32r/beq.cgs: Test BEQ instruction.
@@ -11,17 +22,11 @@ Thu Feb 19 11:15:45 1998  Nick Clifton  <nickc@cygnus.com>
 	* sim/m32r/cmpu.cgs: Test CMPU instruction.
 	* sim/m32r/cmpui.cgs: Test CMPUI instruction.
 	* sim/m32r/div.cgs: Test DIV instruction.
-	* sim/m32r/divh.cgs: Test DIVH instruction.
-
-	* sim/m32r/bcl8.cgs: Test short BCL instruction.
-	* sim/m32r/bncl24.cgs: Test long BNCL instruction.
-	* sim/m32r/bncl8.cgs: Test short BNCL instruction.
+	* sim/m32r/divu.cgs: Test DIVU instruction.
 	* sim/m32r/cmpeq.cgs: Test CMPEQ instruction.
-	* sim/m32r/cmpz.cgs: Test CMPZ instruction.
 	* sim/m32r/sll.cgs: Test SLL instruction.
 	* sim/m32r/sll3.cgs: Test SLL3 instruction.
 	* sim/m32r/slli.cgs: Test SLLI instruction.
-	* sim/m32r/bcl24.cgs: Test long version of BCL instruction
 	* sim/m32r/sra.cgs: Test SRA instruction.
 	* sim/m32r/sra3.cgs: Test SRA3 instruction.
 	* sim/m32r/srai.cgs: Test SRAI instruction.
@@ -30,7 +35,16 @@ Thu Feb 19 11:15:45 1998  Nick Clifton  <nickc@cygnus.com>
 	* sim/m32r/srli.cgs: Test SRLI instruction.
 	* sim/m32r/xor3.cgs: Test XOR3 instruction.
 	* sim/m32r/xor.cgs: Test XOR instruction.
-
+start-sanitize-m342rx	
+	* sim/m32r/jnc.cgs: Test JNC instruction.
+	* sim/m32r/jc.cgs: Test JC instruction.
+	* sim/m32r/cmpz.cgs: Test CMPZ instruction.
+	* sim/m32r/bcl24.cgs: Test long version of BCL instruction
+	* sim/m32r/bcl8.cgs: Test short BCL instruction.
+	* sim/m32r/bncl24.cgs: Test long BNCL instruction.
+	* sim/m32r/bncl8.cgs: Test short BNCL instruction.
+	* sim/m32r/divh.cgs: Test DIVH instruction.
+end-sanitize-m342rx	
 Tue Feb 17 12:46:05 1998  Doug Evans  <devans@seba.cygnus.com>
 
 	* config/default.exp: New file.
