@@ -1,3 +1,8 @@
+2005-03-27  Andreas Schwab  <schwab@suse.de>
+
+	* gdb.base/bigcore.c (main): Add missing mode argument in open
+	call.
+
 2005-03-25  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* lib/mi-support.exp (mi_gdb_load): Use /tmp for gdbserver

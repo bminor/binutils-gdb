@@ -178,7 +178,8 @@ main ()
     int fd;
     large_off_t tmp;
     unlink ("bigcore.corefile");
-    fd = open ("bigcore.corefile", O_RDWR | O_CREAT | O_TRUNC | O_LARGEFILE);
+    fd = open ("bigcore.corefile", O_RDWR | O_CREAT | O_TRUNC | O_LARGEFILE,
+	       0666);
     for (tmp = 1; tmp > 0; tmp <<= 1)
       {
 	if (large_lseek (fd, tmp, SEEK_SET) > 0)
