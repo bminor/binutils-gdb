@@ -31,6 +31,7 @@ mh-dgux
 mh-irix4
 mh-ncr3000
 mh-sco
+mh-solaris
 mh-sysv
 mh-sysv4
 mt-a29k
