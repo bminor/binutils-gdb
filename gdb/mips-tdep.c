@@ -48,6 +48,8 @@
 #include "elf-bfd.h"
 #include "symcat.h"
 
+static void set_reg_offset (CORE_ADDR *saved_regs, int regnum, CORE_ADDR off);
+
 /* A useful bit in the CP0 status register (PS_REGNUM).  */
 /* This bit is set if we are emulating 32-bit FPRs on a 64-bit chip.  */
 #define ST0_FR (1 << 26)
@@ -1423,38 +1425,37 @@ mips_next_pc (CORE_ADDR pc)
     return mips32_next_pc (pc);
 }
 
-/* Guaranteed to set fci->saved_regs to some values (it never leaves it
-   NULL).
-
-   Note: kevinb/2002-08-09: The only caller of this function is (and
-   should remain) mips_frame_init_saved_regs().  In fact,
-   aside from calling mips_find_saved_regs(), mips_frame_init_saved_regs()
-   does nothing more than set frame->saved_regs[SP_REGNUM].  These two
-   functions should really be combined and now that there is only one
-   caller, it should be straightforward.  (Watch out for multiple returns
-   though.)  */
+/* Set up the 'saved_regs' array.  This is a data structure containing
+   the addresses on the stack where each register has been saved, for
+   each stack frame.  Registers that have not been saved will have
+   zero here.  The stack pointer register is special: rather than the
+   address where the stack register has been saved,
+   saved_regs[SP_REGNUM] will have the actual value of the previous
+   frame's stack register.  */
 
 static void
 mips_find_saved_regs (struct frame_info *fci)
 {
   int ireg;
-  CORE_ADDR reg_position;
   /* r0 bit means kernel trap */
   int kernel_trap;
   /* What registers have been saved?  Bitmasks.  */
   unsigned long gen_mask, float_mask;
   mips_extra_func_info_t proc_desc;
   t_inst inst;
+  CORE_ADDR *saved_regs;
 
-  frame_saved_regs_zalloc (fci);
+  if (get_frame_saved_regs (fci) != NULL)
+    return;
+  saved_regs = frame_saved_regs_zalloc (fci);
 
   /* If it is the frame for sigtramp, the saved registers are located
-     in a sigcontext structure somewhere on the stack.
-     If the stack layout for sigtramp changes we might have to change these
-     constants and the companion fixup_sigtramp in mdebugread.c  */
+     in a sigcontext structure somewhere on the stack.  If the stack
+     layout for sigtramp changes we might have to change these
+     constants and the companion fixup_sigtramp in mdebugread.c */
 #ifndef SIGFRAME_BASE
-/* To satisfy alignment restrictions, sigcontext is located 4 bytes
-   above the sigtramp frame.  */
+  /* To satisfy alignment restrictions, sigcontext is located 4 bytes
+     above the sigtramp frame.  */
 #define SIGFRAME_BASE		MIPS_REGSIZE
 /* FIXME!  Are these correct?? */
 #define SIGFRAME_PC_OFF		(SIGFRAME_BASE + 2 * MIPS_REGSIZE)
@@ -1463,61 +1464,65 @@ mips_find_saved_regs (struct frame_info *fci)
         (SIGFRAME_REGSAVE_OFF + MIPS_NUMREGS * MIPS_REGSIZE + 3 * MIPS_REGSIZE)
 #endif
 #ifndef SIGFRAME_REG_SIZE
-/* FIXME!  Is this correct?? */
+  /* FIXME!  Is this correct?? */
 #define SIGFRAME_REG_SIZE	MIPS_REGSIZE
 #endif
   if ((get_frame_type (fci) == SIGTRAMP_FRAME))
     {
       for (ireg = 0; ireg < MIPS_NUMREGS; ireg++)
 	{
-	  reg_position = get_frame_base (fci) + SIGFRAME_REGSAVE_OFF
-	    + ireg * SIGFRAME_REG_SIZE;
-	  get_frame_saved_regs (fci)[ireg] = reg_position;
+	  CORE_ADDR reg_position = (get_frame_base (fci) + SIGFRAME_REGSAVE_OFF
+				    + ireg * SIGFRAME_REG_SIZE);
+	  set_reg_offset (saved_regs, ireg, reg_position);
 	}
       for (ireg = 0; ireg < MIPS_NUMREGS; ireg++)
 	{
-	  reg_position = get_frame_base (fci) + SIGFRAME_FPREGSAVE_OFF
-	    + ireg * SIGFRAME_REG_SIZE;
-	  get_frame_saved_regs (fci)[FP0_REGNUM + ireg] = reg_position;
+	  CORE_ADDR reg_position = (get_frame_base (fci)
+				    + SIGFRAME_FPREGSAVE_OFF
+				    + ireg * SIGFRAME_REG_SIZE);
+	  set_reg_offset (saved_regs, FP0_REGNUM + ireg, reg_position);
 	}
-      get_frame_saved_regs (fci)[PC_REGNUM] = get_frame_base (fci) + SIGFRAME_PC_OFF;
+
+      set_reg_offset (saved_regs, PC_REGNUM, get_frame_base (fci) + SIGFRAME_PC_OFF);
+      /* SP_REGNUM, contains the value and not the address.  */
+      set_reg_offset (saved_regs, SP_REGNUM, get_frame_base (fci));
       return;
     }
 
   proc_desc = get_frame_extra_info (fci)->proc_desc;
   if (proc_desc == NULL)
-    /* I'm not sure how/whether this can happen.  Normally when we can't
-       find a proc_desc, we "synthesize" one using heuristic_proc_desc
-       and set the saved_regs right away.  */
+    /* I'm not sure how/whether this can happen.  Normally when we
+       can't find a proc_desc, we "synthesize" one using
+       heuristic_proc_desc and set the saved_regs right away.  */
     return;
 
   kernel_trap = PROC_REG_MASK (proc_desc) & 1;
   gen_mask = kernel_trap ? 0xFFFFFFFF : PROC_REG_MASK (proc_desc);
   float_mask = kernel_trap ? 0xFFFFFFFF : PROC_FREG_MASK (proc_desc);
 
-  if (				/* In any frame other than the innermost or a frame interrupted by
-				   a signal, we assume that all registers have been saved.
-				   This assumes that all register saves in a function happen before
-				   the first function call.  */
+  if (/* In any frame other than the innermost or a frame interrupted
+	 by a signal, we assume that all registers have been saved.
+	 This assumes that all register saves in a function happen
+	 before the first function call.  */
        (get_next_frame (fci) == NULL
 	|| (get_frame_type (get_next_frame (fci)) == SIGTRAMP_FRAME))
 
-  /* In a dummy frame we know exactly where things are saved.  */
+       /* In a dummy frame we know exactly where things are saved.  */
        && !PROC_DESC_IS_DUMMY (proc_desc)
 
-  /* Don't bother unless we are inside a function prologue.  Outside the
-     prologue, we know where everything is. */
+       /* Don't bother unless we are inside a function prologue.
+	  Outside the prologue, we know where everything is. */
 
        && in_prologue (get_frame_pc (fci), PROC_LOW_ADDR (proc_desc))
 
-  /* Not sure exactly what kernel_trap means, but if it means
-     the kernel saves the registers without a prologue doing it,
-     we better not examine the prologue to see whether registers
-     have been saved yet.  */
+       /* Not sure exactly what kernel_trap means, but if it means the
+	  kernel saves the registers without a prologue doing it, we
+	  better not examine the prologue to see whether registers
+	  have been saved yet.  */
        && !kernel_trap)
     {
-      /* We need to figure out whether the registers that the proc_desc
-         claims are saved have been saved yet.  */
+      /* We need to figure out whether the registers that the
+         proc_desc claims are saved have been saved yet.  */
 
       CORE_ADDR addr;
 
@@ -1530,8 +1535,8 @@ mips_find_saved_regs (struct frame_info *fci)
       addr = PROC_LOW_ADDR (proc_desc);
       instlen = pc_is_mips16 (addr) ? MIPS16_INSTLEN : MIPS_INSTLEN;
 
-      /* Scan through this function's instructions preceding the current
-         PC, and look for those that save registers.  */
+      /* Scan through this function's instructions preceding the
+         current PC, and look for those that save registers.  */
       while (addr < get_frame_pc (fci))
 	{
 	  inst = mips_fetch_instruction (addr);
@@ -1545,89 +1550,84 @@ mips_find_saved_regs (struct frame_info *fci)
       float_mask = float_save_found;
     }
 
-  /* Fill in the offsets for the registers which gen_mask says
-     were saved.  */
-  reg_position = get_frame_base (fci) + PROC_REG_OFFSET (proc_desc);
-  for (ireg = MIPS_NUMREGS - 1; gen_mask; --ireg, gen_mask <<= 1)
-    if (gen_mask & 0x80000000)
-      {
-	get_frame_saved_regs (fci)[ireg] = reg_position;
-	reg_position -= MIPS_SAVED_REGSIZE;
-      }
+  /* Fill in the offsets for the registers which gen_mask says were
+     saved.  */
+  {
+    CORE_ADDR reg_position = (get_frame_base (fci)
+			      + PROC_REG_OFFSET (proc_desc));
+    for (ireg = MIPS_NUMREGS - 1; gen_mask; --ireg, gen_mask <<= 1)
+      if (gen_mask & 0x80000000)
+	{
+	  set_reg_offset (saved_regs, ireg, reg_position);
+	  reg_position -= MIPS_SAVED_REGSIZE;
+	}
+  }
 
-  /* The MIPS16 entry instruction saves $s0 and $s1 in the reverse order
-     of that normally used by gcc.  Therefore, we have to fetch the first
-     instruction of the function, and if it's an entry instruction that
-     saves $s0 or $s1, correct their saved addresses.  */
+  /* The MIPS16 entry instruction saves $s0 and $s1 in the reverse
+     order of that normally used by gcc.  Therefore, we have to fetch
+     the first instruction of the function, and if it's an entry
+     instruction that saves $s0 or $s1, correct their saved addresses.  */
   if (pc_is_mips16 (PROC_LOW_ADDR (proc_desc)))
     {
       inst = mips_fetch_instruction (PROC_LOW_ADDR (proc_desc));
-      if ((inst & 0xf81f) == 0xe809 && (inst & 0x700) != 0x700)		/* entry */
+      if ((inst & 0xf81f) == 0xe809 && (inst & 0x700) != 0x700)
+	/* entry */
 	{
 	  int reg;
 	  int sreg_count = (inst >> 6) & 3;
 
 	  /* Check if the ra register was pushed on the stack.  */
-	  reg_position = get_frame_base (fci) + PROC_REG_OFFSET (proc_desc);
+	  CORE_ADDR reg_position = (get_frame_base (fci)
+				    + PROC_REG_OFFSET (proc_desc));
 	  if (inst & 0x20)
 	    reg_position -= MIPS_SAVED_REGSIZE;
 
-	  /* Check if the s0 and s1 registers were pushed on the stack.  */
+	  /* Check if the s0 and s1 registers were pushed on the
+             stack.  */
 	  for (reg = 16; reg < sreg_count + 16; reg++)
 	    {
-	      get_frame_saved_regs (fci)[reg] = reg_position;
+	      set_reg_offset (saved_regs, reg, reg_position);
 	      reg_position -= MIPS_SAVED_REGSIZE;
 	    }
 	}
     }
 
-  /* Fill in the offsets for the registers which float_mask says
-     were saved.  */
-  reg_position = get_frame_base (fci) + PROC_FREG_OFFSET (proc_desc);
+  /* Fill in the offsets for the registers which float_mask says were
+     saved.  */
+  {
+    CORE_ADDR reg_position = (get_frame_base (fci)
+			      + PROC_FREG_OFFSET (proc_desc));
 
-  /* Apparently, the freg_offset gives the offset to the first 64 bit
-     saved.
+    /* Apparently, the freg_offset gives the offset to the first 64
+       bit saved.
 
-     When the ABI specifies 64 bit saved registers, the FREG_OFFSET
-     designates the first saved 64 bit register.
+       When the ABI specifies 64 bit saved registers, the FREG_OFFSET
+       designates the first saved 64 bit register.
 
-     When the ABI specifies 32 bit saved registers, the ``64 bit saved
-     DOUBLE'' consists of two adjacent 32 bit registers, Hence
-     FREG_OFFSET, designates the address of the lower register of the
-     register pair.  Adjust the offset so that it designates the upper
-     register of the pair -- i.e., the address of the first saved 32
-     bit register.  */
+       When the ABI specifies 32 bit saved registers, the ``64 bit
+       saved DOUBLE'' consists of two adjacent 32 bit registers, Hence
+       FREG_OFFSET, designates the address of the lower register of
+       the register pair.  Adjust the offset so that it designates the
+       upper register of the pair -- i.e., the address of the first
+       saved 32 bit register.  */
 
-  if (MIPS_SAVED_REGSIZE == 4)
-    reg_position += MIPS_SAVED_REGSIZE;
+    if (MIPS_SAVED_REGSIZE == 4)
+      reg_position += MIPS_SAVED_REGSIZE;
 
-  /* Fill in the offsets for the float registers which float_mask says
-     were saved.  */
-  for (ireg = MIPS_NUMREGS - 1; float_mask; --ireg, float_mask <<= 1)
-    if (float_mask & 0x80000000)
-      {
-	get_frame_saved_regs (fci)[FP0_REGNUM + ireg] = reg_position;
-	reg_position -= MIPS_SAVED_REGSIZE;
-      }
+    /* Fill in the offsets for the float registers which float_mask
+       says were saved.  */
+    for (ireg = MIPS_NUMREGS - 1; float_mask; --ireg, float_mask <<= 1)
+      if (float_mask & 0x80000000)
+	{
+	  set_reg_offset (saved_regs, FP0_REGNUM + ireg, reg_position);
+	  reg_position -= MIPS_SAVED_REGSIZE;
+	}
 
-  get_frame_saved_regs (fci)[PC_REGNUM] = get_frame_saved_regs (fci)[RA_REGNUM];
-}
+    set_reg_offset (saved_regs, PC_REGNUM, saved_regs[RA_REGNUM]);
+  }
 
-/* Set up the 'saved_regs' array.  This is a data structure containing
-   the addresses on the stack where each register has been saved, for
-   each stack frame.  Registers that have not been saved will have
-   zero here.  The stack pointer register is special:  rather than the
-   address where the stack register has been saved, saved_regs[SP_REGNUM]
-   will have the actual value of the previous frame's stack register.  */
-
-static void
-mips_frame_init_saved_regs (struct frame_info *frame)
-{
-  if (get_frame_saved_regs (frame) == NULL)
-    {
-      mips_find_saved_regs (frame);
-    }
-  get_frame_saved_regs (frame)[SP_REGNUM] = get_frame_base (frame);
+  /* SP_REGNUM, contains the value and not the address.  */
+  set_reg_offset (saved_regs, SP_REGNUM, get_frame_base (fci));
 }
 
 static CORE_ADDR
@@ -1782,16 +1782,16 @@ static struct mips_extra_func_info temp_proc_desc;
    frames.  */
 static CORE_ADDR *temp_saved_regs;
 
-/* Set a register's saved stack address in temp_saved_regs.  If an address
-   has already been set for this register, do nothing; this way we will
-   only recognize the first save of a given register in a function prologue.
-   This is a helper function for mips{16,32}_heuristic_proc_desc.  */
+/* Set a register's saved stack address in temp_saved_regs.  If an
+   address has already been set for this register, do nothing; this
+   way we will only recognize the first save of a given register in a
+   function prologue.  */
 
 static void
-set_reg_offset (int regno, CORE_ADDR offset)
+set_reg_offset (CORE_ADDR *saved_regs, int regno, CORE_ADDR offset)
 {
-  if (temp_saved_regs[regno] == 0)
-    temp_saved_regs[regno] = offset;
+  if (saved_regs[regno] == 0)
+    saved_regs[regno] = offset;
 }
 
 
@@ -1987,26 +1987,26 @@ mips16_heuristic_proc_desc (CORE_ADDR start_pc, CORE_ADDR limit_pc,
 	  offset = mips16_get_imm (prev_inst, inst, 8, 4, 0);
 	  reg = mips16_to_32_reg[(inst & 0x700) >> 8];
 	  PROC_REG_MASK (&temp_proc_desc) |= (1 << reg);
-	  set_reg_offset (reg, sp + offset);
+	  set_reg_offset (temp_saved_regs, reg, sp + offset);
 	}
       else if ((inst & 0xff00) == 0xf900)	/* sd reg,n($sp) */
 	{
 	  offset = mips16_get_imm (prev_inst, inst, 5, 8, 0);
 	  reg = mips16_to_32_reg[(inst & 0xe0) >> 5];
 	  PROC_REG_MASK (&temp_proc_desc) |= (1 << reg);
-	  set_reg_offset (reg, sp + offset);
+	  set_reg_offset (temp_saved_regs, reg, sp + offset);
 	}
       else if ((inst & 0xff00) == 0x6200)	/* sw $ra,n($sp) */
 	{
 	  offset = mips16_get_imm (prev_inst, inst, 8, 4, 0);
 	  PROC_REG_MASK (&temp_proc_desc) |= (1 << RA_REGNUM);
-	  set_reg_offset (RA_REGNUM, sp + offset);
+	  set_reg_offset (temp_saved_regs, RA_REGNUM, sp + offset);
 	}
       else if ((inst & 0xff00) == 0xfa00)	/* sd $ra,n($sp) */
 	{
 	  offset = mips16_get_imm (prev_inst, inst, 8, 8, 0);
 	  PROC_REG_MASK (&temp_proc_desc) |= (1 << RA_REGNUM);
-	  set_reg_offset (RA_REGNUM, sp + offset);
+	  set_reg_offset (temp_saved_regs, RA_REGNUM, sp + offset);
 	}
       else if (inst == 0x673d)	/* move $s1, $sp */
 	{
@@ -2025,14 +2025,14 @@ mips16_heuristic_proc_desc (CORE_ADDR start_pc, CORE_ADDR limit_pc,
 	  offset = mips16_get_imm (prev_inst, inst, 5, 4, 0);
 	  reg = mips16_to_32_reg[(inst & 0xe0) >> 5];
 	  PROC_REG_MASK (&temp_proc_desc) |= 1 << reg;
-	  set_reg_offset (reg, frame_addr + offset);
+	  set_reg_offset (temp_saved_regs, reg, frame_addr + offset);
 	}
       else if ((inst & 0xFF00) == 0x7900)	/* sd reg,offset($s1) */
 	{
 	  offset = mips16_get_imm (prev_inst, inst, 5, 8, 0);
 	  reg = mips16_to_32_reg[(inst & 0xe0) >> 5];
 	  PROC_REG_MASK (&temp_proc_desc) |= 1 << reg;
-	  set_reg_offset (reg, frame_addr + offset);
+	  set_reg_offset (temp_saved_regs, reg, frame_addr + offset);
 	}
       else if ((inst & 0xf81f) == 0xe809 && (inst & 0x700) != 0x700)	/* entry */
 	entry_inst = inst;	/* save for later processing */
@@ -2062,7 +2062,7 @@ mips16_heuristic_proc_desc (CORE_ADDR start_pc, CORE_ADDR limit_pc,
       for (reg = 4, offset = 0; reg < areg_count + 4; reg++)
 	{
 	  PROC_REG_MASK (&temp_proc_desc) |= 1 << reg;
-	  set_reg_offset (reg, sp + offset);
+	  set_reg_offset (temp_saved_regs, reg, sp + offset);
 	  offset += MIPS_SAVED_REGSIZE;
 	}
 
@@ -2071,7 +2071,7 @@ mips16_heuristic_proc_desc (CORE_ADDR start_pc, CORE_ADDR limit_pc,
       if (entry_inst & 0x20)
 	{
 	  PROC_REG_MASK (&temp_proc_desc) |= 1 << RA_REGNUM;
-	  set_reg_offset (RA_REGNUM, sp + offset);
+	  set_reg_offset (temp_saved_regs, RA_REGNUM, sp + offset);
 	  offset -= MIPS_SAVED_REGSIZE;
 	}
 
@@ -2079,7 +2079,7 @@ mips16_heuristic_proc_desc (CORE_ADDR start_pc, CORE_ADDR limit_pc,
       for (reg = 16; reg < sreg_count + 16; reg++)
 	{
 	  PROC_REG_MASK (&temp_proc_desc) |= 1 << reg;
-	  set_reg_offset (reg, sp + offset);
+	  set_reg_offset (temp_saved_regs, reg, sp + offset);
 	  offset -= MIPS_SAVED_REGSIZE;
 	}
     }
@@ -2124,7 +2124,7 @@ restart:
       else if ((high_word & 0xFFE0) == 0xafa0)	/* sw reg,offset($sp) */
 	{
 	  PROC_REG_MASK (&temp_proc_desc) |= 1 << reg;
-	  set_reg_offset (reg, sp + low_word);
+	  set_reg_offset (temp_saved_regs, reg, sp + low_word);
 	}
       else if ((high_word & 0xFFE0) == 0xffa0)	/* sd reg,offset($sp) */
 	{
@@ -2132,7 +2132,7 @@ restart:
 	     but the register size used is only 32 bits. Make the address
 	     for the saved register point to the lower 32 bits.  */
 	  PROC_REG_MASK (&temp_proc_desc) |= 1 << reg;
-	  set_reg_offset (reg, sp + low_word + 8 - MIPS_REGSIZE);
+	  set_reg_offset (temp_saved_regs, reg, sp + low_word + 8 - MIPS_REGSIZE);
 	}
       else if (high_word == 0x27be)	/* addiu $30,$sp,size */
 	{
@@ -2182,7 +2182,7 @@ restart:
       else if ((high_word & 0xFFE0) == 0xafc0)	/* sw reg,offset($30) */
 	{
 	  PROC_REG_MASK (&temp_proc_desc) |= 1 << reg;
-	  set_reg_offset (reg, frame_addr + low_word);
+	  set_reg_offset (temp_saved_regs, reg, frame_addr + low_word);
 	}
     }
 }
@@ -2581,15 +2581,18 @@ mips_init_extra_frame_info (int fromleaf, struct frame_info *fci)
 	  if (!PC_IN_SIGTRAMP (get_frame_pc (fci), name))
 	    {
 	      frame_saved_regs_zalloc (fci);
-	      memcpy (get_frame_saved_regs (fci), temp_saved_regs, SIZEOF_FRAME_SAVED_REGS);
-	      get_frame_saved_regs (fci)[PC_REGNUM]
-		= get_frame_saved_regs (fci)[RA_REGNUM];
-	      /* Set value of previous frame's stack pointer.  Remember that
-	         saved_regs[SP_REGNUM] is special in that it contains the
-		 value of the stack pointer register.  The other saved_regs
-		 values are addresses (in the inferior) at which a given
-		 register's value may be found.  */
-	      get_frame_saved_regs (fci)[SP_REGNUM] = get_frame_base (fci);
+	      /* Set value of previous frame's stack pointer.
+	         Remember that saved_regs[SP_REGNUM] is special in
+	         that it contains the value of the stack pointer
+	         register.  The other saved_regs values are addresses
+	         (in the inferior) at which a given register's value
+	         may be found.  */
+	      set_reg_offset (temp_saved_regs, SP_REGNUM,
+			      get_frame_base (fci));
+	      set_reg_offset (temp_saved_regs, PC_REGNUM,
+			      temp_saved_regs[RA_REGNUM]);
+	      memcpy (get_frame_saved_regs (fci), temp_saved_regs,
+		      SIZEOF_FRAME_SAVED_REGS);
 	    }
 	}
 
@@ -3807,8 +3810,7 @@ mips_pop_frame (void)
 
   proc_desc = get_frame_extra_info (frame)->proc_desc;
   write_register (PC_REGNUM, DEPRECATED_FRAME_SAVED_PC (frame));
-  if (get_frame_saved_regs (frame) == NULL)
-    DEPRECATED_FRAME_INIT_SAVED_REGS (frame);
+  mips_find_saved_regs (frame);
   for (regnum = 0; regnum < NUM_REGS; regnum++)
     if (regnum != SP_REGNUM && regnum != PC_REGNUM
 	&& get_frame_saved_regs (frame)[regnum])
@@ -5922,7 +5924,7 @@ mips_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_dwarf2_reg_to_regnum (gdbarch, mips_dwarf_dwarf2_ecoff_reg_to_regnum);
 
   /* Initialize a frame */
-  set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, mips_frame_init_saved_regs);
+  set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, mips_find_saved_regs);
   set_gdbarch_deprecated_init_extra_frame_info (gdbarch, mips_init_extra_frame_info);
 
   /* MIPS version of CALL_DUMMY */

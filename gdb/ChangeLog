@@ -1,5 +1,16 @@
 2003-05-31  Andrew Cagney  <cagney@redhat.com>
 
+	* mips-tdep.c (set_reg_offset): Add saved_regs parameter.  Add
+	forward declaration.
+	(mips16_heuristic_proc_desc): Pass temp_saved_regs.
+	(mips16_heuristic_proc_desc): Pass temp_saved_regs.
+	(mips_find_saved_regs): Use set_reg_offset.
+	(mips_frame_init_saved_regs): Delete function.
+	(mips_pop_frame): Call mips_find_saved_regs instead of
+	DEPRECATED_FRAME_INIT_SAVED_REGS.
+
+2003-05-31  Andrew Cagney  <cagney@redhat.com>
+
 	* mips-tdep.c (mips_gdbarch_init): Do not set
 	deprecated_max_register_raw_size, register_virtual_size, and
 	deprecated_max_register_virtual_size.
