@@ -1,5 +1,26 @@
 Wed Sep 28 14:56:39 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
+	* configure.in: Set bfd_gas for all sparc targets in one place,
+	instead of separately for each.  Correctly handle user-supplied
+	"--enable-bfd-gas" option.
+
+	* gdbinit.in: Move "break abort" to end, in case gdb complains.
+
+	* as.h (PRINTF_WHERE_LIKE, PRINT_LIKE) [USE_STDARG, !__GNUC__]:
+	Use PARAMS macro.
+
+	* symbols.c (resolve_symbol_value, case O_symbol): Don't do any
+	processing if add_symbol is undefined or in expr_section.
+	(resolve_symbol_value, case O_add): For symbol plus
+	constant-valued symbol, convert to O_symbol and re-reduce.
+	(S_GET_VALUE): If symbol needs resolving, resolve it.
+	(indent_level): No longer static.
+	(print_symbol_value_1): Don't print frag address if it matches
+	zero_address_frag.  Don't print "resolving" if already resolved.
+	Print segment name.  Don't call print_expr_1 on an undefined
+	symbol.
+	(print_expr_1): Fix whitespace before printing X_add_number.
+
 	* expr.c (make_expr_symbol): No longer static.  Use symbol_create,
 	not symbol_new, for symbols holding expression values.
 	* expr.h (make_expr_symbol): Move declaration here.
