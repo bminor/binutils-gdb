@@ -89,6 +89,7 @@ TESTS= \
 	t-ctret.ok \
 	t-hsw.ok \
 	t-ldsr.ok \
+	t-sld.ok \
 	t-sxb.ok \
 	t-sxh.ok \
 	t-zxb.ok \
