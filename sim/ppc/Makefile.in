@@ -214,7 +214,8 @@ LIB_SRC = \
 	interrupts.c \
 	devices.c \
 	device_tree.c \
-	mon.c
+	mon.c \
+	options.c
 
 MAIN_SRC = \
 	main.c \
@@ -225,6 +226,7 @@ MAIN_SRC = \
 #       first
 LIB_OBJ = \
 	debug.o \
+	options.o \
 	filter_filename.o \
 	bits.o \
 	sim-endian.o \
@@ -266,6 +268,7 @@ $(TARGETLIB): tmp-igen tmp-dgen $(LIB_OBJ) $(GDB_OBJ)
 # Given that inlines are turned on now, rebuild psim whenever
 # anything changes.
 psim.o: psim.c psim.h $(CPU_H) $(IDECODE_H) $(INLINE) $(LIB_SRC) $(BUILT_SRC)
+	$(CC) -c $(CFLAGS) $(INLINE_CFLAGS) $(CONFIG_CFLAGS) $(SIM_CFLAGS) $(HDEFINES) $(TDEFINES) $(INCLUDES) $<
 
 bits.o: bits.c $(BASICS_H)
 
@@ -298,11 +301,11 @@ function_unit.o: function_unit.c $(CPU_H)
 
 events.o: events.c events.h $(BASICS_H) 
 
-sim_calls.o: sim_calls.c $(PSIM_H) function_unit.h itable.h ../../gdb/tm.h devices.h
+sim_calls.o: sim_calls.c $(PSIM_H) function_unit.h itable.h ../../gdb/tm.h devices.h options.h
 
 spreg.o: spreg.h spreg.c words.h
 
-main.o: main.c $(PSIM_H) function_unit.h itable.h
+main.o: main.c $(PSIM_H) function_unit.h itable.h options.h
 
 devices.o: devices.c devices.h $(BASICS_H) \
 	device_tree.h events.h
@@ -315,6 +318,8 @@ semantics.o: semantics.c semantics.h $(CPU_H) $(IDECODE_H)
 itable.o: itable.c itable.h
 
 mon.o: mon.c $(CPU_H)
+
+options.o: options.c $(BASICS_H)
 
 #
 # Rules to create the built c source code files

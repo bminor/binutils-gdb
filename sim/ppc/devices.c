@@ -370,7 +370,7 @@ console_io_read_buffer_callback(const device *me,
 
   /* determine what was read */
 
-  switch (addr) {
+  switch ((int)addr) {
 
   case console_read_buffer:
     val = console->input.buffer;
@@ -441,7 +441,7 @@ console_io_write_buffer_callback(const device *me,
   unsigned_1 val = *(unsigned8*)source;
   DTRACE_IO_WRITE_BUFFER(console);
 
-  switch (addr) {
+  switch ((int)addr) {
   case console_read_buffer:
     console->input.buffer = val;
     break;
@@ -1223,10 +1223,11 @@ update_for_binary_section(bfd *abfd,
   section_vma = bfd_get_section_vma(abfd, the_section);
 
   DTRACE(binary,
-	 ("name=%-7s, vma=0x%.8x, size=%6d, flags=%3x(%s%s%s%s )\n",
+	 ("name=%-7s, vma=0x%.8lx, size=%6ld, flags=%3lx(%s%s%s%s%s )\n",
 	  bfd_get_section_name(abfd, the_section),
-	  section_vma, section_size,
-	  bfd_get_section_flags(abfd, the_section),
+	  (long)section_vma,
+	  (long)section_size,
+	  (long)bfd_get_section_flags(abfd, the_section),
 	  bfd_get_section_flags(abfd, the_section) & SEC_LOAD ? " LOAD" : "",
 	  bfd_get_section_flags(abfd, the_section) & SEC_CODE ? " CODE" : "",
 	  bfd_get_section_flags(abfd, the_section) & SEC_DATA ? " DATA" : "",
@@ -1387,8 +1388,8 @@ write_stack_arguments(psim *system,
 		      unsigned_word end_arg)
 {
   DTRACE(stack,
-	("write_stack_arguments(system=0x%x, arg=0x%x, start_block=0x%x, end_block=0x%x, start_arg=0x%x, end_arg=0x%x)\n",
-	 system, arg, start_block, end_block, start_arg, end_arg));
+	("write_stack_arguments(system=0x%lx, arg=0x%lx, start_block=0x%lx, end_block=0x%lx, start_arg=0x%lx, end_arg=0x%lx)\n",
+	 (long)system, (long)arg, (long)start_block, (long)end_block, (long)start_arg, (long)end_arg));
   if (arg == NULL)
     error("write_arguments: character array NULL\n");
   /* only copy in arguments, memory is already zero */
@@ -1396,9 +1397,9 @@ write_stack_arguments(psim *system,
     int len = strlen(*arg)+1;
     unsigned_word target_start_block;
     DTRACE(stack,
-	  ("write_stack_arguments() write %s=%s at %s=0x%x %s=0x%x %s=0x%x\n",
-	   "**arg", *arg, "start_block", start_block,
-	   "len", len, "start_arg", start_arg));
+	  ("write_stack_arguments() write %s=%s at %s=0x%lx %s=0x%lx %s=0x%lx\n",
+	   "**arg", *arg, "start_block", (long)start_block,
+	   "len", (long)len, "start_arg", (long)start_arg));
     if (psim_write_memory(system, 0, *arg,
 			  start_block, len,
 			  0/*violate_readonly*/) != len)
@@ -1518,8 +1519,8 @@ stack_ioctl_callback(const device *me,
   envp = va_arg(ap, char **);
   va_end(ap);
   DTRACE(stack,
-	 ("stack_ioctl_callback(me=0x%x:%s, system=0x%x, processor=0x%x, cia=0x%x, argv=0x%x, envp=0x%x)\n",
-	  me, me->full_name, system, processor, cia, argv, envp));
+	 ("stack_ioctl_callback(me=0x%lx:%s, system=0x%lx, processor=0x%lx, cia=0x%lx, argv=0x%lx, envp=0x%lx)\n",
+	  (long)me, me->full_name, (long)system, (long)processor, (long)cia, (long)argv, (long)envp));
   if (strcmp(me->name, "stack@elf") == 0)
     create_elf_stack_frame(system, stack_pointer, argv, envp);
   else if (strcmp(me->name, "stack@xcoff") == 0)

@@ -78,6 +78,8 @@ mon.c
 mon.h
 os_emul.c
 os_emul.h
+options.c
+options.h
 ppc-cache-rules
 ppc-instructions
 ppc-opcode-complex

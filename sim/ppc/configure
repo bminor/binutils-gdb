@@ -14,7 +14,7 @@ ac_default_prefix=/usr/local
 ac_help="$ac_help
   --enable-sim-cflags=opts		Extra CFLAGS for use in building simulator"
 ac_help="$ac_help
-  --enable-sim-warnings=opts		Extra CFLAGS for turning on compiler warnings"
+  --enable-sim-warnings=opts		Extra CFLAGS for turning on compiler warnings except for idecode.o, semantics.o and psim.o"
 ac_help="$ac_help
   --enable-sim-config=file		Override default config file"
 ac_help="$ac_help
@@ -465,7 +465,7 @@ fi
 enableval="$enable_sim_warnings"
 if test -n "$enableval"; then
   case "${enableval}" in
-  yes)	sim_warnings="-Wall";;
+  yes)	sim_warnings="-Wall -Wpointer-arith -Wbad-function-cast -Wmissing-prototypes -Wmissing-declarations";;
   no)	sim_warnings="-w";;
   *)	sim_warnings=`echo "${enableval}" | sed -e "s/,/ /g"`;;
 esac

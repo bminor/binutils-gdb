@@ -81,8 +81,8 @@ typedef void (device_init_callback)
 
 #define DTRACE_INIT(OBJECT) \
      DTRACE(OBJECT, \
-	    (#OBJECT "_init(me=0x%x:%s system=0x%x)\n", \
-	     me, me->full_name, system))
+	    (#OBJECT "_init(me=0x%lx:%s system=0x%lx)\n", \
+	     (long)me, me->full_name, (long)system))
 
 /* Data transfers:
 
@@ -173,12 +173,14 @@ typedef void (device_config_address_callback)
 
 #define DTRACE_ATTACH_ADDRESS(OBJECT) \
      DTRACE(OBJECT, \
-	    (#OBJECT "_attach_address(me=0x%x:%s, name=%s, attach=%d, space=%d, addr=0x%x, nr_bytes=%d, access=%d, who=0x%x)\n", \
-	     me, me->full_name, name, attach, space, addr, nr_bytes, access, who))
+	    (#OBJECT "_attach_address(me=0x%lx:%s, name=%s, attach=%ld, space=%ld, addr=0x%lx, nr_bytes=%ld, access=%ld, who=0x%lx)\n", \
+	     (long)me, me->full_name, name, (long)attach, (long)space, \
+	     (long)addr, (long)nr_bytes, (long)access, (long)who))
 #define DTRACE_DETACH_ADDRESS(OBJECT) \
      DTRACE(OBJECT, \
-	    (#OBJECT "_detach_address(me=0x%x:%s, name=%s, attach=%d, space=%d, addr=0x%x, nr_bytes=%d, access=%d, who=0x%x)\n", \
-	     me, me->full_name, name, attach, space, addr, nr_bytes, access, who))
+	    (#OBJECT "_detach_address(me=0x%lx:%s, name=%s, attach=%ld, space=%ld, addr=0x%lx, nr_bytes=%ld, access=%ld, who=0x%lx)\n", \
+	     (long)me, me->full_name, name, (long)attach, (long)space, \
+	     (long)addr, (long)nr_bytes, (long)access, (long)who))
 
 
 typedef unsigned (device_io_read_buffer_callback)
@@ -201,12 +203,14 @@ typedef unsigned (device_io_write_buffer_callback)
 
 #define DTRACE_IO_READ_BUFFER(OBJECT) \
      DTRACE(OBJECT, \
-	    (#OBJECT "_io_read_buffer(me=0x%x:%s dest=0x%x space=%d addr=0x%x nr_bytes=%d processor=0x%x cia=0x%x)\n", \
-	     me, me->full_name, dest, space, addr, nr_bytes, processor, cia))
+	    (#OBJECT "_io_read_buffer(me=0x%lx:%s dest=0x%lx space=%ld addr=0x%lx nr_bytes=%ld processor=0x%lx cia=0x%lx)\n", \
+	     (long)me, me->full_name, (long)dest, (long)space, (long)addr, \
+	     (long)nr_bytes, (long)processor, (long)cia))
 #define DTRACE_IO_WRITE_BUFFER(OBJECT) \
      DTRACE(OBJECT, \
-	    (#OBJECT "_io_write_buffer(me=0x%x:%s source=0x%x space=%d addr=0x%x nr_bytes=%d processor=0x%x cia=0x%x)\n", \
-	     me, me->full_name, source, space, addr, nr_bytes, processor, cia))
+	    (#OBJECT "_io_write_buffer(me=0x%lx:%s source=0x%lx space=%ld addr=0x%lx nr_bytes=%ld processor=0x%lx cia=0x%lx)\n", \
+	     (long)me, me->full_name, (long)source, (long)space, (long)addr, \
+	     (long)nr_bytes, (long)processor, (long)cia))
 
 
 typedef unsigned (device_dma_read_buffer_callback)
@@ -226,12 +230,12 @@ typedef unsigned (device_dma_write_buffer_callback)
 
 #define DTRACE_DMA_READ_BUFFER(OBJECT) \
      DTRACE(OBJECT, \
-	    (#OBJECT "_dma_read_buffer(me=0x%x:%s dest=0x%x space=%d addr=0x%x nr_bytes=%d)\n", \
-	     me, me->full_name, dest, space, addr, nr_bytes))
+	    (#OBJECT "_dma_read_buffer(me=0x%lx:%s dest=0x%lx space=%ld addr=0x%lx nr_bytes=%ld)\n", \
+	     (long)me, me->full_name, (long)dest, (long)space, (long)addr, (long)nr_bytes))
 #define DTRACE_DMA_WRITE_BUFFER(OBJECT) \
      DTRACE(OBJECT, \
-	    (#OBJECT "_dma_write_buffer(me=0x%x:%s source=0x%x space=%d addr=0x%x nr_bytes=%d)\n", \
-	     me, me->full_name, source, space, addr, nr_bytes))
+	    (#OBJECT "_dma_write_buffer(me=0x%lx:%s source=0x%lx space=%ld addr=0x%lx nr_bytes=%ld)\n", \
+	     (long)me, me->full_name, (long)source, (long)space, (long)addr, (long)nr_bytes))
 
 
 /* Interrupts:

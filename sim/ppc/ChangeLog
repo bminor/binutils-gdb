@@ -1,5 +1,53 @@
 Wed Nov  8 13:19:47 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
+	* options.c: New file to print out all of the WITH_ options.
+	* options.h: New include file to declare print_options.
+	* debug.h (trace_options): Add trace_opts to call print_options.
+	* debug.c (trace_description): Add trace_opts support.
+	* main.c (main): If user requested options, print them.
+	* sim_calls.c (sim_open): Ditto.
+	
+	* igen.c (opcode_field_new): Add void to make it a proper prototype.
+
+	* emul_generic.c (emul_enter_call): Make printf_filtered arguments
+	type correct.
+	* emul_netbsd.c (do_kill): Ditto.
+	* registers.c (registers_dump): Ditto.
+	* vm.c (om_translate_effective_to_real): Ditto.
+	* vm_n.h (vm_data_map_read_N): Ditto.
+	(vm_data_map_write_N): Ditto.
+	* devices.h (DTRACE_INIT): Ditto.
+	(DTRACE_{ATTACH,DETACH}_ADDRESS): Ditto.
+	(DTRACE_IO_{READ,WRITE}_BUFFER): Ditto.
+	(DTRACE_DMA_{READ,WRITE}_BUFFER): Ditto.
+	* devices.c (update_for_binary_section): Ditto.
+	(write_stack_arguments): Ditto.
+	(stack_ioctl_callback): Ditto.
+	* device_tree.c (device_tree_add_passthrough): Ditto.
+	(device_tree_{add,find}_device): Ditto.
+	(device_tree_{add,find}_integer): Ditto.
+	(device_tree_find_{string,boolean}): Ditto.
+	(device_tree_init{,_device}): Ditto.
+	(device_tree_dump): Ditto.
+	* sim_calls.c (sim_{read,write}): Ditto.
+	(sim_{fetch,store}_register): Ditto.
+	(sim_stop_reason): Ditto.
+
+	* sim_callbacks.h (printf_filtered): Declare with attribute
+	printf, so we can enable format checks.
+
+	* devices.c (console_io_{read,write}_buffer_callback): Cast swtich
+	argument to int, since ANSI doesn't allow long switch values.
+	* emul_netbsd.c (do___sysctl): Ditto.
+
+	* emul_netbsd.c (do___sysctl): Fix up printf call.
+	
+	* corefile.c (core_translate): Don't do arithmetic with void *
+	pointers.  Cast to char * first.
+	
+	* function_unit.c (FUNC_{LOAD,STORE}): Rename from {LOAD,STORE}
+	and change all uses.
+
 	* Makefile.in ({FUNC,MODEL,WARNING}_CFLAGS): New flags set by
 	configure --enable switches.
 	(CONFIG_CFLAGS): Include FUNC_CFLAGS and MODE_CFLAGS.
@@ -11,9 +59,9 @@ Wed Nov  8 13:19:47 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 	(BUILT_SRC): Include BUILT_SRC_WO_CONFIG, config.h and
 	ppc-config.h.
 	(filter_filename.o): Include config.h/ppc-config.h dependencies.
-	(idecode.o, semantics.o): Specify CC line without WARNING_CFLAGS
-	so that we don't get all of the unused variable warnings that are
-	generated.
+	(idecode.o, semantics.o, psim.o): Specify CC line without
+	WARNING_CFLAGS so that we don't get all of the unused variable
+	warnings that are generated.
 	(function_unit.o): Add rule to build.
 	(main.o, sim_calls.o): Add function_unit.h, itable.h dependencies.
 	(mon.o): Include mon.c dependency.

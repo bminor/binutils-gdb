@@ -503,7 +503,7 @@ struct _opcode_field {
 };
 
 static opcode_field *
-opcode_field_new()
+opcode_field_new(void)
 {
   opcode_field *new_field = (opcode_field*)zalloc(sizeof(opcode_field));
   ASSERT(new_field != NULL);

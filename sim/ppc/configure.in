@@ -11,9 +11,9 @@ AC_ARG_ENABLE(sim-cflags,
 esac],[sim_cflags=""])dnl
 
 AC_ARG_ENABLE(sim-warnings,
-[  --enable-sim-warnings=opts		Extra CFLAGS for turning on compiler warnings except for idecode.o and semantics.o],
+[  --enable-sim-warnings=opts		Extra CFLAGS for turning on compiler warnings except for idecode.o, semantics.o and psim.o],
 [case "${enableval}" in
-  yes)	sim_warnings="-Wall";;
+  yes)	sim_warnings="-Wall -Wpointer-arith -Wbad-function-cast -Wmissing-prototypes -Wmissing-declarations";;
   no)	sim_warnings="-w";;
   *)	sim_warnings=`echo "${enableval}" | sed -e "s/,/ /g"`;;
 esac],[sim_warnings=""])dnl

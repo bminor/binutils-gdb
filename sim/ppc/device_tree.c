@@ -207,7 +207,7 @@ device_tree_add_passthrough(device_tree *root,
 {
   device_tree *new_node;
   TRACE(trace_device_tree,
-	("device_tree_add_passthrough(root=0x%x, path=%s)\n", root, path));
+	("device_tree_add_passthrough(root=0x%lx, path=%s)\n", (long)root, path));
   new_node = device_tree_find_node(root,
 				   path,
 				   path, /*full_path*/
@@ -220,7 +220,7 @@ device_tree_add_passthrough(device_tree *root,
 					new_node->parent->device);
   
   TRACE(trace_device_tree,
-	("device_tree_add_passthrough() = 0x%x\n", new_node));
+	("device_tree_add_passthrough() = 0x%lx\n", (long)new_node));
   return new_node;
 }
 
@@ -232,8 +232,8 @@ device_tree_add_device(device_tree *root,
 {
   device_tree *new_node;
   TRACE(trace_device_tree,
-	("device_tree_add_device(root=0x%x, path=%s, dev=0x%x)\n",
-	 root, path, dev));
+	("device_tree_add_device(root=0x%lx, path=%s, dev=0x%lx)\n",
+	 (long)root, path, (long)dev));
   new_node = device_tree_find_node(root,
 				   path,
 				   path, /* full-path */
@@ -241,7 +241,7 @@ device_tree_add_device(device_tree *root,
 				   device_tree_grow);
   new_node->device = dev;
   TRACE(trace_device_tree,
-	("device_tree_add_device() = 0x%x\n", new_node));
+	("device_tree_add_device() = 0x%lx\n", (long)new_node));
   return new_node;
 }
 
@@ -252,8 +252,8 @@ device_tree_add_integer(device_tree *root,
 {
   device_tree *new_node;
   TRACE(trace_device_tree,
-	("device_tree_add_integer(root=0x%x, path=%s, integer=%d)\n",
-	 root, path, integer));
+	("device_tree_add_integer(root=0x%lx, path=%s, integer=%ld)\n",
+	 (long)root, path, (long)integer));
   new_node = device_tree_find_node(root,
 				   path,
 				   path, /* full-name */
@@ -261,7 +261,7 @@ device_tree_add_integer(device_tree *root,
 				   device_tree_grow);
   new_node->integer = integer;
   TRACE(trace_device_tree,
-	("device_tree_add_integer() = 0x%x\n", new_node));
+	("device_tree_add_integer() = 0x%lx\n", (long)new_node));
   return new_node;
 }
 
@@ -272,8 +272,8 @@ device_tree_add_string(device_tree *root,
 {
   device_tree *new_node;
   TRACE(trace_device_tree,
-	("device_tree_add_device(root=0x%x, path=%s, string=%s)\n",
-	 root, path, string));
+	("device_tree_add_device(root=0x%lx, path=%s, string=%s)\n",
+	 (long)root, path, string));
   new_node = device_tree_find_node(root,
 				   path,
 				   path, /* full-name */
@@ -281,7 +281,7 @@ device_tree_add_string(device_tree *root,
 				   device_tree_grow);
   new_node->string = strdup(string);
   TRACE(trace_device_tree,
-	("device_tree_add_string() = 0x%x\n", new_node));
+	("device_tree_add_string() = 0x%lx\n", (long)new_node));
   return new_node;
 }
 
@@ -292,8 +292,8 @@ device_tree_add_boolean(device_tree *root,
 {
   device_tree *new_node;
   TRACE(trace_device_tree,
-	("device_tree_add_boolean(root=0x%x, path=%s, boolean=%d)\n",
-	 root, path, boolean));
+	("device_tree_add_boolean(root=0x%lx, path=%s, boolean=%d)\n",
+	 (long)root, path, boolean));
   new_node = device_tree_find_node(root,
 				   path,
 				   path, /* full-name */
@@ -301,7 +301,7 @@ device_tree_add_boolean(device_tree *root,
 				   device_tree_grow);
   new_node->boolean = boolean;
   TRACE(trace_device_tree,
-	("device_tree_add_boolean() = 0x%x\n", new_node));
+	("device_tree_add_boolean() = 0x%lx\n", (long)new_node));
   return new_node;
 }
 
@@ -311,14 +311,14 @@ device_tree_add_found_device(device_tree *root,
 {
   device_tree *new_node;
   TRACE(trace_device_tree,
-	("device_tree_add_found_device(root=0x%x, path=%s)\n",
-	 root, path));
+	("device_tree_add_found_device(root=0x%lx, path=%s)\n",
+	 (long)root, path));
   new_node = device_tree_add_device(root, path, NULL);
   new_node->device = device_create(new_node->name,
 				   path,
 				   new_node->parent->device);
   TRACE(trace_device_tree,
-	("device_tree_add_found_device() = 0x%x\n", new_node));
+	("device_tree_add_found_device() = 0x%lx\n", (long)new_node));
   return new_node;
 }
 
@@ -331,14 +331,14 @@ device_tree_find_device(device_tree *root,
 {
   device_tree *node;
   TRACE(trace_device_tree,
-	("device_tree_find_device(root=0x%x, path=%s)\n", root, path));
+	("device_tree_find_device(root=0x%lx, path=%s)\n", (long)root, path));
   node = device_tree_find_node(root,
 			       path,
 			       path, /* full-name */
 			       node_device,
 			       device_tree_abort);
   TRACE(trace_device_tree,
-	("device_tree_find_device() = 0x%x\n", node->device));
+	("device_tree_find_device() = 0x%lx\n", (long)node->device));
   return node->device;
 }
 
@@ -348,14 +348,14 @@ device_tree_find_integer(device_tree *root,
 {
   device_tree *node;
   TRACE(trace_device_tree,
-	("device_tree_find_integer(root=0x%x, path=%s)\n", root, path));
+	("device_tree_find_integer(root=0x%lx, path=%s)\n", (long)root, path));
   node = device_tree_find_node(root,
 			       path,
 			       path, /* full-name */
 			       node_integer,
 			       device_tree_abort);
   TRACE(trace_device_tree,
-	("device_tree_find_integer() = %d\n", node->integer));
+	("device_tree_find_integer() = %ld\n", (long)node->integer));
   return node->integer;
 }
 
@@ -365,14 +365,14 @@ device_tree_find_string(device_tree *root,
 {
   device_tree *node;
   TRACE(trace_device_tree,
-	("device_tree_find_string(root=0x%x, path=%s)\n", root, path));
+	("device_tree_find_string(root=0x%lx, path=%s)\n", (long)root, path));
   node = device_tree_find_node(root,
 			       path,
 			       path, /* full-name */
 			       node_string,
 			       device_tree_abort);
   TRACE(trace_device_tree,
-	("device_tree_find_string() = 0x%x\n", node->string));
+	("device_tree_find_string() = 0x%lx\n", (long)node->string));
   return node->string;
 }
 
@@ -382,14 +382,14 @@ device_tree_find_boolean(device_tree *root,
 {
   device_tree *node;
   TRACE(trace_device_tree,
-	("device_tree_find_boolean(root=0x%x, path=%s)\n", root, path));
+	("device_tree_find_boolean(root=0x%lx, path=%s)\n", (long)root, path));
   node = device_tree_find_node(root,
 			       path,
 			       path, /* full-name */
 			       node_boolean,
 			       device_tree_abort);
   TRACE(trace_device_tree,
-	("device_tree_find_boolean() = %d\n", node->boolean));
+	("device_tree_find_boolean() = %ld\n", (long)node->boolean));
   return node->boolean;
 }
 
@@ -404,8 +404,8 @@ device_tree_init_device(device_tree *root,
   system = (psim*)data;
   if (root->type == node_device) {
     TRACE(trace_device_tree,
-	  ("device_tree_init() initializing device=0x%x:%s\n",
-	   root->device, root->device->full_name));
+	  ("device_tree_init() initializing device=0x%lx:%s\n",
+	   (long)root->device, root->device->full_name));
     root->device->callback->init(root->device, system);
   }
 }
@@ -416,7 +416,7 @@ device_tree_init(device_tree *root,
 		 psim *system)
 {
   TRACE(trace_device_tree,
-	("device_tree_init(root=0x%x, system=0x%x)\n", root, system));
+	("device_tree_init(root=0x%lx, system=0x%lx)\n", (long)root, (long)system));
   device_tree_traverse(root, device_tree_init_device, NULL, system);
   TRACE(trace_device_tree,
 	("device_tree_init() = void\n"));
@@ -448,16 +448,16 @@ INLINE_DEVICE_TREE void
 device_tree_dump(device_tree *device,
 		 void *ignore_data_argument)
 {
-  printf_filtered("(device_tree@0x%x\n", device);
-  printf_filtered(" (parent 0x%x)\n", device->parent);
-  printf_filtered(" (children 0x%x)\n", device->children);
-  printf_filtered(" (sibling 0x%x)\n", device->sibling);
-  printf_filtered(" (type %d)\n", device->type);
+  printf_filtered("(device_tree@0x%lx\n", (long)device);
+  printf_filtered(" (parent 0x%lx)\n", (long)device->parent);
+  printf_filtered(" (children 0x%lx)\n", (long)device->children);
+  printf_filtered(" (sibling 0x%lx)\n", (long)device->sibling);
+  printf_filtered(" (type %ld)\n", (long)device->type);
   printf_filtered(" (name %s)\n", device->name);
-  printf_filtered(" (device 0x%x)\n", device->device);
-  printf_filtered(" (boolean %d)\n", device->boolean);
+  printf_filtered(" (device 0x%lx)\n", (long)device->device);
+  printf_filtered(" (boolean %ld)\n", (long)device->boolean);
   printf_filtered(" (string %s)\n", device->string);
-  printf_filtered(" (integer %d)\n", device->integer);
+  printf_filtered(" (integer %ld)\n", (long)device->integer);
   printf_filtered(")\n");
 }
 
