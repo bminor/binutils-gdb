@@ -328,7 +328,7 @@ md_begin ()
     subsegT orig_subseg = now_subseg;
 
     vuoverlay_table_section = subseg_new (SHNAME_DVP_OVERLAY_TABLE, 0);
-    record_alignment (now_seg, 3);
+    record_alignment (now_seg, 2);
     vuoverlay_string_section = subseg_new (SHNAME_DVP_OVERLAY_STRTAB, 0);
     /* Ensure first byte in executable is zero.  So what if we waste
        a few bytes.  */
@@ -2364,19 +2364,19 @@ create_vuoverlay_section (section_name, addr, start_label, end_label)
       exp.X_op = O_symbol;
       exp.X_add_symbol = name_label;
       exp.X_add_number = 0;
-      emit_expr (&exp, 8);
+      emit_expr (&exp, 4);
 
       /* The section's lma.  */
       exp.X_op = O_symbol;
       exp.X_add_symbol = start_label;
       exp.X_add_number = 0;
-      emit_expr (&exp, 8);
+      emit_expr (&exp, 4);
 
       /* The section's vma.  */
       exp.X_op = O_symbol;
       exp.X_add_symbol = addr;
       exp.X_add_number = 0;
-      emit_expr (&exp, 8);
+      emit_expr (&exp, 4);
     }
 
   /* Restore the original seg/subseg.  */
