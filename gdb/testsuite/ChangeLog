@@ -1,5 +1,8 @@
 2002-02-21  Jim Blandy  <jimb@redhat.com>
 
+	* gdb.asm/asm-source.exp: Parse the output from `info sources' one
+	filename at a time, and watch for the ones we want to see.
+
 	* gdb.base/ptype.exp, gdb.base/ptype.c: Add tests for printing
 	types of pointers to prototyped functions.
 

@@ -202,10 +202,37 @@ gdb_test "info source" \
 	"Current source file is .*asmsrc2.s.*Source language is asm.*" \
 	"info source asmsrc2.s"
 
-# Try 'info sources'
-gdb_test "info sources" \
-	"Source files .*asmsrc\[12\].s.*asmsrc\[12\].s.*" \
-	"info sources"
+# Try 'info sources'.  This can produce a lot of output on systems
+# with dynamic linking, where the system's shared libc was compiled
+# with debugging info; for example, on Linux, this produces 47kb of
+# output.  So we consume it as we go.
+send_gdb "info sources\n"
+set seen_asmsrc_1 0
+set seen_asmsrc_2 0
+gdb_expect {
+    -re "^\[^,\]*asmsrc1.s(, |\[\r\n\]+)" {
+        set seen_asmsrc_1 1
+        exp_continue
+    }
+    -re "^\[^,\]*asmsrc2.s(, |\[\r\n\]+)" {
+        set seen_asmsrc_2 1
+        exp_continue
+    }
+    -re ", " { 
+        exp_continue
+    }
+    -re "$gdb_prompt $" {
+        if {$seen_asmsrc_1 && $seen_asmsrc_2} {
+            pass "info sources"
+        } else {
+            fail "info sources"
+        }
+    }
+    timeout {
+            fail "info sources (timeout)"
+    }
+}
+        
 
 # Try 'info line'
 gdb_test "info line" \
