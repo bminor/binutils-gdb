@@ -1,5 +1,20 @@
 2005-01-09  Eric Botcazou  <ebotcazou@libertysurf.fr>
 
+	* elf64-sparc.c (struct sparc64_elf_link_hash_table): New 'sgot' and
+	'srelgot' fields.
+	(create_got_section): New function.
+	(sparc64_elf_create_dynamic_sections): Likewise.
+	(sparc64_elf_check_relocs): Invoke create_got_section instead of
+	_bfd_elf_create_got_section.  Use the sgot and srelgot shortcuts.
+	(sparc64_elf_size_dynamic_sections): Use the srelgot shortcut.
+	(sparc64_elf_relocate_section): Use the sgot and srelgot shortcuts.
+	(sparc64_elf_finish_dynamic_symbol): Likewise.
+	(sparc64_elf_finish_dynamic_sections): Use the sgot shortcut.
+	(elf_backend_create_dynamic_sections): Define to
+	sparc64_elf_create_dynamic_sections.
+
+2005-01-09  Eric Botcazou  <ebotcazou@libertysurf.fr>
+
 	* elf32-sparc.c (elf32_sparc_omit_section_dynsym): New function.
 	(elf_backend_omit_section_dynsym): Define to it.
 	* elf64-sparc.c (sparc64_elf_omit_section_dynsym): New function.

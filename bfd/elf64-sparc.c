@@ -36,6 +36,10 @@
 
 static struct bfd_link_hash_table * sparc64_elf_bfd_link_hash_table_create
   PARAMS ((bfd *));
+static bfd_boolean create_got_section
+  PARAMS ((bfd *, struct bfd_link_info *));
+static bfd_boolean sparc64_elf_create_dynamic_sections
+  PARAMS ((bfd *, struct bfd_link_info *));
 static bfd_reloc_status_type init_insn_reloc
   PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *,
 	   bfd *, bfd_vma *, bfd_vma *));
@@ -738,6 +742,10 @@ struct sparc64_elf_link_hash_table
 {
   struct elf_link_hash_table root;
 
+  /* Short-cuts to get to dynamic linker sections.  */
+  asection *sgot;
+  asection *srelgot;
+
   struct sparc64_elf_app_reg app_regs [4];
 };
 
@@ -767,6 +775,57 @@ sparc64_elf_bfd_link_hash_table_create (abfd)
     }
 
   return &ret->root.root;
+}
+
+/* Create .got and .rela.got sections in DYNOBJ and set up
+   shortcuts to them in our hash table.  */
+
+static bfd_boolean
+create_got_section (dynobj, info)
+     bfd *dynobj;
+     struct bfd_link_info *info;
+{
+  struct sparc64_elf_link_hash_table *htab;
+
+  if (! _bfd_elf_create_got_section (dynobj, info))
+    return FALSE;
+
+  htab = sparc64_elf_hash_table (info);
+  htab->sgot = bfd_get_section_by_name (dynobj, ".got");
+  BFD_ASSERT (htab->sgot != NULL);
+
+  htab->srelgot = bfd_make_section (dynobj, ".rela.got");
+  if (htab->srelgot == NULL
+      || ! bfd_set_section_flags (dynobj, htab->srelgot, SEC_ALLOC
+							 | SEC_LOAD
+							 | SEC_HAS_CONTENTS
+							 | SEC_IN_MEMORY
+							 | SEC_LINKER_CREATED
+							 | SEC_READONLY)
+      || ! bfd_set_section_alignment (dynobj, htab->srelgot, 3))
+    return FALSE;
+  return TRUE;
+}
+
+/* Create .plt, .rela.plt, .got, .rela.got, .dynbss, and
+   .rela.bss sections in DYNOBJ, and set up shortcuts to them in our
+   hash table.  */
+
+static bfd_boolean
+sparc64_elf_create_dynamic_sections (dynobj, info)
+     bfd *dynobj;
+     struct bfd_link_info *info;
+{
+  struct sparc64_elf_link_hash_table *htab;
+
+  htab = sparc64_elf_hash_table (info);
+  if (!htab->sgot && !create_got_section (dynobj, info))
+    return FALSE;
+
+  if (!_bfd_elf_create_dynamic_sections (dynobj, info))
+    return FALSE;
+
+  return TRUE;
 }
 
 /* Utility for performing the standard initial work of an instruction
@@ -1137,35 +1196,22 @@ sparc64_elf_check_relocs (abfd, info, sec, relocs)
 
 	  if (dynobj == NULL)
 	    {
-	      /* Create the .got section.  */
+	      /* Create the .got and .rela.got sections.  */
 	      elf_hash_table (info)->dynobj = dynobj = abfd;
-	      if (! _bfd_elf_create_got_section (dynobj, info))
+	      if (! create_got_section (dynobj, info))
 		return FALSE;
 	    }
 
 	  if (sgot == NULL)
 	    {
-	      sgot = bfd_get_section_by_name (dynobj, ".got");
+	      sgot = sparc64_elf_hash_table (info)->sgot;
 	      BFD_ASSERT (sgot != NULL);
 	    }
 
 	  if (srelgot == NULL && (h != NULL || info->shared))
 	    {
-	      srelgot = bfd_get_section_by_name (dynobj, ".rela.got");
-	      if (srelgot == NULL)
-		{
-		  srelgot = bfd_make_section (dynobj, ".rela.got");
-		  if (srelgot == NULL
-		      || ! bfd_set_section_flags (dynobj, srelgot,
-						  (SEC_ALLOC
-						   | SEC_LOAD
-						   | SEC_HAS_CONTENTS
-						   | SEC_IN_MEMORY
-						   | SEC_LINKER_CREATED
-						   | SEC_READONLY))
-		      || ! bfd_set_section_alignment (dynobj, srelgot, 3))
-		    return FALSE;
-		}
+	      srelgot = sparc64_elf_hash_table (info)->srelgot;
+	      BFD_ASSERT (srelgot != NULL);
 	    }
 
 	  if (h != NULL)
@@ -1811,7 +1857,7 @@ sparc64_elf_size_dynamic_sections (output_bfd, info)
          not actually use these entries.  Reset the size of .rela.got,
          which will cause it to get stripped from the output file
          below.  */
-      s = bfd_get_section_by_name (dynobj, ".rela.got");
+      s = sparc64_elf_hash_table (info)->srelgot;
       if (s != NULL)
 	s->size = 0;
     }
@@ -2324,7 +2370,7 @@ sparc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	     offset table.  */
 	  if (sgot == NULL)
 	    {
-	      sgot = bfd_get_section_by_name (dynobj, ".got");
+	      sgot = sparc64_elf_hash_table (info)->sgot;
 	      BFD_ASSERT (sgot != NULL);
 	    }
 
@@ -2398,7 +2444,7 @@ sparc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 
 		      /* We need to generate a R_SPARC_RELATIVE reloc
 			 for the dynamic linker.  */
-		      s = bfd_get_section_by_name(dynobj, ".rela.got");
+		      s = sparc64_elf_hash_table (info)->srelgot;
 		      BFD_ASSERT (s != NULL);
 
 		      outrel.r_offset = (sgot->output_section->vma
@@ -2779,8 +2825,8 @@ sparc64_elf_finish_dynamic_symbol (output_bfd, info, h, sym)
 
       /* This symbol has an entry in the GOT.  Set it up.  */
 
-      sgot = bfd_get_section_by_name (dynobj, ".got");
-      srela = bfd_get_section_by_name (dynobj, ".rela.got");
+      sgot = sparc64_elf_hash_table (info)->sgot;
+      srela = sparc64_elf_hash_table (info)->srelgot;
       BFD_ASSERT (sgot != NULL && srela != NULL);
 
       rela.r_offset = (sgot->output_section->vma
@@ -2928,7 +2974,7 @@ sparc64_elf_finish_dynamic_sections (output_bfd, info)
 
   /* Set the first entry in the global offset table to the address of
      the dynamic section.  */
-  sgot = bfd_get_section_by_name (dynobj, ".got");
+  sgot = sparc64_elf_hash_table (info)->sgot;
   BFD_ASSERT (sgot != NULL);
   if (sgot->size > 0)
     {
@@ -3206,7 +3252,7 @@ const struct elf_size_info sparc64_elf_size_info =
   sparc64_elf_new_section_hook
 
 #define elf_backend_create_dynamic_sections \
-  _bfd_elf_create_dynamic_sections
+  sparc64_elf_create_dynamic_sections
 #define elf_backend_add_symbol_hook \
   sparc64_elf_add_symbol_hook
 #define elf_backend_get_symbol_type \
