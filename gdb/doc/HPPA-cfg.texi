@@ -16,40 +16,39 @@
 @c
 @c ----------------------------------------------------------------------
 @c PLATFORM FLAGS:
-@set GENERIC
+@clear GENERIC
 @c
 @c HP PA-RISC target:
 @set HPPA
 @c
 @c Hitachi H8/300 target:
-@set H8
+@clear H8
 @c Hitachi H8/300 target ONLY:
 @clear H8EXCLUSIVE
 @c
 @c remote MIPS target:
-@set MIPS
+@clear MIPS
 @c
 @c SPARC target:
-@set SPARC
-@set SPARCLET
+@clear SPARC
 @c
 @c AMD 29000 target:
-@set AMD29K
+@clear AMD29K
 @c
 @c Intel 960 target:
-@set I960
+@clear I960
 @c
 @c Tandem ST2000 (phone switch) target:
-@set ST2000
+@clear ST2000
 @c
 @c Zilog 8000 target:
-@set Z8K
+@clear Z8K
 @c
 @c Lucid "Energize" environment:
 @clear LUCID
 @c
 @c Wind River Systems VxWorks environment:
-@set VXWORKS
+@clear VXWORKS
 @c
 @c ----------------------------------------------------------------------
 @c DOC FEATURE FLAGS:
@@ -65,16 +64,16 @@
 @c switches for what to include.
 @clear CONLY
 @c Discuss Fortran?
-@set FORTRAN
+@clear FORTRAN
 @c
 @c Discuss Modula 2?
-@set MOD2
+@clear MOD2
 @c
 @c Specifically for host machine running DOS?
 @clear DOSHOST
 @c
 @c Talk about CPU simulator targets?
-@set SIMS
+@clear SIMS
 @c
 @c Is manual stand-alone, or part of an agglomeration, with overall GPL?
 @clear AGGLOMERATION
@@ -86,7 +85,7 @@
 @set POSIX
 @c
 @c Discuss remote serial debugging stub?
-@set REMOTESTUB
+@clear REMOTESTUB
 @c
 @c Discuss gdbserver?
 @set GDBSERVER
@@ -111,6 +110,9 @@
 @c
 @c Name of GDB initialization file.
 @set GDBINIT .gdbinit
+@c 
+@c Name of target.
+@set TARGET HP 9000 Systems
 @c 
 @c Name of host.  Should not be used in generic configs, but generic
 @c value may catch some flubs.

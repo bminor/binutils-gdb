@@ -1,3 +1,16 @@
+Wed Jan  6 11:55:34 1999  David Taylor  <taylor@texas.cygnus.com>
+
+	The following changes were made by Edith Epstein
+ 	<eepstein@cygnus.com> as part of a project to merge in changes
+ 	made by HP.
+	
+	* HPPA-cfg.texi: new file.
+
+	* all-cfg.texi: set HPPA for HP PA-RISC targets.
+
+	* refcard.tex: change documentation about catch.
+	  removed info catch.
+
 Mon Jan  4 18:29:18 1999  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* gdbint.texinfo: Expand on GDB's coding standards,
