@@ -7048,7 +7048,6 @@ is_label (str)
 
 /* We have no need to default values of symbols.  */
 
-/* ARGSUSED */
 symbolS *
 md_undefined_symbol (name)
      char *name ATTRIBUTE_UNUSED;
@@ -7100,7 +7099,6 @@ md_pcrel_from (fixP)
 #ifndef BFD_ASSEMBLER
 #ifdef OBJ_COFF
 
-/*ARGSUSED*/
 void
 tc_coff_symbol_emit_hook (ignore)
      symbolS *ignore ATTRIBUTE_UNUSED;

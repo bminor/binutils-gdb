@@ -72,7 +72,7 @@ typedef int packing_type;
 static packing_type etype = PACK_UNSPEC; /* Used by d10v_cleanup.  */
 
 /* True if instruction swapping warnings should be inhibited.
-   --nowarnswap.  */   
+   --nowarnswap.  */
 static boolean flag_warn_suppress_instructionswap;
 
 /* True if instruction packing should be performed when --gstabs is specified.

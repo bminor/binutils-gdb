@@ -2788,7 +2788,6 @@ s_endian (ignore)
 
 /* We have no need to default values of symbols.  */
 
-/* ARGSUSED */
 symbolS *
 md_undefined_symbol (name)
      char *name;

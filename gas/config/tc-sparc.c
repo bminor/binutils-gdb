@@ -4101,7 +4101,7 @@ sparc_handle_align (fragp)
   char *p;
 
   count = fragp->fr_next->fr_address - fragp->fr_address - fragp->fr_fix;
-  
+
   switch (fragp->fr_type)
     {
     case rs_align_test:

@@ -4595,7 +4595,6 @@ md_convert_frag (abfd, sec, fragp)
 
 /* We have no need to default values of symbols.  */
 
-/*ARGSUSED*/
 symbolS *
 md_undefined_symbol (name)
      char *name ATTRIBUTE_UNUSED;

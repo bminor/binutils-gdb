@@ -56,7 +56,7 @@ const struct suffix_classes {
   { "SUFFIX_NONE", 11 }
 };
 
-#define MAXSUFFIXCLASS (sizeof(suffixclass) / sizeof(struct suffix_classes))
+#define MAXSUFFIXCLASS (sizeof (suffixclass) / sizeof (struct suffix_classes))
 
 const struct syntax_classes {
   char *name;
@@ -71,7 +71,7 @@ const struct syntax_classes {
   { "SYNTAX_2OP",                 10, SYNTAX_2OP|SYNTAX_VALID }
 };
 
-#define MAXSYNTAXCLASS (sizeof(syntaxclass) / sizeof(struct syntax_classes))
+#define MAXSYNTAXCLASS (sizeof (syntaxclass) / sizeof (struct syntax_classes))
 
 const pseudo_typeS md_pseudo_table[] =
 {
@@ -104,9 +104,9 @@ const char comment_chars[] = "#;";
    .line and .file directives will appear in the pre-processed output */
 /* Note that input_file.c hand checks for '#' at the beginning of the
    first line of the input file.  This is because the compiler outputs
-   #NO_APP at the beginning of its output. */
+   #NO_APP at the beginning of its output.  */
 /* Also note that comments started like this one will always
-   work if '/' isn't otherwise defined. */
+   work if '/' isn't otherwise defined.  */
 const char line_comment_chars[] = "#";
 
 const char line_separator_chars[] = "";
@@ -599,7 +599,7 @@ md_assemble (str)
 						    NULL);
 		           else
 			     insn |= suffix->value << operand->shift;
- 
+
 		           str = t;
 		           found = 1;
 		           break;
@@ -674,7 +674,7 @@ md_assemble (str)
                     break;
 		  /* If this is a register constant (IE: one whose
 		     register value gets stored as 61-63) then this
-		     must be a limm. */
+		     must be a limm.  */
 		  /* ??? This bit could use some cleaning up.
 		     Referencing the format chars like this goes
 		     against style.  */
@@ -682,7 +682,7 @@ md_assemble (str)
 		    {
 		      const char *junk;
 		      limm_reloc_p = 1;
-                      /* save this, we don't yet know what reloc to use */ 
+                      /* save this, we don't yet know what reloc to use */
                       fix_up_at = fc;
 		      /* Tell insert_reg we need a limm.  This is
 			 needed because the value at this point is
@@ -953,10 +953,10 @@ arc_extoper (opertype)
           free(name);
           return;
         }
-    
+
       input_line_pointer++;		/* skip ',' */
       mode = input_line_pointer;
-    
+
       if (!strncmp(mode, "r|w",3))
         {
           imode = 0;
@@ -1014,7 +1014,7 @@ arc_extoper (opertype)
             }
           else
            {
-             input_line_pointer += 12; 
+             input_line_pointer += 12;
            }
          }
        }
@@ -1037,11 +1037,11 @@ arc_extoper (opertype)
    }
 
   ext_oper = (struct arc_ext_operand_value *) \
-      xmalloc(sizeof(struct arc_ext_operand_value));
+      xmalloc(sizeof (struct arc_ext_operand_value));
 
   if(opertype)
     {
-      /* if the symbol already exists, point it at the new definition */ 
+      /* if the symbol already exists, point it at the new definition */
       if ((symbolP = symbol_find (name)))
         {
           if (S_GET_SEGMENT(symbolP) == reg_section)
@@ -1304,7 +1304,7 @@ arc_extinst (ignore)
     strcat(syntax,"%F");
   strcat(syntax,"%S%L");
 
-  ext_op = (struct arc_opcode *) xmalloc(sizeof(struct arc_opcode));
+  ext_op = (struct arc_opcode *) xmalloc(sizeof (struct arc_opcode));
   if(NULL == ext_op)
     {
     ignore_rest_of_line ();
@@ -1418,7 +1418,6 @@ arc_common (localScope)
 	       S_GET_NAME (symbolP), (long) S_GET_VALUE (symbolP), size);
     }
   assert (symbolP->sy_frag == &zero_address_frag);
-
 
   /* Now parse the alignment field.  This field is optional for
      local and global symbols. Default alignment is zero.  */
@@ -1596,7 +1595,7 @@ md_number_to_chars (buf, val, n)
     number_to_chars_littleendian (buf, val, n);
 }
 
-/* Round up a section size to the appropriate boundary. */
+/* Round up a section size to the appropriate boundary.  */
 
 valueT
 md_section_align (segment, size)
@@ -1635,7 +1634,7 @@ arc_code_symbol(expressionP)
      expressionS *expressionP;
 {
   if (expressionP->X_op == O_symbol && expressionP->X_add_number == 0
-	  /* I think this test is unnecessary but just as a sanity check... */
+	  /* I think this test is unnecessary but just as a sanity check...  */
     && expressionP->X_op_symbol == NULL)
     {
     expressionS two;
@@ -1672,9 +1671,9 @@ arc_code_symbol(expressionP)
 
    ??? We can't create new expression types so we map the %-op's onto the
    existing syntax.  This means that the user could use the chosen syntax
-   to achieve the same effect. */
+   to achieve the same effect.  */
 
-void 
+void
 md_operand (expressionP)
      expressionS *expressionP;
 {
@@ -1797,7 +1796,7 @@ arc_cons_fix_new (frag, where, nbytes, exp)
 /* The location from which a PC relative jump should be calculated,
    given a PC relative reloc.  */
 
-long 
+long
 md_pcrel_from (fixP)
      fixS *fixP;
 {

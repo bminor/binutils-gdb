@@ -5706,7 +5706,7 @@ alpha_align (n, pfill, label, force)
 /* This is called from HANDLE_ALIGN in write.c.  Fill in the contents
    of an rs_align_code fragment.  */
 
-void 
+void
 alpha_handle_align (fragp)
      fragS *fragp;
 {

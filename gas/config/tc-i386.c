@@ -1126,7 +1126,7 @@ reloc (size, pcrel, sign, other)
 	      sign ? "signed" : "unsigned", size);
     }
 
-  abort();
+  abort ();
   return BFD_RELOC_NONE;
 }
 
@@ -1619,7 +1619,7 @@ md_assemble (line)
 		    break;
 		  case O_absent:
 		  case O_register:
-		    abort();
+		    abort ();
 		  /* Symbols and expressions.  */
 		  default:
 		    /* Convert symbolic operand to proper sizes for matching.  */
@@ -2970,7 +2970,7 @@ md_assemble (line)
 				}
 			    /* We should find the immediate.  */
 			    if (n1 == i.operands)
-			      abort();
+			      abort ();
 			    i.op[n].disps->X_add_number -= imm_size;
 			  }
 
@@ -3064,7 +3064,7 @@ md_assemble (line)
 			  {
 			    /* We don't support dynamic linking on x86-64 yet.  */
 			    if (flag_code == CODE_64BIT)
-			      abort();
+			      abort ();
 			    reloc_type = BFD_RELOC_386_GOTPC;
 			    i.op[n].imms->X_add_number += 3;
 			  }
@@ -4598,7 +4598,7 @@ i386_validate_fix (fixp)
     {
       /* GOTOFF relocation are nonsense in 64bit mode.  */
       if (flag_code == CODE_64BIT)
-	abort();
+	abort ();
       fixp->fx_r_type = BFD_RELOC_386_GOTOFF;
       fixp->fx_subsy = 0;
     }
@@ -4665,7 +4665,7 @@ tc_gen_reloc (section, fixp)
     {
       /* We don't support GOTPC on 64bit targets.  */
       if (flag_code == CODE_64BIT)
-	abort();
+	abort ();
       code = BFD_RELOC_386_GOTPC;
     }
 
@@ -4702,7 +4702,6 @@ tc_gen_reloc (section, fixp)
       if (fixp->fx_pcrel)
 	rel->addend -= fixp->fx_size;
     }
-
 
   rel->howto = bfd_reloc_type_lookup (stdoutput, code);
   if (rel->howto == NULL)
@@ -4931,7 +4930,6 @@ struct intel_token
   };
 
 static struct intel_token cur_token, prev_token;
-
 
 /* Token codes for the intel parser. Since T_SHORT is already used
    by COFF, undefine it first to prevent a warning.  */

@@ -1975,7 +1975,6 @@ md_assemble (instruction_string)
 
 /* We have no need to default values of symbols.  */
 
-/* ARGSUSED */
 symbolS *
 md_undefined_symbol (name)
      char *name;
