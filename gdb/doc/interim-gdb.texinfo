@@ -339,7 +339,7 @@ Installing GDB
 * Subdirectories::              Configuration subdirectories
 * Config Names::                Specifying names for hosts and targets
 * configure Options::           Summary of options for configure
-* Formatting Manual::           How to format and print GDB documentation
+* Formatting Documentation::    How to format and print GDB documentation
 @end menu
 
 @node Summary, New Features, Top, Top
@@ -542,7 +542,7 @@ libraries.  You can load symbols from a shared library with the command
 @code{sharedlibrary} (@pxref{Files}).
 
 @item Reference Card
-_GDBN__ _GDB_VN__ has a reference card; @xref{Formatting Manual} for
+_GDBN__ _GDB_VN__ has a reference card; @xref{Formatting Documentation} for
 instructions on printing it.
 
 @item Work in Progress
@@ -7107,7 +7107,7 @@ readable, and _GDBN__ uses the shell to start your program.
 * Subdirectories::              Configuration subdirectories
 * Config Names::                Specifying names for hosts and targets
 * configure Options::           Summary of options for configure
-* Formatting Manual::           How to format and print _GDBN__ documentation
+* Formatting Documentation::    How to format and print _GDBN__ documentation
 @end menu
 
 
@@ -7211,7 +7211,7 @@ of information in the following pattern:
 @end example
 
 For example, you can use the alias @code{sun4} as a @var{host} argument
-or in a @code{+target=}@var{target} option, but the full name of that
+or in a @code{+target=@var{target}} option, but the full name of that
 configuration specifies that the architecture is @samp{sparc}, the
 vendor is @samp{sun}, and the operating system is @samp{sunos4}.
 
@@ -7268,6 +7268,10 @@ ARCHITECTURE  VENDOR        OS prefix
             | wrs         |
 
 @end example
+@quotation
+@emph{Warning:} Many combinations of architecture, vendor, and OS are
+untested. 
+@end quotation
 @end ifinfo
 @c FIXME: this table is probably screwed in @smallbook.  Try setting
 @c FIXME...smallbook fonts?
@@ -7338,7 +7342,7 @@ i386-none-sysv
 *** No vendor: configuration `i486v' not recognized
 @end example
 
-@node configure Options, Formatting Manual, Config Names, Installing _GDBN__
+@node configure Options, Formatting Documentation, Config Names, Installing _GDBN__
 @section @code{configure} Options
 
 Here is a summary of all the @code{configure} options and arguments that
@@ -7381,11 +7385,12 @@ propagate configuration to subdirectories.
 @item +rm
 Remove the configuration that the other arguments specify.
 
-@item +parse=@var{lang} @dots{}
-Configure the _GDBN__ expression parser to parse the listed languages.
-@samp{all} configures _GDBN__ for all supported languages.  To get a
-list of all supported languages, omit the argument.  Without this
-option, _GDBN__ is configured to parse all supported languages.
+@c This doesn't work (yet if ever).  FIXME.
+@c @item +parse=@var{lang} @dots{}
+@c Configure the _GDBN__ expression parser to parse the listed languages.
+@c @samp{all} configures _GDBN__ for all supported languages.  To get a
+@c list of all supported languages, omit the argument.  Without this
+@c option, _GDBN__ is configured to parse all supported languages.
 
 @item +target=@var{target} @dots{}
 Configure _GDBN__ for cross-debugging programs running on each specified
@@ -7407,10 +7412,18 @@ There is no convenient way to generate a list of all available hosts.
 configuring other GNU tools recursively; but these are the only
 options that affect _GDBN__ or its supporting libraries.
 
-@node Formatting Manual,  , configure Options, Installing _GDBN__
-@section Formatting this Manual
+@node Formatting Documentation,  , configure Options, Installing _GDBN__
+@section Formatting the Documentation
 
-The _GDBN__ _GDB_VN__ release includes the Info version of this manual already
+@cindex _GDBN__ reference card
+@cindex reference card
+The _GDBN__ _GDB_VN__ release includes an already-formatted reference card,
+ready for printing on a PostScript printer, as @file{gdb-_GDB_VN__/gdb/refcard.ps}.
+It uses the most common PostScript fonts: the Times family, Courier, and
+Symbol.  If you have a PostScript printer, you can print the reference
+card by just sending @file{refcard.ps} to the printer.
+
+The release also includes the online Info version of this manual already
 formatted: the main Info file is @file{gdb-_GDB_VN__/gdb/gdb.info}, and it
 refers to subordinate files matching @samp{gdb.info*} in the same
 directory.
@@ -7425,7 +7438,7 @@ make gdb.info
 @noindent
 to make the Info file.
 
-If you want to format and print copies of this manual, you need several
+If you want to format and print copies of the manual, you need several
 things: 
 @itemize @bullet
 @item 
@@ -7452,18 +7465,9 @@ make gdb.dvi
 to format the text of this manual, and print it with the usual output
 method for @TeX{} @sc{dvi} files at your site.
 
-@cindex _GDBN__ reference card
-@cindex reference card
-You might also want hard copy of the _GDBN__ reference card.  The
-_GDBN__ _GDB_VN__ release includes an already-formatted reference card, ready
-for printing on a PostScript printer, as @file{gdb-_GDB_VN__/gdb/refcard.ps}.
-It uses the most common PostScript fonts: the Times family, Courier, and
-Symbol.  If you have a PostScript printer you can print the reference
-card by just sending @file{refcard.ps} to the printer.
-
-If you have some other kind of printer, or want to print using Computer
-Modern fonts instead, you can still print the reference card if you have
-@TeX{}.  Format the reference card by typing
+If you want to print the reference card, but don't have a PostScript
+printer, or you want to use Computer Modern fonts instead, 
+you can still print it if you have @TeX{}.  Format the reference card by typing
 @example
 cd gdb-_GDB_VN__/gdb
 make refcard.dvi
