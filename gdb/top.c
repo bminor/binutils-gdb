@@ -224,21 +224,6 @@ int target_executing = 0;
 /* Level of control structure.  */
 static int control_level;
 
-/* Structure for arguments to user defined functions.  */
-#define MAXUSERARGS 10
-struct user_args
-  {
-    struct user_args *next;
-    struct
-      {
-	char *arg;
-	int len;
-      }
-    a[MAXUSERARGS];
-    int count;
-  }
- *user_args;
-
 /* Signal to catch ^Z typed while reading a command: SIGTSTP or SIGCONT.  */
 
 #ifndef STOP_SIGNAL
