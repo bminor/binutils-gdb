@@ -489,6 +489,45 @@ set_architecture (char *ignore_args, int from_tty, struct cmd_list_element *c)
   show_architecture (NULL, from_tty);
 }
 
+/* Try to select a global architecture that matches "info".  Return
+   non-zero if the attempt succeds.  */
+int
+gdbarch_update_p (struct gdbarch_info info)
+{
+  struct gdbarch *new_gdbarch = gdbarch_find_by_info (info);
+
+  /* If there no architecture by that name, reject the request.  */
+  if (new_gdbarch == NULL)
+    {
+      if (gdbarch_debug)
+	fprintf_unfiltered (gdb_stdlog, "gdbarch_update_p: "
+			    "Architecture not found\n");
+      return 0;
+    }
+
+  /* If it is the same old architecture, accept the request (but don't
+     swap anything).  */
+  if (new_gdbarch == current_gdbarch)
+    {
+      if (gdbarch_debug)
+	fprintf_unfiltered (gdb_stdlog, "gdbarch_update_p: "
+			    "Architecture 0x%08lx (%s) unchanged\n",
+			    (long) new_gdbarch,
+			    gdbarch_bfd_arch_info (new_gdbarch)->printable_name);
+      return 1;
+    }
+
+  /* It's a new architecture, swap it in.  */
+  if (gdbarch_debug)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_update_p: "
+			"New architecture 0x%08lx (%s) selected\n",
+			(long) new_gdbarch,
+			gdbarch_bfd_arch_info (new_gdbarch)->printable_name);
+  deprecated_current_gdbarch_select_hack (new_gdbarch);
+
+  return 1;
+}
+
 /* FIXME: kettenis/20031124: Of the functions that follow, only
    gdbarch_from_bfd is supposed to survive.  The others will
    dissappear since in the future GDB will (hopefully) be truly

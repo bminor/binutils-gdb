@@ -1,5 +1,11 @@
 2003-11-09  Andrew Cagney  <cagney@redhat.com>
 
+	* arch-utils.c (gdbarch_update_p): New function.
+	* gdbarch.sh (gdbarch_update_p): Delete function.
+ 	(find_arch_by_info, gdbarch_find_by_info): New functions.
+	(deprecated_current_gdbarch_set_hack): New function.
+	* gdbarch.c: Re-generate.
+
 	* gdbarch.sh (clear_gdbarch_swap): Delete function.
 	(swapout_gdbarch_swap): Delete function.
 	(swapin_gdbarch_swap): Delete function.
