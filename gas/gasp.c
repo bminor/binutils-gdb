@@ -3500,7 +3500,8 @@ Usage: %s \n\
   [-h]      [--help]              print this message\n\
   [-M]      [--mri]               enter MRI compatibility mode\n\
   [-o out]  [--output out]        set the output file\n\
-  [-p]      [--print]             print line numbers\n\
+  [-p]      [--print]             print line numbers\n");
+  fprintf (file, "\
   [-s]      [--copysource]        copy source through as comments \n\
   [-u]      [--unreasonable]      allow unreasonable nesting\n\
   [-v]      [--version]           print the program version\n\

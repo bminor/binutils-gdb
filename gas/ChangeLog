@@ -1,3 +1,13 @@
+Tue Sep  5 16:47:36 1995  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* config/tc-mips.c: Remove CYGNUS LOCAL comments.
+	(md_begin): Use 0/1 instead of TRUE/FALSE.
+	(md_show_usage): Break up long format string for the benefit
+	of lame compilers.
+	* config/tc-m68k.c (md_show_usage): Ditto.
+	* gasp.c (show_usage): Ditto.
+	* macro.c (check_macro): Cast result of hash_find.
+
 Tue Sep  5 14:46:38 1995  Ken Raeburn  <raeburn@cygnus.com>
 
 	* configure.in: When testing for a free() declaration in system
