@@ -1,4 +1,7 @@
-2003-07-03  Alan Modra  <amodra@bigpond.net.au>
+2003-07-04  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-ppc.c (ppc_elf_create_dynamic_sections): Don't call
+	ppc_elf_create_got if we've already done so.
 
 	* elf-bfd.h (_bfd_elf_create_linker_section) Don't declare.
 	(_bfd_elf_find_pointer_linker_section): Likewise.
