@@ -1,3 +1,8 @@
+2002-04-23  H.J. Lu <hjl@gnu.org>
+
+	* gas/hppa/parse/parse.exp: Don't expect failure on line separator
+	test on hppa*-*-linux* nor hppa*-*-netbsd*.
+
 2002-04-22  Chris Demetriou  <cgd@broadcom.com>
 
 	* gas/mips/mips-gp64-fp32.l: New file.
