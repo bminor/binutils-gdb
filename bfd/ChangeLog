@@ -1,3 +1,8 @@
+Thu May 21 16:59:28 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* peicode.h (add_data_entry): Fix precedence of operators in if ()
+	statement. 
+
 Tue May 19 18:41:19 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* bfd-in.h: Move over patch to bfd-in2.h.
