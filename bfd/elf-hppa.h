@@ -1171,7 +1171,8 @@ elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,
 	   library, then redirect the call to the local stub for this
 	   function.  */
 	if (sym_sec->output_section == NULL)
-	  value = dyn_h->stub_offset;
+	  value = (dyn_h->stub_offset + hppa_info->stub_sec->output_offset
+		   + hppa_info->stub_sec->output_section->vma);
   
 	/* Turn VALUE into a proper PC relative address.  */
 	value -= (offset + input_section->output_offset
@@ -1213,6 +1214,20 @@ elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,
     case R_PARISC_LTOFF16WF:
     case R_PARISC_LTOFF16DF:
       {
+	/* If this relocation was against a local symbol, then we still
+	   have not set up the DLT entry (it's not convienent to do so
+	   in the "finalize_dlt" routine because it is difficult to get
+	   to the local symbol's value).
+
+	   So, if this is a local symbol (h == NULL), then we need to
+	   fill in its DLT entry.  */
+	if (dyn_h->h == NULL)
+	  {
+	    bfd_put_64 (hppa_info->dlt_sec->owner,
+			value,
+			hppa_info->dlt_sec->contents + dyn_h->dlt_offset);
+	  }
+
 	/* We want the value of the DLT offset for this symbol, not
 	   the symbol's actual address.  */
 	value = dyn_h->dlt_offset + hppa_info->dlt_sec->output_offset;
@@ -1417,9 +1432,14 @@ elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,
       }
 
 
-    /* These do not require any work here.  They are simply passed
-       through as dynamic relocations.  */
     case R_PARISC_FPTR64:
+      /* We want the value of the OPD offset for this symbol, not
+          the symbol's actual address.  */
+      value = (dyn_h->opd_offset
+	       + hppa_info->opd_sec->output_offset
+	       + hppa_info->opd_sec->output_section->vma);
+	       
+      bfd_put_64 (input_bfd, value + addend, hit_data);
       return bfd_reloc_ok;
 
     /* Something we don't know how to handle.  */
