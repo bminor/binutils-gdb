@@ -33,6 +33,7 @@ sp64.mt
 sp64sim.mt
 sp64sol2.mt
 sparc-em.mt
+sparclet.mt
 sparclite.mt
 sparclynx.mh
 sparclynx.mt
