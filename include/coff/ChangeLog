@@ -1,4 +1,11 @@
+Sun Jun 12 03:51:52 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* symconst.h:  Pick up SGI define for stIndirect.
+
 Fri Apr 22 13:05:28 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* ecoff.h (REGINFO): Don't define.
+	(struct ecoff_reginfo): Don't define.
 
 	* sh.h (SH_ARCH_MAGIC): Rename from SHMAGIC.  SHMAGIC is used by
 	several targets to mean a shared library.
