@@ -1,4 +1,6 @@
 GDB Internals documentation
+Copyright 1990, 1991 Free Software Foundation, Inc.
+Contributed by Cygnus Support.  Written by John Gilmore.
 
 This needs to be wrapped in texinfo stuff...
 
@@ -63,6 +65,10 @@ If you call it before printing a space, make sure that your indentation
 properly accounts for the leading space that will print if the line wraps
 there.
 
+Any function or set of functions that produce filtered output must finish
+by printing a newline, to flush the wrap buffer, before switching to
+unfiltered ("printf") output.  Symbol reading routines that print
+warnings are a good example.
 
 
 
