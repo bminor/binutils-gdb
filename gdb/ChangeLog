@@ -18,35 +18,24 @@ Thu Jan  4 10:44:17 1996  Fred Fish  <fnf@cirdan.cygnus.com>
 
 	* infptrace.c (udot_info): New function.
 	(PT_*): Define each individually if that one is not defined.
-	Update copyright to 1996.
 	* rs6000-nat.c (kernel_u_size): New function
 	Include <sys/user.h> for "struct user"
-	Update copyright to 1996.
 	* alpha-nat.c (kernel_u_size): New function.
 	Include <sys/user.h> for "struct user"
-	Update copyright to 1996.
 	* sparc-nat.c (kernel_u_size): New function.
 	Include <sys/user.h> for "struct user"
-	Update copyright to 1996.
 	* i386b-nat.c (kernel_u_size): New function.
-	Update copyright to 1996.
 	* i386v-nat.c (kernel_u_size): New function.
-	Update copyright to 1996.
 	* config/i386/nm-fbsd.h (KERNEL_U_SIZE): Define.
 	(kernel_u_size): Declare.
-	Update copyright to 1996.
 	* config/i386/nm-linux.h (KERNEL_U_SIZE): Define.
 	(kernel_u_size): Declare.
-	Update copyright to 1996.
 	* config/sparc/nm-sun4os4.h (KERNEL_U_SIZE): Define.
 	(kernel_u_size): Declare.
-	Update copyright to 1996.
 	* config/alpha/nm-osf2.h (KERNEL_U_SIZE): Define.
 	(kernel_u_size): Declare.
-	Update copyright to 1996.
 	* config/rs6000/nm-rs6000.h (KERNEL_U_SIZE): Define.
 	(kernel_u_size): Declare.
-	Update copyright to 1996.
 
 Thu Jan  4 11:00:01 1996  steve chamberlain  <sac@slash.cygnus.com>
 
@@ -65,10 +54,8 @@ Wed Jan  3 23:13:53 1996  Fred Fish  <fnf@cygnus.com>
 
 	* i386v4-nat.c (supply_gregset, fill_gregset): Subtract NUM_FREGS
  	from NUM_REGS to get number of general registers that we care about.
-	Update copyright to 1996.
 	* config/i386/tm-i386.h (REGISTER_BYTES): Define in terms
 	of number of general regs and number of floating point regs.
-	Update copyright to 1996.
 
 Wed Jan  3 19:49:54 1996  steve chamberlain  <sac@slash.cygnus.com>
 
@@ -82,13 +69,11 @@ Wed Jan  3 19:49:54 1996  steve chamberlain  <sac@slash.cygnus.com>
 	* i386-tdep.c (skip_trampoline_code): New function.
 	* srec.c: Renamed dsrec.c to avoid filename collision.
 	* Makefile.in: Cope with renaming.
-	Update copyrights to 1996.
 	
 Wed Jan  3 13:09:04 1996  Fred Fish  <fnf@cygnus.com>
 
 	* symmisc.c (print_objfile_statistics): Print memory use statistics
 	for objfile psymbol, symbol, and type obstacks.
-	Update copyright to 1996.
 
 Tue Jan  2 13:41:14 1996  Stan Shebs  <shebs@andros.cygnus.com>
 
