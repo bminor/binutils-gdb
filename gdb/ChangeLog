@@ -1,3 +1,8 @@
+2005-01-25  Andrew Cagney  <cagney@gnu.org>
+
+	* ppc-linux-tdep.c (ppc_linux_init_abi): Always set
+        long_double_bit to 8.
+
 2005-01-24  Andrew Cagney  <cagney@gnu.org>
 
 	* infrun.c (handle_inferior_event): Handle back-to-back and nested
