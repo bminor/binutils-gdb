@@ -1,8 +1,3 @@
-2003-09-17  Michael Chastain  <mec@shout.net>
-
-	* gdb.cp/gdb1355.exp: New file.
-	* gdb.cp/gdb1355.c: New file.
-
 2003-09-15  Corinna Vinschen  <vinschen@redhat.com>
 
 	* gdb.asm/asm-source.exp: Add sh*-*-* as supported target.
@@ -10,8 +5,8 @@
 
 2003-09-11  David Carlton  <carlton@kealia.com>
 
-	* gdb.cp/namespace.exp: Add tests for namespace types.
-	* gdb.cp/maint.exp (test_help): Test 'help maint cp namespace'.
+	* gdb.c++/namespace.exp: Add tests for namespace types.
+	* gdb.c++/maint.exp (test_help): Test 'help maint cp namespace'.
 	(test_namespace): New.
 
 2003-09-11  Elena Zannoni  <ezannoni@redhat.com>

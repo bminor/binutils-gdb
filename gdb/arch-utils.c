@@ -23,7 +23,6 @@
 #include "defs.h"
 
 #include "arch-utils.h"
-#include "buildsym.h"
 #include "gdbcmd.h"
 #include "inferior.h"		/* enum CALL_DUMMY_LOCATION et.al. */
 #include "gdb_string.h"
@@ -358,23 +357,6 @@ legacy_value_to_register (struct frame_info *frame, int regnum,
   memcpy (from, from, TYPE_LENGTH (type));
   DEPRECATED_REGISTER_CONVERT_TO_RAW (type, regnum, from, to);
   put_frame_register (frame, regnum, to);
-}
-
-int
-default_stabs_argument_has_addr (struct gdbarch *gdbarch, struct type *type)
-{
-  if (DEPRECATED_REG_STRUCT_HAS_ADDR_P ()
-      && DEPRECATED_REG_STRUCT_HAS_ADDR (processing_gcc_compilation, type))
-    {
-      CHECK_TYPEDEF (type);
-
-      return (TYPE_CODE (type) == TYPE_CODE_STRUCT
-	      || TYPE_CODE (type) == TYPE_CODE_UNION
-	      || TYPE_CODE (type) == TYPE_CODE_SET
-	      || TYPE_CODE (type) == TYPE_CODE_BITSTRING);
-    }
-
-  return 0;
 }
 
 

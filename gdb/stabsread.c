@@ -1748,20 +1748,17 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
       SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
       if (within_function)
 	{
-	  /* Sun cc uses a pair of symbols, one 'p' and one 'r', with
-	     the same name to represent an argument passed in a
-	     register.  GCC uses 'P' for the same case.  So if we find
-	     such a symbol pair we combine it into one 'P' symbol.
-	     For Sun cc we need to do this regardless of
-	     stabs_argument_has_addr, because the compiler puts out
-	     the 'p' symbol even if it never saves the argument onto
-	     the stack.
+	  /* Sun cc uses a pair of symbols, one 'p' and one 'r' with the same
+	     name to represent an argument passed in a register.
+	     GCC uses 'P' for the same case.  So if we find such a symbol pair
+	     we combine it into one 'P' symbol.  For Sun cc we need to do this
+	     regardless of DEPRECATED_REG_STRUCT_HAS_ADDR, because the compiler puts out
+	     the 'p' symbol even if it never saves the argument onto the stack.
 
-	     On most machines, we want to preserve both symbols, so
-	     that we can still get information about what is going on
-	     with the stack (VAX for computing args_printed, using
-	     stack slots instead of saved registers in backtraces,
-	     etc.).
+	     On most machines, we want to preserve both symbols, so that
+	     we can still get information about what is going on with the
+	     stack (VAX for computing args_printed, using stack slots instead
+	     of saved registers in backtraces, etc.).
 
 	     Note that this code illegally combines
 	     main(argc) struct foo argc; { register struct foo argc; }
@@ -1771,8 +1768,13 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
 	  if (local_symbols
 	      && local_symbols->nsyms > 0
 #ifndef USE_REGISTER_NOT_ARG
-	      && gdbarch_stabs_argument_has_addr (current_gdbarch,
-						  SYMBOL_TYPE (sym))
+	      && DEPRECATED_REG_STRUCT_HAS_ADDR_P ()
+	      && DEPRECATED_REG_STRUCT_HAS_ADDR (processing_gcc_compilation,
+				      SYMBOL_TYPE (sym))
+	      && (TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_STRUCT
+		  || TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_UNION
+		  || TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_SET
+		  || TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_BITSTRING)
 #endif
 	    )
 	    {
@@ -2045,21 +2047,29 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
       break;
     }
 
-  /* Some systems pass variables of certain types by reference instead
-     of by value, i.e. they will pass the address of a structure (in a
-     register or on the stack) instead of the structure itself.  */
+  /* When passing structures to a function, some systems sometimes pass
+     the address in a register, not the structure itself. */
 
-  if (gdbarch_stabs_argument_has_addr (current_gdbarch, SYMBOL_TYPE (sym))
+  if (DEPRECATED_REG_STRUCT_HAS_ADDR_P ()
+      && DEPRECATED_REG_STRUCT_HAS_ADDR (processing_gcc_compilation, SYMBOL_TYPE (sym))
       && (SYMBOL_CLASS (sym) == LOC_REGPARM || SYMBOL_CLASS (sym) == LOC_ARG))
     {
-      /* We have to convert LOC_REGPARM to LOC_REGPARM_ADDR (for
-         variables passed in a register).  */
-      if (SYMBOL_CLASS (sym) == LOC_REGPARM)
-	SYMBOL_CLASS (sym) = LOC_REGPARM_ADDR;
-      /* Likewise for converting LOC_ARG to LOC_REF_ARG (for the 7th
-	 and subsequent arguments on SPARC, for example).  */
-      else if (SYMBOL_CLASS (sym) == LOC_ARG)
-	SYMBOL_CLASS (sym) = LOC_REF_ARG;
+      struct type *symbol_type = check_typedef (SYMBOL_TYPE (sym));
+
+      if ((TYPE_CODE (symbol_type) == TYPE_CODE_STRUCT)
+	  || (TYPE_CODE (symbol_type) == TYPE_CODE_UNION)
+	  || (TYPE_CODE (symbol_type) == TYPE_CODE_BITSTRING)
+	  || (TYPE_CODE (symbol_type) == TYPE_CODE_SET))
+	{
+	  /* If DEPRECATED_REG_STRUCT_HAS_ADDR yields non-zero we have to convert
+	     LOC_REGPARM to LOC_REGPARM_ADDR for structures and unions. */
+	  if (SYMBOL_CLASS (sym) == LOC_REGPARM)
+	    SYMBOL_CLASS (sym) = LOC_REGPARM_ADDR;
+	  /* Likewise for converting LOC_ARG to LOC_REF_ARG (for the 7th
+	     and subsequent arguments on the sparc, for example).  */
+	  else if (SYMBOL_CLASS (sym) == LOC_ARG)
+	    SYMBOL_CLASS (sym) = LOC_REF_ARG;
+	}
     }
 
   /* Is there more to parse?  For example LRS/alias information?  */

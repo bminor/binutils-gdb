@@ -204,30 +204,12 @@ ppcnbsd_pc_in_sigtramp (CORE_ADDR pc, char *func_name)
   return (nbsd_pc_in_sigtramp (pc, func_name));
 }
 
-/* NetBSD is confused.  It appears that 1.5 was using the correct SVr4
-   convention but, 1.6 switched to the below broken convention.  For
-   the moment use the broken convention.  Ulgh!.  */
-
-static int     
-ppcnbsd_use_struct_convention (int gcc_p, struct type *value_type)
-{  
-  if ((TYPE_LENGTH (value_type) == 16 || TYPE_LENGTH (value_type) == 8)
-      && TYPE_VECTOR (value_type))
-    return 0;                            
-
-  return !(TYPE_LENGTH (value_type) == 1
-	   || TYPE_LENGTH (value_type) == 2
-	   || TYPE_LENGTH (value_type) == 4
-	   || TYPE_LENGTH (value_type) == 8);
-}
-
 static void
 ppcnbsd_init_abi (struct gdbarch_info info,
                   struct gdbarch *gdbarch)
 {
   set_gdbarch_pc_in_sigtramp (gdbarch, ppcnbsd_pc_in_sigtramp);
 
-  set_gdbarch_use_struct_convention (gdbarch, ppcnbsd_use_struct_convention);
   set_solib_svr4_fetch_link_map_offsets (gdbarch,
                                 nbsd_ilp32_solib_svr4_fetch_link_map_offsets);
 }

@@ -1939,9 +1939,6 @@ typedef CORE_ADDR (gdbarch_frame_align_ftype) (struct gdbarch *gdbarch, CORE_ADD
 extern CORE_ADDR gdbarch_frame_align (struct gdbarch *gdbarch, CORE_ADDR address);
 extern void set_gdbarch_frame_align (struct gdbarch *gdbarch, gdbarch_frame_align_ftype *frame_align);
 
-/* DEPRECATED_REG_STRUCT_HAS_ADDR has been replaced by
-   stabs_argument_has_addr. */
-
 #if defined (DEPRECATED_REG_STRUCT_HAS_ADDR)
 /* Legacy for systems yet to multi-arch DEPRECATED_REG_STRUCT_HAS_ADDR */
 #if !defined (DEPRECATED_REG_STRUCT_HAS_ADDR_P)
@@ -1966,10 +1963,6 @@ extern void set_gdbarch_deprecated_reg_struct_has_addr (struct gdbarch *gdbarch,
 #if !defined (DEPRECATED_REG_STRUCT_HAS_ADDR)
 #define DEPRECATED_REG_STRUCT_HAS_ADDR(gcc_p, type) (gdbarch_deprecated_reg_struct_has_addr (current_gdbarch, gcc_p, type))
 #endif
-
-typedef int (gdbarch_stabs_argument_has_addr_ftype) (struct gdbarch *gdbarch, struct type *type);
-extern int gdbarch_stabs_argument_has_addr (struct gdbarch *gdbarch, struct type *type);
-extern void set_gdbarch_stabs_argument_has_addr (struct gdbarch *gdbarch, gdbarch_stabs_argument_has_addr_ftype *stabs_argument_has_addr);
 
 extern int gdbarch_frame_red_zone_size (struct gdbarch *gdbarch);
 extern void set_gdbarch_frame_red_zone_size (struct gdbarch *gdbarch, int frame_red_zone_size);
@@ -2046,7 +2039,7 @@ extern void set_gdbarch_addr_bits_remove (struct gdbarch *gdbarch, gdbarch_addr_
 #define ADDR_BITS_REMOVE(addr) (gdbarch_addr_bits_remove (current_gdbarch, addr))
 #endif
 
-/* It is not at all clear why SMASH_TEXT_ADDRESS is not folded into 
+/* It is not at all clear why SMASH_TEXT_ADDRESS is not folded into
    ADDR_BITS_REMOVE. */
 
 typedef CORE_ADDR (gdbarch_smash_text_address_ftype) (CORE_ADDR addr);
@@ -2340,7 +2333,7 @@ typedef int (gdbarch_register_reggroup_p_ftype) (struct gdbarch *gdbarch, int re
 extern int gdbarch_register_reggroup_p (struct gdbarch *gdbarch, int regnum, struct reggroup *reggroup);
 extern void set_gdbarch_register_reggroup_p (struct gdbarch *gdbarch, gdbarch_register_reggroup_p_ftype *register_reggroup_p);
 
-/* Fetch the pointer to the ith function argument.   */
+/* Fetch the pointer to the ith function argument. */
 
 #if defined (FETCH_POINTER_ARGUMENT)
 /* Legacy for systems yet to multi-arch FETCH_POINTER_ARGUMENT */

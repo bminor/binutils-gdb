@@ -138,9 +138,6 @@ extern void legacy_register_to_value (struct frame_info *frame, int regnum,
 extern void legacy_value_to_register (struct frame_info *frame, int regnum,
 				      struct type *type, const void *from);
 
-extern int default_stabs_argument_has_addr (struct gdbarch *gdbarch,
-					    struct type *type);
-
 /* For compatibility with older architectures, returns
    (LEGACY_SIM_REGNO_IGNORE) when the register doesn't have a valid
    name.  */
