@@ -66,11 +66,11 @@ struct ui_stream
 /* Prototypes for ui-out API. */
 
 /* A result is a recursive data structure consisting of lists and
-   tupples. */
+   tuples. */
 
 enum ui_out_type
   {
-    ui_out_type_tupple,
+    ui_out_type_tuple,
     ui_out_type_list
   };
 
@@ -84,7 +84,7 @@ extern struct cleanup *ui_out_begin_cleanup_end (struct ui_out *uiout,
 						 enum ui_out_type level_type,
 						 const char *id);
 
-/* A table can be considered a special tupple/list combination with
+/* A table can be considered a special tuple/list combination with
    the implied structure: ``table = { hdr = { header, ... } , body = [ {
    field, ... }, ... ] }'' */
 
@@ -101,11 +101,18 @@ extern void ui_out_table_end (struct ui_out *uiout);
 /* Compatibility wrappers, new code should use ui_out_begin() and
    ui_out_end(). */
 
-extern void ui_out_list_begin (struct ui_out *uiout, char *lstid);
+extern void ui_out_list_begin (struct ui_out *uiout);
 
 extern void ui_out_list_end (struct ui_out *uiout);
 
-extern struct cleanup *make_cleanup_ui_out_list_end (struct ui_out *uiout);
+extern struct cleanup *make_cleanup_ui_out_list_begin_end (struct ui_out *uiout);
+
+extern void ui_out_tuple_begin (struct ui_out *uiout, const char *id);
+
+extern void ui_out_tuple_end (struct ui_out *uiout);
+
+extern struct cleanup *make_cleanup_ui_out_tuple_begin_end (struct ui_out *uiout,
+							    const char *id);
 
 extern void ui_out_field_int (struct ui_out *uiout, char *fldname, int value);
 

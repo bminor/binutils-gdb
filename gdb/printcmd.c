@@ -1908,8 +1908,7 @@ print_frame_args (struct symbol *func, struct frame_info *fi, int num,
 
       annotate_arg_begin ();
 
-      ui_out_list_begin (uiout, NULL);
-      list_chain = make_cleanup_ui_out_list_end (uiout);
+      list_chain = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
       fprintf_symbol_filtered (stb->stream, SYMBOL_SOURCE_NAME (sym),
 			    SYMBOL_LANGUAGE (sym), DMGL_PARAMS | DMGL_ANSI);
       ui_out_field_stream (uiout, "name", stb);
@@ -1952,7 +1951,7 @@ print_frame_args (struct symbol *func, struct frame_info *fi, int num,
       else
 	ui_out_text (uiout, "???");
 
-      /* Invoke ui_out_list_end.  */
+      /* Invoke ui_out_tuple_end.  */
       do_cleanups (list_chain);
 #else
 	  val_print (VALUE_TYPE (val), VALUE_CONTENTS (val), 0,

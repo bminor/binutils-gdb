@@ -422,7 +422,7 @@ void
 cmd_show_list (struct cmd_list_element *list, int from_tty, char *prefix)
 {
 #ifdef UI_OUT
-  ui_out_list_begin (uiout, "showlist");
+  ui_out_tuple_begin (uiout, "showlist");
 #endif
   for (; list != NULL; list = list->next)
     {
@@ -431,19 +431,19 @@ cmd_show_list (struct cmd_list_element *list, int from_tty, char *prefix)
 #ifdef UI_OUT
       if (list->prefixlist && !list->abbrev_flag)
 	{
-	  ui_out_list_begin (uiout, "optionlist");
+	  ui_out_tuple_begin (uiout, "optionlist");
 	  ui_out_field_string (uiout, "prefix", list->prefixname + 5);
 	  cmd_show_list (*list->prefixlist, from_tty, list->prefixname + 5);
-	  ui_out_list_end (uiout);
+	  ui_out_tuple_end (uiout);
 	}
       if (list->type == show_cmd)
 	{
-	  ui_out_list_begin (uiout, "option");
+	  ui_out_tuple_begin (uiout, "option");
 	  ui_out_text (uiout, prefix);
 	  ui_out_field_string (uiout, "name", list->name);
 	  ui_out_text (uiout, ":  ");
 	  do_setshow_command ((char *) NULL, from_tty, list);
-	  ui_out_list_end (uiout);
+	  ui_out_tuple_end (uiout);
 	}
 #else
       if (list->prefixlist && !list->abbrev_flag)
@@ -458,7 +458,7 @@ cmd_show_list (struct cmd_list_element *list, int from_tty, char *prefix)
 #endif
     }
 #ifdef UI_OUT
-  ui_out_list_end (uiout);
+  ui_out_tuple_end (uiout);
 #endif
 }
 

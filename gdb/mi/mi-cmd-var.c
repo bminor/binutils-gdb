@@ -273,11 +273,11 @@ mi_cmd_var_list_children (char *command, char **argv, int argc)
   if (numchild <= 0)
     return MI_CMD_DONE;
 
-  ui_out_list_begin (uiout, "children");
+  ui_out_tuple_begin (uiout, "children");
   cc = childlist;
   while (*cc != NULL)
     {
-      ui_out_list_begin (uiout, "child");
+      ui_out_tuple_begin (uiout, "child");
       ui_out_field_string (uiout, "name", varobj_get_objname (*cc));
       ui_out_field_string (uiout, "exp", varobj_get_expression (*cc));
       ui_out_field_int (uiout, "numchild", varobj_get_num_children (*cc));
@@ -285,10 +285,10 @@ mi_cmd_var_list_children (char *command, char **argv, int argc)
       /* C++ pseudo-variables (public, private, protected) do not have a type */
       if (type)
 	ui_out_field_string (uiout, "type", varobj_get_type (*cc));
-      ui_out_list_end (uiout);
+      ui_out_tuple_end (uiout);
       cc++;
     }
-  ui_out_list_end (uiout);
+  ui_out_tuple_end (uiout);
   xfree (childlist);
   return MI_CMD_DONE;
 }
@@ -421,10 +421,10 @@ mi_cmd_var_update (char *command, char **argv, int argc)
   if ((*name == '*') && (*(name + 1) == '\0'))
     {
       nv = varobj_list (&rootlist);
-      ui_out_list_begin (uiout, "changelist");
+      ui_out_tuple_begin (uiout, "changelist");
       if (nv <= 0)
 	{
-	  ui_out_list_end (uiout);
+	  ui_out_tuple_end (uiout);
 	  return MI_CMD_DONE;
 	}
       cr = rootlist;
@@ -434,7 +434,7 @@ mi_cmd_var_update (char *command, char **argv, int argc)
 	  cr++;
 	}
       xfree (rootlist);
-      ui_out_list_end (uiout);
+      ui_out_tuple_end (uiout);
     }
   else
     {
@@ -443,9 +443,9 @@ mi_cmd_var_update (char *command, char **argv, int argc)
       if (var == NULL)
 	error ("mi_cmd_var_update: Variable object not found");
 
-      ui_out_list_begin (uiout, "changelist");
+      ui_out_tuple_begin (uiout, "changelist");
       varobj_update_one (var);
-      ui_out_list_end (uiout);
+      ui_out_tuple_end (uiout);
     }
     return MI_CMD_DONE;
 }

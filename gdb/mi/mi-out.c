@@ -106,7 +106,7 @@ mi_table_begin (struct ui_out *uiout, int nbrofcols, char *tblid)
   field_separator (uiout);
   if (tblid)
     fprintf_unfiltered (data->buffer, "%s=", tblid);
-  mi_open (uiout, ui_out_type_tupple);
+  mi_open (uiout, ui_out_type_tuple);
   data->first_header = 0;
   data->supress_field_separator = 1;
 }
@@ -119,7 +119,7 @@ mi_table_body (struct ui_out *uiout)
   struct ui_out_data *data = ui_out_data (uiout);
   /* close the table header line if there were any headers */
   if (data->first_header)
-    mi_close (uiout, ui_out_type_tupple);
+    mi_close (uiout, ui_out_type_tuple);
 }
 
 /* Mark end of a table */
@@ -128,7 +128,7 @@ void
 mi_table_end (struct ui_out *uiout)
 {
   struct ui_out_data *data = ui_out_data (uiout);
-  mi_close (uiout, ui_out_type_tupple);
+  mi_close (uiout, ui_out_type_tuple);
   /* If table was empty this flag did not get reset yet */
   data->supress_field_separator = 0;
 }
@@ -142,7 +142,7 @@ mi_table_header (struct ui_out *uiout, int width, int alignment, char *colhdr)
   if (!data->first_header++)
     {
       fputs_unfiltered ("hdr=", data->buffer);
-      mi_open (uiout, ui_out_type_tupple);
+      mi_open (uiout, ui_out_type_tuple);
     }
   mi_field_string (uiout, 0, width, alignment, 0, colhdr);
 }

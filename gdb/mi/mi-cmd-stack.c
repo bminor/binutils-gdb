@@ -77,7 +77,7 @@ mi_cmd_stack_list_frames (char *command, char **argv, int argc)
   if (fi == NULL)
     error ("mi_cmd_stack_list_frames: Not enough frames in stack.");
 
-  ui_out_list_begin (uiout, "stack");
+  ui_out_tuple_begin (uiout, "stack");
 
   /* Now let;s print the frames up to frame_high, or until there are
      frames in the stack. */
@@ -96,7 +96,7 @@ mi_cmd_stack_list_frames (char *command, char **argv, int argc)
 			0 /* args */ );
     }
 
-  ui_out_list_end (uiout);
+  ui_out_tuple_end (uiout);
   if (i < frame_high)
     error ("mi_cmd_stack_list_frames: Not enough frames in stack.");
 
@@ -183,7 +183,7 @@ mi_cmd_stack_list_args (char *command, char **argv, int argc)
   if (fi == NULL)
     error ("mi_cmd_stack_list_args: Not enough frames in stack.");
 
-  ui_out_list_begin (uiout, "stack-args");
+  ui_out_tuple_begin (uiout, "stack-args");
 
   /* Now let's print the frames up to frame_high, or until there are
      frames in the stack. */
@@ -192,13 +192,13 @@ mi_cmd_stack_list_args (char *command, char **argv, int argc)
        i++, fi = get_prev_frame (fi))
     {
       QUIT;
-      ui_out_list_begin (uiout, "frame");
+      ui_out_tuple_begin (uiout, "frame");
       ui_out_field_int (uiout, "level", i);
       list_args_or_locals (0, atoi (argv[0]), fi);
-      ui_out_list_end (uiout);
+      ui_out_tuple_end (uiout);
     }
 
-  ui_out_list_end (uiout);
+  ui_out_tuple_end (uiout);
   if (i < frame_high)
     error ("mi_cmd_stack_list_args: Not enough frames in stack.");
 
@@ -222,7 +222,7 @@ list_args_or_locals (int locals, int values, struct frame_info *fi)
 
   block = get_frame_block (fi);
 
-  ui_out_list_begin (uiout, locals ? "locals" : "args");
+  ui_out_tuple_begin (uiout, locals ? "locals" : "args");
 
   while (block != 0)
     {
@@ -265,7 +265,7 @@ list_args_or_locals (int locals, int values, struct frame_info *fi)
 	  if (print_me)
 	    {
 	      if (values)
-		ui_out_list_begin (uiout, NULL);
+		ui_out_tuple_begin (uiout, NULL);
 	      ui_out_field_string (uiout, "name", SYMBOL_NAME (sym));
 
 	      if (values)
@@ -280,7 +280,7 @@ list_args_or_locals (int locals, int values, struct frame_info *fi)
 		    sym2 = sym;
 		  print_variable_value (sym2, fi, stb->stream);
 		  ui_out_field_stream (uiout, "value", stb);
-		  ui_out_list_end (uiout);
+		  ui_out_tuple_end (uiout);
 		}
 	    }
 	}
@@ -289,7 +289,7 @@ list_args_or_locals (int locals, int values, struct frame_info *fi)
       else
 	block = BLOCK_SUPERBLOCK (block);
     }
-  ui_out_list_end (uiout);
+  ui_out_tuple_end (uiout);
   ui_out_stream_delete (stb);
 }
 

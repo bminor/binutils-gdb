@@ -273,7 +273,7 @@ mi_cmd_data_list_register_names (char *command, char **argv, int argc)
 
   numregs = NUM_REGS;
 
-  ui_out_list_begin (uiout, "register-names");
+  ui_out_tuple_begin (uiout, "register-names");
 
   if (argc == 0)		/* No args, just do all the regs */
     {
@@ -305,7 +305,7 @@ mi_cmd_data_list_register_names (char *command, char **argv, int argc)
 	  return MI_CMD_ERROR;
 	}
     }
-  ui_out_list_end (uiout);
+  ui_out_tuple_end (uiout);
   return MI_CMD_DONE;
 }
 
@@ -323,7 +323,7 @@ mi_cmd_data_list_changed_registers (char *command, char **argv, int argc)
 
   numregs = NUM_REGS;
 
-  ui_out_list_begin (uiout, "changed-registers");
+  ui_out_tuple_begin (uiout, "changed-registers");
 
   if (argc == 0)		/* No args, just do all the regs */
     {
@@ -372,7 +372,7 @@ mi_cmd_data_list_changed_registers (char *command, char **argv, int argc)
 	  return MI_CMD_ERROR;
 	}
     }
-  ui_out_list_end (uiout);
+  ui_out_tuple_end (uiout);
   return MI_CMD_DONE;
 }
 
@@ -433,7 +433,7 @@ mi_cmd_data_list_register_values (char *command, char **argv, int argc)
       return MI_CMD_ERROR;
     }
 
-  ui_out_list_begin (uiout, "register-values");
+  ui_out_tuple_begin (uiout, "register-values");
 
   if (argc == 1)		/* No args, beside the format: do all the regs */
     {
@@ -444,12 +444,12 @@ mi_cmd_data_list_register_values (char *command, char **argv, int argc)
 	  if (REGISTER_NAME (regnum) == NULL
 	      || *(REGISTER_NAME (regnum)) == '\0')
 	    continue;
-	  ui_out_list_begin (uiout, NULL);
+	  ui_out_tuple_begin (uiout, NULL);
 	  ui_out_field_int (uiout, "number", regnum);
 	  result = get_register (regnum, format);
 	  if (result == -1)
 	    return MI_CMD_ERROR;
-	  ui_out_list_end (uiout);
+	  ui_out_tuple_end (uiout);
 	}
     }
 
@@ -463,12 +463,12 @@ mi_cmd_data_list_register_values (char *command, char **argv, int argc)
 	  && REGISTER_NAME (regnum) != NULL
 	  && *REGISTER_NAME (regnum) != '\000')
 	{
-	  ui_out_list_begin (uiout, NULL);
+	  ui_out_tuple_begin (uiout, NULL);
 	  ui_out_field_int (uiout, "number", regnum);
 	  result = get_register (regnum, format);
 	  if (result == -1)
 	    return MI_CMD_ERROR;
-	  ui_out_list_end (uiout);
+	  ui_out_tuple_end (uiout);
 	}
       else
 	{
@@ -476,7 +476,7 @@ mi_cmd_data_list_register_values (char *command, char **argv, int argc)
 	  return MI_CMD_ERROR;
 	}
     }
-  ui_out_list_end (uiout);
+  ui_out_tuple_end (uiout);
   return MI_CMD_DONE;
 }
 
@@ -893,17 +893,17 @@ mi_cmd_data_read_memory (char *command, char **argv, int argc)
     struct ui_stream *stream = ui_out_stream_new (uiout);
     int row;
     int row_byte;
-    ui_out_list_begin (uiout, "memory");
+    ui_out_tuple_begin (uiout, "memory");
     for (row = 0, row_byte = 0;
 	 row < nr_rows;
 	 row++, row_byte += nr_cols * word_size)
       {
 	int col;
 	int col_byte;
-	ui_out_list_begin (uiout, NULL);
+	ui_out_tuple_begin (uiout, NULL);
 	ui_out_field_core_addr (uiout, "addr", addr + row_byte);
 	/* ui_out_field_core_addr_symbolic (uiout, "saddr", addr + row_byte); */
-	ui_out_list_begin (uiout, "data");
+	ui_out_tuple_begin (uiout, "data");
 	for (col = 0, col_byte = row_byte;
 	     col < nr_cols;
 	     col++, col_byte += word_size)
@@ -920,7 +920,7 @@ mi_cmd_data_read_memory (char *command, char **argv, int argc)
 		ui_out_field_stream (uiout, NULL, stream);
 	      }
 	  }
-	ui_out_list_end (uiout);
+	ui_out_tuple_end (uiout);
 	if (aschar)
 	  {
 	    int byte;
@@ -940,10 +940,10 @@ mi_cmd_data_read_memory (char *command, char **argv, int argc)
 	      }
 	    ui_out_field_stream (uiout, "ascii", stream);
 	  }
-	ui_out_list_end (uiout);
+	ui_out_tuple_end (uiout);
       }
     ui_out_stream_delete (stream);
-    ui_out_list_end (uiout);
+    ui_out_tuple_end (uiout);
   }
   do_cleanups (cleanups);
   return MI_CMD_DONE;
@@ -1377,11 +1377,11 @@ mi_load_progress (const char *section_name,
       if (last_async_command)
 	fputs_unfiltered (last_async_command, raw_stdout);
       fputs_unfiltered ("+download", raw_stdout);
-      ui_out_list_begin (uiout, NULL);
+      ui_out_tuple_begin (uiout, NULL);
       ui_out_field_string (uiout, "section", section_name);
       ui_out_field_int (uiout, "section-size", total_section);
       ui_out_field_int (uiout, "total-size", grand_total);
-      ui_out_list_end (uiout);
+      ui_out_tuple_end (uiout);
       mi_out_put (uiout, raw_stdout);
       fputs_unfiltered ("\n", raw_stdout);
       gdb_flush (raw_stdout);
@@ -1395,13 +1395,13 @@ mi_load_progress (const char *section_name,
       if (last_async_command)
 	fputs_unfiltered (last_async_command, raw_stdout);
       fputs_unfiltered ("+download", raw_stdout);
-      ui_out_list_begin (uiout, NULL);
+      ui_out_tuple_begin (uiout, NULL);
       ui_out_field_string (uiout, "section", section_name);
       ui_out_field_int (uiout, "section-sent", sent_so_far);
       ui_out_field_int (uiout, "section-size", total_section);
       ui_out_field_int (uiout, "total-sent", total_sent);
       ui_out_field_int (uiout, "total-size", grand_total);
-      ui_out_list_end (uiout);
+      ui_out_tuple_end (uiout);
       mi_out_put (uiout, raw_stdout);
       fputs_unfiltered ("\n", raw_stdout);
       gdb_flush (raw_stdout);

@@ -2030,14 +2030,14 @@ print_it_typical (bpstat bs)
 	  if (interpreter_p && strcmp (interpreter_p, "mi") == 0)
 	    ui_out_field_string (uiout, "reason", "watchpoint-trigger");
 	  mention (bs->breakpoint_at);
-	  ui_out_list_begin (uiout, "value");
+	  ui_out_tuple_begin (uiout, "value");
 	  ui_out_text (uiout, "\nOld value = ");
 	  value_print (bs->old_val, stb->stream, 0, Val_pretty_default);
 	  ui_out_field_stream (uiout, "old", stb);
 	  ui_out_text (uiout, "\nNew value = ");
 	  value_print (bs->breakpoint_at->val, stb->stream, 0, Val_pretty_default);
 	  ui_out_field_stream (uiout, "new", stb);
-	  ui_out_list_end (uiout);
+	  ui_out_tuple_end (uiout);
 	  ui_out_text (uiout, "\n");
 #else
 	  mention (bs->breakpoint_at);
@@ -2060,11 +2060,11 @@ print_it_typical (bpstat bs)
       if (interpreter_p && strcmp (interpreter_p, "mi") == 0)
 	ui_out_field_string (uiout, "reason", "read-watchpoint-trigger");
       mention (bs->breakpoint_at);
-      ui_out_list_begin (uiout, "value");
+      ui_out_tuple_begin (uiout, "value");
       ui_out_text (uiout, "\nValue = ");
       value_print (bs->breakpoint_at->val, stb->stream, 0, Val_pretty_default);
       ui_out_field_stream (uiout, "value", stb);
-      ui_out_list_end (uiout);
+      ui_out_tuple_end (uiout);
       ui_out_text (uiout, "\n");
 #else
       mention (bs->breakpoint_at);
@@ -2084,7 +2084,7 @@ print_it_typical (bpstat bs)
 	  if (interpreter_p && strcmp (interpreter_p, "mi") == 0)
 	    ui_out_field_string (uiout, "reason", "access-watchpoint-trigger");
 	  mention (bs->breakpoint_at);
-	  ui_out_list_begin (uiout, "value");
+	  ui_out_tuple_begin (uiout, "value");
 	  ui_out_text (uiout, "\nOld value = ");
 	  value_print (bs->old_val, stb->stream, 0, Val_pretty_default);
 	  ui_out_field_stream (uiout, "old", stb);
@@ -2097,12 +2097,12 @@ print_it_typical (bpstat bs)
 	  mention (bs->breakpoint_at);
 	  if (interpreter_p && strcmp (interpreter_p, "mi") == 0)
 	    ui_out_field_string (uiout, "reason", "access-watchpoint-trigger");
-	  ui_out_list_begin (uiout, "value");
+	  ui_out_tuple_begin (uiout, "value");
 	  ui_out_text (uiout, "\nValue = ");
 	}
       value_print (bs->breakpoint_at->val, stb->stream, 0,Val_pretty_default);
       ui_out_field_stream (uiout, "new", stb);
-      ui_out_list_end (uiout);
+      ui_out_tuple_end (uiout);
       ui_out_text (uiout, "\n");
 #else
       if (bs->old_val != NULL)     
@@ -3126,7 +3126,7 @@ print_one_breakpoint (struct breakpoint *b,
 
   annotate_record ();
 #ifdef UI_OUT
-  ui_out_list_begin (uiout, "bkpt");
+  ui_out_tuple_begin (uiout, "bkpt");
 #endif
 
   /* 1 */
@@ -3490,9 +3490,9 @@ print_one_breakpoint (struct breakpoint *b,
     {
       annotate_field (9);
 #ifdef UI_OUT
-      ui_out_list_begin (uiout, "script");
+      ui_out_tuple_begin (uiout, "script");
       print_command_lines (uiout, l, 4);
-      ui_out_list_end (uiout);
+      ui_out_tuple_end (uiout);
 #else
       while (l)
 	{
@@ -3502,7 +3502,7 @@ print_one_breakpoint (struct breakpoint *b,
 #endif
     }
 #ifdef UI_OUT
-  ui_out_list_end (uiout);
+  ui_out_tuple_end (uiout);
   do_cleanups (old_chain);
 #endif
 }
@@ -4379,21 +4379,21 @@ mention (struct breakpoint *b)
 #ifdef UI_OUT
     case bp_watchpoint:
       ui_out_text (uiout, "Watchpoint ");
-      ui_out_list_begin (uiout, "wpt");
+      ui_out_tuple_begin (uiout, "wpt");
       ui_out_field_int (uiout, "number", b->number);
       ui_out_text (uiout, ": ");
       print_expression (b->exp, stb->stream);
       ui_out_field_stream (uiout, "exp", stb);
-      ui_out_list_end (uiout);
+      ui_out_tuple_end (uiout);
       break;
     case bp_hardware_watchpoint:
       ui_out_text (uiout, "Hardware watchpoint ");
-      ui_out_list_begin (uiout, "wpt");
+      ui_out_tuple_begin (uiout, "wpt");
       ui_out_field_int (uiout, "number", b->number);
       ui_out_text (uiout, ": ");
       print_expression (b->exp, stb->stream);
       ui_out_field_stream (uiout, "exp", stb);
-      ui_out_list_end (uiout);
+      ui_out_tuple_end (uiout);
       break;
 #else
     case bp_watchpoint:
@@ -4408,21 +4408,21 @@ mention (struct breakpoint *b)
 #ifdef UI_OUT
     case bp_read_watchpoint:
       ui_out_text (uiout, "Hardware read watchpoint ");
-      ui_out_list_begin (uiout, "hw-rwpt");
+      ui_out_tuple_begin (uiout, "hw-rwpt");
       ui_out_field_int (uiout, "number", b->number);
       ui_out_text (uiout, ": ");
       print_expression (b->exp, stb->stream);
       ui_out_field_stream (uiout, "exp", stb);
-      ui_out_list_end (uiout);
+      ui_out_tuple_end (uiout);
       break;
     case bp_access_watchpoint:
       ui_out_text (uiout, "Hardware access (read/write) watchpoint ");
-      ui_out_list_begin (uiout, "hw-awpt");
+      ui_out_tuple_begin (uiout, "hw-awpt");
       ui_out_field_int (uiout, "number", b->number);
       ui_out_text (uiout, ": ");
       print_expression (b->exp, stb->stream);
       ui_out_field_stream (uiout, "exp", stb);
-      ui_out_list_end (uiout);
+      ui_out_tuple_end (uiout);
       break;
 #else
     case bp_read_watchpoint:

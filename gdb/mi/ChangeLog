@@ -1,3 +1,12 @@
+Fri May 11 13:55:07 2001  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* mi-cmd-var.c: Replace ui_out_list_begin, ui_out_list_end and
+ 	make_cleanup_ui_out_list_end with ui_out_tupple_begin,
+ 	ui_out_tupple_end and make_cleanup_ui_out_tupple_begin_end.
+	* mi-cmd-stack.c: Ditto.
+	* mi-cmd-disas.c: Ditto.
+	* mi-main.c: Ditto.
+
 2001-05-10  Andrew Cagney  <ac131313@redhat.com>
 
 	* mi-out.c (mi_open, mi_close): Replace list_open and list_close.
