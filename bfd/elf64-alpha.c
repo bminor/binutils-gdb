@@ -1,5 +1,5 @@
 /* Alpha specific support for 64-bit ELF
-   Copyright 1996, 1997, 1998, 1999, 2000, 2001
+   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002
    Free Software Foundation, Inc.
    Contributed by Richard Henderson <rth@tamu.edu>.
 
@@ -2501,7 +2501,8 @@ elf64_alpha_check_relocs (abfd, info, sec, relocs)
 		  rent->srel = sreloc;
 		  rent->rtype = r_type;
 		  rent->count = 1;
-		  rent->reltext = (sec->flags & SEC_READONLY) != 0;
+		  rent->reltext = ((sec->flags & (SEC_READONLY | SEC_ALLOC))
+				   == (SEC_READONLY | SEC_ALLOC));
 
 		  rent->next = h->reloc_entries;
 		  h->reloc_entries = rent;
