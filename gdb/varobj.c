@@ -1210,7 +1210,7 @@ create_child (struct varobj *parent, int index, char *name)
   child->name = name;
   child->index = index;
   child->value = value_of_child (parent, index);
-  if ((!CPLUS_FAKE_CHILD(child) && child->value == NULL) || parent->error)
+  if ((!CPLUS_FAKE_CHILD (child) && child->value == NULL) || parent->error)
     child->error = 1;
   child->parent = parent;
   child->root = parent->root;
@@ -1645,8 +1645,8 @@ value_of_child (struct varobj *parent, int index)
   if (value != NULL && VALUE_LAZY (value))
     {
       /* If we fail to fetch the value of the child, return
-	 NULL so that callers notice that we're leaving an
-	 error message. */
+         NULL so that callers notice that we're leaving an
+         error message. */
       if (!gdb_value_fetch_lazy (value))
 	value = NULL;
     }
@@ -1929,7 +1929,8 @@ c_value_of_child (struct varobj *parent, int index)
 
 	case TYPE_CODE_STRUCT:
 	case TYPE_CODE_UNION:
-	  gdb_value_struct_elt (NULL, &value, &temp, NULL, name, NULL, "vstructure");
+	  gdb_value_struct_elt (NULL, &value, &temp, NULL, name, NULL,
+				"vstructure");
 	  break;
 
 	case TYPE_CODE_PTR:
@@ -1937,7 +1938,8 @@ c_value_of_child (struct varobj *parent, int index)
 	    {
 	    case TYPE_CODE_STRUCT:
 	    case TYPE_CODE_UNION:
-	      gdb_value_struct_elt (NULL, &value, &temp, NULL, name, NULL, "vstructure");
+	      gdb_value_struct_elt (NULL, &value, &temp, NULL, name, NULL,
+				    "vstructure");
 	      break;
 
 	    default:
@@ -2062,9 +2064,10 @@ c_value_of_variable (struct varobj *var)
 	  {
 	    if (VALUE_LAZY (var->value))
 	      gdb_value_fetch_lazy (var->value);
-	    val_print (VALUE_TYPE (var->value), VALUE_CONTENTS_RAW (var->value), 0,
-		       VALUE_ADDRESS (var->value),
-		       stb, format_code[(int) var->format], 1, 0, 0);
+	    val_print (VALUE_TYPE (var->value),
+		       VALUE_CONTENTS_RAW (var->value), 0,
+		       VALUE_ADDRESS (var->value), stb,
+		       format_code[(int) var->format], 1, 0, 0);
 	    thevalue = ui_file_xstrdup (stb, &dummy);
 	    do_cleanups (old_chain);
 	  }
@@ -2200,7 +2203,8 @@ cplus_name_of_child (struct varobj *parent, int index)
 	  /* FIXME: This assumes that type orders
 	     inherited, public, private, protected */
 	  i = index + TYPE_N_BASECLASSES (type);
-	  if (STREQ (parent->name, "private") || STREQ (parent->name, "protected"))
+	  if (STREQ (parent->name, "private")
+	      || STREQ (parent->name, "protected"))
 	    i += children[v_public];
 	  if (STREQ (parent->name, "protected"))
 	    i += children[v_private];

@@ -81,11 +81,11 @@ delta68_frame_args_address (struct frame_info *frame_info)
     return frame_info->frame + 12;
   else if (frameless_look_for_prologue (frame_info))
     {
-    /* Check for an interrupted system call */
-    if (frame_info->next && frame_info->next->signal_handler_caller)
-      return frame_info->next->frame + 16;
-    else
-      return frame_info->frame + 4;
+      /* Check for an interrupted system call */
+      if (frame_info->next && frame_info->next->signal_handler_caller)
+	return frame_info->next->frame + 16;
+      else
+	return frame_info->frame + 4;
     }
   else
     return frame_info->frame;
@@ -226,7 +226,8 @@ m68k_pop_frame (void)
     }
   if (fsr.regs[PS_REGNUM])
     {
-      write_register (PS_REGNUM, read_memory_integer (fsr.regs[PS_REGNUM], 4));
+      write_register (PS_REGNUM,
+		      read_memory_integer (fsr.regs[PS_REGNUM], 4));
     }
   write_register (FP_REGNUM, read_memory_integer (fp, 4));
   write_register (PC_REGNUM, read_memory_integer (fp + 4, 4));
@@ -278,7 +279,7 @@ m68k_skip_prologue (CORE_ADDR ip)
      If so, ensure we don't go past it.  If not, assume "infinity". */
 
   sal = find_pc_line (ip, 0);
-  limit = (sal.end) ? sal.end : (CORE_ADDR) ~ 0;
+  limit = (sal.end) ? sal.end : (CORE_ADDR) ~0;
 
   while (ip < limit)
     {
@@ -298,7 +299,7 @@ m68k_skip_prologue (CORE_ADDR ip)
       else if (op == P_FMOVM)
 	ip += 10;		/* Skip fmovm */
       else
-	break;		/* Found unknown code, bail out. */
+	break;			/* Found unknown code, bail out. */
     }
   return (ip);
 }
@@ -314,7 +315,7 @@ m68k_find_saved_regs (struct frame_info *frame_info,
 
   /* First possible address for a pc in a call dummy for this frame.  */
   CORE_ADDR possible_call_dummy_start =
-  (frame_info)->frame - CALL_DUMMY_LENGTH - FP_REGNUM * 4 - 4 - 8 * 12;
+    (frame_info)->frame - CALL_DUMMY_LENGTH - FP_REGNUM * 4 - 4 - 8 * 12;
 
   int nextinsn;
   memset (saved_regs, 0, sizeof (*saved_regs));
@@ -367,7 +368,7 @@ m68k_find_saved_regs (struct frame_info *frame_info,
 	next_addr += read_memory_integer (pc += 2, 4), pc += 4;
     }
 
-  for ( ; ; )
+  for (;;)
     {
       nextinsn = 0xffff & read_memory_integer (pc, 2);
       regmask = read_memory_integer (pc + 2, 2);
@@ -636,9 +637,8 @@ m68k_get_longjmp_target (CORE_ADDR *pc)
   buf = alloca (TARGET_PTR_BIT / TARGET_CHAR_BIT);
   sp = read_register (SP_REGNUM);
 
-  if (target_read_memory (sp + SP_ARG0,		/* Offset of first arg on stack */
-			  buf,
-			  TARGET_PTR_BIT / TARGET_CHAR_BIT))
+  if (target_read_memory (sp + SP_ARG0,	/* Offset of first arg on stack */
+			  buf, TARGET_PTR_BIT / TARGET_CHAR_BIT))
     return 0;
 
   jb_addr = extract_address (buf, TARGET_PTR_BIT / TARGET_CHAR_BIT);
@@ -677,9 +677,40 @@ m68k_saved_pc_after_call (struct frame_info *frame)
     return read_memory_integer (read_register (SP_REGNUM), 4);
 }
 
+/* Function: m68k_gdbarch_init
+   Initializer function for the m68k gdbarch vector.
+   Called by gdbarch.  Sets up the gdbarch vector(s) for this target. */
+
+static struct gdbarch *
+m68k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
+{
+  struct gdbarch_tdep *tdep = NULL;
+  struct gdbarch *gdbarch;
+
+  /* find a candidate among the list of pre-declared architectures. */
+  arches = gdbarch_list_lookup_by_info (arches, &info);
+  if (arches != NULL)
+    return (arches->gdbarch);
+
+#if 0
+  tdep = (struct gdbarch_tdep *) xmalloc (sizeof (struct gdbarch_tdep));
+#endif
+
+  gdbarch = gdbarch_alloc (&info, 0);
+
+  return gdbarch;
+}
+
+
+static void
+m68k_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
+{
+
+}
 
 void
 _initialize_m68k_tdep (void)
 {
+  gdbarch_register (bfd_arch_m68k, m68k_gdbarch_init, m68k_dump_tdep);
   tm_print_insn = print_insn_m68k;
 }

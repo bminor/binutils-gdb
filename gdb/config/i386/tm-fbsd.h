@@ -21,7 +21,6 @@
 #ifndef TM_FBSD_H
 #define TM_FBSD_H
 
-#define HAVE_I387_REGS
 #include "i386/tm-i386.h"
 
 /* These defines allow the recognition of sigtramps as a function name

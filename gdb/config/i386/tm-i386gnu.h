@@ -39,7 +39,6 @@
    FIXME: This is probably native-dependent too.  */
 #define ATTACH_DETACH 1
 
-#define HAVE_I387_REGS
 #include "i386/tm-i386.h"
 
 /* We use stabs-in-ELF with the DWARF register numbering scheme.  */

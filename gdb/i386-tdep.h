@@ -157,7 +157,7 @@ struct gdbarch_tdep
 				 + I386_SIZEOF_XREGS)
 
 /* Return the name of register REG.  */
-extern char *i386_register_name (int reg);
+extern char const *i386_register_name (int reg);
 
 /* Return the offset into the register array of the start of register
    number REG.  */

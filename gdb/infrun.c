@@ -3906,13 +3906,15 @@ struct inferior_status
   CORE_ADDR step_resume_break_address;
   int stop_after_trap;
   int stop_soon_quietly;
-  CORE_ADDR selected_frame_address;
   struct regcache *stop_registers;
 
   /* These are here because if call_function_by_hand has written some
      registers and then decides to call error(), we better not have changed
      any registers.  */
   struct regcache *registers;
+
+  /* A frame unique identifier.  */
+  struct frame_id selected_frame_id;
 
   /* A frame unique identifier.  */
   struct frame_id selected_frame_id;

@@ -150,7 +150,7 @@ s390_memset_extra_info (struct frame_extra_info *fextra_info)
 
 
 
-char *
+const char *
 s390_register_name (int reg_nr)
 {
   static char *register_names[] = {

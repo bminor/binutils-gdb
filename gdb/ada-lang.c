@@ -4280,15 +4280,7 @@ ada_add_block_symbols (block, name, namespace, objfile, wild)
 				/* Function Types */
 
 /* Assuming that SYM is the symbol for a function, fill in its type 
-   with prototype information, if it is not already there.  
-   
-   Why is there provision in struct type for BOTH an array of argument
-   types (TYPE_ARG_TYPES) and for an array of typed fields, whose
-   comment suggests it may also represent argument types?  I presume
-   this is some attempt to save space.  The problem is that argument
-   names in Ada are significant.  Therefore, for Ada we use the
-   (apparently older) TYPE_FIELD_* stuff to store argument types. */
-
+   with prototype information, if it is not already there.  */
 
 static void
 fill_in_ada_prototype (func)

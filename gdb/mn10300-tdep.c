@@ -89,7 +89,7 @@ register_name (int reg, char **regs, long sizeof_regs)
     return regs[reg];
 }
 
-static char *
+static const char *
 mn10300_generic_register_name (int reg)
 {
   static char *regs[] =
@@ -102,7 +102,7 @@ mn10300_generic_register_name (int reg)
 }
 
 
-static char *
+static const char *
 am33_register_name (int reg)
 {
   static char *regs[] =

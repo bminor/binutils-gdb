@@ -58,11 +58,11 @@ static char *i386_register_names[] =
 /* i386_register_offset[i] is the offset into the register file of the
    start of register number i.  We initialize this from
    i386_register_size.  */
-static int i386_register_offset[MAX_NUM_REGS];
+static int i386_register_offset[I386_SSE_NUM_REGS];
 
 /* i386_register_size[i] is the number of bytes of storage in GDB's
    register array occupied by register i.  */
-static int i386_register_size[MAX_NUM_REGS] = {
+static int i386_register_size[I386_SSE_NUM_REGS] = {
    4,  4,  4,  4,
    4,  4,  4,  4,
    4,  4,  4,  4,
@@ -78,7 +78,7 @@ static int i386_register_size[MAX_NUM_REGS] = {
 
 /* Return the name of register REG.  */
 
-char *
+const char *
 i386_register_name (int reg)
 {
   if (reg < 0)
@@ -104,14 +104,6 @@ int
 i386_register_raw_size (int reg)
 {
   return i386_register_size[reg];
-}
-
-/* Return the size in bytes of the virtual type of register REG.  */
-
-int
-i386_register_virtual_size (int reg)
-{
-  return TYPE_LENGTH (REGISTER_VIRTUAL_TYPE (reg));
 }
 
 /* Convert stabs register number REG to the appropriate register
@@ -674,8 +666,8 @@ i386_frame_init_saved_regs (struct frame_info *fip)
 
 /* Return PC of first real instruction.  */
 
-int
-i386_skip_prologue (int pc)
+CORE_ADDR
+i386_skip_prologue (CORE_ADDR pc)
 {
   unsigned char op;
   int i;
@@ -757,6 +749,24 @@ i386_skip_prologue (int pc)
   return (codestream_tell ());
 }
 
+/* Use the program counter to determine the contents and size of a
+   breakpoint instruction.  Return a pointer to a string of bytes that
+   encode a breakpoint instruction, store the length of the string in
+   *LEN and optionally adjust *PC to point to the correct memory
+   location for inserting the breakpoint.
+
+   On the i386 we have a single breakpoint that fits in a single byte
+   and can be inserted anywhere.  */
+   
+static const unsigned char *
+i386_breakpoint_from_pc (CORE_ADDR *pc, int *len)
+{
+  static unsigned char break_insn[] = { 0xcc };	/* int 3 */
+  
+  *len = sizeof (break_insn);
+  return break_insn;
+}
+
 void
 i386_push_dummy_frame (void)
 {
@@ -776,6 +786,19 @@ i386_push_dummy_frame (void)
   write_register (SP_REGNUM, sp);
   write_register (FP_REGNUM, fp);
 }
+
+/* The i386 call dummy sequence:
+
+     call 11223344 (32-bit relative)
+     int 3
+
+   It is 8 bytes long.  */
+
+static LONGEST i386_call_dummy_words[] =
+{
+  0x223344e8,
+  0xcc11
+};
 
 /* Insert the (relative) function address into the call sequence
    stored at DYMMY.  */
@@ -905,7 +928,7 @@ i386_extract_return_value (struct type *type, char *regbuf, char *valbuf)
 
   if (TYPE_CODE (type) == TYPE_CODE_FLT)
     {
-      if (NUM_FREGS == 0)
+      if (FP0_REGNUM == 0)
 	{
 	  warning ("Cannot find floating-point return value.");
 	  memset (valbuf, 0, len);
@@ -959,7 +982,7 @@ i386_store_return_value (struct type *type, char *valbuf)
       unsigned int fstat;
       char buf[FPU_REG_RAW_SIZE];
 
-      if (NUM_FREGS == 0)
+      if (FP0_REGNUM == 0)
 	{
 	  warning ("Cannot set floating-point return value.");
 	  return;
@@ -1340,8 +1363,8 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep->osabi = osabi;
 
   /* The i386 default settings don't include the SSE registers.
-     FIXME: kettenis/20020509: They do include the FPU registers for
-     now, which is not quite right.  */
+     FIXME: kettenis/20020614: They do include the FPU registers for
+     now, which probably is not quite right.  */
   tdep->num_xmm_regs = 0;
 
   tdep->jb_pc_offset = -1;
@@ -1362,38 +1385,15 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
      alignment.  */
   set_gdbarch_long_double_bit (gdbarch, 96);
 
-  set_gdbarch_get_longjmp_target (gdbarch, i386_get_longjmp_target);
-
-  set_gdbarch_use_generic_dummy_frames (gdbarch, 0);
-
-  /* Call dummy code.  */
-  set_gdbarch_call_dummy_location (gdbarch, ON_STACK);
-  set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 5);
-  set_gdbarch_call_dummy_breakpoint_offset_p (gdbarch, 1);
-  set_gdbarch_call_dummy_p (gdbarch, 1);
-  set_gdbarch_call_dummy_stack_adjust_p (gdbarch, 0);
-
-  set_gdbarch_get_saved_register (gdbarch, generic_get_saved_register);
-  set_gdbarch_push_arguments (gdbarch, i386_push_arguments);
-
-  set_gdbarch_pc_in_call_dummy (gdbarch, pc_in_call_dummy_on_stack);
-
-  set_gdbarch_use_struct_convention (gdbarch, i386_use_struct_convention);
-
-  /* The following redefines make backtracing through sigtramp work.
-     They manufacture a fake sigtramp frame and obtain the saved pc in
-     sigtramp from the sigcontext structure which is pushed by the
-     kernel on the user stack, along with a pointer to it.  */
-
-  set_gdbarch_frame_chain (gdbarch, i386_frame_chain);
-  set_gdbarch_frame_chain_valid (gdbarch, file_frame_chain_valid);
-  set_gdbarch_frame_saved_pc (gdbarch, i386_frame_saved_pc);
-  set_gdbarch_saved_pc_after_call (gdbarch, i386_saved_pc_after_call);
-  set_gdbarch_pc_in_sigtramp (gdbarch, i386_pc_in_sigtramp);
-
   /* NOTE: tm-i386aix.h, tm-i386bsd.h, tm-i386os9k.h, tm-ptx.h,
      tm-symmetry.h currently override this.  Sigh.  */
   set_gdbarch_num_regs (gdbarch, I386_NUM_GREGS + I386_NUM_FREGS);
+  
+  set_gdbarch_sp_regnum (gdbarch, 4);
+  set_gdbarch_fp_regnum (gdbarch, 5);
+  set_gdbarch_pc_regnum (gdbarch, 8);
+  set_gdbarch_ps_regnum (gdbarch, 9);
+  set_gdbarch_fp0_regnum (gdbarch, 16);
 
   /* Use the "default" register numbering scheme for stabs and COFF.  */
   set_gdbarch_stab_reg_to_regnum (gdbarch, i386_stab_reg_to_regnum);
@@ -1406,10 +1406,84 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* We don't define ECOFF_REG_TO_REGNUM, since ECOFF doesn't seem to
      be in use on any of the supported i386 targets.  */
 
-  set_gdbarch_register_bytes (gdbarch, I386_SIZEOF_GREGS + I386_SIZEOF_FREGS);
   set_gdbarch_register_name (gdbarch, i386_register_name);
+  set_gdbarch_register_size (gdbarch, 4);
+  set_gdbarch_register_bytes (gdbarch, I386_SIZEOF_GREGS + I386_SIZEOF_FREGS);
   set_gdbarch_register_byte (gdbarch, i386_register_byte);
   set_gdbarch_register_raw_size (gdbarch, i386_register_raw_size);
+  set_gdbarch_max_register_raw_size (gdbarch, 16);
+  set_gdbarch_max_register_virtual_size (gdbarch, 16);
+  set_gdbarch_register_virtual_type (gdbarch, i386_register_virtual_type);
+
+  set_gdbarch_get_longjmp_target (gdbarch, i386_get_longjmp_target);
+
+  set_gdbarch_use_generic_dummy_frames (gdbarch, 0);
+
+  /* Call dummy code.  */
+  set_gdbarch_call_dummy_location (gdbarch, ON_STACK);
+  set_gdbarch_call_dummy_start_offset (gdbarch, 0);
+  set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 5);
+  set_gdbarch_call_dummy_breakpoint_offset_p (gdbarch, 1);
+  set_gdbarch_call_dummy_length (gdbarch, 8);
+  set_gdbarch_call_dummy_p (gdbarch, 1);
+  set_gdbarch_call_dummy_words (gdbarch, i386_call_dummy_words);
+  set_gdbarch_sizeof_call_dummy_words (gdbarch,
+				       sizeof (i386_call_dummy_words));
+  set_gdbarch_call_dummy_stack_adjust_p (gdbarch, 0);
+  set_gdbarch_fix_call_dummy (gdbarch, i386_fix_call_dummy);
+
+  set_gdbarch_register_convertible (gdbarch, i386_register_convertible);
+  set_gdbarch_register_convert_to_virtual (gdbarch,
+					   i386_register_convert_to_virtual);
+  set_gdbarch_register_convert_to_raw (gdbarch, i386_register_convert_to_raw);
+
+  set_gdbarch_get_saved_register (gdbarch, generic_get_saved_register);
+  set_gdbarch_push_arguments (gdbarch, i386_push_arguments);
+
+  set_gdbarch_pc_in_call_dummy (gdbarch, pc_in_call_dummy_on_stack);
+
+  /* "An argument's size is increased, if necessary, to make it a
+     multiple of [32-bit] words.  This may require tail padding,
+     depending on the size of the argument" -- from the x86 ABI.  */
+  set_gdbarch_parm_boundary (gdbarch, 32);
+
+  set_gdbarch_deprecated_extract_return_value (gdbarch,
+					       i386_extract_return_value);
+  set_gdbarch_push_arguments (gdbarch, i386_push_arguments);
+  set_gdbarch_push_dummy_frame (gdbarch, i386_push_dummy_frame);
+  set_gdbarch_pop_frame (gdbarch, i386_pop_frame);
+  set_gdbarch_store_struct_return (gdbarch, i386_store_struct_return);
+  set_gdbarch_store_return_value (gdbarch, i386_store_return_value);
+  set_gdbarch_deprecated_extract_struct_value_address (gdbarch,
+					    i386_extract_struct_value_address);
+  set_gdbarch_use_struct_convention (gdbarch, i386_use_struct_convention);
+
+  set_gdbarch_frame_init_saved_regs (gdbarch, i386_frame_init_saved_regs);
+  set_gdbarch_skip_prologue (gdbarch, i386_skip_prologue);
+
+  /* Stack grows downward.  */
+  set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
+
+  set_gdbarch_breakpoint_from_pc (gdbarch, i386_breakpoint_from_pc);
+  set_gdbarch_decr_pc_after_break (gdbarch, 1);
+  set_gdbarch_function_start_offset (gdbarch, 0);
+
+  /* The following redefines make backtracing through sigtramp work.
+     They manufacture a fake sigtramp frame and obtain the saved pc in
+     sigtramp from the sigcontext structure which is pushed by the
+     kernel on the user stack, along with a pointer to it.  */
+
+  set_gdbarch_frame_args_skip (gdbarch, 8);
+  set_gdbarch_frameless_function_invocation (gdbarch,
+                                           i386_frameless_function_invocation);
+  set_gdbarch_frame_chain (gdbarch, i386_frame_chain);
+  set_gdbarch_frame_chain_valid (gdbarch, file_frame_chain_valid);
+  set_gdbarch_frame_saved_pc (gdbarch, i386_frame_saved_pc);
+  set_gdbarch_frame_args_address (gdbarch, default_frame_address);
+  set_gdbarch_frame_locals_address (gdbarch, default_frame_address);
+  set_gdbarch_saved_pc_after_call (gdbarch, i386_saved_pc_after_call);
+  set_gdbarch_frame_num_args (gdbarch, i386_frame_num_args);
+  set_gdbarch_pc_in_sigtramp (gdbarch, i386_pc_in_sigtramp);
 
   /* Hook in ABI-specific overrides, if they have been registered.  */
   gdbarch_init_osabi (info, gdbarch, osabi);
@@ -1420,7 +1494,8 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 static enum gdb_osabi
 i386_coff_osabi_sniffer (bfd *abfd)
 {
-  if (strcmp (bfd_get_target (abfd), "coff-go32-exe") == 0)
+  if (strcmp (bfd_get_target (abfd), "coff-go32-exe") == 0
+      || strcmp (bfd_get_target (abfd), "coff-go32") == 0)
     return GDB_OSABI_GO32;
 
   return GDB_OSABI_UNKNOWN;
@@ -1447,7 +1522,7 @@ _initialize_i386_tdep (void)
     int i, offset;
 
     offset = 0;
-    for (i = 0; i < MAX_NUM_REGS; i++)
+    for (i = 0; i < I386_SSE_NUM_REGS; i++)
       {
 	i386_register_offset[i] = offset;
 	offset += i386_register_size[i];

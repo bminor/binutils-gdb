@@ -762,7 +762,7 @@ cris_skip_prologue_main (CORE_ADDR pc, int frameless_p)
    adjusts pcptr (if necessary) to point to the actual memory location where
    the breakpoint should be inserted.  */
 
-unsigned char *
+const unsigned char *
 cris_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
 {
   static unsigned char break_insn[] = {0x38, 0xe9};
@@ -995,7 +995,7 @@ cris_abi_v2_store_return_value (struct type *type, char *valbuf)
 /* Return the name of register regno as a string. Return NULL for an invalid or
    unimplemented register.  */
 
-char *
+const char *
 cris_register_name (int regno)
 {
   static char *cris_genreg_names[] =

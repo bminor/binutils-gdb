@@ -97,7 +97,7 @@ enum
 /* Function: xstormy16_register_name
    Returns the name of the standard Xstormy16 register N. */
 
-static char *
+static const char *
 xstormy16_register_name (int regnum)
 {
   static char *register_names[] = {

@@ -553,6 +553,7 @@ condition_command (char *arg, int from_tty)
 	    error ("Junk at end of expression");
 	}
       breakpoints_changed ();
+      breakpoint_modify_event (b->number);
       return;
     }
 
@@ -592,6 +593,7 @@ commands_command (char *arg, int from_tty)
       free_command_lines (&b->commands);
       b->commands = l;
       breakpoints_changed ();
+      breakpoint_modify_event (b->number);
       return;
     }
   error ("No breakpoint number %d.", bnum);
@@ -7071,18 +7073,20 @@ set_ignore_count (int bptnum, int count, int from_tty)
     if (b->number == bptnum)
     {
       b->ignore_count = count;
-      if (!from_tty)
-	return;
-      else if (count == 0)
-	printf_filtered ("Will stop next time breakpoint %d is reached.",
-			 bptnum);
-      else if (count == 1)
-	printf_filtered ("Will ignore next crossing of breakpoint %d.",
-			 bptnum);
-      else
-	printf_filtered ("Will ignore next %d crossings of breakpoint %d.",
-			 count, bptnum);
+      if (from_tty)
+	{
+	  if (count == 0)
+	    printf_filtered ("Will stop next time breakpoint %d is reached.",
+			     bptnum);
+	  else if (count == 1)
+	    printf_filtered ("Will ignore next crossing of breakpoint %d.",
+			     bptnum);
+	  else
+	    printf_filtered ("Will ignore next %d crossings of breakpoint %d.",
+			     count, bptnum);
+	}
       breakpoints_changed ();
+      breakpoint_modify_event (b->number);
       return;
     }
 
@@ -7119,8 +7123,8 @@ ignore_command (char *args, int from_tty)
   set_ignore_count (num,
 		    longest_to_int (value_as_long (parse_and_eval (p))),
 		    from_tty);
-  printf_filtered ("\n");
-  breakpoints_changed ();
+  if (from_tty)
+    printf_filtered ("\n");
 }
 
 /* Call FUNCTION on each of the breakpoints

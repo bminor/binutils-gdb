@@ -1041,24 +1041,24 @@ _initialize_remote_rdi (void)
 	   "Withough an argument, it will display current state.\n",
 	   &maintenancelist);
 
-  add_show_from_set
-    (add_set_boolean_cmd
-     ("rdiromatzero", no_class, &rom_at_zero,
-      "Set target has ROM at addr 0.\n"
-      "A true value disables vector catching, false enables vector catching.\n"
-      "This is evaluated at the time the 'target rdi' command is executed\n",
-      &setlist),
-     &showlist);
+  add_setshow_boolean_cmd
+    ("rdiromatzero", no_class, &rom_at_zero,
+     "Set target has ROM at addr 0.\n"
+     "A true value disables vector catching, false enables vector catching.\n"
+     "This is evaluated at the time the 'target rdi' command is executed\n",
+     "Show if target has ROM at addr 0.\n",
+     NULL, NULL,
+     &setlist, &showlist);
 
-  add_show_from_set
-    (add_set_boolean_cmd
-     ("rdiheartbeat", no_class, &rdi_heartbeat,
-      "Set enable for ADP heartbeat packets.\n"
-      "I don't know why you would want this. If you enable them,\n"
-      "it will confuse ARM and EPI JTAG interface boxes as well\n"
-      "as the Angel Monitor.\n",
-      &setlist),
-     &showlist);
+  add_setshow_boolean_cmd
+    ("rdiheartbeat", no_class, &rdi_heartbeat,
+     "Set enable for ADP heartbeat packets.\n"
+     "I don't know why you would want this. If you enable them,\n"
+     "it will confuse ARM and EPI JTAG interface boxes as well\n"
+     "as the Angel Monitor.\n",
+     "Show enable for ADP heartbeat packets.\n",
+     NULL, NULL,
+     &setlist, &showlist);
 }
 
 /* A little dummy to make linking with the library succeed. */

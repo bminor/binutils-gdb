@@ -21,7 +21,6 @@
 #ifndef TM_I386SOL2_H
 #define TM_I386SOL2_H 1
 
-#define HAVE_I387_REGS
 #include "i386/tm-i386v4.h"
 
 /* If the current gcc for for this target does not produce correct

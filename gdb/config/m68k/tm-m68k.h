@@ -21,6 +21,8 @@
 
 #include "regcache.h"
 
+#define GDB_MULTI_ARCH 0
+
 /* Generic 68000 stuff, to be included by other tm-*.h files.  */
 
 #define TARGET_LONG_DOUBLE_FORMAT &floatformat_m68881_ext

@@ -8,7 +8,7 @@
 @c  @ifinfo
 @c  This file documents GDB/MI, a Machine Interface to GDB.
 
-@c  Copyright 2000, 2001 Free Software Foundation, Inc.
+@c  Copyright 2000, 2001, 2002 Free Software Foundation, Inc.
 @c  Contributed by Cygnus Solutions.
 
 @c  Permission is granted to copy, distribute and/or modify this document
@@ -36,7 +36,7 @@
 @c  @page
 @c  @vskip 0pt plus 1filll
 
-@c  Copyright @copyright{} 2000, 2001 Free Software Foundation, Inc.
+@c  Copyright @copyright{} 2000, 2001, 2002 Free Software Foundation, Inc.
 
 @c  Permission is granted to copy, distribute and/or modify this document
 @c  under the terms of the GNU Free Documentation License, Version 1.1 or
@@ -355,7 +355,7 @@ following line is passed to @sc{gdb/mi} as input, while @samp{<-} means
 the output received from @sc{gdb/mi}.
 
 @subsubheading Target Stop
-
+@c Ummm... There is no "-stop" command. This assumes async, no?
 Here's an example of stopping the inferior process:
 
 @example
@@ -378,7 +378,9 @@ Here's an example of a simple CLI command being passed through
 
 @example
 -> print 1+2
-<- ~3\n
+<- &"print 1+2\n"
+<- ~"$1 = 3\n"
+<- ^done
 <- (@value{GDBP})
 @end example
 
@@ -396,7 +398,7 @@ Here's what happens if you pass a non-existent command:
 
 @example
 -> -rubbish
-<- error,"Rubbish not found"
+<- ^error,msg="Undefined MI command: rubbish"
 <- (@value{GDBP})
 @end example
 

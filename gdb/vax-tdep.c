@@ -83,7 +83,7 @@ static gdbarch_fix_call_dummy_ftype vax_fix_call_dummy;
 
 static unsigned char *print_insn_arg ();
 
-static char *
+static const char *
 vax_register_name (int regno)
 {
   static char *register_names[] =

@@ -458,7 +458,7 @@ f:2:DWARF_REG_TO_REGNUM:int:dwarf_reg_to_regnum:int dwarf_regnr:dwarf_regnr:::no
 # to map one to one onto the sdb register numbers.
 f:2:SDB_REG_TO_REGNUM:int:sdb_reg_to_regnum:int sdb_regnr:sdb_regnr:::no_op_reg_to_regnum::0
 f:2:DWARF2_REG_TO_REGNUM:int:dwarf2_reg_to_regnum:int dwarf2_regnr:dwarf2_regnr:::no_op_reg_to_regnum::0
-f:2:REGISTER_NAME:char *:register_name:int regnr:regnr:::legacy_register_name::0
+f:2:REGISTER_NAME:const char *:register_name:int regnr:regnr:::legacy_register_name::0
 v:2:REGISTER_SIZE:int:register_size::::0:-1
 v:2:REGISTER_BYTES:int:register_bytes::::0:-1
 f:2:REGISTER_BYTE:int:register_byte:int reg_nr:reg_nr::0:0

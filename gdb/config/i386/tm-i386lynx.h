@@ -1,5 +1,5 @@
 /* Macro definitions for Intel 386 running under LynxOS.
-   Copyright 1993, 1995 Free Software Foundation, Inc.
+   Copyright 1993, 1995, 2002 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -25,10 +25,5 @@
 
 /* Most definitions from sysv could be used. */
 #include "i386/tm-i386.h"
-
-#undef SAVED_PC_AFTER_CALL
-
-#define SAVED_PC_AFTER_CALL i386lynx_saved_pc_after_call
-CORE_ADDR i386lynx_saved_pc_after_call ();
 
 #endif /* TM_I386LYNX_H */
