@@ -1,3 +1,9 @@
+Mon Oct  9 14:45:46 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* rs6000.h (AOUTHDR): Add o_maxdata field.  Add comments.
+	(_PAD, _LOADER): Define.
+	(STYP_LOADER): Define.
+
 Thu Oct  5 10:02:57 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ecoff.h: Define section name macros and STYP macros for various
