@@ -1,3 +1,8 @@
+2005-04-01  Jan Beulich  <jbeulich@novell.com>
+
+	* config/tc-i386.c (output_imm): Also set sign flag for 64-bit push
+	immediates.
+
 2005-04-01  Jan-Benedict Glaw  <jbglaw@lug-owl.de>
 
 	* NEWS: Mention [fdgh]_floating.

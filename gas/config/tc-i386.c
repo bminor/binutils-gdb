@@ -3567,7 +3567,8 @@ output_imm (insn_start_frag, insn_start_off)
 	      int sign = 0;
 
 	      if ((i.types[n] & (Imm32S))
-		  && i.suffix == QWORD_MNEM_SUFFIX)
+		  && (i.suffix == QWORD_MNEM_SUFFIX
+		      || (!i.suffix && (i.tm.opcode_modifier & No_lSuf))))
 		sign = 1;
 	      if (i.types[n] & (Imm8 | Imm8S | Imm16 | Imm64))
 		{
