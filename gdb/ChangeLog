@@ -1,3 +1,8 @@
+2003-06-27  Jim Blandy  <jimb@redhat.com>
+
+	* ppc-linux-tdep.c (ppc64_desc_entry_point): New function.
+	(ppc64_standard_linkage_target): Use it.
+
 2003-06-27  Elena Zannoni  <ezannoni@redhat.com>
 
 	* config/powerpc/ppc64-linux.mh (NATDEPFILES): Add linux-nat.o.
