@@ -23,8 +23,10 @@ Do-first:
 
 Things-to-keep:
 
+Makefile.in
 configure.in
 config
+endian.c
 hosts
 h8300
 z8k
