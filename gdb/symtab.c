@@ -1759,11 +1759,18 @@ find_pc_sect_line (CORE_ADDR pc, struct sec *section, int notcurrent)
 	{
 	  best = prev;
 	  best_symtab = s;
-	  /* If another line is in the linetable, and its PC is closer
-	     than the best_end we currently have, take it as best_end.  */
-	  if (i < len && (best_end == 0 || best_end > item->pc))
-	    best_end = item->pc;
+
+	  /* Discard BEST_END if it's before the PC of the current BEST.  */
+	  if (best_end <= best->pc)
+	    best_end = 0;
 	}
+
+      /* If another line (denoted by ITEM) is in the linetable and its
+         PC is after BEST's PC, but before the current BEST_END, then
+	 use ITEM's PC as the new best_end.  */
+      if (best && i < len && item->pc > best->pc
+          && (best_end == 0 || best_end > item->pc))
+	best_end = item->pc;
     }
 
   if (!best_symtab)

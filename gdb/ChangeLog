@@ -1,3 +1,8 @@
+2001-03-26  Kevin Buettner  <kevinb@redhat.com>
+
+	* symtab.c (find_pc_sect_line): Revise method used for finding
+	the ending pc.
+
 2001-03-26  Mark Kettenis  <kettenis@gnu.org>
 
 	* i386-linux-tdep.c (i386_linux_sigtramp_saved_pc,
