@@ -1,3 +1,10 @@
+2004-05-17  Ben Elliston  <bje@au.ibm.com>
+
+	* gprof.texi (Introduction): Update synopsis.
+	(Output Options): Document -r and -R.
+	(Analysis Options): Document -t, --table-length.
+	(Miscellaneous Options): Document -h, --help.
+
 2004-05-13  Nick Clifton  <nickc@redhat.com>
 
 	* po/fr.po: Updated French translation.

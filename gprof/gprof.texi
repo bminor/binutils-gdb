@@ -105,9 +105,9 @@ section entitled "GNU Free Documentation License".
 
 @smallexample
 @c man begin SYNOPSIS
-gprof [ -[abcDhilLsTvwxyz] ] [ -[ACeEfFJnNOpPqQZ][@var{name}] ] 
+gprof [ -[abcDhilLrsTvwxyz] ] [ -[ACeEfFJnNOpPqQZ][@var{name}] ] 
  [ -I @var{dirs} ] [ -d[@var{num}] ] [ -k @var{from/to} ]
- [ -m @var{min-count} ] [ -t @var{table-length} ]
+ [ -m @var{min-count} ] [ -R @var{map_file} ] [ -t @var{table-length} ]
  [ --[no-]annotated-source[=@var{name}] ] 
  [ --[no-]exec-counts[=@var{name}] ]
  [ --[no-]flat-profile[=@var{name}] ] [ --[no-]graph[=@var{name}] ]
@@ -546,6 +546,12 @@ call graph.
 If @var{symspec} is specified, @code{gprof} prints a call graph,
 but excludes matching symbols.
 
+@item -t
+@itemx --table-length=@var{num}
+The @samp{-t} option causes the @var{num} most active source lines in
+each source file to be listed when source annotation is enabled.  The
+default is 10.
+
 @item -y
 @itemx --separate-files
 This option affects annotated source output only.
@@ -565,6 +571,7 @@ The @samp{-Z} option causes @code{gprof} not to
 print a tally of functions and the number of times each was called.
 If @var{symspec} is specified, print tally, but exclude matching symbols.
 
+@item -r
 @item --function-ordering
 The @samp{--function-ordering} option causes @code{gprof} to print a
 suggested function ordering for the program based on profiling data.
@@ -576,6 +583,7 @@ The exact details of how to force the linker to place functions
 in a particular order is system dependent and out of the scope of this
 manual.
 
+@item -R @var{map_file}
 @item --file-ordering @var{map_file}
 The @samp{--file-ordering} option causes @code{gprof} to print a
 suggested .o link line ordering for the program based on profiling data.
@@ -725,6 +733,10 @@ that had no time spent in them.  This is useful in conjunction with the
 The @samp{-d @var{num}} option specifies debugging options.
 If @var{num} is not specified, enable all debugging.
 @xref{Debugging}.
+
+@item -h
+@itemx --help
+The @samp{-h} option prints command line usage.
 
 @item -O@var{name}
 @itemx --file-format=@var{name}
