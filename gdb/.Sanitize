@@ -233,6 +233,7 @@ m88k-tdep.c
 mac-defs.h
 mac-xdep.c
 mac-gdb.r
+mac-nat.c
 main.c
 maint.c
 mdebugread.c

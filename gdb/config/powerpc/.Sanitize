@@ -28,12 +28,16 @@ aix.mt
 aix4.mh
 aix4.mt
 gdbserve.mt
+macos.mh
+macos.mt
 nm-aix.h
+nm-macos.h
 ppc-eabi.mt
 ppc-nw.mt
 ppc-sim.mt
 ppcle-eabi.mt
 ppcle-sim.mt
+tm-macos.h
 tm-ppc-aix.h
 tm-ppc-aix4.h
 tm-ppc-eabi.h
