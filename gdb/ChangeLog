@@ -1,3 +1,12 @@
+2002-10-11  Klee Dienes  <kdienes@apple.com>
+
+        * findvar.c (read_memory_typed_address): New function.
+        * gdbcore.h (read_memory_typed_address): Add prototype.
+        * blockframe.c (sigtramp_saved_pc): Use read_memory_typed_address
+	to read a value destined for a CORE_ADDR, not read_memory_integer.
+        * f-valprint.c (f77_get_dynamic_upperbound): Ditto.
+        (f77_get_dynamic_lowerbound): Ditto.
+
 2002-10-11  Martin M. Hunt  <hunt@redhat.com>
 
 	* utils.c (string_to_core_addr): After turning string into
