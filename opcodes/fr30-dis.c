@@ -366,7 +366,7 @@ print_normal (od, dis_info, value, attrs, pc, length)
 #endif
 
   /* Print the operand as directed by the attributes.  */
-  if (CGEN_BOOL_ATTR (attrs, CGEN_OPERAND_FAKE))
+  if (CGEN_BOOL_ATTR (attrs, CGEN_OPERAND_SEM_ONLY))
     ; /* nothing to do */
   else if (CGEN_BOOL_ATTR (attrs, CGEN_OPERAND_UNSIGNED))
     (*info->fprintf_func) (info->stream, "0x%lx", value);
@@ -392,7 +392,7 @@ print_address (od, dis_info, value, attrs, pc, length)
 #endif
 
   /* Print the operand as directed by the attributes.  */
-  if (CGEN_BOOL_ATTR (attrs, CGEN_OPERAND_FAKE))
+  if (CGEN_BOOL_ATTR (attrs, CGEN_OPERAND_SEM_ONLY))
     ; /* nothing to do */
   else if (CGEN_BOOL_ATTR (attrs, CGEN_OPERAND_PCREL_ADDR))
     (*info->print_address_func) (value, info);

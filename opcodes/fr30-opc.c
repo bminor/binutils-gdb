@@ -286,10 +286,10 @@ const CGEN_ATTR_TABLE fr30_cgen_hardware_attr_table[] =
 const CGEN_ATTR_TABLE fr30_cgen_operand_attr_table[] =
 {
   { "ABS-ADDR", NULL },
-  { "FAKE", NULL },
   { "NEGATIVE", NULL },
   { "PCREL-ADDR", NULL },
   { "RELAX", NULL },
+  { "SEM-ONLY", NULL },
   { "SIGN-OPT", NULL },
   { "UNSIGNED", NULL },
   { 0, 0 }
@@ -407,7 +407,7 @@ const CGEN_OPERAND fr30_cgen_operand_table[MAX_OPERANDS] =
 {
 /* pc: program counter */
   { "pc", & HW_ENT (HW_H_PC), 0, 0,
-    { 0, 0|(1<<CGEN_OPERAND_FAKE), { 0 } }  },
+    { 0, 0|(1<<CGEN_OPERAND_SEM_ONLY), { 0 } }  },
 /* Ri: destination register */
   { "Ri", & HW_ENT (HW_H_GR), 12, 4,
     { 0, 0|(1<<CGEN_OPERAND_UNSIGNED), { 0 } }  },
@@ -416,16 +416,16 @@ const CGEN_OPERAND fr30_cgen_operand_table[MAX_OPERANDS] =
     { 0, 0|(1<<CGEN_OPERAND_UNSIGNED), { 0 } }  },
 /* nbit: negative bit */
   { "nbit", & HW_ENT (HW_H_NBIT), 0, 0,
-    { 0, 0|(1<<CGEN_OPERAND_FAKE), { 0 } }  },
+    { 0, 0|(1<<CGEN_OPERAND_SEM_ONLY), { 0 } }  },
 /* vbit: overflow bit */
   { "vbit", & HW_ENT (HW_H_VBIT), 0, 0,
-    { 0, 0|(1<<CGEN_OPERAND_FAKE), { 0 } }  },
+    { 0, 0|(1<<CGEN_OPERAND_SEM_ONLY), { 0 } }  },
 /* zbit: zero     bit */
   { "zbit", & HW_ENT (HW_H_ZBIT), 0, 0,
-    { 0, 0|(1<<CGEN_OPERAND_FAKE), { 0 } }  },
+    { 0, 0|(1<<CGEN_OPERAND_SEM_ONLY), { 0 } }  },
 /* cbit: carry    bit */
   { "cbit", & HW_ENT (HW_H_CBIT), 0, 0,
-    { 0, 0|(1<<CGEN_OPERAND_FAKE), { 0 } }  },
+    { 0, 0|(1<<CGEN_OPERAND_SEM_ONLY), { 0 } }  },
 };
 
 /* Operand references.  */

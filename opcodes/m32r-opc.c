@@ -303,12 +303,12 @@ const CGEN_ATTR_TABLE m32r_cgen_hardware_attr_table[] =
 const CGEN_ATTR_TABLE m32r_cgen_operand_attr_table[] =
 {
   { "ABS-ADDR", NULL },
-  { "FAKE", NULL },
   { "HASH-PREFIX", NULL },
   { "NEGATIVE", NULL },
   { "PCREL-ADDR", NULL },
   { "RELAX", NULL },
   { "RELOC", NULL },
+  { "SEM-ONLY", NULL },
   { "SIGN-OPT", NULL },
   { "UNSIGNED", NULL },
   { 0, 0 }
@@ -447,7 +447,7 @@ const CGEN_OPERAND m32r_cgen_operand_table[MAX_OPERANDS] =
 {
 /* pc: program counter */
   { "pc", & HW_ENT (HW_H_PC), 0, 0,
-    { 0, 0|(1<<CGEN_OPERAND_FAKE), { 0 } }  },
+    { 0, 0|(1<<CGEN_OPERAND_SEM_ONLY), { 0 } }  },
 /* sr: source register */
   { "sr", & HW_ENT (HW_H_GR), 12, 4,
     { 0, 0|(1<<CGEN_OPERAND_UNSIGNED), { 0 } }  },
@@ -527,10 +527,10 @@ const CGEN_OPERAND m32r_cgen_operand_table[MAX_OPERANDS] =
     { 0, 0|(1<<CGEN_OPERAND_RELAX)|(1<<CGEN_OPERAND_RELOC)|(1<<CGEN_OPERAND_PCREL_ADDR), { 0 } }  },
 /* condbit: condition bit */
   { "condbit", & HW_ENT (HW_H_COND), 0, 0,
-    { 0, 0|(1<<CGEN_OPERAND_FAKE), { 0 } }  },
+    { 0, 0|(1<<CGEN_OPERAND_SEM_ONLY), { 0 } }  },
 /* accum: accumulator */
   { "accum", & HW_ENT (HW_H_ACCUM), 0, 0,
-    { 0, 0|(1<<CGEN_OPERAND_FAKE), { 0 } }  },
+    { 0, 0|(1<<CGEN_OPERAND_SEM_ONLY), { 0 } }  },
 };
 
 /* Operand references.  */
