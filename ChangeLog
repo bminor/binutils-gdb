@@ -1,5 +1,7 @@
 Thu Jul 31 19:49:49 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* Makefile.in (DEVO_SUPPORT): Add ltconfig, ltmain.sh, and missing.
+
 	* ltconfig, ltmain.sh: New files, from libtool 1.0.
 	* missing: New file, from automake 1.2.
 
