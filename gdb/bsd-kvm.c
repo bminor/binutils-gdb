@@ -285,7 +285,7 @@ Optionally specify the filename of a core dump.";
   bsd_kvm_ops.to_open = bsd_kvm_open;
   bsd_kvm_ops.to_close = bsd_kvm_close;
   bsd_kvm_ops.to_fetch_registers = bsd_kvm_fetch_registers;
-  bsd_kvm_ops.to_xfer_memory = bsd_kvm_xfer_memory;
+  bsd_kvm_ops.deprecated_xfer_memory = bsd_kvm_xfer_memory;
   bsd_kvm_ops.to_stratum = process_stratum;
   bsd_kvm_ops.to_has_memory = 1;
   bsd_kvm_ops.to_has_stack = 1;

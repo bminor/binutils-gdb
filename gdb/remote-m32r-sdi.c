@@ -1575,7 +1575,7 @@ init_m32r_ops (void)
   m32r_ops.to_fetch_registers = m32r_fetch_register;
   m32r_ops.to_store_registers = m32r_store_register;
   m32r_ops.to_prepare_to_store = m32r_prepare_to_store;
-  m32r_ops.to_xfer_memory = m32r_xfer_memory;
+  m32r_ops.deprecated_xfer_memory = m32r_xfer_memory;
   m32r_ops.to_files_info = m32r_files_info;
   m32r_ops.to_insert_breakpoint = m32r_insert_breakpoint;
   m32r_ops.to_remove_breakpoint = m32r_remove_breakpoint;

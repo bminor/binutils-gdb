@@ -108,8 +108,9 @@ static void debug_to_store_registers (int);
 
 static void debug_to_prepare_to_store (void);
 
-static int debug_to_xfer_memory (CORE_ADDR, char *, int, int,
-				 struct mem_attrib *, struct target_ops *);
+static int deprecated_debug_xfer_memory (CORE_ADDR, char *, int, int,
+					 struct mem_attrib *,
+					 struct target_ops *);
 
 static void debug_to_files_info (struct target_ops *);
 
@@ -390,7 +391,7 @@ update_current_target (void)
       INHERIT (to_fetch_registers, t);
       INHERIT (to_store_registers, t);
       INHERIT (to_prepare_to_store, t);
-      INHERIT (to_xfer_memory, t);
+      INHERIT (deprecated_xfer_memory, t);
       INHERIT (to_files_info, t);
       INHERIT (to_insert_breakpoint, t);
       INHERIT (to_remove_breakpoint, t);
@@ -497,7 +498,7 @@ update_current_target (void)
   de_fault (to_prepare_to_store, 
 	    (void (*) (void)) 
 	    noprocess);
-  de_fault (to_xfer_memory, 
+  de_fault (deprecated_xfer_memory, 
 	    (int (*) (CORE_ADDR, char *, int, int, struct mem_attrib *, struct target_ops *)) 
 	    nomemory);
   de_fault (to_files_info, 
@@ -1047,8 +1048,8 @@ do_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
   if (len == 0)
     return 0;
 
-  /* to_xfer_memory is not guaranteed to set errno, even when it returns
-     0.  */
+  /* deprecated_xfer_memory is not guaranteed to set errno, even when
+     it returns 0.  */
   errno = 0;
 
   if (!write && trust_readonly)
@@ -1065,7 +1066,7 @@ do_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
     }
 
   /* The quick case is that the top target can handle the transfer.  */
-  res = current_target.to_xfer_memory
+  res = current_target.deprecated_xfer_memory
     (memaddr, myaddr, len, write, attrib, &current_target);
 
   /* If res <= 0 then we call it again in the loop.  Ah well. */
@@ -1076,7 +1077,7 @@ do_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
 	  if (!t->to_has_memory)
 	    continue;
 
-	  res = t->to_xfer_memory (memaddr, myaddr, len, write, attrib, t);
+	  res = t->deprecated_xfer_memory (memaddr, myaddr, len, write, attrib, t);
 	  if (res > 0)
 	    break;		/* Handled all or part of xfer */
 	  if (t->to_has_all_memory)
@@ -1256,9 +1257,9 @@ default_xfer_partial (struct target_ops *ops, enum target_object object,
 		      const void *writebuf, ULONGEST offset, LONGEST len)
 {
   if (object == TARGET_OBJECT_MEMORY
-      && ops->to_xfer_memory != NULL)
-    /* If available, fall back to the target's "to_xfer_memory"
-       method.  */
+      && ops->deprecated_xfer_memory != NULL)
+    /* If available, fall back to the target's
+       "deprecated_xfer_memory" method.  */
     {
       int xfered = -1;
       errno = 0;
@@ -1267,18 +1268,18 @@ default_xfer_partial (struct target_ops *ops, enum target_object object,
 	  void *buffer = xmalloc (len);
 	  struct cleanup *cleanup = make_cleanup (xfree, buffer);
 	  memcpy (buffer, writebuf, len);
-	  xfered = ops->to_xfer_memory (offset, buffer, len, 1/*write*/, NULL,
-					ops);
+	  xfered = ops->deprecated_xfer_memory (offset, buffer, len,
+						1/*write*/, NULL, ops);
 	  do_cleanups (cleanup);
 	}
       if (readbuf != NULL)
-	xfered = ops->to_xfer_memory (offset, readbuf, len, 0/*read*/, NULL,
-				      ops);
+	xfered = ops->deprecated_xfer_memory (offset, readbuf, len, 0/*read*/,
+					      NULL, ops);
       if (xfered > 0)
 	return xfered;
       else if (xfered == 0 && errno == 0)
-	/* "to_xfer_memory" uses 0, cross checked against ERRNO as one
-           indication of an error.  */
+	/* "deprecated_xfer_memory" uses 0, cross checked against
+           ERRNO as one indication of an error.  */
 	return 0;
       else
 	return -1;
@@ -1964,14 +1965,14 @@ debug_to_prepare_to_store (void)
 }
 
 static int
-debug_to_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
-		      struct mem_attrib *attrib,
-		      struct target_ops *target)
+deprecated_debug_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len,
+			      int write, struct mem_attrib *attrib,
+			      struct target_ops *target)
 {
   int retval;
 
-  retval = debug_target.to_xfer_memory (memaddr, myaddr, len, write,
-					attrib, target);
+  retval = debug_target.deprecated_xfer_memory (memaddr, myaddr, len, write,
+						attrib, target);
 
   fprintf_unfiltered (gdb_stdlog,
 		      "target_xfer_memory (0x%x, xxx, %d, %s, xxx) = %d",
@@ -2487,7 +2488,7 @@ setup_target_debug (void)
   current_target.to_fetch_registers = debug_to_fetch_registers;
   current_target.to_store_registers = debug_to_store_registers;
   current_target.to_prepare_to_store = debug_to_prepare_to_store;
-  current_target.to_xfer_memory = debug_to_xfer_memory;
+  current_target.deprecated_xfer_memory = deprecated_debug_xfer_memory;
   current_target.to_files_info = debug_to_files_info;
   current_target.to_insert_breakpoint = debug_to_insert_breakpoint;
   current_target.to_remove_breakpoint = debug_to_remove_breakpoint;

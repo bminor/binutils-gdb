@@ -680,11 +680,11 @@ sol_thread_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int dowrite,
     }
 
   if (target_has_execution)
-    retval = procfs_ops.to_xfer_memory (memaddr, myaddr, len,
-					dowrite, attrib, target);
+    retval = procfs_ops.deprecated_xfer_memory (memaddr, myaddr, len,
+						dowrite, attrib, target);
   else
-    retval = orig_core_ops.to_xfer_memory (memaddr, myaddr, len,
-					   dowrite, attrib, target);
+    retval = orig_core_ops.deprecated_xfer_memory (memaddr, myaddr, len,
+						   dowrite, attrib, target);
 
   do_cleanups (old_chain);
 
@@ -1014,11 +1014,11 @@ rw_common (int dowrite, const struct ps_prochandle *ph, gdb_ps_addr_t addr,
 
       /* FIXME: passing 0 as attrib argument.  */
       if (target_has_execution)
-	cc = procfs_ops.to_xfer_memory (addr, buf, size,
-					dowrite, 0, &procfs_ops);
+	cc = procfs_ops.deprecated_xfer_memory (addr, buf, size,
+						dowrite, 0, &procfs_ops);
       else
-	cc = orig_core_ops.to_xfer_memory (addr, buf, size,
-					   dowrite, 0, &core_ops);
+	cc = orig_core_ops.deprecated_xfer_memory (addr, buf, size,
+						   dowrite, 0, &core_ops);
 
       if (cc < 0)
 	{
@@ -1541,7 +1541,7 @@ init_sol_thread_ops (void)
   sol_thread_ops.to_fetch_registers = sol_thread_fetch_registers;
   sol_thread_ops.to_store_registers = sol_thread_store_registers;
   sol_thread_ops.to_prepare_to_store = sol_thread_prepare_to_store;
-  sol_thread_ops.to_xfer_memory = sol_thread_xfer_memory;
+  sol_thread_ops.deprecated_xfer_memory = sol_thread_xfer_memory;
   sol_thread_ops.to_xfer_partial = sol_thread_xfer_partial;
   sol_thread_ops.to_files_info = sol_thread_files_info;
   sol_thread_ops.to_insert_breakpoint = memory_insert_breakpoint;
@@ -1584,7 +1584,7 @@ init_sol_core_ops (void)
   sol_core_ops.to_attach = sol_thread_attach;
   sol_core_ops.to_detach = sol_core_detach;
   sol_core_ops.to_fetch_registers = sol_thread_fetch_registers;
-  sol_core_ops.to_xfer_memory = sol_thread_xfer_memory;
+  sol_core_ops.deprecated_xfer_memory = sol_thread_xfer_memory;
   sol_core_ops.to_xfer_partial = sol_thread_xfer_partial;
   sol_core_ops.to_files_info = sol_core_files_info;
   sol_core_ops.to_insert_breakpoint = ignore;

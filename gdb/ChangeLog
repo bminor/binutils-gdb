@@ -1,5 +1,41 @@
 2004-10-08  Andrew Cagney  <cagney@gnu.org>
 
+	* target.h (struct target_ops): Rename to_xfer_memory to
+	deprecated_xfer_memory.
+	* target.c: Update.
+	(deprecated_debug_xfer_memory): Rename debug_to_xfer_memory.
+	* wince.c: Update.
+	* win32-nat.c: Update.
+	* v850ice.c: Update.
+	* uw-thread.c: Update.
+	* thread-db.c: Update.
+	* sol-thread.c: Update.
+	* remote.c: Update.
+	* remote-vx.c: Update.
+	* remote-st.c: Update.
+	* remote-sim.c: Update.
+	* remote-sds.c: Update.
+	* remote-rdp.c: Update.
+	* remote-rdi.c: Update.
+	* remote-mips.c: Update.
+	* remote-m32r-sdi.c: Update.
+	* remote-e7000.c: Update.
+	* procfs.c: Update.
+	* ppc-bdm.c: Update.
+	* nto-procfs.c: Update.
+	* monitor.c: Update.
+	* linux-nat.c: Update.
+	* inftarg.c: Update.
+	* hpux-thread.c: Update.
+	* go32-nat.c: Update.
+	* gnu-nat.c: Update.
+	* exec.c: Update.
+	* corelow.c: Update.
+	* bsd-kvm.c: Update.
+	* aix-thread.c: Update.
+
+2004-10-08  Andrew Cagney  <cagney@gnu.org>
+
 	* target.c (debug_target): Move to near start of file.
 	(target_stopped_data_address_p): Re-org logic, add casts.
 

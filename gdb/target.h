@@ -324,12 +324,15 @@ struct target_ops
 
        negative (call its absolute value N) means that we cannot
        transfer right at MEMADDR, but we could transfer at least
-       something at MEMADDR + N.  */
+       something at MEMADDR + N.
 
-    int (*to_xfer_memory) (CORE_ADDR memaddr, char *myaddr,
-			   int len, int write,
-			   struct mem_attrib *attrib,
-			   struct target_ops *target);
+       NOTE: cagney/2004-10-01: This has been entirely superseeded by
+       to_xfer_partial and inferior inheritance.  */
+
+    int (*deprecated_xfer_memory) (CORE_ADDR memaddr, char *myaddr,
+				   int len, int write,
+				   struct mem_attrib *attrib,
+				   struct target_ops *target);
 
     void (*to_files_info) (struct target_ops *);
     int (*to_insert_breakpoint) (CORE_ADDR, char *);

@@ -2332,7 +2332,7 @@ init_linux_nat_ops (void)
      honor the LWP id, so we can use them directly.  */
   linux_nat_ops.to_fetch_registers = fetch_inferior_registers;
   linux_nat_ops.to_store_registers = store_inferior_registers;
-  linux_nat_ops.to_xfer_memory = linux_nat_xfer_memory;
+  linux_nat_ops.deprecated_xfer_memory = linux_nat_xfer_memory;
   linux_nat_ops.to_kill = linux_nat_kill;
   linux_nat_ops.to_create_inferior = linux_nat_create_inferior;
   linux_nat_ops.to_mourn_inferior = linux_nat_mourn_inferior;

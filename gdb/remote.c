@@ -5247,7 +5247,7 @@ Specify the serial device it is connected to\n\
   remote_ops.to_fetch_registers = remote_fetch_registers;
   remote_ops.to_store_registers = remote_store_registers;
   remote_ops.to_prepare_to_store = remote_prepare_to_store;
-  remote_ops.to_xfer_memory = remote_xfer_memory;
+  remote_ops.deprecated_xfer_memory = remote_xfer_memory;
   remote_ops.to_files_info = remote_files_info;
   remote_ops.to_insert_breakpoint = remote_insert_breakpoint;
   remote_ops.to_remove_breakpoint = remote_remove_breakpoint;
@@ -5367,7 +5367,7 @@ Specify the serial device it is connected to (e.g. /dev/ttya).";
   remote_async_ops.to_fetch_registers = remote_fetch_registers;
   remote_async_ops.to_store_registers = remote_store_registers;
   remote_async_ops.to_prepare_to_store = remote_prepare_to_store;
-  remote_async_ops.to_xfer_memory = remote_xfer_memory;
+  remote_async_ops.deprecated_xfer_memory = remote_xfer_memory;
   remote_async_ops.to_files_info = remote_files_info;
   remote_async_ops.to_insert_breakpoint = remote_insert_breakpoint;
   remote_async_ops.to_remove_breakpoint = remote_remove_breakpoint;

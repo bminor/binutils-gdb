@@ -538,11 +538,11 @@ core_xfer_partial (struct target_ops *ops, enum target_object object,
     {
     case TARGET_OBJECT_MEMORY:
       if (readbuf)
-	return (*ops->to_xfer_memory) (offset, readbuf, len, 0/*write*/,
-				       NULL, ops);
+	return (*ops->deprecated_xfer_memory) (offset, readbuf, len,
+					       0/*write*/, NULL, ops);
       if (writebuf)
-	return (*ops->to_xfer_memory) (offset, readbuf, len, 1/*write*/,
-				       NULL, ops);
+	return (*ops->deprecated_xfer_memory) (offset, readbuf, len,
+					       1/*write*/, NULL, ops);
       return -1;
 
     case TARGET_OBJECT_AUXV:
@@ -655,7 +655,7 @@ init_core_ops (void)
   core_ops.to_detach = core_detach;
   core_ops.to_fetch_registers = get_core_registers;
   core_ops.to_xfer_partial = core_xfer_partial;
-  core_ops.to_xfer_memory = xfer_memory;
+  core_ops.deprecated_xfer_memory = xfer_memory;
   core_ops.to_files_info = core_files_info;
   core_ops.to_insert_breakpoint = ignore;
   core_ops.to_remove_breakpoint = ignore;

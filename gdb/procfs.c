@@ -172,7 +172,7 @@ init_procfs_ops (void)
   procfs_ops.to_fetch_registers     = procfs_fetch_registers;
   procfs_ops.to_store_registers     = procfs_store_registers;
   procfs_ops.to_xfer_partial        = procfs_xfer_partial;
-  procfs_ops.to_xfer_memory         = procfs_xfer_memory;
+  procfs_ops.deprecated_xfer_memory = procfs_xfer_memory;
   procfs_ops.to_insert_breakpoint   =  memory_insert_breakpoint;
   procfs_ops.to_remove_breakpoint   =  memory_remove_breakpoint;
   procfs_ops.to_notice_signals      = procfs_notice_signals;
@@ -4326,11 +4326,11 @@ procfs_xfer_partial (struct target_ops *ops, enum target_object object,
     {
     case TARGET_OBJECT_MEMORY:
       if (readbuf)
-	return (*ops->to_xfer_memory) (offset, readbuf, len, 0/*write*/,
-				       NULL, ops);
+	return (*ops->deprecated_xfer_memory) (offset, readbuf, len,
+					       0/*write*/, NULL, ops);
       if (writebuf)
-	return (*ops->to_xfer_memory) (offset, writebuf, len, 1/*write*/,
-				       NULL, ops);
+	return (*ops->deprecated_xfer_memory) (offset, writebuf, len,
+					       1/*write*/, NULL, ops);
       return -1;
 
 #ifdef NEW_PROC_API

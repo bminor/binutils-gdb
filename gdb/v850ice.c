@@ -899,7 +899,7 @@ init_850ice_ops (void)
   v850ice_ops.to_fetch_registers = v850ice_fetch_registers;
   v850ice_ops.to_store_registers = v850ice_store_registers;
   v850ice_ops.to_prepare_to_store = v850ice_prepare_to_store;
-  v850ice_ops.to_xfer_memory = v850ice_xfer_memory;
+  v850ice_ops.deprecated_xfer_memory = v850ice_xfer_memory;
   v850ice_ops.to_files_info = v850ice_files_info;
   v850ice_ops.to_insert_breakpoint = v850ice_insert_breakpoint;
   v850ice_ops.to_remove_breakpoint = v850ice_remove_breakpoint;

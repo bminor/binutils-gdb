@@ -1343,7 +1343,7 @@ Specify the name of the machine to connect to.";
   vx_ops.to_open = vx_open;
   vx_ops.to_close = vx_close;
   vx_ops.to_attach = vx_attach;
-  vx_ops.to_xfer_memory = vx_xfer_memory;
+  vx_ops.deprecated_xfer_memory = vx_xfer_memory;
   vx_ops.to_files_info = vx_files_info;
   vx_ops.to_load = vx_load_command;
   vx_ops.to_lookup_symbol = vx_lookup_symbol;
@@ -1368,7 +1368,7 @@ init_vx_run_ops (void)
   vx_run_ops.to_fetch_registers = vx_read_register;
   vx_run_ops.to_store_registers = vx_write_register;
   vx_run_ops.to_prepare_to_store = vx_prepare_to_store;
-  vx_run_ops.to_xfer_memory = vx_xfer_memory;
+  vx_run_ops.deprecated_xfer_memory = vx_xfer_memory;
   vx_run_ops.to_files_info = vx_run_files_info;
   vx_run_ops.to_insert_breakpoint = vx_insert_breakpoint;
   vx_run_ops.to_remove_breakpoint = vx_remove_breakpoint;

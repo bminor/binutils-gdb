@@ -1272,7 +1272,7 @@ init_procfs_ops (void)
   procfs_ops.to_fetch_registers = procfs_fetch_registers;
   procfs_ops.to_store_registers = procfs_store_registers;
   procfs_ops.to_prepare_to_store = procfs_prepare_to_store;
-  procfs_ops.to_xfer_memory = procfs_xfer_memory;
+  procfs_ops.deprecated_xfer_memory = procfs_xfer_memory;
   procfs_ops.to_files_info = procfs_files_info;
   procfs_ops.to_insert_breakpoint = procfs_insert_breakpoint;
   procfs_ops.to_remove_breakpoint = procfs_remove_breakpoint;

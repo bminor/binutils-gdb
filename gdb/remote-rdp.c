@@ -1405,7 +1405,7 @@ init_remote_rdp_ops (void)
   remote_rdp_ops.to_fetch_registers = remote_rdp_fetch_register;
   remote_rdp_ops.to_store_registers = remote_rdp_store_register;
   remote_rdp_ops.to_prepare_to_store = remote_rdp_prepare_to_store;
-  remote_rdp_ops.to_xfer_memory = remote_rdp_xfer_inferior_memory;
+  remote_rdp_ops.deprecated_xfer_memory = remote_rdp_xfer_inferior_memory;
   remote_rdp_ops.to_files_info = remote_rdp_files_info;
   remote_rdp_ops.to_insert_breakpoint = remote_rdp_insert_breakpoint;
   remote_rdp_ops.to_remove_breakpoint = remote_rdp_remove_breakpoint;

@@ -332,8 +332,9 @@ dbgstate (int state)
 static int
 read_thr_debug (struct thread_debug *debugp)
 {
-  return base_ops.to_xfer_memory (thr_debug_addr, (char *)debugp,
-				  sizeof (*debugp), 0, NULL, &base_ops);
+  return base_ops.deprecated_xfer_memory (thr_debug_addr, (char *)debugp,
+					  sizeof (*debugp), 0, NULL,
+					  &base_ops);
 }
 
 /* Read into MAP the contents of the thread map at inferior process address
@@ -342,8 +343,9 @@ read_thr_debug (struct thread_debug *debugp)
 static int
 read_map (CORE_ADDR mapp, struct thread_map *map)
 {
-  return base_ops.to_xfer_memory ((CORE_ADDR)THR_MAP (mapp), (char *)map,
-				  sizeof (*map), 0, NULL, &base_ops);
+  return base_ops.deprecated_xfer_memory ((CORE_ADDR)THR_MAP (mapp),
+					  (char *)map, sizeof (*map),
+					  0, NULL, &base_ops);
 }
 
 /* Read into LWP the contents of the lwp decriptor at inferior process address
@@ -352,8 +354,8 @@ read_map (CORE_ADDR mapp, struct thread_map *map)
 static int
 read_lwp (CORE_ADDR lwpp, __lwp_desc_t *lwp)
 {
-  return base_ops.to_xfer_memory (lwpp, (char *)lwp,
-				  sizeof (*lwp), 0, NULL, &base_ops);
+  return base_ops.deprecated_xfer_memory (lwpp, (char *)lwp,
+					  sizeof (*lwp), 0, NULL, &base_ops);
 }
 
 /* Iterate through all user threads, applying FUNC(<map>, <lwp>, DATA) until
@@ -375,8 +377,9 @@ thread_iter (int (*func)(iter_t *, void *), void *data)
 
   if (!read_thr_debug (&debug))
     return 0;
-  if (!base_ops.to_xfer_memory ((CORE_ADDR)debug.thr_map, (char *)&mapp,
-				sizeof (mapp), 0, NULL, &base_ops))
+  if (!base_ops.deprecated_xfer_memory ((CORE_ADDR)debug.thr_map,
+					(char *)&mapp, sizeof (mapp), 0, NULL,
+					&base_ops))
     return 0;
   if (!mapp)
     return 0;
@@ -633,11 +636,12 @@ libthread_stub (ptid_t ptid)
 
   /* Retrieve stub args. */
   sp = read_register_pid (SP_REGNUM, ptid);
-  if (!base_ops.to_xfer_memory (sp + SP_ARG0, (char *)&mapp,
-				sizeof (mapp), 0, NULL, &base_ops))
+  if (!base_ops.deprecated_xfer_memory (sp + SP_ARG0, (char *)&mapp,
+					sizeof (mapp), 0, NULL, &base_ops))
     goto err;
-  if (!base_ops.to_xfer_memory (sp + SP_ARG0 + sizeof (mapp), (char *)&change,
-				sizeof (change), 0, NULL, &base_ops))
+  if (!base_ops.deprecated_xfer_memory (sp + SP_ARG0 + sizeof (mapp),
+					(char *)&change, sizeof (change), 0,
+					NULL, &base_ops))
     goto err;
 
   /* create_inferior() may not have finished yet, so notice the main
@@ -953,7 +957,7 @@ libthread_init (void)
   if (!(thr_debug_addr = SYMBOL_VALUE_ADDRESS (ms)))
     return;
 
-  /* Initialize base_ops.to_xfer_memory(). */
+  /* Initialize base_ops.deprecated_xfer_memory().  */
   base_ops = current_target;
 
   /* Load _thr_debug's current contents. */
@@ -984,8 +988,8 @@ libthread_init (void)
 
       /* Activate the stub function. */
       onp = (CORE_ADDR)&((struct thread_debug *)thr_debug_addr)->thr_debug_on;
-      if (!base_ops.to_xfer_memory ((CORE_ADDR)onp, (char *)&one,
-				    sizeof (one), 1, NULL, &base_ops))
+      if (!base_ops.deprecated_xfer_memory ((CORE_ADDR)onp, (char *)&one,
+					    sizeof (one), 1, NULL, &base_ops))
 	{
 	  delete_breakpoint (b);
 	  goto err;

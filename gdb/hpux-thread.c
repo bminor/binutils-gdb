@@ -403,7 +403,7 @@ hpux_thread_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len,
   inferior_ptid = main_ptid;
 
   retval = 
-    deprecated_child_ops.to_xfer_memory (memaddr, myaddr, len, dowrite, attribs, target);
+    deprecated_child_ops.deprecated_xfer_memory (memaddr, myaddr, len, dowrite, attribs, target);
 
   do_cleanups (old_chain);
 
@@ -550,7 +550,7 @@ init_hpux_thread_ops (void)
   hpux_thread_ops.to_fetch_registers = hpux_thread_fetch_registers;
   hpux_thread_ops.to_store_registers = hpux_thread_store_registers;
   hpux_thread_ops.to_prepare_to_store = hpux_thread_prepare_to_store;
-  hpux_thread_ops.to_xfer_memory = hpux_thread_xfer_memory;
+  hpux_thread_ops.deprecated_xfer_memory = hpux_thread_xfer_memory;
   hpux_thread_ops.to_files_info = hpux_thread_files_info;
   hpux_thread_ops.to_insert_breakpoint = memory_insert_breakpoint;
   hpux_thread_ops.to_remove_breakpoint = memory_remove_breakpoint;

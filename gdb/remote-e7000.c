@@ -2150,7 +2150,7 @@ target e7000 foobar";
   e7000_ops.to_fetch_registers = e7000_fetch_register;
   e7000_ops.to_store_registers = e7000_store_register;
   e7000_ops.to_prepare_to_store = e7000_prepare_to_store;
-  e7000_ops.to_xfer_memory = e7000_xfer_inferior_memory;
+  e7000_ops.deprecated_xfer_memory = e7000_xfer_inferior_memory;
   e7000_ops.to_files_info = e7000_files_info;
   e7000_ops.to_insert_breakpoint = e7000_insert_breakpoint;
   e7000_ops.to_remove_breakpoint = e7000_remove_breakpoint;

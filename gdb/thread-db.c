@@ -987,8 +987,8 @@ thread_db_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
     }
 
   xfer =
-    target_beneath->to_xfer_memory (memaddr, myaddr, len, write, attrib,
-				    target);
+    target_beneath->deprecated_xfer_memory (memaddr, myaddr, len, write,
+					    attrib, target);
 
   do_cleanups (old_chain);
   return xfer;
@@ -1339,7 +1339,7 @@ init_thread_db_ops (void)
   thread_db_ops.to_wait = thread_db_wait;
   thread_db_ops.to_fetch_registers = thread_db_fetch_registers;
   thread_db_ops.to_store_registers = thread_db_store_registers;
-  thread_db_ops.to_xfer_memory = thread_db_xfer_memory;
+  thread_db_ops.deprecated_xfer_memory = thread_db_xfer_memory;
   thread_db_ops.to_kill = thread_db_kill;
   thread_db_ops.to_create_inferior = thread_db_create_inferior;
   thread_db_ops.to_post_startup_inferior = thread_db_post_startup_inferior;

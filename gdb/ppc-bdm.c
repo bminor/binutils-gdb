@@ -325,7 +325,7 @@ a wiggler, specify wiggler and then the port it is connected to\n\
   bdm_ppc_ops.to_fetch_registers = bdm_ppc_fetch_registers;
   bdm_ppc_ops.to_store_registers = bdm_ppc_store_registers;
   bdm_ppc_ops.to_prepare_to_store = ocd_prepare_to_store;
-  bdm_ppc_ops.to_xfer_memory = ocd_xfer_memory;
+  bdm_ppc_ops.deprecated_xfer_memory = ocd_xfer_memory;
   bdm_ppc_ops.to_files_info = ocd_files_info;
   bdm_ppc_ops.to_insert_breakpoint = ocd_insert_breakpoint;
   bdm_ppc_ops.to_remove_breakpoint = ocd_remove_breakpoint;

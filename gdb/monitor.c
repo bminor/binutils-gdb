@@ -2256,7 +2256,7 @@ init_base_monitor_ops (void)
   monitor_ops.to_fetch_registers = monitor_fetch_registers;
   monitor_ops.to_store_registers = monitor_store_registers;
   monitor_ops.to_prepare_to_store = monitor_prepare_to_store;
-  monitor_ops.to_xfer_memory = monitor_xfer_memory;
+  monitor_ops.deprecated_xfer_memory = monitor_xfer_memory;
   monitor_ops.to_files_info = monitor_files_info;
   monitor_ops.to_insert_breakpoint = monitor_insert_breakpoint;
   monitor_ops.to_remove_breakpoint = monitor_remove_breakpoint;

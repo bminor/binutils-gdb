@@ -2597,7 +2597,7 @@ init_gnu_ops (void)
   gnu_ops.to_fetch_registers = gnu_fetch_registers;    /* to_fetch_registers */
   gnu_ops.to_store_registers = gnu_store_registers;    /* to_store_registers */
   gnu_ops.to_prepare_to_store = gnu_prepare_to_store; /* to_prepare_to_store */
-  gnu_ops.to_xfer_memory = gnu_xfer_memory; /* to_xfer_memory */
+  gnu_ops.deprecated_xfer_memory = gnu_xfer_memory;
   gnu_ops.to_find_memory_regions = gnu_find_memory_regions;
   gnu_ops.to_insert_breakpoint = memory_insert_breakpoint;
   gnu_ops.to_remove_breakpoint = memory_remove_breakpoint;

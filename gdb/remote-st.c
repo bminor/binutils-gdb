@@ -775,7 +775,7 @@ the speed to connect at in bits per second.";
   st2000_ops.to_fetch_registers = st2000_fetch_register;
   st2000_ops.to_store_registers = st2000_store_register;
   st2000_ops.to_prepare_to_store = st2000_prepare_to_store;
-  st2000_ops.to_xfer_memory = st2000_xfer_inferior_memory;
+  st2000_ops.deprecated_xfer_memory = st2000_xfer_inferior_memory;
   st2000_ops.to_files_info = st2000_files_info;
   st2000_ops.to_insert_breakpoint = st2000_insert_breakpoint;
   st2000_ops.to_remove_breakpoint = st2000_remove_breakpoint;	/* Breakpoints */

@@ -1900,7 +1900,7 @@ init_child_ops (void)
   deprecated_child_ops.to_fetch_registers = child_fetch_inferior_registers;
   deprecated_child_ops.to_store_registers = child_store_inferior_registers;
   deprecated_child_ops.to_prepare_to_store = child_prepare_to_store;
-  deprecated_child_ops.to_xfer_memory = child_xfer_memory;
+  deprecated_child_ops.deprecated_xfer_memory = child_xfer_memory;
   deprecated_child_ops.to_files_info = child_files_info;
   deprecated_child_ops.to_insert_breakpoint = memory_insert_breakpoint;
   deprecated_child_ops.to_remove_breakpoint = memory_remove_breakpoint;

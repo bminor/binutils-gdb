@@ -861,7 +861,7 @@ init_go32_ops (void)
   go32_ops.to_fetch_registers = go32_fetch_registers;
   go32_ops.to_store_registers = go32_store_registers;
   go32_ops.to_prepare_to_store = go32_prepare_to_store;
-  go32_ops.to_xfer_memory = go32_xfer_memory;
+  go32_ops.deprecated_xfer_memory = go32_xfer_memory;
   go32_ops.to_files_info = go32_files_info;
   go32_ops.to_insert_breakpoint = memory_insert_breakpoint;
   go32_ops.to_remove_breakpoint = memory_remove_breakpoint;

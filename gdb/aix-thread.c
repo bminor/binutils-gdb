@@ -1604,8 +1604,8 @@ aix_thread_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
   struct cleanup *cleanup = save_inferior_ptid ();
 
   inferior_ptid = pid_to_ptid (PIDGET (inferior_ptid));
-  n = base_target.to_xfer_memory (memaddr, myaddr, len, 
-				  write, attrib, &base_target);
+  n = base_target.deprecated_xfer_memory (memaddr, myaddr, len, 
+					  write, attrib, &base_target);
   do_cleanups (cleanup);
 
   return n;
@@ -1736,7 +1736,7 @@ init_aix_thread_ops (void)
   aix_thread_ops.to_wait               = aix_thread_wait;
   aix_thread_ops.to_fetch_registers    = aix_thread_fetch_registers;
   aix_thread_ops.to_store_registers    = aix_thread_store_registers;
-  aix_thread_ops.to_xfer_memory        = aix_thread_xfer_memory;
+  aix_thread_ops.deprecated_xfer_memory = aix_thread_xfer_memory;
   /* No need for aix_thread_ops.to_create_inferior, because we activate thread
      debugging when the inferior reaches pd_brk_addr.  */
   aix_thread_ops.to_kill               = aix_thread_kill;

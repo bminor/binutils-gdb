@@ -895,7 +895,7 @@ Specify the serial device it is connected to (e.g. /dev/ttya).";
   arm_rdi_ops.to_fetch_registers = arm_rdi_fetch_registers;
   arm_rdi_ops.to_store_registers = arm_rdi_store_registers;
   arm_rdi_ops.to_prepare_to_store = arm_rdi_prepare_to_store;
-  arm_rdi_ops.to_xfer_memory = arm_rdi_xfer_memory;
+  arm_rdi_ops.deprecated_xfer_memory = arm_rdi_xfer_memory;
   arm_rdi_ops.to_files_info = arm_rdi_files_info;
   arm_rdi_ops.to_insert_breakpoint = arm_rdi_insert_breakpoint;
   arm_rdi_ops.to_remove_breakpoint = arm_rdi_remove_breakpoint;

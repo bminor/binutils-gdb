@@ -1061,7 +1061,7 @@ Specify the serial device it is connected to (e.g. /dev/ttya).";
   sds_ops.to_fetch_registers = sds_fetch_registers;
   sds_ops.to_store_registers = sds_store_registers;
   sds_ops.to_prepare_to_store = sds_prepare_to_store;
-  sds_ops.to_xfer_memory = sds_xfer_memory;
+  sds_ops.deprecated_xfer_memory = sds_xfer_memory;
   sds_ops.to_files_info = sds_files_info;
   sds_ops.to_insert_breakpoint = sds_insert_breakpoint;
   sds_ops.to_remove_breakpoint = sds_remove_breakpoint;

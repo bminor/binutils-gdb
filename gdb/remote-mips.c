@@ -3306,7 +3306,7 @@ _initialize_remote_mips (void)
   mips_ops.to_fetch_registers = mips_fetch_registers;
   mips_ops.to_store_registers = mips_store_registers;
   mips_ops.to_prepare_to_store = mips_prepare_to_store;
-  mips_ops.to_xfer_memory = mips_xfer_memory;
+  mips_ops.deprecated_xfer_memory = mips_xfer_memory;
   mips_ops.to_files_info = mips_files_info;
   mips_ops.to_insert_breakpoint = mips_insert_breakpoint;
   mips_ops.to_remove_breakpoint = mips_remove_breakpoint;

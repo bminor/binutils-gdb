@@ -863,7 +863,7 @@ init_gdbsim_ops (void)
   gdbsim_ops.to_fetch_registers = gdbsim_fetch_register;
   gdbsim_ops.to_store_registers = gdbsim_store_register;
   gdbsim_ops.to_prepare_to_store = gdbsim_prepare_to_store;
-  gdbsim_ops.to_xfer_memory = gdbsim_xfer_inferior_memory;
+  gdbsim_ops.deprecated_xfer_memory = gdbsim_xfer_inferior_memory;
   gdbsim_ops.to_files_info = gdbsim_files_info;
   gdbsim_ops.to_insert_breakpoint = gdbsim_insert_breakpoint;
   gdbsim_ops.to_remove_breakpoint = gdbsim_remove_breakpoint;
