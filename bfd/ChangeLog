@@ -1,3 +1,14 @@
+Tue Nov 16 15:45:54 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* i386linux.c: Define new macro ZMAGIC_DISK_BLOCK_SIZE to 1024, and
+	change PAGE_SIZE to 4096.
+
+Mon Nov 15 11:48:08 1993  Ken Raeburn  (raeburn@rtl.cygnus.com)
+
+	* Makefile.in (diststuff): New target.
+
+	* VERSION: Updated.
+
 Sun Nov 14 23:33:01 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* som.c (som_object_setup): Do not create dummy ".text", ".data",
