@@ -1,3 +1,9 @@
+Mon Apr  5 09:06:30 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* Makefile.in (SFILES_INCLUDED): gdb-config.texi is no longer in
+	$(srcdir).
+	(gdb-config.texi): Depend on file in $(srcdir).
+
 Fri Apr  2 16:55:13 1993  Jim Kingdon  (kingdon@cygnus.com)
 
 	* stabs.texinfo: Fixes about N_SO.
