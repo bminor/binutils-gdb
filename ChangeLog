@@ -1,3 +1,8 @@
+Fri Jun 28 12:14:35 1996  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* mpw-configure: Add support for --bindir.
+	* mpw-build.in: Use a GCC-specific build script for GCC actions.
+
 Wed Jun 26 17:20:12 1996  Geoffrey Noer  <noer@cygnus.com>
 
 	* configure.in: add bash, time, gawk to list of hosttools and things
