@@ -45,7 +45,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include <varargs.h>
 #endif
 
-#define PRIVATE_XMALLOC 1	/* Suppress libiberty decls for xmalloc/xrealloc */
 #include "libiberty.h"
 
 /* libiberty.h can't declare this one, but evidently we can.  */
@@ -474,22 +473,20 @@ enum val_prettyprint
 #include "fopen-same.h"
 #endif
 
+/* Microsoft C can't deal with const pointers */
+
+#ifdef _MSC_VER
+#define CONST_PTR
+#else
+#define CONST_PTR const
+#endif
+
 /*
- * Allow things in gdb to be declared "const".  If compiling ANSI, it
- * just works.  If compiling with gcc but non-ansi, redefine to __const__.
- * If non-ansi, non-gcc, then eliminate "const" entirely, making those
+ * Allow things in gdb to be declared "volatile".  If compiling ANSI, it
+ * just works.  If compiling with gcc but non-ansi, redefine to __volatile__.
+ * If non-ansi, non-gcc, then eliminate "volatile" entirely, making those
  * objects be read-write rather than read-only.
  */
-
-#ifndef const
-#ifndef __STDC__
-# ifdef __GNUC__
-#  define const __const__
-# else
-#  define const /*nothing*/
-# endif /* GNUC */
-#endif /* STDC */
-#endif /* const */
 
 #ifndef volatile
 #ifndef __STDC__
@@ -625,8 +622,11 @@ extern char *getenv PARAMS ((const char *));
 
 /* From other system libraries */
 
-#ifdef __STDC__
+#ifdef HAVE_STDDEF_H
 #include <stddef.h>
+#endif
+
+#ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
 
@@ -646,11 +646,17 @@ extern double atof PARAMS ((const char *));	/* X3.159-1989  4.10.1.1 */
 
 #ifndef MALLOC_INCOMPATIBLE
 
+#ifdef NEED_DECLARATION_MALLOC
 extern PTR malloc ();
+#endif
 
+#ifdef NEED_DECLARATION_REALLOC
 extern PTR realloc ();
+#endif
 
+#ifdef NEED_DECLARATION_FREE
 extern void free ();
+#endif
 
 #endif /* MALLOC_INCOMPATIBLE */
 
