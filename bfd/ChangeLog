@@ -1,3 +1,13 @@
+Wed May 18 08:29:04 1994  Ian Lance Taylor  (ian@cygnus.com)
+
+	* som.c: Don't include <sys/dir.h> or <sys/user.h>.
+	(som_reloc_queue_find): Call memcmp instead of bcmp.
+	(som_bfd_reloc_type_lookup): Change first argument to bfd *.
+	(compare_syms): Change types of arguments to const void *.
+	(bfd_section_from_som_symbol): Removed unused local found.
+	(som_write_armap): Add elength, map, orl_count and int arguments.
+	(som_write_armap): Use %ld and cast to long for getuid result.
+
 Wed May 18 09:09:32 1994  Jeff Law  (law@snake.cs.utah.edu)
 
 	* elf32-hppa.h (R_HPPA_ABS_CALL): Define.

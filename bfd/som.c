@@ -31,10 +31,8 @@
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/param.h>
-#include <sys/dir.h>
 #include <signal.h>
 #include <machine/reg.h>
-#include <sys/user.h>		/* After a.out.h  */
 #include <sys/file.h>
 #include <errno.h>
 
@@ -197,7 +195,7 @@ static unsigned char * som_reloc_call PARAMS ((bfd *, unsigned char *,
 					       struct reloc_queue *));
 static unsigned long som_count_spaces PARAMS ((bfd *));
 static unsigned long som_count_subspaces PARAMS ((bfd *));
-static int compare_syms PARAMS ((asymbol **, asymbol **));
+static int compare_syms PARAMS ((const void *, const void *));
 static unsigned long som_compute_checksum PARAMS ((bfd *));
 static boolean som_prep_headers PARAMS ((bfd *));
 static int som_sizeof_headers PARAMS ((bfd *, boolean));
@@ -212,7 +210,7 @@ static boolean som_write_symbol_strings PARAMS ((bfd *, unsigned long,
 						 unsigned *));
 static boolean som_begin_writing PARAMS ((bfd *));
 static const reloc_howto_type * som_bfd_reloc_type_lookup
-	PARAMS ((bfd_arch_info_type *, bfd_reloc_code_real_type));
+	PARAMS ((bfd *, bfd_reloc_code_real_type));
 static char som_section_type PARAMS ((const char *));
 static int som_decode_symclass PARAMS ((asymbol *));
 static boolean som_bfd_count_ar_symbols PARAMS ((bfd *, struct lst_header *,
@@ -221,7 +219,8 @@ static boolean som_bfd_count_ar_symbols PARAMS ((bfd *, struct lst_header *,
 static boolean som_bfd_fill_in_ar_symbols PARAMS ((bfd *, struct lst_header *,
 						   carsym **syms));
 static boolean som_slurp_armap PARAMS ((bfd *));
-static boolean som_write_armap PARAMS ((bfd *));
+static boolean som_write_armap PARAMS ((bfd *, unsigned int, struct orl *,
+					unsigned int, int));
 static void som_bfd_derive_misc_symbol_info PARAMS ((bfd *, asymbol *,
 					     struct som_misc_symbol_info *));
 static boolean som_bfd_prep_for_ar_write PARAMS ((bfd *, unsigned int *,
@@ -1063,16 +1062,16 @@ som_reloc_queue_find (p, size, queue)
      unsigned int size;
      struct reloc_queue *queue;
 {
-  if (queue[0].reloc && !bcmp (p, queue[0].reloc, size)
+  if (queue[0].reloc && !memcmp (p, queue[0].reloc, size)
       && size == queue[0].size)
     return 0;
-  if (queue[1].reloc && !bcmp (p, queue[1].reloc, size)
+  if (queue[1].reloc && !memcmp (p, queue[1].reloc, size)
       && size == queue[1].size)
     return 1;
-  if (queue[2].reloc && !bcmp (p, queue[2].reloc, size)
+  if (queue[2].reloc && !memcmp (p, queue[2].reloc, size)
       && size == queue[2].size)
     return 2;
-  if (queue[3].reloc && !bcmp (p, queue[3].reloc, size)
+  if (queue[3].reloc && !memcmp (p, queue[3].reloc, size)
       && size == queue[3].size)
     return 3;
   return -1;
@@ -1530,9 +1529,10 @@ hppa_som_gen_reloc_type (abfd, base_type, format, field)
 /* Return the address of the correct entry in the PA SOM relocation
    howto table.  */
 
+/*ARGSUSED*/
 static const reloc_howto_type *
-som_bfd_reloc_type_lookup (arch, code)
-     bfd_arch_info_type *arch;
+som_bfd_reloc_type_lookup (abfd, code)
+     bfd *abfd;
      bfd_reloc_code_real_type code;
 {
   if ((int) code < (int) R_NO_RELOCATION + 255)
@@ -2168,11 +2168,13 @@ som_count_subspaces (abfd)
    count.  Doing so compacts the relocation stream.  */
 
 static int
-compare_syms (sym1, sym2)
-     asymbol **sym1;
-     asymbol **sym2;
+compare_syms (arg1, arg2)
+     const PTR arg1;
+     const PTR arg2;
 
 {
+  asymbol **sym1 = (asymbol **) arg1;
+  asymbol **sym2 = (asymbol **) arg2;
   unsigned int count1, count2;
   
   /* Get relocation count for each symbol.  Note that the count
@@ -3612,7 +3614,6 @@ bfd_section_from_som_symbol (abfd, symbol)
   else
     {
       unsigned int value = symbol->symbol_value;
-      unsigned int found = 0;
 
       /* For executables we will have to use the symbol's address and
 	 find out what section would contain that address.   Yuk.  */
@@ -5342,9 +5343,14 @@ som_bfd_ar_write_symbol_stuff (abfd, nsyms, string_size, lst)
 
    You'll never believe this is really how armaps are handled in SOM...  */
 
+/*ARGSUSED*/
 static boolean
-som_write_armap (abfd)
+som_write_armap (abfd, elength, map, orl_count, stridx)
      bfd *abfd;
+     unsigned int elength;
+     struct orl *map;
+     unsigned int orl_count;
+     int stridx;
 {
   bfd *curr_bfd;
   struct stat statbuf;
@@ -5429,8 +5435,8 @@ som_write_armap (abfd)
 
   sprintf (hdr.ar_name, "/               ");
   sprintf (hdr.ar_date, "%ld", bfd_ardata (abfd)->armap_timestamp);
-  sprintf (hdr.ar_uid, "%d", getuid ());
-  sprintf (hdr.ar_gid, "%d", getgid ());
+  sprintf (hdr.ar_uid, "%ld", (long) getuid ());
+  sprintf (hdr.ar_gid, "%ld", (long) getgid ());
   sprintf (hdr.ar_mode, "%-8o", (unsigned int) statbuf.st_mode);
   sprintf (hdr.ar_size, "%-10d", (int) lst_size);
   hdr.ar_fmag[0] = '`';
