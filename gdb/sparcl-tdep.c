@@ -24,8 +24,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "serial.h"
 #include <sys/types.h>
 #include <sys/time.h>
-#include <unistd.h>
 #ifndef __GO32__
+#include <unistd.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>

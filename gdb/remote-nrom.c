@@ -28,6 +28,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "defs.h"
 #include "gdbcmd.h"
+#include "serial.h"
+
 #include <string.h>
 #include "inferior.h"
 #include "wait.h"
@@ -229,6 +231,10 @@ static int nrom_load_sock = -1;
 static int nrom_targ_sock = -1;
 static int nrom_ctrl_sock = -1;
 
+static serial_t load_desc = NULL;
+static serial_t targ_desc = NULL;
+static serial_t ctrl_desc = NULL;
+
 /* For binding to the socket we ned a sockaddr_in structure.  */
 
 static struct sockaddr_in nrom_sin;
@@ -255,6 +261,8 @@ static int bufindex = 0;
 
 static char workbuf[NROM_BUF_SIZE];
 static char sendbuf[NROM_BUF_SIZE];
+
+static char nrom_hostname[100];
 
 /* Forward data declaration. */
 
@@ -404,68 +412,75 @@ mem2hex (mem, buf, count)
   return buf;
 }
 
+/* Scan input from the remote system, until STRING is found.  If BUF is non-
+   zero, then collect input until we have collected either STRING or BUFLEN-1
+   chars.  In either case we terminate BUF with a 0.  If input overflows BUF
+   because STRING can't be found, return -1, else return number of chars in BUF
+   (minus the terminating NUL).  Note that in the non-overflow case, STRING
+   will be at the end of BUF.  */
+
+static int
+expect (string)
+     char *string;
+{
+  char *p = string;
+  int c;
+
+  immediate_quit = 1;
+
+  while (1)
+    {
+      c = SERIAL_READCHAR (ctrl_desc, 5);
+
+      if (c == *p++)
+	{
+	  if (*p == '\0')
+	    {
+	      immediate_quit = 0;
+
+	      return 0;
+	    }
+	}
+      else
+	{
+	  fputc_unfiltered (c, gdb_stdout);
+	  p = string;
+	  if (c == *p)
+	    p++;
+	}
+    }
+}
+
 static int
 nrom_control_send (s, nbytes)
      char *s;
      int nbytes;
 {
-  long len;
-  char buf[10];
+  SERIAL_WRITE (ctrl_desc, s, nbytes);
 
-  /* clear leading characters */
-  /* FIXME: The ioctl uses here seem bogus to me. -sts */
-  len = 1;
-  while (len > 0)
-    {
-      if (ioctl (nrom_ctrl_sock, FIONREAD, &len) < 0)
-	{
-	  perror ("nrom_control_send ioctl");
-	  return (-1);
-	}
-      if (len > 0)
-	{
-	  if (read (nrom_ctrl_sock, buf, 1) < 0)
-	    {
-	      perror ("nrom_control_send read");
-	      return (-1);
-	    }
-	}
-    }
-
-  if (remote_debug)
-    printf_filtered ("nrom_control_send: sending '%s' (%d bytes) to NetROM\n",
-		     s, nbytes);
-
-  if (writen (nrom_ctrl_sock, s, nbytes) < 0)
-    {
-      perror ("nrom_control_send");
-      return (-1);
-    }
-
-  /* clear trailing characters */
-  len = 1;
-  while (len > 0)
-    {
-      if (ioctl (nrom_ctrl_sock, FIONREAD, &len) < 0)
-	{
-	  perror ("nrom_control_send ioctl");
-	  return (-1);
-	}
-      if (len > 0)
-	{
-	  if (read (nrom_ctrl_sock, buf, 1) < 0)
-	    {
-	      perror ("nrom_control_send read");
-	      return (-1);
-	    }
-	}
-    }
   return 0;
 }
 
 static void
 nrom_kill ()
 {
+  nrom_close (0);
+}
+
+static serial_t
+open_socket (name, port)
+     char *name;
+     int port;
+{
+  char sockname[100];
+  serial_t desc;
+
+  sprintf (sockname, "%s:%d", name, port);
+  desc = SERIAL_OPEN (sockname);
+  if (!desc)
+    perror_with_name (sockname);
+
+  return desc;
 }
 
 /* Download a file specified in ARGS to the netROM.  */
@@ -485,20 +500,9 @@ nrom_load (args, fromtty)
   if (nrom_control_send (downloadstring, strlen (downloadstring)) < 0)
     error ("nrom_load: control_send() of `%s' failed", downloadstring);
 
-  /* Wait for the download daemon to start up. */
-  sleep (1);
+  expect ("Waiting for a connection...\n");
 
-  nrom_load_sock = socket (AF_INET, SOCK_STREAM, 0);
-  if (nrom_load_sock == -1)
-    error ("Could not create download socket, error %d", errno);
-
-  memset (&sin, 0, sizeof(struct sockaddr_in));
-  sin.sin_family = AF_INET;
-  sin.sin_port = htons (load_port);
-  sin.sin_addr.s_addr = htonl (nrom_ipaddr);
-
-  if (connect (nrom_load_sock, &sin, sizeof(sin)) == -1)
-    error ("Connect failed, error %d", errno);
+  load_desc = open_socket (nrom_hostname, load_port);
 
   pbfd = bfd_openr (args, 0);
 
@@ -540,7 +544,7 @@ nrom_load (args, fromtty)
 		      bfd_get_section_contents (pbfd, section, buffer, fptr,
 						count);
 
-		      writen (nrom_load_sock, buffer, count);
+		      SERIAL_WRITE (load_desc, buffer, count);
 		      section_address += count;
 		      fptr += count;
 		      section_size -= count;
@@ -557,7 +561,8 @@ nrom_load (args, fromtty)
   else
     error ("\"%s\": Could not open", args);
 
-  close (nrom_load_sock);
+  SERIAL_CLOSE (load_desc);
+  load_desc = NULL;
 }
 
 /* This is called not only when we first attach, but also when the
@@ -580,52 +585,24 @@ nrom_open (name, from_tty)
 {
   int errn;
 
-  if (name)
-    nrom_set_ipaddr (name, from_tty);
-  else if (nrom_ipaddr == 0)
+  if (!name || strchr (name, '/') || strchr (name, ':'))
     error (
 "To open a NetROM connection, you must specify the hostname\n\
 or IP address of the NetROM device you wish to use.");
 
+  strcpy (nrom_hostname, name);
+
+  target_preopen (from_tty);
+
+  unpush_target (&nrom_ops);
+
+  targ_desc = open_socket (nrom_hostname, target_port);
+  ctrl_desc = open_socket (nrom_hostname, control_port);
+
   push_target (&nrom_ops);
 
-  /* Create the socket used for talking with the target. */
-  nrom_targ_sock = socket (AF_INET, SOCK_STREAM, 0);
-
-  /* Bind the socket.  */
-  nrom_sin.sin_family = AF_INET;
-  nrom_sin.sin_port = htons (target_port);
-  nrom_sin.sin_addr.S_un.S_addr = htonl (nrom_ipaddr);
-
-  /* Connect to the remote host.  */
-  if (connect (nrom_targ_sock, &nrom_sin, sizeof(nrom_sin)) == -1)
-      error ("Connect failed, error %d", errno);
-
-  /* Create the socket used for talking with the debugger services.  */
-  nrom_ctrl_sock = socket (AF_INET, SOCK_STREAM, 0);
-
-  /* Bind the socket.  */
-  nrom_sin.sin_family = AF_INET;
-  nrom_sin.sin_port = htons (control_port);
-  nrom_sin.sin_addr.S_un.S_addr = htonl (nrom_ipaddr);
-
-  /* Connect to the remote host. */
-  if (connect (nrom_ctrl_sock, &nrom_sin, sizeof(nrom_sin)) == -1)
-    {
-      errn = errno;
-      close (nrom_targ_sock);
-      error ("Connect control_socket failed, error %d", errn);
-    }
-
   if (from_tty)
-    {
-      unsigned char *i;
-
-      printf_filtered ("Connected to NetROM device \"%s\"", name);
-      i = (unsigned char *) &nrom_ipaddr;
-      printf_filtered (" (%d.%d.%d.%d)\n",
-		       UC(i[0]), UC(i[1]), UC(i[2]), UC(i[3]));
-    }
+    printf_filtered ("Connected to NetROM device \"%s\"\n", nrom_hostname);
 }
 
 static int
@@ -640,6 +617,16 @@ static void
 nrom_close (quitting)
      int quitting;
 {
+  if (load_desc)
+    SERIAL_CLOSE (load_desc);
+  if (targ_desc)
+    SERIAL_CLOSE (targ_desc);
+  if (ctrl_desc)
+    SERIAL_CLOSE (ctrl_desc);
+
+  load_desc = NULL;
+  targ_desc = NULL;
+  ctrl_desc = NULL;
 }
 
 /* Attach to the target that is already loaded and possibly running */
@@ -1312,7 +1299,7 @@ struct target_ops nrom_ops = {
   nrom_can_run,
   0,				/* to_notice_signals */
   0,
-  process_stratum,		/* to_stratum */
+  download_stratum,		/* to_stratum */
   NULL,				/* to_next */
   1,
   1,

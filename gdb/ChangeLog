@@ -1,3 +1,42 @@
+Thu Jun  8 15:06:00 1995  Stu Grossman  (grossman@cygnus.com)
+
+	* defs.h maint.c monitor.c remote-mips.c remote.c:  Add support
+	for `watchdog' variable.  This allows the user to put an upper
+	limit on the amount of time that GDB will wait for the target to
+	return from a step or continue operation.  This will primarily be
+	used for the testsuite, where it is difficult to come up with a
+	reasonable timeout for things like function calls, which can take
+	as long as three minutes under some circumstances.  If the
+	watchdog timer expires, GDB will generate an error that looks like
+	`Watchdog has expired.', and will detach from the target.
+
+	* remote-mips.c (mips_open):  Setup initial frame from target.
+	Print it out so that user is told where the program is stopped
+	when they attach.
+
+	* remote-nrom.c:  Loads of cleanups.  Use serial code to open
+	network connections.  Use expect() to wait for response to
+	download command.
+
+	* ser-tcp.c (tcp_open):  Retry connection if we get ECONNREFUSED.
+
+	* serial.c serial.h (serial_open serial_fdopen serial_close):
+	Allow users to open the same device multiple times.  They all get
+	to share the same serial_t.  This is about the only way to have
+	multiple active targets use the same device (for download and
+	debug).
+
+	* sparcl-tdep.c:  Keep #include <unistd.h> away from GO32.
+
+	* target.c:  Add `targetdebug' variable.  If this is non-zero,
+	then a special target is put at the top of the target stack which
+	will cause all calls through the target vector to have their args
+	and results printed out.
+
+Wed Jun  7 17:40:37 1995  Per Bothner  <bothner@kalessin.cygnus.com>
+
+	* ch-exp.y: Handle <primitive_value> "->" <modename>.
+
 Wed Jun  7 17:46:33 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* mem-break.c (LITTLE_BREAKPOINT): If BREAKPOINT and

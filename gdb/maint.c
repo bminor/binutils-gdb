@@ -43,6 +43,14 @@ static void maintenance_time_display PARAMS ((char *, int));
 
 static void maintenance_space_display PARAMS ((char *, int));
 
+/* Set this to the maximum number of seconds to wait instead of waiting forever
+   in target_wait().  If this timer times out, then it generates an error and
+   the command is aborted.  This replaces most of the need for timeouts in the
+   GDB test suite, and makes it possible to distinguish between a hung target
+   and one with slow communications.  */
+
+int watchdog = 0;
+
 /*
 
 LOCAL FUNCTION
@@ -330,5 +338,13 @@ If a SOURCE file is specified, dump only that file's partial symbols.",
   add_cmd ("check-symtabs", class_maintenance, maintenance_check_symtabs,
 	   "Check consistency of psymtabs and symtabs.",
 	   &maintenancelist);
+
+  add_show_from_set (
+    add_set_cmd ("watchdog", class_maintenance, var_zinteger, (char *)&watchdog,
+		 "Set watchdog timer.\n\
+When non-zero, this timeout is used instead of waiting forever for a target to\n\
+finish a low-level step or continue operation.  If the specified amount of time\n\
+passes without a response from the target, an error occurs.", &setlist),
+		     &showlist);
 #endif	/* MAINTENANCE_CMDS */
 }

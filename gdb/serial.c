@@ -58,6 +58,13 @@ serial_open (name)
   serial_t scb;
   struct serial_ops *ops;
 
+  for (scb = scb_base; scb; scb = scb->next)
+    if (scb->name && strcmp (scb->name, name) == 0)
+      {
+	scb->refcnt++;
+	return scb;
+      }
+
   if (strcmp (name, "pc") == 0)
     ops = serial_interface_lookup ("pc");
   else if (strchr (name, ':'))
@@ -81,17 +88,29 @@ serial_open (name)
       return NULL;
     }
 
+  scb->name = strsave (name);
+  scb->next = scb_base;
+  scb->refcnt = 1;
+  scb_base = scb;
+
   last_serial_opened = scb;
 
   return scb;
 }
 
 serial_t
-serial_fdopen(fd)
+serial_fdopen (fd)
      const int fd;
 {
   serial_t scb;
   struct serial_ops *ops;
+
+  for (scb = scb_base; scb; scb = scb->next)
+    if (scb->fd == fd)
+      {
+	scb->refcnt++;
+	return scb;
+      }
 
   ops = serial_interface_lookup ("hardwire");
 
@@ -107,6 +126,11 @@ serial_fdopen(fd)
 
   scb->fd = fd;
 
+  scb->name = NULL;
+  scb->next = scb_base;
+  scb->refcnt = 1;
+  scb_base = scb;
+
   last_serial_opened = scb;
 
   return scb;
@@ -116,6 +140,8 @@ void
 serial_close(scb)
      serial_t scb;
 {
+  serial_t tmp_scb;
+
   last_serial_opened = NULL;
 
 /* This is bogus.  It's not our fault if you pass us a bad scb...!  Rob, you
@@ -124,7 +150,27 @@ serial_close(scb)
   if (!scb)
     return;
 
-  scb->ops->close(scb);
+  scb->refcnt--;
+  if (scb->refcnt > 0)
+    return;
+
+  scb->ops->close (scb);
+
+  if (scb->name)
+    free (scb->name);
+
+  if (scb_base == scb)
+    scb_base = scb_base->next;
+  else
+    for (tmp_scb = scb_base; tmp_scb; tmp_scb = tmp_scb->next)
+      {
+	if (tmp_scb->next != scb)
+	  continue;
+
+	tmp_scb->next = tmp_scb->next->next;
+	break;
+      }
+
   free(scb);
 }
 

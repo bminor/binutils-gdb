@@ -79,28 +79,38 @@ tcp_open(scb, name)
       return -1;
     }
 
-  scb->fd = socket (PF_INET, SOCK_STREAM, 0);
-  if (scb->fd < 0)
-    return -1;
-
-  /* Allow rapid reuse of this port. */
-  tmp = 1;
-  setsockopt (scb->fd, SOL_SOCKET, SO_REUSEADDR, (char *)&tmp, sizeof(tmp));
-
-  /* Enable TCP keep alive process. */
-  tmp = 1;
-  setsockopt (scb->fd, SOL_SOCKET, SO_KEEPALIVE, (char *)&tmp, sizeof(tmp));
-
-  sockaddr.sin_family = PF_INET;
-  sockaddr.sin_port = htons(port);
-  memcpy (&sockaddr.sin_addr.s_addr, hostent->h_addr,
-	  sizeof (struct in_addr));
-
-  if (connect (scb->fd, (struct sockaddr *) &sockaddr, sizeof(sockaddr)))
+  for (i = 1; i <= 15; i++)
     {
-      close(scb->fd);
+      scb->fd = socket (PF_INET, SOCK_STREAM, 0);
+      if (scb->fd < 0)
+	return -1;
+
+      /* Allow rapid reuse of this port. */
+      tmp = 1;
+      setsockopt (scb->fd, SOL_SOCKET, SO_REUSEADDR, (char *)&tmp, sizeof(tmp));
+
+      /* Enable TCP keep alive process. */
+      tmp = 1;
+      setsockopt (scb->fd, SOL_SOCKET, SO_KEEPALIVE, (char *)&tmp, sizeof(tmp));
+
+      sockaddr.sin_family = PF_INET;
+      sockaddr.sin_port = htons(port);
+      memcpy (&sockaddr.sin_addr.s_addr, hostent->h_addr,
+	      sizeof (struct in_addr));
+
+      if (!connect (scb->fd, (struct sockaddr *) &sockaddr, sizeof(sockaddr)))
+	break;
+
+      close (scb->fd);
       scb->fd = -1;
-      return -1;
+
+/* We retry for ECONNREFUSED because that is often a temporary condition, which
+   happens when the server is being restarted.  */
+
+      if (errno != ECONNREFUSED)
+	return -1;
+
+      sleep (1);
     }
 
   protoent = getprotobyname ("tcp");

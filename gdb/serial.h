@@ -36,9 +36,14 @@ struct _serial_t
   /* ser-unix.c termio{,s} only, we still need to wait for this many more
      seconds.  */
   int timeout_remaining;
+  char *name;			/* The name of the device or host */
+  struct _serial_t *next;	/* Pointer to the next serial_t */
+  int refcnt;			/* Number of pointers to this block */
 };
 
 typedef struct _serial_t *serial_t;
+
+serial_t scb_base;		/* Pointer to list of scb's */
 
 struct serial_ops {
   char *name;
