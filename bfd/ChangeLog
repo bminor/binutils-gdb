@@ -5,6 +5,14 @@ Tue Oct  8 08:51:19 1996  Stu Grossman  (grossman@critters.cygnus.com)
 
 Tue Oct  8 11:40:16 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* sunos.c (struct sunos_link_hash_table): Add got_base field.
+	(sunos_link_hash_table_create): Initialize got_base.
+	(bfd_sunos_size_dynamic_sections): If the .got section is more
+	than 0x1000 bytes, set __GLOBAL_OFFSET_TABLE_ and got_base to
+	0x1000.
+	(sunos_check_dynamic_reloc): Subtract got_base from a base
+	relative relocation.
+
 	* elf32-mips.c (elf_mips_isa): New static function.
 	(_bfd_mips_elf_merge_private_bfd_data): Don't warn about linking
 	-mips1 and -mips2 code together, or -mips3 and -mips4 code.
