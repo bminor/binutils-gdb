@@ -1,3 +1,14 @@
+2002-11-21  Andrew Cagney  <cagney@redhat.com>
+
+	* mips-tdep.c (mips_dump_tdep): Delete references to
+	GDB_TARGET_UNMASK_DISAS_PC and GDB_TARGET_MASK_DISAS_PC.
+	* config/mips/tm-mips.h (GDB_TARGET_MASK_DISAS_PC): Delete macro.
+	(GDB_TARGET_UNMASK_DISAS_PC): Delete macro.
+	* printcmd.c (build_address_symbolic): Delete calls to
+	GDB_TARGET_UNMASK_DISAS_PC and GDB_TARGET_MASK_DISAS_PC.
+	(address_info): Ditto.
+	Fix PR gdb/773.
+	
 2002-11-19  Klee Dienes  <kdienes@apple.com>
             Adam Fedor  <fedor@gnu.org>
 
@@ -63,7 +74,6 @@
 	* gdb/parser-defs.h: (struct objc_class_str): New structure
 	for parsing ObjC classes.
 
->>>>>>> 1.3477
 2002-11-18  Andrew Cagney  <ac131313@redhat.com>
 
 	* stack.c (frame_relative_level): Copy function from here ...

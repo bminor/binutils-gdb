@@ -6215,12 +6215,6 @@ mips_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
 		      "mips_dump_tdep: GDB_TARGET_IS_MIPS64 = %d\n",
 		      GDB_TARGET_IS_MIPS64);
   fprintf_unfiltered (file,
-		      "mips_dump_tdep: GDB_TARGET_MASK_DISAS_PC # %s\n",
-		      XSTRING (GDB_TARGET_MASK_DISAS_PC (PC)));
-  fprintf_unfiltered (file,
-		      "mips_dump_tdep: GDB_TARGET_UNMASK_DISAS_PC # %s\n",
-		      XSTRING (GDB_TARGET_UNMASK_DISAS_PC (PC)));
-  fprintf_unfiltered (file,
 		      "mips_dump_tdep: GEN_REG_SAVE_MASK = %d\n",
 		      GEN_REG_SAVE_MASK);
   fprintf_unfiltered (file,

@@ -39,14 +39,6 @@ struct value;
 #include "coff/sym.h"		/* Needed for PDR below.  */
 #include "coff/symconst.h"
 
-/* PC should be masked to remove possible MIPS16 flag */
-#if !defined (GDB_TARGET_MASK_DISAS_PC)
-#define GDB_TARGET_MASK_DISAS_PC(addr) UNMAKE_MIPS16_ADDR(addr)
-#endif
-#if !defined (GDB_TARGET_UNMASK_DISAS_PC)
-#define GDB_TARGET_UNMASK_DISAS_PC(addr) MAKE_MIPS16_ADDR(addr)
-#endif
-
 /* Return non-zero if PC points to an instruction which will cause a step
    to execute both the instruction at PC and an instruction at PC+4.  */
 extern int mips_step_skips_delay (CORE_ADDR);

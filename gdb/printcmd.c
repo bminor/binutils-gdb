@@ -624,15 +624,6 @@ build_address_symbolic (CORE_ADDR addr,  /* IN */
 	}
     }
 
-  /* On some targets, add in extra "flag" bits to PC for
-     disassembly.  This should ensure that "rounding errors" in
-     symbol addresses that are masked for disassembly favour the
-     the correct symbol. */
-
-#ifdef GDB_TARGET_UNMASK_DISAS_PC
-  addr = GDB_TARGET_UNMASK_DISAS_PC (addr);
-#endif
-
   /* First try to find the address in the symbol table, then
      in the minsyms.  Take the closest one.  */
 
@@ -671,14 +662,6 @@ build_address_symbolic (CORE_ADDR addr,  /* IN */
     }
   if (symbol == NULL && msymbol == NULL)
     return 1;
-
-  /* On some targets, mask out extra "flag" bits from PC for handsome
-     disassembly. */
-
-#ifdef GDB_TARGET_MASK_DISAS_PC
-  name_location = GDB_TARGET_MASK_DISAS_PC (name_location);
-  addr = GDB_TARGET_MASK_DISAS_PC (addr);
-#endif
 
   /* If the nearest symbol is too far away, don't print anything symbolic.  */
 
@@ -1236,14 +1219,8 @@ address_info (char *exp, int from_tty)
 
     case LOC_BLOCK:
       printf_filtered ("a function at address ");
-#ifdef GDB_TARGET_MASK_DISAS_PC
-      print_address_numeric
-	(load_addr = GDB_TARGET_MASK_DISAS_PC (BLOCK_START (SYMBOL_BLOCK_VALUE (sym))),
-	 1, gdb_stdout);
-#else
       print_address_numeric (load_addr = BLOCK_START (SYMBOL_BLOCK_VALUE (sym)),
 			     1, gdb_stdout);
-#endif
       if (section_is_overlay (section))
 	{
 	  load_addr = overlay_unmapped_address (load_addr, section);
