@@ -1368,6 +1368,7 @@ _bfd_strip_section_from_output (info, s)
 	if (*spp == os)
 	  {
 	    bfd_section_list_remove (os->owner, spp);
+	    os->flags |= SEC_EXCLUDE;
 	    os->owner->section_count--;
 	    break;
 	  }
