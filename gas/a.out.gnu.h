@@ -289,6 +289,7 @@ struct reloc_std_bytes {
 
 #define	RELOC_STD_SIZE	8		/* Bytes per relocation entry */
 
+#ifndef CUSTOM_RELOC_FORMAT
 struct relocation_info
 {
   /* Address (within segment) to be relocated.  */
@@ -323,5 +324,6 @@ struct relocation_info
   /* unused */
   unsigned int r_pad:1;		/* Padding -- set to zero */
 };
+#endif /* CUSTOM_RELOC_FORMAT */
 
 #endif /* __A_OUT_GNU_H__ */
