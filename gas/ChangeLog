@@ -1,3 +1,9 @@
+Thu Mar 16 21:18:13 2000  J"orn Rennecke <amylaar@cygnus.co.uk>
+
+	* config/tc-sh.c (IDENT_CHAR): Define.
+	(parse_reg): Use it instead of isalnum.  Put r[0..7]_bank operand
+	matching back where it came from.
+
 Thu Mar 16 20:58:10 2000  J"orn Rennecke <amylaar@cygnus.co.uk>
 
 	* config/tc-sh.c (md_show_usage): Add description of -dsp.
