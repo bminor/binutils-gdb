@@ -1,3 +1,8 @@
+2002-12-13  Joel Brobecker  <brobecker@gnat.com>
+
+	* hppa-tdep.c (hppa_pop_frame): Fix a compilation error introduced
+	in the previous prototype change to set_momentary_breakpoint.
+
 2002-12-12  Daniel Jacobowitz  <drow@mvista.com>
 
 	* infrun.c (pending_follow): Remove saw_parent_fork, saw_child_fork,

@@ -1604,7 +1604,7 @@ hppa_pop_frame (void)
          for "return_command" will print the frame we returned to.  */
       sal = find_pc_line (target_pc, 0);
       sal.pc = target_pc;
-      breakpoint = set_momentary_breakpoint (sal, NULL, bp_finish);
+      breakpoint = set_momentary_breakpoint (sal, null_frame_id, bp_finish);
       breakpoint->silent = 1;
 
       /* So we can clean things up.  */
