@@ -937,6 +937,7 @@ static bfd_boolean
 elf32_hppa_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
 {
   struct elf32_hppa_link_hash_table *htab;
+  struct elf_link_hash_entry *h;
 
   /* Don't try to create the .plt and .got twice.  */
   htab = hppa_link_hash_table (info);
@@ -966,7 +967,12 @@ elf32_hppa_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
   htab->sdynbss = bfd_get_section_by_name (abfd, ".dynbss");
   htab->srelbss = bfd_get_section_by_name (abfd, ".rela.bss");
 
-  return TRUE;
+  /* hppa-linux needs _GLOBAL_OFFSET_TABLE_ to be visible from the main
+     application, because __canonicalize_funcptr_for_compare needs it.  */
+  h = elf_hash_table (info)->hgot;
+  h->forced_local = 0;
+  h->other = STV_DEFAULT;
+  return bfd_elf_link_record_dynamic_symbol (info, h);
 }
 
 /* Copy the extra info we tack onto an elf_link_hash_entry.  */
@@ -1836,7 +1842,7 @@ allocate_plt_static (struct elf_link_hash_entry *h, void *inf)
   info = inf;
   htab = hppa_link_hash_table (info);
   if (htab->elf.dynamic_sections_created
-	   && h->plt.refcount > 0)
+      && h->plt.refcount > 0)
     {
       /* Make sure this symbol is output as a dynamic symbol.
 	 Undefined weak syms won't yet be marked as dynamic.  */

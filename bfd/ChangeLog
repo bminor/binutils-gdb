@@ -1,3 +1,9 @@
+2005-03-07  Alan Modra  <amodra@bigpond.net.au>
+
+	PR ld/778
+	* elf32-hppa.c (elf32_hppa_create_dynamic_sections): Reinstate
+	_GLOBAL_OFFSET_TABLE_ as a normal dynamic symbol.
+
 2005-03-06  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf.c (elfcore_grok_win32pstatus): Warning fixes.
