@@ -1,3 +1,8 @@
+2003-07-28  Daniel Jacobowitz  <drow@mvista.com>
+
+	* thread.c (info_threads_command): Use get_selected_frame ().
+	Check that there is at least one non-sentinel frame.
+
 2003-07-27  Stephane Carrez  <stcarrez@nerim.fr>
 
 	* m68hc11-tdep.c (struct frame_extra_info): Remove.
