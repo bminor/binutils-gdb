@@ -670,3 +670,68 @@ DEFUN(bfd_perform_relocation,(abfd,
 }
 
 
+
+/*doc*
+
+@section The howto manager 
+
+
+When an application wants to create a relocation, but doesn't know
+what the target machine might call it, it can find out by using this
+bit of code.
+
+*/
+
+/*proto* bfd_reloc_code_enum_type
+
+*+++
+
+$typedef enum 
+${
+
+16 bits wide, simple reloc 
+
+$  BFD_RELOC_16,	
+
+8 bits wide, but used to form an address like 0xffnn
+
+$  BFD_RELOC_8_FFnn,
+
+8 bits wide, simple
+
+$  BFD_RELOC_8,
+
+8 bits wide, pc relative
+
+$  BFD_RELOC_8_PCREL
+$ } bfd_reloc_code_enum_real_type;
+
+*---
+
+*/
+
+
+
+/*proto* bfd_reloc_type_lookup
+This routine returns a pointer to a howto struct which when invoked,
+will perform the supplied relocation on data from the architecture
+noted.
+
+[Note] This function will go away.
+
+*; PROTO(CONST struct reloc_howto_struct *,
+	bfd_reloc_type_lookup,
+	(CONST bfd_arch_info_struct_type *arch, bfd_reloc_code_enum_type code));
+*/
+
+
+CONST struct reloc_howto_struct *
+DEFUN(bfd_reloc_type_lookup,(arch, code),
+	CONST bfd_arch_info_struct_type *arch  AND
+	bfd_reloc_code_enum_type code)
+{
+  return arch->reloc_type_lookup(arch, code);
+}
+
+
+
