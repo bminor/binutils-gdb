@@ -1,5 +1,11 @@
 Fri Mar  3 17:41:50 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
+	* config/tc-h8300.* (md_operand): Change empty function to empty
+	macro.
+
+	* config/tc-h8300.c (build_bytes): Make H8/300-H warning message
+	clearer.
+
 	* write.c (write_contents): If bfd_set_section_contents fails,
 	print a message and exit, instead of aborting.
 
