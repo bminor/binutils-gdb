@@ -5,6 +5,9 @@ Fri May 20 13:38:23 1994  Jeff Law  (law@snake.cs.utah.edu)
 
 Fri May 20 11:57:05 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* coff-mips.c (mips_relocate_section): Add MIPS_R_JMPADDR overflow
+	checking.
+
 	* elf32-i386.c (elf_i386_size_dynamic_sections): Add DT_DEBUG to
 	the dynamic linking information for the benefit of the debugger.
 	From Peter Schauer.
