@@ -97,6 +97,7 @@ NO_EDIT="This file was generated automatically by configure.  Do not edit."
 ##
 
 progname=$0
+PWD=`pwd`
 
 case "${progname}" in
 /*) ;;

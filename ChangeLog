@@ -1,3 +1,10 @@
+Thu Sep 17 23:05:53 1992  Mark Eichin  (eichin@cygnus.com)
+
+	* configure: just set PWD=`pwd` at the top, since Ultrix sh
+	doesn't have unset and all success paths (and most error paths)
+	out set it anyway. (Note: should change all uses of ${PWD=`pwd`}
+	to just ${PWD} to avoid confusion.)
+
 Tue Sep 15 16:00:54 1992  Ian Lance Taylor  (ian@cygnus.com)
 
 	* configure: always set $(tooldir) to $(libdir)/$(target_alias),
