@@ -302,6 +302,12 @@ extern CORE_ADDR symbol_overlayed_address (CORE_ADDR, asection *);
 /* Load symbols from a file.  */
 extern void symbol_file_add_main (char *args, int from_tty);
 
+/* Read inferior memory at ADDR to find the header of a loaded object file
+   and read its in-core symbols out of inferior memory.  TEMPL is a bfd
+   representing the target's format.  */
+extern struct objfile *symbol_file_add_from_memory (bfd *templ, CORE_ADDR addr,
+						    int from_tty);
+
 /* Clear GDB symbol tables.  */
 extern void symbol_file_clear (int from_tty);
 
