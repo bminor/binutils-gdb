@@ -638,8 +638,8 @@ lintlog:$(SOURCES) Makefile
 | grep -v "archive\.c"
 
 
-tags TAGS:$(SOURCES) $(HEADERS)
-	etags -t $?
+TAGS:
+	etags -t $(srcdir)/*.[chly] *.[chly]
 
 
 .PHONY: install

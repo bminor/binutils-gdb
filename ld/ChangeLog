@@ -1,3 +1,7 @@
+Fri Sep 10 07:26:57 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	* Makefile.in (TAGS): Use shell wildcards.
+
 Tue Sep  7 18:04:54 1993  Jeffrey Osier  (jeffrey@cygnus.com)
 
 	* Makefile.in:  add TEXINPUTS variable and use it in ld.dvi target
