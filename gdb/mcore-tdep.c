@@ -1022,7 +1022,6 @@ get_insn (CORE_ADDR pc)
 static struct gdbarch *
 mcore_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
-  static LONGEST call_dummy_words[7] = { };
   struct gdbarch_tdep *tdep = NULL;
   struct gdbarch *gdbarch;
 
@@ -1056,8 +1055,6 @@ mcore_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Call Dummies:  */
 
-  set_gdbarch_deprecated_call_dummy_words (gdbarch, call_dummy_words);
-  set_gdbarch_deprecated_sizeof_call_dummy_words (gdbarch, 0);
   set_gdbarch_deprecated_save_dummy_frame_tos (gdbarch, generic_save_dummy_frame_tos);
   set_gdbarch_deprecated_saved_pc_after_call (gdbarch, mcore_saved_pc_after_call);
   set_gdbarch_breakpoint_from_pc (gdbarch, mcore_breakpoint_from_pc);

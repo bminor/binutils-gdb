@@ -48,10 +48,6 @@ extern gdbarch_use_struct_convention_ftype always_use_struct_convention;
    language family, so that case is irrelevant for C.  */
 extern gdbarch_return_value_on_stack_ftype generic_return_value_on_stack_not;
 
-/* Backward compatible call_dummy_words. */
-extern LONGEST legacy_call_dummy_words[];
-extern int legacy_sizeof_call_dummy_words;
-
 /* Typical remote_translate_xfer_address */
 extern gdbarch_remote_translate_xfer_address_ftype generic_remote_translate_xfer_address;
 

@@ -1,5 +1,23 @@
 2004-05-08  Andrew Cagney  <cagney@redhat.com>
 
+	* gdbarch.sh (DEPRECATED_CALL_DUMMY_WORDS)
+	(DEPRECATED_SIZEOF_CALL_DUMMY_WORDS): Delete.
+	* gdbarch.h, gdbarch.c: Re-generate.
+	* arm-linux-tdep.c (arm_linux_call_dummy_words)
+	(arm_linux_init_abi): Do not set deprecated_call_dummy_words or
+	deprecated_sizeof_call_dummy_words.
+	* arm-tdep.c (arm_call_dummy_words, arm_gdbarch_init): Ditto.
+	* xstormy16-tdep.c (xstormy16_gdbarch_init): Ditto.
+	* v850-tdep.c (v850_gdbarch_init): Ditto.
+	* sh64-tdep.c (sh64_gdbarch_init): Ditto.
+	* ns32k-tdep.c (ns32k_call_dummy_words, ns32k_gdbarch_init): Ditto.
+	* mn10300-tdep.c (mn10300_gdbarch_init): Ditto.
+	* mcore-tdep.c (mcore_gdbarch_init): Ditto.
+	* arch-utils.h (legacy_call_dummy_words)
+	(legacy_sizeof_call_dummy_words): Delete declarations.
+	* arch-utils.c (legacy_call_dummy_words)
+	(legacy_sizeof_call_dummy_words): Delete variables.
+
 	* gdbarch.sh (DEPRECATED_PUSH_DUMMY_FRAME): Delete.
 	* gdbarch.h, gdbarch.c: Re-generate.
 	* inferior.h (PUSH_DUMMY_FRAME): Delete macro.

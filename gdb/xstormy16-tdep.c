@@ -1102,7 +1102,6 @@ xstormy16_save_dummy_frame_tos (CORE_ADDR sp)
 static struct gdbarch *
 xstormy16_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
-  static LONGEST call_dummy_words[1] = { 0 };
   struct gdbarch_tdep *tdep = NULL;
   struct gdbarch *gdbarch;
 
@@ -1176,8 +1175,6 @@ xstormy16_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_extract_struct_value_address (gdbarch, xstormy16_extract_struct_value_address);
   set_gdbarch_use_struct_convention (gdbarch,
 				     xstormy16_use_struct_convention);
-  set_gdbarch_deprecated_call_dummy_words (gdbarch, call_dummy_words);
-  set_gdbarch_deprecated_sizeof_call_dummy_words (gdbarch, 0);
   set_gdbarch_breakpoint_from_pc (gdbarch, xstormy16_breakpoint_from_pc);
 
   set_gdbarch_char_signed (gdbarch, 0);

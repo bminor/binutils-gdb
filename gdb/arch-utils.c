@@ -120,13 +120,6 @@ generic_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
   return 0;
 }
 
-#if defined (CALL_DUMMY)
-LONGEST legacy_call_dummy_words[] = CALL_DUMMY;
-#else
-LONGEST legacy_call_dummy_words[1];
-#endif
-int legacy_sizeof_call_dummy_words = sizeof (legacy_call_dummy_words);
-
 void
 generic_remote_translate_xfer_address (struct gdbarch *gdbarch,
 				       struct regcache *regcache,

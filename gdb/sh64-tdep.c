@@ -2793,7 +2793,6 @@ gdbarch_init_ftype sh64_gdbarch_init;
 struct gdbarch *
 sh64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
-  static LONGEST sh64_call_dummy_words[] = {0};
   struct gdbarch *gdbarch;
   struct gdbarch_tdep *tdep;
 
@@ -2874,8 +2873,6 @@ sh64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_do_registers_info (gdbarch, sh64_do_registers_info);
   set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, sh64_nofp_frame_init_saved_regs);
   set_gdbarch_breakpoint_from_pc (gdbarch, sh64_breakpoint_from_pc);
-  set_gdbarch_deprecated_call_dummy_words (gdbarch, sh64_call_dummy_words);
-  set_gdbarch_deprecated_sizeof_call_dummy_words (gdbarch, sizeof (sh64_call_dummy_words));
 
   set_gdbarch_deprecated_init_extra_frame_info (gdbarch, sh64_init_extra_frame_info);
   set_gdbarch_deprecated_frame_chain (gdbarch, sh64_frame_chain);

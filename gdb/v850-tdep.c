@@ -1175,7 +1175,6 @@ v850_target_read_fp (void)
 static struct gdbarch *
 v850_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
-  static LONGEST call_dummy_words[1] = { 0 };
   struct gdbarch_tdep *tdep = NULL;
   struct gdbarch *gdbarch;
   int i;
@@ -1255,8 +1254,6 @@ v850_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_store_struct_return (gdbarch, v850_store_struct_return);
   set_gdbarch_deprecated_store_return_value (gdbarch, v850_store_return_value);
   set_gdbarch_use_struct_convention (gdbarch, v850_use_struct_convention);
-  set_gdbarch_deprecated_call_dummy_words (gdbarch, call_dummy_nil);
-  set_gdbarch_deprecated_sizeof_call_dummy_words (gdbarch, 0);
   set_gdbarch_deprecated_fix_call_dummy (gdbarch, v850_fix_call_dummy);
   set_gdbarch_breakpoint_from_pc (gdbarch, v850_breakpoint_from_pc);
 

@@ -1173,20 +1173,6 @@ arm_unwind_sp (struct gdbarch *gdbarch, struct frame_info *this_frame)
   return frame_unwind_register_unsigned (this_frame, ARM_SP_REGNUM);
 }
 
-/* DEPRECATED_CALL_DUMMY_WORDS:
-   This sequence of words is the instructions
-
-   mov  lr,pc
-   mov  pc,r4
-   illegal
-
-   Note this is 12 bytes.  */
-
-static LONGEST arm_call_dummy_words[] =
-{
-  0xe1a0e00f, 0xe1a0f004, 0xe7ffdefe
-};
-
 /* When arguments must be pushed onto the stack, they go on in reverse
    order.  The code below implements a FILO (stack) to do this.  */
 
@@ -2723,9 +2709,6 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* This should be low enough for everything.  */
   tdep->lowest_pc = 0x20;
   tdep->jb_pc = -1;	/* Longjump support not enabled by default.  */
-
-  set_gdbarch_deprecated_call_dummy_words (gdbarch, arm_call_dummy_words);
-  set_gdbarch_deprecated_sizeof_call_dummy_words (gdbarch, 0);
 
   set_gdbarch_push_dummy_call (gdbarch, arm_push_dummy_call);
 

@@ -162,8 +162,6 @@ struct gdbarch
   gdbarch_deprecated_dummy_write_sp_ftype *deprecated_dummy_write_sp;
   int deprecated_register_size;
   int call_dummy_location;
-  LONGEST * deprecated_call_dummy_words;
-  int deprecated_sizeof_call_dummy_words;
   gdbarch_deprecated_fix_call_dummy_ftype *deprecated_fix_call_dummy;
   gdbarch_push_dummy_code_ftype *push_dummy_code;
   gdbarch_deprecated_do_registers_info_ftype *deprecated_do_registers_info;
@@ -318,8 +316,6 @@ struct gdbarch startup_gdbarch =
   0,  /* deprecated_dummy_write_sp */
   0,  /* deprecated_register_size */
   0,  /* call_dummy_location */
-  0,  /* deprecated_call_dummy_words */
-  0,  /* deprecated_sizeof_call_dummy_words */
   0,  /* deprecated_fix_call_dummy */
   0,  /* push_dummy_code */
   0,  /* deprecated_do_registers_info */
@@ -470,8 +466,6 @@ gdbarch_alloc (const struct gdbarch_info *info,
   current_gdbarch->deprecated_register_virtual_size = generic_register_size;
   current_gdbarch->deprecated_fp_regnum = -1;
   current_gdbarch->call_dummy_location = AT_ENTRY_POINT;
-  current_gdbarch->deprecated_call_dummy_words = legacy_call_dummy_words;
-  current_gdbarch->deprecated_sizeof_call_dummy_words = legacy_sizeof_call_dummy_words;
   current_gdbarch->print_registers_info = default_print_registers_info;
   current_gdbarch->register_sim_regno = legacy_register_sim_regno;
   current_gdbarch->cannot_fetch_register = cannot_register_not;
@@ -611,8 +605,6 @@ verify_gdbarch (struct gdbarch *current_gdbarch)
   /* Skip verify of deprecated_push_return_address, has predicate */
   /* Skip verify of deprecated_dummy_write_sp, has predicate */
   /* Skip verify of call_dummy_location, invalid_p == 0 */
-  /* Skip verify of deprecated_call_dummy_words, invalid_p == 0 */
-  /* Skip verify of deprecated_sizeof_call_dummy_words, invalid_p == 0 */
   /* Skip verify of deprecated_fix_call_dummy, has predicate */
   /* Skip verify of push_dummy_code, has predicate */
   /* Skip verify of deprecated_do_registers_info, has predicate */
@@ -913,14 +905,6 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: DECR_PC_AFTER_BREAK = %ld\n",
                       (long) DECR_PC_AFTER_BREAK);
-#endif
-#ifdef DEPRECATED_CALL_DUMMY_WORDS
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: DEPRECATED_CALL_DUMMY_WORDS # %s\n",
-                      XSTRING (DEPRECATED_CALL_DUMMY_WORDS));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: DEPRECATED_CALL_DUMMY_WORDS = 0x%08lx\n",
-                      (long) DEPRECATED_CALL_DUMMY_WORDS);
 #endif
 #ifdef DEPRECATED_DO_REGISTERS_INFO_P
   fprintf_unfiltered (file,
@@ -1503,14 +1487,6 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
                       "gdbarch_dump: DEPRECATED_SAVE_DUMMY_FRAME_TOS = <0x%08lx>\n",
                       (long) current_gdbarch->deprecated_save_dummy_frame_tos
                       /*DEPRECATED_SAVE_DUMMY_FRAME_TOS ()*/);
-#endif
-#ifdef DEPRECATED_SIZEOF_CALL_DUMMY_WORDS
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: DEPRECATED_SIZEOF_CALL_DUMMY_WORDS # %s\n",
-                      XSTRING (DEPRECATED_SIZEOF_CALL_DUMMY_WORDS));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: DEPRECATED_SIZEOF_CALL_DUMMY_WORDS = %d\n",
-                      DEPRECATED_SIZEOF_CALL_DUMMY_WORDS);
 #endif
 #ifdef DEPRECATED_STACK_ALIGN_P
   fprintf_unfiltered (file,
@@ -3238,40 +3214,6 @@ set_gdbarch_call_dummy_location (struct gdbarch *gdbarch,
                                  int call_dummy_location)
 {
   gdbarch->call_dummy_location = call_dummy_location;
-}
-
-LONGEST *
-gdbarch_deprecated_call_dummy_words (struct gdbarch *gdbarch)
-{
-  gdb_assert (gdbarch != NULL);
-  /* Skip verify of deprecated_call_dummy_words, invalid_p == 0 */
-  if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_call_dummy_words called\n");
-  return gdbarch->deprecated_call_dummy_words;
-}
-
-void
-set_gdbarch_deprecated_call_dummy_words (struct gdbarch *gdbarch,
-                                         LONGEST * deprecated_call_dummy_words)
-{
-  gdbarch->deprecated_call_dummy_words = deprecated_call_dummy_words;
-}
-
-int
-gdbarch_deprecated_sizeof_call_dummy_words (struct gdbarch *gdbarch)
-{
-  gdb_assert (gdbarch != NULL);
-  /* Skip verify of deprecated_sizeof_call_dummy_words, invalid_p == 0 */
-  if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_sizeof_call_dummy_words called\n");
-  return gdbarch->deprecated_sizeof_call_dummy_words;
-}
-
-void
-set_gdbarch_deprecated_sizeof_call_dummy_words (struct gdbarch *gdbarch,
-                                                int deprecated_sizeof_call_dummy_words)
-{
-  gdbarch->deprecated_sizeof_call_dummy_words = deprecated_sizeof_call_dummy_words;
 }
 
 int

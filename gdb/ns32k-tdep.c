@@ -428,15 +428,6 @@ ns32k_pop_frame (void)
 
    It is 16 bytes long.  */
 
-static LONGEST ns32k_call_dummy_words[] =
-{
-  0x7f00ff82,
-  0x0201c0ae,
-  0x01a57f03,
-  0xf2040302
-};
-static int sizeof_ns32k_call_dummy_words = sizeof (ns32k_call_dummy_words);
-
 #define NS32K_CALL_DUMMY_ADDR         5
 #define NS32K_CALL_DUMMY_NARGS        11
 
@@ -560,8 +551,6 @@ ns32k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Call dummy info */
   set_gdbarch_deprecated_pop_frame (gdbarch, ns32k_pop_frame);
   set_gdbarch_call_dummy_location (gdbarch, ON_STACK);
-  set_gdbarch_deprecated_call_dummy_words (gdbarch, ns32k_call_dummy_words);
-  set_gdbarch_deprecated_sizeof_call_dummy_words (gdbarch, sizeof_ns32k_call_dummy_words);
   set_gdbarch_deprecated_fix_call_dummy (gdbarch, ns32k_fix_call_dummy);
 
   /* Breakpoint info */

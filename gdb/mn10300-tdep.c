@@ -1111,7 +1111,6 @@ static struct gdbarch *
 mn10300_gdbarch_init (struct gdbarch_info info,
 		      struct gdbarch_list *arches)
 {
-  static LONGEST mn10300_call_dummy_words[] = { 0 };
   struct gdbarch *gdbarch;
   struct gdbarch_tdep *tdep = NULL;
   int am33_mode;
@@ -1186,8 +1185,6 @@ mn10300_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_deprecated_target_read_fp (gdbarch, mn10300_read_fp);
 
   /* Calling functions in the inferior from GDB.  */
-  set_gdbarch_deprecated_call_dummy_words (gdbarch, mn10300_call_dummy_words);
-  set_gdbarch_deprecated_sizeof_call_dummy_words (gdbarch, sizeof (mn10300_call_dummy_words));
   set_gdbarch_deprecated_push_arguments (gdbarch, mn10300_push_arguments);
   set_gdbarch_deprecated_reg_struct_has_addr
     (gdbarch, mn10300_reg_struct_has_addr);

@@ -827,28 +827,6 @@ extern void set_gdbarch_call_dummy_location (struct gdbarch *gdbarch, int call_d
 #define CALL_DUMMY_LOCATION (gdbarch_call_dummy_location (current_gdbarch))
 #endif
 
-/* DEPRECATED_CALL_DUMMY_WORDS can be deleted. */
-
-extern LONGEST * gdbarch_deprecated_call_dummy_words (struct gdbarch *gdbarch);
-extern void set_gdbarch_deprecated_call_dummy_words (struct gdbarch *gdbarch, LONGEST * deprecated_call_dummy_words);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_CALL_DUMMY_WORDS)
-#error "Non multi-arch definition of DEPRECATED_CALL_DUMMY_WORDS"
-#endif
-#if !defined (DEPRECATED_CALL_DUMMY_WORDS)
-#define DEPRECATED_CALL_DUMMY_WORDS (gdbarch_deprecated_call_dummy_words (current_gdbarch))
-#endif
-
-/* Implement PUSH_DUMMY_CALL, then delete DEPRECATED_SIZEOF_CALL_DUMMY_WORDS. */
-
-extern int gdbarch_deprecated_sizeof_call_dummy_words (struct gdbarch *gdbarch);
-extern void set_gdbarch_deprecated_sizeof_call_dummy_words (struct gdbarch *gdbarch, int deprecated_sizeof_call_dummy_words);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_SIZEOF_CALL_DUMMY_WORDS)
-#error "Non multi-arch definition of DEPRECATED_SIZEOF_CALL_DUMMY_WORDS"
-#endif
-#if !defined (DEPRECATED_SIZEOF_CALL_DUMMY_WORDS)
-#define DEPRECATED_SIZEOF_CALL_DUMMY_WORDS (gdbarch_deprecated_sizeof_call_dummy_words (current_gdbarch))
-#endif
-
 /* DEPRECATED_FIX_CALL_DUMMY can be deleted.  For the SPARC, implement
    PUSH_DUMMY_CODE and set CALL_DUMMY_LOCATION to ON_STACK. */
 

@@ -3031,35 +3031,6 @@ Since the adjustment of a breakpoint may significantly alter a user's
 expectation, @value{GDBN} prints a warning when an adjusted breakpoint
 is initially set and each time that that breakpoint is hit.
 
-@item DEPRECATED_CALL_DUMMY_WORDS
-@findex DEPRECATED_CALL_DUMMY_WORDS
-Pointer to an array of @code{LONGEST} words of data containing
-host-byte-ordered @code{DEPRECATED_REGISTER_SIZE} sized values that
-partially specify the sequence of instructions needed for an inferior
-function call.
-
-Should be deprecated in favor of a macro that uses target-byte-ordered
-data.
-
-This method has been replaced by @code{push_dummy_code}
-(@pxref{push_dummy_code}).
-
-@item DEPRECATED_SIZEOF_CALL_DUMMY_WORDS
-@findex DEPRECATED_SIZEOF_CALL_DUMMY_WORDS
-The size of @code{DEPRECATED_CALL_DUMMY_WORDS}.  This must return a
-positive value.
-
-This method has been replaced by @code{push_dummy_code}
-(@pxref{push_dummy_code}).
-
-@item CALL_DUMMY
-@findex CALL_DUMMY
-A static initializer for @code{DEPRECATED_CALL_DUMMY_WORDS}.
-Deprecated.
-
-This method has been replaced by @code{push_dummy_code}
-(@pxref{push_dummy_code}).
-
 @item CALL_DUMMY_LOCATION
 @findex CALL_DUMMY_LOCATION
 See the file @file{inferior.h}.
@@ -3700,10 +3671,8 @@ By default, the stack is grown sufficient to hold a frame-aligned
 (@pxref{frame_align}) breakpoint, @var{bp_addr} is set to the address
 reserved for that breakpoint, and @var{real_pc} set to @var{funaddr}.
 
-This method replaces @code{DEPRECATED_CALL_DUMMY_WORDS},
-@code{DEPRECATED_SIZEOF_CALL_DUMMY_WORDS}, @code{CALL_DUMMY},
-@code{CALL_DUMMY_LOCATION}, @code{DEPRECATED_REGISTER_SIZE}, and
-@code{DEPRECATED_FIX_CALL_DUMMY}.
+This method replaces @code{CALL_DUMMY_LOCATION},
+@code{DEPRECATED_REGISTER_SIZE}, and @code{DEPRECATED_FIX_CALL_DUMMY}.
 
 @item DEPRECATED_REGISTER_BYTES
 @findex DEPRECATED_REGISTER_BYTES
