@@ -18,6 +18,10 @@ Wed Sep 14 15:37:19 1994  Jeff Law  (law@snake.cs.utah.edu)
 
 Wed Sep 14 15:06:55 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
+	* aoutx.h (aout_link_write_symbols): Rename skip_indirect to
+	skip_next.  If we find an N_WARNING symbol which has already been
+	written out, set skip_next.
+
 	* libecoff.h (struct ecoff_tdata): Add field find_buffer.
 	* ecoff.c: Include aout/stab_gnu.h.
 	(ecoff_find_nearest_line): Handle stabs debugging information.

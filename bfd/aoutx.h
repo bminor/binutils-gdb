@@ -3609,7 +3609,7 @@ aout_link_write_symbols (finfo, input_bfd)
   struct aout_link_hash_entry **sym_hash;
   int *symbol_map;
   boolean pass;
-  boolean skip_indirect;
+  boolean skip_next;
 
   output_bfd = finfo->output_bfd;
   sym_count = obj_aout_external_sym_count (input_bfd);
@@ -3644,7 +3644,7 @@ aout_link_write_symbols (finfo, input_bfd)
     }
 
   pass = false;
-  skip_indirect = false;
+  skip_next = false;
   sym = obj_aout_external_syms (input_bfd);
   sym_end = sym + sym_count;
   sym_hash = obj_aout_sym_hashes (input_bfd);
@@ -3673,12 +3673,12 @@ aout_link_write_symbols (finfo, input_bfd)
 	  val = GET_WORD (input_bfd, sym->e_value);
 	  pass = false;
 	}
-      else if (skip_indirect)
+      else if (skip_next)
 	{
 	  /* Skip this symbol, which is the target of an indirect
 	     symbol that we have changed to no longer be an indirect
 	     symbol.  */
-	  skip_indirect = false;
+	  skip_next = false;
 	  continue;
 	}
       else
@@ -3713,8 +3713,9 @@ aout_link_write_symbols (finfo, input_bfd)
 	      && h->root.type != bfd_link_hash_warning
 	      && h->written)
 	    {
-	      if ((type & N_TYPE) == N_INDR)
-		skip_indirect = true;
+	      if ((type & N_TYPE) == N_INDR
+		  || type == N_WARNING)
+		skip_next = true;
 	      *symbol_map = h->indx;
 	      continue;
 	    }
@@ -3785,7 +3786,7 @@ aout_link_write_symbols (finfo, input_bfd)
 		 a case we do not want to output the next symbol,
 		 which is the target of the indirection.  */
 	      if ((type & N_TYPE) == N_INDR)
-		skip_indirect = true;
+		skip_next = true;
 
 	      symsec = NULL;
 
