@@ -4145,9 +4145,9 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 
 { "lwsync",  XSYNC(31,598,1), 0xffffffff, PPCONLY,	{ 0 } },
 { "ptesync", XSYNC(31,598,2), 0xffffffff, PPC64,	{ 0 } },
+{ "msync",   X(31,598), 0xffffffff,	BOOKE,		{ 0 } },
 { "sync",    X(31,598), XSYNC_MASK,	PPCCOM,		{ LS } },
 { "dcs",     X(31,598), 0xffffffff,	PWRCOM,		{ 0 } },
-{ "msync",   X(31,598), 0xf80007fe,	BOOKE,		{ 0 } },
 
 { "lfdx",    X(31,599), X_MASK,		COM,		{ FRT, RA, RB } },
 
@@ -4243,8 +4243,8 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 
 { "slbmfev", X(31,851), XRA_MASK,	PPC64,		{ RT, RB } },
 
+{ "mbar",    X(31,854),	X_MASK,		BOOKE,		{ MO } },
 { "eieio",   X(31,854),	0xffffffff,	PPC,		{ 0 } },
-{ "mbar",    X(31,854),	0xffffffff,	BOOKE,		{ MO } },
 
 { "tlbsx",   XRC(31,914,0), X_MASK, 	PPC403,		{ RT, RA, RB } },
 { "tlbsx.",  XRC(31,914,1), X_MASK, 	PPC403,		{ RT, RA, RB } },

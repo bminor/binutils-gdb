@@ -1,3 +1,8 @@
+2002-12-05  Aldy Hernandez  <aldyh@redhat.com>
+
+	* ppc-opc.c: Move mbar and msync up.  Change mask for mbar and
+	msync.
+
 2002-12-04  David Mosberger  <davidm@hpl.hp.com>
 
 	* ia64-opc-d.c (ia64_opcodes_d): Add "hint" instruction.
