@@ -1,3 +1,9 @@
+Fri Feb  4 12:19:32 1994  Jim Kingdon  (kingdon@deneb.cygnus.com)
+
+	* gdb.t17/interrupt.c: If we get EINTR, don't print an error message.
+
+	* gdb.t17/callfuncs.exp: Add xfails for rs6000.
+
 Sat Feb  5 09:11:56 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* gdb.t24/demangle.exp: Re-write demangle to just call gdb_test,
