@@ -1,3 +1,12 @@
+Mon May  3 19:00:27 1993  Per Bothner  (bothner@cygnus.com)
+
+	* configure.in, Makefile.in:  Change definition of $(tooldir)
+	to match the FSF.
+
+Fri Apr 30 15:55:21 1993  Fred Fish  (fnf@cygnus.com)
+
+	* config.guess:  Recognize i[34]86/SVR4.
+
 Fri Apr 30 15:52:46 1993  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* Makefile.in (all-gdb): gdb depends on sim.
