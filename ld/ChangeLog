@@ -1,5 +1,10 @@
 2003-02-28  Alan Modra  <amodra@bigpond.net.au>
 
+	* emultempl/elf32.em (gld${EMULATION_NAME}_get_script): Add combreloc
+	support when scripts read from files.
+
+2003-02-28  Alan Modra  <amodra@bigpond.net.au>
+
 	* ldemul.c (ldemul_parse_args): Return FALSE by default.
 	* ldemul.h (struct ld_emulation_xfer_struct): Update parse_args
 	comment.

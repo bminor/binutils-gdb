@@ -1503,10 +1503,33 @@ cat >>e${EMULATION_NAME}.c <<EOF
     return "ldscripts/${EMULATION_NAME}.xr";
   else if (!config.text_read_only)
     return "ldscripts/${EMULATION_NAME}.xbn";
+EOF
+if cmp -s ldscripts/${EMULATION_NAME}.x ldscripts/${EMULATION_NAME}.xn; then :
+else
+cat >>e${EMULATION_NAME}.c <<EOF
   else if (!config.magic_demand_paged)
     return "ldscripts/${EMULATION_NAME}.xn";
+EOF
+fi
+if test -n "$GENERATE_SHLIB_SCRIPT" ; then
+if test -n "$GENERATE_COMBRELOC_SCRIPT" ; then
+cat >>e${EMULATION_NAME}.c <<EOF
+  else if (link_info.shared && link_info.combreloc)
+    return "ldscripts/${EMULATION_NAME}.xsc";
+EOF
+fi
+cat >>e${EMULATION_NAME}.c <<EOF
   else if (link_info.shared)
     return "ldscripts/${EMULATION_NAME}.xs";
+EOF
+fi
+if test -n "$GENERATE_COMBRELOC_SCRIPT" ; then
+cat >>e${EMULATION_NAME}.c <<EOF
+  else if (link_info.combreloc)
+    return "ldscripts/${EMULATION_NAME}.xc";
+EOF
+fi
+cat >>e${EMULATION_NAME}.c <<EOF
   else
     return "ldscripts/${EMULATION_NAME}.x";
 }
