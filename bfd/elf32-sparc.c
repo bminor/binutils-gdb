@@ -2374,6 +2374,9 @@ elf32_sparc_relocate_section (output_bfd, info, input_bfd, input_section,
 	    break;
 
 	  if ((info->shared
+	       && (h == NULL
+		   || ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
+		   || h->root.type != bfd_link_hash_undefweak)
 	       && (! howto->pc_relative
 		   || (h != NULL
 		       && h->dynindx != -1

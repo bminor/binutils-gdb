@@ -2213,6 +2213,13 @@ sparc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		    break;
 		  }
 
+		/* FIXME: Dynamic reloc handling really needs to be rewritten.  */
+		if (!skip
+		    && h != NULL
+		    && ELF_ST_VISIBILITY (h->other) != STV_DEFAULT
+		    && h->root.type == bfd_link_hash_undefweak)
+		  skip = TRUE, relocate = TRUE;
+
 		if (skip)
 		  memset (&outrel, 0, sizeof outrel);
 		/* h->dynindx may be -1 if the symbol was marked to

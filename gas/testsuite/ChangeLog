@@ -1,3 +1,7 @@
+2004-04-19  Jakub Jelinek  <jakub@redhat.com>
+
+	* gas/cfi/cfi-sparc64-1.d: Update.
+
 2004-04-14  Richard Sandiford  <rsandifo@redhat.com>
 
 	* gas/mips/vr4122.[sd]: Change option to -mfix-vr4120.

@@ -1,3 +1,9 @@
+2004-04-19  Jakub Jelinek  <jakub@redhat.com>
+
+	* elf32-sparc.c (elf32_sparc_relocate_section): Handle
+	relocs against hidden/protected undefweak symbols properly.
+	* elf64-sparc.c (sparc64_elf_relocate_section): Likewise.
+
 2004-04-18  Mark Kettenis  <kettenis@gnu.org>
 
 	* libaout.h (enum machine_type): Add M_POWERPC_NETBSD.

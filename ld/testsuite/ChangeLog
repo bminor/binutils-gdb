@@ -1,3 +1,8 @@
+2004-04-19  Jakub Jelinek  <jakub@redhat.com>
+
+	* ld-elfvsb/elfvsb.exp: XFAIL some tests on sparc64.
+	* ld-shared/shared.exp: Likewise.
+
 2004-04-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-scripts/assert.s: Add a newline.
