@@ -51,6 +51,8 @@ struct mips_got_info
   /* The global symbol in the GOT with the lowest index in the dynamic
      symbol table.  */
   struct elf_link_hash_entry *global_gotsym;
+  /* The number of global .got entries.  */
+  unsigned int global_gotno;
   /* The number of local .got entries.  */
   unsigned int local_gotno;
   /* The number of local .got entries we have used.  */
@@ -177,7 +179,7 @@ static boolean mips_elf_assign_gp PARAMS ((bfd *, bfd_vma *));
 static boolean mips_elf_sort_hash_table_f 
   PARAMS ((struct mips_elf_link_hash_entry *, PTR));
 static boolean mips_elf_sort_hash_table 
-  PARAMS ((struct bfd_link_info *));
+  PARAMS ((struct bfd_link_info *, unsigned long));
 static asection * mips_elf_got_section PARAMS ((bfd *));
 static struct mips_got_info *mips_elf_got_info 
   PARAMS ((bfd *, asection **));
@@ -4317,6 +4319,30 @@ _bfd_mips_elf_final_link (abfd, info)
       elf_elfheader (abfd)->e_flags |= EF_MIPS_CPIC;
     }
 
+  /* We'd carefully arranged the dynamic symbol indices, and then the
+     generic size_dynamic_sections renumbered them out from under us.
+     Rather than trying somehow to prevent the renumbering, just do
+     the sort again.  */
+
+  if (elf_hash_table (info)->dynobj)
+    {
+      bfd *dynobj;
+      asection *got;
+      struct mips_got_info *g;
+
+      if (!mips_elf_sort_hash_table (info, bfd_count_sections (abfd) + 1))
+        return false;
+
+      /* Make sure we didn't grow the global .got region.  */
+      dynobj = elf_hash_table (info)->dynobj;
+      got = bfd_get_section_by_name (dynobj, ".got");
+      g = (struct mips_got_info *) elf_section_data (got)->tdata;
+
+      BFD_ASSERT ((elf_hash_table (info)->dynsymcount
+		   - g->global_gotsym->dynindx)
+		  <= g->global_gotno);
+    }
+
   /* On IRIX5, we omit the .options section.  On IRIX6, however, we
      include it, even though we don't process it quite right.  (Some
      entries are supposed to be merged.)  Empirically, we seem to be
@@ -5302,11 +5328,15 @@ mips_elf_sort_hash_table_f (h, data)
 
 /* Sort the dynamic symbol table so that symbols that need GOT entries
    appear towards the end.  This reduces the amount of GOT space
-   required.  */
+   required.  MAX_LOCAL is used to set the number of local symbols
+   known to be in the dynamic symbol table.  During
+   mips_elf_size_dynamic_sections, this value is 1.  Afterward, the
+   section symbols are added and the count is higher.  */
 
 static boolean
-mips_elf_sort_hash_table (info)
+mips_elf_sort_hash_table (info, max_local)
      struct bfd_link_info *info;
+     unsigned long max_local;
 {
   struct mips_elf_hash_sort_data hsd;
   struct mips_got_info *g;
@@ -5316,7 +5346,7 @@ mips_elf_sort_hash_table (info)
 
   hsd.low = NULL;
   hsd.min_got_dynindx = elf_hash_table (info)->dynsymcount;
-  hsd.max_non_got_dynindx = 1;
+  hsd.max_non_got_dynindx = max_local;
   mips_elf_link_hash_traverse (((struct mips_elf_link_hash_table *) 
 				elf_hash_table (info)), 
 			       mips_elf_sort_hash_table_f, 
@@ -7602,10 +7632,11 @@ _bfd_mips_elf_size_dynamic_sections (output_bfd, info)
  	     higher.  Therefore, it make sense to put those symbols
  	     that need GOT entries at the end of the symbol table.  We
  	     do that here.  */
- 	  if (!mips_elf_sort_hash_table (info))
+ 	  if (!mips_elf_sort_hash_table (info, 1))
  	    return false;
 
  	  i = elf_hash_table (info)->dynsymcount - g->global_gotsym->dynindx;
+	  g->global_gotno = i;
 	  s->_raw_size += i * MIPS_ELF_GOT_SIZE (dynobj);
 	}
       else if (strcmp (name, MIPS_ELF_STUB_SECTION_NAME (output_bfd)) == 0)

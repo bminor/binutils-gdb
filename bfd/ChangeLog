@@ -1,3 +1,11 @@
+1999-07-14  Richard Henderson  <rth@cygnus.com>
+
+	* elf32-mips.c (struct mips_got_info): Add global_gotno.
+	(_bfd_mips_elf_size_dynamic_sections): Set it.
+	(_bfd_mips_elf_final_link): Re-sort; verify the got did not grow.
+	(mips_elf_sort_hash_table): Set max_non_got_dynindex based off
+	new argument max_local.
+
 1999-07-14  Mark Mitchell  <mark@codesourcery.com>
 
 	* elf32-mips.c (mips_elf_obtain_contents): Swap the 16-bit
