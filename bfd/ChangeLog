@@ -1,3 +1,8 @@
+2001-05-18  H.J. Lu  <hjl@gnu.org>
+
+	* elflink.h (elf_link_add_object_symbols): Revert the last
+	change.
+
 2001-05-17  Alan Modra  <amodra@one.net.au>
 
 	* elf32-hppa.c (clobber_millicode_symbols): Temporarily set
