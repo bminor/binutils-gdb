@@ -5196,7 +5196,6 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
                                           hppa_in_solib_return_trampoline);
   set_gdbarch_deprecated_saved_pc_after_call (gdbarch, hppa_saved_pc_after_call);
   set_gdbarch_inner_than (gdbarch, hppa_inner_than);
-  set_gdbarch_decr_pc_after_break (gdbarch, 0);
   set_gdbarch_deprecated_register_size (gdbarch, tdep->bytes_per_address);
   set_gdbarch_deprecated_fp_regnum (gdbarch, 3);
   set_gdbarch_sp_regnum (gdbarch, 30);

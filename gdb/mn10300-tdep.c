@@ -1173,7 +1173,6 @@ mn10300_gdbarch_init (struct gdbarch_info info,
 
   /* Breakpoints.  */
   set_gdbarch_breakpoint_from_pc (gdbarch, mn10300_breakpoint_from_pc);
-  set_gdbarch_decr_pc_after_break (gdbarch, 0);
 
   /* Stack unwinding.  */
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);

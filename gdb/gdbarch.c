@@ -525,7 +525,6 @@ gdbarch_alloc (const struct gdbarch_info *info,
   current_gdbarch->prologue_frameless_p = generic_prologue_frameless_p;
   current_gdbarch->memory_insert_breakpoint = default_memory_insert_breakpoint;
   current_gdbarch->memory_remove_breakpoint = default_memory_remove_breakpoint;
-  current_gdbarch->decr_pc_after_break = -1;
   current_gdbarch->remote_translate_xfer_address = generic_remote_translate_xfer_address;
   current_gdbarch->frame_args_skip = -1;
   current_gdbarch->frameless_function_invocation = generic_frameless_function_invocation_not;
@@ -708,9 +707,7 @@ verify_gdbarch (struct gdbarch *current_gdbarch)
   /* Skip verify of adjust_breakpoint_address, has predicate */
   /* Skip verify of memory_insert_breakpoint, invalid_p == 0 */
   /* Skip verify of memory_remove_breakpoint, invalid_p == 0 */
-  if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
-      && (current_gdbarch->decr_pc_after_break == -1))
-    fprintf_unfiltered (log, "\n\tdecr_pc_after_break");
+  /* Skip verify of decr_pc_after_break, invalid_p == 0 */
   /* Skip verify of function_start_offset, invalid_p == 0 */
   /* Skip verify of remote_translate_xfer_address, invalid_p == 0 */
   if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
@@ -4623,8 +4620,7 @@ CORE_ADDR
 gdbarch_decr_pc_after_break (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  /* Check variable changed from pre-default.  */
-  gdb_assert (gdbarch->decr_pc_after_break != -1);
+  /* Skip verify of decr_pc_after_break, invalid_p == 0 */
   if (gdbarch_debug >= 2)
     fprintf_unfiltered (gdb_stdlog, "gdbarch_decr_pc_after_break called\n");
   return gdbarch->decr_pc_after_break;

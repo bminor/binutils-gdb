@@ -4281,10 +4281,6 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_breakpoint_from_pc (gdbarch, cris_breakpoint_from_pc);
   
-  /* The PC must not be decremented after a breakpoint.  (The breakpoint
-     handler takes care of that.)  */
-  set_gdbarch_decr_pc_after_break (gdbarch, 0);
-  
   /* The number of bytes at the start of arglist that are not really args,
      0 in the CRIS ABI.  */
   set_gdbarch_frame_args_skip (gdbarch, 0);

@@ -2877,7 +2877,6 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Breakpoint manipulation.  */
   set_gdbarch_breakpoint_from_pc (gdbarch, arm_breakpoint_from_pc);
-  set_gdbarch_decr_pc_after_break (gdbarch, 0);
 
   /* Information about registers, etc.  */
   set_gdbarch_print_float_info (gdbarch, arm_print_float_info);

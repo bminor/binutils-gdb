@@ -598,7 +598,6 @@ ns32k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_pc_in_call_dummy (gdbarch, deprecated_pc_in_call_dummy_on_stack);
 
   /* Breakpoint info */
-  set_gdbarch_decr_pc_after_break (gdbarch, 0);
   set_gdbarch_breakpoint_from_pc (gdbarch, ns32k_breakpoint_from_pc);
 
   /* Should be using push_dummy_call.  */

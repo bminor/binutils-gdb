@@ -325,7 +325,6 @@ i386_interix_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->struct_return = reg_struct_return;
   tdep->jb_pc_offset = jump_buffer_Eip_offset;
 
-  set_gdbarch_decr_pc_after_break (gdbarch, 0);
   set_gdbarch_pc_in_sigtramp (gdbarch, i386_interix_pc_in_sigtramp);
   set_gdbarch_in_solib_call_trampoline (gdbarch,
                                         i386_interix_in_solib_call_trampoline);

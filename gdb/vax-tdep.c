@@ -406,7 +406,6 @@ vax_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Breakpoint info */
   set_gdbarch_breakpoint_from_pc (gdbarch, vax_breakpoint_from_pc);
-  set_gdbarch_decr_pc_after_break (gdbarch, 0);
 
   /* Misc info */
   set_gdbarch_function_start_offset (gdbarch, 2);

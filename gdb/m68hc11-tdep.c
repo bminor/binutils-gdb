@@ -1556,7 +1556,6 @@ m68hc11_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_use_struct_convention (gdbarch, m68hc11_use_struct_convention);
   set_gdbarch_skip_prologue (gdbarch, m68hc11_skip_prologue);
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
-  set_gdbarch_decr_pc_after_break (gdbarch, 0);
   set_gdbarch_breakpoint_from_pc (gdbarch, m68hc11_breakpoint_from_pc);
   set_gdbarch_deprecated_stack_align (gdbarch, m68hc11_stack_align);
   set_gdbarch_print_insn (gdbarch, gdb_print_insn_m68hc11);

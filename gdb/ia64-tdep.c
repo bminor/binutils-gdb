@@ -3425,7 +3425,6 @@ ia64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Settings that should be unnecessary.  */
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
 
-  set_gdbarch_decr_pc_after_break (gdbarch, 0);
   set_gdbarch_frame_args_skip (gdbarch, 0);
 
   set_gdbarch_remote_translate_xfer_address (
