@@ -1,5 +1,11 @@
 Mon Sep  9 10:57:42 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/tc-mips.c (append_insn): Don't swap an instruction which
+	sets a condition code with an instruction which uses a condition
+	code.
+	(mips_ip): In cases 'N' and 'M', look for $fccN rather than an
+	immediate value.
+
 	* config/tc-mips.c (md_begin): Recognize r5000 for cpu.  If
 	mips_cpu is 5000, set interlocks and cop_interlocks.
 	(mips_ip): Give a better error message if the ISA level is wrong.

@@ -1417,7 +1417,13 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
 		  && insn_uses_reg (ip,
 				    ((prev_prev_insn.insn_opcode >> OP_SH_RT)
 				     & OP_MASK_RT),
-				    0)))
+				    0))
+	      /* If one instruction sets a condition code and the
+                 other one uses a condition code, we can not swap.  */
+	      || ((pinfo & INSN_READ_COND_CODE)
+		  && (prev_pinfo & INSN_WRITE_COND_CODE))
+	      || ((pinfo & INSN_WRITE_COND_CODE)
+		  && (prev_pinfo & INSN_READ_COND_CODE)))
 	    {
 	      /* We could do even better for unconditional branches to
 		 portions of this object file; we could pick up the
@@ -5891,20 +5897,23 @@ mips_ip (str, ip)
 
 	    case 'N':		/* 3 bit branch condition code */
 	    case 'M':		/* 3 bit compare condition code */
-	      my_getExpression (&imm_expr, s);
-	      check_absolute_expr (ip, &imm_expr);
-              if ((unsigned long) imm_expr.X_add_number > 7)
+	      if (strncmp (s, "$fcc", 4) != 0)
+		break;
+	      s += 4;
+	      regno = 0;
+	      do
 		{
-                  as_warn ("Condition code > 7 (%ld)",
-			   (long) imm_expr.X_add_number);
-                  imm_expr.X_add_number &= 7;
+		  regno *= 10;
+		  regno += *s - '0';
+		  ++s;
 		}
+	      while (isdigit (*s));
+	      if (regno > 7)
+		as_bad ("invalid condition code register $fcc%d", regno);
 	      if (*args == 'N')
-		ip->insn_opcode |= imm_expr.X_add_number << OP_SH_BCC;
+		ip->insn_opcode |= regno << OP_SH_BCC;
 	      else
-		ip->insn_opcode |= imm_expr.X_add_number << OP_SH_CCC;
-              imm_expr.X_op = O_absent;
-              s = expr_end;
+		ip->insn_opcode |= regno << OP_SH_CCC;
               continue;
 
 	    default:
