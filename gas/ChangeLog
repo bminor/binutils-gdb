@@ -1,5 +1,9 @@
 Tue Aug  9 11:12:13 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
+	* config/tc-ppc.c (ppc_stabx): Call expression directly, rather
+	than via pseudo_set.  If expression is a symbol, move stab symbol
+	to just after symbol from expression.
+
 	* ecoff.c (ecoff_build_procs): Don't force adr of first fdr to be
 	zero.  Undoes change of June 4, 1993.
 
