@@ -1,5 +1,11 @@
 2004-02-23  Andrew Cagney  <cagney@redhat.com>
 
+	* hppa-tdep.c (hppa_frame_align): New function.
+	(hppa32_push_dummy_call): New function.
+	(hppa64_push_dummy_call): New function.
+	(hppa_gdbarch_init): Set frame_align and push_dummy_call; keep
+	disabled.
+	
 	* infcall.c (legacy_push_dummy_code): Don't call deprecated
 	FIX_CALL_DUMMY when push_dummy_call is available.
 	(call_function_by_hand, push_dummy_code): Ditto.
