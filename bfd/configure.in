@@ -135,6 +135,9 @@ COREFLAG=
 TRAD_HEADER=
 if test "${target}" = "${host}"; then
   case "${host}" in
+  alpha*-*-freebsd*)
+	COREFILE=''
+	;;
   alpha*-*-linux-gnu*)
 	COREFILE=trad-core.lo
 	TRAD_HEADER='"hosts/alphalinux.h"'

@@ -1,3 +1,8 @@
+2000-11-05  David O'Brien  <obrien@FreeBSD.org>
+
+	* configure.in: Recognize alpha-*-freebsd*.
+	* configure: Regenerate.
+
 2000-11-02  Luciano Gemme <ishitawa@yahoo.com> 
 
 	* srec.c (CHUNK): Rename to DEFAULT_CHUNK.
