@@ -68,20 +68,37 @@ typedef enum bfd_boolean {false, true} boolean;
 /* typedef off_t	file_ptr; */
 typedef long int file_ptr;
 
-/* Support for different sizes of target format ints and addresses */
+/* Support for different sizes of target format ints and addresses.
+   If the host implements--and wants BFD to use--64-bit values, it
+   defines HOST_64_BIT (in BFD and in every program that calls it --
+   since this affects declarations in bfd.h).  */
 
 #ifdef	HOST_64_BIT
-typedef HOST_64_BIT bfd_vma;
-typedef HOST_64_BIT bfd_size_type;
-typedef HOST_64_BIT symvalue;
+typedef unsigned HOST_64_BIT bfd_vma;
+typedef HOST_64_BIT bfd_signed_vma;
+typedef unsigned HOST_64_BIT bfd_size_type;
+typedef unsigned HOST_64_BIT symvalue;
 #define fprintf_vma(s,x) \
 		fprintf(s,"%08x%08x", uint64_typeHIGH(x), uint64_typeLOW(x))
-#else
+#else /* not HOST_64_BIT.  */
+
+/* Represent a target address.  Also used as a generic unsigned type
+   which is guaranteed to be big enough to hold any arithmetic types
+   we need to deal with.  */
 typedef unsigned long bfd_vma;
+
+/* A generic signed type which is guaranteed to be big enough to hold any
+   arithmetic types we need to deal with.  Can be assumed to be compatible
+   with bfd_vma in the same way that signed and unsigned ints are compatible
+   (as parameters, in assignment, etc).  */
+typedef long bfd_signed_vma;
+
 typedef unsigned long symvalue;
 typedef unsigned long bfd_size_type;
+
+/* Print a bfd_vma x on stream s.  */
 #define fprintf_vma(s,x) fprintf(s, "%08lx", x)
-#endif
+#endif /* not HOST_64_BIT.  */
 #define printf_vma(x) fprintf_vma(stdout,x)
 
 typedef unsigned int flagword;	/* 32 bits of flags */

@@ -1,6 +1,6 @@
 /* libbfd.h -- Declarations used by bfd library *implementation*.
    (This include file is not for users of the library.)
-   Copyright 1990, 1991 Free Software Foundation, Inc.
+   Copyright 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -31,7 +31,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* Set a tdata field.  Can't use the other macros for this, since they
    do casts, and casting to the left of assignment isn't portable.  */
-#define set_tdata(bfd, v) ((bfd)->tdata = (PTR) (v))
+#define set_tdata(bfd, v) ((bfd)->tdata.any = (PTR) (v))
 
 /* tdata for an archive.  For an input archive, cache
    needs to be free()'d.  For an output archive, symdefs do.  */
@@ -46,7 +46,7 @@ struct artdata {
   char *extended_names;		/* clever intel extension */
 };
 
-#define bfd_ardata(bfd) ((struct artdata *) ((bfd)->tdata))
+#define bfd_ardata(bfd) ((bfd)->tdata.aout_ar_data)
 
 /* Goes in bfd's arelt_data slot */
 struct areltdata {
@@ -57,99 +57,104 @@ struct areltdata {
 
 #define arelt_size(bfd) (((struct areltdata *)((bfd)->arelt_data))->parsed_size)
 
-/* FIXME -- a lot of my code allocates a large block and subdivides it.
-   This can't always work, because of alignment restrictions.  We should change
-   it before it becomes a problem -- Gumby */
-
-PROTO (char *, zalloc, (bfd_size_type size));
+char *zalloc PARAMS ((bfd_size_type size));
 
 /* These routines allocate and free things on the BFD's obstack.  Note
    that realloc can never occur in place.  */
 
-PROTO(PTR, bfd_alloc, (bfd *abfd, bfd_size_type size));
-PROTO(PTR, bfd_zalloc,(bfd *abfd, bfd_size_type size));
-PROTO(PTR, bfd_realloc,(bfd *abfd, PTR orig, bfd_size_type new));
-PROTO(void, bfd_alloc_grow,(bfd *abfd, PTR thing, bfd_size_type size));
-PROTO(PTR, bfd_alloc_finish,(bfd *abfd));
+PTR	bfd_alloc PARAMS ((bfd *abfd, bfd_size_type size));
+PTR	bfd_zalloc PARAMS ((bfd *abfd, bfd_size_type size));
+PTR	bfd_realloc PARAMS ((bfd *abfd, PTR orig, bfd_size_type new));
+void	bfd_alloc_grow PARAMS ((bfd *abfd, PTR thing, bfd_size_type size));
+PTR	bfd_alloc_finish PARAMS ((bfd *abfd));
+PTR	bfd_alloc_by_size_t PARAMS ((bfd *abfd, size_t wanted));
 
-#define bfd_release(x,y) (void) obstack_free(&(x->memory),y)
-
-
-PROTO (bfd_size_type, bfd_read, (PTR ptr, bfd_size_type size, bfd_size_type nitems, bfd *abfd));
-PROTO (bfd_size_type, bfd_write, (CONST PTR ptr, bfd_size_type size, bfd_size_type nitems, bfd *abfd));
+#define	bfd_release(x,y) (void) obstack_free(&(x->memory),y)
 
 
+bfd_size_type	bfd_read  PARAMS ((PTR ptr, bfd_size_type size,
+				   bfd_size_type nitems, bfd *abfd));
+bfd_size_type	bfd_write PARAMS ((CONST PTR ptr, bfd_size_type size,
+				   bfd_size_type nitems, bfd *abfd));
+int		bfd_seek  PARAMS ((bfd* CONST abfd, CONST file_ptr fp,
+				   CONST int direction));
+long		bfd_tell  PARAMS ((bfd *abfd));
 
-PROTO (int, bfd_seek,(bfd* abfd, file_ptr fp , int direction));
-PROTO (long, bfd_tell, (bfd *abfd));
-PROTO (bfd *, _bfd_create_empty_archive_element_shell, (bfd *obfd));
-PROTO (bfd *, look_for_bfd_in_cache, (bfd *arch_bfd, file_ptr index));
-PROTO (boolean, _bfd_generic_mkarchive, (bfd *abfd));
-PROTO (struct areltdata *, snarf_ar_hdr, (bfd *abfd));
-PROTO (bfd_target *, bfd_generic_archive_p, (bfd *abfd));
-PROTO (boolean, bfd_slurp_bsd_armap, (bfd *abfd));
-PROTO (boolean, bfd_slurp_coff_armap, (bfd *abfd));
-PROTO (boolean, _bfd_slurp_extended_name_table, (bfd *abfd));
-PROTO (boolean, _bfd_write_archive_contents, (bfd *abfd));
-PROTO (bfd *, new_bfd, ());
+bfd *	_bfd_create_empty_archive_element_shell PARAMS ((bfd *obfd));
+bfd *	look_for_bfd_in_cache PARAMS ((bfd *arch_bfd, file_ptr index));
+boolean	_bfd_generic_mkarchive PARAMS ((bfd *abfd));
+struct areltdata *	snarf_ar_hdr PARAMS ((bfd *abfd));
+bfd_target *		bfd_generic_archive_p PARAMS ((bfd *abfd));
+boolean	bfd_slurp_armap PARAMS ((bfd *abfd));
+#define bfd_slurp_bsd_armap bfd_slurp_armap
+#define bfd_slurp_coff_armap bfd_slurp_armap
+boolean	_bfd_slurp_extended_name_table PARAMS ((bfd *abfd));
+boolean	_bfd_write_archive_contents PARAMS ((bfd *abfd));
+bfd *	new_bfd PARAMS (());
 
 #define DEFAULT_STRING_SPACE_SIZE 0x2000
-PROTO (boolean, bfd_add_to_string_table, (char **table, char *new_string,
-					  unsigned int *table_length,
-					  char **free_ptr));
-PROTO (bfd_vma, _do_getb64, (unsigned char *addr));     
-PROTO (bfd_vma, _do_getl64, (unsigned char *addr));     
-PROTO (bfd_vma, _do_getb32, (unsigned char *addr));
-PROTO (bfd_vma, _do_getl32, (unsigned char *addr));
-PROTO (bfd_vma, _do_getb16, (unsigned char *addr));
-PROTO (bfd_vma, _do_getl16, (unsigned char *addr));
-PROTO (void, _do_putb64, (bfd_vma data, unsigned char *addr));
-PROTO (void, _do_putl64, (bfd_vma data, unsigned char *addr));
-PROTO (void, _do_putb32, (bfd_vma data, unsigned char *addr));
-PROTO (void, _do_putl32, (bfd_vma data, unsigned char *addr));
-PROTO (void, _do_putb16, (bfd_vma data, unsigned char *addr));
-PROTO (void, _do_putl16, (bfd_vma data, unsigned char *addr));
+boolean	bfd_add_to_string_table PARAMS ((char **table, char *new_string,
+					 unsigned int *table_length,
+					 char **free_ptr));
+bfd_vma _do_getb64 PARAMS ((unsigned char *addr));     
+bfd_vma _do_getl64 PARAMS ((unsigned char *addr));     
+bfd_signed_vma _do_getb_signed_64 PARAMS ((unsigned char *addr));     
+bfd_signed_vma _do_getl_signed_64 PARAMS ((unsigned char *addr));     
+bfd_vma _do_getb32 PARAMS ((unsigned char *addr));
+bfd_vma _do_getl32 PARAMS ((unsigned char *addr));
+bfd_signed_vma _do_getb_signed_32 PARAMS ((unsigned char *addr));
+bfd_signed_vma _do_getl_signed_32 PARAMS ((unsigned char *addr));
+bfd_vma _do_getb16 PARAMS ((unsigned char *addr));
+bfd_vma _do_getl16 PARAMS ((unsigned char *addr));
+bfd_signed_vma _do_getb_signed_16 PARAMS ((unsigned char *addr));
+bfd_signed_vma _do_getl_signed_16 PARAMS ((unsigned char *addr));
+void    _do_putb64 PARAMS ((bfd_vma data, unsigned char *addr));
+void    _do_putl64 PARAMS ((bfd_vma data, unsigned char *addr));
+void    _do_putb32 PARAMS ((bfd_vma data, unsigned char *addr));
+void    _do_putl32 PARAMS ((bfd_vma data, unsigned char *addr));
+void    _do_putb16 PARAMS ((bfd_vma data, unsigned char *addr));
+void    _do_putl16 PARAMS ((bfd_vma data, unsigned char *addr));
 
-PROTO (boolean, bfd_false, (bfd *ignore));
-PROTO (boolean, bfd_true, (bfd *ignore));
-PROTO (PTR, bfd_nullvoidptr, (bfd *ignore));
-PROTO (int, bfd_0, (bfd *ignore));
-PROTO (unsigned int, bfd_0u, (bfd *ignore));
-PROTO (void, bfd_void, (bfd *ignore));
+boolean	bfd_false PARAMS ((bfd *ignore));
+boolean	bfd_true PARAMS ((bfd *ignore));
+PTR	bfd_nullvoidptr PARAMS ((bfd *ignore));
+int	bfd_0 PARAMS ((bfd *ignore));
+unsigned int	bfd_0u PARAMS ((bfd *ignore));
+void	bfd_void PARAMS ((bfd *ignore));
 
-PROTO (bfd *,new_bfd_contained_in,(bfd *));
-PROTO (boolean, _bfd_dummy_new_section_hook, (bfd *ignore, asection *newsect));
-PROTO (char *, _bfd_dummy_core_file_failing_command, (bfd *abfd));
-PROTO (int, _bfd_dummy_core_file_failing_signal, (bfd *abfd));
-PROTO (boolean, _bfd_dummy_core_file_matches_executable_p, (bfd *core_bfd,
+bfd *	new_bfd_contained_in PARAMS ((bfd *));
+boolean	 _bfd_dummy_new_section_hook PARAMS ((bfd *ignore, asection *newsect));
+char *	 _bfd_dummy_core_file_failing_command PARAMS ((bfd *abfd));
+int	 _bfd_dummy_core_file_failing_signal PARAMS ((bfd *abfd));
+boolean	 _bfd_dummy_core_file_matches_executable_p PARAMS ((bfd *core_bfd,
 							    bfd *exec_bfd));
-PROTO (bfd_target *, _bfd_dummy_target, (bfd *abfd));
+bfd_target *	_bfd_dummy_target PARAMS ((bfd *abfd));
 
-PROTO (void, bfd_dont_truncate_arname, (bfd *abfd, CONST char *filename,
+void	bfd_dont_truncate_arname PARAMS ((bfd *abfd, CONST char *filename,
 					char *hdr));
-PROTO (void, bfd_bsd_truncate_arname, (bfd *abfd, CONST char *filename,
+void	bfd_bsd_truncate_arname PARAMS ((bfd *abfd, CONST char *filename,
 					char *hdr));
-PROTO (void, bfd_gnu_truncate_arname, (bfd *abfd, CONST char *filename,
+void	bfd_gnu_truncate_arname PARAMS ((bfd *abfd, CONST char *filename,
 					char *hdr));
 
-PROTO (boolean, bsd_write_armap, (bfd *arch, unsigned int elength,
+boolean	bsd_write_armap PARAMS ((bfd *arch, unsigned int elength,
 				  struct orl *map, unsigned int orl_count, int stridx));
 
-PROTO (boolean, coff_write_armap, (bfd *arch, unsigned int elength,
+boolean	coff_write_armap PARAMS ((bfd *arch, unsigned int elength,
 				   struct orl *map, unsigned int orl_count, int stridx));
 
-PROTO (bfd *, bfd_generic_openr_next_archived_file, (bfd *archive,
+bfd *	bfd_generic_openr_next_archived_file PARAMS ((bfd *archive,
 						     bfd *last_file));
 
-PROTO(int, bfd_generic_stat_arch_elt, (bfd *, struct stat *));
+int	bfd_generic_stat_arch_elt PARAMS ((bfd *, struct stat *));
 
-PROTO(boolean, bfd_generic_get_section_contents,
-      (bfd *abfd, sec_ptr section, PTR location, file_ptr offset,
-       bfd_size_type count));
+boolean	bfd_generic_get_section_contents PARAMS ((bfd *abfd, sec_ptr section,
+ 						  PTR location, file_ptr offset,
+						  bfd_size_type count));
 
-PROTO(boolean, bfd_generic_set_section_contents,
-      (bfd *abfd, sec_ptr section, PTR location, file_ptr offset,
-       bfd_size_type count));
+boolean	bfd_generic_set_section_contents PARAMS ((bfd *abfd, sec_ptr section,
+						  PTR location, file_ptr offset,
+						  bfd_size_type count));
 
 /* Macros to tell if bfds are read or write enabled.
 
@@ -160,17 +165,18 @@ PROTO(boolean, bfd_generic_set_section_contents,
    !bfd_read_p, and only sometimes bfd_write_p.
 */
 
-#define bfd_read_p(abfd) ((abfd)->direction == read_direction || (abfd)->direction == both_direction)
-#define bfd_write_p(abfd) ((abfd)->direction == write_direction || (abfd)->direction == both_direction)
+#define	bfd_read_p(abfd) ((abfd)->direction == read_direction || (abfd)->direction == both_direction)
+#define	bfd_write_p(abfd) ((abfd)->direction == write_direction || (abfd)->direction == both_direction)
 
-PROTO (void, bfd_assert,(char*,int));
+void	bfd_assert PARAMS ((char*,int));
+
 #define BFD_ASSERT(x) \
 { if (!(x)) bfd_assert(__FILE__,__LINE__); }
 
 #define BFD_FAIL() \
 { bfd_assert(__FILE__,__LINE__); }
 
-PROTO (FILE *, bfd_cache_lookup_worker, (bfd *));
+FILE *	bfd_cache_lookup_worker PARAMS ((bfd *));
 
 extern bfd *bfd_last_cache;
     
@@ -186,23 +192,5 @@ extern bfd *bfd_last_cache;
 /* Generic routine for close_and_cleanup is really just bfd_true.  */
 #define	bfd_generic_close_and_cleanup	bfd_true
 
-/* THE FOLLOWING IS EXTRACTED FROM THE SOURCE*/
-
-/*:init.c*/
-
-/*:libbfd.c*/
-
-/*:cache.c*/
-
-/*:ctor.c*/
-
-/*:reloc.c*/
-
-/*:cpu-h8300.c*/
-
-/*:cpu-i960.c*/
-
-/*:cpu-empty.c*/
-
-/*:archures.c*/
+/* And more follows */
 

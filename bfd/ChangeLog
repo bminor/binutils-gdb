@@ -1,5 +1,10 @@
 Thu Apr 15 09:09:18 1993  Jim Kingdon  (kingdon@cygnus.com)
 
+	* libbfd.c: Add signed versions of bfd_{h_,}{get,put}_signed_<size>.
+	libbfd.c, libbfd-in.h: Add _do*signed*.
+	targets.c, all targets: Add bfd*signed*.
+	bfd-in.h: Add bfd_signed_vma.  Add comments.
+
 	* bfd-in.h (bfd_error), bfd.c (bfd_errmsgs): Add file_truncated.
 
 	* format.c (bfd_check_error): Check error return from

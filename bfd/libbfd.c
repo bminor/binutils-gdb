@@ -400,24 +400,38 @@ DESCRIPTION
 	sections; each access (except for bytes) is vectored through
 	the target format of the BFD and mangled accordingly. The
 	mangling performs any necessary endian translations and
-	removes alignment restrictions. 
+	removes alignment restrictions.  Note that types accepted and
+	returned by these macros are identical so they can be swapped
+	around in macros--for example libaout.h defines GET_WORD to
+	either bfd_get_32 or bfd_get_64.
 
 .#define bfd_put_8(abfd, val, ptr) \
-.                (*((char *)ptr) = (char)val)
+.                (*((unsigned char *)ptr) = (unsigned char)val)
+.#define bfd_put_signed_8(abfd, val, ptr) (*((char *)(ptr)) = (char)(val))
 .#define bfd_get_8(abfd, ptr) \
-.                (*((char *)ptr))
+.                (*((unsigned char *)(ptr)))
+.#define bfd_get_signed_8(abfd, ptr) (((*(char *)(ptr) ^ 0x80) & 0xff) - 0x80)
 .#define bfd_put_16(abfd, val, ptr) \
-.                BFD_SEND(abfd, bfd_putx16, (val,ptr))
+.                BFD_SEND(abfd, bfd_putx16, ((bfd_vma)(val),(ptr)))
+.#define bfd_put_signed_16 bfd_put_16
 .#define bfd_get_16(abfd, ptr) \
 .                BFD_SEND(abfd, bfd_getx16, (ptr))
+.#define bfd_get_signed_16(abfd, ptr) \
+.         	 BFD_SEND (abfd, bfd_getx_signed_16, (ptr))
 .#define bfd_put_32(abfd, val, ptr) \
-.                BFD_SEND(abfd, bfd_putx32, (val,ptr))
+.                BFD_SEND(abfd, bfd_putx32, ((bfd_vma)(val),(ptr)))
+.#define bfd_put_signed_32 bfd_put_32
 .#define bfd_get_32(abfd, ptr) \
 .                BFD_SEND(abfd, bfd_getx32, (ptr))
+.#define bfd_get_signed_32(abfd, ptr) \
+.		 BFD_SEND(abfd, bfd_getx_signed_32, (ptr))
 .#define bfd_put_64(abfd, val, ptr) \
-.                BFD_SEND(abfd, bfd_putx64, (val, ptr))
+.                BFD_SEND(abfd, bfd_putx64, ((bfd_vma)(val), (ptr)))
+.#define bfd_put_signed_64 bfd_put_64
 .#define bfd_get_64(abfd, ptr) \
 .                BFD_SEND(abfd, bfd_getx64, (ptr))
+.#define bfd_get_signed_64(abfd, ptr) \
+.		 BFD_SEND(abfd, bfd_getx_signed_64, (ptr))
 
 */ 
 
@@ -435,23 +449,40 @@ DESCRIPTION
 	order, and their data in little endan order.
 
 .#define bfd_h_put_8(abfd, val, ptr) \
-.                (*((char *)ptr) = (char)val)
+.                (*((unsigned char *)ptr) = (unsigned char)val)
+.#define bfd_h_put_signed_8(abfd, val, ptr) (*((char *)(ptr)) = (char)(val))
 .#define bfd_h_get_8(abfd, ptr) \
-.                (*((char *)ptr))
+.                (*((unsigned char *)(ptr)))
+.#define bfd_h_get_signed_8 bfd_get_signed_8
 .#define bfd_h_put_16(abfd, val, ptr) \
 .                BFD_SEND(abfd, bfd_h_putx16,(val,ptr))
+.#define bfd_h_put_signed_16 bfd_h_put_16
 .#define bfd_h_get_16(abfd, ptr) \
 .                BFD_SEND(abfd, bfd_h_getx16,(ptr))
+.#define bfd_h_get_signed_16(abfd, ptr) \
+.		 BFD_SEND(abfd, bfd_h_getx_signed_16, (ptr))
 .#define bfd_h_put_32(abfd, val, ptr) \
 .                BFD_SEND(abfd, bfd_h_putx32,(val,ptr))
+.#define bfd_h_put_signed_32 bfd_h_put_32
 .#define bfd_h_get_32(abfd, ptr) \
 .                BFD_SEND(abfd, bfd_h_getx32,(ptr))
+.#define bfd_h_get_signed_32(abfd, ptr) \
+.		 BFD_SEND(abfd, bfd_h_getx_signed_32, (ptr))
 .#define bfd_h_put_64(abfd, val, ptr) \
 .                BFD_SEND(abfd, bfd_h_putx64,(val, ptr))
+.#define bfd_h_put_signed_64 bfd_h_put_64
 .#define bfd_h_get_64(abfd, ptr) \
 .                BFD_SEND(abfd, bfd_h_getx64,(ptr))
+.#define bfd_h_get_signed_64(abfd, ptr) \
+.		 BFD_SEND(abfd, bfd_h_getx_signed_64, (ptr))
 
 */ 
+
+/* Sign extension to bfd_signed_vma.  */
+#define COERCE16(x) ((bfd_signed_vma) (((x) ^ 0x8000) - 0x8000))
+#define COERCE32(x) ((bfd_signed_vma) (((x) ^ 0x80000000) - 0x80000000))
+#define COERCE64(x) ((bfd_signed_vma)\
+		     (((x) ^ 0x8000000000000000) - 0x8000000000000000))
 
 bfd_vma
 DEFUN(_do_getb16,(addr),
@@ -465,6 +496,20 @@ DEFUN(_do_getl16,(addr),
       register bfd_byte *addr)
 {
         return (addr[1] << 8) | addr[0];
+}
+
+bfd_signed_vma
+DEFUN(_do_getb_signed_16,(addr),
+      register bfd_byte *addr)
+{
+        return COERCE16((addr[0] << 8) | addr[1]);
+}
+
+bfd_signed_vma
+DEFUN(_do_getl_signed_16,(addr),
+      register bfd_byte *addr)
+{
+        return COERCE16((addr[1] << 8) | addr[0]);
 }
 
 void
@@ -486,8 +531,8 @@ DEFUN(_do_putl16,(data, addr),
 }
 
 bfd_vma
-DEFUN(_do_getb32,(addr),
-      register bfd_byte *addr)
+_do_getb32 (addr)
+     register bfd_byte *addr;
 {
         return ((((addr[0] << 8) | addr[1]) << 8) | addr[2]) << 8 | addr[3];
 }
@@ -497,6 +542,22 @@ _do_getl32 (addr)
         register bfd_byte *addr;
 {
         return ((((addr[3] << 8) | addr[2]) << 8) | addr[1]) << 8 | addr[0];
+}
+
+bfd_signed_vma
+_do_getb_signed_32 (addr)
+     register bfd_byte *addr;
+{
+        return COERCE32(((((addr[0] << 8) | addr[1]) << 8)
+			 | addr[2]) << 8 | addr[3]);
+}
+
+bfd_signed_vma
+_do_getl_signed_32 (addr)
+        register bfd_byte *addr;
+{
+        return COERCE32(((((addr[3] << 8) | addr[2]) << 8)
+			 | addr[1]) << 8 | addr[0]);
 }
 
 bfd_vma
@@ -542,6 +603,56 @@ DEFUN(_do_getl64,(addr),
           addr[0]) );
 
   return high << 32 | low;
+#else
+  BFD_FAIL();
+  return 0;
+#endif
+
+}
+
+bfd_signed_vma
+DEFUN(_do_getb_signed_64,(addr),
+      register bfd_byte *addr)
+{
+#ifdef HOST_64_BIT
+  bfd_vma low, high;
+
+  high= ((((((((addr[0]) << 8) |
+              addr[1]) << 8) |
+            addr[2]) << 8) |
+          addr[3]) );
+
+  low = ((((((((addr[4]) << 8) |
+              addr[5]) << 8) |
+            addr[6]) << 8) |
+          addr[7]));
+
+  return COERCE64(high << 32 | low);
+#else
+  BFD_FAIL();
+  return 0;
+#endif
+
+}
+
+bfd_signed_vma
+DEFUN(_do_getl_signed_64,(addr),
+      register bfd_byte *addr)
+{
+
+#ifdef HOST_64_BIT
+  bfd_vma low, high;
+  high= (((((((addr[7] << 8) |
+              addr[6]) << 8) |
+            addr[5]) << 8) |
+          addr[4]));
+
+  low = (((((((addr[3] << 8) |
+              addr[2]) << 8) |
+            addr[1]) << 8) |
+          addr[0]) );
+
+  return COERCE64(high << 32 | low);
 #else
   BFD_FAIL();
   return 0;

@@ -666,8 +666,12 @@ bfd_target hppa_vec =
   ' ',				/* ar_pad_char */
   16,				/* ar_max_namelen */
     3,				/* minimum alignment */
-_do_getb64, _do_putb64, _do_getb32, _do_putb32, _do_getb16, _do_putb16, /* data */
-_do_getb64, _do_putb64,  _do_getb32, _do_putb32, _do_getb16, _do_putb16, /* hdrs */
+_do_getb64, _do_getb_signed_64, _do_putb64,
+    _do_getb32, _do_getb_signed_32, _do_putb32,
+    _do_getb16, _do_getb_signed_16, _do_putb16, /* data */
+_do_getb64, _do_getb_signed_64, _do_putb64,
+    _do_getb32, _do_getb_signed_32, _do_putb32,
+    _do_getb16, _do_getb_signed_16, _do_putb16, /* hdrs */
   { _bfd_dummy_target,
      hppa_object_p,		/* bfd_check_format */
      bfd_generic_archive_p,

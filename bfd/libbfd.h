@@ -1,6 +1,6 @@
 /* libbfd.h -- Declarations used by bfd library *implementation*.
    (This include file is not for users of the library.)
-   Copyright 1990, 1991 Free Software Foundation, Inc.
+   Copyright 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -98,10 +98,16 @@ boolean	bfd_add_to_string_table PARAMS ((char **table, char *new_string,
 					 char **free_ptr));
 bfd_vma _do_getb64 PARAMS ((unsigned char *addr));     
 bfd_vma _do_getl64 PARAMS ((unsigned char *addr));     
+bfd_signed_vma _do_getb_signed_64 PARAMS ((unsigned char *addr));     
+bfd_signed_vma _do_getl_signed_64 PARAMS ((unsigned char *addr));     
 bfd_vma _do_getb32 PARAMS ((unsigned char *addr));
 bfd_vma _do_getl32 PARAMS ((unsigned char *addr));
+bfd_signed_vma _do_getb_signed_32 PARAMS ((unsigned char *addr));
+bfd_signed_vma _do_getl_signed_32 PARAMS ((unsigned char *addr));
 bfd_vma _do_getb16 PARAMS ((unsigned char *addr));
 bfd_vma _do_getl16 PARAMS ((unsigned char *addr));
+bfd_signed_vma _do_getb_signed_16 PARAMS ((unsigned char *addr));
+bfd_signed_vma _do_getl_signed_16 PARAMS ((unsigned char *addr));
 void    _do_putb64 PARAMS ((bfd_vma data, unsigned char *addr));
 void    _do_putl64 PARAMS ((bfd_vma data, unsigned char *addr));
 void    _do_putb32 PARAMS ((bfd_vma data, unsigned char *addr));
@@ -200,18 +206,6 @@ bfd_write_bigendian_4byte_int PARAMS ((bfd *abfd,  int i));
 bfd_vma 
 bfd_log2 PARAMS ((bfd_vma x));
 
-void 
-bfd_check_init PARAMS ((void));
-
-PTR  
-bfd_xmalloc PARAMS (( bfd_size_type size));
-
-void 
-bfd_write_bigendian_4byte_int PARAMS ((bfd *abfd,  int i));
-
-bfd_vma 
-bfd_log2 PARAMS ((bfd_vma x));
-
 #define BFD_CACHE_MAX_OPEN 10
 extern bfd *bfd_last_cache;
 
@@ -238,7 +232,7 @@ bfd_constructor_entry PARAMS ((bfd *abfd,
 
 CONST struct reloc_howto_struct *
 bfd_default_reloc_type_lookup
- PARAMS ((CONST struct bfd_arch_info *,
+ PARAMS ((bfd *abfd AND
     bfd_reloc_code_real_type  code));
 
 boolean 
@@ -251,7 +245,14 @@ bfd_byte *
 
 bfd_generic_get_relocated_section_contents  PARAMS ((bfd *abfd,
     struct bfd_seclet *seclet,
-    bfd_byte *data));
+    bfd_byte *data,
+    boolean relocateable));
+
+boolean 
+bfd_generic_seclet_link
+ PARAMS ((bfd *abfd,
+    PTR data,
+    boolean relocateable));
 
 extern bfd_arch_info_type bfd_default_arch_struct;
 boolean 
@@ -273,6 +274,6 @@ bfd_default_compatible
 boolean 
 bfd_default_scan PARAMS ((CONST struct bfd_arch_info *, CONST char *));
 
-Elf_Internal_Shdr *
+struct elf_internal_shdr *
 bfd_elf_find_section  PARAMS ((bfd *abfd, char *name));
 

@@ -307,11 +307,13 @@ bfd_target a29kcoff_big_vec =
   15,				/* ar_max_namelen */
   2,				/* minimum section alignment */
   /* data */
-  _do_getb64, _do_putb64, _do_getb32,
-  _do_putb32, _do_getb16, _do_putb16,
+  _do_getb64, _do_getb_signed_64, _do_putb64,
+     _do_getb32, _do_getb_signed_32,   _do_putb32,
+     _do_getb16, _do_getb_signed_16, _do_putb16,
   /* hdrs */
-  _do_getb64, _do_putb64, _do_getb32,
-  _do_putb32, _do_getb16, _do_putb16,
+  _do_getb64, _do_getb_signed_64, _do_putb64,
+     _do_getb32, _do_getb_signed_32,   _do_putb32,
+     _do_getb16, _do_getb_signed_16, _do_putb16,
 
  {
 	    

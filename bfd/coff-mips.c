@@ -60,7 +60,7 @@ typedef struct ecoff_symbol_struct
 #define ecoffsymbol(asymbol) ((ecoff_symbol_type *) (&((asymbol)->the_bfd)))
 
 /* The page boundary used to align sections in the executable file.  */
-#define PAGE_SIZE 0x2000
+#define ROUND_SIZE 0x1000
 
 /* The linker needs a section to hold small common variables while
    linking.  There is no convenient way to create it when the linker
@@ -2174,8 +2174,11 @@ ecoff_find_nearest_line (abfd,
   pdr_ptr = ecoff_data (abfd)->external_pdr + fdr_ptr->ipdFirst;
   pdr_end = pdr_ptr + fdr_ptr->cpd;
   ecoff_swap_pdr_in (abfd, pdr_ptr, &pdr);
-  if (offset < pdr.adr)
-    return false;
+
+  /* The address of the first PDR is an offset which applies to the
+     addresses of all the PDR's.  */
+  offset += pdr.adr;
+
   for (pdr_ptr++; pdr_ptr < pdr_end; pdr_ptr++)
     {
       ecoff_swap_pdr_in (abfd, pdr_ptr, &pdr);
@@ -3188,7 +3191,7 @@ ecoff_compute_section_file_positions (abfd)
 	  && first_data != false
 	  && (current->flags & SEC_CODE) == 0)
 	{
-	  sofar = (sofar + PAGE_SIZE - 1) &~ (PAGE_SIZE - 1);
+	  sofar = (sofar + ROUND_SIZE - 1) &~ (ROUND_SIZE - 1);
 	  first_data = false;
 	}
 
@@ -3292,7 +3295,7 @@ ecoff_write_object_contents (abfd)
      be aligned to a page boundary.  FIXME: Is this true on other
      platforms?  */
   if ((abfd->flags & EXEC_P) != 0)
-    sym_base = (sym_base + PAGE_SIZE - 1) &~ (PAGE_SIZE - 1);
+    sym_base = (sym_base + ROUND_SIZE - 1) &~ (ROUND_SIZE - 1);
 
   ecoff_data (abfd)->sym_filepos = sym_base;
 
@@ -3440,10 +3443,10 @@ ecoff_write_object_contents (abfd)
 
   /* At least on Ultrix, these have to be rounded to page boundaries.
      FIXME: Is this true on other platforms?  */
-  internal_a.tsize = (text_size + PAGE_SIZE - 1) &~ (PAGE_SIZE - 1);
-  internal_a.text_start = text_start &~ (PAGE_SIZE - 1);
-  internal_a.dsize = (data_size + PAGE_SIZE - 1) &~ (PAGE_SIZE - 1);
-  internal_a.data_start = data_start &~ (PAGE_SIZE - 1);
+  internal_a.tsize = (text_size + ROUND_SIZE - 1) &~ (ROUND_SIZE - 1);
+  internal_a.text_start = text_start &~ (ROUND_SIZE - 1);
+  internal_a.dsize = (data_size + ROUND_SIZE - 1) &~ (ROUND_SIZE - 1);
+  internal_a.data_start = data_start &~ (ROUND_SIZE - 1);
 
   /* On Ultrix, the initial portions of the .sbss and .bss segments
      are at the end of the data section.  The bsize field in the
@@ -4123,8 +4126,12 @@ bfd_target ecoff_little_vec =
   '/',				/* ar_pad_char */
   15,				/* ar_max_namelen */
   3,				/* minimum alignment power */
-  _do_getl64, _do_putl64,	_do_getl32, _do_putl32, _do_getl16, _do_putl16, /* data */
-  _do_getl64, _do_putl64,	_do_getl32, _do_putl32, _do_getl16, _do_putl16, /* hdrs */
+  _do_getl64, _do_getl_signed_64, _do_putl64,
+     _do_getl32, _do_getl_signed_32, _do_putl32,
+     _do_getl16, _do_getl_signed_16, _do_putl16, /* data */
+  _do_getl64, _do_getl_signed_64, _do_putl64,
+     _do_getl32, _do_getl_signed_32, _do_putl32,
+     _do_getl16, _do_getl_signed_16, _do_putl16, /* hdrs */
 
   {_bfd_dummy_target, coff_object_p, /* bfd_check_format */
      ecoff_archive_p, _bfd_dummy_target},
@@ -4152,8 +4159,12 @@ bfd_target ecoff_big_vec =
   ' ',				/* ar_pad_char */
   16,				/* ar_max_namelen */
   3,				/* minimum alignment power */
-  _do_getb64, _do_putb64,	_do_getb32, _do_putb32, _do_getb16, _do_putb16,
-  _do_getb64, _do_putb64,	_do_getb32, _do_putb32, _do_getb16, _do_putb16,
+  _do_getb64, _do_getb_signed_64, _do_putb64,
+     _do_getb32, _do_getb_signed_32, _do_putb32,
+     _do_getb16, _do_getb_signed_16, _do_putb16,
+  _do_getb64, _do_getb_signed_64, _do_putb64,
+     _do_getb32, _do_getb_signed_32, _do_putb32,
+     _do_getb16, _do_getb_signed_16, _do_putb16,
  {_bfd_dummy_target, coff_object_p, /* bfd_check_format */
     ecoff_archive_p, _bfd_dummy_target},
  {bfd_false, ecoff_mkobject, _bfd_generic_mkarchive, /* bfd_set_format */
