@@ -983,16 +983,32 @@ xcoff_next_symbol_text ()
   struct internal_syment symbol;
   static struct complaint msg =
     {"Unexpected symbol continuation", 0, 0};
+  char *retval;
 
   bfd_coff_swap_sym_in (current_objfile->obfd, raw_symbol, &symbol);
   if (symbol.n_zeroes)
-    complain (&msg);
+    {
+      complain (&msg);
+
+      /* Return something which points to '\0' and hope the symbol reading
+	 code does something reasonable.  */
+      retval = "";
+    }
   else if (symbol.n_sclass & 0x80)
-    return debugsec + symbol.n_offset;
+    {
+      retval = debugsec + symbol.n_offset;
+      raw_symbol += coff_data (current_objfile->obfd)->local_symesz;
+      ++symnum;
+    }
   else
-    complain (&msg);
-  raw_symbol += coff_data (current_objfile->obfd)->local_symesz;
-  ++symnum;
+    {
+      complain (&msg);
+
+      /* Return something which points to '\0' and hope the symbol reading
+	 code does something reasonable.  */
+      retval = "";
+    }
+  return retval;
 }
 
 /* read the whole symbol table of a given bfd. */

@@ -1,5 +1,9 @@
 Wed Apr 20 08:37:16 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* xcoffread.c (xcoff_next_symbol_text): Don't return before
+	updating raw_symbol and symnum.  Return a value in the case where
+	we complained.
+
 	* dstread.c, coffread.c: Don't define pending_blocks; buildsym.c
 	takes care of it.
 	* parse.c: Don't define block_found; it is defined in symtab.c.
