@@ -31,9 +31,7 @@ ChangeLog
 Makefile.in
 config
 config.h
-configure
 configure.in
-config.sub
 ld.h
 ld.texinfo
 ldemul.c
@@ -86,7 +84,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.15  1991/10/09 20:40:37  bothner
+# Revision 1.16  1991/10/10 11:59:25  rich
+# updating
+#
+# Revision 1.15  1991/10/09  20:40:37  bothner
 # Added h8300hds.{c,sc}.
 #
 # Revision 1.14  1991/10/05  04:55:04  gnu

@@ -41,6 +41,7 @@ t-m68kv
 h-sun4
 h-dec3100
 t-sun4
+t-m68k
 t-m88k-bcs
 t-coff-a29k
 t-news
@@ -51,7 +52,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.7  1991/09/27 20:20:01  bothner
+# Revision 1.8  1991/10/10 11:59:20  rich
+# updating
+#
+# Revision 1.7  1991/09/27  20:20:01  bothner
 # Added {h,t}-news
 #
 # Revision 1.6  1991/09/19  21:03:09  steve

@@ -37,7 +37,6 @@ not-ranlib.c
 maybe-ranlib.c
 binutils.texinfo
 bucomm.c
-config
 configure.in
 copy.c
 cplus-dem.c
@@ -62,7 +61,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.6  1991/10/08 01:50:59  gnu
+# Revision 1.7  1991/10/10 11:59:09  rich
+# updating
+#
+# Revision 1.6  1991/10/08  01:50:59  gnu
 # Remove configure and config.sub from the expected list.
 #
 # Revision 1.5  1991/10/08  01:48:04  gnu

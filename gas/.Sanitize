@@ -45,8 +45,6 @@ bignum-copy.c
 bignum.h
 cond.c
 config
-config.sub
-configure
 configure.in
 debug.c
 expr.c
@@ -91,7 +89,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.2  1991/09/02 01:05:04  rich
+# Revision 1.3  1991/10/10 11:58:04  rich
+# updating
+#
+# Revision 1.2  1991/09/02  01:05:04  rich
 # Correcting some things.
 #
 # Revision 1.1  1991/05/23  17:18:12  rich
