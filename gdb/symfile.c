@@ -1768,6 +1768,7 @@ add_shared_symbol_files_command (char *args, int from_tty)
 #endif
 }
 
+#if 0
 /* Read inferior memory at ADDR to find the header of a loaded object file
    and read its in-core symbols out of inferior memory.  TEMPL is a bfd
    representing the target's format.  */
@@ -1825,10 +1826,12 @@ symbol_file_add_from_memory (bfd *templ, CORE_ADDR addr, int from_tty)
 
   return objf;
 }
+#endif
 
 static void
 add_symbol_file_from_memory_command (char *args, int from_tty)
 {
+#if 0
   CORE_ADDR addr;
   bfd *templ;
 
@@ -1846,7 +1849,10 @@ add_symbol_file_from_memory_command (char *args, int from_tty)
     error ("\
 Must use symbol-file or exec-file before add-symbol-file-from-memory.");
 
-  (void) symbol_file_add_from_memory (templ, addr, from_tty);
+  symbol_file_add_from_memory (templ, addr, from_tty);
+#else
+  error ("add-symbol-file-from-memory not implemented");
+#endif
 }
 
 /* Re-read symbols if a symbol-file has changed.  */
