@@ -752,6 +752,15 @@ debugger attached to a bare board, there may not be any notion of
 ``process'', and there is often no way to get a core dump.  @value{GDBN}
 will warn you if it is unable to attach or to read core dumps.
 
+You can optionally have @code{@value{GDBP}} pass any arguments after the
+executable file to the inferior using @code{--args}.  This option stops
+option processing.
+@example
+gdb --args gcc -O2 -c foo.c
+@end example
+This will cause @code{@value{GDBP}} to debug @code{gcc}, and to set
+@code{gcc}'s command-line arguments (@pxref{Arguments}) to @samp{-O2 -c foo.c}.
+
 You can run @code{@value{GDBP}} without printing the front material, which describes
 @value{GDBN}'s non-warranty, by specifying @code{-silent}:
 
@@ -1014,6 +1023,12 @@ uses the asynchronous event loop by default, unless disabled by the
 @item -noasync
 @cindex @code{--noasync}
 Disable the asynchronous event loop for the command-line interface.
+
+@item --args
+@cindex @code{--args}
+Change interpretation of command line so that arguments following the
+executable file are passed as command line arguments to the inferior.
+This option stops option processing.
 
 @item -baud @var{bps}
 @itemx -b @var{bps}
