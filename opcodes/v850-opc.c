@@ -341,39 +341,39 @@ extract_i5div (insn, invalid)
 const struct v850_operand v850_operands[] =
 {
 #define UNUSED	0
-  { 0, 0, 0, 0, 0 }, 
+  { 0, 0, NULL, NULL, 0 }, 
 
 /* The R1 field in a format 1, 6, 7, or 9 insn. */
-#define R1	(UNUSED+1)
-  { 5, 0, 0, 0, V850_OPERAND_REG }, 
+#define R1	(UNUSED + 1)
+  { 5, 0, NULL, NULL, V850_OPERAND_REG }, 
 
 /* As above, but register 0 is not allowed.  */
 #define R1_NOTR0 (R1 + 1)
-  { 5, 0, 0, 0, V850_OPERAND_REG | V850_NOT_R0 }, 
+  { 5, 0, NULL, NULL, V850_OPERAND_REG | V850_NOT_R0 }, 
 
 /* The R2 field in a format 1, 2, 4, 5, 6, 7, 9 insn. */
 #define R2	(R1_NOTR0 + 1)
-  { 5, 11, 0, 0, V850_OPERAND_REG },
+  { 5, 11, NULL, NULL, V850_OPERAND_REG },
 
 /* As above, but register 0 is not allowed.  */
 #define R2_NOTR0 (R2 + 1)
-  { 5, 11, 0, 0, V850_OPERAND_REG | V850_NOT_R0 },
+  { 5, 11, NULL, NULL, V850_OPERAND_REG | V850_NOT_R0 },
 
 /* The imm5 field in a format 2 insn. */
 #define I5	(R2_NOTR0 + 1)
-  { 5, 0, 0, 0, V850_OPERAND_SIGNED }, 
+  { 5, 0, NULL, NULL, V850_OPERAND_SIGNED }, 
 
 /* The unsigned imm5 field in a format 2 insn. */
 #define I5U	(I5 + 1)
-  { 5, 0, 0, 0, 0 },
+  { 5, 0, NULL, NULL, 0 },
 
 /* The imm16 field in a format 6 insn. */
 #define I16	(I5U + 1)
-  { 16, 16, 0, 0, V850_OPERAND_SIGNED }, 
+  { 16, 16, NULL, NULL, V850_OPERAND_SIGNED }, 
 
 /* The signed disp7 field in a format 4 insn. */
 #define D7	(I16 + 1)
-  { 7, 0, 0, 0, 0},
+  { 7, 0, NULL, NULL, 0},
 
 /* The disp16 field in a format 6 insn. */
 #define D16_15	(D7 + 1)
@@ -381,11 +381,11 @@ const struct v850_operand v850_operands[] =
 
 /* The 3 bit immediate field in format 8 insn.  */
 #define B3	(D16_15 + 1)
-  { 3, 11, 0, 0, 0 },
+  { 3, 11, NULL, NULL, 0 },
 
 /* The 4 bit condition code in a setf instruction */
 #define CCCC	(B3 + 1)
-  { 4, 0, 0, 0, V850_OPERAND_CC },
+  { 4, 0, NULL, NULL, V850_OPERAND_CC },
 
 /* The unsigned DISP8 field in a format 4 insn. */
 #define D8_7	(CCCC + 1)
@@ -397,23 +397,23 @@ const struct v850_operand v850_operands[] =
 
 /* System register operands.  */
 #define SR1	(D8_6 + 1)
-  { 5, 0, 0, 0, V850_OPERAND_SRG },
+  { 5, 0, NULL, NULL, V850_OPERAND_SRG },
 
 /* EP Register.  */
 #define EP	(SR1 + 1)
-  { 0, 0, 0, 0, V850_OPERAND_EP },
+  { 0, 0, NULL, NULL, V850_OPERAND_EP },
 
 /* The imm16 field (unsigned) in a format 6 insn. */
 #define I16U	(EP + 1)
-  { 16, 16, 0, 0, 0}, 
+  { 16, 16, NULL, NULL, 0}, 
 
 /* The R2 field as a system register.  */
 #define SR2	(I16U + 1)
-  { 5, 11, 0, 0, V850_OPERAND_SRG },
+  { 5, 11, NULL, NULL, V850_OPERAND_SRG },
 
 /* The disp16 field in a format 8 insn. */
 #define D16	(SR2 + 1)
-  { 16, 16, 0, 0, V850_OPERAND_SIGNED }, 
+  { 16, 16, NULL, NULL, V850_OPERAND_SIGNED }, 
 
 /* The DISP22 field in a format 4 insn, relaxable. */
 #define D9_RELAX	(D16 + 1)
@@ -430,7 +430,7 @@ const struct v850_operand v850_operands[] =
   
 /* The signed disp4 field in a format 4 insn. */
 #define D4	(D22 + 1)
-  { 4, 0, 0, 0, 0},
+  { 4, 0, NULL, NULL, 0},
 
 /* The unsigned disp5 field in a format 4 insn. */
 #define D5_4	(D4 + 1)
@@ -442,11 +442,11 @@ const struct v850_operand v850_operands[] =
 
 /* Third register in conditional moves. */
 #define R3	(D16_16 + 1)
-  { 5, 27, 0, 0, V850_OPERAND_REG },
+  { 5, 27, NULL, NULL, V850_OPERAND_REG },
 
 /* Condition code in conditional moves.  */
 #define MOVCC	(R3 + 1)
-  { 4, 17, 0, 0, V850_OPERAND_CC },
+  { 4, 17, NULL, NULL, V850_OPERAND_CC },
 
 /* The imm9 field in a multiply word. */
 #define I9	(MOVCC + 1)
@@ -458,15 +458,15 @@ const struct v850_operand v850_operands[] =
 
 /* A list of registers in a prepare/dispose instruction.  */
 #define LIST12	(U9 + 1)
-  { -1, 0xffe00001, 0, 0, V850E_PUSH_POP }, 
+  { -1, 0xffe00001, NULL, NULL, V850E_PUSH_POP }, 
 
 /* The IMM6 field in a call instruction. */
 #define I6	(LIST12 + 1)
-  { 6, 0, 0, 0, 0 }, 
+  { 6, 0, NULL, NULL, 0 }, 
 
 /* The 16 bit immediate following a 32 bit instruction.  */
 #define IMM16	(I6 + 1)
-  { 16, 16, 0, 0, V850_OPERAND_SIGNED | V850E_IMMEDIATE16 }, 
+  { 16, 16, NULL, NULL, V850_OPERAND_SIGNED | V850E_IMMEDIATE16 }, 
 
 /* The 32 bit immediate following a 32 bit instruction.  */
 #define IMM32	(IMM16 + 1)
@@ -474,11 +474,11 @@ const struct v850_operand v850_operands[] =
 
 /* The imm5 field in a push/pop instruction. */
 #define IMM5	(IMM32 + 1)
-  { 5, 1, 0, 0, 0 }, 
+  { 5, 1, NULL, NULL, 0 }, 
 
 /* Reg2 in dispose instruction. */
 #define R2DISPOSE	(IMM5 + 1)
-  { 5, 16, 0, 0, V850_OPERAND_REG | V850_NOT_R0 },
+  { 5, 16, NULL, NULL, V850_OPERAND_REG | V850_NOT_R0 },
 
 /* Stack pointer in prepare instruction. */
 #define SP	(R2DISPOSE + 1)
@@ -493,11 +493,11 @@ const struct v850_operand v850_operands[] =
 
   /* The list of registers in a PUSHMH/POPMH instruction.  */
 #define LIST18_H (I5DIV + 1)
-  { -1, 0xfff8000f, 0, 0, V850E_PUSH_POP }, 
+  { -1, 0xfff8000f, NULL, NULL, V850E_PUSH_POP }, 
 
   /* The list of registers in a PUSHML/POPML instruction.  */
 #define LIST18_L (LIST18_H + 1)
-  { -1, 0xfff8001f, 0, 0, V850E_PUSH_POP }, /* The setting of the 4th bit is a flag to disassmble() in v850-dis.c */
+  { -1, 0xfff8001f, NULL, NULL, V850E_PUSH_POP }, /* The setting of the 4th bit is a flag to disassmble() in v850-dis.c */
 
 /* end-sanitize-v850eq */
 } ; 
@@ -537,7 +537,18 @@ const struct v850_operand v850_operands[] =
    The disassembler reads the table in order and prints the first
    instruction which matches, so this table is sorted to put more
    specific instructions before more general instructions.  It is also
-   sorted by major opcode.  */
+   sorted by major opcode.
+
+   The table is also sorted by name.  This is used by the assembler.
+   When parsing an instruction the assembler finds the first occurance
+   of the name of the instruciton in this table and then attempts to
+   match the instruction's arguments with description of the operands
+   associated with the entry it has just found in this table.  If the
+   match fails the assembler looks at the next entry in this table.
+   If that entry has the same name as the previous entry, then it
+   tries to match the instruction against that entry and so on.  This
+   is how the assembler copes with multiple, different formats of the
+   same instruction.  */
 
 const struct v850_opcode v850_opcodes[] =
 {
@@ -552,20 +563,30 @@ const struct v850_opcode v850_opcodes[] =
 /* start-sanitize-v850e */
 { "sld.bu",     one (0x0060),		one (0x07f0),         	{D4,   EP,   R2_NOTR0},	1, PROCESSOR_V850E },
 /* end-sanitize-v850e */
+  
 /* start-sanitize-v850eq */
 { "sld.hu",	one (0x0400),		one (0x0780),	      	{D8_7, EP,   R2_NOTR0},	1, PROCESSOR_V850EQ },
 /* end-sanitize-v850eq */
 /* start-sanitize-v850e */
 { "sld.hu",     one (0x0070),		one (0x07f0),         	{D5_4, EP,   R2_NOTR0},	1, PROCESSOR_V850E },
 /* end-sanitize-v850e */
+  
 /* start-sanitize-v850eq */
 { "sld.b",      one (0x0060),		one (0x07f0),         	{D4,   EP,   R2}, 	1, PROCESSOR_V850EQ },
 /* end-sanitize-v850eq */
-{ "sld.b",	one (0x0300),		one (0x0780),	      	{D7,   EP,   R2},	1, PROCESSOR_ALL },
+/* start-sanitize-v850e */
+{ "sld.b",	one (0x0300),		one (0x0780),	      	{D7,   EP,   R2},	1, PROCESSOR_V850E },
+/* end-sanitize-v850e */
+{ "sld.b",	one (0x0300),		one (0x0780),	      	{D7,   EP,   R2},	1, PROCESSOR_V850 },
+
 /* start-sanitize-v850eq */
 { "sld.h",      one (0x0070),		one (0x07f0),         	{D5_4, EP,   R2}, 	1, PROCESSOR_V850EQ },
 /* end-sanitize-v850eq */
-{ "sld.h",	one (0x0400),		one (0x0780),	      	{D8_7, EP,   R2}, 	1, PROCESSOR_ALL },
+/* start-sanitize-v850e */
+{ "sld.h",	one (0x0400),		one (0x0780),	      	{D8_7, EP,   R2}, 	1, PROCESSOR_V850E },
+/* end-sanitize-v850e */
+  
+{ "sld.h",	one (0x0400),		one (0x0780),	      	{D8_7, EP,   R2}, 	1, PROCESSOR_V850 },
 { "sld.w",	one (0x0500),		one (0x0781),	      	{D8_6, EP,   R2}, 	1, PROCESSOR_ALL },
 { "sst.b",	one (0x0380),		one (0x0780),	      	{R2,   D7,   EP}, 	2, PROCESSOR_ALL },
 { "sst.h",	one (0x0480),		one (0x0780),	      	{R2,   D8_7, EP}, 	2, PROCESSOR_ALL },
