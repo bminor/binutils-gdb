@@ -1,3 +1,7 @@
+2004-10-12  Paul Brook  <paul@codesourcery.com>
+
+	* elf32-arm.h: Support EABI version 4 objects.
+
 2004-10-12  Alan Modra  <amodra@bigpond.net.au>
 
 	PR 325

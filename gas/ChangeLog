@@ -1,3 +1,11 @@
+2004-10-12  Paul Brook  <paul@codesourcery.com>
+
+	* config/tc-arm.c (md_begin): Change EF_ARM_EABI_VER3 to
+	EF_ARM_EABI_VER4.
+	(arm_eabis): Ditto.
+	* doc/c-arm.texi: Document that we actually support -meabi=4, not
+	-meabi=3.
+
 2004-10-08  Bob Wilson  <bob.wilson@acm.org>
 
 	* doc/as.texinfo (VTableEntry, VTableInherit): Add "directive" to index

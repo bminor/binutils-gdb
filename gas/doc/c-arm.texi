@@ -243,7 +243,7 @@ conform to.
 The following values are recognised:
 @code{gnu}
 and
-@code{3}.
+@code{4}.
 
 @cindex @code{-EB} command line option, ARM
 @item -EB

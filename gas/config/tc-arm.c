@@ -11130,7 +11130,7 @@ md_begin (void)
 	    flags |= EF_ARM_MAVERICK_FLOAT;
 	break;
 
-      case EF_ARM_EABI_VER3:
+      case EF_ARM_EABI_VER4:
 	/* No additional flags to set.  */
 	break;
 
@@ -12901,11 +12901,11 @@ struct arm_eabi_option_table
 };
 
 #ifdef OBJ_ELF
-/* We only know hot to output GNU and ver 3 (AAELF) formats.  */
+/* We only know how to output GNU and ver 4 (AAELF) formats.  */
 static struct arm_eabi_option_table arm_eabis[] =
 {
   {"gnu",	EF_ARM_EABI_UNKNOWN},
-  {"3",		EF_ARM_EABI_VER3},
+  {"4",		EF_ARM_EABI_VER4},
   {NULL, 0}
 };
 #endif

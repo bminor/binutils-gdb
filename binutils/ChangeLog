@@ -1,3 +1,7 @@
+2004-10-12  Paul Brook  <paul@codesourcery.com>
+
+	* readelf.c (decode_ARM_machine_flags): Support EABI version 4.
+
 2004-10-11  Alan Modra  <amodra@bigpond.net.au>
 
 	* objdump.c (dump_symbols): Fix thinko last change.  Improve error

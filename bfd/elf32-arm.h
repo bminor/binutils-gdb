@@ -25,9 +25,9 @@
 typedef unsigned long int insn32;
 typedef unsigned short int insn16;
 
-/* In lieu of proper flags, assume all EABIv3 objects are interworkable.  */
+/* In lieu of proper flags, assume all EABIv4 objects are interworkable.  */
 #define INTERWORK_FLAG(abfd)  \
-  (EF_ARM_EABI_VERSION (elf_elfheader (abfd)->e_flags) == EF_ARM_EABI_VER3 \
+  (EF_ARM_EABI_VERSION (elf_elfheader (abfd)->e_flags) == EF_ARM_EABI_VER4 \
   || (elf_elfheader (abfd)->e_flags & EF_ARM_INTERWORK))
 
 /* The linker script knows the section names for placement.
@@ -2705,6 +2705,10 @@ elf32_arm_print_private_bfd_data (bfd *abfd, void * ptr)
 
     case EF_ARM_EABI_VER3:
       fprintf (file, _(" [Version3 EABI]"));
+      break;
+
+    case EF_ARM_EABI_VER4:
+      fprintf (file, _(" [Version4 EABI]"));
 
       if (flags & EF_ARM_BE8)
 	fprintf (file, _(" [BE8]"));
