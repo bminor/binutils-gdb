@@ -1,3 +1,7 @@
+2001-11-02  Tom Rix  <trix@bluey.cygnus.com>
+
+	* MAINTAINERS: Add self as PPC XCOFF maintainer.
+
 2001-11-02  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* configure.in (ALL_LINGUAS): Add "fr" and "tr".

@@ -70,6 +70,7 @@ responsibility among the other maintainers.
   M88k		   Ben Elliston <bje@redhat.com>
   MMIX		   Hans-Peter Nilsson <hp@bitrange.com>
   PPC		   Geoff Keating <geoffk@redhat.com>
+  PPC XCOFF	   Tom Rix <trix@redhat.com>
   SH		   Jörn Rennecke <amylaar@onetel.net.uk>
   SH		   Hans-Peter Nilsson <hp@bitrange.com>
   SPARC		   Jakub Jelinek <jakub@redhat.com>
