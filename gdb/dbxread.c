@@ -2784,9 +2784,10 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, char *name,
      peculiarities of function_start_offset.  */
   static CORE_ADDR last_function_start;
 
-  /* If this is nonzero, we've seen an N_SLINE since the start of the current
-     function.  Initialized to nonzero to assure that last_function_start
-     is never used uninitialized.  */
+  /* If this is nonzero, we've seen an N_SLINE since the start of the
+     current function.  We use this to tell us to move the first sline
+     to the beginning of the function regardless of what its given
+     value is. */
   static int sline_found_in_function = 1;
 
   /* If this is nonzero, we've seen a non-gcc N_OPT symbol for this source
@@ -2830,7 +2831,7 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, char *name,
  	      break;
  	    }
 
-	  record_line (current_subfile, 0, function_start_offset + valu);
+	  record_line (current_subfile, 0, last_function_start + valu);
 	  within_function = 0;
 	  new = pop_context ();
 

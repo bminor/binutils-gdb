@@ -1,3 +1,11 @@
+2003-02-18  Elena Zannoni  <ezannoni@redhat.com>
+
+	From Jim Ingham   <jingham@apple.com>:
+        * dbxread.c (process_one_symbol): Use last_function_start rather
+        than function_start_offset to find the real beginning of the
+        current function.  The latter is just the text section offset on
+        some systems, the former is always the real function start.
+
 2003-02-17  Andrew Cagney  <cagney@redhat.com>
 
 	* configure.in: Revert ${target} != ${host}.
