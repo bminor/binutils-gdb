@@ -1,6 +1,9 @@
 start-sanitize-v850
 Sat Aug 31 01:27:26 1996  Jeffrey A Law  (law@cygnus.com)
 
+	* v850-opc.c (insert_d9, insert_d22): Slightly improve error
+	message.  Issue an error if the branch offset is odd.
+
 	* v850-opc.c: Add notes about needing special insert/extract
 	for all the load/store insns, except "ld.b" and "st.b".
 

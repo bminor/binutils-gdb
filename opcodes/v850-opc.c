@@ -267,7 +267,10 @@ insert_d9 (insn, value, errmsg)
      const char **errmsg;
 {
   if (value > 255 || value <= -256)
-    *errmsg = "value out of range";
+    *errmsg = "branch value out of range";
+
+  if ((value % 2) != 0)
+    *errmsg = "branch to odd offset";
 
   return (insn | ((value & 0x1f0) << 7) | ((value & 0x0e) << 3));
 }
@@ -293,6 +296,9 @@ insert_d22 (insn, value, errmsg)
 {
   if (value > 0xfffff || value <= -0x100000)
     *errmsg = "value out of range";
+
+  if ((value % 2) != 0)
+    *errmsg = "branch to odd offset";
 
   return (insn | ((value & 0xfffe) << 16) | ((value & 0x3f0000) >> 16));
 }
