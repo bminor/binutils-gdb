@@ -2013,6 +2013,14 @@ read_func_scope (struct die_info *die, struct objfile *objfile,
   /* Make a block for the local symbols within.  */
   finish_block (new->name, &local_symbols, new->old_blocks,
 		lowpc, highpc, objfile);
+  
+  /* In C++, we can have functions nested inside functions (e.g., when
+     a function declares a class that has methods).  This means that
+     when we finish processing a function scope, we may need to go
+     back to building a containing block's symbol lists.  */
+  local_symbols = new->locals;
+  param_symbols = new->params;
+
   list_in_scope = &file_symbols;
 }
 
