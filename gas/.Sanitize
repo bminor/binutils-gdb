@@ -80,6 +80,7 @@ output-file.c
 output-file.h
 read.c
 read.h
+stabs.c
 struc-symbol.h
 subsegs.c
 subsegs.h
@@ -123,7 +124,10 @@ fi
 #
 #
 # $Log$
-# Revision 1.21  1993/11/17 23:23:36  ian
+# Revision 1.22  1993/11/22 06:04:32  law
+# Add stabs.c to things-to-keep.
+#
+# Revision 1.21  1993/11/17  23:23:36  ian
 # New files for ECOFF debugging split out of config/obj-ecoff.c.
 #
 # Revision 1.20  1993/06/04  23:06:28  raeburn
