@@ -1,3 +1,7 @@
+2000-10-24  Ben Elliston  <bje@redhat.com>
+
+	* gencode.c (tab): Delimit strings with commas where applicable.
+
 Tue May 23 21:39:23 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure: Regenerated to track ../common/aclocal.m4 changes.
