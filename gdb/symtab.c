@@ -4402,43 +4402,64 @@ in_prologue (pc, func_start)
   struct symtab_and_line sal;
   CORE_ADDR func_addr, func_end;
 
-  if (!find_pc_partial_function (pc, NULL, &func_addr, &func_end))
-    goto nosyms;		/* Might be in prologue */
+  /* We have several sources of information we can consult to figure
+     this out.
+     - Compilers usually emit line number info that marks the prologue
+       as its own "source line".  So the ending address of that "line"
+       is the end of the prologue.  If available, this is the most
+       reliable method.
+     - The minimal symbols and partial symbols, which can usually tell
+       us the starting and ending addresses of a function.
+     - If we know the function's start address, we can call the
+       architecture-defined SKIP_PROLOGUE function to analyze the
+       instruction stream and guess where the prologue ends.
+     - Our `func_start' argument; if non-zero, this is the caller's
+       best guess as to the function's entry point.  At the time of
+       this writing, handle_inferior_event doesn't get this right, so
+       it should be our last resort.  */
 
+  /* Consult the partial symbol table, to find which function
+     the PC is in.  */
+  if (! find_pc_partial_function (pc, NULL, &func_addr, &func_end))
+    {
+      CORE_ADDR prologue_end;
+
+      /* We don't even have minsym information, so fall back to using
+         func_start, if given.  */
+      if (! func_start)
+	return 1;		/* We *might* be in a prologue.  */
+
+      prologue_end = SKIP_PROLOGUE (func_start);
+
+      return func_start <= pc && pc < prologue_end;
+    }
+
+  /* If we have line number information for the function, that's
+     usually pretty reliable.  */
   sal = find_pc_line (func_addr, 0);
 
-  if (sal.line == 0)
-    goto nosyms;
+  /* Now sal describes the source line at the function's entry point,
+     which (by convention) is the prologue.  The end of that "line",
+     sal.end, is the end of the prologue.
 
-  /* sal.end is the address of the first instruction past sal.line. */
-  if (sal.end > func_addr
-      && sal.end <= func_end)	/* Is prologue in function? */
-    return pc < sal.end;	/* Yes, is pc in prologue? */
+     Note that, for functions whose source code is all on a single
+     line, the line number information doesn't always end up this way.
+     So we must verify that our purported end-of-prologue address is
+     *within* the function, not at its start or end.  */
+  if (sal.line == 0
+      || sal.end <= func_addr
+      || func_end <= sal.end)
+    {
+      /* We don't have any good line number info, so use the minsym
+	 information, together with the architecture-specific prologue
+	 scanning code.  */
+      CORE_ADDR prologue_end = SKIP_PROLOGUE (func_addr);
 
-  /* The line after the prologue seems to be outside the function.  In this
-     case, tell the caller to find the prologue the hard way.  */
+      return func_addr <= pc && pc < prologue_end;
+    }
 
-  return 1;
-
-/* Come here when symtabs don't contain line # info.  In this case, it is
-   likely that the user has stepped into a library function w/o symbols, or
-   is doing a stepi/nexti through code without symbols.  */
-
-nosyms:
-
-/* If func_start is zero (meaning unknown) then we don't know whether pc is
-   in the prologue or not.  I.E. it might be. */
-
-  if (!func_start)
-    return 1;
-
-/* We need to call the target-specific prologue skipping functions with the
-   function's start address because PC may be pointing at an instruction that
-   could be mistakenly considered part of the prologue.  */
-
-  func_start = SKIP_PROLOGUE (func_start);
-
-  return pc < func_start;
+  /* We have line number info, and it looks good.  */
+  return func_addr <= pc && pc < sal.end;
 }
 
 

@@ -1,3 +1,9 @@
+2000-05-03  Elena Zannoni  <ezannoni@makita.cygnus.com>
+
+	* symtab.c (in_prologue): From Jim Blandy. Rewrite, more
+	intelligently, making sure we use the information from the 
+        symbol tables fully.
+
 2000-05-02  H.J. Lu  <hjl@gnu.org>
 
 	* ia64-tdep.c (ia64_gdbarch_init): Reference to ELFOSABI_NONE
