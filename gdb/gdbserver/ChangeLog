@@ -1,5 +1,10 @@
 2003-05-29  Jim Blandy  <jimb@redhat.com>
 
+	* linux-low.c (usr_store_inferior_registers): Transfer buf in
+	PTRACE_XFER_TYPE-sized chunks, not int-sized chunks.  Otherwise,
+	if 'int' is smaller than PTRACE_XFER_TYPE, you end up throwing
+	away part of the register's value.
+
 	Add support for Linux on the 64-bit PowerPC.
 	* linux-ppc64-low.c: New file.
 	* configure.srv (powerpc64-*-linux*): New case.

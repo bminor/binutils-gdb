@@ -976,7 +976,7 @@ usr_store_inferior_registers (int regno)
 	{
 	  errno = 0;
 	  ptrace (PTRACE_POKEUSER, inferior_pid, (PTRACE_ARG3_TYPE) regaddr,
-		  *(int *) (buf + i));
+		  *(PTRACE_XFER_TYPE *) (buf + i));
 	  if (errno != 0)
 	    {
 	      if ((*the_low_target.cannot_store_register) (regno) == 0)
@@ -989,7 +989,7 @@ usr_store_inferior_registers (int regno)
 		  return;
 		}
 	    }
-	  regaddr += sizeof (int);
+	  regaddr += sizeof (PTRACE_XFER_TYPE);
 	}
     }
   else
