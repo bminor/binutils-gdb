@@ -771,7 +771,7 @@ aix5_relocate_main_executable (void)
 
    SYNOPSIS
 
-   void aix5_solib_create_inferior_hook()
+   void aix5_solib_create_inferior_hook ()
 
    DESCRIPTION
 

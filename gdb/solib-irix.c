@@ -371,7 +371,7 @@ enable_break (void)
 
    SYNOPSIS
 
-   void solib_create_inferior_hook()
+   void solib_create_inferior_hook ()
 
    DESCRIPTION
 

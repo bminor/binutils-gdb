@@ -56,9 +56,9 @@ static struct gdbarch_data *fetch_link_map_offsets_gdbarch_data;
 
 /* legacy_svr4_fetch_link_map_offsets_hook is a pointer to a function
    which is used to fetch link map offsets.  It will only be set
-   by solib-legacy.c, if at all. */
+   by solib-legacy.c, if at all.  */
 
-struct link_map_offsets *(*legacy_svr4_fetch_link_map_offsets_hook)(void) = 0;
+struct link_map_offsets *(*legacy_svr4_fetch_link_map_offsets_hook) (void) = 0;
 
 /* Link map info to include in an allocated so_list entry */
 
@@ -1155,7 +1155,7 @@ svr4_relocate_main_executable (void)
 
    SYNOPSIS
 
-   void svr4_solib_create_inferior_hook()
+   void svr4_solib_create_inferior_hook ()
 
    DESCRIPTION
 

@@ -695,7 +695,7 @@ sunos_special_symbol_handling (void)
 
    SYNOPSIS
 
-   void sunos_solib_create_inferior_hook()
+   void sunos_solib_create_inferior_hook ()
 
    DESCRIPTION
 

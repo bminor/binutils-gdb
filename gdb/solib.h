@@ -42,12 +42,12 @@ extern void clear_solib (void);
 extern void solib_add (char *, int, struct target_ops *, int);
 extern int solib_read_symbols (struct so_list *, int);
 
-/* Function to be called when the inferior starts up, to discover the names
-   of shared libraries that are dynamically linked, the base addresses to
-   which they are linked, and sufficient information to read in their symbols
-   at a later time. */
+/* Function to be called when the inferior starts up, to discover the
+   names of shared libraries that are dynamically linked, the base
+   addresses to which they are linked, and sufficient information to
+   read in their symbols at a later time.  */
 
-#define SOLIB_CREATE_INFERIOR_HOOK(PID)	solib_create_inferior_hook()
+#define SOLIB_CREATE_INFERIOR_HOOK(PID)	solib_create_inferior_hook ()
 
 /* Function to be called to remove the connection between debugger and
    dynamic linker that was established by SOLIB_CREATE_INFERIOR_HOOK.

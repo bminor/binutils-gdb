@@ -801,7 +801,7 @@ do_clear_solib (void *dummy)
 
    SYNOPSIS
 
-   void solib_create_inferior_hook()
+   void solib_create_inferior_hook ()
 
    DESCRIPTION
 

@@ -20,6 +20,14 @@
 
 2005-01-13  Michael Snyder  <msnyder@redhat.com>
 
+	* solib-aix.c: Whitespace tweaks.
+	* solib.c: Whitespace tweaks.
+	* solib-frv.c: Whitespace tweaks.
+	* solib.h: Whitespace tweaks.
+	* solib-irix.c: Whitespace tweaks.
+	* solib-som.c: Whitespace tweaks.
+	* solib-sunos.c: Whitespace tweaks.
+	* solib-svr4.[ch]: Whitespace tweaks.
 	* ser-tcp.c: Whitespace tweaks.
 	* ser-unix.c: Whitespace tweaks.
 	* serial.h: Whitespace tweaks.

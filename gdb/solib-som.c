@@ -322,8 +322,8 @@ keep_going:
    shared library events.  To resume notifications, GDB must call
    som_solib_create_inferior_hook.
 
-   This operation does not remove any knowledge of shared libraries which
-   GDB may already have been notified of.
+   This operation does not remove any knowledge of shared libraries
+   of which GDB may already have been notified.
  */
 static void
 som_solib_remove_inferior_hook (int pid)

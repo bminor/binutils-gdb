@@ -917,7 +917,7 @@ frv_relocate_main_executable (void)
 
    SYNOPSIS
 
-   void frv_solib_create_inferior_hook()
+   void frv_solib_create_inferior_hook ()
 
    DESCRIPTION
 
