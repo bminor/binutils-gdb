@@ -125,6 +125,8 @@ tc-i860.c
 tc-i860.h
 tc-i960.c
 tc-i960.h
+tc-m32r.c
+tc-m32r.h
 tc-m68851.h
 tc-m68k.c
 tc-m68k.h
