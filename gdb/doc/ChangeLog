@@ -1,3 +1,7 @@
+Thu May 27 06:20:42 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* gdb.texinfo:  Add `set print symbol-filename' doc.
+
 Wed May 26 00:26:42 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* stabs.texinfo (Arrays): Talk about type definition vs. type

@@ -4259,6 +4259,19 @@ symbolic form of an address, if any symbol precedes it.
 Ask how large the maximum offset is that @value{GDBN} will print in a
 symbolic address.
 
+@item set print symbol-filename on
+@kindex set print symbol-filename
+Tell @value{GDBN} to print the source filename and linenumber of a symbol
+in the symbolic form of an address.
+
+@item set print symbol-filename off
+Do not print source filename and linenumber of a symbol.  This is the default.
+
+@item show print symbol-filename
+@kindex show print symbol-filename
+Show whether or not @value{GDBN} will print the source filename and linenumber
+of a symbol in the symbolic form of an address.
+
 @end table
 
 @ifclear CONLY
