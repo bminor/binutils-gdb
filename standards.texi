@@ -1323,7 +1323,7 @@ name on MS-DOG consists of up to 8 characters, optionally followed by a
 period and up to three characters.  MS-DOG will truncate extra
 characters both before and after the period.  Thus,
 @file{foobarhacker.c} and @file{foobarhacker.o} are not ambiguous; they
-are truncated to @file{foobarhac.c} and @file{foobarhac.o}, which are
+are truncated to @file{foobarha.c} and @file{foobarha.o}, which are
 distinct.
 
 Include in your distribution a copy of the @file{texinfo.tex} you used
