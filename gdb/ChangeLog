@@ -1,3 +1,7 @@
+Mon Aug  2 12:06:00 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* Makefile.in (ALLDEPFILES): Add i386lynx-nat.c.
+
 Mon Aug  2 08:42:50 1993  Stu Grossman  (grossman at cygnus.com)
 
 	* gdbserver/remote-inflow.c (create_inferior):  Fix comments, and
