@@ -644,12 +644,9 @@ Tue Feb 17 12:46:05 1998  Doug Evans  <devans@seba.cygnus.com>
 	(arch): Define.
 	(RUNTEST_FOR_TARGET): Delete.
 	(RUNTEST): Fix.
-	(SCHEME,SCHEMEFLAGS,CGENDIR,CGENFLAGS): Define.
 	(check): Depend on site.exp.  Run dejagnu.
 	(site.exp): New target.
-	(cgen): New target.
-	* configure.in: Call AC_CHECK_PROG(SCHEME) if using cgen.
-	(arch): Define from target_cpu.
+	* configure.in (arch): Define from target_cpu.
 	* configure: Regenerate.
 
 Wed Sep 17 10:21:26 1997  Andrew Cagney  <cagney@b1.cygnus.com>
