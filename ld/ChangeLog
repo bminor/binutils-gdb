@@ -1,3 +1,8 @@
+Wed Jul  7 11:33:12 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* Makefile.in (install): Don't install as $(tooldir)/bin/gld;
+	collect2 doesn't look for gld any more anyhow.
+
 Mon Jul  5 14:29:48 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* ldlang.c (lang_relocate_globals): Skip indirect symbols, which

@@ -530,9 +530,7 @@ install:
 	-n=`t='$(program_transform_name)'; echo ld | sed -e "" $$t`; \
 	  rm -f $(tooldir)/bin/ld; \
 	  ln $(bindir)/$$n $(tooldir)/bin/ld \
-	   || $(INSTALL_PROGRAM) ld.new $(tooldir)/bin/ld; \
-	  rm -f $(tooldir)/bin/gld; \
-	  ln $(tooldir)/bin/ld $(tooldir)/bin/gld; \
+	   || $(INSTALL_PROGRAM) ld.new $(tooldir)/bin/ld
 
 install-info: 
 	for i in ld.info* ; do \
