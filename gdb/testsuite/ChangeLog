@@ -1,3 +1,9 @@
+2004-02-19  Fred Fish  <fnf@redhat.com>
+
+	New testcase for PR breakpoint/1558.
+	* gdb.arch/gdb1558.exp: New file.
+	* gdb.arch/gdb1558.c: New file.
+
 2004-02-19  Elena Zannoni  <ezannoni@redhat.com>
 
 	* gdb.base/nodebug.exp: Fix typo.
