@@ -496,12 +496,40 @@ if {![target_info exists gdb,skip_float_tests]} {
     # GDB bug, probably for all Sparc configs, but obscure. -sts 1999-08-17.
     setup_xfail "sparc*-*-solaris*"
     send_gdb "print print_small_structs(struct1, struct2, struct3, struct4, flags, flags_combo, three_char, five_char, int_char_combo, d1, d2, d3, f1, f2, f3)\n"
-    gdb_expect {
-	-re ".*alpha${ws}gamma${ws}epsilon${ws}alpha${ws}gamma${ws}epsilon${ws}ch1: y.*ch2: n${ws}Contents of three_char_t:${ws}a.*b.*c${ws}Contents of five_char_t:${ws}l.*m.*n.*o.*p${ws}Contents of int_char_combo_t:${ws}123.*z${ws}Sum of the 4 struct values and seed :${ws}52${ws}Contents of struct1:${ws}6.*0${ws}Contents of struct2:${ws}10.*0${ws}Contents of struct3:${ws}12.*0${ws}Contents of one_double_t:${ws}10.500000${ws}Contents of one_double_t:${ws}-3.375000${ws}Contents of one_double_t:${ws}675.093750${ws}Contents of two_floats_t:${ws}45.234001.*43.599998${ws}Contents of two_floats_t:${ws}78.010002.*122.099998${ws}Contents of two_floats_t:${ws}-1232.344971.*-199.210007${ws}.*$gdb_prompt $" {
-	    pass "print print_small_structs from print_long_arg_list"
-	}
-	-re ".*$gdb_prompt $" { fail "print print_small_structs from print_long_arg_list" }
-	timeout { fail "(timeout) print_small_structs from print_long_arg_list" }
+    gdb_expect_list "print print_small_structs from print_long_arg_list" ".*$gdb_prompt $" {
+	"\[\t\r\n \]+alpha"
+	"\[\t\r\n \]+gamma"
+	"\[\t\r\n \]+epsilon"
+	"\[\t\r\n \]+alpha"
+	"\[\t\r\n \]+gamma"
+	"\[\t\r\n \]+epsilon"
+	"\[\t\r\n \]+ch1: y[ \t]*ch2: n"
+	"\[\t\r\n \]+Contents of three_char_t:"
+	"\[\t\r\n \]+a\[ \t\]*b\[ \t\]*c"
+	"\[\t\r\n \]+Contents of five_char_t:"
+	"\[\t\r\n \]+l\[ \t\]*m\[ \t\]*n\[ \t\]*o\[ \t\]*p"
+	"\[\t\r\n \]+Contents of int_char_combo_t:"
+	"\[\t\r\n \]+123\[ \t\]*z"
+	"\[\t\r\n \]+Sum of the 4 struct values and seed :"
+	"\[\t\r\n \]+52"
+	"\[\t\r\n \]+Contents of struct1:"
+	"\[\t\r\n \]+6\[ \t\]*0"
+	"\[\t\r\n \]+Contents of struct2:"
+	"\[\t\r\n \]+10\[ \t\]*0"
+	"\[\t\r\n \]+Contents of struct3:"
+	"\[\t\r\n \]+12\[ \t\]*0"
+	"\[\t\r\n \]+Contents of one_double_t:"
+	"\[\t\r\n \]+10.500000"
+	"\[\t\r\n \]+Contents of one_double_t:"
+	"\[\t\r\n \]+-3.375000"
+	"\[\t\r\n \]+Contents of one_double_t:"
+	"\[\t\r\n \]+675.093750"
+	"\[\t\r\n \]+Contents of two_floats_t:"
+	"\[\t\r\n \]+45.234001\[ \t\]*43.599998"
+	"\[\t\r\n \]+Contents of two_floats_t:"
+	"\[\t\r\n \]+78.010002\[ \t\]*122.099998"
+	"\[\t\r\n \]+Contents of two_floats_t:"
+	"\[\t\r\n \]+-1232.344971\[ \t\]*-199.210007"
     }
 }
 

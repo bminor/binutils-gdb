@@ -1,3 +1,7 @@
+Fri Jun 23 17:45:52 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdb.base/call-ar-st.exp: More rewrites of multi-line patterns.
+
 2000-06-18  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
 	* gdb.base/maint.exp: Add 'maint print architecture' item to output
