@@ -606,9 +606,6 @@ TAGS:	${TAGFILES}
 	etags `find ${srcdir}/config -name $(TM_FILE) -print` \
 	  `find ${srcdir}/config -name ${XM_FILE} -print` \
 	  `find ${srcdir}/config -name ${NAT_FILE} -print` \
-	  `for i in ${DEPFILES}; do \
-	     echo ${srcdir}/$$i | sed -e 's/\.o$$/\.c/' ;\
-	   done` \
 	  ${TAGFILES}
 tags: TAGS
 
@@ -680,6 +677,20 @@ make-proto-gdb-1: ${TARFILES} ${TARDIRS} gdb.info
 	    ln -s $${rootme}/$$i $$i;); \
 	  done
 	chmod og=u `find . -print`
+
+# Build a proto-testsuite.dir.
+make-proto-testsuite.dir: force_update
+	rm -rf proto-testsuite.dir
+	mkdir proto-testsuite.dir
+	rootme=`pwd`/ ; export rootme ; \
+	  for i in `find testsuite -type f -print`; do \
+	    (cd proto-testsuite.dir ; \
+	    dir=`dirname $$i`; \
+	    if test -d $$dir; then true; else mkdir -p $$dir; fi; \
+	    ln -s $${rootme}/$$i $$i;); \
+	  done
+	find proto-testsuite.dir -name Makefile -exec rm {} \;
+	find proto-testsuite.dir -name config.status -exec rm {} \;
 
 clean:
 	@$(MAKE) $(FLAGS_TO_PASS) DO=clean "DODIRS=$(SUBDIRS)" subdir_do 
@@ -886,7 +897,7 @@ unexport CHILLFLAGS CHILL_LIB CHILL_FOR_TARGET :
 
 # This is the end of "Makefile.in".  When built into "Makefile"
 # by the configure script, two things are added below this point:
-# 	alldeps.mak -- defintions of all files that are used in
+# 	alldeps.mak -- definitions of all files that are used in
 #			host- or target-dependent configurations
 #	depend -- what .o files depend on what .c and .h files,
 #			for all configurations.
