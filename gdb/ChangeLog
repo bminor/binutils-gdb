@@ -1,3 +1,8 @@
+Wed Jun 23 00:25:58 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* partial-stab.h: Consolidate case statements for N_LSYM and N_FUN.
+	* dbxread.c: Change comment regarding acc.
+
 Wed Jun 23 15:04:54 1993  K. Richard Pixley  (rich@sendai.cygnus.com)
 
 	Makefile overhaul dropping autodepend features.
@@ -58,7 +63,8 @@ Wed Jun 23 15:04:54 1993  K. Richard Pixley  (rich@sendai.cygnus.com)
 
 Wed Jun 23 00:25:58 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
-	* config/ns32k/{merlin.mh,xm-merlin.h}: Be consistent about name.
+	* config/ns32k/{merlin.mh,xm-merlin.h}: Be consistent about name
+	of gdb-sh.
 
 	* dbxread.c (copy_pending): Change name and function of begi argument
 	to endi, since that is what the caller needs.
