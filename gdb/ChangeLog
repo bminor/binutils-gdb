@@ -1,3 +1,9 @@
+2004-05-11  Andrew Cagney  <cagney@redhat.com>
+
+	* infrun.c (step_over_function): Delete function.
+	(handle_step_into_function): Use insert_step_resume_breakpoint.
+	(insert_step_resume_breakpoint): Fix assertion.
+
 2004-05-11  Nick Roberts  <nickrob@gnu.org>
 
 	* utils.c (defaulted_query): Just use the normal query input type

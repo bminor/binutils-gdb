@@ -968,7 +968,6 @@ static void handle_step_into_function (struct execution_control_state *ecs);
 void handle_inferior_event (struct execution_control_state *ecs);
 
 static void step_into_function (struct execution_control_state *ecs);
-static void step_over_function (struct execution_control_state *ecs);
 static void insert_step_resume_breakpoint (struct frame_info *step_frame,
 					   struct execution_control_state *ecs);
 static void stop_stepping (struct execution_control_state *ecs);
@@ -1204,8 +1203,10 @@ handle_step_into_function (struct execution_control_state *ecs)
 
   if (step_over_calls == STEP_OVER_ALL || IGNORE_HELPER_CALL (stop_pc))
     {
-      /* We're doing a "next".  */
-      step_over_function (ecs);
+      /* We're doing a "next", set a breakpoint at callee's return
+	 address (the address at which the caller will resume).  */
+      insert_step_resume_breakpoint (get_prev_frame (get_current_frame ()),
+				     ecs);
       keep_going (ecs);
       return;
     }
@@ -1249,7 +1250,9 @@ handle_step_into_function (struct execution_control_state *ecs)
       return;
     }
 
-  step_over_function (ecs);
+  /* Set a breakpoint at callee's return address (the address at which
+     the caller will resume).  */
+  insert_step_resume_breakpoint (get_prev_frame (get_current_frame ()), ecs);
   keep_going (ecs);
   return;
 }
@@ -2662,8 +2665,12 @@ insert_step_resume_breakpoint (struct frame_info *step_frame,
   /* This is only used within the step-resume range/frame.  */
   gdb_assert (frame_id_eq (step_frame_id, get_frame_id (step_frame)));
   gdb_assert (step_range_end != 0);
-  gdb_assert (get_frame_pc (step_frame) >= step_range_start
-	      && get_frame_pc (step_frame) < step_range_end);
+  /* Remember, if the call instruction is the last in the step range,
+     the breakpoint will land just beyond that.  Hence ``<=
+     step_range_end''.  Also, ignore check when "nexti".  */
+  gdb_assert (step_range_start == step_range_end
+	      || (get_frame_pc (step_frame) >= step_range_start
+		  && get_frame_pc (step_frame) <= step_range_end));
 
   init_sal (&sr_sal);		/* initialize to zeros */
 
@@ -2675,83 +2682,6 @@ insert_step_resume_breakpoint (struct frame_info *step_frame,
   step_resume_breakpoint
     = set_momentary_breakpoint (sr_sal, get_frame_id (step_frame),
 				bp_step_resume);
-
-  if (breakpoints_inserted)
-    insert_breakpoints ();
-}
-
-/* We've just entered a callee, and we wish to resume until it returns
-   to the caller.  Setting a step_resume breakpoint on the return
-   address will catch a return from the callee.
-     
-   However, if the callee is recursing, we want to be careful not to
-   catch returns of those recursive calls, but only of THIS instance
-   of the caller.
-
-   To do this, we set the step_resume bp's frame to our current
-   caller's frame (obtained by doing a frame ID unwind).  */
-
-static void
-step_over_function (struct execution_control_state *ecs)
-{
-  struct symtab_and_line sr_sal;
-  struct frame_id sr_id;
-
-  init_sal (&sr_sal);		/* initialize to zeros */
-
-  /* NOTE: cagney/2003-04-06:
-
-     At this point the equality get_frame_pc() == get_frame_func()
-     should hold.  This may make it possible for this code to tell the
-     frame where it's function is, instead of the reverse.  This would
-     avoid the need to search for the frame's function, which can get
-     very messy when there is no debug info available (look at the
-     heuristic find pc start code found in targets like the MIPS).  */
-
-  /* NOTE: cagney/2003-04-06:
-
-     The intent of DEPRECATED_SAVED_PC_AFTER_CALL was to:
-
-     - provide a very light weight equivalent to frame_unwind_pc()
-     (nee FRAME_SAVED_PC) that avoids the prologue analyzer
-
-     - avoid handling the case where the PC hasn't been saved in the
-     prologue analyzer
-
-     Unfortunately, not five lines further down, is a call to
-     get_frame_id() and that is guarenteed to trigger the prologue
-     analyzer.
-     
-     The `correct fix' is for the prologe analyzer to handle the case
-     where the prologue is incomplete (PC in prologue) and,
-     consequently, the return pc has not yet been saved.  It should be
-     noted that the prologue analyzer needs to handle this case
-     anyway: frameless leaf functions that don't save the return PC;
-     single stepping through a prologue.
-
-     The d10v handles all this by bailing out of the prologue analsis
-     when it reaches the current instruction.  */
-
-  if (DEPRECATED_SAVED_PC_AFTER_CALL_P ())
-    sr_sal.pc = ADDR_BITS_REMOVE (DEPRECATED_SAVED_PC_AFTER_CALL (get_current_frame ()));
-  else
-    sr_sal.pc = ADDR_BITS_REMOVE (frame_pc_unwind (get_current_frame ()));
-  sr_sal.section = find_pc_overlay (sr_sal.pc);
-
-  check_for_old_step_resume_breakpoint ();
-
-  /* NOTE: cagney/2004-03-31: Code using the current value of
-     "step_frame_id", instead of unwinding that frame ID, removed.  On
-     s390 GNU/Linux, after taking a signal, the program is directly
-     resumed at the signal handler and, consequently, the PC would
-     point at at the first instruction of that signal handler but
-     STEP_FRAME_ID would [incorrectly] at the interrupted code when it
-     should point at the signal trampoline.  By always and locally
-     doing a frame ID unwind, it's possible to assert that the code is
-     always using the correct ID.  */
-  sr_id = frame_unwind_id (get_current_frame ());
-
-  step_resume_breakpoint = set_momentary_breakpoint (sr_sal, sr_id, bp_step_resume);
 
   if (breakpoints_inserted)
     insert_breakpoints ();
