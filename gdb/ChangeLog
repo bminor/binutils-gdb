@@ -1,5 +1,8 @@
 Fri Mar  5 17:16:26 1993  K. Richard Pixley  (rich@rtl.cygnus.com)
 
+	* tm-irix3.h (ZERO_REGNUM): copy this macro from tm-mips.h so that
+	  irix4 will again compile.
+
 	* tm-mips.h (GDB_TARGET_IS_MIPS): no longer used, now removed.
 
 	* configure.in: accept mips-sgi-irix4* for irix4.

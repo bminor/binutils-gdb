@@ -105,6 +105,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    to be actual register numbers as far as the user is concerned
    but do serve to get the desired values when passed to read_register.  */
 
+#define ZERO_REGNUM 0		/* read-only register, always 0 */
 #define A0_REGNUM 4		/* Loc of first arg during a subr call */
 #define SP_REGNUM 29		/* Contains address of top of stack */
 #define FP_REGNUM 30		/* Pseudo register that contains true address of executing stack frame */
