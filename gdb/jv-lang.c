@@ -53,10 +53,10 @@ static int java_demangled_signature_length (char *);
 static void java_demangled_signature_copy (char *, char *);
 
 static struct symtab *get_java_class_symtab (void);
-static char *get_java_utf8_name (struct obstack *obstack, value_ptr name);
-static int java_class_is_primitive (value_ptr clas);
+static char *get_java_utf8_name (struct obstack *obstack, struct value *name);
+static int java_class_is_primitive (struct value *clas);
 static struct type *java_lookup_type (char *signature);
-static value_ptr java_value_string (char *ptr, int len);
+static struct value *java_value_string (char *ptr, int len);
 
 static void java_emit_char (int c, struct ui_file * stream, int quoter);
 
@@ -66,7 +66,7 @@ static void java_emit_char (int c, struct ui_file * stream, int quoter);
 
 static struct objfile *dynamics_objfile = NULL;
 
-static struct type *java_link_class_type (struct type *, value_ptr);
+static struct type *java_link_class_type (struct type *, struct value *);
 
 static struct objfile *
 get_dynamics_objfile (void)
@@ -206,10 +206,10 @@ java_lookup_class (char *name)
    a name given by NAME (which has type Utf8Const*). */
 
 char *
-get_java_utf8_name (struct obstack *obstack, value_ptr name)
+get_java_utf8_name (struct obstack *obstack, struct value *name)
 {
   char *chrs;
-  value_ptr temp = name;
+  struct value *temp = name;
   int name_length;
   CORE_ADDR data_addr;
   temp = value_struct_elt (&temp, NULL, "length", NULL, "structure");
@@ -222,12 +222,12 @@ get_java_utf8_name (struct obstack *obstack, value_ptr name)
   return chrs;
 }
 
-value_ptr
-java_class_from_object (value_ptr obj_val)
+struct value *
+java_class_from_object (struct value *obj_val)
 {
   /* This is all rather inefficient, since the offsets of vtable and
      class are fixed.  FIXME */
-  value_ptr vtable_val;
+  struct value *vtable_val;
 
   if (TYPE_CODE (VALUE_TYPE (obj_val)) == TYPE_CODE_PTR
       && TYPE_LENGTH (TYPE_TARGET_TYPE (VALUE_TYPE (obj_val))) == 0)
@@ -240,9 +240,9 @@ java_class_from_object (value_ptr obj_val)
 
 /* Check if CLASS_IS_PRIMITIVE(value of clas): */
 static int
-java_class_is_primitive (value_ptr clas)
+java_class_is_primitive (struct value *clas)
 {
-  value_ptr vtable = value_struct_elt (&clas, NULL, "vtable", NULL, "struct");
+  struct value *vtable = value_struct_elt (&clas, NULL, "vtable", NULL, "struct");
   CORE_ADDR i = value_as_address (vtable);
   return (int) (i & 0x7fffffff) == (int) 0x7fffffff;
 }
@@ -250,13 +250,13 @@ java_class_is_primitive (value_ptr clas)
 /* Read a GCJ Class object, and generated a gdb (TYPE_CODE_STRUCT) type. */
 
 struct type *
-type_from_class (value_ptr clas)
+type_from_class (struct value *clas)
 {
   struct type *type;
   char *name;
-  value_ptr temp;
+  struct value *temp;
   struct objfile *objfile;
-  value_ptr utf8_name;
+  struct value *utf8_name;
   char *nptr;
   CORE_ADDR addr;
   struct block *bl;
@@ -286,7 +286,7 @@ type_from_class (value_ptr clas)
   objfile = get_dynamics_objfile ();
   if (java_class_is_primitive (clas))
     {
-      value_ptr sig;
+      struct value *sig;
       temp = clas;
       sig = value_struct_elt (&temp, NULL, "method_count", NULL, "structure");
       return java_primitive_type (value_as_long (sig));
@@ -337,16 +337,17 @@ type_from_class (value_ptr clas)
 /* Fill in class TYPE with data from the CLAS value. */
 
 struct type *
-java_link_class_type (struct type *type, value_ptr clas)
+java_link_class_type (struct type *type, struct value *clas)
 {
-  value_ptr temp;
+  struct value *temp;
   char *unqualified_name;
   char *name = TYPE_TAG_NAME (type);
   int ninterfaces, nfields, nmethods;
   int type_is_object = 0;
   struct fn_field *fn_fields;
   struct fn_fieldlist *fn_fieldlists;
-  value_ptr fields, methods;
+  struct value *fields;
+  struct value *methods;
   struct value *method = NULL;
   struct value *field = NULL;
   int i, j;
@@ -802,7 +803,7 @@ java_array_type (struct type *type, int dims)
 
 /* Create a Java string in the inferior from a (Utf8) literal. */
 
-static value_ptr
+static struct value *
 java_value_string (char *ptr, int len)
 {
   error ("not implemented - java_value_string");	/* FIXME */
@@ -845,7 +846,7 @@ java_emit_char (int c, struct ui_file *stream, int quoter)
     }
 }
 
-static value_ptr
+static struct value *
 evaluate_subexp_java (struct type *expect_type, register struct expression *exp,
 		      register int *pos, enum noside noside)
 {
@@ -853,7 +854,8 @@ evaluate_subexp_java (struct type *expect_type, register struct expression *exp,
   int i;
   char *name;
   enum exp_opcode op = exp->elts[*pos].opcode;
-  value_ptr arg1, arg2;
+  struct value *arg1;
+  struct value *arg2;
   struct type *type;
   switch (op)
     {
@@ -899,8 +901,8 @@ evaluate_subexp_java (struct type *expect_type, register struct expression *exp,
 	  struct type *el_type;
 	  char buf4[4];
 
-	  value_ptr clas = java_class_from_object (arg1);
-	  value_ptr temp = clas;
+	  struct value *clas = java_class_from_object (arg1);
+	  struct value *temp = clas;
 	  /* Get CLASS_ELEMENT_TYPE of the array type. */
 	  temp = value_struct_elt (&temp, NULL, "methods",
 				   NULL, "structure");

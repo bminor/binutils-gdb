@@ -18,6 +18,11 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
+#ifndef JV_LANG_H
+#define JV_LANG_H
+
+struct value;
+
 extern int java_parse (void);	/* Defined in jv-exp.y */
 
 extern void java_error (char *);	/* Defined in jv-exp.y */
@@ -42,7 +47,7 @@ extern int java_val_print (struct type *, char *, int, CORE_ADDR,
 extern int java_value_print (struct value *, struct ui_file *, int,
 			     enum val_prettyprint);
 
-extern value_ptr java_class_from_object (value_ptr);
+extern struct value *java_class_from_object (struct value *);
 
 extern struct type *type_from_class (struct value *);
 
@@ -64,3 +69,5 @@ extern void java_print_type (struct type *, char *, struct ui_file *, int,
 			     int);
 
 extern char *java_demangle_type_signature (char *);
+
+#endif

@@ -41,7 +41,7 @@ static void java_print_value_fields (struct type * type, char *valaddr,
 
 
 int
-java_value_print (value_ptr val, struct ui_file *stream, int format,
+java_value_print (struct value *val, struct ui_file *stream, int format,
 		  enum val_prettyprint pretty)
 {
   struct type *type;
@@ -137,8 +137,8 @@ java_value_print (value_ptr val, struct ui_file *stream, int format,
 	}
       else
 	{
-	  value_ptr v = allocate_value (el_type);
-	  value_ptr next_v = allocate_value (el_type);
+	  struct value *v = allocate_value (el_type);
+	  struct value *next_v = allocate_value (el_type);
 
 	  VALUE_ADDRESS (v) = address + JAVA_OBJECT_SIZE + 4;
 	  VALUE_ADDRESS (next_v) = VALUE_ADDRESS (v);
@@ -150,7 +150,7 @@ java_value_print (value_ptr val, struct ui_file *stream, int format,
 
 	      if (i > 0)
 		{
-		  value_ptr tmp;
+		  struct value *tmp;
 
 		  tmp = next_v;
 		  next_v = v;
@@ -204,13 +204,13 @@ java_value_print (value_ptr val, struct ui_file *stream, int format,
       && address != 0
       && value_as_address (val) != 0)
     {
-      value_ptr data_val;
+      struct value *data_val;
       CORE_ADDR data;
-      value_ptr boffset_val;
+      struct value *boffset_val;
       unsigned long boffset;
-      value_ptr count_val;
+      struct value *count_val;
       unsigned long count;
-      value_ptr mark;
+      struct value *mark;
 
       mark = value_mark ();	/* Remember start of new values */
 
@@ -370,7 +370,7 @@ java_print_value_fields (struct type *type, char *valaddr, CORE_ADDR address,
 
 	  if (!TYPE_FIELD_STATIC (type, i) && TYPE_FIELD_PACKED (type, i))
 	    {
-	      value_ptr v;
+	      struct value *v;
 
 	      /* Bitfields require special handling, especially due to byte
 	         order problems.  */
@@ -395,7 +395,7 @@ java_print_value_fields (struct type *type, char *valaddr, CORE_ADDR address,
 		}
 	      else if (TYPE_FIELD_STATIC (type, i))
 		{
-		  value_ptr v = value_static_field (type, i);
+		  struct value *v = value_static_field (type, i);
 		  if (v == NULL)
 		    fputs_filtered ("<optimized out>", stream);
 		  else
