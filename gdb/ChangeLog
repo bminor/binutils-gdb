@@ -1,3 +1,12 @@
+2004-02-21  Mark Kettenis  <kettenis@gnu.org>
+
+	* solib-svr4.h: Update copyright year.
+	(svr4_ilp32_fetch_link_map_offsets)
+	(svr4_lp64_fetch_link_map_offsets): New prototype.
+	* solib-svr4.c: Update copyright year.
+	(svr4_ilp32_fetch_link_map_offsets)
+	(svr4_lp64_fetch_link_map_offsets): New function.
+
 2004-02-20  Daniel Jacobowitz  <drow@mvista.com>
 
 	* dwarf2read.c (add_partial_symbol): Fix typo in adding enumerators
