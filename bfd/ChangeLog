@@ -1,5 +1,11 @@
 Fri Sep 20 11:43:43 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* aoutx.h (aout_link_input_section_ext): When doing a relocateable
+	link, adjust the symbol index of a base relative reloc.  Don't
+	change the addend of a PC relative reloc if pcrel_offset is set.
+	* sunos.c (bfd_sunos_size_dynamic_sections): Don't do anything for
+	a relocateable link.
+
 	* reloc.c (bfd_perform_relocation): Apply the relocation even if
 	it is zero, in case src_mask matters.
 	(bfd_install_relocation): Likewise.
