@@ -1,3 +1,9 @@
+Thu May 27 16:56:25 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* xcoffread.c (read_xcoff_symtab): If several program csects in one
+	source file, give them all the name of the source file, rather than
+	the 2nd and subsequent ones having NULL names.
+
 Thu May 27 06:16:56 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* printcmd.c (print_address_symbolic):  Append source filename and

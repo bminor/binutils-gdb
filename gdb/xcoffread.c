@@ -1163,14 +1163,16 @@ read_xcoff_symtab (objfile, nsyms)
 	    case XMC_PR :			/* a `.text' csect.	*/
 	      {
 
-		/* A program csect is seen.
-		 
-		   We have to allocate one symbol table for each program csect. Normally
-		   gdb prefers one symtab for each compilation unit (CU). In case of AIX, one
-		   CU might include more than one prog csect, and they don't have to be
-		   adjacent in terms of the space they occupy in memory. Thus, one single
-		   CU might get fragmented in the memory and gdb's file start and end address
-		   approach does not work!  */
+		/* A program csect is seen.  We have to allocate one
+		   symbol table for each program csect.  Normally gdb
+		   prefers one symtab for each source file.  In case
+		   of AIX, one source file might include more than one
+		   [PR] csect, and they don't have to be adjacent in
+		   terms of the space they occupy in memory. Thus, one
+		   single source file might get fragmented in the
+		   memory and gdb's file start and end address
+		   approach does not work!  GCC (and I think xlc) seem
+		   to put all the code in the unnamed program csect.  */
 
 		if (last_csect_name) {
 
@@ -1191,7 +1193,9 @@ read_xcoff_symtab (objfile, nsyms)
 			      textsec->target_index);
 		  end_stabs ();
 		  start_stabs ();
-		  start_symtab ((char *)NULL, (char *)NULL, (CORE_ADDR)0);
+		  /* Give all csects for this source file the same
+		     name.  */
+		  start_symtab (filestring, (char *)NULL, (CORE_ADDR)0);
 		}
 
 		/* If this is the very first csect seen, basically `__start'. */
