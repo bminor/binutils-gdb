@@ -1,3 +1,11 @@
+2000-07-10  Alan Modra  <alan@linuxcare.com.au>
+
+	* ld-srec/srec.exp: xfail hppa.
+
+	* ld-scripts/weak.exp: Define $global$ for hppa.
+
+	* ld-scripts/crossref.exp: Fix string quoting.
+
 2000-06-05  H.J. Lu  (hjl@gnu.org)
 
 	* lib/ld-lib.exp (default_ld_link): Redirect the linker output

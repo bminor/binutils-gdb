@@ -344,6 +344,9 @@ setup_xfail "v850*-*-elf"
 setup_xfail "alpha*-*-elf*" "alpha*-*-linux-gnu*" "alpha*-*-gnu*"
 setup_xfail "alpha*-*-netbsd*"
 
+# The S-record linker hasn't any hope of coping with HPPA relocs.
+setup_xfail "hppa*-*-*"
+
 # The S-record linker doesn't support the special PE headers - the PE
 # emulation tries to write pe-specific information to the PE headers
 # in the output bfd, but it's not a PE bfd (it's an srec bfd)
@@ -376,6 +379,7 @@ setup_xfail "powerpc*-*-eabi*"
 setup_xfail "v850*-*-elf"
 setup_xfail "alpha*-*-elf*" "alpha*-*-linux-gnu*" "alpha*-*-gnu*"
 setup_xfail "alpha*-*-netbsd*"
+setup_xfail "hppa*-*-*"
 setup_xfail "*-*-cygwin*" "*-*-mingw*" "*-*-pe*" "*-*-winnt*"
 
 run_srec_test $test2 "tmpdir/sr3.o"
