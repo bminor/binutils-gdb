@@ -1,3 +1,99 @@
+2003-08-06  Michael Meissner  <gnu@the-meissners.org>
+
+	* cgen-asm.c (hash_insn_array): Remove PARAMS macro.
+	(hash_insn_list): Ditto.
+	(build_asm_hash_table): Ditto.
+	(cgen_set_parse_operand_fn): Prototype definition.
+	(cgen_init_parse_operand): Ditto.
+	(hash_insn_array): Ditto.
+	(hash_insn_list): Ditto.
+	(build_asm_hash_table): Ditto.
+	(cgen_asm_lookup_insn): Ditto.
+	(cgen_parse_keyword): Ditto.
+	(cgen_parse_signed_integer): Ditto.
+	(cgen_parse_unsigned_integer): Ditto.
+	(cgen_parse_address): Ditto.
+	(cgen_validate_signed_integer): Ditto.
+	(cgen_validate_unsigned_integer): Ditto.
+
+	* cgen-opc.c (hash_keyword_name): Remove PARAMS macro.
+	(hash_keyword_value): Ditto.
+	(build_keyword_hash_tables): Ditto.
+	(cgen_keyword_lookup_name): Prototype definition.
+	(cgen_keyword_lookup_value): Ditto.
+	(cgen_keyword_add): Ditto.
+	(cgen_keyword_search_init): Ditto.
+	(cgen_keyword_search_next): Ditto.
+	(hash_keyword_name): Ditto.
+	(hash_keyword_value): Ditto.
+	(build_keyword_hash_tables): Ditto.
+	(cgen_hw_lookup_by_name): Ditto.
+	(cgen_hw_lookup_by_num): Ditto.
+	(cgen_operand_lookup_by_name): Ditto.
+	(cgen_operand_lookup_by_num): Ditto.
+	(cgen_insn_count): Ditto.
+	(cgen_macro_insn_count): Ditto.
+	(cgen_get_insn_value): Ditto.
+	(cgen_put_insn_value): Ditto.
+	(cgen_lookup_insn): Ditto.
+	(cgen_get_insn_operands): Ditto.
+	(cgen_lookup_get_insn_operands): Ditto.
+	(cgen_set_signed_overflow_ok): Ditto.
+	(cgen_clear_signed_overflow_ok): Ditto.
+	(cgen_signed_overflow_ok_p): Ditto.
+
+	* cgen-dis.c (hash_insn_array): Remove PARAMS macro.
+	(hash_insn_list): Ditto.
+	(build_dis_hash_table): Ditto.
+	(count_decodable_bits): Ditto.
+	(add_insn_to_hash_chain): Ditto.
+	(count_decodable_bits): Prototype definition.
+	(add_insn_to_hash_chain): Ditto.
+	(hash_insn_array): Ditto.
+	(hash_insn_list): Ditto.
+	(build_dis_hash_table): Ditto.
+	(cgen_dis_lookup_insn): Ditto.
+
+	* cgen-asm.in (parse_insn_normal): Remove PARAMS macro.
+	(@arch@_cgen_build_insn_regex): Prototype definition.
+	(parse_insn_normal): Ditto.
+	(@arch@_cgen_assemble_insn): Ditto.
+	(@arch@_cgen_asm_hash_keywords): Ditto.
+
+	* cgen-dis.in (print_normal): Remove PARAMS macro.  Use void *
+	instead of PTR.
+	(print_address): Ditto.
+	(print_keyword): Ditto.
+	(print_insn_normal): Ditto.
+	(print_insn): Ditto.
+	(default_print_insn): Ditto.
+	(read_insn): Ditto.
+	(print_normal): Prototype definition.  Use void * instead of PTR.
+	(print_address): Ditto.
+	(print_keyword): Ditto.
+	(print_insn_normal): Ditto.
+	(read_insn): Ditto.
+	(print_insn): Ditto.
+	(default_print_insn): Ditto.
+	(print_insn_@arch@): Ditto.
+
+	* cgen-ibld.in (insert_normal): Remove PARAMS macro.
+	(insn_insn_normal): Ditto.
+	(extract_normal): Ditto.
+	(extract_insn_normal): Ditto.
+	(put_insn_int_value): Ditto.
+	(insert_1): Ditto.
+	(fill_cache): Ditto.
+	(extract_1): Ditto.
+	(insert_1): Prototype definition.
+	(insert_normal): Ditto.
+	(insert_insn_normal): Ditto.
+	(put_insn_int_value): Ditto.
+	(fill_cache): Ditto.
+	(extract_1): Ditto.
+	(extract_normal): Ditto.
+	(extract_insn_normal): Ditto.
+
 2003-08-06  Nick Clifton  <nickc@redhat.com>
 
 	* po/fr.po: Updated French translation.
