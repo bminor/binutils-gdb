@@ -1,3 +1,15 @@
+2002-10-03  Chris Demetriou  <cgd@broadcom.com>
+
+	* ld-mips-elf/branch-misc-1.d: Link at 0x500000 and use -N, to be
+	more compatible with non-embedded targets.
+	* ld-mips-elf/branch-misc-2.d: Likewise.
+
+	* ld-mips-elf/mips-elf.exp: Clean up some comments about embedded
+	PIC tests.
+	(elf): New variable, to control whether generic ELF tests are run.
+	(embedded_elf): New variable, to control whether ELF tests
+	requiring embedded PIC or embedded relocs are run.
+
 2002-10-02  Stephen Clarke <stephen.clarke@superh.com>
 
 	* ld-sh/sh64/gotplt.d, ld-sh/sh64/gotplt.map,

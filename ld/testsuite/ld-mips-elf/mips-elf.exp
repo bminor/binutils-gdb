@@ -18,9 +18,22 @@
 
 if { [istarget mips*-*-*] } then {
 
-    # Run embedded-pic tests only if generic ELF.
-    if { [istarget mips*-*-elf] } {
-	# Check basic PC-relative HI/LO relocs.
+    set elf [expr [istarget mips*-*-elf] || [istarget mips*-*-linux*] || \
+		  [istarget mips*-*-netbsd]]
+    set embedded_elf [expr [istarget mips*-*-elf]]
+
+
+    if { $elf } {
+	# Check MIPS16 markings being passed through link.
+	run_dump_test "mips16-1"
+
+	# MIPS branch offset final link checking.
+	run_dump_test "branch-misc-1"
+	run_dump_test "branch-misc-2"
+    }
+
+    if { $embedded_elf } {
+	# Check basic Embedded-PIC PC-relative HI/LO relocs.
 	run_dump_test "empic1-ln"
 	run_dump_test "empic1-lp"
 	run_dump_test "empic1-mn"
@@ -28,7 +41,7 @@ if { [istarget mips*-*-*] } then {
 	run_dump_test "empic1-sn"
 	run_dump_test "empic1-sp"
 
-	# PC-relative HI/LO reloc edge-case regression tests.
+	# Embedded-PIC PC-relative HI/LO reloc edge-case regression tests.
 	# As of 2001-12-26, the linker botches the fwd-0 and rev-1 tests.
 	run_dump_test "empic2-fwd-0"
 	run_dump_test "empic2-fwd-1"
@@ -39,11 +52,6 @@ if { [istarget mips*-*-*] } then {
 	run_dump_test "emrelocs-eb"
 	run_dump_test "emrelocs-el"
 
-	run_dump_test "mips16-1"
-
 	run_dump_test "region1"
-
-	run_dump_test "branch-misc-1"
-	run_dump_test "branch-misc-2"
     }
 }
