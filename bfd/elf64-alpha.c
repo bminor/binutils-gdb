@@ -3628,6 +3628,15 @@ elf64_alpha_relocate_section (output_bfd, info, input_bfd, input_section,
 	  {
 	    const char *name;
 
+	    /* Don't warn if the overflow is due to pc relative reloc
+	       against discarded section.  Section optimization code should
+	       handle it.  */
+
+	    if (r_symndx < symtab_hdr->sh_info
+		&& sec != NULL && howto->pc_relative
+		&& elf_discarded_section (sec))
+	      break;
+
 	    if (h != NULL)
 	      name = h->root.root.root.string;
 	    else

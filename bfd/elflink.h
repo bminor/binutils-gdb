@@ -6551,11 +6551,7 @@ elf_link_input_bfd (finfo, input_bfd)
 			 discarded section.  */
 		      if ((h->root.type == bfd_link_hash_defined
 			   || h->root.type == bfd_link_hash_defweak)
-			  && ! bfd_is_abs_section (h->root.u.def.section)
-			  && bfd_is_abs_section (h->root.u.def.section
-						 ->output_section)
-			  && (elf_section_data (h->root.u.def.section)
-			      ->sec_info_type != ELF_INFO_TYPE_MERGE))
+			  && elf_discarded_section (h->root.u.def.section))
 			{
 #if BFD_VERSION_DATE < 20031005
 			  if ((o->flags & SEC_DEBUGGING) != 0)
@@ -6584,11 +6580,7 @@ elf_link_input_bfd (finfo, input_bfd)
 		    {
 		      asection *sec = finfo->sections[r_symndx];
 
-		      if (sec != NULL
-			  && ! bfd_is_abs_section (sec)
-			  && bfd_is_abs_section (sec->output_section)
-			  && (elf_section_data (sec)->sec_info_type
-			      != ELF_INFO_TYPE_MERGE))
+		      if (sec != NULL && elf_discarded_section (sec))
 			{
 #if BFD_VERSION_DATE < 20031005
 			  if ((o->flags & SEC_DEBUGGING) != 0
@@ -8085,9 +8077,7 @@ elf_reloc_symbol_deleted_p (offset, cookie)
 
 	  if ((h->root.type == bfd_link_hash_defined
 	       || h->root.type == bfd_link_hash_defweak)
-	      && ! bfd_is_abs_section (h->root.u.def.section)
-	      && bfd_is_abs_section (h->root.u.def.section
-				     ->output_section))
+	      && elf_discarded_section (h->root.u.def.section))
 	    return true;
 	  else
 	    return false;
@@ -8103,9 +8093,7 @@ elf_reloc_symbol_deleted_p (offset, cookie)
 	  if (isym.st_shndx < SHN_LORESERVE || isym.st_shndx > SHN_HIRESERVE)
 	    {
 	      isec = section_from_elf_index (rcookie->abfd, isym.st_shndx);
-	      if (isec != NULL
-		  && ! bfd_is_abs_section (isec)
-		  && bfd_is_abs_section (isec->output_section))
+	      if (isec != NULL && elf_discarded_section (isec))
 		return true;
 	    }
 	}

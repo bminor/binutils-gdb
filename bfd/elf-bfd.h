@@ -883,6 +883,12 @@ struct bfd_elf_section_data
 #define elf_group_name(sec)    (elf_section_data(sec)->group_name)
 #define elf_next_in_group(sec) (elf_section_data(sec)->next_in_group)
 
+/* Return true if section has been discarded.  */
+#define elf_discarded_section(sec)					\
+  (!bfd_is_abs_section(sec)						\
+   && bfd_is_abs_section((sec)->output_section)				\
+   && elf_section_data (sec)->sec_info_type != ELF_INFO_TYPE_MERGE)
+
 #define get_elf_backend_data(abfd) \
   ((struct elf_backend_data *) (abfd)->xvec->backend_data)
 
