@@ -863,12 +863,39 @@ $(CONFIGURE_TARGET_MODULES):
 	    RANLIB="$(RANLIB_FOR_TARGET)"; export RANLIB; \
 	    echo Configuring in $(TARGET_SUBDIR)/$${dir}; \
 	    cd $(TARGET_SUBDIR)/$${dir}; \
-	    if [ -f $${srcroot}/$${dir}/configure ] ; then \
-	      $${srcroot}/$${dir}/configure \
-		$(CONFIG_ARGUMENTS) --srcdir=$${srcroot}/$${dir}; \
+	    case $(srcdir) in \
+	    /*) \
+	      topdir=$(srcdir) ;; \
+	    *) \
+	      case "$(TARGET_SUBDIR)" in \
+	      .) topdir="../$(srcdir)" ;; \
+	      *) topdir="../../$(srcdir)" ;; \
+	      esac ;; \
+	    esac; \
+	    if [ "$(srcdir)" = "." ] ; then \
+	      if [ "$(TARGET_SUBDIR)" != "." ] ; then \
+		if $(SHELL) $${srcroot}/symlink-tree $${topdir}/$${dir} "Makefile" ; then \
+		  true; \
+		else \
+		  exit 1; \
+		fi; \
+	      else \
+		true; \
+	      fi; \
+	      srcdiroption="--srcdir=."; \
+	      libsrcdir="."; \
 	    else \
-	      $${srcroot}/configure \
-		$(CONFIG_ARGUMENTS) --srcdir=$${srcroot}/$${dir}; \
+	      srcdiroption="--srcdir=$${topdir}/$${dir}"; \
+	      libsrcdir="$${srcroot}/$${dir}"; \
+	    fi; \
+	    if [ -f $${libsrcdir}/configure ] ; then \
+	      $(SHELL) $${libsrcdir}/configure \
+		$(CONFIG_ARGUMENTS) $${srcdiroption} \
+		--with-target-subdir="$(TARGET_SUBDIR)"; \
+	    else \
+	      $(SHELL) $${srcroot}/configure \
+		$(CONFIG_ARGUMENTS) $${srcdiroption} \
+		--with-target-subdir="$(TARGET_SUBDIR)"; \
 	    fi; \
 	  else \
 	    true; \
@@ -1039,10 +1066,10 @@ all-hello: all-libiberty
 all-indent:
 all-ispell: all-emacs19
 all-ld: all-libiberty all-bfd all-byacc all-flex
-configure-target-libg++: $(ALL_GCC)
+configure-target-libg++: $(ALL_GCC) configure-target-librx
 all-target-libg++: configure-target-libg++ all-gas all-ld all-gcc all-target-libiberty all-target-newlib all-target-libio all-target-librx all-target-libstdc++
 configure-target-libgloss: $(ALL_GCC)
-all-target-libgloss: configure-target-libgloss
+all-target-libgloss: configure-target-libgloss configure-target-newlib
 configure-target-libio: $(ALL_GCC)
 all-target-libio: configure-target-libio all-gas all-ld all-gcc all-target-libiberty all-target-newlib
 all-libiberty:
@@ -1140,7 +1167,7 @@ Makefile: Makefile.in configure.in $(host_makefile_frag) $(target_makefile_frag)
 DEVO_SUPPORT= README Makefile.in configure configure.in \
 	config.guess config.sub config move-if-change \
 	mpw-README mpw-build.in mpw-config.in mpw-configure \
-	COPYING COPYING.LIB install.sh cfg-ml-com.in cfg-ml-pos.in
+	COPYING COPYING.LIB install.sh config-ml.in symlink-tree
 
 # Files in devo/etc used in any net release.
 # ChangeLog omitted because it may refer to files which are not in this

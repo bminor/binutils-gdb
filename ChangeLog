@@ -1,3 +1,7 @@
+Tue Nov 21 16:06:13 1995  Doug Evans  <dje@canuck.cygnus.com>
+
+	* Makefile.in (DEVO_SUPPORT): Add symlink-tree.
+
 Tue Nov 21 14:08:28 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.in: Strip --host and --target options from
