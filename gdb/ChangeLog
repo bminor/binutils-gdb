@@ -1,3 +1,12 @@
+Fri Oct  1 14:54:46 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* printcmd.c (do_examine): Make meaning of 'h', 'w', and 'g' not
+	depend on builtin_type_*.  Instead, it is always 2, 4, and 8 bytes
+	like the documentation says.
+	* printcmd.c (decode_format) [CC_HAS_LONG_LONG]: Remove 'l' as
+	synonym for 'g'.  This was never documented, it shouldn't depend on
+	CC_HAS_LONG_LONG, and I don't see what's wrong with 'g'.
+
 Fri Oct  1 10:06:35 1993  Kung Hsu  (kung@cirdan.cygnus.com)
 
 	* symtab.c: fix a bug in testsuite (virtfunc.exp)

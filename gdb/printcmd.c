@@ -214,13 +214,6 @@ decode_format (string_ptr, oformat, osize)
     {
       if (*p == 'b' || *p == 'h' || *p == 'w' || *p == 'g')
 	val.size = *p++;
-#ifdef CC_HAS_LONG_LONG
-      else if (*p == 'l')
-	{
-	  val.size = 'g';
-	  p++;
-	}
-#endif
       else if (*p >= 'a' && *p <= 'z')
 	val.format = *p++;
       else
@@ -368,15 +361,13 @@ print_scalar_formatted (valaddr, type, format, size, stream)
 
   val_long = unpack_long (type, valaddr);
 
-  /* If value is unsigned, truncate it in case negative.  */
+  /* If we are printing it as unsigned, truncate it in case it is actually
+     a negative signed value (e.g. "print/u (short)-1" should print 65535
+     (if shorts are 16 bits) instead of 4294967295).  */
   if (format != 'd')
     {
-      if (len == sizeof (char))
-	val_long &= (1 << 8 * sizeof(char)) - 1;
-      else if (len == sizeof (short))
-	val_long &= (1 << 8 * sizeof(short)) - 1;
-      else if (len == sizeof (long))
-	val_long &= (unsigned long) - 1;
+      if (len < sizeof (LONGEST))
+	val_long &= ((LONGEST) 1 << HOST_CHAR_BIT * len) - 1;
     }
 
   switch (format)
@@ -590,9 +581,10 @@ print_address (addr, stream)
 #if 0 && defined (ADDR_BITS_REMOVE)
   /* This is wrong for pointer to char, in which we do want to print
      the low bits.  */
-  fprintf_filtered (stream, local_hex_format(), ADDR_BITS_REMOVE(addr));
+  fprintf_filtered (stream, local_hex_format(),
+		    (unsigned long) ADDR_BITS_REMOVE(addr));
 #else
-  fprintf_filtered (stream, local_hex_format(), addr);
+  fprintf_filtered (stream, local_hex_format(), (unsigned long) addr);
 #endif
   print_address_symbolic (addr, stream, asm_demangle, " ");
 }
@@ -611,7 +603,7 @@ print_address_demangle (addr, stream, do_demangle)
   if (addr == 0) {
     fprintf_filtered (stream, "0");
   } else if (addressprint) {
-    fprintf_filtered (stream, local_hex_format(), addr);
+    fprintf_filtered (stream, local_hex_format(), (unsigned long) addr);
     print_address_symbolic (addr, stream, do_demangle, " ");
   } else {
     print_address_symbolic (addr, stream, do_demangle, "");
@@ -630,7 +622,7 @@ do_examine (fmt, addr)
   register char format = 0;
   register char size;
   register int count = 1;
-  struct type *val_type;
+  struct type *val_type = NULL;
   register int i;
   register int maxelts;
 
@@ -644,18 +636,17 @@ do_examine (fmt, addr)
   if (format == 's' || format == 'i')
     size = 'b';
 
+  /* I don't think the TYPE_CODE, TYPE_NAME, or TYPE_FLAGS matter.
+     This is just a (fairly twisted) way of telling print_formatted
+     the right length.  */
   if (size == 'b')
-    val_type = builtin_type_char;
+    val_type = init_type (TYPE_CODE_INT, 1, 0, NULL, NULL);
   else if (size == 'h')
-    val_type = builtin_type_short;
+    val_type = init_type (TYPE_CODE_INT, 2, 0, NULL, NULL);
   else if (size == 'w')
-    val_type = builtin_type_long;
+    val_type = init_type (TYPE_CODE_INT, 4, 0, NULL, NULL);
   else if (size == 'g')
-#ifndef CC_HAS_LONG_LONG
-    val_type = builtin_type_double;
-#else
-    val_type = builtin_type_long_long;
-#endif
+    val_type = init_type (TYPE_CODE_INT, 8, 0, NULL, NULL);
 
   maxelts = 8;
   if (size == 'w')
@@ -686,6 +677,7 @@ do_examine (fmt, addr)
       printf_filtered ("\n");
       fflush (stdout);
     }
+  free (val_type);
 }
 
 static void
@@ -894,7 +886,8 @@ address_info (exp, from_tty)
 
       if (msymbol != NULL)
 	printf ("Symbol \"%s\" is at %s in a file compiled without debugging.\n",
-		exp, local_hex_string(SYMBOL_VALUE_ADDRESS (msymbol)));
+		exp,
+		local_hex_string((unsigned long) SYMBOL_VALUE_ADDRESS (msymbol)));
       else
 	error ("No symbol \"%s\" in current context.", exp);
       return;
@@ -912,7 +905,8 @@ address_info (exp, from_tty)
       break;
 
     case LOC_LABEL:
-      printf ("a label at address %s", local_hex_string(SYMBOL_VALUE_ADDRESS (sym)));
+      printf ("a label at address %s",
+	      local_hex_string((unsigned long) SYMBOL_VALUE_ADDRESS (sym)));
       break;
 
     case LOC_REGISTER:
@@ -920,7 +914,8 @@ address_info (exp, from_tty)
       break;
 
     case LOC_STATIC:
-      printf ("static storage at address %s", local_hex_string(SYMBOL_VALUE_ADDRESS (sym)));
+      printf ("static storage at address %s",
+	      local_hex_string((unsigned long) SYMBOL_VALUE_ADDRESS (sym)));
       break;
 
     case LOC_REGPARM:
@@ -963,7 +958,7 @@ address_info (exp, from_tty)
 
     case LOC_BLOCK:
       printf ("a function at address %s",
-	      local_hex_string(BLOCK_START (SYMBOL_BLOCK_VALUE (sym))));
+	      local_hex_string((unsigned long) BLOCK_START (SYMBOL_BLOCK_VALUE (sym))));
       break;
 
     case LOC_OPTIMIZED_OUT:
@@ -1424,7 +1419,7 @@ print_frame_args (func, fi, num, stream)
      int num;
      FILE *stream;
 {
-  struct block *b;
+  struct block *b = NULL;
   int nsyms = 0;
   int first = 1;
   register int i;
@@ -1623,7 +1618,11 @@ makeva_size (nargs, max_arg_size)
      unsigned int nargs;
      unsigned int max_arg_size;
 {
+#if defined (MAKEVA_SIZE)
+  MAKEVA_SIZE (nargs, max_arg_size);
+#else
   return sizeof (makeva_list) + nargs * max_arg_size;
+#endif
 }
 
 /* Start working on LIST with NARGS arguments and whose largest
@@ -1939,8 +1938,8 @@ disassemble_command (arg, from_tty)
     }
   else
     {
-      printf_filtered ("from %s ", local_hex_string(low));
-      printf_filtered ("to %s:\n", local_hex_string(high));
+      printf_filtered ("from %s ", local_hex_string((unsigned long) low));
+      printf_filtered ("to %s:\n", local_hex_string((unsigned long) high));
     }
 
   /* Dump the specified range.  */
