@@ -1,5 +1,25 @@
 2001-12-02  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
+	* elf32-mips.c (NEWABI_P): New define.
+	(USE_REL): Remove, replaced by
+	(elf_backend_may_use_rel_p): New define.
+	(elf_backend_may_use_rela_p): Likewise.
+	(elf_backend_default_use_rela_p): Likewise.
+	(elf_mips_howto_table): Rename to elf_mips_howto_table_rel.
+	Fix some relocation definitions.
+	(elf_mips_howto_table_rela): New RELA relocation definitions for
+	NewABI support.
+	(mips32_64bit_reloc): Use the renamed elf_mips_howto_table_rel.
+	(bfd_elf32_bfd_reloc_type_lookup): Likewise.
+	(mips_rtype_to_howto): Likewise.
+	(_bfd_mips_elf_relocate_section): Likewise.
+	(_bfd_mips_elf_object_p): Typo.
+	(elf_backend_sign_extend_vma): Reordered together with many other
+	defines nearby to resemble the order of declaration in the header
+	file.
+
+2001-12-02  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
 	* coff-mips.c (mips_bfd_reloc_type_lookup): Replace
 	BFD_RELOC_MIPS_GPREL by BFD_RELOC_GPREL16.
 	* pe-mips.c (mips_bfd_reloc_type_lookup): Likewise.
