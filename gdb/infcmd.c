@@ -740,15 +740,27 @@ environment_info (var, from_tty)
     {
       register char *val = get_in_environ (inferior_environ, var);
       if (val)
-	printf_filtered ("%s = %s\n", var, val);
+	{
+	  puts_filtered (var);
+	  puts_filtered (" = ");
+	  puts_filtered (val);
+	  puts_filtered ("\n");
+	}
       else
-	printf_filtered ("Environment variable \"%s\" not defined.\n", var);
+	{
+	  puts_filtered ("Environment variable \"");
+	  puts_filtered (var);
+	  puts_filtered ("\" not defined.\n");
+	}
     }
   else
     {
       register char **vector = environ_vector (inferior_environ);
       while (*vector)
-	printf_filtered ("%s\n", *vector++);
+	{
+	  puts_filtered (*vector++);
+	  puts_filtered ("\n");
+	}
     }
 }
 
@@ -770,16 +782,15 @@ set_environment_command (arg, from_tty)
   if (p != 0 && val != 0)
     {
       /* We have both a space and an equals.  If the space is before the
-	 equals and the only thing between the two is more space, use
-	 the equals */
+	 equals, walk forward over the spaces til we see a nonspace 
+	 (possibly the equals). */
       if (p > val)
 	while (*val == ' ')
 	  val++;
 
-      /* Take the smaller of the two.  If there was space before the
-	 "=", they will be the same right now. */
-
-      if (val < p)
+      /* Now if the = is after the char following the spaces,
+	 take the char following the spaces.  */
+      if (p > val)
 	p = val - 1;
     }
   else if (val != 0 && p == 0)

@@ -2,6 +2,7 @@ Tue Dec 15 02:01:00 1992  John Gilmore  (gnu@cygnus.com)
 
 	* remote.c:  Avoid printf_filtered line limit.  Suggested by
 	Robert R. Henry, <rrh@tera.com>.
+	* infcmd.c (environment_info):  Ditto, but it was my idea.
 
 	* main.c (main):  Accept --silent as well as --quiet.  Change +help
 	to --help.  Suggested by Karl Berry, <karl@cs.umb.edu>.
