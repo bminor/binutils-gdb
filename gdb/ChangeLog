@@ -1,5 +1,11 @@
 2001-10-15  Andrew Cagney  <ac131313@redhat.com>
 
+	* gdbarch.sh (fallbackdefault): Set to one when predefault is
+	empty.
+	* gdbarch.h: Regenerate.
+
+2001-10-15  Andrew Cagney  <ac131313@redhat.com>
+
 	* mips-tdep.c (mips_integer_to_address): New function.
 	(mips_gdbarch_init): Initialize pointer_to_address,
 	address_to_pointer and integer_to_address.

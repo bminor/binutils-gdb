@@ -1261,7 +1261,7 @@ extern int gdbarch_integer_to_address_p (struct gdbarch *gdbarch);
 
 /* Default (function) for non- multi-arch platforms. */
 #if (!GDB_MULTI_ARCH) && !defined (INTEGER_TO_ADDRESS)
-#define INTEGER_TO_ADDRESS(type, buf) ( (type, buf))
+#define INTEGER_TO_ADDRESS(type, buf) (internal_error (__FILE__, __LINE__, "INTEGER_TO_ADDRESS"), 0)
 #endif
 
 typedef CORE_ADDR (gdbarch_integer_to_address_ftype) (struct type *type, void *buf);

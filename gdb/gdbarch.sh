@@ -111,7 +111,7 @@ EOF
 	    then
 		fallbackdefault="${predefault}"
 	    else
-		fallbackdefault=""
+		fallbackdefault="0"
 	    fi
 
 	    #NOT YET: See gdbarch.log for basic verification of
