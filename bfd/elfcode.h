@@ -485,6 +485,13 @@ DEFUN (bfd_section_from_shdr, (abfd, shindex),
 	      else if (newsect->flags & SEC_ALLOC)
 		newsect->flags |= SEC_DATA;
 
+	      /* The debugging sections appear to recognized only by
+		 name.  */
+	      if (strncmp (name, ".debug", sizeof ".debug" - 1) == 0
+		  || strncmp (name, ".line", sizeof ".line" - 1) == 0
+		  || strncmp (name, ".stab", sizeof ".stab" - 1) == 0)
+		newsect->flags |= SEC_DEBUGGING;
+
 	      hdr->rawdata = (void *) newsect;
 	    }
 	  else

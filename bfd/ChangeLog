@@ -1,3 +1,15 @@
+Thu Sep 23 10:48:27 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* section.c (SEC_DEBUGGING): New section flag.
+	* elfcode.h (bfd_section_from_shdr): If section is SHT_PROGBITS,
+	and the name starts with .debug, .line or .stab, set
+	SEC_DEBUGGING.
+	* elf32-target.h (TARGET_BIG_SYM, TARGET_LITTLE_SYM): Added
+	SEC_DEBUGGING to section_flags.
+	* elf64-target.h (TARGET_BIG_SYM, TARGET_LITTLE_SYM): Added
+	SEC_DEBUGGING and SEC_CODE to section_flags.
+	* bfd-in2.h: Updated.
+
 Wed Sep 22 16:34:14 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* bfd.c (tdata): Add lynx_core_data.
