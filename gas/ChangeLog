@@ -1,3 +1,10 @@
+Wed Jun  7 21:26:15 2000  Denis Chertykov  <denisc@overta.ru>
+
+	* config/tc-avr.c (AVR_ISA_???): moved to include/opcode/avr.h
+	(REGISTER_P): likewise.
+	(avr_opcodes): uses include/opcode/avr.h
+	(avr_operand): enable ld r,Z or st r,Z for at90s1200.
+	
 2000-06-04  Alan Modra  <alan@linuxcare.com.au>
 
 	* read.c (is_end_of_line): No ';' for TC_HPPA.  Add missing
