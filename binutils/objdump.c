@@ -957,8 +957,8 @@ show_line (abfd, section, addr_offset)
      asection *section;
      bfd_vma addr_offset;
 {
-  CONST char *filename;
-  CONST char *functionname;
+  const char *filename;
+  const char *functionname;
   unsigned int line;
 
   if (! with_line_numbers && ! with_source_code)
@@ -2543,7 +2543,7 @@ dump_reloc_set (abfd, sec, relpp, relcount)
 	}
       else
 	{
-	  if (section_name == (CONST char *) NULL)
+	  if (section_name == (const char *) NULL)
 	    section_name = "*unknown*";
 	  bfd_printf_vma (abfd, q->address);
 	  printf (" %-16s  [%s]",

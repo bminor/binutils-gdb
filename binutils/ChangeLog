@@ -1,3 +1,9 @@
+2002-06-08  Alan Modra  <amodra@bigpond.net.au>
+
+	* bucomm.c: Replace CONST with const.
+	* nm.c: Likewise.
+	* objdump.c: Likewise.
+
 2002-06-07  H.J. Lu <hjl@gnu.org>
 
 	* readelf.c (DW_CFA_GNU_args_size): Don't define.

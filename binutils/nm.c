@@ -133,13 +133,13 @@ print_archive_filename_posix PARAMS ((char *filename));
 
 
 static void
-print_archive_member_bsd PARAMS ((char *archive, CONST char *filename));
+print_archive_member_bsd PARAMS ((char *archive, const char *filename));
 
 static void
-print_archive_member_sysv PARAMS ((char *archive, CONST char *filename));
+print_archive_member_sysv PARAMS ((char *archive, const char *filename));
 
 static void
-print_archive_member_posix PARAMS ((char *archive, CONST char *filename));
+print_archive_member_posix PARAMS ((char *archive, const char *filename));
 
 
 static void
@@ -177,7 +177,7 @@ struct output_fns
     void (*print_archive_filename) PARAMS ((char *filename));
 
     /* Print the name of an archive member file.  */
-    void (*print_archive_member) PARAMS ((char *archive, CONST char *filename));
+    void (*print_archive_member) PARAMS ((char *archive, const char *filename));
 
     /* Print the name of the file (and archive, if there is one)
        containing a symbol.  */
@@ -1384,7 +1384,7 @@ print_archive_filename_posix (filename)
 static void
 print_archive_member_bsd (archive, filename)
      char *archive ATTRIBUTE_UNUSED;
-     CONST char *filename;
+     const char *filename;
 {
   if (!filename_per_symbol)
     printf ("\n%s:\n", filename);
@@ -1393,7 +1393,7 @@ print_archive_member_bsd (archive, filename)
 static void
 print_archive_member_sysv (archive, filename)
      char *archive;
-     CONST char *filename;
+     const char *filename;
 {
   if (undefined_only)
     printf (_("\n\nUndefined symbols from %s[%s]:\n\n"), archive, filename);
@@ -1406,7 +1406,7 @@ Name                  Value   Class        Type         Size   Line  Section\n\n
 static void
 print_archive_member_posix (archive, filename)
      char *archive;
-     CONST char *filename;
+     const char *filename;
 {
   if (!filename_per_symbol)
     printf ("%s[%s]:\n", archive, filename);
