@@ -326,14 +326,6 @@ case "${host}" in
 	  configdirs="$configdirs dosrel" ;;
 esac
 
-
-# Configure extra directories which are target specific
-
-case "${target}" in
-  i[345]86-*-win32*)
-	  configdirs="$configdirs winsup newlib" ;;
-esac
-
 # Remove more programs from consideration, based on the host or 
 # target this usually means that a port of the program doesn't
 # exist yet.
@@ -404,12 +396,15 @@ case "${target}" in
     ;;
 
   i[345]86-*-win32)
-
     noconfigdirs="$noconfigdirs tk"
     # Can't build gdb for win32 if not native.
     if [ x${is_cross_compiler} = xyes ]; then
 	    noconfigdirs="$noconfigdirs gdb"
     fi
+    # always build newlib.
+    skipdirs=`echo " ${skipdirs} " | sed -e 's/ newlib / /'`
+    # and winsup
+    configdirs="$configdirs winsup" 
     ;;    
   i[345]86-*-pe)
     noconfigdirs="$noconfigdirs libg++ libstdc++ libio librx"
