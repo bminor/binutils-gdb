@@ -1,5 +1,11 @@
 2004-02-15  Andrew Cagney  <cagney@redhat.com>
 
+	* procfs.c (procfs_init_inferior): Assume that
+	START_INFERIOR_TRAPS_EXPECTED is defined.
+	* config/ns32k/nbsdaout.mt (TM_FILE): Set to tm-ns32k.h.
+	* config/ns32k/tm-nbsd.h: Delete file,
+	START_INFERIOR_TRAPS_EXPECTED already defined as 2.
+
 	* config/vax/tm-vaxbsd.h: Do not include "tm-vax.h".
 	* config/vax/tm-vax.h: Delete file.
 
