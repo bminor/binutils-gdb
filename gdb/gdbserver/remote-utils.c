@@ -630,7 +630,11 @@ prepare_resume_reply (char *buf, char status, unsigned char signo)
 	  thread_from_wait = ((struct inferior_list_entry *)current_inferior)->id;
 	  if (debug_threads)
 	    fprintf (stderr, "Writing resume reply for %d\n\n", thread_from_wait);
-	  if (old_thread_from_wait != thread_from_wait)
+	  /* This if (1) ought to be unnecessary.  But remote_wait in GDB
+	     will claim this event belongs to inferior_ptid if we do not
+	     specify a thread, and there's no way for gdbserver to know
+	     what inferior_ptid is.  */
+	  if (1 || old_thread_from_wait != thread_from_wait)
 	    {
 	      general_thread = thread_from_wait;
 	      sprintf (buf, "thread:%x;", thread_from_wait);
