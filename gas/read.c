@@ -2764,7 +2764,7 @@ s_stab_generic (what, stab_secname, stabstr_secname)
       SKIP_WHITESPACE ();
     }
 
-  /* We have not gathered the type, other, and desc information.  For
+  /* We have now gathered the type, other, and desc information.  For
      .stabs or .stabn, input_line_pointer is now pointing at the
      value.  */
 
