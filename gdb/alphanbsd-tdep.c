@@ -192,20 +192,6 @@ alphanbsd_sigcontext_addr (struct frame_info *frame)
   return frame->frame;
 }
 
-static CORE_ADDR
-alphanbsd_skip_sigtramp_frame (struct frame_info *frame, CORE_ADDR pc)
-{
-  char *name;
-
-  /* FIXME: This is not correct for all versions of NetBSD/alpha.
-     We will probably need to disassemble the trampoline to figure
-     out which trampoline frame type we have.  */
-  find_pc_partial_function (pc, &name, (CORE_ADDR *) NULL, (CORE_ADDR *) NULL);
-  if (PC_IN_SIGTRAMP (pc, name))
-    return frame->frame;
-  return 0;
-}
-
 static void
 alphanbsd_init_abi (struct gdbarch_info info,
                     struct gdbarch *gdbarch)
@@ -221,7 +207,6 @@ alphanbsd_init_abi (struct gdbarch_info info,
   set_solib_svr4_fetch_link_map_offsets (gdbarch,
                                  nbsd_lp64_solib_svr4_fetch_link_map_offsets);
 
-  tdep->skip_sigtramp_frame = alphanbsd_skip_sigtramp_frame;
   tdep->dynamic_sigtramp_offset = alphanbsd_sigtramp_offset;
   tdep->sigcontext_addr = alphanbsd_sigcontext_addr;
 

@@ -1,5 +1,11 @@
 2003-06-03  J. Brobecker  <brobecker@gnat.com>
 
+	* alphanbsd-tdep.c (alphanbsd_skip_sigtramp_frame): Delete.
+	(alphanbsd_init_abi): Do not set skip_sigtramp_frame in tdep
+	structure, field no longer exists.
+
+2003-06-03  J. Brobecker  <brobecker@gnat.com>
+
 	* config/alpha/alpha-osf1.mt (TDEPFILES): Add alpha-mdebug-tdep.o.
 	* alpha-osf1-tdep.c (alpha_osf1_init_abi): Enable the mdebug module.
 
