@@ -58,6 +58,8 @@
 
 #define OBJ_BOUT 1
 
+#define OUTPUT_FLAVOR bfd_target_aout_flavour
+
 #include "targ-cpu.h"
 
 /* We want \v. */
