@@ -83,6 +83,11 @@ static int prev_mul32_p = 0;
 static int flag_explicitly_parallel = 0; 
 static int flag_xp_state = 0;
 
+/* Whether current and previous left sub-instruction disables
+   execution of right sub-instruction.  */
+static int cur_left_kills_right_p = 0;
+static int prev_left_kills_right_p = 0;
+
 /* The known current alignment of the current section.  */
 static int d30v_current_align;
 static segT d30v_current_align_seg;
@@ -222,6 +227,16 @@ check_range (num, bits, flags)
   /* don't bother checking 32-bit values */
   if (bits == 32)
     return 0;
+
+  if (flags & OPERAND_SHIFT)
+    {
+      /* We know that all shifts are right by three bits.... */
+      
+      if (flags & OPERAND_SIGNED)
+	num = (unsigned long) (((/*signed*/ long) num) >> 3);
+      else
+	num >>= 3;
+    }
 
   if (flags & OPERAND_SIGNED)
     {
@@ -770,6 +785,10 @@ write_2_short (opcode1, insn1, opcode2, insn2, exec_type, fx)
     case EXEC_SEQ:	/* sequential */
       if (opcode1->op->unit == IU)
 	as_fatal (_("IU instruction may not be in the left container"));
+      if (prev_left_kills_right_p)
+	as_warn (_("special left instruction `%s' kills instruction "
+		   "`%s' in right container"),
+		 opcode1->op->name, opcode2->op->name);
       insn = FM01 | (insn1 << 32) | insn2;  
       fx = fx->next;
       break;
@@ -1404,6 +1423,45 @@ do_assemble (str, opcode, shortp, is_parallel)
 	}
     }
 
+  /* Propagate left_kills_right status */
+  if (insn != -1)
+    {
+      prev_left_kills_right_p = cur_left_kills_right_p;
+
+      if (opcode->op->flags_set & FLAG_LKR)
+	{
+	  cur_left_kills_right_p = 1;
+	  
+	  if (strcmp (opcode->op->name, "mvtsys") == 0)
+	    {
+	      /* Left kills right for only mvtsys only for PSW/PSWH/PSWL/flags target. */
+	      if ((myops[0].X_op == O_register) &&
+		  ((myops[0].X_add_number == OPERAND_CONTROL) || /* psw */
+		   (myops[0].X_add_number == OPERAND_CONTROL+MAX_CONTROL_REG+2) || /* pswh */
+		   (myops[0].X_add_number == OPERAND_CONTROL+MAX_CONTROL_REG+1) || /* pswl */
+		   (myops[0].X_add_number == OPERAND_FLAG+0) || /* f0 */
+		   (myops[0].X_add_number == OPERAND_FLAG+1) || /* f1 */
+		   (myops[0].X_add_number == OPERAND_FLAG+2) || /* f2 */
+		   (myops[0].X_add_number == OPERAND_FLAG+3) || /* f3 */
+		   (myops[0].X_add_number == OPERAND_FLAG+4) || /* f4 */
+		   (myops[0].X_add_number == OPERAND_FLAG+5) || /* f5 */
+		   (myops[0].X_add_number == OPERAND_FLAG+6) || /* f6 */
+		   (myops[0].X_add_number == OPERAND_FLAG+7))) /* f7 */
+		{
+		  cur_left_kills_right_p = 1;
+		}
+	      else
+		{
+		  /* Other mvtsys target registers don't kill right instruction. */
+		  cur_left_kills_right_p = 0;
+		}
+	    } /* mvtsys */
+	}
+      else
+	cur_left_kills_right_p = 0;
+    }
+
+
   return (insn);
 }
 
@@ -1859,8 +1917,11 @@ d30v_align (n, pfill, label)
      temporarily when -g is in effect.  */
   int switched_seg_p = (d30v_current_align_seg != now_seg);
 
-  if (d30v_current_align >= n && !switched_seg_p)
-    return;
+  /* Do not assume that if 'd30v_current_align >= n' and
+     '! switched_seg_p' that it is safe to avoid performing
+     this alignement request.  The alignment of the current frag
+     can be changed under our feet, for example by a .ascii
+     directive in the source code.  cf testsuite/gas/d30v/reloc.s  */
 
   d30v_cleanup ();
 

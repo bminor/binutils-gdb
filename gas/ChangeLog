@@ -1,3 +1,17 @@
+Thu Jul 30 21:38:43 1998  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* config/tc-d30v.c ({cur,prev}_left_kills_right_p): New variables.
+	(write_2_short): Emit warning if new flag is set.
+	(do_assemble): Set flags if left instruction is one of special
+	"right-instruction-killer" type.
+
+Tue Jun 28 18:12:28 1998  Stan Cox  <scox@cygnus.com>
+	
+	* config/tc-sparc.c (md_number_to_chars, cons_fix_new_sparc):
+	Always output words in debug_info section as big endian.
+	(sparc_target_format): Choose correct bfd target.
+	(md_apply_fix3): Rename BFD_RELOC_SPARC_32LE to BFD_RELOC_SPARC_REV32.
+	
 Tue Jul 28 11:01:21 1998  Jeffrey A Law  (law@cygnus.com)
 
 	* config/tc-mn10300.c (md_assemble): Fix "errmsg" initialization
