@@ -318,3 +318,6 @@
 
 /* Define to `unsigned' if <sys/types.h> does not define. */
 #undef size_t
+
+/* Is the prototype for getopt in <unistd.h> in the expected format?  */
+#undef HAVE_DECL_GETOPT

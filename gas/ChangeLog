@@ -1,3 +1,11 @@
+2005-04-01  Nick Clifton  <nickc@redhat.com>
+
+	* configure.in: Add a check for <unistd.h> providing a prototype
+	for getopt() which is compatible with the one in
+	include/getopt.h.  If so then define HAVE_DECL_GETOPT.
+	* configure: Regenerate.
+	* config.in (HAVE_DECL_GETOPT): Add.
+
 2005-04-01  Jan Beulich  <jbeulich@novell.com>
 
 	* config/tc-i386.c (s_bss): Call obj_elf_section_change_hook.
