@@ -58,3 +58,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define CREATE_INFERIOR_HOOK(pid) inferior_proc_init(pid)
 #endif
 
+/* Use setpgid(0,0) to run inferior in a separate process group */
+
+#define NEED_POSIX_SETPGID
