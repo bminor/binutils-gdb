@@ -36,15 +36,15 @@ interp.c
 sim-main.h
 support.h
 tconfig.in
-
-Things-to-lose:
-
 mips.igen
 mips.dc
 
+Things-to-lose:
+
+
 Do-last:
 
-r5900_files="ChangeLog configure configure.in interp.c gencode.c"
+r5900_files="ChangeLog configure configure.in interp.c gencode.c mips.igen mips.dc"
 
 if ( echo $* | grep keep\-r5900 > /dev/null ) ; then
 	for i in $r5900_files ; do
@@ -74,7 +74,7 @@ else
 fi
 
 
-tx19_files="ChangeLog configure.in gencode.c"
+tx19_files="ChangeLog configure configure.in interp.c gencode.c mips.igen mips.dc"
 
 if ( echo $* | grep keep\-tx19 > /dev/null ) ; then
 	for i in $tx19_files ; do
@@ -102,6 +102,57 @@ else
 		fi
 	done
 fi
+
+
+vr5400_files="ChangeLog configure configure.in interp.c gencode.c mips.igen mips.dc"
+
+if ( echo $* | grep keep\-vr5400 > /dev/null ) ; then
+	for i in $vr5400_files ; do
+		if test ! -d $i && (grep sanitize-vr5400 $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Keeping vr5400 stuff in $i
+			fi
+		fi
+	done
+else
+	for i in * ; do
+		if test ! -d $i && (grep sanitize-vr5400 $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Removing traces of \"vr5400\" from $i...
+			fi
+			cp $i new
+			sed '/start\-sanitize\-vr5400/,/end-\sanitize\-vr5400/d' < $i > new
+			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
+				if [ -n "${verbose}" ] ; then
+					echo Caching $i in .Recover...
+				fi
+				mv $i .Recover
+			fi
+			mv new $i
+		fi
+	done
+fi
+
+
+
+never_files="ChangeLog configure configure.in interp.c gencode.c mips.igen mips.dc"
+
+	for i in * ; do
+		if test ! -d $i && (grep sanitize-cygnus-never $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Removing traces of \"cygnus-never\" from $i...
+			fi
+			cp $i new
+			sed '/start\-sanitize\-cygnus\-never/,/end-\sanitize\-cygnus\-never/d' < $i > new
+			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
+				if [ -n "${verbose}" ] ; then
+					echo Caching $i in .Recover...
+				fi
+				mv $i .Recover
+			fi
+			mv new $i
+		fi
+	done
 
 
 

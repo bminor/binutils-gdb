@@ -1,8 +1,20 @@
+Mon Oct 27 13:53:59 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	start-sanitize-vr5400
+	* mips.igen: Tag all mipsIV instructions with vr5400 model.
+
+	* configure.in: Add mips64vr5400 target.
+	* configure: Re-generate.
+
+	end-sanitize-vr5400
+	* Makefile.in (SIM_NO_OBJ): Define, move SIM_M16_OBJ, SIM_IGEN_OBJ
+ 	to top.
+	(tmp-igen, tmp-m16): Pass -I srcdir to igen.
+
 Sat Oct 25 16:51:40 1997  Gavin Koch  <gavin@cygnus.com>
 
 	* gencode.c (build_instruction): Follow sim_write's lead in using
 	BigEndianMem instead of !ByteSwapMem.
-
 
 Fri Oct 24 17:41:49 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 

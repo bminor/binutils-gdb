@@ -96,14 +96,17 @@ SIM_AC_OPTION_FLOAT($mips_fpu)
 #
 sim_gen=NO
 case "${target}" in
+# start-sanitize-tx19
+  mipstx19*-*-*)	sim_gen=M16 ;;
+# end-sanitize-tx19
 # start-sanitize-r5900
 #  mips64r59*-*-*)       sim_gen=IGEN ;;
 # end-sanitize-r5900
 # start-sanitize-vr5400
-#  mips64vr54*-*-*)      sim_gen=IGEN ;;
+  mips64vr54*-*-*)	sim_gen=IGEN ;;
 # end-sanitize-vr5400
 #  mips16*-*-*)          sim_gen=M16 ;;
-  *)                    sim_gen=NO ;;
+  *)                     sim_gen=NO ;;
 esac
 AC_SUBST(sim_gen)
 

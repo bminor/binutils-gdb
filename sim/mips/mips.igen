@@ -17,7 +17,7 @@
 :option:16:insn-specifying-widths:true
 :option:16:gen-delayed-branch:false
 
-// IGEN config - mipsI..
+// IGEN config - mips32/64..
 :option:32:insn-bit-size:32
 :option:32:hi-bit-nr:31
 :option:32:insn-specifying-widths:true
@@ -41,6 +41,9 @@
 // start-sanitize-tx19
 :model::tx19:tx19:
 // end-sanitize-tx19
+// start-sanitize-vr5400
+:model::vr5400:vr5400:
+// end-sanitize-vr5400
 
 
 
@@ -68,6 +71,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -88,6 +94,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -108,6 +117,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -126,6 +138,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -145,6 +160,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -162,6 +180,9 @@
 *mipsI:
 *mipsII:
 *mipsIII:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -180,6 +201,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -199,6 +223,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -221,6 +248,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -241,6 +271,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -261,6 +294,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -285,6 +321,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -307,6 +346,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -326,6 +368,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -350,6 +395,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -371,6 +419,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -393,6 +444,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -413,6 +467,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -435,6 +492,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -457,6 +517,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -481,6 +544,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -500,6 +566,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -522,6 +591,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -540,6 +612,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -556,6 +631,9 @@
 "dadd r<RD>, r<RS>, r<RT>"
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -574,6 +652,9 @@
 "daddi r<RT>, r<RS>, <IMMEDIATE>"
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -592,6 +673,9 @@
 "daddu r<RT>, r<RS>, <IMMEDIATE>"
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -608,6 +692,9 @@
 "daddu r<RD>, r<RS>, r<RT>"
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -624,6 +711,9 @@
 "ddiv r<RS>, r<RT>"
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -661,6 +751,9 @@
 *mipsIII:
 *mipsIV:
 *r3900:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-tx19
 *tx19:
 // end-sanitize-tx19
@@ -689,6 +782,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -726,6 +822,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -756,6 +855,9 @@
 "dmult r<RS>, r<RT>"
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 *r3900:
 // start-sanitize-tx19
 *tx19:
@@ -815,6 +917,9 @@
 "dmultu r<RS>, r<RT>"
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 *r3900:
 // start-sanitize-tx19
 *tx19:
@@ -851,6 +956,9 @@
 "dsll r<RD>, r<RT>, <SA>"
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -868,6 +976,9 @@
 "dsll32 r<RD>, r<RT>, <SA>"
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -885,6 +996,9 @@
 "dsllv r<RD>, r<RT>, r<RS>"
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -902,6 +1016,9 @@
 "dsra r<RD>, r<RT>, <SA>"
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -919,6 +1036,9 @@
 "dsra32 r<RT>, r<RD>, <SA>"
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -936,6 +1056,9 @@
 "dsra32 r<RT>, r<RD>, r<RS>"
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -953,6 +1076,9 @@
 "dsrav r<RD>, r<RT>, <SA>"
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -970,6 +1096,9 @@
 "dsrl32 r<RD>, r<RT>, <SA>"
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -987,6 +1116,9 @@
 "dsrl32 r<RD>, r<RT>, r<RS>"
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -1004,6 +1136,9 @@
 "dsub r<RD>, r<RS>, r<RT>"
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -1022,6 +1157,9 @@
 "dsubu r<RD>, r<RS>, r<RT>"
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -1040,6 +1178,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -1061,6 +1202,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -1084,6 +1228,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -1104,6 +1251,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -1122,6 +1272,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -1164,6 +1317,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -1204,6 +1360,9 @@
 "ld r<RT>, <OFFSET>(r<BASE>)"
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -1241,6 +1400,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -1277,6 +1439,9 @@
 "ldl r<RT>, <OFFSET>(r<BASE>)"
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -1318,6 +1483,9 @@
 "ldr r<RT>, <OFFSET>(r<BASE>)"
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -1368,6 +1536,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -1413,6 +1584,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -1457,6 +1631,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -1501,6 +1678,9 @@
 "lld r<RT>, <OFFSET>(r<BASE>)"
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -1540,6 +1720,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -1558,6 +1741,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -1603,6 +1789,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -1648,6 +1837,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -1695,6 +1887,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -1747,6 +1942,9 @@
 "lwu r<RT>, <OFFSET>(r<BASE>)"
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -1792,6 +1990,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -1811,6 +2012,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -1827,6 +2031,9 @@
 000000,5.RS,5.RT,5.RD,00000001011:SPECIAL:32::MOVN
 "movn r<RD>, r<RS>, r<RT>"
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -1839,6 +2046,9 @@
 000000,5.RS,5.RT,5.RD,00000001010:SPECIAL:32::MOVZ
 "movz r<RD>, r<RS>, r<RT>"
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -1854,6 +2064,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -1875,6 +2088,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -1896,6 +2112,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -1919,6 +2138,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -1942,6 +2164,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -1960,6 +2185,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -1978,6 +2206,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -1992,6 +2223,9 @@
 
 110011,5.RS,nnnnn,16.OFFSET:NORMAL:32::PREF
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -2017,6 +2251,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -2060,6 +2297,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -2104,6 +2344,9 @@
 "scd r<RT>, <OFFSET>(r<BASE>)"
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -2144,6 +2387,9 @@
 "sd r<RT>, <OFFSET>(r<BASE>)"
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -2183,6 +2429,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -2221,6 +2470,9 @@
 "sdl r<RT>, <OFFSET>(r<BASE>)"
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -2262,6 +2514,9 @@
 "sdr r<RT>, <OFFSET>(r<BASE>)"
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -2305,6 +2560,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -2352,6 +2610,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -2372,6 +2633,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -2392,6 +2656,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -2410,6 +2677,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -2428,6 +2698,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -2445,6 +2718,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -2463,6 +2739,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -2483,6 +2762,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -2503,6 +2785,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -2523,6 +2808,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -2543,6 +2831,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -2563,6 +2854,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -2581,6 +2875,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -2625,6 +2922,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -2669,6 +2969,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -2715,6 +3018,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -2761,6 +3067,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -2779,6 +3088,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -2796,6 +3108,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -2814,6 +3129,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -2832,6 +3150,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -2850,6 +3171,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -2868,6 +3192,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -2886,6 +3213,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -2904,6 +3234,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -2922,6 +3255,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -2940,6 +3276,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -2958,6 +3297,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -2976,6 +3318,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -2994,6 +3339,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -3013,6 +3361,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -3031,6 +3382,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -3109,6 +3463,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -3138,6 +3495,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -3174,6 +3534,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -3214,6 +3577,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -3272,6 +3638,9 @@
 "ceil.l.%s<FMT> f<FD>, f<FS>"
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -3297,6 +3666,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -3325,6 +3697,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -3365,6 +3740,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -3390,6 +3768,9 @@
 "cvt.l.%s<FMT> f<FD>, f<FS>"
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -3420,6 +3801,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -3447,6 +3831,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -3474,6 +3861,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -3501,6 +3891,9 @@
 01000100,x,01,5.FT,vvvvv,00000000000:COP1S:64::DMxC1
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -3541,6 +3934,9 @@
 "floor.l.%s<FMT> f<FD>, f<FS>"
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -3567,6 +3963,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -3595,6 +3994,9 @@
 010011,5.BASE,5.INDEX,5.0,5.FD,000001:COP1X:64::LDXC1
 "ldxc1 f<FD>, r<INDEX>(r<BASE>)"
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -3630,6 +4032,9 @@
 010011,5.BASE,5.INDEX,5.0,5.FD,000000:COP1X:32::LWXC1
 "lwxc1 f<FD>, r<INDEX>(r<BASE>)"
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -3672,6 +4077,9 @@
 010011,5.FR,5.FT,5.FS,5.FD,100,001:COP1X:32::MADD.D
 "madd.d f<FD>, f<FR>, f<FS>, f<FT>"
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -3690,6 +4098,9 @@
 010011,5.FR,5.FT,5.FS,5.FD,100,000:COP1X:32::MADD.S
 "madd.s f<FD>, f<FR>, f<FS>, f<FT>"
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -3712,6 +4123,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -3744,6 +4158,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -3766,6 +4183,9 @@
 000000,5.RS,3.CC,0,1.TF,5.RD,00000000001:SPECIAL:32::MOVtf
 "mov%s<TF> r<RD>, r<RS>, <CC>"
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -3779,6 +4199,9 @@
 010001,10,3.FMT,3.CC,0,1.TF,5.FS,5.FD,010001:COP1:32::MOVtf.fmt
 "mov%s<TF>.%s<FMT> f<FD>, f<FS>, <CC>"
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -3796,6 +4219,9 @@
 
 010001,10,3.FMT,5.RT,5.FS,5.FD,010011:COP1:32::MOVN.fmt
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -3820,6 +4246,9 @@
 010001,10,3.FMT,5.RT,5.FS,5.FD,010010:COP1:32::MOVZ.fmt
 "movz.%s<FMT> f<FD>, f<FS>, r<RT>"
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -3838,6 +4267,9 @@
 010011,5.FR,5.FT,5.FS,5.FD,101,001:COP1X:32::MSUB.D
 "msub.d f<FD>, f<FR>, f<FS>, f<FT>"
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -3857,6 +4289,9 @@
 010011,5.FR,5.FT,5.FS,5.FD,101000:COP1X:32::MSUB.S
 "msub.s f<FD>, f<FR>, f<FS>, f<FT>"
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -3881,6 +4316,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -3909,6 +4347,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -3934,6 +4375,9 @@
 010011,5.FR,5.FT,5.FS,5.FD,110001:COP1X:32::NMADD.D
 "nmadd.d f<FD>, f<FR>, f<FS>, f<FT>"
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 {
   unsigned32 instruction = instruction_0;
   int destreg = ((instruction >> 6) & 0x0000001F);
@@ -3950,6 +4394,9 @@
 010011,5.FR,5.FT,5.FS,5.FD,110000:COP1X:32::NMADD.S
 "nmadd.s f<FD>, f<FR>, f<FS>, f<FT>"
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 {
   unsigned32 instruction = instruction_0;
   int destreg = ((instruction >> 6) & 0x0000001F);
@@ -3966,6 +4413,9 @@
 010011,5.FR,5.FT,5.FS,5.FD,111001:COP1X:32::NMSUB.D
 "nmsub.d f<FD>, f<FR>, f<FS>, f<FT>"
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 {
   unsigned32 instruction = instruction_0;
   int destreg = ((instruction >> 6) & 0x0000001F);
@@ -3982,6 +4432,9 @@
 010011,5.FR,5.FT,5.FS,5.FD,111000:COP1X:32::NMSUB.S
 "nmsub.s f<FD>, f<FR>, f<FS>, f<FT>"
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 {
   unsigned32 instruction = instruction_0;
   int destreg = ((instruction >> 6) & 0x0000001F);
@@ -3997,6 +4450,9 @@
 010011,5.BASE,5.INDEX,5.HINT,00000001111:COP1X:32::PREFX
 "prefx <HINT>, r<INDEX>(r<BASE>)"
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 {
   unsigned32 instruction = instruction_0;
   int fs = ((instruction >> 11) & 0x0000001F);
@@ -4014,6 +4470,9 @@
 010001,10,3.FMT,00000,5.FS,5.FD,010101:COP1:32::RECIP.fmt
 *mipsIV:
 "recip.%s<FMT> f<FD>, f<FS>"
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 {
   unsigned32 instruction = instruction_0;
   int destreg = ((instruction >> 6) & 0x0000001F);
@@ -4032,6 +4491,9 @@
 "round.l.%s<FMT> f<FD>, f<FS>"
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -4058,6 +4520,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -4082,6 +4547,9 @@
 010001,10,3.FMT,00000,5.FS,5.FD,010110:COP1:32::RSQRT.fmt
 *mipsIV:
 "rsqrt.%s<FMT> f<FD>, f<FS>"
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 {
   unsigned32 instruction = instruction_0;
   int destreg = ((instruction >> 6) & 0x0000001F);
@@ -4101,6 +4569,9 @@
 
 010011,5.RS,5.RT,vvvvv,00000001001:COP1X:64::SDXC1
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -4136,6 +4607,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -4163,6 +4637,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -4191,6 +4668,9 @@
 010011,5.BASE,5.INDEX,5.FS,00000,001000:COP1X:32::SWXC1
 "swxc1 f<FS>, r<INDEX>(r<BASE>)"
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -4229,6 +4709,9 @@
 "trunc.l.%s<FMT> f<FD>, f<FS>"
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -4255,6 +4738,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -4289,6 +4775,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -4300,6 +4789,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -4323,6 +4815,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -4331,6 +4826,9 @@
 101111,5.BASE,5.OP,16.OFFSET:NORMAL:32::CACHE
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -4359,6 +4857,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -4370,6 +4871,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -4379,6 +4883,9 @@
 "eret"
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -4390,6 +4897,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -4401,6 +4911,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -4412,6 +4925,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -4423,6 +4939,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -4434,6 +4953,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -4445,6 +4967,9 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900

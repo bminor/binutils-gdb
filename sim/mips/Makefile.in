@@ -6,6 +6,27 @@
 srcdir=@srcdir@
 srcroot=$(srcdir)/../../
 
+SIM_NO_OBJ =
+
+SIM_IGEN_OBJ = \
+	support.o \
+	itable.o \
+	semantics.o \
+	idecode.o \
+	icache.o \
+	engine.o \
+	irun.o
+
+SIM_M16_OBJ = \
+	$(SIM_IGEN_OBJ) = \
+	m16_support.o \
+	m16_itable.o \
+	m16_semantics.o \
+	m16_idecode.o \
+	m16_icache.o \
+	m16_engine.o \
+	m16_irun.o
+
 SIM_OBJS = \
 	$(SIM_@sim_gen@_OBJ) \
 	interp.o \
@@ -80,15 +101,6 @@ IGEN_DC=$(srcdir)/mips.dc
 SIM_IGEN_CFLAGS = -DWITH_IGEN
 SIM_IGEN_ALL = tmp-igen
 
-SIM_IGEN_OBJ = \
-	support.o \
-	itable.o \
-	semantics.o \
-	idecode.o \
-	icache.o \
-	engine.o \
-	irun.o
-
 BUILT_SRC_FROM_IGEN = \
 	icache.h \
 	icache.c \
@@ -117,6 +129,7 @@ tmp-igen: $(IGEN_INSN) $(IGEN_DC) ../igen/igen
 	cd ../igen && $(MAKE)
 	../igen/igen \
 		$(IGEN_TRACE) \
+		-I $(srcdir) \
 		-Werror \
 		-Wnodiscard \
 		-F 32,64,f \
@@ -162,16 +175,6 @@ tmp-igen: $(IGEN_INSN) $(IGEN_DC) ../igen/igen
 SIM_M16_CFLAGS = -DWITH_IGEN
 SIM_M16_ALL = tmp-igen $(SIM_M16_ALL) 
 
-SIM_M16_OBJ = \
-	$(SIM_IGEN_OBJ) = \
-	m16_support.o \
-	m16_itable.o \
-	m16_semantics.o \
-	m16_idecode.o \
-	m16_icache.o \
-	m16_engine.o \
-	m16_irun.o
-
 BUILT_SRC_FROM_M16 = \
 	m16_icache.h \
 	m16_icache.c \
@@ -200,6 +203,7 @@ tmp-m16: $(IGEN_INSN) $(IGEN_DC) ../igen/igen
 	cd ../igen && $(MAKE)
 	../igen/igen \
 		$(IGEN_TRACE) \
+		-I $(srcdir) \
 		-Werror \
 		-Wnodiscard \
 		-F 16 \
