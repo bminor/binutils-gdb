@@ -1,5 +1,8 @@
 Wed Nov 29 12:42:36 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* elf.c (assign_file_positions_for_segments): Fix case where extra
+	program headers were allocated.
+
 	* elf.c (_bfd_elf_print_private_bfd_data): New function.
 	* elf-bfd.h (_bfd_elf_print_private_bfd_data): Declare.
 	* elfxx-target.h (bfd_elfNN_bfd_print_private_bfd_data): Define to

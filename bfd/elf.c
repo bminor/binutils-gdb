@@ -1835,12 +1835,14 @@ assign_file_positions_for_segments (abfd)
     {
       unsigned int i;
       asection **secpp;
-      boolean adjusted;
 
       p->p_type = m->p_type;
 
       if (m->p_flags_valid)
 	p->p_flags = m->p_flags;
+
+      if (p->p_type == PT_LOAD && m->count > 0)
+	off += (m->sections[0]->vma - off) % bed->maxpagesize;
 
       if (m->count == 0)
 	p->p_vaddr = 0;
@@ -1864,7 +1866,6 @@ assign_file_positions_for_segments (abfd)
       p->p_filesz = 0;
       p->p_memsz = 0;
 
-      adjusted = false;
       if (p->p_type == PT_LOAD)
 	{
 	  p->p_offset = off;
@@ -1890,7 +1891,6 @@ assign_file_positions_for_segments (abfd)
 		      p->p_memsz = off;
 		      p->p_vaddr -= off;
 		      p->p_paddr -= off;
-		      adjusted = true;
 		    }
 		  if (mi->p_type == PT_PHDR)
 		    pi_phdr = pi;
@@ -1927,14 +1927,11 @@ assign_file_positions_for_segments (abfd)
 	      adjust = (sec->vma - off) % bed->maxpagesize;
 	      if (adjust != 0)
 		{
-		  if (i == 0 && ! adjusted)
-		    p->p_offset += adjust;
-		  else
-		    {
-		      p->p_memsz += adjust;
-		      if ((flags & SEC_LOAD) != 0)
-			p->p_filesz += adjust;
-		    }
+		  if (i == 0)
+		    abort ();
+		  p->p_memsz += adjust;
+		  if ((flags & SEC_LOAD) != 0)
+		    p->p_filesz += adjust;
 		  off += adjust;
 		}
 
