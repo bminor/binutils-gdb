@@ -1,3 +1,7 @@
+2003-11-07  Mark Kettenis  <kettenis@gnu.org>
+
+	* fbsd-proc.c: Fix formatting.
+
 2003-11-06  Kevin Buettner  <kevinb@redhat.com>
 
 	* frv-tdep.c (first_pseudo_regnum, iacc0_regnum, frv_num_pseudo_regs):

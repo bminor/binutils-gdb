@@ -1,5 +1,6 @@
 /* FreeBSD-specific methods for using the /proc file system.
-   Copyright 2002 Free Software Foundation, Inc.
+
+   Copyright 2002, 2003 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -48,9 +49,7 @@ child_pid_to_exec_file (int pid)
 }
 
 static int
-read_mapping (FILE *mapfile,
-	      unsigned long *start,
-	      unsigned long *end,
+read_mapping (FILE *mapfile, unsigned long *start, unsigned long *end,
 	      char *protection)
 {
   int resident, privateresident;
@@ -72,10 +71,8 @@ read_mapping (FILE *mapfile,
 }
 
 static int
-fbsd_find_memory_regions (int (*func) (CORE_ADDR,
-				       unsigned long,
-				       int, int, int,
-				       void *),
+fbsd_find_memory_regions (int (*func) (CORE_ADDR, unsigned long,
+				       int, int, int, void *),
 			  void *obfd)
 {
   pid_t pid = ptid_get_pid (inferior_ptid);
