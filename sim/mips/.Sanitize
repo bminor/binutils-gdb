@@ -39,6 +39,8 @@ tconfig.in
 
 Things-to-lose:
 
+mips.igen
+
 Do-last:
 
 r5900_files="ChangeLog configure configure.in interp.c gencode.c"
