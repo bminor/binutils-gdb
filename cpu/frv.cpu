@@ -7639,7 +7639,7 @@
 		name mode conv rhs1 rhs2 max min op ope comment)
   (dni name
        (comment)
-       ((UNIT FM01) (FR500-MAJOR M-4) (FR400-MAJOR M-1))
+       ((UNIT FMALL) (FR500-MAJOR M-4) (FR400-MAJOR M-1))
        (.str name "$pack $FRinti,$FRintj,$ACC40Sk")
        (+ pack ACC40Sk op FRinti ope FRintj)
        (media-dual-complex-semantics mode conv rhs1 rhs2 max min)
@@ -7685,7 +7685,7 @@
 		name mode conv rhs1 rhs2 max min op ope comment)
   (dni name
        (comment)
-       ((UNIT FM01) (FR500-MAJOR M-4) (FR400-MAJOR M-1) CONDITIONAL)
+       ((UNIT FMALL) (FR500-MAJOR M-4) (FR400-MAJOR M-1) CONDITIONAL)
        (.str name "$pack $FRinti,$FRintj,$ACC40Sk,$CCi,$cond")
        (+ pack ACC40Sk op FRinti CCi cond ope FRintj)
        (if (eq CCi (or cond 2))
@@ -7733,7 +7733,7 @@
 		name mode conv rhs1 rhs2 max min op ope comment)
   (dni name
        (comment)
-       ((UNIT FM01) (FR500-MAJOR M-4) (FR400-MAJOR M-2))
+       ((UNIT FMALL) (FR500-MAJOR M-4) (FR400-MAJOR M-2))
        (.str name "$pack $FRintieven,$FRintjeven,$ACC40Sk")
        (+ pack ACC40Sk op FRintieven ope FRintjeven)
        (if (register-unaligned ACC40Sk 2)

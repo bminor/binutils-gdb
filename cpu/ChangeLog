@@ -1,3 +1,8 @@
+2003-09-09  Dave Brolley  <brolley@redhat.com>
+
+	* frv.cpu (media-dual-complex): Change UNIT to FMALL.
+	(conditional-media-dual-complex, media-quad-complex): Likewise.
+
 2003-09-04  Dave Brolley  <brolley@redhat.com>
 
 	* frv.cpu (register-transfer): Pass in all attributes in on argument.
