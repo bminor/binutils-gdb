@@ -1,3 +1,7 @@
+Tue Jan 25 10:52:22 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* mpw-xconfig.in: Use forward-include to create include files.
+
 Tue Jan  4 12:24:07 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	* mpw-xconfig.in: New file, mpw x mips configuration bits.
