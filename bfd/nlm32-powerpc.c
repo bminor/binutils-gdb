@@ -38,6 +38,8 @@ static boolean nlm_powerpc_mangle_relocs
   PARAMS ((bfd *, asection *, PTR, bfd_vma, bfd_size_type));
 static boolean nlm_powerpc_read_import
   PARAMS ((bfd *, nlmNAME(symbol_type) *));
+static boolean nlm_powerpc_write_reloc
+  PARAMS ((bfd *, asection *, arelent *, int));
 static boolean nlm_powerpc_write_import
   PARAMS ((bfd *, asection *, arelent *));
 static boolean nlm_powerpc_write_external
@@ -448,6 +450,7 @@ nlm_powerpc_read_reloc (abfd, sym, secp, rel)
   unsigned long l_symndx;
   int l_rtype;
   int l_rsecnm;
+  asection *code_sec, *data_sec, *bss_sec;
 
   /* Read the reloc from the file.  */
   if (bfd_read (&ext, sizeof ext, 1, abfd) != sizeof ext)
@@ -462,6 +465,11 @@ nlm_powerpc_read_reloc (abfd, sym, secp, rel)
   l_rtype = bfd_h_get_16 (abfd, ext.l_rtype);
   l_rsecnm = bfd_h_get_16 (abfd, ext.l_rsecnm);
 
+  /* Get the sections now, for convenience.  */
+  code_sec = bfd_get_section_by_name (abfd, NLM_CODE_NAME);
+  data_sec = bfd_get_section_by_name (abfd, NLM_INITIALIZED_DATA_NAME);
+  bss_sec = bfd_get_section_by_name (abfd, NLM_UNINITIALIZED_DATA_NAME);
+
   /* Work out the arelent fields.  */
   if (sym != NULL)
     {
@@ -474,11 +482,11 @@ nlm_powerpc_read_reloc (abfd, sym, secp, rel)
       asection *sec;
 
       if (l_symndx == 0)
-	sec = bfd_get_section_by_name (abfd, NLM_CODE_NAME);
+	sec = code_sec;
       else if (l_symndx == 1)
-	sec = bfd_get_section_by_name (abfd, NLM_INITIALIZED_DATA_NAME);
+	sec = data_sec;
       else if (l_symndx == 2)
-	sec = bfd_get_section_by_name (abfd, NLM_UNINITIALIZED_DATA_NAME);
+	sec = bss_sec;
       else
 	{
 	  bfd_set_error (bfd_error_bad_value);
@@ -488,7 +496,6 @@ nlm_powerpc_read_reloc (abfd, sym, secp, rel)
       rel->sym_ptr_ptr = sec->symbol_ptr_ptr;
     }
 
-  rel->address = l_vaddr;
   rel->addend = 0;
 
   BFD_ASSERT ((l_rtype & 0xff) < HOWTO_COUNT);
@@ -504,14 +511,19 @@ nlm_powerpc_read_reloc (abfd, sym, secp, rel)
 	      && ((l_rtype >> 8) & 0x1f) == rel->howto->bitsize - 1);
 
   if (l_rsecnm == 0)
-    *secp = bfd_get_section_by_name (abfd, NLM_CODE_NAME);
+    *secp = code_sec;
   else if (l_rsecnm == 1)
-    *secp = bfd_get_section_by_name (abfd, NLM_INITIALIZED_DATA_NAME);
+    {
+      *secp = data_sec;
+      l_vaddr -= bfd_section_size (abfd, code_sec);
+    }
   else
     {
       bfd_set_error (bfd_error_bad_value);
       return false;
     }
+
+  rel->address = l_vaddr;
 
   return true;
 }
@@ -591,36 +603,47 @@ nlm_powerpc_read_import (abfd, sym)
 /* Write a PowerPC NLM reloc.  */
 
 static boolean
-nlm_powerpc_write_import (abfd, sec, rel)
+nlm_powerpc_write_reloc (abfd, sec, rel, indx)
      bfd *abfd;
      asection *sec;
      arelent *rel;
+     int indx;
 {
   struct nlm32_powerpc_external_reloc ext;
+  asection *code_sec, *data_sec, *bss_sec;
   asymbol *sym;
   asection *symsec;
   unsigned long l_symndx;
   int l_rtype;
   int l_rsecnm;
   const reloc_howto_type *howto;
+  bfd_size_type address;
 
-  bfd_h_put_32 (abfd, rel->address, ext.l_vaddr);
+  /* Get the sections now, for convenience.  */
+  code_sec = bfd_get_section_by_name (abfd, NLM_CODE_NAME);
+  data_sec = bfd_get_section_by_name (abfd, NLM_INITIALIZED_DATA_NAME);
+  bss_sec = bfd_get_section_by_name (abfd, NLM_UNINITIALIZED_DATA_NAME);
 
   sym = *rel->sym_ptr_ptr;
   symsec = bfd_get_section (sym);
-  if (symsec == &bfd_und_section)
-    l_symndx = 0;
-  else if (symsec == bfd_get_section_by_name (abfd, NLM_CODE_NAME))
-    l_symndx = 0;
-  else if (symsec == bfd_get_section_by_name (abfd, NLM_INITIALIZED_DATA_NAME))
-    l_symndx = 1;
-  else if (symsec == bfd_get_section_by_name (abfd,
-					      NLM_UNINITIALIZED_DATA_NAME))
-    l_symndx = 2;
+  if (indx != -1)
+    {
+      BFD_ASSERT (symsec == &bfd_und_section);
+      l_symndx = indx + 3;
+    }
   else
     {
-      bfd_set_error (bfd_error_bad_value);
-      return false;
+      if (symsec == code_sec)
+	l_symndx = 0;
+      else if (symsec == data_sec)
+	l_symndx = 1;
+      else if (symsec == bss_sec)
+	l_symndx = 2;
+      else
+	{
+	  bfd_set_error (bfd_error_bad_value);
+	  return false;
+	}
     }
 
   bfd_h_put_32 (abfd, (bfd_vma) l_symndx, ext.l_symndx);
@@ -634,8 +657,12 @@ nlm_powerpc_write_import (abfd, sec, rel)
 	  && howto->bitsize == rel->howto->bitsize
 	  && howto->pc_relative == rel->howto->pc_relative
 	  && howto->bitpos == rel->howto->bitpos
-	  && howto->partial_inplace == rel->howto->partial_inplace
-	  && howto->src_mask == rel->howto->src_mask
+	  && (howto->partial_inplace == rel->howto->partial_inplace
+	      || (! rel->howto->partial_inplace
+		  && rel->addend == 0))
+	  && (howto->src_mask == rel->howto->src_mask
+	      || (rel->howto->src_mask == 0
+		  && rel->addend == 0))
 	  && howto->dst_mask == rel->howto->dst_mask
 	  && howto->pcrel_offset == rel->howto->pcrel_offset)
 	break;
@@ -652,10 +679,15 @@ nlm_powerpc_write_import (abfd, sec, rel)
   l_rtype |= (howto->bitsize - 1) << 8;
   bfd_h_put_16 (abfd, (bfd_vma) l_rtype, ext.l_rtype);
 
-  if (sec == bfd_get_section_by_name (abfd, NLM_CODE_NAME))
+  address = rel->address;
+
+  if (sec == code_sec)
     l_rsecnm = 0;
-  else if (sec == bfd_get_section_by_name (abfd, NLM_INITIALIZED_DATA_NAME))
-    l_rsecnm = 1;
+  else if (sec == data_sec)
+    {
+      l_rsecnm = 1;
+      address += bfd_section_size (abfd, code_sec);
+    }
   else
     {
       bfd_set_error (bfd_error_bad_value);
@@ -663,6 +695,7 @@ nlm_powerpc_write_import (abfd, sec, rel)
     }
 
   bfd_h_put_16 (abfd, (bfd_vma) l_rsecnm, ext.l_rsecnm);
+  bfd_h_put_32 (abfd, (bfd_vma) address, ext.l_vaddr);
 
   if (bfd_write (&ext, sizeof ext, 1, abfd) != sizeof ext)
     return false;
@@ -670,7 +703,20 @@ nlm_powerpc_write_import (abfd, sec, rel)
   return true;
 }
 
-/* Write a PowerPC NLM external symbol.  */
+/* Write a PowerPC NLM import.  */
+
+static boolean
+nlm_powerpc_write_import (abfd, sec, rel)
+     bfd *abfd;
+     asection *sec;
+     arelent *rel;
+{
+  return nlm_powerpc_write_reloc (abfd, sec, rel, -1);
+}
+
+/* Write a PowerPC NLM external symbol.  This routine keeps a static
+   count of the symbol index.  FIXME: I don't know if this is
+   necessary, and the index never gets reset.  */
 
 static boolean
 nlm_powerpc_write_external (abfd, count, sym, relocs)
@@ -682,6 +728,7 @@ nlm_powerpc_write_external (abfd, count, sym, relocs)
   int i;
   bfd_byte len;
   unsigned char temp[NLM_TARGET_LONG_SIZE];
+  static int indx;
 
   len = strlen (sym->name);
   if ((bfd_write (&len, sizeof (bfd_byte), 1, abfd) != sizeof(bfd_byte))
@@ -700,10 +747,12 @@ nlm_powerpc_write_external (abfd, count, sym, relocs)
 
   for (i = 0; i < count; i++)
     {
-      if (nlm_powerpc_write_import (abfd, relocs[i].sec,
-				    relocs[i].rel) == false)
+      if (nlm_powerpc_write_reloc (abfd, relocs[i].sec,
+				   relocs[i].rel, indx) == false)
 	return false;
     }
+
+  ++indx;
 
   return true;
 }

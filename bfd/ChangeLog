@@ -1,3 +1,7 @@
+Fri Mar 11 22:27:19 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* elf32-powerpc.c: Extensive changes to update to preliminary ABI.
+
 Fri Mar 11 00:34:59 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* sunos.c (sunos_read_dynamic_info):  Assume that dynamic info
@@ -282,6 +286,7 @@ Fri Feb 18 11:41:58 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	start-sanitize-powerpc-netware
 	Support for PowerPC NetWare.
+	* nlm32-powerpc.c: New file.
 	* config.bfd (powerpc-*-netware*): New target; use ppc-nlm.
 	* config/ppc-nlm.mt: New file.
 	* configure.in (nlm32_powerpc_vec): New target vector; use

@@ -18,50 +18,81 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-/* I wrote this file without the benefit of a PowerPC ELF ABI.  Thus,
-   it probably does not correspond to whatever people finally settle
-   on.  Ian Taylor.  */
+/* This file is based on a preliminary PowerPC ELF ABI.  The
+   information may not match the final PowerPC ELF ABI.  It includes
+   suggestions from the in-progress Embedded PowerPC ABI, and that
+   information may also not match.  */
 
 #include "bfd.h"
 #include "sysdep.h"
 #include "libbfd.h"
 #include "libelf.h"
 
-static bfd_reloc_status_type powerpc_elf_toc16_reloc PARAMS ((bfd *abfd,
-							      arelent *reloc,
-							      asymbol *symbol,
-							      PTR data,
-							      asection *sec,
-							      bfd *output_bfd,
-							      char **error));
-static bfd_reloc_status_type powerpc_elf_b26_reloc PARAMS ((bfd *abfd,
-							    arelent *reloc,
-							    asymbol *symbol,
-							    PTR data,
-							    asection *sec,
-							    bfd *output_bfd,
-							    char **error));
+static bfd_reloc_status_type ppc_elf_unsupported_reloc
+  PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
+static bfd_reloc_status_type ppc_elf_addr16_ha_reloc
+  PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
+static bfd_reloc_status_type ppc_elf_got16_reloc
+  PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
 static const struct reloc_howto_struct *bfd_elf32_bfd_reloc_type_lookup
   PARAMS ((bfd *abfd, bfd_reloc_code_real_type code));
-static void powerpc_info_to_howto_rel
-  PARAMS ((bfd *abfd, arelent *cache_ptr, Elf32_Internal_Rel *dst));
+static void powerpc_info_to_howto
+  PARAMS ((bfd *abfd, arelent *cache_ptr, Elf32_Internal_Rela *dst));
 
-#define USE_REL
+#define USE_RELA
 
 enum reloc_type
 {
-  R_POWERPC_NONE = 0,
-  R_POWERPC_32,
-  R_POWERPC_B26,
-  R_POWERPC_BA26,
-  R_POWERPC_TOC16,
-  R_POWERPC_max
+  R_PPC_NONE = 0,
+  R_PPC_ADDR32,
+  R_PPC_ADDR24,
+  R_PPC_ADDR16,
+  R_PPC_ADDR16_LO,
+  R_PPC_ADDR16_HI,
+  R_PPC_ADDR16_HA,
+  R_PPC_ADDR14,
+  R_PPC_ADDR14_BRTAKEN,
+  R_PPC_ADDR14_BRNTAKEN,
+  R_PPC_REL24,
+  R_PPC_REL14,
+  R_PPC_REL14_BRTAKEN,
+  R_PPC_REL14_BRNTAKEN,
+  R_PPC_GOT16,
+  R_PPC_GOT16_LO,
+  R_PPC_GOT16_HI,
+  R_PPC_GOT16_HA,
+  R_PPC_PLT24,
+  R_PPC_COPY,
+  R_PPC_GLOB_DAT,
+  R_PPC_JMP_SLOT,
+  R_PPC_RELATIVE,
+  R_PPC_LOCAL24PC,
+  R_PPC_UADDR32,
+  R_PPC_UADDR16,
+
+  /* The remaining relocs are from the Embedded ELF ABI, and are not
+     in the SVR4 ELF ABI.  */
+  R_PPC_CGOT16,
+  R_PPC_CGOT16_LO,
+  R_PPC_CGOT16_HI,
+  R_PPC_CGOT16_HA,
+  R_PPC_GOT_REG,
+  R_PPC_CGOT_REG,
+  R_PPC_NADDR16,
+  R_PPC_NADDR32,
+  R_PPC_NADDR24,
+  R_PPC_DISP16,
+  R_PPC_GOTRL16,
+  R_PPC_GOTRLA16,
+  R_PPC_CGOTRL16,
+  R_PPC_CGOTRLA16,
+  R_PPC_max
 };
 
 static reloc_howto_type elf_powerpc_howto_table[] =
 {
-  /* This relocation does not do anything.  */
-  HOWTO (R_POWERPC_NONE,        /* type */                                 
+  /* This reloc does nothing.  */
+  HOWTO (R_PPC_NONE,	        /* type */                                 
 	 0,	                /* rightshift */                           
 	 2,	                /* size (0 = byte, 1 = short, 2 = long) */ 
 	 32,	                /* bitsize */                   
@@ -69,14 +100,14 @@ static reloc_howto_type elf_powerpc_howto_table[] =
 	 0,	                /* bitpos */                               
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 bfd_elf_generic_reloc, /* special_function */                     
-	 "R_POWERPC_NONE",      /* name */                                 
-	 true,	                /* partial_inplace */                      
+	 "R_PPC_NONE",          /* name */                                 
+	 false,	                /* partial_inplace */                      
 	 0,		        /* src_mask */                             
 	 0,            		/* dst_mask */                             
 	 false),                /* pcrel_offset */
 
-  /* Standard 32 bit relocation.  */
-  HOWTO (R_POWERPC_32,          /* type */                                 
+  /* A standard 32 bit relocation.  */
+  HOWTO (R_PPC_ADDR32,          /* type */                                 
 	 0,	                /* rightshift */                           
 	 2,	                /* size (0 = byte, 1 = short, 2 = long) */ 
 	 32,	                /* bitsize */                   
@@ -84,69 +115,675 @@ static reloc_howto_type elf_powerpc_howto_table[] =
 	 0,	                /* bitpos */                               
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 bfd_elf_generic_reloc, /* special_function */                     
-	 "R_POWERPC_32",        /* name */                                 
-	 true,	                /* partial_inplace */                      
-	 0xffffffff,            /* src_mask */                             
-	 0xffffffff,            /* dst_mask */                             
+	 "R_PPC_ADDR32",	/* name */
+	 false,	                /* partial_inplace */                      
+	 0,		        /* src_mask */                             
+	 0xffffffff,   		/* dst_mask */                             
 	 false),                /* pcrel_offset */
 
-  /* 26 bit relative branch.  */
-  HOWTO (R_POWERPC_B26,         /* type */                                 
+  /* An absolute 26 bit branch; the lower two bits must be zero.
+     FIXME: we don't check that, we just clear them.  */
+  HOWTO (R_PPC_ADDR24,          /* type */                                 
+	 0,	                /* rightshift */                           
+	 2,	                /* size (0 = byte, 1 = short, 2 = long) */ 
+	 26,	                /* bitsize */                   
+	 false,	                /* pc_relative */                          
+	 0,	                /* bitpos */                               
+	 complain_overflow_bitfield, /* complain_on_overflow */
+	 bfd_elf_generic_reloc, /* special_function */                     
+	 "R_PPC_ADDR24",	/* name */
+	 false,	                /* partial_inplace */                      
+	 0,		        /* src_mask */                             
+	 0x3fffffc,    		/* dst_mask */                             
+	 false),                /* pcrel_offset */
+
+  /* A standard 16 bit relocation.  */
+  HOWTO (R_PPC_ADDR16,          /* type */                                 
+	 0,	                /* rightshift */                           
+	 1,	                /* size (0 = byte, 1 = short, 2 = long) */ 
+	 16,	                /* bitsize */                   
+	 false,	                /* pc_relative */                          
+	 0,	                /* bitpos */                               
+	 complain_overflow_bitfield, /* complain_on_overflow */
+	 bfd_elf_generic_reloc, /* special_function */                     
+	 "R_PPC_ADDR16",	/* name */
+	 false,	                /* partial_inplace */                      
+	 0,		        /* src_mask */                             
+	 0xffff,    		/* dst_mask */                             
+	 false),                /* pcrel_offset */
+
+  /* A 16 bit relocation without overflow.  */
+  HOWTO (R_PPC_ADDR16_LO,       /* type */                                 
+	 0,	                /* rightshift */                           
+	 1,	                /* size (0 = byte, 1 = short, 2 = long) */ 
+	 16,	                /* bitsize */                   
+	 false,	                /* pc_relative */                          
+	 0,	                /* bitpos */                               
+	 complain_overflow_dont,/* complain_on_overflow */
+	 bfd_elf_generic_reloc, /* special_function */                     
+	 "R_PPC_ADDR16_LO",	/* name */
+	 false,	                /* partial_inplace */                      
+	 0,		        /* src_mask */                             
+	 0xffff,       		/* dst_mask */                             
+	 false),                /* pcrel_offset */
+
+  /* The high order 16 bits of an address.  */
+  HOWTO (R_PPC_ADDR16_HI,       /* type */                                 
+	 16,	                /* rightshift */                           
+	 1,	                /* size (0 = byte, 1 = short, 2 = long) */ 
+	 16,	                /* bitsize */                   
+	 false,	                /* pc_relative */                          
+	 0,	                /* bitpos */                               
+	 complain_overflow_dont, /* complain_on_overflow */
+	 bfd_elf_generic_reloc, /* special_function */                     
+	 "R_PPC_ADDR16_HI",	/* name */
+	 false,	                /* partial_inplace */                      
+	 0,		        /* src_mask */                             
+	 0xffff,       		/* dst_mask */                             
+	 false),                /* pcrel_offset */
+
+  /* The high order 16 bits of an address, plus 1 if the contents of
+     the low 16 bits, treated as a signed number, is negative.  */
+  HOWTO (R_PPC_ADDR16_HA,       /* type */                                 
+	 16,	                /* rightshift */                           
+	 1,	                /* size (0 = byte, 1 = short, 2 = long) */ 
+	 16,	                /* bitsize */                   
+	 false,	                /* pc_relative */                          
+	 0,	                /* bitpos */                               
+	 complain_overflow_dont, /* complain_on_overflow */
+	 ppc_elf_addr16_ha_reloc, /* special_function */                     
+	 "R_PPC_ADDR16_HA",	/* name */
+	 false,	                /* partial_inplace */                      
+	 0,		        /* src_mask */                             
+	 0xffff,    		/* dst_mask */                             
+	 false),                /* pcrel_offset */
+
+  /* An absolute 16 bit branch; the lower two bits must be zero.
+     FIXME: we don't check that, we just clear them.  */
+  HOWTO (R_PPC_ADDR14,          /* type */                                 
+	 0,	                /* rightshift */                           
+	 2,	                /* size (0 = byte, 1 = short, 2 = long) */ 
+	 16,	                /* bitsize */                   
+	 false,	                /* pc_relative */                          
+	 0,	                /* bitpos */                               
+	 complain_overflow_bitfield, /* complain_on_overflow */
+	 bfd_elf_generic_reloc, /* special_function */                     
+	 "R_PPC_ADDR14",	/* name */
+	 false,	                /* partial_inplace */                      
+	 0,		        /* src_mask */                             
+	 0xfffc,    		/* dst_mask */                             
+	 false),                /* pcrel_offset */
+
+  /* An absolute 16 bit branch, for which bit 10 should be set to
+     indicate that the branch is expected to be taken.  The lower two
+     bits must be zero.  */
+  HOWTO (R_PPC_ADDR14_BRTAKEN,  /* type */                                 
+	 0,	                /* rightshift */                           
+	 2,	                /* size (0 = byte, 1 = short, 2 = long) */ 
+	 16,	                /* bitsize */                   
+	 false,	                /* pc_relative */                          
+	 0,	                /* bitpos */                               
+	 complain_overflow_bitfield, /* complain_on_overflow */
+	 ppc_elf_unsupported_reloc, /* special_function */             
+	 "R_PPC_ADDR14_BRTAKEN",/* name */
+	 false,	                /* partial_inplace */                      
+	 0,		        /* src_mask */                             
+	 0xfffc,      		/* dst_mask */                             
+	 false),                /* pcrel_offset */
+
+  /* An absolute 16 bit branch, for which bit 10 should be set to
+     indicate that the branch is not expected to be taken.  The lower
+     two bits must be zero.  */
+  HOWTO (R_PPC_ADDR14_BRNTAKEN, /* type */                                 
+	 0,	                /* rightshift */                           
+	 2,	                /* size (0 = byte, 1 = short, 2 = long) */ 
+	 16,	                /* bitsize */                   
+	 false,	                /* pc_relative */                          
+	 0,	                /* bitpos */                               
+	 complain_overflow_bitfield, /* complain_on_overflow */
+	 ppc_elf_unsupported_reloc, /* special_function */             
+	 "R_PPC_ADDR14_BRNTAKEN",/* name */
+	 false,	                /* partial_inplace */                      
+	 0,		        /* src_mask */                             
+	 0xfffc,    		/* dst_mask */                             
+	 false),                /* pcrel_offset */
+
+  /* A relative 26 bit branch; the lower two bits must be zero.  */
+  HOWTO (R_PPC_REL24,           /* type */                                 
 	 0,	                /* rightshift */                           
 	 2,	                /* size (0 = byte, 1 = short, 2 = long) */ 
 	 26,	                /* bitsize */                   
 	 true,	                /* pc_relative */                          
 	 0,	                /* bitpos */                               
 	 complain_overflow_signed, /* complain_on_overflow */
-	 powerpc_elf_b26_reloc, /* special_function */                     
-	 "R_POWERPC_B26",       /* name */                                 
-	 true,	                /* partial_inplace */                      
-	 0x3fffffc,	        /* src_mask */                             
-	 0x3fffffc,        	/* dst_mask */                             
+	 bfd_elf_generic_reloc,	/* special_function */                     
+	 "R_PPC_REL24",		/* name */
+	 false,	                /* partial_inplace */                      
+	 0,		        /* src_mask */                             
+	 0x3fffffc,    		/* dst_mask */                             
+	 true),                 /* pcrel_offset */
+
+  /* A relative 16 bit branch; the lower two bits must be zero.  */
+  HOWTO (R_PPC_REL14,           /* type */                                 
+	 0,	                /* rightshift */                           
+	 2,	                /* size (0 = byte, 1 = short, 2 = long) */ 
+	 16,	                /* bitsize */                   
+	 true,	                /* pc_relative */                          
+	 0,	                /* bitpos */                               
+	 complain_overflow_signed, /* complain_on_overflow */
+	 bfd_elf_generic_reloc, /* special_function */                     
+	 "R_PPC_REL14",		/* name */
+	 false,	                /* partial_inplace */                      
+	 0,		        /* src_mask */                             
+	 0xfffc,    		/* dst_mask */                             
+	 true),                 /* pcrel_offset */
+
+  /* A relative 16 bit branch.  Bit 10 should be set to indicate that
+     the branch is expected to be taken.  The lower two bits must be
+     zero.  */
+  HOWTO (R_PPC_REL14_BRTAKEN,   /* type */                                 
+	 0,	                /* rightshift */                           
+	 2,	                /* size (0 = byte, 1 = short, 2 = long) */ 
+	 16,	                /* bitsize */                   
+	 false,	                /* pc_relative */                          
+	 0,	                /* bitpos */                               
+	 complain_overflow_signed, /* complain_on_overflow */
+	 ppc_elf_unsupported_reloc, /* special_function */             
+	 "R_PPC_REL14_BRTAKEN",	/* name */
+	 false,	                /* partial_inplace */                      
+	 0,		        /* src_mask */                             
+	 0xfffc,    		/* dst_mask */                             
+	 true),                 /* pcrel_offset */
+
+  /* A relative 16 bit branch.  Bit 10 should be set to indicate that
+     the branch is not expected to be taken.  The lower two bits must
+     be zero.  */
+  HOWTO (R_PPC_REL14_BRNTAKEN,  /* type */                                 
+	 0,	                /* rightshift */                           
+	 2,	                /* size (0 = byte, 1 = short, 2 = long) */ 
+	 16,	                /* bitsize */                   
+	 false,	                /* pc_relative */                          
+	 0,	                /* bitpos */                               
+	 complain_overflow_signed, /* complain_on_overflow */
+	 ppc_elf_unsupported_reloc, /* special_function */             
+	 "R_PPC_REL14_BRNTAKEN",/* name */
+	 false,	                /* partial_inplace */                      
+	 0,		        /* src_mask */                             
+	 0xfffc,    		/* dst_mask */                             
+	 true),                 /* pcrel_offset */
+
+  /* Like R_PPC_ADDR16, but referring to the GOT table entry for the
+     symbol.  */
+  HOWTO (R_PPC_GOT16,           /* type */                                 
+	 0,	                /* rightshift */                           
+	 1,	                /* size (0 = byte, 1 = short, 2 = long) */ 
+	 16,	                /* bitsize */                   
+	 false,	                /* pc_relative */                          
+	 0,	                /* bitpos */                               
+	 complain_overflow_bitfield, /* complain_on_overflow */
+	 ppc_elf_got16_reloc,	/* special_function */                     
+	 "R_PPC_GOT16",		/* name */
+	 false,	                /* partial_inplace */                      
+	 0,		        /* src_mask */                             
+	 0xffff,    		/* dst_mask */                             
 	 false),                /* pcrel_offset */
 
-  /* 26 bit absolute branch.  */
-  HOWTO (R_POWERPC_BA26,        /* type */                                 
+  /* Like R_PPC_ADDR16_LO, but referring to the GOT table entry for
+     the symbol.  */
+  HOWTO (R_PPC_GOT16_LO,        /* type */                                 
+	 0,	                /* rightshift */                           
+	 1,	                /* size (0 = byte, 1 = short, 2 = long) */ 
+	 16,	                /* bitsize */                   
+	 false,	                /* pc_relative */                          
+	 0,	                /* bitpos */                               
+	 complain_overflow_bitfield, /* complain_on_overflow */
+	 ppc_elf_got16_reloc,	/* special_function */                     
+	 "R_PPC_GOT16_LO",	/* name */
+	 false,	                /* partial_inplace */                      
+	 0,		        /* src_mask */                             
+	 0xffff,    		/* dst_mask */                             
+	 false),                /* pcrel_offset */
+
+  /* Like R_PPC_ADDR16_HI, but referring to the GOT table entry for
+     the symbol.  */
+  HOWTO (R_PPC_GOT16_HI,        /* type */                                 
+	 16,	                /* rightshift */                           
+	 1,	                /* size (0 = byte, 1 = short, 2 = long) */ 
+	 16,	                /* bitsize */                   
+	 false,	                /* pc_relative */                          
+	 0,	                /* bitpos */                               
+	 complain_overflow_bitfield, /* complain_on_overflow */
+	 ppc_elf_got16_reloc,	/* special_function */                     
+	 "R_PPC_GOT16_HI",	/* name */
+	 false,	                /* partial_inplace */                      
+	 0,		        /* src_mask */                             
+	 0xffff,    		/* dst_mask */                             
+	 false),                 /* pcrel_offset */
+
+  /* Like R_PPC_ADDR16_HA, but referring to the GOT table entry for
+     the symbol.  FIXME: Not supported.  */
+  HOWTO (R_PPC_GOT16_HA,        /* type */                                 
+	 0,	                /* rightshift */                           
+	 1,	                /* size (0 = byte, 1 = short, 2 = long) */ 
+	 16,	                /* bitsize */                   
+	 false,	                /* pc_relative */                          
+	 0,	                /* bitpos */                               
+	 complain_overflow_bitfield, /* complain_on_overflow */
+	 ppc_elf_unsupported_reloc, /* special_function */                     
+	 "R_PPC_GOT16_HA",	/* name */
+	 false,	                /* partial_inplace */                      
+	 0,		        /* src_mask */                             
+	 0xffff,    		/* dst_mask */                             
+	 false),                /* pcrel_offset */
+
+  /* Like R_PPC_REL24, but referring to the procedure linkage table
+     entry for the symbol.  FIXME: Not supported.  */
+  HOWTO (R_PPC_PLT24,           /* type */                                 
+	 0,	                /* rightshift */                           
+	 2,	                /* size (0 = byte, 1 = short, 2 = long) */ 
+	 26,	                /* bitsize */                   
+	 true,	                /* pc_relative */                          
+	 0,	                /* bitpos */                               
+	 complain_overflow_signed, /* complain_on_overflow */
+	 bfd_elf_generic_reloc, /* special_function */                     
+	 "R_PPC_PLT24",		/* name */
+	 false,	                /* partial_inplace */                      
+	 0,		        /* src_mask */                             
+	 0x3fffffc,    		/* dst_mask */                             
+	 true),                 /* pcrel_offset */
+
+  /* This is used only by the dynamic linker.  The symbol should exist
+     both in the object being run and in some shared library.  The
+     dynamic linker copies the data addressed by the symbol from the
+     shared library into the object.  I have no idea what the purpose
+     of this is.  */
+  HOWTO (R_PPC_COPY,            /* type */                                 
+	 0,	                /* rightshift */                           
+	 2,	                /* size (0 = byte, 1 = short, 2 = long) */ 
+	 32,	                /* bitsize */                   
+	 false,	                /* pc_relative */                          
+	 0,	                /* bitpos */                               
+	 complain_overflow_bitfield, /* complain_on_overflow */
+	 bfd_elf_generic_reloc, /* special_function */                     
+	 "R_PPC_COPY",		/* name */
+	 false,	                /* partial_inplace */                      
+	 0,		        /* src_mask */                             
+	 0,            		/* dst_mask */                             
+	 false),                /* pcrel_offset */
+
+  /* Like R_PPC_ADDR32, but used when setting global offset table
+     entries.  */
+  HOWTO (R_PPC_GLOB_DAT,        /* type */                                 
+	 0,	                /* rightshift */                           
+	 2,	                /* size (0 = byte, 1 = short, 2 = long) */ 
+	 32,	                /* bitsize */                   
+	 false,	                /* pc_relative */                          
+	 0,	                /* bitpos */                               
+	 complain_overflow_bitfield, /* complain_on_overflow */
+	 bfd_elf_generic_reloc, /* special_function */                     
+	 "R_PPC_GLOB_DAT",	/* name */
+	 false,	                /* partial_inplace */                      
+	 0,		        /* src_mask */                             
+	 0xffffffff,  		/* dst_mask */                             
+	 false),                /* pcrel_offset */
+
+  /* Marks a procedure linkage table entry for a symbol.  */
+  HOWTO (R_PPC_JMP_SLOT,        /* type */                                 
+	 0,	                /* rightshift */                           
+	 2,	                /* size (0 = byte, 1 = short, 2 = long) */ 
+	 32,	                /* bitsize */                   
+	 false,	                /* pc_relative */                          
+	 0,	                /* bitpos */                               
+	 complain_overflow_bitfield, /* complain_on_overflow */
+	 bfd_elf_generic_reloc, /* special_function */                     
+	 "R_PPC_JMP_SLOT",	/* name */
+	 false,	                /* partial_inplace */                      
+	 0,		        /* src_mask */                             
+	 0,            		/* dst_mask */                             
+	 false),                /* pcrel_offset */
+
+  /* Used only by the dynamic linker.  When the object is run, this
+     longword is set to the load address of the object, plus the
+     addend.  */
+  HOWTO (R_PPC_RELATIVE,        /* type */                                 
+	 0,	                /* rightshift */                           
+	 2,	                /* size (0 = byte, 1 = short, 2 = long) */ 
+	 32,	                /* bitsize */                   
+	 false,	                /* pc_relative */                          
+	 0,	                /* bitpos */                               
+	 complain_overflow_bitfield, /* complain_on_overflow */
+	 bfd_elf_generic_reloc, /* special_function */                     
+	 "R_PPC_RELATIVE",	/* name */
+	 false,	                /* partial_inplace */                      
+	 0,		        /* src_mask */                             
+	 0xffffffff,   		/* dst_mask */                             
+	 false),                /* pcrel_offset */
+
+  /* Like R_PPC_REL24, but uses the value of the symbol within the
+     object rather than the final value.  Normally used for
+     _GLOBAL_OFFSET_TABLE_.  FIXME: Not supported.  */
+  HOWTO (R_PPC_LOCAL24PC,       /* type */                                 
+	 0,	                /* rightshift */                           
+	 2,	                /* size (0 = byte, 1 = short, 2 = long) */ 
+	 26,	                /* bitsize */                   
+	 true,	                /* pc_relative */                          
+	 0,	                /* bitpos */                               
+	 complain_overflow_signed, /* complain_on_overflow */
+	 ppc_elf_unsupported_reloc, /* special_function */                     
+	 "R_PPC_LOCAL24PC",	/* name */
+	 false,	                /* partial_inplace */                      
+	 0,		        /* src_mask */                             
+	 0x3fffffc,   		/* dst_mask */                             
+	 true),                 /* pcrel_offset */
+
+  /* Like R_PPC_ADDR32, but may be unaligned.  */
+  HOWTO (R_PPC_UADDR32,         /* type */                                 
+	 0,	                /* rightshift */                           
+	 2,	                /* size (0 = byte, 1 = short, 2 = long) */ 
+	 32,	                /* bitsize */                   
+	 false,	                /* pc_relative */                          
+	 0,	                /* bitpos */                               
+	 complain_overflow_bitfield, /* complain_on_overflow */
+	 bfd_elf_generic_reloc, /* special_function */                     
+	 "R_PPC_UADDR32",	/* name */
+	 false,	                /* partial_inplace */                      
+	 0,		        /* src_mask */                             
+	 0xffffffff,   		/* dst_mask */                             
+	 false),                /* pcrel_offset */
+
+  /* Like R_PPC_ADDR16, but may be unaligned.  */
+  HOWTO (R_PPC_UADDR16,         /* type */                                 
+	 0,	                /* rightshift */                           
+	 1,	                /* size (0 = byte, 1 = short, 2 = long) */ 
+	 16,	                /* bitsize */                   
+	 false,	                /* pc_relative */                          
+	 0,	                /* bitpos */                               
+	 complain_overflow_bitfield, /* complain_on_overflow */
+	 bfd_elf_generic_reloc, /* special_function */                     
+	 "R_PPC_UADDR16",	/* name */
+	 false,	                /* partial_inplace */                      
+	 0,		        /* src_mask */                             
+	 0xffff,       		/* dst_mask */                             
+	 false),                /* pcrel_offset */
+
+  /* The remaining relocs are from the Embedded ELF ABI, and are not
+     in the SVR4 ELF ABI.  */
+
+  /* Like R_PPC_GOT16, but using the constant GOT table.  */
+  HOWTO (R_PPC_CGOT16,          /* type */                                 
+	 0,	                /* rightshift */                           
+	 1,	                /* size (0 = byte, 1 = short, 2 = long) */ 
+	 16,	                /* bitsize */                   
+	 false,	                /* pc_relative */                          
+	 0,	                /* bitpos */                               
+	 complain_overflow_bitfield, /* complain_on_overflow */
+	 ppc_elf_got16_reloc,	/* special_function */                     
+	 "R_PPC_CGOT16",	/* name */
+	 false,	                /* partial_inplace */                      
+	 0,		        /* src_mask */                             
+	 0xffff,   		/* dst_mask */                             
+	 false),                /* pcrel_offset */
+
+  /* Like R_PPC_GOT16_LO, but using the constant GOT table.  */
+  HOWTO (R_PPC_CGOT16_LO,       /* type */                                 
+	 0,	                /* rightshift */                           
+	 1,	                /* size (0 = byte, 1 = short, 2 = long) */ 
+	 16,	                /* bitsize */                   
+	 false,	                /* pc_relative */                          
+	 0,	                /* bitpos */                               
+	 complain_overflow_bitfield, /* complain_on_overflow */
+	 ppc_elf_got16_reloc,	/* special_function */                     
+	 "R_PPC_CGOT16_LO",	/* name */
+	 false,	                /* partial_inplace */                      
+	 0,		        /* src_mask */                             
+	 0xffff,   		/* dst_mask */                             
+	 false),                /* pcrel_offset */
+
+  /* Like R_PPC_GOT16_HI, but using the constant GOT table.  */
+  HOWTO (R_PPC_CGOT16_HI,       /* type */                                 
+	 16,	                /* rightshift */                           
+	 1,	                /* size (0 = byte, 1 = short, 2 = long) */ 
+	 16,	                /* bitsize */                   
+	 false,	                /* pc_relative */                          
+	 0,	                /* bitpos */                               
+	 complain_overflow_bitfield, /* complain_on_overflow */
+	 ppc_elf_got16_reloc,	/* special_function */                     
+	 "R_PPC_CGOT16_HI",	/* name */
+	 false,	                /* partial_inplace */                      
+	 0,		        /* src_mask */                             
+	 0xffff,   		/* dst_mask */                             
+	 false),                /* pcrel_offset */
+
+  /* Like R_PPC_GOT16_HA, but using the constant GOT table.  */
+  HOWTO (R_PPC_CGOT16_HA,       /* type */                                 
+	 0,	                /* rightshift */                           
+	 1,	                /* size (0 = byte, 1 = short, 2 = long) */ 
+	 16,	                /* bitsize */                   
+	 false,	                /* pc_relative */                          
+	 0,	                /* bitpos */                               
+	 complain_overflow_bitfield, /* complain_on_overflow */
+	 ppc_elf_unsupported_reloc, /* special_function */                     
+	 "R_PPC_CGOT16_HA",	/* name */
+	 false,	                /* partial_inplace */                      
+	 0,		        /* src_mask */                             
+	 0xffff,   		/* dst_mask */                             
+	 false),                /* pcrel_offset */
+
+  /* The dedicated GOT register.  */
+  HOWTO (R_PPC_GOT_REG,         /* type */                                 
+	 0,	                /* rightshift */                           
+	 1,	                /* size (0 = byte, 1 = short, 2 = long) */ 
+	 5,	                /* bitsize */                   
+	 false,	                /* pc_relative */                          
+	 0,	                /* bitpos */                               
+	 complain_overflow_bitfield, /* complain_on_overflow */
+	 ppc_elf_unsupported_reloc, /* special_function */                     
+	 "R_PPC_GOT_REG",	/* name */
+	 false,	                /* partial_inplace */                      
+	 0,		        /* src_mask */                             
+	 0x1f,   		/* dst_mask */                             
+	 false),                /* pcrel_offset */
+
+  /* The dedicated CGOT register.  */
+  HOWTO (R_PPC_CGOT_REG,        /* type */                                 
+	 0,	                /* rightshift */                           
+	 1,	                /* size (0 = byte, 1 = short, 2 = long) */ 
+	 5,	                /* bitsize */                   
+	 false,	                /* pc_relative */                          
+	 0,	                /* bitpos */                               
+	 complain_overflow_bitfield, /* complain_on_overflow */
+	 ppc_elf_unsupported_reloc, /* special_function */                     
+	 "R_PPC_CGOT_REG",	/* name */
+	 false,	                /* partial_inplace */                      
+	 0,		        /* src_mask */                             
+	 0x1f,   		/* dst_mask */                             
+	 false),                /* pcrel_offset */
+
+  /* Like R_PPC_ADDR16, but subtract the symbol.  */
+  HOWTO (R_PPC_NADDR16,         /* type */                                 
+	 0,	                /* rightshift */                           
+	 1,	                /* size (0 = byte, 1 = short, 2 = long) */ 
+	 16,	                /* bitsize */                   
+	 false,	                /* pc_relative */                          
+	 0,	                /* bitpos */                               
+	 complain_overflow_bitfield, /* complain_on_overflow */
+	 ppc_elf_unsupported_reloc, /* special_function */                     
+	 "R_PPC_NADDR16",	/* name */
+	 false,	                /* partial_inplace */                      
+	 0,		        /* src_mask */                             
+	 0xffff,   		/* dst_mask */                             
+	 false),                /* pcrel_offset */
+
+  /* Like R_PPC_ADDR32, but subtract the symbol.  */
+  HOWTO (R_PPC_NADDR32,         /* type */                                 
+	 0,	                /* rightshift */                           
+	 2,	                /* size (0 = byte, 1 = short, 2 = long) */ 
+	 32,	                /* bitsize */                   
+	 false,	                /* pc_relative */                          
+	 0,	                /* bitpos */                               
+	 complain_overflow_bitfield, /* complain_on_overflow */
+	 ppc_elf_unsupported_reloc, /* special_function */                     
+	 "R_PPC_NADDR32",	/* name */
+	 false,	                /* partial_inplace */                      
+	 0,		        /* src_mask */                             
+	 0xffffffff,   		/* dst_mask */                             
+	 false),                /* pcrel_offset */
+
+  /* Like R_PPC_ADDR24, but subtract the symbol.  */
+  HOWTO (R_PPC_NADDR24,         /* type */                                 
 	 0,	                /* rightshift */                           
 	 2,	                /* size (0 = byte, 1 = short, 2 = long) */ 
 	 26,	                /* bitsize */                   
 	 false,	                /* pc_relative */                          
 	 0,	                /* bitpos */                               
 	 complain_overflow_bitfield, /* complain_on_overflow */
-	 bfd_elf_generic_reloc, /* special_function */                     
-	 "R_POWERPC_BA26",      /* name */                                 
-	 true,	                /* partial_inplace */                      
-	 0x3fffffc,	        /* src_mask */                             
-	 0x3fffffc,        	/* dst_mask */                             
+	 ppc_elf_unsupported_reloc, /* special_function */                     
+	 "R_PPC_NADDR24",	/* name */
+	 false,	                /* partial_inplace */                      
+	 0,		        /* src_mask */                             
+	 0x3fffffc,   		/* dst_mask */                             
 	 false),                /* pcrel_offset */
-  
-  /* 16 bit reference to TOC section.  */
-  HOWTO (R_POWERPC_TOC16,       /* type */                                 
+
+  /* Offset of symbol relative to containing csect.  */
+  HOWTO (R_PPC_DISP16,          /* type */                                 
 	 0,	                /* rightshift */                           
 	 1,	                /* size (0 = byte, 1 = short, 2 = long) */ 
 	 16,	                /* bitsize */                   
 	 false,	                /* pc_relative */                          
 	 0,	                /* bitpos */                               
-	 complain_overflow_signed, /* complain_on_overflow */
-	 powerpc_elf_toc16_reloc, /* special_function */                     
-	 "R_POWERPC_TOC16",     /* name */                                 
-	 true,	                /* partial_inplace */                      
-	 0xffff,	        /* src_mask */                             
-	 0xffff,        	/* dst_mask */                             
+	 complain_overflow_bitfield, /* complain_on_overflow */
+	 ppc_elf_unsupported_reloc, /* special_function */                     
+	 "R_PPC_DISP16",	/* name */
+	 false,	                /* partial_inplace */                      
+	 0,		        /* src_mask */                             
+	 0xffff,   		/* dst_mask */                             
+	 false),                /* pcrel_offset */
+
+  /* Like R_PPC_GOT16, but may be converted to an address computation
+     instead of a load.  */
+  HOWTO (R_PPC_GOTRL16,         /* type */                                 
+	 0,	                /* rightshift */                           
+	 1,	                /* size (0 = byte, 1 = short, 2 = long) */ 
+	 16,	                /* bitsize */                   
+	 false,	                /* pc_relative */                          
+	 0,	                /* bitpos */                               
+	 complain_overflow_bitfield, /* complain_on_overflow */
+	 ppc_elf_got16_reloc,	/* special_function */                     
+	 "R_PPC_GOTRL16",	/* name */
+	 false,	                /* partial_inplace */                      
+	 0,		        /* src_mask */                             
+	 0xffff,   		/* dst_mask */                             
+	 false),                /* pcrel_offset */
+
+  /* Like R_PPC_GOT16, but may be converted to a load instead of an
+     address computation.  */
+  HOWTO (R_PPC_GOTRLA16,        /* type */                                 
+	 0,	                /* rightshift */                           
+	 1,	                /* size (0 = byte, 1 = short, 2 = long) */ 
+	 16,	                /* bitsize */                   
+	 false,	                /* pc_relative */                          
+	 0,	                /* bitpos */                               
+	 complain_overflow_bitfield, /* complain_on_overflow */
+	 ppc_elf_got16_reloc,	/* special_function */                     
+	 "R_PPC_GOTRLA16",	/* name */
+	 false,	                /* partial_inplace */                      
+	 0,		        /* src_mask */                             
+	 0xffff,  		/* dst_mask */                             
+	 false),                /* pcrel_offset */
+
+  /* Like R_PPC_CGOT16, but may be converted to an address computation
+     instead of a load.  */
+  HOWTO (R_PPC_CGOTRL16,        /* type */                                 
+	 0,	                /* rightshift */                           
+	 1,	                /* size (0 = byte, 1 = short, 2 = long) */ 
+	 16,	                /* bitsize */                   
+	 false,	                /* pc_relative */                          
+	 0,	                /* bitpos */                               
+	 complain_overflow_bitfield, /* complain_on_overflow */
+	 ppc_elf_unsupported_reloc, /* special_function */                     
+	 "R_PPC_CGOTRL16",	/* name */
+	 false,	                /* partial_inplace */                      
+	 0,		        /* src_mask */                             
+	 0xffff,   		/* dst_mask */                             
+	 false),                /* pcrel_offset */
+
+  /* Like R_PPC_CGOT16, but may be converted to a load instead of an
+     address computation.  */
+  HOWTO (R_PPC_CGOTRLA16,       /* type */                                 
+	 0,	                /* rightshift */                           
+	 1,	                /* size (0 = byte, 1 = short, 2 = long) */ 
+	 16,	                /* bitsize */                   
+	 false,	                /* pc_relative */                          
+	 0,	                /* bitpos */                               
+	 complain_overflow_bitfield, /* complain_on_overflow */
+	 ppc_elf_unsupported_reloc, /* special_function */
+	 "R_PPC_CGOTRLA16",	/* name */
+	 false,	                /* partial_inplace */                      
+	 0,		        /* src_mask */                             
+	 0xffff,   		/* dst_mask */                             
 	 false),                /* pcrel_offset */
 };
 
-/* Handle the TOC16 reloc.  We want to use the offset within the .toc
-   section, not the actual VMA.  */
+/* Don't pretend we can deal with unsupported relocs.  */
+
+/*ARGSUSED*/
+static bfd_reloc_status_type
+ppc_elf_unsupported_reloc (abfd, reloc_entry, symbol, data, input_section,
+			   output_bfd, error_message)
+     bfd *abfd;
+     arelent *reloc_entry;
+     asymbol *symbol;
+     PTR data;
+     asection *input_section;
+     bfd *output_bfd;
+     char **error_message;
+{
+  abort ();
+}
+
+/* Handle the ADDR16_HA reloc by adjusting the reloc addend.  */
 
 static bfd_reloc_status_type
-powerpc_elf_toc16_reloc (abfd,
-			 reloc_entry,
-			 symbol,
-			 data,
-			 input_section,
-			 output_bfd,
-			 error_message)
+ppc_elf_addr16_ha_reloc (abfd, reloc_entry, symbol, data, input_section,
+		         output_bfd, error_message)
+     bfd *abfd;
+     arelent *reloc_entry;
+     asymbol *symbol;
+     PTR data;
+     asection *input_section;
+     bfd *output_bfd;
+     char **error_message;
+{
+  bfd_vma relocation;
+
+  if (output_bfd != (bfd *) NULL)
+    return bfd_elf_generic_reloc (abfd, reloc_entry, symbol, data,
+				  input_section, output_bfd, error_message);
+
+  if (bfd_is_com_section (symbol->section))
+    relocation = 0;
+  else
+    relocation = symbol->value;
+
+  relocation += (symbol->section->output_section->vma
+		 + symbol->section->output_offset
+		 + reloc_entry->addend);
+
+  if ((relocation & 0x8000) != 0)
+    reloc_entry->addend += 0x10000;
+
+  return bfd_reloc_continue;
+}
+
+/* Handle the GOT16 reloc.  We want to use the offset within the .got
+   section, not the actual VMA.  This is appropriate when generating
+   an embedded ELF object, for which the .got section acts like the
+   AIX .toc section.  When and if we support PIC code, we will have to
+   change this, perhaps by switching off on the e_type field.  */
+
+static bfd_reloc_status_type
+ppc_elf_got16_reloc (abfd, reloc_entry, symbol, data, input_section,
+		     output_bfd, error_message)
      bfd *abfd;
      arelent *reloc_entry;
      asymbol *symbol;
@@ -157,68 +794,15 @@ powerpc_elf_toc16_reloc (abfd,
 {
   asection *sec;
 
-  /* Simply adjust the reloc addend by the negative of the VMA of the
-     .toc section.  */
+  if (output_bfd != (bfd *) NULL)
+    return bfd_elf_generic_reloc (abfd, reloc_entry, symbol, data,
+				  input_section, output_bfd, error_message);
+
   sec = bfd_get_section (*reloc_entry->sym_ptr_ptr);
-  if (sec == &bfd_und_section)
-    return bfd_reloc_continue;
-  BFD_ASSERT (strcmp (bfd_get_section_name (abfd, sec), ".toc") == 0);
+  BFD_ASSERT (sec == &bfd_und_section
+	      || strcmp (bfd_get_section_name (abfd, sec), ".got") == 0
+	      || strcmp (bfd_get_section_name (abfd, sec), ".cgot") == 0);
   reloc_entry->addend -= sec->output_section->vma;
-  return bfd_reloc_continue;
-}
-
-/* Handle a branch.  If the next instruction is the special
-   instruction "cror 31,31,31", and this branch is to a stub routine
-   we have created, we must change the cror instruction into an
-   instruction which reloads the TOC register.  We can detect a stub
-   routine because it is in a BFD named "linker stubs".  FIXME: What a
-   hack.  */
-
-static bfd_reloc_status_type
-powerpc_elf_b26_reloc (abfd,
-		       reloc_entry,
-		       symbol,
-		       data,
-		       input_section,
-		       output_bfd,
-		       error_message)
-     bfd *abfd;
-     arelent *reloc_entry;
-     asymbol *symbol;
-     PTR data;
-     asection *input_section;
-     bfd *output_bfd;
-     char **error_message;
-{
-  if (bfd_get_section (symbol) != &bfd_und_section
-      && (strcmp (bfd_get_section (symbol)->owner->filename, "linker stubs")
-	  == 0))
-    {
-      bfd_vma val;
-
-      /* This symbol is a stub created by the linker.  */
-      val = bfd_get_32 (abfd, (bfd_byte *) data + reloc_entry->address + 4);
-      if (val == 0x4ffffb82)			/* cror 31,31,31 */
-	bfd_put_32 (abfd, (bfd_vma) 0x80410014,	/* l r2,20(r1) */
-		    (bfd_byte *) data + reloc_entry->address + 4);
-    }
-
-  if (output_bfd != (bfd *) NULL
-      && bfd_get_section (symbol) == &bfd_und_section)
-    {
-      bfd_size_type address;
-
-      /* If we are generating relocateable output, and the symbol is
-	 undefined, we just want to adjust the reloc by the amount the
-	 section moved.  */
-      address = reloc_entry->address;
-      reloc_entry->address += input_section->output_offset;
-      return _bfd_relocate_contents (reloc_entry->howto, abfd,
-				     - input_section->output_offset,
-				     (bfd_byte *) data + address);
-    }
-
-  /* Otherwise, let bfd_perform_relocation handle it.  */
   return bfd_reloc_continue;
 }
 
@@ -232,12 +816,12 @@ struct powerpc_reloc_map
 
 static const struct powerpc_reloc_map powerpc_reloc_map[] =
 {
-  { BFD_RELOC_NONE, R_POWERPC_NONE, },
-  { BFD_RELOC_32, R_POWERPC_32 },
-  { BFD_RELOC_CTOR, R_POWERPC_32 },
-  { BFD_RELOC_PPC_B26, R_POWERPC_B26 },
-  { BFD_RELOC_PPC_BA26, R_POWERPC_BA26 },
-  { BFD_RELOC_PPC_TOC16, R_POWERPC_TOC16 }
+  { BFD_RELOC_NONE, R_PPC_NONE, },
+  { BFD_RELOC_32, R_PPC_ADDR32 },
+  { BFD_RELOC_CTOR, R_PPC_ADDR32 },
+  { BFD_RELOC_PPC_B26, R_PPC_REL24 },
+  { BFD_RELOC_PPC_BA26, R_PPC_ADDR24 },
+  { BFD_RELOC_PPC_TOC16, R_PPC_GOT16 }
 };
 
 static const struct reloc_howto_struct *
@@ -261,13 +845,13 @@ bfd_elf32_bfd_reloc_type_lookup (abfd, code)
 /* Set the howto pointer for a PowerPC ELF reloc.  */
 
 static void
-powerpc_info_to_howto_rel (abfd, cache_ptr, dst)
+powerpc_info_to_howto (abfd, cache_ptr, dst)
      bfd *abfd;
      arelent *cache_ptr;
-     Elf32_Internal_Rel *dst;
+     Elf32_Internal_Rela *dst;
 {
-  BFD_ASSERT (ELF32_R_TYPE (dst->r_info) < (unsigned int) R_POWERPC_max);
-  cache_ptr->howto = &elf_powerpc_howto_table[ELF32_R_TYPE(dst->r_info)];
+  BFD_ASSERT (ELF32_R_TYPE (dst->r_info) < (unsigned int) R_PPC_max);
+  cache_ptr->howto = &elf_powerpc_howto_table[ELF32_R_TYPE (dst->r_info)];
 }
 
 #define TARGET_BIG_SYM		bfd_elf32_powerpc_vec
@@ -275,7 +859,6 @@ powerpc_info_to_howto_rel (abfd, cache_ptr, dst)
 #define ELF_ARCH		bfd_arch_powerpc
 #define ELF_MACHINE_CODE	EM_CYGNUS_POWERPC
 #define ELF_MAXPAGESIZE		0x10000
-#define elf_info_to_howto	0
-#define elf_info_to_howto_rel	powerpc_info_to_howto_rel
+#define elf_info_to_howto	powerpc_info_to_howto
 
 #include "elf32-target.h"
