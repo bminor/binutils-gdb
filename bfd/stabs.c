@@ -515,7 +515,7 @@ _bfd_discard_section_stabs (abfd, stabsec, psecinfo,
      bfd *abfd;
      asection *stabsec;
      PTR psecinfo;
-     boolean (*reloc_symbol_deleted_p) (bfd_vma, PTR);
+     boolean (*reloc_symbol_deleted_p) PARAMS ((bfd_vma, PTR));
      PTR cookie;
 {
   bfd_size_type count, amt;
