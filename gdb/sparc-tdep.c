@@ -3285,7 +3285,8 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_pop_frame (gdbarch, sparc_pop_frame);
   set_gdbarch_deprecated_push_return_address (gdbarch, sparc_push_return_address);
   set_gdbarch_deprecated_push_dummy_frame (gdbarch, sparc_push_dummy_frame);
-  set_gdbarch_reg_struct_has_addr (gdbarch, sparc_reg_struct_has_addr);
+  set_gdbarch_deprecated_reg_struct_has_addr
+    (gdbarch, sparc_reg_struct_has_addr);
   set_gdbarch_return_value_on_stack (gdbarch, sparc_return_value_on_stack);
   set_gdbarch_deprecated_saved_pc_after_call (gdbarch, sparc_saved_pc_after_call);
   set_gdbarch_prologue_frameless_p (gdbarch, sparc_prologue_frameless_p);

@@ -1,3 +1,13 @@
+2003-09-14  Mark Kettenis  <kettenis@gnu.org>
+
+	* cris-tdep.c (cris_gdbarch_init): Set
+	deprecated_reg_struct_has_addr instead of reg_struct_has_addr.
+	* hppa-tdep.c (hppa_gdbarch_init): Likewise.
+	* mcore-tdep.c (mcore_gdbarch_init): Likewise.
+	* mips-tdep.c (mips_gdbarch_init): Likewise.
+	* mn10300-tdep.c (mn10300_gdbarch_init): Likewise.
+	* sparc-tdep.c (sparc_gdbarch_init): Likewise.
+
 2003-09-13  Andrew Cagney  <cagney@redhat.com>
 
 	* values.c (using_struct_return): Delete "function" and "funcaddr"

@@ -5119,7 +5119,8 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
         set_gdbarch_deprecated_call_dummy_length
           (gdbarch, hppa32_call_dummy_length);
         set_gdbarch_deprecated_stack_align (gdbarch, hppa32_stack_align);
-        set_gdbarch_reg_struct_has_addr (gdbarch, hppa_reg_struct_has_addr);
+        set_gdbarch_deprecated_reg_struct_has_addr
+	  (gdbarch, hppa_reg_struct_has_addr);
         set_gdbarch_deprecated_extract_return_value
           (gdbarch, hppa32_extract_return_value);
         set_gdbarch_use_struct_convention

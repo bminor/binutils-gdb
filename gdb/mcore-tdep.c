@@ -1115,7 +1115,8 @@ mcore_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_believe_pcc_promotion (gdbarch, 1);
   /* MCore will never pass a sturcture by reference. It will always be split
      between registers and stack.  */
-  set_gdbarch_reg_struct_has_addr (gdbarch, mcore_reg_struct_has_addr);
+  set_gdbarch_deprecated_reg_struct_has_addr
+    (gdbarch, mcore_reg_struct_has_addr);
 
   /* Should be using push_dummy_call.  */
   set_gdbarch_deprecated_dummy_write_sp (gdbarch, deprecated_write_sp);

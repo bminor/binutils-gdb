@@ -4156,7 +4156,7 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
                                       cris_abi_original_store_return_value);
       set_gdbarch_deprecated_extract_return_value 
         (gdbarch, cris_abi_original_extract_return_value);
-      set_gdbarch_reg_struct_has_addr 
+      set_gdbarch_deprecated_reg_struct_has_addr 
         (gdbarch, cris_abi_original_reg_struct_has_addr);
     }
   else if (tdep->cris_abi == CRIS_ABI_V2)
@@ -4166,8 +4166,8 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_deprecated_store_return_value (gdbarch, cris_abi_v2_store_return_value);
       set_gdbarch_deprecated_extract_return_value
 	(gdbarch, cris_abi_v2_extract_return_value);
-      set_gdbarch_reg_struct_has_addr (gdbarch, 
-                                       cris_abi_v2_reg_struct_has_addr);
+      set_gdbarch_deprecated_reg_struct_has_addr
+	(gdbarch, cris_abi_v2_reg_struct_has_addr);
     }
   else
     internal_error (__FILE__, __LINE__, "cris_gdbarch_init: unknown CRIS ABI");
