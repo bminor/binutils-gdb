@@ -1,5 +1,9 @@
 Tue Nov 21 16:14:32 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* configure.in: Use BFD_NEED_DECLARATION.
+	* acconfig.h: Put NEED_DECLARATION_FREE in @TOP@ section.
+	* configure, config.in: Rebuild with autoconf 2.6.
+
 	* ldmain.c (constructor_callback): Don't warn about BFD_RELOC_CTOR
 	being unsupported if this is not a relocaeable link and the input
 	BFD supports it, since ldctor_build_sets can cope with that case.
