@@ -1928,6 +1928,8 @@ Define this to override the defaults of @code{__volatile__} or @code{/**/}.
 
 Regex conditionals.
 
+@table
+
 @item C_ALLOCA
 regex.c
 @item NFAILURES
@@ -1946,6 +1948,8 @@ regex.c
 regex.c
 @item test
 regex.c
+
+@end table
 
 @node Target Conditionals
 @chapter Target Conditionals
