@@ -117,6 +117,7 @@ NINDY ROM monitor at the other end of the line.
 #include "nindy-share/stop.h"
 
 #include "dcache.h"
+#include "remote-utils.h"
 
 static DCACHE *nindy_dcache;
 
@@ -179,6 +180,7 @@ nindy_open (name, from_tty)
     char *name;		/* "/dev/ttyXX", "ttyXX", or "XX": tty to be opened */
     int from_tty;
 {
+  char baudrate[1024];
 
   if (!name)
     error_no_arg ("serial port device name");
@@ -193,7 +195,8 @@ nindy_open (name, from_tty)
   /* Allow user to interrupt the following -- we could hang if there's
      no NINDY at the other end of the remote tty.  */
   immediate_quit++;
-  ninConnect(name, baud_rate ? baud_rate : "9600",
+  sprintf(baudrate, "%d", sr_get_baud_rate());
+  ninConnect(name, baudrate,
 	     nindy_initial_brk, !from_tty, nindy_old_protocol);
   immediate_quit--;
 
@@ -222,8 +225,8 @@ nindy_detach (name, from_tty)
 static void
 nindy_files_info ()
 {
-  printf("\tAttached to %s at %s bps%s%s.\n", savename,
-	 baud_rate? baud_rate: "9600",
+  printf("\tAttached to %s at %d bps%s%s.\n", savename,
+	 sr_get_baud_rate(),
 	 nindy_old_protocol? " in old protocol": "",
          nindy_initial_brk? " with initial break": "");
 }

@@ -133,6 +133,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "gdb-stabs.h"
 
 #include "dcache.h"
+#include "remote-utils.h"
 
 #if !defined(DONT_USE_REMOTE)
 #ifdef USG
@@ -297,20 +298,11 @@ device is attached to the remote system (e.g. /dev/ttya).");
   if (!remote_desc)
     perror_with_name (name);
 
-#if 0
-  /* FIXME: This should be using remote-utils.c.  */
-  if (baud_rate)
+  if (SERIAL_SETBAUDRATE (remote_desc, sr_get_baud_rate()))
     {
-      int rate;
-
-      if (sscanf (baud_rate, "%d", &rate) == 1)
-	if (SERIAL_SETBAUDRATE (remote_desc, rate))
-	  {
-	    SERIAL_CLOSE (remote_desc);
-	    perror_with_name (name);
-	  }
+      SERIAL_CLOSE (remote_desc);
+      perror_with_name (name);
     }
-#endif
 
   SERIAL_RAW (remote_desc);
 

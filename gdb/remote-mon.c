@@ -49,6 +49,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "command.h"
 #include "serial.h"
 #include "monitor.h"
+#include "remote-utils.h"
 
 #ifdef HAVE_TERMIO
 #  define TERMINAL struct termios
@@ -337,16 +338,10 @@ general_open(args, name, from_tty)
     perror_with_name(dev_name);
 
   /* The baud rate was specified when GDB was started.  */
-  if (baud_rate)
+  if (SERIAL_SETBAUDRATE (monitor_desc, sr_get_baud_rate()))
     {
-      int rate;
-
-      if (sscanf (baud_rate, "%d", &rate) == 1)
-	if (SERIAL_SETBAUDRATE (monitor_desc, rate))
-	  {
-	    SERIAL_CLOSE (monitor_desc);
-	    perror_with_name (name);
-	  }
+      SERIAL_CLOSE (monitor_desc);
+      perror_with_name (name);
     }
 
   SERIAL_RAW(monitor_desc);

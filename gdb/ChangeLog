@@ -1,3 +1,12 @@
+Tue Sep 14 12:21:49 1993  K. Richard Pixley  (rich@sendai.cygnus.com)
+
+	* remote.c, remote-nindy.c, remote-mon.c, remote-es.c: include
+	  remote-utils.h.
+
+	* remote.c (remote_open), remote-nindy.c (nindy_open,
+	  nindy_files_info), remote-mon.c (general_open), remote-es.c
+	  (es1800_open): use remote-utils facilities for baud rate.
+
 Tue Sep 14 09:12:17 1993  Jim Kingdon  (kingdon@cirdan.cygnus.com)
 
 	* paread.c, coffread.c, elfread.c: Include <time.h> before libbfd.h.

@@ -106,6 +106,7 @@ STP
 #include "wait.h"
 #include "terminal.h"
 #include "command.h"
+#include "remote-utils.h"
 
 #ifdef USG
 #include <sys/types.h>
@@ -364,7 +365,7 @@ es1800_open (name, from_tty)
   char buf[PBUFSIZ];
   char *p;
   int i, fcflag;
-  char *baudrate;
+  char baudrate[1024];
 
   m68020 = 0;
 
@@ -372,7 +373,7 @@ es1800_open (name, from_tty)
     {
       error_no_arg ("serial port device name");
     }
-  baudrate = baud_rate ? baud_rate : "19200";  /* default baudrate = 19200 */
+  sprintf(baudrate, "%d", sr_get_baud_rate());
 
   target_preopen (from_tty);
   es1800_close (0);
