@@ -27,6 +27,7 @@ Makefile.in
 bfd.texinfo
 bfdsumm.texi
 chew.c
+makefile.vms
 proto.str
 doc.str
 ChangeLog
