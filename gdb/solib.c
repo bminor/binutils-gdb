@@ -181,6 +181,8 @@ solib_map_sections (so)
 /* Read all dynamically loaded common symbol definitions from the inferior
    and add them to the misc_function_vector.  */
 
+#ifndef SVR4_SHARED_LIBS
+
 static void
 solib_add_common_symbols (rtc_symp)
     struct rtc_symb *rtc_symp;
@@ -228,6 +230,8 @@ solib_add_common_symbols (rtc_symp)
 
   condense_misc_bunches (1);
 }
+
+#endif	/* SVR4_SHARED_LIBS */
 
 /*
 

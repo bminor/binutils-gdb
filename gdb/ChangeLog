@@ -1,3 +1,8 @@
+Wed Jan 15 09:56:16 1992  Fred Fish  (fnf at cygnus.com)
+
+	* solib.c (solib_add_common_symbols):  Only compile in when not
+	using SVR4 style shared libraries.
+
 Tue Jan 14 22:34:00 1992  Fred Fish  (fnf at cygnus.com)
 
 	* dwarfread.c (locval):  Add offreg flag to indicate location
