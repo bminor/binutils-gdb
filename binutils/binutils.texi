@@ -929,7 +929,7 @@ objdump [ -a | --archive-headers ]
         [ -f | --file-headers ]
         [ -h | --section-headers | --headers ]  [ -i | --info ]
         [ -j @var{section} | --section=@var{section} ]
-        [ -l | --line-numbers ]
+        [ -l | --line-numbers ] [ -S | --source ]
         [ -m @var{machine} | --architecture=@var{machine} ]
         [ -r | --reloc ] [ -R | --dynamic-reloc ]
         [ -s | --full-contents ]  [ --stabs ]
@@ -1060,6 +1060,13 @@ libraries.
 @cindex sections, full contents
 @cindex object file sections
 Display the full contents of any sections requested.
+
+@item -S
+@itemx --source
+@cindex source disassembly
+@cindex disassembly, with source
+Display source code intermixed with disassembly, if possible.  Implies
+@samp{-d}.
 
 @item --stabs
 @cindex stab

@@ -41,6 +41,7 @@ objdump \- display information from object files.
 .RB "[\|" \-r | \-\-reloc "\|]" 
 .RB "[\|" \-R | \-\-dynamic\-reloc "\|]" 
 .RB "[\|" \-s | \-\-full\-contents "\|]"
+.RB "[\|" \-S | \-\-source "\|]"
 .RB "[\|" \-\-stabs "\|]"
 .RB "[\|" \-t | \-\-syms "\|]" 
 .RB "[\|" \-T | \-\-dynamic\-syms "\|]" 
@@ -226,6 +227,13 @@ libraries.
 .TP
 .B \-\-full\-contents
 Display the full contents of any sections requested.
+
+.TP
+.B \-S
+.TP
+.B \-\-source
+Display source code intermixed with disassembly, if possible.  Implies
+\fB-d\fP.
 
 .TP
 .B \-\-stabs
