@@ -1,3 +1,10 @@
+Fri Oct 29 14:55:05 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* ld.h (flag_is_*): Removed macros.
+	* ldmain.c (enter_global_ref), ldsym.c (write_file_locals):
+	Consistently check the BFD symbol flags directly, rather than
+	using file_is_* macros.
+
 Thu Oct 28 19:08:42 1993  Stan Shebs  (shebs@rtl.cygnus.com)
 
 	* configure.in (sparc*-*-lynxos*): New target.

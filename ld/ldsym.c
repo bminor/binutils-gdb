@@ -474,14 +474,14 @@ write_file_locals (output_buffer)
 
 	if (p->section == 0)
 	  p->section = &bfd_abs_section;
-	if (flag_is_global (p->flags)
-	    || flag_is_weak (p->flags))
+	if ((p->flags & BSF_GLOBAL)
+	    || (p->flags & BSF_WEAK))
 	  {
 	    /* If this symbol is marked as occurring now, rather than
 	       at the end, output it now.  This is used for COFF C_EXT
 	       FCN symbols.  FIXME: There must be a better way.  */
 	    if (bfd_asymbol_bfd (p) == entry->the_bfd
-		&& flag_is_not_at_end (p->flags))
+		&& (p->flags & BSF_NOT_AT_END))
 	      {
 		*(output_buffer++) = p;
 		p->flags |= BSF_KEEP;
@@ -493,7 +493,7 @@ write_file_locals (output_buffer)
 	      {
 		/* Dont think about indirect symbols */
 	      }
-	    else if (flag_is_debugger (p->flags))
+	    else if (p->flags & BSF_DEBUGGING)
 	      {
 		/* Only keep the debugger symbols if no stripping required */
 		if (strip_symbols == STRIP_NONE)
@@ -506,7 +506,7 @@ write_file_locals (output_buffer)
 	      {
 		/* These must be global.  */
 	      }
-	    else if (flag_is_ordinary_local (p->flags))
+	    else if (p->flags & BSF_LOCAL)
 	      {
 		if (discard_locals == DISCARD_ALL)
 		  {
