@@ -1133,11 +1133,13 @@ relocation entry.
 @itemx md_long_jump_size
 @itemx md_create_short_jump
 @itemx md_create_long_jump
+@itemx TC_CHECK_ADJUSTED_BROKEN_DOT_WORD
 @cindex WORKING_DOT_WORD
 @cindex md_short_jump_size
 @cindex md_long_jump_size
 @cindex md_create_short_jump
 @cindex md_create_long_jump
+@cindex TC_CHECK_ADJUSTED_BROKEN_DOT_WORD
 If @code{WORKING_DOT_WORD} is defined, GAS will not do broken word processing
 (@pxref{Broken words}).  Otherwise, you should set @code{md_short_jump_size} to
 the size of a short jump (a jump that is just long enough to jump around a
@@ -1145,6 +1147,10 @@ number of long jumps) and @code{md_long_jump_size} to the size of a long jump
 (a jump that can go anywhere in the function).  You should define
 @code{md_create_short_jump} to create a short jump around a number of long
 jumps, and define @code{md_create_long_jump} to create a long jump.
+If defined, the macro TC_CHECK_ADJUSTED_BROKEN_DOT_WORD will be called for each
+adjusted word just before the word is output.  The macro takes two arguments,
+an @code{addressT} with the adjusted word and a pointer to the current
+@code{struct broken_word}.
 
 @item md_estimate_size_before_relax
 @cindex md_estimate_size_before_relax
