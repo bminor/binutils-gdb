@@ -210,7 +210,7 @@ libopcodes_la_LDFLAGS = -release $(VERSION) @WIN32LDFLAGS@
 
 noinst_LIBRARIES = libopcodes.a
 
-POTFILES = $(BFD_H) $(HFILES) $(CFILES)
+POTFILES = $(HFILES) $(CFILES)
 
 CLEANFILES = libopcodes.a stamp-lib dep.sed .dep .dep1
 # start-sanitize-cygnus
