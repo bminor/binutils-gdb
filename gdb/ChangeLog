@@ -1,3 +1,8 @@
+2003-08-16  Andrew Cagney  <cagney@redhat.com>
+
+	* Makefile.in (printcmd.o, valprint.o): Do not try to build with
+	-Werror.  -Wformat-nonliteral problems.
+
 2003-08-15  J. Brobecker  <brobecker@gnat.com>
 
 	Further multiarching work mostly for hppa64-*-hpux11:
