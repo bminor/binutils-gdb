@@ -1,3 +1,44 @@
+2000-08-10  Mark Kettenis  <kettenis@gnu.org>
+
+	Adapt support for SSE registers in Linux/x86 for Linux 2.4.
+	* i386-linux-nat.c: Various doc fixes.  Include "i387-nat.h".
+	(GETFPXREGS_SUPPLIES): Renamed from GETXFPREGS_SUPPLIES.
+	(have_ptrace_getfpxregs): Renamed from have_ptrace_getxfpregs.
+	(convert_to_gregset): Removed.  Moved logic to ...
+	(fill_gregset): ... here.  Simplified function.
+	(fetch_regs): Use perror_with_name for error reporting.
+	(store_regs): Add `regno' parameter.  Use perror_with_name for
+	error reporting.  Call fill_gregset instead of convert_to_gregset.
+	(FPREG_ADDR): Remove.
+	(supply_fpregset): Implement by calling i387_supply_fsave.
+	(convert_to_fpregset): Remove.
+	(fill_fpregset): Implement by calling i387_fill_fsave.
+	(fetch_fpregs): Use perror_with_name fro error reporting.
+	(store_fpregs) Add `regno' parameter.  Use perror_with_name fro
+	error reporting.  Call fill_fpregset instead of
+	convert_to_fpregset.
+	(supply_xfpregset, convert_to_xfpregset): Removed.
+	(supply_fpxregset, fill_fpxregset): New functions.
+	(fetch_fpxregs): Renamed from fetch_xfpregs.  Use perror_with_name
+	for error reporting.  Call supply_fpxregset instead of
+	supply_xfpregset.
+	(store_xfpregs): Removed.
+	(store_fpxregs): New function.
+	(fetch_inferior_registers): Adjust for xfp -> fpx change.  Tweak
+	message in call to internal_error.
+	(store_inferior_registers): Adjust for xfp ->fpx change.  Pass
+	REGNO to store_regs, store_fpregs and store_fpxregs.
+	(fetch_core_registers): Adjust for xfp -> fpx change.
+	* acconfig.h (HAVE_PTRACE_GETFPXREGS): Renamed from
+	HAVE_PTRACE_GETXFPREGS.
+	* config.in: Regenerated.
+	* configure.in: Replace check for PTRACE_GETXFPREGS with check for
+	PTRACE_GETFPXREGS.  Remove comment about Cygnus SSE extensions.
+	* configure: Regenerated.
+	* config/i386/linux.mh (NATDEPFILES): Add i387-nat.o.
+	* config/i386/tm-linux.h: Base definition of HAVE_SSE_REGS on
+	HAVE_PTRACE_GETFPXREGS instead of HAVE_PTRACE_GETXFPREGS.
+
 2000-08-10  Andrew Cagney  <cagney@ops1.cygnus.com>
 
 	* regcache.c (TARGET_WRITE_PC, TARGET_READ_PC, TARGET_READ_FP,
