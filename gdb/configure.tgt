@@ -62,8 +62,6 @@ d30v-*-*)		gdb_target=d30v ;;
 h8300-*-*)		gdb_target=h8300 ;;
 h8500-*-*)		gdb_target=h8500 ;;
 
-sh-*-*)			gdb_target=sh ;;
-
 fr30-*-elf*)		gdb_target=fr30 ;;
 
 hppa*-*-bsd*)		gdb_target=hppabsd ;;
@@ -233,6 +231,8 @@ rs6000-*-lynxos*)	gdb_target=rs6000lynx ;;
 rs6000-*-aix4*)		gdb_target=aix4 ;;
 rs6000-*-*)		gdb_target=rs6000 ;;
 
+sh-*-*)			gdb_target=sh ;;
+
 sparc-*-aout*)		gdb_target=sparc-em ;;
 sparc-*-coff*)		gdb_target=sparc-em ;;
 sparc-*-elf*)		gdb_target=sparc-em ;;
@@ -267,6 +267,11 @@ fr30-*-*)		gdb_target=fr30
 			;;
 
 v850*-*-*)		gdb_target=v850
+			case ${gdb_host} in
+			cygwin*)
+				CONFIG_OBS="${CONFIG_OBS} v850ice.o" ;;
+			* ) ;;
+			esac
 			;;
 
 w65-*-*)		gdb_target=w65 ;;

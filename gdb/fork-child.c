@@ -1,5 +1,5 @@
 /* Fork a Unix child process, and set up to debug it, for GDB.
-   Copyright 1990, 1991, 1992, 1993, 1994, 1996 Free Software Foundation, Inc.
+   Copyright 1990, 91, 92, 93, 94, 1996, 1999 Free Software Foundation, Inc.
    Contributed by Cygnus Support.
 
 This file is part of GDB.
@@ -33,8 +33,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include <unistd.h>
 #endif
 
-#define DEBUGGING 0
-
 /* This just gets used as a default if we can't find SHELL */
 #ifndef SHELL_FILE
 #define SHELL_FILE "/bin/sh"
@@ -57,9 +55,6 @@ breakup_args (
 {
   char *cp = scratch;
 
-#if DEBUGGING
-  printf ("breakup_args: input = %s\n", scratch);
-#endif
   for (;;)
     {
 
@@ -126,7 +121,6 @@ fork_inferior (exec_file, allargs, env, traceme_fun, init_trace_fun,
   char **save_our_env;
   int shell = 0;
   char **argv;
-  char *tryname;
 
   /* If no exec file handed to us, get it from the exec-file command -- with
      a good, common error message if none is specified.  */
@@ -147,10 +141,6 @@ fork_inferior (exec_file, allargs, env, traceme_fun, init_trace_fun,
       shell = 1;
     }
 
-#if DEBUGGING
-  printf ("shell is %s\n", shell_file);
-#endif
-
   /* Multiplying the length of exec_file by 4 is to account for the fact
      that it may expand when quoted; it is a worst-case number based on
      every character being '.  */
@@ -169,14 +159,6 @@ fork_inferior (exec_file, allargs, env, traceme_fun, init_trace_fun,
     {
       /* We're going to call execvp. Create argv */
       /* Largest case: every other character is a separate arg */
-#if DEBUGGING
-      printf ("allocating argv, length = %d\n",
-	      (
-		(strlen (allargs) + 1) / (unsigned) 2
-		+ 2
-	      ) * sizeof (*argv)
-	);
-#endif
       argv = (char **) xmalloc (((strlen (allargs) + 1) / (unsigned) 2 + 2) * sizeof (*argv));
       argv[0] = exec_file;
       breakup_args (allargs, &argv[1]);
@@ -334,16 +316,7 @@ fork_inferior (exec_file, allargs, env, traceme_fun, init_trace_fun,
        */
       if (shell)
 	{
-#if 0
-
-	  /* HP change is problematic. The -f option has different meanings
-	   for different shells. It is particularly inappropriate for
-	   bourne shells. */
-	  execlp (shell_file, shell_file, "-f", "-c", shell_command, (char *) 0);
-#else
 	  execlp (shell_file, shell_file, "-c", shell_command, (char *) 0);
-#endif
-
 
 	  /* If we get here, it's an error */
 	  fprintf_unfiltered (gdb_stderr, "Cannot exec %s: %s.\n", shell_file,
@@ -356,16 +329,7 @@ fork_inferior (exec_file, allargs, env, traceme_fun, init_trace_fun,
 	  /* Otherwise, we directly exec the target program with execvp. */
 	  int i;
 	  char *errstring;
-#if DEBUGGING
-	  printf ("about to exec target, exec_file = %s\n", exec_file);
-	  i = 0;
-	  while (argv[i] != NULL)
-	    {
-	      printf ("strlen(argv[%d]) is %d\n", i, strlen (argv[i]));
-	      printf ("argv[%d] is %s\n", i, argv[i]);
-	      i++;
-	    }
-#endif
+
 	  execvp (exec_file, argv);
 
 	  /* If we get here, it's an error */

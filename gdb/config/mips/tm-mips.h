@@ -151,11 +151,16 @@ extern breakpoint_from_pc_fn mips_breakpoint_from_pc;
 #define NUM_REGS 90
 #endif
 
+/* Given the register index, return the name of the corresponding
+   register. */
+extern char *mips_register_name PARAMS ((int regnr));
+#define REGISTER_NAME(i) mips_register_name (i)
+
 /* Initializer for an array of names of registers.
    There should be NUM_REGS strings in this initializer.  */
 
-#ifndef REGISTER_NAMES
-#define REGISTER_NAMES 	\
+#ifndef MIPS_REGISTER_NAMES
+#define MIPS_REGISTER_NAMES 	\
     {	"zero",	"at",	"v0",	"v1",	"a0",	"a1",	"a2",	"a3", \
 	"t0",	"t1",	"t2",	"t3",	"t4",	"t5",	"t6",	"t7", \
 	"s0",	"s1",	"s2",	"s3",	"s4",	"s5",	"s6",	"s7", \
@@ -438,20 +443,13 @@ typedef struct mips_extra_func_info {
 	PDR	pdr;		/* Procedure descriptor record */
 } *mips_extra_func_info_t;
 
-#define EXTRA_FRAME_INFO \
-  mips_extra_func_info_t proc_desc; \
-  int num_args;
+extern void mips_init_extra_frame_info PARAMS ((int fromleaf, struct frame_info *));
+#define INIT_EXTRA_FRAME_INFO(fromleaf, fci) \
+  mips_init_extra_frame_info(fromleaf, fci)
 
-#define INIT_EXTRA_FRAME_INFO(fromleaf, fci) init_extra_frame_info(fci)
-extern void init_extra_frame_info PARAMS ((struct frame_info *));
-
+extern void mips_print_extra_frame_info PARAMS ((struct frame_info *frame));
 #define	PRINT_EXTRA_FRAME_INFO(fi) \
-  { \
-    if (fi && fi->proc_desc && fi->proc_desc->pdr.framereg < NUM_REGS) \
-      printf_filtered (" frame pointer is at %s+%d\n", \
-                       REGISTER_NAME (fi->proc_desc->pdr.framereg), \
-                                 fi->proc_desc->pdr.frameoffset); \
-  }
+  mips_print_extra_frame_info (fi)
 
 /* It takes two values to specify a frame on the MIPS.
 

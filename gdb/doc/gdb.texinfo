@@ -404,24 +404,25 @@ Change things in your program, so you can experiment with correcting the
 effects of one bug and go on to learn about another.
 @end itemize
 
-You can use @value{GDBN} to debug programs written in C or C++.
-@c "MOD2" used as a "miscellaneous languages" flag here.
-@c This is acceptable while there is no real doc for Chill and Pascal.
+You can use @value{GDBN} to debug programs written in C and C++.
 For more information, see @ref{Support,,Supported languages}.
 For more information, see @ref{C,,C and C++}.
 
+@cindex Chill
+@cindex Modula-2
 Support for Modula-2 and Chill is partial.  For information on Modula-2,
-see @ref{Modula-2,,Modula-2}.  There is no further documentation on Chill yet.
+see @ref{Modula-2,,Modula-2}.  For information on Chill, see @ref{Chill}.
 
-Debugging Pascal programs which use sets, subranges, file variables, or nested
-functions does not currently work.  @value{GDBN} does not support
-entering expressions, printing values, or similar features using Pascal syntax.
+@cindex Pascal
+Debugging Pascal programs which use sets, subranges, file variables, or
+nested functions does not currently work.  @value{GDBN} does not support
+entering expressions, printing values, or similar features using Pascal
+syntax.
 
 @cindex Fortran
 @value{GDBN} can be used to debug programs written in Fortran, although
-it does not yet support entering expressions, printing values, or
-similar features using Fortran syntax.  It may be necessary to refer to
-some variables with a trailing underscore.
+It may be necessary to refer to some variables with a trailing
+underscore.
 
 @ifset HPPA
 This version of the manual documents HP Wildebeest (WDB) Version 0.75,
@@ -5886,7 +5887,8 @@ being set automatically by @value{GDBN}.
 @node Support,  , Checks, Languages
 @section Supported languages
 
-@value{GDBN} supports C, C++, Fortran, Chill, assembly, and Modula-2.
+@value{GDBN} supports C, C++, Fortran, Java, Chill, assembly, and Modula-2.
+@c This is false ...
 Some @value{GDBN} features may be used in expressions regardless of the
 language you use: the @value{GDBN} @code{@@} and @code{::} operators,
 and the @samp{@{type@}addr} construct (@pxref{Expressions,
@@ -5903,7 +5905,8 @@ language reference or tutorial.
 
 @menu
 * C::           C and C++
-* Modula-2::                    Modula-2
+* Modula-2::    Modula-2
+* Chill::	Chill
 @end menu
 
 @node C, Modula-2, , Support
@@ -6463,7 +6466,7 @@ available choices, or to finish the type list for you.
 @xref{Completion,, Command completion}, for details on how to do this.
 @end table
 
-@node Modula-2,  , C, Support
+@node Modula-2, Chill, C, Support
 @subsection Modula-2
 
 @cindex Modula-2
@@ -6904,6 +6907,452 @@ address can be specified by an integral constant, the construct
 @cindex @code{#} in Modula-2
 In @value{GDBN} scripts, the Modula-2 inequality operator @code{#} is
 interpreted as the beginning of a comment.  Use @code{<>} instead.
+
+@node Chill, , Modula-2, Support
+@subsection Chill
+
+The extensions made to @value{GDBN} to support Chill only support output
+from the GNU Chill compiler.  Other Chill compilers are not currently
+supported, and attempting to debug executables produced by them is most
+likely to give an error as @value{GDBN} reads in the executable's symbol
+table.
+
+This section covers the following Chill related topics and the features
+of @value{GDBN} which support these topics.
+
+@menu
+* How modes are displayed::	How modes are displayed
+* Locations::			Locations and their accesses
+* Values and their Operations:: Values and their Operations
+@end menu
+
+@node How modes are displayed
+@subsubsection How modes are displayed
+
+The Chill Datatype- (Mode) support of @value{GDBN} is directly related
+with the functionality of the GNU Chill compiler, and therefore deviates
+slightly from the standard specification of the Chill language. The
+provided modes are:
+@table @code
+@item @r{@emph{Discrete modes:}}
+@itemize @bullet
+@item
+@emph{Integer Modes} which are predefined by @code{BYTE, UBYTE, INT,
+UINT, LONG, ULONG},
+@item
+@emph{Boolean Mode} which is predefined by @code{BOOL}, 
+@item
+@emph{Character Mode} which is predefined by @code{CHAR}, 
+@item
+@emph{Set Mode} which is displayed by the keyword @code{SET}.
+@smallexample
+(@value{GDBP}) ptype x
+type = SET (karli = 10, susi = 20, fritzi = 100)
+@end smallexample
+If the type is an unnumbered set the set element values are omitted.
+@item
+@emph{Range Mode} which is displayed by @code{type = <basemode>
+(<lower bound> : <upper bound>)}, where @code{<lower bound>, <upper
+bound>} can be of any discrete literal expression (e.g. set element
+names).
+@end itemize
+
+@item @r{@emph{Powerset Mode:}}
+A Powerset Mode is displayed by the keyword @code{POWERSET} followed by
+the member mode of the powerset. The member mode can be any discrete mode.
+@smallexample
+(@value{GDBP}) ptype x
+type = POWERSET SET (egon, hugo, otto)
+@end smallexample
+
+@item @r{@emph{Reference Modes:}}
+@itemize @bullet
+@item
+@emph{Bound Reference Mode} which is diplayed by the keyword @code{REF}
+followed by the mode name to which the reference is bound.
+@item
+@emph{Free Reference Mode} which is displayed by the keyword @code{PTR}.
+@end itemize
+
+@item @r{@emph{Procedure mode}}
+The procedure mode is displayed by @code{type = PROC(<parameter list>)
+<return mode> EXCEPTIONS (<exception list>)}. The @code{<parameter
+list>} is a list of the parameter modes. @code{<return mode>} indicates
+the mode of the result of the procedure if any. The exceptionlist lists
+all possible exceptions which can be raised by the procedure.
+
+@ignore
+@item @r{@emph{Instance mode}}
+The instance mode is represented by a structure, which has a static
+type, and is therefore not really of interest. 
+@end ignore
+
+@item @r{@emph{Synchronization Modes:}} 
+@itemize @bullet
+@item
+@emph{Event Mode} which is displayed by @code{EVENT (<event length>)},
+where @code{(<event length>)} is optional.
+@item
+@emph{Buffer Mode} which is displayed by @code{BUFFER (<buffer length>)
+<buffer element mode>}, where @code{(<buffer length>)} is optional.
+@end itemize
+
+@item @r{@emph{Timing Modes:}} 
+@itemize @bullet
+@item
+@emph{Duration Mode} which is predefined by @code{DURATION}
+@item
+@emph{Absolute Time Mode} which is predefined by @code{TIME}
+@end itemize
+
+@item @r{@emph{Real Modes:}}
+Real Modes are predefined with @code{REAL} and @code{LONG_REAL}.
+
+@item @r{@emph{String Modes:}}
+@itemize @bullet
+@item
+@emph{Character String Mode} which is displayed by @code{CHARS(<string
+length>)}, followed by the keyword @code{VARYING} if the String Mode is
+a varying mode
+@item
+@emph{Bit String Mode} which is displayed by @code{BOOLS(<string
+length>)}.
+@end itemize
+
+@item @r{@emph{Array Mode:}}
+The Array Mode is displayed by the keyword @code{ARRAY(<range>)}
+followed by the element mode (which may in turn be an array mode).
+@smallexample
+(@value{GDBP}) ptype x
+type = ARRAY (1:42) 
+          ARRAY (1:20) 
+             SET (karli = 10, susi = 20, fritzi = 100)
+@end smallexample
+
+@item @r{@emph{Structure Mode}} 
+The Structure mode is displayed by the keyword @code{STRUCT(<field
+list>)}. The @code{<field list>} consists of names and modes of fields
+of the structure. Variant structures have the keyword @code{CASE <field>
+OF <variant fields> ESAC} in their field list. Since the current version
+of the GNU Chill compiler doesn't implement tag processing (no runtime
+checks of variant fields, and therefore no debugging info), the output
+always displays all variant fields.
+@smallexample
+(@value{GDBP}) ptype str
+type = STRUCT (
+    as x,
+    bs x,
+    CASE bs OF
+    (karli):
+        cs a
+    (ott):
+        ds x
+    ESAC
+)
+@end smallexample
+@end table
+
+@node Locations
+@subsubsection Locations and their accesses
+
+A location in Chill is an object which can contain values.
+
+A value of a location is generally accessed by the (declared) name of
+the location. The output conforms to the specification of values in
+Chill programs. How values are specified, and which operations are valid
+is the topic of the next section.
+
+The pseudo-location @code{RESULT} (or @code{result}) can be used to
+display or change the result of a currently-active procedure:
+@smallexample
+set result := EXPR
+@end smallexample
+- does the same as the Chill action @code{RESULT EXPR} (which
+is not available in gdb).
+
+Values of reference mode locations are printed by @code{PTR(<hex
+value>)} in case of a free reference mode, and by @code{(REF <reference
+mode>) (<hex-value>)} in case of a bound reference. @code{<hex value>}
+represents the address where the reference points to.  To access the
+value of the location referenced by the pointer, use the dereference
+operator `@code{->}'.
+
+Values of procedure mode locations are displayed by @code{@{ PROC
+(<argument modes> ) <return mode> @} <address> <name of procedure
+location>}. @code{<argument modes>} is a list of modes according to the
+parameter specification of the procedure and @code{<address>} shows the
+address of the entry point. 
+
+@ignore
+Locations of instance modes are displayed just like a structure with two
+fields specifying the @emph{process type} and the @emph{copy number} of
+the investigated instance location@footnote{This comes from the current
+implementation of instances. They are implemented as a structure (no
+na). The output should be something like @code{[<name of the process>;
+<instance number>]}.}. The field names are @code{__proc_type} and
+@code{__proc_copy}.
+
+Locations of synchronization modes are displayed like a structure with
+the field name @code{__event_data} in case of a event mode location, and
+like a structure with the field @code{__buffer_data} in case of a buffer
+mode location (refer to previous paragraph).
+
+Structure Mode locations are printed by @code{[.<field name>: <value>,
+...]}. The @code{<field name>} corresponds to the structure mode
+definition and the layout of @code{<value>} varies depending of the mode
+of the field. If the investigated structure mode location is of variant
+structure mode the variant parts of the structure are enclosed in curled
+braces (`@code{@{@}}'). Fields enclosed by `@code{@{,@}}' are residing
+on the same memory location and represent the current values of the
+memory location in their specific modes. Since no tag processing is done
+all variants are displayed. A variant field is printed by
+@code{(<variant name>) = .<field name>: <value>}. (who implements the
+stuff ???)
+@smallexample
+(@value{GDBP}) print str1 $4 = [.as: 0, .bs: karli, .<TAG>: { (karli) =
+[.cs: []], (susi) = [.ds: susi]}]
+@end smallexample
+@end ignore
+
+Substructures of string mode-, array mode- or structure mode-values
+(e.g. array slices, fields of structure locations) are accessed using
+certain operations which are descibed in the next chapter.
+
+A location value may be interpreted as having a different mode using the
+location conversion. This mode conversion is written as @code{<mode
+name>(<location>)}. The user has to consider that the sizes of the modes
+have to be equal otherwise an error message occurs. Further no range
+checking of the location against the destination mode is performed and
+therefore the result can be quite confusing.
+@smallexample
+(@value{GDBP}) print int (s(3 up 4)) XXX TO be filled in !! XXX
+@end smallexample
+
+@node Values and their Operations
+@subsubsection Values and their Operations
+
+Values are used to alter locations, to investigate complex structures in
+more detail or to filter relevant information out of a large amount of
+data. There are several (mode dependent) operations defined which enable
+such investigations. These operations are not only applicable to
+constant values but also to locations, which can become quite useful
+when debugging complex structures. During parsing the command line
+(e.g. evaluating an expression) @value{GDBN} treats location names as
+the values behind these locations.
+
+This subchapters describes how values have to be specified and which
+operations are legal to be used with such values.
+
+@table @code
+@item Literal Values
+Literal values are specified in the same manner as in GNU Chill programs.
+For detailed specification refer to the GNU Chill implementation Manual
+chapter 1.5.
+
+@ignore 
+@itemize @bullet
+@item
+@emph{Integer Literals} are specified in the same manner as in Chill
+programs (refer z200/88 chpt 5.2.4.2)
+@item
+@emph{Boolean Literals} are defined by @code{TRUE} and @code{FALSE}.
+@item
+@emph{Character Literals} are defined by @code{'<character>'}. (e.g.
+@code{'M'})
+@item
+@emph{Set Literals} are defined by a name which was specified in a set
+mode. The value delivered by a Set Literal is the set value. This is
+comparable to an enumaration in C/C++ language.
+@item
+@emph{Emptiness Literal} is predefined by @code{NULL}. The value of the
+emptiness literal delivers either the empty reference value, the empty
+procedure value or the empty instance value. 
+
+@item
+@emph{Character String Literals} are defined by a sequence of characters
+enclosed in single- or double quotes. If a single- or double quote has
+to be part of the string literal it has to be stuffed (specified twice).
+@item
+@emph{Bitstring Literals} are specified in the same manner as in Chill
+programs (refer z200/88 chpt 5.2.4.8).
+@item
+@emph{Floating point literals} are specified in the same manner as in
+(gnu-)Chill programs (refer GNU Chill implementation Manual chapter 1.5).
+@end itemize
+@end ignore
+
+@item Tuple Values
+A tuple is specified by @code{<mode name>[<tuple>]}, where @code{<mode
+name>} can be omitted if the mode of the tuple is unambigous. This
+unambiguity is derived from the context of a evaluated expression.
+@code{<tuple>} can be one of the following:
+@itemize @bullet
+@item @emph{Powerset Tuple}
+@item @emph{Array Tuple}
+@item @emph{Structure Tuple}
+Powerset tuples, array tuples and structure tuples are specified in the
+same manner as in Chill programs refer z200/88 chpt 5.2.5.
+@end itemize
+
+@item String Element Value
+A string element value is specified by @code{<string value>(<index>)},
+where @code{<index>} is a integer expression. It delivers a character
+value which is equivalent to the character indexed by @code{<index>} in
+the string.
+
+@item String Slice Value
+A string slice value is specified by @code{<string value>(<slice
+spec>)}, where @code{<slice spec>} can be either a range of integer
+expressions or specified by @code{<start expr> up <size>}.
+@code{<size>} denotes the number of elements which the slice contains.
+The delivered value is a string value, which is part of the specified
+string.
+
+@item Array Element Values
+An array element value is specified by @code{<array value>(<expr>)} and
+delivers a array element value of the mode of the specified array.
+
+@item Array Slice Values
+An array slice is specified by @code{<array value>(<slice spec>)}, where
+@code{<slice spec>} can be either a range specified by expressions or by
+@code{<start expr> up <size>}. @code{<size>} denotes the number of
+arrayelements the slice contains. The delivered value is an array value
+which is part of the specified array.
+
+@item Structure Field Values
+A structure field value is derived by @code{<structure value>.<field
+name>}, where @code{<field name>} indcates the name of a field specified
+in the mode definition of the structure. The mode of the delivered value
+corresponds to this mode definition in the structure definition.
+
+@item Procedure Call Value
+The procedure call value is derived from the return value of the
+procedure@footnote{If a procedure call is used for instance in an
+expression, then this procedure is called with all its side
+effects. This can lead to confusing results if used carelessly.}.
+
+Values of duration mode locations are represented by ULONG literals.
+
+Values of time mode locations are represented by TIME(<secs>:<nsecs>).
+
+@ignore
+This is not implemented yet:
+@item Built-in Value
+@noindent
+The following built in functions are provided:
+@table @code
+@item @code{ADDR()}
+@item @code{NUM()}
+@item @code{PRED()}
+@item @code{SUCC()}
+@item @code{ABS()}
+@item @code{CARD()}
+@item @code{MAX()}
+@item @code{MIN()}
+@item @code{SIZE()}
+@item @code{UPPER()}
+@item @code{LOWER()}
+@item @code{LENGTH()}
+@item @code{SIN()}
+@item @code{COS()}
+@item @code{TAN()}
+@item @code{ARCSIN()}
+@item @code{ARCCOS()}
+@item @code{ARCTAN()}
+@item @code{EXP()}
+@item @code{LN()}
+@item @code{LOG()}
+@item @code{SQRT()}
+@end table
+
+For a detailed description refer to the GNU Chill implementation manual
+chapter 1.6.
+@end ignore
+
+@item Zero-adic Operator Value
+The zero-adic operator value is derived from the instance value for the
+current active process.
+
+@item Expression Values
+The value delivered by an expression is the result of the evaluation of
+the specified expression. If there are error conditions (mode
+incompatibility, etc.) the evaluation of expressions is aborted with a
+corresponding error message. Expressions may be paranthesised which
+causes the evaluation of this expression before any other expression
+which uses the result of the paranthesised expression. The following
+operators are supported by @value{GDBN}:
+@table @code
+@item @code{OR, ORIF, XOR}
+@item @code{AND, ANDIF}
+@item @code{NOT}
+Logical operators defined over operands of boolean mode.
+@item @code{=, /=}
+Equality and inequality operators defined over all modes.
+@item @code{>, >=}
+@item @code{<, <=}
+Relational operators defined over predefined modes.
+@item @code{+, -}
+@item @code{*, /, MOD, REM}
+Arithmetic operators defined over predefined modes.
+@item @code{-}
+Change sign operator.
+@item @code{//}
+String concatenation operator.
+@item @code{()}
+String repetition operator.
+@item @code{->}
+Referenced location operator which can be used either to take the
+address of a location (@code{->loc}), or to dereference a reference
+location (@code{loc->}).
+@item @code{OR, XOR}
+@item @code{AND}
+@item @code{NOT}
+Powerset and bitstring operators.
+@item @code{>, >=}
+@item @code{<, <=}
+Powerset inclusion operators.
+@item @code{IN}
+Membership operator.
+@end table
+@end table
+
+@subsubsection Chill type and range checks
+
+@value{GDBN} considers two Chill variables mode equivalent if the sizes
+of the two modes are equal. This rule applies recursively to more
+complex datatypes which means that complex modes are treated
+eqivalent if all element modes (which also can be complex modes like
+structures, arrays, etc.) have the same size.
+
+Range checking is done on all mathematical operations, assignment, array
+index bounds and all built in procedures.
+
+Strong type checks are forced using the @value{GDBN} command @code{set
+check strong}. This enforces strong type and range checks on all
+operations where Chill constructs are used (expressions, built in
+functions, etc.) in respect to the semantics as defined in the z.200
+language specification.
+
+@noindent
+All checks can be disabled by the @value{GDBN} command @code{set check
+off}.
+
+@ignore 
+@subsubsection Deviations from the Chill Standard Z200/88
+see last paragraph ?
+@end ignore
+
+@subsubsection Chill defaults
+
+If type and range checking are set automatically by @value{GDBN}, they
+both default to @code{on} whenever the working language changes to
+Chill.  This happens regardless of whether you, or @value{GDBN},
+selected the working language.
+
+If you allow @value{GDBN} to set the language automatically, then entering
+code compiled from a file whose name ends with @file{.ch} sets the
+working language to Chill. @xref{Automatically, ,Having @value{GDBN} set
+the language automatically}, for further details.
 
 @node Symbols, Altering, Languages, Top
 @chapter Examining the Symbol Table

@@ -1,5 +1,5 @@
 /* Parse expressions for GDB.
-   Copyright (C) 1986, 89, 90, 91, 94, 1998 Free Software Foundation, Inc.
+   Copyright (C) 1986, 89, 90, 91, 94, 98, 1999 Free Software Foundation, Inc.
    Modified from expread.y by the Department of Computer Science at the
    State University of New York at Buffalo, 1991.
 
@@ -28,9 +28,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
    during the process of parsing; the lower levels of the tree always
    come first in the result.  */
    
+#include <ctype.h>
+
 #include "defs.h"
 #include "gdb_string.h"
-#include <ctype.h>
 #include "symtab.h"
 #include "gdbtypes.h"
 #include "frame.h"
@@ -41,7 +42,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "parser-defs.h"
 #include "gdbcmd.h"
 #include "symfile.h"	/* for overlay functions */
-#include <ctype.h>
 
 /* Global variables declared in parser-defs.h (and commented there).  */
 struct expression *expout;
@@ -86,30 +86,8 @@ static struct funcall *funcall_chain;
 /* Assign machine-independent names to certain registers 
    (unless overridden by the REGISTER_NAMES table) */
 
-#ifdef NO_STD_REGS
 unsigned num_std_regs = 0;
-struct std_regs std_regs[1];
-#else
-struct std_regs std_regs[] = {
-
-#ifdef PC_REGNUM
-	{ "pc", PC_REGNUM },
-#endif
-#ifdef FP_REGNUM
-	{ "fp", FP_REGNUM },
-#endif
-#ifdef SP_REGNUM
-	{ "sp", SP_REGNUM },
-#endif
-#ifdef PS_REGNUM
-	{ "ps", PS_REGNUM },
-#endif
-
-};
-
-unsigned num_std_regs = (sizeof std_regs / sizeof std_regs[0]);
-
-#endif
+struct std_regs *std_regs;
 
 /* The generic method for targets to specify how their registers are
    named.  The mapping can be derived from three sources:
@@ -691,10 +669,6 @@ parse_nested_classes_for_hpacc (name, len, token, class_prefix, argptr)
       prefix = tmp;
       prefix_len = strlen (prefix);
       
-#if 0 /* DEBUGGING */ 
-      printf ("Searching for nested class spec: Prefix is %s\n", prefix);
-#endif      
-
       /* See if the prefix we have now is something we know about */
 
       if (!done) 
@@ -740,10 +714,6 @@ parse_nested_classes_for_hpacc (name, len, token, class_prefix, argptr)
 
   if (argptr)
     *argptr = done ? p : end;
-
-#if 0 /* DEBUGGING */ 
-  printf ("Searching for nested class spec: Token is %s, class_prefix %d\n", *token, *class_prefix);
-#endif
 
   return sym_var ? sym_var : sym_class; /* found */ 
 }
@@ -1321,6 +1291,8 @@ static void build_parse PARAMS ((void));
 static void
 build_parse ()
 {
+  int i;
+
   msym_text_symbol_type =
     init_type (TYPE_CODE_FUNC, 1, 0, "<text variable, no debug info>", NULL);
   TYPE_TARGET_TYPE (msym_text_symbol_type) = builtin_type_int;
@@ -1331,6 +1303,51 @@ build_parse ()
     init_type (TYPE_CODE_INT, 1, 0,
 	       "<variable (not text or data), no debug info>",
 	       NULL);
+
+  /* create the std_regs table */
+
+  num_std_regs = 0;
+#ifdef PC_REGNUM
+  if (PC_REGNUM >= 0)
+    num_std_regs++;
+#endif
+#ifdef FP_REGNUM
+  if (FP_REGNUM >= 0)
+    num_std_regs++;
+#endif
+#ifdef FP_REGNUM
+  if (SP_REGNUM >= 0)
+    num_std_regs++;
+#endif
+#ifdef PS_REGNUM
+  if (PS_REGNUM >= 0)
+    num_std_regs++;
+#endif
+  /* create an empty table */
+  std_regs = xmalloc ((num_std_regs + 1) * sizeof *std_regs);
+  i = 0;
+  /* fill it in */
+#ifdef PC_REGNUM
+  std_regs[i].name = "pc";
+  std_regs[i].regnum = PC_REGNUM;
+  i++;
+#endif
+#ifdef FP_REGNUM
+  std_regs[i].name = "fp";
+  std_regs[i].regnum = FP_REGNUM;
+  i++;
+#endif
+#ifdef SP_REGNUM
+  std_regs[i].name = "sp";
+  std_regs[i].regnum = SP_REGNUM;
+  i++;
+#endif
+#ifdef PS_REGNUM
+  std_regs[i].name = "ps";
+  std_regs[i].regnum = PS_REGNUM;
+  i++;
+#endif
+  memset (&std_regs[i], 0, sizeof (std_regs[i]));
 }
 
 void

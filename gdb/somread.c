@@ -1,5 +1,5 @@
 /* Read HP PA/Risc object files for GDB.
-   Copyright 1991, 1992, 1996 Free Software Foundation, Inc.
+   Copyright 1991, 1992, 1996, 1999 Free Software Foundation, Inc.
    Written by Fred Fish at Cygnus Support.
 
 This file is part of GDB.
@@ -547,10 +547,6 @@ init_import_symbols (objfile)
   objfile->import_list = NULL;
   objfile->import_list_size = 0;
 
-#if 0  /* DEBUGGING */
-  printf ("Processing import list for %s\n", objfile->name);
-#endif
-
   /* It doesn't work, for some reason, to read in space $TEXT$;
      the subspace $SHLIB_INFO$ has to be used.  Some BFD quirk? pai/1997-08-05 */ 
   text_section = bfd_get_section_by_name (objfile->obfd, "$SHLIB_INFO$");
@@ -606,10 +602,6 @@ init_import_symbols (objfile)
           else /* null type */ 
             objfile->import_list[k] = NULL;
           
-#if 0 /* DEBUGGING */
-          printf ("Import String %d:%d (%d), type %d is %s\n", j, i, k,
-                  (int) buffer[i].type, objfile->import_list[k]);
-#endif
         }
     }
 
@@ -629,10 +621,6 @@ init_import_symbols (objfile)
         }
       else
         objfile->import_list[k] = NULL;
-#if 0 /* DEBUGGING */ 
-      printf ("Import String F:%d (%d), type %d, is %s\n", i, k,
-              (int) buffer[i].type, objfile->import_list[k]);
-#endif
     }
 
   objfile->import_list_size = import_list_size;
@@ -680,10 +668,6 @@ init_export_symbols (objfile)
   /* Initialize in case we error out */
   objfile->export_list = NULL;
   objfile->export_list_size = 0;
-
-#if 0  /* DEBUGGING */
-  printf ("Processing export list for %s\n", objfile->name);
-#endif
 
   /* It doesn't work, for some reason, to read in space $TEXT$;
      the subspace $SHLIB_INFO$ has to be used.  Some BFD quirk? pai/1997-08-05 */ 
@@ -743,10 +727,6 @@ init_export_symbols (objfile)
               objfile->export_list[k].name = NULL;
               objfile->export_list[k].address = 0;
             }
-#if 0 /* DEBUGGING */
-          printf ("Export String %d:%d (%d), type %d is %s\n", j, i, k,
-                  (int) buffer[i].type, objfile->export_list[k].name);
-#endif
         }
     }
 
@@ -770,10 +750,6 @@ init_export_symbols (objfile)
           objfile->export_list[k].name = NULL;
           objfile->export_list[k].address = 0;
         }
-#if 0 /* DEBUGGING */ 
-      printf ("Export String F:%d (%d), type %d, value %x is %s\n", i, k,
-              (int) buffer[i].type, buffer[i].value, objfile->export_list[k].name);
-#endif
     }
 
   objfile->export_list_size = export_list_size;

@@ -1,3 +1,220 @@
+1999-06-07  Keith Seitz  <keiths@cygnus.com>
+
+	* v850ice.c (init_hidden_window): Do not rely on the existence of
+	a gui for window creation. Return boolean status.
+	(v850ice_open): Use boolean status of init_hidden_window.
+	Allow any ICE execution command to run under CLI. Maybe one
+	day gdb will use a real event loop and allow this code to run.
+	* configure.tgt: Configure the v850 ice for all cygwin-hosted
+	toolchains.
+
+Mon Jun  7 23:37:26 1999  Andrew Cagney  <cagney@amy.cygnus.com>
+
+	* config/mips/tm-mips.h (EXTRA_FRAME_INFO): Delete.
+	* mips-tdep.c (mips_init_extra_frame_info): Allocate saved_regs.
+	(temp_saved_regs): Replace struct with a simple pointer.
+	(set_reg_offset, mips32_heuristic_proc_desc, heuristic_proc_desc,
+ 	mips_init_extra_frame_info): Update.
+
+Mon Jun  7 21:40:12 1999  Andrew Cagney  <cagney@amy.cygnus.com>
+
+	* config/mips/tm-mips.h (EXTRA_FRAME_INFO): Move elements from here.
+	* mips-tdep.c (struct frame_extra_info): To here.
+
+	* mips-tdep.c (mips_print_extra_frame_info, mips_find_saved_regs,
+ 	mips_init_extra_frame_info, mips_pop_frame): Update
+	(mips_init_extra_frame_info): Allocate space for the extra info.
+
+Mon Jun  7 21:08:50 1999  Andrew Cagney  <cagney@amy.cygnus.com>
+
+	* config/mips/tm-mips.h (mips_init_extra_frame_info), mips-tdep.c:
+ 	Rename init_extra_frame_info.  Add argument ``fromleaf''.
+
+	* config/mips/tm-mips.h (mips_print_extra_frame_info),
+ 	mips-tdep.c: New function.
+	(PRINT_EXTRA_FRAME_INFO): Update definition.
+
+Mon Jun  7 20:11:07 1999  Andrew Cagney  <cagney@amy.cygnus.com>
+
+	* config/mips/tm-mips.h, config/mips/tm-irix3.h,
+ 	config/mips/tm-tx19.h, config/mips/tm-tx19l.h,
+ 	config/mips/tm-tx39.h, config/mips/tm-tx39l.h: Rename macro
+	REGISTER_NAMES to MIPS_REGISTER_NAMES.
+
+	* config/mips/tm-mips.h (REGISTER_NAME): Define.
+	* mips-tdep.c (mips_processor_reg_names): New static variable.
+	(mips_register_name): New function.
+	(mips_set_processor_type): Update mips_processor_reg_names.
+	(mips_generic_reg_names): Initialize using MIPS_REGISTER_NAMES.
+
+Sun Jun  6 11:09:19 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* remote.c (PBUFSIZ): Re-define so that value is computed at
+ 	run-time.
+	(MAXBUFBYTES): Re-define as a macro function.
+
+1999-06-05  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+	* symtab.c (decode_line_1): Accept filenames with spaces in
+	'linespecs' when enclosed in double quotation marks and handle
+	drive specification is DOS format (D:).
+
+1999-06-04  Jim Blandy  <jimb@zwingli.cygnus.com>
+
+	* parse.c: Don't include <ctype.h> twice.
+
+1999-06-04  David Taylor  <taylor@louisiana.cygnus.com>
+
+	Sat May 15 12:16:09 1999  Per Bothner  <bothner@deneb.cygnus.com>
+
+        * eval.c (evaluate_subexp_standard):  Remove Gilmore rant.
+        (Of course C has "expected types", at least if you allow
+        brace-initializer expressions - as in Gcc.)
+        Remove NULLing out expect_type.  Do pass NULL_TYPE in place
+        the incoming expect_type where appropriate.
+
+Fri Jun  4 10:56:23 1999  Jeffrey A Law  (law@cygnus.com)
+
+	* hppa-tdep.c (hppa_fix_call_dummy): Make it work for GCC compiled
+	executables without end.o.  Clean up lots of mis-guided comments.
+
+Fri Jun  4 17:10:36 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* parser-defs.h (std_regs): Replace array with pointer.
+	* parse.c (build_parse): Build the std_regs table according to the
+ 	standard registers available.
+	
+1999-06-03  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* thread.c: eliminate the target_thread_vector (functionality
+	moved into the standard target vector).
+	* gdbthread.h: eliminate target_thread_vector.  Move all related
+	defines into remote.c, since they are no longer shared with thread.c.
+	* remote.c: eliminate the target_thread_vector.
+ 	(remote_find_new_threads): change return type to void, consistent
+	with the target vector table.  (cont_thread): rename continue_thread.
+	(record_currthread): remove dead code.  (remote_thread_alive):
+	clean up and simplify.  (threadref etc.): move definitions to here
+	from gdbthread.h.  
+
+1999-06-02  Jason Molenda  (jsm@bugshack.cygnus.com)
+
+	* inftarg.c (child_create_inferior): Remove dead HPUX specific code
+	which tries to find csh.
+	* fork-child.c: Remove DEBUGGING predefine and conditionalized
+	printfs.
+	(fork_inferior): Remove dead HPUX specific code which assumes shell
+	is csh.
+
+	* hppa-tdep.c: Remove DEBUGGING and #if 0 debugging printfs.
+	* parse.c: Ditto.
+	* somread.c: Ditto.
+
+Thu Jun  3 10:12:38 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* d10v-tdep.c (do_d10v_pop_frame): Rename d10v_pop_frame.  Make
+ 	static.
+	* d10v-tdep.c (d10v_pop_frame), config/d10v/tm-d10v.h: New
+ 	function.  Call generic_pop_current_frame.
+	* config/d10v/tm-d10v.h (POP_FRAME): Update.
+	* gdbarch.h, gdbarch.c (frame_num_args_unknown): New function.
+	* config/d10v/tm-d10v.h (DMEM_START, IMEM_START, STACK_START,
+ 	ARG1_REGNUM, ARGN_REGNUM, RET1_REGNUM): Move definitions from
+ 	here.
+	* d10v-tdep.c: To here.
+	* config/d10v/tm-d10v.h (struct type): Move declaration from here.
+	* gdbarch.h: To here.
+	* config/d10v/tm-d10v.h (struct frame_info, struct
+ 	frame_saved_regs, struct type): Delete declarations.
+	
+1999-06-02  Robert Hoehne  <robert.hoehne@gmx.net>
+
+	* go32-nat.c: go32_terminal_init, go32_terminal_inferior and
+	go32_terminal_ours are new functions to save/restore the inferior`s
+	stdin/stdout filemodes
+
+1999-06-02  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* MAINTAINERS: Add Mark Kettenis, Jeff Law, and Philippe De Muyter
+	as maintainers for Hurd, HP/UX, and COFF, respectively.
+
+1999-06-02  Mark Kettenis  <kettenis@gnu.org>
+
+	* gnu-nat.c (inf_continue): New function.
+	(struct inf): Use `unsigned int' instead of `int' for bit-fields.
+	Add new bit-field named `nomsg'.
+	(inf_validate_procinfo): Renamed from inf_validate_stopped, all
+	callers changed.  Also update the `nomsg' and `traced' fields of
+	INF.
+	(make_inf): Initialize INF->nomsg.
+	(inf_cleanup): Reset INF->nomsg.
+	(inf_detach): Call `inf_validate_procinfo'.  Call `inf_continue'
+	instead of `inf_signal' if the inferior does not have a message
+	port.
+	(gnu_resume): Likewise.
+	(gnu_create_inferior): Reset INF->nomsg in `attach_to_child'.
+	Call `inf_validate_procinfo' after returning from `fork_inferior'.
+	(gnu_attach): Update signal thread and tracing state.
+
+	* config/i386/tm-i386gnu.h: Include "i386/tm-i386.h" instead of
+	"i386/tm-i386v.h".
+	(STACK_END_ADDR): Remove.
+	(SIGCONTEXT_PC_OFFSET): New define.
+	Include "tm-sysv4.h".
+
+1999-06-02  J.T. Conklin  <jtc@redback.com>
+
+	* config/tm-vxworks.h: New file, header for definitions common to
+ 	all vxWorks targets.
+	* config/a29k/tm-vx29k.h, config/i960/tm-vx960.h,
+ 	config/m68k/tm-vx68.h, config/mips/tm-vxmips.h,
+ 	config/sparc/tm-vxsparc.h: Include tm-vxworks.h.
+
+Wed Jun  2 17:37:03 1999  Jeffrey A Law  (law@cygnus.com)
+
+	* config/pa/tm-hppa.h (IMPORT_SHLIB): New unwind stub type.
+
+1999-06-02  Christopher Faylor <cgf@cygnus.com>
+
+	* configure.tgt: Alphabetically reorder some targets.
+
+1999-06-02  Keith Seitz  <keiths@cygnus.com>
+
+	* v850ice.c (v850ice_xfer_memory): Insert lost "break".
+
+1999-06-02  Jim Blandy  <jimb@zwingli.cygnus.com>
+
+	* rs6000-tdep.c (variants): Fix description of 750 register set.
+	(Thanks to J. T. Conklin.)
+
+Wed Jun  2 16:10:08 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* config/d10v/tm-d10v.h (FRAME_INIT_SAVED_REGS): Replace
+ 	FRAME_FIND_SAVED_REGS.
+	(d10v_frame_init_saved_regs): Replace d10v_frame_find_saved_regs.
+	* d10v-tdep.c (d10v_pop_frame, d10v_frame_chain,
+ 	d10v_frame_init_saved_regs): Update.
+
+	* config/d10v/tm-d10v.h (EXTRA_FRAME_INFO): Delete.
+	* d10v-tdep.c (struct frame_extra_info): Define.
+	(d10v_init_extra_frame_info, d10v_pop_frame, d10v_frame_chain,
+ 	d10v_frame_find_saved_regs): Update.
+
+Tue Jun  1 13:36:31 1999  Philippe De Muyter  <phdm@macqel.be>
+
+	* config/m68k/tm-delta68.h (FRAME_NUM_ARGS): Macro prototype fixed.
+	* config/m68k/tm-news.h, config/ns32k/tm-merlin.h: Ditto.
+	* config/ns32k/tm-umax.h (FRAME_NUM_ARGS): Old macro definition
+	removed; new macro prototype fixed.
+
+Wed Jun  2 11:18:37 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* defs.h (REGISTER_NAME): Move compatibility definition from here.
+	* gdbarch.h: To here.
+
+	* frame.h, blockframe.c (generic_fix_call_dummy): New
+ 	stub function.
+
 Tue Jun  1 18:47:54 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* parse.c (build_parse): New function.  Initialize

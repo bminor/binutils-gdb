@@ -2489,8 +2489,10 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line, canonical)
   struct symbol *sym_class;
   int i1;
   int is_quoted;
+  int is_quote_enclosed;
   int has_parens;  
   int has_if = 0;
+  int has_comma = 0;
   struct symbol **sym_arr;
   struct type *t;
   char *saved_arg = *argptr;
@@ -2562,12 +2564,33 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line, canonical)
   if (has_if)
     *ii = ' ';
 
+  /* Maybe we were called with a line range FILENAME:LINENUM,FILENAME:LINENUM
+     and we must isolate the first half.  Outer layers will call again later
+     for the second half */
+  if ((ii = strchr(*argptr, ',')) != NULL)
+    has_comma = 1;
+  /* Temporarily zap out second half to not
+   * confuse the code below.
+   * This is undone below. Do not change ii!!
+   */
+  if (has_comma) {
+    *ii = '\0';
+  }
+
   /* Maybe arg is FILE : LINENUM or FILE : FUNCTION */
   /* May also be CLASS::MEMBER, or NAMESPACE::NAME */
   /* Look for ':', but ignore inside of <> */
 
   s = NULL;
-  for (p = *argptr; *p; p++)
+  p = *argptr;
+  if (p[0] == '"')
+    {
+      is_quote_enclosed = 1;
+      p++;
+    }
+  else
+      is_quote_enclosed = 0;
+  for ( ; *p; p++)
     {
       if (p[0] == '<') 
 	{
@@ -2576,8 +2599,15 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line, canonical)
             error ("malformed template specification in command");
           p = temp_end;
 	}
-      if (p[0] == ':' || p[0] == ' ' || p[0] == '\t' || !*p)
-	break;
+      /* Check for the end of the first half of the linespec.  End of line,
+         a tab, a double colon or the last single colon, or a space.  But
+         if enclosed in double quotes we do not break on enclosed spaces */
+      if (!*p
+          || p[0] == '\t'
+          || ((p[0] == ':')
+              && ((p[1] == ':') || (strchr (p + 1, ':') == NULL)))
+          || ((p[0] == ' ') && ! is_quote_enclosed))
+        break;
       if (p[0] == '.' && strchr (p, ':') == NULL) /* Java qualified method. */
 	{
 	  /* Find the *last* '.', since the others are package qualifiers. */
@@ -2590,6 +2620,16 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line, canonical)
 	}
     }
   while (p[0] == ' ' || p[0] == '\t') p++;
+  /* if the closing double quote was left at the end, remove it */
+  if (is_quote_enclosed && ((pp = strchr (p, '"')) != NULL))
+    if (!*(pp+1))
+      *pp = '\0';
+
+  /* Now that we've safely parsed the first half,
+   * put back ',' so outer layers can see it 
+   */
+  if (has_comma)
+    *ii = ',';
 
   if ((p[0] == ':' || p[0] == '.') && !has_parens)
     {
@@ -2811,8 +2851,6 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line, canonical)
           sym = lookup_symbol (copy, 0, VAR_NAMESPACE, 0, &sym_symtab);
           s = (struct symtab *) 0;
           /* Prepare to jump: restore the " if (condition)" so outer layers see it */
-          if (has_if)
-            *ii = ' ';
           /* Symbol was found --> jump to normal symbol processing.
              Code following "symbol_found" expects "copy" to have the
              symbol name, "sym" to have the symbol pointer, "s" to be
@@ -2837,9 +2875,22 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line, canonical)
       /* Extract the file name.  */
       p1 = p;
       while (p != *argptr && p[-1] == ' ') --p;
+      if ((*p == '"') && is_quote_enclosed) --p;
       copy = (char *) alloca (p - *argptr + 1);
-      memcpy (copy, *argptr, p - *argptr);
-      copy[p - *argptr] = 0;
+      if ((**argptr == '"') && is_quote_enclosed)
+        {
+          memcpy (copy, *argptr + 1, p - *argptr - 1);
+          /* It may have the ending quote right after the file name */
+          if (copy[p - *argptr - 2] == '"')
+            copy[p - *argptr - 2] = 0;
+          else
+            copy[p - *argptr - 1] = 0;
+        }
+      else
+        {
+          memcpy (copy, *argptr, p - *argptr);
+          copy[p - *argptr] = 0;
+        }
 
       /* Find that file's data.  */
       s = lookup_symtab (copy);
@@ -2882,8 +2933,6 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line, canonical)
       /* Yes, we have a symbol; jump to symbol processing */
       /* Code after symbol_found expects S, SYM_SYMTAB, SYM, 
          and COPY to be set correctly */ 
-      if (has_if)
-        *ii = ' ';
       *argptr = (*p == '\'') ? p + 1 : p;
       s = (struct symtab *) 0;
       goto symbol_found;

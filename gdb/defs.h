@@ -747,12 +747,6 @@ extern PTR xmrealloc PARAMS ((PTR, PTR, long));
 
 extern int parse_escape PARAMS ((char **));
 
-/* compat - handle old targets that just define REGISTER_NAMES */
-#ifndef REGISTER_NAME
-extern char *gdb_register_names[];
-#define REGISTER_NAME(i) gdb_register_names[i]
-#endif
-
 /* Message to be printed before the error message, when an error occurs.  */
 
 extern char *error_pre_print;

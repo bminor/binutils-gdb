@@ -638,7 +638,14 @@ test "$host_alias" != "$target_alias" &&
 
 
 # Directories to use in all configurations.
-configdirs="gdb.asm gdb.base gdb.c++ gdb.disasm gdb.chill gdb.threads gdb.trace"
+configdirs="gdb.asm \
+            gdb.base \
+            gdb.c++ \
+            gdb.disasm \
+            gdb.chill \
+            gdb.threads \
+            gdb.trace"
+
 
 # Directories to use for a configuration which uses stabs.
 stabsdirs="gdb.stabs"

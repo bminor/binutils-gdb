@@ -1,5 +1,5 @@
 /* Target machine description for VxWorks on the 29k, for GDB, the GNU debugger.
-   Copyright 1994 Free Software Foundation, Inc.
+   Copyright 1994, 1999 Free Software Foundation, Inc.
    Contributed by Cygnus Support.
 
 This file is part of GDB.
@@ -19,10 +19,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "a29k/tm-a29k.h"
-
-#define	GDBINIT_FILENAME	".vxgdbinit"
-
-#define	DEFAULT_PROMPT		"(vxgdb) "
+#include "tm-vxworks.h"
 
 /* Number of registers in a ptrace_getregs call. */
 

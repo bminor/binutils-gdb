@@ -27,7 +27,7 @@ struct std_regs {
 	int regnum;
 };
 
-extern struct std_regs std_regs[];
+extern struct std_regs *std_regs;
 extern unsigned num_std_regs;
 
 extern struct expression *expout;

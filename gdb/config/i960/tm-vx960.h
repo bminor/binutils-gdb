@@ -1,5 +1,5 @@
 /* Parameters for VxWorks Intel 960's, for GDB, the GNU debugger.
-   Copyright (C) 1986-1991 Free Software Foundation, Inc.
+   Copyright (C) 1986-1991, 1999 Free Software Foundation, Inc.
    Contributed by Cygnus Support.
 
 This file is part of GDB.
@@ -19,15 +19,12 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "i960/tm-i960.h"
+#include "tm-vxworks.h"
 
 /* Under VxWorks the IP isn't filled in.  Skip it, go with RIP, which has
    the real value.  */
 #undef PC_REGNUM
 #define PC_REGNUM RIP_REGNUM
-
-#define	GDBINIT_FILENAME	".vxgdbinit"
-
-#define	DEFAULT_PROMPT		"(vxgdb) "
 
 /* We have more complex, useful breakpoints on the target.
    Amount ip must be decremented by after a breakpoint.  */

@@ -20,6 +20,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #ifndef GDBARCH_H
 #define GDBARCH_H
 
+#ifdef __STDC__
+struct frame_info;
+struct value;
+enum lval_type;
+#endif
+
 /* The target-system-dependant byte order is dynamic */
 
 /* TARGET_BYTE_ORDER_SELECTABLE_P determines if the target endianness
@@ -140,6 +146,14 @@ extern disassemble_info tm_print_insn_info;
 #endif
 
 
+/* Fallback definition for REGISTER_NAME for systems still defining
+   REGISTER_NAMES. */
+#ifndef REGISTER_NAME
+extern char *gdb_register_names[];
+#define REGISTER_NAME(i) gdb_register_names[i]
+#endif
+
+
 /* Set the dynamic target-system-dependant parameters (architecture,
    byte-order, ...) using information found in the BFD */
 
@@ -150,6 +164,12 @@ extern void set_gdbarch_from_file PARAMS ((bfd *));
    on bfd_architecture and machine. */
 
 extern void set_architecture_from_arch_mach PARAMS ((enum bfd_architecture, unsigned long));
+
+
+/* Helper function for targets that don't know how my arguments are
+   being passed */
+
+extern int frame_num_args_unknown PARAMS ((struct frame_info *fi));
 
 
 /* gdbarch trace variable */

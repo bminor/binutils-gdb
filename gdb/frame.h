@@ -241,6 +241,10 @@ extern int       generic_pc_in_call_dummy    PARAMS ((CORE_ADDR pc,
 extern char *    generic_find_dummy_frame    PARAMS ((CORE_ADDR pc, 
 						      CORE_ADDR fp));
 
+extern void generic_fix_call_dummy PARAMS ((char *dummy, CORE_ADDR pc, CORE_ADDR fun,
+					    int nargs, struct value **args,
+					    struct type *type, int gcc_p));
+
 #ifdef __GNUC__
 /* Some native compilers, even ones that are supposed to be ANSI and for which __STDC__
    is true, complain about forward decls of enums. */

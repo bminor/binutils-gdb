@@ -1,5 +1,5 @@
 /* Interface GDB to the GNU Hurd
-   Copyright (C) 1992, 1995, 1996, 1997 Free Software Foundation, Inc.
+   Copyright (C) 1992, 1995, 1996, 1997, 1999 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -108,6 +108,7 @@ void inf_set_step_thread (struct inf *inf, struct proc *proc);
 void inf_detach (struct inf *inf);
 void inf_attach (struct inf *inf, int pid);
 void inf_signal (struct inf *inf, enum target_signal sig);
+void inf_continue (struct inf *inf);
 
 #define inf_debug(_inf, msg, args...) \
   do { struct inf *__inf = (_inf); \
@@ -194,19 +195,22 @@ struct inf
 
   /* True if we think at least one thread in the inferior could currently be
      running.  */
-  int running : 1;
+  unsigned int running : 1;
 
   /* True if the process has stopped (in the proc server sense).  Note that
      since a proc server `stop' leaves the signal thread running, the inf can
      be RUNNING && STOPPED...  */
-  int stopped : 1;
+  unsigned int stopped : 1;
+
+  /* True if the inferior has no message port.  */
+  unsigned int nomsg : 1;
 
   /* True if the inferior is traced.  */
-  int traced : 1;
+  unsigned int traced : 1;
 
   /* True if we shouldn't try waiting for the inferior, usually because we
      can't for some reason.  */
-  int no_wait : 1;
+  unsigned int no_wait : 1;
 
   /* When starting a new inferior, we don't try to validate threads until all
      the proper execs have been done.  This is a count of how many execs we
@@ -635,8 +639,9 @@ struct inf *make_inf ()
   inf->step_thread = 0;
   inf->signal_thread = 0;
   inf->event_port = MACH_PORT_NULL;
-  inf->stopped = 0;
   inf->running = 0;
+  inf->stopped = 0;
+  inf->nomsg = 1;
   inf->traced = 0;
   inf->no_wait = 0;
   inf->pending_execs = 0;
@@ -680,10 +685,11 @@ inf_cleanup (struct inf *inf)
 
   inf_set_pid (inf, -1);
   inf->pid = 0;
+  inf->running = 0;
+  inf->stopped = 0;
+  inf->nomsg = 1;
   inf->traced = 0;
   inf->no_wait = 0;
-  inf->stopped = 0;
-  inf->running = 0;
   inf->pending_execs = 0;
 
   if (inf->event_port)
@@ -760,9 +766,12 @@ inf_set_pid (struct inf *inf, pid_t pid)
     inf->pid = -1;
 }
 
-/* Validates INF's stopped field from the actual proc server state.  */
+/* Validates INF's stopped, nomsg and traced field from the actual
+   proc server state.  Note that the traced field is only updated from
+   the proc server state if we do not have a message port.  If we do
+   have a message port we'd better look at the tracemask itself.  */
 static void
-inf_validate_stopped (struct inf *inf)
+inf_validate_procinfo (struct inf *inf)
 {
   char *noise;
   mach_msg_type_number_t noise_len = 0;
@@ -776,6 +785,9 @@ inf_validate_stopped (struct inf *inf)
   if (! err)
     {
       inf->stopped = !!(pi->state & PI_STOPPED);
+      inf->nomsg = !!(pi->state & PI_NOMSG);
+      if (inf->nomsg)
+	inf->traced = !!(pi->state & PI_TRACED);
       vm_deallocate (mach_task_self (), (vm_address_t)pi, pi_len);
       if (noise_len > 0)
 	vm_deallocate (mach_task_self (), (vm_address_t)noise, noise_len);
@@ -1147,9 +1159,16 @@ inf_detach (struct inf *inf)
     {
       struct proc *thread;
 
+      inf_validate_procinfo (inf);
+
       inf_set_traced (inf, 0);
       if (inf->stopped)
-	inf_signal (inf, TARGET_SIGNAL_0);
+	{
+	  if (inf->nomsg)
+	    inf_continue (inf);
+	  else
+	    inf_signal (inf, TARGET_SIGNAL_0);
+	}
 
       proc_restore_exc_port (task);
       task->sc = inf->detach_sc;
@@ -1289,6 +1308,34 @@ inf_signal (struct inf *inf, enum target_signal sig)
     warning ("Delivering signal %s: %s", NAME, strerror (err));
 
 #undef NAME
+}
+
+/* Continue INF without delivering a signal.  This is meant to be used
+   when INF does not have a message port.  */
+void
+inf_continue (struct inf *inf)
+{
+  process_t proc;
+  error_t err = proc_pid2proc (proc_server, inf->pid, &proc);
+
+  if (! err)
+    {
+      inf_debug (inf, "continuing process");
+
+      err = proc_mark_cont (proc);
+      if (! err)
+	{
+	  struct proc *thread;
+
+	  for (thread = inf->threads; thread; thread = thread->next)
+	    thread_resume (thread->port);
+	  
+	  inf->stopped = 0;
+	}
+    }
+
+  if (err)
+    warning ("Can't continue process: %s", strerror (err));
 }
 
 /* The inferior used for all gdb target ops.  */
@@ -1800,8 +1847,15 @@ gnu_resume (int tid, int step, enum target_signal sig)
 
   inf_debug (inf, "tid = %d, step = %d, sig = %d", tid, step, sig);
 
+  inf_validate_procinfo (inf);
+  
   if (sig != TARGET_SIGNAL_0 || inf->stopped)
-    inf_signal (inf, sig);
+    {
+      if (sig == TARGET_SIGNAL_0 && inf->nomsg)
+	inf_continue (inf);
+      else
+	inf_signal (inf, sig);
+    }
   else if (inf->wait.exc.reply != MACH_PORT_NULL)
     /* We received an exception to which we have chosen not to forward, so
        abort the faulting thread, which will perhaps retake it.  */
@@ -1923,6 +1977,7 @@ gnu_create_inferior (exec_file, allargs, env)
       push_target (&gnu_ops);
 
       inf->pending_execs = 2;
+      inf->nomsg = 1;
       inf->traced = 1;
 
       /* Now let the child run again, knowing that it will stop immediately
@@ -1938,6 +1993,7 @@ gnu_create_inferior (exec_file, allargs, env)
   fork_inferior (exec_file, allargs, env, trace_me, attach_to_child,
 		 NULL, NULL);
 
+  inf_validate_procinfo (inf);
   inf_update_signal_thread (inf);
   inf_set_traced (inf, inf->want_signals);
 
@@ -2007,13 +2063,13 @@ gnu_attach (args, from_tty)
   /* We have to initialize the terminal settings now, since the code
      below might try to restore them.  */
   target_terminal_init ();
- 
-  inf_update_signal_thread (inf);
-  inf_set_traced (inf, inf->want_signals);
-
+  
   /* If the process was stopped before we attached, make it continue the next
      time the user does a continue.  */
-  inf_validate_stopped (inf);
+  inf_validate_procinfo (inf);
+
+  inf_update_signal_thread (inf);
+  inf_set_traced (inf, inf->want_signals);
 
 #if 0 /* Do we need this? */
   renumber_threads (0);		/* Give our threads reasonable names. */

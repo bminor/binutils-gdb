@@ -100,6 +100,12 @@ merlin_frame_num_args (fi)
   return numargs;
 }
 
+
+/* Return number of args passed to a frame.
+   Can return -1, meaning no way to tell.
+   Encore's C compiler often reuses same area on stack for args,
+   so this will often not work properly.  If the arg names
+   are known, it's likely most of them will be printed. */
 int
 umax_frame_num_args (fi)
      struct frame_info *fi;

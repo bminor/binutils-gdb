@@ -17,10 +17,13 @@ elf reader		Jim Blandy		jimb@cygnus.com
 stabs reader		Jim Blandy		jimb@cygnus.com
 x86 linux native	Jim Blandy		jimb@cygnus.com
 Scheme support		Jim Blandy		jimb@cygnus.com
+hurd native		Mark Kettenis		kettenis@wins.va.nl
+hpux, hp pa native	Jeff Law		law@cygnus.com
 m32r target		Michael Snyder		msnyder@cygnus.com
 tracing			Michael Snyder		msnyder@cygnus.com
 threads			Michael Snyder		msnyder@cygnus.com
 breakpoint.c		Michael Snyder		msnyder@cygnus.com
+coff reader		Philippe De Muyter	phdm@macqel.be
 macos host & native	Stan Shebs		shebs@cygnus.com
 sds protocol		Stan Shebs		shebs@cygnus.com
 rdi/adp protocol	Stan Shebs		shebs@cygnus.com

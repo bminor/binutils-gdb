@@ -912,6 +912,9 @@ Your host config file defines this if it includes declarations of
 @code{memcpy} and @code{memset}.  Define this to avoid conflicts between
 the native include files and the declarations in @file{defs.h}.
 
+@item NO_STD_REGS
+This macro is deprecated.
+
 @item NO_SYS_FILE
 Define this if your system does not have a @code{<sys/file.h>}.
 
@@ -1331,7 +1334,11 @@ If defined, then the `info float' command will print information about
 the processor's floating point unit.
 
 @item FP_REGNUM
-The number of the frame pointer register.
+If the virtual frame pointer is kept in a register, then define this
+macro to be the number (greater than or equal to zero) of that register.
+
+This should only need to be defined if @code{TARGET_READ_FP} and
+@code{TARGET_WRITE_FP} are not defined.
 
 @item FRAMELESS_FUNCTION_INVOCATION(fi)
 Define this to an expression that returns 1 if the function invocation
@@ -1500,8 +1507,10 @@ counter.  (Defined only for the RS/6000.)
 
 @item PC_REGNUM
 If the program counter is kept in a register, then define this macro to
-be the number of that register.  This need be defined only if
-@code{TARGET_WRITE_PC} is not defined.
+be the number (greater than or equal to zero) of that register.
+
+This should only need to be defined if @code{TARGET_READ_PC} and
+@code{TARGET_WRITE_PC} are not defined.
 
 @item NPC_REGNUM
 The number of the ``next program counter'' register, if defined.
@@ -1576,8 +1585,11 @@ the functions being called, then define this macro to return a new PC
 that is at the start of the real function.
 
 @item SP_REGNUM
-Define this to be the number of the register that serves as the stack
-pointer.
+If the stack-pointer is kept in a register, then define this macro to be
+the number (greater than or equal to zero) of that register.
+
+This should only need to be defined if @code{TARGET_WRITE_SP} and
+@code{TARGET_WRITE_SP} are not defined.
 
 @item STAB_REG_TO_REGNUM
 Define this to convert stab register numbers (as gotten from `r'

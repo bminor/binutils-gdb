@@ -122,7 +122,7 @@ gdb_test "info break" \
 #
 
 
-gdb_run_cmd
+rerun_to_main
 
 #
 # run until the breakpoint at a line number

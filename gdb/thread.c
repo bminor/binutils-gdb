@@ -79,10 +79,6 @@ void _initialize_thread PARAMS ((void));
 
 /* Prototypes for local functions. */
 
-#if !defined(FIND_NEW_THREADS)
-#define FIND_NEW_THREADS local_find_new_threads
-#endif  
-			   
 static struct thread_info *thread_list = NULL;
 static int highest_thread_num;
 
@@ -96,68 +92,6 @@ static void thread_apply_command PARAMS ((char *, int));
 static void restore_current_thread PARAMS ((int));
 static void switch_to_thread PARAMS ((int pid));
 static void prune_threads PARAMS ((void));
-static int local_find_new_threads PARAMS ((void));
-
-/* If the host has threads, the host machine definition may set this
-   macro. But, for remote thread debugging, it gets more complex and
-   setting macros does not bind to the various target dependent
-   methods well. So, we use the vector target_thread_functions */
-
-static struct target_thread_vector *target_thread_functions;
-
-static int
-local_find_new_threads ()
-{
-  int retval = 0;
-  if (target_thread_functions &&
-      target_thread_functions->find_new_threads)
-    retval = (*(target_thread_functions->find_new_threads)) ();
-  return retval;		/* no support */
-}
-
-
-int
-target_get_thread_info PARAMS ((gdb_threadref * ref,
-				int selection,		/* FIXME: Selection */
-				struct gdb_ext_thread_info * info));
-
-int
-target_get_thread_info (ref, selection, info)
-
-     gdb_threadref *ref;
-     int selection;
-    /* FIXME: Selection */
-     struct gdb_ext_thread_info *info;
-
-{
-  int retval = 0;
-  if (target_thread_functions
-      && target_thread_functions->get_thread_info)
-    retval = (*(target_thread_functions->get_thread_info)) (ref, selection, info);
-  return retval;
-}
-
-
-/* It is possible that these bind and unbinf functions implement a
-   stack the interface allows it, but its not implemented that way
- */
-
-
-void
-bind_target_thread_vector (vec)
-     struct target_thread_vector *vec;
-{
-  target_thread_functions = vec;
-}
-
-struct target_thread_vector *
-unbind_target_thread_vector ()
-{
-  struct target_thread_vector *retval;
-  retval = target_thread_functions;
-  target_thread_functions = 0;
-  return retval;
-}				/* unbind_target_thread-vector */
 
 void
 init_thread_list ()

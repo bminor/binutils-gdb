@@ -313,6 +313,242 @@ static void packet_command PARAMS ((char *, int));
 
 static int stub_unpack_int PARAMS ((char *buff, int fieldlength));
 
+static int remote_current_thread PARAMS ((int oldpid));
+
+static void remote_find_new_threads PARAMS ((void));
+
+static void record_currthread PARAMS ((int currthread));
+
+/* exported functions */
+
+extern int fromhex PARAMS ((int a));
+
+extern void getpkt PARAMS ((char *buf, int forever));
+
+extern int putpkt PARAMS ((char *buf));
+
+static int putpkt_binary PARAMS ((char *buf, int cnt));
+
+void remote_console_output PARAMS ((char *));
+
+static void check_binary_download PARAMS ((CORE_ADDR addr));
+
+/* Define the target subroutine names */
+
+void open_remote_target PARAMS ((char *, int, struct target_ops *, int));
+
+void _initialize_remote PARAMS ((void));
+
+/* */
+
+static struct target_ops remote_ops;
+
+static struct target_ops extended_remote_ops;
+
+/* This was 5 seconds, which is a long time to sit and wait.
+   Unless this is going though some terminal server or multiplexer or
+   other form of hairy serial connection, I would think 2 seconds would
+   be plenty.  */
+
+/* Changed to allow option to set timeout value.
+   was static int remote_timeout = 2; */
+extern int remote_timeout;
+
+/* This variable chooses whether to send a ^C or a break when the user
+   requests program interruption.  Although ^C is usually what remote
+   systems expect, and that is the default here, sometimes a break is
+   preferable instead.  */
+
+static int remote_break;
+
+/* Descriptor for I/O to remote machine.  Initialize it to NULL so that
+   remote_open knows that we don't have a file open when the program
+   starts.  */
+static serial_t remote_desc = NULL;
+
+/* This variable (available to the user via "set remotebinarydownload")
+   dictates whether downloads are sent in binary (via the 'X' packet).
+   We assume that the stub can, and attempt to do it. This will be cleared if
+   the stub does not understand it. This switch is still needed, though
+   in cases when the packet is supported in the stub, but the connection
+   does not allow it (i.e., 7-bit serial connection only). */
+static int remote_binary_download = 1;
+ 
+/* Have we already checked whether binary downloads work? */
+static int remote_binary_checked;
+
+/* Maximum number of bytes to read/write at once.  The value here
+   is chosen to fill up a packet (the headers account for the 32).  */
+#define MAXBUFBYTES(N) (((N)-32)/2)
+
+/* Having this larger than 400 causes us to be incompatible with m68k-stub.c
+   and i386-stub.c.  Normally, no one would notice because it only matters
+   for writing large chunks of memory (e.g. in downloads).  Also, this needs
+   to be more than 400 if required to hold the registers (see below, where
+   we round it up based on REGISTER_BYTES).  */
+/* Round up PBUFSIZ to hold all the registers, at least.  */
+#define	PBUFSIZ ((REGISTER_BYTES > MAXBUFBYTES (400)) \
+		 ? (REGISTER_BYTES * 2 + 32) \
+		 : 400)
+
+
+/* This variable sets the number of bytes to be written to the target
+   in a single packet.  Normally PBUFSIZ is satisfactory, but some
+   targets need smaller values (perhaps because the receiving end
+   is slow).  */
+
+static int remote_write_size;
+
+/* This variable sets the number of bits in an address that are to be
+   sent in a memory ("M" or "m") packet.  Normally, after stripping
+   leading zeros, the entire address would be sent. This variable
+   restricts the address to REMOTE_ADDRESS_SIZE bits.  HISTORY: The
+   initial implementation of remote.c restricted the address sent in
+   memory packets to ``host::sizeof long'' bytes - (typically 32
+   bits).  Consequently, for 64 bit targets, the upper 32 bits of an
+   address was never sent.  Since fixing this bug may cause a break in
+   some remote targets this variable is principly provided to
+   facilitate backward compatibility. */
+
+static int remote_address_size;
+
+/* This is the size (in chars) of the first response to the `g' command.  This
+   is used to limit the size of the memory read and write commands to prevent
+   stub buffers from overflowing.  The size does not include headers and
+   trailers, it is only the payload size. */
+
+static int remote_register_buf_size = 0;
+
+/* Should we try the 'P' request?  If this is set to one when the stub
+   doesn't support 'P', the only consequence is some unnecessary traffic.  */
+static int stub_supports_P = 1;
+
+/* These are pointers to hook functions that may be set in order to
+   modify resume/wait behavior for a particular architecture.  */
+
+void (*target_resume_hook) PARAMS ((void));
+void (*target_wait_loop_hook) PARAMS ((void));
+
+
+
+/* These are the threads which we last sent to the remote system.
+   -1 for all or -2 for not sent yet.  */
+static int general_thread;
+static int continue_thread;
+
+/* Call this function as a result of
+   1) A halt indication (T packet) containing a thread id
+   2) A direct query of currthread
+   3) Successful execution of set thread
+ */
+
+static void
+record_currthread (currthread)
+     int currthread;
+{
+  general_thread = currthread;
+
+  /* If this is a new thread, add it to GDB's thread list.
+     If we leave it up to WFI to do this, bad things will happen.  */
+  if (!in_thread_list (currthread))
+    add_thread (currthread);
+}
+
+#define MAGIC_NULL_PID 42000
+
+static void
+set_thread (th, gen)
+     int th;
+     int gen;
+{
+  char buf[PBUFSIZ];
+  int state = gen ? general_thread : continue_thread;
+
+  if (state == th)
+    return;
+
+  buf[0] = 'H';
+  buf[1] = gen ? 'g' : 'c';
+  if (th == MAGIC_NULL_PID)
+    {
+      buf[2] = '0';
+      buf[3] = '\0';
+    }
+  else if (th < 0)
+    sprintf (&buf[2], "-%x", -th);
+  else
+    sprintf (&buf[2], "%x", th);
+  putpkt (buf);
+  getpkt (buf, 0);
+  if (gen)
+    general_thread  = th;
+  else
+    continue_thread = th;
+}
+
+/*  Return nonzero if the thread TH is still alive on the remote system.  */
+
+static int
+remote_thread_alive (tid)
+     int tid;
+{
+  char buf[16];
+
+  if (tid < 0)
+    sprintf (buf, "T-%08x", -tid);
+  else
+    sprintf (buf, "T%08x", tid);
+  putpkt (buf);
+  getpkt (buf, 0);
+  return (buf[0] == 'O' && buf[1] == 'K');
+}
+
+/* About these extended threadlist and threadinfo packets.  They are
+   variable length packets but, the fields within them are often fixed
+   length.  They are redundent enough to send over UDP as is the
+   remote protocol in general.  There is a matching unit test module
+   in libstub.  */
+
+#define OPAQUETHREADBYTES 8
+
+/* a 64 bit opaque identifier */
+typedef unsigned char threadref[OPAQUETHREADBYTES];
+
+/* WARNING: This threadref data structure comes from the remote O.S., libstub
+   protocol encoding, and remote.c. it is not particularly changable */
+
+/* Right now, the internal structure is int. We want it to be bigger.
+   Plan to fix this.
+   */
+
+typedef int gdb_threadref; /* internal GDB thread reference */
+
+/*  gdb_ext_thread_info is an internal GDB data structure which is
+   equivalint to the reply of the remote threadinfo packet */
+
+struct gdb_ext_thread_info
+{
+  threadref threadid;	  /* External form of thread reference */
+  int active;		  /* Has state interesting to GDB? , regs, stack */
+  char display[256];	  /* Brief state display, name, blocked/syspended */
+  char shortname[32];	  /* To be used to name threads */
+  char more_display[256]; /* Long info, statistics, queue depth, whatever */
+};
+
+/* The volume of remote transfers can be limited by submitting
+   a mask containing bits specifying the desired information.
+   Use a union of these values as the 'selection' parameter to
+   get_thread_info. FIXME: Make these TAG names more thread specific.
+   */
+
+#define TAG_THREADID 1
+#define TAG_EXISTS 2
+#define TAG_DISPLAY 4
+#define TAG_THREADNAME 8
+#define TAG_MOREDISPLAY 16 
+
+#define BUF_THREAD_ID_SIZE (OPAQUETHREADBYTES*2)
+
 char *unpack_varlen_hex PARAMS ((char *buff, int *result));
 
 static char *unpack_nibble PARAMS ((char *buf, int *val));
@@ -380,221 +616,6 @@ static int remote_threadlist_iterator PARAMS ((rmt_thread_action stepfunction,
 					       void *context, int looplimit));
 
 static int remote_newthread_step PARAMS ((threadref *ref, void *context));
-
-static int remote_current_thread PARAMS ((int oldpid));
-
-int remote_find_new_threads PARAMS ((void));
-
-static void record_currthread PARAMS ((int currthread));
-
-static void init_remote_threads PARAMS ((void));
-
-/* exported functions */
-
-extern int fromhex PARAMS ((int a));
-
-extern void getpkt PARAMS ((char *buf, int forever));
-
-extern int putpkt PARAMS ((char *buf));
-
-static int putpkt_binary PARAMS ((char *buf, int cnt));
-
-void remote_console_output PARAMS ((char *));
-
-static void check_binary_download PARAMS ((CORE_ADDR addr));
-
-/* Define the target subroutine names */
-
-void open_remote_target PARAMS ((char *, int, struct target_ops *, int));
-
-void _initialize_remote PARAMS ((void));
-
-/* */
-
-static struct target_ops remote_ops;
-
-static struct target_ops extended_remote_ops;
-
-static struct target_thread_vector remote_thread_vec;
-
-/* This was 5 seconds, which is a long time to sit and wait.
-   Unless this is going though some terminal server or multiplexer or
-   other form of hairy serial connection, I would think 2 seconds would
-   be plenty.  */
-
-/* Changed to allow option to set timeout value.
-   was static int remote_timeout = 2; */
-extern int remote_timeout;
-
-/* This variable chooses whether to send a ^C or a break when the user
-   requests program interruption.  Although ^C is usually what remote
-   systems expect, and that is the default here, sometimes a break is
-   preferable instead.  */
-
-static int remote_break;
-
-/* Descriptor for I/O to remote machine.  Initialize it to NULL so that
-   remote_open knows that we don't have a file open when the program
-   starts.  */
-static serial_t remote_desc = NULL;
-
-/* This variable (available to the user via "set remotebinarydownload")
-   dictates whether downloads are sent in binary (via the 'X' packet).
-   We assume that the stub can, and attempt to do it. This will be cleared if
-   the stub does not understand it. This switch is still needed, though
-   in cases when the packet is supported in the stub, but the connection
-   does not allow it (i.e., 7-bit serial connection only). */
-static int remote_binary_download = 1;
- 
-/* Have we already checked whether binary downloads work? */
-static int remote_binary_checked;
-
-/* Having this larger than 400 causes us to be incompatible with m68k-stub.c
-   and i386-stub.c.  Normally, no one would notice because it only matters
-   for writing large chunks of memory (e.g. in downloads).  Also, this needs
-   to be more than 400 if required to hold the registers (see below, where
-   we round it up based on REGISTER_BYTES).  */
-#define	PBUFSIZ	400
-
-/* Maximum number of bytes to read/write at once.  The value here
-   is chosen to fill up a packet (the headers account for the 32).  */
-#define MAXBUFBYTES ((PBUFSIZ-32)/2)
-
-/* Round up PBUFSIZ to hold all the registers, at least.  */
-/* The blank line after the #if seems to be required to work around a
-   bug in HP's PA compiler.  */
-#if REGISTER_BYTES > MAXBUFBYTES
-
-#undef PBUFSIZ
-#define	PBUFSIZ	(REGISTER_BYTES * 2 + 32)
-#endif
-
-
-/* This variable sets the number of bytes to be written to the target
-   in a single packet.  Normally PBUFSIZ is satisfactory, but some
-   targets need smaller values (perhaps because the receiving end
-   is slow).  */
-
-static int remote_write_size = PBUFSIZ;
-
-/* This variable sets the number of bits in an address that are to be
-   sent in a memory ("M" or "m") packet.  Normally, after stripping
-   leading zeros, the entire address would be sent. This variable
-   restricts the address to REMOTE_ADDRESS_SIZE bits.  HISTORY: The
-   initial implementation of remote.c restricted the address sent in
-   memory packets to ``host::sizeof long'' bytes - (typically 32
-   bits).  Consequently, for 64 bit targets, the upper 32 bits of an
-   address was never sent.  Since fixing this bug may cause a break in
-   some remote targets this variable is principly provided to
-   facilitate backward compatibility. */
-
-static int remote_address_size;
-
-/* This is the size (in chars) of the first response to the `g' command.  This
-   is used to limit the size of the memory read and write commands to prevent
-   stub buffers from overflowing.  The size does not include headers and
-   trailers, it is only the payload size. */
-
-static int remote_register_buf_size = 0;
-
-/* Should we try the 'P' request?  If this is set to one when the stub
-   doesn't support 'P', the only consequence is some unnecessary traffic.  */
-static int stub_supports_P = 1;
-
-/* These are pointers to hook functions that may be set in order to
-   modify resume/wait behavior for a particular architecture.  */
-
-void (*target_resume_hook) PARAMS ((void));
-void (*target_wait_loop_hook) PARAMS ((void));
-
-
-
-/* These are the threads which we last sent to the remote system.
-   -1 for all or -2 for not sent yet.  */
-static int general_thread;
-static int cont_thread;
-
-/* Call this function as a result of
-   1) A halt indication (T packet) containing a thread id
-   2) A direct query of currthread
-   3) Successful execution of set thread
- */
-
-static void
-record_currthread (currthread)
-     int currthread;
-{
-#if 0	/* target_wait must not modify inferior_pid! */
-  inferior_pid = currthread;
-#endif
-  general_thread = currthread;
-#if 0	/* setting cont_thread has a different meaning 
-	   from having the target report its thread id.  */
-  cont_thread = currthread;
-#endif
-  /* If this is a new thread, add it to GDB's thread list.
-     If we leave it up to WFI to do this, bad things will happen.  */
-  if (!in_thread_list (currthread))
-    add_thread (currthread);
-}
-
-#define MAGIC_NULL_PID 42000
-
-static void
-set_thread (th, gen)
-     int th;
-     int gen;
-{
-  char buf[PBUFSIZ];
-  int state = gen ? general_thread : cont_thread;
-
-  if (state == th)
-    return;
-
-  buf[0] = 'H';
-  buf[1] = gen ? 'g' : 'c';
-  if (th == MAGIC_NULL_PID)
-    {
-      buf[2] = '0';
-      buf[3] = '\0';
-    }
-  else if (th < 0)
-    sprintf (&buf[2], "-%x", -th);
-  else
-    sprintf (&buf[2], "%x", th);
-  putpkt (buf);
-  getpkt (buf, 0);
-  if (gen)
-    general_thread = th;
-  else
-    cont_thread = th;
-}
-
-/*  Return nonzero if the thread TH is still alive on the remote system.  */
-
-static int
-remote_thread_alive (th)
-     int th;
-{
-  char buf[PBUFSIZ];
-
-  buf[0] = 'T';
-  if (th < 0)
-    sprintf (&buf[1], "-%08x", -th);
-  else
-    sprintf (&buf[1], "%08x", th);
-  putpkt (buf);
-  getpkt (buf, 0);
-  return (buf[0] == 'O' && buf[1] == 'K');
-}
-
-/* About these extended threadlist and threadinfo packets.  They are
-   variable length packets but, the fields within them are often fixed
-   length.  They are redundent enough to send over UDP as is the
-   remote protocol in general.  There is a matching unit test module
-   in libstub.  */
-
-#define BUF_THREAD_ID_SIZE (OPAQUETHREADBYTES*2)
 
 /* encode 64 bits in 16 chars of hex */
 
@@ -1232,26 +1253,15 @@ remote_current_thread (oldpid)
     return oldpid;
 }
 
-int
+/* Find new threads for info threads command.  */
+
+static void
 remote_find_new_threads ()
 {
-  int ret;
-
-  ret = remote_threadlist_iterator (remote_newthread_step, 0, 
+  remote_threadlist_iterator (remote_newthread_step, 0, 
 				    CRAZY_MAX_THREADS);
   if (inferior_pid == MAGIC_NULL_PID)	/* ack ack ack */
     inferior_pid = remote_current_thread (inferior_pid);
-  return ret;
-}
-
-/* Initialize the thread vector which is used by threads.c */
-/* The thread stub is a package, it has an initializer */
-
-static void
-init_remote_threads ()
-{
-  remote_thread_vec.find_new_threads = remote_find_new_threads;
-  remote_thread_vec.get_thread_info = adapt_remote_get_threadinfo;
 }
 
 
@@ -1467,19 +1477,14 @@ serial device is attached to the remote system (e.g. /dev/ttya).");
     }
   push_target (target);	/* Switch to using remote target now */
 
-  /* The target vector does not have the thread functions in it yet,
-     so we use this function to call back into the thread module and
-     register the thread vector and its contained functions. */
-  bind_target_thread_vector (&remote_thread_vec);
-
   /* Start out by trying the 'P' request to set registers.  We set
      this each time that we open a new target so that if the user
      switches from one stub to another, we can (if the target is
      closed and reopened) cope.  */
   stub_supports_P = 1;
 
-  general_thread = -2;
-  cont_thread = -2;
+  general_thread  = -2;
+  continue_thread = -2;
 
   /* Force remote_write_bytes to check whether target supports
      binary downloading. */
@@ -3121,7 +3126,7 @@ remote_query (query_type, buf, outbuf, bufsiz)
   if (! bufsiz)
     error ("null pointer to remote bufer size specified");
 
-  /* minimum outbuf size is PBUFSIZE - if bufsiz is not large enough let 
+  /* minimum outbuf size is PBUFSIZ - if bufsiz is not large enough let 
      the caller know and return what the minimum size is   */
   /* Note: a zero bufsiz can be used to query the minimum buffer size */
   if ( *bufsiz < PBUFSIZ )
@@ -3385,7 +3390,7 @@ Specify the serial device it is connected to (e.g. /dev/ttya).";
   remote_ops.to_load = generic_load;		
   remote_ops.to_mourn_inferior = remote_mourn;
   remote_ops.to_thread_alive = remote_thread_alive;
-  remote_ops.to_find_new_threads = (void*) remote_find_new_threads;
+  remote_ops.to_find_new_threads = remote_find_new_threads;
   remote_ops.to_stop = remote_stop;
   remote_ops.to_query = remote_query;
   remote_ops.to_stratum = process_stratum;
@@ -3420,12 +3425,15 @@ Specify the serial device it is connected to (e.g. /dev/ttya).",
 void
 _initialize_remote ()
 {
+  /* runtime constants */
+  remote_write_size = PBUFSIZ;
+
   init_remote_ops ();
   add_target (&remote_ops);
 
   init_extended_remote_ops ();
   add_target (&extended_remote_ops);
-  init_remote_threads ();
+
 #if 0
   init_remote_threadtests ();
 #endif

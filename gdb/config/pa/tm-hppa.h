@@ -1,5 +1,5 @@
 /* Parameters for execution on any Hewlett-Packard PA-RISC machine.
-   Copyright 1986, 1987, 1989, 1990, 1991, 1992, 1993, 1995
+   Copyright 1986, 1987, 1989, 1990, 1991, 1992, 1993, 1995, 1999
    Free Software Foundation, Inc. 
 
    Contributed by the Center for Software Science at the
@@ -723,6 +723,7 @@ enum unwind_stub_types
   PARAMETER_RELOCATION = 2,
   EXPORT = 10,
   IMPORT = 11,
+  IMPORT_SHLIB = 12,
 };
 
 /* We use the objfile->obj_private pointer for two things:

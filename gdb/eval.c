@@ -396,19 +396,6 @@ evaluate_subexp_standard (expect_type, exp, pos, noside)
   struct type ** arg_types;
   int save_pos1;
 
-  /* This expect_type crap should not be used for C.  C expressions do
-     not have any notion of expected types, never has and (goddess
-     willing) never will.  The C++ code uses it for some twisted
-     purpose (I haven't investigated but I suspect it just the usual
-     combination of Stroustrup figuring out some crazy language
-     feature and Tiemann figuring out some crazier way to try to
-     implement it).  CHILL has the tuple stuff; I don't know enough
-     about CHILL to know whether expected types is the way to do it.
-     FORTRAN I don't know.  */
-  if (exp->language_defn->la_language != language_cplus
-      && exp->language_defn->la_language != language_chill)
-    expect_type = NULL_TYPE;
-
   pc = (*pos)++;
   op = exp->elts[pc].opcode;
 
@@ -421,7 +408,7 @@ evaluate_subexp_standard (expect_type, exp, pos, noside)
 					     0,
 					     exp->elts[pc + 1].type,
 					     &exp->elts[pc + 3].string,
-					     expect_type);
+					     NULL_TYPE);
       if (arg1 == NULL)
 	error ("There is no field named %s", &exp->elts[pc + 3].string);
       return arg1;
@@ -1635,7 +1622,7 @@ bad_pointer_to_member:
 	      (*pos) += 3 + BYTES_TO_EXP_ELEM (temm + 1);
 	    }
 	  else
-	    evaluate_subexp (expect_type, exp, pos, EVAL_SKIP);
+	    evaluate_subexp (NULL_TYPE, exp, pos, EVAL_SKIP);
 	  goto nosideret;
 	}
       else 

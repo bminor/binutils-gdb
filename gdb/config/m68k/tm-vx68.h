@@ -1,5 +1,5 @@
 /* Target machine description for VxWorks m68k's, for GDB, the GNU debugger.
-   Copyright 1986, 1987, 1989, 1991, 1992, 1993 Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1989, 1991, 1992, 1993, 1999 Free Software Foundation, Inc.
    Contributed by Cygnus Support.
 
 This file is part of GDB.
@@ -18,10 +18,6 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
-#define	GDBINIT_FILENAME	".vxgdbinit"
-
-#define	DEFAULT_PROMPT		"(vxgdb) "
-
 /* GCC is probably the only compiler used on this configuration.  So
    get this right even if the code which detects gcc2_compiled. is
    still broken.  */
@@ -32,6 +28,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define	DECR_PC_AFTER_BREAK	0
 
 #include "m68k/tm-m68k.h"
+#include "tm-vxworks.h"
 
 /* Takes the current frame-struct pointer and returns the chain-pointer
    to get to the calling frame.

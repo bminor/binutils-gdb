@@ -339,6 +339,15 @@ set_architecture_from_file (abfd)
 }
 
 
+/* Misc helper functions for targets. */
+
+int
+frame_num_args_unknown (fi)
+     struct frame_info *fi;
+{
+  return -1;
+}
+
 
 /* Disassembler */
 

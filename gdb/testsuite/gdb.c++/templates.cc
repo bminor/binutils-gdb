@@ -290,7 +290,7 @@ void printf(const char *format, ... )
 
 class T1 {
 public:
-    static void* operator new(size_t);
+    static void* operator new(size_t) throw ();
     static void operator delete(void *pointer);
 
     void operator=(const T1&);
@@ -365,7 +365,7 @@ public:
 };
 
 void* 
-T1::operator new(size_t)
+T1::operator new(size_t) throw ()
 { return 0; }
 
 void
@@ -456,7 +456,7 @@ public:
     T5(int);
     T5(const T5<T>&);
     ~T5();
-    static void* operator new(size_t);
+    static void* operator new(size_t) throw ();
     static void operator delete(void *pointer);
     int value();
     
@@ -479,7 +479,7 @@ T5<T>::~T5()
 
 template<class T>
 void*
-T5<T>::operator new(size_t)
+T5<T>::operator new(size_t) throw ()
 { return 0; }
 
 template<class T>

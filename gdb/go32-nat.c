@@ -166,6 +166,12 @@ static int go32_insert_nonaligned_watchpoint (int pid, CORE_ADDR waddr,
                                              CORE_ADDR addr, int len, int rw);
 
 static struct target_ops go32_ops;
+static void
+go32_terminal_init (void);
+static void
+go32_terminal_inferior (void);
+static void
+go32_terminal_ours (void);
 
 static void
 print_387_status (unsigned short status, struct env387 *ep)
@@ -812,6 +818,41 @@ go32_insert_hw_breakpoint (CORE_ADDR addr, CORE_ADDR shadow)
   return 0;
 }
 
+static int inf_flags_valid = 0;
+static int inf_in_flag;
+static int inf_out_flag;
+
+static void
+go32_terminal_init (void)
+{
+  /* Save the filemodes for stdin/stout */
+  inf_in_flag = setmode(0, 0);
+  setmode(0, inf_in_flag);
+  inf_out_flag = setmode(1, 0);
+  setmode(1, inf_out_flag);
+  inf_flags_valid = 1;
+}
+
+static void
+go32_terminal_inferior (void)
+{
+  /* set the filemodes for stdin/stdout of the inferior */
+  if (inf_flags_valid)
+  {
+    setmode(0, inf_in_flag);
+    setmode(1, inf_out_flag);
+  }
+}
+
+static void
+go32_terminal_ours (void)
+{
+  /* Switch to text mode on stdin/stdout always on the gdb terminal and
+     save the inferior modes to be restored later */
+  inf_in_flag = setmode(0, O_TEXT);
+  inf_out_flag = setmode(1, O_TEXT);
+}
+
 static void
 init_go32_ops (void)
 {
@@ -831,10 +872,10 @@ init_go32_ops (void)
   go32_ops.to_files_info = go32_files_info;
   go32_ops.to_insert_breakpoint = memory_insert_breakpoint;
   go32_ops.to_remove_breakpoint = memory_remove_breakpoint;
-  go32_ops.to_terminal_init = ignore;
-  go32_ops.to_terminal_inferior = ignore;
+  go32_ops.to_terminal_init = go32_terminal_init;
+  go32_ops.to_terminal_inferior = go32_terminal_inferior;
   go32_ops.to_terminal_ours_for_output = ignore;
-  go32_ops.to_terminal_ours = ignore;
+  go32_ops.to_terminal_ours = go32_terminal_ours;
   go32_ops.to_terminal_info = ignore2;
   go32_ops.to_kill = go32_kill_inferior;
   go32_ops.to_create_inferior = go32_create_inferior;

@@ -36,6 +36,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "opcode/mips.h"
 
+struct frame_extra_info
+{
+  mips_extra_func_info_t proc_desc;
+  int num_args;
+};
+
 /* Some MIPS boards don't support floating point while others only
    support single-precision floating-point operations.  See also
    FP_REGISTER_DOUBLE. */
@@ -106,7 +112,16 @@ char *tmp_mips_processor_type;
 /* A set of original names, to be used when restoring back to generic
    registers from a specific set.  */
 
-char *mips_generic_reg_names[] = REGISTER_NAMES;
+char *mips_generic_reg_names[] = MIPS_REGISTER_NAMES;
+char **mips_processor_reg_names = mips_generic_reg_names;
+
+char *
+mips_register_name (i)
+     int i;
+{
+  return mips_processor_reg_names[i];
+}
+
 
 /* Names of IDT R3041 registers.  */
 
@@ -219,6 +234,18 @@ struct linked_proc_info
   struct linked_proc_info *next;
 } *linked_proc_desc_table = NULL;
 
+void
+mips_print_extra_frame_info (fi)
+     struct frame_info *fi;
+{
+  if (fi
+      && fi->extra_info
+      && fi->extra_info->proc_desc
+      && fi->extra_info->proc_desc->pdr.framereg < NUM_REGS)
+    printf_filtered (" frame pointer is at %s+%d\n",
+		     REGISTER_NAME (fi->extra_info->proc_desc->pdr.framereg),
+		     fi->extra_info->proc_desc->pdr.frameoffset);
+}
 
 /* Should the upper word of 64-bit addresses be zeroed? */
 static int mask_address_p = 1;
@@ -873,7 +900,7 @@ mips_find_saved_regs (fci)
       return;
     }
 
-  proc_desc = fci->proc_desc;
+  proc_desc = fci->extra_info->proc_desc;
   if (proc_desc == NULL)
     /* I'm not sure how/whether this can happen.  Normally when we can't
        find a proc_desc, we "synthesize" one using heuristic_proc_desc
@@ -1065,7 +1092,7 @@ mips_frame_saved_pc(frame)
      struct frame_info *frame;
 {
   CORE_ADDR saved_pc;
-  mips_extra_func_info_t proc_desc = frame->proc_desc;
+  mips_extra_func_info_t proc_desc = frame->extra_info->proc_desc;
   /* We have to get the saved pc from the sigcontext
      if it is a signal handler frame.  */
   int pcreg = frame->signal_handler_caller ? PC_REGNUM
@@ -1080,7 +1107,7 @@ mips_frame_saved_pc(frame)
 }
 
 static struct mips_extra_func_info temp_proc_desc;
-static struct frame_saved_regs temp_saved_regs;
+static CORE_ADDR temp_saved_regs[NUM_REGS];
 
 /* Set a register's saved stack address in temp_saved_regs.  If an address
    has already been set for this register, do nothing; this way we will
@@ -1092,8 +1119,8 @@ set_reg_offset (regno, offset)
      int regno;
      CORE_ADDR offset;
 {
-  if (temp_saved_regs.regs[regno] == 0)
-    temp_saved_regs.regs[regno] = offset;
+  if (temp_saved_regs[regno] == 0)
+    temp_saved_regs[regno] = offset;
 }
 
 
@@ -1405,7 +1432,7 @@ mips32_heuristic_proc_desc(start_pc, limit_pc, next_frame, sp)
   CORE_ADDR cur_pc;
   CORE_ADDR frame_addr = 0; /* Value of $r30. Used by gcc for frame-pointer */
 restart:
-  memset (&temp_saved_regs, '\0', sizeof(struct frame_saved_regs));
+  memset (temp_saved_regs, '\0', SIZEOF_FRAME_SAVED_REGS);
   PROC_FRAME_OFFSET(&temp_proc_desc) = 0;
   PROC_FRAME_ADJUST (&temp_proc_desc) = 0;	/* offset of FP from SP */
   for (cur_pc = start_pc; cur_pc < limit_pc; cur_pc += MIPS_INSTLEN)
@@ -1508,7 +1535,7 @@ heuristic_proc_desc(start_pc, limit_pc, next_frame)
 
   if (start_pc == 0) return NULL;
   memset (&temp_proc_desc, '\0', sizeof(temp_proc_desc));
-  memset (&temp_saved_regs, '\0', sizeof(struct frame_saved_regs));
+  memset (&temp_saved_regs, '\0', SIZEOF_FRAME_SAVED_REGS);
   PROC_LOW_ADDR (&temp_proc_desc) = start_pc;
   PROC_FRAME_REG (&temp_proc_desc) = SP_REGNUM;
   PROC_PC_REG (&temp_proc_desc) = RA_REGNUM;
@@ -1676,7 +1703,8 @@ mips_frame_chain(frame)
 }
 
 void
-init_extra_frame_info(fci)
+mips_init_extra_frame_info(fromleaf, fci)
+     int fromleaf;
      struct frame_info *fci;
 {
   int regnum;
@@ -1685,8 +1713,11 @@ init_extra_frame_info(fci)
   mips_extra_func_info_t proc_desc =
     fci->next ? cached_proc_desc : find_proc_desc(fci->pc, fci->next);
 
+  fci->extra_info = (struct frame_extra_info *)
+    frame_obstack_alloc (sizeof (struct frame_extra_info));
+
   fci->saved_regs = NULL;
-  fci->proc_desc =
+  fci->extra_info->proc_desc =
     proc_desc == &temp_proc_desc ? 0 : proc_desc;
   if (proc_desc)
     {
@@ -1711,21 +1742,21 @@ init_extra_frame_info(fci)
 				    (CORE_ADDR *)NULL,(CORE_ADDR *)NULL);
 	  if (!IN_SIGTRAMP (fci->pc, name))
 	    {
-	      fci->saved_regs = (CORE_ADDR*)
-		frame_obstack_alloc (SIZEOF_FRAME_SAVED_REGS);
-	      memcpy (fci->saved_regs, temp_saved_regs.regs, SIZEOF_FRAME_SAVED_REGS);
+              frame_saved_regs_zalloc (fci);
+	      memcpy (fci->saved_regs, temp_saved_regs, SIZEOF_FRAME_SAVED_REGS);
 	      fci->saved_regs[PC_REGNUM]
 		= fci->saved_regs[RA_REGNUM];
 	    }
 	}
 
       /* hack: if argument regs are saved, guess these contain args */
-      fci->num_args = -1;	/* assume we can't tell how many args for now */
+      /* assume we can't tell how many args for now */
+      fci->extra_info->num_args = -1;
       for (regnum = MIPS_LAST_ARG_REGNUM; regnum >= A0_REGNUM; regnum--)
 	{
 	  if (PROC_REG_MASK(proc_desc) & (1 << regnum))
 	    {
-	      fci->num_args = regnum - A0_REGNUM + 1;
+	      fci->extra_info->num_args = regnum - A0_REGNUM + 1;
 	      break;
 	    }
 	} 
@@ -2109,7 +2140,7 @@ mips_pop_frame()
   struct frame_info *frame = get_current_frame ();
   CORE_ADDR new_sp = FRAME_FP (frame);
 
-  mips_extra_func_info_t proc_desc = frame->proc_desc;
+  mips_extra_func_info_t proc_desc = frame->extra_info->proc_desc;
 
   write_register (PC_REGNUM, FRAME_SAVED_PC(frame));
   if (frame->saved_regs == NULL)
@@ -3012,13 +3043,8 @@ mips_set_processor_type (str)
       if (strcasecmp (str, mips_processor_type_table[i].name) == 0)
 	{
 	  mips_processor_type = str;
-
-	  for (j = 0; j < NUM_REGS; ++j)
-	    /* FIXME - MIPS should be defining REGISTER_NAME() instead */
-	    gdb_register_names[j] = mips_processor_type_table[i].regnames[j];
-
+	  mips_processor_reg_names = mips_processor_type_table[i].regnames;
 	  return 1;
-
 	  /* FIXME tweak fpu flag too */
 	}
     }

@@ -31,20 +31,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #define FUNCTION_START_OFFSET 0
 
-/* these are the addresses the D10V-EVA board maps data */
-/* and instruction memory to. */
-
-#define DMEM_START	0x0000000
-#define IMEM_START	0x1000000
-#define STACK_START	0x0007ffe
-
-#ifdef __STDC__		/* Forward decls for prototypes */
-struct frame_info;
-struct frame_saved_regs; 
-struct type;
-struct value;
-#endif
-
 /* Advance PC across any function entry prologue instructions
    to reach some "real" code.  */
 
@@ -74,6 +60,8 @@ extern char *d10v_register_name PARAMS ((int reg_nr));
    to be actual register numbers as far as the user is concerned
    but do serve to get the desired values when passed to read_register.  */
 
+/* Used by both d10v-tdep.c and remote-d10v.c */
+
 #define R0_REGNUM	0
 #define LR_REGNUM 	13
 #define SP_REGNUM 	15
@@ -85,8 +73,11 @@ extern char *d10v_register_name PARAMS ((int reg_nr));
 #define DMAP_REGNUM	34
 #define A0_REGNUM 	35
 
+/* ??? */
+#define REGISTER_SIZE 2
+
 /* Say how much memory is needed to store a copy of the register set */
-#define REGISTER_BYTES    ((NUM_REGS-2)*2+16) 
+#define REGISTER_BYTES    ((37/*NUM_REGS*/-2)*2+16) 
 
 /* Index within `registers' of the first byte of the space for
    register N.  */
@@ -117,14 +108,13 @@ extern int d10v_register_virtual_size PARAMS ((int reg_nr));
 extern struct type *d10v_register_virtual_type PARAMS ((int reg_nr));
 #define REGISTER_VIRTUAL_TYPE(N) (d10v_register_virtual_type (N))
 
-
 /* convert $pc and $sp to/from virtual addresses */
 extern int d10v_register_convertible PARAMS ((int nr));
-#define REGISTER_CONVERTIBLE(N) (d10v_register_convertible ((N)))
 extern void d10v_register_convert_to_virtual PARAMS ((int regnum, struct type *type, char *from, char *to));
+extern void d10v_register_convert_to_raw PARAMS ((struct type *type, int regnum, char *from, char *to));
+#define REGISTER_CONVERTIBLE(N) (d10v_register_convertible ((N)))
 #define REGISTER_CONVERT_TO_VIRTUAL(REGNUM,TYPE,FROM,TO) \
   d10v_register_convert_to_virtual ((REGNUM), (TYPE), (FROM), (TO))
-extern void d10v_register_convert_to_raw PARAMS ((struct type *type, int regnum, char *from, char *to));
 #define REGISTER_CONVERT_TO_RAW(TYPE,REGNUM,FROM,TO) \
   d10v_register_convert_to_raw ((TYPE), (REGNUM), (FROM), (TO))
 
@@ -142,10 +132,6 @@ extern CORE_ADDR d10v_convert_daddr_to_raw PARAMS ((CORE_ADDR x));
 #define D10V_CONVERT_DADDR_TO_RAW(X) (d10v_convert_daddr_to_raw (X))
 extern CORE_ADDR d10v_convert_iaddr_to_raw PARAMS ((CORE_ADDR x));
 #define D10V_CONVERT_IADDR_TO_RAW(X) (d10v_convert_iaddr_to_raw (X))
-
-#define ARG1_REGNUM R0_REGNUM
-#define ARGN_REGNUM 3
-#define RET1_REGNUM R0_REGNUM
 
 /* Store the address of the place in which to copy the structure the
    subroutine will return.  This is called from call_function. 
@@ -184,20 +170,13 @@ extern use_struct_convention_fn d10v_use_struct_convention;
 #define USE_STRUCT_CONVENTION(gcc_p, type) d10v_use_struct_convention (gcc_p, type)
 
 
-
 /* Define other aspects of the stack frame. 
    we keep a copy of the worked out return pc lying around, since it
    is a useful bit of info */
 
-#define EXTRA_FRAME_INFO \
-    CORE_ADDR return_pc; \
-    int frameless; \
-    int size;
-
+extern void d10v_init_extra_frame_info PARAMS ((int fromleaf, struct frame_info *fi));
 #define INIT_EXTRA_FRAME_INFO(fromleaf, fi) \
     d10v_init_extra_frame_info(fromleaf, fi) 
-
-extern void d10v_init_extra_frame_info PARAMS (( int fromleaf, struct frame_info *fi ));
 
 /* A macro that tells us whether the function invocation represented
    by FI does not have a frame on the stack associated with it.  If it
@@ -234,17 +213,15 @@ extern CORE_ADDR d10v_saved_pc_after_call PARAMS ((struct frame_info *frame));
 
 #define FRAME_ARGS_SKIP 0
 
-
-/* Put here the code to store, into a struct frame_saved_regs,
-   the addresses of the saved registers of frame described by FRAME_INFO.
+/* Put here the code to store, into frame_info->saved_regs, the
+   addresses of the saved registers of frame described by FRAME_INFO.
    This includes special registers such as pc and fp saved in special
-   ways in the stack frame.  sp is even more special:
-   the address we return for it IS the sp for the next frame.  */
+   ways in the stack frame.  sp is even more special: the address we
+   return for it IS the sp for the next frame.  */
 
-#define FRAME_FIND_SAVED_REGS(frame_info, frame_saved_regs)	    \
-   d10v_frame_find_saved_regs(frame_info, &(frame_saved_regs))
-
-extern void d10v_frame_find_saved_regs PARAMS ((struct frame_info *, struct frame_saved_regs *));
+extern void d10v_frame_init_saved_regs PARAMS ((struct frame_info *));
+#define FRAME_INIT_SAVED_REGS(frame_info)	    \
+   d10v_frame_init_saved_regs(frame_info)
 
 /* DUMMY FRAMES.  Need these to support inferior function calls.  They
    work like this on D10V: First we set a breakpoint at 0 or __start.
@@ -255,8 +232,8 @@ extern void d10v_frame_find_saved_regs PARAMS ((struct frame_info *, struct fram
    breakpoint, clear the break point and pop the old register contents
    off the stack.  */
 
-extern void d10v_pop_frame PARAMS ((struct frame_info *frame));
-#define POP_FRAME generic_pop_current_frame (d10v_pop_frame)
+extern void d10v_pop_frame PARAMS ((void));
+#define POP_FRAME d10v_pop_frame ()
 
 #define USE_GENERIC_DUMMY_FRAMES 1
 #define CALL_DUMMY                   {0}
@@ -289,18 +266,8 @@ extern CORE_ADDR d10v_push_arguments PARAMS ((int, struct value **, CORE_ADDR, i
 
 #define EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF) \
 d10v_extract_return_value(TYPE, REGBUF, VALBUF)
-  extern void
-d10v_extract_return_value PARAMS ((struct type *, char *, char *));
+extern void d10v_extract_return_value PARAMS ((struct type *, char *, char *));
 
-
-#define REGISTER_SIZE 2
-
-#ifdef CC_HAS_LONG_LONG
-#  define LONGEST long long
-#else
-#  define LONGEST long
-#endif 
-#define ULONGEST unsigned LONGEST
 
 void d10v_write_pc PARAMS ((CORE_ADDR val, int pid));
 CORE_ADDR d10v_read_pc PARAMS ((int pid));

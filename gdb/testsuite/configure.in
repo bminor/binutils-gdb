@@ -13,7 +13,14 @@ AC_CONFIG_AUX_DIR(`cd $srcdir;pwd`/../..)
 AC_CANONICAL_SYSTEM
 
 # Directories to use in all configurations.
-configdirs="gdb.asm gdb.base gdb.c++ gdb.disasm gdb.chill gdb.threads gdb.trace"
+configdirs="gdb.asm \
+            gdb.base \
+            gdb.c++ \
+            gdb.disasm \
+            gdb.chill \
+            gdb.threads \
+            gdb.trace"
+
 
 # Directories to use for a configuration which uses stabs.
 stabsdirs="gdb.stabs"

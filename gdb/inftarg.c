@@ -508,67 +508,7 @@ child_create_inferior (exec_file, allargs, env)
      char *allargs;
      char **env;
 {
-
 #ifdef HPUXHPPA
-  char *tryname;
-  char *shell_file;
-  char *p;
-  char *p1;
-  char *path = getenv ("PATH");
-  int len;
-  struct stat statbuf;
-
-  /* On HP-UX, we have a possible bad interaction between
-   * the start-up-with-shell code and our catch-fork/catch-exec
-   * logic. To avoid the bad interaction, we start up with the
-   * C shell ("csh") and pass it the "-f" flag (fast start-up,
-   * don't run .cshrc code).
-   * See further comments in inferior.h toward the bottom
-   * (STARTUP_WITH_SHELL flag) and in fork-child.c
-   */
-
-  /* Rather than passing in a hard-wired path like "/bin/csh",
-   * we look down the PATH to find csh. I took this code from
-   * procfs.c, which is the file in the Sun-specific part of GDB
-   * analogous to inftarg.c. See procfs.c for more detailed 
-   * comments. - RT
-   */
-  shell_file = "csh";
-  if (path == NULL)
-    path = "/bin:/usr/bin";
-  tryname = alloca (strlen (path) + strlen (shell_file) + 2);
-  for (p = path; p != NULL; p = p1 ? p1 + 1: NULL)
-    {
-    p1 = strchr (p, ':');
-    if (p1 != NULL)
-      len = p1 - p;
-    else
-      len = strlen (p);
-    strncpy (tryname, p, len);
-    tryname[len] = '\0';
-    strcat (tryname, "/");
-    strcat (tryname, shell_file);
-    if (access (tryname, X_OK) < 0)
-      continue;
-    if (stat (tryname, &statbuf) < 0)
-      continue;
-    if (!S_ISREG (statbuf.st_mode))
-      /* We certainly need to reject directories.  I'm not quite
-         as sure about FIFOs, sockets, etc., but I kind of doubt
-         that people want to exec() these things.  */
-      continue;
-      break;
-    }
-  if (p == NULL)
-    /* Not found. I replaced the error() which existed in procfs.c
-     * with simply passing in NULL and hoping fork_inferior() 
-     * can deal with it. - RT
-     */ 
-    /* error ("Can't find shell %s in PATH", shell_file); */
-    shell_file = NULL;
-  else
-    shell_file = tryname;
-
   fork_inferior (exec_file, allargs, env, ptrace_me, ptrace_him, pre_fork_inferior, NULL);
 #else
  fork_inferior (exec_file, allargs, env, ptrace_me, ptrace_him, NULL, NULL);

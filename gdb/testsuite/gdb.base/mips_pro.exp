@@ -55,7 +55,7 @@ gdb_load ${binfile}
 if [runto middle] then {
     # PR 3016
     if {$gcc_compiled} then { 
-	setup_xfail "hppa*-*-*" "mips*-sgi-irix4*" "mips64*-*-elf"
+	setup_xfail "mips*-sgi-irix4*" "mips64*-*-elf"
     }
     gdb_test "backtrace" "#0.*middle.*#1.*top.*#2.*main.*"
 }

@@ -1,3 +1,22 @@
+Fri Jun  4 10:47:46 1999  Jeffrey A Law  (law@cygnus.com)
+
+	* gdb.base/a1-selftest.exp: Remove bogus hppa xfail.
+	* gdb.base/mips_pro.exp: Likewise.
+
+1999-06-02  Keith Seitz  <keiths@cygnus.com>
+
+	* gdb.c++/templates.cc: Change all "new" operators to throw
+	an exception.
+	* gdb.c++/cplusfuncs.cc: Likewise.
+
+	* gdb.base/Makefile.in (EXECUTABLES): Add smoke1, annota1, and annota2.
+
+Wed Jun  2 17:37:05 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdb.base/condbreak.exp: Use rerun_to_main to start the program.
+        * gdb.base/ending-run.exp: When stepping out of main, accept a
+        step into an arbitrary assembler file.
+
 1999-05-20  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
 	* gdb.base/annota1.exp: Allow any number of "frames-invalid" and 

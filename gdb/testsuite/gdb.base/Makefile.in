@@ -1,7 +1,7 @@
 VPATH = @srcdir@
 srcdir = @srcdir@
 
-EXECUTABLES = all-types bitfields break \
+EXECUTABLES = all-types annota1 annota2 bitfields break \
 	call-ar-st call-rt-st call-strs callfuncs callfuncs2 commands \
 	compiler condbreak constvars coremaker display \
 	ending-run exprs funcargs int-type interrupt \
@@ -10,7 +10,7 @@ EXECUTABLES = all-types bitfields break \
 	mips_pro miscexprs nodebug opaque pointers pointers2 printcmds ptype \
 	recurse reread reread1 restore return run \
 	scope section_command setshow setvar \
-	shmain sigall signals smoke \
+	shmain sigall signals smoke smoke1 \
 	solib so-impl-ld so-indr-cl \
 	step-test structs structs2 twice-tmp varargs watchpoint whatis
 

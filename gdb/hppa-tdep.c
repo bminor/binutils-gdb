@@ -1923,7 +1923,22 @@ cover_find_stub_with_shl_get (args)
    On the hppa we need to call the stack dummy through $$dyncall.
    Therefore our version of FIX_CALL_DUMMY takes an extra argument,
    real_pc, which is the location where gdb should start up the
-   inferior to do the function call. */
+   inferior to do the function call. 
+
+   This has to work across several versions of hpux, bsd, osf1.  It has to
+   work regardless of what compiler was used to build the inferior program.
+   It should work regardless of whether or not end.o is available.  It has
+   to work even if gdb can not call into the dynamic loader in the inferior
+   to query it for symbol names and addresses.
+
+   Yes, all those cases should work.  Luckily code exists to handle most
+   of them.  The complexity is in selecting exactly what scheme should
+   be used to perform the inferior call.
+
+   At the current time this routine is known not to handle cases where
+   the program was linked with HP's compiler without including end.o.
+
+   Please contact Jeff Law (law@cygnus.com) before changing this code.  */
 
 CORE_ADDR
 hppa_fix_call_dummy (dummy, pc, fun, nargs, args, type, gcc_p)
@@ -1939,20 +1954,35 @@ hppa_fix_call_dummy (dummy, pc, fun, nargs, args, type, gcc_p)
   struct minimal_symbol *msymbol;
   struct minimal_symbol *trampoline;
   int flags = read_register (FLAGS_REGNUM);
-  struct unwind_table_entry *u;
-  CORE_ADDR new_stub=0;
-  CORE_ADDR solib_handle=0;
+  struct unwind_table_entry *u = NULL;
+  CORE_ADDR new_stub = 0;
+  CORE_ADDR solib_handle = 0;
 
+  /* Nonzero if we will use GCC's PLT call routine.  This routine must be
+     passed an import stub, not a PLABEL.  It is also necessary to set %r19	
+     (the PIC register) before performing the call. 
+
+     If zero, then we are using __d_plt_call (HP's PLT call routine) or we
+     are calling the target directly.  When using __d_plt_call we want to
+     use a PLABEL instead of an import stub.  */
+  int using_gcc_plt_call = 1;
+
+  /* Prefer __gcc_plt_call over the HP supplied routine because
+      __gcc_plt_call works for any number of arguments.  */
   trampoline = NULL;
+  if (lookup_minimal_symbol ("__gcc_plt_call", NULL, NULL) == NULL)
+    using_gcc_plt_call = 0;
+
   msymbol = lookup_minimal_symbol ("$$dyncall", NULL, NULL);
   if (msymbol == NULL)
-    error ("Can't find an address for $$dyncall trampoline"); /* purecov: deadcode */
+    error ("Can't find an address for $$dyncall trampoline");
 
   dyncall_addr = SYMBOL_VALUE_ADDRESS (msymbol);
 
   /* FUN could be a procedure label, in which case we have to get
-     its real address and the value of its GOT/DP.  */
-  if (fun & 0x2)
+     its real address and the value of its GOT/DP if we plan to
+     call the routine via gcc_plt_call.  */
+  if ((fun & 0x2) && using_gcc_plt_call)
     {
       /* Get the GOT/DP value for the target function.  It's
 	 at *(fun+4).  Note the call dummy is *NOT* allowed to
@@ -1967,20 +1997,14 @@ hppa_fix_call_dummy (dummy, pc, fun, nargs, args, type, gcc_p)
     {
 
 #ifndef GDB_TARGET_IS_PA_ELF
-      /* FUN could be either an export stub, or the real address of a
-	 function in a shared library.  We must call an import stub
-	 rather than the export stub or real function for lazy binding
-	 to work correctly.  */
+      /* FUN could be an export stub, the real address of a function, or
+	 a PLABEL.  When using gcc's PLT call routine we must call an import
+	 stub rather than the export stub or real function for lazy binding
+	 to work correctly
 
-      /* elz: let's see if fun is in a shared library */
-      solib_handle = som_solib_get_solib_by_pc(fun);
-
-      /* elz: for 10.30 and 11.00 the calls via __d_plt_call cannot be made
-	 via import stubs, only via plables, so this code here becomes useless.
-	 On 10.20, the plables mechanism works too, so we just ignore this import 
-	 stub stuff */
-#if 0
-      if (solib_handle)
+      /* If we are using the gcc PLT call routine, then we need to
+	 get the import stub for the target function.  */
+      if (using_gcc_plt_call && som_solib_get_got_by_pc (fun))
 	{
 	  struct objfile *objfile;
 	  struct minimal_symbol *funsymbol, *stub_symbol;
@@ -1994,8 +2018,14 @@ hppa_fix_call_dummy (dummy, pc, fun, nargs, args, type, gcc_p)
 	     right name. */
 	  ALL_OBJFILES (objfile)
 	    {
-	      stub_symbol = lookup_minimal_symbol (SYMBOL_NAME (funsymbol),
-						   NULL, objfile);
+	      stub_symbol
+		= lookup_minimal_symbol_solib_trampoline
+		    (SYMBOL_NAME (funsymbol), NULL, objfile);
+
+	      if (! stub_symbol)
+		stub_symbol = lookup_minimal_symbol (SYMBOL_NAME (funsymbol),
+						     NULL, objfile);
+
 	      /* Found a symbol with the right name.  */
 	      if (stub_symbol)
 		{
@@ -2006,7 +2036,9 @@ hppa_fix_call_dummy (dummy, pc, fun, nargs, args, type, gcc_p)
 
 		  /* It must also be an import stub.  */
 		  u = find_unwind_entry (SYMBOL_VALUE (stub_symbol));
-		  if (!u || u->stub_unwind.stub_type != IMPORT)
+		  if (!u
+		      || (u->stub_unwind.stub_type != IMPORT)
+			  && u->stub_unwind.stub_type != IMPORT_SHLIB)
 		    continue;
 
 		  /* OK.  Looks like the correct import stub.  */
@@ -2014,92 +2046,79 @@ hppa_fix_call_dummy (dummy, pc, fun, nargs, args, type, gcc_p)
 		  fun = newfun;
 		}
 	    }
+
+	  /* Ouch.  We did not find an import stub.  Make an attempt to
+	     do the right thing instead of just croaking.  Most of the
+	     time this will actually work.  */
 	  if (newfun == 0)
 	    write_register (19, som_solib_get_got_by_pc (fun));
+
+	  u = find_unwind_entry (fun);
+	  if (u 
+	      && (u->stub_unwind.stub_type == IMPORT
+		  || u->stub_unwind.stub_type == IMPORT_SHLIB))
+	    trampoline = lookup_minimal_symbol ("__gcc_plt_call", NULL, NULL);
+
+	  /* If we found the import stub in the shared library, then we have
+	     to set %r19 before we call the stub.  */
+	  if (u && u->stub_unwind.stub_type == IMPORT_SHLIB)
+	    write_register (19, som_solib_get_got_by_pc (fun));
 	}
-#endif /* end of if 0 */
 #endif
     }
 
-  /* If we are calling an import stub (eg calling into a dynamic library)
-     then have sr4export call the magic __d_plt_call routine which is linked
-     in from end.o.  (You can't use _sr4export to call the import stub as
-     the value in sp-24 will get fried and you end up returning to the
-     wrong location.  You can't call the import stub directly as the code
-     to bind the PLT entry to a function can't return to a stack address.)  */
+  /* If we are calling into another load module then have sr4export call the
+     magic __d_plt_call routine which is linked in from end.o.
 
-  /* elz:
-     There does not have to be an import stub to call a routine in a
-     different load module (note: a "load module" is an a.out or a shared
-     library).  If you call a routine indirectly, going through $$dyncall (or
-     $$dyncall_external), you won't go through an import stub.  Import stubs
-     are only used for direct calls to an imported routine.
+     You can't use _sr4export to make the call as the value in sp-24 will get
+     fried and you end up returning to the wrong location.  You can't call the
+     target as the code to bind the PLT entry to a function can't return to a
+     stack address.
 
-     What you (wdb) need is to go through $$dyncall with a proper plabel for
-     the imported routine.  shl_findsym() returns you the address of a plabel
-     suitable for use in making an indirect call through, e.g., through
-     $$dyncall.
-     This is taken care below with the call to find_stub_.... */
-#if 0
-  /* elz: this check here is not necessary if we are going to call stuff through
-     plabels only, we just now check whether the function we call is in a shlib */
-  u = find_unwind_entry (fun);
-
-  if (u && u->stub_unwind.stub_type == IMPORT || 
-      (!(u && u->stub_unwind.stub_type == IMPORT) && solib_handle))
-#endif /* 0 */
-  if (solib_handle)
+     Also, query the dynamic linker in the inferior to provide a suitable
+     PLABEL for the target function.  */
+  if (! using_gcc_plt_call)
     {
       CORE_ADDR new_fun;
 
-      /* Prefer __gcc_plt_call over the HP supplied routine because
-	 __gcc_plt_call works for any number of arguments.  */
-      trampoline = lookup_minimal_symbol ("__gcc_plt_call", NULL, NULL);
-      if (trampoline == NULL)
-	trampoline = lookup_minimal_symbol ("__d_plt_call", NULL, NULL);
+      /* Get a handle for the shared library containing FUN.  Given the
+	 handle we can query the shared library for a PLABEL.  */
+      solib_handle = som_solib_get_solib_by_pc (fun);
 
-      if (trampoline == NULL)
+      if (solib_handle)
 	{
-	  error ("Can't find an address for __d_plt_call or __gcc_plt_call trampoline\nSuggest linking executable with -g (links in /opt/langtools/lib/end.o)");
-	}
-      /* This is where sr4export will jump to.  */
-      new_fun = SYMBOL_VALUE_ADDRESS (trampoline);
+	  struct minimal_symbol *fmsymbol = lookup_minimal_symbol_by_pc (fun);
 
-      if (strcmp (SYMBOL_NAME (trampoline), "__d_plt_call") == 0)
-	{
-          /* if the function is in a shared library, but we have no import sub for 
-             it, we need to get the plabel from a call to __d_shl_get, which is a 
-             function in end.o. To call this function we need to set up various things */
-	  
-	  /* actually now we just use the plabel any time we make the call,
-	     because on 10.30 and 11.00 this is the only acceptable way. This also
-	     works fine for 10.20 */
-	  /* if (!(u && u->stub_unwind.stub_type == IMPORT) && solib_handle) */
-            {
-              struct minimal_symbol *fmsymbol = lookup_minimal_symbol_by_pc(fun);
-              
-              new_stub = find_stub_with_shl_get(fmsymbol, solib_handle);
+	  trampoline = lookup_minimal_symbol ("__d_plt_call", NULL, NULL);
 
-              if (new_stub == NULL) 
-                error("Can't find an import stub for %s", SYMBOL_NAME(fmsymbol)); /* purecov: deadcode */
-            }
+	  if (trampoline == NULL)
+	    {
+	      error ("Can't find an address for __d_plt_call or __gcc_plt_call trampoline\nSuggest linking executable with -g or compiling with gcc.");
+	    }
+
+	  /* This is where sr4export will jump to.  */
+	  new_fun = SYMBOL_VALUE_ADDRESS (trampoline);
+
+	  /* If the function is in a shared library, then call __d_shl_get to
+	     get a PLABEL for the target function.  */
+	  new_stub = find_stub_with_shl_get (fmsymbol, solib_handle);
+
+	  if (new_stub == 0) 
+	    error ("Can't find an import stub for %s", SYMBOL_NAME (fmsymbol));
 
 	  /* We have to store the address of the stub in __shlib_funcptr.  */
-	    msymbol = lookup_minimal_symbol ("__shlib_funcptr", NULL,
-					     (struct objfile *)NULL);
-	    if (msymbol == NULL)
-	      error ("Can't find an address for __shlib_funcptr"); /* purecov: deadcode */
+	  msymbol = lookup_minimal_symbol ("__shlib_funcptr", NULL,
+					   (struct objfile *)NULL);
 
-         /* if (new_stub != NULL) */
-	     target_write_memory (SYMBOL_VALUE_ADDRESS (msymbol), (char *)&new_stub, 4);
-         /* this is no longer used */
-         /* else
-	     target_write_memory (SYMBOL_VALUE_ADDRESS (msymbol), (char *)&fun, 4); */
+	  if (msymbol == NULL)
+	    error ("Can't find an address for __shlib_funcptr");
+	  target_write_memory (SYMBOL_VALUE_ADDRESS (msymbol),
+			       (char *)&new_stub, 4);
 
 	  /* We want sr4export to call __d_plt_call, so we claim it is
 	     the final target.  Clear trampoline.  */
-	    fun = new_fun;
-	    trampoline = NULL;
+	  fun = new_fun;
+	  trampoline = NULL;
 	}
     }
 
@@ -2131,7 +2150,7 @@ hppa_fix_call_dummy (dummy, pc, fun, nargs, args, type, gcc_p)
       {
 	msymbol = lookup_minimal_symbol ("_sr4export", NULL, NULL);
 	if (msymbol == NULL)
-	  error ("Can't find an address for _sr4export trampoline"); /* purecov: deadcode */
+	  error ("Can't find an address for _sr4export trampoline");
 
 	trampoline_addr = SYMBOL_VALUE_ADDRESS (msymbol);
       }
@@ -2176,7 +2195,6 @@ hppa_fix_call_dummy (dummy, pc, fun, nargs, args, type, gcc_p)
 #endif
   else
     return dyncall_addr;
-
 }
 
 
@@ -3961,10 +3979,6 @@ initialize_hp_cxx_exception_support ()
       return 0;
     }
 
-#if 0 /* DEBUGGING */
-  printf ("Hook addr found is %lx\n", eh_notify_hook_addr);
-#endif
-
   /* Next look for the notify callback routine in end.o */
   /* This is always available in the SOM symbol dictionary if end.o is linked in */ 
   msym = lookup_minimal_symbol (HP_ACC_EH_notify_callback, NULL, NULL);
@@ -4011,10 +4025,6 @@ initialize_hp_cxx_exception_support ()
                                               message, RETURN_MASK_ALL);
       recurse--;
       
-#if 0 /* DEBUGGING  */
-      printf ("found plabel for eh notify callback: %x\n", eh_notify_callback_addr);
-#endif
-
       exception_catchpoints_are_fragile = 1;
       
       if (!eh_notify_callback_addr)
@@ -4028,10 +4038,6 @@ initialize_hp_cxx_exception_support ()
     }
   else
     exception_catchpoints_are_fragile = 0;
-
-#if 0  /* DEBUGGING */
-  printf ("Cb addr found is %lx\n", eh_notify_callback_addr);
-#endif
 
   /* Now, look for the breakpointable routine in end.o */
   /* This should also be available in the SOM symbol dict. if end.o linked in */ 
@@ -4050,10 +4056,6 @@ initialize_hp_cxx_exception_support ()
       return 0;
     }
 
-#if 0  /* DEBUGGING */
-  printf ("break addr found is %lx\n", eh_break_addr);  
-#endif
-  
   /* Next look for the catch enable flag provided in end.o */
   sym = lookup_symbol (HP_ACC_EH_catch_catch, (struct block *) NULL,
                        VAR_NAMESPACE, 0, (struct symtab **) NULL);
@@ -4079,10 +4081,6 @@ initialize_hp_cxx_exception_support ()
         }
     }
 
-#if 0  /* DEBUGGING */
-  printf ("catch catch addr found is %lx\n", eh_catch_catch_addr);
-#endif
-
   /* Next look for the catch enable flag provided end.o */
   sym = lookup_symbol (HP_ACC_EH_catch_catch, (struct block *) NULL,
                        VAR_NAMESPACE, 0, (struct symtab **) NULL);
@@ -4107,10 +4105,6 @@ initialize_hp_cxx_exception_support ()
           return 0;
         }
     }
-
-#if 0  /* DEBUGGING */
-  printf ("catch throw addr found is %lx\n", eh_catch_throw_addr);
-#endif
 
   /* Set the flags */ 
   hp_cxx_exception_support = 2; /* everything worked so far */ 

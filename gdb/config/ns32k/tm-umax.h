@@ -221,46 +221,6 @@ extern CORE_ADDR umax_skip_prologue PARAMS ((CORE_ADDR));
 
 extern CORE_ADDR ns32k_get_enter_addr ();
 
-/* Return number of args passed to a frame.
-   Can return -1, meaning no way to tell.
-   Encore's C compiler often reuses same area on stack for args,
-   so this will often not work properly.  If the arg names
-   are known, it's likely most of them will be printed. */
-
-#define FRAME_NUM_ARGS(numargs, fi)			\
-{ CORE_ADDR	pc;					\
-  CORE_ADDR	enter_addr;				\
-  unsigned int	insn;					\
-  unsigned int	addr_mode;				\
-  int width;						\
-							\
-  numargs = -1;						\
-  enter_addr = ns32k_get_enter_addr ((fi)->pc);		\
-  if (enter_addr > 0)					\
-    {							\
-      pc = (enter_addr == 1) ?				\
-	SAVED_PC_AFTER_CALL (fi) :			\
-	FRAME_SAVED_PC (fi);				\
-      insn = read_memory_integer (pc,2);		\
-      addr_mode = (insn >> 11) & 0x1f;			\
-      insn = insn & 0x7ff;				\
-      if ((insn & 0x7fc) == 0x57c &&			\
-		addr_mode == 0x14) /* immediate */	\
-	{						\
-	  if (insn == 0x57c) /* adjspb */		\
-  		width = 1;				\
-	  else if (insn == 0x57d) /* adjspw */		\
-  		width = 2;				\
-	  else if (insn == 0x57f) /* adjspd */		\
-  		width = 4;				\
-	  numargs = read_memory_integer (pc+2,width);	\
-	  if (width > 1)				\
-	    flip_bytes (&numargs, width);		\
-	  numargs = - sign_extend (numargs, width*8) / 4;\
-	}						\
-    }							\
-}
-
 /* Return number of bytes at start of arglist that are not really args.  */
 
 #define FRAME_ARGS_SKIP 8
@@ -272,7 +232,7 @@ extern CORE_ADDR ns32k_get_enter_addr ();
    the address we return for it IS the sp for the next frame.  */
 
 extern int umax_frame_num_args PARAMS ((struct frame_info *fi));
-#define FRAME_NUM_ARGS (umax_frame_num_args ((fi)))
+#define FRAME_NUM_ARGS(fi) (umax_frame_num_args ((fi)))
 
 /* Things needed for making the inferior call functions.  */
 

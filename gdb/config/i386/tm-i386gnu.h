@@ -1,5 +1,5 @@
 /* Macro definitions for i386, GNU Hurd
-   Copyright (C) 1992 Free Software Foundation, Inc.
+   Copyright (C) 1992, 1999 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -17,6 +17,9 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
+#ifndef TM_I386GNU_H
+#define TM_I386GNU_H 1
+
 /* Include common definitions for gnu systems */
 #include "nm-gnu.h"
 
@@ -33,16 +36,15 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 /* we can do it */
 #define ATTACH_DETACH 1
 
-/* Sigh. There should be a file for i386 but no sysv stuff in it */
-#include "i386/tm-i386v.h"
+#include "i386/tm-i386.h"
 
-/* I want to test this float info code. See comment in tm-i386v.h */
 #undef FLOAT_INFO
 #define FLOAT_INFO { i386_mach3_float_info (); }
 
-/* Address of end of stack space.
- * for MACH, see <machine/vmparam.h>
- * @@@ I don't know what is in the 5 ints...
- */
-#undef  STACK_END_ADDR
-#define STACK_END_ADDR (0xc0000000-sizeof(int [5]))
+/* Offset to saved PC in sigcontext.  */
+#define SIGCONTEXT_PC_OFFSET 68
+
+/* We need this file for the SOLIB_TRAMPOLINE stuff.  */
+#include "tm-sysv4.h"
+
+#endif /* TM_I386GNU_H */

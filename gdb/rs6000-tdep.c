@@ -1639,7 +1639,7 @@ variants[] =
     num_registers (register_names_603),   register_names_603 },
   { "604", "Motorola PowerPC 604 or 604e",
     num_registers (register_names_604),   register_names_604 },
-  { "750", "Motorola/IBM PowerPC 750 or 750",
+  { "750", "Motorola/IBM PowerPC 750 or 740",
     num_registers (register_names_750),   register_names_750 },
   { 0, 0, 0, 0 }
 };

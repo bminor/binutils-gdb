@@ -60,6 +60,6 @@ Here is an m-news.h file for gdb.  It supports the 68881 registers.
    Can return -1, meaning no way to tell.  */
 
 extern int news_frame_num_args PARAMS ((struct frame_info *fi));
-#define FRAME_NUM_ARGS (news_frame_num_args ((fi)))
+#define FRAME_NUM_ARGS(fi) (news_frame_num_args ((fi)))
 
 #include "m68k/tm-m68k.h"

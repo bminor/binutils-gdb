@@ -151,9 +151,12 @@ gdb_expect {
     -re ".*in.*start.*$gdb_prompt $" { 
         pass "step out of main"
     }
-  -re ".*Program received signal SIGTRAP.*$gdb_prompt $" {
+    -re ".*in.*currently asm.*$gdb_prompt $" { 
+        pass "step out of main into assembler"
+    }
+    -re ".*Program received signal SIGTRAP.*$gdb_prompt $" {
         pass "Cygmon stopped in ending trap."
-  }
+    }
     timeout { fail "hang or timeout on step at end 1" }
 }
 

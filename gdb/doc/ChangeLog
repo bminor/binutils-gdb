@@ -1,3 +1,15 @@
+Mon Jun  7 15:49:40 1999  Stan Shebs  <shebs@andros.cygnus.com>
+
+	From Per Bothner  <bothner@cygnus.com>:
+	* gdb.texinfo: Document Chill support.
+
+Fri Jun  4 16:58:22 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdbint.texinfo (SP_REGNUM, FP_REGNUM, PC_REGNUM): Add reference
+ 	to corresponding TARGET_READ_reg TARGET_WRITE_reg macros.
+  	Document that the value should be greater-than or equal-to zero.
+  	(NO_STD_REGS): Document. Deprecate.
+
 Tue Jun  1 15:04:15 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* gdbint.texinfo (TARGET_COMPLEX_BIT, TARGET_DOUBLE_COMPLEX_BIT):

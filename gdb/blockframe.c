@@ -1107,7 +1107,8 @@ pc_in_call_dummy_at_entry_point (pc, sp, frame_address)
  * zero, and CALL_DUMMY_LOCATION to AT_ENTRY.  Then you must remember
  * to define PUSH_RETURN_ADDRESS, because no call instruction will be
  * being executed by the target.  Also FRAME_CHAIN_VALID as
- * generic_frame_chain_valid.  */
+ * generic_frame_chain_valid and FIX_CALL_DUMMY as
+ * generic_fix_call_dummy.  */
 
 /* Dummy frame.  This saves the processor state just prior to setting
    up the inferior function call.  Older targets save the registers
@@ -1272,6 +1273,23 @@ generic_frame_chain_valid (fp, fi)
 	    && !inside_entry_file (FRAME_SAVED_PC(fi)));
 }
  
+/* Function: fix_call_dummy
+   Stub function.  Generic dumy frames typically do not need to fix
+   the frame being created */
+
+void
+generic_fix_call_dummy (dummy, pc, fun, nargs, args, type, gcc_p)
+     char *dummy;
+     CORE_ADDR pc;
+     CORE_ADDR fun;
+     int nargs;
+     struct value **args;
+     struct type *type;
+     int gcc_p;
+{
+  return;
+}
+
 /* Function: get_saved_register
    Find register number REGNUM relative to FRAME and put its (raw,
    target format) contents in *RAW_BUFFER.  

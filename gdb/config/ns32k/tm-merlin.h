@@ -193,7 +193,7 @@ extern CORE_ADDR merlin_skip_prologue PARAMS ((CORE_ADDR));
    Can return -1, meaning no way to tell.  */
 
 extern int merlin_frame_num_args PARAMS ((struct frame_info *fi));
-#define FRAME_NUM_ARGS (merlin_frame_num_args ((fi)))
+#define FRAME_NUM_ARGS(fi) (merlin_frame_num_args ((fi)))
 
 /* Return number of bytes at start of arglist that are not really args.  */
 

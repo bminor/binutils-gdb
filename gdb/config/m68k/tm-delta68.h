@@ -76,7 +76,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
    Can return -1, meaning no way to tell.  */
 
 extern int delta68_frame_num_args PARAMS ((struct frame_info *fi));
-#define FRAME_NUM_ARGS (delta68_frame_num_args ((fi)))
+#define FRAME_NUM_ARGS(fi) (delta68_frame_num_args ((fi)))
 
 /* On M68040 versions of sysV68 R3V7.1, ptrace(PT_WRITE_I) does not clear
    the processor's instruction cache as it should.  */
