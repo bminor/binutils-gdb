@@ -77,7 +77,7 @@ MAKEINFO = `if [ -f $${rootme}/texinfo/C/makeinfo ] ; \
 CC_FOR_BUILD = $(CC)
 CXX_FOR_BUILD = $(CXX)
 
-SUBDIRS = libiberty mmalloc glob readline opcodes bfd z8ksim gdb binutils ld gas tgas gcc libg++ newlib deja-gnu
+SUBDIRS = libiberty mmalloc glob readline opcodes bfd h8300sim z8ksim gdb binutils ld gas tgas gcc libg++ newlib deja-gnu
 OTHERS = 
 
 ALL = all.normal
@@ -247,7 +247,7 @@ install-dir.info:
 
 all.normal: all-m4 all-autoconf all-libiberty all-mmalloc all-texinfo \
 	all-byacc all-flex all-opcodes all-bfd all-ld all-gas all-tgas \
-	all-gcc all-binutils  all-libg++ all-readline all-z8ksim all-gdb \
+	all-gcc all-binutils  all-libg++ all-readline all-z8ksim all-h8300sim all-gdb \
 	all-make all-rcs all-cvs all-diff all-grep \
 	all-patch all-emacs all-ispell all-etc \
 	all-tcl all-tk all-expect \
@@ -257,7 +257,7 @@ all.normal: all-m4 all-autoconf all-libiberty all-mmalloc all-texinfo \
 
 
 all.cross: all-libiberty all-mmalloc all-gas all-byacc all-flex all-ld \
-	 all-opcodes all-z8ksim all-bfd all-readline all-gdb all-binutils all-gcc \
+	 all-opcodes all-z8ksim all-h8300sim all-bfd all-readline all-gdb all-binutils all-gcc \
 	all-newlib all-deja-gnu
 
 .PHONY: clean distclean mostlyclean realclean do_clean
@@ -325,6 +325,7 @@ install-no-fixedincludes: install-dirs gcc-no-fixedincludes \
 	install-texinfo \
 	install-tk  \
 	install-z8ksim \
+	install-h8300sim \
 	install-fileutils install-find install-gawk install-m4 install-sed install-shellutils \
 	install-textutils install-time install-wdiff
 
@@ -1028,6 +1029,25 @@ install-z8ksim: force
 	else \
 		true ; \
 	fi
+
+### h8300sim: all-bfd 
+	@if [ -f ./h8300sim/Makefile ] ; then \
+		rootme=`pwd` ; export rootme ; \
+		(cd ./h8300sim; \
+		$(MAKE) $(FLAGS_TO_PASS) all) ; \
+	else \
+		true ; \
+	fi
+
+install-h8300sim: force
+	@if [ -f ./h8300sim/Makefile ] ; then \
+		rootme=`pwd` ; export rootme ; \
+		(cd ./h8300sim; \
+		$(MAKE) $(FLAGS_TO_PASS) install) ; \
+	else \
+		true ; \
+	fi
+
 
 ### fileutils
 all-fileutils: force

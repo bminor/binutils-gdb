@@ -58,6 +58,7 @@ glob
 gprof
 grep
 groff
+h8300sim
 include
 ispell
 ld
