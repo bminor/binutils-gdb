@@ -1,3 +1,11 @@
+Tue May 30 12:31:31 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* write.c (write_object_file): Check for undefined local dollar
+	and fb labels.
+
+	* symbols.c (decode_local_label_name): Extract instance number
+	from the correct location.
+
 Sat May 27 21:28:49 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
 
 	* config/te-dpx2.h: Include obj-format.h.
