@@ -1,5 +1,10 @@
 2002-03-07  Daniel Jacobowitz  <drow@mvista.com>
 
+	* configure.in: Set is_release=y for 2.12 release.
+	* configure: Likewise.
+
+2002-03-07  Daniel Jacobowitz  <drow@mvista.com>
+
 	* configure.in: Bump version to 2.12.
 	* configure: Likewise.
 
