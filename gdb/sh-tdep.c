@@ -743,12 +743,12 @@ sh_push_dummy_call_fpu (struct gdbarch *gdbarch,
 {
   int stack_offset = 0;
   int argreg = ARG0_REGNUM;
-  int flt_argreg;
+  int flt_argreg = 0;
   int argnum;
   struct type *type;
   CORE_ADDR regval;
   char *val;
-  int len, reg_size;
+  int len, reg_size = 0;
   int pass_on_stack;
 
   /* first force sp to a 4-byte alignment */

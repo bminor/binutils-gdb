@@ -1,5 +1,10 @@
 2003-10-03  Corinna Vinschen  <vinschen@redhat.com>
 
+	* sh-tdep.c (sh_push_dummy_call_fpu): Initialize flt_argreg and
+	reg_size to keep GCC silent.
+
+2003-10-03  Corinna Vinschen  <vinschen@redhat.com>
+
 	* dwarf2-frame.c (struct comp_unit): Add tbase member to store
 	base for DW_EH_PE_textrel encodings.
 	(read_encoded_value): Add a DW_EH_PE_textrel case.
