@@ -305,6 +305,9 @@ set_language PARAMS ((enum language));
    (to produce e.g. %08x or %lx).  */
 
 extern char *
+local_decimal_format_custom PARAMS ((char *));	/* language.c */
+
+extern char *
 local_octal_format_custom PARAMS ((char *));	/* language.c */
 
 extern char *

@@ -531,6 +531,21 @@ local_octal_format_custom(pre)
    strcat (form, local_octal_format_suffix ());
    return form;
 }
+
+/* Returns the appropriate printf format for decimal numbers. */
+char *
+local_decimal_format_custom(pre)
+   char *pre;
+{
+   static char form[50];
+
+   strcpy (form, local_decimal_format_prefix ());
+   strcat (form, "%");
+   strcat (form, pre);
+   strcat (form, local_decimal_format_specifier ());
+   strcat (form, local_decimal_format_suffix ());
+   return form;
+}
 
 /* This page contains functions that are used in type/range checking.
    They all return zero if the type/range check fails.

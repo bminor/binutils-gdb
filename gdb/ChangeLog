@@ -1,3 +1,9 @@
+Mon Mar  1 09:25:57 1993  Fred Fish  (fnf@cygnus.com)
+
+	* language.h (local_decimal_format_custom):  Add prototype.
+	* language.c (local_decimal_format_custom):  Add function, bug
+	reported by Robert R. Henry (rrh@tera.com).
+
 Fri Feb 26 18:33:18 1993  John Gilmore  (gnu@cacophony.cygnus.com)
 
 	* xcoffexec.c (vmap_ldinfo):  Fix "/" for '/' typo, reported
