@@ -1,3 +1,9 @@
+Fri Oct 22 14:03:33 1993  Mark Eichin  (eichin@cygnus.com)
+
+	* m68k-lynx.mt, i386-lynx.mt (TDEFINES): set
+	FPRINTF_ALREADY_DECLARED because the objdump.c declaration of
+	fprintf collides with the native one.
+
 Fri Oct 22 11:50:25 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* targets.c (target_vector): Enable MIPS ELF vectors.
