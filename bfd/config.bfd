@@ -312,6 +312,7 @@ case "${targ}" in
 # start-sanitize-gm
   mips*-*-magic*)
     targ_defvec=ecoff_big_vec
+    targ_selvecs=bfd_elf32_bigmips_vec
     ;;
 # end-sanitize-gm
   mips*-*-ecoff*)
