@@ -266,6 +266,8 @@ TSSTART = /lib/crt0.o
 
 NTSSTART = kdb-start.o
 
+SUBDIRS = doc
+
 # For now, shortcut the "configure GDB for fewer languages" stuff.
 YYFILES = c-exp.tab.c m2-exp.tab.c
 YYOBJ = c-exp.tab.o m2-exp.tab.o
@@ -276,11 +278,13 @@ YYOBJ = c-exp.tab.o m2-exp.tab.o
 	${CC} -c ${CFLAGS} $<
 
 all: gdb
+	$(MAKE) subdir_do DO=all "DODIRS=$(SUBDIRS)"
 
 install: gdb
 	cp gdb $(bindir)/gdb.new
 	mv $(bindir)/gdb.new $(bindir)/gdb
 	$(M_INSTALL)
+	$(MAKE) subdir_do DO=install "DODIRS=$(SUBDIRS)"
 
 init.c: $(srcdir)/munch $(OBS) $(TSOBS)
 	$(srcdir)/munch ${MUNCH_DEFINE} $(OBS) $(TSOBS) > init.c
@@ -508,49 +512,73 @@ clean:
 	rm -f init.c init.o version.c
 	rm -f gdb core gdb.tar gdb.tar.Z make.log
 	rm -f gdb[0-9]
-	cd $(srcdir)/doc; $(MAKE) clean
+	$(MAKE) subdir_do DO=clean "DODIRS=$(SUBDIRS)"
 
 distclean: clean c-exp.tab.c m2-exp.tab.c TAGS
 	rm -f tm.h xm.h config.status
 	rm -f y.output yacc.acts yacc.tmp
 	rm -f ${TESTS} Makefile depend
+	$(MAKE) subdir_do DO=distclean "DODIRS=$(SUBDIRS)"
 
 realclean: clean
 	rm -f c-exp.tab.c m2-exp.tab.c TAGS
 	rm -f tm.h xm.h config.status
 	rm -f Makefile depend
+	$(MAKE) subdir_do DO=realclean "DODIRS=$(SUBDIRS)"
 
 STAGESTUFF=${OBS} ${TSOBS} ${NTSOBS} ${ADD_FILES} init.c init.o version.c gdb
+
+subdir_do: force
+	for i in $(DODIRS); do \
+		if [ -d $(unsubdir)/$$i ] ; then \
+			if (cd $(unsubdir)/$$i$(subdir); \
+				$(MAKE) \
+					"against=$(against)" \
+					"AR=$(AR)" \
+					"CC=$(CC)" \
+					"AR_FLAGS=$(AR_FLAGS)" \
+					"RANLIB=$(RANLIB)" \
+					"BISON=$(BISON)" $(DO)) ; then true ; \
+			else exit 1 ; fi ; \
+		else true ; fi ; \
+	done
 
 # Copy the object files from a particular stage into a subdirectory.
 stage1: force
 	-mkdir stage1
 	-mv -f $(STAGESTUFF) stage1
+	$(MAKE) subdir_do DO=stage1 "DODIRS=$(SUBDIRS)"
 
 stage2: force
 	-mkdir stage2
 	-mv -f $(STAGESTUFF) stage2
+	$(MAKE) subdir_do DO=stage2 "DODIRS=$(SUBDIRS)"
 
 stage3: force
 	-mkdir stage3
 	-mv -f $(STAGESTUFF) stage3
+	$(MAKE) subdir_do DO=stage3 "DODIRS=$(SUBDIRS)"
 
 against=stage2
 
 comparison: force
 	for i in $(STAGESTUFF) ; do cmp $$i $(against)/$$i ; done
+	$(MAKE) subdir_do DO=comparison "DODIRS=$(SUBDIRS)"
 
 de-stage1: force
 	- (cd stage1 ; mv -f * ..)
 	- rmdir stage1
+	$(MAKE) subdir_do DO=de-stage1 "DODIRS=$(SUBDIRS)"
 
 de-stage2: force
 	- (cd stage2 ; mv -f * ..)
 	- rmdir stage2
+	$(MAKE) subdir_do DO=de-stage2 "DODIRS=$(SUBDIRS)"
 
 de-stage3: force
 	- (cd stage3 ; mv -f * ..)
 	- rmdir stage3
+	$(MAKE) subdir_do DO=de-stage3 "DODIRS=$(SUBDIRS)"
 
 Makefile: $(srcdir)/Makefile.in $(host_makefile_frag) $(target_makefile_frag)
 	$(SHELL) ./config.status

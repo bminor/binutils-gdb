@@ -1,3 +1,4 @@
+configdirs="doc"
 srcname="GDB"
 srctrigger=main.c
 # per-host:
