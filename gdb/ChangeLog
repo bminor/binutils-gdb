@@ -1,3 +1,8 @@
+1998-07-01  Jim Blandy  <jimb@zwingli.cygnus.com>
+
+	* Makefile.in (ax-general.o): Depend on $(defs_h) too.
+	(ax_h): Bother to define this.
+
 Mon Jun 29 19:01:18 1998  Jim Wilson  <wilson@cygnus.com>
 
         * gnu-regex.c (re_comp): Add cast to char * before gettext calls.
