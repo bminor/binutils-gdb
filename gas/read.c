@@ -4863,6 +4863,12 @@ equals (sym_name, reassign)
 	  && S_IS_DEFINED (symbolP)
 	  && S_GET_SEGMENT (symbolP) != reg_section)
 	as_bad (_("symbol `%s' already defined"), S_GET_NAME (symbolP));
+
+#ifdef OBJ_COFF
+      /* "set" symbols are local unless otherwise specified.  */
+      SF_SET_LOCAL (symbolP);
+#endif /* OBJ_COFF */
+
       pseudo_set (symbolP);
     }
 

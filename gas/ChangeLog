@@ -1,3 +1,7 @@
+2001-03-27  Nick Papadonis  <nick@coelacanth.com>
+
+	* read.c (equals): (for COFF) default symbols to being local.
+
 2001-03-27  Hans-Peter Nilsson  <hp@axis.com>
 
 	* configure.in (cris-*-*): Change default emulation to criself.
