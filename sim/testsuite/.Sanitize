@@ -45,13 +45,13 @@ Things-to-keep:
 
 ChangeLog
 Makefile.in
+common
 configure
 configure.in
 d10v-elf
 
 Things-to-lose:
 
-common
 tic80-coff
 README
 
