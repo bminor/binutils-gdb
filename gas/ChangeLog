@@ -1,3 +1,10 @@
+Tue Jun  2 13:11:13 1998  Pat Rankin  <rankin@eql.caltech.edu>
+
+	* config/tc-vax.c (md_create_short_jump): Fix off by two bug in
+	offset calculation.  Also, use VAX_BRW from vax-inst.h instead
+	of hardcoded magic number.
+	(md_create_long_jump): Use VAX_JMP and VAX_ABSOLUTE_MODE macros.
+
 Tue Jun  2 09:25:34 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* read.c (do_s_func): New function.
