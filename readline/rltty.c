@@ -20,10 +20,13 @@
    is generally kept in a file called COPYING or LICENSE.  If you do not
    have a copy of the license, write to the Free Software Foundation,
    675 Mass Ave, Cambridge, MA 02139, USA. */
-#include <sys/types.h>
+#include "sysdep.h"
 #include <signal.h>
 #include <errno.h>
 #include <stdio.h>
+#ifndef	NO_SYS_FILE
+#include <sys/file.h>
+#endif
 
 #if defined (HAVE_UNISTD_H)
 #  include <unistd.h>
@@ -39,10 +42,10 @@ extern int errno;
 extern int readline_echoing_p;
 extern int _rl_eof_char;
 
-#if defined (_GO32_)
+#if defined (__GO32__)
 #  include <sys/pc.h>
 #  undef HANDLE_SIGNALS
-#endif /* _GO32_ */
+#endif /* __GO32__ */
 
 /* **************************************************************** */
 /*								    */
@@ -215,7 +218,6 @@ set_tty_settings (tty, tiop)
       ioctl (tty, TIOCSETN, &(tiop->sgttyb));
       tiop->flags &= ~SGTTY_SET;
     }
-  readline_echoing_p = 1;
 
 #if defined (TIOCLSET)
   if (tiop->flags & LFLAG_SET)
@@ -249,7 +251,7 @@ prepare_terminal_settings (meta_flag, otio, tiop)
      int meta_flag;
      TIOTYPE otio, *tiop;
 {
-#if !defined (_GO32_)
+#if !defined (__GO32__)
   readline_echoing_p = (otio.sgttyb.sg_flags & ECHO);
 
   /* Copy the original settings to the structure we're going to use for
@@ -315,11 +317,11 @@ prepare_terminal_settings (meta_flag, otio, tiop)
   tiop->ltchars.t_dsuspc = -1;	/* C-y */
   tiop->ltchars.t_lnextc = -1;	/* C-v */
 #endif /* TIOCGLTC */
-#endif /* !_GO32_ */
+#endif /* !__GO32__ */
 }
 #endif /* defined (NEW_TTY_DRIVER) */
 
-#if !defined (NEW_TTY_DRIVER) && !defined(_GO32_)
+#if !defined (NEW_TTY_DRIVER) && !defined(__GO32__)
 
 #if !defined (VMIN)
 #  define VMIN VEOF
@@ -442,14 +444,14 @@ prepare_terminal_settings (meta_flag, otio, tiop)
 
 #endif /* TERMIOS_TTY_DRIVER && _POSIX_VDISABLE */
 }
-#endif /* !defined (NEW_TTY_DRIVER) && !defined(_GO32_) */
+#endif /* !defined (NEW_TTY_DRIVER) && !defined(__GO32__) */
 
 /* Put the terminal in CBREAK mode so that we can detect key presses. */
 void
 rl_prep_terminal (meta_flag)
      int meta_flag;
 {
-#if !defined (_GO32_)
+#if !defined (__GO32__)
   int tty = fileno (rl_instream);
   TIOTYPE tio;
 
@@ -479,14 +481,14 @@ rl_prep_terminal (meta_flag)
   terminal_prepped = 1;
 
   release_sigint ();
-#endif /* !_GO32_ */
+#endif /* !__GO32__ */
 }
 
 /* Restore the terminal's normal settings and modes. */
 void
 rl_deprep_terminal ()
 {
-#if !defined (_GO32_)
+#if !defined (__GO32__)
   int tty = fileno (rl_instream);
 
   if (!terminal_prepped)
@@ -500,12 +502,15 @@ rl_deprep_terminal ()
       release_sigint ();
       return;
     }
+#ifdef NEW_TTY_DRIVER
+  readline_echoing_p = 1;
+#endif
 
   control_meta_key (0);
   terminal_prepped = 0;
 
   release_sigint ();
-#endif /* !_GO32_ */
+#endif /* !__GO32__ */
 }
 
 /* **************************************************************** */
@@ -574,6 +579,7 @@ rl_stop_output (count, key)
 /*			Default Key Bindings			    */
 /*								    */
 /* **************************************************************** */
+#if !defined (__GO32__)
 void
 rltty_set_default_bindings (kmap)
      Keymap kmap;
@@ -660,3 +666,4 @@ rltty_set_default_bindings (kmap)
     }
 #endif /* !NEW_TTY_DRIVER */
 }
+#endif /* !__GO32__ */

@@ -1,3 +1,9 @@
+Mon May  9 18:29:42 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* readline.c (readline_default_bindings): Don't compile if
+	__GO32__ is defined.
+	* rltty.c (rltty_set_default_bindings): Likewise.
+
 Fri May  6 13:38:39 1994  Steve Chamberlain  (sac@cygnus.com)
 
         * config/mh-go32: New fragment.
