@@ -1,3 +1,8 @@
+Wed Jul 12 18:14:29 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdb.base/exprs.exp: Test casts to a pointer including over and
+ 	underflow.
+
 Thu Jul 13 11:52:53 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* gdb.base/sizeof.exp, gdb.base/sizeof.c: New files.  Compare GDB
