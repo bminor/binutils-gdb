@@ -62,8 +62,9 @@ static char *download_path;	/* user-settable path for SREC files     */
  */
 
 static void
-m32r_load_section (bfd *abfd, asection *s, unsigned int *data_count)
+m32r_load_section (bfd *abfd, asection *s, void *obj)
 {
+  unsigned int *data_count = obj;
   if (s->flags & SEC_LOAD)
     {
       bfd_size_type section_size = bfd_section_size (abfd, s);

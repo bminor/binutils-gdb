@@ -1,3 +1,8 @@
+Sun Dec  3 00:29:31 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* m32r-rom.c (m32r_load_section): Update to match
+ 	bfd_map_over_sections's ``func'' arg.
+
 Thu Nov 30 01:24:37 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* mips-tdep.c (struct upk_mips16): Delete fields ``inst'' and
