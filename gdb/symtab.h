@@ -1261,13 +1261,6 @@ extern struct symtab_and_line find_pc_line (CORE_ADDR, int);
 
 extern struct symtab_and_line find_pc_sect_line (CORE_ADDR, asection *, int);
 
-/* Given an address, return the nearest symbol at or below it in memory.
-   Optionally return the symtab it's from through 2nd arg, and the
-   address in inferior memory of the symbol through 3rd arg.  */
-
-extern struct symbol *find_addr_symbol (CORE_ADDR, struct symtab **,
-					CORE_ADDR *);
-
 /* Given a symtab and line number, return the pc there.  */
 
 extern int find_line_pc (struct symtab *, int, CORE_ADDR *);

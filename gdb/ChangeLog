@@ -1,3 +1,9 @@
+2002-10-28  David Carlton  <carlton@math.stanford.edu>
+
+	* symtab.c (find_addr_symbol): Delete.  (It was already commented
+	out.)
+	* symtab.h: Delete prototype for find_addr_symbol.
+
 2002-10-26  Andrew Cagney  <cagney@redhat.com>
 
 	* gdbarch.sh (DEPRECATED_DO_REGISTERS_INFO): Rename
