@@ -52,8 +52,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
   ((exec).a_info = \
    (((exec).a_info & ~(0x3ff<<16)) | (((machtype)&0xff) << 16)))
 #define N_SET_FLAGS(exec, flags) \
-  ((exec).a_info = ((exec).a_info & 0xffff) | (flags & 0xffff))
-#define N_SET_FLAGS(exec, flags) \
   ((exec).a_info = \
       (((exec).a_info & ~(0x3f<<26)) | (((flags)&0x3f) << 26)))
 
