@@ -1,5 +1,9 @@
 2004-02-28  Mark Kettenis  <kettenis@gnu.org>
 
+	* amd64-nat.c: Include "gdb_string.h".
+	(amd64_collect_native_gregset): Zero-extend the 32-bit
+	general-purpose registers and %eip.
+
 	* amd64-tdep.h: (amd64_collect_fxsave): New prototype.
 	* amd64-tdep.c (amd64_collect_fxsave): New function.
 	(amd64_fill_fxsave): Simply call amd64_collect_fxsave.

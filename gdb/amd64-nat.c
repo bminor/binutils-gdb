@@ -24,6 +24,7 @@
 #include "regcache.h"
 
 #include "gdb_assert.h"
+#include "gdb_string.h"
 
 #include "i386-tdep.h"
 #include "amd64-tdep.h"
@@ -128,7 +129,17 @@ amd64_collect_native_gregset (const struct regcache *regcache,
   int i;
 
   if (gdbarch_ptr_bit (gdbarch) == 32)
-    num_regs = amd64_native_gregset32_num_regs;
+    {
+      num_regs = amd64_native_gregset32_num_regs;
+
+      /* Make sure %eax, %ebx, %ecx, %edx, %esi, %edi, %ebp, %esp and
+         %eip get zero-extended to 64 bits.  */
+      for (i = 0; i <= I386_EIP_REGNUM; i++)
+	{
+	  if (regnum == -1 || regnum == i)
+	    memset (regs + amd64_native_gregset_reg_offset (i), 0, 8);
+	}
+    }
 
   if (num_regs > NUM_REGS)
     num_regs = NUM_REGS;
