@@ -1,4 +1,4 @@
-#! /bin/sh -x
+#! /bin/sh
 #
 # shobj-conf -- output a series of variable assignments to be substituted
 #		into a Makefile by configure which specify system-dependent
