@@ -1,3 +1,9 @@
+2001-10-02  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.am (Makefile): Depend on bfd/configure.in.
+	Run "make dep-am".
+	* Makefile.in: Regenerate.
+
 2001-09-30  John Healy  <jhealy@redhat.com>
 
         * cgen-ibld.in (insert_1): Switched bfd_get_bits and bfd_set_bits

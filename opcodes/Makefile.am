@@ -312,6 +312,8 @@ s390-mkopc: s390-mkopc.c
 s390-opc.tab: s390-mkopc s390-opc.txt
 	./s390-mkopc < $(srcdir)/s390-opc.txt > s390-opc.tab
 
+Makefile: $(BFDDIR)/configure.in
+
 # This dependency stuff is copied from BFD.
 
 DEP: dep.sed $(CFILES) $(HFILES) config.h
@@ -360,27 +362,30 @@ dep-am: DEP
 # DO NOT DELETE THIS LINE -- mkdep uses it.
 # DO NOT PUT ANYTHING AFTER THIS LINE, IT WILL GO AWAY.
 a29k-dis.lo: a29k-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/opcode/a29k.h
+  $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/symcat.h $(INCDIR)/opcode/a29k.h
 alpha-dis.lo: alpha-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/opcode/alpha.h
+  $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/symcat.h $(INCDIR)/opcode/alpha.h
 alpha-opc.lo: alpha-opc.c sysdep.h config.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/opcode/alpha.h $(BFD_H) opintl.h
+  $(INCDIR)/opcode/alpha.h $(BFD_H) $(INCDIR)/symcat.h \
+  opintl.h
 arc-dis.lo: arc-dis.c $(INCDIR)/dis-asm.h $(BFD_H) \
-  $(INCDIR)/opcode/arc.h $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h \
-  $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h \
-  $(INCDIR)/elf/arc.h $(INCDIR)/elf/reloc-macros.h opintl.h \
-  arc-dis.h arc-ext.h
+  $(INCDIR)/symcat.h $(INCDIR)/opcode/arc.h $(BFDDIR)/elf-bfd.h \
+  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
+  $(INCDIR)/bfdlink.h $(INCDIR)/elf/arc.h $(INCDIR)/elf/reloc-macros.h \
+  opintl.h arc-dis.h arc-ext.h
 arc-opc.lo: arc-opc.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/opcode/arc.h
 arc-ext.lo: arc-ext.c sysdep.h config.h $(INCDIR)/ansidecl.h \
-  $(BFD_H) arc-ext.h $(INCDIR)/libiberty.h
+  $(BFD_H) $(INCDIR)/symcat.h arc-ext.h $(INCDIR)/libiberty.h
 arm-dis.lo: arm-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/dis-asm.h $(BFD_H) arm-opc.h $(INCDIR)/coff/internal.h \
-  $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h opintl.h $(BFDDIR)/elf-bfd.h \
-  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
-  $(INCDIR)/elf/arm.h $(INCDIR)/elf/reloc-macros.h
+  $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/symcat.h arm-opc.h \
+  $(INCDIR)/coff/internal.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h \
+  opintl.h $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h \
+  $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/elf/arm.h \
+  $(INCDIR)/elf/reloc-macros.h
 avr-dis.lo: avr-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/dis-asm.h $(BFD_H) opintl.h $(INCDIR)/opcode/avr.h
+  $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/symcat.h opintl.h \
+  $(INCDIR)/opcode/avr.h
 cgen-asm.lo: cgen-asm.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/libiberty.h $(INCDIR)/safe-ctype.h $(BFD_H) \
   $(INCDIR)/symcat.h $(INCDIR)/opcode/cgen.h opintl.h
@@ -390,22 +395,23 @@ cgen-opc.lo: cgen-opc.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/libiberty.h $(INCDIR)/safe-ctype.h $(BFD_H) \
   $(INCDIR)/symcat.h $(INCDIR)/opcode/cgen.h
 cris-dis.lo: cris-dis.c $(INCDIR)/dis-asm.h $(BFD_H) \
-  $(INCDIR)/ansidecl.h sysdep.h config.h $(INCDIR)/opcode/cris.h \
-  $(INCDIR)/libiberty.h
+  $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h sysdep.h config.h \
+  $(INCDIR)/opcode/cris.h $(INCDIR)/libiberty.h
 cris-opc.lo: cris-opc.c $(INCDIR)/opcode/cris.h
 d10v-dis.lo: d10v-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/opcode/d10v.h $(INCDIR)/dis-asm.h $(BFD_H)
+  $(INCDIR)/opcode/d10v.h $(INCDIR)/dis-asm.h $(BFD_H) \
+  $(INCDIR)/symcat.h
 d10v-opc.lo: d10v-opc.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/opcode/d10v.h
 d30v-dis.lo: d30v-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/opcode/d30v.h $(INCDIR)/dis-asm.h $(BFD_H) \
-  opintl.h
+  $(INCDIR)/symcat.h opintl.h
 d30v-opc.lo: d30v-opc.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/opcode/d30v.h
 dis-buf.lo: dis-buf.c sysdep.h config.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/dis-asm.h $(BFD_H) opintl.h
+  $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/symcat.h opintl.h
 disassemble.lo: disassemble.c sysdep.h config.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/dis-asm.h $(BFD_H)
+  $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/symcat.h
 fr30-asm.lo: fr30-asm.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/safe-ctype.h $(BFD_H) $(INCDIR)/symcat.h \
   fr30-desc.h $(INCDIR)/opcode/cgen.h fr30-opc.h opintl.h \
@@ -424,23 +430,26 @@ fr30-opc.lo: fr30-opc.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   fr30-opc.h $(INCDIR)/libiberty.h
 h8300-dis.lo: h8300-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/opcode/h8300.h $(INCDIR)/dis-asm.h $(BFD_H) \
-  opintl.h
+  $(INCDIR)/symcat.h opintl.h
 h8500-dis.lo: h8500-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
-  h8500-opc.h $(INCDIR)/dis-asm.h $(BFD_H) opintl.h
+  h8500-opc.h $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/symcat.h \
+  opintl.h
 hppa-dis.lo: hppa-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/dis-asm.h $(BFD_H) $(BFDDIR)/libhppa.h $(INCDIR)/opcode/hppa.h
+  $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/symcat.h $(BFDDIR)/libhppa.h \
+  $(INCDIR)/opcode/hppa.h
 i370-dis.lo: i370-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/opcode/i370.h
+  $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/symcat.h $(INCDIR)/opcode/i370.h
 i370-opc.lo: i370-opc.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/opcode/i370.h
 i386-dis.lo: i386-dis.c $(INCDIR)/dis-asm.h $(BFD_H) \
-  $(INCDIR)/ansidecl.h sysdep.h config.h opintl.h
+  $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h sysdep.h config.h \
+  opintl.h
 i860-dis.lo: i860-dis.c $(INCDIR)/dis-asm.h $(BFD_H) \
-  $(INCDIR)/ansidecl.h $(INCDIR)/opcode/i860.h
+  $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h $(INCDIR)/opcode/i860.h
 i960-dis.lo: i960-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/dis-asm.h $(BFD_H)
+  $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/symcat.h
 ia64-dis.lo: ia64-dis.c $(INCDIR)/dis-asm.h $(BFD_H) \
-  $(INCDIR)/ansidecl.h $(INCDIR)/opcode/ia64.h
+  $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h $(INCDIR)/opcode/ia64.h
 ia64-opc-a.lo: ia64-opc-a.c ia64-opc.h $(INCDIR)/opcode/ia64.h
 ia64-opc-b.lo: ia64-opc-b.c ia64-opc.h $(INCDIR)/opcode/ia64.h
 ia64-opc-f.lo: ia64-opc-f.c ia64-opc.h $(INCDIR)/opcode/ia64.h
@@ -475,21 +484,22 @@ m32r-opinst.lo: m32r-opinst.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(BFD_H) $(INCDIR)/symcat.h m32r-desc.h $(INCDIR)/opcode/cgen.h \
   m32r-opc.h
 m68hc11-dis.lo: m68hc11-dis.c $(INCDIR)/ansidecl.h \
-  $(INCDIR)/opcode/m68hc11.h $(INCDIR)/dis-asm.h $(BFD_H)
+  $(INCDIR)/opcode/m68hc11.h $(INCDIR)/dis-asm.h $(BFD_H) \
+  $(INCDIR)/symcat.h
 m68hc11-opc.lo: m68hc11-opc.c $(INCDIR)/ansidecl.h \
   $(INCDIR)/opcode/m68hc11.h
 m68k-dis.lo: m68k-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/floatformat.h \
+  $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/symcat.h $(INCDIR)/floatformat.h \
   opintl.h $(INCDIR)/opcode/m68k.h
 m68k-opc.lo: m68k-opc.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/opcode/m68k.h
 m88k-dis.lo: m88k-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/opcode/m88k.h \
+  $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/symcat.h $(INCDIR)/opcode/m88k.h \
   opintl.h
 mcore-dis.lo: mcore-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
-  mcore-opc.h $(INCDIR)/dis-asm.h $(BFD_H)
+  mcore-opc.h $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/symcat.h
 mips-dis.lo: mips-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/opcode/mips.h \
+  $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/symcat.h $(INCDIR)/opcode/mips.h \
   opintl.h $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h \
   $(INCDIR)/elf/mips.h $(INCDIR)/elf/reloc-macros.h
@@ -499,17 +509,17 @@ mips16-opc.lo: mips16-opc.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/opcode/mips.h
 m10200-dis.lo: m10200-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/opcode/mn10200.h $(INCDIR)/dis-asm.h $(BFD_H) \
-  opintl.h
+  $(INCDIR)/symcat.h opintl.h
 m10200-opc.lo: m10200-opc.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/opcode/mn10200.h
 m10300-dis.lo: m10300-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/opcode/mn10300.h $(INCDIR)/dis-asm.h $(BFD_H) \
-  opintl.h
+  $(INCDIR)/symcat.h opintl.h
 m10300-opc.lo: m10300-opc.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/opcode/mn10300.h
 ns32k-dis.lo: ns32k-dis.c $(BFD_H) $(INCDIR)/ansidecl.h \
-  sysdep.h config.h $(INCDIR)/dis-asm.h $(INCDIR)/opcode/ns32k.h \
-  opintl.h
+  $(INCDIR)/symcat.h sysdep.h config.h $(INCDIR)/dis-asm.h \
+  $(INCDIR)/opcode/ns32k.h opintl.h
 openrisc-asm.lo: openrisc-asm.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/safe-ctype.h $(BFD_H) $(INCDIR)/symcat.h \
   openrisc-desc.h $(INCDIR)/opcode/cgen.h openrisc-opc.h \
@@ -528,49 +538,53 @@ openrisc-opc.lo: openrisc-opc.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(BFD_H) $(INCDIR)/symcat.h openrisc-desc.h $(INCDIR)/opcode/cgen.h \
   openrisc-opc.h $(INCDIR)/libiberty.h
 pdp11-dis.lo: pdp11-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/opcode/pdp11.h
+  $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/symcat.h $(INCDIR)/opcode/pdp11.h
 pdp11-opc.lo: pdp11-opc.c $(INCDIR)/opcode/pdp11.h
 pj-dis.lo: pj-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/opcode/pj.h $(INCDIR)/dis-asm.h $(BFD_H)
+  $(INCDIR)/opcode/pj.h $(INCDIR)/dis-asm.h $(BFD_H) \
+  $(INCDIR)/symcat.h
 pj-opc.lo: pj-opc.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/opcode/pj.h
 ppc-dis.lo: ppc-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/opcode/ppc.h
+  $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/symcat.h $(INCDIR)/opcode/ppc.h
 ppc-opc.lo: ppc-opc.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/opcode/ppc.h opintl.h
 s390-mkopc.lo: s390-mkopc.c
 s390-opc.lo: s390-opc.c $(INCDIR)/ansidecl.h $(INCDIR)/opcode/s390.h \
   s390-opc.tab
 s390-dis.lo: s390-dis.c $(INCDIR)/ansidecl.h sysdep.h \
-  config.h $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/opcode/s390.h
+  config.h $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/symcat.h \
+  $(INCDIR)/opcode/s390.h
 sh-dis.lo: sh-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
-  sh-opc.h $(INCDIR)/dis-asm.h $(BFD_H)
+  sh-opc.h $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/symcat.h
 sparc-dis.lo: sparc-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/opcode/sparc.h $(INCDIR)/dis-asm.h $(BFD_H) \
-  $(INCDIR)/libiberty.h opintl.h
+  $(INCDIR)/symcat.h $(INCDIR)/libiberty.h opintl.h
 sparc-opc.lo: sparc-opc.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/opcode/sparc.h
 tic30-dis.lo: tic30-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/opcode/tic30.h
+  $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/symcat.h $(INCDIR)/opcode/tic30.h
 tic54x-dis.lo: tic54x-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/opcode/tic54x.h \
+  $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/symcat.h $(INCDIR)/opcode/tic54x.h \
   $(INCDIR)/coff/tic54x.h $(INCDIR)/coff/ti.h
 tic54x-opc.lo: tic54x-opc.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/opcode/tic54x.h
 tic80-dis.lo: tic80-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/opcode/tic80.h $(INCDIR)/dis-asm.h $(BFD_H)
+  $(INCDIR)/opcode/tic80.h $(INCDIR)/dis-asm.h $(BFD_H) \
+  $(INCDIR)/symcat.h
 tic80-opc.lo: tic80-opc.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/opcode/tic80.h
 v850-dis.lo: v850-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/opcode/v850.h $(INCDIR)/dis-asm.h $(BFD_H) \
-  opintl.h
+  $(INCDIR)/symcat.h opintl.h
 v850-opc.lo: v850-opc.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/opcode/v850.h opintl.h
 vax-dis.lo: vax-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/opcode/vax.h $(INCDIR)/dis-asm.h $(BFD_H)
+  $(INCDIR)/opcode/vax.h $(INCDIR)/dis-asm.h $(BFD_H) \
+  $(INCDIR)/symcat.h
 w65-dis.lo: w65-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
-  w65-opc.h $(INCDIR)/dis-asm.h $(BFD_H)
+  w65-opc.h $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/symcat.h
 z8k-dis.lo: z8k-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/dis-asm.h $(BFD_H) z8k-opc.h
+  $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/symcat.h z8k-opc.h
 z8kgen.lo: z8kgen.c sysdep.h config.h $(INCDIR)/ansidecl.h
 # IF YOU PUT ANYTHING HERE IT WILL GO AWAY
