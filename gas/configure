@@ -827,10 +827,6 @@ for this_target in $target $canon_targets ; do
       *)		;;
     esac
 
-    case ${cpu_type} in
-      m68k) extra_objects="$extra_objects m68k-parse.o" ;;
-    esac
-
 # See if we really can support this configuration with the emulation code.
 
     if test $this_target = $target ; then
@@ -871,6 +867,10 @@ for this_target in $target $canon_targets ; do
 EOF
 
 
+    case ${cpu_type} in
+      m68k) extra_objects="$extra_objects m68k-parse.o" ;;
+    esac
+
 done
 
 # Assign floating point type.  Most processors with FP support
@@ -886,8 +886,8 @@ case "${obj_format}" in
 esac
 
 
-if test ! -r ${srcdir}/config/tc-${cpu_type}.c; then
-  { echo "configure: error: GAS does not support target CPU ${cpu_type}" 1>&2; exit 1; }
+if test ! -r ${srcdir}/config/tc-${target_cpu_type}.c; then
+  { echo "configure: error: GAS does not support target CPU ${target_cpu_type}" 1>&2; exit 1; }
 fi
 
 if test ! -r ${srcdir}/config/obj-${obj_format}.c; then
@@ -1076,14 +1076,14 @@ cat >> confdefs.h <<EOF
 EOF
 
 
-files="config/tc-${cpu_type}.c	config/tc-${cpu_type}.h \
+files="config/tc-${target_cpu_type}.c config/tc-${target_cpu_type}.h \
 	config/obj-${obj_format}.h config/obj-${obj_format}.c \
 	config/te-${te_file}.h config/atof-${atof}.c \
 	$extra_files"
 links="targ-cpu.c targ-cpu.h obj-format.h obj-format.c targ-env.h atof-targ.c \
 	$extra_links"
 
-case ${primary_bfd_gas}-${cpu_type}-${obj_format} in
+case ${primary_bfd_gas}-${target_cpu_type}-${obj_format} in
   yes-*-coff)	need_bfd=yes ;;
   no-*-coff)	need_bfd=yes
 		cat >> confdefs.h <<\EOF
@@ -1230,7 +1230,7 @@ else
   # On the NeXT, cc -E runs the code through the compiler's parser,
   # not just through cpp.
   cat > conftest.$ac_ext <<EOF
-#line 1230 "configure"
+#line 1234 "configure"
 #include "confdefs.h"
 #include <assert.h>
 Syntax Error
@@ -1244,7 +1244,7 @@ else
   rm -rf conftest*
   CPP="${CC-cc} -E -traditional-cpp"
   cat > conftest.$ac_ext <<EOF
-#line 1244 "configure"
+#line 1248 "configure"
 #include "confdefs.h"
 #include <assert.h>
 Syntax Error
@@ -1277,7 +1277,7 @@ if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1277 "configure"
+#line 1281 "configure"
 #include "confdefs.h"
 #include <$ac_hdr>
 EOF
@@ -1329,7 +1329,7 @@ else
   ac_cv_c_cross=yes
 else
 cat > conftest.$ac_ext <<EOF
-#line 1329 "configure"
+#line 1333 "configure"
 #include "confdefs.h"
 main(){return(0);}
 EOF
@@ -1352,7 +1352,7 @@ if eval "test \"`echo '$''{'ac_cv_header_alloca_h'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1352 "configure"
+#line 1356 "configure"
 #include "confdefs.h"
 #include <alloca.h>
 int main() { return 0; }
@@ -1383,7 +1383,7 @@ if eval "test \"`echo '$''{'ac_cv_func_alloca'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1383 "configure"
+#line 1387 "configure"
 #include "confdefs.h"
 
 #ifdef __GNUC__
@@ -1441,7 +1441,7 @@ if eval "test \"`echo '$''{'ac_cv_os_cray'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1441 "configure"
+#line 1445 "configure"
 #include "confdefs.h"
 #if defined(CRAY) && ! defined(CRAY2)
 webecray
@@ -1469,7 +1469,7 @@ if eval "test \"`echo '$''{'ac_cv_func_$ac_func'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1469 "configure"
+#line 1473 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char $ac_func(); below.  */
@@ -1523,7 +1523,7 @@ else
   ac_cv_c_stack_direction=0
 else
 cat > conftest.$ac_ext <<EOF
-#line 1523 "configure"
+#line 1527 "configure"
 #include "confdefs.h"
 find_stack_direction ()
 {
@@ -1565,7 +1565,7 @@ else
   ac_cv_c_inline=no
 for ac_kw in inline __inline__ __inline; do
   cat > conftest.$ac_ext <<EOF
-#line 1565 "configure"
+#line 1569 "configure"
 #include "confdefs.h"
 
 int main() { return 0; }
@@ -1604,7 +1604,7 @@ if eval "test \"`echo '$''{'ac_cv_func_$ac_func'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1604 "configure"
+#line 1608 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char $ac_func(); below.  */
@@ -1657,7 +1657,7 @@ if eval "test \"`echo '$''{'ac_cv_func_$ac_func'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1657 "configure"
+#line 1661 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char $ac_func(); below.  */
@@ -1710,7 +1710,7 @@ if eval "test \"`echo '$''{'gas_cv_assert_ok'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1710 "configure"
+#line 1714 "configure"
 #include "confdefs.h"
 #include <assert.h>
 #include <stdio.h>
@@ -1767,7 +1767,7 @@ if eval "test \"`echo '$''{'gas_cv_decl_needed_malloc'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1767 "configure"
+#line 1771 "configure"
 #include "confdefs.h"
 $gas_test_headers
 int main() { return 0; }
@@ -1803,7 +1803,7 @@ if eval "test \"`echo '$''{'gas_cv_decl_needed_free'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1803 "configure"
+#line 1807 "configure"
 #include "confdefs.h"
 $gas_test_headers
 int main() { return 0; }
@@ -1842,7 +1842,7 @@ if eval "test \"`echo '$''{'gas_cv_decl_needed_errno'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1842 "configure"
+#line 1846 "configure"
 #include "confdefs.h"
 
 #ifdef HAVE_ERRNO_H
@@ -2002,7 +2002,7 @@ s%@OPCODES_LIB@%$OPCODES_LIB%g
 /@target_frag@/r $target_frag
 s%@target_frag@%%g
 s%@extra_objects@%$extra_objects%g
-s%@cpu_type@%$cpu_type%g
+s%@target_cpu_type@%$target_cpu_type%g
 s%@obj_format@%$obj_format%g
 s%@atof@%$atof%g
 s%@BFDLIB@%$BFDLIB%g

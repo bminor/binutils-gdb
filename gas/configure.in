@@ -300,10 +300,6 @@ changequote([,])dnl
       *)		;;
     esac
 
-    case ${cpu_type} in
-      m68k) extra_objects="$extra_objects m68k-parse.o" ;;
-    esac
-
 # See if we really can support this configuration with the emulation code.
 
     if test $this_target = $target ; then
@@ -341,6 +337,10 @@ changequote([,])dnl
 
     test -n "$want_sparcv9" && AC_DEFINE(sparcv9)
 
+    case ${cpu_type} in
+      m68k) extra_objects="$extra_objects m68k-parse.o" ;;
+    esac
+
 done
 
 # Assign floating point type.  Most processors with FP support
@@ -359,8 +359,8 @@ dnl
 dnl Make sure the desired support files exist.
 dnl
 
-if test ! -r ${srcdir}/config/tc-${cpu_type}.c; then
-  AC_MSG_ERROR(GAS does not support target CPU ${cpu_type})
+if test ! -r ${srcdir}/config/tc-${target_cpu_type}.c; then
+  AC_MSG_ERROR(GAS does not support target CPU ${target_cpu_type})
 fi
 
 if test ! -r ${srcdir}/config/obj-${obj_format}.c; then
@@ -465,14 +465,14 @@ AC_SUBST(extra_objects)
 AC_DEFINE_UNQUOTED(EMULATIONS, $EMULATIONS)
 AC_DEFINE_UNQUOTED(DEFAULT_EMULATION, "$DEFAULT_EMULATION")
 
-files="config/tc-${cpu_type}.c	config/tc-${cpu_type}.h \
+files="config/tc-${target_cpu_type}.c config/tc-${target_cpu_type}.h \
 	config/obj-${obj_format}.h config/obj-${obj_format}.c \
 	config/te-${te_file}.h config/atof-${atof}.c \
 	$extra_files"
 links="targ-cpu.c targ-cpu.h obj-format.h obj-format.c targ-env.h atof-targ.c \
 	$extra_links"
 
-case ${primary_bfd_gas}-${cpu_type}-${obj_format} in
+case ${primary_bfd_gas}-${target_cpu_type}-${obj_format} in
   yes-*-coff)	need_bfd=yes ;;
   no-*-coff)	need_bfd=yes
 		AC_DEFINE(MANY_SEGMENTS) ;;
@@ -486,7 +486,7 @@ case ${reject_dev_configs}-${dev} in
     ;;
 esac
 
-AC_SUBST(cpu_type)
+AC_SUBST(target_cpu_type)
 AC_SUBST(obj_format)
 AC_SUBST(atof)
 dnl AC_SUBST(emulation)

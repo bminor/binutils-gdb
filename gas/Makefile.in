@@ -337,7 +337,7 @@ ecoff.o : ecoff.c ecoff.h \
 stabs.o : stabs.c subsegs.h $(srcdir)/../include/aout/stab_gnu.h
 atof-targ.o : atof-targ.c
 obj-format.o : obj-format.c
-targ-cpu.o : targ-cpu.c $(TARG_CPU_DEP_@cpu_type@)
+targ-cpu.o : targ-cpu.c $(TARG_CPU_DEP_@target_cpu_type@)
 
 obj-elf.o : $(srcdir)/config/obj-elf.c
 	$(CC) -c $(ALL_CFLAGS) $(CPPFLAGS) $(INCLUDES) $(srcdir)/config/obj-elf.c
