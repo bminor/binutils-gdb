@@ -1,3 +1,8 @@
+2004-08-18  Thiemo Seufer  <seufer@csv.ica.uni-stuttgart.de>
+	* gas/mips/branch-swap.s: New testcase.
+	* gas/mips/branch-swap.d: New testcase.
+	* gas/mips/mips.exp: Run the testcase.
+
 2004-07-30  Michal Ludvig  <mludvig@suse.cz>
 
 	* gas/i386/padlock.s, gas/i386/padlock.d: New tests for
