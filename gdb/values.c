@@ -1,5 +1,5 @@
 /* Low level packing and unpacking of values for GDB, the GNU Debugger.
-   Copyright 1986, 1987, 1989, 1991, 1993, 1994, 1995, 1996
+   Copyright 1986, 1987, 1989, 1991, 1993, 1994, 1995, 1996, 1997
    Free Software Foundation, Inc.
 
 This file is part of GDB.
@@ -761,13 +761,13 @@ value_primitive_field (arg1, offset, fieldno, arg_type)
 
   /* Handle packed fields */
 
-  offset += TYPE_FIELD_BITPOS (arg_type, fieldno) / 8;
   if (TYPE_FIELD_BITSIZE (arg_type, fieldno))
     {
       v = value_from_longest (type,
-			   unpack_field_as_long (arg_type,
-						 VALUE_CONTENTS (arg1),
-						 fieldno));
+			      unpack_field_as_long (arg_type,
+						    VALUE_CONTENTS (arg1)
+						      + offset,
+						    fieldno));
       VALUE_BITPOS (v) = TYPE_FIELD_BITPOS (arg_type, fieldno) % 8;
       VALUE_BITSIZE (v) = TYPE_FIELD_BITSIZE (arg_type, fieldno);
     }
@@ -777,14 +777,17 @@ value_primitive_field (arg1, offset, fieldno, arg_type)
       if (VALUE_LAZY (arg1))
 	VALUE_LAZY (v) = 1;
       else
-	memcpy (VALUE_CONTENTS_RAW (v), VALUE_CONTENTS_RAW (arg1) + offset,
+	memcpy (VALUE_CONTENTS_RAW (v),
+		VALUE_CONTENTS_RAW (arg1) + offset
+		  + TYPE_FIELD_BITPOS (arg_type, fieldno) / 8,
 		TYPE_LENGTH (type));
     }
   VALUE_LVAL (v) = VALUE_LVAL (arg1);
   if (VALUE_LVAL (arg1) == lval_internalvar)
     VALUE_LVAL (v) = lval_internalvar_component;
   VALUE_ADDRESS (v) = VALUE_ADDRESS (arg1);
-  VALUE_OFFSET (v) = offset + VALUE_OFFSET (arg1);
+  VALUE_OFFSET (v) = VALUE_OFFSET (arg1) + offset
+		     + TYPE_FIELD_BITPOS (arg_type, fieldno) / 8;
   return v;
 }
 
