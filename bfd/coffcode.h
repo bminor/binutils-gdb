@@ -307,47 +307,70 @@ DEFUN(sec_to_styp_flags, (sec_name, sec_flags),
 	CONST char *		sec_name	AND
 	flagword	sec_flags)
 {
-    long styp_flags = 0;
+  long styp_flags = 0;
 
-    if (!strcmp(sec_name, _TEXT)) {
-	return((long)STYP_TEXT);
-    } else if (!strcmp(sec_name, _DATA)) {
-	return((long)STYP_DATA);
+  if (!strcmp(sec_name, _TEXT)) 
+  {
+    styp_flags = STYP_TEXT;
+  } 
+  else if (!strcmp(sec_name, _DATA)) 
+  {
+    styp_flags = STYP_DATA;
 #ifdef TWO_DATA_SECS
-    } else if (!strcmp(sec_name, ".data2")) {
-        return((long)STYP_DATA);
-#endif /* TWO_DATA_SECS */
-    } else if (!strcmp(sec_name, _BSS)) {
-	return((long)STYP_BSS);
+  }
+  else if (!strcmp(sec_name, ".data2")) 
+  {
+    styp_flags = STYP_DATA;
+#endif				/* TWO_DATA_SECS */
+  }
+  else if (!strcmp(sec_name, _BSS)) 
+  {
+    styp_flags = STYP_BSS;
 #ifdef _COMMENT
-    } else if (!strcmp(sec_name, _COMMENT)) {
-        return((long)STYP_INFO);
-#endif /* _COMMENT */
+  } 
+  else if (!strcmp(sec_name, _COMMENT)) 
+  {
+    styp_flags = STYP_INFO;
+#endif				/* _COMMENT */
 #ifdef _LIB
-    } else if (!strcmp(sec_name, _LIB)) {
-        return((long)STYP_LIB);
-#endif /* _LIB */
-    }
+  }
+  else if (!strcmp(sec_name, _LIB)) 
+  {
+    styp_flags = STYP_LIB;
+#endif				/* _LIB */
 
-/* Try and figure out what it should be */
-   if (sec_flags & SEC_CODE) styp_flags = STYP_TEXT;
-   if (sec_flags & SEC_DATA) styp_flags = STYP_DATA;
-   else if (sec_flags & SEC_READONLY)
-#ifdef STYP_LIT	/* 29k readonly text/data section */
-   	styp_flags = STYP_LIT;
+  }
+  /* Try and figure out what it should be */
+  else   if (sec_flags & SEC_CODE) 
+  {
+    styp_flags = STYP_TEXT;
+  }
+  else  if (sec_flags & SEC_DATA) 
+  {
+    styp_flags = STYP_DATA;
+  }
+  else if (sec_flags & SEC_READONLY)
+  {
+#ifdef STYP_LIT			/* 29k readonly text/data section */
+    styp_flags = STYP_LIT;
 #else
-   	styp_flags = STYP_TEXT;
-#endif	/* STYP_LIT */
-   else if (sec_flags & SEC_LOAD) styp_flags = STYP_TEXT;
-
-   if (styp_flags == 0) styp_flags = STYP_BSS;
+    styp_flags = STYP_TEXT;
+#endif				/* STYP_LIT */
+  }
+  else if (sec_flags & SEC_LOAD)
+  {
+    styp_flags = STYP_TEXT;
+  }
+  else {
+     styp_flags = STYP_BSS;
+   }
 
 #ifdef STYP_NOLOAD
-   if (sec_flags & SEC_NEVER_LOAD)
-        styp_flags |= STYP_NOLOAD;
+  if (sec_flags & SEC_NEVER_LOAD)
+   styp_flags |= STYP_NOLOAD;
 #endif
 
-   return(styp_flags);
+  return(styp_flags);
 }
 /*
  * Return a word with SEC_* flags set to represent the incoming

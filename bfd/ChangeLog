@@ -1,3 +1,9 @@
+Fri Jan  8 15:20:00 1993  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* coffcode.h (sec_to_styp_flags): allow SEC_NEVER_LOAD to turn on
+	STYP_NOLOAD bit.
+	* coff-z8k.c: delete unused reloc functions
+
 Fri Jan  8 15:47:53 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* bfd.c (struct _bfd): Added ecoff_tdata to tdata union.
