@@ -1,3 +1,20 @@
+Tue Jan 16 15:16:58 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ldgram.y (%union): Add phdr field.
+	(phdr): Use phdr_qualifiers rather than opt_hdrs and opt_at.
+	(phdr_qualifiers): New nonterminal.  Add support for FLAGS.
+	(opt_hdrs, hdr): Remove.
+	(phdr_val): New nonterminal.
+	* ldlang.c (lang_new_phdr): Replace hdrs parameter with filehdr
+	and phdrs parameters.  Add flags parameter.
+	(lang_record_phdrs): Update for changes to lang_phdr.  Pass flags
+	to bfd_record_phdr.
+	* ldlang.h (struct lang_phdr): Replace hdrs field with filehdr and
+	phdrs fields.  Add flags field.
+	(LANG_PHDR_FILEHDR, LANG_PHDR_PHDRS): Remove.
+	(lang_new_phdr): Update declaration.
+	* ld.texinfo: Document FLAGS.
+
 Mon Jan 15 15:07:19 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* emultempl/sunos.em (gld${EMULATION_NAME}_before_allocation):
