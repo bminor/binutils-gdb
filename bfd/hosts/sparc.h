@@ -28,7 +28,6 @@ extern int EXFUN(fclose,(FILE*));
 extern void EXFUN(bcopy,(char*,char*,int));
 extern int EXFUN(bcmp,(char *, char *, int));
 extern void EXFUN(bzero,(char *, int));
-extern PTR EXFUN(emset,(PTR, int,unsigned int));
 #ifndef __GNUC__
 PTR EXFUN(memcpy,(PTR,CONST PTR,unsigned int));
 #else
