@@ -1194,9 +1194,9 @@ finish_command (arg, from_tty)
   breakpoint = set_momentary_breakpoint (sal, frame, bp_finish);
 
   if (!event_loop_p || !target_can_async_p ())
-    old_chain = make_cleanup ((make_cleanup_func) delete_breakpoint, breakpoint);
+    old_chain = make_cleanup_delete_breakpoint (breakpoint);
   else
-    old_chain = make_exec_cleanup ((make_cleanup_func) delete_breakpoint, breakpoint);
+    old_chain = make_exec_cleanup_delete_breakpoint (breakpoint);
 
   /* Find the function we will return from.  */
 

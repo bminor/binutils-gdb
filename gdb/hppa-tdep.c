@@ -1618,7 +1618,7 @@ hppa_pop_frame ()
       breakpoint->silent = 1;
 
       /* So we can clean things up.  */
-      old_chain = make_cleanup ((make_cleanup_func) delete_breakpoint, breakpoint);
+      old_chain = make_cleanup_delete_breakpoint (breakpoint);
 
       /* Start up the inferior.  */
       clear_proceed_status ();

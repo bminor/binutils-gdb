@@ -1,3 +1,15 @@
+Mon May 15 14:06:23 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* breakpoint.h (make_cleanup_delete_breakpoint,
+ 	make_exec_cleanup_delete_breakpoint): Declare.
+	* breakpoint.c (make_cleanup_delete_breakpoint,
+ 	make_exec_cleanup_delete_breakpoint,
+ 	do_delete_breakpoint_cleanup): New fuctions.
+	
+	* infcmd.c (finish_command), hppa-tdep.c (hppa_pop_frame),
+ 	breakpoint.c (until_break_command, until_break_command): Replace
+ 	call to make_cleanup / make_exec_cleanup.
+
 Mon May 15 13:25:57 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* defs.h (core_addr_greaterthan, core_addr_lessthan), utils.c
