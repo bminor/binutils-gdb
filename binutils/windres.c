@@ -960,6 +960,9 @@ main (argc, argv)
       break;
     }
 
+  if (resources == NULL)
+    fatal ("no resources");
+
   /* Sort the resources.  This is required for COFF, convenient for
      rc, and unimportant for res.  */
 

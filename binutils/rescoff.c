@@ -531,9 +531,6 @@ write_coff_file (filename, target, resources)
 
   bfd_set_reloc (abfd, sec, cwi.relocs, cwi.reloc_count);
 
-  /* We allocated the relocs array using malloc.  */
-  free (cwi.relocs);
-
   offset = 0;
   for (d = cwi.dirs.d; d != NULL; d = d->next)
     {
@@ -564,6 +561,9 @@ write_coff_file (filename, target, resources)
 
   if (! bfd_close (abfd))
     bfd_fatal ("bfd_close");
+
+  /* We allocated the relocs array using malloc.  */
+  free (cwi.relocs);
 }
 
 /* Work out the sizes of the various fixed size resource directory

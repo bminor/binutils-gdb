@@ -1,3 +1,9 @@
+Thu Jun 26 13:53:17 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* windres.c (main): Quit if we didn't get any resources.
+	* rescoff.c (write_coff_file): Don't free the relocation array
+	until after we've closed the BFD.
+
 Wed Jun 25 20:57:06 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* resbin.c: New file.
