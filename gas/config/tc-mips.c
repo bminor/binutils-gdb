@@ -3461,7 +3461,7 @@ macro_build_ldst_constoffset (expressionS *ep, const char *op,
       macro_build (ep, op, "t,o(b)", treg, BFD_RELOC_LO16, AT);
 
       if (mips_opts.noat)
-	as_warn (_("Macro used $at after \".set noat\""));
+	as_bad (_("Macro used $at after \".set noat\""));
     }
 }
 
@@ -4060,6 +4060,9 @@ load_address (int reg, expressionS *ep, int *used_at)
     }
   else
     abort ();
+
+  if (mips_opts.noat && *used_at == 1)
+    as_bad (_("Macro used $at after \".set noat\""));
 }
 
 /* Move the contents of register SOURCE into register DEST.  */
@@ -4221,7 +4224,7 @@ macro (struct mips_cl_insn *ip)
       macro_build (NULL, dbl ? "dsub" : "sub", "d,v,t", dreg, 0, sreg);
 
       --mips_opts.noreorder;
-      return;
+      break;
 
     case M_ADD_I:
       s = "addi";
@@ -4246,8 +4249,9 @@ macro (struct mips_cl_insn *ip)
 	  && imm_expr.X_add_number < 0x8000)
 	{
 	  macro_build (&imm_expr, s, "t,r,j", treg, sreg, BFD_RELOC_LO16);
-	  return;
+	  break;
 	}
+      used_at = 1;
       load_register (AT, &imm_expr, dbl);
       macro_build (NULL, s2, "d,v,t", treg, sreg, AT);
       break;
@@ -4280,9 +4284,10 @@ macro (struct mips_cl_insn *ip)
 			   treg, sreg, BFD_RELOC_LO16);
 	      macro_build (NULL, "nor", "d,v,t", treg, treg, 0);
 	    }
-	  return;
+	  break;
 	}
 
+      used_at = 1;
       load_register (AT, &imm_expr, HAVE_64BIT_GPRS);
       macro_build (NULL, s2, "d,v,t", treg, sreg, AT);
       break;
@@ -4304,8 +4309,9 @@ macro (struct mips_cl_insn *ip)
       if (imm_expr.X_op == O_constant && imm_expr.X_add_number == 0)
 	{
 	  macro_build (&offset_expr, s, "s,t,p", sreg, 0);
-	  return;
+	  break;
 	}
+      used_at = 1;
       load_register (AT, &imm_expr, HAVE_64BIT_GPRS);
       macro_build (&offset_expr, s, "s,t,p", sreg, AT);
       break;
@@ -4316,13 +4322,14 @@ macro (struct mips_cl_insn *ip)
       if (treg == 0)
 	{
 	  macro_build (&offset_expr, likely ? "bgezl" : "bgez", "s,p", sreg);
-	  return;
+	  break;
 	}
       if (sreg == 0)
 	{
 	  macro_build (&offset_expr, likely ? "blezl" : "blez", "s,p", treg);
-	  return;
+	  break;
 	}
+      used_at = 1;
       macro_build (NULL, "slt", "d,v,t", AT, sreg, treg);
       macro_build (&offset_expr, likely ? "beql" : "beq", "s,t,p", AT, 0);
       break;
@@ -4349,7 +4356,7 @@ macro (struct mips_cl_insn *ip)
 	    macro_build (NULL, "nop", "", 0);
 	  else
 	    macro_build (&offset_expr, "bnel", "s,t,p", 0, 0);
-	  return;
+	  break;
 	}
       if (imm_expr.X_op != O_constant)
 	as_bad (_("Unsupported large constant"));
@@ -4362,12 +4369,12 @@ macro (struct mips_cl_insn *ip)
       if (imm_expr.X_op == O_constant && imm_expr.X_add_number == 0)
 	{
 	  macro_build (&offset_expr, likely ? "bgezl" : "bgez", "s,p", sreg);
-	  return;
+	  break;
 	}
       if (imm_expr.X_op == O_constant && imm_expr.X_add_number == 1)
 	{
 	  macro_build (&offset_expr, likely ? "bgtzl" : "bgtz", "s,p", sreg);
-	  return;
+	  break;
 	}
       maxnum = 0x7fffffff;
       if (HAVE_64BIT_GPRS && sizeof (maxnum) > 4)
@@ -4386,8 +4393,9 @@ macro (struct mips_cl_insn *ip)
 	  /* result is always true */
 	  as_warn (_("Branch %s is always true"), ip->insn_mo->name);
 	  macro_build (&offset_expr, "b", "p");
-	  return;
+	  break;
 	}
+      used_at = 1;
       set_at (sreg, 0);
       macro_build (&offset_expr, likely ? "beql" : "beq", "s,t,p", AT, 0);
       break;
@@ -4401,8 +4409,9 @@ macro (struct mips_cl_insn *ip)
 	{
 	  macro_build (&offset_expr, likely ? "beql" : "beq",
 		       "s,t,p", 0, treg);
-	  return;
+	  break;
 	}
+      used_at = 1;
       macro_build (NULL, "sltu", "d,v,t", AT, sreg, treg);
       macro_build (&offset_expr, likely ? "beql" : "beq", "s,t,p", AT, 0);
       break;
@@ -4429,8 +4438,9 @@ macro (struct mips_cl_insn *ip)
 	{
 	  macro_build (&offset_expr, likely ? "bnel" : "bne",
 		       "s,t,p", sreg, 0);
-	  return;
+	  break;
 	}
+      used_at = 1;
       set_at (sreg, 1);
       macro_build (&offset_expr, likely ? "beql" : "beq", "s,t,p", AT, 0);
       break;
@@ -4441,13 +4451,14 @@ macro (struct mips_cl_insn *ip)
       if (treg == 0)
 	{
 	  macro_build (&offset_expr, likely ? "bgtzl" : "bgtz", "s,p", sreg);
-	  return;
+	  break;
 	}
       if (sreg == 0)
 	{
 	  macro_build (&offset_expr, likely ? "bltzl" : "bltz", "s,p", treg);
-	  return;
+	  break;
 	}
+      used_at = 1;
       macro_build (NULL, "slt", "d,v,t", AT, treg, sreg);
       macro_build (&offset_expr, likely ? "bnel" : "bne", "s,t,p", AT, 0);
       break;
@@ -4459,10 +4470,11 @@ macro (struct mips_cl_insn *ip)
 	{
 	  macro_build (&offset_expr, likely ? "bnel" : "bne",
 		       "s,t,p", sreg, 0);
-	  return;
+	  break;
 	}
       if (sreg == 0)
 	goto do_false;
+      used_at = 1;
       macro_build (NULL, "sltu", "d,v,t", AT, treg, sreg);
       macro_build (&offset_expr, likely ? "bnel" : "bne", "s,t,p", AT, 0);
       break;
@@ -4473,13 +4485,14 @@ macro (struct mips_cl_insn *ip)
       if (treg == 0)
 	{
 	  macro_build (&offset_expr, likely ? "blezl" : "blez", "s,p", sreg);
-	  return;
+	  break;
 	}
       if (sreg == 0)
 	{
 	  macro_build (&offset_expr, likely ? "bgezl" : "bgez", "s,p", treg);
-	  return;
+	  break;
 	}
+      used_at = 1;
       macro_build (NULL, "slt", "d,v,t", AT, treg, sreg);
       macro_build (&offset_expr, likely ? "beql" : "beq", "s,t,p", AT, 0);
       break;
@@ -4510,13 +4523,14 @@ macro (struct mips_cl_insn *ip)
       if (imm_expr.X_op == O_constant && imm_expr.X_add_number == 0)
 	{
 	  macro_build (&offset_expr, likely ? "bltzl" : "bltz", "s,p", sreg);
-	  return;
+	  break;
 	}
       if (imm_expr.X_op == O_constant && imm_expr.X_add_number == 1)
 	{
 	  macro_build (&offset_expr, likely ? "blezl" : "blez", "s,p", sreg);
-	  return;
+	  break;
 	}
+      used_at = 1;
       set_at (sreg, 0);
       macro_build (&offset_expr, likely ? "bnel" : "bne", "s,t,p", AT, 0);
       break;
@@ -4528,10 +4542,11 @@ macro (struct mips_cl_insn *ip)
 	{
 	  macro_build (&offset_expr, likely ? "beql" : "beq",
 		       "s,t,p", sreg, 0);
-	  return;
+	  break;
 	}
       if (sreg == 0)
 	goto do_true;
+      used_at = 1;
       macro_build (NULL, "sltu", "d,v,t", AT, treg, sreg);
       macro_build (&offset_expr, likely ? "beql" : "beq", "s,t,p", AT, 0);
       break;
@@ -4558,8 +4573,9 @@ macro (struct mips_cl_insn *ip)
 	{
 	  macro_build (&offset_expr, likely ? "beql" : "beq",
 		       "s,t,p", sreg, 0);
-	  return;
+	  break;
 	}
+      used_at = 1;
       set_at (sreg, 1);
       macro_build (&offset_expr, likely ? "bnel" : "bne", "s,t,p", AT, 0);
       break;
@@ -4570,13 +4586,14 @@ macro (struct mips_cl_insn *ip)
       if (treg == 0)
 	{
 	  macro_build (&offset_expr, likely ? "bltzl" : "bltz", "s,p", sreg);
-	  return;
+	  break;
 	}
       if (sreg == 0)
 	{
 	  macro_build (&offset_expr, likely ? "bgtzl" : "bgtz", "s,p", treg);
-	  return;
+	  break;
 	}
+      used_at = 1;
       macro_build (NULL, "slt", "d,v,t", AT, sreg, treg);
       macro_build (&offset_expr, likely ? "bnel" : "bne", "s,t,p", AT, 0);
       break;
@@ -4590,8 +4607,9 @@ macro (struct mips_cl_insn *ip)
 	{
 	  macro_build (&offset_expr, likely ? "bnel" : "bne",
 		       "s,t,p", 0, treg);
-	  return;
+	  break;
 	}
+      used_at = 1;
       macro_build (NULL, "sltu", "d,v,t", AT, sreg, treg);
       macro_build (&offset_expr, likely ? "bnel" : "bne", "s,t,p", AT, 0);
       break;
@@ -4642,7 +4660,7 @@ macro (struct mips_cl_insn *ip)
 	  }
 	macro_build ((expressionS *) NULL, s, fmt, treg, sreg, pos, size - 1);
       }
-      return;
+      break;
 
     case M_DINS:
       {
@@ -4691,7 +4709,7 @@ macro (struct mips_cl_insn *ip)
 	macro_build ((expressionS *) NULL, s, fmt, treg, sreg, pos,
 		     pos + size - 1);
       }
-      return;
+      break;
 
     case M_DDIV_3:
       dbl = 1;
@@ -4710,7 +4728,7 @@ macro (struct mips_cl_insn *ip)
 	    macro_build (NULL, "teq", "s,t,q", 0, 0, 7);
 	  else
 	    macro_build (NULL, "break", "c", 7);
-	  return;
+	  break;
 	}
 
       mips_emit_delays (TRUE);
@@ -4729,6 +4747,7 @@ macro (struct mips_cl_insn *ip)
 	  macro_build (NULL, "break", "c", 7);
 	}
       expr1.X_add_number = -1;
+      used_at = 1;
       load_register (AT, &expr1, dbl);
       expr1.X_add_number = mips_trap ? (dbl ? 12 : 8) : (dbl ? 20 : 16);
       macro_build (&expr1, "bne", "s,t,p", treg, AT);
@@ -4808,7 +4827,7 @@ macro (struct mips_cl_insn *ip)
 	    macro_build (NULL, "teq", "s,t,q", 0, 0, 7);
 	  else
 	    macro_build (NULL, "break", "c", 7);
-	  return;
+	  break;
 	}
       if (imm_expr.X_op == O_constant && imm_expr.X_add_number == 1)
 	{
@@ -4816,7 +4835,7 @@ macro (struct mips_cl_insn *ip)
 	    move_register (dreg, sreg);
 	  else
 	    move_register (dreg, 0);
-	  return;
+	  break;
 	}
       if (imm_expr.X_op == O_constant
 	  && imm_expr.X_add_number == -1
@@ -4828,9 +4847,10 @@ macro (struct mips_cl_insn *ip)
 	    }
 	  else
 	    move_register (dreg, 0);
-	  return;
+	  break;
 	}
 
+      used_at = 1;
       load_register (AT, &imm_expr, dbl);
       macro_build (NULL, s, "z,s,t", sreg, AT);
       macro_build (NULL, s2, "d", dreg);
@@ -4875,7 +4895,7 @@ macro (struct mips_cl_insn *ip)
 	  macro_build (NULL, "break", "c", 7);
 	}
       macro_build (NULL, s2, "d", dreg);
-      return;
+      break;
 
     case M_DLCA_AB:
       dbl = 1;
@@ -4902,7 +4922,7 @@ macro (struct mips_cl_insn *ip)
 	  macro_build (&offset_expr,
 		       (dbl || HAVE_64BIT_ADDRESSES) ? "daddiu" : "addiu",
 		       "t,r,j", treg, sreg, BFD_RELOC_LO16);
-	  return;
+	  break;
 	}
 
       if (!mips_opts.noat && (treg == breg))
@@ -5356,6 +5376,7 @@ macro (struct mips_cl_insn *ip)
 			   AT, AT, BFD_RELOC_LO16);
 	      macro_build (NULL, ADDRESS_ADD_INSN, "d,v,t",
 			   tempreg, tempreg, AT);
+	      used_at = 1;
 	    }
 	  relax_end ();
 	}
@@ -5480,10 +5501,6 @@ macro (struct mips_cl_insn *ip)
 
 	  macro_build (NULL, s, "d,v,t", treg, tempreg, breg);
 	}
-
-      if (!used_at)
-	return;
-
       break;
 
     case M_J_A:
@@ -5494,7 +5511,7 @@ macro (struct mips_cl_insn *ip)
 	macro_build (&offset_expr, "j", "a");
       else
 	macro_build (&offset_expr, "b", "p");
-      return;
+      break;
 
       /* The jal instructions must be handled as macros because when
 	 generating PIC code they expand to multi-instruction
@@ -5540,7 +5557,7 @@ macro (struct mips_cl_insn *ip)
       else
 	abort ();
 
-      return;
+      break;
 
     case M_JAL_A:
       if (mips_pic == NO_PIC)
@@ -5677,7 +5694,7 @@ macro (struct mips_cl_insn *ip)
       else
 	abort ();
 
-      return;
+      break;
 
     case M_LB_AB:
       s = "lb";
@@ -5726,7 +5743,7 @@ macro (struct mips_cl_insn *ip)
       if (mips_opts.arch == CPU_R4650)
 	{
 	  as_bad (_("opcode not supported on this processor"));
-	  return;
+	  break;
 	}
       s = "ldc1";
       /* Itbl support may require additional care here.  */
@@ -5759,23 +5776,14 @@ macro (struct mips_cl_insn *ip)
     case M_LWU_AB:
       s = "lwu";
     ld:
-      /* XXX Why don't we try to use AT for all expansions? */
-      if (!mips_opts.noat && (breg == treg || coproc || lr))
+      if (breg == treg || coproc || lr)
 	{
 	  tempreg = AT;
 	  used_at = 1;
 	}
-      else if (breg == treg
-	       && (offset_expr.X_op != O_constant
-		   || (offset_expr.X_add_number > 0x7fff
-		       || offset_expr.X_add_number < -0x8000)))
-	{
-	  as_bad(_("load expansion needs $at register"));
-	}
       else
 	{
 	  tempreg = treg;
-	  used_at = 0;
 	}
       goto ld_st;
     case M_SB_AB:
@@ -5823,7 +5831,7 @@ macro (struct mips_cl_insn *ip)
       if (mips_opts.arch == CPU_R4650)
 	{
 	  as_bad (_("opcode not supported on this processor"));
-	  return;
+	  break;
 	}
       s = "sdc1";
       coproc = 1;
@@ -5845,23 +5853,8 @@ macro (struct mips_cl_insn *ip)
     case M_SDR_AB:
       s = "sdr";
     st:
-      if (!mips_opts.noat)
-	{
-	  tempreg = AT;
-	  used_at = 1;
-	}
-      else if (breg == treg
-	       && (offset_expr.X_op != O_constant
-		   || (offset_expr.X_add_number > 0x7fff
-		       || offset_expr.X_add_number < -0x8000)))
-	{
-	  as_bad(_("store expansion needs $at register"));
-	}
-      else
-	{
-	  tempreg = treg;
-	  used_at = 0;
-	}
+      tempreg = AT;
+      used_at = 1;
     ld_st:
       /* Itbl support may require additional care here.  */
       if (mask == M_LWC1_AB
@@ -6025,11 +6018,7 @@ macro (struct mips_cl_insn *ip)
 		  macro_build (&offset_expr, s, fmt, treg,
 			       BFD_RELOC_LO16, tempreg);
 		}
-
-	      if (used_at)
-		break;
-
-	      return;
+	      break;
 	    }
 
 	  if (offset_expr.X_op == O_constant
@@ -6107,10 +6096,6 @@ macro (struct mips_cl_insn *ip)
 			     tempreg, tempreg, breg);
 	      macro_build (&offset_expr, s, fmt, treg,
 			   BFD_RELOC_MIPS_GOT_OFST, tempreg);
-
-	      if (!used_at)
-		return;
-
 	      break;
 	    }
 	  expr1.X_add_number = offset_expr.X_add_number;
@@ -6222,23 +6207,21 @@ macro (struct mips_cl_insn *ip)
       else
 	abort ();
 
-      if (!used_at)
-	return;
-
       break;
 
     case M_LI:
     case M_LI_S:
       load_register (treg, &imm_expr, 0);
-      return;
+      break;
 
     case M_DLI:
       load_register (treg, &imm_expr, 1);
-      return;
+      break;
 
     case M_LI_SS:
       if (imm_expr.X_op == O_constant)
 	{
+	  used_at = 1;
 	  load_register (AT, &imm_expr, 0);
 	  macro_build (NULL, "mtc1", "t,G", AT, treg);
 	  break;
@@ -6252,7 +6235,7 @@ macro (struct mips_cl_insn *ip)
 		  && offset_expr.X_add_number == 0);
 	  macro_build (&offset_expr, "lwc1", "T,o(b)", treg,
 		       BFD_RELOC_MIPS_LITERAL, mips_gp_register);
-	  return;
+	  break;
 	}
 
     case M_LI_D:
@@ -6292,7 +6275,7 @@ macro (struct mips_cl_insn *ip)
 		    }
 		}
 	    }
-	  return;
+	  break;
 	}
 
       /* We know that sym is in the .rdata section.  First we get the
@@ -6300,20 +6283,26 @@ macro (struct mips_cl_insn *ip)
       if (mips_pic == NO_PIC)
 	{
 	  macro_build_lui (&offset_expr, AT);
+	  used_at = 1;
 	}
       else if (mips_pic == SVR4_PIC)
 	{
 	  macro_build (&offset_expr, ADDRESS_LOAD_INSN, "t,o(b)", AT,
 		       BFD_RELOC_MIPS_GOT16, mips_gp_register);
+	  used_at = 1;
 	}
       else
 	abort ();
 
       /* Now we load the register(s).  */
       if (HAVE_64BIT_GPRS)
-	macro_build (&offset_expr, "ld", "t,o(b)", treg, BFD_RELOC_LO16, AT);
+	{
+	  used_at = 1;
+	  macro_build (&offset_expr, "ld", "t,o(b)", treg, BFD_RELOC_LO16, AT);
+	}
       else
 	{
+	  used_at = 1;
 	  macro_build (&offset_expr, "lw", "t,o(b)", treg, BFD_RELOC_LO16, AT);
 	  if (treg != RA)
 	    {
@@ -6334,6 +6323,7 @@ macro (struct mips_cl_insn *ip)
          OFFSET_EXPR.  */
       if (imm_expr.X_op == O_constant || imm_expr.X_op == O_big)
 	{
+	  used_at = 1;
 	  load_register (AT, &imm_expr, HAVE_64BIT_FPRS);
 	  if (HAVE_64BIT_FPRS)
 	    {
@@ -6364,7 +6354,7 @@ macro (struct mips_cl_insn *ip)
 	    {
 	      macro_build (&offset_expr, "ldc1", "T,o(b)", treg,
 			   BFD_RELOC_MIPS_LITERAL, mips_gp_register);
-	      return;
+	      break;
 	    }
 	  breg = mips_gp_register;
 	  r = BFD_RELOC_MIPS_LITERAL;
@@ -6373,6 +6363,7 @@ macro (struct mips_cl_insn *ip)
       else
 	{
 	  assert (strcmp (s, RDATA_SECTION_NAME) == 0);
+	  used_at = 1;
 	  if (mips_pic == SVR4_PIC)
 	    macro_build (&offset_expr, ADDRESS_LOAD_INSN, "t,o(b)", AT,
 			 BFD_RELOC_MIPS_GOT16, mips_gp_register);
@@ -6397,7 +6388,7 @@ macro (struct mips_cl_insn *ip)
       if (mips_opts.arch == CPU_R4650)
 	{
 	  as_bad (_("opcode not supported on this processor"));
-	  return;
+	  break;
 	}
       /* Even on a big endian machine $fn comes before $fn+1.  We have
 	 to adjust when loading from memory.  */
@@ -6411,9 +6402,6 @@ macro (struct mips_cl_insn *ip)
       offset_expr.X_add_number += 4;
       macro_build (&offset_expr, "lwc1", "T,o(b)",
 		   target_big_endian ? treg : treg + 1, r, breg);
-
-      if (breg != AT)
-	return;
       break;
 
     case M_L_DAB:
@@ -6431,7 +6419,7 @@ macro (struct mips_cl_insn *ip)
       if (mips_opts.arch == CPU_R4650)
 	{
 	  as_bad (_("opcode not supported on this processor"));
-	  return;
+	  break;
 	}
       /* Itbl support may require additional care here.  */
       coproc = 1;
@@ -6449,7 +6437,7 @@ macro (struct mips_cl_insn *ip)
       if (mips_opts.arch == CPU_R4650)
 	{
 	  as_bad (_("opcode not supported on this processor"));
-	  return;
+	  break;
 	}
 
       if (mips_opts.isa != ISA_MIPS1)
@@ -6572,6 +6560,7 @@ macro (struct mips_cl_insn *ip)
 		  offset_expr.X_op = O_constant;
 		}
 	    }
+	  used_at = 1;
 	  macro_build_lui (&offset_expr, AT);
 	  if (breg != 0)
 	    macro_build (NULL, ADDRESS_ADD_INSN, "d,v,t", AT, breg, AT);
@@ -6711,9 +6700,6 @@ macro (struct mips_cl_insn *ip)
       else
 	abort ();
 
-      if (!used_at)
-	return;
-
       break;
 
     case M_LD_OB:
@@ -6726,7 +6712,7 @@ macro (struct mips_cl_insn *ip)
       macro_build (&offset_expr, s, "t,o(b)", treg, BFD_RELOC_LO16, breg);
       offset_expr.X_add_number += 4;
       macro_build (&offset_expr, s, "t,o(b)", treg + 1, BFD_RELOC_LO16, breg);
-      return;
+      break;
 
    /* New code added to support COPZ instructions.
       This code builds table entries out of the macros in mip_opcodes.
@@ -6760,11 +6746,11 @@ macro (struct mips_cl_insn *ip)
       /* For now we just do C (same as Cz).  The parameter will be
          stored in insn_opcode by mips_ip.  */
       macro_build (NULL, s, "C", ip->insn_opcode);
-      return;
+      break;
 
     case M_MOVE:
       move_register (dreg, sreg);
-      return;
+      break;
 
 #ifdef LOSING_COMPILER
     default:
@@ -6783,13 +6769,13 @@ macro (struct mips_cl_insn *ip)
 	  s2 = "cop3";
 	  coproc = ITBL_DECODE_PNUM (immed_expr);;
 	  macro_build (&immed_expr, s, "C");
-	  return;
+	  break;
 	}
       macro2 (ip);
-      return;
+      break;
     }
-  if (mips_opts.noat)
-    as_warn (_("Macro used $at after \".set noat\""));
+  if (mips_opts.noat && used_at)
+    as_bad (_("Macro used $at after \".set noat\""));
 }
 
 static void
@@ -6831,7 +6817,7 @@ macro2 (struct mips_cl_insn *ip)
     case M_MUL:
       macro_build (NULL, dbl ? "dmultu" : "multu", "s,t", sreg, treg);
       macro_build (NULL, "mflo", "d", dreg);
-      return;
+      break;
 
     case M_DMUL_I:
       dbl = 1;
@@ -6839,6 +6825,7 @@ macro2 (struct mips_cl_insn *ip)
       /* The MIPS assembler some times generates shifts and adds.  I'm
 	 not trying to be that fancy. GCC should do this for us
 	 anyway.  */
+      used_at = 1;
       load_register (AT, &imm_expr, dbl);
       macro_build (NULL, dbl ? "dmult" : "mult", "s,t", sreg, AT);
       macro_build (NULL, "mflo", "d", dreg);
@@ -6857,6 +6844,7 @@ macro2 (struct mips_cl_insn *ip)
       mips_emit_delays (TRUE);
       ++mips_opts.noreorder;
       mips_any_noreorder = 1;
+      used_at = 1;
       if (imm)
 	load_register (AT, &imm_expr, dbl);
       macro_build (NULL, dbl ? "dmult" : "mult", "s,t", sreg, imm ? AT : treg);
@@ -6889,6 +6877,7 @@ macro2 (struct mips_cl_insn *ip)
       mips_emit_delays (TRUE);
       ++mips_opts.noreorder;
       mips_any_noreorder = 1;
+      used_at = 1;
       if (imm)
 	load_register (AT, &imm_expr, dbl);
       macro_build (NULL, dbl ? "dmultu" : "multu", "s,t",
@@ -6921,10 +6910,9 @@ macro2 (struct mips_cl_insn *ip)
 	    }
 	  macro_build (NULL, "dnegu", "d,w", tempreg, treg);
 	  macro_build (NULL, "drorv", "d,t,s", dreg, sreg, tempreg);
-	  if (used_at)
-	    break;
-	  return;
+	  break;
 	}
+      used_at = 1;
       macro_build (NULL, "dsubu", "d,v,t", AT, 0, treg);
       macro_build (NULL, "dsrlv", "d,t,s", AT, sreg, AT);
       macro_build (NULL, "dsllv", "d,t,s", dreg, sreg, treg);
@@ -6945,10 +6933,9 @@ macro2 (struct mips_cl_insn *ip)
 	    }
 	  macro_build (NULL, "negu", "d,w", tempreg, treg);
 	  macro_build (NULL, "rorv", "d,t,s", dreg, sreg, tempreg);
-	  if (used_at)
-	    break;
-	  return;
+	  break;
 	}
+      used_at = 1;
       macro_build (NULL, "subu", "d,v,t", AT, 0, treg);
       macro_build (NULL, "srlv", "d,t,s", AT, sreg, AT);
       macro_build (NULL, "sllv", "d,t,s", dreg, sreg, treg);
@@ -6970,16 +6957,17 @@ macro2 (struct mips_cl_insn *ip)
 	      macro_build (NULL, "dror32", "d,w,<", dreg, sreg, rot - 32);
 	    else
 	      macro_build (NULL, "dror", "d,w,<", dreg, sreg, rot);
-	    return;
+	    break;
 	  }
 	if (rot == 0)
 	  {
 	    macro_build (NULL, "dsrl", "d,w,<", dreg, sreg, 0);
-	    return;
+	    break;
 	  }
 	l = (rot < 0x20) ? "dsll" : "dsll32";
 	r = ((0x40 - rot) < 0x20) ? "dsrl" : "dsrl32";
 	rot &= 0x1f;
+	used_at = 1;
 	macro_build (NULL, l, "d,w,<", AT, sreg, rot);
 	macro_build (NULL, r, "d,w,<", dreg, sreg, (0x20 - rot) & 0x1f);
 	macro_build (NULL, "or", "d,v,t", dreg, dreg, AT);
@@ -6996,13 +6984,14 @@ macro2 (struct mips_cl_insn *ip)
 	if (ISA_HAS_ROR (mips_opts.isa) || CPU_HAS_ROR (mips_opts.arch))
 	  {
 	    macro_build (NULL, "ror", "d,w,<", dreg, sreg, (32 - rot) & 0x1f);
-	    return;
+	    break;
 	  }
 	if (rot == 0)
 	  {
 	    macro_build (NULL, "srl", "d,w,<", dreg, sreg, 0);
-	    return;
+	    break;
 	  }
+	used_at = 1;
 	macro_build (NULL, "sll", "d,w,<", AT, sreg, rot);
 	macro_build (NULL, "srl", "d,w,<", dreg, sreg, (0x20 - rot) & 0x1f);
 	macro_build (NULL, "or", "d,v,t", dreg, dreg, AT);
@@ -7013,8 +7002,9 @@ macro2 (struct mips_cl_insn *ip)
       if (ISA_HAS_DROR (mips_opts.isa) || CPU_HAS_DROR (mips_opts.arch))
 	{
 	  macro_build (NULL, "drorv", "d,t,s", dreg, sreg, treg);
-	  return;
+	  break;
 	}
+      used_at = 1;
       macro_build (NULL, "dsubu", "d,v,t", AT, 0, treg);
       macro_build (NULL, "dsllv", "d,t,s", AT, sreg, AT);
       macro_build (NULL, "dsrlv", "d,t,s", dreg, sreg, treg);
@@ -7025,8 +7015,9 @@ macro2 (struct mips_cl_insn *ip)
       if (ISA_HAS_ROR (mips_opts.isa) || CPU_HAS_ROR (mips_opts.arch))
 	{
 	  macro_build (NULL, "rorv", "d,t,s", dreg, sreg, treg);
-	  return;
+	  break;
 	}
+      used_at = 1;
       macro_build (NULL, "subu", "d,v,t", AT, 0, treg);
       macro_build (NULL, "sllv", "d,t,s", AT, sreg, AT);
       macro_build (NULL, "srlv", "d,t,s", dreg, sreg, treg);
@@ -7047,16 +7038,17 @@ macro2 (struct mips_cl_insn *ip)
 	      macro_build (NULL, "dror32", "d,w,<", dreg, sreg, rot - 32);
 	    else
 	      macro_build (NULL, "dror", "d,w,<", dreg, sreg, rot);
-	    return;
+	    break;
 	  }
 	if (rot == 0)
 	  {
 	    macro_build (NULL, "dsrl", "d,w,<", dreg, sreg, 0);
-	    return;
+	    break;
 	  }
 	r = (rot < 0x20) ? "dsrl" : "dsrl32";
 	l = ((0x40 - rot) < 0x20) ? "dsll" : "dsll32";
 	rot &= 0x1f;
+	used_at = 1;
 	macro_build (NULL, r, "d,w,<", AT, sreg, rot);
 	macro_build (NULL, l, "d,w,<", dreg, sreg, (0x20 - rot) & 0x1f);
 	macro_build (NULL, "or", "d,v,t", dreg, dreg, AT);
@@ -7073,13 +7065,14 @@ macro2 (struct mips_cl_insn *ip)
 	if (ISA_HAS_ROR (mips_opts.isa) || CPU_HAS_ROR (mips_opts.arch))
 	  {
 	    macro_build (NULL, "ror", "d,w,<", dreg, sreg, rot);
-	    return;
+	    break;
 	  }
 	if (rot == 0)
 	  {
 	    macro_build (NULL, "srl", "d,w,<", dreg, sreg, 0);
-	    return;
+	    break;
 	  }
+	used_at = 1;
 	macro_build (NULL, "srl", "d,w,<", AT, sreg, rot);
 	macro_build (NULL, "sll", "d,w,<", dreg, sreg, (0x20 - rot) & 0x1f);
 	macro_build (NULL, "or", "d,v,t", dreg, dreg, AT);
@@ -7090,7 +7083,7 @@ macro2 (struct mips_cl_insn *ip)
       if (mips_opts.arch == CPU_R4650)
 	{
 	  as_bad (_("opcode not supported on this processor"));
-	  return;
+	  break;
 	}
       assert (mips_opts.isa == ISA_MIPS1);
       /* Even on a big endian machine $fn comes before $fn+1.  We have
@@ -7100,7 +7093,7 @@ macro2 (struct mips_cl_insn *ip)
       offset_expr.X_add_number += 4;
       macro_build (&offset_expr, "swc1", "T,o(b)",
 		   target_big_endian ? treg : treg + 1, BFD_RELOC_LO16, breg);
-      return;
+      break;
 
     case M_SEQ:
       if (sreg == 0)
@@ -7112,20 +7105,20 @@ macro2 (struct mips_cl_insn *ip)
 	  macro_build (NULL, "xor", "d,v,t", dreg, sreg, treg);
 	  macro_build (&expr1, "sltiu", "t,r,j", dreg, dreg, BFD_RELOC_LO16);
 	}
-      return;
+      break;
 
     case M_SEQ_I:
       if (imm_expr.X_op == O_constant && imm_expr.X_add_number == 0)
 	{
 	  macro_build (&expr1, "sltiu", "t,r,j", dreg, sreg, BFD_RELOC_LO16);
-	  return;
+	  break;
 	}
       if (sreg == 0)
 	{
 	  as_warn (_("Instruction %s: result is always false"),
 		   ip->insn_mo->name);
 	  move_register (dreg, 0);
-	  return;
+	  break;
 	}
       if (imm_expr.X_op == O_constant
 	  && imm_expr.X_add_number >= 0
@@ -7148,9 +7141,7 @@ macro2 (struct mips_cl_insn *ip)
 	  used_at = 1;
 	}
       macro_build (&expr1, "sltiu", "t,r,j", dreg, dreg, BFD_RELOC_LO16);
-      if (used_at)
-	break;
-      return;
+      break;
 
     case M_SGE:		/* sreg >= treg <==> not (sreg < treg) */
       s = "slt";
@@ -7160,7 +7151,7 @@ macro2 (struct mips_cl_insn *ip)
     sge:
       macro_build (NULL, s, "d,v,t", dreg, sreg, treg);
       macro_build (&expr1, "xori", "t,r,i", dreg, dreg, BFD_RELOC_LO16);
-      return;
+      break;
 
     case M_SGE_I:		/* sreg >= I <==> not (sreg < I) */
     case M_SGEU_I:
@@ -7179,9 +7170,7 @@ macro2 (struct mips_cl_insn *ip)
 	  used_at = 1;
 	}
       macro_build (&expr1, "xori", "t,r,i", dreg, dreg, BFD_RELOC_LO16);
-      if (used_at)
-	break;
-      return;
+      break;
 
     case M_SGT:		/* sreg > treg  <==>  treg < sreg */
       s = "slt";
@@ -7190,7 +7179,7 @@ macro2 (struct mips_cl_insn *ip)
       s = "sltu";
     sgt:
       macro_build (NULL, s, "d,v,t", dreg, treg, sreg);
-      return;
+      break;
 
     case M_SGT_I:		/* sreg > I  <==>  I < sreg */
       s = "slt";
@@ -7198,6 +7187,7 @@ macro2 (struct mips_cl_insn *ip)
     case M_SGTU_I:
       s = "sltu";
     sgti:
+      used_at = 1;
       load_register (AT, &imm_expr, HAVE_64BIT_GPRS);
       macro_build (NULL, s, "d,v,t", dreg, AT, sreg);
       break;
@@ -7210,7 +7200,7 @@ macro2 (struct mips_cl_insn *ip)
     sle:
       macro_build (NULL, s, "d,v,t", dreg, treg, sreg);
       macro_build (&expr1, "xori", "t,r,i", dreg, dreg, BFD_RELOC_LO16);
-      return;
+      break;
 
     case M_SLE_I:	/* sreg <= I <==> I >= sreg <==> not (I < sreg) */
       s = "slt";
@@ -7218,6 +7208,7 @@ macro2 (struct mips_cl_insn *ip)
     case M_SLEU_I:
       s = "sltu";
     slei:
+      used_at = 1;
       load_register (AT, &imm_expr, HAVE_64BIT_GPRS);
       macro_build (NULL, s, "d,v,t", dreg, AT, sreg);
       macro_build (&expr1, "xori", "t,r,i", dreg, dreg, BFD_RELOC_LO16);
@@ -7229,8 +7220,9 @@ macro2 (struct mips_cl_insn *ip)
 	  && imm_expr.X_add_number < 0x8000)
 	{
 	  macro_build (&imm_expr, "slti", "t,r,j", dreg, sreg, BFD_RELOC_LO16);
-	  return;
+	  break;
 	}
+      used_at = 1;
       load_register (AT, &imm_expr, HAVE_64BIT_GPRS);
       macro_build (NULL, "slt", "d,v,t", dreg, sreg, AT);
       break;
@@ -7242,8 +7234,9 @@ macro2 (struct mips_cl_insn *ip)
 	{
 	  macro_build (&imm_expr, "sltiu", "t,r,j", dreg, sreg,
 		       BFD_RELOC_LO16);
-	  return;
+	  break;
 	}
+      used_at = 1;
       load_register (AT, &imm_expr, HAVE_64BIT_GPRS);
       macro_build (NULL, "sltu", "d,v,t", dreg, sreg, AT);
       break;
@@ -7258,13 +7251,13 @@ macro2 (struct mips_cl_insn *ip)
 	  macro_build (NULL, "xor", "d,v,t", dreg, sreg, treg);
 	  macro_build (NULL, "sltu", "d,v,t", dreg, 0, dreg);
 	}
-      return;
+      break;
 
     case M_SNE_I:
       if (imm_expr.X_op == O_constant && imm_expr.X_add_number == 0)
 	{
 	  macro_build (NULL, "sltu", "d,v,t", dreg, 0, sreg);
-	  return;
+	  break;
 	}
       if (sreg == 0)
 	{
@@ -7272,7 +7265,7 @@ macro2 (struct mips_cl_insn *ip)
 		   ip->insn_mo->name);
 	  macro_build (&expr1, HAVE_32BIT_GPRS ? "addiu" : "daddiu", "t,r,j",
 		       dreg, 0, BFD_RELOC_LO16);
-	  return;
+	  break;
 	}
       if (imm_expr.X_op == O_constant
 	  && imm_expr.X_add_number >= 0
@@ -7295,9 +7288,7 @@ macro2 (struct mips_cl_insn *ip)
 	  used_at = 1;
 	}
       macro_build (NULL, "sltu", "d,v,t", dreg, 0, dreg);
-      if (used_at)
-	break;
-      return;
+      break;
 
     case M_DSUB_I:
       dbl = 1;
@@ -7309,8 +7300,9 @@ macro2 (struct mips_cl_insn *ip)
 	  imm_expr.X_add_number = -imm_expr.X_add_number;
 	  macro_build (&imm_expr, dbl ? "daddi" : "addi", "t,r,j",
 		       dreg, sreg, BFD_RELOC_LO16);
-	  return;
+	  break;
 	}
+      used_at = 1;
       load_register (AT, &imm_expr, dbl);
       macro_build (NULL, dbl ? "dsub" : "sub", "d,v,t", dreg, sreg, AT);
       break;
@@ -7325,8 +7317,9 @@ macro2 (struct mips_cl_insn *ip)
 	  imm_expr.X_add_number = -imm_expr.X_add_number;
 	  macro_build (&imm_expr, dbl ? "daddiu" : "addiu", "t,r,j",
 		       dreg, sreg, BFD_RELOC_LO16);
-	  return;
+	  break;
 	}
+      used_at = 1;
       load_register (AT, &imm_expr, dbl);
       macro_build (NULL, dbl ? "dsubu" : "subu", "d,v,t", dreg, sreg, AT);
       break;
@@ -7349,6 +7342,7 @@ macro2 (struct mips_cl_insn *ip)
     case M_TNE_I:
       s = "tne";
     trap:
+      used_at = 1;
       load_register (AT, &imm_expr, HAVE_64BIT_GPRS);
       macro_build (NULL, s, "s,t", sreg, AT);
       break;
@@ -7356,6 +7350,7 @@ macro2 (struct mips_cl_insn *ip)
     case M_TRUNCWS:
     case M_TRUNCWD:
       assert (mips_opts.isa == ISA_MIPS1);
+      used_at = 1;
       sreg = (ip->insn_opcode >> 11) & 0x1f;	/* floating reg */
       dreg = (ip->insn_opcode >> 06) & 0x1f;	/* floating reg */
 
@@ -7388,6 +7383,7 @@ macro2 (struct mips_cl_insn *ip)
     case M_ULHU:
       s = "lbu";
     ulh:
+      used_at = 1;
       if (offset_expr.X_add_number >= 0x7fff)
 	as_bad (_("operand overflow"));
       if (! target_big_endian)
@@ -7417,7 +7413,10 @@ macro2 (struct mips_cl_insn *ip)
       if (treg != breg)
 	tempreg = treg;
       else
-	tempreg = AT;
+	{
+	  used_at = 1;
+	  tempreg = AT;
+	}
       if (! target_big_endian)
 	offset_expr.X_add_number += off;
       macro_build (&offset_expr, s, "t,o(b)", tempreg, BFD_RELOC_LO16, breg);
@@ -7429,7 +7428,7 @@ macro2 (struct mips_cl_insn *ip)
 
       /* If necessary, move the result in tempreg the final destination.  */
       if (treg == tempreg)
-        return;
+        break;
       /* Protect second load's delay slot.  */
       load_delay_nop ();
       move_register (treg, tempreg);
@@ -7481,6 +7480,7 @@ macro2 (struct mips_cl_insn *ip)
       break;
 
     case M_USH:
+      used_at = 1;
       if (offset_expr.X_add_number >= 0x7fff)
 	as_bad (_("operand overflow"));
       if (target_big_endian)
@@ -7514,7 +7514,7 @@ macro2 (struct mips_cl_insn *ip)
       else
 	offset_expr.X_add_number += off;
       macro_build (&offset_expr, s2, "t,o(b)", treg, BFD_RELOC_LO16, breg);
-      return;
+      break;
 
     case M_USD_A:
       s = "sdl";
@@ -7571,8 +7571,8 @@ macro2 (struct mips_cl_insn *ip)
       as_bad (_("Macro %s not implemented yet"), ip->insn_mo->name);
       break;
     }
-  if (mips_opts.noat)
-    as_warn (_("Macro used $at after \".set noat\""));
+  if (mips_opts.noat && used_at)
+    as_bad (_("Macro used $at after \".set noat\""));
 }
 
 /* Implement macros in mips16 mode.  */
@@ -7662,7 +7662,7 @@ mips16_macro (struct mips_cl_insn *ip)
     case M_MUL:
       macro_build (NULL, dbl ? "dmultu" : "multu", "x,y", xreg, yreg);
       macro_build (NULL, "mflo", "x", zreg);
-      return;
+      break;
 
     case M_DSUBU_I:
       dbl = 1;

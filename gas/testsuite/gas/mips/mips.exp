@@ -738,4 +738,12 @@ if { [istarget mips*-*-*] } then {
 	run_dump_test "macro-warn-1-n32"
 	run_dump_test "macro-warn-2-n32"
     }
+
+    run_dump_test "noat-1"
+    run_list_test "noat-2" ""
+    run_list_test "noat-3" ""
+    run_list_test "noat-4" ""
+    run_list_test "noat-5" ""
+    run_list_test "noat-6" ""
+    run_list_test "noat-7" ""
 }

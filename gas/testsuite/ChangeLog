@@ -1,3 +1,22 @@
+2005-02-18  Thiemo Seufer  <seufer@csv.ica.uni-stuttgart.de>
+
+	* gas/mips/noat-1.s, gas/mips/noat-1.d, gas/mips/noat-2.s,
+	gas/mips/noat2.l, gas/mips/noat-3.s, gas/mips/noat-3.l,
+	gas/mips/noat-4.s, gas/mips/noat-4.l, gas/mips/noat-5.s,
+	gas/mips/noat-5.l, gas/mips/noat-6.s, gas/mips/noat-6.l,
+	gas/mips/noat-7.s, gas/mips/noat-7.l: New files, testcases for
+	.set noat in macro expansions.
+	* gas/mips/mips.exp: Run new testcases.
+	* gas/mips/rol-hw.d, gas/mips/rol-hw.l, gas/mips/rol.d,
+	gas/mips/rol.l, gas/mips/rol.s, gas/mips/rol64-hw.d,
+	gas/mips/rol64-hw.l, gas/mips/rol64.d, gas/mips/rol64.l,
+	gas/mips/rol64.s, gas/mips/uld2-eb.d, gas/mips/uld2-el.d,
+	gas/mips/uld2.l, gas/mips/uld2.s, gas/mips/ulh2-eb.d,
+	gas/mips/ulh2-el.d, gas/mips/ulh2.l, gas/mips/ulh2.s,
+	gas/mips/ulw2-eb-ilocks.d, gas/mips/ulw2-eb.d,
+	gas/mips/ulw2-el-ilocks.d, gas/mips/ulw2-el.d, gas/mips/ulw2.l,
+	gas/mips/ulw2.s: Don't try to test .set noat.
+
 2005-02-17  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/ia64/hint.b-err.l: New file.
