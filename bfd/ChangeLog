@@ -1,3 +1,22 @@
+2005-01-17  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* dwarf2.c (dwarf2_debug): Move info_ptr_unit to ...
+	(comp_unit): Here.
+	(read_unsigned_leb128): Removed.
+	(read_signed_leb128): Removed.
+	(find_abstract_instance_name): Updated.
+	(parse_comp_unit): Accept info_ptr_unit.
+	(_bfd_dwarf2_find_nearest_line): Set info_ptr_unit for each
+	comp unit and pass it to parse_comp_unit.
+
+	* elf-eh-frame.c (read_unsigned_leb128): Moved to ...
+	(read_signed_leb128): Moved to ...
+	* libbfd.c: Here.
+
+	* libbfd-in.h (read_unsigned_leb128): New prototype.
+	(read_signed_leb128): Likewise.
+	* libbfd.h: Regenerated.
+
 2005-01-17  Andrew Stubbs  <andrew.stubbs@st.com>
 	    Nick Clifton   <nickc@redhat.com>
 

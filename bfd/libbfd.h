@@ -691,6 +691,9 @@ extern void bfd_section_already_linked_table_traverse
   (bfd_boolean (*) (struct bfd_section_already_linked_hash_entry *,
 		    void *), void *);
 
+extern bfd_vma read_unsigned_leb128 (bfd *, char *, unsigned int *);
+extern bfd_signed_vma read_signed_leb128 (bfd *, char *, unsigned int *);
+
 /* Extracted from init.c.  */
 /* Extracted from libbfd.c.  */
 bfd_boolean bfd_write_bigendian_4byte_int (bfd *, unsigned int);

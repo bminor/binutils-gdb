@@ -84,10 +84,6 @@ struct dwarf2_debug
      into a buffer yet.  */
   char* info_ptr;
 
-  /* Preserve the original value of info_ptr for the current
-     comp_unit so we can find a given entry by its reference. */
-  char* info_ptr_unit;
-
   /* Pointer to the end of the .debug_info section memory buffer.  */
   char* info_ptr_end;
 
@@ -154,6 +150,10 @@ struct comp_unit
 
   /* TRUE if there is a line number table associated with this comp. unit.  */
   int stmtlist;
+
+  /* Pointer to the current comp_unit so that we can find a given entry
+     by its reference.  */
+  char *info_ptr_unit;
 
   /* The offset into .debug_line of the line number table.  */
   unsigned long line_offset;
@@ -319,67 +319,6 @@ read_indirect_string (struct comp_unit* unit,
   if (*buf == '\0')
     return NULL;
   return buf;
-}
-
-static unsigned int
-read_unsigned_leb128 (bfd *abfd ATTRIBUTE_UNUSED,
-		      char *buf,
-		      unsigned int *bytes_read_ptr)
-{
-  unsigned int  result;
-  unsigned int  num_read;
-  int           shift;
-  unsigned char byte;
-
-  result   = 0;
-  shift    = 0;
-  num_read = 0;
-
-  do
-    {
-      byte = bfd_get_8 (abfd, buf);
-      buf ++;
-      num_read ++;
-      result |= ((byte & 0x7f) << shift);
-      shift += 7;
-    }
-  while (byte & 0x80);
-
-  * bytes_read_ptr = num_read;
-
-  return result;
-}
-
-static int
-read_signed_leb128 (bfd *abfd ATTRIBUTE_UNUSED,
-		    char *buf,
-		    unsigned int * bytes_read_ptr)
-{
-  int           result;
-  int           shift;
-  int           num_read;
-  unsigned char byte;
-
-  result = 0;
-  shift = 0;
-  num_read = 0;
-
-  do
-    {
-      byte = bfd_get_8 (abfd, buf);
-      buf ++;
-      num_read ++;
-      result |= ((byte & 0x7f) << shift);
-      shift += 7;
-    }
-  while (byte & 0x80);
-
-  if ((shift < 32) && (byte & 0x40))
-    result |= -(1 << shift);
-
-  * bytes_read_ptr = num_read;
-
-  return result;
 }
 
 /* END VERBATIM */
@@ -1332,7 +1271,7 @@ find_abstract_instance_name (struct comp_unit *unit, bfd_uint64_t die_ref)
   struct attribute attr;
   char *name = 0;
 
-  info_ptr = unit->stash->info_ptr_unit + die_ref;
+  info_ptr = unit->info_ptr_unit + die_ref;
   abbrev_number = read_unsigned_leb128 (abfd, info_ptr, &bytes_read);
   info_ptr += bytes_read;
 
@@ -1478,6 +1417,7 @@ static struct comp_unit *
 parse_comp_unit (bfd *abfd,
 		 struct dwarf2_debug *stash,
 		 bfd_vma unit_length,
+		 char *info_ptr_unit,
 		 unsigned int offset_size)
 {
   struct comp_unit* unit;
@@ -1558,6 +1498,7 @@ parse_comp_unit (bfd *abfd,
   unit->abbrevs = abbrevs;
   unit->end_ptr = end_ptr;
   unit->stash = stash;
+  unit->info_ptr_unit = info_ptr_unit;
 
   for (i = 0; i < abbrev->num_attrs; ++i)
     {
@@ -1803,7 +1744,6 @@ _bfd_dwarf2_find_nearest_line (bfd *abfd,
       if (stash->info_ptr == NULL)
 	return FALSE;
 
-      stash->info_ptr_unit = stash->info_ptr;
       stash->info_ptr_end = stash->info_ptr;
 
       for (msec = find_debug_info (abfd, NULL);
@@ -1851,6 +1791,7 @@ _bfd_dwarf2_find_nearest_line (bfd *abfd,
       bfd_vma length;
       bfd_boolean found;
       unsigned int offset_size = addr_size;
+      char *info_ptr_unit = stash->info_ptr;
 
       length = read_4_bytes (abfd, stash->info_ptr);
       /* A 0xffffff length is the DWARF3 way of indicating we use
@@ -1883,7 +1824,8 @@ _bfd_dwarf2_find_nearest_line (bfd *abfd,
 
       if (length > 0)
 	{
-	  each = parse_comp_unit (abfd, stash, length, offset_size);
+	  each = parse_comp_unit (abfd, stash, length, info_ptr_unit,
+				  offset_size);
 	  stash->info_ptr += length;
 
 	  if ((bfd_vma) (stash->info_ptr - stash->sec_info_ptr)
