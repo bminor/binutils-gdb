@@ -1,3 +1,8 @@
+2004-02-22  Mark Kettenis  <kettenis@gnu.org>
+
+	* x86-64-linux-nat.c (x86_64_linux_gregset32_reg_offset): Use
+	symbolic constants from <sys/reg.h> instead of hard-coded numbers.
+
 2004-02-21  Mark Kettenis  <kettenis@gnu.org>
 
 	* configure.host: Add i[34567]86-*-openbsd[0-2].* and

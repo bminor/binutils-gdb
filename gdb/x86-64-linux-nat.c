@@ -83,18 +83,18 @@ static int x86_64_linux_gregset64_reg_offset[] =
 /* From <sys/reg.h> on GNU/Linux i386.  */
 static int x86_64_linux_gregset32_reg_offset[] =
 {
-  10 * 8, 11 * 8,		/* %eax, %ecx */
-  12 * 8, 13 * 8,		/* %edx, %ebx */
-  19 * 8, 4 * 8,		/* %esp, %ebp */
-  13 * 8, 14 * 8,		/* %esi, %edi */
-  16 * 8, 18 * 8,		/* %eip, %eflags */
-  17 * 8, 20 * 8,		/* %cs, %ss */
-  23 * 8, 24 * 8,		/* %ds, %es */
-  25 * 4, 26 * 4,		/* %fs, %gs */
+  RAX * 8, RCX * 8,		/* %eax, %ecx */
+  RDX * 8, RBX * 8,		/* %edx, %ebx */
+  RSP * 8, RBP * 8,		/* %esp, %ebp */
+  RSI * 8, RDI * 8,		/* %esi, %edi */
+  RIP * 8, EFLAGS * 8,		/* %eip, %eflags */
+  CS * 8, SS * 8,		/* %cs, %ss */
+  DS * 8, ES * 8,		/* %ds, %es */
+  FS * 8, GS * 8,		/* %fs, %gs */
   -1, -1, -1, -1, -1, -1, -1, -1,
   -1, -1, -1, -1, -1, -1, -1, -1,
   -1, -1, -1, -1, -1, -1, -1, -1, -1,
-  15 * 8			/* "orig_eax" */
+  ORIG_RAX * 8			/* "orig_eax" */
 };
 
 /* Which ptrace request retrieves which registers?
