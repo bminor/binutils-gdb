@@ -1,5 +1,48 @@
 2002-10-16  Alan Modra  <amodra@bigpond.net.au>
 
+	* Makefile.am (BFD32_BACKENDS): Remove elfarmqnx-nabi.lo,
+	elf32-i386-fbsd.lo, elf32-i386qnx.lo, elf32-ppcqnx.lo, 
+	elf32-sh-lin.lo, elf32-sh64-lin.lo, elf32-sh-nbsd.lo,
+	elf32-sh64-nbsd.lo, elf32-shqnx.lo.  Add elf32-qnx.lo.
+	(BFD32_BACKENDS_CFILES): Likewise for corresponding C files.
+	(BFD64_BACKENDS): Remove elf64-sh64-lin.lo, elf64-sh64-nbsd.lo.
+	(BFD64_BACKENDS_CFILES): Likewise for corresponding C files.
+	(SOURCE_HFILES): Add elf32-qnx.h.
+	(BUILD_HFILES): Add bfdver.h.
+	Run "make dep-am".
+	* Makefile.in: Regenerate.
+	* configure.in Update bfd vector dependencies.
+	* configure: Regenerate.
+	* elf32-i386-fbsd.c: Delete.  Move code to elf32-i386.c.
+	* elf32-i386qnx.c: Likewise.
+	* elf32-ppcqnx.c: Delete.  Move code to elf32-ppc.c.
+	* elf32-sh-nbsd.c: Delete.  Move code to elf32-sh.c.
+	* elf32-sh-lin.c: Likewise.
+	* elf32-shqnx.c: Likewise.
+	* elf32-sh64-lin.c: Delete.  Move code to elf32-sh64.c.
+	* elf32-sh64-nbsd.c: Likewise.
+	* elf64-sh64-lin.c: Delete.  Move code to elf64-sh64.c.
+	* elf64-sh64-nbsd.c: Likewise.
+	* elfarmqnx-nabi.c: Delete.  Move code to elfarm-nabi.c.
+	* elf32-arm.h (ELF_MAXPAGESIZE): Always define.
+	* elf32-i386.c: Remove ELF_ARCH and ELF32_I386_C_INCLUDED tests.
+	* elf32-ppc.c: Remove ELF32_PPC_C_INCLUDED tests.
+	* elf32-qnx.h (elf_backend_set_nonloadable_filepos): Always define.
+	(elf_backend_is_contained_by_filepos): Likewise.
+	(elf_backend_copy_private_bfd_data_p): Likewise.
+	Globalize and move functions to..
+	* elf32-qnx.c: ..here.  New file.
+	* elf32-sh.c: Remove ELF_ARCH and ELF32_SH_C_INCLUDED tests.  Don't
+	emit target vectors when INCLUDE_SHMEDIA.
+	* elf32-sh64.c: Remove ELF_ARCH test.  Move TARGET_* etc. defines to
+	end of file.
+	* elf64-sh64.c: Remove ELF_ARCH test.
+	* elfarm-nabi.c: Remove ELFARM_NABI_C_INCLUDED test.
+	* po/BLD-POTFILES.in: Regenerate.
+	* po/SRC-POTFILES.in: Regenerate.
+
+2002-10-16  Alan Modra  <amodra@bigpond.net.au>
+
 	* elflink.h (elf_link_add_object_symbols): Error out on dynamic objects
 	loaded with --just-symbols.
 

@@ -105,6 +105,10 @@ static enum elf_reloc_type_class sh_elf_reloc_type_class
 #ifdef INCLUDE_SHMEDIA
 inline static void movi_shori_putval PARAMS ((bfd *, unsigned long, char *));
 #endif
+static boolean elf32_shlin_grok_prstatus
+  PARAMS ((bfd *abfd, Elf_Internal_Note *note));
+static boolean elf32_shlin_grok_psinfo
+  PARAMS ((bfd *abfd, Elf_Internal_Note *note));
 
 /* The name of the dynamic interpreter.  This is put in the .interp
    section.  */
@@ -7324,7 +7328,71 @@ sh_elf_reloc_type_class (rela)
     }
 }
 
-#ifndef ELF_ARCH
+/* Support for Linux core dump NOTE sections */
+static boolean
+elf32_shlin_grok_prstatus (abfd, note)
+     bfd *abfd;
+     Elf_Internal_Note *note;
+{
+  int offset;
+  unsigned int raw_size;
+
+  switch (note->descsz)
+    {
+      default:
+	return false;
+
+      case 168:		/* Linux/SH */
+	/* pr_cursig */
+	elf_tdata (abfd)->core_signal = bfd_get_16 (abfd, note->descdata + 12);
+
+	/* pr_pid */
+	elf_tdata (abfd)->core_pid = bfd_get_32 (abfd, note->descdata + 24);
+
+	/* pr_reg */
+	offset = 72;
+	raw_size = 92;
+
+	break;
+    }
+
+  /* Make a ".reg/999" section.  */
+  return _bfd_elfcore_make_pseudosection (abfd, ".reg",
+					  raw_size, note->descpos + offset);
+}
+
+static boolean
+elf32_shlin_grok_psinfo (abfd, note)
+     bfd *abfd;
+     Elf_Internal_Note *note;
+{
+  switch (note->descsz)
+    {
+      default:
+	return false;
+
+      case 124:		/* Linux/SH elf_prpsinfo */
+	elf_tdata (abfd)->core_program
+	 = _bfd_elfcore_strndup (abfd, note->descdata + 28, 16);
+	elf_tdata (abfd)->core_command
+	 = _bfd_elfcore_strndup (abfd, note->descdata + 44, 80);
+    }
+
+  /* Note that for some reason, a spurious space is tacked
+     onto the end of the args in some (at least one anyway)
+     implementations, so strip it off if it exists.  */
+
+  {
+    char *command = elf_tdata (abfd)->core_command;
+    int n = strlen (command);
+
+    if (0 < n && command[n - 1] == ' ')
+      command[n - 1] = '\0';
+  }
+
+  return true;
+}
+
 #define TARGET_BIG_SYM		bfd_elf32_sh_vec
 #define TARGET_BIG_NAME		"elf32-sh"
 #define TARGET_LITTLE_SYM	bfd_elf32_shl_vec
@@ -7334,7 +7402,6 @@ sh_elf_reloc_type_class (rela)
 #define ELF_MAXPAGESIZE		128
 
 #define elf_symbol_leading_char '_'
-#endif /* ELF_ARCH */
 
 #define bfd_elf32_bfd_reloc_type_lookup	sh_elf_reloc_type_lookup
 #define elf_info_to_howto		sh_elf_info_to_howto
@@ -7378,7 +7445,74 @@ sh_elf_reloc_type_class (rela)
 #define elf_backend_got_header_size	12
 #define elf_backend_plt_header_size	PLT_ENTRY_SIZE
 
-#ifndef ELF32_SH_C_INCLUDED
-#include "elf32-target.h"
-#endif
+#ifndef INCLUDE_SHMEDIA
 
+#include "elf32-target.h"
+
+/* QNX support.  */
+#include "elf32-qnx.h"
+
+#undef	TARGET_LITTLE_SYM 
+#define	TARGET_LITTLE_SYM		bfd_elf32_shlqnx_vec
+#undef	TARGET_LITTLE_NAME
+#define	TARGET_LITTLE_NAME		"elf32-shl-nto"
+#undef	TARGET_BIG_SYM
+#define	TARGET_BIG_SYM			bfd_elf32_shqnx_vec
+#undef	TARGET_BIG_NAME
+#define	TARGET_BIG_NAME			"elf32-sh-nto"
+#undef	ELF_MAXPAGESIZE
+#define	ELF_MAXPAGESIZE			0x1000
+
+#define	elf32_bed			elf32_sh_qnx_bed
+
+#include "elf32-target.h"
+
+#undef	elf_backend_set_nonloadable_filepos
+#undef	elf_backend_is_contained_by_filepos
+#undef	elf_backend_copy_private_bfd_data_p
+#undef	elf32_bed
+
+/* NetBSD support.  */
+#undef	TARGET_BIG_SYM
+#define	TARGET_BIG_SYM			bfd_elf32_shnbsd_vec
+#undef	TARGET_BIG_NAME
+#define	TARGET_BIG_NAME			"elf32-sh-nbsd"
+#undef	TARGET_LITTLE_SYM
+#define	TARGET_LITTLE_SYM		bfd_elf32_shlnbsd_vec
+#undef	TARGET_LITTLE_NAME
+#define	TARGET_LITTLE_NAME		"elf32-shl-nbsd"
+#undef	ELF_MAXPAGESIZE
+#define	ELF_MAXPAGESIZE			0x10000
+#undef	elf_symbol_leading_char
+#define	elf_symbol_leading_char		0
+
+#define	elf32_bed			elf32_sh_nbsd_bed
+
+#include "elf32-target.h"
+
+#undef	elf32_bed
+
+/* Linux support.  */
+#undef	TARGET_BIG_SYM
+#define	TARGET_BIG_SYM			bfd_elf32_shblin_vec
+#undef	TARGET_BIG_NAME
+#define	TARGET_BIG_NAME			"elf32-shbig-linux"
+#undef	TARGET_LITTLE_SYM
+#define	TARGET_LITTLE_SYM		bfd_elf32_shlin_vec
+#undef	TARGET_LITTLE_NAME
+#define	TARGET_LITTLE_NAME		"elf32-sh-linux"
+
+#undef	elf_backend_grok_prstatus
+#define	elf_backend_grok_prstatus	elf32_shlin_grok_prstatus
+#undef	elf_backend_grok_psinfo
+#define	elf_backend_grok_psinfo		elf32_shlin_grok_psinfo
+
+#define	elf32_bed			elf32_sh_lin_bed
+
+#include "elf32-target.h"
+
+#undef	elf_backend_grok_prstatus
+#undef	elf_backend_grok_psinfo
+#undef	elf32_bed
+
+#endif /* INCLUDE_SHMEDIA */

@@ -3649,9 +3649,7 @@ elf32_arm_reloc_type_class (rela)
 
 #define ELF_ARCH			bfd_arch_arm
 #define ELF_MACHINE_CODE		EM_ARM
-#ifndef ELF_MAXPAGESIZE
 #define ELF_MAXPAGESIZE			0x8000
-#endif
 
 #define bfd_elf32_bfd_copy_private_bfd_data	elf32_arm_copy_private_bfd_data
 #define bfd_elf32_bfd_merge_private_bfd_data	elf32_arm_merge_private_bfd_data

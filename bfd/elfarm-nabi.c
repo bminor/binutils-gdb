@@ -749,6 +749,27 @@ elf32_arm_nabi_grok_psinfo (abfd, note)
 #define elf_backend_grok_prstatus	elf32_arm_nabi_grok_prstatus
 #define elf_backend_grok_psinfo		elf32_arm_nabi_grok_psinfo
 
-#ifndef ELFARM_NABI_C_INCLUDED
 #include "elf32-arm.h"
-#endif
+
+/* QNX support.  */
+#include "elf32-qnx.h"
+
+#undef	TARGET_LITTLE_SYM 
+#define	TARGET_LITTLE_SYM		bfd_elf32_littlearmqnx_vec
+#undef	TARGET_LITTLE_NAME
+#define	TARGET_LITTLE_NAME		"elf32-littlearm-nto"
+#undef	TARGET_BIG_SYM
+#define	TARGET_BIG_SYM			bfd_elf32_bigarmqnx_vec
+#undef	TARGET_BIG_NAME
+#define	TARGET_BIG_NAME			"elf32-bigarm-nto"
+#undef	ELF_MAXPAGESIZE
+#define	ELF_MAXPAGESIZE			0x1000
+
+#define	elf32_bed			elf32_arm_qnx_bed
+
+#include "elf32-target.h"
+
+#undef	elf_backend_set_nonloadable_filepos
+#undef	elf_backend_is_contained_by_filepos
+#undef	elf_backend_copy_private_bfd_data_p
+#undef	elf32_bed
