@@ -1,0 +1,4 @@
+CC=cc
+CFLAGS=
+RANLIB=true
+AR_FLAGS=

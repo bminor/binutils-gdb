@@ -133,6 +133,7 @@ case "${host}" in
   i[3456]86-*-aix*)	  host_makefile_frag=config/mh-aix386 ;;
   i[3456]86-*-go32*)	  host_makefile_frag=config/mh-go32 ;;
   *-cygwin32*)	  	  host_makefile_frag=config/mh-cygwin32 ;;
+  *-windows*)	  	  host_makefile_frag=config/mh-windows ;;
   vax-*-ultrix2*)         host_makefile_frag=config/mh-vaxult2 ;;
   *-*-solaris2*)          host_makefile_frag=config/mh-solaris ;;
   m68k-sun-sunos*)	  host_makefile_frag=config/mh-sun3 ;;

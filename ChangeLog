@@ -1,3 +1,8 @@
+Tue Oct  8 08:32:48 1996  Stu Grossman  (grossman@critters.cygnus.com)
+
+	* configure.in config/mh-windows:  Add support for windows host
+	(that is a build done under the Microsoft build environment).
+
 Tue Oct  8 10:39:08 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.in: Replace all uses of srcroot with s, to shrink
