@@ -620,7 +620,7 @@ proc test_print_string_constants {} {
     set timeout 60;
 
     gdb_test "p \"a string\""		" = \"a string\""
-    gdb_test "p \"embedded \\000 null\"" " = \"embedded \\\\0 null\""
+    gdb_test "p \"embedded \\000 null\"" " = \"embedded \\\\000 null\""
     gdb_test "p \"abcd\"\[2\]"	" = 99 'c'"
     gdb_test "p sizeof (\"abcdef\")"	" = 7"
     gdb_test "ptype \"foo\""		" = char \\\[4\\\]"

@@ -1,3 +1,8 @@
+2002-09-17  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.base/printcmds.exp (test_print_string_constants): Expect
+	\000, not \0, in double-quoted string.
+
 2002-09-14  Corinna Vinschen  <vinschen@redhat.com>
 
 	* gdb.base/command.exp: Don't expect a "Program exited normally"
