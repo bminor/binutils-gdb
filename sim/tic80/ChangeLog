@@ -1,3 +1,8 @@
+Sat May 10 12:35:47 1997  Michael Meissner  <meissner@cygnus.com>
+
+	* insns (and{.tt,.tf,.ft,.ff}): Immediate values are unsigned, not
+	signed.
+
 Fri May  9 15:47:36 1997  Mike Meissner  <meissner@cygnus.com>
 
 	* insns (cmp_vals,do_cmp): Produce the correct bits as specified

@@ -64,7 +64,7 @@ void::function::do_and:signed32 *rDest, signed32 Source1, signed32 Source2
 
 
 // and, and.tt
-31.Dest,26.Source2,21.0b0010001,14.SignedImmediate::::and.tt i
+31.Dest,26.Source2,21.0b0010001,14.UnsignedImmediate::::and.tt i
 	do_and (_SD, rDest, vSource1, rSource2);
 31.Dest,26.Source2,21.0b110010001,12.0,11./,4.Source1::::and.tt r
 	do_and (_SD, rDest, rSource1, rSource2);
@@ -74,7 +74,7 @@ void::function::do_and:signed32 *rDest, signed32 Source1, signed32 Source2
 
 
 // and.ff
-31.Dest,26.Source2,21.0b0011000,14.SignedImmediate::::and.ff i
+31.Dest,26.Source2,21.0b0011000,14.UnsignedImmediate::::and.ff i
 	do_and (_SD, rDest, ~vSource1, ~rSource2);
 31.Dest,26.Source2,21.0b110011000,12.0,11./,4.Source1::::and.ff r
 	do_and (_SD, rDest, ~rSource1, ~rSource2);
@@ -84,7 +84,7 @@ void::function::do_and:signed32 *rDest, signed32 Source1, signed32 Source2
 
 
 // and.ft
-31.Dest,26.Source2,21.0b0010100,14.SignedImmediate::::and.ft i
+31.Dest,26.Source2,21.0b0010100,14.UnsignedImmediate::::and.ft i
 	do_and (_SD, rDest, ~vSource1, rSource2);
 31.Dest,26.Source2,21.0b110010100,12.0,11./,4.Source1::::and.ft r
 	do_and (_SD, rDest, ~rSource1, rSource2);
@@ -94,7 +94,7 @@ void::function::do_and:signed32 *rDest, signed32 Source1, signed32 Source2
 
 
 // and.tf
-31.Dest,26.Source2,21.0b0010010,14.SignedImmediate::::and.tf i
+31.Dest,26.Source2,21.0b0010010,14.UnsignedImmediate::::and.tf i
 	do_and (_SD, rDest, vSource1, ~rSource2);
 31.Dest,26.Source2,21.0b110010010,12.0,11./,4.Source1::::and.tf r
 	do_and (_SD, rDest, rSource1, ~rSource2);
