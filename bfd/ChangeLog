@@ -1,3 +1,8 @@
+2002-04-12  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf.c (prep_headers): Don't zero EI_OSABI, EI_ABIVERSION or
+	header pad.
+
 2002-04-09  DJ Delorie  <dj@redhat.com>
 
 	* elfarm-nabi.c (elf32_arm_howto_table): Fix ABS16 masks.
