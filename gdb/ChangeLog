@@ -1,3 +1,7 @@
+2004-05-01  Mark Kettenis  <kettenis@gnu.org>
+
+	* m68k-tdep.h (m68kbsd_fpreg_offset): New prototype.
+
 2004-05-01  Andrew Cagney  <cagney@redhat.com>
 
 	* frv-linux-tdep.c: Include "trad-frame.h" and "frame-unwind.h".

@@ -83,4 +83,8 @@ struct gdbarch_tdep
   enum struct_return struct_return;
 };
 
+/* Functions exported from m68kbsd-tdep.c.  */
+
+extern int m68kbsd_fpreg_offset (int regnum);
+
 #endif /* m68k-tdep.h */
