@@ -47,6 +47,10 @@ if [istarget "d10v-*-*"] then {
 if [istarget "s390-*-*"] then {
     set asm-arch s390
 }
+if [istarget "x86_64-*-*"] then {
+    set asm-arch x86_64
+    set asm-flags "-gdwarf2 -I${srcdir}/${subdir} -I${objdir}/${subdir}"
+}
 if [istarget "i\[3456\]86-*-*"] then {
     set asm-arch i386
 }
