@@ -31,8 +31,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <signal.h>
 #include "gdbcore.h"
 #include <sys/user.h>
-#ifndef USER			/* added to support BCS ptrace_user */
 
+#ifndef USER			/* added to support BCS ptrace_user */
 #define USER ptrace_user
 #endif
 #include <sys/ioctl.h>
@@ -44,14 +44,20 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "setjmp.h"
 #include "value.h"
 
+#ifdef DELTA88
+#include <sys/ptrace.h>
+
 /* define offsets to the pc instruction offsets in ptrace_user struct */
-#define SXIP_OFFSET (char *)&u.pt_sigframe.dg_sigframe.sc_sxip - \
-				(char *)&u
-
-#define SNIP_OFFSET (char *)&u.pt_sigframe.dg_sigframe.sc_snip - \
-				(char *)&u
-
+#define SXIP_OFFSET (char *)&u.pt_sigframe.sig_sxip - (char *)&u
+#define SNIP_OFFSET (char *)&u.pt_sigframe.sig_snip - (char *)&u
+#define SFIP_OFFSET (char *)&u.pt_sigframe.sig_sfip - (char *)&u
+#else
+/* define offsets to the pc instruction offsets in ptrace_user struct */
+#define SXIP_OFFSET (char *)&u.pt_sigframe.dg_sigframe.sc_sxip - (char *)&u
+#define SNIP_OFFSET (char *)&u.pt_sigframe.dg_sigframe.sc_snip - (char *)&u
 #define SFIP_OFFSET (char *)&u.pt_sigframe.dg_sigframe.sc_sfip - (char *)&u
+#endif
+
 extern int have_symbol_file_p();
 
 extern jmp_buf stack_jmp;
@@ -87,11 +93,11 @@ fetch_inferior_registers ()
       supply_register (regno, buf);
     }
     /* now load up registers 36 - 38; special pc registers */
-    *(int *) &buf[0] = ptrace (3,inferior_pid,(char *)&u.pt_sigframe.dg_sigframe.sc_sxip - (char *)&u ,0);
+    *(int *) &buf[0] = ptrace (3,inferior_pid,SXIP_OFFSET ,0);
     supply_register (SXIP_REGNUM, buf);
-    *(int *) &buf[0] = ptrace (3, inferior_pid, (char *)&u.pt_sigframe.dg_sigframe.sc_snip - (char *)&u ,0);
+    *(int *) &buf[0] = ptrace (3, inferior_pid,SNIP_OFFSET,0);
     supply_register (SNIP_REGNUM, buf);
-    *(int *) &buf[0] = ptrace (3, inferior_pid, (char *)&u.pt_sigframe.dg_sigframe.sc_sfip - (char *)&u ,0);
+    *(int *) &buf[0] = ptrace (3, inferior_pid,SFIP_OFFSET,0);
     supply_register (SFIP_REGNUM, buf);
 }
 
@@ -107,18 +113,9 @@ store_inferior_registers (regno)
 
   struct USER u;
 
-#if defined(BCS)
-#if defined(DGUX)
 
   unsigned int offset = (char *) &u.pt_r0 - (char *) &u;
 
-#endif /* defined (DGUX) */
-#else
-
-  unsigned int offset = (char *) &u.pt_r0 - (char *) &u;
-
-#endif /* defined(BCS) */
-/*  offset = ptrace (3, inferior_pid, offset, 0) - KERNEL_U_ADDR; */
   regaddr = offset;
 
   if (regno >= 0)
