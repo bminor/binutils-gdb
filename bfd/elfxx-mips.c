@@ -3832,7 +3832,6 @@ mips_elf_create_dynamic_relocation (output_bfd, info, rel, h, sec,
   else
     {
       long indx;
-      bfd_vma section_offset;
 
       /* We must now calculate the dynamic symbol table index to use
 	 in the relocation.  */
@@ -3862,15 +3861,18 @@ mips_elf_create_dynamic_relocation (output_bfd, info, rel, h, sec,
 		abort ();
 	    }
 
-	  /* Figure out how far the target of the relocation is from
-	     the beginning of its section.  */
-	  section_offset = symbol - sec->output_section->vma;
-	  /* The relocation we're building is section-relative.
-	     Therefore, the original addend must be adjusted by the
-	     section offset.  */
-	  *addendp += section_offset;
-	  /* Now, the relocation is just against the section.  */
-	  symbol = sec->output_section->vma;
+	  /* Instead of generating a relocation using the section
+	     symbol, we may as well make it a fully relative
+	     relocation.  We want to avoid generating relocations to
+	     local symbols because we used to generate them
+	     incorrectly, without adding the original symbol value,
+	     which is mandated by the ABI for section symbols.  In
+	     order to give dynamic loaders and applications time to
+	     phase out the incorrect use, we refrain from emitting
+	     section-relative relocations.  It's not like they're
+	     useful, after all.  This should be a bit more efficient
+	     as well.  */
+	  indx = 0;
 	}
 
       /* If the relocation was previously an absolute relocation and
@@ -3884,6 +3886,18 @@ mips_elf_create_dynamic_relocation (output_bfd, info, rel, h, sec,
 	 know where the shared library will wind up at load-time.  */
       outrel[0].r_info = ELF_R_INFO (output_bfd, (unsigned long) indx,
 				     R_MIPS_REL32);
+      /* For strict adherence to the ABI specification, we should
+	 generate a R_MIPS_64 relocation record by itself before the
+	 _REL32/_64 record as well, such that the addend is read in as
+	 a 64-bit value (REL32 is a 32-bit relocation, after all).
+	 However, since none of the existing ELF64 MIPS dynamic
+	 loaders seems to care, we don't waste space with these
+	 artificial relocations.  If this turns out to not be true,
+	 mips_elf_allocate_dynamic_relocation() should be tweaked so
+	 as to make room for a pair of dynamic relocations per
+	 invocation if ABI_64_P, and here we should generate an
+	 additional relocation record with R_MIPS_64 by itself for a
+	 NULL symbol before this relocation record.  */
       outrel[1].r_info = ELF_R_INFO (output_bfd, (unsigned long) 0,
 				     ABI_64_P (output_bfd)
 				     ? R_MIPS_64

@@ -1,3 +1,10 @@
+2003-03-11  Alexandre Oliva  <aoliva@redhat.com>
+
+	* elfxx-mips.c (mips_elf_create_dynamic_relocation): Do not create
+	dynamic relocations pointing to local or section symbols, use the
+	NULL symbol instead.  Document the choice to not emit an
+	additional R_MIPS_64 relocation.
+
 2003-03-11  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-ppc.c (ppc_elf_relocate_section): Subtract tls seg vma from
