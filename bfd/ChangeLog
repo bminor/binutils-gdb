@@ -1,5 +1,9 @@
 2002-11-07  Daniel Jacobowitz  <drow@mvista.com>
 
+	* configure.in: Clear is_release on the branch after release.
+
+2002-11-07  Daniel Jacobowitz  <drow@mvista.com>
+
 	* configure.in: Bump version and set is_release.
 	* configure: Regenerate.
 
