@@ -5,6 +5,9 @@ Thu Jun 11 15:24:53 1998  Doug Evans  <devans@canuck.cygnus.com>
 	* sim/sky/vu01reg.dvpasm: New file.
 	* sim/sky/vu01reg.brn: New file.
 
+	* sim/sky/vu.h (VU0_MEM1_WINDOW_START): New macro.
+	(VU0_MEM1_SIZE): New macro.
+
 Wed Jun 10 15:56:10 1998  Frank Ch. Eigler  <fche@cygnus.com>
 
 	* sim/sky/t-int.c: New file to test sky hardware
