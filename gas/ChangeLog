@@ -1,3 +1,9 @@
+2001-09-24  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* config/tc-arc.c: Add missing prototype.
+	(md_atof): Change type to int. Add missing prototype.
+	* config/tc-arc.h: Prototype exported functions.
+
 2001-09-22  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* as.c: Add missing function prototype.

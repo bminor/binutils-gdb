@@ -46,8 +46,10 @@ static void arc_common PARAMS ((int));
 static void arc_extinst PARAMS ((int));
 static void arc_extoper PARAMS ((int));
 static void arc_option PARAMS ((int));
-static int get_arc_exp_reloc_type PARAMS ((int, int, expressionS *,
+static int  get_arc_exp_reloc_type PARAMS ((int, int, expressionS *,
 					   expressionS *));
+
+static void init_opcode_tables PARAMS ((int));
 
 const struct suffix_classes {
   char *name;
@@ -1537,7 +1539,7 @@ arc_option (ignore)
 
 char *
 md_atof (type, litP, sizeP)
-     char type;
+     int type;
      char *litP;
      int *sizeP;
 {
@@ -1545,7 +1547,7 @@ md_atof (type, litP, sizeP)
   LITTLENUM_TYPE words[MAX_LITTLENUMS];
   LITTLENUM_TYPE *wordP;
   char *t;
-  char *atof_ieee ();
+  char * atof_ieee PARAMS ((char *, int, LITTLENUM_TYPE *));
 
   switch (type)
     {
