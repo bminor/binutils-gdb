@@ -248,23 +248,23 @@ ld3: ld2
 ######################################################################
 # DOCUMENTATION TARGETS
 # TeX output
-ld.dvi: ld.texinfo
-	TEXINPUTS=${TEXIDIR}:.:$$TEXINPUTS tex ld.texinfo
+ld.dvi: $(srcdir)/ld.texinfo
+	TEXINPUTS=${TEXIDIR}:.:$$TEXINPUTS tex $(srcdir)/ld.texinfo
 	texindex ld.??
-	TEXINPUTS=${TEXIDIR}:.:$$TEXINPUTS tex ld.texinfo
+	TEXINPUTS=${TEXIDIR}:.:$$TEXINPUTS tex $(srcdir)/ld.texinfo
 
 # info file for online browsing
-ld.info: ld.texinfo
-	makeinfo ld.texinfo
+ld.info: $(srcdir)/ld.texinfo
+	makeinfo -o ld.info $(srcdir)/ld.texinfo
 
 #separate targets for "ms", "me", and "mm" forms of roff doc
 # (we don't use a variable because we don't trust all makes to handle
 # a var in the target name right).
 # roff output (-ms)
-ld.ms: ld.texinfo
+ld.ms: $(srcdir)/ld.texinfo
 	sed -e '/\\input texinfo/d' \
 		-e '/@c TEXI2ROFF-KILL/,/@c END TEXI2ROFF-KILL/d' \
-		ld.texinfo | \
+		$(srcdir)/ld.texinfo | \
 	texi2roff $(TEXI2OPT) -ms >ld.ms 
 
 # index for roff output
@@ -274,11 +274,15 @@ ld-index.ms: ld.ms
 		texi2index >ld-index.ms
 
 # roff output (-mm)
-ld.mm: ld.texinfo
+ld.mm: $(srcdir)/ld.texinfo
 	sed -e '/\\input texinfo/d' \
 		-e '/@c TEXI2ROFF-KILL/,/@c END TEXI2ROFF-KILL/d' \
-		ld.texinfo | \
-	texi2roff $(TEXI2OPT) -mm >ld.mm 
+		-e 's/{.*,,/{/' \
+		-e '/@noindent/d' \
+		$(srcdir)/ld.texinfo | \
+	texi2roff $(TEXI2OPT) -mm | \
+	sed -e 's/---/\\(em/g' \
+	>ld.mm 
 
 # index for roff output
 ld-index.mm: ld.mm
@@ -287,10 +291,10 @@ ld-index.mm: ld.mm
 		texi2index >ld-index.mm
 
 # roff output (-me)
-ld.me: ld.texinfo
+ld.me: $(srcdir)/ld.texinfo
 	sed -e '/\\input texinfo/d' \
 		-e '/@c TEXI2ROFF-KILL/,/@c END TEXI2ROFF-KILL/d' \
-		ld.texinfo | \
+		$(srcdir)/ld.texinfo | \
 	texi2roff $(TEXI2OPT) -me >ld.me 
 
 # index for roff output
