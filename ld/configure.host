@@ -9,6 +9,8 @@
 #  HOSTING_CRT0		crt0.o file used for bootstrapping
 #  HOSTING_LIBS		libraries used for bootstrapping
 #  NATIVE_LIB_DIRS	library directories to search on this host
+#  HLDFLAGS		link flags to use on this host
+#  RPATH_ENVVAR		environment variable used to find shared libraries
 
 HDEFINES=
 HOSTING_CRT0=/lib/crt0.o
@@ -133,11 +135,13 @@ sparc-*-solaris2*)
 esac
 
 HLDFLAGS=
+RPATH_ENVVAR=LD_LIBRARY_PATH
 # If we have shared libraries, try to set rpath reasonably.
 if test "${shared}" = "true"; then
   case "${host}" in
   *-*-hpux*)
     HLDFLAGS='-Wl,+s,+b,$(libdir)'
+    RPATH_ENVVAR=SHLIB_PATH
     ;;
   *-*-irix5*)
     HLDFLAGS='-Wl,-rpath,$(libdir)'

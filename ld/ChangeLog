@@ -1,3 +1,11 @@
+Thu Feb 15 13:58:06 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in: Substitute RPATH_ENVVAR.
+	* configure: Rebuild.
+	* configure.host: Set RPATH_ENVVAR.
+	* Makefile.in (RPATH_ENVVAR): New variable.
+	(check): Use $(RPATH_ENVVAR) rather than LD_LIBRARY_PATH.
+
 Wed Feb 14 18:49:01 1996  Alan Modra  <alan@spri.levels.unisa.edu.au>
 
 	* configure.in: Redo emulation handling so that each emulation

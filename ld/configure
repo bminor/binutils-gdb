@@ -759,6 +759,7 @@ fi
 
 
 
+
 # For most hosts we can use a simple definition to pick up the BFD and
 # opcodes libraries.  However, if we are building shared libraries, we
 # need to handle some hosts specially.
@@ -789,7 +790,7 @@ else
   # On the NeXT, cc -E runs the code through the compiler's parser,
   # not just through cpp.
   cat > conftest.$ac_ext <<EOF
-#line 793 "configure"
+#line 794 "configure"
 #include "confdefs.h"
 #include <assert.h>
 Syntax Error
@@ -803,7 +804,7 @@ else
   rm -rf conftest*
   CPP="${CC-cc} -E -traditional-cpp"
   cat > conftest.$ac_ext <<EOF
-#line 807 "configure"
+#line 808 "configure"
 #include "confdefs.h"
 #include <assert.h>
 Syntax Error
@@ -836,7 +837,7 @@ if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 840 "configure"
+#line 841 "configure"
 #include "confdefs.h"
 #include <$ac_hdr>
 EOF
@@ -871,7 +872,7 @@ if eval "test \"`echo '$''{'ac_cv_func_$ac_func'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 875 "configure"
+#line 876 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char $ac_func(); below.  */
@@ -924,7 +925,7 @@ if eval "test \"`echo '$''{'ac_cv_header_dirent_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 928 "configure"
+#line 929 "configure"
 #include "confdefs.h"
 #include <sys/types.h>
 #include <$ac_hdr>
@@ -964,7 +965,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-ldir  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 968 "configure"
+#line 969 "configure"
 #include "confdefs.h"
 
 int main() { return 0; }
@@ -999,7 +1000,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-lx  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 1003 "configure"
+#line 1004 "configure"
 #include "confdefs.h"
 
 int main() { return 0; }
@@ -1042,7 +1043,7 @@ if eval "test \"`echo '$''{'bfd_cv_decl_needed_free'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1046 "configure"
+#line 1047 "configure"
 #include "confdefs.h"
 
 #include <stdio.h>
@@ -1262,6 +1263,7 @@ s%@build_vendor@%$build_vendor%g
 s%@build_os@%$build_os%g
 s%@CC@%$CC%g
 s%@HLDFLAGS@%$HLDFLAGS%g
+s%@RPATH_ENVVAR@%$RPATH_ENVVAR%g
 s%@HDEFINES@%$HDEFINES%g
 s%@HOSTING_CRT0@%$HOSTING_CRT0%g
 s%@HOSTING_LIBS@%$HOSTING_LIBS%g

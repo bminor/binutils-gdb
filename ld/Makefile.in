@@ -63,6 +63,7 @@ AR_FLAGS = qv
 CC = @CC@
 CFLAGS = @CFLAGS@
 HLDFLAGS = @HLDFLAGS@
+RPATH_ENVVAR = @RPATH_ENVVAR@
 MAKEINFO = makeinfo
 TEXI2DVI = texi2dvi
 RANLIB = ranlib
@@ -581,8 +582,8 @@ check: site.exp
 	r=`pwd`; export r; \
 	srcroot=`cd ${srcdir}; pwd` ; export srcroot ; \
 	EXPECT=${EXPECT} ; export EXPECT ; \
-	LD_LIBRARY_PATH=$$r/../bfd:$$r/../opcodes:$$LD_LIBRARY_PATH; \
-	export LD_LIBRARY_PATH; \
+	$(RPATH_ENVVAR)=$$r/../bfd:$$r/../opcodes:$$$(RPATH_ENVVAR); \
+	export $(RPATH_ENVVAR); \
 	if [ -f $$r/../expect/expect ] ; then  \
 	   TCL_LIBRARY=$${srcroot}/../tcl/library ; \
 	   export TCL_LIBRARY ; \
