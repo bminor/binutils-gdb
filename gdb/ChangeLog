@@ -1,3 +1,8 @@
+2004-02-18  Mark Kettenis  <kettenis@gnu.org>
+
+	* config/djgpp/fnchange.lst: Rename "amd64obsd-tdep.c" and
+        "amd64obsd-nat.c" to "a64ob-tdep.c" and "a64ob-nat.c".
+
 2004-02-18  Ulrich Weigand <Ulrich.Weigand@de.ibm.com>
 
 	Committed by Mark Kettenis  <kettenis@gnu.org>.

@@ -69,6 +69,8 @@
 @V@/gdb/amd64fbsd-tdep.c @V@/gdb/a64fb-tdep.c
 @V@/gdb/amd64nbsd-nat.c @V@/gdb/a64nb-nat.c
 @V@/gdb/amd64nbsd-tdep.c @V@/gdb/a64nb-tdep.c
+@V@/gdb/amd64obsd-nat.c @V@/gdb/a64ob-nat.c
+@V@/gdb/amd64obsd-tdep.c @V@/gdb/a64ob-tdep.c
 @V@/gdb/alphabsd-nat.c @V@/gdb/alphb-nat.c
 @V@/gdb/alphabsd-tdep.c @V@/gdb/alphb-tdep.c
 @V@/gdb/alphanbsd-tdep.c @V@/gdb/alphnb-tdep.c
