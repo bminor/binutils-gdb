@@ -246,8 +246,8 @@ static const pseudo_typeS potable[] =
   {"ascii", stringer, 0},
   {"asciz", stringer, 1},
   {"balign", s_align_bytes, 0},
-  {"balignw", s_align_bytes, 2},
-  {"balignl", s_align_bytes, 4},
+  {"balignw", s_align_bytes, -2},
+  {"balignl", s_align_bytes, -4},
 /* block */
   {"byte", cons, 1},
   {"comm", s_comm, 0},
@@ -341,8 +341,8 @@ static const pseudo_typeS potable[] =
   {"offset", s_struct, 0},
   {"org", s_org, 0},
   {"p2align", s_align_ptwo, 0},
-  {"p2alignw", s_align_ptwo, 2},
-  {"p2alignl", s_align_ptwo, 4},
+  {"p2alignw", s_align_ptwo, -2},
+  {"p2alignl", s_align_ptwo, -4},
   {"page", listing_eject, 0},
   {"plen", listing_psize, 0},
   {"print", s_print, 0},
@@ -1100,7 +1100,12 @@ s_align_bytes (arg)
     stop = mri_comment_field (&stopc);
 
   if (is_end_of_line[(unsigned char) *input_line_pointer])
-    temp = arg;			/* Default value from pseudo-op table */
+    {
+      if (arg < 0)
+	temp = 0;
+      else
+	temp = arg;	/* Default value from pseudo-op table */
+    }
   else
     temp = get_absolute_expression ();
 
@@ -1123,29 +1128,32 @@ s_align_bytes (arg)
   if (*input_line_pointer == ',')
     {
       offsetT fillval;
+      int len;
 
       input_line_pointer++;
       fillval = get_absolute_expression ();
-      if (arg == 0)
-	arg = 1;
-      if (arg <= 1)
+      if (arg >= 0)
+	len = 1;
+      else
+	len = - arg;
+      if (len <= 1)
 	{
 	  temp_fill = fillval;
-	  do_align (temp, &temp_fill, arg);
+	  do_align (temp, &temp_fill, len);
 	}
       else
 	{
 	  char ab[16];
 
-	  if (arg > sizeof ab)
+	  if (len > sizeof ab)
 	    abort ();
-	  md_number_to_chars (ab, fillval, arg);
-	  do_align (temp, ab, arg);
+	  md_number_to_chars (ab, fillval, len);
+	  do_align (temp, ab, len);
 	}
     }
   else
     {
-      if (arg > 0)
+      if (arg < 0)
 	as_warn ("expected fill pattern missing");
       do_align (temp, (char *) NULL, 0);
     }
@@ -1181,29 +1189,32 @@ s_align_ptwo (arg)
   if (*input_line_pointer == ',')
     {
       offsetT fillval;
+      int len;
 
       input_line_pointer++;
       fillval = get_absolute_expression ();
-      if (arg == 0)
-	arg = 1;
-      if (arg <= 1)
+      if (arg >= 0)
+	len = 1;
+      else
+	len = - arg;
+      if (len <= 1)
 	{
 	  temp_fill = fillval;
-	  do_align (temp, &temp_fill, arg);
+	  do_align (temp, &temp_fill, len);
 	}
       else
 	{
 	  char ab[16];
 
-	  if (arg > sizeof ab)
+	  if (len > sizeof ab)
 	    abort ();
-	  md_number_to_chars (ab, fillval, arg);
-	  do_align (temp, ab, arg);
+	  md_number_to_chars (ab, fillval, len);
+	  do_align (temp, ab, len);
 	}
     }
   else
     {
-      if (arg > 0)
+      if (arg < 0)
 	as_warn ("expected fill pattern missing");
       do_align (temp, (char *) NULL, 0);
     }
