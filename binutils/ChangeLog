@@ -1,3 +1,11 @@
+Thu Sep 28 15:49:00 1995  steve chamberlain  <sac@slash.cygnus.com>
+
+	* dlltool.c: (gen_exp_file): Always emit a .reloc section if relocatable.
+	(imp_name_lab): New.
+	(gen_def_file): New.
+	(gen_lib_file): Use imp_name_lab.
+	(main): Initialize imp_name_lab.
+
 Mon Sep 25 12:05:34 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.in: Call AC_HEADER_SYS_WAIT.
