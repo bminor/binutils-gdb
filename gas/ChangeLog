@@ -1,3 +1,62 @@
+Wed May  4 02:29:21 1994  Ken Raeburn  (raeburn@kr-pc.cygnus.com)
+
+	* configure.in (i386-*-gnu*): New target, handled like i386-mach.
+
+Tue May  3 21:04:16 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* config/obj-coff.h (TARGET_FORMAT) [TC_I960]: Select little
+	endian version.
+
+	* config/obj-coffbfd.h (TARGET_FORMAT) [TC_I960]: Ditto.
+
+	* config/obj-coff.c (coff_frob_section): Round up the size of
+	every section to a multiple of the alignment, so that BFD doesn't
+	surprise us.
+
+	Eliminate many simple differences between the two COFF back ends:
+
+	* config/obj-coffbfd.c: Removed all uses of DEFUN and DEFUN_VOID.
+	Made minor stylistic changes, deleted some register declarations.
+	(stack_top): Deleted.
+	(symbol_to_chars): Use absolute_section and reg_section instead of
+	the corresponding SEG_* symbols.
+	(obj_coff_endef, tag_find_or_make, fixup_segment): Likewise.
+	(stack typedef, stack_init, stack_delete, stack_push, stack_pop):
+	Moved to just after pseudo-op table.  All functions now static.
+	(stack_delete): Removed declaration.
+	(tag_init, tag_insert, tag_find_or_make, tag_find): Moved to just
+	after stack functions.
+	* config/obj-coffbfd.h: Reordered some declarations and macros.
+	(stack_init, stack_delete, stack_push, stack_pop): Don't declare.
+	(stack typedef): Deleted.
+	(SYMBOLS_NEED_BACKPOINTERS): Always undef then define; don't test.
+	(SYM_AUXENT): New macro.
+	(SA_GET_*, SA_SET_*): Define in terms of SYM_AUXENT when feasible.
+	(SF_GET_*, SF_SET_*): Define in terms of SF_GET when feasible.
+	(SA_GET_SYM_TAGNDX, SA_GET_SYM_ENDNDX, SA_SET_SYM_TAGNDX,
+	SA_SET_SYM_ENDNDX, object_headers typedef, data_section_header,
+	text_section_header): Delete non-BFD_HEADERS versions, since we
+	always define that symbol now.
+
+	* config/obj-coff.c (stack_top): Deleted.
+	(obj_coff_endef, obj_coff_dim, obj_coff_line, obj_coff_size,
+	obj_coff_scl, obj_coff_tag, obj_coff_type, obj_coff_val): Change
+	argument name from "ignored" to "ignore".
+	(obj_coff_val): Use frag_now_fix.
+	(obj_pseudo_table): Removed IGNORE_DEBUG version, since it doesn't
+	get used.
+	(stack typedef, stack_init, stack_delete, stack_push, stack_pop):
+	Moved to just after pseudo-op table.  All functions now static.
+	(tag_init, tag_insert, tag_find_or_make, tag_find): Moved to just
+	after stack functions.
+	* config/obj-coff.h: Reordered some declarations and macros.
+	Protected against multiple inclusions.
+	(stack_init, stack_delete, stack_push, stack_pop): Don't declare.
+	(stack typedef): Deleted.
+	(SYMBOLS_NEED_BACKPOINTERS): Always undef then define; don't test.
+	(stdoutput): Deleted declaration.
+	(TARGET_FORMAT) [TC_I386]: Don't define if already defined.
+
 Mon May  2 17:09:24 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* subsegs.h (segment_info_type): Use fix_tail field even if
