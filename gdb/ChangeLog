@@ -1,3 +1,7 @@
+2003-10-03  Mark Kettenis  <kettenis@gnu.org>
+
+	* dwarf2-frame.c (dwarf2_build_frame_info): Fix comment.
+
 2003-10-02  Andrew Cagney  <cagney@redhat.com>
 
 	* gdbarch.sh (DEPRECATED_REGISTER_RAW_SIZE): Rename

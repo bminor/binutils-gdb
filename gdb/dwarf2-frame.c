@@ -1540,9 +1540,9 @@ dwarf2_build_frame_info (struct objfile *objfile)
       unit.dwarf_frame_section = dwarf_eh_frame_section;
 
       /* FIXME: kettenis/20030602: This is the DW_EH_PE_datarel base
-	 that for the i386/amd64 target, which currently is the only
-	 target in GCC that supports/uses the DW_EH_PE_datarel
-	 encoding.  */
+	 that is used for the i386/amd64 target, which currently is
+	 the only target in GCC that supports/uses the
+	 DW_EH_PE_datarel encoding.  */
       got = bfd_get_section_by_name (unit.abfd, ".got");
       if (got)
 	unit.dbase = got->vma;
