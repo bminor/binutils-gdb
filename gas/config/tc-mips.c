@@ -8542,7 +8542,7 @@ md_apply_fix (fixP, valueP)
 
     case BFD_RELOC_PCREL_HI16_S:
       /* The addend for this is tricky if it is internal, so we just
-	 do everything here rather than in bfd_perform_relocation.  */
+	 do everything here rather than in bfd_install_relocation.  */
       if ((fixP->fx_addsy->bsym->flags & BSF_SECTION_SYM) == 0)
 	{
 	  /* For an external symbol adjust by the address to make it
@@ -8562,7 +8562,7 @@ md_apply_fix (fixP, valueP)
 
     case BFD_RELOC_PCREL_LO16:
       /* The addend for this is tricky if it is internal, so we just
-	 do everything here rather than in bfd_perform_relocation.  */
+	 do everything here rather than in bfd_install_relocation.  */
       if ((fixP->fx_addsy->bsym->flags & BSF_SECTION_SYM) == 0)
 	value += fixP->fx_frag->fr_address + fixP->fx_where;
       buf = (unsigned char *) fixP->fx_frag->fr_literal + fixP->fx_where;

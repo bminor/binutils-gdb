@@ -2398,7 +2398,7 @@ md_apply_fix3 (fixP, value, segment)
 #ifdef OBJ_ELF
   /* FIXME: SPARC ELF relocations don't use an addend in the data
      field itself.  This whole approach should be somehow combined
-     with the calls to bfd_perform_relocation.  Also, the value passed
+     with the calls to bfd_install_relocation.  Also, the value passed
      in by fixup_segment includes the value of a defined symbol.  We
      don't want to include the value of an externally visible symbol.  */
   if (fixP->fx_addsy != NULL)
