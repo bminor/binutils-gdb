@@ -1,3 +1,14 @@
+Mon Jun 19 09:06:49 1995  Steve Chamberlain  <sac@slash.cygnus.com>
+
+	* dlltool.c: Change names of generated files. .*.s-> -*.s
+
+	* objdump.c (dump_section_stabs):  Check for names
+	which are supersets of selected names. binutils/7240.
+
+Wed Jun 14 19:43:52 1995  Doug Evans  <dje@canuck.cygnus.com>
+
+	* dlltool.c (mtable, ARM jump): Must redirect via pc offsetable ptr.
+
 Wed Jun 14 13:27:22 1995  Steve Chamberlain  <sac@slash.cygnus.com>
 
 	* deflex.l, defparse.y, dlltool.c: New files.

@@ -55,6 +55,7 @@ boolean disassemble;		/* -d */
 boolean disassemble_all;	/* -D */
 boolean formats_info;		/* -i */
 char *only;			/* -j secname */
+int wide_output;		/* -w */
 
 /* Extra info to pass to the disassembler address printing function.  */
 struct objdump_disasm_info {
@@ -119,15 +120,16 @@ usage (stream, status)
      int status;
 {
   fprintf (stream, "\
-Usage: %s [-ahifdDrRtTxsSl] [-b bfdname] [-m machine] [-j section-name]\n\
+Usage: %s [-ahifdDrRtTxsSlw] [-b bfdname] [-m machine] [-j section-name]\n\
        [--archive-headers] [--target=bfdname] [--disassemble]\n\
        [--disassemble-all] [--file-headers] [--section-headers] [--headers]\n\
-       [--info] [--section=section-name] [--line-numbers] [--source]\n\
+       [--info] [--section=section-name] [--line-numbers] [--source]\n",
+	   program_name);
+  fprintf (stream, "\
        [--architecture=machine] [--reloc] [--full-contents] [--stabs]\n\
        [--syms] [--all-headers] [--dynamic-syms] [--dynamic-reloc]\n\
-       [--version] [--help] objfile...\n\
-at least one option besides -l (--line-numbers) must be given\n",
-	   program_name);
+       [--wide] [--version] [--help] objfile...\n\
+at least one option besides -l (--line-numbers) must be given\n");
   list_supported_targets (program_name, stream);
   exit (status);
 }
@@ -155,6 +157,7 @@ static struct option long_options[]=
   {"syms", no_argument, NULL, 't'},
   {"target", required_argument, NULL, 'b'},
   {"version", no_argument, &show_version,    1},
+  {"wide", no_argument, &wide_output, 'w'},
   {0, no_argument, 0, 0}
 };
 
@@ -176,8 +179,10 @@ dump_section_header (abfd, section, ignored)
 	  (unsigned) bfd_get_section_size_before_reloc (section));
   printf (" vma ");
   printf_vma (section->vma);
-  printf (" align 2**%u\n ",
-	  section->alignment_power);
+  printf (" lma ");
+  printf_vma (section->lma);
+  printf (" align 2**%u%s ",
+	  section->alignment_power, (wide_output) ? "" : "\n");
   PF (SEC_ALLOC, "ALLOC");
   PF (SEC_CONSTRUCTOR, "CONSTRUCTOR");
   PF (SEC_CONSTRUCTOR_TEXT, "CONSTRUCTOR TEXT");
@@ -359,8 +364,6 @@ objdump_print_address (vma, info)
   long max = sorted_symcount;
   long thisplace;
 
-  bfd_signed_vma vardiff;
-
   fprintf_vma (info->stream, vma);
 
   if (sorted_symcount < 1)
@@ -375,11 +378,9 @@ objdump_print_address (vma, info)
       thisplace = (max + min) / 2;
       sym = sorted_syms[thisplace];
 
-      vardiff = bfd_asymbol_value (sym) - vma;
-
-      if (vardiff > 0)
+      if (bfd_asymbol_value (sym) > vma)
 	max = thisplace;
-      else if (vardiff < 0)
+      else if (bfd_asymbol_value (sym) < vma)
 	min = thisplace;
       else
 	{
@@ -817,6 +818,7 @@ disassemble_data (abfd)
       while (i < disasm_info.buffer_length)
 	{
 	  int bytes;
+	  boolean need_nl = false;
 
 	  if (data[i] == 0 && data[i + 1] == 0 && data[i + 2] == 0 &&
 	      data[i + 3] == 0)
@@ -850,7 +852,10 @@ disassemble_data (abfd)
 		  /* Old style */
 		  bytes = print (section->vma + i, data + i, stdout);
 		}
-	      putchar ('\n');
+	      if (!wide_output)
+		putchar ('\n');
+	      else
+		need_nl = true;
 	    }
 
 	  if (dump_reloc_info
@@ -895,10 +900,13 @@ disassemble_data (abfd)
 		    }
 
 		  printf ("\n");
-
+		  need_nl = false;
 		  ++relpp;
 		}
 	    }
+
+	  if (need_nl)
+	    printf ("\n");
 
 	  i += bytes;
 	}
@@ -1100,11 +1108,26 @@ dump_section_stabs (abfd, stabsect_name, strsect_name)
      char *stabsect_name;
      char *strsect_name;
 {
+  asection *s;
   if (read_section_stabs (abfd, stabsect_name, strsect_name))
     {
       print_section_stabs (abfd, stabsect_name, strsect_name);
       free (stabs);
       free (strtab);
+    }
+
+  /* Check for names which are supersets of the selected name */
+  for (s = abfd->sections;
+       s;
+       s = s->next)
+    {
+      if (strncmp (stabsect_name, s->name, strlen (stabsect_name)) == 0) 
+	{
+	  read_section_stabs (abfd, s->name, strsect_name);
+	  print_section_stabs (abfd, s->name, strsect_name);
+	  free (stabs);
+	  free (strtab);
+	}
     }
 }
 
@@ -1682,7 +1705,7 @@ main (argc, argv)
 
   bfd_init ();
 
-  while ((c = getopt_long (argc, argv, "ib:m:VdDlfahrRtTxsSj:", long_options,
+  while ((c = getopt_long (argc, argv, "ib:m:VdDlfahrRtTxsSj:w", long_options,
 			   (int *) 0))
 	 != EOF)
     {
@@ -1751,6 +1774,9 @@ main (argc, argv)
 	  usage (stdout, 0);
 	case 'V':
 	  show_version = 1;
+	  break;
+	case 'w':
+	  wide_output = 1;
 	  break;
 	default:
 	  usage (stderr, 1);
