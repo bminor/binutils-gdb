@@ -247,17 +247,6 @@ get_frame_block (struct frame_info *frame, CORE_ADDR *addr_in_block)
   return block_for_pc (pc);
 }
 
-struct block *
-get_current_block (CORE_ADDR *addr_in_block)
-{
-  CORE_ADDR pc = read_pc ();
-
-  if (addr_in_block)
-    *addr_in_block = pc;
-
-  return block_for_pc (pc);
-}
-
 CORE_ADDR
 get_pc_function_start (CORE_ADDR pc)
 {

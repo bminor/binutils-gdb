@@ -1543,8 +1543,22 @@ get_selected_block (CORE_ADDR *addr_in_block)
   if (!target_has_stack)
     return 0;
 
+  /* NOTE: cagney/2002-11-28: Why go to all this effort to not create
+     a selected/current frame?  Perhaphs this function is called,
+     indirectly, by WFI in "infrun.c" where avoiding the creation of
+     an inner most frame is very important (it slows down single
+     step).  I suspect, though that this was true in the deep dark
+     past but is no longer the case.  A mindless look at all the
+     callers tends to support this theory.  I think we should be able
+     to assume that there is always a selcted frame.  */
+  /* gdb_assert (selected_frame != NULL); So, do you feel lucky? */
   if (!selected_frame)
-    return get_current_block (addr_in_block);
+    {
+      CORE_ADDR pc = read_pc ();
+      if (addr_in_block != NULL)
+	*addr_in_block = pc;
+      return block_for_pc (pc);
+    }
   return get_frame_block (selected_frame, addr_in_block);
 }
 
