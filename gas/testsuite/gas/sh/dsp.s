@@ -1,4 +1,4 @@
-#	Test file for ARM/GAS -- basic instructions
+#	Test file for SH/GAS -- dsp instructions
 
 	.text
 	.align
