@@ -21,7 +21,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #define TARGET_BYTE_ORDER LITTLE_ENDIAN
 
-#define REGISTER_SIZE 3
+/* 24 bit registers but we'll pretend that they are 32 bits */
+#define REGISTER_SIZE 4
+
 #define MAX_REGISTER_RAW_SIZE REGISTER_SIZE
 #define NUM_REGS 12
 
