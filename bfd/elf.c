@@ -2357,7 +2357,7 @@ DEFUN (elf_print_symbol,(ignore_abfd, filep, symbol, how),
     case bfd_print_symbol_nm:
     case bfd_print_symbol_all:
       {
-	char *section_name;
+	CONST char *section_name;
 	section_name = symbol->section? symbol->section->name : "(*none*)";
 	bfd_print_symbol_vandf((PTR) file, symbol);
 	fprintf(file, " %-5s %s %s %s",

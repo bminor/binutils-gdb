@@ -1,3 +1,10 @@
+Tue Jun 23 21:54:44 1992  Fred Fish  (fnf@cygnus.com)
+
+	* libbfd.h, libbfd-in.h (bfd_seek):  Make prototype match definition.
+	* reloc.c (bfd_default_reloc_type_lookup):  Make cast on return
+	type match actual return type.
+	* elf_print_symbol (section_name):  Make CONST.
+
 Mon Jun 22 17:35:24 1992  Per Bothner  (bothner@cygnus.com)
 
 	* i386linux.c, hosts/i386linux.h, config/i386-linux.mt:

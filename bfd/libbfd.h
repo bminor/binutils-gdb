@@ -80,7 +80,7 @@ PROTO (bfd_size_type, bfd_write, (CONST PTR ptr, bfd_size_type size, bfd_size_ty
 
 
 
-PROTO (int, bfd_seek,(bfd* abfd, file_ptr fp , int direction));
+PROTO (int, bfd_seek,(bfd* CONST abfd, CONST file_ptr fp , CONST int direction));
 PROTO (long, bfd_tell, (bfd *abfd));
 PROTO (bfd *, _bfd_create_empty_archive_element_shell, (bfd *obfd));
 PROTO (bfd *, look_for_bfd_in_cache, (bfd *arch_bfd, file_ptr index));
