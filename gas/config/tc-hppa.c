@@ -4406,7 +4406,7 @@ md_undefined_symbol (name)
 void
 md_apply_fix3 (fixP, valP, seg)
      fixS *fixP;
-     valueT *valp;
+     valueT *valP;
      segT seg ATTRIBUTE_UNUSED;
 {
   unsigned char *buf;
