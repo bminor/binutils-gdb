@@ -375,13 +375,14 @@ tty_command (char *file, int from_tty)
   inferior_io_terminal = savestring (file, strlen (file));
 }
 
-static void
-run_command (char *args, int from_tty)
+/* Kill the inferior if already running.  This function is designed
+   to be called when we are about to start the execution of the program
+   from the beginning.  Ask the user to confirm that he wants to restart
+   the program being debugged when FROM_TTY is non-null.  */
+
+void
+kill_if_already_running (int from_tty)
 {
-  char *exec_file;
-
-  dont_repeat ();
-
   if (! ptid_equal (inferior_ptid, null_ptid) && target_has_execution)
     {
       if (from_tty
@@ -394,7 +395,16 @@ Start it from the beginning? "))
 #endif
       init_wait_for_inferior ();
     }
+}
 
+static void
+run_command (char *args, int from_tty)
+{
+  char *exec_file;
+
+  dont_repeat ();
+
+  kill_if_already_running (from_tty);
   clear_breakpoint_hit_counts ();
 
   /* Purge old solib objfiles. */
@@ -480,6 +490,29 @@ run_no_args_command (char *args, int from_tty)
   xfree (old_args);
 }
 
+
+/* Start the execution of the program up until the beginning of the main
+   program.  */
+
+static void
+start_command (char *args, int from_tty)
+{
+  /* Some languages such as Ada need to search inside the program
+     minimal symbols for the location where to put the temporary
+     breakpoint before starting.  */
+  if (!have_minimal_symbols ())
+    error ("No symbol table loaded.  Use the \"file\" command.");
+
+  /* If the inferior is already running, we want to ask the user if we
+     should restart it or not before we insert the temporary breakpoint.
+     This makes sure that this command doesn't have any side effect if
+     the user changes its mind.  */
+  kill_if_already_running (from_tty);
+
+  /* Insert the temporary breakpoint, and run...  */
+  tbreak_command (main_name (), 0);
+  run_command (args, from_tty);
+} 
 
 void
 continue_command (char *proc_count_exp, int from_tty)
@@ -2143,6 +2176,13 @@ use \"set args\" without arguments.");
   if (xdb_commands)
     add_com ("R", class_run, run_no_args_command,
 	     "Start debugged program with no arguments.");
+
+  c = add_com ("start", class_run, start_command,
+               "\
+Run the debugged program until the beginning of the main procedure.\n\
+You may specify arguments to give to your program, just as with the\n\
+\"run\" command.");
+  set_cmd_completer (c, filename_completer);
 
   add_com ("interrupt", class_run, interrupt_target_command,
 	   "Interrupt the execution of the debugged program.");

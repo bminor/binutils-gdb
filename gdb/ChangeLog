@@ -1,3 +1,12 @@
+2004-05-24  Joel Brobecker  <brobecker@gnat.com>
+
+	* infcmd.c (kill_if_already_running): New function, extracted
+	from run_command().
+	(run_command): Replace extracted code by call to
+	kill_if_already_running().
+	(start_command): New function.
+	(_initialize_infcmd): Add "start" command.
+
 2004-05-24  Mark Kettenis  <kettenis@gnu.org>
 
 	Add OpenBSD/m88k support.
