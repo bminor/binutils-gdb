@@ -1,3 +1,8 @@
+Tue Mar  8 12:10:38 1994  Ian Lance Taylor  (ian@cygnus.com)
+
+	* coff-mips.c (mips_relocate_section): Handle MIPS_R_LITERAL like
+	MIPS_R_GPREL.
+
 Sat Mar  5 14:08:54 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* elf32-hppa.h, elfcode.h:  Replace uses of Elf*_Half, Elf*_Word,
