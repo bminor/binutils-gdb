@@ -1,5 +1,9 @@
 2004-01-17  Andrew Cagney  <cagney@redhat.com>
 
+	* mips-tdep.c: Re-indent.  Group functions by ABI.
+
+2004-01-17  Andrew Cagney  <cagney@redhat.com>
+
 	* gdbarch.sh (DECR_PC_AFTER_BREAK): Make zero the default.
 	* gdbarch.c: Re-generate.
 	* xstormy16-tdep.c (xstormy16_gdbarch_init): Do not set
