@@ -2108,11 +2108,16 @@ get_tag (tag, sym, basic_type)
 
   if (hash_ptr == (shash_t *) NULL)
     {
+      char *perm;
+
+      perm = xmalloc (strlen (tag) + 1);
+      strcpy (perm, tag);
       hash_ptr = allocate_shash ();
-      err = hash_insert (tag_hash, tag, (char *) hash_ptr);
+      err = hash_insert (tag_hash, perm, (char *) hash_ptr);
       if (*err != '\0')
 	as_fatal ("Inserting \"%s\" into tag hash table: %s",
 		  tag, err);
+      hash_ptr->string = perm;
     }
 
   tag_ptr = allocate_tag ();
@@ -3844,19 +3849,28 @@ ecoff_build_symbols (buf,
 
 		      /* The value of a block start symbol is the
 			 offset from the start of the procedure.  For
-			 other symbols we just use the gas value.  */
+			 other symbols we just use the gas value (but
+			 we must offset it by the vma of the section,
+			 just as BFD does, because BFD will not see
+			 this value).  */
 		      if (sym_ptr->ecoff_sym.st == (int) st_Block
 			  && sym_ptr->ecoff_sym.sc == (int) sc_Text)
 			{
+			  symbolS *begin_sym;
+
 			  know (sym_ptr->proc_ptr != (proc_t *) NULL);
+			  begin_sym = sym_ptr->proc_ptr->sym->as_sym;
+			  if (S_GET_SEGMENT (as_sym)
+			      != S_GET_SEGMENT (begin_sym))
+			    as_warn (".begin/.bend in different segments");
 			  sym_ptr->ecoff_sym.value =
-			    (bfd_asymbol_value (as_sym->bsym)
-			     - bfd_asymbol_value (sym_ptr->proc_ptr->sym
-						  ->as_sym->bsym));
+			    S_GET_VALUE (as_sym) - S_GET_VALUE (begin_sym);
 			}
 		      else
 			sym_ptr->ecoff_sym.value =
-			  bfd_asymbol_value (as_sym->bsym);
+			  (S_GET_VALUE (as_sym)
+			   + bfd_get_section_vma (stdoutput,
+						  S_GET_SEGMENT (as_sym)));
 
 		      /* Set st_Proc to st_StaticProc for local
 			 functions.  */
@@ -4000,19 +4014,26 @@ ecoff_build_symbols (buf,
 			{
 			  know (as_sym != (symbolS *) NULL);
 			  know (begin_ptr->as_sym != (symbolS *) NULL);
+			  if (S_GET_SEGMENT (as_sym)
+			      != S_GET_SEGMENT (begin_ptr->as_sym))
+			    as_warn (".begin/.bend in different segments");
 			  sym_ptr->ecoff_sym.value =
-			    (bfd_asymbol_value (as_sym->bsym)
-			     - bfd_asymbol_value (begin_ptr->as_sym->bsym));
+			    (S_GET_VALUE (as_sym)
+			     - S_GET_VALUE (begin_ptr->as_sym));
 			}
 		      else if (begin_type == st_Block
 			       && sym_ptr->ecoff_sym.sc != (int) sc_Info)
 			{
+			  symbolS *begin_sym;
+
 			  know (as_sym != (symbolS *) NULL);
 			  know (sym_ptr->proc_ptr != (proc_t *) NULL);
+			  begin_sym = sym_ptr->proc_ptr->sym->as_sym;
+			  if (S_GET_SEGMENT (as_sym)
+			      != S_GET_SEGMENT (begin_sym))
+			    as_warn (".begin/.bend in different segments");
 			  sym_ptr->ecoff_sym.value =
-			    (bfd_asymbol_value (as_sym->bsym)
-			     - bfd_asymbol_value (sym_ptr->proc_ptr->sym
-						  ->as_sym->bsym));
+			    S_GET_VALUE (as_sym) - S_GET_VALUE (begin_sym);
 			}
 		    }
 
@@ -4143,9 +4164,13 @@ ecoff_build_procs (buf, bufend, offset)
 	      proc_end = proc_ptr + proc_cnt;
 	      for (; proc_ptr < proc_end; proc_ptr++)
 		{
+		  symbolS *adr_sym;
 		  unsigned long adr;
 
-		  adr = bfd_asymbol_value (proc_ptr->sym->as_sym->bsym);
+		  adr_sym = proc_ptr->sym->as_sym;
+		  adr = (S_GET_VALUE (adr_sym)
+			 + bfd_get_section_vma (stdoutput,
+						S_GET_SEGMENT (adr_sym)));
 		  if (first)
 		    {
 		      if (first_fil)
@@ -4499,7 +4524,7 @@ ecoff_frob_file ()
 
       cur_file_ptr = sym->ecoff_file;
       add_ecoff_symbol ((const char *) NULL, st_Nil, sc_Nil, sym,
-			bfd_asymbol_value (sym->bsym), indexNil);
+			S_GET_VALUE (sym), indexNil);
     }
   cur_proc_ptr = hold_proc_ptr;
   cur_file_ptr = hold_file_ptr;

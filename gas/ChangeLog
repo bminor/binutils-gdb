@@ -1,5 +1,8 @@
 Mon Aug  2 17:35:48 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* config/obj-ecoff.c (get_tag): Save tag name in permanent memory
+	and in hash_ptr->string.
+
 	* app.c (do_scrub_next_char): Reset state to 0 after .appline if
 	file name is not seen.
 
