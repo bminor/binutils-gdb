@@ -1,3 +1,10 @@
+2002-06-06  John David Anglin  <dave@hiauly1.hia.nrc.ca>
+
+	* testsuite/binutils-all/objcopy.exp: clear xfail for
+	"hppa*64*-*-hpux*".
+	* testsuite/binutils-all/hppa/objdump.exp: Return if
+	"*64*-*-*".
+
 2002-06-05  Alan Modra  <amodra@bigpond.net.au>
 
 	* objcopy.c (copy_section): Don't copy SEC_GROUP sections.
