@@ -5008,8 +5008,43 @@ pa_procend (unused)
      int unused;
 {
 
-  if (last_call_info->start_symbol == NULL)
-    as_bad ("Missing function name for .PROC");
+  /* If we are within a procedure definition, make sure we've
+     defined a label for the procedure; handle case where the
+     label was defined after the .PROC directive. 
+
+     Note there's not need to diddle with the segment or fragment
+     for the label symbol in this case.  We have already switched
+     into the new $CODE$ subspace at this point.  */
+  if (within_procedure && last_call_info->start_symbol == NULL)
+    {
+      label_symbol_struct *label_symbol = pa_get_label ();
+
+      if (label_symbol)
+	{
+	  if (label_symbol->lss_label)
+	    {
+	      last_call_info->start_symbol = label_symbol->lss_label;
+	      label_symbol->lss_label->bsym->flags |= BSF_FUNCTION;
+#ifdef OBJ_SOM
+	      /* Also handle allocation of a fixup to hold the unwind
+		 information when the label appears after the proc/procend.  */
+	      if (within_entry_exit)
+		{
+		  char *where = frag_more (0);
+
+		  fix_new_hppa (frag_now, where - frag_now->fr_literal, 0,
+				last_call_info->start_symbol, (offsetT) 0, NULL,
+				0, R_HPPA_ENTRY, e_fsel, 0, 0,
+				(char *) &last_call_info->ci_unwind.descriptor);
+		}
+#endif
+	    }
+	  else
+	    as_bad ("Missing function name for .PROC (corrupted label chain)");
+	}
+      else
+	as_bad ("Missing function name for .PROC");
+    }
 
   if (!within_procedure)
     as_bad ("misplaced .procend");

@@ -1,5 +1,8 @@
 Mon Apr 11 09:00:57 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
+	* config/tc-hppa.c (pa_procend): Handle case where label was
+	defined after the .proc directive.
+
 	* config/tc-hppa.c (pa_procend): Give an error if we encounter a
 	procend for a procedure without a name.
 
