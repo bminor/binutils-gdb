@@ -474,30 +474,7 @@ value_at (struct type *type, CORE_ADDR addr, asection *sect)
 
   val = allocate_value (type);
 
-  if (GDB_TARGET_IS_D10V
-      && TYPE_CODE (type) == TYPE_CODE_PTR
-      && TYPE_TARGET_TYPE (type)
-      && (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_FUNC))
-    {
-      /* pointer to function */
-      unsigned long num;
-      unsigned short snum;
-      snum = read_memory_unsigned_integer (addr, 2);
-      num = D10V_MAKE_IADDR (snum);
-      store_address (VALUE_CONTENTS_RAW (val), 4, num);
-    }
-  else if (GDB_TARGET_IS_D10V
-	   && TYPE_CODE (type) == TYPE_CODE_PTR)
-    {
-      /* pointer to data */
-      unsigned long num;
-      unsigned short snum;
-      snum = read_memory_unsigned_integer (addr, 2);
-      num = D10V_MAKE_DADDR (snum);
-      store_address (VALUE_CONTENTS_RAW (val), 4, num);
-    }
-  else
-    read_memory (addr, VALUE_CONTENTS_ALL_RAW (val), TYPE_LENGTH (type));
+  read_memory (addr, VALUE_CONTENTS_ALL_RAW (val), TYPE_LENGTH (type));
 
   VALUE_LVAL (val) = lval_memory;
   VALUE_ADDRESS (val) = addr;
@@ -545,29 +522,7 @@ value_fetch_lazy (register value_ptr val)
   int length = TYPE_LENGTH (VALUE_ENCLOSING_TYPE (val));
 
   struct type *type = VALUE_TYPE (val);
-  if (GDB_TARGET_IS_D10V
-      && TYPE_CODE (type) == TYPE_CODE_PTR
-      && TYPE_TARGET_TYPE (type)
-      && (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_FUNC))
-    {
-      /* pointer to function */
-      unsigned long num;
-      unsigned short snum;
-      snum = read_memory_unsigned_integer (addr, 2);
-      num = D10V_MAKE_IADDR (snum);
-      store_address (VALUE_CONTENTS_RAW (val), 4, num);
-    }
-  else if (GDB_TARGET_IS_D10V
-	   && TYPE_CODE (type) == TYPE_CODE_PTR)
-    {
-      /* pointer to data */
-      unsigned long num;
-      unsigned short snum;
-      snum = read_memory_unsigned_integer (addr, 2);
-      num = D10V_MAKE_DADDR (snum);
-      store_address (VALUE_CONTENTS_RAW (val), 4, num);
-    }
-  else if (length)
+  if (length)
     read_memory (addr, VALUE_CONTENTS_ALL_RAW (val), length);
 
   VALUE_LAZY (val) = 0;

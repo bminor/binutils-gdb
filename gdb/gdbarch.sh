@@ -476,14 +476,6 @@ f:2:PUSH_DUMMY_FRAME:void:push_dummy_frame:void:-:::0
 f:1:PUSH_RETURN_ADDRESS:CORE_ADDR:push_return_address:CORE_ADDR pc, CORE_ADDR sp:pc, sp:::0
 f:2:POP_FRAME:void:pop_frame:void:-:::0
 #
-# I wish that these would just go away....
-f:2:D10V_MAKE_DADDR:CORE_ADDR:d10v_make_daddr:CORE_ADDR x:x:::0::0
-f:2:D10V_MAKE_IADDR:CORE_ADDR:d10v_make_iaddr:CORE_ADDR x:x:::0::0
-f:2:D10V_DADDR_P:int:d10v_daddr_p:CORE_ADDR x:x:::0::0
-f:2:D10V_IADDR_P:int:d10v_iaddr_p:CORE_ADDR x:x:::0::0
-f:2:D10V_CONVERT_DADDR_TO_RAW:CORE_ADDR:d10v_convert_daddr_to_raw:CORE_ADDR x:x:::0::0
-f:2:D10V_CONVERT_IADDR_TO_RAW:CORE_ADDR:d10v_convert_iaddr_to_raw:CORE_ADDR x:x:::0::0
-#
 f:2:STORE_STRUCT_RETURN:void:store_struct_return:CORE_ADDR addr, CORE_ADDR sp:addr, sp:::0
 f:2:STORE_RETURN_VALUE:void:store_return_value:struct type *type, char *valbuf:type, valbuf:::0
 F:2:EXTRACT_STRUCT_VALUE_ADDRESS:CORE_ADDR:extract_struct_value_address:char *regbuf:regbuf:::0
@@ -1071,12 +1063,6 @@ extern disassemble_info tm_print_insn_info;
 #define TARGET_PRINT_INSN_INFO (&tm_print_insn_info)
 #endif
 
-
-
-/* Explicit test for D10V architecture.
-   USE of these macro's is *STRONGLY* discouraged. */
-
-#define GDB_TARGET_IS_D10V (TARGET_ARCHITECTURE->arch == bfd_arch_d10v)
 
 
 /* Set the dynamic target-system-dependent parameters (architecture,

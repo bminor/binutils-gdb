@@ -332,46 +332,14 @@ d10v_register_virtual_size (int reg_nr)
 static struct type *
 d10v_register_virtual_type (int reg_nr)
 {
-  if (reg_nr >= A0_REGNUM
+  if (reg_nr == PC_REGNUM)
+    return builtin_type_void_func_ptr;
+  else if (reg_nr >= A0_REGNUM
       && reg_nr < (A0_REGNUM + NR_A_REGS))
     return builtin_type_int64;
-  else if (reg_nr == PC_REGNUM
-	   || reg_nr == SP_REGNUM)
-    return builtin_type_int32;
   else
     return builtin_type_int16;
 }
-
-/* convert $pc and $sp to/from virtual addresses */
-static int
-d10v_register_convertible (int nr)
-{
-  return ((nr) == PC_REGNUM || (nr) == SP_REGNUM);
-}
-
-static void
-d10v_register_convert_to_virtual (int regnum, struct type *type, char *from,
-				  char *to)
-{
-  ULONGEST x = extract_unsigned_integer (from, REGISTER_RAW_SIZE (regnum));
-  if (regnum == PC_REGNUM)
-    x = (x << 2) | IMEM_START;
-  else
-    x |= DMEM_START;
-  store_unsigned_integer (to, TYPE_LENGTH (type), x);
-}
-
-static void
-d10v_register_convert_to_raw (struct type *type, int regnum, char *from,
-			      char *to)
-{
-  ULONGEST x = extract_unsigned_integer (from, TYPE_LENGTH (type));
-  x &= 0x3ffff;
-  if (regnum == PC_REGNUM)
-    x >>= 2;
-  store_unsigned_integer (to, 2, x);
-}
-
 
 static CORE_ADDR
 d10v_make_daddr (CORE_ADDR x)
@@ -409,6 +377,48 @@ d10v_convert_daddr_to_raw (CORE_ADDR x)
 {
   return ((x) & 0xffff);
 }
+
+static void
+d10v_address_to_pointer (struct type *type, void *buf, CORE_ADDR addr)
+{
+  /* Is it a code address?  */
+  if (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_FUNC
+      || TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_METHOD)
+    {
+#if 0
+      if (! d10v_iaddr_p (addr))
+        {
+          warning_begin ();
+          fprintf_unfiltered (gdb_stderr, "address `");
+          print_address_numeric (addr, 1, gdb_stderr);
+          fprintf_unfiltered (gdb_stderr, "' is not a code address\n");
+        }
+#endif
+
+      store_unsigned_integer (buf, TYPE_LENGTH (type), 
+                              d10v_convert_iaddr_to_raw (addr));
+    }
+  else
+    {
+      /* Strip off any upper segment bits.  */
+      store_unsigned_integer (buf, TYPE_LENGTH (type), 
+                              d10v_convert_daddr_to_raw (addr));
+    }
+}
+
+static CORE_ADDR
+d10v_pointer_to_address (struct type *type, void *buf)
+{
+  CORE_ADDR addr = extract_address (buf, TYPE_LENGTH (type));
+
+  /* Is it a code address?  */
+  if (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_FUNC
+      || TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_METHOD)
+    return d10v_make_iaddr (addr);
+  else
+    return d10v_make_daddr (addr);
+}
+
 
 /* Store the address of the place in which to copy the structure the
    subroutine will return.  This is called from call_function. 
@@ -1011,39 +1021,6 @@ d10v_push_arguments (int nargs, value_ptr *args, CORE_ADDR sp,
       char *contents = VALUE_CONTENTS (arg);
       int len = TYPE_LENGTH (type);
       /* printf ("push: type=%d len=%d\n", type->code, len); */
-      if (TYPE_CODE (type) == TYPE_CODE_PTR)
-	{
-	  /* pointers require special handling - first convert and
-	     then store */
-	  long val = extract_signed_integer (contents, len);
-	  len = 2;
-	  if (TYPE_TARGET_TYPE (type)
-	      && (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_FUNC))
-	    {
-	      /* function pointer */
-	      val = d10v_convert_iaddr_to_raw (val);
-	    }
-	  else if (d10v_iaddr_p (val))
-	    {
-	      /* also function pointer! */
-	      val = d10v_convert_daddr_to_raw (val);
-	    }
-	  else
-	    {
-	      /* data pointer */
-	      val &= 0xFFFF;
-	    }
-	  if (regnum <= ARGN_REGNUM)
-	    write_register (regnum++, val & 0xffff);
-	  else
-	    {
-	      char ptr[2];
-	      /* arg will go onto stack */
-	      store_address (ptr, 2, val & 0xffff);
-	      si = push_stack_item (si, ptr, 2);
-	    }
-	}
-      else
 	{
 	  int aligned_regnum = (regnum + 1) & ~1;
 	  if (len <= 2 && regnum <= ARGN_REGNUM)
@@ -1098,25 +1075,6 @@ d10v_extract_return_value (struct type *type, char regbuf[REGISTER_BYTES],
 {
   int len;
   /*    printf("RET: TYPE=%d len=%d r%d=0x%x\n",type->code, TYPE_LENGTH (type), RET1_REGNUM - R0_REGNUM, (int) extract_unsigned_integer (regbuf + REGISTER_BYTE(RET1_REGNUM), REGISTER_RAW_SIZE (RET1_REGNUM)));  */
-  if (TYPE_CODE (type) == TYPE_CODE_PTR
-      && TYPE_TARGET_TYPE (type)
-      && (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_FUNC))
-    {
-      /* pointer to function */
-      int num;
-      short snum;
-      snum = extract_address (regbuf + REGISTER_BYTE (RET1_REGNUM), REGISTER_RAW_SIZE (RET1_REGNUM));
-      store_address (valbuf, 4, d10v_make_iaddr (snum));
-    }
-  else if (TYPE_CODE (type) == TYPE_CODE_PTR)
-    {
-      /* pointer to data */
-      int num;
-      short snum;
-      snum = extract_address (regbuf + REGISTER_BYTE (RET1_REGNUM), REGISTER_RAW_SIZE (RET1_REGNUM));
-      store_address (valbuf, 4, d10v_make_daddr (snum));
-    }
-  else
     {
       len = TYPE_LENGTH (type);
       if (len == 1)
@@ -1516,7 +1474,10 @@ d10v_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_max_register_virtual_size (gdbarch, 8);
   set_gdbarch_register_virtual_type (gdbarch, d10v_register_virtual_type);
 
-  set_gdbarch_ptr_bit (gdbarch, 4 * TARGET_CHAR_BIT);
+  set_gdbarch_ptr_bit (gdbarch, 2 * TARGET_CHAR_BIT);
+  set_gdbarch_addr_bit (gdbarch, 32);
+  set_gdbarch_address_to_pointer (gdbarch, d10v_address_to_pointer);
+  set_gdbarch_pointer_to_address (gdbarch, d10v_pointer_to_address);
   set_gdbarch_short_bit (gdbarch, 2 * TARGET_CHAR_BIT);
   set_gdbarch_int_bit (gdbarch, 2 * TARGET_CHAR_BIT);
   set_gdbarch_long_bit (gdbarch, 4 * TARGET_CHAR_BIT);
@@ -1558,21 +1519,10 @@ d10v_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_get_saved_register (gdbarch, generic_get_saved_register);
   set_gdbarch_fix_call_dummy (gdbarch, generic_fix_call_dummy);
 
-  set_gdbarch_register_convertible (gdbarch, d10v_register_convertible);
-  set_gdbarch_register_convert_to_virtual (gdbarch, d10v_register_convert_to_virtual);
-  set_gdbarch_register_convert_to_raw (gdbarch, d10v_register_convert_to_raw);
-
   set_gdbarch_extract_return_value (gdbarch, d10v_extract_return_value);
   set_gdbarch_push_arguments (gdbarch, d10v_push_arguments);
   set_gdbarch_push_dummy_frame (gdbarch, generic_push_dummy_frame);
   set_gdbarch_push_return_address (gdbarch, d10v_push_return_address);
-
-  set_gdbarch_d10v_make_daddr (gdbarch, d10v_make_daddr);
-  set_gdbarch_d10v_make_iaddr (gdbarch, d10v_make_iaddr);
-  set_gdbarch_d10v_daddr_p (gdbarch, d10v_daddr_p);
-  set_gdbarch_d10v_iaddr_p (gdbarch, d10v_iaddr_p);
-  set_gdbarch_d10v_convert_daddr_to_raw (gdbarch, d10v_convert_daddr_to_raw);
-  set_gdbarch_d10v_convert_iaddr_to_raw (gdbarch, d10v_convert_iaddr_to_raw);
 
   set_gdbarch_store_struct_return (gdbarch, d10v_store_struct_return);
   set_gdbarch_store_return_value (gdbarch, d10v_store_return_value);

@@ -1,5 +1,61 @@
 2001-07-10  Jim Blandy  <jimb@redhat.com>
 
+	Clean up the D10V port so that GDB and the target program no
+	longer disagree on how big pointers are.
+	* findvar.c (value_from_register): Remove special case code for D10V.
+	* printcmd.c (print_frame_args): Same.
+	* valops.c (value_at, value_fetch_lazy): Same.
+	* values.c (unpack_long): Same.
+	* gdbarch.sh: Changes to effect the following:
+	* gdbarch.h (GDB_TARGET_IS_D10V, D10V_MAKE_DADDR,
+	gdbarch_d10v_make_daddr_ftype, gdbarch_d10v_make_daddr,
+	set_gdbarch_d10v_make_daddr, D10V_MAKE_IADDR,
+	gdbarch_d10v_make_iaddr_ftype, gdbarch_d10v_make_iaddr,
+	set_gdbarch_d10v_make_iaddr, D10V_DADDR_P,
+	gdbarch_d10v_daddr_p_ftype, gdbarch_d10v_daddr_p,
+	set_gdbarch_d10v_daddr_p, D10V_IADDR_P,
+	gdbarch_d10v_iaddr_p_ftype, gdbarch_d10v_iaddr_p,
+	set_gdbarch_d10v_iaddr_p, D10V_CONVERT_DADDR_TO_RAW,
+	gdbarch_d10v_convert_daddr_to_raw_ftype,
+	gdbarch_d10v_convert_daddr_to_raw,
+	set_gdbarch_d10v_convert_daddr_to_raw, D10V_CONVERT_IADDR_TO_RAW,
+	gdbarch_d10v_convert_iaddr_to_raw_ftype,
+	gdbarch_d10v_convert_iaddr_to_raw,
+	set_gdbarch_d10v_convert_iaddr_to_raw): Delete declarations.
+	* gdbarch.c: Delete the corresponding definitions.
+	(struct gdbarch): Delete members d10v_make_daddr,
+	d10v_make_iaddr, d10v_daddr_p, d10v_iaddr_p,
+	d10v_convert_daddr_to_raw, and d10v_convert_iaddr_to_raw.
+	(startup_gdbarch): Remove initializers for the above.
+	(verify_gdbarch, gdbarch_dump): Don't verify or dump them any
+	more.
+	* d10v-tdep.c (d10v_register_virtual_type): Rather that
+	claiming the stack pointer and PC are 32 bits long (which they
+	aren't), say that the stack pointer is an int16_t, and the
+	program counter is a function pointer.  This allows the rest
+	of GDB to make the appropriate conversions between the code
+	pointer format and real addresses.
+	(d10v_register_convertible, d10v_register_convert_to_virtual,
+	d10v_register_convert_to_raw): Delete function; no registers
+	are convertible now, so we use
+	generic_register_convertible_not instead.
+	(d10v_address_to_pointer, d10v_pointer_to_address): New gdbarch
+	methods.
+	(d10v_push_arguments, d10v_extract_return_value): Remove special
+	cases for code and data pointers.
+	(d10v_gdbarch_init): Set gdbarch_ptr_bit to 16, so that GDB and
+	the target agree on how large pointers are.  Say that addresses
+	are 32 bits long.  Register the address_to_pointer and
+	pointer_to_address conversion functions.  Since no registers are
+	convertible now, register generic_register_convertible_not as the
+	gdbarch_register_convertible method instead of
+	d10v_register_convertible.  Remove registrations for
+        d10v_register_convert_to_virtual,
+	d10v_register_convert_to_raw, gdbarch_d10v_make_daddr,
+	gdbarch_d10v_make_iaddr, gdbarch_d10v_daddr_p,
+	gdbarch_d10v_iaddr_p, gdbarch_d10v_convert_daddr_to_raw, and
+	gdbarch_d10v_convert_iaddr_to_raw.
+	
 	* printcmd.c (print_scalar_formatted): If we are printing an
 	address, remember that TARGET_ADDR_BIT is not always equal to
 	TARGET_PTR_BIT.

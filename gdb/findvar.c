@@ -729,11 +729,6 @@ value_from_register (struct type *type, int regnum, struct frame_info *frame)
   CHECK_TYPEDEF (type);
   len = TYPE_LENGTH (type);
 
-  /* Pointers on D10V are really only 16 bits, 
-     but we lie to gdb elsewhere... */
-  if (GDB_TARGET_IS_D10V && TYPE_CODE (type) == TYPE_CODE_PTR)
-    len = 2;
-
   VALUE_REGNO (v) = regnum;
 
   num_storage_locs = (len > REGISTER_VIRTUAL_SIZE (regnum) ?
@@ -931,24 +926,6 @@ value_from_register (struct type *type, int regnum, struct frame_info *frame)
 	}
 
       memcpy (VALUE_CONTENTS_RAW (v), raw_buffer + VALUE_OFFSET (v), len);
-    }
-
-  if (GDB_TARGET_IS_D10V
-      && TYPE_CODE (type) == TYPE_CODE_PTR)
-    {
-      unsigned long num;
-      unsigned short snum;
-
-      snum = (unsigned short)
-	extract_unsigned_integer (VALUE_CONTENTS_RAW (v), 2);
-
-      if (TYPE_TARGET_TYPE (type)	  /* pointer to function */
-	  && (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_FUNC))
-	num = D10V_MAKE_IADDR (snum);
-      else 				  /* pointer to data */
-	num = D10V_MAKE_DADDR (snum);
-
-      store_address (VALUE_CONTENTS_RAW (v), 4, num);
     }
 
   return v;

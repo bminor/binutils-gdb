@@ -1293,110 +1293,6 @@ extern void set_gdbarch_pop_frame (struct gdbarch *gdbarch, gdbarch_pop_frame_ft
 #endif
 #endif
 
-/* I wish that these would just go away.... */
-
-/* Default (function) for non- multi-arch platforms. */
-#if (!GDB_MULTI_ARCH) && !defined (D10V_MAKE_DADDR)
-#define D10V_MAKE_DADDR(x) (internal_error (__FILE__, __LINE__, "D10V_MAKE_DADDR"), 0)
-#endif
-
-typedef CORE_ADDR (gdbarch_d10v_make_daddr_ftype) (CORE_ADDR x);
-extern CORE_ADDR gdbarch_d10v_make_daddr (struct gdbarch *gdbarch, CORE_ADDR x);
-extern void set_gdbarch_d10v_make_daddr (struct gdbarch *gdbarch, gdbarch_d10v_make_daddr_ftype *d10v_make_daddr);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (D10V_MAKE_DADDR)
-#error "Non multi-arch definition of D10V_MAKE_DADDR"
-#endif
-#if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (D10V_MAKE_DADDR)
-#define D10V_MAKE_DADDR(x) (gdbarch_d10v_make_daddr (current_gdbarch, x))
-#endif
-#endif
-
-/* Default (function) for non- multi-arch platforms. */
-#if (!GDB_MULTI_ARCH) && !defined (D10V_MAKE_IADDR)
-#define D10V_MAKE_IADDR(x) (internal_error (__FILE__, __LINE__, "D10V_MAKE_IADDR"), 0)
-#endif
-
-typedef CORE_ADDR (gdbarch_d10v_make_iaddr_ftype) (CORE_ADDR x);
-extern CORE_ADDR gdbarch_d10v_make_iaddr (struct gdbarch *gdbarch, CORE_ADDR x);
-extern void set_gdbarch_d10v_make_iaddr (struct gdbarch *gdbarch, gdbarch_d10v_make_iaddr_ftype *d10v_make_iaddr);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (D10V_MAKE_IADDR)
-#error "Non multi-arch definition of D10V_MAKE_IADDR"
-#endif
-#if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (D10V_MAKE_IADDR)
-#define D10V_MAKE_IADDR(x) (gdbarch_d10v_make_iaddr (current_gdbarch, x))
-#endif
-#endif
-
-/* Default (function) for non- multi-arch platforms. */
-#if (!GDB_MULTI_ARCH) && !defined (D10V_DADDR_P)
-#define D10V_DADDR_P(x) (internal_error (__FILE__, __LINE__, "D10V_DADDR_P"), 0)
-#endif
-
-typedef int (gdbarch_d10v_daddr_p_ftype) (CORE_ADDR x);
-extern int gdbarch_d10v_daddr_p (struct gdbarch *gdbarch, CORE_ADDR x);
-extern void set_gdbarch_d10v_daddr_p (struct gdbarch *gdbarch, gdbarch_d10v_daddr_p_ftype *d10v_daddr_p);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (D10V_DADDR_P)
-#error "Non multi-arch definition of D10V_DADDR_P"
-#endif
-#if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (D10V_DADDR_P)
-#define D10V_DADDR_P(x) (gdbarch_d10v_daddr_p (current_gdbarch, x))
-#endif
-#endif
-
-/* Default (function) for non- multi-arch platforms. */
-#if (!GDB_MULTI_ARCH) && !defined (D10V_IADDR_P)
-#define D10V_IADDR_P(x) (internal_error (__FILE__, __LINE__, "D10V_IADDR_P"), 0)
-#endif
-
-typedef int (gdbarch_d10v_iaddr_p_ftype) (CORE_ADDR x);
-extern int gdbarch_d10v_iaddr_p (struct gdbarch *gdbarch, CORE_ADDR x);
-extern void set_gdbarch_d10v_iaddr_p (struct gdbarch *gdbarch, gdbarch_d10v_iaddr_p_ftype *d10v_iaddr_p);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (D10V_IADDR_P)
-#error "Non multi-arch definition of D10V_IADDR_P"
-#endif
-#if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (D10V_IADDR_P)
-#define D10V_IADDR_P(x) (gdbarch_d10v_iaddr_p (current_gdbarch, x))
-#endif
-#endif
-
-/* Default (function) for non- multi-arch platforms. */
-#if (!GDB_MULTI_ARCH) && !defined (D10V_CONVERT_DADDR_TO_RAW)
-#define D10V_CONVERT_DADDR_TO_RAW(x) (internal_error (__FILE__, __LINE__, "D10V_CONVERT_DADDR_TO_RAW"), 0)
-#endif
-
-typedef CORE_ADDR (gdbarch_d10v_convert_daddr_to_raw_ftype) (CORE_ADDR x);
-extern CORE_ADDR gdbarch_d10v_convert_daddr_to_raw (struct gdbarch *gdbarch, CORE_ADDR x);
-extern void set_gdbarch_d10v_convert_daddr_to_raw (struct gdbarch *gdbarch, gdbarch_d10v_convert_daddr_to_raw_ftype *d10v_convert_daddr_to_raw);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (D10V_CONVERT_DADDR_TO_RAW)
-#error "Non multi-arch definition of D10V_CONVERT_DADDR_TO_RAW"
-#endif
-#if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (D10V_CONVERT_DADDR_TO_RAW)
-#define D10V_CONVERT_DADDR_TO_RAW(x) (gdbarch_d10v_convert_daddr_to_raw (current_gdbarch, x))
-#endif
-#endif
-
-/* Default (function) for non- multi-arch platforms. */
-#if (!GDB_MULTI_ARCH) && !defined (D10V_CONVERT_IADDR_TO_RAW)
-#define D10V_CONVERT_IADDR_TO_RAW(x) (internal_error (__FILE__, __LINE__, "D10V_CONVERT_IADDR_TO_RAW"), 0)
-#endif
-
-typedef CORE_ADDR (gdbarch_d10v_convert_iaddr_to_raw_ftype) (CORE_ADDR x);
-extern CORE_ADDR gdbarch_d10v_convert_iaddr_to_raw (struct gdbarch *gdbarch, CORE_ADDR x);
-extern void set_gdbarch_d10v_convert_iaddr_to_raw (struct gdbarch *gdbarch, gdbarch_d10v_convert_iaddr_to_raw_ftype *d10v_convert_iaddr_to_raw);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (D10V_CONVERT_IADDR_TO_RAW)
-#error "Non multi-arch definition of D10V_CONVERT_IADDR_TO_RAW"
-#endif
-#if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (D10V_CONVERT_IADDR_TO_RAW)
-#define D10V_CONVERT_IADDR_TO_RAW(x) (gdbarch_d10v_convert_iaddr_to_raw (current_gdbarch, x))
-#endif
-#endif
-
 typedef void (gdbarch_store_struct_return_ftype) (CORE_ADDR addr, CORE_ADDR sp);
 extern void gdbarch_store_struct_return (struct gdbarch *gdbarch, CORE_ADDR addr, CORE_ADDR sp);
 extern void set_gdbarch_store_struct_return (struct gdbarch *gdbarch, gdbarch_store_struct_return_ftype *store_struct_return);
@@ -2291,12 +2187,6 @@ extern disassemble_info tm_print_insn_info;
 #define TARGET_PRINT_INSN_INFO (&tm_print_insn_info)
 #endif
 
-
-
-/* Explicit test for D10V architecture.
-   USE of these macro's is *STRONGLY* discouraged. */
-
-#define GDB_TARGET_IS_D10V (TARGET_ARCHITECTURE->arch == bfd_arch_d10v)
 
 
 /* Set the dynamic target-system-dependent parameters (architecture,

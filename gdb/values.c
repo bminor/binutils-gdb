@@ -650,9 +650,6 @@ unpack_long (struct type *type, char *valaddr)
     case TYPE_CODE_REF:
       /* Assume a CORE_ADDR can fit in a LONGEST (for now).  Not sure
          whether we want this to be true eventually.  */
-      if (GDB_TARGET_IS_D10V
-	  && len == 2)
-	return D10V_MAKE_DADDR (extract_address (valaddr, len));
       return extract_typed_address (valaddr, type);
 
     case TYPE_CODE_MEMBER:

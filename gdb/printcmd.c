@@ -1946,9 +1946,6 @@ print_frame_args (struct symbol *func, struct frame_info *fi, int num,
 
       if (val)
 	{
-	  if (GDB_TARGET_IS_D10V
-	      && SYMBOL_CLASS (sym) == LOC_REGPARM && TYPE_CODE (VALUE_TYPE (val)) == TYPE_CODE_PTR)
-	    TYPE_LENGTH (VALUE_TYPE (val)) = 2;
 #ifdef UI_OUT
 	  val_print (VALUE_TYPE (val), VALUE_CONTENTS (val), 0,
 		     VALUE_ADDRESS (val),

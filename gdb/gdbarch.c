@@ -211,12 +211,6 @@ struct gdbarch
   gdbarch_push_dummy_frame_ftype *push_dummy_frame;
   gdbarch_push_return_address_ftype *push_return_address;
   gdbarch_pop_frame_ftype *pop_frame;
-  gdbarch_d10v_make_daddr_ftype *d10v_make_daddr;
-  gdbarch_d10v_make_iaddr_ftype *d10v_make_iaddr;
-  gdbarch_d10v_daddr_p_ftype *d10v_daddr_p;
-  gdbarch_d10v_iaddr_p_ftype *d10v_iaddr_p;
-  gdbarch_d10v_convert_daddr_to_raw_ftype *d10v_convert_daddr_to_raw;
-  gdbarch_d10v_convert_iaddr_to_raw_ftype *d10v_convert_iaddr_to_raw;
   gdbarch_store_struct_return_ftype *store_struct_return;
   gdbarch_store_return_value_ftype *store_return_value;
   gdbarch_extract_struct_value_address_ftype *extract_struct_value_address;
@@ -337,12 +331,6 @@ struct gdbarch startup_gdbarch =
   0,
   0,
   generic_get_saved_register,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
   0,
   0,
   0,
@@ -695,12 +683,6 @@ verify_gdbarch (struct gdbarch *gdbarch)
       && (gdbarch->pop_frame == 0))
     internal_error (__FILE__, __LINE__,
                     "gdbarch: verify_gdbarch: pop_frame invalid");
-  /* Skip verify of d10v_make_daddr, invalid_p == 0 */
-  /* Skip verify of d10v_make_iaddr, invalid_p == 0 */
-  /* Skip verify of d10v_daddr_p, invalid_p == 0 */
-  /* Skip verify of d10v_iaddr_p, invalid_p == 0 */
-  /* Skip verify of d10v_convert_daddr_to_raw, invalid_p == 0 */
-  /* Skip verify of d10v_convert_iaddr_to_raw, invalid_p == 0 */
   if ((GDB_MULTI_ARCH >= 2)
       && (gdbarch->store_struct_return == 0))
     internal_error (__FILE__, __LINE__,
@@ -1258,42 +1240,6 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                       "gdbarch_dump: %s # %s\n",
                       "POP_FRAME(-)",
                       XSTRING (POP_FRAME (-)));
-#endif
-#ifdef D10V_MAKE_DADDR
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "D10V_MAKE_DADDR(x)",
-                      XSTRING (D10V_MAKE_DADDR (x)));
-#endif
-#ifdef D10V_MAKE_IADDR
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "D10V_MAKE_IADDR(x)",
-                      XSTRING (D10V_MAKE_IADDR (x)));
-#endif
-#ifdef D10V_DADDR_P
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "D10V_DADDR_P(x)",
-                      XSTRING (D10V_DADDR_P (x)));
-#endif
-#ifdef D10V_IADDR_P
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "D10V_IADDR_P(x)",
-                      XSTRING (D10V_IADDR_P (x)));
-#endif
-#ifdef D10V_CONVERT_DADDR_TO_RAW
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "D10V_CONVERT_DADDR_TO_RAW(x)",
-                      XSTRING (D10V_CONVERT_DADDR_TO_RAW (x)));
-#endif
-#ifdef D10V_CONVERT_IADDR_TO_RAW
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "D10V_CONVERT_IADDR_TO_RAW(x)",
-                      XSTRING (D10V_CONVERT_IADDR_TO_RAW (x)));
 #endif
 #if defined (STORE_STRUCT_RETURN) && GDB_MULTI_ARCH
   /* Macro might contain `[{}]' when not multi-arch */
@@ -1998,48 +1944,6 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         "gdbarch_dump: POP_FRAME = 0x%08lx\n",
                         (long) current_gdbarch->pop_frame
                         /*POP_FRAME ()*/);
-#endif
-#ifdef D10V_MAKE_DADDR
-  if (GDB_MULTI_ARCH)
-    fprintf_unfiltered (file,
-                        "gdbarch_dump: D10V_MAKE_DADDR = 0x%08lx\n",
-                        (long) current_gdbarch->d10v_make_daddr
-                        /*D10V_MAKE_DADDR ()*/);
-#endif
-#ifdef D10V_MAKE_IADDR
-  if (GDB_MULTI_ARCH)
-    fprintf_unfiltered (file,
-                        "gdbarch_dump: D10V_MAKE_IADDR = 0x%08lx\n",
-                        (long) current_gdbarch->d10v_make_iaddr
-                        /*D10V_MAKE_IADDR ()*/);
-#endif
-#ifdef D10V_DADDR_P
-  if (GDB_MULTI_ARCH)
-    fprintf_unfiltered (file,
-                        "gdbarch_dump: D10V_DADDR_P = 0x%08lx\n",
-                        (long) current_gdbarch->d10v_daddr_p
-                        /*D10V_DADDR_P ()*/);
-#endif
-#ifdef D10V_IADDR_P
-  if (GDB_MULTI_ARCH)
-    fprintf_unfiltered (file,
-                        "gdbarch_dump: D10V_IADDR_P = 0x%08lx\n",
-                        (long) current_gdbarch->d10v_iaddr_p
-                        /*D10V_IADDR_P ()*/);
-#endif
-#ifdef D10V_CONVERT_DADDR_TO_RAW
-  if (GDB_MULTI_ARCH)
-    fprintf_unfiltered (file,
-                        "gdbarch_dump: D10V_CONVERT_DADDR_TO_RAW = 0x%08lx\n",
-                        (long) current_gdbarch->d10v_convert_daddr_to_raw
-                        /*D10V_CONVERT_DADDR_TO_RAW ()*/);
-#endif
-#ifdef D10V_CONVERT_IADDR_TO_RAW
-  if (GDB_MULTI_ARCH)
-    fprintf_unfiltered (file,
-                        "gdbarch_dump: D10V_CONVERT_IADDR_TO_RAW = 0x%08lx\n",
-                        (long) current_gdbarch->d10v_convert_iaddr_to_raw
-                        /*D10V_CONVERT_IADDR_TO_RAW ()*/);
 #endif
 #ifdef STORE_STRUCT_RETURN
   if (GDB_MULTI_ARCH)
@@ -3706,114 +3610,6 @@ set_gdbarch_pop_frame (struct gdbarch *gdbarch,
                        gdbarch_pop_frame_ftype pop_frame)
 {
   gdbarch->pop_frame = pop_frame;
-}
-
-CORE_ADDR
-gdbarch_d10v_make_daddr (struct gdbarch *gdbarch, CORE_ADDR x)
-{
-  if (gdbarch->d10v_make_daddr == 0)
-    internal_error (__FILE__, __LINE__,
-                    "gdbarch: gdbarch_d10v_make_daddr invalid");
-  if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_d10v_make_daddr called\n");
-  return gdbarch->d10v_make_daddr (x);
-}
-
-void
-set_gdbarch_d10v_make_daddr (struct gdbarch *gdbarch,
-                             gdbarch_d10v_make_daddr_ftype d10v_make_daddr)
-{
-  gdbarch->d10v_make_daddr = d10v_make_daddr;
-}
-
-CORE_ADDR
-gdbarch_d10v_make_iaddr (struct gdbarch *gdbarch, CORE_ADDR x)
-{
-  if (gdbarch->d10v_make_iaddr == 0)
-    internal_error (__FILE__, __LINE__,
-                    "gdbarch: gdbarch_d10v_make_iaddr invalid");
-  if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_d10v_make_iaddr called\n");
-  return gdbarch->d10v_make_iaddr (x);
-}
-
-void
-set_gdbarch_d10v_make_iaddr (struct gdbarch *gdbarch,
-                             gdbarch_d10v_make_iaddr_ftype d10v_make_iaddr)
-{
-  gdbarch->d10v_make_iaddr = d10v_make_iaddr;
-}
-
-int
-gdbarch_d10v_daddr_p (struct gdbarch *gdbarch, CORE_ADDR x)
-{
-  if (gdbarch->d10v_daddr_p == 0)
-    internal_error (__FILE__, __LINE__,
-                    "gdbarch: gdbarch_d10v_daddr_p invalid");
-  if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_d10v_daddr_p called\n");
-  return gdbarch->d10v_daddr_p (x);
-}
-
-void
-set_gdbarch_d10v_daddr_p (struct gdbarch *gdbarch,
-                          gdbarch_d10v_daddr_p_ftype d10v_daddr_p)
-{
-  gdbarch->d10v_daddr_p = d10v_daddr_p;
-}
-
-int
-gdbarch_d10v_iaddr_p (struct gdbarch *gdbarch, CORE_ADDR x)
-{
-  if (gdbarch->d10v_iaddr_p == 0)
-    internal_error (__FILE__, __LINE__,
-                    "gdbarch: gdbarch_d10v_iaddr_p invalid");
-  if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_d10v_iaddr_p called\n");
-  return gdbarch->d10v_iaddr_p (x);
-}
-
-void
-set_gdbarch_d10v_iaddr_p (struct gdbarch *gdbarch,
-                          gdbarch_d10v_iaddr_p_ftype d10v_iaddr_p)
-{
-  gdbarch->d10v_iaddr_p = d10v_iaddr_p;
-}
-
-CORE_ADDR
-gdbarch_d10v_convert_daddr_to_raw (struct gdbarch *gdbarch, CORE_ADDR x)
-{
-  if (gdbarch->d10v_convert_daddr_to_raw == 0)
-    internal_error (__FILE__, __LINE__,
-                    "gdbarch: gdbarch_d10v_convert_daddr_to_raw invalid");
-  if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_d10v_convert_daddr_to_raw called\n");
-  return gdbarch->d10v_convert_daddr_to_raw (x);
-}
-
-void
-set_gdbarch_d10v_convert_daddr_to_raw (struct gdbarch *gdbarch,
-                                       gdbarch_d10v_convert_daddr_to_raw_ftype d10v_convert_daddr_to_raw)
-{
-  gdbarch->d10v_convert_daddr_to_raw = d10v_convert_daddr_to_raw;
-}
-
-CORE_ADDR
-gdbarch_d10v_convert_iaddr_to_raw (struct gdbarch *gdbarch, CORE_ADDR x)
-{
-  if (gdbarch->d10v_convert_iaddr_to_raw == 0)
-    internal_error (__FILE__, __LINE__,
-                    "gdbarch: gdbarch_d10v_convert_iaddr_to_raw invalid");
-  if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_d10v_convert_iaddr_to_raw called\n");
-  return gdbarch->d10v_convert_iaddr_to_raw (x);
-}
-
-void
-set_gdbarch_d10v_convert_iaddr_to_raw (struct gdbarch *gdbarch,
-                                       gdbarch_d10v_convert_iaddr_to_raw_ftype d10v_convert_iaddr_to_raw)
-{
-  gdbarch->d10v_convert_iaddr_to_raw = d10v_convert_iaddr_to_raw;
 }
 
 void
