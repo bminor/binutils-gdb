@@ -42,7 +42,7 @@ host_tools="texinfo byacc flex bison binutils ld gas gcc gdb make patch
 # these libraries are built for the target environment, and are built after
 # the host libraries and the host tools (which may be a cross compiler)
 #
-target_libs="target-libiberty target-libgloss target-newlib target-libio target-librx target-libstdc++ target-libg++ target-winsup"
+target_libs="target-libiberty target-libgloss target-newlib target-libio target-librx target-libstdc++ target-libg++"
 
 
 # these tools are built using the target libs, and are intended to run only
@@ -407,6 +407,7 @@ case "${target}" in
   i[345]86-*-win32)
     # Can't build gdb for win32 if not native.
     # make/glob's configure uses some AC_TRY_RUN type tests
+    target_configdirs="$target_configdirs target-winsup"
     if [ x${is_cross_compiler} = xyes ]; then
 	    noconfigdirs="$noconfigdirs gdb tk make"
     fi

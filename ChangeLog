@@ -1,3 +1,8 @@
+Fri Nov 17 17:42:25 1995  Jason Molenda  (crash@phydeaux.cygnus.com)
+
+	* configure.in (target_configdirs): add target-winsup only
+	for win32 target systems.
+
 Thu Nov 16 14:04:47 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.in (all-target-libgloss): Depend upon
