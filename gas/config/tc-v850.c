@@ -197,7 +197,7 @@ v850_offset (ignore)
   int temp = get_absolute_expression ();
 
   pfrag = frag_var (rs_org, 1, 1, (relax_substateT)0, (symbolS *)0,
-                       (offsetT) temp, (char *) 0);
+		    (offsetT) temp, (char *) 0);
   *pfrag = 0;
 
   demand_empty_rest_of_line ();
@@ -396,12 +396,12 @@ v850_comm (area)
 	}
       else
 	{
-          segT   old_sec;
-          int    old_subsec;
+	  segT   old_sec;
+	  int    old_subsec;
 
 	allocate_common:
-          old_sec = now_seg;
-          old_subsec = now_subseg;
+	  old_sec = now_seg;
+	  old_subsec = now_subseg;
 
 	  S_SET_VALUE (symbolP, (valueT) size);
 	  S_SET_ALIGN (symbolP, temp);
@@ -477,7 +477,7 @@ set_machine (number)
 
   switch (machine)
     {
-    case 0:               processor_mask = PROCESSOR_V850;   break;
+    case 0:		  processor_mask = PROCESSOR_V850;   break;
     case bfd_mach_v850e:  processor_mask = PROCESSOR_V850E;  break;
     }
 }
@@ -495,7 +495,7 @@ v850_longcode (type)
       if (type == 1)
 	as_warn (".longcall pseudo-op seen when not relaxing");
       else
-	as_warn (".longjump pseudo-op seen when not relaxing");	
+	as_warn (".longjump pseudo-op seen when not relaxing");
     }
 
   expression (&ex);
@@ -508,7 +508,7 @@ v850_longcode (type)
       return;
     }
 
-  if (type == 1) 
+  if (type == 1)
     fix_new_exp (frag_now, frag_now_fix (), 4, & ex, 1,
 		 BFD_RELOC_V850_LONGCALL);
   else
@@ -539,8 +539,8 @@ const pseudo_typeS md_pseudo_table[] =
   { "call_table_data",	v850_seg,		CALL_TABLE_DATA_SECTION	},
   { "call_table_text",	v850_seg,		CALL_TABLE_TEXT_SECTION	},
   { "v850e",		set_machine,		bfd_mach_v850e		},
-  { "longcall",         v850_longcode,          1                       },
-  { "longjump",         v850_longcode,          2                       },
+  { "longcall",		v850_longcode,		1			},
+  { "longjump",		v850_longcode,		2			},
   { NULL,		NULL,			0			}
 };
 
@@ -715,9 +715,9 @@ reg_name_search (regs, regcount, name, accept_numbers)
 }
 
 /* Summary of register_name().
-  
+
    in: Input_line_pointer points to 1st char of operand.
-  
+
    out: An expressionS.
   	The operand may have been a register: in this case, X_op == O_register,
   	X_add_number is set to the register number, and truth is returned.
@@ -749,7 +749,7 @@ register_name (expressionP)
   /* Look to see if it's in the register table.  */
   if (reg_number >= 0)
     {
-      expressionP->X_op         = O_register;
+      expressionP->X_op		= O_register;
       expressionP->X_add_number = reg_number;
 
       /* Make the rest nice.  */
@@ -768,13 +768,13 @@ register_name (expressionP)
 }
 
 /* Summary of system_register_name().
-  
+
    in:  INPUT_LINE_POINTER points to 1st char of operand.
-        EXPRESSIONP points to an expression structure to be filled in.
-        ACCEPT_NUMBERS is true iff numerical register names may be used.
-        ACCEPT_LIST_NAMES is true iff the special names PS and SR may be
-        accepted.
-  
+	EXPRESSIONP points to an expression structure to be filled in.
+	ACCEPT_NUMBERS is true iff numerical register names may be used.
+	ACCEPT_LIST_NAMES is true iff the special names PS and SR may be
+	accepted.
+
    out: An expressionS structure in expressionP.
   	The operand may have been a register: in this case, X_op == O_register,
   	X_add_number is set to the register number, and truth is returned.
@@ -837,7 +837,7 @@ system_register_name (expressionP, accept_numbers, accept_list_names)
   /* Look to see if it's in the register table.  */
   if (reg_number >= 0)
     {
-      expressionP->X_op         = O_register;
+      expressionP->X_op		= O_register;
       expressionP->X_add_number = reg_number;
 
       /* Make the rest nice.  */
@@ -856,9 +856,9 @@ system_register_name (expressionP, accept_numbers, accept_list_names)
 }
 
 /* Summary of cc_name().
-  
+
    in: INPUT_LINE_POINTER points to 1st char of operand.
-  
+
    out: An expressionS.
   	The operand may have been a register: in this case, X_op == O_register,
   	X_add_number is set to the register number, and truth is returned.
@@ -888,7 +888,7 @@ cc_name (expressionP)
   /* Look to see if it's in the register table.  */
   if (reg_number >= 0)
     {
-      expressionP->X_op         = O_constant;
+      expressionP->X_op		= O_constant;
       expressionP->X_add_number = reg_number;
 
       /* Make the rest nice.  */
@@ -917,24 +917,24 @@ skip_white_space ()
 }
 
 /* Summary of parse_register_list ().
-  
+
    in: INPUT_LINE_POINTER  points to 1st char of a list of registers.
-       INSN                is the partially constructed instruction.
-       OPERAND             is the operand being inserted.
-  
+       INSN		   is the partially constructed instruction.
+       OPERAND		   is the operand being inserted.
+
    out: NULL if the parse completed successfully, otherwise a
-        pointer to an error message is returned.  If the parse
-        completes the correct bit fields in the instruction
-        will be filled in.
-  
+	pointer to an error message is returned.  If the parse
+	completes the correct bit fields in the instruction
+	will be filled in.
+
    Parses register lists with the syntax:
-  
+
      { rX }
      { rX, rY }
      { rX - rY }
      { rX - rY, rZ }
      etc
-  
+
    and also parses constant epxressions whoes bits indicate the
    registers in the lists.  The LSB in the expression refers to
    the lowest numbered permissable register in the register list,
@@ -1158,7 +1158,6 @@ md_show_usage (stream)
   fprintf (stream, _("  -mv850e                   The code is targeted at the v850e\n"));
   fprintf (stream, _("  -mv850any                 The code is generic, despite any processor specific instructions\n"));
   fprintf (stream, _("  -mrelax                   Enable relaxation\n"));
-  
 }
 
 int
@@ -1347,7 +1346,7 @@ md_begin ()
   else
     /* xgettext:c-format  */
     as_bad (_("Unable to determine default target processor from string: %s"),
-            TARGET_CPU);
+	    TARGET_CPU);
 
   v850_hash = hash_new ();
 
@@ -1509,13 +1508,13 @@ v850_reloc_prefix (operand)
       return reloc;							\
     }
 
-  CHECK_ ("hi0",    BFD_RELOC_HI16         );
-  CHECK_ ("hi",     BFD_RELOC_HI16_S       );
-  CHECK_ ("lo",     BFD_RELOC_LO16         );
+  CHECK_ ("hi0",    BFD_RELOC_HI16	   );
+  CHECK_ ("hi",	    BFD_RELOC_HI16_S	   );
+  CHECK_ ("lo",	    BFD_RELOC_LO16	   );
   CHECK_ ("sdaoff", handle_sdaoff (operand));
   CHECK_ ("zdaoff", handle_zdaoff (operand));
   CHECK_ ("tdaoff", handle_tdaoff (operand));
-  CHECK_ ("hilo",   BFD_RELOC_32           );
+  CHECK_ ("hilo",   BFD_RELOC_32	   );
   CHECK_ ("ctoff",  handle_ctoff (operand) );
 
   /* Restore skipped parenthesis.  */
@@ -1791,8 +1790,8 @@ md_assemble (str)
 			}
 
 		      extra_data_after_insn = TRUE;
-		      extra_data_len        = 4;
-		      extra_data            = 0;
+		      extra_data_len	    = 4;
+		      extra_data	    = 0;
 		      break;
 
 		    default:
@@ -1820,8 +1819,8 @@ md_assemble (str)
 			}
 
 		      extra_data_after_insn = TRUE;
-		      extra_data_len        = 4;
-		      extra_data            = ex.X_add_number;
+		      extra_data_len	    = 4;
+		      extra_data	    = ex.X_add_number;
 		    }
 
 		  if (fc > MAX_INSN_FIXUPS)
@@ -1897,7 +1896,7 @@ md_assemble (str)
 
 		  /* The parse_register_list() function has already done
 		     everything, so fake a dummy expression.  */
-		  ex.X_op         = O_constant;
+		  ex.X_op	  = O_constant;
 		  ex.X_add_number = 0;
 		}
 	      else if (operand->flags & V850E_IMMEDIATE16)
@@ -1917,9 +1916,9 @@ md_assemble (str)
 		    }
 
 		  extra_data_after_insn = TRUE;
-		  extra_data_len        = 2;
-		  extra_data            = ex.X_add_number;
-		  ex.X_add_number       = 0;
+		  extra_data_len	= 2;
+		  extra_data		= ex.X_add_number;
+		  ex.X_add_number	= 0;
 		}
 	      else if (operand->flags & V850E_IMMEDIATE32)
 		{
@@ -1929,9 +1928,9 @@ md_assemble (str)
 		    errmsg = _("constant expression expected");
 
 		  extra_data_after_insn = TRUE;
-		  extra_data_len        = 4;
-		  extra_data            = ex.X_add_number;
-		  ex.X_add_number       = 0;
+		  extra_data_len	= 4;
+		  extra_data		= ex.X_add_number;
+		  ex.X_add_number	= 0;
 		}
 	      else if (register_name (&ex)
 		       && (operand->flags & V850_OPERAND_REG) == 0)
@@ -2216,7 +2215,7 @@ md_assemble (str)
 	  fix_new_exp (frag_now,
 		       f - frag_now->fr_literal, 4,
 		       & fixups[i].exp,
-		       1 /* FIXME: V850_OPERAND_RELATIVE ???  */,
+		       (operand->flags & V850_OPERAND_DISP) != 0,
 		       (bfd_reloc_code_real_type) (fixups[i].opindex
 						   + (int) BFD_RELOC_UNUSED));
 	}
@@ -2235,7 +2234,7 @@ tc_gen_reloc (seg, fixp)
 {
   arelent *reloc;
 
-  reloc               = (arelent *) xmalloc (sizeof (arelent));
+  reloc		      = (arelent *) xmalloc (sizeof (arelent));
   reloc->sym_ptr_ptr  = (asymbol **) xmalloc (sizeof (asymbol *));
   *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
   reloc->address      = fixp->fx_frag->fr_address + fixp->fx_where;
@@ -2255,7 +2254,7 @@ tc_gen_reloc (seg, fixp)
       reloc->addend = fixp->fx_addnumber;
     }
 
-  reloc->howto        = bfd_reloc_type_lookup (stdoutput, fixp->fx_r_type);
+  reloc->howto = bfd_reloc_type_lookup (stdoutput, fixp->fx_r_type);
 
   if (reloc->howto == (reloc_howto_type *) NULL)
     {
@@ -2285,7 +2284,7 @@ v850_handle_align (frag)
       && now_seg != v850_seg_table[TBSS_SECTION].s
       && now_seg != v850_seg_table[ZBSS_SECTION].s)
     fix_new (frag, frag->fr_fix, 2, & abs_symbol, frag->fr_offset, 0,
-           BFD_RELOC_V850_ALIGN);
+	     BFD_RELOC_V850_ALIGN);
 }
 
 /* Return current size of variable part of frag.  */
@@ -2370,7 +2369,7 @@ md_apply_fix3 (fixP, valueP, seg)
       operand = &v850_operands[opindex];
 
       /* Fetch the instruction, insert the fully resolved operand
-         value, and stuff the instruction back again.
+	 value, and stuff the instruction back again.
 
 	 Note the instruction has been stored in little endian
 	 format!  */

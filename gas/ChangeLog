@@ -1,5 +1,10 @@
 2003-07-15  Alan Modra  <amodra@bigpond.net.au>
 
+	* config/tc-v850.c (md_assemble): When no reloc, create pcrel fixups
+	only for V850_OPERAND_DISP operands.
+
+2003-07-15  Alan Modra  <amodra@bigpond.net.au>
+
 	* frags.c (frag_more): Move segment checks to..
 	(frag_alloc_check): ..here.  New function.
 	(frag_append_1_char): Call frag_alloc_check.
