@@ -1,3 +1,16 @@
+Thu Jul 30 21:41:10 1998  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* d30v-opc.c (d30v_opcode_table): Add new "LKR" flag to some
+	instructions.
+
+start-sanitize-m32rx
+Tue Jul 28 13:15:39 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	Add support for new versions of mulwhi,mulwlo,macwhi,macwlo that
+	accept an accumulator choice.
+	* m32r-opc.c,m32r-opc.h: Regenerate.
+
+end-sanitize-m32rx
 Tue Jul 28 11:00:09 1998  Jeffrey A Law  (law@cygnus.com)
 
 	* m10300-opc.c: Add entries for "no_match_operands" field in
