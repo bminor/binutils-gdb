@@ -1,3 +1,11 @@
+2004-06-07  Andrew Cagney  <cagney@gnu.org>
+
+	* target.h (PC_REQUIRES_RUN_BEFORE_USE): Delete definition.
+	* config/pa/tm-hppa.h (DEPRECATED_PC_REQUIRES_RUN_BEFORE_USE):
+	Rename PC_REQUIRES_RUN_BEFORE_USE.
+	* breakpoint.c (breakpoint_sals_to_pc): Update.  Wrap reference in
+	#ifdef.
+
 2004-06-07  Randolph Chung  <tausq@debian.org>
 
 	* hppa-tdep.c (hppa_frame_cache): Handle the cases when we start

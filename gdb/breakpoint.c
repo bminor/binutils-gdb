@@ -5025,7 +5025,8 @@ breakpoint_sals_to_pc (struct symtabs_and_lines *sals,
 
          Give the target a chance to bless sals.sals[i].pc before we
          try to make a breakpoint for it. */
-      if (PC_REQUIRES_RUN_BEFORE_USE (sals->sals[i].pc))
+#ifdef DEPRECATED_PC_REQUIRES_RUN_BEFORE_USE
+      if (DEPRECATED_PC_REQUIRES_RUN_BEFORE_USE (sals->sals[i].pc))
 	{
 	  if (address == NULL)
 	    error ("Cannot break without a running program.");
@@ -5033,6 +5034,7 @@ breakpoint_sals_to_pc (struct symtabs_and_lines *sals,
 	    error ("Cannot break on %s without a running program.", 
 		   address);
 	}
+#endif
     }
 }
 

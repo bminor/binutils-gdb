@@ -1088,15 +1088,6 @@ extern void (*deprecated_target_new_objfile_hook) (struct objfile *);
     (*current_target.to_stopped_data_address) ()
 #endif
 
-/* Sometimes gdb may pick up what appears to be a valid target address
-   from a minimal symbol, but the value really means, essentially,
-   "This is an index into a table which is populated when the inferior
-   is run.  Therefore, do not attempt to use this as a PC."  */
-
-#if !defined(PC_REQUIRES_RUN_BEFORE_USE)
-#define PC_REQUIRES_RUN_BEFORE_USE(pc) (0)
-#endif
-
 /* This will only be defined by a target that supports catching vfork events,
    such as HP-UX.
 

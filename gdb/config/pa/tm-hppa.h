@@ -29,7 +29,7 @@
 #define GDB_MULTI_ARCH 1
 
 extern int hppa_pc_requires_run_before_use (CORE_ADDR pc);
-#define PC_REQUIRES_RUN_BEFORE_USE(pc) hppa_pc_requires_run_before_use (pc)
+#define DEPRECATED_PC_REQUIRES_RUN_BEFORE_USE(pc) hppa_pc_requires_run_before_use (pc)
 
 /* PA specific macro to see if the current instruction is nullified. */
 #ifndef INSTRUCTION_NULLIFIED
