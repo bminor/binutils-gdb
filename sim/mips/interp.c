@@ -344,7 +344,7 @@ sim_open (kind, cb, abfd, argv)
 
 /* start-sanitize-sky */
 #ifdef TARGET_SKY
-  sky_command_options (sd);
+  sky_command_options_open (sd);
 #endif
 /* end-sanitize-sky */
 
@@ -661,6 +661,13 @@ sim_close (sd, quitting)
 #ifdef DEBUG
   printf("DBG: sim_close: entered (quitting = %d)\n",quitting);
 #endif
+
+/* start-sanitize-sky */
+#ifdef TARGET_SKY
+  sky_command_options_close (sd);
+#endif
+/* end-sanitize-sky */
+
 
   /* "quitting" is non-zero if we cannot hang on errors */
 
