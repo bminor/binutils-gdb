@@ -140,6 +140,7 @@ coff_i860_reloc_nyi (bfd *abfd ATTRIBUTE_UNUSED,
 {
   reloc_howto_type *howto = reloc_entry->howto;
   fprintf (stderr, _("Relocation `%s' not yet implemented\n"), howto->name);
+  return bfd_reloc_notsupported;
 }
 
 #ifndef PCRELOFFSET

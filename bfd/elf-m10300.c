@@ -1743,10 +1743,13 @@ elf32_mn10300_finish_hash_table_entry (gen_entry, in_args)
     byte_count += 2;
 
   /* Count the insn to allocate stack space too.  */
-  if (entry->stack_size > 0 && entry->stack_size <= 128)
-    byte_count += 3;
-  else if (entry->stack_size > 0 && entry->stack_size < 256)
-    byte_count += 4;
+  if (entry->stack_size > 0)
+    {
+      if (entry->stack_size <= 128)
+	byte_count += 3;
+      else
+	byte_count += 4;
+    }
 
   /* If using "call" will result in larger code, then turn all
      the associated "call" instructions into "calls" instructions.  */
@@ -2238,11 +2241,13 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 		      if (sym_hash->movm_args)
 			bytes += 2;
 
-		      if (sym_hash->stack_size && sym_hash->stack_size <= 128)
-			bytes += 3;
-		      else if (sym_hash->stack_size
-			       && sym_hash->stack_size < 256)
-			bytes += 4;
+		      if (sym_hash->stack_size > 0)
+			{
+			  if (sym_hash->stack_size <= 128)
+			    bytes += 3;
+			  else
+			    bytes += 4;
+			}
 
 		      /* Note that we've deleted prologue bytes for this
 			 function.  */
@@ -2290,11 +2295,13 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 		      if (sym_hash->movm_args)
 			bytes += 2;
 
-		      if (sym_hash->stack_size && sym_hash->stack_size <= 128)
-			bytes += 3;
-		      else if (sym_hash->stack_size
-			       && sym_hash->stack_size < 256)
-			bytes += 4;
+		      if (sym_hash->stack_size > 0)
+			{
+			  if (sym_hash->stack_size <= 128)
+			    bytes += 3;
+			  else
+			    bytes += 4;
+			}
 
 		      /* Note that we've deleted prologue bytes for this
 			 function.  */

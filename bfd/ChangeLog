@@ -1,5 +1,13 @@
 2003-12-04  Alan Modra  <amodra@bigpond.net.au>
 
+	* coff-i860.c (coff_i860_reloc_nyi): Return bfd_reloc_not_supported.
+	* elf-m10300.c (elf32_mn10300_finish_hash_table_entry): Warning fixes.
+	(mn10300_elf_relax_section): Likewise.
+	* nlm32-alpha.c (ONES): Define.
+	(nlm32_alpha_howto_table): Use it to avoid warnings.
+
+2003-12-04  Alan Modra  <amodra@bigpond.net.au>
+
 	* elf32-i386.c (elf_i386_object_p): Delete.
 	(elf_backend_object_p): Don't define.
 	* elf32-s390.c (elf_s390_object_p): No need to alloc tdata here.
