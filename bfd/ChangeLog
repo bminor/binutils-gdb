@@ -1,3 +1,8 @@
+2004-04-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-arm.h (elf32_arm_final_link_relocate): Handle
+	R_ARM_ALU* only if OLD_ARM_ABI is not defined.
+
 2004-04-01  Paul Brook  <paul@codesourcery.com>
 
 	* bfd-in.h (bfd_elf32_arm_process_before_allocation): Update.

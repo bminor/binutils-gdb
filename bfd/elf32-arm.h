@@ -1767,6 +1767,7 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
 	return bfd_reloc_ok;
       }
 
+#ifndef OLD_ARM_ABI
     case R_ARM_ALU_PCREL7_0:
     case R_ARM_ALU_PCREL15_8:
     case R_ARM_ALU_PCREL23_15:
@@ -1791,6 +1792,7 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
 	bfd_put_32 (input_bfd, value, hit_data);
       }
       return bfd_reloc_ok;
+#endif
 
     case R_ARM_GNU_VTINHERIT:
     case R_ARM_GNU_VTENTRY:
