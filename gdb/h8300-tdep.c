@@ -838,8 +838,10 @@ h8300_print_register_hook (int regno)
       frame_register_read (selected_frame, regno, b);
       l = b[REGISTER_VIRTUAL_SIZE (CCR_REGNUM) - 1];
       printf_unfiltered ("\t");
-      printf_unfiltered ("I-%d - ", (l & 0x80) != 0);
-      printf_unfiltered ("H-%d - ", (l & 0x20) != 0);
+      printf_unfiltered ("I-%d ", (l & 0x80) != 0);
+      printf_unfiltered ("UI-%d ", (l & 0x40) != 0);
+      printf_unfiltered ("H-%d ", (l & 0x20) != 0);
+      printf_unfiltered ("U-%d ", (l & 0x10) != 0);
       N = (l & 0x8) != 0;
       Z = (l & 0x4) != 0;
       V = (l & 0x2) != 0;
