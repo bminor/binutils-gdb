@@ -45,21 +45,21 @@ Specifies that the assembled code should be marked as being targeted at
 the V850 processor.  This allows the linker to detect attempts to link
 such code with code assembled for other processors.
 
-@c start-santize-v850e
+@c start-sanitize-v850e
 @cindex @code{-mv850e} command line option, V850
 @item -mv850e
 Specifies that the assembled code should be marked as being targeted at
 the V850E processor.  This allows the linker to detect attempts to link
 such code with code assembled for other processors.
-@c end-santize-v850e
+@c end-sanitize-v850e
 
-@c start-santize-v850eq
+@c start-sanitize-v850eq
 @cindex @code{-mv850eq} command line option, V850
 @item -mv850eq
 Specifies that the assembled code should be marked as being targeted at
 the V850EQ processor.  This allows the linker to detect attempts to link
 such code with code assembled for other processors.
-@c end-santize-v850eq
+@c end-sanitize-v850eq
 
 @end table
 
@@ -172,7 +172,7 @@ ecr
 @cindex @code{psw} register, V850
 @item system register 5
 psw
-@c start-santize-v850e
+@c start-sanitize-v850e
 @cindex @code{ctpc} register, V850
 @item system register 16
 ctpc
@@ -188,7 +188,7 @@ dbpsw
 @cindex @code{ctbp} register, V850
 @item system register 20
 ctbp
-@c end-santize-v850e
+@c end-sanitize-v850e
 @end table
 
 @node V850 Floating Point
@@ -220,21 +220,21 @@ Specifies that the assembled code should be marked as being targeted at
 the V850 processor.  This allows the linker to detect attempts to link
 such code with code assembled for other processors.
 
-@c start-santize-v850e
+@c start-sanitize-v850e
 @cindex @code{.v850e} directive, V850
 @item .v850e
 Specifies that the assembled code should be marked as being targeted at
 the V850E processor.  This allows the linker to detect attempts to link
 such code with code assembled for other processors.
-@c end-santize-v850e
+@c end-sanitize-v850e
 
-@c start-santize-v850eq
+@c start-sanitize-v850eq
 @cindex @code{.v850eq} directive, V850
 @item .v850eq
 Specifies that the assembled code should be marked as being targeted at
 the V850EQ processor.  This allows the linker to detect attempts to link
 such code with code assembled for other processors.
-@c end-santize-v850eq
+@c end-sanitize-v850eq
 
 @end table
 
@@ -294,7 +294,7 @@ in the top bit of the lo() pseudo op, the movhi instruction actually
 stores 0 into r6 (0xFFFF + 1 = 0x0000), so that the movea instruction
 stores 0xFFFFFFFF into r6 - the right value.
 
-@c start-santize-v850e
+@c start-sanitize-v850e
 @cindex @code{hilo} pseudo-op, V850
 @item hilo()
 Computes the 32 bit value of the given expression and stores it into
@@ -305,7 +305,7 @@ mov instruction).  For example:
 
 computes the absolute address of label 'here' and puts the result into
 register 6.  
-@c end-santize-v850e
+@c end-sanitize-v850e
 
 @cindex @code{sdaoff} pseudo-op, V850
 @item sdaoff()
@@ -329,9 +329,9 @@ command line option].
 Computes the offset of the named variable from the start of the Tiny
 Data Area (whoes address is held in register 30, the EP register) and
 stores the result as a
-@c start-santize-v850e
+@c start-sanitize-v850e
 4,5,
-@c end-santize-v850e
+@c end-sanitize-v850e
 7 or 8 bit unsigned value in the immediate
 operand field of the given instruction.  For example:
 
@@ -358,7 +358,7 @@ that the label is somewhere within the first 32K of memory.  (Strictly
 speaking it also possible to access the last 32K of memory as well, as
 the offsets are signed).
 
-@c start-santize-v850e
+@c start-sanitize-v850e
 @cindex @code{ctoff} pseudo-op, V850
 @item ctoff()
 Computes the offset of the named variable from the start of the Call
@@ -371,7 +371,7 @@ example:
 
 will put the call the function whoes address is held in the call table
 at the location labeled 'table_func1'.
-@c end-santize-v850e
+@c end-sanitize-v850e
 
 @end table
 

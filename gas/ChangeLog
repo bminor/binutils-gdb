@@ -282,7 +282,7 @@ Mon Aug 25 11:21:48 1997  Nick Clifton  <nickc@cygnus.com>
 start-sanitize-v850e
 	* config/tc-v850.c (parse_register_list): Support constant
 	expressions as register lists.
-start-sanitize-v850e
+end-sanitize-v850e
 
 Mon Aug 25 10:19:34 1997  Nick Clifton  <nickc@cygnus.com>
 
@@ -429,25 +429,15 @@ Fri Aug 15 14:00:13 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 Wed Aug 13 18:58:56 1997  Nick Clifton  <nickc@cygnus.com>
 
-start-sanitize-v850e
-	* config/.Sanitize (Do-first, Do-last): Add support for keep-v850e
-	command line option.
-end-sanitize-v850e
-
-start-sanitize-v850eq
-	* config/.Sanitize (Do-first, Do-last): Add support for keep-v850eq
-	command line option.
-end-sanitize-v850eq
-
 start-sanitize-v850eq
 	* config/tc-v850.c (md_assemble, md_show_usage, md_parse_option):
 	Add support for v850eq instructions.
-start-sanitize-v850eq
+end-sanitize-v850eq
 	
 start-sanitize-v850e
 	* config/tc-v850.c (md_assemble, md_show_usage, md_parse_option):
 	Add support for v850e instructions.
-start-sanitize-v850e
+end-sanitize-v850e
 	
 	* config/tc-v850.c (md_assemble): Fix error recovery to reload
 	text of entire opcode. 

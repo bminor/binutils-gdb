@@ -81,7 +81,7 @@ Fri Sep 12 11:43:54 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* v850-dis.c (disassemble): Improved display of register lists.
 
-start-sanitize-v850e
+end-sanitize-v850e
 Thu Sep 11 17:35:10 1997  Doug Evans  <dje@canuck.cygnus.com>
 
 	* sparc-opc.c (sparc_opcodes): Fix assembler args to
@@ -157,7 +157,7 @@ Mon Aug 18 11:10:03 1997  Nick Clifton  <nickc@cygnus.com>
 start-sanitize-v850eq
 	* v850-opc.c (v850_opcodes[]): Add support for reversed short load
 	opcodes..
-start-sanitize-v850eq
+end-sanitize-v850eq
 
 start-sanitize-v850e
 Mon Aug 18 11:08:25 1997  Nick Clifton  <nickc@cygnus.com>
@@ -186,25 +186,19 @@ Fri Aug 15 05:17:48 1997  Doug Evans  <dje@canuck.cygnus.com>
 Wed Aug 13 18:52:11 1997  Nick Clifton  <nickc@cygnus.com>
 
 start-sanitize-v850eq
-	* .Sanitize (Do-first): Add support for keep-v850eq command line
-	option.
-	
 	* v850-dis.c (disassemble): Add support for v850EQ instructions.
 	
 	* v850-opc.c (insert_i5div, extract_i5div): New Functions.
 	(v850_opcodes): Add v850EQ instructions.
 end-sanitize-v850eq
 start-sanitize-v850e
-	* .Sanitize (Do-first): Add support for keep-v850e command line
-	option.
-	
 	* v850-dis.c (disassemble): Add support for v850E instructions.
 	
 	* v850-opc.c (insert_d5_4, extract_d5_4, insert_d16_16,
 	extract_d16_16, insert_i9, extract_i9, insert_u9, extract_u9,
 	insert_spe, extract_spe): New Functions.
 	(v850_opcodes): Add v850E instructions.
-start-sanitize-v850e
+end-sanitize-v850e
 	
 	* v850-opc.c: Reorganised and re-layed out to improve readability
 	and portability.
@@ -1435,8 +1429,7 @@ Sat Aug 31 01:27:26 1996  Jeffrey A Law  (law@cygnus.com)
 	(v850_opcodes): Fix mask for jarl and jr.
 
 	* v850-dis.c: New file.  Skeleton for disassembler support.
-	* Makefile.in Remove v850 references, they're not needed here
-	and they weren't being sanitized away.
+	* Makefile.in Remove v850 references, they're not needed here.
 	* configure.in: Add v850-dis.o when building v850 toolchains.
 	* configure: Rebuilt.
 	* disassemble.c (disassembler): Call v850 disassembler.

@@ -451,7 +451,7 @@ Sun Feb  5 16:19:46 1995  David Mosberger-Tang  <davidm@piston.cs.arizona.edu>
 	filename printed in the call-graph function index; line-level
 	profiling should still work, but requires some patience
 
-	* cg_print.c (cg_print_index): sanitized printing of index when
+	* cg_print.c (cg_print_index): sanitised printing of index when
 	using FSF-style output; in particular, output width is now controlled
 	via option --width and the function tries hard to keep columns
 	aligned even in the presence of (occasional) long names

@@ -94,7 +94,7 @@ Mon Sep 15 18:44:05 1997  Jim Wilson  <wilson@cygnus.com>
 
 	* simops.c (Multiply64): Don't store into register zero.
 
-start-sanitize-v850e
+end-sanitize-v850e
 Tue Sep 16 09:02:00 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* Makefile.in (semantics.o): Add dependency.
@@ -439,7 +439,7 @@ Mon Aug 18 10:59:02 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* simops.c (OP_300, OP_400, OP_60, OP_70): Support variant opcodes
 	with US bit set in the PSW.
-start-sanitize-v850eq
+end-sanitize-v850eq
 
 Wed Aug 13 19:06:55 1997  Nick Clifton  <nickc@cygnus.com>
 
@@ -461,15 +461,9 @@ start-sanitize-v850e
 	
 	* simops.c: Add support for v850e instructions.
 	
-	* .Sanitize (Do-first, Do-last): Add support for keep-v850e
-	command line option.
-
 end-sanitize-v850e
 
 start-sanitize-v850eq
-	* .Sanitize (Do-first, Do-last): Add support for keep-v850eq
-	command line option.
-
 	* simops.c: Add support for v850eq instructions.
 end-sanitize-v850eq
 	

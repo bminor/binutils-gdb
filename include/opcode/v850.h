@@ -62,7 +62,7 @@ struct v850_opcode
 /* end-sanitize-v850e */
 /* start-sanitize-v850eq */
 #define PROCESSOR_V850EQ	(1 << 2)		/* Just the V850EQ. */
-/* start-sanitize-v850eq */
+/* end-sanitize-v850eq */
 
 /* The table itself is sorted by major opcode number, and is otherwise
    in the order in which the disassembler should consider

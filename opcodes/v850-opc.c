@@ -277,7 +277,6 @@ extract_u9 (insn, invalid)
   return ret;
 }
 
-/* start-sanitize-v850e */
 static unsigned long
 insert_spe (insn, value, errmsg)
      unsigned long insn;
