@@ -1,5 +1,5 @@
 /* Common code for PA ELF implementations.
-   Copyright 1999, 2000, 2001 Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
 
@@ -29,6 +29,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define ELF_R_TYPE(X)   ELF64_R_TYPE(X)
 #define ELF_R_SYM(X)   ELF64_R_SYM(X)
 #define elf_hppa_internal_shdr Elf64_Internal_Shdr
+#define elf_hppa_reloc_final_type elf64_hppa_reloc_final_type
 #define _bfd_elf_hppa_gen_reloc_type _bfd_elf64_hppa_gen_reloc_type
 #define elf_hppa_relocate_section elf64_hppa_relocate_section
 #define bfd_elf_bfd_final_link bfd_elf64_bfd_final_link
@@ -38,14 +39,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define ELF_R_TYPE(X)   ELF32_R_TYPE(X)
 #define ELF_R_SYM(X)   ELF32_R_SYM(X)
 #define elf_hppa_internal_shdr Elf32_Internal_Shdr
+#define elf_hppa_reloc_final_type elf32_hppa_reloc_final_type
 #define _bfd_elf_hppa_gen_reloc_type _bfd_elf32_hppa_gen_reloc_type
 #define elf_hppa_relocate_section elf32_hppa_relocate_section
 #define bfd_elf_bfd_final_link bfd_elf32_bfd_final_link
 #define elf_hppa_final_link elf32_hppa_final_link
 #endif
-
-elf_hppa_reloc_type ** _bfd_elf_hppa_gen_reloc_type
-  PARAMS ((bfd *, elf_hppa_reloc_type, int, unsigned int, int, asymbol *));
 
 static void elf_hppa_info_to_howto
   PARAMS ((bfd *, arelent *, Elf_Internal_Rela *));
@@ -605,40 +604,17 @@ static reloc_howto_type elf_hppa_howto_table[ELF_HOWTO_TABLE_SIZE] =
 #define OFFSET_14R_FROM_21L 4
 #define OFFSET_14F_FROM_21L 5
 
-/* Return one (or more) BFD relocations which implement the base
-   relocation with modifications based on format and field.  */
+/* Return the final relocation type for the given base type, instruction
+   format, and field selector.  */
 
-elf_hppa_reloc_type **
-_bfd_elf_hppa_gen_reloc_type (abfd, base_type, format, field, ignore, sym)
+elf_hppa_reloc_type
+elf_hppa_reloc_final_type (abfd, base_type, format, field)
      bfd *abfd;
      elf_hppa_reloc_type base_type;
      int format;
      unsigned int field;
-     int ignore ATTRIBUTE_UNUSED;
-     asymbol *sym ATTRIBUTE_UNUSED;
 {
-  elf_hppa_reloc_type *finaltype;
-  elf_hppa_reloc_type **final_types;
-  bfd_size_type amt = sizeof (elf_hppa_reloc_type *) * 2;
-
-  /* Allocate slots for the BFD relocation.  */
-  final_types = (elf_hppa_reloc_type **) bfd_alloc (abfd, amt);
-  if (final_types == NULL)
-    return NULL;
-
-  /* Allocate space for the relocation itself.  */
-  amt = sizeof (elf_hppa_reloc_type);
-  finaltype = (elf_hppa_reloc_type *) bfd_alloc (abfd, amt);
-  if (finaltype == NULL)
-    return NULL;
-
-  /* Some reasonable defaults.  */
-  final_types[0] = finaltype;
-  final_types[1] = NULL;
-
-#define final_type finaltype[0]
-
-  final_type = base_type;
+  elf_hppa_reloc_type final_type = base_type;
 
   /* Just a tangle of nested switch statements to deal with the braindamage
      that a different field selector means a completely different relocation
@@ -677,7 +653,7 @@ _bfd_elf_hppa_gen_reloc_type (abfd, base_type, format, field, ignore, sym)
 	      final_type = R_PARISC_PLABEL14R;
 	      break;
 	    default:
-	      return NULL;
+	      return R_PARISC_NONE;
 	    }
 	  break;
 
@@ -693,7 +669,7 @@ _bfd_elf_hppa_gen_reloc_type (abfd, base_type, format, field, ignore, sym)
 	      final_type = R_PARISC_DIR17R;
 	      break;
 	    default:
-	      return NULL;
+	      return R_PARISC_NONE;
 	    }
 	  break;
 
@@ -717,7 +693,7 @@ _bfd_elf_hppa_gen_reloc_type (abfd, base_type, format, field, ignore, sym)
 	      final_type = R_PARISC_PLABEL21L;
 	      break;
 	    default:
-	      return NULL;
+	      return R_PARISC_NONE;
 	    }
 	  break;
 
@@ -736,7 +712,7 @@ _bfd_elf_hppa_gen_reloc_type (abfd, base_type, format, field, ignore, sym)
 	      final_type = R_PARISC_PLABEL32;
 	      break;
 	    default:
-	      return NULL;
+	      return R_PARISC_NONE;
 	    }
 	  break;
 
@@ -750,12 +726,12 @@ _bfd_elf_hppa_gen_reloc_type (abfd, base_type, format, field, ignore, sym)
 	      final_type = R_PARISC_FPTR64;
 	      break;
 	    default:
-	      return NULL;
+	      return R_PARISC_NONE;
 	    }
 	  break;
 
 	default:
-	  return NULL;
+	  return R_PARISC_NONE;
 	}
       break;
 
@@ -776,7 +752,7 @@ _bfd_elf_hppa_gen_reloc_type (abfd, base_type, format, field, ignore, sym)
 	      final_type = base_type + OFFSET_14F_FROM_21L;
 	      break;
 	    default:
-	      return NULL;
+	      return R_PARISC_NONE;
 	    }
 	  break;
 
@@ -792,12 +768,12 @@ _bfd_elf_hppa_gen_reloc_type (abfd, base_type, format, field, ignore, sym)
 	      final_type = base_type;
 	      break;
 	    default:
-	      return NULL;
+	      return R_PARISC_NONE;
 	    }
 	  break;
 
 	default:
-	  return NULL;
+	  return R_PARISC_NONE;
 	}
       break;
 
@@ -811,7 +787,7 @@ _bfd_elf_hppa_gen_reloc_type (abfd, base_type, format, field, ignore, sym)
 	      final_type = R_PARISC_PCREL12F;
 	      break;
 	    default:
-	      return NULL;
+	      return R_PARISC_NONE;
 	    }
 	  break;
 
@@ -829,7 +805,7 @@ _bfd_elf_hppa_gen_reloc_type (abfd, base_type, format, field, ignore, sym)
 	      final_type = R_PARISC_PCREL14F;
 	      break;
 	    default:
-	      return NULL;
+	      return R_PARISC_NONE;
 	    }
 	  break;
 
@@ -845,7 +821,7 @@ _bfd_elf_hppa_gen_reloc_type (abfd, base_type, format, field, ignore, sym)
 	      final_type = R_PARISC_PCREL17F;
 	      break;
 	    default:
-	      return NULL;
+	      return R_PARISC_NONE;
 	    }
 	  break;
 
@@ -860,7 +836,7 @@ _bfd_elf_hppa_gen_reloc_type (abfd, base_type, format, field, ignore, sym)
 	      final_type = R_PARISC_PCREL21L;
 	      break;
 	    default:
-	      return NULL;
+	      return R_PARISC_NONE;
 	    }
 	  break;
 
@@ -871,12 +847,12 @@ _bfd_elf_hppa_gen_reloc_type (abfd, base_type, format, field, ignore, sym)
 	      final_type = R_PARISC_PCREL22F;
 	      break;
 	    default:
-	      return NULL;
+	      return R_PARISC_NONE;
 	    }
 	  break;
 
 	default:
-	  return NULL;
+	  return R_PARISC_NONE;
 	}
       break;
 
@@ -888,8 +864,44 @@ _bfd_elf_hppa_gen_reloc_type (abfd, base_type, format, field, ignore, sym)
       break;
 
     default:
-      return NULL;
+      return R_PARISC_NONE;
     }
+
+  return final_type;
+}
+
+/* Return one (or more) BFD relocations which implement the base
+   relocation with modifications based on format and field.  */
+
+elf_hppa_reloc_type **
+_bfd_elf_hppa_gen_reloc_type (abfd, base_type, format, field, ignore, sym)
+     bfd *abfd;
+     elf_hppa_reloc_type base_type;
+     int format;
+     unsigned int field;
+     int ignore ATTRIBUTE_UNUSED;
+     asymbol *sym ATTRIBUTE_UNUSED;
+{
+  elf_hppa_reloc_type *finaltype;
+  elf_hppa_reloc_type **final_types;
+  bfd_size_type amt = sizeof (elf_hppa_reloc_type *) * 2;
+
+  /* Allocate slots for the BFD relocation.  */
+  final_types = (elf_hppa_reloc_type **) bfd_alloc (abfd, amt);
+  if (final_types == NULL)
+    return NULL;
+
+  /* Allocate space for the relocation itself.  */
+  amt = sizeof (elf_hppa_reloc_type);
+  finaltype = (elf_hppa_reloc_type *) bfd_alloc (abfd, amt);
+  if (finaltype == NULL)
+    return NULL;
+
+  /* Some reasonable defaults.  */
+  final_types[0] = finaltype;
+  final_types[1] = NULL;
+
+  *finaltype = elf_hppa_reloc_final_type (abfd, base_type, format, field);
 
   return final_types;
 }
