@@ -1,5 +1,7 @@
 2001-07-05  Ben Elliston  <bje@redhat.com>
 
+	* read.c (s_fill): Correct spelling error in comments.
+
 	* doc/c-m88k.texi: New file.
 	* doc/Makefile.am (CPU_DOCS): Add c-m88k.texi.
 	* doc/Makefile.in: Regenerate.

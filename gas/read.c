@@ -1753,10 +1753,10 @@ s_fill (ignore)
       memset (p, 0, (unsigned int) size);
 
       /* The magic number BSD_FILL_SIZE_CROCK_4 is from BSD 4.2 VAX
-         flavoured AS.  The following bizzare behaviour is to be
+         flavoured AS.  The following bizarre behaviour is to be
          compatible with above.  I guess they tried to take up to 8
          bytes from a 4-byte expression and they forgot to sign
-         extend. Un*x Sux.  */
+         extend.  */
 #define BSD_FILL_SIZE_CROCK_4 (4)
       md_number_to_chars (p, (valueT) fill,
 			  (size > BSD_FILL_SIZE_CROCK_4
