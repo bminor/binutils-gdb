@@ -1728,32 +1728,37 @@ open_output (name)
       /* Get the chosen target.  */
       target = bfd_search_for_target (get_target, (void *) output_target);
 
-      if (command_line.endian == ENDIAN_BIG)
-	desired_endian = BFD_ENDIAN_BIG;
-      else
-	desired_endian = BFD_ENDIAN_LITTLE;
-      
-      /* See if the target has the wrong endianness.  This should not happen
-	 if the linker script has provided big and little endian alternatives,
-	 but some scrips don't do this.  */
-      if (target->byteorder != desired_endian)
+      /* If the target is not supported, we cannot do anything.  */
+      if (target != NULL)
 	{
-	  /* If it does, then see if the target provides
-	     an alternative with the correct endianness.  */
-	  if (target->alternative_target != NULL
-	      && (target->alternative_target->byteorder == desired_endian))
-	    output_target = target->alternative_target->name;
+	  if (command_line.endian == ENDIAN_BIG)
+	    desired_endian = BFD_ENDIAN_BIG;
 	  else
+	    desired_endian = BFD_ENDIAN_LITTLE;
+	  
+	  /* See if the target has the wrong endianness.  This should not happen
+	     if the linker script has provided big and little endian alternatives,
+	     but some scrips don't do this.  */
+	  if (target->byteorder != desired_endian)
 	    {
-	      /* Try to find a target as similar as possible to the default
-		 target, but which has the desired endian characteristic.  */
-	      (void) bfd_search_for_target (closest_target_match, (void *) target);
-	      
-	      /* Oh dear - we could not find any targets that satisfy our requirements.  */
-	      if (winner == NULL)
-		einfo (_("%P: warning: could not find any targets that match endianness requirement\n"));
+	      /* If it does, then see if the target provides
+		 an alternative with the correct endianness.  */
+	      if (target->alternative_target != NULL
+		  && (target->alternative_target->byteorder == desired_endian))
+		output_target = target->alternative_target->name;
 	      else
-		output_target = winner->name;
+		{
+		  /* Try to find a target as similar as possible to the default
+		     target, but which has the desired endian characteristic.  */
+		  (void) bfd_search_for_target (closest_target_match, (void *) target);
+		  
+		  /* Oh dear - we could not find any targets that satisfy our
+		     requirements.  */
+		  if (winner == NULL)
+		    einfo (_("%P: warning: could not find any targets that match endianness requirement\n"));
+		  else
+		    output_target = winner->name;
+		}
 	    }
 	}
     }
@@ -3155,14 +3160,15 @@ lang_do_assignments (s, output_section_statement, fill, dot)
 		dot = os->bfd_section->vma + os->bfd_section->_raw_size / opb;
 
 	      }
-	    if (os->load_base) 
+	    if (os->load_base)
 	      {
 		/* If nothing has been placed into the output section then
 		   it won't have a bfd_section. */
 		if (os->bfd_section) 
 		  {
 		    os->bfd_section->lma 
-		      = exp_get_abs_int(os->load_base, 0,"load base", lang_final_phase_enum);
+		      = exp_get_abs_int(os->load_base, 0,"load base",
+					lang_final_phase_enum);
 		  }
 	      }
 	  }
@@ -3872,7 +3878,6 @@ lang_enter_output_section_statement (output_section_statement_name,
   os->load_base = ebase;
   return os;
 }
-
 
 void
 lang_final ()

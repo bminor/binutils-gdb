@@ -1,3 +1,9 @@
+2000-08-25  Nick Clifton  <nickc@redhat.com>
+
+	* ldlang.c (open_output): When choosing the target for a
+	particular endianness, do nothing if the target is not
+	supported.
+
 2000-08-25  H.J. Lu  <hjl@gnu.org>
 
 	* emultempl/elf32.em (gld${EMULATION_NAME}_after_open): Don't
