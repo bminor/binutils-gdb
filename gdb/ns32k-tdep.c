@@ -309,10 +309,6 @@ ns32k_frame_chain (struct frame_info *frame)
   /* In the case of the NS32000 series, the frame's nominal address is the
      FP value, and that address is saved at the previous FP value as a
      4-byte word.  */
-
-  if (deprecated_inside_entry_file (get_frame_pc (frame)))
-    return 0;
-
   return (read_memory_integer (get_frame_base (frame), 4));
 }
 

@@ -1,3 +1,9 @@
+2004-02-02  Andrew Cagney  <cagney@redhat.com>
+
+	* vax-tdep.c (vax_frame_chain): Delete call to
+	deprecated_inside_entry_file.
+	* ns32k-tdep.c (ns32k_frame_chain): Ditto.
+
 2004-02-02  Mark Kettenis  <kettenis@gnu.org>
 
 	* dwarf2-frame.c (dwarf2_frame_cache): Deal with a return address
