@@ -21,6 +21,7 @@
 2000-07-20  Kazu Hirata  <kazu@hxi.com>
 	
 	* read.c: Fix formatting.
+	* write.c: Fix formatting.
 
 2000-07-19  H.J. Lu  <hjl@gnu.org>
 
