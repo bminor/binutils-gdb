@@ -57,6 +57,11 @@ Sat Feb 12 01:08:21 EST 2000  Nicholas Duffek <nsd@cygnus.com>
 	symbol.
 	Checked in by Jim Kingdon  <kingdon@redhat.com>
 
+2000-02-10  Mark Kettenis  <kettenis@gnu.org>
+
+	* gnu-nat.c: Remove hackery to include <bits/waitflags.h>.  It is
+	no longer necessary now we have gdb_wait.h.
+
 2000-02-09  Mark Kettenis  <kettenis@gnu.org>
 
 	* gnu-nat.c (proc_string): Make global.
