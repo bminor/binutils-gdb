@@ -1,3 +1,8 @@
+Sat Apr 23 19:05:52 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* breakpoint.c (breakpoint_1): Annotate each field of output.  Add
+	FIXME-32x64 comment.
+
 Fri Apr 22 16:43:54 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* infrun.c (wait_for_inferior): Move call to flush_cached_frames
