@@ -49,7 +49,6 @@
 #define DO_STRIP 0
 #define LISTING_HEADER "RCE Experimental GAS "
 #define NEED_FX_R_TYPE 1
-#define COFF_FLAGS 1
 #define TC_COFF_SIZEMACHDEP(frag) tc_coff_sizemachdep(frag)
 
 #endif

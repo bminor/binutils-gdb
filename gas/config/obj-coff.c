@@ -22,6 +22,11 @@
 #include "obstack.h"
 #include "subsegs.h"
 
+/* I think this is probably always correct.  */
+#ifndef KEEP_RELOC_INFO
+#define KEEP_RELOC_INFO
+#endif
+
 const char *s_get_name PARAMS ((symbolS * s));
 static symbolS *def_symbol_in_progress;
 

@@ -35,7 +35,6 @@
 #define LISTING_HEADER "Hitachi H8/500 GAS "
 #define NEED_FX_R_TYPE 1
 #define RELOC_32 1234
-#define COFF_FLAGS 1
 
 #define TC_START_LABEL(ch, ptr)  (ch == ':' && start_label(ptr))
 #define TC_COFF_SIZEMACHDEP(frag) tc_coff_sizemachdep(frag)
