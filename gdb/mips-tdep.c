@@ -38,6 +38,7 @@
 #include "target.h"
 #include "arch-utils.h"
 #include "regcache.h"
+#include "osabi.h"
 
 #include "opcode/mips.h"
 #include "elf/mips.h"
@@ -119,6 +120,7 @@ struct gdbarch_tdep
   {
     /* from the elf header */
     int elf_flags;
+
     /* mips options */
     enum mips_abi mips_abi;
     const char *mips_abi_string;
@@ -131,6 +133,8 @@ struct gdbarch_tdep
     int mips_default_stack_argsize;
     int gdb_target_is_mips64;
     int default_mask_address_p;
+
+    enum gdb_osabi osabi;
   };
 
 #if GDB_MULTI_ARCH
@@ -4132,6 +4136,7 @@ mips_gdbarch_init (struct gdbarch_info info,
   struct gdbarch_tdep *tdep;
   int elf_flags;
   enum mips_abi mips_abi;
+  enum gdb_osabi osabi = GDB_OSABI_UNKNOWN;
 
   /* Reset the disassembly info, in case it was set to something
      non-default.  */
@@ -4139,12 +4144,18 @@ mips_gdbarch_init (struct gdbarch_info info,
   tm_print_insn_info.arch = bfd_arch_unknown;
   tm_print_insn_info.mach = 0;
 
-  /* Extract the elf_flags if available */
-  if (info.abfd != NULL
-      && bfd_get_flavour (info.abfd) == bfd_target_elf_flavour)
-    elf_flags = elf_elfheader (info.abfd)->e_flags;
-  else
-    elf_flags = 0;
+  elf_flags = 0;
+
+  if (info.abfd)
+    {
+      /* First of all, extract the elf_flags, if available.  */
+      if (bfd_get_flavour (info.abfd) == bfd_target_elf_flavour)
+	elf_flags = elf_elfheader (info.abfd)->e_flags;
+
+      /* Try to determine the OS ABI of the object we are loading.  If
+	 we end up with `unknown', just leave it that way.  */
+      osabi = gdbarch_lookup_osabi (info.abfd);
+    }
 
   /* Check ELF_FLAGS to see if it specifies the ABI being used. */
   switch ((elf_flags & EF_MIPS_ABI))
@@ -4215,13 +4226,15 @@ mips_gdbarch_init (struct gdbarch_info info,
 	continue;
       if (gdbarch_tdep (arches->gdbarch)->mips_abi != mips_abi)
 	continue;
-      return arches->gdbarch;
+      if (gdbarch_tdep (arches->gdbarch)->osabi == osabi)
+        return arches->gdbarch;
     }
 
   /* Need a new architecture. Fill in a target specific vector. */
   tdep = (struct gdbarch_tdep *) xmalloc (sizeof (struct gdbarch_tdep));
   gdbarch = gdbarch_alloc (&info, tdep);
   tdep->elf_flags = elf_flags;
+  tdep->osabi = osabi;
 
   /* Initially set everything according to the default ABI/ISA. */
   set_gdbarch_short_bit (gdbarch, 16);
@@ -4433,6 +4446,10 @@ mips_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_pointer_to_address (gdbarch, signed_pointer_to_address);
   set_gdbarch_address_to_pointer (gdbarch, address_to_signed_pointer);
   set_gdbarch_integer_to_address (gdbarch, mips_integer_to_address);
+
+  /* Hook in OS ABI-specific overrides, if they have been registered.  */
+  gdbarch_init_osabi (info, gdbarch, osabi);
+
   return gdbarch;
 }
 
@@ -4841,6 +4858,10 @@ mips_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
 		      "mips_dump_tdep: _PROC_MAGIC_ = %d\n",
 		      _PROC_MAGIC_);
+
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: OS ABI = %s\n",
+		      gdbarch_osabi_name (tdep->osabi));
 }
 
 void

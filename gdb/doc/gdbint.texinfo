@@ -2312,6 +2312,127 @@ The target architecture object is implemented as the C structure
 @code{struct gdbarch *}.  The structure, and its methods, are generated
 using the Bourne shell script @file{gdbarch.sh}.
 
+@section Operating System ABI Variant Handling
+@cindex OS ABI variants
+
+@value{GDBN} provides a mechanism for handling variations in OS
+ABIs.  An OS ABI variant may have influence over any number of
+variables in the target architecture definition.  There are two major
+components in the OS ABI mechanism: sniffers and handlers.
+
+A @dfn{sniffer} examines a file matching a BFD architecture/flavour pair
+(the architecture may be wildcarded) in an attempt to determine the
+OS ABI of that file.  Sniffers with a wildcarded architecture are considered
+to be @dfn{generic}, while sniffers for a specific architecture are
+considered to be @dfn{specific}.  A match from a specific sniffer
+overrides a match from a generic sniffer.  Multiple sniffers for an
+architecture/flavour may exist, in order to differentiate between two
+different operating systems which use the same basic file format.  The
+OS ABI framework provides a generic sniffer for ELF-format files which
+examines the @code{EI_OSABI} field of the ELF header, as well as note
+sections known to be used by several operating systems.
+
+@cindex fine-tuning @code{gdbarch} structure
+A @dfn{handler} is used to fine-tune the @code{gdbarch} structure for the
+selected OS ABI.  There may be only one handler for a given OS ABI
+for each BFD architecture.
+
+The following OS ABI variants are defined in @file{osabi.h}:
+
+@table @code
+
+@findex GDB_OSABI_UNKNOWN
+@item GDB_OSABI_UNKNOWN
+The ABI of the inferior is unknown.  The default @code{gdbarch}
+settings for the architecture will be used.
+
+@findex GDB_OSABI_SVR4
+@item GDB_OSABI_SVR4
+UNIX System V Release 4
+
+@findex GDB_OSABI_HURD
+@item GDB_OSABI_HURD
+GNU using the Hurd kernel
+
+@findex GDB_OSABI_SOLARIS
+@item GDB_OSABI_SOLARIS
+Sun Solaris
+
+@findex GDB_OSABI_OSF1
+@item GDB_OSABI_OSF1
+OSF/1, including Digital UNIX and Compaq Tru64 UNIX
+
+@findex GDB_OSABI_LINUX
+@item GDB_OSABI_LINUX
+GNU using the Linux kernel
+
+@findex GDB_OSABI_FREEBSD_AOUT
+@item GDB_OSABI_FREEBSD_AOUT
+FreeBSD using the a.out executable format
+
+@findex GDB_OSABI_FREEBSD_ELF
+@item GDB_OSABI_FREEBSD_ELF
+FreeBSD using the ELF executable format
+
+@findex GDB_OSABI_NETBSD_AOUT
+@item GDB_OSABI_NETBSD_AOUT
+NetBSD using the a.out executable format
+
+@findex GDB_OSABI_NETBSD_ELF
+@item GDB_OSABI_NETBSD_ELF
+NetBSD using the ELF executable format
+
+@findex GDB_OSABI_WINCE
+@item GDB_OSABI_WINCE
+Windows CE
+
+@findex GDB_OSABI_ARM_EABI_V1
+@item GDB_OSABI_ARM_EABI_V1
+ARM Embedded ABI version 1
+
+@findex GDB_OSABI_ARM_EABI_V2
+@item GDB_OSABI_ARM_EABI_V2
+ARM Embedded ABI version 2
+
+@findex GDB_OSABI_ARM_APCS
+@item GDB_OSABI_ARM_APCS
+Generic ARM Procedure Call Standard
+
+@end table
+
+Here are the functions that make up the OS ABI framework:
+
+@deftypefun const char *gdbarch_osabi_name (enum gdb_osabi @var{osabi})
+Return the name of the OS ABI corresponding to @var{osabi}.
+@end deftypefun
+
+@deftypefun void gdbarch_register_osabi (enum bfd_architecture @var{arch}, enum gdb_osabi @var{osabi}, void (*@var{init_osabi})(struct gdbarch_info @var{info}, struct gdbarch *@var{gdbarch}))
+Register the OS ABI handler specified by @var{init_osabi} for the
+architecture/OS ABI pair specified by @var{arch} and @var{osabi}.
+@end deftypefun
+
+@deftypefun void gdbarch_register_osabi_sniffer (enum bfd_architecture @var{arch}, enum bfd_flavour @var{flavour}, enum gdb_osabi (*@var{sniffer})(bfd *@var{abfd}))
+Register the OS ABI file sniffer specified by @var{sniffer} for the
+BFD architecture/flavour pair specified by @var{arch} and @var{flavour}.
+If @var{arch} is @code{bfd_arch_unknown}, the sniffer is considered to
+be generic, and is allowed to examine @var{flavour}-flavoured files for
+any architecture.
+@end deftypefun
+
+@deftypefun enum gdb_osabi gdbarch_lookup_osabi (bfd *@var{abfd})
+Examine the file described by @var{abfd} to determine its OS ABI.
+The value @code{GDB_OSABI_UNKNOWN} is returned if the OS ABI cannot
+be determined.
+@end deftypefun
+
+@deftypefun void gdbarch_init_osabi (struct gdbarch info @var{info}, struct gdbarch *@var{gdbarch}, enum gdb_osabi @var{osabi})
+Invoke the OS ABI handler corresponding to @var{osabi} to fine-tune the
+@code{gdbarch} structure specified by @var{gdbarch}.  If a handler
+corresponding to @var{osabi} has not been registered for @var{gdbarch}'s
+architecture, a warning will be issued and the debugging session will continue
+with the defaults already established for @var{gdbarch}.
+@end deftypefun
+
 @section Registers and Memory
 
 @value{GDBN}'s model of the target machine is rather simple.

@@ -22,6 +22,8 @@
 #ifndef ALPHA_TDEP_H
 #define ALPHA_TDEP_H
 
+#include "osabi.h"
+
 /* Say how long (ordinary) registers are.  This is a piece of bogosity
    used in push_word and a few other places;  REGISTER_RAW_SIZE is the
    real way to know how big a register is.  */
@@ -76,24 +78,10 @@
    pointer, the value of localoff is obtained from the PDR.  */
 #define ALPHA_NUM_ARG_REGS   6
 
-/* ABI variants that we know about.  If you add to this enum, please
-   update the table of names in alpha-tdep.c.  */
-enum alpha_abi
-{
-  ALPHA_ABI_UNKNOWN = 0,
-  ALPHA_ABI_OSF1,
-  ALPHA_ABI_LINUX,
-  ALPHA_ABI_FREEBSD,
-  ALPHA_ABI_NETBSD,
-
-  ALPHA_ABI_INVALID	/* Keep this last. */
-};
-
 /* Target-dependent structure in gdbarch.  */
 struct gdbarch_tdep
 {
-  enum alpha_abi alpha_abi;	/* OS/ABI of inferior.  */
-  const char *abi_name;		/* Name of the above.  */
+  enum gdb_osabi osabi;		/* OS/ABI of inferior.  */
 
   CORE_ADDR vm_min_address;	/* used by heuristic_proc_start */
 
@@ -117,9 +105,5 @@ struct gdbarch_tdep
 };
 
 void alpha_software_single_step (enum target_signal, int);
-
-void alpha_gdbarch_register_os_abi (enum alpha_abi,
-                                    void (*init_abi)(struct gdbarch_info,
-						     struct gdbarch *));
 
 #endif /* ALPHA_TDEP_H */

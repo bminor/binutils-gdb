@@ -543,5 +543,5 @@ arm_linux_init_abi (struct gdbarch_info info,
 void
 _initialize_arm_linux_tdep (void)
 {
-  arm_gdbarch_register_os_abi (ARM_ABI_LINUX, arm_linux_init_abi);
+  gdbarch_register_osabi (bfd_arch_arm, GDB_OSABI_LINUX, arm_linux_init_abi);
 }

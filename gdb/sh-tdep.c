@@ -4179,175 +4179,6 @@ sh_linux_svr4_fetch_link_map_offsets (void)
 #endif /* SVR4_SHARED_LIBS */
 
 
-/* This table matches the indices assigned to enum sh_osabi.  Keep
-   them in sync.  */
-static const char * const sh_osabi_names[] =
-{
-  "<unknown>",
-  "GNU/Linux",
-  "NetBSD ELF",
-  NULL
-};
-
-static void
-process_note_abi_tag_sections (bfd *abfd, asection *sect, void *obj)
-{
-  enum sh_osabi *os_ident_ptr = obj;
-  const char *name;
-  unsigned int sectsize;
-
-  name = bfd_get_section_name (abfd, sect);
-  sectsize = bfd_section_size (abfd, sect);
-
-  if (strcmp (name, ".note.ABI-tag") == 0 && sectsize > 0)
-    {
-      unsigned int name_length, data_length, note_type;
-      char *note;
-
-      /* If the section is larger than this, it's probably not what we are
-	 looking for.  */
-      if (sectsize > 128)
-	sectsize = 128;
-
-      note = alloca (sectsize);
-
-      bfd_get_section_contents (abfd, sect, note,
-				(file_ptr) 0, (bfd_size_type) sectsize);
-
-      name_length = bfd_h_get_32 (abfd, note);
-      data_length = bfd_h_get_32 (abfd, note + 4);
-      note_type   = bfd_h_get_32 (abfd, note + 8);
-
-      if (name_length == 4 && data_length == 16 && note_type == NT_GNU_ABI_TAG
-	  && strcmp (note + 12, "GNU") == 0)
-	{
-	  int os_number = bfd_h_get_32 (abfd, note + 16);
-
-	  /* The case numbers are from abi-tags in glibc.  */
-	  switch (os_number)
-	    {
-	    case GNU_ABI_TAG_LINUX:
-	      *os_ident_ptr = SH_OSABI_LINUX;
-	      break;
-
-	    case GNU_ABI_TAG_HURD:
-	      internal_error
-		(__FILE__, __LINE__,
-		 "process_note_abi_sections: Hurd objects not supported");
-	      break;
-
-	    case GNU_ABI_TAG_SOLARIS:
-	      internal_error
-		(__FILE__, __LINE__,
-		 "process_note_abi_sections: Solaris objects not supported");
-	      break;
-
-	    default:
-	      internal_error
-		(__FILE__, __LINE__,
-		 "process_note_abi_sections: unknown OS number %d",
-		 os_number);
-	    }
-	}
-    }
-  /* NetBSD uses a similar trick.  */
-  else if (strcmp (name, ".note.netbsd.ident") == 0 && sectsize > 0)
-    {
-      unsigned int name_length, desc_length, note_type;
-      char *note;
-
-      /* If the section is larger than this, it's probably not what we are
-	 looking for.  */
-      if (sectsize > 128)
-	sectsize = 128;
-
-      note = alloca (sectsize);
-
-      bfd_get_section_contents (abfd, sect, note,
-				(file_ptr) 0, (bfd_size_type) sectsize);
-
-      name_length = bfd_h_get_32 (abfd, note);
-      desc_length = bfd_h_get_32 (abfd, note + 4);
-      note_type   = bfd_h_get_32 (abfd, note + 8);
-
-      if (name_length == 7 && desc_length == 4 && note_type == NT_NETBSD_IDENT
-	  && strcmp (note + 12, "NetBSD") == 0)
-	/* XXX Should we check the version here?
-	   Probably not necessary yet.  */
-	*os_ident_ptr = SH_OSABI_NETBSD_ELF;
-    }
-}
-
-static int
-get_elfosabi (bfd *abfd)
-{
-  int elfosabi;
-  enum sh_osabi sh_osabi = SH_OSABI_UNKNOWN;
-
-  elfosabi = elf_elfheader (abfd)->e_ident[EI_OSABI];
-
-  switch (elfosabi)
-    {
-    case ELFOSABI_NONE:
-      /* When elfosabi is 0 (ELFOSABI_NONE), this is supposed to indicate
-	 that we're on a SYSV system.  However, some systems use note sections
-	 to record OS/ABI info, but leave e_ident[EI_OSABI] zero.  So we
-	 have to check the note sections too.  */
-      bfd_map_over_sections (abfd,
-			     process_note_abi_tag_sections,
-			     &sh_osabi);
-      break;
-
-    case ELFOSABI_NETBSD:
-      sh_osabi = SH_OSABI_NETBSD_ELF;
-      break;
-
-    case ELFOSABI_LINUX:
-      sh_osabi = SH_OSABI_LINUX;
-      break;
-    }
-
-  return (sh_osabi);
-}
-
-struct sh_osabi_handler
-{
-  struct sh_osabi_handler *next;
-  enum sh_osabi abi;
-  void (*init_osabi)(struct gdbarch_info, struct gdbarch *);
-};
-
-struct sh_osabi_handler *sh_osabi_handler_list = NULL;
-
-void
-sh_gdbarch_register_os_abi (enum sh_osabi abi,
-                            void (*init_osabi)(struct gdbarch_info,
-					       struct gdbarch *))
-{
-  struct sh_osabi_handler **handler_p;
-
-  for (handler_p = &sh_osabi_handler_list; *handler_p != NULL;
-       handler_p = &(*handler_p)->next)
-    {
-      if ((*handler_p)->abi == abi)
-	{
-	  internal_error
-	    (__FILE__, __LINE__,
-	     "sh_gdbarch_register_os_abi: A handler for this ABI variant "
-	     "(%d) has already been registered", (int) abi);
-	  /* If user wants to continue, override previous definition.  */
-	  (*handler_p)->init_osabi = init_osabi;
-	  return;
-	}
-    }
-
-  (*handler_p)
-    = (struct sh_osabi_handler *) xmalloc (sizeof (struct sh_osabi_handler));
-  (*handler_p)->next = NULL;
-  (*handler_p)->abi = abi;
-  (*handler_p)->init_osabi = init_osabi;
-}
-
 static gdbarch_init_ftype sh_gdbarch_init;
 
 static struct gdbarch *
@@ -4359,23 +4190,14 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   gdbarch_register_name_ftype *sh_register_name;
   gdbarch_store_return_value_ftype *sh_store_return_value;
   gdbarch_register_virtual_type_ftype *sh_register_virtual_type;
-  enum sh_osabi sh_osabi = SH_OSABI_UNKNOWN;
-  struct sh_osabi_handler *osabi_handler;
+  enum gdb_osabi osabi = GDB_OSABI_UNKNOWN;
 
   /* Try to determine the ABI of the object we are loading.  */
 
   if (info.abfd != NULL)
     {
-      switch (bfd_get_flavour (info.abfd))
-	{
-	case bfd_target_elf_flavour:
-	  sh_osabi = get_elfosabi (info.abfd);
-	  break;
-
-	default:
-	  /* Just leave it as "unkown".  */
-	  break;
-	}
+      osabi = gdbarch_lookup_osabi (info.abfd);
+      /* If we get "unknown" back, just leave it that way.  */
     }
 
   /* Find a candidate among the list of pre-declared architectures. */
@@ -4385,7 +4207,7 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     {
       /* Make sure the ABI selection matches.  */
       tdep = gdbarch_tdep (arches->gdbarch);
-      if (tdep && tdep->sh_osabi == sh_osabi)
+      if (tdep && tdep->osabi == osabi)
 	return arches->gdbarch;
     }
 
@@ -4394,15 +4216,7 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep = XMALLOC (struct gdbarch_tdep);
   gdbarch = gdbarch_alloc (&info, tdep);
 
-  tdep->sh_osabi = sh_osabi;
-  if (sh_osabi < SH_OSABI_INVALID)
-    tdep->osabi_name = sh_osabi_names[sh_osabi];
-  else
-    {
-      internal_error (__FILE__, __LINE__, "Invalid setting of sh_osabi %d",
-		      (int) sh_osabi);
-      tdep->osabi_name = "<invalid>";
-    }
+  tdep->osabi = osabi;
 
   /* Initialize the register numbers that are not common to all the
      variants to -1, if necessary thse will be overwritten in the case
@@ -4754,32 +4568,11 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
   set_gdbarch_believe_pcc_promotion (gdbarch, 1);
 
-  /* Hook in ABI-specific overrides, if they have been registered.  If
-     the ABI is unknown, this is probably an embedded target, so we
-     should not warn about this situation.  */
-  if (sh_osabi != SH_OSABI_UNKNOWN)
-    {
-      for (osabi_handler = sh_osabi_handler_list; osabi_handler != NULL;
-	   osabi_handler = osabi_handler->next)
-	if (osabi_handler->abi == sh_osabi)
-	  break;
+  /* Hook in ABI-specific overrides, if they have been registered.
 
-      if (osabi_handler)
-        osabi_handler->init_osabi (info, gdbarch);
-      else
-        {
-	  /* We assume that if GDB_MULTI_ARCH is less than
-	     GDB_MULTI_ARCH_TM that an ABI variant can be supported by 
-	     overriding definitions in this file.  */
-	  if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) 
-	    fprintf_filtered
-	      (gdb_stderr,
-	       "A handler for the ABI variant \"%s\" is not built into this "
-	       "configuration of GDB.  "
-	       "Attempting to continue with the default SuperH settings",
-	       sh_osabi_names[sh_osabi]);
-        }
-    }
+     FIXME: if the ABI is unknown, this is probably an embedded target,
+     so we should not warn about this situation.  */
+  gdbarch_init_osabi (info, gdbarch, osabi);
 
   return gdbarch;
 }
@@ -4792,12 +4585,8 @@ sh_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
   if (tdep == NULL)
     return;
 
-  if (tdep->osabi_name != NULL)
-    fprintf_unfiltered (file, "sh_dump_tdep: OS ABI = %s\n", tdep->osabi_name);
-  else
-    internal_error (__FILE__, __LINE__,
-		    "sh_dump_tdep: illegal setting of tdep->sh_osabi (%d)",
-		    (int) tdep->sh_osabi);
+  fprintf_unfiltered (file, "sh_dump_tdep: OS ABI = %s\n",
+                      gdbarch_osabi_name (tdep->osabi));
 }
 
 void

@@ -1,3 +1,59 @@
+2002-05-21  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* Makefile.in (SFILES): Add osabi.c.
+	(COMMON_OBS): Add osabi.o.
+	(osabi.o): New dependency list.
+	* osabi.c: New file.
+	* osabi.h: New file.
+	* doc/gdbint.texinfo: Document new generic OS ABI framework.
+
+	* Makefile.in (alpha_tdep_h): Define and use instead of
+	alpha-tdep.h.
+	* alpha-tdep.c (alpha_abi_names, process_note_abi_tag_sections,
+	get_elfosabi, alpha_abi_handler_list, alpha_gdbarch_register_os_abi):
+	Remove.
+	(alpha_gdbarch_init, alpha_dump_tdep): Use generic OS ABI framework.
+	* alpha-tdep.h: Include osabi.h.
+	(alpha_abi): Remove.
+	(gdbarch_tdep): Use generic OS ABI framework.
+	* alpha-linux-tdep.c (_initialize_alpha_linux_tdep): Use
+	gdbarch_register_osabi.
+	* alpha-osf1-tdep.c (_initialize_alpha_osf1_tdep): Likewise.
+	* alphafbsd-tdep.c (_initialize_alphafbsd_tdep): Likewise.
+	* alphanbsd-tdep.c (_initialize_alphanbsd_tdep): Likewise.
+
+	* Makefile.in (sh_tdep_h): Add osabi.h.
+	* sh-tdep.h (sh_osabi): Remove.
+	(gdbarch_tdep): Use generic OS ABI framework.
+	* sh-tdep.c (sh_osabi_names, process_note_abi_tag_sections,
+	sh_osabi_handler_list, sh_gdbarch_register_os_abi): Remove.
+	(sh_gdbarch_init, sh_dump_tdep): Use generic OS ABI framework.
+	* shnbsd-tdep.c (_initialize_shnbsd_tdep): Use gdbarch_register_osabi.
+
+	* Makefile.in (arm_tdep_h): Define and use instead of arm-tdep.h.
+	* arm-linux-tdep.c (_initialize_arm_linux_tdep): Use
+	gdbarch_register_osabi.
+	* arm-tdep.c (arm_abi_names, process_note_abi_tag_sections,
+	arm_abi_handler_list, arm_gdbarch_register_os_abi): Remove.
+	(get_elfosabi): Rename to...
+	(arm_elf_osabi_sniffer): ...this.  Adjust to use generic OS
+	ABI framework support routines.
+	(arm_gdbarch_init): Use generic OS ABI framework.
+	(arm_dump_tdep): Likewise.
+	(_initialize_arm_tdep): Likewise.
+	* arm-tdep.h: Include osabi.h.
+	(arm_abi): Remove.
+	(gdbarch_tdep): Remove arm_abi and abi_name members.  Add
+	osabi member.
+	(arm_gdbarch_register_os_abi): Remove prototype.
+	* armnbsd-tdep.c (arm_netbsd_aout_osabi_sniffer): New function.
+	(_initialize_arm_netbsd_tdep): Use gdbarch_register_osabi.
+
+	* Makefile.in (mips-tdep.o): Add osabi.h to dependency list.
+	* mips-tdep.c: Include osabi.h.
+	(gdbarch_tdep, mips_gdbarch_init, mips_dump_tdep): Use generic
+	OS ABI framework.
+
 2002-05-20  Kazu Hirata  <kazu@cs.umass.edu>
 
 	* h8300-tdep.c: Fix formatting.
