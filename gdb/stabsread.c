@@ -291,7 +291,7 @@ Invalid symbol data: type number (%d,%d) out of range at symtab pos %d.",
 	    {
 	      type_vector_length = INITIAL_TYPE_VECTOR_LENGTH;
 	      type_vector = (struct type **)
-		malloc (type_vector_length * sizeof (struct type *));
+		xmalloc (type_vector_length * sizeof (struct type *));
 	    }
 	  while (index >= type_vector_length)
 	    {

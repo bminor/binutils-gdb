@@ -547,10 +547,7 @@ SAVED_BF_PTR allocate_saved_bf_node()
 {
   SAVED_BF_PTR new;
   
-  new = (SAVED_BF_PTR) malloc (sizeof (SAVED_BF));
-  
-  if (new == NULL)
-    fatal("could not allocate enough memory to save one more .bf on save list");
+  new = (SAVED_BF_PTR) xmalloc (sizeof (SAVED_BF));
   return(new);
 }
 
@@ -558,11 +555,7 @@ SAVED_FUNCTION *allocate_saved_function_node()
 {
   SAVED_FUNCTION *new;
   
-  new = (SAVED_FUNCTION *) malloc (sizeof (SAVED_FUNCTION));
-  
-  if (new == NULL)
-    fatal("could not allocate enough memory to save one more function on save list");
-  
+  new = (SAVED_FUNCTION *) xmalloc (sizeof (SAVED_FUNCTION));
   return(new);
 }
 
@@ -570,11 +563,7 @@ SAVED_F77_COMMON_PTR allocate_saved_f77_common_node()
 {
   SAVED_F77_COMMON_PTR new;
   
-  new = (SAVED_F77_COMMON_PTR) malloc (sizeof (SAVED_F77_COMMON));
-  
-  if (new == NULL)
-    fatal("could not allocate enough memory to save one more F77 COMMON blk on save list");
-  
+  new = (SAVED_F77_COMMON_PTR) xmalloc (sizeof (SAVED_F77_COMMON));
   return(new);
 }
 
@@ -582,11 +571,7 @@ COMMON_ENTRY_PTR allocate_common_entry_node()
 {
   COMMON_ENTRY_PTR new;
   
-  new = (COMMON_ENTRY_PTR) malloc (sizeof (COMMON_ENTRY));
-  
-  if (new == NULL)
-    fatal("could not allocate enough memory to save one more COMMON entry on save list");
-  
+  new = (COMMON_ENTRY_PTR) xmalloc (sizeof (COMMON_ENTRY));
   return(new);
 }
 
@@ -635,10 +620,10 @@ void add_common_block(name,offset,secnum,func_stab)
   
   tmp = allocate_saved_f77_common_node();
   
-  local_copy_func_stab = malloc (strlen(func_stab) + 1);
+  local_copy_func_stab = xmalloc (strlen(func_stab) + 1);
   strcpy(local_copy_func_stab,func_stab); 
   
-  tmp->name = malloc(strlen(name) + 1);
+  tmp->name = xmalloc(strlen(name) + 1);
   
   /* local_copy_func_stab is a stabstring, let us first extract the 
      function name from the stab by NULLing out the ':' character. */ 
@@ -653,7 +638,7 @@ void add_common_block(name,offset,secnum,func_stab)
     error("Malformed function STAB found in add_common_block()");
   
   
-  tmp->owning_function = malloc (strlen(local_copy_func_stab) + 1); 
+  tmp->owning_function = xmalloc (strlen(local_copy_func_stab) + 1); 
   
   strcpy(tmp->owning_function,local_copy_func_stab); 
   

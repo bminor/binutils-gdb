@@ -26,15 +26,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
    during the process of parsing; the lower levels of the tree always
    come first in the result.
 
-   Note that malloc's and realloc's in this file are transformed to
-   xmalloc and xrealloc respectively by the same sed command in the
-   makefile that remaps any other malloc/realloc inserted by the parser
-   generator.  Doing this with #defines and trying to control the interaction
-   with include files (<malloc.h> and <stdlib.h> for example) just became
-   too messy, particularly when such includes can be inserted at random
-   times by the parser generator.
-
-   Also note that the language accepted by this parser is more liberal
+   Note that the language accepted by this parser is more liberal
    than the one accepted by an actual Chill compiler.  For example, the
    language rule that a simple name string can not be one of the reserved
    simple name strings is not enforced (e.g "case" is not treated as a
@@ -1094,11 +1086,11 @@ growbuf_by_size (count)
   tempbufsize += growby;
   if (tempbuf == NULL)
     {
-      tempbuf = (char *) malloc (tempbufsize);
+      tempbuf = (char *) xmalloc (tempbufsize);
     }
   else
     {
-      tempbuf = (char *) realloc (tempbuf, tempbufsize);
+      tempbuf = (char *) xrealloc (tempbuf, tempbufsize);
     }
 }
 

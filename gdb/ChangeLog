@@ -1,3 +1,16 @@
+Mon Feb 12 13:11:32 1996  Fred Fish  <fnf@cygnus.com>
+
+	* f-lang.c (allocate_saved_bf_node, allocate_saved_function_node,
+	allocate_saved_f77_common_node, allocate_common_entry_node,
+	add_common_block): Use xmalloc rather than malloc, some of which
+	were unchecked.
+	* gnu-regex.c: At same point as other gdb specific changes
+	#undef malloc and then #define it to xmalloc.
+	* ch-exp.c (growbuf_by_size): Use xmalloc/xrealloc rather than
+	bare unchecked calls to malloc/realloc.
+	* stabsread.c (dbx_lookup_type): Use xmalloc rather than bare
+ 	unchecked call to malloc.
+
 Wed Feb  7 11:31:26 1996  Stu Grossman  (grossman@cygnus.com)
 
 	* symtab.c (gdb_mangle_name):  Change opname var to be const to
