@@ -1,3 +1,7 @@
+2001-03-11  Philip Blundell  <philb@gnu.org>
+
+	* configure.in: Set version to 2.11.
+
 2001-01-27  Michael Sokolov  <msokolov@ivan.Harhan.ORG>
 
 	* basic_blocks.c: #include <unistd.h> only if it exists.

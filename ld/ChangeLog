@@ -1,3 +1,7 @@
+2001-03-11  Philip Blundell  <philb@gnu.org>
+
+	* configure.in: Set version to 2.11.
+
 2001-03-05  Alan Modra  <alan@linuxcare.com.au>
 
 	* emultempl/m68kelf.em (m68k_elf_after_allocation): Call

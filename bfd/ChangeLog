@@ -1,5 +1,7 @@
 2001-03-11  Philip Blundell  <philb@gnu.org>
 
+	* configure.in: Set version to 2.11.
+
 	* elf32-arm.h (elf32_arm_finish_dynamic_symbol): Don't make PLT
 	entries that could serve as a definition for a weak symbol.
 

@@ -1,3 +1,7 @@
+2001-03-11  Philip Blundell  <philb@gnu.org>
+
+	* configure.in: Set version to 2.11.
+
 2001-02-13  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* acinclude.m4 (AM_PROG_LEX): Override installed definition.
