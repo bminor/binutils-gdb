@@ -261,6 +261,7 @@ testsuite		Michael Chastain	mec.gnu@mindspring.com
   mi tests (gdb.mi)     Elena Zannoni           ezannoni@redhat.com
                         Andrew Cagney           cagney@redhat.com
   threads (gdb.threads) Michael Snyder          msnyder@redhat.com
+			Michael Chastain	mec.gnu@mindspring.com
   trace (gdb.trace)     Michael Snyder          msnyder@redhat.com
   hp tests (gdb.hp)	(vacant)
   Java tests (gdb.java)	Anthony Green 		green@redhat.com
