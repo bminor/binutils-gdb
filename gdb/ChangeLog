@@ -1,3 +1,8 @@
+2004-06-14  GDB Administrator  <gdbadmin@sourceware.org>
+
+	GDB 6.1.1 released.
+	* version.in: Bump to 6.1.1.
+
 2004-06-14  Andrew Cagney  <cagney@gnu.org>
 
 	* NEWS: Mention that the TUI is built-in.
