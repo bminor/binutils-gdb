@@ -1,3 +1,7 @@
+Thu Sep  1 17:32:54 1994  Per Bothner  (bothner@kalessin.cygnus.com)
+
+	* c-typeprint.c (c_typedef_print):  Add missing Chill support.
+
 Thu Sep  1 15:41:21 1994  Stu Grossman  (grossman@cygnus.com)
 
 	* rs6000-pinsn.c (print_insn):  Use powerpc disassembler when

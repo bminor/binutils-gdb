@@ -87,7 +87,14 @@ c_typedef_print (type, new, stream)
 #endif
 #ifdef _LANG_chill
    case language_chill:
-      error ("Missing Chill support in function c_typedef_print."); /*FIXME*/
+      fprintf_filtered(stream, "SYNMODE ");
+      if(!TYPE_NAME(SYMBOL_TYPE(new)) ||
+	 !STREQ (TYPE_NAME(SYMBOL_TYPE(new)), SYMBOL_NAME(new)))
+	fprintf_filtered(stream, "%s = ", SYMBOL_SOURCE_NAME(new));
+      else
+	 fprintf_filtered(stream, "<builtin> = ");
+      type_print(type,"",stream,0);
+      break;
 #endif
    default:
       error("Language not supported.");
