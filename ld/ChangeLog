@@ -1,3 +1,24 @@
+2001-11-27  H.J. Lu <hjl@gnu.org>
+
+	* emulparams/elf_i386.sh (NO_SMALL_DATA): Set to yes.
+	* emulparams/elf_i386_be.sh (NO_SMALL_DATA): Likewise.
+	* emulparams/elf_i386_chaos.sh (NO_SMALL_DATA): Likewise.
+	* emulparams/elf_i386_ldso.sh (NO_SMALL_DATA): Likewise.
+	* emulparams/elf_x86_64.sh (NO_SMALL_DATA): Likewise.
+	* emulparams/m68kelf.sh (NO_SMALL_DATA): Likewise.
+	* emulparams/elf32_sparc.sh (NO_SMALL_DATA): Likewise.
+	* emulparams/elf64_sparc.sh (NO_SMALL_DATA): Likewise.
+
+	* scripttempl/elf.sc (SBSS): New. Define if ${NO_SMALL_DATA} 
+	is not empty.
+	(SDATA): Likewise.
+	(REL_SDATA): Likewise.
+	(REL_SBSS): Likewise.
+	(REL_SDATA2): Likewise.
+	(REL_SBSS2): Likewise.
+	(SBSS2): Define if ${NO_SMALL_DATA} is not empty.
+	(SDATA2): Likewise.
+
 2001-11-25  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
 
 	* scripttempl/elfm68hc11.sc (CTOR, DTOR): Put constructor and

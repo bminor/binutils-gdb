@@ -1,6 +1,8 @@
 #
 # Unusual variables checked by this code:
 #	NOP - four byte opcode for no-op (defaults to 0)
+#	NO_SMALL_DATA - no .sbss/.sbss2/.sdata/.sdata2 sections if not
+#		empty.
 #	DATA_ADDR - if end-of-text-plus-one-page isn't right for data start
 #	INITIAL_READONLY_SECTIONS - at start of text segment
 #	OTHER_READONLY_SECTIONS - other than .text .init .rodata ...
@@ -72,8 +74,36 @@ INTERP=".interp       ${RELOCATING-0} : { *(.interp) }"
 PLT=".plt          ${RELOCATING-0} : { *(.plt) }"
 DYNAMIC=".dynamic      ${RELOCATING-0} : { *(.dynamic) }"
 RODATA=".rodata       ${RELOCATING-0} : { *(.rodata${RELOCATING+ .rodata.* .gnu.linkonce.r.*}) }"
-SBSS2=".sbss2        ${RELOCATING-0} : { *(.sbss2${RELOCATING+ .sbss2.* .gnu.linkonce.sb2.*}) }"
-SDATA2=".sdata2       ${RELOCATING-0} : { *(.sdata2${RELOCATING+ .sdata2.* .gnu.linkonce.s2.*}) }"
+if test -z "${NO_SMALL_DATA}"; then
+  SBSS=".sbss         ${RELOCATING-0} :
+  {
+    ${RELOCATING+PROVIDE (__sbss_start = .);}
+    ${RELOCATING+PROVIDE (___sbss_start = .);}
+    *(.dynsbss)
+    *(.sbss${RELOCATING+ .sbss.* .gnu.linkonce.sb.*})
+    *(.scommon)
+    ${RELOCATING+PROVIDE (__sbss_end = .);}
+    ${RELOCATING+PROVIDE (___sbss_end = .);}
+  }"
+  SBSS2=".sbss2        ${RELOCATING-0} : { *(.sbss2${RELOCATING+ .sbss2.* .gnu.linkonce.sb2.*}) }"
+  SDATA="/* We want the small data sections together, so single-instruction offsets
+     can access them all, and initialized data all before uninitialized, so
+     we can shorten the on-disk segment size.  */
+  .sdata        ${RELOCATING-0} : 
+  {
+    ${RELOCATING+${SDATA_START_SYMBOLS}}
+    *(.sdata${RELOCATING+ .sdata.* .gnu.linkonce.s.*})
+  }"
+  SDATA2=".sdata2       ${RELOCATING-0} : { *(.sdata2${RELOCATING+ .sdata2.* .gnu.linkonce.s2.*}) }"
+  REL_SDATA=".rel.sdata    ${RELOCATING-0} : { *(.rel.sdata${RELOCATING+ .rel.sdata.* .rel.gnu.linkonce.s.*}) }
+  .rela.sdata   ${RELOCATING-0} : { *(.rela.sdata${RELOCATING+ .rela.sdata.* .rela.gnu.linkonce.s.*}) }"
+  REL_SBSS=".rel.sbss     ${RELOCATING-0} : { *(.rel.sbss${RELOCATING+ .rel.sbss.* .rel.gnu.linkonce.sb.*}) }
+  .rela.sbss    ${RELOCATING-0} : { *(.rela.sbss${RELOCATING+ .rela.sbss.* .rela.gnu.linkonce.sb.*}) }"
+  REL_SDATA2=".rel.sdata2   ${RELOCATING-0} : { *(.rel.sdata2${RELOCATING+ .rel.sdata2.* .rel.gnu.linkonce.s2.*}) }
+  .rela.sdata2  ${RELOCATING-0} : { *(.rela.sdata2${RELOCATING+ .rela.sdata2.* .rela.gnu.linkonce.s2.*}) }"
+  REL_SBSS2=".rel.sbss2    ${RELOCATING-0} : { *(.rel.sbss2${RELOCATING+ .rel.sbss2.* .rel.gnu.linkonce.sb2.*}) }
+  .rela.sbss2   ${RELOCATING-0} : { *(.rela.sbss2${RELOCATING+ .rela.sbss2.* .rela.gnu.linkonce.sb2.*}) }"
+fi
 CTOR=".ctors        ${CONSTRUCTING-0} : 
   {
     ${CONSTRUCTING+${CTOR_START}}
@@ -177,14 +207,10 @@ eval $COMBRELOCCAT <<EOF
   .rel.got      ${RELOCATING-0} : { *(.rel.got) }
   .rela.got     ${RELOCATING-0} : { *(.rela.got) }
   ${OTHER_GOT_RELOC_SECTIONS}
-  .rel.sdata    ${RELOCATING-0} : { *(.rel.sdata${RELOCATING+ .rel.sdata.* .rel.gnu.linkonce.s.*}) }
-  .rela.sdata   ${RELOCATING-0} : { *(.rela.sdata${RELOCATING+ .rela.sdata.* .rela.gnu.linkonce.s.*}) }
-  .rel.sbss     ${RELOCATING-0} : { *(.rel.sbss${RELOCATING+ .rel.sbss.* .rel.gnu.linkonce.sb.*}) }
-  .rela.sbss    ${RELOCATING-0} : { *(.rela.sbss${RELOCATING+ .rela.sbss.* .rela.gnu.linkonce.sb.*}) }
-  .rel.sdata2   ${RELOCATING-0} : { *(.rel.sdata2${RELOCATING+ .rel.sdata2.* .rel.gnu.linkonce.s2.*}) }
-  .rela.sdata2  ${RELOCATING-0} : { *(.rela.sdata2${RELOCATING+ .rela.sdata2.* .rela.gnu.linkonce.s2.*}) }
-  .rel.sbss2    ${RELOCATING-0} : { *(.rel.sbss2${RELOCATING+ .rel.sbss2.* .rel.gnu.linkonce.sb2.*}) }
-  .rela.sbss2   ${RELOCATING-0} : { *(.rela.sbss2${RELOCATING+ .rela.sbss2.* .rela.gnu.linkonce.sb2.*}) }
+  ${REL_SDATA}
+  ${REL_SBSS}
+  ${REL_SDATA2}
+  ${REL_SBSS2}
   .rel.bss      ${RELOCATING-0} : { *(.rel.bss${RELOCATING+ .rel.bss.* .rel.gnu.linkonce.b.*}) }
   .rela.bss     ${RELOCATING-0} : { *(.rela.bss${RELOCATING+ .rela.bss.* .rela.gnu.linkonce.b.*}) }
 EOF
@@ -266,29 +292,13 @@ cat <<EOF
   ${OTHER_GOT_SECTIONS}
   ${CREATE_SHLIB+${SDATA2}}
   ${CREATE_SHLIB+${SBSS2}}
-  /* We want the small data sections together, so single-instruction offsets
-     can access them all, and initialized data all before uninitialized, so
-     we can shorten the on-disk segment size.  */
-  .sdata        ${RELOCATING-0} : 
-  {
-    ${RELOCATING+${SDATA_START_SYMBOLS}}
-    *(.sdata${RELOCATING+ .sdata.* .gnu.linkonce.s.*})
-  }
+  ${SDATA}
   ${OTHER_SDATA_SECTIONS}
   ${RELOCATING+_edata = .;}
   ${RELOCATING+PROVIDE (edata = .);}
   ${RELOCATING+__bss_start = .;}
   ${RELOCATING+${OTHER_BSS_SYMBOLS}}
-  .sbss         ${RELOCATING-0} :
-  {
-    ${RELOCATING+PROVIDE (__sbss_start = .);}
-    ${RELOCATING+PROVIDE (___sbss_start = .);}
-    *(.dynsbss)
-    *(.sbss${RELOCATING+ .sbss.* .gnu.linkonce.sb.*})
-    *(.scommon)
-    ${RELOCATING+PROVIDE (__sbss_end = .);}
-    ${RELOCATING+PROVIDE (___sbss_end = .);}
-  }
+  ${SBSS}
   ${BSS_PLT+${PLT}}
   .bss          ${RELOCATING-0} :
   {
