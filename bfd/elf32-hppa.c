@@ -1537,8 +1537,7 @@ elf32_hppa_check_relocs (abfd, info, sec, relocs)
 		  || is_absolute_reloc (r_type)
 		  || (h != NULL
 		      && ((h->elf.elf_link_hash_flags
-			   & ELF_LINK_HASH_DEF_REGULAR) == 0
-			  || h->elf.root.type == bfd_link_hash_defweak)))
+			   & ELF_LINK_HASH_DEF_REGULAR) == 0)))
 #endif
 	      )
 	    {
@@ -2096,7 +2095,7 @@ hppa_discard_copies (h, inf)
      any relocs.  */
   if (eh->elf.dynindx == -1
       || ((eh->elf.elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) != 0
-	  && eh->elf.root.type != bfd_link_hash_defweak
+	  && !is_absolute_reloc (r_type)
 	  && info->symbolic))
     {
       for (s = eh->reloc_entries; s != NULL; s = s->next)
@@ -2441,8 +2440,15 @@ elf32_hppa_size_stubs (output_bfd, stub_bfd, info, multi_subspace,
   hplink->add_stub_section = add_stub_section;
   hplink->layout_sections_again = layout_sections_again;
 
-  /* Count the number of input BFDs and find the top section id.  */
-  for (input_bfd = info->input_bfds, bfd_count = 0, top_id = 0;
+  /* Count the number of input BFDs, find the top input section id,
+     and the top output section index.  We can't use output_bfd
+     section_count here to find the top output section index as some
+     sections may have been removed, and _bfd_strip_section_from_output
+     doesn't renumber the indices.  Also, sections created by the
+     linker aren't counted, and to make matters worse, aren't even on
+     the output_bfd section list.  We could probably just ignore
+     sections created by the linker, but this way seems safer.  */
+  for (input_bfd = info->input_bfds, bfd_count = 0, top_id = 0, top_index = 0;
        input_bfd != NULL;
        input_bfd = input_bfd->link_next)
     {
@@ -2453,6 +2459,10 @@ elf32_hppa_size_stubs (output_bfd, stub_bfd, info, multi_subspace,
 	{
 	  if (top_id < section->id)
 	    top_id = section->id;
+	  if (section->output_section != NULL
+	      && section->output_section->owner == output_bfd
+	      && top_index < section->output_section->index)
+	    top_index = section->output_section->index;
 	}
     }
 
@@ -2461,18 +2471,7 @@ elf32_hppa_size_stubs (output_bfd, stub_bfd, info, multi_subspace,
   if (hplink->stub_group == NULL)
     return false;
 
-  /* Now make a list of input sections for each output section.
-     We can't use output_bfd->section_count here as some sections may
-     have been removed, and _bfd_strip_section_from_output doesn't
-     renumber the indices.  Sections may also be re-ordered, so the
-     last section index isn't necessarily the biggest.  */
-  for (section = output_bfd->sections, top_index = 0;
-       section != NULL;
-       section = section->next)
-    {
-      if (top_index < section->index)
-	top_index = section->index;
-    }
+  /* Now make a list of input sections for each output section.  */
   input_list
     = (asection **) bfd_zmalloc (sizeof (asection *) * (top_index + 1));
   if (input_list == NULL)
@@ -2506,7 +2505,7 @@ elf32_hppa_size_stubs (output_bfd, stub_bfd, info, multi_subspace,
      .fini output sections respectively, because glibc splits the
      _init and _fini functions into multiple parts.  Putting a stub in
      the middle of a function is not a good idea.  */
-  list = input_list + output_bfd->section_count;
+  list = input_list + top_index;
   while (list-- != input_list)
     {
       asection *tail = *list;

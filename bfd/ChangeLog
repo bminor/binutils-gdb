@@ -1,3 +1,10 @@
+2000-09-21  Alan Modra  <alan@linuxcare.com.au>
+
+	* elf32-hppa.c (elf32_hppa_check_relocs): Fix weak sym handling in
+	currently unused RELATIVE_DYNAMIC_RELOCS code.
+	(hppa_discard_copies): Likewise.
+	(elf32_hppa_size_stubs): Size `input_list' array correctly.
+
 2000-09-20  Alan Modra  <alan@linuxcare.com.au>
 
 	* section.c (bfd_get_unique_section_name): Return NULL if
