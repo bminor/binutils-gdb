@@ -1415,7 +1415,7 @@ all-sed: all-libiberty
 all-send-pr: all-prms
 all-shellutils:
 all-sim: all-libiberty all-bfd all-opcodes
-all-sn: all-tcl all-tk all-itcl all-db
+all-sn: all-tcl all-tk all-itcl all-db all-grep
 all-tar: all-libiberty
 all-tcl:
 all-tclX: all-tcl all-tk
