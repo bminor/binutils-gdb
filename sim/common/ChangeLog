@@ -1,3 +1,26 @@
+Fri Oct 31 13:03:33 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-memopt.c (do_memopt_add, do_memopt_delete): Add level and
+ 	space params.
+	(parse_size, parse_addr): New functions
+	(memory_option_handler, memory_options): Parse address & size
+ 	using new functions. Pass level, space, modulo to do_memopt_add &
+ 	do_memopt_del.
+
+	* sim-memopt.h (struct _sim_memopt): Add level & space fields.
+
+	* sim-core.h (sim_core_arrach, sim_core_detach): Replace
+ 	`attach_type attach' argument with `unsigned level' argument.
+  	Document.
+
+	* sim-core.c (new_sim_core_mapping, sim_core_map_attach,
+ 	sim_core_attach): Replace argument attach with level.  Update
+ 	verification of arguments.
+	(sim_core_map_detach, sim_core_detach): Replace argument attach
+ 	with level.
+
+	* sim-basics.h (enum _attach_type): Delete.
+
 Thu Oct 30 13:45:00 1997  Doug Evans  <devans@seba.cygnus.com>
 
 	* sim-core.h (sim_core_write_8): Define.

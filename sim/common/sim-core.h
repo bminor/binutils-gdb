@@ -103,23 +103,40 @@ EXTERN_SIM_CORE\
 
 /* Create a memory space within the core.
 
-   The CPU option (when non NULL) specifes the single processor that
-   the memory space is to be attached to. (UNIMPLEMENTED).
+   CPU, when non NULL, specifes the single processor that the memory
+   space is to be attached to. (UNIMPLEMENTED).
 
-   */
+   LEVEL specifies the ordering of the memory region.  Lower regions
+   are searched first.  Within a level, memory regions can not
+   overlap.
+
+   DEVICE, when non NULL, specifies a callback memory space.
+   (UNIMPLEMENTED, see the ppc simulator for an example).
+
+   MODULO, when the simulator has been configured WITH_MODULO support
+   and is greater than zero, specifies that accesses to the region
+   [ADDR .. ADDR+NR_BYTES) should be mapped onto the sub region [ADDR
+   .. ADDR+MODULO).  The modulo value must be a power of two.
+
+   OPTIONAL_BUFFER, when non NULL, specifies the buffer to use for
+   data read & written to the region.  Normally a more efficient
+   internal structure is used.  It is assumed that buffer is allocated
+   such that the byte alignmed of OPTIONAL_BUFFER matches ADDR vis
+   (OPTIONAL_BUFFER % 8) == (ADDR % 8)) */
 
 EXTERN_SIM_CORE\
 (void) sim_core_attach
 (SIM_DESC sd,
  sim_cpu *cpu,
- attach_type attach,
+ int level,
  access_type access,
  int address_space,
  address_word addr,
  address_word nr_bytes,
- unsigned modulo, /* Power of two, zero for none. */
+ unsigned modulo,
  device *client,
  void *optional_buffer);
+
 
 /* Delete a memory space within the core.
 
@@ -129,7 +146,7 @@ EXTERN_SIM_CORE\
 (void) sim_core_detach
 (SIM_DESC sd,
  sim_cpu *cpu,
- attach_type attach,
+ int level,
  int address_space,
  address_word addr);
 

@@ -145,7 +145,7 @@ sim_core_map_to_str (sim_core_maps map)
 STATIC_SIM_CORE\
 (sim_core_mapping *)
 new_sim_core_mapping (SIM_DESC sd,
-		      attach_type attach,
+		      int level,
 		      int space,
 		      address_word addr,
 		      address_word nr_bytes,
@@ -156,7 +156,7 @@ new_sim_core_mapping (SIM_DESC sd,
 {
   sim_core_mapping *new_mapping = ZALLOC(sim_core_mapping);
   /* common */
-  new_mapping->level = attach;
+  new_mapping->level = level;
   new_mapping->space = space;
   new_mapping->base = addr;
   new_mapping->nr_bytes = nr_bytes;
@@ -165,19 +165,9 @@ new_sim_core_mapping (SIM_DESC sd,
     new_mapping->mask = (unsigned) 0 - 1;
   else
     new_mapping->mask = modulo - 1;
-  if (attach == attach_raw_memory)
-    {
-      new_mapping->buffer = buffer;
-      new_mapping->free_buffer = free_buffer;
-    }
-  else if (attach >= attach_callback)
-    {
-      new_mapping->device = device;
-    }
-  else {
-    sim_io_error (sd, "new_sim_core_mapping - internal error - unknown attach type %d\n",
-		  attach);
-  }
+  new_mapping->buffer = buffer;
+  new_mapping->free_buffer = free_buffer;
+  new_mapping->device = device;
   return new_mapping;
 }
 
@@ -186,7 +176,7 @@ STATIC_SIM_CORE\
 (void)
 sim_core_map_attach (SIM_DESC sd,
 		     sim_core_map *access_map,
-		     attach_type attach,
+		     int level,
 		     int space,
 		     address_word addr,
 		     address_word nr_bytes,
@@ -200,10 +190,8 @@ sim_core_map_attach (SIM_DESC sd,
   sim_core_mapping *next_mapping;
   sim_core_mapping **last_mapping;
 
-  SIM_ASSERT ((attach >= attach_callback)
-	      <= (client != NULL && buffer == NULL && free_buffer == NULL));
-  SIM_ASSERT ((attach == attach_raw_memory)
-	      <= (client == NULL && buffer != NULL));
+  SIM_ASSERT ((client == NULL) != (buffer == NULL));
+  SIM_ASSERT ((client == NULL) >= (free_buffer != NULL));
 
   /* actually do occasionally get a zero size map */
   if (nr_bytes == 0)
@@ -219,8 +207,8 @@ sim_core_map_attach (SIM_DESC sd,
   next_mapping = access_map->first;
   last_mapping = &access_map->first;
   while(next_mapping != NULL
-	&& (next_mapping->level < (int) attach
-	    || (next_mapping->level == (int) attach
+	&& (next_mapping->level < level
+	    || (next_mapping->level == level
 		&& next_mapping->bound < addr)))
     {
       /* provided levels are the same */
@@ -231,8 +219,8 @@ sim_core_map_attach (SIM_DESC sd,
     }
   
   /* check insertion point correct */
-  SIM_ASSERT (next_mapping == NULL || next_mapping->level >= (int) attach);
-  if (next_mapping != NULL && next_mapping->level == (int) attach
+  SIM_ASSERT (next_mapping == NULL || next_mapping->level >= level);
+  if (next_mapping != NULL && next_mapping->level == level
       && next_mapping->base < (addr + (nr_bytes - 1)))
     {
 #if (WITH_DEVICES)
@@ -260,7 +248,7 @@ sim_core_map_attach (SIM_DESC sd,
 
   /* create/insert the new mapping */
   *last_mapping = new_sim_core_mapping(sd,
-				       attach,
+				       level,
 				       space, addr, nr_bytes, modulo,
 				       client, buffer, free_buffer);
   (*last_mapping)->next = next_mapping;
@@ -271,7 +259,7 @@ EXTERN_SIM_CORE\
 (void)
 sim_core_attach (SIM_DESC sd,
 		 sim_cpu *cpu,
-		 attach_type attach,
+		 int level,
 		 access_type access,
 		 int space,
 		 address_word addr,
@@ -299,38 +287,55 @@ sim_core_attach (SIM_DESC sd,
 #endif
     }
 
-  /* verify the attach type */
-  if (attach == attach_raw_memory)
+  /* verify modulo memory */
+  if (!WITH_MODULO_MEMORY && modulo != 0)
     {
-      if (WITH_MODULO_MEMORY && modulo != 0)
+#if (WITH_DEVICES)
+      device_error (client, "sim_core_attach - internal error - modulo memory disabled");
+#else
+      sim_io_error (sd, "sim_core_attach - internal error - modulo memory disabled");
+#endif
+    }
+  if (client != NULL && modulo != 0)
+    {
+#if (WITH_DEVICES)
+      device_error (client, "sim_core_attach - internal error - modulo and callback memory conflict");
+#else
+      sim_io_error (sd, "sim_core_attach - internal error - modulo and callback memory conflict");
+#endif
+    }
+  if (modulo != 0)
+    {
+      unsigned mask = modulo - 1;
+      /* any zero bits */
+      while (mask >= sizeof (unsigned64)) /* minimum modulo */
 	{
-	  unsigned mask = modulo - 1;
-	  if (mask < 7) /* 8 is minimum modulo */
+	  if ((mask & 1) == 0)
 	    mask = 0;
-	  while (mask > 1) /* no zero bits */
-	    {
-	      if ((mask & 1) == 0)
-		mask = 0;
-	      else
-		mask >>= 1;
-	    }
-	  if (mask == 0)
-	    {
-#if (WITH_DEVICES)
-	      device_error (client, "sim_core_attach - internal error - modulo not power of two");
-#else
-	      sim_io_error (sd, "sim_core_attach - internal error - modulo not power of two");
-#endif
-	    }
+	  else
+	    mask >>= 1;
 	}
-      else if (!WITH_MODULO_MEMORY && modulo != 0)
+      if (mask != sizeof (unsigned64) - 1)
 	{
 #if (WITH_DEVICES)
-	  device_error (client, "sim_core_attach - internal error - modulo memory disabled");
+	  device_error (client, "sim_core_attach - internal error - modulo %lx not power of two", (long) modulo);
 #else
-	  sim_io_error (sd, "sim_core_attach - internal error - modulo memory disabled");
+	  sim_io_error (sd, "sim_core_attach - internal error - modulo %lx not power of two", (long) modulo);
 #endif
 	}
+    }
+
+  /* verify consistency between device and buffer */
+  if (client != NULL && optional_buffer != NULL)
+    {
+#if (WITH_DEVICES)
+      device_error (client, "sim_core_attach - internal error - conflicting buffer and attach arguments");
+#else
+      sim_io_error (sd, "sim_core_attach - internal error - conflicting buffer and attach arguments");
+#endif
+    }
+  if (client == NULL)
+    {
       if (optional_buffer == NULL)
 	{
 	  int padding = (addr % sizeof (unsigned64));
@@ -343,18 +348,9 @@ sim_core_attach (SIM_DESC sd,
 	  free_buffer = NULL;
 	}
     }
-  else if (attach >= attach_callback)
-    {
-      buffer = NULL;
-      free_buffer = NULL;
-    }
   else
     {
-#if (WITH_DEVICES)
-      device_error (client, "sim_core_attach - internal error - conflicting buffer and attach arguments");
-#else
-      sim_io_error (sd, "sim_core_attach - internal error - conflicting buffer and attach arguments");
-#endif
+      /* a device */
       buffer = NULL;
       free_buffer = NULL;
     }
@@ -369,24 +365,21 @@ sim_core_attach (SIM_DESC sd,
 	case sim_core_read_map:
 	  if (access & access_read)
 	    sim_core_map_attach (sd, &memory->common.map[map],
-				 attach,
-				 space, addr, nr_bytes, modulo,
+				 level, space, addr, nr_bytes, modulo,
 				 client, buffer, free_buffer);
 	  free_buffer = NULL;
 	  break;
 	case sim_core_write_map:
 	  if (access & access_write)
 	    sim_core_map_attach (sd, &memory->common.map[map],
-				 attach,
-				 space, addr, nr_bytes, modulo,
+				 level, space, addr, nr_bytes, modulo,
 				 client, buffer, free_buffer);
 	  free_buffer = NULL;
 	  break;
 	case sim_core_execute_map:
 	  if (access & access_exec)
 	    sim_core_map_attach (sd, &memory->common.map[map],
-				 attach,
-				 space, addr, nr_bytes, modulo,
+				 level, space, addr, nr_bytes, modulo,
 				 client, buffer, free_buffer);
 	  free_buffer = NULL;
 	  break;
@@ -414,7 +407,7 @@ STATIC_INLINE_SIM_CORE\
 (void)
 sim_core_map_detach (SIM_DESC sd,
 		     sim_core_map *access_map,
-		     attach_type attach,
+		     int level,
 		     int space,
 		     address_word addr)
 {
@@ -424,7 +417,7 @@ sim_core_map_detach (SIM_DESC sd,
        entry = &(*entry)->next)
     {
       if ((*entry)->base == addr
-	  && (*entry)->level == (int) attach
+	  && (*entry)->level == level
 	  && (*entry)->space == space)
 	{
 	  sim_core_mapping *dead = (*entry);
@@ -441,7 +434,7 @@ EXTERN_SIM_CORE\
 (void)
 sim_core_detach (SIM_DESC sd,
 		 sim_cpu *cpu,
-		 attach_type attach,
+		 int level,
 		 int address_space,
 		 address_word addr)
 {
@@ -450,7 +443,7 @@ sim_core_detach (SIM_DESC sd,
   for (map = 0; map < nr_sim_core_maps; map++)
     {
       sim_core_map_detach (sd, &memory->common.map[map],
-			   attach, address_space, addr);
+			   level, address_space, addr);
     }
   /* Just copy this update to each of the processor specific data
      structures.  FIXME - later this will be replaced by true
