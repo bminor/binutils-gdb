@@ -1,3 +1,11 @@
+2004-08-01  Andrew Cagney  <cagney@gnu.org>
+
+	* infcall.c (call_function_by_hand): Do not use
+	DEPRECATED_PUSH_RETURN_ADDRESS, DEPRECATED_DUMMY_WRITE_SP,
+	DEPRECATED_SAVE_DUMMY_FRAME_TOS, DEPRECATED_TARGET_READ_FP,
+	DEPRECATED_FP_REGNUM, DEPRECATED_STORE_STRUCT_RETURN, and
+	DEPRECATED_STACK_ALIGN.
+
 2004-07-30  Ramana Radhakrishnan <ramana.radhakrishnan@codito.com>
 
 	Committed by Andrew Cagney.

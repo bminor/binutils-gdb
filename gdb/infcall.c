@@ -585,14 +585,7 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
 	      arg_type = check_typedef (VALUE_ENCLOSING_TYPE (args[i]));
 	      len = TYPE_LENGTH (arg_type);
 
-	      if (DEPRECATED_STACK_ALIGN_P ())
-		/* MVS 11/22/96: I think at least some of this
-		   stack_align code is really broken.  Better to let
-		   PUSH_ARGUMENTS adjust the stack in a target-defined
-		   manner.  */
-		aligned_len = DEPRECATED_STACK_ALIGN (len);
-	      else
-		aligned_len = len;
+	      aligned_len = len;
 	      if (INNER_THAN (1, 2))
 		{
 		  /* stack grows downward */
@@ -628,10 +621,6 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
   if (struct_return)
     {
       int len = TYPE_LENGTH (value_type);
-      if (DEPRECATED_STACK_ALIGN_P ())
-	/* NOTE: cagney/2003-03-22: Should rely on frame align, rather
-           than stack align to force the alignment of the stack.  */
-	len = DEPRECATED_STACK_ALIGN (len);
       if (INNER_THAN (1, 2))
 	{
 	  /* Stack grows downward.  Align STRUCT_ADDR and SP after
@@ -671,64 +660,10 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
   else
     error ("This target does not support function calls");
 
-  if (DEPRECATED_PUSH_RETURN_ADDRESS_P ())
-    /* for targets that use no CALL_DUMMY */
-    /* There are a number of targets now which actually don't write
-       any CALL_DUMMY instructions into the target, but instead just
-       save the machine state, push the arguments, and jump directly
-       to the callee function.  Since this doesn't actually involve
-       executing a JSR/BSR instruction, the return address must be set
-       up by hand, either by pushing onto the stack or copying into a
-       return-address register as appropriate.  Formerly this has been
-       done in PUSH_ARGUMENTS, but that's overloading its
-       functionality a bit, so I'm making it explicit to do it here.  */
-    /* NOTE: cagney/2003-04-22: The first parameter ("real_pc") has
-       been replaced with zero, it turns out that no implementation
-       used that parameter.  This occured because the value being
-       supplied - the address of the called function's entry point
-       instead of the address of the breakpoint that the called
-       function should return to - wasn't useful.  */
-    sp = DEPRECATED_PUSH_RETURN_ADDRESS (0, sp);
-
-  /* NOTE: cagney/2003-03-23: Diable this code when there is a
-     push_dummy_call() method.  Since that method will have already
-     handled any alignment issues, the code below is entirely
-     redundant.  */
-  if (!gdbarch_push_dummy_call_p (current_gdbarch)
-      && DEPRECATED_STACK_ALIGN_P () && !INNER_THAN (1, 2))
-    {
-      /* If stack grows up, we must leave a hole at the bottom, note
-         that sp already has been advanced for the arguments!  */
-      sp = DEPRECATED_STACK_ALIGN (sp);
-    }
-
-  /* Store the address at which the structure is supposed to be
-     written.  */
-  /* NOTE: 2003-03-24: Since PUSH_ARGUMENTS can (and typically does)
-     store the struct return address, this call is entirely redundant.  */
-  if (struct_return && DEPRECATED_STORE_STRUCT_RETURN_P ())
-    DEPRECATED_STORE_STRUCT_RETURN (struct_addr, sp);
-
-  /* Write the stack pointer.  This is here because the statements
-     above might fool with it.  On SPARC, this write also stores the
-     register window into the right place in the new stack frame,
-     which otherwise wouldn't happen (see store_inferior_registers in
-     sparc-nat.c).  */
-  /* NOTE: cagney/2003-03-23: Since the architecture method
-     push_dummy_call() should have already stored the stack pointer
-     (as part of creating the fake call frame), and none of the code
-     following that call adjusts the stack-pointer value, the below
-     call is entirely redundant.  */
-  if (DEPRECATED_DUMMY_WRITE_SP_P ())
-    DEPRECATED_DUMMY_WRITE_SP (sp);
-
-  if (DEPRECATED_SAVE_DUMMY_FRAME_TOS_P ())
-    DEPRECATED_SAVE_DUMMY_FRAME_TOS (sp);
-  else
-    /* Sanity.  The exact same SP value is returned by
-       PUSH_DUMMY_CALL, saved as the dummy-frame TOS, and used by
-       unwind_dummy_id to form the frame ID's stack address.  */
-    generic_save_dummy_frame_tos (sp);
+  /* Sanity.  The exact same SP value is returned by PUSH_DUMMY_CALL,
+     saved as the dummy-frame TOS, and used by unwind_dummy_id to form
+     the frame ID's stack address.  */
+  generic_save_dummy_frame_tos (sp);
 
   /* Now proceed, having reached the desired place.  */
   clear_proceed_status ();
@@ -747,28 +682,10 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
        set_momentary_breakpoint.  We need to give the breakpoint a
        frame ID so that the breakpoint code can correctly re-identify
        the dummy breakpoint.  */
-    if (gdbarch_unwind_dummy_id_p (current_gdbarch))
-      {
-	/* Sanity.  The exact same SP value is returned by
-	 PUSH_DUMMY_CALL, saved as the dummy-frame TOS, and used by
-	 unwind_dummy_id to form the frame ID's stack address.  */
-	frame = frame_id_build (sp, sal.pc);
-      }
-    else
-      {
-	/* The assumption here is that push_dummy_call() returned the
-	   stack part of the frame ID.  Unfortunately, many older
-	   architectures were, via a convoluted mess, relying on the
-	   poorly defined and greatly overloaded
-	   DEPRECATED_TARGET_READ_FP or DEPRECATED_FP_REGNUM to supply
-	   the value.  */
-	if (DEPRECATED_TARGET_READ_FP_P ())
-	  frame = frame_id_build (DEPRECATED_TARGET_READ_FP (), sal.pc);
-	else if (DEPRECATED_FP_REGNUM >= 0)
-	  frame = frame_id_build (read_register (DEPRECATED_FP_REGNUM), sal.pc);
-	else
-	  frame = frame_id_build (sp, sal.pc);
-      }
+    /* Sanity.  The exact same SP value is returned by
+       PUSH_DUMMY_CALL, saved as the dummy-frame TOS, and used by
+       unwind_dummy_id to form the frame ID's stack address.  */
+    frame = frame_id_build (sp, sal.pc);
     bpt = set_momentary_breakpoint (sal, frame, bp_call_dummy);
     bpt->disposition = disp_del;
   }
