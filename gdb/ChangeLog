@@ -1,3 +1,13 @@
+Fri Nov 21 19:43:23 1997  Jim Blandy  <jimb@zwingli.cygnus.com>
+
+	* valops.c (call_function_by_hand): If the function has a
+	prototype, convert its arguments as if by assignment.  Otherwise,
+	do the usual promotions. 
+	* stabsread.c (define_symbol): Set the TYPE_FLAG_PROTOTYPED flag
+ 	on functions' types when we can; all C++ functions should get it,
+	and if the Sun-style prototype notation is in the stabs, we can
+	notice that.
+
 Fri Nov 21 12:20:16 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* aclocal.m4 (AM_CYGWIN32, AM_EXEEXT): Remove.  They are already
