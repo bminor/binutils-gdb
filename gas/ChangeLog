@@ -1,3 +1,9 @@
+Fri Nov  5 12:08:21 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* config/obj-som.c (obj_som_init_stab_section): Change
+	space/subspace sort keys for the stab sections so as to avoid
+	bugs in the hp linker and pxdb.
+
 Thu Nov  4 17:00:05 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* write.c (chain_frchains_together): Update pointer to last
