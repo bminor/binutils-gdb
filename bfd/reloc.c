@@ -1870,8 +1870,6 @@ ENUMX
 ENUMX
   BFD_RELOC_SPARC_WDISP19
 ENUMX
-  BFD_RELOC_SPARC_GLOB_JMP
-ENUMX
   BFD_RELOC_SPARC_7
 ENUMX
   BFD_RELOC_SPARC_6
@@ -2439,6 +2437,14 @@ ENUM
 ENUMDOC
   This is a 16 bit offset from the zero data area pointer, with the
   bits placed non-contigously in the instruction.
+ENUM
+  BFD_RELOC_V850_CALLT_6_7_OFFSET
+ENUMDOC
+  This is a 6 bit offset from the call table base pointer.
+ENUM
+  BFD_RELOC_V850_CALLT_16_16_OFFSET
+ENUMDOC
+  This is a 16 bit offset from the call table base pointer.
 COMMENT
 {* end-sanitize-v850e *}
 

@@ -1245,10 +1245,8 @@ enum bfd_architecture
 #define bfd_mach_v850          0
   /* start-sanitize-v850e */
 #define bfd_mach_v850e 	'E'
-  /* end-sanitize-v850e */
-  /* start-sanitize-v850eq */
 #define bfd_mach_v850eq	'Q'
-  /* end-sanitize-v850eq */
+  /* end-sanitize-v850e */
   bfd_arch_arc,        /* Argonaut RISC Core */
 #define bfd_mach_arc_base 0
   bfd_arch_m32r,       /* Mitsubishi M32R/D */
@@ -1629,7 +1627,6 @@ relocation types already defined. */
   BFD_RELOC_SPARC_PC_LM22,
   BFD_RELOC_SPARC_WDISP16,
   BFD_RELOC_SPARC_WDISP19,
-  BFD_RELOC_SPARC_GLOB_JMP,
   BFD_RELOC_SPARC_7,
   BFD_RELOC_SPARC_6,
   BFD_RELOC_SPARC_5,

@@ -126,7 +126,7 @@ reloc_howto_type _bfd_sparc_elf_howto_table[] =
 #endif
   HOWTO(R_SPARC_WDISP16,   2,2,16,true, 0,complain_overflow_signed,  sparc_elf_wdisp16_reloc,"R_SPARC_WDISP16", false,0,0x00000000,true),
   HOWTO(R_SPARC_WDISP19,   2,2,22,true, 0,complain_overflow_signed,  bfd_elf_generic_reloc,  "R_SPARC_WDISP19", false,0,0x0007ffff,true),
-  HOWTO(R_SPARC_GLOB_JMP,  0,0,00,false,0,complain_overflow_dont,    bfd_elf_generic_reloc,  "R_SPARC_GLOB_JMP",false,0,0x00000000,true),
+  HOWTO(R_SPARC_UNUSED_42, 0,0, 0,false,0,complain_overflow_dont,    bfd_elf_generic_reloc,  "R_SPARC_UNUSED_42",false,0,0x00000000,true),
   HOWTO(R_SPARC_7,         0,2, 7,false,0,complain_overflow_bitfield,bfd_elf_generic_reloc,  "R_SPARC_7",       false,0,0x0000007f,true),
   HOWTO(R_SPARC_5,         0,2, 5,false,0,complain_overflow_bitfield,bfd_elf_generic_reloc,  "R_SPARC_5",       false,0,0x0000001f,true),
   HOWTO(R_SPARC_6,         0,2, 6,false,0,complain_overflow_bitfield,bfd_elf_generic_reloc,  "R_SPARC_6",       false,0,0x0000003f,true),
@@ -178,7 +178,6 @@ static CONST struct elf_reloc_map sparc_reloc_map[] =
   {BFD_RELOC_SPARC_PC_LM22, R_SPARC_PC_LM22},
   {BFD_RELOC_SPARC_WDISP16, R_SPARC_WDISP16},
   {BFD_RELOC_SPARC_WDISP19, R_SPARC_WDISP19},
-  {BFD_RELOC_SPARC_GLOB_JMP, R_SPARC_GLOB_JMP},
   {BFD_RELOC_SPARC_7, R_SPARC_7},
   {BFD_RELOC_SPARC_5, R_SPARC_5},
   {BFD_RELOC_SPARC_6, R_SPARC_6},
@@ -819,7 +818,8 @@ elf32_sparc_size_dynamic_sections (output_bfd, info)
 					      s->output_section);
 	      target = bfd_get_section_by_name (output_bfd, outname + 5);
 	      if (target != NULL
-		  && (target->flags & SEC_READONLY) != 0)
+		  && (target->flags & SEC_READONLY) != 0
+		  && (target->flags & SEC_ALLOC) != 0)
 		reltext = true;
 
 	      if (strcmp (name, ".rela.plt") == 0)
