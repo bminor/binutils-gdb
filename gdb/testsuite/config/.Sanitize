@@ -23,6 +23,7 @@ abug.exp
 arm-ice.exp
 cpu32bug.exp
 d10v.exp
+dve.exp
 est.exp
 gdbserver.exp
 h8300.exp
