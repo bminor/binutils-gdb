@@ -1,3 +1,57 @@
+Tue Jun 16 06:28:21 1992  Ken Raeburn  (Raeburn@Cygnus.COM)
+
+	* targets.c (struct bfd_target): Added field for target-specific
+	(but not file-specific) data, for distinguishing minor
+	characteristics between (e.g.) a.out formats.
+
+	* section.c (struct sec): New field user_set_vma indicates vma
+	field should be heeded, not assumed to be unset.
+	(STD_SECTION): Initialize that field of standard sections to zero.
+	* bfd-in.h (bfd_set_section_vma): Set user_set_vma to true.
+
+	* coffcode.h (coff_write_relocs): Write out swapped reloc, not
+	pre-swapped version.
+
+	* archures.c (struct bfd_arch_info): Fixed order of comment and
+	field decl.  New fields indicate size of page and segment for
+	architecture.
+	* cpu-m68k.c (N): Fill in values.
+	* cpu-sparc.c (arch_info_struct): Ditto.
+
+	* libaout.h (struct aout_backend_data): Various bits of data (not
+	all used currently) with characteristics of a.out implementation.
+	Important field for now is text_includes_header, indicating that
+	the text section starts immediately after the file header, which
+	gets mapped in with it.
+	(struct aout_data): New fields indicate whether vma has been
+	adjusted yet (not yet used), and what magic number will be used in
+	the output file (should go away in favor of vma_adjusted).
+	(WRITE_HEADERS): Code for dealing with section sizes and related
+	header fields replaced with call to adjust_sizes_and_vmas.
+	* aoutx.h (some_aout_object_p): Fill in magic number field.
+	Set WP_TEXT flag for ZMAGIC as well as NMAGIC files.
+	(set_arch_mach): Set page size and segment size once CPU
+	type is known.
+	(adjust_sizes_and_vmas): New function; has much code moved
+	from set_section_contents and WRITE_HEADERS.  Sets or adjusts vma
+	and size parameters, as well as many header fields, after deciding
+	on magic number for output file.  Checks to ensure that this
+	adjustment has only been done once.
+	(set_section_contents): Call adjust_sizes_and_vmas instead of
+	doing much of the work here.
+
+	* aout-target.h (MY_make_debug_symbol, MY_backend_data): Provide
+	default (null) values of these fields.
+	* aoutf1.h (sunos4_write_object_contents): Don't override a_text
+	value in exec header.
+	(sunos4_aout_backend, MY_backend_data): Define backend data
+	indicating file header is included in text section.
+
+	* aoutf1.h (MY_reloc_howto_type_lookup): Fix typo.
+
+	* hosts/sparc.h (abort, exit): Hide these names if compiling with
+	gcc version 2, to avoid warnings.
+
 Mon Jun 15 12:26:56 1992  Fred Fish  (fnf@cygnus.com)
 
 	* config/ncr3000.mh (INSTALL, RANLIB):  Don't use /usr/ucb/install,
