@@ -14,7 +14,7 @@ The home page for binutils is:
 
 and patches should be sent to:
 
-  bug-gnu-utils@gnu.org
+  bug-binutils@gnu.org
   
 with "[Patch]" as part of the subject line.  Note - patches to the
 top level configure.in and config.sub scripts should be sent to:
