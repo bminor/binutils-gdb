@@ -1,3 +1,7 @@
+Thu Aug  3 10:45:37 1995  Fred Fish  <fnf@cygnus.com>
+
+	* Update all FSF addresses except those in COPYING* files.
+
 Wed Jul  5 16:12:53 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
 
 	* w65.mt: Removed.

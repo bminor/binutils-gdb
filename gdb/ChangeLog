@@ -1,3 +1,7 @@
+Thu Aug  3 10:45:37 1995  Fred Fish  <fnf@cygnus.com>
+
+	* Update all FSF addresses except those in COPYING* files.
+
 Thu Aug  3 01:38:45 1995  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* config/alpha/tm-alpha.h (EXTRA_FRAME_INFO):  Add pc_reg field.
