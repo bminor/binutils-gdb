@@ -1,3 +1,9 @@
+Tue Apr 30 13:22:02 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* configure (powerpcle-*-solaris*): Add Solaris support.
+
+	* config/powerpc/{solaris.m[ht],tm-solaris.h}: New files for
+	Solaris support.
 
 Mon Apr 29 16:17:31 1996  Dawn Perchik <dawn@cygnus.com>
 	* c-valprint.c (c_val_print): Fix printing for arrays defined 

@@ -34,11 +34,14 @@ macos.mh
 macos.mt
 nm-aix.h
 nm-macos.h
+nm-solaris.h
 ppc-eabi.mt
 ppc-nw.mt
 ppc-sim.mt
 ppcle-eabi.mt
 ppcle-sim.mt
+solaris.mh
+solaris.mt
 tm-cygwin32.h
 tm-macos.h
 tm-ppc-aix.h
@@ -48,8 +51,9 @@ tm-ppc-nw.h
 tm-ppc-sim.h
 tm-ppcle-eabi.h
 tm-ppcle-sim.h
-xm-cygwin32.h
+tm-solaris.h
 xm-aix.h
+xm-cygwin32.h
 xm-mpw.h
 
 Things-to-lose:
