@@ -1,3 +1,7 @@
+Wed Sep  8 19:18:27 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* breakpoint.c (breakpoint_1): Deal with step resume breakpoint.
+
 Wed Sep  8 13:01:10 1993  K. Richard Pixley  (rich@cygnus.com)
 
 	Gcc lint.
