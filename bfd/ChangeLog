@@ -1,3 +1,23 @@
+Tue Oct 29 13:23:53 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ieee.c (ieee_write_section_part): Use LMA rather than VMA.
+	(do_with_relocs): Likewise.
+	(do_as_repeat): Likewise.
+	(copy_expression): Likewise.
+
+Fri Oct 25 16:56:40 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ieee.c (ieee_write_external_part): Correctly record whether
+	there is an external part.
+
+start-sanitize-v850
+Thu Oct 24 14:32:52 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* elf32-v850.c (elf32_v850_bfd_final_link_relocate): Correctly
+	handle tda offsets for sld.w and sst.w instructions.
+	Fix alignment check in sld.w and sst.w tda reloc handling.
+
+end-sanitize-v850
 Thu Oct 24 09:08:47 1996  Stu Grossman  (grossman@critters.cygnus.com)
 
 	* aclocal.m4, configure:  Set USE_BINARY_FOPEN for *-*-windows.
