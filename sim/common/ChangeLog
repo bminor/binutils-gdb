@@ -1,3 +1,21 @@
+Wed Jun 17 13:18:28 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-inline.h (EXTERN_*): Replace with EXTERN_*_P. Correct
+ 	documentation on how it works.
+
+	* sim-core.h, sim-core.c (sim_core_install, sim_core_attach,
+ 	sim_core_detach, sim_core_read_buffer, sim_core_write_buffer,
+ 	sim_core_set_xor, sim_core_xor_read_buffer,
+ 	sim_core_xor_write_buffer): Update.
+
+	* sim-events.h, sim-events.c (sim_events_install,
+ 	sim_events_watch_clock, sim_events_schedule_after_signal,
+ 	sim_events_schedule, sim_events_watch_sim, sim_events_watch_core,
+ 	sim_events_deschedule): Update.
+
+	* sim-fpu.h, sim-fpu.c (sim_fpu_zero, sim_fpu_one, sim_fpu_two,
+ 	sim_fpu_max32, sim_fpu_max64): Update.
+
 Sat Jun 13 07:45:38 1998  Doug Evans  <devans@fallis.cygnus.com>
 
 	* cgen-trace.c (trace_insn_fini): Redo cycle handling.
