@@ -190,7 +190,8 @@ if { [istarget mips*-*-*] } then {
   	run_dump_test "mips-abi32-pic"
 
 	run_dump_test "elf${el}-rel"
-	if {[istarget mips64*-*-*] || [istarget mipsisa32*-*-*]} { 
+	if {[istarget mips64*-*-*] || [istarget mipsisa32*-*-*]
+	    || [istarget mipsisa64*-*-*]} { 
 	    run_dump_test "elf${el}-rel2"
 	} else {
 	    run_dump_test "e32${el}-rel2"

@@ -1,3 +1,8 @@
+2002-05-31  Chris G. Demetriou  <cgd@broadcom.com>
+
+	* gas/mips/mips.exp: Use elf-rel2 and elfel-rel2 for
+	mipsisa64*-*-* targets, rather than e32-rel2 and e32el-rel2.
+
 2002-05-30  Chris G. Demetriou  <cgd@broadcom.com>
 
 	* gas/mips/mips64-mdmx.s: Tweak to more thoroughly cover
