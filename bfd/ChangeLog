@@ -1,3 +1,23 @@
+2001-06-14  Nick Clifton <nickc@redhat.com>
+
+	Merge from mainline sources:
+	2001-04-27  Sean McNeil <sean@mcneil.com>
+	* config.bfd: Add arm-vxworks target.
+	* coff-arm (coff_arm_relocate_section): Add in symbol value to
+	addend (fro VXworks targets).
+	2001-03-06  Nick Clifton  <nickc@redhat.com>
+	* elf32-arm.h (elf32_arm_final_link_relocate): Clear bit zero
+	of offset in BLX(1) instruction.
+	* coff-arm.c (coff_arm_relocate_section): Clear bit zero of
+	offset in BLX(1) instruction.
+        Fix formatting.
+	2001-03-06  Nick Clifton  <nickc@redhat.com>
+	* coff-arm.c (coff_arm_reloc_type_lookup): Add
+	BFD_RELOC_THUMB_PCREL_BLX.
+	2001-05-04  Nick Clifton  <nickc@cambridge.redhat.com>
+	* elf32-arm.h (elf32_arm_final_link_relocate): Set
+        EF_ARM_HASENTRY if the start address is set.
+
 2001-06-11  Alan Modra  <amodra@bigpond.net.au>
 
 	* configure.in (<COREFILE case stmt>): Move powerpc-*-*bsd* after
