@@ -1,5 +1,11 @@
 Thu Jan 13 10:32:38 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* remote-vx.c (vx_wait): Only call i960_fault_to_signal if I80960
+	is defined.  Otherwise just report TARGET_SIGNAL_UNKNOWN.
+
+	* mips-tdep.c (mips_push_arguments): Byteswap struct_addr before
+	writing it.
+
 	Add search to target vector (#if 0'd until after 4.12):
 	* target.h (to_search, target_search): Add.
 	* gdbcore.h, core.c (generic_search): Add.

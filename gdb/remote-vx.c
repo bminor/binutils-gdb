@@ -950,7 +950,16 @@ vx_wait (pid_to_wait_for, status)
       break;
 
     case EVENT_SIGNAL:
+#ifdef I80960
       status->value.sig = i960_fault_to_signal (rdbEvent.sigType);
+#else
+      /* Back in the old days, before enum target_signal, this code used
+	 to add NSIG to the signal number and claim that PRINT_RANDOM_SIGNAL
+	 would take care of it.  But PRINT_RANDOM_SIGNAL has never been
+	 defined except on the i960, so I don't really know what we are
+	 supposed to do on other architectures.  */
+      status->value.sig = TARGET_SIGNAL_UNKNOWN;
+#endif
       break;
     } /* switch */
   return pid;
