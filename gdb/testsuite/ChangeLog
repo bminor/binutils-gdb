@@ -1,3 +1,7 @@
+Thu Aug 19 18:18:59 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* gdb.t06/signals.exp: Skip the whole file with xfail for delta68.
+
 Tue Aug 17 00:05:28 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* gdb.t00/teststrategy.exp: Deal with it if cmdsize = 1 line
