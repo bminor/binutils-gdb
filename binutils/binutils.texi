@@ -2841,9 +2841,10 @@ and then we might not encounter the bug.
 A complete input file, or set of input files, that will reproduce the
 bug.  If the utility is reading an object file or files, then it is
 generally most helpful to send the actual object files, uuencoded if
-necessary to get them through the mail system.  Making them available
-for anonymous FTP is not as good, but may be the only reasonable choice
-for large object files.
+necessary to get them through the mail system.  Note that
+@samp{bug-gnu-utils@@gnu.org} is a mailing list, so you should avoid
+sending very large files to it.  Making the files available for
+anonymous FTP is OK.
 
 If the source files were produced exclusively using @sc{gnu} programs
 (e.g., @code{gcc}, @code{gas}, and/or the @sc{gnu} @code{ld}), then it

@@ -1,3 +1,8 @@
+1999-08-31  Ian Lance Taylor  <ian@zembu.com>
+
+	* binutils.texi (Bug Reporting): Clarify that large files should
+	not be sent to bug-gnu-utils.
+
 1999-08-28  Stephane Carrez  <stcarrez@worldnet.fr>
 
 	* readelf.c (process_extended_line_op): New parameter pointer_size,
