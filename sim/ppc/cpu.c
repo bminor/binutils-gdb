@@ -96,7 +96,9 @@ cpu_create(psim *system,
   processor->virtual = vm_create(memory);
   processor->instruction_map = vm_create_instruction_map(processor->virtual);
   processor->data_map = vm_create_data_map(processor->virtual);
-  processor->model_ptr = model_create (processor);
+
+  if (CURRENT_MODEL_ISSUE > 0)
+    processor->model_ptr = model_create (processor);
 
   /* link back to core system */
   processor->system = system;
@@ -114,7 +116,8 @@ cpu_init(cpu *processor)
   memset(&processor->regs, 0, sizeof(processor->regs));
   /* FIXME - should any of VM be inited also ? */
 
-  model_init (processor, processor->model_ptr);
+  if (CURRENT_MODEL_ISSUE > 0)
+    model_init (processor->model_ptr);
 }
 
 
@@ -247,7 +250,9 @@ cpu_halt(cpu *processor,
 	  signal);
   }
   else {
-    model_halt(processor, processor->model_ptr);
+    if (CURRENT_MODEL_ISSUE > 0)
+      model_halt(processor->model_ptr);
+
     processor->program_counter = cia;
     psim_halt(processor->system, processor->cpu_nr, cia, reason, signal);
   }

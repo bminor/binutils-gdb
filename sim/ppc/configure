@@ -909,8 +909,8 @@ fi
 enableval="$enable_sim_model_issue"
 if test -n "$enableval"; then
   case "${enableval}" in
-  yes)	sim_model_issue="-DWITH_MODEL_ISSUE=1";;
-  no)	sim_model_issue="-DWITH_MODEL_ISSUE=0";;
+  yes)	sim_model_issue="-DWITH_MODEL_ISSUE=MODEL_ISSUE_PROCESS";;
+  no)	sim_model_issue="-DWITH_MODEL_ISSUE=MODEL_ISSUE_IGNORE";;
   *)	{ echo "configure: error: "--enable-sim-model-issue does not take a value"" 1>&2; exit 1; }; sim_model_issue="";;
 esac
 if test x"$silent" != x"yes"; then

@@ -353,8 +353,8 @@ fi],[sim_model=""])dnl
 AC_ARG_ENABLE(sim-model-issue,
 [  --enable-sim-model-issue		Specify whether to simulate model specific actions],
 [case "${enableval}" in
-  yes)	sim_model_issue="-DWITH_MODEL_ISSUE=1";;
-  no)	sim_model_issue="-DWITH_MODEL_ISSUE=0";;
+  yes)	sim_model_issue="-DWITH_MODEL_ISSUE=MODEL_ISSUE_PROCESS";;
+  no)	sim_model_issue="-DWITH_MODEL_ISSUE=MODEL_ISSUE_IGNORE";;
   *)	AC_MSG_ERROR("--enable-sim-model-issue does not take a value"); sim_model_issue="";;
 esac
 if test x"$silent" != x"yes"; then

@@ -97,6 +97,7 @@ int current_host_byte_order;
 int current_environment;
 int current_alignment;
 int current_floating_point;
+int current_model_issue = MODEL_ISSUE_IGNORE;
 model_enum current_model = WITH_DEFAULT_MODEL;
 
 

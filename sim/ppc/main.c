@@ -23,7 +23,7 @@
 #include <stdio.h>
 
 #include "psim.h"
-#include "function_unit.h"
+#include "cpu.h"
 #include "options.h"
 
 #ifdef HAVE_STDLIB_H
@@ -116,6 +116,7 @@ main(int argc, char **argv)
 	print_info = 1;
 	break;
       case 'I':
+	current_model_issue = MODEL_ISSUE_PROCESS;
 	print_info = 2;
 	break;
       default:

@@ -228,7 +228,7 @@ mon_print_info(psim *system,
   len_cpu = strlen (buffer);
 
 #ifdef HAVE_GETRUSAGE
-  if (total_insns && verbose > 1)
+  if (total_insns && verbose)
     {
       struct rusage mytime;
       if (getrusage (RUSAGE_SELF, &mytime) == 0
@@ -273,7 +273,7 @@ mon_print_info(psim *system,
       printf_filtered ("\n");
     }
 
-    if (WITH_MODEL_ISSUE)
+    if (CURRENT_MODEL_ISSUE > 0)
       {
 	model_data *model_ptr = cpu_model(psim_cpu(system, cpu_nr));
 	model_print *ptr = model_mon_info(model_ptr);
@@ -351,7 +351,7 @@ mon_print_info(psim *system,
 
   if (cpu_insns_second)
     printf_filtered ("%sSimulator speed was %s instructions/second\n",
-		     (monitor->nr_cpus <= 1 && verbose <= 1) ? "" : "\n",
+		     (monitor->nr_cpus > 1) ? "" : "\n",
 		     mon_add_commas(buffer, sizeof(buffer), cpu_insns_second));
 }
 

@@ -106,6 +106,7 @@ sim_open (char *args)
 	    print_info = 1;
 	    break;
 	  case 'I':
+	    current_model_issue = MODEL_ISSUE_PROCESS;
 	    print_info = 2;
 	    break;
 	  }
@@ -341,7 +342,7 @@ zalloc(long size)
   void *memory = (void*)xmalloc(size);
   if (memory == NULL)
     error("xmalloc failed\n");
-  bzero(memory, size);
+  memset(memory, 0, size);
   return memory;
 }
 

@@ -275,9 +275,17 @@ extern int current_floating_point;
 #define WITH_DEFAULT_MODEL		DEFAULT_MODEL
 #endif
 
+#define MODEL_ISSUE_IGNORE		(-1)
+#define MODEL_ISSUE_PROCESS		1
+
 #ifndef WITH_MODEL_ISSUE
-#define WITH_MODEL_ISSUE		1
+#define WITH_MODEL_ISSUE		0
 #endif
+
+extern int current_model_issue;
+#define CURRENT_MODEL_ISSUE (WITH_MODEL_ISSUE	\
+			     ? WITH_MODEL_ISSUE	\
+			     : current_model_issue)
 
 /* INLINE CODE SELECTION:
 

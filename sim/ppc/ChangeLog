@@ -1,3 +1,31 @@
+Tue Nov 28 13:38:26 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* configure{,.in} (--enable-sim-model-issue): Instead of defining
+	0/1, define it to be MODEL_ISSUE_{PROCESS,IGNORE}.
+
+	* std-config.h (WITH_MODEL_ISSUE): Default to 0.
+	(CURRENT_MODEL_ISSUE): Reference WITH_MODEL_ISSUE, and if that is
+	0, use current_model_issue.
+
+	* psim.c (current_model_issue): New global variable.
+
+	* cpu.c (cpu_create): Use CURRENT_MODEL_ISSUE > 0 instead of
+	WITH_MODEL_ISSUE.
+	(cpu_{init,halt}): Ditto.
+	* mon.c (mon_print_info): Ditto.
+	* ppc-instructions (PPC_INSN_* macros, branch handling): Ditto.
+
+	* mon.c (mon_print_info): Print instructins/second if verbose > 0,
+	rather than > 1.
+
+	* main.c (main): Set current_model_issue to MODEL_ISSUE_PROCESS if
+	the -I switch is used.
+	* sim_calls (sim_open): Ditto.
+
+	* ppc-instructions (model support): Add support for determining
+	when we don't have enough writeback slots.  Add tracing for the
+	beginning of each cycle.
+
 Mon Nov 27 17:46:33 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* mon.c: Check for whether to include sys/types.h and sys/time.h.
