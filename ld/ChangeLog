@@ -1,5 +1,10 @@
 Wed Nov 16 10:03:03 1994  Jeff Law  (law@snake.cs.utah.edu)
 
+	* scripttempl/hppaelf.sc (.text): Handle a use rdefined text start
+	address.
+	(.data, .bss): If "-N", then place the data/bss just after the end
+	of the .text section rather than at the default 0x40000000.
+
 	* scripttempl/hppaelf.sc (.text): Place unwind descriptors in the
 	text segment.
 
