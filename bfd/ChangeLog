@@ -93,7 +93,6 @@
 	(xstormy16_reloc_type_lookup): Use 'table' field to locate correct
 	howto entry.
 
->>>>>>> 1.1263
 2002-01-10  Michael Snyder  <msnyder@redhat.com>
 
 	* elf.c (elfcore_write_prstatus): Use long instead of pid_t;
