@@ -3534,6 +3534,7 @@ fi
 done
 
 
+COPRO=armcopro.o
 
 
 trap '' 1 2 15
@@ -3744,6 +3745,7 @@ s%@sim_stdio@%$sim_stdio%g
 s%@sim_trace@%$sim_trace%g
 s%@sim_profile@%$sim_profile%g
 s%@EXEEXT@%$EXEEXT%g
+s%@COPRO@%$COPRO%g
 
 CEOF
 EOF

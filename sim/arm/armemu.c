@@ -2864,6 +2864,9 @@ ARMul_Emulate26 (register ARMul_State * state)
 
       if (state->Emulate == ONCE)
 	state->Emulate = STOP;
+      /* If we have changed mode, allow the PC to advance before stopping.  */
+      else if (state->Emulate == CHANGEMODE)
+	continue;
       else if (state->Emulate != RUN)
 	break;
     }
@@ -2872,7 +2875,8 @@ ARMul_Emulate26 (register ARMul_State * state)
   state->decoded = decoded;
   state->loaded = loaded;
   state->pc = pc;
-  return (pc);
+
+  return pc;
 }				/* Emulate 26/32 in instruction based mode */
 
 

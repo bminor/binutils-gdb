@@ -165,6 +165,7 @@ ARMul_OSInit (ARMul_State * state)
   ARMul_SetReg (state, SVC32MODE, 13, ADDRSUPERSTACK);	/* and for supervisor mode */
   ARMul_SetReg (state, ABORT32MODE, 13, ADDRSUPERSTACK);	/* and for abort 32 mode */
   ARMul_SetReg (state, UNDEF32MODE, 13, ADDRSUPERSTACK);	/* and for undef 32 mode */
+  ARMul_SetReg (state, SYSTEMMODE, 13, ADDRSUPERSTACK);	/* and for system mode */
   instr = 0xe59ff000 | (ADDRSOFTVECTORS - 8);	/* load pc from soft vector */
   for (i = ARMul_ResetV; i <= ARMFIQV; i += 4)
     ARMul_WriteWord (state, i, instr);	/* write hardware vectors */

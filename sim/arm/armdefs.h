@@ -200,16 +200,17 @@ struct ARMul_State
 *                          Mode and Bank Constants                          *
 \***************************************************************************/
 
-#define USER26MODE 0L
-#define FIQ26MODE 1L
-#define IRQ26MODE 2L
-#define SVC26MODE 3L
-#define USER32MODE 16L
-#define FIQ32MODE 17L
-#define IRQ32MODE 18L
-#define SVC32MODE 19L
+#define USER26MODE   0L
+#define FIQ26MODE    1L
+#define IRQ26MODE    2L
+#define SVC26MODE    3L
+#define USER32MODE  16L
+#define FIQ32MODE   17L
+#define IRQ32MODE   18L
+#define SVC32MODE   19L
 #define ABORT32MODE 23L
 #define UNDEF32MODE 27L
+#define SYSTEMMODE  31L
 
 #define ARM32BITMODE (state->Mode > 3)
 #define ARM26BITMODE (state->Mode <= 3)
@@ -225,6 +226,10 @@ struct ARMul_State
 #define ABORTBANK 4
 #define UNDEFBANK 5
 #define DUMMYBANK 6
+#define SYSTEMBANK 7
+
+#define BANK_CAN_ACCESS_SPSR(bank)  \
+  ((bank) != USERBANK && (bank) != SYSTEMBANK && (bank) != DUMMYBANK)
 
 /***************************************************************************\
 *                  Definitons of things in the emulator                     *
