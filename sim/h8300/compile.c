@@ -74,7 +74,7 @@ int debug;
 #endif
 
 #ifndef SEXTCHAR
-#define SEXTCHAR(x) ((x & 0x80) ? (x | ~0xff):x)
+#define SEXTCHAR(x) ((x & 0x80) ? (x | ~0xff): x & 0xff)
 #endif
 
 #define UEXTCHAR(x) ((x) & 0xff)
@@ -84,6 +84,9 @@ int debug;
 static cpu_state_type cpu;
 
 int h8300hmode = 0;
+/* start-sanitize-h8s */
+int h8300smode = 0;
+/* end-sanitize-h8s */
 
 static int memory_size;
 
@@ -1424,6 +1427,42 @@ sim_resume (step, siggnal)
 	case O (O_NOP, SB):
 	  goto next;
 
+/* start-sanitize-h8s */
+	case O (O_STM, SL):
+	  {
+	    int nregs, firstreg, i;
+
+	    nregs = GET_MEMORY_B (pc + 1);
+	    nregs >>= 4;
+	    nregs &= 0xf;
+	    firstreg = GET_MEMORY_B (pc + 3);
+	    firstreg &= 0xf;
+	    for (i = firstreg; i <= firstreg + nregs; i++)
+	      {
+		cpu.regs[7] -= 4;
+		SET_MEMORY_L (cpu.regs[7], cpu.regs[i]);
+	      }
+	  }
+	  goto next;
+
+	case O (O_LDM, SL):
+	  {
+	    int nregs, firstreg, i;
+
+	    nregs = GET_MEMORY_B (pc + 1);
+	    nregs >>= 4;
+	    nregs &= 0xf;
+	    firstreg = GET_MEMORY_B (pc + 3);
+	    firstreg &= 0xf;
+	    for (i = firstreg; i >= firstreg - nregs; i--)
+	      {
+		cpu.regs[i] = GET_MEMORY_L (cpu.regs[7]);
+		cpu.regs[7] += 4;
+	      }
+	  }
+	  goto next;
+
+/* end-sanitize-h8s */
 	default:
 	  cpu.exception = SIGILL;
 	  goto end;
@@ -1892,7 +1931,13 @@ sim_load (prog, from_tty)
   if ((abfd = bfd_openr (prog, "coff-h8300")) != 0)
     {
       if (bfd_check_format (abfd, bfd_object)) 
-	set_h8300h (abfd->arch_info->mach == bfd_mach_h8300h);
+	{
+	  set_h8300h (abfd->arch_info->mach == bfd_mach_h8300h
+/* start-sanitize-h8s */
+		      || abfd->arch_info->mach == bfd_mach_h8300s
+/* end-sanitize-h8s */
+		      );
+	}
       bfd_close (abfd);
     }
 
