@@ -1,3 +1,7 @@
+Mon Jul 19 15:09:01 1993  david d `zoo' zuhn  (zoo@rtl.cygnus.com)
+
+	* configure.{hosts,in}: add i[34]86-*-lynxos* support
+
 Mon Jul 19 14:53:30 1993  Ken Raeburn  (raeburn@rtl.cygnus.com)
 
 	* elf.c, elfcode.h, libelf.h: Serious reorganization.
