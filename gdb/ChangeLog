@@ -1,5 +1,21 @@
 2003-05-31  Andrew Cagney  <cagney@redhat.com>
 
+	* mips-tdep.c (mips_gdbarch_init): Do not set the deprecated
+	architecture methods call_dummy_words, sizeof_call_dummy_words,
+	push_return_address, store_struct_return, and fix_call_dummy.  Set
+	push_dummy_call instead of deprecated_push_arguments.
+	(mips_store_struct_return): Delete function.
+	(mips_fix_call_dummy): Delete function.
+	(mips_push_return_address): Delete function.
+	(mips_eabi_push_dummy_call): Replace mips_eabi_push_arguments, set
+	RA_REGNUM and T9_REGNUM.
+	(mips_n32n64_push_dummy_call): Ditto for
+	mips_n32n64_push_arguments.
+	(mips_o32_push_dummy_call): Ditto for mips_o32_push_arguments.
+	(mips_o64_push_dummy_call): Ditto for mips_o64_push_arguments.
+
+2003-05-31  Andrew Cagney  <cagney@redhat.com>
+
 	* gdbarch.sh (PUSH_DUMMY_CALL): Add "func_addr" parameter.  Rename
 	"dummy_addr" to "bp_addr".
 	* infcall.c (call_function_by_hand): Pass "funaddr" to

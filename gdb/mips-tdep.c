@@ -2697,17 +2697,24 @@ mips_frame_align (struct gdbarch *gdbarch, CORE_ADDR addr)
 }
 
 static CORE_ADDR
-mips_eabi_push_arguments (int nargs,
-			  struct value **args,
-			  CORE_ADDR sp,
-			  int struct_return,
-			  CORE_ADDR struct_addr)
+mips_eabi_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
+			   struct regcache *regcache, CORE_ADDR bp_addr, int nargs,
+			   struct value **args, CORE_ADDR sp, int struct_return,
+			   CORE_ADDR struct_addr)
 {
   int argreg;
   int float_argreg;
   int argnum;
   int len = 0;
   int stack_offset = 0;
+
+  /* For shared libraries, "t9" needs to point at the function
+     address.  */
+  regcache_cooked_write_signed (regcache, T9_REGNUM, func_addr);
+
+  /* Set the return address register to point to the entry point of
+     the program, where a breakpoint lies in wait.  */
+  regcache_cooked_write_signed (regcache, RA_REGNUM, bp_addr);
 
   /* First ensure that the stack and structure return address (if any)
      are properly aligned.  The stack has to be at least 64-bit
@@ -2728,7 +2735,7 @@ mips_eabi_push_arguments (int nargs,
 
   if (mips_debug)
     fprintf_unfiltered (gdb_stdlog, 
-			"mips_eabi_push_arguments: sp=0x%s allocated %d\n",
+			"mips_eabi_push_dummy_call: sp=0x%s allocated %d\n",
 			paddr_nz (sp), ROUND_UP (len, 16));
 
   /* Initialize the integer and float register pointers.  */
@@ -2740,7 +2747,7 @@ mips_eabi_push_arguments (int nargs,
     {
       if (mips_debug)
 	fprintf_unfiltered (gdb_stdlog,
-			    "mips_eabi_push_arguments: struct_return reg=%d 0x%s\n",
+			    "mips_eabi_push_dummy_call: struct_return reg=%d 0x%s\n",
 			    argreg, paddr_nz (struct_addr));
       write_register (argreg++, struct_addr);
     }
@@ -2759,7 +2766,7 @@ mips_eabi_push_arguments (int nargs,
 
       if (mips_debug)
 	fprintf_unfiltered (gdb_stdlog,
-			    "mips_eabi_push_arguments: %d len=%d type=%d",
+			    "mips_eabi_push_dummy_call: %d len=%d type=%d",
 			    argnum + 1, len, (int) typecode);
 
       /* The EABI passes structures that do not fit in a register by
@@ -2947,20 +2954,27 @@ mips_eabi_push_arguments (int nargs,
   return sp;
 }
 
-/* N32/N64 version of push_arguments.  */
+/* N32/N64 version of push_dummy_call.  */
 
 static CORE_ADDR
-mips_n32n64_push_arguments (int nargs,
-			    struct value **args,
-			    CORE_ADDR sp,
-			    int struct_return,
-			    CORE_ADDR struct_addr)
+mips_n32n64_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
+			     struct regcache *regcache, CORE_ADDR bp_addr, int nargs,
+			     struct value **args, CORE_ADDR sp, int struct_return,
+			     CORE_ADDR struct_addr)
 {
   int argreg;
   int float_argreg;
   int argnum;
   int len = 0;
   int stack_offset = 0;
+
+  /* For shared libraries, "t9" needs to point at the function
+     address.  */
+  regcache_cooked_write_signed (regcache, T9_REGNUM, func_addr);
+
+  /* Set the return address register to point to the entry point of
+     the program, where a breakpoint lies in wait.  */
+  regcache_cooked_write_signed (regcache, RA_REGNUM, bp_addr);
 
   /* First ensure that the stack and structure return address (if any)
      are properly aligned.  The stack has to be at least 64-bit
@@ -2979,7 +2993,7 @@ mips_n32n64_push_arguments (int nargs,
 
   if (mips_debug)
     fprintf_unfiltered (gdb_stdlog, 
-			"mips_n32n64_push_arguments: sp=0x%s allocated %d\n",
+			"mips_n32n64_push_dummy_call: sp=0x%s allocated %d\n",
 			paddr_nz (sp), ROUND_UP (len, 16));
 
   /* Initialize the integer and float register pointers.  */
@@ -2991,7 +3005,7 @@ mips_n32n64_push_arguments (int nargs,
     {
       if (mips_debug)
 	fprintf_unfiltered (gdb_stdlog,
-			    "mips_n32n64_push_arguments: struct_return reg=%d 0x%s\n",
+			    "mips_n32n64_push_dummy_call: struct_return reg=%d 0x%s\n",
 			    argreg, paddr_nz (struct_addr));
       write_register (argreg++, struct_addr);
     }
@@ -3010,7 +3024,7 @@ mips_n32n64_push_arguments (int nargs,
 
       if (mips_debug)
 	fprintf_unfiltered (gdb_stdlog,
-			    "mips_n32n64_push_arguments: %d len=%d type=%d",
+			    "mips_n32n64_push_dummy_call: %d len=%d type=%d",
 			    argnum + 1, len, (int) typecode);
 
       val = (char *) VALUE_CONTENTS (arg);
@@ -3169,20 +3183,27 @@ mips_n32n64_push_arguments (int nargs,
   return sp;
 }
 
-/* O32 version of push_arguments.  */
+/* O32 version of push_dummy_call.  */
 
 static CORE_ADDR
-mips_o32_push_arguments (int nargs,
-			 struct value **args,
-			 CORE_ADDR sp,
-			 int struct_return,
-			 CORE_ADDR struct_addr)
+mips_o32_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
+			  struct regcache *regcache, CORE_ADDR bp_addr, int nargs,
+			  struct value **args, CORE_ADDR sp, int struct_return,
+			  CORE_ADDR struct_addr)
 {
   int argreg;
   int float_argreg;
   int argnum;
   int len = 0;
   int stack_offset = 0;
+
+  /* For shared libraries, "t9" needs to point at the function
+     address.  */
+  regcache_cooked_write_signed (regcache, T9_REGNUM, func_addr);
+
+  /* Set the return address register to point to the entry point of
+     the program, where a breakpoint lies in wait.  */
+  regcache_cooked_write_signed (regcache, RA_REGNUM, bp_addr);
 
   /* First ensure that the stack and structure return address (if any)
      are properly aligned.  The stack has to be at least 64-bit
@@ -3201,7 +3222,7 @@ mips_o32_push_arguments (int nargs,
 
   if (mips_debug)
     fprintf_unfiltered (gdb_stdlog, 
-			"mips_o32_push_arguments: sp=0x%s allocated %d\n",
+			"mips_o32_push_dummy_call: sp=0x%s allocated %d\n",
 			paddr_nz (sp), ROUND_UP (len, 16));
 
   /* Initialize the integer and float register pointers.  */
@@ -3213,7 +3234,7 @@ mips_o32_push_arguments (int nargs,
     {
       if (mips_debug)
 	fprintf_unfiltered (gdb_stdlog,
-			    "mips_o32_push_arguments: struct_return reg=%d 0x%s\n",
+			    "mips_o32_push_dummy_call: struct_return reg=%d 0x%s\n",
 			    argreg, paddr_nz (struct_addr));
       write_register (argreg++, struct_addr);
       stack_offset += MIPS_STACK_ARGSIZE;
@@ -3233,7 +3254,7 @@ mips_o32_push_arguments (int nargs,
 
       if (mips_debug)
 	fprintf_unfiltered (gdb_stdlog,
-			    "mips_o32_push_arguments: %d len=%d type=%d",
+			    "mips_o32_push_dummy_call: %d len=%d type=%d",
 			    argnum + 1, len, (int) typecode);
 
       val = (char *) VALUE_CONTENTS (arg);
@@ -3468,20 +3489,27 @@ mips_o32_push_arguments (int nargs,
   return sp;
 }
 
-/* O64 version of push_arguments.  */
+/* O64 version of push_dummy_call.  */
 
 static CORE_ADDR
-mips_o64_push_arguments (int nargs,
-			 struct value **args,
-			 CORE_ADDR sp,
-			 int struct_return,
-			 CORE_ADDR struct_addr)
+mips_o64_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
+			  struct regcache *regcache, CORE_ADDR bp_addr, int nargs,
+			  struct value **args, CORE_ADDR sp, int struct_return,
+			  CORE_ADDR struct_addr)
 {
   int argreg;
   int float_argreg;
   int argnum;
   int len = 0;
   int stack_offset = 0;
+
+  /* For shared libraries, "t9" needs to point at the function
+     address.  */
+  regcache_cooked_write_signed (regcache, T9_REGNUM, func_addr);
+
+  /* Set the return address register to point to the entry point of
+     the program, where a breakpoint lies in wait.  */
+  regcache_cooked_write_signed (regcache, RA_REGNUM, bp_addr);
 
   /* First ensure that the stack and structure return address (if any)
      are properly aligned.  The stack has to be at least 64-bit
@@ -3500,7 +3528,7 @@ mips_o64_push_arguments (int nargs,
 
   if (mips_debug)
     fprintf_unfiltered (gdb_stdlog, 
-			"mips_o64_push_arguments: sp=0x%s allocated %d\n",
+			"mips_o64_push_dummy_call: sp=0x%s allocated %d\n",
 			paddr_nz (sp), ROUND_UP (len, 16));
 
   /* Initialize the integer and float register pointers.  */
@@ -3512,7 +3540,7 @@ mips_o64_push_arguments (int nargs,
     {
       if (mips_debug)
 	fprintf_unfiltered (gdb_stdlog,
-			    "mips_o64_push_arguments: struct_return reg=%d 0x%s\n",
+			    "mips_o64_push_dummy_call: struct_return reg=%d 0x%s\n",
 			    argreg, paddr_nz (struct_addr));
       write_register (argreg++, struct_addr);
       stack_offset += MIPS_STACK_ARGSIZE;
@@ -3532,7 +3560,7 @@ mips_o64_push_arguments (int nargs,
 
       if (mips_debug)
 	fprintf_unfiltered (gdb_stdlog,
-			    "mips_o64_push_arguments: %d len=%d type=%d",
+			    "mips_o64_push_dummy_call: %d len=%d type=%d",
 			    argnum + 1, len, (int) typecode);
 
       val = (char *) VALUE_CONTENTS (arg);
@@ -3764,15 +3792,6 @@ mips_o64_push_arguments (int nargs,
     }
 
   /* Return adjusted stack pointer.  */
-  return sp;
-}
-
-static CORE_ADDR
-mips_push_return_address (CORE_ADDR pc, CORE_ADDR sp)
-{
-  /* Set the return address register to point to the entry
-     point of the program, where a breakpoint lies in wait.  */
-  write_register (RA_REGNUM, CALL_DUMMY_ADDRESS ());
   return sp;
 }
 
@@ -3848,13 +3867,6 @@ mips_pop_frame (void)
 			read_memory_integer (new_sp - 4 * MIPS_SAVED_REGSIZE,
 					     MIPS_SAVED_REGSIZE));
     }
-}
-
-static void
-mips_fix_call_dummy (char *dummy, CORE_ADDR pc, CORE_ADDR fun, int nargs, 
-		     struct value **args, struct type *type, int gcc_p)
-{
-  write_register(T9_REGNUM, fun);
 }
 
 /* Floating point register management.
@@ -4893,12 +4905,6 @@ mips_n32n64_store_return_value (struct type *type, char *valbuf)
   mips_n32n64_xfer_return_value (type, current_regcache, NULL, valbuf);
 }
 
-static void
-mips_store_struct_return (CORE_ADDR addr, CORE_ADDR sp)
-{
-  /* Nothing to do -- push_arguments does all the work.  */
-}
-
 static CORE_ADDR
 mips_extract_struct_value_address (struct regcache *regcache)
 {
@@ -5550,8 +5556,6 @@ static struct gdbarch *
 mips_gdbarch_init (struct gdbarch_info info,
 		   struct gdbarch_list *arches)
 {
-  static LONGEST mips_call_dummy_words[] =
-  {0};
   struct gdbarch *gdbarch;
   struct gdbarch_tdep *tdep;
   int elf_flags;
@@ -5725,7 +5729,7 @@ mips_gdbarch_init (struct gdbarch_info info,
   switch (mips_abi)
     {
     case MIPS_ABI_O32:
-      set_gdbarch_deprecated_push_arguments (gdbarch, mips_o32_push_arguments);
+      set_gdbarch_push_dummy_call (gdbarch, mips_o32_push_dummy_call);
       set_gdbarch_deprecated_store_return_value (gdbarch, mips_o32_store_return_value);
       set_gdbarch_extract_return_value (gdbarch, mips_o32_extract_return_value);
       tdep->mips_default_saved_regsize = 4;
@@ -5744,7 +5748,7 @@ mips_gdbarch_init (struct gdbarch_info info,
 					 mips_o32_use_struct_convention);
       break;
     case MIPS_ABI_O64:
-      set_gdbarch_deprecated_push_arguments (gdbarch, mips_o64_push_arguments);
+      set_gdbarch_push_dummy_call (gdbarch, mips_o64_push_dummy_call);
       set_gdbarch_deprecated_store_return_value (gdbarch, mips_o64_store_return_value);
       set_gdbarch_deprecated_extract_return_value (gdbarch, mips_o64_extract_return_value);
       tdep->mips_default_saved_regsize = 8;
@@ -5763,7 +5767,7 @@ mips_gdbarch_init (struct gdbarch_info info,
 					 mips_o32_use_struct_convention);
       break;
     case MIPS_ABI_EABI32:
-      set_gdbarch_deprecated_push_arguments (gdbarch, mips_eabi_push_arguments);
+      set_gdbarch_push_dummy_call (gdbarch, mips_eabi_push_dummy_call);
       set_gdbarch_deprecated_store_return_value (gdbarch, mips_eabi_store_return_value);
       set_gdbarch_deprecated_extract_return_value (gdbarch, mips_eabi_extract_return_value);
       tdep->mips_default_saved_regsize = 4;
@@ -5782,7 +5786,7 @@ mips_gdbarch_init (struct gdbarch_info info,
 					 mips_eabi_use_struct_convention);
       break;
     case MIPS_ABI_EABI64:
-      set_gdbarch_deprecated_push_arguments (gdbarch, mips_eabi_push_arguments);
+      set_gdbarch_push_dummy_call (gdbarch, mips_eabi_push_dummy_call);
       set_gdbarch_deprecated_store_return_value (gdbarch, mips_eabi_store_return_value);
       set_gdbarch_deprecated_extract_return_value (gdbarch, mips_eabi_extract_return_value);
       tdep->mips_default_saved_regsize = 8;
@@ -5801,7 +5805,7 @@ mips_gdbarch_init (struct gdbarch_info info,
 					 mips_eabi_use_struct_convention);
       break;
     case MIPS_ABI_N32:
-      set_gdbarch_deprecated_push_arguments (gdbarch, mips_n32n64_push_arguments);
+      set_gdbarch_push_dummy_call (gdbarch, mips_n32n64_push_dummy_call);
       set_gdbarch_deprecated_store_return_value (gdbarch, mips_n32n64_store_return_value);
       set_gdbarch_extract_return_value (gdbarch, mips_n32n64_extract_return_value);
       tdep->mips_default_saved_regsize = 8;
@@ -5820,7 +5824,7 @@ mips_gdbarch_init (struct gdbarch_info info,
 				       mips_n32n64_reg_struct_has_addr);
       break;
     case MIPS_ABI_N64:
-      set_gdbarch_deprecated_push_arguments (gdbarch, mips_n32n64_push_arguments);
+      set_gdbarch_push_dummy_call (gdbarch, mips_n32n64_push_dummy_call);
       set_gdbarch_deprecated_store_return_value (gdbarch, mips_n32n64_store_return_value);
       set_gdbarch_extract_return_value (gdbarch, mips_n32n64_extract_return_value);
       tdep->mips_default_saved_regsize = 8;
@@ -5922,12 +5926,7 @@ mips_gdbarch_init (struct gdbarch_info info,
   /* MIPS version of CALL_DUMMY */
 
   set_gdbarch_call_dummy_address (gdbarch, mips_call_dummy_address);
-  set_gdbarch_deprecated_push_return_address (gdbarch, mips_push_return_address);
   set_gdbarch_deprecated_pop_frame (gdbarch, mips_pop_frame);
-  set_gdbarch_deprecated_fix_call_dummy (gdbarch, mips_fix_call_dummy);
-  set_gdbarch_deprecated_call_dummy_words (gdbarch, mips_call_dummy_words);
-  set_gdbarch_deprecated_sizeof_call_dummy_words (gdbarch, sizeof (mips_call_dummy_words));
-  set_gdbarch_deprecated_push_return_address (gdbarch, mips_push_return_address);
   set_gdbarch_frame_align (gdbarch, mips_frame_align);
   set_gdbarch_save_dummy_frame_tos (gdbarch, generic_save_dummy_frame_tos);
   set_gdbarch_register_convertible (gdbarch, mips_register_convertible);
@@ -5969,7 +5968,6 @@ mips_gdbarch_init (struct gdbarch_info info,
   /* Hook in OS ABI-specific overrides, if they have been registered.  */
   gdbarch_init_osabi (info, gdbarch);
 
-  set_gdbarch_deprecated_store_struct_return (gdbarch, mips_store_struct_return);
   set_gdbarch_extract_struct_value_address (gdbarch, 
 					    mips_extract_struct_value_address);
   
