@@ -1,3 +1,9 @@
+2000-04-01  Ian Lance Taylor  <ian@zembu.com>
+
+	* disassemble.c (disassembler_usage): Don't use a prototype.  Mark
+	the parameter ATTRIBUTE_UNUSED.
+	* ppc-opc.c: Add ATTRIBUTE_UNUSED as needed.
+
 2000-04-01  Alexandre Oliva  <aoliva@cygnus.com>
 
 	* m10300-opc.c: SP-based offsets are always unsigned.

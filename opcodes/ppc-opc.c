@@ -410,8 +410,8 @@ const struct powerpc_operand powerpc_operands[] =
 static unsigned long
 insert_bat (insn, value, errmsg)
      unsigned long insn;
-     long value;
-     const char **errmsg;
+     long value ATTRIBUTE_UNUSED;
+     const char **errmsg ATTRIBUTE_UNUSED;
 {
   return insn | (((insn >> 21) & 0x1f) << 16);
 }
@@ -437,8 +437,8 @@ extract_bat (insn, invalid)
 static unsigned long
 insert_bba (insn, value, errmsg)
      unsigned long insn;
-     long value;
-     const char **errmsg;
+     long value ATTRIBUTE_UNUSED;
+     const char **errmsg ATTRIBUTE_UNUSED;
 {
   return insn | (((insn >> 16) & 0x1f) << 11);
 }
@@ -462,7 +462,7 @@ static unsigned long
 insert_bd (insn, value, errmsg)
      unsigned long insn;
      long value;
-     const char **errmsg;
+     const char **errmsg ATTRIBUTE_UNUSED;
 {
   return insn | (value & 0xfffc);
 }
@@ -471,7 +471,7 @@ insert_bd (insn, value, errmsg)
 static long
 extract_bd (insn, invalid)
      unsigned long insn;
-     int *invalid;
+     int *invalid ATTRIBUTE_UNUSED;
 {
   if ((insn & 0x8000) != 0)
     return (insn & 0xfffc) - 0x10000;
@@ -491,7 +491,7 @@ static unsigned long
 insert_bdm (insn, value, errmsg)
      unsigned long insn;
      long value;
-     const char **errmsg;
+     const char **errmsg ATTRIBUTE_UNUSED;
 {
   if ((value & 0x8000) != 0)
     insn |= 1 << 21;
@@ -522,7 +522,7 @@ static unsigned long
 insert_bdp (insn, value, errmsg)
      unsigned long insn;
      long value;
-     const char **errmsg;
+     const char **errmsg ATTRIBUTE_UNUSED;
 {
   if ((value & 0x8000) == 0)
     insn |= 1 << 21;
@@ -643,7 +643,7 @@ static unsigned long
 insert_ds (insn, value, errmsg)
      unsigned long insn;
      long value;
-     const char **errmsg;
+     const char **errmsg ATTRIBUTE_UNUSED;
 {
   return insn | (value & 0xfffc);
 }
@@ -652,7 +652,7 @@ insert_ds (insn, value, errmsg)
 static long
 extract_ds (insn, invalid)
      unsigned long insn;
-     int *invalid;
+     int *invalid ATTRIBUTE_UNUSED;
 {
   if ((insn & 0x8000) != 0)
     return (insn & 0xfffc) - 0x10000;
@@ -679,7 +679,7 @@ insert_li (insn, value, errmsg)
 static long
 extract_li (insn, invalid)
      unsigned long insn;
-     int *invalid;
+     int *invalid ATTRIBUTE_UNUSED;
 {
   if ((insn & 0x2000000) != 0)
     return (insn & 0x3fffffc) - 0x4000000;
@@ -788,7 +788,7 @@ static unsigned long
 insert_mb6 (insn, value, errmsg)
      unsigned long insn;
      long value;
-     const char **errmsg;
+     const char **errmsg ATTRIBUTE_UNUSED;
 {
   return insn | ((value & 0x1f) << 6) | (value & 0x20);
 }
@@ -797,7 +797,7 @@ insert_mb6 (insn, value, errmsg)
 static long
 extract_mb6 (insn, invalid)
      unsigned long insn;
-     int *invalid;
+     int *invalid ATTRIBUTE_UNUSED;
 {
   return ((insn >> 6) & 0x1f) | (insn & 0x20);
 }
@@ -822,7 +822,7 @@ insert_nb (insn, value, errmsg)
 static long
 extract_nb (insn, invalid)
      unsigned long insn;
-     int *invalid;
+     int *invalid ATTRIBUTE_UNUSED;
 {
   long ret;
 
@@ -842,7 +842,7 @@ static unsigned long
 insert_nsi (insn, value, errmsg)
      unsigned long insn;
      long value;
-     const char **errmsg;
+     const char **errmsg ATTRIBUTE_UNUSED;
 {
   return insn | ((- value) & 0xffff);
 }
@@ -915,8 +915,8 @@ insert_ras (insn, value, errmsg)
 static unsigned long
 insert_rbs (insn, value, errmsg)
      unsigned long insn;
-     long value;
-     const char **errmsg;
+     long value ATTRIBUTE_UNUSED;
+     const char **errmsg ATTRIBUTE_UNUSED;
 {
   return insn | (((insn >> 21) & 0x1f) << 11);
 }
@@ -939,7 +939,7 @@ static unsigned long
 insert_sh6 (insn, value, errmsg)
      unsigned long insn;
      long value;
-     const char **errmsg;
+     const char **errmsg ATTRIBUTE_UNUSED;
 {
   return insn | ((value & 0x1f) << 11) | ((value & 0x20) >> 4);
 }
@@ -948,7 +948,7 @@ insert_sh6 (insn, value, errmsg)
 static long
 extract_sh6 (insn, invalid)
      unsigned long insn;
-     int *invalid;
+     int *invalid ATTRIBUTE_UNUSED;
 {
   return ((insn >> 11) & 0x1f) | ((insn << 4) & 0x20);
 }
@@ -960,7 +960,7 @@ static unsigned long
 insert_spr (insn, value, errmsg)
      unsigned long insn;
      long value;
-     const char **errmsg;
+     const char **errmsg ATTRIBUTE_UNUSED;
 {
   return insn | ((value & 0x1f) << 16) | ((value & 0x3e0) << 6);
 }
@@ -968,7 +968,7 @@ insert_spr (insn, value, errmsg)
 static long
 extract_spr (insn, invalid)
      unsigned long insn;
-     int *invalid;
+     int *invalid ATTRIBUTE_UNUSED;
 {
   return ((insn >> 16) & 0x1f) | ((insn >> 6) & 0x3e0);
 }
@@ -987,7 +987,7 @@ static unsigned long
 insert_tbr (insn, value, errmsg)
      unsigned long insn;
      long value;
-     const char **errmsg;
+     const char **errmsg ATTRIBUTE_UNUSED;
 {
   if (value == 0)
     value = TB;
@@ -997,7 +997,7 @@ insert_tbr (insn, value, errmsg)
 static long
 extract_tbr (insn, invalid)
      unsigned long insn;
-     int *invalid;
+     int *invalid ATTRIBUTE_UNUSED;
 {
   long ret;
 

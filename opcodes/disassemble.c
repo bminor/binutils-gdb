@@ -266,7 +266,8 @@ disassembler (abfd)
 }
 
 void
-disassembler_usage (FILE * stream)
+disassembler_usage (stream)
+     FILE *stream ATTRIBUTE_UNUSED;
 {
 #ifdef ARCH_arm
   print_arm_disassembler_options (stream);
