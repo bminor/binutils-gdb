@@ -1,3 +1,8 @@
+2000-03-16  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* makefile.in (go32-nat.o): Add prerequisites.
+	(ALLDEPFILES): Add go32-nat.c.
+
 2000-03-15  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	From "Peter.Schauer" <Peter.Schauer@regent.e-technik.tu-muenchen.de>
