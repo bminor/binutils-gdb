@@ -1,3 +1,7 @@
+Thu Sep 10 20:51:23 1998  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* mn10300-tdep.c (mn10300_analyze_prologue): guard against NULL.
+
 Wed Sep  9 19:37:36 1998  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* dbxread.c (IGNORE_SYMBOL): Remove definition, is never used.
