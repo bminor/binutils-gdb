@@ -29,7 +29,7 @@ void
 ldversion (noisy)
      int noisy;
 {
-  fprintf(stdout,"ld version cygnus-2.4.1 (with BFD %s)\n", BFD_VERSION);
+  fprintf(stdout,"ld version cygnus-2.5 (with BFD %s)\n", BFD_VERSION);
 
   if (noisy) 
   {
@@ -62,6 +62,7 @@ Options:\n\
   puts ("\
        [-r | -Ur] [-S] [-s] [-sort-common] [-T commandfile]\n\
        [-Ttext textorg] [-Tdata dataorg] [-Tbss bssorg] [-t]\n\
-       [-u symbol] [-V] [-v] [-version] [-warn-common]\n\
-       [-X] [-x] [-y symbol]");
+       [-traditional-format] [-u symbol] [-V] [-v] [-version]\n\
+       [-warn-common] [-X] [-x] [-y symbol]\n\
+       [-( archives -)] [--start-group archives --end-group]");
 }

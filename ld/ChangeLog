@@ -1,5 +1,17 @@
 Fri Oct 14 14:35:38 1994  J.T. Conklin  (jtc@rtl.cygnus.com)
 
+	* Makefile.in (ALL_EMULATIONS): Add ei386nw.o and eppcnw.o.
+	  (ei386nw.c, eppcnw.c): New targets.
+
+	* config/{i386,ppc}-nw.mt, emulparams/{i386,ppc}nw.sh,
+	  scripttmpl/nw.sc: New files, for i386 and powerpc netware.
+	  
+	* configure.in: Changed netware ld_target name to be {i386,ppc}-nw
+	  instead of {i386,ppc}-elf.
+
+ 	* configure.in (sparc*-*-netware): Removed.  There is no such
+	  thing anymore.
+
 	* ldint.texinfo: Move misplaced `@end iftex'.
 
 Fri Oct 14 12:02:18 1994  Eric Youngdale  (eric@aib.com)
@@ -8,6 +20,9 @@ Fri Oct 14 12:02:18 1994  Eric Youngdale  (eric@aib.com)
 	.rela.dtors to the list of .rel* sections.
 
 Thu Oct 13 14:16:27 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* ldver.c (ldversion): Update to version 2.5.
+	* Version 2.5 released.
 
 	* configure.in (all_targets): Handle i386-linux*.
 
