@@ -5,6 +5,12 @@
 
 2001-08-29  Jeff Law <law@redhat.com>
 
+	* elf32-h8300.c (h8_elf_howto_table): Add new PC relative
+	relocations.
+	(h8_reloc_map): Similarly.
+	(elf32_h8_final_link_relocate): Remove incorrect overflow tests.
+	Add support for PC relative relocations.
+
 	* elf32-h8300.c: Put all prototypes together.
 	(elf32_h8_info_to_howto): Parameter elf_reloc is used.
 	(elf32_h8_final_link_relocate): New function for linker.

@@ -171,6 +171,34 @@ static reloc_howto_type h8_elf_howto_table[] =
 	 0,			/* src_mask */
 	 0xffffffff,		/* dst_mask */
 	 false),		/* pcrel_offset */
+#define R_H8_PCREL16_X (R_H8_DIR32A16_X + 1)
+  HOWTO (R_H8_PCREL16,		/* type */
+	 0,			/* rightshift */
+	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 16,			/* bitsize */
+	 true,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_signed, /* complain_on_overflow */
+	 NULL,			/* special_function */
+	 "R_H8_PCREL16",	/* name */
+	 false,			/* partial_inplace */
+	 0xffff,		/* src_mask */
+	 0xffff,		/* dst_mask */
+	 true),			/* pcrel_offset */
+#define R_H8_PCREL8_X (R_H8_PCREL16_X + 1)
+  HOWTO (R_H8_PCREL8,		/* type */
+	 0,			/* rightshift */
+	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 8,			/* bitsize */
+	 true,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_signed, /* complain_on_overflow */
+	 NULL,			/* special_function */
+	 "R_H8_PCREL8",		/* name */
+	 false,			/* partial_inplace */
+	 0xff,			/* src_mask */
+	 0xff,			/* dst_mask */
+	 true),			/* pcrel_offset */
 };
 
 /* This structure is used to map BFD reloc codes to H8 ELF relocs.  */
@@ -194,6 +222,8 @@ static const struct elf_reloc_map h8_reloc_map[] =
   { BFD_RELOC_H8_DIR24A8, R_H8_DIR24A8_X },
   { BFD_RELOC_H8_DIR24R8, R_H8_DIR24R8_X },
   { BFD_RELOC_H8_DIR32A16, R_H8_DIR32A16_X },
+  { BFD_RELOC_16_PCREL, R_H8_PCREL16_X },
+  { BFD_RELOC_8_PCREL, R_H8_PCREL8_X },
 };
 
 
@@ -287,9 +317,6 @@ elf32_h8_final_link_relocate (r_type, input_bfd, output_bfd,
     case R_H8_DIR8:
       value += addend;
 
-      if ((long) value > 0x7f || (long) value < -0x80)
-	return bfd_reloc_overflow;
-
       bfd_put_8 (input_bfd, value, hit_data);
       return bfd_reloc_ok;
 
@@ -297,12 +324,27 @@ elf32_h8_final_link_relocate (r_type, input_bfd, output_bfd,
     case R_H8_DIR24R8:
       value += addend;
 
-      if ((long) value > 0x7fffff || (long) value < -0x800000)
-	return bfd_reloc_overflow;
-
       value &= 0xffffff;
       value |= (bfd_get_32 (input_bfd, hit_data) & 0xff000000);
       bfd_put_32 (input_bfd, value, hit_data);
+      return bfd_reloc_ok;
+
+    case R_H8_PCREL16:
+      value -= (input_section->output_section->vma
+		+ input_section->output_offset);
+      value -= offset;
+      value += addend;
+
+      bfd_put_16 (input_bfd, value, hit_data);
+      return bfd_reloc_ok;
+
+    case R_H8_PCREL8:
+      value -= (input_section->output_section->vma
+		+ input_section->output_offset);
+      value -= offset;
+      value += addend;
+
+      bfd_put_8 (input_bfd, value, hit_data);
       return bfd_reloc_ok;
 
     default:
