@@ -1,3 +1,14 @@
+2003-03-05  Andrew Cagney  <cagney@redhat.com>
+
+	* frame.h (struct frame_info): Replace "id_unwind_cache_p" and
+	"id_unwind_cache" with "id".
+	(frame_id_unwind): Delete declaration.
+	* frame.c (frame_id_unwind): Delete function.
+	(get_prev_frame): Call the frame id unwind method directly.  Store
+	the returned next frame's ID value in NEXT_FRAME.  Note that there
+	is a problem with the wrong unwind ID being called with the wrong
+	unwind cache.
+
 2003-03-05  Daniel Jacobowitz  <drow@mvista.com>
 
 	* Makefile.in (FLAGS_TO_PASS): Add LDFLAGS.
