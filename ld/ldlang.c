@@ -28,13 +28,13 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "ld.h"
 #include "ldmain.h"
 #include "ldsym.h"
-#include "ldgram.tab.h"
-#include "ldmisc.h"
+#include "ldgramtb.h"
+
 #include "ldlang.h"
 #include "ldexp.h"
 #include "ldemul.h"
 #include "ldlex.h"
-
+#include "ldmisc.h"
 /* FORWARDS */
 PROTO(static void, print_statements,(void));
 PROTO(static void, print_statement,(lang_statement_union_type *,
@@ -63,7 +63,7 @@ lang_input_statement_type *script_file = 0;
 boolean option_longmap = false;
 lang_statement_list_type file_chain = {0};
 CONST char *entry_symbol = 0;
-size_t largest_section = 0;
+bfd_size_type largest_section = 0;
 boolean lang_has_input_file = false;
 lang_output_section_statement_type *create_object_symbols = 0;
 boolean had_output_filename = false;
@@ -97,7 +97,32 @@ extern boolean write_map;
 
 #define outside_symbol_address(q) ((q)->value +   outside_section_address(q->section))
 
+static void 
+DEFUN(print_size,(value),
+      size_t value)
+{
+  printf("%5x", (unsigned)value);
+}
+static void 
+DEFUN(print_alignment,(value),
+      unsigned int value)
+{
+  printf("2**%2u",value);
+}
+static void 
+DEFUN(print_fill,(value),
+      fill_type value)
+{
+  printf("%04x",(unsigned)value);
+}
 
+
+static void 
+DEFUN(print_section,(name),
+      CONST char *CONST name)
+{
+  printf("%*s", -longest_section_name, name);
+}
 
 /*----------------------------------------------------------------------
   lang_for_each_statement walks the parse tree and calls the provided
@@ -158,51 +183,6 @@ list->head = (lang_statement_union_type *)NULL;
 list->tail = &list->head;
 }
 
-/*----------------------------------------------------------------------
-  Functions to print the link map 
- */
-
-static void 
-DEFUN(print_section,(name),
-      CONST char *CONST name)
-{
-  printf("%*s", -longest_section_name, name);
-}
-static void 
-DEFUN_VOID(print_space)
-{
-  printf(" ");
-}
-static void 
-DEFUN_VOID(print_nl)
-{
-  printf("\n");
-}
-static void 
-DEFUN(print_address,(value),
-      bfd_vma value)
-{
-  printf("%8lx", value);
-}
-static void 
-DEFUN(print_size,(value),
-      size_t value)
-{
-  printf("%5x", (unsigned)value);
-}
-static void 
-DEFUN(print_alignment,(value),
-      unsigned int value)
-{
-  printf("2**%2u",value);
-}
-
-static void 
-DEFUN(print_fill,(value),
-      fill_type value)
-{
-  printf("%04x",(unsigned)value);
-}
 
 /*----------------------------------------------------------------------
   
@@ -214,7 +194,7 @@ static
 lang_statement_union_type*
 DEFUN(new_statement,(type, size, list),
       enum statement_enum type AND
-      size_t size AND
+      bfd_size_type size AND
       lang_statement_list_type *list)
 {
   lang_statement_union_type *new = (lang_statement_union_type *)
@@ -383,7 +363,7 @@ DEFUN(lang_memory_region_lookup,(name),
   }
     {
       lang_memory_region_type *new =
-	(lang_memory_region_type *)ldmalloc(sizeof(lang_memory_region_type));
+	(lang_memory_region_type *)ldmalloc((bfd_size_type)(sizeof(lang_memory_region_type)));
       new->name = buystring(name);
       new->next = (lang_memory_region_type *)NULL;
 
@@ -476,8 +456,10 @@ DEFUN(lang_map,(outfile),
        m = m->next) 
     {
       fprintf(outfile,"%-16s", m->name);
-
-      fprintf(outfile,"%08lx\t%08lx\t", m->origin, m->length);
+      print_address(m->origin);
+      print_space();
+      print_address(m->length);
+      print_space();
       print_flags(outfile, &m->flags);
       fprintf(outfile,"\n");
     }
@@ -498,7 +480,7 @@ DEFUN(init_os,(s),
 {
   section_userdata_type *new =
     (section_userdata_type *)
-      ldmalloc(sizeof(section_userdata_type));
+      ldmalloc((bfd_size_type)(sizeof(section_userdata_type)));
 
   s->bfd_section = bfd_make_section(output_bfd, s->name);
   s->bfd_section->output_section = s->bfd_section;
@@ -775,7 +757,7 @@ DEFUN(ldlang_add_undef,(name),
 {
   ldlang_undef_chain_list_type *new =
     (ldlang_undef_chain_list_type
-     *)ldmalloc(sizeof(ldlang_undef_chain_list_type));
+     *)ldmalloc((bfd_size_type)(sizeof(ldlang_undef_chain_list_type)));
 
   new->next = ldlang_undef_chain_list_head;
   ldlang_undef_chain_list_head = new;
@@ -793,7 +775,7 @@ DEFUN_VOID(lang_place_undefineds)
   while (ptr != (ldlang_undef_chain_list_type*)NULL) {
     ldsym_type *sy = ldsym_get(ptr->name);
     asymbol *def;
-    asymbol **def_ptr = (asymbol **)ldmalloc(sizeof(asymbol **));
+    asymbol **def_ptr = (asymbol **)ldmalloc((bfd_size_type)(sizeof(asymbol **)));
     def = (asymbol *)bfd_make_empty_symbol(script_file->the_bfd);
     *def_ptr= def;
     def->name = ptr->name;
@@ -1015,7 +997,7 @@ DEFUN(print_input_section,(in),
 	else {
 	  printf("%s", abfd->filename);
 	}
-	printf("(%d bytes)", bfd_alloc_size(abfd));
+	printf("(%d bytes)", (int)bfd_alloc_size(abfd));
 	print_nl();
 
 	/* Find all the symbols in this file defined in this section */
@@ -1215,7 +1197,7 @@ DEFUN(insert_pad,(this_ptr, fill, power, output_section_statement, dot),
     {
       lang_statement_union_type *new = 
 	(lang_statement_union_type *)
-	  ldmalloc(sizeof(lang_padding_statement_type));
+	  ldmalloc((bfd_size_type)(sizeof(lang_padding_statement_type)));
       /* Link into existing chain */
       new->header.next = *this_ptr;
       *this_ptr = new;
@@ -1413,7 +1395,7 @@ DEFUN(lang_size_sections,(s, output_section_statement, prev, fill, dot),
 		  {
 		    lang_statement_union_type *new = 
 		      (lang_statement_union_type *)
-			ldmalloc(sizeof(lang_padding_statement_type));
+			ldmalloc((bfd_size_type)(sizeof(lang_padding_statement_type)));
 		    /* Link into existing chain */
 		    new->header.next = *prev;
 		    *prev = new;
@@ -1616,44 +1598,55 @@ static void
 DEFUN_VOID(lang_check)
 {
   lang_statement_union_type *file;
+  unsigned long max_machine = bfd_get_machine(output_bfd);
+  unsigned long max_machine_seen = 0;
+  bfd * input_bfd;
+  unsigned long input_machine;
+  char *out_arch, *out_arch2;
 
-  
   for (file = file_chain.head;
        file != (lang_statement_union_type *)NULL;
        file=file->input_statement.next) 
       {
-	/* Inspect the architecture and ensure we're linking like
-	   with like
-	   */
+ 	input_bfd = file->input_statement.the_bfd;
+ 	input_machine = bfd_get_machine(input_bfd);
+  
+ 	if ( input_machine > max_machine_seen ){
+ 	  max_machine_seen = input_machine;
+ 	}
+ 
+ 	/* Inspect the architecture and ensure we're linking like with like */
+ 	if ( (input_machine > max_machine)
+	    ||   !bfd_arch_compatible( input_bfd,
+				      output_bfd,
+				      &ldfile_output_architecture,
+				      NULL)) {
+  	  enum bfd_architecture this_architecture =
+  	    bfd_get_architecture(file->input_statement.the_bfd);
+  	  unsigned long this_machine =
 
-	if (bfd_arch_compatible( file->input_statement.the_bfd,
-				output_bfd,
-				&ldfile_output_architecture,
-				&ldfile_output_machine)) {
-	  bfd_set_arch_mach(output_bfd,
-			    ldfile_output_architecture, ldfile_output_machine);
-	}
-	else {
-	  enum bfd_architecture this_architecture =
-	    bfd_get_architecture(file->input_statement.the_bfd);
-	  unsigned long this_machine =
 	    bfd_get_machine(file->input_statement.the_bfd);
-	
-	  info("%I: architecture %s",
-	       file,
-	       bfd_printable_arch_mach(this_architecture, this_machine));
-	  info(" incompatible with output %s\n",
-	       bfd_printable_arch_mach(ldfile_output_architecture,
-				       ldfile_output_machine));
+
+	  /* Result of bfd_printable_arch_mach is not guaranteed to stick
+	     around after next call, so we have to copy it.  */
+	  out_arch = bfd_printable_arch_mach(ldfile_output_architecture,
+					       ldfile_output_machine);
+	  out_arch2 = ldmalloc (strlen (out_arch)+1);
+	  strcpy (out_arch2, out_arch);
+
+ 	  info("%P: warning, %s architecture of input file `%B' incompatible with %s output\n",
+	       bfd_printable_arch_mach(this_architecture, this_machine),
+	       input_bfd,
+	       out_arch2);
+	  free (out_arch2);
 	  ldfile_output_architecture = this_architecture;
 	  ldfile_output_machine = this_machine;
 	  bfd_set_arch_mach(output_bfd,
 			    ldfile_output_architecture,
 			    ldfile_output_machine);
-
-
 	}
       }
+       bfd_set_arch_mach(output_bfd,ldfile_output_architecture,max_machine_seen);
 }
 
 
@@ -1959,7 +1952,7 @@ DEFUN(create_symbol,(name, flags, section),
       asection *section)
 {
   extern lang_input_statement_type *script_file;
-  asymbol **def_ptr = (asymbol **)ldmalloc(sizeof(asymbol **));
+  asymbol **def_ptr = (asymbol **)ldmalloc((bfd_size_type)(sizeof(asymbol **)));
   /* Add this definition to script file */
   asymbol *def =  (asymbol  *)bfd_make_empty_symbol(script_file->the_bfd);
   def->name = buystring(name);
