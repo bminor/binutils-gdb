@@ -52,7 +52,8 @@ END-INFO-DIR-ENTRY
 @ifinfo
 This file documents the @sc{gnu} linker LD version @value{VERSION}.
 
-Copyright (C) 1991, 92, 93, 94, 95, 96, 97, 98, 99, 2000 Free Software Foundation, Inc.
+Copyright (C) 1991, 92, 93, 94, 95, 96, 97, 98, 99, 2000,
+2001 Free Software Foundation, Inc.
 
 @ignore
 
@@ -700,6 +701,12 @@ magic numbers, this option also sets the output file's magic number to
 If this option is not specified, an absolute file is produced.  When
 linking C++ programs, this option @emph{will not} resolve references to
 constructors; to do that, use @samp{-Ur}.
+
+When an input file does not have the same format as the output file,
+partial linking is only supported if that input file does not contain any
+relocations.  Different output formats can have further restrictions; for
+example some @code{a.out}-based formats do not support partial linking
+with input files in other formats at all.
 
 This option does the same thing as @samp{-i}.
 

@@ -1,3 +1,8 @@
+2001-06-21  Hans-Peter Nilsson  <hp@axis.com>
+
+	* ld.texinfo (Options, -r): Mention restrictions when using
+	different object formats.
+
 2001-06-19  Hans-Peter Nilsson  <hp@axis.com>
 
 	* ldlang.c (lang_check): Emit fatal error if relocatable link
