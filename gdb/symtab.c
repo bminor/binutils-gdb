@@ -434,10 +434,6 @@ create_demangled_names_hash (struct objfile *objfile)
      NULL, objfile->md, xmcalloc, xmfree);
 }
 
-#ifndef LINKER_SYMBOLS_HAVE_WIN32_STDCALL_ARG_SIZES
-#define LINKER_SYMBOLS_HAVE_WIN32_STDCALL_ARG_SIZES (0)
-#endif
-
 /* Try to determine the demangled name for a symbol, based on the
    language of that symbol.  If the language is set to language_auto,
    it will attempt to find any demangling algorithm that works and
@@ -449,39 +445,6 @@ symbol_find_demangled_name (struct general_symbol_info *gsymbol,
 			    const char *mangled)
 {
   char *demangled = NULL;
-
-  /* On Windows, some functions use the `stdcall' calling convention,
-     in which the callee is expected to pop the arguments off the
-     stack.  Normally, the caller takes care of this, because only the
-     caller knows how many arguments it really passed.  To avoid
-     confusion, the linker symbols for `stdcall' functions have names
-     with a suffix "@N" attached to them, where "N" is the number of
-     bytes they'll pop.  That way, if a caller thinks some `stdcall'
-     function `foo' expects M argument bytes, but the definition of
-     `foo' expects N argument bytes, N != M, then the call will be a
-     reference to `foo@M', but the definition will have a linker
-     symbol `foo@N', and you'll get a link-time `symbol not found'
-     error, instead of a crash at run-time.
-
-     (Note how this fails to address calls through function pointers,
-     since the byte count isn't part of the function pointer's type.
-     Go, Microsoft!)
-
-     Whatever.  But our demangler doesn't like that '@N' suffix, so we
-     need to strip it off.  */
-  if (LINKER_SYMBOLS_HAVE_WIN32_STDCALL_ARG_SIZES)
-    {
-      char *arg_byte_suffix = strchr (mangled, '@');
-      if (arg_byte_suffix)
-        {
-          int prefix_len = arg_byte_suffix - mangled;
-          char *mangled_sans_suffix = alloca (prefix_len + 1);
-          memcpy (mangled_sans_suffix, mangled, prefix_len);
-          mangled_sans_suffix[prefix_len] = '\0';
-
-          mangled = mangled_sans_suffix;
-        }
-    }
 
   if (gsymbol->language == language_unknown)
     gsymbol->language = language_auto;
