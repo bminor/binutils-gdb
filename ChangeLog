@@ -1,3 +1,8 @@
+Thu Sep 18 15:37:42 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure (tooldir): enable_gdbtk=YES for cygwin32, NO for
+ 	windows.  Consistent with gdb/configure.
+
 1997-09-15 02:37  Ulrich Drepper  <drepper@cygnus.com>
 
 	* config/mt-linux: Define CXXFLAGS to make sure -fvtable-thunks is
