@@ -1,4 +1,30 @@
+Wed Aug 20 11:14:13 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ldgram.y (atype): Accept parentheses with no type.
+
+	* ld.texinfo (Section Definition): Clarify use of whitespace.
+	(Section Placement): Likewise.
+
+start-sanitize-v850eq
+Mon Aug 18 11:12:03 1997  Nick Clifton  <nickc@cygnus.com>
+
+	* configure.tgt (targ_extra_emuls): Add support for v850e target.
+end-sanitize-v850eq
+
+start-sanitize-v850e
+Mon Aug 18 11:12:03 1997  Nick Clifton  <nickc@cygnus.com>
+
+	* configure.tgt (targ_extra_emuls): Add support for v850e target.
+end-sanitize-v850e
+
 Sat Aug  9 00:42:27 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.am (ld.info): Change dependency from
+	$(BFDDIR)/doc/bfdsumm.texi to bfdsumm.texi.
+	(ld.dvi): Likewise.
+	(bfdsumm.texi): New target.
+	(CLEANFILES): Add bfdsumm.texi.
+	* Makefile.in: Rebuild.
 
 	* Makefile.am: New file, based on old Makefile.in.
 	* acinclude.m4: New file, from old aclocal.m4.
