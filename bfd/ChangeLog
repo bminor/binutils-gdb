@@ -1,4 +1,14 @@
+Tue Apr  1 16:18:05 1997  Klaus Kaempf  <kkaempf@progis.de>
+
+	* configure.com: New file.
+	* config.h-vms: Remove file.
+	* makefile.vms: Update for new configure scheme.
+
 Mon Mar 31 23:28:39 1997  H.J. Lu  <hjl@gnu.ai.mit.edu>
+
+	* libcoff-in.h (ppc_allocate_toc_section): Declare.
+	(ppc_process_before_allocation): Declare.
+	* libcoff.h: Rebuild.
 
 	* coffcode.h (coff_mkobject_hook): Declare if not a macro.
 

@@ -119,10 +119,10 @@ coffgen.c
 cofflink.c
 coffswap.h
 config.bfd
-config.h-vms
 config.in
 configure
 configure.bat
+configure.com
 configure.host
 configure.in
 corefile.c
