@@ -147,9 +147,9 @@ static unsigned int dwarf_str_size;
 /* The data in a compilation unit header looks like this.  */
 struct comp_unit_head
   {
-    int length;
+    unsigned int length;
     short version;
-    int abbrev_offset;
+    unsigned int abbrev_offset;
     unsigned char addr_size;
   };
 
@@ -930,6 +930,16 @@ dwarf2_build_psymtabs_hard (objfile, section_offsets, mainline)
       if (cu_header.version != 2)
 	{
 	  error ("Dwarf Error: wrong version in compilation unit header.");
+	  return;
+	}
+      if (cu_header.abbrev_offset >= dwarf_abbrev_size)
+	{
+	  error ("Dwarf Error: bad offset in compilation unit header.");
+	  return;
+	}
+      if (cu_header.length > dwarf_abbrev_size - cu_header.abbrev_offset)
+	{
+	  error ("Dwarf Error:  bad length in compilation unit header.");
 	  return;
 	}
 
