@@ -262,14 +262,6 @@ static int trap_expected;
 static int stop_on_solib_events;
 #endif
 
-#ifdef HP_OS_BUG
-/* Nonzero if the next time we try to continue the inferior, it will
-   step one instruction and generate a spurious trace trap.
-   This is used to compensate for a bug in HP-UX.  */
-
-static int trap_expected_after_continue;
-#endif
-
 /* Nonzero means expecting a trace trap
    and should stop the inferior and return silently when it happens.  */
 
@@ -768,18 +760,6 @@ proceed (CORE_ADDR addr, enum target_signal siggnal, int step)
   if (prepare_to_proceed () && breakpoint_here_p (read_pc ()))
     oneproc = 1;
 
-#ifdef HP_OS_BUG
-  if (trap_expected_after_continue)
-    {
-      /* If (step == 0), a trap will be automatically generated after
-         the first instruction is executed.  Force step one
-         instruction to clear this condition.  This should not occur
-         if step is nonzero, but it is harmless in that case.  */
-      oneproc = 1;
-      trap_expected_after_continue = 0;
-    }
-#endif /* HP_OS_BUG */
-
   if (oneproc)
     /* We will get a trace trap after one instruction.
        Continue it automatically and insert breakpoints then.  */
@@ -880,9 +860,6 @@ init_wait_for_inferior (void)
   /* These are meaningless until the first time through wait_for_inferior.  */
   prev_pc = 0;
 
-#ifdef HP_OS_BUG
-  trap_expected_after_continue = 0;
-#endif
   breakpoints_inserted = 0;
   breakpoint_init_inferior (inf_starting);
 
@@ -2020,9 +1997,6 @@ process_event_stop_test:
     if (what.call_dummy)
       {
 	stop_stack_dummy = 1;
-#ifdef HP_OS_BUG
-	trap_expected_after_continue = 1;
-#endif
       }
 
     switch (what.main_action)

@@ -1,5 +1,10 @@
 2004-06-06  Randolph Chung  <tausq@debian.org>
 
+	* infrun.c (trap_expected_after_continue): Remove HP_OS_BUG workaround.
+	(proceed, init_wait_for_inferior, handle_inferior_event): Likewise.
+
+2004-06-06  Randolph Chung  <tausq@debian.org>
+
 	* hppa-hpux-tdep.c (hppa32_hpux_in_solib_call_trampoline) 
 	(hppa_hpux_skip_trampoline_code): Don't cache symbol values.
 	* hppa-linux-tdep.c (hppa_linux_in_dyncall): Likewise.
