@@ -1,3 +1,39 @@
+Fri Jun 26 21:27:17 1992  John Gilmore  (gnu at cygnus.com)
+
+	* i386.h:  Add setc, setnc, addr16, data16, repz, repnz aliases.
+	Fix opcodes on various sizes of fild/fist instructions
+	(16bit=no suffix, 32bit="l" suffix, 64bit="ll" suffix).
+	Fixes suggested by Minh Tran-Le.
+
+Thu Jun 25 16:13:26 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* h8300.h:  Fill in all the holes in the opcode table so that the
+	losing HPUX C compiler can digest this...
+
+Thu Jun 11 12:15:25 1992  John Gilmore  (gnu at cygnus.com)
+
+	* mips.h:  Fix decoding of coprocessor instructions, somewhat.
+	(Fix by Eric Anderson, 3jean@maas-neotek.arc.nasa.gov.)
+
+Thu May 28 11:17:44 1992  Jim Wilson  (wilson@sphagnum.cygnus.com)
+
+	* sparc.h: Add new architecture variant sparclite; add its scan
+	and divscc opcodes.  Define ARCHITECTURES_CONFLICT_P macro.
+
+Tue May  5 14:23:27 1992  Per Bothner  (bothner@rtl.cygnus.com)
+
+	* mips.h:  Add some more opcode synonyms (from Frank Yellin,
+	fy@lucid.com).
+
+Thu Apr 16 18:25:26 1992  Per Bothner  (bothner@cygnus.com)
+
+	* rs6k.h:  New version from IBM (Metin).
+
+Thu Apr  9 00:31:19 1992  Per Bothner  (bothner@rtl.cygnus.com)
+
+	* rs6k.h: Fix incorrect extended opcode for instructions `fm'
+        and `fd'.  (From metin@ibmpa.awdpa.ibm.com (Metin G. Ozisik).)
+
 Tue Apr  7 13:38:47 1992  Stu Grossman  (grossman at cygnus.com)
 
 	* rs6k.h:  Move from ../../gdb/rs6k-opcode.h.
