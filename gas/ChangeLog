@@ -1,3 +1,18 @@
+Thu Jun 20 19:10:28 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* write.c (adjust_reloc_syms): Refetch the symbol section after
+	calling S_GET_VALUE, since it may have changed.
+
+	* expr.c (struct expr_symbol_line): Define.
+	(expr_symbol_lines): New static variable.
+	(make_expr_symbol): Add entry to expr_symbol_lines.
+	(expr_symbol_where): New function.
+	* expr.h: Use extern on function declarations.
+	(expr_symbol_where): Declare.
+	* symbols.c (resolve_symbol_value): Try to use expr_symbol_where
+	rather than printing the meaningless name of an expression
+	symbol.
+
 Thu Jun 20 15:57:41 1996  Ken Raeburn  <raeburn@cygnus.com>
 
 	* config/tc-i386.c (md_number_to_chars): Deleted.
