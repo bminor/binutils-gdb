@@ -1567,7 +1567,7 @@ unsigned int written)
   for (j = 0; j < native->u.syment.n_numaux;  j++)
   {
     AUXENT buf1;
-    bzero((PTR)&buf, AUXESZ);
+    memset((PTR)&buf, 0, AUXESZ);
     coff_swap_aux_out(abfd,
 		      &( (native + j + 1)->u.auxent), type, class, &buf1);
     bfd_write((PTR) (&buf1), 1, AUXESZ, abfd);
@@ -2300,7 +2300,7 @@ coff_section_symbol (abfd, name)
       };
       struct foo *f;
       f = (struct foo *) bfd_alloc_by_size_t (abfd, sizeof (*f));
-      bzero ((char *) f, sizeof (*f));
+      memset ((char *) f, 0, sizeof (*f));
       coff_symbol_from (abfd, sym)->native = csym = f->e;
     }
   csym[0].u.syment.n_sclass = C_STAT;
@@ -3059,7 +3059,7 @@ bfd            *abfd)
 		bfd_error = no_memory;
 		return (NULL);
 	      }			/* on error */
-	    bzero(newstring, i);
+	    memset(newstring, 0, i);
 	    strncpy(newstring, internal_ptr->u.syment._n._n_name, i-1);
 	    internal_ptr->u.syment._n._n_n._n_offset =  (int) newstring;
 	    internal_ptr->u.syment._n._n_n._n_zeroes = 0;
