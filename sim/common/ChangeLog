@@ -1,3 +1,15 @@
+Wed Oct 15 09:24:19 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-core.h (struct _sim_core_mapping): Change free_buffer to
+ 	type void*.
+
+	* sim-core.c (sim_core_uninstall, new_sim_core_mapping,
+ 	sim_core_map_attach, sim_core_map_detach): Change free_buffer to
+ 	type void*.
+	(sim_core_attach): Rename buffer_freed to free_buffer, type
+ 	void*. Ensure that allocated buffer is alligned according to
+ 	region's address.
+
 Mon Oct 13 11:34:50 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim-alu.h (ALU64_HAD_OVERFLOW): Define.

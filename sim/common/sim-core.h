@@ -48,7 +48,7 @@ struct _sim_core_mapping {
   unsigned_word nr_bytes;
   unsigned mask;
   /* memory map */
-  int free_buffer;
+  void *free_buffer;
   void *buffer;
   /* callback map */
   device *device;
@@ -90,7 +90,7 @@ struct _sim_core {
 
 typedef struct _sim_cpu_core {
   sim_core_common common;
-  address_word xor[WITH_XOR_ENDIAN];
+  address_word xor[WITH_XOR_ENDIAN + 1]; /* +1 to avoid zero-sized array */
 } sim_cpu_core;
 
 

@@ -25,6 +25,14 @@
 #include "sim-main.h"
 #include "sim-assert.h"
 
+#include <signal.h>
+
+/* for Windows builds.  signal numbers used by MSVC are mostly
+   the same as non-linux unixen. */
+#ifndef SIGBUS
+# define SIGBUS 10
+#endif
+
 
 /* "core" module install handler.
 
@@ -63,9 +71,9 @@ sim_core_uninstall (SIM_DESC sd)
     while (curr != NULL) {
       sim_core_mapping *tbd = curr;
       curr = curr->next;
-      if (tbd->free_buffer) {
+      if (tbd->free_buffer != NULL) {
 	SIM_ASSERT(tbd->buffer != NULL);
-	zfree(tbd->buffer);
+	zfree(tbd->free_buffer);
       }
       zfree(tbd);
     }
@@ -103,15 +111,18 @@ sim_core_signal (SIM_DESC sd,
   switch (sig)
     {
     case sim_core_unmapped_signal:
-      sim_engine_abort (sd, cpu, cia, "sim-core: %d byte %s to unmaped address 0x%lx",
-			nr_bytes, copy, (unsigned long) addr);
+      sim_io_eprintf (sd, "core: %d byte %s to unmaped address 0x%lx\n",
+		      nr_bytes, copy, (unsigned long) addr);
+      sim_engine_halt (sd, cpu, NULL, cia, sim_signalled, SIGSEGV);
       break;
     case sim_core_unaligned_signal:
-      sim_engine_abort (sd, cpu, cia, "sim-core: %d byte misaligned %s to address 0x%lx",
-			nr_bytes, copy, (unsigned long) addr);
+      sim_io_eprintf (sd, "core: %d byte misaligned %s to address 0x%lx",
+		      nr_bytes, copy, (unsigned long) addr);
+      sim_engine_halt (sd, cpu, NULL, cia, sim_signalled, SIGBUS);
       break;
     default:
-      sim_engine_abort (sd, cpu, cia, "sim_core_signal - internal error - bad switch");
+      sim_engine_abort (sd, cpu, cia,
+			"sim_core_signal - internal error - bad switch");
     }
 }
 #endif
@@ -141,7 +152,7 @@ new_sim_core_mapping (SIM_DESC sd,
 		      unsigned modulo,
 		      device *device,
 		      void *buffer,
-		      int free_buffer)
+		      void *free_buffer)
 {
   sim_core_mapping *new_mapping = ZALLOC(sim_core_mapping);
   /* common */
@@ -182,7 +193,7 @@ sim_core_map_attach (SIM_DESC sd,
 		     unsigned modulo,
 		     device *client, /*callback/default*/
 		     void *buffer, /*raw_memory*/
-		     int free_buffer) /*raw_memory*/
+		     void *free_buffer) /*raw_memory*/
 {
   /* find the insertion point for this additional mapping and then
      insert */
@@ -190,7 +201,7 @@ sim_core_map_attach (SIM_DESC sd,
   sim_core_mapping **last_mapping;
 
   SIM_ASSERT ((attach >= attach_callback)
-	      <= (client != NULL && buffer == NULL && !free_buffer));
+	      <= (client != NULL && buffer == NULL && free_buffer == NULL));
   SIM_ASSERT ((attach == attach_raw_memory)
 	      <= (client == NULL && buffer != NULL));
 
@@ -272,7 +283,7 @@ sim_core_attach (SIM_DESC sd,
   sim_core *memory = STATE_CORE(sd);
   sim_core_maps map;
   void *buffer;
-  int buffer_freed;
+  void *free_buffer;
 
   /* check for for attempt to use unimplemented per-processor core map */
   if (cpu != NULL)
@@ -322,19 +333,20 @@ sim_core_attach (SIM_DESC sd,
 	}
       if (optional_buffer == NULL)
 	{
-	  buffer = zalloc (modulo == 0 ? nr_bytes : modulo);
-	  buffer_freed = 0;
+	  int padding = (addr % sizeof (unsigned64));
+	  free_buffer = zalloc ((modulo == 0 ? nr_bytes : modulo) + padding);
+	  buffer = (char*) free_buffer + padding;
 	}
       else
 	{
 	  buffer = optional_buffer;
-	  buffer_freed = 1;
+	  free_buffer = NULL;
 	}
     }
   else if (attach >= attach_callback)
     {
       buffer = NULL;
-      buffer_freed = 1;
+      free_buffer = NULL;
     }
   else
     {
@@ -344,7 +356,7 @@ sim_core_attach (SIM_DESC sd,
       sim_io_error (sd, "sim_core_attach - internal error - conflicting buffer and attach arguments");
 #endif
       buffer = NULL;
-      buffer_freed = 1;
+      free_buffer = NULL;
     }
 
   /* attach the region to all applicable access maps */
@@ -359,24 +371,24 @@ sim_core_attach (SIM_DESC sd,
 	    sim_core_map_attach (sd, &memory->common.map[map],
 				 attach,
 				 space, addr, nr_bytes, modulo,
-				 client, buffer, !buffer_freed);
-	  buffer_freed ++;
+				 client, buffer, free_buffer);
+	  free_buffer = NULL;
 	  break;
 	case sim_core_write_map:
 	  if (access & access_write)
 	    sim_core_map_attach (sd, &memory->common.map[map],
 				 attach,
 				 space, addr, nr_bytes, modulo,
-				 client, buffer, !buffer_freed);
-	  buffer_freed ++;
+				 client, buffer, free_buffer);
+	  free_buffer = NULL;
 	  break;
 	case sim_core_execute_map:
 	  if (access & access_exec)
 	    sim_core_map_attach (sd, &memory->common.map[map],
 				 attach,
 				 space, addr, nr_bytes, modulo,
-				 client, buffer, !buffer_freed);
-	  buffer_freed ++;
+				 client, buffer, free_buffer);
+	  free_buffer = NULL;
 	  break;
 	case nr_sim_core_maps:
 	  sim_io_error (sd, "sim_core_attach - internal error - bad switch");
@@ -417,8 +429,8 @@ sim_core_map_detach (SIM_DESC sd,
 	{
 	  sim_core_mapping *dead = (*entry);
 	  (*entry) = dead->next;
-	  if (dead->free_buffer)
-	    zfree (dead->buffer);
+	  if (dead->free_buffer != NULL)
+	    zfree (dead->free_buffer);
 	  zfree (dead);
 	  return;
 	}
@@ -711,7 +723,7 @@ sim_core_xor_write_buffer (SIM_DESC sd,
   else
     /* only break up transfers when xor-endian is both selected and enabled */
     {
-      unsigned_1 x[WITH_XOR_ENDIAN];
+      unsigned_1 x[WITH_XOR_ENDIAN + 1]; /* +1 to avoid zero sized array */
       unsigned nr_transfered = 0;
       address_word start = addr;
       unsigned nr_this_transfer = (WITH_XOR_ENDIAN - (addr & ~(WITH_XOR_ENDIAN - 1)));
