@@ -1,5 +1,8 @@
 Mon Jul 13 13:55:42 1998  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/obj-coff.c (c_symbol_merge): Correct number of bytes when
+	copying aux information.
+
 	* expr.c (make_expr_symbol): Catch attempts to turn an O_big
 	expression into a symbol.
 
