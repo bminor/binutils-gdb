@@ -917,7 +917,7 @@ x86_64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   int i, sum;
 
-  /* The x86_64 has 16 SSE registers.  */
+  /* The x86-64 has 16 SSE registers.  */
   tdep->num_xmm_regs = 16;
 
   /* This is what all the fuss is about.  */
@@ -925,11 +925,35 @@ x86_64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_long_long_bit (gdbarch, 64);
   set_gdbarch_ptr_bit (gdbarch, 64);
 
+  /* In contrast to the i386, on the x86-64 a `long double' actually
+     takes up 128 bits, even though it's still based on the i387
+     extended floating-point format which has only 80 significant bits.  */
+  set_gdbarch_long_double_bit (gdbarch, 128);
+
   set_gdbarch_num_regs (gdbarch, X86_64_NUM_REGS);
+
+  /* Register numbers of various important registers.  */
+  set_gdbarch_sp_regnum (gdbarch, 7); /* %rsp */
+  set_gdbarch_fp_regnum (gdbarch, 6); /* %rbp */
+  set_gdbarch_pc_regnum (gdbarch, 16); /* %rip */
+  set_gdbarch_ps_regnum (gdbarch, 17); /* %eflags */
+  set_gdbarch_fp0_regnum (gdbarch, X86_64_NUM_GREGS); /* %st(0) */
+
+  /* The "default" register numbering scheme for the x86-64 is
+     referred to as the "DWARF register number mapping" in the psABI.
+     The preferred debugging format for all known x86-64 targets is
+     actually DWARF2, and GCC doesn't seem to support DWARF (that is
+     DWARF-1), but we provide the same mapping just in case.  This
+     mapping is also used for stabs, which GCC does support.  */
+  set_gdbarch_stab_reg_to_regnum (gdbarch, x86_64_dwarf2_reg_to_regnum);
+  set_gdbarch_dwarf_reg_to_regnum (gdbarch, x86_64_dwarf2_reg_to_regnum);
+  set_gdbarch_dwarf2_reg_to_regnum (gdbarch, x86_64_dwarf2_reg_to_regnum);
+
+  /* We don't override SDB_REG_RO_REGNUM, sice COFF doesn't seem to be
+     in use on any of the supported x86-64 targets.  */
+
   set_gdbarch_register_name (gdbarch, x86_64_register_name);
   set_gdbarch_register_size (gdbarch, 8);
-  set_gdbarch_register_raw_size (gdbarch, x86_64_register_raw_size);
-  set_gdbarch_register_byte (gdbarch, x86_64_register_byte);
 
   /* Total amount of space needed to store our copies of the machine's
      register (SIZEOF_GREGS + SIZEOF_FPU_REGS + SIZEOF_FPU_CTRL_REGS +
@@ -938,7 +962,13 @@ x86_64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
     sum += x86_64_register_info_table[i].size;
   set_gdbarch_register_bytes (gdbarch, sum);
 
+  set_gdbarch_register_raw_size (gdbarch, x86_64_register_raw_size);
+  set_gdbarch_register_byte (gdbarch, x86_64_register_byte);
   set_gdbarch_register_virtual_type (gdbarch, x86_64_register_virtual_type);
+
+  /* FIXME: kettenis/20021026: As long as we don't support longjmp,
+     that is, as long as we have `tdep->jb_pc_offset == -1', using
+     i386_get_longjmp_target is fine.  */
 
   set_gdbarch_register_convertible (gdbarch, x86_64_register_convertible);
   set_gdbarch_register_convert_to_virtual (gdbarch,
@@ -946,84 +976,61 @@ x86_64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_register_convert_to_raw (gdbarch,
 				       x86_64_register_convert_to_raw);
 
-  /* Register numbers of various important registers.  */
-  set_gdbarch_sp_regnum (gdbarch, 7); /* %rsp */
-  set_gdbarch_fp_regnum (gdbarch, 6); /* %rbp */
-  set_gdbarch_pc_regnum (gdbarch, 16); /* %rip */
-  set_gdbarch_fp0_regnum (gdbarch, X86_64_NUM_GREGS); /* %st(0) */
-
-  set_gdbarch_read_fp (gdbarch, cfi_read_fp);
-
-  /* Discard from the stack the innermost frame, restoring all registers.  */
-  set_gdbarch_pop_frame (gdbarch, x86_64_pop_frame);
-
-  /* FRAME_CHAIN takes a frame's nominal address and produces the
-     frame's chain-pointer.  */
-  set_gdbarch_frame_chain (gdbarch, x86_64_linux_frame_chain);
-
-  set_gdbarch_frameless_function_invocation (gdbarch,
-				        x86_64_frameless_function_invocation);
-  set_gdbarch_frame_saved_pc (gdbarch, x86_64_linux_frame_saved_pc);
-
-  set_gdbarch_frame_init_saved_regs (gdbarch, x86_64_frame_init_saved_regs);
-
-  /* Frame pc initialization is handled by unwind informations.  */
-  set_gdbarch_init_frame_pc (gdbarch, x86_64_init_frame_pc);
-
-  /* Initialization of unwind informations.  */
-  set_gdbarch_init_extra_frame_info (gdbarch, x86_64_init_extra_frame_info);
-
-  /* Getting saved registers is handled by unwind informations.  */
+  /* Getting saved registers is handled by unwind information.  */
   set_gdbarch_get_saved_register (gdbarch, cfi_get_saved_register);
 
+  /* FIXME: kettenis/20021026: Should we set parm_boundary to 64 here?  */
+  set_gdbarch_read_fp (gdbarch, cfi_read_fp);
+
+  /* FIXME: kettenis/20021026: Should be undeprecated.  */
+  set_gdbarch_extract_return_value (gdbarch, NULL);
+  set_gdbarch_deprecated_extract_return_value (gdbarch,
+					       x86_64_extract_return_value);
+  set_gdbarch_push_arguments (gdbarch, x86_64_push_arguments);
+  set_gdbarch_push_return_address (gdbarch, x86_64_push_return_address);
+  set_gdbarch_pop_frame (gdbarch, x86_64_pop_frame);
+  set_gdbarch_store_struct_return (gdbarch, x86_64_store_struct_return);
+  /* FIXME: kettenis/20021026: Should be undeprecated.  */
+  set_gdbarch_store_return_value (gdbarch, NULL);
+  set_gdbarch_deprecated_store_return_value (gdbarch,
+					     x86_64_store_return_value);
+  /* Override, since this is handled by x86_64_extract_return_value.  */
+  set_gdbarch_extract_struct_value_address (gdbarch, NULL);
+  set_gdbarch_use_struct_convention (gdbarch, x86_64_use_struct_convention);
+
   set_gdbarch_frame_init_saved_regs (gdbarch, x86_64_frame_init_saved_regs);
+  set_gdbarch_skip_prologue (gdbarch, x86_64_skip_prologue);
 
-  /* Cons up virtual frame pointer for trace */
-  set_gdbarch_virtual_frame_pointer (gdbarch, cfi_virtual_frame_pointer);
-
+  set_gdbarch_frame_chain (gdbarch, x86_64_linux_frame_chain);
+  set_gdbarch_frameless_function_invocation (gdbarch,
+					 x86_64_frameless_function_invocation);
   /* FIXME: kettenis/20021025: Shouldn't this be set to
      generic_file_frame_chain_valid?  */
   set_gdbarch_frame_chain_valid (gdbarch, file_frame_chain_valid);
-
-  set_gdbarch_push_return_address (gdbarch, x86_64_push_return_address);
-  set_gdbarch_push_arguments (gdbarch, x86_64_push_arguments);
-
-  /* Return number of args passed to a frame, no way to tell.  */
-  set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
-
-  /* If USE_STRUCT_CONVENTION retruns 0, then gdb uses
-     STORE_RETURN_VALUE and EXTRACT_RETURN_VALUE to store/fetch the
-     functions return value.  It is the case when structure is
-     returned in registers.  */
-  set_gdbarch_use_struct_convention (gdbarch, x86_64_use_struct_convention);
-
-  /* Store the address of the place in which to copy the structure the
-     subroutine will return.  This is called from call_function.  */
-  set_gdbarch_store_struct_return (gdbarch, x86_64_store_struct_return);
-
-  /* Extract from an array REGBUF containing the (raw) register state
-     a function return value of type TYPE, and copy that, in virtual
-     format, into VALBUF.  */
-  set_gdbarch_deprecated_extract_return_value (gdbarch,
-					       x86_64_extract_return_value);
-
-
-  /* Write into the appropriate registers a function return value
-     stored in VALBUF of type TYPE, given in virtual format.  */
-  set_gdbarch_deprecated_store_return_value (gdbarch,
-					     x86_64_store_return_value);
-
-  set_gdbarch_skip_prologue (gdbarch, x86_64_skip_prologue);
-
+  /* FIXME: kettenis/20021026: These two are GNU/Linux-specific and
+     should be moved elsewhere.  */
+  set_gdbarch_frame_saved_pc (gdbarch, x86_64_linux_frame_saved_pc);
   set_gdbarch_saved_pc_after_call (gdbarch, x86_64_linux_saved_pc_after_call);
-
-  set_gdbarch_in_solib_call_trampoline (gdbarch, in_plt_section);
-
-  /* Use dwarf2 debug frame informations.  */
-  set_gdbarch_dwarf2_build_frame_info (gdbarch, dwarf2_build_frame_info);
-  set_gdbarch_dwarf2_reg_to_regnum (gdbarch, x86_64_dwarf2_reg_to_regnum);
-
+  set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
+  /* FIXME: kettenis/20021026: This one is GNU/Linux-specific too.  */
   set_gdbarch_pc_in_sigtramp (gdbarch, x86_64_linux_in_sigtramp);
+
+  /* Build call frame information (CFI) from DWARF2 frame debug info.  */
+  set_gdbarch_dwarf2_build_frame_info (gdbarch, dwarf2_build_frame_info);
+
+  /* Initialization of per-frame CFI.  */
+  set_gdbarch_init_extra_frame_info (gdbarch, x86_64_init_extra_frame_info);
+
+  /* Frame PC initialization is handled by using CFI.  */
+  set_gdbarch_init_frame_pc (gdbarch, x86_64_init_frame_pc);
+
+  /* Cons up virtual frame pointer for trace.  */
+  set_gdbarch_virtual_frame_pointer (gdbarch, cfi_virtual_frame_pointer);
+
+  /* FIXME: kettenis/20021026: This is ELF-specific.  Fine for now,
+     since all supported x86-64 targets are ELF, but that might change
+     in the future.  */
+  set_gdbarch_in_solib_call_trampoline (gdbarch, in_plt_section);
 }
 
 static struct gdbarch *

@@ -1,5 +1,9 @@
 2002-10-26  Mark Kettenis  <kettenis@gnu.org>
 
+	* x86-64-tdep.c (x86_64_init_abi): Add calls to override the i386
+	target where necessary.  Add more comments and remove the ones
+	that don't provide any useful information.
+
 	* i386-tdep.c (i386_frame_saved_pc): Replace call to
 	deprecated_read_register_dummy with
 	frame_unwind_unsigned_register.
