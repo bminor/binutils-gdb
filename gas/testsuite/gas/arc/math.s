@@ -1,5 +1,8 @@
 # @OC@ test
 
+# Stay away from operands with duplicate arguments (eg:	add r0,r1,r1).
+# They will be disassembled as they're macro counterparts (eg: asl r0,r1).
+
 # reg,reg,reg
 	@OC@ r0,r1,r2
 	@OC@ r26,fp,sp
@@ -24,8 +27,8 @@
 	@OC@ r0,r1,256
 	@OC@ r0,-257,r2
 	@OC@ 511,r1,r2
-	@OC@ r0,0x42424242,0x42424242
-	@OC@ 0x12345678,0x12345678,0x12345678
+	@OC@ r0,0x42424242,r2
+	@OC@ 0x12345678,r1,0x12345678
 
 # shimm and limm
 	@OC@ r0,255,256
@@ -59,13 +62,13 @@
 	@OC@.v r51,r52,r53
 	@OC@.vc r54,r55,r56
 	@OC@.nv r57,r58,r59
-	@OC@.gt r60,r60,r60
+	@OC@.gt r60,r60,r0
 	@OC@.ge r0,r0,0
 	@OC@.lt r1,1,r1
-	@OC@.le 2,r2,r2
-	@OC@.hi r3,3,3
+	@OC@.le 2,r1,r2
+	@OC@.hi r3,3,r3
 	@OC@.ls 4,4,r4
-	@OC@.pnz 5,5,5
+	@OC@.pnz 5,r5,5
 
 # flag setting
 	@OC@.f r0,r1,r2
