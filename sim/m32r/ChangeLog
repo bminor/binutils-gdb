@@ -1,16 +1,24 @@
+start-sanitize-m32rx
+Thu Jan 29 11:22:00 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* Makefile.in (M32RX_OBJS): Comment out until m32rx port working.
+	* arch.h (HAVE_CPU_M32R{,X}): Delete, moved to m32r-opc.h.
+	* arch.c (machs): Check ifdef HAVE_CPU_FOO for each entry.
+
+end-sanitize-m32rx
 Tue Jan 20 14:16:02 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* cpux.h: Fix duplicate definition of h_accums field for
 	fmt_53_sadd structure.
 
+start-sanitize-m32rx
 Tue Jan 20 01:42:17 1998  Doug Evans  <devans@seba.cygnus.com>
 
-start-sanitize-m32rx
 	* Makefile.in: Add m32rx objs, and rules to build them.
 	* cpux.h, decodex.h, decodex.c, readx.c, semx.c, modelx.c: New files.
 	* m32rx.c, mloopx.in: New files.
-end-sanitize-m32rx
 
+end-sanitize-m32rx
 Mon Jan 19 22:26:29 1998  Doug Evans  <devans@seba>
 
 	* configure: Regenerated to track ../common/aclocal.m4 changes.
