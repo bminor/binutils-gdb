@@ -1,3 +1,15 @@
+Fri Apr  7 19:33:16 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* configure.in (host_libs): Remove glob, since it is gone from the
+	sources.
+
+Fri Mar 31 11:36:17 1995  Jason Molenda  (crash@phydeaux.cygnus.com)
+
+	* Makefile.in: define empty GDB_NLM_DEPS var.
+
+	* configure.in(target_makefile_frag): use config/mt-netware
+	for netware targets.
+
 Thu Mar 30 13:51:43 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config.sub: Merge in recent FSF changes.  Remove linux special
