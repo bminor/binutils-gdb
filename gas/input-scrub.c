@@ -267,7 +267,7 @@ input_scrub_include_sb (from, position, is_expansion)
      int is_expansion;
 {
   if (macro_nest > max_macro_nest)
-    as_fatal (_("buffers nested too deeply"));
+    as_fatal (_("macros nested too deeply"));
   ++macro_nest;
 
 #ifdef md_macro_start
@@ -312,7 +312,8 @@ input_scrub_next_buffer (bufp)
       if (sb_index >= from_sb.len)
 	{
 	  sb_kill (&from_sb);
-          if (from_sb_is_expansion)
+          if (from_sb_is_expansion
+	      )
             {
               cond_finish_check (macro_nest);
 #ifdef md_macro_end
