@@ -1,5 +1,8 @@
 Mon Jun 13 15:46:09 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* ldgram.y (exp): Treat BLOCK as a synonym for ALIGN, so that
+	BLOCK works in a section address as documented.
+
 	* ldgram.y (YYDEBUG): Don't define.
 
 Fri Jun 10 16:45:39 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
