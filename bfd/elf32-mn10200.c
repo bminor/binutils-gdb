@@ -491,12 +491,12 @@ mn10200_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	* jsr:24 -> jsr:16 					   2 bytes
 
 	* jmp:24 -> jmp:16					   2 bytes
-	- jmp:16 -> bra:8					   1 byte
+	* jmp:16 -> bra:8					   1 byte
 
-		- If the previous instruction is a conditional branch
+		* If the previous instruction is a conditional branch
 		around the jump/bra, we may be able to reverse its condition
 		and change its target to the jump's target.  The jump/bra
-		can then be deleted.				   1 byte
+		can then be deleted.				   2 bytes
 
 	- mov abs24 -> mov abs16	2 byte savings
 
@@ -506,6 +506,9 @@ mn10200_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	- Most instructions which accept d24 can relax to d16	   2 bytes
 	- Most instructions which accept d16 can relax to d8	   1 byte
 
+	abs24, imm24, d24 all look the same at the reloc level.  It
+	might make the code simpler if we had different relocs for
+	the various relaxable operand types.
    
   A '*' indicates a case this code can handle.  */
 
