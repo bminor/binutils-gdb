@@ -41,41 +41,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define ECOFF_32
 #include "ecoffswap.h"
 
-static bfd_reloc_status_type mips_elf_hi16_reloc PARAMS ((bfd *abfd,
-							  arelent *reloc,
-							  asymbol *symbol,
-							  PTR data,
-							  asection *section,
-							  bfd *output_bfd,
-							  char **error));
-static bfd_reloc_status_type mips_elf_got16_reloc PARAMS ((bfd *abfd,
-							   arelent *reloc,
-							   asymbol *symbol,
-							   PTR data,
-							   asection *section,
-							   bfd *output_bfd,
-							   char **error));
-static bfd_reloc_status_type mips_elf_lo16_reloc PARAMS ((bfd *abfd,
-							  arelent *reloc,
-							  asymbol *symbol,
-							  PTR data,
-							  asection *section,
-							  bfd *output_bfd,
-							  char **error));
-static bfd_reloc_status_type mips_elf_gprel16_reloc PARAMS ((bfd *abfd,
-							     arelent *reloc,
-							     asymbol *symbol,
-							     PTR data,
-							     asection *section,
-							     bfd *output_bfd,
-							     char **error));
-static bfd_reloc_status_type mips_elf_gprel32_reloc PARAMS ((bfd *abfd,
-							     arelent *reloc,
-							     asymbol *symbol,
-							     PTR data,
-							     asection *section,
-							     bfd *output_bfd,
-							     char **error));
 static reloc_howto_type *bfd_elf32_bfd_reloc_type_lookup
   PARAMS ((bfd *, bfd_reloc_code_real_type));
 static void mips_info_to_howto_rel
@@ -91,18 +56,12 @@ static boolean mips_elf_create_procedure_table
 	   struct ecoff_debug_info *));
 static int mips_elf_additional_program_headers PARAMS ((bfd *));
 static boolean mips_elf_modify_segment_map PARAMS ((bfd *));
-static boolean mips_elf_set_private_flags PARAMS ((bfd *, flagword));
-static boolean mips_elf_copy_private_bfd_data PARAMS ((bfd *, bfd *));
-static boolean mips_elf_merge_private_bfd_data PARAMS ((bfd *, bfd *));
 static boolean mips_elf32_section_from_shdr
   PARAMS ((bfd *, Elf32_Internal_Shdr *, char *));
 static boolean mips_elf32_section_processing
   PARAMS ((bfd *, Elf32_Internal_Shdr *));
 static boolean mips_elf_is_local_label
   PARAMS ((bfd *, asymbol *));
-static boolean mips_elf_find_nearest_line
-  PARAMS ((bfd *, asection *, asymbol **, bfd_vma, const char **,
-	   const char **, unsigned int *));
 static struct bfd_hash_entry *mips_elf_link_hash_newfunc
   PARAMS ((struct bfd_hash_entry *, struct bfd_hash_table *, const char *));
 static struct bfd_link_hash_table *mips_elf_link_hash_table_create
@@ -427,7 +386,7 @@ static reloc_howto_type elf_mips_howto_table[] =
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
-	 mips_elf_hi16_reloc,	/* special_function */
+	 _bfd_mips_elf_hi16_reloc,	/* special_function */
 	 "R_MIPS_HI16",		/* name */
 	 true,			/* partial_inplace */
 	 0xffff,		/* src_mask */
@@ -442,7 +401,7 @@ static reloc_howto_type elf_mips_howto_table[] =
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
-	 mips_elf_lo16_reloc,	/* special_function */
+	 _bfd_mips_elf_lo16_reloc,	/* special_function */
 	 "R_MIPS_LO16",		/* name */
 	 true,			/* partial_inplace */
 	 0xffff,		/* src_mask */
@@ -457,7 +416,7 @@ static reloc_howto_type elf_mips_howto_table[] =
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
-	 mips_elf_gprel16_reloc, /* special_function */
+	 _bfd_mips_elf_gprel16_reloc, /* special_function */
 	 "R_MIPS_GPREL16",	/* name */
 	 true,			/* partial_inplace */
 	 0xffff,		/* src_mask */
@@ -472,7 +431,7 @@ static reloc_howto_type elf_mips_howto_table[] =
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
-	 mips_elf_gprel16_reloc, /* special_function */
+	 _bfd_mips_elf_gprel16_reloc, /* special_function */
 	 "R_MIPS_LITERAL",	/* name */
 	 true,			/* partial_inplace */
 	 0xffff,		/* src_mask */
@@ -487,7 +446,7 @@ static reloc_howto_type elf_mips_howto_table[] =
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
-	 mips_elf_got16_reloc,	/* special_function */
+	 _bfd_mips_elf_got16_reloc,	/* special_function */
 	 "R_MIPS_GOT16",	/* name */
 	 false,			/* partial_inplace */
 	 0,			/* src_mask */
@@ -533,7 +492,7 @@ static reloc_howto_type elf_mips_howto_table[] =
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
-	 mips_elf_gprel32_reloc, /* special_function */
+	 _bfd_mips_elf_gprel32_reloc, /* special_function */
 	 "R_MIPS_GPREL32",	/* name */
 	 true,			/* partial_inplace */
 	 0xffffffff,		/* src_mask */
@@ -727,8 +686,8 @@ struct mips_hi16
 
 static struct mips_hi16 *mips_hi16_list;
 
-static bfd_reloc_status_type
-mips_elf_hi16_reloc (abfd,
+bfd_reloc_status_type
+_bfd_mips_elf_hi16_reloc (abfd,
 		     reloc_entry,
 		     symbol,
 		     data,
@@ -820,8 +779,8 @@ mips_elf_hi16_reloc (abfd,
    inplace relocation; this function exists in order to do the
    R_MIPS_HI16 relocation described above.  */
 
-static bfd_reloc_status_type
-mips_elf_lo16_reloc (abfd,
+bfd_reloc_status_type
+_bfd_mips_elf_lo16_reloc (abfd,
 		     reloc_entry,
 		     symbol,
 		     data,
@@ -930,8 +889,8 @@ mips_elf_lo16_reloc (abfd,
    This implementation suffices for the assembler, but the linker does
    not yet know how to create global offset tables.  */
 
-static bfd_reloc_status_type
-mips_elf_got16_reloc (abfd,
+bfd_reloc_status_type
+_bfd_mips_elf_got16_reloc (abfd,
 		      reloc_entry,
 		      symbol,
 		      data,
@@ -960,8 +919,8 @@ mips_elf_got16_reloc (abfd,
      just like HI16.  */
   if (output_bfd != (bfd *) NULL
       && (symbol->flags & BSF_SECTION_SYM) != 0)
-    return mips_elf_hi16_reloc (abfd, reloc_entry, symbol, data,
-				input_section, output_bfd, error_message);
+    return _bfd_mips_elf_hi16_reloc (abfd, reloc_entry, symbol, data,
+				     input_section, output_bfd, error_message);
 
   abort ();
 }
@@ -1050,14 +1009,9 @@ static bfd_reloc_status_type gprel16_with_gp PARAMS ((bfd *, asymbol *,
 						      arelent *, asection *,
 						      boolean, PTR, bfd_vma));
 
-static bfd_reloc_status_type
-mips_elf_gprel16_reloc (abfd,
-			reloc_entry,
-			symbol,
-			data,
-			input_section,
-			output_bfd,
-			error_message)
+bfd_reloc_status_type
+_bfd_mips_elf_gprel16_reloc (abfd, reloc_entry, symbol, data, input_section,
+			     output_bfd, error_message)
      bfd *abfd;
      arelent *reloc_entry;
      asymbol *symbol;
@@ -1128,9 +1082,17 @@ gprel16_with_gp (abfd, symbol, reloc_entry, input_section, relocateable, data,
   insn = bfd_get_32 (abfd, (bfd_byte *) data + reloc_entry->address);
 
   /* Set val to the offset into the section or symbol.  */
-  val = ((insn & 0xffff) + reloc_entry->addend) & 0xffff;
-  if (val & 0x8000)
-    val -= 0x10000;
+  if (reloc_entry->howto->src_mask == 0)
+    {
+      /* This case occurs with the 64-bit MIPS ELF ABI.  */
+      val = reloc_entry->addend;
+    }
+  else
+    {
+      val = ((insn & 0xffff) + reloc_entry->addend) & 0xffff;
+      if (val & 0x8000)
+	val -= 0x10000;
+    }
 
   /* Adjust val for the final section location and GP value.  If we
      are producing relocateable output, we don't want to do this for
@@ -1159,8 +1121,8 @@ static bfd_reloc_status_type gprel32_with_gp PARAMS ((bfd *, asymbol *,
 						      arelent *, asection *,
 						      boolean, PTR, bfd_vma));
 
-static bfd_reloc_status_type
-mips_elf_gprel32_reloc (abfd,
+bfd_reloc_status_type
+_bfd_mips_elf_gprel32_reloc (abfd,
 			reloc_entry,
 			symbol,
 			data,
@@ -1237,7 +1199,13 @@ gprel32_with_gp (abfd, symbol, reloc_entry, input_section, relocateable, data,
   if (reloc_entry->address > input_section->_cooked_size)
     return bfd_reloc_outofrange;
 
-  val = bfd_get_32 (abfd, (bfd_byte *) data + reloc_entry->address);
+  if (reloc_entry->howto->src_mask == 0)
+    {
+      /* This case arises with the 64-bit MIPS ELF ABI.  */
+      val = 0;
+    }
+  else
+    val = bfd_get_32 (abfd, (bfd_byte *) data + reloc_entry->address);
 
   /* Set val to the offset into the section or symbol.  */
   val += reloc_entry->addend;
@@ -1420,6 +1388,34 @@ bfd_elf32_swap_crinfo_out (abfd, in, ex)
   bfd_h_put_32 (abfd, (bfd_vma) in->konst, ex->konst);
   bfd_h_put_32 (abfd, (bfd_vma) in->vaddr, ex->vaddr);
 }
+
+/* Swap in an options header.  */
+
+void
+bfd_mips_elf_swap_options_in (abfd, ex, in)
+     bfd *abfd;
+     const Elf_External_Options *ex;
+     Elf_Internal_Options *in;
+{
+  in->kind = bfd_h_get_8 (abfd, ex->kind);
+  in->size = bfd_h_get_8 (abfd, ex->size);
+  in->section = bfd_h_get_16 (abfd, ex->section);
+  in->info = bfd_h_get_32 (abfd, ex->info);
+}
+
+/* Swap out an options header.  */
+
+void
+bfd_mips_elf_swap_options_out (abfd, in, ex)
+     bfd *abfd;
+     const Elf_Internal_Options *in;
+     Elf_External_Options *ex;
+{
+  bfd_h_put_8 (abfd, in->kind, ex->kind);
+  bfd_h_put_8 (abfd, in->size, ex->size);
+  bfd_h_put_16 (abfd, in->section, ex->section);
+  bfd_h_put_32 (abfd, in->info, ex->info);
+}
 
 /* Determine whether a symbol is global for the purposes of splitting
    the symbol table into global symbols and local symbols.  At least
@@ -1543,8 +1539,8 @@ _bfd_mips_elf_final_write_processing (abfd, linker)
 
 /* Function to keep MIPS specific file flags like as EF_MIPS_PIC. */
 
-static boolean
-mips_elf_set_private_flags (abfd, flags)
+boolean
+_bfd_mips_elf_set_private_flags (abfd, flags)
      bfd *abfd;
      flagword flags;
 {
@@ -1558,8 +1554,8 @@ mips_elf_set_private_flags (abfd, flags)
 
 /* Copy backend specific data from one object module to another */
 
-static boolean
-mips_elf_copy_private_bfd_data (ibfd, obfd)
+boolean
+_bfd_mips_elf_copy_private_bfd_data (ibfd, obfd)
      bfd *ibfd;
      bfd *obfd;
 {
@@ -1582,8 +1578,8 @@ mips_elf_copy_private_bfd_data (ibfd, obfd)
 /* Merge backend specific data from an object file to the output
    object file when linking.  */
 
-static boolean
-mips_elf_merge_private_bfd_data (ibfd, obfd)
+boolean
+_bfd_mips_elf_merge_private_bfd_data (ibfd, obfd)
      bfd *ibfd;
      bfd *obfd;
 {
@@ -1705,7 +1701,8 @@ _bfd_mips_elf_section_from_shdr (abfd, hdr, name)
 	return false;
       break;
     case SHT_MIPS_OPTIONS:
-      if (strcmp (name, ".options") != 0)
+      if (strcmp (name, ".options") != 0
+	  && strcmp (name, ".MIPS.options") != 0)
 	return false;
       break;
     case SHT_MIPS_DWARF:
@@ -1762,6 +1759,47 @@ mips_elf32_section_from_shdr (abfd, hdr, name)
 	return false;
       bfd_mips_elf32_swap_reginfo_in (abfd, &ext, &s);
       elf_gp (abfd) = s.ri_gp_value;
+    }
+
+  /* For a SHT_MIPS_OPTIONS section, look for a ODK_REGINFO entry, and
+     set the gp value based on what we find.  We may see both
+     SHT_MIPS_REGINFO and SHT_MIPS_OPTIONS/ODK_REGINFO; in that case,
+     they should agree.  */
+  if (hdr->sh_type == SHT_MIPS_OPTIONS)
+    {
+      bfd_byte *contents, *l, *lend;
+
+      contents = (bfd_byte *) bfd_malloc (hdr->sh_size);
+      if (contents == NULL)
+	return false;
+      if (! bfd_get_section_contents (abfd, hdr->bfd_section, contents,
+				      (file_ptr) 0, hdr->sh_size))
+	{
+	  free (contents);
+	  return false;
+	}
+      l = contents;
+      lend = contents + hdr->sh_size;
+      while (l + sizeof (Elf_External_Options) <= lend)
+	{
+	  Elf_Internal_Options intopt;
+
+	  bfd_mips_elf_swap_options_in (abfd, (Elf_External_Options *) l,
+					&intopt);
+	  if (intopt.kind == ODK_REGINFO)
+	    {
+	      Elf32_RegInfo intreg;
+
+	      bfd_mips_elf32_swap_reginfo_in
+		(abfd,
+		 ((Elf32_External_RegInfo *)
+		  (l + sizeof (Elf_External_Options))),
+		 &intreg);
+	      elf_gp (abfd) = intreg.ri_gp_value;
+	    }
+	  l += intopt.size;
+	}
+      free (contents);
     }
 
   return true;
@@ -1842,7 +1880,8 @@ _bfd_mips_elf_fake_sections (abfd, hdr, sec)
 	   || strcmp (name, ".lit4") == 0
 	   || strcmp (name, ".lit8") == 0)
     hdr->sh_flags |= SHF_MIPS_GPREL;
-  else if (strcmp (name, ".options") == 0)
+  else if (strcmp (name, ".options") == 0
+	   || strcmp (name, ".MIPS.options") == 0)
     {
       hdr->sh_type = SHT_MIPS_OPTIONS;
       hdr->sh_entsize = 1;
@@ -1881,11 +1920,56 @@ _bfd_mips_elf_section_from_bfd_section (abfd, hdr, sec, retval)
   return false;
 }
 
-/* Work over a section just before writing it out.  We update the GP
-   value in the .reginfo section based on the value we are using.
-   This routine is used by both the 32-bit and the 64-bit ABI.  FIXME:
-   We recognize sections that need the SHF_MIPS_GPREL flag by name;
-   there has to be a better way.  */
+/* When are writing out the .options or .MIPS.options section,
+   remember the bytes we are writing out, so that we can install the
+   GP value in the section_processing routine.  */
+
+boolean
+_bfd_mips_elf_set_section_contents (abfd, section, location, offset, count)
+     bfd *abfd;
+     sec_ptr section;
+     PTR location;
+     file_ptr offset;
+     bfd_size_type count;
+{
+  if (strcmp (section->name, ".options") == 0
+      || strcmp (section->name, ".MIPS.options") == 0)
+    {
+      bfd_byte *c;
+
+      if (elf_section_data (section) == NULL)
+	{
+	  section->used_by_bfd =
+	    (PTR) bfd_zalloc (abfd, sizeof (struct bfd_elf_section_data));
+	  if (elf_section_data (section) == NULL)
+	    return false;
+	}
+      c = (bfd_byte *) elf_section_data (section)->tdata;
+      if (c == NULL)
+	{
+	  bfd_size_type size;
+
+	  if (section->_cooked_size != 0)
+	    size = section->_cooked_size;
+	  else
+	    size = section->_raw_size;
+	  c = (PTR) bfd_zalloc (abfd, size);
+	  if (c == NULL)
+	    return false;
+	  elf_section_data (section)->tdata = (PTR) c;
+	}
+
+      memcpy (c + offset, location, count);
+    }
+
+  return _bfd_elf_set_section_contents (abfd, section, location, offset,
+					count);
+}
+
+/* Work over a section just before writing it out.  This routine is
+   used by both the 32-bit and the 64-bit ABI.  FIXME: We recognize
+   sections that need the SHF_MIPS_GPREL flag by name; there has to be
+   a better way.  */
 
 boolean
 _bfd_mips_elf_section_processing (abfd, hdr)
@@ -1934,8 +2018,8 @@ _bfd_mips_elf_section_processing (abfd, hdr)
 }
 
 /* Work over a section just before writing it out.  We update the GP
-   value in the .reginfo section based on the value we are using.  The
-   64 bit ABI does not use the .reginfo section.  */
+   value in the SHT_MIPS_REGINFO and SHT_MIPS_OPTIONS sections based
+   on the value we are using.  */
 
 static boolean
 mips_elf32_section_processing (abfd, hdr)
@@ -1956,6 +2040,48 @@ mips_elf32_section_processing (abfd, hdr)
       bfd_h_put_32 (abfd, (bfd_vma) elf_gp (abfd), buf);
       if (bfd_write (buf, (bfd_size_type) 1, (bfd_size_type) 4, abfd) != 4)
 	return false;
+    }
+
+  if (hdr->sh_type == SHT_MIPS_OPTIONS
+      && hdr->bfd_section != NULL
+      && elf_section_data (hdr->bfd_section) != NULL
+      && elf_section_data (hdr->bfd_section)->tdata != NULL)
+    {
+      bfd_byte *contents, *l, *lend;
+
+      /* We stored the section contents in the elf_section_data tdata
+	 field in the set_section_contents routine.  We save the
+	 section contents so that we don't have to read them again.
+	 At this point we know that elf_gp is set, so we can look
+	 through the section contents to see if there is an
+	 ODK_REGINFO structure.  */
+
+      contents = (bfd_byte *) elf_section_data (hdr->bfd_section)->tdata;
+      l = contents;
+      lend = contents + hdr->sh_size;
+      while (l + sizeof (Elf_External_Options) <= lend)
+	{
+	  Elf_Internal_Options intopt;
+
+	  bfd_mips_elf_swap_options_in (abfd, (Elf_External_Options *) l,
+					&intopt);
+	  if (intopt.kind == ODK_REGINFO)
+	    {
+	      bfd_byte buf[4];
+
+	      if (bfd_seek (abfd,
+			    (hdr->sh_offset
+			     + (l - contents)
+			     + sizeof (Elf_External_Options)
+			     + (sizeof (Elf32_External_RegInfo) - 4)),
+			     SEEK_SET) == -1)
+		return false;
+	      bfd_h_put_32 (abfd, elf_gp (abfd), buf);
+	      if (bfd_write (buf, 1, 4, abfd) != 4)
+		return false;
+	    }
+	  l += intopt.size;
+	}
     }
 
   return _bfd_mips_elf_section_processing (abfd, hdr);
@@ -2408,9 +2534,9 @@ struct mips_elf_find_line
   struct ecoff_find_line i;
 };
 
-static boolean
-mips_elf_find_nearest_line (abfd, section, symbols, offset, filename_ptr,
-			    functionname_ptr, line_ptr)
+boolean
+_bfd_mips_elf_find_nearest_line (abfd, section, symbols, offset, filename_ptr,
+				 functionname_ptr, line_ptr)
      bfd *abfd;
      asection *section;
      asymbol **symbols;
@@ -5839,7 +5965,7 @@ elf32_mips_get_relocated_section_contents (abfd, link_info, link_order, data,
 		 fall over on its own.  */
 	    }
 	  else if ((*parent)->howto->special_function
-		   == mips_elf_gprel16_reloc)
+		   == _bfd_mips_elf_gprel16_reloc)
 	    {
 	      /* bypass special_function call */
 	      r = gprel16_with_gp (input_bfd, sym, *parent, input_section,
@@ -5980,16 +6106,16 @@ static const struct ecoff_debug_swap mips_elf32_ecoff_debug_swap =
 #define elf_backend_ecoff_debug_swap	&mips_elf32_ecoff_debug_swap
 
 #define bfd_elf32_bfd_is_local_label	mips_elf_is_local_label
-#define bfd_elf32_find_nearest_line	mips_elf_find_nearest_line
-
+#define bfd_elf32_find_nearest_line	_bfd_mips_elf_find_nearest_line
+#define bfd_elf32_set_section_contents	_bfd_mips_elf_set_section_contents
 #define bfd_elf32_bfd_link_hash_table_create \
 					mips_elf_link_hash_table_create
 #define bfd_elf32_bfd_final_link	mips_elf_final_link
 #define bfd_elf32_bfd_copy_private_bfd_data \
-					mips_elf_copy_private_bfd_data
+					_bfd_mips_elf_copy_private_bfd_data
 #define bfd_elf32_bfd_merge_private_bfd_data \
-					mips_elf_merge_private_bfd_data
-#define bfd_elf32_bfd_set_private_flags	mips_elf_set_private_flags
+					_bfd_mips_elf_merge_private_bfd_data
+#define bfd_elf32_bfd_set_private_flags	_bfd_mips_elf_set_private_flags
 #define elf_backend_add_symbol_hook	mips_elf_add_symbol_hook
 #define elf_backend_create_dynamic_sections \
 					mips_elf_create_dynamic_sections

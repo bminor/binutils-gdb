@@ -1,5 +1,50 @@
 Fri May 31 13:51:28 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* elf64-mips.c: Improve reloc special_functions and handling of
+	SHT_MIPS_OPTIONS section.
+	* elf32-mips.c (_bfd_mips_elf_hi16_reloc): Rename from
+	mips_elf_hi16_reloc and make globally visible.
+	(_bfd_mips_elf_lo16_reloc): Rename from mips_elf_lo16_reloc and
+	make globally visible.
+	(_bfd_mips_elf_got16_reloc): Rename from mips_elf_got16_reloc and
+	make globally visible.
+	(_bfd_mips_elf_gprel16_reloc): Rename from mips_elf_gprel16_reloc
+	and make globally visible.
+	(gprel16_with_gp): Check howto->src_mask before using value in
+	insn.
+	(_bfd_mips_elf_gprel32_reloc): Rename from mips_elf_gprel32_reloc
+	and make globally visible.
+	(gprel32_with_gp): Check howto->src_mask before fetching value.
+	(bfd_mips_elf_swap_options_in): New function.
+	(bfd_mips_elf_swap_options_out): New function.
+	(_bfd_mips_elf_set_private_flags): Rename from
+	mips_elf_set_private_flags and make globally visible.
+	(_bfd_mips_elf_copy_private_bfd_data): Rename from
+	mips_elf_copy_private_bfd_data and make globally visible.
+	(_bfd_mips_elf_merge_private_bfd_data): Rename from
+	mips_elf_merge_private_bfd_data and make globally visible.
+	(_bfd_mips_elf_section_from_shdr): Accept .MIPS.options as a name
+	for a SHT_MIPS_OPTIONS section.
+	(mips_elf32_section_from_shdr): Handle SHT_MIPS_OPTIONS section.
+	(_bfd_mips_elf_fake_sections): Consider .MIPS.options to be the
+	name of a SHT_MIPS_OPTIONS section.
+	(_bfd_mips_elf_set_section_contents): New function.
+	(mips_elf32_section_processing): Set the GP value in a
+	SHT_MIPS_OPTIONS section.
+	(_bfd_mips_elf_find_nearest_line): Rename from
+	mips_elf_find_nearest_line and make globally visible.
+	(bfd_elf32_set_section_contents): Define.
+	* elf-bfd.h (_bfd_mips_elf_hi16_reloc): Declare.
+	(_bfd_mips_elf_lo16_reloc): Declare.
+	(_bfd_mips_elf_gprel16_reloc): Declare.
+	(_bfd_mips_elf_got16_reloc): Declare.
+	(_bfd_mips_elf_gprel32_reloc): Declare.
+	(_bfd_mips_elf_set_private_flags): Declare.
+	(_bfd_mips_elf_copy_private_bfd_data): Declare.
+	(_bfd_mips_elf_merge_private_bfd_data): Declare.
+	(_bfd_mips_elf_find_nearest_line): Declare.
+	(_bfd_mips_elf_set_section_contents): Declare.
+
 	* elf32-hppa.c (elf32_hppa_info_to_howto): Rename from
 	elf_info_to_howto.
 	(elf_info_to_howto): Define.
