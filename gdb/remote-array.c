@@ -832,7 +832,7 @@ array_fetch_registers (int ignored)
 static void
 array_fetch_register (int ignored)
 {
-  array_fetch_registers ();
+  array_fetch_registers (0 /* ignored */);
 }
 
 /*
@@ -880,7 +880,7 @@ array_store_registers (int ignored)
 static void
 array_store_register (int ignored)
 {
-  array_store_registers ();
+  array_store_registers (0 /* ignored */);
 }
 
 /* Get ready to modify the registers array.  On machines which store

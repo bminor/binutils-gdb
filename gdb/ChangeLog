@@ -1,3 +1,9 @@
+2000-08-18  Andrew Cagney  <cagney@ops1.cygnus.com>
+
+	* remote-array.c (array_fetch_register): Pass dummy parameter to
+	array_fetch_registers.
+	(array_store_register): Ditto.
+
 2000-08-16  Eli Zaretskii <eliz@is.elta.co.il>
 
 	* value.h (struct value) <lazy>: Add a comment about its use for
