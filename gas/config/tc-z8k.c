@@ -1241,11 +1241,12 @@ md_assemble (char *str)
 
       new_input_line_pointer = get_operands (opcode, op_end, operand);
       if (new_input_line_pointer)
-        input_line_pointer = new_input_line_pointer;
+        {
+          input_line_pointer = new_input_line_pointer;
+          opcode = get_specific (opcode, operand);
+        }
 
-      opcode = get_specific (opcode, operand);
-
-      if (opcode == 0)
+      if (new_input_line_pointer == NULL || opcode == NULL)
 	{
 	  /* Couldn't find an opcode which matched the operands.  */
 	  char *where = frag_more (2);

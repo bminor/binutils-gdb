@@ -1,3 +1,7 @@
+2005-01-28  Christian Groessler  <chris@groessler.org>
+
+	* config/tc-z8k.c (md_assemble): Improve error detection.
+
 2005-01-28  Jan Beulich  <jbeulich@novell.com>
 
 	* config/tc-ia64.c (ia64_estimate_size_before_relax): Allocate space
