@@ -151,18 +151,10 @@ input_file_open (char *filename, /* "" means use stdin. Must not be 0.  */
 
   if (f_in == NULL || ferror (f_in))
     {
-      switch (errno)
-	{
-	case ENOENT:
-	  as_bad (_("%s: no such file"), filename);
-	  break;
-	case EISDIR:
-	  as_bad (_("%s: is a directory"), filename);
-	  break;
-	default:
-          as_bad (_("can't open %s for reading"), file_name);
-          as_perror ("%s", file_name);
-        }
+#ifdef BFD_ASSEMBLER
+      bfd_set_error (bfd_error_system_call);
+#endif
+      as_perror (_("Can't open %s for reading"), file_name);
 
       if (f_in)
 	{
@@ -227,6 +219,9 @@ input_file_get (char *buf, int buflen)
   size = fread (buf, sizeof (char), buflen, f_in);
   if (size < 0)
     {
+#ifdef BFD_ASSEMBLER
+      bfd_set_error (bfd_error_system_call);
+#endif
       as_perror (_("Can't read from %s"), file_name);
       size = 0;
     }
@@ -253,6 +248,9 @@ input_file_give_next_buffer (char *where /* Where to place 1st character of new 
     size = fread (where, sizeof (char), BUFFER_SIZE, f_in);
   if (size < 0)
     {
+#ifdef BFD_ASSEMBLER
+      bfd_set_error (bfd_error_system_call);
+#endif
       as_perror (_("Can't read from %s"), file_name);
       size = 0;
     }
@@ -261,7 +259,12 @@ input_file_give_next_buffer (char *where /* Where to place 1st character of new 
   else
     {
       if (fclose (f_in))
-	as_perror (_("Can't close %s"), file_name);
+	{
+#ifdef BFD_ASSEMBLER
+	  bfd_set_error (bfd_error_system_call);
+#endif
+	  as_perror (_("Can't close %s"), file_name);
+	}
       f_in = (FILE *) 0;
       return_value = 0;
     }

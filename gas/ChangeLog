@@ -1,3 +1,17 @@
+2003-12-19  Nick Clifton  <nickc@redhat.com>
+            Andreas Schwab  <schwab@suse.de>
+
+	* messages.c (as_perror): Save errno around library calls.
+	* input-file.c [BFD_ASSEMBLER]: Set the BFD error to
+	bfd_error_system_call before each call to as_perror.
+	(input_file_open): Simplify the error reporting code to just use
+	as_perror().
+	* output-file.c (output_file_create) [BFD_ASSEMBLER]: Set the BFD
+	error to bfd_error_system_call before calling as_perror.
+	(output_file_close) [BFD_ASSEMBLER]: Likewise.
+	(output_file_append) [BFD_ASSEMBLER]: Likewise.
+	* listing.c (listing_print) [BFD_ASSEMBLER]: Likewise.
+
 2003-12-19  Kazuhiro Inaoka <inaoka.kazuhiro@renesas.com>
 
         Add m32r-linux and PIC support.  Add new ABI that uses RELA.
