@@ -473,7 +473,7 @@ set_greg\@:
 	pop	r0
 	.endm
 
-	.macro	set_sr_bit
+	.macro	set_sr_bit val
 	push	r0
 	push	r1
 	get_sr	r0
@@ -532,6 +532,7 @@ set_greg\@:
 	pop	r0
 	bra	.Lssr\@
 	nop
+	.align 2
 .Lssrval\@:
 	.long	\val
 .Lssr\@:
@@ -550,6 +551,7 @@ set_greg\@:
 	pop	r0
 	bra	.Lssr2_\@
 	nop
+	.align 2
 .Lssr2val\@:
 	.long	\val
 .Lssr2_\@:
@@ -564,6 +566,7 @@ set_greg\@:
 	pop	r0
 	bra	.Lscr\@
 	nop
+	.align 2
 .Lscrval\@:
 	.long	\val
 .Lscr\@:

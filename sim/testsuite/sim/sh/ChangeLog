@@ -1,3 +1,11 @@
+2004-01-07  Michael Snyder  <msnyder@redhat.com>
+
+	* dmxy.s, fipr.s, fpchg.s, ldrc.s, loop.s, movli.s, movua.s,
+	movxy.s, pabs.s, pclr.s, prnd.s, psub.s, pswap.s: New files.
+	* allinsn.exp: Add new tests.
+	* testutils.inc (set_sr_bit): Add argument.
+	(set_greg): Add .align directives.
+
 2003-08-11  Michael Snyder  <msnyder@redhat.com>
 
 	* macl.s: New file.
