@@ -2380,7 +2380,8 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
   /* The backend must work out the sizes of all the other dynamic
      sections.  */
   old_dynsymcount = elf_hash_table (info)->dynsymcount;
-  if (! (*bed->elf_backend_size_dynamic_sections) (output_bfd, info))
+  if (bed->elf_backend_size_dynamic_sections
+      && ! (*bed->elf_backend_size_dynamic_sections) (output_bfd, info))
     return false;
 
   if (elf_hash_table (info)->dynamic_sections_created)

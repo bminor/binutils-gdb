@@ -1,3 +1,8 @@
+Thu Sep  3 17:28:50 1998  Richard Henderson  <rth@cygnus.com>
+
+	* elflink.h (bfd_elfNN_size_dynamic_sections): Verify that the
+	bed has a size_dynamic_sections routine before trying to use it.
+
 Mon Aug 31 14:49:22 1998  Richard Henderson  <rth@cygnus.com>
 
 	* elf32-mips.c (elf_mips_gnu_vtentry_howto): Use
