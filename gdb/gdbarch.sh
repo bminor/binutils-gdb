@@ -351,6 +351,7 @@ EOF
 	if class_is_predicate_p && default_is_fallback_p
 	then
 	    echo "Error: predicate function can not have a non- multi-arch default" 1>&2
+	    kill $$
 	    exit 1
 	fi
     done
@@ -468,7 +469,13 @@ do
 	echo ""
 	echo "#if defined (${macro})"
 	echo "/* Legacy for systems yet to multi-arch ${macro} */"
+#	echo "#if (GDB_MULTI_ARCH <= 2) && defined (${macro})"
 	echo "#define ${macro}_P() (1)"
+	echo "#endif"
+	echo ""
+	echo "/* Default predicate for non- multi-arch targets. */"
+	echo "#if (GDB_MULTI_ARCH == 0) && !defined (${macro}_P)"
+	echo "#define ${macro}_P() (0)"
 	echo "#endif"
 	echo ""
 	echo "extern int gdbarch_${function}_p (struct gdbarch *gdbarch);"
@@ -478,23 +485,38 @@ do
     fi
     if class_is_variable_p
     then
+	if default_is_fallback_p || class_is_predicate_p
+	then
+	    echo ""
+	    echo "/* Default (value) for non- multi-arch platforms. */"
+	    echo "#if (GDB_MULTI_ARCH == 0) && !defined (${macro})"
+	    echo "#define ${macro} (${default})"
+	    echo "#endif"
+	fi
 	echo ""
 	echo "extern ${returntype} gdbarch_${function} (struct gdbarch *gdbarch);"
 	echo "extern void set_gdbarch_${function} (struct gdbarch *gdbarch, ${returntype} ${function});"
-	if ! default_is_fallback_p && ! class_is_predicate_p
-	then
-	    echo "#if GDB_MULTI_ARCH"
-	fi
+	echo "#if GDB_MULTI_ARCH"
 	echo "#if (GDB_MULTI_ARCH > 1) || !defined (${macro})"
 	echo "#define ${macro} (gdbarch_${function} (current_gdbarch))"
 	echo "#endif"
-	if ! default_is_fallback_p && ! class_is_predicate_p
-	then
-	    echo "#endif"
-	fi
+	echo "#endif"
     fi
     if class_is_function_p
     then
+	if default_is_fallback_p || class_is_predicate_p
+	then
+	    echo ""
+	    echo "/* Default (function) for non- multi-arch platforms. */"
+	    echo "#if (GDB_MULTI_ARCH == 0) && !defined (${macro})"
+	    if [ "${default}" = "0" ]
+	    then
+		echo "#define ${macro}(${actual}) (internal_error (\"${macro}\"), 0)"
+	    else
+		echo "#define ${macro}(${actual}) (${default} (${actual}))"
+	    fi
+	    echo "#endif"
+	fi
 	echo ""
 	echo "typedef ${returntype} (gdbarch_${function}_ftype) (${formal});"
 	if [ "${formal}" = "void" ]
@@ -504,10 +526,7 @@ do
 	  echo "extern ${returntype} gdbarch_${function} (struct gdbarch *gdbarch, ${formal});"
 	fi
 	echo "extern void set_gdbarch_${function} (struct gdbarch *gdbarch, gdbarch_${function}_ftype *${function});"
-	if ! default_is_fallback_p && ! class_is_predicate_p
-	then
-	    echo "#if GDB_MULTI_ARCH"
-	fi
+	echo "#if GDB_MULTI_ARCH"
 	echo "#if (GDB_MULTI_ARCH > 1) || !defined (${macro})"
 	if [ "${actual}" = "" ]
 	then
@@ -519,10 +538,7 @@ do
 	  echo "#define ${macro}(${actual}) (gdbarch_${function} (current_gdbarch, ${actual}))"
 	fi
 	echo "#endif"
-	if ! default_is_fallback_p && ! class_is_predicate_p
-	then
-	    echo "#endif"
-	fi
+	echo "#endif"
     fi
 done
 
@@ -1176,19 +1192,6 @@ do
 	  echo "gdbarch_${function} (struct gdbarch *gdbarch, ${formal})"
 	fi
 	echo "{"
-	if default_is_fallback_p && [ "${default}" != "0" ]
-	then
-	    echo "  if (GDB_MULTI_ARCH == 0)"
-	    if [ "${returntype}" = "void" ]
-	    then
-		echo "    {"
-		echo "      ${default} (${actual});"
-		echo "      return;"
-		echo "    }"
-	    else
-		echo "    return ${default} (${actual});"
-	    fi
-	fi
         echo "  if (gdbarch->${function} == 0)"
         echo "    internal_error (\"gdbarch: gdbarch_${function} invalid\");"
 	echo "  if (gdbarch_debug >= 2)"
@@ -1214,11 +1217,6 @@ do
 	echo "${returntype}"
 	echo "gdbarch_${function} (struct gdbarch *gdbarch)"
 	echo "{"
-	if default_is_fallback_p && [ "${default}" != "0" ]
-	then
-	    echo "  if (GDB_MULTI_ARCH == 0)"
-	    echo "    return ${default};"
-	fi
 	if [ "${invalid_p}" = "0" ]
 	then
 	    echo "  /* Skip verify of ${function}, invalid_p == 0 */"

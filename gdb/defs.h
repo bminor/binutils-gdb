@@ -984,6 +984,12 @@ extern char *alloca ();
 
 /* Dynamic target-system-dependent parameters for GDB. */
 #include "gdbarch.h"
+#if (GDB_MULTI_ARCH == 0)
+/* Multi-arch targets _should_ be including "arch-utils.h" directly
+   into their *-tdep.c file.  This is a prop to help old non-
+   multi-arch targets to continue to compile. */
+#include "arch-utils.h"
+#endif
 
 /* Static target-system-dependent parameters for GDB. */
 

@@ -1,3 +1,11 @@
+Tue May  2 18:48:57 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdbarch.sh: Provide non- multi-arch defaults by direct
+ 	definition in "gdbarch.h" instead of going through "gdbarch.c".
+	* gdbarch.h, gdbarch.c: Re-generate.
+	* defs.h: When non- multi-arch, include "arch-utils.h" so that
+ 	legacy definitions are globally visible.
+	
 Tue May  2 16:32:06 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* MAINTAINERS: Add Syd Polk to gdbtk maintainers.
