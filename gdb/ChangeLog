@@ -1,3 +1,7 @@
+2001-02-12  Jim Kingdon  <jkingdon@engr.sgi.com>
+
+	* MAINTAINERS: Update my email address.
+
 2001-02-11  Eli Zaretskii  <eliz@is.elta.co.il>
 
 	* NEWS: Document that "info symbol" works with COFF debug info and
