@@ -19,5 +19,3 @@ here SWYM 0,0,0
  BSPEC -1 % { dg-error "invalid BSPEC expression" "" }
  TETRA 4
  ESPEC
-
-

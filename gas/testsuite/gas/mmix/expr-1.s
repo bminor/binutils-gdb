@@ -3,4 +3,3 @@
 
 k	IS	#cdef00
 Main	OCTA	#ab<<32+k&~(k-1)
-

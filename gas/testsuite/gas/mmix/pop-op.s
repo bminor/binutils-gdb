@@ -6,4 +6,3 @@ Main	POP 132,3567
 	POP X,YZ
 X IS 23
 YZ IS #5678
-

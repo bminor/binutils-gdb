@@ -1,3 +1,12 @@
+2001-10-31  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* gas/mmix/tst.s: Delete unused file.
+	* gas/mmix/unsave-op.s, gas/mmix/save-op.s, gas/mmix/resume-op.s,
+	gas/mmix/reloc8.s, gas/mmix/prefix1.s, gas/mmix/pop-op.s,
+	gas/mmix/greg8.s, gas/mmix/greg6.s, gas/mmix/expr-1.s,
+	gas/mmix/greg1.s, gas/mmix/err-bspec-5.s, gas/mmix/op-0-1.s,
+	gas/mmix/fb-2.s: Remove trailing empty lines.
+
 2001-10-30  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* gas/mmix: New testsuite directory.

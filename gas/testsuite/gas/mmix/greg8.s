@@ -6,5 +6,3 @@ y OCTA 33
   GREG y
 
 Main LDA $44,x+88
-
-

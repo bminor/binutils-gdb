@@ -5,4 +5,3 @@ Main	SYNCD foo,$45,234
 	TRIP fee-1,fie+1,foe+3
 	RESUME foobar+8
 localsym IS 42
-

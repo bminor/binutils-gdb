@@ -18,4 +18,3 @@ a TETRA b
  PREFIX :
 a0 TETRA a
 d TETRA c
-

@@ -7,5 +7,3 @@ y OCTA 33
 
   LOC t
 Main LDA $44,x+88
-
-
