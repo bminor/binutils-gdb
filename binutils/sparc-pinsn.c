@@ -251,16 +251,6 @@ memcpy(&insn,buffer, sizeof (insn));
 		    freg (insn.rs2);
 		    break;
 
-#ifndef NO_V9
-/* Somebody who know needs to define rs3.
-		  case 'j':
-		  case 'u':	* double/even *
-		  case 'U':	* quad/multiple of 4 *
-		    freg (insn.rs3);
-		    break;
-*/
-#endif				/* NO_V9 */
-
 		  case 'g':
 		  case 'H':	/* double/even */
 		  case 'J':	/* quad/multiple of 4 */
@@ -311,6 +301,38 @@ memcpy(&insn,buffer, sizeof (insn));
 		    break;
 
 #ifndef NO_V9
+		  case 'I':	/* 11 bit immediate.  */
+		  case 'j':	/* 10 bit immediate.  */
+		    {
+		      /* We cannot trust the compiler to sign-extend
+			 when extracting the bitfield, hence the shifts.  */
+		      int imm;
+
+		      if (*s == 'I')
+			imm = ((int) insn.imm13 << 21) >> 21;
+		      else
+			imm = ((int) insn.imm13 << 22) >> 22;
+
+		      /* Check to see whether we have a 1+i, and take
+			 note of that fact.
+			 
+			 Note: because of the way we sort the table,
+			 we will be matching 1+i rather than i+1,
+			 so it is OK to assume that i is after +,
+			 not before it.  */
+		      if (found_plus)
+			imm_added_to_rs1 = 1;
+		      
+		      if (imm <= 9)
+			fprintf (stream, "%d", imm);
+		      else
+			fprintf (stream, "%#x", (unsigned) imm);
+		    }
+		    break;
+
+
+
+
 		  case 'k':
 		    print_address ((bfd_vma)
 				   (memaddr
@@ -326,10 +348,6 @@ memcpy(&insn,buffer, sizeof (insn));
 				   stream);
 		    break;
 
-		  case 'Y':
-		    fputs ("%amr", stream);
-		    break;
-
 		  case '6':
 		  case '7':
 		  case '8':
@@ -343,6 +361,14 @@ memcpy(&insn,buffer, sizeof (insn));
 
 		  case 'Z':
 		    fputs ("xcc", stream);
+		    break;
+
+		  case 'E':
+		    fputs ("%ccr", stream);
+		    break;
+
+		  case 's':
+		    fputs ("%fprs", stream);
 		    break;
 #endif				/* NO_V9 */
 
