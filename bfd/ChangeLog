@@ -1,3 +1,7 @@
+1999-07-23  Donn Terry  <donn@interix.com>
+
+	* config.bfd (i[3456]86-*-interix*): New target.
+
 1999-07-21  Mark Elbrecht  <snowball3@bigfoot.com>
 
 	* coffcode.h (styp_to_sec_flags): If COFF_LONG_SECTION_NAMES and
