@@ -40,6 +40,7 @@ SECTION
 #include "libbfd.h"
 #define ARCH_SIZE 0
 #include "elf-bfd.h"
+#include "libiberty.h"
 
 static INLINE struct elf_segment_map *make_mapping
   PARAMS ((bfd *, asection **, unsigned int, unsigned int, boolean));
@@ -466,7 +467,7 @@ setup_group (abfd, hdr, newsect)
 	  while (--n_elt != 0)
 	    if ((++idx)->shdr == hdr)
 	      {
-		asection *s;
+		asection *s = NULL;
 
 		/* We are a member of this group.  Go looking through
 		   other members to see if any others are linked via
@@ -599,7 +600,7 @@ _bfd_elf_make_section_from_shdr (abfd, hdr, name)
     };
     int i;
 
-    for (i = sizeof (debug_sec_names) / sizeof (debug_sec_names[0]); i--;)
+    for (i = ARRAY_SIZE (debug_sec_names); i--;)
       if (strncmp (name, debug_sec_names[i], strlen (debug_sec_names[i])) == 0)
 	break;
 
@@ -643,17 +644,30 @@ _bfd_elf_make_section_from_shdr (abfd, hdr, name)
 	  phdr = elf_tdata (abfd)->phdr;
 	  for (i = 0; i < elf_elfheader (abfd)->e_phnum; i++, phdr++)
 	    {
+	      /* This section is part of this segment if its file
+		 offset plus size lies within the segment's memory
+		 span and, if the section is loaded, the extent of the
+		 loaded data lies within the extent of the segment.  
+		 If the p_paddr field is not set, we don't alter the 
+		 LMA.  */
 	      if (phdr->p_type == PT_LOAD
-		  && phdr->p_vaddr != phdr->p_paddr
-		  && phdr->p_vaddr <= hdr->sh_addr
-		  && (phdr->p_vaddr + phdr->p_memsz
-		      >= hdr->sh_addr + hdr->sh_size)
+		  && phdr->p_paddr
+		  && (bfd_vma) hdr->sh_offset >= phdr->p_offset
+		  && (hdr->sh_offset + hdr->sh_size
+		      <= phdr->p_offset + phdr->p_memsz)
 		  && ((flags & SEC_LOAD) == 0
-		      || (phdr->p_offset <= (bfd_vma) hdr->sh_offset
-			  && (phdr->p_offset + phdr->p_filesz
-			      >= hdr->sh_offset + hdr->sh_size))))
+		      || (phdr->p_offset + phdr->p_filesz
+			  >= hdr->sh_offset + hdr->sh_size)))
 		{
-		  newsect->lma += phdr->p_paddr - phdr->p_vaddr;
+		  /* We used to do a relative adjustment here, but
+		     that doesn't work if the segment is packed with
+		     code from multiple VMAs.  Instead we calculate
+		     the LMA absoultely, based on the LMA of the
+		     segment (it is assumed that the segment will
+		     contain sections with contiguous LMAs, even if
+		     the VMAs are not).  */
+		  newsect->lma = phdr->p_paddr
+		    + hdr->sh_offset - phdr->p_offset;
 		  break;
 		}
 	    }
