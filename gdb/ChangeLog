@@ -1,3 +1,9 @@
+2000-04-06  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* top.c (filename_completer): Set subsequent_name to 1 early on,
+	to prevent an infinite loop if the first file in the directory is
+	a backup file (whose name ends in a `~').
+
 2000-04-05  Jim Blandy  <jimb@redhat.com>
 
 	* solib.c (update_solib_list): New function.

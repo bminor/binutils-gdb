@@ -1887,6 +1887,11 @@ filename_completer (text, word)
 	  return_val[return_val_used++] = p;
 	  break;
 	}
+      /* We need to set subsequent_name to a non-zero value before the
+	 continue line below, because otherwise, if the first file seen
+	 by GDB is a backup file whose name ends in a `~', we will loop
+	 indefinitely.  */
+      subsequent_name = 1;
       /* Like emacs, don't complete on old versions.  Especially useful
          in the "source" command.  */
       if (p[strlen (p) - 1] == '~')
@@ -1916,7 +1921,6 @@ filename_completer (text, word)
 	    free (p);
 	  }
       }
-      subsequent_name = 1;
     }
 #if 0
   /* There is no way to do this just long enough to affect quote inserting
