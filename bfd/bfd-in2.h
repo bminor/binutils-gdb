@@ -2017,23 +2017,10 @@ as the absolute section symbol), and the "addend" indicates the type
 of instruction using the register:
 1 - "memory" fmt insn
 2 - byte-manipulation (byte offset reg)
-3 - jsr (target of branch)
-
-The GNU linker currently doesn't do any of this optimizing. */
+3 - jsr (target of branch) */
   BFD_RELOC_ALPHA_LITERAL,
   BFD_RELOC_ALPHA_ELF_LITERAL,
   BFD_RELOC_ALPHA_LITUSE,
-
-/* The BFD_RELOC_ALPHA_USER_* relocations are used by the assembler to
-process the explicit !<reloc>!sequence relocations, and are mapped
-into the normal relocations at the end of processing. */
-  BFD_RELOC_ALPHA_USER_LITERAL,
-  BFD_RELOC_ALPHA_USER_LITUSE_BASE,
-  BFD_RELOC_ALPHA_USER_LITUSE_BYTOFF,
-  BFD_RELOC_ALPHA_USER_LITUSE_JSR,
-  BFD_RELOC_ALPHA_USER_GPDISP,
-  BFD_RELOC_ALPHA_USER_GPRELHIGH,
-  BFD_RELOC_ALPHA_USER_GPRELLOW,
 
 /* The HINT relocation indicates a value that should be filled into the
 "hint" field of a jmp/jsr/ret instruction, for possible branch-
@@ -2047,6 +2034,11 @@ which is filled by the linker. */
 /* The CODEADDR relocation outputs a STO_CA in the object file,
 which is filled by the linker. */
   BFD_RELOC_ALPHA_CODEADDR,
+
+/* The GPREL_HI/LO relocations together form a 32-bit offset from the 
+GP register. */
+  BFD_RELOC_ALPHA_GPREL_HI16,
+  BFD_RELOC_ALPHA_GPREL_LO16,
 
 /* Bits 27..2 of the relocation address shifted right 2 bits;
 simple reloc otherwise. */

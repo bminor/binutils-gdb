@@ -399,6 +399,9 @@ elf64_alpha_object_p (abfd)
    from smaller values.  Start with zero, widen, *then* decrement.  */
 #define MINUS_ONE	(((bfd_vma)0) - 1)
 
+#define SKIP_HOWTO(N) \
+  HOWTO(N, 0, 0, 0, 0, 0, 0, elf64_alpha_reloc_bad, 0, 0, 0, 0, 0)
+
 static reloc_howto_type elf64_alpha_howto_table[] =
 {
   HOWTO (R_ALPHA_NONE,		/* type */
@@ -465,7 +468,7 @@ static reloc_howto_type elf64_alpha_howto_table[] =
   /* Used for an instruction that refers to memory off the GP register.  */
   HOWTO (R_ALPHA_LITERAL,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 1,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -486,7 +489,7 @@ static reloc_howto_type elf64_alpha_howto_table[] =
      This does not actually do any relocation.  */
   HOWTO (R_ALPHA_LITUSE,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 1,			/* size (0 = byte, 1 = short, 2 = long) */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -546,7 +549,7 @@ static reloc_howto_type elf64_alpha_howto_table[] =
   /* A hint for a jump to a register.  */
   HOWTO (R_ALPHA_HINT,		/* type */
 	 2,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 1,			/* size (0 = byte, 1 = short, 2 = long) */
 	 14,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -603,99 +606,22 @@ static reloc_howto_type elf64_alpha_howto_table[] =
 	 MINUS_ONE,		/* dst_mask */
 	 true),			/* pcrel_offset */
 
-  /* Push a value on the reloc evaluation stack.  */
-  /* Not implemented -- it's dumb.  */
-  HOWTO (R_ALPHA_OP_PUSH,	/* type */
-	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
-	 0,			/* bitsize */
-	 false,			/* pc_relative */
-	 0,			/* bitpos */
-	 complain_overflow_dont, /* complain_on_overflow */
-	 elf64_alpha_reloc_bad, /* special_function */
-	 "OP_PUSH",		/* name */
-	 false,			/* partial_inplace */
-	 0,			/* src_mask */
-	 0,			/* dst_mask */
-	 false),		/* pcrel_offset */
-
-  /* Store the value from the stack at the given address.  Store it in
-     a bitfield of size r_size starting at bit position r_offset.  */
-  /* Not implemented -- it's dumb.  */
-  HOWTO (R_ALPHA_OP_STORE,	/* type */
-	 0,			/* rightshift */
-	 4,			/* size (0 = byte, 1 = short, 2 = long) */
-	 64,			/* bitsize */
-	 false,			/* pc_relative */
-	 0,			/* bitpos */
-	 complain_overflow_dont, /* complain_on_overflow */
-	 elf64_alpha_reloc_bad, /* special_function */
-	 "OP_STORE",		/* name */
-	 false,			/* partial_inplace */
-	 0,			/* src_mask */
-	 MINUS_ONE,		/* dst_mask */
-	 false),		/* pcrel_offset */
-
-  /* Subtract the reloc address from the value on the top of the
-     relocation stack.  */
-  /* Not implemented -- it's dumb.  */
-  HOWTO (R_ALPHA_OP_PSUB,	/* type */
-	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
-	 0,			/* bitsize */
-	 false,			/* pc_relative */
-	 0,			/* bitpos */
-	 complain_overflow_dont, /* complain_on_overflow */
-	 elf64_alpha_reloc_bad, /* special_function */
-	 "OP_PSUB",		/* name */
-	 false,			/* partial_inplace */
-	 0,			/* src_mask */
-	 0,			/* dst_mask */
-	 false),		/* pcrel_offset */
-
-  /* Shift the value on the top of the relocation stack right by the
-     given value.  */
-  /* Not implemented -- it's dumb.  */
-  HOWTO (R_ALPHA_OP_PRSHIFT,	/* type */
-	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
-	 0,			/* bitsize */
-	 false,			/* pc_relative */
-	 0,			/* bitpos */
-	 complain_overflow_dont, /* complain_on_overflow */
-	 elf64_alpha_reloc_bad, /* special_function */
-	 "OP_PRSHIFT",		/* name */
-	 false,			/* partial_inplace */
-	 0,			/* src_mask */
-	 0,			/* dst_mask */
-	 false),		/* pcrel_offset */
-
-  /* Change the value of GP used by +r_addend until the next GPVALUE or the
-     end of the input bfd.  */
-  /* Not implemented -- it's dumb.  */
-  HOWTO (R_ALPHA_GPVALUE,
-	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
-	 0,			/* bitsize */
-	 false,			/* pc_relative */
-	 0,			/* bitpos */
-	 complain_overflow_dont, /* complain_on_overflow */
-	 elf64_alpha_reloc_bad, /* special_function */
-	 "GPVALUE",		/* name */
-	 false,			/* partial_inplace */
-	 0,			/* src_mask */
-	 0,			/* dst_mask */
-	 false),		/* pcrel_offset */
+  /* Skip 12 - 16; deprecated ECOFF relocs.  */
+  SKIP_HOWTO (12),
+  SKIP_HOWTO (13),
+  SKIP_HOWTO (14),
+  SKIP_HOWTO (15),
+  SKIP_HOWTO (16),
 
   /* The high 16 bits of the displacement from GP to the target.  */
   HOWTO (R_ALPHA_GPRELHIGH,
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 1,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
-	 elf64_alpha_reloc_bad, /* special_function */
+	 0,			/* special_function */
 	 "GPRELHIGH",		/* name */
 	 false,			/* partial_inplace */
 	 0xffff,		/* src_mask */
@@ -705,12 +631,12 @@ static reloc_howto_type elf64_alpha_howto_table[] =
   /* The low 16 bits of the displacement from GP to the target.  */
   HOWTO (R_ALPHA_GPRELLOW,
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 1,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
-	 elf64_alpha_reloc_bad, /* special_function */
+	 0,			/* special_function */
 	 "GPRELLOW",		/* name */
 	 false,			/* partial_inplace */
 	 0xffff,		/* src_mask */
@@ -718,89 +644,25 @@ static reloc_howto_type elf64_alpha_howto_table[] =
 	 false),		/* pcrel_offset */
 
   /* A 16-bit displacement from the GP to the target.  */
-  /* XXX: Not implemented.  */
-  HOWTO (R_ALPHA_IMMED_GP_16,
+  HOWTO (R_ALPHA_GPREL16,
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 1,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
 	 0,			/* special_function */
-	 "IMMED_GP_16",		/* name */
+	 "GPREL16",		/* name */
 	 false,			/* partial_inplace */
 	 0xffff,		/* src_mask */
 	 0xffff,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
-  /* The high bits of a 32-bit displacement from the GP to the target; the
-     low bits are supplied in the subsequent R_ALPHA_IMMED_LO32 relocs.  */
-  /* XXX: Not implemented.  */
-  HOWTO (R_ALPHA_IMMED_GP_HI32,
-	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
-	 0,			/* bitsize */
-	 false,			/* pc_relative */
-	 0,			/* bitpos */
-	 complain_overflow_dont, /* complain_on_overflow */
-	 elf64_alpha_reloc_bad, /* special_function */
-	 "IMMED_GP_HI32",		/* name */
-	 false,			/* partial_inplace */
-	 0,			/* src_mask */
-	 0,			/* dst_mask */
-	 false),		/* pcrel_offset */
-
-  /* The high bits of a 32-bit displacement to the starting address of the
-     current section (the relocation target is ignored); the low bits are
-     supplied in the subsequent R_ALPHA_IMMED_LO32 relocs.  */
-  /* XXX: Not implemented.  */
-  HOWTO (R_ALPHA_IMMED_SCN_HI32,
-	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
-	 0,			/* bitsize */
-	 false,			/* pc_relative */
-	 0,			/* bitpos */
-	 complain_overflow_dont, /* complain_on_overflow */
-	 elf64_alpha_reloc_bad, /* special_function */
-	 "IMMED_SCN_HI32",		/* name */
-	 false,			/* partial_inplace */
-	 0,			/* src_mask */
-	 0,			/* dst_mask */
-	 false),		/* pcrel_offset */
-
-  /* The high bits of a 32-bit displacement from the previous br, bsr, jsr
-     or jmp insn (as tagged by a BRADDR or HINT reloc) to the target; the
-     low bits are supplied by subsequent R_ALPHA_IMMED_LO32 relocs.  */
-  /* XXX: Not implemented.  */
-  HOWTO (R_ALPHA_IMMED_BR_HI32,
-	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
-	 0,			/* bitsize */
-	 false,			/* pc_relative */
-	 0,			/* bitpos */
-	 complain_overflow_dont, /* complain_on_overflow */
-	 elf64_alpha_reloc_bad, /* special_function */
-	 "IMMED_BR_HI32",		/* name */
-	 false,			/* partial_inplace */
-	 0,			/* src_mask */
-	 0,			/* dst_mask */
-	 false),		/* pcrel_offset */
-
-  /* The low 16 bits of a displacement calculated in a previous HI32 reloc.  */
-  /* XXX: Not implemented.  */
-  HOWTO (R_ALPHA_IMMED_LO32,
-	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
-	 0,			/* bitsize */
-	 false,			/* pc_relative */
-	 0,			/* bitpos */
-	 complain_overflow_dont, /* complain_on_overflow */
-	 elf64_alpha_reloc_bad, /* special_function */
-	 "IMMED_LO32",		/* name */
-	 false,			/* partial_inplace */
-	 0,			/* src_mask */
-	 0,			/* dst_mask */
-	 false),		/* pcrel_offset */
+  /* Skip 20 - 23; deprecated ECOFF relocs.  */
+  SKIP_HOWTO (20),
+  SKIP_HOWTO (21),
+  SKIP_HOWTO (22),
+  SKIP_HOWTO (23),
 
   /* Misc ELF relocations.  */
 
@@ -1003,30 +865,22 @@ struct elf_reloc_map
 
 static const struct elf_reloc_map elf64_alpha_reloc_map[] =
 {
-  {BFD_RELOC_NONE,		R_ALPHA_NONE},
-  {BFD_RELOC_32,		R_ALPHA_REFLONG},
-  {BFD_RELOC_64,		R_ALPHA_REFQUAD},
-  {BFD_RELOC_CTOR,		R_ALPHA_REFQUAD},
-  {BFD_RELOC_GPREL32,		R_ALPHA_GPREL32},
-  {BFD_RELOC_ALPHA_ELF_LITERAL,	R_ALPHA_LITERAL},
-  {BFD_RELOC_ALPHA_LITUSE,	R_ALPHA_LITUSE},
-  {BFD_RELOC_ALPHA_GPDISP,	R_ALPHA_GPDISP},
-  {BFD_RELOC_23_PCREL_S2,	R_ALPHA_BRADDR},
-  {BFD_RELOC_ALPHA_HINT,	R_ALPHA_HINT},
-  {BFD_RELOC_16_PCREL,		R_ALPHA_SREL16},
-  {BFD_RELOC_32_PCREL,		R_ALPHA_SREL32},
-  {BFD_RELOC_64_PCREL,		R_ALPHA_SREL64},
-
-/* The BFD_RELOC_ALPHA_USER_* relocations are used by the assembler to process
-   the explicit !<reloc>!sequence relocations, and are mapped into the normal
-   relocations at the end of processing.  */
-  {BFD_RELOC_ALPHA_USER_LITERAL,	R_ALPHA_LITERAL},
-  {BFD_RELOC_ALPHA_USER_LITUSE_BASE,	R_ALPHA_LITUSE},
-  {BFD_RELOC_ALPHA_USER_LITUSE_BYTOFF,	R_ALPHA_LITUSE},
-  {BFD_RELOC_ALPHA_USER_LITUSE_JSR,	R_ALPHA_LITUSE},
-  {BFD_RELOC_ALPHA_USER_GPDISP,		R_ALPHA_GPDISP},
-  {BFD_RELOC_ALPHA_USER_GPRELHIGH,	R_ALPHA_GPRELHIGH},
-  {BFD_RELOC_ALPHA_USER_GPRELLOW,	R_ALPHA_GPRELLOW},
+  {BFD_RELOC_NONE,			R_ALPHA_NONE},
+  {BFD_RELOC_32,			R_ALPHA_REFLONG},
+  {BFD_RELOC_64,			R_ALPHA_REFQUAD},
+  {BFD_RELOC_CTOR,			R_ALPHA_REFQUAD},
+  {BFD_RELOC_GPREL32,			R_ALPHA_GPREL32},
+  {BFD_RELOC_ALPHA_ELF_LITERAL,		R_ALPHA_LITERAL},
+  {BFD_RELOC_ALPHA_LITUSE,		R_ALPHA_LITUSE},
+  {BFD_RELOC_ALPHA_GPDISP,		R_ALPHA_GPDISP},
+  {BFD_RELOC_23_PCREL_S2,		R_ALPHA_BRADDR},
+  {BFD_RELOC_ALPHA_HINT,		R_ALPHA_HINT},
+  {BFD_RELOC_16_PCREL,			R_ALPHA_SREL16},
+  {BFD_RELOC_32_PCREL,			R_ALPHA_SREL32},
+  {BFD_RELOC_64_PCREL,			R_ALPHA_SREL64},
+  {BFD_RELOC_ALPHA_GPREL_HI16,		R_ALPHA_GPRELHIGH},
+  {BFD_RELOC_ALPHA_GPREL_LO16,		R_ALPHA_GPRELLOW},
+  {BFD_RELOC_GPREL16,			R_ALPHA_GPREL16},
 };
 
 /* Given a BFD reloc type, return a HOWTO structure.  */
@@ -1205,7 +1059,7 @@ elf64_alpha_relax_with_lituse (info, symval, irel, irelend)
 		 register from the literal insn.  Leave the offset alone.  */
 	      insn = (insn & 0xffe0ffff) | (lit_insn & 0x001f0000);
 	      urel->r_info = ELF64_R_INFO (ELF64_R_SYM (irel->r_info),
-					   R_ALPHA_GPRELLOW);
+					   R_ALPHA_GPREL16);
 	      urel->r_addend = irel->r_addend;
 	      info->changed_relocs = true;
 
@@ -1442,7 +1296,7 @@ elf64_alpha_relax_without_lituse (info, symval, irel)
   bfd_put_32 (info->abfd, insn, info->contents + irel->r_offset);
   info->changed_contents = true;
 
-  irel->r_info = ELF64_R_INFO (ELF64_R_SYM (irel->r_info), R_ALPHA_GPRELLOW);
+  irel->r_info = ELF64_R_INFO (ELF64_R_SYM (irel->r_info), R_ALPHA_GPREL16);
   info->changed_relocs = true;
 
   /* Reduce the use count on this got entry by one, possibly
@@ -2539,6 +2393,7 @@ elf64_alpha_check_relocs (abfd, info, sec, relocs)
 	  /* FALLTHRU */
 
 	case R_ALPHA_GPDISP:
+	case R_ALPHA_GPREL16:
 	case R_ALPHA_GPREL32:
 	case R_ALPHA_GPRELHIGH:
 	case R_ALPHA_GPRELLOW:
@@ -3560,13 +3415,6 @@ elf64_alpha_relocate_section (output_bfd, info, input_bfd, input_section,
 	  }
 	  break;
 
-	case R_ALPHA_OP_PUSH:
-	case R_ALPHA_OP_STORE:
-	case R_ALPHA_OP_PSUB:
-	case R_ALPHA_OP_PRSHIFT:
-	  /* We hate these silly beasts.  */
-	  abort ();
-
 	case R_ALPHA_LITERAL:
 	  {
 	    struct alpha_elf_got_entry *gotent;
@@ -3637,6 +3485,7 @@ elf64_alpha_relocate_section (output_bfd, info, input_bfd, input_section,
 	  /* overflow handled by _bfd_final_link_relocate */
 	  goto default_reloc;
 
+	case R_ALPHA_GPREL16:
 	case R_ALPHA_GPREL32:
 	case R_ALPHA_GPRELLOW:
 	  BFD_ASSERT(gp != 0);

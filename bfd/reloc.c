@@ -1931,27 +1931,6 @@ ENUMDOC
               2 - byte-manipulation (byte offset reg)
               3 - jsr (target of branch)
 
-     The GNU linker currently doesn't do any of this optimizing.
-
-ENUM
-  BFD_RELOC_ALPHA_USER_LITERAL
-ENUMX
-  BFD_RELOC_ALPHA_USER_LITUSE_BASE
-ENUMX
-  BFD_RELOC_ALPHA_USER_LITUSE_BYTOFF
-ENUMX
-  BFD_RELOC_ALPHA_USER_LITUSE_JSR
-ENUMX
-  BFD_RELOC_ALPHA_USER_GPDISP
-ENUMX
-  BFD_RELOC_ALPHA_USER_GPRELHIGH
-ENUMX
-  BFD_RELOC_ALPHA_USER_GPRELLOW
-ENUMDOC
-  The BFD_RELOC_ALPHA_USER_* relocations are used by the assembler to
-     process the explicit !<reloc>!sequence relocations, and are mapped
-     into the normal relocations at the end of processing.
-
 ENUM
   BFD_RELOC_ALPHA_HINT
 ENUMDOC
@@ -1970,6 +1949,14 @@ ENUM
 ENUMDOC
   The CODEADDR relocation outputs a STO_CA in the object file,
      which is filled by the linker.
+
+ENUM
+  BFD_RELOC_ALPHA_GPREL_HI16
+ENUMX
+  BFD_RELOC_ALPHA_GPREL_LO16
+ENUMDOC
+  The GPREL_HI/LO relocations together form a 32-bit offset from the 
+     GP register.  
 
 ENUM
   BFD_RELOC_MIPS_JMP

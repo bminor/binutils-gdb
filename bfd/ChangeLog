@@ -1,3 +1,17 @@
+2001-09-04  Richard Henderson  <rth@redhat.com>
+
+	* elf64-alpha.c (SKIP_HOWTO): New.
+	(elf64_alpha_howto_table): Use it to remove dead ECOFF relocs.
+	Fix sizes of 16-bit mem format relocs.
+	(elf64_alpha_reloc_map): Update to match.
+	(elf64_alpha_relax_with_lituse): Use GPREL16 as appropriate.
+	(elf64_alpha_relax_without_lituse): Likewise.
+	(elf64_alpha_check_relocs): Handle GPREL16.
+	(elf64_alpha_relocate_section): Likewise.
+	* reloc.c (BFD_RELOC_ALPHA_USER_*): Remove.
+	(BFD_RELOC_ALPHA_GPREL_HI16, BFD_RELOC_ALPHA_GPREL_LO16): New.
+	* bfd-in2.h, libbfd.h: Rebuild.
+
 2001-09-04  Jeff Law <law@redhat.com>
 
 	* elf32-h8300.c (elf32_h8_relax_section): New function.
