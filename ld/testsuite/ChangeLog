@@ -1,3 +1,8 @@
+2003-07-29  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-powerpc/tlsso.r: Update.
+	* ld-powerpc/tlstocso.r: Update.
+
 2003-07-29  Nick Clifton  <nickc@redhat.com>
 
 	* ld-alpha/tlsbin.dd: Update to account for .eh_frame section.
