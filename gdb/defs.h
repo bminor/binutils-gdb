@@ -160,8 +160,13 @@ typedef bfd_vma CORE_ADDR;
    making untested changes, the remaining references were deprecated
    rather than replaced.  */
 
-#define DEPRECATED_STREQ(a,b) (*(a) == *(b) ? !strcmp ((a), (b)) : 0)
-#define DEPRECATED_STREQN(a,b,c) (*(a) == *(b) ? !strncmp ((a), (b), (c)) : 0)
+/* DISCLAIMER: cagney/2003-11-23: Simplified definition of these
+   macros so that they just map directly onto strcmp equivalent.  I'm
+   not responsible for any breakage due to code that relied on the old
+   underlying implementation.  */
+
+#define DEPRECATED_STREQ(a,b) (strcmp ((a), (b)) == 0)
+#define DEPRECATED_STREQN(a,b,c) (strncmp ((a), (b), (c)) == 0)
 
 /* Check if a character is one of the commonly used C++ marker characters.  */
 extern int is_cplus_marker (int);

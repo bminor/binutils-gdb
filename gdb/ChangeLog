@@ -1,3 +1,8 @@
+2003-12-07  Andrew Cagney  <cagney@redhat.com>
+
+	* defs.h (DEPRECATED_STREQN, DEPRECATED_STREQ): Simplify by
+	directly calling strcmp equivalents.  Add disclaimer.
+
 2003-12-06  Andrew Cagney  <cagney@redhat.com>
 
 	* remote.c (remote_fetch_registers): For short packets, explicitly
