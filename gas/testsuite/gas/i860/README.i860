@@ -28,9 +28,7 @@ TODO:
 
 Contact me (Jason Eckhardt, jle@rice.edu) if you'd like to help.
 
-Known failures:
-  - dual01.s: GAS mishandles d.fnop (dual bit erroneously set on next
-      instruction).
+Known testsuite failures:
   - dual02-err.s: GAS currently doesn't check that dual mode pairs
       are properly aligned.
 

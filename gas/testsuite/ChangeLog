@@ -1,5 +1,9 @@
 2003-08-05  Jason Eckhardt  <jle@rice.edu>
 
+	* gas/i860/README.i860: Remove dual01 from the known failures.
+
+2003-08-05  Jason Eckhardt  <jle@rice.edu>
+
 	* gas/i860/dir-intel01.{s,d}: New files.
 	* gas/i860/dir-intel02.{s,d}: New files.
 	* gas/i860/dir-intel03-err.{s,l}: New files.
