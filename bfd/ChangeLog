@@ -1,4 +1,14 @@
+Wed Aug 26 14:20:16 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* cpu-z8k.c (compatible): made static to reduce name space
+	polution.
+
 Tue Aug 25 08:39:10 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+        Add basic support for the z8k:
+
+	* Makefile.in, archures.c, coffcode.h, configure.in, reloc.c,
+	section.c, targets.c, 
 
 	* syms.c: move mis-inserted patch.
 
@@ -75,7 +85,6 @@ Fri Aug 14 19:22:18 1992  Per Bothner  (bothner@cygnus.com)
 	* trad-core.c:  Don't include <machine/reg.h>.  It doesn't
 	seem to be needed, and many machines don't have it.
 
->>>>>>> 1.274
 Thu Aug 13 09:53:39 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* coff-m68k.c (vector): read and write archives in coff format.
