@@ -1,5 +1,7 @@
 Wed Nov 16 15:28:29 1994  Rob Savoye  (rob@cygnus.com)
 
+	* Makefile.in: Fix the test for installing gdbtk.
+
 	* hppa-tdep.c: Remove including sys/dir.h from a target file.
 
 Wed Nov 16 10:31:27 1994  J.T. Conklin  (jtc@cygnus.com)
