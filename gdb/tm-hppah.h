@@ -32,11 +32,7 @@ extern CORE_ADDR millicode_start, millicode_end;
    some instructions.  */
 
 #undef	SAVED_PC_AFTER_CALL
-#define SAVED_PC_AFTER_CALL(frame)              \
-  ((get_frame_pc (frame) >= millicode_start     \
-    && get_frame_pc (frame) < millicode_end) ?  \
-   read_register (31) & ~3                      \
-   : read_register (RP_REGNUM) & ~3)
+#define SAVED_PC_AFTER_CALL(frame) saved_pc_after_call (frame)
 
 /* We need to figure out where the text region is so that we use the
    appropriate ptrace operator to manipulate text.  Simply reading/writing

@@ -1,3 +1,30 @@
+Mon Dec 28 15:00:01 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* hppah-tdep.c (frame_saved_pc):  Use better test for outermost
+	frame.  Use find_return_regnum to find the caller.
+	* (find_unwind_entry):  New routine to locate stack frame info
+	associated with a procedure.  This looks in the $UNWIND_START$
+	section in the SOM file.
+	* (find_return_regnum):  New routine.  Uses find_unwind_entry() to
+	figure out where the caller's return address is stored.
+	* (find_proc_framesize):  New routine.  Uses find_unwind_entry()
+	to figure out the frame size for a procedure.
+	* (saved_pc_after_call):  New routine, moved from tm-hppa.h.
+	* (init_extra_frame_info):  New routine.  Corrects PC and FP for
+	outermost frame if necessary.
+	* (frame_chain):  New routine, moved from tm-hppa.h.
+	* (skip_trampoline_code):  Handle computed function calls (ie:
+	calls from $$dyncall).
+	* (unwind_command):  Temporary support function to allow user
+	to control/observe aspects of the unwind (stack frame) info.
+	* infcmd.c (read_pc):  (Temporary), put a hack in to see if the PC
+	was in a system call, if so, then read the PC from r31.
+	* tm-hppah.h (SKIP_TRAMPOLINE_CODE, IN_SOLIB_TRAMPOLINE):  Deal
+	with extra arg for skip_trampoline_code().
+	* (INIT_EXTRA_FRAME_INFO):  Define to point at subr (see above).
+	* (FRAME_CHAIN, FRAME_CHAIN_VALID):  Turn into real subroutines.
+	* tm-hppa.h (SAVED_PC_AFTER_CALL):  Turn into real subroutine.
+
 Sun Dec 27 17:34:15 1992  Fred Fish  (fnf@cygnus.com)
 
 	* dbxread.c (dbx_symfile_init, elfstab_build_psymtabs):

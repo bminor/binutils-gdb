@@ -75,11 +75,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* If PC is in some function-call trampoline code, return the PC
    where the function itself actually starts.  If not, return NULL.  */
 
-#define	SKIP_TRAMPOLINE_CODE(pc) skip_trampoline_code (pc)
+#define	SKIP_TRAMPOLINE_CODE(pc) skip_trampoline_code (pc, NULL)
 
 /* Return non-zero if we are in some sort of a trampoline. */
 
-#define IN_SOLIB_TRAMPOLINE(pc,name) skip_trampoline_code (pc)
+#define IN_SOLIB_TRAMPOLINE(pc, name) skip_trampoline_code (pc, name)
 
 /* Immediately after a function call, return the saved pc.
    Can't go through the frames for this because on some machines
@@ -290,11 +290,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
                    ((regno) >= PCSQ_TAIL_REGNUM && (regno) < IPSW_REGNUM) ||  \
                    ((regno) > IPSW_REGNUM && (regno) < FP4_REGNUM)
 
-/* This is a piece of magic that is given a register number REGNO
-   and as BLOCKEND the address in the system of the end of the user structure
-   and stores in ADDR the address in the kernel or core dump
-   of that register.  */
-
+#define INIT_EXTRA_FRAME_INFO(fromleaf, frame) init_extra_frame_info (fromleaf, frame)
 
 /* Describe the pointer in each stack frame to the previous stack frame
    (its caller).  */
@@ -313,13 +309,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    is the address of a 4-byte word containing the calling frame's
    address (previous FP).  */
 
-#define FRAME_CHAIN(thisframe)  \
-  (!inside_entry_file ((thisframe)->pc) ? \
-   read_memory_integer ((thisframe)->frame, 4) :\
-   0)
+#define FRAME_CHAIN(thisframe) frame_chain (thisframe)
 
+#if 0
 #define FRAME_CHAIN_VALID(chain, thisframe) \
   frame_chain_valid (chain, thisframe)
+#endif
 
 #define FRAME_CHAIN_COMBINE(chain, thisframe) (chain)
 

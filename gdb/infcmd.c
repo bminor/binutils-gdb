@@ -877,6 +877,13 @@ path_command (dirname, from_tty)
 CORE_ADDR
 read_pc ()
 {
+#if GDB_TARGET_IS_HPPA
+  int flags = read_register(FLAGS_REGNUM);
+
+  if (flags & 2)
+    return read_register(31) & ~0x3;
+#endif
+
   return ADDR_BITS_REMOVE ((CORE_ADDR) read_register (PC_REGNUM));
 }
 

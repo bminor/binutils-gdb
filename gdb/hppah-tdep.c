@@ -260,29 +260,150 @@ extract_17 (word)
 		      (word & 0x1) << 16, 17) << 2;
 }
 
+int use_unwind = 0;
+
+static struct unwind_table_entry *
+find_unwind_entry(pc)
+     CORE_ADDR pc;
+{
+  static struct unwind_table_entry *unwind = NULL, *unwind_end;
+  struct unwind_table_entry *u;
+
+  if (!use_unwind)
+    return NULL;
+
+  if (!unwind)
+    {
+      asection *unwind_sec;
+
+      unwind_sec = bfd_get_section_by_name (exec_bfd, "$UNWIND_START$");
+      if (unwind_sec)
+	{
+	  int size;
+
+	  size = bfd_section_size (exec_bfd, unwind_sec);
+	  unwind = malloc (size);
+	  unwind_end = unwind + size/sizeof (struct unwind_table_entry);
+
+	  bfd_get_section_contents (exec_bfd, unwind_sec, unwind, 0, size);
+	}
+    }
+
+  for (u = unwind; u < unwind_end; u++)
+    {
+      if (pc >= u->region_start
+	  && pc <= u->region_end)
+	return u;
+    }
+  return NULL;
+}
+
+static int
+find_return_regnum(pc)
+     CORE_ADDR pc;
+{
+  struct unwind_table_entry *u;
+
+  u = find_unwind_entry (pc);
+
+  if (!u)
+    return RP_REGNUM;
+
+  if (u->Millicode)
+    return 31;
+
+  return RP_REGNUM;
+}
+
+int
+find_proc_framesize(pc)
+     CORE_ADDR pc;
+{
+  struct unwind_table_entry *u;
+
+  u = find_unwind_entry (pc);
+
+  if (!u)
+    return -1;
+
+  return u->Total_frame_size << 3;
+}
+
+CORE_ADDR
+saved_pc_after_call (frame)
+     FRAME frame;
+{
+  int ret_regnum;
+
+  ret_regnum = find_return_regnum (get_frame_pc (frame));
+
+  return read_register (ret_regnum) & ~0x3;
+}
+
 CORE_ADDR
 frame_saved_pc (frame)
      FRAME frame;
 {
-  if (get_current_frame () == frame)
+  if (!frame->next)
     {
-      struct frame_saved_regs saved_regs;
       CORE_ADDR pc = get_frame_pc (frame);
-      int flags;
+      int ret_regnum;
 
-      flags = read_register (FLAGS_REGNUM);
-      get_frame_saved_regs (frame, &saved_regs);
-      if (pc >= millicode_start && pc < millicode_end
-	  || (flags & 2))	/* In system call? */
-	return read_register (31) & ~3;
-      else if (saved_regs.regs[RP_REGNUM])
-	return read_memory_integer (saved_regs.regs[RP_REGNUM], 4) & ~3;
-      else
-	return read_register (RP_REGNUM) & ~3;
+      ret_regnum = find_return_regnum (pc);
+
+      return read_register (ret_regnum) & ~0x3;
     }
   return read_memory_integer (frame->frame - 20, 4) & ~0x3;
 }
+
+/* We need to correct the PC and the FP for the outermost frame when we are
+   in a system call.  */
 
+void
+init_extra_frame_info (fromleaf, frame)
+     int fromleaf;
+     struct frame_info *frame;
+{
+  int flags;
+  int framesize;
+
+  if (frame->next)		/* Only do this for outermost frame */
+    return;
+
+  flags = read_register (FLAGS_REGNUM);
+  if (flags & 2)	/* In system call? */
+    frame->pc = read_register (31) & ~0x3;
+
+  /* The outermost frame is always derived from PC-framesize */
+  framesize = find_proc_framesize(frame->pc);
+  if (framesize == -1)
+    frame->frame = read_register (FP_REGNUM);
+  else
+    frame->frame = read_register (SP_REGNUM) - framesize;
+
+  if (framesize != 0)		/* Frameless? */
+    return;
+
+  /* For frameless functions, we need to look at the caller's frame */
+  framesize = find_proc_framesize(FRAME_SAVED_PC(frame));
+  if (framesize != -1)
+    frame->frame -= framesize;
+}
+
+FRAME_ADDR
+frame_chain (frame)
+     struct frame_info *frame;
+{
+  int framesize;
+
+  framesize = find_proc_framesize(FRAME_SAVED_PC(frame));
+
+  if (framesize != -1)
+    return frame->frame - framesize;
+
+  return read_memory_integer (frame->frame, 4);
+}
+
 /* To see if a frame chain is valid, see if the caller looks like it
    was compiled with gcc. */
 
@@ -293,7 +414,6 @@ int frame_chain_valid (chain, thisframe)
   if (chain && (chain > 0x60000000))
     {
       CORE_ADDR pc = get_pc_function_start (FRAME_SAVED_PC (thisframe));
-
       if (inside_entry_file (pc))
 	return 0;
       /* look for stw rp, -20(0,sp); copy 4,1; copy sp, 4 */
@@ -629,13 +749,32 @@ pa_print_fp_reg (i)
    small piece of code that does long format (`external' in HPPA parlance)
    jumps.  We figure out where the trampoline is going to end up, and return
    the PC of the final destination.  If we aren't in a trampoline, we just
-   return NULL. */
+   return NULL. 
+
+   For computed calls, we just extract the new PC from r22.  */
 
 CORE_ADDR
-skip_trampoline_code (pc)
+skip_trampoline_code (pc, name)
      CORE_ADDR pc;
+     char *name;
 {
   long inst0, inst1;
+  static CORE_ADDR dyncall = 0;
+  struct minimal_symbol *msym;
+
+/* FIXME XXX - dyncall must be initialized whenever we get a new exec file */
+
+  if (!dyncall)
+    {
+      msym = lookup_minimal_symbol ("$$dyncall", NULL);
+      if (msym)
+	dyncall = msym->address;
+      else
+	dyncall = -1;
+    }
+
+  if (pc == dyncall)
+    return (CORE_ADDR)(read_register (22) & ~0x3);
 
   inst0 = read_memory_integer (pc, 4);
   inst1 = read_memory_integer (pc+4, 4);
@@ -644,7 +783,49 @@ skip_trampoline_code (pc)
       && (inst1 & 0xffe0e002) == 0xe0202002) /* be,n yyy(sr4, r1) */
     pc = extract_21 (inst0) + extract_17 (inst1);
   else
-    pc = NULL;
+    pc = (CORE_ADDR)NULL;
 
   return pc;
+}
+
+static void
+unwind_command (exp, from_tty)
+     char *exp;
+     int from_tty;
+{
+  CORE_ADDR address;
+  union
+    {
+      int *foo;
+      struct unwind_table_entry *u;
+    } xxx;
+
+  /* If we have an expression, evaluate it and use it as the address.  */
+
+  if (exp != 0 && *exp != 0)
+    address = parse_and_eval_address (exp);
+  else
+    return;
+
+  xxx.u = find_unwind_entry (address);
+
+  if (!xxx.u)
+    {
+      printf ("Can't find unwind table entry for PC 0x%x\n", address);
+      return;
+    }
+
+  printf ("%08x\n%08X\n%08X\n%08X\n", xxx.foo[0], xxx.foo[1], xxx.foo[2],
+	  xxx.foo[3]);
+}
+
+void
+_initialize_hppah_tdep ()
+{
+  add_com ("unwind", class_obscure, unwind_command, "Print unwind info\n");
+  add_show_from_set
+    (add_set_cmd ("use_unwind", class_obscure, var_boolean,
+		  (char *)&use_unwind,
+		  "Control the useage of unwind info.\n", &setlist),
+     &showlist);
 }
