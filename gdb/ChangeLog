@@ -1,3 +1,9 @@
+2003-01-05  Mark Kettenis  <kettenis@gnu.org>
+
+	* i386-tdep.c (i386_get_longjmp_target): Make usable on x86-64.
+	* x86-64-tdep.c (x86_64_init_abi): Remove FIXME about
+	i386_get_longjmp_target.
+
 2003-01-05  Andrew Cagney  <ac131313@redhat.com>
 
 	* arm-tdep.c (prologue_cache): Change to a pointer.

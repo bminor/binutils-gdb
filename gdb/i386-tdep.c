@@ -891,15 +891,16 @@ i386_pop_frame (void)
 /* Figure out where the longjmp will land.  Slurp the args out of the
    stack.  We expect the first arg to be a pointer to the jmp_buf
    structure from which we extract the address that we will land at.
-   This address is copied into PC.  This routine returns true on
+   This address is copied into PC.  This routine returns non-zero on
    success.  */
 
 static int
 i386_get_longjmp_target (CORE_ADDR *pc)
 {
-  char buf[4];
+  char buf[8];
   CORE_ADDR sp, jb_addr;
   int jb_pc_offset = gdbarch_tdep (current_gdbarch)->jb_pc_offset;
+  int len = TARGET_PTR_BIT / TARGET_CHAR_BIT;
 
   /* If JB_PC_OFFSET is -1, we have no way to find out where the
      longjmp will land.  */
@@ -907,14 +908,14 @@ i386_get_longjmp_target (CORE_ADDR *pc)
     return 0;
 
   sp = read_register (SP_REGNUM);
-  if (target_read_memory (sp + 4, buf, 4))
+  if (target_read_memory (sp + len, buf, len))
     return 0;
 
-  jb_addr = extract_address (buf, 4);
-  if (target_read_memory (jb_addr + jb_pc_offset, buf, 4))
+  jb_addr = extract_address (buf, len);
+  if (target_read_memory (jb_addr + jb_pc_offset, buf, len))
     return 0;
 
-  *pc = extract_address (buf, 4);
+  *pc = extract_address (buf, len);
   return 1;
 }
 

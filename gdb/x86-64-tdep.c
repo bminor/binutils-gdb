@@ -967,10 +967,6 @@ x86_64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_register_byte (gdbarch, x86_64_register_byte);
   set_gdbarch_register_virtual_type (gdbarch, x86_64_register_virtual_type);
 
-  /* FIXME: kettenis/20021026: As long as we don't support longjmp,
-     that is, as long as we have `tdep->jb_pc_offset == -1', using
-     i386_get_longjmp_target is fine.  */
-
   set_gdbarch_register_convertible (gdbarch, x86_64_register_convertible);
   set_gdbarch_register_convert_to_virtual (gdbarch,
 					   x86_64_register_convert_to_virtual);
