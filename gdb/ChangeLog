@@ -1,3 +1,8 @@
+Fri Apr  7 13:44:38 2000  glen mccready  <gkm@pobox.com>
+
+        * rs6000-nat.c (xcoff_relocate_symtab): Grow buffer if ptrace()
+          fails due to lack of space.
+
 Fri Mar 24 12:10:38 2000  glen mccready  <gkm@pobox.com>
 
         * command.c, command.h (help_all): Add functionality to display

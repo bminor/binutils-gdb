@@ -639,11 +639,16 @@ void
 xcoff_relocate_symtab (pid)
      unsigned int pid;
 {
-#define	MAX_LOAD_SEGS 64	/* maximum number of load segments */
+  int load_segs = 64; /* number of load segments */
 
+  do
+    {
   struct ld_info *ldi;
+      int rc;
 
-  ldi = (void *) alloca (MAX_LOAD_SEGS * sizeof (*ldi));
+      ldi = (void *) alloca (load_segs * sizeof (*ldi));
+      if (ldi == 0)
+	perror_with_name ("xcoff_relocate_symtab");
 
   /* According to my humble theory, AIX has some timing problems and
      when the user stack grows, kernel doesn't update stack info in time
@@ -653,15 +658,21 @@ xcoff_relocate_symtab (pid)
   usleep (36000);
 
   errno = 0;
-  ptrace (PT_LDINFO, pid, (PTRACE_ARG3_TYPE) ldi,
-	  MAX_LOAD_SEGS * sizeof (*ldi), (int *) ldi);
-  if (errno)
+      rc = ptrace (PT_LDINFO, pid, (PTRACE_ARG3_TYPE) ldi,
+	      load_segs * sizeof (*ldi), (int *) ldi);
+      if (rc == -1)
+        {
+	if (errno == ENOMEM)
+	  load_segs *= 2;
+	else
     perror_with_name ("ptrace ldinfo");
-
+        }
+      else
+	{
   vmap_ldinfo (ldi);
-
-  /* relocate the exec and core sections as well. */
-  vmap_exec ();
+	  vmap_exec (); /* relocate the exec and core sections as well. */
+	}
+    } while (rc == -1);
 }
 
 /* Core file stuff.  */
