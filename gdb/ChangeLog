@@ -1,3 +1,11 @@
+2003-03-05  Daniel Jacobowitz  <drow@mvista.com>
+
+	* dwarf2expr.c (new_dwarf_expr_context): Add (void) to definition.
+	* dwarf2loc.c: Include "regcache.h".
+	(dwarf_expr_read_reg): Rename regnum argument to dwarf_regnum.  Use
+	register_size.
+	* Makefile.in (dwarf2loc.o): Update dependencies.
+
 2003-03-04  Theodore A. Roth  <troth@openavr.org>
 
 	* avr-tdep.c (avr_io_reg_read_command): Fix to handle case when the

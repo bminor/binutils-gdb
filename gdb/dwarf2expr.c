@@ -35,7 +35,7 @@ static void execute_stack_op (struct dwarf_expr_context *,
 /* Create a new context for the expression evaluator.  */
 
 struct dwarf_expr_context *
-new_dwarf_expr_context ()
+new_dwarf_expr_context (void)
 {
   struct dwarf_expr_context *retval;
   retval = xcalloc (1, sizeof (struct dwarf_expr_context));
