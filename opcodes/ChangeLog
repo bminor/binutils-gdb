@@ -1,6 +1,9 @@
 start-sanitize-r5900
 Mon Jun  1 10:27:26 1998  Jeffrey A Law  (law@cygnus.com)
 
+	* mips-opc.c (c.lt.s): Remove r5900 specific variant.
+	(c.le.s): Likewise.
+
 	* vu0.h (sqc2): Fix opcode.
 
         * mips-opc.c (rsqrt.s): Update based on r5900 ISA manual version 2.1
