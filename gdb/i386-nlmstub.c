@@ -124,15 +124,6 @@ struct DBG_LoadDefinitionStructure
 /* The main thread ID.  */
 static int mainthread;
 
-/* The LoadDefinitionStructure of the NLM being debugged.  */
-static struct DBG_LoadDefinitionStructure *handle;
-
-/* Whether we have connected to gdb.  */
-static int talking;
-
-/* The actual first instruction in the program.  */
-static unsigned char first_insn;
-
 /* An error message for the main thread to print.  */
 static char *error_message;
 
@@ -141,7 +132,7 @@ static int AIOhandle;
 
 /* BUFMAX defines the maximum number of characters in inbound/outbound
    buffers.  At least NUMREGBYTES*2 are needed for register packets */
-#define BUFMAX 400
+#define BUFMAX (REGISTER_BYTES * 2 + 16)
 
 /* remote_debug > 0 prints ill-formed commands in valid packets and
    checksum errors. */
@@ -149,17 +140,21 @@ static int remote_debug = 1;
 
 static const char hexchars[] = "0123456789abcdef";
 
-/* Number of bytes of registers.  */
-#define NUMREGBYTES 64
-enum regnames {EAX, ECX, EDX, EBX, ESP, EBP, ESI, EDI,
-	       PC /* also known as eip */,
-	       PS /* also known as eflags */,
-	       CS, SS, DS, ES, FS, GS};
+/* Register values.  All of these values *MUST* agree with tm.h */
+#define SP_REGNUM 4		/* Contains address of top of stack */
+#define PC_REGNUM 8		/* Contains program counter */
+#define FP_REGNUM 5		/* Virtual frame pointer */
+#define NUM_REGS 16		/* Number of machine registers */
+#define REGISTER_BYTES (NUM_REGS * 4) /* Total size of registers array */
 
-/* Register values.  */
-static int registers[NUMREGBYTES/4];
+static void flush_i_cache() {}
 
+static char *mem2hex (void *mem, char *buf, int count, int may_fault);
+static char *hex2mem (char *buf, void *mem, int count, int may_fault);
+
+#if 0
 __main() {};
+#endif
 
 /* Read a character from the serial port.  This must busy wait, but
    that's OK because we will be the only thread running anyhow.  */
@@ -211,49 +206,45 @@ putDebugChar (c)
 static void
 frame_to_registers (frame, regs)
      T_TSS_StackFrame *frame;
-     int *regs;
+     char *regs;
 {
-  regs[EAX] = frame->ExceptionEAX;
-  regs[ECX] = frame->ExceptionECX;
-  regs[EDX] = frame->ExceptionEDX;
-  regs[EBX] = frame->ExceptionEBX;
-  regs[ESP] = frame->ExceptionESP;
-  regs[EBP] = frame->ExceptionEBP;
-  regs[ESI] = frame->ExceptionESI;
-  regs[EDI] = frame->ExceptionEDI;
-  regs[PC] = frame->ExceptionEIP;
-  regs[PS] = frame->ExceptionSystemFlags;
-  regs[CS] = frame->ExceptionCS[0];
-  regs[SS] = frame->ExceptionSS[0];
-  regs[DS] = frame->ExceptionDS[0];
-  regs[ES] = frame->ExceptionES[0];
-  regs[FS] = frame->ExceptionFS[0];
-  regs[GS] = frame->ExceptionGS[0];
+  /* Copy EAX -> EDI */
+  mem2hex (&frame->ExceptionEAX, &regs[0 * 4 * 2], 4 * 8, 0);
+
+  /* Copy EIP & PS */
+  mem2hex (&frame->ExceptionEIP, &regs[8 * 4 * 2], 4 * 2, 0);
+
+  /* Copy CS, SS, DS */
+  mem2hex (&frame->ExceptionCS, &regs[10 * 4 * 2], 4 * 3, 0);
+
+  /* Copy ES */
+  mem2hex (&frame->ExceptionES, &regs[13 * 4 * 2], 4 * 1, 0);
+
+  /* Copy FS & GS */
+  mem2hex (&frame->ExceptionFS, &regs[14 * 4 * 2], 4 * 2, 0);
 }
 
 /* Put the registers back into the frame information.  */
 
 static void
 registers_to_frame (regs, frame)
-     int *regs;
+     char *regs;
      T_TSS_StackFrame *frame;
 {
-  frame->ExceptionEAX = regs[EAX];
-  frame->ExceptionECX = regs[ECX];
-  frame->ExceptionEDX = regs[EDX];
-  frame->ExceptionEBX = regs[EBX];
-  frame->ExceptionESP = regs[ESP];
-  frame->ExceptionEBP = regs[EBP];
-  frame->ExceptionESI = regs[ESI];
-  frame->ExceptionEDI = regs[EDI];
-  frame->ExceptionEIP = regs[PC];
-  frame->ExceptionSystemFlags = regs[PS];
-  frame->ExceptionCS[0] = regs[CS];
-  frame->ExceptionSS[0] = regs[SS];
-  frame->ExceptionDS[0] = regs[DS];
-  frame->ExceptionES[0] = regs[ES];
-  frame->ExceptionFS[0] = regs[FS];
-  frame->ExceptionGS[0] = regs[GS];
+  /* Copy EAX -> EDI */
+  hex2mem (&regs[0 * 4 * 2], &frame->ExceptionEAX, 4 * 8, 0);
+
+  /* Copy EIP & PS */
+  hex2mem (&regs[8 * 4 * 2], &frame->ExceptionEIP, 4 * 2, 0);
+
+  /* Copy CS, SS, DS */
+  hex2mem (&regs[10 * 4 * 2], &frame->ExceptionCS, 4 * 3, 0);
+
+  /* Copy ES */
+  hex2mem (&regs[13 * 4 * 2], &frame->ExceptionES, 4 * 1, 0);
+
+  /* Copy FS & GS */
+  hex2mem (&regs[14 * 4 * 2], &frame->ExceptionFS, 4 * 2, 0);
 }
 
 /* Turn a hex character into a number.  */
@@ -319,17 +310,16 @@ getpacket (buffer)
 	  if (ch == -1)
 	    return 0;
 	  xmitcsum += hex(ch);
-	  if ((remote_debug ) && (checksum != xmitcsum))
-	    {
-	      fprintf(stderr,"bad checksum.  My count = 0x%x, sent=0x%x. buf=%s\n",
-		      checksum,xmitcsum,buffer);
-	    }
 
 	  if (checksum != xmitcsum)
 	    {
+	      if (remote_debug)
+		ConsolePrintf ("bad checksum.  My count = 0x%x, sent=0x%x. buf=%s\n",
+			       checksum,xmitcsum,buffer);
 	      /* failed checksum */
 	      if (! putDebugChar('-'))
 		return 0;
+	      return 1;
 	    }
 	  else
 	    {
@@ -413,8 +403,8 @@ debug_error (format, parm)
 {
   if (remote_debug)
     {
-      fprintf (stderr, format, parm);
-      fprintf (stderr, "\n");
+      ConsolePrintf (format, parm);
+      ConsolePrintf ("\n");
     }
 }
 
@@ -464,18 +454,19 @@ asm ("ret");
 
 static char *
 mem2hex (mem, buf, count, may_fault)
-     char *mem;
+     void *mem;
      char *buf;
      int count;
      int may_fault;
 {
   int i;
   unsigned char ch;
+  char *ptr = mem;
 
   mem_may_fault = may_fault;
   for (i = 0; i < count; i++)
     {
-      ch = get_char (mem++);
+      ch = get_char (ptr++);
       if (may_fault && mem_err)
 	return (buf);
       *buf++ = hexchars[ch >> 4];
@@ -492,21 +483,22 @@ mem2hex (mem, buf, count, may_fault)
 static char *
 hex2mem (buf, mem, count, may_fault)
      char *buf;
-     char *mem;
+     void *mem;
      int count;
      int may_fault;
 {
   int i;
   unsigned char ch;
+  char *ptr = mem;
 
   mem_may_fault = may_fault;
   for (i=0;i<count;i++)
     {
       ch = hex(*buf++) << 4;
       ch = ch + hex(*buf++);
-      set_char (mem++, ch);
+      set_char (ptr++, ch);
       if (may_fault && mem_err)
-	return (mem);
+	return (ptr);
     }
   mem_may_fault = 0;
   return(mem);
@@ -574,18 +566,45 @@ hexToInt(ptr, intValue)
   return (numChars);
 }
 
+static void
+do_status (ptr, frame)
+     char *ptr;
+     struct T_TSS_StackFrame *frame;
+{
+  int sigval;
+
+  sigval = computeSignal (frame->ExceptionNumber);
+
+  sprintf (ptr, "T%02x", sigval);
+  ptr += 3;
+
+  sprintf (ptr, "%02x:", PC_REGNUM);
+  ptr = mem2hex (&frame->ExceptionEIP, ptr + 3, 4, 0);
+  *ptr++ = ';';
+
+  sprintf (ptr, "%02x:", SP_REGNUM);
+  ptr = mem2hex (&frame->ExceptionESP, ptr + 3, 4, 0);
+  *ptr++ = ';';
+
+  sprintf (ptr, "%02x:", FP_REGNUM);
+  ptr = mem2hex (&frame->ExceptionEBP, ptr + 3, 4, 0);
+  *ptr++ = ';';
+
+  *ptr = '\000';
+}
+
 /* This function does all command processing for interfacing to gdb.
    It is called whenever an exception occurs in the module being
    debugged.  */
 
 static LONG
-handle_exception (T_StackFrame *old_frame)
+handle_exception (frame)
+     T_TSS_StackFrame *frame;
 {
-  T_TSS_StackFrame *frame = (T_TSS_StackFrame *) old_frame;
-  int sigval;
   int addr, length;
-  char * ptr;
-  int newPC;
+  char *ptr;
+  static struct DBG_LoadDefinitionStructure *ldinfo = 0;
+  static LONG first_insn;	/* The first instruction in the program.  */
 
   /* Apparently the bell can sometimes be ringing at this point, and
      should be stopped.  */
@@ -601,90 +620,86 @@ handle_exception (T_StackFrame *old_frame)
 		     GetThreadID ());
     }
 
-  /* If the NLM just started, we record the module load information
-     and the thread ID, and set a breakpoint at the first instruction
-     in the program.  */
-  if (frame->ExceptionNumber == START_NLM_EVENT
-      && handle == NULL)
+  switch (frame->ExceptionNumber)
     {
-      handle = ((struct DBG_LoadDefinitionStructure *)
+    case START_NLM_EVENT:
+      /* If the NLM just started, we record the module load information
+	 and the thread ID, and set a breakpoint at the first instruction
+	 in the program.  */
+
+      ldinfo = ((struct DBG_LoadDefinitionStructure *)
 		frame->ExceptionErrorCode);
-      first_insn = *(char *) handle->LDInitializationProcedure;
-      *(unsigned char *) handle->LDInitializationProcedure = 0xcc;
-      ConsolePrintf ("NLM offsets/lengths:  Code: 0x%x/0x%x, Data: 0x%x/0x%x, BSS: /0x%x\r\n",
-		     handle->LDCodeImageOffset, handle->LDCodeImageLength,
-		     handle->LDDataImageOffset, handle->LDDataImageLength,
-		     handle->LDUninitializedDataLength);
-
+      first_insn = *(unsigned char *)ldinfo->LDInitializationProcedure;
+      *(unsigned char *)ldinfo->LDInitializationProcedure = 0xcc;
+      flush_i_cache ();
       return RETURN_TO_PROGRAM;
-    }
 
-  /* After we've reached the initial breakpoint, reset it.  */
-  if (frame->ExceptionEIP == (LONG) handle->LDInitializationProcedure + 1
-      && *(unsigned char *) handle->LDInitializationProcedure == 0xcc)
-    {
-      *(char *) handle->LDInitializationProcedure = first_insn;
-      frame->ExceptionEIP = (LONG) handle->LDInitializationProcedure;
-    }
+    case ENTER_DEBUGGER_EVENT:
+    case KEYBOARD_BREAK_EVENT:
+      /* Pass some events on to the next debugger, in case it will handle
+	 them.  */
+      return RETURN_TO_NEXT_DEBUGGER;
 
-  /* Pass some events on to the next debugger, in case it will handle
-     them.  */
-  if (frame->ExceptionNumber == ENTER_DEBUGGER_EVENT
-      || frame->ExceptionNumber == KEYBOARD_BREAK_EVENT)
-    return RETURN_TO_NEXT_DEBUGGER;
+    case 3:			/* Breakpoint */
+      /* After we've reached the initial breakpoint, reset it.  */
+      if (frame->ExceptionEIP - 1 == (long) ldinfo->LDInitializationProcedure
+	  && *(unsigned char *) ldinfo->LDInitializationProcedure == 0xcc)
+	{
+	  *(unsigned char *) ldinfo->LDInitializationProcedure = first_insn;
+	  frame->ExceptionEIP -= 1;
+	  flush_i_cache ();
+	}
+      /* Normal breakpoints end up here */
+      do_status (remcomOutBuffer, frame);
+      break;
 
-  /* At the moment, we don't care about most of the unusual NetWare
-     exceptions.  */
-  if (frame->ExceptionNumber != TERMINATE_NLM_EVENT
-      && frame->ExceptionNumber > 31)
-    return RETURN_TO_PROGRAM;
+    default:
+      /* At the moment, we don't care about most of the unusual NetWare
+	 exceptions.  */
+      if (frame->ExceptionNumber > 31)
+	return RETURN_TO_PROGRAM;
 
-  /* If we get a GP fault, and mem_may_fault is set, and the
-     instruction pointer is near set_char or get_char, then we caused
-     the fault ourselves accessing an illegal memory location.  */
-  if (mem_may_fault
-      && (frame->ExceptionNumber == 11
-	  || frame->ExceptionNumber == 13
-	  || frame->ExceptionNumber == 14)
-      && ((frame->ExceptionEIP >= (long) &set_char
-	   && frame->ExceptionEIP < (long) &set_char + 50)
-	  || (frame->ExceptionEIP >= (long) &get_char
-	      && frame->ExceptionEIP < (long) &get_char + 50)))
-    {
-      mem_err = 1;
-      /* Point the instruction pointer at an assembly language stub
-	 which just returns from the function.  */
-      frame->ExceptionEIP = (long) &just_return;
-      /* Keep going.  This will act as though it returned from
-	 set_char or get_char.  The calling routine will check
-	 mem_err, and do the right thing.  */
-      return RETURN_TO_PROGRAM;
+      /* Most machine level exceptions end up here */
+      do_status (remcomOutBuffer, frame);
+      break;
+
+    case 11:			/* Segment not present */
+    case 13:			/* General protection */
+    case 14:			/* Page fault */
+      /* If we get a GP fault, and mem_may_fault is set, and the
+	 instruction pointer is near set_char or get_char, then we caused
+	 the fault ourselves accessing an illegal memory location.  */
+      if (mem_may_fault
+	  && ((frame->ExceptionEIP >= (long) &set_char
+	       && frame->ExceptionEIP < (long) &set_char + 50)
+	      || (frame->ExceptionEIP >= (long) &get_char
+		  && frame->ExceptionEIP < (long) &get_char + 50)))
+	{
+	  mem_err = 1;
+	  /* Point the instruction pointer at an assembly language stub
+	     which just returns from the function.  */
+
+	  frame->ExceptionEIP = (long) &just_return;
+
+	  /* Keep going.  This will act as though it returned from
+	     set_char or get_char.  The calling routine will check
+	     mem_err, and do the right thing.  */
+	  return RETURN_TO_PROGRAM;
+	}
+      /* Random mem fault, report it */
+      do_status (remcomOutBuffer, frame);
+      break;
+
+    case TERMINATE_NLM_EVENT:
+      /* There is no way to get the exit status.  */
+      sprintf (remcomOutBuffer, "W%02x", 0);
+      break;			/* We generate our own status */
     }
 
   /* FIXME: How do we know that this exception has anything to do with
      the program we are debugging?  We can check whether the PC is in
      the range of the module we are debugging, but that doesn't help
      much since an error could occur in a library routine.  */
-
-  frame_to_registers (frame, registers);
-
-  /* reply to host that an exception has occurred */
-  if (frame->ExceptionNumber == TERMINATE_NLM_EVENT)
-    {
-      /* There is no way to get the exit status.  */
-      remcomOutBuffer[0] = 'W';
-      remcomOutBuffer[1] = hexchars[0];
-      remcomOutBuffer[2] = hexchars[0];
-      remcomOutBuffer[3] = 0;
-    }
-  else
-    {
-      sigval = computeSignal (frame->ExceptionNumber);
-      remcomOutBuffer[0] = 'S';
-      remcomOutBuffer[1] =  hexchars[sigval >> 4];
-      remcomOutBuffer[2] =  hexchars[sigval % 16];
-      remcomOutBuffer[3] = 0;
-    }
 
   if (! putpacket(remcomOutBuffer))
     return RETURN_TO_NEXT_DEBUGGER;
@@ -701,26 +716,21 @@ handle_exception (T_StackFrame *old_frame)
       remcomOutBuffer[0] = 0;
       if (! getpacket (remcomInBuffer))
 	return RETURN_TO_NEXT_DEBUGGER;
-      talking = 1;
       switch (remcomInBuffer[0])
 	{
 	case '?':
-	  sigval = computeSignal (frame->ExceptionNumber);
-	  remcomOutBuffer[0] = 'S';
-	  remcomOutBuffer[1] =  hexchars[sigval >> 4];
-	  remcomOutBuffer[2] =  hexchars[sigval % 16];
-	  remcomOutBuffer[3] = 0;
+	  do_status (remcomOutBuffer, frame);
 	  break;
 	case 'd':
 	  remote_debug = !(remote_debug); /* toggle debug flag */
 	  break;
 	case 'g':
 	  /* return the value of the CPU registers */
-	  mem2hex((char*) registers, remcomOutBuffer, NUMREGBYTES, 0);
+	  frame_to_registers (frame, remcomOutBuffer);
 	  break;
 	case 'G':
 	  /* set the value of the CPU registers - return OK */
-	  hex2mem(&remcomInBuffer[1], (char*) registers, NUMREGBYTES, 0);
+	  registers_to_frame (&remcomInBuffer[1], frame);
 	  strcpy(remcomOutBuffer,"OK");
 	  break;
 
@@ -787,22 +797,25 @@ handle_exception (T_StackFrame *old_frame)
 	  /* try to read optional parameter, pc unchanged if no parm */
 	  ptr = &remcomInBuffer[1];
 	  if (hexToInt(&ptr,&addr))
-	    registers[ PC ] = addr;
-
-	  newPC = registers[ PC];
+	    {
+/*	      registers[PC_REGNUM].lo = addr;*/
+	      fprintf (stderr, "Setting PC to 0x%x\n", addr);
+	      while (1);
+	    }
 
 	  /* clear the trace bit */
-	  registers[ PS ] &= 0xfffffeff;
+	  frame->ExceptionSystemFlags &= ~0x100;
 
 	  /* set the trace bit if we're stepping */
-	  if (remcomInBuffer[0] == 's') registers[ PS ] |= 0x100;
+	  if (remcomInBuffer[0] == 's')
+	    frame->ExceptionSystemFlags |= 0x100;
 
-	  registers_to_frame (registers, frame);
+	  flush_i_cache ();
 	  return RETURN_TO_PROGRAM;
 
 	case 'k':
 	  /* kill the program */
-	  KillMe (handle);
+	  KillMe (ldinfo);
 	  ResumeThread (mainthread);
 	  return RETURN_TO_PROGRAM;
 
@@ -810,9 +823,9 @@ handle_exception (T_StackFrame *old_frame)
 	  if (strcmp (&remcomInBuffer[1], "Offsets") == 0)
 	    {
 	      sprintf (remcomOutBuffer, "Text=%x;Data=%x;Bss=%x",
-		       handle->LDCodeImageOffset,
-		       handle->LDDataImageOffset,
-		       handle->LDDataImageOffset + handle->LDDataImageLength);
+		       ldinfo->LDCodeImageOffset,
+		       ldinfo->LDDataImageOffset,
+		       ldinfo->LDDataImageOffset + ldinfo->LDDataImageLength);
 	    }
 	  else
 	    sprintf (remcomOutBuffer, "E04, Unknown query %s", &remcomInBuffer[1]);
@@ -936,7 +949,7 @@ main (argc, argv)
   memset (&s, 0, sizeof s);
   s.DDSResourceTag = ((struct ResourceTagStructure *)
 		      AllocateResourceTag (GetNLMHandle (),
-					   "gdbserver",
+					   (BYTE *)"gdbserver",
 					   DebuggerSignature));
   if (s.DDSResourceTag == 0)
     {
@@ -977,8 +990,6 @@ main (argc, argv)
     }
 
   mainthread = GetThreadID ();
-  handle = NULL;
-  talking = 0;
 
   if (remote_debug > 0)
     ConsolePrintf ("About to call LoadModule with \"%s\" %08x\r\n",
@@ -986,7 +997,7 @@ main (argc, argv)
 
   /* Start up the module to be debugged.  */
   err = LoadModule ((struct ScreenStruct *) __GetScreenID (GetCurrentScreen()),
-		    cmdlin, LO_DEBUG);
+		    (BYTE *)cmdlin, LO_DEBUG);
   if (err != 0)
     {
       fprintf (stderr, "LoadModule failed: %d\n", err);

@@ -1,3 +1,10 @@
+Tue Apr 26 22:45:24 1994  Stu Grossman  (grossman at cygnus.com)
+
+	* i386-nlmstub.c:  Update to be more in line with PIN stub.
+	* nlm/gdbserve.c (putDebugChar):  Install bug fix from i386-nlmstub.
+	* (hex2mem):  Init ptr.
+	* General cleanups to use ConsolePrintf, standard prologues, etc...
+
 Tue Apr 26 10:23:04 1994  Stu Grossman  (grossman at cygnus.com)
 
 	* i386-nlmstub.c:  More changes to be compatible with remote.c.
