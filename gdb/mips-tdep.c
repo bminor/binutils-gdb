@@ -4537,32 +4537,6 @@ mips_skip_trampoline_code (CORE_ADDR pc)
   return 0;			/* not a stub */
 }
 
-/* Return non-zero if the PC is inside a return thunk (aka stub or
-   trampoline).  */
-
-static int
-mips_in_solib_return_trampoline (CORE_ADDR pc, char *name)
-{
-  CORE_ADDR start_addr;
-
-  /* Find the starting address of the function containing the PC.  */
-  if (find_pc_partial_function (pc, NULL, &start_addr, NULL) == 0)
-    return 0;
-
-  /* If the PC is in __mips16_ret_{d,s}f, this is a return stub.  */
-  if (strcmp (name, "__mips16_ret_sf") == 0
-      || strcmp (name, "__mips16_ret_df") == 0)
-    return 1;
-
-  /* If the PC is in __mips16_call_stub_{s,d}f_{0..10} but not at the start,
-     i.e. after the jal instruction, this is effectively a return stub.  */
-  if (strncmp (name, "__mips16_call_stub_", 19) == 0
-      && (name[19] == 's' || name[19] == 'd') && pc != start_addr)
-    return 1;
-
-  return 0;			/* not a stub */
-}
-
 /* Convert a dbx stab register number (from `r' declaration) to a GDB
    [1 * NUM_REGS .. 2 * NUM_REGS) REGNUM.  */
 
@@ -5057,15 +5031,6 @@ mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_have_nonsteppable_watchpoint (gdbarch, 1);
 
   set_gdbarch_skip_trampoline_code (gdbarch, mips_skip_trampoline_code);
-
-  /* NOTE drow/2004-02-11: We overload the core solib trampoline code
-     to support MIPS16.  This is a bad thing.  Make sure not to do it
-     if we have an OS ABI that actually supports shared libraries, since
-     shared library support is more important.  If we have an OS someday
-     that supports both shared libraries and MIPS16, we'll have to find
-     a better place for these.  */
-  if (info.osabi == GDB_OSABI_UNKNOWN)
-    set_gdbarch_in_solib_return_trampoline (gdbarch, mips_in_solib_return_trampoline);
 
   set_gdbarch_single_step_through_delay (gdbarch, mips_single_step_through_delay);
 

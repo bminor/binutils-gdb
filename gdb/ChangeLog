@@ -1,5 +1,8 @@
 2004-10-31  Andrew Cagney  <cagney@gnu.org>
 
+	* mips-tdep.c (mips_in_solib_return_trampoline): Delete.
+	(mips_gdbarch_init): Do not set same.
+
 	* arch-utils.c (generic_in_solib_call_trampoline): Delete.
 	* arch-utils.h (generic_in_solib_call_trampoline): Delete.
 
