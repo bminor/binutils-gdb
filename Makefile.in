@@ -730,7 +730,7 @@ install-flex: force
 		true ; \
 	fi
 ### gcc
-all-gcc: all-libiberty all-byacc all-binutils
+all-gcc: all-libiberty all-byacc all-binutils all-gas
 	@if [ -f ./gcc/Makefile ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		srcroot=`cd $(srcdir); pwd` ; export srcroot ; \

@@ -1,5 +1,7 @@
 Tue Feb  2 11:45:53 1993  Ian Lance Taylor  (ian@cygnus.com)
 
+	* Makefile.in (all-gcc): Added dependency on all-gas.
+
 	* configure.in (mips-*-*): Build ld and binutils.
 
 Mon Feb  1 12:35:41 1993  K. Richard Pixley  (rich@rtl.cygnus.com)
