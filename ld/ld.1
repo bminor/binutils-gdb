@@ -82,6 +82,10 @@ ld \- the GNU linker
 .RB "[\|" \-S "\|]" 
 .RB "[\|" \-s "\|]" 
 .RB "[\|" \-sort\-common "\|]" 
+.RB "[\|" \-split\-by\-reloc\ "\c
+.I count\c
+\&\|]
+.RB "[\|" \-split\-by\-file "\|]" 
 .RB "[\|" "\-T\ "\c
 .I commandfile\c
 \&\|]  
@@ -699,6 +703,28 @@ it sorts them by size.  First come all the one byte symbols, then all
 the two bytes, then all the four bytes, and then everything else.
 This is to prevent gaps between symbols due to
 alignment constraints.  This option disables that sorting.
+
+.TP
+.B \-split\-by\-reloc\ \fIcount
+Trys to creates extra sections in the output file so that no single
+output section in the file contains more than
+.I count
+relocations.
+This is useful when generating huge relocatable for downloading into
+certain real time kernels with the COFF object file format; since COFF
+cannot represent more than 65535 relocations in a single section.
+Note that this will fail to work with object file formats which do not
+support arbitrary sections.  The linker will not split up individual
+input sections for redistribution, so if a single input section
+contains more than
+.I count
+relocations one output section will contain that many relocations.
+
+.TP
+.B \-split\-by\-file
+Similar to
+.B \-split\-by\-reloc
+but creates a new output section for each input file.
 
 .TP
 .BI "\-Tbss " "org"\c
