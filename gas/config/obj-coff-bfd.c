@@ -40,7 +40,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "obstack.h"
 #include "subsegs.h"
 #include "frags.h"
-
+#include "../bfd/libbfd.h"
 
 
 /* This vector is used to turn an internal segment into a section #
@@ -108,10 +108,18 @@ static symbolS *EXFUN(tag_find_or_make,(char *name));
 static symbolS* EXFUN(tag_find,(char *name));
 
 
-static void EXFUN(w_symbols,(
-bfd *abfd ,
-char **where ,
-			symbolS *symbol_rootP));
+static int
+EXFUN(c_line_new,(
+      symbolS *symbol,
+      long paddr,
+      unsigned short line_number,
+		  fragS* frag));
+
+
+static void EXFUN(w_symbols,
+		  (bfd *abfd ,
+		   char *where ,
+		   symbolS *symbol_rootP));
 
 
 
@@ -125,7 +133,6 @@ static void EXFUN( obj_coff_line,(void));
 static void EXFUN( obj_coff_ln,(void));
 static void EXFUN( obj_coff_scl,(void));
 static void EXFUN( obj_coff_size,(void));
-static void EXFUN( obj_coff_stab,(int what));
 static void EXFUN( obj_coff_tag,(void));
 static void EXFUN( obj_coff_type,(void));
 static void EXFUN( obj_coff_val,(void));
@@ -211,12 +218,10 @@ seg_info_type seg_info_off_by_4[N_SEG] =
 {18},
 {19},
 {20},
-{21},
-{22},
-{23},
-{SEG_REGISTER},0x1111,0x2222,0x3333,0x4444
-
-};
+{0},
+{0},
+{0},
+{SEG_REGISTER},0,0,0,0};
 
 #define SEG_INFO_FROM_SECTION_NUMBER(x) (seg_info_off_by_4[(x)+4])
 #define SEG_INFO_FROM_SEG_NUMBER(x) (seg_info_off_by_4[(x)])
@@ -251,7 +256,7 @@ static unsigned int  DEFUN(size_section,(abfd, idx),
 		  bfd *abfd AND
 		  unsigned int idx)
 {
-  asection *sec;
+
   unsigned int size = 0;
   fragS *frag = segment_info[idx].frchainP->frch_root;
   while (frag) {
@@ -311,14 +316,14 @@ void DEFUN(do_relocs_for,(abfd, file_cursor),
 	   unsigned long *file_cursor)
 {
     unsigned int nrelocs;
-    arelent **reloc_ptr_vector;
-    arelent *reloc_vector;
-    asymbol **ptrs;
+
+
+
     unsigned int idx;
   
 
-    unsigned int i;
-    fixS *from;
+
+
     for (idx = SEG_E0; idx < SEG_E9; idx++) 
     {
 	if (segment_info[idx].scnhdr.s_name[0]) 
@@ -333,7 +338,7 @@ void DEFUN(do_relocs_for,(abfd, file_cursor),
 	    nrelocs = count_entries_in_chain(idx);
 	    external_reloc_size = nrelocs * RELSZ;
 	    external_reloc_vec =
-	     (struct external_reloc*)alloca(external_reloc_size);
+	     (struct external_reloc*)malloc(external_reloc_size);
 
 	
 	    
@@ -397,8 +402,9 @@ void DEFUN(do_relocs_for,(abfd, file_cursor),
 	    /* Write out the reloc table */
 	    segment_info[idx].scnhdr.s_relptr = *file_cursor;
 	    segment_info[idx].scnhdr.s_nreloc = nrelocs;
-	    bfd_write(external_reloc_vec, 1, external_reloc_size, abfd);
+	    bfd_write((PTR)external_reloc_vec, 1, external_reloc_size, abfd);
 	    *file_cursor += external_reloc_size;
+	    free( external_reloc_vec);
 	}
     }
 }
@@ -424,7 +430,7 @@ static void DEFUN(fill_section,(abfd, filehdr, file_cursor),
 	  
       if (s->s_name[0]) {
 	  fragS *frag = segment_info[i].frchainP->frch_root;
-	  char *buffer =  alloca(s->s_size);
+	  char *buffer =  malloc(s->s_size);
 	  s->s_scnptr = *file_cursor;
 	  s->s_paddr =  paddr;
 	  s->s_vaddr =  paddr;
@@ -440,6 +446,7 @@ static void DEFUN(fill_section,(abfd, filehdr, file_cursor),
 	  while (frag) {
 	      unsigned int fill_size;
 	      switch (frag->fr_type) {
+
 		case rs_fill:
 		case rs_align:
 		case rs_org:
@@ -472,11 +479,12 @@ static void DEFUN(fill_section,(abfd, filehdr, file_cursor),
 		  abort();
 		}
 	      frag = frag->fr_next;
-	    }
-
-
+	  }
+	  
 
 	  bfd_write(buffer, s->s_size,1,abfd);
+	  free(buffer);
+	  
 	  *file_cursor += s->s_size;
 	  paddr += s->s_size;
 	}      
@@ -525,37 +533,39 @@ DEFUN(coff_header_append,(abfd, filehdr, aouthdr),
 }
 
 
-void 
+char *
 DEFUN(symbol_to_chars,(abfd, where, symbolP),
       bfd*abfd AND
-      char **where AND
+      char *where AND
       symbolS *symbolP)
 {
-  unsigned int numaux = symbolP->sy_symbol.ost_entry.n_numaux;
-  unsigned int i;
+    unsigned int numaux = symbolP->sy_symbol.ost_entry.n_numaux;
+    unsigned int i;
 
-  /* Turn any symbols with register attributes into abs symbols */
-  if (S_GET_SEGMENT(symbolP) == SEG_REGISTER) 
-  {
-    S_SET_SEGMENT(symbolP, SEG_ABSOLUTE);
-  }
+    /* Turn any symbols with register attributes into abs symbols */
+    if (S_GET_SEGMENT(symbolP) == SEG_REGISTER) 
+    {
+	S_SET_SEGMENT(symbolP, SEG_ABSOLUTE);
+    }
     /* At the same time, relocate all symbols to their output value */
 
     S_SET_VALUE(symbolP,
 		segment_info[S_GET_SEGMENT(symbolP)].scnhdr.s_paddr 
 		+ S_GET_VALUE(symbolP));
 
-  *where += bfd_coff_swap_sym_out(abfd, &symbolP->sy_symbol.ost_entry,
-				  *where);
+    where += bfd_coff_swap_sym_out(abfd, &symbolP->sy_symbol.ost_entry,
+				   where);
 	
-  for (i = 0; i < numaux; i++) 
-  {
-    *where += bfd_coff_swap_aux_out(abfd,
-				    &symbolP->sy_symbol.ost_auxent[i],
-				    S_GET_DATA_TYPE(symbolP),
-				    S_GET_STORAGE_CLASS(symbolP),
-				    *where);
-  }
+    for (i = 0; i < numaux; i++) 
+    {
+	where += bfd_coff_swap_aux_out(abfd,
+				       &symbolP->sy_symbol.ost_auxent[i],
+				       S_GET_DATA_TYPE(symbolP),
+				       S_GET_STORAGE_CLASS(symbolP),
+				       where);
+    }
+    return where;
+  
 } 
 
 
@@ -643,6 +653,7 @@ stack* st;
 	st->pointer = 0;
 	return (char*)0;
     }
+
     return st->data + st->pointer;
 }
 
@@ -745,7 +756,7 @@ int what;
 
 unsigned int dim_index;
 static void obj_coff_endef() {
-	symbolS *symbolP;
+	symbolS *symbolP = 0;
 /* DIM BUG FIX sac@cygnus.com */
 	dim_index =0;
 	if (def_symbol_in_progress == NULL) {
@@ -878,15 +889,20 @@ static void obj_coff_endef() {
 
 	if (SF_GET_FUNCTION(def_symbol_in_progress)) {
 		know(sizeof(def_symbol_in_progress) <= sizeof(long));
-		function_lineoff = c_line_new((long) def_symbol_in_progress,0, 0, &zero_address_frag);
+		function_lineoff 
+		 = c_line_new((long)
+			      def_symbol_in_progress,0, 0, &zero_address_frag);
+
+
+
 		SF_SET_PROCESS(def_symbol_in_progress);
 
 		if (symbolP == NULL) {
 			/* That is, if this is the first
 			   time we've seen the function... */
 			symbol_table_insert(def_symbol_in_progress);
-		} /* definition follows debug */
-	} /* Create the line number entry pointing to the function being defined */
+		    }		/* definition follows debug */
+	    }			/* Create the line number entry pointing to the function being defined */
 
 	def_symbol_in_progress = NULL;
 	demand_empty_rest_of_line();
@@ -1413,8 +1429,8 @@ static void DEFUN(crawl_symbols,(headers, abfd),
  * Find strings by crawling along symbol table chain.
  */
 
-w_strings(where)
-char *where;
+void DEFUN(w_strings,(where),
+	   char *where)
 {
   symbolS *symbolP;
 
@@ -1430,7 +1446,7 @@ char *where;
     if (SF_GET_STRING(symbolP)) {
 	size = strlen(S_GET_NAME(symbolP)) + 1;
 	    
-	memcpy(where,     S_GET_NAME(symbolP),size);
+	memcpy(where,  S_GET_NAME(symbolP),size);
 	where += size;
 	    
       }	
@@ -1440,72 +1456,6 @@ char *where;
 
 
 
-
-/* This is a copy from aout.  All I do is neglect to actually build the symbol. */
-
-static void obj_coff_stab(what)
-int what;
-{
-	char *string;
-	expressionS e;
-	int goof = 0;	/* TRUE if we have aborted. */
-	int length;
-	int saved_type = 0;
-	long longint;
-	symbolS *symbolP = 0;
-
-	if (what == 's') {
-		string = demand_copy_C_string(&length);
-		SKIP_WHITESPACE();
-
-		if (*input_line_pointer == ',') {
-			input_line_pointer++;
-		} else {
-			as_bad("I need a comma after symbol's name");
-			goof = 1;
-		} /* better be a comma */
-	} /* skip the string */
-
-	/*
-	 * Input_line_pointer->after ','.  String->symbol name.
-	 */
-	if (!goof) {
-		if (get_absolute_expression_and_terminator(&longint) != ',') {
-			as_bad("I want a comma after the n_type expression");
-			goof = 1;
-			input_line_pointer--; /* Backup over a non-',' char. */
-		} /* on error */
-	} /* no error */
-
-	if (!goof) {
-		if (get_absolute_expression_and_terminator(&longint) != ',') {
-			as_bad("I want a comma after the n_other expression");
-			goof = 1;
-			input_line_pointer--; /* Backup over a non-',' char. */
-		} /* on error */
-	} /* no error */
-
-	if (!goof) {
-		get_absolute_expression();
-
-		if (what == 's' || what == 'n') {
-			if (*input_line_pointer != ',') {
-				as_bad("I want a comma after the n_desc expression");
-				goof = 1;
-			} else {
-				input_line_pointer++;
-			} /* on goof */
-		} /* not stabd */
-	} /* no error */
-
-	expression(&e);
-
-	if (goof) {
-		ignore_rest_of_line();
-	} else {
-		demand_empty_rest_of_line();
-	} /* on error */
-} /* obj_coff_stab() */
 
 
 static void 
@@ -1524,7 +1474,7 @@ DEFUN(do_linenos_for,(abfd, file_cursor),
       struct lineno_list *line_ptr ;
 
       struct external_lineno *buffer = 
-       (struct external_lineno *)alloca(s->scnhdr.s_nlnno * LINESZ);
+       (struct external_lineno *)xmalloc(s->scnhdr.s_nlnno * LINESZ);
 
       struct external_lineno *dst= buffer;
   
@@ -1548,6 +1498,8 @@ DEFUN(do_linenos_for,(abfd, file_cursor),
       s->scnhdr.s_lnnoptr = *file_cursor;
       
       bfd_write(buffer, 1, s->scnhdr.s_nlnno* LINESZ, abfd);
+      free(buffer);
+      
       *file_cursor += s->scnhdr.s_nlnno * LINESZ;
     }
   }
@@ -1590,7 +1542,7 @@ extern void DEFUN_VOID(write_object_file)
 {
     int i;
     struct frchain *frchain_ptr; 
-    struct frag *frag_ptr;
+
     struct internal_filehdr filehdr;
     struct internal_aouthdr aouthdr;
     unsigned long file_cursor;  
@@ -1692,16 +1644,14 @@ extern void DEFUN_VOID(write_object_file)
   {
 
       unsigned int   symtable_size = filehdr.f_nsyms * SYMESZ;
-      char *buffer1 = alloca(symtable_size);
-      char *buffer2 = alloca(string_byte_count+4);
+      char *buffer1 = malloc(symtable_size + string_byte_count + 4);
       char *ptr = buffer1;
       filehdr.f_symptr = bfd_tell(abfd);
-      w_symbols(abfd,&buffer1, symbol_rootP);
-      bfd_write(ptr, 1, symtable_size, abfd);
-
-      w_strings(buffer2);
-      bfd_write(buffer2, 1, string_byte_count, abfd);
-
+      w_symbols(abfd, buffer1, symbol_rootP);
+      w_strings(buffer1 + symtable_size);
+      bfd_write(buffer1, 1,symtable_size +  string_byte_count + 4, abfd);
+      free(buffer1);
+      
   }
     coff_header_append(abfd, &filehdr, &aouthdr);
 
@@ -1798,12 +1748,12 @@ symbolS *normal;
 	SF_SET_DEBUG_FIELD(normal, SF_GET_DEBUG_FIELD(debug));
 } /* c_symbol_merge() */
 
-int
-c_line_new(symbol, paddr, line_number, frag)
-symbolS *symbol;
-long paddr;
-unsigned short line_number;
-fragS* frag;
+static int
+DEFUN(c_line_new,(symbol, paddr, line_number, frag),
+      symbolS *symbol AND
+      long paddr AND
+      unsigned short line_number AND
+      fragS* frag)
 {
   struct lineno_list* new_line = 
    (struct lineno_list *)xmalloc(sizeof(struct lineno_list));
@@ -1887,10 +1837,11 @@ int idx;
 
     return symbolP;
 } /* c_section_symbol() */
+
 static void 
 DEFUN(w_symbols,(abfd, where, symbol_rootP),
 bfd *abfd AND
-char **where AND
+char *where AND
 symbolS *symbol_rootP)
 {
     symbolS *symbolP;
@@ -1928,9 +1879,10 @@ symbolS *symbol_rootP)
 			bzero(symbolP->sy_symbol.ost_entry.n_name, SYMNMLEN);
 			strncpy(symbolP->sy_symbol.ost_entry.n_name, temp, SYMNMLEN);
 		    }
-	    symbol_to_chars(abfd, where, symbolP);
+	    where =  symbol_to_chars(abfd, where, symbolP);
 	    S_SET_NAME(symbolP,temp);
 	}
+    
 }				/* w_symbols() */
 
 static void DEFUN_VOID(obj_coff_lcomm)

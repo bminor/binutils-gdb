@@ -23,11 +23,9 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "targ-cpu.h"
 
-
-#ifdef BFD_HEADERS
 #include "bfd.h"
 
-extern bfd *stdoutput;
+/*extern bfd *stdoutput;*/
 /* This internal_lineno crap is to stop namespace pollution from the
    bfd internal coff headerfile. */
 
@@ -44,21 +42,8 @@ extern bfd *stdoutput;
 #else
 help me
 #endif
-#else
-#include "coff.gnu.h"
-#endif
 
-#ifdef USE_NATIVE_HEADERS
-#include <filehdr.h>
-#include <aouthdr.h>
-#include <scnhdr.h>
-#include <storclass.h>
-#include <linenum.h>
-#include <syms.h>
-#include <reloc.h>
-#include <sys/types.h>
-#endif /* USE_NATIVE_HEADERS */
-
+#if 0
 /* Define some processor dependent values according to the processor we are
    on. */
 #if defined(TC_H8300)
@@ -96,24 +81,18 @@ help me
 you lose
 #endif 
 
+#endif
 
 #ifndef OBJ_COFF_MAX_AUXENTRIES
 #define OBJ_COFF_MAX_AUXENTRIES 1
 #endif /* OBJ_COFF_MAX_AUXENTRIES */
 
-/*extern const short seg_N_TYPE[];*/
+
 extern const segT  N_TYPE_seg[];
 
 /* Magic number of paged executable. */
 #define DEFAULT_MAGIC_NUMBER_FOR_OBJECT_FILE	0x8300
 
-#ifndef BFD_HEADERS
-
-/* Add these definitions to have a consistent convention for all the
-   types used in COFF format. */
-#define AOUTHDR			struct aouthdr
-#define AOUTHDRSZ		sizeof(AOUTHDR)
-#endif
 
 /* SYMBOL TABLE */
 
@@ -483,31 +462,21 @@ typedef struct {
     unsigned long pointer;
 } stack;
 
-#ifdef __STDC__
 
-char *stack_pop(stack *st);
-char *stack_push(stack *st, char *element);
-char *stack_top(stack *st);
-stack *stack_init(unsigned long chunk_size, unsigned long element_size);
-void c_dot_file_symbol(char *filename);
-void obj_extra_stuff(object_headers *headers);
-void stack_delete(stack *st);
 
-#ifndef tc_headers_hook
-void tc_headers_hook(object_headers *headers);
-#endif /* tc_headers_hook */
+char *EXFUN(stack_pop,(stack *st));
+char *EXFUN(stack_push,(stack *st, char *element));
+char *EXFUN(stack_top,(stack *st));
+stack *EXFUN(stack_init,(unsigned long chunk_size, unsigned long element_size));
+void EXFUN(c_dot_file_symbol,(char *filename));
+void EXFUN(obj_extra_stuff,(object_headers *headers));
+void EXFUN(stack_delete,(stack *st));
 
-#ifndef tc_coff_symbol_emit_hook
-void tc_coff_symbol_emit_hook(); /* really tc_coff_symbol_emit_hook(symbolS *symbolP) */
-#endif /* tc_coff_symbol_emit_hook */
 
-void c_section_header(
-#ifdef BFD_HEADERS
+
+void EXFUN(c_section_header,(
+
 		      struct internal_scnhdr *header,
-#else
-		      SCNHDR *header,
-#endif
-
 		      char *name,
 		      long core_address,
 		      long size,
@@ -516,22 +485,7 @@ void c_section_header(
 		      long lineno_ptr,
 		      long reloc_number,
 		      long lineno_number,
-		      long alignment);
-
-#else /* __STDC__ */
-
-char *stack_pop();
-char *stack_push();
-char *stack_top();
-stack *stack_init();
-void c_dot_file_symbol();
-void c_section_header();
-void obj_extra_stuff();
-void stack_delete();
-void tc_headers_hook();
-void tc_coff_symbol_emit_hook();
-
-#endif /* __STDC__ */
+		      long alignment));
 
 
  /* sanity check */
