@@ -348,6 +348,12 @@ changequote([,])dnl
 	;;
       *)
 	need_opcodes=yes
+
+	case "${enable_shared}" in
+	yes) shared_opcodes=true ;;
+	*opcodes*) shared_opcodes=true ;;
+	*) shared_opcodes=false ;;
+	esac
 	if test "${shared_opcodes}" = "true"; then
 	  # A shared libopcodes must be linked against libbfd.
 	  need_bfd=yes
