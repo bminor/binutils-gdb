@@ -240,6 +240,18 @@ http://sourceware.cygnus.com/ml/gdb/2000-q1/msg00845.html
 
 --
 
+		GDB 5.1 Known Problems
+		======================
+
+--
+
+z8k
+
+The z8k has suffered bit rot and is known to not build.  The problem
+was occuring in the opcodes directory.
+
+--
+
 		GDB 5.2 - Fixes
 		===============
 
