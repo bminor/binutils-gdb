@@ -12,7 +12,7 @@
 # 
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
-# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 # Please email any bugs, comments, and/or additions to this file to:
 # bug-gdb@prep.ai.mit.edu
@@ -56,28 +56,24 @@ if $usestubs {
 # test simple breakpoint setting commands
 #
 
-#
-# test deleting all breakpoints; note that gdb-init.exp provides a
-# "delete_breakpoints" proc for general use elsewhere
-#
+# Test deleting all breakpoints when there are none installed.
+# Between 4.15 and 4.16 a change made gdb stop prompting when
+# there are no user breakpoints installed.
+# Note that gdb-init.exp provides a "delete_breakpoints" proc
+# for general use elsewhere.
+
 send "delete breakpoints\n"
 expect {
     -re "Delete all breakpoints.*y or n. $"\
 	{ send "y\n"
 	    expect {
-		-re ".*$prompt $"\
-		    { send "info breakpoints\n"
-			expect {
-			    -re "No breakpoints or watchpoints..*$prompt $" { pass "Deleted all breakpoints" }
-			    -re ".*$prompt $"       { fail "Deleted all breakpoints" }
-			    timeout	            { fail "Deleted all breakpoints" }
-			}
-		    }
-		timeout	            { fail "Deleted all breakpoints" }	    
+		-re ".*$prompt $" {}
+		timeout	{ fail "Delete all breakpoints when none (timeout)" }
 	    }
+	    fail "Delete all breakpoints when none (known pre 4.16 bug)"
 	}
-    -re ".*$prompt $"       { fail "Deleted all breakpoints" }
-    timeout	            { fail "Deleted all breakpoints" }
+    -re ".*$prompt $"       { pass "Delete all breakpoints when none" }
+    timeout	            { fail "Delete all breakpoints when none" }
 }
 
 #
@@ -119,9 +115,15 @@ gdb_test "break $srcfile:70" \
 #
 # check to see what breakpoints are set
 #
+if $usestubs then {
+    set main_line 57
+} else {
+    set main_line 60
+}
+
 gdb_test "info break" \
     "Num Type\[ \]+Disp Enb Address\[ \]+What.*
-\[0-9\]+\[\t \]+breakpoint     keep y.* in main at .*$srcfile:57.*
+\[0-9\]+\[\t \]+breakpoint     keep y.* in main at .*$srcfile:$main_line.*
 \[0-9\]+\[\t \]+breakpoint     keep y.* in factorial at .*$srcfile:76.*
 \[0-9\]+\[\t \]+breakpoint     keep y.* in main at .*$srcfile:64.*
 \[0-9\]+\[\t \]+breakpoint     keep y.* in main at .*$srcfile:64.*
@@ -146,14 +148,16 @@ if !$usestubs then {
 	send "run\n"
   }
   expect {
+    -re "The program .* has been started already.*y or n. $" {
+	send "y\n"
+	exp_continue
+    }
     -re "Starting program.*Breakpoint \[0-9\]+,.*main .*argc.*argv.* at .*$srcfile:60.*60\[\t \]+if .argc.* \{.*$prompt $"\
 	                    { pass "run until function breakpoint" }
     -re ".*$prompt $"       { fail "run until function breakpoint" }
     timeout	            { fail "(timeout) run until function breakpoint" }
   }
 }
-
-#if $usestubs {}
 
 #
 # run until the breakpoint at a line number
@@ -244,7 +248,7 @@ gdb_test  "tbreak $srcfile:66" "Breakpoint.*at.* file .*$srcfile, line 66.*" "Te
 send "info break\n"
 expect {
     -re "Num Type.*Disp Enb Address.*What.*
-\[0-9\]+\[\t \]+breakpoint     del.*y.*in main at .*$srcfile:57.*
+\[0-9\]+\[\t \]+breakpoint     del.*y.*in main at .*$srcfile:$main_line.*
 \[0-9\]+\[\t \]+breakpoint     del.*y.*in factorial at .*$srcfile:76.*
 \[0-9\]+\[\t \]+breakpoint     del.*y.*in main at .*$srcfile:64.*
 \[0-9\]+\[\t \]+breakpoint     del.*y.*in main at .*$srcfile:70.*$prompt $" {
@@ -342,7 +346,10 @@ proc test_next_with_recursion {} {
     if $result!=0 then { return }
 
     # Continue until we exit.  Should not stop again.
-    gdb_test "continue" "Continuing.\r\n720\r\n\r\nProgram exited normally\\."\
+    # Don't bother to check the output of the program, that may be
+    # extremely tough for some remote systems.
+    gdb_test "continue"\
+	        "Continuing.\[\r\n0-9\]+Program exited normally\\."\
 		"continue until exit in recursive next test"
 }
 

@@ -1,3 +1,9 @@
+Wed Nov  1 15:57:16 1995  Fred Fish  <fnf@cygnus.com>
+
+	* gdb.base/break.exp: Change test that deletes all breakpoints
+	when no user breakpoints are installed.  A post 4.15 change
+	causes gdb to no longer prompt in this case.
+
 Tue Oct 31 15:13:43 1995  Fred Fish  <fnf@cygnus.com>
 
 	* gdb.base/return.exp (return_tests):  Change xfail for test
