@@ -1,4 +1,8 @@
 start-sanitize-r5900
+Thu Sep 10 11:50:54 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* r5900.igen (plzcw): Make `i' signed.
+
 Wed Sep 9 11:28:20 1998  Ron Unrau <runrau@cygnus.com>
 
 	* sim-main.h: track COP0 registers
