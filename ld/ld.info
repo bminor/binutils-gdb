@@ -4,90 +4,90 @@ START-INFO-DIR-ENTRY
 * Ld: (ld).                       The GNU linker.
 END-INFO-DIR-ENTRY
 
-   This file documents the GNU linker LD version 2.13.92.
+   This file documents the GNU linker LD version 2.14.
 
    Copyright (C) 1991, 92, 93, 94, 95, 96, 97, 98, 99, 2000, 2001,
 2002, 2003 Free Software Foundation, Inc.
 
 
 Indirect:
-ld.info-1: 330
-ld.info-2: 2618
-ld.info-3: 68510
-ld.info-4: 118141
-ld.info-5: 162241
-ld.info-6: 200532
+ld.info-1: 327
+ld.info-2: 2612
+ld.info-3: 68504
+ld.info-4: 118135
+ld.info-5: 162235
+ld.info-6: 200526
 
 Tag Table:
 (Indirect)
-Node: Top330
-Node: Overview1098
-Node: Invocation2211
-Node: Options2618
-Node: Environment68510
-Node: Scripts70264
-Node: Basic Script Concepts71997
-Node: Script Format74699
-Node: Simple Example75557
-Node: Simple Commands78647
-Node: Entry Point79093
-Node: File Commands79843
-Node: Format Commands83136
-Node: Miscellaneous Commands85093
-Node: Assignments87314
-Node: Simple Assignments87646
-Node: PROVIDE89342
-Node: SECTIONS90515
-Node: Output Section Description92401
-Node: Output Section Name93386
-Node: Output Section Address94253
-Node: Input Section95895
-Node: Input Section Basics96687
-Node: Input Section Wildcards99022
-Node: Input Section Common101829
-Node: Input Section Keep103298
-Node: Input Section Example103767
-Node: Output Section Data104724
-Node: Output Section Keywords107492
-Node: Output Section Discarding110924
-Node: Output Section Attributes111869
-Node: Output Section Type112703
-Node: Output Section LMA113844
-Node: Output Section Region115948
-Node: Output Section Phdr116361
-Node: Output Section Fill117012
-Node: Overlay Description118141
-Node: MEMORY122380
-Node: PHDRS126457
-Node: VERSION131496
-Node: Expressions138497
-Node: Constants139331
-Node: Symbols139881
-Node: Location Counter140609
-Node: Operators142922
-Node: Evaluation143833
-Node: Expression Section145187
-Node: Builtin Functions146663
-Node: Implicit Linker Scripts152714
-Node: Machine Dependent153482
-Node: H8/300154226
-Node: i960155022
-Node: ARM156702
-Node: HPPA ELF32157856
-Node: MMIX159474
-Node: MSP430160686
-Node: TI COFF161723
-Node: WIN32162241
-Node: Xtensa176073
-Node: BFD177911
-Node: BFD outline179365
-Node: BFD information loss180646
-Node: Canonical format183154
-Node: Reporting Bugs187500
-Node: Bug Criteria188193
-Node: Bug Reporting188887
-Node: MRI195908
-Node: GNU Free Documentation License200532
-Node: Index220221
+Node: Top327
+Node: Overview1092
+Node: Invocation2205
+Node: Options2612
+Node: Environment68504
+Node: Scripts70258
+Node: Basic Script Concepts71991
+Node: Script Format74693
+Node: Simple Example75551
+Node: Simple Commands78641
+Node: Entry Point79087
+Node: File Commands79837
+Node: Format Commands83130
+Node: Miscellaneous Commands85087
+Node: Assignments87308
+Node: Simple Assignments87640
+Node: PROVIDE89336
+Node: SECTIONS90509
+Node: Output Section Description92395
+Node: Output Section Name93380
+Node: Output Section Address94247
+Node: Input Section95889
+Node: Input Section Basics96681
+Node: Input Section Wildcards99016
+Node: Input Section Common101823
+Node: Input Section Keep103292
+Node: Input Section Example103761
+Node: Output Section Data104718
+Node: Output Section Keywords107486
+Node: Output Section Discarding110918
+Node: Output Section Attributes111863
+Node: Output Section Type112697
+Node: Output Section LMA113838
+Node: Output Section Region115942
+Node: Output Section Phdr116355
+Node: Output Section Fill117006
+Node: Overlay Description118135
+Node: MEMORY122374
+Node: PHDRS126451
+Node: VERSION131490
+Node: Expressions138491
+Node: Constants139325
+Node: Symbols139875
+Node: Location Counter140603
+Node: Operators142916
+Node: Evaluation143827
+Node: Expression Section145181
+Node: Builtin Functions146657
+Node: Implicit Linker Scripts152708
+Node: Machine Dependent153476
+Node: H8/300154220
+Node: i960155016
+Node: ARM156696
+Node: HPPA ELF32157850
+Node: MMIX159468
+Node: MSP430160680
+Node: TI COFF161717
+Node: WIN32162235
+Node: Xtensa176067
+Node: BFD177905
+Node: BFD outline179359
+Node: BFD information loss180640
+Node: Canonical format183148
+Node: Reporting Bugs187494
+Node: Bug Criteria188187
+Node: Bug Reporting188881
+Node: MRI195902
+Node: GNU Free Documentation License200526
+Node: Index220215
 
 End Tag Table
