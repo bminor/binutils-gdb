@@ -153,7 +153,6 @@ else
 	else
 		true
 	fi
-
 fi
 
 ## this sed command emulates the dirname command

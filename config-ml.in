@@ -99,6 +99,7 @@ fi
 
 # Scan all the arguments and set all the ones we need.
 
+ml_verbose=--verbose
 for option in ${ml_arguments}
 do
   case $option in
@@ -127,6 +128,9 @@ do
 	;;
   --norecursion | --no*)
 	ml_norecursion=yes
+	;;
+  --silent | --sil* | --quiet | --q*)
+	ml_verbose=--silent
 	;;
   --verbose | --v | --verb*)
 	ml_verbose=--verbose
@@ -214,6 +218,7 @@ arc-*-elf*)
 	  done
 	fi
 	;;
+# start-sanitize-m32rx
 m32r-*-*)
 	if [ x$enable_m32rx = xno ]
 	then
@@ -227,6 +232,7 @@ m32r-*-*)
 	  done
 	fi
 	;;
+# end-sanitize-m32rx
 m68*-*-*)
 	if [ x$enable_softfloat = xno ]
 	then
@@ -421,6 +427,7 @@ multi-do:
 				CXXFLAGS="$(CXXFLAGS) $${flags}" \
 				LIBCFLAGS="$(LIBCFLAGS) $${flags}" \
 				LIBCXXFLAGS="$(LIBCXXFLAGS) $${flags}" \
+				LDFLAGS="$(LDFLAGS) $${flags}" \
 				$(DO)); then \
 		  true; \
 		else \
@@ -576,6 +583,13 @@ if [ -n "${multidirs}" ] && [ -z "${ml_norecursion}" ]; then
       fi
       (cd ${ml_dir}/${ml_libdir};
        ../${dotdot}${ml_unsubdir}symlink-tree ../${dotdot}${ml_unsubdir}${ml_libdir} "")
+      if [ -f ${ml_dir}/${ml_libdir}/Makefile ]; then
+	if [ x"${MAKE}" = x ]; then
+	  (cd ${ml_dir}/${ml_libdir}; make distclean)
+	else
+	  (cd ${ml_dir}/${ml_libdir}; ${MAKE} distclean)
+	fi
+      fi
       ml_newsrcdir="."
       ml_srcdiroption=
       multisrctop=${dotdot}

@@ -792,7 +792,10 @@ if test "$with_gnu_ld" = yes; then
   sunos4*)
     archive_cmds='$LD -assert pure-text -Bstatic -o $lib$libobjs'
     hardcode_direct=yes
-    hardcode_minus_L=yes
+    # The GNU linker will only hardcode -L options if -rpath is not
+    # used, but we will be using -rpath because we set
+    # hardcode_libdir_flag_spec below.
+    hardcode_minus_L=no
     hardcode_shlibpath_var=no
     ;;
 
@@ -1139,11 +1142,11 @@ void nm_test_func(){}
 main(){nm_test_var='a';nm_test_func();return(0);}
 EOF
 
-echo "$progname:1142: checking if global_symbol_pipe works" >&5
-if { (eval echo $progname:1143: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; } && test -s conftest.$objext; then
+echo "$progname:1145: checking if global_symbol_pipe works" >&5
+if { (eval echo $progname:1146: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; } && test -s conftest.$objext; then
   # Now try to grab the symbols.
   nlist=conftest.nm
-  if { echo "$progname:1146: eval \"$NM conftest.$objext | $global_symbol_pipe > $nlist\"" >&5; eval "$NM conftest.$objext | $global_symbol_pipe > $nlist 2>&5"; } && test -s "$nlist"; then
+  if { echo "$progname:1149: eval \"$NM conftest.$objext | $global_symbol_pipe > $nlist\"" >&5; eval "$NM conftest.$objext | $global_symbol_pipe > $nlist 2>&5"; } && test -s "$nlist"; then
 
     # Try sorting and uniquifying the output.
     if sort "$nlist" | uniq > "$nlist"T; then
@@ -1201,7 +1204,7 @@ EOF
 	save_CFLAGS="$CFLAGS"
         LIBS="conftestm.$objext"
 	CFLAGS="$CFLAGS$no_builtin_flag"
-        if { (eval echo $progname:1204: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest; then
+        if { (eval echo $progname:1207: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest; then
           pipe_works=yes
         else
           echo "$progname: failed program was:" >&5
@@ -1395,7 +1398,7 @@ solaris2*)
 
 sunos4*)
   version_type=sunos
-  library_names_spec='${libname}${release}.so$versuffix'
+  library_names_spec='${libname}${release}.so$versuffix ${libname}.so$versuffix'
   finish_cmds='PATH="\$PATH:/usr/etc" ldconfig $libdir'
   shlibpath_var=LD_LIBRARY_PATH
   ;;

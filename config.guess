@@ -1,6 +1,6 @@
 #! /bin/sh
 # Attempt to guess a canonical system name.
-#   Copyright (C) 1992, 93-97, 1998 Free Software Foundation, Inc.
+#   Copyright (C) 1992, 93, 94, 95, 96, 97, 1998 Free Software Foundation, Inc.
 #
 # This file is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License as published by
@@ -98,7 +98,7 @@ EOF
 		esac
 	fi
 	rm -f dummy.s dummy
-	echo ${UNAME_MACHINE}-dec-osf`echo ${UNAME_RELEASE} | sed -e 's/^[VTX]//' | tr [[A-Z]] [[a-z]]`
+	echo ${UNAME_MACHINE}-dec-osf`echo ${UNAME_RELEASE} | sed -e 's/^[VTX]//' | tr 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' 'abcdefghijklmnopqrstuvwxyz'`
 	exit 0 ;;
     21064:Windows_NT:50:3)
 	echo alpha-dec-winnt3.5
@@ -111,6 +111,9 @@ EOF
       exit 0 ;;
     amiga:OpenBSD:*:*)
 	echo m68k-unknown-openbsd${UNAME_RELEASE}
+	exit 0 ;;
+    *:[Aa]miga[Oo][Ss]:*:*)
+	echo ${UNAME_MACHINE}-unknown-amigaos
 	exit 0 ;;
     arc64:OpenBSD:*:*)
 	echo mips64el-unknown-openbsd${UNAME_RELEASE}
@@ -149,6 +152,9 @@ EOF
 	exit 0 ;;
     NILE:*:*:dcosx)
 	echo pyramid-pyramid-svr4
+	exit 0 ;;
+    sun4H:SunOS:5.*:*)
+	echo sparc-hal-solaris2`echo ${UNAME_RELEASE}|sed -e 's/[^.]*//'`
 	exit 0 ;;
     sun4*:SunOS:5.*:* | tadpole*:SunOS:5.*:*)
 	echo sparc-sun-solaris2`echo ${UNAME_RELEASE}|sed -e 's/[^.]*//'`
@@ -354,6 +360,9 @@ EOF
     hp300:4.4BSD:*:* | 9000/[34]??:4.3bsd:2.*:*)
 	echo m68k-hp-bsd4.4
 	exit 0 ;;
+    *9??*:MPE/iX:*:*)
+	echo hppa1.0-hp-mpeix
+	exit 0 ;;
     9000/[3478]??:HP-UX:*:*)
 	case "${UNAME_MACHINE}" in
 	    9000/31? )            HP_ARCH=m68000 ;;
@@ -364,7 +373,7 @@ EOF
 	    9000/8[67]1 | 9000/80[24] | 9000/8[78]9 | 9000/893 )
 				  HP_ARCH=hppa1.1 ;; # FIXME: really hppa2.0
 	    9000/8?[13679] )	  HP_ARCH=hppa1.1 ;;
-	    9000/8?? )		  HP_ARCH=hppa1.0 ;;
+	    9000/8?? )            HP_ARCH=hppa1.0 ;;
 	esac
 	HPUX_REV=`echo ${UNAME_RELEASE}|sed -e 's/[^.]*.[0B]*//'`
 	echo ${HP_ARCH}-hp-hpux${HPUX_REV}
@@ -457,7 +466,7 @@ EOF
 	echo cray2-cray-unicos
         exit 0 ;;
     F300:UNIX_System_V:*:*)
-        FUJITSU_SYS=`uname -p | tr [A-Z] [a-z] | sed -e 's/\///'`
+        FUJITSU_SYS=`uname -p | tr 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' 'abcdefghijklmnopqrstuvwxyz' | sed -e 's/\///'`
         FUJITSU_REL=`echo ${UNAME_RELEASE} | sed -e 's/ /_/'`
         echo "f300-fujitsu-${FUJITSU_SYS}${FUJITSU_REL}"
         exit 0 ;;
@@ -483,10 +492,10 @@ EOF
 	echo ${UNAME_MACHINE}-unknown-openbsd`echo ${UNAME_RELEASE}|sed -e 's/[-_].*/\./'`
 	exit 0 ;;
     i*:CYGWIN*:*)
-	echo i386-pc-cygwin32
+	echo ${UNAME_MACHINE}-pc-cygwin32
 	exit 0 ;;
     i*:MINGW*:*)
-	echo i386-pc-mingw32
+	echo ${UNAME_MACHINE}-pc-mingw32
 	exit 0 ;;
     p*:CYGWIN*:*)
 	echo powerpcle-unknown-cygwin32
@@ -684,6 +693,11 @@ EOF
        (/bin/uname -X|egrep i80486 >/dev/null) && UNAME_MACHINE=i486
        (/bin/uname -X|egrep '^Machine.*Pentium' >/dev/null) \
                && UNAME_MACHINE=i586
+# 5.0.4c returns "Pent II".  5.0.5 returns PentII
+       (/bin/uname -X|egrep '^Machine.*Pent *II' >/dev/null) \
+               && UNAME_MACHINE=i686
+       (/bin/uname -X|egrep '^Machine.*Pentium Pro' >/dev/null) \
+               && UNAME_MACHINE=i686
        echo ${UNAME_MACHINE}-${UNAME_SYSTEM}${UNAME_VERSION}-sysv${UNAME_RELEASE}
        exit 0 ;;
     i?86:*:3.2:*)
@@ -695,6 +709,12 @@ EOF
 		(/bin/uname -X|egrep i80486 >/dev/null) && UNAME_MACHINE=i486
 		(/bin/uname -X|egrep '^Machine.*Pentium' >/dev/null) \
 			&& UNAME_MACHINE=i586
+		(/bin/uname -X|egrep '^Machine.*PentII' >/dev/null) \
+			&& UNAME_MACHINE=i686
+		(/bin/uname -X|egrep '^Machine.*Pent II' >/dev/null) \
+			&& UNAME_MACHINE=i686
+                (/bin/uname -X|egrep '^Machine.*Pentium Pro' >/dev/null) \
+                        && UNAME_MACHINE=i686
 		echo ${UNAME_MACHINE}-pc-sco$UNAME_REL
 	else
 		echo ${UNAME_MACHINE}-pc-sysv32
@@ -783,7 +803,7 @@ EOF
     news*:NEWS-OS:*:6*)
 	echo mips-sony-newsos6
 	exit 0 ;;
-    R3000:*System_V*:*:* | R4000:UNIX_SYSV:*:*)
+    R3000:*System_V*:*:* | R4000:UNIX_SYSV:*:* | R4000:UNIX_SV:*:*)
 	if [ -d /usr/nec ]; then
 	        echo mips-nec-sysv${UNAME_RELEASE}
 	else
@@ -795,6 +815,9 @@ EOF
 	exit 0 ;;
     BeMac:BeOS:*:*)	# BeOS running on Mac or Mac clone, PPC only.
 	echo powerpc-apple-beos
+	exit 0 ;;
+    BePC:BeOS:*:*)	# BeOS running on Intel PC compatible.
+	echo i586-pc-beos
 	exit 0 ;;
 esac
 
