@@ -1,3 +1,9 @@
+2000-06-25  Eli Zaretskii <eliz@is.elta.co.il>
+
+	* Makefile.in (install-info): Support installation from outside of
+        the source directory.  Reported by Mark Harig
+        <markh@frazier.landmark.com>.
+
 2000-06-20  J.T. Conklin  <jtc@redback.com>
 
 	* gdb.texinfo: Fix typo, $bpnum is set to last breakpoint number.

@@ -118,9 +118,10 @@ diststuff: info
 
 install-info: info
 	$(SHELL) $(srcdir)/../../mkinstalldirs $(infodir)
+	(cd $(srcdir); \
 	for i in *.info* ; do \
 		$(INSTALL_DATA) $$i $(infodir)/$$i ; \
-	done
+	done)
 	@if $(SHELL) -c 'install-info --version | sed 1q | fgrep -s -v -i debian' >/dev/null 2>&1; then \
 	  list='gdb.info gdbint.info stabs.info'; \
 	  for file in $$list; do \
