@@ -1,3 +1,10 @@
+Mon Oct  2 11:46:37 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* sim_calls.c (sim_open): Add argument processing to add the same
+	switches main.c accepts for the standalone processor.
+	* main.c (main): Add comment saying to update sim_calls.c when
+	adding switches.
+
 Sun Oct  1 13:52:59 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* main.c (printf_filtered): Correct to match new prototype.

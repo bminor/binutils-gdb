@@ -82,7 +82,8 @@ main(int argc, char **argv)
   int letter;
   int i;
 
-  /* check for arguments - FIXME use getopt */
+  /* check for arguments -- note sim_calls.c also contains argument processing
+     code for the simulator linked within gdb.  */
   while ((letter = getopt (argc, argv, "acCipst")) != EOF)
     {
       switch (letter) {
