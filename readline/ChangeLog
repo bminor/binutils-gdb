@@ -1,3 +1,8 @@
+Fri Nov  5 11:49:47 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* configure.in: Add doc to configdirs.
+	* Makefile.in (info dvi install-info clean-info): Recurse into doc.
+
 Fri Oct 22 07:55:08 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* configure.in: Add * to end of all OS names.
