@@ -1,3 +1,18 @@
+2001-11-19  H.J. Lu <hjl@gnu.org>
+
+	* ld-elfvsb/define.s: Mark all global lables as object.
+
+	* ld-elfvsb/hidden0.d: Match large section number.
+	* ld-elfvsb/hidden1.d: Likewise.
+	* ld-elfvsb/internal0.d: Likewise.
+	* ld-elfvsb/internal1.d: Likewise.
+	* ld-elfvsb/protected0.d: Likewise.
+	* ld-elfvsb/protected1.d: Likewise.
+
+	* ld-elfvsb/hidden0.d: Change NOTYPE to OBJECT.
+	* ld-elfvsb/internal0.d: Likewise.
+	* ld-elfvsb/protected0.d: Likewise.
+
 2001-11-15  H.J. Lu <hjl@gnu.org>
 
 	* ld-sh/ld-r-1.d: Updated.
