@@ -57,7 +57,7 @@ static struct value *value_arg_coerce (struct value *, struct type *, int);
 
 static CORE_ADDR value_push (CORE_ADDR, struct value *);
 
-static struct value *search_struct_field (char *, struct value *, int,
+static struct value *search_struct_field (const char *, struct value *, int,
 				      struct type *, int);
 
 static struct value *search_struct_method (char *, struct value **,
@@ -1750,7 +1750,7 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
     SAVE_DUMMY_FRAME_TOS (sp);
 
   {
-    char *name;
+    const char *name;
     struct symbol *symbol;
 
     name = NULL;
@@ -1772,10 +1772,12 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
     if (name == NULL)
       {
 	char format[80];
+	char *temp_name;
 	sprintf (format, "at %s", local_hex_format ());
-	name = alloca (80);
+	temp_name = alloca (80);
 	/* FIXME-32x64: assumes funaddr fits in a long.  */
-	sprintf (name, format, (unsigned long) funaddr);
+	sprintf (temp_name, format, (unsigned long) funaddr);
+	name = temp_name;
       }
 
     /* Execute the stack dummy routine, calling FUNCTION.
@@ -2132,7 +2134,7 @@ typecmp (int staticp, int varargs, int nargs,
    look for a baseclass named NAME.  */
 
 static struct value *
-search_struct_field (char *name, struct value *arg1, int offset,
+search_struct_field (const char *name, struct value *arg1, int offset,
 		     register struct type *type, int looking_for_baseclass)
 {
   int i;
@@ -2382,7 +2384,7 @@ search_struct_method (char *name, struct value **arg1p,
   CHECK_TYPEDEF (type);
   for (i = TYPE_NFN_FIELDS (type) - 1; i >= 0; i--)
     {
-      char *t_field_name = TYPE_FN_FIELDLIST_NAME (type, i);
+      const char *t_field_name = TYPE_FN_FIELDLIST_NAME (type, i);
       /* FIXME!  May need to check for ARM demangling here */
       if (strncmp (t_field_name, "__", 2) == 0 ||
 	  strncmp (t_field_name, "op", 2) == 0 ||
@@ -2646,7 +2648,7 @@ find_method_list (struct value **argp, char *method, int offset,
   for (i = TYPE_NFN_FIELDS (type) - 1; i >= 0; i--)
     {
       /* pai: FIXME What about operators and type conversions? */
-      char *fn_field_name = TYPE_FN_FIELDLIST_NAME (type, i);
+      const char *fn_field_name = TYPE_FN_FIELDLIST_NAME (type, i);
       if (fn_field_name && (strcmp_iw (fn_field_name, method) == 0))
 	{
 	  int len = TYPE_FN_FIELDLIST_LENGTH (type, i);
@@ -2803,7 +2805,7 @@ find_overload_match (struct type **arg_types, int nargs, char *name, int method,
   int static_offset;
   struct cleanup *cleanups = NULL;
 
-  char *obj_type_name = NULL;
+  const char *obj_type_name = NULL;
   char *func_name = NULL;
 
   /* Get the list of overloaded methods or functions */
@@ -3016,7 +3018,7 @@ destructor_name_p (const char *name, const struct type *type)
 
   if (name[0] == '~')
     {
-      char *dname = type_name_no_tag (type);
+      const char *dname = type_name_no_tag (type);
       char *cp = strchr (dname, '<');
       unsigned int len;
 
@@ -3185,7 +3187,7 @@ value_struct_elt_for_reference (struct type *domain, int offset,
 
   for (i = TYPE_NFN_FIELDS (t) - 1; i >= 0; --i)
     {
-      char *t_field_name = TYPE_FN_FIELDLIST_NAME (t, i);
+      const char *t_field_name = TYPE_FN_FIELDLIST_NAME (t, i);
       char dem_opname[64];
 
       if (strncmp (t_field_name, "__", 2) == 0 ||
@@ -3276,13 +3278,10 @@ value_namespace_elt (const struct type *curtype,
 		     const char *name)
 {
   const char *namespace_name = TYPE_TAG_NAME (curtype);
-  struct using_direct_node *usings = block_all_usings (block);
   const struct symbol *sym;
 
   sym = lookup_symbol_namespace (namespace_name, strlen (namespace_name),
-				 name, usings, NULL, VAR_NAMESPACE, NULL);
-
-  cp_free_usings (usings);
+				 name, NULL, block, VAR_NAMESPACE, NULL);
 
   /* FIXME: carlton/2002-11-24: Should this really be here, or should
      it be in c-exp.y like the other similar messages?  Hmm...  */

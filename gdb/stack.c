@@ -465,7 +465,7 @@ print_frame (struct frame_info *fi,
 	     struct symtab_and_line sal)
 {
   struct symbol *func;
-  register char *funname = 0;
+  register const char *funname = 0;
   enum language funlang = language_unknown;
   struct ui_stream *stb;
   struct cleanup *old_chain;
@@ -783,7 +783,7 @@ frame_info (char *addr_exp, int from_tty)
   struct symtab *s;
   struct frame_info *calling_frame_info;
   int i, count, numregs;
-  char *funname = 0;
+  const char *funname = 0;
   enum language funlang = language_unknown;
 
   if (!target_has_stack)
@@ -1877,7 +1877,7 @@ func_command (char *arg, int from_tty)
     {
       if (sals.sals[i].pc == (CORE_ADDR) 0 ||
 	  find_pc_partial_function (sals.sals[i].pc,
-				    (char **) NULL,
+				    NULL,
 				    &func_bounds[i].low,
 				    &func_bounds[i].high) == 0)
 	{

@@ -167,7 +167,8 @@ extern void symbol_init_demangled_name (struct general_symbol_info *symbol,
    that symbol.  If no demangled name exists, return NULL. */
 #define SYMBOL_DEMANGLED_NAME(symbol) \
   (symbol_demangled_name (&(symbol)->ginfo))
-extern char *symbol_demangled_name (const struct general_symbol_info *symbol);
+extern const char *symbol_demangled_name (const struct general_symbol_info
+					  *symbol);
 
 /* Macro that returns the demangled name of the symbol if if possible
    and the symbol name if not possible.  This is like
@@ -944,11 +945,11 @@ extern struct symbol *lookup_symbol (const char *, const struct block *,
 
 /* Lookup a symbol within a namespace.  */
 
-extern struct symbol *lookup_symbol_namespace (const char *namespace,
+extern struct symbol *lookup_symbol_namespace (const char *namespace_name,
 					       int namespace_len,
 					       const char *name,
-					       struct using_direct_node *using,
 					       const char *mangled_name,
+					       const struct block *block,
 					       namespace_enum name_space,
 					       struct symtab **symtab);
 
@@ -984,7 +985,8 @@ find_pc_partial_function (CORE_ADDR, char **, CORE_ADDR *, CORE_ADDR *);
 extern void clear_pc_function_cache (void);
 
 extern int find_pc_sect_partial_function (CORE_ADDR, asection *,
-					  char **, CORE_ADDR *, CORE_ADDR *);
+					  char **, CORE_ADDR *,
+					  CORE_ADDR *);
 
 /* from symtab.c: */
 

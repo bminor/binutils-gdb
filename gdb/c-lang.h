@@ -32,7 +32,7 @@ extern int c_parse (void);	/* Defined in c-exp.y */
 extern void c_error (char *);	/* Defined in c-exp.y */
 
 /* Defined in c-typeprint.c */
-extern void c_print_type (struct type *, char *, struct ui_file *, int,
+extern void c_print_type (struct type *, const char *, struct ui_file *, int,
 			  int);
 
 extern int c_val_print (struct type *, char *, int, CORE_ADDR,

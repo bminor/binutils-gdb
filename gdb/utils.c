@@ -1274,7 +1274,7 @@ print_spaces (register int n, register struct ui_file *file)
 /* Print a host address.  */
 
 void
-gdb_print_host_address (void *addr, struct ui_file *stream)
+gdb_print_host_address (const void *addr, struct ui_file *stream)
 {
 
   /* We could use the %p conversion specifier to fprintf if we had any
@@ -2297,7 +2297,8 @@ print_spaces_filtered (int n, struct ui_file *stream)
    demangling is off, the name is printed in its "raw" form. */
 
 void
-fprintf_symbol_filtered (struct ui_file *stream, char *name, enum language lang,
+fprintf_symbol_filtered (struct ui_file *stream, const char *name,
+			 enum language lang,
 			 int arg_mode)
 {
   char *demangled;

@@ -47,7 +47,8 @@ void pascal_type_print_varspec_prefix (struct type *, struct ui_file *, int, int
 /* LEVEL is the depth to indent lines by.  */
 
 void
-pascal_print_type (struct type *type, char *varstring, struct ui_file *stream,
+pascal_print_type (struct type *type, const char *varstring,
+		   struct ui_file *stream,
 		   int show, int level)
 {
   register enum type_code code;
@@ -115,7 +116,7 @@ pascal_print_type (struct type *type, char *varstring, struct ui_file *stream,
 static void
 pascal_type_print_derivation_info (struct ui_file *stream, struct type *type)
 {
-  char *name;
+  const char *name;
   int i;
 
   for (i = 0; i < TYPE_N_BASECLASSES (type); i++)
@@ -136,7 +137,7 @@ pascal_type_print_derivation_info (struct ui_file *stream, struct type *type)
 /* Print the Pascal method arguments ARGS to the file STREAM.  */
 
 void
-pascal_type_print_method_args (char *physname, char *methodname,
+pascal_type_print_method_args (char *physname, const char *methodname,
 			       struct ui_file *stream)
 {
   int is_constructor = STREQN (physname, "__ct__", 6);
@@ -191,7 +192,7 @@ void
 pascal_type_print_varspec_prefix (struct type *type, struct ui_file *stream,
 				  int show, int passed_a_ptr)
 {
-  char *name;
+  const char *name;
   if (type == 0)
     return;
 
@@ -628,8 +629,8 @@ pascal_type_print_base (struct type *type, struct ui_file *stream, int show,
 	    {
 	      struct fn_field *f = TYPE_FN_FIELDLIST1 (type, i);
 	      int j, len2 = TYPE_FN_FIELDLIST_LENGTH (type, i);
-	      char *method_name = TYPE_FN_FIELDLIST_NAME (type, i);
-	      char *name = type_name_no_tag (type);
+	      const char *method_name = TYPE_FN_FIELDLIST_NAME (type, i);
+	      const char *name = type_name_no_tag (type);
 	      /* this is GNU C++ specific
 	         how can we know constructor/destructor?
 	         It might work for GNU pascal */

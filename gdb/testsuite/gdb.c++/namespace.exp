@@ -248,6 +248,16 @@ gdb_test "print E::ce" "No symbol \"ce\" in namespace \"C::D::E\"." "print E::ce
 gdb_test "ptype C" "type = namespace C::C" "ptype C::C"
 gdb_test "ptype E" "type = namespace C::D::E" "ptype C::D::E"
 
+gdb_test "ptype CClass" "type = class C::CClass \{\r\n  public:\r\n    int x;\r\n\}" "ptype CClass"
+gdb_test "ptype CClass::NestedClass" "type = class C::CClass::NestedClass \{\r\n  public:\r\n    int y;\r\n\}" "ptype CClass::NestedClass"
+gdb_test "ptype NestedClass" "No symbol \"NestedClass\" in current context." "ptype NestedClass"
+gdb_test "ptype ::C::CClass" "type = class C::CClass \{\r\n  public:\r\n    inty;\r\n\}" "ptype ::C::CClass"
+gdb_test "ptype ::C::CClass::NestedClass" "type = class C::CClass::NestedClass \{\r\n  public:\r\n    int y;\r\n\}" "ptype ::C::CClass::NestedClass"
+gdb_test "ptype ::C::NestedClass" "No symbol \"NestedClass\" in namespace \"C\"." "ptype ::C::NestedClass"
+gdb_test "ptype C::CClass" "No symbol \"Class\" in namespace \"C::C\"" "ptype C::CClass"
+gdb_test "ptype C::CClass::NestedClass" "No symbol \"Class\" in namespace \"C::C\"" "ptype C::CClass::NestedClass"
+gdb_test "ptype C::NestedClass" "No symbol \"NestedClass\" in namespace \"C::C\"." "ptype C::NestedClass"
+
 # Some anonymous namespace tests.
 
 gdb_test "print cX" "\\$\[0-9\].* = 6" "print cX"

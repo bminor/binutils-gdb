@@ -687,7 +687,7 @@ const char pascal_vtbl_ptr_name[] =
 int
 pascal_object_is_vtbl_ptr_type (struct type *type)
 {
-  char *typename = type_name_no_tag (type);
+  const char *typename = type_name_no_tag (type);
 
   return (typename != NULL
 	  && (STREQ (typename, pascal_vtbl_ptr_name)));
@@ -925,7 +925,7 @@ pascal_object_print_value (struct type *type, char *valaddr, CORE_ADDR address,
     {
       int boffset;
       struct type *baseclass = check_typedef (TYPE_BASECLASS (type, i));
-      char *basename = TYPE_NAME (baseclass);
+      const char *basename = TYPE_NAME (baseclass);
       char *base_valaddr;
 
       if (BASETYPE_VIA_VIRTUAL (type, i))
@@ -1076,7 +1076,7 @@ pascal_object_print_class_member (char *valaddr, struct type *domain,
     }
   if (i < len)
     {
-      char *name;
+      const char *name;
       fprintf_filtered (stream, prefix);
       name = type_name_no_tag (domain);
       if (name)

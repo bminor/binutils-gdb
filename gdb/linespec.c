@@ -79,8 +79,9 @@ static int count_methods (struct type *class_type, char *method,
 static int find_methods (struct type *class_type, char *method,
 			 struct symbol **sym_arr);
 
-static char *find_method_name (struct type *class_type, int method_counter,
-			       char *dem_opname);
+static const char *find_method_name (struct type *class_type,
+				     int method_counter,
+				     char *dem_opname);
 
 static int add_matching_methods (int method_counter, struct type *class_type,
 				 struct symbol **sym_arr);
@@ -896,7 +897,7 @@ find_methods (struct type *class_type, char *method,
 {
   int count = 0;
   int ibase;
-  char *class_name = type_name_no_tag (class_type);
+  const char *class_name = type_name_no_tag (class_type);
 
   /* Ignore this class if it doesn't have a name.  This is ugly, but
      unless we figure out how to get the physname without the name of
@@ -920,7 +921,7 @@ find_methods (struct type *class_type, char *method,
 	{
 	  int field_counter;
 	  char dem_opname[64];
-	  char *current_method_name
+	  const char *current_method_name
 	    = find_method_name (class_type, method_counter, dem_opname);
 
 	  if (strcmp_iw (method, current_method_name) == 0)
@@ -959,11 +960,11 @@ find_methods (struct type *class_type, char *method,
    used as storage space.  Note that this function is g++
    specific.  */
 
-static char *
+static const char *
 find_method_name (struct type *class_type, int method_counter,
 		  char *dem_opname)
 {
-  char *name = TYPE_FN_FIELDLIST_NAME (class_type, method_counter);
+  const char *name = TYPE_FN_FIELDLIST_NAME (class_type, method_counter);
   if (strncmp (name, "__", 2) == 0
       || strncmp (name, "op", 2) == 0
       || strncmp (name, "type", 4) == 0)

@@ -51,8 +51,8 @@ struct type *java_void_type;
 
 extern void _initialize_java_language (void);
 
-static int java_demangled_signature_length (char *);
-static void java_demangled_signature_copy (char *, char *);
+static int java_demangled_signature_length (const char *);
+static void java_demangled_signature_copy (char *, const char *);
 
 static struct symtab *get_java_class_symtab (void);
 static char *get_java_utf8_name (struct obstack *obstack, struct value *name);
@@ -608,7 +608,7 @@ is_object_type (struct type *type)
   if (TYPE_CODE (type) == TYPE_CODE_PTR)
     {
       struct type *ttype = check_typedef (TYPE_TARGET_TYPE (type));
-      char *name;
+      const char *name;
       if (TYPE_CODE (ttype) != TYPE_CODE_STRUCT)
 	return 0;
       while (TYPE_N_BASECLASSES (ttype) > 0)
@@ -658,7 +658,7 @@ java_primitive_type (int signature)
    return that type.  Otherwise, return NULL. */
 
 struct type *
-java_primitive_type_from_name (char *name, int namelen)
+java_primitive_type_from_name (const char *name, int namelen)
 {
   switch (name[0])
     {
@@ -703,7 +703,7 @@ java_primitive_type_from_name (char *name, int namelen)
    signature string SIGNATURE. */
 
 static int
-java_demangled_signature_length (char *signature)
+java_demangled_signature_length (const char *signature)
 {
   int array = 0;
   for (; *signature == '['; signature++)
@@ -721,7 +721,7 @@ java_demangled_signature_length (char *signature)
 /* Demangle the Java type signature SIGNATURE, leaving the result in RESULT. */
 
 static void
-java_demangled_signature_copy (char *result, char *signature)
+java_demangled_signature_copy (char *result, const char *signature)
 {
   int array = 0;
   char *ptr;
@@ -746,11 +746,14 @@ java_demangled_signature_copy (char *result, char *signature)
 	}
       break;
     default:
-      ptr = TYPE_NAME (java_primitive_type (signature[0]));
-      i = strlen (ptr);
-      strcpy (result, ptr);
-      ptr = result + i;
-      break;
+      {
+	const char *tempptr
+	  = TYPE_NAME (java_primitive_type (signature[0]));
+	i = strlen (tempptr);
+	strcpy (result, tempptr);
+	ptr = result + i;
+	break;
+      }
     }
   while (--array >= 0)
     {
@@ -763,7 +766,7 @@ java_demangled_signature_copy (char *result, char *signature)
    as a freshly allocated copy. */
 
 char *
-java_demangle_type_signature (char *signature)
+java_demangle_type_signature (const char *signature)
 {
   int length = java_demangled_signature_length (signature);
   char *result = xmalloc (length + 1);
@@ -854,7 +857,7 @@ evaluate_subexp_java (struct type *expect_type, register struct expression *exp,
 {
   int pc = *pos;
   int i;
-  char *name;
+  const char *name;
   enum exp_opcode op = exp->elts[*pos].opcode;
   struct value *arg1;
   struct value *arg2;

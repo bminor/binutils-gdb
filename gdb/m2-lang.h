@@ -23,7 +23,7 @@ extern int m2_parse (void);	/* Defined in m2-exp.y */
 extern void m2_error (char *);	/* Defined in m2-exp.y */
 
 /* Defined in m2-typeprint.c */
-extern void m2_print_type (struct type *, char *, struct ui_file *, int,
+extern void m2_print_type (struct type *, const char *, struct ui_file *, int,
 			   int);
 
 extern int m2_val_print (struct type *, char *, int, CORE_ADDR,

@@ -154,3 +154,54 @@ block_static_block (const struct block *block)
 
   return block;
 }
+
+/* Initialize ITERATOR to point at the first using directive valid for
+   BLOCK, and return that using directive, or NULL if there aren't
+   any.  */
+
+struct using_direct *
+block_using_iterator_first (const struct block *block,
+			    struct block_using_iterator *iterator)
+{
+  if (block == NULL)
+    return NULL;
+  
+  iterator->current_block = block;
+  iterator->next_node = block_using (block);
+
+  return block_using_iterator_next (iterator);
+}
+
+/* Advance ITERATOR, and return the next using directive, or NULL if
+   there aren't any more.  Don't call this if you've previously
+   received NULL from block_using_iterator_first or
+   block_using_iterator_next during this iteration.  */
+
+struct using_direct *
+block_using_iterator_next (struct block_using_iterator *iterator)
+{
+  if (iterator->next_node != NULL)
+    {
+      struct using_direct *retval = iterator->next_node->current;
+      iterator->next_node = iterator->next_node->next;
+      return retval;
+    }
+  else
+    {
+      while (BLOCK_SUPERBLOCK (iterator->current_block) != NULL)
+	{
+	  iterator->current_block
+	    = BLOCK_SUPERBLOCK (iterator->current_block);
+	  iterator->next_node = block_using (iterator->current_block); 
+	  if (iterator->next_node != NULL)
+	    {
+	      struct using_direct *retval = iterator->next_node->current;
+	      iterator->next_node = iterator->next_node->next;
+	      return retval;
+	    }
+	}
+
+      /* We didn't find any superblocks with using directives.  */
+      return NULL;
+    }
+}

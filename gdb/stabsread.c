@@ -3600,7 +3600,7 @@ read_cpp_abbrev (struct field_info *fip, char **pp, struct type *type,
 		 struct objfile *objfile)
 {
   register char *p;
-  char *name;
+  const char *name;
   char cpp_abbrev;
   struct type *context;
 
@@ -4411,7 +4411,7 @@ static struct deprecated_complaint multiply_defined_struct =
 static void 
 complain_about_struct_wipeout (struct type *type)
 {
-  char *name = "";
+  const char *name = "";
   char *kind = "";
 
   if (TYPE_TAG_NAME (type))
@@ -5355,7 +5355,7 @@ cleanup_undefined_types (void)
 		struct pending *ppt;
 		int i;
 		/* Name of the type, without "struct" or "union" */
-		char *typename = TYPE_TAG_NAME (*type);
+		const char *typename = TYPE_TAG_NAME (*type);
 
 		if (typename == NULL)
 		  {

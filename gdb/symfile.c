@@ -230,7 +230,7 @@ static int
 compare_psymbols (const void *s1p, const void *s2p)
 {
   register struct partial_symbol **s1, **s2;
-  register char *st1, *st2;
+  register const char *st1, *st2;
 
   s1 = (struct partial_symbol **) s1p;
   s2 = (struct partial_symbol **) s2p;

@@ -46,13 +46,16 @@ SLOWTESTS="gdb.base/callfuncs.exp \
   gdb.c++/demangle.exp"
 
 echo "Running fast tests."
-runtest ${FASTTESTS} 2>&1 | grep -v "^Test Run By" > /tmp/fastout
+runtest ${FASTTESTS} > /dev/null 2>&1
+grep -v "^Test Run By" gdb.sum > /tmp/fastout
 diff -u {carlton_,/tmp/}fastout
 echo "Running medium tests."
-runtest ${MEDTESTS} 2>&1 | grep -v "^Test Run By" > /tmp/medout
+runtest ${MEDTESTS} > /dev/null 2>&1
+grep -v "^Test Run By" gdb.sum > /tmp/medout
 diff -u {carlton_,/tmp/}medout
 echo "Running slow tests."
-runtest ${SLOWTESTS} 2>&1 | grep -v "^Test Run By" > /tmp/slowout
+runtest ${SLOWTESTS} > /dev/null 2>&1
+grep -v "^Test Run By" gdb.sum > /tmp/slowout
 diff -u {carlton_,/tmp/}slowout
 
 echo "Done."

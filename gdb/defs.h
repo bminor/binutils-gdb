@@ -480,7 +480,7 @@ extern void fputstr_unfiltered (const char *str, int quotr, struct ui_file * str
 extern void fputstrn_unfiltered (const char *str, int n, int quotr, struct ui_file * stream);
 
 /* Display the host ADDR on STREAM formatted as ``0x%x''. */
-extern void gdb_print_host_address (void *addr, struct ui_file *stream);
+extern void gdb_print_host_address (const void *addr, struct ui_file *stream);
 
 /* Convert a CORE_ADDR into a HEX string.  paddr() is like %08lx.
    paddr_nz() is like %lx.  paddr_u() is like %lu. paddr_width() is
@@ -501,7 +501,7 @@ extern const char *core_addr_to_string (const CORE_ADDR addr);
 extern const char *core_addr_to_string_nz (const CORE_ADDR addr);
 extern CORE_ADDR string_to_core_addr (const char *my_string);
 
-extern void fprintf_symbol_filtered (struct ui_file *, char *,
+extern void fprintf_symbol_filtered (struct ui_file *, const char *,
 				     enum language, int);
 
 extern NORETURN void perror_with_name (const char *) ATTR_NORETURN;

@@ -89,7 +89,7 @@ static void unk_lang_printstr (struct ui_file * stream, char *string,
 
 static struct type *unk_lang_create_fundamental_type (struct objfile *, int);
 
-static void unk_lang_print_type (struct type *, char *, struct ui_file *,
+static void unk_lang_print_type (struct type *, const char *, struct ui_file *,
 				 int, int);
 
 static int unk_lang_val_print (struct type *, char *, int, CORE_ADDR,
@@ -1393,7 +1393,7 @@ unk_lang_create_fundamental_type (struct objfile *objfile, int typeid)
 }
 
 static void
-unk_lang_print_type (struct type *type, char *varstring, struct ui_file *stream,
+unk_lang_print_type (struct type *type, const char *varstring, struct ui_file *stream,
 		     int show, int level)
 {
   error ("internal error - unimplemented function unk_lang_print_type called.");

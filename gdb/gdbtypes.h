@@ -1138,9 +1138,9 @@ extern struct type *create_set_type (struct type *, struct type *);
 
 /* OBSOLETE extern int chill_varying_type (struct type *); */
 
-extern struct type *lookup_unsigned_typename (char *);
+extern struct type *lookup_unsigned_typename (const char *);
 
-extern struct type *lookup_signed_typename (char *);
+extern struct type *lookup_signed_typename (const char *);
 
 extern struct type *check_typedef (struct type *);
 
@@ -1148,13 +1148,13 @@ extern struct type *check_typedef (struct type *);
 
 extern void check_stub_method_group (struct type *, int);
 
-extern struct type *lookup_primitive_typename (char *);
+extern struct type *lookup_primitive_typename (const char *);
 
 extern char *gdb_mangle_name (struct type *, int, int);
 
 extern struct type *builtin_type (char **);
 
-extern struct type *lookup_typename (char *, struct block *, int);
+extern struct type *lookup_typename (const char *, struct block *, int);
 
 extern struct type *lookup_template_type (char *, struct type *,
 					  struct block *);

@@ -56,7 +56,8 @@
 
 /* Prototypes for local functions */
 
-static void completion_list_add_name (char *, char *, int, char *, char *);
+static void completion_list_add_name (const char *, char *, int, char *,
+				      char *);
 
 static void rbreak_command (char *, int);
 
@@ -109,6 +110,13 @@ struct symbol *lookup_symbol_aux_nonlocal (int block_index,
 					   struct symtab **symtab);
 
 static
+struct symbol *lookup_symbol_aux_file (const char *name,
+				       const char *mangled_name,
+				       const struct block *block,
+				       const namespace_enum namespace,
+				       struct symtab **symtab);
+
+static
 struct symbol *lookup_symbol_aux_symtabs (int block_index,
 					  const char *name,
 					  const char *mangled_name,
@@ -132,11 +140,11 @@ struct symbol *lookup_symbol_aux_using (const char *name,
 static
 struct symbol *lookup_symbol_aux_using_loop (const char *name,
 					     const char *mangled_name,
+					     const struct block *block,
 					     namespace_enum namespace,
 					     struct symtab **symtab,
 					     const char *scope,
-					     int scope_len,
-					     struct using_direct_node *using);
+					     int scope_len);
 
 static
 struct symbol *lookup_symbol_aux_minsyms (int block_index,
@@ -353,9 +361,9 @@ gdb_mangle_name (struct type *type, int method_id, int signature_id)
   char *mangled_name;
   struct fn_field *f = TYPE_FN_FIELDLIST1 (type, method_id);
   struct fn_field *method = &f[signature_id];
-  char *field_name = TYPE_FN_FIELDLIST_NAME (type, method_id);
-  char *physname = TYPE_FN_FIELD_PHYSNAME (f, signature_id);
-  char *newname = type_name_no_tag (type);
+  const char *field_name = TYPE_FN_FIELDLIST_NAME (type, method_id);
+  const char *physname = TYPE_FN_FIELD_PHYSNAME (f, signature_id);
+  const char *newname = type_name_no_tag (type);
 
   /* Does the form of physname indicate that it is the full mangled name
      of a constructor (not just the args)?  */
@@ -470,7 +478,7 @@ void
 symbol_init_demangled_name (struct general_symbol_info *gsymbol,
 			    struct obstack *obstack)
 {
-  char *mangled = gsymbol->name;
+  const char *mangled = gsymbol->name;
   char *demangled = NULL;
 
   if (gsymbol->language == language_unknown)
@@ -532,7 +540,7 @@ symbol_init_demangled_name (struct general_symbol_info *gsymbol,
 
 /* Return the demangled name for a symbol based on the language for
    that symbol.  If no demangled name exists, return NULL. */
-char *
+const char *
 symbol_demangled_name (const struct general_symbol_info *gsymbol)
 {
   if (gsymbol->language == language_cplus
@@ -897,46 +905,10 @@ lookup_symbol_aux (const char *name, const char *mangled_name,
 	}
     }
 
-  /* If there's a static block to search, search it next.  */
-
-  /* NOTE: carlton/2002-11-06: There is a question as to whether or
-     not it would be appropriate to search the current global block
-     here as well.  On the one hand, it's redundant with the
-     lookup_symbol_aux_symtabs search that happens next.  On the other
-     hand, if decode_line_1 is passed an argument like filename:var,
-     then the user presumably wants 'var' to be searched for in
-     filename.  On the third hand, there shouldn't be multiple global
-     variables all of which are named 'var', and it's not like the
-     code has ever restricted its search to only global variables in a
-     single filename.  All in all, only searching the static block
-     seems best: it's cleanest, it's correct, and it might be useful
-     for handling namespace scope issues completely correctly.  */
-
-  static_block = block_static_block (block);
-
-  if (static_block != NULL)
-    {
-      sym = lookup_symbol_aux_block (name, mangled_name, static_block,
-				     namespace, symtab);
-      if (sym != NULL)
-	return sym;
-    }
-
-  /* Now search all global blocks.  Do the symtab's first, then the
-     minsyms, then check the psymtab's. If minsyms or psymtabs
-     indicate the existence of the desired name as a global, then
-     generate the appropriate symtab on the fly and return the found
-     symbol.
-
+  /* Now search this block's static block, and all the global blocks.
      We do this from within lookup_symbol_aux_using: that will apply
      appropriate using directives in the C++ case.  But it works fine
      in the non-C++ case, too.  */
-
-  /* NOTE: carlton/2002-10-22: Is it worthwhile to try to figure out
-     whether or not we're in the C++ case?  Doing
-     lookup_symbol_aux_using won't slow things down significantly in
-     the general case, though: other parts of this function are much,
-     much more expensive.  */
 
   sym = lookup_symbol_aux_using (name, mangled_name, block, namespace,
 				 symtab);
@@ -945,11 +917,6 @@ lookup_symbol_aux (const char *name, const char *mangled_name,
 
   /* Now search all static file-level symbols.  Not strictly correct,
      but more useful than an error.  */
-
-  /* FIXME: carlton/2002-10-28: See my FIXME comment in
-     lookup_symbol_aux_minsyms about the possible desirability of
-     having a msymbol_found flag that could cause us to skip the
-     STATIC_BLOCK search.  */
 
   sym = lookup_symbol_aux_nonlocal (STATIC_BLOCK, name, mangled_name,
 				    namespace, symtab);
@@ -1113,6 +1080,31 @@ lookup_symbol_aux_nonlocal (int block_index,
   return NULL;
 }
 
+/* Look up NAME in BLOCK's static block and in global blocks.  */
+
+static struct symbol *
+lookup_symbol_aux_file (const char *name,
+			const char *mangled_name,
+			const struct block *block,
+			const namespace_enum namespace,
+			struct symtab **symtab)
+{
+  struct symbol *sym;
+  const struct block *static_block = block_static_block (block);
+
+  if (static_block != NULL)
+    {
+      sym = lookup_symbol_aux_block (name, mangled_name, static_block,
+				     namespace, symtab);
+      if (sym != NULL)
+	return sym;
+    }
+
+  return lookup_symbol_aux_nonlocal (GLOBAL_BLOCK, name, mangled_name,
+				     namespace, symtab);
+}
+
+
 /* Check to see if the symbol is defined in one of the symtabs.
    BLOCK_INDEX should be either GLOBAL_BLOCK or STATIC_BLOCK,
    depending on whether or not we want to search global symbols or
@@ -1206,9 +1198,9 @@ lookup_symbol_aux_psymtabs (int block_index, const char *name,
   return NULL;
 }
 
-/* This function gathers using directives from BLOCK and its
-   superblocks, and then searches for symbols in the global namespace
-   by trying to apply those various using directives.  */
+/* This function and lookup_symbol_aux_using_loop calculates the
+   appropriate namespaces scope for BLOCK, and searches for NAME in
+   each of the namespaces that are in scope.  */
 
 static struct symbol *lookup_symbol_aux_using (const char *name,
 					       const char *mangled_name,
@@ -1216,33 +1208,21 @@ static struct symbol *lookup_symbol_aux_using (const char *name,
 					       const namespace_enum namespace,
 					       struct symtab **symtab)
 {
-  struct using_direct_node *using;
-  const char *scope;
-  struct symbol *sym;
+  const char *scope = block_scope (block);
 
-  using = block_all_usings (block);
-  scope = block_scope (block);
-  
-  sym = lookup_symbol_aux_using_loop (name, mangled_name, namespace, symtab,
-				      scope, 0, using);
-  cp_free_usings (using);
-  
-  return sym;
+  return lookup_symbol_aux_using_loop (name, mangled_name, block,
+				       namespace, symtab,
+				       scope, 0);
 }
-
-/* Look up NAME in the namespaces given by SCOPE and its initial
-   prefixes, applying using directives given by USING; only consider
-   prefixes that are at least as long as SCOPE_LEN, however.  Look up
-   longest prefixes first.  */
 
 static struct
 symbol *lookup_symbol_aux_using_loop (const char *name,
 				      const char *mangled_name,
+				      const struct block *block,
 				      namespace_enum namespace,
 				      struct symtab **symtab,
 				      const char *scope,
-				      int scope_len,
-				      struct using_direct_node *using)
+				      int scope_len)
 {
   if (scope[scope_len] != '\0')
     {
@@ -1257,19 +1237,19 @@ symbol *lookup_symbol_aux_using_loop (const char *name,
 	  new_scope_len += 2;
 	}
       next_component = cp_find_first_component (scope + new_scope_len) - scope;
-      sym = lookup_symbol_aux_using_loop (name, mangled_name, namespace,
-					  symtab, scope, next_component,
-					  using);
+      sym = lookup_symbol_aux_using_loop (name, mangled_name, block, namespace,
+					  symtab, scope, next_component);
       if (sym != NULL)
 	return sym;
     }
 
-  return lookup_symbol_namespace (scope, scope_len, name, using,
-				  mangled_name, namespace, symtab);
+  return lookup_symbol_namespace (scope, scope_len, name, mangled_name,
+				  block, namespace, symtab);
 }
 
 /* This tries to look up NAME in the namespace given by the initial
-   substring of NAMESPACE of length NAMESPACE_LEN.
+   substring of NAMESPACE_NAME of length NAMESPACE_LEN.  It applies
+   the using directives that are active in BLOCK.
 
    For example, assume that we have using directives adding A to the
    global namespace, adding A::inner to namespace A, and adding B to
@@ -1283,45 +1263,42 @@ symbol *lookup_symbol_aux_using_loop (const char *name,
    stuff in A::A::foo, A::inner::A::foo, A::inner::foo, and
    B::A::foo).  */
 
-/* FIXME: carlton/2002-10-11: There are still some places where this
-   will return false positives.  For example, if you have namespaces
-   C, C::D, C::E, and C::D::E, then, from a function defined in C::D,
-   all references to variables E::var _should_ be treated as
-   C::D::E::var, but this function will also see variables in
-   C::E::var.  I don't think this can be fixed without making
-   namespaces first-class objects.  (Which is certainly a good idea
-   for other reasons, but it will take a little while.)  */
+/* FIXME: carlton/2002-11-27: Currently, there's no way to specify
+   that additional using directives are active.  When we get around to
+   implementing Koenig lookup, that will have to change.  */
 
-/* NOTE: carlton/2002-11-19: This is optimistically called
-   lookup_symbol_namespace instead of lookup_symbol_aux_namespace in
-   hopes that it or something like it might eventually be useful
-   outside of lookup_symbol.  */
+/* NOTE: carlton/2002-11-27: I'm calling the namespace_enum argument
+   NAME_SPACE instead of NAMESPACE because I'm being driven crazy by
+   the two different meanings of "namespace" in this function.  */
 
 struct symbol *
-lookup_symbol_namespace (const char *namespace,
+lookup_symbol_namespace (const char *namespace_name,
 			 int namespace_len,
 			 const char *name,
-			 struct using_direct_node *using,
 			 const char *mangled_name,
+			 const struct block *block,
 			 namespace_enum name_space,
 			 struct symtab **symtab)
 {
-  struct using_direct_node *current;
+  struct block_using_iterator iter;
+  const struct using_direct *current;
   struct symbol *sym;
 
-  for (current = using; current; current = current->next)
+  for (current = block_using_iterator_first (block, &iter);
+       current != NULL;
+       current = block_using_iterator_next (&iter))
     {
       /* First, see if the namespace matches the start of this using
 	 directive.  */
-      if (namespace_len <= current->current->outer_length
-	  && strncmp (namespace, current->current->name, namespace_len) == 0)
+      if (namespace_len <= current->outer_length
+	  && strncmp (namespace_name, current->name, namespace_len) == 0)
 	{
 	  /* Great, it matches: now does the rest of the using
 	     directive match the rest of the name?  */
 	  
-	  const char *rest_of_outer = current->current->name + namespace_len;
+	  const char *rest_of_outer = current->name + namespace_len;
 	  int rest_of_outer_len
-	    = current->current->outer_length - namespace_len;
+	    = current->outer_length - namespace_len;
 	  /* Should we skip some colons?  Should be true unless
 	     NAMESPACE_LEN is zero (and hence we're in the global
 	     namespace) or we've finished all of outer.  */
@@ -1338,11 +1315,11 @@ lookup_symbol_namespace (const char *namespace,
 	      if (*new_name == ':')
 		new_name += 2;
 
-	      sym = lookup_symbol_namespace (current->current->name,
-					     current->current->inner_length,
+	      sym = lookup_symbol_namespace (current->name,
+					     current->inner_length,
 					     new_name,
-					     using,
 					     mangled_name,
+					     block,
 					     name_space,
 					     symtab);
 	      if (sym != NULL)
@@ -1357,18 +1334,18 @@ lookup_symbol_namespace (const char *namespace,
   
   if (namespace_len == 0)
     {
-      return lookup_symbol_aux_nonlocal (GLOBAL_BLOCK, name, mangled_name,
-					 name_space, symtab);
+      return lookup_symbol_aux_file (name, mangled_name, block,
+				     name_space, symtab);
     }
   else
     {
       char *concatenated_name
 	= xmalloc (namespace_len + 2 + strlen (name) + 1);
-      strncpy (concatenated_name, namespace, namespace_len);
+      strncpy (concatenated_name, namespace_name, namespace_len);
       strcpy (concatenated_name + namespace_len, "::");
       strcpy (concatenated_name + namespace_len + 2, name);
-      sym = lookup_symbol_aux_nonlocal (GLOBAL_BLOCK, concatenated_name,
-					mangled_name, name_space, symtab);
+      sym = lookup_symbol_aux_file (concatenated_name, mangled_name,
+				    block, name_space, symtab);
 
       xfree (concatenated_name);
       return sym;
@@ -3351,7 +3328,8 @@ static char **return_val;
    characters.  If so, add it to the current completion list. */
 
 static void
-completion_list_add_name (char *symname, char *sym_text, int sym_text_len,
+completion_list_add_name (const char *symname, char *sym_text,
+			  int sym_text_len,
 			  char *text, char *word)
 {
   int newsize;

@@ -8,10 +8,12 @@
 EXTRADEBUGPATH=/usr/local/testbed/gcc3/bin
 
 echo "Running tests using regular compiler."
-runtest gdb.c++/namespace.exp 2>&1 | grep -v "^Test Run By" > /tmp/namespaceout
+runtest gdb.c++/namespace.exp > /dev/null 2>&1
+grep -v "^Test Run By" gdb.sum > /tmp/namespaceout
 diff -u {carlton_,/tmp/}namespaceout
 echo "Running tests using compiler with extra debug info."
-PATH=${EXTRADEBUGPATH}:${PATH} runtest gdb.c++/namespace.exp 2>&1 | grep -v "^Test Run By" > /tmp/namespacedebugout
+PATH=${EXTRADEBUGPATH}:${PATH} runtest gdb.c++/namespace.exp > /dev/null 2>&1
+grep -v "^Test Run By" gdb.sum > /tmp/namespacedebugout
 diff -u {carlton_,/tmp/}namespacedebugout
 
 echo "Done."

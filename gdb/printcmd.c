@@ -611,7 +611,7 @@ build_address_symbolic (CORE_ADDR addr,  /* IN */
   struct symtab *symtab = 0;
   CORE_ADDR name_location = 0;
   asection *section = 0;
-  char *name_temp = "";
+  const char *name_temp = "";
   
   /* Let's say it is unmapped. */
   *unmapped = 0;

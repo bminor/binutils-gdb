@@ -1,3 +1,134 @@
+2002-11-27  David Carlton  <carlton@math.stanford.edu>
+
+	* dwarf2read.c (add_partial_enumeration): New function.
+	(scan_partial_symbols): Call add_partial_enumeration.
+	(locate_pdi_sibling): New function.
+	(scan_partial_symbols): Call locate_pdi_sibling.  Get rid of
+	nesting_level.
+	(pdi_needs_namespace): New function.
+	(add_partial_symbol): Add 'namespace' arg; calculate full name
+	when appropriate.
+	(scan_partial_symbols): Update calls to add_partial_symbol.
+	(add_partial_enumeration): Ditto.
+	(read_enumeration): Add processing_current_prefix to name when
+	appropriate.
+	(new_symbol): Set names of enumerators and typedefs appropriately
+	if processing_has_namespace_info.
+	* symtab.c (lookup_symbol_namespace): Rename 'namespace' argument
+	to 'namespace_name'.
+	* symtab.h: Ditto.
+	* symtab.c (lookup_symbol_namespace): Delete FIXME comments; add a
+	new one.
+	(lookup_symbol_aux_file): New function.
+	(lookup_symbol_aux): Delete FIXME comment.
+	(lookup_symbol_aux): Don't search static block explicitly; delete
+	FIXME comments.
+	* valops.c (value_namespace_elt): Update call to
+	lookup_symbol_namespace.
+	* symtab.h: Update declaration for lookup_symbol_namespace.
+	* symtab.c (lookup_symbol_namespace): Delete 'using' argument and
+	add 'block' argument; get using directives via iterators.
+	(lookup_symbol_aux_using_loop): Delete 'using' argument and add
+	'block' argument.
+	(lookup_symbol_aux_using): Don't calculate using directives.
+	* block.c (block_using_iterator_first): New function.
+	(block_using_iterator_next): Ditto.
+	* block.h: Add comment.
+	(struct block_using_iterator): New struct.
+	Declare block_using_iterator_first, block_using_iterator_next.
+
+2002-11-26  David Carlton  <carlton@math.stanford.edu>
+
+	* dwarf2read.c (read_structure_scope): Set type name and
+	processing_current_prefix appropriately.
+	(new_symbol): Make sure that, in symbols associated to class
+	types, the name includes appropriate namespaces.
+	* buildsym.h: Rename processing_current_namespace to
+	processing_current_prefix.
+	* buildsym.c (finish_block): Ditto.
+	* dwarf2read.c (psymtab_to_symtab_1): Ditto.
+	(read_namespace): Ditto.  Also rename previous_namespace to
+	previous_prefix.
+	
+	Now come a thousand and one const correctness fixes:
+	* p-typeprint.c (pascal_print_type): Const.
+	(pascal_type_print_method_args): Const.
+	* p-lang.h: Const.
+	* m2-typeprint.c (m2_print_type): Const.
+	* valops.c (hand_function_call): Const.
+	* jv-lang.c (java_primitive_type_from_name): Const.
+	* jv-lang.h: Const.
+	* jv-typeprint.c (java_print_type): Const.
+	* language.c: (unk_lang_print_type): Const.
+	* stack.c (frame_info): Const.
+	* linespec.c (find_methods): Const.
+	(find_method_name): Const
+	* f-lang.h: Const.
+	* f-typeprint.c (f_print_type): Const.
+	* c-typeprint.c (c_print_type): Const.
+	* c-lang.h: Const.
+	* gdbtypes.h: Const.
+	* gdbtypes.c (lookup_primitive_typename): Const.
+	* stack.c (print_frame): Const.
+	(func_command): Delete pointless cast.
+	* linespec.c (find_method_name): Const.
+	* language.h: Const.
+	* symfile.c (compare_psymbols): Const.
+	* symtab.c (completion_list_add_name): Const.
+	* breakpoint.c (break_at_finish_at_depth_command_1): Remove
+	useless cast.
+	(break_at_finish_command_1): Ditto.
+	* typeprint.c (type_print): Const.
+	* symtab.h: Const.
+	* symtab.c (gdb_mangle_name): Const.
+	(symbol_init_demangled_name): Const.
+	(symbol_demangled_name): Const.
+	* defs.h: Const.
+	* printcmd.c (build_address_symbolic): Const.
+	* valops.c (search_struct_method): Const.
+	* cp-valprint.c (cp_is_vtbl_ptr_type): Const.
+	(cp_print_value): Const.
+	(cp_print_class_member): Const.
+	* c-typeprint.c (cp_type_print_derivation_info): Const.
+	(c_type_print_varspec_prefix): Const.
+	(c_type_print_base): Const.
+	* p-valprint.c (pascal_object_is_vtbl_ptr_type): Const.
+	(pascal_object_print_value): Const.
+	(pascal_object_print_class_member): Const.
+	* p-typeprint.c (pascal_type_print_derivation_info): Const.
+	(pascal_type_print_varspec_prefix): Const.
+	(pascal_type_print_base): Const.
+	* jv-typeprint.c (java_type_print_base): Const.
+	* jv-lang.h (java_demangle_type_signature): Const.
+	* jv-lang.c (java_demangle_type_signature): Const.
+	(java_demangled_signature_length): Const.
+	(java_demangled_signature_copy): Const.
+	* jv-typeprint.c (java_type_print_derivation_info): Const.
+	* jv-valprint.c (java_value_print): Const.
+	(java_print_value_fields): Const.
+	* jv-lang.c (is_object_type): Const.
+	(evaluate_subexp_java): Const.
+	* stabsread.c (read_cpp_abbrev): Const.
+	(complain_about_struct_wipeout): Const.
+	(cleanup_undefined_types): Const.
+	* gdbtypes.h: Const.
+	* gdbtypes.c (add_name): Second arg const.
+	(lookup_typename): Const.
+	(lookup_unsigned_typename): Const.
+	(lookup_signed_typename): Const.
+	* linespec.c (find_methods): const char *class_name.
+	* symtab.c (gdb_mangle_name): const char *newname.
+	* valops.c (destructor_name_p): const char *dname.
+	(search_struct_field): First arg const.
+	* gdbtypes.c (check_typedef): const char *name (multiple places).
+	(cfront_mangle_name): const char *newname.
+	* gdbtypes.c (add_mangled_type): const char *tname.
+	* valops.c (find_overload_match): const char *obj_type_name.
+	* utils.c (gdb_print_host_address): Make first arg const.
+	* defs.h: Declare first arg of gdb_print_host_address to be
+	const.
+	* valarith.c (find_size_for_pointer_math): const char *name.
+
 2002-11-24  David Carlton  <carlton@bactrian.org>
 
 	* Makefile.in (c-typeprint.o): Depend on gdb_assert_h.

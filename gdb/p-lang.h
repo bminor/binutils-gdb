@@ -26,14 +26,14 @@ extern int pascal_parse (void);	/* Defined in p-exp.y */
 extern void pascal_error (char *);	/* Defined in p-exp.y */
 
 /* Defined in p-typeprint.c */
-extern void pascal_print_type (struct type *, char *, struct ui_file *, int, int);
+extern void pascal_print_type (struct type *, const char *, struct ui_file *, int, int);
 
 extern int pascal_val_print (struct type *, char *, int, CORE_ADDR, struct ui_file *, int, int,
 			     int, enum val_prettyprint);
 
 extern int pascal_value_print (struct value *, struct ui_file *, int, enum val_prettyprint);
 
-extern void pascal_type_print_method_args (char *, char *,
+extern void pascal_type_print_method_args (char *, const char *,
 					   struct ui_file *);
 
 /* These are in p-lang.c: */

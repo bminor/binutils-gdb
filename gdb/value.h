@@ -490,7 +490,7 @@ extern int record_latest_value (struct value *val);
 extern void
 modify_field (char *addr, LONGEST fieldval, int bitpos, int bitsize);
 
-extern void type_print (struct type * type, char *varstring,
+extern void type_print (struct type * type, const char *varstring,
 			struct ui_file * stream, int show);
 
 extern char *baseclass_addr (struct type *type, int index, char *valaddr,

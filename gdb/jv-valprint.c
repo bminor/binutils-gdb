@@ -48,7 +48,7 @@ java_value_print (struct value *val, struct ui_file *stream, int format,
   struct type *type;
   CORE_ADDR address;
   int i;
-  char *name;
+  const char *name;
 
   type = VALUE_TYPE (val);
   address = VALUE_ADDRESS (val) + VALUE_OFFSET (val);
@@ -262,7 +262,7 @@ java_print_value_fields (struct type *type, char *valaddr, CORE_ADDR address,
 	{
 	  int boffset;
 	  struct type *baseclass = check_typedef (TYPE_BASECLASS (type, i));
-	  char *basename = TYPE_NAME (baseclass);
+	  const char *basename = TYPE_NAME (baseclass);
 	  char *base_valaddr;
 
 	  if (BASETYPE_VIA_VIRTUAL (type, i))

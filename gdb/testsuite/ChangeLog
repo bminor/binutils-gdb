@@ -1,3 +1,18 @@
+2002-11-27  David Carlton  <carlton@math.stanford.edu>
+
+	* gdb.c++/m-data.cc (main): Add marker comment.
+	* gdb.c++/m-data.exp: Use marker comment instead of line numbers.
+	* gdb.c++/m-data.cc: Delete superfluous namespace.
+	* gdb.c++/m-static.cc: Ditto.
+	* gdb.c++/m-static1.cc: Ditto.
+	* carlton_runtest: Compare based on gdb.sum, not based on output.
+	* carlton_runnamespace: Ditto.
+
+2002-11-26  David Carlton  <carlton@math.stanford.edu>
+
+	* gdb.c++/namespace.exp: Put tests for CClass.
+	* gdb.c++/namespace.cc (C): Add CClass.
+
 2002-11-24  David Carlton  <carlton@bactrian.org>
 
 	* gdb.c++/namespace.exp: Eliminate some of the single quotes, and

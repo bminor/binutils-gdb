@@ -135,6 +135,15 @@ namespace C
   int c = 1;
   int shadow = 12;
 
+  class CClass {
+  public:
+    int x;
+    class NestedClass {
+    public:
+      int y;
+    };
+  };
+
   namespace
   {
     int cX = 6;

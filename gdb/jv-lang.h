@@ -53,7 +53,7 @@ extern struct type *type_from_class (struct value *);
 
 extern struct type *java_primitive_type (int signature);
 
-extern struct type *java_primitive_type_from_name (char *, int);
+extern struct type *java_primitive_type_from_name (const char *, int);
 
 extern struct type *java_array_type (struct type *, int);
 
@@ -65,9 +65,10 @@ extern struct type *java_lookup_class (char *);
 extern int is_object_type (struct type *);
 
 /* Defined in jv-typeprint.c */
-extern void java_print_type (struct type *, char *, struct ui_file *, int,
+extern void java_print_type (struct type *, const char *,
+			     struct ui_file *, int,
 			     int);
 
-extern char *java_demangle_type_signature (char *);
+extern char *java_demangle_type_signature (const char *);
 
 #endif

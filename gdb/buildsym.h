@@ -100,11 +100,12 @@ EXTERN unsigned char processing_hp_compilation;
 EXTERN unsigned char processing_has_namespace_info;
 
 /* If processing_has_namespace_info is nonzero, this string should
-   contain the name of the current namespace.  Other people shouldn't
-   have to copy it when referring to it, so don't free its previous
-   contents when setting this to a new value.  */
+   contain the name of the current prefix (namespaces plus classes).
+   Other people shouldn't have to copy it when referring to it, so
+   don't free its previous contents when setting this to a new
+   value.  */
 
-EXTERN const char *processing_current_namespace;
+EXTERN const char *processing_current_prefix;
 
 /* Count symbols as they are processed, for error messages.  */
 

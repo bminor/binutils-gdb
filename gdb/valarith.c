@@ -65,7 +65,7 @@ find_size_for_pointer_math (struct type *ptr_type)
 	sz = 1;
       else
 	{
-	  char *name;
+	  const char *name;
 	  
 	  name = TYPE_NAME (ptr_target);
 	  if (name == NULL)

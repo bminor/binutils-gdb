@@ -126,7 +126,7 @@ struct extra
     int len;
   };				/* maximum extension is 128! FIXME */
 
-static void add_name (struct extra *, char *);
+static void add_name (struct extra *, const char *);
 static void add_mangled_type (struct extra *, struct type *);
 #if 0
 static void cfront_mangle_name (struct type *, int, int);
@@ -1015,7 +1015,7 @@ type_name_no_tag (register const struct type *type)
    Return zero if NAME is not a primitive type. */
 
 struct type *
-lookup_primitive_typename (char *name)
+lookup_primitive_typename (const char *name)
 {
   struct type **const *p;
 
@@ -1034,7 +1034,7 @@ lookup_primitive_typename (char *name)
    If NOERR is nonzero, return zero if NAME is not suitably defined.  */
 
 struct type *
-lookup_typename (char *name, struct block *block, int noerr)
+lookup_typename (const char *name, struct block *block, int noerr)
 {
   register struct symbol *sym;
   register struct type *tmp;
@@ -1060,7 +1060,7 @@ lookup_typename (char *name, struct block *block, int noerr)
 }
 
 struct type *
-lookup_unsigned_typename (char *name)
+lookup_unsigned_typename (const char *name)
 {
   char *uns = alloca (strlen (name) + 10);
 
@@ -1070,7 +1070,7 @@ lookup_unsigned_typename (char *name)
 }
 
 struct type *
-lookup_signed_typename (char *name)
+lookup_signed_typename (const char *name)
 {
   struct type *t;
   char *uns = alloca (strlen (name) + 8);
@@ -1354,7 +1354,7 @@ check_typedef (struct type *type)
     {
       if (!TYPE_TARGET_TYPE (type))
 	{
-	  char *name;
+	  const char *name;
 	  struct symbol *sym;
 
 	  /* It is dangerous to call lookup_symbol if we are currently
@@ -1392,7 +1392,7 @@ check_typedef (struct type *type)
 
   if (TYPE_IS_OPAQUE (type) && opaque_type_resolution && !currently_reading_symtab)
     {
-      char *name = type_name_no_tag (type);
+      const char *name = type_name_no_tag (type);
       struct type *newtype;
       if (name == NULL)
 	{
@@ -1406,7 +1406,7 @@ check_typedef (struct type *type)
   /* Otherwise, rely on the stub flag being set for opaque/stubbed types */
   else if (TYPE_STUB (type) && !currently_reading_symtab)
     {
-      char *name = type_name_no_tag (type);
+      const char *name = type_name_no_tag (type);
       /* FIXME: shouldn't we separately check the TYPE_NAME and the
          TYPE_TAG_NAME, and look in STRUCT_NAMESPACE and/or VAR_NAMESPACE
          as appropriate?  (this code was written before TYPE_NAME and
@@ -1460,7 +1460,7 @@ check_typedef (struct type *type)
 #define ADD_EXTRA(c) { pextras->str[pextras->len++]=c; }
 
 static void
-add_name (struct extra *pextras, char *n)
+add_name (struct extra *pextras, const char *n)
 {
   int nlen;
 
@@ -1475,7 +1475,7 @@ add_mangled_type (struct extra *pextras, struct type *t)
 {
   enum type_code tcode;
   int tlen, tflags;
-  char *tname;
+  const char *tname;
 
   tcode = TYPE_CODE (t);
   tlen = TYPE_LENGTH (t);
@@ -1617,7 +1617,7 @@ cfront_mangle_name (struct type *type, int i, int j)
       struct fn_field *method = &f[j];
       char *field_name = TYPE_FN_FIELDLIST_NAME (type, i);
       char *physname = TYPE_FN_FIELD_PHYSNAME (f, j);
-      char *newname = type_name_no_tag (type);
+      const char *newname = type_name_no_tag (type);
 
       struct type *ftype = TYPE_FN_FIELD_TYPE (f, j);
       int nargs = TYPE_NFIELDS (ftype);		/* number of args */

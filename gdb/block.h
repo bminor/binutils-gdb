@@ -137,6 +137,11 @@ extern struct symbol *block_function (const struct block *);
 
 extern int contained_in (const struct block *, const struct block *);
 
+/* NOTE: carlton/2002-11-27: I'm a little bit torn about whether many
+   of these should go here or in cp-support.h.  I ended up putting
+   them here, since they really do use the block structure, but one
+   could argue with my decision.  */
+
 extern struct using_direct_node *block_using (const struct block *);
 
 extern struct using_direct_node *block_all_usings (const struct block *block);
@@ -151,3 +156,30 @@ extern void block_set_scope (struct block *block, const char *scope,
 			     struct obstack *obstack);
 
 extern const struct block *block_static_block (const struct block *block);
+
+/* In an ideal world, this would be opaque: don't access it directly,
+   just use the iterator functions.  */
+
+struct block_using_iterator
+{
+  const struct block *current_block;
+  const struct using_direct_node *next_node;
+};
+
+/* Initialize ITERATOR to point at the first using directive valid for
+   BLOCK, and return that using directive, or NULL if there aren't
+   any.  */
+
+extern struct
+using_direct *block_using_iterator_first (const struct block *block,
+					  struct block_using_iterator
+					  *iterator);
+
+/* Advance ITERATOR, and return the next using directive, or NULL if
+   there aren't any more.  Don't call this if you've previously
+   received NULL from block_using_iterator_first or
+   block_using_iterator_next during this iteration.  */
+
+extern struct
+using_direct *block_using_iterator_next (struct block_using_iterator
+					 *iterator);

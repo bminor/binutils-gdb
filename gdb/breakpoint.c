@@ -5005,7 +5005,7 @@ break_at_finish_at_depth_command_1 (char *arg, int flag, int from_tty)
 
   if (selected_pc)
     {
-      if (find_pc_partial_function (selected_pc, (char **) NULL, &low, &high))
+      if (find_pc_partial_function (selected_pc, NULL, &low, &high))
 	{
 	  addr_string = (char *) xmalloc (26 + extra_args_len);
 	  if (extra_args_len)
@@ -5087,7 +5087,7 @@ break_at_finish_command_1 (char *arg, int flag, int from_tty)
   for (i = 0; (i < sals.nelts); i++)
     {
       sal = sals.sals[i];
-      if (find_pc_partial_function (sal.pc, (char **) NULL, &low, &high))
+      if (find_pc_partial_function (sal.pc, NULL, &low, &high))
 	{
 	  break_string = (char *) xmalloc (extra_args_len + 26);
 	  if (extra_args_len)

@@ -452,7 +452,7 @@ finish_block (struct symbol *symbol, struct pending **listhead,
 	  const char *next;
 
 	  if (processing_has_namespace_info)
-	    block_set_scope (block, processing_current_namespace,
+	    block_set_scope (block, processing_current_prefix,
 			     &objfile->symbol_obstack);
 	  else
 	    {
