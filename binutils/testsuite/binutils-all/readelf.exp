@@ -284,6 +284,7 @@ proc readelf_wi_test {} {
 	".*DW_AT_name.*(testprog.c|indirect string).*"
 	".*DW_AT_name.*fn.*"
 	".*DW_AT_name.*(main|indirect string).*"
+	".*\(DW_OP_addr: 0\).*"
     }
     
     foreach looked_for $sought {	
