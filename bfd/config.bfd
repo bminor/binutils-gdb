@@ -27,6 +27,7 @@ case "${canon}" in
   hppa*-*-hpux*)	bfd_name=hppahpux ;;
   hppa*-*-osf)		bfd_name=hppa-elf ;;
   i[34]86-*-sysv4*)	bfd_name=i386-elf ;;
+  i[34]86-*-solaris2*)	bfd_name=i386-elf ;;
   i[34]86-*-sysv*)	bfd_name=i386-coff ;;
   i[34]86-*-isc*)	bfd_name=i386-sco ;; # gets core dump reading right
   i[34]86-*-sco*)	bfd_name=i386-sco ;;

@@ -1,3 +1,9 @@
+Sat Sep 11 18:13:42 1993  Jim Kingdon  (kingdon@poseidon.cygnus.com)
+
+	* config.bfd: Recognize i[34]86-*-solaris2* specifically rather
+	than using *-*-solaris2* (i486-unknown-solaris2 is i386-elf, not
+	i486-elf which doesn't exist).
+
 Fri Sep 10 12:56:36 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* coffswap.h (coff_swap_aouthdr_out): For ALPHAECOFF, force
