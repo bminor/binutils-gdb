@@ -82,7 +82,7 @@ static struct partial_symbol *lookup_partial_symbol (struct partial_symtab *,
 						     domain_enum);
 
 static struct symbol *lookup_symbol_aux (const char *name,
-					 const char *mangled_name,
+					 const char *linkage_name,
 					 const struct block *block,
 					 const domain_enum domain,
 					 int *is_a_field_of_this,
@@ -90,7 +90,7 @@ static struct symbol *lookup_symbol_aux (const char *name,
 
 static
 struct symbol *lookup_symbol_aux_local (const char *name,
-					const char *mangled_name,
+					const char *linkage_name,
 					const struct block *block,
 					const domain_enum domain,
 					struct symtab **symtab,
@@ -98,7 +98,7 @@ struct symbol *lookup_symbol_aux_local (const char *name,
 
 static
 struct symbol *lookup_symbol_aux_block (const char *name,
-					const char *mangled_name,
+					const char *linkage_name,
 					const struct block *block,
 					const domain_enum domain,
 					struct symtab **symtab);
@@ -106,21 +106,21 @@ struct symbol *lookup_symbol_aux_block (const char *name,
 static
 struct symbol *lookup_symbol_aux_symtabs (int block_index,
 					  const char *name,
-					  const char *mangled_name,
+					  const char *linkage_name,
 					  const domain_enum domain,
 					  struct symtab **symtab);
 
 static
 struct symbol *lookup_symbol_aux_psymtabs (int block_index,
 					   const char *name,
-					   const char *mangled_name,
+					   const char *linkage_name,
 					   const domain_enum domain,
 					   struct symtab **symtab);
 
 #if 0
 static
 struct symbol *lookup_symbol_aux_minsyms (const char *name,
-					  const char *mangled_name,
+					  const char *linkage_name,
 					  const domain_enum domain,
 					  int *is_a_field_of_this,
 					  struct symtab **symtab);
@@ -947,8 +947,13 @@ lookup_symbol (const char *name, const struct block *block,
   return returnval;	 
 }
 
+/* Behave like lookup_symbol_aux except that NAME is the natural name
+   of the symbol that we're looking for and, if LINKAGE_NAME is
+   non-NULL, ensure that the symbol's linkage name matches as
+   well.  */
+
 static struct symbol *
-lookup_symbol_aux (const char *name, const char *mangled_name,
+lookup_symbol_aux (const char *name, const char *linkage_name,
 		   const struct block *block, const domain_enum domain,
 		   int *is_a_field_of_this, struct symtab **symtab)
 {
@@ -958,7 +963,7 @@ lookup_symbol_aux (const char *name, const char *mangled_name,
   /* Search specified block and its superiors.  Don't search
      STATIC_BLOCK or GLOBAL_BLOCK.  */
 
-  sym = lookup_symbol_aux_local (name, mangled_name, block, domain,
+  sym = lookup_symbol_aux_local (name, linkage_name, block, domain,
 				 symtab, &static_block);
   if (sym != NULL)
     return sym;
@@ -996,7 +1001,7 @@ lookup_symbol_aux (const char *name, const char *mangled_name,
 	if (BLOCK_START (b) <= BLOCK_START (block)
 	    && BLOCK_END (b) > BLOCK_START (block))
 	  {
-	    sym = lookup_block_symbol (b, name, mangled_name, VAR_DOMAIN);
+	    sym = lookup_block_symbol (b, name, linkage_name, VAR_DOMAIN);
 	    if (sym)
 	      {
 		block_found = b;
@@ -1051,7 +1056,7 @@ lookup_symbol_aux (const char *name, const char *mangled_name,
 
   if (static_block != NULL)
     {
-      sym = lookup_symbol_aux_block (name, mangled_name, static_block,
+      sym = lookup_symbol_aux_block (name, linkage_name, static_block,
 				     domain, symtab);
       if (sym != NULL)
 	return sym;
@@ -1062,12 +1067,12 @@ lookup_symbol_aux (const char *name, const char *mangled_name,
      of the desired name as a global, then do psymtab-to-symtab
      conversion on the fly and return the found symbol. */
 
-  sym = lookup_symbol_aux_symtabs (GLOBAL_BLOCK, name, mangled_name,
+  sym = lookup_symbol_aux_symtabs (GLOBAL_BLOCK, name, linkage_name,
 				   domain, symtab);
   if (sym != NULL)
     return sym;
 
-  sym = lookup_symbol_aux_psymtabs (GLOBAL_BLOCK, name, mangled_name,
+  sym = lookup_symbol_aux_psymtabs (GLOBAL_BLOCK, name, linkage_name,
 				    domain, symtab);
   if (sym != NULL)
     return sym;
@@ -1078,12 +1083,12 @@ lookup_symbol_aux (const char *name, const char *mangled_name,
      desired name as a file-level static, then do psymtab-to-symtab
      conversion on the fly and return the found symbol. */
 
-  sym = lookup_symbol_aux_symtabs (STATIC_BLOCK, name, mangled_name,
+  sym = lookup_symbol_aux_symtabs (STATIC_BLOCK, name, linkage_name,
 				   domain, symtab);
   if (sym != NULL)
     return sym;
   
-  sym = lookup_symbol_aux_psymtabs (STATIC_BLOCK, name, mangled_name,
+  sym = lookup_symbol_aux_psymtabs (STATIC_BLOCK, name, linkage_name,
 				    domain, symtab);
   if (sym != NULL)
     return sym;
@@ -1098,7 +1103,7 @@ lookup_symbol_aux (const char *name, const char *mangled_name,
    match, store the address of STATIC_BLOCK in static_block.  */
 
 static struct symbol *
-lookup_symbol_aux_local (const char *name, const char *mangled_name,
+lookup_symbol_aux_local (const char *name, const char *linkage_name,
 			 const struct block *block,
 			 const domain_enum domain,
 			 struct symtab **symtab,
@@ -1116,7 +1121,7 @@ lookup_symbol_aux_local (const char *name, const char *mangled_name,
 
   while (BLOCK_SUPERBLOCK (BLOCK_SUPERBLOCK (block)) != NULL)
     {
-      sym = lookup_symbol_aux_block (name, mangled_name, block, domain,
+      sym = lookup_symbol_aux_block (name, linkage_name, block, domain,
 				     symtab);
       if (sym != NULL)
 	return sym;
@@ -1133,7 +1138,7 @@ lookup_symbol_aux_local (const char *name, const char *mangled_name,
    symbol, and set block_found appropriately.  */
 
 static struct symbol *
-lookup_symbol_aux_block (const char *name, const char *mangled_name,
+lookup_symbol_aux_block (const char *name, const char *linkage_name,
 			 const struct block *block,
 			 const domain_enum domain,
 			 struct symtab **symtab)
@@ -1144,7 +1149,7 @@ lookup_symbol_aux_block (const char *name, const char *mangled_name,
   struct block *b;
   struct symtab *s = NULL;
 
-  sym = lookup_block_symbol (block, name, mangled_name, domain);
+  sym = lookup_block_symbol (block, name, linkage_name, domain);
   if (sym)
     {
       block_found = block;
@@ -1177,7 +1182,7 @@ lookup_symbol_aux_block (const char *name, const char *mangled_name,
 
 static struct symbol *
 lookup_symbol_aux_symtabs (int block_index,
-			   const char *name, const char *mangled_name,
+			   const char *name, const char *linkage_name,
 			   const domain_enum domain,
 			   struct symtab **symtab)
 {
@@ -1191,7 +1196,7 @@ lookup_symbol_aux_symtabs (int block_index,
   {
     bv = BLOCKVECTOR (s);
     block = BLOCKVECTOR_BLOCK (bv, block_index);
-    sym = lookup_block_symbol (block, name, mangled_name, domain);
+    sym = lookup_block_symbol (block, name, linkage_name, domain);
     if (sym)
       {
 	block_found = block;
@@ -1211,7 +1216,7 @@ lookup_symbol_aux_symtabs (int block_index,
 
 static struct symbol *
 lookup_symbol_aux_psymtabs (int block_index, const char *name,
-			    const char *mangled_name,
+			    const char *linkage_name,
 			    const domain_enum domain,
 			    struct symtab **symtab)
 {
@@ -1226,13 +1231,13 @@ lookup_symbol_aux_psymtabs (int block_index, const char *name,
   ALL_PSYMTABS (objfile, ps)
   {
     if (!ps->readin
-	&& lookup_partial_symbol (ps, name, mangled_name,
+	&& lookup_partial_symbol (ps, name, linkage_name,
 				  psymtab_index, domain))
       {
 	s = PSYMTAB_TO_SYMTAB (ps);
 	bv = BLOCKVECTOR (s);
 	block = BLOCKVECTOR_BLOCK (bv, block_index);
-	sym = lookup_block_symbol (block, name, mangled_name, domain);
+	sym = lookup_block_symbol (block, name, linkage_name, domain);
 	if (!sym)
 	  {
 	    /* This shouldn't be necessary, but as a last resort try
@@ -1249,7 +1254,7 @@ lookup_symbol_aux_psymtabs (int block_index, const char *name,
 	    block = BLOCKVECTOR_BLOCK (bv,
 				       block_index == GLOBAL_BLOCK ?
 				       STATIC_BLOCK : GLOBAL_BLOCK);
-	    sym = lookup_block_symbol (block, name, mangled_name, domain);
+	    sym = lookup_block_symbol (block, name, linkage_name, domain);
 	    if (!sym)
 	      error ("Internal: %s symbol `%s' found in %s psymtab but not in symtab.\n%s may be an inlined function, or may be a template function\n(if a template, try specifying an instantiation: %s<type>).",
 		     block_index == GLOBAL_BLOCK ? "global" : "static",
@@ -1285,7 +1290,7 @@ lookup_symbol_aux_psymtabs (int block_index, const char *name,
 
 static struct symbol *
 lookup_symbol_aux_minsyms (const char *name,
-			   const char *mangled_name,
+			   const char *linkage_name,
 			   const domain_enum domain,
 			   int *is_a_field_of_this,
 			   struct symtab **symtab)
@@ -1330,14 +1335,14 @@ lookup_symbol_aux_minsyms (const char *name,
 	         to be clearly the wrong thing to pass as the
 	         unmangled name.  */
 	      sym =
-		lookup_block_symbol (block, name, mangled_name, domain);
+		lookup_block_symbol (block, name, linkage_name, domain);
 	      /* We kept static functions in minimal symbol table as well as
 	         in static scope. We want to find them in the symbol table. */
 	      if (!sym)
 		{
 		  block = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
 		  sym = lookup_block_symbol (block, name,
-					     mangled_name, domain);
+					     linkage_name, domain);
 		}
 
 	      /* NOTE: carlton/2002-12-04: The following comment was
@@ -1628,13 +1633,13 @@ find_main_psymtab (void)
    symbol (language_cplus or language_objc set) has both the encoded and 
    non-encoded names tested for a match.
 
-   If MANGLED_NAME is non-NULL, verify that any symbol we find has this
+   If LINKAGE_NAME is non-NULL, verify that any symbol we find has this
    particular mangled name.
 */
 
 struct symbol *
 lookup_block_symbol (register const struct block *block, const char *name,
-		     const char *mangled_name,
+		     const char *linkage_name,
 		     const domain_enum domain)
 {
   register int bot, top, inc;
@@ -1650,8 +1655,8 @@ lookup_block_symbol (register const struct block *block, const char *name,
       for (sym = BLOCK_BUCKET (block, hash_index); sym; sym = sym->hash_next)
 	{
 	  if (SYMBOL_DOMAIN (sym) == domain 
-	      && (mangled_name
-		  ? strcmp (DEPRECATED_SYMBOL_NAME (sym), mangled_name) == 0
+	      && (linkage_name
+		  ? strcmp (DEPRECATED_SYMBOL_NAME (sym), linkage_name) == 0
 		  : SYMBOL_MATCHES_NATURAL_NAME (sym, name)))
 	    return sym;
 	}
@@ -1720,8 +1725,8 @@ lookup_block_symbol (register const struct block *block, const char *name,
 	{
 	  sym = BLOCK_SYM (block, bot);
 	  if (SYMBOL_DOMAIN (sym) == domain
-	      && (mangled_name
-		  ? strcmp (DEPRECATED_SYMBOL_NAME (sym), mangled_name) == 0
+	      && (linkage_name
+		  ? strcmp (DEPRECATED_SYMBOL_NAME (sym), linkage_name) == 0
 		  : SYMBOL_MATCHES_NATURAL_NAME (sym, name)))
 	    {
 	      return sym;
@@ -1755,8 +1760,8 @@ lookup_block_symbol (register const struct block *block, const char *name,
 	{
 	  sym = BLOCK_SYM (block, bot);
 	  if (SYMBOL_DOMAIN (sym) == domain
-	      && (mangled_name
-		  ? strcmp (DEPRECATED_SYMBOL_NAME (sym), mangled_name) == 0
+	      && (linkage_name
+		  ? strcmp (DEPRECATED_SYMBOL_NAME (sym), linkage_name) == 0
 		  : SYMBOL_MATCHES_NATURAL_NAME (sym, name)))
 	    {
 	      /* If SYM has aliases, then use any alias that is active

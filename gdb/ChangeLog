@@ -1,3 +1,13 @@
+2003-05-18  David Carlton  <carlton@bactrian.org>
+
+	* symtab.c (lookup_symbol_aux): Rename 'mangled_name' argument to
+	'linkage_name'.  Add comment.
+	(lookup_symbol_aux_local): Rename 'mangled_name' argument to
+	'linkage_name'.
+	(lookup_symbol_aux_block, lookup_symbol_aux_symtabs)
+	(lookup_symbol_aux_psymtabs, lookup_symbol_aux_minsyms)
+	(lookup_block_symbol): Ditto.
+
 2003-05-16  Andrew Cagney  <cagney@redhat.com>
 
 	* gdbarch.sh (DEPRECATED_REGISTER_BYTES): Rename REGISTER_BYTES.
