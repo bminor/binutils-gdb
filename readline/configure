@@ -3,6 +3,9 @@
 # configure.in and a configure template.
 configdirs=
 
+# the debugger.
+#set -x
+
 #!/bin/sh
 
 # Configuration script template
@@ -279,6 +282,8 @@ for host in ${hosts} ; do
 		defaulttargets=true
 	fi
 
+	host_makefile_frag=config/hmake-${host}
+
 #### configure.in per-host parts come in here.
 
 ## end of per-host part.
@@ -287,8 +292,10 @@ for host in ${hosts} ; do
 	for target in ${targets} ; do
 
 		if [ -n "${verbose}" ] ; then
-			echo "	"target=\"${target}\"
+			echo host \= \"${host}\", target \= \"${target}\".
 		fi
+
+		target_makefile_frag=config/tmake-${target}
 
 #### configure.in per-target parts come in here.
 
@@ -428,14 +435,6 @@ for host in ${hosts} ; do
 			cat ${srcdir}/Makefile.in >> Makefile
 
 			# and shake thoroughly.
-			if [ -z "${host_makefile_frag}" ] ; then
-				host_makefile_frag=config/hmake-${host}
-			fi
-
-			if [ -z "${target_makefile_frag}" ] ; then
-				target_makefile_frag=config/tmake-${target}
-			fi
-
 			# Conditionalize the makefile for this host.
 			if [ -f ${srcdir}/${host_makefile_frag} ] ; then
 				sed -e "/^####/  r ${srcdir}/${host_makefile_frag}" Makefile > Makefile.tem
@@ -599,8 +598,14 @@ exit 0
 
 #
 # $Log$
-# Revision 1.1  1991/05/21 19:55:06  rich
-# Initial revision
+# Revision 1.2  1991/05/27 20:54:50  rich
+# fixed a bug in multiple targets
+#
+# Revision 1.14  1991/05/22  01:44:04  rich
+# remove gdb until config issues resolve.
+#
+# Revision 1.13  1991/05/19  08:00:09  rich
+# Added gdb.
 #
 # Revision 1.12  1991/05/19  00:32:13  rich
 # Changes to deal with missing subdirs gracefully, and changes dictated
