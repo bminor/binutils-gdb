@@ -1,3 +1,22 @@
+Thu Feb  8 14:01:03 1996  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
+
+	* elf32-m68k.c (elf_m68k_relocate_section): For a R_68K_RELATIVE
+	relocation put the addend both in the reloc entry and the data.
+	(elf_m68k_finish_dynamic_symbol): Likewise.  Mask out marker in
+	GOT offset value.
+
+	* elf32-m68k.c (elf_m68k_relocate_section): If -Bsymbolic, resolve
+	a R_68K_PCxx reloc against a defined global symbol directly.
+	(elf_m68k_check_relocs): Don't count such a reloc.
+
+	* elf32-m68k.c (elf_m68k_check_relocs): Don't record a symbol with
+	a PLTxx reloc as dynamic.  Disallow PLTxxO reloc against a local
+	symbol for now, otherwise always record the symbol as dynamic.
+	(elf_m68k_adjust_dynamic_symbol): If a symbol with a PLTxx reloc
+	is not referenced by a dynamic object, and we are not making a
+	shared object, then don't make a PLT entry.  If we do make a PLT
+	entry, make sure the symbol has been recorded as dynamic.
+
 Wed Feb  7 13:56:06 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.host: When making a shared library, set HLDFLAGS to
@@ -10,6 +29,9 @@ Wed Feb  7 13:56:06 1996  Ian Lance Taylor  <ian@cygnus.com>
 	(install): Skip stamp-tshlink during install.
 
 Wed Feb  7 13:37:39 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* elf32-ppc.c (ppc_elf_add_symbol_hook): Do not assume that the
+	linker sections have been set up yet.
 
 	* elf.c (make_mapping): Add an additional argument to suppress
 	making the first section include the program headers.
