@@ -414,6 +414,13 @@ primitive_value	:
 			{
 			  write_exp_elt_opcode (UNOP_IND);
 			}
+  		|	primitive_value POINTER mode_name
+			{
+			  write_exp_elt_opcode (UNOP_CAST);
+			  write_exp_elt_type (lookup_pointer_type ($3.type));
+			  write_exp_elt_opcode (UNOP_CAST);
+			  write_exp_elt_opcode (UNOP_IND);
+			}
                 |	value_name
 			{
 			  $$ = 0;	/* FIXME */
