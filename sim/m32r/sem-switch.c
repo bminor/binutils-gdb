@@ -175,7 +175,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
   CASE (sem, INSN_ADD) : /* add $dr,$sr */
 {
-#define FLD(f) abuf->fields.fmt_0_add.f
+#define FLD(f) abuf->fields.fmt_add.f
   new_pc = SEM_NEXT_PC (sem_arg, 2);
 
 * FLD (f_r1) = ADDSI (* FLD (f_r1), * FLD (f_r2));
@@ -185,9 +185,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 }
   BREAK (sem);
 
-  CASE (sem, INSN_ADD3) : /* add3 $dr,$sr,#$slo16 */
+  CASE (sem, INSN_ADD3) : /* add3 $dr,$sr,$hash$slo16 */
 {
-#define FLD(f) abuf->fields.fmt_1_add3.f
+#define FLD(f) abuf->fields.fmt_add3.f
   new_pc = SEM_NEXT_PC (sem_arg, 4);
 
 * FLD (f_r1) = ADDSI (* FLD (f_r2), FLD (f_simm16));
@@ -199,7 +199,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
   CASE (sem, INSN_AND) : /* and $dr,$sr */
 {
-#define FLD(f) abuf->fields.fmt_0_add.f
+#define FLD(f) abuf->fields.fmt_add.f
   new_pc = SEM_NEXT_PC (sem_arg, 2);
 
 * FLD (f_r1) = ANDSI (* FLD (f_r1), * FLD (f_r2));
@@ -209,9 +209,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 }
   BREAK (sem);
 
-  CASE (sem, INSN_AND3) : /* and3 $dr,$sr,#$uimm16 */
+  CASE (sem, INSN_AND3) : /* and3 $dr,$sr,$uimm16 */
 {
-#define FLD(f) abuf->fields.fmt_2_and3.f
+#define FLD(f) abuf->fields.fmt_and3.f
   new_pc = SEM_NEXT_PC (sem_arg, 4);
 
 * FLD (f_r1) = ANDSI (* FLD (f_r2), FLD (f_uimm16));
@@ -223,7 +223,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
   CASE (sem, INSN_OR) : /* or $dr,$sr */
 {
-#define FLD(f) abuf->fields.fmt_0_add.f
+#define FLD(f) abuf->fields.fmt_add.f
   new_pc = SEM_NEXT_PC (sem_arg, 2);
 
 * FLD (f_r1) = ORSI (* FLD (f_r1), * FLD (f_r2));
@@ -233,9 +233,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 }
   BREAK (sem);
 
-  CASE (sem, INSN_OR3) : /* or3 $dr,$sr,#$ulo16 */
+  CASE (sem, INSN_OR3) : /* or3 $dr,$sr,$hash$ulo16 */
 {
-#define FLD(f) abuf->fields.fmt_3_or3.f
+#define FLD(f) abuf->fields.fmt_or3.f
   new_pc = SEM_NEXT_PC (sem_arg, 4);
 
 * FLD (f_r1) = ORSI (* FLD (f_r2), FLD (f_uimm16));
@@ -247,7 +247,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
   CASE (sem, INSN_XOR) : /* xor $dr,$sr */
 {
-#define FLD(f) abuf->fields.fmt_0_add.f
+#define FLD(f) abuf->fields.fmt_add.f
   new_pc = SEM_NEXT_PC (sem_arg, 2);
 
 * FLD (f_r1) = XORSI (* FLD (f_r1), * FLD (f_r2));
@@ -257,9 +257,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 }
   BREAK (sem);
 
-  CASE (sem, INSN_XOR3) : /* xor3 $dr,$sr,#$uimm16 */
+  CASE (sem, INSN_XOR3) : /* xor3 $dr,$sr,$uimm16 */
 {
-#define FLD(f) abuf->fields.fmt_2_and3.f
+#define FLD(f) abuf->fields.fmt_and3.f
   new_pc = SEM_NEXT_PC (sem_arg, 4);
 
 * FLD (f_r1) = XORSI (* FLD (f_r2), FLD (f_uimm16));
@@ -269,9 +269,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 }
   BREAK (sem);
 
-  CASE (sem, INSN_ADDI) : /* addi $dr,#$simm8 */
+  CASE (sem, INSN_ADDI) : /* addi $dr,$simm8 */
 {
-#define FLD(f) abuf->fields.fmt_4_addi.f
+#define FLD(f) abuf->fields.fmt_addi.f
   new_pc = SEM_NEXT_PC (sem_arg, 2);
 
 * FLD (f_r1) = ADDSI (* FLD (f_r1), FLD (f_simm8));
@@ -283,7 +283,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
   CASE (sem, INSN_ADDV) : /* addv $dr,$sr */
 {
-#define FLD(f) abuf->fields.fmt_5_addv.f
+#define FLD(f) abuf->fields.fmt_addv.f
   new_pc = SEM_NEXT_PC (sem_arg, 2);
 
 do {
@@ -300,9 +300,9 @@ do {
 }
   BREAK (sem);
 
-  CASE (sem, INSN_ADDV3) : /* addv3 $dr,$sr,#$simm16 */
+  CASE (sem, INSN_ADDV3) : /* addv3 $dr,$sr,$simm16 */
 {
-#define FLD(f) abuf->fields.fmt_6_addv3.f
+#define FLD(f) abuf->fields.fmt_addv3.f
   new_pc = SEM_NEXT_PC (sem_arg, 4);
 
 do {
@@ -321,7 +321,7 @@ do {
 
   CASE (sem, INSN_ADDX) : /* addx $dr,$sr */
 {
-#define FLD(f) abuf->fields.fmt_7_addx.f
+#define FLD(f) abuf->fields.fmt_addx.f
   new_pc = SEM_NEXT_PC (sem_arg, 2);
 
 do {
@@ -340,7 +340,7 @@ do {
 
   CASE (sem, INSN_BC8) : /* bc $disp8 */
 {
-#define FLD(f) abuf->fields.fmt_8_bc8.f
+#define FLD(f) abuf->fields.fmt_bc8.f
   new_pc = SEM_NEXT_PC (sem_arg, 2);
 
 if (CPU (h_cond)) {
@@ -354,7 +354,7 @@ if (CPU (h_cond)) {
 
   CASE (sem, INSN_BC24) : /* bc $disp24 */
 {
-#define FLD(f) abuf->fields.fmt_9_bc24.f
+#define FLD(f) abuf->fields.fmt_bc24.f
   new_pc = SEM_NEXT_PC (sem_arg, 4);
 
 if (CPU (h_cond)) {
@@ -368,7 +368,7 @@ if (CPU (h_cond)) {
 
   CASE (sem, INSN_BEQ) : /* beq $src1,$src2,$disp16 */
 {
-#define FLD(f) abuf->fields.fmt_10_beq.f
+#define FLD(f) abuf->fields.fmt_beq.f
   new_pc = SEM_NEXT_PC (sem_arg, 4);
 
 if (EQSI (* FLD (f_r1), * FLD (f_r2))) {
@@ -382,7 +382,7 @@ if (EQSI (* FLD (f_r1), * FLD (f_r2))) {
 
   CASE (sem, INSN_BEQZ) : /* beqz $src2,$disp16 */
 {
-#define FLD(f) abuf->fields.fmt_11_beqz.f
+#define FLD(f) abuf->fields.fmt_beqz.f
   new_pc = SEM_NEXT_PC (sem_arg, 4);
 
 if (EQSI (* FLD (f_r2), 0)) {
@@ -396,7 +396,7 @@ if (EQSI (* FLD (f_r2), 0)) {
 
   CASE (sem, INSN_BGEZ) : /* bgez $src2,$disp16 */
 {
-#define FLD(f) abuf->fields.fmt_11_beqz.f
+#define FLD(f) abuf->fields.fmt_beqz.f
   new_pc = SEM_NEXT_PC (sem_arg, 4);
 
 if (GESI (* FLD (f_r2), 0)) {
@@ -410,7 +410,7 @@ if (GESI (* FLD (f_r2), 0)) {
 
   CASE (sem, INSN_BGTZ) : /* bgtz $src2,$disp16 */
 {
-#define FLD(f) abuf->fields.fmt_11_beqz.f
+#define FLD(f) abuf->fields.fmt_beqz.f
   new_pc = SEM_NEXT_PC (sem_arg, 4);
 
 if (GTSI (* FLD (f_r2), 0)) {
@@ -424,7 +424,7 @@ if (GTSI (* FLD (f_r2), 0)) {
 
   CASE (sem, INSN_BLEZ) : /* blez $src2,$disp16 */
 {
-#define FLD(f) abuf->fields.fmt_11_beqz.f
+#define FLD(f) abuf->fields.fmt_beqz.f
   new_pc = SEM_NEXT_PC (sem_arg, 4);
 
 if (LESI (* FLD (f_r2), 0)) {
@@ -438,7 +438,7 @@ if (LESI (* FLD (f_r2), 0)) {
 
   CASE (sem, INSN_BLTZ) : /* bltz $src2,$disp16 */
 {
-#define FLD(f) abuf->fields.fmt_11_beqz.f
+#define FLD(f) abuf->fields.fmt_beqz.f
   new_pc = SEM_NEXT_PC (sem_arg, 4);
 
 if (LTSI (* FLD (f_r2), 0)) {
@@ -452,7 +452,7 @@ if (LTSI (* FLD (f_r2), 0)) {
 
   CASE (sem, INSN_BNEZ) : /* bnez $src2,$disp16 */
 {
-#define FLD(f) abuf->fields.fmt_11_beqz.f
+#define FLD(f) abuf->fields.fmt_beqz.f
   new_pc = SEM_NEXT_PC (sem_arg, 4);
 
 if (NESI (* FLD (f_r2), 0)) {
@@ -466,7 +466,7 @@ if (NESI (* FLD (f_r2), 0)) {
 
   CASE (sem, INSN_BL8) : /* bl $disp8 */
 {
-#define FLD(f) abuf->fields.fmt_12_bl8.f
+#define FLD(f) abuf->fields.fmt_bl8.f
   new_pc = SEM_NEXT_PC (sem_arg, 2);
 
 do {
@@ -482,7 +482,7 @@ do {
 
   CASE (sem, INSN_BL24) : /* bl $disp24 */
 {
-#define FLD(f) abuf->fields.fmt_13_bl24.f
+#define FLD(f) abuf->fields.fmt_bl24.f
   new_pc = SEM_NEXT_PC (sem_arg, 4);
 
 do {
@@ -498,7 +498,7 @@ do {
 
   CASE (sem, INSN_BNC8) : /* bnc $disp8 */
 {
-#define FLD(f) abuf->fields.fmt_8_bc8.f
+#define FLD(f) abuf->fields.fmt_bc8.f
   new_pc = SEM_NEXT_PC (sem_arg, 2);
 
 if (NOTBI (CPU (h_cond))) {
@@ -512,7 +512,7 @@ if (NOTBI (CPU (h_cond))) {
 
   CASE (sem, INSN_BNC24) : /* bnc $disp24 */
 {
-#define FLD(f) abuf->fields.fmt_9_bc24.f
+#define FLD(f) abuf->fields.fmt_bc24.f
   new_pc = SEM_NEXT_PC (sem_arg, 4);
 
 if (NOTBI (CPU (h_cond))) {
@@ -526,7 +526,7 @@ if (NOTBI (CPU (h_cond))) {
 
   CASE (sem, INSN_BNE) : /* bne $src1,$src2,$disp16 */
 {
-#define FLD(f) abuf->fields.fmt_10_beq.f
+#define FLD(f) abuf->fields.fmt_beq.f
   new_pc = SEM_NEXT_PC (sem_arg, 4);
 
 if (NESI (* FLD (f_r1), * FLD (f_r2))) {
@@ -540,7 +540,7 @@ if (NESI (* FLD (f_r1), * FLD (f_r2))) {
 
   CASE (sem, INSN_BRA8) : /* bra $disp8 */
 {
-#define FLD(f) abuf->fields.fmt_14_bra8.f
+#define FLD(f) abuf->fields.fmt_bra8.f
   new_pc = SEM_NEXT_PC (sem_arg, 2);
 
   BRANCH_NEW_PC (new_pc, SEM_BRANCH_VIA_CACHE (sem_arg, FLD (f_disp8)));
@@ -552,7 +552,7 @@ if (NESI (* FLD (f_r1), * FLD (f_r2))) {
 
   CASE (sem, INSN_BRA24) : /* bra $disp24 */
 {
-#define FLD(f) abuf->fields.fmt_15_bra24.f
+#define FLD(f) abuf->fields.fmt_bra24.f
   new_pc = SEM_NEXT_PC (sem_arg, 4);
 
   BRANCH_NEW_PC (new_pc, SEM_BRANCH_VIA_CACHE (sem_arg, FLD (f_disp24)));
@@ -564,7 +564,7 @@ if (NESI (* FLD (f_r1), * FLD (f_r2))) {
 
   CASE (sem, INSN_CMP) : /* cmp $src1,$src2 */
 {
-#define FLD(f) abuf->fields.fmt_16_cmp.f
+#define FLD(f) abuf->fields.fmt_cmp.f
   new_pc = SEM_NEXT_PC (sem_arg, 2);
 
   CPU (h_cond) = LTSI (* FLD (f_r1), * FLD (f_r2));
@@ -574,9 +574,9 @@ if (NESI (* FLD (f_r1), * FLD (f_r2))) {
 }
   BREAK (sem);
 
-  CASE (sem, INSN_CMPI) : /* cmpi $src2,#$simm16 */
+  CASE (sem, INSN_CMPI) : /* cmpi $src2,$simm16 */
 {
-#define FLD(f) abuf->fields.fmt_17_cmpi.f
+#define FLD(f) abuf->fields.fmt_cmpi.f
   new_pc = SEM_NEXT_PC (sem_arg, 4);
 
   CPU (h_cond) = LTSI (* FLD (f_r2), FLD (f_simm16));
@@ -588,7 +588,7 @@ if (NESI (* FLD (f_r1), * FLD (f_r2))) {
 
   CASE (sem, INSN_CMPU) : /* cmpu $src1,$src2 */
 {
-#define FLD(f) abuf->fields.fmt_16_cmp.f
+#define FLD(f) abuf->fields.fmt_cmp.f
   new_pc = SEM_NEXT_PC (sem_arg, 2);
 
   CPU (h_cond) = LTUSI (* FLD (f_r1), * FLD (f_r2));
@@ -598,12 +598,12 @@ if (NESI (* FLD (f_r1), * FLD (f_r2))) {
 }
   BREAK (sem);
 
-  CASE (sem, INSN_CMPUI) : /* cmpui $src2,#$uimm16 */
+  CASE (sem, INSN_CMPUI) : /* cmpui $src2,$simm16 */
 {
-#define FLD(f) abuf->fields.fmt_18_cmpui.f
+#define FLD(f) abuf->fields.fmt_cmpi.f
   new_pc = SEM_NEXT_PC (sem_arg, 4);
 
-  CPU (h_cond) = LTUSI (* FLD (f_r2), FLD (f_uimm16));
+  CPU (h_cond) = LTUSI (* FLD (f_r2), FLD (f_simm16));
   TRACE_RESULT (current_cpu, "condbit", 'x', CPU (h_cond));
 
 #undef FLD
@@ -612,7 +612,7 @@ if (NESI (* FLD (f_r1), * FLD (f_r2))) {
 
   CASE (sem, INSN_DIV) : /* div $dr,$sr */
 {
-#define FLD(f) abuf->fields.fmt_19_div.f
+#define FLD(f) abuf->fields.fmt_div.f
   new_pc = SEM_NEXT_PC (sem_arg, 4);
 
 if (NESI (* FLD (f_r2), 0)) {
@@ -626,7 +626,7 @@ if (NESI (* FLD (f_r2), 0)) {
 
   CASE (sem, INSN_DIVU) : /* divu $dr,$sr */
 {
-#define FLD(f) abuf->fields.fmt_19_div.f
+#define FLD(f) abuf->fields.fmt_div.f
   new_pc = SEM_NEXT_PC (sem_arg, 4);
 
 if (NESI (* FLD (f_r2), 0)) {
@@ -640,7 +640,7 @@ if (NESI (* FLD (f_r2), 0)) {
 
   CASE (sem, INSN_REM) : /* rem $dr,$sr */
 {
-#define FLD(f) abuf->fields.fmt_19_div.f
+#define FLD(f) abuf->fields.fmt_div.f
   new_pc = SEM_NEXT_PC (sem_arg, 4);
 
 if (NESI (* FLD (f_r2), 0)) {
@@ -654,7 +654,7 @@ if (NESI (* FLD (f_r2), 0)) {
 
   CASE (sem, INSN_REMU) : /* remu $dr,$sr */
 {
-#define FLD(f) abuf->fields.fmt_19_div.f
+#define FLD(f) abuf->fields.fmt_div.f
   new_pc = SEM_NEXT_PC (sem_arg, 4);
 
 if (NESI (* FLD (f_r2), 0)) {
@@ -668,7 +668,7 @@ if (NESI (* FLD (f_r2), 0)) {
 
   CASE (sem, INSN_JL) : /* jl $sr */
 {
-#define FLD(f) abuf->fields.fmt_20_jl.f
+#define FLD(f) abuf->fields.fmt_jl.f
   new_pc = SEM_NEXT_PC (sem_arg, 2);
 
 do {
@@ -687,7 +687,7 @@ do {
 
   CASE (sem, INSN_JMP) : /* jmp $sr */
 {
-#define FLD(f) abuf->fields.fmt_21_jmp.f
+#define FLD(f) abuf->fields.fmt_jmp.f
   new_pc = SEM_NEXT_PC (sem_arg, 2);
 
   BRANCH_NEW_PC (new_pc, SEM_BRANCH_VIA_ADDR (sem_arg, * FLD (f_r2)));
@@ -699,7 +699,7 @@ do {
 
   CASE (sem, INSN_LD) : /* ld $dr,@$sr */
 {
-#define FLD(f) abuf->fields.fmt_22_ld.f
+#define FLD(f) abuf->fields.fmt_ld.f
   new_pc = SEM_NEXT_PC (sem_arg, 2);
 
 * FLD (f_r1) = GETMEMSI (current_cpu, * FLD (f_r2));
@@ -711,7 +711,7 @@ do {
 
   CASE (sem, INSN_LD_D) : /* ld $dr,@($slo16,$sr) */
 {
-#define FLD(f) abuf->fields.fmt_23_ld_d.f
+#define FLD(f) abuf->fields.fmt_ld_d.f
   new_pc = SEM_NEXT_PC (sem_arg, 4);
 
 * FLD (f_r1) = GETMEMSI (current_cpu, ADDSI (* FLD (f_r2), FLD (f_simm16)));
@@ -723,7 +723,7 @@ do {
 
   CASE (sem, INSN_LDB) : /* ldb $dr,@$sr */
 {
-#define FLD(f) abuf->fields.fmt_24_ldb.f
+#define FLD(f) abuf->fields.fmt_ldb.f
   new_pc = SEM_NEXT_PC (sem_arg, 2);
 
 * FLD (f_r1) = EXTQISI (GETMEMQI (current_cpu, * FLD (f_r2)));
@@ -735,7 +735,7 @@ do {
 
   CASE (sem, INSN_LDB_D) : /* ldb $dr,@($slo16,$sr) */
 {
-#define FLD(f) abuf->fields.fmt_25_ldb_d.f
+#define FLD(f) abuf->fields.fmt_ldb_d.f
   new_pc = SEM_NEXT_PC (sem_arg, 4);
 
 * FLD (f_r1) = EXTQISI (GETMEMQI (current_cpu, ADDSI (* FLD (f_r2), FLD (f_simm16))));
@@ -747,7 +747,7 @@ do {
 
   CASE (sem, INSN_LDH) : /* ldh $dr,@$sr */
 {
-#define FLD(f) abuf->fields.fmt_26_ldh.f
+#define FLD(f) abuf->fields.fmt_ldh.f
   new_pc = SEM_NEXT_PC (sem_arg, 2);
 
 * FLD (f_r1) = EXTHISI (GETMEMHI (current_cpu, * FLD (f_r2)));
@@ -759,7 +759,7 @@ do {
 
   CASE (sem, INSN_LDH_D) : /* ldh $dr,@($slo16,$sr) */
 {
-#define FLD(f) abuf->fields.fmt_27_ldh_d.f
+#define FLD(f) abuf->fields.fmt_ldh_d.f
   new_pc = SEM_NEXT_PC (sem_arg, 4);
 
 * FLD (f_r1) = EXTHISI (GETMEMHI (current_cpu, ADDSI (* FLD (f_r2), FLD (f_simm16))));
@@ -771,7 +771,7 @@ do {
 
   CASE (sem, INSN_LDUB) : /* ldub $dr,@$sr */
 {
-#define FLD(f) abuf->fields.fmt_24_ldb.f
+#define FLD(f) abuf->fields.fmt_ldb.f
   new_pc = SEM_NEXT_PC (sem_arg, 2);
 
 * FLD (f_r1) = ZEXTQISI (GETMEMQI (current_cpu, * FLD (f_r2)));
@@ -783,7 +783,7 @@ do {
 
   CASE (sem, INSN_LDUB_D) : /* ldub $dr,@($slo16,$sr) */
 {
-#define FLD(f) abuf->fields.fmt_25_ldb_d.f
+#define FLD(f) abuf->fields.fmt_ldb_d.f
   new_pc = SEM_NEXT_PC (sem_arg, 4);
 
 * FLD (f_r1) = ZEXTQISI (GETMEMQI (current_cpu, ADDSI (* FLD (f_r2), FLD (f_simm16))));
@@ -795,7 +795,7 @@ do {
 
   CASE (sem, INSN_LDUH) : /* lduh $dr,@$sr */
 {
-#define FLD(f) abuf->fields.fmt_26_ldh.f
+#define FLD(f) abuf->fields.fmt_ldh.f
   new_pc = SEM_NEXT_PC (sem_arg, 2);
 
 * FLD (f_r1) = ZEXTHISI (GETMEMHI (current_cpu, * FLD (f_r2)));
@@ -807,7 +807,7 @@ do {
 
   CASE (sem, INSN_LDUH_D) : /* lduh $dr,@($slo16,$sr) */
 {
-#define FLD(f) abuf->fields.fmt_27_ldh_d.f
+#define FLD(f) abuf->fields.fmt_ldh_d.f
   new_pc = SEM_NEXT_PC (sem_arg, 4);
 
 * FLD (f_r1) = ZEXTHISI (GETMEMHI (current_cpu, ADDSI (* FLD (f_r2), FLD (f_simm16))));
@@ -819,7 +819,7 @@ do {
 
   CASE (sem, INSN_LD_PLUS) : /* ld $dr,@$sr+ */
 {
-#define FLD(f) abuf->fields.fmt_28_ld_plus.f
+#define FLD(f) abuf->fields.fmt_ld_plus.f
   new_pc = SEM_NEXT_PC (sem_arg, 2);
 
 do {
@@ -836,9 +836,9 @@ do {
 }
   BREAK (sem);
 
-  CASE (sem, INSN_LD24) : /* ld24 $dr,#$uimm24 */
+  CASE (sem, INSN_LD24) : /* ld24 $dr,$uimm24 */
 {
-#define FLD(f) abuf->fields.fmt_29_ld24.f
+#define FLD(f) abuf->fields.fmt_ld24.f
   new_pc = SEM_NEXT_PC (sem_arg, 4);
 
 * FLD (f_r1) = FLD (f_uimm24);
@@ -848,9 +848,9 @@ do {
 }
   BREAK (sem);
 
-  CASE (sem, INSN_LDI8) : /* ldi $dr,#$simm8 */
+  CASE (sem, INSN_LDI8) : /* ldi $dr,$simm8 */
 {
-#define FLD(f) abuf->fields.fmt_30_ldi8.f
+#define FLD(f) abuf->fields.fmt_ldi8.f
   new_pc = SEM_NEXT_PC (sem_arg, 2);
 
 * FLD (f_r1) = FLD (f_simm8);
@@ -860,9 +860,9 @@ do {
 }
   BREAK (sem);
 
-  CASE (sem, INSN_LDI16) : /* ldi $dr,$slo16 */
+  CASE (sem, INSN_LDI16) : /* ldi $dr,$hash$slo16 */
 {
-#define FLD(f) abuf->fields.fmt_31_ldi16.f
+#define FLD(f) abuf->fields.fmt_ldi16.f
   new_pc = SEM_NEXT_PC (sem_arg, 4);
 
 * FLD (f_r1) = FLD (f_simm16);
@@ -874,7 +874,7 @@ do {
 
   CASE (sem, INSN_LOCK) : /* lock $dr,@$sr */
 {
-#define FLD(f) abuf->fields.fmt_32_lock.f
+#define FLD(f) abuf->fields.fmt_lock.f
   new_pc = SEM_NEXT_PC (sem_arg, 2);
 
 do {
@@ -890,11 +890,11 @@ do {
 
   CASE (sem, INSN_MACHI) : /* machi $src1,$src2 */
 {
-#define FLD(f) abuf->fields.fmt_33_machi.f
+#define FLD(f) abuf->fields.fmt_machi.f
   new_pc = SEM_NEXT_PC (sem_arg, 2);
 
-  CPU (h_accum) = SRADI (SLLDI (ADDDI (CPU (h_accum), MULDI (EXTSIDI (ANDSI (* FLD (f_r1), 0xffff0000)), EXTHIDI (TRUNCSIHI (SRASI (* FLD (f_r2), 16))))), 8), 8);
-  TRACE_RESULT (current_cpu, "accum", 'D', CPU (h_accum));
+m32r_h_accum_set (current_cpu, SRADI (SLLDI (ADDDI (m32r_h_accum_get (current_cpu), MULDI (EXTSIDI (ANDSI (* FLD (f_r1), 0xffff0000)), EXTHIDI (TRUNCSIHI (SRASI (* FLD (f_r2), 16))))), 8), 8));
+  TRACE_RESULT (current_cpu, "accum", 'D', m32r_h_accum_get (current_cpu));
 
 #undef FLD
 }
@@ -902,11 +902,11 @@ do {
 
   CASE (sem, INSN_MACLO) : /* maclo $src1,$src2 */
 {
-#define FLD(f) abuf->fields.fmt_33_machi.f
+#define FLD(f) abuf->fields.fmt_machi.f
   new_pc = SEM_NEXT_PC (sem_arg, 2);
 
-  CPU (h_accum) = SRADI (SLLDI (ADDDI (CPU (h_accum), MULDI (EXTSIDI (SLLSI (* FLD (f_r1), 16)), EXTHIDI (TRUNCSIHI (* FLD (f_r2))))), 8), 8);
-  TRACE_RESULT (current_cpu, "accum", 'D', CPU (h_accum));
+m32r_h_accum_set (current_cpu, SRADI (SLLDI (ADDDI (m32r_h_accum_get (current_cpu), MULDI (EXTSIDI (SLLSI (* FLD (f_r1), 16)), EXTHIDI (TRUNCSIHI (* FLD (f_r2))))), 8), 8));
+  TRACE_RESULT (current_cpu, "accum", 'D', m32r_h_accum_get (current_cpu));
 
 #undef FLD
 }
@@ -914,11 +914,11 @@ do {
 
   CASE (sem, INSN_MACWHI) : /* macwhi $src1,$src2 */
 {
-#define FLD(f) abuf->fields.fmt_33_machi.f
+#define FLD(f) abuf->fields.fmt_machi.f
   new_pc = SEM_NEXT_PC (sem_arg, 2);
 
-  CPU (h_accum) = SRADI (SLLDI (ADDDI (CPU (h_accum), MULDI (EXTSIDI (* FLD (f_r1)), EXTHIDI (TRUNCSIHI (SRASI (* FLD (f_r2), 16))))), 8), 8);
-  TRACE_RESULT (current_cpu, "accum", 'D', CPU (h_accum));
+m32r_h_accum_set (current_cpu, SRADI (SLLDI (ADDDI (m32r_h_accum_get (current_cpu), MULDI (EXTSIDI (* FLD (f_r1)), EXTHIDI (TRUNCSIHI (SRASI (* FLD (f_r2), 16))))), 8), 8));
+  TRACE_RESULT (current_cpu, "accum", 'D', m32r_h_accum_get (current_cpu));
 
 #undef FLD
 }
@@ -926,11 +926,11 @@ do {
 
   CASE (sem, INSN_MACWLO) : /* macwlo $src1,$src2 */
 {
-#define FLD(f) abuf->fields.fmt_33_machi.f
+#define FLD(f) abuf->fields.fmt_machi.f
   new_pc = SEM_NEXT_PC (sem_arg, 2);
 
-  CPU (h_accum) = SRADI (SLLDI (ADDDI (CPU (h_accum), MULDI (EXTSIDI (* FLD (f_r1)), EXTHIDI (TRUNCSIHI (* FLD (f_r2))))), 8), 8);
-  TRACE_RESULT (current_cpu, "accum", 'D', CPU (h_accum));
+m32r_h_accum_set (current_cpu, SRADI (SLLDI (ADDDI (m32r_h_accum_get (current_cpu), MULDI (EXTSIDI (* FLD (f_r1)), EXTHIDI (TRUNCSIHI (* FLD (f_r2))))), 8), 8));
+  TRACE_RESULT (current_cpu, "accum", 'D', m32r_h_accum_get (current_cpu));
 
 #undef FLD
 }
@@ -938,7 +938,7 @@ do {
 
   CASE (sem, INSN_MUL) : /* mul $dr,$sr */
 {
-#define FLD(f) abuf->fields.fmt_0_add.f
+#define FLD(f) abuf->fields.fmt_add.f
   new_pc = SEM_NEXT_PC (sem_arg, 2);
 
 * FLD (f_r1) = MULSI (* FLD (f_r1), * FLD (f_r2));
@@ -950,11 +950,11 @@ do {
 
   CASE (sem, INSN_MULHI) : /* mulhi $src1,$src2 */
 {
-#define FLD(f) abuf->fields.fmt_34_mulhi.f
+#define FLD(f) abuf->fields.fmt_mulhi.f
   new_pc = SEM_NEXT_PC (sem_arg, 2);
 
-  CPU (h_accum) = SRADI (SLLDI (MULDI (EXTSIDI (ANDSI (* FLD (f_r1), 0xffff0000)), EXTHIDI (TRUNCSIHI (SRASI (* FLD (f_r2), 16)))), 16), 16);
-  TRACE_RESULT (current_cpu, "accum", 'D', CPU (h_accum));
+m32r_h_accum_set (current_cpu, SRADI (SLLDI (MULDI (EXTSIDI (ANDSI (* FLD (f_r1), 0xffff0000)), EXTHIDI (TRUNCSIHI (SRASI (* FLD (f_r2), 16)))), 16), 16));
+  TRACE_RESULT (current_cpu, "accum", 'D', m32r_h_accum_get (current_cpu));
 
 #undef FLD
 }
@@ -962,11 +962,11 @@ do {
 
   CASE (sem, INSN_MULLO) : /* mullo $src1,$src2 */
 {
-#define FLD(f) abuf->fields.fmt_34_mulhi.f
+#define FLD(f) abuf->fields.fmt_mulhi.f
   new_pc = SEM_NEXT_PC (sem_arg, 2);
 
-  CPU (h_accum) = SRADI (SLLDI (MULDI (EXTSIDI (SLLSI (* FLD (f_r1), 16)), EXTHIDI (TRUNCSIHI (* FLD (f_r2)))), 16), 16);
-  TRACE_RESULT (current_cpu, "accum", 'D', CPU (h_accum));
+m32r_h_accum_set (current_cpu, SRADI (SLLDI (MULDI (EXTSIDI (SLLSI (* FLD (f_r1), 16)), EXTHIDI (TRUNCSIHI (* FLD (f_r2)))), 16), 16));
+  TRACE_RESULT (current_cpu, "accum", 'D', m32r_h_accum_get (current_cpu));
 
 #undef FLD
 }
@@ -974,11 +974,11 @@ do {
 
   CASE (sem, INSN_MULWHI) : /* mulwhi $src1,$src2 */
 {
-#define FLD(f) abuf->fields.fmt_34_mulhi.f
+#define FLD(f) abuf->fields.fmt_mulhi.f
   new_pc = SEM_NEXT_PC (sem_arg, 2);
 
-  CPU (h_accum) = SRADI (SLLDI (MULDI (EXTSIDI (* FLD (f_r1)), EXTHIDI (TRUNCSIHI (SRASI (* FLD (f_r2), 16)))), 8), 8);
-  TRACE_RESULT (current_cpu, "accum", 'D', CPU (h_accum));
+m32r_h_accum_set (current_cpu, SRADI (SLLDI (MULDI (EXTSIDI (* FLD (f_r1)), EXTHIDI (TRUNCSIHI (SRASI (* FLD (f_r2), 16)))), 8), 8));
+  TRACE_RESULT (current_cpu, "accum", 'D', m32r_h_accum_get (current_cpu));
 
 #undef FLD
 }
@@ -986,11 +986,11 @@ do {
 
   CASE (sem, INSN_MULWLO) : /* mulwlo $src1,$src2 */
 {
-#define FLD(f) abuf->fields.fmt_34_mulhi.f
+#define FLD(f) abuf->fields.fmt_mulhi.f
   new_pc = SEM_NEXT_PC (sem_arg, 2);
 
-  CPU (h_accum) = SRADI (SLLDI (MULDI (EXTSIDI (* FLD (f_r1)), EXTHIDI (TRUNCSIHI (* FLD (f_r2)))), 8), 8);
-  TRACE_RESULT (current_cpu, "accum", 'D', CPU (h_accum));
+m32r_h_accum_set (current_cpu, SRADI (SLLDI (MULDI (EXTSIDI (* FLD (f_r1)), EXTHIDI (TRUNCSIHI (* FLD (f_r2)))), 8), 8));
+  TRACE_RESULT (current_cpu, "accum", 'D', m32r_h_accum_get (current_cpu));
 
 #undef FLD
 }
@@ -998,7 +998,7 @@ do {
 
   CASE (sem, INSN_MV) : /* mv $dr,$sr */
 {
-#define FLD(f) abuf->fields.fmt_35_mv.f
+#define FLD(f) abuf->fields.fmt_mv.f
   new_pc = SEM_NEXT_PC (sem_arg, 2);
 
 * FLD (f_r1) = * FLD (f_r2);
@@ -1010,10 +1010,10 @@ do {
 
   CASE (sem, INSN_MVFACHI) : /* mvfachi $dr */
 {
-#define FLD(f) abuf->fields.fmt_36_mvfachi.f
+#define FLD(f) abuf->fields.fmt_mvfachi.f
   new_pc = SEM_NEXT_PC (sem_arg, 2);
 
-* FLD (f_r1) = TRUNCDISI (SRADI (CPU (h_accum), 32));
+* FLD (f_r1) = TRUNCDISI (SRADI (m32r_h_accum_get (current_cpu), 32));
   TRACE_RESULT (current_cpu, "dr", 'x', * FLD (f_r1));
 
 #undef FLD
@@ -1022,10 +1022,10 @@ do {
 
   CASE (sem, INSN_MVFACLO) : /* mvfaclo $dr */
 {
-#define FLD(f) abuf->fields.fmt_36_mvfachi.f
+#define FLD(f) abuf->fields.fmt_mvfachi.f
   new_pc = SEM_NEXT_PC (sem_arg, 2);
 
-* FLD (f_r1) = TRUNCDISI (CPU (h_accum));
+* FLD (f_r1) = TRUNCDISI (m32r_h_accum_get (current_cpu));
   TRACE_RESULT (current_cpu, "dr", 'x', * FLD (f_r1));
 
 #undef FLD
@@ -1034,10 +1034,10 @@ do {
 
   CASE (sem, INSN_MVFACMI) : /* mvfacmi $dr */
 {
-#define FLD(f) abuf->fields.fmt_36_mvfachi.f
+#define FLD(f) abuf->fields.fmt_mvfachi.f
   new_pc = SEM_NEXT_PC (sem_arg, 2);
 
-* FLD (f_r1) = TRUNCDISI (SRADI (CPU (h_accum), 16));
+* FLD (f_r1) = TRUNCDISI (SRADI (m32r_h_accum_get (current_cpu), 16));
   TRACE_RESULT (current_cpu, "dr", 'x', * FLD (f_r1));
 
 #undef FLD
@@ -1046,7 +1046,7 @@ do {
 
   CASE (sem, INSN_MVFC) : /* mvfc $dr,$scr */
 {
-#define FLD(f) abuf->fields.fmt_37_mvfc.f
+#define FLD(f) abuf->fields.fmt_mvfc.f
   new_pc = SEM_NEXT_PC (sem_arg, 2);
 
 * FLD (f_r1) = m32r_h_cr_get (current_cpu, FLD (f_r2));
@@ -1058,11 +1058,11 @@ do {
 
   CASE (sem, INSN_MVTACHI) : /* mvtachi $src1 */
 {
-#define FLD(f) abuf->fields.fmt_38_mvtachi.f
+#define FLD(f) abuf->fields.fmt_mvtachi.f
   new_pc = SEM_NEXT_PC (sem_arg, 2);
 
-  CPU (h_accum) = ORDI (ANDDI (CPU (h_accum), MAKEDI (0, 0xffffffff)), SLLDI (EXTSIDI (* FLD (f_r1)), 32));
-  TRACE_RESULT (current_cpu, "accum", 'D', CPU (h_accum));
+m32r_h_accum_set (current_cpu, ORDI (ANDDI (m32r_h_accum_get (current_cpu), MAKEDI (0, 0xffffffff)), SLLDI (EXTSIDI (* FLD (f_r1)), 32)));
+  TRACE_RESULT (current_cpu, "accum", 'D', m32r_h_accum_get (current_cpu));
 
 #undef FLD
 }
@@ -1070,11 +1070,11 @@ do {
 
   CASE (sem, INSN_MVTACLO) : /* mvtaclo $src1 */
 {
-#define FLD(f) abuf->fields.fmt_38_mvtachi.f
+#define FLD(f) abuf->fields.fmt_mvtachi.f
   new_pc = SEM_NEXT_PC (sem_arg, 2);
 
-  CPU (h_accum) = ORDI (ANDDI (CPU (h_accum), MAKEDI (0xffffffff, 0)), ZEXTSIDI (* FLD (f_r1)));
-  TRACE_RESULT (current_cpu, "accum", 'D', CPU (h_accum));
+m32r_h_accum_set (current_cpu, ORDI (ANDDI (m32r_h_accum_get (current_cpu), MAKEDI (0xffffffff, 0)), ZEXTSIDI (* FLD (f_r1))));
+  TRACE_RESULT (current_cpu, "accum", 'D', m32r_h_accum_get (current_cpu));
 
 #undef FLD
 }
@@ -1082,7 +1082,7 @@ do {
 
   CASE (sem, INSN_MVTC) : /* mvtc $sr,$dcr */
 {
-#define FLD(f) abuf->fields.fmt_39_mvtc.f
+#define FLD(f) abuf->fields.fmt_mvtc.f
   new_pc = SEM_NEXT_PC (sem_arg, 2);
 
 m32r_h_cr_set (current_cpu, FLD (f_r1), * FLD (f_r2));
@@ -1094,7 +1094,7 @@ m32r_h_cr_set (current_cpu, FLD (f_r1), * FLD (f_r2));
 
   CASE (sem, INSN_NEG) : /* neg $dr,$sr */
 {
-#define FLD(f) abuf->fields.fmt_35_mv.f
+#define FLD(f) abuf->fields.fmt_mv.f
   new_pc = SEM_NEXT_PC (sem_arg, 2);
 
 * FLD (f_r1) = NEGSI (* FLD (f_r2));
@@ -1106,7 +1106,7 @@ m32r_h_cr_set (current_cpu, FLD (f_r1), * FLD (f_r2));
 
   CASE (sem, INSN_NOP) : /* nop */
 {
-#define FLD(f) abuf->fields.fmt_40_nop.f
+#define FLD(f) abuf->fields.fmt_nop.f
   new_pc = SEM_NEXT_PC (sem_arg, 2);
 
 PROFILE_COUNT_FILLNOPS (current_cpu, abuf->addr);
@@ -1117,7 +1117,7 @@ PROFILE_COUNT_FILLNOPS (current_cpu, abuf->addr);
 
   CASE (sem, INSN_NOT) : /* not $dr,$sr */
 {
-#define FLD(f) abuf->fields.fmt_35_mv.f
+#define FLD(f) abuf->fields.fmt_mv.f
   new_pc = SEM_NEXT_PC (sem_arg, 2);
 
 * FLD (f_r1) = INVSI (* FLD (f_r2));
@@ -1129,15 +1129,15 @@ PROFILE_COUNT_FILLNOPS (current_cpu, abuf->addr);
 
   CASE (sem, INSN_RAC) : /* rac */
 {
-#define FLD(f) abuf->fields.fmt_41_rac.f
+#define FLD(f) abuf->fields.fmt_rac.f
   new_pc = SEM_NEXT_PC (sem_arg, 2);
 
 do {
   DI tmp_tmp1;
-  tmp_tmp1 = SLLDI (CPU (h_accum), 1);
+  tmp_tmp1 = SLLDI (m32r_h_accum_get (current_cpu), 1);
   tmp_tmp1 = ADDDI (tmp_tmp1, MAKEDI (0, 32768));
-  CPU (h_accum) = (GTDI (tmp_tmp1, MAKEDI (32767, 0xffff0000))) ? (MAKEDI (32767, 0xffff0000)) : (LTDI (tmp_tmp1, MAKEDI (0xffff8000, 0))) ? (MAKEDI (0xffff8000, 0)) : (ANDDI (tmp_tmp1, MAKEDI (0xffffffff, 0xffff0000)));
-  TRACE_RESULT (current_cpu, "accum", 'D', CPU (h_accum));
+m32r_h_accum_set (current_cpu, (GTDI (tmp_tmp1, MAKEDI (32767, 0xffff0000))) ? (MAKEDI (32767, 0xffff0000)) : (LTDI (tmp_tmp1, MAKEDI (0xffff8000, 0))) ? (MAKEDI (0xffff8000, 0)) : (ANDDI (tmp_tmp1, MAKEDI (0xffffffff, 0xffff0000))));
+  TRACE_RESULT (current_cpu, "accum", 'D', m32r_h_accum_get (current_cpu));
 } while (0);
 
 #undef FLD
@@ -1146,24 +1146,24 @@ do {
 
   CASE (sem, INSN_RACH) : /* rach */
 {
-#define FLD(f) abuf->fields.fmt_41_rac.f
+#define FLD(f) abuf->fields.fmt_rac.f
   new_pc = SEM_NEXT_PC (sem_arg, 2);
 
 do {
   DI tmp_tmp1;
-  tmp_tmp1 = ANDDI (CPU (h_accum), MAKEDI (16777215, 0xffffffff));
+  tmp_tmp1 = ANDDI (m32r_h_accum_get (current_cpu), MAKEDI (16777215, 0xffffffff));
 if (ANDIFSI (GEDI (tmp_tmp1, MAKEDI (16383, 0x80000000)), LEDI (tmp_tmp1, MAKEDI (8388607, 0xffffffff)))) {
   tmp_tmp1 = MAKEDI (16383, 0x80000000);
 } else {
 if (ANDIFSI (GEDI (tmp_tmp1, MAKEDI (8388608, 0)), LEDI (tmp_tmp1, MAKEDI (16760832, 0)))) {
   tmp_tmp1 = MAKEDI (16760832, 0);
 } else {
-  tmp_tmp1 = ANDDI (ADDDI (CPU (h_accum), MAKEDI (0, 1073741824)), MAKEDI (0xffffffff, 0x80000000));
+  tmp_tmp1 = ANDDI (ADDDI (m32r_h_accum_get (current_cpu), MAKEDI (0, 1073741824)), MAKEDI (0xffffffff, 0x80000000));
 }
 }
   tmp_tmp1 = SLLDI (tmp_tmp1, 1);
-  CPU (h_accum) = SRADI (SLLDI (tmp_tmp1, 7), 7);
-  TRACE_RESULT (current_cpu, "accum", 'D', CPU (h_accum));
+m32r_h_accum_set (current_cpu, SRADI (SLLDI (tmp_tmp1, 7), 7));
+  TRACE_RESULT (current_cpu, "accum", 'D', m32r_h_accum_get (current_cpu));
 } while (0);
 
 #undef FLD
@@ -1172,7 +1172,7 @@ if (ANDIFSI (GEDI (tmp_tmp1, MAKEDI (8388608, 0)), LEDI (tmp_tmp1, MAKEDI (16760
 
   CASE (sem, INSN_RTE) : /* rte */
 {
-#define FLD(f) abuf->fields.fmt_42_rte.f
+#define FLD(f) abuf->fields.fmt_rte.f
   new_pc = SEM_NEXT_PC (sem_arg, 2);
 
 do {
@@ -1182,7 +1182,7 @@ do {
   TRACE_RESULT (current_cpu, "h-ie-0", 'x', CPU (h_ie));
   CPU (h_cond) = CPU (h_bcond);
   TRACE_RESULT (current_cpu, "condbit", 'x', CPU (h_cond));
-  BRANCH_NEW_PC (new_pc, SEM_BRANCH_VIA_ADDR (sem_arg, CPU (h_bpc)));
+  BRANCH_NEW_PC (new_pc, SEM_BRANCH_VIA_ADDR (sem_arg, ANDSI (CPU (h_bpc), -4)));
   TRACE_RESULT (current_cpu, "pc", 'x', CPU (h_pc));
 } while (0);
 
@@ -1190,9 +1190,9 @@ do {
 }
   BREAK (sem);
 
-  CASE (sem, INSN_SETH) : /* seth $dr,#$hi16 */
+  CASE (sem, INSN_SETH) : /* seth $dr,$hash$hi16 */
 {
-#define FLD(f) abuf->fields.fmt_43_seth.f
+#define FLD(f) abuf->fields.fmt_seth.f
   new_pc = SEM_NEXT_PC (sem_arg, 4);
 
 * FLD (f_r1) = SLLSI (FLD (f_hi16), 16);
@@ -1204,7 +1204,7 @@ do {
 
   CASE (sem, INSN_SLL) : /* sll $dr,$sr */
 {
-#define FLD(f) abuf->fields.fmt_0_add.f
+#define FLD(f) abuf->fields.fmt_add.f
   new_pc = SEM_NEXT_PC (sem_arg, 2);
 
 * FLD (f_r1) = SLLSI (* FLD (f_r1), ANDSI (* FLD (f_r2), 31));
@@ -1214,9 +1214,9 @@ do {
 }
   BREAK (sem);
 
-  CASE (sem, INSN_SLL3) : /* sll3 $dr,$sr,#$simm16 */
+  CASE (sem, INSN_SLL3) : /* sll3 $dr,$sr,$simm16 */
 {
-#define FLD(f) abuf->fields.fmt_44_sll3.f
+#define FLD(f) abuf->fields.fmt_sll3.f
   new_pc = SEM_NEXT_PC (sem_arg, 4);
 
 * FLD (f_r1) = SLLSI (* FLD (f_r2), ANDSI (FLD (f_simm16), 31));
@@ -1226,9 +1226,9 @@ do {
 }
   BREAK (sem);
 
-  CASE (sem, INSN_SLLI) : /* slli $dr,#$uimm5 */
+  CASE (sem, INSN_SLLI) : /* slli $dr,$uimm5 */
 {
-#define FLD(f) abuf->fields.fmt_45_slli.f
+#define FLD(f) abuf->fields.fmt_slli.f
   new_pc = SEM_NEXT_PC (sem_arg, 2);
 
 * FLD (f_r1) = SLLSI (* FLD (f_r1), FLD (f_uimm5));
@@ -1240,7 +1240,7 @@ do {
 
   CASE (sem, INSN_SRA) : /* sra $dr,$sr */
 {
-#define FLD(f) abuf->fields.fmt_0_add.f
+#define FLD(f) abuf->fields.fmt_add.f
   new_pc = SEM_NEXT_PC (sem_arg, 2);
 
 * FLD (f_r1) = SRASI (* FLD (f_r1), ANDSI (* FLD (f_r2), 31));
@@ -1250,9 +1250,9 @@ do {
 }
   BREAK (sem);
 
-  CASE (sem, INSN_SRA3) : /* sra3 $dr,$sr,#$simm16 */
+  CASE (sem, INSN_SRA3) : /* sra3 $dr,$sr,$simm16 */
 {
-#define FLD(f) abuf->fields.fmt_44_sll3.f
+#define FLD(f) abuf->fields.fmt_sll3.f
   new_pc = SEM_NEXT_PC (sem_arg, 4);
 
 * FLD (f_r1) = SRASI (* FLD (f_r2), ANDSI (FLD (f_simm16), 31));
@@ -1262,9 +1262,9 @@ do {
 }
   BREAK (sem);
 
-  CASE (sem, INSN_SRAI) : /* srai $dr,#$uimm5 */
+  CASE (sem, INSN_SRAI) : /* srai $dr,$uimm5 */
 {
-#define FLD(f) abuf->fields.fmt_45_slli.f
+#define FLD(f) abuf->fields.fmt_slli.f
   new_pc = SEM_NEXT_PC (sem_arg, 2);
 
 * FLD (f_r1) = SRASI (* FLD (f_r1), FLD (f_uimm5));
@@ -1276,7 +1276,7 @@ do {
 
   CASE (sem, INSN_SRL) : /* srl $dr,$sr */
 {
-#define FLD(f) abuf->fields.fmt_0_add.f
+#define FLD(f) abuf->fields.fmt_add.f
   new_pc = SEM_NEXT_PC (sem_arg, 2);
 
 * FLD (f_r1) = SRLSI (* FLD (f_r1), ANDSI (* FLD (f_r2), 31));
@@ -1286,9 +1286,9 @@ do {
 }
   BREAK (sem);
 
-  CASE (sem, INSN_SRL3) : /* srl3 $dr,$sr,#$simm16 */
+  CASE (sem, INSN_SRL3) : /* srl3 $dr,$sr,$simm16 */
 {
-#define FLD(f) abuf->fields.fmt_44_sll3.f
+#define FLD(f) abuf->fields.fmt_sll3.f
   new_pc = SEM_NEXT_PC (sem_arg, 4);
 
 * FLD (f_r1) = SRLSI (* FLD (f_r2), ANDSI (FLD (f_simm16), 31));
@@ -1298,9 +1298,9 @@ do {
 }
   BREAK (sem);
 
-  CASE (sem, INSN_SRLI) : /* srli $dr,#$uimm5 */
+  CASE (sem, INSN_SRLI) : /* srli $dr,$uimm5 */
 {
-#define FLD(f) abuf->fields.fmt_45_slli.f
+#define FLD(f) abuf->fields.fmt_slli.f
   new_pc = SEM_NEXT_PC (sem_arg, 2);
 
 * FLD (f_r1) = SRLSI (* FLD (f_r1), FLD (f_uimm5));
@@ -1312,7 +1312,7 @@ do {
 
   CASE (sem, INSN_ST) : /* st $src1,@$src2 */
 {
-#define FLD(f) abuf->fields.fmt_46_st.f
+#define FLD(f) abuf->fields.fmt_st.f
   new_pc = SEM_NEXT_PC (sem_arg, 2);
 
 SETMEMSI (current_cpu, * FLD (f_r2), * FLD (f_r1));
@@ -1324,7 +1324,7 @@ SETMEMSI (current_cpu, * FLD (f_r2), * FLD (f_r1));
 
   CASE (sem, INSN_ST_D) : /* st $src1,@($slo16,$src2) */
 {
-#define FLD(f) abuf->fields.fmt_47_st_d.f
+#define FLD(f) abuf->fields.fmt_st_d.f
   new_pc = SEM_NEXT_PC (sem_arg, 4);
 
 SETMEMSI (current_cpu, ADDSI (* FLD (f_r2), FLD (f_simm16)), * FLD (f_r1));
@@ -1336,7 +1336,7 @@ SETMEMSI (current_cpu, ADDSI (* FLD (f_r2), FLD (f_simm16)), * FLD (f_r1));
 
   CASE (sem, INSN_STB) : /* stb $src1,@$src2 */
 {
-#define FLD(f) abuf->fields.fmt_48_stb.f
+#define FLD(f) abuf->fields.fmt_stb.f
   new_pc = SEM_NEXT_PC (sem_arg, 2);
 
 SETMEMQI (current_cpu, * FLD (f_r2), * FLD (f_r1));
@@ -1348,7 +1348,7 @@ SETMEMQI (current_cpu, * FLD (f_r2), * FLD (f_r1));
 
   CASE (sem, INSN_STB_D) : /* stb $src1,@($slo16,$src2) */
 {
-#define FLD(f) abuf->fields.fmt_49_stb_d.f
+#define FLD(f) abuf->fields.fmt_stb_d.f
   new_pc = SEM_NEXT_PC (sem_arg, 4);
 
 SETMEMQI (current_cpu, ADDSI (* FLD (f_r2), FLD (f_simm16)), * FLD (f_r1));
@@ -1360,7 +1360,7 @@ SETMEMQI (current_cpu, ADDSI (* FLD (f_r2), FLD (f_simm16)), * FLD (f_r1));
 
   CASE (sem, INSN_STH) : /* sth $src1,@$src2 */
 {
-#define FLD(f) abuf->fields.fmt_50_sth.f
+#define FLD(f) abuf->fields.fmt_sth.f
   new_pc = SEM_NEXT_PC (sem_arg, 2);
 
 SETMEMHI (current_cpu, * FLD (f_r2), * FLD (f_r1));
@@ -1372,7 +1372,7 @@ SETMEMHI (current_cpu, * FLD (f_r2), * FLD (f_r1));
 
   CASE (sem, INSN_STH_D) : /* sth $src1,@($slo16,$src2) */
 {
-#define FLD(f) abuf->fields.fmt_51_sth_d.f
+#define FLD(f) abuf->fields.fmt_sth_d.f
   new_pc = SEM_NEXT_PC (sem_arg, 4);
 
 SETMEMHI (current_cpu, ADDSI (* FLD (f_r2), FLD (f_simm16)), * FLD (f_r1));
@@ -1384,7 +1384,7 @@ SETMEMHI (current_cpu, ADDSI (* FLD (f_r2), FLD (f_simm16)), * FLD (f_r1));
 
   CASE (sem, INSN_ST_PLUS) : /* st $src1,@+$src2 */
 {
-#define FLD(f) abuf->fields.fmt_52_st_plus.f
+#define FLD(f) abuf->fields.fmt_st_plus.f
   new_pc = SEM_NEXT_PC (sem_arg, 2);
 
 do {
@@ -1402,7 +1402,7 @@ SETMEMSI (current_cpu, tmp_new_src2, * FLD (f_r1));
 
   CASE (sem, INSN_ST_MINUS) : /* st $src1,@-$src2 */
 {
-#define FLD(f) abuf->fields.fmt_52_st_plus.f
+#define FLD(f) abuf->fields.fmt_st_plus.f
   new_pc = SEM_NEXT_PC (sem_arg, 2);
 
 do {
@@ -1420,7 +1420,7 @@ SETMEMSI (current_cpu, tmp_new_src2, * FLD (f_r1));
 
   CASE (sem, INSN_SUB) : /* sub $dr,$sr */
 {
-#define FLD(f) abuf->fields.fmt_0_add.f
+#define FLD(f) abuf->fields.fmt_add.f
   new_pc = SEM_NEXT_PC (sem_arg, 2);
 
 * FLD (f_r1) = SUBSI (* FLD (f_r1), * FLD (f_r2));
@@ -1432,7 +1432,7 @@ SETMEMSI (current_cpu, tmp_new_src2, * FLD (f_r1));
 
   CASE (sem, INSN_SUBV) : /* subv $dr,$sr */
 {
-#define FLD(f) abuf->fields.fmt_5_addv.f
+#define FLD(f) abuf->fields.fmt_addv.f
   new_pc = SEM_NEXT_PC (sem_arg, 2);
 
 do {
@@ -1451,7 +1451,7 @@ do {
 
   CASE (sem, INSN_SUBX) : /* subx $dr,$sr */
 {
-#define FLD(f) abuf->fields.fmt_7_addx.f
+#define FLD(f) abuf->fields.fmt_addx.f
   new_pc = SEM_NEXT_PC (sem_arg, 2);
 
 do {
@@ -1468,18 +1468,18 @@ do {
 }
   BREAK (sem);
 
-  CASE (sem, INSN_TRAP) : /* trap #$uimm4 */
+  CASE (sem, INSN_TRAP) : /* trap $uimm4 */
 {
-#define FLD(f) abuf->fields.fmt_53_trap.f
+#define FLD(f) abuf->fields.fmt_trap.f
   new_pc = SEM_NEXT_PC (sem_arg, 2);
 
 do {
 m32r_h_cr_set (current_cpu, 6, ADDSI (CPU (h_pc), 4));
   TRACE_RESULT (current_cpu, "h-cr-6", 'x', m32r_h_cr_get (current_cpu, 6));
-m32r_h_cr_set (current_cpu, 0, ANDSI (SRLSI (m32r_h_cr_get (current_cpu, 0), 8), 33488896));
+m32r_h_cr_set (current_cpu, 0, ANDSI (SLLSI (m32r_h_cr_get (current_cpu, 0), 8), 65408));
   TRACE_RESULT (current_cpu, "h-cr-0", 'x', m32r_h_cr_get (current_cpu, 0));
-do_trap (current_cpu, FLD (f_uimm4));
-; /*clobber*/
+  BRANCH_NEW_PC (new_pc, SEM_BRANCH_VIA_ADDR (sem_arg, do_trap (current_cpu, FLD (f_uimm4))));
+  TRACE_RESULT (current_cpu, "pc", 'x', CPU (h_pc));
 } while (0);
 
 #undef FLD
@@ -1488,7 +1488,7 @@ do_trap (current_cpu, FLD (f_uimm4));
 
   CASE (sem, INSN_UNLOCK) : /* unlock $src1,@$src2 */
 {
-#define FLD(f) abuf->fields.fmt_54_unlock.f
+#define FLD(f) abuf->fields.fmt_unlock.f
   new_pc = SEM_NEXT_PC (sem_arg, 2);
 
 do {

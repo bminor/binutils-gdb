@@ -664,7 +664,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
   EXTRACT_FMT_MACWHI_CODE
 
       /* Fetch the input operands for the semantic handler.  */
-      OPRND (accum) = CPU (h_accum);
+      OPRND (accum) = m32rx_h_accum_get (current_cpu);
       OPRND (src1) = CPU (h_gr[f_r1]);
       OPRND (src2) = CPU (h_gr[f_r2]);
 #undef OPRND

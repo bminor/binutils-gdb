@@ -1,3 +1,22 @@
+Mon Apr 20 16:12:35 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* cpu.c,sem.c,sem-switch.c: Regenerate.  From
+	- cgen/m32r.cpu (h-accum): Add attribute FUN-ACCESS.
+	* m32r.c (m32r_h_accum_get,m32r_h_accum_set): New functions.
+	#include cgen-ops.h.
+start-sanitize-m32rx
+	* cpux.c,readx.c,semx.c: Regenerate.
+	* m32rx.c (m32r_h_accum_get,m32r_h_accum_set): New functions.
+	#include cgen-ops.h.  Delete inclusion of several unnecessary headers.
+	(m32r_h_accums_get): Sign extend top 8 bits.
+end-sanitize-m32rx
+
+start-sanitize-m32rx
+Tue Apr 14 14:04:07 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* semx.c: Regenerate.
+
+end-sanitize-m32rx
 Fri Apr 10 18:22:41 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* cpu.h,decode.c,decode.h,extract.c,sem.c,sem-switch.c: Regenerate.

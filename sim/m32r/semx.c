@@ -1867,8 +1867,8 @@ SEM_FN_NAME (m32rx,macwhi) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_
   EXTRACT_FMT_MACWHI_VARS /* f-op1 f-r1 f-op2 f-r2 */
   EXTRACT_FMT_MACWHI_CODE
 
-  CPU (h_accum) = SRADI (SLLDI (ADDDI (OPRND (accum), MULDI (EXTSIDI (OPRND (src1)), EXTHIDI (TRUNCSIHI (SRASI (OPRND (src2), 16))))), 8), 8);
-  TRACE_RESULT (current_cpu, "accum", 'D', CPU (h_accum));
+m32rx_h_accum_set (current_cpu, SRADI (SLLDI (ADDDI (OPRND (accum), MULDI (EXTSIDI (OPRND (src1)), EXTHIDI (TRUNCSIHI (SRASI (OPRND (src2), 16))))), 8), 8));
+  TRACE_RESULT (current_cpu, "accum", 'D', m32rx_h_accum_get (current_cpu));
 
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
@@ -1893,8 +1893,8 @@ SEM_FN_NAME (m32rx,macwlo) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_
   EXTRACT_FMT_MACWHI_VARS /* f-op1 f-r1 f-op2 f-r2 */
   EXTRACT_FMT_MACWHI_CODE
 
-  CPU (h_accum) = SRADI (SLLDI (ADDDI (OPRND (accum), MULDI (EXTSIDI (OPRND (src1)), EXTHIDI (TRUNCSIHI (OPRND (src2))))), 8), 8);
-  TRACE_RESULT (current_cpu, "accum", 'D', CPU (h_accum));
+m32rx_h_accum_set (current_cpu, SRADI (SLLDI (ADDDI (OPRND (accum), MULDI (EXTSIDI (OPRND (src1)), EXTHIDI (TRUNCSIHI (OPRND (src2))))), 8), 8));
+  TRACE_RESULT (current_cpu, "accum", 'D', m32rx_h_accum_get (current_cpu));
 
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
@@ -1998,8 +1998,8 @@ SEM_FN_NAME (m32rx,mulwhi) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_
   EXTRACT_FMT_MULWHI_VARS /* f-op1 f-r1 f-op2 f-r2 */
   EXTRACT_FMT_MULWHI_CODE
 
-  CPU (h_accum) = SRADI (SLLDI (MULDI (EXTSIDI (OPRND (src1)), EXTHIDI (TRUNCSIHI (SRASI (OPRND (src2), 16)))), 8), 8);
-  TRACE_RESULT (current_cpu, "accum", 'D', CPU (h_accum));
+m32rx_h_accum_set (current_cpu, SRADI (SLLDI (MULDI (EXTSIDI (OPRND (src1)), EXTHIDI (TRUNCSIHI (SRASI (OPRND (src2), 16)))), 8), 8));
+  TRACE_RESULT (current_cpu, "accum", 'D', m32rx_h_accum_get (current_cpu));
 
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
@@ -2024,8 +2024,8 @@ SEM_FN_NAME (m32rx,mulwlo) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_
   EXTRACT_FMT_MULWHI_VARS /* f-op1 f-r1 f-op2 f-r2 */
   EXTRACT_FMT_MULWHI_CODE
 
-  CPU (h_accum) = SRADI (SLLDI (MULDI (EXTSIDI (OPRND (src1)), EXTHIDI (TRUNCSIHI (OPRND (src2)))), 8), 8);
-  TRACE_RESULT (current_cpu, "accum", 'D', CPU (h_accum));
+m32rx_h_accum_set (current_cpu, SRADI (SLLDI (MULDI (EXTSIDI (OPRND (src1)), EXTHIDI (TRUNCSIHI (OPRND (src2)))), 8), 8));
+  TRACE_RESULT (current_cpu, "accum", 'D', m32rx_h_accum_get (current_cpu));
 
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
@@ -3239,8 +3239,8 @@ SEM_FN_NAME (m32rx,msblo) (SIM_CPU *current_cpu, SEM_ARG sem_arg, PAREXEC *par_e
   EXTRACT_FMT_MACWHI_VARS /* f-op1 f-r1 f-op2 f-r2 */
   EXTRACT_FMT_MACWHI_CODE
 
-  CPU (h_accum) = SRADI (SLLDI (SUBDI (OPRND (accum), SRADI (SLLDI (MULDI (EXTHIDI (TRUNCSIHI (OPRND (src1))), EXTHIDI (TRUNCSIHI (OPRND (src2)))), 32), 16)), 8), 8);
-  TRACE_RESULT (current_cpu, "accum", 'D', CPU (h_accum));
+m32rx_h_accum_set (current_cpu, SRADI (SLLDI (SUBDI (OPRND (accum), SRADI (SLLDI (MULDI (EXTHIDI (TRUNCSIHI (OPRND (src1))), EXTHIDI (TRUNCSIHI (OPRND (src2)))), 32), 16)), 8), 8));
+  TRACE_RESULT (current_cpu, "accum", 'D', m32rx_h_accum_get (current_cpu));
 
 #if WITH_PROFILE_MODEL_P
   if (PROFILE_MODEL_P (current_cpu))
