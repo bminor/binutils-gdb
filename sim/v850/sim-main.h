@@ -21,6 +21,10 @@ typedef address_word sim_cia;
 
 #include "sim-base.h"
 
+#include "simops.h"
+#include "bfd.h"
+
+
 typedef signed8 int8;
 typedef unsigned8 uint8;
 typedef signed16 int16;
@@ -86,9 +90,9 @@ extern uint32 OP[4];
    it. */
 
 #if 0
-OP[0] = inst & 0x1f;
-OP[1] = (inst >> 11) & 0x1f;
-OP[2] = (inst >> 16) & 0xffff;
+OP[0] = inst & 0x1f;           /* RRRRR -> reg1 */
+OP[1] = (inst >> 11) & 0x1f;   /* rrrrr -> reg2 */
+OP[2] = (inst >> 16) & 0xffff; /* wwwww -> reg3 */
 OP[3] = inst;
 #endif
 
@@ -260,4 +264,27 @@ void trace_output PARAMS ((enum op_types result));
 #define trace_output(RESULT)
 #endif
 
-#include "simops.h"
+
+/* start-sanitize-v850eq */
+extern void divun ( unsigned int       N,
+		    unsigned long int  als,
+		    unsigned long int  sfi,
+		    unsigned long int *  quotient_ptr,
+		    unsigned long int *  remainder_ptr,
+		    boolean *          overflow_ptr
+		    );
+extern void divn ( unsigned int       N,
+		   unsigned long int  als,
+		   unsigned long int  sfi,
+		   signed long int *  quotient_ptr,
+		   signed long int *  remainder_ptr,
+		   boolean *          overflow_ptr
+		   );
+/* end-sanitize-v850eq */
+/* start-sanitize-v850e */
+extern int type1_regs[];
+extern int type2_regs[];
+/* end-sanitize-v850e */
+/* start-sanitize-v850eq */
+extern int type3_regs[];
+/* end-sanitize-v850eq */

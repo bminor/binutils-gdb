@@ -1,6 +1,15 @@
 Mon Sep 15 17:36:15 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 start-sanitize-v850eq
+	* simops.c (OP_300, OP_400, OP_70): Make behavour depend on PSW[US].
+	
+	* simops.c: Move "divun", "sld.bu", "divhn", "divhun", "divn",
+ 	"divun", "pushml" code from here to v850.igen.
+	(divun): Make global.
+	(type3_regs): Make global
+	
+	* v850.igen: Move simops.c code to here.
+
 	* interp.c (sim_create_inferior): For v850eq set US bit by
  	default.
 

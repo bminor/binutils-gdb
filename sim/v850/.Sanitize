@@ -41,7 +41,7 @@ Things-to-lose:
 Do-last:
 
 # NOTE: keep-v850eq keeps all of keep-v850e as well.
-v850e_files="interp.c simops.c v850_sim.h"
+v850e_files="interp.c simops.c v850_sim.h v850.igen v850-dc"
 if ( echo $* | grep keep\-v850eq > /dev/null ) ; then
         for i in $v850e_files ; do
                 if test -r $i && (grep sanitize-v850eq $i > /dev/null) ; then

@@ -31,7 +31,6 @@
     pollute the name space */
 #include "../../libgloss/v850/sys/syscall.h"
 
-#include "bfd.h"
 #include "libiberty.h"
 
 #include <errno.h>
@@ -42,14 +41,17 @@
 #endif
 
 /* start-sanitize-v850e */
-/* This is an array of the bit positions of registers r20 .. r31 in that order in a prepare/dispose instruction.  */
-static int type1_regs[12] = { 27, 26, 25, 24, 31, 30, 29, 28, 23, 22, 0, 21 };
+/* This is an array of the bit positions of registers r20 .. r31 in
+   that order in a prepare/dispose instruction.  */
+int type1_regs[12] = { 27, 26, 25, 24, 31, 30, 29, 28, 23, 22, 0, 21 };
 /* end-sanitize-v850e */
 /* start-sanitize-v850eq */
-/* This is an array of the bit positions of registers r16 .. r31 in that order in a push/pop instruction.  */
-static int type2_regs[16] = { 3, 2, 1, 0, 27, 26, 25, 24, 31, 30, 29, 28, 23, 22, 20, 21};
-/* This is an array of the bit positions of registers r1 .. r15 in that order in a push/pop instruction.  */
-static int type3_regs[15] = { 2, 1, 0, 27, 26, 25, 24, 31, 30, 29, 28, 23, 22, 20, 21};
+/* This is an array of the bit positions of registers r16 .. r31 in
+   that order in a push/pop instruction.  */
+int type2_regs[16] = { 3, 2, 1, 0, 27, 26, 25, 24, 31, 30, 29, 28, 23, 22, 20, 21};
+/* This is an array of the bit positions of registers r1 .. r15 in
+   that order in a push/pop instruction.  */
+int type3_regs[15] = { 2, 1, 0, 27, 26, 25, 24, 31, 30, 29, 28, 23, 22, 20, 21};
 /* end-sanitize-v850eq */
 
 #ifdef DEBUG
@@ -473,17 +475,19 @@ OP_300 ()
   result = load_mem (State.regs[30] + (OP[3] & 0x7f), 1);
 
 /* start-sanitize-v850eq */
-#ifdef ARCH_v850eq
-  trace_input ("sld.bu", OP_LOAD16, 1);
-  
-  State.regs[ OP[1] ] = result;
-#else
+  if (PSW & PSW_US)
+    {
+      trace_input ("sld.bu", OP_LOAD16, 1);
+      State.regs[ OP[1] ] = result;
+    }
+  else
+    {
 /* end-sanitize-v850eq */
   trace_input ("sld.b", OP_LOAD16, 1);
   
   State.regs[ OP[1] ] = EXTEND8 (result);
 /* start-sanitize-v850eq */
-#endif
+    }
 /* end-sanitize-v850eq */
   
   trace_output (OP_LOAD16);
@@ -500,17 +504,19 @@ OP_400 ()
   result = load_mem (State.regs[30] + ((OP[3] & 0x7f) << 1), 2);
 
 /* start-sanitize-v850eq */
-#ifdef ARCH_v850eq
-  trace_input ("sld.hu", OP_LOAD16, 2);
-  
-  State.regs[ OP[1] ] = result;
-#else
+  if (PSW & PSW_US)
+    {
+      trace_input ("sld.hu", OP_LOAD16, 2);
+      State.regs[ OP[1] ] = result;
+    }
+  else
+    {
 /* end-sanitize-v850eq */
   trace_input ("sld.h", OP_LOAD16, 2);
   
   State.regs[ OP[1] ] = EXTEND16 (result);
 /* start-sanitize-v850eq */
-#endif
+    }
 /* end-sanitize-v850eq */
   
   trace_output (OP_LOAD16);
@@ -1007,17 +1013,11 @@ OP_2E0 ()
 int
 OP_6E0 ()
 {
-  if (OP[1] == 0)
-    {
-    }
-  else
-    {
-      trace_input ("mulhi", OP_IMM_REG_REG, 0);
+  trace_input ("mulhi", OP_IMM_REG_REG, 0);
   
-      State.regs[ OP[1] ] = EXTEND16 (State.regs[ OP[0] ]) * EXTEND16 (OP[2]);
+  State.regs[ OP[1] ] = EXTEND16 (State.regs[ OP[0] ]) * EXTEND16 (OP[2]);
       
-      trace_output (OP_IMM_REG_REG);
-    }
+  trace_output (OP_IMM_REG_REG);
   
   return 4;
 }
@@ -1154,53 +1154,39 @@ OP_7E0 ()
   return 4;
 }
 
-/* zxh reg1 */
 /* satadd reg,reg */
 int
 OP_C0 ()
 {
-/* start-sanitize-v850e */
-  if (OP[1] == 0)
-    {
-      trace_input ("zxh", OP_REG, 0);
-      
-      State.regs[ OP[0] ] &= 0xffff;
-
-      trace_output (OP_REG);
-    }
-  else
-/* end-sanitize-v850e */
-    {
-      unsigned int op0, op1, result, z, s, cy, ov, sat;
-
-      trace_input ("satadd", OP_REG_REG, 0);
-      /* Compute the result.  */
-      op0 = State.regs[ OP[0] ];
-      op1 = State.regs[ OP[1] ];
-      result = op0 + op1;
-      
-      /* Compute the condition codes.  */
-      z = (result == 0);
-      s = (result & 0x80000000);
-      cy = (result < op0 || result < op1);
-      ov = ((op0 & 0x80000000) == (op1 & 0x80000000)
-	    && (op0 & 0x80000000) != (result & 0x80000000));
-      sat = ov;
-      
-      /* Store the result and condition codes.  */
-      State.regs[OP[1]] = result;
-      PSW &= ~(PSW_Z | PSW_S | PSW_CY | PSW_OV);
-      PSW |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
-	      | (cy ? PSW_CY : 0) | (ov ? PSW_OV : 0)
-	      | (sat ? PSW_SAT : 0));
-      
-      /* Handle saturated results.  */
-      if (sat && s)
-	State.regs[OP[1]] = 0x80000000;
-      else if (sat)
-	State.regs[OP[1]] = 0x7fffffff;
-      trace_output (OP_REG_REG);
-    }
+  unsigned int op0, op1, result, z, s, cy, ov, sat;
+  
+  trace_input ("satadd", OP_REG_REG, 0);
+  /* Compute the result.  */
+  op0 = State.regs[ OP[0] ];
+  op1 = State.regs[ OP[1] ];
+  result = op0 + op1;
+  
+  /* Compute the condition codes.  */
+  z = (result == 0);
+  s = (result & 0x80000000);
+  cy = (result < op0 || result < op1);
+  ov = ((op0 & 0x80000000) == (op1 & 0x80000000)
+	&& (op0 & 0x80000000) != (result & 0x80000000));
+  sat = ov;
+  
+  /* Store the result and condition codes.  */
+  State.regs[OP[1]] = result;
+  PSW &= ~(PSW_Z | PSW_S | PSW_CY | PSW_OV);
+  PSW |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
+	  | (cy ? PSW_CY : 0) | (ov ? PSW_OV : 0)
+	  | (sat ? PSW_SAT : 0));
+  
+  /* Handle saturated results.  */
+  if (sat && s)
+    State.regs[OP[1]] = 0x80000000;
+  else if (sat)
+    State.regs[OP[1]] = 0x7fffffff;
+  trace_output (OP_REG_REG);
 
   return 2;
 }
@@ -1339,53 +1325,39 @@ OP_660 ()
 }
 
 /* satsubr reg,reg */
-/* zxb reg1 */
 int
 OP_80 ()
 {
-/* start-sanitize-v850e */
-  if (OP[1] == 0)
-    {
-      trace_input ("zxb", OP_REG, 0);
-
-      State.regs[ OP[0] ] &= 0xff;
-
-      trace_output (OP_REG);
-    }
-  else
-/* end-sanitize-v850e */
-    {
-      unsigned int op0, op1, result, z, s, cy, ov, sat;
-      
-      trace_input ("satsubr", OP_REG_REG, 0);
-      
-      /* Compute the result.  */
-      op0 = State.regs[ OP[0] ];
-      op1 = State.regs[ OP[1] ];
-      result = op0 - op1;
-      
-      /* Compute the condition codes.  */
-      z = (result == 0);
-      s = (result & 0x80000000);
-      cy = (result < op0);
-      ov = ((op1 & 0x80000000) != (op0 & 0x80000000)
-	    && (op1 & 0x80000000) != (result & 0x80000000));
-      sat = ov;
-      
-      /* Store the result and condition codes.  */
-      State.regs[OP[1]] = result;
-      PSW &= ~(PSW_Z | PSW_S | PSW_CY | PSW_OV);
-      PSW |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
-	      | (cy ? PSW_CY : 0) | (ov ? PSW_OV : 0)
-	      | (sat ? PSW_SAT : 0));
-      
-      /* Handle saturated results.  */
-      if (sat && s)
-	State.regs[OP[1]] = 0x80000000;
-      else if (sat)
-	State.regs[OP[1]] = 0x7fffffff;
-      trace_output (OP_REG_REG);
-    }
+  unsigned int op0, op1, result, z, s, cy, ov, sat;
+  
+  trace_input ("satsubr", OP_REG_REG, 0);
+  
+  /* Compute the result.  */
+  op0 = State.regs[ OP[0] ];
+  op1 = State.regs[ OP[1] ];
+  result = op0 - op1;
+  
+  /* Compute the condition codes.  */
+  z = (result == 0);
+  s = (result & 0x80000000);
+  cy = (result < op0);
+  ov = ((op1 & 0x80000000) != (op0 & 0x80000000)
+	&& (op1 & 0x80000000) != (result & 0x80000000));
+  sat = ov;
+  
+  /* Store the result and condition codes.  */
+  State.regs[OP[1]] = result;
+  PSW &= ~(PSW_Z | PSW_S | PSW_CY | PSW_OV);
+  PSW |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
+	  | (cy ? PSW_CY : 0) | (ov ? PSW_OV : 0)
+	  | (sat ? PSW_SAT : 0));
+  
+  /* Handle saturated results.  */
+  if (sat && s)
+    State.regs[OP[1]] = 0x80000000;
+  else if (sat)
+    State.regs[OP[1]] = 0x7fffffff;
+  trace_output (OP_REG_REG);
 
   return 2;
 }
@@ -2444,7 +2416,7 @@ OP_20007E0 (void)
 /* end-sanitize-v850e */
 /* start-sanitize-v850eq */
 /* This function is courtesy of Sugimoto at NEC, via Seow Tan (Soew_Tan@el.nec.com) */
-static void
+void
 divun
 (
   unsigned int       N,
@@ -2518,7 +2490,7 @@ divun
 }
 
 /* This function is courtesy of Sugimoto at NEC, via Seow Tan (Soew_Tan@el.nec.com) */
-static void
+void
 divn
 (
   unsigned int       N,
@@ -2769,61 +2741,30 @@ OP_2C207E0 (void)
   unsigned long int divide_this;
   boolean           overflow = false;
   
-  if ((OP[3] & 0x3c0000) == 0)
+  trace_input ("divu", OP_REG_REG_REG, 0);
+  
+  /* Compute the result.  */
+  
+  divide_by   = State.regs[ OP[0] ];
+  divide_this = State.regs[ OP[1] ];
+  
+  if (divide_by == 0)
     {
-      trace_input ("divu", OP_REG_REG_REG, 0);
-
-      /* Compute the result.  */
-
-      divide_by   = State.regs[ OP[0] ];
-      divide_this = State.regs[ OP[1] ];
-
-      if (divide_by == 0)
-	{
-	  overflow = true;
-	  divide_by  = 1;
-	}
-	    
-      State.regs[ OP[1]       ] = quotient  = divide_this / divide_by;
-      State.regs[ OP[2] >> 11 ] = remainder = divide_this % divide_by;
-
-      /* Set condition codes.  */
-      PSW &= ~(PSW_Z | PSW_S | PSW_OV);
-      
-      if (overflow)      PSW |= PSW_OV;
-      if (quotient == 0) PSW |= PSW_Z;
-      if (quotient & 0x80000000) PSW |= PSW_S;
-
-      trace_output (OP_REG_REG_REG);
+      overflow = true;
+      divide_by  = 1;
     }
-/* start-sanitize-v850eq */
-/* divun imm5, reg1, reg2, reg3 */
-  else
-    {
-      unsigned int imm5;
-      
-      trace_input ("divun", OP_IMM_REG_REG_REG, 0);
-
-      imm5 = 32 - ((OP[3] & 0x3c0000) >> 17);
-
-      divide_by   = State.regs[ OP[0] ];
-      divide_this = State.regs[ OP[1] ];
-
-      divun (imm5, divide_by, divide_this, & quotient, & remainder, & overflow);
-      
-      State.regs[ OP[1]       ] = quotient;
-      State.regs[ OP[2] >> 11 ] = remainder;
-      
-      /* Set condition codes.  */
-      PSW &= ~(PSW_Z | PSW_S | PSW_OV);
-      
-      if (overflow)      PSW |= PSW_OV;
-      if (quotient == 0) PSW |= PSW_Z;
-      if (quotient & 0x80000000) PSW |= PSW_S;
-
-      trace_output (OP_IMM_REG_REG_REG);
-    }
-/* end-sanitize-v850eq */
+  
+  State.regs[ OP[1]       ] = quotient  = divide_this / divide_by;
+  State.regs[ OP[2] >> 11 ] = remainder = divide_this % divide_by;
+  
+  /* Set condition codes.  */
+  PSW &= ~(PSW_Z | PSW_S | PSW_OV);
+  
+  if (overflow)      PSW |= PSW_OV;
+  if (quotient == 0) PSW |= PSW_Z;
+  if (quotient & 0x80000000) PSW |= PSW_S;
+  
+  trace_output (OP_REG_REG_REG);
 
   return 4;
 }
@@ -2840,61 +2781,30 @@ OP_2C007E0 (void)
   signed long int divide_this;
   boolean         overflow = false;
   
-  if ((OP[3] & 0x3c0000) == 0)
+  trace_input ("div", OP_REG_REG_REG, 0);
+  
+  /* Compute the result.  */
+  
+  divide_by   = State.regs[ OP[0] ];
+  divide_this = State.regs[ OP[1] ];
+  
+  if (divide_by == 0 || (divide_by == -1 && divide_this == (1 << 31)))
     {
-      trace_input ("div", OP_REG_REG_REG, 0);
-
-      /* Compute the result.  */
-
-      divide_by   = State.regs[ OP[0] ];
-      divide_this = State.regs[ OP[1] ];
-
-      if (divide_by == 0 || (divide_by == -1 && divide_this == (1 << 31)))
-	{
-	  overflow  = true;
-	  divide_by = 1;
-	}
-	    
-      State.regs[ OP[1]       ] = quotient  = divide_this / divide_by;
-      State.regs[ OP[2] >> 11 ] = remainder = divide_this % divide_by;
-
-      /* Set condition codes.  */
-      PSW &= ~(PSW_Z | PSW_S | PSW_OV);
-      
-      if (overflow)      PSW |= PSW_OV;
-      if (quotient == 0) PSW |= PSW_Z;
-      if (quotient <  0) PSW |= PSW_S;
-
-      trace_output (OP_REG_REG_REG);
+      overflow  = true;
+      divide_by = 1;
     }
-/* start-sanitize-v850eq */
-/* divn imm5, reg1, reg2, reg3 */
-  else
-    {
-      unsigned int imm5;
-      
-      trace_input ("divn", OP_IMM_REG_REG_REG, 0);
-
-      imm5 = 32 - ((OP[3] & 0x3c0000) >> 17);
-
-      divide_by   = State.regs[ OP[0] ];
-      divide_this = State.regs[ OP[1] ];
-
-      divn (imm5, divide_by, divide_this, & quotient, & remainder, & overflow);
-      
-      State.regs[ OP[1]       ] = quotient;
-      State.regs[ OP[2] >> 11 ] = remainder;
-      
-      /* Set condition codes.  */
-      PSW &= ~(PSW_Z | PSW_S | PSW_OV);
-      
-      if (overflow)      PSW |= PSW_OV;
-      if (quotient == 0) PSW |= PSW_Z;
-      if (quotient <  0) PSW |= PSW_S;
-
-      trace_output (OP_IMM_REG_REG_REG);
-    }
-/* end-sanitize-v850eq */
+  
+  State.regs[ OP[1]       ] = quotient  = divide_this / divide_by;
+  State.regs[ OP[2] >> 11 ] = remainder = divide_this % divide_by;
+  
+  /* Set condition codes.  */
+  PSW &= ~(PSW_Z | PSW_S | PSW_OV);
+  
+  if (overflow)      PSW |= PSW_OV;
+  if (quotient == 0) PSW |= PSW_Z;
+  if (quotient <  0) PSW |= PSW_S;
+  
+  trace_output (OP_REG_REG_REG);
 
   return 4;
 }
@@ -2911,61 +2821,30 @@ OP_28207E0 (void)
   unsigned long int divide_this;
   boolean           overflow = false;
   
-  if ((OP[3] & 0x3c0000) == 0)
+  trace_input ("divhu", OP_REG_REG_REG, 0);
+  
+  /* Compute the result.  */
+  
+  divide_by   = State.regs[ OP[0] ] & 0xffff;
+  divide_this = State.regs[ OP[1] ];
+  
+  if (divide_by == 0)
     {
-      trace_input ("divhu", OP_REG_REG_REG, 0);
-
-      /* Compute the result.  */
-
-      divide_by   = State.regs[ OP[0] ] & 0xffff;
-      divide_this = State.regs[ OP[1] ];
-
-      if (divide_by == 0)
-	{
-	  overflow = true;
-	  divide_by  = 1;
-	}
-	    
-      State.regs[ OP[1]       ] = quotient  = divide_this / divide_by;
-      State.regs[ OP[2] >> 11 ] = remainder = divide_this % divide_by;
-
-      /* Set condition codes.  */
-      PSW &= ~(PSW_Z | PSW_S | PSW_OV);
-      
-      if (overflow)      PSW |= PSW_OV;
-      if (quotient == 0) PSW |= PSW_Z;
-      if (quotient & 0x80000000) PSW |= PSW_S;
-
-      trace_output (OP_REG_REG_REG);
+      overflow = true;
+      divide_by  = 1;
     }
-/* start-sanitize-v850eq */
-/* divhun imm5, reg1, reg2, reg3 */
-  else
-    {
-      unsigned int imm5;
-      
-      trace_input ("divhun", OP_IMM_REG_REG_REG, 0);
-
-      imm5 = 32 - ((OP[3] & 0x3c0000) >> 17);
-
-      divide_by   = State.regs[ OP[0] ] & 0xffff;
-      divide_this = State.regs[ OP[1] ];
-
-      divun (imm5, divide_by, divide_this, & quotient, & remainder, & overflow);
-      
-      State.regs[ OP[1]       ] = quotient;
-      State.regs[ OP[2] >> 11 ] = remainder;
-      
-      /* Set condition codes.  */
-      PSW &= ~(PSW_Z | PSW_S | PSW_OV);
-      
-      if (overflow)      PSW |= PSW_OV;
-      if (quotient == 0) PSW |= PSW_Z;
-      if (quotient & 0x80000000) PSW |= PSW_S;
-
-      trace_output (OP_IMM_REG_REG_REG);
-    }
-/* end-sanitize-v850eq */
+  
+  State.regs[ OP[1]       ] = quotient  = divide_this / divide_by;
+  State.regs[ OP[2] >> 11 ] = remainder = divide_this % divide_by;
+  
+  /* Set condition codes.  */
+  PSW &= ~(PSW_Z | PSW_S | PSW_OV);
+  
+  if (overflow)      PSW |= PSW_OV;
+  if (quotient == 0) PSW |= PSW_Z;
+  if (quotient & 0x80000000) PSW |= PSW_S;
+  
+  trace_output (OP_REG_REG_REG);
 
   return 4;
 }
@@ -2982,61 +2861,30 @@ OP_28007E0 (void)
   signed long int divide_this;
   boolean         overflow = false;
   
-  if ((OP[3] & 0x3c0000) == 0)
+  trace_input ("divh", OP_REG_REG_REG, 0);
+  
+  /* Compute the result.  */
+  
+  divide_by  = State.regs[ OP[0] ];
+  divide_this = EXTEND16 (State.regs[ OP[1] ]);
+  
+  if (divide_by == 0 || (divide_by == -1 && divide_this == (1 << 31)))
     {
-      trace_input ("divh", OP_REG_REG_REG, 0);
-
-      /* Compute the result.  */
-
-      divide_by  = State.regs[ OP[0] ];
-      divide_this = EXTEND16 (State.regs[ OP[1] ]);
-
-      if (divide_by == 0 || (divide_by == -1 && divide_this == (1 << 31)))
-	{
-	  overflow = true;
-	  divide_by  = 1;
-	}
-	    
-      State.regs[ OP[1]       ] = quotient  = divide_this / divide_by;
-      State.regs[ OP[2] >> 11 ] = remainder = divide_this % divide_by;
-
-      /* Set condition codes.  */
-      PSW &= ~(PSW_Z | PSW_S | PSW_OV);
-      
-      if (overflow)      PSW |= PSW_OV;
-      if (quotient == 0) PSW |= PSW_Z;
-      if (quotient <  0) PSW |= PSW_S;
-
-      trace_output (OP_REG_REG_REG);
+      overflow = true;
+      divide_by  = 1;
     }
-/* start-sanitize-v850eq */
-/* divhn imm5, reg1, reg2, reg3 */
-  else
-    {
-      unsigned int imm5;
-      
-      trace_input ("divhn", OP_IMM_REG_REG_REG, 0);
-
-      imm5 = 32 - ((OP[3] & 0x3c0000) >> 17);
-
-      divide_by   = EXTEND16 (State.regs[ OP[0] ]);
-      divide_this = State.regs[ OP[1] ];
-
-      divn (imm5, divide_by, divide_this, & quotient, & remainder, & overflow);
-      
-      State.regs[ OP[1]       ] = quotient;
-      State.regs[ OP[2] >> 11 ] = remainder;
-      
-      /* Set condition codes.  */
-      PSW &= ~(PSW_Z | PSW_S | PSW_OV);
-      
-      if (overflow)      PSW |= PSW_OV;
-      if (quotient == 0) PSW |= PSW_Z;
-      if (quotient <  0) PSW |= PSW_S;
-
-      trace_output (OP_IMM_REG_REG_REG);
-    }
-/* end-sanitize-v850eq */
+  
+  State.regs[ OP[1]       ] = quotient  = divide_this / divide_by;
+  State.regs[ OP[2] >> 11 ] = remainder = divide_this % divide_by;
+  
+  /* Set condition codes.  */
+  PSW &= ~(PSW_Z | PSW_S | PSW_OV);
+  
+  if (overflow)      PSW |= PSW_OV;
+  if (quotient == 0) PSW |= PSW_Z;
+  if (quotient <  0) PSW |= PSW_S;
+  
+  trace_output (OP_REG_REG_REG);
 
   return 4;
 }
@@ -3191,105 +3039,40 @@ OP_34207E0 (void)
 
 /* end-sanitize-v850e */
 /* start-sanitize-v850e */
-/* pushml list18 */
 /* ld.hu */
 int
 OP_107E0 (void)
 {
-  if (OP[ 1 ] == 0)
-    {
-      int i;
+  int adr;
 
-      trace_input ("pushml", OP_PUSHPOP3, 0);
+  trace_input ("ld.hu", OP_LOAD32, 2);
 
-      /* Store the registers with lower number registers being placed at higher addresses.  */
-      for (i = 0; i < 15; i++)
-	if ((OP[3] & (1 << type3_regs[ i ])))
-	  {
-	    SP -= 4;
-	    store_mem (SP & ~ 3, 4, State.regs[ i + 1 ]);
-	  }
-
-      if (OP[3] & (1 << 3))
-	{
-	  SP -= 4;
-
-	  store_mem (SP & ~ 3, 4, PSW);
-	}
-	  
-      if (OP[3] & (1 << 19))
-	{
-	  SP -= 8;
-
-	  if ((PSW & PSW_NP) && ((PSW & PSW_EP) == 0))
-	    {
-	      store_mem ((SP + 4) & ~ 3, 4, FEPC);
-	      store_mem ( SP      & ~ 3, 4, FEPSW);
-	    }
-	  else
-	    {
-	      store_mem ((SP + 4) & ~ 3, 4, EIPC);
-	      store_mem ( SP      & ~ 3, 4, EIPSW);
-	    }
-	}
-
-      trace_output (OP_PUSHPOP2);
-    }
-  else
-    {
-      int adr;
-
-      trace_input ("ld.hu", OP_LOAD32, 2);
-
-      adr = State.regs[ OP[0] ] + EXTEND16 (OP[2] & ~1);
-      adr &= ~0x1;
+  adr = State.regs[ OP[0] ] + EXTEND16 (OP[2] & ~1);
+  adr &= ~0x1;
       
-      State.regs[ OP[1] ] = load_mem (adr, 2);
+  State.regs[ OP[1] ] = load_mem (adr, 2);
       
-      trace_output (OP_LOAD32);
-    }
+  trace_output (OP_LOAD32);
   
   return 4;
 }
 
 /* end-sanitize-v850e */
 /* start-sanitize-v850e */
-/* prepare list12, imm5 */
 /* ld.bu */
 int
 OP_10780 (void)
 {
-  if (OP[ 1 ] == 0)
-    {
-      int  i;
+  int adr;
+
+  trace_input ("ld.bu", OP_LOAD32, 1);
+
+  adr = (State.regs[ OP[0] ]
+	 + (EXTEND16 (OP[2] & ~1) | ((OP[3] >> 5) & 1)));
       
-      trace_input ("prepare", OP_PUSHPOP1, 0);
-      
-      /* Store the registers with lower number registers being placed at higher addresses.  */
-      for (i = 0; i < 12; i++)
-	if ((OP[3] & (1 << type1_regs[ i ])))
-	  {
-	    SP -= 4;
-	    store_mem (SP, 4, State.regs[ 20 + i ]);
-	  }
-
-      SP -= (OP[3] & 0x3e) << 1;
-
-      trace_output (OP_PUSHPOP1);
-    }
-  else
-    {
-      int adr;
-
-      trace_input ("ld.bu", OP_LOAD32, 1);
-
-      adr = (State.regs[ OP[0] ]
-	     + (EXTEND16 (OP[2] & ~1) | ((OP[3] >> 5) & 1)));
-      
-      State.regs[ OP[1] ] = load_mem (adr, 1);
+  State.regs[ OP[1] ] = load_mem (adr, 1);
   
-      trace_output (OP_LOAD32);
-    }
+  trace_output (OP_LOAD32);
   
   return 4;
 }
@@ -3404,18 +3187,20 @@ OP_70 (void)
   
   result  = load_mem (State.regs[30] + ((OP[3] & 0xf) << 1), 2);
 
-/* start-sanitize-v850eq */
-#ifdef ARCH_v850eq
-  trace_input ("sld.h", OP_LOAD16, 2);
-  
-  State.regs[ OP[1] ] = EXTEND16 (result);
-#else
+  /* start-sanitize-v850eq */
+  if (PSW & PSW_US)
+    {
+      trace_input ("sld.h", OP_LOAD16, 2);
+      State.regs[ OP[1] ] = EXTEND16 (result);
+    }
+  else
+    {
 /* end-sanitize-v850eq */
   trace_input ("sld.hu", OP_LOAD16, 2);
   
   State.regs[ OP[1] ] = result;
 /* start-sanitize-v850eq */
-#endif
+    }
 /* end-sanitize-v850eq */
   
   trace_output (OP_LOAD16);

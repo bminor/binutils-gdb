@@ -254,8 +254,13 @@ rrrrr,11111100000 + wwwww,01101000000:XII:::bsw
 
 
 // end-sanitize-v850e
+// start-sanitize-v850e
 // CALLT
 0000001000,iiiiii:II:::callt
+*v850e
+// start-sanitize-v850eq
+*v850eq
+// end-sanitize-v850eq
 "callt <imm6>"
 {
   COMPAT_1 (OP_200 ());
@@ -263,6 +268,7 @@ rrrrr,11111100000 + wwwww,01101000000:XII:::bsw
 
 
 
+// end-sanitize-v850e
 // CLR1
 10,bbb,111110,RRRRR + dddddddddddddddd:VIII:::clr1
 "clr1 <bit3>, <disp16>[r<reg1>]"
@@ -270,7 +276,12 @@ rrrrr,11111100000 + wwwww,01101000000:XII:::bsw
   COMPAT_2 (OP_87C0 ());
 }
 
+// start-sanitize-v850e
 rrrrr,111111,RRRRR + 0000000011100100:IX:::clr1
+*v850e
+// start-sanitize-v850eq
+*v850eq
+// end-sanitize-v850eq
 "clr1 r<reg2>, [r<reg1>]"
 {
   COMPAT_2 (OP_E407E0 ());
@@ -278,8 +289,14 @@ rrrrr,111111,RRRRR + 0000000011100100:IX:::clr1
 
 
 
+// end-sanitize-v850e
+// start-sanitize-v850e
 // CTRET
 0000011111100000 + 0000000101000100:X:::ctret
+*v850e
+// start-sanitize-v850eq
+*v850eq
+// end-sanitize-v850eq
 "ctret"
 {
   COMPAT_2 (OP_14407E0 ());
@@ -287,6 +304,7 @@ rrrrr,111111,RRRRR + 0000000011100100:IX:::clr1
 
 
 
+// end-sanitize-v850e
 // start-sanitize-v850e
 // CMOV
 rrrrr,111111,RRRRR + wwwww,011001,cccc,0:XI:::cmov
@@ -299,6 +317,8 @@ rrrrr,111111,RRRRR + wwwww,011001,cccc,0:XI:::cmov
   COMPAT_2 (OP_32007E0 ());
 }
 
+// end-sanitize-v850e
+// start-sanitize-v850e
 rrrrr,111111,iiiii + wwwww,011000,cccc,0:XII:::cmov
 *v850e
 // start-sanitize-v850eq
@@ -382,9 +402,9 @@ rrrrr,111111,RRRRR + wwwww,01010000000:XI:::divh
   COMPAT_2 (OP_28007E0 ());
 }
 
+
+
 // end-sanitize-v850e
-
-
 // start-sanitize-v850e
 // DIVHU
 rrrrr,111111,RRRRR + wwwww,01010000010:XI:::divhu
@@ -427,8 +447,8 @@ rrrrr,111111,RRRRR + wwwww,01011000010:XI:::divu
 
 
 
-// HSW
 // start-sanitize-v850e
+// HSW
 rrrrr,11111100000 + wwwww,01101000100:XII:::hsw
 *v850e
 // start-sanitize-v850eq
@@ -491,20 +511,31 @@ rrrrr,111001,RRRRR + ddddddddddddddd,1:VII:::ld.w
   COMPAT_2 (OP_10720 ());
 }
 
+// start-sanitize-v850e
 rrrrr!0,11110,b,RRRRR + ddddddddddddddd,1:VII:::ld.bu
+*v850e
+// start-sanitize-v850eq
+*v850eq
+// end-sanitize-v850eq
 "ld.bu <disp16>[r<reg1>], r<reg2>"
 {
   COMPAT_2 (OP_10780 ());
 }
 
+// end-sanitize-v850e
+// start-sanitize-v850e
 rrrrr!0,111111,RRRRR + ddddddddddddddd,1:VII:::ld.hu
+*v850e
+// start-sanitize-v850eq
+*v850eq
+// end-sanitize-v850eq
 "ld.hu <disp16>[r<reg1>], r<reg2>"
 {
   COMPAT_2 (OP_107E0 ());
 }
 
 
-
+// end-sanitize-v850e
 // LDSR
 //rrrrr,111111,RRRRR + 0000000000100000:IX:::ldsr
 //"ldsr r<reg2>, r<regID>"
@@ -532,7 +563,12 @@ rrrrr!0,010000,iiiii:II:::mov
   COMPAT_1 (OP_200 ());
 }
 
+// start-sanitize-v850e
 00000110001,RRRRR + iiiiiiiiiiiiiiii + IIIIIIIIIIIIIIII:VI:::mov
+*v850e
+// start-sanitize-v850eq
+*v850eq
+// end-sanitize-v850eq
 "mov <imm32>, r<reg1>"
 {
   COMPAT_2 (OP_620 ());
@@ -540,6 +576,7 @@ rrrrr!0,010000,iiiii:II:::mov
 
 
 
+// end-sanitize-v850e
 // MOVEA
 rrrrr!0,110001,RRRRR + iiiiiiiiiiiiiiii:VI:::movea
 "movea <imm16>, r<reg1>, r<reg2>"
@@ -570,6 +607,8 @@ rrrrr,111111,RRRRR + wwwww,01000100000:XI:::mul
   COMPAT_2 (OP_22007E0 ());
 }
 
+// end-sanitize-v850e
+// start-sanitize-v850e
 rrrrr,111111,iiiii + wwwww,01001,IIII,00:XII:::mul
 *v850e
 // start-sanitize-v850eq
@@ -657,7 +696,12 @@ rrrrr,000001,RRRRR:I:::not
   COMPAT_2 (OP_47C0 ());
 }
 
+// start-sanitize-v850e
 rrrrr,111111,RRRRR + 0000000011100010:IX:::not1
+*v850e
+// start-sanitize-v850eq
+*v850eq
+// end-sanitize-v850eq
 "not1 r<reg2>, r<reg1>"
 {
   COMPAT_2 (OP_E207E0 ());
@@ -665,6 +709,7 @@ rrrrr,111111,RRRRR + 0000000011100010:IX:::not1
 
 
 
+// end-sanitize-v850e
 // OR
 rrrrr,001000,RRRRR:I:::or
 "or r<reg1>, r<reg2>"
@@ -692,8 +737,25 @@ rrrrr,110100,RRRRR + iiiiiiiiiiiiiiii:VI:::ori
 // end-sanitize-v850eq
 "prepare <list12>, <imm5>"
 {
-  COMPAT_2 (OP_10780 ());
+  int  i;
+  COMPAT_2 (0);
+  
+  trace_input ("prepare", OP_PUSHPOP1, 0);
+  
+  /* Store the registers with lower number registers being placed at
+     higher addresses.  */
+  for (i = 0; i < 12; i++)
+    if ((OP[3] & (1 << type1_regs[ i ])))
+      {
+	SP -= 4;
+	store_mem (SP, 4, State.regs[ 20 + i ]);
+      }
+  
+  SP -= (OP[3] & 0x3e) << 1;
+  
+  trace_output (OP_PUSHPOP1);
 }
+
 
 0000011110,iiiii,L + LLLLLLLLLLL,00011:XIII:::prepare00
 *v850e
@@ -762,8 +824,13 @@ rrrrr,010101,iiiii:II:::sar
 
 
 
+// start-sanitize-v850e
 // SASF
 rrrrr,1111110,cccc + 0000001000000000:IX:::sasf
+*v850e
+// start-sanitize-v850eq
+*v850eq
+// end-sanitize-v850eq
 "sasf <cccc>, r<reg2>"
 {
   COMPAT_2 (OP_20007E0 ());
@@ -772,6 +839,7 @@ rrrrr,1111110,cccc + 0000001000000000:IX:::sasf
 
 
 
+// end-sanitize-v850e
 // SATADD
 rrrrr!0,000110,RRRRR:I:::satadd
 "satadd r<reg1>, r<reg2>"
@@ -830,7 +898,12 @@ rrrrr,1111110,cccc + 0000000000000000:IX:::setf
   COMPAT_2 (OP_7C0 ());
 }
 
+// start-sanitize-v850e
 rrrrr,111111,RRRRR + 0000000011100000:IX:::set1
+*v850e
+// start-sanitize-v850eq
+*v850eq
+// end-sanitize-v850eq
 "set1 r<reg2>, [r<reg1>]"
 {
   COMPAT_2 (OP_E007E0 ());
@@ -838,6 +911,7 @@ rrrrr,111111,RRRRR + 0000000011100000:IX:::set1
 
 
 
+// end-sanitize-v850e
 // SHL
 rrrrr,111111,RRRRR + 0000000011000000:IX:::shl
 "shl r<reg1>, r<reg2>"
@@ -996,17 +1070,28 @@ rrrrr,001100,RRRRR:I:::subr
 
 
 
+// start-sanitize-v850e
 // SWITCH
 00000000010,RRRRR:I:::switch
+*v850e
+// start-sanitize-v850eq
+*v850eq
+// end-sanitize-v850eq
 "switch r<reg1>"
 {
   COMPAT_1 (OP_40 ());
 }
+// end-sanitize-v850e
 
 
 
+// start-sanitize-v850e
 // SXB
 00000000101,RRRRR:I:::sxb
+*v850e
+// start-sanitize-v850eq
+*v850eq
+// end-sanitize-v850eq
 "sxb r<reg1>"
 {
   COMPAT_1 (OP_A0 ());
@@ -1014,8 +1099,14 @@ rrrrr,001100,RRRRR:I:::subr
 
 
 
+// end-sanitize-v850e
+// start-sanitize-v850e
 // SXH
 00000000111,RRRRR:I:::sxh
+*v850e
+// start-sanitize-v850eq
+*v850eq
+// end-sanitize-v850eq
 "sxh r<reg1>"
 {
   COMPAT_1 (OP_E0 ());
@@ -1023,6 +1114,7 @@ rrrrr,001100,RRRRR:I:::subr
 
 
 
+// end-sanitize-v850e
 // TRAP
 00000111111,iiiii + 0000000100000000:X:::trap
 "trap <vector>"
@@ -1048,7 +1140,12 @@ rrrrr,001011,RRRRR:I:::tst
   COMPAT_2 (OP_C7C0 ());
 }
 
+// start-sanitize-v850e
 rrrrr,111111,RRRRR + 0000000011100110:IX:::tst1
+*v850e
+// start-sanitize-v850eq
+*v850eq
+// end-sanitize-v850eq
 "tst1 r<reg2>, [r<reg1>]"
 {
   COMPAT_2 (OP_E607E0 ());
@@ -1056,6 +1153,7 @@ rrrrr,111111,RRRRR + 0000000011100110:IX:::tst1
 
 
 
+// end-sanitize-v850e
 // XOR
 rrrrr,001001,RRRRR:I:::xor
 "xor r<reg1>, r<reg2>"
@@ -1074,24 +1172,48 @@ rrrrr,110101,RRRRR + iiiiiiiiiiiiiiii:VI:::xori
 
 
 
+// start-sanitize-v850e
 // ZXB
 00000000100,RRRRR:I:::zxb
+*v850e
+// start-sanitize-v850eq
+*v850eq
+// end-sanitize-v850eq
 "zxb r<reg1>"
 {
-  COMPAT_1 (OP_80 ());
+  COMPAT_1 (0);
+
+  trace_input ("zxb", OP_REG, 0);
+
+  State.regs[ OP[0] ] &= 0xff;
+
+  trace_output (OP_REG);
 }
 
 
 
+// end-sanitize-v850e
+// start-sanitize-v850e
 // ZXH
 00000000110,RRRRR:I:::zxh
+*v850e
+// start-sanitize-v850eq
+*v850eq
+// end-sanitize-v850eq
 "zxh r<reg1>"
 {
-  COMPAT_1 (OP_C0 ());
+  COMPAT_1 (0);
+
+  trace_input ("zxh", OP_REG, 0);
+      
+  State.regs[ OP[0] ] &= 0xffff;
+
+  trace_output (OP_REG);
 }
 
 
 
+// end-sanitize-v850e
 // Special - breakpoint
 // 1111111111111111:Z:::breakpoint
 // {
@@ -1105,7 +1227,31 @@ rrrrr,111111,RRRRR + wwwww,01010,iiii,00:XI:::divhn
 *v850eq
 "divhn <imm5>, r<reg1>, r<reg2>, r<reg3>"
 {
-  COMPAT_2 (OP_28007E0 ());
+  signed32 quotient;
+  signed32 remainder;
+  signed32 divide_by;
+  signed32 divide_this;
+  boolean overflow = false;
+  COMPAT_2 (0);
+      
+  trace_input ("divhn", OP_IMM_REG_REG_REG, 0);
+
+  divide_by   = EXTEND16 (State.regs[ reg1 ]);
+  divide_this = State.regs[ reg2 ];
+  
+  divn (imm5, divide_by, divide_this, & quotient, & remainder, & overflow);
+  
+  State.regs[ reg2 ] = quotient;
+  State.regs[ reg3 ] = remainder;
+  
+  /* Set condition codes.  */
+  PSW &= ~(PSW_Z | PSW_S | PSW_OV);
+  
+  if (overflow)      PSW |= PSW_OV;
+  if (quotient == 0) PSW |= PSW_Z;
+  if (quotient <  0) PSW |= PSW_S;
+  
+  trace_output (OP_IMM_REG_REG_REG);
 }
 
 
@@ -1115,7 +1261,31 @@ rrrrr,111111,RRRRR + wwwww,01010,iiii,10:XI:::divhun
 *v850eq
 "divhun <imm5>, r<reg1>, r<reg2>, r<reg3>"
 {
-  COMPAT_2 (OP_28207E0 ());
+  signed32 quotient;
+  signed32 remainder;
+  signed32 divide_by;
+  signed32 divide_this;
+  boolean overflow = false;
+  COMPAT_2 (0);
+      
+  trace_input ("divhun", OP_IMM_REG_REG_REG, 0);
+  
+  divide_by   = State.regs[ reg1 ] & 0xffff;
+  divide_this = State.regs[ reg2 ];
+  
+  divun (imm5, divide_by, divide_this, & quotient, & remainder, & overflow);
+  
+  State.regs[ reg2 ] = quotient;
+  State.regs[ reg3 ] = remainder;
+  
+  /* Set condition codes.  */
+  PSW &= ~(PSW_Z | PSW_S | PSW_OV);
+  
+  if (overflow)      PSW |= PSW_OV;
+  if (quotient == 0) PSW |= PSW_Z;
+  if (quotient & 0x80000000) PSW |= PSW_S;
+
+  trace_output (OP_IMM_REG_REG_REG);
 }
 
 
@@ -1125,7 +1295,31 @@ rrrrr,111111,RRRRR + wwwww,01011,iiii,00:XI:::divn
 *v850eq
 "divn <imm5>, r<reg1>, r<reg2>, r<reg3>"
 {
-  COMPAT_2 (OP_2C007E0 ());
+  signed32 quotient;
+  signed32 remainder;
+  signed32 divide_by;
+  signed32 divide_this;
+  boolean overflow = false;
+  COMPAT_2 (0);
+      
+  trace_input ("divn", OP_IMM_REG_REG_REG, 0);
+
+  divide_by   = State.regs[ reg1 ];
+  divide_this = State.regs[ reg2 ];
+
+  divn (imm5, divide_by, divide_this, & quotient, & remainder, & overflow);
+      
+  State.regs[ reg2 ] = quotient;
+  State.regs[ reg3 ] = remainder;
+      
+  /* Set condition codes.  */
+  PSW &= ~(PSW_Z | PSW_S | PSW_OV);
+  
+  if (overflow)      PSW |= PSW_OV;
+  if (quotient == 0) PSW |= PSW_Z;
+  if (quotient <  0) PSW |= PSW_S;
+  
+  trace_output (OP_IMM_REG_REG_REG);
 }
 
 
@@ -1135,7 +1329,31 @@ rrrrr,111111,RRRRR + wwwww,01011,iiii,10:XI:::divun
 *v850eq
 "divun <imm5>, r<reg1>, r<reg2>, r<reg3>"
 {
-  COMPAT_2 (OP_2C207E0 ());
+  signed32 quotient;
+  signed32 remainder;
+  signed32 divide_by;
+  signed32 divide_this;
+  boolean overflow = false;
+  COMPAT_2 (0);
+
+  trace_input ("divun", OP_IMM_REG_REG_REG, 0);
+
+  divide_by   = State.regs[ reg1 ];
+  divide_this = State.regs[ reg2 ];
+
+  divun (imm5, divide_by, divide_this, & quotient, & remainder, & overflow);
+      
+  State.regs[ reg2 ] = quotient;
+  State.regs[ reg3 ] = remainder;
+      
+  /* Set condition codes.  */
+  PSW &= ~(PSW_Z | PSW_S | PSW_OV);
+      
+  if (overflow)      PSW |= PSW_OV;
+  if (quotient == 0) PSW |= PSW_Z;
+  if (quotient & 0x80000000) PSW |= PSW_S;
+
+  trace_output (OP_IMM_REG_REG_REG);
 }
 
 
@@ -1185,7 +1403,45 @@ rrrrr,111111,RRRRR + wwwww,00111,iiii,10:XI:::sdivun
 *v850eq
 "pushml <list18>"
 {
-  COMPAT_2 (OP_107E0 ());
+  int i;
+  COMPAT_2 (0);
+  
+  trace_input ("pushml", OP_PUSHPOP3, 0);
+  
+  /* Store the registers with lower number registers being placed at
+     higher addresses.  */
+
+  for (i = 0; i < 15; i++)
+    if ((OP[3] & (1 << type3_regs[ i ])))
+      {
+	SP -= 4;
+	store_mem (SP & ~ 3, 4, State.regs[ i + 1 ]);
+      }
+  
+  if (OP[3] & (1 << 3))
+    {
+      SP -= 4;
+      
+      store_mem (SP & ~ 3, 4, PSW);
+    }
+  
+  if (OP[3] & (1 << 19))
+    {
+      SP -= 8;
+      
+      if ((PSW & PSW_NP) && ((PSW & PSW_EP) == 0))
+	{
+	  store_mem ((SP + 4) & ~ 3, 4, FEPC);
+	  store_mem ( SP      & ~ 3, 4, FEPSW);
+	}
+      else
+	{
+	  store_mem ((SP + 4) & ~ 3, 4, EIPC);
+	  store_mem ( SP      & ~ 3, 4, EIPSW);
+	}
+    }
+  
+  trace_output (OP_PUSHPOP2);
 }
 
 
