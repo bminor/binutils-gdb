@@ -663,17 +663,14 @@ refcard.ps: $(srcdir)/doc/refcard.tex
 	mv ./doc/refcard.ps .
 
 # GDB MANUAL: TeX dvi file
-gdb.dvi: ./doc/gdb-all.texi
+gdb.dvi:
 	( cd ./doc; $(MAKE) M4=$(M4) gdb.dvi $(FLAGS_TO_PASS) )
 	mv ./doc/gdb.dvi .
 
 # GDB MANUAL: info file
-gdb.info: ./doc/gdb-all.texi
+gdb.info:
 	( cd ./doc; $(MAKE) M4=$(M4) gdb.info $(FLAGS_TO_PASS) )
 	mv ./doc/gdb.info* .
-
-./doc/gdb-all.texi:
-	(cd ./doc; $(MAKE) M4=$(M4) gdb-all.texi $(FLAGS_TO_PASS) )
 
 # Make copying.c from COPYING
 copying.c: ${srcdir}/COPYING ${srcdir}/copying.awk
