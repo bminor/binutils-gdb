@@ -1,3 +1,11 @@
+2004-09-24  Ian Lance Taylor <ian@wasabisystems.com>
+
+	Committed by Andrew Cagney.
+	* configure.in: Check for sys/mount.h, sys/vfs.h, sys/statfs.h.
+	Check for struct statfs.
+	* emul_netbsd.c: If not HAVE_STRUCT_STATFS, #undef HAVE_FSTATFS.
+	* configure, config.in: Regenerate.
+
 2004-08-05  Nathanael Nerode  <neroden@gcc.gnu.org>
 
 	* Makefile.in (GDB_INCLUDES): Remove bogus reference to mmalloc.

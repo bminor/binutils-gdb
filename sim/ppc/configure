@@ -4294,7 +4294,7 @@ fi
 done
 
 
-for ac_hdr in fcntl.h stdlib.h string.h strings.h sys/ioctl.h sys/param.h sys/resource.h sys/stat.h sys/termio.h sys/termios.h sys/time.h sys/times.h sys/types.h time.h unistd.h
+for ac_hdr in fcntl.h stdlib.h string.h strings.h sys/ioctl.h sys/mount.h sys/param.h sys/resource.h sys/stat.h sys/termio.h sys/termios.h sys/time.h sys/times.h sys/types.h time.h unistd.h sys/vfs.h sys/statfs.h
 do
 ac_safe=`echo "$ac_hdr" | sed 'y%./+-%__p_%'`
 echo $ac_n "checking for $ac_hdr""... $ac_c" 1>&6
@@ -4609,9 +4609,54 @@ else
   ac_cv_termio_cline=no
 fi
 
+echo $ac_n "checking for struct statfs""... $ac_c" 1>&6
+echo "configure:4614: checking for struct statfs" >&5
+if eval "test \"`echo '$''{'ac_cv_struct_statfs'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  cat > conftest.$ac_ext <<EOF
+#line 4619 "configure"
+#include "confdefs.h"
+#include <sys/types.h>
+#ifdef HAVE_SYS_PARAM_H
+#include <sys/param.h>
+#endif
+#ifdef HAVE_SYS_MOUNT_H
+#include <sys/mount.h>
+#endif
+#ifdef HAVE_SYS_VFS_H
+#include <sys/vfs.h>
+#endif
+#ifdef HAVE_SYS_STATFS_H
+#include <sys/statfs.h>
+#endif
+int main() {
+static struct statfs s;
+; return 0; }
+EOF
+if { (eval echo configure:4638: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+  rm -rf conftest*
+  ac_cv_struct_statfs=yes
+else
+  echo "configure: failed program was:" >&5
+  cat conftest.$ac_ext >&5
+  rm -rf conftest*
+  ac_cv_struct_statfs=no
+fi
+rm -f conftest*
+fi
+
+echo "$ac_t""$ac_cv_struct_statfs" 1>&6
+if test $ac_cv_struct_statfs = yes; then
+  cat >> confdefs.h <<\EOF
+#define HAVE_STRUCT_STATFS 1
+EOF
+
+fi
+
 sim_devzero=""
 echo $ac_n "checking for /dev/zero""... $ac_c" 1>&6
-echo "configure:4615: checking for /dev/zero" >&5
+echo "configure:4660: checking for /dev/zero" >&5
 if eval "test \"`echo '$''{'ac_cv_devzero'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -4619,7 +4664,7 @@ else
   ac_cv_devzero=no
 else
   cat > conftest.$ac_ext <<EOF
-#line 4623 "configure"
+#line 4668 "configure"
 #include "confdefs.h"
 #include <fcntl.h>
 main () {
@@ -4638,7 +4683,7 @@ main () {
   return 0;
 }
 EOF
-if { (eval echo configure:4642: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext} && (./conftest; exit) 2>/dev/null
+if { (eval echo configure:4687: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext} && (./conftest; exit) 2>/dev/null
 then
   ac_cv_devzero=yes
 else
@@ -4660,7 +4705,7 @@ else
 fi
 
 echo $ac_n "checking for common simulator directory""... $ac_c" 1>&6
-echo "configure:4664: checking for common simulator directory" >&5
+echo "configure:4709: checking for common simulator directory" >&5
 if test -f "${srcdir}/../common/callback.c"; then
   echo "$ac_t""yes" 1>&6
   sim_callback="callback.o targ-map.o"
@@ -4672,7 +4717,7 @@ else
 fi
 
 echo $ac_n "checking for common simulator directory fpu implementation""... $ac_c" 1>&6
-echo "configure:4676: checking for common simulator directory fpu implementation" >&5
+echo "configure:4721: checking for common simulator directory fpu implementation" >&5
 if test -f "${srcdir}/../common/sim-fpu.c"; then
   echo "$ac_t""yes" 1>&6
   sim_fpu_cflags="-DHAVE_COMMON_FPU -I../common -I${srcdir}/../common"
@@ -4684,12 +4729,12 @@ else
 fi
 
 echo $ac_n "checking for Cygwin environment""... $ac_c" 1>&6
-echo "configure:4688: checking for Cygwin environment" >&5
+echo "configure:4733: checking for Cygwin environment" >&5
 if eval "test \"`echo '$''{'ac_cv_cygwin'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 4693 "configure"
+#line 4738 "configure"
 #include "confdefs.h"
 
 int main() {
@@ -4700,7 +4745,7 @@ int main() {
 return __CYGWIN__;
 ; return 0; }
 EOF
-if { (eval echo configure:4704: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:4749: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   ac_cv_cygwin=yes
 else
@@ -4717,19 +4762,19 @@ echo "$ac_t""$ac_cv_cygwin" 1>&6
 CYGWIN=
 test "$ac_cv_cygwin" = yes && CYGWIN=yes
 echo $ac_n "checking for mingw32 environment""... $ac_c" 1>&6
-echo "configure:4721: checking for mingw32 environment" >&5
+echo "configure:4766: checking for mingw32 environment" >&5
 if eval "test \"`echo '$''{'ac_cv_mingw32'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 4726 "configure"
+#line 4771 "configure"
 #include "confdefs.h"
 
 int main() {
 return __MINGW32__;
 ; return 0; }
 EOF
-if { (eval echo configure:4733: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:4778: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   ac_cv_mingw32=yes
 else
@@ -4748,7 +4793,7 @@ test "$ac_cv_mingw32" = yes && MINGW32=yes
 
 
 echo $ac_n "checking for executable suffix""... $ac_c" 1>&6
-echo "configure:4752: checking for executable suffix" >&5
+echo "configure:4797: checking for executable suffix" >&5
 if eval "test \"`echo '$''{'ac_cv_exeext'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -4758,7 +4803,7 @@ else
   rm -f conftest*
   echo 'int main () { return 0; }' > conftest.$ac_ext
   ac_cv_exeext=
-  if { (eval echo configure:4762: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
+  if { (eval echo configure:4807: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
     for file in conftest.*; do
       case $file in
       *.c | *.o | *.obj | *.ilk | *.pdb) ;;
@@ -4787,7 +4832,7 @@ AR=${AR-ar}
 # Extract the first word of "ranlib", so it can be a program name with args.
 set dummy ranlib; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:4791: checking for $ac_word" >&5
+echo "configure:4836: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_prog_RANLIB'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
