@@ -1505,7 +1505,7 @@ mips_read_processor_type ()
 
   prid = read_register (PRID_REGNUM);
 
-  if (prid & ~0xf == 0x700)
+  if ((prid & ~0xf) == 0x700)
     return savestring ("r3041", strlen("r3041"));
 
   return NULL;

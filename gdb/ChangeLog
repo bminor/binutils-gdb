@@ -1,5 +1,9 @@
 Mon Jul 29 21:13:20 1996  Fred Fish  <fnf@cygnus.com>
 
+	* mips-tdep.c (mips_read_processor_type): Add parens around
+	bitwise-and operands in comparison; previous expression always
+	evaluated to 0 because of equality comparison of two constants.
+
 	* rs6000-tdep.c (skip_prologue): Add missing parens around
 	operands of logical-or so that first operand does not bind
 	to previous logical-and.
