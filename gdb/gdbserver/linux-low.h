@@ -34,6 +34,10 @@ struct linux_target_ops
   int num_regs;
   int *regmap;
   int (*cannot_fetch_register) (int);
+
+  /* Returns 0 if we can store the register, 1 if we can not
+     store the register, and 2 if failure to store the register
+     is acceptable.  */
   int (*cannot_store_register) (int);
 };
 

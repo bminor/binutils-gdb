@@ -46,11 +46,15 @@ static int ppc_regmap[] =
   PT_FPR0*4+192,  PT_FPR0*4+200,  PT_FPR0*4+208,  PT_FPR0*4+216,
   PT_FPR0*4+224,  PT_FPR0*4+232,  PT_FPR0*4+240,  PT_FPR0*4+248,
   PT_NIP * 4,    PT_MSR * 4,    PT_CCR * 4,    PT_LNK * 4,
-  PT_CTR * 4,    PT_XER * 4,    -1, };
+  PT_CTR * 4,    PT_XER * 4,    PT_FPSCR * 4, };
 
 static int
 ppc_cannot_store_register (int regno)
 {
+  /* Some kernels do not allow us to store fpscr.  */
+  if (regno == find_regno ("fpscr"))
+    return 2;
+
   return 0;
 }
 

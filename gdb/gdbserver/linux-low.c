@@ -240,7 +240,7 @@ usr_store_inferior_registers (int regno)
       if (regno >= the_low_target.num_regs)
 	return;
 
-      if ((*the_low_target.cannot_store_register) (regno))
+      if ((*the_low_target.cannot_store_register) (regno) == 1)
 	return;
 
       regaddr = register_addr (regno);
@@ -254,14 +254,15 @@ usr_store_inferior_registers (int regno)
 		  *(int *) (register_data (regno) + i));
 	  if (errno != 0)
 	    {
-	      /* Warning, not error, in case we are attached; sometimes the
-		 kernel doesn't let us at the registers.  */
-	      char *err = strerror (errno);
-	      char *msg = alloca (strlen (err) + 128);
-	      sprintf (msg, "writing register %d: %s",
-		       regno, err);
-	      error (msg);
-	      return;
+	      if ((*the_low_target.cannot_store_register) (regno) == 0)
+		{
+		  char *err = strerror (errno);
+		  char *msg = alloca (strlen (err) + 128);
+		  sprintf (msg, "writing register %d: %s",
+			   regno, err);
+		  error (msg);
+		  return;
+		}
 	    }
 	  regaddr += sizeof (int);
 	}

@@ -1,3 +1,12 @@
+2002-04-11  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdbserver/linux-low.c (usr_store_inferior_registers): Support
+	registers which are allowed to fail to store.
+	* gdbserver/linux-low.h (linux_target_ops): Likewise.
+	* gdbserver/linux-ppc-low.c (ppc_regmap): Support FPSCR.
+	(ppc_cannot_store_register): FPSCR may not be storable.
+	* regformats/reg-ppc.dat: Support FPSCR.
+
 2002-04-11  Kevin Buettner  <kevinb@redhat.com>
 
 	* ppc-tdep.h (struct gdbarch_tdep): Add new field ``ppc_fpscr_regnum''.
