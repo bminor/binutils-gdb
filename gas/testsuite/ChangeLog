@@ -1,3 +1,9 @@
+2004-06-30  James E Wilson  <wilson@specifixinc.com>
+
+	* gas/ia64/dv-imply.d: Update.
+	* gas/ia64/dv-mutex.d: Likewise.
+	* gas/ia64/dv-safe.d: Likewise.
+
 2004-06-29  Alan Modra  <amodra@bigpond.net.au>
 
 	* gas/m68k/mode5.s: Pad section.
