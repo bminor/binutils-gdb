@@ -335,7 +335,8 @@ program."
     (gdb-registers-buffer
      gdb-registers-buffer-name)
     (gdb-breakpoints-buffer
-     gdb-breakpoints-buffer-name)
+     gdb-breakpoints-buffer-name
+     gud-breakpoints-mode)
     (gdb-frames-buffer
      gdb-frames-buffer-name)))
 
@@ -798,6 +799,8 @@ The key should be one of the cars in `gdb-instance-buffer-rules-assoc'."
 	  (setq gdb-buffer-type key)
 	  (make-variable-buffer-local 'gdb-buffer-instance)
 	  (setq gdb-buffer-instance instance)
+	  (if (cdr (cdr rules))
+	      (funcall (car (cdr (cdr rules)))))
 	  new))))
 
 (defun gdb-rules-name-maker (rules) (car (cdr rules)))
@@ -866,6 +869,58 @@ The key should be one of the cars in `gdb-instance-buffer-rules-assoc'."
    (gdb-get-create-instance-buffer instance
 				    'gdb-breakpoints-buffer)))
 
+
+(defun gud-toggle-bp-this-line ()
+  (interactive)
+  (save-excursion
+    (beginning-of-line 1)
+    (if (not (looking-at "\\([0-9]*\\)\\s-*\\S-*\\s-*\\S-*\\s-*\\(.\\)"))
+	(error "Not recognized as breakpoint line (demo foo).")
+      (gdb-instance-enqueue-idle-input
+       gdb-buffer-instance
+       (list
+	(concat
+	 (if (eq ?y (char-after (match-beginning 2)))
+	     "server disable "
+	   "server enable ")
+	 (buffer-substring (match-beginning 0)
+			   (match-end 1))
+	 "\n")
+	'(lambda () nil)))
+      )))
+
+(defun gud-delete-bp-this-line ()
+  (interactive)
+  (save-excursion
+    (beginning-of-line 1)
+    (if (not (looking-at "\\([0-9]*\\)\\s-*\\S-*\\s-*\\S-*\\s-*\\(.\\)"))
+	(error "Not recognized as breakpoint line (demo foo).")
+      (gdb-instance-enqueue-idle-input
+       gdb-buffer-instance
+       (list
+	(concat
+	 "server delete "
+	 (buffer-substring (match-beginning 0)
+			   (match-end 1))
+	 "\n")
+	'(lambda () nil)))
+      )))
+
+(defvar gud-breakpoints-mode-map nil)
+
+(defun gud-breakpoints-mode ()
+  "Major mode for gud breakpoints.
+
+\\{gud-breakpoints-mode-map}"
+  (setq major-mode 'gud-breakpoints-mode)
+  (setq mode-name "Breakpoints")
+  (use-local-map gud-breakpoints-mode-map))
+
+(if gud-breakpoints-mode-map
+    nil
+  (setq gud-breakpoints-mode-map (make-sparse-keymap))
+  (define-key gud-breakpoints-mode-map " " 'gud-toggle-bp-this-line)
+  (define-key gud-breakpoints-mode-map "d" 'gud-delete-bp-this-line))
 
 ;;
 ;; Registers buffers
@@ -1831,22 +1886,3 @@ Link exprs of the form:
 (provide 'gud)
 
 ;;; gud.el ends here
-
-(defun gdb-toggle-bp-this-line ()
-  (interactive)
-  (save-excursion
-    (beginning-of-line 1)
-    (if (not (looking-at "\\([0-9]*\\)\\s-*\\S-*\\s-*\\S-*\\s-*\\(.\\)"))
-	(error "Not recognized as breakpoint line (demo foo).")
-      (gdb-instance-enqueue-idle-input
-       gdb-buffer-instance
-       (list
-	(concat
-	 (if (eq ?y (char-after (match-beginning 2)))
-	     "server disable "
-	   "server enable ")
-	 (buffer-substring (match-beginning 0)
-			   (match-end 1))
-	 "\n")
-	'(lambda () nil)))
-      )))
