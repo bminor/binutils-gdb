@@ -1,5 +1,12 @@
 1998-11-23  DJ Delorie  <dj@cygnus.com>
 
+	* coff-i386.c (bfd_pe_dll_not_recognized_hack): the linker wants
+	to see .DLL files as unrecognized.
+	(i3coff_object_p): Sorry, had to hack it to not recognize these
+	files (pei-i386) on request.
+
+1998-11-23  DJ Delorie  <dj@cygnus.com>
+
 	* opncls.c (bfd_make_readable): need more cleanup for symbols and
 	relents.  Call bfd_check_format to reinitialize.
 
