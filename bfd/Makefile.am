@@ -1,5 +1,7 @@
 ## Process this file with automake to generate Makefile.in
 
+AUTOMAKE_OPTIONS = cygnus
+
 INCDIR = $(srcdir)/../include
 CSEARCH = -I. -I$(srcdir) -I$(INCDIR)
 DEP = mkdep
@@ -13,13 +15,7 @@ lib_LTLIBRARIES = libbfd.la
 # bfd.h goes here, for now
 BFD_H = bfd.h
 
-# Some of these files should be in BFD*_BACKENDS below, but some programs
-# won't link without them.  So, in order for some of the minimal-bfd
-# hacks to work, they're also included here for now.
-#	gdb: elf.o
-#	objdump: elf.o
-#
-# Also, Jim Kingdon notes:
+# Jim Kingdon notes:
 # Writing S-records should be included in all (or at least most)
 # *-*-coff, *-*-aout, etc., configurations, because people will want to
 # be able to use objcopy to create S-records.  (S-records are not useful
@@ -30,13 +26,13 @@ BFD_LIBS = \
 	archive.lo archures.lo bfd.lo cache.lo coffgen.lo corefile.lo \
 	format.lo init.lo libbfd.lo opncls.lo reloc.lo \
 	section.lo syms.lo targets.lo hash.lo linker.lo \
-	elf.lo srec.lo binary.lo tekhex.lo ihex.lo stabs.lo stab-syms.lo
+	srec.lo binary.lo tekhex.lo ihex.lo stabs.lo stab-syms.lo
 
 BFD_LIBS_CFILES = \
 	archive.c archures.c bfd.c cache.c coffgen.c corefile.c \
 	format.c init.c libbfd.c opncls.c reloc.c \
 	section.c syms.c targets.c hash.c linker.c \
-	elf.c srec.c binary.c tekhex.c ihex.c stabs.c stab-syms.c
+	srec.c binary.c tekhex.c ihex.c stabs.c stab-syms.c
 
 # This list is alphabetized to make it easier to keep in sync
 # with the decls and initializer in archures.c.
@@ -150,6 +146,7 @@ BFD32_BACKENDS = \
 	dwarf2.lo \
 	ecoff.lo \
 	ecofflink.lo \
+	elf.lo \
 	elf32-arc.lo \
 	elf32-d10v.lo \
 	$(start-sanitize-d30v) \
@@ -257,6 +254,7 @@ BFD32_BACKENDS_CFILES = \
 	dwarf2.c \
 	ecoff.c \
 	ecofflink.c \
+	elf.c \
 	elf32-arc.c \
 	elf32-d10v.c \
 	elf32-gen.c \
@@ -436,8 +434,10 @@ noinst_LIBRARIES = libbfd.a
 libbfd_a_SOURCES =
 
 stamp-lib: libbfd.la
-	cp .libs/libbfd.a libbfd.tmp
-	$(SHELL) $(srcdir)/../move-if-change libbfd.tmp libbfd.a
+	if [ -f .libs/libbfd.a ]; then \
+	  cp .libs/libbfd.a libbfd.tmp; \
+	  $(SHELL) $(srcdir)/../move-if-change libbfd.tmp libbfd.a; \
+	else true; fi
 	touch stamp-lib
 
 libbfd.a: stamp-lib ; @true

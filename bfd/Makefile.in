@@ -1,8 +1,14 @@
-# Makefile.in generated automatically by automake 1.2 from Makefile.am
+# Makefile.in generated automatically by automake 1.2e from Makefile.am
 
-# Copyright (C) 1994, 1995, 1996, 1997 Free Software Foundation, Inc.
+# Copyright (C) 1994, 1995, 1996, 1997, 1998 Free Software Foundation, Inc.
 # This Makefile.in is free software; the Free Software Foundation
-# gives unlimited permission to copy, distribute and modify it.
+# gives unlimited permission to copy and/or distribute it,
+# with or without modifications, as long as this notice is preserved.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY, to the extent permitted by law; without
+# even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+# PARTICULAR PURPOSE.
 
 
 SHELL = @SHELL@
@@ -43,12 +49,12 @@ INSTALL_DATA = @INSTALL_DATA@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 transform = @program_transform_name@
 
-NORMAL_INSTALL = true
-PRE_INSTALL = true
-POST_INSTALL = true
-NORMAL_UNINSTALL = true
-PRE_UNINSTALL = true
-POST_UNINSTALL = true
+NORMAL_INSTALL = :
+PRE_INSTALL = :
+POST_INSTALL = :
+NORMAL_UNINSTALL = :
+PRE_UNINSTALL = :
+POST_UNINSTALL = :
 build_alias = @build_alias@
 build_triplet = @build@
 host_alias = @host_alias@
@@ -83,6 +89,8 @@ bfd_machines = @bfd_machines@
 tdefaults = @tdefaults@
 wordsize = @wordsize@
 
+AUTOMAKE_OPTIONS = cygnus
+
 INCDIR = $(srcdir)/../include
 CSEARCH = -I. -I$(srcdir) -I$(INCDIR)
 DEP = mkdep
@@ -96,13 +104,7 @@ lib_LTLIBRARIES = libbfd.la
 # bfd.h goes here, for now
 BFD_H = bfd.h
 
-# Some of these files should be in BFD*_BACKENDS below, but some programs
-# won't link without them.  So, in order for some of the minimal-bfd
-# hacks to work, they're also included here for now.
-#	gdb: elf.o
-#	objdump: elf.o
-#
-# Also, Jim Kingdon notes:
+# Jim Kingdon notes:
 # Writing S-records should be included in all (or at least most)
 # *-*-coff, *-*-aout, etc., configurations, because people will want to
 # be able to use objcopy to create S-records.  (S-records are not useful
@@ -113,13 +115,13 @@ BFD_LIBS = \
 	archive.lo archures.lo bfd.lo cache.lo coffgen.lo corefile.lo \
 	format.lo init.lo libbfd.lo opncls.lo reloc.lo \
 	section.lo syms.lo targets.lo hash.lo linker.lo \
-	elf.lo srec.lo binary.lo tekhex.lo ihex.lo stabs.lo stab-syms.lo
+	srec.lo binary.lo tekhex.lo ihex.lo stabs.lo stab-syms.lo
 
 BFD_LIBS_CFILES = \
 	archive.c archures.c bfd.c cache.c coffgen.c corefile.c \
 	format.c init.c libbfd.c opncls.c reloc.c \
 	section.c syms.c targets.c hash.c linker.c \
-	elf.c srec.c binary.c tekhex.c ihex.c stabs.c stab-syms.c
+	srec.c binary.c tekhex.c ihex.c stabs.c stab-syms.c
 
 # This list is alphabetized to make it easier to keep in sync
 # with the decls and initializer in archures.c.
@@ -233,6 +235,7 @@ BFD32_BACKENDS = \
 	dwarf2.lo \
 	ecoff.lo \
 	ecofflink.lo \
+	elf.lo \
 	elf32-arc.lo \
 	elf32-d10v.lo \
 	$(start-sanitize-d30v) \
@@ -340,6 +343,7 @@ BFD32_BACKENDS_CFILES = \
 	dwarf2.c \
 	ecoff.c \
 	ecofflink.c \
+	elf.c \
 	elf32-arc.c \
 	elf32-d10v.c \
 	elf32-gen.c \
@@ -533,7 +537,7 @@ LTLIBRARIES =  $(lib_LTLIBRARIES)
 
 libbfd_la_OBJECTS =  archive.lo archures.lo bfd.lo cache.lo coffgen.lo \
 corefile.lo format.lo init.lo libbfd.lo opncls.lo reloc.lo section.lo \
-syms.lo targets.lo hash.lo linker.lo elf.lo srec.lo binary.lo tekhex.lo \
+syms.lo targets.lo hash.lo linker.lo srec.lo binary.lo tekhex.lo \
 ihex.lo stabs.lo stab-syms.lo
 CFLAGS = @CFLAGS@
 COMPILE = $(CC) $(DEFS) $(INCLUDES) $(CPPFLAGS) $(CFLAGS)
@@ -570,7 +574,8 @@ config.status: $(srcdir)/configure
 $(srcdir)/configure: @MAINT@$(srcdir)/configure.in $(ACLOCAL_M4) $(CONFIGURE_DEPENDENCIES)
 	cd $(srcdir) && $(AUTOCONF)
 
-config.h: stamp-h ; @:
+config.h: stamp-h
+	@:
 stamp-h: $(srcdir)/config.in $(top_builddir)/config.status
 	cd $(top_builddir) \
 	  && CONFIG_FILES= CONFIG_HEADERS=config.h:config.in \
@@ -586,7 +591,7 @@ mostlyclean-hdr:
 clean-hdr:
 
 distclean-hdr:
-	rm -f config.h
+	-rm -f config.h
 
 maintainer-clean-hdr:
 bfd-in3.h: $(top_builddir)/config.status bfd-in2.h
@@ -595,11 +600,14 @@ bfd-in3.h: $(top_builddir)/config.status bfd-in2.h
 mostlyclean-noinstLIBRARIES:
 
 clean-noinstLIBRARIES:
-	test -z "$(noinst_LIBRARIES)" || rm -f $(noinst_LIBRARIES)
+	-test -z "$(noinst_LIBRARIES)" || rm -f $(noinst_LIBRARIES)
 
 distclean-noinstLIBRARIES:
 
 maintainer-clean-noinstLIBRARIES:
+
+.c.o:
+	$(COMPILE) -c $<
 
 .s.o:
 	$(COMPILE) -c $<
@@ -607,23 +615,19 @@ maintainer-clean-noinstLIBRARIES:
 .S.o:
 	$(COMPILE) -c $<
 
-.c.o:
-	$(COMPILE) -c $<
-
 mostlyclean-compile:
-	rm -f *.o core
+	-rm -f *.o core *.core
 
 clean-compile:
 
 distclean-compile:
-	rm -f *.tab.c
+	-rm -f *.tab.c
 
 maintainer-clean-compile:
 
 .c.lo:
 	$(LIBTOOL) --mode=compile $(COMPILE) -c $<
 
-# These are just copies of the above rule.
 .s.lo:
 	$(LIBTOOL) --mode=compile $(COMPILE) -c $<
 
@@ -631,10 +635,10 @@ maintainer-clean-compile:
 	$(LIBTOOL) --mode=compile $(COMPILE) -c $<
 
 mostlyclean-libtool:
-	rm -f *.lo
+	-rm -f *.lo
 
 clean-libtool:
-	rm -rf .libs
+	-rm -rf .libs _libs
 
 distclean-libtool:
 
@@ -643,7 +647,7 @@ maintainer-clean-libtool:
 mostlyclean-libLTLIBRARIES:
 
 clean-libLTLIBRARIES:
-	test -z "$(lib_LTLIBRARIES)" || rm -f $(lib_LTLIBRARIES)
+	-test -z "$(lib_LTLIBRARIES)" || rm -f $(lib_LTLIBRARIES)
 
 distclean-libLTLIBRARIES:
 
@@ -654,8 +658,8 @@ install-libLTLIBRARIES: $(lib_LTLIBRARIES)
 	$(mkinstalldirs) $(libdir)
 	@list='$(lib_LTLIBRARIES)'; for p in $$list; do \
 	  if test -f $$p; then \
-	    echo "$(LIBTOOL)  --mode=install $(INSTALL_PROGRAM) $$p $(libdir)/$$p"; \
-	    $(LIBTOOL)  --mode=install $(INSTALL_PROGRAM) $$p $(libdir)/$$p; \
+	    echo "$(LIBTOOL)  --mode=install $(INSTALL_DATA) $$p $(libdir)/$$p"; \
+	    $(LIBTOOL)  --mode=install $(INSTALL_DATA) $$p $(libdir)/$$p; \
 	  else :; fi; \
 	done
 
@@ -681,7 +685,7 @@ all-recursive install-data-recursive install-exec-recursive \
 installdirs-recursive install-recursive uninstall-recursive install-info-recursive \
 check-recursive installcheck-recursive info-recursive dvi-recursive:
 	@set fnord $(MAKEFLAGS); amf=$$2; \
-	for subdir in $(SUBDIRS); do \
+	list='$(SUBDIRS)'; for subdir in $$list; do \
 	  target=`echo $@ | sed s/-recursive//`; \
 	  echo "Making $$target in $$subdir"; \
 	  (cd $$subdir && $(MAKE) $$target) \
@@ -691,7 +695,9 @@ check-recursive installcheck-recursive info-recursive dvi-recursive:
 mostlyclean-recursive clean-recursive distclean-recursive \
 maintainer-clean-recursive:
 	@set fnord $(MAKEFLAGS); amf=$$2; \
-	rev=''; for subdir in $(SUBDIRS); do rev="$$rev $$subdir"; done; \
+	rev=''; list='$(SUBDIRS)'; for subdir in $$list; do \
+	  rev="$$subdir $$rev"; \
+	done; \
 	for subdir in $$rev; do \
 	  target=`echo $@ | sed s/-recursive//`; \
 	  echo "Making $$target in $$subdir"; \
@@ -705,24 +711,29 @@ tags-recursive:
 
 tags: TAGS
 
-ID: $(HEADERS) $(SOURCES)
-	here=`pwd` && cd $(srcdir) && mkid -f$$here/ID $(SOURCES) $(HEADERS)
+ID: $(HEADERS) $(SOURCES) $(LISP)
+	here=`pwd` && cd $(srcdir) \
+	  && mkid -f$$here/ID $(SOURCES) $(HEADERS) $(LISP)
 
-TAGS: tags-recursive $(HEADERS) $(SOURCES) config.in $(TAGS_DEPENDENCIES)
+TAGS: tags-recursive $(HEADERS) $(SOURCES) config.in $(TAGS_DEPENDENCIES) $(LISP)
 	tags=; \
 	here=`pwd`; \
 	list='$(SUBDIRS)'; for subdir in $$list; do \
 	  test -f $$subdir/TAGS && tags="$$tags -i $$here/$$subdir/TAGS"; \
 	done; \
-	test -z "$(ETAGS_ARGS)config.in$(SOURCES)$(HEADERS)$$tags" \
-	  || (cd $(srcdir) && etags $(ETAGS_ARGS) $$tags config.in $(SOURCES) $(HEADERS) -o $$here/TAGS)
+	list='$(SOURCES) $(HEADERS)'; \
+	unique=`for i in $$list; do echo $$i; done | \
+	  awk '    { files[$$0] = 1; } \
+	       END { for (i in files) print i; }'`; \
+	test -z "$(ETAGS_ARGS)config.in$$unique$(LISP)$$tags" \
+	  || (cd $(srcdir) && etags $(ETAGS_ARGS) $$tags config.in $$unique $(LISP) -o $$here/TAGS)
 
 mostlyclean-tags:
 
 clean-tags:
 
 distclean-tags:
-	rm -f TAGS ID
+	-rm -f TAGS ID
 
 maintainer-clean-tags:
 
@@ -733,7 +744,7 @@ top_distdir = $(distdir)
 # it guarantees that the distribution is self-contained by making another
 # tarfile.
 distcheck: dist
-	rm -rf $(distdir)
+	-rm -rf $(distdir)
 	GZIP=$(GZIP) $(TAR) zxf $(distdir).tar.gz
 	mkdir $(distdir)/=build
 	mkdir $(distdir)/=inst
@@ -746,20 +757,20 @@ distcheck: dist
 	  && $(MAKE) install \
 	  && $(MAKE) installcheck \
 	  && $(MAKE) dist
-	rm -rf $(distdir)
+	-rm -rf $(distdir)
 	@echo "========================"; \
 	echo "$(distdir).tar.gz is ready for distribution"; \
 	echo "========================"
 dist: distdir
 	-chmod -R a+r $(distdir)
 	GZIP=$(GZIP) $(TAR) chozf $(distdir).tar.gz $(distdir)
-	rm -rf $(distdir)
+	-rm -rf $(distdir)
 dist-all: distdir
 	-chmod -R a+r $(distdir)
 	GZIP=$(GZIP) $(TAR) chozf $(distdir).tar.gz $(distdir)
-	rm -rf $(distdir)
+	-rm -rf $(distdir)
 distdir: $(DISTFILES)
-	rm -rf $(distdir)
+	-rm -rf $(distdir)
 	mkdir $(distdir)
 	-chmod 777 $(distdir)
 	@for file in $(DISTFILES); do \
@@ -768,17 +779,17 @@ distdir: $(DISTFILES)
 	  || ln $$d/$$file $(distdir)/$$file 2> /dev/null \
 	  || cp -p $$d/$$file $(distdir)/$$file; \
 	done
-	for subdir in $(SUBDIRS); do		\
-	  test -d $(distdir)/$$subdir		\
-	  || mkdir $(distdir)/$$subdir		\
-	  || exit 1;				\
-	  chmod 777 $(distdir)/$$subdir;	\
-	  (cd $$subdir && $(MAKE) top_distdir=../$(top_distdir) distdir=../$(distdir)/$$subdir distdir) \
+	for subdir in $(SUBDIRS); do \
+	  test -d $(distdir)/$$subdir \
+	  || mkdir $(distdir)/$$subdir \
+	  || exit 1; \
+	  chmod 777 $(distdir)/$$subdir; \
+	  (cd $$subdir && $(MAKE) top_distdir=../$(distdir) distdir=../$(distdir)/$$subdir distdir) \
 	    || exit 1; \
 	done
 info: info-recursive
 dvi: dvi-recursive
-check: all-am
+check:
 	$(MAKE) check-recursive
 installcheck: installcheck-recursive
 install-info: install-info-recursive
@@ -813,19 +824,19 @@ installdirs: installdirs-recursive
 
 
 mostlyclean-generic:
-	test -z "$(MOSTLYCLEANFILES)" || rm -f $(MOSTLYCLEANFILES)
+	-test -z "$(MOSTLYCLEANFILES)" || rm -f $(MOSTLYCLEANFILES)
 
 clean-generic:
-	test -z "$(CLEANFILES)" || rm -f $(CLEANFILES)
+	-test -z "$(CLEANFILES)" || rm -f $(CLEANFILES)
 
 distclean-generic:
-	rm -f Makefile $(DISTCLEANFILES)
-	rm -f config.cache config.log stamp-h stamp-h[0-9]*
-	test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
+	-rm -f Makefile $(DISTCLEANFILES)
+	-rm -f config.cache config.log stamp-h stamp-h[0-9]*
+	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
 
 maintainer-clean-generic:
-	test -z "$(MAINTAINERCLEANFILES)" || rm -f $(MAINTAINERCLEANFILES)
-	test -z "$(BUILT_SOURCES)" || rm -f $(BUILT_SOURCES)
+	-test -z "$(MAINTAINERCLEANFILES)" || rm -f $(MAINTAINERCLEANFILES)
+	-test -z "$(BUILT_SOURCES)" || rm -f $(BUILT_SOURCES)
 mostlyclean-am:  mostlyclean-hdr mostlyclean-noinstLIBRARIES \
 		mostlyclean-compile mostlyclean-libtool \
 		mostlyclean-libLTLIBRARIES mostlyclean-tags \
@@ -850,13 +861,13 @@ mostlyclean:  mostlyclean-recursive mostlyclean-am
 clean:  clean-recursive clean-am
 
 distclean:  distclean-recursive distclean-am
-	rm -f config.status
-	rm -f libtool
+	-rm -f config.status
+	-rm -f libtool
 
 maintainer-clean:  maintainer-clean-recursive maintainer-clean-am
 	@echo "This command is intended for maintainers to use;"
 	@echo "it deletes files that may require special tools to rebuild."
-	rm -f config.status
+	-rm -f config.status
 
 .PHONY: default mostlyclean-hdr distclean-hdr clean-hdr \
 maintainer-clean-hdr mostlyclean-noinstLIBRARIES \
@@ -896,8 +907,10 @@ stamp-ofiles: Makefile
 ofiles: stamp-ofiles ; @true
 
 stamp-lib: libbfd.la
-	cp .libs/libbfd.a libbfd.tmp
-	$(SHELL) $(srcdir)/../move-if-change libbfd.tmp libbfd.a
+	if [ -f .libs/libbfd.a ]; then \
+	  cp .libs/libbfd.a libbfd.tmp; \
+	  $(SHELL) $(srcdir)/../move-if-change libbfd.tmp libbfd.a; \
+	else true; fi
 	touch stamp-lib
 
 libbfd.a: stamp-lib ; @true

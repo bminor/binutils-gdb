@@ -1,3 +1,9 @@
+Sun Apr  5 16:04:39 1998  H.J. Lu  <hjl@gnu.org>
+
+	* Makefile.am (stamp-lib): Check that .libs/libbfd.a exists before
+	trying to copy it.
+	* Makefile.in: Rebuild.
+
 Fri Apr  3 11:09:42 1998  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
 
 	* elf32-m68k.c (elf_m68k_size_dynamic_sections): Generate section
