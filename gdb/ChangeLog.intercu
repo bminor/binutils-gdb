@@ -1,3 +1,11 @@
+2004-03-14  Daniel Jacobowitz  <drow@mvista.com>
+
+	* dwarf2read.c (read_structure_type): Renamed from
+	read_structure_scope.
+	(process_enumeration_scope): Renamed from read_enumeration_scope.
+	(add_partial_structure, process_die, new_symbol)
+	(read_type_die): Update calls and comments.
+
 2004-02-24  Daniel Jacobowitz  <drow@mvista.com>
 
 	* dwarf2read.c (struct comp_unit_head): Remove dwarf2_abbrevs array.

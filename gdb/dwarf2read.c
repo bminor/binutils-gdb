@@ -855,7 +855,7 @@ static void dwarf2_add_member_fn (struct field_info *,
 static void dwarf2_attach_fn_fields_to_type (struct field_info *,
 					     struct type *, struct dwarf2_cu *);
 
-static void read_structure_scope (struct die_info *, struct dwarf2_cu *);
+static void read_structure_type (struct die_info *, struct dwarf2_cu *);
 
 static void process_structure_scope (struct die_info *, struct dwarf2_cu *);
 
@@ -868,7 +868,7 @@ static const char *namespace_name (struct die_info *die,
 
 static void read_enumeration_type (struct die_info *, struct dwarf2_cu *);
 
-static void read_enumeration_scope (struct die_info *, struct dwarf2_cu *);
+static void process_enumeration_scope (struct die_info *, struct dwarf2_cu *);
 
 static struct type *dwarf_base_type (int, int, struct dwarf2_cu *);
 
@@ -2043,7 +2043,7 @@ add_partial_structure (struct partial_die_info *struct_pdi,
 	 what template types look like, because the demangler
 	 frequently doesn't give the same name as the debug info.  We
 	 could fix this by only using the demangled name to get the
-	 prefix (but see comment in read_structure_scope).  */
+	 prefix (but see comment in read_structure_type).  */
 
       struct partial_die_info *child_pdi = struct_pdi->die_child;
 
@@ -2595,17 +2595,17 @@ process_die (struct die_info *die, struct dwarf2_cu *cu)
     case DW_TAG_class_type:
     case DW_TAG_structure_type:
     case DW_TAG_union_type:
-      read_structure_scope (die, cu);
+      read_structure_type (die, cu);
       process_structure_scope (die, cu);
       break;
     case DW_TAG_enumeration_type:
       read_enumeration_type (die, cu);
-      read_enumeration_scope (die, cu);
+      process_enumeration_scope (die, cu);
       break;
 
-    /* FIXME: These initialize die->type, but do not create a symbol
-       or process any children.  Therefore it doesn't do anything that
-       won't be done on-demand by read_type_die.  */
+    /* FIXME drow/2004-03-14: These initialize die->type, but do not create
+       a symbol or process any children.  Therefore it doesn't do anything
+       that won't be done on-demand by read_type_die.  */
     case DW_TAG_subroutine_type:
       read_subroutine_type (die, cu);
       break;
@@ -3641,7 +3641,7 @@ dwarf2_attach_fn_fields_to_type (struct field_info *fip, struct type *type,
    suppresses creating a symbol table entry itself).  */
 
 static void
-read_structure_scope (struct die_info *die, struct dwarf2_cu *cu)
+read_structure_type (struct die_info *die, struct dwarf2_cu *cu)
 {
   struct objfile *objfile = cu->objfile;
   struct type *type;
@@ -3963,7 +3963,7 @@ read_enumeration_type (struct die_info *die, struct dwarf2_cu *cu)
    NOTE: We reverse the order of the element list.  */
 
 static void
-read_enumeration_scope (struct die_info *die, struct dwarf2_cu *cu)
+process_enumeration_scope (struct die_info *die, struct dwarf2_cu *cu)
 {
   struct objfile *objfile = cu->objfile;
   struct die_info *child_die;
@@ -6706,7 +6706,7 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
 
 	  /* Make sure that the symbol includes appropriate enclosing
 	     classes/namespaces in its name.  These are calculated in
-	     read_structure_scope, and the correct name is saved in
+	     read_structure_type, and the correct name is saved in
 	     the type.  */
 
 	  if (cu->language == language_cplus)
@@ -7048,7 +7048,7 @@ read_type_die (struct die_info *die, struct dwarf2_cu *cu)
     case DW_TAG_class_type:
     case DW_TAG_structure_type:
     case DW_TAG_union_type:
-      read_structure_scope (die, cu);
+      read_structure_type (die, cu);
       break;
     case DW_TAG_enumeration_type:
       read_enumeration_type (die, cu);
