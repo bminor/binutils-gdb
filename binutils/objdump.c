@@ -88,8 +88,9 @@ dump_symbols PARAMS ((bfd *abfd));
 void
 usage ()
 {
-  fprintf (stderr,
-	 "usage: %s [-ahifdrtxsl] [-m machine] [-j section_name] obj ...\n",
+  fprintf (stderr, "\
+usage: %s [-ahifdrtxsl] [-m machine] [-j section_name]\n\
+         [--syms] [--reloc] [--header] [--version] obj ...\n",
 	   program_name);
   exit (1);
 }

@@ -1,3 +1,7 @@
+Fri Mar 19 10:56:51 1993  Jim Kingdon  (kingdon@cygnus.com)
+
+	* objdump.c (usage): Mention long options.
+
 Thu Mar 18 14:22:17 1993  Per Bothner  (bothner@rtl.cygnus.com)
 
 	* nm.c:  Modify behavior of -o flag for archives to match
