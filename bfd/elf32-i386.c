@@ -1238,6 +1238,7 @@ elf_i386_size_dynamic_sections (output_bfd, info)
 	{
 	  if (! bfd_elf32_add_dynamic_entry (info, DT_TEXTREL, 0))
 	    return false;
+	  info->flags |= DF_TEXTREL;
 	}
     }
 

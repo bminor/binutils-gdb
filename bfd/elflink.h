@@ -2837,6 +2837,7 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
 	{
 	  if (! elf_add_dynamic_entry (info, DT_SYMBOLIC, 0))
 	    return false;
+	  info->flags |= DF_SYMBOLIC;
 	}
 
       if (rpath != NULL)
@@ -2846,7 +2847,8 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
 	  indx = _bfd_stringtab_add (elf_hash_table (info)->dynstr, rpath,
 				     true, true);
 	  if (indx == (bfd_size_type) -1
-	      || ! elf_add_dynamic_entry (info, DT_RPATH, indx))
+	      || ! elf_add_dynamic_entry (info, DT_RPATH, indx)
+	      || ! elf_add_dynamic_entry (info, DT_RUNPATH, indx))
 	    return false;
 	}
 
@@ -3133,6 +3135,22 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
 	    return false;
 
 	  elf_tdata (output_bfd)->cverdefs = cdefs;
+	}
+
+      if (info->flags)
+	{
+	  if (! elf_add_dynamic_entry (info, DT_FLAGS, info->flags))
+	    return false;
+	}
+
+      if (info->flags_1)
+	{
+	  if (! info->shared)
+	    info->flags_1 &= ~ (DF_1_INITFIRST
+				| DF_1_NODELETE
+				| DF_1_NOOPEN);
+	  if (! elf_add_dynamic_entry (info, DT_FLAGS_1, info->flags_1))
+	    return false;
 	}
 
       /* Work out the size of the version reference section.  */

@@ -1,5 +1,25 @@
 2000-07-19  H.J. Lu  <hjl@gnu.org>
 
+	* elf32-arm.h (elf32_arm_size_dynamic_sections): Also set
+	DF_TEXTREL if DT_TEXTREL is set.
+	* elf32-i370.c (i370_elf_size_dynamic_sections): Likewise.
+	* elf32-i386.c (elf_i386_size_dynamic_sections): Likewise.
+	* elf32-m68k.c (elf_m68k_size_dynamic_sections): Likewise.
+	* elf32-mips.c (_bfd_mips_elf_size_dynamic_sections): Likewise.
+	* elf32-ppc.c (ppc_elf_size_dynamic_sections): Likewise.
+	* elf32-sparc.c (elf32_sparc_size_dynamic_sections): Likewise.
+	* elf64-alpha.c (elf64_alpha_size_dynamic_sections): Likewise.
+	* elf64-hppa.c (elf64_hppa_size_dynamic_sections): Likewise.
+	* elf64-ia64.c (elf64_ia64_size_dynamic_sections): Likewise.
+	* elf64-sparc.c (sparc64_elf_size_dynamic_sections): Likewise.
+
+	* bfd/elflink.h (NAME(bfd_elf,size_dynamic_sections)): Also
+	set DF_SYMBOLIC for symbolic link. Also set DT_RUNPATH if
+	DT_RPATH is set.
+	Set the DT_FLAGS and DT_FLAGS_1 entries if necessary.
+
+2000-07-19  H.J. Lu  <hjl@gnu.org>
+
 	* bfd-in.h (bfd_elf_set_dt_needed_soname): New.
 	* bfd-in2.h: Rebuild.
 
