@@ -8808,7 +8808,7 @@ free_comp_units_worker (struct dwarf2_cu *cu, int aging,
 
       next_cu = per_cu->cu->read_in_chain;
 
-      if ((aging && per_cu->cu->last_used < MAX_CACHE_AGE)
+      if ((aging && per_cu->cu->last_used > MAX_CACHE_AGE)
 	  || (target_cu && per_cu->cu == target_cu)
 	  || (!aging && target_cu == NULL))
 	{
