@@ -341,6 +341,11 @@ static PTR coff_mkobject_hook PARAMS ((bfd *, PTR,  PTR));
 #ifdef COFF_WITH_PE
 static flagword handle_COMDAT PARAMS ((bfd *, flagword, PTR, const char *, asection *));
 #endif
+#ifdef COFF_IMAGE_WITH_PE
+static boolean coff_read_word PARAMS ((bfd *, unsigned int *));
+static unsigned int coff_compute_checksum PARAMS ((bfd *));
+static boolean coff_apply_checksum PARAMS ((bfd *));
+#endif
 
 /* void warning(); */
 
@@ -3270,6 +3275,100 @@ coff_add_missing_symbols (abfd)
 
 #endif /* 0 */
 
+#ifdef COFF_IMAGE_WITH_PE
+
+static unsigned int pelength;
+static unsigned int peheader;
+
+static boolean
+coff_read_word (abfd, value)
+  bfd *abfd;
+  unsigned int *value;
+{
+  unsigned char b[2];
+  int status;
+
+  status = bfd_bread (b, (bfd_size_type) 2, abfd);
+  if (status < 1)
+    {
+      *value = 0;
+      return false;
+    }
+
+  if (status == 1)
+    *value = (unsigned int) b[0];
+  else
+    *value = (unsigned int) (b[0] + (b[1] << 8));
+
+  pelength += (unsigned int) status;
+
+  return true;
+}
+
+static unsigned int
+coff_compute_checksum (abfd)
+  bfd *abfd;
+{
+  boolean more_data;
+  file_ptr filepos;
+  unsigned int value;
+  unsigned int total;
+
+  total = 0;
+  pelength = 0;
+  filepos = (file_ptr) 0;
+
+  do
+    {
+      if (bfd_seek (abfd, filepos, SEEK_SET) != 0)
+	return 0;
+
+      more_data = coff_read_word (abfd, &value);
+      total += value;
+      total = 0xffff & (total + (total >> 0x10));
+      filepos += 2;
+    }
+  while (more_data);
+
+  return (0xffff & (total + (total >> 0x10)));
+}
+
+static boolean
+coff_apply_checksum (abfd)
+  bfd *abfd;
+{
+  unsigned int computed;
+  unsigned int checksum = 0;
+
+  if (bfd_seek (abfd, 0x3c, SEEK_SET) != 0)
+    return false;
+
+  if (!coff_read_word (abfd, &peheader))
+    return false;
+
+  if (bfd_seek (abfd, peheader + 0x58, SEEK_SET) != 0)
+    return false;
+
+  checksum = 0;
+  bfd_bwrite (&checksum, (bfd_size_type) 4, abfd);
+
+  if (bfd_seek (abfd, peheader, SEEK_SET) != 0)
+    return false;
+
+  computed = coff_compute_checksum (abfd);
+
+  checksum = computed + pelength;
+
+  if (bfd_seek (abfd, peheader + 0x58, SEEK_SET) != 0)
+    return false;
+
+  bfd_bwrite (&checksum, (bfd_size_type) 4, abfd);
+
+  return true;
+}
+
+#endif /* COFF_IMAGE_WITH_PE */
+
 /* SUPPRESS 558 */
 /* SUPPRESS 529 */
 static boolean
@@ -4060,6 +4159,11 @@ coff_write_object_contents (abfd)
 
       if (amount != bfd_coff_aoutsz (abfd))
 	return false;
+
+#ifdef COFF_IMAGE_WITH_PE
+      if (! coff_apply_checksum (abfd))
+	return false;
+#endif
     }
 #ifdef RS6000COFF_C
   else
