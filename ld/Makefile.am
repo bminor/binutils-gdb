@@ -1,73 +1,4 @@
-# Makefile.in generated automatically by automake 1.2 from Makefile.am
-
-# Copyright (C) 1994, 1995, 1996, 1997 Free Software Foundation, Inc.
-# This Makefile.in is free software; the Free Software Foundation
-# gives unlimited permission to copy, distribute and modify it.
-
-
-SHELL = /bin/sh
-
-srcdir = @srcdir@
-top_srcdir = @top_srcdir@
-VPATH = @srcdir@
-prefix = @prefix@
-exec_prefix = @exec_prefix@
-
-bindir = @bindir@
-sbindir = @sbindir@
-libexecdir = @libexecdir@
-datadir = @datadir@
-sysconfdir = @sysconfdir@
-sharedstatedir = @sharedstatedir@
-localstatedir = @localstatedir@
-libdir = @libdir@
-infodir = @infodir@
-mandir = @mandir@
-includedir = @includedir@
-oldincludedir = /usr/include
-
-pkgdatadir = $(datadir)/@PACKAGE@
-pkglibdir = $(libdir)/@PACKAGE@
-pkgincludedir = $(includedir)/@PACKAGE@
-
-top_builddir = .
-
-ACLOCAL = @ACLOCAL@
-AUTOCONF = @AUTOCONF@
-AUTOMAKE = @AUTOMAKE@
-AUTOHEADER = @AUTOHEADER@
-
-INSTALL = @INSTALL@
-INSTALL_PROGRAM = @INSTALL_PROGRAM@
-INSTALL_DATA = @INSTALL_DATA@
-INSTALL_SCRIPT = @INSTALL_SCRIPT@
-transform = @program_transform_name@
-
-NORMAL_INSTALL = true
-PRE_INSTALL = true
-POST_INSTALL = true
-NORMAL_UNINSTALL = true
-PRE_UNINSTALL = true
-POST_UNINSTALL = true
-build_alias = @build_alias@
-build_triplet = @build@
-host_alias = @host_alias@
-host_triplet = @host@
-target_alias = @target_alias@
-target_triplet = @target@
-CC = @CC@
-EXEEXT = @EXEEXT@
-HDEFINES = @HDEFINES@
-LD = @LD@
-LIBTOOL = @LIBTOOL@
-LN_S = @LN_S@
-MAINT = @MAINT@
-MAKEINFO = @MAKEINFO@
-NATIVE_LIB_DIRS = @NATIVE_LIB_DIRS@
-PACKAGE = @PACKAGE@
-RANLIB = @RANLIB@
-TDIRS = @TDIRS@
-VERSION = @VERSION@
+## Process this file with automake to generate Makefile.in
 
 AUTOMAKE_OPTIONS = dejagnu
 
@@ -270,415 +201,6 @@ OFILES = ldgram.o ldlex.o lexsup.o ldlang.o mri.o ldctor.o ldmain.o \
 
 STAGESTUFF = *.o ldscripts/* e*.c
 
-# These all start with e so 'make clean' can find them.
-
-GENSCRIPTS = $(SHELL) $(srcdir)/genscripts.sh ${srcdir} ${libdir} @host@ @target@ @target_alias@ ${EMUL} "@NATIVE_LIB_DIRS@"
-GEN_DEPENDS = $(srcdir)/genscripts.sh $(srcdir)/emultempl/stringify.sed
-
-ld_new_SOURCES = ldgram.y ldlex.l lexsup.c ldlang.c mri.c ldctor.c ldmain.c \
-	ldwrite.c ldexp.c ldemul.c ldver.c ldmisc.c ldfile.c ldcref.c
-ld_new_DEPENDENCIES = $(EMULATION_OFILES) $(BFDLIB) $(LIBIBERTY) @LEXLIB@
-ld_new_LDADD = $(EMULATION_OFILES) $(BFDLIB) $(LIBIBERTY) @LEXLIB@
-
-# This is the real libbfd.a created by libtool.
-TESTBFDLIB = ../bfd/.libs/libbfd.a
-
-MOSTCLEANFILES = $(STAGESTUFF) ld1$(EXEEXT) ld2$(EXEEXT) ld3$(EXEEXT) \
-	ldemul-list.h tmpdir crtbegin.o crtend.o
-CLEANFILES = dep.sed .dep .dep1
-DISTCLEANFILES = ldscripts
-ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-mkinstalldirs = $(SHELL) $(top_srcdir)/../mkinstalldirs
-CONFIG_HEADER = config.h
-CONFIG_CLEAN_FILES = 
-noinst_PROGRAMS =  ld-new$(EXEEXT)
-PROGRAMS =  $(noinst_PROGRAMS)
-
-
-DEFS = @DEFS@ -I. -I$(srcdir) -I.
-CPPFLAGS = @CPPFLAGS@
-LDFLAGS = @LDFLAGS@
-LIBS = @LIBS@
-ld_new_OBJECTS =  ldgram.o ldlex.o lexsup.o ldlang.o mri.o ldctor.o \
-ldmain.o ldwrite.o ldexp.o ldemul.o ldver.o ldmisc.o ldfile.o ldcref.o
-ld_new_LDFLAGS = 
-LEX_OUTPUT_ROOT = @LEX_OUTPUT_ROOT@
-LEXLIB = @LEXLIB@
-CFLAGS = @CFLAGS@
-COMPILE = $(CC) $(DEFS) $(INCLUDES) $(CPPFLAGS) $(CFLAGS)
-LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(INCLUDES) $(CPPFLAGS) $(CFLAGS)
-LINK = $(LIBTOOL) --mode=link $(CC) $(CFLAGS) $(LDFLAGS) -o $@
-TEXI2DVI = `if test -f $(top_srcdir)/../texinfo/util/texi2dvi; then echo $(top_srcdir)/../texinfo/util/texi2dvi; else echo texi2dvi; fi`
-TEXINFO_TEX = $(top_srcdir)/../texinfo/texinfo.tex
-INFO_DEPS = ld.info
-DVIS = ld.dvi
-TEXINFOS = ld.texinfo
-MANS = ld.1
-
-NROFF = nroff
-DIST_COMMON =  README ChangeLog Makefile.am Makefile.in NEWS TODO \
-acconfig.h acinclude.m4 aclocal.m4 config.in configure configure.in \
-ldgram.c ldlex.c stamp-h.in
-
-
-DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
-
-TAR = tar
-GZIP = --best
-SOURCES = $(ld_new_SOURCES)
-OBJECTS = $(ld_new_OBJECTS)
-
-default: all
-
-.SUFFIXES:
-.SUFFIXES: .c .dvi .h .info .l .lo .o .ps .texi .texinfo .y
-$(srcdir)/Makefile.in: @MAINT@ Makefile.am $(top_srcdir)/configure.in $(ACLOCAL_M4) 
-	cd $(top_srcdir) && $(AUTOMAKE) --cygnus Makefile
-
-Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
-	cd $(top_builddir) \
-	  && CONFIG_FILES=$@ CONFIG_HEADERS= $(SHELL) ./config.status
-
-$(ACLOCAL_M4): @MAINT@ configure.in  acinclude.m4
-	cd $(srcdir) && $(ACLOCAL)
-
-config.status: $(srcdir)/configure
-	$(SHELL) ./config.status --recheck
-$(srcdir)/configure: @MAINT@$(srcdir)/configure.in $(ACLOCAL_M4) $(CONFIGURE_DEPENDENCIES)
-	cd $(srcdir) && $(AUTOCONF)
-
-config.h: stamp-h ; @true
-stamp-h: $(srcdir)/config.in $(top_builddir)/config.status
-	cd $(top_builddir) \
-	  && CONFIG_FILES= CONFIG_HEADERS=config.h:config.in \
-	     $(SHELL) ./config.status
-	@echo timestamp > stamp-h
-$(srcdir)/config.in: @MAINT@$(srcdir)/stamp-h.in
-$(srcdir)/stamp-h.in: $(top_srcdir)/configure.in $(ACLOCAL_M4) acconfig.h
-	cd $(top_srcdir) && $(AUTOHEADER)
-	@echo timestamp > $(srcdir)/stamp-h.in
-
-mostlyclean-hdr:
-
-clean-hdr:
-
-distclean-hdr:
-	rm -f config.h
-
-maintainer-clean-hdr:
-
-mostlyclean-noinstPROGRAMS:
-
-clean-noinstPROGRAMS:
-	test -z "$(noinst_PROGRAMS)" || rm -f $(noinst_PROGRAMS)
-
-distclean-noinstPROGRAMS:
-
-maintainer-clean-noinstPROGRAMS:
-
-.c.o:
-	$(COMPILE) -c $<
-
-mostlyclean-compile:
-	rm -f *.o core
-
-clean-compile:
-
-distclean-compile:
-	rm -f *.tab.c
-
-maintainer-clean-compile:
-
-.c.lo:
-	$(LIBTOOL) --mode=compile $(COMPILE) -c $<
-
-mostlyclean-libtool:
-	rm -f *.lo
-
-clean-libtool:
-	rm -rf .libs
-
-distclean-libtool:
-
-maintainer-clean-libtool:
-
-ld-new$(EXEEXT): $(ld_new_OBJECTS) $(ld_new_DEPENDENCIES)
-	@rm -f ld-new$(EXEEXT)
-	$(LINK) $(ld_new_LDFLAGS) $(ld_new_OBJECTS) $(ld_new_LDADD) $(LIBS)
-.y.c:
-	$(YACC) $(YFLAGS) $< && mv y.tab.c $@
-	if test -f y.tab.h; then \
-	if cmp -s y.tab.h $*.h; then rm -f y.tab.h; else mv y.tab.h $*.h; fi; \
-	else :; fi
-.y.h:
-	$(YACC) $(YFLAGS) $< && mv y.tab.c $@
-	if test -f y.tab.h; then \
-	if cmp -s y.tab.h $*.h; then rm -f y.tab.h; else mv y.tab.h $*.h; fi; \
-	else :; fi
-.l.c:
-	$(LEX) $(LFLAGS) $< && mv $(LEX_OUTPUT_ROOT).c $@
-
-ld.info: ld.texinfo
-ld.dvi: ld.texinfo
-
-
-DVIPS = dvips
-
-.texi.info:
-	@rm -f $@ $@-[0-9] $@-[0-9][0-9]
-	$(MAKEINFO) -I $(srcdir) $<
-
-.texi.dvi:
-	TEXINPUTS=$(top_srcdir)/../texinfo:$$TEXINPUTS \
-	  MAKEINFO='$(MAKEINFO) -I $(srcdir)' $(TEXI2DVI) $<
-
-.texi:
-	@rm -f $@ $@-[0-9] $@-[0-9][0-9]
-	$(MAKEINFO) -I $(srcdir) $<
-
-.texinfo.info:
-	@rm -f $@ $@-[0-9] $@-[0-9][0-9]
-	$(MAKEINFO) -I $(srcdir) $<
-
-.texinfo:
-	@rm -f $@ $@-[0-9] $@-[0-9][0-9]
-	$(MAKEINFO) -I $(srcdir) $<
-
-.texinfo.dvi:
-	TEXINPUTS=$(top_srcdir)/../texinfo:$$TEXINPUTS \
-	  MAKEINFO='$(MAKEINFO) -I $(srcdir)' $(TEXI2DVI) $<
-.dvi.ps:
-	$(DVIPS) $< -o $@
-
-install-info-am: $(INFO_DEPS)
-	@$(NORMAL_INSTALL)
-	$(mkinstalldirs) $(infodir)
-	@for file in $(INFO_DEPS); do \
-	  if test -f $$file; then d=.; else d=$(srcdir); fi; \
-	  for ifile in `cd $$d && echo $$file $$file-[0-9] $$file-[0-9][0-9]`; do \
-	    if test -f $$d/$$ifile; then \
-	      echo " $(INSTALL_DATA) $$d/$$ifile $(infodir)/$$ifile"; \
-	      $(INSTALL_DATA) $$d/$$ifile $(infodir)/$$ifile; \
-	    else : ; fi; \
-	  done; \
-	done
-	@$(POST_INSTALL)
-	@if $(SHELL) -c 'install-info --version | sed 1q | fgrep -s -v -i debian' >/dev/null 2>&1; then \
-	  for file in $(INFO_DEPS); do \
-	    echo " install-info --info-dir=$(infodir) $(infodir)/$$file";\
-	    install-info --info-dir=$(infodir) $(infodir)/$$file || :;\
-	  done; \
-	else : ; fi
-
-uninstall-info:
-	$(PRE_UNINSTALL)
-	@if $(SHELL) -c 'install-info --version | sed 1q | fgrep -s -v -i debian' >/dev/null 2>&1; then \
-	  ii=yes; \
-	else ii=; fi; \
-	for file in $(INFO_DEPS); do \
-	  test -z $ii || install-info --info-dir=$(infodir) --remove $$file; \
-	done
-	$(NORMAL_UNINSTALL)
-	for file in $(INFO_DEPS); do \
-	  (cd $(infodir) && rm -f $$file $$file-[0-9] $$file-[0-9][0-9]); \
-	done
-
-dist-info: $(INFO_DEPS)
-	for base in $(INFO_DEPS); do \
-	  if test -f $$base; then d=.; else d=$(srcdir); fi; \
-	  for file in `cd $$d && eval echo $$base*`; do \
-	    test -f $(distdir)/$$file \
-	    || ln $$d/$$file $(distdir)/$$file 2> /dev/null \
-	    || cp -p $$d/$$file $(distdir)/$$file; \
-	  done; \
-	done
-
-mostlyclean-aminfo:
-	rm -f ld.aux ld.cp ld.cps ld.dvi ld.fn ld.fns ld.ky ld.log ld.pg ld.toc \
-	  ld.tp ld.tps ld.vr ld.vrs ld.op ld.tr ld.cv
-
-clean-aminfo:
-
-distclean-aminfo:
-
-maintainer-clean-aminfo:
-	for i in $(INFO_DEPS); do rm -f `eval echo $$i*`; done
-clean-info: mostlyclean-aminfo
-install-man: $(MANS)
-	$(NORMAL_INSTALL)
-	$(mkinstalldirs) $(mandir)/man1
-	@sect=1;				\
-	inst=`echo "ld" | sed '$(transform)'`.1; \
-	if test -f $(srcdir)/ld.1; then file=$(srcdir)/ld.1; \
-	else file=ld.1; fi; \
-	echo " $(INSTALL_DATA) $$file $(mandir)/man$$sect/$$inst"; \
-	$(INSTALL_DATA) $$file $(mandir)/man$$sect/$$inst
-
-uninstall-man:
-	$(NORMAL_UNINSTALL)
-	inst=`echo "ld" | sed '$(transform)'`.1; \
-	rm -f $(mandir)/man1/$$inst
-
-
-tags: TAGS
-
-ID: $(HEADERS) $(SOURCES)
-	here=`pwd` && cd $(srcdir) && mkid -f$$here/ID $(SOURCES) $(HEADERS)
-
-TAGS:  $(HEADERS) $(SOURCES) config.in $(TAGS_DEPENDENCIES)
-	tags=; \
-	here=`pwd`; \
-	test -z "$(ETAGS_ARGS)config.in$(SOURCES)$(HEADERS)$$tags" \
-	  || (cd $(srcdir) && etags $(ETAGS_ARGS) $$tags config.in $(SOURCES) $(HEADERS) -o $$here/TAGS)
-
-mostlyclean-tags:
-
-clean-tags:
-
-distclean-tags:
-	rm -f TAGS ID
-
-maintainer-clean-tags:
-
-distdir = $(PACKAGE)-$(VERSION)
-top_distdir = $(distdir)
-
-# This target untars the dist file and tries a VPATH configuration.  Then
-# it guarantees that the distribution is self-contained by making another
-# tarfile.
-distcheck: dist
-	rm -rf $(distdir)
-	GZIP=$(GZIP) $(TAR) zxf $(distdir).tar.gz
-	mkdir $(distdir)/=build
-	mkdir $(distdir)/=inst
-	dc_install_base=`cd $(distdir)/=inst && pwd`; \
-	cd $(distdir)/=build \
-	  && ../configure --srcdir=.. --prefix=$$dc_install_base \
-	  && $(MAKE) \
-	  && $(MAKE) dvi \
-	  && $(MAKE) check \
-	  && $(MAKE) install \
-	  && $(MAKE) installcheck \
-	  && $(MAKE) dist
-	rm -rf $(distdir)
-	@echo "========================"; \
-	echo "$(distdir).tar.gz is ready for distribution"; \
-	echo "========================"
-dist: distdir
-	-chmod -R a+r $(distdir)
-	GZIP=$(GZIP) $(TAR) chozf $(distdir).tar.gz $(distdir)
-	rm -rf $(distdir)
-dist-all: distdir
-	-chmod -R a+r $(distdir)
-	GZIP=$(GZIP) $(TAR) chozf $(distdir).tar.gz $(distdir)
-	rm -rf $(distdir)
-distdir: $(DISTFILES)
-	rm -rf $(distdir)
-	mkdir $(distdir)
-	-chmod 777 $(distdir)
-	@for file in $(DISTFILES); do \
-	  if test -f $$file; then d=.; else d=$(srcdir); fi; \
-	  test -f $(distdir)/$$file \
-	  || ln $$d/$$file $(distdir)/$$file 2> /dev/null \
-	  || cp -p $$d/$$file $(distdir)/$$file; \
-	done
-	$(MAKE) top_distdir="$(top_distdir)" distdir="$(distdir)" dist-info
-
-DEJATOOL = $(PACKAGE)
-site.exp: Makefile
-	@echo 'Making a new site.exp file...'
-	-@rm -f site.bak
-	@echo '## these variables are automatically generated by make ##' > $@-t
-	@echo '# Do not edit here.  If you wish to override these values' >> $@-t
-	@echo '# edit the last section' >> $@-t
-	@echo 'set tool $(DEJATOOL)' >> $@-t
-	@echo 'set srcdir $(srcdir)' >> $@-t
-	@echo 'set objdir' `pwd` >> $@-t
-	@echo 'set host_alias $(host_alias)' >> $@-t
-	@echo 'set host_triplet $(host_triplet)' >> $@-t
-	@echo 'set target_alias $(target_alias)' >> $@-t
-	@echo 'set target_triplet $(target_triplet)' >> $@-t
-	@echo 'set build_alias $(build_alias)' >> $@-t
-	@echo 'set build_triplet $(build_triplet)' >> $@-t
-	@echo '## All variables above are generated by configure. Do Not Edit ##' >> $@-t
-	-@sed '1,/^## All variables above are.*##/ d' site.bak >> $@-t
-	-@mv site.exp site.bak
-	@mv $@-t site.exp
-info: $(INFO_DEPS)
-dvi: $(DVIS)
-check: all
-	$(MAKE) check-DEJAGNU
-installcheck:
-install-info: install-info-am
-install-exec: install-exec-local
-	@$(NORMAL_INSTALL)
-
-install-data: install-man install-data-local
-	@$(NORMAL_INSTALL)
-
-install: install-exec install-data all
-	@:
-
-uninstall: uninstall-man
-
-all: Makefile $(PROGRAMS) $(MANS) config.h
-
-install-strip:
-	$(MAKE) INSTALL_PROGRAM='$(INSTALL_PROGRAM) -s' INSTALL_SCRIPT='$(INSTALL_PROGRAM)' install
-installdirs:
-	$(mkinstalldirs)  $(mandir)/man1
-
-
-mostlyclean-generic:
-	test -z "$(MOSTLYCLEANFILES)" || rm -f $(MOSTLYCLEANFILES)
-
-clean-generic:
-	test -z "$(CLEANFILES)" || rm -f $(CLEANFILES)
-
-distclean-generic:
-	rm -f Makefile $(DISTCLEANFILES)
-	rm -f config.cache config.log stamp-h stamp-h[0-9]*
-	test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
-
-maintainer-clean-generic:
-	test -z "$(MAINTAINERCLEANFILES)" || rm -f $(MAINTAINERCLEANFILES)
-	test -z "$(BUILT_SOURCES)" || rm -f $(BUILT_SOURCES)
-mostlyclean:  mostlyclean-hdr mostlyclean-noinstPROGRAMS \
-		mostlyclean-compile mostlyclean-libtool \
-		mostlyclean-aminfo mostlyclean-tags mostlyclean-generic
-
-clean:  clean-hdr clean-noinstPROGRAMS clean-compile clean-libtool \
-		clean-aminfo clean-tags clean-generic mostlyclean
-
-distclean:  distclean-hdr distclean-noinstPROGRAMS distclean-compile \
-		distclean-libtool distclean-aminfo distclean-tags \
-		distclean-generic clean
-	rm -f config.status
-	rm -f libtool
-
-maintainer-clean:  maintainer-clean-hdr maintainer-clean-noinstPROGRAMS \
-		maintainer-clean-compile maintainer-clean-libtool \
-		maintainer-clean-aminfo maintainer-clean-tags \
-		maintainer-clean-generic distclean
-	@echo "This command is intended for maintainers to use;"
-	@echo "it deletes files that may require special tools to rebuild."
-	rm -f config.status
-
-.PHONY: default mostlyclean-hdr distclean-hdr clean-hdr \
-maintainer-clean-hdr mostlyclean-noinstPROGRAMS \
-distclean-noinstPROGRAMS clean-noinstPROGRAMS \
-maintainer-clean-noinstPROGRAMS mostlyclean-compile distclean-compile \
-clean-compile maintainer-clean-compile mostlyclean-libtool \
-distclean-libtool clean-libtool maintainer-clean-libtool \
-install-info-am uninstall-info mostlyclean-aminfo distclean-aminfo \
-clean-aminfo maintainer-clean-aminfo install-man uninstall-man tags \
-mostlyclean-tags distclean-tags clean-tags maintainer-clean-tags \
-distdir check-DEJAGNU info dvi installcheck install-info install-exec \
-install-data install uninstall all installdirs mostlyclean-generic \
-distclean-generic clean-generic maintainer-clean-generic clean \
-mostlyclean distclean maintainer-clean
-
-
 ldmain.o: ldmain.c config.status
 	$(COMPILE) -c -DDEFAULT_EMULATION='"$(EMUL)"' -DSCRIPTDIR='"$(scriptdir)"' -DTARGET='"@target@"' $(srcdir)/ldmain.c
 
@@ -696,6 +218,11 @@ ldemul-list.h: Makefile
 	done;\
 	echo "  0") >ldemul-tmp.h
 	mv ldemul-tmp.h ldemul-list.h
+
+# These all start with e so 'make clean' can find them.
+
+GENSCRIPTS = $(SHELL) $(srcdir)/genscripts.sh ${srcdir} ${libdir} @host@ @target@ @target_alias@ ${EMUL} "@NATIVE_LIB_DIRS@"
+GEN_DEPENDS = $(srcdir)/genscripts.sh $(srcdir)/emultempl/stringify.sed
 @TDIRS@
 
 ea29k.c: $(srcdir)/emulparams/a29k.sh \
@@ -1004,10 +531,18 @@ ez8002.c: $(srcdir)/emulparams/z8002.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/z8000.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} z8002 "$(tdir_z8002)"
 
+ld_new_SOURCES = ldgram.y ldlex.l lexsup.c ldlang.c mri.c ldctor.c ldmain.c \
+	ldwrite.c ldexp.c ldemul.c ldver.c ldmisc.c ldfile.c ldcref.c
+ld_new_DEPENDENCIES = $(EMULATION_OFILES) $(BFDLIB) $(LIBIBERTY) @LEXLIB@
+ld_new_LDADD = $(EMULATION_OFILES) $(BFDLIB) $(LIBIBERTY) @LEXLIB@
+
 # The generated emulation files mostly have the same dependencies.
 $(EMULATION_OFILES): ../bfd/bfd.h sysdep.h config.h $(INCDIR)/bfdlink.h \
   ld.h ldmain.h ldemul.h ldfile.h ldmisc.h ldexp.h ldlang.h \
   ldctor.h ldexp.h ldlang.h ldgram.h
+
+# This is the real libbfd.a created by libtool.
+TESTBFDLIB = ../bfd/.libs/libbfd.a
 
 check-DEJAGNU: site.exp
 	srcroot=`cd $(srcdir) && pwd`; export srcroot; \
@@ -1095,6 +630,11 @@ configdoc.texi:	${DOCVER}-doc.texi
 
 ld.info: $(srcdir)/ld.texinfo configdoc.texi $(BFDDIR)/doc/bfdsumm.texi
 ld.dvi: $(srcdir)/ld.texinfo configdoc.texi $(BFDDIR)/doc/bfdsumm.texi
+
+MOSTCLEANFILES = $(STAGESTUFF) ld1$(EXEEXT) ld2$(EXEEXT) ld3$(EXEEXT) \
+	ldemul-list.h tmpdir crtbegin.o crtend.o
+CLEANFILES = dep.sed .dep .dep1
+DISTCLEANFILES = ldscripts
 
 .PHONY: install-exec-local install-data-local
 
@@ -1213,7 +753,3 @@ ldlex.o: ldlex.c ../bfd/bfd.h sysdep.h config.h $(INCDIR)/fopen-same.h \
   ldmain.h
 
 # IF YOU PUT ANYTHING HERE IT WILL GO AWAY
-
-# Tell versions [3.59,3.63) of GNU make to not export all variables.
-# Otherwise a system limit (for SysV at least) may be exceeded.
-.NOEXPORT:

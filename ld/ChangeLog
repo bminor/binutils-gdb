@@ -1,3 +1,22 @@
+Sat Aug  9 00:42:27 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.am: New file, based on old Makefile.in.
+	* acinclude.m4: New file, from old aclocal.m4.
+	* configure.in: Call AM_INIT_AUTOMAKE and AM_PROG_LIBTOOL.  Remove
+	shared library handling; now handled by libtool.  Replace
+	AC_CONFIG_HEADER with AM_CONFIG_HEADER.  Call AC_PROG_YACC,
+	AC_PROG_LEX, and AC_DECL_YYTEXT.  Call AM_MAINTAINER_MODE,
+	AM_CYGWIN32, and AM_EXEEXT.  Don't call CY_CYGWIN32 or CY_EXEEXT.
+	* configure.host: Don't set HLDFLAGS, HLDENV, or RPATH_ENVVAR.
+	* acconfig.h: Mention PACKAGE and VERSION.
+	* stamp-h.in: New file.
+	* ldver.c (ld_program_vresion): Set ld_program_version from
+	VERSION.
+	* ldgram.y, ldlex.l: Replace VERSION with VERSIONK.
+	* Makefile.in: Now built with automake.
+	* aclocal.m4: Now built with aclocal.
+	* configure, config.in: Rebuild.
+
 Mon Jul 28 19:04:50 1997  Rob Savoye  <rob@chinadoll.cygnus.com>
 
         * configure.in: Use CYGWIN and EXEEXT autoconf macro to look for

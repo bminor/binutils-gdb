@@ -24,12 +24,14 @@ Do-first:
 Things-to-keep:
 
 ChangeLog
+Makefile.am
 Makefile.in
 NEWS
 README
 TODO
 acconfig.h
 aclocal.m4
+acinclude.m4
 config.in
 configure
 configure.bat
@@ -79,6 +81,7 @@ mpw-make.sed
 mri.c
 mri.h
 scripttempl
+stamp-h.in
 sysdep.h
 testsuite
 
@@ -86,7 +89,7 @@ Things-to-lose:
 
 Do-last:
 
-arc_files="ChangeLog configure.tgt Makefile.in"
+arc_files="ChangeLog configure.tgt Makefile.am Makefile.in"
 
 if ( echo $* | grep keep\-arc > /dev/null ) ; then
 	for i in $arc_files ; do
@@ -115,7 +118,7 @@ else
 	done
 fi
 
-v850_files="ChangeLog configure.tgt Makefile.in"
+v850_files="ChangeLog configure.tgt Makefile.am Makefile.in"
 
 if ( echo $* | grep keep\-v850 > /dev/null ) ; then
 	for i in $v850_files ; do
@@ -173,7 +176,7 @@ else
 	done
 fi
 
-tic80_files="ChangeLog configure.tgt Makefile.in"
+tic80_files="ChangeLog configure.tgt Makefile.am Makefile.in"
 
 if ( echo $* | grep keep\-tic80 > /dev/null ) ; then
 	for i in $tic80_files ; do
@@ -202,7 +205,7 @@ else
 	done
 fi
 
-d30v_files="ChangeLog configure.tgt Makefile.in"
+d30v_files="ChangeLog configure.tgt Makefile.am Makefile.in"
 
 if ( echo $* | grep keep\-d30v > /dev/null ) ; then
 	for i in $d30v_files ; do
