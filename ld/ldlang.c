@@ -985,7 +985,7 @@ section_already_linked (abfd, sec, data)
      of having link once sections in the first place.
 
      Also, not merging link once sections in a relocatable link
-     causes trouble for MIPS ELF, which relies in link once semantics
+     causes trouble for MIPS ELF, which relies on link once semantics
      to handle the .reginfo section correctly.  */
 
   name = bfd_get_section_name (abfd, sec);
@@ -1038,6 +1038,9 @@ section_already_linked (abfd, sec, data)
 	     does not create a lang_input_section structure for this
 	     section.  */
 	  sec->output_section = bfd_abs_section_ptr;
+
+	  if (flags & SEC_GROUP)
+	    bfd_discard_group (abfd, sec);
 
 	  return;
 	}

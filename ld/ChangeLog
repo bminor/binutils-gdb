@@ -1,3 +1,7 @@
+2002-06-04  Alan Modra  <amodra@bigpond.net.au>
+
+	* ldlang.c (section_already_linked): Call bfd_discard_group.  Typo fix.
+
 2002-06-02  Marek Michalkiewicz  <marekm@amelek.gda.pl>
 
 	* scripttempl/avr.sc: Changes to support current GCC and avr-libc,
