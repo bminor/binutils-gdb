@@ -1,3 +1,8 @@
+2003-04-13  Daniel Jacobowitz  <drow@mvista.com>
+
+	* minsyms.c (install_minimal_symbols): Only switch to gnu-v3 mode
+	if the linkage name demangled successfully.
+
 2003-04-13  Mark Kettenis  <kettenis@gnu.org>
 
 	* x86-64-tdep.c (att_flavour, intel_flavour, valid_flavours,
