@@ -1,3 +1,7 @@
+2004-04-16  Nick Clifton  <nickc@redhat.com>
+
+	* bfd.c (bfd_archive_filename): Catch NULL bfd pointers.
+
 2004-04-16  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elflink.c (_bfd_elf_merge_symbol): Treat weak as strong only
