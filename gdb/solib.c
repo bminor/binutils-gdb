@@ -45,17 +45,26 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define MAX_PATH_SIZE 256		/* FIXME: Should be dynamic */
 
-/* On SVR4 systems, for the initial implementation, use main() as the
-   "startup mapping complete" breakpoint address.  The models for SunOS
-   and SVR4 dynamic linking debugger support are different in that SunOS
-   hits one breakpoint when all mapping is complete while using the SVR4
+/* On SVR4 systems, for the initial implementation, use some runtime startup
+   symbol as the "startup mapping complete" breakpoint address.  The models
+   for SunOS and SVR4 dynamic linking debugger support are different in that
+   SunOS hits one breakpoint when all mapping is complete while using the SVR4
    debugger support takes two breakpoint hits for each file mapped, and
    there is no way to know when the "last" one is hit.  Both these
    mechanisms should be tied to a "breakpoint service routine" that
    gets automatically executed whenever one of the breakpoints indicating
    a change in mapping is hit.  This is a future enhancement.  (FIXME) */
 
-#define BKPT_AT_MAIN 1
+#define BKPT_AT_SYMBOL 1
+
+static char *bkpt_names[] = {
+#ifdef SOLIB_BKPT_NAME
+  SOLIB_BKPT_NAME,		/* Prefer configured name if it exists. */
+#endif
+  "_start",
+  "main",
+  NULL
+};
 
 /* local data declarations */
 
@@ -94,6 +103,7 @@ struct so_list {
   struct section_table *sections;
   struct section_table *sections_end;
   struct section_table *textsection;
+  bfd *bfd;
 };
 
 static struct so_list *so_list_head;	/* List of known shared objects */
@@ -201,8 +211,8 @@ solib_map_sections (so)
   if (scratch_chan < 0)
     {
       perror_with_name (filename);
-    }  
-  make_cleanup (free, scratch_pathname);
+    }
+  /* Leave scratch_pathname allocated.  bfd->name will point to it.  */
 
   abfd = bfd_fdopenr (scratch_pathname, NULL, scratch_chan);
   if (!abfd)
@@ -211,8 +221,9 @@ solib_map_sections (so)
       error ("Could not open `%s' as an executable file: %s",
 	     scratch_pathname, bfd_errmsg (bfd_error));
     }
-
-  make_cleanup (bfd_close, abfd);	/* Zap bfd, close scratch_chan. */
+  /* Leave bfd open, core_xfer_memory and "info files" need it.  */
+  so -> bfd = abfd;
+  abfd -> cacheable = true;
 
   if (!bfd_check_format (abfd, bfd_object))
     {
@@ -222,7 +233,7 @@ solib_map_sections (so)
   if (build_section_table (abfd, &so -> sections, &so -> sections_end))
     {
       error ("Can't find the file sections in `%s': %s", 
-	     exec_bfd -> filename, bfd_errmsg (bfd_error));
+	     bfd_get_filename (exec_bfd), bfd_errmsg (bfd_error));
     }
 
   for (p = so -> sections; p < so -> sections_end; p++)
@@ -363,7 +374,8 @@ bfd_lookup_symbol (abfd, symname)
 	  sym = *symbol_table++;
 	  if (STREQ (sym -> name, symname))
 	    {
-	      symaddr = sym -> value;
+	      /* Bfd symbols are section relative. */
+	      symaddr = sym -> value + sym -> section -> vma;
 	      break;
 	    }
 	}
@@ -541,6 +553,23 @@ locate_base ()
 
 }
 
+/*
+
+LOCAL FUNCTION
+
+	first_link_map_member -- locate first member in dynamic linker's map
+
+SYNOPSIS
+
+	static struct link_map *first_link_map_member (void)
+
+DESCRIPTION
+
+	Read in a copy of the first member in the inferior's dynamic
+	link map from the inferior's dynamic linker structures, and return
+	a pointer to the copy in our address space.
+*/
+
 static struct link_map *
 first_link_map_member ()
 {
@@ -561,6 +590,9 @@ first_link_map_member ()
 #else	/* SVR4_SHARED_LIBS */
 
   read_memory (debug_base, (char *) &debug_copy, sizeof (struct r_debug));
+  /* FIXME:  Perhaps we should validate the info somehow, perhaps by
+     checking r_version for a known version number, or r_state for
+     RT_CONSISTENT. */
   lm = debug_copy.r_map;
 
 #endif	/* !SVR4_SHARED_LIBS */
@@ -607,7 +639,7 @@ find_solib (so_list_ptr)
 	  /* We have not already read in the dynamic linking structures
 	     from the inferior, lookup the address of the base structure. */
 	  debug_base = locate_base ();
-	  if (debug_base > 0)
+	  if (debug_base != 0)
 	    {
 	      /* Read the base structure in and find the address of the first
 		 link map list member. */
@@ -724,6 +756,7 @@ solib_add (arg_string, from_tty, target)
     {
       if (so -> so_name[0] && re_exec (so -> so_name))
 	{
+	  so -> from_tty = from_tty;
 	  if (so -> symbols_loaded)
 	    {
 	      if (from_tty)
@@ -731,14 +764,12 @@ solib_add (arg_string, from_tty, target)
 		  printf ("Symbols already loaded for %s\n", so -> so_name);
 		}
 	    }
-	  else
+	  else if (catch_errors
+		   (symbol_add_stub, (char *) so,
+		    "Error while reading shared library symbols:\n"))
 	    {
-	      catch_errors (symbol_add_stub, (char *) so,
-			    "Error while reading shared library symbols:\n");
-	      
 	      special_symbol_handling (so);
 	      so -> symbols_loaded = 1;
-	      so -> from_tty = from_tty;
 	    }
 	}
     }
@@ -893,6 +924,7 @@ void
 clear_solib()
 {
   struct so_list *next;
+  char *bfd_filename;
   
   while (so_list_head)
     {
@@ -900,8 +932,19 @@ clear_solib()
 	{
 	  free ((PTR)so_list_head -> sections);
 	}
+      if (so_list_head -> bfd)
+	{
+	  bfd_filename = bfd_get_filename (so_list_head -> bfd);
+	  bfd_close (so_list_head -> bfd);
+	}
+      else
+	/* This happens for the executable on SVR4.  */
+	bfd_filename = NULL;
+      
       next = so_list_head -> next;
-      free((PTR)so_list_head);
+      if (bfd_filename)
+	free ((PTR)bfd_filename);
+      free ((PTR)so_list_head);
       so_list_head = next;
     }
   debug_base = 0;
@@ -1018,6 +1061,7 @@ DESCRIPTION
 static int
 enable_break ()
 {
+  int success = 0;
 
 #ifndef SVR4_SHARED_LIBS
 
@@ -1046,31 +1090,37 @@ enable_break ()
   /* Write a value of 1 to this member.  */
 
   in_debugger = 1;
-
   write_memory (flag_addr, (char *) &in_debugger, sizeof (in_debugger));
+  success = 1;
 
 #else	/* SVR4_SHARED_LIBS */
 
-#ifdef BKPT_AT_MAIN
+#ifdef BKPT_AT_SYMBOL
 
   struct minimal_symbol *msymbol;
+  char **bkpt_namep;
+  CORE_ADDR bkpt_addr;
 
-  msymbol = lookup_minimal_symbol ("main", symfile_objfile);
-  if ((msymbol != NULL) && (SYMBOL_VALUE_ADDRESS (msymbol) != 0))
+  /* Scan through the list of symbols, trying to look up the symbol and
+     set a breakpoint there.  Terminate loop when we/if we succeed. */
+
+  breakpoint_addr = 0;
+  for (bkpt_namep = bkpt_names; *bkpt_namep != NULL; bkpt_namep++)
     {
-      breakpoint_addr = SYMBOL_VALUE_ADDRESS (msymbol);
-    }
-  else
-    {
-      return (0);
+      msymbol = lookup_minimal_symbol (*bkpt_namep, symfile_objfile);
+      if ((msymbol != NULL) && (SYMBOL_VALUE_ADDRESS (msymbol) != 0))
+	{
+	  bkpt_addr = SYMBOL_VALUE_ADDRESS (msymbol);
+	  if (target_insert_breakpoint (bkpt_addr, shadow_contents) == 0)
+	    {
+	      breakpoint_addr = bkpt_addr;
+	      success = 1;
+	      break;
+	    }
+	}
     }
 
-  if (target_insert_breakpoint (breakpoint_addr, shadow_contents) != 0)
-    {
-      return (0);
-    }
-
-#else	/* !BKPT_AT_MAIN */
+#else	/* !BKPT_AT_SYMBOL */
 
   struct symtab_and_line sal;
 
@@ -1084,12 +1134,13 @@ enable_break ()
      deal with hitting these breakpoints.  (FIXME). */
 
   warning ("'%s': line %d: missing SVR4 support code", __FILE__, __LINE__);
+  success = 1;
 
-#endif	/* BKPT_AT_MAIN */
+#endif	/* BKPT_AT_SYMBOL */
 
 #endif	/* !SVR4_SHARED_LIBS */
 
-  return (1);
+  return (success);
 }
   
 /*
@@ -1108,6 +1159,21 @@ DESCRIPTION
 	shell) until it is ready to execute it's first instruction.  At this
 	point, this function gets called via expansion of the macro
 	SOLIB_CREATE_INFERIOR_HOOK.
+
+	For SunOS executables, this first instruction is typically the
+	one at "_start", or a similar text label, regardless of whether
+	the executable is statically or dynamically linked.  The runtime
+	startup code takes care of dynamically linking in any shared
+	libraries, once gdb allows the inferior to continue.
+
+	For SVR4 executables, this first instruction is either the first
+	instruction in the dynamic linker (for dynamically linked
+	executables) or the instruction at "start" for statically linked
+	executables.  For dynamically linked executables, the system
+	first exec's /lib/libc.so.N, which contains the dynamic linker,
+	and starts it running.  The dynamic linker maps in any needed
+	shared libraries, maps in the actual user executable, and then
+	jumps to "start" in the user executable.
 
 	For both SunOS shared libraries, and SVR4 shared libraries, we
 	can arrange to cooperate with the dynamic linker to discover the

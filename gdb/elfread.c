@@ -255,7 +255,8 @@ elf_symtab_read (abfd, addr, objfile)
 	  if ((sym -> flags & (BSF_GLOBAL | BSF_WEAK))
 	      && (sym -> section != NULL))
 	    {
-	      symaddr = sym -> value;
+	      /* Bfd symbols are section relative. */
+	      symaddr = sym -> value + sym -> section -> vma;
 	      /* Relocate all non-absolute symbols by base address.  */
 	      if (sym -> section != &bfd_abs_section)
 		symaddr += addr;
@@ -343,7 +344,8 @@ elf_symtab_read (abfd, addr, objfile)
 		  if (sectinfo->sections[index])
 		    complain (&section_info_dup_complaint, sectinfo->filename);
 
-		  symaddr = sym -> value;
+		  /* Bfd symbols are section relative. */
+		  symaddr = sym -> value + sym -> section -> vma;
 		  /* Relocate all non-absolute symbols by base address.  */
 		  if (sym -> section != &bfd_abs_section)
 		      symaddr += addr;
