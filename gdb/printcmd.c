@@ -1,5 +1,7 @@
 /* Print values for GNU debugger GDB.
-   Copyright 1986-1991, 1993-1995, 1998, 2000 Free Software Foundation, Inc.
+
+   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1993, 1994, 1995,
+   1998, 2000 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -445,14 +447,7 @@ print_scalar_formatted (valaddr, type, format, size, stream)
 
     case 'a':
       {
-	/* Truncate address to the size of a target pointer, avoiding
-	   shifts larger or equal than the width of a CORE_ADDR.  The
-	   local variable PTR_BIT stops the compiler reporting a shift
-	   overflow when it won't occure. */
 	CORE_ADDR addr = unpack_pointer (type, valaddr);
-	int ptr_bit = TARGET_PTR_BIT;
-	if (ptr_bit < (sizeof (CORE_ADDR) * HOST_CHAR_BIT))
-	  addr &= ((CORE_ADDR) 1 << ptr_bit) - 1;
 	print_address (addr, stream);
       }
       break;
@@ -740,8 +735,17 @@ print_address_numeric (addr, use_local, stream)
      int use_local;
      struct ui_file *stream;
 {
-  /* This assumes a CORE_ADDR can fit in a LONGEST.  Probably a safe
-     assumption.  */
+  /* Truncate address to the size of a target pointer, avoiding shifts
+     larger or equal than the width of a CORE_ADDR.  The local
+     variable PTR_BIT stops the compiler reporting a shift overflow
+     when it won't occure. */
+  /* NOTE: This assumes that the significant address information is
+     kept in the least significant bits of ADDR - the upper bits were
+     either zero or sign extended.  Should ADDRESS_TO_POINTER() or
+     some ADDRESS_TO_PRINTABLE() be used to do the conversion?  */
+  int ptr_bit = TARGET_PTR_BIT;
+  if (ptr_bit < (sizeof (CORE_ADDR) * HOST_CHAR_BIT))
+    addr &= ((CORE_ADDR) 1 << ptr_bit) - 1;
   print_longest (stream, 'x', use_local, (ULONGEST) addr);
 }
 

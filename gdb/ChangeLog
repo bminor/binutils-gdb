@@ -1,3 +1,10 @@
+Tue Jul 11 18:32:40 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* printcmd.c (print_scalar_formatted): Move masking of 'a' address
+ 	from here.
+	(print_address_numeric): To here.
+	* TODO: Update.
+
 Tue Jul 11 17:50:31 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* symtab.c: Use paddr_nz() to print addresses.

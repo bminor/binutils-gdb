@@ -117,6 +117,15 @@ BIG_ENDIAN and LITTLE_ENDIAN.
 
 --
 
+printcmd.c (print_address_numeric):
+
+NOTE: This assumes that the significant address information is kept in
+the least significant bits of ADDR - the upper bits were either zero
+or sign extended.  Should ADDRESS_TO_POINTER() or some
+ADDRESS_TO_PRINTABLE() be used to do the conversion?
+
+--
+
 		Code Cleanups: General
 		======================
 
