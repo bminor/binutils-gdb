@@ -1,3 +1,7 @@
+Fri Apr  2 16:55:13 1993  Jim Kingdon  (kingdon@cygnus.com)
+
+	* stabs.texinfo: Fixes about N_SO.
+
 Fri Mar 26 18:00:35 1993  Roland H. Pesch  (pesch@fowanton.cygnus.com)
 
 	* gdb.texinfo: include list of nonstandard init file names

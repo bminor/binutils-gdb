@@ -2769,15 +2769,21 @@ Path and name of source file containing main routine
 @end display
 
 @example
-"name" -> /path/to/source/file
-       -> source_file_terminal_name
+"name" -> /source/directory/
+       -> source_file
 
 value  -> the starting text address of the compilation.
 @end example
 
-These are found two in a row.  The name field of the first N_SO
-contains the path to the source file.  The name field of the second
-N_SO contains the terminal name of the source file itself.
+These are found two in a row.  The name field of the first N_SO contains
+the directory that the source file is relative to.  The name field of
+the second N_SO contains the name of the source file itself.
+
+Only some compilers (e.g. gcc2, Sun cc) include the directory; this
+symbol can be distinguished by the fact that it ends in a slash.
+According to a comment in GDB's partial-stab.h, other compilers
+(especially unnamed C++ compilers) put out useless N_SO's for
+nonexistent source files (after the N_SO for the real source file).
 
 @node N_LSYM
 @section 128 - 0x80 - N_LSYM      
