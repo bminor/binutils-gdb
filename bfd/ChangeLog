@@ -1,5 +1,11 @@
 2001-10-21  H.J. Lu <hjl@gnu.org>
 
+	* configure.in (WIN32LIBADD): Include -L../libiberty/pic -liberty
+	if shared library is enabled only for Linux hosts.
+	* configure: Rebuild.
+
+2001-10-21  H.J. Lu <hjl@gnu.org>
+
 	* configure.in (WIN32LIBADD): Check if PICFLAG is defined in
 	../libiberty/Makefile instead of $enable_shared.
 	* configure: Rebuild.

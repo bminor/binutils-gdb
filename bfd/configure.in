@@ -410,7 +410,7 @@ case "${host}" in
     WIN32LIBADD="-L`pwd`/../libiberty -liberty -L`pwd`/../intl -lintl -lcygwin -lkernel32"
   fi
   ;;
-*)
+*-*-linux*)
   # We borrow WIN32LIBADD so that the shared libbfd won't depend on
   # libiberty.a.
   PICFLAG=
