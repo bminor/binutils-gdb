@@ -1651,13 +1651,16 @@ thumb_get_next_pc (CORE_ADDR pc)
     {
       nextpc = pc_val + (sbits (inst1, 0, 10) << 1);
     }
-  else if ((inst1 & 0xf800) == 0xf000)	/* long branch with link */
+  else if ((inst1 & 0xf800) == 0xf000)	/* long branch with link, and blx */
     {
       unsigned short inst2 = read_memory_integer (pc + 2, 2);
       offset = (sbits (inst1, 0, 10) << 12) + (bits (inst2, 0, 10) << 1);
       nextpc = pc_val + offset;
+      /* For BLX make sure to clear the low bits.  */
+      if (bits (inst2, 11, 12) == 1)
+	nextpc = nextpc & 0xfffffffc;
     }
-  else if ((inst1 & 0xff80) == 0x4700)	/* branch and exchange (bx) */
+  else if ((inst1 & 0xff00) == 0x4700)	/* bx REG, blx REG */
     {
       if (bits (inst1, 3, 6) == 0x0f)
 	nextpc = pc_val;
