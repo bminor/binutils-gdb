@@ -107,6 +107,9 @@ descriptors (@pxref{Type Descriptors}) are believed to be completely
 comprehensive.  Stabs for COBOL-specific features and for variant
 records (used by Pascal and Modula-2) are poorly documented here.
 
+@c FIXME: Need to document all OS9000 stuff in GDB; see all references
+@c to os9k_stabs in stabsread.c.
+
 Other sources of information on stabs are @cite{Dbx and Dbxtool
 Interfaces}, 2nd edition, by Sun, 1988, and @cite{AIX Version 3.2 Files
 Reference}, Fourth Edition, September 1992, "dbx Stabstring Grammar" in
@@ -3384,13 +3387,15 @@ Open array; see @ref{Arrays}.
 
 @item b
 Pascal space type (AIX); see @ref{Miscellaneous Types}.  Builtin integer
-type (Sun); see @ref{Builtin Type Descriptors}.
+type (Sun); see @ref{Builtin Type Descriptors}.  Const and volatile
+qualfied type (OS9000).
 
 @item B
 Volatile-qualified type; see @ref{Miscellaneous Types}.
 
 @item c
-Complex builtin type; see @ref{Builtin Type Descriptors}.
+Complex builtin type (AIX); see @ref{Builtin Type Descriptors}.
+Const-qualified type (OS9000).
 
 @item C
 COBOL Picture type.  See AIX documentation for details.
@@ -3420,7 +3425,8 @@ Builtin floating point type; see @ref{Builtin Type Descriptors}.
 COBOL Group.  See AIX documentation for details.
 
 @item i
-Imported type; see @ref{Cross-References}.
+Imported type (AIX); see @ref{Cross-References}.  Volatile-qualified
+type (OS9000).
 
 @item k
 Const-qualified type; see @ref{Miscellaneous Types}.

@@ -1,3 +1,8 @@
+Tue Mar  1 17:04:43 1994  Jim Kingdon  (kingdon@deneb.cygnus.com)
+
+	* stabs.texinfo (Type Descriptors): Add OS9000 type descriptors c,
+	i, and b.
+
 Wed Feb 23 10:44:18 1994  Jim Kingdon  (kingdon@rtl.cygnus.com)
 
 	* stabs.texinfo: Document N_RBRAC as function relative for COFF as
