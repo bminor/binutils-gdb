@@ -94,9 +94,25 @@ typedef enum h_gr {
  , H_GR_R13 = 13, H_GR_R14 = 14, H_GR_R15 = 15
 } H_GR;
 
+/* Enum declaration for dedicated registers.  */
+typedef enum h_dr {
+  H_DR_TBR, H_DR_RP, H_DR_SSP, H_DR_USP
+} H_DR;
+
+/* Enum declaration for multiplication and division registers.  */
+typedef enum h_mdr {
+  H_MDR_MDH = 4, H_MDR_MDL = 5
+} H_MDR;
+
+/* Enum declaration for control registers.  */
+typedef enum h_cr {
+  H_CR_PC, H_CR_PS
+} H_CR;
+
 /* Enum declaration for fr30 operand types.  */
 typedef enum cgen_operand_type {
-  FR30_OPERAND_PC, FR30_OPERAND_RI, FR30_OPERAND_RJ, FR30_OPERAND_MAX
+  FR30_OPERAND_PC, FR30_OPERAND_RI, FR30_OPERAND_RJ, FR30_OPERAND_NBIT
+ , FR30_OPERAND_VBIT, FR30_OPERAND_ZBIT, FR30_OPERAND_CBIT, FR30_OPERAND_MAX
 } CGEN_OPERAND_TYPE;
 
 /* Non-boolean attributes.  */
@@ -113,13 +129,13 @@ typedef enum mach_attr {
 #define MAX_OPERANDS ((int) FR30_OPERAND_MAX)
 
 /* Maximum number of operands referenced by any insn.  */
-#define MAX_OPERAND_INSTANCES 3
+#define MAX_OPERAND_INSTANCES 7
 
 /* Hardware, operand and instruction attribute indices.  */
 
 /* Enum declaration for cgen_hw attrs.  */
 typedef enum cgen_hw_attr {
-  CGEN_HW_CACHE_ADDR, CGEN_HW_PC, CGEN_HW_PROFILE
+  CGEN_HW_CACHE_ADDR, CGEN_HW_FUN_ACCESS, CGEN_HW_PC, CGEN_HW_PROFILE
 } CGEN_HW_ATTR;
 
 /* Number of non-boolean elements in cgen_hw.  */
@@ -188,7 +204,9 @@ extern const CGEN_ATTR_TABLE fr30_cgen_insn_attr_table[];
 /* Enum declaration for fr30 hardware types.  */
 typedef enum hw_type {
   HW_H_PC, HW_H_MEMORY, HW_H_SINT, HW_H_UINT
- , HW_H_ADDR, HW_H_IADDR, HW_H_GR, HW_MAX
+ , HW_H_ADDR, HW_H_IADDR, HW_H_GR, HW_H_DR
+ , HW_H_MDR, HW_H_CR, HW_H_NBIT, HW_H_ZBIT
+ , HW_H_VBIT, HW_H_CBIT, HW_MAX
 } HW_TYPE;
 
 #define MAX_HW ((int) HW_MAX)
@@ -196,6 +214,9 @@ typedef enum hw_type {
 /* Hardware decls.  */
 
 extern CGEN_KEYWORD fr30_cgen_opval_h_gr;
+extern CGEN_KEYWORD fr30_cgen_opval_h_dr;
+extern CGEN_KEYWORD fr30_cgen_opval_h_mdr;
+extern CGEN_KEYWORD fr30_cgen_opval_h_cr;
 
 #define CGEN_INIT_PARSE(od) \
 {\

@@ -277,6 +277,7 @@ static const CGEN_ATTR_ENTRY MACH_attr[] =
 const CGEN_ATTR_TABLE fr30_cgen_hardware_attr_table[] =
 {
   { "CACHE-ADDR", NULL },
+  { "FUN-ACCESS", NULL },
   { "PC", NULL },
   { "PROFILE", NULL },
   { 0, 0 }
@@ -336,6 +337,44 @@ CGEN_KEYWORD fr30_cgen_opval_h_gr =
   19
 };
 
+CGEN_KEYWORD_ENTRY fr30_cgen_opval_h_dr_entries[] = 
+{
+  { "tbr", 0 },
+  { "rp", 1 },
+  { "ssp", 2 },
+  { "usp", 3 }
+};
+
+CGEN_KEYWORD fr30_cgen_opval_h_dr = 
+{
+  & fr30_cgen_opval_h_dr_entries[0],
+  4
+};
+
+CGEN_KEYWORD_ENTRY fr30_cgen_opval_h_mdr_entries[] = 
+{
+  { "mdh", 4 },
+  { "mdl", 5 }
+};
+
+CGEN_KEYWORD fr30_cgen_opval_h_mdr = 
+{
+  & fr30_cgen_opval_h_mdr_entries[0],
+  2
+};
+
+CGEN_KEYWORD_ENTRY fr30_cgen_opval_h_cr_entries[] = 
+{
+  { "pc", 0 },
+  { "ps", 1 }
+};
+
+CGEN_KEYWORD fr30_cgen_opval_h_cr = 
+{
+  & fr30_cgen_opval_h_cr_entries[0],
+  2
+};
+
 
 /* The hardware table.  */
 
@@ -349,6 +388,13 @@ static const CGEN_HW_ENTRY fr30_cgen_hw_entries[] =
   { HW_H_ADDR, & HW_ENT (HW_H_ADDR + 1), "h-addr", CGEN_ASM_KEYWORD, (PTR) 0, { 0, 0, { 0 } } },
   { HW_H_IADDR, & HW_ENT (HW_H_IADDR + 1), "h-iaddr", CGEN_ASM_KEYWORD, (PTR) 0, { 0, 0, { 0 } } },
   { HW_H_GR, & HW_ENT (HW_H_GR + 1), "h-gr", CGEN_ASM_KEYWORD, (PTR) & fr30_cgen_opval_h_gr, { 0, 0|(1<<CGEN_HW_CACHE_ADDR)|(1<<CGEN_HW_PROFILE), { 0 } } },
+  { HW_H_DR, & HW_ENT (HW_H_DR + 1), "h-dr", CGEN_ASM_KEYWORD, (PTR) & fr30_cgen_opval_h_dr, { 0, 0, { 0 } } },
+  { HW_H_MDR, & HW_ENT (HW_H_MDR + 1), "h-mdr", CGEN_ASM_KEYWORD, (PTR) & fr30_cgen_opval_h_mdr, { 0, 0, { 0 } } },
+  { HW_H_CR, & HW_ENT (HW_H_CR + 1), "h-cr", CGEN_ASM_KEYWORD, (PTR) & fr30_cgen_opval_h_cr, { 0, 0, { 0 } } },
+  { HW_H_NBIT, & HW_ENT (HW_H_NBIT + 1), "h-nbit", CGEN_ASM_KEYWORD, (PTR) 0, { 0, 0|(1<<CGEN_HW_FUN_ACCESS), { 0 } } },
+  { HW_H_ZBIT, & HW_ENT (HW_H_ZBIT + 1), "h-zbit", CGEN_ASM_KEYWORD, (PTR) 0, { 0, 0|(1<<CGEN_HW_FUN_ACCESS), { 0 } } },
+  { HW_H_VBIT, & HW_ENT (HW_H_VBIT + 1), "h-vbit", CGEN_ASM_KEYWORD, (PTR) 0, { 0, 0|(1<<CGEN_HW_FUN_ACCESS), { 0 } } },
+  { HW_H_CBIT, & HW_ENT (HW_H_CBIT + 1), "h-cbit", CGEN_ASM_KEYWORD, (PTR) 0, { 0, 0|(1<<CGEN_HW_FUN_ACCESS), { 0 } } },
   { 0 }
 };
 
@@ -368,6 +414,18 @@ const CGEN_OPERAND fr30_cgen_operand_table[MAX_OPERANDS] =
 /* Rj: source register */
   { "Rj", & HW_ENT (HW_H_GR), 8, 4,
     { 0, 0|(1<<CGEN_OPERAND_UNSIGNED), { 0 } }  },
+/* nbit: negative bit */
+  { "nbit", & HW_ENT (HW_H_NBIT), 0, 0,
+    { 0, 0|(1<<CGEN_OPERAND_FAKE), { 0 } }  },
+/* vbit: overflow bit */
+  { "vbit", & HW_ENT (HW_H_VBIT), 0, 0,
+    { 0, 0|(1<<CGEN_OPERAND_FAKE), { 0 } }  },
+/* zbit: zero     bit */
+  { "zbit", & HW_ENT (HW_H_ZBIT), 0, 0,
+    { 0, 0|(1<<CGEN_OPERAND_FAKE), { 0 } }  },
+/* cbit: carry    bit */
+  { "cbit", & HW_ENT (HW_H_CBIT), 0, 0,
+    { 0, 0|(1<<CGEN_OPERAND_FAKE), { 0 } }  },
 };
 
 /* Operand references.  */
@@ -375,10 +433,14 @@ const CGEN_OPERAND fr30_cgen_operand_table[MAX_OPERANDS] =
 #define INPUT CGEN_OPERAND_INSTANCE_INPUT
 #define OUTPUT CGEN_OPERAND_INSTANCE_OUTPUT
 
-static const CGEN_OPERAND_INSTANCE fmt_ADD_ops[] = {
+static const CGEN_OPERAND_INSTANCE fmt_add_ops[] = {
   { INPUT, "Rj", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (RJ), 0 },
   { INPUT, "Ri", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (RI), 0 },
   { OUTPUT, "Ri", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (RI), 0 },
+  { OUTPUT, "vbit", & HW_ENT (HW_H_VBIT), CGEN_MODE_BI, 0, 0 },
+  { OUTPUT, "cbit", & HW_ENT (HW_H_CBIT), CGEN_MODE_BI, 0, 0 },
+  { OUTPUT, "zbit", & HW_ENT (HW_H_ZBIT), CGEN_MODE_BI, 0, 0 },
+  { OUTPUT, "nbit", & HW_ENT (HW_H_NBIT), CGEN_MODE_BI, 0, 0 },
   { 0 }
 };
 
@@ -399,13 +461,13 @@ const CGEN_INSN fr30_cgen_insn_table_entries[MAX_INSNS] =
      A `num' value of zero is thus invalid.
      Also, the special `invalid' insn resides here.  */
   { { 0 }, 0 },
-/* ADD $Rj,$Ri */
+/* add $Rj,$Ri */
   {
     { 1, 1, 1, 1 },
-    FR30_INSN_ADD, "ADD", "ADD",
+    FR30_INSN_ADD, "add", "add",
     { { MNEM, ' ', OP (RJ), ',', OP (RI), 0 } },
     { 16, 16, 0xff00 }, 0xa600,
-    (PTR) & fmt_ADD_ops[0],
+    (PTR) & fmt_add_ops[0],
     { 0, 0, { 0 } }
   },
 };
