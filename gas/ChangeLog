@@ -1,4 +1,11 @@
 start-sanitize-v850
+Fri Aug 30 23:50:08 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* config/tc-v850.c (md_apply_fix3): Use little endian get/put
+	routines to fetch/store the updated instruction from/to memory.
+	(v850_insert_operand): If the operand has a specialized insert
+	routine, call it.
+
 Fri Aug 30 18:35:26 1996  J.T. Conklin  <jtc@hippo.cygnus.com>
 
 	* config/tc-v850.c (reg_name_search): Align calling convention to

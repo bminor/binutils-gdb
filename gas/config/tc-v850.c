@@ -883,12 +883,16 @@ md_apply_fix3 (fixp, valuep, seg)
       operand = &v850_operands[opindex];
 
       /* Fetch the instruction, insert the fully resolved operand
-         value, and stuff the instruction back again. */
+         value, and stuff the instruction back again.
+
+	 Note the instruction has been stored in little endian
+	 format!  */
       where = fixp->fx_frag->fr_literal + fixp->fx_where;
-      insn = bfd_getb32((unsigned char *) where);
+
+      insn = bfd_getl32((unsigned char *) where);
       insn = v850_insert_operand (insn, operand, (offsetT) value,
 				  fixp->fx_file, fixp->fx_line);
-      bfd_putb32((bfd_vma) insn, (unsigned char *) where);
+      bfd_putl32((bfd_vma) insn, (unsigned char *) where);
 
       if (fixp->fx_done)
 	{
@@ -971,6 +975,19 @@ v850_insert_operand (insn, operand, val, file, line)
         }
     }
 
-  insn |= (((long) val & ((1 << operand->bits) - 1)) << operand->shift);
+  if (operand->insert)
+    {
+      const char *message = NULL;
+      insn = (operand->insert) (insn, val, &message);
+      if (message != NULL)
+	{
+	  if (file == (char *) NULL)
+	    as_warn (message);
+	  else
+	    as_warn_where (file, line, message);
+	}
+    }
+  else
+    insn |= (((long) val & ((1 << operand->bits) - 1)) << operand->shift);
   return insn;
 }
