@@ -647,15 +647,18 @@ unpack_double (type, valaddr, invp)
 	  *invp = 1;
 	  return 1.234567891011121314;
 	}
-      return extract_floating (valaddr, TYPE_LENGTH (type));
+      return extract_floating (valaddr, len);
     }
-  else if (nosign) {
-   /* Unsigned -- be sure we compensate for signed LONGEST.  */
-   return (unsigned LONGEST) unpack_long (type, valaddr);
-  } else {
-    /* Signed -- we are OK with unpack_long.  */
-    return unpack_long (type, valaddr);
-  }
+  else if (nosign)
+    {
+      /* Unsigned -- be sure we compensate for signed LONGEST.  */
+      return (unsigned LONGEST) unpack_long (type, valaddr);
+    }
+  else
+    {
+      /* Signed -- we are OK with unpack_long.  */
+      return unpack_long (type, valaddr);
+    }
 }
 
 /* Unpack raw data (copied from debugee, target byte order) at VALADDR

@@ -1,3 +1,15 @@
+Wed Nov 10 09:31:10 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	gcc -Wall lint:
+	* thread.c: Include "gdbcmd.h" and <ctype.h>.
+	* Makefile.in: Update dependency.
+	* thread.c (thread_command): Remove unused variable p.
+	* values.c (unpack_double): Use len instead of TYPE_LENGTH (type).
+	* valprint.c (print_floating): Correctly check sign bit now that
+	we are using unsigned arithmetic.
+	* symtab.c (find_pc_line_range): Remove unused variables exact_match,
+	ind, and l.
+
 Tue Nov  9 17:42:25 1993  Kung Hsu  (kung@cirdan.cygnus.com)
 
 	* valarith.c (value_x_binop): fix search operator in class bug

@@ -1401,7 +1401,7 @@ tahoe-pinsn.o: tahoe-pinsn.c $(OP_INCLUDE)/tahoe.h $(defs_h) \
 target.o: target.c $(bfd_h) $(defs_h) $(gdbcmd_h) $(inferior_h) \
 	objfiles.h symfile.h target.h
 
-thread.o: thread.c $(defs_h) thread.h 
+thread.o: thread.c $(defs_h) thread.h $(gdbcmd_h)
 
 typeprint.o: typeprint.c $(defs_h) $(expression_h) $(gdbcmd_h) \
 	$(gdbcore_h) $(gdbtypes_h) language.h $(symtab_h) target.h \

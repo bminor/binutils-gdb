@@ -29,7 +29,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "target.h"
 #include "thread.h"
 #include "command.h"
+#include "gdbcmd.h"
 
+#include <ctype.h>
 #include <sys/types.h>
 #include <signal.h>
 
@@ -323,7 +325,6 @@ thread_command (tidstr, from_tty)
 {
   int num;
   struct thread_info *tp;
-  char *p;
 
   if (!tidstr)
     error ("Please specify a thread ID.  Use the \"info threads\" command to\n\

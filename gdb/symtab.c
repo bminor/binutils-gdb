@@ -1284,9 +1284,6 @@ find_line_pc_range (sal, startptr, endptr)
      struct symtab_and_line sal;
      CORE_ADDR *startptr, *endptr;
 {
-  struct linetable *l;
-  int ind;
-  int exact_match;		/* did we get an exact linenumber match */
   CORE_ADDR startaddr;
   struct symtab_and_line found_sal;
 
