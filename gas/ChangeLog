@@ -1,3 +1,10 @@
+start-sanitize-d10v
+Wed Dec  4 15:42:41 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
+
+	* config/tc-d10v.c (md_assemble, d10v_cleanup): Fix bug
+	with multiple sections.
+
+end-sanitize-d10v	
 Wed Dec  4 13:00:07 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-mips.c (md_longopts): Rename mips-16 to mips16, and
