@@ -1,3 +1,9 @@
+Thu Jan 12 01:32:25 1995  Ian Lance Taylor  <ian@tweedledumb.cygnus.com>
+
+	* ldlang.c (lang_place_orphans): Don't ignore files with
+	just_syms_flag set.  Instead, put all their sections in
+	bfd_abs_section_ptr, using the section VMA as the output_offset.
+
 Wed Jan 11 22:59:09 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* ldctor.c (ldctor_build_sets): Don't use `const' with typedef
