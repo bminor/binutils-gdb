@@ -825,14 +825,14 @@
         PC = cia - 4; /* reference the branch instruction */
       else
         PC = cia;
-      SignalException(BreakPoint, instruction_0);
+      SignalException (BreakPoint, instruction_0);
     }
 
   else
     {
       /* If we get this far, we're not an instruction reserved by the sim.  Raise
 	 the exception. */
-      SignalException(BreakPoint, instruction_0);
+      SignalException (BreakPoint, instruction_0);
     }
 }
 
@@ -2746,7 +2746,7 @@
 *vr5000:
 *r3900:
 {
-  SignalException(SystemCall, instruction_0);
+  SignalException (SystemCall, instruction_0);
 }
 
 
@@ -2760,7 +2760,7 @@
 *vr5000:
 {
   if ((signed_word) GPR[RS] == (signed_word) GPR[RT])
-    SignalException(Trap, instruction_0);
+    SignalException (Trap, instruction_0);
 }
 
 
@@ -2774,7 +2774,7 @@
 *vr5000:
 {
   if ((signed_word) GPR[RS] == (signed_word) EXTEND16 (IMMEDIATE))
-    SignalException(Trap, instruction_0);
+    SignalException (Trap, instruction_0);
 }
 
 
@@ -2788,7 +2788,7 @@
 *vr5000:
 {
   if ((signed_word) GPR[RS] >= (signed_word) GPR[RT])
-    SignalException(Trap, instruction_0);
+    SignalException (Trap, instruction_0);
 }
 
 
@@ -2802,7 +2802,7 @@
 *vr5000:
 {
   if ((signed_word) GPR[RS] >= (signed_word) EXTEND16 (IMMEDIATE))
-    SignalException(Trap, instruction_0);
+    SignalException (Trap, instruction_0);
 }
 
 
@@ -2816,7 +2816,7 @@
 *vr5000:
 {
   if ((unsigned_word) GPR[RS] >= (unsigned_word) EXTEND16 (IMMEDIATE))
-    SignalException(Trap, instruction_0);
+    SignalException (Trap, instruction_0);
 }
 
 
@@ -2830,7 +2830,7 @@
 *vr5000:
 {
   if ((unsigned_word) GPR[RS] >= (unsigned_word) GPR[RT])
-    SignalException(Trap, instruction_0);
+    SignalException (Trap, instruction_0);
 }
 
 
@@ -2844,7 +2844,7 @@
 *vr5000:
 {
   if ((signed_word) GPR[RS] < (signed_word) GPR[RT])
-    SignalException(Trap, instruction_0);
+    SignalException (Trap, instruction_0);
 }
 
 
@@ -2858,7 +2858,7 @@
 *vr5000:
 {
   if ((signed_word) GPR[RS] < (signed_word) EXTEND16 (IMMEDIATE))
-    SignalException(Trap, instruction_0);
+    SignalException (Trap, instruction_0);
 }
 
 
@@ -2872,7 +2872,7 @@
 *vr5000:
 {
   if ((unsigned_word) GPR[RS] < (unsigned_word) EXTEND16 (IMMEDIATE))
-    SignalException(Trap, instruction_0);
+    SignalException (Trap, instruction_0);
 }
 
 
@@ -2886,7 +2886,7 @@
 *vr5000:
 {
   if ((unsigned_word) GPR[RS] < (unsigned_word) GPR[RT])
-    SignalException(Trap, instruction_0);
+    SignalException (Trap, instruction_0);
 }
 
 
@@ -2900,7 +2900,7 @@
 *vr5000:
 {
   if ((signed_word) GPR[RS] != (signed_word) GPR[RT])
-    SignalException(Trap, instruction_0);
+    SignalException (Trap, instruction_0);
 }
 
 
@@ -2914,7 +2914,7 @@
 *vr5000:
 {
   if ((signed_word) GPR[RS] != (signed_word) EXTEND16 (IMMEDIATE))
-    SignalException(Trap, instruction_0);
+    SignalException (Trap, instruction_0);
 }
 
 
@@ -3380,7 +3380,7 @@
   check_fpu (SD_);
   {
     if ((fmt == fmt_double) | 0)
-      SignalException(ReservedInstruction,instruction_0);
+      SignalException (ReservedInstruction, instruction_0);
     else
       StoreFPR(FD,fmt_double,Convert(GETRM(),ValueFPR(FS,fmt),fmt,fmt_double));
   }
@@ -3400,7 +3400,7 @@
   check_fpu (SD_);
   {
     if ((fmt == fmt_long) | ((fmt == fmt_long) || (fmt == fmt_word)))
-      SignalException(ReservedInstruction,instruction_0);
+      SignalException (ReservedInstruction, instruction_0);
     else
       StoreFPR(FD,fmt_long,Convert(GETRM(),ValueFPR(FS,fmt),fmt,fmt_long));
   }
@@ -3425,7 +3425,7 @@
   check_fpu (SD_);
   {
     if ((fmt == fmt_single) | 0)
-      SignalException(ReservedInstruction,instruction_0);
+      SignalException (ReservedInstruction, instruction_0);
     else
       StoreFPR(FD,fmt_single,Convert(GETRM(),ValueFPR(FS,fmt),fmt,fmt_single));
   }
@@ -3447,7 +3447,7 @@
   check_fpu (SD_);
   {
     if ((fmt == fmt_word) | ((fmt == fmt_long) || (fmt == fmt_word)))
-      SignalException(ReservedInstruction,instruction_0);
+      SignalException (ReservedInstruction, instruction_0);
     else
       StoreFPR(FD,fmt_word,Convert(GETRM(),ValueFPR(FS,fmt),fmt,fmt_word));
   }
