@@ -14,7 +14,7 @@ struct internal_filehdr
   unsigned short f_magic;	/* magic number			*/
   unsigned short f_nscns;	/* number of sections		*/
   long f_timdat;		/* time & date stamp		*/
-  long f_symptr;		/* file pointer to symtab	*/
+  bfd_vma f_symptr;		/* file pointer to symtab	*/
   long f_nsyms;			/* number of symtab entries	*/
   unsigned short f_opthdr;	/* sizeof(optional hdr)		*/
   unsigned short f_flags;	/* flags			*/
@@ -47,12 +47,12 @@ struct internal_aouthdr
 {
   short magic;			/* type of file				*/
   short vstamp;			/* version stamp			*/
-  unsigned long tsize;		/* text size in bytes, padded to FW bdry*/
-  unsigned long dsize;		/* initialized data "  "		*/
-  unsigned long bsize;		/* uninitialized data "   "		*/
-  unsigned long entry;		/* entry pt.				*/
-  unsigned long text_start;	/* base of text used for this file */
-  unsigned long data_start;	/* base of data used for this file */
+  bfd_vma tsize;		/* text size in bytes, padded to FW bdry*/
+  bfd_vma dsize;		/* initialized data "  "		*/
+  bfd_vma bsize;		/* uninitialized data "   "		*/
+  bfd_vma entry;		/* entry pt.				*/
+  bfd_vma text_start;		/* base of text used for this file */
+  bfd_vma data_start;		/* base of data used for this file */
 
   /* i960 stuff */
   unsigned long tagentries;	/* number of tag entries to follow */
@@ -70,11 +70,17 @@ struct internal_aouthdr
   short o_modtype;		/* Module type field, 1R,RE,RO	*/
   unsigned long o_maxstack;	/* max stack size allowed.	*/
 
-  /* MIPS ECOFF stuff */
-  unsigned long bss_start;	/* Base of bss section.		*/
-  unsigned long gp_value;	/* GP register value.		*/
+  /* ECOFF stuff */
+  bfd_vma bss_start;		/* Base of bss section.		*/
+  bfd_vma gp_value;		/* GP register value.		*/
   unsigned long gprmask;	/* General registers used.	*/
   unsigned long cprmask[4];	/* Coprocessor registers used.	*/
+  unsigned long fprmask;	/* Floating pointer registers used.  */
+
+  /* Apollo stuff */
+  long o_inlib;
+  long o_sri;
+  long vid[2];
 };
 
 /********************** STORAGE CLASSES **********************/
@@ -123,6 +129,10 @@ struct internal_aouthdr
 #define C_PRAGMA	111	/* Advice to compiler or linker	*/
 #define C_SEGMENT	112	/* 80960 segment name		*/
 
+  /* Storage classes for m88k */
+#define C_SHADOW        107     /* shadow symbol                */
+#define C_VERSION       108     /* coff version symbol          */
+
  /* New storage classes for RS/6000 */
 #define C_HIDEXT        107	/* Un-named external symbol */
 #define C_BINCL         108	/* Marks beginning of include file */
@@ -149,12 +159,12 @@ struct internal_aouthdr
 struct internal_scnhdr
 {
   char s_name[8];		/* section name			*/
-  long s_paddr;			/* physical address, aliased s_nlib */
-  long s_vaddr;			/* virtual address		*/
-  long s_size;			/* section size			*/
-  long s_scnptr;		/* file ptr to raw data for section */
-  long s_relptr;		/* file ptr to relocation	*/
-  long s_lnnoptr;		/* file ptr to line numbers	*/
+  bfd_vma s_paddr;		/* physical address, aliased s_nlib */
+  bfd_vma s_vaddr;		/* virtual address		*/
+  bfd_vma s_size;		/* section size			*/
+  bfd_vma s_scnptr;		/* file ptr to raw data for section */
+  bfd_vma s_relptr;		/* file ptr to relocation	*/
+  bfd_vma s_lnnoptr;		/* file ptr to line numbers	*/
   unsigned long s_nreloc;	/* number of relocation entries	*/
   unsigned long s_nlnno;	/* number of line number entries*/
   long s_flags;			/* flags			*/
@@ -425,12 +435,12 @@ union internal_auxent
 
 struct internal_reloc
 {
-  long r_vaddr;			/* Virtual address of reference */
+  bfd_vma r_vaddr;		/* Virtual address of reference */
   long r_symndx;		/* Index into symbol table	*/
   unsigned short r_type;	/* Relocation type		*/
-  unsigned char r_size;		/* Used on RS/6000		*/
-  unsigned long r_offset;
-
+  unsigned char r_size;		/* Used by RS/6000 and ECOFF	*/
+  unsigned char r_extern;	/* Used by ECOFF		*/
+  unsigned long r_offset;	/* Used by Alpha ECOFF, SPARC, others */
 };
 
 #define R_RELBYTE	017
@@ -439,6 +449,7 @@ struct internal_reloc
 #define R_PCRWORD	023
 #define R_PCRLONG	024
 
+#define	R_DIR16		01
 #define R_DIR32		06
 #define	R_PCLONG	020
 #define R_RELBYTE	017
@@ -462,12 +473,19 @@ struct internal_reloc
 #define R_GETPA		(0x1e)
 #define R_TAGWORD	(0x1f)
 #define R_JUMPTARG	0x20	/* strange 29k 00xx00xx reloc */
-#define R_MOVB1    0x41		/* Special h8 16bit or 8 bit reloc for  mov.b */
-#define R_MOVB2    0x42		/* Special h8 opcode for 8bit which could
-							      be 16 */
-#define R_JMP1     0x43		/* Special h8 16bit jmp which could be pcrel */
-#define R_JMP2 0x44		/* a branch which used to be a jmp */
-#define R_RELLONG_NEG  0x45
+
+
+#define R_MOVB1    	0x41	/* Special h8 16bit or 8 bit reloc for mov.b 	*/
+#define R_MOVB2 	0x42	/* Special h8 opcode for 8bit which could be 16 */
+#define R_JMP1     	0x43	/* Special h8 16bit jmp which could be pcrel 	*/
+#define R_JMP2 		0x44	/* a branch which used to be a jmp 		*/
+#define R_RELLONG_NEG  	0x45
+
+#define R_JMPL1     	0x46	/* Special h8 24bit jmp which could be pcrel 	*/
+#define R_JMPL_B8	0x47	/* a 8 bit pcrel which used to be a jmp  */
+
+#define R_MOVLB1    	0x48	/* Special h8 24bit or 8 bit reloc for mov.b 	*/
+#define R_MOVLB2 	0x49	/* Special h8 opcode for 8bit which could be 24 */
 
 /* Z8k modes */
 #define R_IMM16   0x01		/* 16 bit abs */
@@ -481,7 +499,7 @@ struct internal_reloc
 #define R_CALLR	  0x05		/* callr 12 bit disp */
 #define R_SEG     0x10		/* set if in segmented mode */
 #define R_IMM4H   0x24		/* high nibble */
-
+#define R_DISP7   0x25          /* djnz displacement */
 
 /* H8500 modes */
 
@@ -493,3 +511,28 @@ struct internal_reloc
 #define R_H8500_LOW16 	7		/* low 16 bits of 24 bit immediate */
 #define R_H8500_IMM24	6		/* 24 bit immediate */
 #define R_H8500_IMM32   8               /* 32 bit immediate */
+#define R_H8500_HIGH16  9		/* high 16 bits of 32 bit immediate */
+
+/* SH modes */
+
+#define R_SH_PCREL8 	3		/*  8 bit pcrel 	*/
+#define R_SH_PCREL16 	4		/* 16 bit pcrel 	*/
+#define R_SH_HIGH8  	5		/* high 8 bits of 24 bit address */
+#define R_SH_LOW16 	7		/* low 16 bits of 24 bit immediate */
+#define R_SH_IMM24	6		/* 24 bit immediate */
+#define R_SH_PCDISP8BY4	9  		/* PC rel 8 bits *4 +ve */
+#define R_SH_PCDISP8BY2	10  		/* PC rel 8 bits *2 +ve */
+#define R_SH_PCDISP8    11  		/* 8 bit branch */
+#define R_SH_PCDISP     12  		/* 12 bit branch */
+#define R_SH_IMM32      14    		/* 32 bit immediate */
+#define R_SH_IMM8   	16
+#define R_SH_IMM8BY2    17
+#define R_SH_IMM8BY4    18
+#define R_SH_IMM4   	19
+#define R_SH_IMM4BY2    20
+#define R_SH_IMM4BY4    21
+#define R_SH_PCRELIMM8BY2   22
+#define R_SH_PCRELIMM8BY4   23
+#define R_SH_IMM16      24    		/* 16 bit immediate */
+
+
