@@ -30,36 +30,28 @@ $!
 $!
 $! Create the file version.opt, which helps identify the executalbe.
 $!
-$search version.c version_string,"="/match=and/output=t.tmp
+$search Makefile.in "VERSION="/match=and/output=t.tmp
 $open ifile$ t.tmp
 $read ifile$ line
 $close ifile$
-$delete/nolog t.tmp;
-$ijk=f$locate("""",line)+1
+$delete/nolog t.tmp;*
+$! Discard "VERSION=" and "\n" parts.
+$ijk=f$locate("=",line)+1
 $line=f$extract(ijk,f$length(line)-ijk,line)
-$ijk=f$locate("""",line)
-$line=f$extract(0,ijk,line)
 $ijk=f$locate("\n",line)
 $line=f$extract(0,ijk,line)
 $!
-$i=0
-$loop:
-$elm=f$element(i," ",line)
-$if elm.eqs."" then goto no_ident
-$if (elm.les."9").and.(elm.ges."0") then goto write_ident
-$i=i+1
-$goto loop
-$!
-$no_ident:
-$elm="?.??"
-$!
-$!
-$write_ident:
 $open ifile$ version.opt/write
-$write ifile$ "ident="+""""+elm+""""
+$write ifile$ "ident="+""""+line+""""
+$close ifile$
+$! Now write config.h.
+$open ifile$ config.h/write
+$write ifile$ "#define TARGET_CPU       """,cpu_type,"""
+$write ifile$ "#define TARGET_ALIAS     ""vms"""
+$write ifile$ "#define TARGET_CANONICAL ""vax-dec-vms""""
+$write ifile$ "#define GAS_VERSION      """,line,""""
 $close ifile$
 $!
-$ !
 $ if f$search("config.status") .nes. "" then delete config.status.*
 $ open/write file config.status
 $ write file "Links are now set up for use with a vax running VMS."
