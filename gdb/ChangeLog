@@ -40,6 +40,13 @@
 	(delete_file_handler, handle_file_event): Likewise.
 	(gdb_wait_for_event, poll_timers): Likewise.
 
+2000-03-22  Daniel Berlin  <dan@cgsoftware.com>
+	* command.c (apropos_cmd_helper): New function, meat of the
+	apropos command.
+	(apropos_command): New apropos command to search command
+	names/documentation for regular expressions.
+	(_initialize_command): Add the apropos command.
+
 2000-03-22  Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
 
 	* printcmd.c (print_scalar_formatted):  Truncate addresses to the

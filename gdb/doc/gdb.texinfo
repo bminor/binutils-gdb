@@ -1318,6 +1318,25 @@ Command name abbreviations are allowed if unambiguous.
 With a command name as @code{help} argument, @value{GDBN} displays a
 short paragraph on how to use that command.
 
+@kindex apropos
+@item apropos @var{args}
+The @code{apropos @var{args}} command searches through all of the @value{GDBN}
+commands, and their documentation, for the regular expression specified in
+@var{args}. It prints out all matches found. For example:
+
+@smallexample
+apropos reload
+@end smallexample
+
+@noindent results in:
+
+@smallexample
+@group
+set symbol-reloading -- Set dynamic symbol table reloading multiple times in one run
+show symbol-reloading -- Show dynamic symbol table reloading multiple times in one run
+@end group
+@end smallexample
+
 @kindex complete
 @item complete @var{args}
 The @code{complete @var{args}} command lists all the possible completions

@@ -27,7 +27,7 @@
 #endif
 
 #include "gdb_wait.h"
-
+#include "gnu-regex.h"
 /* FIXME: this should be auto-configured!  */
 #ifdef __MSDOS__
 # define CANT_FORK
@@ -54,6 +54,10 @@ static struct cmd_list_element *find_cmd PARAMS ((char *command,
 					    struct cmd_list_element * clist,
 						  int ignore_help_classes,
 						  int *nfound));
+static void apropos_cmd_helper (struct ui_file *, struct cmd_list_element *, 
+		    		struct re_pattern_buffer *, char *);
+
+void apropos_command (char *, int);
 
 void _initialize_command PARAMS ((void));
 
@@ -370,6 +374,87 @@ delete_cmd (name, list)
 	  c = c->next;
       }
 }
+/* Recursively walk the commandlist structures, and print out the
+   documentation of commands that match our regex in either their
+   name, or their documentation.
+*/
+static void 
+apropos_cmd_helper (struct ui_file *stream, struct cmd_list_element *commandlist,
+			 struct re_pattern_buffer *regex, char *prefix)
+{
+  register struct cmd_list_element *c;
+  int returnvalue=1; /*Needed to avoid double printing*/
+  /* Walk through the commands */
+  for (c=commandlist;c;c=c->next)
+    {
+      if (c->name != NULL)
+	{
+	  /* Try to match against the name*/
+	  returnvalue=re_search(regex,c->name,strlen(c->name),0,strlen(c->name),NULL);
+	  if (returnvalue >= 0)
+	    {
+	      /* Stolen from help_cmd_list. We don't directly use
+	       * help_cmd_list because it doesn't let us print out
+	       * single commands
+	       */
+	      fprintf_filtered (stream, "%s%s -- ", prefix, c->name);
+	      print_doc_line (stream, c->doc);
+	      fputs_filtered ("\n", stream);
+	      returnvalue=0; /*Set this so we don't print it again.*/
+	    }
+	}
+      if (c->doc != NULL && returnvalue != 0)
+	{
+	  /* Try to match against documentation */
+	  if (re_search(regex,c->doc,strlen(c->doc),0,strlen(c->doc),NULL) >=0)
+	    {
+	      /* Stolen from help_cmd_list. We don't directly use
+	       * help_cmd_list because it doesn't let us print out
+	       * single commands
+	       */
+	      fprintf_filtered (stream, "%s%s -- ", prefix, c->name);
+	      print_doc_line (stream, c->doc);
+	      fputs_filtered ("\n", stream);
+	    }
+	}
+      /* Check if this command has subcommands */
+      if (c->prefixlist != NULL)
+	{
+	  /* Recursively call ourselves on the subcommand list,
+	     passing the right prefix in.
+	  */
+	  apropos_cmd_helper(stream,*c->prefixlist,regex,c->prefixname);
+	}
+    }
+}
+/* Search through names of commands and documentations for a certain
+   regular expression.
+*/
+void 
+apropos_command (char *searchstr, int from_tty)
+{
+  extern struct cmd_list_element *cmdlist; /*This is the main command list*/
+  regex_t pattern;
+  char *pattern_fastmap;
+  char errorbuffer[512];
+  pattern_fastmap=calloc(256,sizeof(char));
+  if (searchstr == NULL)
+      error("REGEXP string is empty");
+
+  if (regcomp(&pattern,searchstr,REG_ICASE) == 0)
+    {
+      pattern.fastmap=pattern_fastmap;
+      re_compile_fastmap(&pattern);
+      apropos_cmd_helper(gdb_stdout,cmdlist,&pattern,"");
+    }
+  else
+    {
+      regerror(regcomp(&pattern,searchstr,REG_ICASE),NULL,errorbuffer,512);
+      error("Error in regular expression:%s",errorbuffer);
+    }
+  free(pattern_fastmap);
+}
+
 
 /* This command really has to deal with two things:
  *     1) I want documentation on *this string* (usually called by
@@ -1693,4 +1778,5 @@ With no arguments, run an inferior shell.");
 	   "Show definitions of user defined commands.\n\
 Argument is the name of the user defined command.\n\
 With no argument, show definitions of all user defined commands.", &showlist);
+  add_com ("apropos", class_support, apropos_command, "Search for commands matching a REGEXP");
 }

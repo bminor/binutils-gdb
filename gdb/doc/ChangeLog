@@ -1,3 +1,7 @@
+2000-03-22  Daniel Berlin  <dan@cgsoftware.com>
+
+      * gdb.texinfo: Add documentation for the apropos command.
+
 2000-03-20  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	* gdb.texinfo: Add white space to prevent overprinting in 
