@@ -369,7 +369,7 @@ struct internal_syment *syment)
 {
 
   /* Normalize the symbol flags */
-  if (coff_symbol_ptr->symbol.section == &bfd_com_section) {
+  if (bfd_is_com_section (coff_symbol_ptr->symbol.section)) {
     /* a common symbol is undefined with a value */
     syment->n_scnum = N_UNDEF;
     syment->n_value = coff_symbol_ptr->symbol.value;
@@ -664,7 +664,7 @@ DEFUN(coff_write_alien_symbol,(abfd, symbol, written),
       native->u.syment.n_scnum =  N_UNDEF;
       native->u.syment.n_value =  symbol->value;
     }
-  else if (symbol->section == &bfd_com_section) 
+  else if (bfd_is_com_section (symbol->section))
   {
       native->u.syment.n_scnum =  N_UNDEF;
       native->u.syment.n_value =  symbol->value;
@@ -1276,113 +1276,106 @@ DEFUN (coff_make_debug_symbol, (abfd, ptr, sz),
   return &new->symbol;
 }
 
+/* Print out information about COFF symbol.  */
+
 void
-DEFUN(coff_print_symbol,(abfd, filep, symbol, how),
-      bfd            *abfd AND
-      PTR           filep AND
-      asymbol        *symbol AND
-      bfd_print_symbol_type how)
+coff_print_symbol (abfd, filep, symbol, how)
+     bfd *abfd;
+     PTR filep;
+     asymbol *symbol;
+     bfd_print_symbol_type how;
 {
-  FILE *file = (FILE *)filep;
-  switch (how) {
+  FILE *file = (FILE *) filep;
+
+  switch (how)
+    {
     case bfd_print_symbol_name:
-      fprintf(file, "%s", symbol->name);
+      fprintf (file, "%s", symbol->name);
       break;
+
     case bfd_print_symbol_more:
-      fprintf(file, "coff %lx %lx", (unsigned long) coffsymbol(symbol)->native,
-	      (unsigned long) coffsymbol(symbol)->lineno);
+      fprintf (file, "coff %s %s",
+	       coffsymbol(symbol)->native ? "n" : "g",
+	       coffsymbol(symbol)->lineno ? "l" : " ");
       break;
+
     case bfd_print_symbol_nm:
-
-    {
-      CONST char *section_name = symbol->section->name;
-      bfd_print_symbol_vandf((PTR) file, symbol);
-
-	
-      fprintf(file, " %-5s %s %s %s",
-	      section_name,
-	      coffsymbol(symbol)->native ? "n" : "g",
-	      coffsymbol(symbol)->lineno ? "l" : " ",
-	      symbol->name);
-    }
-
-
+      bfd_print_symbol_vandf ((PTR) file, symbol);
+      fprintf (file, " %-5s %s %s %s",
+	       symbol->section->name,
+	       coffsymbol(symbol)->native ? "n" : "g",
+	       coffsymbol(symbol)->lineno ? "l" : " ",
+	       symbol->name);
       break;
+
     case bfd_print_symbol_all:
-      /* Print out the symbols in a reasonable way */
-    {
-      CONST char *section_name = symbol->section->name;
-
-
       if (coffsymbol(symbol)->native) 
-      {
-	unsigned int aux;
-	combined_entry_type *combined = coffsymbol(symbol)->native;
-	combined_entry_type *root = obj_raw_syments(abfd);
-	
-	fprintf(file,"[%3d]",
-		combined - root);
-	
-
-	fprintf(file, "(sc %2d)(fl%4x)(ty%3x)(sc%3d) nx(%d) %08x %s",
-		combined->u.syment.n_scnum,
-		combined->u.syment.n_flags,
-		combined->u.syment.n_type,
-		combined->u.syment.n_sclass,
-		combined->u.syment.n_numaux,
-		combined->u.syment.n_value,
-		symbol->name
-		);
-	for (aux = 0; aux < combined->u.syment.n_numaux; aux++) 
 	{
-	  fprintf(file,"\n");
-	  switch (combined->u.syment.n_sclass) {
-	    case C_FILE:
-	      fprintf(file, "File ");
-	      break;
-	    default:
-	      fprintf(file, "AUX lnno %x size %x tagndx %x",
-		      combined[aux+1].u.auxent.x_sym.x_misc.x_lnsz.x_lnno,
-		      combined[aux+1].u.auxent.x_sym.x_misc.x_lnsz.x_size,
-		      combined[aux+1].u.auxent.x_sym.x_tagndx.l);
-	      break;
-    
+	  unsigned int aux;
+	  combined_entry_type *combined = coffsymbol (symbol)->native;
+	  combined_entry_type *root = obj_raw_syments (abfd);
+	  struct lineno_cache_entry *l = coffsymbol(symbol)->lineno;
+	
+	  fprintf (file,"[%3d]", combined - root);
+
+	  fprintf (file,
+		   "(sc %2d)(fl 0x%02x)(ty %3x)(sc %3d) (nx %d) 0x%08x %s",
+		   combined->u.syment.n_scnum,
+		   combined->u.syment.n_flags,
+		   combined->u.syment.n_type,
+		   combined->u.syment.n_sclass,
+		   combined->u.syment.n_numaux,
+		   combined->u.syment.n_value,
+		   symbol->name);
+
+	  for (aux = 0; aux < combined->u.syment.n_numaux; aux++) 
+	    {
+	      combined_entry_type *auxp = combined + aux + 1;
+	      long tagndx;
+
+	      if (auxp->fix_tag)
+		tagndx = auxp->u.auxent.x_sym.x_tagndx.p - root;
+	      else
+		tagndx = auxp->u.auxent.x_sym.x_tagndx.l;
+
+	      fprintf (file, "\n");
+	      switch (combined->u.syment.n_sclass)
+		{
+		case C_FILE:
+		  fprintf (file, "File ");
+		  break;
+		default:
+
+		  fprintf (file, "AUX lnno %d size 0x%x tagndx %d",
+			   auxp->u.auxent.x_sym.x_misc.x_lnsz.x_lnno,
+			   auxp->u.auxent.x_sym.x_misc.x_lnsz.x_size,
+			   tagndx);
+		  break;
+		}
 	    }
-
-	}
 	
-      {
-	struct lineno_cache_entry *l = coffsymbol(symbol)->lineno;
-	if (l) 
+	  if (l)
+	    {
+	      printf ("\n%s :", l->u.sym->name);
+	      l++;
+	      while (l->line_number) 
+		{
+		  printf ("\n%4d : 0x%x",
+			  l->line_number,
+			  l->u.offset);
+		  l++;
+		}
+	    }
+	} 
+      else
 	{
-	  printf("\n%s :", l->u.sym->name);
-	  l++;
-	  while (l->line_number) 
-	  {
-	    printf("\n%4d : %x", 
-		   l->line_number,
-		   l->u.offset);
-	    l++;
-	    
-	  }
+	  bfd_print_symbol_vandf ((PTR) file, symbol);
+	  fprintf (file, " %-5s %s %s %s",
+		   symbol->section->name,
+		   coffsymbol(symbol)->native ? "n" : "g",
+		   coffsymbol(symbol)->lineno ? "l" : " ",
+		   symbol->name);
 	}
-      }
-
-    
-
-      } 
-
-      else {
-	  bfd_print_symbol_vandf((PTR) file, symbol);
-	  fprintf(file, " %-5s %s %s %s",
-		  section_name,
-		  coffsymbol(symbol)->native ? "n" : "g",
-		  coffsymbol(symbol)->lineno ? "l" : " ",
-		  symbol->name);
-	}
-
-    }
-	
     }
 }
 

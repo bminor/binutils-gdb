@@ -1,3 +1,8 @@
+Fri Feb 12 14:23:07 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* coffgen.c (coff_print_symbol): Print correct tagndx value;
+	cleaned up output formatting a bit.
+
 Fri Feb 12 08:28:56 1993  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* coffcode.h (coff_set_arch_mach_hook): *FIXME* the H8/300 is always
