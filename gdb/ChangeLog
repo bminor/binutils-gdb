@@ -1,3 +1,8 @@
+Thu Sep 16 12:34:01 1993  Jim Kingdon  (kingdon@cirdan.cygnus.com)
+
+	* dbxread.c (copy_pending): Deal with END NULL.
+	(process_one_symbol): Add comments about what common_block NULL means.
+
 Thu Sep 16 12:12:59 1993  Stu Grossman  (grossman at cygnus.com)
 
 	* sparc-stub.c (_trap_low):  Do restore/save sequence after
