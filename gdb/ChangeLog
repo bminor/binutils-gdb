@@ -1,3 +1,23 @@
+Wed Jan  1 04:29:00 1992  Fred Fish  (fnf at cygnus.com)
+
+	* Makefile.in:  Change tm-svr4.h to tm-sysv4.h.  Change xm-svr4.h
+	to xm-sysv4.h.  Split OPCODE_DIR into OPCODE_DIR1 and OPCODE_DIR2
+	to reflect actual locations of opcode files, so TAGS target will
+	be buildable.
+
+	* i386-tdep.c:  Change an erroneous 'm68k' reference to 'i386'.
+
+	* i386-tdep.c (supply_fpregset, fill_fpregset):  Remove m68k
+	code.
+
+	* m68k-tdep.c (supply_fpregset, fill_fpregset):  Fix array
+	dereferencing to access the correct elements.
+
+	* valops.c (value_addr):  Declare return type of external func
+	value_copy().
+
+	* xcoffread.c:  Undefine next_symbol_text before redefining it.
+
 Mon Dec 30 10:57:02 1991  Per Bothner  (bothner at cygnus.com)
 
 	Mainly stuff to improve handling of TYPE_CODE_REF values.

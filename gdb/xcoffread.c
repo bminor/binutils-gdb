@@ -1209,6 +1209,7 @@ dump_misc_funcs ()
 /* So far, I haven't seen this happenning xlc output. I doubt we'll need this
    for aixcoff. */
 
+#undef next_symbol_text
 #define	next_symbol_text() \
   printf ("Gdb Error: symbol names on multiple lines not implemented.\n")
 
