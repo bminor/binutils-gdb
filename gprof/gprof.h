@@ -51,7 +51,12 @@ char	*whoami;
      * booleans
      */
 typedef int	bool;
+/* These may already be defined on some systems.  We could probably just
+   use the BFD versions of these, since BFD has already dealt with this
+   problem.  */
+#undef FALSE
 #define	FALSE	0
+#undef TRUE
 #define	TRUE	1
 
     /*
