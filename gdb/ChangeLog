@@ -1,5 +1,11 @@
 Sun Mar  1 17:41:09 1992  Per Bothner  (bothner@cygnus.com)
 
+	* rs6000-xdep.c (frame_initial_stack_address):  Move
+	code to set frame->cache_fsr into new separate function
+	frame_get_cacahe_fsr.  This allows fixing a fatal error.
+	* xcoffexec.c:  Turn previously suppressed error
+	message back on, after cleaning up BFD.
+
 	* breakpoint.c (breakpoint_re_set):  Removed (at least for now)
 	printing of blank line, since it cases printing of an
 	extra blank line.  Is this intended?  It does mess up
@@ -221,97 +227,347 @@ Sat Feb 22 00:08:50 1992  John Gilmore  (gnu at cygnus.com)
 	* remote-vx.c:  Add missing break; statement.  Bugfix by
 	Michael Sclafani, <sclafani@src.dec.com>.
 
+Fri Feb 21 17:29:54 1992  Fred Fish  (fnf at cygnus.com)
+
+	* Makefile.in (VERSION):  Update version to 4.4.2
+	* Makefile.in (SFILES_MAINDIR):  Add gdbtypes.c, state.c, objfiles.c,
+	minsyms.c, mmap-alloc.c, mmap-sbrk.c
+	* Makefile.in (HFILES):  Add gdbtypes.h, state.h, solib.h
+	* Makefile.in (OBS):  Add gdbtypes.o, state.o, objfiles.o, minsyms.o,
+	mmap-alloc.o, mmap-sbrk.o
+
+	* altos-xdep.c:  Minor whitespace change.
+	* am29k-tdep.c (examine_prologue):  Convert from misc function vector
+	use to new minimal symbol table use.
+	* arm-xdep.c (fetch_inferior_registers):  Document unused argument.
+	* arm-xdep.c (store_inferior_registers):  Returns void.
+	* blockframe.c (get_pc_function_start, find_pc_partial_function):
+	Convert from misc function vector use to new minimal symbol table use.
+	Remove find_pc_misc_function().  Ifdef out block_innermost_frame().
+	* breakpoint.c:  Add prototypes for local functions.
+	* breakpoint.c (catch_command_1):  Change to static and remove unused
+	local "pc".
+	* breakpoint.c (map_breakpoint_numbers):  Prototype arg "function".
+	* breakpoint.h:  Change function decls to prototype form.
+	* buildsym.c:  Add prototypes for local functions.
+	* buildsym.c:  Moved hashname() function here from dbxread.c.
+	* buildsym.c (dbx_lookup_type):  Cast args to xrealloc().
+	* buildsym.c:  Remove dbx_create_type(), uses changed to alloc_type().
+	* buildsym.c (dbx_alloc_type):  Change to static.
+	* buildsym.c (finish_block): Add objfile parameter.
+	* buildsym.c (misc):  Change symbol_obstack to objfile version.
+	* buildsym.c (make_blockvector): Change to static.
+	* buildsym.c (start_subfile):  Use strdup instead of obsavestring.
+	* buildsym.c (compare_line_numbers): Change to static, args are const,
+	cast args when used.
+	* buildsym.c (start_symtab):  Inline new_object_header_files() call.
+	* buildsym.c (patch_block_stabs):  Moved to this file from xcoffread
+	and made static.  Add objfile parameter.
+	* buildsym.c (end_symtab): Simplify code using line table size.
+	Realloc the linetable on the objfile symbol_obstack and copy there.
+	* buildsym.c (scan_file_globals):  Convert from misc function vector
+	use to new minimal symbol use.
+	* buildsym.c (define_symbol):  Add objfile parameter.  Make sure
+	strings get allocated in objfile's symbol_obstack.  Convert references
+	to builtin types to lookup_fundamental_type().
+	* buildsym.c (read_type):  Make static, add objfile parameter, convert
+	references to buildin types to lookup_fundamental_type().
+	* buildsym.c (read_struct_type):  Add objfile parameter.
+	* buildsym.c (read_array_type):  Make static, add objfile parameter.
+	* buildsym.c (read_enum_type):  Make static, add objfile parameter.
+	* buildsym.c (read_huge_number): Make static.
+	* buildsym.c (read_range_type): Make static, add objfile parameter,
+	convert references to buildin types to lookup_fundamental_type ().
+	* buildsym.c (read_args):  Make static, add objfile parameter.
+	* buildsym.h:  Convert function decl's to prototype form.
+	* c-exp.y:  Add prototypes for local functions, convert uses of misc
+	function vector to minimal symbol table.  Reformat all builtin type
+	initializations and pass a NULL objfile to init_type() for them.
+	* coffread.c:  Change context_stack ref's to coff_context_stack,
+	add local function prototypes.  Cast uses of xrealloc arg 1.
+	* coffread.c (coff_alloc_type):  Call alloc_type instead of  hand-
+	crafting a new type.
+	* coffread.c (add_symbol_to_list):  Change to coff_add_symbol_to_list.
+	* coffread.c (finish_block):  Change name to coff_finish_block.
+	* coffread.c (make_blockvector):  Add and use objfile parameter.
+	* coffread.c (record_line):  Change name to coff_record_line.
+	* coffread.c (start_symtab):  Change name to coff_start_symtab.
+	* coffread.c (end_symtab):  Change name to coff_end_symtab.
+	* coffread.c (record_misc_function):  Change name to record_minimal_
+	symbol and change to minimal symbol table use from misc func tbl.
+	* coffread.c (coff_symfile_read):  Convert from misc function vector
+	use to minimal symbol table use.
+	* coffread.c (hashname):  Remove; use common version in buildsym.c.
+	* coffread.c (decode_base_type):  Change references to builtin types
+	to calls to lookup_fundamental_type().
+	* coffread.c (read_struct_type):  Change name to coff_read_struct_type.
+	* coffread.c (read_enum_type):  Change name to coff_read_enum_type.
+	* command.c: Add prototypes for local functions.
+	* command.c (add_cmd):  Prototype the 'fun' parameter and use the
+	appropriate member of the function union for that type.
+	* command.c (add_abbrev_cmd):  Prototype the 'fun' parameter and
+	ifdef out the function since it isn't currently used.
+	* command.c (add_alias_cmd):  Pass correct function type to add_cmd.
+	* command.c (add_prefix_cmd):  Prototype the 'fun' parameter.
+	* command.c (add_abbrev_prefix_cmd):  Prototype the 'fun' parameter.
+	* command.c (help_cmd):  Compare function pointer to NULL.
+	* command.c (help_cmd_list):  Compare function pointer to NULL.
+	* command.c (lookup_cmd_1):  Use correct member of function union.
+	* command.c (undef_cmd_error):  Make static.
+	* command.c (complete_on_cmdlist):  Use correct member of func union.
+	* command.c (do_setshow_command):  Use correct member of func union.
+	* command.c (shell_escape):  Convert rindex use to strrchr.
+	* command.h (COMMAND_H):  Define if already included.
+	* command.h (cmd_list_element struct):  Change 'function' to a union
+	and prototype args.  Prototype completer function.
+	* command.h:  Convert decl's to prototype form.
+	* convex-xdep.c (store_inferior_registers):  Returns void.
+	* copying.c:  Prototype local functions.
+	* coredep.c:  Minor whitespace change.
+	* cplus-dem.c:  Remove hack to use BSD equivalents of mem* and str*.
+	* cplus-dem.c:  Prototype local functions.
+	* dbxread.c (hashname):  Remove; moved to buildsym.c.
+	* dbxread.c (free_and_init_header_files):  Make static.
+	* dbxread.c:  Add prototypes for local functions.
+	* dbxread.c (new_object_header_files):  Remove; inlined usages.
+	* dbxread.c (xrealloc usages):  Cast args.
+	* dbxread.c (record_misc_function):  Change to record_minimal_symbol
+	and change usages accordingly.
+	* dbxread.c (static_psymbols usages):  Change to use per-objfile copy.
+	* dbxread.c (xmalloc usages):  Use per-objfile copy when appropriate.
+	* dbxread.c (dbx_next_symbol_text):  Make static.
+	* dbxread.c (init_psymbol_list):  Convert to use per-objfile data.
+	* dbxread.c (init_bincl_list):  Add and use objfile parameter.
+	* dbxread.c (free_bincl_list):  Add and use objfile parameter.
+	* dbxread.c (compare_psymbols):  Remove; use common symfile.c version.
+	* dbxread.c (end_psymtab):  Convert to use per-objfile data.
+	* dwarfread.c (DEFUN/EXFUN):  Remove all usages.  Use PARAMS for
+	prototypes.
+	* dwarfread.c (record_misc_function):  Change name to record_minimal_
+	symbol and use minimal symbol table throughout.
+	* dwarfread.c (compare_psymbols):  Remove; use common symtab.c version.
+	* dwarfread.c:  Convert all references to builtin types to use the new
+	lookup_fundamental_type function.
+	* dwarfread.c (read_enumeration):  Add and use objfile parameter.
+	* elfread.c (DEFUN/EXFUN):  Remove all usages.  Use PARAMS for proto-
+	types.
+	* elfread.c (record_misc_function):  Convert to use record_minimal_
+	symbol.
+	* elfread.c (elf_symtab_read):  Add objfile parameter.
+	* eval.c:  Add prototypes for local functions and move some decls
+	around to accomodate prototypes.
+	* expprint.c:  Add prototypes for local functions.  Change references
+	to misc function vector to minimal symbol table.
+	* findvar.c (read_memory usages):  Cast args.
+	* gdbtypes.h:  New file, type info from symfile.h and symtab.h.
+	* gmalloc.c:  Use NOARGS where prototypes used hardwired void.
+	* gmalloc.c (BLOCKSIZE):  Constant to be shifted is unsigned.
+	* gmalloc.h:  Use NOARGS where prototypes used hardwired void.
+	* gould-xdep.c:  Minor whitespace change.
+	* hp300ux-xdep.c (fetch_inferior_registers):  Remove unused regno var.
+	* hp300ux-xdep.c (store_inferior_registers):  Returns void.
+	* hp300ux-xdep.c (fetch_core_registers):  Takes unused arg reg_addr.
+	* i386-stub.c: Add prototypes, change "volatile" to NORETURN.
+	* i386-tdep.c: Add prototypes for local functions.
+	* i386-tdep.c (codestream_fill, codestream_seek, codestream_read,
+	i386_get_frame_setup, i386_skip_prologue): Explicitly declare params
+	that defaulted to int.
+	* i386-tdep.c (i386_follow_jump, i386_frame_find_saved_regs,
+	i386_push_dummy_frame):	Returns void.
+	* i386-xdep.c (i386_register_u_addr):  Declare params that default to
+	int and explicitly declare return type as int.
+	* i387-tdep.c:  Minor formatting changes.
+	* i960-tdep.c (leafproc_return):  Convert from misc function vector
+	use to minimal symbol table use.
+	* infcmd.c:  Add prototypes for local functions.
+	* infcmd.c (continue_command, until_next_command, until_command,
+	path_info, path_command):  Make static.
+	* infcmd.c (step_1, until_next_command):  Convert from misc func
+	vector to minimal symbol table use.
+	* inflow.c:  Add prototypes for local functions.
+	* infptrace.c (store_inferior_registers):  Returns void, not int.
+	* language.c (_initialize_language):  Use proper member of function
+	union.
+	* m2-exp.y:  Add prototypes for local functions, convert misc function
+	vector uses to minimal symbol table uses.
+	* m2-exp.y (make_qualname, yyerror):  Make static.
+	* m2-exp.y (_initialize_m2_exp):  Call init_types with NULL objfile.
+	* m68k-pinsn.c:  Add prototypes for local functions.
+	* m68k-pinsn.c (print_insn):  Cast args to read_memory.
+	* m68k-pinsn.c (fetch_arg):  Make parameter 'code' and int.
+	* m68k-stub.c:  Add prototypes.
+	* m88k-pinsn.c (sprint_address):  Convert from misc function vector
+	use to minimal symbol table use.
+	* m88k-xdep.c (fetch_inferior_registers):  Takes an unused parameter.
+	* m88k-xdep.c (store_inferior_registers):  Returns void.
+	* mach386-xdep.c (fetch_inferior_registers):  Takes an unused param.
+	* mach386-xdep.c (store_inferior_registers):  Returns void.
+	* mach386-xdep.c (fetch_core_registers):  Takes an unused parameter.
+	* main.c:  Add prototypes for local functions.
+	* main.c (return_to_top_level):  Is type NORETURN (volatile).  Cast
+	longjmp() result to (NORETURN void).
+	* main.c (catch_errors):  Prototype the 'func' parameter.
+	* main.c (disconnect, stop_sig, do_nothin, float_handler):
+	Takes an unused arg.
+	* main.c (execute_command):  Call the right member of the func union.
+	* main.c (command_loop_marker, symbol_completion_function,
+	command_loop):  Make static.
+	* main.c (command_line_input):  Make linelength unsigned, cast arg
+	to command_line_input().
+	* main.c (add_info, add_com):  Prototype the 'fun' parameter.
+	* main.c (initialize_main):  Call right member of function union.
+	* mcheck.c (NOARGS):  Change hardwired void in prototypes to NOARGS.
+	* mem-break.c:  Include symtab.h
+	* mips-xdep.c (fetch_inferior_registers):  Takes unused param.
+	* mips-xdep.c (store_inferior_registers):  Returns void.
+	* mipsread.c (mipscoff_symfile_read):  Change from misc function vector
+	use to minimal symbol table use.
+	* mipsread.c (symbol_obstack usages):  Convert all to use per-objfile
+	version.
+	* mipsread.c (make_type):  Remove, convert usages to init_type.
+	* mipsread.c (_initialize_mipsread):  Call init_type with NULL objfile.
+	* nindy-tdep.c (nindy_frame_chain_valid):  Convert from misc function
+	vector use to minimal symbol table use.
+	* parse.c:  Add prototypes for local functions.
+	* parse.c (xrealloc usages):  Cast args.
+	* parse.c (prefixify_expression, length_of_subexp):  Make static.
+	* parser-defs.h (PARSER_DEFS_H):  Define when first included.
+	* parser-defs.h:  Convert function decls to prototype form.
+	* partial-stab.h:  Convert from misc function vector use to new minimal
+	symbol table use.
+	* partial-stab.h (global_psymbols, static_psymbols usages):  Reference
+	the per-objfile copies.
+	* printcmd.c:  Add prototypes for local functions.  Move some struct
+	definitions around to accomodate prototypes.
+	* printcmd.c (decode_format):  Make static, change args oformat and
+	osize to int from char.
+	* printcmd.c (print_formatted):  Change 'format' and 'size' to int.
+	* printcmd.c (print_scalar_formatted):  Change arg 'format' to int.
+	* printcmd.c (print_address_symbolic):  Convert from misc function
+	vector use to minimal symbol table use.
+	* printcmd.c (address_info):  Convert from misc function vector use
+	to minimal symbol table use.
+	* printcmd.c (delete_display, enable_display, disable_display_command):
+	Make static.
+	* procfs.c (EXFUN/DEFUN):  Remove all usages, convert to PARAM.
+	* procfs.c (fetch_core_registers):  Add unused param reg_addr.
+	* pyr-xdep.c (fetch_inferior_registers):  Add unused param regno.
+	* pyr-xdep.c (store_inferior_registers):  Returns void.
+	* remote-mm.c (mm_load):  symbol_file_add return value unused.
+	* remote-nindy.c:  Minor format change.
+	* remote-vx.c (vx_load_command):  symbol_file_add result unused.
+	* rs6000-xdep.c (fetch_inferior_registers):  Add unused param regno.
+	* rs6000-xdep.c (store_inferior_registers):  Returns void.
+	* rs6000-xdep.c (fetch_core_registers):  add unused param reg_addr
+	* rs6000-xdep.c (aixcoff_relocate_symtab):  Convert from misc function
+	vector use to minimal symbol table use.
+	* solib.c:  Add prototypes for local functions.
+	* solib.c (solib_add_common_symbols, locate_base):  Convert from misc
+	function vector use to minimal symbol table use.
+	* solib.c (EXFUN/DEFUN):  Remove all usages, convert to PARAM.
+	* solib.c (find_solib, shared_library_command):  Make static
+	* solib.c (read_memory, write_memory usages):  Cast args.
+	* solib.c (special_symbol_handling):  Add function
+	* source.c:  Add prototypes for local functions.
+	* source.c (select_source_symtab):  Convert to scan objfiles.
+	* source.c (open_source_file):  Make static.
+	* source.c (xrealloc usages):  Cast args.
+	* source.c (source_line_charpos):  ifdef out, unused.
+	* source.c (get_filename_and_charpos):  Make static.
+	* stack.c:  Add prototypes for local functions.
+	* stack.c (print_frame_info, frame_info):  Convert from misc function
+	vector use to minimal symbol table use.
+	* symfile.c:  Add prototypes for local functions.
+	* symfile.c (compare_symbols):  Make args const PTR's.
+	* symfile.c (compare_psymbols, sort_pst_symbols) add.
+	* symfile.c (sort_all_symtab_syms):  Scan objfile list.
+	* symfile.c (obsavestring):  Add objfile parameter.
+	* symfile.c (init_misc_bunches, prim_record_misc_function,
+	compare_misc_functions, discard_misc_bunches, condense_misc_bunches,
+	sort_misc_function_vector, compact_misc_function_vector): Remove
+	* symfile.c (symbol_file_add_digested):  Add function.
+	* symfile.c (symbol_file_add):  Returns struct objfile *.
+	* symfile.c (symbol_file_command):  Modify for state file use.
+	* symfile.c (symfile_open):  Add parameter "dumpable".
+	* symfile.c (allocate_objfile, free_objfile):  Moved to objfiles.c
+	* symfile.c (load_command, add_symbol_file_command):  Make static.
+	* symfile.c (fill_in_vptr_fieldno):  Moved to gdbtypes.c
+	* symfile.c (rindex usages):  Converted to strrchr.
+	* symfile.c (allocate_psymtab):  New
+	* symfile.c (free_named_symtabs):  Ifdef out code that needs to be
+	converted to minimal symbol table usage, but no obvious conversion.
+	* symfile.c (free_all_symtabs):  Remove.
+	* symfile.c (_initialize_symfile):  Use per-objfile info.
+	* symfile.h:  Rework the objfile structure to add per-objfile data
+	objects (psymbol_obstack, symbol_obstack, type_obstack,
+	global_psymbols, static_psymbols, msymbols, minimal_symbol_count,
+	fundamental_types, malloc, realloc, free, xmalloc, xrealloc, etc).
+	Add prototypes to function declarations.
+	* symm-tdep.c (symmetry_extract_return_value):  Convert from misc
+	function vector usage to minimal symbol table usage.
+	* symmisc.c (DEV_TTY):  Define if not defined.
+	* symmisc.c:  Add local function prototypes.
+	* symmisc.c (dump_objfile, dump_msymbols, dump-symtab, print_syms,
+	printpsyms_command, print_objfiles, print_objfiles_command):
+	Rework to use iterate_over_*
+	* symtab.c:  Add prototypes for local functions.
+	* symtab.c (lookup_symtab_1):  Convert to look through objfiles.
+	* symtab.c (lookup_partial_symtab):  Scan through objfiles.
+	* symtab.c (lookup_primitive_typename, lookup_typename, lookup_
+	unsigned_typename, lookup_struct, lookup_union, lookup_enum,
+	lookup_template_type, lookup_struct_elt_type, lookup_pointer_type,
+	lookup_reference_type, lookup_member_type, allocate_stub_method,
+	check_stub_method, create_array_type, smash_to_member_type,):
+	Moved to gdbtypes.c
+	* symtab.c (lookup_symbol):  Some args are const.
+	* symtab.h: All type related defs and structs moved to gdbtypes.h
+	* symtab.h: Convert decls to prototypes.
+	* target.c (noprocess):  Make static.
+	* target.h:  Change decl's to prototypes.
+	* tm-sunos.h: (CLEAR_SOLIB, SOLIB_ADD, SOLIB_CREATE_INFERIOR_HOOK,
+	DISABLE_UNSETTABLE_BREAK) Moved to solib.h.
+	* utils.c (_initialize_utils):  Use correct member of function union.
+	* valarith.c:  include gdbtypes.h
+	* valops.c: include gdbtypes.h, add prototypes for local functions.
+	* valops.c (value_push, value_arg_push, find_function_addr):
+	Make static.
+	* valops.c (value_string):  Convert from misc function vector use
+	to minimal symbol table use.
+	* valops.c (check_field_in):  Make arg const.
+	* valprint.c:  Add prototypes for local functions.
+	* valprint.c (print_string):  Make static
+	* valprint.c (value_print, val_print_fields, val_print): Make arg int.
+	* values.c:  Add prototypes for local functions.
+	* values.c (value_headof):  Convert from misc function vector to
+	minimal symbol table.
+	* xcoffexec.c:  Add prototypes for local functions.
+	* xcoffexec.c (exec_close, file_command, add_to_section_table):
+	Make static.
+	* xcoffexec.c (relocate_minimal_symbol):  Add.
+	* xcoffread.c (patch_block_stabs):  Moved to buildsyms.c.
+	* xcoffread.c: Add prototypes for local functions.
+	* xcoffread.c (sort_syms):  Convert to scan objfiles.
+	* xcoffread.c (read_xcoff_symtab):  Make static.
+	* xcoffread.c (various):  Replace references to builtin types with
+	calls to lookup_fundamental_type.  Replace references to symbol_obstack
+	and psymbol_obstack with pointers to the per-objfile copies.
+	* xcoffread.c (dump_linetable, dump_type, dump_symbol, dump_namespace,
+	dump_block, dump_blockvector, dump_last_symtab, dump_symtabs):
+	Make static.
+	* xcoffread.c (init_stringtab):  Add objfile parameter.
+	* gdbtypes.c: New file
+	* minsyms.c: New file
+	* mmap-alloc.c: New file
+	* mmap-sbrk.c: New file
+	* objfiles.c: New file
+	* state.c: New file
+	* state.h: New file
+
 Fri Feb 21 17:29:54 1992  John Gilmore  (gnu at cygnus.com)
 
 	* Check in Fred Fish's changes in these modules.  Fred
 	will make ChangeLog entries for all of them.  Update VERSION
 	to 4.4.2.
-
-	* Makefile.in
-	* altos-xdep.c
-	* am29k-tdep.c
-	* arm-xdep.c
-	* blockframe.c
-	* breakpoint.c
-	* breakpoint.h
-	* buildsym.c
-	* buildsym.h
-	* c-exp.y
-	* coffread.c
-	* command.c
-	* command.h
-	* convex-xdep.c
-	* copying.c
-	* coredep.c
-	* cplus-dem.c
-	* dbxread.c
-	* dwarfread.c
-	* elfread.c
-	* eval.c
-	* expprint.c
-	* findvar.c
-	* gdbtypes.h
-	* gmalloc.c
-	* gmalloc.h
-	* gould-xdep.c
-	* hp300ux-xdep.c
-	* i386-stub.c
-	* i386-tdep.c
-	* i386-xdep.c
-	* i387-tdep.c
-	* i960-tdep.c
-	* infcmd.c
-	* inflow.c
-	* infptrace.c
-	* language.c
-	* m2-exp.y
-	* m68k-pinsn.c
-	* m68k-stub.c
-	* m88k-pinsn.c
-	* m88k-xdep.c
-	* mach386-xdep.c
-	* main.c
-	* mcheck.c
-	* mem-break.c
-	* mips-xdep.c
-	* mipsread.c
-	* nindy-tdep.c
-	* parse.c
-	* parser-defs.h
-	* partial-stab.h
-	* printcmd.c
-	* procfs.c
-	* pyr-xdep.c
-	* remote-mm.c
-	* remote-nindy.c
-	* remote-vx.c
-	* rs6000-xdep.c
-	* solib.c
-	* source.c
-	* stack.c
-	* symfile.c
-	* symfile.h
-	* symm-tdep.c
-	* symmisc.c
-	* symtab.c
-	* symtab.h
-	* target.c
-	* target.h
-	* tm-sunos.h
-	* utils.c
-	* valarith.c
-	* valops.c
-	* valprint.c
-	* values.c
-	* xcoffexec.c
-	* xcoffread.c
-	* gdbtypes.c
-	* minsyms.c
-	* mmap-alloc.c
-	* mmap-sbrk.c
-	* objfiles.c
-	* state.c
-	* state.h
 
 Thu Feb 20 18:10:17 1992  Fred Fish  (fnf at cygnus.com)
 
