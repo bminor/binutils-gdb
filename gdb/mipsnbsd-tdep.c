@@ -66,7 +66,9 @@ mipsnbsd_supply_fpreg (char *fpregs, int regno)
 {
   int i;
 
-  for (i = FP0_REGNUM; i <= FCRIR_REGNUM; i++)
+  for (i = FP0_REGNUM;
+       i <= mips_regnum (current_gdbarch)->fp_implementation_revision;
+       i++)
     {
       if (regno == i || regno == -1)
 	{
@@ -83,7 +85,8 @@ mipsnbsd_fill_fpreg (char *fpregs, int regno)
 {
   int i;
 
-  for (i = FP0_REGNUM; i <= FCRCS_REGNUM; i++)
+  for (i = FP0_REGNUM; i <= mips_regnum (current_gdbarch)->fp_control_status;
+       i++)
     if ((regno == i || regno == -1) && ! CANNOT_STORE_REGISTER (i))
       regcache_collect (i, fpregs + ((i - FP0_REGNUM) * mips_regsize (current_gdbarch)));
 }
@@ -259,14 +262,14 @@ static int
 mipsnbsd_cannot_fetch_register (int regno)
 {
   return (regno == ZERO_REGNUM
-	  || regno == FCRIR_REGNUM);
+	  || regno == mips_regnum (current_gdbarch)->fp_implementation_revision);
 }
 
 static int
 mipsnbsd_cannot_store_register (int regno)
 {
   return (regno == ZERO_REGNUM
-	  || regno == FCRIR_REGNUM);
+	  || regno == mips_regnum (current_gdbarch)->fp_implementation_revision);
 }
 
 /* NetBSD/mips uses a slightly different link_map structure from the

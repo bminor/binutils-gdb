@@ -35,21 +35,21 @@
 		  addr = PCB_OFFSET(pcb_fpregs[0]) + 4*(regno-FP0_REGNUM); \
               else if (regno == PS_REGNUM) \
                   addr = UPAGES*NBPG-EF_SIZE+4*EF_SR; \
-              else if (regno == BADVADDR_REGNUM) \
+              else if (regno == mips_regnum (current_gdbarch)->badvaddr) \
   		  addr = UPAGES*NBPG-EF_SIZE+4*EF_BADVADDR; \
-	      else if (regno == LO_REGNUM) \
+	      else if (regno == mips_regnum (current_gdbarch)->lo) \
 		  addr = UPAGES*NBPG-EF_SIZE+4*EF_MDLO; \
-	      else if (regno == HI_REGNUM) \
+	      else if (regno == mips_regnum (current_gdbarch)->hi) \
 		  addr = UPAGES*NBPG-EF_SIZE+4*EF_MDHI; \
-	      else if (regno == CAUSE_REGNUM) \
+	      else if (regno == mips_regnum (current_gdbarch)->cause) \
 		  addr = UPAGES*NBPG-EF_SIZE+4*EF_CAUSE; \
-	      else if (regno == PC_REGNUM) \
+	      else if (regno == mips_regnum (current_gdbarch)->pc) \
 		  addr = UPAGES*NBPG-EF_SIZE+4*EF_EPC; \
-              else if (regno < FCRCS_REGNUM) \
+              else if (regno < mips_regnum (current_gdbarch)->fp_control_status) \
 		  addr = PCB_OFFSET(pcb_fpregs[0]) + 4*(regno-FP0_REGNUM); \
-	      else if (regno == FCRCS_REGNUM) \
+	      else if (regno == mips_regnum (current_gdbarch)->fp_control_status) \
 		  addr = PCB_OFFSET(pcb_fpc_csr); \
-	      else if (regno == FCRIR_REGNUM) \
+	      else if (regno == mips_regnum (current_gdbarch)->fp_implementation_revision) \
 		  addr = PCB_OFFSET(pcb_fpc_eir); \
               else \
                   addr = 0;

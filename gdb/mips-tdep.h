@@ -47,4 +47,27 @@ extern CORE_ADDR mips_next_pc (CORE_ADDR pc);
    architecture's word size.  */
 extern int mips_regsize (struct gdbarch *gdbarch);
 
+/* Return the current index for various MIPS registers.  */
+struct mips_regnum
+{
+  int pc;
+  int fp0;
+  int fp_implementation_revision;
+  int fp_control_status;
+  int badvaddr;		/* Bad vaddr for addressing exception.  */
+  int cause;		/* Describes last exception.  */
+  int hi;		/* Multiply/divide temp.  */
+  int lo;		/* ...  */
+};
+extern const struct mips_regnum *mips_regnum (struct gdbarch *gdbarch);
+
+enum {
+  MIPS_EMBED_LO_REGNUM = 33,
+  MIPS_EMBED_HI_REGNUM = 34,
+  MIPS_EMBED_BADVADDR_REGNUM = 35,
+  MIPS_EMBED_CAUSE_REGNUM = 36,
+  MIPS_EMBED_PC_REGNUM = 37,
+  MIPS_EMBED_FP0_REGNUM = 38
+};
+
 #endif /* MIPS_TDEP_H */

@@ -1,5 +1,34 @@
 2003-11-16  Andrew Cagney  <cagney@redhat.com>
 
+	* mips-tdep.c (struct gdbarch_tdep): Add field "regnum".
+	(mips_fpa0_regnum, mips_regnum): New function.
+	(mips_gdbarch_init): Fill in the "regnum" fields.
+	* mips-tdep.h (struct mips_regnum): Define.
+	(mips_regnum): Declare.
+	* config/mips/tm-mips.h (BADVADDR_REGNUM): Delete macro.
+	(LO_REGNUM, HI_REGNUM, BADVADDR_REGNUM): Ditto.
+	(CAUSE_REGNUM, PC_REGNUM, FP0_REGNUM): Ditto.
+	(FCRCS_REGNUM, FCRIR_REGNUM, FPA0_REGNUM): Ditto.
+	* config/mips/tm-irix6.h (FP0_REGNUM): Delete macro.
+	(PC_REGNUM, CAUSE_REGNUM, BADVADDR_REGNUM): Ditto.
+	(HI_REGNUM, LO_REGNUM, FCRCS_REGNUM, FCRIR_REGNUM): Ditto.
+	* config/mips/tm-irix5.h (FP0_REGNUM): Delete macro.
+	(PC_REGNUM, CAUSE_REGNUM, BADVADDR_REGNUM): Ditto.
+	(HI_REGNUM, LO_REGNUM, FCRCS_REGNUM, FCRIR_REGNUM): Ditto.
+	* remote-mips.c: Include "mips-tdep.h".  Update.
+	* mipsnbsd-tdep.c: Update.
+	* mipsv4-nat.c: Update.
+	* mips-tdep.c: Update.
+	* mips-nat.c: Update.
+	* mips-linux-tdep.c: Update.
+	* mips-linux-nat.c: Update.
+	* irix5-nat.c: Update.
+	* dve3900-rom.c: Include "mips-tdep.h".  Update.
+	(ignore_packet): Supress GCC warning.
+	* config/mips/nm-riscos.h: Update.
+
+2003-11-16  Andrew Cagney  <cagney@redhat.com>
+
 	* mips-tdep.c: Replace DEPRECATED_REGISTER_RAW_SIZE with
 	register_size.
 	(mips_register_raw_size): Delete function.
@@ -13,6 +42,7 @@
 	(_initialize_mips_tdep): Use "add_setshow_cmd" when adding the
 	"set remote-mips64-transfers-32bit-regs" command.  Specify
 	set_mips64_transfers_32bit_regs as the set function.
+	* Makefile.in (dve3900-rom.o, remote-mips.o): Update dependencies.
 
 2003-11-16  Mark Kettenis  <kettenis@gnu.org>
 

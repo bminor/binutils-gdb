@@ -36,6 +36,7 @@
 #include "gdb_stat.h"
 #include "regcache.h"
 #include <ctype.h>
+#include "mips-tdep.h"
 
 
 /* Breakpoint types.  Values 0, 1, and 2 must agree with the watch
@@ -1902,26 +1903,24 @@ mips_map_regno (int regno)
 {
   if (regno < 32)
     return regno;
-  if (regno >= FP0_REGNUM && regno < FP0_REGNUM + 32)
-    return regno - FP0_REGNUM + 32;
-  switch (regno)
-    {
-    case PC_REGNUM:
-      return REGNO_OFFSET + 0;
-    case CAUSE_REGNUM:
-      return REGNO_OFFSET + 1;
-    case HI_REGNUM:
-      return REGNO_OFFSET + 2;
-    case LO_REGNUM:
-      return REGNO_OFFSET + 3;
-    case FCRCS_REGNUM:
-      return REGNO_OFFSET + 4;
-    case FCRIR_REGNUM:
-      return REGNO_OFFSET + 5;
-    default:
-      /* FIXME: Is there a way to get the status register?  */
-      return 0;
-    }
+  if (regno >= mips_regnum (current_gdbarch)->fp0
+      && regno < mips_regnum (current_gdbarch)->fp0 + 32)
+    return regno - mips_regnum (current_gdbarch)->fp0 + 32;
+  else if (regno == mips_regnum (current_gdbarch)->pc)
+    return REGNO_OFFSET + 0;
+  else if (regno == mips_regnum (current_gdbarch)->cause)
+    return REGNO_OFFSET + 1;
+  else if (regno == mips_regnum (current_gdbarch)->hi)
+    return REGNO_OFFSET + 2;
+  else if (regno == mips_regnum (current_gdbarch)->lo)
+    return REGNO_OFFSET + 3;
+  else if (regno == mips_regnum (current_gdbarch)->fp_control_status)
+    return REGNO_OFFSET + 4;
+  else if (regno == mips_regnum (current_gdbarch)->fp_implementation_revision)
+    return REGNO_OFFSET + 5;
+  else
+    /* FIXME: Is there a way to get the status register?  */
+    return 0;
 }
 
 /* Fetch the remote registers.  */

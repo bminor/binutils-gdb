@@ -55,12 +55,12 @@ static int
 register_ptrace_addr (int regno)
 {
   return (regno < 32 ? GPR_BASE + regno
-	  : regno == PC_REGNUM ? PC
-	  : regno == CAUSE_REGNUM ? CAUSE
-	  : regno == HI_REGNUM ? MMHI
-	  : regno == LO_REGNUM ? MMLO
-	  : regno == FCRCS_REGNUM ? FPC_CSR
-	  : regno == FCRIR_REGNUM ? FPC_EIR
+	  : regno == mips_regnum (current_gdbarch)->pc ? PC
+	  : regno == mips_regnum (current_gdbarch)->cause ? CAUSE
+	  : regno == mips_regnum (current_gdbarch)->hi ? MMHI
+	  : regno == mips_regnum (current_gdbarch)->lo ? MMLO
+	  : regno == mips_regnum (current_gdbarch)->fp_control_status ? FPC_CSR
+	  : regno == mips_regnum (current_gdbarch)->fp_implementation_revision ? FPC_EIR
 	  : regno >= FP0_REGNUM ? FPR_BASE + (regno - FP0_REGNUM)
 	  : 0);
 }
@@ -110,8 +110,10 @@ store_inferior_registers (int regno)
   if (regno > 0)
     {
       if (regno == ZERO_REGNUM || regno == PS_REGNUM
-	  || regno == BADVADDR_REGNUM || regno == CAUSE_REGNUM
-	  || regno == FCRIR_REGNUM || regno == DEPRECATED_FP_REGNUM
+	  || regno == mips_regnum (current_gdbarch)->badvaddr
+	  || regno == mips_regnum (current_gdbarch)->cause
+	  || regno == mips_regnum (current_gdbarch)->fp_implementation_revision
+	  || regno == DEPRECATED_FP_REGNUM
 	  || (regno >= FIRST_EMBED_REGNUM && regno <= LAST_EMBED_REGNUM))
 	return;
       regaddr = register_ptrace_addr (regno);

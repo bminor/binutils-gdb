@@ -75,15 +75,6 @@ extern int mips_step_skips_delay (CORE_ADDR);
 #define SP_REGNUM 29		/* Contains address of top of stack */
 #define RA_REGNUM 31		/* Contains return address value */
 #define PS_REGNUM 32		/* Contains processor status */
-#define HI_REGNUM 34		/* Multiple/divide temp */
-#define LO_REGNUM 33		/* ... */
-#define BADVADDR_REGNUM 35	/* bad vaddr for addressing exception */
-#define CAUSE_REGNUM 36		/* describes last exception */
-#define PC_REGNUM 37		/* Contains program counter */
-#define FP0_REGNUM 38		/* Floating point register 0 (single float) */
-#define FPA0_REGNUM (FP0_REGNUM+12)	/* First float argument register */
-#define FCRCS_REGNUM 70		/* FP control/status */
-#define FCRIR_REGNUM 71		/* FP implementation/revision */
 #define	UNUSED_REGNUM 73	/* Never used, FIXME */
 #define	FIRST_EMBED_REGNUM 74	/* First CP0 register for embedded use */
 #define	PRID_REGNUM 89		/* Processor ID */
