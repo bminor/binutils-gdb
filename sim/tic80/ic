@@ -37,3 +37,7 @@ compute:Code:Code:
 #
 compute:SignedOffset:SignedOffset:
 compute:SignedOffset:vSignedOffset:signed_word:SEXT (SignedOffset, 14)
+#
+compute:UCRN:UCRN:
+compute:INDCR:INDCR:
+compute:INDCR:UCRN:unsigned32:(INDCR == 0 ? 0 : (CPU)->reg[INDCR])

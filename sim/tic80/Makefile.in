@@ -83,11 +83,9 @@ clean-igen:
 
 tmp-igen: $(srcdir)/dc $(srcdir)/insns $(srcdir)/ic ../igen/igen
 	cd ../igen && $(MAKE)
-	@echo "Generating short version ..."
 	../igen/igen \
 		-G direct-access \
 		-G delayed-branch \
-		-G omit-line-numbers \
 		-F short,emul \
 		-B 32 -H 31 \
 		-o $(srcdir)/dc \
@@ -128,6 +126,7 @@ ENGINE_H = \
 	$(srcdir)/../common/sim-types.h \
 	$(srcdir)/../common/sim-bits.h \
 	$(srcdir)/../common/sim-endian.h \
+	$(srcdir)/../common/sim-options.h \
 	itable.h \
 	idecode.h \
 	cpu.h \
@@ -138,6 +137,7 @@ ENGINE_H = \
 
 idecode.o: $(ENGINE_H)
 semantics.o: $(ENGINE_H)
+support.o: $(ENGINE_H)
 interp.o: interp.c $(ENGINE_H)
 sim-calls.o: sim-calls.c $(ENGINE_H)
 cpu.o: cpu.c $(ENGINE_H)

@@ -85,11 +85,18 @@ sim_open (SIM_OPEN_KIND kind, char **argv)
 
   engine_init(&simulation);
 
+#define TIC80_MEM_START 0x2000000
+#define TIC80_MEM_SIZE 0x100000
+
   /* external memory */
   sim_core_attach(&simulation,
 		  attach_raw_memory,
 		  access_read_write_exec,
-		  0, 0x2000000, 0x100000, NULL, NULL);
+		  0, TIC80_MEM_START, TIC80_MEM_SIZE, NULL, NULL);
+  sim_core_attach(&simulation,
+		  attach_raw_memory,
+		  access_read_write_exec,
+		  0, 0, TIC80_MEM_SIZE, NULL, NULL);
 
  /* FIXME: for now */
   return (SIM_DESC) &simulation;
@@ -216,6 +223,7 @@ sim_create_inferior (SIM_DESC sd,
   STATE_CPU (sd, 0)->cia.ip = STATE_START_ADDR(sd);
   STATE_CPU (sd, 0)->cia.dp = (STATE_START_ADDR(sd)
 			       + sizeof (instruction_word));
+  STATE_CPU (sd, 0)->reg[1] = TIC80_MEM_START + TIC80_MEM_SIZE - 16;
   return SIM_RC_OK;
 }
 

@@ -52,7 +52,7 @@ engine_error (SIM_DESC sd,
 
   if (sd->halt_ok)
     {
-      sim_io_printf (sd, "\n");
+      sim_io_eprintf (sd, "\n");
       engine_halt (sd, cpu, cia, sim_signalled, SIGABRT);
     }
   else

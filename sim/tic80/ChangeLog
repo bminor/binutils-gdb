@@ -1,3 +1,28 @@
+Tue Apr 29 10:58:48 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* alu.h (MEM, STORE): Force addresses to be correctly aligned.
+
+	* insns (do_jsr): Fix.
+	(do_st, do_ld): Handle 64bit transfers.
+	(do_trap): Match libgloss.
+	(rdcr): Implement nop - Dest == r0 - variant.
+
+	* sim-calls.c (sim_create_inferior): Initialize SP.
+
+	* Makefile.in (ENGINE_H): Everything now depends on sim-options.h.
+	(support.o): Depends on ENGINE_H.
+
+	* cpu.h: Four accumulators.
+
+	* Makefile.in (tmp-igen): Include line number information in
+ 	generated files.
+
+	* insns (dld, dst): Fill in.
+
+Mon Apr 28 13:02:26 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* insns (vld): Fix instruction format wrong.
+
 Thu Apr 24 16:43:09 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* dc: Add additional rules so that minor opcode files are

@@ -235,32 +235,33 @@ void::function::do_cmp:unsigned32 *rDest, unsigned32 Source1, unsigned32 Source2
 
 
 // dld[{.b|.h|.d}]
-#void::function::do_dld:unsigned32 *rDest, unsigned32 Source1, unsigned32 Source2
-#	sim_io_error ("dld");
+void::function::do_dld:instruction_address cia, int Dest, unsigned32 Base, unsigned32 *rBase, int m , int sz, int S, unsigned32 Offset
+	do_ld (_SD, cia, Dest, Base, rBase, m, sz, S, Offset);
 31.Dest,26.Base,21.0b110100,15.m,14.sz,12.0,11.S,10.1,9./,4.IndOff::::dld r
-#	do_dld (_SD, rDest, rSource1, rSource2);
+	do_dld (_SD, cia, Dest, rBase, &GPR(Base), m, sz, S, rIndOff);
 31.Dest,26.Base,21.0b110100,15.m,14.sz,12.1,11.S,10.1,9./::::dld l
-#	long_immediate (LongSignedImmediateOffset);
-#	do_dld (_SD, rDest, LongSignedImmediate, rSource2);
+	long_immediate (LongSignedImmediateOffset);
+	do_dld (_SD, cia, Dest, rBase, &GPR(Base), m, sz, S, LongSignedImmediateOffset);
 
 
 // dld.u[{.b|.h|.d}]
-#void::function::do_dld_u:unsigned32 *rDest, unsigned32 Source1, unsigned32 Source2
-#	sim_io_error ("dld.u");
+void::function::do_dld_u:instruction_address cia, unsigned32 *rDest, unsigned32 Base, unsigned32 *rBase, int m , int sz, int S, unsigned32 Offset
+	do_ld_u (_SD, cia, rDest, Base, rBase, m, sz, S, Offset);
 31.Dest,26.Base,21.0b110101,15.m,14.sz,12.0,11.S,10.1,9./,4.IndOff::::dld.u r
-#	do_dld_u (_SD, rDest, rSource1, rSource2);
+	do_dld_u (_SD, cia, rDest, rBase, &GPR(Base), m, sz, S, rIndOff);
 31.Dest,26.Base,21.0b110101,15.m,14.sz,12.1,11.S,10.1,9./::::dld.u l
-#	long_immediate (LongSignedImmediateOffset);
-#	do_dld_u (_SD, rDest, LongSignedImmediate, rSource2);
+	long_immediate (LongSignedImmediateOffset);
+	do_dld_u (_SD, cia, rDest, rBase, &GPR(Base), m, sz, S, LongSignedImmediateOffset);
 
 
 // dst[{.b|.h|.d}]
-#void::function::do_dst:unsigned32 *rDest, unsigned32 Source1, unsigned32 Source2
-#	sim_io_error ("dst");
-31.Dest,26.Base,21.0b110110,15.m,14.sz,12.0,11.S,10.1,9./,4.IndOff::::dst r
-#	do_dst (_SD, rDest, rSource1, rSource2);
-31.Dest,26.Base,21.0b110110,15.m,14.sz,12.1,11.S,10.1,9./::::dst l
-#	do_dst (_SD, rDest, LongSignedImmediate, rSource2);
+void::function::do_dst:instruction_address cia, int Source, unsigned32 Base, unsigned32 *rBase, int m , int sz, int S, unsigned32 Offset
+	do_st (_SD, cia, Source, Base, rBase, m, sz, S, Offset);
+31.Source,26.Base,21.0b110110,15.m,14.sz,12.0,11.S,10.1,9./,4.IndOff::::dst r
+	do_dst (_SD, cia, Source, rBase, &GPR(Base), m, sz, S, rIndOff);
+31.Source,26.Base,21.0b110110,15.m,14.sz,12.1,11.S,10.1,9./::::dst l
+	long_immediate (LongSignedImmediateOffset);
+	do_dst (_SD, cia, Source, rBase, &GPR(Base), m, sz, S, LongSignedImmediateOffset);
 
 
 // estop
@@ -386,7 +387,10 @@ instruction_address::function::do_jsr:instruction_address cia, instruction_addre
 	  }
 	else
 	  *rLink = cia.dp + sizeof (instruction_word);
-	nia.dp = cia.ip + 4 * offset;
+	nia.dp = offset + base;
+	if (nia.dp & 0x3)
+	  engine_error (SD, CPU, cia, "destination address 0x%lx misaligned",
+	                (unsigned long) nia.dp);
 	return nia;
 31.Link,26.Base,21.0b100010,15.A,14.SignedOffset::::jsr i
 	nia = do_jsr (_SD, cia, nia, rLink, A, vSignedOffset, rBase);
@@ -398,40 +402,48 @@ instruction_address::function::do_jsr:instruction_address cia, instruction_addre
 
 
 // ld[{.b.h.d}]
-void::function::do_ld:instruction_address cia, unsigned32 *rDest, unsigned32 Base, unsigned32 *rBase, int m , int sz, int S, unsigned32 Offset
+void::function::do_ld:instruction_address cia, int Dest, unsigned32 Base, unsigned32 *rBase, int m , int sz, int S, unsigned32 Offset
 	unsigned32 addr;
 	switch (sz)
 	  {
 	  case 0:
 	    addr = Base + (S ? (Offset << 0) : Offset);
-	    *rDest = MEM (signed, addr, 1);
+	    if (m)
+	      *rBase = addr;
+	    GPR(Dest) = MEM (signed, addr, 1);
 	    break;
 	  case 1:
 	    addr = Base + (S ? (Offset << 1) : Offset);
-	    *rDest = MEM (signed, addr, 2);
+	    if (m)
+	      *rBase = addr;
+	    GPR(Dest) = MEM (signed, addr, 2);
 	    break;
 	  case 2:
 	    addr = Base + (S ? (Offset << 2) : Offset);
-	    *rDest = MEM (signed, addr, 4);
+	    if (m)
+	      *rBase = addr;
+	    GPR(Dest) = MEM (signed, addr, 4);
 	    break;
 	  case 3:
-	    engine_error (SD, CPU, cia, "ld.d broken");
+	    if (Dest & 0x1)
+	      engine_error (SD, CPU, cia, "0x%lx: ld.d to odd register %d",
+	                    cia.ip, Dest);
 	    addr = Base + (S ? (Offset << 3) : Offset);
-	    *rDest = MEM (signed, addr, 8);
+	    if (m)
+	      *rBase = addr;
+	    *(unsigned64*)(&GPR(Dest)) = MEM (signed, addr, 8);
 	    break;
 	  default:
 	    addr = -1;
 	    engine_error (SD, CPU, cia, "ld - invalid sz %d", sz);
 	  }
-	if (m)
-	  *rBase = addr;
 31.Dest,26.Base,21.0b0100,17.m,16.sz,14.SignedOffset::::ld i
-	do_ld (_SD, cia, rDest, rBase, &GPR(Base), m, sz, 0, vSignedOffset);
+	do_ld (_SD, cia, Dest, rBase, &GPR(Base), m, sz, 0, vSignedOffset);
 31.Dest,26.Base,21.0b110100,15.m,14.sz,12.0,11.S,10.0,9./,4.IndOff::::ld r
-	do_ld (_SD, cia, rDest, rBase, &GPR(Base), m, sz, S, rIndOff);
+	do_ld (_SD, cia, Dest, rBase, &GPR(Base), m, sz, S, rIndOff);
 31.Dest,26.Base,21.0b110100,15.m,14.sz,12.1,11.S,10.0,9./::::ld l
 	long_immediate (LongSignedImmediateOffset);
-	do_ld (_SD, cia, rDest, rBase, &GPR(Base), m, sz, S, LongSignedImmediateOffset);
+	do_ld (_SD, cia, Dest, rBase, &GPR(Base), m, sz, S, LongSignedImmediateOffset);
 
 
 // ld.u[{.b.h.d}]
@@ -514,9 +526,16 @@ void::function::do_or:unsigned32 *rDest, unsigned32 Source1, unsigned32 Source2
 
 
 // rdcr
+void::function::do_rdcr:instruction_address cia, unsigned32 Dest, int cr
+	if (Dest != 0)
+	  engine_error (SD, CPU, cia, "rdcr unimplement");
 31.Dest,26.0,21.0b0000100,14.UCRN::::rdcr i
+	do_rdcr (_SD, cia, Dest, UCRN);
 31.Dest,26.0,21.0b110000100,12.0,11./,4.INDCR::::rdcr r
+	do_rdcr (_SD, cia, Dest, UCRN);
 31.Dest,26.0,21.0b110000100,12.1,11./::::rdcr l
+	long_immediate (UnsignedControlRegisterNumber);
+	do_rdcr (_SD, cia, Dest, UnsignedControlRegisterNumber);
 
 
 // rmo
@@ -559,40 +578,42 @@ void::function::do_or:unsigned32 *rDest, unsigned32 Source1, unsigned32 Source2
 
 
 // st[{.b|.h|.d}]
-void::function::do_st:instruction_address cia, unsigned32 rSource, unsigned32 Base, unsigned32 *rBase, int m , int sz, int S, unsigned32 Offset
+void::function::do_st:instruction_address cia, int Source, unsigned32 Base, unsigned32 *rBase, int m , int sz, int S, unsigned32 Offset
 	unsigned32 addr;
 	switch (sz)
 	  {
 	  case 0:
 	    addr = Base + (S ? (Offset << 0) : Offset);
-	    STORE (addr, 1, rSource);
+	    STORE (addr, 1, GPR(Source));
 	    break;
 	  case 1:
 	    addr = Base + (S ? (Offset << 1) : Offset);
-	    STORE (addr, 2, rSource);
+	    STORE (addr, 2, GPR(Source));
 	    break;
 	  case 2:
 	    addr = Base + (S ? (Offset << 2) : Offset);
-	    STORE (addr, 4, rSource);
+	    STORE (addr, 4, GPR(Source));
 	    break;
 	  case 3:
-	    engine_error (SD, CPU, cia, "st.d broken");
+	    if (Source & 0x1)
+	      engine_error (SD, CPU, cia, "0x%lx: st.d with odd source register %d",
+	                    cia.ip, Source);
 	    addr = Base + (S ? (Offset << 3) : Offset);
-	    STORE (addr, 8, rSource);
+	    STORE (addr, 8, *(unsigned64*)&GPR(Source));
 	    break;
 	  default:
 	    addr = -1;
-	    engine_error (SD, CPU, cia, "ld - invalid sz %d", sz);
+	    engine_error (SD, CPU, cia, "st - invalid sz %d", sz);
 	  }
 	if (m)
 	  *rBase = addr;
 31.Source,26.Base,21.0b0110,17.m,16.sz,14.SignedOffset::::st i
-	do_st (_SD, cia, rSource, rBase, &GPR(Base), m, sz, 0, vSignedOffset);
+	do_st (_SD, cia, Source, rBase, &GPR(Base), m, sz, 0, vSignedOffset);
 31.Source,26.Base,21.0b110110,15.m,14.sz,12.0,11.S,10.0,9./,4.IndOff::::st r
-	do_st (_SD, cia, rSource, rBase, &GPR(Base), m, sz, S, rIndOff);
+	do_st (_SD, cia, Source, rBase, &GPR(Base), m, sz, S, rIndOff);
 31.Source,26.Base,21.0b110110,15.m,14.sz,12.1,11.S,10.0,9./::::st l
 	long_immediate (LongSignedImmediateOffset);
-	do_st (_SD, cia, rSource, rBase, &GPR(Base), m, sz, S, LongSignedImmediateOffset);
+	do_st (_SD, cia, Source, rBase, &GPR(Base), m, sz, S, LongSignedImmediateOffset);
 
 
 // sub
@@ -600,7 +621,6 @@ void::function::do_sub:signed32 *rDest, signed32 Source1, signed32 Source2
 	ALU_BEGIN (Source1);
 	ALU_SUB (Source2);
 	ALU_END (*rDest);	
-// FIXME - the book has 15.1 which conflicts with subu.
 31.Dest,26.Source2,21.0b101101,15.0,14.SignedImmediate::::sub i
 	do_sub (_SD, rDest, vSource1, rSource2);
 31.Dest,26.Source2,21.0b11101101,13.0,12.0,11./,4.Source1::::sub r
@@ -613,6 +633,7 @@ void::function::do_sub:signed32 *rDest, signed32 Source1, signed32 Source2
 // subu
 void::function::do_subu:signed32 *rDest, signed32 Source1, signed32 Source2
 	*rDest = Source1 - Source2;
+// NOTE - the book has 15.1 which conflicts with subu.
 31.Dest,26.Source2,21.0b101101,15.1,14.SignedImmediate::::subu i
 	do_subu (_SD, rDest, vSource1, rSource2);
 31.Dest,26.Source2,21.0b11101101,13.1,12.0,11./,4.Source1::::subu r
@@ -634,32 +655,36 @@ void::function::do_subu:signed32 *rDest, signed32 Source1, signed32 Source2
 
 // trap
 void::function::do_trap:instruction_address cia, unsigned32 trap_number
-	if (trap_number == 72)
+	switch (trap_number)
 	  {
-	    switch (GPR(2))
+	  case 72:
+	    switch (GPR(15))
 	      {
 	      case 1: /* EXIT */
 	        {
-	          engine_halt (SD, CPU, cia, sim_exited, GPR(3));
+	          engine_halt (SD, CPU, cia, sim_exited, GPR(2));
 	          break;
 	        }
 	      case 4: /* WRITE */
 	        {
 	          int i;
-	          if (GPR(3) != 1)
-	            engine_error (SD, CPU, cia, "write to invalid fid %d", GPR(3));
-		  for (i = 0; i < GPR(5); i++)
+	          if (GPR(2) != 1)
+	            engine_error (SD, CPU, cia, "write to invalid fid %d", GPR(2));
+		  for (i = 0; i < GPR(6); i++)
 	            {
 		      char c;
 		      c = MEM (unsigned, GPR(4) + i, 1);
 	              sim_io_write_stdout (SD, &c, 1);
 	            }
-	          GPR(2) = GPR(5);
+	          GPR(2) = GPR(6);
 	          break;
 	        }
 	      default:
-	        engine_error (SD, CPU, cia, "unknown trap %d", GPR(2));
+	        engine_error (SD, CPU, cia, "unknown syscall trap %d", GPR(2));
 	      }
+	    break;
+	  default:
+	    engine_error (SD, CPU, cia, "unsupported trap %d", trap_number);
 	  }
 31./,27.0,26./,21.0b0000001,14.UTN::::trap i
 	do_trap (_SD, cia, UTN);
@@ -676,7 +701,7 @@ void::function::do_trap:instruction_address cia, unsigned32 trap_number
 
 
 // vld{0|1}.{s|d} - see above - same instruction
-#31.Dest,26.*,21.0b11110,18.*,10.1,9.S,8.*,6.p,7.******::::vld
+#31.Dest,26.*,21.0b11110,16.*,10.1,9.S,8.*,6.p,7.******::::vld
 
 
 // vmac.ss{s|d}
