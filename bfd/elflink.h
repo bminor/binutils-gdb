@@ -3068,8 +3068,11 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
 		}
 	      free (newname);
 
-	      /* Mark this version if there is a definition.  */
+	      /* Mark this version if there is a definition and it is
+		 not defined in a shared object.  */
 	      if (newh != NULL
+		  && ((newh->elf_link_hash_flags
+		       & ELF_LINK_HASH_DEF_DYNAMIC) == 0)
 		  && (newh->root.type == bfd_link_hash_defined
 		      || newh->root.type == bfd_link_hash_defweak))
 		d->symver = 1;
