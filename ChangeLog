@@ -1,3 +1,13 @@
+Mon Mar  8 11:12:43 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* Makefile.in (GCC_FOR_TARGET): Eliminated definition; use
+	CC_FOR_TARGET instead.
+	(BASE_FLAGS_TO_PASS): Pass GCC_FOR_TARGET=$(CC_FOR_TARGET).
+
+Wed Mar  3 16:00:28 1993  Steve Chamberlain  (sac@ok.cygnus.com)
+
+	* Makefile.in: Add sim to list of directories sent with gdb
+
 Wed Mar  3 11:42:39 1993  Ken Raeburn  (raeburn@cygnus.com)
 
 	* configure.in: Put back mips-dec-bsd* case.
@@ -203,15 +213,6 @@ Tue Jan 19 08:26:07 1993  Ian Lance Taylor  (ian@cygnus.com)
 	* Makefile.in (gcc-no-fixedincludes): Made to work with current
 	gcc Makefile.
 
-**** start-sanitize-chill ****
-Fri Jan 15 16:40:54 1993  Mike Werner  (mtw@rtl.cygnus.com)
-
-	* Makefile.in: added variables CHILL_FOR_TARGET, CHILLFLAGS,
-	  and CHILL_LIB.
-	* deja-gnu/gdb.t31/Makefile.in: removed explicit setting of
-	  CHILL variables as these are now passed down from the top
-	  level makefile using FLAGS_TO_PASS.
-**** end-sanitize-chill ****
 
 Fri Jan 15 10:27:02 1993  Ian Lance Taylor  (ian@cygnus.com)
 
@@ -226,11 +227,6 @@ Wed Jan  6 20:29:16 1993  Mike Werner  (mtw@rtl.cygnus.com)
 
 	* Makefile.in: Removed explicit setting of SUBDIRS. SUBDIRS is now
 	  set exclusively by configure, using configure.in .
-        **** start-sanitize-chill ****
-	* configure.in: Changed the method by which SUBDIRS is set, in order
-          to properly handle the addition of chill related subdirectories
-          to the SUBDIRS list.
-        **** end-sanitize-chill ****
 
 Wed Jan  6 13:44:11 1993  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
 
@@ -244,18 +240,6 @@ Wed Jan  6 11:02:10 1993  Fred Fish  (fnf@cygnus.com)
 	the one used in gcc/Makefile.in, so that a null expansion doesn't
 	override the one needed to build gcc with a native cc.
 
-	**** start-sanitize-chill ****
-Wed Jan  6 07:53:46 1993  Fred Fish  (fnf@cygnus.com)
-
-	* Makefile.in (SUBDIRS):  Add chillrt.
-	* Makefile.in (all.normal):  Add all-chillrt.
-	* Makefile.in (all.cross):  Add all-chillrt.
-	* Makefile.in (install-no-fixedincludes):  Add install-chillrt.
-	* Makefile.in (install.cross):  Add install-chillrt.
-	* Makefile.in (all-chillrt, install-chillrt):  New targets.
-	* Makefile.in (subdir_do):  Handle chillrt like newlib.
-	* configure.in (target_libs):  Add chillrt.
-	**** end-sanitize-chill ****
 
 Tue Jan  5 07:55:12 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
