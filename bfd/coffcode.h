@@ -829,8 +829,6 @@ handle_COMDAT (abfd, sec_flags, hdr, name, section)
 		/* The first time we've seen the symbol.  */
 		union internal_auxent aux;
 
-		seen_state = 1;
-
 		/* If it isn't the stuff we're expecting, die;
 		   The MS documentation is vague, but it
 		   appears that the second entry serves BOTH
@@ -858,7 +856,10 @@ handle_COMDAT (abfd, sec_flags, hdr, name, section)
 		   function).  See comment above for more.  */
 
 		if (strcmp (name, symname) != 0)
-		  abort ();
+		  _bfd_error_handler (_("%B: warning: COMDAT symbol '%s' does not match section name '%s'"),
+				      abfd, symname, name);
+
+		seen_state = 1;
 
 		/* This is the section symbol.  */
 		bfd_coff_swap_aux_in (abfd, (PTR) (esym + bfd_coff_symesz (abfd)),

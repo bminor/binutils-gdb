@@ -1,3 +1,9 @@
+2004-09-03  Nick Clifton  <nickc@redhat.com>
+
+	PR 360
+	* coffcode.h (handle_COMDAT): Replace abort with an warning
+	message and allow the scan to continue.
+
 2004-09-02  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf64-ppc.c (ppc64_elf_get_synthetic_symtab): Use static_syms passed
