@@ -323,7 +323,7 @@ What is a backend
 @node BFD front end, BFD back end, Mechanism, Top
 @page
 @chapter BFD front end
-@include  bfd.c.texi
+@include  bfd.texi
 @page
 @node Memory Usage, Sections, bfd, Top
 @section Memory Usage
