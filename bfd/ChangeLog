@@ -1,3 +1,9 @@
+Thu Oct 10 11:15:06 1996  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* mpw-make.sed (config.bfd, targmatch.sed): Edit references to
+	point explicitly to srcdir.
+	(targmatch.h): Edit references to point explicitly to objdir.
+
 Thu Oct 10 14:14:23 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config.bfd: When setting targ_cpu, don't get confused by
