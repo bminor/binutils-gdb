@@ -1,3 +1,10 @@
+start-sanitize-d30v
+Thu Feb 26 15:53:09 1998  Michael Meissner  <meissner@cygnus.com>
+
+	* d30v-opc.c (d30v_opcode_table): Indicate which instructions are
+	delayed branches or jumps.
+
+end-sanitize-d30v
 start-sanitize-sky
 Fri Feb 27 10:04:19 1998  Doug Evans  <devans@canuck.cygnus.com>
 
