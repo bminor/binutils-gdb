@@ -56,31 +56,56 @@ static boolean elf_i386_finish_dynamic_sections
 
 static reloc_howto_type elf_howto_table[]=
 {
-  HOWTO(R_386_NONE,	 0,0, 0,false,0,complain_overflow_bitfield, bfd_elf_generic_reloc,"R_386_NONE",	    true,0x00000000,0x00000000,false),
-  HOWTO(R_386_32,	 0,2,32,false,0,complain_overflow_bitfield, bfd_elf_generic_reloc,"R_386_32",	    true,0xffffffff,0xffffffff,false),
-  HOWTO(R_386_PC32,	 0,2,32,true, 0,complain_overflow_bitfield, bfd_elf_generic_reloc,"R_386_PC32",	    true,0xffffffff,0xffffffff,true),
-  HOWTO(R_386_GOT32,	 0,2,32,false,0,complain_overflow_bitfield, bfd_elf_generic_reloc,"R_386_GOT32",    true,0xffffffff,0xffffffff,false),
-  HOWTO(R_386_PLT32,	 0,2,32,true,0,complain_overflow_bitfield, bfd_elf_generic_reloc,"R_386_PLT32",    true,0xffffffff,0xffffffff,true),
-  HOWTO(R_386_COPY,      0,2,32,false,0,complain_overflow_bitfield, bfd_elf_generic_reloc,"R_386_COPY",	    true,0xffffffff,0xffffffff,false),
-  HOWTO(R_386_GLOB_DAT,  0,2,32,false,0,complain_overflow_bitfield, bfd_elf_generic_reloc,"R_386_GLOB_DAT", true,0xffffffff,0xffffffff,false),
-  HOWTO(R_386_JUMP_SLOT, 0,2,32,false,0,complain_overflow_bitfield, bfd_elf_generic_reloc,"R_386_JUMP_SLOT",true,0xffffffff,0xffffffff,false),
-  HOWTO(R_386_RELATIVE,  0,2,32,false,0,complain_overflow_bitfield, bfd_elf_generic_reloc,"R_386_RELATIVE", true,0xffffffff,0xffffffff,false),
-  HOWTO(R_386_GOTOFF,    0,2,32,false,0,complain_overflow_bitfield, bfd_elf_generic_reloc,"R_386_GOTOFF",   true,0xffffffff,0xffffffff,false),
-  HOWTO(R_386_GOTPC,     0,2,32,true,0,complain_overflow_bitfield, bfd_elf_generic_reloc,"R_386_GOTPC",    true,0xffffffff,0xffffffff,true),
-  EMPTY_HOWTO (11),
-  EMPTY_HOWTO (12),
-  EMPTY_HOWTO (13),
-  EMPTY_HOWTO (14),
-  EMPTY_HOWTO (15),
-  EMPTY_HOWTO (16),
-  EMPTY_HOWTO (17),
-  EMPTY_HOWTO (18),
-  EMPTY_HOWTO (19),
+  HOWTO(R_386_NONE, 0, 0, 0, false, 0, complain_overflow_bitfield,
+	bfd_elf_generic_reloc, "R_386_NONE",
+	true, 0x00000000, 0x00000000, false),
+  HOWTO(R_386_32, 0, 2, 32, false, 0, complain_overflow_bitfield,
+	bfd_elf_generic_reloc, "R_386_32",
+	true, 0xffffffff, 0xffffffff, false),
+  HOWTO(R_386_PC32, 0, 2, 32, true, 0, complain_overflow_bitfield,
+	bfd_elf_generic_reloc, "R_386_PC32",
+	true, 0xffffffff, 0xffffffff, true),
+  HOWTO(R_386_GOT32, 0, 2, 32, false, 0, complain_overflow_bitfield,
+	bfd_elf_generic_reloc, "R_386_GOT32",
+	true, 0xffffffff, 0xffffffff, false),
+  HOWTO(R_386_PLT32, 0, 2, 32, true, 0, complain_overflow_bitfield,
+	bfd_elf_generic_reloc, "R_386_PLT32",
+	true, 0xffffffff, 0xffffffff, true),
+  HOWTO(R_386_COPY, 0, 2, 32, false, 0, complain_overflow_bitfield,
+	bfd_elf_generic_reloc, "R_386_COPY",
+	true, 0xffffffff, 0xffffffff, false),
+  HOWTO(R_386_GLOB_DAT, 0, 2, 32, false, 0, complain_overflow_bitfield,
+	bfd_elf_generic_reloc, "R_386_GLOB_DAT",
+	true, 0xffffffff, 0xffffffff, false),
+  HOWTO(R_386_JUMP_SLOT, 0, 2, 32, false, 0, complain_overflow_bitfield,
+	bfd_elf_generic_reloc, "R_386_JUMP_SLOT",
+	true, 0xffffffff, 0xffffffff, false),
+  HOWTO(R_386_RELATIVE, 0, 2, 32, false, 0, complain_overflow_bitfield,
+	bfd_elf_generic_reloc, "R_386_RELATIVE",
+	true, 0xffffffff, 0xffffffff, false),
+  HOWTO(R_386_GOTOFF, 0, 2, 32, false, 0, complain_overflow_bitfield,
+	bfd_elf_generic_reloc, "R_386_GOTOFF",
+	true, 0xffffffff, 0xffffffff, false),
+  HOWTO(R_386_GOTPC, 0, 2, 32, true, 0, complain_overflow_bitfield,
+	bfd_elf_generic_reloc, "R_386_GOTPC",
+	true, 0xffffffff, 0xffffffff, true),
+
+#define R_386_standard ((unsigned int) R_386_GOTPC + 1)
+#define R_386_ext_offset ((unsigned int) R_386_16 - R_386_standard)
+
   /* The remaining relocs are a GNU extension.  */
-  HOWTO(R_386_16,	 0,1,16,false,0,complain_overflow_bitfield, bfd_elf_generic_reloc,"R_386_16",	    true,0xffff,0xffff,false),
-  HOWTO(R_386_PC16,	 0,1,16,true, 0,complain_overflow_bitfield, bfd_elf_generic_reloc,"R_386_PC16",	    true,0xffff,0xffff,true),
-  HOWTO(R_386_8,	 0,0,8,false,0,complain_overflow_bitfield, bfd_elf_generic_reloc,"R_386_8",	    true,0xff,0xff,false),
-  HOWTO(R_386_PC8,	 0,0,8,true, 0,complain_overflow_signed, bfd_elf_generic_reloc,"R_386_PC8",	    true,0xff,0xff,true),
+  HOWTO(R_386_16, 0, 1, 16, false, 0, complain_overflow_bitfield,
+	bfd_elf_generic_reloc, "R_386_16",
+	true, 0xffff, 0xffff, false),
+  HOWTO(R_386_PC16, 0, 1, 16, true, 0, complain_overflow_bitfield,
+	bfd_elf_generic_reloc, "R_386_PC16",
+	true, 0xffff, 0xffff, true),
+  HOWTO(R_386_8, 0, 0, 8, false, 0, complain_overflow_bitfield,
+	bfd_elf_generic_reloc, "R_386_8",
+	true, 0xff, 0xff, false),
+  HOWTO(R_386_PC8, 0, 0, 8, true, 0, complain_overflow_signed,
+	bfd_elf_generic_reloc, "R_386_PC8",
+	true, 0xff, 0xff, true)
 };
 
 /* GNU extension to record C++ vtable hierarchy.  */
@@ -130,68 +155,68 @@ elf_i386_reloc_type_lookup (abfd, code)
     {
     case BFD_RELOC_NONE:
       TRACE ("BFD_RELOC_NONE");
-      return &elf_howto_table[ (int)R_386_NONE ];
+      return &elf_howto_table[(unsigned int) R_386_NONE ];
 
     case BFD_RELOC_32:
       TRACE ("BFD_RELOC_32");
-      return &elf_howto_table[ (int)R_386_32 ];
+      return &elf_howto_table[(unsigned int) R_386_32 ];
 
     case BFD_RELOC_CTOR:
       TRACE ("BFD_RELOC_CTOR");
-      return &elf_howto_table[ (int)R_386_32 ];
+      return &elf_howto_table[(unsigned int) R_386_32 ];
 
     case BFD_RELOC_32_PCREL:
       TRACE ("BFD_RELOC_PC32");
-      return &elf_howto_table[ (int)R_386_PC32 ];
+      return &elf_howto_table[(unsigned int) R_386_PC32 ];
 
     case BFD_RELOC_386_GOT32:
       TRACE ("BFD_RELOC_386_GOT32");
-      return &elf_howto_table[ (int)R_386_GOT32 ];
+      return &elf_howto_table[(unsigned int) R_386_GOT32 ];
 
     case BFD_RELOC_386_PLT32:
       TRACE ("BFD_RELOC_386_PLT32");
-      return &elf_howto_table[ (int)R_386_PLT32 ];
+      return &elf_howto_table[(unsigned int) R_386_PLT32 ];
 
     case BFD_RELOC_386_COPY:
       TRACE ("BFD_RELOC_386_COPY");
-      return &elf_howto_table[ (int)R_386_COPY ];
+      return &elf_howto_table[(unsigned int) R_386_COPY ];
 
     case BFD_RELOC_386_GLOB_DAT:
       TRACE ("BFD_RELOC_386_GLOB_DAT");
-      return &elf_howto_table[ (int)R_386_GLOB_DAT ];
+      return &elf_howto_table[(unsigned int) R_386_GLOB_DAT ];
 
     case BFD_RELOC_386_JUMP_SLOT:
       TRACE ("BFD_RELOC_386_JUMP_SLOT");
-      return &elf_howto_table[ (int)R_386_JUMP_SLOT ];
+      return &elf_howto_table[(unsigned int) R_386_JUMP_SLOT ];
 
     case BFD_RELOC_386_RELATIVE:
       TRACE ("BFD_RELOC_386_RELATIVE");
-      return &elf_howto_table[ (int)R_386_RELATIVE ];
+      return &elf_howto_table[(unsigned int) R_386_RELATIVE ];
 
     case BFD_RELOC_386_GOTOFF:
       TRACE ("BFD_RELOC_386_GOTOFF");
-      return &elf_howto_table[ (int)R_386_GOTOFF ];
+      return &elf_howto_table[(unsigned int) R_386_GOTOFF ];
 
     case BFD_RELOC_386_GOTPC:
       TRACE ("BFD_RELOC_386_GOTPC");
-      return &elf_howto_table[ (int)R_386_GOTPC ];
+      return &elf_howto_table[(unsigned int) R_386_GOTPC ];
 
       /* The remaining relocs are a GNU extension.  */
     case BFD_RELOC_16:
       TRACE ("BFD_RELOC_16");
-      return &elf_howto_table[(int) R_386_16];
+      return &elf_howto_table[(unsigned int) R_386_16 - R_386_ext_offset];
 
     case BFD_RELOC_16_PCREL:
       TRACE ("BFD_RELOC_16_PCREL");
-      return &elf_howto_table[(int) R_386_PC16];
+      return &elf_howto_table[(unsigned int) R_386_PC16 - R_386_ext_offset];
 
     case BFD_RELOC_8:
       TRACE ("BFD_RELOC_8");
-      return &elf_howto_table[(int) R_386_8];
+      return &elf_howto_table[(unsigned int) R_386_8 - R_386_ext_offset];
 
     case BFD_RELOC_8_PCREL:
       TRACE ("BFD_RELOC_8_PCREL");
-      return &elf_howto_table[(int) R_386_PC8];
+      return &elf_howto_table[(unsigned int) R_386_PC8 - R_386_ext_offset];
 
     case BFD_RELOC_VTABLE_INHERIT:
       TRACE ("BFD_RELOC_VTABLE_INHERIT");
@@ -231,14 +256,19 @@ elf_i386_info_to_howto_rel (abfd, cache_ptr, dst)
     cache_ptr->howto = &elf32_i386_vtinherit_howto;
   else if (type == R_386_GNU_VTENTRY)
     cache_ptr->howto = &elf32_i386_vtentry_howto;
-  else if (type < R_386_max
-	   && (type < FIRST_INVALID_RELOC || type > LAST_INVALID_RELOC))
-    cache_ptr->howto = &elf_howto_table[(int) type];
   else
     {
-      (*_bfd_error_handler) (_("%s: invalid relocation type %d"),
-			     bfd_get_filename (abfd), (int) type);
-      cache_ptr->howto = &elf_howto_table[(int) R_386_NONE];
+      unsigned int indx;
+
+      if ((indx = (unsigned int) type) >= R_386_standard
+	  && ((indx = (unsigned int) type - R_386_ext_offset)
+	      >= sizeof (elf_howto_table) / sizeof (elf_howto_table[0])))
+	{
+	  (*_bfd_error_handler) (_("%s: invalid relocation type %d"),
+				 bfd_get_filename (abfd), (int) type);
+	  indx = (unsigned int) R_386_NONE;
+	}
+      cache_ptr->howto = &elf_howto_table[indx];
     }
 }
 
@@ -1283,20 +1313,20 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
       asection *sec;
       bfd_vma relocation;
       bfd_reloc_status_type r;
+      unsigned int indx;
 
       r_type = ELF32_R_TYPE (rel->r_info);
       if (r_type == R_386_GNU_VTINHERIT
 	  || r_type == R_386_GNU_VTENTRY)
 	continue;
-      if (r_type < 0
-	  || r_type >= (int) R_386_max
-	  || (r_type >= (int) FIRST_INVALID_RELOC
-	      && r_type <= (int) LAST_INVALID_RELOC))
+      if ((indx = (unsigned) r_type) >= R_386_standard
+	  && ((indx = (unsigned) r_type - R_386_ext_offset)
+	      >= sizeof (elf_howto_table) / sizeof (elf_howto_table[0])))
 	{
 	  bfd_set_error (bfd_error_bad_value);
 	  return false;
 	}
-      howto = elf_howto_table + r_type;
+      howto = elf_howto_table + indx;
 
       r_symndx = ELF32_R_SYM (rel->r_info);
 

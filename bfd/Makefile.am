@@ -900,10 +900,12 @@ elf32-avr.lo: elf32-avr.c $(INCDIR)/filenames.h elf-bfd.h \
   elf32-target.h
 elf32-d10v.lo: elf32-d10v.c $(INCDIR)/filenames.h elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
-  $(INCDIR)/bfdlink.h elf32-target.h
+  $(INCDIR)/bfdlink.h $(INCDIR)/elf/d10v.h $(INCDIR)/elf/reloc-macros.h \
+  elf32-target.h
 elf32-d30v.lo: elf32-d30v.c $(INCDIR)/filenames.h elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
-  $(INCDIR)/bfdlink.h elf32-target.h
+  $(INCDIR)/bfdlink.h $(INCDIR)/elf/d30v.h $(INCDIR)/elf/reloc-macros.h \
+  elf32-target.h
 elf32-fr30.lo: elf32-fr30.c $(INCDIR)/filenames.h elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   $(INCDIR)/bfdlink.h $(INCDIR)/elf/fr30.h $(INCDIR)/elf/reloc-macros.h \

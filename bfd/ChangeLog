@@ -1,3 +1,20 @@
+2000-06-07  Alan Modra  <alan@linuxcare.com.au>
+
+	* elf32-d10v.c: Include elf/d10v.h
+	(enum reloc_type): Delete.
+	* elf32-d30v.c: Include elf/d30v.h
+	(enum reloc_type): Delete.
+
+	* Makefile.am: Run "make dep-am" to regenerate dependencies.
+	* Makefile.in: Regenerate.
+
+	* elf32-i386.c (elf_howto_table): Remove EMPTY_HOWTOs.
+	(R_386_standard, R_386_ext_offset): Define.
+	(elf_i386_reloc_type_lookup): Modify calculation of index into
+	elf_howto_table since we've removed the gap.
+	(elf_i386_info_to_howto_rel): Likewise.
+	(elf_i386_relocate_section): Likewise.
+
 2000-06-06  Michael Snyder  <msnyder@seadog.cygnus.com>
 
 	* elf.c (elf_grok_pr_status): Eliminate reference to prgregset_t.

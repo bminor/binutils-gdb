@@ -22,7 +22,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "sysdep.h"
 #include "libbfd.h"
 #include "elf-bfd.h"
-/* #include "elf/d10v.h" */
+#include "elf/d10v.h"
 
 static reloc_howto_type *bfd_elf32_bfd_reloc_type_lookup
   PARAMS ((bfd *abfd, bfd_reloc_code_real_type code));
@@ -32,20 +32,6 @@ static void d10v_info_to_howto_rel
 
 /* Use REL instead of RELA to save space */
 #define USE_REL
-
-enum reloc_type
-{
-  R_D10V_NONE = 0,
-  R_D10V_10_PCREL_R,
-  R_D10V_10_PCREL_L,
-  R_D10V_16,
-  R_D10V_18,
-  R_D10V_18_PCREL,
-  R_D10V_32,
-  R_D10V_GNU_VTINHERIT,
-  R_D10V_GNU_VTENTRY,
-  R_D10V_max
-};
 
 static reloc_howto_type elf_d10v_howto_table[] =
 {

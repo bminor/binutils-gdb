@@ -22,6 +22,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "sysdep.h"
 #include "libbfd.h"
 #include "elf-bfd.h"
+#include "elf/d30v.h"
 
 static reloc_howto_type *bfd_elf32_bfd_reloc_type_lookup
   PARAMS ((bfd *abfd, bfd_reloc_code_real_type code));
@@ -45,24 +46,6 @@ static bfd_reloc_status_type bfd_elf_d30v_reloc_21 PARAMS ((
      asection *input_section,
      bfd *output_bfd,
      char **error_message));
-
-enum reloc_type
-{
-  R_D30V_NONE = 0,
-  R_D30V_6,
-  R_D30V_9_PCREL,
-  R_D30V_9_PCREL_R,
-  R_D30V_15,
-  R_D30V_15_PCREL,
-  R_D30V_15_PCREL_R,
-  R_D30V_21,
-  R_D30V_21_PCREL,
-  R_D30V_21_PCREL_R,
-  R_D30V_32,
-  R_D30V_32_PCREL,
-  R_D30V_32_NORMAL,
-  R_D30V_max
-};
 
 static reloc_howto_type elf_d30v_howto_table[] =
 {
