@@ -652,25 +652,27 @@ syms_from_objfile (struct objfile *objfile, struct section_addr_info *addrs,
       else
  	lower_offset = 0;
  
-       /* Calculate offsets for the loadable sections.
+      /* Calculate offsets for the loadable sections.
  	 FIXME! Sections must be in order of increasing loadable section
  	 so that contiguous sections can use the lower-offset!!!
  
-          Adjust offsets if the segments are not contiguous.
-          If the section is contiguous, its offset should be set to
+         Adjust offsets if the segments are not contiguous.
+         If the section is contiguous, its offset should be set to
  	 the offset of the highest loadable section lower than it
  	 (the loadable section directly below it in memory).
  	 this_offset = lower_offset = lower_addr - lower_orig_addr */
 
-       /* Calculate offsets for sections. */
+      /* Calculate offsets for sections. */
       for (i=0 ; i < MAX_SECTIONS && addrs->other[i].name; i++)
 	{
 	  if (addrs->other[i].addr != 0)
  	    {
- 	      sect = bfd_get_section_by_name (objfile->obfd, addrs->other[i].name);
+ 	      sect = bfd_get_section_by_name (objfile->obfd,
+                                              addrs->other[i].name);
  	      if (sect)
  		{
- 		  addrs->other[i].addr -= bfd_section_vma (objfile->obfd, sect);
+ 		  addrs->other[i].addr
+                    -= bfd_section_vma (objfile->obfd, sect);
  		  lower_offset = addrs->other[i].addr;
 		  /* This is the index used by BFD. */
 		  addrs->other[i].sectindex = sect->index ;

@@ -1,5 +1,7 @@
 2002-11-25  Jim Blandy  <jimb@redhat.com>
 
+	* symfile.c (syms_from_objfile): Adjust indentation.
+
 	* symfile.c (symbol_file_add): Flush gdb_stdout even if from_tty
 	|| info_verbose isn't true.
 
