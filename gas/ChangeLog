@@ -1,3 +1,7 @@
+2005-02-21  Alan Modra  <amodra@bigpond.net.au>
+
+	* input-file.c (input_file_open): Rearrange to avoid warning.
+
 2005-02-19  Alan Modra  <amodra@bigpond.net.au>
 
 	* config/tc-hppa.h (TC_EQUAL_IN_INSN): Delete.
@@ -205,8 +209,7 @@
 
 2005-02-11  H.J. Lu  <hongjiu.lu@intel.com>
 
-	(dot_xdata): Undo the last change. Section name is used by
-	set_section.
+	* config/tc-ia64.c (dot_xdata): Undo the last change.
 	(dot_float_cons): Likewise.
 	(dot_xstringer): Likewise.
 	(dot_xdata_ua): Likewise.
