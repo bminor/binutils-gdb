@@ -188,7 +188,7 @@ void
 OP_E0 ()
 {
   State.regs[OP[1]] = ((State.regs[OP[1]] & 0xffff)
-		       * (State.regs[OP[2]] & 0xffff));
+		       * (State.regs[OP[0]] & 0xffff));
 }
 
 /* mulh sign_extend(imm5), reg2
@@ -214,7 +214,7 @@ OP_6E0 ()
  
   value = value & 0xffff;
 
-  State.regs[OP[1]] = (State.regs[OP[1]] & 0xffff) * value;
+  State.regs[OP[2]] = (State.regs[OP[1]] & 0xffff) * value;
 }
 
 /* divh reg1, reg2
@@ -224,7 +224,7 @@ OP_6E0 ()
 void
 OP_40 ()
 {
-  State.regs[OP[1]] /= (State.regs[OP[1]] & 0xffff);
+  State.regs[OP[1]] /= (State.regs[OP[0]] & 0xffff);
 }
 
 void
