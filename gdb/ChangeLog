@@ -1,5 +1,10 @@
 2003-08-22  Daniel Jacobowitz  <drow@mvista.com>
 
+	* gnu-v3-abi.c (gnuv3_baseclass_offset): Check whether
+	TYPE_VPTR_FIELDNO is valid.
+
+2003-08-22  Daniel Jacobowitz  <drow@mvista.com>
+
 	From mainline:
 	2003-08-17  Daniel Jacobowitz  <drow@mvista.com>
 	* linux-nat.c (PTRACE_O_TRACEVFORKDONE, PTRACE_O_TRACEEXIT): Define.
