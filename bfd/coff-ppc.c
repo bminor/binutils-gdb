@@ -1091,7 +1091,10 @@ ppc_mark_symbol_as_glue(abfd, sym, rel)
   struct ppc_coff_link_hash_entry *h;
 
   h = (struct ppc_coff_link_hash_entry *) (obj_coff_sym_hashes (abfd)[sym]);
-
+#ifdef DEBUG_RELOC
+  fprintf(stderr,
+	  "ppc_mark_symbol_as_glue:\n");
+#endif
   CHECK_EYE(h->eye_catcher);
 
   h->symbol_is_glue = 1;
@@ -1311,6 +1314,13 @@ coff_ppc_relocate_section (output_bfd, info, input_bfd, input_section,
 	  sym = syms + symndx;
 	}
 
+      if (r_type == IMAGE_REL_PPC_IMGLUE && h == 0)
+	{
+	  fprintf(stderr,
+		  "relocate_section: IMGLUE reloc has no name!\n");
+	  abort();
+	}
+
       sec = NULL;
       val = 0;
 
@@ -1342,8 +1352,6 @@ coff_ppc_relocate_section (output_bfd, info, input_bfd, input_section,
 	    }
 	  else
 	    {
-fprintf(stderr,
-	"missing %s\n",h->root.root.root.string);
 	      if (! ((*info->callbacks->undefined_symbol)
 		     (info, h->root.root.root.string, input_bfd, input_section,
 		      rel->r_vaddr - input_section->vma)))
@@ -1452,11 +1460,6 @@ fprintf(stderr,
 
 		if ((r_flags & IMAGE_REL_PPC_TOCDEFN) 
 		    == IMAGE_REL_PPC_TOCDEFN )
-#if 0
-		  /* This is wrong. If tocdefn is on, we must unconditionally
-		     assume the following path */
-		    && IS_UNALLOCATED(our_toc_offset))
-#endif
 		  {
 		    /* This is unbelievable cheese. Some knowledgable asm 
 		       hacker has decided to use r2 as a base for loading 
@@ -1474,8 +1477,10 @@ fprintf(stderr,
 		    */
 #ifdef DEBUG_RELOC
 		    fprintf(stderr,
-			    "TOCDEFN is on, (%s) (%p) our_toc_offset = %x\n", 
-			    name, h, our_toc_offset);
+ "TOCDEFN is on, (%s) (%p) our_toc_offset = %x, val (%x) vma (%x) off (%x)\n", 
+			    name, h, our_toc_offset,
+			    val, toc_section->output_section->vma, 
+			    toc_section->output_offset);
 #endif
 
 		    our_toc_offset = val - 
@@ -1491,7 +1496,7 @@ fprintf(stderr,
 		    if (our_toc_offset >= 65535)
 		      {
 			fprintf(stderr,
-				"TOCDEFN Relocation exceeded displacement of 65535\n");
+				"Error: TOCDEFN Relocation of %d for %s exceeded displacement of 65535\n", our_toc_offset, name);
 			abort();
 		      }
 
@@ -3101,6 +3106,13 @@ ppc_bfd_coff_final_link (abfd, info)
       finfo.section_info = NULL;
     }
 
+  /* If we have optimized stabs strings, output them.  */
+  if (coff_hash_table (info)->stab_info != NULL)
+    {
+      if (! _bfd_write_stab_strings (abfd, &coff_hash_table (info)->stab_info))
+	return false;
+    }
+
   /* Write out the string table.  */
   if (obj_raw_syment_count (abfd) != 0)
     {
@@ -3187,7 +3199,7 @@ TARGET_LITTLE_SYM =
 
   (HAS_RELOC | EXEC_P |		/* FIXME: object flags */
    HAS_LINENO | HAS_DEBUG |
-   HAS_SYMS | HAS_LOCALS | WP_TEXT),
+   HAS_SYMS | HAS_LOCALS | WP_TEXT | D_PAGED),
   
 #ifndef COFF_WITH_PE
   (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* section flags */
@@ -3240,7 +3252,7 @@ TARGET_BIG_SYM =
 
   (HAS_RELOC | EXEC_P |		/* FIXME: object flags */
    HAS_LINENO | HAS_DEBUG |
-   HAS_SYMS | HAS_LOCALS | WP_TEXT),
+   HAS_SYMS | HAS_LOCALS | WP_TEXT | D_PAGED),
 
 #ifndef COFF_WITH_PE
   (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* section flags */
