@@ -861,6 +861,12 @@ dependent COFF routines:
 .       boolean collect, 
 .       struct bfd_link_hash_entry **hashp));
 .
+. boolean (*_bfd_coff_link_output_has_begun) PARAMS ((
+.	bfd * abfd ));
+. boolean (*_bfd_coff_final_link_postscript) PARAMS ((
+.	bfd * abfd,
+.	struct coff_final_link_info * pfinfo));
+.
 .} bfd_coff_backend_data;
 .
 .#define coff_backend_info(abfd) ((bfd_coff_backend_data *) (abfd)->xvec->backend_data)
@@ -974,6 +980,11 @@ dependent COFF routines:
 .#define bfd_coff_link_add_one_symbol(info,abfd,name,flags,section,value,string,cp,coll,hashp)\
 .        ((coff_backend_info (abfd)->_bfd_coff_link_add_one_symbol)\
 .         (info, abfd, name, flags, section, value, string, cp, coll, hashp))
+.
+.#define bfd_coff_link_output_has_begun(a) \
+.        ((coff_backend_info (a)->_bfd_coff_link_output_has_begun) (a))
+.#define bfd_coff_final_link_postscript(a,p) \
+.        ((coff_backend_info (a)->_bfd_coff_final_link_postscript) (a,p))
 .
 */
 
@@ -3714,12 +3725,10 @@ static boolean coff_sym_is_global PARAMS ((bfd *, struct internal_syment *));
 
 static boolean
 coff_sym_is_global (abfd, syment)
-     bfd *abfd;
-     struct internal_syment *syment;
+     bfd * abfd;
+     struct internal_syment * syment;
 {
-  if (syment->n_sclass == OTHER_GLOBAL_CLASS)
-    return true;
-  return false;
+  return (syment->n_sclass == OTHER_GLOBAL_CLASS);
 }
 
 #undef OTHER_GLOBAL_CLASS
@@ -4055,13 +4064,79 @@ dummy_reloc16_extra_cases (abfd, link_info, link_order, reloc, data, src_ptr,
 #define coff_link_add_one_symbol _bfd_generic_link_add_one_symbol
 #endif
 
+#ifndef coff_link_output_has_begun
+#define coff_link_output_has_begun _coff_link_output_has_begun
+static boolean
+_coff_link_output_has_begun (abfd)
+     bfd * abfd;
+{
+  return abfd->output_has_begun;
+}
+#endif
+
+#ifndef coff_final_link_postscript
+#define coff_final_link_postscript _coff_final_link_postscript
+static boolean
+_coff_final_link_postscript (abfd, pfinfo)
+     bfd * abfd;
+     struct coff_final_link_info * pfinfo;
+{
+  return true;
+}
+#endif
+
+#ifndef coff_SWAP_aux_in
+#define coff_SWAP_aux_in coff_swap_aux_in
+#endif
+#ifndef coff_SWAP_sym_in
+#define coff_SWAP_sym_in coff_swap_sym_in
+#endif
+#ifndef coff_SWAP_lineno_in
+#define coff_SWAP_lineno_in coff_swap_lineno_in
+#endif
+#ifndef coff_SWAP_aux_out
+#define coff_SWAP_aux_out coff_swap_aux_out
+#endif
+#ifndef coff_SWAP_sym_out
+#define coff_SWAP_sym_out coff_swap_sym_out
+#endif
+#ifndef coff_SWAP_lineno_out
+#define coff_SWAP_lineno_out coff_swap_lineno_out
+#endif
+#ifndef coff_SWAP_reloc_out
+#define coff_SWAP_reloc_out coff_swap_reloc_out
+#endif
+#ifndef coff_SWAP_filehdr_out
+#define coff_SWAP_filehdr_out coff_swap_filehdr_out
+#endif
+#ifndef coff_SWAP_aouthdr_out
+#define coff_SWAP_aouthdr_out coff_swap_aouthdr_out
+#endif
+#ifndef coff_SWAP_scnhdr_out
+#define coff_SWAP_scnhdr_out coff_swap_scnhdr_out
+#endif
+#ifndef coff_SWAP_reloc_in
+#define coff_SWAP_reloc_in coff_swap_reloc_in
+#endif
+#ifndef coff_SWAP_filehdr_in
+#define coff_SWAP_filehdr_in coff_swap_filehdr_in
+#endif
+#ifndef coff_SWAP_aouthdr_in
+#define coff_SWAP_aouthdr_in coff_swap_aouthdr_in
+#endif
+#ifndef coff_SWAP_scnhdr_in
+#define coff_SWAP_scnhdr_in coff_swap_scnhdr_in
+#endif
+
+
+
 static CONST bfd_coff_backend_data bfd_coff_std_swap_table =
 {
-  coff_swap_aux_in, coff_swap_sym_in, coff_swap_lineno_in,
-  coff_swap_aux_out, coff_swap_sym_out,
-  coff_swap_lineno_out, coff_swap_reloc_out,
-  coff_swap_filehdr_out, coff_swap_aouthdr_out,
-  coff_swap_scnhdr_out,
+  coff_SWAP_aux_in, coff_SWAP_sym_in, coff_SWAP_lineno_in,
+  coff_SWAP_aux_out, coff_SWAP_sym_out,
+  coff_SWAP_lineno_out, coff_SWAP_reloc_out,
+  coff_SWAP_filehdr_out, coff_SWAP_aouthdr_out,
+  coff_SWAP_scnhdr_out,
   FILHSZ, AOUTSZ, SCNHSZ, SYMESZ, AUXESZ, RELSZ, LINESZ,
 #ifdef COFF_LONG_FILENAMES
   true,
@@ -4074,14 +4149,15 @@ static CONST bfd_coff_backend_data bfd_coff_std_swap_table =
   false,
 #endif
   COFF_DEFAULT_SECTION_ALIGNMENT_POWER,
-  coff_swap_filehdr_in, coff_swap_aouthdr_in, coff_swap_scnhdr_in,
-  coff_swap_reloc_in, coff_bad_format_hook, coff_set_arch_mach_hook,
+  coff_SWAP_filehdr_in, coff_SWAP_aouthdr_in, coff_SWAP_scnhdr_in,
+  coff_SWAP_reloc_in, coff_bad_format_hook, coff_set_arch_mach_hook,
   coff_mkobject_hook, styp_to_sec_flags, coff_set_alignment_hook,
   coff_slurp_symbol_table, symname_in_debug_hook, coff_pointerize_aux_hook,
   coff_print_aux, coff_reloc16_extra_cases, coff_reloc16_estimate,
   coff_sym_is_global, coff_compute_section_file_positions,
   coff_start_final_link, coff_relocate_section, coff_rtype_to_howto,
-  coff_adjust_symndx, coff_link_add_one_symbol
+  coff_adjust_symndx, coff_link_add_one_symbol,
+  coff_link_output_has_begun, coff_final_link_postscript
 };
 
 #ifndef coff_close_and_cleanup
