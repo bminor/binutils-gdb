@@ -1,5 +1,8 @@
 Wed May  8 16:10:38 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* srec.c (srec_set_arch_mach): Write as a function rather than a
+	macro definition.
+
 	* xcofflink.c (_bfd_xcoff_bfd_link_add_symbols): If an archive has
 	no map, just check each member in turn to see whether it is
 	required.
