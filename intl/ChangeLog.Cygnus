@@ -1,5 +1,9 @@
 Wed Mar 25 15:00:14 1998  Tom Tromey  <tromey@cygnus.com>
 
+	* configure.in: Build config.h from config.in.
+	* config.h.in: Removed.
+	* config.in: New file.
+
 	* config.h.in: New file.
 
 	* configure.in, configure, acconfig.h, aclocal.m4: New files.
