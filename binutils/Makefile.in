@@ -5,7 +5,7 @@
 srcdir = .
 destdir = /usr/local
 
-version=`$(srcdir)/../gcc$(subdir)/gcc -dumpversion`
+version=`$(unsubdir)/../gcc$(subdir)/gcc -dumpversion`
 prefix = $(destdir)
 bindir = $(prefix)/bin
 libdir = $(prefix)/lib
@@ -19,7 +19,7 @@ INSTALL_FILE = $(INSTALL)
 # These should be all you need set before compiling
 
 #CC=gcc -Wall
-# these two should be the same program
+# these two are almost the same program
 AR_PROG=ar
 RANLIB_PROG=ranlib
 
@@ -35,8 +35,8 @@ OBJDUMP_PROG=objdump
 PROGS = $(SIZE_PROG) $(COPY_PROG) $(OBJDUMP_PROG) $(NM_PROG) $(AR_PROG) $(STRIP_PROG) $(RANLIB_PROG)
 STAGESTUFF = $(PROGS) *.o
 
-BASEDIR = $(srcdir)/..
-LIBDIR  = $(srcdir)/../bfd$(subdir)
+BASEDIR = $(unsubdir)/..
+LIBDIR  = $(unsubdir)/../bfd$(subdir)
 
 #### host and target dependant Makefile fragments come in here.
 ###
@@ -65,7 +65,7 @@ DISASMS = m68k-pinsn.o i960-pinsn.o sparc-pinsn.o  am29k-pinsn.o
 # Use the GNU getopt unless you have problems with it.
 # The IRIS version could probably benefit from being assembled with
 # libmalloc rather than the ordinary malloc.
-LIBIBERTY = $(srcdir)/../libiberty$(subdir)/libiberty.a
+LIBIBERTY = $(unsubdir)/../libiberty$(subdir)/libiberty.a
 
 # Code shared by all the binutils.
 BULIBS = bucomm.o version.o filemode.o
@@ -94,10 +94,21 @@ $(NM_PROG): $(ADDL_LIBS) nm.o $(BFD)
 $(OBJDUMP_PROG): $(ADDL_LIBS) size.o objdump.o $(DISASMS) $(BFD)
 	$(CC) $(LDFLAGS) $(CFLAGS) -o $(OBJDUMP_PROG) objdump.o $(DISASMS) $(ADDL_LIBS) $(LOADLIBES)
 
-$(AR_PROG): $(ADDL_LIBS) ar.o $(BFD)
-	$(CC) $(LDFLAGS) $(CFLAGS) -o $(AR_PROG) ar.o $(ADDL_LIBS) $(LOADLIBES)
+$(AR_PROG): $(ADDL_LIBS) ar.o not-ranlib.o $(BFD)
+	$(CC) $(LDFLAGS) $(CFLAGS) -o $(AR_PROG) ar.o not-ranlib.o $(ADDL_LIBS) $(LOADLIBES)
 
-$(RANLIB_PROG): $(AR_PROG) 
+$(RANLIB_PROG): $(ADDL_LIBS) ar.o is-ranlib.o $(BFD)
+	$(CC) $(LDFLAGS) $(CFLAGS) -o $(AR_PROG) ar.o is-ranlib.o $(ADDL_LIBS) $(LOADLIBES)
+
+# This rule creates a single binary that switches between ar and ranlib
+# by looking at argv[0].  Use this kludge to save some disk space.
+# However, you have to install things by hand.
+# (That is after 'make install', replace the installed ranlib by a link to ar.)
+
+# Alternatively, you can install ranlib.sh as ranlib.
+
+ar_with_ranlib: $(ADDL_LIBS) ar.o maybe-ranlib.o $(BFD)
+	$(CC) $(LDFLAGS) $(CFLAGS) -o $(AR_PROG) ar.o maybe-ranlib.o $(ADDL_LIBS) $(LOADLIBES)
 	-rm -f $(RANLIB_PROG)
 	-ln $(AR_PROG) $(RANLIB_PROG)
 
