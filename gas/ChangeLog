@@ -1,3 +1,7 @@
+2003-05-29  Kazuhiro Inaoka  <inaoka.kazuhiro@renesas.com>
+	
+        * config/tc-m32r.c: Amend comment to refer to Renesas
+
 2003-05-27  Richard Henderson  <rth@redhat.com>
 
 	* expr.c (make_expr_symbol): Fold FAKE_LABEL_NAME use into the
