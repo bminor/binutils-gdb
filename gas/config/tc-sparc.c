@@ -414,7 +414,7 @@ char *str;
 		return;
 		
 	default:
-		abort();
+		as_fatal("failed sanity check.");
 	}
 } /* md_assemble() */
 
@@ -1081,7 +1081,7 @@ char *str;
 				continue;
 				
 			default:
-				abort();
+				as_fatal("failed sanity check.");
 			} /* switch on arg code */
 			break;
 		} /* for each arg that we expect */
@@ -1244,7 +1244,7 @@ int n;
 		break;
 		
 	default:
-		abort();
+		as_fatal("failed sanity check.");
 	}
 	return;
 } /* md_number_to_chars() */
@@ -1411,8 +1411,7 @@ long to_addr;
 fragS *frag;
 symbolS *to_symbol;
 {
-	fprintf(stderr, "sparc_create_short_jmp\n");
-	abort();
+	as_fatal("sparc_create_short_jmp\n");
 } /* md_create_short_jump() */
 
 /* Translate internal representation of relocation info to target format.
@@ -1474,8 +1473,7 @@ void md_convert_frag(headers, fragP)
 object_headers *headers;
 register fragS *fragP;
 {
-	fprintf(stderr, "sparc_convert_frag\n");
-	abort();
+	as_fatal("sparc_convert_frag\n");
 } /* md_convert_frag() */
 
 /* should never be called for sparc */
@@ -1485,8 +1483,7 @@ long from_addr, to_addr;
 fragS	*frag;
 symbolS	*to_symbol;
 {
-	fprintf(stderr, "sparc_create_long_jump\n");
-	abort();
+	as_fatal("sparc_create_long_jump\n");
 } /* md_create_long_jump() */
 
 /* should never be called for sparc */
@@ -1494,9 +1491,7 @@ int md_estimate_size_before_relax(fragP, segtype)
 fragS *fragP;
 segT segtype;
 {
-	fprintf(stderr, "sparc_estimate_size_before_relax\n");
-	abort();
-	return 0;
+	as_fatal("sparc_estimate_size_before_relax\n");
 } /* md_estimate_size_before_relax() */
 
 #if 0
@@ -1583,8 +1578,7 @@ relax_addressT segment_address_in_file;
 	for (; fixP; fixP = fixP->fx_next) {
 		
 		if (fixP->fx_r_type >= NO_RELOC) {
-			fprintf(stderr, "fixP->fx_r_type = %d\n", fixP->fx_r_type);
-			abort();
+			as_fatal("fixP->fx_r_type = %d\n", fixP->fx_r_type);
 		}
 		
 		if ((symbolP = fixP->fx_addsy) != NULL) {

@@ -534,7 +534,7 @@ machine_ip(str)
 		opcode |= reg << 16;
 		continue;
 	    }
-	    abort();
+	    as_fatal("failed sanity check.");
 	    break;
 
 	case 'x':		/* 16 bit constant, zero-extended */
@@ -749,7 +749,7 @@ md_number_to_chars(buf,val,n)
 	break;
 
     default:
-	abort();
+	as_fatal("failed sanity check.");
     }
     return;
 }
@@ -763,7 +763,7 @@ void md_apply_fix(fixP, val)
     fixP->fx_addnumber = val;	/* Remember value for emit_reloc */
 
     if (fixP->fx_r_type == NO_RELOC) {
-	abort();		/* FIXME-SOON, if this is never used, remove */
+	as_fatal("failed sanity check.");		/* FIXME-SOON, if this is never used, remove */
 	switch (fixP->fx_size) {
 	case 1:
 		*buf = val;
@@ -779,7 +779,7 @@ void md_apply_fix(fixP, val)
 		*buf = val;
 		break;
 	default:
-		abort();
+		as_fatal("failed sanity check.");
 	}
 	return;
     }
@@ -899,8 +899,7 @@ void md_create_short_jump(ptr, from_addr, to_addr, frag, to_symbol)
 fragS *frag;
 symbolS *to_symbol;
 {
-    fprintf(stderr, "a29k_create_short_jmp\n");
-    abort();
+    as_fatal("a29k_create_short_jmp\n");
 }
 
 /* should never be called for 29k */
@@ -908,8 +907,7 @@ void md_convert_frag(headers, fragP)
 object_headers *headers;
     register fragS *fragP;
 {
-    fprintf(stderr, "sparc_convert_frag\n");
-    abort();
+    as_fatal("sparc_convert_frag\n");
 }
 
 /* should never be called for 29k */
@@ -920,8 +918,7 @@ void md_create_long_jump(ptr, from_addr, to_addr, frag, to_symbol)
     fragS	*frag;
     symbolS	*to_symbol;
 {
-    fprintf(stderr, "sparc_create_long_jump\n");
-    abort();
+	as_fatal("sparc_create_long_jump\n");
 }
 
 /* should never be called for sparc */
@@ -929,9 +926,7 @@ int md_estimate_size_before_relax(fragP, segtype)
     register fragS *fragP;
 segT segtype;
 {
-    fprintf(stderr, "sparc_estimate_size_before_relax\n");
-    abort();
-    return 0;
+    as_fatal("sparc_estimate_size_before_relax\n");
 }
 
 #if 0

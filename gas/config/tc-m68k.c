@@ -753,8 +753,8 @@ register struct m68k_op *opP;
 		opP->error="Invalid indirect register";
 		return FAIL;
 	}
-	if(*str!='@')
-		abort();
+	know(*str == '@');
+
 	str++;
 	switch(*str) {
 	case '\0':
@@ -1097,10 +1097,10 @@ char	*instring;
 	}
 		/* We've got the operands.  Find an opcode that'll
 		   accept them */
-	for(losing=0;;) {
-		if(opsfound!=opcode->m_opnum)
+	for (losing = 0; ; ) {
+		if (opsfound != opcode->m_opnum)
 			losing++;
-		else for(s=opcode->m_operands,opP= &the_ins.operands[0];*s && !losing;s+=2,opP++) {
+		else for (s=opcode->m_operands,opP= &the_ins.operands[0];*s && !losing;s+=2,opP++) {
 				/* Warning: this switch is huge! */
 				/* I've tried to organize the cases into  this order:
 				   non-alpha first, then alpha by letter.  lower-case goes directly
@@ -1575,7 +1575,7 @@ char	*instring;
 					case 2: nextword|=0x200; break;
 					case 4: nextword|=0x400; break;
 					case 8: nextword|=0x600; break;
-					default: abort();
+					default: as_fatal("failed sanity check.");
 					}
 						/* IF its simple,
 						   GET US OUT OF HERE! */
@@ -1952,7 +1952,7 @@ char	*instring;
 				tmpreg=0x804;
 				break;
 			default:
-				abort();
+				as_fatal("failed sanity check.");
 			}
 			install_operand(s[1],tmpreg);
 			break;
@@ -2022,7 +2022,7 @@ char	*instring;
 			if(opP->reg==FPI) tmpreg=0x1;
 			else if(opP->reg==FPS) tmpreg=0x2;
 			else if(opP->reg==FPC) tmpreg=0x4;
-			else abort();
+			else as_fatal("failed sanity check.");
 			install_operand(s[1],tmpreg);
 			break;
 
@@ -2047,7 +2047,7 @@ char	*instring;
 				tmpreg=1;
 				break;
 			default:
-				abort();
+				as_fatal("failed sanity check.");
 			}
 			install_operand(s[1],tmpreg);
 			break;
@@ -2070,7 +2070,7 @@ char	*instring;
 				tmpreg=7;
 				break;
 			default:
-				abort();
+				as_fatal("failed sanity check.");
 			}
 			install_operand(s[1],tmpreg);
 			break;
@@ -2078,7 +2078,7 @@ char	*instring;
 		case 'V':
 			if (opP->reg == VAL)
 				break;
-			abort();
+			as_fatal("failed sanity check.");
 
 		case 'W':
 			switch(opP->reg) {
@@ -2093,7 +2093,7 @@ char	*instring;
 				tmpreg=3;
 				break;
 			default:
-				abort();
+				as_fatal("failed sanity check.");
 			}
 			install_operand(s[1],tmpreg);
 			break;
@@ -2111,19 +2111,19 @@ char	*instring;
 				break;
 
 			default:
-				abort();
+				as_fatal("failed sanity check.");
 			}
 			install_operand(s[1], tmpreg);
 			break;
 		case 'Y':
 			if (opP->reg == PSR)
 				break;
-			abort();
+			as_fatal("failed sanity check.");
 
 		case 'Z':
 			if (opP->reg == PCSR)
 				break;
-			abort();
+			as_fatal("failed sanity check.");
 #endif /* m68851 */
 		default:
 			as_fatal("Internal error:  Operand type %c unknown in line %s of file \"%s\"", s[0], __LINE__, __FILE__);
@@ -2293,7 +2293,7 @@ int val;
 		break;
 	case 'c':
 	default:
-		abort();
+		as_fatal("failed sanity check.");
 	}
 } /* install_operand() */
 
@@ -2320,7 +2320,7 @@ int val;
 		break;
 		/* more stuff goes here */
 	default:
-		abort();
+		as_fatal("failed sanity check.");
 	}
 } /* install_gen_operand() */
 
@@ -2699,7 +2699,7 @@ int n;
 		*buf++=val;
 		break;
 	default:
-		abort();
+		as_fatal("failed sanity check.");
 	}
 }
 
@@ -3363,7 +3363,7 @@ int ok;
 		}
 		break;
 	default:
-		abort();
+		as_fatal("failed sanity check.");
 	}
 	if(input_line_pointer!=exp->e_end+1)
 		as_bad("Ignoring junk after expression");
