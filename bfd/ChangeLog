@@ -1,3 +1,8 @@
+2002-05-02  Richard Henderson  <rth@redhat.com>
+
+	* elf64-alpha.c (elf64_alpha_relocate_section): Force relative relocs
+	vs SHN_UNDEF to zero.
+
 2002-04-27  Alan Modra  <amodra@bigpond.net.au>
 
 	Merge from mainline
