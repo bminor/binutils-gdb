@@ -1,3 +1,13 @@
+2003-02-19  Andrew Cagney  <ac131313@redhat.com>
+
+	* rs6000-tdep.c: Include "gdb_assert.h".
+	(registers_e500): Add "acc" and "spefscr".
+	(PPC_GPRS_PSEUDO_REGS): Remove trailing comma.
+	(rs6000_gdbarch_init): Update initialization of ppc_gp0_regnum,
+	ppc_gplast_regnum, sp_regnum and fp_regnum.  Check that gp0_regnum
+	really is "r0".
+	(registers_e500): Mark the "acc" as a 64 bit (from Jim Willson).
+
 2003-02-18  Keith Seitz  <keiths@redhat.com>
 
 	* Makefile.in: Add gdbtk-interps.c.

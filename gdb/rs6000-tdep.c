@@ -47,6 +47,8 @@
 #include "solib-svr4.h"
 #include "ppc-tdep.h"
 
+#include "gdb_assert.h"
+
 /* If the kernel has to deliver a signal, it pushes a sigcontext
    structure on the stack and then calls the signal handler, passing
    the address of the sigcontext in an argument register. Usually
@@ -2271,7 +2273,7 @@ rs6000_convert_from_func_ptr_addr (CORE_ADDR addr)
   /*  0 */ P(r0), P(r1), P(r2), P(r3), P(r4), P(r5), P(r6), P(r7),  \
   /*  8 */ P(r8), P(r9), P(r10),P(r11),P(r12),P(r13),P(r14),P(r15), \
   /* 16 */ P(r16),P(r17),P(r18),P(r19),P(r20),P(r21),P(r22),P(r23), \
-  /* 24 */ P(r24),P(r25),P(r26),P(r27),P(r28),P(r29),P(r30),P(r31), \
+  /* 24 */ P(r24),P(r25),P(r26),P(r27),P(r28),P(r29),P(r30),P(r31)
 
 /* IBM POWER (pre-PowerPC) architecture, user-level view.  We only cover
    user-level SPR's.  */
@@ -2450,6 +2452,9 @@ static const struct reg registers_e500[] =
   PPC_UISA_NOFP_SPRS,
   /* 7...38 */
   PPC_EV_REGS,
+  R8(acc), R(spefscr),
+  /* NOTE: Add new registers here the end of the raw register
+     list and just before the first pseudo register.  */
   /* 39...70 */
   PPC_GPRS_PSEUDO_REGS
 };
@@ -2801,8 +2806,8 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	tdep->ppc_ev31_regnum = -1;
 	break;
       case bfd_mach_ppc_e500:
-        tdep->ppc_gp0_regnum = 39;
-        tdep->ppc_gplast_regnum = 70;
+        tdep->ppc_gp0_regnum = 41;
+        tdep->ppc_gplast_regnum = tdep->ppc_gp0_regnum + 32 - 1;
         tdep->ppc_toc_regnum = -1;
         tdep->ppc_ps_regnum = 1;
         tdep->ppc_cr_regnum = 2;
@@ -2812,8 +2817,8 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	tdep->ppc_ev0_regnum = 7;
 	tdep->ppc_ev31_regnum = 38;
         set_gdbarch_pc_regnum (gdbarch, 0);
-        set_gdbarch_sp_regnum (gdbarch, 40);
-        set_gdbarch_fp_regnum (gdbarch, 40);
+        set_gdbarch_sp_regnum (gdbarch, tdep->ppc_gp0_regnum + 1);
+        set_gdbarch_fp_regnum (gdbarch, tdep->ppc_gp0_regnum + 1);
         set_gdbarch_dwarf2_reg_to_regnum (gdbarch, e500_dwarf2_reg_to_regnum);
         set_gdbarch_pseudo_register_read (gdbarch, e500_pseudo_register_read);
         set_gdbarch_pseudo_register_write (gdbarch, e500_pseudo_register_write);
@@ -2827,6 +2832,9 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	tdep->ppc_ev31_regnum = -1;
 	break;
       }   
+
+  /* Sanity check on registers.  */
+  gdb_assert (strcmp (tdep->regs[tdep->ppc_gp0_regnum].name, "r0") == 0);
 
   /* Set lr_frame_offset.  */
   if (wordsize == 8)
