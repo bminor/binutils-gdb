@@ -1,5 +1,7 @@
 Fri Apr 26 12:02:06 1991  Jim Kingdon  (kingdon at cygint.cygnus.com)
 
+	* tm-sparc.h: Add comments about gcc version 2 and structure passing.
+
 	* xconfig/i386v{,32}{,-g}: Add XM_CFLAGS=-Dgetpagesize()=4096.
 	gmalloc.c: #if 0 out !HAVE_GETPAGESIZE code.
 

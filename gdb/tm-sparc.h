@@ -36,7 +36,9 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
    two symbols, so we get a LOC_ARG saying the address is on the stack
    (a lie, and a serious one since we don't know which register to
    use), and a LOC_REGISTER saying that the struct is in a register
-   (sort of a lie, but fixable with REG_STRUCT_HAS_ADDR).
+   (sort of a lie, but fixable with REG_STRUCT_HAS_ADDR).  Gcc version
+   two (as of 1.92) behaves like sun cc, but I don't know how we can
+   distinguish between gcc version 1 and gcc version 2.
 
    This still doesn't work if the argument is not one passed in a
    register (i.e. it's the 7th or later argument).  */
