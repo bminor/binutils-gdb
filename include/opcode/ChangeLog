@@ -1,5 +1,9 @@
 Tue Aug 26 12:21:52 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* i386.h (two_byte_segment_defaults): Correct base register 5 in
+	modes 1 and 2 to be ss rather than ds.  From Gabriel Paubert
+	<paubert@iram.es>.
+
 	* i386.h: Set ud2 to 0x0f0b.  From Gabriel Paubert
 	<paubert@iram.es>.
 
