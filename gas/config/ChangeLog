@@ -1,3 +1,21 @@
+Wed Sep  9 11:10:24 1992  Ian Lance Taylor  (ian@cygnus.com)
+
+	* tc-m68k.c (m68k_ip, m68k_ip_op, get_num, try_moto_index): merge
+	 Motorola and MIT syntax; gas can now assemble either type of
+	 file.
+	tc-m68kmote.c, tc-m68kmote.h: removed now superfluous files.
+	From Steve Chamberlain:
+	m68kcoff.mt: for m68k COFF.
+	obj-coffbfd.c: (fixup_mdeps) added
+	 (size_section) removed bad sanity check
+	 (fill_section) added rs_machine_dependent case
+	 (write_object_file) call fixup_mdeps
+	 (fixup_segment) set fx_subsy to 0.
+	obj-coffbfd.h: define WORKING_DOT_WORD (too hard to support) and
+	 handle m68k.
+	tc-m68k.c, config/tc-m68k.h: added m68k COFF support and Motorala
+	 pseudo ops.
+
 Fri Aug 28 16:25:22 1992  Ian Lance Taylor  (ian@cygnus.com)
 
 	* obj-bout.h, obj-bout.c (obj_header_append, obj_symbol_to_chars),

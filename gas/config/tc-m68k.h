@@ -1,3 +1,23 @@
+/* This file is tc-m68k.h
+
+   Copyright (C) 1987-1992 Free Software Foundation, Inc.
+   
+   This file is part of GAS, the GNU Assembler.
+   
+   GAS is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2, or (at your option)
+   any later version.
+   
+   GAS is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+   
+   You should have received a copy of the GNU General Public License
+   along with GAS; see the file COPYING.  If not, write to
+   the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+
 /*
  * This file is tp-generic.h and is intended to be a template for
  * target processor specific header files. 
@@ -5,6 +25,14 @@
 
 #define TC_M68K 1
 
+
+#define COFF_MAGIC MC68MAGIC
+#define BFD_ARCH bfd_arch_m68k
+#define COFF_FLAGS F_AR32W
+#define TC_COUNT_RELOC(x) ((x)->fx_addsy||(x)->fx_subsy||(x)->fx_offset)
+
+#define TC_COFF_FIX2RTYPE(fixP) tc_coff_fix2rtype(fixP)
+#define TC_COFF_SIZEMACHDEP(frag) tc_coff_sizemachdep(frag)
 #ifdef TE_SUN3
 /* This variable contains the value to write out at the beginning of
    the a.out file.  The 2<<16 means that this is a 68020 file instead
@@ -14,8 +42,6 @@
 #endif /* TE_SUN3 */
     
 #define AOUT_MACHTYPE 0x2
-#define REVERSE_SORT_RELOCS /* FIXME-NOW: this line can be removed. */
-#define LOCAL_LABELS_FB
     
 #define tc_crawl_symbol_chain(a)	{;} /* not used */
 #define tc_headers_hook(a)		{;} /* not used */

@@ -22,6 +22,8 @@
 
 #define OBJ_COFF 1
 
+#define WORKING_DOT_WORD
+
 #include "targ-cpu.h"
 
 #include "bfd.h"
@@ -39,6 +41,10 @@
 #elif defined(TC_H8300)
 #include "coff/h8300.h"
 #define TARGET_FORMAT "coff-h8300"
+#elif defined(TC_M68K)
+#include "coff/m68k.h"
+#define TARGET_FORMAT "coff-m68k"
+
 #elif defined(TC_A29K)
 #include "coff/a29k.h"
 #define TARGET_FORMAT "coff-a29k-big"
@@ -93,7 +99,6 @@ help me
 #ifndef FILE_HEADER_MAGIC
 #define FILE_HEADER_MAGIC	SIPFBOMAGIC
 #endif /* FILE_HEADER_MAGIC */
-
 #else
 you lose
 #endif 

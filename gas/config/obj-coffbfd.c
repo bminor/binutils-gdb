@@ -97,6 +97,10 @@ void EXFUN(bfd_as_write_hook,(struct internal_filehdr *,
 static void EXFUN(fixup_segment,(fixS *	fixP,
 		  segT	this_segment_type));
 
+
+static void EXFUN(fixup_mdeps,(fragS *));
+
+
 static void EXFUN(fill_section,(bfd *abfd ,
 				struct internal_filehdr *f, unsigned
 				long *));
@@ -135,7 +139,7 @@ static void EXFUN( obj_coff_size,(void));
 static void EXFUN( obj_coff_tag,(void));
 static void EXFUN( obj_coff_type,(void));
 static void EXFUN( obj_coff_val,(void));
-static void EXFUN( obj_coff_section,(void));
+void EXFUN( obj_coff_section,(void));
 static void EXFUN( tag_init,(void));
 static void EXFUN( tag_insert,(char *name, symbolS *symbolP));
 
@@ -253,27 +257,38 @@ symbolS* x)
 
 /* calculate the size of the frag chain and fill in the section header
    to contain all of it, also fill in the addr of the sections */
-static unsigned int  DEFUN(size_section,(abfd, idx),
-		  bfd *abfd AND
-		  unsigned int idx)
+static unsigned int  
+DEFUN(size_section,(abfd, idx),
+      bfd *abfd AND
+      unsigned int idx)
 {
 
   unsigned int size = 0;
   fragS *frag = segment_info[idx].frchainP->frch_root;
   while (frag) {
+    size = frag->fr_address;
+#if 0    
       if (frag->fr_address != size) {	
 	  printf("Out of step\n");
 	  size = frag->fr_address;
 	}
-      size += frag->fr_fix;
+
       switch (frag->fr_type) {
+#ifdef TC_COFF_SIZEMACHDEP
+       case rs_machine_dependent:
+	size +=  TC_COFF_SIZEMACHDEP(frag);
+	break;
+#endif
 	case rs_fill:
 	case rs_org:
+      size += frag->fr_fix;
 	  size  +=    frag->fr_offset * frag->fr_var;
 	  break;
 	case rs_align:
+      size += frag->fr_fix;
 	  size  +=   relax_align(size, frag->fr_offset);
 	}
+#endif
       frag = frag->fr_next;
     }
   segment_info[idx].scnhdr.s_size = size;
@@ -478,7 +493,16 @@ static void DEFUN(fill_section,(abfd, filehdr, file_cursor),
       while (frag) {
 	unsigned int fill_size;
 	switch (frag->fr_type) {
+	 case rs_machine_dependent:
+	  if(frag->fr_fix) 
+	  {
+	    memcpy(buffer + frag->fr_address,
+		   frag->fr_literal,
+		   frag->fr_fix);
+	    offset += frag->fr_fix;
+	  }
 
+	  break;
 	 case rs_fill:
 	 case rs_align:
 	 case rs_org:
@@ -506,6 +530,8 @@ static void DEFUN(fill_section,(abfd, filehdr, file_cursor),
 	    }
 
 	  }
+	  break;
+	 case rs_broken_word:
 	  break;
 	 default:	
 	  abort();
@@ -1703,7 +1729,8 @@ extern void DEFUN_VOID(write_object_file)
 #ifndef TC_H8300
     for (i = SEG_E0; i < SEG_UNKNOWN; i++) 
     {
-	fixup_segment(segment_info[i].fix_root, i);
+      fixup_mdeps(segment_info[i].frchainP->frch_root);
+      fixup_segment(segment_info[i].fix_root, i);
     }
 #endif
 
@@ -1781,7 +1808,7 @@ static void DEFUN(change_to_section,(name, len, exp),
   subseg_new(i, exp);  
 }
 
-static void 
+void 
 DEFUN_VOID(obj_coff_section)
 {
     /* Strip out the section name */
@@ -2045,7 +2072,29 @@ static void DEFUN_VOID(obj_coff_lcomm)
     demand_empty_rest_of_line();
 }
 
+static void DEFUN(fixup_mdeps,(frags),
+		  fragS *frags)
+{
+  while (frags) 
+  {
+    switch (frags->fr_type) 
+    {
+     case rs_align:
+     case rs_org:
+      frags->fr_type = rs_fill;
+      frags->fr_offset =
+       (frags->fr_next->fr_address - frags->fr_address - frags->fr_fix);
+      break;
+     case rs_machine_dependent:
+      md_convert_frag(0, frags);
+      break;
+     default:
+      ;
+    }
+    frags = frags->fr_next;
+  }
 
+}
 #if 1
 static void DEFUN(fixup_segment,(fixP, this_segment_type),
 register fixS *	fixP AND
@@ -2100,6 +2149,7 @@ segT		this_segment_type)
 			    }	/* not absolute */
 				
 			add_number -= S_GET_VALUE(sub_symbolP);
+			fixP->fx_subsy = 0;
 				
 			/* if sub_symbol is in the same segment that add_symbol
 			   and add_symbol is either in DATA, TEXT, BSS or ABSOLUTE */

@@ -22,11 +22,13 @@
 #include <ctype.h>
 #define  NO_RELOC 0
 #include "as.h"
+#include "read.h"
 
 #include "obstack.h"
 
 /* note that this file includes real declarations and thus can only be included by one source file per executable. */
 #include "opcode/m68k.h"
+
 #ifdef TE_SUN
 /* This variable contains the value to write out at the beginning of
    the a.out file.  The 2<<16 means that this is a 68020 file instead
@@ -76,8 +78,8 @@ static struct obstack robyn;
 #define SHORT		1
 #define LONG		2
 #define SZ_UNDEF	3
-
-#define BRANCH		1
+#undef BRANCH
+#define ABRANCH		1
 #define FBRANCH		2
 #define PCREL		3
 #define BCC68000        4
@@ -383,6 +385,8 @@ struct m68k_incant {
 	struct m68k_incant *m_next;
 };
 
+
+
 #define getone(x)	((((x)->m_opcode)>>16)&0xffff)
 #define gettwo(x)	(((x)->m_opcode)&0xffff)
 
@@ -397,7 +401,7 @@ static int reverse_8_bits(int in);
 static int try_index(char **s, struct m68k_op *opP);
 static void install_gen_operand(int mode, int val);
 static void install_operand(int mode, int val);
- void s_bss(void);
+static void s_bss(void);
 static void s_data1(void);
 static void s_data2(void);
 static void s_even(void);
@@ -413,7 +417,7 @@ static int reverse_8_bits();
 static int try_index();
 static void install_gen_operand();
 static void install_operand();
-void s_bss();
+static void s_bss();
 void s_align_bytes();
 static void s_data1();
 static void s_data2();
@@ -446,8 +450,8 @@ const relax_typeS
 	    { 1,		1,		0,	0 },	/* that the VAX doesn't either */
 	    { 1,		1,		0,	0 },
 
-	    { (127),	(-128),		0,	TAB(BRANCH,SHORT)},
-	    { (32767),	(-32768),	2,	TAB(BRANCH,LONG) },
+	    { (127),	(-128),		0,	TAB(ABRANCH,SHORT)},
+	    { (32767),	(-32768),	2,	TAB(ABRANCH,LONG) },
 	    { 0,		0,		4,	0 },
 	    { 1,		1,		0,	0 },
 
@@ -503,6 +507,33 @@ const pseudo_typeS md_pseudo_table[] = {
 };
 
 
+/* The mote pseudo ops are put into the opcode table, since they
+   don't start with a . they look like opcodes to gas.  
+   */
+extern void obj_coff_section();
+
+const pseudo_typeS mote_pseudo_table[] =
+{
+
+ { "dc.l", cons,4},
+ { "dc", cons,2},
+ { "dc.w", cons,2},
+ { "dc.b", cons,1},
+
+ { "ds.l", s_space,4},
+ { "ds", s_space,2},
+ { "ds.w", s_space,2},
+ { "ds.b", s_space,1},
+
+ { "xdef", s_globl, 0},
+ { "align", s_align_ptwo, 0},
+#ifdef M68KCOFF
+ { "sect", obj_coff_section,0},
+ { "section", obj_coff_section,0},
+#endif
+  0,
+};
+
 /* #define isbyte(x)	((x)>=-128 && (x)<=127) */
 /* #define isword(x)	((x)>=-32768 && (x)<=32767) */
 
@@ -557,7 +588,12 @@ register char **ccp;
     char *p = start;
     symbolS *symbolP;
 
-    while (is_part_of_name(c = *p++))
+    c = *p++;
+    while (isalpha(c) || isdigit(c)) 
+    {
+    c = *p++;
+  }      
+
      ;
     * -- p = 0;
     symbolP = symbol_find(start);
@@ -575,17 +611,174 @@ register char **ccp;
 }
 
 #define SKIP_WHITE()	{ str++; if(*str==' ') str++;}
+#define SKIP_W()	{ ss++; if(*ss==' ') ss++;}
+
+/* Parse an index specification using Motorola syntax.  */
+
+static int
+try_moto_index(s,opP)
+char **s;
+struct m68k_op *opP;
+{
+	register int	i;
+	char	*ss;
+
+	ss= *s;
+	/* SKIP_W(); */
+	if(*ss==' ') ss++;
+	i=m68k_reg_parse(&ss);
+	if(!(i>=DATA+0 && i<=ADDR+7)) {	/* if i is not DATA or ADDR reg */
+		opP->error="Invalid index register";
+		*s=ss;
+		return FAIL;
+	}
+	opP->ireg=i;
+	/* SKIP_W(); */
+	if(*ss==')') {
+		opP->isiz=0;
+		opP->imul=1;
+		SKIP_W();
+		*s=ss;
+		return OK;
+	}
+	if(*ss!='.') {
+		opP->error="Missing . in index register";
+		*s=ss;
+		return FAIL;
+	}
+	SKIP_W();
+	if(mklower(*ss)=='w') opP->isiz=2;
+	else if(mklower(*ss)=='l') opP->isiz=3;
+	else {
+		opP->error="Size spec not .W or .L";
+		*s=ss;
+		return FAIL;
+	}
+	SKIP_W();
+	if(*ss=='.' || *ss=='*') {
+		SKIP_W();
+		switch(*ss) {
+		case '1':
+		case '2':
+		case '4':
+		case '8':
+			opP->imul= *ss-'0';
+			break;
+		default:
+			opP->error="index multiplier not 1, 2, 4 or 8";
+			*s=ss;
+			return FAIL;
+		}
+		SKIP_W();
+	} else opP->imul=1;
+	if(*ss!=')') {
+		opP->error="Missing )";
+		*s=ss;
+		return FAIL;
+	}
+	SKIP_W();
+	*s=ss;
+	return OK;
+}
 
 /*
- * m68k_ip_op := '#' + <anything>
- *	| <register> + range_sep + get_regs
+ *
+ * try_index := data_or_address_register + ')' + SKIP_W
+ *	| data_or_address_register + ':' + SKIP_W + size_spec + SKIP_W + multiplier + ')' + SKIP_W
+ *
+ * multiplier := <empty>
+ *	| ':' + multiplier_number
  *	;
  *
- * range_sep := '/' | '-' ;
+ * multiplier_number := '1' | '2' | '4' | '8' ;
  *
- * SKIP_WHITE := <empty> | ' ' ;
+ * size_spec := 'l' | 'L' | 'w' | 'W' ;
+ *
+ * SKIP_W := <empty> | ' ' ;
  *
  */
+
+static int try_index(s,opP)
+char **s;
+struct m68k_op *opP;
+{
+	register int	i;
+	char	*ss;
+
+	ss= *s;
+	/* SKIP_W(); */
+	i=m68k_reg_parse(&ss);
+	if(!(i>=DATA+0 && i<=ADDR+7)) {	/* if i is not DATA or ADDR reg */
+		*s=ss;
+		return FAIL;
+	}
+	opP->ireg=i;
+	/* SKIP_W(); */
+	if(*ss==')') {
+		opP->isiz=0;
+		opP->imul=1;
+		SKIP_W();
+		*s=ss;
+		return OK;
+	}
+	if(*ss!=':') {
+		opP->error="Missing : in index register";
+		*s=ss;
+		return FAIL;
+	}
+	SKIP_W();
+	switch(*ss) {
+	case 'w':
+	case 'W':
+		opP->isiz=2;
+		break;
+	case 'l':
+	case 'L':
+		opP->isiz=3;
+		break;
+	default:
+		opP->error="Index register size spec not :w or :l";
+		*s=ss;
+		return FAIL;
+	}
+	SKIP_W();
+	if(*ss==':') {
+		SKIP_W();
+		switch(*ss) {
+		case '1':
+		case '2':
+		case '4':
+		case '8':
+			if (cpu_of_arch(current_architecture) < m68020) {
+				opP->error="no index scaling in pre-68020's";
+				*s=ss;
+				return FAIL;
+			}
+			opP->imul= *ss-'0';
+			break;
+		default:
+			opP->error="index multiplier not 1, 2, 4 or 8";
+			*s=ss;
+			return FAIL;
+		}
+		SKIP_W();
+	} else opP->imul=1;
+	if(*ss!=')') {
+		opP->error="Missing )";
+		*s=ss;
+		return FAIL;
+	}
+	SKIP_W();
+	*s=ss;
+	return OK;
+} /* try_index() */
+
+/* Ian Taylor expanded this function to accept both MIT and Motorola
+   syntax.  I removed the old comment, since it was wrong.  The syntax
+   this accepted even before my changes was complex and undocumented.
+   I mainly added a large case when the operand string does not
+   contain an '@', since the Motorola syntax does not use the '@'
+   character.  */
 
 int
     m68k_ip_op(str,opP)
@@ -596,6 +789,7 @@ register struct m68k_op *opP;
 	long	i;
 	char	*parse_index();
 	int needp;
+
 	if (*str==' ') {
 		str++;
 	} /* Find the beginning of the string */
@@ -605,8 +799,8 @@ register struct m68k_op *opP;
 		return FAIL;
 	} /* Out of gas */
 
-	for(strend = str; *strend; strend++) ;;
-
+	for(strend = str; *strend; strend++)
+	  ;
 	--strend;
 
 	if(*str=='#') {
@@ -618,16 +812,29 @@ register struct m68k_op *opP;
 
 	i = m68k_reg_parse(&str);
 
-	/* is a register, is exactly a register, and is followed by '@' */
+        if (i!=FAIL) {
+	     if(*str=='/' || *str=='-') {
+	          /* "Rm-Rn/Ro-Rp"  Register list for MOVEM instruction */
+	          opP->mode=REGLST;
+		  return get_regs(i,str,opP);
+		}
+	     if(*str=='\0') {
+	          opP->reg=i;
+	          /* "Rn"  Register Direct mode */
+	          if(i>=DATA+0 && i<=DATA+7)
+		    opP->mode=DREG;
+		  else if(i>=ADDR+0 && i<=ADDR+7)
+		    opP->mode=AREG;
+		  else
+		    opP->mode=MSCR;
+		  return OK;
+		}
+	   }
 
-	if((i==FAIL || *str!='\0') && *str!='@') {
+	if (*str!='@') {
 		char *stmp;
 
-		if(i!=FAIL && (*str=='/' || *str=='-')) {
-			opP->mode=REGLST;
-			return(get_regs(i,str,opP));
-		}
-		if ((stmp=strchr(str,'@')) != '\0') {
+		if ((stmp=strchr(str,'@')) != 0) {
 			opP->con1=add_exp(str,stmp-1);
 			if(stmp==strend) {
 				opP->mode=AINDX;
@@ -653,22 +860,233 @@ register struct m68k_op *opP;
 			}
 			return(OK);
 		} /* if there's an '@' */
-		opP->mode = ABSL;
-		opP->con1 = add_exp(str,strend);
-		return(OK);
-	} /* not a register, not exactly a register, or no '@' */
+
+#ifndef MIT_SYNTAX_ONLY
+		/* The operand has no '@'.  Try to parse it using
+		   Motorola syntax.  */
+		/* Logic of the parsing switch(*str):
+		   case			opP->mode =
+		   ----			-----------
+		   #anything		IMMED	1
+		   REG		        AREG or DREG or MSCR	3 or 2 or 13
+		   REG- or REG/	        REGLST	14
+		   (REG)		AINDR	4
+		   (REG)+	        AINC   	6
+		   (REG,INDX)	        AINDX	8
+		   (EXPR,REG)	        AOFF   	7
+		   (EXPR,REG,INDX)      AINDX	8
+		   -(REG)	      	ADEC   	5
+		   EXP2(REG)		AOFF   	7
+		   EXP2(REG,INDX)	AINDX	8
+		   EXP2			ABSL   	12
+
+		   REG  means truth(m68k_reg_parse(&str))
+		   INDX means truth(try_moto_index(&str,opP))
+		   EXPR means not REG
+		   EXP2 means not REG and not '(' and not '-('
+		   */
+
+                  if(*str=='(') {
+		       str++;
+		       i=m68k_reg_parse(&str);
+		       if((i<ADDR+0 || i>ADDR+7)
+			  && (i<DATA+0 || i>DATA+7
+			      || *str != ')' || str[1] != '0')
+			  && i!=PC && i!=ZPC && i!=FAIL) {	
+			    /* Can't indirect off non address regs */
+			    opP->error="Invalid indirect register";
+			    return FAIL;
+		       }
+		       if(i!=FAIL) {
+			    opP->reg=i;
+			    if(*str==')') {
+				 str++;
+				 if(*str=='\0') {
+				      /* "(An)"  Address Register Indirect mode
+					 or "(Dn)" for cas2.  */
+				      if (i>=DATA+0 && i<=DATA+7)
+					opP->mode=DINDR;
+				      else
+					opP->mode=AINDR;
+				      return OK;
+				 }
+				 if(*str=='+') {
+				      if(str[1]=='\0') {
+					   /* "(An)+" Register Indirect w Postincrement */
+					   opP->mode=AINC;
+					   return OK;
+				      }
+				 }
+				 opP->error="Junk after indirect";
+				 return FAIL;
+			    }
+			    if(*str==',') {
+				 str++;
+				 i=try_moto_index(&str,opP);
+				 if(i==FAIL) return FAIL;
+				 /* "(An,Rn)"  Register Indirect with Index mode*/
+				 opP->mode=AINDX;
+				 return OK;
+			    }
+			    else {
+				 opP->error="Bad indirect syntax";
+				 return FAIL;
+			    }
+		       }
+		       else {
+			    /* "(EXPR,..." , a displacement */
+			    char *stmp;
+			    char *index();
+
+			    if(stmp=index(str,',')) {
+				 opP->con1=add_exp(str,stmp-1);
+				 str=stmp;
+				 SKIP_WHITE();
+				 i=m68k_reg_parse(&str);
+				 if((i<ADDR+0 || i>ADDR+7) && i!=PC && i!=ZPC) {
+				      /* Can't indirect off non address regs */
+				      opP->error="Invalid indirect register";
+				      return FAIL;
+				 }
+				 if(i!=FAIL) {
+				      opP->reg=i;
+				      if(*str==')') {
+					   /* "(d,An)"  Register Indirect w Displacement */
+					   opP->mode=AOFF;
+					   return OK;
+				      }
+				      if(*str==',') {
+					   str++;
+					   i=try_moto_index(&str,opP);
+					   if(i==FAIL) return FAIL;
+					   /* "(d,An,Rn)"  Register Indirect with Index */
+					   opP->mode=AINDX;
+					   return OK;
+				      }
+				      else {
+					   opP->error="Bad indirect syntax";
+					   return FAIL;
+				      }
+				 }
+				 else {
+				      opP->error="Invalid register";
+				      return FAIL;
+				 }
+			    }
+			    else {
+			         opP->mode = ABSL;
+				 opP->con1 = add_exp(str-1,strend);
+				 return OK;
+			    }
+		       }
+		  }
+
+		  if(*str=='-') {
+		       if(str[1]=='(') {
+			    str = str+2;
+			    i=m68k_reg_parse(&str);
+			    if((i<ADDR+0 || i>ADDR+7) && i!=PC && i!=ZPC && i!=FAIL) {
+				 /* Can't indirect off non address regs */
+				 opP->error="Invalid indirect register";
+				 return FAIL;
+			    }
+			    if(i!=FAIL) {
+				 opP->reg=i;
+				 if(*str==')') {
+				      str++;
+				      if(*str=='\0') {
+					   /* "-(An)" Register Indirect with Predecrement */
+					   opP->mode=ADEC;
+					   return OK;
+				      }
+				      opP->error="Junk after indirect";
+				      return FAIL;
+				 }
+				 opP->error="Bad indirect syntax";
+				 return FAIL;
+			    }
+			    opP->mode = ABSL;
+			    opP->con1 = add_exp(str-2,strend);
+			    return OK;
+		       }
+		       /* if '-' but not "-(', do nothing */
+		  }
+
+		  /* whether *str=='-' or not */
+		  {
+		       /* "EXP2" or "EXP2(REG..." */
+		       char *stmp;
+		       char *index();
+		       if(stmp=index(str,'(')) {
+			    char *ostr=str;
+
+			    opP->con1=add_exp(str,stmp-1);
+			    str=stmp+1;
+			    i=m68k_reg_parse(&str);
+			    if((i<ADDR+0 || i>ADDR+7) && i!=PC
+			       && i!=ZPC && i!=FAIL) {
+				 /* Can't indirect off non address regs */
+				 opP->error="Invalid indirect register";
+				 return FAIL;
+			    }
+			    if(i!=FAIL) {
+				 opP->reg=i;
+				 if(*str==')') {
+				      /* "d(An)"  Register Indirect w Displacement */
+				      opP->mode=AOFF;
+				      return OK;
+				 }
+				 if(*str==',') {
+				      str++;
+				      i=try_moto_index(&str,opP);
+				      if(i==FAIL) return FAIL;
+				      /* "d(An,Rn)"  Register Indirect with Index */
+				      opP->mode=AINDX;
+				      return OK;
+				 }
+				 else {
+				      opP->error="Bad indirect syntax";
+				      return FAIL;
+				 }
+			    }
+			    else {
+			         opP->mode = ABSL;
+				 opP->con1 = add_exp(ostr,strend);
+				 return OK;
+			    }
+		       }
+		       else {
+			    /* "EXP2"  Absolute */
+			    opP->mode=ABSL;
+			    opP->isiz=0;
+			    if(strend[-1]=='.' || strend[-1]==':') {
+			      /* mode ==foo.[wl] */
+				 switch(*strend) {
+				    case 'w':
+				    case 'W':
+				      opP->isiz=2;
+				      strend-=2;
+				      break;
+				    case 'l':
+				    case 'L':
+				      opP->isiz=3;
+				      strend-=2;
+				      break;
+				 }
+			    } 
+			    opP->con1=add_exp(str,strend);
+			    return OK;
+		       }
+		  }
+		/*NOTREACHED*/
+#else /* defined (MIT_SYNTAX_ONLY) */
+		opP->mode=ABSL;
+		opP->con1=add_exp(str,strend);
+		return OK;
+#endif /* defined (MIT_SYNTAX_ONLY) */
+	      }
 
 	opP->reg=i;
-
-	if (*str=='\0') {
-		if(i>=DATA+0 && i<=DATA+7)
-		    opP->mode=DREG;
-		else if(i>=ADDR+0 && i<=ADDR+7)
-		    opP->mode=AREG;
-		else
-		    opP->mode=MSCR;
-		return OK;
-	}
 
 	/* Can't indirect off non address regs, but Dx@ is OK for cas2 */
 	if((i<ADDR+0 || i>ADDR+7) && i!=PC && i!=ZPC && i!=FAIL
@@ -681,7 +1099,7 @@ register struct m68k_op *opP;
 	str++;
 	switch(*str) {
 	case '\0':
-	  	if (i < DATA + 0 || i > DATA + 7)
+	  	if (i<DATA+0 || i>DATA+7)
 		  opP->mode=AINDR;
 		else
 		  opP->mode=DINDR;
@@ -837,98 +1255,24 @@ register struct m68k_op *opP;
 	return(OK);
 } /* m68k_ip_op() */
 
-/*
- *
- * try_index := data_or_address_register + ')' + SKIP_W
- *	| data_or_address_register + ':' + SKIP_W + size_spec + SKIP_W + multiplier + ')' + SKIP_W
- *
- * multiplier := <empty>
- *	| ':' + multiplier_number
- *	;
- *
- * multiplier_number := '1' | '2' | '4' | '8' ;
- *
- * size_spec := 'l' | 'L' | 'w' | 'W' ;
- *
- * SKIP_W := <empty> | ' ' ;
- *
- */
 
-static int try_index(s,opP)
-char **s;
-struct m68k_op *opP;
+#ifdef M68KCOFF
+
+short tc_coff_fix2rtype(fixP)
+fixS *fixP;
 {
-	register int	i;
-	char	*ss;
-#define SKIP_W()	{ ss++; if (*ss==' ') ss++;}
+  return  (fixP->fx_pcrel ?
+	   (fixP->fx_size == 1 ? R_PCRBYTE :
+	    fixP->fx_size == 2 ? R_PCRWORD :
+	    R_PCRLONG):
+	   (fixP->fx_size == 1 ? R_RELBYTE :
+	    fixP->fx_size == 2 ? R_RELWORD :
+	    R_RELLONG));
 
-	ss= *s;
-	/* SKIP_W(); */
-	i=m68k_reg_parse(&ss);
-	if(!(i>=DATA+0 && i<=ADDR+7)) {	/* if i is not DATA or ADDR reg */
-		*s=ss;
-		return FAIL;
-	}
-	opP->ireg=i;
-	/* SKIP_W(); */
-	if(*ss==')') {
-		opP->isiz=0;
-		opP->imul=1;
-		SKIP_W();
-		*s=ss;
-		return OK;
-	}
-	if(*ss!=':') {
-		opP->error="Missing : in index register";
-		*s=ss;
-		return FAIL;
-	}
-	SKIP_W();
-	switch(*ss) {
-	case 'w':
-	case 'W':
-		opP->isiz=2;
-		break;
-	case 'l':
-	case 'L':
-		opP->isiz=3;
-		break;
-	default:
-		opP->error="Index register size spec not :w or :l";
-		*s=ss;
-		return FAIL;
-	}
-	SKIP_W();
-	if(*ss==':') {
-		SKIP_W();
-		switch(*ss) {
-		case '1':
-		case '2':
-		case '4':
-		case '8':
-			if (cpu_of_arch(current_architecture) < m68020) {
-				opP->error="no index scaling in pre-68020's";
-				*s=ss;
-				return FAIL;
-			}
-			opP->imul= *ss-'0';
-			break;
-		default:
-			opP->error="index multiplier not 1, 2, 4 or 8";
-			*s=ss;
-			return FAIL;
-		}
-		SKIP_W();
-	} else opP->imul=1;
-	if(*ss!=')') {
-		opP->error="Missing )";
-		*s=ss;
-		return FAIL;
-	}
-	SKIP_W();
-	*s=ss;
-	return OK;
-} /* try_index() */
+
+}
+
+#endif
 
 #ifdef TEST1	/* TEST1 tests m68k_ip_op(), which parses operands */
 main()
@@ -995,6 +1339,7 @@ void m68k_ip (instring)
   register struct m68k_incant *opcode;
   register char *s;
   register int tmpreg = 0, baseo = 0, outro = 0, nextword;
+  char *pdot, *pdotmove;
   int siz1, siz2;
   char	c;
   int	losing;
@@ -1009,10 +1354,13 @@ void m68k_ip (instring)
 
   /* Scan up to end of operation-code, which MUST end in end-of-string
      or exactly 1 space. */
-  for (p = instring; *p != '\0'; p++)
+  pdot = 0;
+  for (p = instring; *p != '\0'; p++) {
     if (*p == ' ')
       break;
-
+    if (*p == '.')
+      pdot = p;
+  }
 
   if (p == instring) {
     the_ins.error = "No operator";
@@ -1023,11 +1371,25 @@ void m68k_ip (instring)
 
   /* p now points to the end of the opcode name, probably whitespace.
      make sure the name is null terminated by clobbering the whitespace,
-     look it up in the hash table, then fix it back. */
+     look it up in the hash table, then fix it back.
+     Remove a dot, first, since the opcode tables have none.  */
+  if (pdot != NULL) {
+    for (pdotmove=pdot; pdotmove<p; pdotmove++)
+      *pdotmove=pdotmove[1];
+    p--;
+  }
+
   c = *p;
   *p = '\0';
   opcode = (struct m68k_incant *)hash_find (op_hash, instring);
   *p = c;
+
+  if (pdot != NULL) {
+    for (pdotmove=p; pdotmove>pdot; pdotmove--)
+      *pdotmove=pdotmove[-1];
+    *pdot='.';
+    ++p;
+  }
 
   if (opcode == NULL) {
     the_ins.error = "Unknown operator";
@@ -1038,6 +1400,20 @@ void m68k_ip (instring)
 
   /* found a legitimate opcode, start matching operands */
   while (*p == ' ') ++p;
+
+
+   if (opcode->m_operands == 0) {
+     char *old = input_line_pointer;
+     *old = '\n';
+     input_line_pointer = p;
+     /* Ahh - it's a motorola style psuedo op */
+     mote_pseudo_table[opcode->m_opnum].poc_handler
+      ( mote_pseudo_table[opcode->m_opnum].poc_val);
+     input_line_pointer = old;
+     *old = 0;
+
+     return;
+   }
 
   for(opP = &the_ins.operands[0]; *p; opP++) {
 
@@ -1959,7 +2335,7 @@ void m68k_ip (instring)
 	    && (the_ins.opcode[0] <= 0x6f00)) {
 	  add_frag(adds(opP->con1),offs(opP->con1),TAB(BCC68000,SZ_UNDEF));
 	    } else {
-	      add_frag(adds(opP->con1),offs(opP->con1),TAB(BRANCH,SZ_UNDEF));
+	      add_frag(adds(opP->con1),offs(opP->con1),TAB(ABRANCH,SZ_UNDEF));
 	    }
 	break;
       case 'w':
@@ -2280,6 +2656,7 @@ void m68k_ip (instring)
 	       s[0], __LINE__, __FILE__);
     }
   }
+
   /* By the time whe get here (FINALLY) the_ins contains the complete
      instruction, ready to be emitted. . . */
 } /* m68k_ip() */
@@ -2899,8 +3276,6 @@ md_assemble(str)
 
 
 
-
-
 void
     md_begin()
 {
@@ -2949,7 +3324,7 @@ void
 		retval = hash_insert (op_hash, ins->name,(char *)hack);
 		/* Didn't his mommy tell him about null pointers? */
 		if(retval && *retval)
-		    as_fatal("Internal Error:  Can't hash %s: %s",ins->name,retval);
+		    as_bad("Internal Error:  Can't hash %s: %s",ins->name,retval);
 	}
 
 	for (i = 0; i < sizeof(mklower_table) ; i++)
@@ -2971,6 +3346,24 @@ void
 	alt_notend_table['F'] = 1;
 #ifdef REGISTER_PREFIX
 	alt_notend_table[REGISTER_PREFIX] = 1;
+#endif
+
+#ifndef MIT_SYNTAX_ONLY
+	/* Insert pseudo ops, these have to go into the opcode table since 
+	   gas expects pseudo ops to start with a dot */
+       {
+	 int n = 0;
+	 while (mote_pseudo_table[n].poc_name)
+	 {
+		hack=(struct m68k_incant *)
+		  obstack_alloc(&robyn,sizeof(struct m68k_incant));	   
+		hash_insert(op_hash, 
+			    mote_pseudo_table[n].poc_name, (char *)hack);
+		hack->m_operands = 0;
+		hack->m_opnum = n;
+		n++;
+	 }
+       }
 #endif
 
 	init_regtable();
@@ -3142,7 +3535,7 @@ register fragS *fragP;
 
 	switch(fragP->fr_subtype) {
 	case TAB(BCC68000,BYTE):
-    case TAB(BRANCH,BYTE):
+    case TAB(ABRANCH,BYTE):
 	know(issbyte(disp));
 	if(disp==0)
 	    as_bad("short branch with zero offset: use :w");
@@ -3154,12 +3547,12 @@ register fragS *fragP;
 	ext=2;
 	break;
  case TAB(BCC68000,SHORT):
- case TAB(BRANCH,SHORT):
+ case TAB(ABRANCH,SHORT):
      know(issword(disp));
 	fragP->fr_opcode[1]=0x00;
 	ext=2;
 	break;
- case TAB(BRANCH,LONG):
+ case TAB(ABRANCH,LONG):
      if (cpu_of_arch(current_architecture) < m68020) {
 	     if (fragP->fr_opcode[0]==0x61) {
 		     fragP->fr_opcode[0]= 0x4E;
@@ -3304,7 +3697,7 @@ segT segment;
 	/* handle SZ_UNDEF first, it can be changed to BYTE or SHORT */
 	switch (fragP->fr_subtype) {
 
-	case TAB(BRANCH,SZ_UNDEF): {
+	case TAB(ABRANCH,SZ_UNDEF): {
 		if((fragP->fr_symbol != NULL) 	/* Not absolute */
 		   && S_GET_SEGMENT(fragP->fr_symbol) == segment) {
 			fragP->fr_subtype=TAB(TABTYPE(fragP->fr_subtype),BYTE);
@@ -3341,7 +3734,7 @@ segT segment;
 		}
 
 		break;
-	} /* case TAB(BRANCH,SZ_UNDEF) */
+	} /* case TAB(ABRANCH,SZ_UNDEF) */
 
 	case TAB(FBRANCH,SZ_UNDEF): {
 		if(S_GET_SEGMENT(fragP->fr_symbol) == segment || flagseen['l']) {
@@ -3459,7 +3852,7 @@ segT segment;
 	/* now that SZ_UNDEF are taken care of, check others */
 	switch (fragP->fr_subtype) {
 	case TAB(BCC68000,BYTE):
-    case TAB(BRANCH,BYTE):
+    case TAB(ABRANCH,BYTE):
 	/* We can't do a short jump to the next instruction,
 	   so we force word mode.  */
 	if (fragP->fr_symbol && S_GET_VALUE(fragP->fr_symbol)==0 &&
@@ -3630,26 +4023,31 @@ int ok;
 	}
 
 	exp->e_siz=0;
-	if(/* ok!=80 && */exp->e_end[-1]==':' && (exp->e_end-exp->e_beg)>=2) {
+	if(/* ok!=80 && */ (exp->e_end[-1]==':' || exp->e_end[-1]=='.')
+	   && (exp->e_end-exp->e_beg)>=2) {
 		switch(exp->e_end[0]) {
 		case 's':
 		case 'S':
 		case 'b':
 		case 'B':
 			exp->e_siz=1;
+			exp->e_end-=2;
 			break;
 		case 'w':
 		case 'W':
 			exp->e_siz=2;
+			exp->e_end-=2;
 			break;
 		case 'l':
 		case 'L':
 			exp->e_siz=3;
+			exp->e_end-=2;
 			break;
 		default:
-			as_bad("Unknown size for expression \"%c\"",exp->e_end[0]);
+			if (exp->e_end[-1] == ':')
+			  as_bad("Unknown size for expression \"%c\"",exp->e_end[0]);
+			break;
 		}
-		exp->e_end-=2;
 	}
 	c_save=exp->e_end[1];
 	exp->e_end[1]='\0';
@@ -4081,6 +4479,24 @@ fixS *fixP;
 	return(fixP->fx_size + fixP->fx_where + fixP->fx_frag->fr_address);
 }
 
+void 
+tc_coff_symbol_emit_hook ()
+{
+}
+
+int 
+tc_coff_sizemachdep(frag)
+fragS *frag;
+{
+  switch (frag->fr_subtype & 0x3) 
+  {
+   case BYTE: return 1;
+   case SHORT: return 2;
+   case LONG: return 4;
+   default: abort();
+  }
+
+}
 /*
  * Local Variables:
  * comment-column: 0
@@ -4089,3 +4505,4 @@ fixS *fixP;
  */
 
 /* end of tc-m68k.c */
+

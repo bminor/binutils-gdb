@@ -53,6 +53,7 @@ ho-sysv.h
 ho-vax.h
 i386aix.mt
 m68k.mt
+m68kcoff.mt
 m88k-opcode.h
 m88k.patches
 mh-i386
@@ -95,8 +96,6 @@ tc-i960.h
 tc-m68851.h
 tc-m68k.c
 tc-m68k.h
-tc-m68kmote.c
-tc-m68kmote.h
 tc-m88k.c
 tc-m88k.h
 tc-mips.c
@@ -142,7 +141,26 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.26  1992/08/31 00:27:23  wilson
+# Revision 1.27  1992/09/09 18:38:05  ian
+# Wed Sep  9 11:10:24 1992  Ian Lance Taylor  (ian@cygnus.com)
+#
+# 	* tc-m68k.c (m68k_ip, m68k_ip_op, get_num, try_moto_index): merge
+# 	 Motorola and MIT syntax; gas can now assemble either type of
+# 	 file.
+# 	tc-m68kmote.c, tc-m68kmote.h: removed now superfluous files.
+# 	From Steve Chamberlain:
+# 	m68kcoff.mt: for m68k COFF.
+# 	obj-coffbfd.c: (fixup_mdeps) added
+# 	 (size_section) removed bad sanity check
+# 	 (fill_section) added rs_machine_dependent case
+# 	 (write_object_file) call fixup_mdeps
+# 	 (fixup_segment) set fx_subsy to 0.
+# 	obj-coffbfd.h: define WORKING_DOT_WORD (too hard to support) and
+# 	 handle m68k.
+# 	tc-m68k.c, config/tc-m68k.h: added m68k COFF support and Motorala
+# 	 pseudo ops.
+#
+# Revision 1.26  1992/08/31  00:27:23  wilson
 # Keep sparc.mt.
 #
 # Revision 1.25  1992/08/31  00:01:22  wilson
