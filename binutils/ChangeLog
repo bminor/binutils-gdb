@@ -1,3 +1,16 @@
+Wed Apr  7 22:22:50 1993  Rob Savoye  (rob@cygnus.com)
+
+	* Makefile.in: Changed check target to use DejaGnu.
+
+Thu Apr  1 12:37:13 1993  Jim Kingdon  (kingdon@cygnus.com)
+
+	* Makefile.in: Remove am29k-pinsn.c, i960-pinsn.c.
+	objdump.c: a29k and i960 are `disassemble' not `print'.
+
+	* objdump.c: Rename print_address to objdump_print_address
+	and change parameters.
+	(disassemble_data): Use objdump_print_address.
+
 Wed Mar 31 10:25:29 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* objdump.c (disassemble_data): print_insn_sparc is now a
