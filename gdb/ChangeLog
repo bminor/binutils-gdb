@@ -1,3 +1,13 @@
+Thu Jul 23 14:49:27 1998  Dawn Perchik  <dawn@cygnus.com>
+
+	* remote-mips.c (remote_mips_insert_hw_breakpoint,
+	remote_mips_remove_hw_breakpoint): New functions for hardware
+	breakpoints on LSI targets.
+	* config/mips/tm-embed.h (target_remove_hw_breakpoint,
+	target_insert_hw_breakpoint): Define to call
+	remote_mips_insert_hw_breakpoint and remote_mips_remove_hw_breakpoint,
+	respectively.
+
 start-sanitize-sky
 Thu Jul 23 13:00:28 1998  Ian Carmichael  <iancarm@cygnus.com>
 

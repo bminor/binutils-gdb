@@ -2488,6 +2488,36 @@ calculate_mask (addr, len)
   return mask;
 }
 
+
+/* Insert a hardware breakpoint.  This works only on LSI targets, which
+   implement ordinary breakpoints using hardware facilities.  */
+
+int
+remote_mips_insert_hw_breakpoint (addr, contents_cache)
+     CORE_ADDR addr;
+     char *contents_cache;
+{
+  if (strcmp (target_shortname, "lsi") == 0)
+    return mips_insert_breakpoint (addr, contents_cache);
+  else
+    return -1;
+}
+
+
+/* Remove a hardware breakpoint.  This works only on LSI targets, which
+   implement ordinary breakpoints using hardware facilities.  */
+
+int
+remote_mips_remove_hw_breakpoint (addr, contents_cache)
+     CORE_ADDR addr;
+     char *contents_cache;
+{
+  if (strcmp (target_shortname, "lsi") == 0)
+    return mips_remove_breakpoint (addr, contents_cache);
+  else
+    return -1;
+}
+
 /* Set a data watchpoint.  ADDR and LEN should be obvious.  TYPE is 0
    for a write watchpoint, 1 for a read watchpoint, or 2 for a read/write
    watchpoint. */
