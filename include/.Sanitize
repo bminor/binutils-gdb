@@ -97,12 +97,23 @@ else
 	mv new aout64.h
 fi
 
+if ( echo $* | grep keep\-29k > /dev/null ) ; then
+	echo Keeping 29k in amdcoff.h
+else
+	echo Sanitizing 29k in amdcoff.h
+	rm -f amdcoff.h
+fi
+
 echo Done in `pwd`.
 
 #
 #
 # $Log$
-# Revision 1.7  1991/07/31 03:11:46  gnu
+# Revision 1.8  1991/07/31 17:36:04  gnu
+# Remove amdcoff.h by default because its copyright is not assigned to FSF.
+# "Sanitize -keep-29k" will keep it.
+#
+# Revision 1.7  1991/07/31  03:11:46  gnu
 # Remove symseg.h, the ancient GDB symbol-segments (gdb-specific debug
 # information) definition.
 #
