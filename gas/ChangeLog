@@ -1,3 +1,25 @@
+2003-05-01  Christian Groessler <chris@groessler.org>
+
+	* expr.h: Fix comments in operatorT typedef.
+	* config/tc-z8k.c: Add 2003 to copyright message.  
+	Fold s_segm() and s_unseg() into one function s_segm(parm) which
+	decides by the parameter.
+	(md_begin): Don't set linkrelax.  Only set Z8002 default if no
+	command line argument was given to select the intended
+	architecure.
+	(get_interrupt_operand): Warn if NOP type code is emitted.
+	(newfix): New parameter 'size', forward it to 'fix_new_exp'.
+	(apply_fix): Call newfix with additional 'size' parameter.
+	(build_bytes): Remove unused variable 'nib'.  Detect overflow in
+	4 bit immediate arguments.
+	(md_longopts): Add 'linkrelax' option.
+	(md_parse_option): Adapt to new s_segm function.  Set 'linkrelax'
+	variable when 'linkrelax' command line option is specified.
+	(md_show_usage): Display 'linkrelax' option.
+	(md_apply_fix3): Fix cases R_IMM4L, R_JR, and R_IMM8.  Add cases
+	R_CALLR and R_REL16.
+	* config/tc-z8k.h: Undef WARN_SIGNED_OVERFLOW_WORD.
+
 2003-04-30  H.J. Lu <hjl@gnu.org>
 
 	* config/tc-ia64.c (ia64_number_to_chars): New function pointer.
