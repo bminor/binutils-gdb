@@ -1,3 +1,9 @@
+Mon Dec  9 16:42:43 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* mn10200-opc.c: Create mn10200 opcode table.
+	* mn10200-dis.c: Flesh out mn10200 disassembler.  Not ready,
+	but moving along nicely.
+
 Sun Dec  8 04:28:31 1996  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* Makefile.in (ALL_MACHINES):  Add mips16-opc.o.
