@@ -1644,11 +1644,19 @@ DEFUN(end_symtab, (filename, language), char *filename AND long language)
   symtab -> line_charpos = 0;
   
   /* FIXME:  The following may need to be expanded for other languages */
-  if (language == LANG_C89 || language == LANG_C) 
+  switch (language)
     {
-      symtab -> language = language_c;
+      case LANG_C89:
+      case LANG_C:
+	symtab -> language = language_c;
+	break;
+      case LANG_C_PLUS_PLUS:
+	symtab -> language = language_cplus;
+	break;
+      default:
+	;
     }
-  
+
   /* Link the new symtab into the list of such.  */
   symtab -> next = symtab_list;
   symtab_list = symtab;

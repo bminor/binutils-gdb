@@ -122,6 +122,7 @@ set_language_command (ignore, from_tty)
     printf("The currently understood settings are:\n\n\
 local or auto    Automatic setting based on source file\n\
 c                Use the C language\n\
+c++              Use the C++ language\n\
 modula-2         Use the Modula-2 language\n");
     /* Restore the silly string. */
     set_language(current_language->la_language);
@@ -280,6 +281,7 @@ set_language(lang)
       current_language = languages[i];
       set_type_range ();
       set_lang_str();
+      break;
     }
   }
 }
@@ -379,6 +381,7 @@ binop_result_type(v1,v2)
    switch(current_language->la_language)
    {
    case language_c:
+   case language_cplus:
       if (TYPE_CODE(VALUE_TYPE(v1))==TYPE_CODE_FLT)
 	 return TYPE_CODE(VALUE_TYPE(v2)) == TYPE_CODE_FLT && l2 > l1 ?
 	    VALUE_TYPE(v2) : VALUE_TYPE(v1);
@@ -537,6 +540,7 @@ integral_type (type)
    switch(current_language->la_language)
    {
    case language_c:
+   case language_cplus:
       return (TYPE_CODE(type) != TYPE_CODE_INT) &&
 	 (TYPE_CODE(type) != TYPE_CODE_ENUM) ? 0 : 1;
    case language_m2:
@@ -572,6 +576,7 @@ character_type (type)
       return TYPE_CODE(type) != TYPE_CODE_CHAR ? 0 : 1;
 
    case language_c:
+   case language_cplus:
       return (TYPE_CODE(type) == TYPE_CODE_INT) &&
 	 TYPE_LENGTH(type) == sizeof(char)
 	 ? 1 : 0;
@@ -589,6 +594,7 @@ boolean_type (type)
       return TYPE_CODE(type) != TYPE_CODE_BOOL ? 0 : 1;
 
    case language_c:
+   case language_cplus:
       return TYPE_CODE(type) != TYPE_CODE_INT ? 0 : 1;
    }
 }
@@ -618,6 +624,7 @@ structured_type(type)
    switch(current_language->la_language)
    {
    case language_c:
+   case language_cplus:
       return (TYPE_CODE(type) == TYPE_CODE_STRUCT) ||
 	 (TYPE_CODE(type) == TYPE_CODE_UNION) ||
 	    (TYPE_CODE(type) == TYPE_CODE_ARRAY);
@@ -643,6 +650,7 @@ value_true(val)
   switch (current_language->la_language) {
 
   case language_c:
+  case language_cplus:
     return !value_zerop (val);
 
   case language_m2:
@@ -798,6 +806,7 @@ binop_type_check(arg1,arg2,op)
       {
 #ifdef _LANG_c
       case language_c:
+      case language_cplus:
 	 switch(op)
 	 {
 	 case BINOP_DIV:

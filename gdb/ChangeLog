@@ -1,3 +1,28 @@
+Tue Nov  5 16:47:47 1991  Per Bothner  (bothner at cygnus.com)
+
+	Add C++ as a separate language.
+	* defs.h (enum language): Add language_cplus.
+	* dwarfread.c (end_symtab):  Support language_cplus.
+	* c-exp.y:  Add new struct language_defn cplus_language_defn.
+	Don't set c to be the default language (see main.c).
+	* c-exp.y (yylex):  Only look for field of this if
+	language is C++.  (First difference from C!)
+	* language.c:  Add case branches for C++ (currently, all
+	the same as C).  Also, add c++ to "usage" note for "set lang".
+	* valprint.c (typedef_print).  Add case branches for C++. 
+	* main.c (main):  New way to set initial language:  Look at
+	file extension of psymtab containing main().  (Same as we
+	do for symtabs, but avoid loading the symtab yet.)
+	* symtab.c: New routine find_main_psymtab(), used by main()
+	to set initial language.
+	* symfile.c (allocate_symtab):  Move code for mapping file
+	extensions-> languages to new deduce_language_from_filename().
+
+	Fix a C++ problem when looking for methods in super-classes.
+	There was confusion between base and derived types.
+	* valops.c (value_fn_field):  Change function interface.
+	* values.c:  Use new value_fn_field interface.
+
 Mon Nov  4 10:49:33 1991  Per Bothner  (bothner at cygnus.com)
 
 	* infrun.c:  Fixed typo in comment.

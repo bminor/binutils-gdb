@@ -1348,7 +1348,10 @@ yylex ()
     int hextype;
 
     sym = lookup_symbol (tmp, expression_context_block,
-			 VAR_NAMESPACE, &is_a_field_of_this, NULL);
+			 VAR_NAMESPACE,
+			 current_language->la_language == language_cplus
+			 ? &is_a_field_of_this : NULL,
+			 NULL);
     if ((sym && SYMBOL_CLASS (sym) == LOC_BLOCK) ||
         lookup_partial_symtab (tmp))
       {
@@ -1480,11 +1483,26 @@ struct type ** const (c_builtin_types[]) =
   0
 };
 
-/* FIXME:  Eventually do a separate defintion for C++.  */
-
 const struct language_defn c_language_defn = {
   "c",				/* Language name */
   language_c,
+  c_builtin_types,
+  range_check_off,
+  type_check_off,
+  c_parse,
+  c_error,
+  &BUILTIN_TYPE_LONGEST,	 /* longest signed   integral type */
+  &BUILTIN_TYPE_UNSIGNED_LONGEST,/* longest unsigned integral type */
+  &builtin_type_double,		/* longest floating point type */ /*FIXME*/
+  "0x%x", "0x%", "x",		/* Hex   format, prefix, suffix */
+  "0%o",  "0%",  "o",		/* Octal format, prefix, suffix */
+  c_op_print_tab,		/* expression operators for printing */
+  LANG_MAGIC
+};
+
+const struct language_defn cplus_language_defn = {
+  "c++",				/* Language name */
+  language_cplus,
   c_builtin_types,
   range_check_off,
   type_check_off,
@@ -1552,5 +1570,5 @@ _initialize_c_exp ()
 	       "double complex");
 
   add_language (&c_language_defn);
-  set_language (language_c);		/* Make C the default language */
+  add_language (&cplus_language_defn);
 }

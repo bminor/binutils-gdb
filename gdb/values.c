@@ -879,21 +879,23 @@ value_field (arg1, fieldno)
   return value_primitive_field (arg1, 0, fieldno, VALUE_TYPE (arg1));
 }
 
+/* Return a non-virtual function as a value.
+   F is the list of member functions which contains the desired method.
+   J is an index into F which provides the desired method. */
+
 value
-value_fn_field (arg1, fieldno, subfieldno)
-     register value arg1;
-     register int fieldno;
-     int subfieldno;
+value_fn_field (f, j)
+     struct fn_field *f;
+     int j;
 {
   register value v;
-  struct fn_field *f = TYPE_FN_FIELDLIST1 (VALUE_TYPE (arg1), fieldno);
-  register struct type *type = TYPE_FN_FIELD_TYPE (f, subfieldno);
+  register struct type *type = TYPE_FN_FIELD_TYPE (f, j);
   struct symbol *sym;
 
-  sym = lookup_symbol (TYPE_FN_FIELD_PHYSNAME (f, subfieldno),
+  sym = lookup_symbol (TYPE_FN_FIELD_PHYSNAME (f, j),
 		       0, VAR_NAMESPACE, 0, NULL);
   if (! sym) error ("Internal error: could not find physical method named %s",
-		    TYPE_FN_FIELD_PHYSNAME (f, subfieldno));
+		    TYPE_FN_FIELD_PHYSNAME (f, j));
   
   v = allocate_value (type);
   VALUE_ADDRESS (v) = BLOCK_START (SYMBOL_BLOCK_VALUE (sym));
