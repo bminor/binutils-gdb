@@ -1,3 +1,9 @@
+Wed Jul  1 16:58:50 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* coff-sh.c (sh_relax_delete_bytes): Correct address comparisons
+ 	when handling 32 bit immediate relocs.
+	* elf32-sh.c (sh_elf_relax_delete_bytes): Likewise.
+
 Tue Jun 30 09:55:03 1998  Jeffrey A Law  (law@cygnus.com)
 
 	* section.c (STD_SECTION): Account for recently added gc_mark
