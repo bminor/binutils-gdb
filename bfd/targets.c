@@ -40,7 +40,7 @@ extern bfd_target m88k_bcs_vec;
 bfd_target *target_vector[] = 
   {
 #ifndef INTEL960VERSION
-    &srec_vec,
+
 
 #endif /* INTEL960VERSION */
     &ieee_vec,
@@ -51,6 +51,6 @@ bfd_target *target_vector[] =
     &m88k_bcs_vec,
     &b_out_vec_big_host,
     &b_out_vec_little_host,
-
+    &srec_vec,
     NULL
     };

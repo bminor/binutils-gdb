@@ -293,7 +293,8 @@ bfd *abfd;
   while (loop) {
     oasys_record_union_type record;
     oasys_read_record(abfd, &record);
-
+    if (record.header.length < sizeof(record.header))
+      return (bfd_target *)NULL;
 
     switch ((oasys_record_enum_type)(record.header.type)) {
     case oasys_record_is_header_enum:

@@ -1864,7 +1864,7 @@ bfd_target ieee_vec =
   (HAS_RELOC | EXEC_P |		/* object flags */
    HAS_LINENO | HAS_DEBUG |
    HAS_SYMS | HAS_LOCALS | DYNAMIC | WP_TEXT | D_PAGED),
-  (SEC_CODE|SEC_DATA|SEC_ROM
+  (SEC_CODE|SEC_DATA|SEC_ROM|SEC_HAS_CONTENTS
    |SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* section flags */
   0,				/* valid reloc types */
   ' ',				/* ar_pad_char */
