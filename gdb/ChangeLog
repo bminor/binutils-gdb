@@ -1,3 +1,7 @@
+Fri Oct  9 14:20:08 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* config/bigmips.mh config/littlemips.mh:  Remove mips-xdep.o.
+
 Fri Oct  9 08:41:11 1992  Ian Lance Taylor  (ian@cygnus.com)
 
 	* xm-hppah.h: if __STDC__ is not defined, define
@@ -2656,7 +2660,7 @@ Fri Apr 24 07:41:19 1992  Stu Grossman  (grossman at cygnus.com)
 	rewrite, only leave out the bugs.
 
 	* Makefile.in:  Add 29k/UDI support.  Improve depend.
-	* .Sanitize, alldeps.mak, configure.in, depend:  Add 29k/UDI support.
+	* alldeps.mak, configure.in, depend:  Add 29k/UDI support.
 
 	* am29k-tdep.c:  Update to use new calling conventions, and misc
 	symbol elements.
@@ -3692,10 +3696,10 @@ Thu Mar  5 23:56:01 1992  John Gilmore  (gnu at cygnus.com)
 
 Thu Mar  5 12:32:09 1992  Stu Grossman  (grossman at cygnus.com)
 
-	* config.sub configure.in config/.Sanitize config/mh-irix4
-	gdb/.Sanitize gdb/configure.in gdb/mips-tdep.c gdb/mipsread.c
+	* config.sub configure.in config/mh-irix4
+	gdb/configure.in gdb/mips-tdep.c gdb/mipsread.c
 	gdb/procfs.c gdb/signame.h gdb/tm-irix3.h gdb/tm-mips.h
-	gdb/xm-irix4.h gdb/config/.Sanitize gdb/config/mt-irix3
+	gdb/xm-irix4.h gdb/config/mt-irix3
 	gdb/config/mh-irix4 texinfo/configure.in:  Port to SGI Irix-4.x.
 
 Wed Mar  4 11:56:42 1992  Fred Fish  (fnf@cygnus.com)
