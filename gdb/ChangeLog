@@ -1,3 +1,33 @@
+Fri Jun 10 10:38:15 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* hppa-tdep.c (target_read_pc, target_write_pc): Accept (and
+	ignore) a PID argument.
+	(hppa_pop_frame): Pass a PID to target_write_pc.
+	* config/pa/tm-hppa.h (TARGET_READ_PC, TARGET_WRITE_PC): Accept
+	and pass through a PID argument.
+	(target_read_pc, target_write_pc): Update prototypes.
+
+Thu Jun  9 18:10:44 1994  Kung Hsu  (kung@mexican.cygnus.com)
+
+	* Makefile.in: add new file sparclite-tdep.c.
+	* sparclite/Makefile.in: add new file sparclite-stub.c.
+	* sparclite/hw_breakpoint.note: note for SPARClite hardware breapoint
+	support.
+	* config/sparc/sparclite.mt: add sparclite-tdep.o.
+	* config/sparc/tm-sparclite.h: add hardware breakpoints support 
+	defiines and code.
+	* sparclite-tdep.c: new file, contains hardware breakpoint support
+	code.
+	* sparclite-stub.c: new file, stub code that add support hardware
+	breakpoint support.
+	* breakpoint.c: add hardware breakpoint support.
+	* breakpoint.h: add new breakpoint type to support hardware
+	breakpoint.
+	* config/mips/nm-irix4.h: change interface for target dependent
+	code supporting watch point.
+	* config/pa/nm-hppab.h: change interface for target dependent
+	code supporting watch point.
+
 Thu Jun  9 14:59:58 1994  Kung Hsu  (kung@mexican.cygnus.com)
 
 	* remote-os9k.c (rombuf_command): fix a bug accepting rombug

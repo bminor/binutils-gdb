@@ -1140,7 +1140,7 @@ hppa_pop_frame ()
 
   /* Else use the value in %rp to set the new PC.  */
   else 
-    target_write_pc (read_register (RP_REGNUM));
+    target_write_pc (read_register (RP_REGNUM), 0);
 
   write_register (FP_REGNUM, read_memory_integer (fp, 4));
 
@@ -1373,7 +1373,8 @@ hppa_fix_call_dummy (dummy, pc, fun, nargs, args, type, gcc_p)
 /* Get the PC from %r31 if currently in a syscall.  Also mask out privilege
    bits.  */
 CORE_ADDR
-target_read_pc ()
+target_read_pc (pid)
+     int pid;
 {
   int flags = read_register (FLAGS_REGNUM);
 
@@ -1385,8 +1386,9 @@ target_read_pc ()
 /* Write out the PC.  If currently in a syscall, then also write the new
    PC value into %r31.  */
 void
-target_write_pc (v)
+target_write_pc (v, pid)
      CORE_ADDR v;
+     int pid;
 {
   int flags = read_register (FLAGS_REGNUM);
 
