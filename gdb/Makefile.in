@@ -451,13 +451,13 @@ tags: TAGS
 gdb.tar.Z: force_update
 	./configure none
 	rm -f alldeps.mak
-	$(MAKE) alldeps.mak
+	$(MAKE) $(MFLAGS) alldeps.mak
 	./configure none
 	rm -f depend
-	$(MAKE) depend
+	$(MAKE) $(MFLAGS) depend
 	./configure none
-	$(MAKE) gdb.info
-	$(MAKE) gdb-$(VERSION).tar.Z
+	$(MAKE) $(MFLAGS) gdb.info
+	$(MAKE) $(MFLAGS) gdb-$(VERSION).tar.Z
 
 gdb-$(VERSION).tar.Z: ${TARFILES} ${TARDIRS}
 	rm -f gdb.tar gdb-$(VERSION).tar.Z; rm -rf $(DIST)
