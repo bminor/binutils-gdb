@@ -81,7 +81,7 @@ char   CoffFileName[100] = "";
 #define TYPE_A29050     3
 static  char *processor_name[] = { "Unknown", "Am29000", "Am29030", "Am29050" };
 static  int processor_type=TYPE_UNKNOWN;
-#define FREEZE_MODE     (read_register(CPS_REGNUM) && 0x400)
+#define FREEZE_MODE     (read_register(CPS_REGNUM) & 0x400)
 #define USE_SHADOW_PC	((processor_type == TYPE_A29050) && FREEZE_MODE) 
 
 #define LLOG_FILE "udi.log"

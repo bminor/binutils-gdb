@@ -1,3 +1,8 @@
+Tue Feb  9 20:07:18 1993  John Gilmore  (gnu@cygnus.com)
+
+	* remote-udi.c (FREEZE_MODE):  Fix && for & typo.  Found and
+	fixed by Lynn D. Shumaker, shumaker@saifr00.cfsat.honeywell.com.
+
 Tue Feb  9 08:18:07 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* config/i386sco4.mh (MUNCH_DEFINE): Pass -p to nm to avoid bug in
