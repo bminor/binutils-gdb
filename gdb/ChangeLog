@@ -1,3 +1,7 @@
+Fri Jul 30 08:58:01 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* symtab.c (gdb_mangle_name): Deal with it if type lacks a name.
+
 Fri Jul 30 07:36:53 1993  Fred Fish  (fnf@deneb.cygnus.com)
 
 	* NEWS:  Add note that DEC alpha support is host only, not native.
