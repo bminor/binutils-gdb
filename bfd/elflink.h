@@ -4287,6 +4287,11 @@ elf_link_output_extsym (h, data)
 						 input_sec->output_section);
 	    if (sym.st_shndx == (unsigned short) -1)
 	      {
+		(*_bfd_error_handler)
+		  (_("%s: could not find output section %s for input section %s"),
+		   bfd_get_filename (finfo->output_bfd),
+		   input_sec->output_section->name,
+		   input_sec->name);
 		eoinfo->failed = true;
 		return false;
 	      }
