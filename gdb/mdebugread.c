@@ -56,13 +56,13 @@
 #include "gdb_assert.h"
 #include "block.h"
 #include "dictionary.h"
+#include "mdebugread.h"
 
 /* These are needed if the tm.h file does not contain the necessary
    mips specific definitions.  */
 
 #ifndef MDEBUG_EFI_SYMBOL_NAME
 #define MDEBUG_EFI_SYMBOL_NAME "__GDB_EFI_INFO__"
-extern void ecoff_relocate_efi (struct symbol *, CORE_ADDR);
 #include "coff/sym.h"
 #include "coff/symconst.h"
 struct mdebug_extra_func_info

@@ -49,7 +49,6 @@ extern int mips_step_skips_delay (CORE_ADDR);
    hang mdebug_extra_func_info's off of this.  */
 
 #define MDEBUG_EFI_SYMBOL_NAME "__GDB_EFI_INFO__"
-extern void ecoff_relocate_efi (struct symbol *, CORE_ADDR);
 
 /* Specific information about a procedure.
    This overlays the MIPS's PDR records, 

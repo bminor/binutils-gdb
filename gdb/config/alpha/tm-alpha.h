@@ -35,7 +35,6 @@ struct symbol;
    alpha_extra_func_info_t's off of this.  */
 
 #define MDEBUG_EFI_SYMBOL_NAME "__GDB_EFI_INFO__"
-extern void ecoff_relocate_efi (struct symbol *, CORE_ADDR);
 
 #define RA_REGNUM 26		/* XXXJRT needed by mdebugread.c */
 

@@ -1,5 +1,13 @@
 2004-10-30  Andrew Cagney  <cagney@gnu.org>
 
+	* objfiles.c: Include "mdebugread.h".
+	* mdebugread.c: Include "mdebugread.h".
+	(ecoff_relocate_cfi): Delete.
+	* config/alpha/tm-alpha.h (ecoff_relcate_cfi): Delete.
+	* config/mips/tm-mips.h (ecoff_relcate_cfi): Delete.
+	* mdebugread.h (ecoff_relocate_efi): New file.
+	* Makefile.in: Update dependencies.
+	
 	* mips-tdep.c (struct frame_extra_info): Delete.
 	(temp_proc_desc): Delete.
 

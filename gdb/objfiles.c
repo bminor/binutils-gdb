@@ -33,7 +33,7 @@
 #include "gdb-stabs.h"
 #include "target.h"
 #include "bcache.h"
-
+#include "mdebugread.h"
 #include "gdb_assert.h"
 #include <sys/types.h>
 #include "gdb_stat.h"
