@@ -1,3 +1,8 @@
+Fri Aug  9 14:16:14 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-sh.c (sh_do_align): If not BFD_ASSEMBLER, always align
+	with nops if not in data_section or bss_section.
+
 Thu Aug  8 12:32:56 1996  Klaus Kaempf  <kkaempf@progis.de>
 
 	Add support for openVMS/Alpha.
