@@ -1,3 +1,7 @@
+2003-05-24  Mark Kettenis  <kettenis@gnu.org>
+
+	* sparcnbsd-tdep.c: Include "gdb_string.h".
+
 2003-05-23  Andrew Cagney  <cagney@redhat.com>
 
 	* p-valprint.c (pascal_val_print): Replace extract_address with
