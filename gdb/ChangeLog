@@ -1,3 +1,22 @@
+Wed Oct  9 17:03:34 1991  John Gilmore  (gnu at cygnus.com)
+
+	* mipsread.c, coffread.c:  initialise TYPE_VPTR_FIELDNO to -1.
+	This avoids coredumps under `set print object on' in value_headof
+	(called erroneously by value_from_vtable_info) for `p &struct'
+	or `p *struct'.  From Peter Schauer.
+
+Mon Oct  7 00:06:52 1991  John Gilmore  (gnu at cygnus.com)
+
+	* Makefile.in:  Roll version to 4.1.2.
+	* dbxread.c:  Use aout64.h, not a.out.gnu.h.  Get external symbol entry
+	size from BFD (but, FIXME, we don't yet read external nlists's and
+	convert them to internal nlists's before handling them -- we still
+	assume they have the same size and alignment.)  Use SET_NAMESTRING
+	everywhere useful.
+	* exec.c (exec_file_command):  Move dead coff-encapsulation code
+	to BFD.
+	* m88k-tdep.c, m88k-xdep.c:  Remove encap test and #inc <a.out.h>.
+
 Fri Oct  4 22:30:06 1991  John Gilmore  (gnu at cygnus.com)
 
 	* configure.in, tm-i386v.h, xm-i386v.h: Intel 386 Mach host port.
