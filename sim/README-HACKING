@@ -1,0 +1,126 @@
+This is a loose collection of notes for people hacking on simulators.
+If this document gets big enough it can be prettied it up then.
+
+Contents
+
+- The "common" directory
+- Common Makefile Support
+- Generating "configure" files
+
+The "common" directory
+======================
+
+The common directory contains:
+
+- common documentation files (e.g. run.1, and maybe in time .texi files)
+- common source files (e.g. run.c)
+- common Makefile fragment and configury (e.g. Make-common.in, aclocal.m4).
+
+In addition "common" contains portions of the system call support
+(e.g. callback.c, nltvals.def).
+
+Even though no files are built in this directory, it is still configured
+so support for regenerating nltvals.def is present.
+
+Common Makefile Support
+=======================
+
+A common configuration framework is available for simulators that want
+to use it.  The common framework exists to remove a lot of duplication
+in configure.in and Makefile.in, and it also provides a foundation for
+enhancing the simulators uniformly (e.g. the more they share in common
+the easier a feature added to one is added to all).
+
+The configure.in of a simulator using the common framework should look like:
+
+--- snip ---
+dnl Process this file with autoconf to produce a configure script.
+sinclude(../common/aclocal.m4)
+AC_PREREQ(2.5)dnl
+AC_INIT(Makefile.in)
+
+SIM_AC_COMMON
+
+... target specific additions ...
+
+SIM_AC_OUTPUT
+--- snip ---
+
+SIM_AC_COMMON:
+
+- invokes the autoconf macros most often used by the simulators
+- defines --enable/--with options usable by all simulators
+- initializes sim_link_files/sim_link_links as the set of symbolic links
+  to set up
+
+SIM_AC_OUTPUT:
+
+- creates the symbolic links defined in sim_link_{files,links}
+- creates config.h
+- creates the Makefile
+
+The Makefile.in of a simulator using the common framework should look like:
+
+--- snip ---
+# Makefile for blah ...
+# Copyright blah ...
+
+## COMMON_PRE_CONFIG_FRAG
+
+# These variables are given default values in COMMON_PRE_CONFIG_FRAG.
+# We override the ones we need to here.
+# Not all of these need to be mentioned, only the necessary ones.
+
+# List of object files, less common parts.
+SIM_OBJS =
+# List of flags to always pass to $(CC).
+SIM_EXTRA_CFLAGS =
+# List of extra libraries to link with.
+SIM_EXTRA_LIBS =
+# List of extra program dependencies.
+SIM_EXTRA_LIBDEPS =
+# List of main object files for `run'.
+SIM_RUN_OBJS = run.o
+# Dependency of `all' to build any extra files.
+SIM_EXTRA_ALL =
+# Dependency of `install' to install any extra files.
+SIM_EXTRA_INSTALL =
+# Dependency of `clean' to clean any extra files.
+SIM_EXTRA_CLEAN =
+
+## COMMON_POST_CONFIG_FRAG
+
+# Rules need to build $(SIM_OBJS), plus whatever else the target wants.
+
+... target specific rules ...
+--- snip ---
+
+COMMON_{PRE,POST}_CONFIG_FRAG are markers for SIM_AC_OUTPUT to tell it
+where to insert the two pieces of common/Make-common.in.
+The resulting Makefile is created by doing autoconf substitions on
+both the target's Makefile.in and Make-common.in, and inserting
+the two pieces of Make-common.in into the target's Makefile.in at
+COMMON_{PRE,POST}_CONFIG_FRAG.
+
+Generating "configure" files
+============================
+
+For target's using the common framework, "configure" can be generated
+by running autoconf.  This works because configure.in contains
+"sinclude(../common/aclocal.m4)".
+
+To regenerate the configure files for all targets using the common framework:
+
+	$  cd devo/sim
+	$  make -f Makefile.in autoconf-common
+
+To add a change-log entry to the ChangeLog file for each updated
+directory (WARNING - check the modified new-ChangeLog files before
+renaming):
+
+	$  make -f Makefile.in autoconf-changelog
+	$  more */new-ChangeLog
+	$  for f in */new-ChangeLog ; do echo $f ; mv $f `dirname $f`/ChangeLog ; done
+
+
+

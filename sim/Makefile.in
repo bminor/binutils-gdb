@@ -1,5 +1,5 @@
 #    Makefile template for Configure for the sim library.
-#    Copyright (C) 1993, 1995 Free Software Foundation, Inc.
+#    Copyright (C) 1993, 1995, 1997 Free Software Foundation, Inc.
 #    Written by Cygnus Support.
 # 
 # This file is part of BFD, the Binary File Descriptor library.
@@ -77,6 +77,11 @@ CC_FOR_BUILD = $(CC)
 # @target_makefile_frag@
 ###
 
+RUNTEST = `if [ -f $${srcdir}/../dejagnu/runtest ] ; then \
+		echo $${srcdir}/../dejagnu/runtest ; else echo runtest; \
+	   fi`
+RUNTESTFLAGS=
+
 FLAGS_TO_PASS = \
 	"prefix=$(prefix)" \
 	"exec_prefix=$(exec_prefix)" \
@@ -90,25 +95,41 @@ FLAGS_TO_PASS = \
 	"MAKEINFO=$(MAKEINFO)" \
 	"INSTALL=$(INSTALL)" \
 	"INSTALL_DATA=$(INSTALL_DATA)" \
-	"INSTALL_PROGRAM=$(INSTALL_PROGRAM)"
+	"INSTALL_PROGRAM=$(INSTALL_PROGRAM)" \
+	"RUNTEST=$(RUNTEST)" \
+	"RUNTESTFLAGS=$(RUNTESTFLAGS)"
+
+# The use of $$(x_FOR_TARGET) reduces the command line length by not
+# duplicating the lengthy definition.
+TARGET_FLAGS_TO_PASS = \
+	"prefix=$(prefix)" \
+	"exec_prefix=$(exec_prefix)" \
+	"against=$(against)" \
+	'CC=$$(CC_FOR_TARGET)' \
+	"CC_FOR_TARGET=$(CC_FOR_TARGET)" \
+	"CFLAGS=$(CFLAGS)" \
+	"CHILLFLAGS=$(CHILLFLAGS)" \
+	'CHILL=$$(CHILL_FOR_TARGET)' \
+	"CHILL_FOR_TARGET=$(CHILL_FOR_TARGET)" \
+	"CHILL_LIB=$(CHILL_LIB)" \
+	'CXX=$$(CXX_FOR_TARGET)' \
+	"CXX_FOR_TARGET=$(CXX_FOR_TARGET)" \
+	"CXXFLAGS=$(CXXFLAGS)" \
+	"INSTALL=$(INSTALL)" \
+	"INSTALL_PROGRAM=$(INSTALL_PROGRAM)" \
+	"INSTALL_DATA=$(INSTALL_DATA)" \
+	"MAKEINFO=$(MAKEINFO)" \
+	"RUNTEST=$(RUNTEST)" \
+	"RUNTESTFLAGS=$(RUNTESTFLAGS)"
+
 
 all:
 	@rootme=`pwd` ; export rootme ; \
-	for dir in . ${SUBDIRS}; do \
+	for dir in . `echo ${SUBDIRS} | sed 's/testsuite//'` ; do \
 		if [ "$$dir" = "." ]; then \
 			true; \
 		elif [ -d $$dir ]; then \
 			(cd $$dir; $(MAKE) $(FLAGS_TO_PASS)); \
-		else true; fi; \
-	done
-
-clean mostlyclean: 
-	@rootme=`pwd` ; export rootme ; \
-	for dir in . ${SUBDIRS}; do \
-		if [ "$$dir" = "." ]; then \
-			true; \
-		elif [ -d $$dir ]; then \
-			(cd $$dir; $(MAKE) $(FLAGS_TO_PASS) $@); \
 		else true; fi; \
 	done
 
@@ -132,6 +153,23 @@ install:
 			(cd $$dir; $(MAKE) $(FLAGS_TO_PASS) install); \
 		else true; fi; \
 	done
+
+installcheck:
+	@echo No installcheck target is available yet for the GNU simulators.
+
+installcheck:
+
+# The check target can not use subdir_do, because subdir_do does not
+# use TARGET_FLAGS_TO_PASS.
+check: force
+	@if [ -f testsuite/Makefile ]; then \
+	  rootme=`pwd`; export rootme; \
+	  rootsrc=`cd $(srcdir); pwd`; export rootsrc; \
+	  cd testsuite; \
+	  $(MAKE) $(TARGET_FLAGS_TO_PASS) check; \
+	else true; fi
+
+
 
 info:
 install-info:
@@ -167,6 +205,27 @@ autoconf-common:
 		then \
 		    echo "Running autoconf in $$d ..." ; \
 		    (cd $$d && autoconf) ; \
+		fi ; \
+	    fi ; \
+	done
+
+autoconf-changelog:
+	user="`finger $$USER | sed -n 's/^.*Name: //p'` <$$USER@`hostname`>" ; \
+	date="`date | sed 's/ [^ ]* \([0-9]*\)$$/ \1/'`" ; \
+	echo "$$date $$user" ; \
+	for d in * ; \
+	do \
+	    if [ -d $$d -a -f $$d/configure.in ] ; \
+	    then \
+		if grep SIM_AC_COMMON $$d/configure.in >/dev/null ; \
+		then \
+		    echo "Creating new-ChangeLog in $$d ..." ; \
+		    ( echo "$$date  $$user" ; \
+		      echo "" ; \
+		      echo "	* configure: Regenerated to track ../common/aclocal.m4 changes." ; \
+		      echo "" ; \
+		      cat $$d/ChangeLog \
+		    ) > $$d/new-ChangeLog ; \
 		fi ; \
 	    fi ; \
 	done
