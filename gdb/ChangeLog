@@ -1,3 +1,11 @@
+2002-04-10  Michal Ludvig  <mludvig@suse.cz>
+
+	* x86-64-linux-nat.c (child_resume, child_xfer_memory): Delete.
+	(PTRACE_XFER_TYPE): Moved to config/i386/nm-x86-64.h.
+	(kernel_u_size): Added.
+	* config/i386/nm-x86-64.h (CHILD_XFER_MEMORY, CHILD_RESUME): Delete.
+	(PTRACE_XFER_TYPE): Moved here from config/i386/nm-x86-64.h.
+
 2002-04-04  Jim Ingham  <jingham@apple.com>
  
        * valarith.c (find_size_for_pointer_math): New function, either returns
