@@ -1,3 +1,19 @@
+1998-10-06  Jason Molenda  (jsm@bugshack.cygnus.com)
+
+ 	Eliminate a few warnings from the compiler.
+	* breakpoint.h: Add prototype.
+	* breakpoint.c (do_enable_breakpoint): cast mem_cnt, i to (void).
+	* configure.in: Check if strdup declaration is necessary.
+	* configure: Regenerated.
+	* defs.h: Add prototypes.
+	* gdb_string.h: Only define strdup if necessary.
+	* gdbthread.h: Add prototypes.
+	* printcmd.c: Add prototyptes.
+	(disassemble_command): Remove unused variable 'section'.
+	* symtab.c: Add prototypes.
+	* symtab.h: Include gnu-regex.h, add prototype.
+	* thread.c: Add prototype.
+
 Mon Oct  5 19:44:39 1998  Stan Shebs  <shebs@andros.cygnus.com>
 
 	From David Purves  <purves@apogee.com>:

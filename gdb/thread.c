@@ -1,5 +1,5 @@
 /* Multi-process/thread control for GDB, the GNU debugger.
-   Copyright 1986, 1987, 1988, 1993
+   Copyright 1986, 1987, 1988, 1993, 1998
 
    Contributed by Lynx Real-Time Systems, Inc.  Los Gatos, CA.
    Free Software Foundation, Inc.
@@ -81,6 +81,9 @@ thread_apply_all_command PARAMS ((char *, int));
 
 static void
 thread_apply_command PARAMS ((char *, int));
+
+static int
+thread_alive PARAMS ((struct thread_info *));
 
 void
 init_thread_list ()

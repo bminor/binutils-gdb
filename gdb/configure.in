@@ -1,5 +1,5 @@
 dnl Autoconf configure script for GDB, the GNU debugger.
-dnl Copyright 1995, 1996 Free Software Foundation, Inc.
+dnl Copyright 1995, 1996, 1997, 1998 Free Software Foundation, Inc.
 dnl
 dnl This file is part of GDB.
 dnl 
@@ -81,6 +81,12 @@ AC_C_CONST
 AC_CHECK_FUNCS(setpgid sbrk select poll sigaction isascii bzero bcopy \
                memcpy btowc)
 AC_FUNC_ALLOCA
+
+BFD_NEED_DECLARATION(malloc)
+BFD_NEED_DECLARATION(realloc)
+BFD_NEED_DECLARATION(free)
+BFD_NEED_DECLARATION(strerror)
+BFD_NEED_DECLARATION(strdup)
 
 # If we are configured native on GNU/Linux, work around problems with sys/procfs.h
 if test "${target}" = "${host}"; then
@@ -202,12 +208,6 @@ fi
 AC_MSG_RESULT($gdb_cv_scanf_has_long_double)
 
 AC_FUNC_MMAP
-
-BFD_NEED_DECLARATION(malloc)
-BFD_NEED_DECLARATION(realloc)
-BFD_NEED_DECLARATION(free)
-
-BFD_NEED_DECLARATION(strerror)
 
 dnl See if thread_db library is around for Solaris thread debugging.  Note that
 dnl we must explicitly test for version 1 of the library because version 0

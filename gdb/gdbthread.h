@@ -1,5 +1,5 @@
 /* Multi-process/thread control defs for GDB, the GNU debugger.
-   Copyright 1987, 1988, 1989, 1990, 1991, 1992, 1993
+   Copyright 1987, 88, 89, 90, 91, 92, 1993, 1998
 
    Contributed by Lynx Real-Time Systems, Inc.  Los Gatos, CA.
    Free Software Foundation, Inc.
@@ -27,6 +27,10 @@ extern void init_thread_list PARAMS ((void));
 
 extern void add_thread PARAMS ((int pid));
 
+extern void delete_thread PARAMS ((int));
+  
+extern int thread_id_to_pid PARAMS ((int));
+
 extern int in_thread_list PARAMS ((int pid));
 
 extern int pid_to_thread_id PARAMS ((int pid));
@@ -45,5 +49,7 @@ extern void save_infrun_state PARAMS ((int, CORE_ADDR, CORE_ADDR, char *,
 
 /* Commands with a prefix of `thread'.  */
 extern struct cmd_list_element *thread_cmd_list;
+
+extern void _initialize_thread PARAMS ((void));
 
 #endif	/* GDBTHREAD_H */
