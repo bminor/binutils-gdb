@@ -1,5 +1,11 @@
 Mon May 15 12:12:34 1995  Stu Grossman  (grossman@cygnus.com)
 
+	* sparclite/salib.c (win_ovf win_unf):  Make window size constant
+	into a variable (__WINSIZE) so that it can be controlled via the
+	.h file.
+	* sparclite/sparclite.h:  Add SL933 #ifdef to set __WINSIZE to 6
+	for the 933 board.
+
 	* infrun.c:  Add #ifdef HP_OS_BUG to all references to
 	trap_expected_after_continue.
 	* (wait_for_inferior):  Fix for remote watchpoints.  Don't try to
