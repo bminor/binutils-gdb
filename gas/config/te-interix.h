@@ -6,6 +6,8 @@
 /* The PE format supports long section names.  */
 #define COFF_LONG_SECTION_NAMES
 
+#define GLOBAL_OFFSET_TABLE_NAME "__GLOBAL_OFFSET_TABLE_"
+
 /* Both architectures use these */
 #ifndef LOCAL_LABELS_FB
 #define LOCAL_LABELS_FB 1
