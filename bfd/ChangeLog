@@ -1,3 +1,8 @@
+2005-03-29  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* elf32-arm.c (elf32_arm_check_relocs): Increment count for all
+	relocation types.  Don't count relocations which will use a PLT.
+
 2005-03-22  Bob Wilson  <bob.wilson@acm.org>
 
 	* xtensa-isa.c (xtensa_opcode_lookup, xtensa_state_lookup,
