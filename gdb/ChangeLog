@@ -1,3 +1,12 @@
+2002-05-16  Corinna Vinschen  <vinschen@redhat.com>
+
+	* v850-tdep.c: Begin multi-arch'ing v850.
+	(v850_target_architecture_hook): Remove function.
+	(v850_gdbarch_init): New function.  Add code previously in
+	v850_target_architecture_hook().
+	(_initialize_v850_tdep): Don't  set target_architecture_hook.
+	Call register_gdbarch_init() instead.
+
 2002-05-16 Daniel Jacobowitz  <drow@mvista.com>
 
 	* gdbtypes.h (struct cplus_struct_type): Remove args field.

@@ -830,33 +830,44 @@ v850_fix_call_dummy (char *dummy, CORE_ADDR sp, CORE_ADDR fun, int nargs,
   return 0;
 }
 
-/* Change the register names based on the current machine type. */
-
-static int
-v850_target_architecture_hook (const bfd_arch_info_type *ap)
+static struct gdbarch *
+v850_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
-  int i, j;
+  struct gdbarch_tdep *tdep = NULL;
+  struct gdbarch *gdbarch;
+  int i;
 
-  if (ap->arch != bfd_arch_v850)
+  /* find a candidate among the list of pre-declared architectures. */
+  arches = gdbarch_list_lookup_by_info (arches, &info);
+  if (arches != NULL)
+    return (arches->gdbarch);
+
+#if 0
+  tdep = (struct gdbarch_tdep *) xmalloc (sizeof (struct gdbarch_tdep));
+#endif
+
+  if (info.bfd_arch_info->arch != bfd_arch_v850)
     return 0;
 
+  gdbarch = gdbarch_alloc (&info, 0);
+
+  /* Change the register names based on the current machine type. */
   for (i = 0; v850_processor_type_table[i].regnames != NULL; i++)
     {
-      if (v850_processor_type_table[i].mach == ap->mach)
-	{
-	  v850_register_names = v850_processor_type_table[i].regnames;
-	  tm_print_insn_info.mach = ap->mach;
-	  return 1;
-	}
+      if (v850_processor_type_table[i].mach == info.bfd_arch_info->mach)
+        {
+          v850_register_names = v850_processor_type_table[i].regnames;
+          tm_print_insn_info.mach = info.bfd_arch_info->mach;
+          break;
+        }
     }
 
-  internal_error (__FILE__, __LINE__,
-		  "Architecture `%s' unrecognized", ap->printable_name);
+  return gdbarch;
 }
 
 void
 _initialize_v850_tdep (void)
 {
   tm_print_insn = print_insn_v850;
-  target_architecture_hook = v850_target_architecture_hook;
+  register_gdbarch_init (bfd_arch_v850, v850_gdbarch_init);
 }
