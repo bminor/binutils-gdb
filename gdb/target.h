@@ -328,6 +328,16 @@ struct target_ops
 					    void *), 
 				   void *);
     char * (*to_make_corefile_notes) (bfd *, int *);
+
+    /* Return the thread-local address at OFFSET in the
+       thread-local storage for the thread PTID and the shared library
+       or executable file given by OBJFILE.  If that block of
+       thread-local storage hasn't been allocated yet, this function
+       may return an error.  */
+    CORE_ADDR (*to_get_thread_local_address) (ptid_t ptid,
+					      struct objfile *objfile,
+					      CORE_ADDR offset);
+
     int to_magic;
     /* Need sub-structure for target machine related rather than comm related?
      */
@@ -1038,6 +1048,12 @@ extern void (*target_new_objfile_hook) (struct objfile *);
 
 #define target_make_corefile_notes(BFD, SIZE_P) \
      (current_target.to_make_corefile_notes) (BFD, SIZE_P)
+
+/* Thread-local values.  */
+#define target_get_thread_local_address \
+    (current_target.to_get_thread_local_address)
+#define target_get_thread_local_address_p() \
+    (target_get_thread_local_address != NULL)
 
 /* Hook to call target-dependent code after reading in a new symbol table.  */
 

@@ -1,3 +1,25 @@
+2002-11-11  Elena Zannoni  <ezannoni@redhat.com>
+
+        * findvar.c (read_var_value): Reenable TLS code.
+
+2002-11-11  Elena Zannoni  <ezannoni@redhat.com>
+            Jim Blandy  <jimb@redhat.com>
+	
+	* gdb_thread_db.h (enum): Add TD_NOTALLOC.
+	* target.c (update_current_target): Add
+	to_get_thread_local_address.
+	* target.h (to_get_thread_local_address): Export.
+	(target_get_thread_local_address): Define.
+	(target_get_thread_local_address_p): Define.
+	* thread-db.c: Include solib-svr4.h.
+	(td_thr_tls_get_addr_p): Define.
+	(thread_db_load): Get a pointer to td_thr_tls_get_addr.
+	(thread_db_get_thread_local_address): New function.
+	(init_thread_db_ops): Initialize to_get_thread_local_address.
+	* configure.in: Add test for TD_NOTALLOC in thread_db.h.
+	* configure: Regenerate.
+	* config.in: Regenerate.
+
 2002-11-11  David Carlton  <carlton@math.stanford.edu>
 
 	* linespec.c (set_flags): New function.

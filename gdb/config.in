@@ -1,4 +1,4 @@
-/* config.in.  Generated automatically from configure.in by autoheader 2.13.  */
+/* config.in.  Generated automatically from configure.in by autoheader.  */
 
 /* Define if on AIX 3.
    System headers sometimes define this.
@@ -513,4 +513,7 @@
 
 /* Define if <sys/procfs.h> has pr_siginfo64_t. */
 #undef HAVE_PR_SIGINFO64_T
+
+/* Define if <thread_db.h> has the TD_NOTALLOC error code. */
+#undef THREAD_DB_HAS_TD_NOTALLOC
 

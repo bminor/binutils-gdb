@@ -666,6 +666,7 @@ update_current_target (void)
       INHERIT (to_async_mask_value, t);
       INHERIT (to_find_memory_regions, t);
       INHERIT (to_make_corefile_notes, t);
+      INHERIT (to_get_thread_local_address, t);
       INHERIT (to_magic, t);
 
 #undef INHERIT

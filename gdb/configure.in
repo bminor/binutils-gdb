@@ -600,6 +600,23 @@ if test ${build} = ${host} -a ${host} = ${target} ; then
    AC_SUBST(CONFIG_LDFLAGS)
 fi
 
+dnl See if we have a thread_db header file that has TD_NOTALLOC.
+if test "x$ac_cv_header_thread_db_h" = "xyes"; then
+   AC_CACHE_CHECK([whether <thread_db.h> has TD_NOTALLOC],
+                  gdb_cv_thread_db_h_has_td_notalloc,
+     AC_TRY_COMPILE(
+       [#include <thread_db.h>],
+       [int i = TD_NOTALLOC;],
+       gdb_cv_thread_db_h_has_td_notalloc=yes,
+       gdb_cv_thread_db_h_has_td_notalloc=no
+     )
+   )
+fi
+if test "x$gdb_cv_thread_db_h_has_td_notalloc" = "xyes"; then
+  AC_DEFINE(THREAD_DB_HAS_TD_NOTALLOC, 1,
+            [Define if <thread_db.h> has the TD_NOTALLOC error code.])
+fi
+
 dnl The CLI cannot be disabled yet, but may be in the future  
 
 dnl Handle CLI sub-directory configury.
