@@ -796,6 +796,20 @@ read_initial_length (bfd *abfd, char *buf, unsigned int *bytes_read_ptr)
 
 /* Pointer encoding helper functions.  */
 
+/* GCC supports exception handling based on DWARF2 CFI.  However, for
+   technical reasons, it encodes addresses in its FDE's in a different
+   way.  Several "pointer encodings" are supported.  The encoding
+   that's used for a particular FDE is determined by the 'R'
+   augmentation in the associated CIE.  The argument of this
+   augmentation is a single byte.  
+
+   The address can be encoded as 2 bytes, 4 bytes, 8 bytes, or as a
+   LEB128.  This is encoded in bits 0, 1 and 2.  Bit 3 encodes whether
+   the address is signed or unsigned.  Bits 4, 5 and 6 encode how the
+   address should be interpreted (absolute, relative to the current
+   position in the FDE, ...).  Bit 7, indicates that the address
+   should be dereferenced.  */
+
 static unsigned char
 encoding_for_size (unsigned int size)
 {
@@ -958,7 +972,7 @@ add_fde (struct comp_unit *unit, struct dwarf_fde *fde)
 #define DW64_CIE_ID ~0
 #endif
 
-/* Read and the CIE or FDE in BUF and decode it.  */
+/* Read a CIE or FDE in BUF and decode it.  */
 
 static char *
 decode_frame_entry (struct comp_unit *unit, char *buf, int eh_frame_p)

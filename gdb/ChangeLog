@@ -1,5 +1,7 @@
 2003-05-17  Mark Kettenis  <kettenis@gnu.org>
 
+	* dwarf-frame.c: Add and fix some comments.
+
 	* i386-tdep.c (i386_frame_cache, i386_sigtramp_frame_cache,
 	i386_extract_struct_value_address, i386_svr4_sigcontext_addr): Use
 	extract_unsigned_integer instead of extract_address.
