@@ -48,6 +48,8 @@ PMAX (MIPS) running Mach 3.0			mips*-*-mach3*
 Sequent family					i[3456]86-sequent-sysv4*
 						i[3456]86-sequent-sysv*
 						i[3456]86-sequent-bsd*
+Tsqware Sparclet				sparclet-*-*
+Fujitsu SPARClite 			sparclite-fujitsu-none  or  sparclite
 
 * REMOVED configurations and files
 

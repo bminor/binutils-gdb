@@ -1,3 +1,19 @@
+2003-04-16  Andrew Cagney  <cagney@redhat.com>
+
+	* NEWS: Mention that sparclet-*-* and sparclite-*-* have been made
+	obsolete.
+	* sparc-tdep.c: Obsolete SPARCLET and SPARCLITE code.
+	* sparcl-stub.c: Obsolete file.
+	* config/sparc/tm-sparclet.h: Obsolete file.
+	* sparclet-stub.c: Obsolete file.
+	* sparclet-rom.c: Obsolete file.
+	* sparcl-tdep.c: Obsolete file.
+	* config/sparc/tm-sparclite.h: Obsolete file.
+	* config/sparc/sparclite.mt: Obsolete file.
+	* config/sparc/sparclet.mt: Obsolete file.
+	* configure.tgt: Make sparclet-*-*, sparclite-*-*, and
+	sparc86x-*-* obsolete.
+
 2003-04-15  David Carlton  <carlton@math.stanford.edu>
 
 	* Makefile.in (SFILES): Add cp-namespace.c.
