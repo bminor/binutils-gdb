@@ -186,6 +186,8 @@ parse_die (abfd, aDieInfo, aDiePtr)
   /* First comes the length. */
   aDieInfo->length = bfd_get_32 (abfd, xptr);
   xptr += 4;
+  if (aDieInfo->length == 0)
+    return false;
   if (aDieInfo->length < 6)
     {
       /* Just padding bytes. */
