@@ -49,6 +49,7 @@ rldefs.h
 rltty.c
 search.c
 signals.c
+sysdep-6irix.h
 sysdep-aix.h
 sysdep-cxux7.h
 sysdep-irix.h

@@ -1,3 +1,11 @@
+Wed May 13 13:41:53 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* sysdep-6irix.h: New file.
+	* configure.in (*-*-irix6*): New host; use sysdep-6irix.h.
+
+	* Makefile.in (isearch.o, search.o): Depend upon sysdep.h.
+	(Makefile): Depend upon $(srcdir)/configure.in.
+
 Thu Apr  9 11:59:38 1998  Ian Dall (<Ian.Dall@dsto.defence.gov.au>
 
 	* configure.in (host==netbsd): Include config/mh-bsd44.
