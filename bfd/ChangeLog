@@ -1,3 +1,8 @@
+2002-07-26  Chris Demetriou  <cgd@broadcom.com>
+
+	* elfxx-mips.c (_bfd_mips_elf_merge_private_bfd_data): Merge ASE
+	flags into resulting BFD.
+
 2002-07-26  Alan Modra  <amodra@bigpond.net.au>
 
 	From John Reiser <jreiser@BitWagon.com>

@@ -39,6 +39,8 @@ if { [istarget mips*-*-*] } then {
 	run_dump_test "emrelocs-eb"
 	run_dump_test "emrelocs-el"
 
+	run_dump_test "mips16-1"
+
 	run_dump_test "region1"
     }
 }

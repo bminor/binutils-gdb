@@ -7803,6 +7803,15 @@ _bfd_mips_elf_merge_private_bfd_data (ibfd, obfd)
       old_flags &= ~EF_MIPS_ABI;
     }
 
+  /* For now, allow arbitrary mixing of ASEs (retain the union).  */
+  if ((new_flags & EF_MIPS_ARCH_ASE) != (old_flags & EF_MIPS_ARCH_ASE))
+    {
+      elf_elfheader (obfd)->e_flags |= new_flags & EF_MIPS_ARCH_ASE;
+
+      new_flags &= ~ EF_MIPS_ARCH_ASE;
+      old_flags &= ~ EF_MIPS_ARCH_ASE;
+    }
+
   /* Warn about any other mismatches */
   if (new_flags != old_flags)
     {
