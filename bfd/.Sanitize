@@ -45,8 +45,6 @@ bout.c
 cache.c
 coffcode.h
 config
-config.sub
-configure
 configure.in
 core.c
 demo64.c
@@ -69,7 +67,6 @@ cpu-h8300.c
 cpu-i960.c
 cpu-m88k.c
 init.c
-howto.c
 cpu-sparc.c
 libbfd.c
 libbfd.h
@@ -114,7 +111,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.22  1991/10/03 22:23:56  gnu
+# Revision 1.23  1991/10/05 06:16:44  gnu
+# howto.c, configure, config.sub gone.
+#
+# Revision 1.22  1991/10/03  22:23:56  gnu
 # Add elf.c
 #
 # Revision 1.21  1991/10/01  03:55:34  steve
