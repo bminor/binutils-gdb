@@ -1,5 +1,13 @@
 Mon Jul 29 21:13:20 1996  Fred Fish  <fnf@cygnus.com>
 
+	* rs6000-tdep.c (push_arguments): Remove unused variable "pc".
+	(branch_dest): Remove unused variable "offset".
+	(pop_dummy_frame): Add prototype and make static.
+	(push_arguments): Guard against using len uninitialized.
+	(push_arguments): Guard against using arg uninitialized.
+	(frame_saved_pc): Remove unused variable "frameless".
+	(free_loadinfo): Ifdef out unused function.
+
 	* xcoffread.c (compare_lte): Change prototype and function to
 	be correct type for passing to qsort.
 	(add_stab_to_list): Ifdef out unused function and prototype.

@@ -54,6 +54,8 @@ static CORE_ADDR branch_dest PARAMS ((int opcode, int instr, CORE_ADDR pc,
 static void frame_get_cache_fsr PARAMS ((struct frame_info *fi,
 					 struct rs6000_framedata *fdatap));
 
+static void pop_dummy_frame PARAMS ((void));
+
 /* Calculate the destination of a branch/jump.  Return -1 if not a branch.  */
 
 static CORE_ADDR
@@ -63,7 +65,6 @@ branch_dest (opcode, instr, pc, safety)
      CORE_ADDR pc;
      CORE_ADDR safety;
 {
-  register long offset;
   CORE_ADDR dest;
   int immediate;
   int absolute;
@@ -534,6 +535,7 @@ saved SP register!  There should *not* be a separate stack in the
 GDB process that keeps track of these dummy frames!  -- gnu@cygnus.com Aug92
  */
    
+static void
 pop_dummy_frame ()
 {
   CORE_ADDR sp, pc;
@@ -690,15 +692,16 @@ push_arguments (nargs, args, sp, struct_return, struct_addr)
      int struct_return;
      CORE_ADDR struct_addr;
 {
-  int ii, len;
+  int ii;
+  int len = 0;
   int argno;					/* current argument number */
   int argbytes;					/* current argument byte */
   char tmp_buffer [50];
   int f_argno = 0;				/* current floating point argno */
-  value_ptr arg;
+  value_ptr arg = 0;
   struct type *type;
 
-  CORE_ADDR saved_sp, pc;
+  CORE_ADDR saved_sp;
 
   if ( dummy_frame_count <= 0)
     printf_unfiltered ("FATAL ERROR -push_arguments()! frame not found!!\n");
@@ -968,7 +971,6 @@ frame_saved_pc (fi)
 {
   CORE_ADDR func_start;
   struct rs6000_framedata fdata;
-  int frameless;
 
   if (fi->signal_handler_caller)
     return read_memory_integer (fi->frame + SIG_FRAME_PC_OFFSET, 4);
@@ -1169,6 +1171,7 @@ xcoff_init_loadinfo ()
 
 
 /* FIXME -- this is never called!  */
+#if 0
 void
 free_loadinfo ()
 {
@@ -1179,6 +1182,7 @@ free_loadinfo ()
   loadinfotocindex = 0;
   loadinfotextindex = 0;
 }
+#endif
 
 /* this is called from xcoffread.c */
 
