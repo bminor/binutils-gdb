@@ -507,6 +507,7 @@ init_content_element (struct tui_win_element * element, enum tui_win_type type)
       element->which_element.data.item_no = UNDEFINED_ITEM;
       element->which_element.data.value = NULL;
       element->which_element.data.highlight = FALSE;
+      element->which_element.data.content = (char*) NULL;
       break;
     case LOCATOR_WIN:
       element->which_element.locator.file_name[0] =
@@ -548,6 +549,7 @@ init_win_info (struct tui_win_info * win_info)
 	TUI_UNDEFINED_REGS;
       win_info->detail.data_display_info.regs_column_count = 1;
       win_info->detail.data_display_info.display_regs = FALSE;
+      win_info->detail.data_display_info.current_group = 0;
       break;
     case CMD_WIN:
       win_info->detail.command_info.cur_line = 0;
@@ -904,6 +906,7 @@ free_content_elements (tui_win_content content, int content_size, enum tui_win_t
 		      if (element->which_element.data.type != TUI_REGISTER)
 			xfree ((void *)element->which_element.data.name);
 		      xfree (element->which_element.data.value);
+                      xfree (element->which_element.data.content);
 		      xfree (element);
 		      break;
 		    case CMD_WIN:
