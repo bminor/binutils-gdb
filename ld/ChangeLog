@@ -1,3 +1,8 @@
+2002-03-05  Jakub Jelinek  <jakub@redhat.com>
+
+	* scripttempl/elf.sc: Only use DATA_SEGMENT_END() together with
+	DATA_SEGMENT_ALIGN.
+
 2002-03-04  H.J. Lu <hjl@gnu.org>
 
 	* scripttempl/elf.sc: Put .preinit_array, .init_array and

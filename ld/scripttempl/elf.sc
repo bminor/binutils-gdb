@@ -70,9 +70,13 @@ if [ -z "$MACHINE" ]; then OUTPUT_ARCH=${ARCH}; else OUTPUT_ARCH=${ARCH}:${MACHI
 test -z "${ELFSIZE}" && ELFSIZE=32
 test -z "${ALIGNMENT}" && ALIGNMENT="${ELFSIZE} / 8"
 test "$LD_FLAG" = "N" && DATA_ADDR=.
+test -n "$CREATE_SHLIB" && test -n "$SHLIB_DATA_ADDR" && COMMONPAGESIZE=""
+test -z "$CREATE_SHLIB" && test -n "$DATA_ADDR" && COMMONPAGESIZE=""
 DATA_SEGMENT_ALIGN="ALIGN(${MAXPAGESIZE}) + (. & (${MAXPAGESIZE} - 1))"
-if [ -n "${COMMONPAGESIZE}" ]; then
+DATA_SEGMENT_END=""
+if test -n "${COMMONPAGESIZE}"; then
   DATA_SEGMENT_ALIGN="DATA_SEGMENT_ALIGN(${MAXPAGESIZE}, ${COMMONPAGESIZE})"
+  DATA_SEGMENT_END=". = DATA_SEGMENT_END (.);"
 fi
 INTERP=".interp       ${RELOCATING-0} : { *(.interp) }"
 PLT=".plt          ${RELOCATING-0} : { *(.plt) }"
@@ -337,7 +341,7 @@ cat <<EOF
   ${RELOCATING+_end = .;}
   ${RELOCATING+${OTHER_BSS_END_SYMBOLS}}
   ${RELOCATING+PROVIDE (end = .);}
-  ${COMMONPAGESIZE+${RELOCATING+. = DATA_SEGMENT_END (.);}}
+  ${RELOCATING+${DATA_SEGMENT_END}}
 
   /* Stabs debugging sections.  */
   .stab          0 : { *(.stab) }
