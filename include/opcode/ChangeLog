@@ -3,6 +3,7 @@ Tue Feb 24 10:44:17 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* dvp.h (dvp_cpu): Add DVP_UNKNOWN.
 	(vif_insn_len): Update prototype.
+	(gif_reg): Add recent register name/number changes.
 
 end-sanitize-sky
 Mon Feb 23 10:38:21 1998  Doug Evans  <devans@seba.cygnus.com>
