@@ -1,3 +1,11 @@
+Thu Aug 10 17:35:00 1995  Ken Raeburn  <raeburn@cygnus.com>
+
+	* Makefile.in (config.texi): New target.  Write out a setting for
+	texinfo variable VERSION.
+	(binutils.dvi, binutils.info): Depend on it.
+	* binutils.texi: Include it, and reference @value{VERSION} instead
+	of explicitly specifying 2.2(!).
+
 Thu Aug 10 16:07:53 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* coffgrok.c (do_type): Handle array dimensions the same way gdb

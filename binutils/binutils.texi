@@ -1,5 +1,6 @@
 \input texinfo       @c                    -*- Texinfo -*-
 @setfilename binutils.info
+@include config.texi
 
 @ifinfo
 @format
@@ -51,7 +52,7 @@ into another language, under the above conditions for modified versions.
 @titlepage
 @finalout
 @title The GNU Binary Utilities
-@subtitle Version 2.2
+@subtitle Version @value{VERSION}
 @sp 1
 @subtitle May 1993
 @author Roland H. Pesch
@@ -85,7 +86,7 @@ into another language, under the above conditions for modified versions.
 
 @cindex version
 This brief manual contains preliminary documentation for the GNU binary
-utilities (collectively version 2.2): 
+utilities (collectively version @value{VERSION}): 
 
 @iftex
 @table @code
