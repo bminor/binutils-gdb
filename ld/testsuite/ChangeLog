@@ -1,3 +1,7 @@
+2001-11-02  NIIBE Yutaka  <gniibe@m17n.org>
+
+	* ld-sh/sh.exp: Have its own start.s for linux.
+
 2001-10-31  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* ld-mmix/locdo-1.d: Prune character dump part.

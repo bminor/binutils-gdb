@@ -1,3 +1,8 @@
+2001-11-02  NIIBE Yutaka  <gniibe@m17n.org>
+
+	* gas/sh/basic.exp: For Linux, add "-big" option for the
+	invocation of gas.
+
 2001-11-01  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
 
 	* gas/m68hc11/opers12.s: Add test for disassembler bug with movb

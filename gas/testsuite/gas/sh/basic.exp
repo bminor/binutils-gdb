@@ -19,6 +19,11 @@
 
 # Written by Cygnus Support.
 
+if [istarget "sh*-*-linux-gnu"] {
+    global ASFLAGS
+    set ASFLAGS "$ASFLAGS -big"
+}
+
 proc do_fp {} {
     set testname "fp.s: floating point tests (sh3e)"
     set x 0
