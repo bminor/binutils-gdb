@@ -132,6 +132,10 @@ int sh_relax;		/* set if -relax seen */
 
 int sh_small;
 
+/* Flag to generate relocations against symbol values for local symbols.  */
+
+static int dont_adjust_reloc_32;
+
 /* preset architecture set, if given; zero otherwise.  */
 
 static int preset_target_arch;
@@ -2883,6 +2887,7 @@ struct option md_longopts[] =
 #define OPTION_SMALL (OPTION_LITTLE + 1)
 #define OPTION_DSP (OPTION_SMALL + 1)
 #define OPTION_ISA                    (OPTION_DSP + 1)
+#define OPTION_RENESAS (OPTION_ISA + 1)
 
   {"relax", no_argument, NULL, OPTION_RELAX},
   {"big", no_argument, NULL, OPTION_BIG},
@@ -2890,8 +2895,10 @@ struct option md_longopts[] =
   {"small", no_argument, NULL, OPTION_SMALL},
   {"dsp", no_argument, NULL, OPTION_DSP},
   {"isa",                    required_argument, NULL, OPTION_ISA},
+  {"renesas", no_argument, NULL, OPTION_RENESAS},
+
 #ifdef HAVE_SH64
-#define OPTION_ABI                    (OPTION_ISA + 1)
+#define OPTION_ABI                    (OPTION_RENESAS + 1)
 #define OPTION_NO_MIX                 (OPTION_ABI + 1)
 #define OPTION_SHCOMPACT_CONST_CRANGE (OPTION_NO_MIX + 1)
 #define OPTION_NO_EXPAND              (OPTION_SHCOMPACT_CONST_CRANGE + 1)
@@ -2930,6 +2937,10 @@ md_parse_option (int c, char *arg ATTRIBUTE_UNUSED)
 
     case OPTION_DSP:
       preset_target_arch = arch_sh1_up & ~arch_sh2e_up;
+      break;
+
+    case OPTION_RENESAS:
+      dont_adjust_reloc_32 = 1;
       break;
 
     case OPTION_ISA:
@@ -3019,6 +3030,8 @@ SH options:\n\
 -little			generate little endian code\n\
 -big			generate big endian code\n\
 -relax			alter jump instructions for long displacements\n\
+-renesas		disable optimization with section symbol for\n\
+			compatibility with Renesas assembler.\n\
 -small			align sections to 4 byte boundaries, not 16\n\
 -dsp			enable sh-dsp insns, and disable floating-point ISAs.\n\
 -isa=[sh4\n\
@@ -3564,6 +3577,7 @@ sh_fix_adjustable (fixS *fixP)
   if (fixP->fx_r_type == BFD_RELOC_32_PLT_PCREL
       || fixP->fx_r_type == BFD_RELOC_32_GOT_PCREL
       || fixP->fx_r_type == BFD_RELOC_SH_GOTPC
+      || ((fixP->fx_r_type == BFD_RELOC_32) && dont_adjust_reloc_32)
       || fixP->fx_r_type == BFD_RELOC_RVA)
     return 0;
 

@@ -1,3 +1,13 @@
+2004-04-01  Asgari Jinia  <asgarij@kpitcummins.com>
+	    Dhananjay Deshpande <dhananjayd@kpitcummins.com>
+
+	* config/tc-sh.c (dont_adjust_reloc_32): New variable.
+	(sh_fix_adjustable): Avoid adjusting BFD_RELOC_32 when
+	dont_adjust_reloc_32 is set.
+	(md_longopts): Add option -renesas.
+	(md_parse_option, md_show_usage): Likewise.
+	* doc/c-sh.texi: Likewise.
+
 2004-04-01  Dave Korn  <dk@artimi.com>
 
 	* config/tc-dlx.c (md_assemble): set fx_no_overflow flag for

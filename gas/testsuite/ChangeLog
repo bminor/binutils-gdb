@@ -1,3 +1,9 @@
+2004-04-01  Asgari Jinia  <asgarij@kpitcummins.com>
+
+	* gas/sh/renesas-1.s, gas/sh/renesas-1.d: New test for -renesas
+	option.
+	* gas/sh/basic.exp: Run the new test.
+
 2004-04-01  Dave Korn  <dk@artimi.com>
 
 	* gas/dlx/alltests.exp: Execute new lohi test.
