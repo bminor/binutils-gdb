@@ -30,7 +30,7 @@ extern int x86_64_num_gregs;
 
 int x86_64_register_number (const char *name);
 const char *x86_64_register_name (int reg_nr);
-	
+
 gdbarch_frame_saved_pc_ftype x86_64_linux_frame_saved_pc;
 gdbarch_saved_pc_after_call_ftype x86_64_linux_saved_pc_after_call;
 gdbarch_pc_in_sigtramp_ftype x86_64_linux_in_sigtramp;

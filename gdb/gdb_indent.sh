@@ -37,7 +37,7 @@ fi
 # Different indent versions give different indentation.
 
 case `${indent} --version 2>/dev/null < /dev/null` in
-    GNU*2.2.6 ) ;;
+    GNU*2.2* ) ;;
     *GNU* ) echo "Incorrect version of GNU indent" 1>&2 ;;
     * ) echo "Indent is not GNU" 1>&2 ;;
 esac

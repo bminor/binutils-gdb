@@ -35,7 +35,7 @@
 #define LINUX_SIGTRAMP_OFFSET1 (7)
 
 static const unsigned char linux_sigtramp_code[] = {
-  /*  mov $__NR_rt_sigreturn,%rax */	
+  /*  mov $__NR_rt_sigreturn,%rax */
   LINUX_SIGTRAMP_INSN0, 0xc7, 0xc0, 0x0f, 0x00, 0x00, 0x00,
   /* syscall */
   LINUX_SIGTRAMP_INSN1, 0x05
@@ -100,8 +100,7 @@ x86_64_linux_sigcontext_addr (struct frame_info *frame)
 
       /* This is the top frame. */
       rsp = read_register (SP_REGNUM);
-      return rsp + LINUX_SIGINFO_SIZE +
-	LINUX_UCONTEXT_SIGCONTEXT_OFFSET;
+      return rsp + LINUX_SIGINFO_SIZE + LINUX_UCONTEXT_SIGCONTEXT_OFFSET;
 
     }
 
@@ -148,53 +147,51 @@ x86_64_linux_in_sigtramp (CORE_ADDR pc, char *name)
 {
   if (name)
     return STREQ ("__restore_rt", name);
-  
+
   return (x86_64_linux_sigtramp_start (pc) != 0);
 }
 
 CORE_ADDR
 x86_64_linux_frame_chain (struct frame_info *fi)
 {
-	ULONGEST addr;
-	CORE_ADDR fp, pc;
-	
-	if (! fi->signal_handler_caller)
-	{
-		fp = cfi_frame_chain (fi);
-		if(fp)
-			return fp;
-		else
-			addr = fi->frame;
-	}
-	else
-		addr = fi->next->frame;
+  ULONGEST addr;
+  CORE_ADDR fp, pc;
 
-	addr += LINUX_SIGINFO_SIZE + LINUX_UCONTEXT_SIGCONTEXT_OFFSET;
-	
-	fp = read_memory_integer (addr + LINUX_SIGCONTEXT_FP_OFFSET, 8)+8;
-	
+  if (!fi->signal_handler_caller)
+    {
+      fp = cfi_frame_chain (fi);
+      if (fp)
 	return fp;
+      else
+	addr = fi->frame;
+    }
+  else
+    addr = fi->next->frame;
+
+  addr += LINUX_SIGINFO_SIZE + LINUX_UCONTEXT_SIGCONTEXT_OFFSET;
+
+  fp = read_memory_integer (addr + LINUX_SIGCONTEXT_FP_OFFSET, 8) + 8;
+
+  return fp;
 }
 
 void
 x86_64_init_frame_pc (int fromleaf, struct frame_info *fi)
 {
-	CORE_ADDR addr;
+  CORE_ADDR addr;
 
-	if(fi->next && fi->next->signal_handler_caller)
-	{
-		addr = fi->next->next->frame 
-			+ LINUX_SIGINFO_SIZE 
-			+ LINUX_UCONTEXT_SIGCONTEXT_OFFSET;
-		fi->pc = read_memory_integer (addr 
-				+ LINUX_SIGCONTEXT_PC_OFFSET, 8);
-	}
-	else
-		cfi_init_frame_pc (fromleaf, fi);
+  if (fi->next && fi->next->signal_handler_caller)
+    {
+      addr = fi->next->next->frame
+	+ LINUX_SIGINFO_SIZE + LINUX_UCONTEXT_SIGCONTEXT_OFFSET;
+      fi->pc = read_memory_integer (addr + LINUX_SIGCONTEXT_PC_OFFSET, 8);
+    }
+  else
+    cfi_init_frame_pc (fromleaf, fi);
 }
 
 void
 x86_64_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 {
-	cfi_init_extra_frame_info (fromleaf, fi);
+  cfi_init_extra_frame_info (fromleaf, fi);
 }

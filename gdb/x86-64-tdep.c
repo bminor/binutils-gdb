@@ -904,7 +904,7 @@ x86_64_skip_prologue (CORE_ADDR pc)
 
 /* Sequence of bytes for breakpoint instruction.  */
 static unsigned char *
-x86_64_breakpoint_from_pc (CORE_ADDR * pc, int *lenptr)
+x86_64_breakpoint_from_pc (CORE_ADDR *pc, int *lenptr)
 {
   static unsigned char breakpoint[] = { 0xcc };
   *lenptr = 1;
@@ -1090,12 +1090,14 @@ x86_64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 /* Extract from an array REGBUF containing the (raw) register state
    a function return value of type TYPE, and copy that, in virtual format,
    into VALBUF.  */
-  set_gdbarch_deprecated_extract_return_value (gdbarch, x86_64_extract_return_value);
+  set_gdbarch_deprecated_extract_return_value (gdbarch,
+					       x86_64_extract_return_value);
 
 
 /* Write into the appropriate registers a function return value stored
    in VALBUF of type TYPE, given in virtual format.  */
-  set_gdbarch_deprecated_store_return_value (gdbarch, x86_64_store_return_value);
+  set_gdbarch_deprecated_store_return_value (gdbarch,
+					     x86_64_store_return_value);
 
 
 /* Offset from address of function to start of its code.  */

@@ -84,7 +84,7 @@ CORE_ADDR cfi_get_ra (struct frame_info *fi);
    The argument RAW_BUFFER must point to aligned memory.  */
 void cfi_get_saved_register (char *raw_buffer,
 			     int *optimized,
-			     CORE_ADDR * addrp,
+			     CORE_ADDR *addrp,
 			     struct frame_info *frame,
 			     int regnum, enum lval_type *lval);
 

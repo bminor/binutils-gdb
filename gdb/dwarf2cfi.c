@@ -814,13 +814,13 @@ frame_state_for (struct context *context, struct frame_state *fs)
   gdb_assert (fde->cie_ptr != NULL);
 
   cie = fde->cie_ptr;
-  
+
   fs->code_align = cie->code_align;
   fs->data_align = cie->data_align;
   fs->retaddr_column = cie->ra;
   fs->addr_encoding = cie->addr_encoding;
   fs->objfile = cie->objfile;
-  
+
   execute_cfa_program (cie->objfile, cie->data,
 		       cie->data + cie->data_length, context, fs);
   execute_cfa_program (cie->objfile, fde->data,
@@ -1094,7 +1094,7 @@ execute_stack_op (struct objfile *objfile,
 	    case DW_OP_deref_size:
 	      {
 		int len = *op_ptr++;
-		if (len != 1 && len != 2 && len != 4 && len !=8)
+		if (len != 1 && len != 2 && len != 4 && len != 8)
 		  internal_error (__FILE__, __LINE__,
 				  "execute_stack_op error");
 		result = read_memory_unsigned_integer (result, len);
