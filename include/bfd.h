@@ -190,7 +190,7 @@ typedef struct sec *sec_ptr;
 #define bfd_get_section_flags(bfd, ptr) ((ptr)->flags + 0)
 #define bfd_get_section_userdata(bfd, ptr) ((ptr)->userdata)
 
-#define bfd_set_section_vma(bfd, ptr, val) (((ptr)->vma = (val)), true)
+#define bfd_set_section_vma(bfd, ptr, val) (((ptr)->vma = (val)), ((ptr)->user_set_vma = true), true)
 #define bfd_set_section_alignment(bfd, ptr, val) (((ptr)->alignment_power = (val)),true)
 #define bfd_set_section_userdata(bfd, ptr, val) (((ptr)->userdata = (val)),true)
 
@@ -472,6 +472,7 @@ typedef struct sec
 
        
    bfd_vma vma;
+   boolean user_set_vma;
 
          /* The size of the section in bytes, as it will be output.
            contains a value even if the section has no contents (eg, the
@@ -659,8 +660,8 @@ typedef struct bfd_arch_info
   long mach;
   char *arch_name;
   CONST  char *printable_name;
+  unsigned int section_align_power;
   /* true if this is the default machine for the architecture */
- unsigned int section_align_power;
   boolean the_default;	
   CONST struct bfd_arch_info * EXFUN((*compatible),
 	(CONST struct bfd_arch_info *a,
@@ -670,8 +671,10 @@ typedef struct bfd_arch_info
   unsigned int EXFUN((*disassemble),(bfd_vma addr, CONST char *data,
 				     PTR stream));
 
-  struct bfd_arch_info *next;
+  unsigned int segment_size;
+  unsigned int page_size;
 
+  struct bfd_arch_info *next;
 } bfd_arch_info_type;
 CONST char *EXFUN(bfd_printable_name, (bfd *abfd));
 bfd_arch_info_type *EXFUN(bfd_scan_arch, (CONST char *));
@@ -1391,6 +1394,7 @@ typedef struct bfd_target
        bfd *abfd,
        void *ptr,
        unsigned long size));
+ PTR backend_data;
 } bfd_target;
 bfd_target *EXFUN(bfd_find_target, (CONST char *, bfd *));
 CONST char **EXFUN(bfd_target_list, (void));
