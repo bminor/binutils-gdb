@@ -1003,6 +1003,8 @@ find_pc_symtab (pc)
    complaints can be queued until we regain control of the terminal.  -fnf
  */
 
+/* If it's worth the effort, we could be using a binary search.  */
+
 struct symtab_and_line
 find_pc_line (pc, notcurrent)
      CORE_ADDR pc;
@@ -1329,6 +1331,7 @@ find_line_common (l, lineno, exact_match)
 
       if (item->line == lineno)
 	{
+	  /* Return the first (lowest address) entry which matches.  */
 	  *exact_match = 1;
 	  return i;
 	}
@@ -1462,24 +1465,9 @@ find_methods (t, name, sym_arr)
   int ibase;
   struct symbol *sym_class;
   char *class_name = type_name_no_tag (t);
-  /* Ignore this class if it doesn't have a name.
-     This prevents core dumps, but is just a workaround
-     because we might not find the function in
-     certain cases, such as
-     struct D {virtual int f();}
-     struct C : D {virtual int g();}
-     (in this case g++ 1.35.1- does not put out a name
-     for D as such, it defines type 19 (for example) in
-     the same stab as C, and then does a
-     .stabs "D:T19" and a .stabs "D:t19".
-     Thus
-     "break C::f" should not be looking for field f in
-     the class named D, 
-     but just for the field f in the baseclasses of C
-     (no matter what their names).
-     
-     However, I don't know how to replace the code below
-     that depends on knowing the name of D.  */
+  /* Ignore this class if it doesn't have a name.  This is ugly, but
+     unless we figure out how to get the physname without the name of
+     the class, then the loop can't do any good.  */
   if (class_name
       && (sym_class = lookup_symbol (class_name,
 				     (struct block *)NULL,
@@ -1488,6 +1476,7 @@ find_methods (t, name, sym_arr)
 				     (struct symtab **)NULL)))
     {
       int method_counter;
+      /* FIXME: Shouldn't this just be check_stub_type (t)?  */
       t = SYMBOL_TYPE (sym_class);
       for (method_counter = TYPE_NFN_FIELDS (t) - 1;
 	   method_counter >= 0;
@@ -1510,6 +1499,14 @@ find_methods (t, name, sym_arr)
 		/* Destructor is handled by caller, dont add it to the list */
 		if (DESTRUCTOR_PREFIX_P (phys_name))
 		  continue;
+
+		/* FIXME: Why are we looking this up in the
+		   SYMBOL_BLOCK_VALUE (sym_class)?  It is intended as a hook
+		   for nested types?  If so, it should probably hook to the
+		   type, not the symbol.  mipsread.c is the only symbol
+		   reader which sets the SYMBOL_BLOCK_VALUE for types, and
+		   this is not documented in symtab.h.  -26Aug93.  */
+
 		sym_arr[i1] = lookup_symbol (phys_name,
 					     SYMBOL_BLOCK_VALUE (sym_class),
 					     VAR_NAMESPACE,
@@ -1526,9 +1523,18 @@ find_methods (t, name, sym_arr)
 	      }
 	}
     }
-  /* Only search baseclasses if there is no match yet,
-   * since names in derived classes override those in baseclasses.
-   */
+
+  /* Only search baseclasses if there is no match yet, since names in
+     derived classes override those in baseclasses.
+
+     FIXME: The above is not true; it is only true of member functions
+     if they have the same number of arguments (??? - section 13.1 of the
+     ARM says the function members are not in the same scope but doesn't
+     really spell out the rules in a way I understand.  In any case, if
+     the number of arguments differ this is a case in which we can overload
+     rather than hiding without any problem, and gcc 2.4.5 does overload
+     rather than hiding in this case).  */
+
   if (i1)
     return i1;
   for (ibase = 0; ibase < TYPE_N_BASECLASSES (t); ibase++)
