@@ -163,7 +163,7 @@ sim_set_breakpoint (sd, addr)
     else
       break;
 
-  bp = (struct sim_breakpoint *) xmalloc (sizeof (struct sim_breakpoint));
+  bp = ZALLOC (struct sim_breakpoint);
 
   bp->addr = addr;
   bp->next = STATE_BREAKPOINTS (sd);
@@ -200,7 +200,7 @@ sim_clear_breakpoint (sd, addr)
   else
     STATE_BREAKPOINTS (sd) = NULL;
 
-  free (bp);
+  zfree (bp);
 
   return SIM_RC_OK;
 }
