@@ -1,3 +1,7 @@
+Fri Dec 15 12:11:48 1995  Raymond Jou  <rjou@mexican.cygnus.com>
+
+	* mpw-make.sed: If linking, edit ALL_CFLAGS to CFLAGS.
+
 Thu Dec 14 15:09:52 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/obj-coff.c (write_object_file): Set the s_align field to

@@ -53,6 +53,9 @@ LOCAL_LOADLIBES = \
 /{OBJS}/s/{OBJS} \\Option-f "{o}"config.h/{OBJS} \\Option-f/
 /gasp.c/s/gasp\.c "{o}"config.h/gasp.c/
 
+# ALL_CFLAGS includes TDEFINES, which is not desirable at link time.
+/CC_LD/s/ALL_CFLAGS/CFLAGS/g
+
 # The resource file is called mac-as.r.
 /as.new.r/s/as\.new\.r/mac-as.r/
 /gasp.new.r/s/gasp\.new\.r/mac-as.r/
