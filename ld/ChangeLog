@@ -1,3 +1,7 @@
+Mon Sep 12 01:50:03 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* emultempl/hppaelf.em: Add newlines to the error messages.
+
 Sat Sep 10 16:05:38 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* config/i386lynx.mh: New file.
