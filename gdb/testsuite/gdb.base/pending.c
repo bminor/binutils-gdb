@@ -23,13 +23,13 @@
 
 int k = 0;
 
-extern void pendfunc1 (int x);
+extern void pendfunc (int x);
 
 int main()
 {
-  pendfunc1 (3); /* break main here */
-  pendfunc1 (4);
+  pendfunc (3); /* break main here */
+  pendfunc (4);
   k = 1;
-  pendfunc1 (3);
+  pendfunc (3);
   return 0;
 }

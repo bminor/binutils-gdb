@@ -1,3 +1,9 @@
+2004-02-04  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* gdb.base/pendshr.c (pendfunc): New function that calls
+	pendfunc1.
+	* gdb.base/pending.c: Call pendfunc instead of pendfunc1.
+
 2004-02-04  Fred Fish  <fnf@redhat.com>
 
 	* gdb.arch/gdb1431.c: Add underbar prefixed version of global

@@ -26,3 +26,8 @@ void pendfunc1 (int x)
   int y = x + 4;
   printf ("in pendfunc1, x is %d\n", x);
 }
+
+void pendfunc (int x)
+{
+  pendfunc1 (x);
+}
