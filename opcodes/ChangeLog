@@ -1,3 +1,17 @@
+2000-05-03  J.T. Conklin  <jtc@redback.com>
+
+	* ppc-opc.c (VA, VB, VC, VD, VS, SIMM, UIMM, SHB): New macros, for
+ 	vector unit operands.
+	(VX, VX_MASK, VXA, VXA_MASK, VXR, VXR_MASK): New macros, for vector
+	unit instruction formats.
+	(PPCVEC): New macro, mask for vector instructions.
+	(powerpc_operands): Add table entries for above operand types.
+	(powerpc_opcodes): Add table entries for vector instructions.
+
+	* ppc-dis.c (print_insn_big_powerpc): Add PPC_OPCODE_ALTIVEC to mask.
+	(print_insn_little_powerpc): Likewise.
+	(print_insn_powerpc): Prepend 'v' when printing vector registers.
+
 Sun Apr 23 17:54:14 2000  Denis Chertykov  <denisc@overta.ru>
 
 	* avr-dis.c (reg_fmul_d): New. Extract destination register from
