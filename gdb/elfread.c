@@ -386,7 +386,10 @@ elf_symtab_read (abfd, addr, objfile, dynamic)
 		    {
 		      ms_type = mst_text;
 		    }
-		  else if (sym->name[0] == '.' && sym->name[1] == 'L')
+		  else if ((sym->name[0] == '.' && sym->name[1] == 'L')
+			   || ((sym -> flags & BSF_LOCAL)
+			       && sym->name[0] == 'L'
+			       && sym->name[1] == 'L'))
 		    /* Looks like a compiler-generated label.  Skip it.
 		       The assembler should be skipping these (to keep
 		       executables small), but apparently with gcc on the

@@ -1,3 +1,8 @@
+Tue Jul 26 18:20:46 1994  Paul Flinders  (ptf@smee)
+
+	* elfread.c (elf_symtab_read): Discard compiler labels generated
+	by the Solaris 2.1/Intel SunPro compiler.
+
 Mon Jul 25 18:19:24 1994  Stu Grossman  (grossman@cygnus.com)
 
 	* target.c (nomemory):  Fix prototype and routine to take correct
