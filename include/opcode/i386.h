@@ -35,7 +35,7 @@ static const template i386_optab[] = {
 /* The next instruction accepts WordReg so that `movl %gs,%esi' can be
    used to move a segment register to a 32 bit register without using
    a size prefix, which works although Intel does not document it.  I
-   think it clobbers the upper 16 bits in the 32 bit register.  */
+   think it zeroes the upper 16 bits in the 32 bit register.  */
 { "mov", 2, 0x8c, _, D|Modrm,  { SReg3|SReg2, WordReg|WordMem, 0 } },
 /* move to/from control debug registers */
 { "mov", 2, 0x0f20, _, D|Modrm, { Control, Reg32, 0} },
