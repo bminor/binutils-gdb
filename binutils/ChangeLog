@@ -1,3 +1,7 @@
+2001-06-19  H.J. Lu <hjl@gnu.org>
+
+	* doc/Makefile.in: Regenerated.
+
 2001-06-19  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* readelf.c: Restore formatting.
