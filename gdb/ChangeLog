@@ -1,5 +1,12 @@
 2004-01-08  Michael Chastain  <mec.gnu@mindspring.com>
 
+	* config/pa/tm-hppa.h: Update extern declarations for
+	hppa32_hpux_frame_saved_pc_in_sigtramp,
+	hppa32_hpux_frame_base_before_sigtramp, and
+	hppa32_hpux_frame_find_saved_regs_in_sigtramp.
+
+2004-01-08  Michael Chastain  <mec.gnu@mindspring.com>
+
 	* config/pa/tm-hppah.h: Update copyright years.
 
 2004-01-08  Andrew Cagney  <cagney@redhat.com>
