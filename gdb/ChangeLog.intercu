@@ -1,5 +1,17 @@
 2004-02-23  Daniel Jacobowitz  <drow@mvista.com>
 
+	* dwarf2read.c (REF_HASH_SIZE): Move above struct dwarf2_cu.
+	(struct dwarf2_cu): Add die_ref_table.
+	(die_ref_table): Delete static variable.
+	(store_in_ref_table): Take a comp unit argument and use its
+	die_ref_table.
+	(dwarf2_empty_hash_tables): Likewise.
+	(read_comp_unit): Update call to dwarf2_empty_hash_tables.
+	(read_die_and_children): Update call to store_in_ref_table.
+	(follow_die_ref): Use the comp unit's die_ref_table.
+
+2004-02-23  Daniel Jacobowitz  <drow@mvista.com>
+
 	* dwarf2read.c (read_structure_scope): Don't create a symbol
 	or call process_die.  Return immediately if die->type is set.
 	Call read_type_die before dwarf2_add_member_fn.

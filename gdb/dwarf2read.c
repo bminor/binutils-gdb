@@ -224,6 +224,11 @@ struct comp_unit_head
     int base_known;
   };
 
+/* Fixed size for the DIE hash table.  */
+#ifndef REF_HASH_SIZE
+#define REF_HASH_SIZE 1021
+#endif
+
 /* Internal state when decoding a particular compilation unit.  */
 struct dwarf2_cu
 {
@@ -281,6 +286,9 @@ struct dwarf2_cu
 
   /* How many compilation units ago was this CU last referenced?  */
   int last_used;
+
+  /* A hash table of die offsets for following references.  */
+  struct die_info *die_ref_table[REF_HASH_SIZE];
 };
 
 static const struct objfile_data *dwarf2_cu_tree;
@@ -445,13 +453,6 @@ struct partial_die_info
 #ifndef ATTR_ALLOC_CHUNK
 #define ATTR_ALLOC_CHUNK 4
 #endif
-
-/* A hash table of die offsets for following references.  */
-#ifndef REF_HASH_SIZE
-#define REF_HASH_SIZE 1021
-#endif
-
-static struct die_info *die_ref_table[REF_HASH_SIZE];
 
 /* Obstack for allocating temporary storage used during symbol reading.  */
 static struct obstack dwarf2_tmp_obstack;
@@ -947,9 +948,10 @@ static void dump_die (struct die_info *);
 
 static void dump_die_list (struct die_info *);
 
-static void store_in_ref_table (unsigned int, struct die_info *);
+static void store_in_ref_table (unsigned int, struct die_info *,
+				struct dwarf2_cu *);
 
-static void dwarf2_empty_hash_tables (void);
+static void dwarf2_empty_hash_tables (struct dwarf2_cu *);
 
 static unsigned int dwarf2_get_ref_die_offset (struct attribute *,
 					       struct dwarf2_cu *);
@@ -4526,7 +4528,7 @@ read_comp_unit (char *info_ptr, bfd *abfd, struct dwarf2_cu *cu)
 {
   /* Reset die reference table; we are
      building new ones now.  */
-  dwarf2_empty_hash_tables ();
+  dwarf2_empty_hash_tables (cu);
 
   return read_die_and_children (info_ptr, abfd, cu, &info_ptr, NULL);
 }
@@ -4548,7 +4550,7 @@ read_die_and_children (char *info_ptr, bfd *abfd,
   int has_children;
 
   cur_ptr = read_full_die (&die, abfd, info_ptr, cu, &has_children);
-  store_in_ref_table (die->offset, die);
+  store_in_ref_table (die->offset, die, cu);
 
   if (has_children)
     {
@@ -8044,22 +8046,23 @@ dump_die_list (struct die_info *die)
 }
 
 static void
-store_in_ref_table (unsigned int offset, struct die_info *die)
+store_in_ref_table (unsigned int offset, struct die_info *die,
+		    struct dwarf2_cu *cu)
 {
   int h;
   struct die_info *old;
 
   h = (offset % REF_HASH_SIZE);
-  old = die_ref_table[h];
+  old = cu->die_ref_table[h];
   die->next_ref = old;
-  die_ref_table[h] = die;
+  cu->die_ref_table[h] = die;
 }
 
 
 static void
-dwarf2_empty_hash_tables (void)
+dwarf2_empty_hash_tables (struct dwarf2_cu *cu)
 {
-  memset (die_ref_table, 0, sizeof (die_ref_table));
+  memset (cu->die_ref_table, 0, sizeof (cu->die_ref_table));
 }
 
 static unsigned int
@@ -8118,16 +8121,14 @@ follow_die_ref (struct attribute *attr, struct dwarf2_cu *cu,
   int h;
 
   offset = dwarf2_get_ref_die_offset (attr, cu);
+  *spec_cu = cu;
 
   h = (offset % REF_HASH_SIZE);
-  die = die_ref_table[h];
+  die = (*spec_cu)->die_ref_table[h];
   while (die)
     {
       if (die->offset == offset)
-	{
-	  *spec_cu = cu;
-	  return die;
-	}
+	return die;
       die = die->next_ref;
     }
   return NULL;
