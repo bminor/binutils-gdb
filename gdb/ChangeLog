@@ -1,3 +1,40 @@
+Thu Mar 19 13:54:11 1992  Fred Fish  (fnf@cygnus.com)
+
+	* coffread.c, mipsread.c, xcoffread.c, coffread.c, dbxread.c,
+	elfread.c (coff_symfile_finish):  Add function, prototype, and
+	add to the xxxx_sym_fns struct for each file type.  Also reformat
+	the xxxx_sym_fns vector to a standard format and add comments.
+	* coffread.c, mipsread.c, xcoffread.c, coffread.c, dbxread.c,
+	elfread.c (xxx_symfile_new_init, xxx_symfile_init, xxx_symfile_read):  
+	Pass pointer to struct objfile rather than pointer to sym_fns.
+	Change references inside each function accordingly.  Allocate any
+	symbol file specific info in the per-objfile memory region.
+	* dbxread.c (free_and_init_header_files):  Break function into
+	free_header_files(), called from dbx_symfile_finish(), and
+	init_header_files(), called from dbx_new_init().
+	* dbxread.c (dbx_new_init):  Move deallocation things to new
+	dbx_symfile_finish function.
+	* elfread.c (elf_new_init):  Call buildsym_new_init().
+	* objfiles.c (free_objfile): Call the appropriate symfile_finish()
+	routine for the objfile before deallocating other stuff.
+	* sparc-tdep.c (get_longjmp_target):  Cast target_read_memory arg.
+	* symfile.h:  Move struct sym_fns to before struct objfile def.
+	Add sym_finish function pointer and change prototypes of other
+	function pointers to reflect passing struct objfile pointer rather
+	than struct sym_fns pointer.
+	* symfile.c:  Remove now obsolete symtab_fns pointer.
+	* symfile.c (symfile_init):  Renamed to find_sym_fns, and now only
+	locates the correct sym_fns struct for the given objfile.
+	* symfile.c (syms_from_objfile, symbol_file_add):  Restructured
+	for better support of mapped symbol tables.
+	* symfile.c (symbol_file_command):  Remove obsolete code using
+	symfile_fns.
+	* symfile.h:  Remove duplicate declarations for symfile_objfile,
+	entry_point, and object_files.
+	* target.c (target_info):  Compare symfile_objfile to NULL.
+	* xcoffread.c (aixcoff_new_init):  Move deallocation stuff to
+	aixcoff_symfile_finish().
+
 Wed Mar 18 18:22:46 1992  Fred Fish  (fnf@cygnus.com)
 
 	* infrun.c (IN_SOLIB_TRAMPOLINE):  Add default definition.

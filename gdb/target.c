@@ -18,10 +18,9 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-#include <stdio.h>
+#include "defs.h"
 #include <errno.h>
 #include <ctype.h>
-#include "defs.h"
 #include "target.h"
 #include "gdbcmd.h"
 #include "symtab.h"
@@ -53,9 +52,6 @@ static int
 nosymbol PARAMS ((char *, CORE_ADDR *));
 
 static void
-noprocess PARAMS ((void));
-
-static void
 tcomplain PARAMS ((void));
 
 static int
@@ -63,7 +59,6 @@ nomemory PARAMS ((CORE_ADDR, char *, int, int));
 
 static void
 ignore PARAMS ((void));
-
 static void
 target_command PARAMS ((char *, int));
 
@@ -184,7 +179,7 @@ tcomplain ()
 	 current_target->to_shortname);
 }
 
-static void
+void
 noprocess ()
 {
   error ("You can't do that without a process to debug");
@@ -549,7 +544,7 @@ target_info (args, from_tty)
   struct target_ops *t;
   int has_all_mem = 0;
   
-  if (symfile_objfile != 0)
+  if (symfile_objfile != NULL)
     printf ("Symbols from \"%s\".\n", symfile_objfile->name);
 
 #ifdef FILES_INFO_HOOK

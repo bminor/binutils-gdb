@@ -28,6 +28,60 @@ struct psymbol_allocation_list {
   int size;
 };
 
+/* Structure to keep track of symbol reading functions for various
+   object file types.  */
+
+struct sym_fns {
+
+  /* is the name, or name prefix, of the BFD "target type" that this
+     set of functions handles.  E.g. "a.out" or "sunOs" or "coff" or "elf".  */
+
+  char *sym_name;
+
+  /* counts how many bytes of sym_name should be checked against the
+     BFD target type of the file being read.  If an exact match is
+     desired, specify the number of characters in sym_name plus 1 for the
+     NUL.  If a prefix match is desired, specify the number of characters in
+     sym_name.  */
+
+  int sym_namelen;
+
+  /* Initializes anything that is global to the entire symbol table.  It is
+     called during symbol_file_add, when we begin debugging an entirely new
+     program. */
+
+  void (*sym_new_init) PARAMS ((struct objfile *));
+
+  /* Reads any initial information from a symbol file, and initializes the
+     struct sym_fns SF in preparation for sym_read().  It is called every
+     time we read a symbol file for any reason. */
+
+  void (*sym_init) PARAMS ((struct objfile *));
+
+  /* sym_read (objfile, addr, mainline)
+     Reads a symbol file into a psymtab (or possibly a symtab).
+     OBJFILE is the objfile struct for the file we are reading.  ADDR
+     is the offset between the file's specified start address and
+     its true address in memory.  MAINLINE is 1 if this is the
+     main symbol table being read, and 0 if a secondary
+     symbol file (e.g. shared library or dynamically loaded file)
+     is being read.  */
+
+  void (*sym_read) PARAMS ((struct objfile *, CORE_ADDR, int));
+
+  /* Called when we are finished with an objfile.  Should do all cleanup
+     that is specific to the object file format for the particular objfile. */
+ 
+  void (*sym_finish) PARAMS ((struct objfile *));
+
+  /* Finds the next struct sym_fns.  They are allocated and initialized
+     in whatever module implements the functions pointed to; an 
+     initializer calls add_symtab_fns to add them to the global chain.  */
+
+  struct sym_fns *next;
+
+};
+
 /* Master structure for keeping track of each input file from which
    gdb reads symbols.  One of these is allocated for each such file we
    access, e.g. the exec_file, symbol_file, and any shared library object
@@ -117,7 +171,20 @@ struct objfile
      the memory mapped malloc() package to manage storage for this objfile's
      data.  NULL if we are not. */
 
-  void *md;
+  PTR md;
+
+  /* Structure which keeps track of functions that manipulate objfile's
+     of the same type as this objfile.  I.E. the function to read partial
+     symbols for example.  Note that this structure is in statically
+     allocated memory, and is shared by all objfiles that use the
+     object module reader of this type. */
+
+  struct sym_fns *sf;
+
+  /* Hook for information which is shared by sym_init and sym_read for
+     this objfile.  It is typically a pointer to malloc'd memory.  */
+
+  PTR sym_private;
 
 };
 
@@ -132,69 +199,6 @@ struct objfile
 
 #define OBJF_MAPPED	(1 << 0)	/* Objfile data is mmap'd */
 
-
-/* Structure to keep track of symbol reading functions for various
-   object file types.  */
-
-struct sym_fns {
-
-  /* is the name, or name prefix, of the BFD "target type" that this
-     set of functions handles.  E.g. "a.out" or "sunOs" or "coff" or "elf".  */
-
-  char *sym_name;
-
-  /* counts how many bytes of sym_name should be checked against the
-     BFD target type of the file being read.  If an exact match is
-     desired, specify the number of characters in sym_name plus 1 for the
-     NUL.  If a prefix match is desired, specify the number of characters in
-     sym_name.  */
-
-  int sym_namelen;
-
-  /* initializes anything that is global to the entire
-     symbol table.  It is called during symbol_file_add, when
-     we begin debugging an entirely new program.  */
-
-  void (*sym_new_init) PARAMS ((void));
-
-  /* sym_init (sf)
-     reads any initial information from a symbol file, and
-     initializes the struct sym_fns SF in preparation for sym_read().
-     It is called every time we read a symbol file for any reason.  */
-
-  void (*sym_init) PARAMS ((struct sym_fns *));
-
-  /* sym_read (sf, addr, mainline)
-     reads a symbol file into a psymtab (or possibly a symtab).
-     SF is the struct sym_fns that sym_init initialized.  ADDR
-     is the offset between the file's specified start address and
-     its true address in memory.  MAINLINE is 1 if this is the
-     main symbol table being read, and 0 if a secondary
-     symbol file (e.g. shared library or dynamically loaded file)
-     is being read.  */
-
-  void (*sym_read) PARAMS ((struct sym_fns *, CORE_ADDR, int));
-
-  /* is the accessor for the symbol file being read.  */
-
-  bfd *sym_bfd;
-
-  /* is where information can be shared among sym_init and sym_read.
-     It is typically a pointer to malloc'd memory.  */
-
-  char *sym_private;			/* Should be void * */
-
-  /* is the "struct objfile" for the object file being read.  */
-
-  struct objfile *objfile;
-
-  /* finds the next struct sym_fns.  They are allocated and initialized
-     in whatever module implements the functions pointed to; an 
-     initializer calls add_symtab_fns to add them to the global chain.  */
-
-  struct sym_fns *next;
-
-};
 
 extern void
 extend_psymbol_list PARAMS ((struct psymbol_allocation_list *,
@@ -342,21 +346,6 @@ struct complaint {
    This is used to reset the counters, and/or report the total counts.  */
 
 extern struct complaint complaint_root[1];
-
-/* Externally visible variables defined in symfile.c */
-
-/* The object file that the main symbol table was loaded from (e.g. the
-   argument to the "symbol-file" or "file" command).  */
-
-extern struct objfile *symfile_objfile;
-
-/* Where execution starts in symfile */
-
-extern CORE_ADDR entry_point;
-
-/* Root of object file struct chain.  */
-
-extern struct objfile *object_files;
 
 /* Functions that handle complaints.  (in symfile.c)  */
 

@@ -50,13 +50,16 @@ struct elfinfo {
 };
 
 static void
-elf_symfile_init PARAMS ((struct sym_fns *));
+elf_symfile_init PARAMS ((struct objfile *));
 
 static void
-elf_new_init PARAMS ((void));
+elf_new_init PARAMS ((struct objfile *));
 
 static void
-elf_symfile_read PARAMS ((struct sym_fns *, CORE_ADDR, int));
+elf_symfile_read PARAMS ((struct objfile *, CORE_ADDR, int));
+
+static void
+elf_symfile_finish PARAMS ((struct objfile *));
 
 static void
 elf_symtab_read PARAMS ((bfd *,  CORE_ADDR, int, struct objfile *));
@@ -271,12 +274,12 @@ elf_symtab_read (abfd, addr, mainline, objfile)
  */
 
 static void
-elf_symfile_read (sf, addr, mainline)
-     struct sym_fns *sf;
+elf_symfile_read (objfile, addr, mainline)
+     struct objfile *objfile;
      CORE_ADDR addr;
      int mainline;
 {
-  bfd *abfd = sf->objfile->obfd;
+  bfd *abfd = objfile->obfd;
   struct elfinfo ei;
   struct cleanup *back_to;
 
@@ -285,7 +288,7 @@ elf_symfile_read (sf, addr, mainline)
 
   /* Process the normal ELF symbol table first. */
 
-  elf_symtab_read (abfd, addr, mainline, sf->objfile);
+  elf_symtab_read (abfd, addr, mainline, objfile);
 
   /* Now process the DWARF debugging information, which is contained in
      special ELF sections.  We first have to find them... */
@@ -298,7 +301,7 @@ elf_symfile_read (sf, addr, mainline)
 			    bfd_get_filename (abfd),
 			    addr, mainline,
 			    ei.dboffset, ei.dbsize,
-			    ei.lnoffset, ei.lnsize, sf->objfile);
+			    ei.lnoffset, ei.lnsize, objfile);
     }
 
   if (!have_partial_symbols ())
@@ -311,7 +314,7 @@ elf_symfile_read (sf, addr, mainline)
   /* Install any minimal symbols that have been collected as the current
      minimal symbols for this objfile. */
 
-  install_minimal_symbols (sf -> objfile);
+  install_minimal_symbols (objfile);
 
   do_cleanups (back_to);
 }
@@ -324,8 +327,25 @@ elf_symfile_read (sf, addr, mainline)
    just a stub. */
 
 static void
-elf_new_init ()
+elf_new_init (objfile)
+     struct objfile *objfile;
 {
+  buildsym_new_init ();
+}
+
+/* Perform any local cleanups required when we are done with a particular
+   objfile.  I.E, we are in the process of discarding all symbol information
+   for an objfile, freeing up all memory held for it, and unlinking the
+   objfile struct from the global list of known objfiles. */
+
+static void
+elf_symfile_finish (objfile)
+     struct objfile *objfile;
+{
+  if (objfile -> sym_private != NULL)
+    {
+      mfree (objfile -> md, objfile -> sym_private);
+    }
 }
 
 /* ELF specific initialization routine for reading symbols.
@@ -338,8 +358,8 @@ elf_new_init ()
    just a stub. */
 
 static void
-elf_symfile_init (sf)
-     struct sym_fns *sf;
+elf_symfile_init (objfile)
+     struct objfile *objfile;
 {
 }
 
@@ -360,14 +380,14 @@ elf_symfile_init (sf)
     use "elf" in the same sense as "a.out" or "coff", to imply both the ELF
     object file format and the DWARF debugging format. */
 
-static struct sym_fns elf_sym_fns = {
+static struct sym_fns elf_sym_fns =
+{
   "elf",		/* sym_name: name or name prefix of BFD target type */
   3,			/* sym_namelen: number of significant sym_name chars */
   elf_new_init,		/* sym_new_init: init anything gbl to entire symtab */
   elf_symfile_init,	/* sym_init: read initial info, setup for sym_read() */
   elf_symfile_read,	/* sym_read: read a symbol file into symtab */
-  NULL,			/* sym_bfd: accessor for symbol file being read */
-  NULL,			/* sym_private: sym_init & sym_read shared info */
+  elf_symfile_finish,	/* sym_finish: finished with file, cleanup */
   NULL			/* next: pointer to next struct sym_fns */
 };
 

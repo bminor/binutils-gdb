@@ -40,8 +40,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* Global variables owned by this file */
 
 CORE_ADDR entry_point;			/* Where execution starts in symfile */
-struct sym_fns *symtab_fns = NULL;	/* List of all available sym_fns.  */
-int readnow_symbol_files;			/* Read full symbols immediately */
+int readnow_symbol_files;		/* Read full symbols immediately */
 
 /* External variables and functions referenced. */
 
@@ -70,19 +69,17 @@ compare_symbols PARAMS ((const void *, const void *));
 static bfd *
 symfile_bfd_open PARAMS ((char *));
 
-static struct sym_fns *
-symfile_init PARAMS ((struct objfile *));
+static void
+find_sym_fns PARAMS ((struct objfile *));
 
 static void
 clear_symtab_users_once PARAMS ((void));
 
-/* Saves the sym_fns of the current symbol table, so we can call
-   the right XXX_new_init function when we free it.  FIXME.  This
-   should be extended to calling the new_init function for each
-   existing symtab or psymtab, since the main symbol file and 
-   subsequent added symbol files can have different types.  */
+/* List of all available sym_fns.  On gdb startup, each object file reader
+   calls add_symtab_fns() to register information on each format it is
+   prepared to read. */
 
-static struct sym_fns *symfile_fns;
+static struct sym_fns *symtab_fns = NULL;
 
 /* When we need to allocate a new type, we need to know which type_obstack
    to allocate the type on, since there is one for each objfile.  The places
@@ -351,7 +348,6 @@ syms_from_objfile (objfile, addr, mainline, verbo)
      int verbo;
 {
   asection *text_sect;
-  struct sym_fns *sf;
 
   /* There is a distinction between having no symbol table
      (we refuse to read the file, leaving the old set of symbols around)
@@ -363,6 +359,7 @@ syms_from_objfile (objfile, addr, mainline, verbo)
 
   /* Save startup file's range of PC addresses to help blockframe.c
      decide where the bottom of the stack is.  */
+
   if (bfd_get_file_flags (objfile -> obfd) & EXEC_P)
     {
       /* Executable file -- record its entry point so we'll recognize
@@ -379,30 +376,34 @@ syms_from_objfile (objfile, addr, mainline, verbo)
       startup_file_end = 0;
     }
 
-  sf = symfile_init (objfile);
+  find_sym_fns (objfile);
 
   if (mainline) 
     {
       /* Since no error yet, throw away the old symbol table.  */
 
-      if (symfile_objfile)
-        free_objfile (symfile_objfile);
-      symfile_objfile = NULL;
+      if (symfile_objfile != NULL)
+	{
+	  free_objfile (symfile_objfile);
+	  symfile_objfile = NULL;
+	}
 
-      (*sf->sym_new_init) ();
+      (*objfile -> sf -> sym_new_init) (objfile);
 
       /* For mainline, caller didn't know the specified address of the
          text section.  We fix that here.  */
+
       text_sect = bfd_get_section_by_name (objfile -> obfd, ".text");
       addr = bfd_section_vma (objfile -> obfd, text_sect);
     }
 
-  /* Allow complaints to appear for this new file, and record how
-     verbose to be. */
+  /* Initialize symbol reading routines for this objfile, allow complaints to
+     appear for this new file, and record how verbose to be, then do the
+     initial symbol reading for this file. */
 
-  clear_complaints(1, verbo);
-
-  (*sf->sym_read) (sf, addr, mainline);
+  (*objfile -> sf -> sym_init) (objfile);
+  clear_complaints (1, verbo);
+  (*objfile -> sf -> sym_read) (objfile, addr, mainline);
 
   /* Don't allow char * to have a typename (else would get caddr_t.)  */
   /* Ditto void *.  FIXME should do this for all the builtin types.  */
@@ -414,14 +415,13 @@ syms_from_objfile (objfile, addr, mainline, verbo)
     {
       /* OK, make it the "real" symbol file.  */
       symfile_objfile = objfile;
-      symfile_fns = sf;
     }
 
   /* If we have wiped out any old symbol tables, clean up.  */
   clear_symtab_users_once ();
 
   /* We're done reading the symbol file; finish off complaints.  */
-  clear_complaints(0, verbo);
+  clear_complaints (0, verbo);
 
   /* Fixup all the breakpoints that may have been redefined by this
      symbol file. */
@@ -453,74 +453,96 @@ symbol_file_add (name, from_tty, addr, mainline, mapped, readnow)
 {
   struct objfile *objfile;
   struct partial_symtab *psymtab;
+  bfd *abfd;
+  int mapped_it;
 
-  /* Open a bfd for the file, then allocate a new objfile. */
-
-  objfile = allocate_objfile (symfile_bfd_open (name), mapped);
-
-  /* There is a distinction between having no symbol table
+  /* Open a bfd for the file and then check to see if the file has a
+     symbol table.  There is a distinction between having no symbol table
      (we refuse to read the file, leaving the old set of symbols around)
-     and having no debugging symbols in your symbol table (we read
-     the file and end up with a mostly empty symbol table, but with lots
-     of stuff in the minimal symbol table).  */
+     and having no debugging symbols in the symbol table (we read the file
+     and end up with a mostly empty symbol table, but with lots of stuff in
+     the minimal symbol table).  We need to make the decision about whether
+     to continue with the file before allocating and building a objfile.
 
-  if (!(bfd_get_file_flags (objfile -> obfd) & HAS_SYMS))
+     FIXME:  This strategy works correctly when the debugging symbols are
+     intermixed with "normal" symbols.  However, when the debugging symbols
+     are separate, such as with ELF/DWARF, it is perfectly plausible for
+     the symbol table to be missing but still have all the DWARF info
+     intact.  Thus in general it is wrong to assume that having no symbol
+     table implies no debugging information. */
+
+  abfd = symfile_bfd_open (name);
+  if (!(bfd_get_file_flags (abfd) & HAS_SYMS))
     {
       error ("%s has no symbol-table", name);
     }
 
+  if ((have_full_symbols () || have_partial_symbols ())
+      && mainline
+      && from_tty
+      && !query ("Load new symbol table from \"%s\"? ", name))
+      error ("Not confirmed.");
+      
+  objfile = allocate_objfile (abfd, mapped);
+
   /* If the objfile uses a mapped symbol file, and we have a psymtab for
      it, then skip reading any symbols at this time. */
 
-  if ((objfile -> psymtabs != NULL) && (objfile -> flags & OBJF_MAPPED))
+  if ((objfile -> flags & OBJF_MAPPED) && (objfile -> psymtabs != NULL))
     {
+      /* We mapped in an existing symbol table file that already has had
+	 the psymbols read in.  So we can skip that part.  Notify the user
+	 that instead of reading the symbols, they have been mapped. */
       if (from_tty || info_verbose)
 	{
-	  printf_filtered ("Mapped symbols for %s.\n", name);
+	  printf_filtered ("Mapped symbols for %s...", name);
+	  wrap_here ("");
 	  fflush (stdout);
 	}
     }
   else
     {
-      if ((have_full_symbols () || have_partial_symbols ())
-	  && mainline
-	  && from_tty
-	  && !query ("Load new symbol table from \"%s\"? ", name))
-	error ("Not confirmed.");
-      
+      /* We either created a new mapped symbol table, mapped an existing
+	 symbol table file with no partial symbols, or need to read an
+	 unmapped symbol table. */
       if (from_tty || info_verbose)
 	{
 	  printf_filtered ("Reading symbols from %s...", name);
 	  wrap_here ("");
 	  fflush (stdout);
 	}
-      
       syms_from_objfile (objfile, addr, mainline, from_tty);
-      
-      readnow |= readnow_symbol_files;
-      if (readnow)
-	{
-	  if (from_tty || info_verbose)
-	    {
-	      printf_filtered ("expanding to full symbols...");
-	      wrap_here ("");
-	      fflush (stdout);
-	    }
-      
-	  for (psymtab = objfile -> psymtabs;
-	       psymtab != NULL;
-	       psymtab = psymtab -> next)
-	    {
-	      (void) psymtab_to_symtab (psymtab);
-	    }
-	}
+    }      
 
+  /* We now have at least a partial symbol table.  Check to see if the
+     user requested that all symbols be read on initial access via either
+     the gdb startup command line or on a per symbol file basis.  Expand
+     all partial symbol tables for this objfile if so. */
+
+  readnow |= readnow_symbol_files;
+  if (readnow)
+    {
       if (from_tty || info_verbose)
 	{
-	  printf_filtered ("done.\n");
+	  printf_filtered ("expanding to full symbols...");
+	  wrap_here ("");
 	  fflush (stdout);
 	}
+
+      for (psymtab = objfile -> psymtabs;
+	   psymtab != NULL;
+	   psymtab = psymtab -> next)
+	{
+	  (void) psymtab_to_symtab (psymtab);
+	}
     }
+
+  if (from_tty || info_verbose)
+    {
+      printf_filtered ("done.\n");
+      fflush (stdout);
+    }
+
   return (objfile);
 }
 
@@ -550,15 +572,6 @@ symbol_file_command (args, from_tty)
 	error ("Not confirmed.");
       free_all_objfiles ();
       symfile_objfile = NULL;
-      /* FIXME, this does not account for the main file and subsequent
-         files (shared libs, dynloads, etc) having different formats. 
-         It only calls the cleanup routine for the main file's format.  */
-      if (symfile_fns)
-	{
-	  (*symfile_fns -> sym_new_init) ();
-	  free (symfile_fns);
-	  symfile_fns = 0;
-	}
     }
   else
     {
@@ -649,8 +662,10 @@ symfile_bfd_open (name)
   return (sym_bfd);
 }
 
-/* Link a new symtab_fns into the global symtab_fns list.
-   Called by various _initialize routines.  */
+/* Link a new symtab_fns into the global symtab_fns list.  Called on gdb
+   startup by the _initialize routine in each object file format reader,
+   to register information about each format the the reader is prepared
+   to handle. */
 
 void
 add_symtab_fns (sf)
@@ -662,32 +677,27 @@ add_symtab_fns (sf)
 
 
 /* Initialize to read symbols from the symbol file sym_bfd.  It either
-   returns or calls error().  The result is a malloc'd struct sym_fns
-   that contains cached information about the symbol file.  */
+   returns or calls error().  The result is an initialized struct sym_fns
+   in the objfile structure, that contains cached information about the
+   symbol file.  */
 
-static struct sym_fns *
-symfile_init (objfile)
+static void
+find_sym_fns (objfile)
      struct objfile *objfile;
 {
   struct sym_fns *sf, *sf2;
 
-  for (sf = symtab_fns; sf != NULL; sf = sf->next)
+  for (sf = symtab_fns; sf != NULL; sf = sf -> next)
     {
-      if (!strncmp (bfd_get_target (objfile -> obfd), sf->sym_name, sf->sym_namelen))
+      if (strncmp (bfd_get_target (objfile -> obfd),
+		    sf -> sym_name, sf -> sym_namelen) == 0)
 	{
-	  sf2 = (struct sym_fns *)xmalloc (sizeof (*sf2));	
-	  /* FIXME, who frees this? */
-	  *sf2 = *sf;
-  	  sf2->objfile = objfile;
-	  sf2->sym_bfd = objfile -> obfd;
-	  sf2->sym_private = 0;			/* Not alloc'd yet */
-	  (*sf2->sym_init) (sf2);
-	  return sf2;
+	  objfile -> sf = sf;
+	  return;
 	}
     }
   error ("I'm sorry, Dave, I can't do that.  Symbol format `%s' unknown.",
 	 bfd_get_target (objfile -> obfd));
-  return 0; /* Appease lint.  */
 }
 
 /* This function runs the load command of our current target.  */

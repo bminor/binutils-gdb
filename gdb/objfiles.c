@@ -173,7 +173,14 @@ allocate_objfile (abfd, mapped)
 
 /* Destroy an objfile and all the symtabs and psymtabs under it.  Note
    that as much as possible is allocated on the symbol_obstack and
-   psymbol_obstack, so that the memory can be efficiently freed. */
+   psymbol_obstack, so that the memory can be efficiently freed.
+
+   Things which we do NOT free because they are not in malloc'd memory
+   or not in memory specific to the objfile include:
+
+   	objfile -> sf
+
+   */
 
 void
 free_objfile (objfile)
@@ -181,11 +188,15 @@ free_objfile (objfile)
 {
   struct objfile *ofp;
 
-  if (objfile -> name)
+  if (objfile -> sf != NULL)
+    {
+      (*objfile -> sf -> sym_finish) (objfile);
+    }
+  if (objfile -> name != NULL)
     {
       mfree (objfile -> md, objfile -> name);
     }
-  if (objfile -> obfd)
+  if (objfile -> obfd != NULL)
     {
       bfd_close (objfile -> obfd);
     }

@@ -154,9 +154,6 @@ enter_line_range PARAMS ((struct subfile *, unsigned, unsigned,
 			  CORE_ADDR, CORE_ADDR, unsigned *));
 
 static void
-aixcoff_symfile_read PARAMS ((struct sym_fns *, CORE_ADDR, int));
-
-static void
 free_debugsection PARAMS ((void));
 
 static int
@@ -166,10 +163,16 @@ static int
 init_stringtab PARAMS ((bfd *, long, struct objfile *));
 
 static void
-aixcoff_symfile_init PARAMS ((struct sym_fns *));
+aixcoff_symfile_init PARAMS ((struct objfile *));
 
 static void
-aixcoff_new_init PARAMS ((void));
+aixcoff_new_init PARAMS ((struct objfile *));
+
+static void
+aixcoff_symfile_read PARAMS ((struct sym_fns *, CORE_ADDR, int));
+
+static void
+aixcoff_symfile_finish PARAMS ((struct objfile *));
 
 static int
 init_lineno PARAMS ((bfd *, long, int));
@@ -2001,27 +2004,20 @@ build_function_symbol (ind, objfile)
 #endif
 
 static void
-aixcoff_new_init ()
+aixcoff_new_init (objfile)
+     struct objfile *objfile;
 {
-  /* This routine is executed once per executable. We should start with a
-     fresh include table per executable. */
-
-  if (inclTable) {
-    free (inclTable);
-    inclTable = NULL;
-  }
-  inclIndx = inclLength = inclDepth = NULL;
 }
 
 static void
-aixcoff_symfile_init (sf)
-struct sym_fns *sf;
+aixcoff_symfile_init (objfile)
+  struct objfile *objfile;
 {
-  bfd *abfd = sf->sym_bfd;
+  bfd *abfd = objfile->obfd;
 
   /* Allocate struct to keep track of the symfile */
-  /* FIXME memory leak */
-  sf->sym_private = xmalloc(sizeof (struct coff_symfile_info));
+  objfile -> sym_private = xmmalloc (objfile -> md,
+				     sizeof (struct coff_symfile_info));
 
   /*
    * Save startup file's range of PC addresses to help
@@ -2035,6 +2031,30 @@ struct sym_fns *sf;
     startup_file_start = 0;
     startup_file_end = 0;
   }
+}
+
+/* Perform any local cleanups required when we are done with a particular
+   objfile.  I.E, we are in the process of discarding all symbol information
+   for an objfile, freeing up all memory held for it, and unlinking the
+   objfile struct from the global list of known objfiles. */
+
+static void
+aixcoff_symfile_finish (objfile)
+     struct objfile *objfile;
+{
+  if (objfile -> sym_private != NULL)
+    {
+      mfree (objfile -> md, objfile -> sym_private);
+    }
+
+  /* Start with a fresh include table for the next objfile. */
+
+  if (inclTable)
+    {
+      free (inclTable);
+      inclTable = NULL;
+    }
+  inclIndx = inclLength = inclDepth = 0;
 }
 
 
@@ -2121,8 +2141,8 @@ free_debugsection()
 /* aixcoff version of symbol file read. */
 
 static void
-aixcoff_symfile_read (sf, addr, mainline)
-  struct sym_fns *sf;
+aixcoff_symfile_read (objfile, addr, mainline)
+  struct objfile *objfile;
   CORE_ADDR addr;
   int mainline;
 {
@@ -2131,11 +2151,12 @@ aixcoff_symfile_read (sf, addr, mainline)
   int stringtab_offset;				/* string table file offsets */
   int val;
   bfd *abfd;
-  struct coff_symfile_info *info = (void*) sf->sym_private;
+  struct coff_symfile_info *info;
   char *name;
 
-  symfile_bfd = abfd = sf->objfile->obfd;
-  name = sf->objfile->name;
+  info = (struct coff_symfile_info *) objfile -> sym_private;
+  symfile_bfd = abfd = objfile->obfd;
+  name = objfile->name;
 
   num_symbols = bfd_get_symcount (abfd);	/* # of symbols */
   symtab_offset = obj_sym_filepos (abfd);	/* symbol table file offset */
@@ -2158,7 +2179,7 @@ aixcoff_symfile_read (sf, addr, mainline)
       error("\"%s\": error reading line numbers\n", name);
   }
 
-  val = init_stringtab(abfd, stringtab_offset, sf->objfile);
+  val = init_stringtab(abfd, stringtab_offset, objfile);
   if (val < 0) {
     error ("\"%s\": can't get string table", name);
   }
@@ -2186,7 +2207,7 @@ aixcoff_symfile_read (sf, addr, mainline)
   /* Now that the executable file is positioned at symbol table,
      process it and define symbols accordingly. */
 
-  read_xcoff_symtab(sf->objfile, num_symbols);
+  read_xcoff_symtab(objfile, num_symbols);
 
   make_cleanup (free_debugsection, 0);
 
@@ -2196,7 +2217,7 @@ aixcoff_symfile_read (sf, addr, mainline)
   /* Install any minimal symbols that have been collected as the current
      minimal symbols for this objfile. */
 
-  install_minimal_symbols (sf -> objfile);
+  install_minimal_symbols (objfile);
 
   /* Make a default for file to list.  */
   select_source_symtab (0);
@@ -2206,9 +2227,13 @@ aixcoff_symfile_read (sf, addr, mainline)
 
 static struct sym_fns aixcoff_sym_fns =
 {
-  "aixcoff-rs6000", 15,
-  aixcoff_new_init, aixcoff_symfile_init,
-  aixcoff_symfile_read, 
+  "aixcoff-rs6000",	/* sym_name: name or name prefix of BFD target type */
+  15,			/* sym_namelen: number of significant sym_name chars */
+  aixcoff_new_init,	/* sym_new_init: init anything gbl to entire symtab */
+  aixcoff_symfile_init,	/* sym_init: read initial info, setup for sym_read() */
+  aixcoff_symfile_read,	/* sym_read: read a symbol file into symtab */
+  aixcoff_symfile_finish, /* sym_finish: finished with file, cleanup */
+  NULL			/* next: pointer to next struct sym_fns */
 };
 
 void

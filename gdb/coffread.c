@@ -254,16 +254,19 @@ static void
 read_coff_symtab PARAMS ((int, int, struct objfile *));
 
 static void
-coff_new_init PARAMS ((void));
-
-static void
-coff_symfile_read PARAMS ((struct sym_fns *, CORE_ADDR, int));
-
-static void
 find_linenos PARAMS ((bfd *, sec_ptr, PTR));
 
 static void
-coff_symfile_init PARAMS ((struct sym_fns *));
+coff_symfile_init PARAMS ((struct objfile *));
+
+static void
+coff_new_init PARAMS ((struct objfile *));
+
+static void
+coff_symfile_read PARAMS ((struct objfile *, CORE_ADDR, int));
+
+static void
+coff_symfile_finish PARAMS ((struct objfile *));
 
 static void
 record_minimal_symbol PARAMS ((char *, CORE_ADDR));
@@ -655,15 +658,15 @@ struct coff_symfile_info {
 static int text_bfd_scnum;
 
 static void
-coff_symfile_init (sf)
-     struct sym_fns *sf;
+coff_symfile_init (objfile)
+     struct objfile *objfile;
 {
   asection	*section;
-  bfd *abfd = sf->sym_bfd;
+  bfd *abfd = objfile->obfd;
 
   /* Allocate struct to keep track of the symfile */
-  /* FIXME memory leak */
-  sf->sym_private = xmalloc (sizeof (struct coff_symfile_info));
+  objfile -> sym_private = xmmalloc (objfile -> md,
+				     sizeof (struct coff_symfile_info));
 
   /* Save startup file's range of PC addresses to help blockframe.c
      decide where the bottom of the stack is.  */
@@ -737,13 +740,13 @@ static bfd *symfile_bfd;
 
 /* ARGSUSED */
 static void
-coff_symfile_read (sf, addr, mainline)
-     struct sym_fns *sf;
+coff_symfile_read (objfile, addr, mainline)
+     struct objfile *objfile;
      CORE_ADDR addr;
      int mainline;
 {
-  struct coff_symfile_info *info = (struct coff_symfile_info *)sf->sym_private;
-  bfd *abfd = sf->objfile->obfd;
+  struct coff_symfile_info *info;
+  bfd *abfd = objfile->obfd;
   coff_data_type *cdata = coff_data (abfd);
   char *name = bfd_get_filename (abfd);
   int desc;
@@ -752,6 +755,7 @@ coff_symfile_read (sf, addr, mainline)
   int symtab_offset;
   int stringtab_offset;
 
+  info = (struct coff_symfile_info *) objfile -> sym_private;
   symfile_bfd = abfd;			/* Kludge for swap routines */
 
 /* WARNING WILL ROBINSON!  ACCESSING BFD-PRIVATE DATA HERE!  FIXME!  */
@@ -808,7 +812,7 @@ coff_symfile_read (sf, addr, mainline)
   /* Now that the executable file is positioned at symbol table,
      process it and define symbols accordingly.  */
 
-  read_coff_symtab (desc, num_symbols, sf->objfile);
+  read_coff_symtab (desc, num_symbols, objfile);
 
   iterate_over_symtabs (patch_opaque_types, (PTR) NULL, (PTR) NULL,
 			(PTR) NULL);
@@ -820,14 +824,31 @@ coff_symfile_read (sf, addr, mainline)
   /* Install any minimal symbols that have been collected as the current
      minimal symbols for this objfile. */
 
-  install_minimal_symbols (sf -> objfile);
+  install_minimal_symbols (objfile);
 }
 
 static void
-coff_new_init ()
+coff_new_init (objfile)
+     struct objfile *objfile;
 {
 	/* Nothin' to do */
 }
+
+/* Perform any local cleanups required when we are done with a particular
+   objfile.  I.E, we are in the process of discarding all symbol information
+   for an objfile, freeing up all memory held for it, and unlinking the
+   objfile struct from the global list of known objfiles. */
+
+static void
+coff_symfile_finish (objfile)
+     struct objfile *objfile;
+{
+  if (objfile -> sym_private != NULL)
+    {
+      mfree (objfile -> md, objfile -> sym_private);
+    }
+}
+
 
 /* Given pointers to a symbol table in coff style exec file,
    analyze them and create struct symtab's describing the symbols.
@@ -2103,8 +2124,13 @@ coff_read_enum_type (index, length, lastsym)
 
 static struct sym_fns coff_sym_fns =
 {
-    "coff", 4,
-    coff_new_init, coff_symfile_init, coff_symfile_read,
+  "coff",		/* sym_name: name or name prefix of BFD target type */
+  4,			/* sym_namelen: number of significant sym_name chars */
+  coff_new_init,	/* sym_new_init: init anything gbl to entire symtab */
+  coff_symfile_init,	/* sym_init: read initial info, setup for sym_read() */
+  coff_symfile_read,	/* sym_read: read a symbol file into symtab */
+  coff_symfile_finish,	/* sym_finish: finished with file, cleanup */
+  NULL			/* next: pointer to next struct sym_fns */
 };
 
 void

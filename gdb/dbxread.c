@@ -62,7 +62,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* Information is passed among various dbxread routines for accessing
    symbol files.  A pointer to this structure is kept in the sym_private
-   field of the struct sym_fns passed in by symfile.h.  */
+   field of the objfile struct passed in by symfile.h.  */
  
 struct dbx_symfile_info {
   asection *text_sect;		/* Text section accessor */
@@ -182,7 +182,10 @@ static int bincls_allocated;
 /* Local function prototypes */
 
 static void
-free_and_init_header_files PARAMS ((void));
+free_header_files PARAMS ((void));
+
+static void
+init_header_files PARAMS ((void));
 
 static struct pending *
 copy_pending PARAMS ((struct pending *, int, struct pending *));
@@ -223,13 +226,16 @@ static void
 fill_symbuf PARAMS ((bfd *));
 
 static void
-dbx_symfile_init PARAMS ((struct sym_fns *));
+dbx_symfile_init PARAMS ((struct objfile *));
 
 static void
-dbx_new_init PARAMS ((void));
+dbx_new_init PARAMS ((struct objfile *));
 
 static void
-dbx_symfile_read PARAMS ((struct sym_fns *, CORE_ADDR, int));
+dbx_symfile_read PARAMS ((struct objfile *, CORE_ADDR, int));
+
+static void
+dbx_symfile_finish PARAMS ((struct objfile *));
 
 static void
 record_minimal_symbol PARAMS ((char *, CORE_ADDR, int, struct objfile *));
@@ -243,23 +249,41 @@ add_old_header_file PARAMS ((char *, int));
 static void
 add_this_object_header_file PARAMS ((int));
 
-/* Free up old header file tables, and allocate new ones.
-   We're reading a new symbol file now.  */
+/* Free up old header file tables */
 
 static void
-free_and_init_header_files ()
+free_header_files ()
 {
   register int i;
-  for (i = 0; i < n_header_files; i++)
-    free (header_files[i].name);
-  if (header_files)			/* First time null */
-    free (header_files);
-  if (this_object_header_files)		/* First time null */
-    free (this_object_header_files);
 
-  n_allocated_header_files = 10;
-  header_files = (struct header_file *) xmalloc (10 * sizeof (struct header_file));
+  if (header_files != NULL)
+    {
+      for (i = 0; i < n_header_files; i++)
+	{
+	  free (header_files[i].name);
+	}
+      free (header_files);
+      header_files = NULL;
+      n_header_files = 0;
+    }
+  if (this_object_header_files)
+    {
+      free (this_object_header_files);
+      this_object_header_files = NULL;
+    }
+  n_allocated_header_files = 0;
+  n_allocated_this_object_header_files = 0;
+}
+
+/* Allocate new header file tables */
+
+static void
+init_header_files ()
+{
   n_header_files = 0;
+  n_allocated_header_files = 10;
+  header_files = (struct header_file *)
+    xmalloc (10 * sizeof (struct header_file));
 
   n_allocated_this_object_header_files = 10;
   this_object_header_files = (int *) xmalloc (10 * sizeof (int));
@@ -402,18 +426,20 @@ record_minimal_symbol (name, address, type, objfile)
    table (as opposed to a shared lib or dynamically loaded file).  */
 
 static void
-dbx_symfile_read (sf, addr, mainline)
-     struct sym_fns *sf;
+dbx_symfile_read (objfile, addr, mainline)
+     struct objfile *objfile;
      CORE_ADDR addr;
      int mainline;	/* FIXME comments above */
 {
-  struct dbx_symfile_info *info = (struct dbx_symfile_info *) (sf->sym_private);
-  bfd *sym_bfd = sf->objfile->obfd;
+  struct dbx_symfile_info *info;
+  bfd *sym_bfd;
   int val;
 
-  val = bfd_seek (sf->objfile->obfd, info->symtab_offset, L_SET);
+  sym_bfd = objfile->obfd;
+  info = (struct dbx_symfile_info *) (objfile -> sym_private);
+  val = bfd_seek (objfile->obfd, info->symtab_offset, L_SET);
   if (val < 0)
-    perror_with_name (sf->objfile->name);
+    perror_with_name (objfile->name);
 
   /* If mainline, set global string table pointers, and reinitialize global
      partial symbol list.  */
@@ -423,8 +449,8 @@ dbx_symfile_read (sf, addr, mainline)
   }
 
   /* If we are reinitializing, or if we have never loaded syms yet, init */
-  if (mainline || sf->objfile->global_psymbols.size == 0 || sf->objfile->static_psymbols.size == 0)
-    init_psymbol_list (info->symcount, sf->objfile);
+  if (mainline || objfile->global_psymbols.size == 0 || objfile->static_psymbols.size == 0)
+    init_psymbol_list (info->symcount, objfile);
 
   /* FIXME POKING INSIDE BFD DATA STRUCTURES */
   symbol_size = obj_symbol_entry_size (sym_bfd);
@@ -439,7 +465,7 @@ dbx_symfile_read (sf, addr, mainline)
      process them and define symbols accordingly.  */
 
   read_dbx_symtab (addr - bfd_section_vma (sym_bfd, info->text_sect), /*offset*/
-		   sf->objfile, info->stringtab, info->stringtab_size,
+		   objfile, info->stringtab, info->stringtab_size,
 		   info->symcount,
 		   bfd_section_vma  (sym_bfd, info->text_sect),
 		   bfd_section_size (sym_bfd, info->text_sect));
@@ -447,16 +473,16 @@ dbx_symfile_read (sf, addr, mainline)
   /* Install any minimal symbols that have been collected as the current
      minimal symbols for this objfile. */
 
-  install_minimal_symbols (sf -> objfile);
+  install_minimal_symbols (objfile);
 
   /* Free up any memory we allocated for ourselves.  */
 
   if (!mainline) {
-    mfree (sf->objfile->md, info->stringtab);	/* Stringtab is only saved for mainline */
+    mfree (objfile->md, info->stringtab);	/* Stringtab is only saved for mainline */
   }
-  mfree (sf->objfile->md, info);
-  sf->sym_private = NULL;	/* Zap pointer to our (now gone) info struct */
-
+  mfree (objfile->md, info);
+  /* Zap pointer to our (now gone) info struct */
+  objfile -> sym_private = NULL;
   if (!have_partial_symbols ()) {
     wrap_here ("");
     printf_filtered ("(no debugging symbols found)...");
@@ -469,25 +495,17 @@ dbx_symfile_read (sf, addr, mainline)
    file, e.g. a shared library).  */
 
 static void
-dbx_new_init ()
+dbx_new_init (objfile)
+     struct objfile *objfile;
 {
   buildsym_new_init ();
-
-  /* Don't put these on the cleanup chain; they need to stick around
-     until the next call to dbx_new_init.  *Then* we'll free them. */
-  if (symfile_string_table)
-    {
-      free (symfile_string_table);
-      symfile_string_table = 0;
-      symfile_string_table_size = 0;
-    }
-  free_and_init_header_files ();
+  init_header_files ();
 }
 
 
 /* dbx_symfile_init ()
    is the dbx-specific initialization routine for reading symbols.
-   It is passed a struct sym_fns which contains, among other things,
+   It is passed a struct objfile which contains, among other things,
    the BFD for the file whose symbols are being read, and a slot for a pointer
    to "private data" which we fill with goodies.
 
@@ -499,18 +517,18 @@ dbx_new_init ()
    FIXME, there should be a cleaner peephole into the BFD environment here.  */
 
 static void
-dbx_symfile_init (sf)
-  struct sym_fns *sf;
+dbx_symfile_init (objfile)
+     struct objfile *objfile;
 {
   int val;
-  bfd *sym_bfd = sf->objfile->obfd;
+  bfd *sym_bfd = objfile->obfd;
   char *name = bfd_get_filename (sym_bfd);
   struct dbx_symfile_info *info;
   unsigned char size_temp[4];
 
   /* Allocate struct to keep track of the symfile */
-  sf->sym_private = xmmalloc (sf->objfile->md, sizeof (*info));
-  info = (struct dbx_symfile_info *)sf->sym_private;
+  objfile-> sym_private = xmmalloc (objfile -> md, sizeof (*info));
+  info = (struct dbx_symfile_info *) objfile -> sym_private;
 
   /* FIXME POKING INSIDE BFD DATA STRUCTURES */
 #define	STRING_TABLE_OFFSET	(sym_bfd->origin + obj_str_filepos (sym_bfd))
@@ -535,7 +553,7 @@ dbx_symfile_init (sf)
   if (info->stringtab_size >= 0)
     {
       /* Yes, this should be malloc, not xmalloc.  We check its result.  */
-      info->stringtab = (char *) mmalloc (sf->objfile->md, info->stringtab_size);
+      info->stringtab = (char *) mmalloc (objfile->md, info->stringtab_size);
       /* Caller is responsible for freeing the string table.  No cleanup. */
     }
   else
@@ -556,6 +574,29 @@ dbx_symfile_init (sf)
 
   info->symtab_offset = SYMBOL_TABLE_OFFSET;
 }
+
+/* Perform any local cleanups required when we are done with a particular
+   objfile.  I.E, we are in the process of discarding all symbol information
+   for an objfile, freeing up all memory held for it, and unlinking the
+   objfile struct from the global list of known objfiles. */
+
+static void
+dbx_symfile_finish (objfile)
+     struct objfile *objfile;
+{
+  if (objfile -> sym_private != NULL)
+    {
+      mfree (objfile -> md, objfile -> sym_private);
+    }
+  if (symfile_string_table)
+    {
+      free (symfile_string_table);
+      symfile_string_table = 0;
+      symfile_string_table_size = 0;
+    }
+  free_header_files ();
+}
+
 
 /* Buffer for reading the symbol table entries.  */
 static struct internal_nlist symbuf[4096];
@@ -1665,14 +1706,38 @@ copy_pending (beg, begi, end)
 
 /* Register our willingness to decode symbols for SunOS and a.out and
    b.out files handled by BFD... */
-static struct sym_fns sunos_sym_fns = {"sunOs", 6,
-              dbx_new_init, dbx_symfile_init, dbx_symfile_read};
+static struct sym_fns sunos_sym_fns =
+{
+  "sunOs",		/* sym_name: name or name prefix of BFD target type */
+  6,			/* sym_namelen: number of significant sym_name chars */
+  dbx_new_init,		/* sym_new_init: init anything gbl to entire symtab */
+  dbx_symfile_init,	/* sym_init: read initial info, setup for sym_read() */
+  dbx_symfile_read,	/* sym_read: read a symbol file into symtab */
+  dbx_symfile_finish,	/* sym_finish: finished with file, cleanup */
+  NULL			/* next: pointer to next struct sym_fns */
+};
 
-static struct sym_fns aout_sym_fns = {"a.out", 5,
-              dbx_new_init, dbx_symfile_init, dbx_symfile_read};
+static struct sym_fns aout_sym_fns =
+{
+  "a.out",		/* sym_name: name or name prefix of BFD target type */
+  5,			/* sym_namelen: number of significant sym_name chars */
+  dbx_new_init,		/* sym_new_init: init anything gbl to entire symtab */
+  dbx_symfile_init,	/* sym_init: read initial info, setup for sym_read() */
+  dbx_symfile_read,	/* sym_read: read a symbol file into symtab */
+  dbx_symfile_finish,	/* sym_finish: finished with file, cleanup */
+  NULL			/* next: pointer to next struct sym_fns */
+};
 
-static struct sym_fns bout_sym_fns = {"b.out", 5,
-              dbx_new_init, dbx_symfile_init, dbx_symfile_read};
+static struct sym_fns bout_sym_fns =
+{
+  "b.out",		/* sym_name: name or name prefix of BFD target type */
+  5,			/* sym_namelen: number of significant sym_name chars */
+  dbx_new_init,		/* sym_new_init: init anything gbl to entire symtab */
+  dbx_symfile_init,	/* sym_init: read initial info, setup for sym_read() */
+  dbx_symfile_read,	/* sym_read: read a symbol file into symtab */
+  dbx_symfile_finish,	/* sym_finish: finished with file, cleanup */
+  NULL			/* next: pointer to next struct sym_fns */
+};
 
 void
 _initialize_dbxread ()

@@ -266,28 +266,29 @@ extern CORE_ADDR startup_file_start;	/* From blockframe.c */
 extern CORE_ADDR startup_file_end;	/* From blockframe.c */
 
 void
-mipscoff_new_init()
+mipscoff_new_init (objfile)
+     struct objfile *objfile;
 {
-  /* If we have a file symbol header lying around, blow it away.  */
-  if (cur_hdr)
-    free ((char *)cur_hdr);
-  cur_hdr = 0;
 }
 
 void
-mipscoff_symfile_init (sf)
-     struct sym_fns *sf;
+mipscoff_symfile_init (objfile)
+     struct objfile *objfile;
 {
-  sf->sym_private = NULL;
+  if (objfile -> sym_private != NULL)
+    {
+      mfree (objfile -> md, objfile -> sym_private);
+    }
+  objfile -> sym_private = NULL;
 }
 
 void
-mipscoff_symfile_read(sf, addr, mainline)
-     struct sym_fns *sf;
+mipscoff_symfile_read (objfile, addr, mainline)
+     struct objfile *objfile;
      CORE_ADDR addr;
      int mainline;
 {
-  bfd *abfd = sf->objfile->obfd;
+  bfd *abfd = objfile -> obfd;
   int desc;
 
 /* WARNING WILL ROBINSON!  ACCESSING BFD-PRIVATE DATA HERE!  FIXME!  */
@@ -300,14 +301,37 @@ mipscoff_symfile_read(sf, addr, mainline)
   /* Now that the executable file is positioned at symbol table,
      process it and define symbols accordingly.  */
 
-  read_mips_symtab(sf->objfile, desc);
+  read_mips_symtab(objfile, desc);
 
   /* Install any minimal symbols that have been collected as the current
      minimal symbols for this objfile. */
 
-  install_minimal_symbols (sf -> objfile);
+  install_minimal_symbols (objfile);
 }
   
+/* Perform any local cleanups required when we are done with a particular
+   objfile.  I.E, we are in the process of discarding all symbol information
+   for an objfile, freeing up all memory held for it, and unlinking the
+   objfile struct from the global list of known objfiles. */
+
+static void
+mipscoff_symfile_finish (objfile)
+     struct objfile *objfile;
+{
+  if (objfile -> sym_private != NULL)
+    {
+      mfree (objfile -> md, objfile -> sym_private);
+    }
+
+  /* If we have a file symbol header lying around, blow it away.  */
+
+  if (cur_hdr)
+    {
+      free ((char *)cur_hdr);
+    }
+  cur_hdr = 0;
+}
+
 /* Allocate zeroed memory */
 
 static char *
@@ -2952,9 +2976,17 @@ fixup_sigtramp()
 
 /* Initialization */
 
-static struct sym_fns ecoff_sym_fns = {"ecoff", 5,
-		mipscoff_new_init, mipscoff_symfile_init,
-		mipscoff_symfile_read};
+static struct sym_fns ecoff_sym_fns =
+{
+  "ecoff",		/* sym_name: name or name prefix of BFD target type */
+  5,			/* sym_namelen: number of significant sym_name chars */
+  mipscoff_new_init,	/* sym_new_init: init anything gbl to entire symtab */
+  mipscoff_symfile_init,/* sym_init: read initial info, setup for sym_read() */
+  mipscoff_symfile_read,/* sym_read: read a symbol file into symtab */
+  mipscoff_symfile_finish,/* sym_finish: finished with file, cleanup */
+  NULL			/* next: pointer to next struct sym_fns */
+};
+
 
 _initialize_mipsread ()
 {
