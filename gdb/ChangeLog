@@ -1,3 +1,10 @@
+Mon Sep 19 15:48:10 1994  J.T. Conklin  (jtc@phishhead.cygnus.com)
+
+	* Makefile.in: Removed prelude.o, i386-nlmstub.o, nlmstub.o,
+	  nlmstub.nlm, and nlmstub targets.  Removed NWSOURCE and
+	  NWINCLUDES definitions.
+	* i386-nlmstub.c: Removed.
+
 Mon Sep 19 07:48:36 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* dbxread.c (read_dbx_dynamic_symtab): Cast bfd_asymbol_name to
