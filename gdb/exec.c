@@ -558,7 +558,6 @@ print_section_info (struct target_ops *t, bfd *abfd)
     }
   for (p = t->to_sections; p < t->to_sections_end; p++)
     {
-      /* FIXME-32x64 need a print_address_numeric with field width */
       printf_filtered ("\t%s", local_hex_string_custom (p->addr, fmt));
       printf_filtered (" - %s", local_hex_string_custom (p->endaddr, fmt));
       if (info_verbose)
