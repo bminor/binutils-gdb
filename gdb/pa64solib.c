@@ -319,9 +319,9 @@ pa64_solib_load_symbols (struct so_list *so, char *name, int from_tty,
       return;
     }
 
-  ANOFFSET (so->objfile->section_offsets, SECT_OFF_TEXT (so->objfile))
+  (so->objfile->section_offsets)->offsets[SECT_OFF_TEXT (so->objfile)]
     = so->pa64_solib_desc.text_base;
-  ANOFFSET (so->objfile->section_offsets, SECT_OFF_DATA (so->objfile))
+  (so->objfile->section_offsets)->offsets[SECT_OFF_DATA (so->objfile)]
     = so->pa64_solib_desc.data_base;
 
   /* Relocate all the sections based on where they got loaded.  */

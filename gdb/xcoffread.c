@@ -2744,7 +2744,7 @@ xcoff_symfile_offsets (struct objfile *objfile, struct section_addr_info *addrs)
 	 sensibly), so just ignore the addr parameter and use 0.
 	 rs6000-nat.c will set the correct section offsets via
 	 objfile_relocate.  */
-	ANOFFSET (objfile->section_offsets, i) = 0;
+	(objfile->section_offsets)->offsets[i] = 0;
     }
 }
 

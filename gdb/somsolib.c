@@ -1378,10 +1378,10 @@ som_solib_section_offsets (struct objfile *objfile,
 	  asection *private_section;
 
 	  /* The text offset is easy.  */
-	  ANOFFSET (offsets, SECT_OFF_TEXT (objfile))
+	  offsets->offsets[SECT_OFF_TEXT (objfile)]
 	    = (so_list->som_solib.text_addr
 	       - so_list->som_solib.text_link_addr);
-	  ANOFFSET (offsets, SECT_OFF_RODATA (objfile))
+	  offsets->offsets[SECT_OFF_RODATA (objfile)]
 	    = ANOFFSET (offsets, SECT_OFF_TEXT (objfile));
 
 	  /* We should look at presumed_dp in the SOM header, but
@@ -1391,13 +1391,13 @@ som_solib_section_offsets (struct objfile *objfile,
 	  if (!private_section)
 	    {
 	      warning ("Unable to find $PRIVATE$ in shared library!");
-	      ANOFFSET (offsets, SECT_OFF_DATA (objfile)) = 0;
-	      ANOFFSET (offsets, SECT_OFF_BSS (objfile)) = 0;
+	      offsets->offsets[SECT_OFF_DATA (objfile)] = 0;
+	      offsets->offsets[SECT_OFF_BSS (objfile)] = 0;
 	      return 1;
 	    }
-	  ANOFFSET (offsets, SECT_OFF_DATA (objfile))
+	  offsets->offsets[SECT_OFF_DATA (objfile)]
 	    = (so_list->som_solib.data_start - private_section->vma);
-	  ANOFFSET (offsets, SECT_OFF_BSS (objfile))
+	  offsets->offsets[SECT_OFF_BSS (objfile)]
 	    = ANOFFSET (offsets, SECT_OFF_DATA (objfile));
 	  return 1;
 	}

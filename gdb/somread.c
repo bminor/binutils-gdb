@@ -477,7 +477,7 @@ som_symfile_offsets (struct objfile *objfile, struct section_addr_info *addrs)
       text_addr = addrs->other[i].addr;
 
       for (i = 0; i < SECT_OFF_MAX; i++)
-	ANOFFSET (objfile->section_offsets, i) = text_addr;
+	(objfile->section_offsets)->offsets[i] = text_addr;
     }
 }
 

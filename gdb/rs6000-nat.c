@@ -609,13 +609,13 @@ vmap_symtab (struct vmap *vp)
   new_offsets = (struct section_offsets *) alloca (SIZEOF_SECTION_OFFSETS);
 
   for (i = 0; i < objfile->num_sections; ++i)
-    ANOFFSET (new_offsets, i) = ANOFFSET (objfile->section_offsets, i);
+    new_offsets->offsets[i] = ANOFFSET (objfile->section_offsets, i);
 
   /* The symbols in the object file are linked to the VMA of the section,
      relocate them VMA relative.  */
-  ANOFFSET (new_offsets, SECT_OFF_TEXT (objfile)) = vp->tstart - vp->tvma;
-  ANOFFSET (new_offsets, SECT_OFF_DATA (objfile)) = vp->dstart - vp->dvma;
-  ANOFFSET (new_offsets, SECT_OFF_BSS (objfile)) = vp->dstart - vp->dvma;
+  new_offsets->offsets[SECT_OFF_TEXT (objfile)] = vp->tstart - vp->tvma;
+  new_offsets->offsets[SECT_OFF_DATA (objfile)] = vp->dstart - vp->dvma;
+  new_offsets->offsets[SECT_OFF_BSS (objfile)] = vp->dstart - vp->dvma;
 
   objfile_relocate (objfile, new_offsets);
 }
