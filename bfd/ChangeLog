@@ -1,3 +1,8 @@
+Fri Dec  3 18:40:58 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* config/solaris2.mh (HDEFINES): Remove -Dconst=
+	* hosts/solaris.h: If not __GNUC__, define const as empty.
+
 Thu Dec  2 15:43:32 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* ecoff.c: Added various casts for 32/64 bit cross targeting.
