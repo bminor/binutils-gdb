@@ -6750,14 +6750,14 @@ _bfd_mips_elf_link_hash_table_create (abfd)
   struct mips_elf_link_hash_table *ret;
   bfd_size_type amt = sizeof (struct mips_elf_link_hash_table);
 
-  ret = (struct mips_elf_link_hash_table *) bfd_alloc (abfd, amt);
+  ret = (struct mips_elf_link_hash_table *) bfd_malloc (amt);
   if (ret == (struct mips_elf_link_hash_table *) NULL)
     return NULL;
 
   if (! _bfd_elf_link_hash_table_init (&ret->root, abfd,
 				       mips_elf_link_hash_newfunc))
     {
-      bfd_release (abfd, ret);
+      free (ret);
       return NULL;
     }
 

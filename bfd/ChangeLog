@@ -1,3 +1,79 @@
+2002-04-04  Daniel Jacobowitz  <drow@mvista.com>
+
+	* aout-adobe.c (aout_32_bfd_link_hash_table_free): Define.
+	* aout-target.h (MY_bfd_link_hash_table_free): Conditionally
+	define.
+	* aout-tic30.c (MY_bfd_link_hash_table_free): Likewise.
+	* bfd.c (bfd_link_hash_table_free): Define.
+	* binary.c (binary_bfd_link_hash_table_free): Define.
+	* bout.c (b_out_bfd_link_hash_table_free): Define.
+	* coff-rs6000.c (rs6000coff_vec): Include
+	_bfd_generic_link_hash_table_free.
+	(pmac_xcoff_vec): Likewise.
+	* coff64-rs6000.c (rs6000coff64_vec): Likewise.
+	(aix5coff64_vec): Likewise.
+	* coffcode.h (coff_bfd_link_hash_table_free): Conditionally define.
+	* elf-m10300.c (elf32_mn10300_link_hash_table_free): New function.
+	(bfd_elf32_bfd_link_hash_table_free): Define.
+	* elf32-hppa.c (elf32_hppa_link_hash_table_free): New function.
+	(bfd_elf32_bfd_link_hash_table_free): Define.
+	* elfxx-target.h (bfd_elfNN_bfd_link_hash_table_free): Conditionally
+	define.
+	* i386msdos.c (msdos_bfd_link_hash_table_free): Define.
+	* i386os9k.c (os9k_bfd_link_hash_table_free): Define.
+	* ieee.c (ieee_bfd_link_hash_table_free): Define.
+	* ihex.c (ihex_bfd_link_hash_table_free): Define.
+	* libbfd-in.h (_bfd_nolink_bfd_link_hash_table_free): Define.
+	(_bfd_generic_link_hash_table_free): Add prototype.
+	* libcoff-in.h (_bfd_xcoff_bfd_link_hash_table_free): Add prototype.
+	* libecoff.h (_bfd_ecoff_bfd_link_hash_table_free): Define.
+	* linker.c (_bfd_generic_link_hash_table_free): New function.
+	* mmo.c (mmo_bfd_link_hash_table_free): Define.
+	* nlm-target.h (nlm_bfd_link_hash_table_free): Define.
+	* oasys.c (oasys_bfd_link_hash_table_free): Define.
+	* ppcboot.c (ppcboot_bfd_link_hash_table_free): Define.
+	* som.c (som_bfd_link_hash_table_free): Define.
+	* srec.c (srec_bfd_link_hash_table_free): Define.
+	* tekhex.c (tekhex_bfd_link_hash_table_free): Define.
+	* versados.c (versados_bfd_link_hash_table_free): Define.
+	* vms.c (vms_bfd_link_hash_table_free): New function.
+	* xcofflink.c (_bfd_xcoff_bfd_link_hash_table_free): New function.
+
+	* coff-arm.c (coff_arm_link_hash_table_create): Use bfd_malloc
+	instead of bfd_alloc.
+	* coff-h8300.c (h8300_coff_link_hash_table_create): Likewise.
+	* coff-mcore.c (coff_mcore_link_hash_table_create): Likewise.
+	* coff-ppc.c (ppc_coff_link_hash_table_create): Likewise.
+	* cofflink.c (_bfd_coff_link_hash_table_create): Likewise.
+	* ecoff.c (_bfd_ecoff_bfd_link_hash_table_create): Likewise.
+	* elf-m10300.c (elf32_mn10300_link_hash_table_create): Likewise.
+	* elf.c (_bfd_elf_link_hash_table_create): Likewise.
+	* elf32-arm.h (elf32_arm_link_hash_table_create): Likewise.
+	* elf32-cris.c (elf_cris_link_hash_table_create): Likewise.
+	* elf32-hppa.c (elf32_hppa_link_hash_table_create): Likewise.
+	* elf32-i386.c (elf_i386_link_hash_table_create): Likewise.
+	* elf32-m68k.c (elf_m68k_link_hash_table_create): Likewise.
+	* elf32-s390.c (elf_s390_link_hash_table_create): Likewise.
+	* elf32-sh.c (sh_elf_link_hash_table_create): Likewise.
+	* elf64-alpha.c (elf64_alpha_bfd_link_hash_table_create): Likewise.
+	* elf64-ppc.c (ppc64_elf_link_hash_table_create): Likewise.
+	* elf64-s390.c (elf_s390_link_hash_table_create): Likewise.
+	* elf64-sh64.c (sh64_elf64_link_hash_table_create): Likewise.
+	* elf64-sparc.c (sparc64_elf_bfd_link_hash_table_create): Likewise.
+	* elf64-x86-64.c (elf64_x86_64_link_hash_table_create): Likewise.
+	* elfxx-mips.c (_bfd_mips_elf_link_hash_table_create): Likewise.
+	* linker.c (_bfd_generic_link_hash_table_create): Likewise.
+	* m68klinux.c (linux_link_hash_table_create): Likewise.
+	* sparclinux.c (linux_link_hash_table_create): Likewise.
+	* sunos.c (sunos_link_hash_table_create): Likewise.
+	* xcofflink.c (_bfd_xcoff_bfd_link_hash_table_create): Likewise.
+
+	* targets.c: Add _bfd_link_hash_table_free to xvec.
+
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+	* libcoff.h: Regenerate.
+
 2002-04-04  Alan Modra  <amodra@bigpond.net.au>
 
 	* dep-in.sed: Cope with absolute paths.

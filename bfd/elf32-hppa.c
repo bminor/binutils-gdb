@@ -284,6 +284,9 @@ static struct bfd_hash_entry *hppa_link_hash_newfunc
 static struct bfd_link_hash_table *elf32_hppa_link_hash_table_create
   PARAMS ((bfd *));
 
+static void elf32_hppa_link_hash_table_free
+  PARAMS ((struct bfd_link_hash_table *));
+
 /* Stub handling functions.  */
 static char *hppa_stub_name
   PARAMS ((const asection *, const asection *,
@@ -479,13 +482,13 @@ elf32_hppa_link_hash_table_create (abfd)
   struct elf32_hppa_link_hash_table *ret;
   bfd_size_type amt = sizeof (*ret);
 
-  ret = (struct elf32_hppa_link_hash_table *) bfd_alloc (abfd, amt);
+  ret = (struct elf32_hppa_link_hash_table *) bfd_malloc (amt);
   if (ret == NULL)
     return NULL;
 
   if (!_bfd_elf_link_hash_table_init (&ret->elf, abfd, hppa_link_hash_newfunc))
     {
-      bfd_release (abfd, ret);
+      free (ret);
       return NULL;
     }
 
@@ -512,6 +515,19 @@ elf32_hppa_link_hash_table_create (abfd)
   ret->sym_sec.abfd = NULL;
 
   return &ret->elf.root;
+}
+
+/* Free the derived linker hash table.  */
+
+static void
+elf32_hppa_link_hash_table_free (hash)
+     struct bfd_link_hash_table *hash;
+{
+  struct elf32_hppa_link_hash_table *ret
+    = (struct elf32_hppa_link_hash_table *) hash;
+
+  bfd_hash_table_free (&ret->stub_hash_table);
+  _bfd_generic_link_hash_table_free (hash);
 }
 
 /* Build a name for an entry in the stub hash table.  */
@@ -4477,6 +4493,7 @@ elf32_hppa_elf_get_symbol_type (elf_sym, type)
 /* Stuff for the BFD linker.  */
 #define bfd_elf32_bfd_final_link	     elf32_hppa_final_link
 #define bfd_elf32_bfd_link_hash_table_create elf32_hppa_link_hash_table_create
+#define bfd_elf32_bfd_link_hash_table_free   elf32_hppa_link_hash_table_free
 #define elf_backend_add_symbol_hook	     elf32_hppa_add_symbol_hook
 #define elf_backend_adjust_dynamic_symbol    elf32_hppa_adjust_dynamic_symbol
 #define elf_backend_copy_indirect_symbol     elf32_hppa_copy_indirect_symbol

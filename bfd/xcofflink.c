@@ -482,12 +482,12 @@ _bfd_xcoff_bfd_link_hash_table_create (abfd)
   struct xcoff_link_hash_table *ret;
   bfd_size_type amt = sizeof (struct xcoff_link_hash_table);
 
-  ret = (struct xcoff_link_hash_table *) bfd_alloc (abfd, amt);
+  ret = (struct xcoff_link_hash_table *) bfd_malloc (amt);
   if (ret == (struct xcoff_link_hash_table *) NULL)
     return (struct bfd_link_hash_table *) NULL;
   if (! _bfd_link_hash_table_init (&ret->root, abfd, xcoff_link_hash_newfunc))
     {
-      bfd_release (abfd, ret);
+      free (ret);
       return (struct bfd_link_hash_table *) NULL;
     }
 
@@ -513,6 +513,18 @@ _bfd_xcoff_bfd_link_hash_table_create (abfd)
   return &ret->root;
 }
 
+/* Free a XCOFF link hash table.  */
+
+void
+_bfd_xcoff_bfd_link_hash_table_free (hash)
+     struct bfd_link_hash_table *hash;
+{
+  struct xcoff_link_hash_table *ret = (struct xcoff_link_hash_table *) hash;
+
+  _bfd_stringtab_free (ret->debug_strtab);
+  bfd_hash_table_free (&ret->root.table);
+  free (ret);
+}
 
 /* Read internal relocs for an XCOFF csect.  This is a wrapper around
    _bfd_coff_read_internal_relocs which tries to take advantage of any

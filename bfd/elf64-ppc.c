@@ -1780,13 +1780,13 @@ ppc64_elf_link_hash_table_create (abfd)
   struct ppc_link_hash_table *htab;
   bfd_size_type amt = sizeof (struct ppc_link_hash_table);
 
-  htab = (struct ppc_link_hash_table *) bfd_alloc (abfd, amt);
+  htab = (struct ppc_link_hash_table *) bfd_malloc (amt);
   if (htab == NULL)
     return NULL;
 
   if (! _bfd_elf_link_hash_table_init (&htab->elf, abfd, link_hash_newfunc))
     {
-      bfd_release (abfd, htab);
+      free (htab);
       return NULL;
     }
 

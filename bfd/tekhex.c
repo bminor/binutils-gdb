@@ -1,5 +1,5 @@
 /* BFD backend for Extended Tektronix Hex Format  objects.
-   Copyright 1992, 1993, 1994, 1995, 1996, 1998, 1999, 2000, 2001
+   Copyright 1992, 1993, 1994, 1995, 1996, 1998, 1999, 2000, 2001, 2002
    Free Software Foundation, Inc.
    Written by Steve Chamberlain of Cygnus Support <sac@cygnus.com>.
 
@@ -1006,6 +1006,7 @@ tekhex_print_symbol (abfd, filep, symbol, how)
 #define tekhex_bfd_gc_sections bfd_generic_gc_sections
 #define tekhex_bfd_merge_sections bfd_generic_merge_sections
 #define tekhex_bfd_link_hash_table_create _bfd_generic_link_hash_table_create
+#define tekhex_bfd_link_hash_table_free _bfd_generic_link_hash_table_free
 #define tekhex_bfd_link_add_symbols _bfd_generic_link_add_symbols
 #define tekhex_bfd_final_link _bfd_generic_final_link
 #define tekhex_bfd_link_split_section _bfd_generic_link_split_section

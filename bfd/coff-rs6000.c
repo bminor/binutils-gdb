@@ -3677,6 +3677,7 @@ const bfd_target rs6000coff_vec =
   bfd_generic_get_relocated_section_contents,
   bfd_generic_relax_section,               /* _bfd_relax_section */
   _bfd_xcoff_bfd_link_hash_table_create,   /* _bfd_link_hash_table_create */
+  _bfd_generic_link_hash_table_free,       /* _bfd_link_hash_table_free */
   _bfd_xcoff_bfd_link_add_symbols,         /* _bfd_link_add_symbols */
   _bfd_xcoff_bfd_final_link,               /* _bfd_filnal_link */
   _bfd_generic_link_split_section,         /* _bfd_link_split_section */
@@ -3937,6 +3938,7 @@ const bfd_target pmac_xcoff_vec =
   bfd_generic_get_relocated_section_contents,
   bfd_generic_relax_section,               /* _bfd_relax_section */
   _bfd_xcoff_bfd_link_hash_table_create,   /* _bfd_link_hash_table_create */
+  _bfd_generic_link_hash_table_free,       /* _bfd_link_hash_table_free */
   _bfd_xcoff_bfd_link_add_symbols,         /* _bfd_link_add_symbols */
   _bfd_xcoff_bfd_final_link,               /* _bfd_filnal_link */
   _bfd_generic_link_split_section,         /* _bfd_link_split_section */

@@ -1,5 +1,5 @@
 /* SPARC-specific support for 64-bit ELF
-   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001
+   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002
    Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -659,14 +659,14 @@ sparc64_elf_bfd_link_hash_table_create (abfd)
   struct sparc64_elf_link_hash_table *ret;
   bfd_size_type amt = sizeof (struct sparc64_elf_link_hash_table);
 
-  ret = (struct sparc64_elf_link_hash_table *) bfd_zalloc (abfd, amt);
+  ret = (struct sparc64_elf_link_hash_table *) bfd_zmalloc (amt);
   if (ret == (struct sparc64_elf_link_hash_table *) NULL)
     return NULL;
 
   if (! _bfd_elf_link_hash_table_init (&ret->root, abfd,
 				       _bfd_elf_link_hash_newfunc))
     {
-      bfd_release (abfd, ret);
+      free (ret);
       return NULL;
     }
 

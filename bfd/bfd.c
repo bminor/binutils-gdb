@@ -1189,6 +1189,9 @@ DESCRIPTION
 .#define bfd_link_hash_table_create(abfd) \
 .	BFD_SEND (abfd, _bfd_link_hash_table_create, (abfd))
 .
+.#define bfd_link_hash_table_free(abfd, hash) \
+.	BFD_SEND (abfd, _bfd_link_hash_table_free, (hash))
+.
 .#define bfd_link_add_symbols(abfd, info) \
 .	BFD_SEND (abfd, _bfd_link_add_symbols, (abfd, info))
 .

@@ -114,6 +114,8 @@ static boolean vms_bfd_merge_sections
   PARAMS ((bfd *abfd, struct bfd_link_info *link_info));
 static struct bfd_link_hash_table *vms_bfd_link_hash_table_create
   PARAMS ((bfd *abfd));
+static void vms_bfd_link_hash_table_free
+  PARAMS ((struct bfd_link_hash_table *hash));
 static boolean vms_bfd_link_add_symbols
   PARAMS ((bfd *abfd, struct bfd_link_info *link_info));
 static boolean vms_bfd_final_link
@@ -1787,6 +1789,17 @@ vms_bfd_link_hash_table_create (abfd)
   vms_debug (1, "vms_bfd_link_hash_table_create(%p)\n", abfd);
 #endif
   return 0;
+}
+
+/* Free a linker hash table.  */
+
+static void
+vms_bfd_link_hash_table_free (hash)
+     struct bfd_link_hash_table *hash ATTRIBUTE_UNUSED;
+{
+#if VMS_DEBUG
+  vms_debug (1, "vms_bfd_link_hash_table_free(%p)\n", abfd);
+#endif
 }
 
 /* Add symbols from this object file into the hash table.  */

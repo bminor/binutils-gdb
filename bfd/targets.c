@@ -394,6 +394,7 @@ the tokens.
 .CONCAT2 (NAME,_bfd_get_relocated_section_contents), \
 .CONCAT2 (NAME,_bfd_relax_section), \
 .CONCAT2 (NAME,_bfd_link_hash_table_create), \
+.CONCAT2 (NAME,_bfd_link_hash_table_free), \
 .CONCAT2 (NAME,_bfd_link_add_symbols), \
 .CONCAT2 (NAME,_bfd_final_link), \
 .CONCAT2 (NAME,_bfd_link_split_section), \
@@ -410,6 +411,9 @@ the tokens.
 .  {* Create a hash table for the linker.  Different backends store
 .     different information in this table.  *}
 .  struct bfd_link_hash_table *(*_bfd_link_hash_table_create) PARAMS ((bfd *));
+.
+.  {* Release the memory associated with the linker hash table.  *}
+.  void (*_bfd_link_hash_table_free) PARAMS ((struct bfd_link_hash_table *));
 .
 .  {* Add symbols from this object file into the hash table.  *}
 .  boolean  (*_bfd_link_add_symbols) PARAMS ((bfd *, struct bfd_link_info *));

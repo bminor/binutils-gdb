@@ -5043,6 +5043,10 @@ dummy_reloc16_extra_cases (abfd, link_info, link_order, reloc, data, src_ptr,
 }
 #endif
 
+#ifndef coff_bfd_link_hash_table_free
+#define coff_bfd_link_hash_table_free _bfd_generic_link_hash_table_free
+#endif
+
 /* If coff_relocate_section is defined, we can use the optimized COFF
    backend linker.  Otherwise we must continue to use the old linker.  */
 #ifdef coff_relocate_section

@@ -3452,7 +3452,7 @@ _bfd_ecoff_bfd_link_hash_table_create (abfd)
   struct ecoff_link_hash_table *ret;
   bfd_size_type amt = sizeof (struct ecoff_link_hash_table);
 
-  ret = (struct ecoff_link_hash_table *) bfd_alloc (abfd, amt);
+  ret = (struct ecoff_link_hash_table *) bfd_malloc (amt);
   if (ret == NULL)
     return NULL;
   if (! _bfd_link_hash_table_init (&ret->root, abfd,

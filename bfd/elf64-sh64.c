@@ -3227,14 +3227,14 @@ sh64_elf64_link_hash_table_create (abfd)
   struct elf_sh64_link_hash_table *ret;
 
   ret = ((struct elf_sh64_link_hash_table *)
-	 bfd_alloc (abfd, sizeof (struct elf_sh64_link_hash_table)));
+	 bfd_malloc (sizeof (struct elf_sh64_link_hash_table)));
   if (ret == (struct elf_sh64_link_hash_table *) NULL)
     return NULL;
 
   if (! _bfd_elf_link_hash_table_init (&ret->root, abfd,
 				       sh64_elf64_link_hash_newfunc))
     {
-      bfd_release (abfd, ret);
+      free (ret);
       return NULL;
     }
 

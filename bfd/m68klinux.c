@@ -230,7 +230,7 @@ linux_link_hash_table_create (abfd)
   struct linux_link_hash_table *ret;
   bfd_size_type amt = sizeof (struct linux_link_hash_table);
 
-  ret = (struct linux_link_hash_table *) bfd_alloc (abfd, amt);
+  ret = (struct linux_link_hash_table *) bfd_malloc (amt);
   if (ret == (struct linux_link_hash_table *) NULL)
     {
       bfd_set_error (bfd_error_no_memory);

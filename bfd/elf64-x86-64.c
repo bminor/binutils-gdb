@@ -340,13 +340,13 @@ elf64_x86_64_link_hash_table_create (abfd)
   struct elf64_x86_64_link_hash_table *ret;
   bfd_size_type amt = sizeof (struct elf64_x86_64_link_hash_table);
 
-  ret = (struct elf64_x86_64_link_hash_table *) bfd_alloc (abfd, amt);
+  ret = (struct elf64_x86_64_link_hash_table *) bfd_malloc (amt);
   if (ret == NULL)
     return NULL;
 
   if (! _bfd_elf_link_hash_table_init (&ret->elf, abfd, link_hash_newfunc))
     {
-      bfd_release (abfd, ret);
+      free (ret);
       return NULL;
     }
 

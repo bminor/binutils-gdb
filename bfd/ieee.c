@@ -4011,6 +4011,7 @@ ieee_bfd_debug_info_accumulate (abfd, section)
 #define ieee_bfd_gc_sections bfd_generic_gc_sections
 #define ieee_bfd_merge_sections bfd_generic_merge_sections
 #define ieee_bfd_link_hash_table_create _bfd_generic_link_hash_table_create
+#define ieee_bfd_link_hash_table_free _bfd_generic_link_hash_table_free
 #define ieee_bfd_link_add_symbols _bfd_generic_link_add_symbols
 #define ieee_bfd_final_link _bfd_generic_final_link
 #define ieee_bfd_link_split_section  _bfd_generic_link_split_section
@@ -4084,6 +4085,7 @@ const bfd_target ieee_vec =
 
   /* ieee_sizeof_headers, ieee_bfd_get_relocated_section_contents,
      ieee_bfd_relax_section, ieee_bfd_link_hash_table_create,
+     _bfd_generic_link_hash_table_free,
      ieee_bfd_link_add_symbols, ieee_bfd_final_link,
      ieee_bfd_link_split_section, ieee_bfd_gc_sections,
      ieee_bfd_merge_sections  */

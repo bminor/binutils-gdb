@@ -675,7 +675,7 @@ _bfd_generic_link_hash_table_create (abfd)
   struct generic_link_hash_table *ret;
   bfd_size_type amt = sizeof (struct generic_link_hash_table);
 
-  ret = (struct generic_link_hash_table *) bfd_alloc (abfd, amt);
+  ret = (struct generic_link_hash_table *) bfd_malloc (amt);
   if (ret == NULL)
     return (struct bfd_link_hash_table *) NULL;
   if (! _bfd_link_hash_table_init (&ret->root, abfd,
@@ -685,6 +685,17 @@ _bfd_generic_link_hash_table_create (abfd)
       return (struct bfd_link_hash_table *) NULL;
     }
   return &ret->root;
+}
+
+void
+_bfd_generic_link_hash_table_free (hash)
+     struct bfd_link_hash_table *hash;
+{
+  struct generic_link_hash_table *ret
+    = (struct generic_link_hash_table *) hash;
+
+  bfd_hash_table_free (&ret->root.table);
+  free (ret);
 }
 
 /* Grab the symbols for an object file when doing a generic link.  We

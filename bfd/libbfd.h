@@ -6,7 +6,7 @@
 /* libbfd.h -- Declarations used by bfd library *implementation*.
    (This include file is not for users of the library.)
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001
+   2000, 2001, 2002
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
@@ -329,6 +329,8 @@ extern boolean _bfd_generic_set_section_contents
    bfd_false)
 #define _bfd_nolink_bfd_link_hash_table_create \
   ((struct bfd_link_hash_table *(*) PARAMS ((bfd *))) bfd_nullvoidptr)
+#define _bfd_nolink_bfd_link_hash_table_free \
+  ((void (*) PARAMS ((struct bfd_link_hash_table *))) bfd_void)
 #define _bfd_nolink_bfd_link_add_symbols \
   ((boolean (*) PARAMS ((bfd *, struct bfd_link_info *))) bfd_false)
 #define _bfd_nolink_bfd_final_link \
@@ -393,6 +395,10 @@ extern boolean _bfd_link_hash_table_init
 /* Generic link hash table creation routine.  */
 extern struct bfd_link_hash_table *_bfd_generic_link_hash_table_create
   PARAMS ((bfd *));
+
+/* Generic link hash table destruction routine.  */
+extern void _bfd_generic_link_hash_table_free
+  PARAMS ((struct bfd_link_hash_table *));
 
 /* Generic add symbol routine.  */
 extern boolean _bfd_generic_link_add_symbols

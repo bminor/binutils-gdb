@@ -1,5 +1,5 @@
 /* BFD back-end for oasys objects.
-   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1998, 1999, 2001
+   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1998, 1999, 2001, 2002
    Free Software Foundation, Inc.
    Written by Steve Chamberlain of Cygnus Support, <sac@cygnus.com>.
 
@@ -1491,6 +1491,7 @@ oasys_sizeof_headers (abfd, exec)
 #define oasys_bfd_gc_sections bfd_generic_gc_sections
 #define oasys_bfd_merge_sections bfd_generic_merge_sections
 #define oasys_bfd_link_hash_table_create _bfd_generic_link_hash_table_create
+#define oasys_bfd_link_hash_table_free _bfd_generic_link_hash_table_free
 #define oasys_bfd_link_add_symbols _bfd_generic_link_add_symbols
 #define oasys_bfd_final_link _bfd_generic_final_link
 #define oasys_bfd_link_split_section _bfd_generic_link_split_section

@@ -3245,6 +3245,7 @@ mmo_canonicalize_reloc (abfd, section, relptr, symbols)
   bfd_generic_get_relocated_section_contents
 #define mmo_bfd_gc_sections bfd_generic_gc_sections
 #define mmo_bfd_link_hash_table_create _bfd_generic_link_hash_table_create
+#define mmo_bfd_link_hash_table_free _bfd_generic_link_hash_table_free
 #define mmo_bfd_link_add_symbols _bfd_generic_link_add_symbols
 #define mmo_bfd_final_link _bfd_generic_final_link
 #define mmo_bfd_link_split_section _bfd_generic_link_split_section
