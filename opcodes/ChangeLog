@@ -1,3 +1,8 @@
+2000-12-01  Nick Clifton  <nickc@redhat.com>
+
+	* mips16-opc.c (mips16_opcodes): Add initialiser for membership
+	field.
+
 2000-12-01  Chris Demetriou <cgd@sibyte.com>
 
         mips-dis.c (print_insn_arg): Handle new 'U' and 'J' argument
