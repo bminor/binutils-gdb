@@ -30,7 +30,8 @@ static void elf_i386_info_to_howto
   PARAMS ((bfd *, arelent *, Elf32_Internal_Rela *));
 static void elf_i386_info_to_howto_rel
   PARAMS ((bfd *, arelent *, Elf32_Internal_Rel *));
-static boolean elf_i386_is_local_label_name PARAMS ((bfd *, const char *));
+static boolean elf_i386_is_local_label_name
+  PARAMS ((bfd *, const char *));
 static boolean elf_i386_grok_prstatus
   PARAMS ((bfd *abfd, Elf_Internal_Note *note));
 static boolean elf_i386_grok_psinfo
@@ -39,9 +40,13 @@ static struct bfd_hash_entry *link_hash_newfunc
   PARAMS ((struct bfd_hash_entry *, struct bfd_hash_table *, const char *));
 static struct bfd_link_hash_table *elf_i386_link_hash_table_create
   PARAMS ((bfd *));
-static boolean create_got_section PARAMS((bfd *, struct bfd_link_info *));
+static boolean create_got_section
+  PARAMS((bfd *, struct bfd_link_info *));
 static boolean elf_i386_create_dynamic_sections
   PARAMS((bfd *, struct bfd_link_info *));
+static void
+elf_i386_copy_indirect_symbol
+  PARAMS ((struct elf_link_hash_entry *, struct elf_link_hash_entry *));
 static boolean elf_i386_check_relocs
   PARAMS ((bfd *, struct bfd_link_info *, asection *,
 	   const Elf_Internal_Rela *));
@@ -473,7 +478,7 @@ struct elf_i386_dyn_relocs
 
 struct elf_i386_link_hash_entry
 {
-  struct elf_link_hash_entry root;
+  struct elf_link_hash_entry elf;
 
   /* Track dynamic relocs copied for this symbol.  */
   struct elf_i386_dyn_relocs *dyn_relocs;
@@ -483,7 +488,7 @@ struct elf_i386_link_hash_entry
 
 struct elf_i386_link_hash_table
 {
-  struct elf_link_hash_table root;
+  struct elf_link_hash_table elf;
 
   /* Short-cuts to get to dynamic linker sections.  */
   asection *sgot;
@@ -508,28 +513,27 @@ link_hash_newfunc (entry, table, string)
      struct bfd_hash_table *table;
      const char *string;
 {
-  struct elf_i386_link_hash_entry *ret =
-    (struct elf_i386_link_hash_entry *) entry;
-
   /* Allocate the structure if it has not already been allocated by a
      subclass.  */
-  if (ret == (struct elf_i386_link_hash_entry *) NULL)
-    ret = ((struct elf_i386_link_hash_entry *)
-	   bfd_hash_allocate (table,
-			      sizeof (struct elf_i386_link_hash_entry)));
-  if (ret == (struct elf_i386_link_hash_entry *) NULL)
-    return (struct bfd_hash_entry *) ret;
-
-  /* Call the allocation method of the superclass.  */
-  ret = ((struct elf_i386_link_hash_entry *)
-	 _bfd_elf_link_hash_newfunc ((struct bfd_hash_entry *) ret,
-				     table, string));
-  if (ret != (struct elf_i386_link_hash_entry *) NULL)
+  if (entry == NULL)
     {
-      ret->dyn_relocs = NULL;
+      entry = bfd_hash_allocate (table,
+				 sizeof (struct elf_i386_link_hash_entry));
+      if (entry == NULL)
+	return entry;
     }
 
-  return (struct bfd_hash_entry *) ret;
+  /* Call the allocation method of the superclass.  */
+  entry = _bfd_elf_link_hash_newfunc (entry, table, string);
+  if (entry != NULL)
+    {
+      struct elf_i386_link_hash_entry *eh;
+
+      eh = (struct elf_i386_link_hash_entry *) entry;
+      eh->dyn_relocs = NULL;
+    }
+
+  return entry;
 }
 
 /* Create an i386 ELF linker hash table.  */
@@ -542,10 +546,10 @@ elf_i386_link_hash_table_create (abfd)
   bfd_size_type amt = sizeof (struct elf_i386_link_hash_table);
 
   ret = (struct elf_i386_link_hash_table *) bfd_alloc (abfd, amt);
-  if (ret == (struct elf_i386_link_hash_table *) NULL)
+  if (ret == NULL)
     return NULL;
 
-  if (! _bfd_elf_link_hash_table_init (&ret->root, abfd, link_hash_newfunc))
+  if (! _bfd_elf_link_hash_table_init (&ret->elf, abfd, link_hash_newfunc))
     {
       bfd_release (abfd, ret);
       return NULL;
@@ -559,7 +563,7 @@ elf_i386_link_hash_table_create (abfd)
   ret->sdynbss = NULL;
   ret->srelbss = NULL;
 
-  return &ret->root.root;
+  return &ret->elf.root;
 }
 
 /* Create .got, .gotplt, and .rel.got sections in DYNOBJ, and set up
@@ -623,6 +627,28 @@ elf_i386_create_dynamic_sections (dynobj, info)
   return true;
 }
 
+/* Copy the extra info we tack onto an elf_link_hash_entry.  */
+
+void
+elf_i386_copy_indirect_symbol (dir, ind)
+     struct elf_link_hash_entry *dir, *ind;
+{
+  struct elf_i386_link_hash_entry *edir, *eind;
+
+  edir = (struct elf_i386_link_hash_entry *) dir;
+  eind = (struct elf_i386_link_hash_entry *) ind;
+
+  if (edir->dyn_relocs == NULL)
+    {
+      edir->dyn_relocs = eind->dyn_relocs;
+      eind->dyn_relocs = NULL;
+    }
+  else if (eind->dyn_relocs != NULL)
+    abort ();
+
+  _bfd_elf_link_hash_copy_indirect (dir, ind);
+}
+
 /* Look through the relocs for a section during the first phase, and
    allocate space in the global offset table or procedure linkage
    table.  */
@@ -647,7 +673,7 @@ elf_i386_check_relocs (abfd, info, sec, relocs)
     return true;
 
   htab = elf_i386_hash_table (info);
-  dynobj = htab->root.dynobj;
+  dynobj = htab->elf.dynobj;
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
   sym_hashes = elf_sym_hashes (abfd);
   local_got_refcounts = elf_local_got_refcounts (abfd);
@@ -684,7 +710,7 @@ elf_i386_check_relocs (abfd, info, sec, relocs)
 	    case R_386_GOTOFF:
 	    case R_386_GOTPC:
 	      if (dynobj == NULL)
-		htab->root.dynobj = dynobj = abfd;
+		htab->elf.dynobj = dynobj = abfd;
 	      if (!create_got_section (dynobj, info))
 		return false;
 	      break;
@@ -715,16 +741,12 @@ elf_i386_check_relocs (abfd, info, sec, relocs)
 		  size = symtab_hdr->sh_info;
 		  size *= sizeof (bfd_signed_vma);
 		  local_got_refcounts = ((bfd_signed_vma *)
-					 bfd_alloc (abfd, size));
+					 bfd_zalloc (abfd, size));
 		  if (local_got_refcounts == NULL)
 		    return false;
 		  elf_local_got_refcounts (abfd) = local_got_refcounts;
-		  memset (local_got_refcounts, -1, (size_t) size);
 		}
-	      if (local_got_refcounts[r_symndx] == -1)
-		local_got_refcounts[r_symndx] = 1;
-	      else
-		local_got_refcounts[r_symndx] += 1;
+	      local_got_refcounts[r_symndx] += 1;
 	    }
 	  break;
 
@@ -755,9 +777,12 @@ elf_i386_check_relocs (abfd, info, sec, relocs)
 	  if (h != NULL && !info->shared)
 	    {
 	      /* If this reloc is in a read-only section, we might
-		 need a copy reloc.  */
-	      if ((sec->flags & SEC_READONLY) != 0)
-		h->elf_link_hash_flags |= ELF_LINK_NON_GOT_REF;
+		 need a copy reloc.  We can't check reliably at this
+		 stage whether the section is read-only, as input
+		 sections have not yet been mapped to output sections.
+		 Tentatively set the flag for now, and correct in
+		 adjust_dynamic_symbol.  */
+	      h->elf_link_hash_flags |= ELF_LINK_NON_GOT_REF;
 
 	      /* We may need a .plt entry if the function this reloc
 		 refers to is in a shared lib.  */
@@ -778,7 +803,7 @@ elf_i386_check_relocs (abfd, info, sec, relocs)
 	     possible that DEF_REGULAR is not set now but will be set
 	     later (it is never cleared).  In case of a weak definition,
 	     DEF_REGULAR may be cleared later by a strong definition in
-	     a shared library. We account for that possibility below by
+	     a shared library.  We account for that possibility below by
 	     storing information in the relocs_copied field of the hash
 	     table entry.  A similar situation occurs when creating
 	     shared libraries and symbol visibility changes render the
@@ -799,7 +824,6 @@ elf_i386_check_relocs (abfd, info, sec, relocs)
 	      || (!info->shared
 		  && (sec->flags & SEC_ALLOC) != 0
 		  && h != NULL
-		  && (h->elf_link_hash_flags & ELF_LINK_NON_GOT_REF) == 0
 		  && (h->root.type == bfd_link_hash_defweak
 		      || (h->elf_link_hash_flags
 			  & ELF_LINK_HASH_DEF_REGULAR) == 0)))
@@ -808,7 +832,7 @@ elf_i386_check_relocs (abfd, info, sec, relocs)
 		 Create a reloc section in dynobj and make room for
 		 this reloc.  */
 	      if (dynobj == NULL)
-		htab->root.dynobj = dynobj = abfd;
+		htab->elf.dynobj = dynobj = abfd;
 
 	      if (sreloc == NULL)
 		{
@@ -1061,11 +1085,13 @@ elf_i386_adjust_dynamic_symbol (info, h)
 {
   struct elf_i386_link_hash_table *htab;
   bfd *dynobj;
+  struct elf_i386_link_hash_entry * eh;
+  struct elf_i386_dyn_relocs *p;
   asection *s;
   unsigned int power_of_two;
 
   htab = elf_i386_hash_table (info);
-  dynobj = htab->root.dynobj;
+  dynobj = htab->elf.dynobj;
 
   /* If this is a function, put it in the procedure linkage table.  We
      will fill in the contents of the procedure linkage table later,
@@ -1106,7 +1132,6 @@ elf_i386_adjust_dynamic_symbol (info, h)
 		  || h->weakdef->root.type == bfd_link_hash_defweak);
       h->root.u.def.section = h->weakdef->root.u.def.section;
       h->root.u.def.value = h->weakdef->root.u.def.value;
-      return true;
     }
 
   /* This is a reference to a symbol defined by a dynamic object which
@@ -1123,6 +1148,22 @@ elf_i386_adjust_dynamic_symbol (info, h)
      GOT, we don't need to generate a copy reloc.  */
   if ((h->elf_link_hash_flags & ELF_LINK_NON_GOT_REF) == 0)
     return true;
+
+  eh = (struct elf_i386_link_hash_entry *) h;
+  for (p = eh->dyn_relocs; p != NULL; p = p->next)
+    {
+      s = p->sec->output_section;
+      if (s != NULL && (s->flags & SEC_READONLY) != 0)
+	break;
+    }
+
+  /* If we didn't find any dynamic relocs in read-only sections, then
+     we'll be keeping the dynamic relocs and avoiding the copy reloc.  */ 
+  if (p == NULL)
+    {
+      h->elf_link_hash_flags &= ~ELF_LINK_NON_GOT_REF;
+      return true;
+    }
 
   /* We must allocate the symbol in our .dynbss section, which will
      become part of the .bss section of the executable.  There will be
@@ -1210,7 +1251,7 @@ allocate_dynrelocs (h, inf)
   info = (struct bfd_link_info *) inf;
   htab = elf_i386_hash_table (info);
 
-  if (htab->root.dynamic_sections_created
+  if (htab->elf.dynamic_sections_created
       && h->plt.refcount > 0)
     {
       /* Make sure this symbol is output as a dynamic symbol.
@@ -1286,7 +1327,7 @@ allocate_dynrelocs (h, inf)
       s = htab->sgot;
       h->got.offset = s->_raw_size;
       s->_raw_size += 4;
-      dyn = htab->root.dynamic_sections_created;
+      dyn = htab->elf.dynamic_sections_created;
       if (WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, info, h))
 	htab->srelgot->_raw_size += sizeof (Elf32_External_Rel);
     }
@@ -1331,7 +1372,7 @@ allocate_dynrelocs (h, inf)
       if ((h->elf_link_hash_flags & ELF_LINK_NON_GOT_REF) == 0
 	  && (((h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) != 0
 	       && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0)
-	      || (htab->root.dynamic_sections_created
+	      || (htab->elf.dynamic_sections_created
 		  && (h->root.type == bfd_link_hash_undefweak
 		      || h->root.type == bfd_link_hash_undefined))))
 	{
@@ -1407,11 +1448,11 @@ elf_i386_size_dynamic_sections (output_bfd, info)
   bfd *ibfd;
 
   htab = elf_i386_hash_table (info);
-  dynobj = htab->root.dynobj;
+  dynobj = htab->elf.dynobj;
   if (dynobj == NULL)
     abort ();
 
-  if (htab->root.dynamic_sections_created)
+  if (htab->elf.dynamic_sections_created)
     {
       /* Set the contents of the .interp section to the interpreter.  */
       if (! info->shared)
@@ -1473,7 +1514,7 @@ elf_i386_size_dynamic_sections (output_bfd, info)
 
   /* Allocate global sym .plt and .got entries, and space for global
      sym dynamic relocs.  */
-  elf_link_hash_traverse (&htab->root, allocate_dynrelocs, (PTR) info);
+  elf_link_hash_traverse (&htab->elf, allocate_dynrelocs, (PTR) info);
 
   /* We now have determined the sizes of the various dynamic sections.
      Allocate memory for them.  */
@@ -1536,7 +1577,7 @@ elf_i386_size_dynamic_sections (output_bfd, info)
 	return false;
     }
 
-  if (htab->root.dynamic_sections_created)
+  if (htab->elf.dynamic_sections_created)
     {
       /* Add some entries to the .dynamic section.  We fill in the
 	 values later, in elf_i386_finish_dynamic_sections, but we
@@ -1570,7 +1611,7 @@ elf_i386_size_dynamic_sections (output_bfd, info)
 
 	  /* If any dynamic relocs apply to a read-only section,
 	     then we need a DT_TEXTREL entry.  */
-	  elf_link_hash_traverse (&htab->root, readonly_dynrelocs, (PTR) info);
+	  elf_link_hash_traverse (&htab->elf, readonly_dynrelocs, (PTR) info);
 
 	  if ((info->flags & DF_TEXTREL) != 0)
 	    {
@@ -1642,7 +1683,7 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
   Elf_Internal_Rela *relend;
 
   htab = elf_i386_hash_table (info);
-  dynobj = htab->root.dynobj;
+  dynobj = htab->elf.dynobj;
   symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
   sym_hashes = elf_sym_hashes (input_bfd);
   local_got_offsets = elf_local_got_offsets (input_bfd);
@@ -1769,7 +1810,7 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
 	      boolean dyn;
 
 	      off = h->got.offset;
-	      dyn = htab->root.dynamic_sections_created;
+	      dyn = htab->elf.dynamic_sections_created;
 	      if (! WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, info, h)
 		  || (info->shared
 		      && (info->symbolic
@@ -1928,7 +1969,7 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
 	      else
 		{
 		  off = (_bfd_stab_section_offset
-			 (output_bfd, htab->root.stab_info, input_section,
+			 (output_bfd, htab->elf.stab_info, input_section,
 			  &elf_section_data (input_section)->stab_info,
 			  rel->r_offset));
 		  if (off == (bfd_vma) -1)
@@ -2058,7 +2099,7 @@ elf_i386_finish_dynamic_symbol (output_bfd, info, h, sym)
   bfd *dynobj;
 
   htab = elf_i386_hash_table (info);
-  dynobj = htab->root.dynobj;
+  dynobj = htab->elf.dynobj;
 
   if (h->plt.offset != (bfd_vma) -1)
     {
@@ -2239,10 +2280,10 @@ elf_i386_finish_dynamic_sections (output_bfd, info)
   asection *sdyn;
 
   htab = elf_i386_hash_table (info);
-  dynobj = htab->root.dynobj;
+  dynobj = htab->elf.dynobj;
   sdyn = bfd_get_section_by_name (dynobj, ".dynamic");
 
-  if (htab->root.dynamic_sections_created)
+  if (htab->elf.dynamic_sections_created)
     {
       Elf32_External_Dyn *dyncon, *dynconend;
 
@@ -2370,6 +2411,7 @@ elf_i386_finish_dynamic_sections (output_bfd, info)
 #define bfd_elf32_bfd_reloc_type_lookup	      elf_i386_reloc_type_lookup
 
 #define elf_backend_adjust_dynamic_symbol     elf_i386_adjust_dynamic_symbol
+#define elf_backend_copy_indirect_symbol      elf_i386_copy_indirect_symbol
 #define elf_backend_check_relocs	      elf_i386_check_relocs
 #define elf_backend_create_dynamic_sections   elf_i386_create_dynamic_sections
 #define elf_backend_finish_dynamic_sections   elf_i386_finish_dynamic_sections

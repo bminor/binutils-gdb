@@ -1,5 +1,32 @@
 2001-09-26  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf32-i386 (elf_i386_copy_indirect_symbol): New function.
+	(elf_backend_copy_indirect_symbol): Define.
+	(struct elf_i386_link_hash_entry): Rename "root" to "elf".
+	(struct elf_i386_link_hash_table): Likewise.
+	(link_hash_newfunc): Get rid of unnecessary casts.
+	(elf_i386_link_hash_table_create): Likewise.
+	(elf_i386_check_relocs): Initialise local_got_refcounts to 0.
+	Don't test input section SEC_READONLY here to try to avoid copy
+	relocs, and keep dyn_relocs regardleas of ELF_LINK_NON_GOT_REF.
+	(elf_i386_adjust_dynamic_symbol): Check output section SEC_READONLY
+	here to properly test whether we need copy relocs.  Do so for weak
+	syms too.
+
+	* elf32-hppa (elf32_hppa_copy_indirect_symbol): New function.
+	(elf_backend_copy_indirect_symbol): Define.
+	(struct elf32_hppa_link_hash_table): Rename "root" to "elf".
+	(stub_hash_newfunc): Get rid of unnecessary casts.
+	(hppa_link_hash_newfunc): Likewise.
+	(elf32_hppa_check_relocs): Initialise local_got_refcounts to 0.
+	Don't test input section SEC_READONLY here to try to avoid copy
+	relocs, and keep dyn_relocs regardleas of ELF_LINK_NON_GOT_REF.
+	(elf32_hppa_adjust_dynamic_symbol): Check output section SEC_READONLY
+	here to properly test whether we need copy relocs.  Do so for weak
+	syms too.
+
+2001-09-26  Alan Modra  <amodra@bigpond.net.au>
+
 	* bfd.c (_bfd_default_error_handlerl): Define using VPARAMS,
 	VA_OPEN, VA_FIXEDARG, VA_CLOSE.
 	(bfd_archive_filename): Cast bfd_malloc arg to the correct size.
