@@ -76,7 +76,7 @@ extern char *strrchr();
 extern char *ctime();
 extern int _flsbuf();
 extern int fclose();
-extern int time();
+/* extern int time(); this causes error with time.h on mach3 */
 extern int utimes();
 extern int vfprintf();
 extern long atol();
