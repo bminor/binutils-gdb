@@ -1,3 +1,7 @@
+2000-09-12  Fernando Nasser  <fnasser@cygnus.com>
+
+	* remote-rdi.c (arm_rdi_open): Fix typo in error message.
+
 Wed Sep 13 03:08:32 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* remote-mips.c (mips_expect, mips_getstring, mips_send_packet,
