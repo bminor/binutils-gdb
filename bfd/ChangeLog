@@ -1,3 +1,11 @@
+Mon Aug  5 13:42:41 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* elf.c (map_sections_to_segments): Rewrite tests for starting a
+	new segment to make them more comprehensible.  If the relationship
+	between the LMA and the VMA changed, start a new segment.  Don't
+	check dynsec when deciding whether to start a new segment for a
+	writeable section; -N will now handle this.
+
 Thu Aug  1 22:43:08 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* libhppa.h: Remove "esel" changes.  Not the right approach.

@@ -40,6 +40,7 @@ SECTION
 
 static INLINE struct elf_segment_map *make_mapping
   PARAMS ((bfd *, asection **, unsigned int, unsigned int, boolean));
+static boolean map_sections_to_segments PARAMS ((bfd *));
 static int elf_sort_sections PARAMS ((const PTR, const PTR));
 static boolean assign_file_positions_for_segments PARAMS ((bfd *));
 static boolean assign_file_positions_except_relocs PARAMS ((bfd *));
@@ -1754,29 +1755,68 @@ map_sections_to_segments (abfd)
   for (i = 0, hdrpp = sections; i < count; i++, hdrpp++)
     {
       asection *hdr;
+      boolean new_segment;
 
       hdr = *hdrpp;
 
       /* See if this section and the last one will fit in the same
-         segment.  Don't put a loadable section after a non-loadable
-         section.  If we are building a dynamic executable, don't put
-         a writable section in a read only segment, unless they're on
-         the same page anyhow (we don't do this for a non-dynamic
-         executable because some people prefer to have only one
-         program segment; anybody can use PHDRS in their linker script
-         to control what happens anyhow).  */
-      if (last_hdr == NULL
-	  || (abfd->flags & D_PAGED) == 0
-	  || ((BFD_ALIGN (last_hdr->lma + last_hdr->_raw_size, maxpagesize)
-	       >= hdr->lma)
-	      && ((last_hdr->flags & SEC_LOAD) != 0
-		  || (hdr->flags & SEC_LOAD) == 0)
-	      && (dynsec == NULL
-		  || writable
-		  || (hdr->flags & SEC_READONLY) != 0
-		  || (BFD_ALIGN (last_hdr->lma + last_hdr->_raw_size,
-				 maxpagesize)
-		      > hdr->lma))))
+         segment.  */
+
+      if (last_hdr == NULL)
+	{
+	  /* If we don't have a segment yet, then we don't need a new
+	     one (we build the last one after this loop).  */
+	  new_segment = false;
+	}
+      else if (last_hdr->lma - last_hdr->vma != hdr->lma - hdr->vma)
+	{
+	  /* If this section has a different relation between the
+             virtual address and the load address, then we need a new
+             segment.  */
+	  new_segment = true;
+	}
+      else if ((abfd->flags & D_PAGED) == 0)
+	{
+	  /* If the file is not demand paged, which means that we
+             don't require the sections to be correctly aligned in the
+             file, then there is no other reason for a new segment.  */
+	  new_segment = false;
+	}
+      else if (BFD_ALIGN (last_hdr->lma + last_hdr->_raw_size, maxpagesize)
+	       < hdr->lma)
+	{
+	  /* If putting this section in this segment would force us to
+             skip a page in the segment, then we need a new segment.  */
+	  new_segment = true;
+	}
+      else if ((last_hdr->flags & SEC_LOAD) == 0
+	       && (hdr->flags & SEC_LOAD) != 0)
+	{
+	  /* We don't want to put a loadable section after a
+             nonloadable section in the same segment.  */
+	  new_segment = true;
+	}
+      else if (! writable
+	       && (hdr->flags & SEC_READONLY) == 0
+	       && (BFD_ALIGN (last_hdr->lma + last_hdr->_raw_size, maxpagesize)
+		   == hdr->lma))
+	{
+	  /* We don't want to put a writable section in a read only
+             segment, unless they are on the same page in memory
+             anyhow.  We already know that the last section does not
+             bring us past the current section on the page, so the
+             only case in which the new section is not on the same
+             page as the previous section is when the previous section
+             ends precisely on a page boundary.  */
+	  new_segment = true;
+	}
+      else
+	{
+	  /* Otherwise, we can use the same segment.  */
+	  new_segment = false;
+	}
+
+      if (! new_segment)
 	{
 	  if ((hdr->flags & SEC_READONLY) == 0)
 	    writable = true;
@@ -1784,9 +1824,8 @@ map_sections_to_segments (abfd)
 	  continue;
 	}
 
-      /* This section won't fit in the program segment.  We must
-         create a new program header holding all the sections from
-         phdr_index until hdr.  */
+      /* We need a new program segment.  We must create a new program
+         header holding all the sections from phdr_index until hdr.  */
 
       m = make_mapping (abfd, sections, phdr_index, i, phdr_in_section);
       if (m == NULL)
