@@ -493,12 +493,6 @@ F:2:DEPRECATED_REGISTER_RAW_SIZE:int:deprecated_register_raw_size:int reg_nr:reg
 # DEPRECATED_REGISTER_VIRTUAL_SIZE can be deleted.  See: maint print
 # registers.
 F:2:DEPRECATED_REGISTER_VIRTUAL_SIZE:int:deprecated_register_virtual_size:int reg_nr:reg_nr::generic_register_size:generic_register_size
-# DEPRECATED_MAX_REGISTER_RAW_SIZE can be deleted.  It has been
-# replaced by the constant MAX_REGISTER_SIZE.
-V:2:DEPRECATED_MAX_REGISTER_RAW_SIZE:int:deprecated_max_register_raw_size
-# DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE can be deleted.  It has been
-# replaced by the constant MAX_REGISTER_SIZE.
-V:2:DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE:int:deprecated_max_register_virtual_size
 
 # See gdbint.texinfo, and PUSH_DUMMY_CALL.
 M::UNWIND_DUMMY_ID:struct frame_id:unwind_dummy_id:struct frame_info *info:info

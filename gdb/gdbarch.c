@@ -150,8 +150,6 @@ struct gdbarch
   gdbarch_deprecated_register_byte_ftype *deprecated_register_byte;
   gdbarch_deprecated_register_raw_size_ftype *deprecated_register_raw_size;
   gdbarch_deprecated_register_virtual_size_ftype *deprecated_register_virtual_size;
-  int deprecated_max_register_raw_size;
-  int deprecated_max_register_virtual_size;
   gdbarch_unwind_dummy_id_ftype *unwind_dummy_id;
   gdbarch_deprecated_save_dummy_frame_tos_ftype *deprecated_save_dummy_frame_tos;
   int deprecated_fp_regnum;
@@ -298,8 +296,6 @@ struct gdbarch startup_gdbarch =
   generic_register_byte,  /* deprecated_register_byte */
   generic_register_size,  /* deprecated_register_raw_size */
   generic_register_size,  /* deprecated_register_virtual_size */
-  0,  /* deprecated_max_register_raw_size */
-  0,  /* deprecated_max_register_virtual_size */
   0,  /* unwind_dummy_id */
   0,  /* deprecated_save_dummy_frame_tos */
   -1,  /* deprecated_fp_regnum */
@@ -578,8 +574,6 @@ verify_gdbarch (struct gdbarch *current_gdbarch)
   /* Skip verify of deprecated_register_byte, has predicate */
   /* Skip verify of deprecated_register_raw_size, has predicate */
   /* Skip verify of deprecated_register_virtual_size, has predicate */
-  /* Skip verify of deprecated_max_register_raw_size, has predicate */
-  /* Skip verify of deprecated_max_register_virtual_size, has predicate */
   /* Skip verify of unwind_dummy_id, has predicate */
   /* Skip verify of deprecated_save_dummy_frame_tos, has predicate */
   /* Skip verify of deprecated_fp_regnum, invalid_p == 0 */
@@ -1146,40 +1140,6 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
                       "gdbarch_dump: DEPRECATED_INIT_FRAME_PC = <0x%08lx>\n",
                       (long) current_gdbarch->deprecated_init_frame_pc
                       /*DEPRECATED_INIT_FRAME_PC ()*/);
-#endif
-#ifdef DEPRECATED_MAX_REGISTER_RAW_SIZE_P
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "DEPRECATED_MAX_REGISTER_RAW_SIZE_P()",
-                      XSTRING (DEPRECATED_MAX_REGISTER_RAW_SIZE_P ()));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: DEPRECATED_MAX_REGISTER_RAW_SIZE_P() = %d\n",
-                      DEPRECATED_MAX_REGISTER_RAW_SIZE_P ());
-#endif
-#ifdef DEPRECATED_MAX_REGISTER_RAW_SIZE
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: DEPRECATED_MAX_REGISTER_RAW_SIZE # %s\n",
-                      XSTRING (DEPRECATED_MAX_REGISTER_RAW_SIZE));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: DEPRECATED_MAX_REGISTER_RAW_SIZE = %d\n",
-                      DEPRECATED_MAX_REGISTER_RAW_SIZE);
-#endif
-#ifdef DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE_P
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE_P()",
-                      XSTRING (DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE_P ()));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE_P() = %d\n",
-                      DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE_P ());
-#endif
-#ifdef DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE # %s\n",
-                      XSTRING (DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE = %d\n",
-                      DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE);
 #endif
 #ifdef DEPRECATED_POP_FRAME_P
   fprintf_unfiltered (file,
@@ -2839,52 +2799,6 @@ set_gdbarch_deprecated_register_virtual_size (struct gdbarch *gdbarch,
                                               gdbarch_deprecated_register_virtual_size_ftype deprecated_register_virtual_size)
 {
   gdbarch->deprecated_register_virtual_size = deprecated_register_virtual_size;
-}
-
-int
-gdbarch_deprecated_max_register_raw_size_p (struct gdbarch *gdbarch)
-{
-  gdb_assert (gdbarch != NULL);
-  return gdbarch->deprecated_max_register_raw_size != 0;
-}
-
-int
-gdbarch_deprecated_max_register_raw_size (struct gdbarch *gdbarch)
-{
-  gdb_assert (gdbarch != NULL);
-  if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_max_register_raw_size called\n");
-  return gdbarch->deprecated_max_register_raw_size;
-}
-
-void
-set_gdbarch_deprecated_max_register_raw_size (struct gdbarch *gdbarch,
-                                              int deprecated_max_register_raw_size)
-{
-  gdbarch->deprecated_max_register_raw_size = deprecated_max_register_raw_size;
-}
-
-int
-gdbarch_deprecated_max_register_virtual_size_p (struct gdbarch *gdbarch)
-{
-  gdb_assert (gdbarch != NULL);
-  return gdbarch->deprecated_max_register_virtual_size != 0;
-}
-
-int
-gdbarch_deprecated_max_register_virtual_size (struct gdbarch *gdbarch)
-{
-  gdb_assert (gdbarch != NULL);
-  if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_max_register_virtual_size called\n");
-  return gdbarch->deprecated_max_register_virtual_size;
-}
-
-void
-set_gdbarch_deprecated_max_register_virtual_size (struct gdbarch *gdbarch,
-                                                  int deprecated_max_register_virtual_size)
-{
-  gdbarch->deprecated_max_register_virtual_size = deprecated_max_register_virtual_size;
 }
 
 int

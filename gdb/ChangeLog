@@ -1,5 +1,19 @@
 2004-06-13  Andrew Cagney  <cagney@gnu.org>
 
+	* gdbarch.sh (DEPRECATED_MAX_REGISTER_RAW_SIZE)
+	(DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE): Delete.
+	* gdbarch.h, gdbarch.c: Regenerate.
+	* ns32k-tdep.h (NS32K_MAX_REGISTER_RAW_SIZE) 
+	(NS32K_MAX_REGISTER_VIRTUAL_SIZE): Delete macros.
+	* xstormy16-tdep.c (xstormy16_gdbarch_init): Do not set
+	deprecated_max_register_raw_size and
+	deprecated_max_register_virtual_size.
+	* v850-tdep.c (v850_gdbarch_init): Ditto.
+	* ns32k-tdep.c (ns32k_gdbarch_init): Ditto.
+	* mn10300-tdep.c (mn10300_gdbarch_init): Ditto.
+	* mcore-tdep.c (mcore_gdbarch_init): Ditto.
+	* cris-tdep.c (cris_gdbarch_init): Ditto.
+
 	* gdbarch.sh (RETURN_VALUE_ON_STACK): Delete method.
 	* gdbarch.h, gdbarch.c: Re-generate.
 	* m68hc11-tdep.c (m68hc11_return_value_on_stack): Delete function.

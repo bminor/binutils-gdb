@@ -1036,8 +1036,6 @@ mcore_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* All registers are 32 bits */
   set_gdbarch_deprecated_register_size (gdbarch, MCORE_REG_SIZE);
-  set_gdbarch_deprecated_max_register_raw_size (gdbarch, MCORE_REG_SIZE);
-  set_gdbarch_deprecated_max_register_virtual_size (gdbarch, MCORE_REG_SIZE);
   set_gdbarch_register_name (gdbarch, mcore_register_name);
   set_gdbarch_deprecated_register_virtual_type (gdbarch, mcore_register_virtual_type);
   set_gdbarch_deprecated_register_virtual_size (gdbarch, mcore_register_size);

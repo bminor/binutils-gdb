@@ -521,10 +521,7 @@ ns32k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_deprecated_register_size (gdbarch, NS32K_REGISTER_SIZE);
   set_gdbarch_deprecated_register_raw_size (gdbarch, ns32k_register_raw_size);
-  set_gdbarch_deprecated_max_register_raw_size (gdbarch, NS32K_MAX_REGISTER_RAW_SIZE);
   set_gdbarch_deprecated_register_virtual_size (gdbarch, ns32k_register_virtual_size);
-  set_gdbarch_deprecated_max_register_virtual_size (gdbarch,
-                                         NS32K_MAX_REGISTER_VIRTUAL_SIZE);
   set_gdbarch_deprecated_register_virtual_type (gdbarch, ns32k_register_virtual_type);
 
   /* Frame and stack info */

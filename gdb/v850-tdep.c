@@ -1194,9 +1194,7 @@ v850_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_register_bytes (gdbarch, E_ALL_REGS_SIZE);
   set_gdbarch_deprecated_register_byte (gdbarch, v850_register_byte);
   set_gdbarch_deprecated_register_raw_size (gdbarch, v850_register_raw_size);
-  set_gdbarch_deprecated_max_register_raw_size (gdbarch, v850_reg_size);
   set_gdbarch_deprecated_register_virtual_size (gdbarch, v850_register_raw_size);
-  set_gdbarch_deprecated_max_register_virtual_size (gdbarch, v850_reg_size);
   set_gdbarch_deprecated_register_virtual_type (gdbarch, v850_reg_virtual_type);
 
   set_gdbarch_deprecated_target_read_fp (gdbarch, v850_target_read_fp);
