@@ -1,3 +1,8 @@
+2003-07-03  Daniel Jacobowitz  <drow@mvista.com>
+
+	* cli/cli-interp.c (cli_interpreter_resume): Update the
+	cli_uiout's stream to gdb_stdout.
+
 2003-07-02  Daniel Jacobowitz  <drow@mvista.com>
 
 	* cli/cli-logging.c (pop_output_files): Add void to function
