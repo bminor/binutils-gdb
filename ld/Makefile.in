@@ -23,6 +23,8 @@ INCLUDE	= $(srcdir)/../include
 INCLUDES = -I. -I$(srcdir)  -I$(INCLUDE) 
 DEBUG	= -g
 
+TEXIDIR = $(srcdir)/../texinfo/fsf
+
 BISON = bison
 BISONFLAGS = -v
 
@@ -168,8 +170,13 @@ ld2: ld1
 ld3: ld2
 	$(HOSTING_EMU); ./ld2 -o ld3 $(HOSTING_CRT0) $(OFILES) $(BFDLIB) $(LIBIBERTY) $(HOSTING_LIBS)
 
-ld.dvi:ld.tex
-	tex ld.tex
+ld.dvi: ld.texinfo
+	TEXINPUTS=${TEXIDIR}:.:$$TEXINPUTS tex ld.texinfo
+	texindex ld.??
+	TEXINPUTS=${TEXIDIR}:.:$$TEXINPUTS tex ld.texinfo
+
+ld.info: ld.texinfo
+	makeinfo ld.texinfo
 
 mkscript: $(srcdir)/mkscript.c
 	$(CC) $(CFLAGS) $(LDFLAGS) -o mkscript $(srcdir)/mkscript.c $(LOADLIBES)
@@ -235,6 +242,7 @@ de-stage3: force
 clean:
 	- rm -f TAGS $(OFILES) $(GENERATED_SOURCES) $(GENERATED_HEADERS)
 	- rm -f *.x *.x[ru] *.sc[ur]
+	- rm -f ld.?? ld.??? 
 	- rm -f ld ld1 ld2 ld3 ld.new mkscript *.o y.output
 
 lintlog:$(SOURCES) Makefile
