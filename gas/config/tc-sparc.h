@@ -114,14 +114,16 @@ extern void sparc_handle_align PARAMS ((struct frag *));
    relocations against sections.  This is required for the dynamic
    linker to operate properly.  When generating PIC, we need to keep
    any non PC relative reloc.  */
-#define tc_fix_adjustable(FIX)				\
-  (! S_IS_EXTERNAL ((FIX)->fx_addsy)			\
-   && ! S_IS_WEAK ((FIX)->fx_addsy)			\
-   && (! sparc_pic_code					\
-       || (FIX)->fx_pcrel				\
-       || ((FIX)->fx_subsy != NULL			\
-	   && (S_GET_SEGMENT ((FIX)->fx_subsy)		\
-	       == S_GET_SEGMENT ((FIX)->fx_addsy)))))
+#define tc_fix_adjustable(FIX)						\
+  (! S_IS_EXTERNAL ((FIX)->fx_addsy)					\
+   && ! S_IS_WEAK ((FIX)->fx_addsy)					\
+   && (! sparc_pic_code							\
+       || (FIX)->fx_pcrel						\
+       || ((FIX)->fx_subsy != NULL					\
+	   && (S_GET_SEGMENT ((FIX)->fx_subsy)				\
+	       == S_GET_SEGMENT ((FIX)->fx_addsy)))			\
+       || strchr (S_GET_NAME ((FIX)->fx_addsy), '\001') != NULL		\
+       || strchr (S_GET_NAME ((FIX)->fx_addsy), '\002') != NULL))
 #endif
 
 #ifdef OBJ_AOUT
@@ -133,6 +135,9 @@ extern void sparc_handle_align PARAMS ((struct frag *));
    || (FIX)->fx_r_type == BFD_RELOC_16 \
    || (FIX)->fx_r_type == BFD_RELOC_32)
 #endif
+
+#define elf_tc_final_processing sparc_elf_final_processing
+extern void sparc_elf_final_processing PARAMS ((void));
 
 #define md_operand(x)
 
