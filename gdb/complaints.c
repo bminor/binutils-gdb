@@ -109,6 +109,10 @@ complain (va_alist)
 	puts_filtered ("...");
 	wrap_here ("");
     }
+  /* If GDB dumps core, we'd like to see the complaints first.  Presumably
+     GDB will not be sending so many complaints that this becomes a
+     performance hog.  */
+  fflush (stdout);
   va_end (args);
 }
 

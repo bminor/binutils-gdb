@@ -1,3 +1,7 @@
+Tue Aug 17 11:14:25 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* complaints.c (complain): fflush (stdout) after output.
+
 Tue Aug 17 01:43:55 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* blockframe.c, frame.h (sigtramp_saved_pc):  New routine to fetch
@@ -9,6 +13,9 @@ Tue Aug 17 01:43:55 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 	FRAME_SAVED_PC, SIGCONTEXT_PC_OFFSET):  Ditto.
 
 Mon Aug 16 13:52:14 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* main.c (cd_command): If current_directory on entry is "/", then
+	don't append an extra slash.
 
 	* target.c (target_xfer_memory): Clear errno before calling
 	to_xfer_memory.
