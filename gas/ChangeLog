@@ -1,3 +1,8 @@
+2004-09-11  Theodore A. Roth  <troth@openavr.org>
+
+	* config/tc-avr.c: Add support for
+	atmega48, atmega88, atmega168, attiny13, attiny2313, at90can128.
+
 2004-09-09  Alan Modra  <amodra@bigpond.net.au>
 
 	* dw2gencfi.c (select_cie_for_fde): When separating CIE out

@@ -90,20 +90,26 @@ static struct mcu_type_s mcu_types[] =
   {"at43usb320",AVR_ISA_M103,     bfd_mach_avr3},
   {"at43usb355",AVR_ISA_M603,     bfd_mach_avr3},
   {"at76c711",  AVR_ISA_M603,     bfd_mach_avr3},
+  {"atmega48",  AVR_ISA_M8,       bfd_mach_avr4},
   {"atmega8",   AVR_ISA_M8,       bfd_mach_avr4},
   {"atmega83",  AVR_ISA_M8,       bfd_mach_avr4}, /* XXX -> m8535 */
   {"atmega85",  AVR_ISA_M8,       bfd_mach_avr4}, /* XXX -> m8 */
+  {"atmega88",  AVR_ISA_M8,       bfd_mach_avr4},
   {"atmega8515",AVR_ISA_M8,       bfd_mach_avr4},
   {"atmega8535",AVR_ISA_M8,       bfd_mach_avr4},
+  {"attiny13",  AVR_ISA_TINY2,    bfd_mach_avr4},
+  {"attiny2313",AVR_ISA_TINY2,    bfd_mach_avr4},
   {"atmega16",  AVR_ISA_M323,     bfd_mach_avr5},
   {"atmega161", AVR_ISA_M161,     bfd_mach_avr5},
   {"atmega162", AVR_ISA_M323,     bfd_mach_avr5},
   {"atmega163", AVR_ISA_M161,     bfd_mach_avr5},
+  {"atmega168", AVR_ISA_M323,     bfd_mach_avr5},
   {"atmega169", AVR_ISA_M323,     bfd_mach_avr5},
   {"atmega32",  AVR_ISA_M323,     bfd_mach_avr5},
   {"atmega323", AVR_ISA_M323,     bfd_mach_avr5},
   {"atmega64",  AVR_ISA_M323,     bfd_mach_avr5},
   {"atmega128", AVR_ISA_M128,     bfd_mach_avr5},
+  {"at90can128",AVR_ISA_M128,     bfd_mach_avr5},
   {"at94k",     AVR_ISA_94K,      bfd_mach_avr5},
   {NULL, 0, 0}
 };
@@ -531,7 +537,8 @@ avr_operands (opcode, line)
       /* Warn if the previous opcode was cpse/sbic/sbis/sbrc/sbrs
          (AVR core bug, fixed in the newer devices).  */
 
-      if (!(avr_opt.no_skip_bug || (avr_mcu->isa & AVR_ISA_MUL))
+      if (!(avr_opt.no_skip_bug ||
+            (avr_mcu->isa & (AVR_ISA_MUL | AVR_ISA_MOVW)))
 	  && AVR_SKIP_P (prev))
 	as_warn (_("skipping two-word instruction"));
 
