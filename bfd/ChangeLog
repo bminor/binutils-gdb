@@ -1,5 +1,16 @@
 Wed Sep 14 15:37:19 1994  Jeff Law  (law@snake.cs.utah.edu)
 
+	* som.h (struct somdata): New field sorted_syms.
+	(obj_som_sorted_syms): Accessor macro.
+	* som.c (som_object_setup): Initialize sorted_syms to NULL.
+	(som_prep_for_fixups): Sort a copy of the BFD's symbol table;
+	store the sorted symbol table in sorted_syms.
+	(som_write_fixups): Initalize tmp_reloc to NULL to make GCC happy.
+	(som_begin_writing): Similarly for exec_header.  Pass the sorted
+	symbol table to som_write_symbol_strings.
+	(som_build_and_write_symbol_table): Use the sorted symbols rather
+	than the canonical symbol table.
+
 	* som.h (som_symbol_type): Add "stringtab_offset" field.
 	* som.c (som_write_symbol_strings): Use "stringtab_offset"
 	rather than destroying the "name" field in the BFD symbol.
