@@ -1,3 +1,8 @@
+2003-06-24  Michael Chastain  <mec@shout.net>
+
+	* PROBLEMS: Document pr gdb/1091 and pr gdb/1193,
+	the "constructor breakpoints ignored" bug.
+
 2003-06-25  David Carlton  <carlton@kealia.com>
 
 	* MAINTAINERS: Update e-mail address.
