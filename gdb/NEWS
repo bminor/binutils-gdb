@@ -1,6 +1,19 @@
 		What has changed since GDB-3.5?
 		(Organized release by release)
 
+*** Changes in GDB-4.12:
+
+* Irix 5 is now supported
+
+* HPPA support
+
+GDB-4.12 on the HPPA has a number of changes which make it unable
+to debug the output from the currently released versions of GCC and
+GAS (GCC 2.5.8 and GAS-2.2 or PAGAS-1.36).  Until the next major release
+of GCC and GAS, versions of these tools designed to work with GDB-4.12
+can be retrieved via anonymous ftp from jaguar.cs.utah.edu:/dist.
+
+
 *** Changes in GDB-4.11:
 
 * User visible changes:

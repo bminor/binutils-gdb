@@ -1,4 +1,14 @@
+Thu Feb  3 17:34:05 1994  Fred Fish  (fnf@cygnus.com)
+
+	* Makefile.in (VERSION):  Bump to 4.12.1
+	* NEWS, README:  Update to match 4.12 release.
+
 Thu Feb  3 12:38:58 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* command.c (empty_sfunc): New function.
+	(add_set_cmd): Use it instead of not_just_help_class_command.
+	(not_just_help_class_command): Change calling convention back to
+	what it was before yesterday's change.
 
 	* stabsread.c (read_sun_builtin_type): Skip the semicolon at the end
 	of the type if present.
@@ -31,7 +41,7 @@ Wed Feb  2 11:16:45 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 	change 'g' size to 'w' for integers.  print_scalar_formatted handles
 	printing huge integers well enough, thank you.
 
-	* command.c (add_set_cmd, no_just_help_class_command): Change
+	* command.c (add_set_cmd, not_just_help_class_command): Change
 	to make this the sfunc, not cfunc, since that is how we call it.
 	* command.h: Comment difference between sfunc and cfunc.
 	* demangle.c (set_demangling_command): Add third arg since that
