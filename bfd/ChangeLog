@@ -1,3 +1,10 @@
+Thu Jul 16 16:39:25 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* coff-m68k.c: added R_RELLONG_NEG reloc type, and changed
+	RTYPE2HOWTO to cope with same.
+	* reloc.c (bfd_perform_relocation): added support for size of -2
+	(subtract a word reloc type). Updated doc.
+
 Thu Jul 16 16:28:09 1992  K. Richard Pixley  (rich@rtl.cygnus.com)
 
 	* Makefile.in: merged changes from progressive, removed rcsid.
