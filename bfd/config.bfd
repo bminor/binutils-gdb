@@ -72,7 +72,7 @@ case "${canon}" in
   mips*-sgi-*)		bfd_name=bigmips ;;
   mips*-*-sysv*)	bfd_name=riscos ;;
   mips*-*-riscos*)	bfd_name=riscos ;;
-  mips*-*-bsd*)		bfd_name=noop ;;
+  mips*-*-bsd*)		bfd_name=bigmips ;; # Sony News
   mips*el-*-elf*)	bfd_name=mipslelf ;;
   mips*-*-elf*)		bfd_name=mipsbelf ;;
   # Apparently this is similar enough to 386 mach to use the same target.
