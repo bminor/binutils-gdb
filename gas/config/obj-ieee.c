@@ -457,7 +457,7 @@ obj_ieee_section (ignore)
   memcpy (segment_info[i].name, s, p - s);
   segment_info[i].name[p - s] = 0;
 ok:
-  subseg_new (i, 0);
+  subseg_set (i, 0);
   while (!is_end_of_line[*p])
     p++;
   input_line_pointer = p;
@@ -515,9 +515,9 @@ DEFUN_VOID (write_object_file)
     }
   bfd_set_format (abfd, bfd_object);
   bfd_set_arch_mach (abfd, bfd_arch_h8300, 0);
-  subseg_new (1, 0);
-  subseg_new (2, 0);
-  subseg_new (3, 0);
+  subseg_set (1, 0);
+  subseg_set (2, 0);
+  subseg_set (3, 0);
   for (frchain_ptr = frchain_root;
        frchain_ptr != (struct frchain *) NULL;
        frchain_ptr = frchain_ptr->frch_next)
@@ -527,7 +527,7 @@ DEFUN_VOID (write_object_file)
 	 that any .align's size can be worked by looking at the next
 	 frag.  */
 
-      subseg_new (frchain_ptr->frch_seg, frchain_ptr->frch_subseg);
+      subseg_set (frchain_ptr->frch_seg, frchain_ptr->frch_subseg);
 #ifndef SUB_SEGMENT_ALIGN
 #define SUB_SEGMENT_ALIGN(SEG) 2
 #endif

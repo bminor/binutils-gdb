@@ -134,29 +134,38 @@ static void EXFUN (w_symbols,
 		      char *where,
 		      symbolS * symbol_rootP));
 
+static char *stack_pop PARAMS ((stack * st));
+static char *stack_push PARAMS ((stack * st, char *element));
+#if 0
+static char *stack_top PARAMS ((stack * st));
+#endif
+static stack *stack_init PARAMS ((unsigned long chunk_size,
+				  unsigned long element_size));
 
 
-static void EXFUN (obj_coff_def, (int what));
-static void EXFUN (obj_coff_lcomm, (void));
-static void EXFUN (obj_coff_dim, (void));
-static void EXFUN (obj_coff_text, (void));
-static void EXFUN (obj_coff_data, (void));
-static void EXFUN( obj_coff_bss,(void));
-static void EXFUN( obj_coff_ident,(void));
-static void EXFUN (obj_coff_endef, (void));
-static void EXFUN (obj_coff_line, (void));
-static void EXFUN (obj_coff_ln, (int));
-static void EXFUN (obj_coff_scl, (void));
-static void EXFUN (obj_coff_size, (void));
-static void EXFUN (obj_coff_tag, (void));
-static void EXFUN (obj_coff_type, (void));
-static void EXFUN (obj_coff_val, (void));
-void EXFUN (obj_coff_section, (void));
-static void EXFUN (tag_init, (void));
-static void EXFUN (tag_insert, (char *name, symbolS * symbolP));
+static void tag_init PARAMS ((void));
+static void tag_insert PARAMS ((char *name, symbolS * symbolP));
 
 static struct hash_control *tag_hash;
+
 static symbolS *def_symbol_in_progress = NULL;
+
+static void obj_coff_def PARAMS ((int));
+static void obj_coff_lcomm PARAMS ((int));
+static void obj_coff_dim PARAMS ((int));
+static void obj_coff_text PARAMS ((int));
+static void obj_coff_data PARAMS ((int));
+static void obj_coff_bss PARAMS ((int));
+static void obj_coff_ident PARAMS ((int));
+static void obj_coff_endef PARAMS ((int));
+static void obj_coff_line PARAMS ((int));
+static void obj_coff_ln PARAMS ((int));
+static void obj_coff_scl PARAMS ((int));
+static void obj_coff_size PARAMS ((int));
+static void obj_coff_tag PARAMS ((int));
+static void obj_coff_type PARAMS ((int));
+static void obj_coff_val PARAMS ((int));
+void obj_coff_section PARAMS ((int));
 
 const pseudo_typeS obj_pseudo_table[] =
 {
@@ -309,6 +318,10 @@ DEFUN (size_section, (abfd, idx),
 	case rs_align:
 	  size += frag->fr_fix;
 	  size += relax_align (size, frag->fr_offset);
+	  break;
+	default:
+	  BAD_CASE (frag->fr_type);
+	  break;
 	}
       frag = frag->fr_next;
     }
@@ -696,7 +709,7 @@ obj_symbol_new_hook (symbolP)
   /* Additional information */
   symbolP->sy_symbol.ost_flags = 0;
   /* Auxiliary entries */
-  bzero ((char *) &symbolP->sy_symbol.ost_auxent[0], AUXESZ);
+  memset ((char *) &symbolP->sy_symbol.ost_auxent[0], 0, AUXESZ);
 
 #ifdef STRIP_UNDERSCORE
   /* Remove leading underscore at the beginning of the symbol.
@@ -718,7 +731,7 @@ obj_symbol_new_hook (symbolP)
 }				/* obj_symbol_new_hook() */
 
 /* stack stuff */
-stack *
+static stack *
 stack_init (chunk_size, element_size)
      unsigned long chunk_size;
      unsigned long element_size;
@@ -747,7 +760,7 @@ stack_delete (st)
   free (st);
 }
 
-char *
+static char *
 stack_push (st, element)
      stack *st;
      char *element;
@@ -763,26 +776,28 @@ stack_push (st, element)
   return st->data + st->pointer;
 }				/* stack_push() */
 
-char *
+static char *
 stack_pop (st)
      stack *st;
 {
-  if ((st->pointer -= st->element_size) < 0)
+  if (st->pointer < st->element_size)
     {
       st->pointer = 0;
       return (char *) 0;
     }
-
+  st->pointer -= st->element_size;
   return st->data + st->pointer;
 }
 
-char *
+#if 0
+/* Not used.  */
+static char *
 stack_top (st)
      stack *st;
 {
   return st->data + st->pointer - st->element_size;
 }
-
+#endif
 
 /*
  * Handle .ln directives.
@@ -863,7 +878,7 @@ DEFUN (obj_coff_def, (what),
   SKIP_WHITESPACES ();
 
   def_symbol_in_progress = (symbolS *) obstack_alloc (&notes, sizeof (*def_symbol_in_progress));
-  bzero (def_symbol_in_progress, sizeof (*def_symbol_in_progress));
+  memset (def_symbol_in_progress, 0, sizeof (*def_symbol_in_progress));
 
   symbol_name = input_line_pointer;
   name_end = get_symbol_end ();
@@ -897,8 +912,10 @@ DEFUN (obj_coff_def, (what),
 }				/* obj_coff_def() */
 
 unsigned int dim_index;
+
 static void
-DEFUN_VOID (obj_coff_endef)
+obj_coff_endef (ignore)
+     int ignore;
 {
   symbolS *symbolP = 0;
   /* DIM BUG FIX sac@cygnus.com */
@@ -1066,7 +1083,8 @@ DEFUN_VOID (obj_coff_endef)
 }
 
 static void
-DEFUN_VOID (obj_coff_dim)
+obj_coff_dim (ignore)
+     int ignore;
 {
   register int dim_index;
 
@@ -1106,7 +1124,8 @@ DEFUN_VOID (obj_coff_dim)
 }				/* obj_coff_dim() */
 
 static void
-obj_coff_line ()
+obj_coff_line (ignore)
+     int ignore;
 {
   int this_base;
 
@@ -1140,7 +1159,8 @@ obj_coff_line ()
 }				/* obj_coff_line() */
 
 static void
-obj_coff_size ()
+obj_coff_size (ignore)
+     int ignore;
 {
   if (def_symbol_in_progress == NULL)
     {
@@ -1156,7 +1176,8 @@ obj_coff_size ()
 }				/* obj_coff_size() */
 
 static void
-obj_coff_scl ()
+obj_coff_scl (ignore)
+     int ignore;
 {
   if (def_symbol_in_progress == NULL)
     {
@@ -1171,7 +1192,8 @@ obj_coff_scl ()
 }				/* obj_coff_scl() */
 
 static void
-obj_coff_tag ()
+obj_coff_tag (ignore)
+     int ignore;
 {
   char *symbol_name;
   char name_end;
@@ -1203,7 +1225,8 @@ obj_coff_tag ()
 }				/* obj_coff_tag() */
 
 static void
-obj_coff_type ()
+obj_coff_type (ignore)
+     int ignore;
 {
   if (def_symbol_in_progress == NULL)
     {
@@ -1225,7 +1248,8 @@ obj_coff_type ()
 }				/* obj_coff_type() */
 
 static void
-obj_coff_val ()
+obj_coff_val (ignore)
+     int ignore;
 {
   if (def_symbol_in_progress == NULL)
     {
@@ -1271,7 +1295,7 @@ obj_coff_val ()
 
       /* FIXME: this is to avoid an error message in the
 	 FIXME case mentioned just above.  */
-      while (! is_end_of_line[*input_line_pointer])
+      while (! is_end_of_line[(unsigned char) *input_line_pointer])
 	++input_line_pointer;
     }
   else
@@ -1299,7 +1323,7 @@ tag_insert (name, symbolP)
      char *name;
      symbolS *symbolP;
 {
-  register char *error_string;
+  register const char *error_string;
 
   if (*(error_string = hash_jam (tag_hash, name, (char *) symbolP)))
     {
@@ -1617,9 +1641,7 @@ DEFUN (crawl_symbols, (h, abfd),
        object_headers *h AND
        bfd * abfd)
 {
-
   unsigned int i;
-  symbolS *symbolP;
 
   /* Initialize the stack used to keep track of the matching .bb .be */
 
@@ -1823,7 +1845,7 @@ DEFUN_VOID (write_object_file)
 	       that any .align's size can be worked by looking at the next
 	       frag */
 
-      subseg_new (frchain_ptr->frch_seg, frchain_ptr->frch_subseg);
+      subseg_set (frchain_ptr->frch_seg, frchain_ptr->frch_subseg);
 #ifndef SUB_SEGMENT_ALIGN
 #define SUB_SEGMENT_ALIGN(SEG) 1
 #endif
@@ -1917,7 +1939,7 @@ DEFUN_VOID (write_object_file)
   {
     unsigned int symtable_size = H_GET_SYMBOL_TABLE_SIZE (&headers);
     char *buffer1 = xmalloc (symtable_size + string_byte_count + 1);
-    char *ptr = buffer1;
+
     H_SET_SYMBOL_TABLE_POINTER (&headers, bfd_tell (abfd));
     w_symbols (abfd, buffer1, symbol_rootP);
     if (string_byte_count > 0)
@@ -1933,27 +1955,40 @@ DEFUN_VOID (write_object_file)
 	      bfd_errmsg (bfd_error));
 }
 
+/* Add a new segment.  This is called from subseg_new via the
+   obj_new_segment macro.  */
 
-static void
-DEFUN (change_to_section, (name, len, exp),
-       char *name AND
-       unsigned int len AND
-       unsigned int exp)
+segT
+obj_coff_add_segment (name)
+     const char *name;
 {
+  unsigned int len;
   unsigned int i;
-  /* Find out if we've already got a section of this name etc */
+
+  /* Find out if we've already got a section of this name.  */
+  len = strlen (name);
+  if (len < sizeof (segment_info[i].scnhdr.s_name))
+    ++len;
+  else
+    len = sizeof (segment_info[i].scnhdr.s_name);
   for (i = SEG_E0; i < SEG_E9 && segment_info[i].scnhdr.s_name[0]; i++)
+    if (strncmp (segment_info[i].scnhdr.s_name, name, len) == 0
+	&& (len == sizeof (segment_info[i].scnhdr.s_name)
+	    || segment_info[i].scnhdr.s_name[len] == '\0'))
+      return (segT) i;
+
+  if (i == SEG_E9)
     {
-      if (strncmp (segment_info[i].scnhdr.s_name, name, len) == 0)
-	{
-	  subseg_new (i, exp);
-	  return;
-	}
+      as_bad ("Too many new sections; can't add \"%s\"", name);
+      return now_seg;
     }
-  /* No section, add one */
-  strncpy (segment_info[i].scnhdr.s_name, name, 8);
+
+  /* Add a new section.  */
+  strncpy (segment_info[i].scnhdr.s_name, name,
+	   sizeof (segment_info[i].scnhdr.s_name));
   segment_info[i].scnhdr.s_flags = STYP_REG;
-  subseg_new (i, exp);
+
+  return (segT) i;
 }
 
 /*
@@ -1973,7 +2008,8 @@ DEFUN (change_to_section, (name, len, exp),
  */
 
 void
-DEFUN_VOID (obj_coff_section)
+obj_coff_section (ignore)
+     int ignore;
 {
   /* Strip out the section name */
   char *section_name;
@@ -2012,7 +2048,7 @@ DEFUN_VOID (obj_coff_section)
 	{
 	  ++input_line_pointer;
 	  while (*input_line_pointer != '"'
-		 && ! is_end_of_line[*input_line_pointer])
+		 && ! is_end_of_line[(unsigned char) *input_line_pointer])
 	    {
 	      switch (*input_line_pointer)
 		{
@@ -2036,7 +2072,7 @@ DEFUN_VOID (obj_coff_section)
 	}
     }
 
-  change_to_section (section_name, len, exp);
+  subseg_new (section_name, exp);
 
   segment_info[now_seg].scnhdr.s_flags |= flags;
 
@@ -2045,38 +2081,42 @@ DEFUN_VOID (obj_coff_section)
 
 
 static void
-obj_coff_text ()
+obj_coff_text (ignore)
+     int ignore;
 {
-  change_to_section (".text", 5, get_absolute_expression ());
+  subseg_new (".text", get_absolute_expression ());
 }
 
 
 static void
-obj_coff_data ()
+obj_coff_data (ignore)
+     int ignore;
 {
   if (flagseen['R'])
-    change_to_section (".text", 5, get_absolute_expression () + 1000);
+    subseg_new (".text", get_absolute_expression () + 1000);
   else
-    change_to_section (".data", 5, get_absolute_expression ());
+    subseg_new (".data", get_absolute_expression ());
 }
 
 static void
-obj_coff_bss()
+obj_coff_bss (ignore)
+     int ignore;
 {
   if (*input_line_pointer == '\n')	/* .bss 		*/
-    change_to_section(".bss",4, get_absolute_expression());
+    subseg_new(".bss", get_absolute_expression());
   else					/* .bss id,expr		*/
-    obj_coff_lcomm();
+    obj_coff_lcomm(0);
 }
 
 static void
-obj_coff_ident()
+obj_coff_ident (ignore)
+     int ignore;
 {
   segT current_seg = now_seg;		/* save current seg	*/
   subsegT current_subseg = now_subseg;
-  change_to_section (".comment", 8, 0);	/* .comment seg		*/
+  subseg_new (".comment", 0);		/* .comment seg		*/
   stringer (1);				/* read string		*/
-  subseg_new (current_seg, current_subseg);	/* restore current seg	*/
+  subseg_set (current_seg, current_subseg);	/* restore current seg	*/
 }
 
 void
@@ -2250,7 +2290,7 @@ DEFUN (w_symbols, (abfd, where, symbol_rootP),
 	}
       else
 	{
-	  bzero (symbolP->sy_symbol.ost_entry.n_name, SYMNMLEN);
+	  memset (symbolP->sy_symbol.ost_entry.n_name, 0, SYMNMLEN);
 	  strncpy (symbolP->sy_symbol.ost_entry.n_name, temp, SYMNMLEN);
 	}
       where = symbol_to_chars (abfd, where, symbolP);
@@ -2260,7 +2300,8 @@ DEFUN (w_symbols, (abfd, where, symbol_rootP),
 }				/* w_symbols() */
 
 static void
-DEFUN_VOID (obj_coff_lcomm)
+obj_coff_lcomm (ignore)
+     int ignore;
 {
   char *name;
   char c;
@@ -2305,12 +2346,12 @@ DEFUN_VOID (obj_coff_lcomm)
 	  segT current_seg = now_seg; 	/* save current seg     */
 	  subsegT current_subseg = now_subseg;
 
-	  subseg_new (SEG_E2, 1);
+	  subseg_set (SEG_E2, 1);
 	  symbolP->sy_frag = frag_now;
 	  p = frag_var(rs_org, 1, 1, (relax_substateT)0, symbolP,
 		       temp, (char *)0);
 	  *p = 0;
-	  subseg_new (current_seg, current_subseg); /* restore current seg */
+	  subseg_set (current_seg, current_subseg); /* restore current seg */
 	  S_SET_SEGMENT(symbolP, SEG_E2);
 	  S_SET_STORAGE_CLASS(symbolP, C_STAT);
 	}
@@ -2448,9 +2489,10 @@ DEFUN (fixup_segment, (segP, this_segment_type),
 		}
 	      else
 		{
-		  as_bad ("Can't emit reloc {- %s-seg symbol \"%s\"} @ file address %d.",
+		  as_bad ("Can't emit reloc {- %s-seg symbol \"%s\"} @ file address %ld.",
 			  segment_name (S_GET_SEGMENT (sub_symbolP)),
-		       S_GET_NAME (sub_symbolP), fragP->fr_address + where);
+			  S_GET_NAME (sub_symbolP),
+			  (long) (fragP->fr_address + where));
 		}		/* if absolute */
 	    }
 	}			/* if sub_symbolP */
@@ -2565,8 +2607,9 @@ DEFUN (fixup_segment, (segP, this_segment_type),
 	      (size == 2 &&
 	       (add_number & ~0xFFFF) && ((add_number & ~0xFFFF) != (-1 & ~0xFFFF))))
 	    {
-	      as_bad ("Value of %d too large for field of %d bytes at 0x%x",
-		      add_number, size, fragP->fr_address + where);
+	      as_bad ("Value of %ld too large for field of %d bytes at 0x%lx",
+		      (long) add_number, size,
+		      (unsigned long) (fragP->fr_address + where));
 	    }			/* generic error checking */
 #endif
 #ifdef WARN_SIGNED_OVERFLOW_WORD
@@ -2577,8 +2620,9 @@ DEFUN (fixup_segment, (segP, this_segment_type),
 	  if (!flagseen['J']
 	      && size == 2
 	      && add_number > 0x7fff)
-	    as_bad ("Signed .word overflow; switch may be too large; %d at 0x%x",
-		    add_number, fragP->fr_address + where);
+	    as_bad ("Signed .word overflow; switch may be too large; %ld at 0x%lx",
+		    (long) add_number,
+		    (unsigned long) (fragP->fr_address + where));
 #endif
 	}			/* not a bit fix */
       /* once this fix has been applied, we don't have to output anything

@@ -33,7 +33,9 @@
 #define	machine_it	a29k_it
 
 const relax_typeS md_relax_table[] =
-{0};
+{
+  { 0, 0, 0, 0 }
+};
 
 #define	IMMEDIATE_BIT	0x01000000	/* Turns RB into Immediate */
 #define	ABSOLUTE_BIT	0x01000000	/* Turns PC-relative to Absolute */
@@ -61,8 +63,10 @@ the_insn;
 
 static void machine_ip PARAMS ((char *str));
 /* static void print_insn PARAMS ((struct machine_it *insn)); */
+#ifndef OBJ_COFF
 static void s_data1 PARAMS ((void));
-static void s_use PARAMS ((void));
+static void s_use PARAMS ((int));
+#endif
 
 const pseudo_typeS
   md_pseudo_table[] =
@@ -132,8 +136,11 @@ static unsigned char toHex[256];
  */
 #define ANNUL       (1 << 29)
 
+#ifndef OBJ_COFF
+
 static void
-s_use ()
+s_use (ignore)
+     int ignore;
 {
 
   if (strncmp (input_line_pointer, ".text", 5) == 0)
@@ -159,7 +166,7 @@ s_use ()
   if (strncmp (input_line_pointer, ".lit", 4) == 0)
     {
       input_line_pointer += 4;
-      subseg_new (SEG_DATA, 200);
+      subseg_set (SEG_DATA, 200);
       demand_empty_rest_of_line ();
       return;
     }
@@ -172,10 +179,12 @@ s_use ()
 static void
 s_data1 ()
 {
-  subseg_new (SEG_DATA, 1);
+  subseg_set (SEG_DATA, 1);
   demand_empty_rest_of_line ();
   return;
 }
+
+#endif /* OBJ_COFF */
 
 /* Install symbol definition that maps REGNAME to REGNO.
    FIXME-SOON:  These are not recognized in mixed case.  */
@@ -260,7 +269,7 @@ define_some_regs ()
 void
 md_begin ()
 {
-  register char *retval = NULL;
+  register const char *retval = NULL;
   int lose = 0;
   register int skipnext = 0;
   register unsigned int i;
@@ -322,7 +331,7 @@ md_begin ()
 	    skipnext = 1;
 	}
 
-      retval = hash_insert (op_hash, name, &machine_opcodes[i]);
+      retval = hash_insert (op_hash, name, (PTR) &machine_opcodes[i]);
       if (retval != NULL && *retval != '\0')
 	{
 	  fprintf (stderr, "internal error: can't hash `%s': %s\n",
@@ -491,8 +500,8 @@ machine_ip (str)
 		}
 	      else
 		{
-		  as_bad ("Immediate value of %d is too large",
-			  operand->X_add_number);
+		  as_bad ("Immediate value of %ld is too large",
+			  (long) operand->X_add_number);
 		  continue;
 		}
 	    }
@@ -518,8 +527,8 @@ machine_ip (str)
 		}
 	      else
 		{
-		  as_bad ("Immediate value of %d is too large",
-			  operand->X_add_number);
+		  as_bad ("Immediate value of %ld is too large",
+			  (long) operand->X_add_number);
 		  continue;
 		}
 	    }

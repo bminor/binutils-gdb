@@ -19,7 +19,9 @@ to the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
 
 #include "as.h"
 #include "aout/stab_gnu.h"
+#ifdef BFD_ASSEMBLER
 #include "aout/aout64.h"
+#endif
 #include "obstack.h"
 
 #ifndef BFD_ASSEMBLER
@@ -60,8 +62,8 @@ const segT N_TYPE_seg[N_TYPE + 2] =
 #endif
 
 static void obj_aout_stab PARAMS ((int what));
-static void obj_aout_line PARAMS ((void));
-static void obj_aout_desc PARAMS ((void));
+static void obj_aout_line PARAMS ((int));
+static void obj_aout_desc PARAMS ((int));
 
 const pseudo_typeS obj_pseudo_table[] =
 {
@@ -242,7 +244,8 @@ obj_emit_symbols (where, symbol_rootP)
 #endif /* ! BFD_ASSEMBLER */
 
 static void
-obj_aout_line ()
+obj_aout_line (ignore)
+     int ignore;
 {
   /* Assume delimiter is part of expression.
      BSD4.2 as fails with delightful bug, so we
@@ -313,7 +316,7 @@ obj_aout_stab (what)
 	{
 	case 'd':
 	  S_SET_NAME (symbolP, NULL);	/* .stabd feature. */
-	  S_SET_VALUE (symbolP, (char*) obstack_next_free (&frags) - frag_now->fr_literal);
+	  S_SET_VALUE (symbolP, (valueT) frag_now_fix ());
 	  symbolP->sy_frag = frag_now;
 	  break;
 
@@ -382,7 +385,7 @@ obj_aout_stab (what)
     {
       if (S_GET_TYPE (symbolP) == N_SLINE)
 	{
-	  listing_source_line (S_GET_DESC (symbolP));
+	  listing_source_line ((unsigned int) S_GET_DESC (symbolP));
 	}
       else if (S_GET_TYPE (symbolP) == N_SO || S_GET_TYPE (symbolP) == N_SOL)
 	{
@@ -398,7 +401,8 @@ obj_aout_stab (what)
 }				/* obj_aout_stab() */
 
 static void
-obj_aout_desc ()
+obj_aout_desc (ignore)
+     int ignore;
 {
   register char *name;
   register char c;
@@ -603,15 +607,15 @@ DEFUN_VOID (s_sect)
 
   if (strcmp (section_name, ".text") == 0)
     {
-      subseg_new (SEG_TEXT, (subsegT) exp);
+      subseg_set (SEG_TEXT, (subsegT) exp);
     }
 
   if (strcmp (section_name, ".data") == 0)
     {
       if (flagseen['R'])
-	subseg_new (SEG_TEXT, (subsegT) exp + 1000);
+	subseg_set (SEG_TEXT, (subsegT) exp + 1000);
       else
-	subseg_new (SEG_DATA, (subsegT) exp);
+	subseg_set (SEG_DATA, (subsegT) exp);
     }
 
   *section_name_end = c;

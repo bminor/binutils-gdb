@@ -155,7 +155,7 @@ static int prev_prev_insn_unreordered;
 #endif
 
 static int insn_uses_reg PARAMS ((struct mips_cl_insn *ip,
-				  int reg, int fpr));
+				  unsigned int reg, int fpr));
 static void append_insn PARAMS ((struct mips_cl_insn * ip,
 				 expressionS * p,
 				 bfd_reloc_code_real_type r));
@@ -286,7 +286,7 @@ static bfd_reloc_code_real_type offset_reloc;
 void
 md_begin ()
 {
-  register char *retval = NULL;
+  register const char *retval = NULL;
   register unsigned int i = 0;
 
   if (mips_isa == -1)
@@ -312,7 +312,7 @@ md_begin ()
     {
       const char *name = mips_opcodes[i].name;
 
-      retval = hash_insert (op_hash, name, &mips_opcodes[i]);
+      retval = hash_insert (op_hash, name, (PTR) &mips_opcodes[i]);
       if (retval != NULL && *retval != '\0')
 	{
 	  fprintf (stderr, "internal error: can't hash `%s': %s\n",
@@ -392,7 +392,7 @@ md_assemble (str)
 static int
 insn_uses_reg (ip, reg, fpr)
      struct mips_cl_insn *ip;
-     int reg;
+     unsigned int reg;
      int fpr;
 {
   /* Don't report on general register 0, since it never changes.  */
@@ -409,10 +409,12 @@ insn_uses_reg (ip, reg, fpr)
 	 because there is no instruction that sets both $f0 and $f1
 	 and requires a delay.  */
       if ((ip->insn_mo->pinfo & INSN_READ_FPR_S)
-	  && ((ip->insn_opcode >> OP_SH_FS) & OP_MASK_FS) == (reg &~ 1))
+	  && (((ip->insn_opcode >> OP_SH_FS) & OP_MASK_FS)
+	      == (reg &~ (unsigned) 1)))
 	return 1;
       if ((ip->insn_mo->pinfo & INSN_READ_FPR_T)
-	  && ((ip->insn_opcode >> OP_SH_FT) & OP_MASK_FT) == (reg &~ 1))
+	  && (((ip->insn_opcode >> OP_SH_FT) & OP_MASK_FT)
+	      == (reg &~ (unsigned) 1)))
 	return 1;
     }
   else
@@ -598,7 +600,7 @@ append_insn (ip, address_expr, reloc_type)
 	    {
 	      assert (S_GET_SEGMENT (insn_label) == now_seg);
 	      insn_label->sy_frag = frag_now;
-	      S_SET_VALUE (insn_label, frag_now_fix ());
+	      S_SET_VALUE (insn_label, (valueT) frag_now_fix ());
 	    }
 	}
     }
@@ -914,7 +916,7 @@ mips_emit_delays ()
 	    {
 	      assert (S_GET_SEGMENT (insn_label) == now_seg);
 	      insn_label->sy_frag = frag_now;
-	      S_SET_VALUE (insn_label, frag_now_fix ());
+	      S_SET_VALUE (insn_label, (valueT) frag_now_fix ());
 	    }
 	}
       mips_no_prev_insn ();
@@ -3196,7 +3198,8 @@ mips_ip (str, ip)
 		char *save_in;
 		char *err;
 		unsigned char temp[8];
-		int length;
+		int len;
+		unsigned int length;
 		segT seg;
 		subsegT subseg;
 		char *p;
@@ -3222,7 +3225,8 @@ mips_ip (str, ip)
 
 		save_in = input_line_pointer;
 		input_line_pointer = s;
-		err = md_atof (f64 ? 'd' : 'f', (char *) temp, &length);
+		err = md_atof (f64 ? 'd' : 'f', (char *) temp, &len);
+		length = len;
 		s = input_line_pointer;
 		input_line_pointer = save_in;
 		if (err != NULL && *err != '\0')
@@ -3279,7 +3283,7 @@ mips_ip (str, ip)
 		    offset_expr.X_add_number = 0;
 
 		    /* Put the floating point number into the section.  */
-		    p = frag_more (length);
+		    p = frag_more ((int) length);
 		    memcpy (p, temp, length);
 
 		    /* Switch back to the original section.  */
@@ -3835,7 +3839,7 @@ md_apply_fix (fixP, valueP)
 	  return 0;
 	}
       insn |= value & 0xFFFF;
-      md_number_to_chars ((char *) buf, insn, 4);
+      md_number_to_chars ((char *) buf, (valueT) insn, 4);
       break;
 
     default:
@@ -3956,7 +3960,7 @@ mips_align (to, fill)
     {
       assert (S_GET_SEGMENT (insn_label) == now_seg);
       insn_label->sy_frag = frag_now;
-      S_SET_VALUE (insn_label, frag_now_fix ());
+      S_SET_VALUE (insn_label, (valueT) frag_now_fix ());
       insn_label = NULL;
     }
 }
@@ -4035,7 +4039,7 @@ s_change_sec (sec)
   switch (sec)
     {
     case 't':
-      s_text ();
+      s_text (0);
       break;
     case 'r':
 #ifdef OBJ_ECOFF
@@ -4046,14 +4050,10 @@ s_change_sec (sec)
       /* Fall through.  */
 #endif
     case 'd':
-      s_data ();
+      s_data (0);
       break;
     case 'b':
-#ifdef BFD_ASSEMBLER
       subseg_set (bss_section, (subsegT) get_absolute_expression ());
-#else
-      subseg_new (bss_section, (subsegT) get_absolute_expression ());
-#endif
       demand_empty_rest_of_line ();
       break;
     case 's':
@@ -4092,7 +4092,7 @@ static void
 s_extern (x)
      int x;
 {
-  long size;
+  valueT size;
   symbolS *symbolP;
 
   symbolP = get_symbol ();

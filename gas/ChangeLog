@@ -1,3 +1,44 @@
+Mon Sep 13 16:48:38 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* read.c (s_desc): Only compile and use if S_SET_DESC is defined.
+	* struc-symbol.h: Declare verify_symbol_chain and
+	verify_symbol_chain_2 even if not SYMBOLS_NEED_BACKPOINTERS.
+	* symbols.c (verify_symbol_chain): Removed useless expression.
+	* write.c (headers, the_object_file): Only use if not
+	BFD_ASSEMBLER and not BFD.
+	(fixup_segment, cvs_frag_to_fill): Only use if BFD_ASSEMBLER or
+	not BFD.
+	(merge_data_into_text): Only use if BFD_ASSEMBLER or (not BFD and
+	not OBJ_AOUT).
+	* write.h: Declare relax_segment.
+	* config/obj-coffbfd.c (stack_pop, stack_push, stack_init): Made
+	static.
+	(stack_top): Commented out, since it's not used.
+	Fixed up pseudo-op functions to take an ignored int argument.
+	(size_section): Added default BAD_CASE to switch.
+	Changed bzero calls to memset.
+	* config/obj-coffbfd.h (S_IS_LOCAL): Call strchr on S_GET_NAME
+	(s), not on s itself.
+	* config/tc-a29k.c (s_use): Take ignored int argument.  Only
+	define if OBJ_COFF is not defined.
+	* config/tc-i386.c: (fits_in_signed_byte, smallest_imm_type): Make
+	argument signed again.
+	* config/tc-m68k.c (s_bss, s_even, s_proc): Take ignored int
+	argument.
+	(m68k_ip): Fully bracket initialization of archs.
+	Correct several formats for __LINE__ to be %d rather than %s.
+	(init_table): Fully bracket initialization.
+	Cast values larger than 0x7f assigned to fr_opcode to char.
+
+	* subsegs.c: Renamed non-BFD_ASSEMBLER subseg_new to subseg_set.
+	Wrote non-BFD_ASSEMBLER subseg_new.  Now subseg_new always takes a
+	section name, and subseg_set always takes a segT.  Changed all
+	callers as appropriate.
+	* config/obj-coffbfd.c 	(change_to_section): Renamed to
+	obj_coff_add_segment.  Corrected.  Made callers use subseg_new.
+	* config/obj-coffbfd.h (obj_segment_name, obj_add_segment):
+	Define.
+
 Mon Sep 13 13:15:03 1993  Doug Evans  (dje@canuck.cygnus.com)
 
 	* config/tc-sparc.h (LOCAL_LABEL): Remove test for name[0] == 'L'.

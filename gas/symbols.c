@@ -82,10 +82,10 @@ symbol_begin ()
  */
 
 symbolS *
-symbol_new (name, segment, value, frag)
+symbol_new (name, segment, valu, frag)
      CONST char *name;		/* It is copied, the caller can destroy/modify */
      segT segment;		/* Segment identifier (SEG_<something>) */
-     valueT value;		/* Symbol value */
+     valueT valu;		/* Symbol value */
      fragS *frag;		/* Associated fragment */
 {
   unsigned int name_length;
@@ -113,7 +113,7 @@ symbol_new (name, segment, value, frag)
   S_SET_NAME (symbolP, preserved_copy_of_name);
 
   S_SET_SEGMENT (symbolP, segment);
-  S_SET_VALUE (symbolP, value);
+  S_SET_VALUE (symbolP, valu);
   symbol_clear_list_pointers(symbolP);
 
   symbolP->sy_frag = frag;
@@ -329,12 +329,12 @@ void
 symbol_table_insert (symbolP)
      symbolS *symbolP;
 {
-  register char *error_string;
+  register const char *error_string;
 
   know (symbolP);
   know (S_GET_NAME (symbolP));
 
-  if (*(error_string = hash_jam (sy_hash, S_GET_NAME (symbolP), (char *) symbolP)))
+  if (*(error_string = hash_jam (sy_hash, S_GET_NAME (symbolP), (PTR) symbolP)))
     {
       as_fatal ("Inserting \"%s\" into symbol table failed: %s",
 		S_GET_NAME (symbolP), error_string);
@@ -542,7 +542,7 @@ verify_symbol_chain (rootP, lastP)
       know (symbolP->sy_next->sy_previous == symbolP);
 #else
       /* Walk the list anyways, to make sure pointers are still good.  */
-      *symbolP;
+      ;
 #endif /* SYMBOLS_NEED_BACKPOINTERS */
     }
 
@@ -707,7 +707,7 @@ static long *dollar_labels;
 static long *dollar_label_instances;
 static char *dollar_label_defines;
 static long dollar_label_count;
-static long dollar_label_max;
+static unsigned long dollar_label_max;
 
 int 
 dollar_label_defined (label)
@@ -745,7 +745,7 @@ dollar_label_instance (label)
 void 
 dollar_label_clear ()
 {
-  memset (dollar_label_defines, '\0', dollar_label_count);
+  memset (dollar_label_defines, '\0', (unsigned int) dollar_label_count);
 }
 
 #define DOLLAR_LABEL_BUMP_BY 10

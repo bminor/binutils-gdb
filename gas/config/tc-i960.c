@@ -1219,7 +1219,7 @@ brtab_emit ()
       return;
     }
 
-  subseg_new (SEG_DATA, 0);	/* 	.data */
+  subseg_set (SEG_DATA, 0);	/* 	.data */
   frag_align (2, 0);		/* 	.align 2 */
   record_alignment (now_seg, 2);
   colon (BR_TAB_NAME);		/* BR_TAB_NAME: */
@@ -1839,14 +1839,14 @@ parse_expr (textP, expP)
       /* Treat empty string as absolute 0 */
       expP->X_add_symbol = expP->X_op_symbol = NULL;
       expP->X_add_number = 0;
-      exp->X_op = O_constant;
+      expP->X_op = O_constant;
     }
   else
     {
       save_in = input_line_pointer;	/* Save global */
       input_line_pointer = textP;	/* Make parser work for us */
 
-      seg = expression (expP);
+      (void) expression (expP);
       if (input_line_pointer - textP != strlen (textP))
 	{
 	  /* Did not consume all of the input */
@@ -1862,7 +1862,6 @@ parse_expr (textP, expP)
 
       input_line_pointer = save_in;	/* Restore global */
     }
-  return seg;
 }
 
 

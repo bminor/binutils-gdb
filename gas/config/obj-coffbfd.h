@@ -183,7 +183,7 @@ obj_symbol_type;
 #define S_IS_LOCAL(s) \
   ((s)->sy_symbol.ost_entry.n_scnum == C_REGISTER_SECTION \
    || (S_LOCAL_NAME(s) && !flagseen['L']) \
-   || (strchr (s, '\001') != NULL))
+   || (strchr (S_GET_NAME (s), '\001') != NULL))
 /* True if a symbol is not defined in this file */
 #define S_IS_EXTERN(s)		((s)->sy_symbol.ost_entry.n_scnum == 0 \
 				 && S_GET_VALUE (s) == 0)
@@ -500,30 +500,30 @@ typedef struct
 
 stack;
 
+#define obj_segment_name(i) (segment_info[(int) (i)].scnhdr.s_name)
 
+#define obj_add_segment(s) obj_coff_add_segment (s)
 
-char *EXFUN (stack_pop, (stack * st));
-char *EXFUN (stack_push, (stack * st, char *element));
-char *EXFUN (stack_top, (stack * st));
-stack *EXFUN (stack_init, (unsigned long chunk_size, unsigned long element_size));
-void EXFUN (c_dot_file_symbol, (char *filename));
-void EXFUN (obj_extra_stuff, (object_headers * headers));
-void EXFUN (stack_delete, (stack * st));
+extern segT obj_coff_add_segment PARAMS ((const char *));
 
-segT EXFUN (s_get_segment,(struct symbol * ptr));
+extern void obj_coff_section PARAMS ((int));
 
-void EXFUN (c_section_header, (
+extern void c_dot_file_symbol PARAMS ((char *filename));
+extern void obj_extra_stuff PARAMS ((object_headers * headers));
+extern void stack_delete PARAMS ((stack * st));
 
-				struct internal_scnhdr * header,
-				char *name,
-				long core_address,
-				long size,
-				long data_ptr,
-				long reloc_ptr,
-				long lineno_ptr,
-				long reloc_number,
-				long lineno_number,
-				long alignment));
+extern segT s_get_segment PARAMS ((struct symbol * ptr));
+
+extern void c_section_header PARAMS ((struct internal_scnhdr * header,
+				      char *name,
+				      long core_address,
+				      long size,
+				      long data_ptr,
+				      long reloc_ptr,
+				      long lineno_ptr,
+				      long reloc_number,
+				      long lineno_number,
+				      long alignment));
 
 
 /* sanity check */

@@ -339,7 +339,7 @@ struct _pseudo_type
     /* assembler mnemonic, lower case, no '.' */
     char *poc_name;
     /* Do the work */
-    void (*poc_handler) ();
+    void (*poc_handler) PARAMS ((int));
     /* Value to pass to handler */
     int poc_val;
   };
@@ -379,6 +379,7 @@ void sprint_value PARAMS ((char *buf, addressT value));
 int had_errors PARAMS ((void));
 int had_warnings PARAMS ((void));
 
+void print_version_id PARAMS ((void));
 char *app_push PARAMS ((void));
 char *atof_ieee PARAMS ((char *str, int what_kind, LITTLENUM_TYPE * words));
 char *input_scrub_include_file PARAMS ((char *filename, char *position));
@@ -387,16 +388,13 @@ char *input_scrub_next_buffer PARAMS ((char **bufp));
 #if 0 /* incompatible with solaris 2 native cc */
 char *strstr PARAMS ((const char *s, const char *wanted));
 #endif
-char *xmalloc PARAMS ((long size));
-char *xrealloc PARAMS ((char *ptr, long n));
-int do_scrub_next_char PARAMS ((int (*get) (), void (*unget) ()));
+char *xmalloc PARAMS ((unsigned long size));
+char *xrealloc PARAMS ((char *ptr, unsigned long n));
+int do_scrub_next_char PARAMS ((int (*get) (void), void (*unget) (int)));
 int gen_to_words PARAMS ((LITTLENUM_TYPE * words, int precision,
 			  long exponent_bits));
 int had_err PARAMS ((void));
-int had_errors PARAMS ((void));
-int had_warnings PARAMS ((void));
 int ignore_input PARAMS ((void));
-int scrub_from_file PARAMS ((void));
 int scrub_from_file PARAMS ((void));
 int scrub_from_string PARAMS ((void));
 int seen_at_least_1_file PARAMS ((void));
@@ -415,12 +413,8 @@ void scrub_to_file PARAMS ((int ch));
 void scrub_to_string PARAMS ((int ch));
 void subsegs_begin PARAMS ((void));
 void subseg_change PARAMS ((segT seg, int subseg));
-#ifdef BFD_ASSEMBLER
 segT subseg_new PARAMS ((const char *name, subsegT subseg));
 void subseg_set PARAMS ((segT seg, subsegT subseg));
-#else
-void subseg_new PARAMS ((segT seg, subsegT subseg));
-#endif
 
 /* this one starts the chain of target dependant headers */
 #include "targ-env.h"

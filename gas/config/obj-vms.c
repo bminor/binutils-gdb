@@ -327,7 +327,7 @@ s_const ()
   register int temp;
 
   temp = get_absolute_expression ();
-  subseg_new (SEG_DATA, (subsegT) temp);
+  subseg_set (SEG_DATA, (subsegT) temp);
   const_flag = 1;
   demand_empty_rest_of_line ();
 }

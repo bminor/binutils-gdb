@@ -204,7 +204,9 @@ static const pseudo_typeS potable[] =
   {"byte", cons, 1},
   {"comm", s_comm, 0},
   {"data", s_data, 0},
+#ifdef S_SET_DESC
   {"desc", s_desc, 0},
+#endif
 /* dim */
   {"double", float_cons, 'd'},
 /* dsect */
@@ -270,7 +272,7 @@ static const pseudo_typeS potable[] =
 static void 
 pobegin ()
 {
-  char *errtxt;			/* error text */
+  const char *errtxt;			/* error text */
   const pseudo_typeS *pop;
 
   po_hash = hash_new ();
@@ -599,7 +601,7 @@ read_a_source_file (name)
 	      char *ends;
 	      char *new_buf;
 	      char *new_tmp;
-	      int new_length;
+	      unsigned int new_length;
 	      char *tmp_buf = 0;
 	      extern char *scrub_string, *scrub_last_string;
 
@@ -613,8 +615,8 @@ read_a_source_file (name)
 
 	      if (!ends)
 		{
-		  int tmp_len;
-		  int num;
+		  unsigned int tmp_len;
+		  unsigned int num;
 
 		  /* The end of the #APP wasn't in this buffer.  We
 		     keep reading in buffers until we find the #NO_APP
@@ -710,7 +712,8 @@ read_a_source_file (name)
 }				/* read_a_source_file() */
 
 void 
-s_abort ()
+s_abort (ignore)
+     int ignore;
 {
   as_fatal (".abort detected.  Abandoning ship.");
 }				/* s_abort() */
@@ -759,16 +762,17 @@ s_align_bytes (arg)
     temp_fill = 0;
   /* Only make a frag if we HAVE to. . . */
   if (temp && !need_pass_2)
-    frag_align (temp, (int) temp_fill);
+    frag_align ((int) temp, (int) temp_fill);
 
-  record_alignment (now_seg, temp);
+  record_alignment (now_seg, (int) temp);
 
   demand_empty_rest_of_line ();
 }				/* s_align_bytes() */
 
 /* For machines where ".align 4" means align to 2**4 boundary. */
 void 
-s_align_ptwo ()
+s_align_ptwo (ignore)
+     int ignore;
 {
   register int temp;
   register long temp_fill;
@@ -802,7 +806,8 @@ s_align_ptwo ()
 }				/* s_align_ptwo() */
 
 void 
-s_comm ()
+s_comm (ignore)
+     int ignore;
 {
   register char *name;
   register char c;
@@ -860,7 +865,8 @@ s_comm ()
 }				/* s_comm() */
 
 void
-s_data ()
+s_data (ignore)
+     int ignore;
 {
   segT section;
   register int temp;
@@ -874,11 +880,7 @@ s_data ()
   else
     section = data_section;
 
-#ifdef BFD_ASSEMBLER
   subseg_set (section, (subsegT) temp);
-#else
-  subseg_new (section, (subsegT) temp);
-#endif
 
 #ifdef OBJ_VMS
   const_flag = 0;
@@ -927,7 +929,8 @@ s_app_file (appfile)
    specific pseudo-ops.  */
 
 void
-s_app_line ()
+s_app_line (ignore)
+     int ignore;
 {
   int l;
 
@@ -942,7 +945,8 @@ s_app_line ()
 }
 
 void 
-s_fill ()
+s_fill (ignore)
+     int ignore;
 {
   long temp_repeat = 0;
   long temp_size = 1;
@@ -982,14 +986,14 @@ s_fill ()
   if (temp_size && !need_pass_2)
     {
       p = frag_var (rs_fill, (int) temp_size, (int) temp_size, (relax_substateT) 0, (symbolS *) 0, temp_repeat, (char *) 0);
-      memset (p, 0, (int) temp_size);
+      memset (p, 0, (unsigned int) temp_size);
       /* The magic number BSD_FILL_SIZE_CROCK_4 is from BSD 4.2 VAX
        * flavoured AS.  The following bizzare behaviour is to be
        * compatible with above.  I guess they tried to take up to 8
        * bytes from a 4-byte expression and they forgot to sign
        * extend. Un*x Sux. */
 #define BSD_FILL_SIZE_CROCK_4 (4)
-      md_number_to_chars (p, temp_fill,
+      md_number_to_chars (p, (valueT) temp_fill,
 			  (temp_size > BSD_FILL_SIZE_CROCK_4
 			   ? BSD_FILL_SIZE_CROCK_4
 			   : (int) temp_size));
@@ -1002,7 +1006,8 @@ s_fill ()
 }
 
 void 
-s_globl ()
+s_globl (ignore)
+     int ignore;
 {
   char *name;
   int c;
@@ -1123,13 +1128,9 @@ s_lcomm (needs_align)
        (S_GET_SEGMENT (symbolP) == bss_seg
 	|| (!S_IS_DEFINED (symbolP) && S_GET_VALUE (symbolP) == 0)))
     {
-      char *p;
+      char *pfrag;
 
-#ifdef BFD_ASSEMBLER
       subseg_set (bss_seg, 1);
-#else
-      subseg_new (bss_seg, 1);
-#endif
 
       if (align)
 	frag_align (align, 0);
@@ -1138,9 +1139,9 @@ s_lcomm (needs_align)
 	symbolP->sy_frag->fr_symbol = NULL;
 
       symbolP->sy_frag = frag_now;
-      p = frag_var (rs_org, 1, 1, (relax_substateT)0, symbolP,
-		    temp, (char *)0);
-      *p = 0;
+      pfrag = frag_var (rs_org, 1, 1, (relax_substateT)0, symbolP,
+			temp, (char *)0);
+      *pfrag = 0;
 
       S_SET_SEGMENT (symbolP, bss_seg);
 
@@ -1159,29 +1160,14 @@ s_lcomm (needs_align)
       as_bad ("Ignoring attempt to re-define symbol %s.", name);
     }
 
-#ifdef BFD_ASSEMBLER
   subseg_set (current_seg, current_subseg);
-#else
-  subseg_new (current_seg, current_subseg);
-#endif
 
   demand_empty_rest_of_line ();
 }				/* s_lcomm() */
 
-void
-s_long ()
-{
-  cons (4);
-}
-
-void
-s_int ()
-{
-  cons (4);
-}
-
 void 
-s_lsym ()
+s_lsym (ignore)
+     int ignore;
 {
   register char *name;
   register char c;
@@ -1242,7 +1228,8 @@ s_lsym ()
 }				/* s_lsym() */
 
 void 
-s_org ()
+s_org (ignore)
+     int ignore;
 {
   register segT segment;
   expressionS exp;
@@ -1281,7 +1268,8 @@ s_org ()
 }				/* s_org() */
 
 void 
-s_set ()
+s_set (ignore)
+     int ignore;
 {
   register char *name;
   register char delim;
@@ -1391,16 +1379,13 @@ s_space (mult)
 }				/* s_space() */
 
 void
-s_text ()
+s_text (ignore)
+     int ignore;
 {
   register int temp;
 
   temp = get_absolute_expression ();
-#ifdef BFD_ASSEMBLER
   subseg_set (text_section, (subsegT) temp);
-#else
-  subseg_new (text_section, (subsegT) temp);
-#endif
   demand_empty_rest_of_line ();
 }				/* s_text() */
 
@@ -1502,13 +1487,13 @@ pseudo_set (symbolP)
       else
 	S_CLEAR_EXTERNAL (symbolP);
 #endif /* OBJ_AOUT or OBJ_BOUT */
-      S_SET_VALUE (symbolP, exp.X_add_number);
+      S_SET_VALUE (symbolP, (valueT) exp.X_add_number);
       symbolP->sy_frag = &zero_address_frag;
       break;
 
     case O_register:
       S_SET_SEGMENT (symbolP, reg_section);
-      S_SET_VALUE (symbolP, exp.X_add_number);
+      S_SET_VALUE (symbolP, (valueT) exp.X_add_number);
       symbolP->sy_frag = &zero_address_frag;
       break;
 
@@ -1592,7 +1577,7 @@ parse_repeat_cons PARAMS ((expressionS *exp, unsigned int nbytes));
 /* end-of-line. */
 void 
 cons (nbytes)
-     register unsigned int nbytes;	/* 1=.byte, 2=.word, 4=.long */
+     register int nbytes;	/* 1=.byte, 2=.word, 4=.long */
 {
   expressionS exp;
 
@@ -1604,8 +1589,8 @@ cons (nbytes)
 
   do
     {
-      TC_PARSE_CONS_EXPRESSION (&exp, nbytes);
-      emit_expr (&exp, nbytes);
+      TC_PARSE_CONS_EXPRESSION (&exp, (unsigned int) nbytes);
+      emit_expr (&exp, (unsigned int) nbytes);
     }
   while (*input_line_pointer++ == ',');
 
@@ -1649,7 +1634,7 @@ emit_expr (exp, nbytes)
       op = O_constant;
     }
 
-  p = frag_more (nbytes);
+  p = frag_more ((int) nbytes);
 
 #ifndef WORKING_DOT_WORD
   /* If we have the difference of two symbols in a word, save it on
@@ -1700,11 +1685,12 @@ emit_expr (exp, nbytes)
 	{		/* Leading bits contain both 0s & 1s. */
 	  as_warn ("Value 0x%lx truncated to 0x%lx.", get, use);
 	}
-      md_number_to_chars (p, use, nbytes);	/* put bytes in right order. */
+      /* put bytes in right order. */
+      md_number_to_chars (p, (valueT) use, (int) nbytes);
     }
   else
     {
-      md_number_to_chars (p, (long) 0, nbytes);
+      md_number_to_chars (p, (valueT) 0, (int) nbytes);
 
       /* Now we need to generate a fixS to record the symbol value.
 	 This is easy for BFD.  For other targets it can be more
@@ -1719,7 +1705,7 @@ emit_expr (exp, nbytes)
 #ifdef TC_CONS_FIX_NEW
       TC_CONS_FIX_NEW (frag_now, p - frag_now->fr_literal, nbytes, exp);
 #else
-      fix_new_exp (frag_now, p - frag_now->fr_literal, nbytes, exp, 0,
+      fix_new_exp (frag_now, p - frag_now->fr_literal, (int) nbytes, exp, 0,
 		   /* @@ Should look at CPU word size.  */
 		   nbytes == 2 ? BFD_RELOC_16
 		   : nbytes == 8 ? BFD_RELOC_64
@@ -2098,7 +2084,7 @@ big_cons (nbytes)
 		p[i] = *src++;
 	    }
 	  else
-	    memcpy (p, bignum_low, (int) nbytes);
+	    memcpy (p, bignum_low, (unsigned int) nbytes);
 	}
       /* C contains character after number. */
       SKIP_WHITESPACE ();
@@ -2112,7 +2098,7 @@ big_cons (nbytes)
 static void 
 grow_bignum ()
 {
-  register long length;
+  register unsigned long length;
 
   bignum_high++;
   if (bignum_high >= bignum_limit)
@@ -2209,7 +2195,7 @@ float_cons (float_type)
 	  while (--count >= 0)
 	    {
 	      p = frag_more (length);
-	      memcpy (p, temp, length);
+	      memcpy (p, temp, (unsigned int) length);
 	    }
 	}
       SKIP_WHITESPACE ();
@@ -2595,7 +2581,7 @@ s_include (arg)
 
   filename = demand_copy_string (&i);
   demand_empty_rest_of_line ();
-  path = xmalloc (i + include_dir_maxlen + 5 /* slop */ );
+  path = xmalloc ((unsigned long) i + include_dir_maxlen + 5 /* slop */ );
   for (i = 0; i < include_dir_count; i++)
     {
       strcpy (path, include_dirs[i]);
@@ -2685,14 +2671,14 @@ change_to_section (name, len, exp)
     {
       if (strncmp (segment_info[i].scnhdr.s_name, name, len) == 0)
 	{
-	  subseg_new (i, exp);
+	  subseg_set (i, exp);
 	  return;
 	}
     }
   /* No section, add one */
   strncpy (segment_info[i].scnhdr.s_name, name, 8);
   segment_info[i].scnhdr.s_flags = 0 /* STYP_NOLOAD */;
-  subseg_new (i, exp);
+  subseg_set (i, exp);
 #endif
 #endif
 }
@@ -2744,15 +2730,11 @@ get_stab_string_offset (string, secname)
 	    bfd_set_section_flags (stdoutput, seg, SEC_READONLY | SEC_ALLOC);
 	  }
 #else
-	change_to_section(newsecname, strlen(newsecname), 0);
+	subseg_new (newsecname, 0);
 #endif
 /*	free (newsecname);*/
       }
-#ifdef BFD_ASSEMBLER
       subseg_set (seg, save_subseg);
-#else
-/*      subseg_new (seg, save_subseg);  */
-#endif
       old_gdb_string_index = gdb_string_index;
       i = 0;
       while ((c = *string++))
@@ -2772,11 +2754,7 @@ get_stab_string_offset (string, secname)
 	  i++;
 	  gdb_string_index++;
 	}
-#ifdef BFD_ASSEMBLER
       subseg_set (save_seg, save_subseg);
-#else
-/*      subseg_new (save_seg, save_subseg);  */
-#endif
     }
   return old_gdb_string_index;
 }
@@ -2803,7 +2781,7 @@ s_stab_generic (what, secname)
   segT seg;
   subsegT saved_subseg = now_subseg;
   subsegT subseg;
-  int valu;
+  valueT valu;
 #ifdef SEPARATE_STAB_SECTIONS
   int seg_is_new = 0;
 #endif
@@ -2822,7 +2800,7 @@ s_stab_generic (what, secname)
       seg_is_new = 1;
     }
 #else
-  change_to_section (secname, strlen(secname), 0);
+  subseg_new (secname, 0);
 #endif
 #endif /* SEPARATE_STAB_SECTIONS */
 
@@ -2934,17 +2912,11 @@ s_stab_generic (what, secname)
   if (goof)
     {
       ignore_rest_of_line ();
-#ifdef BFD_ASSEMBLER
       subseg_set (saved_seg, saved_subseg);
-#else
-      subseg_new (saved_seg, saved_subseg);
-#endif
       return;
     }
 
-#ifdef BFD_ASSEMBLER
   subseg_set (seg, subseg);
-#endif
 
 #if 0  /* needed for elf only? */
   if (seg_is_new)
@@ -2956,7 +2928,7 @@ s_stab_generic (what, secname)
   {
     char *toP;
 
-    change_to_section(secname, strlen(secname), 0);
+    subseg_new (secname, 0);
     toP = frag_more (8);
     /* the string index portion of the stab */
     md_number_to_chars (toP, (valueT) S_GET_OFFSET_2(symbol), 4);
@@ -2977,11 +2949,7 @@ s_stab_generic (what, secname)
       char *p = frag_more (4);
       md_number_to_chars (p, 0, 4);
     }
-#ifdef BFD_ASSEMBLER
   subseg_set (saved_seg, subseg);
-#else
-/*  subseg_new (saved_seg, subseg);  */
-#endif
 #else
   if (what == 's' || what == 'n')
     {
@@ -3010,7 +2978,7 @@ s_stab_generic (what, secname)
     switch (S_GET_TYPE (symbol))
       {
       case N_SLINE:
-	listing_source_line (S_GET_DESC (symbol));
+	listing_source_line ((unsigned int) S_GET_DESC (symbol));
 	break;
       case N_SO:
       case N_SOL:
@@ -3020,7 +2988,7 @@ s_stab_generic (what, secname)
 #endif /* !NO_LISTING */
 
 #ifdef SEPARATE_STAB_SECTIONS
-  subseg_new (saved_seg, saved_subseg);
+  subseg_set (saved_seg, saved_subseg);
 #endif
 
   demand_empty_rest_of_line ();
@@ -3057,10 +3025,13 @@ s_xstab (what)
   s_stab_generic (what, secname);
 }
 
+#ifdef S_SET_DESC
+
 /* Frob invented at RMS' request. Set the n_desc of a symbol.  */
 
 void 
-s_desc ()
+s_desc (ignore)
+     int ignore;
 {
   char *name;
   char c;
@@ -3091,5 +3062,7 @@ s_desc ()
     }
   demand_empty_rest_of_line ();
 }				/* s_desc() */
+
+#endif /* defined (S_SET_DESC) */
 
 /* end of read.c */

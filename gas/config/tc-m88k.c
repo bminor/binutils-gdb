@@ -1269,7 +1269,7 @@ s_bss ()
 	  segT current_seg = now_seg;
 	  subsegT current_subseg = now_subseg;
 
-	  subseg_new (SEG_BSS, 1); /* switch to bss	*/
+	  subseg_set (SEG_BSS, 1); /* switch to bss	*/
 
 	  if (bss_align)
 	    frag_align (bss_align, 0);
@@ -1284,7 +1284,7 @@ s_bss ()
 	  *p = 0;
 	  S_SET_SEGMENT (symbolP, SEG_BSS);
 
-	  subseg_new (current_seg, current_subseg);
+	  subseg_set (current_seg, current_subseg);
 	}
     }
   else

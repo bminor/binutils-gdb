@@ -22,17 +22,19 @@
 #include "aout/stab_gnu.h"
 #include "obstack.h"
 
+static int obj_elf_write_symbol_p PARAMS ((symbolS *sym));
+
 static void obj_elf_stab PARAMS ((int what));
 static void obj_elf_xstab PARAMS ((int what));
-static void obj_elf_line PARAMS ((void));
-void obj_elf_desc PARAMS ((void));
-void obj_elf_version PARAMS ((void));
-static void obj_elf_size PARAMS ((void));
-static void obj_elf_type PARAMS ((void));
-static void obj_elf_ident PARAMS ((void));
-static void obj_elf_weak PARAMS ((void));
-static void obj_elf_local PARAMS ((void));
-static void obj_elf_common PARAMS ((void));
+static void obj_elf_line PARAMS ((int));
+void obj_elf_desc PARAMS ((int));
+void obj_elf_version PARAMS ((int));
+static void obj_elf_size PARAMS ((int));
+static void obj_elf_type PARAMS ((int));
+static void obj_elf_ident PARAMS ((int));
+static void obj_elf_weak PARAMS ((int));
+static void obj_elf_local PARAMS ((int));
+static void obj_elf_common PARAMS ((int));
 
 const pseudo_typeS obj_pseudo_table[] =
 {
@@ -87,7 +89,8 @@ elf_file_symbol (s)
 }
 
 static void
-obj_elf_common ()
+obj_elf_common (ignore)
+     int ignore;
 {
   char *name;
   char c;
@@ -153,7 +156,7 @@ obj_elf_common ()
 	{
 	  segT old_sec;
 	  int old_subsec;
-	  char *p;
+	  char *pfrag;
 	  int align;
 
 	/* allocate_bss: */
@@ -167,9 +170,9 @@ obj_elf_common ()
 	  if (S_GET_SEGMENT (symbolP) == bss_section)
 	    symbolP->sy_frag->fr_symbol = 0;
 	  symbolP->sy_frag = frag_now;
-	  p = frag_var (rs_org, 1, 1, (relax_substateT) 0, symbolP, size,
-			(char *) 0);
-	  *p = 0;
+	  pfrag = frag_var (rs_org, 1, 1, (relax_substateT) 0, symbolP, size,
+			    (char *) 0);
+	  *pfrag = 0;
 	  S_SET_SEGMENT (symbolP, bss_section);
 	  S_CLEAR_EXTERNAL (symbolP);
 	  subseg_set (old_sec, old_subsec);
@@ -177,7 +180,7 @@ obj_elf_common ()
       else
 	{
 	allocate_common:
-	  S_SET_VALUE (symbolP, size);
+	  S_SET_VALUE (symbolP, (valueT) size);
 	  S_SET_EXTERNAL (symbolP);
 	  /* should be common, but this is how gas does it for now */
 	  S_SET_SEGMENT (symbolP, &bfd_und_section);
@@ -221,7 +224,8 @@ obj_elf_common ()
 }
 
 static void 
-obj_elf_local ()
+obj_elf_local (ignore)
+     int ignore;
 {
   char *name;
   int c;
@@ -249,7 +253,8 @@ obj_elf_local ()
 }
 
 static void 
-obj_elf_weak ()
+obj_elf_weak (ignore)
+     int ignore;
 {
   char *name;
   int c;
@@ -307,7 +312,7 @@ obj_elf_section (xxx)
 	p++;
       c = *p;
       *p = 0;
-      string = xmalloc (p - input_line_pointer + 1);
+      string = xmalloc ((unsigned long) (p - input_line_pointer + 1));
       strcpy (string, input_line_pointer);
       *p = c;
       input_line_pointer = p;
@@ -324,7 +329,8 @@ obj_elf_section (xxx)
   while (*input_line_pointer == ',')
     {
       flagword bit;
-      int len, inv;
+      unsigned int len;
+      int inv;
       char *p, oldp;
 
       input_line_pointer++;
@@ -393,7 +399,8 @@ obj_elf_section (xxx)
 }
 
 void
-obj_elf_previous ()
+obj_elf_previous (ignore)
+     int ignore;
 {
   if (previous_section == 0)
     {
@@ -404,7 +411,7 @@ obj_elf_previous ()
   previous_section = 0;
 }
 
-int
+static int
 obj_elf_write_symbol_p (sym)
      symbolS *sym;
 {
@@ -475,7 +482,8 @@ obj_elf_frob_symbol (sym, punt)
 }
 
 static void
-obj_elf_line ()
+obj_elf_line (ignore)
+     int ignore;
 {
   /* Assume delimiter is part of expression.  BSD4.2 as fails with
      delightful bug, so we are not being incompatible here. */
@@ -540,7 +548,7 @@ elf_stab_symbol_string (string, secname)
 
       /* Create the stab sections, if they are not already created. */
       {
-	char *newsecname = xmalloc (strlen (secname) + 4);
+	char *newsecname = xmalloc ((unsigned long) (strlen (secname) + 4));
 	strcpy (newsecname, secname);
 	strcat (newsecname, "str");
 	seg = bfd_get_section_by_name (stdoutput, newsecname);
@@ -737,7 +745,7 @@ obj_elf_stab_generic (what, secname)
       return;
     }
 
-  subseg_new ((char *) seg->name, subseg);
+  subseg_set (seg, subseg);
 
   if (seg_is_new)
     /* allocate and discard -- filled in later */
@@ -757,7 +765,7 @@ obj_elf_stab_generic (what, secname)
       md_number_to_chars (p, 0, 4);
     }
 
-  subseg_new ((char *) saved_seg->name, subseg);
+  subseg_set (saved_seg, subseg);
 
   if ((what == 's' || what == 'n')
       && symbolP->sy_value.X_op == O_constant)
@@ -783,7 +791,7 @@ obj_elf_stab_generic (what, secname)
     switch (S_GET_TYPE (symbolP))
       {
       case N_SLINE:
-	listing_source_line (S_GET_DESC (symbolP));
+	listing_source_line ((unsigned int) S_GET_DESC (symbolP));
 	break;
       case N_SO:
       case N_SOL:
@@ -822,7 +830,8 @@ obj_elf_xstab (what)
 }
 
 void 
-obj_elf_desc ()
+obj_elf_desc (ignore)
+     int ignore;
 {
   char *name;
   char c;
@@ -877,7 +886,8 @@ obj_symbol_new_hook (symbolP)
 }
 
 void 
-obj_elf_version ()
+obj_elf_version (ignore)
+     int ignore;
 {
   char *name;
   unsigned int c;
@@ -916,7 +926,7 @@ obj_elf_version ()
 
       /* process the version string */
 
-      subseg_new ((char *) note_secp->name, 0);
+      subseg_set (note_secp, 0);
       len = strlen (name);
 
       i_note.namesz = ((len + 1) + 3) & ~3; /* round this to word boundary */
@@ -938,7 +948,7 @@ obj_elf_version ()
 	}
       frag_align (2, 0);
 
-      subseg_new ((char *) seg->name, subseg);
+      subseg_set (seg, subseg);
     }
   else
     {
@@ -948,7 +958,8 @@ obj_elf_version ()
 }
 
 static void
-obj_elf_size ()
+obj_elf_size (ignore)
+     int ignore;
 {
   char *name = input_line_pointer;
   char c = get_symbol_end ();
@@ -995,7 +1006,8 @@ obj_elf_size ()
 }
 
 static void
-obj_elf_type ()
+obj_elf_type (ignore)
+     int ignore;
 {
   char *name = input_line_pointer;
   char c = get_symbol_end ();
@@ -1042,7 +1054,8 @@ obj_elf_type ()
 }
 
 static void
-obj_elf_ident ()
+obj_elf_ident (ignore)
+     int ignore;
 {
   static segT comment_section;
   segT old_section = now_seg;
@@ -1096,8 +1109,8 @@ adjust_stab_sections (abfd, sec, xxx)
   assert (fragp->fr_type == rs_fill);
   assert (fragp->fr_address == 0 && fragp->fr_fix >= 12);
 
-  bfd_h_put_16 (abfd, nsyms, fragp->fr_literal + 6);
-  bfd_h_put_32 (abfd, strsz, fragp->fr_literal + 8);
+  bfd_h_put_16 (abfd, (bfd_vma) nsyms, fragp->fr_literal + 6);
+  bfd_h_put_32 (abfd, (bfd_vma) strsz, fragp->fr_literal + 8);
 }
 
 void 

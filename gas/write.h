@@ -101,16 +101,21 @@ bit_fixS *bit_fix_new PARAMS ((int size, int offset, long base_type,
 void append PARAMS ((char **charPP, char *fromP, unsigned long length));
 void record_alignment PARAMS ((segT seg, int align));
 void write_object_file PARAMS ((void));
+void relax_segment PARAMS ((struct frag * seg_frag_root, segT seg_type));
 
 #ifdef BFD_ASSEMBLER
 fixS *fix_new PARAMS ((fragS * frag, int where, int size,
-		       symbolS * add_symbol, symbolS * sub_symbol,
-		       offsetT offset, int pcrel,
+		       symbolS * add_symbol, offsetT offset, int pcrel,
 		       bfd_reloc_code_real_type r_type));
+fixS *fix_new_exp PARAMS ((fragS * frag, int where, int size,
+			   expressionS *exp, int pcrel,
+			   bfd_reloc_code_real_type r_type));
 #else
 fixS *fix_new PARAMS ((fragS * frag, int where, int size,
-		       symbolS * add_symbol, symbolS * sub_symbol,
-		       long offset, int pcrel, int r_type));
+		       symbolS * add_symbol, offsetT offset, int pcrel,
+		       int r_type));
+fixS *fix_new_exp PARAMS ((fragS * frag, int where, int size,
+			   expressionS *exp, int pcrel, int r_type));
 #endif
 
 /* end of write.h */
