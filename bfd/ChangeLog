@@ -382,6 +382,30 @@ Fri Feb 25 18:39:26 2000  Rodney Brown (RodneyBrown@pmsc.com)
 	* coff-rs6000.c (xcoff_howto_table_16): New variable.
 	(xcoff_rtype2howto): Handle 16-bit variants of 32-bit relocs.
 
+2000-02-18  Ulrich Drepper  <drepper@cygnus.com>
+
+	* coff-rs6000.c (XCOFFARMAGBIG): New macro.
+	(xcoff_ar_file_hdr_big): New structure.
+	(SIZEOF_AR_FILE_HDR_BIG): New macro.
+	(xcoff_ar_hdr_big): New structure.
+	(SIZEOF_AR_HDR_BIG): New macro.
+	(xcoff_big_format_p): New macro.
+	(xcoff_ardata_big): New macro.
+	(arch_xhdr_big): New macro.
+	(xcoff_slurp_armap): Handle large archives.
+	(xcoff_archive_p): Detect large archives.
+	(xcoff_read_ar_hdr): Handle large archives.
+	(xcoff_openr_next_archived_file): Handle large archives.
+	(xcoff_generic_stat_arch_elt): Handle large archives.
+	(xcoff_write_armap_old): Rename from xcoff_write_armap.
+	(xcoff_write_armap_big): New function.
+	(xcoff_write_armap): New function, dispatch to _old or _big.
+	(xcoff_write_archive_contents_old): Rename from
+	xcoff_write_archive_contents.
+	(xcoff_write_archive_contents_big): New function.
+	(xcoff_write_archive_contents): New function, dispatch to _old or
+	_big.
+
 2000-02-18  Richard Henderson  <rth@cygnus.com>
 
 	* elf-bfd.h (struct elf_link_hash_table): Remove copy_indirect
