@@ -5646,8 +5646,7 @@ struct gdbarch_data_registry gdbarch_data_registry =
 };
 
 struct gdbarch_data *
-register_gdbarch_data (gdbarch_data_init_ftype *init,
-                       gdbarch_data_free_ftype *free)
+register_gdbarch_data (gdbarch_data_init_ftype *init)
 {
   struct gdbarch_data_registration **curr;
   /* Append the new registraration.  */

@@ -1,5 +1,17 @@
 2003-08-04  Andrew Cagney  <cagney@redhat.com>
 
+	* gdbarch.sh (gdbarch_data_free_ftype): Delete declaration.
+	(register_gdbarch_data): Delete "free" parameter.  Update
+	comments.
+	* gdbarch.h, gdbarch.c: Re-generate.
+	* reggroups.c (_initialize_reggroup): Update.
+	* gnu-v3-abi.c (init_gnuv3_ops): Update.
+	* frame-base.c (_initialize_frame_base): Update.
+	* frame-unwind.c (_initialize_frame_unwind): Update.
+	* user-regs.c (_initialize_user_regs): Update.
+	* remote.c (_initialize_remote): Update.
+	* regcache.c (_initialize_regcache): Update.
+
 	* regcache.c (xfree_regcache_descr): Delete function.
 	(_initialize_regcache): Update call to register_gdbarch_data.
 	(init_regcache_descr, init_legacy_regcache_descr): Use

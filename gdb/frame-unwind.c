@@ -95,5 +95,5 @@ extern initialize_file_ftype _initialize_frame_unwind; /* -Wmissing-prototypes *
 void
 _initialize_frame_unwind (void)
 {
-  frame_unwind_data = register_gdbarch_data (frame_unwind_init, NULL);
+  frame_unwind_data = register_gdbarch_data (frame_unwind_init);
 }

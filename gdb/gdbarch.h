@@ -3257,7 +3257,11 @@ extern int gdbarch_update_p (struct gdbarch_info info);
 
    The per-architecture data-pointer is either initialized explicitly
    (set_gdbarch_data()) or implicitly (by INIT() via a call to
-   gdbarch_data()).  FREE() is ignored.
+   gdbarch_data()).
+
+   Memory for the per-architecture data shall be allocated using
+   gdbarch_obstack_zalloc.  That memory will be deleted when the
+   corresponding architecture object is deleted.
 
    When a previously created architecture is re-selected, the
    per-architecture data-pointer for that previous architecture is
@@ -3269,10 +3273,7 @@ extern int gdbarch_update_p (struct gdbarch_info info);
 struct gdbarch_data;
 
 typedef void *(gdbarch_data_init_ftype) (struct gdbarch *gdbarch);
-typedef void (gdbarch_data_free_ftype) (struct gdbarch *gdbarch,
-					void *pointer);
-extern struct gdbarch_data *register_gdbarch_data (gdbarch_data_init_ftype *init,
-						   gdbarch_data_free_ftype *free);
+extern struct gdbarch_data *register_gdbarch_data (gdbarch_data_init_ftype *init);
 extern void set_gdbarch_data (struct gdbarch *gdbarch,
 			      struct gdbarch_data *data,
 			      void *pointer);
