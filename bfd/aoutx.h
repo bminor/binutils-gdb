@@ -1496,6 +1496,22 @@ translate_from_native_sym_flags (abfd, cache_ptr)
 
 #endif /* 0 */
 
+	switch (cache_ptr->type & N_TYPE)
+	  {
+	  case N_SETA:
+	    cache_ptr->symbol.section = bfd_abs_section_ptr;
+	    break;
+	  case N_SETT:
+	    cache_ptr->symbol.section = obj_textsec (abfd);
+	    break;
+	  case N_SETD:
+	    cache_ptr->symbol.section = obj_datasec (abfd);
+	    break;
+	  case N_SETB:
+	    cache_ptr->symbol.section = obj_bsssec (abfd);
+	    break;
+	  }
+
 	cache_ptr->symbol.flags |= BSF_CONSTRUCTOR;
       }
       break;
@@ -2732,7 +2748,7 @@ NAME(aout,find_nearest_line)
     adata (abfd).line_buf = buf = NULL;
   else
     {
-      buf = (char *) bfd_malloc (filelen + funclen + 2);
+      buf = (char *) bfd_malloc (filelen + funclen + 3);
       adata (abfd).line_buf = buf;
       if (buf == NULL)
 	return false;

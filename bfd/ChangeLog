@@ -1,3 +1,8 @@
+Tue May 28 11:42:08 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* aoutx.h (NAME(aout,find_nearest_line)): Make room for the
+	potential leading underscore in the allocated buffer.
+
 Fri May 24 14:28:38 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* elf32-ppc.c (ppc_elf_add_symbol_hook): Do not put small common
