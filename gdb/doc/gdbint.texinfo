@@ -1,6 +1,6 @@
 \input texinfo
 @setfilename gdbint.info
-
+@include gdb-cfg.texi
 @ifinfo
 @format
 START-INFO-DIR-ENTRY
@@ -10,7 +10,7 @@ END-INFO-DIR-ENTRY
 @end ifinfo
 
 @ifinfo
-This file documents the internals of the GNU debugger GDB.
+This file documents the internals of the GNU debugger @value{GDBN}.
 
 Copyright 1990-1999 Free Software Foundation, Inc.
 Contributed by Cygnus Solutions.  Written by John Gilmore.
@@ -33,10 +33,10 @@ regarded as a program in the language TeX).
 @end ifinfo
 
 @setchapternewpage off
-@settitle GDB Internals
+@settitle @value{GDBN} Internals
 
 @titlepage
-@title{GDB Internals}
+@title @value{GDBN} Internals
 @subtitle{A guide to the internals of the GNU debugger}
 @author John Gilmore
 @author Cygnus Solutions
@@ -68,9 +68,9 @@ are preserved on all copies.
 @c not for TeX).  Existing GNU manuals seem inconsistent on this point.
 @top Scope of this Document
 
-This document documents the internals of the GNU debugger, GDB.  It
-includes description of GDB's key algorithms and operations, as well
-as the mechanisms that adapt GDB to specific hosts and targets.
+This document documents the internals of the GNU debugger, @value{GDBN}.  It
+includes description of @value{GDBN}'s key algorithms and operations, as well
+as the mechanisms that adapt @value{GDBN} to specific hosts and targets.
 
 @menu
 * Requirements::
@@ -95,41 +95,41 @@ as the mechanisms that adapt GDB to specific hosts and targets.
 @chapter Requirements
 
 Before diving into the internals, you should understand the formal
-requirements and other expectations for GDB.  Although some of these may
-seem obvious, there have been proposals for GDB that have run counter to
+requirements and other expectations for @value{GDBN}.  Although some of these may
+seem obvious, there have been proposals for @value{GDBN} that have run counter to
 these requirements.
 
-First of all, GDB is a debugger.  It's not designed to be a front panel
+First of all, @value{GDBN} is a debugger.  It's not designed to be a front panel
 for embedded systems.  It's not a text editor.  It's not a shell.  It's
 not a programming environment.
 
-GDB is an interactive tool.  Although a batch mode is available, GDB's
+@value{GDBN} is an interactive tool.  Although a batch mode is available, @value{GDBN}'s
 primary role is to interact with a human programmer.
 
-GDB should be responsive to the user.  A programmer hot on the trail of
+@value{GDBN} should be responsive to the user.  A programmer hot on the trail of
 a nasty bug, and operating under a looming deadline, is going to be very
 impatient of everything, including the response time to debugger
 commands.
 
-GDB should be relatively permissive, such as for expressions.  While the
+@value{GDBN} should be relatively permissive, such as for expressions.  While the
 compiler should be picky (or have the option to be made picky), since
 source code lives for a long time usually, the programmer doing
 debugging shouldn't be spending time figuring out to mollify the
 debugger.
 
-GDB will be called upon to deal with really large programs.  Executable
+@value{GDBN} will be called upon to deal with really large programs.  Executable
 sizes of 50 to 100 megabytes occur regularly, and we've heard reports of
 programs approaching 1 gigabyte in size.
 
-GDB should be able to run everywhere.  No other debugger is available
-for even half as many configurations as GDB supports.
+@value{GDBN} should be able to run everywhere.  No other debugger is available
+for even half as many configurations as @value{GDBN} supports.
 
 
 @node Overall Structure
 
 @chapter Overall Structure
 
-GDB consists of three major subsystems: user interface, symbol handling
+@value{GDBN} consists of three major subsystems: user interface, symbol handling
 (the ``symbol side''), and target system handling (the ``target side'').
 
 Ther user interface consists of several actual interfaces, plus
@@ -151,26 +151,26 @@ should fit together.
 
 @section The Symbol Side
 
-The symbolic side of GDB can be thought of as ``everything you can do in
-GDB without having a live program running''.  For instance, you can look
+The symbolic side of @value{GDBN} can be thought of as ``everything you can do in
+@value{GDBN} without having a live program running''.  For instance, you can look
 at the types of variables, and evaluate many kinds of expressions.
 
 @section The Target Side
 
-The target side of GDB is the ``bits and bytes manipulator''.  Although
+The target side of @value{GDBN} is the ``bits and bytes manipulator''.  Although
 it may make reference to symbolic info here and there, most of the
 target side will run with only a stripped executable available -- or
 even no executable at all, in remote debugging cases.
 
 Operations such as disassembly, stack frame crawls, and register
 display, are able to work with no symbolic info at all.  In some cases,
-such as disassembly, GDB will use symbolic info to present addresses
+such as disassembly, @value{GDBN} will use symbolic info to present addresses
 relative to symbols rather than as raw numbers, but it will work either
 way.
 
 @section Configurations
 
-@dfn{Host} refers to attributes of the system where GDB runs.
+@dfn{Host} refers to attributes of the system where @value{GDBN} runs.
 @dfn{Target} refers to the system where the program being debugged
 executes.  In most cases they are the same machine, in which case a
 third type of @dfn{Native} attributes come into play.
@@ -196,7 +196,7 @@ are really part of the target environment, but which require
 @code{#include} files that are only available on the host system.  Core
 file handling and @code{setjmp} handling are two common cases.
 
-When you want to make GDB work ``native'' on a particular machine, you
+When you want to make @value{GDBN} work ``native'' on a particular machine, you
 have to include all three kinds of information.
 
 
@@ -204,18 +204,18 @@ have to include all three kinds of information.
 
 @chapter Algorithms
 
-GDB uses a number of debugging-specific algorithms.  They are often not
+@value{GDBN} uses a number of debugging-specific algorithms.  They are often not
 very complicated, but get lost in the thicket of special cases and
 real-world issues.  This chapter describes the basic algorithms and
 mentions some of the specific target definitions that they use.
 
 @section Frames
 
-A frame is a construct that GDB uses to keep track of calling and called
+A frame is a construct that @value{GDBN} uses to keep track of calling and called
 functions.
 
 @code{FRAME_FP} in the machine description has no meaning to the
-machine-independent part of GDB, except that it is used when setting up
+machine-independent part of @value{GDBN}, except that it is used when setting up
 a new frame from scratch, as follows:
 
 @example
@@ -229,8 +229,8 @@ any value that is convenient for the code that creates new frames.
 defined; that is where you should use the @code{FP_REGNUM} value, if
 your frames are nonstandard.)
 
-Given a GDB frame, define @code{FRAME_CHAIN} to determine the address of
-the calling function's frame.  This will be used to create a new GDB
+Given a @value{GDBN} frame, define @code{FRAME_CHAIN} to determine the address of
+the calling function's frame.  This will be used to create a new @value{GDBN}
 frame struct, and then @code{INIT_EXTRA_FRAME_INFO} and
 @code{INIT_FRAME_PC} will be called for the new frame.
 
@@ -247,25 +247,25 @@ Hardware breakpoints are sometimes available as a builtin debugging
 features with some chips.  Typically these work by having dedicated
 register into which the breakpoint address may be stored.  If the PC
 ever matches a value in a breakpoint registers, the CPU raises an
-exception and reports it to GDB.  Another possibility is when an
+exception and reports it to @value{GDBN}.  Another possibility is when an
 emulator is in use; many emulators include circuitry that watches the
 address lines coming out from the processor, and force it to stop if the
 address matches a breakpoint's address.  A third possibility is that the
 target already has the ability to do breakpoints somehow; for instance,
 a ROM monitor may do its own software breakpoints.  So although these
-are not literally ``hardware breakpoints'', from GDB's point of view
-they work the same; GDB need not do nothing more than set the breakpoint
+are not literally ``hardware breakpoints'', from @value{GDBN}'s point of view
+they work the same; @value{GDBN} need not do nothing more than set the breakpoint
 and wait for something to happen.
 
 Since they depend on hardware resources, hardware breakpoints may be
-limited in number; when the user asks for more, GDB will start trying to
+limited in number; when the user asks for more, @value{GDBN} will start trying to
 set software breakpoints.
 
-Software breakpoints require GDB to do somewhat more work.  The basic
-theory is that GDB will replace a program instruction with a trap,
+Software breakpoints require @value{GDBN} to do somewhat more work.  The basic
+theory is that @value{GDBN} will replace a program instruction with a trap,
 illegal divide, or some other instruction that will cause an exception,
-and then when it's encountered, GDB will take the exception and stop the
-program. When the user says to continue, GDB will restore the original
+and then when it's encountered, @value{GDBN} will take the exception and stop the
+program. When the user says to continue, @value{GDBN} will restore the original
 instruction, single-step, re-insert the trap, and continue on.
 
 Since it literally overwrites the program being tested, the program area
@@ -300,7 +300,7 @@ much of the interesting breakpoint action is in @file{infrun.c}.
 
 @section Longjmp Support
 
-GDB has support for figuring out that the target is doing a
+@value{GDBN} has support for figuring out that the target is doing a
 @code{longjmp} and for stopping at the target of the jump, if we are
 stepping.  This is done with a few specialized internal breakpoints,
 which are visible in the @code{maint info breakpoint} command.
@@ -316,12 +316,12 @@ is target specific, you will need to define it in the appropriate
 
 @chapter User Interface
 
-GDB has several user interfaces.  Although the command-line interface
+@value{GDBN} has several user interfaces.  Although the command-line interface
 is the most common and most familiar, there are others.
 
 @section Command Interpreter
 
-The command interpreter in GDB is fairly simple.  It is designed to
+The command interpreter in @value{GDBN} is fairly simple.  It is designed to
 allow for the set of commands to be augmented dynamically, and also
 has a recursive subcommand capability, where the first argument to
 a command may itself direct a lookup on a different command list.
@@ -354,19 +354,19 @@ entire string the user should type at the command line.
 @section libgdb
 
 @code{libgdb} was an abortive project of years ago.  The theory was to
-provide an API to GDB's functionality.
+provide an API to @value{GDBN}'s functionality.
 
 @node Symbol Handling
 
 @chapter Symbol Handling
 
-Symbols are a key part of GDB's operation.  Symbols include variables,
+Symbols are a key part of @value{GDBN}'s operation.  Symbols include variables,
 functions, and types.
 
 @section Symbol Reading
 
-GDB reads symbols from ``symbol files''.  The usual symbol file is the
-file containing the program which GDB is debugging.  GDB can be directed
+@value{GDBN} reads symbols from ``symbol files''.  The usual symbol file is the
+file containing the program which @value{GDBN} is debugging.  @value{GDBN} can be directed
 to use a different file for symbols (with the @code{symbol-file}
 command), and it can also read more symbols via the ``add-file'' and
 ``load'' commands, or while reading symbols from shared libraries.
@@ -376,7 +376,7 @@ BFD library.  BFD identifies the type of the file by examining its
 header.  @code{find_sym_fns} then uses this identification to locate a
 set of symbol-reading functions.
 
-Symbol reading modules identify themselves to GDB by calling
+Symbol reading modules identify themselves to @value{GDBN} by calling
 @code{add_symtab_fns} during their module initialization.  The argument
 to @code{add_symtab_fns} is a @code{struct sym_fns} which contains the
 name (or name prefix) of the symbol format, the length of the prefix,
@@ -410,7 +410,7 @@ There is no result from @code{@var{xyz}_symfile_init}, but it can call
 
 Called from @code{symbol_file_add} when discarding existing symbols.
 This function need only handle the symbol-reading module's internal
-state; the symbol table data structures visible to the rest of GDB will
+state; the symbol table data structures visible to the rest of @value{GDBN} will
 be discarded by @code{symbol_file_add}.  It has no arguments and no
 result.  It may be called after @code{@var{xyz}_symfile_init}, if a new
 symbol table is being read, or may be called alone if all symbols are
@@ -432,7 +432,7 @@ or dynamically loaded file) is being read.@refill
 In addition, if a symbol-reading module creates psymtabs when
 @var{xyz}_symfile_read is called, these psymtabs will contain a pointer
 to a function @code{@var{xyz}_psymtab_to_symtab}, which can be called
-from any point in the GDB symbol-handling code.
+from any point in the @value{GDBN} symbol-handling code.
 
 @table @code
 @item @var{xyz}_psymtab_to_symtab (struct partial_symtab *pst)
@@ -447,7 +447,7 @@ zero if there were no symbols in that part of the symbol file.
 
 @section Partial Symbol Tables
 
-GDB has three types of symbol tables.
+@value{GDBN} has three types of symbol tables.
 
 @itemize @bullet
 
@@ -469,7 +469,7 @@ A psymtab is constructed by doing a very quick pass over an executable
 file's debugging information.  Small amounts of information are
 extracted -- enough to identify which parts of the symbol table will
 need to be re-read and fully digested later, when the user needs the
-information.  The speed of this pass causes GDB to start up very
+information.  The speed of this pass causes @value{GDBN} to start up very
 quickly.  Later, as the detailed rereading occurs, it occurs in small
 pieces, at various times, and the delay therefrom is mostly invisible to
 the user.
@@ -515,7 +515,7 @@ them anyway.  Psymtabs don't have the idea of the type of a symbol,
 either, so types need not appear, unless they will be referenced by
 name.
 
-It is a bug for GDB to behave one way when only a psymtab has been read,
+It is a bug for @value{GDBN} to behave one way when only a psymtab has been read,
 and another way if the corresponding symtab has been read in.  Such bugs
 are typically caused by a psymtab that does not contain all the visible
 symbols, or which has the wrong instruction address ranges.
@@ -532,14 +532,14 @@ unless you want to do a lot more work.
 
 Fundamental Types (e.g., FT_VOID, FT_BOOLEAN).
 
-These are the fundamental types that GDB uses internally.  Fundamental
+These are the fundamental types that @value{GDBN} uses internally.  Fundamental
 types from the various debugging formats (stabs, ELF, etc) are mapped
 into one of these.  They are basically a union of all fundamental types
-that gdb knows about for all the languages that GDB knows about.
+that gdb knows about for all the languages that @value{GDBN} knows about.
 
 Type Codes (e.g., TYPE_CODE_PTR, TYPE_CODE_ARRAY).
 
-Each time GDB builds an internal type, it marks it with one of these
+Each time @value{GDBN} builds an internal type, it marks it with one of these
 types.  The type may be a fundamental type, such as TYPE_CODE_INT, or a
 derived type, such as TYPE_CODE_PTR which is a pointer to another type.
 Typically, several FT_* types map to one TYPE_CODE_* type, and are
@@ -549,7 +549,7 @@ type is signed or unsigned, and how many bits it uses.
 Builtin Types (e.g., builtin_type_void, builtin_type_char).
 
 These are instances of type structs that roughly correspond to
-fundamental types and are created as global types for GDB to use for
+fundamental types and are created as global types for @value{GDBN} to use for
 various ugly historical reasons.  We eventually want to eliminate these.
 Note for example that builtin_type_int initialized in gdbtypes.c is
 basically the same as a TYPE_CODE_INT type that is initialized in
@@ -614,7 +614,7 @@ been run (or the core file has been read).
 Windows 95 and NT use the PE (Portable Executable) format for their
 executables.  PE is basically COFF with additional headers.
 
-While BFD includes special PE support, GDB needs only the basic
+While BFD includes special PE support, @value{GDBN} needs only the basic
 COFF reader.
 
 @subsection ELF
@@ -634,7 +634,7 @@ The SOM reader is in @file{hpread.c}.
 
 @subsection Other File Formats
 
-Other file formats that have been supported by GDB include Netware
+Other file formats that have been supported by @value{GDBN} include Netware
 Loadable Modules (@file{nlmread.c}.
 
 @section Debugging File Formats
@@ -687,7 +687,7 @@ The DWARF 2 reader is in @file{dwarf2read.c}.
 
 Like COFF, the SOM definition includes debugging information.
 
-@section Adding a New Symbol Reader to GDB
+@section Adding a New Symbol Reader to @value{GDBN}
 
 If you are using an existing object file format (a.out, COFF, ELF, etc),
 there is probably little to be done.
@@ -696,9 +696,9 @@ If you need to add a new object file format, you must first add it to
 BFD.  This is beyond the scope of this document.
 
 You must then arrange for the BFD code to provide access to the
-debugging symbols.  Generally GDB will have to call swapping routines
+debugging symbols.  Generally @value{GDBN} will have to call swapping routines
 from BFD and a few other BFD internal routines to locate the debugging
-information.  As much as possible, GDB should not depend on the BFD
+information.  As much as possible, @value{GDBN} should not depend on the BFD
 internal data structures.
 
 For some targets (e.g., COFF), there is a special transfer vector used
@@ -706,24 +706,24 @@ to call swapping routines, since the external data structures on various
 platforms have different sizes and layouts.  Specialized routines that
 will only ever be implemented by one object file format may be called
 directly.  This interface should be described in a file
-@file{bfd/libxyz.h}, which is included by GDB.
+@file{bfd/libxyz.h}, which is included by @value{GDBN}.
 
 
 @node Language Support
 
 @chapter Language Support
 
-GDB's language support is mainly driven by the symbol reader, although
+@value{GDBN}'s language support is mainly driven by the symbol reader, although
 it is possible for the user to set the source language manually.
 
-GDB chooses the source language by looking at the extension of the file
+@value{GDBN} chooses the source language by looking at the extension of the file
 recorded in the debug info; @code{.c} means C, @code{.f} means Fortran,
 etc.  It may also use a special-purpose language identifier if the debug
 format supports it, such as DWARF.
 
-@section Adding a Source Language to GDB
+@section Adding a Source Language to @value{GDBN}
 
-To add other languages to GDB's expression parser, follow the following
+To add other languages to @value{GDBN}'s expression parser, follow the following
 steps:
 
 @table @emph
@@ -760,7 +760,7 @@ various parsers from defining the same global names:
 At the bottom of your parser, define a @code{struct language_defn} and
 initialize it with the right values for your language.  Define an
 @code{initialize_@var{lang}} routine and have it call
-@samp{add_language(@var{lang}_language_defn)} to tell the rest of GDB
+@samp{add_language(@var{lang}_language_defn)} to tell the rest of @value{GDBN}
 that your language exists.  You'll need some other supporting variables
 and functions, which will be used via pointers from your
 @code{@var{lang}_language_defn}.  See the declaration of @code{struct
@@ -793,7 +793,7 @@ string.
 
 Update the function @code{_initialize_language} to include your
 language.  This function picks the default language upon startup, so is
-dependent upon which languages that GDB is built for.
+dependent upon which languages that @value{GDBN} is built for.
 
 Update @code{allocate_symtab} in @file{symfile.c} and/or symbol-reading
 code so that the language of each symtab (source file) is set properly.
@@ -814,18 +814,18 @@ Add a call to @code{@var{lang}_parse()} and @code{@var{lang}_error} in
 
 @item Use macros to trim code
 
-The user has the option of building GDB for some or all of the
-languages.  If the user decides to build GDB for the language
+The user has the option of building @value{GDBN} for some or all of the
+languages.  If the user decides to build @value{GDBN} for the language
 @var{lang}, then every file dependent on @file{language.h} will have the
 macro @code{_LANG_@var{lang}} defined in it.  Use @code{#ifdef}s to
 leave out large routines that the user won't need if he or she is not
 using your language.
 
-Note that you do not need to do this in your YACC parser, since if GDB
+Note that you do not need to do this in your YACC parser, since if @value{GDBN}
 is not build for @var{lang}, then @file{@var{lang}-exp.tab.o} (the
-compiled form of your parser) is not linked into GDB at all.
+compiled form of your parser) is not linked into @value{GDBN} at all.
 
-See the file @file{configure.in} for how GDB is configured for different
+See the file @file{configure.in} for how @value{GDBN} is configured for different
 languages.
 
 @item Edit @file{Makefile.in}
@@ -847,12 +847,12 @@ definition machinery anymore.
 
 @section Adding a New Host
 
-Most of GDB's host configuration support happens via autoconf.  It
-should be rare to need new host-specific definitions.  GDB still uses
+Most of @value{GDBN}'s host configuration support happens via autoconf.  It
+should be rare to need new host-specific definitions.  @value{GDBN} still uses
 the host-specific definitions and files listed below, but these mostly
 exist for historical reasons, and should eventually disappear.
 
-Several files control GDB's configuration for host systems:
+Several files control @value{GDBN}'s configuration for host systems:
 
 @table @file
 
@@ -909,7 +909,7 @@ This contains generic TCP support using sockets.
 
 @section Host Conditionals
 
-When GDB is configured and compiled, various macros are defined or left
+When @value{GDBN} is configured and compiled, various macros are defined or left
 undefined, to control compilation based on the attributes of the host
 system.  These macros and their meanings (or if the meaning is not
 documented here, then one of the source files where they are used is
@@ -917,8 +917,8 @@ indicated) are:
 
 @table @code
 
-@item GDBINIT_FILENAME
-The default name of GDB's initialization file (normally @file{.gdbinit}).
+@item @value{GDBN}INIT_FILENAME
+The default name of @value{GDBN}'s initialization file (normally @file{.gdbinit}).
 
 @item MEM_FNS_DECLARED
 Your host config file defines this if it includes declarations of
@@ -1065,7 +1065,7 @@ Define this to 1 if the target is using the generic inferior function
 call code.  See @code{blockframe.c} for more information.
 
 @item USE_MMALLOC
-GDB will use the @code{mmalloc} library for memory allocation for symbol
+@value{GDBN} will use the @code{mmalloc} library for memory allocation for symbol
 reading if this symbol is defined.  Be careful defining it since there
 are systems on which @code{mmalloc} does not work for some reason.  One
 example is the DECstation, where its RPC library can't cope with our
@@ -1105,7 +1105,7 @@ Define these to appropriate value for the system lseek(), if not already
 defined.
 
 @item STOP_SIGNAL
-This is the signal for stopping GDB.  Defaults to SIGTSTP.  (Only
+This is the signal for stopping @value{GDBN}.  Defaults to SIGTSTP.  (Only
 redefined for the Convex.)
 
 @item USE_O_NOCTTY
@@ -1133,25 +1133,25 @@ Define this to override the defaults of @code{__volatile__} or
 
 @chapter Target Architecture Definition
 
-GDB's target architecture defines what sort of machine-language programs
-GDB can work with, and how it works with them.
+@value{GDBN}'s target architecture defines what sort of machine-language programs
+@value{GDBN} can work with, and how it works with them.
 
 At present, the target architecture definition consists of a number of C
 macros.
 
 @section Registers and Memory
 
-GDB's model of the target machine is rather simple.  GDB assumes the
+@value{GDBN}'s model of the target machine is rather simple.  @value{GDBN} assumes the
 machine includes a bank of registers and a block of memory.  Each
 register may have a different size.
 
-GDB does not have a magical way to match up with the compiler's idea of
+@value{GDBN} does not have a magical way to match up with the compiler's idea of
 which registers are which; however, it is critical that they do match up
 accurately.  The only way to make this work is to get accurate
 information about the order that the compiler uses, and to reflect that
 in the @code{REGISTER_NAME} and related macros.
 
-GDB can handle big-endian, little-endian, and bi-endian architectures.
+@value{GDBN} can handle big-endian, little-endian, and bi-endian architectures.
 
 @section Using Different Register and Memory Data Representations
 @cindex raw representation
@@ -1162,9 +1162,9 @@ GDB can handle big-endian, little-endian, and bi-endian architectures.
 
 Some architectures use one representation for a value when it lives in a
 register, but use a different representation when it lives in memory.
-In GDB's terminology, the @dfn{raw} representation is the one used in
+In @value{GDBN}'s terminology, the @dfn{raw} representation is the one used in
 the target registers, and the @dfn{virtual} representation is the one
-used in memory, and within GDB @code{struct value} objects.
+used in memory, and within @value{GDBN} @code{struct value} objects.
 
 For almost all data types on almost all architectures, the virtual and
 raw representations are identical, and no special handling is needed.
@@ -1182,8 +1182,8 @@ type is the raw representation, and the twelve-byte loosely-packed
 arrangement is the virtual representation.
 
 @item
-Some 64-bit MIPS targets present 32-bit registers to GDB as 64-bit
-registers, with garbage in their upper bits.  GDB ignores the top 32
+Some 64-bit MIPS targets present 32-bit registers to @value{GDBN} as 64-bit
+registers, with garbage in their upper bits.  @value{GDBN} ignores the top 32
 bits.  Thus, the 64-bit form, with garbage in the upper 32 bits, is the
 raw representation, and the trimmed 32-bit representation is the
 virtual representation.
@@ -1191,9 +1191,9 @@ virtual representation.
 @end itemize
 
 In general, the raw representation is determined by the architecture, or
-GDB's interface to the architecture, while the virtual representation
-can be chosen for GDB's convenience.  GDB's register file,
-@code{registers}, holds the register contents in raw format, and the GDB
+@value{GDBN}'s interface to the architecture, while the virtual representation
+can be chosen for @value{GDBN}'s convenience.  @value{GDBN}'s register file,
+@code{registers}, holds the register contents in raw format, and the @value{GDBN}
 remote protocol transmits register values in raw format.
 
 Your architecture may define the following macros to request raw /
@@ -1206,7 +1206,7 @@ and virtual formats.
 
 @deftypefn {Target Macro} int REGISTER_RAW_SIZE (int @var{reg})
 The size of register number @var{reg}'s raw value.  This is the number
-of bytes the register will occupy in @code{registers}, or in a GDB
+of bytes the register will occupy in @code{registers}, or in a @value{GDBN}
 remote protocol packet.
 @end deftypefn
 
@@ -1219,7 +1219,7 @@ register's value.
 @deftypefn {Target Macro} struct type *REGISTER_VIRTUAL_TYPE (int @var{reg})
 This is the type of the virtual representation of register number
 @var{reg}.  Note that there is no need for a macro giving a type for the
-register's raw form; once the register's value has been obtained, GDB
+register's raw form; once the register's value has been obtained, @value{GDBN}
 always uses the virtual form.
 @end deftypefn
 
@@ -1262,7 +1262,7 @@ machine.
 @item ADDITIONAL_OPTION_HANDLER
 @item ADDITIONAL_OPTION_HELP
 These are a set of macros that allow the addition of additional command
-line options to GDB.  They are currently used only for the unsupported
+line options to @value{GDBN}.  They are currently used only for the unsupported
 i960 Nindy target, and should not be used in any other configuration.
 
 @item ADDR_BITS_REMOVE (addr)
@@ -1283,7 +1283,7 @@ Define this to expand into any code that you want to execute before the
 main loop starts.  Although this is not, strictly speaking, a target
 conditional, that is how it is currently being used.  Note that if a
 configuration were to define it one way for a host and a different way
-for the target, GDB will probably not compile, let alone run correctly.
+for the target, @value{GDBN} will probably not compile, let alone run correctly.
 This is currently used only for the unsupported i960 Nindy target, and
 should not be used in any other configuration.
 
@@ -1293,7 +1293,7 @@ still reports the parameter as its original type, rather than the
 promoted type.
 
 @item BELIEVE_PCC_PROMOTION_TYPE
-Define this if GDB should believe the type of a short argument when
+Define this if @value{GDBN} should believe the type of a short argument when
 compiled by pcc, but look within a full int space to get its value.
 Only defined for Sun-3 at present.
 
@@ -1400,7 +1400,7 @@ from an inferior process.  This is only relevant if
 @item CANNOT_STORE_REGISTER (regno)
 A C expression that should be nonzero if @var{regno} should not be
 written to the target.  This is often the case for program counters,
-status words, and other special registers.  If this is not defined, GDB
+status words, and other special registers.  If this is not defined, @value{GDBN}
 will assume that all registers may be written.
 
 @item DO_DEFERRED_STORES
@@ -1428,7 +1428,7 @@ The default behavior is to promote only when we have no type information
 for the formal parameter.  This is different from the obvious behavior,
 which would be to promote whenever we have no prototype, just as the
 compiler does.  It's annoying, but some older targets rely on this.  If
-you want GDB to follow the typical compiler behavior --- to always
+you want @value{GDBN} to follow the typical compiler behavior --- to always
 promote when there is no prototype in scope --- your gdbarch init
 function can call @code{set_gdbarch_coerce_float_to_double} and select
 the @code{standard_coerce_float_to_double} function.
@@ -1559,21 +1559,21 @@ be 2 on the VAX.
 
 @item GCC_COMPILED_FLAG_SYMBOL
 @item GCC2_COMPILED_FLAG_SYMBOL
-If defined, these are the names of the symbols that GDB will look for to
+If defined, these are the names of the symbols that @value{GDBN} will look for to
 detect that GCC compiled the file.  The default symbols are
 @code{gcc_compiled.} and @code{gcc2_compiled.}, respectively. (Currently
 only defined for the Delta 68.)
 
-@item GDB_MULTI_ARCH
+@item @value{GDBN}_MULTI_ARCH
 If defined and non-zero, enables suport for multiple architectures
-within GDB.
+within @value{GDBN}.
 
 The support can be enabled at two levels.  At level one, only
 definitions for previously undefined macros are provided; at level two,
 a multi-arch definition of all architecture dependant macros will be
 defined.
 
-@item GDB_TARGET_IS_HPPA
+@item @value{GDBN}_TARGET_IS_HPPA
 This determines whether horrible kludge code in dbxread.c and
 partial-stab.h is used to mangle multiple-symbol-table files from
 HPPA's.  This should all be ripped out, and a scheme like elfread.c
@@ -1607,7 +1607,7 @@ repenting at leisure.
 
 @item SYMBOLS_CAN_START_WITH_DOLLAR
 Some systems have routines whose names start with @samp{$}.  Giving this
-macro a non-zero value tells GDB's expression parser to check for such
+macro a non-zero value tells @value{GDBN}'s expression parser to check for such
 routines when parsing tokens that begin with @samp{$}.
 
 On HP-UX, certain system routines (millicode) have names beginning with
@@ -1665,11 +1665,11 @@ stepping will suffice.
 @item IS_TRAPPED_INTERNALVAR (name)
 This is an ugly hook to allow the specification of special actions that
 should occur as a side-effect of setting the value of a variable
-internal to GDB.  Currently only used by the h8500.  Note that this
+internal to @value{GDBN}.  Currently only used by the h8500.  Note that this
 could be either a host or target conditional.
 
 @item NEED_TEXT_START_END
-Define this if GDB should determine the start and end addresses of the
+Define this if @value{GDBN} should determine the start and end addresses of the
 text section.  (Seems dubious.)
 
 @item NO_HIF_SUPPORT
@@ -1802,7 +1802,7 @@ call. Return the updated stack pointer value.
 Used in @samp{call_function_by_hand} to create an artificial stack frame.
 
 @item REGISTER_BYTES
-The total amount of space needed to store GDB's copy of the machine's
+The total amount of space needed to store @value{GDBN}'s copy of the machine's
 register state.
 
 @item REGISTER_NAME(i)
@@ -1823,14 +1823,14 @@ This is the value of the @var{SP} after both the dummy frame and space
 for parameters/results have been allocated on the stack.
 
 @item SDB_REG_TO_REGNUM
-Define this to convert sdb register numbers into GDB regnums.  If not
+Define this to convert sdb register numbers into @value{GDBN} regnums.  If not
 defined, no conversion will be done.
 
 @item SHIFT_INST_REGS
 (Only used for m88k targets.)
 
 @item SKIP_PERMANENT_BREAKPOINT
-Advance the inferior's PC past a permanent breakpoint.  GDB normally
+Advance the inferior's PC past a permanent breakpoint.  @value{GDBN} normally
 steps over a breakpoint by removing it, stepping one instruction, and
 re-inserting the breakpoint.  However, permanent breakpoints are
 hardwired into the inferior, and can't be removed, so this strategy
@@ -1862,7 +1862,7 @@ This should only need to be defined if @code{TARGET_WRITE_SP} and
 
 @item STAB_REG_TO_REGNUM
 Define this to convert stab register numbers (as gotten from `r'
-declarations) into GDB regnums.  If not defined, no conversion will be
+declarations) into @value{GDBN} regnums.  If not defined, no conversion will be
 done.
 
 @item STACK_ALIGN (addr)
@@ -1872,7 +1872,7 @@ processor's stack.
 @item STEP_SKIPS_DELAY (addr)
 Define this to return true if the address is of an instruction with a
 delay slot.  If a breakpoint has been placed in the instruction's delay
-slot, GDB will single-step over that instruction before resuming
+slot, @value{GDBN} will single-step over that instruction before resuming
 normally.  Currently only defined for the Mips.
 
 @item STORE_RETURN_VALUE (type, valbuf)
@@ -1942,7 +1942,7 @@ Number of bits in a short integer; defaults to @code{2 * TARGET_CHAR_BIT}.
 @item TARGET_WRITE_FP
 These change the behavior of @code{read_pc}, @code{write_pc},
 @code{read_sp}, @code{write_sp}, @code{read_fp} and @code{write_fp}.
-For most targets, these may be left undefined.  GDB will call the read
+For most targets, these may be left undefined.  @value{GDBN} will call the read
 and write register functions with the relevant @code{_REGNUM} argument.
 
 These macros are useful when a target keeps one of these registers in a
@@ -1967,7 +1967,7 @@ other compilers.
 For dbx-style debugging information, if the compiler puts variable
 declarations inside LBRAC/RBRAC blocks, this should be defined to be
 nonzero.  @var{desc} is the value of @code{n_desc} from the
-@code{N_RBRAC} symbol, and @var{gcc_p} is true if GDB has noticed the
+@code{N_RBRAC} symbol, and @var{gcc_p} is true if @value{GDBN} has noticed the
 presence of either the @code{GCC_COMPILED_SYMBOL} or the
 @code{GCC2_COMPILED_SYMBOL}.  By default, this is 0.
 
@@ -1991,7 +1991,7 @@ Defaults to @code{1}.
 
 @section Adding a New Target
 
-The following files define a target to GDB:
+The following files define a target to @value{GDBN}:
 
 @table @file
 
@@ -2004,7 +2004,7 @@ tm-@var{ttt}.h}.
 
 You can also define @samp{TM_CFLAGS}, @samp{TM_CLIBS}, @samp{TM_CDEPS},
 but these are now deprecated, replaced by autoconf, and may go away in
-future versions of GDB.
+future versions of @value{GDBN}.
 
 @item gdb/config/@var{arch}/tm-@var{ttt}.h
 (@file{tm.h} is a link to this file, created by configure).  Contains
@@ -2043,10 +2043,10 @@ that just @code{#include}s @file{tm-@var{arch}.h} and
 
 @chapter Target Vector Definition
 
-The target vector defines the interface between GDB's abstract handling
+The target vector defines the interface between @value{GDBN}'s abstract handling
 of target systems, and the nitty-gritty code that actually exercises
-control over a process or a serial port.  GDB includes some 30-40
-different target vectors; however, each configuration of GDB includes
+control over a process or a serial port.  @value{GDBN} includes some 30-40
+different target vectors; however, each configuration of @value{GDBN} includes
 only a few of them.
 
 @section File Targets
@@ -2055,12 +2055,12 @@ Both executables and core files have target vectors.
 
 @section Standard Protocol and Remote Stubs
 
-GDB's file @file{remote.c} talks a serial protocol to code that runs in
-the target system.  GDB provides several sample ``stubs'' that can be
+@value{GDBN}'s file @file{remote.c} talks a serial protocol to code that runs in
+the target system.  @value{GDBN} provides several sample ``stubs'' that can be
 integrated into target programs or operating systems for this purpose;
 they are named @file{*-stub.c}.
 
-The GDB user's manual describes how to put such a stub into your target
+The @value{GDBN} user's manual describes how to put such a stub into your target
 code.  What follows is a discussion of integrating the SPARC stub into a
 complicated operating system (rather than a simple program), by Stu
 Grossman, the author of this stub.
@@ -2095,7 +2095,7 @@ do breakpoints.  Everything else is unnecessary for the proper operation
 of the debugger/stub.
 
 From reading the stub, it's probably not obvious how breakpoints work.
-They are simply done by deposit/examine operations from GDB.
+They are simply done by deposit/examine operations from @value{GDBN}.
 
 @section ROM Monitor Interface
 
@@ -2110,7 +2110,7 @@ They are simply done by deposit/examine operations from GDB.
 
 @chapter Native Debugging
 
-Several files control GDB's configuration for native support:
+Several files control @value{GDBN}'s configuration for native support:
 
 @table @file
 
@@ -2179,7 +2179,7 @@ just provide @code{fetch_core_registers} in @code{@var{xyz}-nat.c} (or
 @item core-aout.c::register_addr()
 If your @code{nm-@var{xyz}.h} file defines the macro
 @code{REGISTER_U_ADDR(addr, blockend, regno)}, it should be defined to
-set @code{addr} to the offset within the @samp{user} struct of GDB
+set @code{addr} to the offset within the @samp{user} struct of @value{GDBN}
 register number @code{regno}.  @code{blockend} is the offset within the
 ``upage'' of @code{u.u_ar0}.  If @code{REGISTER_U_ADDR} is defined,
 @file{core-aout.c} will define the @code{register_addr()} function and
@@ -2194,7 +2194,7 @@ implementations simply locate the registers themselves.@refill
 
 @end table
 
-When making GDB run native on a new operating system, to make it
+When making @value{GDBN} run native on a new operating system, to make it
 possible to debug core files, you will need to either write specific
 code for parsing your OS's core files, or customize
 @file{bfd/trad-core.c}.  First, use whatever @code{#include} files your
@@ -2211,13 +2211,13 @@ section information basically delimits areas in the core file in a
 standard way, which the section-reading routines in BFD know how to seek
 around in.
 
-Then back in GDB, you need a matching routine called
+Then back in @value{GDBN}, you need a matching routine called
 @code{fetch_core_registers()}.  If you can use the generic one, it's in
 @file{core-aout.c}; if not, it's in your @file{@var{xyz}-nat.c} file.
 It will be passed a char pointer to the entire ``registers'' segment,
 its length, and a zero; or a char pointer to the entire ``regs2''
 segment, its length, and a 2.  The routine should suck out the supplied
-register values and install them into GDB's ``registers'' array.
+register values and install them into @value{GDBN}'s ``registers'' array.
 
 If your system uses @file{/proc} to control processes, and uses ELF
 format core files, then you may be able to use the same routines for
@@ -2233,7 +2233,7 @@ reading the registers out of processes and out of core files.
 
 @section Native Conditionals
 
-When GDB is configured and compiled, various macros are defined or left
+When @value{GDBN} is configured and compiled, various macros are defined or left
 undefined, to control compilation when the host and target systems are
 the same.  These macros should be defined (or left undefined) in
 @file{nm-@var{system}.h}.
@@ -2241,7 +2241,7 @@ the same.  These macros should be defined (or left undefined) in
 @table @code
 
 @item ATTACH_DETACH
-If defined, then GDB will include support for the @code{attach} and
+If defined, then @value{GDBN} will include support for the @code{attach} and
 @code{detach} commands.
 
 @item CHILD_PREPARE_TO_STORE
@@ -2280,18 +2280,18 @@ pointer.  It examines the current state of the machine as needed.
 
 @item KERNEL_U_ADDR
 Define this to the address of the @code{u} structure (the ``user
-struct'', also known as the ``u-page'') in kernel virtual memory.  GDB
+struct'', also known as the ``u-page'') in kernel virtual memory.  @value{GDBN}
 needs to know this so that it can subtract this address from absolute
 addresses in the upage, that are obtained via ptrace or from core files.
 On systems that don't need this value, set it to zero.
 
 @item KERNEL_U_ADDR_BSD
-Define this to cause GDB to determine the address of @code{u} at
+Define this to cause @value{GDBN} to determine the address of @code{u} at
 runtime, by using Berkeley-style @code{nlist} on the kernel's image in
 the root directory.
 
 @item KERNEL_U_ADDR_HPUX
-Define this to cause GDB to determine the address of @code{u} at
+Define this to cause @value{GDBN} to determine the address of @code{u} at
 runtime, by using HP-style @code{nlist} on the kernel's image in the
 root directory.
 
@@ -2307,7 +2307,7 @@ threads.
 In a multi-threaded task we may select another thread and then continue
 or step.  But if the old thread was stopped at a breakpoint, it will
 immediately cause another breakpoint stop without any execution (i.e. it
-will report a breakpoint hit incorrectly).  So GDB must step over it
+will report a breakpoint hit incorrectly).  So @value{GDBN} must step over it
 first.
 
 If defined, @code{PREPARE_TO_PROCEED} should check the current thread
@@ -2340,14 +2340,14 @@ Defaults to @code{"/bin/sh"}.
 
 @item SOLIB_ADD (filename, from_tty, targ)
 Define this to expand into an expression that will cause the symbols in
-@var{filename} to be added to GDB's symbol table.
+@var{filename} to be added to @value{GDBN}'s symbol table.
 
 @item SOLIB_CREATE_INFERIOR_HOOK
 Define this to expand into any shared-library-relocation code that you
 want to be run just after the child process has been forked.
 
 @item START_INFERIOR_TRAPS_EXPECTED
-When starting an inferior, GDB normally expects to trap twice; once when
+When starting an inferior, @value{GDBN} normally expects to trap twice; once when
 the shell execs, and once when the program itself execs.  If the actual
 number of traps is something other than 2, then define this macro to
 expand into the number expected.
@@ -2357,7 +2357,7 @@ Define this to indicate that SVR4-style shared libraries are in use.
 
 @item USE_PROC_FS
 This determines whether small routines in @file{*-tdep.c}, which
-translate register values between GDB's internal representation and the
+translate register values between @value{GDBN}'s internal representation and the
 /proc representation, are compiled.
 
 @item U_REGS_OFFSET
@@ -2387,7 +2387,7 @@ Define this to debug ptrace calls.
 
 @section BFD
 
-BFD provides support for GDB in several ways:
+BFD provides support for @value{GDBN} in several ways:
 
 @table @emph
 
@@ -2398,7 +2398,7 @@ several variants thereof, as well as several kinds of core files.
 @item access to sections of files
 BFD parses the file headers to determine the names, virtual addresses,
 sizes, and file locations of all the various named sections in files
-(such as the text section or the data section).  GDB simply calls BFD to
+(such as the text section or the data section).  @value{GDBN} simply calls BFD to
 read or write section X at byte offset Y for length Z.
 
 @item specialized core file support
@@ -2408,17 +2408,17 @@ file matches (i.e. could be a core dump of) a particular executable
 file.
 
 @item locating the symbol information
-GDB uses an internal interface of BFD to determine where to find the
-symbol information in an executable file or symbol-file.  GDB itself
+@value{GDBN} uses an internal interface of BFD to determine where to find the
+symbol information in an executable file or symbol-file.  @value{GDBN} itself
 handles the reading of symbols, since BFD does not ``understand'' debug
-symbols, but GDB uses BFD's cached information to find the symbols,
+symbols, but @value{GDBN} uses BFD's cached information to find the symbols,
 string table, etc.
 
 @end table
 
 @section opcodes
 
-The opcodes library provides GDB's disassembler.  (It's a separate
+The opcodes library provides @value{GDBN}'s disassembler.  (It's a separate
 library because it's also used in binutils, for @file{objdump}).
 
 @section readline
@@ -2458,7 +2458,7 @@ Regex conditionals.
 @chapter Coding
 
 This chapter covers topics that are lower-level than the major
-algorithms of GDB.
+algorithms of @value{GDBN}.
 
 @section Cleanups
 
@@ -2538,19 +2538,19 @@ finish by printing a newline, to flush the wrap buffer, before switching
 to unfiltered (``@code{printf}'') output.  Symbol reading routines that
 print warnings are a good example.
 
-@section GDB Coding Standards
+@section @value{GDBN} Coding Standards
 
-GDB follows the GNU coding standards, as described in
+@value{GDBN} follows the GNU coding standards, as described in
 @file{etc/standards.texi}.  This file is also available for anonymous
-FTP from GNU archive sites.  GDB takes a strict interpretation of the
+FTP from GNU archive sites.  @value{GDBN} takes a strict interpretation of the
 standard; in general, when the GNU standard recommends a practice but
-does not require it, GDB requires it.
+does not require it, @value{GDBN} requires it.
 
-GDB follows an additional set of coding standards specific to GDB,
+@value{GDBN} follows an additional set of coding standards specific to @value{GDBN},
 as described in the following sections.
 
 You can configure with @samp{--enable-build-warnings} to get GCC to
-check on a number of these rules.  GDB sources ought not to engender any
+check on a number of these rules.  @value{GDBN} sources ought not to engender any
 complaints, unless they are caused by bogus host systems.  (The exact
 set of enabled warnings is currently @samp{-Wall -Wpointer-arith
 -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations}.
@@ -2587,7 +2587,7 @@ Block comments must appear in the following form, with no `/*'- or
    gets a signal, we may decide to start it up again instead of
    returning.  That is why there is a loop in this function.  When
    this function actually returns it means the inferior should be left
-   stopped and GDB should read more commands.  */
+   stopped and @value{GDBN} should read more commands.  */
 @end example
 
 (Note that this format is encouraged by Emacs; tabbing for a multi-line
@@ -2608,8 +2608,8 @@ host's floating point numbers, the alignment of anything, or the order
 of evaluation of expressions.
 
 Use functions freely.  There are only a handful of compute-bound areas
-in GDB that might be affected by the overhead of a function call, mainly
-in symbol reading.  Most of GDB's performance is limited by the target
+in @value{GDBN} that might be affected by the overhead of a function call, mainly
+in symbol reading.  Most of @value{GDBN}'s performance is limited by the target
 interface (whether serial line or system call).
 
 However, use functions with moderation.  A thousand one-line functions
@@ -2618,7 +2618,7 @@ are just as hard to understand as a single thousand-line function.
 @subsection Function Prototypes
 
 Prototypes must be used to @emph{declare} functions, and may be used to
-@emph{define} them.  Prototypes for GDB functions must include both the
+@emph{define} them.  Prototypes for @value{GDBN} functions must include both the
 argument type and name, with the name matching that used in the actual
 function definition.
 
@@ -2633,13 +2633,13 @@ source file.
 @subsection Clean Design
 
 In addition to getting the syntax right, there's the little question of
-semantics.  Some things are done in certain ways in GDB because long
+semantics.  Some things are done in certain ways in @value{GDBN} because long
 experience has shown that the more obvious ways caused various kinds of
 trouble.
 
 You can't assume the byte order of anything that comes from a target
 (including @var{value}s, object files, and instructions).  Such things
-must be byte-swapped using @code{SWAP_TARGET_AND_HOST} in GDB, or one of
+must be byte-swapped using @code{SWAP_TARGET_AND_HOST} in @value{GDBN}, or one of
 the swap routines defined in @file{bfd.h}, such as @code{bfd_get_32}.
 
 You can't assume that you know what interface is being used to talk to
@@ -2698,7 +2698,7 @@ where the macro is used or in an appropriate header file.
 Whether to include a @dfn{small} hook, a hook around the exact pieces of
 code which are system-dependent, or whether to replace a whole function
 with a hook depends on the case.  A good example of this dilemma can be
-found in @code{get_saved_register}.  All machines that GDB 2.8 ran on
+found in @code{get_saved_register}.  All machines that @value{GDBN} 2.8 ran on
 just needed the @code{FRAME_FIND_SAVED_REGS} hook to find the saved
 registers.  Then the SPARC and Pyramid came along, and
 @code{HAVE_REGISTER_WINDOWS} and @code{REGISTER_IN_WINDOW_P} were
@@ -2710,8 +2710,8 @@ with @code{GET_SAVED_REGISTER}, since that would result in much
 duplicated code.  Other times, duplicating a few lines of code here or
 there is much cleaner than introducing a large number of small hooks.
 
-Another way to generalize GDB along a particular interface is with an
-attribute struct.  For example, GDB has been generalized to handle
+Another way to generalize @value{GDBN} along a particular interface is with an
+attribute struct.  For example, @value{GDBN} has been generalized to handle
 multiple kinds of remote interfaces -- not by #ifdef's everywhere, but
 by defining the "target_ops" structure and having a current target (as
 well as a stack of targets below it, for memory references).  Whenever
@@ -2722,11 +2722,11 @@ current target_ops structure.  In this way, when a new remote interface
 is added, only one module needs to be touched -- the one that actually
 implements the new remote interface.  Other examples of
 attribute-structs are BFD access to multiple kinds of object file
-formats, or GDB's access to multiple source languages.
+formats, or @value{GDBN}'s access to multiple source languages.
 
-Please avoid duplicating code.  For example, in GDB 3.x all the code
-interfacing between @code{ptrace} and the rest of GDB was duplicated in
-@file{*-dep.c}, and so changing something was very painful.  In GDB 4.x,
+Please avoid duplicating code.  For example, in @value{GDBN} 3.x all the code
+interfacing between @code{ptrace} and the rest of @value{GDBN} was duplicated in
+@file{*-dep.c}, and so changing something was very painful.  In @value{GDBN} 4.x,
 these have all been consolidated into @file{infptrace.c}.
 @file{infptrace.c} can deal with variations between systems the same way
 any system-independent file would (hooks, #if defined, etc.), and
@@ -2735,11 +2735,11 @@ all.
 
 Don't put debugging printfs in the code.
 
-@node Porting GDB
+@node Porting @value{GDBN}
 
-@chapter Porting GDB
+@chapter Porting @value{GDBN}
 
-Most of the work in making GDB compile on a new machine is in specifying
+Most of the work in making @value{GDBN} compile on a new machine is in specifying
 the configuration of the machine.  This is done in a dizzying variety of
 header files and configuration scripts, which we hope to make more
 sensible soon.  Let's say your new host is called an @var{xyz} (e.g.
@@ -2769,17 +2769,17 @@ and no error messages.
 You need to port BFD, if that hasn't been done already.  Porting BFD is
 beyond the scope of this manual.
 
-To configure GDB itself, edit @file{gdb/configure.host} to recognize
+To configure @value{GDBN} itself, edit @file{gdb/configure.host} to recognize
 your system and set @code{gdb_host} to @var{xyz}, and (unless your
 desired target is already available) also edit @file{gdb/configure.tgt},
 setting @code{gdb_target} to something appropriate (for instance,
 @var{xyz}).
 
-Finally, you'll need to specify and define GDB's host-, native-, and
+Finally, you'll need to specify and define @value{GDBN}'s host-, native-, and
 target-dependent @file{.h} and @file{.c} files used for your
 configuration.
 
-@section Configuring GDB for Release
+@section Configuring @value{GDBN} for Release
 
 From the top level directory (containing @file{gdb}, @file{bfd},
 @file{libiberty}, and so on):
@@ -2822,20 +2822,20 @@ or so included files.
 
 @chapter Testsuite
 
-The testsuite is an important component of the GDB package.  While it is
+The testsuite is an important component of the @value{GDBN} package.  While it is
 always worthwhile to encourage user testing, in practice this is rarely
 sufficient; users typically use only a small subset of the available
 commands, and it has proven all too common for a change to cause a
 significant regression that went unnoticed for some time.
 
-The GDB testsuite uses the DejaGNU testing framework.  DejaGNU is built
+The @value{GDBN} testsuite uses the DejaGNU testing framework.  DejaGNU is built
 using tcl and expect.  The tests themselves are calls to various tcl
 procs; the framework runs all the procs and summarizes the passes and
 fails.
 
 @section Using the Testsuite
 
-To run the testsuite, simply go to the GDB object directory (or to the
+To run the testsuite, simply go to the @value{GDBN} object directory (or to the
 testsuite's objdir) and type @code{make check}.  This just sets up some
 environment variables and invokes DejaGNU's @code{runtest} script.  While
 the testsuite is running, you'll get mentions of which test file is in use,
@@ -2853,17 +2853,17 @@ finished, you'll get a summary that looks like this:
 @end example
 The ideal test run consists of expected passes only; however, reality
 conspires to keep us from this ideal.  Unexpected failures indicate
-real problems, whether in GDB or in the testsuite.  Expected failures
+real problems, whether in @value{GDBN} or in the testsuite.  Expected failures
 are still failures, but ones which have been decided are too hard to
 deal with at the time; for instance, a test case might work everywhere
 except on AIX, and there is no prospect of the AIX case being fixed in
 the near future.  Expected failures should not be added lightly, since
-you may be masking serious bugs in GDB.  Unexpected successes are expected
+you may be masking serious bugs in @value{GDBN}.  Unexpected successes are expected
 fails that are passing for some reason, while unresolved and untested
 cases often indicate some minor catastrophe, such as the compiler being
 unable to deal with a test program.
 
-When making any significant change to GDB, you should run the testsuite
+When making any significant change to @value{GDBN}, you should run the testsuite
 before and after the change, to confirm that there are no regressions.
 Note that truly complete testing would require that you run the
 testsuite with all supported configurations and a variety of compilers;
@@ -2873,8 +2873,8 @@ one big-endian (Sparc) and one little-endian (x86) host, a cross config
 with a builtin simulator (powerpc-eabi, mips-elf), or a 64-bit host
 (Alpha).
 
-If you add new functionality to GDB, please consider adding tests for it
-as well; this way future GDB hackers can detect and fix their changes
+If you add new functionality to @value{GDBN}, please consider adding tests for it
+as well; this way future @value{GDBN} hackers can detect and fix their changes
 that break the functionality you added.  Similarly, if you fix a bug
 that was not previously reported as a test failure, please add a test
 case for it.  Some cases are extremely difficult to test, such as code
@@ -2886,9 +2886,9 @@ compilers, and it's OK not to try to write tests for all of those.
 The testsuite is entirely contained in @file{gdb/testsuite}.  While the
 testsuite includes some makefiles and configury, these are very minimal,
 and used for little besides cleaning up, since the tests themselves
-handle the compilation of the programs that GDB will run.  The file
+handle the compilation of the programs that @value{GDBN} will run.  The file
 @file{testsuite/lib/gdb.exp} contains common utility procs useful for
-all GDB tests, while the directory @file{testsuite/config} contains
+all @value{GDBN} tests, while the directory @file{testsuite/config} contains
 configuration-specific files, typically used for special-purpose
 definitions of procs like @code{gdb_load} and @code{gdb_start}.
 
@@ -2909,7 +2909,7 @@ intelligibility.
 @item gdb.base
 
 This is the base testsuite.  The tests in it should apply to all
-configurations of GDB (but generic native-only tests may live here).
+configurations of @value{GDBN} (but generic native-only tests may live here).
 The test programs should be in the subset of C that is valid K&R,
 ANSI/ISO, and C++ (ifdefs are allowed if necessary, for instance
 for prototypes).
@@ -2930,11 +2930,11 @@ HP-UX.
 Tests specific to a particular compiler.  As of this writing (June
 1999), there aren't currently any groups of tests in this category that
 couldn't just as sensibly be made platform-specific, but one could
-imagine a gdb.gcc, for tests of GDB's handling of GCC extensions.
+imagine a gdb.gcc, for tests of @value{GDBN}'s handling of GCC extensions.
 
 @item gdb.@var{subsystem}
 
-Tests that exercise a specific GDB subsystem in more depth.  For
+Tests that exercise a specific @value{GDBN} subsystem in more depth.  For
 instance, @file{gdb.disasm} exercises various disassemblers, while
 @file{gdb.stabs} tests pathways through the stabs symbol reader.
 
@@ -2942,7 +2942,7 @@ instance, @file{gdb.disasm} exercises various disassemblers, while
 
 @section Writing Tests
 
-In many areas, the GDB tests are already quite comprehensive; you
+In many areas, the @value{GDBN} tests are already quite comprehensive; you
 should be able to copy existing tests to handle new cases.
 
 You should try to use @code{gdb_test} whenever possible, since it
@@ -2952,12 +2952,12 @@ instance, @file{gdb.base/exprs.exp} defines a @code{test_expr} that
 calls @code{gdb_test} multiple times.
 
 Only use @code{send_gdb} and @code{gdb_expect} when absolutely
-necessary, such as when GDB has several valid responses to a command.
+necessary, such as when @value{GDBN} has several valid responses to a command.
 
 The source language programs do @emph{not} need to be in a consistent
-style.  Since GDB is used to debug programs written in many different
+style.  Since @value{GDBN} is used to debug programs written in many different
 styles, it's worth having a mix of styles in the testsuite; for
-instance, some GDB bugs involving the display of source lines would
+instance, some @value{GDBN} bugs involving the display of source lines would
 never manifest themselves if the programs used GNU coding style
 uniformly.
 
@@ -2969,25 +2969,25 @@ Check the @file{README} file, it often has useful information that does not
 appear anywhere else in the directory.
 
 @menu
-* Getting Started::		Getting started working on GDB
-* Debugging GDB::		Debugging GDB with itself
+* Getting Started::		Getting started working on @value{GDBN}
+* Debugging @value{GDBN}::		Debugging @value{GDBN} with itself
 @end menu
 
 @node Getting Started,,, Hints
 
 @section Getting Started
 
-GDB is a large and complicated program, and if you first starting to
+@value{GDBN} is a large and complicated program, and if you first starting to
 work on it, it can be hard to know where to start.  Fortunately, if you
 know how to go about it, there are ways to figure out what is going on.
 
-This manual, the GDB Internals manual, has information which applies
-generally to many parts of GDB.
+This manual, the @value{GDBN} Internals manual, has information which applies
+generally to many parts of @value{GDBN}.
 
 Information about particular functions or data structures are located in
 comments with those functions or data structures.  If you run across a
 function or a global variable which does not have a comment correctly
-explaining what is does, this can be thought of as a bug in GDB; feel
+explaining what is does, this can be thought of as a bug in @value{GDBN}; feel
 free to submit a bug report, with a suggested comment if you can figure
 out what the comment should say.  If you find a comment which is
 actually wrong, be especially sure to report that.
@@ -3002,20 +3002,20 @@ also documents all the available macros.
 @c Conditionals}, @pxref{Native Conditionals}, and @pxref{Obsolete
 @c Conditionals})
 
-Start with the header files.  Once you have some idea of how GDB's internal
+Start with the header files.  Once you have some idea of how @value{GDBN}'s internal
 symbol tables are stored (see @file{symtab.h}, @file{gdbtypes.h}), you
 will find it much easier to understand the code which uses and creates
 those symbol tables.
 
 You may wish to process the information you are getting somehow, to
 enhance your understanding of it.  Summarize it, translate it to another
-language, add some (perhaps trivial or non-useful) feature to GDB, use
+language, add some (perhaps trivial or non-useful) feature to @value{GDBN}, use
 the code to predict what a test case would do and write the test case
 and verify your prediction, etc.  If you are reading code and your eyes
 are starting to glaze over, this is a sign you need to use a more active
 approach.
 
-Once you have a part of GDB to start with, you can find more
+Once you have a part of @value{GDBN} to start with, you can find more
 specifically the part you are looking for by stepping through each
 function with the @code{next} command.  Do not use @code{step} or you
 will quickly get distracted; when the function you are stepping through
@@ -3036,7 +3036,7 @@ rather than worrying about all its details.
 
 A good place to start when tracking down some particular area is with a
 command which invokes that feature.  Suppose you want to know how
-single-stepping works.  As a GDB user, you know that the @code{step}
+single-stepping works.  As a @value{GDBN} user, you know that the @code{step}
 command invokes single-stepping.  The command is invoked via command
 tables (see @file{command.h}); by convention the function which actually
 performs the command is formed by taking the name of the command and
@@ -3044,30 +3044,30 @@ adding @samp{_command}, or in the case of an @code{info} subcommand,
 @samp{_info}.  For example, the @code{step} command invokes the
 @code{step_command} function and the @code{info display} command invokes
 @code{display_info}.  When this convention is not followed, you might
-have to use @code{grep} or @kbd{M-x tags-search} in emacs, or run GDB on
+have to use @code{grep} or @kbd{M-x tags-search} in emacs, or run @value{GDBN} on
 itself and set a breakpoint in @code{execute_command}.
 
 If all of the above fail, it may be appropriate to ask for information
 on @code{bug-gdb}.  But @emph{never} post a generic question like ``I was
 wondering if anyone could give me some tips about understanding
-GDB''---if we had some magic secret we would put it in this manual.
+@value{GDBN}''---if we had some magic secret we would put it in this manual.
 Suggestions for improving the manual are always welcome, of course.
 
-@node Debugging GDB,,,Hints
+@node Debugging @value{GDBN},,,Hints
 
-@section Debugging GDB with itself
+@section Debugging @value{GDBN} with itself
 
-If GDB is limping on your machine, this is the preferred way to get it
+If @value{GDBN} is limping on your machine, this is the preferred way to get it
 fully functional.  Be warned that in some ancient Unix systems, like
 Ultrix 4.2, a program can't be running in one process while it is being
 debugged in another.  Rather than typing the command @code{@w{./gdb
 ./gdb}}, which works on Suns and such, you can copy @file{gdb} to
 @file{gdb2} and then type @code{@w{./gdb ./gdb2}}.
 
-When you run GDB in the GDB source directory, it will read a
+When you run @value{GDBN} in the @value{GDBN} source directory, it will read a
 @file{.gdbinit} file that sets up some simple things to make debugging
 gdb easier.  The @code{info} command, when executed without a subcommand
-in a GDB being debugged by gdb, will pop you back up to the top level
+in a @value{GDBN} being debugged by gdb, will pop you back up to the top level
 gdb.  See @file{.gdbinit} for details.
 
 If you use emacs, you will probably want to do a @code{make TAGS} after
@@ -3075,18 +3075,18 @@ you configure your distribution; this will put the machine dependent
 routines for your local machine where they will be accessed first by
 @kbd{M-.}
 
-Also, make sure that you've either compiled GDB with your local cc, or
+Also, make sure that you've either compiled @value{GDBN} with your local cc, or
 have run @code{fixincludes} if you are compiling with gcc.
 
 @section Submitting Patches
 
 Thanks for thinking of offering your changes back to the community of
-GDB users.  In general we like to get well designed enhancements.
+@value{GDBN} users.  In general we like to get well designed enhancements.
 Thanks also for checking in advance about the best way to transfer the
 changes.
 
-The GDB maintainers will only install ``cleanly designed'' patches.
-This manual summarizes what we believe to be clean design for GDB.
+The @value{GDBN} maintainers will only install ``cleanly designed'' patches.
+This manual summarizes what we believe to be clean design for @value{GDBN}.
 
 If the maintainers don't have time to put the patch in when it arrives,
 or if there is any question about a patch, it goes into a large queue
@@ -3098,7 +3098,7 @@ of the changes to the Free Software Foundation.  You can get the
 standard documents for doing this by sending mail to @code{gnu@@gnu.org}
 and asking for it.  We recommend that people write in "All programs
 owned by the Free Software Foundation" as "NAME OF PROGRAM", so that
-changes in many programs (not just GDB, but GAS, Emacs, GCC, etc) can be
+changes in many programs (not just @value{GDBN}, but GAS, Emacs, GCC, etc) can be
 contributed with only one piece of legalese pushed through the
 bureacracy and filed with the FSF.  We can't start merging changes until
 this paperwork is received by the FSF (their rules, which we follow
@@ -3138,12 +3138,12 @@ they arrive.  The others go into a queue and get installed as time
 permits, which, since the maintainers have many demands to meet, may not
 be for quite some time.
 
-Please send patches directly to the GDB maintainers at
+Please send patches directly to the @value{GDBN} maintainers at
 @code{gdb-patches@@sourceware.cygnus.com}.
 
 @section Obsolete Conditionals
 
-Fragments of old code in GDB sometimes reference or set the following
+Fragments of old code in @value{GDBN} sometimes reference or set the following
 configuration macros.  They should not be used by new code, and old uses
 should be removed as those parts of the debugger are otherwise touched.
 
@@ -3152,10 +3152,10 @@ should be removed as those parts of the debugger are otherwise touched.
 @item STACK_END_ADDR
 This macro used to define where the end of the stack appeared, for use
 in interpreting core file formats that don't record this address in the
-core file itself.  This information is now configured in BFD, and GDB
-gets the info portably from there.  The values in GDB's configuration
+core file itself.  This information is now configured in BFD, and @value{GDBN}
+gets the info portably from there.  The values in @value{GDBN}'s configuration
 files should be moved into BFD configuration files (if needed there),
-and deleted from all of GDB's config files.
+and deleted from all of @value{GDBN}'s config files.
 
 Any @file{@var{foo}-xdep.c} file that references STACK_END_ADDR
 is so old that it has never been converted to use BFD.  Now that's old!
