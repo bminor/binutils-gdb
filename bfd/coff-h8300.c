@@ -940,15 +940,26 @@ h8300_reloc16_extra_cases (bfd *abfd, struct bfd_link_info *link_info,
 
       break;
 
-    /* A 16bit absolute mov.b that is now an 8bit absolute mov.b.  */
+      /* This is a 16-bit absolute address in one of the following
+	 instructions:
+
+	   "band", "bclr", "biand", "bild", "bior", "bist", "bixor",
+	   "bld", "bnot", "bor", "bset", "bst", "btst", "bxor", and
+	   "mov.b"
+
+	 We may relax this into an 8-bit absolute address if it's in
+	 the right range.  */
     case R_MOV16B2:
       value = bfd_coff_reloc16_get_value (reloc, link_info, input_section);
 
-      /* Sanity check.  */
+      /* All instructions with R_H8_DIR16B2 start with 0x6a.  */
       if (data[dst_address - 2] != 0x6a)
 	abort ();
 
       temp_code = data[src_address - 1];
+
+      /* If this is a mov.b instruction, clear the lower nibble, which
+	 contains the source/destination register number.  */
       if ((temp_code & 0x10) != 0x10)
 	temp_code &= 0xf0;
 
@@ -956,15 +967,23 @@ h8300_reloc16_extra_cases (bfd *abfd, struct bfd_link_info *link_info,
       switch (temp_code)
 	{
 	case 0x00:
+	  /* This is mov.b @aa:16,Rd.  */
 	  data[dst_address - 2] = (data[src_address - 1] & 0xf) | 0x20;
 	  break;
 	case 0x80:
+	  /* This is mov.b Rs,@aa:16.  */
 	  data[dst_address - 2] = (data[src_address - 1] & 0xf) | 0x30;
 	  break;
 	case 0x18:
+	  /* This is a bit-maniputation instruction that stores one
+	     bit into memory, one of "bclr", "bist", "bnot", "bset",
+	     and "bst".  */
 	  data[dst_address - 2] = 0x7f;
 	  break;
 	case 0x10:
+	  /* This is a bit-maniputation instruction that loads one bit
+	     from memory, one of "band", "biand", "bild", "bior",
+	     "bixor", "bld", "bor", "btst", and "bxor".  */
 	  data[dst_address - 2] = 0x7e;
 	  break;
 	default:
@@ -975,15 +994,26 @@ h8300_reloc16_extra_cases (bfd *abfd, struct bfd_link_info *link_info,
       src_address += 2;
       break;
 
-    /* Similarly for a 24bit mov.b  */
+      /* This is a 24-bit absolute address in one of the following
+	 instructions:
+
+	   "band", "bclr", "biand", "bild", "bior", "bist", "bixor",
+	   "bld", "bnot", "bor", "bset", "bst", "btst", "bxor", and
+	   "mov.b"
+
+	 We may relax this into an 8-bit absolute address if it's in
+	 the right range.  */
     case R_MOV24B2:
       value = bfd_coff_reloc16_get_value (reloc, link_info, input_section);
 
-      /* Sanity check.  */
+      /* All instructions with R_MOV24B2 start with 0x6a.  */
       if (data[dst_address - 2] != 0x6a)
 	abort ();
 
       temp_code = data[src_address - 1];
+
+      /* If this is a mov.b instruction, clear the lower nibble, which
+	 contains the source/destination register number.  */
       if ((temp_code & 0x30) != 0x30)
 	temp_code &= 0xf0;
 
@@ -991,15 +1021,23 @@ h8300_reloc16_extra_cases (bfd *abfd, struct bfd_link_info *link_info,
       switch (temp_code)
 	{
 	case 0x20:
+	  /* This is mov.b @aa:24/32,Rd.  */
 	  data[dst_address - 2] = (data[src_address - 1] & 0xf) | 0x20;
 	  break;
 	case 0xa0:
+	  /* This is mov.b Rs,@aa:24/32.  */
 	  data[dst_address - 2] = (data[src_address - 1] & 0xf) | 0x30;
 	  break;
 	case 0x38:
+	  /* This is a bit-maniputation instruction that stores one
+	     bit into memory, one of "bclr", "bist", "bnot", "bset",
+	     and "bst".  */
 	  data[dst_address - 2] = 0x7f;
 	  break;
 	case 0x30:
+	  /* This is a bit-maniputation instruction that loads one bit
+	     from memory, one of "band", "biand", "bild", "bior",
+	     "bixor", "bld", "bor", "btst", and "bxor".  */
 	  data[dst_address - 2] = 0x7e;
 	  break;
 	default:

@@ -659,6 +659,10 @@ elf32_h8_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
      bCC:16          ->    bCC:8                  2 bytes
      bsr:16          ->    bsr:8                  2 bytes
 
+     bset:16	     ->    bset:8                 2 bytes
+     bset:24/32	     ->    bset:8                 4 bytes
+     (also applicable to other bit manipulation instructions)
+
      mov.b:16	     ->    mov.b:8                2 bytes
      mov.b:24/32     ->    mov.b:8                4 bytes
 
@@ -1000,8 +1004,15 @@ elf32_h8_relax_section (bfd *abfd, asection *sec,
 	    break;
 	  }
 
-	/* This is a 16 bit absolute address in a "mov.b" insn, which may
-	   become an 8 bit absolute address if its in the right range.  */
+	/* This is a 16-bit absolute address in one of the following
+	   instructions:
+
+	     "band", "bclr", "biand", "bild", "bior", "bist", "bixor",
+	     "bld", "bnot", "bor", "bset", "bst", "btst", "bxor", and
+	     "mov.b"
+
+	   We may relax this into an 8-bit absolute address if it's in
+	   the right range.  */
 	case R_H8_DIR16A8:
 	  {
 	    bfd_vma value;
@@ -1021,28 +1032,41 @@ elf32_h8_relax_section (bfd *abfd, asection *sec,
 		/* Get the opcode.  */
 		code = bfd_get_8 (abfd, contents + irel->r_offset - 2);
 
-		/* Sanity check.  */
+		/* All instructions with R_H8_DIR16A8 start with
+		   0x6a.  */
 		if (code != 0x6a)
 		  abort ();
 
 		temp_code = code = bfd_get_8 (abfd, contents + irel->r_offset - 1);
+		/* If this is a mov.b instruction, clear the lower
+		   nibble, which contains the source/destination
+		   register number.  */
 		if ((temp_code & 0x10) != 0x10)
 		  temp_code &= 0xf0;
 
 		switch (temp_code)
 		  {
 		  case 0x00:
+		    /* This is mov.b @aa:16,Rd.  */
 		    bfd_put_8 (abfd, (code & 0xf) | 0x20,
 			       contents + irel->r_offset - 2);
 		    break;
 		  case 0x80:
+		    /* This is mov.b Rs,@aa:16.  */
 		    bfd_put_8 (abfd, (code & 0xf) | 0x30,
 			       contents + irel->r_offset - 2);
 		    break;
 		  case 0x18:
+		    /* This is a bit-maniputation instruction that
+		       stores one bit into memory, one of "bclr",
+		       "bist", "bnot", "bset", and "bst".  */
 		    bfd_put_8 (abfd, 0x7f, contents + irel->r_offset - 2);
 		    break;
 		  case 0x10:
+		    /* This is a bit-maniputation instruction that
+		       loads one bit from memory, one of "band",
+		       "biand", "bild", "bior", "bixor", "bld", "bor",
+		       "btst", and "bxor".  */
 		    bfd_put_8 (abfd, 0x7e, contents + irel->r_offset - 2);
 		    break;
 		  default:
@@ -1068,8 +1092,15 @@ elf32_h8_relax_section (bfd *abfd, asection *sec,
 	    break;
 	  }
 
-	/* This is a 24 bit absolute address in a "mov.b" insn, which may
-	   become an 8 bit absolute address if its in the right range.  */
+	/* This is a 24-bit absolute address in one of the following
+	   instructions:
+
+	     "band", "bclr", "biand", "bild", "bior", "bist", "bixor",
+	     "bld", "bnot", "bor", "bset", "bst", "btst", "bxor", and
+	     "mov.b"
+
+	   We may relax this into an 8-bit absolute address if it's in
+	   the right range.  */
 	case R_H8_DIR24A8:
 	  {
 	    bfd_vma value;
@@ -1089,29 +1120,42 @@ elf32_h8_relax_section (bfd *abfd, asection *sec,
 		/* Get the opcode.  */
 		code = bfd_get_8 (abfd, contents + irel->r_offset - 2);
 
-		/* Sanity check.  */
+		/* All instructions with R_H8_DIR24A8 start with
+		   0x6a.  */
 		if (code != 0x6a)
 		  abort ();
 
 		temp_code = code = bfd_get_8 (abfd, contents + irel->r_offset - 1);
 
+		/* If this is a mov.b instruction, clear the lower
+		   nibble, which contains the source/destination
+		   register number.  */
 		if ((temp_code & 0x30) != 0x30)
 		  temp_code &= 0xf0;
 
 		switch (temp_code)
 		  {
 		  case 0x20:
+		    /* This is mov.b @aa:24/32,Rd.  */
 		    bfd_put_8 (abfd, (code & 0xf) | 0x20,
 			       contents + irel->r_offset - 2);
 		    break;
 		  case 0xa0:
+		    /* This is mov.b Rs,@aa:24/32.  */
 		    bfd_put_8 (abfd, (code & 0xf) | 0x30,
 			       contents + irel->r_offset - 2);
 		    break;
 		  case 0x38:
+		    /* This is a bit-maniputation instruction that
+		       stores one bit into memory, one of "bclr",
+		       "bist", "bnot", "bset", and "bst".  */
 		    bfd_put_8 (abfd, 0x7f, contents + irel->r_offset - 2);
 		    break;
 		  case 0x30:
+		    /* This is a bit-maniputation instruction that
+		       loads one bit from memory, one of "band",
+		       "biand", "bild", "bior", "bixor", "bld", "bor",
+		       "btst", and "bxor".  */
 		    bfd_put_8 (abfd, 0x7e, contents + irel->r_offset - 2);
 		    break;
 		  default:
