@@ -1207,19 +1207,6 @@ trace_info (char *args, int from_tty)
   printf_filtered ("Tracing is currently %s.\n", (tracing ? "on" : "off"));
 }
 
-/* Print the instruction at address MEMADDR in debugged memory,
-   on STREAM.  Returns length of the instruction, in bytes.  */
-
-static int
-print_insn (CORE_ADDR memaddr, struct ui_file *stream)
-{
-  if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
-    tm_print_insn_info.endian = BFD_ENDIAN_BIG;
-  else
-    tm_print_insn_info.endian = BFD_ENDIAN_LITTLE;
-  return TARGET_PRINT_INSN (memaddr, &tm_print_insn_info);
-}
-
 static void
 d10v_eva_prepare_to_trace (void)
 {
@@ -1380,7 +1367,8 @@ display_trace (int low, int high)
 	  printf_filtered (":");
 	  printf_filtered ("\t");
 	  wrap_here ("    ");
-	  next_address = next_address + print_insn (next_address, gdb_stdout);
+	  next_address += TARGET_PRINT_INSN (next_address,
+					     &tm_print_insn_info);
 	  printf_filtered ("\n");
 	  gdb_flush (gdb_stdout);
 	}
@@ -1673,6 +1661,8 @@ d10v_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Return the unwound PC value.  */
   set_gdbarch_unwind_pc (gdbarch, d10v_unwind_pc);
 
+  set_gdbarch_print_insn (gdbarch, print_insn_d10v);
+
   return gdbarch;
 }
 
@@ -1680,8 +1670,6 @@ void
 _initialize_d10v_tdep (void)
 {
   register_gdbarch_init (bfd_arch_d10v, d10v_gdbarch_init);
-
-  tm_print_insn = print_insn_d10v;
 
   target_resume_hook = d10v_eva_prepare_to_trace;
   target_wait_loop_hook = d10v_eva_get_trace_data;

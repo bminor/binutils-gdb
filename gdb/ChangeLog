@@ -1,5 +1,12 @@
 2003-04-25  Andrew Cagney  <cagney@redhat.com>
 
+	* d10v-tdep.c (print_insn): Delete function.
+	(display_trace): Use TARGET_PRINT_INSN.
+	(_initialize_d10v_tdep): Do not set tm_print_insn.
+	(d10v_gdbarch_init): Set print_insn.
+
+2003-04-25  Andrew Cagney  <cagney@redhat.com>
+
 	* d10v-tdep.c (d10v_extract_return_value): Delete call to printf.
 	(_initialize_d10v_tdep): Use add_setshow_boolean_cmd.
 	(d10v_frame_unwind_cache): Use FRAME_OBSTACK_CALLOC.
