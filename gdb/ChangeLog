@@ -1,3 +1,11 @@
+start-sanitize-gdbtk
+Sun Aug 17 00:42:11 1997  Martin M. Hunt  <hunt@cygnus.com>
+
+	* gdbtk.c (gdb_listfuncs): New function that returns
+	a list of all the functions in a source file.
+
+end-sanitize-gdbtk
+
 Fri Aug 15 13:59:37 1997  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* infrun.c (wait_for_inferior):  Add the symbols for any

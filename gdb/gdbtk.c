@@ -90,6 +90,7 @@ static int gdbtk_dis_asm_read_memory PARAMS ((bfd_vma, bfd_byte *, int, disassem
 static int gdb_path_conv PARAMS ((ClientData, Tcl_Interp *, int, char *[]));
 static int gdb_stop PARAMS ((ClientData, Tcl_Interp *, int, char *[]));
 static int gdb_listfiles PARAMS ((ClientData, Tcl_Interp *, int, char *[]));
+static int gdb_listfuncs PARAMS ((ClientData, Tcl_Interp *, int, char *[]));
 static int call_wrapper PARAMS ((ClientData, Tcl_Interp *, int, char *[]));
 static int gdb_cmd PARAMS ((ClientData, Tcl_Interp *, int, char *argv[]));
 static int gdb_fetch_registers PARAMS ((ClientData, Tcl_Interp *, int, char *[]));
@@ -911,6 +912,46 @@ gdb_listfiles (clientData, interp, argc, argv)
 }
 
 static int
+gdb_listfuncs (clientData, interp, argc, argv)
+     ClientData clientData;
+     Tcl_Interp *interp;
+     int argc;
+     char *argv[];
+{
+  struct symtab *symtab;
+  struct blockvector *bv;
+  struct block *b;
+  struct symbol *sym;
+  int i,j;
+         
+  if (argc != 2)
+    error ("wrong # args");
+  
+  symtab = lookup_symtab (argv[1]);
+  
+  if (!symtab)
+    error ("No such file");
+
+  bv = BLOCKVECTOR (symtab);
+  for (i = GLOBAL_BLOCK; i <= STATIC_BLOCK; i++)
+    {
+      b = BLOCKVECTOR_BLOCK (bv, i);
+      /* Skip the sort if this block is always sorted.  */
+      if (!BLOCK_SHOULD_SORT (b))
+	sort_block_syms (b);
+      for (j = 0; j < BLOCK_NSYMS (b); j++)
+	{
+	  sym = BLOCK_SYM (b, j);
+	  if (SYMBOL_CLASS (sym) == LOC_BLOCK)
+	    {
+	      Tcl_DStringAppendElement (result_ptr, SYMBOL_NAME(sym));
+	    }
+	}
+    }
+  return TCL_OK;
+}
+
+static int
 gdb_stop (clientData, interp, argc, argv)
      ClientData clientData;
      Tcl_Interp *interp;
@@ -1419,6 +1460,8 @@ gdbtk_init ( argv0 )
   Tcl_CreateCommand (interp, "gdb_sourcelines", call_wrapper, gdb_sourcelines,
 		     NULL);
   Tcl_CreateCommand (interp, "gdb_listfiles", call_wrapper, gdb_listfiles,
+		     NULL);
+  Tcl_CreateCommand (interp, "gdb_listfuncs", call_wrapper, gdb_listfuncs,
 		     NULL);
   Tcl_CreateCommand (interp, "gdb_stop", call_wrapper, gdb_stop, NULL);
   Tcl_CreateCommand (interp, "gdb_regnames", call_wrapper, gdb_regnames, NULL);
