@@ -1,3 +1,8 @@
+Mon May  4 10:08:18 1998  Tom Tromey  <tromey@cygnus.com>
+
+	* libbfd.h: Rebuilt.
+	* libbfd-in.h (_): Define as dgettext.
+
 Mon May  4 11:02:23 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* coff-arm.c (coff_arm_relocate_section): Cast to bfd_signed_vma,
