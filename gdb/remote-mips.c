@@ -1283,13 +1283,13 @@ mips_request (int cmd,
 }
 
 static void
-mips_initialize_cleanups (PTR arg)
+mips_initialize_cleanups (void *arg)
 {
   mips_initializing = 0;
 }
 
 static void
-mips_exit_cleanups (PTR arg)
+mips_exit_cleanups (void *arg)
 {
   mips_exiting = 0;
 }

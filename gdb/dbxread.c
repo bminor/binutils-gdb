@@ -638,7 +638,7 @@ dbx_symfile_init (struct objfile *objfile)
   /* Allocate struct to keep track of the symfile */
   objfile->sym_stab_info = (struct dbx_symfile_info *)
     xmmalloc (objfile->md, sizeof (struct dbx_symfile_info));
-  memset ((PTR) objfile->sym_stab_info, 0, sizeof (struct dbx_symfile_info));
+  memset (objfile->sym_stab_info, 0, sizeof (struct dbx_symfile_info));
 
   DBX_TEXT_SECTION (objfile) = bfd_get_section_by_name (sym_bfd, ".text");
   DBX_DATA_SECTION (objfile) = bfd_get_section_by_name (sym_bfd, ".data");
@@ -690,8 +690,8 @@ dbx_symfile_init (struct objfile *objfile)
       if (val < 0)
 	perror_with_name (name);
 
-      memset ((PTR) size_temp, 0, sizeof (size_temp));
-      val = bfd_bread ((PTR) size_temp, sizeof (size_temp), sym_bfd);
+      memset (size_temp, 0, sizeof (size_temp));
+      val = bfd_bread (size_temp, sizeof (size_temp), sym_bfd);
       if (val < 0)
 	{
 	  perror_with_name (name);
@@ -924,7 +924,7 @@ fill_symbuf (bfd *sym_bfd)
 	count = sizeof (symbuf);
     }
 
-  nbytes = bfd_bread ((PTR) symbuf, count, sym_bfd);
+  nbytes = bfd_bread (symbuf, count, sym_bfd);
   if (nbytes < 0)
     perror_with_name (bfd_get_filename (sym_bfd));
   else if (nbytes == 0)
@@ -1025,7 +1025,7 @@ find_corresponding_bincl_psymtab (char *name, int instance)
 static void
 free_bincl_list (struct objfile *objfile)
 {
-  xmfree (objfile->md, (PTR) bincl_list);
+  xmfree (objfile->md, bincl_list);
   bincls_allocated = 0;
 }
 
@@ -1676,7 +1676,7 @@ read_dbx_symtab (struct objfile *objfile)
 	      psymtab_include_list = (char **)
 		alloca ((includes_allocated *= 2) *
 			sizeof (char *));
-	      memcpy ((PTR) psymtab_include_list, (PTR) orig,
+	      memcpy (psymtab_include_list, orig,
 		      includes_used * sizeof (char *));
 	    }
 	    continue;
@@ -2100,7 +2100,7 @@ read_dbx_symtab (struct objfile *objfile)
 		      (struct partial_symtab **)
 		      alloca ((dependencies_allocated *= 2)
 			      * sizeof (struct partial_symtab *));
-		    memcpy ((PTR) dependency_list, (PTR) orig,
+		    memcpy (dependency_list, orig,
 			    (dependencies_used
 			     * sizeof (struct partial_symtab *)));
 #ifdef DEBUG_INFO

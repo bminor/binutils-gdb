@@ -114,7 +114,7 @@ void _initialize_infcmd (void);
 
 #define GO_USAGE   "Usage: go <location>\n"
 
-static void breakpoint_auto_delete_contents (PTR);
+static void breakpoint_auto_delete_contents (void *);
 
 #define ERROR_NO_INFERIOR \
    if (!target_has_execution) error ("The program is not being run.");
@@ -953,7 +953,7 @@ signal_command (char *signum_exp, int from_tty)
    pointed to by arg (which is really a bpstat *).  */
 
 static void
-breakpoint_auto_delete_contents (PTR arg)
+breakpoint_auto_delete_contents (void *arg)
 {
   breakpoint_auto_delete (*(bpstat *) arg);
 }

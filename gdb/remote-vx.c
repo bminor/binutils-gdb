@@ -638,7 +638,7 @@ struct find_sect_args
 static void find_sect (bfd *, asection *, void *);
 
 static void
-find_sect (bfd *abfd, asection *sect, PTR obj)
+find_sect (bfd *abfd, asection *sect, void *obj)
 {
   struct find_sect_args *args = (struct find_sect_args *) obj;
 

@@ -32,7 +32,7 @@
 
 /* Type of function passed to bfd_map_over_sections.  */
 
-typedef void (*section_map_func) (bfd * abfd, asection * sect, PTR obj);
+typedef void (*section_map_func) (bfd * abfd, asection * sect, void *obj);
 
 /* Packet escape character used by Densan monitor.  */
 

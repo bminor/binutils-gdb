@@ -184,7 +184,7 @@ typedef struct
   }
 args_for_find_stub;
 
-static int cover_find_stub_with_shl_get (PTR);
+static int cover_find_stub_with_shl_get (void *);
 
 static int is_pa_2 = 0;		/* False */
 
@@ -373,7 +373,7 @@ internalize_unwinds (struct objfile *objfile, struct unwind_table_entry *table,
       if (TARGET_PTR_BIT == 64 && text_offset == 0)
 	{
 	  bfd_map_over_sections (objfile->obfd,
-				 record_text_segment_lowaddr, (PTR) NULL);
+				 record_text_segment_lowaddr, NULL);
 
 	  /* ?!? Mask off some low bits.  Should this instead subtract
 	     out the lowest section's filepos or something like that?
@@ -574,7 +574,7 @@ read_unwind_info (struct objfile *objfile)
       obj_private->so_info = NULL;
       obj_private->dp = 0;
 
-      objfile->obj_private = (PTR) obj_private;
+      objfile->obj_private = obj_private;
     }
   obj_private = (obj_private_data_t *) objfile->obj_private;
   obj_private->unwind_info = ui;
@@ -2032,7 +2032,7 @@ find_stub_with_shl_get (struct minimal_symbol *function, CORE_ADDR handle)
 
 /* Cover routine for find_stub_with_shl_get to pass to catch_errors */
 static int
-cover_find_stub_with_shl_get (PTR args_untyped)
+cover_find_stub_with_shl_get (void *args_untyped)
 {
   args_for_find_stub *args = args_untyped;
   args->return_val = find_stub_with_shl_get (args->msym, args->solib_handle);
@@ -4300,7 +4300,7 @@ initialize_hp_cxx_exception_support (void)
       args.return_val = 0;
 
       recurse++;
-      catch_errors (cover_find_stub_with_shl_get, (PTR) &args, message,
+      catch_errors (cover_find_stub_with_shl_get, &args, message,
 		    RETURN_MASK_ALL);
       eh_notify_callback_addr = args.return_val;
       recurse--;

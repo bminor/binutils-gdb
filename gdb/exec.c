@@ -55,7 +55,7 @@ void (*file_changed_hook) (char *);
 
 /* Prototypes for local functions */
 
-static void add_to_section_table (bfd *, sec_ptr, PTR);
+static void add_to_section_table (bfd *, sec_ptr, void *);
 
 static void exec_close (int);
 
@@ -65,7 +65,7 @@ static void set_section_command (char *, int);
 
 static void exec_files_info (struct target_ops *);
 
-static void bfdsec_to_vmap (bfd *, sec_ptr, PTR);
+static void bfdsec_to_vmap (bfd *, sec_ptr, void *);
 
 static int ignore (CORE_ADDR, char *);
 
@@ -366,7 +366,7 @@ file_command (char *arg, int from_tty)
    we cast it back to its proper type.  */
 
 static void
-add_to_section_table (bfd *abfd, sec_ptr asect, PTR table_pp_char)
+add_to_section_table (bfd *abfd, sec_ptr asect, void *table_pp_char)
 {
   struct section_table **table_pp = (struct section_table **) table_pp_char;
   flagword aflag;
@@ -405,7 +405,7 @@ build_section_table (bfd *some_bfd, struct section_table **start,
 }
 
 static void
-bfdsec_to_vmap (bfd *abfd, sec_ptr sect, PTR arg3)
+bfdsec_to_vmap (bfd *abfd, sec_ptr sect, void *arg3)
 {
   struct vmap_and_bfd *vmap_bfd = (struct vmap_and_bfd *) arg3;
   struct vmap *vp;
@@ -485,7 +485,7 @@ xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
   int res;
   struct section_table *p;
   CORE_ADDR nextsectaddr, memend;
-  int (*xfer_fn) (bfd *, sec_ptr, PTR, file_ptr, bfd_size_type);
+  int (*xfer_fn) (bfd *, sec_ptr, void *, file_ptr, bfd_size_type);
   asection *section = NULL;
 
   if (len <= 0)

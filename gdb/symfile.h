@@ -252,7 +252,7 @@ extern struct partial_symtab *allocate_psymtab (char *, struct objfile *);
 
 extern void discard_psymtab (struct partial_symtab *);
 
-extern void find_lowest_section (bfd *, asection *, PTR);
+extern void find_lowest_section (bfd *, asection *, void *);
 
 extern bfd *symfile_bfd_open (char *);
 

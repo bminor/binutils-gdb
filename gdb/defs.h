@@ -245,8 +245,8 @@ enum auto_boolean
 struct cleanup
   {
     struct cleanup *next;
-    void (*function) (PTR);
-    PTR arg;
+    void (*function) (void *);
+    void *arg;
   };
 
 
@@ -967,7 +967,7 @@ extern int catch_exceptions (struct ui_out *uiout,
 
    This function is superseeded by catch_exceptions().  */
 
-typedef int (catch_errors_ftype) (PTR);
+typedef int (catch_errors_ftype) (void *);
 extern int catch_errors (catch_errors_ftype *, void *, char *, return_mask);
 
 /* Template to catch_errors() that wraps calls to command

@@ -1664,7 +1664,7 @@ hpread_symfile_init (struct objfile *objfile)
   asection *vt_section, *slt_section, *lntt_section, *gntt_section;
 
   /* Allocate struct to keep track of the symfile */
-  objfile->sym_private = (PTR)
+  objfile->sym_private =
     xmmalloc (objfile->md, sizeof (struct hpread_symfile_info));
   memset (objfile->sym_private, 0, sizeof (struct hpread_symfile_info));
 
@@ -1959,7 +1959,7 @@ hpread_build_psymtabs (struct objfile *objfile, int mainline)
 			psymtab_include_list = (char **)
 			  alloca ((includes_allocated *= 2) *
 				  sizeof (char *));
-			memcpy ((PTR) psymtab_include_list, (PTR) orig,
+			memcpy (psymtab_include_list, orig,
 				includes_used * sizeof (char *));
 		      }
 		    continue;

@@ -193,7 +193,7 @@ static void xcoff_symfile_finish (struct objfile *);
 static void
 xcoff_symfile_offsets (struct objfile *, struct section_addr_info *addrs);
 
-static void find_linenos (bfd *, sec_ptr, PTR);
+static void find_linenos (bfd *, sec_ptr, void *);
 
 static char *coff_getfilename (union internal_auxent *, struct objfile *);
 
@@ -237,7 +237,7 @@ struct find_targ_sec_arg
 static void find_targ_sec (bfd *, asection *, void *);
 
 static void
-find_targ_sec (bfd *abfd, asection *sect, PTR obj)
+find_targ_sec (bfd *abfd, asection *sect, void *obj)
 {
   struct find_targ_sec_arg *args = (struct find_targ_sec_arg *) obj;
   struct objfile *objfile = args->objfile;
@@ -1699,7 +1699,7 @@ gotit:
  * mainline code can read the whole thing for efficiency.
  */
 static void
-find_linenos (bfd *abfd, sec_ptr asect, PTR vpinfo)
+find_linenos (bfd *abfd, sec_ptr asect, void *vpinfo)
 {
   struct coff_symfile_info *info;
   int size, count;
@@ -2554,7 +2554,7 @@ scan_xcoff_symtab (struct objfile *objfile)
 		psymtab_include_list = (char **)
 		  alloca ((includes_allocated *= 2) *
 			  sizeof (char *));
-		memcpy ((PTR) psymtab_include_list, (PTR) orig,
+		memcpy (psymtab_include_list, orig,
 			includes_used * sizeof (char *));
 	      }
 	    continue;

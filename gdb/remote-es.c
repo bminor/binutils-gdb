@@ -1355,20 +1355,20 @@ bfd_copy (bfd *from_bfd, bfd *to_bfd)
 
       for (i = 0; (i + NUMCPYBYTES) < p->_cooked_size; i += NUMCPYBYTES)
 	{
-	  if (!bfd_get_section_contents (from_bfd, p, (PTR) buf, (file_ptr) i,
+	  if (!bfd_get_section_contents (from_bfd, p, buf, (file_ptr) i,
 					 (bfd_size_type) NUMCPYBYTES))
 	    {
 	      error ("bfd_get_section_contents\n");
 	    }
-	  if (!bfd_set_section_contents (to_bfd, new, (PTR) buf, (file_ptr) i,
+	  if (!bfd_set_section_contents (to_bfd, new, buf, (file_ptr) i,
 					 (bfd_size_type) NUMCPYBYTES))
 	    {
 	      error ("bfd_set_section_contents\n");
 	    }
 	}
-      bfd_get_section_contents (from_bfd, p, (PTR) buf, (file_ptr) i,
+      bfd_get_section_contents (from_bfd, p, buf, (file_ptr) i,
 				(bfd_size_type) (p->_cooked_size - i));
-      bfd_set_section_contents (to_bfd, new, (PTR) buf, (file_ptr) i,
+      bfd_set_section_contents (to_bfd, new, buf, (file_ptr) i,
 				(bfd_size_type) (p->_cooked_size - i));
     }
 }

@@ -57,7 +57,7 @@ static int solib_cleanup_queued = 0;	/* make_run_cleanup called */
 
 /* Local function prototypes */
 
-static void do_clear_solib (PTR);
+static void do_clear_solib (void *);
 
 /* If non-zero, this is a prefix that will be added to the front of the name
    shared libraries with an absolute filename for loading.  */
@@ -207,7 +207,7 @@ solib_open (char *in_pathname, char **found_pathname)
  */
 
 static int
-solib_map_sections (PTR arg)
+solib_map_sections (void *arg)
 {
   struct so_list *so = (struct so_list *) arg;	/* catch_errors bogon */
   char *filename;
@@ -324,7 +324,7 @@ free_so (struct so_list *so)
 /* A small stub to get us past the arg-passing pinhole of catch_errors.  */
 
 static int
-symbol_add_stub (PTR arg)
+symbol_add_stub (void *arg)
 {
   register struct so_list *so = (struct so_list *) arg;  /* catch_errs bogon */
   struct section_addr_info *sap;
@@ -387,7 +387,7 @@ update_solib_list (int from_tty, struct target_ops *target)
      symbols now!  */
   if (attach_flag &&
       symfile_objfile == NULL)
-    catch_errors (TARGET_SO_OPEN_SYMBOL_FILE_OBJECT, (PTR) &from_tty, 
+    catch_errors (TARGET_SO_OPEN_SYMBOL_FILE_OBJECT, &from_tty, 
 		  "Error reading attached process's symbol file.\n",
 		  RETURN_MASK_ALL);
 
@@ -755,7 +755,7 @@ clear_solib (void)
 }
 
 static void
-do_clear_solib (PTR dummy)
+do_clear_solib (void *dummy)
 {
   solib_cleanup_queued = 0;
   clear_solib ();

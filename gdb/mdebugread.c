@@ -2950,7 +2950,7 @@ parse_partial_symbols (struct objfile *objfile)
 			  psymtab_include_list = (char **)
 			    alloca ((includes_allocated *= 2) *
 				    sizeof (char *));
-			  memcpy ((PTR) psymtab_include_list, (PTR) orig,
+			  memcpy (psymtab_include_list, orig,
 				  includes_used * sizeof (char *));
 			}
 		      continue;

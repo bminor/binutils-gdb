@@ -165,12 +165,12 @@ struct print_args_args
   struct ui_file *stream;
 };
 
-static int print_args_stub (PTR);
+static int print_args_stub (void *);
 
 /* Pass the args the way catch_errors wants them.  */
 
 static int
-print_args_stub (PTR args)
+print_args_stub (void *args)
 {
   int numargs;
   struct print_args_args *p = (struct print_args_args *) args;

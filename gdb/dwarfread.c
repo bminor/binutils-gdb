@@ -360,7 +360,7 @@ static const struct language_defn *cu_language_defn;
 /* Forward declarations of static functions so we don't have to worry
    about ordering within this file.  */
 
-static void free_utypes (PTR);
+static void free_utypes (void *);
 
 static int attribute_size (unsigned int);
 
@@ -772,7 +772,7 @@ alloc_utype (DIE_REF die_ref, struct type *utypep)
 
    SYNOPSIS
 
-   static void free_utypes (PTR dummy)
+   static void free_utypes (void *dummy)
 
    DESCRIPTION
 
@@ -782,7 +782,7 @@ alloc_utype (DIE_REF die_ref, struct type *utypep)
  */
 
 static void
-free_utypes (PTR dummy)
+free_utypes (void *dummy)
 {
   xfree (utypes);
   utypes = NULL;
@@ -2212,7 +2212,7 @@ read_ofile_symtab (struct partial_symtab *pst)
   if (LNFOFF (pst))
     {
       if (bfd_seek (abfd, LNFOFF (pst), SEEK_SET) ||
-	  (bfd_bread ((PTR) lnsizedata, sizeof (lnsizedata), abfd)
+	  (bfd_bread (lnsizedata, sizeof (lnsizedata), abfd)
 	   != sizeof (lnsizedata)))
 	{
 	  error ("can't read DWARF line number table size");

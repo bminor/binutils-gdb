@@ -621,7 +621,7 @@ dwarf2_invalid_attrib_class_complaint (const char *arg1, const char *arg2)
 
 /* local function prototypes */
 
-static void dwarf2_locate_sections (bfd *, asection *, PTR);
+static void dwarf2_locate_sections (bfd *, asection *, void *);
 
 #if 0
 static void dwarf2_build_psymtabs_easy (struct objfile *, int);
@@ -644,7 +644,7 @@ char *dwarf2_read_section (struct objfile *, file_ptr, unsigned int);
 
 static void dwarf2_read_abbrevs (bfd *abfd, struct comp_unit_head *cu_header);
 
-static void dwarf2_empty_abbrev_table (PTR);
+static void dwarf2_empty_abbrev_table (void *);
 
 static struct abbrev_info *dwarf2_lookup_abbrev (unsigned int,
                                          const struct comp_unit_head *cu_header);
@@ -855,7 +855,7 @@ static struct type *dwarf2_fundamental_type (struct objfile *, int);
 
 /* memory allocation interface */
 
-static void dwarf2_free_tmp_obstack (PTR);
+static void dwarf2_free_tmp_obstack (void *);
 
 static struct dwarf_block *dwarf_alloc_block (void);
 
@@ -902,7 +902,7 @@ dwarf2_has_info (bfd *abfd)
    in.  */
 
 static void
-dwarf2_locate_sections (bfd *ignore_abfd, asection *sectp, PTR ignore_ptr)
+dwarf2_locate_sections (bfd *ignore_abfd, asection *sectp, void *ignore_ptr)
 {
   if (STREQ (sectp->name, INFO_SECTION))
     {
@@ -3507,7 +3507,7 @@ dwarf2_read_abbrevs (bfd *abfd, struct comp_unit_head *cu_header)
 
 /* ARGSUSED */
 static void
-dwarf2_empty_abbrev_table (PTR ptr_to_abbrevs_table)
+dwarf2_empty_abbrev_table (void *ptr_to_abbrevs_table)
 {
   int i;
   struct abbrev_info *abbrev, *next;
@@ -6700,7 +6700,7 @@ decode_locdesc (struct dwarf_block *blk, struct objfile *objfile,
 
 /* ARGSUSED */
 static void
-dwarf2_free_tmp_obstack (PTR ignore)
+dwarf2_free_tmp_obstack (void *ignore)
 {
   obstack_free (&dwarf2_tmp_obstack, NULL);
 }

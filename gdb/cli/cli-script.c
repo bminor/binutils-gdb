@@ -1228,7 +1228,7 @@ struct source_cleanup_lines_args
 };
 
 static void
-source_cleanup_lines (PTR args)
+source_cleanup_lines (void *args)
 {
   struct source_cleanup_lines_args *p =
   (struct source_cleanup_lines_args *) args;

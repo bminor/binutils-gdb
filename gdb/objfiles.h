@@ -328,7 +328,7 @@ struct objfile
        the memory mapped malloc() package to manage storage for this objfile's
        data.  NULL if we are not. */
 
-    PTR md;
+    void *md;
 
     /* The file descriptor that was used to obtain the mmalloc descriptor
        for this objfile.  If we call mmalloc_detach with the malloc descriptor
@@ -359,7 +359,7 @@ struct objfile
        typically a pointer to malloc'd memory.  The symbol reader's finish
        function is responsible for freeing the memory thusly allocated.  */
 
-    PTR sym_private;
+    void *sym_private;
 
     /* Hook for target-architecture-specific information.  This must
        point to memory allocated on one of the obstacks in this objfile,

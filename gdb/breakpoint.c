@@ -73,7 +73,7 @@ static void map_breakpoint_numbers (char *, void (*)(struct breakpoint *));
 
 static void ignore_command (char *, int);
 
-static int breakpoint_re_set_one (PTR);
+static int breakpoint_re_set_one (void *);
 
 static void clear_command (char *, int);
 
@@ -108,9 +108,9 @@ static void breakpoint_1 (int, int);
 
 static bpstat bpstat_alloc (struct breakpoint *, bpstat);
 
-static int breakpoint_cond_eval (PTR);
+static int breakpoint_cond_eval (void *);
 
-static void cleanup_executing_breakpoints (PTR);
+static void cleanup_executing_breakpoints (void *);
 
 static void commands_command (char *, int);
 
@@ -140,9 +140,9 @@ typedef struct
   }
 args_for_catchpoint_enable;
 
-static int watchpoint_check (PTR);
+static int watchpoint_check (void *);
 
-static int cover_target_enable_exception_callback (PTR);
+static int cover_target_enable_exception_callback (void *);
 
 static void maintenance_info_breakpoints (char *, int);
 
@@ -1916,7 +1916,7 @@ bpstat_clear_actions (bpstat bs)
 /* Stub for cleaning up our state if we error-out of a breakpoint command */
 /* ARGSUSED */
 static void
-cleanup_executing_breakpoints (PTR ignore)
+cleanup_executing_breakpoints (void *ignore)
 {
   executing_breakpoint_commands = 0;
 }
@@ -2331,7 +2331,7 @@ bpstat_print (bpstat bs)
    make it pass through catch_errors.  */
 
 static int
-breakpoint_cond_eval (PTR exp)
+breakpoint_cond_eval (void *exp)
 {
   struct value *mark = value_mark ();
   int i = !value_true (evaluate_expression ((struct expression *) exp));
@@ -2371,7 +2371,7 @@ bpstat_alloc (struct breakpoint *b, bpstat cbs /* Current "bs" value */ )
 /* Check watchpoint condition.  */
 
 static int
-watchpoint_check (PTR p)
+watchpoint_check (void *p)
 {
   bpstat bs = (bpstat) p;
   struct breakpoint *b;
@@ -6232,7 +6232,7 @@ catch_exception_command_1 (enum exception_event_kind ex_event, char *arg,
    inside a catch_errors */
 
 static int
-cover_target_enable_exception_callback (PTR arg)
+cover_target_enable_exception_callback (void *arg)
 {
   args_for_catchpoint_enable *args = arg;
   struct symtab_and_line *sal;
@@ -6909,7 +6909,7 @@ delete_command (char *arg, int from_tty)
    Unused in this case.  */
 
 static int
-breakpoint_re_set_one (PTR bint)
+breakpoint_re_set_one (void *bint)
 {
   /* get past catch_errs */
   struct breakpoint *b = (struct breakpoint *) bint;

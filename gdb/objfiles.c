@@ -52,11 +52,11 @@ static int open_existing_mapped_file (char *, long, int);
 
 static int open_mapped_file (char *filename, long mtime, int flags);
 
-static PTR map_to_file (int);
+static void *map_to_file (int);
 
 #endif /* defined(USE_MMALLOC) && defined(HAVE_MMAP) */
 
-static void add_to_objfile_sections (bfd *, sec_ptr, PTR);
+static void add_to_objfile_sections (bfd *, sec_ptr, void *);
 
 /* Externally visible variables that are owned by this module.
    See declarations in objfile.h for more info. */
@@ -82,7 +82,7 @@ int mapped_symbol_files;	/* Try to use mapped symbol files */
    the end of the table (objfile->sections_end). */
 
 static void
-add_to_objfile_sections (bfd *abfd, sec_ptr asect, PTR objfile_p_char)
+add_to_objfile_sections (bfd *abfd, sec_ptr asect, void *objfile_p_char)
 {
   struct objfile *objfile = (struct objfile *) objfile_p_char;
   struct obj_section section;
@@ -178,7 +178,7 @@ allocate_objfile (bfd *abfd, int flags)
 			     flags);
       if (fd >= 0)
 	{
-	  PTR md;
+	  void *md;
 
 	  if ((md = map_to_file (fd)) == NULL)
 	    {
@@ -900,13 +900,13 @@ open_mapped_file (char *filename, long mtime, int flags)
   return (fd);
 }
 
-static PTR
+static void *
 map_to_file (int fd)
 {
-  PTR md;
+  void *md;
   CORE_ADDR mapto;
 
-  md = mmalloc_attach (fd, (PTR) 0);
+  md = mmalloc_attach (fd, 0);
   if (md != NULL)
     {
       mapto = (CORE_ADDR) mmalloc_getkey (md, 1);
@@ -919,7 +919,7 @@ map_to_file (int fd)
       else if (mapto != (CORE_ADDR) NULL)
 	{
 	  /* This mapping file needs to be remapped at "mapto" */
-	  md = mmalloc_attach (fd, (PTR) mapto);
+	  md = mmalloc_attach (fd, mapto);
 	}
       else
 	{
@@ -931,10 +931,10 @@ map_to_file (int fd)
 	         address selected by mmap, we must truncate it before trying
 	         to do an attach at the address we want. */
 	      ftruncate (fd, 0);
-	      md = mmalloc_attach (fd, (PTR) mapto);
+	      md = mmalloc_attach (fd, mapto);
 	      if (md != NULL)
 		{
-		  mmalloc_setkey (md, 1, (PTR) mapto);
+		  mmalloc_setkey (md, 1, mapto);
 		}
 	    }
 	}

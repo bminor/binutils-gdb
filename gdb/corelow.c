@@ -58,7 +58,7 @@ static struct core_fns *core_vec = NULL;
 static void core_files_info (struct target_ops *);
 
 #ifdef SOLIB_ADD
-static int solib_add_stub (PTR);
+static int solib_add_stub (void *);
 #endif
 
 static struct core_fns *sniff_core_bfd (bfd *);
@@ -75,7 +75,7 @@ static void core_close_cleanup (void *ignore);
 
 static void get_core_registers (int);
 
-static void add_to_thread_list (bfd *, asection *, PTR);
+static void add_to_thread_list (bfd *, asection *, void *);
 
 static int ignore (CORE_ADDR, char *);
 
@@ -222,7 +222,7 @@ core_close_cleanup (void *ignore)
    is really an int * which points to from_tty.  */
 
 static int
-solib_add_stub (PTR from_ttyp)
+solib_add_stub (void *from_ttyp)
 {
   SOLIB_ADD (NULL, *(int *) from_ttyp, &current_target, auto_solib_add);
   re_enable_breakpoints_in_shlibs ();
@@ -234,7 +234,7 @@ solib_add_stub (PTR from_ttyp)
    list of threads in a core file.  */
 
 static void
-add_to_thread_list (bfd *abfd, asection *asect, PTR reg_sect_arg)
+add_to_thread_list (bfd *abfd, asection *asect, void *reg_sect_arg)
 {
   int thread_id;
   asection *reg_sect = (asection *) reg_sect_arg;

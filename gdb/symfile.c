@@ -411,7 +411,7 @@ entry_point_address (void)
    lowest-addressed loadable section.  */
 
 void
-find_lowest_section (bfd *abfd, asection *sect, PTR obj)
+find_lowest_section (bfd *abfd, asection *sect, void *obj)
 {
   asection **lowest = (asection **) obj;
 
@@ -648,7 +648,7 @@ syms_from_objfile (struct objfile *objfile, struct section_addr_info *addrs,
       lower_sect = bfd_get_section_by_name (objfile->obfd, ".text");
       if (lower_sect == NULL)
 	bfd_map_over_sections (objfile->obfd, find_lowest_section,
-			       (PTR) &lower_sect);
+			       &lower_sect);
       if (lower_sect == NULL)
 	warning ("no loadable sections found in added symbol-file %s",
 		 objfile->name);
@@ -2483,11 +2483,11 @@ init_psymbol_list (struct objfile *objfile, int total_symbols)
 
   if (objfile->global_psymbols.list)
     {
-      xmfree (objfile->md, (PTR) objfile->global_psymbols.list);
+      xmfree (objfile->md, objfile->global_psymbols.list);
     }
   if (objfile->static_psymbols.list)
     {
-      xmfree (objfile->md, (PTR) objfile->static_psymbols.list);
+      xmfree (objfile->md, objfile->static_psymbols.list);
     }
 
   /* Current best guess is that approximately a twentieth
