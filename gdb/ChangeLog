@@ -1,3 +1,29 @@
+Mon Apr 20 14:18:45 1998  J. Kean Johnston  <jkj@sco.com>
+
+        * procfs.c: Added replacement macros for LWP stuff.  Fixed support 
+        for UnixWare / SVR4.2MP targets and any targets which use
+        multi-file /proc entries.  Fixed support for hardware watchpoints.
+        * solib.c: SCO needs some of the same code as SunOS. Change
+        preprocessor conditionals.
+
+        * config/i386/i386sco5.mt: New file.
+        * config/i386/tm-i386sco5.h: New file.
+        * config/i386/i386sco5.mh (NATDEPFILES): add i386v-nat.o.
+        * config/i386/nm-i386v42mp.h 
+        (TARGET_HAS_HARDWARE_WATCHPOINTS): define.  
+        Add other macros for hardware assisted watchpoints.
+        * config/i386/nm-i386sco5.h: Correct attributions.
+        (TARGET_HAS_HARDWARE_WATCHPOINTS): define.
+        * config/i386/nm-linux.h (target_remote_watchpoint): Pass
+        'type' through to i386_insert_watchpoint.
+
+Mon Apr 20 14:12:30 1998 Peter Schauer (pes@regent.e-technik.tu-muenchen.de)
+
+	* infrun.c (wait_for_inferior): Don't add signalled processes
+	as new threads.
+	* procfs.c (wait_fd): Note if LWP has exited.
+	(procfs_wait): use GETPID to get process ID.
+
 Sat Apr 18 15:21:04 1998  Stan Cox  <scox@cygnus.com>
 
 	* configure.tgt: Added sparc86x support.

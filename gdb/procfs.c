@@ -54,6 +54,42 @@ regardless of whether or not the actual target has floating point hardware.
 #include "gdbcore.h"
 #include "gdbthread.h"
 
+#if !defined(SYS_lwp_create) && defined(SYS_lwpcreate)
+# define SYS_lwp_create SYS_lwpcreate
+#endif
+
+#if !defined(SYS_lwp_exit) && defined(SYS_lwpexit)
+# define SYS_lwp_exit SYS_lwpexit
+#endif
+
+#if !defined(SYS_lwp_wait) && defined(SYS_lwpwait)
+# define SYS_lwp_wait SYS_lwpwait
+#endif
+
+#if !defined(SYS_lwp_self) && defined(SYS_lwpself)
+# define SYS_lwp_self SYS_lwpself
+#endif
+
+#if !defined(SYS_lwp_info) && defined(SYS_lwpinfo)
+# define SYS_lwp_info SYS_lwpinfo
+#endif
+
+#if !defined(SYS_lwp_private) && defined(SYS_lwpprivate)
+# define SYS_lwp_private SYS_lwpprivate
+#endif
+
+#if !defined(SYS_lwp_kill) && defined(SYS_lwpkill)
+# define SYS_lwp_kill SYS_lwpkill
+#endif
+
+#if !defined(SYS_lwp_suspend) && defined(SYS_lwpsuspend)
+# define SYS_lwp_suspend SYS_lwpsuspend
+#endif
+
+#if !defined(SYS_lwp_continue) && defined(SYS_lwpcontinue)
+# define SYS_lwp_continue SYS_lwpcontinue
+#endif
+
 /* the name of the proc status struct depends on the implementation */
 #ifdef HAVE_PSTATUS_T
   typedef pstatus_t gdb_prstatus_t;
@@ -901,6 +937,12 @@ wait_fd ()
 	      if ((poll_list[i].revents & POLLHUP) != 0	||
 		  !procfs_read_status(pi))
 		{ /* The LWP has apparently terminated.  */
+		  if (num_poll_list <= 1)
+		    {
+		      pi->prstatus.pr_flags = 0;
+		      pi->had_event = 1;
+		      break;
+		    }
 		  if (info_verbose)
 		    printf_filtered ("LWP %d exited.\n", 
 				     (pi->pid >> 16) & 0xffff);
@@ -1689,6 +1731,60 @@ init_syscall_table ()
 #if defined (SYS_lwp_sema_trywait)
   syscall_table[SYS_lwp_sema_trywait] = "lwp_sema_trywait";
 #endif
+#if defined(SYS_fstatvfs64)
+  syscall_table[SYS_fstatvfs64] = "fstatvfs64";
+#endif
+#if defined(SYS_statvfs64)
+  syscall_table[SYS_statvfs64] = "statvfs64";
+#endif
+#if defined(SYS_ftruncate64)
+  syscall_table[SYS_ftruncate64] = "ftruncate64";
+#endif
+#if defined(SYS_truncate64)
+  syscall_table[SYS_truncate64] = "truncate64";
+#endif
+#if defined(SYS_getrlimit64)
+  syscall_table[SYS_getrlimit64] = "getrlimit64";
+#endif
+#if defined(SYS_setrlimit64)
+  syscall_table[SYS_setrlimit64] = "setrlimit64";
+#endif
+#if defined(SYS_lseek64)
+  syscall_table[SYS_lseek64] = "lseek64";
+#endif
+#if defined(SYS_mmap64)
+  syscall_table[SYS_mmap64] = "mmap64";
+#endif
+#if defined(SYS_pread64)
+  syscall_table[SYS_pread64] = "pread64";
+#endif
+#if defined(SYS_creat64)
+  syscall_table[SYS_creat64] = "creat64";
+#endif
+#if defined(SYS_dshmsys)
+  syscall_table[SYS_dshmsys] = "dshmsys";
+#endif
+#if defined(SYS_invlpg)
+  syscall_table[SYS_invlpg] = "invlpg";
+#endif
+#if defined(SYS_cg_ids)
+  syscall_table[SYS_cg_ids] = "cg_ids";
+#endif
+#if defined(SYS_cg_processors)
+  syscall_table[SYS_cg_processors] = "cg_processors";
+#endif
+#if defined(SYS_cg_info)
+  syscall_table[SYS_cg_info] = "cg_info";
+#endif
+#if defined(SYS_cg_bind)
+  syscall_table[SYS_cg_bind] = "cg_bind";
+#endif
+#if defined(SYS_cg_current)
+  syscall_table[SYS_cg_current] = "cg_current";
+#endif
+#if defined(SYS_cg_memloc)
+  syscall_table[SYS_cg_memloc] = "cg_memloc";
+#endif
 }
 
 /*
@@ -1975,6 +2071,8 @@ init_procinfo (pid, kill)
 {
   struct procinfo *pi = (struct procinfo *) 
     xmalloc (sizeof (struct procinfo));
+  struct sig_ctl  sctl;
+  struct flt_ctl  fctl;
 
   memset ((char *) pi, 0, sizeof (*pi));
   if (!open_proc_file (pid, pi, O_RDWR, 1))
@@ -2123,10 +2221,20 @@ procfs_exit_handler (pi, syscall_num, why, rtnvalp, statvalp)
      int *statvalp;
 {
   struct procinfo *temp_pi, *next_pi;
+  struct proc_ctl pctl;
 
+#ifdef UNIXWARE
+  pctl.cmd = PCRUN;
+  pctl.data = PRCFAULT;
+#else
   pi->prrun.pr_flags = PRCFAULT;
+#endif
 
+#ifdef PROCFS_USE_READ_WRITE
+  if (write (pi->ctl_fd, (char *)&pctl, sizeof (struct proc_ctl)) < 0)
+#else
   if (ioctl (pi->ctl_fd, PIOCRUN, &pi->prrun) != 0)
+#endif
     perror_with_name (pi->pathname);
 
   if (attach_flag)
@@ -2809,6 +2917,7 @@ proc_base_address (addr)
 
 #endif	/* 0 */
 
+#ifndef UNIXWARE
 /*
 
 LOCAL FUNCTION
@@ -2847,7 +2956,7 @@ proc_address_to_fd (pi, addr, complain)
     }
   return (fd);
 }
-
+#endif /* !UNIXWARE */
 
 /* Attach to process PID, then initialize for debugging it
    and wait for the trace-trap that results from attaching.  */
@@ -3065,8 +3174,8 @@ do_attach (pid)
 	}
       add_thread (pi->pid);
       procfs_set_inferior_syscall_traps (pi);
-    }
 #endif /* PROCFS_USE_READ_WRITE */
+    }
   attach_flag = 1;
   return (pi->pid);
 }
@@ -3247,7 +3356,6 @@ procfs_wait (pid, ourstatus)
   struct procinfo *pi;
   struct proc_ctl pctl;
 
-#ifndef UNIXWARE
   if (pid != -1)		/* Non-specific process? */
     pi = NULL;
   else
@@ -3269,7 +3377,6 @@ procfs_wait (pid, ourstatus)
     for (pi = procinfo_list; pi; pi = pi->next)
       if (pi->pid == pid && pi->had_event)
 	break;
-#endif
 
   if (!pi && !checkerr)
     goto wait_again;
@@ -3291,7 +3398,7 @@ procfs_wait (pid, ourstatus)
 	{
 	  /* XXX Fixme -- what to do if attached?  Can't call wait... */
 	  rtnval = wait (&statval);
-	  if ((rtnval) != (inferior_pid))
+	  if ((rtnval) != (PIDGET (inferior_pid)))
 	    {
 	      print_sys_errmsg (pi->pathname, errno);
 	      error ("procfs_wait: wait failed, returned %d", rtnval);
@@ -3305,7 +3412,11 @@ procfs_wait (pid, ourstatus)
 	  /* NOTREACHED */
 	}
     }
+#ifdef UNIXWARE
+  else if (pi->prstatus.pr_lwp.pr_flags & (PR_STOPPED | PR_ISTOP))
+#else
   else if (pi->prstatus.pr_flags & (PR_STOPPED | PR_ISTOP))
+#endif
     {
 #ifdef UNIXWARE
       rtnval = pi->prstatus.pr_pid;
@@ -3414,7 +3525,7 @@ procfs_wait (pid, ourstatus)
 	    if (!procinfo->had_event)
 	      {
 #ifdef PROCFS_USE_READ_WRITE
-		cmd = PCSTOP;
+		long cmd = PCSTOP;
 		if (write (pi->ctl_fd, (char *) &cmd, sizeof (long)) < 0)
 		  {
 		    print_sys_errmsg (procinfo->pathname, errno);
@@ -3448,8 +3559,12 @@ procfs_wait (pid, ourstatus)
     }
   else
     {
-      error ("PIOCWSTOP, stopped for unknown/unhandled reason, flags %#x", 
+      error ("PIOCWSTOP, stopped for unknown/unhandled reason, flags %#x",
+#ifdef UNIXWARE
+	     pi->prstatus.pr_lwp.pr_flags);
+#else
 	     pi->prstatus.pr_flags);
+#endif
     }
 
   store_waitstatus (ourstatus, statval);
@@ -3725,7 +3840,6 @@ procfs_resume (pid, step, signo)
 		  print_sys_errmsg (procinfo->pathname, errno);
 		  error ("PCRUN failed");
 		}
-	      procfs_read_status (procinfo);
 #else
 	      procinfo->prrun.pr_flags &= PRSTEP;
 	      procinfo->prrun.pr_flags |= PRCFAULT | PRCSIG;
@@ -3752,9 +3866,9 @@ procfs_resume (pid, step, signo)
 		  print_sys_errmsg (procinfo->pathname, errno);
 		  warning ("PIOCRUN failed");
 		}
+#endif
 	    }
 	procfs_read_status (procinfo);
-#endif
       }
 }
 
@@ -4794,7 +4908,11 @@ No process.  Start debugging a program or specify an explicit process ID.");
       if (summary || all)
 	{
 	  info_proc_stop (pip, summary);
+#ifdef UNIXWARE
+	  supply_gregset (&pip->prstatus.pr_lwp.pr_context.uc_mcontext.gregs);
+#else
 	  supply_gregset (&pip->prstatus.pr_reg);
+#endif
 	  printf_filtered ("PC: ");
 	  print_address (read_pc (), gdb_stdout);
 	  printf_filtered ("\n");
@@ -5002,7 +5120,8 @@ procfs_clear_syscall_trap (pi, syscall_num, errok)
 {
   sysset_t sysset;
   int goterr, i;
-  
+
+#ifndef UNIXWARE
   goterr = ioctl (pi->ctl_fd, PIOCGENTRY, &sysset) < 0;
 
   if (goterr && !errok)
@@ -5042,6 +5161,7 @@ procfs_clear_syscall_trap (pi, syscall_num, errok)
 	  error ("PIOCSEXIT failed");
 	}
     }
+#endif
 
   if (!pi->syscall_handlers)
     {
@@ -5106,6 +5226,7 @@ procfs_set_syscall_trap (pi, syscall_num, flags, func)
 {
   sysset_t sysset;
 
+#ifndef UNIXWARE
   if (flags & PROCFS_SYSCALL_ENTRY)
     {
       if (ioctl (pi->ctl_fd, PIOCGENTRY, &sysset) < 0)
@@ -5141,6 +5262,7 @@ procfs_set_syscall_trap (pi, syscall_num, flags, func)
 	  error ("PIOCSEXIT failed");
 	}
     }
+#endif
 
   if (!pi->syscall_handlers)
     {
@@ -5210,6 +5332,7 @@ procfs_lwp_creation_handler (pi, syscall_num, why, rtnvalp, statvalp)
 {
   int lwp_id;
   struct procinfo *childpi;
+  struct proc_ctl pctl;
 
   /* We've just detected the completion of an lwp_create system call.  Now we
      need to setup a procinfo struct for this thread, and notify the thread
@@ -5218,6 +5341,19 @@ procfs_lwp_creation_handler (pi, syscall_num, why, rtnvalp, statvalp)
   /* If lwp_create failed, then nothing interesting happened.  Continue the
      process and go back to sleep. */
 
+#ifdef UNIXWARE
+  /* Joel ... can you check this logic out please? JKJ */
+  if (pi->prstatus.pr_lwp.pr_context.uc_mcontext.gregs[R_EFL] & 1)
+    { /* _lwp_create failed */
+      pctl.cmd = PCRUN;
+      pctl.data = PRCFAULT;
+
+      if (write (pi->ctl_fd, (char *) &pctl, sizeof (struct proc_ctl)) < 0)
+	perror_with_name (pi->pathname);
+
+      return 0;
+    }
+#else /* UNIXWARE */
   if (PROCFS_GET_CARRY (pi->prstatus.pr_reg))
     {				/* _lwp_create failed */
       pi->prrun.pr_flags &= PRSTEP;
@@ -5228,17 +5364,25 @@ procfs_lwp_creation_handler (pi, syscall_num, why, rtnvalp, statvalp)
 
       return 0;
     }
+#endif
 
   /* At this point, the new thread is stopped at it's first instruction, and
      the parent is stopped at the exit from lwp_create.  */
 
   if (pi->new_child)		/* Child? */
     {				/* Yes, just continue it */
+#ifdef UNIXWARE
+      pctl.cmd = PCRUN;
+      pctl.data = PRCFAULT;
+
+      if (write(pi->ctl_fd, (char *)&pctl, sizeof (struct proc_ctl)) < 0)
+#else /* !UNIXWARE */
       pi->prrun.pr_flags &= PRSTEP;
       pi->prrun.pr_flags |= PRCFAULT;
 
       if ((pi->prstatus.pr_flags & PR_ISTOP)
 	  && ioctl (pi->ctl_fd, PIOCRUN, &pi->prrun) != 0)
+#endif /* !UNIXWARE */
 	perror_with_name (pi->pathname);
 
       pi->new_child = 0;	/* No longer new */
@@ -5250,7 +5394,11 @@ procfs_lwp_creation_handler (pi, syscall_num, why, rtnvalp, statvalp)
      in the child and continue the parent.  */
 
   /* Third arg is pointer to new thread id. */
+#ifdef UNIXWARE
+  lwp_id = read_memory_integer (pi->prstatus.pr_lwp.pr_sysarg[2], sizeof (int));
+#else
   lwp_id = read_memory_integer (pi->prstatus.pr_sysarg[2], sizeof (int));
+#endif
 
   lwp_id = (lwp_id << 16) | PIDGET (pi->pid);
 
@@ -5265,25 +5413,42 @@ procfs_lwp_creation_handler (pi, syscall_num, why, rtnvalp, statvalp)
   printf_filtered ("[New %s]\n", target_pid_to_str (lwp_id));
 
   /* Continue the parent */
+#ifdef UNIXWARE
+  pctl.cmd = PCRUN;
+  pctl.data = PRCFAULT;
 
+  if (write(pi->ctl_fd, (char *)&pctl, sizeof (struct proc_ctl)) < 0)
+#else
   pi->prrun.pr_flags &= PRSTEP;
   pi->prrun.pr_flags |= PRCFAULT;
   if (ioctl (pi->ctl_fd, PIOCRUN, &pi->prrun) != 0)
+#endif
     perror_with_name (pi->pathname);
 
   /* The new child may have been created in one of two states: 
      SUSPENDED or RUNNABLE.  If runnable, we will simply signal it to run.
      If suspended, we flag it to be continued later, when it has an event.  */
 
+#ifdef UNIXWARE
+  if (childpi->prstatus.pr_lwp.pr_why == PR_SUSPENDED)
+#else
   if (childpi->prstatus.pr_why == PR_SUSPENDED)
+#endif
     childpi->new_child = 1;	/* Flag this as an unseen child process */
   else
     {
       /* Continue the child */
+#ifdef UNIXWARE
+      pctl.cmd = PCRUN;
+      pctl.data = PRCFAULT;
+
+      if (write(pi->ctl_fd, (char *)&pctl, sizeof (struct proc_ctl)) < 0)
+#else
       childpi->prrun.pr_flags &= PRSTEP;
       childpi->prrun.pr_flags |= PRCFAULT;
 
       if (ioctl (childpi->ctl_fd, PIOCRUN, &childpi->prrun) != 0)
+#endif
 	perror_with_name (childpi->pathname);
     }
   return 0;
@@ -5406,6 +5571,7 @@ procfs_can_run ()
   return !procfs_suppress_run;
 }
 #ifdef TARGET_HAS_HARDWARE_WATCHPOINTS
+#ifndef UNIXWARE
 
 /* Insert a watchpoint */
 int
@@ -5465,6 +5631,7 @@ procfs_stopped_by_watchpoint(pid)
     }
   return 0;
 }
+#endif /* !UNIXWARE */
 #endif /* TARGET_HAS_HARDWARE_WATCHPOINTS */
 
 /* Why is this necessary?  Shouldn't dead threads just be removed from the
