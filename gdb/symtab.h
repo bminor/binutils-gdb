@@ -153,10 +153,10 @@ struct block
   /* Note that in an unrelocated symbol segment in an object file
      this pointer may be zero when the correct value should be
      the second special block (for symbols whose scope is one compilation).
-     This is because the compiler ouptuts the special blocks at the
+     This is because the compiler outputs the special blocks at the
      very end, after the other blocks.   */
   struct block *superblock;
-  /* A flag indicating whether or not the fucntion corresponding
+  /* A flag indicating whether or not the function corresponding
      to this block was compiled with gcc or not.  If there is no
      function corresponding to this block, this meaning of this flag
      is undefined.  (In practice it will be 1 if the block was created
@@ -251,6 +251,18 @@ struct symbol
       struct symbol *chain;	/* for opaque typedef struct chain */
     }
   value;
+
+  /* Some symbols require an additional value to be recorded on a per-
+     symbol basis.  Stash those values here. */
+  union
+    {
+      struct			/* for OP_BASEREG in DWARF location specs */
+	{
+	  short regno_valid;	/* 0 == regno invalid; !0 == regno valid */
+	  short regno;		/* base register number {0, 1, 2, ...} */
+	} basereg;
+    }
+  aux_value;
 };
 
 
@@ -442,11 +454,11 @@ struct partial_symtab
 
 /* This symtab variable specifies the current file for printing source lines */
 
-struct symtab *current_source_symtab;
+extern struct symtab *current_source_symtab;
 
 /* This is the next line to print for listing source lines.  */
 
-int current_source_line;
+extern int current_source_line;
 
 #define BLOCKVECTOR(symtab) (symtab)->blockvector
 
@@ -478,6 +490,8 @@ int current_source_line;
 #define SYMBOL_VALUE_CHAIN(symbol) (symbol)->value.chain
 #define SYMBOL_TYPE(symbol) (symbol)->type
 #define SYMBOL_LINE(symbol) (symbol)->line
+#define SYMBOL_BASEREG_VALID(symbol) (symbol)->aux_value.basereg.regno_valid
+#define SYMBOL_BASEREG(symbol) (symbol)->aux_value.basereg.regno
 
 /* The virtual function table is now an array of structures
    which have the form { int16 offset, delta; void *pfn; }. 
@@ -557,17 +571,8 @@ contained_in PARAMS ((struct block *, struct block *));
 extern void
 reread_symbols PARAMS ((void));
 
-extern int
-have_partial_symbols PARAMS ((void));
-
-extern int
-have_full_symbols PARAMS ((void));
-
 /* Functions for dealing with the minimal symbol table, really a misc
    address<->symbol mapping for things we don't have debug symbols for.  */
-
-extern int
-have_minimal_symbols PARAMS ((void));
 
 extern void
 prim_record_minimal_symbol PARAMS ((const char *, CORE_ADDR,
@@ -578,12 +583,6 @@ lookup_minimal_symbol PARAMS ((const char *, struct objfile *));
 
 extern struct minimal_symbol *
 lookup_minimal_symbol_by_pc PARAMS ((CORE_ADDR));
-
-extern PTR
-iterate_over_msymbols PARAMS ((PTR (*func) (struct objfile *,
-					    struct minimal_symbol *,
-					    PTR, PTR, PTR),
-			       PTR, PTR, PTR));
 
 extern void
 init_minimal_symbol_collection PARAMS ((void));

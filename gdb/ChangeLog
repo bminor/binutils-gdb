@@ -1,3 +1,13 @@
+Sat Jun 13 11:16:45 1992  Fred Fish  (fnf at cygnus.com)
+
+	* symtab.h (struct symbol):  Add aux_value union for preserving
+	an additional per-symbol value.
+	* symtab.h (SYMBOL_BASEREG, SYMBOL_BASEREG_VALID):  Add defines.
+	* frame.h (FRAME_GET_BASEREG_VALUE):  Provide default definition.
+	* findvar.c (read_var_value):  Use SYMBOL_BASEREG if valid.
+	* printcmd.c (address_info):  Use SYMBOL_BASEREG if valid.
+	* symmisc.c (print_symbol):  Use SYMBOL_BASEREG if valid.
+
 Sat Jun 13 09:18:46 1992  Michael Tiemann  (tiemann@rtl.cygnus.com)
 
 	* symfile.c (clear_symtab_users_once): Now non-static (for
@@ -78,7 +88,7 @@ Fri Jun 12 18:54:40 1992  John Gilmore  (gnu at cygnus.com)
 	* symfile.c (symfile_bfd_open):  Comment where name is freed.
 	* symmisc.c (extend_psymbol_list):  Comment where list is freed.
 
-Fri Jun 12 12:49:43 1992  Fred Fish  (fnf@cygnus.com)
+Fri Jun 12 08:24:36 1992  Fred Fish  (fnf at cygnus.com)
 
 	* expprint.c (print_subexp):  Add missing ']'.
 	* defs.h (reg_names):  Fix declaration to match that in infcmd.c
@@ -104,7 +114,7 @@ Thu Jun 11 01:33:40 1992  John Gilmore  (gnu at cygnus.com)
 	* tm-i960.h (REGISTER_NAMES):  Cosmetic change.
 	* infcmd.c:  Lint.
 
-Tue Jun  9 17:19:45 1992  Fred Fish  (fnf@cygnus.com)
+Tue Jun  9 17:19:45 1992  Fred Fish  (fnf at cygnus.com)
 
 	* c-exp.y, m2-exp.y:  Move remapping defines for malloc and
 	realloc.  Add remapping defines for {yyss, yyssp, yyvs, yyvsp}.
