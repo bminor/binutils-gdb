@@ -1,4 +1,14 @@
+Thu Apr  3 13:22:45 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Branched binutils 2.8.
+
 Wed Apr  2 12:23:53 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* m10200-dis.c: Rename from mn10200-dis.c.
+	* m10200-opc.c: Rename from mn10200-opc.c.
+	* m10300-dis.c: Rename from mn10300-dis.c
+	* m10300-opc.c: Rename from mn10300-opc.c.
+	* Makefile.in: Update accordingly.
 
 	* mips16-opc.c: Add mul and dmul macros.
 
