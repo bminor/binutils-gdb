@@ -1,5 +1,10 @@
 1998-12-09  Doug Evans  <devans@casey.cygnus.com>
 
+	* cpu.h,decode.c,sem-switch.c,sem.c: Regenerate.
+start-sanitize-m32rx
+	* cpux.h,decodex.c,semx-switch.c: Regenerate.
+end-sanitize-m32rx
+
 	* sim-if.c: Include string.h or strings.h if present.
 
 1998-12-04  Doug Evans  <devans@casey.cygnus.com>

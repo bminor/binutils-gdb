@@ -476,7 +476,7 @@ SEM_FN_NAME (m32rbf,bc8) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 
 if (CPU (h_cond)) {
   {
-    USI opval = FLD (f_disp8);
+    USI opval = FLD (i_disp8);
     SEM_BRANCH_VIA_CACHE (current_cpu, sem_arg, opval, vpc, SEM_BRANCH_ADDR_CACHE (sem_arg));
     written |= (1 << 2);
     TRACE_RESULT (current_cpu, abuf, "pc", 'x', opval);
@@ -503,7 +503,7 @@ SEM_FN_NAME (m32rbf,bc24) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 
 if (CPU (h_cond)) {
   {
-    USI opval = FLD (f_disp24);
+    USI opval = FLD (i_disp24);
     SEM_BRANCH_VIA_CACHE (current_cpu, sem_arg, opval, vpc, SEM_BRANCH_ADDR_CACHE (sem_arg));
     written |= (1 << 2);
     TRACE_RESULT (current_cpu, abuf, "pc", 'x', opval);
@@ -530,7 +530,7 @@ SEM_FN_NAME (m32rbf,beq) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 
 if (EQSI (* FLD (i_src1), * FLD (i_src2))) {
   {
-    USI opval = FLD (f_disp16);
+    USI opval = FLD (i_disp16);
     SEM_BRANCH_VIA_CACHE (current_cpu, sem_arg, opval, vpc, SEM_BRANCH_ADDR_CACHE (sem_arg));
     written |= (1 << 3);
     TRACE_RESULT (current_cpu, abuf, "pc", 'x', opval);
@@ -557,7 +557,7 @@ SEM_FN_NAME (m32rbf,beqz) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 
 if (EQSI (* FLD (i_src2), 0)) {
   {
-    USI opval = FLD (f_disp16);
+    USI opval = FLD (i_disp16);
     SEM_BRANCH_VIA_CACHE (current_cpu, sem_arg, opval, vpc, SEM_BRANCH_ADDR_CACHE (sem_arg));
     written |= (1 << 2);
     TRACE_RESULT (current_cpu, abuf, "pc", 'x', opval);
@@ -584,7 +584,7 @@ SEM_FN_NAME (m32rbf,bgez) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 
 if (GESI (* FLD (i_src2), 0)) {
   {
-    USI opval = FLD (f_disp16);
+    USI opval = FLD (i_disp16);
     SEM_BRANCH_VIA_CACHE (current_cpu, sem_arg, opval, vpc, SEM_BRANCH_ADDR_CACHE (sem_arg));
     written |= (1 << 2);
     TRACE_RESULT (current_cpu, abuf, "pc", 'x', opval);
@@ -611,7 +611,7 @@ SEM_FN_NAME (m32rbf,bgtz) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 
 if (GTSI (* FLD (i_src2), 0)) {
   {
-    USI opval = FLD (f_disp16);
+    USI opval = FLD (i_disp16);
     SEM_BRANCH_VIA_CACHE (current_cpu, sem_arg, opval, vpc, SEM_BRANCH_ADDR_CACHE (sem_arg));
     written |= (1 << 2);
     TRACE_RESULT (current_cpu, abuf, "pc", 'x', opval);
@@ -638,7 +638,7 @@ SEM_FN_NAME (m32rbf,blez) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 
 if (LESI (* FLD (i_src2), 0)) {
   {
-    USI opval = FLD (f_disp16);
+    USI opval = FLD (i_disp16);
     SEM_BRANCH_VIA_CACHE (current_cpu, sem_arg, opval, vpc, SEM_BRANCH_ADDR_CACHE (sem_arg));
     written |= (1 << 2);
     TRACE_RESULT (current_cpu, abuf, "pc", 'x', opval);
@@ -665,7 +665,7 @@ SEM_FN_NAME (m32rbf,bltz) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 
 if (LTSI (* FLD (i_src2), 0)) {
   {
-    USI opval = FLD (f_disp16);
+    USI opval = FLD (i_disp16);
     SEM_BRANCH_VIA_CACHE (current_cpu, sem_arg, opval, vpc, SEM_BRANCH_ADDR_CACHE (sem_arg));
     written |= (1 << 2);
     TRACE_RESULT (current_cpu, abuf, "pc", 'x', opval);
@@ -692,7 +692,7 @@ SEM_FN_NAME (m32rbf,bnez) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 
 if (NESI (* FLD (i_src2), 0)) {
   {
-    USI opval = FLD (f_disp16);
+    USI opval = FLD (i_disp16);
     SEM_BRANCH_VIA_CACHE (current_cpu, sem_arg, opval, vpc, SEM_BRANCH_ADDR_CACHE (sem_arg));
     written |= (1 << 2);
     TRACE_RESULT (current_cpu, abuf, "pc", 'x', opval);
@@ -724,7 +724,7 @@ do {
     TRACE_RESULT (current_cpu, abuf, "gr-14", 'x', opval);
   }
   {
-    USI opval = FLD (f_disp8);
+    USI opval = FLD (i_disp8);
     SEM_BRANCH_VIA_CACHE (current_cpu, sem_arg, opval, vpc, SEM_BRANCH_ADDR_CACHE (sem_arg));
     TRACE_RESULT (current_cpu, abuf, "pc", 'x', opval);
   }
@@ -754,7 +754,7 @@ do {
     TRACE_RESULT (current_cpu, abuf, "gr-14", 'x', opval);
   }
   {
-    USI opval = FLD (f_disp24);
+    USI opval = FLD (i_disp24);
     SEM_BRANCH_VIA_CACHE (current_cpu, sem_arg, opval, vpc, SEM_BRANCH_ADDR_CACHE (sem_arg));
     TRACE_RESULT (current_cpu, abuf, "pc", 'x', opval);
   }
@@ -779,7 +779,7 @@ SEM_FN_NAME (m32rbf,bnc8) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 
 if (NOTBI (CPU (h_cond))) {
   {
-    USI opval = FLD (f_disp8);
+    USI opval = FLD (i_disp8);
     SEM_BRANCH_VIA_CACHE (current_cpu, sem_arg, opval, vpc, SEM_BRANCH_ADDR_CACHE (sem_arg));
     written |= (1 << 2);
     TRACE_RESULT (current_cpu, abuf, "pc", 'x', opval);
@@ -806,7 +806,7 @@ SEM_FN_NAME (m32rbf,bnc24) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 
 if (NOTBI (CPU (h_cond))) {
   {
-    USI opval = FLD (f_disp24);
+    USI opval = FLD (i_disp24);
     SEM_BRANCH_VIA_CACHE (current_cpu, sem_arg, opval, vpc, SEM_BRANCH_ADDR_CACHE (sem_arg));
     written |= (1 << 2);
     TRACE_RESULT (current_cpu, abuf, "pc", 'x', opval);
@@ -833,7 +833,7 @@ SEM_FN_NAME (m32rbf,bne) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 
 if (NESI (* FLD (i_src1), * FLD (i_src2))) {
   {
-    USI opval = FLD (f_disp16);
+    USI opval = FLD (i_disp16);
     SEM_BRANCH_VIA_CACHE (current_cpu, sem_arg, opval, vpc, SEM_BRANCH_ADDR_CACHE (sem_arg));
     written |= (1 << 3);
     TRACE_RESULT (current_cpu, abuf, "pc", 'x', opval);
@@ -859,7 +859,7 @@ SEM_FN_NAME (m32rbf,bra8) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
-    USI opval = FLD (f_disp8);
+    USI opval = FLD (i_disp8);
     SEM_BRANCH_VIA_CACHE (current_cpu, sem_arg, opval, vpc, SEM_BRANCH_ADDR_CACHE (sem_arg));
     TRACE_RESULT (current_cpu, abuf, "pc", 'x', opval);
   }
@@ -882,7 +882,7 @@ SEM_FN_NAME (m32rbf,bra24) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
   {
-    USI opval = FLD (f_disp24);
+    USI opval = FLD (i_disp24);
     SEM_BRANCH_VIA_CACHE (current_cpu, sem_arg, opval, vpc, SEM_BRANCH_ADDR_CACHE (sem_arg));
     TRACE_RESULT (current_cpu, abuf, "pc", 'x', opval);
   }
@@ -1385,7 +1385,7 @@ SEM_FN_NAME (m32rbf,ld24) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
   {
-    SI opval = FLD (f_uimm24);
+    SI opval = FLD (i_uimm24);
     * FLD (i_dr) = opval;
     TRACE_RESULT (current_cpu, abuf, "dr", 'x', opval);
   }
