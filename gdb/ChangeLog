@@ -1,5 +1,10 @@
 Tue Mar 22 20:12:53 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
+	* config/pa/tm-hppao.h (NO_PC_SPACE_QUEUE_RESTORE): Define.
+
+	* hppa-tdep.c (hppa_pop_frame): Do not restore the PC space
+	queue if NO_PC_SPACE_QUEUE_RESTORE is defined.
+
 	* stabsread.c (REG_STRUCT_HAS_ADDR): Accept additional argument
 	for the structure's type.  All callers changed.
 

@@ -891,8 +891,10 @@ hppa_pop_frame ()
   fp = fi->frame;
   get_frame_saved_regs (fi, &fsr);
 
+#ifndef NO_PC_SPACE_QUEUE_RESTORE
   if (fsr.regs[IPSW_REGNUM])    /* Restoring a call dummy frame */
     restore_pc_queue (&fsr);
+#endif
 
   for (regnum = 31; regnum > 0; regnum--)
     if (fsr.regs[regnum])

@@ -47,5 +47,8 @@
 /* OSF1 needs an extra trap.  I assume for the emulator startup (?!?) */
 #define START_INFERIOR_TRAPS_EXPECTED 3
 
+/* OSF1 does not need the pc space queue restored.  */
+#define NO_PC_SPACE_QUEUE_RESTORE
+
 /* It's mostly just the common stuff.  */
 #include "pa/tm-hppa.h"
