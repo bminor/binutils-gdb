@@ -3,7 +3,7 @@
 # script appropriate for this directory.  For more information, check
 # any existing configure script.
 
-configdirs="getopt bfd binutils ld gas gcc gnulib clib"
+configdirs="libiberty bfd binutils ld gas gcc gnulib clib"
 srctrigger=README.configure
 srcname="gnu development package"
 
