@@ -83,7 +83,7 @@ DEFUN(rel,(abfd, seclet, output_section, data),
       && !(output_section->flags & SEC_NEVER_LOAD)
       && seclet->size)
   {
-    data = bfd_get_relocated_section_contents(abfd, seclet, data);
+    data = (PTR) bfd_get_relocated_section_contents(abfd, seclet, data);
     if(bfd_set_section_contents(abfd,
 				output_section,
 				data,
