@@ -638,6 +638,7 @@ openrisc_elf_final_write_processing (abfd, linker)
 
 #define ELF_ARCH			bfd_arch_openrisc
 #define ELF_MACHINE_CODE		EM_OPENRISC
+#define ELF_MACHINE_ALT1		EM_OPENRISC_OLD
 #define ELF_MAXPAGESIZE			0x1000
 
 #define TARGET_BIG_SYM			bfd_elf32_openrisc_vec
