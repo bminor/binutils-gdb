@@ -90,6 +90,9 @@
 
 2002-09-18  Michael Snyder  <msnyder@redhat.com>
 
+	Contributed by Apple Computer, Inc.  Merged with current sources
+	by Adam Fedor <fedor@doc.com> [cagney].
+	
 	* objc-lang.c: First clean-up round: comments, indentation.
 	* objc-lang.h: Ditto.
 	* objc-lang.y: Ditto.
