@@ -70,10 +70,8 @@ When
 .B objcopy
 generates a raw binary file, it will essentially produce a memory dump
 of the contents of the input object file.  All symbols and relocation
-information will be discarded.  By default, the memory dump will start
-at virtual address zero; the
-.B --set-start
-option may be used to specify a different starting point.
+information will be discarded.  The memory dump will start at the
+virtual address of the lowest section copied into the output file.
 .PP
 When generating an S-record or a raw binary file, it may be helpful to
 use
@@ -140,9 +138,7 @@ The interleave is ignored if neither \fB\-b\fP nor \fB\-\-byte\fP is given.
 .TP
 .B \fB\-\-set\-start=\fIval
 Set the start address of the new file to \fIval\fP.  Not all object
-file formats support setting the start address.  When using the
-\fBbinary\fP output file format, the start address sets the virtual
-address of the first byte in the binary output file.
+file formats support setting the start address.
 .TP
 .B \fB\-\-adjust\-start=\fIincr
 Adjust the start address by adding \fIincr\fP.  Not all object file

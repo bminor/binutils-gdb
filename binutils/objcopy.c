@@ -316,15 +316,7 @@ copy_object (ibfd, obfd)
   if (set_start_set)
     start = set_start;
   else
-    {
-      /* As a special hack make it easier to generate a raw binary
-         file, we default the starting address to zero for the binary
-         output format.  */
-      if (strcmp (bfd_get_target (obfd), "binary") == 0)
-	start = 0;
-      else
-	start = bfd_get_start_address (ibfd);
-    }
+    start = bfd_get_start_address (ibfd);
   start += adjust_start;
 
   if (!bfd_set_start_address (obfd, start)
