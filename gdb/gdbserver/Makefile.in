@@ -96,7 +96,9 @@ READLINE_DEP = $$(READLINE_DIR)
 # -I.. for gdb's config files (especially config.h)
 # -I${srcdir} possibly for regex.h also.
 # -I${srcdir}/config for more generic config files.
-INCLUDE_CFLAGS = -I. -I.. -I${srcdir} -I${srcdir}/.. -I${srcdir}/../config -I$(INCLUDE_DIR)
+# -I$(srcdir)/../regformats for regdef.h
+INCLUDE_CFLAGS = -I. -I.. -I${srcdir} -I${srcdir}/.. -I${srcdir}/../config \
+	-I$(INCLUDE_DIR) -I$(srcdir)/../regformats
 
 # M{H,T}_CFLAGS, if defined, has host- and target-dependent CFLAGS
 # from the config/ directory.
@@ -247,5 +249,30 @@ low-sparc.o : $(srcdir)/low-sparc.c $(srcdir)/server.h
 low-sun3.o : $(srcdir)/low-sun3.c $(srcdir)/server.h
 low-hppabsd.o : $(srcdir)/low-hppabsd.c $(srcdir)/server.h
 utils.o : ${srcdir}/utils.c ${srcdir}/server.h
+
+regdef_h = $(srcdir)/../regformats/regdef.h
+regdat_sh = $(srcdir)/../regformats/regdat.sh
+
+reg-arm.o : reg-arm.c $(regdef_h)
+reg-arm.c : $(srcdir)/../regformats/reg-arm.dat $(regdat_sh)
+	sh $(regdat_sh) $(srcdir)/../regformats/reg-arm.dat reg-arm.c
+reg-i386.o : reg-i386.c $(regdef_h)
+reg-i386.c : $(srcdir)/../regformats/reg-i386.dat $(regdat_sh)
+	sh $(regdat_sh) $(srcdir)/../regformats/reg-i386.dat reg-i386.c
+reg-ia64.o : reg-ia64.c $(regdef_h)
+reg-ia64.c : $(srcdir)/../regformats/reg-ia64.dat $(regdat_sh)
+	sh $(regdat_sh) $(srcdir)/../regformats/reg-ia64.dat reg-ia64.c
+reg-m68k.o : reg-m68k.c $(regdef_h)
+reg-m68k.c : $(srcdir)/../regformats/reg-m68k.dat $(regdat_sh)
+	sh $(regdat_sh) $(srcdir)/../regformats/reg-m68k.dat reg-m68k.c
+reg-mips.o : reg-mips.c $(regdef_h)
+reg-mips.c : $(srcdir)/../regformats/reg-mips.dat $(regdat_sh)
+	sh $(regdat_sh) $(srcdir)/../regformats/reg-mips.dat reg-mips.c
+reg-ppc.o : reg-ppc.c $(regdef_h)
+reg-ppc.c : $(srcdir)/../regformats/reg-ppc.dat $(regdat_sh)
+	sh $(regdat_sh) $(srcdir)/../regformats/reg-ppc.dat reg-ppc.c
+reg-sh.o : reg-sh.c $(regdef_h)
+reg-sh.c : $(srcdir)/../regformats/reg-sh.dat $(regdat_sh)
+	sh $(regdat_sh) $(srcdir)/../regformats/reg-sh.dat reg-sh.c
 
 # This is the end of "Makefile.in".

@@ -1,5 +1,10 @@
 2002-02-04  Daniel Jacobowitz  <drow@mvista.com>
 
+	* gdbserver/Makefile.in: Add regformats directory to INCLUDE_CFLAGS.
+	Add rules for building the register data files.
+
+2002-02-04  Daniel Jacobowitz  <drow@mvista.com>
+
 	* regformats/regdat.sh: Add braces to the definition of
 	expedite_regs_${arch}.
 
