@@ -186,6 +186,7 @@ extern bfd_byte *value_contents_all_raw (struct value *);
 extern const bfd_byte *value_contents_all (struct value *);
 
 extern int value_fetch_lazy (struct value *val);
+extern int value_contents_equal (struct value *val1, struct value *val2);
 
 /* If nonzero, this is the value of a variable which does not actually
    exist in the program.  */

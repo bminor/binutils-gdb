@@ -18,14 +18,16 @@
    Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
+#include "exceptions.h"
 #include "value.h"
 #include "expression.h"
 #include "frame.h"
 #include "language.h"
 #include "wrapper.h"
 #include "gdbcmd.h"
+
+#include "gdb_assert.h"
 #include "gdb_string.h"
-#include <math.h>
 
 #include "varobj.h"
 
@@ -784,8 +786,8 @@ int
 varobj_set_value (struct varobj *var, char *expression)
 {
   struct value *val;
-  int error;
   int offset = 0;
+  int error = 0;
 
   /* The argument "expression" contains the variable's new value.
      We need to first construct a legal expression for this -- ugh! */
@@ -875,10 +877,10 @@ int
 varobj_update (struct varobj **varp, struct varobj ***changelist)
 {
   int changed = 0;
+  int error = 0;
   int type_changed;
   int i;
   int vleft;
-  int error2;
   struct varobj *v;
   struct varobj **cv;
   struct varobj **templist = NULL;
@@ -928,14 +930,13 @@ varobj_update (struct varobj **varp, struct varobj ***changelist)
      There a couple of exceptions here, though.
      We don't want some types to be reported as "changed". */
   else if (type_changeable (*varp) &&
-	   ((*varp)->updated || !my_value_equal ((*varp)->value, new, &error2)))
+	   ((*varp)->updated || !my_value_equal ((*varp)->value, new, &error)))
     {
       vpush (&result, *varp);
       (*varp)->updated = 0;
       changed++;
-      /* error2 replaces var->error since this new value
-         WILL replace the old one. */
-      (*varp)->error = error2;
+      /* Its value is going to be updated to NEW.  */
+      (*varp)->error = error;
     }
 
   /* We must always keep around the new value for this root
@@ -969,16 +970,15 @@ varobj_update (struct varobj **varp, struct varobj ***changelist)
       /* Update this variable */
       new = value_of_child (v->parent, v->index);
       if (type_changeable (v) && 
-          (v->updated || !my_value_equal (v->value, new, &error2)))
+          (v->updated || !my_value_equal (v->value, new, &error)))
 	{
 	  /* Note that it's changed */
 	  vpush (&result, v);
 	  v->updated = 0;
 	  changed++;
 	}
-      /* error2 replaces v->error since this new value
-         WILL replace the old one. */
-      v->error = error2;
+      /* Its value is going to be updated to NEW.  */
+      v->error = error;
 
       /* We must always keep new values, since children depend on it. */
       if (v->value != NULL)
@@ -1438,60 +1438,40 @@ variable_default_display (struct varobj *var)
   return FORMAT_NATURAL;
 }
 
-/* This function is similar to gdb's value_equal, except that this
-   one is "safe" -- it NEVER longjmps. It determines if the VAR's
-   value is the same as VAL2. */
+/* This function is similar to GDB's value_contents_equal, except that
+   this one is "safe"; it never longjmps.  It determines if the VAL1's
+   value is the same as VAL2.  If for some reason the value of VAR2
+   can't be established, *ERROR2 is set to non-zero.  */
+
 static int
 my_value_equal (struct value *val1, struct value *val2, int *error2)
 {
-  int r, err1, err2;
+  volatile struct exception except;
 
-  *error2 = 0;
-  /* Special case: NULL values. If both are null, say
-     they're equal. */
+  /* As a special case, if both are null, we say they're equal.  */
   if (val1 == NULL && val2 == NULL)
     return 1;
   else if (val1 == NULL || val2 == NULL)
     return 0;
 
-  /* This is bogus, but unfortunately necessary. We must know
-     exactly what caused an error -- reading val1 or val2 --  so
-     that we can really determine if we think that something has changed. */
-  err1 = 0;
-  err2 = 0;
-  /* We do need to catch errors here because the whole purpose
-     is to test if value_equal() has errored */
-  if (!gdb_value_equal (val1, val1, &r))
-    err1 = 1;
+  /* The contents of VAL1 are supposed to be known.  */
+  gdb_assert (!value_lazy (val1));
 
-  if (!gdb_value_equal (val2, val2, &r))
-    *error2 = err2 = 1;
-
-  if (err1 != err2)
-    return 0;
-
-  if (!gdb_value_equal (val1, val2, &r))
+  /* Make sure we also know the contents of VAL2.  */
+  val2 = coerce_array (val2);
+  TRY_CATCH (except, RETURN_MASK_ERROR)
     {
-      /* An error occurred, this could have happened if
-         either val1 or val2 errored. ERR1 and ERR2 tell
-         us which of these it is. If both errored, then
-         we assume nothing has changed. If one of them is
-         valid, though, then something has changed. */
-      if (err1 == err2)
-	{
-	  /* both the old and new values caused errors, so
-	     we say the value did not change */
-	  /* This is indeterminate, though. Perhaps we should
-	     be safe and say, yes, it changed anyway?? */
-	  return 1;
-	}
-      else
-	{
-	  return 0;
-	}
+      if (value_lazy (val2))
+	value_fetch_lazy (val2);
     }
+  if (except.reason < 0)
+    {
+      *error2 = 1;
+      return 0;
+    }
+  gdb_assert (!value_lazy (val2));
 
-  return r;
+  return value_contents_equal (val1, val2);
 }
 
 /* FIXME: The following should be generic for any pointer */

@@ -1,3 +1,15 @@
+2005-02-16  Mark Kettenis  <kettenis@gnu.org>
+
+	* value.h (value_contents_equal): New prototype.
+	* value.c (value_contents_equal): New function.
+	* varobj.c: Include "exceptions.h" and "gdb_assert.h".  Don't
+	include <math.h>.
+	(varobj_set_value): Initialize error to zero.
+	(varobj_update): Rename error2 to error and initialize it to zero.
+	Slightly change the wording of some comments.
+	(my_value_equal): Reimplement using TRY_CATCH and
+	value_contents_equal.
+
 2005-02-18  Andrew Cagney  <cagney@gnu.org>
 
 	* cli/cli-decode.c (add_setshow_integer_cmd): New function.
