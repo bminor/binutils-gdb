@@ -93,6 +93,40 @@ vax_register_virtual_type (int regno)
   return (builtin_type_int);
 }
 
+void
+vax_frame_init_saved_regs (struct frame_info *frame)
+{
+  int regnum, regmask;
+  CORE_ADDR next_addr;
+
+  if (frame->saved_regs)
+    return;
+
+  frame_saved_regs_zalloc (frame);
+
+  regmask = read_memory_integer (frame->frame + 4, 4) >> 16;
+
+  next_addr = frame->frame + 16;
+
+  /* regmask's low bit is for register 0, which is the first one
+     what would be pushed.  */
+  for (regnum = 0; regnum < AP_REGNUM; regnum++)
+    {
+      if (regmask & (1 << regnum))
+        frame->saved_regs[regnum] = next_addr += 4;
+    }
+
+  frame->saved_regs[SP_REGNUM] = next_addr + 4;
+  if (regmask & (1 << FP_REGNUM))
+    frame->saved_regs[SP_REGNUM] +=
+      4 + (4 * read_memory_integer (next_addr + 4, 4));
+
+  frame->saved_regs[PC_REGNUM] = frame->frame + 16;
+  frame->saved_regs[FP_REGNUM] = frame->frame + 12;
+  frame->saved_regs[AP_REGNUM] = frame->frame + 8;
+  frame->saved_regs[PS_REGNUM] = frame->frame + 4;
+}
+
 /* Advance PC across any function entry prologue instructions
    to reach some "real" code.  */
 

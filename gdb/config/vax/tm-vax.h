@@ -215,30 +215,8 @@ extern int vax_frame_num_args (struct frame_info *fi);
 
 #define FRAME_ARGS_SKIP 4
 
-/* Put here the code to store, into a struct frame_saved_regs,
-   the addresses of the saved registers of frame described by FRAME_INFO.
-   This includes special registers such as pc and fp saved in special
-   ways in the stack frame.  sp is even more special:
-   the address we return for it IS the sp for the next frame.  */
-
-#define FRAME_FIND_SAVED_REGS(frame_info, frame_saved_regs) \
-{ register int regnum;     \
-  register int regmask = read_memory_integer ((frame_info)->frame+4, 4) >> 16; \
-  register CORE_ADDR next_addr;     \
-  memset (&frame_saved_regs, '\0', sizeof frame_saved_regs);     \
-  next_addr = (frame_info)->frame + 16;     \
-  /* Regmask's low bit is for register 0,     \
-     which is the first one that would be pushed.  */     \
-  for (regnum = 0; regnum < 12; regnum++, regmask >>= 1)  \
-    (frame_saved_regs).regs[regnum] = (regmask & 1) ? (next_addr += 4) : 0;  \
-  (frame_saved_regs).regs[SP_REGNUM] = next_addr + 4;  \
-  if (read_memory_integer ((frame_info)->frame + 4, 4) & 0x20000000)   \
-    (frame_saved_regs).regs[SP_REGNUM] += 4 + 4 * read_memory_integer (next_addr + 4, 4);  \
-  (frame_saved_regs).regs[PC_REGNUM] = (frame_info)->frame + 16;  \
-  (frame_saved_regs).regs[FP_REGNUM] = (frame_info)->frame + 12;  \
-  (frame_saved_regs).regs[AP_REGNUM] = (frame_info)->frame + 8;  \
-  (frame_saved_regs).regs[PS_REGNUM] = (frame_info)->frame + 4;  \
-}
+#define FRAME_INIT_SAVED_REGS(fi) vax_frame_init_saved_regs ((fi))
+extern void vax_frame_init_saved_regs (struct frame_info *);
 
 /* Things needed for making the inferior call functions.  */
 

@@ -1,5 +1,11 @@
 2002-04-22  Jason Thorpe  <thorpej@wasabisystems.com>
 
+	* vax-tdep.c (vax_frame_init_saved_regs): New function.
+	* config/vax/tm-vax.h (FRAME_FIND_SAVED_REGS): Remove.
+	(FRAME_INIT_SAVED_REGS): New macro.
+
+2002-04-22  Jason Thorpe  <thorpej@wasabisystems.com>
+
 	* MAINTAINERS: Reflect that the Alpha target has been multi-arch'd.
 
 2002-04-22  Jason Thorpe  <thorpej@wasabisystems.com>
