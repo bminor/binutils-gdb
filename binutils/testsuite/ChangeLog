@@ -1,3 +1,7 @@
+2001-11-15  Alan Modra  <amodra@bigpond.net.au>
+
+	* binutils-all/objcopy.exp: Allow '? main', to suit powerpc64.
+
 2001-11-14  Geoffrey Keating  <geoffk@redhat.com>
 
 	* binutils-all/readelf.exp: powerpc-*-eabi* is an ELF target.
