@@ -85,7 +85,7 @@ options_mon (int mon)
   return "UNKNOWN";
 }
 
-void
+INLINE_OPTIONS void
 print_options (void)
 {
 #if defined(_GNUC_) && defined(__VERSION__)
@@ -96,6 +96,7 @@ print_options (void)
 
   printf_filtered ("WITH_HOST_BYTE_ORDER     = %s\n", options_byte_order (WITH_HOST_BYTE_ORDER));
   printf_filtered ("WITH_TARGET_BYTE_ORDER   = %s\n", options_byte_order (WITH_TARGET_BYTE_ORDER));
+  printf_filtered ("WITH_XOR_ENDIAN          = %d\n", WITH_XOR_ENDIAN);
   printf_filtered ("WITH_BSWAP               = %d\n", WITH_BSWAP);
   printf_filtered ("WITH_SMP                 = %d\n", WITH_SMP);
   printf_filtered ("WITH_HOST_WORD_BITSIZE   = %d\n", WITH_HOST_WORD_BITSIZE);
@@ -129,6 +130,7 @@ print_options (void)
   printf_filtered ("SEMANTICS_INLINE         = %d\n", SEMANTICS_INLINE);
   printf_filtered ("IDECODE_INLINE           = %d\n", IDECODE_INLINE);
   printf_filtered ("FUNCTION_UNIT_INLINE     = %d\n", FUNCTION_UNIT_INLINE);
+  printf_filtered ("OPTIONS_INLINE           = %d\n", FUNCTION_UNIT_INLINE);
 
 #ifdef OPCODE_RULES
   printf_filtered ("OPCODE rules             = %s\n", OPCODE_RULES);

@@ -20,6 +20,10 @@ Wed Nov 15 17:32:13 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 	* {ppc-instructions,igen.c}: More global changes to add model
 	specific features.
 
+	* inline.{c,h}: Provide for inlining options.c.
+	* options.{c,h}: Ditto.
+	* std-config.h: Add OPTIONS_INLINE.
+
 Tue Nov 14 04:47:25 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* Makefile.in (devices.o, main.o): Update dependency.

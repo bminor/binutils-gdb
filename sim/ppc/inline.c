@@ -54,6 +54,10 @@
 #include "model.c"
 #endif
 
+#if OPTIONS_INLINE
+#include "options.c"
+#endif
+
 #if FUNCTION_UNIT_INLINE
 #include "function_unit.c"
 #endif

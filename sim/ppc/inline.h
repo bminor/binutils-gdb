@@ -69,6 +69,7 @@
 #define INLINE_MODEL static
 #endif
 #define STATIC_MODEL static
+#define EXTERN_MODEL static
 #endif
 
 #if BITS_INLINE
@@ -159,6 +160,14 @@
 #define INLINE_FUNCTION_UNIT static INLINE
 #else
 #define INLINE_FUNCTION_UNIT static
+#endif
+#endif
+
+#if OPTIONS_INLINE
+#if OPTIONS_INLINE == 2
+#define INLINE_OPTIONS static INLINE
+#else
+#define INLINE_OPTIONS static
 #endif
 #endif
 

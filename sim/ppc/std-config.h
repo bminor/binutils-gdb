@@ -49,6 +49,17 @@ extern int current_target_byte_order;
 				   : current_target_byte_order)
 
 
+/* PowerPC XOR endian.
+
+   In addition to the above, the simulator can support the PowerPC's
+   horrible XOR endian mode.  This feature makes it possible to
+   control the endian mode of a processor using the MSR. */
+
+#ifndef WITH_XOR_ENDIAN
+#define WITH_XOR_ENDIAN		8
+#endif
+
+
 /* Intel host BSWAP support:
 
    Whether to use bswap on the 486 and pentiums rather than the 386
@@ -69,7 +80,7 @@ extern int current_target_byte_order;
    /options/smp@<nr-cpu> */
 
 #ifndef WITH_SMP
-#define WITH_SMP                        2
+#define WITH_SMP                        5
 #endif
 #if WITH_SMP
 #define MAX_NR_PROCESSORS		WITH_SMP
@@ -343,7 +354,11 @@ extern ppc_model current_ppc_model;
 /* Your compilers inline reserved word */
 
 #ifndef INLINE
-#if defined(__GNUC__) && defined(__OPTIMIZE__)
+#if defined(__GNUC__) && defined(__OPTIMIZE__) && \
+  (DEFAULT_INLINE || SIM_ENDIAN_INLINE || BITS_INLINE || CPU_INLINE || VM_INLINE || CORE_INLINE \
+   || EVENTS_INLINE || MON_INLINE || INTERRUPTS_INLINE || REGISTERS_INLINE || DEVICE_TREE_INLINE \
+   || DEVICES_INLINE || SPREG_INLINE || SEMANTICS_INLINE || IDECODE_INLINE || MODEL_INLINE \
+   || FUNCTION_UNIT_INLINE)
 #define INLINE __inline__
 #else
 #define INLINE /*inline*/
@@ -483,6 +498,15 @@ extern ppc_model current_ppc_model;
 
 #ifndef FUNCTION_UNIT_INLINE
 #define FUNCTION_UNIT_INLINE		DEFAULT_INLINE
+#endif
+
+/* Code to print out what options we were compiled with.  Because this
+   is called at process startup, it doesn't have to be inlined, but
+   if it isn't brought in and the model routines are inline, the model
+   routines will be pulled in twice.  */
+
+#ifndef OPTIONS_INLINE
+#define OPTIONS_INLINE			(DEFAULT_INLINE ? 1 : 0)
 #endif
 
 #endif /* _CONFIG_H */
