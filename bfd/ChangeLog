@@ -1,3 +1,22 @@
+999-05-05  Catherine Moore  <clm@cygnus.com>
+ 
+        * elf32-m68k.c (elf32_m68k_set_private_flags): New.
+        (elf32_m68k_copy_private_bfd_data): New.
+        (elf32_m68k_merge_private_bfd_data): New.
+        (elf32_m68k_print_private_bfd_data): New.
+        (CPU32_FLAG): Define.
+        (PLT_CPU32_ENTRY_SIZE): Define.
+        (elf_cpu32_plt0_entry): Declare.
+        (elf_cpu32_plt_entry): Declare.
+        (elf_m68k_adjust_dynamic_symbol): Generate cpu32 plt entries.
+        (elf_m68k_finish_dynamic_symbol): Likewise.
+        (elf_m68k_finish_dynamic_sections): Likewise.
+        (elf_backend_plt_header_size): Remove definition.
+        (bfd_elf32_bfd_copy_private_bfd_data): Define.
+        (bfd_elf32_bfd_merge_private_bfd_data): Define.
+        (bfd_elf32_bfd_set_private_flags): Define.
+        (bfd_elf32_bfd_print_private_bfd_data): Define.
+ 
 Mon May  3 09:24:49 1999  Jeffrey A Law  (law@cygnus.com)
 
 	* som.c (som_fixup_formats): Fix comments for R_SHORT_PCREL_MODE
