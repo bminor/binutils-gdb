@@ -1,3 +1,23 @@
+Tue Apr 7 11:20:50 1998 Jillian Ye <jillian@cygnus.com>
+        
+	* Added the SCE (feb28) testsuite.
+	  sce_testN.* corresponds to the original testN/test.*
+	      *.vuasm       : MICRO code
+	      *.dvpasm      : DMAtag and VIF code description
+	      *.out_gif.dat : GIF output values for the corresponding testcase.
+	      
+	  They are modified to compile before check in.
+	
+	* Added sce_macros.s, originated from SCE (feb28)
+	  provide macros.s.
+	  
+	* Added sce_main.c as the driver for the SCE testcases.
+	 
+        * Added refresh.s, needed by sce_main.c.
+	  It may be used by other test cases in the future.  
+
+        * Updated Makefile.in to work with the newly added testcases.
+
 Mon Apr 6 16:40:17 1998 Jillian Ye <jillian@cygnus.com>
 
 	* c_gen.pl: Added subroutin perform_test64.

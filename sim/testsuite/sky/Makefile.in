@@ -1,5 +1,6 @@
 # Makefile for regression testing the sky simulator.
 
+#set -x
 
 VPATH = @srcdir@
 srcdir = @srcdir@
@@ -47,13 +48,22 @@ AS_FOR_TARGET = `\
   else \
     echo $(target_alias)-as ; \
   fi`
-
+      
 LD_FOR_TARGET = `\
   if [ -x ../../../ld/ld-new ]; then \
     echo ../../../ld/ld-new ; \
   else \
     echo $(target_alias)-ld ; \
   fi`
+
+OBJCOPY_FOR_TARGET = `\
+  if [ -x ../../../binutils/objcopy ]; then \
+    echo ../../../binutils/objcopy ; \
+  else \
+    echo $(target_alias)-objcopy ; \
+  fi`
+
+
 
 RUNOPTS = 
 
@@ -73,49 +83,96 @@ GCC_FOR_TARGET = `\
 
 C_GEN = perl $(srcdir)/c_gen.pl
 
-.SUFFIXES: .trc .c .run .ok .vif0out .vif0ok .vif0expect .vif1out .vif1ok .vif1expect .uu
+.SUFFIXES: .trc .c .run .ok \
+           .vif0out .vif0ok \
+	   .vif0expect 	    \
+	   .vif1out .vif1ok .vif1expect \
+	   .uu	\
+	   .dvpasm .vuasm 
 
 TESTS = \
 	t-dma.ok \
-	t-pke2.vif1ok \
-	t-pke3.ok \
-	t-pke4.vif0ok \
-	tss08_0.ok \
-	tss08_1.ok \
-	tss16_0.ok \
-	tss16_1.ok \
-	tss32_0.ok \
-	tss32_1.ok \
-	tsv208_0.ok \
-	tsv208_1.ok \
-	tsv216_0.ok \
-	tsv216_1.ok \
-	tsv232_0.ok \
-	tsv232_1.ok \
-	tsv308_0.ok \
-	tsv308_1.ok \
-	tsv316_0.ok \
-	tsv316_1.ok \
-	tsv332_0.ok \
-	tsv332_1.ok \
-	tsv408_0.ok \
-	tsv408_1.ok \
-	tsv416_0.ok \
-	tsv416_1.ok \
-	tsv432_0.ok \
-	tsv432_1.ok
+	t-pke2.vif1ok t-pke3.ok t-pke4.vif0ok \
+	tss08_0.ok tss08_1.ok \
+	tss16_0.ok tss16_1.ok \
+	tss32_0.ok tss32_1.ok \
+	tsv208_0.ok tsv208_1.ok \
+	tsv216_0.ok tsv216_1.ok \
+	tsv232_0.ok tsv232_1.ok \
+	tsv308_0.ok tsv308_1.ok \
+	tsv316_0.ok tsv316_1.ok \
+	tsv332_0.ok tsv332_1.ok \
+	tsv408_0.ok tsv408_1.ok \
+	tsv416_0.ok tsv416_1.ok \
+	tsv432_0.ok tsv432_1.ok
 
-
-check: sanity $(TESTS)
+#SCE_TESTS := $(patsubst %.dvpasm, %.ok, $(wildcard sce*.dvpasm))
+SCE_TESTS = \
+        sce_test1.ok  sce_test2.ok  sce_test3.ok  sce_test4.ok  \
+        sce_test5.ok  sce_test6.ok  sce_test7.ok  sce_test8.ok  \
+        sce_test9.ok  sce_test10.ok sce2_test11.ok sce2_test12.ok  \
+        sce_test13.ok sce_test14.ok sce_test15.ok sce_test16.ok  \
+        sce_test17.ok sce_test18.ok sce_test19.ok sce_test20.ok  \
+        sce_test21.ok sce_test22.ok sce2_test23.ok sce_test24.ok  \
+        sce_test25.ok sce_test26.ok sce_test27.ok sce_test28.ok  \
+        sce_test29.ok sce_test30.ok sce_test31.ok sce_test32.ok  \
+        sce_test33.ok sce_test34.ok sce_test35.ok sce_test36.ok  \
+        sce_test37.ok sce_test38.ok sce_test39.ok sce_test40.ok  \
+        sce_test41.ok sce_test42.ok sce_test43.ok sce_test44.ok  \
+        sce_test45.ok sce_test46.ok sce_test47.ok sce_test48.ok  \
+        sce_test49.ok sce_test50.ok sce_test51.ok sce_test52.ok  \
+        sce_test53.ok sce_test54.ok sce_test55.ok sce_test56.ok  \
+        sce_test57.ok sce_test58.ok sce_test59.ok 
+	
+check: sanity $(TESTS) $(SCE_TESTS)
 
 sanity:
 	@eval echo AS_FOR_TARGET = $(AS_FOR_TARGET)
 	@eval echo LD_FOR_TARGET = $(LD_FOR_TARGET)
+	@eval echo OBJCOPY_FOR_TARGET = $(OBJCOPY_FOR_TARGET)
 	@eval echo RUN_FOR_TARGET = $(RUN_FOR_TARGET)
 	@eval echo GCC_FOR_TARGET = $(GCC_FOR_TARGET)
 
+#------------------------------------
+# Rules for building and running the SCE tests :
+#------------------------------------
 
-# Rules for running the tests
+LDFLAGS=-T$(srcdir)/sky.ld
+
+sce%.exe: sce%.o sce_main.o refresh.o
+	$(GCC_FOR_TARGET) $(CFLAGS) $(LDFLAGS) sce_main.o refresh.o -o $@ $<
+
+sce_main.o: sce_main.c
+	$(GCC_FOR_TARGET) -c $(CFLAGS) -o $@ $<
+	
+refresh.o: refresh.s
+	$(AS_FOR_TARGET) -o $@ $<
+        
+sce_%.o: sce_%.dvpasm sce_%.vuasm
+	$(AS_FOR_TARGET) -o $@ $<
+
+sce2_%.o: sce2_%.dvpasm sce2_%.vubin
+	$(AS_FOR_TARGET) -o $@ $<
+
+sce2_%.vubin: sce2_%.vu.o
+	$(OBJCOPY_FOR_TARGET) -O binary $<  $@
+                           
+sce2_%.vu.o: sce2_%.vuasm
+	$(AS_FOR_TARGET) -o $@ $<
+ 
+sce%.ok: sce%.exe
+	rm -f sce$*.ok 
+	ulimit -t 30 ; $(RUN_FOR_TARGET) $<  > sce$*_our_gif.dat; \
+        if [ $$? -ne 0 ];  then \
+	   echo Running sce$*.exe returns $$? > sce$*.ok ; \
+	else 						   \
+	   diff -bitw sce$*_out_dif.dat sce$*_our_gif.dat > sce$*.ok; \
+        fi
+	
+
+#------------------------------------
+# Rules for running the TESTS
+#------------------------------------
 
 .run.ok:
 	rm -f tmp-$* $*.hi
@@ -138,7 +195,9 @@ sanity:
 	diff $(srcdir)/$*.vif1expect $<
 	touch $@
 
-# Rules for building all the tests
+#------------------------------------
+# Rules for building the TESTS
+#------------------------------------
  
 .trc.c:
 	$(C_GEN) $< $@
@@ -161,7 +220,8 @@ sanity:
 clean mostlyclean:
 	-rm -f *~ core *.o a.out *.x *.grt
 	-rm -f *.vif*out *.ok tmp-*
-	rm -f $(TESTS)
+	rm -f $(TESTS) 
+	rm -f $(SCE_TESTS) sce*our_gif.dat sce*.exe a.raw
 #	if [ x"${SUBDIRS}" != x ] ; then \
 #	    for dir in ${SUBDIRS}; \
 #	    do \
@@ -176,6 +236,7 @@ distclean maintainer-clean realclean: clean
 	-rm -f *~ core
 	-rm -f Makefile config.status *-init.exp
 	-rm -fr *.log summary detail *.plog *.sum *.psum site.*
+	-rm -f a.raw
 #	if [ x"${SUBDIRS}" != x ] ; then \
 #	    for dir in ${SUBDIRS}; \
 #	    do \
