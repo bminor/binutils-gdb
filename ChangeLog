@@ -1,4 +1,8 @@
-Fri Jun  7 18:16:52 1996  Harlan Stenn <harlan@clark.net>
+Sat Jun 15 17:13:25 1996  Geoffrey Noer <noer@cygnus.com>
+
+	* configure: enable_gdbtk=no for cygwin32-hosted toolchains
+
+Fri Jun  7 18:16:52 1996  Harlan Stenn <harlan@pfcs.com>
 
 	* config.guess (i?86-ncr-sysv*):  Emit minor release numbers.
 	Recognize the NCR 4850 machine and NCR Pentium-based platforms.
@@ -7,7 +11,7 @@ Wed Jun  5 00:09:17 1996  Per Bothner  <bothner@wombat.gnu.ai.mit.edu>
 
 	* config.guess:  Combine mips-mips-riscos cases, and use cpp to
 	distinguish sysv/svr4/bsd variants.
-	Based on a patch from Harlan Stenn <harlan@clark.net>.
+	Based on a patch from Harlan Stenn <harlan@pfcs.com>.
 
 Fri Jun  7 14:24:49 1996  Tom Tromey  <tromey@creche.cygnus.com>
 
