@@ -1,3 +1,8 @@
+2003-06-24  Jim Blandy  <jimb@redhat.com>
+
+	* ppc-linux-tdep.c (ppc64_desc_entry_point): New function.
+	(ppc64_standard_linkage_target): Use it.
+
 2003-06-23  Andrew Cagney  <cagney@redhat.com>
 
 	* rs6000-tdep.c (rs6000_register_virtual_type): Add explict cases
