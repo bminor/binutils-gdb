@@ -130,7 +130,12 @@ legacy_svr4_fetch_link_map_offsets (void)
 #endif /* defined (HAVE_STRUCT_LINK_MAP32) */
 
 #if defined (HAVE_STRUCT_LINK_MAP32)
-  if (bfd_get_arch_size (exec_bfd) == 32)
+  if (exec_bfd != NULL)
+    {
+      if (bfd_get_arch_size (exec_bfd) == 32)
+	return lmp32;
+    }
+  else if (TARGET_PTR_BIT == 32)
     return lmp32;
   else
 #endif
