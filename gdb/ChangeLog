@@ -1,5 +1,11 @@
 2004-01-12  Andrew Cagney  <cagney@redhat.com>
 
+	* mips-tdep.c (mips_pseudo_register_read): Don't return a value,
+	the function is void.
+	(mips_pseudo_register_write): Ditto.
+
+2004-01-12  Andrew Cagney  <cagney@redhat.com>
+
 	* stack.c (frame_info): Delete DEPRECATED_PRINT_EXTRA_FRAME_INFO
 	call.  Never defined.
 	* sparc-tdep.h (struct frame_info): Add opaque declaration.

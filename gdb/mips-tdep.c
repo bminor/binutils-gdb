@@ -556,7 +556,7 @@ mips_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
   int rawnum = cookednum % NUM_REGS;
   gdb_assert (cookednum >= NUM_REGS && cookednum < 2 * NUM_REGS);
   if (register_size (gdbarch, rawnum) == register_size (gdbarch, cookednum))
-    return regcache_raw_read (regcache, rawnum, buf);
+    regcache_raw_read (regcache, rawnum, buf);
   else if (register_size (gdbarch, rawnum) > register_size (gdbarch, cookednum))
     {
       if (gdbarch_tdep (gdbarch)->mips64_transfers_32bit_regs_p
@@ -576,7 +576,7 @@ mips_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
   int rawnum = cookednum % NUM_REGS;
   gdb_assert (cookednum >= NUM_REGS && cookednum < 2 * NUM_REGS);
   if (register_size (gdbarch, rawnum) == register_size (gdbarch, cookednum))
-    return regcache_raw_write (regcache, rawnum, buf);
+    regcache_raw_write (regcache, rawnum, buf);
   else if (register_size (gdbarch, rawnum) > register_size (gdbarch, cookednum))
     {
       if (gdbarch_tdep (gdbarch)->mips64_transfers_32bit_regs_p
