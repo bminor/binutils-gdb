@@ -54,12 +54,12 @@ proc do_tests {} {
     gdb_reinitialize_dir $srcdir/$subdir
     gdb_load $binfile
 
-    send "set language chill\n" ; expect -re "$prompt $"
+    gdb_test "set language chill ""
 
-    send "set var \$i := m_x\[\]\n" ; expect -re "$prompt $"
+    gdb_test "set var \$i := m_x\[\] ""
     gdb_test "print \$i" { = \[.i: 0, .ar: \[\(5:6\): \[.f1: 0, .f2: NULL, .f3: \[\(2:3\): 0\]\]\]\]}
 
-    send "set var \$j := m_y\[\]\n" ; expect -re "$prompt $"
+    gdb_test "set var \$j := m_y\[\] ""
     gdb_test "print \$j" { = \[.i: 0, .ar: \[\(7:8\): \[\(9:10\): \[.f1: 0, .f2: NULL, .f3: \[\(2:3\): 0\]\]\]\]\]}
 }
 

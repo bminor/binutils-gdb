@@ -13,7 +13,7 @@
 # 
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
-# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #
 # Written by Jeffrey Wheat (cassidy@cygnus.com)
 # Rewritten by Ian Lance Taylor (ian@cygnus.com)
@@ -29,9 +29,15 @@ if ![isnative] {
     return
 }
 
-if { ![ld_compile "$CXX $CXXFLAGS -fgnu-linker" $srcdir$subdir/cdtest-foo.cc tmpdir/cdtest-foo.o]
-     || ![ld_compile "$CXX $CXXFLAGS -fgnu-linker" $srcdir$subdir/cdtest-bar.cc tmpdir/cdtest-bar.o]
-     || ![ld_compile "$CXX $CXXFLAGS -fgnu-linker" $srcdir$subdir/cdtest-main.cc tmpdir/cdtest-main.o] } {
+if { [which $CXX] == 0 } {
+    untested $test1
+    untested $test2
+    return
+}
+
+if { ![ld_compile "$CXX $CXXFLAGS -fgnu-linker" $srcdir/$subdir/cdtest-foo.cc tmpdir/cdtest-foo.o]
+     || ![ld_compile "$CXX $CXXFLAGS -fgnu-linker" $srcdir/$subdir/cdtest-bar.cc tmpdir/cdtest-bar.o]
+     || ![ld_compile "$CXX $CXXFLAGS -fgnu-linker" $srcdir/$subdir/cdtest-main.cc tmpdir/cdtest-main.o] } {
     unresolved $test1
     unresolved $test2
     return
@@ -48,9 +54,9 @@ if ![ld_link $ld tmpdir/cdtest {tmpdir/cdtest-foo.o tmpdir/cdtest-bar.o tmpdir/c
 	verbose "$exec_output" 1
 	fail $test1
     } else {
-	send_log "diff tmpdir/cdtest.out $srcdir$subdir/cdtest.dat\n"
-	verbose "diff tmpdir/cdtest.out $srcdir$subdir/cdtest.dat"
-	catch "exec diff tmpdir/cdtest.out $srcdir$subdir/cdtest.dat" exec_output
+	send_log "diff tmpdir/cdtest.out $srcdir/$subdir/cdtest.dat\n"
+	verbose "diff tmpdir/cdtest.out $srcdir/$subdir/cdtest.dat"
+	catch "exec diff tmpdir/cdtest.out $srcdir/$subdir/cdtest.dat" exec_output
 	set exec_output [prune_system_crud $host_triplet $exec_output]
 
 	if [string match "" $exec_output] then {
@@ -77,9 +83,9 @@ if ![ld_relocate $ld tmpdir/cdtest.o {-Ur tmpdir/cdtest-foo.o tmpdir/cdtest-bar.
 	    verbose "$exec_output" 1
 	    fail $test2
 	} else {
-	    send_log "diff tmpdir/cdtest.out $srcdir$subdir/cdtest.dat\n"
-	    verbose "diff tmpdir/cdtest.out $srcdir$subdir/cdtest.dat"
-	    catch "exec diff tmpdir/cdtest.out $srcdir$subdir/cdtest.dat" exec_output
+	    send_log "diff tmpdir/cdtest.out $srcdir/$subdir/cdtest.dat\n"
+	    verbose "diff tmpdir/cdtest.out $srcdir/$subdir/cdtest.dat"
+	    catch "exec diff tmpdir/cdtest.out $srcdir/$subdir/cdtest.dat" exec_output
 	    set exec_output [prune_system_crud $host_triplet $exec_output]
 
 	    if [string match "" $exec_output] then {

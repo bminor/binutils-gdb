@@ -45,7 +45,7 @@ proc set_lang_chill {} {
     verbose "loading file '$binfile'"
     gdb_load $binfile
 
-    send "set language chill\n"
+    send_gdb "set language chill\n"
     expect {
 	-re ".*$prompt $" {}
 	timeout { fail "set language chill (timeout)" ; return 0 }
@@ -64,7 +64,7 @@ gdb_exit
 gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
 
-send "set print sevenbit-strings\n" ; expect -re ".*$prompt $"
+gdb_test "set print sevenbit-strings ".*"
 
 if ![set_lang_chill] then {
     runto arr_

@@ -1,3 +1,51 @@
+Tue Jan 28 14:42:31 1997  Bob Manson  <manson@charmed.cygnus.com>
+
+	   Major rewrite for testsuite revision.
+	
+	* lib/gdb.exp: Remove references to global CC, CXX, B_OPTIONS,
+	TARGET_INCLUDES, LDFLAGS and target_alias. Use gdb_spawn_id
+	instead of relying on spawn_id to always contain a valid
+	spawn id.
+	(get_compiler_info): New procedure to build the ${binfile}.ci
+	file, instead of replicating this in N different places.
+	(gdb_compile): New procedure.
+	
+	gdb.*/*.exp: Use gdb_compile and get_compiler_info (with
+ 	appropriate arguments) instead of compile. Use gdb_test in a lot
+ 	more places.  Use send_gdb instead of send. Always run gdb_start
+	at the start of a testcase, as this is no longer done magically.
+
+	config/*-gdb.exp: Rename without the -gdb suffix.
+
+	config/mips.exp: Use remote_close instead of exit_remote_shell.
+	config/monitor.exp: Use target_info instead of looking at
+	baud, timeout, etc.
+	config/sim.exp: Use gdb_spawn_id instead of relying on spawn_id.
+
+Sat Dec 14 00:43:57 1996  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* gdb.c++/templates.exp (test_ptype_of_templates),
+	gdb.c++/inherit.exp (test_ptype_si, test_print_anon_union):
+	Update expect patterns for destructors and assignment operators
+	to match corresponding c-typeprint.c changes.
+	* gdb.c++/templates.exp (test_template_breakpoints):  Revert change
+	to destructor breakpoint test, GDB should be able to set the
+	destructor breakpoint without specifying arguments.
+
+Tue Dec  3 20:17:52 1996  Fred Fish  <fnf@ninemoons.com>
+
+	* gdb.threads/pthreads.exp: Change result for failure to compile due
+	to lack of pthreads runtime support from an error to simply an
+	unsupported test, per dejagnu standards.
+
+Sun Dec  1 00:18:59 1996  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* lib/gdb.exp (gdb_test):  Simplify expect pattern for the case
+	where GDB exits to reduce pattern match time.
+	(skip_chill_tests):  Skip chill tests for mips*-sgi-irix6*.
+
+	* gdb.base/nodebug.exp:  Add mips*-sgi-irix6* xfails.
+
 Tue Nov 26 18:29:23 1996  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	* gdb.base/callfuncs.exp: Turn on function call tests for h8300.

@@ -46,31 +46,31 @@ proc do_tests {} {
     gdb_reinitialize_dir $srcdir/$subdir
     gdb_load $binfile
 
-    send "set language chill\n" ; expect -re "$prompt $"
+    gdb_test "set language chill ""
 
-    send "set width 0\n" ; expect -re "$prompt $"
-    send "set print sevenbit-strings\n" ; expect -re "$prompt $"
-    send "set print address off\n" ; expect -re "$prompt $"
+    gdb_test "set width 0 ""
+    gdb_test "set print sevenbit-strings ""
+    gdb_test "set print address off ""
 
     # simple function
     runto simple_func
-    send "step 2\n" ; expect -re "$prompt $"
+    gdb_test "step 2 ""
     gdb_test "print j" "= 5"
     gdb_test "p RESULT" "= 10"
-    send "continue\n" ; expect -re "$prompt $"
+    gdb_test "continue ""
     gdb_test "print i" "= 7"
-    send "step 4\n" ; expect -re "$prompt $"
-    send "set RESULT := 50\n" ; expect -re "$prompt $"
-    send "finish\n" ; expect -re "$prompt $"
-    send "step\n" ; expect -re "$prompt $"
+    gdb_test "step 4 ""
+    gdb_test "set RESULT := 50 ""
+    gdb_test "finish ""
+    gdb_test "step ""
     gdb_test "print i" "= 50"
 
     # returning a structure
     runto ret_struct
-    send "step 2\n"; expect -re "$prompt $"
+    gdb_test "step 2 ""
     gdb_test "p result" {\[.l: 33, .b: FALSE\]}
-    send "set var result := \[383, TRUE\]\n"; expect -re "$prompt $"
-    send "finish\n"; expect -re "$prompt $"
+    gdb_test "set var result := \[383, TRUE\] ""
+    gdb_test "finish ""
     gdb_test "p v_struct" {\[.l: 383, .b: TRUE\]}
 }
 

@@ -23,18 +23,28 @@ if $tracelevel then {
 	strace $tracelevel
 }
 
+if ![istarget "sh3*-*-*"] {
+    verbose "Tests ignored for all but sh3 based targets."
+    return
+}
+
 set prms_id 0
 set bug_id 0
 
-set binfile "sh3"
-set srcfile $binfile.s
+set testfile "sh3"
+set srcfile ${srcdir}/${subdir}/${testfile}.s
+set binfile ${objdir}/${subdir}/${testfile}
+if  { [gdb_compile "${srcfile}" "${binfile}" executable ""] != "" } {
+    perror "Couldn't link ${binfile}"
+    return -1
+}
 
 proc all_fp_move_and_load_tests { } {
     global prompt
     global hex
     global decimal
 
-    send "x/9i fp_move_and_load_tests\n"
+    send_gdb "x/9i fp_move_and_load_tests\n"
     expect {
 	-re "
 .*fmov.s\t@r0,fr0.*
@@ -57,14 +67,14 @@ proc all_fp_arithmetic_tests { } {
     global hex
     global decimal
 
-    send "x/13i fp_arithmetic_tests\n"
+    send_gdb "x/13i fp_arithmetic_tests\n"
     expect {
 	-re "
 .*fadd\tfr0,fr1.*
 .*fsub\tfr0,fr1.*
 .*fmul\tfr0,fr1.*
 .*fdiv\tfr0,fr1.*
-.*fmac\tfr0,fr1.*
+.*fmac\tfr0,fr0,fr1.*
 .*fcmp/eq\tfr0,fr1.*
 .*fcmp/gt\tfr0,fr1.*
 .*ftst/nan\tfr0.*
@@ -84,7 +94,7 @@ proc all_fp_misc_tests { } {
     global hex
     global decimal
 
-    send "x/10i fp_misc_tests\n"
+    send_gdb "x/10i fp_misc_tests\n"
     expect {
 	-re "
 .*fsts\tfpul,fr0.*
@@ -103,19 +113,12 @@ proc all_fp_misc_tests { } {
     }
 }
 
-if ![file exists $objdir/$subdir/$binfile] then {
-    if $all_flag then {
-	warning "$objdir/$subdir/$binfile does not exist; tests suppressed"
-    }
-} else {
-    # Start with a fresh gdb.
+gdb_exit
+gdb_start
+gdb_reinitialize_dir $srcdir/$subdir
+gdb_load $binfile
 
-    gdb_exit
-    gdb_start
-    gdb_reinitialize_dir $srcdir/$subdir
-    gdb_load $objdir/$subdir/$binfile
+all_fp_move_and_load_tests
+all_fp_arithmetic_tests
+all_fp_misc_tests
 
-    all_fp_move_and_load_tests
-    all_fp_arithmetic_tests
-    all_fp_misc_tests
-}

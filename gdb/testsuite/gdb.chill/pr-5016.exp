@@ -46,7 +46,7 @@ proc do_tests {} {
     gdb_reinitialize_dir $srcdir/$subdir
     gdb_load $binfile
 
-    send "set language chill\n" ; expect -re "$prompt $"
+    gdb_test "set language chill ""
 
     runto dump
     # Linux thinks type is "_cint" (and so does sparc-sun-sunos4, alpha-dec-osf2.0)
@@ -55,7 +55,7 @@ proc do_tests {} {
     gdb_test_exact "ptype m_index" "type = RANGE (1:10)" "ptype m_index"
     gdb_test_exact "whatis a" "type = /*LOC*/ vector"
     gdb_test "ptype a" "type = /\\*LOC\\*/ ARRAY \\(1:10\\) (INT|int)"
-    send "step\n"; expect -re "$prompt $"
+    gdb_test "step ""
     gdb_test_exact "whatis i" "type = long" "whatis loop counter i"
 }
 

@@ -42,20 +42,20 @@ proc set_lang_chill {} {
 
     verbose "loading file '$binfile'"
     gdb_load $binfile
-    send "set language chill\n"
+    send_gdb "set language chill\n"
     expect {
 	-re ".*$prompt $" {}
 	timeout { fail "set language chill (timeout)" ; return 0 }
     }
 
-    send "show language\n"
+    send_gdb "show language\n"
     expect {
 	-re ".* source language is \"chill\".*$prompt $" {
 	    pass "set language to \"chill\""
-	    send "break dummyfunc\n"
+	    send_gdb "break dummyfunc\n"
 	    expect {
 		-re ".*$prompt $" {
-		    send "run\n" 
+		    send_gdb "run\n" 
 		    expect -re ".*$prompt $" {}
 		    return 1
 		}
@@ -85,7 +85,7 @@ proc set_lang_chill {} {
 #
 # Args are:
 #
-#	First one is string to send to gdb
+#	First one is string to send_gdb to gdb
 #	Second one is string to match gdb result to
 #	Third one is an optional message to be printed
 
@@ -811,7 +811,7 @@ gdb_exit
 gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
 
-send "set print sevenbit-strings\n" ; expect -re ".*$prompt $"
+gdb_test "set print sevenbit-strings ".*"
 
 if [set_lang_chill] then {
     test_modes

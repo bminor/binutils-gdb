@@ -44,7 +44,7 @@ proc set_lang_chill {} {
     verbose "loading file '$binfile'"
     gdb_load $binfile
 
-    send "set language chill\n"
+    send_gdb "set language chill\n"
     expect {
         -re ".*$prompt $" {}
         timeout { fail "set language chill (timeout)" ; return 0 }
@@ -63,14 +63,14 @@ gdb_exit
 gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
 
-send "set print sevenbit-strings\n" ; expect -re ".*$prompt $"
+gdb_test "set print sevenbit-strings ".*"
 
 if ![set_lang_chill] then {
     runto doit
-    send "next\n" ; expect -re "$prompt $"
+    gdb_test "next ""
     # check too many array elements
     gdb_test {set var v_x := [1,2,3,4,5]} {Too many array elements}
     gdb_test {set var $i := m_x[(3): 22, 25]} {Too many array elements}
-    send "set var \$i := m_x\[\(2\): 22, 25\]\n" ; expect -re "$prompt $"
+    gdb_test "set var \$i := m_x\[\(2\): 22, 25\] ""
     gdb_test {print $i} { = \[\(1\): 0, \(2\): 22, \(3\): 25\]}
 }

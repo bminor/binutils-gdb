@@ -35,8 +35,8 @@ proc do_tests {} {
     gdb_start
     gdb_load $binfile
 
-    send "set language chill\n" ;  expect -re "$prompt $"
-    send "set var \$i:=xx\n" ;  expect -re "$prompt $"
+    gdb_test "set language chill ""
+    gdb_test "set var \$i:=xx ""
     gdb_test "print \$i" {= \[.c: "", .b: B'00000000', .boo: FALSE\]}
 }
 

@@ -46,20 +46,20 @@ proc set_lang_chill {} {
 
     verbose "loading file '$binfile'"
     gdb_load $binfile
-    send "set language chill\n"
+    send_gdb "set language chill\n"
     expect {
 	-re ".*$prompt $" {}
 	timeout { fail "set language chill (timeout)" ; return 0 }
     }
 
-    send "show language\n"
+    send_gdb "show language\n"
     expect {
 	-re ".* source language is \"chill\".*$prompt $" {
 	    pass "set language to \"chill\""
-	    send "break xx_\n"
+	    send_gdb "break xx_\n"
 	    expect {
 		-re ".*$prompt $" {
-		    send "run\n" 
+		    send_gdb "run\n" 
 		    expect -re ".*$prompt $" {}
 		    return 1
 		}
@@ -89,7 +89,7 @@ proc set_lang_chill {} {
 #
 # Args are:
 #
-#	First one is string to send to gdb
+#	First one is string to send_gdb to gdb
 #	Second one is string to match gdb result to
 #	Third one is an optional message to be printed
 
@@ -122,30 +122,30 @@ proc test_chars {} {
     test_print_accept "print c" {'a'<repeats 70 times>//"\^\(0,5\)Jason"//'b'<repeats 70 times>}
     test_print_accept "print d" {'\^\(11\)'}
 
-    send "set var a := (100)'\^(0,255)'\n" ; expect -re "$prompt $"
+    gdb_test "set var a := (100)'\^(0,255)' ""
     test_print_accept "print a" {"\^\(0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255\)"}
 
-    send "set var a := (10)'\^(1)'//(26)\"\^(66,67)\"//\" \"//'I'//' '//'a'//'m'//\" Hugo\" \n" ; expect -re "$prompt $"
+    send_gdb "set var a := (10)'\^(1)'//(26)\"\^(66,67)\"//\" \"//'I'//' '//'a'//'m'//\" Hugo\" \n" ; expect -re "$prompt $"
     test_print_accept "print a" {"\^\(1,1,1,1,1,1,1,1,1,1\)BCBCBCBCBCBCBCBCBCBCBCBCBCBCBCBCBCBCBCBCBCBCBCBCBCBC I am Hugo"}
-    send "set var b := \"Hugo \"\"\^(3,4)\"\"Otto\^(17)\" \n" ; expect -re "$prompt $"
+    send_gdb "set var b := \"Hugo \"\"\^(3,4)\"\"Otto\^(17)\" \n" ; expect -re "$prompt $"
     test_print_accept "print b" {"Hugo ""\^\(3,4\)""Otto\^\(17\)"}
-    send "set var c := (70)'b' // \"\^(2,3)Hugo \" // (70)'c' \n" ; expect -re "$prompt $"
+    send_gdb "set var c := (70)'b' // \"\^(2,3)Hugo \" // (70)'c' \n" ; expect -re "$prompt $"
     test_print_accept "print c" {'b'<repeats 70 times>//"\^\(2,3\)Hugo "//'c'<repeats 70 times>}
-    send "set var d := '\^(199)'\n" ; expect -re "$prompt $"
+    gdb_test "set var d := '\^(199)' ""
     test_print_accept "print d" {'\^\(199\)'}
 
     test_print_accept "print (10)'\^(0)'//(26)\"\^(66,67)\"//\" \"//'I'//' '//'a'//'m'//\" Hugo\"" {"\^\(0,0,0,0,0,0,0,0,0,0\)BCBCBCBCBCBCBCBCBCBCBCBCBCBCBCBCBCBCBCBCBCBCBCBCBCBC I am Hugo"}
     test_print_accept "print \"Jason\"\"\^(0,5)\"\"Hugo\^(10)\"" {"Jason""\^\(0,5\)""Hugo\^\(10\)"}
 
-    send "set var a := \"\" \n" ; expect -re "$prompt $"
+    send_gdb "set var a := \"\" \n" ; expect -re "$prompt $"
     test_print_accept "print a" {""}
-    send "set var a := \"\"\"\" \n" ; expect -re "$prompt $"
+    send_gdb "set var a := \"\"\"\" \n" ; expect -re "$prompt $"
     test_print_accept "print a" {""""}
-    send "set var a := \" \"\"\" \n" ; expect -re "$prompt $"
+    send_gdb "set var a := \" \"\"\" \n" ; expect -re "$prompt $"
     test_print_accept "print a" {" """}
-    send "set var a := \"\^\^\" \n" ; expect -re "$prompt $"
+    send_gdb "set var a := \"\^\^\" \n" ; expect -re "$prompt $"
     test_print_accept "print a" {"\^\^"}
-    send "set var a := \"'\" \n" ; expect -re "$prompt $"
+    send_gdb "set var a := \"'\" \n" ; expect -re "$prompt $"
     test_print_accept "print a" {"'"}
 }
 
@@ -170,7 +170,7 @@ gdb_exit
 gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
 
-send "set print sevenbit-strings\n" ; expect -re ".*$prompt $"
+gdb_test "set print sevenbit-strings ".*"
 
 
 if [set_lang_chill] then {

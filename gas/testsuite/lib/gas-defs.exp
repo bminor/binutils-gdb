@@ -24,10 +24,11 @@ proc gas_version {} {
     catch "exec $AS -version < /dev/null" tmp
     # Should find a way to discard constant parts, keep whatever's
     # left, so the version string could be almost anything at all...
-    regexp "version (cygnus-|)\[-0-9.a-zA-Z-\]+" $tmp version
-    set tmp $version
-    clone_output "[which $AS] $version\n"
-    unset tmp
+    regexp "\[^\n\]* (cygnus-|)(\[-0-9.a-zA-Z-\]+)\[\r\n\].*" $tmp version cyg number
+    if ![info exists number] then {
+        return "[which $AS] (no version number)\n"
+    }
+    clone_output "[which $AS] $number\n"
     unset version
 }
 
@@ -37,9 +38,13 @@ proc gas_run { prog as_opts redir } {
     global comp_output
     global srcdir
     global subdir
+    global host_triplet
 
-    verbose "Executing $AS $ASFLAGS $as_opts $prog $redir"
+    verbose "Executing $srcdir/lib/run $AS $ASFLAGS $as_opts $srcdir/$subdir/$prog $redir"
     catch "exec $srcdir/lib/run $AS $ASFLAGS $as_opts $srcdir/$subdir/$prog $redir" comp_output
+    set comp_output [prune_system_crud $host_triplet $comp_output]
+    verbose "output was $comp_output"
+    return [list $comp_output ""];
 }
 
 proc all_ones { args } {
@@ -181,6 +186,7 @@ proc run_dump_test { name } {
     global subdir srcdir
     global OBJDUMP NM AS OBJCOPY
     global OBJDUMPFLAGS NMFLAGS ASFLAGS OBJCOPYFLAGS
+    global host_triplet
 
     if [string match "*/*" $name] {
 	set file $name
@@ -258,6 +264,7 @@ proc run_dump_test { name } {
 
     send_log "$AS $ASFLAGS $opts(as) -o dump.o $sourcefile\n"
     catch "exec $srcdir/lib/run $AS $ASFLAGS $opts(as) -o dump.o $sourcefile" comp_output
+    set comp_output [prune_system_crud $host_triplet $comp_output]
 
     if ![string match "" $comp_output] then {
 	send_log "$comp_output\n"
@@ -275,14 +282,18 @@ proc run_dump_test { name } {
     verbose "running $binary $progopts $progopts1" 3
     if { $program == "objcopy" } {
 	send_log "$binary $progopts $progopts1 dump.o dump.out\n"
-	if [catch "exec $binary $progopts $progopts1 dump.o dump.out" comp_output] {
+	catch "exec $binary $progopts $progopts1 dump.o dump.out" comp_output
+	set comp_output [prune_system_crud $host_triplet $comp_output]
+	if ![string match "" $comp_output] then {
 	    send_log "$comp_output\n"
 	    fail $testname
 	    return
 	}
     } else {
 	send_log "$binary $progopts $progopts1 dump.o > dump.out\n"
-	if [catch "exec $binary $progopts $progopts1 dump.o > dump.out" comp_output] {
+	catch "exec $binary $progopts $progopts1 dump.o > dump.out" comp_output
+	set comp_output [prune_system_crud $host_triplet $comp_output]
+	if ![string match "" $comp_output] then {
 	    send_log "$comp_output\n"
 	    fail $testname
 	    return
@@ -292,6 +303,7 @@ proc run_dump_test { name } {
     verbose_eval {[file_contents "dump.out"]} 3
     if { [regexp_diff "dump.out" "${file}.d"] } then {
 	fail $testname
+	verbose "output is [file_contents "dump.out"]" 2
 	return
     }
 
@@ -328,8 +340,10 @@ proc slurp_options { file } {
 proc objdump { opts } {
     global OBJDUMP
     global comp_output
+    global host_triplet
 
     catch "exec $OBJDUMP $opts" comp_output
+    set comp_output [prune_system_crud $host_triplet $comp_output]
     verbose "objdump output=$comp_output\n" 3
 }
 
@@ -446,4 +460,30 @@ proc file_contents { filename } {
 proc verbose_eval { expr { level 1 } } {
     global verbose
     if $verbose>$level then { eval verbose "$expr" $level }
+}
+
+# This definition is taken from an unreleased version of DejaGnu.  Once
+# that version gets released, and has been out in the world for a few
+# months at least, it may be safe to delete this copy.
+if ![string length [info proc prune_system_crud]] {
+    #
+    # prune_system_crud -- delete various system verbosities from TEXT on SYSTEM
+    #
+    # An example is:
+    # ld.so: warning: /usr/lib/libc.so.1.8.1 has older revision than expected 9
+    #
+    # SYSTEM is typical $target_triplet or $host_triplet.
+    #
+    # This is useful when trying to do pattern matches on program output.
+    # Sites with particular verbose os's may wish to override this in site.exp.
+    #
+    proc prune_system_crud { system text } {
+	# This is from sun4's.  Do it for all machines for now.
+	# The "\\1" is to try to preserve a "\n" but only if necessary.
+	regsub -all "(^|\n)(ld.so: warning:\[^\n\]*\n?)+" $text "\\1" text
+
+	# It might be tempting to get carried away and delete blank lines, etc.
+	# Just delete *exactly* what we're ask to, and that's it.
+	return $text
+    }
 }

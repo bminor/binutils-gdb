@@ -20,30 +20,18 @@
 
 # This file was written by Rob Savoye. (rob@cygnus.com)
 
-#
-# NOTE: these test assume that there is a udi_soc file in th
-#
-
 load_lib gdb.exp
-load_lib udi.exp
-
-#
-# gdb_version -- extract and print the version number of gdb
-#
-proc gdb_version {} {
-    default_gdb_version
-}
 
 #
 # gdb_target_udi
 # Set gdb to the desired UDI target
 #
 proc gdb_target_udi { } {
-    global targetname
     global prompt
     global verbose
     global exit_status
 
+    set targetname [target_info remote_host];
     # set targets hostname
     send "target udi $targetname\n"
     set timeout 60
@@ -79,6 +67,7 @@ proc gdb_target_udi { } {
 # gdb_load -- load a file into the debugger.
 #             return a -1 if anything goes wrong.
 #
+
 proc gdb_load { arg } {
     global verbose
     global loadpath
@@ -86,7 +75,9 @@ proc gdb_load { arg } {
     global GDB
     global prompt
 
-    if [gdb_file_cmd $arg] then { return -1 }
+    if [gdb_file_cmd $arg] {
+	return -1 
+    }
 
     gdb_target_udi
 }
@@ -117,12 +108,3 @@ proc gdb_exit { } {
     }
     close $in
 }
-
-gdb_start
-
-# make sure gdb has actually started, otherwise if the first test
-# timesout, DejaGnu crashes
-send "\n"
-expect {
-    -re "$prompt"
-    }

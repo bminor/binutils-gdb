@@ -124,9 +124,9 @@ proc default_ld_compile { cc source object } {
 
     catch "exec rm -f $object" exec_output
 
-    verbose -log "$cc -I$srcdir$subdir -c $CFLAGS $source -o $object"
+    verbose -log "$cc -I$srcdir/$subdir -c $CFLAGS $source -o $object"
 
-    catch "exec $cc -I$srcdir$subdir -c $CFLAGS $source -o $object" exec_output
+    catch "exec $cc -I$srcdir/$subdir -c $CFLAGS $source -o $object" exec_output
     set exec_output [prune_system_crud $host_triplet $exec_output]
     if [string match "" $exec_output] then {
 	if {![file exists $object]} then {

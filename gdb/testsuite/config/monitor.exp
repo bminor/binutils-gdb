@@ -18,40 +18,47 @@
 load_lib gdb.exp
 
 #
-# gdb_version -- extract and print the version number of gdb
-#
-proc gdb_version {} {
-    default_gdb_version
-}
-
-#
 # gdb_target_monitor
 # Set gdb to target the monitor
 #
 proc gdb_target_monitor { } {
     global prompt
     global exit_status
-    global targetname
-    global serialport
-    global baud
-    global target_info
+    global timeout
 
     set timeout 60
-    if {$baud != ""} then {
-	send "set remotebaud $baud\n"
+
+    verbose "Timeout is now $timeout seconds" 2
+    if [target_info exists gdb_protocol] {
+	set targetname "[target_info gdb_protocol]"
+    } else {
+	perror "No protocol specified for [target_info name].";
+	return -1;
     }
-    if [info exists target_info(target,cflags)] {
-	set targetname "$target_info(target,target)"
+    if [target_info exists baud] {
+	send_gdb "set remotebaud [target_info baud]\n"
     }
-    if [info exists target_info(target,netport)] {
-	set serialport "$target_info(target,netport)"
+    if [target_info exists netport] {
+	set serialport "[target_info netport]"
+    } else {
+	set serialport "[target_info serial]"
     }
-    for {set i 1} {$i <= 3} {incr i} {
-	send "target $targetname $serialport\n"
-	expect {
-		-re "Remote target $targetname connected to.*$prompt $"	{
-		     verbose "Set target to $targetname"
-		     return
+
+    for {set j 1} {$j <= 2} {incr j} {
+	for {set i 1} {$i <= 3} {incr i} {
+	    send_gdb "target $targetname $serialport\n"
+	    expect {
+		-re "Remote MIPS debugging.*" {
+		    verbose "Set target to $targetname"
+		    return
+		}
+		-re "Remote debugging using $serialport.*" {
+		    verbose "Set target to $targetname"
+		    return
+		}
+		-re "Remote target $targetname connected to.*"	{
+		    verbose "Set target to $targetname"
+		    return
 		}
 		-re "Connection refused" {
 		    verbose "Connection refused by remote target.  Pausing, and trying again."
@@ -61,10 +68,14 @@ proc gdb_target_monitor { } {
 		timeout { 
 		    break
 		}
+	    }
+	}
+	if { $j == 1 && ![reboot_target] } {
+	    break;
 	}
     }
 
-    perror "Couldn't set target for $targetname."
+    perror "Couldn't set target for $targetname, port is $serialport."
     cleanup
     exit $exit_status
 }
@@ -79,14 +90,23 @@ proc gdb_load { arg } {
     global loadfile
     global GDB
     global prompt
+    global timeout
 
-    if [gdb_file_cmd $arg] then { return -1 }
+    if { $arg != "" } {
+	if [gdb_file_cmd $arg] { return -1 }
+    }
 
     gdb_target_monitor
 
+    if [is_remote host] {
+	# FIXME:
+	set arg a.out;
+    }
+
     verbose "Loading $arg"
-    send "load $arg\n"
-    set timeout 600
+    send_gdb "load $arg\n"
+    set timeout 1000
+    verbose "Timeout is now $timeout seconds" 2
     expect {
 	-re ".*$prompt $" {
 	    if { $verbose > 1 } {
@@ -101,24 +121,22 @@ proc gdb_load { arg } {
 	}
 	timeout {
 	    if { $verbose > 1 } {
-	 perror "Timed out trying to load $arg."
+		perror "Timed out trying to load $arg."
 	    }
 	}
     }
 }
 
-#
-# gdb_start -- start GDB running.
-#
 proc gdb_start { } {
-    default_gdb_start
-}
+    global timeout
+    global reboot
 
-#
-# gdb_exit -- exit gdb
-#
-proc gdb_exit { } {
-    catch default_gdb_exit
-}
+    # reboot the board to get a clean start
+    if $reboot then {
+	reboot_target;
+    }
+    catch default_gdb_start;
 
-gdb_start
+    set timeout 10
+    verbose "Timeout is now $timeout seconds" 2
+}

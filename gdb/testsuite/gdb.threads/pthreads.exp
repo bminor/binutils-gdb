@@ -26,15 +26,49 @@ if $tracelevel then {
 set prms_id 0
 set bug_id 0
 
+# This only works with native configurations
+if ![isnative] then {
+    return
+}
+
 set testfile "pthreads"
 set srcfile ${testfile}.c
 set binfile ${objdir}/${subdir}/${testfile}
-set ccout [compile "${srcdir}/${subdir}/${srcfile} -I${objdir}/${subdir} -g -o ${binfile} -lpthread"]
-switch -regexp -- $ccout {
-	".*no posix threads support.*" { return 0 }
-	{^$} { pass "successfully compiled posix threads test case" }
-	default { perror "Couldn't compile ${srcfile}" ; return -1 }
+
+set built_binfile 0
+if [istarget "*-*-linux"] then {
+    set target_cflags "-D_MIT_POSIX_THREADS"
+} else {
+    set target_cflags ""
+}
+set why_msg "unrecognized error"
+foreach lib {-lpthreads -lpthread} {
+    set options "debug"
+    lappend options "incdir=${objdir}/${subdir}"
+    lappend options "libs=$lib"
+    set ccout [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable $options]
+    switch -regexp -- $ccout {
+	".*no posix threads support.*" {
+	    set why_msg "missing threads include file"
+	    break
+	}
+	".*cannot open -lpthread.*" {
+	    set why_msg "missing runtime threads library"
+	}
+	".*Can't find library for -lpthread.*" {
+	    set why_msg "missing runtime threads library"
+	}
+	{^$} {
+	    pass "successfully compiled posix threads test case"
+	    set built_binfile 1
+	    break
+	}
     }
+}
+if {$built_binfile == "0"} {
+    unsupported "Couldn't compile ${srcfile}, ${why_msg}"
+    return -1
+}
 
 # Now we can proceed with the real testing.
 
@@ -45,16 +79,16 @@ gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
 gdb_load ${binfile}
 
-send "set print sevenbit-strings\n" ; expect -re "$prompt $"
-#send "set print address off\n" ; expect -re "$prompt $"
-send "set width 0\n" ; expect -re "$prompt $"
+gdb_test "set print sevenbit-strings" ""
+#gdb_test "set print address off" ""
+gdb_test "set width 0" ""
 
-# We'll need this when we send a ^C to GDB.  Need to do it before we
+# We'll need this when we send_gdb a ^C to GDB.  Need to do it before we
 # run the program and gdb starts saving and restoring tty states.
 # On Ultrix, we don't need it and it is really slow (because shell_escape
 # doesn't use vfork).
 if ![istarget "*-*-ultrix*"] then {
-    send "shell stty intr '^C'\n" ; expect -re "$prompt $"
+    gdb_test "shell stty intr '^C'" ""
 }
 
 proc all_threads_running {} {
@@ -62,26 +96,26 @@ proc all_threads_running {} {
     global srcfile
 
     # Reset all the counters to zero.
-    send "set var common_routine::hits=0\n" ; expect -re "$prompt $"
-    send "set var common_routine::from_thread1=0\n" ; expect -re "$prompt $"
-    send "set var common_routine::from_thread2=0\n" ; expect -re "$prompt $"
-    send "set var common_routine::from_main=0\n" ; expect -re "$prompt $"
-    send "set var common_routine::full_coverage=0\n" ; expect -re "$prompt $"
+    gdb_test "set var common_routine::hits=0" ""
+    gdb_test "set var common_routine::from_thread1=0" ""
+    gdb_test "set var common_routine::from_thread2=0" ""
+    gdb_test "set var common_routine::from_main=0" ""
+    gdb_test "set var common_routine::full_coverage=0" ""
 
     # Disable all breakpoints.
-    send "disable\n" ; expect -re "$prompt $"
+    gdb_test "disable" ""
 
     # Set up a breakpoint that will cause us to stop when we have
     # been called 15 times.  This should be plenty of time to allow
     # every thread to run at least once, since each thread sleeps for
     # one second between calls to common_routine.
-    send "tbreak common_routine if hits == 15\n"; expect -re "$prompt $"
+    gdb_test "tbreak common_routine if hits == 15" ""
 
     # Start all the threads running again and wait for the inferior
     # to stop.  Since no other breakpoints are set at this time
     # we should stop only when we have been previously called 15 times.
 
-    send "continue\n"
+    send_gdb "continue\n"
     expect {
 	-re "Continuing.*common_routine.*at.*$srcfile.*$prompt $" {}
 	default {
@@ -97,11 +131,15 @@ proc all_threads_running {} {
     # Check that we stopped when we actually expected to stop, by
     # verifying that there have been 15 previous hits.
 
-    send "p common_routine::hits\n"
+    send_gdb "p common_routine::hits\n"
     expect {
 	-re ".*= 15\r\n$prompt $" {}
 	default {
 	    fail "stopped before calling common_routine 15 times"
+	    return 0
+	}
+	-re ".*$prompt $" {
+	    fail "stopped before clling common_routine 15 times"
 	    return 0
 	}
 	timeout {
@@ -113,7 +151,7 @@ proc all_threads_running {} {
     # Also check that all of the threads have run, which will only be true
     # if the full_coverage variable is set.
 
-    send "p common_routine::full_coverage\n"
+    send_gdb "p common_routine::full_coverage\n"
     expect {
 	-re ".*= 1\r\n$prompt $" {}
 	default {
@@ -135,10 +173,21 @@ proc test_startup {} {
     global main_id thread1_id thread2_id
 
     # We should be able to do an info threads before starting any others.
-    gdb_test "info threads" ".*Thread.*LWP.*main.*"
+    send_gdb "info threads\n"
+    expect {
+	-re ".*Thread.*LWP.*main.*" {
+	    pass "info threads"
+	}
+	-re "\r\n$prompt $" {
+	    pass "info threads"
+	    setup_xfail "*-*-*"
+	    fail "gdb does not support pthreads for this machine"
+	    return 0
+	}
+    }
 
     # Extract the thread id number of main thread from "info threads" output.
-    send "info threads\n" ; expect -re "(\[0-9\]+)(.*Thread.*main.*)($prompt $)"
+    send_gdb "info threads\n" ; expect -re "(\[0-9\]+)(.*Thread.*main.*)($prompt $)"
     set main_id $expect_out(1,string)
 
     # Check that we can continue and create the first thread.
@@ -146,10 +195,10 @@ proc test_startup {} {
     gdb_test "continue" \
 	    "Continuing.*Breakpoint .*, thread1 \\(arg=0xfeedface\\).*at.*$srcfile.*" \
 	    "Continue to creation of first thread"
-    send "disable\n" ; expect -re "$prompt $"
+    gdb_test "disable" ""
 
     # Extract the thread id number of thread 1 from "info threads" output.
-    send "info threads\n" ; expect -re "(\[0-9\]+)(.*Thread.*thread1.*)($prompt $)"
+    send_gdb "info threads\n" ; expect -re "(\[0-9\]+)(.*Thread.*thread1.*)($prompt $)"
     set thread1_id $expect_out(1,string)
 
     # Check that we can continue and create the second thread,
@@ -160,8 +209,10 @@ proc test_startup {} {
 	    "Continue to creation of second thread"
 
     # Extract the thread id number of thread 2 from "info threads" output.
-    send "info threads\n" ; expect -re "(\[0-9\]+)(.*Thread.*thread2.*)($prompt $)"
+    send_gdb "info threads\n" ; expect -re "(\[0-9\]+)(.*Thread.*thread2.*)($prompt $)"
     set thread2_id $expect_out(1,string)
+
+    return 1
 }
 
 proc check_control_c {} {
@@ -173,9 +224,9 @@ proc check_control_c {} {
     }
 
     # Send a continue followed by ^C to the process to stop it.
-    send "continue\n"
+    send_gdb "continue\n"
     set description "Stopped with a ^C"
-    after 1000 [send "\003"]
+    after 1000 [send_gdb "\003"]
     expect {
 	-re "Program received signal SIGINT.*$prompt $" {
 	    pass $description
@@ -187,7 +238,7 @@ proc check_control_c {} {
 	    fail "$description (timeout)"
 	}
     }
-    send "bt\n" ; expect -re "$prompt $"
+    gdb_test "bt" ""
 
     # Verify that all threads can be run again after a ^C stop.
     if [all_threads_running] then {
@@ -224,10 +275,10 @@ proc check_backtraces {} {
 	    "Breakpoint .* at 0x.* file .* line .*" \
 	    "set break at common_routine in thread 2"
 
-    send "continue\n"
+    send_gdb "continue\n"
     expect {
 	-re "Breakpoint .* common_routine \\(arg=2\\).*" {
-	    send "backtrace\n"
+	    send_gdb "backtrace\n"
 	    expect {
 		-re "#0.*common_routine \\(arg=2\\).*#1.*thread2.*" {
 		    pass "backtrace from thread 2 bkpt in common_routine"
@@ -246,18 +297,24 @@ proc check_backtraces {} {
 	-re "Breakpoint .* common_routine \\(arg=1\\).*" {
 	    fail "stopped in main thread at breakpoint for thread 1"
 	}
+	-re ".*$prompt" {
+	    fail "continue to bkpt at common_routine in thread 2"
+	}
 	default {
 	    fail "continue to bkpt at common_routine in thread 2"
 	}
 	timeout {
 	    fail "continue to bkpt at common_routine in thread 2 (timeout)"
 	}
-	
     }
 }
 
+setup_xfail "alpha-*-osf*"
 if [runto_main] then {
-    test_startup
-    check_control_c
-    check_backtraces
+    clear_xfail "alpha-*-osf*"
+    if [test_startup] then {
+	check_control_c
+	check_backtraces
+    }
 }
+clear_xfail "alpha-*-osf*"

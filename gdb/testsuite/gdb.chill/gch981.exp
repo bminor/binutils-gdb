@@ -46,20 +46,20 @@ proc set_lang_chill {} {
 
     verbose "loading file '$binfile'"
     gdb_load $binfile
-    send "set language chill\n"
+    send_gdb "set language chill\n"
     expect {
 	-re ".*$prompt $" {}
 	timeout { fail "set language chill (timeout)" ; return 0 }
     }
 
-    send "show language\n"
+    send_gdb "show language\n"
     expect {
 	-re ".* source language is \"chill\".*$prompt $" {
 	    pass "set language to \"chill\""
-	    send "break xx_\n"
+	    send_gdb "break xx_\n"
 	    expect {
 		-re ".*$prompt $" {
-		    send "run\n" 
+		    send_gdb "run\n" 
 		    expect -re ".*$prompt $" {}
 		    return 1
 		}
@@ -89,7 +89,7 @@ proc set_lang_chill {} {
 #
 # Args are:
 #
-#	First one is string to send to gdb
+#	First one is string to send_gdb to gdb
 #	Second one is string to match gdb result to
 #	Third one is an optional message to be printed
 
@@ -120,105 +120,105 @@ proc test_power {} {
     test_print_accept "print v2_power1" {\[\]}
     test_print_accept "print SIZE(v1_power1)" "1"
 
-    send "set v1_power1 := \[b1\] \n" ; expect -re "$prompt $"
+    gdb_test "set v1_power1 := \[b1\]  ""
 #   if GDB has rejected the improper values, we have to expect the same!
     test_print_accept "print v1_power1" {\[e1:e5\]}
 
-    send "set v1_power1 := \[a1,a2\] \n" ; expect -re "$prompt $"
+    gdb_test "set v1_power1 := \[a1,a2\]  ""
     test_print_accept "print v1_power1" {\[e1:e5\]}
-    send "set v1_power1 := \[b1,b2,b3,e4\] \n" ; expect -re "$prompt $"
+    gdb_test "set v1_power1 := \[b1,b2,b3,e4\]  ""
     test_print_accept "print v1_power1" {\[e1:e5\]}
-    send "set v1_power1 := \[e4:e5\] \n" ; expect -re "$prompt $"
+    gdb_test "set v1_power1 := \[e4:e5\]  ""
     test_print_accept "print v1_power1" {\[e4:e5\]}
-    send "set v1_power1 := \[e1, e2:e3, e5\] \n" ; expect -re "$prompt $"
+    gdb_test "set v1_power1 := \[e1, e2:e3, e5\]  ""
     test_print_accept "print v1_power1" {\[e1:e3, e5\]}
-    send "set v1_power1 := \[e1, e2:e4, e4:e5\] \n" ; expect -re "$prompt $"
+    gdb_test "set v1_power1 := \[e1, e2:e4, e4:e5\]  ""
     test_print_accept "print v1_power1" {\[e1:e5\]}
-    send "set v1_power1 := \[e1, e1:e3, e1:e2, e2:e3\] \n" ; expect -re "$prompt $"
+    gdb_test "set v1_power1 := \[e1, e1:e3, e1:e2, e2:e3\]  ""
     test_print_accept "print v1_power1" {\[e1:e3\]}
 
-    send "set v_power2 := \[e2\] \n" ; expect -re "$prompt $"
+    gdb_test "set v_power2 := \[e2\]  ""
     test_print_accept "print v_power2" {\[\]}
-    send "set v_power2 := \[1,2,3\] \n" ; expect -re "$prompt $"
+    gdb_test "set v_power2 := \[1,2,3\]  ""
     test_print_accept "print v_power2" {\[\]}
-    send "set v_power2 := \[e2, b2, b1\] \n" ; expect -re "$prompt $"
+    gdb_test "set v_power2 := \[e2, b2, b1\]  ""
     test_print_accept "print v_power2" {\[\]}
 
 # Note, that this is a numbered SET, so a1:a3 contains all elements (exept a6)
-    send "set v_power2 := \[a1:a3, a6:a4, a7:a9\] \n" ; expect -re "$prompt $"
+    gdb_test "set v_power2 := \[a1:a3, a6:a4, a7:a9\]  ""
     test_print_accept "print v_power2" {\[a6:a3\]}
-    send "set v_power2 := \[a1, a4:a6, a9\] \n" ; expect -re "$prompt $"
+    gdb_test "set v_power2 := \[a1, a4:a6, a9\]  ""
     test_print_accept "print v_power2" {\[a1, a9\]}
-    send "set v_power2 := \[a1:a2, a6, a9\] \n" ; expect -re "$prompt $"
+    gdb_test "set v_power2 := \[a1:a2, a6, a9\]  ""
     test_print_accept "print v_power2" {\[a6:a2, a9\]}
-    send "set v_power2 := \[a1, a4, a7:a8, a9:a3\] \n" ; expect -re "$prompt $"
+    gdb_test "set v_power2 := \[a1, a4, a7:a8, a9:a3\]  ""
     test_print_accept "print v_power2" {\[a1, a4, a9:a8\]}
-    send "set v_power2 := \[a1, a4:a8\] \n" ; expect -re "$prompt $"
+    gdb_test "set v_power2 := \[a1, a4:a8\]  ""
     test_print_accept "print v_power2" {\[a1, a4:a8\]}
-    send "set v_power2 := \[a8,a3,a7,a9,a5,a6\] \n" ; expect -re "$prompt $"
+    gdb_test "set v_power2 := \[a8,a3,a7,a9,a5,a6\]  ""
     test_print_accept "print v_power2" {\[a6, a5, a9, a7, a3, a8\]}
 
-    send "set v_power3 := \[b1:b2,e1\] \n" ; expect -re "$prompt $"
+    gdb_test "set v_power3 := \[b1:b2,e1\]  ""
     test_print_accept "print v_power3" {\[b1:b2\]}
-    send "set v_power3 := \[b1, b3, b6:b7\] \n" ; expect -re "$prompt $"
+    gdb_test "set v_power3 := \[b1, b3, b6:b7\]  ""
     test_print_accept "print v_power3" {\[b1, b3, b6:b7\]}
-    send "set v_power3 := \[b1, b3:b4, b7\] \n" ; expect -re "$prompt $"
+    gdb_test "set v_power3 := \[b1, b3:b4, b7\]  ""
     test_print_accept "print v_power3" {\[b1, b3:b4, b7\]}
-    send "set v_power3 := \[b1, b4:b6, b7\] \n" ; expect -re "$prompt $"
+    gdb_test "set v_power3 := \[b1, b4:b6, b7\]  ""
     test_print_accept "print v_power3" {\[b1, b4:b7\]}
-    send "set v_power3 := \[b1:b7\] \n" ; expect -re "$prompt $"
+    gdb_test "set v_power3 := \[b1:b7\]  ""
     test_print_accept "print v_power3" {\[b1:b7\]}
-    send "set v_power3 := \[b5:b7, b1\] \n" ; expect -re "$prompt $"
+    gdb_test "set v_power3 := \[b5:b7, b1\]  ""
     test_print_accept "print v_power3" {\[b1, b5:b7\]}
 
-    send "set v_power4 := \[\"b\"\] \n" ; expect -re "$prompt $"
+    send_gdb "set v_power4 := \[\"b\"\] \n" ; expect -re "$prompt $"
     test_print_accept "print v_power4" {\['b':'x'\]}
-    send "set v_power4 := \[5\] \n" ; expect -re "$prompt $"
+    gdb_test "set v_power4 := \[5\]  ""
     test_print_accept "print v_power4" {\['b':'x'\]}
-    send "set v_power4 := \['c':'f','g':'h','o':'t'\]\n"; expect -re "$prompt $"
+    gdb_test "set v_power4 := \['c':'f','g':'h','o':'t'\] ""
     test_print_accept "print v_power4" {\['c':'h', 'o':'t'\]}
-    send "set v_power4 := \['a','b','c','d','e','f'\]\n"; expect -re "$prompt $"
+    gdb_test "set v_power4 := \['a','b','c','d','e','f'\] ""
     test_print_accept "print v_power4" {\['a':'f'\]}
-    send "set v_power4 := \['\^(0)':'\^(200)'\]\n"; expect -re "$prompt $"
+    gdb_test "set v_power4 := \['\^(0)':'\^(200)'\] ""
     test_print_accept "print v_power4" {\['\^\(0\)':'\^\(200\)'\]}
 
-    send "set v_power5 := \[a8\] \n" ; expect -re "$prompt $"
+    gdb_test "set v_power5 := \[a8\]  ""
     test_print_accept "print v_power5" {\[2:100\]}
-    send "set v_power5 := \[4\] \n" ; expect -re "$prompt $"
+    gdb_test "set v_power5 := \[4\]  ""
     test_print_accept "print v_power5" {\[4\]}
-    send "set v_power5 := \[3:95,9:100,10:107,200:250\]\n" ; expect -re "$prompt $"
+    gdb_test "set v_power5 := \[3:95,9:100,10:107,200:250\] ""
     test_print_accept "print v_power5" {\[3:107, 200:250\]}
-    send "set v_power5 := \[2, 100:120, 350:400\] \n" ; expect -re "$prompt $"
+    gdb_test "set v_power5 := \[2, 100:120, 350:400\]  ""
     test_print_accept "print v_power5" {\[2, 100:120, 350:400\]}
-    send "set v_power5 := \[2:64,65:127,128:256,256:399,400\]\n" ; expect -re "$prompt $"
+    gdb_test "set v_power5 := \[2:64,65:127,128:256,256:399,400\] ""
     test_print_accept "print v_power5" {\[2:400\]}
-    send "set v_power5 := \[3:95, 99:100, 101:107, 200:250\] \n" ; expect -re "$prompt $"
+    gdb_test "set v_power5 := \[3:95, 99:100, 101:107, 200:250\]  ""
     test_print_accept "print v_power5" {\[3:95, 99:107, 200:250\]}
 
-    send "set v_power6 := \[a8\] \n" ; expect -re "$prompt $"
+    gdb_test "set v_power6 := \[a8\]  ""
     test_print_accept "print v_power6" {\[\]}
-    send "set v_power6 := \[4\] \n" ; expect -re "$prompt $"
+    gdb_test "set v_power6 := \[4\]  ""
     test_print_accept "print v_power6" {\[4\]}
-    send "set v_power6 := \[3:95, 99:100, 101:107, 200:250\] \n" ; expect -re "$prompt $"
+    gdb_test "set v_power6 := \[3:95, 99:100, 101:107, 200:250\]  ""
     test_print_accept "print v_power6" {\[3:95, 99:107, 200:250\]}
-    send "set v_power6 := \[-111:0, 1:112, 11111:22222\] \n" ; expect -re "$prompt $"
+    gdb_test "set v_power6 := \[-111:0, 1:112, 11111:22222\]  ""
     test_print_accept "print v_power6" {\[-111:112, 11111:22222\]}
-    send "set v_power6 := \[0, 200:4000, 6666:9999\] \n" ; expect -re "$prompt $"
+    gdb_test "set v_power6 := \[0, 200:4000, 6666:9999\]  ""
     test_print_accept "print v_power6" {\[0, 200:4000, 6666:9999\]}
 
-#    send "set v_power7 := \[a8\] \n" ; expect -re "$prompt $"
+#    gdb_test "set v_power7 := \[a8\]  ""
 #    test_print_accept "print v_power7" {\[2:100\]}
-#    send "set v_power7 := \[4\] \n" ; expect -re "$prompt $"
+#    gdb_test "set v_power7 := \[4\]  ""
 #    test_print_accept "print v_power7" {\[4\]}
-#    send "set v_power7 := \[3:95, 99:100, 101:107, 200:250\]\n" ; expect -re "$prompt $"
+#    gdb_test "set v_power7 := \[3:95, 99:100, 101:107, 200:250\] ""
 #    test_print_accept "print v_power7" {\[3:95, 99:107, 200:250\]}
-#    send "set v_power7 := \[0, 1000, 1000000, 10000000000\] \n" ; expect -re "$prompt $"
+#    gdb_test "set v_power7 := \[0, 1000, 1000000, 10000000000\]  ""
 #    test_print_accept "print v_power7" {\[0, 1000, 1000000, 1000000000\]}
-#    send "set v_power7 := \[-20000:100000, 111111:2222222\] \n" ; expect -re "$prompt $"
+#    gdb_test "set v_power7 := \[-20000:100000, 111111:2222222\]  ""
 #    test_print_accept "print v_power7" {\[-20000:100000, 111111:2222222\]}
-#    send "set v_power7 := \[\] \n" ; expect -re "$prompt $"
+#    gdb_test "set v_power7 := \[\]  ""
 #    test_print_accept "print v_power7" {\[3:95, 99:107, 200:250\]}
-#    send "set v_power7 := \[2:-500, -501:1, 20:370, -888:-920, 1000:2000, 1800:2500\]\ \n" ; expect -re "$prompt $"
+#    gdb_test "set v_power7 := \[2:-500, -501:1, 20:370, -888:-920, 1000:2000, 1800:2500\]\  ""
 #    test_print_accept "print v_power7" {\[-920:-888, -501:2, 20:370, 1000:2500\]}
 #    test_print_accept "print SIZE(v_power7)" ""
 
@@ -237,7 +237,7 @@ gdb_exit
 gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
 
-send "set print sevenbit-strings\n" ; expect -re ".*$prompt $"
+gdb_test "set print sevenbit-strings ".*"
 
 
 if [set_lang_chill] then {

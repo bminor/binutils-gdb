@@ -23,7 +23,6 @@ load_lib gdb.exp
 load_lib remote.exp
 
 global shell_id
-global passwd
 
 global LD
 if ![info exists LD] then {
@@ -55,8 +54,10 @@ proc gdb_load { arg } {
     global LD
     global NLMCONV
     global errorCode
-    global targetname
     global shell_id
+
+    # FIXME: this is wrong.
+    set targetname [target_info name];
 
     set obj [file tail $arg]
     set nlm "$obj.nlm"
@@ -101,21 +102,24 @@ proc gdb_load { arg } {
     gdb_file_cmd $nlm
 }
 
-proc gdb_start { } {
-    default_gdb_start
-}
-  
-proc gdb_exit { } {
-    catch default_gdb_exit
-}
-
 proc gdb_run_cmd { } {
     global shell_id
     global prompt
-    global baud serialport
-    global targetname
     global timeout
 
+    set connhost [target_info name];
+    if [board_info $connhost exists serial] {
+	set serialport [board_info $connhost serial];
+    } else {
+	set serialport [board_info $connhost netport];
+    }
+
+    if [board_info $connhost exists baud] {
+	set baud [board_info $connhost baud];
+    } else {
+	set baud 9600;
+    }
+    # FIXME: This is wrong.
     send "kill\n"
     expect {
 	-re ".*Kill the program being debugged.*y or n. $" {
@@ -125,7 +129,7 @@ proc gdb_run_cmd { } {
 	-re ".*$prompt $" {}
     }
 
-    verbose "Starting GDB stub on $targetname" 1
+    verbose "Starting GDB stub on [target_info name]" 1
     send -i $shell_id "load nlmstub BAUD=$baud x.nlm\r\n"
 
     send "set remotebaud $baud\n"
@@ -148,12 +152,14 @@ proc gdb_run_cmd { } {
 	}
 	-re "$prompt" {}
 	timeout {
+	    set timeout $otimeout
+	    verbose "Timeout restored to $timeout seconds" 2
 	    perror "Couldn't set remote target"
 	    return
 	}
     }
     set timeout $otimeout
-    verbose "Timeout is now $timeout seconds" 2
+    verbose "Timeout restored to $timeout seconds" 2
 
     send "continue\n"
     expect {
@@ -170,7 +176,7 @@ proc gdb_run_cmd { } {
 #
 
 set shell_prompt "Password:"
-set shell_id [ eval $connectmode "$targetname" ]
+set shell_id [remote_open target]
 
 if $shell_id<0 then {
     warning "Couldn't connect to target"
@@ -199,7 +205,8 @@ expect {
 }
 
 
-set shell_prompt "[string toupper $targetname]:"
+# FIXME: this is wrong.
+set shell_prompt "[string toupper [target_info name]]:"
 send -i $shell_id "1\n"
 
 expect {
@@ -209,5 +216,3 @@ expect {
 	return -1
     }
 }
-
-gdb_start

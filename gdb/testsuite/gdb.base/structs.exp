@@ -26,44 +26,32 @@ if $tracelevel then {
 set prms_id 0
 set bug_id 0
 
-set prototypes 0
+set prototypes 1
 set testfile "structs"
 set srcfile ${testfile}.c
 set binfile ${objdir}/${subdir}/${testfile}
 
 # build the first test case
-execute_anywhere "rm -f ${binfile}.ci"
-execute_anywhere "echo set prototypes 1 > ${binfile}.ci"
-if  { [compile "-g ${srcdir}/${subdir}/${srcfile} -o ${binfile} "] != "" } {
-    execute_anywhere "rm -f ${binfile}.ci"    
+if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
     # built the second test case since we can't use prototypes
     warning "Prototypes not supported, rebuilding with -DNO_PROTOTYPES"
-    execute_anywhere "echo set prototypes 0 > ${binfile}.ci"
-    if  { [compile "-g -DNO_PROTOTYPES ${srcdir}/${subdir}/${srcfile} -o ${binfile} "] != "" } {
+if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug additional_flags=-DNO_PROTOTYPES}] != "" } {
 	perror "Couldn't compile ${testfile}.c"
 	return -1
     }
+    set prototypes 0
 }
 
 # Create and source the file that provides information about the compiler
 # used to compile the test case.
-if  { [compile "-E ${srcdir}/${subdir}/compiler.c >> ${binfile}.ci"] != "" } {
-    perror "Couldn't make ${binfile}.ci"
-    return -1
+if [get_compiler_info ${binfile}] {
+    return -1;
 }
-source ${binfile}.ci
 
 # The a29k can't call functions, so don't even bother with this test.
 if [istarget "a29k-*-udi"] then {
     setup_xfail "a29k-*-udi" 2416
     fail "a29k-*-udi can not call functions"
-    continue
-}
-
-# The h8300 simulator can't call functions, so don't even bother with this test.
-if [istarget "h8300*-*-*"] then {
-    setup_xfail "h8300*-*-*" 
-    fail "h8300*-*-* simulator can not call functions"
     continue
 }
 
@@ -84,13 +72,9 @@ proc do_function_calls {} {
     gdb_test "p fun2()" " = {a = 97 'a', b = 98 'b'}"
     gdb_test "p fun3()" " = {a = 65 'A', b = 66 'B', c = 67 'C'}"
     gdb_test "p fun4()" " = {a = 49 '1', b = 50 '2', c = 51 '3', d = 52 '4'}"
-    setup_xfail "hppa*-*-hpux9*"
     gdb_test "p fun5()" " = {a = 97 'a', b = 98 'b', c = 99 'c', d = 100 'd', e = 101 'e'}"
-    setup_xfail "hppa*-*-hpux9*"
     gdb_test "p fun6()" " = {a = 65 'A', b = 66 'B', c = 67 'C', d = 68 'D', e = 69 'E', f = 70 'F'}"
-    setup_xfail "hppa*-*-hpux9*"
     gdb_test "p fun7()" " = {a = 49 '1', b = 50 '2', c = 51 '3', d = 52 '4', e = 53 '5', f = 54 '6', g = 55 '7'}"
-    setup_xfail "hppa*-*-hpux9*"
     gdb_test "p fun8()" " = {a = 49 '1', b = 50 '2', c = 51 '3', d = 52 '4', e = 53 '5', f = 54 '6', g = 55 '7', h = 56 '8'}"
     gdb_test "p fun9()" " = {a = 97 'a', b = 98 'b', c = 99 'c', d = 100 'd', e = 101 'e', f = 102 'f', g = 103 'g', h = 104 'h', i = 105 'i'}"
     gdb_test "p fun10()" " = {a = 65 'A', b = 66 'B', c = 67 'C', d = 68 'D', e = 69 'E', f = 70 'F', g = 71 'G', h = 72 'H', i = 73 'I', j = 74 'J'}"
@@ -145,9 +129,9 @@ gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
 gdb_load ${binfile}
 
-send "set print sevenbit-strings\n" ; expect -re "$prompt $"
-send "set print address off\n" ; expect -re "$prompt $"
-send "set width 0\n" ; expect -re "$prompt $"
+send_gdb "set print sevenbit-strings\n" ; expect -re "$prompt $"
+send_gdb "set print address off\n" ; expect -re "$prompt $"
+send_gdb "set width 0\n" ; expect -re "$prompt $"
 
 if [runto_main] then {
     do_function_calls

@@ -1,4 +1,4 @@
-# Copyright (C) 1992 Free Software Foundation, Inc.
+# Copyright (C) 92, 96, 1997 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -12,12 +12,13 @@
 # 
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
-# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. 
 
 # Please email any bugs, comments, and/or additions to this file to:
 # bug-gdb@prep.ai.mit.edu
 
 # This file was written by Fred Fish. (fnf@cygnus.com)
+# and modified by Bob Manson. (manson@cygnus.com)
 
 if $tracelevel then {
 	strace $tracelevel
@@ -26,19 +27,16 @@ if $tracelevel then {
 set prms_id 0
 set bug_id 0
 
-set prototypes 0
 set testfile "callfuncs"
 set srcfile ${testfile}.c
 set binfile ${objdir}/${subdir}/${testfile}
 
-# build the first test case
-execute_anywhere "echo set prototypes 1 > ${objdir}/${subdir}/callfuncs.tmp"
-if  { [compile "-g ${srcdir}/${subdir}/${srcfile} -o ${binfile} "] != "" } {
-    execute_anywhere "rm -f ${objdir}/${subdir}/callfuncs.tmp"    
+set prototypes 1
+if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
+    set prototypes 0;
     # built the second test case since we can't use prototypes
     warning "Prototypes not supported, rebuilding with -DNO_PROTOTYPES"
-    execute_anywhere "echo set prototypes 0 > ${objdir}/${subdir}/callfuncs.tmp"
-    if  { [compile "-g -DNO_PROTOTYPES ${srcdir}/${subdir}/${srcfile} -o ${binfile} "] != "" } {
+    if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug additional_flags=-DNO_PROTOTYPES}] != "" } {
 	perror "Couldn't compile ${testfile}.c"
 	return -1
     }
@@ -46,39 +44,31 @@ if  { [compile "-g ${srcdir}/${subdir}/${srcfile} -o ${binfile} "] != "" } {
 
 # Create and source the file that provides information about the compiler
 # used to compile the test case.
-execute_anywhere "rm -f ${binfile}.ci"
-if  { [compile "-E ${srcdir}/${subdir}/compiler.c >> ${binfile}.ci"] != "" } {
-    perror "Couldn't make ${binfile}.ci"
-    return -1
+
+if [get_compiler_info ${binfile}] {
+    return -1;
 }
-source ${binfile}.ci
 
 # The a29k can't call functions, so don't even bother with this test.
-if [istarget "a29k-*-udi"] then {
-    setup_xfail "a29k-*-udi" 2416
-    fail "a29k-*-udi can not call functions"
+if [target_info exists gdb,cannot_call_functions] {
+    setup_xfail "*-*-*" 2416
+    fail "This target can not call functions"
     continue
 }
 
-# The h8300 simulator can't call functions, so don't even bother with this test.
-if [istarget "h8300*-*-*"] then {
-    setup_xfail "h8300*-*-*" 
-    fail "h8300*-*-* simulator can not call functions"
-    continue
-}
 # Set the current language to C.  This counts as a test.  If it
 # fails, then we skip the other tests.
 
 proc set_lang_c {} {
     global prompt
 
-    send "set language c\n"
+    send_gdb "set language c\n"
     expect {
 	-re ".*$prompt $" {}
 	timeout { fail "set language c (timeout)" ; return 0 }
     }
 
-    send "show language\n"
+    send_gdb "show language\n"
     expect {
 	-re ".* source language is \"c\".*$prompt $" {
 	    pass "set language to \"c\""
@@ -234,12 +224,13 @@ gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
 gdb_load ${binfile}
 
-send "set print sevenbit-strings\n" ; expect -re "$prompt $"
-send "set print address off\n" ; expect -re "$prompt $"
-send "set width 0\n" ; expect -re "$prompt $"
+gdb_test "set print sevenbit-strings" ""
+gdb_test "set print address off" ""
+gdb_test "set width 0" ""
 
 if [set_lang_c] then {
     if [runto_main] then {
+	gdb_test "next" ".*"
 	do_function_calls
     } else {
 	fail "C function calling tests suppressed"

@@ -43,13 +43,9 @@ proc gdb_version {} {
 # take precedence. Returns -1 on error, else 0.
 #
 proc gdb_load { arg } {
-    global shell_id
-
-#    gdb_exit
-#    spawn_vxgdb
     set result 0
 
-    if { [vxworks_ld $shell_id $arg] != 0 } {
+    if { [vxworks_ld target $arg] != 0 } {
 	perror "Couldn't load $arg"
 	return -1
     }
@@ -58,20 +54,18 @@ proc gdb_load { arg } {
 }
 
 #
-# gdb_start -- start gdb running and 
+# gdb_start -- start gdb running
 #
 proc gdb_start { } {
     global prompt
     global verbose
-    global targetname
     global connectmode
     global reboot
-    global shell_id
 
     # get a connection to the board
-    set shell_id [ eval $connectmode "$targetname" ]
+    set shell_id [remote_open target]
     if { $shell_id < 0 } then {
-	perror "Couldn't connect to $targetname."
+	perror "Couldn't connect to target."
 	return -1
     }
     verbose "Spawn id for remote shell is $shell_id"
@@ -108,7 +102,6 @@ proc gdb_start { } {
 proc spawn_vxgdb { } {
     global prompt
     global verbose
-    global targetname
 
     default_gdb_start
 
@@ -119,15 +112,15 @@ proc spawn_vxgdb { } {
 
     verbose "Setting up target, Please wait..."
     # set targets hostname
-    send "target vxworks $targetname\n"
+    send "target vxworks [target_info netport]\n"
     set timeout 60
     verbose "Timeout is now $timeout seconds" 2
     expect {
 	-re "Done\..*$prompt $"	{
-	    verbose "Set target to $targetname" 1
+	    verbose "Set target to [target_info netport]" 1
 	}
 	-re "net_connect: RPC: Program not registered.*$" {
-	    perror "Couldn't set GDB to target $targetname."
+	    perror "Couldn't set GDB to target [target_info netport]."
 	    exit 1
 	}
 	timeout { 
@@ -142,10 +135,7 @@ proc spawn_vxgdb { } {
 }
 
 proc gdb_exit { } {
-    global shell_id
-    if [info exists shell_id] then {
-	exit_remote_shell $shell_id
-    }
+    remote_close target;
     catch default_gdb_exit
 }
 
@@ -158,6 +148,4 @@ proc gdb_exit { } {
 #    "virtual memory exhausted" { perror "virtual memory exhausted." }
 #    "Undefined command"	   { perror "send string probably wrong." }
 #}
-
-gdb_start
 

@@ -12,7 +12,7 @@
 # 
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
-# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 # Please email any bugs, comments, and/or additions to this file to:
 # bug-gdb@prep.ai.mit.edu
@@ -31,27 +31,15 @@ set bug_id 0
 
 proc set_lang_fortran {} {
     global prompt
-
-    send "set language fortran\n"
-    expect {
-	-re ".*$prompt $" {}
-	timeout { fail "set language fortran (timeout)" ; return 0 }
+    
+    if [gdb_test "set language fortran" ""] {
+	return 0;
     }
 
-    send "show language\n"
-    expect {
-	-re ".* source language is \"fortran\".*$prompt $" {
-	    pass "set language to \"fortran\""
-	    return 1
-	}
-	-re ".*$prompt $" {
-	    fail "setting language to \"fortran\""
-	    return 0
-	}
-	timeout {
-	    fail "can't show language (timeout)"
-	    return 0
-	}
+    if ![gdb_test "show language" ".* source language is \"fortran\".*"] {
+	return 1;
+    } else {
+	return 0;
     }
 }
 
@@ -92,72 +80,72 @@ proc test_float_literals_accepted {} {
 
     # Test various floating point formats
 
-    gdb_test "p .44 .LT. .45" " = 1"
-    gdb_test "p .44 .GT. .45" " = 0"
-    gdb_test "p 0.44 .LT. 0.45" " = 1"
-    gdb_test "p 0.44 .GT. 0.45" " = 0"
-    gdb_test "p 44. .LT. 45." " = 1"
-    gdb_test "p 44. .GT. 45." " = 0"
-    gdb_test "p 44.0 .LT. 45.0" " = 1"
-    gdb_test "p 44.0 .GT. 45.0" " = 0"
-    gdb_test "p 10D20 .LT. 10D21" " = 1"
-    gdb_test "p 10D20 .GT. 10D21" " = 0"
-    gdb_test "p 10d20 .LT. 10d21" " = 1"
-    gdb_test "p 10d20 .GT. 10d21" " = 0"
-    gdb_test "p 10E20 .LT. 10E21" " = 1"
-    gdb_test "p 10E20 .GT. 10E21" " = 0"
-    gdb_test "p 10e20 .LT. 10e21" " = 1"
-    gdb_test "p 10e20 .GT. 10e21" " = 0"
-    gdb_test "p 10.D20 .LT. 10.D21" " = 1"
-    gdb_test "p 10.D20 .GT. 10.D21" " = 0"
-    gdb_test "p 10.d20 .LT. 10.d21" " = 1"
-    gdb_test "p 10.d20 .GT. 10.d21" " = 0"
-    gdb_test "p 10.E20 .LT. 10.E21" " = 1"
-    gdb_test "p 10.E20 .GT. 10.E21" " = 0"
-    gdb_test "p 10.e20 .LT. 10.e21" " = 1"
-    gdb_test "p 10.e20 .GT. 10.e21" " = 0"
-    gdb_test "p 10.0D20 .LT. 10.0D21" " = 1"
-    gdb_test "p 10.0D20 .GT. 10.0D21" " = 0"
-    gdb_test "p 10.0d20 .LT. 10.0d21" " = 1"
-    gdb_test "p 10.0d20 .GT. 10.0d21" " = 0"
-    gdb_test "p 10.0E20 .LT. 10.0E21" " = 1"
-    gdb_test "p 10.0E20 .GT. 10.0E21" " = 0"
-    gdb_test "p 10.0e20 .LT. 10.0e21" " = 1"
-    gdb_test "p 10.0e20 .GT. 10.0e21" " = 0"
-    gdb_test "p 10.0D+20 .LT. 10.0D+21" " = 1"
-    gdb_test "p 10.0D+20 .GT. 10.0D+21" " = 0"
-    gdb_test "p 10.0d+20 .LT. 10.0d+21" " = 1"
-    gdb_test "p 10.0d+20 .GT. 10.0d+21" " = 0"
-    gdb_test "p 10.0E+20 .LT. 10.0E+21" " = 1"
-    gdb_test "p 10.0E+20 .GT. 10.0E+21" " = 0"
-    gdb_test "p 10.0e+20 .LT. 10.0e+21" " = 1"
-    gdb_test "p 10.0e+20 .GT. 10.0e+21" " = 0"
-    gdb_test "p 10.0D-11 .LT. 10.0D-10" " = 1"
-    gdb_test "p 10.0D-11 .GT. 10.0D-10" " = 0"
-    gdb_test "p 10.0d-11 .LT. 10.0d-10" " = 1"
-    gdb_test "p 10.0d-11 .GT. 10.0d-10" " = 0"
-    gdb_test "p 10.0E-11 .LT. 10.0E-10" " = 1"
-    gdb_test "p 10.0E-11 .GT. 10.0E-10" " = 0"
-    gdb_test "p 10.0e-11 .LT. 10.0e-10" " = 1"
-    gdb_test "p 10.0e-11 .GT. 10.0e-10" " = 0"
+    gdb_test "p .44 .LT. .45" " = .TRUE."
+    gdb_test "p .44 .GT. .45" " = .FALSE."
+    gdb_test "p 0.44 .LT. 0.45" " = .TRUE."
+    gdb_test "p 0.44 .GT. 0.45" " = .FALSE."
+    gdb_test "p 44. .LT. 45." " = .TRUE."
+    gdb_test "p 44. .GT. 45." " = .FALSE."
+    gdb_test "p 44.0 .LT. 45.0" " = .TRUE."
+    gdb_test "p 44.0 .GT. 45.0" " = .FALSE."
+    gdb_test "p 10D20 .LT. 10D21" " = .TRUE."
+    gdb_test "p 10D20 .GT. 10D21" " = .FALSE."
+    gdb_test "p 10d20 .LT. 10d21" " = .TRUE."
+    gdb_test "p 10d20 .GT. 10d21" " = .FALSE."
+    gdb_test "p 10E20 .LT. 10E21" " = .TRUE."
+    gdb_test "p 10E20 .GT. 10E21" " = .FALSE."
+    gdb_test "p 10e20 .LT. 10e21" " = .TRUE."
+    gdb_test "p 10e20 .GT. 10e21" " = .FALSE."
+    gdb_test "p 10.D20 .LT. 10.D21" " = .TRUE."
+    gdb_test "p 10.D20 .GT. 10.D21" " = .FALSE."
+    gdb_test "p 10.d20 .LT. 10.d21" " = .TRUE."
+    gdb_test "p 10.d20 .GT. 10.d21" " = .FALSE."
+    gdb_test "p 10.E20 .LT. 10.E21" " = .TRUE."
+    gdb_test "p 10.E20 .GT. 10.E21" " = .FALSE."
+    gdb_test "p 10.e20 .LT. 10.e21" " = .TRUE."
+    gdb_test "p 10.e20 .GT. 10.e21" " = .FALSE."
+    gdb_test "p 10.0D20 .LT. 10.0D21" " = .TRUE."
+    gdb_test "p 10.0D20 .GT. 10.0D21" " = .FALSE."
+    gdb_test "p 10.0d20 .LT. 10.0d21" " = .TRUE."
+    gdb_test "p 10.0d20 .GT. 10.0d21" " = .FALSE."
+    gdb_test "p 10.0E20 .LT. 10.0E21" " = .TRUE."
+    gdb_test "p 10.0E20 .GT. 10.0E21" " = .FALSE."
+    gdb_test "p 10.0e20 .LT. 10.0e21" " = .TRUE."
+    gdb_test "p 10.0e20 .GT. 10.0e21" " = .FALSE."
+    gdb_test "p 10.0D+20 .LT. 10.0D+21" " = .TRUE."
+    gdb_test "p 10.0D+20 .GT. 10.0D+21" " = .FALSE."
+    gdb_test "p 10.0d+20 .LT. 10.0d+21" " = .TRUE."
+    gdb_test "p 10.0d+20 .GT. 10.0d+21" " = .FALSE."
+    gdb_test "p 10.0E+20 .LT. 10.0E+21" " = .TRUE."
+    gdb_test "p 10.0E+20 .GT. 10.0E+21" " = .FALSE."
+    gdb_test "p 10.0e+20 .LT. 10.0e+21" " = .TRUE."
+    gdb_test "p 10.0e+20 .GT. 10.0e+21" " = .FALSE."
+    gdb_test "p 10.0D-11 .LT. 10.0D-10" " = .TRUE."
+    gdb_test "p 10.0D-11 .GT. 10.0D-10" " = .FALSE."
+    gdb_test "p 10.0d-11 .LT. 10.0d-10" " = .TRUE."
+    gdb_test "p 10.0d-11 .GT. 10.0d-10" " = .FALSE."
+    gdb_test "p 10.0E-11 .LT. 10.0E-10" " = .TRUE."
+    gdb_test "p 10.0E-11 .GT. 10.0E-10" " = .FALSE."
+    gdb_test "p 10.0e-11 .LT. 10.0e-10" " = .TRUE."
+    gdb_test "p 10.0e-11 .GT. 10.0e-10" " = .FALSE."
 }
 
 proc test_convenience_variables {} {
     global prompt
 
-    gdb_test "set \$foo = 101"	" = 101\[\r\n\]+" \
+    gdb_test "set \$foo = 101"	" = 101\[\r\n\]*" \
 	"Set a new convenience variable"
 
     gdb_test "print \$foo"		" = 101" \
 	"Print contents of new convenience variable"
 
-    gdb_test "set \$foo = 301"	" = 301\[\r\n\]+" \
+    gdb_test "set \$foo = 301"	" = 301\[\r\n\]*" \
 	"Set convenience variable to a new value"
 
     gdb_test "print \$foo"		" = 301" \
 	"Print new contents of convenience variable"
 
-    gdb_test "set \$_ = 11"		" = 11\[\r\n\]+" \
+    gdb_test "set \$_ = 11"		" = 11\[\r\n\]*" \
 	"Set convenience variable \$_"
 
     gdb_test "print \$_"		" = 11" \
@@ -269,7 +257,7 @@ gdb_exit
 gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
 
-send "set print sevenbit-strings\n" ; expect -re ".*$prompt $"
+gdb_test "set print sevenbit-strings" ""
 
 if [set_lang_fortran] then {
     test_value_history
@@ -281,5 +269,5 @@ if [set_lang_fortran] then {
     test_float_literals_accepted
     test_arithmetic_expressions
 } else {
-    warning "$test_name tests suppressed."
+    warning "$test_name tests suppressed." 0
 }

@@ -27,9 +27,9 @@ set prms_id 0
 set bug_id 0
 
 set testfile "bitfields"
-set srcfile ${srcdir}/$subdir/${testfile}.c
+set srcfile ${testfile}.c
 set binfile ${objdir}/${subdir}/${testfile}
-if  { [compile "${srcfile} -g -o ${binfile}"] != "" } {
+if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
     perror "Couldn't compile ${srcfile}"
     return -1
 }
@@ -55,7 +55,7 @@ proc bitfield_uniqueness {} {
 	-re "Break.*break1 \\(\\) at .*$srcfile:$decimal.*$prompt $" {
 	    pass "running to break1"
 	}
-	timeout { fail "running to break1"; return }
+	timeout { fail "(timeout) running to break1"; return }
     }
 	
     if [gdb_test "print flags" ".*uc = 1 .*, s1 = 0, u1 = 0, s2 = 0, u2 = 0, s3 = 0, u3 = 0, s9 = 0, u9 = 0, sc = 0.*"] {
@@ -145,7 +145,7 @@ proc bitfield_containment {} {
 	-re "Break.*break2 \\(\\) at .*$srcfile:$decimal.*$prompt $" {
 	    pass "running to break2"
 	}
-	timeout { fail "running to break2"; return }
+	timeout { fail "(timeout) running to break2"; return }
     }
 
     if [gdb_test "print/x flags" "= {uc = 0xff, s1 = 0x0, u1 = 0x1, s2 = 0x0, u2 = 0x3, s3 = 0x0, u3 = 0x7, s9 = 0x0, u9 = 0x1ff, sc = 0x0}" "bitfield containment #1"] {
@@ -185,7 +185,7 @@ proc bitfield_unsignedness {} {
 	-re "Break.*break3 \\(\\) at .*$srcfile:$decimal.*$prompt $" {
 	    pass "running to break3"
 	}
-	timeout { fail "running to break3"; return }
+	timeout { fail "(timeout) running to break3"; return }
     }
 
     if [gdb_test "print flags" ".*uc = 0 .*, s1 = 0, u1 = 1, s2 = 0, u2 = 3, s3 = 0, u3 = 7, s9 = 0, u9 = 511, sc = 0.*" "unsigned bitfield ranges"] {
@@ -217,7 +217,7 @@ proc bitfield_signedness {} {
 	-re "Break.*break4 \\(\\) at .*$srcfile:$decimal.*$prompt $" {
 	    pass "running to break4"
 	}
-	timeout { fail "running to break4"; return }
+	timeout { fail "(timeout) running to break4"; return }
     }
 
     if [gdb_test "print flags" "= {uc = 0 .*, s1 = 0, u1 = 0, s2 = 1, u2 = 0, s3 = 3, u3 = 0, s9 = 255, u9 = 0, sc = 0 .*}" "signed bitfields, max positive values"] {
@@ -230,7 +230,7 @@ proc bitfield_signedness {} {
 
     # Determine if the target has signed bitfields so we can xfail the
     # the signed bitfield tests if it doesn't.
-    send "print i\n"
+    send_gdb "print i\n"
     expect {
 	-re ".* = -256.*$prompt $" {
 	    pass "determining signed-ness of bitfields"
@@ -259,14 +259,11 @@ proc bitfield_signedness {} {
     }
 }
 
-# Start with a fresh gdb.
-
-gdb_exit
 gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
 gdb_load ${binfile}
 
-send "set print sevenbit-strings\n" ; expect -re "$prompt $"
+send_gdb "set print sevenbit-strings\n" ; expect -re "$prompt $"
 bitfield_uniqueness
 if [istarget "mips-idt-*"] then {
     # Restart because IDT/SIM runs out of file descriptors.

@@ -45,7 +45,7 @@ proc set_lang_chill {} {
     verbose "loading file '$binfile'"
     gdb_load $binfile
 
-    send "set language chill\n"
+    send_gdb "set language chill\n"
     expect {
 	-re ".*$prompt $" {}
 	timeout { fail "set language chill (timeout)" ; return 0 }
@@ -64,7 +64,7 @@ gdb_exit
 gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
 
-send "set print sevenbit-strings\n" ; expect -re ".*$prompt $"
+gdb_test "set print sevenbit-strings ".*"
 
 if ![set_lang_chill] then {
     runto dummyfunc
@@ -78,7 +78,7 @@ if ![set_lang_chill] then {
     gdb_test "print NULL" " = NULL" "print emptiness literal"
 
     # This tests PR 8496.
-    gdb_test {printf "%d %d.\n",  3+4,2} "7 2." "printf with 2 arguments"
+    gdb_test {printf "%d %d.",  3+4,2} "7 2." "printf with 2 arguments"
 
     # This tests GCH/924
     gdb_test {print (h'23)} { = 35} "print parantised integer literal"
@@ -93,7 +93,7 @@ if ![set_lang_chill] then {
     setup_xfail "m68*-*-hpux*"
     gdb_test "print array () ubyte (foo)" { = \[\(0:11\): 0\]}
 	
-    send "set var \$i := foo\n"
+    send_gdb "set var \$i := foo\n"
     expect -re ".*$prompt $"
     setup_xfail "m68*-*-hpux*"
     gdb_test "print/x array () byte (\$i)" { = \[\(0:11\): H'0\]}

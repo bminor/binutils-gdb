@@ -44,7 +44,7 @@ proc set_lang_chill {} {
     verbose "loading file '$binfile'"
     gdb_load $binfile
 
-    send "set language chill\n"
+    send_gdb "set language chill\n"
     expect {
         -re ".*$prompt $" {}
         timeout { fail "set language chill (timeout)" ; return 0 }
@@ -63,19 +63,19 @@ gdb_exit
 gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
 
-send "set print sevenbit-strings\n" ; expect -re ".*$prompt $"
+gdb_test "set print sevenbit-strings ".*"
 
 if ![set_lang_chill] then {
     runto brrr
 
     # check foo
     gdb_test {print foo} { = \[\(0:99\): 222\]}
-    send "set var foo := m_array\[\(\*\):44\]\n" ; expect -re ".*$prompt $"
+    gdb_test "set var foo := m_array\[\(\*\):44\] ".*"
     gdb_test {print foo} { = \[\(0:99\): 44\]}
 
     # check bar
     gdb_test {print bar} { = \[\(-10:20\): \[.i: 0, .b: FALSE\]\]}
-    send "set var bar := m_bar\[\(\*\): \[42, TRUE\]\]\n" ; expect -re ".*$prompt $"
+    gdb_test "set var bar := m_bar\[\(\*\): \[42, TRUE\]\] ".*"
     gdb_test {print bar} { = \[\(-10:20\): \[.i: 42, .b: TRUE\]\]}
 
     # some failues

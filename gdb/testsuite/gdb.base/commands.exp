@@ -28,9 +28,9 @@ set prms_id 0
 set bug_id 0
 
 set testfile "run"
-set srcfile ${srcdir}/$subdir/${testfile}.c
+set srcfile ${testfile}.c
 set binfile ${objdir}/${subdir}/${testfile}
-if  { [compile "${srcfile} -g -o ${binfile}"] != "" } {
+if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
     perror "Couldn't compile ${srcfile}"
     return -1
 }
@@ -69,9 +69,8 @@ proc gdbvar_complex_if_while_test {} {
 
 proc progvar_simple_if_test {} {
     global prompt
-    global noargs
 
-    if $noargs { 
+    if [target_info exists gdb,noargs] { 
         verbose "Skipping progvar_simple_if_test because of noargs."
         return
     }
@@ -86,9 +85,8 @@ proc progvar_simple_if_test {} {
 
 proc progvar_simple_while_test {} {
     global prompt
-    global noargs
 
-    if $noargs { 
+    if [target_info exists gdb,noargs] { 
         verbose "Skipping progvar_simple_while_test because of noargs."
         return
     }
@@ -101,9 +99,8 @@ proc progvar_simple_while_test {} {
 
 proc progvar_complex_if_while_test {} {
     global prompt
-    global noargs
 
-    if $noargs { 
+    if [target_info exists gdb,noargs] { 
         verbose "Skipping progvar_simple_if_while_test because of noargs."
         return
     }
@@ -115,9 +112,7 @@ proc progvar_complex_if_while_test {} {
 }
 
 proc if_while_breakpoint_command_test {} {
-    global noargs
-
-    if $noargs { 
+    if [target_info exists gdb,noargs] { 
         verbose "Skipping if_while_breakpoint_command_test because of noargs."
         return
     }
@@ -127,7 +122,7 @@ proc if_while_breakpoint_command_test {} {
     delete_breakpoints
     gdb_test "break factorial" "Breakpoint.*at.*"
 
-    send "commands\n"
+    send_gdb "commands\n"
     expect {
 	-re "End with" {
 	    pass "commands in if_while_breakpoint_command_test"
@@ -144,9 +139,7 @@ proc if_while_breakpoint_command_test {} {
 
 # Test that we can run the inferior from breakpoint commands.
 proc infrun_breakpoint_command_test {} {
-    global noargs
-
-    if $noargs { 
+    if [target_info exists gdb,noargs] { 
         verbose "Skipping infrun_breakpoint_command_test because of noargs."
         return
     }
@@ -173,9 +166,7 @@ factorial \\(value=3\\) at .*
 }
 
 proc breakpoint_command_test {} {
-    global noargs
-
-    if $noargs { 
+    if [target_info exists gdb,noargs] { 
         verbose "Skipping breakpoint_command_test because of noargs."
         return
     }
@@ -197,7 +188,7 @@ proc user_defined_command_test {} {
 
     gdb_test "set \$foo = 4" "" "set foo in user_defined_command_test"
 
-    send "define mycommand\n"
+    send_gdb "define mycommand\n"
     expect {
 	-re "End with"  {
 	    pass "define mycommand in user_defined_command_test"

@@ -20,16 +20,17 @@
 # This file was written by Rob Savoye. (rob@cygnus.com)
 
 if $tracelevel then {
-	strace $tracelevel
-	}
+    strace $tracelevel
+}
 
 set prms_id 0
 set bug_id 0
 
 # are we on a target board
-if ![isnative] then {
+if [is_remote target] {
     return
 }
+
 if [istarget "m68k*-*-hpux*"] then {
     # The top-level makefile passes CFLAGS= (no -g) for hp300.  This probably
     # should be fixed (it is only needed for gcc bootstrapping, not gdb),
@@ -160,7 +161,7 @@ proc do_steps_and_nexts {} {
     }
 }
 
-proc test_with_self {} {
+proc test_with_self { executable } {
     global prompt
     global tool
     global det_file
@@ -180,7 +181,7 @@ proc test_with_self {} {
     set oldtimeout $timeout
     set timeout 600
     verbose "Timeout is now $timeout seconds" 2
-    if {[gdb_load "./x$tool"] <0} then {
+    if {[gdb_load $executable] <0} then {
 	set timeout $oldtimeout
 	verbose "Timeout is now $timeout seconds" 2
 	return -1
@@ -189,27 +190,14 @@ proc test_with_self {} {
     verbose "Timeout is now $timeout seconds" 2
 
     # disassemble yourself
-    send "x/10i main\n"
-    expect {
-	-re "x/10i.*main.*main.$decimal.*main.$decimal.*$prompt $"\
-	    { pass "Disassemble main" }
-	-re ".*$prompt $"	{ fail "Disassemble main" }
-	timeout		{ fail "(timeout) Disassemble main" }
-    }
+    gdb_test "x/10i main" \
+	    "x/10i.*main.*main.$decimal.*main.$decimal.*" \
+	    "Disassemble main"
 
-    set description "set breakpoint at main"
-    send "break main\n"
-    expect {
-	-re "Breakpoint.*at.* file.*, line.*$prompt $" {
-	    pass "$description"
-	}
-	-re ".*$prompt $" {
-	    fail "$description"
-	}
-	timeout {
-	    fail "$description (timeout)"
-	}
-    }
+    # Set a breakpoint at main
+    gdb_test "break main" \
+	    "Breakpoint.*at.* file.*, line.*" \
+	    "breakpoint in main"
 
     # We'll need this when we send a ^C to GDB.  Need to do it before we
     # run the program and gdb starts saving and restoring tty states.
@@ -223,7 +211,7 @@ proc test_with_self {} {
     # FIXME: If we put this after the run to main, the first list
     # command doesn't print the same line as the current line where
     # gdb is stopped.
-    send "set listsize 1\n" ; expect -re "$prompt $"
+    gdb_test "set listsize 1" "" "set listsize to 1"
 
     # run yourself
     # It may take a very long time for the inferior gdb to start (lynx),
@@ -274,19 +262,7 @@ proc test_with_self {} {
 
     do_steps_and_nexts
 
-    set description "print a string"
-    send "print \"foo\"\n"
-    expect {
-	-re ".\[0-9\]+ = \"foo\".*$prompt $" {
-	    pass "$description"
-	}
-	-re ".*$prompt $" {
-	    fail "$description"
-	}
-	timeout {
-	    fail "$description (timeout)"
-	}
-    }
+    gdb_test "print \"foo\"" ".\[0-9\]+ = \"foo\"" "print a string"
 
     # do_steps_and_nexts left us ready to execute an xmalloc call,
     # so give that a try.
@@ -432,26 +408,20 @@ proc find_gdb { arg } {
 }
 
 # Run the test with self.
-# Copy the file executable file in case this OS doesn't like to edit it's own
+# Copy the file executable file in case this OS doesn't like to edit its own
 # text space.
 
 set GDB_FULLPATH [find_gdb $GDB]
 
 # Remove any old copy lying around.
-catch "exec rm -f ./x$tool"
+remote_file build delete x$tool
 
-if ![file executable $GDB_FULLPATH] then {
-    fail "couldn't convert $GDB to absolute pathname to make local copy"
-} else {
-    if [catch "exec cp $GDB_FULLPATH ./x$tool"] then {
-	fail "couldn't copy $GDB_FULLPATH to current directory"
-    } else {
-	verbose "\t\tCopied $GDB_FULLPATH to ./x$tool"
-	if {[test_with_self] <0} then {
-	    warning "Couldn't test self"
-	    catch "exec rm -f ./x$tool"
-	    return -1
-	}
-	catch "exec rm -f ./x$tool"
-    }
+gdb_start
+set file [remote_download build $GDB_FULLPATH x$tool]
+set result [test_with_self $file];
+remote_file build delete $file;
+
+if {$result <0} then {
+    warning "Couldn't test self"
+    return -1
 }

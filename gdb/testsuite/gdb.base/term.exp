@@ -12,7 +12,7 @@
 # 
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
-# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 # Please email any bugs, comments, and/or additions to this file to:
 # bug-gdb@prep.ai.mit.edu
@@ -28,6 +28,8 @@ if ![isnative] then {
     continue
 }
 
+gdb_start
+
 #
 # test running programs
 #
@@ -35,9 +37,9 @@ set prms_id 0
 set bug_id 0
 
 set testfile "run"
-set srcfile ${srcdir}/$subdir/${testfile}.c
+set srcfile ${testfile}.c
 set binfile ${objdir}/${subdir}/${testfile}
-if  { [compile "${srcfile} -g -o ${binfile}"] != "" } {
+if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
     perror "Couldn't compile ${srcfile}"
     return -1
 }
@@ -46,51 +48,27 @@ delete_breakpoints
 gdb_reinitialize_dir $srcdir/$subdir
 gdb_load ${binfile}
 
-# Test that GDB correctly identifies that it does not control a terminal.
-send "info terminal\n"
+gdb_test "set print sevenbit-strings" "" "test set print sevenbit-strings"
+gdb_test "set print address off" "" "test set print address off"
+gdb_test "set width 0" "" "test set width 0"
+gdb_test "info terminal" "No saved terminal information.*" "test info terminal"
+gdb_run_cmd 5
 expect {
-    -re "No saved terminal information..*$prompt $"\
-	{ send "run 5\n"
-	    expect {
-		-re "Starting program.*$binfile.*120.*Program exited normally..*$prompt $"\
-		    { send "info terminal\n"
-			expect {
-			    -re "No saved terminal information..*$prompt $"\
-				{ pass "info terminal" }
-			    -re ".*$prompt $"	{ fail "info terminal" }
-			    timeout		{ fail "(timeout) info terminal" }
-			}
-		    }
-		-re ".*$prompt $"	{ fail "info terminal" }
-		timeout		{ fail "(timeout) info terminal" }
-	    }
-	}
-    -re ".*$prompt $"	{ fail "info terminal" }
-    timeout		{ fail "(timeout) info terminal" }
+    -re ".*120.*Program exited normally.*$prompt $" {
+	gdb_test "info terminal" "No saved terminal information.*" "test info terminal"
+    }
+    default {
+	fail "term.exp, factorial didn't run to completion for info terminal"
+    }
 }
 
-
 # In mid-execution
-send "break main\n"
+gdb_breakpoint main
+gdb_run_cmd 5
 expect {
-    -re "Breakpoint.*at.* file .*, line.*$prompt $"\
-	{ send "run 5\n"
-	    expect {
-		-re "Starting program.*Breakpoint \[0-9\]+,.*main.*if .argc != 2.*$prompt $"\
-		    { send "info terminal\n"
-			expect {
-			    -re "Inferior's terminal status .currently saved by GDB.:.*$prompt $"\
-				{ pass "info terminal at breakpoint" }
-			    -re ".*$prompt $"	{ fail "info terminal at breakpoint" }
-			    timeout			{ fail "(timeout) info terminal at breakpoint" }
-			}
-		    }
-		-re ".*$prompt $"	{ fail "info terminal at breakpoint" }
-		timeout			{ fail "(timeout) info terminal at breakpoint" }
-	    }
-	}
+    -re ".*Breakpoint \[0-9\]+,.*main.*if .argc != 2.*$prompt $" {
+	gdb_test "info terminal" "Inferior's terminal status .currently saved by GDB.:.*" "info terminal at breakpoint"
+    }
     -re ".*$prompt $"	{ fail "info terminal at breakpoint" }
     timeout		{ fail "(timeout) info terminal at breakpoint" }
 }
-
-

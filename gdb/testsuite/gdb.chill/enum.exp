@@ -44,7 +44,7 @@ proc set_lang_chill {} {
     verbose "loading file '$binfile'"
     gdb_load $binfile
 
-    send "set language chill\n"
+    send_gdb "set language chill\n"
     expect {
 	-re ".*$prompt $" {}
 	timeout { fail "set language chill (timeout)" ; return 0 }
@@ -63,12 +63,12 @@ gdb_exit
 gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
 
-send "set print sevenbit-strings\n" ; expect -re ".*$prompt $"
+gdb_test "set print sevenbit-strings ".*"
 
 if ![set_lang_chill] then {
     runto hugo_
 
-    send "set var \$i := d\n"
+    send_gdb "set var \$i := d\n"
     expect -re ".*$prompt $"
     gdb_test "print \$i" { = d}
     gdb_test "print size (\$i)" { = 1}
@@ -80,6 +80,6 @@ if ![set_lang_chill] then {
     gdb_test "print a/=\$i" { = TRUE}
 
 # This is PR 8870:
-    send "break malloc\n"; expect -re ".*$prompt $"
+    gdb_test "break malloc ".*"
     gdb_test {set var $j := m_set[b]} ".*invalid.*tuple.*"
 }

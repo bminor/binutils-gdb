@@ -30,17 +30,17 @@ set prms_id 0
 set bug_id 0
 
 set testfile "ptype"
-set srcfile ${srcdir}/$subdir/${testfile}.c
+set srcfile ${testfile}.c
 set binfile ${objdir}/${subdir}/${testfile}
-if  { [compile "${srcfile} -g -o ${binfile}"] != "" } {
+if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
     perror "Couldn't compile ${srcfile}"
     return -1
 }
 
-execute_anywhere "rm -f ${binfile}.ci"
-if  { [compile "-E ${srcdir}/${subdir}/compiler.c > ${binfile}.ci"] != "" } {
-    perror "Couldn't make ${testfile}.ci file"
-    return -1
+# Create and source the file that provides information about the compiler
+# used to compile the test case.
+if [get_compiler_info ${binfile}] {
+    return -1;
 }
 
 gdb_exit
@@ -48,14 +48,12 @@ gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
 gdb_load ${binfile}
 
-source ${binfile}.ci
-
 # Test ptype of unnamed enumeration members before any action causes
 # the partial symbol table to be expanded to full symbols.  This fails
 # with stabs compilers which fail to use a nameless stab (such as
 # pre-2.4.5 versions of gcc and most non-gcc compilers).
 
-send "ptype red1\n"
+send_gdb "ptype red1\n"
 expect {
     -re "type = enum primary1_tag \{red1, green1, blue1\}.*$prompt $"\
 	{
@@ -75,7 +73,7 @@ expect {
 # Here and elsewhere, we accept
 # "long", "long int", or "int" for long variables (whatis.exp already
 # has an XFAIL for "int" (Sun cc bug), so no need to fail it here).
-send "ptype struct t_struct\n"
+send_gdb "ptype struct t_struct\n"
 expect {
     -re "type = struct t_struct \{.*
     (unsigned |)char v_char_member;.*
@@ -113,11 +111,11 @@ if [gdb_test "ptype v_t_struct_p->v_float_member"	"type = float"]<0 then {
 }
 
 
-send "ptype struct link\n"
+send_gdb "ptype struct link\n"
 expect {
     -re "type = struct link \{.*
     struct link \[*\]next;.*
-    struct link \[*(\]+linkfunc\[)(\]+;.*
+    struct link \[*(\]+linkfunc\[)(\]+(struct link \[*\], int\[)\]|);.*
     struct t_struct stuff.1..2..3.;.*
 \}.*$prompt $"                      { pass "ptype linked list structure" }
     -re ".*$prompt $"	{ 
@@ -134,7 +132,7 @@ expect {
 #
 # test ptype command with unions
 #
-send "ptype union t_union\n"
+send_gdb "ptype union t_union\n"
 expect {
     -re "type = union t_union \{.*
     (unsigned |)char v_char_member;.*
@@ -149,11 +147,11 @@ expect {
 }
 
 
-send "ptype union tu_link\n"
+send_gdb "ptype union tu_link\n"
 expect {
     -re "type = union tu_link .*
     struct link \[*\]next;.*
-    struct link \[(\*\]+linkfunc\[)(\]+;.*
+    struct link \[(\*\]+linkfunc\[)(\]+(struct link \[*\], int\[)\]|);.*
     struct t_struct stuff.1..2..3.;.*
 \}.*$prompt $"                      { pass "ptype linked list union" }
     -re ".*$prompt $" {
@@ -171,7 +169,7 @@ expect {
 # test ptype command with enums
 #
 
-send "ptype primary\n"
+send_gdb "ptype primary\n"
 expect {
     -re "type = enum .red, green, blue.*$prompt $"       { pass "ptype unnamed enumeration" }
     -re ".*$prompt $"	{ fail "ptype unnamed enumeration" }
@@ -179,7 +177,7 @@ expect {
 }
 
 
-send "ptype enum colors\n"
+send_gdb "ptype enum colors\n"
 expect {
     -re "type = enum colors \{yellow, purple, pink\}.*$prompt $"\
 	{ pass "ptype named enumeration" }
@@ -191,7 +189,7 @@ expect {
 #
 # test ptype command with enums as typedef
 #
-send "ptype boolean\n"
+send_gdb "ptype boolean\n"
 expect {
     -re "type = enum \{FALSE, TRUE\}.*$prompt $"   { pass "ptype unnamed typedef'd enumeration" }
     -re ".*$prompt $"	{ fail "ptype unnamed typedef'd enumeration" }
@@ -207,8 +205,7 @@ expect {
 # GDB's behavior is correct; the type which the variable is defined
 # as (51) doesn't have a name.  Only 55 has a name.
 
-setup_xfail "i*86-*-sysv4*"
-if {!$gcc_compiled} then { setup_xfail "rs6000-*-*" }
+if {!$gcc_compiled} then { setup_xfail "rs6000-*-*" "i*86-*-sysv4*" }
 gdb_test "whatis v_boolean" "type = boolean" \
   "whatis unnamed typedef'd enum (compiler bug in IBM's xlc)"
 
@@ -221,7 +218,7 @@ gdb_test "ptype t_union3" "type = union \{.*
  *double v_double_member;.*
  *int v_int_member;.*\}" "printing typedef'd union"
 
-send "ptype enum bvals\n"
+send_gdb "ptype enum bvals\n"
 expect {
     -re "type = enum bvals \{false, true\}.*$prompt $"   { pass "ptype named typedef'd enumf'd enum" }
     -re ".*$prompt $"	{ fail "ptype named typedef'd enumeration" }
@@ -232,7 +229,7 @@ expect {
 #
 # test ptype command with out-of-order enum values
 #
-send "ptype enum misordered\n"
+send_gdb "ptype enum misordered\n"
 expect {
     -re "type = enum misordered \{two = 2, one = 1, zero = 0, three = 3\}.*$prompt $"\
 	{ pass "ptype misordered enumeration" }
@@ -244,7 +241,7 @@ expect {
 #
 # test ptype command with a named enum's value
 #
-send "ptype three\n"
+send_gdb "ptype three\n"
 expect {
     -re "type = enum misordered \{two = 2, one = 1, zero = 0, three = 3\}.*$prompt $"\
 	{ pass "ptype named enumeration member" }
@@ -253,7 +250,7 @@ expect {
 }
 
 
-send "ptype red\n"
+send_gdb "ptype red\n"
 expect {
     -re "type = enum \{red, green, blue\}.*$prompt $"\
 	{ pass "ptype unnamed enumeration member" }
@@ -297,7 +294,7 @@ expect {
 #}
 
 
-send "ptype v_short\n"
+send_gdb "ptype v_short\n"
 expect {
     -re "type = short(| int).*$prompt $"	{ pass "ptype short" }
     -re ".*$prompt $"	{ fail "ptype short" }
@@ -321,7 +318,7 @@ expect {
 #}
 
 
-send "ptype v_int\n"
+send_gdb "ptype v_int\n"
 expect {
     -re "type = int.*$prompt $"	{ pass "ptype int" }
     -re ".*$prompt $"	{ fail "ptype int" }
@@ -482,8 +479,7 @@ expect {
 #}
 #
 
-setup_xfail "i*86-*-sysv4*"
-if {!$gcc_compiled} then { setup_xfail "rs6000-*-*" }
+if {!$gcc_compiled} then { setup_xfail "rs6000-*-*" "i*86-*-sysv4*" }
 gdb_test "ptype t_char_array" "type = (|unsigned )char \\\[0?\\\]"
 
 #
@@ -608,7 +604,7 @@ gdb_test "ptype t_char_array" "type = (|unsigned )char \\\[0?\\\]"
 #
 # test ptype command with nested structure and union
 #
-send "ptype struct outer_struct\n"
+send_gdb "ptype struct outer_struct\n"
 expect {
     -re "type = struct outer_struct \{.*
     int outer_int;.*
@@ -621,7 +617,7 @@ expect {
 }
 
 
-send "ptype struct inner_struct\n"
+send_gdb "ptype struct inner_struct\n"
 expect {
     -re "type = struct inner_struct \{.*
     int inner_int;.*
@@ -632,7 +628,7 @@ expect {
 }
 
 
-send "ptype union inner_union\n"
+send_gdb "ptype union inner_union\n"
 expect {
     -re "type = union inner_union \{.*
     int inner_union_int;.*
@@ -643,7 +639,7 @@ expect {
 }
 
 
-send "ptype nested_su\n"
+send_gdb "ptype nested_su\n"
 expect {
     -re "type = struct outer_struct \{.*
     int outer_int;.*
@@ -656,7 +652,7 @@ expect {
 }
 
 
-send "ptype nested_su.outer_int\n"
+send_gdb "ptype nested_su.outer_int\n"
 expect {
     -re "type = int.*$prompt $"           { pass "ptype outer int" }
     -re ".*$prompt $"	{ fail "ptype outer int" }
@@ -664,7 +660,7 @@ expect {
 }
 
 
-send "ptype nested_su.inner_struct_instance\n"
+send_gdb "ptype nested_su.inner_struct_instance\n"
 expect {
     -re "type = struct inner_struct \{.*
     int inner_int;.*
@@ -675,7 +671,7 @@ expect {
 }
 
 
-send "ptype nested_su.inner_struct_instance.inner_int\n"
+send_gdb "ptype nested_su.inner_struct_instance.inner_int\n"
 expect {
     -re "type = int.*$prompt $"           { pass "ptype inner int" }
     -re ".*$prompt $"	{ fail "ptype inner int" }
@@ -683,7 +679,7 @@ expect {
 }
 
 
-send "ptype nested_su.inner_union_instance\n"
+send_gdb "ptype nested_su.inner_union_instance\n"
 expect {
     -re "type = union inner_union \{.*
     int inner_union_int;.*

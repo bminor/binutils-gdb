@@ -7,35 +7,27 @@ set bug_id 0
 
 set testfile langs
 set binfile ${objdir}/${subdir}/${testfile}
-if  { [compile "${srcdir}/${subdir}/langs0.c -g -c -o ${binfile}0.o "] != "" } {
-    perror "Couldn't compile langs0.c to object"
-    return -1
+
+if [is_remote host] {
+    remote_download host ${srcdir}/${subdir}/langs1.f
+    remote_download host ${srcdir}/${subdir}/langs2.cxx
 }
-if  { [compile "${srcdir}/${subdir}/langs1.c -g -c -o ${binfile}1.o "] != "" } {
-    perror "Couldn't compile langs1.c to object"
-    return -1
-}
-if  { [compile "${srcdir}/${subdir}/langs2.c -g -c -o ${binfile}2.o "] != "" } {
-    perror "Couldn't compile langs2.c to object"
-    return -1
-}
-if  { [compile "${binfile}0.o ${binfile}1.o ${binfile}2.o  -o ${binfile}"] != "" } {
+
+if  { [gdb_compile "${srcdir}/${subdir}/langs0.c ${srcdir}/${subdir}/langs1.c ${srcdir}/${subdir}/langs2.c" "${binfile}" executable {debug}] != "" } {
     perror "Couldn't link langs."
     return -1
 }
 
-execute_anywhere "rm -f ${binfile}.ci"
-if  { [compile "-E ${srcdir}/${subdir}/compiler.c > ${binfile}.ci"] != "" } {
-    perror "Couldn't make ${testfile}.ci file"
-    return -1
+# Create and source the file that provides information about the compiler
+# used to compile the test case.
+if [get_compiler_info ${binfile}] {
+    return -1;
 }
 
 gdb_exit
 gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
 gdb_load $binfile
-
-source ${binfile}.ci
 
 gdb_test "b langs0" {Function "langs0" not defined\.} \
     "break on nonexistent function in langs.exp"
@@ -85,8 +77,12 @@ if [runto csub] then {
 
     if $noresults==1 then { return }
 
-    gdb_test "cont" "Program exited normally\\." \
-	"continue to exit in langs.exp"
+    if [target_info exists use_gdb_stub] {
+	gdb_test "cont" "Breakpoint .*exit.*" "continue to exit in langs.exp"
+    } else {
+	gdb_test "cont" "Program exited normally\\." \
+		"continue to exit in langs.exp"
+    }
 }
 
 return 0

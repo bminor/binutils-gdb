@@ -5,6 +5,16 @@ if $tracelevel then {
 	strace $tracelevel
 }
 
+# If the test directory was not created by configure then skip
+# this test.
+if ![file isdirectory ${objdir}/${subdir}] then {
+    return 0
+}
+
+if ![file exists ${objdir}/${subdir}/weird.s] {
+    return 0
+}
+
 set prms_id 0
 set bug_id 0
 
@@ -17,7 +27,7 @@ proc do_tests {} {
 	# file is then processed with native cc, all stabs directives
 	# will be lost.
 	# Skip the rest of the stabs tests for this case.
-	send "ptype inttype\n"
+	send_gdb "ptype inttype\n"
 	expect {
 		-re "^ptype inttype\r*\ntype = inttype.*$prompt $" {
 			pass "stabs found"
@@ -179,8 +189,6 @@ field3 = 0x77888877\}" "print struct constant"
 	gdb_test "p common0var2" "= 22"
 
 	# this long line must be continous, not with "/" escaping the newline
-	# This apparently worked at one time and is now broken on some configs
-	setup_xfail "sparc-sun-sunos4*" "sparc-sun-solaris*" "hppa*-*-*"
 	gdb_test "p v_comb" "{<> = {<> = {x = 42}, \[_a-zA-Z$.\]* = \[0-9xa-fA-F\]*, a = 43}, <> = {\[_a-zA-Z$.\]* = \[0-9xa-fA-F\]*, b = 44}, comb = 45}"
 }
 
@@ -189,7 +197,7 @@ proc print_weird_var { var } {
 
 	# Make sure that the variable gets printed out correctly, without
 	# any sort of warning message.
-	send "print $var\n"
+	send_gdb "print $var\n"
 	expect {
 		-re "^print $var\r*\n.\[0-9\]* = 42.*$prompt $" {
 			pass "variable $var printed properly"
@@ -223,7 +231,7 @@ gdb_reinitialize_dir $srcdir/$subdir
 # error messages during symbol reading.
 set testfile weird
 set srcfile ${objdir}/${subdir}/weird.s
-set binfile ${objdir}/${subdir}/weird.o
+set binfile ${objdir}/${subdir}/weirdx.o
 
 global target_os
 set sedscript ${srcdir}/${subdir}/aout.sed
@@ -252,19 +260,21 @@ switch -glob ${target_triplet} {
 }
 
 
-set exec_output [execute_anywhere "sed -f ${sedscript} < ${srcdir}/${subdir}/weird.def > ${srcfile}"]
-if { $exec_output != "" } {
-    perror "Couldn't make test case."
+# Hope this is a Unix box.
+set exec_output [remote_exec build "sed" "-f ${sedscript}" "${srcdir}/${subdir}/weird.def" "${srcfile}"]
+if { [lindex $exec_output 0] != 0 } {
+    perror "Couldn't make test case. $exec_output"
     return -1
 }
 
-if  { [compile "${srcfile} -c -o ${binfile}"] != "" } {
+if  { [gdb_compile "${srcfile}" "${binfile}" object ""] != "" } {
     perror "Couldn't compile ${srcfile}"
     return -1
 }
 
-set exec_output [execute_anywhere "rm -f ${srcfile}"]
-exp_send "file $binfile\n"
+remote_file build delete ${srcfile}
+set binfile [remote_download host ${binfile} object.o]
+send_gdb "file $binfile\n"
 # If $binfile is very long, a \r (but not a \n) will echo in the
 # middle of the echo of the command.  So to match the echo, we
 # would like to match anything not containing \n
@@ -274,22 +284,24 @@ exp_send "file $binfile\n"
 # But spaces following by backspaces aren't really spaces.
 expect {
     -re "^file (\[^ \]| +\008)*\r*\nReading symbols from $binfile\.\.\.done\.\r*\n$prompt $" {
-	pass "weird.o read without error"
+	pass "weirdx.o read without error"
     }
     -re "A program is being debugged already.  Kill it\? \(y or n\)" {
-	send "y\n"
+	send_gdb "y\n"
 	exp_continue
     }
     -re ".*$prompt $" {
-	fail "Errors reading weird.o"
+	fail "Errors reading weirdx.o"
     }
     timeout {
 	perror "couldn't load $binfile into $GDB (timed out)."
 	return -1
     }
-    eof { fail "(eof) cannot read weird.o" }
+    eof { fail "(eof) cannot read weirdx.o" }
 }
 
 do_tests
+
+remote_file host delete ${binfile}
 
 return 0
