@@ -1,3 +1,8 @@
+Wed Jan 12 15:31:57 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* linker.c (default_indirect_link_order): Don't expect space for
+	output relocations if there aren't any input relocations.
+
 Tue Jan 11 14:37:12 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* aoutx.h (NAME(aout,final_link)): Set a_entry before computing

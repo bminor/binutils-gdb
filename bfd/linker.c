@@ -1523,6 +1523,7 @@ default_indirect_link_order (output_bfd, info, output_section, link_order)
   BFD_ASSERT (bfd_section_size (input_bfd, input_section) == link_order->size);
 
   if (info->relocateable
+      && input_section->reloc_count > 0
       && output_section->orelocation == (arelent **) NULL)
     {
       /* Space has not been allocated for the output relocations.
