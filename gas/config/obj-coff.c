@@ -38,7 +38,29 @@
 #define TC_COFF_SECTION_DEFAULT_ATTRIBUTES (SEC_LOAD | SEC_DATA)
 #endif
 
+/* This is used to hold the symbol built by a sequence of pseudo-ops
+   from .def and .endef.  */
+static symbolS *def_symbol_in_progress;
+
+typedef struct
+  {
+    unsigned long chunk_size;
+    unsigned long element_size;
+    unsigned long size;
+    char *data;
+    unsigned long pointer;
+  }
+stack;
+
+static stack *stack_init PARAMS ((unsigned long, unsigned long));
+static char *stack_push PARAMS ((stack *, char *));
+static char *stack_pop PARAMS ((stack *));
+static void tag_init PARAMS ((void));
+static void tag_insert PARAMS ((const char *, symbolS *));
+static symbolS *tag_find PARAMS ((char *));
+static symbolS *tag_find_or_make PARAMS ((char *));
 static void obj_coff_bss PARAMS ((int));
+static void obj_coff_weak PARAMS ((int));
 const char *s_get_name PARAMS ((symbolS * s));
 static void obj_coff_ln PARAMS ((int));
 static void obj_coff_def PARAMS ((int));
@@ -54,21 +76,8 @@ static void obj_coff_ident PARAMS ((int));
 #ifdef BFD_ASSEMBLER
 static void obj_coff_loc PARAMS((int));
 #endif
-
-/* This is used to hold the symbol built by a sequence of pseudo-ops
-   from .def and .endef.  */
-static symbolS *def_symbol_in_progress;
 
 /* stack stuff */
-typedef struct
-  {
-    unsigned long chunk_size;
-    unsigned long element_size;
-    unsigned long size;
-    char *data;
-    unsigned long pointer;
-  }
-stack;
 
 static stack *
 stack_init (chunk_size, element_size)
@@ -246,7 +255,11 @@ obj_coff_weak (ignore)
 
 #ifdef BFD_ASSEMBLER
 
+static segT fetch_coff_debug_section PARAMS ((void));
 static void SA_SET_SYM_TAGNDX PARAMS ((symbolS *, symbolS *));
+static int S_GET_DATA_TYPE PARAMS ((symbolS *));
+void c_symbol_merge PARAMS ((symbolS *, symbolS *));
+static void add_lineno PARAMS ((fragS *, addressT, int));
 
 #define GET_FILENAME_STRING(X) \
 ((char*) (&((X)->sy_symbol.ost_auxent->x_file.x_n.x_offset))[1])

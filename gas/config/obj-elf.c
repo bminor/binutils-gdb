@@ -73,6 +73,10 @@ static void obj_elf_ident PARAMS ((int));
 static void obj_elf_weak PARAMS ((int));
 static void obj_elf_local PARAMS ((int));
 static void obj_elf_visibility PARAMS ((int));
+static void obj_elf_change_section PARAMS ((char *, int, int, int, int));
+static int obj_elf_parse_section_letters PARAMS ((char *, size_t));
+static int obj_elf_section_word PARAMS ((char *, size_t));
+static int obj_elf_section_type PARAMS ((char *, size_t));
 static void obj_elf_symver PARAMS ((int));
 static void obj_elf_subsection PARAMS ((int));
 static void obj_elf_popsection PARAMS ((int));
@@ -611,7 +615,7 @@ static struct special_section const special_sections[] =
   { NULL,	0,		0				}
 };
 
-void
+static void
 obj_elf_change_section (name, type, attr, entsize, push)
      char *name;
      int type, attr, entsize, push;
@@ -726,7 +730,7 @@ obj_elf_change_section (name, type, attr, entsize, push)
 #endif
 }
 
-int
+static int
 obj_elf_parse_section_letters (str, len)
      char *str;
      size_t len;
@@ -774,7 +778,7 @@ obj_elf_parse_section_letters (str, len)
   return attr;
 }
 
-int
+static int
 obj_elf_section_word (str, len)
      char *str;
      size_t len;
@@ -798,7 +802,7 @@ obj_elf_section_word (str, len)
   return 0;
 }
 
-int
+static int
 obj_elf_section_type (str, len)
      char *str;
      size_t len;

@@ -1,3 +1,17 @@
+2001-08-09  Alan Modra  <amodra@bigpond.net.au>
+
+	* symbols.c: Add missing prototypes.
+	* config/e-i386elf.c: Likewise.
+	* config/e-i386coff.c: Likewise.
+	* config/e-i386aout.c: Likewise.
+	* config/obj-coff.c: Likewise.
+	(def_symbol_in_progress, stack): Move definition.
+	* config/obj-elf.c: Add missing prototypes.
+	(obj_elf_change_section): Make static.
+	(obj_elf_parse_section_letters): Likewise.
+	(obj_elf_section_word): Likewise.
+	(obj_elf_section_type): Likewise.
+
 2001-08-08  Alan Modra  <amodra@bigpond.net.au>
 
 	From 1999-10-25  Torbjorn Granlund  <tege@swox.com>

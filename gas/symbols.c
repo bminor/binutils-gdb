@@ -61,6 +61,7 @@ symbolS abs_symbol;
 
 struct obstack notes;
 
+static char *save_symbol_name PARAMS ((const char *));
 static void fb_label_init PARAMS ((void));
 static long dollar_label_instance PARAMS ((long));
 static long fb_label_instance PARAMS ((long));
