@@ -1,3 +1,8 @@
+2002-09-19  Daniel Jacobowitz  <drow@mvista.com>
+
+	* elf32-arm.h (elf32_arm_adjust_dynamic_symbol): Update
+	ELF_LINK_HASH_NEEDS_PLT logic.
+
 2002-09-18  Daniel Jacobowitz  <drow@mvista.com>
 
 	* elfcode.h (elf_slurp_reloc_table_from_section): Check
