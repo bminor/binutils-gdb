@@ -1,3 +1,16 @@
+Fri Jul 22 14:17:12 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* bfdlink.h (struct bfd_link_hash_entry): Change u.c.size into a
+	bitfield.  Add field u.c.alignment_power.
+
+Sun Jul 10 00:26:39 1994  Ian Dall  (dall@hfrd.dsto.gov.au)
+
+	* dis-asm.h: Add print_insn_ns32k declaration.
+
+Mon Jun 20 17:13:29 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* bfdlink.h (bfd_link_hash_table): Make creator a const pointer.
+
 Sat Jun 18 16:09:32 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	* demangle.h (cplus_demangle_opname): Declare.
