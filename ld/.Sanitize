@@ -1,0 +1,114 @@
+# Sanitize.in for devo.
+# $Id$
+#
+
+# Each directory to survive it's way into a release will need a file
+# like this one called "./.Sanitize".  All keyword lines must exist,
+# and must exist in the order specified by this file.  Each directory
+# in the tree will be processed, top down, in the following order.
+
+# Hash started lines like this one are comments and will be deleted
+# before anything else is done.  Blank lines will also be squashed
+# out.
+
+# The lines between the "Do-first:" line and the "Things-to-keep:"
+# line are executed as a /bin/sh shell script before anything else is
+# done in this 
+
+Do-first:
+
+echo Sanitizing `pwd`...
+
+# All files listed between the "Things-to-keep:" line and the
+# "Files-to-sed:" line will be kept.  All other files will be removed.
+# Directories listed in this section will have their own Sanitize
+# called.  Directories not listed will be removed in their entirety
+# with rm -rf.
+
+Things-to-keep:
+
+Makefile.in
+config
+config.h
+configure
+configure.in
+ld-emul.c
+ld-emul.h
+ld-gld-Ur.script
+ld-gld-r.script
+ld-gld.c
+ld-gld.script
+ld-gld68k-Ur.script
+ld-gld68k-r.script
+ld-gld68k.c
+ld-gld68k.script
+ld-gld960.c
+ld-gld960.script
+ld-gldm88kbcs-Ur.script
+ld-gldm88kbcs-r.script
+ld-gldm88kbcs.c
+ld-gldm88kbcs.script
+ld-lnk960-r.script
+ld-lnk960.c
+ld-lnk960.script
+ld-vanilla.c
+ld.h
+ld.texinfo
+ldemul.c
+ldemul.h
+ldexp.c
+ldexp.h
+ldfile.c
+ldfile.h
+ldgld.c
+ldgld.script
+ldgld68k.c
+ldgld68k.script
+ldgld68kUr.script
+ldgld68kr.script
+ldgld960.c
+ldgld960.script
+ldgldUr.script
+ldgldm88kbcs.c
+ldgldm88kbcs.script
+ldgldm88kbcsUr.script
+ldgldm88kbcsr.script
+ldgldr.script
+ldgram.h
+ldgram.y
+ldlang.c
+ldlang.h
+ldlex.h
+ldlex.l
+ldlnk960.c
+ldlnk960.script
+ldlnk960r.script
+ldmain.c
+ldmain.h
+ldmisc.c
+ldmisc.h
+ldsym.c
+ldsym.h
+ldvanilla.c
+ldver.c
+ldver.h
+ldversion.c
+ldwarn.h
+ldwrite.c
+ldwrite.h
+mkscript.c
+
+Do-last:
+
+echo Done in `pwd`.
+
+#
+#
+# $Log$
+# Revision 1.1  1991/05/23 21:45:12  rich
+# Initial revision
+#
+#
+#
+
+# End of file.
