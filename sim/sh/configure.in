@@ -16,11 +16,8 @@ files="../../bfd/hosts/${my_host}.h"
 links="sysdep.h"
 
 if [ ! -f ${srcdir}/${files} ] ; then
-	if [ -n "${my_host}" ] ; then
-		echo '***' No file ${srcdir}/${files} 1>&2
-	fi
-	echo '***' ${srcname} does not support host ${host} 1>&2
-	exit 1
+	files=../bfd/hosts/std-host.h
+	echo "[${srcname} has no specific support for host ${host} -- using std-host]"
 fi
 
 host_makefile_frag=
