@@ -1,3 +1,8 @@
+Tue Dec 14 17:19:03 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* ldlang.c (lang_for_each_statement_worker,
+	lang_for_each_statement): Forgot to use PARAMS.
+
 Mon Dec 13 14:30:03 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* Makefile.in: Added .PHONY targets where appropriate.  Added some
