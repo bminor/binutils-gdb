@@ -457,7 +457,6 @@ case "${target}" in
     ;;
 # start-sanitize-d30v
   d30v-*-*)
-    noconfigdirs="$noconfigdirs target-librx target-libg++ target-libstdc++ target-libio target-examples"
 # start-sanitize-ide
     noconfigdirs="$noconfigdirs libide vmake jstools"
 # end-sanitize-ide

@@ -1,4 +1,8 @@
 start-sanitize-d30v
+Mon Nov 10 14:38:03 1997  Michael Meissner  <meissner@cygnus.com>
+
+	* configure.in (d30v-*-*): Configure all directories.
+
 Sun Nov  9 17:36:20 1997  Michael Meissner  <meissner@cygnus.com>
 
 	* configure.in (d30v-*-*): Configure newlib, libiberty directories
