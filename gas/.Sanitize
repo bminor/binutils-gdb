@@ -73,7 +73,6 @@ gasp.c
 gdbinit.in
 hash.c
 hash.h
-hex-value.c
 input-file.c
 input-file.h
 input-scrub.c
