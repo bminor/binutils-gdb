@@ -1,3 +1,7 @@
+2000-11-28  Mark Salter  <msalter@redhat.com>
+
+	* MAINTAINERS: Add Mark Salter to Write After Approval list.
+
 Tue Nov 28 12:24:43 2000  Christopher Faylor <cgf@cygnus.com>
 
 	* win32-nat.c (dll_code_sections_add): strdup -> xstrdup.
