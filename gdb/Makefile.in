@@ -450,7 +450,7 @@ gdb.tar.Z: force_update
 	rm -f depend
 	$(MAKE) $(MFLAGS) depend
 	./configure none
-	(cd doc; $(MAKE) $(MFLAGS) rdl-apps.texinfo)
+	(cd doc; $(MAKE) $(MFLAGS) rdl-apps.texi)
 	$(MAKE) $(MFLAGS) gdb.info
 	$(MAKE) $(MFLAGS) refcard.ps
 	$(MAKE) $(MFLAGS) gdb-$(VERSION).tar.Z
@@ -545,7 +545,7 @@ refcard.ps : $(srcdir)/doc/refcard.tex
 	mv $(srcdir)/doc/refcard.ps .
 
 # GDB MANUAL: TeX dvi file
-gdb.dvi : $(srcdir)/doc/gdb-all.texinfo $(srcdir)/doc/rdl-apps.texinfo
+gdb.dvi : $(srcdir)/doc/gdb-all.texinfo $(srcdir)/doc/rdl-apps.texi
 	( cd $(srcdir)/doc; make gdb.dvi )
 	mv $(srcdir)/doc/gdb.dvi .
 
@@ -556,8 +556,8 @@ gdb.info: $(srcdir)/doc/gdb-all.texinfo
 
 $(srcdir)/doc/gdb-all.texinfo:
 	(cd $(srcdir)/doc; $(MAKE) gdb-all.texinfo)
-$(srcdir)/doc/rdl-apps.texinfo:
-	(cd $(srcdir)/doc; $(MAKE) rdl-apps.texinfo)
+$(srcdir)/doc/rdl-apps.texi:
+	(cd $(srcdir)/doc; $(MAKE) rdl-apps.texi)
 
 # Make copying.c from COPYING
 copying.c : COPYING copying.awk
