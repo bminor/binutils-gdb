@@ -1,3 +1,15 @@
+Sat Sep 19 09:52:26 1992  Fred Fish  (fnf@cygnus.com)
+
+	* main.c (main):  Move code that sets initial language to
+	symfile.c.  Fixup places where command files are processed to
+	be consistent in setting a default language if none has been
+	previously set.
+	* symfile.c (set_initial_language):  Add code moved from
+	main() that sets an initial default language when a new
+	symbol file is read.
+	* symfile.c (symbol_file_command):  Call set_initial_language.
+	* symtab.c (find_main_psymtab):  Add FIXME comment.
+
 Wed Sep 16 22:31:55 1992  K. Richard Pixley  (rich@sendai.cygnus.com)
 
 	* breakpoint.c, sparc-tdep.c: comment changes.

@@ -767,25 +767,6 @@ GDB manual (available as on-line info or a printed manual).\n", stderr);
   error_pre_print = "\n";
   warning_pre_print = "\nwarning: ";
 
-  /* Set the initial language. */
-  {
-    struct partial_symtab *pst = find_main_psymtab ();
-    enum language lang = language_unknown;  	
-    if (pst == NULL) ;
-#if 0
-    /* A better solution would set the language when reading the psymtab.
-       This would win for symbol file formats that encode the langauge,
-       such as DWARF.  But, we don't do that yet. FIXME */
-    else if (pst->language != language_unknown)
-	lang = pst->language;
-#endif
-    else if (pst->filename != NULL)
-      lang = deduce_language_from_filename (pst->filename);
-    if (lang == language_unknown) /* Make C the default language */
-	lang = language_c;
-    set_language (lang);
-  }
-
   if (corearg != NULL)
     if (!setjmp (to_top_level))
       core_file_command (corearg, !batch);
@@ -812,19 +793,30 @@ GDB manual (available as on-line info or a printed manual).\n", stderr);
   if (!homedir
       || memcmp ((char *) &homebuf, (char *) &cwdbuf, sizeof (struct stat)))
     if (!inhibit_gdbinit && access (gdbinit, R_OK) == 0)
-      if (!setjmp (to_top_level))
-	source_command (gdbinit, 0);
-      do_cleanups (ALL_CLEANUPS);
+      {
+	/* If no language has been set yet, default to C. */
+	if (current_language->la_language == language_unknown)
+	  set_language (language_c);
+	if (!setjmp (to_top_level))
+	  source_command (gdbinit, 0);
+      }
+  do_cleanups (ALL_CLEANUPS);
 
   for (i = 0; i < ncmd; i++)
-    if (!setjmp (to_top_level))
-      {
-	if (cmdarg[i][0] == '-' && cmdarg[i][1] == '\0')
-	  read_command_file (stdin);
-	else
-	  source_command (cmdarg[i], !batch);
-	do_cleanups (ALL_CLEANUPS);
-      }
+    {
+      /* If no language has been set yet, default to C.  For consistency with
+         other places, we redo this each time before sourcing commands. */
+      if (current_language->la_language == language_unknown)
+	set_language (language_c);
+      if (!setjmp (to_top_level))
+	{
+	  if (cmdarg[i][0] == '-' && cmdarg[i][1] == '\0')
+	    read_command_file (stdin);
+	  else
+	    source_command (cmdarg[i], !batch);
+	  do_cleanups (ALL_CLEANUPS);
+	}
+    }
   free ((PTR)cmdarg);
 
   /* Read in the old history after all the command files have been read. */
