@@ -1,5 +1,9 @@
 Tue Oct 12 08:59:15 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* inflow.c: Use 0 (standard input) not scb->fd.
+	(terminal_ours_1): If printing warning, don't claim it happened in
+	terminal_inferior.
+
 	* blockframe.c (get_prev_frame_info): Don't error() if there are no
 	frames; just return NULL.
 

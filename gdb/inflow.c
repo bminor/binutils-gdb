@@ -140,7 +140,7 @@ gdb_has_a_terminal ()
 	      our_process_group = tcgetpgrp (0);
 #endif
 #ifdef HAVE_SGTTY
-	      ioctl (scb->fd, TIOCGPGRP, &our_process_group);
+	      ioctl (0, TIOCGPGRP, &our_process_group);
 #endif
 	    }
 	}
@@ -305,7 +305,7 @@ terminal_ours_1 (output_only)
       inferior_process_group = tcgetpgrp (0);
 #endif
 #ifdef HAVE_SGTTY
-      ioctl (scb->fd, TIOCGPGRP, &inferior_process_group);
+      ioctl (0, TIOCGPGRP, &inferior_process_group);
 #endif
 
       /* Here we used to set ICANON in our ttystate, but I believe this
@@ -325,12 +325,16 @@ terminal_ours_1 (output_only)
 	{
 #ifdef HAVE_TERMIOS
 	  result = tcsetpgrp (0, our_process_group);
-	  OOPSY ("tcsetpgrp");
+	  if (result == -1)
+	    fprintf (stderr, "[tcsetpgrp failed in terminal_ours: %s]\n",
+		     strerror (errno));
 #endif
 
 #ifdef HAVE_SGTTY
 	  result = ioctl (0, TIOCSPGRP, our_process_group);
-	  OOPSY ("TIOCSPGRP");
+	  if (result == -1)
+	    fprintf (stderr, "[TIOCSPGRP failed in terminal_ours: %s]\n",
+		     strerror (errno));
 #endif
 	}
 
