@@ -6,6 +6,7 @@
 
 2004-11-05  Jon Beniston <jon@beniston.com>
 
+	Committed by Andrew Cagney.
 	* remote.c (putpkt_binary) Fix PR gdb/1806. Send an ACK 
 	when an unexpected packet is received, as the target stubs 
 	continually retransmit the same packet until ACKed.
