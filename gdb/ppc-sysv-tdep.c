@@ -850,6 +850,12 @@ ppc64_sysv_abi_return_value (struct gdbarch *gdbarch, struct type *valtype,
 			     const void *writebuf)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  /* This function exists to support a calling convention that
+     requires floating-point registers.  It shouldn't be used on
+     processors that lack them.  */
+  gdb_assert (ppc_floating_point_unit_p (gdbarch));
+
   /* Floats and doubles in F1.  */
   if (TYPE_CODE (valtype) == TYPE_CODE_FLT && TYPE_LENGTH (valtype) <= 8)
     {

@@ -1,3 +1,8 @@
+2004-05-07  Jim Blandy  <jimb@redhat.com>
+
+	* ppc-sysv-tdep.c (ppc64_sysv_abi_return_value): Assert that
+	the given architecture has floating-point registers. 
+
 2004-05-07  Andrew Cagney  <cagney@redhat.com>
 
 	* gdbarch.sh (DEPRECATED_USE_GENERIC_DUMMY_FRAMES): Replace with
