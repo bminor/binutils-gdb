@@ -1,3 +1,10 @@
+2003-12-18  Kevin Buettner  <kevinb@redhat.com>
+
+	* frv-tdep.c (skip_prologue_using_sal): New function.  Taken verbatim
+	from mips-tdep.c.
+	(frv_analyze_prologue): Rework to account for intermixed prologue /
+	body instructions.
+
 2003-12-18  Michael Chastain  <mec.gnu@mindspring.com>
 
 	* hppa-tdep.c (hppa_gdbarch_init): Set sizeof(long_double) to 128.
