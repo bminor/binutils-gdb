@@ -28,22 +28,24 @@ echo Sanitizing `pwd`...
 Things-to-keep:
 
 h-amix.h
-h-dec3100.h
+h-decstation.h
 h-dgux.h
-h-hp9000.h
+h-dose.h
 h-hp300bsd.h
+h-hp9000.h
 h-i386mach.h
 h-i386v.h
 h-irix3.h
+h-news.h
 h-rs6000.h
 h-rtbsd.h
+h-sparc-64.h
+h-sparc.h
 h-sun3.h
-h-sun4.h
-h-tahoebsd.h
+h-tahoe.h
 h-ultra3.h
 h-vaxbsd.h
 h-vaxult.h
-h_dos.h
 
 Do-last:
 
@@ -52,7 +54,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.9  1991/10/05 06:18:50  gnu
+# Revision 1.10  1991/10/12 07:38:07  gnu
+# Update for new bfd/hosts.
+#
+# Revision 1.9  1991/10/05  06:18:50  gnu
 # h-amix.h
 #
 # Revision 1.8  1991/10/04  08:27:36  gnu
