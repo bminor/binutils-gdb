@@ -36,6 +36,9 @@ enum reloc_type
     RELOC_JMP_TBL,		/* P.I.C. jump table */
     RELOC_SEGOFF16,		/* reputedly for shared libraries somehow */
     RELOC_GLOB_DAT,  RELOC_JMP_SLOT, RELOC_RELATIVE,
+    RELOC_11,
+    RELOC_WDISP2_14,
+    RELOC_WDISP19,
     
     /* 29K relocation types */
     RELOC_JUMPTARG, RELOC_CONST,     RELOC_CONSTH,
@@ -52,6 +55,7 @@ enum reloc_type
 "SFA_BASE",	"SFAOFF13",	"BASE10",	"BASE13",	\
 "BASE22",	"PC10",		"PC22",		"JMP_TBL",	\
 "SEGOFF16",	"GLOB_DAT",	"JMP_SLOT",	"RELATIVE",	\
+"11",		"WDISP2_14",	"WDISP19", \
 "JUMPTARG",	"CONST",	"CONSTH",			\
 "NO_RELOC",							\
 "XXX_28", "XXX_29", "XXX_30", "XXX_31"
