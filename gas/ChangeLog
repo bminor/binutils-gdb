@@ -1,3 +1,25 @@
+Tue Sep 13 16:20:36 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* Makefile.in (*_FOR_TARGET, INSTALL_XFORM, install, uninstall):
+	Rewrite handling of program_transform_name.
+
+	* configure.in: Test for "unlink" and "delete", define
+	USE_DELETE_FOR_UNLINK if only the latter is found.  Not expected
+	to be triggered on UNIX/POSIX systems.
+	* acconfig.h (USE_DELETE_FOR_UNLINK): Undef here, provide
+	comments.
+
+	Update for autoconf 1.118:
+	* gdbinit.in: New file, created from old .gdbinit.
+	* .gdbinit: Deleted.
+	* aclocal.m4 (GAS_GDBINIT): Deleted.
+	* configure.in: Don't use it.  Instead, generate .gdbinit from
+	gdbinit.in.  Don't substitute cpu_type, obj_format, emulation,
+	atof.  Switched order of AC_LINK_FILES arguments.  Use AC_PREREQ
+	to ensure that older versions of autoconf aren't used.
+	* Makefile.in: Added @configure_input@ line.
+	(configure): Deleted rule.
+
 Tue Sep 13 12:08:20 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
 	* config/obj-coff.c (fixup_segment): After handling the difference

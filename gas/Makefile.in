@@ -1,3 +1,4 @@
+## @configure_input@
 # Makefile for GNU Assembler
 #   Copyright (C) 1987-1992, 1993 Free Software Foundation, Inc.
 
@@ -59,7 +60,7 @@ SHELL = /bin/sh
 INSTALL = $${srcroot}/install.sh -c
 INSTALL_PROGRAM = $(INSTALL)
 INSTALL_DATA = $(INSTALL)
-INSTALL_XFORM = $(INSTALL) -t='$(program_transform_name)'
+INSTALL_XFORM = $(INSTALL) -t='-e "$(program_transform_name)"'
 INSTALL_XFORM1= $(INSTALL_XFORM) -b=.1
 
 AR = ar
@@ -82,10 +83,11 @@ CC_FOR_TARGET = ` \
     if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
       echo $(CC); \
     else \
-      t='$(program_transform_name)'; echo gcc | sed $$t; \
+      echo gcc | sed '$(program_transform_name)'; \
     fi; \
   fi`
 
+NM=nm
 NM_FOR_TARGET = ` \
   if [ -f $${here}/../binutils/Makefile ] ; then \
     echo $${here}/../binutils/nm ; \
@@ -93,7 +95,7 @@ NM_FOR_TARGET = ` \
     if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
       echo $(NM); \
     else \
-       t='$(program_transform_name)'; echo nm | sed $$t ; \
+      echo nm | sed '$(program_transform_name)' ; \
     fi; \
   fi`
 
@@ -105,7 +107,7 @@ OBJDUMP_FOR_TARGET = ` \
     if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
       echo $(OBJDUMP); \
     else \
-       t='$(program_transform_name)'; echo objdump | sed $$t ; \
+      echo objdump | sed '$(program_transform_name)' ; \
     fi; \
   fi`
 
@@ -307,12 +309,6 @@ config.status: configure
 	  exit 1 ; \
 	fi
 
-configure: configure.in aclocal.m4 acconfig.h
-	(cd ${srcdir} && \
-	 autoheader configure.in > conf-in.h && \
-	 ../move-if-change conf-in.h conf.in)
-	(cd ${srcdir} && autoconf )
-
 config.h: config-stamp ; @true
 config-stamp: Makefile conf
 	-rm -f config.new config-stamp
@@ -461,7 +457,7 @@ install:
 	srcroot=`cd $(srcroot); pwd`; export srcroot; \
 	$(INSTALL_XFORM) as.new $(bindir)/as; \
 	$(INSTALL_XFORM1) $(srcdir)/doc/as.1 $(man1dir)/as.1; \
-	n=`t='$(program_transform_name)'; echo as | sed $$t`; \
+	n=`echo as | sed '$(program_transform_name)'`; \
 	if [ -d $(tooldir) ]; then \
 	  if [ -d $(tooldir)/bin ] ; then true ; else mkdir $(tooldir)/bin ; fi; \
 	  rm -f $(tooldir)/bin/as; \
@@ -470,7 +466,7 @@ install:
 	else true; fi
 	srcroot=`cd $(srcroot); pwd`; export srcroot; \
 	$(INSTALL_XFORM) gasp.new $(bindir)/gasp; \
-	n=`t='$(program_transform_name)'; echo gasp | sed $$t`; \
+	n=`echo gasp | sed '$(program_transform_name)' `; \
 	if [ -d $(tooldir) ]; then \
 	  if [ -d $(tooldir)/bin ] ; then true ; else mkdir $(tooldir)/bin ; fi; \
 	  rm -f $(tooldir)/bin/gasp; \

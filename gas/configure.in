@@ -3,10 +3,9 @@ dnl
 dnl And be careful when changing it!  If you must add tests with square
 dnl brackets, be sure changequote invocations surround it.
 dnl
-dnl Remember to use "dnl" in each line before the AC_INIT call...
 dnl
-dnl
-AC_INIT(as.h)
+AC_PREREQ(1.118)dnl
+AC_INIT(as.h)dnl
 dnl
 bfd_gas=no
 user_bfd_gas=
@@ -254,14 +253,10 @@ case ${reject_dev_configs}-${dev} in
     ;;
 esac
 
-dnl Looks like the AC_MAKE_LINKS string is taken literally and put into the
-dnl  config.status file.  So the necessary variables also have to be
-dnl  exported.
-AC_SUBST(cpu_type) AC_SUBST(obj_format) AC_SUBST(emulation) AC_SUBST(atof)
-AC_LINK_FILES(targ-cpu.c targ-cpu.h obj-format.h obj-format.c targ-env.h atof-targ.c,
-	config/tc-${cpu_type}.c	config/tc-${cpu_type}.h \
+AC_LINK_FILES(config/tc-${cpu_type}.c	config/tc-${cpu_type}.h \
 	config/obj-${obj_format}.h config/obj-${obj_format}.c \
-	config/te-${emulation}.h config/atof-${atof}.c)
+	config/te-${emulation}.h config/atof-${atof}.c,
+	targ-cpu.c targ-cpu.h obj-format.h obj-format.c targ-env.h atof-targ.c)
 
 case "${bfd_gas}" in
   yes)	AC_DEFINE(BFD_ASSEMBLER)
@@ -313,6 +308,11 @@ dnl AC_CONST
 AC_FUNC_ALLOCA
 AC_C_INLINE
 
+# VMS needs this.
+AC_CHECK_FUNC(unlink,,
+  AC_CHECK_FUNC(delete,AC_DEFINE(USE_DELETE_FOR_UNLINK),
+    AC_MSG_ERROR(No unlink or delete function available on this system.)))
+
 # Some non-ANSI preprocessors botch requoting inside strings.  That's bad
 # enough, but on some of those systems, the assert macro relies on requoting
 # working properly!
@@ -348,9 +348,7 @@ GAS_CHECK_DECL_NEEDED(errno, f, int f, [
 
 AC_CONFIG_SUBDIRS(testsuite)
 
-GAS_GDBINIT
-
 dnl This must come last.
 dnl Apparently symlinks are checked for in the directory containing
 dnl  the last Makefile.  Thus the order used here...
-AC_OUTPUT(doc/Makefile Makefile)
+AC_OUTPUT(Makefile doc/Makefile .gdbinit:gdbinit.in)
