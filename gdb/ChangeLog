@@ -1,3 +1,13 @@
+2000-05-25  Scott Bambrough <scottb@netwinder.org>
+
+	* arm-linux-tdep.c (find_minsym_and_objfile): New.
+	(skip_hurd_resolver): New.
+	(arm_linux_skip_solib_resolver): New.
+	(arm_skip_solib_resolver): Removed.
+
+	* config/arm/tm-linux.h (SKIP_SOLIB_RESOLVER): Changed to use 
+	arm_linux_skip_solib_resolver.
+
 2000-05-25  Mark Kettenis  <kettenis@gnu.org>
 
 	* acconfig.h (HAVE_R_FS, HAVE_R_GS): Add.
