@@ -1,3 +1,11 @@
+2000-03-17  Alan Modra  <alan@linuxcare.com.au>
+
+	* reloc.c (bfd_check_overflow): In case complain_overflow_bitfield,
+	flag an overflow if the bitfield is outside -2**n to 2**n-1.  The
+	allowable range used to be -2**(n-1) to 2**n-1.
+	* reloc.c (_bfd_relocate_contents): Same here.  Also replace
+	"boolean overflow" with "bfd_reloc_status_type flag".
+
 2000-03-14  Doug Evans  <dje@casey.transmeta.com>
  
         * elf32-m32r.c (m32r_elf_lo16_reloc): Rewrite.
