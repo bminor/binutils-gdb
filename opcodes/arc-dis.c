@@ -26,7 +26,6 @@
 #include <string.h>
 #include "opintl.h"
 
-#include <ctype.h>
 #include <stdarg.h>
 #include "arc-dis.h"
 #include "arc-ext.h"
