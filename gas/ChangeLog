@@ -1,3 +1,13 @@
+2002-11-18  Kevin Buettner  <kevinb@redhat.com>
+
+	* dwarf2dbg.h (dwarf2_format): New enum.
+	* dwarf2dbg.c (DWARF2_FORMAT): Provide default definition.
+	(out_debug_line, out_debug_info): Add code for handling 64-bit
+	DWARF 2 formats.
+	* config/tc-mips.h (mips_dwarf2_format): Declare.
+	* config/tc-mips.c (mips_dwarf2_format): New function.
+	* doc/internals.texi (DWARF2_FORMAT): Document.
+
 2002-11-18  Alexandre Oliva  <aoliva@redhat.com>
 
 	* config/tc-mips.c (s_change_section): Make sure input buffer

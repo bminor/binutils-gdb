@@ -43,6 +43,10 @@
 
 #include "dwarf2dbg.h"
 
+#ifndef DWARF2_FORMAT
+#define DWARF2_FORMAT() dwarf2_format_32bit
+#endif
+
 #ifdef BFD_ASSEMBLER
 
 #include "subsegs.h"
@@ -999,6 +1003,8 @@ out_debug_line (line_seg)
   symbolS *prologue_end;
   symbolS *line_end;
   struct line_seg *s;
+  enum dwarf2_format d2f;
+  int sizeof_offset;
 
   subseg_set (line_seg, 0);
 
@@ -1010,8 +1016,31 @@ out_debug_line (line_seg)
   expr.X_op = O_subtract;
   expr.X_add_symbol = line_end;
   expr.X_op_symbol = line_start;
-  expr.X_add_number = -4;
-  emit_expr (&expr, 4);
+
+  d2f = DWARF2_FORMAT ();
+  if (d2f == dwarf2_format_32bit)
+    {
+      expr.X_add_number = -4;
+      emit_expr (&expr, 4);
+      sizeof_offset = 4;
+    }
+  else if (d2f == dwarf2_format_64bit)
+    {
+      expr.X_add_number = -12;
+      out_four (-1);
+      emit_expr (&expr, 8);
+      sizeof_offset = 8;
+    }
+  else if (d2f == dwarf2_format_64bit_irix)
+    {
+      expr.X_add_number = -8;
+      emit_expr (&expr, 8);
+      sizeof_offset = 8;
+    }
+  else
+    {
+      as_fatal (_("internal error: unknown dwarf2 format"));
+    }
 
   /* Version.  */
   out_two (2);
@@ -1021,7 +1050,7 @@ out_debug_line (line_seg)
   expr.X_add_symbol = prologue_end;
   expr.X_op_symbol = line_start;
   expr.X_add_number = - (4 + 2 + 4);
-  emit_expr (&expr, 4);
+  emit_expr (&expr, sizeof_offset);
 
   /* Parameters of the state machine.  */
   out_byte (DWARF2_LINE_MIN_INSN_LENGTH);
@@ -1174,6 +1203,8 @@ out_debug_info (info_seg, abbrev_seg, line_seg)
   symbolS *info_end;
   char *p;
   int len;
+  enum dwarf2_format d2f;
+  int sizeof_offset;
 
   subseg_set (info_seg, 0);
 
@@ -1184,8 +1215,31 @@ out_debug_info (info_seg, abbrev_seg, line_seg)
   expr.X_op = O_subtract;
   expr.X_add_symbol = info_end;
   expr.X_op_symbol = info_start;
-  expr.X_add_number = -4;
-  emit_expr (&expr, 4);
+
+  d2f = DWARF2_FORMAT ();
+  if (d2f == dwarf2_format_32bit)
+    {
+      expr.X_add_number = -4;
+      emit_expr (&expr, 4);
+      sizeof_offset = 4;
+    }
+  else if (d2f == dwarf2_format_64bit)
+    {
+      expr.X_add_number = -12;
+      out_four (-1);
+      emit_expr (&expr, 8);
+      sizeof_offset = 8;
+    }
+  else if (d2f == dwarf2_format_64bit_irix)
+    {
+      expr.X_add_number = -8;
+      emit_expr (&expr, 8);
+      sizeof_offset = 8;
+    }
+  else
+    {
+      as_fatal (_("internal error: unknown dwarf2 format"));
+    }
 
   /* DWARF version.  */
   out_two (2);
@@ -1194,7 +1248,7 @@ out_debug_info (info_seg, abbrev_seg, line_seg)
   expr.X_op = O_symbol;
   expr.X_add_symbol = section_symbol (abbrev_seg);
   expr.X_add_number = 0;
-  emit_expr (&expr, 4);
+  emit_expr (&expr, sizeof_offset);
 
   /* Target address size.  */
   out_byte (sizeof_address);

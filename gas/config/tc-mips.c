@@ -14550,3 +14550,12 @@ MIPS options:\n\
 -64			create 64 ABI object file\n"));
 #endif
 }
+
+enum dwarf2_format
+mips_dwarf2_format ()
+{
+  if (mips_abi == N64_ABI)
+    return dwarf2_format_64bit_irix;
+  else
+    return dwarf2_format_32bit;
+}

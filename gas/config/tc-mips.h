@@ -182,4 +182,7 @@ extern void mips_flush_pending_output PARAMS ((void));
 extern void mips_enable_auto_align PARAMS ((void));
 #define md_elf_section_change_hook()	mips_enable_auto_align()
 
+extern enum dwarf2_format mips_dwarf2_format PARAMS ((void));
+#define DWARF2_FORMAT() mips_dwarf2_format ()
+
 #endif /* TC_MIPS */
