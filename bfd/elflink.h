@@ -6812,20 +6812,12 @@ elf_link_input_bfd (finfo, input_bfd)
 			   || h->root.type == bfd_link_hash_defweak)
 			  && elf_discarded_section (h->root.u.def.section))
 			{
-#if BFD_VERSION_DATE < 20031005
 			  if ((o->flags & SEC_DEBUGGING) != 0)
 			    {
-#if BFD_VERSION_DATE > 20021005
-			      (*finfo->info->callbacks->warning)
-				(finfo->info,
-				 _("warning: relocation against removed section; zeroing"),
-				 NULL, input_bfd, o, rel->r_offset);
-#endif
 			      BFD_ASSERT (r_symndx != 0);
 			      memset (rel, 0, sizeof (*rel));
 			    }
 			  else
-#endif
 			    {
 			      if (! ((*finfo->info->callbacks->undefined_symbol)
 				     (finfo->info, h->root.root.string,
@@ -6841,23 +6833,15 @@ elf_link_input_bfd (finfo, input_bfd)
 
 		      if (sec != NULL && elf_discarded_section (sec))
 			{
-#if BFD_VERSION_DATE < 20031005
 			  if ((o->flags & SEC_DEBUGGING) != 0
 			      || (sec->flags & SEC_LINK_ONCE) != 0)
 			    {
-#if BFD_VERSION_DATE > 20021005
-			      (*finfo->info->callbacks->warning)
-				(finfo->info,
-				 _("warning: relocation against removed section"),
-				 NULL, input_bfd, o, rel->r_offset);
-#endif
 			      BFD_ASSERT (r_symndx != 0);
 			      rel->r_info
 				= ELF_R_INFO (0, ELF_R_TYPE (rel->r_info));
 			      rel->r_addend = 0;
 			    }
 			  else
-#endif
 			    {
 			      boolean ok;
 			      const char *msg
