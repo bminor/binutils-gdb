@@ -1,3 +1,7 @@
+Wed May 26 09:40:18 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* config.guess: Recognize SunOS6 as Solaris3.
+
 Tue May 25 23:03:11 1993  Per Bothner  (bothner@cygnus.com)
 
 	* config.guess:  Fix typo.  Avoid #elif (not in K&R 1).
