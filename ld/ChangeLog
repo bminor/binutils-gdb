@@ -1,3 +1,9 @@
+2001-11-14  H.J. Lu  <hjl@gnu.org>
+
+	* emultempl/armelf.em (arm_elf_finish): Renamed from
+	gld${EMULATION_NAME}_finish.
+	(LDEMUL_FINISH): Set to arm_elf_finish.
+
 2001-11-14  Daniel Jacobowitz  <drow@mvista.com>
 
 	* emultempl/elf32.em (gld${EMULATION_NAME}_finish): New.
