@@ -1,3 +1,7 @@
+Thu Jun  2 23:19:10 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* hppa-tdep.c (skip_trampoline_code): Fix typo.
+
 Thu Jun  2 18:09:59 1994  Per Bothner  (bothner@kalessin.cygnus.com)
 
 	* ch-valprint.c (chill_val_print_array_elements):  New function.
