@@ -27,6 +27,7 @@ mips-gdb.exp
 mt-a29k-udi
 mt-hpux
 mt-i386-aout
+mt-i386-netware
 mt-i960-nindy
 mt-lynx
 mt-m68k
@@ -35,6 +36,7 @@ mt-slite
 mt-sparc-aout
 mt-unix
 mt-vxworks
+netware.exp
 nind-gdb.exp
 udi-gdb.exp
 unix-gdb.exp

@@ -1,3 +1,7 @@
+Tue Aug  2 10:24:08 1994  J.T. Conklin  (jtc@phishhead.cygnus.com)
+
+	* config/netware.exp: New file.
+
 Thu Jul 28 12:54:07 1994  J.T. Conklin  (jtc@phishhead.cygnus.com)
 
 	* config/mt-slite (LDFLAGS): If using the newlib in the tree, set
