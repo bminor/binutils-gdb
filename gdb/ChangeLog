@@ -1,5 +1,22 @@
 2004-01-24  Mark Kettenis  <kettenis@gnu.org>
 
+	* sparc64-tdep.h (stryct_frame_info, struct trad_frame_saved_reg):
+	Add opaque declarations.
+	(sparc64nbsd_sigcontext_saved_regs): New prototype.
+	* sparc64nbsd-tdep.c (sparc64nbsd_sigcontext_saved_regs): New
+	function with code split out from
+	sparc64nbsd_sigcontext_frame_cache.
+	(sparc64nbsd_sigcontext_frame_cache): Use
+	sparc64nbsd_sigcontext_saved_regs.
+	(_initialize_sparc64nbsd_tdep): Don't register OS ABI handler for
+	OpenBSD.
+	* sparc64obsd-tdep.c: New file.
+	* Makefile.in (ALLDEPFILES): Add sparc64obsd-tdep.c.
+	(sparc64obsd-tdep.o): New dependency.
+	* configure.tgt (sparc64-*-openbsd*): Set gdb_target to obsd64 and
+	gdb_osabi to GDB_OSABI_OPENBSD_ELF.
+	* config/sparc/obsd64.mt: New file.
+
 	* sparc-tdep.c (sparc_fetch_instruction): Return zero if we can't
 	read the instruction at PC.
 
