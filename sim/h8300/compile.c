@@ -86,7 +86,7 @@ void sim_set_simcache_size PARAMS ((int));
                               (N << 3) | (Z << 2) | (V<<1) | C;
 
 #define BUILDEXR()	    \
-  if( h8300smode ) cpu.exr = ( trace<<7 ) | intMask;
+  if (h8300smode) cpu.exr = (trace<<7) | intMask;
 
 #define GETSR()		    \
   c = (cpu.ccr >> 0) & 1;\
@@ -99,7 +99,7 @@ void sim_set_simcache_size PARAMS ((int));
   intMaskBit = (cpu.ccr >> 7) & 1;
 
 #define GETEXR()	    \
-  if( h8300smode ) { \
+  if (h8300smode) { \
     trace = (cpu.exr >> 7) & 1;\
     intMask = cpu.exr & 7; }
 
@@ -850,7 +850,7 @@ mop (code, bsize, sign)
 }
 
 #define ONOT(name, how) \
-case O(name, SB):				\
+case O (name, SB):				\
 {						\
   int t;					\
   int hm = 0x80;				\
@@ -858,7 +858,7 @@ case O(name, SB):				\
   how; 						\
   goto shift8;					\
 } 						\
-case O(name, SW):				\
+case O (name, SW):				\
 { 						\
   int t;					\
   int hm = 0x8000;				\
@@ -866,7 +866,7 @@ case O(name, SW):				\
   how; 						\
   goto shift16;					\
 } 						\
-case O(name, SL):				\
+case O (name, SL):				\
 {						\
   int t;					\
   int hm = 0x80000000; 				\
@@ -876,7 +876,7 @@ case O(name, SL):				\
 }
 
 #define OSHIFTS(name, how1, how2) \
-case O(name, SB):				\
+case O (name, SB):				\
 {						\
   int t;					\
   int hm = 0x80;				\
@@ -891,7 +891,7 @@ case O(name, SB):				\
     }						\
   goto shift8;					\
 } 						\
-case O(name, SW):				\
+case O (name, SW):				\
 { 						\
   int t;					\
   int hm = 0x8000;				\
@@ -906,7 +906,7 @@ case O(name, SW):				\
     }						\
   goto shift16;					\
 } 						\
-case O(name, SL):				\
+case O (name, SL):				\
 {						\
   int t;					\
   int hm = 0x80000000; 				\
@@ -923,14 +923,14 @@ case O(name, SL):				\
 }
 
 #define OBITOP(name,f, s, op) 			\
-case  O(name, SB):				\
+case O (name, SB):				\
 {						\
   int m;					\
   int b; 					\
   if (f) ea = fetch (&code->dst);		\
-  m=1<< fetch(&code->src);			\
+  m=1<< fetch (&code->src);			\
   op;						\
-  if(s) store (&code->dst,ea); goto next;	\
+  if (s) store (&code->dst,ea); goto next;	\
 }
 
 int
@@ -1021,15 +1021,15 @@ sim_resume (sd, step, siggnal)
 
 
 #define ALUOP(STORE, NAME, HOW) \
-    case O(NAME,SB):  HOW; if(STORE)goto alu8;else goto just_flags_alu8;  \
-    case O(NAME, SW): HOW; if(STORE)goto alu16;else goto just_flags_alu16; \
-    case O(NAME,SL):  HOW; if(STORE)goto alu32;else goto just_flags_alu32;
+    case O (NAME,SB):  HOW; if (STORE)goto alu8;else goto just_flags_alu8;  \
+    case O (NAME, SW): HOW; if (STORE)goto alu16;else goto just_flags_alu16; \
+    case O (NAME,SL):  HOW; if (STORE)goto alu32;else goto just_flags_alu32;
 
 
 #define LOGOP(NAME, HOW) \
-    case O(NAME,SB): HOW; goto log8;\
-    case O(NAME, SW): HOW; goto log16;\
-    case O(NAME,SL): HOW; goto log32;
+    case O (NAME,SB): HOW; goto log8;\
+    case O (NAME, SW): HOW; goto log16;\
+    case O (NAME,SL): HOW; goto log32;
 
 
 
@@ -1075,8 +1075,8 @@ sim_resume (sd, step, siggnal)
 	  res = rd + ea;
 	  goto alu8;
 
-#define EA    ea = fetch(&code->src);
-#define RD_EA ea = fetch(&code->src); rd = fetch(&code->dst);
+#define EA    ea = fetch (&code->src);
+#define RD_EA ea = fetch (&code->src); rd = fetch (&code->dst);
 
 	  ALUOP (1, O_SUB, RD_EA;
 		 ea = -ea;
@@ -1139,31 +1139,31 @@ sim_resume (sd, step, siggnal)
 
 	case O (O_EEPMOV, SB):
 	case O (O_EEPMOV, SW):
-	  if(h8300hmode||h8300smode)
+	  if (h8300hmode||h8300smode)
 	    {
 	      register unsigned char *_src,*_dst;
-	      unsigned int count = (code->opcode==O(O_EEPMOV, SW))?cpu.regs[R4_REGNUM]&0xffff:
+	      unsigned int count = (code->opcode == O(O_EEPMOV, SW))?cpu.regs[R4_REGNUM]&0xffff:
 		cpu.regs[R4_REGNUM]&0xff;
 
 	      _src = cpu.regs[R5_REGNUM] < memory_size ? cpu.memory+cpu.regs[R5_REGNUM] :
 		cpu.eightbit + (cpu.regs[R5_REGNUM] & 0xff);
-	      if((_src+count)>=(cpu.memory+memory_size))
+	      if ((_src+count)>=(cpu.memory+memory_size))
 		{
-		  if((_src+count)>=(cpu.eightbit+0x100))
+		  if ((_src+count)>=(cpu.eightbit+0x100))
 		    goto illegal;
 		}
 	      _dst = cpu.regs[R6_REGNUM] < memory_size ? cpu.memory+cpu.regs[R6_REGNUM] :
 	           				       	      cpu.eightbit + (cpu.regs[R6_REGNUM] & 0xff);
-	      if((_dst+count)>=(cpu.memory+memory_size))
+	      if ((_dst+count)>=(cpu.memory+memory_size))
 		{
-		  if((_dst+count)>=(cpu.eightbit+0x100))
+		  if ((_dst+count)>=(cpu.eightbit+0x100))
 		    goto illegal;
 		}
 	      memcpy(_dst,_src,count);
 
 	      cpu.regs[R5_REGNUM]+=count;
 	      cpu.regs[R6_REGNUM]+=count;
-	      cpu.regs[R4_REGNUM]&=(code->opcode==O(O_EEPMOV, SW))?(~0xffff):(~0xff);
+	      cpu.regs[R4_REGNUM]&=(code->opcode == O(O_EEPMOV, SW))?(~0xffff):(~0xff);
 	      cycles += 2*count;
 	      goto next;
 	    }
@@ -1248,21 +1248,21 @@ sim_resume (sd, step, siggnal)
 	  goto just_flags_inc32;
 
 #define GET_CCR(x) BUILDSR();x = cpu.ccr
-#define GET_EXR(x) BUILDEXR();x = cpu.exr
+#define GET_EXR(x) BUILDEXR ();x = cpu.exr
 
 	case O (O_LDC, SB):
 	case O (O_LDC, SW):
-	  res = fetch(&code->src);
+	  res = fetch (&code->src);
 	  goto setc;
 	case O (O_STC, SB):
 	case O (O_STC, SW):
-	  if(code->src.type==OP_CCR)
+	  if (code->src.type == OP_CCR)
 	    {
-	      GET_CCR(res);
+	      GET_CCR (res);
 	    }
-	  else if(code->src.type==OP_EXR && h8300smode)
+	  else if (code->src.type == OP_EXR && h8300smode)
 	    {
-	      GET_EXR(res);
+	      GET_EXR (res);
 	    }
 	  else
 	    goto illegal;
@@ -1270,11 +1270,11 @@ sim_resume (sd, step, siggnal)
 	  goto next;
 
 	case O (O_ANDC, SB):
-	  if(code->dst.type==OP_CCR)
+	  if (code->dst.type == OP_CCR)
 	    {
 	      GET_CCR (rd);
 	    }
-	  else if(code->dst.type==OP_EXR && h8300smode)
+	  else if (code->dst.type == OP_EXR && h8300smode)
 	    {
 	      GET_EXR (rd);
 	    }
@@ -1285,11 +1285,11 @@ sim_resume (sd, step, siggnal)
 	  goto setc;
 
 	case O (O_ORC, SB):
-	  if(code->dst.type==OP_CCR)
+	  if (code->dst.type == OP_CCR)
 	    {
 	      GET_CCR (rd);
 	    }
-	  else if(code->dst.type==OP_EXR && h8300smode)
+	  else if (code->dst.type == OP_EXR && h8300smode)
 	    {
 	      GET_EXR (rd);
 	    }
@@ -1300,11 +1300,11 @@ sim_resume (sd, step, siggnal)
 	  goto setc;
 
 	case O (O_XORC, SB):
-	  if(code->dst.type==OP_CCR)
+	  if (code->dst.type == OP_CCR)
 	    {
 	      GET_CCR (rd);
 	    }
-	  else if(code->dst.type==OP_EXR && h8300smode)
+	  else if (code->dst.type == OP_EXR && h8300smode)
 	    {
 	      GET_EXR (rd);
 	    }
@@ -1410,7 +1410,7 @@ sim_resume (sd, step, siggnal)
 		   c = rd & (hm >> 1); v = (rd & (hm >> 1)) != ((rd & (hm >> 2)) << 2); rd <<= 2);
 	  OSHIFTS (O_SHAR,
 		   t = rd & hm; c = rd & 1; v = 0; rd >>= 1; rd |= t,
-		   t = rd & hm; c = rd & 2; v = 0; rd >>= 2; rd |= t | t >> 1 );
+		   t = rd & hm; c = rd & 2; v = 0; rd >>= 2; rd |= t | t >> 1);
 	  OSHIFTS (O_ROTL,
 		   c = rd & hm; v = 0; rd <<= 1; rd |= C,
 		   c = rd & hm; v = 0; rd <<= 1; rd |= C; c = rd & hm; rd <<= 1; rd |= C);
@@ -1534,9 +1534,9 @@ sim_resume (sd, step, siggnal)
 	  break;
 
 	case O (O_TAS, SB):
-	  if( !h8300smode || code->src.type != X (OP_REG, SL) )
+	  if (!h8300smode || code->src.type != X (OP_REG, SL))
 	    goto illegal;
-	  switch(code->src.reg)
+	  switch (code->src.reg)
 	    {
 	    case R0_REGNUM:
 	    case R1_REGNUM:
@@ -1681,12 +1681,12 @@ sim_resume (sd, step, siggnal)
       abort ();
 
     setc:
-      if(code->dst.type==OP_CCR)
+      if (code->dst.type == OP_CCR)
 	{
 	  cpu.ccr = res;
 	  GETSR ();
 	}
-      else if(code->dst.type==OP_EXR && h8300smode)
+      else if (code->dst.type == OP_EXR && h8300smode)
 	{
 	  cpu.exr = res;
 	  GETEXR ();
@@ -1873,7 +1873,7 @@ sim_resume (sd, step, siggnal)
 
   cpu.pc = pc;
   BUILDSR ();
-  BUILDEXR();
+  BUILDEXR ();
   cpu.mask = oldmask;
   signal (SIGINT, prev);
 }
@@ -1994,7 +1994,7 @@ sim_fetch_register (sd, rn, buf, length)
 
   init_pointers ();
 
-  if(!h8300smode && rn >=EXR_REGNUM)
+  if (!h8300smode && rn >=EXR_REGNUM)
     rn++;
   switch (rn)
     {
