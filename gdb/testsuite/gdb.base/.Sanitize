@@ -67,6 +67,7 @@ d10vovly.c
 default.exp
 define.exp
 display.c
+display.exp
 dollar.exp
 echo.exp
 ena-dis-br.exp
@@ -101,6 +102,7 @@ list0.h
 list1.c
 logical.exp
 long_long.c
+long_long.exp
 m32r.ld
 m32rovly.c
 m68k-aout.u
@@ -162,6 +164,7 @@ smoke.c
 smoke.cc
 smoke.exp
 solib.c
+solib.exp
 solib1.c
 solib2.c
 so-impl-ld.c
@@ -172,6 +175,7 @@ sparc-aout.u
 sparc-elf.u
 ss.h
 step-test.c
+step-test.exp
 structs2.c
 structs2.exp
 term.exp
