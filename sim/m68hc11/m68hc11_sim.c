@@ -54,7 +54,6 @@ static SIM_RC
 cpu_option_handler (SIM_DESC sd, sim_cpu *cpu,
                     int opt, char *arg, int is_command)
 {
-  sim_cpu *cpu;
   int val;
   
   cpu = STATE_CPU (sd, 0);
@@ -393,7 +392,11 @@ cpu_move8 (sim_cpu *cpu, uint8 code)
       src = cpu_get_indexed_operand8 (cpu, 1);
       addr = cpu_get_indexed_operand_addr (cpu, 1);
       break;
-      
+
+    default:
+      sim_engine_abort (CPU_STATE (cpu), cpu, 0,
+			"Invalid code 0x%0x -- internal error?", code);
+      return;
     }
   memory_write8 (cpu, addr, src);
 }
@@ -436,7 +439,11 @@ cpu_move16 (sim_cpu *cpu, uint8 code)
       src = cpu_get_indexed_operand16 (cpu, 1);
       addr = cpu_get_indexed_operand_addr (cpu, 1);
       break;
-      
+
+    default:
+      sim_engine_abort (CPU_STATE (cpu), cpu, 0,
+			"Invalid code 0x%0x -- internal error?", code);
+      return;
     }
   memory_write16 (cpu, addr, src);
 }
@@ -941,7 +948,7 @@ sim_memory_error (sim_cpu *cpu, SIM_SIGNAL excep,
   vsprintf (buf, message, args);
   va_end (args);
 
-  printf("%s\n", buf);
+  sim_io_printf (CPU_STATE (cpu), "%s\n", buf);
   cpu_memory_exception (cpu, excep, addr, buf);
 }
 
