@@ -15,11 +15,6 @@
 
 Do-first:
 
-if ( echo $* | grep keep\-mpw > /dev/null ) ; then
-	keep_these_too="mpw.h"
-else
-	lose_these_too="mpw.h"
-fi
 
 # All files listed between the "Things-to-keep:" line and the
 # "Files-to-sed:" line will be kept.  All other files will be removed.
@@ -66,6 +61,7 @@ m88kmach3.h
 miniframe.h
 mipsbsd.h
 mipsmach3.h
+mpw.h
 nbsd.h
 ncr3000.h
 news-mips.h

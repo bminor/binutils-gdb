@@ -15,14 +15,6 @@
 
 Do-first:
 
-mpw_files="mpw-config.in mpw-make.in ChangeLog.mpw"
-
-if ( echo $* | grep keep\-mpw > /dev/null ) ; then
-	keep_these_too="${mpw_files} ${keep_these_too}"
-else
-	lose_these_too="${mpw_files} ${lose_these_too}"
-fi
-
 rce_files="cpu-rce.c aout-rce.c"
 
 if ( echo $* | grep keep\-rce > /dev/null ) ; then
@@ -191,6 +183,8 @@ m68knetbsd.c
 m88kmach3.c
 makefile.dos
 mipsbsd.c
+mpw-config.in
+mpw-make.in
 newsos3.c
 netbsd.h
 nlm-target.h
@@ -230,28 +224,6 @@ Things-to-lose:
 
 
 Do-last:
-
-mpwfiles="ecoffswap.h coffswap.h"
-if ( echo $* | grep keep\-mpw > /dev/null ) ; then
-	if [ -n "${verbose}" ] ; then
-		echo Keeping mpw stuff in $mpwfiles.
-	fi
-else
-	if [ -n "${verbose}" ]; then
-		echo -n Cleaning mpw in `pwd`:
-	fi
-	for f in $mpwfiles ; do
-		if [ -n "${verbose}" ] ; then
-			echo -n " " $f
-		fi
-		sed '/start\-sanitize\-mpw/,/end\-sanitize\-mpw/d' < $f > new
-		if [ -n "${safe}" ] ; then
-			mv $f .Recover
-		fi
-		mv new $f
-	done
-	chmod a+x config.bfd
-fi
 
 i960xl_files="ChangeLog archures.c bfd-in2.h cpu-i960.c coffcode.h"
 if ( echo $* | grep keep\-i960xl > /dev/null ) ; then
