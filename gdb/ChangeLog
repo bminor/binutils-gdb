@@ -1,3 +1,9 @@
+Fri May 17 14:40:14 1991  Roland H. Pesch  (pesch at fowanton.cygnus.com)
+
+	* doc/gdb.texinfo: finished using all RMS comments, save those for
+	appendices on readline and cmd history (which are in other source
+	files) 
+
 Thu May 16 18:06:05 1991  Roland H. Pesch  (pesch at fowanton.cygnus.com)
 
 	* doc/gdb.texinfo: (1) Updated w/ref to RMS comments through
