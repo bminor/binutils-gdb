@@ -1,0 +1,1709 @@
+\input texinfo
+@c
+@c search for "UPDATE!" for items that will need examination on future
+@c releases
+@c
+@c This file may require a nonstandard texinfo.tex to format; if you
+@c need it, please contact Cygnus Support (email editor-in-chief@cygnus.com)
+@setfilename README.info
+@c
+@c This file describes how to install a Cygnus Progressive Release.
+@c
+@c Copyright (C) 1991, 1992 Cygnus Support
+@c This text may be freely distributed under the terms of the GNU
+@c General Public License.
+@c
+@c $Id$
+@set CDROMinst
+@clear CUSTOMER
+@clear FIXMES
+@c
+@iftex
+@c The include file "texiplus.tex" is in the texinfo/cygnus dir, and
+@c implements Cygnus modifications to the texinfo manual style.
+@input texiplus
+@c The include file "smpklug.texi" is a kluge to deal with local
+@c document production issues at Cygnus; it's safe to comment out this
+@c line if you don't have (or don't want) the file.
+@input smpklug.texi
+@smallbook
+@cropmarks
+@setchapternewpage on
+@finalout
+@end iftex
+@settitle Solaris--||RELNO|| Installation
+@tex
+% override-override: the following \font lines are redundant if you're
+% using an unmodified FSF texinfo.  
+\globaldefs=1
+\font\texttt=cmtt10 scaled \magstephalf\let\tentt=\texttt
+\font\textsl=cmsl10 scaled \magstephalf\let\tensl=\textsl
+\font\textsf=cmss10 scaled \magstephalf\let\tensf=\textsf
+\globaldefs=0
+%end override-override
+% WARNING: NONSTANDARD USAGE we need \tensf for print, without
+% upsetting info.  We weren't using @b in this note, so I redefine it:
+%
+\global\def\b#1{{\tensf #1}}
+\global\parindent=0pt
+@end tex
+@titlepage
+@title Installation Notes
+@sp 3
+@table @strong
+@item Cygnus Support Developer's Kit
+@item Progressive Release ||RELNO|| for Solaris
+@item {}
+@item Contents
+@end table
+@c TOGGLE XREF DISPLAY TO AVOID SQUARE BRACKETS OR QUOTES:
+@c (Cygnus "texiplus.tex" hack.  If you want standard texinfo remove
+@c or comment-out instances of @altref).
+@altref
+@format
+@ref{Brief,,Installing in Brief}
+@ref{Contents,,Release Contents}.
+@ref{Platforms,,Supported Platforms}.
+
+@ref{Installing,,Installing the Developer's Kit}.
+@ref{local-install,,Installing with local ||MEDIUM|| drive}.
+@ref{cross-install,,Installing with another machine's ||MEDIUM|| drive}.
+@ref{Examples,,Installation Examples}.
+
+@ref{Paths,,Changing the Paths}
+@ref{Trouble,,Some Things that Might go Wrong}
+@ref{Rebuilding,,Rebuilding From Source}.
+@ref{Removing,,Removing the Developer's Kit}.
+
+@ref{Cygnus-FSF,,Cygnus Progressive Releases and the FSF}.
+@ref{Cygnus-Support,,About Cygnus Support}.
+@end format
+@c TOGGLE XREF DISPLAY BACK, TO RESTORE MARKERS AROUND SECNAMES:
+
+@altref
+@author Cygnus Support @hfill hotline: +1 415 322 7836
+@page
+
+@tex
+\def\$#1${{#1}} % Kluge: collect RCS revision info without $...$
+\xdef\Rmanvers{{\it Installation Notes (Solaris Developer's Kit)}, \$Revision$} % *NOT* for use in headers, footers
+{\parskip=0pt \hfill Cygnus Support\par \hfill \Rmanvers\par \hfill
+\TeX{}info \texinfoversion\par }
+\global\def\manvers{Progressive ||RELNO|| for Solaris}
+@end tex
+
+@vskip 0pt plus 1filll
+Copyright @copyright{} 1991, 1992 Cygnus Support
+
+Permission is granted to make and distribute verbatim copies of
+this manual provided the copyright notice and this permission notice
+are preserved on all copies.
+
+Permission is granted to copy and distribute modified versions of this
+manual under the conditions for verbatim copying, provided also that
+the entire resulting derived work is distributed under the terms of a
+permission notice identical to this one.
+
+Permission is granted to copy and distribute translations of this manual
+into another language, under the above conditions for modified versions.
+
+@end titlepage
+
+@ifinfo
+@node Top, Brief, (dir), (dir)
+@top Overview
+
+This file is about the Cygnus Developer's Kit for Solaris: what's in it,
+how to install it, and how to reconfigure it.
+
+@menu
+* Brief::                       Installing in Brief
+* Contents::                    Release Contents
+* Requirements::                System Requirements
+* Installing::                  Installing the Developer's Kit
+* Running::                     Running the Programs
+* Paths::                       Changing the Paths
+* Trouble::                     Some Things that Might go Wrong
+* Rebuilding::                  Rebuilding From Source
+* Removing::                    Removing Parts of the Developer's Kit
+* Cygnus-FSF::                  Cygnus Releases and the FSF
+* Cygnus-Support::              About Cygnus Support
+
+@end menu
+
+@end ifinfo
+
+@node Brief, Contents, Top, Top
+@unnumbered Installing in Brief
+@strong{You can run the brief installation procedure if:}
+@itemize @bullet
+@item
+Your Solaris computer has its own ||MEDIUM|| drive 
+@item
+You use the default installation directory @file{/opt/gnu}, and
+@item
+You have at least ||DF|| MB available in @code{/opt} (try @samp{df /opt})
+@end itemize
+Otherwise, see @ref{Installing,,Installing the Developer's Kit}.
+
+@strong{Steps for Brief Install:}
+
+The whole procedure takes between ?? minutes and ???.
+
+@enumerate
+@item 
+Make sure you have root access to the computer.
+
+@cartouche
+@example
+eg$ @b{su} @b{root}
+password:                   @i{(enter root password)}
+@end example
+@end cartouche
+
+@item
+Load the Progressive--||RELNO|| ||MEDIUM|| into your ||MEDIUM|| drive.
+
+@ifset CDROMinst
+@item
+Mount the @sc{cd-rom}:
+
+@cartouche
+@example
+eg# @b{mkdir} @b{/cdrom}             @i{(ignore any errors)}
+eg# @b{mount} @b{-F} @b{hsfs} @b{-o} @b{ro} @b{/dev/dsk/c0t6d0s0} @b{/cdrom}
+@end example
+@end cartouche
+@end ifset
+
+@item
+Run the @code{pkgadd} command like this:
+
+@cartouche
+@example
+eg# @b{/usr/sbin/pkgadd} @b{-n} @b{-d} @b{||MEDstr||} @b{GNUDEVTkit} @b{GNUDEVTsrc}
+@end example
+@end cartouche
+
+You will see messages about installation activity, ending with
+
+@cartouche
+@example
+Cygnus Support software distribution installed!
+@end example
+@end cartouche
+
+@item
+Build a symbolic link to make execution paths easy:
+
+@cartouche
+@example
+eg# @b{cd} @b{/opt/gnu}
+eg# @b{ln} @b{-s} @b{progressive-||RELNO||} @b{progressive}
+@end example
+@end cartouche
+
+@ifset CUSTOMER
+@item
+Use your Cygnus customer-ID (see cover letter) to tag your copy of our
+problem-report form:
+
+@cartouche
+@example
+eg# @b{/opt/progressive/bin/install@t{_}cid} @var{customerID}
+@end example
+@end cartouche
+@end ifset
+
+@end enumerate
+
+You're done!  Anyone who puts @samp{/opt/progressive/bin} in her or his
+@code{PATH} can use the Developer's Kit.
+
+@node Contents, Requirements, Brief, Top
+@unnumbered Release Contents
+
+This Developer's Kit is a Cygnus Support @dfn{Progressive Release}: the
+programs in it are recent versions, which have been tested and certified
+both individually and as a coordinated suite of tools.
+The kit includes both source and binaries for:  
+
+@c UPDATE! Anything new shoveled in?
+@table @r
+@item @sc{gcc}
+C compiler
+
+@item @sc{gdb}
+debugger
+
+@item @sc{make}
+compilation control program
+
+@item Documentation Tools
+@code{info}, @code{makeinfo}
+
+@item Support Utilities
+@code{patch}, the source-code update utility; @sc{gnu} @code{diff}; and
+@code{send_pr}, the Cygnus problem-reporting utility
+@end table
+
+@menu
+* Platforms::                   Supported Platforms
+@end menu
+
+@node Platforms,  , Contents, Contents
+@unnumberedsec Supported Platforms
+
+@table @strong
+@item ||HOST||s
+All programs in your Developer's Kit are for ||HOST||s running
+Solaris; we ship binaries (configured to install and run under
+@file{/opt/gnu}) as well as all source code.
+
+@item Other Platforms
+For information on other platforms or other programs
+that we may support, please contact Cygnus Support at:
+
+@table @strong
+@item voice
++1 415 322 3811
+@item hotline
++1 415 322 7836
+@item fax
++1 415 322 3270
+@item email
+@code{info@@cygnus.com}
+@end table
+@end table
+
+@menu
+* Requirements::                System Requirements
+@end menu
+
+@node Requirements, Installing, Contents, Top
+@unnumbered System Requirements
+
+@table @strong
+@item OS Level
+Progressive Release ||RELNO|| for ||HOST||s requires Solaris 2.0 or
+later. 
+
+@item A ||MEDIUM|| Drive
+You need access to a ||MEDIUM|| drive.  The ||MEDIUM|| drive need not be
+on the computer where you want to run the software; but it is best if
+the machine with a ||MEDIUM|| drive and your computer can mount a common
+file system.  At the very least, you need some sort of file transfer
+capability between the machine with a ||MEDIUM|| drive and your
+computer.
+
+@item Disk Space
+The total space required to extract and install
+binaries and source for all programs is
+||DF|| megabytes.
+
+The software is configured to go into @file{/opt/gnu}.  If you have
+space available, but not in the same file system as @file{/opt}, you can
+use @samp{ln -s} to create @file{/opt/gnu} as a symbolic link to the
+file system where you do have the space available.
+
+If you don't have enough space, you may be able to install binaries only;
+see @ref{Limited Space,,Not Enough Space}.  The space required for
+installing the binaries is ||BD|| megabytes.
+
+@item Root Access
+The standard Solaris installation procedures for optional packages
+require you to run the installation with root privileges.  We deplore
+this requirement, but consider it valuable nevertheless to conform to
+the standard Solaris installation procedure.
+@end table
+
+@node Installing, Running, Requirements, Top
+@unnumbered Installing the Developer's Kit
+
+@iftex
+This note shows the different parts of examples like this:
+@table @asis
+@item Computer output is shown in @code{typewriter font.}
+@item Your input is indicated by @b{a sans-serif font.}
+@item Text to replace, rather than typing verbatim, is in @var{this font}.
+@item Comments appear in @i{italic font}.
+@end table
+@end iftex
+In examples, we show the system prompt as @samp{eg#}.
+
+The Cygnus Progressive--||RELNO|| ||MEDIUM|| is designed to work with
+the Solaris administration command @code{pkgadd}.  
+
+Two checklists follow.  The first checklist shows what to do if you have
+a ||MEDIUM|| drive on the computer where you want to install the
+Developer's Kit; the second shows how to use another networked machine
+to read the ||MEDIUM||, then finish the installation on your computer.
+
+Both checklists suggest installing the Developer's Kit binaries under
+@file{/opt/gnu} (which can be a symbolic link from somewhere else, if
+you like).  We recommend you use this location for the software, because
+the precompiled, ready-to-run versions of the tools are configured this
+way.  If you want to install elsewhere, see @ref{Paths,,Changing
+the Paths}.)
+
+Both checklists are very similar to @ref{Brief,,Installing in Brief},
+but provide more discussion of each step, and offer alternatives for
+systems whose available disk space is not in @code{/opt} and for
+installing only portions of the Developer's Kit.
+
+@menu
+* local-install::               Installing with a local ||MEDIUM|| drive
+* cross-install::               Installing with another machine's ||MEDIUM|| drive
+* Examples::                    Installation Examples
+* Why-fixincludes::             Why Convert System Header Files?
+* Link::                        Easy Access and Updating
+@end menu
+
+@node local-install, cross-install, Installing, Installing
+@unnumberedsubsec Installing with a local ||MEDIUM|| drive
+
+This procedure is for a ||HOST|| that has its own ||MEDIUM|| drive.  The
+complete procedure takes at least ?? minutes on a fast, unloaded
+machine; it may take up to ??? in other situations.
+
+@enumerate
+@item 
+Make sure you have root access to the computer.  The standard Solaris
+installation procedures for optional packages require @code{root} to run
+the complete installation.
+
+@cartouche
+@example
+eg$ @b{su root}
+password:                   @i{Enter root password.}
+@end example
+@end cartouche
+
+@item
+Check that you have enough space available in @file{/opt}
+(@pxref{Requirements,,System Requirements}).  You can use @samp{df /opt}
+to check.
+@ifset FIXMES
+@quotation
+@emph{FIXME!} Does @code{pkgadd} check for this and issue an error?  If
+so, recast in those terms?
+@end quotation
+@end ifset
+
+@ifset CDROMinst
+@item
+Load the Catalyst CDWARE disk into a disk caddy, and put the caddy in
+your CD-ROM drive.
+
+@item
+Mount the @sc{cd-rom}.  This note assumes your mount point for a
+@code{cd-rom} is a directory called @file{/cdrom}; substitute to match
+your site's conventions if necessary.
+
+@c makeinfo seems unable to cope with nested ifset's when outer is off,
+@c inner  is on.
+@c @ifset FIXMES
+@quotation
+@emph{FIXME!} @file{/dev/dsk/c0t6d0s0} for @sc{cd-rom} cribbed from
+Sun's generic optional-package install notes.  Is it really this cut and
+dried?  What about systems with more than one @sc{cd-rom} drive?
+@end quotation
+@c @end ifset
+
+@cartouche
+@example
+eg# @b{mkdir} @b{/cdrom}             @i{(ignore any errors)}
+eg# @b{mount} @b{-F} @b{hsfs} @b{-o} @b{ro} @b{/dev/dsk/c0t6d0s0} @b{/cdrom}
+@end example
+@end cartouche
+@end ifset
+
+@ifclear CDROMinst
+@item
+Load the Cygnus Support release tape (labelled
+``Progressive--||RELNO||'') into your system's tape drive.
+
+@item
+find out the name of the tape device on your machine that can read the
+release tape.  Cygnus release tapes are labelled to identify the kind of
+tape used.  You should use one of the following devices:
+
+@ifset FIXMES
+@quotation
+@emph{FIXME!}  Does SVr4 specify device names enough that we can be more
+explicit here?
+@end quotation
+
+@quotation
+@emph{FIXME!}  For our own @code{Install}, we asked for
+@emph{non-rewinding} tape device.  @code{pkgadd} doesn't say what kind
+of tape devices it wants.  Does it matter?
+@end quotation
+@end ifset
+
+@table @emph
+@item ||TAPdflt|| tape
+Use @file{||DEVdflt||} where the examples show @code{||MEDstr||}.
+
+@item Exabyte ||MEDIUM||
+The device name depends on how your Exabyte tape drive was installed;
+ask your system administrator.  You will probably use something like
+@file{/dev/???/a0b1c2d3} where we show @code{||MEDstr||}.
+@end table
+@end ifclear
+
+@item
+Now you can install ready-to-run binaries; or source; or both.
+
+@itemize @bullet
+@item
+Choose source or binaries by running @code{pkgadd} with either or
+both of the arguments @samp{GNUDEVTkit} (to install binaries) or
+@code{GNUDEVTsrc} (for the source).  
+
+@item
+Run @code{pkgadd} interactively (that is, @emph{without} the @w{@samp{-n}}
+option) to choose the installation directory.
+
+@item
+Use the @w{@samp{-d}} option to identify your ||MEDIUM||.
+@end itemize
+
+For instance, typing this command line starts installation of both
+the source package and the binary package:
+
+@cartouche
+@example
+eg# @b{/usr/sbin/pkgadd} @b{-d} @b{||MEDstr||} @b{GNUDEVTkit} @b{GNUDEVTsrc}
+@end example
+@end cartouche
+
+@item
+For each of the packages, @code{pkgadd} will ask for confirmation of the
+install directory @file{/opt/gnu}, or an alternative.  
+
+For the source package @code{GNUDEVTsrc}, place the package wherever
+it's convenient; the only advantage of using the default location
+@file{/opt/gnu} is to keep the source near the binaries.
+
+For the @code{GNUDEVTkit} binaries, we recommend using the default location
+@file{/opt/gnu}, since this location is configured and compiled into all
+the tools.  
+
+@quotation
+@emph{Warning!} If you choose an alternate location for
+@code{GNUDEVTkit} binaries, you will need to override the compiled-in
+paths to run the programs.  @xref{Paths,,Changing the Paths}.
+@end quotation
+
+This example shows the interaction to accept @file{/opt/gnu} for the
+binaries:
+
+@cartouche
+@example
+Extracting Solaris GNU Developer's Kit binaries.
+ >>Installing in "/opt/gnu".  OK?  [y/n]> @b{y}
+@end example
+@end cartouche
+
+This example shows the interaction to place the source in
+@file{/usr/local/src} instead of the default location.  After you type
+the location, the installation script asks you to confirm.  You can use
+this opportunity to avoid typographical errors in the install directory
+name.
+
+@cartouche
+@example
+Extracting Solaris GNU Developer's Kit source.
+ >>Installing in "/opt/gnu".  OK?  [y/n]> @b{n}
+ >>Where do you want to install?  > @b{/usr/local/src}
+ >>Installing in "/usr/local/src".  OK? [y/n]> @b{y}
+@end example
+@end cartouche
+
+@item
+Installing the Developer's Kit binaries is a time-consuming step
+(between ?? minutes and ???, depending on the speed of your machine).
+@code{pkgadd} will display informative messages about its progress.
+After the initial extraction step, it prepares copies of your system
+header files, converted to comply better with @sc{ansi} C
+(@pxref{Why-fixincludes,,Why Convert System Header Files?}).  A log for
+this step goes in @file{/opt/gnu/progressive-||RELNO||/fixincludes.log}.
+@emph{Your system's original header files are not changed;}
+@code{pkgadd} writes the converted copies in a separate,
+@sc{gcc}-specific directory.
+
+When installation is complete, @code{pkgadd} displays the message
+
+@cartouche
+@example
+Cygnus Support software distribution installed!
+@end example
+@end cartouche
+
+@item
+Now that the software is on your system, you should arrange for users
+to run it conveniently.  We recommend the following symbolic link; see
+@ref{Link,,Easy Access and Updating}, for a discussion.
+
+@cartouche
+@example
+eg# @b{cd} @b{/opt/gnu}
+eg# @b{ln} @b{-s} @b{progressive-||RELNO||} @b{progressive}
+@end example
+@end cartouche
+
+@ifset CUSTOMER
+@item
+Finally, in case you need to send problem reports to Cygnus, we've
+included a script @code{send_pr} (and a supporting online template) to
+structure and transmit your reports.  Please use the small utility
+script @code{install_cid} to record your Cygnus customer ID in your copy
+of the problem report form.  (You can find your customer ID in the cover
+letter that came with this release; or call the Cygnus hotline, 
+@w{+1 415 322 7836}.)  This will enable us to respond as quickly as
+possible to any problem reports you send.
+
+@cartouche
+@example
+eg# @b{/opt/progressive/bin/install@t{_}cid @var{customerID}}
+install_cid: `@var{customerID}' is now the default customer ID
+ for send_pr
+@end example
+@end cartouche
+@end ifset
+
+@end enumerate
+
+You're done!  Anyone who puts @samp{/opt/progressive/bin} in her or his
+@code{PATH} can use the Developer's Kit.
+
+@node cross-install, Examples, local-install, Installing
+@unnumberedsubsec Installing with another machine's ||MEDIUM|| drive 
+This checklist is for a ||HOST|| that does not have its own ||MEDIUM|| drive,
+but can share a file system with another machine that does have a ||MEDIUM||
+drive.  The other machine need not be a ||HOST||, @emph{but it must be
+running some version of UNIX System V release 4}.  The complete
+procedure takes between ?? and ???, depending on the speed of
+each machine.
+
+We show the other computer's prompt as @samp{other#}, and your
+computer's prompt as @samp{eg#}.
+
+@ifset FIXMES
+@quotation
+@emph{FIXME!} SVr4 required simply for presence of @code{pkgadd}
+command.  If we care enough to relax this, we simply need to provide an
+alternative extraction command-line.  @code{dd}?  @code{tar}?
+@end quotation
+@end ifset
+
+@enumerate
+@item
+find a machine with a suitable ||MEDIUM|| drive on the same network as your
+||HOST||, and sign on to it.  If the only machine with a ||MEDIUM||
+drive isn't on the network, @pxref{No Drive,,No Local ||MEDIUM|| Drive}.
+
+@item 
+Make sure you have root access to @emph{both} computers.  The standard
+Solaris installation procedures for optional packages require
+@code{root} to run all installation steps.
+
+@cartouche
+@example
+other$ @b{su} @b{root}
+password:                   @i{(enter root password)}
+@end example
+@end cartouche
+
+@item
+Choose a directory where you will extract the Developer's Kit.  The
+directory must be accessible from both machines (the one with the
+||MEDIUM|| drive, and the ||HOST|| where you want to use the software).
+If possible, use @file{/var/spool/pkg}; this is the default package
+spooling directory for Solaris (and System V release 4 in general).
+
+@ifset FIXMES
+@quotation
+@emph{FIXME!} Do SVr4 systems expect to export things like
+@file{/var/spool/pkg}, or is this a nonsensical suggestion for
+cross-install?
+@end quotation
+@end ifset
+
+Wherever this note uses @var{shr}, substitute the name of the
+directory you chose.
+
+@item
+Check that you have enough space available (@pxref{Requirements,,System
+Requirements}) in @var{shr}.  You can use @samp{df @var{shr}} to check.
+@ifset FIXMES
+@quotation
+@emph{FIXME!} Does @code{pkgadd} check for this and issue an error?  If
+so, recast in those terms?
+@end quotation
+@end ifset
+
+@ifset CDROMinst
+@item
+Load the Catalyst CDWARE disk into a disk caddy, and put the caddy in
+your CD-ROM drive.
+
+@item
+Mount the @sc{cd-rom}.  This note assumes your mount point for a
+@code{cd-rom} is a directory called @file{/cdrom}; substitute to match
+your site's conventions if necessary.
+
+@c makeinfo seems unable to cope with nested ifsets when outer is off,
+@c inner is on.
+@c @ifset FIXMES
+@quotation
+@emph{FIXME!} @file{/dev/dsk/c0t6d0s0} for @sc{cd-rom} cribbed from
+Sun's generic optional-package install notes.  Is it really this
+definite on @emph{all} SVr4 systems?  What about systems with more than
+one @sc{cd-rom} drive?
+@end quotation
+@c @end ifset
+
+@cartouche
+@example
+other# @b{mkdir} @b{/cdrom}             @i{(ignore any errors)}
+other# @b{mount} @b{-F} @b{hsfs} @b{-o} @b{ro} @b{/dev/dsk/c0t6d0s0} @b{/cdrom}
+@end example
+@end cartouche
+@end ifset
+
+@ifclear CDROMinst
+@item
+Load the Cygnus Support release ||MEDIUM|| (labelled
+``Progressive--||RELNO||'') into the tape drive.  In these examples,
+@var{||MEDstr||} stands for the device name for the appropriate
+tape drive on your system.
+
+@item
+find out the name of the tape device on the machine
+that can read the release tape.  Cygnus release tapes are labelled to
+identify the kind of tape used.  You should use one of the following
+devices:
+@ifset FIXMES
+@quotation
+@emph{FIXME!}  Does SVr4 specify device names enough that we can be more
+explicit here?
+@end quotation
+
+@quotation
+@emph{FIXME!}  For our own @code{Install}, we asked for
+@emph{non-rewinding} tape device.  @code{pkgadd} doesn't say what kind
+of tape devices it wants.  Does it matter?
+@end quotation
+@end ifset
+
+@table @emph
+@item ||TAPdflt|| ||MEDIUM||
+Use @file{||DEVdflt||} where the examples show @code{||MEDstr||}.
+
+@item Exabyte ||MEDIUM||
+The device name depends on how your Exabyte ||MEDIUM|| drive was installed;
+check with your system administrator.  You will probably use something like
+@file{/dev/???/a0b1c2d3} where the example shows @code{||MEDstr||}.
+@end table
+@end ifclear
+
+@item
+Now you can extract either the ready-to-run binary package, the source
+package, or both.  
+
+@itemize @bullet
+@item
+Choose source or binaries by running @code{pkgadd} with either or
+both of the arguments @samp{GNUDEVTkit} (to install binaries) or
+@code{GNUDEVTsrc} (for the source).  
+
+@emph{Warning:} later, when installing on your ||HOST||, only the
+packages you extract now will be available.  We recommend you extract
+both packages at this point.
+
+@item
+Use @samp{-s @var{shr}} to copy the packages to @var{shr}, where you
+will be able to install them from your ||HOST||.
+
+@item
+Use the @w{@samp{-d}} option to identify your ||MEDIUM||.
+@end itemize
+
+This is the command line to extract both packages into @var{shr}:
+
+@cartouche
+@example
+other# @b{/usr/sbin/pkgadd} @b{-s} @var{shr} @b{-d} @b{||MEDstr||} \
+  @b{GNUDEVTkit} @b{GNUDEVTsrc}
+@end example
+@end cartouche
+
+@item
+Log off the computer with the ||MEDIUM|| drive, and log on to the
+||HOST|| where you want to use the software.
+
+@item 
+Make sure you have root access to this computer, too.  The standard
+Solaris installation procedures for optional packages require
+@code{root} to run the complete installation.
+
+@cartouche
+@example
+eg$ @b{su root}
+password:                   @i{(enter root password)}
+@end example
+@end cartouche
+
+@item
+Check that you have enough space available in @file{/opt}
+(@pxref{Requirements,,System Requirements}).  You can use @samp{df /opt}
+to check.
+@ifset FIXMES
+@quotation
+@emph{FIXME!} Does @code{pkgadd} check for this and issue an error?  If
+so, recast in those terms?
+@end quotation
+@end ifset
+
+@item
+Now you can install ready-to-run binaries; or source; or both.
+
+@itemize @bullet
+@item
+Choose source or binaries by running @code{pkgadd} with either or
+both of the arguments @samp{GNUDEVTkit} (to install binaries) or
+@code{GNUDEVTsrc} (for the source).  
+
+@emph{Warning:} if you extracted only one of these packages when reading
+the ||MEDIUM|| from another machine, you no longer have a choice---you
+can only specify that package name to complete the installation.
+
+@item
+Run @code{pkgadd} interactively (that is, @emph{without} the @w{@samp{-n}}
+option) to choose the installation directory.
+
+@item
+Use the @w{@samp{-d} @var{shr}} option to identify the shared directory
+where you extracted the packages earlier.  (If you used
+@file{/var/spool/pkg} as @var{shr}, you can leave off this option;
+@code{pkgadd} uses that directory as the default location for packages
+to install.)
+@end itemize
+
+For instance, typing this command line starts installation of both
+the source package and the binary package:
+
+@cartouche
+@example
+eg# @b{/usr/sbin/pkgadd} @b{-d} @var{shr} @b{GNUDEVTkit} @b{GNUDEVTsrc}
+@end example
+@end cartouche
+
+@item
+For each of the packages, @code{pkgadd} will ask for confirmation of the
+install directory @file{/opt/gnu}, or an alternative.  
+
+For the source package @code{GNUDEVTsrc}, place the package wherever
+it's convenient; the only advantage of using the default location
+@file{/opt/gnu} is to keep the source near the binaries.
+
+For the @code{GNUDEVTkit} binaries, we recommend using the default location
+@file{/opt/gnu}, since this location is configured and compiled into all
+the tools.  
+
+@quotation
+@emph{Warning!} If you choose an alternate location for
+@code{GNUDEVTkit} binaries, you will need to override the compiled-in
+paths to run the programs.  @xref{Paths,,Changing the Paths}.
+@end quotation
+
+This example shows the interaction to accept @file{/opt/gnu} for the
+binaries:
+
+@cartouche
+@example
+Extracting Solaris GNU Developer's Kit binaries.
+ >>Installing in "/opt/gnu".  OK?  [y/n]> @b{y}
+@end example
+@end cartouche
+
+This example shows the interaction to place the source in
+@file{/usr/local/src} instead of the default location.  After you type
+the location, the installation script asks you to confirm.  You can use
+this opportunity to avoid typographical errors in the install directory
+name.
+
+@cartouche
+@example
+Extracting Solaris GNU Developer's Kit source.
+ >>Installing in "/opt/gnu".  OK?  [y/n]> @b{n}
+ >>Where do you want to install?  > @b{/usr/local/src}
+ >>Installing in "/usr/local/src".  OK? [y/n]> @b{y}
+@end example
+@end cartouche
+
+@item
+Installing the Developer's Kit binaries is a time-consuming step (at
+least ?? minutes on a fast, unloaded machine; it may take as much as ???
+under other circumstances).  @code{pkgadd} will display informative
+messages about its progress.  After copying the binaries into their
+installed locations, @code{pkgadd} prepares copies of your system header
+files, converted to comply better with @sc{ansi} C
+(@pxref{Why-fixincludes,,Why Convert System Header Files?}).  A log for
+this step goes in @file{/opt/gnu/progressive-||RELNO||/fixincludes.log}.
+@emph{Your system's original header files are not changed;}
+@code{Install} writes the converted copies in a separate,
+@sc{gcc}-specific directory.
+
+When installation is complete, @code{pkgadd} displays the message
+
+@cartouche
+@example
+Cygnus Support software distribution installed!
+@end example
+@end cartouche
+
+@item
+Now that the software is on your system, you need to arrange for users
+to run it conveniently.  We recommend the following link; see
+@ref{Link,,Easy Access and Updating}, for a discussion.
+
+@cartouche
+@example
+eg# @b{cd} @b{/opt/gnu}
+eg# @b{ln} @b{-s} @b{progressive-||RELNO||} @b{progressive}
+@end example
+@end cartouche
+
+@ifset CUSTOMER
+@item
+Finally, in case you need to send problem reports to Cygnus, we've
+included a script @code{send_pr} (and a supporting online form) to
+structure and transmit your reports.  Please use the small utility
+script @code{install_cid} to record your Cygnus customer ID in your copy
+of the problem report form.  (You can find your customer ID in the cover
+letter that came with this release; or call the Cygnus hotline, 
+@w{+1 415 322 7836}.)  This will enable us to respond as quickly as
+possible to any problem reports you send.
+
+@cartouche
+@example
+eg# @b{/opt/progressive/bin/install@t{_}cid @var{customerID}}
+install_cid: `@var{customerID}' is now the default customer ID
+ for send_pr
+@end example
+@end cartouche
+@end ifset
+
+@end enumerate
+
+You're done!  Anyone who puts @samp{/opt/progressive/bin} in her or his
+@code{PATH} can use the Developer's Kit.
+
+@node Examples, Why-fixincludes, cross-install, Installing
+@unnumbered Installation Examples
+
+Here are some examples covering common situations.
+
+@menu
+* binaries::                    Installing binaries only
+* ||HOSTstr||-remote::          Reading ||MEDIUM|| on any machine, finishing on ||HOST||
+* source-remove::               Removing Source
+@end menu
+
+@node binaries, ||HOSTstr||-remote, Examples, Examples
+@unnumberedsubsec Installing binaries only
+
+@c FIXME for texinfo??  The "ifsets" were originally only around the
+@c portions of this example that depend on cdrom, but texinfo kept
+@c not-finding the end-ifsets.  Does ifset break inside example?
+@ifset CDROMinst
+@cartouche
+@example
+eg$ @b{su} @b{root}
+password:
+
+@i{Insert ||MEDIUM|| into drive.}
+
+eg# @b{mkdir} @b{/cdrom}
+eg# @b{mount} @b{-F} @b{hsfs} @b{-o} @b{ro} @b{/dev/dsk/c0t6d0s0} @b{/cdrom}
+eg# @b{/usr/sbin/pkgadd} @b{-n} @b{-d} @b{||MEDstr||} @b{GNUDEVTkit}
+
+Extracting Solaris GNU Developer's Kit binaries.
+ >>Installing in "/opt/gnu".  OK?  [y/n]> @b{y}
+
+@i{Installation progress messages, ending with:}
+
+Cygnus Support software distribution installed!
+
+eg# @b{cd} @b{/opt/gnu}
+eg# @b{ln} @b{-s} @b{progressive-||RELNO||} @b{progressive}
+@end example
+@end cartouche
+@end ifset
+
+@ifclear CDROMINST
+@cartouche
+@example
+eg$ @b{su} @b{root}
+password:
+
+@i{Insert ||MEDIUM|| into drive.}
+
+eg# @b{/usr/sbin/pkgadd} @b{-n} @b{-d} @b{||MEDstr||} @b{GNUDEVTkit}
+
+Extracting Solaris GNU Developer's Kit binaries.
+ >>Installing in "/opt/gnu".  OK?  [y/n]> @b{y}
+
+@i{Installation progress messages, ending with:}
+
+Cygnus Support software distribution installed!
+
+eg# @b{cd} @b{/opt/gnu}
+eg# @b{ln} @b{-s} @b{progressive-||RELNO||} @b{progressive}
+@end example
+@end cartouche
+@end ifclear
+
+If you don't want the source---for instance, to save space---you can use
+the argument @samp{GNUDEVTbin} and omit @samp{GNUDEVTsrc}.
+
+@node ||HOSTstr||-remote, source-remove, binaries, Examples
+@unnumberedsubsec Reading ||MEDIUM|| on other machine, finishing on ||HOST||
+
+@ifset CDROMinst
+@cartouche
+@example
+@emph{On another SVr4 machine on your network with a ||MEDIUM|| drive:}
+other$ @b{su} @b{root}
+password:
+
+@i{Insert ||MEDIUM|| into drive.}
+
+other# @b{mkdir} @b{/cdrom}             @i{(ignore any errors)}
+other# @b{mount} @b{-F} @b{hsfs} @b{-o} @b{ro} @b{/dev/dsk/c0t6d0s0} @b{/cdrom}
+other# @b{/usr/sbin/pkgadd} @b{-s} @var{/var/spool/pkg} @b{-d} @b{||MEDstr||} \
+  @b{GNUDEVTkit} @b{GNUDEVTsrc}
+other# exit
+
+@emph{On your ||HOST||}
+eg$ @b{su} @b{root}
+password:
+eg# @b{/usr/sbin/pkgadd} @b{GNUDEVTkit} @b{GNUDEVTsrc}
+
+Extracting Solaris GNU Developer's Kit binaries.
+ >>Installing in "/opt/gnu".  OK?  [y/n]> @b{y}
+
+Extracting Solaris GNU Developer's Kit source.
+ >>Installing in "/opt/gnu".  OK?  [y/n]> @b{y}
+
+@i{Installation progress messages, ending with:}
+
+Cygnus Support software distribution installed!
+
+eg# @b{cd} @b{/opt/gnu}
+eg# @b{ln} @b{-s} @b{progressive-||RELNO||} @b{progressive}
+@end example
+@end cartouche
+@end ifset
+
+@ifclear CDROMinst
+@cartouche
+@example
+@emph{On another SVr4 machine on your network with a ||MEDIUM|| drive:}
+other$ @b{su} @b{root}
+password:
+
+@i{Insert ||MEDIUM|| into drive.}
+
+other# @b{/usr/sbin/pkgadd} @b{-s} @var{/var/spool/pkg} @b{-d} @b{||MEDstr||} \
+  @b{GNUDEVTkit} @b{GNUDEVTsrc}
+other# exit
+
+@emph{On your ||HOST||}
+eg$ @b{su} @b{root}
+password:
+eg# @b{/usr/sbin/pkgadd} @b{GNUDEVTkit} @b{GNUDEVTsrc}
+
+Extracting Solaris GNU Developer's Kit binaries.
+ >>Installing in "/opt/gnu".  OK?  [y/n]> @b{y}
+
+Extracting Solaris GNU Developer's Kit source.
+ >>Installing in "/opt/gnu".  OK?  [y/n]> @b{y}
+
+@i{Installation progress messages, ending with:}
+
+Cygnus Support software distribution installed!
+
+eg# @b{cd} @b{/opt/gnu}
+eg# @b{ln} @b{-s} @b{progressive-||RELNO||} @b{progressive}
+@end example
+@end cartouche
+@end ifclear
+
+@noindent
+If your ||HOST|| doesn't have a ||MEDIUM|| drive, but another SVr4
+machine that can mount a shared directory (here the default
+package-spooling directory, @samp{/var/spool/pkg}) does have one, you
+can carry out the first step of the installation from the machine with a
+||MEDIUM|| drive, as shown.  Note that you have to use @samp{-s} on
+the @code{pkgadd} command line.  This alerts @code{pkgadd} to stop the
+install procedure after it reads the ||MEDIUM||.  You still have to
+finish the installation, but the last two steps have to run on your
+||HOST||.  
+
+@node source-remove,  , ||HOSTstr||-remote, Examples
+@unnumberedsubsec Removing Source
+The @code{pkgrm} command can remove any package installed by
+@code{pkgadd}.  For example, if after installing the complete
+Developer's Kit on your machine you decide to remove the source files:
+
+@cartouche
+@example
+eg$ @b{su} @b{root}
+password:
+eg# @b{/usr/sbin/pkgrm GNUDEVTsrc}
+@end example
+@end cartouche
+
+@node Why-fixincludes, Link, Examples, Installing
+@unnumberedsec Why Convert System Header Files?
+
+@ifset FIXMES
+@quotation
+@emph{FIXME!} This is pretty much the standard progressive blurb about
+fixincludes.  Surely it's bogus here, since Solaris is a nice modern
+system?  Doesn't it have ANSI header files?
+
+Someone, please confirm or deny!  I seem to recall there's at least some
+bullshit about how @code{__ANSIC__} or some such thing is defined.
+Specifics, anyone?
+@end quotation
+@end ifset
+
+You may notice messages about running @samp{fixincludes} during your
+Developer's Kit installation.  When the @sc{ansi x3j11} committee
+finished developing a standard for the C language, a few things that had
+worked one way in many traditional C compilers ended up working
+differently in @sc{ansi} C.  Most of these changes are improvements.
+But some Unix header files still rely on the old C meanings, in cases
+where the Unix vendor has not yet converted to using an @sc{ansi} C
+compiler for the operating system itself.  The @samp{fixincludes}
+portion of installation is a mechanical translation that writes
+@sc{ansi} C versions of some system header files into a new,
+@sc{gcc}-specific include directory---@emph{your system's original
+header files are not affected.}
+
+The particular problems fixed include:
+@itemize @bullet
+@item
+@code{_IOR}, @code{_IOW}, and @code{_IORW} macros use obsolete
+preprocessor facilities
+@item
+@code{#endif} no longer ignores its argument
+@end itemize
+
+If you don't run @code{fixincludes}, the GNU C compiler can only use the
+original system header files when you compile new C programs.  @emph{In
+some cases, the resulting programs will fail at run-time}.
+
+@node Link, , Why-fixincludes, Installing
+@unnumbered Easy Access and Updating
+Once you've extracted them from the ||MEDIUM||, the Developer's Kit
+tools are installed under a directory named
+@file{progressive-||RELNO||}.  We put the release number in the
+directory name so that you can keep several releases installed at the
+same time, if you wish.  In order to simplify administrative procedures
+(such as upgrades to future Cygnus Progressive releases), we recommend
+that you establish a symbolic link @file{/opt/gnu/progressive} to this
+directory.  For example, assuming you've used the default installation
+path:
+
+@cartouche
+@example
+eg# @b{cd /opt/gnu}
+eg# @b{ln -s progressive-||RELNO|| progressive}
+@end example
+@end cartouche
+
+We recommend building this link as the very last step in the
+installation process.  That way, users at your site will only see
+software in @file{/opt/gnu/progressive} when you're satisfied that the
+installation is complete and successful.
+
+@node Running, Paths, Installing, Top
+@unnumbered Running the Programs
+Any users who wish to run the Cygnus development tools will need to make
+sure the @code{PATH} environment variable will find them.  If you create
+the symbolic link we recommend above, users who want to run the
+Developer's Kit---regardless of whether they need binaries for a ||HOST||,
+or for some other platform---can use settings like one of the following
+in their initialization files.
+
+@example
+@exdent For shells compatible with Bourne shell (e.g. @code{/bin/sh}, @code{bash}, or Korn shell):
+@cartouche
+@b{PATH=/opt/gnu/progressive/bin:$PATH}
+@b{export PATH}
+@end cartouche
+@end example
+
+@example
+@exdent For C shell:
+@cartouche
+@b{set path=(/opt/gnu/progressive/bin $path)}
+@end cartouche
+@end example
+
+@noindent
+You should also ensure that your @code{man} command can pick up the
+manual pages for these tools.  Some @code{man} programs recognize a
+@code{MANPATH} environment variable.  If your @code{man} program is one
+of these, users at your site can also include in their initialization
+file lines like 
+
+@example
+@exdent For Bourne-compatible shells:
+@cartouche
+@b{MANPATH=/opt/gnu/progressive/man:$MANPATH:/opt/man}
+@b{export MANPATH}
+@end cartouche
+@end example
+
+@example
+@exdent For C shell:
+@cartouche
+@b{setenv MANPATH /opt/gnu/progressive/man:$MANPATH:/opt/man}
+@end cartouche
+@end example
+
+If your @code{man} program doesn't recognize @samp{MANPATH}, you may
+want to copy or link the files from
+@file{progressive/man/man1} into your system's
+@file{man/man1}. @refill
+
+@node Paths, Trouble, Running, Top
+@unnumbered Changing the Paths
+The binaries shipped by Cygnus are configured for installation under the
+directory @file{/opt/gnu}.  If you wish to run the tools in another
+location, the best solution---and, to date, the only complete one---is
+to rebuild them from source.  @xref{Rebuilding,,Rebuilding from Source}.
+
+In particular, @code{gcc} and the documentation browser @code{info} need
+to know the location of the distribution.
+
+@subheading GCC Paths
+@ifset FIXMES
+@quotation
+@emph{FIXME!} Add something about specs file?
+@end quotation
+@end ifset
+You can run the compiler @sc{gcc} without recompiling, even if you
+install the distribution in an alternate location, by first setting the
+environment variable @samp{GCC_EXEC_PREFIX}.  This variable specifies
+where to find the executables, libraries, and data files used by the
+compiler.  Its value will be different depending on which set of
+binaries you need to run.  For example, if you install the Developer's Kit
+binaries under @file{/local} (instead of the default
+@file{/opt/gnu}), and you wish to run @sc{gcc} from there, 
+you could set @samp{GCC_EXEC_PREFIX} as follows.  (You can
+type the first two lines as a single line, if you like; the example
+is split using the line continuation character @samp{\} only
+to make it fit on the printed page.)
+
+@cartouche
+@example
+@b{GCC@t{_}EXEC@t{_}PREFIX=/local/progressive-||RELNO||/@t{\}
+lib/gcc/||TARGET||/||GCCvn||/}
+@b{export GCC@t{_}EXEC@t{_}PREFIX}
+@end example
+@end cartouche
+
+@noindent
+The example assumes you use a shell compatible with the Bourne shell; if
+you run the C shell, use the following instead.  (Again, the line
+continuation character @samp{\} is only used for convenience in the
+example; feel free to use a single line.)
+
+@cartouche
+@example
+@b{setenv GCC@t{_}EXEC@t{_}PREFIX /local/progressive-||RELNO||/@t{\}
+lib/gcc/||TARGET||/||GCCvn||/}
+@end example
+@end cartouche
+
+@quotation
+@emph{Warning: The trailing slash @samp{/} is important}.  The @code{gcc}
+program uses @samp{GCC_EXEC_PREFIX} simply as a prefix.  If you omit the
+slash (or make any other mistakes in specifying the prefix), @code{gcc}
+will fail with a message beginning @samp{installation problem, cannot
+exec@dots{}}.
+@end quotation
+
+@subheading @code{info} Paths
+You can use the @w{@samp{--directory}} option, each time you run @code{info},
+to specify a non-default location for the documentation files.  For
+example, if you read the distribution ||MEDIUM||s into @file{/local},
+you could run @code{info} as follows:
+
+@cartouche
+@example
+@b{info --directory /local/progressive-||RELNO||/info}
+@end example
+@end cartouche
+
+@quotation
+@emph{Warning:} the directory you specify with @code{--directory}
+@emph{must} contain at least the structured file called @code{dir},
+which specifies the menu structure that leads to the other documentation
+files.
+@end quotation
+
+You can also run @code{info} on a specific documentation file,
+regardless of its location, by giving the option @code{-file} followed
+by a pathname to the desired file; or you can use the command
+@code{g(@var{filename})} to the same effect, after entering the
+@code{info} program.
+
+@node Trouble, Rebuilding, Paths, Top
+@unnumbered Some Things that Might go Wrong
+
+We've tried to make the installation of your Developer's Kit as painless
+as possible.  Still, some complications may arise.  Here are suggestions
+for dealing with some of them.
+
+@menu
+* No Drive::                    No Local ||MEDIUM|| Drive
+* Limited Space::               Not Enough Space
+* Install errors::              Error Messages from @code{Install}
+@end menu
+
+@node No Drive, Limited Space, Trouble, Trouble
+@unnumberedsec No Local ||MEDIUM|| Drive
+If your ||HOST|| doesn't have an appropriate ||MEDIUM|| drive, you may
+still be able to install your software.  Check with your system
+administrator to see if another machine that runs Unix SVr4 at your site
+has a ||MEDIUM|| drive you can use.  If so:
+
+@emph{If a shared filesystem is available} between the two machines, and
+it has enough space, see @ref{cross-install,,Installing with another
+machine's ||MEDIUM|| drive}.
+
+@node Limited Space, Install errors, No Drive, Trouble
+@unnumberedsec Not Enough Space
+If you don't have enough space to install all of the ||MEDIUM||
+distribution, you can instead extract only the compiled code, or only
+the source.
+
+The following table summarizes the approximate space (rounded up to the
+next megabyte) needed for source and binaries.
+There is a little overlap between the partial installations: the
+documentation, and documentation tools, are always installed.
+
+@table @r
+@item ||BD|| MB
+||HOST|| binaries
+
+@item ||SD|| MB
+source code for all programs
+
+@item ||DF|| MB
+total
+@end table
+
+You can easily extract these components independently of one another, by
+using the @samp{GNUDEVTsrc} or @samp{GNUDEVTbin} arguments to @code{pkgadd}.
+
+@node Install errors,  , Limited Space, Trouble
+@unnumberedsec Error Messages from @code{Install}
+The @code{Install} script checks for many errors and inconsistencies in
+the way its arguments are used.  The messages are meant to be
+self-explanatory.  Here is a list of a few messages where further
+information might be useful:
+
+@ifset FIXMES
+@quotation
+@emph{FIXME!} These are probably bogus, they're basically from Cygnus
+@code{Install}.
+@end quotation
+@end ifset
+@table @code
+@item Cannot read from device @var{||MEDstr||}
+The error message ends with the ||MEDIUM|| device or directory that
+@code{pkgadd} was trying to use.  Please check that it is the device you
+intended; possible causes of trouble might include leaving off the
+@samp{/dev/} prefix at the front of a device name.  A typo in the
+device name might also cause this problem.
+
+If the problem is neither of these things, perhaps your ||MEDIUM||
+device can't read our ||MEDIUM||; @pxref{No Drive,,No Local ||MEDIUM||
+Drive}, for a discussion of how to use another machine's ||MEDIUM||
+drive.
+
+@item @dots{} This is a problem.
+@itemx Cannot cd to @var{installdir}
+@itemx I do not know why I cannot create @var{installdir}
+@itemx hello.c fails to run
+@itemx test-ioctl.c fails to run
+@itemx I do not know how to remove an arch called @dots{}
+These errors (the first covers anything that ends in @samp{This is a
+problem}) are from paranoia checks; they are issued for situations that
+other checks should have covered, or for unlikely situations that
+require further diagnosis.  
+
+If you get one of these messages, please 
+@itemize @bullet
+@item
+@strong{call the Cygnus hotline, +1 415 322 7836}, or 
+@item
+send electronic mail to @samp{help@@cygnus.com}. 
+@end itemize
+@end table
+
+@node Rebuilding, Removing, Trouble, Top
+@unnumbered Rebuilding From Source
+
+All Cygnus products are free software; your Developer's Kit includes
+complete source code for all programs.
+
+Cygnus Support has implemented an automatic configuration scheme to
+adapt the programs to different environments.
+
+Rebuilding the programs from source requires these steps:
+@enumerate
+@item
+configuration
+@item
+compilation
+@item
+installation
+@end enumerate
+
+For example, executing the following commands in sequence will rebuild
+and install a native version of all the tools in a nonstandard
+directory:
+
+@cartouche
+@example
+@b{cd progressive/src}
+@b{./configure ||HOSTstr|| -prefix=/local/gnu}
+@b{make clean all install}
+@end example
+@end cartouche
+
+@noindent
+We discuss each step in detail in the following sections.
+
+@menu
+* Configuration::               Configuration
+* Config Names::                Specifying Names for Hosts and Targets
+* configure Options::           @code{configure} Options
+* Compilation::                 Compilation
+* Installation::                Installation
+@end menu
+
+@node Configuration, Config Names, Rebuilding, Rebuilding
+@unnumberedsec Configuration
+
+You can configure the software in this release by using the shell
+script called @code{configure}.  The shell script requires one argument:
+the host type.  There are also several possible options, including a
+@w{@samp{-target=}} option to configure for cross-system development.
+
+@node Config Names, configure Options, Configuration, Rebuilding
+@section Specifying Names for Hosts and Targets
+
+The specifications used for hosts and targets in the @code{configure}
+script are based on a three-part naming scheme, but some short predefined
+aliases are also supported.  The full naming scheme encodes three pieces
+of information in the following pattern:
+
+@example
+@var{architecture}-@var{vendor}-@var{os}
+@end example
+
+@ifset FIXMES
+@quotation
+@emph{FIXME!} What is real alias for Solaris/SPARC?
+@end quotation
+@end ifset
+For example, you can use the alias @code{solar} as a @var{host} argument
+or in a @w{@samp{-target=@var{target}}} option, but the equivalent full name
+is @samp{sparc-sun-solaris2}.
+
+@quotation
+@emph{Warning:} @code{configure} can represent a very large number of
+combinations of architecture, vendor, and OS.  There is by no means
+support for all possible combinations!
+@end quotation
+
+@node configure Options, Compilation, Config Names, Rebuilding
+@section @code{configure} Options
+
+This section summarizes the @code{configure} options and arguments.
+Your Developer's Kit contains full online documentation for the Cygnus
+configure system.  @inforef{Using Configure,,configure.info}, to read
+about @code{configure} in more detail, including information on how the
+@code{configure} options relate to @file{Makefile} variables.
+
+@example
+configure @r{[}-prefix=@var{dest}@r{]} 
+          @r{[}-exec-prefix=@var{bindest}@r{]} 
+          @r{[}-srcdir=@var{path}@r{]}
+          @r{[}-norecursion@r{]} 
+          @r{[}-target=@var{target}@r{]}
+          @var{host}
+@end example
+
+@ifset FIXMES
+@quotation
+@emph{FIXME!} Show complete configure option list used for release?
+@end quotation
+@end ifset
+@table @code
+@item -prefix=@var{dest}
+@var{dest} is an installation directory @emph{path prefix},
+the root for the directories where @code{make install} will
+place things.  After you configure with this option, @code{make install}
+will install info files in @file{@var{dest}/info}, man pages in
+@file{@var{dest}/man}, and---unless you also use
+@w{@samp{-exec-prefix}}---compiled programs in @file{@var{dest}/bin},
+and libraries in @file{@var{dest}/lib}. 
+If you specify @w{@samp{-prefix=/local}}, for example, @code{make
+install} puts the development tools in @file{/local/bin}.
+
+@emph{WARNING:} the default @var{dest} path prefix in the source is not
+the same as the prefix for the preconfigured binaries distributed by Cygnus.
+
+@w{@samp{-prefix=/opt/gnu/progressive-||RELNO||}} was used to build this
+Cygnus Progressive Release.  If you do not use @w{@samp{-prefix}}, the
+installation directory is @file{/usr/local}.
+
+@item -exec-prefix=@var{bindest}
+@w{@samp{-exec-prefix}} serves the same purpose as @w{@samp{-prefix}}, but
+affects only machine-dependent targets (compiled programs and
+libraries).  Specifying both @w{@samp{-prefix}} and @w{@samp{-exec-prefix}}
+allows you to segregate machine-dependent files, so that
+machine-independent files can be shared.  
+
+@emph{WARNING:} the default @var{bindest} path prefix in the source is not
+the same as the prefix for the preconfigured binaries distributed by Cygnus.
+
+@w{@samp{-exec-prefix=/opt/gnu/progressive-||RELNO||}} was
+used to build this Cygnus Progressive Release.
+If you do not use @w{@samp{-exec-prefix}}, the default directory for
+machine-dependent targets is whatever was specified with @file{-prefix}
+(by default, @file{/usr/local}).
+
+@item -srcdir=@var{path}
+@emph{Warning: This option is only supported if you use @sc{gnu}
+@code{make}} (which is included in this Cygnus Progressive--||RELNO|| release).
+Use this option to make configurations in directories separate from the
+source directories. @code{configure} writes configuration specific files
+in the current directory, but arranges for them to use the source in the
+directory @var{path}.  @code{configure} will create directories under
+the working directory in parallel to the source directories below
+@var{path}.  Among other things, you can use this to build (or maintain)
+several configurations simultaneously, in separate directories.
+
+@item -norecursion
+Configure only the directory level where @code{configure} is executed; do not
+propagate configuration to subdirectories.
+
+@item -target=@var{target}
+Configure the development tools for cross-development (compiling,
+debugging, or other processing) of programs running on the specified
+@var{target}.  Without this option, programs are configured ``native'',
+that is, for managing programs that run on the same machine (@var{host})
+as the development tools themselves.
+
+There is no convenient way to generate a list of all available targets.
+
+@item @var{host} @dots{}
+Configure the development tools to run on the specified @var{host}.
+
+There is no convenient way to generate a list of all available hosts.
+@end table
+
+The @w{@samp{-prefix=@var{dest}}} and @w{@samp{-exec-prefix=@var{bindest}}}
+options are particularly important.  If you don't specify a @var{dest}
+or @var{bindest} directory, the @file{Makefile} installs binaries in
+subdirectories of @file{/usr/local}.  These options are important
+because the @var{dest} and @var{bindest} directories are used for
+several purposes:
+
+@enumerate
+@item
+@var{bindest} is the directory where binaries are installed.
+
+@item
+@var{bindest} is built into the compiler itself for the
+locations of @sc{gcc} specific include files, the locations of @sc{gcc}
+subprograms, and the location of the @sc{gcc} specific library
+@file{libgcc.a}.
+
+@item
+@var{dest} is compiled into @code{info} as the default directory
+for the documentation.
+
+@end enumerate
+
+@node Compilation, Installation, configure Options, Rebuilding
+@unnumberedsec Compilation
+
+After you've run @code{configure} (which writes the final
+@file{Makefile} in each directory), compilation is straightforward.
+To compile all the programs in the Developer's Kit, run:
+
+@cartouche
+@example
+@b{make}
+@end example
+@end cartouche
+
+The overall @file{Makefile} propagates the value of the @code{CC}
+variable explicitly, so that you can easily control the compiler used in
+this step.  @code{CFLAGS} is treated the same way.  For instance, to
+build the compiler a second time, using @sc{gcc} to compile itself
+(after building and installing it in the alternate directory
+@file{/local/gnu}), you might use
+
+@cartouche
+@example
+@b{make CC=/local/gnu/H-sun4/bin/gcc CFLAGS=-O}
+@end example
+@end cartouche
+
+The conventional targets @samp{all}, @samp{install}, and @samp{clean}
+are supported at all levels of @file{Makefile}.  Other targets are
+supported as well, as appropriate in each directory; please read the
+individual @file{Makefile} for details.  Each @file{Makefile} in the
+source directories includes ample comments to help you read it.  If you
+are not familiar with @code{make}, refer to @ref{Overview,,Overview of
+@code{make}, make.info, GNU Make: A Program for Directing
+Recompilation}.
+
+@node Installation,  , Compilation, Rebuilding
+@unnumberedsec Installation
+
+Whether you configure an alternative path using @code{-prefix}, or you
+use the default installation path @file{/usr/local}, you can install the
+software by executing:
+
+@cartouche
+@example
+@b{make install}
+@end example
+@end cartouche
+
+@node Removing, Cygnus-FSF, Rebuilding, Top
+@unnumbered Removing Parts of the Developer's Kit
+You can use the @code{pkgrm} command to remove either part of this
+release from where @code{pkgadd} installed it.
+
+To do this, call @code{pkgrm} with either or both of the arguments
+@samp{GNUDEVTkit} (to remove binaries) or @samp{GNUDEVTsrc} (to remove
+source).  For example, suppose you never look at the source, and are
+running short of disk space; you can remove the source, while leaving
+the rest of the Progressive Release undisturbed, as follows:
+
+@cartouche
+@example
+eg# @b{/usr/sbin/pkgrm GNUDEVTsrc}
+@end example
+@end cartouche
+
+To remove the complete Progressive Release of the Developer's Kit from
+your system (if, eventually, you no longer want it), specify both
+package names as arguments to @code{pkgrm}
+
+@node Cygnus-FSF, Cygnus-Support, Removing, Top
+@unnumbered Cygnus Releases and the FSF
+
+Most of the tools in this Developer's Kit are originally from the Free
+Software Foundation (FSF).  You can get versions of all these tools
+from the FSF as well as from Cygnus.  In general, Cygnus Progressive
+Releases add to FSF software in the following ways:
+@c UPDATE! more differences bet Cygnus/FSF releases?
+
+@itemize @bullet
+@item
+Commercial support is available.  Cygnus adds value to FSF releases in
+large measure by offering outstanding support services.
+@item
+Coordination.  The tools in your Developer's Kit are certified to work
+together; you need not worry about tools being out of step with each other.
+@item
+Bug fixes.  A Progressive Release includes many fixes, already integrated
+into the programs.  Cygnus repairs bugs discovered during testing, and
+also tracks and includes bug fixes developed for other Cygnus customers
+or distributed over the Internet.
+@item
+Bug reporting.  Cygnus releases include the tool @code{send_pr}, which
+you can use to make sure your problem reports receive prompt attention,
+and are also incorporated in our future tests.
+@item
+Documentation.  Cygnus revises and adds to available FSF
+documentation to give you better descriptions of all the software tools.
+@item
+Stability.  Cygnus tests (and uses) all the programs it releases.
+@end itemize
+
+@c FIXME! If we can say something about this, remove @ignore/@end ignore
+@c        and fill in below:
+@ignore
+This particular Cygnus Progressive release differs from the nearest
+corresponding FSF distributions in these important details:
+
+FILL IN HERE!
+
+@end ignore
+
+@node Cygnus-Support,  , Cygnus-FSF, Top
+@unnumbered About Cygnus Support
+
+Cygnus Support was founded in 1989 to provide commercial support for
+free software.  Cygnus supplies products and services that benefit
+advanced development groups by allowing them to use state-of-the-art
+tools without having to maintain them.  With Cygnus Support, sites that
+once were forced to do their own tool support can recover that valuable
+staff time.  Former users of proprietary software now may choose
+supported free software, combining the advantages of both worlds.
+
+Free software is faster, more powerful, and more portable than its
+proprietary counterparts.  It evolves faster because users who want to
+make improvements are free to do so.  Cygnus tracks these
+improvements and integrates them into tested, stable versions ready
+for commercial use, then backs this software with comprehensive
+support.
+
+With Cygnus Support as your partner, you will have the software and
+the support you need to meet your business objectives.  Cygnus
+is intimately familiar with this software from extensive experience
+using, debugging, and implementing it.  You get direct access to the
+most qualified support people: the authors of the software.
+
+We provide ``vintage'' releases---the most stable versions, which have
+been though even more extensive use and testing---or up-to-the minute
+``progressive'' releases, for those who need the very latest version.
+
+Because all our improvements are also free software, you can
+distribute them widely within your organization, or to your customers,
+without extra cost.
+
+@sp 4
+
+@display
+Cygnus Support
+814 University Avenue
+Palo Alto, CA 94301, USA
+
++1 415 322 3811
+hotline: +1 415 322 7836
+email: @code{info@@cygnus.com}
+fax: +1 415 322 3270
+@end display
+
+@bye
