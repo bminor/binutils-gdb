@@ -1,3 +1,15 @@
+2003-09-14  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
+	* config/tc-mips.c (HAVE_64BIT_ADDRESS_CONSTANTS): Remove.
+	(macro_build_ldst_constoffset): Sign-extend 32-bit constants. Change
+	the function prototype.
+	(load_register): Likewise. Simplify the checks for sign-extended
+	constants.
+	(macro): Likewise. Fix code generation for 64-bit address constants
+	outside the 32-bit compatibility space. Adjust
+	macro_build_ldst_constoffset calls.
+	(s_cprestore): Adjust macro_build_ldst_constoffset call.
+
 2003-09-11  Bob Wilson  <bob.wilson@acm.org>
 
 	* config/tc-xtensa.c (insn_labels, free_insn_labels, saved_insn_labels,
