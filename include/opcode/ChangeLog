@@ -1,4 +1,4 @@
-start-santizie-v850
+start-sanitize-v850
 Wed Aug 13 18:45:48 1997  Nick Clifton  <nickc@cygnus.com>
 
 start-sanitize-v850e
@@ -11,20 +11,18 @@ start-sanitize-v850eq
 	command line options.
 end-sanitize-v850eq
 
-start-sanitize-v850
 	* v850.h (struct v850_opcode): Add flags field.
 	(struct v850_operand): Extend meaning of 'bits' and 'shift'
 	fields. 
-start-sanitize-v850
-	
+
 start-sanitize-v850e
 start-sanitize-v850eq
 	(V850E_INSTRUCTION, V850EQ_INSTRUCTION): New flags.
 	(V850E_PUSH_POP, V850E_IMMEDIATE16, V850E_IMMEDIATE32): New flags.
 end-sanitize-v850eq
 end-sanitize-v850e
-end-santizie-v850
 
+end-sanitize-v850
 Fri Aug  8 16:58:42 1997  Doug Evans  <dje@canuck.cygnus.com>
 
 	* arc.h: New file.
