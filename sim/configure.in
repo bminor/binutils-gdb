@@ -48,6 +48,7 @@ extra_subdirs=common
 
 case "${target}" in
   arm*-*-*)		sim_target=arm ;;
+  strongarm*-*-*)	sim_target=arm ;;
   thumb*-*-*)           sim_target=arm ;;
   d10v-*-*)		sim_target=d10v ;;
   d30v-*-*)

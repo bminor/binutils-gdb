@@ -1,3 +1,13 @@
+1999-02-08  Nick Clifton  <nickc@cygnus.com>
+
+	* configure.in: Add support for StrongARM target.
+	* configure: Regenerate.
+
+1999-02-02  Doug Evans  <devans@casey.cygnus.com>
+
+	* configure.in (sparc*): Configure sparc subdir if --with-cgen.
+	* configure: Rebuild.
+
 1999-01-04  Jason Molenda  (jsm@bugshack.cygnus.com)
 
 	* configure.in: Require autoconf 2.12.1 or higher.
