@@ -822,7 +822,7 @@ static void
 sol_thread_notice_signals (pid)
      int pid;
 {
-  procfs_ops.to_notice_signals (pid);
+  procfs_ops.to_notice_signals (PIDGET (pid));
 }
 
 /* Fork an inferior process, and start debugging it with /proc.  */

@@ -1,3 +1,8 @@
+Fri Sep 18 07:53:08 1998  Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
+
+	* sol-thread.c (sol_thread_notice_signals):  Use PIDGET when
+	passing pid down to procfs_notice_signals.
+
 Wed Sep 16 14:57:14 1998  Stu Grossman  <grossman@babylon-5.cygnus.com>
 
 	* stabsread.c (resolve_symbol_reference):  Return 1 on success, 0 on
