@@ -1,5 +1,5 @@
 /* tc-mmix.c -- Assembler for Don Knuth's MMIX.
-   Copyright (C) 2001 Free Software Foundation.
+   Copyright (C) 2001, 2002 Free Software Foundation.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -154,11 +154,15 @@ static int warn_on_expansion = 1;
 /* Should we merge non-zero GREG register definitions?  */
 static int merge_gregs = 1;
 
+/* Should we pass on undefined BFD_RELOC_MMIX_BASE_PLUS_OFFSET relocs
+   (missing suitable GREG definitions) to the linker?  */
+static int allocate_undefined_gregs_in_linker = 0;
+
 /* Should we emit built-in symbols?  */
 static int predefined_syms = 1;
 
-/* Should we anything but the listed special register name (e.g. equated
-   symbols)?  */
+/* Should we allow anything but the listed special register name
+   (e.g. equated symbols)?  */
 static int equated_spec_regs = 1;
 
 /* Do we require standard GNU syntax?  */
@@ -185,6 +189,7 @@ struct option md_longopts[] =
 #define OPTION_GNU_SYNTAX  (OPTION_NOSYMS + 1)
 #define OPTION_GLOBALIZE_SYMBOLS  (OPTION_GNU_SYNTAX + 1)
 #define OPTION_FIXED_SPEC_REGS  (OPTION_GLOBALIZE_SYMBOLS + 1)
+#define OPTION_LINKER_ALLOCATED_GREGS  (OPTION_FIXED_SPEC_REGS + 1)
    {"linkrelax", no_argument, NULL, OPTION_RELAX},
    {"no-expand", no_argument, NULL, OPTION_NOEXPAND},
    {"no-merge-gregs", no_argument, NULL, OPTION_NOMERGEGREG},
@@ -193,6 +198,8 @@ struct option md_longopts[] =
    {"globalize-symbols", no_argument, NULL, OPTION_GLOBALIZE_SYMBOLS},
    {"fixed-special-register-names", no_argument, NULL,
     OPTION_FIXED_SPEC_REGS},
+   {"linker-allocated-gregs", no_argument, NULL,
+    OPTION_LINKER_ALLOCATED_GREGS},
    {NULL, no_argument, NULL, 0}
  };
 
@@ -621,6 +628,7 @@ md_parse_option (c, arg)
     {
     case 'x':
       warn_on_expansion = 0;
+      allocate_undefined_gregs_in_linker = 1;
       break;
 
     case OPTION_RELAX:
@@ -651,6 +659,10 @@ md_parse_option (c, arg)
 
     case OPTION_FIXED_SPEC_REGS:
       equated_spec_regs = 0;
+      break;
+
+    case OPTION_LINKER_ALLOCATED_GREGS:
+      allocate_undefined_gregs_in_linker = 1;
       break;
 
     default:
@@ -685,9 +697,13 @@ md_show_usage (stream)
   fprintf (stream, _("\
   -no-merge-gregs         Do not merge GREG definitions with nearby values.\n"));
   fprintf (stream, _("\
+  -linker-allocated-gregs If there's no suitable GREG definition for the\
+                          operands of an instruction, let the linker resolve.\n"));
+  fprintf (stream, _("\
   -x                      Do not warn when an operand to GETA, a branch,\n\
                           PUSHJ or JUMP is not known to be within range.\n\
-                          The linker will catch any errors.\n"));
+                          The linker will catch any errors.  Implies\n\
+                          -linker-allocated-gregs."));
 }
 
 /* Step to end of line, but don't step over the end of the line.  */
@@ -1031,10 +1047,10 @@ md_assemble (str)
       current_fb_label = -1;
     }
 
-  /* We also assume that the length of the instruction is determinable
-     from the first format character.  Currently *all* the information is
-     in the first character.  We need a self-contained frag since we want
-     the relocation to point to the instruction, not the variant part.  */
+  /* We also assume that the length of the instruction is at least 4, the
+     size of an unexpanded instruction.  We need a self-contained frag
+     since we want the relocation to point to the instruction, not the
+     variant part.  */
 
   opcodep = frag_more (4);
   mmix_opcode_frag = opc_fragP = frag_now;
@@ -2577,8 +2593,8 @@ tc_gen_reloc (section, fixP)
   char *buf  = fixP->fx_where + fixP->fx_frag->fr_literal;
   symbolS *addsy = fixP->fx_addsy;
   asection *addsec = addsy == NULL ? NULL : S_GET_SEGMENT (addsy);
-  bfd_vma addend = fixP->fx_offset;
   asymbol *baddsy = addsy != NULL ? symbol_get_bfdsym (addsy) : NULL;
+  bfd_vma addend = val - (baddsy == NULL ? 0 : bfd_asymbol_value (baddsy));
 
   /* A single " LOCAL expression" in the wrong section will not work when
      linking to MMO; relocations for zero-content sections are then
@@ -2608,8 +2624,7 @@ tc_gen_reloc (section, fixP)
     case BFD_RELOC_8:
       code = fixP->fx_r_type;
 
-      if (addsy == NULL
-	  || bfd_is_abs_section (S_GET_SEGMENT (addsy)))
+      if (addsy == NULL || bfd_is_abs_section (addsec))
 	{
 	  /* Resolve this reloc now, as md_apply_fix3 would have done (not
 	     called if -linkrelax).  There is no point in keeping a reloc
@@ -2658,7 +2673,7 @@ tc_gen_reloc (section, fixP)
 	 register contents section (that is, to a register), then we can't
 	 resolve the relocation here.  */
       if (addsy != NULL
-	  && (bfd_is_und_section (S_GET_SEGMENT (addsy))
+	  && (bfd_is_und_section (addsec)
 	      || strcmp (bfd_get_section_name (addsec->owner, addsec),
 			 MMIX_REG_CONTENTS_SECTION_NAME) == 0))
 	{
@@ -2672,14 +2687,13 @@ tc_gen_reloc (section, fixP)
 	  && (S_GET_SEGMENT (addsy) != real_reg_section
 	      || val > 255
 	      || val < 0)
-	  && ! bfd_is_abs_section (S_GET_SEGMENT (addsy)))
+	  && ! bfd_is_abs_section (addsec))
 	goto badop;
 
       /* Set the "immediate" bit of the insn if this relocation is to Z
 	 field when the value is a numeric value, i.e. not a register.  */
       if ((fixP->fx_where & 3) == 3
-	  && (addsy == NULL
-	      || S_GET_SEGMENT (addsy) == absolute_section))
+	  && (addsy == NULL || bfd_is_abs_section (addsec)))
 	buf[-3] |= IMM_OFFSET_BIT;
 
       buf[0] = val;
@@ -2687,8 +2701,8 @@ tc_gen_reloc (section, fixP)
 
     case BFD_RELOC_MMIX_BASE_PLUS_OFFSET:
       if (addsy != NULL
-	  &&  strcmp (bfd_get_section_name (addsec->owner, addsec),
-		      MMIX_REG_CONTENTS_SECTION_NAME) == 0)
+	  && strcmp (bfd_get_section_name (addsec->owner, addsec),
+		     MMIX_REG_CONTENTS_SECTION_NAME) == 0)
 	{
 	  /* This changed into a register; the relocation is for the
 	     register-contents section.  The constant part remains zero.  */
@@ -2701,16 +2715,14 @@ tc_gen_reloc (section, fixP)
 
 	 If we encounter any other defined symbol, then we must find a
 	 suitable register and emit a reloc.  */
-      if (addsy == NULL
-	  || S_GET_SEGMENT (addsy) != real_reg_section)
+      if (addsy == NULL || addsec != real_reg_section)
 	{
 	  struct mmix_symbol_gregs *gregs;
 	  struct mmix_symbol_greg_fixes *fix;
 
 	  if (S_IS_DEFINED (addsy))
 	    {
-	      if (! symbol_section_p (addsy)
-		  && ! bfd_is_abs_section (S_GET_SEGMENT (addsy)))
+	      if (! symbol_section_p (addsy) && ! bfd_is_abs_section (addsec))
 		as_fatal (_("internal: BFD_RELOC_MMIX_BASE_PLUS_OFFSET not resolved to section"));
 
 	      /* If this is an absolute symbol sufficiently near
@@ -2720,7 +2732,7 @@ tc_gen_reloc (section, fixP)
 		 comparisons.  */
 	      if (lowest_data_loc != (bfd_vma) -1
 		  && (bfd_vma) val + 256 > lowest_data_loc
-		  && bfd_is_abs_section (S_GET_SEGMENT (addsy)))
+		  && bfd_is_abs_section (addsec))
 		{
 		  val -= (offsetT) lowest_data_loc;
 		  addsy = section_symbol (data_section);
@@ -2728,7 +2740,7 @@ tc_gen_reloc (section, fixP)
 	      /* Likewise text section.  */
 	      else if (lowest_text_loc != (bfd_vma) -1
 		       && (bfd_vma) val + 256 > lowest_text_loc
-		       && bfd_is_abs_section (S_GET_SEGMENT (addsy)))
+		       && bfd_is_abs_section (addsec))
 		{
 		  val -= (offsetT) lowest_text_loc;
 		  addsy = section_symbol (text_section);
@@ -2738,8 +2750,7 @@ tc_gen_reloc (section, fixP)
 	  gregs = *symbol_get_tc (addsy);
 
 	  /* If that symbol does not have any associated GREG definitions,
-	     we can't do anything.  FIXME: implement allocate-on-demand in
-	     the linker.  */
+	     we can't do anything.  */
 	  if (gregs == NULL
 	      || (fix = bsearch (&val, gregs->greg_fixes, gregs->n_gregs,
 				 sizeof (gregs->greg_fixes[0]),
@@ -2750,8 +2761,17 @@ tc_gen_reloc (section, fixP)
 		 before the address we want.  */
 	      || fix->offs + 255 < val)
 	    {
-	      as_bad_where (fixP->fx_file, fixP->fx_line,
-			    _("no suitable GREG definition for operands"));
+	      /* We can either let the linker allocate GREGs
+		 automatically, or emit an error.  */
+	      if (allocate_undefined_gregs_in_linker)
+		{
+		  /* The values in baddsy and addend are right.  */
+		  code = fixP->fx_r_type;
+		  break;
+		}
+	      else
+		as_bad_where (fixP->fx_file, fixP->fx_line,
+			      _("no suitable GREG definition for operands"));
 	      return NULL;
 	    }
 	  else
@@ -2781,7 +2801,7 @@ tc_gen_reloc (section, fixP)
 
     case BFD_RELOC_MMIX_REG:
       if (addsy != NULL
-	  && (bfd_is_und_section (S_GET_SEGMENT (addsy))
+	  && (bfd_is_und_section (addsec)
 	      || strcmp (bfd_get_section_name (addsec->owner, addsec),
 			 MMIX_REG_CONTENTS_SECTION_NAME) == 0))
 	{
@@ -2790,10 +2810,10 @@ tc_gen_reloc (section, fixP)
 	}
 
       if (addsy != NULL
-	  && (S_GET_SEGMENT (addsy) != real_reg_section
+	  && (addsec != real_reg_section
 	      || val > 255
 	      || val < 0)
-	  && ! bfd_is_und_section (S_GET_SEGMENT (addsy)))
+	  && ! bfd_is_und_section (addsec))
 	/* Drop through to error message.  */
 	;
       else

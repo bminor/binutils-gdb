@@ -1,3 +1,28 @@
+2002-02-01  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	Support on-demand global register allocation by passing on
+	base-plus-offset relocs to the linker.
+	* config/tc-mmix.c: Tweak and fix typos in comments.
+ 	(allocate_undefined_gregs_in_linker): New variable.
+	(OPTION_LINKER_ALLOCATED_GREGS): New option macro.
+	(md_longopts): Add --linker-allocated-gregs.
+	(md_parse_option) <case 'x'>: Imply --linker-allocated-gregs.
+	<case OPTION_LINKER_ALLOCATED_GREGS>: New.
+	(md_show_usage): Update text for -x.  Add text for
+	--linker-allocated-gregs.
+	(tc_gen_reloc): Derive default value for addend from val and
+	baddsy.  Use addsec and bfd_is_abs_section in more places.  Don't
+	emit error for BFD_RELOC_MMIX_BASE_PLUS_OFFSET without suitable
+	GREG if allocate_undefined_gregs_in_linker.
+	* doc/as.texinfo (Overview) <Target MMIX options>: Add
+	--linker-allocated-gregs.
+	* doc/c-mmix.texi (MMIX-Opts): Add blurb about
+	--linker-allocated-gregs.  Mention that it's implied by -x.
+	(MMIX-Pseudos) <GREG>: Mention when and how a GREG can be omitted.
+	(MMIX-mmixal): Clarify dated comparison and location of MMIXware.
+
+	* config/tc-mmix.h (md_parse_name): Use ISUPPER, not isupper.
+
 2002-02-01  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.am: Run "make dep-am"

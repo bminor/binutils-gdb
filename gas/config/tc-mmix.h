@@ -1,5 +1,5 @@
 /* tc-mmix.h -- Header file for tc-mmix.c.
-   Copyright (C) 2001 Free Software Foundation, Inc.
+   Copyright (C) 2001, 2002 Free Software Foundation, Inc.
    Written by Hans-Peter Nilsson (hp@bitrange.com).
 
    This file is part of GAS, the GNU Assembler.
@@ -75,7 +75,7 @@ extern int mmix_gnu_syntax;
   && (name[0] == '@'						\
       ? (! is_part_of_name (name[1])				\
 	 && mmix_current_location (current_location, exp))	\
-      : ((name[0] == ':' || isupper (name[0]))			\
+      : ((name[0] == ':' || ISUPPER (name[0]))			\
 	 && mmix_parse_predefined_name (name, exp))))
 
 extern char *mmix_prefix_name PARAMS ((char *));
