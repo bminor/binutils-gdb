@@ -32,80 +32,84 @@
  *
  *	@(#)gmon.h	5.2 (Berkeley) 5/6/91
  */
+#ifndef gmon_h
+#define gmon_h
 
-struct phdr {
-    char	*lpc;
-    char	*hpc;
-    int		ncnt;
+struct raw_phdr {
+    char low_pc[sizeof(bfd_vma)];	/* base pc address of sample buffer */
+    char high_pc[sizeof(bfd_vma)];	/* max pc address of sampled buffer */
+    char ncnt[4];		/* size of sample buffer (plus this header) */
+#ifdef __osf__
+    /*
+     * DEC's OSF v3.0 uses 4 bytes of padding to bring the header to
+     * a size that is a multiple of 8.
+     */
+    char pad[4];
+#endif
 };
 
-    /*
-     *	histogram counters are unsigned shorts (according to the kernel).
-     */
-#define	HISTCOUNTER	unsigned short
+/*
+ * Histogram counters are unsigned shorts:
+ */
+#define	HISTCOUNTER unsigned short
 
-    /*
-     *	fraction of text space to allocate for histogram counters
-     *	here, 1/2
-     */
+/*
+ * Fraction of text space to allocate for histogram counters here, 1/2:
+ */
 #define	HISTFRACTION	2
 
-    /*
-     *	Fraction of text space to allocate for from hash buckets.
-     *	The value of HASHFRACTION is based on the minimum number of bytes
-     *	of separation between two subroutine call points in the object code.
-     *	Given MIN_SUBR_SEPARATION bytes of separation the value of
-     *	HASHFRACTION is calculated as:
-     *
-     *		HASHFRACTION = MIN_SUBR_SEPARATION / (2 * sizeof(short) - 1);
-     *
-     *	For the VAX, the shortest two call sequence is:
-     *
-     *		calls	$0,(r0)
-     *		calls	$0,(r0)
-     *
-     *	which is separated by only three bytes, thus HASHFRACTION is 
-     *	calculated as:
-     *
-     *		HASHFRACTION = 3 / (2 * 2 - 1) = 1
-     *
-     *	Note that the division above rounds down, thus if MIN_SUBR_FRACTION
-     *	is less than three, this algorithm will not work!
-     */
-#define	HASHFRACTION	1
+/*
+ * Fraction of text space to allocate for from hash buckets.  The
+ * value of HASHFRACTION is based on the minimum number of bytes of
+ * separation between two subroutine call points in the object code.
+ * Given MIN_SUBR_SEPARATION bytes of separation the value of
+ * HASHFRACTION is calculated as:
+ *
+ *	HASHFRACTION = MIN_SUBR_SEPARATION / (2 * sizeof(short) - 1);
+ *
+ * For the VAX, the shortest two call sequence is:
+ *
+ *	calls	$0,(r0)
+ *	calls	$0,(r0)
+ *
+ * which is separated by only three bytes, thus HASHFRACTION is 
+ * calculated as:
+ *
+ *	HASHFRACTION = 3 / (2 * 2 - 1) = 1
+ *
+ * Note that the division above rounds down, thus if MIN_SUBR_FRACTION
+ * is less than three, this algorithm will not work!
+ */
+#define	HASHFRACTION 1
 
-    /*
-     *	percent of text space to allocate for tostructs
-     *	with a minimum.
-     */
+/*
+ * Percent of text space to allocate for tostructs with a minimum:
+ */
 #define ARCDENSITY	2
 #define MINARCS		50
 
 struct tostruct {
     char		*selfpc;
-    long		count;
+    int			count;
     unsigned short	link;
 };
 
-    /*
-     *	a raw arc,
-     *	    with pointers to the calling site and the called site
-     *	    and a count.
-     */
-struct rawarc {
-    unsigned long	raw_frompc;
-    unsigned long	raw_selfpc;
-    long		raw_count;
+/*
+ * A raw arc, with pointers to the calling site and the called site
+ * and a count.  Everything is defined in terms of characters so
+ * as to get a packed representation (otherwise, different compilers
+ * might introduce different padding):
+ */
+struct raw_arc {
+    char from_pc[sizeof(bfd_vma)];
+    char self_pc[sizeof(bfd_vma)];
+    char count[sizeof(long)];
 };
 
-struct veryrawarc {
-    char raw_frompc[4];
-    char raw_selfpc[4];
-    char raw_count[4];
-};
-
-    /*
-     *	general rounding functions.
-     */
+/*
+ * General rounding functions:
+ */
 #define ROUNDDOWN(x,y)	(((x)/(y))*(y))
 #define ROUNDUP(x,y)	((((x)+(y)-1)/(y))*(y))
+
+#endif /* gmon_h */

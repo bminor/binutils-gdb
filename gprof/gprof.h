@@ -18,284 +18,118 @@
  *
  *	@(#)gprof.h	5.9 (Berkeley) 6/1/90
  */
+#ifndef gprof_h
+#define gprof_h
 
 #include <ansidecl.h>
 #include "sysdep.h"
-#include "bfd.h"
-#include "gmon.h"
+
+#ifndef MIN
+# define MIN(a,b)	((a) < (b) ? (a) : (b))
+#endif
+#ifndef MAX
+# define MAX(a,b)	((a) > (b) ? (a) : (b))
+#endif
 
 /* AIX defines hz as a macro.  */
 #undef hz
 
-#ifdef	MACHINE_H
-#	include	MACHINE_H
+#ifdef MACHINE_H
+# include MACHINE_H
 #else
-#	if vax
-#	   include "vax.h"
-#	endif
-#	if sun
-#		include "sun.h"
-#	endif
-#	if tahoe
-#		include "tahoe.h"
-#	endif
+# if vax
+#  include "vax.h"
+# endif
+# if sun
+#  include "sun.h"
+# endif
+# if tahoe
+#  include "tahoe.h"
+# endif
 #endif
 
+#ifndef FOPEN_RB
+# define FOPEN_RB "r"
+#endif
+#ifndef FOPEN_WB
+# define FOPEN_WB "w"
+#endif
 
-    /*
-     *	who am i, for error messages.
-     */
-char	*whoami;
+#ifndef PATH_MAX
+# define PATH_MAX	1024
+#endif
 
-    /*
-     * booleans
-     */
-typedef int	bool;
-/* These may already be defined on some systems.  We could probably just
-   use the BFD versions of these, since BFD has already dealt with this
-   problem.  */
+#define	A_OUTNAME	"a.out"		/* default core filename */
+#define	GMONNAME	"gmon.out"	/* default profile filename */
+#define	GMONSUM		"gmon.sum"	/* profile summary filename */
+
+/*
+ * These may already be defined on some systems.  We could probably
+ * just use the BFD versions of these, since BFD has already dealt
+ * with this problem.
+ */
 #undef FALSE
 #define	FALSE	0
 #undef TRUE
 #define	TRUE	1
 
-    /*
-     *	ticks per second
-     */
-long	hz;
+#define STYLE_FLAT_PROFILE	(1<<0)
+#define STYLE_CALL_GRAPH	(1<<1)
+#define STYLE_SUMMARY_FILE	(1<<2)
+#define STYLE_EXEC_COUNTS	(1<<3)
+#define STYLE_ANNOTATED_SOURCE	(1<<4)
+#define STYLE_GMON_INFO		(1<<5)
 
+#define	ANYDEBUG	(1<<0)		/*    1 */
+#define	DFNDEBUG	(1<<1)		/*    2 */
+#define	CYCLEDEBUG	(1<<2)		/*    4 */
+#define	ARCDEBUG	(1<<3)		/*    8 */
+#define	TALLYDEBUG	(1<<4)		/*   16 */
+#define	TIMEDEBUG	(1<<5)		/*   32 */
+#define	SAMPLEDEBUG	(1<<6)		/*   64 */
+#define	AOUTDEBUG	(1<<7)		/*  128 */
+#define	CALLDEBUG	(1<<8)		/*  256 */
+#define	LOOKUPDEBUG	(1<<9)		/*  512 */
+#define	PROPDEBUG	(1<<10)		/* 1024 */
+#define BBDEBUG		(1<<11)		/* 2048 */
+#define IDDEBUG		(1<<12)		/* 4096 */
+#define SRCDEBUG	(1<<13)		/* 8192 */
+
+#ifdef DEBUG
+# define DBG(l,s)	if (debug_level & (l)) {s;}
+#else
+# define DBG(l,s)
+#endif
+
+typedef enum {
+    FF_AUTO = 0, FF_MAGIC, FF_BSD, FF_PROF
+} File_Format;
+
+typedef int bool;
 typedef	unsigned char UNIT[2];		/* unit of profiling */
-char	*a_outname;
-#define	A_OUTNAME		"a.out"
 
-char	*gmonname;
-#define	GMONNAME		"gmon.out"
-#define	GMONSUM			"gmon.sum"
+extern const char *whoami;		/* command-name, for error messages */
+extern const char *a_out_name;		/* core filename */
+extern long hz;				/* ticks per second */
 
-extern int bsd_style_output;
-extern int discard_underscores;
-
-    /*
-     *	a constructed arc,
-     *	    with pointers to the namelist entry of the parent and the child,
-     *	    a count of how many times this arc was traversed,
-     *	    and pointers to the next parent of this child and
-     *		the next child of this parent.
-     */
-struct arcstruct {
-    struct nl		*arc_parentp;	/* pointer to parent's nl entry */
-    struct nl		*arc_childp;	/* pointer to child's nl entry */
-    long		arc_count;	/* how calls from parent to child */
-    double		arc_time;	/* time inherited along arc */
-    double		arc_childtime;	/* childtime inherited along arc */
-    struct arcstruct	*arc_parentlist; /* parents-of-this-child list */
-    struct arcstruct	*arc_childlist;	/* children-of-this-parent list */
-};
-typedef struct arcstruct	arctype;
-
-    /*
-     * The symbol table;
-     * for each external in the specified file we gather
-     * its address, the number of calls and compute its share of cpu time.
-     */
-struct nl {
-    CONST char		*name;		/* the name */
-    unsigned long	value;		/* the pc entry point */
-    unsigned long	svalue;		/* entry point aligned to histograms */
-    double		time;		/* ticks in this routine */
-    double		childtime;	/* cumulative ticks in children */
-    long		ncall;		/* how many times called */
-    long		selfcalls;	/* how many calls to self */
-    double		propfraction;	/* what % of time propagates */
-    double		propself;	/* how much self time propagates */
-    double		propchild;	/* how much child time propagates */
-    bool		printflag;	/* should this be printed? */
-    int			index;		/* index in the graph list */
-    int			toporder;	/* graph call chain top-sort order */
-    int			cycleno;	/* internal number of cycle on */
-    struct nl		*cyclehead;	/* pointer to head of cycle */
-    struct nl		*cnext;		/* pointer to next member of cycle */
-    arctype		*parents;	/* list of caller arcs */
-    arctype		*children;	/* list of callee arcs */
-};
-typedef struct nl	nltype;
-
-nltype	*nl;			/* the whole namelist */
-nltype	*npe;			/* the virtual end of the namelist */
-int	nname;			/* the number of function names */
-
-    /*
-     *	flag which marks a nl entry as topologically ``busy''
-     *	flag which marks a nl entry as topologically ``not_numbered''
-     */
-#define	DFN_BUSY	-1
-#define	DFN_NAN		0
-
-    /* 
-     *	namelist entries for cycle headers.
-     *	the number of discovered cycles.
-     */
-nltype	*cyclenl;		/* cycle header namelist */
-int	ncycle;			/* number of cycles discovered */
-
-    /*
-     * The header on the gmon.out file.
-     * gmon.out consists of one of these headers,
-     * and then an array of ncnt samples
-     * representing the discretized program counter values.
-     *	this should be a struct phdr, but since everything is done
-     *	as UNITs, this is in UNITs too.
-     */
-struct hdr {
-    UNIT	*lowpc;
-    UNIT	*highpc;
-    int	ncnt;
-};
-
-
-struct rawhdr {
-    char lowpc[4];
-    char highpc[4];
-    char ncnt[4];
-};
-
-struct hdr	h;
-
-int	debug;
-
-    /*
-     * Each discretized pc sample has
-     * a count of the number of samples in its range
-     */
-int 	*samples;
-
-unsigned long	s_lowpc;	/* lowpc from the profile file */
-unsigned long	s_highpc;	/* highpc from the profile file */
-unsigned lowpc, highpc;		/* range profiled, in UNIT's */
-unsigned sampbytes;		/* number of bytes of samples */
-int	nsamples;		/* number of samples */
-double	actime;			/* accumulated time thus far for putprofline */
-double	totime;			/* total time for all routines */
-double	printtime;		/* total of time being printed */
-double	scale;			/* scale factor converting samples to pc
-				   values: each sample covers scale bytes */
-char	*strtab;		/* string table in core */
-off_t	ssiz;			/* size of the string table */
-unsigned char	*textspace;		/* text space of a.out in core */
-
-    /*
-     *	option flags, from a to z.
-     */
-bool	aflag;				/* suppress static functions */
-bool	bflag;				/* blurbs, too */
-bool	cflag;				/* discovered call graph, too */
-bool	dflag;				/* debugging options */
-bool	eflag;				/* specific functions excluded */
-bool	Eflag;				/* functions excluded with time */
-bool	fflag;				/* specific functions requested */
-bool	Fflag;				/* functions requested with time */
-bool	kflag;				/* arcs to be deleted */
-bool	sflag;				/* sum multiple gmon.out files */
-bool	zflag;				/* zero time/called functions, too */
-
-    /*
-     *	structure for various string lists
-     */
-struct stringlist {
-    struct stringlist	*next;
-    char		*string;
-};
-extern struct stringlist	*elist;
-extern struct stringlist	*Elist;
-extern struct stringlist	*flist;
-extern struct stringlist	*Flist;
-extern struct stringlist	*kfromlist;
-extern struct stringlist	*ktolist;
-
-    /*
-     *	function declarations
-     */
 /*
-		addarc();
-*/
-int		arccmp();
-arctype		*arclookup();
-/*
-		asgnsamples();
-		printblurb();
-		cyclelink();
-		dfn();
-*/
-bool		dfn_busy();
-/*
-		dfn_findcycle();
-*/
-bool		dfn_numbered();
-/*
-		dfn_post_visit();
-		dfn_pre_visit();
-		dfn_self_cycle();
-*/
-nltype		**doarcs();
-/*
-		done();
-		findcalls();
-		flatprofheader();
-		flatprofline();
-*/
-bool		funcsymbol();
-/*
-		getnfile();
-		getpfile();
-		getstrtab();
-		getsymtab();
-		gettextspace();
-		gprofheader();
-		gprofline();
-		main();
-*/
-unsigned long	max();
-int		membercmp();
-unsigned long	min();
-nltype		*nllookup();
-FILE		*openpfile();
-/*
-		printchildren();
-		printcycle();
-		printgprof();
-		printmembers();
-		printname();
-		printparents();
-		printprof();
-		readsamples();
-*/
-int		printnameonly();
-unsigned long	reladdr();
-/*
-		sortchildren();
-		sortmembers();
-		sortparents();
-		tally();
-		timecmp();
-		topcmp();
-*/
-int		totalcmp();
-/*
-		valcmp();
-*/
+ * Command-line options:
+ */
+extern int debug_level;			/* debug level */
+extern int output_style;
+extern int output_width;		/* controls column width in index */
+extern bool bsd_style_output;		/* as opposed to FSF style output */
+extern bool discard_underscores;	/* discard leading underscores? */
+extern bool ignore_direct_calls;	/* don't count direct calls */
+extern bool ignore_static_funcs;	/* suppress static functions */
+extern bool ignore_zeros;		/* ignore unused symbols/files */
+extern bool line_granularity;		/* function or line granularity? */
+extern bool print_descriptions;		/* output profile description */
+extern bool print_path;			/* print path or just filename? */
+extern File_Format file_format;		/* requested file format */
 
-#define	LESSTHAN	-1
-#define	EQUALTO		0
-#define	GREATERTHAN	1
+extern bool first_output;		/* no output so far? */
 
-#define	DFNDEBUG	1
-#define	CYCLEDEBUG	2
-#define	ARCDEBUG	4
-#define	TALLYDEBUG	8
-#define	TIMEDEBUG	16
-#define	SAMPLEDEBUG	32
-#define	AOUTDEBUG	64
-#define	CALLDEBUG	128
-#define	LOOKUPDEBUG	256
-#define	PROPDEBUG	512
-#define	ANYDEBUG	1024
+extern void done PARAMS((int status));
+
+#endif /* gprof_h */

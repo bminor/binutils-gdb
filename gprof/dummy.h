@@ -32,17 +32,21 @@
  *
  *	@(#)dummy.h	5.1 (Berkeley) 4/18/91
  */
+#ifndef dummy_h
+#define dummy_h
 
 /*
  * dummy.h -- This file should be used when a processor is not yet supported.
  */
 
-    /*
-     *	offset (in bytes) of the code from the entry address of a routine.
-     *	(see asgnsamples for use and explanation.)
-     */
-#define OFFSET_OF_CODE	0
-#define	UNITS_TO_CODE	(OFFSET_OF_CODE / sizeof(UNIT))
+/*
+ * Offset (in bytes) of the code from the entry address of a routine.
+ * (see hist_assign_samples()) for use and explanation.)
+ */
+#define OFFSET_TO_CODE	0
+#define	UNITS_TO_CODE	(OFFSET_TO_CODE / sizeof(UNIT))
 
 enum opermodes { dummy };
-typedef enum opermodes	operandenum;
+typedef enum opermodes operandenum;
+
+#endif /* dummy_h */

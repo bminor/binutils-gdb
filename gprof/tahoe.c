@@ -16,44 +16,22 @@
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
+#include "gprof.h"
+#include "time_host.h"
 
-#ifndef lint
-static char sccsid[] = "@(#)tahoe.c	1.5 (Berkeley) 6/1/90";
-#endif /* not lint */
+/*
+ * A symbol to be the child of indirect callf:
+ */
+Sym indirectchild;
 
-#include	"gprof.h"
-
-    /*
-     *	a namelist entry to be the child of indirect callf
-     */
-nltype	indirectchild = {
-	"(*)" ,				/* the name */
-	(unsigned long) 0 ,		/* the pc entry point */
-	(unsigned long) 0 ,		/* entry point aligned to histogram */
-	(double) 0.0 ,			/* ticks in this routine */
-	(double) 0.0 ,			/* cumulative ticks in children */
-	(long) 0 ,			/* how many times called */
-	(long) 0 ,			/* how many calls to self */
-	(double) 1.0 ,			/* propagation fraction */
-	(double) 0.0 ,			/* self propagation time */
-	(double) 0.0 ,			/* child propagation time */
-	(bool) 0 ,			/* print flag */
-	(int) 0 ,			/* index in the graph list */
-	(int) 0 , 			/* graph call chain top-sort order */
-	(int) 0 ,			/* internal number of cycle on */
-	(struct nl *) &indirectchild ,	/* pointer to head of cycle */
-	(struct nl *) 0 ,		/* pointer to next member of cycle */
-	(arctype *) 0 ,			/* list of caller arcs */
-	(arctype *) 0 			/* list of callee arcs */
-    };
 
 operandenum
-operandmode( modep )
+operandmode(modep)
     unsigned char	*modep;
 {
-    long	usesreg = ((long)*modep) & 0xf;
+    long usesreg = ((long)*modep) & 0xf;
     
-    switch ( ((long)*modep) >> 4 ) {
+    switch (((long)*modep) >> 4) {
 	case 0:
 	case 1:
 	case 2:
@@ -68,31 +46,31 @@ operandmode( modep )
 	case 7:
 	    return autodec;
 	case 8:
-	    return ( usesreg != 0xe ? autoinc : immediate );
+	    return usesreg != 0xe ? autoinc : immediate;
 	case 9:
-	    return ( usesreg != PC ? autoincdef : absolute );
+	    return usesreg != PC ? autoincdef : absolute;
 	case 10:
-	    return ( usesreg != PC ? bytedisp : byterel );
+	    return usesreg != PC ? bytedisp : byterel;
 	case 11:
-	    return ( usesreg != PC ? bytedispdef : bytereldef );
+	    return usesreg != PC ? bytedispdef : bytereldef;
 	case 12:
-	    return ( usesreg != PC ? worddisp : wordrel );
+	    return usesreg != PC ? worddisp : wordrel;
 	case 13:
-	    return ( usesreg != PC ? worddispdef : wordreldef );
+	    return usesreg != PC ? worddispdef : wordreldef;
 	case 14:
-	    return ( usesreg != PC ? longdisp : longrel );
+	    return usesreg != PC ? longdisp : longrel;
 	case 15:
-	    return ( usesreg != PC ? longdispdef : longreldef );
+	    return usesreg != PC ? longdispdef : longreldef;
     }
     /* NOTREACHED */
 }
 
 char *
-operandname( mode )
+operandname(mode)
     operandenum	mode;
 {
     
-    switch ( mode ) {
+    switch (mode) {
 	case literal:
 	    return "literal";
 	case indexed:
@@ -140,11 +118,11 @@ operandname( mode )
 }
 
 long
-operandlength( modep )
+operandlength(modep)
     unsigned char	*modep;
 {
     
-    switch ( operandmode( modep ) ) {
+    switch (operandmode(modep)) {
 	case literal:
 	case reg:
 	case regdef:
@@ -170,16 +148,16 @@ operandlength( modep )
 	case longreldef:
 	    return 5;
 	case indexed:
-	    return 1+operandlength( modep + 1 );
+	    return 1+operandlength(modep + 1);
     }
     /* NOTREACHED */
 }
 
-unsigned long
-reladdr( modep )
+bfd_vma
+reladdr(modep)
     char	*modep;
 {
-    operandenum	mode = operandmode( modep );
+    operandenum	mode = operandmode(modep);
     char	*cp;
     short	*sp;
     long	*lp;
@@ -187,82 +165,81 @@ reladdr( modep )
     long	value = 0;
 
     cp = modep;
-    cp += 1;			/* skip over the mode */
-    switch ( mode ) {
+    ++cp;			/* skip over the mode */
+    switch (mode) {
 	default:
-	    fprintf( stderr , "[reladdr] not relative address\n" );
-	    return (unsigned long) modep;
+	    fprintf(stderr, "[reladdr] not relative address\n");
+	    return (bfd_vma) modep;
 	case byterel:
-	    return (unsigned long) ( cp + sizeof *cp + *cp );
+	    return (bfd_vma) (cp + sizeof *cp + *cp);
 	case wordrel:
 	    for (i = 0; i < sizeof *sp; i++)
 		value = (value << 8) + (cp[i] & 0xff);
-	    return (unsigned long) ( cp + sizeof *sp + value );
+	    return (bfd_vma) (cp + sizeof *sp + value);
 	case longrel:
 	    for (i = 0; i < sizeof *lp; i++)
 		value = (value << 8) + (cp[i] & 0xff);
-	    return (unsigned long) ( cp + sizeof *lp + value );
+	    return (bfd_vma) (cp + sizeof *lp + value);
     }
 }
 
-findcall( parentp , p_lowpc , p_highpc )
-    nltype		*parentp;
-    unsigned long	p_lowpc;
-    unsigned long	p_highpc;
+find_call(parent, p_lowpc, p_highpc)
+     Sym *parent;
+     bfd_vma p_lowpc;
+     bfd_vma p_highpc;
 {
-    unsigned char	*instructp;
-    long		length;
-    nltype		*childp;
-    operandenum		mode;
-    operandenum		firstmode;
-    unsigned long	destpc;
+    unsigned char *instructp;
+    long length;
+    Sym *child;
+    operandenum mode;
+    operandenum firstmode;
+    bfd_vma destpc;
+    static bool inited = FALSE;
 
-    if ( textspace == 0 ) {
+    if (!inited) {
+	inited = TRUE;
+	sym_init(&indirectchild);
+	indirectchild.cg.prop.fract = 1.0;
+	indirectchild.cg.cyc.head = &indirectchild;
+    } /* if */
+
+    if (textspace == 0) {
 	return;
     }
-    if ( p_lowpc < s_lowpc ) {
+    if (p_lowpc < s_lowpc) {
 	p_lowpc = s_lowpc;
     }
-    if ( p_highpc > s_highpc ) {
+    if (p_highpc > s_highpc) {
 	p_highpc = s_highpc;
     }
-#   ifdef DEBUG
-	if ( debug & CALLDEBUG ) {
-	    printf( "[findcall] %s: 0x%x to 0x%x\n" ,
-		    parentp -> name , p_lowpc , p_highpc );
-	}
-#   endif DEBUG
-    for (   instructp = textspace + p_lowpc ;
+    DBG(CALLDEBUG, printf("[findcall] %s: 0x%x to 0x%x\n",
+			  parent -> name, p_lowpc, p_highpc));
+    for (  instructp = textspace + p_lowpc ;
 	    instructp < textspace + p_highpc ;
-	    instructp += length ) {
+	    instructp += length) {
 	length = 1;
-	if ( *instructp == CALLF ) {
+	if (*instructp == CALLF) {
 		/*
 		 *	maybe a callf, better check it out.
 		 *	skip the count of the number of arguments.
 		 */
-#	    ifdef DEBUG
-		if ( debug & CALLDEBUG ) {
-		    printf( "[findcall]\t0x%x:callf" , instructp - textspace );
-		}
-#	    endif DEBUG
-	    firstmode = operandmode( instructp+length );
-	    switch ( firstmode ) {
+	    DBG(CALLDEBUG, printf("[findcall]\t0x%x:callf",
+				  instructp - textspace));
+	    firstmode = operandmode(instructp+length);
+	    switch (firstmode) {
 		case literal:
 		case immediate:
 		    break;
 		default:
 		    goto botched;
 	    }
-	    length += operandlength( instructp+length );
-	    mode = operandmode( instructp + length );
-#	    ifdef DEBUG
-		if ( debug & CALLDEBUG ) {
-		    printf( "\tfirst operand is %s", operandname( firstmode ) );
-		    printf( "\tsecond operand is %s\n" , operandname( mode ) );
-		}
-#	    endif DEBUG
-	    switch ( mode ) {
+	    length += operandlength(instructp+length);
+	    mode = operandmode(instructp + length);
+	    DBG(CALLDEBUG,
+		printf("\tfirst operand is %s", operandname(firstmode));
+		printf("\tsecond operand is %s\n", operandname(mode));
+		);
+	    switch (mode) {
 		case regdef:
 		case bytedispdef:
 		case worddispdef:
@@ -278,8 +255,8 @@ findcall( parentp , p_lowpc , p_highpc )
 			 *	[are there others that we miss?,
 			 *	 e.g. arrays of pointers to functions???]
 			 */
-		    addarc( parentp , &indirectchild , (long) 0 );
-		    length += operandlength( instructp + length );
+		    arc_add(parent, &indirectchild, (long) 0);
+		    length += operandlength(instructp + length);
 		    continue;
 		case byterel:
 		case wordrel:
@@ -289,24 +266,21 @@ findcall( parentp , p_lowpc , p_highpc )
 			 *	check that this is the address of 
 			 *	a function.
 			 */
-		    destpc = reladdr( instructp+length )
-				- (unsigned long) textspace;
-		    if ( destpc >= s_lowpc && destpc <= s_highpc ) {
-			childp = nllookup( destpc );
-#			ifdef DEBUG
-			    if ( debug & CALLDEBUG ) {
-				printf( "[findcall]\tdestpc 0x%x" , destpc );
-				printf( " childp->name %s" , childp -> name );
-				printf( " childp->value 0x%x\n" ,
-					childp -> value );
-			    }
-#			endif DEBUG
-			if ( childp -> value == destpc ) {
+		    destpc = reladdr(instructp+length)
+				- (bfd_vma) textspace;
+		    if (destpc >= s_lowpc && destpc <= s_highpc) {
+			child = sym_lookup(destpc);
+			DBG(CALLDEBUG,
+			    printf("[findcall]\tdestpc 0x%x", destpc);
+			    printf(" child->name %s", child -> name);
+			    printf(" child->addr 0x%x\n", child -> addr);
+			    );
+			if (child -> addr == destpc) {
 				/*
 				 *	a hit
 				 */
-			    addarc( parentp , childp , (long) 0 );
-			    length += operandlength( instructp + length );
+			    arc_add(parent, child, (long) 0);
+			    length += operandlength(instructp + length);
 			    continue;
 			}
 			goto botched;
@@ -322,11 +296,7 @@ findcall( parentp , p_lowpc , p_highpc )
 			/*
 			 *	something funny going on.
 			 */
-#		    ifdef DEBUG
-			if ( debug & CALLDEBUG ) {
-			    printf( "[findcall]\tbut it's a botch\n" );
-			}
-#		    endif DEBUG
+		    DBG(CALLDEBUG, printf("[findcall]\tbut it's a botch\n"));
 		    length = 1;
 		    continue;
 	    }

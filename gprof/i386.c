@@ -16,107 +16,71 @@
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
+#include "gprof.h"
+#include "cg_arcs.h"
+#include "core.h"
+#include "hist.h"
+#include "symtab.h"
 
-#ifndef lint
-static char sccsid[] = "@(#)tahoe.c	1.5 (Berkeley) 6/1/90";
-#endif /* not lint */
 
-#include	"gprof.h"
-
-    /*
-     *	a namelist entry to be the child of indirect callf
-     */
-nltype	indirectchild = {
-	"(*)" ,				/* the name */
-	(unsigned long) 0 ,		/* the pc entry point */
-	(unsigned long) 0 ,		/* entry point aligned to histogram */
-	(double) 0.0 ,			/* ticks in this routine */
-	(double) 0.0 ,			/* cumulative ticks in children */
-	(long) 0 ,			/* how many times called */
-	(long) 0 ,			/* how many calls to self */
-	(double) 1.0 ,			/* propagation fraction */
-	(double) 0.0 ,			/* self propagation time */
-	(double) 0.0 ,			/* child propagation time */
-	(bool) 0 ,			/* print flag */
-	(int) 0 ,			/* index in the graph list */
-	(int) 0 , 			/* graph call chain top-sort order */
-	(int) 0 ,			/* internal number of cycle on */
-	(struct nl *) &indirectchild ,	/* pointer to head of cycle */
-	(struct nl *) 0 ,		/* pointer to next member of cycle */
-	(arctype *) 0 ,			/* list of caller arcs */
-	(arctype *) 0 			/* list of callee arcs */
-    };
-
-#ifdef	__STDC__
 int
-iscall (unsigned char *ip)
-#else
-int iscall(ip)
-	unsigned char *ip;
-#endif	/* __STDC__ */
+DEFUN(iscall, (ip), unsigned char *ip)
 {
   if (*ip == 0xeb || *ip == 0x9a) 
     return 1;
   return 0;
 }
 
-findcall( parentp , p_lowpc , p_highpc )
-    nltype		*parentp;
-    unsigned long	p_lowpc;
-    unsigned long	p_highpc;
-{
-    unsigned char	*instructp;
-    long		length;
-    nltype		*childp;
-    unsigned long	destpc;
 
-    if ( textspace == 0 ) {
+void
+find_call(parent, p_lowpc, p_highpc)
+    Sym *parent;
+    bfd_vma p_lowpc;
+    bfd_vma p_highpc;
+{
+    unsigned char *instructp;
+    long length;
+    Sym *child;
+    bfd_vma destpc;
+
+    if (core_text_space == 0) {
 	return;
     }
-    if ( p_lowpc < s_lowpc ) {
+    if (p_lowpc < s_lowpc) {
 	p_lowpc = s_lowpc;
     }
-    if ( p_highpc > s_highpc ) {
+    if (p_highpc > s_highpc) {
 	p_highpc = s_highpc;
     }
-#   ifdef DEBUG
-	if ( debug & CALLDEBUG ) {
-	    printf( "[findcall] %s: 0x%x to 0x%x\n" ,
-		    parentp -> name , p_lowpc , p_highpc );
-	}
-#   endif DEBUG
-    for (   instructp = textspace + p_lowpc ;
-	    instructp < textspace + p_highpc ;
-	    instructp += length ) {
+    DBG(CALLDEBUG, printf("[findcall] %s: 0x%lx to 0x%lx\n",
+			  parent->name, p_lowpc, p_highpc));
+    for (  instructp = (unsigned char*) core_text_space + p_lowpc ;
+	    instructp < (unsigned char*) core_text_space + p_highpc ;
+	    instructp += length) {
 	length = 1;
-	if ( iscall (instructp) ) {
-#	    ifdef DEBUG
-	  if ( debug & CALLDEBUG ) {
-	    printf( "[findcall]\t0x%x:callf" , instructp - textspace );
-	  }
-#	    endif DEBUG
+	if (iscall (instructp)) {
+	    DBG(CALLDEBUG,
+		printf("[findcall]\t0x%x:callf",
+		       instructp - (unsigned char*) core_text_space));
 	  length = 4;
 	  /*
 	   *	regular pc relative addressing
 	   *	check that this is the address of 
 	   *	a function.
 	   */
-	  destpc = ( (unsigned long)instructp + 5 - (unsigned long) textspace);
-	  if ( destpc >= s_lowpc && destpc <= s_highpc ) {
-	    childp = nllookup( destpc );
-#			ifdef DEBUG
-	    if ( debug & CALLDEBUG ) {
-	      printf( "[findcall]\tdestpc 0x%x" , destpc );
-	      printf( " childp->name %s" , childp -> name );
-	      printf( " childp->value 0x%x\n" ,
-		     childp -> value );
-	    }
-#			endif DEBUG
-	    if ( childp -> value == destpc ) {
+	  destpc = ((bfd_vma)instructp + 5 - (bfd_vma) core_text_space);
+	  if (destpc >= s_lowpc && destpc <= s_highpc) {
+	    child = sym_lookup(&symtab, destpc);
+	    DBG(CALLDEBUG,
+		printf("[findcall]\tdestpc 0x%lx", destpc);
+		printf(" child->name %s", child->name);
+		printf(" child->addr 0x%lx\n", child->addr);
+		);
+	    if (child->addr == destpc) {
 	      /*
 	       *	a hit
 	       */
-	      addarc( parentp , childp , (long) 0 );
+	      arc_add(parent, child, (long) 0);
 	      length += 4;	/* constant lengths */
 	      continue;
 	    }
@@ -131,13 +95,9 @@ findcall( parentp , p_lowpc , p_highpc )
 	  /*
 	   *	something funny going on.
 	   */
-#		    ifdef DEBUG
-	  if ( debug & CALLDEBUG ) {
-	    printf( "[findcall]\tbut it's a botch\n" );
-	  }
-#		    endif DEBUG
-	  length = 1;
-	  continue;
+	    DBG(CALLDEBUG, printf("[findcall]\tbut it's a botch\n"));
+	    length = 1;
+	    continue;
 	}
       }
   }

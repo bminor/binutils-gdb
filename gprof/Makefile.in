@@ -34,18 +34,22 @@ texidir		= $(srcdir)/../texinfo
 ###
 
 PROG=	gprof
-SRCS=	gprof.c arcs.c dfn.c lookup.c $(MY_MACHINE).c hertz.c \
-	printgprof.c printlist.c
+SRCS=	$(MY_MACHINE).c basic_blocks.c call_graph.c \
+	cg_arcs.c cg_dfn.c cg_print.c core.c \
+	gmon_io.c gprof.c hertz.c hist.c source.c search_list.c symtab.c \
+	sym_ids.c utils.c
+
 LIBS = ../bfd/libbfd.a ../libiberty/libiberty.a
 
-OBJS=	gprof.o arcs.o dfn.o lookup.o $(MY_MACHINE).o hertz.o \
-	printgprof.o printlist.o \
-	flat_bl.o bsd_callg_bl.o fsf_callg_bl.o
+OBJS=	$(MY_MACHINE).o basic_blocks.o bsd_callg_bl.o call_graph.o \
+	cg_arcs.o cg_dfn.o cg_print.o core.o flat_bl.o fsf_callg_bl.o \
+	gmon_io.o gprof.o hertz.o hist.o source.o search_list.o symtab.o \
+	sym_ids.o utils.o
 
 # Files that can be generated, but should be included in distribution.
 DISTSTUFF = flat_bl.c bsd_callg_bl.c fsf_callg_bl.c
 
-CFLAGS=-g
+CFLAGS=-g -DDEBUG
 LDFLAGS=
 .c.o:
 	$(CC) -c $(CFLAGS) -I. -I$(srcdir) -I../bfd -I$(srcdir)/../include -I$(srcdir)/../bfd -DMACHINE_H=\"$(MY_MACHINE).h\" $(TCFLAGS) $(HCFLAGS) $<
@@ -116,14 +120,22 @@ Makefile : Makefile.in
 
 
 # These get around a bug in Sun Make in SunOS 4.1.1 and Solaris 2
-gprof.o: gprof.c
-arcs.o: arcs.c
-dfn.o: dfn.c
-lookup.o: lookup.c
 $(MY_MACHINE).o: $(MY_MACHINE).c
-hertz.o: hertz.c
-printgprof.o: printgprof.c
-printlist.o: printlist.c
+basic_blocks.o: basic_blocks.c
+bsd_call_bl.o: bsd_call_bl.c
+call_graph.o: call_graph.c
+cg_arcs.o: cg_arcs.c
+cg_dfn.o: cg_dfn.c
+cg_print.o: cg_print.c
+core.o: core.c
 flat_bl.o: flat_bl.c
-bsd_callg_bl.o: bsd_callg_bl.c
 fsf_callg_bl.o: fsf_callg_bl.c
+gmon_io.o: gmon_io.c
+gprof.o: gprof.c
+hertz.o: hertz.c
+hist.o: hist.c
+search_list.o: search_list.c
+source.o: source.c
+symtab.o: symtab.c
+sym_ids.o: sym_ids.c
+utils.o: utils.c
