@@ -47,6 +47,7 @@ Makefile.in
 PORTING
 TODO
 VERSION
+aclocal.m4
 aix386-core.c
 aout-adobe.c
 aout-arm.c
@@ -93,7 +94,6 @@ coffcode.h
 coffgen.c
 cofflink.c
 coffswap.h
-config
 config.bfd
 configure
 configure.bat

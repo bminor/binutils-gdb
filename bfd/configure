@@ -556,7 +556,40 @@ target64=false
 
 # host stuff:
 
+HDEFINES=
+
+# Permit host specific settings.
 . ${srcdir}/configure.host
+
+echo $ac_n "checking for CC""... $ac_c" 1>&6
+test -z "$CC" && CC=`egrep '^CC *=' ../Makefile | tail -1 | sed 's/^CC *= *//'`
+test -z "$CC" && CC=cc
+echo "$ac_t""setting CC to $CC" 1>&6
+
+cat > conftest.c <<EOF
+#ifdef __GNUC__
+  yes;
+#endif
+EOF
+if ${CC-cc} -E conftest.c 2>&5 | egrep yes >/dev/null 2>&1; then
+  GCC=yes
+  if test "${CFLAGS+set}" != set; then
+    echo 'void f(){}' > conftest.c
+    if test -z "`${CC-cc} -g -c conftest.c 2>&1`"; then
+      CFLAGS="-g -O"
+    else
+      CFLAGS="-O"
+    fi
+  fi
+else
+  GCC=
+  test "${CFLAGS+set}" = set || CFLAGS="-g"
+fi
+rm -f conftest*
+
+
+
+AR=${AR-ar}
 
 # Extract the first word of "ranlib", so it can be a program name with args.
 set dummy ranlib; ac_word=$2
@@ -586,6 +619,91 @@ else
   echo "$ac_t""no" 1>&6
 fi
 
+# Find a good install program.  We prefer a C program (faster),
+# so one script is as good as another.  But avoid the broken or
+# incompatible versions:
+# SysV /etc/install, /usr/sbin/install
+# SunOS /usr/etc/install
+# IRIX /sbin/install
+# AIX /bin/install
+# AFS /usr/afsws/bin/install, which mishandles nonexistent args
+# SVR4 /usr/ucb/install, which tries to use the nonexistent group "staff"
+# ./install, which can be erroneously created by make from ./install.sh.
+echo $ac_n "checking for a BSD compatible install""... $ac_c" 1>&6
+if test -z "$INSTALL"; then
+if eval "test \"`echo '$''{'ac_cv_path_install'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+    IFS="${IFS= 	}"; ac_save_ifs="$IFS"; IFS="${IFS}:"
+  for ac_dir in $PATH; do
+    # Account for people who put trailing slashes in PATH elements.
+    case "$ac_dir/" in
+    /|./|.//|/etc/*|/usr/sbin/*|/usr/etc/*|/sbin/*|/usr/afsws/bin/*|/usr/ucb/*) ;;
+    *)
+      # OSF1 and SCO ODT 3.0 have their own names for install.
+      for ac_prog in ginstall installbsd scoinst install; do
+        if test -f $ac_dir/$ac_prog; then
+	  if test $ac_prog = install &&
+            grep dspmsg $ac_dir/$ac_prog >/dev/null 2>&1; then
+	    # AIX install.  It has an incompatible calling convention.
+	    # OSF/1 installbsd also uses dspmsg, but is usable.
+	    :
+	  else
+	    ac_cv_path_install="$ac_dir/$ac_prog -c"
+	    break 2
+	  fi
+	fi
+      done
+      ;;
+    esac
+  done
+  IFS="$ac_save_ifs"
+  # As a last resort, use the slow shell script.
+  test -z "$ac_cv_path_install" && ac_cv_path_install="$ac_install_sh"
+fi
+  INSTALL="$ac_cv_path_install"
+fi
+echo "$ac_t""$INSTALL" 1>&6
+
+# Use test -z because SunOS4 sh mishandles braces in ${var-val}.
+# It thinks the first close brace ends the variable substitution.
+test -z "$INSTALL_PROGRAM" && INSTALL_PROGRAM='${INSTALL}'
+
+test -z "$INSTALL_DATA" && INSTALL_DATA='${INSTALL} -m 644'
+
+
+# Put a plausible default for CC_FOR_BUILD in Makefile.
+# If we cannot run a trivial program, we must be cross compiling.
+echo $ac_n "checking whether cross-compiling""... $ac_c" 1>&6
+if eval "test \"`echo '$''{'ac_cv_c_cross'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  if test "$cross_compiling" = yes; then
+  ac_cv_c_cross=yes
+else
+cat > conftest.$ac_ext <<EOF
+#line 686 "configure"
+#include "confdefs.h"
+main(){return(0);}
+EOF
+eval $ac_link
+if test -s conftest && (./conftest; exit) 2>/dev/null; then
+  ac_cv_c_cross=no
+else
+  ac_cv_c_cross=yes
+fi
+fi
+rm -fr conftest*
+fi
+cross_compiling=$ac_cv_c_cross
+echo "$ac_t""$ac_cv_c_cross" 1>&6
+
+if test "x$cross_compiling" = "xno"; then
+  CC_FOR_BUILD='$(CC)'
+else
+  CC_FOR_BUILD=gcc
+fi
+
 
 # Set up to make a link between the host's include file and "sysdep.h".
 files=hosts/${my_host}.h
@@ -595,18 +713,6 @@ if test ! -f ${srcdir}/${files} ; then
 	echo "configure: warning: BFD has no specific support for host ${host} -- using std-host" 1>&2
 fi
 
-
-
-if test -f ${srcdir}/config/${my_host}.mh ; then
-	host_makefile_frag=$srcdir/config/${my_host}.mh
-else
-	host_makefile_frag=/dev/null
-fi
-
-frags=
-if test $host_makefile_frag != /dev/null ; then
-    frags="$host_makefile_frag"
-fi
 
 
 # If we are configured native, pick a core file support file.
@@ -1015,6 +1121,7 @@ do
 done
 
 ac_given_srcdir=$srcdir
+ac_given_INSTALL="$INSTALL"
 
 trap 'rm -fr `echo "Makefile doc/Makefile" | sed "s/:[^ ]*//g"` conftest*; exit 1' 1 2 15
 
@@ -1047,10 +1154,13 @@ s%@build_alias@%$build_alias%g
 s%@build_cpu@%$build_cpu%g
 s%@build_vendor@%$build_vendor%g
 s%@build_os@%$build_os%g
+s%@CC@%$CC%g
+s%@HDEFINES@%$HDEFINES%g
+s%@AR@%$AR%g
 s%@RANLIB@%$RANLIB%g
-/@host_makefile_frag@/r $host_makefile_frag
-s%@host_makefile_frag@%%g
-s%@frags@%$frags%g
+s%@INSTALL_PROGRAM@%$INSTALL_PROGRAM%g
+s%@INSTALL_DATA@%$INSTALL_DATA%g
+s%@CC_FOR_BUILD@%$CC_FOR_BUILD%g
 s%@COREFILE@%$COREFILE%g
 s%@COREFLAG@%$COREFLAG%g
 s%@TDEFINES@%$TDEFINES%g
@@ -1099,6 +1209,10 @@ for ac_file in .. $CONFIG_FILES; do if test "x$ac_file" != x..; then
     top_srcdir="$ac_dots$ac_given_srcdir" ;;
   esac
 
+  case "$ac_given_INSTALL" in
+  [/$]*) INSTALL="$ac_given_INSTALL" ;;
+  *) INSTALL="$ac_dots$ac_given_INSTALL" ;;
+  esac
   echo creating "$ac_file"
   rm -f "$ac_file"
   configure_input="Generated automatically from `echo $ac_file_in|sed 's%.*/%%'` by configure."
@@ -1111,6 +1225,7 @@ for ac_file in .. $CONFIG_FILES; do if test "x$ac_file" != x..; then
 s%@configure_input@%$configure_input%g
 s%@srcdir@%$srcdir%g
 s%@top_srcdir@%$top_srcdir%g
+s%@INSTALL@%$INSTALL%g
 " -f conftest.subs $ac_given_srcdir/$ac_file_in > $ac_file
 fi; done
 rm -f conftest.subs

@@ -29,9 +29,27 @@ target64=false
 
 # host stuff:
 
+HDEFINES=
+
+# Permit host specific settings.
 . ${srcdir}/configure.host
 
+AC_PROG_CC
+AC_SUBST(CFLAGS)
+AC_SUBST(HDEFINES)
+AR=${AR-ar}
+AC_SUBST(AR)
 AC_PROG_RANLIB
+AC_PROG_INSTALL
+
+# Put a plausible default for CC_FOR_BUILD in Makefile.
+AC_C_CROSS
+if test "x$cross_compiling" = "xno"; then
+  CC_FOR_BUILD='$(CC)'
+else
+  CC_FOR_BUILD=gcc
+fi
+AC_SUBST(CC_FOR_BUILD)
 
 # Set up to make a link between the host's include file and "sysdep.h".
 files=hosts/${my_host}.h
@@ -42,18 +60,6 @@ if test ! -f ${srcdir}/${files} ; then
 fi
 
 AC_LINK_FILES($files, sysdep.h)
-
-if test -f ${srcdir}/config/${my_host}.mh ; then
-	host_makefile_frag=$srcdir/config/${my_host}.mh
-else
-	host_makefile_frag=/dev/null
-fi
-AC_SUBST_FILE(host_makefile_frag)
-frags=
-if test $host_makefile_frag != /dev/null ; then
-    frags="$host_makefile_frag"
-fi
-AC_SUBST(frags)
 
 # If we are configured native, pick a core file support file.
 COREFILE=

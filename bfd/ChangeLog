@@ -1,5 +1,26 @@
 Mon Sep  4 14:02:43 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* configure.host: Incorporate host Makefile fragments by setting
+	shell variables.
+	* configure.in: Call AC_PROG_CC.  Substitute CFLAGS, HDEFINES and
+	AR.  Call AC_PROG_INSTALL.  Substitute CC_FOR_BUILD, choosing a
+	value based on whether the code is being compiled by a cross
+	compiler.  Don't substitute host_makefile_frag or frags.
+	* aclocal.m4: New file to define local AC_PROG_CC.
+	* configure: Rebuild.
+	* Makefile.in (INSTALL): Set to @INSTALL@.
+	(INSTALL_PROGRAM): Set to @INSTALL_PROGRAM@.
+	(INSTALL_DATA): Set to @INSTALL_DATA@.
+	(AR): Set to @AR@.
+	(CC): Define as @CC@.
+	(CFLAGS): Set to @CFLAGS@.
+	(CC_FOR_BUILD): Set to @CC_FOR_BUILD@.
+	(@host_makefile_frag@): Remove.
+	(ALL_CFLAGS): Change $(HDEFINES) to @HDEFINES@.  Move $(CFLAGS)
+	after other options.
+	(config.status): Remove dependency upon @frags@.
+	* config/*.mh, config/README: Remove.
+
 	* config.bfd: Rewrite to incorporate the contents of the Makefile
 	fragments by setting shell variables, rather than merely returning
 	the name of a Makefile fragment.
