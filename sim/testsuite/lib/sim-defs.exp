@@ -1,12 +1,27 @@
 # Simulator dejagnu utilities.
 
+# Communicate simulator path from sim_init to sim_version.
+# For some reason [board_info target sim] doesn't work in sim_version.
+# [Presumubly because the target has been "popped" by then.  Odd though.]
+set sim_path "unknown-run"
+
+# Initialize the testrun.
+# Required by dejagnu.
+
+proc sim_init { args } {
+    global sim_path
+    set sim_path [board_info target sim]
+    # Need to return an empty string (copied from GAS).
+    return ""
+}
+
 # Print the version of the simulator being tested.
 # Required by dejagnu.
 
 proc sim_version {} {
+    global sim_path
     set version 0.5
-    set program [board_info target sim]
-    clone_output "$program $version\n"
+    clone_output "$sim_path $version\n"
 }
 
 # Cover function to target_compile.
@@ -24,7 +39,9 @@ proc sim_compile { source dest type options } {
 
 # Run a program on the simulator.
 # Required by dejagnu (at least ${tool}_run used to be).
-# FIXME: What should we do with `redir'?
+#
+# At present REDIR must be "" or "> foo".
+#
 # The result is a list of two elements.
 # The first is one of pass/fail/etc.
 # The second is the program's output.
@@ -33,7 +50,7 @@ proc sim_compile { source dest type options } {
 # dejagnu/config/sim.exp.  It's not clear how to pass arguments to the
 # simulator (not the simulated program, the simulator) with sim_load.
 
-proc sim_run { prog sim_opts redir } {
+proc sim_run { prog sim_opts prog_opts redir env_vals } {
     global SIMFLAGS
 
     # FIXME: The timeout value we actually want is a function of
@@ -48,7 +65,16 @@ proc sim_run { prog sim_opts redir } {
 
     set sim [board_info target sim]
 
-    remote_spawn host "$sim $SIMFLAGS $sim_opts $prog"
+    # FIXME: this works for UNIX only
+    if { "$env_vals" != "" } {
+	set sim "env $env_vals $sim"
+    }
+
+    if { "$redir" == "" } {
+	remote_spawn host "$sim $SIMFLAGS $sim_opts $prog $prog_opts"
+    } else {
+	remote_spawn host "$sim $SIMFLAGS $sim_opts $prog $prog_opts $redir" writeonly
+    }
     set result [remote_wait host $testcase_timeout]
 
     set return_code [lindex $result 0]
@@ -66,14 +92,6 @@ proc sim_run { prog sim_opts redir } {
     }
 
     return [list $status $output]
-}
-
-# Initialize the testrun.
-# Required by dejagnu.
-
-proc sim_init { args } {
-    # Need to return an empty string (copied from GAS).
-    return ""
 }
 
 # Run testcase NAME.
@@ -166,7 +184,7 @@ proc run_sim_test { name } {
 	    set opts(sim,$mach) $opts(sim)
 	}
 
-	set result [sim_run ${name}.x "$opts(sim,$mach)" ""]
+	set result [sim_run ${name}.x "$opts(sim,$mach)" "" "" ""]
 	set status [lindex $result 0]
 	set output [lindex $result 1]
 

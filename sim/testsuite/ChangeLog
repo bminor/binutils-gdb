@@ -1,16 +1,27 @@
+Mon Jun  1 18:54:22 1998  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* lib/sim-defs.exp (sim_run): Add possible environment variable
+ 	list to simulator run.
+start-sanitize-sky
+	* sim/sky/sky-defs.tcl: Use it.
+	
+	* sim/sky/t-pke2.vif1out: Update to match recent word-precise
+ 	tracking table change in sim/mips/sky-pke.c.
+	* sim/sky/t-pke3.trc: Ditto.
+	* sim/sky/t-pke4.vif0expect: Ditto.
+end-sanitize-sky	
+
+Thu May 28 14:59:46 1998 Jillian Ye <jillian@cygnus.com>
+
+        * Makefile.in: Take RUNTEST out of FLAG_TO_PASS
+                       so that make check can be invoked recursively.
+
 start-sanitize-sky
 Mon May 18 10:37:47 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* sim/sky/sky.ld: Delete file.
 
 end-sanitize-sky
-start-sanitize-m32rx
-Fri May 15 17:31:15 1998  Doug Evans  <devans@seba.cygnus.com>
-
-	* sim/m32r/allinsn.exp: Pass --m32rx-enable-special to gas.
-	* sim/m32r/misc.exp: Ditto.
-
-end-sanitize-m32rx
 Thu May 14 11:48:35 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* config/default.exp (CC,SIM): Delete.
