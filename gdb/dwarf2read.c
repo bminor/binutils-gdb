@@ -6094,6 +6094,8 @@ set_cu_language (unsigned int lang, struct dwarf2_cu *cu)
       break;
     case DW_LANG_Ada83:
     case DW_LANG_Ada95:
+      cu->language = language_ada;
+      break;
     case DW_LANG_Cobol74:
     case DW_LANG_Cobol85:
     case DW_LANG_Pascal83:

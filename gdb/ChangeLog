@@ -1,3 +1,8 @@
+2004-10-15  Joel Brobecker  <brobecker@gnat.com>
+
+	* dwarf2read.c (set_cu_language): Set language to Ada for
+	DW_LANG_Ada83 and DW_LANG_Ada95.
+
 2004-10-15  Michael Chastain  <mec.gnu@mindspring.com>
 
 	From Andreas Schwab <schwab@suse.de>:
