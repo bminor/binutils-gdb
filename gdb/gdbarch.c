@@ -761,13 +761,9 @@ verify_gdbarch (struct gdbarch *gdbarch)
       && (gdbarch->frame_args_skip == -1))
     fprintf_unfiltered (log, "\n\tframe_args_skip");
   /* Skip verify of frameless_function_invocation, invalid_p == 0 */
-  if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
-      && (gdbarch->frame_chain == 0))
-    fprintf_unfiltered (log, "\n\tframe_chain");
+  /* Skip verify of frame_chain, has predicate */
   /* Skip verify of frame_chain_valid, has predicate */
-  if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
-      && (gdbarch->frame_saved_pc == 0))
-    fprintf_unfiltered (log, "\n\tframe_saved_pc");
+  /* Skip verify of frame_saved_pc, has predicate */
   /* Skip verify of frame_args_address, invalid_p == 0 */
   /* Skip verify of frame_locals_address, invalid_p == 0 */
   if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
@@ -1429,6 +1425,15 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                       "gdbarch_dump: FRAME_ARGS_SKIP = %ld\n",
                       (long) FRAME_ARGS_SKIP);
 #endif
+#ifdef FRAME_CHAIN_P
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "FRAME_CHAIN_P()",
+                      XSTRING (FRAME_CHAIN_P ()));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: FRAME_CHAIN_P() = %d\n",
+                      FRAME_CHAIN_P ());
+#endif
 #ifdef FRAME_CHAIN
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
@@ -1504,6 +1509,15 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         "gdbarch_dump: FRAME_NUM_ARGS = <0x%08lx>\n",
                         (long) current_gdbarch->frame_num_args
                         /*FRAME_NUM_ARGS ()*/);
+#endif
+#ifdef FRAME_SAVED_PC_P
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "FRAME_SAVED_PC_P()",
+                      XSTRING (FRAME_SAVED_PC_P ()));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: FRAME_SAVED_PC_P() = %d\n",
+                      FRAME_SAVED_PC_P ());
 #endif
 #ifdef FRAME_SAVED_PC
   fprintf_unfiltered (file,
@@ -4657,6 +4671,13 @@ set_gdbarch_frameless_function_invocation (struct gdbarch *gdbarch,
   gdbarch->frameless_function_invocation = frameless_function_invocation;
 }
 
+int
+gdbarch_frame_chain_p (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  return gdbarch->frame_chain != 0;
+}
+
 CORE_ADDR
 gdbarch_frame_chain (struct gdbarch *gdbarch, struct frame_info *frame)
 {
@@ -4700,6 +4721,13 @@ set_gdbarch_frame_chain_valid (struct gdbarch *gdbarch,
                                gdbarch_frame_chain_valid_ftype frame_chain_valid)
 {
   gdbarch->frame_chain_valid = frame_chain_valid;
+}
+
+int
+gdbarch_frame_saved_pc_p (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  return gdbarch->frame_saved_pc != 0;
 }
 
 CORE_ADDR

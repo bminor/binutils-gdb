@@ -665,6 +665,7 @@ frame_saved_regs_register_unwind (struct frame_info *frame, void **cache,
 static CORE_ADDR
 frame_saved_regs_pc_unwind (struct frame_info *frame, void **cache)
 {
+  gdb_assert (FRAME_SAVED_PC_P ());
   return FRAME_SAVED_PC (frame);
 }
 	
@@ -713,6 +714,7 @@ frame_saved_regs_id_unwind (struct frame_info *next_frame, void **cache,
          this to after the ffi test; I'd rather have backtraces from
          start go curfluy than have an abort called from main not show
          main.  */
+      gdb_assert (FRAME_CHAIN_P ());
       base = FRAME_CHAIN (next_frame);
 
       if (!frame_chain_valid (base, next_frame))
@@ -995,6 +997,7 @@ legacy_get_prev_frame (struct frame_info *next_frame)
          this to after the ffi test; I'd rather have backtraces from
          start go curfluy than have an abort called from main not show
          main.  */
+      gdb_assert (FRAME_CHAIN_P ());
       address = FRAME_CHAIN (next_frame);
 
       if (!frame_chain_valid (address, next_frame))
@@ -1233,7 +1236,8 @@ get_prev_frame (struct frame_info *next_frame)
      frames use the new unwind code.  */
   if ((DEPRECATED_INIT_FRAME_PC_P ()
        || DEPRECATED_INIT_FRAME_PC_FIRST_P ()
-       || INIT_EXTRA_FRAME_INFO_P ())
+       || INIT_EXTRA_FRAME_INFO_P ()
+       || FRAME_CHAIN_P ())
       && next_frame->level >= 0)
     return legacy_get_prev_frame (next_frame);
 

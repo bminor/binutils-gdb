@@ -2026,6 +2026,31 @@ extern void set_gdbarch_frameless_function_invocation (struct gdbarch *gdbarch, 
 #endif
 #endif
 
+#if defined (FRAME_CHAIN)
+/* Legacy for systems yet to multi-arch FRAME_CHAIN */
+#if !defined (FRAME_CHAIN_P)
+#define FRAME_CHAIN_P() (1)
+#endif
+#endif
+
+/* Default predicate for non- multi-arch targets. */
+#if (!GDB_MULTI_ARCH) && !defined (FRAME_CHAIN_P)
+#define FRAME_CHAIN_P() (0)
+#endif
+
+extern int gdbarch_frame_chain_p (struct gdbarch *gdbarch);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (FRAME_CHAIN_P)
+#error "Non multi-arch definition of FRAME_CHAIN"
+#endif
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (FRAME_CHAIN_P)
+#define FRAME_CHAIN_P() (gdbarch_frame_chain_p (current_gdbarch))
+#endif
+
+/* Default (function) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (FRAME_CHAIN)
+#define FRAME_CHAIN(frame) (internal_error (__FILE__, __LINE__, "FRAME_CHAIN"), 0)
+#endif
+
 typedef CORE_ADDR (gdbarch_frame_chain_ftype) (struct frame_info *frame);
 extern CORE_ADDR gdbarch_frame_chain (struct gdbarch *gdbarch, struct frame_info *frame);
 extern void set_gdbarch_frame_chain (struct gdbarch *gdbarch, gdbarch_frame_chain_ftype *frame_chain);
@@ -2073,6 +2098,31 @@ extern void set_gdbarch_frame_chain_valid (struct gdbarch *gdbarch, gdbarch_fram
 #if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (FRAME_CHAIN_VALID)
 #define FRAME_CHAIN_VALID(chain, thisframe) (gdbarch_frame_chain_valid (current_gdbarch, chain, thisframe))
 #endif
+#endif
+
+#if defined (FRAME_SAVED_PC)
+/* Legacy for systems yet to multi-arch FRAME_SAVED_PC */
+#if !defined (FRAME_SAVED_PC_P)
+#define FRAME_SAVED_PC_P() (1)
+#endif
+#endif
+
+/* Default predicate for non- multi-arch targets. */
+#if (!GDB_MULTI_ARCH) && !defined (FRAME_SAVED_PC_P)
+#define FRAME_SAVED_PC_P() (0)
+#endif
+
+extern int gdbarch_frame_saved_pc_p (struct gdbarch *gdbarch);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (FRAME_SAVED_PC_P)
+#error "Non multi-arch definition of FRAME_SAVED_PC"
+#endif
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (FRAME_SAVED_PC_P)
+#define FRAME_SAVED_PC_P() (gdbarch_frame_saved_pc_p (current_gdbarch))
+#endif
+
+/* Default (function) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (FRAME_SAVED_PC)
+#define FRAME_SAVED_PC(fi) (internal_error (__FILE__, __LINE__, "FRAME_SAVED_PC"), 0)
 #endif
 
 typedef CORE_ADDR (gdbarch_frame_saved_pc_ftype) (struct frame_info *fi);
