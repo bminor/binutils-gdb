@@ -36,7 +36,7 @@
 #include "floatformat.h"
 #include "regcache.h"
 #include "value.h"
-
+#include "gdb_assert.h"
 
 
 
@@ -1199,116 +1199,343 @@ s390_pop_frame ()
 }
 
 
-/* used by call function by hand
-  struct_return indicates that this function returns a structure &
-  therefore gpr2 stores a pointer to the structure to be returned as
-  opposed to the first argument.
-  Currently I haven't seen a TYPE_CODE_INT whose size wasn't 2^n or less
-  than S390_GPR_SIZE this is good because I don't seem to have to worry
-  about sign extending pushed arguments (i.e. a signed char currently
-  comes into this code with a size of 4 ). */
+/* Return non-zero if TYPE is an integer-like type, zero otherwise.
+   "Integer-like" types are those that should be passed the way
+   integers are: integers, enums, ranges, characters, and booleans.  */
+static int
+is_integer_like (struct type *type)
+{
+  enum type_code code = TYPE_CODE (type);
 
+  return (code == TYPE_CODE_INT
+          || code == TYPE_CODE_ENUM
+          || code == TYPE_CODE_RANGE
+          || code == TYPE_CODE_CHAR
+          || code == TYPE_CODE_BOOL);
+}
+
+
+/* Return non-zero if TYPE is a pointer-like type, zero otherwise.
+   "Pointer-like" types are those that should be passed the way
+   pointers are: pointers and references.  */
+static int
+is_pointer_like (struct type *type)
+{
+  enum type_code code = TYPE_CODE (type);
+
+  return (code == TYPE_CODE_PTR
+          || code == TYPE_CODE_REF);
+}
+
+
+/* Return non-zero if TYPE is considered a `DOUBLE_OR_FLOAT', as
+   defined by the parameter passing conventions described in the
+   "Linux for S/390 ELF Application Binary Interface Supplement".
+   Otherwise, return zero.  */
+static int
+is_double_or_float (struct type *type)
+{
+  return (TYPE_CODE (type) == TYPE_CODE_FLT
+          && (TYPE_LENGTH (type) == 4
+              || TYPE_LENGTH (type) == 8));
+}
+
+
+/* Return non-zero if TYPE is considered a `SIMPLE_ARG', as defined by
+   the parameter passing conventions described in the "Linux for S/390
+   ELF Application Binary Interface Supplement".  Return zero otherwise.  */
+static int
+is_simple_arg (struct type *type)
+{
+  enum type_code code = TYPE_CODE (type);
+  unsigned length = TYPE_LENGTH (type);
+
+  return ((is_integer_like (type) && length <= 4)
+          || is_pointer_like (type)
+          || code == TYPE_CODE_STRUCT
+          || code == TYPE_CODE_UNION
+          || (code == TYPE_CODE_FLT && length == 16));
+}
+
+
+/* Return non-zero if TYPE should be passed as a pointer to a copy,
+   zero otherwise.  TYPE must be a SIMPLE_ARG, as recognized by
+   `is_simple_arg'.  */
+static int
+pass_by_copy_ref (struct type *type)
+{
+  enum type_code code = TYPE_CODE (type);
+  unsigned length = TYPE_LENGTH (type);
+
+  return (((code == TYPE_CODE_STRUCT || code == TYPE_CODE_UNION)
+           && length != 1 && length != 2 && length != 4)
+          || (code == TYPE_CODE_FLT && length == 16));
+}
+
+
+/* Return ARG, a `SIMPLE_ARG', sign-extended or zero-extended to a full
+   word as required for the ABI.  */
+static LONGEST
+extend_simple_arg (struct value *arg)
+{
+  struct type *type = VALUE_TYPE (arg);
+
+  /* Even structs get passed in the least significant bits of the
+     register / memory word.  It's not really right to extract them as
+     an integer, but it does take care of the extension.  */
+  if (TYPE_UNSIGNED (type))
+    return extract_unsigned_integer (VALUE_CONTENTS (arg),
+                                     TYPE_LENGTH (type));
+  else
+    return extract_signed_integer (VALUE_CONTENTS (arg),
+                                   TYPE_LENGTH (type));
+}
+
+
+/* Return non-zero if TYPE is a `DOUBLE_ARG', as defined by the
+   parameter passing conventions described in the "Linux for S/390 ELF
+   Application Binary Interface Supplement".  Return zero otherwise.  */
+static int
+is_double_arg (struct type *type)
+{
+  enum type_code code = TYPE_CODE (type);
+  unsigned length = TYPE_LENGTH (type);
+
+  return ((is_integer_like (type)
+           || code == TYPE_CODE_STRUCT
+           || code == TYPE_CODE_UNION)
+          && length == 8);
+}
+
+
+/* Round ADDR up to the next N-byte boundary.  N must be a power of
+   two.  */
+static CORE_ADDR
+round_up (CORE_ADDR addr, int n)
+{
+  /* Check that N is really a power of two.  */
+  gdb_assert (n && (n & (n-1)) == 0);
+  return ((addr + n - 1) & -n);
+}
+
+
+/* Round ADDR down to the next N-byte boundary.  N must be a power of
+   two.  */
+static CORE_ADDR
+round_down (CORE_ADDR addr, int n)
+{
+  /* Check that N is really a power of two.  */
+  gdb_assert (n && (n & (n-1)) == 0);
+  return (addr & -n);
+}
+
+
+/* Return the alignment required by TYPE.  */
+static int
+alignment_of (struct type *type)
+{
+  int alignment;
+
+  if (is_integer_like (type)
+      || is_pointer_like (type)
+      || TYPE_CODE (type) == TYPE_CODE_FLT)
+    alignment = TYPE_LENGTH (type);
+  else if (TYPE_CODE (type) == TYPE_CODE_STRUCT
+           || TYPE_CODE (type) == TYPE_CODE_UNION)
+    {
+      int i;
+
+      alignment = 1;
+      for (i = 0; i < TYPE_NFIELDS (type); i++)
+        {
+          int field_alignment = alignment_of (TYPE_FIELD_TYPE (type, i));
+
+          if (field_alignment > alignment)
+            alignment = field_alignment;
+        }
+    }
+  else
+    alignment = 1;
+
+  /* Check that everything we ever return is a power of two.  Lots of
+     code doesn't want to deal with aligning things to arbitrary
+     boundaries.  */
+  gdb_assert ((alignment & (alignment - 1)) == 0);
+
+  return alignment;
+}
+
+
+/* Put the actual parameter values pointed to by ARGS[0..NARGS-1] in
+   place to be passed to a function, as specified by the "Linux for
+   S/390 ELF Application Binary Interface Supplement".
+
+   SP is the current stack pointer.  We must put arguments, links,
+   padding, etc. whereever they belong, and return the new stack
+   pointer value.
+   
+   If STRUCT_RETURN is non-zero, then the function we're calling is
+   going to return a structure by value; STRUCT_ADDR is the address of
+   a block we've allocated for it on the stack.
+
+   Our caller has taken care of any type promotions needed to satisfy
+   prototypes or the old K&R argument-passing rules.  */
 CORE_ADDR
 s390_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 		     int struct_return, CORE_ADDR struct_addr)
 {
-  int num_float_args, num_gpr_args, orig_num_gpr_args, argno;
-  int second_pass, len, arglen, gprs_required;
-  CORE_ADDR outgoing_args_ptr, outgoing_args_space;
-  struct value *arg;
-  struct type *type;
-  int max_num_gpr_args = 5 - (struct_return ? 1 : 0);
-  int arg0_regnum = S390_GP0_REGNUM + 2 + (struct_return ? 1 : 0);
-  char *reg_buff = alloca (max (S390_FPR_SIZE, REGISTER_SIZE)), *value;
+  int i;
+  int pointer_size = (TARGET_PTR_BIT / TARGET_CHAR_BIT);
 
-  for (second_pass = 0; second_pass <= 1; second_pass++)
+  /* The number of arguments passed by reference-to-copy.  */
+  int num_copies;
+
+  /* If the i'th argument is passed as a reference to a copy, then
+     copy_addr[i] is the address of the copy we made.  */
+  CORE_ADDR *copy_addr = alloca (nargs * sizeof (CORE_ADDR));
+
+  /* Build the reference-to-copy area.  */
+  num_copies = 0;
+  for (i = 0; i < nargs; i++)
     {
-      if (second_pass)
-	outgoing_args_ptr = sp + S390_STACK_FRAME_OVERHEAD;
-      else
-	outgoing_args_ptr = 0;
-      num_float_args = 0;
-      num_gpr_args = 0;
-      for (argno = 0; argno < nargs; argno++)
-	{
-	  arg = args[argno];
-	  type = check_typedef (VALUE_TYPE (arg));
-	  len = TYPE_LENGTH (type);
-	  if (TYPE_CODE (type) == TYPE_CODE_FLT)
-	    {
-	      int all_float_registers_used =
-		num_float_args > (GDB_TARGET_IS_ESAME ? 3 : 1);
+      struct value *arg = args[i];
+      struct type *type = VALUE_TYPE (arg);
+      unsigned length = TYPE_LENGTH (type);
 
-	      if (second_pass)
-		{
-		  DOUBLEST tempfloat =
-		    extract_floating (VALUE_CONTENTS (arg), len);
-
-
-		  floatformat_from_doublest (all_float_registers_used &&
-					     len == (TARGET_FLOAT_BIT >> 3)
-					     ? &floatformat_ieee_single_big
-					     : &floatformat_ieee_double_big,
-					     &tempfloat, reg_buff);
-		  if (all_float_registers_used)
-		    write_memory (outgoing_args_ptr, reg_buff, len);
-		  else
-		    write_register_bytes (REGISTER_BYTE ((S390_FP0_REGNUM)
-							 +
-							 (2 *
-							  num_float_args)),
-					  reg_buff, S390_FPR_SIZE);
-		}
-	      if (all_float_registers_used)
-		outgoing_args_ptr += len;
-	      num_float_args++;
-	    }
-	  else
-	    {
-	      gprs_required = ((len + (S390_GPR_SIZE - 1)) / S390_GPR_SIZE);
-
-	      value =
-		s390_promote_integer_argument (type, VALUE_CONTENTS (arg),
-					       reg_buff, &arglen);
-
-	      orig_num_gpr_args = num_gpr_args;
-	      num_gpr_args += gprs_required;
-	      if (num_gpr_args > max_num_gpr_args)
-		{
-		  if (second_pass)
-		    write_memory (outgoing_args_ptr, value, arglen);
-		  outgoing_args_ptr += arglen;
-		}
-	      else
-		{
-		  if (second_pass)
-		    write_register_bytes (REGISTER_BYTE (arg0_regnum)
-					  +
-					  (orig_num_gpr_args * S390_GPR_SIZE),
-					  value, arglen);
-		}
-	    }
-	}
-      if (second_pass)
+      if (is_simple_arg (type)
+          && pass_by_copy_ref (type))
         {
-          /* Write the back chain pointer into the first word of the
-             stack frame.  This will help us get backtraces from
-             within functions called from GDB.  */
-          write_memory_unsigned_integer (sp, 
-                                         (TARGET_PTR_BIT / TARGET_CHAR_BIT),
-                                         read_fp ());
+          sp -= length;
+          sp = round_down (sp, alignment_of (type));
+          write_memory (sp, VALUE_CONTENTS (arg), length);
+          copy_addr[i] = sp;
+          num_copies++;
         }
-      else
-	{
-	  outgoing_args_space = outgoing_args_ptr;
-	  /* Align to 16 bytes because because I like alignment & 
-	     some of the kernel code requires 8 byte stack alignment at least. */
-	  sp = (sp - (S390_STACK_FRAME_OVERHEAD + outgoing_args_ptr)) & (-16);
-	}
-
     }
-  return sp;
 
+  /* Reserve space for the parameter area.  As a conservative
+     simplification, we assume that everything will be passed on the
+     stack.  */
+  {
+    int i;
+
+    for (i = 0; i < nargs; i++)
+      {
+        struct value *arg = args[i];
+        struct type *type = VALUE_TYPE (arg);
+        int length = TYPE_LENGTH (type);
+        
+        sp = round_down (sp, alignment_of (type));
+
+        /* SIMPLE_ARG values get extended to 32 bits.  Assume every
+           argument is.  */
+        if (length < 4) length = 4;
+        sp -= length;
+      }
+  }
+
+  /* Include space for any reference-to-copy pointers.  */
+  sp = round_down (sp, pointer_size);
+  sp -= num_copies * pointer_size;
+    
+  /* After all that, make sure it's still aligned on an eight-byte
+     boundary.  */
+  sp = round_down (sp, 8);
+
+  /* Finally, place the actual parameters, working from SP towards
+     higher addresses.  The code above is supposed to reserve enough
+     space for this.  */
+  {
+    int fr = 0;
+    int gr = 2;
+    CORE_ADDR starg = sp;
+
+    for (i = 0; i < nargs; i++)
+      {
+        struct value *arg = args[i];
+        struct type *type = VALUE_TYPE (arg);
+        
+        if (is_double_or_float (type)
+            && fr <= 2)
+          {
+            /* When we store a single-precision value in an FP register,
+               it occupies the leftmost bits.  */
+            write_register_bytes (REGISTER_BYTE (S390_FP0_REGNUM + fr),
+                                  VALUE_CONTENTS (arg),
+                                  TYPE_LENGTH (type));
+            fr += 2;
+          }
+        else if (is_simple_arg (type)
+                 && gr <= 6)
+          {
+            /* Do we need to pass a pointer to our copy of this
+               argument?  */
+            if (pass_by_copy_ref (type))
+              write_register (S390_GP0_REGNUM + gr, copy_addr[i]);
+            else
+              write_register (S390_GP0_REGNUM + gr, extend_simple_arg (arg));
+
+            gr++;
+          }
+        else if (is_double_arg (type)
+                 && gr <= 5)
+          {
+            write_register_gen (S390_GP0_REGNUM + gr,
+                                VALUE_CONTENTS (arg));
+            write_register_gen (S390_GP0_REGNUM + gr + 1,
+                                VALUE_CONTENTS (arg) + 4);
+            gr += 2;
+          }
+        else
+          {
+            /* The `OTHER' case.  */
+            enum type_code code = TYPE_CODE (type);
+            unsigned length = TYPE_LENGTH (type);
+            
+            /* If we skipped r6 because we couldn't fit a DOUBLE_ARG
+               in it, then don't go back and use it again later.  */
+            if (is_double_arg (type) && gr == 6)
+              gr = 7;
+
+            if (is_simple_arg (type))
+              {
+                /* Simple args are always either extended to 32 bits,
+                   or pointers.  */
+                starg = round_up (starg, 4);
+
+                /* Do we need to pass a pointer to our copy of this
+                   argument?  */
+                if (pass_by_copy_ref (type))
+                  write_memory_signed_integer (starg, pointer_size,
+                                               copy_addr[i]);
+                else
+                  /* Simple args are always extended to 32 bits.  */
+                  write_memory_signed_integer (starg, 4,
+                                               extend_simple_arg (arg));
+                starg += 4;
+              }
+            else
+              {
+                starg = round_up (starg, alignment_of (type));
+                write_memory (starg, VALUE_CONTENTS (arg), length);
+                starg += length;
+              }
+          }
+      }
+  }
+
+  /* Allocate the standard frame areas: the register save area, the
+     word reserved for the compiler (which seems kind of meaningless),
+     and the back chain pointer.  */
+  sp -= 96;
+
+  /* Write the back chain pointer into the first word of the stack
+     frame.  This will help us get backtraces from within functions
+     called from GDB.  */
+  write_memory_unsigned_integer (sp, (TARGET_PTR_BIT / TARGET_CHAR_BIT),
+                                 read_fp ());
+
+  return sp;
 }
 
 /* Return the GDB type object for the "standard" data type

@@ -1,5 +1,14 @@
 2001-11-13  Jim Blandy  <jimb@redhat.com>
 
+	* s390-tdep.c: Rewrite inferior function call code.  This may
+	break zSeries support; that should be fixed soon.
+	#include "gdb_assert.h".
+	(is_integer_like, is_pointer_like, is_simple_arg,
+	pass_by_copy_ref, extend_simple_arg, is_double_arg, round_up,
+	round_down, alignment_of): New functions.
+	(s390_push_arguments): Rewritten to handle passing large arguments
+	by value, and to make more readable.
+
 	* s390-tdep.c (s390_pop_frame): Call generic_pop_current_frame, to
 	interact correctly with generic dummy frames.
 	(s390_pop_frame_regular): Move the guts of the frame-popping code
