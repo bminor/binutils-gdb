@@ -1,4 +1,9 @@
-Mon Jan 20 10:39:36 1997  J.T. Conklin  <jtc@beauty.cygnus.com>
+Mon Jan 20 10:56:47 1997  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
+
+	* config/tc-m68k.c (m68k_ip): Reject pc-relative addresses for the
+ 	'p' operand specifier.
+
+Mon Jan 20 10:39:36 1997  J.T. Conklin  <jtc@cygnus.com>
 
 	* config/tc-m68k.c (HAVE_LONG_BRANCH): New macro, returns true for
  	m68k family cpus which support long branch addressing modes.
