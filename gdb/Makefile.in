@@ -872,7 +872,7 @@ do-maintainer-clean:
 		subdir_do
 
 diststuff: $(DISTSTUFF)
-	cd doc; $(MAKE) $(MFLAGS) all-doc
+	cd doc; $(MAKE) $(MFLAGS) diststuff
 
 subdir_do: force
 	@for i in $(DODIRS); do \

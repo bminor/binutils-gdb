@@ -1,3 +1,8 @@
+2000-02-15  Jason Molenda  (jsm@bugshack.cygnus.com)
+
+	* Makefile.in (diststuff): Run 'diststuff' in doc/ subdir, not
+	'do-doc'.
+
 2000-02-15  Kevin Buettner  <kevinb@redhat.com>
 
 	Changes for AIX 4.3:
