@@ -5952,7 +5952,7 @@ remote protocol (@pxref{Remote,Remote Debugging}) to debug a program
 running on an IBM mainframe, which uses the @sc{ebcdic} character set,
 then the host character set is Latin-1, and the target character set is
 @sc{ebcdic}.  If you give @value{GDBN} the command @code{set
-target-charset ebcdic-us}, then @value{GDBN} translates between
+target-charset EBCDIC-US}, then @value{GDBN} translates between
 @sc{ebcdic} and Latin 1 as you print character or string values, or use
 character and string literals in expressions.
 
@@ -5967,9 +5967,9 @@ support:
 @item set target-charset @var{charset}
 @kindex set target-charset
 Set the current target character set to @var{charset}.  We list the
-character set names @value{GDBN} recognizes below, but if you invoke the
-@code{set target-charset} command with no argument, @value{GDBN} lists
-the character sets it supports.
+character set names @value{GDBN} recognizes below, but if you type
+@code{set target-charset} followed by @key{TAB}@key{TAB}, @value{GDBN} will
+list the target character sets it supports.
 @end table
 
 @table @code
@@ -5983,28 +5983,29 @@ system it is running on; you can override that default using the
 
 @value{GDBN} can only use certain character sets as its host character
 set.  We list the character set names @value{GDBN} recognizes below, and
-indicate which can be host character sets, but if you invoke the
-@code{set host-charset} command with no argument, @value{GDBN} lists the
-character sets it supports, placing an asterisk (@samp{*}) after those
-it can use as a host character set.
+indicate which can be host character sets, but if you type
+@code{set target-charset} followed by @key{TAB}@key{TAB}, @value{GDBN} will
+list the host character sets it supports.
 
 @item set charset @var{charset}
 @kindex set charset
-Set the current host and target character sets to @var{charset}.  If you
-invoke the @code{set charset} command with no argument, it lists the
-character sets it supports.  @value{GDBN} can only use certain character
-sets as its host character set; it marks those in the list with an
-asterisk (@samp{*}).
+Set the current host and target character sets to @var{charset}.  As
+above, if you type @code{set charset} followed by @key{TAB}@key{TAB},
+@value{GDBN} will list the name of the character sets that can be used
+for both host and target.
+
 
 @item show charset
-@itemx show host-charset
-@itemx show target-charset
 @kindex show charset
+Show the names of the current host and target charsets. 
+
+@itemx show host-charset
 @kindex show host-charset
+Show the name of the current host charset. 
+
+@itemx show target-charset
 @kindex show target-charset
-Show the current host and target charsets.  The @code{show host-charset}
-and @code{show target-charset} commands are synonyms for @code{show
-charset}.
+Show the name of the current target charset. 
 
 @end table
 
@@ -6021,7 +6022,7 @@ character set.
 @item ISO-8859-1
 @cindex ISO 8859-1 character set
 @cindex ISO Latin 1 character set
-The ISO Latin 1 character set.  This extends ASCII with accented
+The ISO Latin 1 character set.  This extends @sc{ascii} with accented
 characters needed for French, German, and Spanish.  @value{GDBN} can use
 this as its host character set.
 
@@ -6080,16 +6081,16 @@ strings:
 
 @smallexample
 (gdb) show charset
-The current host and target character set is `iso-8859-1'.
+The current host and target character set is `ISO-8859-1'.
 (gdb) 
 @end smallexample
 
 For the sake of printing this manual, let's use @sc{ascii} as our
 initial character set:
 @smallexample
-(gdb) set charset ascii
+(gdb) set charset ASCII
 (gdb) show charset
-The current host and target character set is `ascii'.
+The current host and target character set is `ASCII'.
 (gdb) 
 @end smallexample
 
@@ -6131,17 +6132,13 @@ $5 = 200 '\310'
 (gdb) 
 @end smallexample
 
-If we invoke the @code{set target-charset} command without an argument,
+If we invoke the @code{set target-charset} followed by @key{TAB}@key{TAB},
 @value{GDBN} tells us the character sets it supports:
 
 @smallexample
 (gdb) set target-charset
-Valid character sets are:
-  ascii *
-  iso-8859-1 *
-  ebcdic-us  
-  ibm1047  
-* - can be used as a host character set
+ASCII       EBCDIC-US   IBM1047     ISO-8859-1  
+(gdb) set target-charset 
 @end smallexample
 
 We can select @sc{ibm1047} as our target character set, and examine the
@@ -6151,10 +6148,10 @@ target character set, @sc{ibm1047}, to the host character set,
 @sc{ascii}, and they display correctly:
 
 @smallexample
-(gdb) set target-charset ibm1047
+(gdb) set target-charset IBM1047
 (gdb) show charset
-The current host character set is `ascii'.
-The current target character set is `ibm1047'.
+The current host character set is `ASCII'.
+The current target character set is `IBM1047'.
 (gdb) print ascii_hello
 $6 = 0x401698 "\110\145%%?\054\040\167?\162%\144\041\012"
 (gdb) print ascii_hello[0]
@@ -6175,7 +6172,7 @@ $10 = 78 '+'
 (gdb) 
 @end smallexample
 
-The IBM1047 character set uses the number 78 to encode the @samp{+}
+The @sc{ibm1047} character set uses the number 78 to encode the @samp{+}
 character.
 
 

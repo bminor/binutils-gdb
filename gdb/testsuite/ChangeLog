@@ -1,3 +1,8 @@
+2003-05-02  Elena Zannoni  <ezannoni@redhat.com>
+
+	* gdb.base/charset.exp: Update based on new behavior of set/show
+	charset commands.
+
 2003-05-01  Andrew Cagney  <cagney@redhat.com>
 
 	* gdb.asm/asm-source.exp: Check that "disassm" and "x/i" of a

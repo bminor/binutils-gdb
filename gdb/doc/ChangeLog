@@ -1,3 +1,8 @@
+2003-05-02  Elena Zannoni  <ezannoni@redhat.com>
+
+	* gdb.texinfo (Character Sets): Update to reflect new behavior of
+	set/show charsets commands.
+
 2003-04-28  Andrew Cagney  <cagney@redhat.com>
 
 	* gdbint.texinfo (Target Architecture Definition): Replace

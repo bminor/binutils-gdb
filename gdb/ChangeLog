@@ -1,3 +1,27 @@
+2003-05-02  Elena Zannoni  <ezannoni@redhat.com>
+
+	* charset.c (GDB_DEFAULT_TARGET_CHARSET,
+	GDB_DEFAULT_HOST_CHARSET): Move to earlier in the file.
+	(host_charset_name, target_charset_name): New vars for use by
+	set/show commands.
+	(host_charset_enum, target_charset_enum): New enums for set/show
+	commands.
+	(set_charset_sfunc, set_host_charset_sfunc,
+	set_target_charset_sfunc): New functions.
+	(set_host_charset, set_target_charset): Make static.
+	(list_charsets, set_host_charset_command,
+	set_target_charset_command): Delete functions.
+	(show_charset_command): Rewrite as....
+	(show_charset): Hook this up with the set/show command mechanism.
+	(_initialize_charset): Change names of charsets to match the
+	set/show enums. Use host_charset_name and target_charset_name.
+	Use set/show mechanism for charset, host-charset, target-charset
+	commands. Do not make 'show host-charset' and 'show
+	target-charset' be aliases of 'show charset'.
+
+	* charset.h (set_host_charset, set_target_charset): Don't export,
+	they are not used outside the file.
+
 2003-05-01  Andrew Cagney  <cagney@redhat.com>
 
 	* disasm.c (gdb_disassemble_from_exec): Delete global variable.
