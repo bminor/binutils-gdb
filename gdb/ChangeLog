@@ -1,3 +1,7 @@
+2004-12-07  Mark Kettenis  <kettenis@gnu.org>
+
+	* Makefile.in (inf-ttrace.o): Fix typo.
+
 2004-12-07  Jim Blandy  <jimb@redhat.com>
 
 	* remote.c (remote_threads_info, remote_current_thread): Use

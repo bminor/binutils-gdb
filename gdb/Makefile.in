@@ -2089,7 +2089,7 @@ inf-ptrace.o: inf-ptrace.c $(defs_h) $(command_h) $(inferior_h) $(inflow_h) \
 	$(gdbcore_h) $(observer_h) $(gdb_string_h) $(gdb_ptrace_h) \
 	$(gdb_wait_h) $(inf_child_h)
 inf-ttrace.o: inf-ttrace.c $(defs_h) $(command_h) $(gdbcore_h) \
-	$(gdbthread_h)$(inferior_h) $(observer_h) $(target_h) \
+	$(gdbthread_h) $(inferior_h) $(observer_h) $(target_h) \
 	$(gdb_assert_h) $(gdb_string_h) $(inf_child_h) $(inf_ttrace_h)
 infptrace.o: infptrace.c $(defs_h) $(command_h) $(frame_h) $(gdbcore_h) \
 	$(inferior_h) $(regcache_h) $(target_h) $(gdb_assert_h) \
