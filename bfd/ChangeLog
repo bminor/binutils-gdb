@@ -1,5 +1,9 @@
 1999-06-13  Mark Mitchell  <mark@codesourcery.com>
 
+	* elflink.h (elf_link_remove_section_and_adjust_dynindices):
+	Remove abfd parameter.  Use _bfd_strip_section_from_output.
+	(bfd_elf_size_dynamic_sections): Adjust callers accordingly.
+	
 	* elf-bfd.h (_bfd_elf_link_adjust_dynindx): New function.
 	* elflink.c (_bfd_elf_link_adjust_dynindx): Define it.
 	* elflink.h (elf_link_remove_section_and_adjust_dynindices): New

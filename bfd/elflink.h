@@ -55,7 +55,7 @@ static boolean elf_collect_hash_codes
 static boolean elf_link_read_relocs_from_section 
   PARAMS ((bfd *, Elf_Internal_Shdr *, PTR, Elf_Internal_Rela *));
 static void elf_link_remove_section_and_adjust_dynindices 
-  PARAMS ((bfd *, struct bfd_link_info *, asection *));
+  PARAMS ((struct bfd_link_info *, asection *));
 
 /* Given an ELF BFD, add symbols to the global hash table as
    appropriate.  */
@@ -2408,20 +2408,14 @@ compute_bucket_count (info)
    subsequent entries.  */
 
 static void
-elf_link_remove_section_and_adjust_dynindices (abfd, info, section)
-     bfd *abfd;
+elf_link_remove_section_and_adjust_dynindices (info, section)
      struct bfd_link_info *info;
      asection *section;
 {
   asection **spp;
 
   /* Remove the section from the output list.  */
-  for (spp = &abfd->sections;
-       *spp != section->output_section;
-       spp = &(*spp)->next)
-    ;
-  *spp = section->output_section->next;
-  --abfd->section_count;
+  _bfd_strip_section_from_output (section);
 
   if (elf_section_data (section->output_section)->dynindx)
     {
@@ -2648,9 +2642,7 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
       verdefs = asvinfo.verdefs;
 
       if (verdefs == NULL)
-	elf_link_remove_section_and_adjust_dynindices (output_bfd,
-						       info,
-						       s);
+	elf_link_remove_section_and_adjust_dynindices (info, s);
       else
 	{
 	  unsigned int cdefs;
@@ -2843,9 +2835,7 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
 				(PTR) &sinfo);
 
 	if (elf_tdata (output_bfd)->verref == NULL)
-	  elf_link_remove_section_and_adjust_dynindices (output_bfd,
-							 info,
-							 s);
+	  elf_link_remove_section_and_adjust_dynindices (info, s);
 	else
 	  {
 	    Elf_Internal_Verneed *t;
@@ -2945,9 +2935,7 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
       if (dynsymcount == 0
 	  || (verdefs == NULL && elf_tdata (output_bfd)->verref == NULL))
 	{
-	  elf_link_remove_section_and_adjust_dynindices (output_bfd,
-							 info,
-							 s);
+	  elf_link_remove_section_and_adjust_dynindices (info, s);
 	  /* The DYNSYMCOUNT might have changed if we were going to
 	     output a dynamic symbol table entry for S.  */
 	  dynsymcount = elf_hash_table (info)->dynsymcount;
