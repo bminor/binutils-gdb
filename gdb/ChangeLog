@@ -23,6 +23,8 @@ Tue Apr 26 09:50:45 1994  Stu Grossman  (grossman at cygnus.com)
 	* partial-stabs.h (cases 'f' & 'F'):  Fixes to work around Solaris
 	brain-damage which don't apply to relocatable object files.
 	* remote.c (putpkt):  Improve error reporting and error handling.
+	* (get_offsets):  Temporary kludge to force data & bss sections to
+	have the same relocation.
 	* stabsread.c (define_symbol, scan_file_globals):  Record section
 	info in sym.
 

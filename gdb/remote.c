@@ -318,8 +318,13 @@ get_offsets ()
      with SEC_CODE set, but we currently have no way to deal with that).  */
 
   ANOFFSET (offs, SECT_OFF_TEXT) = text_addr;
+
+  /* This is a temporary kludge to force data and bss to use the same offsets
+     because that's what nlmconv does now.  The real solution requires changes
+     to the stub and remote.c that I don't have time to do right now.  */
+
   ANOFFSET (offs, SECT_OFF_DATA) = data_addr;
-  ANOFFSET (offs, SECT_OFF_BSS) = bss_addr;
+  ANOFFSET (offs, SECT_OFF_BSS) = data_addr;
 
   objfile_relocate (symfile_objfile, offs);
 }
@@ -1096,10 +1101,13 @@ putpkt (buf)
 
   while (1)
     {
+      int started_error_output = 0;
+
       if (remote_debug)
 	{
 	  *p = '\0';
-	  printf_unfiltered ("Sending packet: %s...", buf2);  gdb_flush(gdb_stdout);
+	  printf_unfiltered ("Sending packet: %s...", buf2);
+	  gdb_flush(gdb_stdout);
 	}
       if (SERIAL_WRITE (remote_desc, buf2, p - buf2))
 	perror_with_name ("putpkt: write failed");
@@ -1108,6 +1116,23 @@ putpkt (buf)
       while (1)
 	{
 	  ch = readchar ();
+
+	  if (remote_debug)
+	    {
+	      switch (ch)
+		{
+		case '+':
+		case SERIAL_TIMEOUT:
+		case SERIAL_ERROR:
+		case SERIAL_EOF:
+		case '$':
+		  if (started_error_output)
+		    {
+		      putc_unfiltered ('\n');
+		      started_error_output = 0;
+		    }
+		}
+	    }
 
 	  switch (ch)
 	    {
@@ -1121,9 +1146,25 @@ putpkt (buf)
 	      perror_with_name ("putpkt: couldn't read ACK");
 	    case SERIAL_EOF:
 	      error ("putpkt: EOF while trying to read ACK");
+	    case '$':
+	      {
+		unsigned char junkbuf[PBUFSIZ];
+
+	      /* It's probably an old response, and we're out of sync.  Just
+		 gobble up the packet and ignore it.  */
+		getpkt (junkbuf, 0);
+		continue;		/* Now, go look for + */
+	      }
 	    default:
 	      if (remote_debug)
-		printf_unfiltered ("%02X %c ", ch&0xFF, ch);
+		{
+		  if (!started_error_output)
+		    {
+		      started_error_output = 1;
+		      printf_unfiltered ("putpkt: Junk: ");
+		    }
+		  putc_unfiltered (ch & 0177);
+		}
 	      continue;
 	    }
 	  break;		/* Here to retransmit */
