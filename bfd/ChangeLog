@@ -1,3 +1,22 @@
+1999-08-05  Ian Lance Taylor  <ian@zembu.com>
+
+	Based on patches from Donn Terry <donn@interix.com>:
+	* coffcode.h (enum coff_symbol_classification): Define.
+	(bfd_coff_backend_data): Rename _bfd_coff_sym_is_global to
+	_bfd_coff_classify_symbol.  Change return type.
+	(bfd_coff_classify_symbol): Rename from bfd_coff_sym_is_global.
+	(coff_slurp_symbol_table): Use coff_classify_symbol.
+	(coff_classify_symbol): New static function.
+	(coff_sym_is_global): Never define.
+	(bfd_coff_std_swap_table): Initialize with coff_classify_symbol.
+	* cofflink.c (coff_link_check_ar_symbols): Use
+	bfd_coff_classify_symbol rather than bfd_coff_sym_is_global.
+	(coff_link_add_symbols): Likewise.
+	(_bfd_coff_link_input_bfd): Likewise.
+	* coff-sh.c (bfd_coff_small_swap_table): Initialize with
+	coff_classify_symbol.
+	* libcoff.h: Rebuild.
+
 Wed Aug  4 18:08:07 1999  Jeffrey A Law  (law@cygnus.com)
 
 	* libhppa.h (R_HPPA_LTPSEL, R_HPPA_RTPSEL): New field selectors

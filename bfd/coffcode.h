@@ -329,6 +329,8 @@ static boolean coff_set_section_contents
 static PTR buy_and_read PARAMS ((bfd *, file_ptr, int, size_t));
 static boolean coff_slurp_line_table PARAMS ((bfd *, asection *));
 static boolean coff_slurp_symbol_table PARAMS ((bfd *));
+static enum coff_symbol_classification coff_classify_symbol
+  PARAMS ((bfd *, struct internal_syment *));
 static boolean coff_slurp_reloc_table PARAMS ((bfd *, asection *, asymbol **));
 static long coff_canonicalize_reloc
   PARAMS ((bfd *, asection *, arelent **, asymbol **));
@@ -709,6 +711,22 @@ INTERNAL_DEFINITION
 
 CODE_FRAGMENT
 
+.{* COFF symbol classifications.  *}
+.
+.enum coff_symbol_classification
+.{
+.  {* Global symbol.  *}
+.  COFF_SYMBOL_GLOBAL,
+.  {* Common symbol.  *}
+.  COFF_SYMBOL_COMMON,
+.  {* Undefined symbol.  *}
+.  COFF_SYMBOL_UNDEFINED,
+.  {* Local symbol.  *}
+.  COFF_SYMBOL_LOCAL,
+.  {* PE section symbol.  *}
+.  COFF_SYMBOL_PE_SECTION
+.};
+.
 Special entry points for gdb to swap in coff symbol table parts:
 .typedef struct
 .{
@@ -853,7 +871,7 @@ dependent COFF routines:
 .       arelent *r,
 .       unsigned int shrink,
 .       struct bfd_link_info *link_info));
-. boolean (*_bfd_coff_sym_is_global) PARAMS ((
+. enum coff_symbol_classification (*_bfd_coff_classify_symbol) PARAMS ((
 .       bfd *abfd,
 .       struct internal_syment *));
 . boolean (*_bfd_coff_compute_section_file_positions) PARAMS ((
@@ -993,8 +1011,8 @@ dependent COFF routines:
 .        ((coff_backend_info (abfd)->_bfd_coff_reloc16_estimate)\
 .         (abfd, section, reloc, shrink, link_info))
 .
-.#define bfd_coff_sym_is_global(abfd, sym)\
-.        ((coff_backend_info (abfd)->_bfd_coff_sym_is_global)\
+.#define bfd_coff_classify_symbol(abfd, sym)\
+.        ((coff_backend_info (abfd)->_bfd_coff_classify_symbol)\
 .         (abfd, sym))
 .
 .#define bfd_coff_compute_section_file_positions(abfd)\
@@ -3569,31 +3587,15 @@ coff_slurp_symbol_table (abfd)
 	    case C_SYSTEM:	/* System Wide variable */
 #endif
 #ifdef COFF_WITH_PE
-            /* PE uses storage class 0x68 to denote a section symbol */
+            /* In PE, 0x68 (104) denotes a section symbol */
             case C_SECTION:
-	    /* PE uses storage class 0x69 for a weak external symbol.  */
+	    /* In PE, 0x69 (105) denotes a weak external symbol.  */
 	    case C_NT_WEAK:
 #endif
-	      if ((src->u.syment.n_scnum) == 0)
+	      switch (coff_classify_symbol (abfd, &src->u.syment))
 		{
-		  if ((src->u.syment.n_value) == 0)
-		    {
-		      dst->symbol.section = bfd_und_section_ptr;
-		      dst->symbol.value = 0;
-		    }
-		  else
-		    {
-		      dst->symbol.section = bfd_com_section_ptr;
-		      dst->symbol.value = (src->u.syment.n_value);
-		    }
-		}
-	      else
-		{
-		  /* Base the value as an index from the base of the
-		     section */
-
+		case COFF_SYMBOL_GLOBAL:
 		  dst->symbol.flags = BSF_EXPORT | BSF_GLOBAL;
-
 #if defined COFF_WITH_PE
 		  /* PE sets the symbol to a value relative to the
                      start of the section.  */
@@ -3602,19 +3604,45 @@ coff_slurp_symbol_table (abfd)
 		  dst->symbol.value = (src->u.syment.n_value
 				       - dst->symbol.section->vma);
 #endif
-
 		  if (ISFCN ((src->u.syment.n_type)))
 		    {
 		      /* A function ext does not go at the end of a
 			 file.  */
 		      dst->symbol.flags |= BSF_NOT_AT_END | BSF_FUNCTION;
 		    }
+		  break;
+
+		case COFF_SYMBOL_COMMON:
+		  dst->symbol.section = bfd_com_section_ptr;
+		  dst->symbol.value = src->u.syment.n_value;
+		  break;
+
+		case COFF_SYMBOL_UNDEFINED:
+		  dst->symbol.section = bfd_und_section_ptr;
+		  dst->symbol.value = 0;
+		  break; 
+
+		case COFF_SYMBOL_PE_SECTION:
+		  dst->symbol.flags |= BSF_EXPORT | BSF_SECTION_SYM;
+		  dst->symbol.value = 0;
+		  break;
+
+		case COFF_SYMBOL_LOCAL:
+		  dst->symbol.flags = BSF_LOCAL;
+#if defined COFF_WITH_PE
+		  /* PE sets the symbol to a value relative to the
+                     start of the section.  */
+		  dst->symbol.value = src->u.syment.n_value;
+#else
+		  dst->symbol.value = (src->u.syment.n_value
+				       - dst->symbol.section->vma);
+#endif
+		  if (ISFCN ((src->u.syment.n_type)))
+		    dst->symbol.flags |= BSF_NOT_AT_END | BSF_FUNCTION;
+		  break;
 		}
 
 #ifdef RS6000COFF_C
-	      /* A C_HIDEXT symbol is not global.  */
-	      if (src->u.syment.n_sclass == C_HIDEXT)
-		dst->symbol.flags = BSF_LOCAL;
 	      /* A symbol with a csect entry should not go at the end.  */
 	      if (src->u.syment.n_numaux > 0)
 		dst->symbol.flags |= BSF_NOT_AT_END;
@@ -3830,46 +3858,101 @@ coff_slurp_symbol_table (abfd)
   return true;
 }				/* coff_slurp_symbol_table() */
 
-/* Check whether a symbol is globally visible.  This is used by the
-   COFF backend linker code in cofflink.c, since a couple of targets
-   have globally visible symbols which are not class C_EXT.  This
-   function need not handle the case of n_class == C_EXT.  */
+/* Classify a COFF symbol.  A couple of targets have globally visible
+   symbols which are not class C_EXT, and this handles those.  It also
+   recognizes some special PE cases.  */
 
-#undef OTHER_GLOBAL_CLASS
-
-#ifdef I960
-#define OTHER_GLOBAL_CLASS C_LEAFEXT
-#endif
-
-#ifdef COFFARM
-#define OTHER_GLOBAL_CLASS C_THUMBEXT || syment->n_sclass == C_THUMBEXTFUNC
-#else
-#ifdef COFF_WITH_PE
-#define OTHER_GLOBAL_CLASS C_SECTION
-#endif
-#endif
-
-#ifdef OTHER_GLOBAL_CLASS
-
-static boolean coff_sym_is_global PARAMS ((bfd *, struct internal_syment *));
-
-static boolean
-coff_sym_is_global (abfd, syment)
-     bfd * abfd ATTRIBUTE_UNUSED;
-     struct internal_syment * syment;
+static enum coff_symbol_classification
+coff_classify_symbol (abfd, syment)
+     bfd *abfd;
+     struct internal_syment *syment;
 {
-  return (syment->n_sclass == OTHER_GLOBAL_CLASS);
+  /* FIXME: This partially duplicates the switch in
+     coff_slurp_symbol_table.  */
+  switch (syment->n_sclass)
+    {
+    case C_EXT:
+    case C_WEAKEXT:
+#ifdef I960
+    case C_LEAFEXT:
+#endif
+#ifdef ARM
+    case C_THUMBEXT:
+    case C_THUMBEXTFUNC:
+#endif
+#ifdef C_SYSTEM
+    case C_SYSTEM:
+#endif
+#ifdef COFF_WITH_PE
+    case C_NT_WEAK:
+#endif
+      if (syment->n_scnum == 0)
+	{
+	  if (syment->n_value == 0)
+	    return COFF_SYMBOL_UNDEFINED;
+	  else
+	    return COFF_SYMBOL_COMMON;
+	}
+      return COFF_SYMBOL_GLOBAL;
+
+    default:
+      break;
+    }
+
+#ifdef COFF_WITH_PE
+  if (syment->n_sclass == C_STAT)
+    {
+      if (syment->n_scnum == 0)
+	{
+	  /* The Microsoft compiler sometimes generates these if a
+             small static function is inlined every time it is used.
+             The function is discarded, but the symbol table entry
+             remains.  */
+	  return COFF_SYMBOL_LOCAL;
+	}
+
+      if (syment->n_value == 0)
+	{
+	  asection *sec;
+	  char buf[SYMNMLEN + 1];
+
+	  sec = coff_section_from_bfd_index (abfd, syment->n_scnum);
+	  if (sec != NULL
+	      && (strcmp (bfd_get_section_name (abfd, sec),
+			  _bfd_coff_internal_syment_name (abfd, syment, buf))
+		  == 0))
+	    return COFF_SYMBOL_PE_SECTION;
+	}
+
+      return COFF_SYMBOL_LOCAL;
+    }
+
+  if (syment->n_sclass == C_SECTION)
+    {
+      /* In some cases in a DLL generated by the Microsoft linker, the
+         n_value field will contain garbage.  FIXME: This should
+         probably be handled by the swapping function instead.  */
+      syment->n_value = 0;
+      if (syment->n_scnum == 0)
+	return COFF_SYMBOL_UNDEFINED;
+      return COFF_SYMBOL_PE_SECTION;
+    }
+#endif /* COFF_WITH_PE */
+
+  /* If it is not a global symbol, we presume it is a local symbol.  */
+
+  if (syment->n_scnum == 0)
+    {
+      char buf[SYMNMLEN + 1];
+
+      (*_bfd_error_handler)
+	(_("warning: %s: local symbol `%s' has no section"),
+	 bfd_get_filename (abfd),
+	 _bfd_coff_internal_syment_name (abfd, syment, buf));
+    }
+
+  return COFF_SYMBOL_LOCAL;
 }
-
-#undef OTHER_GLOBAL_CLASS
-
-#else /* ! defined (OTHER_GLOBAL_CLASS) */
-
-/* sym_is_global should not be defined if it has nothing to do.  */
-
-#define coff_sym_is_global 0
-
-#endif /* ! defined (OTHER_GLOBAL_CLASS) */
 
 /*
 SUBSUBSECTION
@@ -4291,7 +4374,7 @@ static CONST bfd_coff_backend_data bfd_coff_std_swap_table =
   coff_mkobject_hook, styp_to_sec_flags, coff_set_alignment_hook,
   coff_slurp_symbol_table, symname_in_debug_hook, coff_pointerize_aux_hook,
   coff_print_aux, coff_reloc16_extra_cases, coff_reloc16_estimate,
-  coff_sym_is_global, coff_compute_section_file_positions,
+  coff_classify_symbol, coff_compute_section_file_positions,
   coff_start_final_link, coff_relocate_section, coff_rtype_to_howto,
   coff_adjust_symndx, coff_link_add_one_symbol,
   coff_link_output_has_begun, coff_final_link_postscript

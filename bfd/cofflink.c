@@ -225,14 +225,11 @@ coff_link_check_ar_symbols (abfd, info, pneeded)
      struct bfd_link_info *info;
      boolean *pneeded;
 {
-  boolean (*sym_is_global) PARAMS ((bfd *, struct internal_syment *));
   bfd_size_type symesz;
   bfd_byte *esym;
   bfd_byte *esym_end;
 
   *pneeded = false;
-
-  sym_is_global = coff_backend_info (abfd)->_bfd_coff_sym_is_global;
 
   symesz = bfd_coff_symesz (abfd);
   esym = (bfd_byte *) obj_coff_external_syms (abfd);
@@ -240,17 +237,13 @@ coff_link_check_ar_symbols (abfd, info, pneeded)
   while (esym < esym_end)
     {
       struct internal_syment sym;
+      enum coff_symbol_classification classification;
 
       bfd_coff_swap_sym_in (abfd, (PTR) esym, (PTR) &sym);
 
-      if ((sym.n_sclass == C_EXT
-	   || sym.n_sclass == C_WEAKEXT
-	   || (obj_pe (abfd) && sym.n_sclass == C_NT_WEAK)
-#ifdef C_SYSTEM
-	   || sym.n_sclass == C_SYSTEM
-#endif
-	   || (sym_is_global && (*sym_is_global) (abfd, &sym)))
-	  && (sym.n_scnum != 0 || sym.n_value != 0))
+      classification = bfd_coff_classify_symbol (abfd, &sym);
+      if (classification == COFF_SYMBOL_GLOBAL
+	  || classification == COFF_SYMBOL_COMMON)
 	{
 	  const char *name;
 	  char buf[SYMNMLEN + 1];
@@ -292,7 +285,6 @@ coff_link_add_symbols (abfd, info)
      bfd *abfd;
      struct bfd_link_info *info;
 {
-  boolean (*sym_is_global) PARAMS ((bfd *, struct internal_syment *));
   boolean keep_syms;
   boolean default_copy;
   bfd_size_type symcount;
@@ -305,8 +297,6 @@ coff_link_add_symbols (abfd, info)
      to read the generic symbols in order to report an error message.  */
   keep_syms = obj_coff_keep_syms (abfd);
   obj_coff_keep_syms (abfd) = true;
-
-  sym_is_global = coff_backend_info (abfd)->_bfd_coff_sym_is_global;
 
   if (info->keep_memory)
     default_copy = false;
@@ -334,17 +324,13 @@ coff_link_add_symbols (abfd, info)
   while (esym < esym_end)
     {
       struct internal_syment sym;
+      enum coff_symbol_classification classification;
       boolean copy;
 
       bfd_coff_swap_sym_in (abfd, (PTR) esym, (PTR) &sym);
 
-      if (sym.n_sclass == C_EXT
-	   || sym.n_sclass == C_WEAKEXT
-	   || (obj_pe (abfd) && sym.n_sclass == C_NT_WEAK)
-#ifdef C_SYSTEM
-	  || sym.n_sclass == C_SYSTEM
-#endif
-	  || (sym_is_global && (*sym_is_global) (abfd, &sym)))
+      classification = bfd_coff_classify_symbol (abfd, &sym);
+      if (classification != COFF_SYMBOL_LOCAL)
 	{
 	  const char *name;
 	  char buf[SYMNMLEN + 1];
@@ -368,25 +354,32 @@ coff_link_add_symbols (abfd, info)
 
 	  value = sym.n_value;
 
-	  if (sym.n_scnum == 0)
+	  switch (classification)
 	    {
-	      if (value == 0)
-		{
-		  flags = 0;
-		  section = bfd_und_section_ptr;
-		}
-	      else
-		{
-		  flags = BSF_GLOBAL;
-		  section = bfd_com_section_ptr;
-		}
-	    }
-	  else
-	    {
+	    default:
+	      abort ();
+
+	    case COFF_SYMBOL_GLOBAL:
 	      flags = BSF_EXPORT | BSF_GLOBAL;
 	      section = coff_section_from_bfd_index (abfd, sym.n_scnum);
 	      if (! obj_pe (abfd))
 		value -= section->vma;
+	      break;
+
+	    case COFF_SYMBOL_UNDEFINED:
+	      flags = 0;
+	      section = bfd_und_section_ptr;
+	      break;
+
+	    case COFF_SYMBOL_COMMON:
+	      flags = BSF_GLOBAL;
+	      section = bfd_com_section_ptr;
+	      break;
+
+	    case COFF_SYMBOL_PE_SECTION:
+	      flags = BSF_SECTION_SYM | BSF_GLOBAL;
+	      section = coff_section_from_bfd_index (abfd, sym.n_scnum);
+	      break;
 	    }
 
 	  if (sym.n_sclass == C_WEAKEXT
@@ -480,6 +473,26 @@ coff_link_add_symbols (abfd, info)
 		      (*sym_hash)->aux = alloc;
 		    }
 		}
+	    }
+
+	  if (classification == COFF_SYMBOL_PE_SECTION
+	      && (*sym_hash)->numaux != 0)
+	    {
+	      /* Some PE sections (such as .bss) have a zero size in
+                 the section header, but a non-zero size in the AUX
+                 record.  Correct that here.
+
+		 FIXME: This is not at all the right place to do this.
+		 For example, it won't help objdump.  This needs to be
+		 done when we swap in the section header.  */
+
+	      BFD_ASSERT ((*sym_hash)->numaux == 1);
+	      if (section->_raw_size == 0)
+		section->_raw_size = (*sym_hash)->aux[0].x_scn.x_scnlen;
+
+	      /* FIXME: We could test whether the section sizes
+                 matches the size in the aux entry, but apparently
+                 that sometimes fails unexpectedly.  */
 	    }
 	}
 
@@ -1243,7 +1256,6 @@ _bfd_coff_link_input_bfd (finfo, input_bfd)
      struct coff_final_link_info *finfo;
      bfd *input_bfd;
 {
-  boolean (*sym_is_global) PARAMS ((bfd *, struct internal_syment *));
   boolean (*adjust_symndx) PARAMS ((bfd *, struct bfd_link_info *, bfd *,
 				    asection *, struct internal_reloc *,
 				    boolean *));
@@ -1269,7 +1281,6 @@ _bfd_coff_link_input_bfd (finfo, input_bfd)
   /* Move all the symbols to the output file.  */
 
   output_bfd = finfo->output_bfd;
-  sym_is_global = coff_backend_info (input_bfd)->_bfd_coff_sym_is_global;
   strings = NULL;
   syment_base = obj_raw_syment_count (output_bfd);
   isymesz = bfd_coff_symesz (input_bfd);
@@ -1324,6 +1335,7 @@ _bfd_coff_link_input_bfd (finfo, input_bfd)
   while (esym < esym_end)
     {
       struct internal_syment isym;
+      enum coff_symbol_classification classification;
       boolean skip;
       boolean global;
       boolean dont_skip_symbol;
@@ -1337,14 +1349,22 @@ _bfd_coff_link_input_bfd (finfo, input_bfd)
 	 the symbol.  */
       isym = *isymp;
 
-      if (isym.n_scnum != 0)
-	*secpp = coff_section_from_bfd_index (input_bfd, isym.n_scnum);
-      else
+      classification = bfd_coff_classify_symbol (input_bfd, &isym);
+      switch (classification)
 	{
-	  if (isym.n_value == 0)
-	    *secpp = bfd_und_section_ptr;
-	  else
-	    *secpp = bfd_com_section_ptr;
+	default:
+	  abort ();
+	case COFF_SYMBOL_GLOBAL:
+	case COFF_SYMBOL_PE_SECTION:
+	case COFF_SYMBOL_LOCAL:
+	  *secpp = coff_section_from_bfd_index (input_bfd, isym.n_scnum);
+	  break;
+	case COFF_SYMBOL_COMMON:
+	  *secpp = bfd_com_section_ptr;
+	  break;
+	case COFF_SYMBOL_UNDEFINED:
+	  *secpp = bfd_und_section_ptr;
+	  break;
 	}
 
       /* Extract the flag indicating if this symbol is used by a
@@ -1368,28 +1388,34 @@ _bfd_coff_link_input_bfd (finfo, input_bfd)
 
       if (! skip)
 	{
-	  if (isym.n_sclass == C_EXT
-	      || isym.n_sclass == C_WEAKEXT
-	      || (obj_pe (input_bfd) && isym.n_sclass == C_NT_WEAK)
-#ifdef C_SYSTEM
-	      || isym.n_sclass == C_SYSTEM
-#endif
-	      || (sym_is_global && (*sym_is_global) (input_bfd, &isym)))
+	  switch (classification)
 	    {
+	    default:
+	      abort ();
+	    case COFF_SYMBOL_GLOBAL:
+	    case COFF_SYMBOL_COMMON:
+	    case COFF_SYMBOL_PE_SECTION:
 	      /* This is a global symbol.  Global symbols come at the
 		 end of the symbol table, so skip them for now.
 		 Locally defined function symbols, however, are an
 		 exception, and are not moved to the end.  */
 	      global = true;
-	      if (! ISFCN (isym.n_type) || isym.n_scnum == 0)
+	      if (! ISFCN (isym.n_type))
 		skip = true;
-	    }
-	  else
-	    {
+	      break;
+
+	    case COFF_SYMBOL_UNDEFINED:
+	      /* Undefined symbols are left for the end.  */
+	      global = true;
+	      skip = true;
+	      break;
+
+	    case COFF_SYMBOL_LOCAL:
 	      /* This is a local symbol.  Skip it if we are discarding
                  local symbols.  */
 	      if (finfo->info->discard == discard_all && ! dont_skip_symbol)
 		skip = true;
+	      break;
 	    }
 	}
 

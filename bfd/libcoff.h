@@ -586,6 +586,22 @@ struct lineno_cache_entry *lineno;
     /* Have the line numbers been relocated yet ? */
 boolean done_lineno;
 } coff_symbol_type;
+ /* COFF symbol classifications.  */
+
+enum coff_symbol_classification
+{
+   /* Global symbol.  */
+  COFF_SYMBOL_GLOBAL,
+   /* Common symbol.  */
+  COFF_SYMBOL_COMMON,
+   /* Undefined symbol.  */
+  COFF_SYMBOL_UNDEFINED,
+   /* Local symbol.  */
+  COFF_SYMBOL_LOCAL,
+   /* PE section symbol.  */
+  COFF_SYMBOL_PE_SECTION
+};
+
 typedef struct
 {
   void (*_bfd_coff_swap_aux_in) PARAMS ((
@@ -722,7 +738,7 @@ typedef struct
        arelent *r,
        unsigned int shrink,
        struct bfd_link_info *link_info));
- boolean (*_bfd_coff_sym_is_global) PARAMS ((
+ enum coff_symbol_classification (*_bfd_coff_classify_symbol) PARAMS ((
        bfd *abfd,
        struct internal_syment *));
  boolean (*_bfd_coff_compute_section_file_positions) PARAMS ((
@@ -862,8 +878,8 @@ typedef struct
         ((coff_backend_info (abfd)->_bfd_coff_reloc16_estimate)\
          (abfd, section, reloc, shrink, link_info))
 
-#define bfd_coff_sym_is_global(abfd, sym)\
-        ((coff_backend_info (abfd)->_bfd_coff_sym_is_global)\
+#define bfd_coff_classify_symbol(abfd, sym)\
+        ((coff_backend_info (abfd)->_bfd_coff_classify_symbol)\
          (abfd, sym))
 
 #define bfd_coff_compute_section_file_positions(abfd)\
