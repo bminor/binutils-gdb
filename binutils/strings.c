@@ -50,7 +50,8 @@
 #include <getopt.h>
 #include <ctype.h>
 #include <errno.h>
-#include <bfd.h>
+#include "bfd.h"
+#include "bucomm.h"
 
 #ifdef isascii
 #define isgraphic(c) (isascii (c) && isprint (c))
@@ -83,10 +84,13 @@ static boolean datasection_only;
 /* true if we found an initialized data section in the current file.  */
 static boolean got_a_section;
 
-/* Opened to /dev/null for reading from a BFD.  */
+/* Opened to /dev/null for reading from a BFD.
+   This is a kludge to avoid rewriting print_strings;
+   the way we call print_strings now, it actually only needs
+   to read from either a memory buffer or a stream, never both
+   for a given file.  */
 static FILE *devnull;
 
-extern char *program_name;
 extern char *program_version;
 
 static struct option long_options[] =
@@ -100,13 +104,12 @@ static struct option long_options[] =
   {NULL, 0, NULL, 0}
 };
 
-char *xmalloc ();
-char *xrealloc ();
-
-static boolean strings_file ();
-static int integer_arg ();
-static void dump_strings ();
-static void usage ();
+static boolean strings_file PARAMS ((char *file));
+static int integer_arg PARAMS ((char *s));
+static void print_strings PARAMS ((char *filename, FILE *stream,
+				  file_ptr address, int stop_point,
+				  int magiccount, char *magic));
+static void usage PARAMS ((FILE *stream, int status));
 
 void
 main (argc, argv)
@@ -123,7 +126,7 @@ main (argc, argv)
   print_filenames = false;
   datasection_only = true;
 
-  while ((optc = getopt_long (argc, argv, "afhn:ot:v0123456789",
+  while ((optc = getopt_long (argc, argv, "afn:ot:v0123456789",
 			      long_options, (int *) 0)) != EOF)
     {
       switch (optc)
@@ -137,8 +140,7 @@ main (argc, argv)
 	  break;
 
 	case 'h':
-	  usage (stdout);
-	  exit (0);
+	  usage (stdout, 0);
 
 	case 'n':
 	  string_min = integer_arg (optarg);
@@ -158,7 +160,7 @@ main (argc, argv)
 	case 't':
 	  print_addresses = true;
 	  if (optarg[1] != '\0')
-	    usage ();
+	    usage (stderr, 1);
 	  switch (optarg[0])
 	    {
 	    case 'o':
@@ -174,16 +176,16 @@ main (argc, argv)
 	      break;
 
 	    default:
-	      usage ();
+	      usage (stderr, 1);
 	    }
 	  break;
 
 	case 'v':
-	  printf ("%s version %s\n", program_name, program_version);
+	  printf ("GNU %s version %s\n", program_name, program_version);
 	  exit (0);
 
 	case '?':
-	  usage (stderr);
+	  usage (stderr, 1);
 
 	default:
 	  if (string_min < 0)
@@ -218,14 +220,14 @@ main (argc, argv)
     }
 
   if (files_given == false)
-    usage (stderr);
+    usage (stderr, 1);
 
   exit (exit_status);
 }
 
-/* Scan the sections of the file ABFD, whose printable name is FILE.
-   If any of them contain initialized data,
-   set `got_a_section' and print the strings in them.  */
+/* Scan section SECT of the file ABFD, whose printable name is FILE.
+   If it contains initialized data,
+   set `got_a_section' and print the strings in it.  */
 
 static void
 strings_a_section (abfd, sect, file)
@@ -240,13 +242,14 @@ strings_a_section (abfd, sect, file)
       if (bfd_get_section_contents (abfd, sect, mem, (file_ptr) 0, sz))
 	{
 	  got_a_section = true;
-	  dump_strings (file, devnull, sect->filepos, 0, sz, mem);
+	  print_strings (file, devnull, sect->filepos, 0, sz, mem);
 	}
       free (mem);
     }
 }
 
-/* Print the strings in the initialized data section of FILE.
+/* Scan all of the sections in FILE, and print the strings
+   in the initialized data section(s).
    Return true if successful,
    false if not (such as if FILE is not an object file).  */
 
@@ -307,7 +310,7 @@ strings_file (file)
 	  return false;
 	}
 
-      dump_strings (file, stream, (file_ptr) 0, 0, 0, (char *) 0);
+      print_strings (file, stream, (file_ptr) 0, 0, 0, (char *) 0);
 
       if (fclose (stream) == EOF)
 	{
@@ -332,7 +335,7 @@ strings_file (file)
    Those characters come at address ADDRESS and the data in STREAM follow.  */
 
 static void
-dump_strings (filename, stream, address, stop_point, magiccount, magic)
+print_strings (filename, stream, address, stop_point, magiccount, magic)
      char *filename;
      FILE *stream;
      file_ptr address;
@@ -495,13 +498,14 @@ integer_arg (s)
 }
 
 static void
-usage (stream)
+usage (stream, status)
      FILE *stream;
+     int status;
 {
   fprintf (stream, "\
-Usage: %s [-afhov] [-n min-len] [-min-len] [-t {o,x,d}] [-]\n\
+Usage: %s [-afov] [-n min-len] [-min-len] [-t {o,x,d}] [-]\n\
        [--all] [--print-file-name] [--bytes=min-len] [--radix={o,x,d}]\n\
        [--help] [--version] file...\n",
 	   program_name);
-  exit (1);
+  exit (status);
 }

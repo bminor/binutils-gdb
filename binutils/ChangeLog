@@ -1,3 +1,22 @@
+Fri Jul  2 16:58:34 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	* strings.c: Doc fixes.
+
+Sun Jun 27 13:35:24 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	* Makefile.in: Note dependencies on bucomm.h.
+	(cplus-dem.o): Link c++filt with version.o.
+
+	* strings.c: Include bucomm.h and add prototypes to other decls.
+	Remove -h option.
+
+	* bucomm.h: Declare xrealloc.
+
+	* nm.c, objcopy.c, objdump.c, size.c, strings.c (main, usage): Add
+	--help option.  Put "GNU" in the version message.
+	(usage): Take stream and exit status as args.
+	(main): Pass new args to usage.
+
 Fri Jun 25 23:12:12 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
 
 	* strings.c, strings.1: New files.
