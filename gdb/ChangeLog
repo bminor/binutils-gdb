@@ -1,3 +1,15 @@
+Tue Mar 16 15:18:17 1993  Jim Kingdon  (kingdon@cygnus.com)
+
+	* xcoffexec.c (add_vmap): Wrap symbol read in catch_errors.
+
+	* xcoffread.c (read_symbol_lineno): Look to end of symbols for .bf,
+	not just 50 symbols.
+	(symtbl_num_syms): New variable.
+	(read_xcoff_symtab): Set it.
+	(read_symbol_nvalue): Check for bad symno.
+	(read_symbol_{lineno,nvalue}, callers): Don't pass symtable; it's
+	always symtbl.
+
 Tue Mar 16 10:09:05 1993  Stu Grossman  (grossman@cygnus.com)
 
 	* config/rs6000.mh:  Get rid of -Dfd_set=int crock.

@@ -465,6 +465,17 @@ CORE_ADDR old_start;
     }
 }
 
+/* Add symbols for an objfile.  */
+static int
+objfile_symbol_add (arg)
+     char *arg;
+{
+  struct objfile *obj = (struct objfile *) arg;
+  syms_from_objfile (obj, 0, 0, 0);
+  new_symfile_objfile (obj, 0, 0);
+  return 1;
+}
+
 static struct vmap *add_vmap PARAMS ((struct ld_info *));
 
 /* Add a new vmap entry based on ldinfo() information.
@@ -540,10 +551,13 @@ add_vmap(ldi)
 	vp->objfile = obj;
 
 #ifndef SOLIB_SYMBOLS_MANUAL
-	syms_from_objfile (obj, 0, 0, 0);
-	new_symfile_objfile (obj, 0, 0);
-	vmap_symtab (vp, 0, 0);
-	vp->loaded = 1;
+	if (catch_errors (objfile_symbol_add, (char *)obj,
+			  "Error while reading shared library symbols:\n"))
+	  {
+	    /* Note this is only done if symbol reading was successful.  */
+	    vmap_symtab (vp, 0, 0);
+	    vp->loaded = 1;
+	  }
 #endif
 	return vp;
 }
