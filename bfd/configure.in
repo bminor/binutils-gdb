@@ -111,6 +111,13 @@ sony)	bfd_target=news ;;
 intel)	bfd_target=${target_cpu}-coff ;;	
 cbm)	bfd_target=${target_cpu}-elf ;;
 
+amd)
+	case "${target_os}"  in
+		ebmon) bfd_target=a29k-coff ;;
+		*) bfd_target=a29k-aout ;;
+	esac
+	;;
+
 hitachi)
 	case "${target_cpu}" in
 	h8300) bfd_target=h8300-ieee ;;
@@ -133,7 +140,7 @@ sun)
 	;;
 dec)
 	case "${target_cpu}" in
-	mips) bfd_target=dec3100 ;;
+	mips) bfd_target=decstation ;;
 	vax) bfd_target=vax ;;
 	esac
 	;;
