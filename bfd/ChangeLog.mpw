@@ -1,3 +1,10 @@
+Fri Mar  3 16:43:39 1995  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* hosts/mpw.h (SEEK_SET, SEEK_CUR, BYTES_IN_PRINTF_INT):
+	Remove definitions.
+	(mpw_fread, mpw_fwrite): Declare, define as substitutes
+	for fread and fwrite.
+
 Tue Jan  3 12:13:39 1995  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* mpw-make.in (DebugOptions): Remove define of DEBUG_BFD_SEND.

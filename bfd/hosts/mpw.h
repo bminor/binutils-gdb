@@ -1,4 +1,4 @@
-/* MPW host-specific definitions. */
+/* Mac MPW host-specific definitions. */
 
 #ifndef	hosts_mpw_H
 #define hosts_mpw_H
@@ -13,6 +13,9 @@
 #ifndef ALMOST_STDC
 #define ALMOST_STDC
 #endif
+
+/* This bit of ugliness works around the stupid and useless definitions
+   of true and false in BFD header files.  */
 
 #ifdef BFD_TRUE_FALSE
 #ifndef false
@@ -34,16 +37,6 @@
 
 #ifndef	O_ACCMODE
 #define O_ACCMODE (O_RDONLY | O_WRONLY | O_RDWR)
-#endif
-#ifndef	SEEK_SET
-#define SEEK_SET 0
-#endif
-#ifndef	SEEK_CUR
-#define SEEK_CUR 1
-#endif
-
-#ifndef	BYTES_IN_PRINTF_INT
-#define BYTES_IN_PRINTF_INT 4
 #endif
 
 /* Binary files have different characteristics; for instance, no cr/nl
@@ -70,12 +63,16 @@ int fstat ();
 
 FILE *mpw_fopen ();
 int mpw_fseek ();
+int mpw_fread ();
+int mpw_fwrite ();
 void mpw_abort ();
 
 /* Map these standard functions to improved versions in libiberty. */
 
 #define fopen mpw_fopen
 #define fseek mpw_fseek
+#define fread mpw_fread
+#define fwrite mpw_fwrite
 #define abort mpw_abort
 
 #ifndef TRUE_FALSE_ALREADY_DEFINED
