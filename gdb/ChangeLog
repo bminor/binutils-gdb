@@ -1,3 +1,11 @@
+Thu Mar  5 12:32:09 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* config.sub configure.in config/.Sanitize config/mh-irix4
+	gdb/.Sanitize gdb/configure.in gdb/mips-tdep.c gdb/mipsread.c
+	gdb/procfs.c gdb/signame.h gdb/tm-irix3.h gdb/tm-mips.h
+	gdb/xm-irix4.h gdb/config/.Sanitize gdb/config/mt-irix3
+	gdb/config/mh-irix4 texinfo/configure.in:  Port to SGI Irix-4.x.
+
 Wed Mar  4 11:56:42 1992  Fred Fish  (fnf@cygnus.com)
 
 	* defs.h, utils.c:  xrealloc takes PTR as first arg.
