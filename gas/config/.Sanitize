@@ -171,6 +171,7 @@ te-hppa.h
 te-i386aix.h
 te-ic960.h
 te-linux.h
+te-lnews.h
 te-lynx.h
 te-mach.h
 te-macos.h
