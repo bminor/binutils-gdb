@@ -582,7 +582,7 @@ register_loaded_dll (const char *name, DWORD load_addr)
   HANDLE h = FindFirstFile(name, &w32_fd);
   size_t len;
 
-  if (h)
+  if (h != INVALID_HANDLE_VALUE)
     {
       FindClose (h);
       strcpy (buf, name);
