@@ -1413,13 +1413,10 @@ subsegs_finish ()
       if (!frchainP->frch_next || frchainP->frch_next->frch_seg != now_seg)
 	alignment = get_recorded_alignment (now_seg);
 
-      if (alignment > 0)
-	{
-	  if (subseg_text_p (now_seg))
-	    frag_align_code (alignment, 0);
-	  else
-	    frag_align (alignment, 0, 0);
-	}
+      if (subseg_text_p (now_seg))
+	frag_align_code (alignment, 0);
+      else
+	frag_align (alignment, 0, 0);
 
       /* frag_align will have left a new frag.
 	 Use this last frag for an empty ".fill".
