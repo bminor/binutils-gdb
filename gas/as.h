@@ -377,17 +377,21 @@ struct frag
   relax_stateT fr_type;
   relax_substateT fr_subtype;
 
-  /* These are needed only on the NS32K machines */
-  char fr_pcrel_adjust;
-  char fr_bsr;
+  /* These are needed only on the NS32K machines.  But since we don't
+     include targ-cpu.h until after this structure has been defined,
+     we can't really conditionalize it.  This code should be
+     rearranged a bit to make that possible.
 
-  /* Chars begin here.
-     One day we will compile fr_literal[0]. */
+     In the meantime, if we get stuck like this with any other target,
+     create a union here.  */
+  char fr_pcrel_adjust, fr_bsr;
+
+  /* Data begins here.  */
   char fr_literal[1];
 };
 
 #define SIZEOF_STRUCT_FRAG \
-((int)zero_address_frag.fr_literal-(int)&zero_address_frag)
+((char *)zero_address_frag.fr_literal-(char *)&zero_address_frag)
 /* We want to say fr_literal[0] above. */
 
 typedef struct frag fragS;
@@ -409,10 +413,24 @@ COMMON unsigned char flag_no_comments; /* -f */
 COMMON unsigned char flag_debug; /* -D */
 COMMON unsigned char flag_signed_overflow_ok; /* -J */
 COMMON unsigned char flag_warn_displacement; /* -K */
+
+/* True if local symbols should be retained.  */
 COMMON unsigned char flag_keep_locals; /* -L */
+
+/* Should the data section be made read-only and appended to the text
+   section?  */
 COMMON unsigned char flag_readonly_data_in_text; /* -R */
+
+/* True if warnings should be inhibited.  */
 COMMON unsigned char flag_no_warnings; /* -W */
+
+/* True if we should attempt to generate output even if non-fatal errors
+   are detected.  */
 COMMON unsigned char flag_always_generate_output; /* -Z */
+
+/* This is true if the assembler should output time and space usage. */
+
+COMMON unsigned char flag_print_statistics;
 
 /* name of emitted object file */
 COMMON char *out_file_name;

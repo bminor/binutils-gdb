@@ -1,5 +1,19 @@
 Sun Aug 28 13:22:52 1994  Ken Raeburn  (raeburn@rtl.cygnus.com)
 
+	* as.h (flag_*): Added comments describing meanings of some of
+	these variables.
+	(struct frag): Add some comments about the ns32k-specific fields
+	and why they're here.
+	(SIZEOF_STRUCT_FRAG): Cast addresses to char*, not int.
+	(flag_print_statistics): Declare.
+
+	* as.c (parse_args): Set flag_print_statistics instead of
+	statistics_flag.  Options array is now const.  Added new option
+	"dump-config"; if specified, print TARGET_ALIAS, TARGET_CANONICAL,
+	TARGET_CPU, TARGET_OBJ_FORMAT, and TARGET_FORMAT, if defined.
+	(main): Change test to check flag_print_statistics.
+	(statistics_flag): Deleted.
+
 	* frags.c (frag_variant): Removed PCREL_ADJUST and BSR arguments.
 	Always initialize them to zero.
 	* frags.h (frag_variant): Fixed prototype.
