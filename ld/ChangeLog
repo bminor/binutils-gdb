@@ -1,3 +1,9 @@
+Mon Jul 15 11:49:49 1996  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
+
+	* emultempl/elf32.em (gld${EMULATION_NAME}_place_orphan): Round
+ 	the value of __start_SECNAME to the alignment required by the
+ 	section to be placed.
+
 Tue Jul  9 12:09:02 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.tgt (mips*el-*-elf*): Use elf32elmip.
