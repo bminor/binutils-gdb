@@ -1,3 +1,12 @@
+Fri Nov  1 10:29:11 1996  Richard Henderson  <rth@tamu.edu>
+
+	* alpha-dis.c (print_insn_alpha): Use new NOPAL mask for
+	standard disassembly.
+
+	* alpha-opc.c (alpha_operands): Rearrange flags slot.
+	(alpha_opcodes): Add new BWX, CIX, and MAX instructions.  
+	Recategorize PALcode instructions.
+
 start-sanitize-v850
 Wed Oct 30 16:46:58 1996  Jeffrey A Law  (law@cygnus.com)
 
