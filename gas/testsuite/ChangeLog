@@ -1,3 +1,7 @@
+2005-01-05  Eric Botcazou  <ebotcazou@libertysurf.fr>
+
+	* gas/elf/elf.exp (section5): Use 0-9 instead of [:digit:].
+
 2004-12-31  Alan Modra  <amodra@bigpond.net.au>
 
 	* gas/elf/elf.exp: Don't list reloc sections.
