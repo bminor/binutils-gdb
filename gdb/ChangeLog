@@ -1,3 +1,7 @@
+2001-03-09  Kevin Buettner  <kevinb@redhat.com>
+
+	* utils.c (xmrealloc, xcalloc): Return NULL for zero-sized requests.
+
 2001-03-09  Andrew Cagney  <ac131313@redhat.com>
 
 	* MAINTAINERS (Write After Approval): Update Philip Blundell.

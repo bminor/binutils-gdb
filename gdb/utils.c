@@ -1044,17 +1044,26 @@ xmrealloc (PTR md, PTR ptr, long size)
 {
   register PTR val;
 
-  if (ptr != NULL)
+  if (size == 0)
     {
-      val = mrealloc (md, ptr, size);
+      if (ptr != NULL)
+	mfree (md, ptr);
+      val = NULL;
     }
   else
     {
-      val = mmalloc (md, size);
-    }
-  if (val == NULL)
-    {
-      nomem (size);
+      if (ptr != NULL)
+	{
+	  val = mrealloc (md, ptr, size);
+	}
+      else
+	{
+	  val = mmalloc (md, size);
+	}
+      if (val == NULL)
+	{
+	  nomem (size);
+	}
     }
   return (val);
 }
@@ -1073,9 +1082,16 @@ xmalloc (size_t size)
 PTR
 xcalloc (size_t number, size_t size)
 {
-  void *mem = mcalloc (NULL, number, size);
-  if (mem == NULL)
-    nomem (number * size);
+  void *mem;
+
+  if (number == 0 || size == 0)
+    mem = NULL;
+  else
+    {
+      mem = mcalloc (NULL, number, size);
+      if (mem == NULL)
+	nomem (number * size);
+    }
   return mem;
 }
 
