@@ -713,11 +713,6 @@ write_2_short (opcode1, insn1, opcode2, insn2, exec_type, fx)
       if (opcode1->exec_type & SEQ || opcode2->exec_type & SEQ)
 	as_fatal ("One of these instructions may not be executed in parallel.");
 
-      if ( !parallel_ok (opcode1, insn1, opcode2, insn2, exec_type)
-	   && (opcode1->exec_type & PARONLY) == 0
-	   && (opcode2->exec_type & PARONLY) == 0)
-	as_fatal ("Two instructions may not be executed in parallel with each other.");
-
       if (opcode1->unit == IU)
 	{
 	  if (opcode2->unit == IU)
@@ -916,6 +911,9 @@ md_assemble (str)
   int extype=0;			/* execution type; parallel, etc */
   static int etype=0;		/* saved extype.  used for multiline instructions */
   char *str2;
+
+  for (str2 = str; *str2; str2++)
+    *str2 = tolower(*str2);
 
   if (etype == 0)
     {
