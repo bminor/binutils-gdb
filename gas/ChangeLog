@@ -28,6 +28,13 @@ Tue Nov 29 13:58:10 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
 	registers.
 	(m68k_ip, case 'J'): Handle them.
 
+	Delete signal handler code.  It's been disabled since March 1993
+	without complaints.
+	* as.c: Don't include signal.h.
+	(got_sig): Unused function deleted, declaration deleted.
+	(SIGTY): Macro deleted.
+	(main): Deleted disabled code for establishing signal handler.
+
 	start-sanitize-rce
 	Tiemann should've noted something like this:
 	* config/tc-rce.c, config/tc-rce.h: New files.
