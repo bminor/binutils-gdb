@@ -17,4 +17,7 @@
 #define TRAD_CORE_EXTRA_SIZE_ALLOWED 4096
 
 /* Used for core file stuff only.  */
+#ifndef NO_PROCFS
 #define HAVE_PROCFS
+#endif
+

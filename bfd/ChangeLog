@@ -1,3 +1,8 @@
+Mon Apr 24 10:34:02 1995  Michael Meissner  <meissner@cygnus.com>
+
+	* hosts/i386linux.h (HAVE_PROCFS): If NO_PROCFS is defined, don't
+	define HAVE_PROCFS.
+
 Mon Apr 24 08:33:12 1995  Michael Meissner  <meissner@cygnus.com>
 
 	* elf32-ppc.c (ppc_elf_relocate_section): Do not continue
