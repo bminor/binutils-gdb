@@ -1,5 +1,5 @@
 %{ /* rcparse.y -- parser for Windows rc files
-   Copyright 1997, 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
+   Copyright 1997, 1998, 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
 
    This file is part of GNU Binutils.
@@ -519,7 +519,7 @@ control:
 	  {
 	    $$ = $3;
 	    if (dialog.ex == NULL)
-	      rcparse_warning (_("IEDIT requires DIALOGEX"));
+	      rcparse_warning (_("BEDIT requires DIALOGEX"));
 	    res_string_to_id (&$$->class, "BEDIT");
 	  }
 	| CHECKBOX
@@ -573,7 +573,7 @@ control:
 		$$->data = $12;
 	      }
 	    $$->class.named = 1;
-  	    unicode_from_ascii(&$$->class.u.n.length, &$$->class.u.n.name, $5);
+  	    unicode_from_ascii (&$$->class.u.n.length, &$$->class.u.n.name, $5);
 	  }
 	| CONTROL optstringc numexpr ',' QUOTEDSTRING control_styleexpr
 	    cnumexpr cnumexpr cnumexpr cnumexpr cnumexpr cnumexpr opt_control_data
@@ -584,7 +584,7 @@ control:
 	    $$->help = $12;
 	    $$->data = $13;
 	    $$->class.named = 1;
-  	    unicode_from_ascii(&$$->class.u.n.length, &$$->class.u.n.name, $5);
+  	    unicode_from_ascii (&$$->class.u.n.length, &$$->class.u.n.name, $5);
 	  }
 	| CTEXT
 	    {

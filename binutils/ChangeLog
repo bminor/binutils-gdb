@@ -2,6 +2,7 @@
 
 	* rcparse.y: CLASS definitions in DIALOG resources 
 	are quoted.
+	Fix typo in BEDIT warning
 
 2002-04-09  Gunnar Degnbol <degnbol@danbbs.dk>
 
