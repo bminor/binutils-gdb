@@ -549,20 +549,28 @@ MOSTLYCLEANFILES = $(STAGESTUFF) core stamp-mk.com \
 CLEANFILES = dep.sed .tcdep .objdep .dep2 .dep1 .depa .dep .depdir
 
 .PHONY: install-exec-local install-data-local
+.PHONY: install-exec-bindir install-exec-tooldir
 
-install-exec-local: $(noinst_PROGRAMS)
-	$(mkinstalldirs) $(bindir) $(tooldir)/bin
+install-exec-local: install-exec-bindir install-exec-tooldir
+
+install-exec-bindir: $(noinst_PROGRAMS)
+	$(mkinstalldirs) $(bindir)
 	@list='$(noinst_PROGRAMS)'; for p in $$list; do \
 	  if test -f $$p; then \
 	    echo " $(LIBTOOL)  --mode=install $(INSTALL_PROGRAM) $$p $(bindir)/`echo $$p|sed -e 's/$(EXEEXT)$$//' -e 's/-new//'|sed '$(transform)'|sed 's/$$/$(EXEEXT)/'`"; \
 	    $(LIBTOOL)  --mode=install $(INSTALL_PROGRAM) $$p $(bindir)/`echo $$p|sed -e 's/$(EXEEXT)$$//' -e 's/-new//'|sed '$(transform)'|sed 's/$$/$(EXEEXT)/'`; \
 	  else :; fi; \
 	done
+
+install-exec-tooldir: $(noinst_PROGRAMS)
+	$(mkinstalldirs) $(tooldir)/bin
 	n=`echo as | sed '$(transform)'`; \
 	if [ "$(bindir)/$$n$(EXEEXT)" != "$(tooldir)/bin/as$(EXEEXT)" ]; then \
 	  rm -f $(tooldir)/bin/as$(EXEEXT); \
 	  ln $(bindir)/$$n$(EXEEXT) $(tooldir)/bin/as$(EXEEXT) >/dev/null 2>/dev/null \
 	    || $(LIBTOOL) --mode=install $(INSTALL_PROGRAM) as-new$(EXEEXT) $(tooldir)/bin/as$(EXEEXT); \
+	else \
+	  true ; \
 	fi
 
 # These exist for maintenance purposes.

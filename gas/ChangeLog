@@ -1,3 +1,9 @@
+Fri Jul 24 19:58:59 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* Makefile.am (install-exec-local): Split into two ...
+	(install-exec-bindir,install-exec-tooldir): New rules.
+	* Makefile.in: Regenerate.
+
 Fri Jul 24 16:31:49 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.am (install-exec-local): Don't remove the file before
