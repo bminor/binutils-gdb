@@ -132,29 +132,6 @@ sparc64_single_step (ignore)
     }
 }
 
-/* FIXME: sparc64_frame_chain() is temporary.  sparc_frame_chain() can
-   be fixed to support both of us.  */
-
-#define	FRAME_SAVED_L0	0			  /* Byte offset from SP */
-#define	FRAME_SAVED_I0	(8*REGISTER_RAW_SIZE (0)) /* Byte offset from SP */
-
-CORE_ADDR
-sparc64_frame_chain (thisframe)
-     FRAME thisframe;
-{
-  REGISTER_TYPE retval;
-  int err;
-  CORE_ADDR addr;
-
-  addr = thisframe->frame + FRAME_SAVED_I0 +
-	 REGISTER_RAW_SIZE (0) * (FP_REGNUM - I0_REGNUM);
-  err = target_read_memory (addr, (char *) &retval, sizeof (REGISTER_TYPE));
-  if (err)
-    return 0;
-  SWAP_TARGET_AND_HOST (&retval, sizeof (retval));
-  return retval;
-}
-
 CORE_ADDR
 sparc64_extract_struct_value_address (regbuf)
      char regbuf[REGISTER_BYTES];
@@ -164,36 +141,6 @@ sparc64_extract_struct_value_address (regbuf)
   /* FIXME: We assume a non-leaf function.  */
   addr = read_register (I0_REGNUM);
   return addr;
-}
-
-/* Find the pc saved in frame FRAME.  */
-/* FIXME: This function can be removed when sparc_frame_saved_pc
-   handles us too.  */
-
-CORE_ADDR
-sparc64_frame_saved_pc (frame)
-     FRAME frame;
-{
-  int err;
-  REGISTER_TYPE retval;
-  CORE_ADDR addr,prev_pc;
-
-  if (get_current_frame () == frame)  /* FIXME, debug check. Remove >=gdb-4.6 */
-    {
-      if (read_register (SP_REGNUM) != frame->bottom) abort();
-    }
-
-  addr = frame->bottom + FRAME_SAVED_I0 +
-	 REGISTER_RAW_SIZE (0) * (I7_REGNUM - I0_REGNUM);
-  err = target_read_memory (addr, (char *) &retval, sizeof (REGISTER_TYPE));
-  if (err)
-    return 0;
-  SWAP_TARGET_AND_HOST (&retval, sizeof (retval));
-
-  /* CORE_ADDR isn't always the same size as REGISTER_TYPE, so convert.  */
-
-  prev_pc = (CORE_ADDR) retval;
-  return PC_ADJUST (prev_pc);
 }
 
 /* Check instruction at ADDR to see if it is an annulled branch or other
@@ -299,6 +246,46 @@ isbranch (instruction, addr, target)
     }
 
   return val;
+}
+
+/* PRINT_REGISTER_HOOK routine.
+   Pretty print various registers.  */
+
+static void
+dump_ccreg (reg, val)
+     char *reg;
+     int val;
+{
+  printf ("%s:%s,%s,%s,%s", reg,
+	  val & 8 ? "N" : "NN",
+	  val & 4 ? "Z" : "NZ",
+	  val & 2 ? "O" : "NO",
+	  val & 1 ? "C" : "NC"
+  );
+}
+
+void
+sparc_print_register_hook (regno)
+     int regno;
+{
+  if (((unsigned) (regno) - FP0_REGNUM < FP_MAX_REGNUM - FP0_REGNUM)
+       && ((regno) & 1) == 0)
+    {
+      char doublereg[8];		/* two float regs */
+      if (!read_relative_register_raw_bytes ((regno), doublereg))
+	{
+	  printf("\t");
+	  print_floating (doublereg, builtin_type_double, stdout);
+	}
+    }
+  else if ((regno) == CCR_REGNUM)
+    {
+      int ccr = read_register (CCR_REGNUM);
+      printf("\t");
+      dump_ccreg ("xcc", ccr >> 4);
+      printf(", ");
+      dump_ccreg ("icc", ccr & 15);
+    }
 }
 
 /* We try to support 32 bit and 64 bit pointers.
