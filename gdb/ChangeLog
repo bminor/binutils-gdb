@@ -1,3 +1,8 @@
+Thu Aug  4 14:34:12 1994  Stu Grossman  (grossman@cygnus.com)
+
+	* target.c (find_default_run_target):  Make sure to_can_run is set
+	before calling it.
+
 Thu Aug  4 11:46:27 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* TODO: Remove note about fast watchpoints and remove obsolete
