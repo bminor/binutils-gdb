@@ -35,10 +35,18 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "dis-asm.h"
 #include "sysdep.h"
+#include "opintl.h"
 
 #define MAXLEN 20
 
 #include <setjmp.h>
+
+#ifndef UNIXWARE_COMPAT
+/* Set non-zero for broken, compatible instructions.  Set to zero for
+   non-broken opcodes.  */
+#define UNIXWARE_COMPAT 1
+#endif
+
 
 static int fetch_data PARAMS ((struct disassemble_info *, bfd_byte *));
 
@@ -132,10 +140,11 @@ fetch_data (info, addr)
 #define Av OP_DIR, v_mode
 #define Ob OP_OFF, b_mode
 #define Ov OP_OFF, v_mode
-#define Xb OP_DSSI, b_mode
-#define Xv OP_DSSI, v_mode
-#define Yb OP_ESDI, b_mode
-#define Yv OP_ESDI, v_mode
+#define Xb OP_DSreg, eSI_reg
+#define Xv OP_DSreg, eSI_reg
+#define Yb OP_ESreg, eDI_reg
+#define Yv OP_ESreg, eDI_reg
+#define DSBX OP_DSreg, eBX_reg
 
 #define es OP_REG, es_reg
 #define ss OP_REG, ss_reg
@@ -148,40 +157,45 @@ fetch_data (info, addr)
 #define EM OP_EM, v_mode
 #define MS OP_MS, b_mode
 
-typedef int (*op_rtn) PARAMS ((int bytemode, int aflag, int dflag));
+/* bits in sizeflag */
+#define AFLAG 2
+#define DFLAG 1
 
-static int OP_E PARAMS ((int, int, int));
-static int OP_G PARAMS ((int, int, int));
-static int OP_I PARAMS ((int, int, int));
-static int OP_indirE PARAMS ((int, int, int));
-static int OP_sI PARAMS ((int, int, int));
-static int OP_REG PARAMS ((int, int, int));
-static int OP_J PARAMS ((int, int, int));
-static int OP_DIR PARAMS ((int, int, int));
-static int OP_OFF PARAMS ((int, int, int));
-static int OP_ESDI PARAMS ((int, int, int));
-static int OP_DSSI PARAMS ((int, int, int));
-static int OP_SEG PARAMS ((int, int, int));
-static int OP_C PARAMS ((int, int, int));
-static int OP_D PARAMS ((int, int, int));
-static int OP_T PARAMS ((int, int, int));
-static int OP_rm PARAMS ((int, int, int));
-static int OP_ST PARAMS ((int, int, int));
-static int OP_STi  PARAMS ((int, int, int));
+typedef void (*op_rtn) PARAMS ((int bytemode, int sizeflag));
+
+static void OP_E PARAMS ((int, int));
+static void OP_G PARAMS ((int, int));
+static void OP_I PARAMS ((int, int));
+static void OP_indirE PARAMS ((int, int));
+static void OP_sI PARAMS ((int, int));
+static void OP_REG PARAMS ((int, int));
+static void OP_J PARAMS ((int, int));
+static void OP_DIR PARAMS ((int, int));
+static void OP_OFF PARAMS ((int, int));
+static void OP_ESreg PARAMS ((int, int));
+static void OP_DSreg PARAMS ((int, int));
+static void OP_SEG PARAMS ((int, int));
+static void OP_C PARAMS ((int, int));
+static void OP_D PARAMS ((int, int));
+static void OP_T PARAMS ((int, int));
+static void OP_rm PARAMS ((int, int));
+static void OP_ST PARAMS ((int, int));
+static void OP_STi  PARAMS ((int, int));
 #if 0
-static int OP_ONE PARAMS ((int, int, int));
+static void OP_ONE PARAMS ((int, int));
 #endif
-static int OP_MMX PARAMS ((int, int, int));
-static int OP_EM PARAMS ((int, int, int));
-static int OP_MS PARAMS ((int, int, int));
+static void OP_MMX PARAMS ((int, int));
+static void OP_EM PARAMS ((int, int));
+static void OP_MS PARAMS ((int, int));
 
-static void append_prefix PARAMS ((void));
+static void append_seg PARAMS ((void));
 static void set_op PARAMS ((int op));
-static void putop PARAMS ((char *template, int aflag, int dflag));
-static void dofloat PARAMS ((int aflag, int dflag));
+static void putop PARAMS ((char *template, int sizeflag));
+static void dofloat PARAMS ((int sizeflag));
 static int get16 PARAMS ((void));
 static int get32 PARAMS ((void));
 static void ckprefix PARAMS ((void));
+static void ptr_reg PARAMS ((int, int));
 
 #define b_mode 1
 #define v_mode 2
@@ -369,8 +383,8 @@ static struct dis386 dis386[] = {
   { "popS",	eSI },
   { "popS",	eDI },
   /* 60 */
-  { "pusha" },
-  { "popa" },
+  { "pushaS" },
+  { "popaS" },
   { "boundS",	Gv, Ma },
   { "arpl",	Ew, Gw },
   { "(bad)" },			/* seg fs */
@@ -436,8 +450,8 @@ static struct dis386 dis386[] = {
   { "cStd" },
   { "lcall",	Ap },
   { "(bad)" },		/* fwait */
-  { "pushf" },
-  { "popf" },
+  { "pushfS" },
+  { "popfS" },
   { "sahf" },
   { "lahf" },
   /* a0 */
@@ -479,17 +493,17 @@ static struct dis386 dis386[] = {
   /* c0 */
   { GRP2b },
   { GRP2S },
-  { "ret",	Iw },
-  { "ret" },
+  { "retS",	Iw },
+  { "retS" },
   { "lesS",	Gv, Mp },
   { "ldsS",	Gv, Mp },
   { "movb",	Eb, Ib },
   { "movS",	Ev, Iv },
   /* c8 */
-  { "enter",	Iw, Ib },
-  { "leave" },
-  { "lret",	Iw },
-  { "lret" },
+  { "enterS",	Iw, Ib },
+  { "leaveS" },
+  { "lretS",	Iw },
+  { "lretS" },
   { "int3" },
   { "int",	Ib },
   { "into" },
@@ -502,7 +516,7 @@ static struct dis386 dis386[] = {
   { "aam",	Ib },
   { "aad",	Ib },
   { "(bad)" },
-  { "xlat" },
+  { "xlat",	DSBX },
   /* d8 */
   { FLOAT },
   { FLOAT },
@@ -1074,7 +1088,7 @@ static struct dis386 grps[][8] = {
 #define PREFIX_FS 0x80
 #define PREFIX_GS 0x100
 #define PREFIX_DATA 0x200
-#define PREFIX_ADR 0x400
+#define PREFIX_ADDR 0x400
 #define PREFIX_FWAIT 0x800
 
 static int prefixes;
@@ -1119,7 +1133,7 @@ ckprefix ()
 	  prefixes |= PREFIX_DATA;
 	  break;
 	case 0x67:
-	  prefixes |= PREFIX_ADR;
+	  prefixes |= PREFIX_ADDR;
 	  break;
 	case 0x9b:
 	  prefixes |= PREFIX_FWAIT;
@@ -1145,27 +1159,25 @@ static int start_pc;
  * The function returns the length of this instruction in bytes.
  */
 
-int print_insn_x86 PARAMS ((bfd_vma pc, disassemble_info *info, int aflag,
-			    int dflag));
+int print_insn_x86 PARAMS ((bfd_vma pc, disassemble_info *info, int sizeflag));
 int
 print_insn_i386 (pc, info)
      bfd_vma pc;
      disassemble_info *info;
 {
   if (info->mach == bfd_mach_i386_i386)
-    return print_insn_x86 (pc, info, 1, 1);
+    return print_insn_x86 (pc, info, AFLAG|DFLAG);
   else if (info->mach == bfd_mach_i386_i8086)
-    return print_insn_x86 (pc, info, 0, 0);
+    return print_insn_x86 (pc, info, 0);
   else
     abort ();
 }
 
 int
-print_insn_x86 (pc, info, aflag, dflag)
+print_insn_x86 (pc, info, sizeflag)
      bfd_vma pc;
      disassemble_info *info;
-     int aflag;
-     int dflag;
+     int sizeflag;
 {
   struct dis386 *dp;
   int i;
@@ -1222,16 +1234,16 @@ print_insn_x86 (pc, info, aflag, dflag)
     {
       /* fwait not followed by floating point instruction */
       (*info->fprintf_func) (info->stream, "fwait");
-      return (1);
+      return 1;
     }
   
   if (prefixes & PREFIX_DATA)
-    dflag ^= 1;
+    sizeflag ^= DFLAG;
   
-  if (prefixes & PREFIX_ADR)
+  if (prefixes & PREFIX_ADDR)
     {
-      aflag ^= 1;
-      if (aflag)
+      sizeflag ^= AFLAG;
+      if (sizeflag & AFLAG)
         oappend ("addr32 ");
       else
 	oappend ("addr16 ");
@@ -1260,29 +1272,29 @@ print_insn_x86 (pc, info, aflag, dflag)
 
   if (dp->name == NULL && dp->bytemode1 == FLOATCODE)
     {
-      dofloat (aflag, dflag);
+      dofloat (sizeflag);
     }
   else
     {
       if (dp->name == NULL)
 	dp = &grps[dp->bytemode1][reg];
       
-      putop (dp->name, aflag, dflag);
+      putop (dp->name, sizeflag);
       
       obufp = op1out;
       op_ad = 2;
       if (dp->op1)
-	(*dp->op1)(dp->bytemode1, aflag, dflag);
+	(*dp->op1)(dp->bytemode1, sizeflag);
       
       obufp = op2out;
       op_ad = 1;
       if (dp->op2)
-	(*dp->op2)(dp->bytemode2, aflag, dflag);
+	(*dp->op2)(dp->bytemode2, sizeflag);
       
       obufp = op3out;
       op_ad = 0;
       if (dp->op3)
-	(*dp->op3)(dp->bytemode3, aflag, dflag);
+	(*dp->op3)(dp->bytemode3, sizeflag);
     }
   
   obufp = obuf + strlen (obuf);
@@ -1338,7 +1350,7 @@ print_insn_x86 (pc, info, aflag, dflag)
       else
 	(*info->fprintf_func) (info->stream, "%s", third);
     }
-  return (codep - inbuf);
+  return codep - inbuf;
 }
 
 static char *float_mem[] = {
@@ -1480,10 +1492,17 @@ static struct dis386 float_reg[][8] = {
     { "fmul",	STi, ST },
     { "(bad)" },
     { "(bad)" },
+#if UNIXWARE_COMPAT
     { "fsub",	STi, ST },
     { "fsubr",	STi, ST },
     { "fdiv",	STi, ST },
     { "fdivr",	STi, ST },
+#else
+    { "fsubr",	STi, ST },
+    { "fsub",	STi, ST },
+    { "fdivr",	STi, ST },
+    { "fdiv",	STi, ST },
+#endif
   },
   /* dd */
   {
@@ -1502,10 +1521,17 @@ static struct dis386 float_reg[][8] = {
     { "fmulp",	STi, ST },
     { "(bad)" },
     { FGRPde_3 },
+#if UNIXWARE_COMPAT
     { "fsubp",	STi, ST },
     { "fsubrp",	STi, ST },
     { "fdivp",	STi, ST },
     { "fdivrp",	STi, ST },
+#else
+    { "fsubrp",	STi, ST },
+    { "fsubp",	STi, ST },
+    { "fdivrp",	STi, ST },
+    { "fdivp",	STi, ST },
+#endif
   },
   /* df */
   {
@@ -1570,9 +1596,8 @@ static char *fgrps[][8] = {
 };
 
 static void
-dofloat (aflag, dflag)
-     int aflag;
-     int dflag;
+dofloat (sizeflag)
+     int sizeflag;
 {
   struct dis386 *dp;
   unsigned char floatop;
@@ -1581,9 +1606,9 @@ dofloat (aflag, dflag)
   
   if (mod != 3)
     {
-      putop (float_mem[(floatop - 0xd8) * 8 + reg], aflag, dflag);
+      putop (float_mem[(floatop - 0xd8) * 8 + reg], sizeflag);
       obufp = op1out;
-      OP_E (v_mode, aflag, dflag);
+      OP_E (v_mode, sizeflag);
       return;
     }
   codep++;
@@ -1591,7 +1616,7 @@ dofloat (aflag, dflag)
   dp = &float_reg[floatop - 0xd8][reg];
   if (dp->name == NULL)
     {
-      putop (fgrps[dp->bytemode1][rm], aflag, dflag);
+      putop (fgrps[dp->bytemode1][rm], sizeflag);
       /* instruction fnstsw is only one with strange arg */
       if (floatop == 0xdf
 	  && FETCH_DATA (the_info, codep + 1)
@@ -1600,46 +1625,41 @@ dofloat (aflag, dflag)
     }
   else
     {
-      putop (dp->name, aflag, dflag);
+      putop (dp->name, sizeflag);
       obufp = op1out;
       if (dp->op1)
-	(*dp->op1)(dp->bytemode1, aflag, dflag);
+	(*dp->op1)(dp->bytemode1, sizeflag);
       obufp = op2out;
       if (dp->op2)
-	(*dp->op2)(dp->bytemode2, aflag, dflag);
+	(*dp->op2)(dp->bytemode2, sizeflag);
     }
 }
 
 /* ARGSUSED */
-static int
-OP_ST (ignore, aflag, dflag)
+static void
+OP_ST (ignore, sizeflag)
      int ignore;
-     int aflag;
-     int dflag;
+     int sizeflag;
 {
   oappend ("%st");
-  return (0);
 }
 
 /* ARGSUSED */
-static int
-OP_STi (ignore, aflag, dflag)
+static void
+OP_STi (ignore, sizeflag)
      int ignore;
-     int aflag;
-     int dflag;
+     int sizeflag;
 {
   sprintf (scratchbuf, "%%st(%d)", rm);
   oappend (scratchbuf);
-  return (0);
 }
 
 
 /* capital letters in template are macros */
 static void
-putop (template, aflag, dflag)
+putop (template, sizeflag)
      char *template;
-     int aflag;
-     int dflag;
+     int sizeflag;
 {
   char *p;
   
@@ -1651,7 +1671,7 @@ putop (template, aflag, dflag)
 	  *obufp++ = *p;
 	  break;
 	case 'C':		/* For jcxz/jecxz */
-	  if (aflag)
+	  if (sizeflag & AFLAG)
 	    *obufp++ = 'e';
 	  break;
 	case 'N':
@@ -1660,14 +1680,14 @@ putop (template, aflag, dflag)
 	  break;
 	case 'S':
 	  /* operand size flag */
-	  if (dflag)
+	  if (sizeflag & DFLAG)
 	    *obufp++ = 'l';
 	  else
 	    *obufp++ = 'w';
 	  break;
 	case 'W':
 	  /* operand size flag for cwtl, cbtw */
-	  if (dflag)
+	  if (sizeflag & DFLAG)
 	    *obufp++ = 'w';
 	  else
 	    *obufp++ = 'b';
@@ -1683,11 +1703,10 @@ oappend (s)
 {
   strcpy (obufp, s);
   obufp += strlen (s);
-  *obufp = 0;
 }
 
 static void
-append_prefix ()
+append_seg ()
 {
   if (prefixes & PREFIX_CS)
     oappend ("%cs:");
@@ -1703,21 +1722,19 @@ append_prefix ()
     oappend ("%gs:");
 }
 
-static int
-OP_indirE (bytemode, aflag, dflag)
+static void
+OP_indirE (bytemode, sizeflag)
      int bytemode;
-     int aflag;
-     int dflag;
+     int sizeflag;
 {
   oappend ("*");
-  return OP_E (bytemode, aflag, dflag);
+  OP_E (bytemode, sizeflag);
 }
 
-static int
-OP_E (bytemode, aflag, dflag)
+static void
+OP_E (bytemode, sizeflag)
      int bytemode;
-     int aflag;
-     int dflag;
+     int sizeflag;
 {
   int disp;
 
@@ -1735,7 +1752,7 @@ OP_E (bytemode, aflag, dflag)
 	  oappend (names16[rm]);
 	  break;
 	case v_mode:
-	  if (dflag)
+	  if (sizeflag & DFLAG)
 	    oappend (names32[rm]);
 	  else
 	    oappend (names16[rm]);
@@ -1744,13 +1761,13 @@ OP_E (bytemode, aflag, dflag)
 	  oappend ("<bad dis table>");
 	  break;
 	}
-      return 0;
+      return;
     }
 
   disp = 0;
-  append_prefix ();
+  append_seg ();
 
-  if (aflag) /* 32 bit address mode */
+  if (sizeflag & AFLAG) /* 32 bit address mode */
     {
       int havesib;
       int havebase;
@@ -1854,14 +1871,14 @@ OP_E (bytemode, aflag, dflag)
 	  oappend (")");
 	}
     }
-  return 0;
 }
 
-static int
-OP_G (bytemode, aflag, dflag)
+#define INTERNAL_DISASSEMBLER_ERROR _("<internal disassembler error>")
+
+static void
+OP_G (bytemode, sizeflag)
      int bytemode;
-     int aflag;
-     int dflag;
+     int sizeflag;
 {
   switch (bytemode) 
     {
@@ -1875,16 +1892,15 @@ OP_G (bytemode, aflag, dflag)
       oappend (names32[reg]);
       break;
     case v_mode:
-      if (dflag)
+      if (sizeflag & DFLAG)
 	oappend (names32[reg]);
       else
 	oappend (names16[reg]);
       break;
     default:
-      oappend ("<internal disassembler error>");
+      oappend (INTERNAL_DISASSEMBLER_ERROR);
       break;
     }
-  return (0);
 }
 
 static int
@@ -1897,7 +1913,7 @@ get32 ()
   x |= (*codep++ & 0xff) << 8;
   x |= (*codep++ & 0xff) << 16;
   x |= (*codep++ & 0xff) << 24;
-  return (x);
+  return x;
 }
 
 static int
@@ -1908,7 +1924,7 @@ get16 ()
   FETCH_DATA (the_info, codep + 2);
   x = *codep++ & 0xff;
   x |= (*codep++ & 0xff) << 8;
-  return (x);
+  return x;
 }
 
 static void
@@ -1919,11 +1935,10 @@ set_op (op)
   op_address[op_ad] = op;
 }
 
-static int
-OP_REG (code, aflag, dflag)
+static void
+OP_REG (code, sizeflag)
      int code;
-     int aflag;
-     int dflag;
+     int sizeflag;
 {
   char *s;
   
@@ -1944,24 +1959,22 @@ OP_REG (code, aflag, dflag)
 		break;
 	case eAX_reg: case eCX_reg: case eDX_reg: case eBX_reg:
 	case eSP_reg: case eBP_reg: case eSI_reg: case eDI_reg:
-      if (dflag)
+      if (sizeflag & DFLAG)
 	s = names32[code - eAX_reg];
       else
 	s = names16[code - eAX_reg];
       break;
     default:
-      s = "<internal disassembler error>";
+      s = INTERNAL_DISASSEMBLER_ERROR;
       break;
     }
   oappend (s);
-  return (0);
 }
 
-static int
-OP_I (bytemode, aflag, dflag)
+static void
+OP_I (bytemode, sizeflag)
      int bytemode;
-     int aflag;
-     int dflag;
+     int sizeflag;
 {
   int op;
   
@@ -1972,7 +1985,7 @@ OP_I (bytemode, aflag, dflag)
       op = *codep++ & 0xff;
       break;
     case v_mode:
-      if (dflag)
+      if (sizeflag & DFLAG)
 	op = get32 ();
       else
 	op = get16 ();
@@ -1981,19 +1994,17 @@ OP_I (bytemode, aflag, dflag)
       op = get16 ();
       break;
     default:
-      oappend ("<internal disassembler error>");
-      return (0);
+      oappend (INTERNAL_DISASSEMBLER_ERROR);
+      return;
     }
   sprintf (scratchbuf, "$0x%x", op);
   oappend (scratchbuf);
-  return (0);
 }
 
-static int
-OP_sI (bytemode, aflag, dflag)
+static void
+OP_sI (bytemode, sizeflag)
      int bytemode;
-     int aflag;
-     int dflag;
+     int sizeflag;
 {
   int op;
   
@@ -2006,7 +2017,7 @@ OP_sI (bytemode, aflag, dflag)
 	op -= 0x100;
       break;
     case v_mode:
-      if (dflag)
+      if (sizeflag & DFLAG)
 	op = get32 ();
       else
 	{
@@ -2021,19 +2032,17 @@ OP_sI (bytemode, aflag, dflag)
 	op -= 0x10000;
       break;
     default:
-      oappend ("<internal disassembler error>");
-      return (0);
+      oappend (INTERNAL_DISASSEMBLER_ERROR);
+      return;
     }
   sprintf (scratchbuf, "$0x%x", op);
   oappend (scratchbuf);
-  return (0);
 }
 
-static int
-OP_J (bytemode, aflag, dflag)
+static void
+OP_J (bytemode, sizeflag)
      int bytemode;
-     int aflag;
-     int dflag;
+     int sizeflag;
 {
   int disp;
   int mask = -1;
@@ -2047,7 +2056,7 @@ OP_J (bytemode, aflag, dflag)
 	disp -= 0x100;
       break;
     case v_mode:
-      if (dflag)
+      if (sizeflag & DFLAG)
 	disp = get32 ();
       else
 	{
@@ -2061,43 +2070,39 @@ OP_J (bytemode, aflag, dflag)
 	}
       break;
     default:
-      oappend ("<internal disassembler error>");
-      return (0);
+      oappend (INTERNAL_DISASSEMBLER_ERROR);
+      return;
     }
   disp = (start_pc + codep - start_codep + disp) & mask;
   set_op (disp);
   sprintf (scratchbuf, "0x%x", disp);
   oappend (scratchbuf);
-  return (0);
 }
 
 /* ARGSUSED */
-static int
-OP_SEG (dummy, aflag, dflag)
+static void
+OP_SEG (dummy, sizeflag)
      int dummy;
-     int aflag;
-     int dflag;
+     int sizeflag;
 {
   static char *sreg[] = {
     "%es","%cs","%ss","%ds","%fs","%gs","%?","%?",
   };
 
   oappend (sreg[reg]);
-  return (0);
 }
 
-static int
-OP_DIR (size, aflag, dflag)
+static void
+OP_DIR (size, sizeflag)
      int size;
-     int aflag;
-     int dflag;
+     int sizeflag;
 {
   int seg, offset;
   
   switch (size) 
     {
     case lptr:
-      if (aflag) 
+      if (sizeflag & DFLAG) 
 	{
 	  offset = get32 ();
 	  seg = get16 ();
@@ -2111,7 +2116,7 @@ OP_DIR (size, aflag, dflag)
       oappend (scratchbuf);
       break;
     case v_mode:
-      if (aflag)
+      if (sizeflag & DFLAG)
 	offset = get32 ();
       else
 	{
@@ -2126,52 +2131,58 @@ OP_DIR (size, aflag, dflag)
       oappend (scratchbuf);
       break;
     default:
-      oappend ("<internal disassembler error>");
+      oappend (INTERNAL_DISASSEMBLER_ERROR);
       break;
     }
-  return (0);
 }
 
 /* ARGSUSED */
-static int
-OP_OFF (bytemode, aflag, dflag)
-     int bytemode;
-     int aflag;
-     int dflag;
+static void
+OP_OFF (ignore, sizeflag)
+     int ignore;
+     int sizeflag;
 {
   int off;
 
-  append_prefix ();
+  append_seg ();
 
-  if (aflag)
+  if (sizeflag & AFLAG)
     off = get32 ();
   else
     off = get16 ();
   
   sprintf (scratchbuf, "0x%x", off);
   oappend (scratchbuf);
-  return (0);
 }
 
-/* ARGSUSED */
-static int
-OP_ESDI (dummy, aflag, dflag)
-     int dummy;
-     int aflag;
-     int dflag;
+static void
+ptr_reg (code, sizeflag)
+     int code;
+     int sizeflag;
 {
-  oappend ("%es:(");
-  oappend (aflag ? "%edi" : "%di");
+  char *s;
+  oappend ("(");
+  if (sizeflag & AFLAG)
+    s = names32[code - eAX_reg];
+  else
+    s = names16[code - eAX_reg];
+  oappend (s);
   oappend (")");
-  return (0);
 }
 
-/* ARGSUSED */
-static int
-OP_DSSI (dummy, aflag, dflag)
-     int dummy;
-     int aflag;
-     int dflag;
+static void
+OP_ESreg (code, sizeflag)
+     int code;
+     int sizeflag;
+{
+  oappend ("%es:");
+  ptr_reg (code, sizeflag);
+}
+
+static void
+OP_DSreg (code, sizeflag)
+     int code;
+     int sizeflag;
 {
   if ((prefixes
        & (PREFIX_CS
@@ -2181,73 +2192,61 @@ OP_DSSI (dummy, aflag, dflag)
 	  | PREFIX_FS
 	  | PREFIX_GS)) == 0)
     prefixes |= PREFIX_DS;
-  append_prefix ();
-  oappend ("(");
-  oappend (aflag ? "%esi" : "%si");
-  oappend (")");
-  return (0);
+  append_seg();
+  ptr_reg (code, sizeflag);
 }
 
 #if 0
 /* Not used.  */
 
 /* ARGSUSED */
-static int
-OP_ONE (dummy, aflag, dflag)
+static void
+OP_ONE (dummy, sizeflag)
      int dummy;
-     int aflag;
-     int dflag;
+     int sizeflag;
 {
   oappend ("1");
-  return (0);
 }
 
 #endif
 
 /* ARGSUSED */
-static int
-OP_C (dummy, aflag, dflag)
+static void
+OP_C (dummy, sizeflag)
      int dummy;
-     int aflag;
-     int dflag;
+     int sizeflag;
 {
   codep++; /* skip mod/rm */
   sprintf (scratchbuf, "%%cr%d", reg);
   oappend (scratchbuf);
-  return (0);
 }
 
 /* ARGSUSED */
-static int
-OP_D (dummy, aflag, dflag)
+static void
+OP_D (dummy, sizeflag)
      int dummy;
-     int aflag;
-     int dflag;
+     int sizeflag;
 {
   codep++; /* skip mod/rm */
   sprintf (scratchbuf, "%%db%d", reg);
   oappend (scratchbuf);
-  return (0);
 }
 
 /* ARGSUSED */
-static int
-OP_T (dummy, aflag, dflag)
+static void
+OP_T (dummy, sizeflag)
      int dummy;
-     int aflag;
-     int dflag;
+     int sizeflag;
 {
   codep++; /* skip mod/rm */
   sprintf (scratchbuf, "%%tr%d", reg);
   oappend (scratchbuf);
-  return (0);
 }
 
-static int
-OP_rm (bytemode, aflag, dflag)
+static void
+OP_rm (bytemode, sizeflag)
      int bytemode;
-     int aflag;
-     int dflag;
+     int sizeflag;
 {
   switch (bytemode) 
     {
@@ -2258,43 +2257,39 @@ OP_rm (bytemode, aflag, dflag)
       oappend (names16[rm]);
       break;
     }
-  return (0);
 }
 
-static int
-OP_MMX (bytemode, aflag, dflag)
-     int bytemode;
-     int aflag;
-     int dflag;
+static void
+OP_MMX (ignore, sizeflag)
+     int ignore;
+     int sizeflag;
 {
   sprintf (scratchbuf, "%%mm%d", reg);
   oappend (scratchbuf);
-  return 0;
 }
 
-static int
-OP_EM (bytemode, aflag, dflag)
+static void
+OP_EM (bytemode, sizeflag)
      int bytemode;
-     int aflag;
-     int dflag;
+     int sizeflag;
 {
   if (mod != 3)
-    return OP_E (bytemode, aflag, dflag);
+    {
+      OP_E (bytemode, sizeflag);
+      return;
+    }
 
   codep++;
   sprintf (scratchbuf, "%%mm%d", rm);
   oappend (scratchbuf);
-  return 0;
 }
 
-static int
-OP_MS (bytemode, aflag, dflag)
-     int bytemode;
-     int aflag;
-     int dflag;
+static void
+OP_MS (ignore, sizeflag)
+     int ignore;
+     int sizeflag;
 {
   ++codep;
   sprintf (scratchbuf, "%%mm%d", rm);
   oappend (scratchbuf);
-  return 0;
 }

@@ -1,3 +1,19 @@
+Fri Jun  5 23:47:55 1998  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	* i386-dis.c:  Combine aflag and dflag into sizeflag.  Change OP_*
+	functions to void.
+	(OP_DSreg): Rename from OP_DSSI.
+	(OP_ESreg): Rename from OP_ESDI.
+	(Xb, Xv, Yb, Yv): Use index reg code, not b_mode or v_mode.
+	(DSBX): Define.
+	(append_seg): Rename from append_prefix.
+	(ptr_reg): New function.
+	(dis386): Add S suffix to pushf, popf, ret, lret, enter, leave.
+	Add DSBX for xlat.
+	(PREFIX_ADDR): Rename from PREFIX_ADR.
+	(float_reg): Add non-broken opcodes for people who don't want
+	UNIXWARE_COMPAT.
+
 Fri Jun  5 19:15:04 1998  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
 
 	* m68k-opc.c (tstb, tstw, tstl): Don't allow pcrel on
