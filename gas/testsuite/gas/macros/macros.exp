@@ -40,3 +40,8 @@ if { ![istarget hppa*-*-*] || [istarget *-*-linux*] } {
     setup_xfail "*c4x*-*-*" "*c54x*-*"
     run_dump_test strings
 }
+
+run_dump_test app1
+run_dump_test app2
+run_dump_test app3
+run_dump_test app4
