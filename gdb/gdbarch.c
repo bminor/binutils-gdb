@@ -163,17 +163,14 @@ struct gdbarch
   gdbarch_deprecated_dummy_write_sp_ftype *deprecated_dummy_write_sp;
   int deprecated_register_size;
   int call_dummy_location;
-  gdbarch_deprecated_call_dummy_address_ftype *deprecated_call_dummy_address;
   CORE_ADDR deprecated_call_dummy_start_offset;
   CORE_ADDR deprecated_call_dummy_breakpoint_offset;
   int deprecated_call_dummy_length;
   LONGEST * deprecated_call_dummy_words;
   int deprecated_sizeof_call_dummy_words;
-  int deprecated_call_dummy_stack_adjust;
   gdbarch_deprecated_fix_call_dummy_ftype *deprecated_fix_call_dummy;
   gdbarch_push_dummy_code_ftype *push_dummy_code;
   gdbarch_deprecated_push_dummy_frame_ftype *deprecated_push_dummy_frame;
-  int deprecated_extra_stack_alignment_needed;
   gdbarch_deprecated_do_registers_info_ftype *deprecated_do_registers_info;
   gdbarch_print_registers_info_ftype *print_registers_info;
   gdbarch_print_float_info_ftype *print_float_info;
@@ -333,17 +330,14 @@ struct gdbarch startup_gdbarch =
   0,  /* deprecated_dummy_write_sp */
   0,  /* deprecated_register_size */
   0,  /* call_dummy_location */
-  0,  /* deprecated_call_dummy_address */
   0,  /* deprecated_call_dummy_start_offset */
   0,  /* deprecated_call_dummy_breakpoint_offset */
   0,  /* deprecated_call_dummy_length */
   0,  /* deprecated_call_dummy_words */
   0,  /* deprecated_sizeof_call_dummy_words */
-  0,  /* deprecated_call_dummy_stack_adjust */
   0,  /* deprecated_fix_call_dummy */
   0,  /* push_dummy_code */
   0,  /* deprecated_push_dummy_frame */
-  0,  /* deprecated_extra_stack_alignment_needed */
   0,  /* deprecated_do_registers_info */
   default_print_registers_info,  /* print_registers_info */
   0,  /* print_float_info */
@@ -644,14 +638,11 @@ verify_gdbarch (struct gdbarch *current_gdbarch)
   /* Skip verify of deprecated_push_return_address, has predicate */
   /* Skip verify of deprecated_dummy_write_sp, has predicate */
   /* Skip verify of call_dummy_location, invalid_p == 0 */
-  /* Skip verify of deprecated_call_dummy_address, has predicate */
   /* Skip verify of deprecated_call_dummy_words, invalid_p == 0 */
   /* Skip verify of deprecated_sizeof_call_dummy_words, invalid_p == 0 */
-  /* Skip verify of deprecated_call_dummy_stack_adjust, has predicate */
   /* Skip verify of deprecated_fix_call_dummy, has predicate */
   /* Skip verify of push_dummy_code, has predicate */
   /* Skip verify of deprecated_push_dummy_frame, has predicate */
-  /* Skip verify of deprecated_extra_stack_alignment_needed, invalid_p == 0 */
   /* Skip verify of deprecated_do_registers_info, has predicate */
   /* Skip verify of print_registers_info, invalid_p == 0 */
   /* Skip verify of print_float_info, has predicate */
@@ -963,25 +954,6 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
                       "gdbarch_dump: DECR_PC_AFTER_BREAK = %ld\n",
                       (long) DECR_PC_AFTER_BREAK);
 #endif
-#ifdef DEPRECATED_CALL_DUMMY_ADDRESS_P
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "DEPRECATED_CALL_DUMMY_ADDRESS_P()",
-                      XSTRING (DEPRECATED_CALL_DUMMY_ADDRESS_P ()));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: DEPRECATED_CALL_DUMMY_ADDRESS_P() = %d\n",
-                      DEPRECATED_CALL_DUMMY_ADDRESS_P ());
-#endif
-#ifdef DEPRECATED_CALL_DUMMY_ADDRESS
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "DEPRECATED_CALL_DUMMY_ADDRESS()",
-                      XSTRING (DEPRECATED_CALL_DUMMY_ADDRESS ()));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: DEPRECATED_CALL_DUMMY_ADDRESS = <0x%08lx>\n",
-                      (long) current_gdbarch->deprecated_call_dummy_address
-                      /*DEPRECATED_CALL_DUMMY_ADDRESS ()*/);
-#endif
 #ifdef DEPRECATED_CALL_DUMMY_BREAKPOINT_OFFSET
   fprintf_unfiltered (file,
                       "gdbarch_dump: DEPRECATED_CALL_DUMMY_BREAKPOINT_OFFSET # %s\n",
@@ -997,23 +969,6 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: DEPRECATED_CALL_DUMMY_LENGTH = %d\n",
                       DEPRECATED_CALL_DUMMY_LENGTH);
-#endif
-#ifdef DEPRECATED_CALL_DUMMY_STACK_ADJUST_P
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "DEPRECATED_CALL_DUMMY_STACK_ADJUST_P()",
-                      XSTRING (DEPRECATED_CALL_DUMMY_STACK_ADJUST_P ()));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: DEPRECATED_CALL_DUMMY_STACK_ADJUST_P() = %d\n",
-                      DEPRECATED_CALL_DUMMY_STACK_ADJUST_P ());
-#endif
-#ifdef DEPRECATED_CALL_DUMMY_STACK_ADJUST
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: DEPRECATED_CALL_DUMMY_STACK_ADJUST # %s\n",
-                      XSTRING (DEPRECATED_CALL_DUMMY_STACK_ADJUST));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: DEPRECATED_CALL_DUMMY_STACK_ADJUST = %d\n",
-                      DEPRECATED_CALL_DUMMY_STACK_ADJUST);
 #endif
 #ifdef DEPRECATED_CALL_DUMMY_START_OFFSET
   fprintf_unfiltered (file,
@@ -1097,14 +1052,6 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
                       "gdbarch_dump: DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS = <0x%08lx>\n",
                       (long) current_gdbarch->deprecated_extract_struct_value_address
                       /*DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS ()*/);
-#endif
-#ifdef DEPRECATED_EXTRA_STACK_ALIGNMENT_NEEDED
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: DEPRECATED_EXTRA_STACK_ALIGNMENT_NEEDED # %s\n",
-                      XSTRING (DEPRECATED_EXTRA_STACK_ALIGNMENT_NEEDED));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: DEPRECATED_EXTRA_STACK_ALIGNMENT_NEEDED = %d\n",
-                      DEPRECATED_EXTRA_STACK_ALIGNMENT_NEEDED);
 #endif
 #ifdef DEPRECATED_FIX_CALL_DUMMY_P
   fprintf_unfiltered (file,
@@ -3458,30 +3405,6 @@ set_gdbarch_call_dummy_location (struct gdbarch *gdbarch,
   gdbarch->call_dummy_location = call_dummy_location;
 }
 
-int
-gdbarch_deprecated_call_dummy_address_p (struct gdbarch *gdbarch)
-{
-  gdb_assert (gdbarch != NULL);
-  return gdbarch->deprecated_call_dummy_address != NULL;
-}
-
-CORE_ADDR
-gdbarch_deprecated_call_dummy_address (struct gdbarch *gdbarch)
-{
-  gdb_assert (gdbarch != NULL);
-  gdb_assert (gdbarch->deprecated_call_dummy_address != NULL);
-  if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_call_dummy_address called\n");
-  return gdbarch->deprecated_call_dummy_address ();
-}
-
-void
-set_gdbarch_deprecated_call_dummy_address (struct gdbarch *gdbarch,
-                                           gdbarch_deprecated_call_dummy_address_ftype deprecated_call_dummy_address)
-{
-  gdbarch->deprecated_call_dummy_address = deprecated_call_dummy_address;
-}
-
 CORE_ADDR
 gdbarch_deprecated_call_dummy_start_offset (struct gdbarch *gdbarch)
 {
@@ -3565,29 +3488,6 @@ set_gdbarch_deprecated_sizeof_call_dummy_words (struct gdbarch *gdbarch,
 }
 
 int
-gdbarch_deprecated_call_dummy_stack_adjust_p (struct gdbarch *gdbarch)
-{
-  gdb_assert (gdbarch != NULL);
-  return gdbarch->deprecated_call_dummy_stack_adjust != 0;
-}
-
-int
-gdbarch_deprecated_call_dummy_stack_adjust (struct gdbarch *gdbarch)
-{
-  gdb_assert (gdbarch != NULL);
-  if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_call_dummy_stack_adjust called\n");
-  return gdbarch->deprecated_call_dummy_stack_adjust;
-}
-
-void
-set_gdbarch_deprecated_call_dummy_stack_adjust (struct gdbarch *gdbarch,
-                                                int deprecated_call_dummy_stack_adjust)
-{
-  gdbarch->deprecated_call_dummy_stack_adjust = deprecated_call_dummy_stack_adjust;
-}
-
-int
 gdbarch_deprecated_fix_call_dummy_p (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
@@ -3657,23 +3557,6 @@ set_gdbarch_deprecated_push_dummy_frame (struct gdbarch *gdbarch,
                                          gdbarch_deprecated_push_dummy_frame_ftype deprecated_push_dummy_frame)
 {
   gdbarch->deprecated_push_dummy_frame = deprecated_push_dummy_frame;
-}
-
-int
-gdbarch_deprecated_extra_stack_alignment_needed (struct gdbarch *gdbarch)
-{
-  gdb_assert (gdbarch != NULL);
-  /* Skip verify of deprecated_extra_stack_alignment_needed, invalid_p == 0 */
-  if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_extra_stack_alignment_needed called\n");
-  return gdbarch->deprecated_extra_stack_alignment_needed;
-}
-
-void
-set_gdbarch_deprecated_extra_stack_alignment_needed (struct gdbarch *gdbarch,
-                                                     int deprecated_extra_stack_alignment_needed)
-{
-  gdbarch->deprecated_extra_stack_alignment_needed = deprecated_extra_stack_alignment_needed;
 }
 
 int

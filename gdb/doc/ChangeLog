@@ -1,3 +1,8 @@
+2004-02-14  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbint.texinfo (Target Architecture Definition): Delete
+	description of DEPRECATED_CALL_DUMMY_STACK_ADJUST.
+
 2004-02-12  Elena Zannoni  <ezannoni@redhat.com>
 
 	* gdb.texinfo: Properly quote the name "C++".

@@ -559,9 +559,6 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
 	}
       real_pc = funaddr;
       dummy_addr = entry_point_address ();
-      if (DEPRECATED_CALL_DUMMY_ADDRESS_P ())
-	/* Override it.  */
-	dummy_addr = DEPRECATED_CALL_DUMMY_ADDRESS ();
       /* Make certain that the address points at real code, and not a
          function descriptor.  */
       dummy_addr = gdbarch_convert_from_func_ptr_addr (current_gdbarch,
@@ -763,31 +760,6 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
 	}
     }
 
-  /* elz: on HPPA no need for this extra alignment, maybe it is needed
-     on other architectures. This is because all the alignment is
-     taken care of in the above code (ifdef DEPRECATED_REG_STRUCT_HAS_ADDR)
-     and in hppa_push_arguments */
-  /* NOTE: cagney/2003-03-24: The below code is very broken.  Given an
-     odd sized parameter the below will mis-align the stack.  As was
-     suggested back in '96, better to let PUSH_ARGUMENTS handle it.  */
-  if (DEPRECATED_EXTRA_STACK_ALIGNMENT_NEEDED)
-    {
-      /* MVS 11/22/96: I think at least some of this stack_align code
-	 is really broken.  Better to let push_dummy_call() adjust the
-	 stack in a target-defined manner.  */
-      if (DEPRECATED_STACK_ALIGN_P () && INNER_THAN (1, 2))
-	{
-	  /* If stack grows down, we must leave a hole at the top. */
-	  int len = 0;
-	  int i;
-	  for (i = nargs - 1; i >= 0; i--)
-	    len += TYPE_LENGTH (VALUE_ENCLOSING_TYPE (args[i]));
-	  if (DEPRECATED_CALL_DUMMY_STACK_ADJUST_P ())
-	    len += DEPRECATED_CALL_DUMMY_STACK_ADJUST;
-	  sp -= DEPRECATED_STACK_ALIGN (len) - len;
-	}
-    }
-
   /* Create the dummy stack frame.  Pass in the call dummy address as,
      presumably, the ABI code knows where, in the call dummy, the
      return address should be pointed.  */
@@ -833,22 +805,8 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
     {
       /* If stack grows up, we must leave a hole at the bottom, note
          that sp already has been advanced for the arguments!  */
-      if (DEPRECATED_CALL_DUMMY_STACK_ADJUST_P ())
-	sp += DEPRECATED_CALL_DUMMY_STACK_ADJUST;
       sp = DEPRECATED_STACK_ALIGN (sp);
     }
-
-/* XXX This seems wrong.  For stacks that grow down we shouldn't do
-   anything here!  */
-  /* MVS 11/22/96: I think at least some of this stack_align code is
-     really broken.  Better to let PUSH_ARGUMENTS adjust the stack in
-     a target-defined manner.  */
-  if (DEPRECATED_CALL_DUMMY_STACK_ADJUST_P ())
-    if (INNER_THAN (1, 2))
-      {
-	/* stack grows downward */
-	sp -= DEPRECATED_CALL_DUMMY_STACK_ADJUST;
-      }
 
   /* Store the address at which the structure is supposed to be
      written.  */

@@ -838,31 +838,6 @@ extern void set_gdbarch_call_dummy_location (struct gdbarch *gdbarch, int call_d
 #define CALL_DUMMY_LOCATION (gdbarch_call_dummy_location (current_gdbarch))
 #endif
 
-#if defined (DEPRECATED_CALL_DUMMY_ADDRESS)
-/* Legacy for systems yet to multi-arch DEPRECATED_CALL_DUMMY_ADDRESS */
-#if !defined (DEPRECATED_CALL_DUMMY_ADDRESS_P)
-#define DEPRECATED_CALL_DUMMY_ADDRESS_P() (1)
-#endif
-#endif
-
-extern int gdbarch_deprecated_call_dummy_address_p (struct gdbarch *gdbarch);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_CALL_DUMMY_ADDRESS_P)
-#error "Non multi-arch definition of DEPRECATED_CALL_DUMMY_ADDRESS"
-#endif
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_CALL_DUMMY_ADDRESS_P)
-#define DEPRECATED_CALL_DUMMY_ADDRESS_P() (gdbarch_deprecated_call_dummy_address_p (current_gdbarch))
-#endif
-
-typedef CORE_ADDR (gdbarch_deprecated_call_dummy_address_ftype) (void);
-extern CORE_ADDR gdbarch_deprecated_call_dummy_address (struct gdbarch *gdbarch);
-extern void set_gdbarch_deprecated_call_dummy_address (struct gdbarch *gdbarch, gdbarch_deprecated_call_dummy_address_ftype *deprecated_call_dummy_address);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_CALL_DUMMY_ADDRESS)
-#error "Non multi-arch definition of DEPRECATED_CALL_DUMMY_ADDRESS"
-#endif
-#if !defined (DEPRECATED_CALL_DUMMY_ADDRESS)
-#define DEPRECATED_CALL_DUMMY_ADDRESS() (gdbarch_deprecated_call_dummy_address (current_gdbarch))
-#endif
-
 /* DEPRECATED_CALL_DUMMY_START_OFFSET can be deleted. */
 
 extern CORE_ADDR gdbarch_deprecated_call_dummy_start_offset (struct gdbarch *gdbarch);
@@ -916,32 +891,6 @@ extern void set_gdbarch_deprecated_sizeof_call_dummy_words (struct gdbarch *gdba
 #endif
 #if !defined (DEPRECATED_SIZEOF_CALL_DUMMY_WORDS)
 #define DEPRECATED_SIZEOF_CALL_DUMMY_WORDS (gdbarch_deprecated_sizeof_call_dummy_words (current_gdbarch))
-#endif
-
-/* Implement PUSH_DUMMY_CALL, then delete DEPRECATED_CALL_DUMMY_STACK_ADJUST. */
-
-#if defined (DEPRECATED_CALL_DUMMY_STACK_ADJUST)
-/* Legacy for systems yet to multi-arch DEPRECATED_CALL_DUMMY_STACK_ADJUST */
-#if !defined (DEPRECATED_CALL_DUMMY_STACK_ADJUST_P)
-#define DEPRECATED_CALL_DUMMY_STACK_ADJUST_P() (1)
-#endif
-#endif
-
-extern int gdbarch_deprecated_call_dummy_stack_adjust_p (struct gdbarch *gdbarch);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_CALL_DUMMY_STACK_ADJUST_P)
-#error "Non multi-arch definition of DEPRECATED_CALL_DUMMY_STACK_ADJUST"
-#endif
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_CALL_DUMMY_STACK_ADJUST_P)
-#define DEPRECATED_CALL_DUMMY_STACK_ADJUST_P() (gdbarch_deprecated_call_dummy_stack_adjust_p (current_gdbarch))
-#endif
-
-extern int gdbarch_deprecated_call_dummy_stack_adjust (struct gdbarch *gdbarch);
-extern void set_gdbarch_deprecated_call_dummy_stack_adjust (struct gdbarch *gdbarch, int deprecated_call_dummy_stack_adjust);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_CALL_DUMMY_STACK_ADJUST)
-#error "Non multi-arch definition of DEPRECATED_CALL_DUMMY_STACK_ADJUST"
-#endif
-#if !defined (DEPRECATED_CALL_DUMMY_STACK_ADJUST)
-#define DEPRECATED_CALL_DUMMY_STACK_ADJUST (gdbarch_deprecated_call_dummy_stack_adjust (current_gdbarch))
 #endif
 
 /* DEPRECATED_FIX_CALL_DUMMY can be deleted.  For the SPARC, implement
@@ -1005,18 +954,6 @@ extern void set_gdbarch_deprecated_push_dummy_frame (struct gdbarch *gdbarch, gd
 #endif
 #if !defined (DEPRECATED_PUSH_DUMMY_FRAME)
 #define DEPRECATED_PUSH_DUMMY_FRAME (gdbarch_deprecated_push_dummy_frame (current_gdbarch))
-#endif
-
-/* Implement PUSH_DUMMY_CALL, then delete
-   DEPRECATED_EXTRA_STACK_ALIGNMENT_NEEDED. */
-
-extern int gdbarch_deprecated_extra_stack_alignment_needed (struct gdbarch *gdbarch);
-extern void set_gdbarch_deprecated_extra_stack_alignment_needed (struct gdbarch *gdbarch, int deprecated_extra_stack_alignment_needed);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_EXTRA_STACK_ALIGNMENT_NEEDED)
-#error "Non multi-arch definition of DEPRECATED_EXTRA_STACK_ALIGNMENT_NEEDED"
-#endif
-#if !defined (DEPRECATED_EXTRA_STACK_ALIGNMENT_NEEDED)
-#define DEPRECATED_EXTRA_STACK_ALIGNMENT_NEEDED (gdbarch_deprecated_extra_stack_alignment_needed (current_gdbarch))
 #endif
 
 #if defined (DEPRECATED_DO_REGISTERS_INFO)

@@ -1227,12 +1227,6 @@ get_next_frame (struct frame_info *this_frame)
     return NULL;
 }
 
-struct frame_info *
-deprecated_get_next_frame_hack (struct frame_info *this_frame)
-{
-  return this_frame->next;
-}
-
 /* Flush the entire frame cache.  */
 
 void

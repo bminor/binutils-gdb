@@ -1,3 +1,15 @@
+2004-02-14  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbarch.sh (DEPRECATED_EXTRA_STACK_ALIGNMENT_NEEDED): Delete.
+	(DEPRECATED_CALL_DUMMY_STACK_ADJUST): Delete.
+	(DEPRECATED_CALL_DUMMY_ADDRESS): Delete.
+	* gdbarch.h, gdbarch.c: Re-generate.	
+	* frame.c (deprecated_get_next_frame_hack): Delete function.
+	* frame.h (deprecated_get_next_frame_hack): Delete declaration.
+	* blockframe.c (deprecated_pc_in_call_dummy_at_entry_point):
+	Update.
+	* infcall.c (call_function_by_hand): Update.
+
 2004-02-14  Elena Zannoni  <ezannoni@redhat.com>
 
 	* symfile.c (init_entry_point_info, entry_point_address): Move

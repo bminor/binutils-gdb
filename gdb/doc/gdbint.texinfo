@@ -3077,12 +3077,6 @@ See the file @file{inferior.h}.
 This method has been replaced by @code{push_dummy_code}
 (@pxref{push_dummy_code}).
 
-@item DEPRECATED_CALL_DUMMY_STACK_ADJUST
-@findex DEPRECATED_CALL_DUMMY_STACK_ADJUST
-Stack adjustment needed when performing an inferior function call.  This
-function is no longer needed.  @xref{push_dummy_call}, which can handle
-all alignment directly.
-
 @item CANNOT_FETCH_REGISTER (@var{regno})
 @findex CANNOT_FETCH_REGISTER
 A C expression that should be nonzero if @var{regno} cannot be fetched
