@@ -1,3 +1,8 @@
+Mon Mar 30 17:11:55 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* run.c (main): Handle all alternatives of enum sim_stop.
+	(main): Delete unused `asection *s'.
+
 Fri Mar 27 16:15:52 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* hw-tree.h, hw-tree.c (hw_tree_vparse): New function
