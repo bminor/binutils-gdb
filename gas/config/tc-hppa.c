@@ -6246,9 +6246,6 @@ hppa_force_relocation (fixp)
 
 /* Now for some ELF specific code.  FIXME.  */
 #ifdef OBJ_ELF
-static symext_chainS *symext_rootP;
-static symext_chainS *symext_lastP;
-
 /* Mark the end of a function so that it's possible to compute
    the size of the function in hppa_elf_final_processing.  */
 
@@ -6303,27 +6300,6 @@ hppa_elf_mark_end_of_function ()
   else
     as_bad ("No memory for symbol name.");
   
-}
-
-/* Do any symbol processing requested by the target-cpu or target-format.  */
-
-void
-hppa_tc_symbol (abfd, symbolP, sym_idx)
-     bfd *abfd;
-     elf_symbol_type *symbolP;
-     int sym_idx;
-{
-  /* Just call the ELF BFD routine.  */
-  elf_hppa_tc_symbol (abfd, symbolP, sym_idx, &symext_rootP, &symext_lastP);
-}
-
-/* Make sections needed by the target cpu and/or target format.  */
-void
-hppa_tc_make_sections (abfd)
-     bfd *abfd;
-{
-  /* Just call the ELF BFD routine.  */
-  elf_hppa_tc_make_sections (abfd, symext_rootP);
 }
 
 /* For ELF, this function serves one purpose:  to setup the st_size

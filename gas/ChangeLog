@@ -1,3 +1,17 @@
+Thu Apr  7 10:38:18 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* config/tc-hppa.h (elf_tc_symbol): Delete.  No longer used.
+	(elf_tc_make_sections): Likewise.
+	(hppa_tc_make_sections, hppa_tc_symbol): Delete extern decls.
+
+	* config/tc-hppa.c (hppa_tc_make_sections): Delete function.
+	(hppa_tc_symbol): Likewise.
+
+	* config/obj-elf.c (elf_frob_file): Delete elf_tc_symbol and
+	elf_tc_make_sections stuff.  It was there to support PA braindamage
+	which has been fixed, and in the case of elf_tc_make_sections is
+	redundant with elf_tc_final_processing.
+
 Wed Apr  6 20:48:30 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* configure.in (hppa*-*-*elf*): Don't require "-hp-" for the
