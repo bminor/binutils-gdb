@@ -1,3 +1,8 @@
+2004-10-25  David Mosberger  <davidm@hpl.hp.com>
+
+	* readelf.c (slurp_ia64_unwind_table): Support relocations against
+	non-section symbols by adding in the symbol value.
+
 2004-10-25  Nick Clifton  <nickc@redhat.com>
 
 	PR 465

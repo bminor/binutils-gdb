@@ -4421,25 +4421,11 @@ slurp_ia64_unwind_table (FILE *file,
 	    {
 	      relname = elf_ia64_reloc_type (ELF32_R_TYPE (rp->r_info));
 	      sym = aux->symtab + ELF32_R_SYM (rp->r_info);
-
-	      if (ELF32_ST_TYPE (sym->st_info) != STT_SECTION)
-		{
-		  warn (_("Skipping unexpected symbol type %u\n"),
-			ELF32_ST_TYPE (sym->st_info));
-		  continue;
-		}
 	    }
 	  else
 	    {
 	      relname = elf_ia64_reloc_type (ELF64_R_TYPE (rp->r_info));
 	      sym = aux->symtab + ELF64_R_SYM (rp->r_info);
-
-	      if (ELF64_ST_TYPE (sym->st_info) != STT_SECTION)
-		{
-		  warn (_("Skipping unexpected symbol type %u\n"),
-			ELF64_ST_TYPE (sym->st_info));
-		  continue;
-		}
 	    }
 
 	  if (strncmp (relname, "R_IA64_SEGREL", 13) != 0)
@@ -4454,15 +4440,15 @@ slurp_ia64_unwind_table (FILE *file,
 	    {
 	    case 0:
 	      aux->table[i].start.section = sym->st_shndx;
-	      aux->table[i].start.offset += rp->r_addend;
+	      aux->table[i].start.offset += rp->r_addend + sym->st_value;
 	      break;
 	    case 1:
 	      aux->table[i].end.section   = sym->st_shndx;
-	      aux->table[i].end.offset   += rp->r_addend;
+	      aux->table[i].end.offset   += rp->r_addend + sym->st_value;
 	      break;
 	    case 2:
 	      aux->table[i].info.section  = sym->st_shndx;
-	      aux->table[i].info.offset  += rp->r_addend;
+	      aux->table[i].info.offset  += rp->r_addend + sym->st_value;
 	      break;
 	    default:
 	      break;
