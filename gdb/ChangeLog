@@ -1,5 +1,8 @@
 Fri Aug 27 09:30:40 1993  Jim Kingdon  (kingdon@deneb.cygnus.com)
 
+	* mips-tdep.c: Call reinit_frame_cache every time the user does
+	"set heuristic-fence-post".
+
 	* gdbserver/low-sun3.c: New file.
 	* gdbserver/Makefile.in, config/m68k/sun3.mh: Change accordingly.
 

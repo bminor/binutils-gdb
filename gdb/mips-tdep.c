@@ -762,7 +762,7 @@ mips_frame_num_args(fip)
 	return -1;
 }
 
-/* Does this instruction involve use of a delay slot?  */
+/* Is this a branch with a delay slot?  */
 static int
 is_delayed (insn)
      unsigned long insn;
@@ -772,7 +772,10 @@ is_delayed (insn)
     if (mips_opcodes[i].pinfo != INSN_MACRO
 	&& (insn & mips_opcodes[i].mask) == mips_opcodes[i].match)
       break;
-  return i < NUMOPCODES && (mips_opcodes[i].pinfo & ANY_DELAY);
+  return (i < NUMOPCODES
+	  && (mips_opcodes[i].pinfo & (INSN_UNCOND_BRANCH_DELAY
+				       | INSN_COND_BRANCH_DELAY
+				       | INSN_COND_BRANCH_LIKELY)));
 }
 
 /* To skip prologues, I use this predicate.  Returns either PC itself
@@ -910,12 +913,28 @@ mips_store_return_value (valtype, valbuf)
   write_register_bytes(REGISTER_BYTE (regnum), raw_buffer, TYPE_LENGTH (valtype));
 }
 
-/* Let the user turn off floating point and set the fence post for
-   heuristic_proc_start.  */
+static void reinit_frame_cache_sfunc PARAMS ((char *, int
+					      struct cmd_list_element *));
+
+/* Just like reinit_frame_cache, but with the right arguments to be
+   callable as an sfunc.  */
+static void
+reinit_frame_cache_sfunc (args, from_tty, c)
+     char *args;
+     int from_tty;
+     struct cmd_list_element *c;
+{
+  reinit_frame_cache ();
+}
 
 void
 _initialize_mips_tdep ()
 {
+  struct cmd_list_element *c;
+
+  /* Let the user turn off floating point and set the fence post for
+     heuristic_proc_start.  */
+
   add_show_from_set
     (add_set_cmd ("mipsfpu", class_support, var_boolean,
 		  (char *) &mips_fpu,
@@ -924,14 +943,16 @@ Turn off to avoid using floating point instructions when calling functions\n\
 or dealing with return values.", &setlist),
      &showlist);
 
-  add_show_from_set
-    (add_set_cmd ("heuristic-fence-post", class_support, var_uinteger,
-		  (char *) &heuristic_fence_post,
-		  "\
+  c = add_set_cmd ("heuristic-fence-post", class_support, var_uinteger,
+		   (char *) &heuristic_fence_post,
+		   "\
 Set the distance searched for the start of a function.\n\
 If you are debugging a stripped executable, GDB needs to search through the\n\
 program for the start of a function.  This command sets the distance of the\n\
 search.  The only need to set it is when debugging a stripped executable.",
-		  &setlist),
-     &showlist);
+		   &setlist);
+  /* We need to throw away the frame cache when we set this, since it
+     might change our ability to get backtraces.  */
+  c->function.sfunc = reinit_frame_cache_sfunc;
+  add_show_from_set (c, &showlist);
 }
