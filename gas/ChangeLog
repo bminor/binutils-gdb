@@ -1,3 +1,8 @@
+Sat Jan 15 09:20:55 1994  Doug Evans  (dje@canuck.cygnus.com)
+
+	* read.c (emit_expr): Fix computation of mask.
+	* config/obj-elf.c (obj_elf_section): Fix loop termination test.
+
 Thu Jan 13 16:15:15 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
 	* ecoff.c (ecoff_set_gp_prolog_size): New function.

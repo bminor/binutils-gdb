@@ -356,7 +356,7 @@ read_a_source_file (name)
 	   * If input_line_pointer [-1] == '\n' then we just
 	   * scanned another line: so bump line counters.
 	   */
-	  if (is_end_of_line[input_line_pointer[-1]])
+	  if (is_end_of_line[(unsigned char) input_line_pointer[-1]])
 	    {
 	      if (input_line_pointer[-1] == '\n')
 		bump_line_counters ();
@@ -1712,7 +1712,7 @@ emit_expr (exp, nbytes)
       if (nbytes >= sizeof (valueT))
 	mask = 0;
       else
-	mask = ~0 << (BITS_PER_CHAR * nbytes);	/* Don't store these bits. */
+	mask = ~(valueT) 0 << (BITS_PER_CHAR * nbytes);	/* Don't store these bits. */
 
       unmask = ~mask;		/* Do store these bits. */
 
