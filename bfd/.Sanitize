@@ -1,4 +1,4 @@
-# .Sanitize for devo/bfd.
+# .Sanitize for devo/bfd
 
 # Each directory to survive its way into a release will need a file
 # like this one called "./.Sanitize".  All keyword lines must exist,
@@ -32,7 +32,7 @@ else
 fi
 
 # All files listed between the "Things-to-keep:" line and the
-# "Files-to-sed:" line will be kept.  All other files will be removed.
+# "Do-last:" line will be kept.  All other files will be removed.
 # Directories listed in this section will have their own Sanitize
 # called.  Directories not listed will be removed in their entirety
 # with rm -rf.
@@ -99,8 +99,8 @@ coff-stgo32.c
 coff-svm68k.c
 coff-tic30.c
 coff-u68k.c
-coff-we32k.c
 coff-w65.c
+coff-we32k.c
 coff-z8k.c
 coffcode.h
 coffgen.c
@@ -125,12 +125,12 @@ cpu-hppa.c
 cpu-i386.c
 cpu-i860.c
 cpu-i960.c
+cpu-m10200.c
+cpu-m10300.c
 cpu-m32r.c
 cpu-m68k.c
 cpu-m88k.c
 cpu-mips.c
-cpu-m10200.c
-cpu-m10300.c
 cpu-ns32k.c
 cpu-powerpc.c
 cpu-rs6000.c
@@ -139,8 +139,8 @@ cpu-sparc.c
 cpu-tic30.c
 cpu-v850.c
 cpu-vax.c
-cpu-we32k.c
 cpu-w65.c
+cpu-we32k.c
 cpu-z8k.c
 demo64.c
 dep-in.sed
@@ -150,6 +150,8 @@ ecoff.c
 ecofflink.c
 ecoffswap.h
 elf-bfd.h
+elf-m10200.c
+elf-m10300.c
 elf.c
 elf32-arc.c
 elf32-d10v.c
@@ -162,8 +164,6 @@ elf32-m32r.c
 elf32-m68k.c
 elf32-m88k.c
 elf32-mips.c
-elf-m10200.c
-elf-m10300.c
 elf32-ppc.c
 elf32-sh.c
 elf32-sparc.c
@@ -174,17 +174,17 @@ elf64-gen.c
 elf64-mips.c
 elf64-sparc.c
 elf64.c
-elfxx-target.h
 elfcode.h
 elfcore.h
 elflink.c
 elflink.h
-evax.h
+elfxx-target.h
 evax-alpha.c
 evax-egsd.c
 evax-emh.c
 evax-etir.c
 evax-misc.c
+evax.h
 filemode.c
 format.c
 freebsd.h
@@ -204,10 +204,10 @@ i386bsd.c
 i386dynix.c
 i386freebsd.c
 i386linux.c
-i386netbsd.c
 i386lynx.c
 i386mach3.c
 i386msdos.c
+i386netbsd.c
 i386os9k.c
 ieee.c
 ihex.c
@@ -236,9 +236,9 @@ makefile.vms
 mipsbsd.c
 mpw-config.in
 mpw-make.sed
-newsos3.c
 netbsd-core.c
 netbsd.h
+newsos3.c
 nlm-target.h
 nlm.c
 nlm32-alpha.c
@@ -262,6 +262,7 @@ pei-arm.c
 pei-i386.c
 pei-ppc.c
 peicode.h
+po
 ppcboot.c
 ptrace-core.c
 reloc.c
@@ -275,8 +276,8 @@ sparclinux.c
 sparclynx.c
 sparcnetbsd.c
 srec.c
-stabs.c
 stab-syms.c
+stabs.c
 stamp-h.in
 sunos.c
 syms.c
@@ -291,6 +292,11 @@ xcofflink.c
 
 Things-to-lose:
 
+
+
+# The lines between the "Do-last:" line and the end of the file
+# are executed as a /bin/sh shell script after everything else is
+# done.
 
 Do-last:
 
@@ -608,4 +614,4 @@ for i in * ; do
 	fi
 done
 
-# End of file.
+# eof

@@ -1,4 +1,4 @@
-# .Sanitize for devo/binutils
+# .Sanitize for devo/binutils/po
 
 # Each directory to survive its way into a release will need a file
 # like this one called "./.Sanitize".  All keyword lines must exist,
@@ -24,93 +24,9 @@ Do-first:
 
 Things-to-keep:
 
-ChangeLog
-Makefile.am
-Makefile.in
-NEWS
-README
-acconfig.h
-acinclude.m4
-aclocal.m4
-addr2line.1
-addr2line.c
-ar.1
-ar.c
-arlex.l
-arparse.y
-arsup.c
-arsup.h
-binutils.texi
-bucomm.c
-bucomm.h
-budbg.h
-coffdump.c
-coffgrok.c
-coffgrok.h
-config.in
-configure
-configure.bat
-configure.com
-configure.in
-cxxfilt.man
-debug.c
-debug.h
-deflex.l
-defparse.y
-dep-in.sed
-dlltool.c
-dlltool.h
-filemode.c
-ieee.c
-is-ranlib.c
-is-strip.c
-mac-binutils.r
-makefile.vms
-maybe-ranlib.c
-maybe-strip.c
-mpw-config.in
-mpw-make.sed
-nlmconv.1
-nlmconv.c
-nlmconv.h
-nlmheader.y
-nm.1
-nm.c
-not-ranlib.c
-not-strip.c
-objcopy.1
-objcopy.c
-objdump.1
-objdump.c
-po
-prdbg.c
-ranlib.1
-ranlib.sh
-rclex.l
-rcparse.y
-rdcoff.c
-rddbg.c
-resbin.c
-rescoff.c
-resrc.c
-sanity.sh
-size.1
-size.c
-srconv.c
-stabs.c
-stamp-h.in
-strings.1
-strings.c
-strip.1
-sysdump.c
-sysinfo.y
-syslex.l
-sysroff.info
-testsuite
-version.c
-windres.c
-windres.h
-wrstabs.c
+Make-in
+POTFILES.in
+binutils.pot
 
 Things-to-lose:
 
