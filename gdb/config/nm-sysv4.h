@@ -18,6 +18,12 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
+#include "solib.h"	/* Support for shared libraries. */
+
+/* Use SVR4 style shared library support */
+
+#define SVR4_SHARED_LIBS
+
 /* SVR4 has /proc support, so use it instead of ptrace. */
 
 #define USE_PROC_FS

@@ -1,3 +1,14 @@
+Tue Sep 28 17:53:26 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* config/nm-sysv4.h: Include solib.h.  Define SVR4_SHARED_LIBS.
+	* config/tm-sysv4.h: Don't include solib.h.
+	* config/xm-sysv4.h: Don't define SVR4_SHARED_LIBS.
+	* config/i386/i386v4.mt (TDEPFILES): Move solib.o from here...
+	* config/i386/i386v4.mh (NATDEPFILES): ...to here.
+	* config/i386/nm-i386v4.h: Include nm-sysv4.h.
+	* config/m68k/amix.mt (TDEPFIES): Move solib.o from here...
+	* config/m68k/amix.mh (NATDEPFILES): ...to here.
+
 Tue Sep 28 09:45:38 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* symmisc.c (print_symbol): Use %02x not %2x for LOC_CONST_BYTES.

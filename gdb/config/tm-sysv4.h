@@ -18,8 +18,6 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-#include "solib.h"	/* Support for shared libraries. */
-
 /* For SVR4 shared libraries, each call to a library routine goes through
    a small piece of trampoline code in the ".init" section.  Although each
    of these fragments is labeled with the name of the routine being called,
