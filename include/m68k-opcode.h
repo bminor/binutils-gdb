@@ -17,25 +17,7 @@ You should have received a copy of the GNU General Public License
 along with GDB or GAS; see the file COPYING.  If not, write to
 the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
    
-/*
-$Id$
-$Log$
-Revision 1.1  1991/05/19 00:19:41  rich
-Initial revision
 
- * Revision 1.1.1.1  1991/03/21  21:26:44  gumby
- * Back from Intel with Steve
- *
- * Revision 1.1  1991/03/21  21:26:43  gumby
- * Initial revision
- *
- * Revision 1.1  1991/03/13  00:33:57  chrisb
- * Initial revision
- *
- * Revision 1.1  1991/02/22  16:48:06  sac
- * Initial revision
- *
-*/
 struct m68k_opcode
 {
   char *name;
@@ -178,10 +160,13 @@ struct m68k_opcode
    7  second word, shifted 7
    8  second word, shifted 10
    D  store in both place 1 and place 3; for divul and divsl.
+   B  first word, low byte, for branch displacements
+   W  second word (entire), for branch displacements
+   L  second and third words (entire), for branch displacements
    b  second word, low byte
-   w  second word (entire)
+   w  second word (entire) [variable word/long branch offset for dbra]
    l  second and third word (entire)
-   g  branch offset for bra and similar instructions.
+   g  variable branch offset for bra and similar instructions.
       The place to store depends on the magnitude of offset.
    t  store in both place 7 and place 8; for floating point operations
    c  branch offset for cpBcc operations.
@@ -289,20 +274,64 @@ struct m68k_opcode m68k_opcodes[] =
 {"asrw",	one(0160140),		one(0170770),		"DdDs"},
 {"asrw",	one(0160300),		one(0177700),		"~s"},	/* Shift memory */
 
-{"bhi",		one(0061000),		one(0177400),		"Bg"},
-{"bls",		one(0061400),		one(0177400),		"Bg"},
-{"bcc",		one(0062000),		one(0177400),		"Bg"},
-{"bcs",		one(0062400),		one(0177400),		"Bg"},
-{"bne",		one(0063000),		one(0177400),		"Bg"},
-{"beq",		one(0063400),		one(0177400),		"Bg"},
-{"bvc",		one(0064000),		one(0177400),		"Bg"},
-{"bvs",		one(0064400),		one(0177400),		"Bg"},
-{"bpl",		one(0065000),		one(0177400),		"Bg"},
-{"bmi",		one(0065400),		one(0177400),		"Bg"},
-{"bge",		one(0066000),		one(0177400),		"Bg"},
-{"blt",		one(0066400),		one(0177400),		"Bg"},
-{"bgt",		one(0067000),		one(0177400),		"Bg"},
-{"ble",		one(0067400),		one(0177400),		"Bg"},
+/* Fixed-size branches with 16-bit offsets */
+
+{"bhi",		one(0061000),		one(0177777),		"BW"},
+{"bls",		one(0061400),		one(0177777),		"BW"},
+{"bcc",		one(0062000),		one(0177777),		"BW"},
+{"bcs",		one(0062400),		one(0177777),		"BW"},
+{"bne",		one(0063000),		one(0177777),		"BW"},
+{"beq",		one(0063400),		one(0177777),		"BW"},
+{"bvc",		one(0064000),		one(0177777),		"BW"},
+{"bvs",		one(0064400),		one(0177777),		"BW"},
+{"bpl",		one(0065000),		one(0177777),		"BW"},
+{"bmi",		one(0065400),		one(0177777),		"BW"},
+{"bge",		one(0066000),		one(0177777),		"BW"},
+{"blt",		one(0066400),		one(0177777),		"BW"},
+{"bgt",		one(0067000),		one(0177777),		"BW"},
+{"ble",		one(0067400),		one(0177777),		"BW"},
+{"bra",		one(0060000),		one(0177777),		"BW"},
+{"bsr",		one(0060400),		one(0177777),		"BW"},
+
+/* Fixed-size branches with short (byte) offsets */
+
+{"bhis",	one(0061000),		one(0177400),		"BB"},
+{"blss",	one(0061400),		one(0177400),		"BB"},
+{"bccs",	one(0062000),		one(0177400),		"BB"},
+{"bcss",	one(0062400),		one(0177400),		"BB"},
+{"bnes",	one(0063000),		one(0177400),		"BB"},
+{"beqs",	one(0063400),		one(0177400),		"BB"},
+{"bvcs",	one(0064000),		one(0177400),		"BB"},
+{"bvss",	one(0064400),		one(0177400),		"BB"},
+{"bpls",	one(0065000),		one(0177400),		"BB"},
+{"bmis",	one(0065400),		one(0177400),		"BB"},
+{"bges",	one(0066000),		one(0177400),		"BB"},
+{"blts",	one(0066400),		one(0177400),		"BB"},
+{"bgts",	one(0067000),		one(0177400),		"BB"},
+{"bles",	one(0067400),		one(0177400),		"BB"},
+{"bras",	one(0060000),		one(0177400),		"BB"},
+{"bsrs",	one(0060400),		one(0177400),		"BB"},
+
+/* Fixed-size branches with long (32-bit) offsets */
+
+{"bhil",	one(0061377),		one(0177777),		"BL"},
+{"blsl",	one(0061777),		one(0177777),		"BL"},
+{"bccl",	one(0062377),		one(0177777),		"BL"},
+{"bcsl",	one(0062777),		one(0177777),		"BL"},
+{"bnel",	one(0063377),		one(0177777),		"BL"},
+{"beql",	one(0063777),		one(0177777),		"BL"},
+{"bvcl",	one(0064377),		one(0177777),		"BL"},
+{"bvsl",	one(0064777),		one(0177777),		"BL"},
+{"bpll",	one(0065377),		one(0177777),		"BL"},
+{"bmil",	one(0065777),		one(0177777),		"BL"},
+{"bgel",	one(0066377),		one(0177777),		"BL"},
+{"bltl",	one(0066777),		one(0177777),		"BL"},
+{"bgtl",	one(0067377),		one(0177777),		"BL"},
+{"blel",	one(0067777),		one(0177777),		"BL"},
+{"bral",	one(0060377),		one(0177777),		"BL"},
+{"bsrl",	one(0060777),		one(0177777),		"BL"},
+
+/* We now return you to our regularly scheduled instruction set */
 
 {"bchg",	one(0000500),		one(0170700),		"Dd$s"},
 {"bchg",	one(0004100),		one(0177700),		"#b$s"},
@@ -322,10 +351,6 @@ struct m68k_opcode m68k_opcodes[] =
 {"btst",	one(0004000),		one(0177700),		"#b@s"},
 
 {"bkpt",	one(0044110),		one(0177770),		"Qs"},
-{"bra",		one(0060000),		one(0177400),		"Bg"},
-{"bras",	one(0060000),		one(0177400),		"Bw"},
-{"bsr",		one(0060400),		one(0177400),		"Bg"},
-{"bsrs",	one(0060400),		one(0177400),		"Bw"},
 
 {"callm",	one(0003300),		one(0177700),		"#b!s"},
 {"cas2l",	two(0007374, 0),	two(0177777, 0107070),	"D3D6D2D5R1R4"}, /* JF FOO this is really a 3 word ins */
@@ -751,38 +776,75 @@ struct m68k_opcode m68k_opcodes[] =
 {"fatanhx",	two(0xF000, 0x480D),	two(0xF1C0, 0xFC7F),	"Ii;xF7"},
 {"fatanhx",	two(0xF000, 0x000D),	two(0xF1C0, 0xE07F),	"IiFt"},
 
-{"fbeq",	one(0xF081),		one(0xF1BF),		"IdBc"},
-{"fbf",		one(0xF080),		one(0xF1BF),		"IdBc"},
-{"fbge",	one(0xF093),		one(0xF1BF),		"IdBc"},
-{"fbgl",	one(0xF096),		one(0xF1BF),		"IdBc"},
-{"fbgle",	one(0xF097),		one(0xF1BF),		"IdBc"},
-{"fbgt",	one(0xF092),		one(0xF1BF),		"IdBc"},
-{"fble",	one(0xF095),		one(0xF1BF),		"IdBc"},
-{"fblt",	one(0xF094),		one(0xF1BF),		"IdBc"},
-{"fbne",	one(0xF08E),		one(0xF1BF),		"IdBc"},
-{"fbnge",	one(0xF09C),		one(0xF1BF),		"IdBc"},
-{"fbngl",	one(0xF099),		one(0xF1BF),		"IdBc"},
-{"fbngle",	one(0xF098),		one(0xF1BF),		"IdBc"},
-{"fbngt",	one(0xF09D),		one(0xF1BF),		"IdBc"},
-{"fbnle",	one(0xF09A),		one(0xF1BF),		"IdBc"},
-{"fbnlt",	one(0xF09B),		one(0xF1BF),		"IdBc"},
-{"fboge",	one(0xF083),		one(0xF1BF),		"IdBc"},
-{"fbogl",	one(0xF086),		one(0xF1BF),		"IdBc"},
-{"fbogt",	one(0xF082),		one(0xF1BF),		"IdBc"},
-{"fbole",	one(0xF085),		one(0xF1BF),		"IdBc"},
-{"fbolt",	one(0xF084),		one(0xF1BF),		"IdBc"},
-{"fbor",	one(0xF087),		one(0xF1BF),		"IdBc"},
-{"fbseq",	one(0xF091),		one(0xF1BF),		"IdBc"},
-{"fbsf",	one(0xF090),		one(0xF1BF),		"IdBc"},
-{"fbsne",	one(0xF09E),		one(0xF1BF),		"IdBc"},
-{"fbst",	one(0xF09F),		one(0xF1BF),		"IdBc"},
-{"fbt",		one(0xF08F),		one(0xF1BF),		"IdBc"},
-{"fbueq",	one(0xF089),		one(0xF1BF),		"IdBc"},
-{"fbuge",	one(0xF08B),		one(0xF1BF),		"IdBc"},
-{"fbugt",	one(0xF08A),		one(0xF1BF),		"IdBc"},
-{"fbule",	one(0xF08D),		one(0xF1BF),		"IdBc"},
-{"fbult",	one(0xF08C),		one(0xF1BF),		"IdBc"},
-{"fbun",	one(0xF088),		one(0xF1BF),		"IdBc"},
+/* Fixed-size Float branches */
+
+{"fbeq",	one(0xF081),		one(0xF1BF),		"IdBW"},
+{"fbf",		one(0xF080),		one(0xF1BF),		"IdBW"},
+{"fbge",	one(0xF093),		one(0xF1BF),		"IdBW"},
+{"fbgl",	one(0xF096),		one(0xF1BF),		"IdBW"},
+{"fbgle",	one(0xF097),		one(0xF1BF),		"IdBW"},
+{"fbgt",	one(0xF092),		one(0xF1BF),		"IdBW"},
+{"fble",	one(0xF095),		one(0xF1BF),		"IdBW"},
+{"fblt",	one(0xF094),		one(0xF1BF),		"IdBW"},
+{"fbne",	one(0xF08E),		one(0xF1BF),		"IdBW"},
+{"fbnge",	one(0xF09C),		one(0xF1BF),		"IdBW"},
+{"fbngl",	one(0xF099),		one(0xF1BF),		"IdBW"},
+{"fbngle",	one(0xF098),		one(0xF1BF),		"IdBW"},
+{"fbngt",	one(0xF09D),		one(0xF1BF),		"IdBW"},
+{"fbnle",	one(0xF09A),		one(0xF1BF),		"IdBW"},
+{"fbnlt",	one(0xF09B),		one(0xF1BF),		"IdBW"},
+{"fboge",	one(0xF083),		one(0xF1BF),		"IdBW"},
+{"fbogl",	one(0xF086),		one(0xF1BF),		"IdBW"},
+{"fbogt",	one(0xF082),		one(0xF1BF),		"IdBW"},
+{"fbole",	one(0xF085),		one(0xF1BF),		"IdBW"},
+{"fbolt",	one(0xF084),		one(0xF1BF),		"IdBW"},
+{"fbor",	one(0xF087),		one(0xF1BF),		"IdBW"},
+{"fbseq",	one(0xF091),		one(0xF1BF),		"IdBW"},
+{"fbsf",	one(0xF090),		one(0xF1BF),		"IdBW"},
+{"fbsne",	one(0xF09E),		one(0xF1BF),		"IdBW"},
+{"fbst",	one(0xF09F),		one(0xF1BF),		"IdBW"},
+{"fbt",		one(0xF08F),		one(0xF1BF),		"IdBW"},
+{"fbueq",	one(0xF089),		one(0xF1BF),		"IdBW"},
+{"fbuge",	one(0xF08B),		one(0xF1BF),		"IdBW"},
+{"fbugt",	one(0xF08A),		one(0xF1BF),		"IdBW"},
+{"fbule",	one(0xF08D),		one(0xF1BF),		"IdBW"},
+{"fbult",	one(0xF08C),		one(0xF1BF),		"IdBW"},
+{"fbun",	one(0xF088),		one(0xF1BF),		"IdBW"},
+
+/* Float branches -- long (32-bit) displacements */
+
+{"fbeql",	one(0xF081),		one(0xF1BF),		"IdBC"},
+{"fbfl",	one(0xF080),		one(0xF1BF),		"IdBC"},
+{"fbgel",	one(0xF093),		one(0xF1BF),		"IdBC"},
+{"fbgll",	one(0xF096),		one(0xF1BF),		"IdBC"},
+{"fbglel",	one(0xF097),		one(0xF1BF),		"IdBC"},
+{"fbgtl",	one(0xF092),		one(0xF1BF),		"IdBC"},
+{"fblel",	one(0xF095),		one(0xF1BF),		"IdBC"},
+{"fbltl",	one(0xF094),		one(0xF1BF),		"IdBC"},
+{"fbnel",	one(0xF08E),		one(0xF1BF),		"IdBC"},
+{"fbngel",	one(0xF09C),		one(0xF1BF),		"IdBC"},
+{"fbngll",	one(0xF099),		one(0xF1BF),		"IdBC"},
+{"fbnglel",	one(0xF098),		one(0xF1BF),		"IdBC"},
+{"fbngtl",	one(0xF09D),		one(0xF1BF),		"IdBC"},
+{"fbnlel",	one(0xF09A),		one(0xF1BF),		"IdBC"},
+{"fbnltl",	one(0xF09B),		one(0xF1BF),		"IdBC"},
+{"fbogel",	one(0xF083),		one(0xF1BF),		"IdBC"},
+{"fbogll",	one(0xF086),		one(0xF1BF),		"IdBC"},
+{"fbogtl",	one(0xF082),		one(0xF1BF),		"IdBC"},
+{"fbolel",	one(0xF085),		one(0xF1BF),		"IdBC"},
+{"fboltl",	one(0xF084),		one(0xF1BF),		"IdBC"},
+{"fborl",	one(0xF087),		one(0xF1BF),		"IdBC"},
+{"fbseql",	one(0xF091),		one(0xF1BF),		"IdBC"},
+{"fbsfl",	one(0xF090),		one(0xF1BF),		"IdBC"},
+{"fbsnel",	one(0xF09E),		one(0xF1BF),		"IdBC"},
+{"fbstl",	one(0xF09F),		one(0xF1BF),		"IdBC"},
+{"fbtl",	one(0xF08F),		one(0xF1BF),		"IdBC"},
+{"fbueql",	one(0xF089),		one(0xF1BF),		"IdBC"},
+{"fbugel",	one(0xF08B),		one(0xF1BF),		"IdBC"},
+{"fbugtl",	one(0xF08A),		one(0xF1BF),		"IdBC"},
+{"fbulel",	one(0xF08D),		one(0xF1BF),		"IdBC"},
+{"fbultl",	one(0xF08C),		one(0xF1BF),		"IdBC"},
+{"fbunl",	one(0xF088),		one(0xF1BF),		"IdBC"},
 
 {"fcmpb",	two(0xF000, 0x5838),	two(0xF1C0, 0xFC7F),	"Ii;bF7"},
 {"fcmpd",	two(0xF000, 0x5438),	two(0xF1C0, 0xFC7F),	"Ii;FF7"},
@@ -1087,18 +1149,6 @@ struct m68k_opcode m68k_opcodes[] =
 {"fsave",	one(0xF100),		one(0xF1C0),		"Id&s"},
 {"fsave",	one(0xF120),		one(0xF1F8),		"Id-s"},
 
-{"fsincosb",	two(0xF000, 0x5830),	two(0xF1C0, 0xFC78),	"Ii;bF7FC"},
-{"fsincosd",	two(0xF000, 0x5430),	two(0xF1C0, 0xFC78),	"Ii;FF7FC"},
-{"fsincosl",	two(0xF000, 0x4030),	two(0xF1C0, 0xFC78),	"Ii;lF7FC"},
-{"fsincosp",	two(0xF000, 0x4C30),	two(0xF1C0, 0xFC78),	"Ii;pF7FC"},
-{"fsincoss",	two(0xF000, 0x4430),	two(0xF1C0, 0xFC78),	"Ii;fF7FC"},
-{"fsincosw",	two(0xF000, 0x5030),	two(0xF1C0, 0xFC78),	"Ii;wF7FC"},
-{"fsincosx",	two(0xF000, 0x0030),	two(0xF1C0, 0xE078),	"IiF8F7FC"},
-{"fsincosx",	two(0xF000, 0x4830),	two(0xF1C0, 0xFC78),	"Ii;xF7FC"},
-
-
-#ifdef comment
-/* gas's version had these. */
 {"fsincosb",	two(0xF000, 0x5830),	two(0xF1C0, 0xFC78),	"Ii;bF3F7"},
 {"fsincosd",	two(0xF000, 0x5430),	two(0xF1C0, 0xFC78),	"Ii;FF3F7"},
 {"fsincosl",	two(0xF000, 0x4030),	two(0xF1C0, 0xFC78),	"Ii;lF3F7"},
@@ -1107,7 +1157,6 @@ struct m68k_opcode m68k_opcodes[] =
 {"fsincosw",	two(0xF000, 0x5030),	two(0xF1C0, 0xFC78),	"Ii;wF3F7"},
 {"fsincosx",	two(0xF000, 0x0030),	two(0xF1C0, 0xE078),	"IiF8F3F7"},
 {"fsincosx",	two(0xF000, 0x4830),	two(0xF1C0, 0xFC78),	"Ii;xF3F7"},
-#endif /* comment */
 
 {"fscaleb",	two(0xF000, 0x5826),	two(0xF1C0, 0xFC7F),	"Ii;bF7"},
 {"fscaled",	two(0xF000, 0x5426),	two(0xF1C0, 0xFC7F),	"Ii;FF7"},
@@ -1363,6 +1412,7 @@ struct m68k_opcode m68k_opcodes[] =
 {"ftwotoxx",	two(0xF000, 0x4811),	two(0xF1C0, 0xFC7F),	"Ii;xF7"},
 {"ftwotoxx",	two(0xF000, 0x0011),	two(0xF1C0, 0xE07F),	"IiFt"},
 
+/* Variable-sized float branches */
 
 {"fjeq",	one(0xF081),		one(0xF1FF),		"IdBc"},
 {"fjf",		one(0xF080),		one(0xF1FF),		"IdBc"},
@@ -1397,24 +1447,7 @@ struct m68k_opcode m68k_opcodes[] =
 {"fjult",	one(0xF08C),		one(0xF1FF),		"IdBc"},
 {"fjun",	one(0xF088),		one(0xF1FF),		"IdBc"},
 
-/* The assembler will ignore attempts to force a short offset */
-
-{"bhis",	one(0061000),		one(0177400),		"Bg"},
-{"blss",	one(0061400),		one(0177400),		"Bg"},
-{"bccs",	one(0062000),		one(0177400),		"Bg"},
-{"bcss",	one(0062400),		one(0177400),		"Bg"},
-{"bnes",	one(0063000),		one(0177400),		"Bg"},
-{"beqs",	one(0063400),		one(0177400),		"Bg"},
-{"bvcs",	one(0064000),		one(0177400),		"Bg"},
-{"bvss",	one(0064400),		one(0177400),		"Bg"},
-{"bpls",	one(0065000),		one(0177400),		"Bg"},
-{"bmis",	one(0065400),		one(0177400),		"Bg"},
-{"bges",	one(0066000),		one(0177400),		"Bg"},
-{"blts",	one(0066400),		one(0177400),		"Bg"},
-{"bgts",	one(0067000),		one(0177400),		"Bg"},
-{"bles",	one(0067400),		one(0177400),		"Bg"},
-
-/* Alternate mnemonics for SUN */
+/* Variable-sized branches */
 
 {"jbsr",	one(0060400),		one(0177400),		"Bg"},
 {"jbsr",	one(0047200),		one(0177700),		"!s"},
@@ -1435,25 +1468,6 @@ struct m68k_opcode m68k_opcodes[] =
 {"jlt",		one(0066400),		one(0177400),		"Bg"},
 {"jgt",		one(0067000),		one(0177400),		"Bg"},
 {"jle",		one(0067400),		one(0177400),		"Bg"},
-
-/* Short offsets are ignored */
-
-{"jbsrs",	one(0060400),		one(0177400),		"Bg"},
-{"jras",	one(0060000),		one(0177400),		"Bg"},
-{"jhis",	one(0061000),		one(0177400),		"Bg"},
-{"jlss",	one(0061400),		one(0177400),		"Bg"},
-{"jccs",	one(0062000),		one(0177400),		"Bg"},
-{"jcss",	one(0062400),		one(0177400),		"Bg"},
-{"jnes",	one(0063000),		one(0177400),		"Bg"},
-{"jeqs",	one(0063400),		one(0177400),		"Bg"},
-{"jvcs",	one(0064000),		one(0177400),		"Bg"},
-{"jvss",	one(0064400),		one(0177400),		"Bg"},
-{"jpls",	one(0065000),		one(0177400),		"Bg"},
-{"jmis",	one(0065400),		one(0177400),		"Bg"},
-{"jges",	one(0066000),		one(0177400),		"Bg"},
-{"jlts",	one(0066400),		one(0177400),		"Bg"},
-{"jgts",	one(0067000),		one(0177400),		"Bg"},
-{"jles",	one(0067400),		one(0177400),		"Bg"},
 
 {"movql",	one(0070000),		one(0170400),		"MsDd"},
 {"moveql",	one(0070000),		one(0170400),		"MsDd"},
@@ -1568,13 +1582,7 @@ struct m68k_opcode m68k_opcodes[] =
 {"pflush",	two(0xf000, 0x3800),	two(0xffc0, 0xfe1e),	"f3T9&s" },
 
 {"pflushs",	two(0xf000, 0x3410),	two(0xfff8, 0xfe10),	"T3T9" },
-{"pflushs",	two(0xf000, 0x3c00),	two(0xfff8, 0xfe00),	"T3T9&s" },
-
-#ifdef comment
- /* gas's version had this instead. */
 {"pflushs",	two(0xf000, 0x3c10),	two(0xfff8, 0xfe00),	"T3T9&s" },
-#endif /* comment */
-
 {"pflushs",	two(0xf000, 0x3408),	two(0xfff8, 0xfe18),	"D3T9" },
 {"pflushs",	two(0xf000, 0x3c08),	two(0xfff8, 0xfe18),	"D3T9&s" },
 {"pflushs",	two(0xf000, 0x3400),	two(0xfff8, 0xfe1e),	"f3T9" },
