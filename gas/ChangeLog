@@ -7,6 +7,11 @@
 	* frags.c (frag_new): Update fr_var comments.
 	* frags.h (struct frag): Ditto.
 
+	* config/tc-i386.c (tc_i386_fix_adjustable): Prevent adjustment
+	for OBJ_MAYBE_ELF too.  Use S_IS_EXTERNAL instead of S_IS_EXTERN.
+	(md_estimate_size_before_relax): Ensure jumps to weak and
+	externally visible symbols are relocatable.
+
 2000-05-14  David O'Brien  <obrien@FreeBSD.org>
 
 	* config/te-freebsd.h: New file.
