@@ -1,5 +1,9 @@
 Wed Sep 28 11:50:40 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
+	* config/tc-mips.c: Include subsegs.h.
+	(md_apply_fix): If an unconditional b or bal overflows, and we are
+	not assembling PIC code, replace it with a j or jal.
+
 	* config/tc-mips.c (md_apply_fix): Correct branch overflow test.
 	Use as_bad_where and as_warn_where rather than as_bad and as_warn.
 
