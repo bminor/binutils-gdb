@@ -1,3 +1,14 @@
+Mon May  4 16:12:23 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-sparc.h (tc_fix_adjustable) [OBJ_AOUT]: When PIC,
+	don't adjust a PC relative reloc against an externally visible
+	symbol.
+	* config/tc-sparc.c (md_apply_fix3): When generating a.out PIC,
+	for a PC relative fixup against an externally visible defined
+	symbol, arrange to store object file and addend values as though
+	the symbol were not defined.
+	(tc_gen_reloc): Likewise.
+
 Thu Apr 30 13:09:39 1998  Fred Fish  <fnf@ninemoons.com>
 
 	* read.c (sizeof_leb128): Referenced externally by write.c so
