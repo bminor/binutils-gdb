@@ -1,3 +1,7 @@
+Mon Apr  8 23:58:49 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* compile.c (sim_resume): Fix overflow checks for ALU insns.
+
 Fri Apr  5 17:20:59 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* compile.c (decode): Use "bit" to hold L_3 immediates instead

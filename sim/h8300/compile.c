@@ -1508,8 +1508,22 @@ sim_resume (step, siggnal)
     just_flags_alu8:
       n = res & 0x80;
       nz = res & 0xff;
-      v = ((ea & 0x80) == (rd & 0x80)) && ((ea & 0x80) != (res & 0x80));
       c = (res & 0x100);
+      switch (code->opcode / 4)
+	{
+	case O_ADD:
+	  v = ((rd & 0x80) == (ea & 0x80)
+	       && (rd & 0x80) != (res & 0x80));
+	  break;
+	case O_SUB:
+	case O_CMP:
+	  v = ((rd & 0x80) != (-ea & 0x80)
+	       && (rd & 0x80) != (res & 0x80));
+	  break;
+	case O_NEG:
+	  v = (rd == 0x80);
+	  break;
+	}
       goto next;
 
     alu16:
@@ -1517,8 +1531,22 @@ sim_resume (step, siggnal)
     just_flags_alu16:
       n = res & 0x8000;
       nz = res & 0xffff;
-      v = ((ea & 0x8000) == (rd & 0x8000)) && ((ea & 0x8000) != (res & 0x8000));
       c = (res & 0x10000);
+      switch (code->opcode / 4)
+	{
+	case O_ADD:
+	  v = ((rd & 0x8000) == (ea & 0x8000)
+	       && (rd & 0x8000) != (res & 0x8000));
+	  break;
+	case O_SUB:
+	case O_CMP:
+	  v = ((rd & 0x8000) != (-ea & 0x8000)
+	       && (rd & 0x8000) != (res & 0x8000));
+	  break;
+	case O_NEG:
+	  v = (rd == 0x8000);
+	  break;
+	}
       goto next;
 
     alu32:
@@ -1526,8 +1554,22 @@ sim_resume (step, siggnal)
     just_flags_alu32:
       n = res & 0x80000000;
       nz = res & 0xffffffff;
-      v = ((ea & 0x80000000) == (rd & 0x80000000))
-	&& ((ea & 0x80000000) != (res & 0x80000000));
+      switch (code->opcode / 4)
+	{
+	case O_ADD:
+	  v = ((rd & 0x80000000) == (ea & 0x80000000)
+	       && (rd & 0x80000000) != (res & 0x80000000));
+	  break;
+	case O_SUB:
+	case O_CMP:
+	  v = ((rd & 0x80000000) != (-ea & 0x80000000)
+	       && (rd & 0x80000000) != (res & 0x80000000));
+	  break;
+	case O_NEG:
+	  v = (rd == 0x80000000);
+	  break;
+	}
+      goto next;
       switch (code->opcode / 4)
 	{
 	case O_ADD:
