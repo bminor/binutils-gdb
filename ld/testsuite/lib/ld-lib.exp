@@ -587,6 +587,10 @@ proc simple_diff { file_1 file_2 } {
 #	to pass.  The PROG, objdump, nm and objcopy options have no
 #	meaning and need not supplied if this is present.
 #
+#   warning: REGEX
+#	Expect a linker warning matching REGEX.  It is an error to issue
+#	both "error" and "warning".
+#
 # Each option may occur at most once unless otherwise mentioned.
 #
 # After the option lines come regexp lines.  `run_dump_test' calls
@@ -634,6 +638,7 @@ proc run_dump_test { name } {
     set opts(PROG) {}
     set opts(source) {}
     set opts(error) {}
+    set opts(warning) {}
     set opts(objcopy_linked_file) {}
     set asflags(${file}.s) {}
 
@@ -800,6 +805,15 @@ proc run_dump_test { name } {
     # Perhaps link the file(s).
     if { $run_ld } {
 	set objfile "tmpdir/dump"
+	set expmsg $opts(error)
+
+	if { $opts(warning) != "" } {
+	    if { $expmsg != "" } {
+		perror "$testname: mixing error and warning test-directives"
+		return
+	    }
+	    set expmsg $opts(warning)
+	}
 
 	# Add -L$srcdir/$subdir so that the linker command can use
 	# linker scripts in the source directory.
@@ -810,18 +824,36 @@ proc run_dump_test { name } {
 	set cmdret [catch "exec $cmd" comp_output]
 	set comp_output [prune_warnings $comp_output]
 
-	if { $cmdret != 0 || ![string match "" $comp_output] } then {
-	    verbose -log "failed with: <$comp_output>, expected: <$opts(error)>"
+	if { $cmdret != 0 || $comp_output != "" || $expmsg != "" } then {
+	    # If the executed program writes to stderr and stderr is not
+	    # redirected, exec *always* returns failure, regardless of the
+	    # program exit code.  Thankfully, we can retrieve the true
+	    # return status from a special variable.  Redirection would
+	    # cause a tcl-specific message to be appended, and we'd rather
+	    # not deal with that if we can help it.
+	    global errorCode
+	    if { $cmdret != 0 && [lindex $errorCode 0] == "NONE" } {
+		set cmdret 0
+	    }
+
+	    set exitstat "succeeded"
+	    if { $cmdret != 0 } { set exitstat "failed" }
+	    verbose -log "$exitstat with: <$comp_output>, expected: <$expmsg>"
 	    send_log "$comp_output\n"
 	    verbose "$comp_output" 3
-	    if { $opts(error) != "" && $run_objcopy == 0 } {
-		if [regexp $opts(error) $comp_output] {
+	    if { $expmsg != "" && $run_objcopy == 0 \
+		    && [regexp $expmsg $comp_output] \
+		    && (($cmdret == 0) == ($opts(warning) != "")) } {
+		# Only "pass" and return here if we expected (and got)
+		# an error.
+		if { $opts(error) != "" } {
 		    pass $testname
 		    return
 		}
+	    } {
+		fail $testname
+		return
 	    }
-	    fail $testname
-	    return
 	}
 
 	if { $run_objcopy } {

@@ -1,3 +1,7 @@
+2005-02-07  Hans-Peter Nilsson  <hp@axis.com>
+
+	* lib/ld-lib.exp: Support new directive "warning".
+
 2005-02-02  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* ld-mips-elf/eh-frame3.d, ld-mips-elf/eh-frame4.d: Move comments
