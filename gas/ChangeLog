@@ -1,3 +1,11 @@
+Wed Oct  8 00:04:05 1997  Gavin Koch  <gavin@cygnus.com>
+
+	* config/tc-mips.c (md_begin): Replace the TARGET_CPU value
+	of mipsr3900 with mipstx39.
+
+	* config/tc-mips.c (mips_ip): Don't print the 'opcode requires 
+	-mipsXX message' if the insn isn't an ISA insn.
+
 Tue Oct  7 12:48:30 1997  Doug Evans  <dje@canuck.cygnus.com>
 
 	* config/tc-sparc.h (TARGET_FORMAT support): Moved to tc-sparc.c.

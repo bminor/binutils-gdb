@@ -104,7 +104,9 @@ static char *mips_regmask_frag;
 extern int target_big_endian;
 
 /* 1 is we should use the 64 bit MIPS ELF ABI, 0 if we should use the
-   32 bit ABI.  This has no meaning for ECOFF.  */
+   32 bit ABI.  This has no meaning for ECOFF.
+   Note that the default is always 32 bit, even if "configured" for
+   64 bit [e.g. --target=mips64-elf].  */
 static int mips_64;
 
 /* The default target format to use.  */
@@ -804,7 +806,7 @@ md_begin ()
 	    mips_cpu = 3000;
 	}
       else if (strcmp (cpu, "r3900") == 0
-               || strcmp (cpu, "mipsr3900") == 0
+               || strcmp (cpu, "mipstx39") == 0
                /* start-sanitize-tx19 */
                || strcmp (cpu, "r1900") == 0
                || strcmp (cpu, "mipstx19") == 0
@@ -6618,7 +6620,8 @@ mips_ip (str, ip)
 	      ++insn;
 	      continue;
 	    }
-	  if (insn_isa <= mips_opts.isa)
+	  if (insn_isa == 15 
+              || insn_isa <= mips_opts.isa)
 	    insn_error = "opcode not supported on this processor";
 	  else
 	    {
