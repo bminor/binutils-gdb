@@ -237,7 +237,6 @@ evaluate_subexp (expect_type, exp, pos, noside)
   struct type *type;
   int nargs;
   value_ptr *argvec;
-  int tmp_pos, tmp1_pos; 
   struct symbol *tmp_symbol; 
   int upper, lower, retcode; 
   int code;
@@ -430,11 +429,7 @@ evaluate_subexp (expect_type, exp, pos, noside)
 	}
       if (noside == EVAL_SKIP)
 	goto nosideret;
-      if (current_language->la_language == language_fortran)
-         /* For F77, we need to do special things to literal strings */ 
-         return (f77_value_literal_string (tem2, tem3, argvec));
       return value_array (tem2, tem3, argvec);
-      break;
 
     case TERNOP_SLICE:
       {
@@ -629,6 +624,8 @@ evaluate_subexp (expect_type, exp, pos, noside)
 	  argvec[0] = arg1;
 	}
 
+    do_call_it:
+
       if (noside == EVAL_SKIP)
 	goto nosideret;
       if (noside == EVAL_AVOID_SIDE_EFFECTS)
@@ -652,8 +649,6 @@ evaluate_subexp (expect_type, exp, pos, noside)
 
     case OP_F77_UNDETERMINED_ARGLIST: 
 
-      tmp_pos = pc; /* Point to this instr */ 
-
       /* Remember that in F77, functions, substring ops and 
          array subscript operations cannot be disambiguated 
          at parse time.  We have made all array subscript operations, 
@@ -673,88 +668,41 @@ evaluate_subexp (expect_type, exp, pos, noside)
             
          instruction sequence */
 
-      nargs = longest_to_int (exp->elts[tmp_pos+1].longconst);
-      tmp_pos += 3; /* size(op_funcall) == 3 elts */ 
-
-      /* We will always have an OP_VAR_VALUE as the next opcode. 
-         The data stored after the OP_VAR_VALUE is the a pointer 
-         to the function/array/string symbol.  We should now check and 
-         make sure that the symbols is an array and not a function.  
-         If it is an array type, we have hit a F77 subscript operation and 
-         we have to do some magic. If it is not an array, we check 
-         to see if we found a string here. If there is a string, 
-         we recursively evaluate and let OP_f77_SUBSTR deal with 
-         things.  If there is no string, we know there is a function 
-         call at hand and change OP_FUNCALL_OR_SUBSCRIPT -> OP_FUNCALL.  
-         In all cases, we recursively evaluate.  */ 
+      nargs = longest_to_int (exp->elts[pc+1].longconst);
+      (*pos) += 2;
 
       /* First determine the type code we are dealing with.  */ 
-
-      switch (exp->elts[tmp_pos].opcode)
-	{
-	case OP_VAR_VALUE: 
-	  tmp_pos += 1; /* To get to the symbol ptr */ 
-	  tmp_symbol = exp->elts[tmp_pos].symbol; 
-	  code = TYPE_CODE (SYMBOL_TYPE (tmp_symbol)); 
-	  break; 
-
-	case OP_INTERNALVAR:
-	  tmp_pos += 1;
-	  var = exp->elts[tmp_pos].internalvar; 
-	  code = TYPE_CODE(VALUE_TYPE(var->value)); 
-	  break; 
-
-	case OP_F77_UNDETERMINED_ARGLIST:
-	  /* Special case when you do stuff like print ARRAY(1,1)(3:4) */ 
-	  tmp1_pos = tmp_pos ; 
-	  arg2 = evaluate_subexp (NULL_TYPE, exp, &tmp1_pos, noside);
-	  code =TYPE_CODE (VALUE_TYPE (arg2)); 
-	  break; 
-
-	default:
-	  error ("Cannot perform substring on this type"); 
-	}                
+      arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
+      code = TYPE_CODE (VALUE_TYPE (arg1)); 
 
       switch (code) 
 	{
-	case TYPE_CODE_ARRAY: 
-	  /* Transform this into what it really is: a MULTI_F77_SUBSCRIPT */
-	  tmp_pos = pc; 
-	  exp->elts[tmp_pos].opcode = MULTI_F77_SUBSCRIPT;
-	  exp->elts[tmp_pos+2].opcode = MULTI_F77_SUBSCRIPT; 
-	  break;
+	case TYPE_CODE_ARRAY:
+	  goto multi_f77_subscript;
 
-	case TYPE_CODE_LITERAL_STRING:  /* When substring'ing internalvars */ 
 	case TYPE_CODE_STRING:
-	  tmp_pos = pc; 
-	  exp->elts[tmp_pos].opcode = OP_F77_SUBSTR; 
-	  exp->elts[tmp_pos+2].opcode = OP_F77_SUBSTR; 
-	  break;
+	  goto op_f77_substr;
 
 	case TYPE_CODE_PTR:
 	case TYPE_CODE_FUNC:
-	  /* This is just a regular OP_FUNCALL, transform it 
-	     and recursively evaluate */ 
-	  tmp_pos = pc; /* Point to OP_FUNCALL_OR_SUBSCRIPT */ 
-	  exp->elts[tmp_pos].opcode = OP_FUNCALL; 
-	  exp->elts[tmp_pos+2].opcode = OP_FUNCALL; 
-	  break; 
+	  /* It's a function call. */
+	  /* Allocate arg vector, including space for the function to be
+	     called in argvec[0] and a terminating NULL */
+	  argvec = (value_ptr *) alloca (sizeof (value_ptr) * (nargs + 2));
+	  argvec[0] = arg1;
+	  tem = 1;
+	  for (; tem <= nargs; tem++)
+	    argvec[tem] = evaluate_subexp_with_coercion (exp, pos, noside);
+	  argvec[tem] = 0; /* signal end of arglist */
+	  goto do_call_it;
 
 	default:
               error ("Cannot perform substring on this type"); 
 	}
 
-      /* Pretend like you never saw this expression */
-      *pos -= 1; 
-      arg2 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
-      return arg2;   
-
-    case OP_F77_SUBSTR:
+    op_f77_substr:
       /* We have a substring operation on our hands here, 
          let us get the string we will be dealing with */
-
-      (*pos) += 2;
-      arg1 = evaluate_subexp_with_coercion (exp, pos, noside);
 
       /* Now evaluate the 'from' and 'to' */
 
@@ -762,6 +710,9 @@ evaluate_subexp (expect_type, exp, pos, noside)
 
       if (TYPE_CODE (VALUE_TYPE (arg2)) != TYPE_CODE_INT)
          error ("Substring arguments must be of type integer");
+
+      if (nargs < 2)
+	return value_subscript (arg1, arg2);
 
       arg3 = evaluate_subexp_with_coercion (exp, pos, noside);
 
@@ -780,16 +731,15 @@ evaluate_subexp (expect_type, exp, pos, noside)
       if (noside == EVAL_SKIP)
         goto nosideret;
       
-      return f77_value_substring (arg1, tem2, tem3);
+      return value_slice (arg1, tem2, tem3 - tem2 + 1);
 
-    case OP_F77_LITERAL_COMPLEX:
+    case OP_COMPLEX:
       /* We have a complex number, There should be 2 floating 
 	 point numbers that compose it */ 
       arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
       arg2 = evaluate_subexp (NULL_TYPE, exp, pos, noside); 
 
-      /* Complex*16 is the default size to create */ 
-      return f77_value_literal_complex (arg1, arg2, 16);
+      return value_literal_complex (arg1, arg2, builtin_type_f_complex_s16);
 
     case STRUCTOP_STRUCT:
       tem = longest_to_int (exp->elts[pc + 1].longconst);
@@ -1014,7 +964,7 @@ evaluate_subexp (expect_type, exp, pos, noside)
 	}
       return (arg1);
 
-    case MULTI_F77_SUBSCRIPT:
+    multi_f77_subscript:
       { 
 	int subscript_array[MAX_FORTRAN_DIMS+1]; /* 1-based array of 
 						    subscripts, max == 7 */
@@ -1024,13 +974,8 @@ evaluate_subexp (expect_type, exp, pos, noside)
 	int offset_item;   /* The array offset where the item lives */ 
 	int fixed_subscript; 
 
-	(*pos) += 2;
-	nargs = longest_to_int (exp->elts[pc + 1].longconst);
-         
 	if (nargs > MAX_FORTRAN_DIMS)
 	  error ("Too many subscripts for F77 (%d Max)", MAX_FORTRAN_DIMS);
-
-	arg1 = evaluate_subexp_with_coercion (exp, pos, noside);
          
 	ndimensions = calc_f77_array_dims (VALUE_TYPE (arg1)); 
 

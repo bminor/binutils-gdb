@@ -279,7 +279,7 @@ complexnum:     exp ',' exp
         ;
 
 exp	:	'(' complexnum ')'
-                	{ write_exp_elt_opcode(OP_F77_LITERAL_COMPLEX); }
+                	{ write_exp_elt_opcode(OP_COMPLEX); }
 	;
 
 exp	:	'(' type ')' exp  %prec UNARY
@@ -436,32 +436,11 @@ exp     :       BOOLEAN_LITERAL
         ;
 
 exp	:	STRING_LITERAL
-			{  /* In F77, we encounter string literals 
-			      basically in only one place:
-			      when we are setting up manual parameter 
-			      lists to functions we call by hand or 
-			      when setting string vars to manual values. 
-			      These are character*N type variables.
-			      They are treated specially  behind the 
-			      scenes. Remember that the literal strings's 
-			      OPs are being emitted in reverse order, thus 
-			      we first have the elements and then 
-			      the array descriptor itself.  */ 
-			  char *sp = $1.ptr; int count = $1.length;
-
-			  while (count-- > 0)
-			    {
-			      write_exp_elt_opcode (OP_LONG);
-			      write_exp_elt_type (builtin_type_f_character);
-			      write_exp_elt_longcst ((LONGEST)(*sp++));
-			      write_exp_elt_opcode (OP_LONG);
-			    }
-			  write_exp_elt_opcode (OP_ARRAY);
-			  write_exp_elt_longcst ((LONGEST) 1);
-			  write_exp_elt_longcst ((LONGEST) ($1.length)); 
-			  write_exp_elt_opcode (OP_ARRAY); 
+			{
+			  write_exp_elt_opcode (OP_STRING);
+			  write_exp_string ($1);
+			  write_exp_elt_opcode (OP_STRING);
 			}
-
 	;
 
 variable:	name_not_typename

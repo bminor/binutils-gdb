@@ -121,8 +121,6 @@ enum type_code
 
   /* Fortran */
   TYPE_CODE_COMPLEX,		/* Complex float */
-  TYPE_CODE_LITERAL_COMPLEX,	/* */
-  TYPE_CODE_LITERAL_STRING	/* */
 };
 
 /* For now allow source to use TYPE_CODE_CLASS for C++ classes, as an
@@ -214,6 +212,7 @@ struct type
      For an array type, describes the type of the elements.
      For a function or method type, describes the type of the return value.
      For a range type, describes the type of the full range.
+     For a complex type, describes the type of each coordinate.
      Unused otherwise.  */
 
   struct type *target_type;
@@ -724,13 +723,7 @@ create_array_type PARAMS ((struct type *, struct type *, struct type *));
 extern struct type *
 create_string_type PARAMS ((struct type *, struct type *));
 
-extern struct type *f77_create_literal_string_type PARAMS ((struct type *,
-							    struct type *));
-
 extern struct type *create_set_type PARAMS ((struct type *, struct type *));
-
-extern struct type *f77_create_literal_complex_type PARAMS ((struct type *,
-							     struct type *));
 
 extern int chill_varying_type PARAMS ((struct type*));
 

@@ -411,6 +411,8 @@ const struct language_defn c_language_defn = {
   {"0x%lx", "0x",  "x", ""},	/* Hex format info */
   c_op_print_tab,		/* expression operators for printing */
   1,				/* c-style arrays */
+  0,				/* String lower bound */
+  &builtin_type_char,		/* Type of string elements */ 
   LANG_MAGIC
 };
 
@@ -434,6 +436,8 @@ const struct language_defn cplus_language_defn = {
   {"0x%lx",  "0x",  "x",  ""},	/* Hex format info */
   c_op_print_tab,		/* expression operators for printing */
   1,				/* c-style arrays */
+  0,				/* String lower bound */
+  &builtin_type_char,		/* Type of string elements */ 
   LANG_MAGIC
 };
 
@@ -457,6 +461,8 @@ const struct language_defn asm_language_defn = {
   {"0x%lx", "0x",  "x", ""},	/* Hex format info */
   c_op_print_tab,		/* expression operators for printing */
   1,				/* c-style arrays */
+  0,				/* String lower bound */
+  &builtin_type_char,		/* Type of string elements */ 
   LANG_MAGIC
 };
 

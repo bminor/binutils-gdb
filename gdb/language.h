@@ -177,6 +177,12 @@ struct language_defn
 
   char c_style_arrays;
 
+  /* Index to use for extracting the first element of a string. */
+  char string_lower_bound;
+
+  /* Type of elements of strings. */
+  struct type **string_char_type;
+
   /* Add fields above this point, so the magic number is always last. */
   /* Magic number for compat checking */
 

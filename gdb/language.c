@@ -1201,6 +1201,8 @@ const struct language_defn unknown_language_defn = {
   {"0x%lx",  "0x",  "x",  ""},	/* Hex format info */
   unk_op_print_tab,		/* expression operators for printing */
   1,				/* c-style arrays */
+  0,				/* String lower bound */
+  &builtin_type_char,		/* Type of string elements */ 
   LANG_MAGIC
 };
 
@@ -1225,6 +1227,8 @@ const struct language_defn auto_language_defn = {
   {"0x%lx",  "0x",  "x",  ""},	/* Hex format info */
   unk_op_print_tab,		/* expression operators for printing */
   1,				/* c-style arrays */
+  0,				/* String lower bound */
+  &builtin_type_char,		/* Type of string elements */ 
   LANG_MAGIC
 };
 
@@ -1248,6 +1252,8 @@ const struct language_defn local_language_defn = {
   {"0x%lx",  "0x",  "x",  ""},	/* Hex format info */
   unk_op_print_tab,		/* expression operators for printing */
   1,				/* c-style arrays */
+  0,				/* String lower bound */
+  &builtin_type_char,		/* Type of string elements */ 
   LANG_MAGIC
 };
 

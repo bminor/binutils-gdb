@@ -274,8 +274,6 @@ static char stabs_symbol[] = STABS_SYMBOL;
    be using our own types thoughout this file, instead of sometimes using
    builtin_type_*.  */
 
-static struct type *mdebug_type_complex;
-static struct type *mdebug_type_double_complex;
 static struct type *mdebug_type_fixed_dec;
 static struct type *mdebug_type_float_dec;
 static struct type *mdebug_type_string;
@@ -1358,8 +1356,8 @@ parse_type (fd, ax, aux_index, bs, bigend, sym_name)
     0,				/* btTypedef */
     0,				/* btRange */
     0,				/* btSet */
-    &mdebug_type_complex,	/* btComplex */
-    &mdebug_type_double_complex,	/* btDComplex */
+    &builtin_type_complex,	/* btComplex */
+    &builtin_type_double_complex,/* btDComplex */
     0,				/* btIndirect */
     &mdebug_type_fixed_dec,	/* btFixedDec */
     &mdebug_type_float_dec,	/* btFloatDec */
@@ -4063,17 +4061,6 @@ _initialize_mdebugread ()
     init_type (TYPE_CODE_STRING,
 	       TARGET_CHAR_BIT / TARGET_CHAR_BIT,
 	       0, "string",
-	       (struct objfile *) NULL);
-
-  mdebug_type_complex =
-    init_type (TYPE_CODE_ERROR,
-	       TARGET_COMPLEX_BIT / TARGET_CHAR_BIT,
-	       0, "complex",
-	       (struct objfile *) NULL);
-  mdebug_type_double_complex =
-    init_type (TYPE_CODE_ERROR,
-	       TARGET_DOUBLE_COMPLEX_BIT / TARGET_CHAR_BIT,
-	       0, "double complex",
 	       (struct objfile *) NULL);
 
   /* We use TYPE_CODE_INT to print these as integers.  Does this do any

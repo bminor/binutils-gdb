@@ -28,6 +28,23 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "language.h"
 #include "f-lang.h"
 
+/* The built-in types of F77.  FIXME: integer*4 is missing, plain
+   logical is missing (builtin_type_logical is logical*4).  */
+
+struct type *builtin_type_f_character;
+struct type *builtin_type_f_logical;
+struct type *builtin_type_f_logical_s1;
+struct type *builtin_type_f_logical_s2;
+struct type *builtin_type_f_integer; 
+struct type *builtin_type_f_integer_s2;
+struct type *builtin_type_f_real;
+struct type *builtin_type_f_real_s8;
+struct type *builtin_type_f_real_s16;
+struct type *builtin_type_f_complex_s8;
+struct type *builtin_type_f_complex_s16;
+struct type *builtin_type_f_complex_s32;
+struct type *builtin_type_f_void;
+
 /* Print the character C on STREAM as part of the contents of a literal
    string whose delimiter is QUOTER.  Note that that format for printing
    characters and strings is language specific.
@@ -318,19 +335,22 @@ f_create_fundamental_type (objfile, typeid)
 			0, "real*16", objfile);
       break;
     case FT_COMPLEX:
-      type = init_type (TYPE_CODE_FLT,
-			TARGET_COMPLEX_BIT / TARGET_CHAR_BIT,
+      type = init_type (TYPE_CODE_COMPLEX,
+			2 * TARGET_FLOAT_BIT / TARGET_CHAR_BIT,
 			0, "complex*8", objfile);
+      TYPE_TARGET_TYPE (type) = builtin_type_f_real;
       break;
     case FT_DBL_PREC_COMPLEX:
-      type = init_type (TYPE_CODE_FLT,
-			TARGET_DOUBLE_COMPLEX_BIT / TARGET_CHAR_BIT,
+      type = init_type (TYPE_CODE_COMPLEX,
+			2 * TARGET_DOUBLE_BIT / TARGET_CHAR_BIT,
 			0, "complex*16", objfile);
+      TYPE_TARGET_TYPE (type) = builtin_type_f_real_s8;
       break;
     case FT_EXT_PREC_COMPLEX:
-      type = init_type (TYPE_CODE_FLT,
-			TARGET_DOUBLE_COMPLEX_BIT / TARGET_CHAR_BIT,
+      type = init_type (TYPE_CODE_COMPLEX,
+			2 * TARGET_LONG_DOUBLE_BIT / TARGET_CHAR_BIT,
 			0, "complex*32", objfile);
+      TYPE_TARGET_TYPE (type) = builtin_type_f_real_s16;
       break;
     default:
       /* FIXME:  For now, if we are asked to produce a type not in this
@@ -373,23 +393,6 @@ static const struct op_print f_op_print_tab[] = {
   { NULL,    0, 0, 0 }
 };
 
-/* The built-in types of F77.  FIXME: integer*4 is missing, plain
-   logical is missing (builtin_type_logical is logical*4).  */
-
-struct type *builtin_type_f_character;
-struct type *builtin_type_f_logical;
-struct type *builtin_type_f_logical_s1;
-struct type *builtin_type_f_logical_s2;
-struct type *builtin_type_f_integer; 
-struct type *builtin_type_f_integer_s2;
-struct type *builtin_type_f_real;
-struct type *builtin_type_f_real_s8;
-struct type *builtin_type_f_real_s16;
-struct type *builtin_type_f_complex_s8;
-struct type *builtin_type_f_complex_s16;
-struct type *builtin_type_f_complex_s32;
-struct type *builtin_type_f_void;
-
 struct type ** const (f_builtin_types[]) = 
 {
   &builtin_type_f_character,
@@ -432,6 +435,8 @@ const struct language_defn f_language_defn = {
   {"0x%x", "0x",  "x", ""},	/* Hex format info */
   f_op_print_tab,		/* expression operators for printing */
   0,				/* arrays are first-class (not c-style) */
+  1,				/* String lower bound */
+  &builtin_type_f_character,	/* Type of string elements */ 
   LANG_MAGIC
   };
 
@@ -489,24 +494,26 @@ _initialize_f_language ()
 	       "real*16", (struct objfile *) NULL);
   
   builtin_type_f_complex_s8 =
-    init_type (TYPE_CODE_COMPLEX, TARGET_COMPLEX_BIT / TARGET_CHAR_BIT,
+    init_type (TYPE_CODE_COMPLEX, 2 * TARGET_FLOAT_BIT / TARGET_CHAR_BIT,
 	       0,
 	       "complex*8", (struct objfile *) NULL);
+  TYPE_TARGET_TYPE (builtin_type_f_complex_s8) = builtin_type_f_real;
   
   builtin_type_f_complex_s16 =
-    init_type (TYPE_CODE_COMPLEX, TARGET_DOUBLE_COMPLEX_BIT / TARGET_CHAR_BIT,
+    init_type (TYPE_CODE_COMPLEX, 2 * TARGET_DOUBLE_BIT / TARGET_CHAR_BIT,
 	       0,
 	       "complex*16", (struct objfile *) NULL);
+  TYPE_TARGET_TYPE (builtin_type_f_complex_s16) = builtin_type_f_real_s8;
   
-#if 0
   /* We have a new size == 4 double floats for the
      complex*32 data type */
   
   builtin_type_f_complex_s32 = 
-    init_type (TYPE_CODE_COMPLEX, TARGET_EXT_COMPLEX_BIT / TARGET_CHAR_BIT,
+    init_type (TYPE_CODE_COMPLEX, 2 * TARGET_LONG_DOUBLE_BIT / TARGET_CHAR_BIT,
 	       0,
 	       "complex*32", (struct objfile *) NULL);
-#endif
+  TYPE_TARGET_TYPE (builtin_type_f_complex_s32) = builtin_type_f_real_s16;
+
   builtin_type_string =
     init_type (TYPE_CODE_STRING, TARGET_CHAR_BIT / TARGET_CHAR_BIT,
 	       0,

@@ -451,7 +451,9 @@ create_string_type (result_type, range_type)
      struct type *result_type;
      struct type *range_type;
 {
-  result_type = create_array_type (result_type, builtin_type_char, range_type);
+  result_type = create_array_type (result_type,
+				   *current_language->string_char_type,
+				   range_type);
   TYPE_CODE (result_type) = TYPE_CODE_STRING;
   return (result_type);
 }
@@ -484,86 +486,6 @@ create_set_type (result_type, domain_type)
     }
   TYPE_FIELD_TYPE (result_type, 0) = domain_type;
   return (result_type);
-}
-
-/* Create an  F77 literal complex type composed of the two types we are 
-   given as arguments.  */
-
-struct type * 
-f77_create_literal_complex_type (type_arg1, type_arg2)
-     struct type *type_arg1;
-     struct type *type_arg2;
-{
-  struct type *result; 
-
-  /* First make sure that the 2 components of the complex 
-     number both have the same type */
-
-  if (TYPE_CODE (type_arg1) != TYPE_CODE (type_arg2))
-    error ("Both components of a F77 complex number must have the same type!");
-   
-  result = alloc_type (TYPE_OBJFILE (type_arg1));
-   
-  TYPE_CODE (result) = TYPE_CODE_LITERAL_COMPLEX;
-  TYPE_LENGTH (result) = TYPE_LENGTH(type_arg1) * 2;
-
-  return result;
-}
-
-/* Create a F77 LITERAL string type supplied by the user from the keyboard.
-
-   Elements will be of type ELEMENT_TYPE, the indices will be of type
-   RANGE_TYPE.
-
-   FIXME:  Maybe we should check the TYPE_CODE of RESULT_TYPE to make
-   sure it is TYPE_CODE_UNDEF before we bash it into an array type? 
-
-   This is a total clone of create_array_type() except that there are 
-   a few simplyfing assumptions (e.g all bound types are simple).  */ 
-
-struct type *
-f77_create_literal_string_type (result_type, range_type)
-     struct type *result_type;
-     struct type *range_type;
-{
-  int low_bound;
-  int high_bound;
-
-  if (TYPE_CODE (range_type) != TYPE_CODE_RANGE)
-    {
-      /* FIXME:  We only handle range types at the moment.  Complain and
-	 create a dummy range type to use. */
-      warning ("internal error:  array index type must be a range type");
-      range_type = lookup_fundamental_type (TYPE_OBJFILE (range_type),
-					    FT_INTEGER);
-      range_type = create_range_type ((struct type *) NULL, range_type, 0, 0);
-    }
-  if (result_type == NULL)
-    result_type = alloc_type (TYPE_OBJFILE (range_type));
-  TYPE_CODE (result_type) = TYPE_CODE_LITERAL_STRING;
-  TYPE_TARGET_TYPE (result_type) = builtin_type_f_character; 
-  low_bound = TYPE_FIELD_BITPOS (range_type, 0);
-  high_bound = TYPE_FIELD_BITPOS (range_type, 1);
-
-  /* Safely can assume that all bound types are simple */ 
-
-  TYPE_LENGTH (result_type) =
-    TYPE_LENGTH (builtin_type_f_character) * (high_bound - low_bound + 1);
-
-  TYPE_NFIELDS (result_type) = 1;
-  TYPE_FIELDS (result_type) =
-    (struct field *) TYPE_ALLOC (result_type, sizeof (struct field));
-  memset (TYPE_FIELDS (result_type), 0, sizeof (struct field));
-  TYPE_FIELD_TYPE (result_type, 0) = range_type;
-  TYPE_VPTR_FIELDNO (result_type) = -1;
-
-  /* Remember that all literal strings in F77 are of the 
-     character*N type. */
-
-  TYPE_ARRAY_LOWER_BOUND_TYPE (result_type) = BOUND_SIMPLE; 
-  TYPE_ARRAY_UPPER_BOUND_TYPE (result_type) = BOUND_SIMPLE; 
-
-  return result_type;
 }
 
 /* Smash TYPE to be a type of members of DOMAIN with type TO_TYPE. 
@@ -1663,13 +1585,15 @@ _initialize_gdbtypes ()
 	       0,
 	       "long double", (struct objfile *) NULL);
   builtin_type_complex =
-    init_type (TYPE_CODE_FLT, TARGET_COMPLEX_BIT / TARGET_CHAR_BIT,
+    init_type (TYPE_CODE_COMPLEX, 2 * TARGET_FLOAT_BIT / TARGET_CHAR_BIT,
 	       0,
 	       "complex", (struct objfile *) NULL);
+  TYPE_TARGET_TYPE (builtin_type_complex) = builtin_type_float;
   builtin_type_double_complex =
-    init_type (TYPE_CODE_FLT, TARGET_DOUBLE_COMPLEX_BIT / TARGET_CHAR_BIT,
+    init_type (TYPE_CODE_COMPLEX, 2 * TARGET_DOUBLE_BIT / TARGET_CHAR_BIT,
 	       0,
 	       "double complex", (struct objfile *) NULL);
+  TYPE_TARGET_TYPE (builtin_type_double_complex) = builtin_type_double;
   builtin_type_string =
     init_type (TYPE_CODE_STRING, TARGET_CHAR_BIT / TARGET_CHAR_BIT,
 	       0,

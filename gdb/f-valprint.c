@@ -216,60 +216,6 @@ f77_get_dynamic_length_of_aggregate (type)
     (upper_bound - lower_bound + 1) * TYPE_LENGTH (TYPE_TARGET_TYPE (type));
 }       
 
-/* Print a FORTRAN COMPLEX value of type TYPE, pointed to in GDB by VALADDR,
-   on STREAM.  which_complex indicates precision, which may be regular,
-   *16, or *32 */
-
-void
-f77_print_cmplx (valaddr, type, stream, which_complex)
-     char *valaddr;
-     struct type *type;
-     FILE *stream;
-     int which_complex;
-{
-  float *f1,*f2;
-  double *d1, *d2;
-  
-  switch (which_complex)
-    {
-    case TARGET_COMPLEX_BIT:
-      f1 = (float *) valaddr;
-      f2 = (float *) (valaddr + sizeof(float));
-      fprintf_filtered (stream, "(%.7e,%.7e)", *f1, *f2);
-      break;
-      
-    case TARGET_DOUBLE_COMPLEX_BIT:
-      d1 = (double *) valaddr;
-      d2 = (double *) (valaddr + sizeof(double));
-      fprintf_filtered (stream, "(%.16e,%.16e)", *d1, *d2);
-      break;
-#if 0
-    case TARGET_EXT_COMPLEX_BIT:
-      fprintf_filtered (stream, "<complex*32 format unavailable, "
-		       "printing raw data>\n");
-      
-      fprintf_filtered (stream, "( [ "); 
-      
-      for (i = 0;i<4;i++)
-	fprintf_filtered (stream, "0x%x ",
-			 * ( (unsigned int *) valaddr+i));
-      
-      fprintf_filtered (stream, "],\n  [ "); 
-      
-      for (i=4;i<8;i++)
-	fprintf_filtered (stream, "0x%x ",
-			 * ((unsigned int *) valaddr+i));
-      
-      fprintf_filtered (stream, "] )");
-      
-      break;
-#endif
-    default:
-      fprintf_filtered (stream, "<cannot handle complex of this type>");
-      break;
-    }
-}
-
 /* Function that sets up the array offset,size table for the array 
    type "type".  */ 
 
@@ -446,45 +392,9 @@ f_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
   
   switch (TYPE_CODE (type))
     {
-    case TYPE_CODE_LITERAL_STRING: 
-      /* It is trivial to print out F77 strings allocated in the 
-	 superior process. The address field is actually a 
-	 pointer to the bytes of the literal. For an internalvar,
-	 valaddr points to a ptr. which points to 
-	 VALUE_LITERAL_DATA(value->internalvar->value)
-	 and for straight literals (i.e. of the form 'hello world'), 
-	 valaddr points a ptr to VALUE_LITERAL_DATA(value). */
-      
-      /* First dereference valaddr.  This relies on valaddr pointing to the
-	 aligner union of a struct value (so we are now fetching the
-	 literal_data pointer from that union).  FIXME: Is this always
-	 true.  */
-
-      straddr = * (char **) valaddr; 
-
-      if (straddr)
-	{
-	  len = TYPE_LENGTH (type); 
-	  localstr = alloca (len + 1);
-	  strncpy (localstr, straddr, len);
-	  localstr[len] = '\0'; 
-	  fprintf_filtered (stream, "'%s'", localstr);
-	}
-      else
-	fprintf_filtered (stream, "Unable to print literal F77 string");
-      break; 
-      
-      /* Strings are a little bit funny. They can be viewed as 
-	 monolithic arrays that are dealt with as atomic data 
-	 items. As such they are the only atomic data items whose 
-	 contents are not located in the superior process. Instead 
-	 instead of having the actual data, they contain pointers 
-	 to addresses in the inferior where data is located.  Thus 
-	 instead of using valaddr, we use address. */ 
-      
     case TYPE_CODE_STRING: 
       f77_get_dynamic_length_of_aggregate (type);
-      val_print_string (address, TYPE_LENGTH (type), stream);
+      LA_PRINT_STRING (stream, valaddr, TYPE_LENGTH (type), 0);
       break;
       
     case TYPE_CODE_ARRAY:
@@ -634,60 +544,20 @@ f_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
 	}
       break;
       
-    case TYPE_CODE_LITERAL_COMPLEX:
-      /* We know that the literal complex is stored in the superior 
-	 process not the inferior and that it is 16 bytes long. 
-	 Just like the case above with a literal array, the
-	 bytes for the the literal complex number are stored   
-	 at the address pointed to by valaddr */ 
-      
-      if (TYPE_LENGTH (type) == 32)
-	error ("Cannot currently print out complex*32 literals");
-      
-      /* First dereference valaddr.  */ 
-      
-      addr = * (CORE_ADDR *) valaddr; 
-      
-      if (addr)
-	{
-	  fprintf_filtered (stream, "("); 
-	  
-	  if (TYPE_LENGTH(type) == 16) 
-	    { 
-	      fprintf_filtered (stream, "%.16f", * (double *) addr); 
-	      fprintf_filtered (stream, ", %.16f", * (double *) 
-				(addr + sizeof(double)));
-	    }
-	  else
-	    {
-	      fprintf_filtered (stream, "%.8f", * (float *) addr); 
-	      fprintf_filtered (stream, ", %.8f", * (float *) 
-				(addr + sizeof(float)));
-	    }
-	  fprintf_filtered (stream, ") ");             
-	}
-      else
-	fprintf_filtered (stream, "Unable to print literal F77 array");
-      break; 
-      
     case TYPE_CODE_COMPLEX:
       switch (TYPE_LENGTH (type))
 	{
-	case 8:
-	  f77_print_cmplx (valaddr, type, stream, TARGET_COMPLEX_BIT);
-	  break;
-	  
-	case 16: 
-	  f77_print_cmplx(valaddr, type, stream, TARGET_DOUBLE_COMPLEX_BIT);
-	  break; 
-#if 0
-	case 32:
-	  f77_print_cmplx(valaddr, type, stream, TARGET_EXT_COMPLEX_BIT);
-	  break; 
-#endif
+	case 8:  type = builtin_type_f_real;  break;
+	case 16:  type = builtin_type_f_real_s8;  break;
+	case 32:  type = builtin_type_f_real_s16;  break;
 	default:
 	  error ("Cannot print out complex*%d variables", TYPE_LENGTH(type)); 
 	}
+      fputs_filtered ("(", stream);
+      print_floating (valaddr, type, stream);
+      fputs_filtered (",", stream);
+      print_floating (valaddr, type, stream);
+      fputs_filtered (")", stream);
       break;
       
     case TYPE_CODE_UNDEF:

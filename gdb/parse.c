@@ -470,7 +470,7 @@ length_of_subexp (expr, endpos)
       oplen = 3;
       break;
 
-    case OP_F77_LITERAL_COMPLEX:
+    case OP_COMPLEX:
       oplen = 1; 
       args = 2;
       break; 
@@ -615,7 +615,7 @@ prefixify_subexp (inexpr, outexpr, inend, outbeg)
       oplen = 3;
       break;
 
-    case OP_F77_LITERAL_COMPLEX:
+    case OP_COMPLEX:
       oplen = 1; 
       args = 2; 
       break; 

@@ -191,7 +191,7 @@ enum exp_opcode
   
   /* The following OP is a special one, it introduces a F77 complex
      literal. It is followed by exactly two args that are doubles.  */ 
-  OP_F77_LITERAL_COMPLEX,
+  OP_COMPLEX,
 
   /* The following OP introduces a F77 substring operator.
      It should have a string type and two integer types that follow 

@@ -1,5 +1,62 @@
 Wed Feb  1 15:44:11 1995  Per Bothner  <bothner@kalessin.cygnus.com>
 
+	* eval.c (evaluate_subexp):  Clean up handling of
+	OP_UNDETERMINED_ARGLIST (no backtracking, more general).
+
+	* f-valprint.c (f_val_print):  Print TYPE_CODE_STRING using
+	LA_PRINT_STRING, and not val_print_string (which reads from inferior).
+
+	* ch-lang.c (chill_is_varying_struct), ch-lang.h:  Remve function
+	duplicate function made redundant by chill_varying_type.
+
+	Re-write of f77 string and complex number support:
+
+	* language.h (struct language_defn):  New fields string_lower_bound
+	and string_char_type.
+	* c-lang.c (c_language_defn, cplus_language_defn, asm_language_defn),
+	language.c (unknown_language_defn, auto_language_defn,
+	local_language_defn), m2-lang.c (m2_language_defn), f-lang.c
+	(f_language_defn), ch-lang.c (chill_language_defn):  Set new fields.
+	* gdbtypes.c (create_string_type):  Use new string_char_type field.
+	* valops.c (value_string):  Use new string_lower_bound field.
+
+	* defs.h (TARGET_COMPLEX_BIT, TARGET_DOUBLE_COMPLEX_BIT):  Removed.
+	* f-lang.c (f_create_fundamental_type, _initialize_f_language),
+	m2-lang.c (m2_create_fundamental_type),
+	gdbtypes.c (_initialize_gdbtypes):  Set TYPE_TARGET_TYPE of complex
+	types.  Set their TYPE_CODEs to TYPE_CODE_COMPLEX.
+	* mdebugread.c (mdebug_type_complex, mdebug_type_double_complex):
+	Removed.  Use builtin_type_complex and builtin_type_double_complex.
+
+	* gdbtypes.h (enum type_code):  Removed TYPE_CODE_LITERAL_STRING
+	and TYPE_CODE_LITERAL_COMPLEX.
+	* c-typeprint.c, f-typeprint.c, f-valprint.c, eval.c:  Removed uses of
+	TYPE_CODE_LITERAL_STRING and TYPE_CODE_LITERAL_COMPLEX.
+	* gdbtypes.c, gdbtypes.h (f77_create_literal_complex_type,
+	f77_create_literal_string_type):  Removed.
+	* value.h (VALUE_LITERAL_DATA, VALUE_SUBSTRING_MEMADDR,
+	VALUE_SUBSTRING_MYADDR):  Removed.
+
+	* expression.h (enum exp_opcode):  Rename OP_F77_LITERAL_COMPLEX to
+	OP_COMPLEX.
+	* parse.c:  Update accordingly.
+
+	* f-valprint.c (f77_print_cmplx):  Removed.
+	(f_val_print case TYPE_CODE_COMPLEX):  Re-write to use print_floating.
+
+	* f-exp.y (STRING_LITERAL):  Use OP_STRING instead of OP_ARRAY.
+	* eval.c (evaluate_subexp):  For case OP_ARRAY, don't call
+	f77_value_literal_string.
+	* valops.c, value.h (f77_value_literal_string, f77_value_substring,
+	f77_assign_from_literal_string, f77_assign_from_literal_complex):
+	Removed.
+	(value_assign):  No longer need to handle literal types.
+	* valops.c (f77_value_literal_complex), value.h:  Re-written and
+	renamed to value_literal_complex.  Last arg is now a (complex) type.
+	* valops.c (f77_cast_into_complex):  Re-written and renamed to
+	cast_into_complex.
+	* eval.c (evaluate_subexp):  Update accordingly.
+
 	* ch-valprint.c (chill_val_print):  On TYPE_CODE_STRING, don't
 	print address for non-'s'-formats.
 	* ch-typeprint.c, ch-valprint.c:  Use chill_varying_type instead

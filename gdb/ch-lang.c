@@ -182,21 +182,6 @@ chill_printstr (stream, string, length, force_ellipses)
     }
 }
 
-/* Return 1 if TYPE is a varying string or array. */
-
-int
-chill_is_varying_struct (type)
-     struct type *type;
-{
-  if (TYPE_CODE (type) != TYPE_CODE_STRUCT)
-    return 0;
-  if (TYPE_NFIELDS (type) != 2)
-    return 0;
-  if (strcmp (TYPE_FIELD_NAME (type, 0), "__var_length") != 0)
-    return 0;
-  return 1;
-}
-
 static struct type *
 chill_create_fundamental_type (objfile, typeid)
      struct objfile *objfile;
@@ -324,6 +309,8 @@ const struct language_defn chill_language_defn = {
   {"H'%lx",  "H'",  "x",  ""},	/* Hex format info */
   chill_op_print_tab,		/* expression operators for printing */
   0,				/* arrays are first-class (not c-style) */
+  0,				/* String lower bound */
+  &builtin_type_chill_char,	/* Type of string elements */ 
   LANG_MAGIC
 };
 

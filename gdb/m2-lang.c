@@ -330,19 +330,25 @@ m2_create_fundamental_type (objfile, typeid)
 			  0, "long double", objfile);
 	break;
       case FT_COMPLEX:
-	type = init_type (TYPE_CODE_FLT,
-			  TARGET_COMPLEX_BIT / TARGET_CHAR_BIT,
+	type = init_type (TYPE_CODE_COMPLEX,
+			  2 * TARGET_FLOAT_BIT / TARGET_CHAR_BIT,
 			  0, "complex", objfile);
+	TYPE_TARGET_TYPE (type)
+	  = m2_create_fundamental_type (objfile, FT_FLOAT);
 	break;
       case FT_DBL_PREC_COMPLEX:
-	type = init_type (TYPE_CODE_FLT,
-			  TARGET_DOUBLE_COMPLEX_BIT / TARGET_CHAR_BIT,
+	type = init_type (TYPE_CODE_COMPLEX,
+			  2 * TARGET_DOUBLE_BIT / TARGET_CHAR_BIT,
 			  0, "double complex", objfile);
+	TYPE_TARGET_TYPE (type)
+	  = m2_create_fundamental_type (objfile, FT_DBL_PREC_FLOAT);
 	break;
       case FT_EXT_PREC_COMPLEX:
-	type = init_type (TYPE_CODE_FLT,
-			  TARGET_DOUBLE_COMPLEX_BIT / TARGET_CHAR_BIT,
+	type = init_type (TYPE_CODE_COMPLEX,
+			  2 * TARGET_LONG_DOUBLE_BIT / TARGET_CHAR_BIT,
 			  0, "long double complex", objfile);
+	TYPE_TARGET_TYPE (type)
+	  = m2_create_fundamental_type (objfile, FT_EXT_PREC_FLOAT);
 	break;
       }
   return (type);
@@ -413,6 +419,8 @@ const struct language_defn m2_language_defn = {
   {"0%lXH",  "0",  "X",  "H"},	/* Hex format info */
   m2_op_print_tab,		/* expression operators for printing */
   0,				/* arrays are first-class (not c-style) */
+  0,				/* String lower bound */
+  &builtin_type_m2_char,	/* Type of string elements */ 
   LANG_MAGIC
 };
 

@@ -144,8 +144,6 @@ f_type_print_varspec_prefix (type, stream, show, passed_a_ptr)
     case TYPE_CODE_MEMBER:
     case TYPE_CODE_REF:
     case TYPE_CODE_COMPLEX:
-    case TYPE_CODE_LITERAL_COMPLEX:
-    case TYPE_CODE_LITERAL_STRING:
       /* These types need no prefix.  They are listed here so that
 	 gcc -Wall will reveal any types that haven't been handled.  */
       break;
@@ -291,8 +289,6 @@ f_type_print_varspec_suffix (type, stream, show, passed_a_ptr, demangled_args)
     case TYPE_CODE_METHOD:
     case TYPE_CODE_MEMBER:
     case TYPE_CODE_COMPLEX:
-    case TYPE_CODE_LITERAL_COMPLEX:
-    case TYPE_CODE_LITERAL_STRING:
       /* These types do not need a suffix.  They are listed so that
 	 gcc -Wall will report types that may not have been considered.  */
       break;
@@ -413,7 +409,6 @@ f_type_print_base (type, stream, show, level)
       break;
 
     case TYPE_CODE_COMPLEX:
-    case TYPE_CODE_LITERAL_COMPLEX:
       fprintf_filtered (stream, "complex*");
       fprintf_filtered (stream, "%d", TYPE_LENGTH (type));
       break;
@@ -421,11 +416,6 @@ f_type_print_base (type, stream, show, level)
     case TYPE_CODE_FLT:
       print_equivalent_f77_float_type (type, stream);
       break;
-
-    case TYPE_CODE_LITERAL_STRING:
-       fprintf_filtered (stream, "character*%d",
-			 TYPE_ARRAY_UPPER_BOUND_VALUE (type));
-       break;
 
     case TYPE_CODE_STRING:
       /* Strings may have dynamic upperbounds (lengths) like arrays. */
