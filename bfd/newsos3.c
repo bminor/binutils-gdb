@@ -1,22 +1,21 @@
-/*** bfd backend for NewsOS3 (Sony, 68k) binaries */
+/* BFD back-end for NewsOS3 (Sony, 68k) binaries.
+   Copyright (C) 1990-1991 Free Software Foundation, Inc.
 
-/* Copyright (C) 1990, 1991 Free Software Foundation, Inc.
+This file is part of BFD, the Binary File Descriptor library.
 
-This file is part of BFD, the Binary File Diddler.
-
-BFD is free software; you can redistribute it and/or modify
+This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 1, or (at your option)
-any later version.
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
 
-BFD is distributed in the hope that it will be useful,
+This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with BFD; see the file COPYING.  If not, write to
-the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+along with this program; if not, write to the Free Software
+Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define TARGET_BYTE_ORDER_BIG_P 1
 
@@ -121,7 +120,7 @@ DEFUN(newsos3_write_object_contents,(abfd),
 
 #define newsos_bfd_debug_info_start		bfd_void
 #define newsos_bfd_debug_info_end		bfd_void
-#define newsos_bfd_debug_info_accumulate	bfd_void
+#define newsos_bfd_debug_info_accumulate	(PROTO(void,(*),(bfd*, struct sec *))) bfd_void
 
 #define newsos_mkobject aout_32_mkobject 
 #define newsos_close_and_cleanup aout_32_close_and_cleanup 
@@ -143,9 +142,9 @@ DEFUN(newsos3_write_object_contents,(abfd),
 /* We define our own versions of these routines.  */
 
 
-bfd_target newsos3_vec = /* Sony 68k-based machines running newos3 */
+bfd_target newsos3_vec = /* Sony 68k-based machines running newsos3 */
 {
-  "a.out-newos3",		/* name */
+  "a.out-newsos3",		/* name */
   bfd_target_aout_flavour_enum,
   true,				/* target byte order */
   true,				/* target headers byte order */
@@ -155,7 +154,7 @@ bfd_target newsos3_vec = /* Sony 68k-based machines running newos3 */
   (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* section flags */
   ' ',				/* ar_pad_char */
   16,				/* ar_max_namelen */
-    1,				/* minimum alignment */
+  1,				/* minimum alignment */
   _do_getb64, _do_putb64,	_do_getb32, _do_putb32, _do_getb16, _do_putb16, /* data */
   _do_getb64, _do_putb64,	_do_getb32, _do_putb32, _do_getb16, _do_putb16, /* hdrs */
 
@@ -167,4 +166,4 @@ bfd_target newsos3_vec = /* Sony 68k-based machines running newos3 */
        _bfd_write_archive_contents, bfd_false},
 
   JUMP_TABLE(newsos)
-  };
+};

@@ -1,5 +1,7 @@
 Thu Sep 26 11:24:24 1991  Per Bothner  (bothner at cygnus.com)
 
+	* libaout.h (WRITE_HEADERS): Set header's a_text field always.
+	* newsos3.c: Fixed two types: newos3 -> newsos3.
 	* reloc.c (bfd_perform_relocation): Fix pc-relative relocation
 	to use correct segment.
 
