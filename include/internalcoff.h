@@ -367,7 +367,7 @@ struct internal_reloc {
 	long r_symndx;		/* Index into symbol table	*/
 	unsigned short r_type;	/* Relocation type		*/
 
-#if AIXCOFF_C
+#if RS6000COFF_C
 	unsigned char  r_size;
 #endif
 
