@@ -1,30 +1,23 @@
-/******************************************************************************
- * Copyright 1991 Advanced Micro Devices, Inc.
- *
- * This software is the property of Advanced Micro Devices, Inc  (AMD)  which
- * specifically  grants the user the right to modify, use and distribute this
- * software provided this notice is not removed or altered.  All other rights
- * are reserved by AMD.
- *
- * AMD MAKES NO WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, WITH REGARD TO THIS
- * SOFTWARE.  IN NO EVENT SHALL AMD BE LIABLE FOR INCIDENTAL OR CONSEQUENTIAL
- * DAMAGES IN CONNECTION WITH OR ARISING FROM THE FURNISHING, PERFORMANCE, OR
- * USE OF THIS SOFTWARE.
- *
- * Comments about this software should be directed to udi@amd.com. If access
- * to electronic mail isn't available, send mail to:
- *
- * Advanced Micro Devices, Inc.
- * 29K Support Products
- * Mail Stop 573
- * 5900 E. Ben White Blvd.
- * Austin, TX 78741
- *****************************************************************************
- *       $Id: @(#)udiids.h	2.3, AMD
- */
-
-/*  This file contains the DFE and TIP IDs to be used by AMD products for */
-/*  the UDICapabilities call                                              */
+/* This file contains the DFE and TIP IDs to be used by AMD products for
+   the UDICapabilities call.
+   
+   Copyright 1993 Free Software Foundation, Inc.
+   
+   This file is part of GDB.
+   
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
+   
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+   
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 	/* Company Codes -- AMD assigns these */
 #define UDICompanyCode_AMD 1

@@ -1,35 +1,26 @@
-/******************************************************************************
-* Copyright 1991 Advanced Micro Devices, Inc.
-* 
-* This software is the property of Advanced Micro Devices, Inc  (AMD)  which
-* specifically  grants the user the right to modify, use and distribute this
-* software provided this notice is not removed or altered.  All other rights
-* are reserved by AMD.
-*
-* AMD MAKES NO WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, WITH REGARD TO THIS
-* SOFTWARE.  IN NO EVENT SHALL AMD BE LIABLE FOR INCIDENTAL OR CONSEQUENTIAL
-* DAMAGES IN CONNECTION WITH OR ARISING FROM THE FURNISHING, PERFORMANCE, OR
-* USE OF THIS SOFTWARE.
-*
-* So that all may benefit from your experience, please report  any  problems
-* or  suggestions about this software to the 29K Technical Support Center at
-* 800-29-29-AMD (800-292-9263) in the USA, or 0800-89-1131  in  the  UK,  or
-* 0031-11-1129 in Japan, toll free.  The direct dial number is 512-462-4118.
-*
-* Advanced Micro Devices, Inc.
-* 29K Support Products
-* Mail Stop 573
-* 5900 E. Ben White Blvd.
-* Austin, TX 78741
-* 800-292-9263
-*****************************************************************************
-*/
+/* This module defines constants used in the UDI IPC modules.
+
+   Copyright 1993 Free Software Foundation, Inc.
+
+   This file is part of GDB.
+
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+   
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+
 static char udisoc_h[]="@(#)udisoc.h	2.6  Daniel Mann";
 static char udisoc_h_AMD[]="@(#)udisoc.h	2.4, AMD";
-/*
-*       This module defines constants used in the UDI IPC modules
-********************************************************************** HISTORY
-*/
+
 #define LOCAL static
 #define	company_c	1		/* AMD Company id */
 #define	product_c 	1		/* socket IPC id */
