@@ -1774,7 +1774,7 @@ rs6000_builtin_type (typenum)
      int typenum;
 {
   /* We recognize types numbered from -NUMBER_RECOGNIZED to -1.  */
-#define NUMBER_RECOGNIZED 30
+#define NUMBER_RECOGNIZED 34
   /* This includes an empty slot for type number -0.  */
   static struct type *negative_types[NUMBER_RECOGNIZED + 1];
   struct type *rettype = NULL;
@@ -1907,6 +1907,20 @@ rs6000_builtin_type (typenum)
       break;
     case 30:
       rettype = init_type (TYPE_CODE_CHAR, 2, 0, "wchar", NULL);
+      break;
+    case 31:
+      rettype = init_type (TYPE_CODE_INT, 8, 0, "long long", NULL);
+      break;
+    case 32:
+      rettype = init_type (TYPE_CODE_INT, 8, TYPE_FLAG_UNSIGNED,
+			   "unsigned long long", NULL);
+      break;
+    case 33:
+      rettype = init_type (TYPE_CODE_INT, 8, TYPE_FLAG_UNSIGNED,
+			   "logical*8", NULL);
+      break;
+    case 34:
+      rettype = init_type (TYPE_CODE_INT, 8, 0, "integer*8", NULL);
       break;
     }
   negative_types[-typenum] = rettype;

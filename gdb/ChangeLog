@@ -1,3 +1,7 @@
+Thu Mar 16 12:14:41 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* stabsread.c (rs6000_builtin_type): Recognize types -31 to -34.
+
 Wed Mar 15 15:09:29 1995  Stu Grossman  (grossman@cygnus.com)
 
 	* findvar.c (read_register_bytes write_register_bytes):  Make
