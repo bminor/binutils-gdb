@@ -65,9 +65,6 @@ extern struct type **const (c_builtin_types[]);
 
 extern void c_type_print_base (struct type *, struct ui_file *, int, int);
 
-extern void c_type_print_varspec_prefix (struct type *, struct ui_file *,
-					 int, int);
-
 /* These are in cp-valprint.c */
 
 extern int vtblprint;		/* Controls printing of vtbl's */

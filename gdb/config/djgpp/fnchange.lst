@@ -88,7 +88,6 @@
 @V@/gdb/config/i386/nm-i386v42mp.h @V@/gdb/config/i386/nm-v42mp.h
 @V@/gdb/config/i386/tm-i386mk.h @V@/gdb/config/i386/tm-mk.h
 @V@/gdb/config/i386/tm-i386sol2.h @V@/gdb/config/i386/tm-sol2.h
-@V@/gdb/config/i386/tm-i386v4.h @V@/gdb/config/i386/tm-v4.h
 @V@/gdb/config/i386/tm-i386v42mp.h @V@/gdb/config/i386/tm-v42mp.h
 @V@/gdb/config/i386/xm-i386mach.h @V@/gdb/config/i386/xm-mach.h
 @V@/gdb/config/i386/xm-i386mk.h @V@/gdb/config/i386/xm-mk.h

@@ -1035,19 +1035,17 @@ sigtramp_saved_pc (struct frame_info *frame)
   buf = alloca (ptrbytes);
   /* Get sigcontext address, it is the third parameter on the stack.  */
   if (frame->next)
-    sigcontext_addr = read_memory_integer (FRAME_ARGS_ADDRESS (frame->next)
-					   + FRAME_ARGS_SKIP
-					   + sigcontext_offs,
-					   ptrbytes);
+    sigcontext_addr = read_memory_typed_address
+      (FRAME_ARGS_ADDRESS (frame->next) + FRAME_ARGS_SKIP + sigcontext_offs,
+       builtin_type_void_data_ptr);
   else
-    sigcontext_addr = read_memory_integer (read_register (SP_REGNUM)
-					   + sigcontext_offs,
-					   ptrbytes);
+    sigcontext_addr = read_memory_typed_address
+      (read_register (SP_REGNUM) + sigcontext_offs, builtin_type_void_data_ptr);
 
   /* Don't cause a memory_error when accessing sigcontext in case the stack
      layout has changed or the stack is corrupt.  */
   target_read_memory (sigcontext_addr + SIGCONTEXT_PC_OFFSET, buf, ptrbytes);
-  return extract_unsigned_integer (buf, ptrbytes);
+  return extract_typed_address (buf, builtin_type_void_data_ptr);
 }
 #endif /* SIGCONTEXT_PC_OFFSET */
 
@@ -1552,9 +1550,10 @@ frame_saved_regs_register_unwind (struct frame_info *frame, void **cache,
    The argument RAW_BUFFER must point to aligned memory.  */
 
 void
-generic_get_saved_register (char *raw_buffer, int *optimized, CORE_ADDR *addrp,
-			    struct frame_info *frame, int regnum,
-			    enum lval_type *lval)
+deprecated_generic_get_saved_register (char *raw_buffer, int *optimized,
+				       CORE_ADDR *addrp,
+				       struct frame_info *frame, int regnum,
+				       enum lval_type *lval)
 {
   if (!target_has_registers)
     error ("No registers.");
@@ -1620,7 +1619,7 @@ generic_get_saved_register (char *raw_buffer, int *optimized, CORE_ADDR *addrp,
   if (addrp)
     *addrp = REGISTER_BYTE (regnum);
   if (raw_buffer)
-    read_register_gen (regnum, raw_buffer);
+    deprecated_read_register_gen (regnum, raw_buffer);
 }
 
 void

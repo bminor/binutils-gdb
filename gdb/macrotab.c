@@ -445,7 +445,7 @@ macro_include (struct macro_source_file *source,
          should tolerate bad debug info.  So:
 
          First, squawk.  */
-      static struct complaint bogus_inclusion_line = {
+      static struct deprecated_complaint bogus_inclusion_line = {
         "both `%s' and `%s' allegedly #included at %s:%d", 0, 0
       };
 
@@ -707,7 +707,7 @@ check_for_redefinition (struct macro_source_file *source, int line,
 
       if (! same)
         {
-          static struct complaint macro_redefined = {
+          static struct deprecated_complaint macro_redefined = {
             "macro `%s' redefined at %s:%d; original definition at %s:%d",
             0, 0
           };
@@ -801,7 +801,7 @@ macro_undef (struct macro_source_file *source, int line,
 
       if (key->end_file)
         {
-          static struct complaint double_undef = {
+          static struct deprecated_complaint double_undef = {
             "macro '%s' is #undefined twice, at %s:%d and %s:%d",
             0, 0
           };
@@ -820,7 +820,7 @@ macro_undef (struct macro_source_file *source, int line,
          has no macro definition in scope is ignored.  So we should
          ignore it too.  */
 #if 0
-      static struct complaint no_macro_to_undefine = {
+      static struct deprecated_complaint no_macro_to_undefine = {
         "no definition for macro `%s' in scope to #undef at %s:%d",
         0, 0
       };

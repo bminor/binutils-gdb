@@ -6803,8 +6803,8 @@ elfcore_grok_note (abfd, note)
 #endif
 
     case NT_PRXFPREG:		/* Linux SSE extension */
-      if (note->namesz == 5
-	  && ! strcmp (note->namedata, "LINUX"))
+      if (note->namesz == 6
+	  && strcmp (note->namedata, "LINUX") == 0)
 	return elfcore_grok_prxfpreg (abfd, note);
       else
 	return true;

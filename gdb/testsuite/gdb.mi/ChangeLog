@@ -1,3 +1,10 @@
+2002-10-23  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* mi-var-cmd.exp: Add tests to verify that a -var-assign that changes
+	a value shows up in the changelist of a -var-update.  Part of fix
+	for gdb/702.
+	* mi1-var-cmd.exp: Ditto.
+
 2002-10-03  Jeff Johnston  <jjohnstn@redhat.com>
 
 	* mi-return.exp: Change expected frame output to remove extraneous

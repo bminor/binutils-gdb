@@ -2617,36 +2617,40 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
 		  BFD_ASSERT (rel->r_offset >= 1);
 		  val = bfd_get_8 (input_bfd, contents + rel->r_offset - 1);
 		  BFD_ASSERT (rel->r_offset + 4 <= input_section->_raw_size);
-		  if (val != 0xa1)
-		    {
-		      BFD_ASSERT (rel->r_offset >= 2);
-		      type = bfd_get_8 (input_bfd, contents + rel->r_offset - 2);
-		    }
 		  if (val == 0xa1)
 		    {
 		      /* movl foo, %eax.  */
 		      bfd_put_8 (output_bfd, 0xb8, contents + rel->r_offset - 1);
 		    }
-		  else if (type == 0x8b)
-		    {
-		      /* movl */
-		      BFD_ASSERT ((val & 0xc7) == 0x05);
-		      bfd_put_8 (output_bfd, 0xc7,
-				 contents + rel->r_offset - 2);
-		      bfd_put_8 (output_bfd, 0xc0 | ((val >> 3) & 7),
-				 contents + rel->r_offset - 1);
-		    }
-		  else if (type == 0x03)
-		    {
-		      /* addl */
-		      BFD_ASSERT ((val & 0xc7) == 0x05);
-		      bfd_put_8 (output_bfd, 0x81,
-				 contents + rel->r_offset - 2);
-		      bfd_put_8 (output_bfd, 0xc0 | ((val >> 3) & 7),
-				 contents + rel->r_offset - 1);
-		    }
 		  else
-		    BFD_FAIL ();
+		    {
+		      BFD_ASSERT (rel->r_offset >= 2);
+		      type = bfd_get_8 (input_bfd, contents + rel->r_offset - 2);
+		      switch (type)
+		        {
+			case 0x8b:
+			  /* movl */
+			  BFD_ASSERT ((val & 0xc7) == 0x05);
+			  bfd_put_8 (output_bfd, 0xc7,
+				     contents + rel->r_offset - 2);
+			  bfd_put_8 (output_bfd,
+				     0xc0 | ((val >> 3) & 7),
+				     contents + rel->r_offset - 1);
+			  break;
+			case 0x03:
+			  /* addl */
+			  BFD_ASSERT ((val & 0xc7) == 0x05);
+			  bfd_put_8 (output_bfd, 0x81,
+				     contents + rel->r_offset - 2);
+			  bfd_put_8 (output_bfd,
+				     0xc0 | ((val >> 3) & 7),
+				     contents + rel->r_offset - 1);
+			  break;
+			default:
+			  BFD_FAIL ();
+			  break;
+		        }
+		    }
 		  bfd_put_32 (output_bfd, -tpoff (info, relocation),
 			      contents + rel->r_offset);
 		  continue;
@@ -3344,13 +3348,11 @@ elf_i386_finish_dynamic_sections (output_bfd, info)
   return true;
 }
 
-#ifndef ELF_ARCH
 #define TARGET_LITTLE_SYM		bfd_elf32_i386_vec
 #define TARGET_LITTLE_NAME		"elf32-i386"
 #define ELF_ARCH			bfd_arch_i386
 #define ELF_MACHINE_CODE		EM_386
 #define ELF_MAXPAGESIZE			0x1000
-#endif /* ELF_ARCH */
 
 #define elf_backend_can_gc_sections	1
 #define elf_backend_can_refcount	1
@@ -3385,6 +3387,62 @@ elf_i386_finish_dynamic_sections (output_bfd, info)
 #define elf_backend_relocate_section	      elf_i386_relocate_section
 #define elf_backend_size_dynamic_sections     elf_i386_size_dynamic_sections
 
-#ifndef ELF32_I386_C_INCLUDED
 #include "elf32-target.h"
+
+/* FreeBSD support.  */
+
+#undef	TARGET_LITTLE_SYM
+#define	TARGET_LITTLE_SYM		bfd_elf32_i386_freebsd_vec
+#undef	TARGET_LITTLE_NAME
+#define	TARGET_LITTLE_NAME		"elf32-i386-freebsd"
+
+/* The kernel recognizes executables as valid only if they carry a
+   "FreeBSD" label in the ELF header.  So we put this label on all
+   executables and (for simplicity) also all other object files.  */
+
+static void elf_i386_post_process_headers
+  PARAMS ((bfd *, struct bfd_link_info *));
+
+static void
+elf_i386_post_process_headers (abfd, link_info)
+     bfd *abfd;
+     struct bfd_link_info *link_info ATTRIBUTE_UNUSED;
+{
+  Elf_Internal_Ehdr *i_ehdrp;
+
+  i_ehdrp = elf_elfheader (abfd);
+
+  /* Put an ABI label supported by FreeBSD >= 4.1.  */
+  i_ehdrp->e_ident[EI_OSABI] = ELFOSABI_FREEBSD;
+#ifdef OLD_FREEBSD_ABI_LABEL
+  /* The ABI label supported by FreeBSD <= 4.0 is quite nonstandard.  */
+  memcpy (&i_ehdrp->e_ident[EI_ABIVERSION], "FreeBSD", 8);
 #endif
+}
+
+#undef	elf_backend_post_process_headers
+#define	elf_backend_post_process_headers      elf_i386_post_process_headers
+
+#define	elf32_bed			elf32_i386_fbsd_bed
+
+#include "elf32-target.h"
+
+#undef	elf_backend_post_process_headers
+#undef	elf32_bed
+
+/* QNX support.  */
+#include "elf32-qnx.h"
+
+#undef	TARGET_LITTLE_SYM
+#define	TARGET_LITTLE_SYM		bfd_elf32_i386qnx_vec
+#undef	TARGET_LITTLE_NAME
+#define	TARGET_LITTLE_NAME		"elf32-i386-nto"
+
+#define	elf32_bed			elf32_i386_qnx_bed
+
+#include "elf32-target.h"
+
+#undef	elf_backend_set_nonloadable_filepos
+#undef	elf_backend_is_contained_by_filepos
+#undef	elf_backend_copy_private_bfd_data_p
+#undef	elf32_bed

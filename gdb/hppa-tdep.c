@@ -149,9 +149,6 @@ extern int hp_som_som_object_present;
 /* In breakpoint.c */
 extern int exception_catchpoints_are_fragile;
 
-/* This is defined in valops.c. */
-extern struct value *find_function_in_inferior (char *);
-
 /* Should call_function allocate stack space for a struct return?  */
 int
 hppa_use_struct_convention (int gcc_p, struct type *type)
@@ -300,7 +297,7 @@ static CORE_ADDR low_text_segment_address;
 static void
 record_text_segment_lowaddr (bfd *abfd, asection *section, void *ignored)
 {
-  if ((section->flags & (SEC_ALLOC | SEC_LOAD | SEC_READONLY)
+  if (((section->flags & (SEC_ALLOC | SEC_LOAD | SEC_READONLY))
        == (SEC_ALLOC | SEC_LOAD | SEC_READONLY))
       && section->vma < low_text_segment_address)
     low_text_segment_address = section->vma;
@@ -4426,7 +4423,7 @@ child_enable_exception_callback (enum exception_event_kind kind, int enable)
     {
       break_callback_sal = (struct symtab_and_line *) xmalloc (sizeof (struct symtab_and_line));
     }
-  INIT_SAL (break_callback_sal);
+  init_sal (break_callback_sal);
   break_callback_sal->symtab = NULL;
   break_callback_sal->pc = eh_break_addr;
   break_callback_sal->line = 0;

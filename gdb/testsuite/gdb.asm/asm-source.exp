@@ -57,6 +57,9 @@ if [istarget "i\[3456\]86-*-*"] then {
 if [istarget "m32r*-*"] then {
     set asm-arch m32r
 }
+if [istarget "mips*-*"] then {
+    set asm-arch mips
+}
 if [istarget "powerpc*-*"] then {
     set asm-arch powerpc
 }
@@ -194,7 +197,7 @@ gdb_test "list $entry_symbol" ".*gdbasm_startup.*" "list"
 
 # Now try a source file search
 gdb_test "search A routine for foo2 to call" \
-	"39\[ \t\]+comment \"A routine for foo2 to call.\"" "search"
+	"40\[ \t\]+comment \"A routine for foo2 to call.\"" "search"
 
 # See if `f' prints the right source file.
 gdb_test "f" ".*asmsrc2\[.\]s:8.*" "f in foo2"
@@ -219,7 +222,7 @@ gdb_test "s" "" "s 2"
 gdb_test "n" "" "n 2"
 
 # Now see if a capped `bt' is correct.
-gdb_test "bt 3" "\#0.*foo3.*asmsrc1\[.\]s:44.*\#1.*foo2.*asmsrc2\[.\]s:12.*\#2.*main.*asmsrc1\[.\]s:33.*" "bt 3 in foo3"
+gdb_test "bt 3" "\#0.*foo3.*asmsrc1\[.\]s:45.*\#1.*foo2.*asmsrc2\[.\]s:12.*\#2.*main.*asmsrc1\[.\]s:33.*" "bt 3 in foo3"
 
 # Try 'info source' from asmsrc1.s
 gdb_test "info source" \
@@ -277,7 +280,7 @@ gdb_test "next" "17\[ \t\]+gdbasm_leave" "next over foo3"
 
 # Try 'return' from foo2
 gdb_test "return" "\#0  main .*37\[ \t\]+gdbasm_exit0" "return from foo2" \
-	"Make selected stack frame return now\?.*" "y"
+	"Make (foo2|selected stack frame) return now\?.*" "y"
 
 # See if we can look at a global variable
 gdb_test "print globalvar" ".* = 11" "look at global variable"

@@ -50,11 +50,6 @@
 #include <ctype.h>
 #include "cp-abi.h"
 
-/* Prototype for one function in parser-defs.h,
-   instead of including that entire file. */
-
-extern char *find_template_name_end (char *);
-
 /* Prototypes for local functions */
 
 static void completion_list_add_name (char *, char *, int, char *, char *);
@@ -120,19 +115,6 @@ struct type *builtin_type_error;
    value_of_this. */
 
 const struct block *block_found;
-
-/* While the C++ support is still in flux, issue a possibly helpful hint on
-   using the new command completion feature on single quoted demangled C++
-   symbols.  Remove when loose ends are cleaned up.   FIXME -fnf */
-
-static void
-cplusplus_hint (char *name)
-{
-  while (*name == '\'')
-    name++;
-  printf_filtered ("Hint: try '%s<TAB> or '%s<ESC-?>\n", name, name);
-  printf_filtered ("(Note leading single quote.)\n");
-}
 
 /* Check for a symtab of a specific name; first in symtabs, then in
    psymtabs.  *If* there is no '/' in the name, a match after a '/'
@@ -385,6 +367,33 @@ gdb_mangle_name (struct type *type, int method_id, int signature_id)
 }
 
 
+/* Initialize the language dependent portion of a symbol
+   depending upon the language for the symbol. */
+void
+symbol_init_language_specific (struct general_symbol_info *gsymbol,
+			       enum language language)
+{
+  gsymbol->language = language;
+  if (gsymbol->language == language_cplus
+      || gsymbol->language == language_java)
+    {
+      gsymbol->language_specific.cplus_specific.demangled_name = NULL;
+    }
+  else if (gsymbol->language == language_objc)
+    {
+      gsymbol->language_specific.objc_specific.demangled_name = NULL;
+    }
+  /* OBSOLETE else if (SYMBOL_LANGUAGE (symbol) == language_chill) */
+  /* OBSOLETE   { */
+  /* OBSOLETE     SYMBOL_CHILL_DEMANGLED_NAME (symbol) = NULL; */
+  /* OBSOLETE   } */
+  else
+    {
+      memset (&gsymbol->language_specific, 0,
+	      sizeof (gsymbol->language_specific));
+    }
+}
+
 /* Initialize a symbol's mangled name.  */
 
 /* Try to initialize the demangled name for a symbol, based on the
@@ -461,7 +470,35 @@ symbol_init_demangled_name (struct general_symbol_info *gsymbol,
 #endif
 }
 
+/* Return the demangled name for a symbol based on the language for
+   that symbol.  If no demangled name exists, return NULL. */
+char *
+symbol_demangled_name (struct general_symbol_info *gsymbol)
+{
+  if (gsymbol->language == language_cplus
+      || gsymbol->language == language_java)
+    return gsymbol->language_specific.cplus_specific.demangled_name;
 
+  else if (gsymbol->language == language_objc)
+    return gsymbol->language_specific.objc_specific.demangled_name;
+
+  else 
+    return NULL;
+
+  /* OBSOLETE (SYMBOL_LANGUAGE (symbol) == language_chill */
+  /* OBSOLETE ? SYMBOL_CHILL_DEMANGLED_NAME (symbol) */
+}
+
+/* Initialize the structure fields to zero values.  */
+void
+init_sal (struct symtab_and_line *sal)
+{
+  sal->symtab = 0;
+  sal->section = 0;
+  sal->line = 0;
+  sal->pc = 0;
+  sal->end = 0;
+}
 
 
 
@@ -1655,94 +1692,6 @@ find_pc_symtab (CORE_ADDR pc)
 }
 
 
-#if 0
-
-/* Find the closest symbol value (of any sort -- function or variable)
-   for a given address value.  Slow but complete.  (currently unused,
-   mainly because it is too slow.  We could fix it if each symtab and
-   psymtab had contained in it the addresses ranges of each of its
-   sections, which also would be required to make things like "info
-   line *0x2345" cause psymtabs to be converted to symtabs).  */
-
-struct symbol *
-find_addr_symbol (CORE_ADDR addr, struct symtab **symtabp, CORE_ADDR *symaddrp)
-{
-  struct symtab *symtab, *best_symtab;
-  struct objfile *objfile;
-  register int bot, top;
-  register struct symbol *sym;
-  register CORE_ADDR sym_addr;
-  struct block *block;
-  int blocknum;
-
-  /* Info on best symbol seen so far */
-
-  register CORE_ADDR best_sym_addr = 0;
-  struct symbol *best_sym = 0;
-
-  /* FIXME -- we should pull in all the psymtabs, too!  */
-  ALL_SYMTABS (objfile, symtab)
-  {
-    /* Search the global and static blocks in this symtab for
-       the closest symbol-address to the desired address.  */
-
-    for (blocknum = GLOBAL_BLOCK; blocknum <= STATIC_BLOCK; blocknum++)
-      {
-	QUIT;
-	block = BLOCKVECTOR_BLOCK (BLOCKVECTOR (symtab), blocknum);
-	ALL_BLOCK_SYMBOLS (block, bot, sym)
-	  {
-	    switch (SYMBOL_CLASS (sym))
-	      {
-	      case LOC_STATIC:
-	      case LOC_LABEL:
-		sym_addr = SYMBOL_VALUE_ADDRESS (sym);
-		break;
-
-	      case LOC_INDIRECT:
-		sym_addr = SYMBOL_VALUE_ADDRESS (sym);
-		/* An indirect symbol really lives at *sym_addr,
-		 * so an indirection needs to be done.
-		 * However, I am leaving this commented out because it's
-		 * expensive, and it's possible that symbolization
-		 * could be done without an active process (in
-		 * case this read_memory will fail). RT
-		 sym_addr = read_memory_unsigned_integer
-		 (sym_addr, TARGET_PTR_BIT / TARGET_CHAR_BIT);
-		 */
-		break;
-
-	      case LOC_BLOCK:
-		sym_addr = BLOCK_START (SYMBOL_BLOCK_VALUE (sym));
-		break;
-
-	      default:
-		continue;
-	      }
-
-	    if (sym_addr <= addr)
-	      if (sym_addr > best_sym_addr)
-		{
-		  /* Quit if we found an exact match.  */
-		  best_sym = sym;
-		  best_sym_addr = sym_addr;
-		  best_symtab = symtab;
-		  if (sym_addr == addr)
-		    goto done;
-		}
-	  }
-      }
-  }
-
-done:
-  if (symtabp)
-    *symtabp = best_symtab;
-  if (symaddrp)
-    *symaddrp = best_sym_addr;
-  return best_sym;
-}
-#endif /* 0 */
-
 /* Find the source file and line number for a given PC value and SECTION.
    Return a structure containing a symtab pointer, a line number,
    and a pc range for the entire source line.
@@ -1797,7 +1746,7 @@ find_pc_sect_line (CORE_ADDR pc, struct sec *section, int notcurrent)
      But what we want is the statement containing the instruction.
      Fudge the pc to make sure we get that.  */
 
-  INIT_SAL (&val);		/* initialize to zeroes */
+  init_sal (&val);		/* initialize to zeroes */
 
   /* It's tempting to assume that, if we can't find debugging info for
      any function enclosing PC, that we shouldn't search for line

@@ -2575,6 +2575,22 @@ ENUMX
   BFD_RELOC_SH_IMM_HI16_PCREL
 ENUMX
   BFD_RELOC_SH_PT_16
+ENUMX
+  BFD_RELOC_SH_TLS_GD_32
+ENUMX
+  BFD_RELOC_SH_TLS_LD_32
+ENUMX
+  BFD_RELOC_SH_TLS_LDO_32
+ENUMX
+  BFD_RELOC_SH_TLS_IE_32
+ENUMX
+  BFD_RELOC_SH_TLS_LE_32
+ENUMX
+  BFD_RELOC_SH_TLS_DTPMOD32
+ENUMX
+  BFD_RELOC_SH_TLS_DTPOFF32
+ENUMX
+  BFD_RELOC_SH_TLS_TPOFF32
 ENUMDOC
   Hitachi SH relocs.  Not all of these appear in object files.
 
@@ -3685,7 +3701,7 @@ const char *
 bfd_get_reloc_code_name (code)
      bfd_reloc_code_real_type code;
 {
-  if (code > BFD_RELOC_UNUSED)
+  if ((int) code > (int) BFD_RELOC_UNUSED)
     return 0;
   return bfd_reloc_code_real_names[(int)code];
 }
@@ -3813,7 +3829,7 @@ bfd_generic_get_relocated_section_contents (abfd, link_info, link_order, data,
 
   /* We're not relaxing the section, so just copy the size info.  */
   input_section->_cooked_size = input_section->_raw_size;
-  input_section->reloc_done = true;
+  input_section->reloc_done = (unsigned int) true;
 
   reloc_count = bfd_canonicalize_reloc (input_bfd,
 					input_section,

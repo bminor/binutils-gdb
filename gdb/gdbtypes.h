@@ -253,6 +253,22 @@ enum type_code
 #define TYPE_FLAG_VECTOR	(1 << 12)
 #define TYPE_VECTOR(t)		(TYPE_FLAGS (t) & TYPE_FLAG_VECTOR)
 
+/* Address class flags.  Some environments provide for pointers whose
+   size is different from that of a normal pointer or address types
+   where the bits are interpreted differently than normal addresses.  The
+   TYPE_FLAG_ADDRESS_CLASS_n flags may be used in target specific
+   ways to represent these different types of address classes.  */
+#define TYPE_FLAG_ADDRESS_CLASS_1 (1 << 13)
+#define TYPE_ADDRESS_CLASS_1(t) (TYPE_INSTANCE_FLAGS(t) \
+                                 & TYPE_FLAG_ADDRESS_CLASS_1)
+#define TYPE_FLAG_ADDRESS_CLASS_2 (1 << 14)
+#define TYPE_ADDRESS_CLASS_2(t) (TYPE_INSTANCE_FLAGS(t) \
+				 & TYPE_FLAG_ADDRESS_CLASS_2)
+#define TYPE_FLAG_ADDRESS_CLASS_ALL (TYPE_FLAG_ADDRESS_CLASS_1 \
+				     | TYPE_FLAG_ADDRESS_CLASS_2)
+#define TYPE_ADDRESS_CLASS_ALL(t) (TYPE_INSTANCE_FLAGS(t) \
+				   & TYPE_FLAG_ADDRESS_CLASS_ALL)
+
 struct main_type
 {
   /* Code for kind of type */

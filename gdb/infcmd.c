@@ -983,7 +983,7 @@ run_stack_dummy (CORE_ADDR addr, struct regcache *buffer)
       struct breakpoint *bpt;
       struct symtab_and_line sal;
 
-      INIT_SAL (&sal);		/* initialize to zeroes */
+      init_sal (&sal);		/* initialize to zeroes */
       if (CALL_DUMMY_LOCATION == AT_ENTRY_POINT)
 	{
 	  sal.pc = CALL_DUMMY_ADDRESS ();
@@ -1571,10 +1571,9 @@ default_print_registers_info (struct gdbarch *gdbarch,
   char *raw_buffer = alloca (MAX_REGISTER_RAW_SIZE);
   char *virtual_buffer = alloca (MAX_REGISTER_VIRTUAL_SIZE);
 
-  /* FIXME: cagney/2002-03-08: This should be deprecated.  */
-  if (DO_REGISTERS_INFO_P ())
+  if (DEPRECATED_DO_REGISTERS_INFO_P ())
     {
-      DO_REGISTERS_INFO (regnum, print_all);
+      DEPRECATED_DO_REGISTERS_INFO (regnum, print_all);
       return;
     }
 

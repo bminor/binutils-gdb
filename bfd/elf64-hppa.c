@@ -1855,6 +1855,11 @@ elf64_hppa_size_dynamic_sections (output_bfd, info)
 	    return false;
 	}
 
+      /* Force DT_FLAGS to always be set.
+	 Required by HPUX 11.00 patch PHSS_26559.  */
+      if (!add_dynamic_entry (DT_FLAGS, (info)->flags))
+	return false;
+
       if (plt)
 	{
 	  if (!add_dynamic_entry (DT_PLTRELSZ, 0)

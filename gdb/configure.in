@@ -279,7 +279,7 @@ if test "${target}" = "${host}"; then
   ia64-*-aix*)
       AC_DEFINE(NEW_PROC_API)
       ;;
-  *-*-unixware* | *-*-sysv4.2* | *-*-sysv5*)
+  *-*-unixware* | *-*-sysv4.2* | *-*-sysv5* | *-*-interix* )
       AC_DEFINE(NEW_PROC_API)
       ;;
   *-*-solaris2.[[678]])

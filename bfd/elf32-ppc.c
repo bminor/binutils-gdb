@@ -3849,7 +3849,25 @@ ppc_elf_grok_psinfo (abfd, note)
 #define elf_backend_grok_psinfo			ppc_elf_grok_psinfo
 #define elf_backend_reloc_type_class		ppc_elf_reloc_type_class
 
-#ifndef ELF32_PPC_C_INCLUDED
 #include "elf32-target.h"
-#endif
 
+/* QNX support.  */
+#include "elf32-qnx.h"
+
+#undef	TARGET_LITTLE_SYM 
+#define	TARGET_LITTLE_SYM		bfd_elf32_powerpcleqnx_vec
+#undef	TARGET_LITTLE_NAME
+#define	TARGET_LITTLE_NAME		"elf32-powerpcle-nto"
+#undef	TARGET_BIG_SYM
+#define	TARGET_BIG_SYM			bfd_elf32_powerpcqnx_vec
+#undef	TARGET_BIG_NAME
+#define	TARGET_BIG_NAME			"elf32-powerpc-nto"
+
+#define	elf32_bed			elf32_ppc_qnx_bed
+
+#include "elf32-target.h"
+
+#undef	elf_backend_set_nonloadable_filepos
+#undef	elf_backend_is_contained_by_filepos
+#undef	elf_backend_copy_private_bfd_data_p
+#undef	elf32_bed

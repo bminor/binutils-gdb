@@ -643,7 +643,7 @@ remote_rdp_store_register (int regno)
   else
     {
       char tmp[ARM_MAX_REGISTER_RAW_SIZE];
-      read_register_gen (regno, tmp);
+      deprecated_read_register_gen (regno, tmp);
       if (regno < 15)
 	rdp_store_one_register (1 << regno, tmp);
       else if (regno == ARM_PC_REGNUM)

@@ -240,8 +240,12 @@ mi_cmd_thread_select (char *command, char **argv, int argc)
   else
     rc = gdb_thread_select (uiout, argv[0]);
 
-  if (rc == GDB_RC_FAIL)
+  /* RC is enum gdb_rc if it is successful (>=0)
+     enum return_reason if not (<0). */
+  if ((int) rc < 0 && (enum return_reason) rc == RETURN_ERROR)
     return MI_CMD_CAUGHT_ERROR;
+  else if ((int) rc >= 0 && rc == GDB_RC_FAIL)
+    return MI_CMD_ERROR;
   else
     return MI_CMD_DONE;
 }
@@ -911,19 +915,22 @@ mi_cmd_data_read_memory (char *command, char **argv, int argc)
   /* Build the result as a two dimentional table. */
   {
     struct ui_stream *stream = ui_out_stream_new (uiout);
+    struct cleanup *cleanup_list_memory;
     int row;
     int row_byte;
-    ui_out_list_begin (uiout, "memory");
+    cleanup_list_memory = make_cleanup_ui_out_list_begin_end (uiout, "memory");
     for (row = 0, row_byte = 0;
 	 row < nr_rows;
 	 row++, row_byte += nr_cols * word_size)
       {
 	int col;
 	int col_byte;
-	ui_out_tuple_begin (uiout, NULL);
+	struct cleanup *cleanup_tuple;
+	struct cleanup *cleanup_list_data;
+	cleanup_tuple = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
 	ui_out_field_core_addr (uiout, "addr", addr + row_byte);
 	/* ui_out_field_core_addr_symbolic (uiout, "saddr", addr + row_byte); */
-	ui_out_list_begin (uiout, "data");
+	cleanup_list_data = make_cleanup_ui_out_list_begin_end (uiout, "data");
 	for (col = 0, col_byte = row_byte;
 	     col < nr_cols;
 	     col++, col_byte += word_size)
@@ -940,7 +947,7 @@ mi_cmd_data_read_memory (char *command, char **argv, int argc)
 		ui_out_field_stream (uiout, NULL, stream);
 	      }
 	  }
-	ui_out_list_end (uiout);
+	do_cleanups (cleanup_list_data);
 	if (aschar)
 	  {
 	    int byte;
@@ -960,10 +967,10 @@ mi_cmd_data_read_memory (char *command, char **argv, int argc)
 	      }
 	    ui_out_field_stream (uiout, "ascii", stream);
 	  }
-	ui_out_tuple_end (uiout);
+	do_cleanups (cleanup_tuple);
       }
     ui_out_stream_delete (stream);
-    ui_out_list_end (uiout);
+    do_cleanups (cleanup_list_memory);
   }
   do_cleanups (cleanups);
   return MI_CMD_DONE;
@@ -1415,17 +1422,18 @@ mi_load_progress (const char *section_name,
 		 strcmp (previous_sect_name, section_name) : 1);
   if (new_section)
     {
+      struct cleanup *cleanup_tuple;
       xfree (previous_sect_name);
       previous_sect_name = xstrdup (section_name);
 
       if (last_async_command)
 	fputs_unfiltered (last_async_command, raw_stdout);
       fputs_unfiltered ("+download", raw_stdout);
-      ui_out_tuple_begin (uiout, NULL);
+      cleanup_tuple = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
       ui_out_field_string (uiout, "section", section_name);
       ui_out_field_int (uiout, "section-size", total_section);
       ui_out_field_int (uiout, "total-size", grand_total);
-      ui_out_tuple_end (uiout);
+      do_cleanups (cleanup_tuple);
       mi_out_put (uiout, raw_stdout);
       fputs_unfiltered ("\n", raw_stdout);
       gdb_flush (raw_stdout);
@@ -1434,18 +1442,19 @@ mi_load_progress (const char *section_name,
   if (delta.tv_sec >= update_threshold.tv_sec &&
       delta.tv_usec >= update_threshold.tv_usec)
     {
+      struct cleanup *cleanup_tuple;
       last_update.tv_sec = time_now.tv_sec;
       last_update.tv_usec = time_now.tv_usec;
       if (last_async_command)
 	fputs_unfiltered (last_async_command, raw_stdout);
       fputs_unfiltered ("+download", raw_stdout);
-      ui_out_tuple_begin (uiout, NULL);
+      cleanup_tuple = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
       ui_out_field_string (uiout, "section", section_name);
       ui_out_field_int (uiout, "section-sent", sent_so_far);
       ui_out_field_int (uiout, "section-size", total_section);
       ui_out_field_int (uiout, "total-sent", total_sent);
       ui_out_field_int (uiout, "total-size", grand_total);
-      ui_out_tuple_end (uiout);
+      do_cleanups (cleanup_tuple);
       mi_out_put (uiout, raw_stdout);
       fputs_unfiltered ("\n", raw_stdout);
       gdb_flush (raw_stdout);

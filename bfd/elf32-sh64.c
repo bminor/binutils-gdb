@@ -89,18 +89,6 @@ static void sh64_find_section_for_address PARAMS ((bfd *, asection *, PTR));
    define it true here.  */
 #define _bfd_sh_align_load_span(a,b,c,d,e,f,g,h,i,j) true
 
-#ifndef ELF_ARCH
-#define TARGET_BIG_SYM		bfd_elf32_sh64_vec
-#define TARGET_BIG_NAME		"elf32-sh64"
-#define TARGET_LITTLE_SYM	bfd_elf32_sh64l_vec
-#define TARGET_LITTLE_NAME	"elf32-sh64l"
-#define ELF_ARCH		bfd_arch_sh
-#define ELF_MACHINE_CODE	EM_SH
-#define ELF_MAXPAGESIZE		128
-
-#define elf_symbol_leading_char '_'
-#endif /* ELF_ARCH */
-
 #define GOT_BIAS (-((long)-32768))
 #define INCLUDE_SHMEDIA
 #include "elf32-sh.c"
@@ -411,16 +399,19 @@ sh64_elf_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
       if (h == NULL)
 	{
 	  /* No previous datalabel symbol.  Make one.  */
+	  struct bfd_link_hash_entry *bh = NULL;
+	  struct elf_backend_data *bed = get_elf_backend_data (abfd);
+
 	  if (! _bfd_generic_link_add_one_symbol (info, abfd, dl_name,
 						  flags, *secp, *valp,
 						  *namep, false,
-						  get_elf_backend_data (abfd)->collect,
-						  (struct bfd_link_hash_entry **) &h))
+						  bed->collect, &bh))
 	    {
 	      free (dl_name);
 	      return false;
 	    }
 
+	  h = (struct elf_link_hash_entry *) bh;
 	  h->elf_link_hash_flags &=~ ELF_LINK_NON_ELF;
 	  h->type = STT_DATALABEL;
 	}
@@ -742,3 +733,50 @@ sh64_elf_final_write_processing (abfd, linker)
 	}
     }
 }
+
+#undef	TARGET_BIG_SYM
+#define	TARGET_BIG_SYM		bfd_elf32_sh64_vec
+#undef	TARGET_BIG_NAME
+#define	TARGET_BIG_NAME		"elf32-sh64"
+#undef	TARGET_LITTLE_SYM
+#define	TARGET_LITTLE_SYM	bfd_elf32_sh64l_vec
+#undef	TARGET_LITTLE_NAME
+#define	TARGET_LITTLE_NAME	"elf32-sh64l"
+
+#include "elf32-target.h"
+
+/* NetBSD support.  */
+#undef	TARGET_BIG_SYM
+#define	TARGET_BIG_SYM		bfd_elf32_sh64nbsd_vec
+#undef	TARGET_BIG_NAME
+#define	TARGET_BIG_NAME		"elf32-sh64-nbsd"
+#undef	TARGET_LITTLE_SYM
+#define	TARGET_LITTLE_SYM	bfd_elf32_sh64lnbsd_vec
+#undef	TARGET_LITTLE_NAME
+#define	TARGET_LITTLE_NAME	"elf32-sh64l-nbsd"
+#undef	ELF_MAXPAGESIZE
+#define	ELF_MAXPAGESIZE		0x10000
+#undef	elf_symbol_leading_char
+#define	elf_symbol_leading_char	0
+
+#define	elf32_bed		elf32_sh64_nbsd_bed
+
+#include "elf32-target.h"
+
+#undef	elf32_bed
+
+/* Linux support.  */
+#undef	TARGET_BIG_SYM
+#define	TARGET_BIG_SYM		bfd_elf32_sh64blin_vec
+#undef	TARGET_BIG_NAME
+#define	TARGET_BIG_NAME		"elf32-sh64big-linux"
+#undef	TARGET_LITTLE_SYM
+#define	TARGET_LITTLE_SYM	bfd_elf32_sh64lin_vec
+#undef	TARGET_LITTLE_NAME
+#define	TARGET_LITTLE_NAME	"elf32-sh64-linux"
+
+#define	elf32_bed		elf32_sh64_lin_bed
+
+#include "elf32-target.h"
+
+#undef	elf32_bed

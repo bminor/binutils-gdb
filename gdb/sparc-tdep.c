@@ -956,7 +956,7 @@ sparc_get_saved_register (char *raw_buffer, int *optimized, CORE_ADDR *addrp,
 	*lval = lval_register;
       addr = REGISTER_BYTE (regnum);
       if (raw_buffer != NULL)
-	read_register_gen (regnum, raw_buffer);
+	deprecated_read_register_gen (regnum, raw_buffer);
     }
   if (addrp != NULL)
     *addrp = addr;
@@ -1245,12 +1245,12 @@ sparc_pop_frame (void)
 	  if (fsr[FPS_REGNUM])
 	    {
 	      read_memory (fsr[FPS_REGNUM], raw_buffer, SPARC_INTREG_SIZE);
-	      write_register_gen (FPS_REGNUM, raw_buffer);
+	      deprecated_write_register_gen (FPS_REGNUM, raw_buffer);
 	    }
 	  if (fsr[CPS_REGNUM])
 	    {
 	      read_memory (fsr[CPS_REGNUM], raw_buffer, SPARC_INTREG_SIZE);
-	      write_register_gen (CPS_REGNUM, raw_buffer);
+	      deprecated_write_register_gen (CPS_REGNUM, raw_buffer);
 	    }
 	}
     }
@@ -1609,37 +1609,37 @@ fill_gregset (gdb_gregset_t *gregsetp, int regno)
 
   for (regi = 0; regi <= R_I7; regi++)
     if ((regno == -1) || (regno == regi))
-      read_register_gen (regi, (char *) (regp + regi) + offset);
+      deprecated_read_register_gen (regi, (char *) (regp + regi) + offset);
 
   if ((regno == -1) || (regno == PC_REGNUM))
-    read_register_gen (PC_REGNUM, (char *) (regp + R_PC) + offset);
+    deprecated_read_register_gen (PC_REGNUM, (char *) (regp + R_PC) + offset);
 
   if ((regno == -1) || (regno == NPC_REGNUM))
-    read_register_gen (NPC_REGNUM, (char *) (regp + R_nPC) + offset);
+    deprecated_read_register_gen (NPC_REGNUM, (char *) (regp + R_nPC) + offset);
 
   if ((regno == -1) || (regno == Y_REGNUM))
-    read_register_gen (Y_REGNUM, (char *) (regp + R_Y) + offset);
+    deprecated_read_register_gen (Y_REGNUM, (char *) (regp + R_Y) + offset);
 
   if (GDB_TARGET_IS_SPARC64)
     {
 #ifdef R_CCR
       if (regno == -1 || regno == CCR_REGNUM)
-	read_register_gen (CCR_REGNUM, ((char *) (regp + R_CCR)) + offset);
+	deprecated_read_register_gen (CCR_REGNUM, ((char *) (regp + R_CCR)) + offset);
 #endif
 #ifdef R_FPRS
       if (regno == -1 || regno == FPRS_REGNUM)
-	read_register_gen (FPRS_REGNUM, ((char *) (regp + R_FPRS)) + offset);
+	deprecated_read_register_gen (FPRS_REGNUM, ((char *) (regp + R_FPRS)) + offset);
 #endif
 #ifdef R_ASI
       if (regno == -1 || regno == ASI_REGNUM)
-	read_register_gen (ASI_REGNUM, ((char *) (regp + R_ASI)) + offset);
+	deprecated_read_register_gen (ASI_REGNUM, ((char *) (regp + R_ASI)) + offset);
 #endif
     }
   else /* sparc32 */
     {
 #ifdef R_PS
       if (regno == -1 || regno == PS_REGNUM)
-	read_register_gen (PS_REGNUM, ((char *) (regp + R_PS)) + offset);
+	deprecated_read_register_gen (PS_REGNUM, ((char *) (regp + R_PS)) + offset);
 #endif
 
       /* For 64-bit hosts, R_WIM and R_TBR may not be defined.
@@ -1655,18 +1655,18 @@ fill_gregset (gdb_gregset_t *gregsetp, int regno)
 
 #if defined (R_WIM)
       if (regno == -1 || regno == WIM_REGNUM)
-	read_register_gen (WIM_REGNUM, ((char *) (regp + R_WIM)) + offset);
+	deprecated_read_register_gen (WIM_REGNUM, ((char *) (regp + R_WIM)) + offset);
 #else
       if (regno == -1 || regno == WIM_REGNUM)
-	read_register_gen (WIM_REGNUM, NULL);
+	deprecated_read_register_gen (WIM_REGNUM, NULL);
 #endif
 
 #if defined (R_TBR)
       if (regno == -1 || regno == TBR_REGNUM)
-	read_register_gen (TBR_REGNUM, ((char *) (regp + R_TBR)) + offset);
+	deprecated_read_register_gen (TBR_REGNUM, ((char *) (regp + R_TBR)) + offset);
 #else
       if (regno == -1 || regno == TBR_REGNUM)
-	read_register_gen (TBR_REGNUM, NULL);
+	deprecated_read_register_gen (TBR_REGNUM, NULL);
 #endif
     }
 }
@@ -2099,7 +2099,7 @@ sparc32_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
       for (j = 0; 
 	   j < m_arg->len && oregnum < 6; 
 	   j += SPARC_INTREG_SIZE, oregnum++)
-	write_register_gen (O0_REGNUM + oregnum, m_arg->contents + j);
+	deprecated_write_register_gen (O0_REGNUM + oregnum, m_arg->contents + j);
     }
 
   return sp;
@@ -2155,7 +2155,7 @@ sparc_store_return_value (struct type *type, char *valbuf)
       memset (buffer, 0, REGISTER_RAW_SIZE (regno));
       memcpy (buffer + REGISTER_RAW_SIZE (regno) - TYPE_LENGTH (type), valbuf,
 	      TYPE_LENGTH (type));
-      write_register_gen (regno, buffer);
+      deprecated_write_register_gen (regno, buffer);
     }
   else
     write_register_bytes (REGISTER_BYTE (regno), valbuf, TYPE_LENGTH (type));
@@ -2440,7 +2440,7 @@ sparc64_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 	    {
 	      int oreg = O0_REGNUM + register_counter;
 
-	      write_register_gen (oreg, VALUE_CONTENTS (copyarg) + j);
+	      deprecated_write_register_gen (oreg, VALUE_CONTENTS (copyarg) + j);
 	      register_counter += 1;
 	    }
         }

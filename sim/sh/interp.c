@@ -954,12 +954,14 @@ strnswap (str, len)
   while (start < end);
 }
 
-/* Simulate a monitor trap, put the result into r0 and errno into r1 */
+/* Simulate a monitor trap, put the result into r0 and errno into r1
+   return offset by which to adjust pc.  */
 
-static void
-trap (i, regs, memory, maskl, maskw, endianw)
+static int
+trap (i, regs, insn_ptr, memory, maskl, maskw, endianw)
      int i;
      int *regs;
+     unsigned char *insn_ptr;
      unsigned char *memory;
 {
   switch (i)
@@ -971,6 +973,13 @@ trap (i, regs, memory, maskl, maskw, endianw)
       raise_exception (SIGQUIT);
       break;
     case 3:			/* FIXME: for backwards compat, should be removed */
+    case 33:
+      {
+	unsigned int countp = * (unsigned int *) (insn_ptr + 4);
+
+	WLAT (countp, RLAT (countp) + 1);
+	return 6;
+      }
     case 34:
       {
 	extern int errno;
@@ -1154,9 +1163,11 @@ trap (i, regs, memory, maskl, maskw, endianw)
     case 0xc3:
     case 255:
       raise_exception (SIGTRAP);
+      if (i == 0xc3)
+	return -2;
       break;
     }
-
+  return 0;
 }
 
 void

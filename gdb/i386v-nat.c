@@ -60,6 +60,8 @@
 #include "floatformat.h"
 
 #include "target.h"
+
+#include "i386-tdep.h"
 
 
 /* Mapping between the general-purpose registers in `struct user'

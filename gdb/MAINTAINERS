@@ -56,7 +56,7 @@ maintainer works with the native maintainer when resolving API issues.
 
 	a29k		Deleted.
 
-	alpha		--target=alpha-elf -Werror
+	alpha		--target=alpha-elf ,-Werror
 			Maintenance only
 
 	arc		(--target=arc-elf OBSOLETE)
@@ -80,7 +80,7 @@ maintainer works with the native maintainer when resolving API issues.
 
 	fr30		(--target=fr30-elf OBSOLETE)
 
-	h8300		--target=h8300hms -Werror
+	h8300		--target=h8300hms ,-Werror
 			Maintenance only
 
 	h8500		--target=h8500hms -Werror

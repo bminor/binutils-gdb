@@ -249,10 +249,10 @@ extern CORE_ADDR saved_pc_after_call (struct frame_info *);
       (buf)[sizeof(CORE_ADDR) -1] &= ~0x3; \
   } while (0)
 
-/* Define DO_REGISTERS_INFO() to do machine-specific formatting
+/* Define DEPRECATED_REGISTERS_INFO() to do machine-specific formatting
    of register dumps. */
 
-#define DO_REGISTERS_INFO(_regnum, fp) pa_do_registers_info (_regnum, fp)
+#define DEPRECATED_REGISTERS_INFO(_regnum, fp) pa_do_registers_info (_regnum, fp)
 extern void pa_do_registers_info (int, int);
 
 #if 0

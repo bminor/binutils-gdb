@@ -4395,7 +4395,7 @@ ada_finish_decode_line_1 (char **spec, struct symtab *file_table,
 #endif
       struct minimal_symbol *msymbol;
 
-      INIT_SAL (&val);
+      init_sal (&val);
 
       msymbol = NULL;
       if (lower_name != NULL)
@@ -4537,7 +4537,7 @@ done:
   sals.nelts = 1;
   sals.sals = (struct symtab_and_line *) xmalloc (sizeof (sals.sals[0]));
 
-  INIT_SAL (&sals.sals[0]);
+  init_sal (&sals.sals[0]);
 
   sals.sals[0].line = best_linetable->item[best_index].line;
   sals.sals[0].pc = best_linetable->item[best_index].pc;
@@ -4856,7 +4856,7 @@ all_sals_for_line (const char *filename, int line_num, char ***canonical)
 	  break;
 
 	GROW_VECT (result.sals, len, result.nelts + 1);
-	INIT_SAL (&result.sals[result.nelts]);
+	init_sal (&result.sals[result.nelts]);
 	result.sals[result.nelts].line = LINETABLE (s)->item[ind].line;
 	result.sals[result.nelts].pc = LINETABLE (s)->item[ind].pc;
 	result.sals[result.nelts].symtab = s;

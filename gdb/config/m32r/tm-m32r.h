@@ -221,7 +221,7 @@ extern CORE_ADDR m32r_push_arguments (int nargs,
 /* override the standard get_saved_register function with 
    one that takes account of generic CALL_DUMMY frames */
 #define GET_SAVED_REGISTER(raw_buffer, optimized, addrp, frame, regnum, lval) \
-     generic_get_saved_register (raw_buffer, optimized, addrp, frame, regnum, lval)
+     deprecated_generic_get_saved_register (raw_buffer, optimized, addrp, frame, regnum, lval)
 
 
 #define USE_GENERIC_DUMMY_FRAMES 1

@@ -39,6 +39,8 @@
 #include "gdbcore.h"
 #include "inferior.h"
 #include "solist.h"
+#include "bcache.h"
+#include "regcache.h"
 
 /* Link map info to include in an allocated so_list entry */
 
@@ -135,10 +137,8 @@ allocate_rt_common_objfile (void)
   objfile = (struct objfile *) xmalloc (sizeof (struct objfile));
   memset (objfile, 0, sizeof (struct objfile));
   objfile->md = NULL;
-  obstack_specify_allocation (&objfile->psymbol_cache.cache, 0, 0,
-			      xmalloc, xfree);
-  obstack_specify_allocation (&objfile->macro_cache.cache, 0, 0,
-			      xmalloc, xfree);
+  objfile->psymbol_cache = bcache_xmalloc ();
+  objfile->macro_cache = bcache_xmalloc ();
   obstack_specify_allocation (&objfile->psymbol_obstack, 0, 0, xmalloc,
 			      xfree);
   obstack_specify_allocation (&objfile->symbol_obstack, 0, 0, xmalloc,
