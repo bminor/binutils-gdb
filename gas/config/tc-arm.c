@@ -5571,8 +5571,8 @@ md_apply_fix3 (fixP, val, seg)
 	 instruction, in a 24 bit, signed field.  Thus we need to check
 	 that none of the top 8 bits of the shifted value (top 7 bits of
          the unshifted, unsigned value) are set, or that they are all set.  */
-      if ((value & 0xfe000000UL) != 0
-	  && ((value & 0xfe000000UL) != 0xfe000000UL))
+      if ((value & ~ ((offsetT) 0x1ffffff)) != 0
+	  && ((value & ~ ((offsetT) 0x1ffffff)) != ~ ((offsetT) 0x1ffffff)))
 	{
 #ifdef OBJ_ELF
 	  /* Normally we would be stuck at this point, since we cannot store
@@ -5595,8 +5595,8 @@ md_apply_fix3 (fixP, val, seg)
 
 	      /* Permit a backward branch provided that enough bits are set.
 		 Allow a forwards branch, provided that enough bits are clear.  */
-	      if ((value & 0xfe000000UL) == 0xfe000000UL
-		  || (value & 0xfe000000UL) == 0)
+	      if ((value & ~ ((offsetT) 0x1ffffff)) == ~ ((offsetT) 0x1ffffff)
+		  || (value & ~ ((offsetT) 0x1ffffff)) == 0)
 		fixP->fx_done = 1;
 	    }
 	  
@@ -5609,8 +5609,8 @@ md_apply_fix3 (fixP, val, seg)
       value >>= 2;
       value += SEXT24 (newval);
       
-      if ((value & 0xff000000UL) != 0
-	  && ((value & 0xff000000UL) != 0xff000000UL))
+      if ((value & ~ ((offsetT) 0xffffff)) != 0
+	  && ((value & ~ ((offsetT) 0xffffff)) != ~ ((offsetT) 0xffffff)))
 	as_bad_where (fixP->fx_file, fixP->fx_line,
 		      _("out of range branch"));
       

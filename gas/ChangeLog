@@ -1,3 +1,8 @@
+2000-04-13  Alan Modra  <alan@linuxcare.com.au>
+
+	* config/tc-arm.c (md_apply_fix3): Don't use UL suffix on
+	constants, and don't assume offsetT is 32 bits.
+
 2000-04-12  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* config/tc-d10v.h: Include "write.h" to get definition of fixS.

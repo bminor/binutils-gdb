@@ -1,5 +1,5 @@
 /* BFD back-end for AMD 29000 COFF binaries.
-   Copyright 1990, 91, 92, 93, 94, 95, 97, 98, 1999
+   Copyright 1990, 91, 92, 93, 94, 95, 97, 98, 99, 2000
    Free Software Foundation, Inc.
    Contributed by David Wood at New York University 7/8/91.
 
@@ -43,9 +43,9 @@ static boolean coff_a29k_adjust_symndx
 #define INSERT_HWORD(WORD,HWORD)	\
     (((WORD) & 0xff00ff00) | (((HWORD) & 0xff00) << 8) | ((HWORD)& 0xff))
 #define EXTRACT_HWORD(WORD) \
-    ((((WORD) & 0x00ff0000) >> 8) | ((WORD)& 0xff))
+    ((((WORD) & 0x00ff0000) >> 8) | ((WORD) & 0xff))
 #define SIGN_EXTEND_HWORD(HWORD) \
-    ((HWORD) & 0x8000 ? (HWORD)|(~0xffffL) : (HWORD))
+    (((HWORD) ^ 0x8000) - 0x8000)
 
 /* Provided the symbol, returns the value reffed */
 static long

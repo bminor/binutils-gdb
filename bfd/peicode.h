@@ -905,8 +905,8 @@ pe_ILF_build_a_bfd (bfd *           abfd,
 	/* XXX - treat as IMPORT_NAME ??? */
 	abort ();
       
-      * (unsigned int *) id4->contents = ordinal | 0x80000000UL;
-      * (unsigned int *) id5->contents = ordinal | 0x80000000UL;
+      * (unsigned int *) id4->contents = ordinal | 0x80000000;
+      * (unsigned int *) id5->contents = ordinal | 0x80000000;
     }
   else
     {

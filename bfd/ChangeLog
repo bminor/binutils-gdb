@@ -1,3 +1,19 @@
+2000-04-13  Alan Modra  <alan@linuxcare.com.au>
+
+	* elf32-hppa.h: Update copyright date.
+
+	* elf32-fr30.c (fr30_elf_i20_reloc): Don't use U suffix.
+	* elf32-mips.c (_bfd_mips_elf_relocate_section): And here.
+
+	* elf32-d30v.c (MAX32): Don't use LL suffix.
+	(MIN32): Define in terms of MAX32.
+	(bfd_elf_d30v_reloc): Make relocation a bfd_signed_vma.
+
+	* coff-a29k.c (SIGN_EXTEND_HWORD): Replace with more concise
+	expression.
+
+	* peicode.h (pe_ILF_build_a_bfd): Remove UL from hex constants.
+
 2000-04-12  Alan Modra  <alan@linuxcare.com.au>
 
 	* dep-in.sed: Match space before file name, not after.

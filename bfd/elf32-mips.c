@@ -6739,8 +6739,8 @@ _bfd_mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		  bfd_vma low_bits;
 		  bfd_vma high_bits;
 		  
-		  if (addend & 0x80000000u)
-		    sign_bits = 0xffffffffu;
+		  if (addend & ((bfd_vma) 1 << 31))
+		    sign_bits = ((bfd_vma) 1 << 32) - 1;
 		  else
 		    sign_bits = 0;
 		  
@@ -6859,8 +6859,8 @@ _bfd_mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	  bfd_vma low_bits;
 	  bfd_vma high_bits;
 
-	  if (value & 0x80000000u)
-	    sign_bits = 0xffffffffu;
+	  if (value & ((bfd_vma) 1 << 31))
+	    sign_bits = ((bfd_vma) 1 << 32) - 1;
 	  else
 	    sign_bits = 0;
 

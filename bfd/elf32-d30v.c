@@ -1,5 +1,5 @@
 /* D30V-specific support for 32-bit ELF
-   Copyright (C) 1997, 1998, 1999 Free Software Foundation, Inc.
+   Copyright (C) 1997, 98, 99, 2000 Free Software Foundation, Inc.
    Contributed by Martin Hunt (hunt@cygnus.com).
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -263,8 +263,8 @@ static reloc_howto_type elf_d30v_howto_table[] =
 
 };
 
-#define MIN32 (long long)0xffffffff80000000LL
-#define MAX32 0x7fffffffLL
+#define MAX32 ((bfd_signed_vma) 0x7fffffff)
+#define MIN32 (- MAX32 - 1)
 
 static bfd_reloc_status_type
 bfd_elf_d30v_reloc (abfd, reloc_entry, symbol, data, input_section, output_bfd, error_message)
@@ -276,7 +276,7 @@ bfd_elf_d30v_reloc (abfd, reloc_entry, symbol, data, input_section, output_bfd, 
      bfd *output_bfd;
      char **error_message;
 {
-  long long relocation;
+  bfd_signed_vma relocation;
   bfd_vma in1, in2, num;
   bfd_vma tmp_addr = 0;
   bfd_reloc_status_type r;
@@ -360,15 +360,10 @@ bfd_elf_d30v_reloc (abfd, reloc_entry, symbol, data, input_section, output_bfd, 
 
   if (howto->pc_relative == true && howto->bitsize == 32)
     {
-      /* the D30V has a PC that doesn't wrap and PC-relative jumps */
-      /* are signed, so a PC-relative jump can'tbe more than +/- 2^31 byrtes */
-      /* if one exceeds this, change it to an absolute jump */
-      if (relocation > MAX32)
-	{
-	  relocation = (relocation + tmp_addr) & 0xffffffff;
-	  make_absolute = 1;
-	}
-      else if (relocation < MIN32)
+      /* The D30V has a PC that doesn't wrap and PC-relative jumps are
+	 signed, so a PC-relative jump can't be more than +/- 2^31 bytes.
+	 If one exceeds this, change it to an absolute jump.  */
+      if (relocation > MAX32 || relocation < MIN32)
 	{
 	  relocation = (relocation + tmp_addr) & 0xffffffff;
 	  make_absolute = 1;
