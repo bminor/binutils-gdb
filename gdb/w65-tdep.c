@@ -65,18 +65,6 @@ w65_push_dummy_frame ()
   abort ();
 }
 
-int
-print_insn (memaddr, stream)
-     CORE_ADDR memaddr;
-     GDB_FILE *stream;
-{
-  disassemble_info info;
-
-  GDB_INIT_DISASSEMBLE_INFO (info, stream);
-
-  return print_insn_w65 ((bfd_vma) memaddr, &info);
-}
-
 /* Put here the code to store, into a struct frame_saved_regs,
    the addresses of the saved registers of frame described by FRAME_INFO.
    This includes special registers such as pc and fp saved in special
@@ -298,4 +286,10 @@ print_register_hook (regno)
       if ((Z | (N ^ V)) == 1)
 	printf_unfiltered ("<= ");
     }
+}
+
+void
+_initialize_w65_tdep ()
+{
+  tm_print_insn = print_insn_w65;
 }

@@ -205,22 +205,14 @@ z8k_push_dummy_frame ()
 }
 
 int
-print_insn (memaddr, stream)
-     CORE_ADDR memaddr;
-     GDB_FILE *stream;
+gdb_print_insn_z8k (memaddr, info)
+     bfd_vma memaddr;
+     disassemble_info *info;
 {
-  disassemble_info info;
-
-  GDB_INIT_DISASSEMBLE_INFO (info, stream);
-
   if (BIG)
-    {
-      return print_insn_z8001 ((bfd_vma) memaddr, &info);
-    }
+    return print_insn_z8001 (memaddr, info);
   else
-    {
-      return print_insn_z8002 ((bfd_vma) memaddr, &info);
-    }
+    return print_insn_z8002 (memaddr, info);
 }
 
 /* Fetch the instruction at ADDR, returning 0 if ADDR is beyond LIM or
@@ -443,6 +435,8 @@ set_memory (args, from_tty)
 void
 _initialize_z8ktdep ()
 {
+  tm_print_insn = gdb_print_insn_z8k;
+
   add_prefix_cmd ("memory", no_class, set_memory,
 		  "set the memory model", &setmemorylist, "set memory ", 0,
 		  &setlist);

@@ -1,5 +1,6 @@
 /* Print NS 32000 instructions for GDB, the GNU debugger.
-   Copyright 1986, 1988, 1991, 1992, 1994 Free Software Foundation, Inc.
+   Copyright 1986, 1988, 1991, 1992, 1994, 1995
+   Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -18,19 +19,9 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "defs.h"
-#include "dis-asm.h"
 
-/* Print the instruction at address MEMADDR in debugged memory,
-   on STREAM.  Returns length of the instruction, in bytes.  */
-
-int
-print_insn (memaddr, stream)
-     CORE_ADDR memaddr;
-     GDB_FILE *stream;
+void
+_initialize_ns32k_tdep ()
 {
-  disassemble_info info;
-
-  GDB_INIT_DISASSEMBLE_INFO (info, stream);
-
-  return print_insn_ns32k (memaddr, &info);
+  tm_print_insn = print_insn_ns32k;
 }

@@ -1,5 +1,5 @@
 /* Target-dependent code for the HP PA architecture, for GDB.
-   Copyright 1986, 1987, 1989, 1990, 1991, 1992, 1993, 1994
+   Copyright 1986, 1987, 1989, 1990, 1991, 1992, 1993, 1994, 1995
    Free Software Foundation, Inc.
 
    Contributed by the Center for Software Science at the
@@ -2623,6 +2623,8 @@ unwind_command (exp, from_tty)
 void
 _initialize_hppa_tdep ()
 {
+  tm_print_insn = print_insn_hppa;
+
 #ifdef MAINTENANCE_CMDS
   add_cmd ("unwind", class_maintenance, unwind_command,
 	   "Print unwind table entry at given address.",

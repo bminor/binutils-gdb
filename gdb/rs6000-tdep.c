@@ -1,5 +1,5 @@
 /* Target-dependent code for GDB, the GNU debugger.
-   Copyright 1986, 1987, 1989, 1991, 1992, 1993, 1994
+   Copyright 1986, 1987, 1989, 1991, 1992, 1993, 1994, 1995
    Free Software Foundation, Inc.
 
 This file is part of GDB.
@@ -1194,4 +1194,15 @@ find_toc_address (pc)
     }
 
   return loadinfo[toc_entry].dataorg + loadinfo[toc_entry].toc_offset;
+}
+
+void
+_initialize_rs6000_tdep ()
+{
+  /* FIXME, this should not be decided via ifdef. */
+#ifdef GDB_TARGET_POWERPC
+  tm_print_insn = print_insn_big_powerpc;
+#else
+  tm_print_insn = print_insn_rs6000;
+#endif
 }

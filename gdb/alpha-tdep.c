@@ -1083,21 +1083,6 @@ alpha_store_return_value (valtype, valbuf)
   write_register_bytes(REGISTER_BYTE (regnum), raw_buffer, TYPE_LENGTH (valtype));
 }
 
-/* Print the instruction at address MEMADDR in debugged memory,
-   on STREAM.  Returns length of the instruction, in bytes.  */
-
-int
-print_insn (memaddr, stream)
-     CORE_ADDR memaddr;
-     GDB_FILE *stream;
-{
-  disassemble_info info;
-
-  GDB_INIT_DISASSEMBLE_INFO(info, stream);
-
-  return print_insn_alpha (memaddr, &info);
-}
-
 /* Just like reinit_frame_cache, but with the right arguments to be
    callable as an sfunc.  */
 
@@ -1138,6 +1123,8 @@ void
 _initialize_alpha_tdep ()
 {
   struct cmd_list_element *c;
+
+  tm_print_insn = print_insn_alpha;
 
   /* Let the user set the fence post for heuristic_proc_start.  */
 

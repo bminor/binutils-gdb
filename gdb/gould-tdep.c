@@ -1,4 +1,4 @@
-/* Print GOULD RISC instructions for GDB, the GNU debugger.
+/* GOULD RISC target-dependent code for GDB, the GNU debugger.
    Copyright 1986, 1987, 1989, 1991 Free Software Foundation, Inc.
 
 This file is part of GDB.
@@ -38,9 +38,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    on STREAM.  Returns length of the instruction, in bytes.  */
 
 int
-print_insn (memaddr, stream)
-	CORE_ADDR memaddr;
-	FILE *stream;
+gould_print_insn (memaddr, stream)
+     CORE_ADDR memaddr;
+     FILE *stream;
 {
 	unsigned char buffer[MAXLEN];
 	register int i;

@@ -74,22 +74,19 @@ sh_skip_prologue (start_pc)
   return start_pc;
 }
 
-/* Disassemble an instruction */
+/* Disassemble an instruction.  */
 
 int
-print_insn (memaddr, stream)
-     CORE_ADDR memaddr;
-     GDB_FILE *stream;
+gdb_print_insn_sh (memaddr, info)
+     bfd_vma memaddr;
+     disassemble_info *info;
 {
-  disassemble_info info;
-
-  GDB_INIT_DISASSEMBLE_INFO (info, stream);
-
   if (TARGET_BYTE_ORDER == BIG_ENDIAN)
     return print_insn_sh (memaddr, &info);
   else
     return print_insn_shl (memaddr, &info);
 }
+
 /* Given a GDB frame, determine the address of the calling function's frame.
    This will be used to create a new GDB frame struct, and then
    INIT_EXTRA_FRAME_INFO and INIT_FRAME_PC will be called for the new frame.
@@ -318,6 +315,9 @@ void
 _initialize_sh_tdep ()
 {
   extern int sim_memory_size;
+
+  tm_print_insn = gdb_print_insn_sh;
+
   /* FIXME, there should be a way to make a CORE_ADDR variable settable. */
   add_show_from_set
     (add_set_cmd ("memory_size", class_support, var_uinteger,

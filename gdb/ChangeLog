@@ -1,3 +1,61 @@
+Mon Jan 16 18:11:03 1995  Stan Shebs  <shebs@andros.cygnus.com>
+
+	General cleanup and simplication of disassembler interface.
+	* a29k-pinsn.c, arm-pinsn.c, convex-pinsn.c, gould-pinsn.c,
+        hppa-pinsn.c, i386-pinsn.c, i960-pinsn.c, m68k-pinsn.c,
+        m88k-pinsn.c, mips-pinsn.c, ns32k-pinsn.c, pyr-pinsn.c,
+        rs6000-pinsn.c, sparc-pinsn.c, tahoe-pinsn.c, vax-pinsn.c: Remove.
+	* gould-tdep.c, ns32k-tdep.c, tahoe-tdep.c, vax-tdep.c: New files,
+	had been -pinsn.c files.
+	* Makefile.in (ALLDEPFILES): Remove removed files.
+	(a29k-pinsn.o, arm-pinsn.o, convex-pinsn.o, gould-pinsn.o,
+        hppa-pinsn.o, i386-pinsn.o, i960-pinsn.o, m68k-pinsn.o,
+        m88k-pinsn.o, mips-pinsn.o, ns32k-pinsn.o, pyr-pinsn.o,
+        rs6000-pinsn.o, sparc-pinsn.o, tahoe-pinsn.o, vax-pinsn.o):
+        Remove compile actions.
+	* arm-tdep.o, gould-tdep.o, ns32k-tdep.o, tahoe-tdep.o,
+	vax-tdep.o: Add compile actions.
+	* defs.h (tm_print_insn): New global.
+	* a29k-tdep.c (gdb_print_insn_a29k): New function.
+	(_initialize_a29k_tdep): Rename from _initialize_29k,
+	set tm_print_insn.
+	* alpha-tdep.c (print_insn): Remove.
+	(_initialize_alpha_tdep): Set tm_print_insn.
+	* arm-tdep.c (arm_print_insn): New function, was print_insn
+	in arm-pinsn.c.
+	* convex-tdep.c (convex_print_insn): New function, was print_insn
+	in convex-pinsn.c.
+	* h8300-tdep.c (print_insn): Remove.
+	(gdb_print_insn_h8300): New function.
+	(_initialize_h8300_tdep): New function.
+	* h8500-tdep.c (print_insn): Remove.
+	(_initialize_h8500_tdep): New function.
+	* hppa-tdep.c (_initialize_hppa_tdep): Set tm_print_insn.
+	* i386-tdep.c (_initialize_i386_tdep): New function.
+	* i960-tdep.c (mem, next_insn): New functions, were in
+	i960-pinsn.c.
+	(_initialize_i960_tdep): Set tm_print_insn.
+	* m68k-tdep.c (_initialize_m68k_tdep): New function.
+	* m88k-tdep.c (_initialize_m88k_tdep): New function.
+	* mips-tdep.c (gdb_print_insn_mips): New function.
+	(_initialize_mips_tdep): Set tm_print_insn.
+	* pyr-tdep.c (pyr_print_insn): New function, was print_insn
+	in pyr-pinsn.c.
+	* rs6000-tdep.c (_initialize_rs6000_tdep): New function.
+	* sh-tdep.c (print_insn): Remove.
+	(gdb_print_insn_sh): New function.
+	(_initialize_sh_tdep): Set tm_print_insn.
+	* sparc-tdep.c (_initialize_sparc_tdep): New function.
+	* w65-tdep.c (print_insn): Remove.
+	(_initialize_w65_tdep): New function.
+	* z8k-tdep.c (print_insn): Remove.
+	(gdb_print_insn_z8k): New function.
+	(_initialize_z8k_tdep): Set tm_print_insn.
+	* printcmd.c (print_insn): New function, generic disassembler.
+	* config/*/*.mt (TDEPFILES): Remove refs to *-pinsn.o.
+
+	* defs.h (query_hook, error_hook): Fix prototypes.
+
 Mon Jan 16 15:43:29 1995  Kung Hsu  <kung@mexican.cygnus.com>
 
 	* Makefile.in: add new files remote-vx29k.c, config/a29k/tm-vx29k.h,

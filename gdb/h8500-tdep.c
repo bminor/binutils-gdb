@@ -1,5 +1,5 @@
 /* Target-machine dependent code for Hitachi H8/500, for GDB.
-   Copyright (C) 1993, 1994 Free Software Foundation, Inc.
+   Copyright 1993, 1994, 1995 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -102,16 +102,6 @@ h8500_skip_prologue (start_pc)
     }
 
   return start_pc;
-}
-
-int
-print_insn (memaddr, stream)
-     CORE_ADDR memaddr;
-     GDB_FILE *stream;
-{
-  disassemble_info info;
-  GDB_INIT_DISASSEMBLE_INFO (info, stream);
-  return print_insn_h8500 (memaddr, &info);
 }
 
 /* Given a GDB frame, determine the address of the calling function's frame.
@@ -680,3 +670,8 @@ h8500_write_fp (v)
   write_register (PR6_REGNUM, v);
 }
 
+void
+_initialize_h8500_tdep ()
+{
+  tm_print_insn = gdb_print_insn_sh;
+}

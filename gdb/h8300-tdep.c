@@ -98,12 +98,10 @@ h8300_skip_prologue (start_pc)
 }
 
 int
-print_insn (memaddr, stream)
-     CORE_ADDR memaddr;
-     GDB_FILE *stream;
+gdb_print_insn_h8300 (memaddr, info)
+     bfd_vma memaddr;
+     disassemble_info *info;
 {
-  disassemble_info info;
-  GDB_INIT_DISASSEMBLE_INFO(info, stream);
   if (h8300hmode)
     return print_insn_h8300h (memaddr, &info);
   else
@@ -473,3 +471,8 @@ print_register_hook (regno)
     }
 }
 
+void
+_initialize_h8300_tdep ()
+{
+  tm_print_insn = gdb_print_insn_h8300;
+}

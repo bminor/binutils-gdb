@@ -1,5 +1,5 @@
 /* Target-dependent code for the MIPS architecture, for GDB, the GNU Debugger.
-   Copyright 1988, 1989, 1990, 1991, 1992, 1993, 1994
+   Copyright 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995
    Free Software Foundation, Inc.
    Contributed by Alessandro Forin(af@cs.cmu.edu) at CMU
    and by Per Bothner(bothner@cs.wisc.edu) at U.Wisconsin.
@@ -1311,10 +1311,23 @@ reinit_frame_cache_sfunc (args, from_tty, c)
   reinit_frame_cache ();
 }
 
+int
+gdb_print_insn_mips (memaddr, info)
+     bfd_vma memaddr;
+     disassemble_info *info;
+{
+  if (TARGET_BYTE_ORDER == BIG_ENDIAN)
+    return print_insn_big_mips (memaddr, info);
+  else
+    return print_insn_little_mips (memaddr, info);
+}
+
 void
 _initialize_mips_tdep ()
 {
   struct cmd_list_element *c;
+
+  tm_print_insn = gdb_print_insn_mips;
 
   /* Let the user turn off floating point and set the fence post for
      heuristic_proc_start.  */

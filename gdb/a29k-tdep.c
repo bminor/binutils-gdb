@@ -1,5 +1,6 @@
 /* Target-machine dependent code for the AMD 29000
-   Copyright 1990, 1991, 1992, 1993, 1994 Free Software Foundation, Inc.
+   Copyright 1990, 1991, 1992, 1993, 1994, 1995
+   Free Software Foundation, Inc.
    Contributed by Cygnus Support.  Written by Jim Kingdon.
 
 This file is part of GDB.
@@ -910,6 +911,17 @@ setup_arbitrary_frame (argc, argv)
   return frame;
 }
 
+int
+gdb_print_insn_a29k (memaddr, info)
+     bfd_vma memaddr;
+     disassemble_info *info;
+{
+  if (TARGET_BYTE_ORDER == BIG_ENDIAN)
+    return print_insn_big_a29k (memaddr, &info);
+  else
+    return print_insn_little_a29k (memaddr, &info);
+}
+
 enum a29k_processor_types processor_type = a29k_unknown;
 
 void
@@ -956,9 +968,11 @@ a29k_get_processor_type ()
 }
 
 void
-_initialize_29k()
+_initialize_a29k_tdep ()
 {
   extern CORE_ADDR text_end;
+
+  tm_print_insn = gdb_print_insn_a29k;
 
   /* FIXME, there should be a way to make a CORE_ADDR variable settable. */
   add_show_from_set

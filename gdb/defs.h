@@ -834,9 +834,20 @@ extern CORE_ADDR push_word PARAMS ((CORE_ADDR, unsigned LONGEST));
 #define MAINTENANCE_CMDS 1
 #endif
 
-/* Hooks for alternate command interfaces.  */
-
 #include "dis-asm.h"		/* Get defs for disassemble_info */
+
+extern int dis_asm_read_memory PARAMS ((bfd_vma memaddr, bfd_byte *myaddr,
+					int len, disassemble_info *info));
+
+extern void dis_asm_memory_error PARAMS ((int status, bfd_vma memaddr,
+					  disassemble_info *info));
+
+extern void dis_asm_print_address PARAMS ((bfd_vma addr,
+					   disassemble_info *info));
+
+extern int (*tm_print_insn) PARAMS ((bfd_vma, disassemble_info*));
+
+/* Hooks for alternate command interfaces.  */
 
 #ifdef __STDC__
 struct target_waitstatus;
@@ -845,10 +856,12 @@ struct cmd_list_element;
 
 extern void (*init_ui_hook) PARAMS ((void));
 extern void (*command_loop_hook) PARAMS ((void));
-extern void (*fputs_unfiltered_hook) PARAMS ((const char *linebuffer, FILE *stream));
-extern void (*print_frame_info_listing_hook) PARAMS ((struct symtab *s, int line,
-					       int stopline, int noerror));
-extern int (*query_hook) PARAMS (());
+extern void (*fputs_unfiltered_hook) PARAMS ((const char *linebuffer,
+					      FILE *stream));
+extern void (*print_frame_info_listing_hook) PARAMS ((struct symtab *s,
+						      int line, int stopline,
+						      int noerror));
+extern int (*query_hook) PARAMS ((void));
 extern void (*flush_hook) PARAMS ((FILE *stream));
 extern void (*create_breakpoint_hook) PARAMS ((struct breakpoint *b));
 extern void (*delete_breakpoint_hook) PARAMS ((struct breakpoint *bpt));
@@ -866,7 +879,7 @@ extern int (*target_wait_hook) PARAMS ((int pid,
 extern void (*call_command_hook) PARAMS ((struct cmd_list_element *c,
 					  char *cmd, int from_tty));
 
-extern NORETURN void (*error_hook) PARAMS (());
+extern NORETURN void (*error_hook) PARAMS ((void));
 
 /* Inhibit window interface if non-zero. */
 

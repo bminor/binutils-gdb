@@ -1,5 +1,5 @@
 /* Target-machine dependent code for Motorola 88000 series, for GDB.
-   Copyright (C) 1988, 1990, 1991, 1994 Free Software Foundation, Inc.
+   Copyright 1988, 1990, 1991, 1994, 1995 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -607,4 +607,10 @@ pop_frame ()
       write_pc (frame_saved_pc (frame));
     }
   reinit_frame_cache ();
+}
+
+void
+_initialize_m88k_tdep ()
+{
+  tm_print_insn = print_insn_m88k;
 }
