@@ -728,6 +728,11 @@ parse_frame_specification (char *frame_exp)
 
 	    tmp_cleanup = make_cleanup (xfree, addr_string);
 
+	    /* NOTE: we call parse_and_eval and then both
+	       value_as_long and value_as_pointer rather than calling
+	       parse_and_eval_long and parse_and_eval_address because
+	       of the issue of potential side effects from evaluating
+	       the expression.  */
 	    vp = parse_and_eval (addr_string);
 	    if (numargs == 0)
 	      level = value_as_long (vp);
