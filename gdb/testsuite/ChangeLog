@@ -1,5 +1,11 @@
 2004-03-31  Joel Brobecker  <brobecker@gnat.com>
 
+	* gdb.ada: New subdirectory.
+	* gdb.ada/Makefile.in: New file.
+	* gdb.ada/gnat_ada.gpr.in: New file.
+
+2004-03-31  Joel Brobecker  <brobecker@gnat.com>
+
 	* lib/ada.exp: New file.
 
 2004-03-24  Daniel Jacobowitz  <drow@mvista.com>

@@ -1,0 +1,10 @@
+--  This project files allows us to control the location where the
+--  compilation artifacts produced when building the Ada examples
+--  are stored.
+
+project Gnat_Ada is
+
+   for Source_Dirs use ("@srcdir@");
+   --  No need to set the Object_Dir, it is set to "." by default.
+
+end Gnat_Ada;
