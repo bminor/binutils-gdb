@@ -116,6 +116,8 @@ cp_print_class_method (valaddr, type, stream)
 	  for (j = 0; j < len2; j++)
 	    {
 	      QUIT;
+	      if (TYPE_FN_FIELD_STUB (f, j))
+		check_stub_method (domain, i, j);
 	      if (STREQ (SYMBOL_NAME (sym), TYPE_FN_FIELD_PHYSNAME (f, j)))
 		{
 		  goto common;

@@ -1566,6 +1566,8 @@ read_member_functions (fip, pp, type, objfile)
 
 	  if (TYPE_FLAGS (new_sublist -> fn_field.type) & TYPE_FLAG_STUB)
 	    {
+	      if (!TYPE_DOMAIN_TYPE (new_sublist -> fn_field.type))
+		TYPE_DOMAIN_TYPE (new_sublist -> fn_field.type) = type;
 	      new_sublist -> fn_field.is_stub = 1;
 	    }
 	  new_sublist -> fn_field.physname = savestring (*pp, p - *pp);

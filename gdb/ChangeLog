@@ -1,3 +1,11 @@
+Wed Apr 14 12:49:29 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* stabsread.c (read_member_functions): Initialize domain for stubbed
+	member functions to avoid gdb core dumps when printing pointers
+	to member functions.
+	* cp-valprint.c (cp_print_class_method): Check for stubbed member
+	functions.
+
 Tue Apr 13 08:28:26 1993  Jim Kingdon  (kingdon@cygnus.com)
 
 	* expprint.c (print_subexp): If opcode not found in op_print_tab,
