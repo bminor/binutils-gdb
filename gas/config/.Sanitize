@@ -51,7 +51,6 @@ mh-cygnus
 mh-i386
 mt-ebmon29k
 mt-h8300
-mt-h8300hds
 mt-m68k
 mt-mips
 obj-aout.c
@@ -124,7 +123,13 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.9  1991/11/11 23:36:39  sac
+# Revision 1.10  1991/11/26 02:16:55  sac
+# obj-coff-bfd:
+# 	bfd support gets deeper into gas
+# *h8*
+# 	fixed numerous bugs in instruction encoding
+#
+# Revision 1.9  1991/11/11  23:36:39  sac
 # Added tc-sparc.c
 #
 # Revision 1.8  1991/11/06  11:53:16  sac
