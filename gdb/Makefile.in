@@ -1260,15 +1260,23 @@ findvar.o: findvar.c $(defs_h) $(gdbcore_h) $(inferior_h) target.h \
 fork-child.o: fork-child.c gdb_wait.h $(defs_h) $(gdbcore_h) \
 	$(inferior_h) target.h terminal.h gdbthread.h gdb_string.h
 
+# FIXME: cagney/2000-03-27: Post 5.0 this link code can be removed.
+# It should now be possible to run GDBtk from the build directory
+# without the link in place.
 all-gdbtk:
-	if test "$(LN_S)" = "ln -s" -a ! -d gdbtcl/images ; then \
-	  echo linking ${srcdir}/gdbtk/library to gdbtcl ; \
-	  $(LN_S) ${srcdir}/gdbtk/library gdbtcl ; \
-	else \
-	  echo Warning: Unable to link ${srcdir}/gdbtk/library to gdbtcl. ; \
-	  echo "         " You will need to do a ; \
-	  echo "         " make install before you are able to run the GUI. ; \
-	fi
+	@if test ! -d gdbtcl/images ; then \
+	  if test "$(LN_S)" = "ln -s" ; then \
+	    echo linking ${srcdir}/gdbtk/library to gdbtcl ; \
+	    rm -f gdbtcl ; \
+	    test ! -r gdbtcl || exit 1 ; \
+	    $(LN_S) ${srcdir}/gdbtk/library gdbtcl ; \
+	  else \
+	    echo "Warning:" ; \
+	    echo "Unable to link ${srcdir}/gdbtk/library to gdbtcl." ; \
+	    echo "You will need to do a \`make install' before you are" ; \
+	    echo "able to run the GUI." ; \
+	  fi ; \
+	else true ; fi
 
 clean-gdbtk:
 	rm -f gdbtcl
