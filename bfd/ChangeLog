@@ -1,5 +1,24 @@
 Fri Feb 25 16:35:57 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
+	* libhppa.h (hppa_rebuild_insn): Moved here from elf32-hppa.c.
+
+	* elf32-hppa.h (elf_hppa_tc_symbol): Add new arguments.
+	(elf_hppa_tc_make_sections): Likewise.
+	(elf_hppa_final_processing): Add extern decl.
+
+	* elf32-hppa.c: First half of major cleanup.  Add/cleanup lots of
+	comments.  PARAMize some static functions.  Delete unused functions.
+	Delete unused/unnecessary arguments to many functions.  Group
+	static vars together.  Collapse common case statements together
+	in many places.  Use default case when possible instead of listing
+	each case separately.  Abort for bad errors until we get error
+	code propogation working.  Work on spacing and indention problems.
+	Add FIXMEs for some unresolved problems.  Delete hopelessly broken 
+	COMPLEX relocation support (it's never used anyway).
+	(hppa_elf_rebuild_insn): Delete.  Moved into libhppa.h.
+	(elf_hppa_tc_symbol): Accept and use new arguments (symext chains).
+	(elf_hppa_tc_make_sections): Likewise.
+
 	* format.c (bfd_check_format_matches): Initialize matching_vector
 	to keep gcc -Wall quiet.
 

@@ -30,28 +30,42 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "bfdlink.h"
 #include "libelf.h"
 
+/* Note there isn't much error handling code in here yet.  Unexpected
+   conditions are handled by just calling abort.  FIXME damnit! */
+ 
 /* ELF32/HPPA relocation support
 
 	This file contains ELF32/HPPA relocation support as specified
 	in the Stratus FTX/Golf Object File Format (SED-1762) dated
-	November 19, 1992.
-*/
+	November 19, 1992.  */
 
 #include "elf32-hppa.h"
 #include "libhppa.h"
 #include "aout/aout64.h"
 #include "hppa_stubs.h"
 
-/* ELF/PA relocation howto entries */
+/* ELF/PA relocation howto entries.  */
 
 static bfd_reloc_status_type hppa_elf_reloc
   PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
 
+static unsigned long hppa_elf_relocate_insn 
+  PARAMS ((bfd *, asection *, unsigned long, unsigned long, long,
+	   long, unsigned long, unsigned long, unsigned long));
+
+static void hppa_elf_relocate_unwind_table
+  PARAMS ((bfd *, PTR, unsigned long, long, long,
+	   unsigned long, unsigned long));
+
+static long get_symbol_value PARAMS ((asymbol *));
+static bfd_reloc_status_type hppa_elf_reloc
+  PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd*, char **));
+
+static CONST reloc_howto_type * elf_hppa_reloc_type_lookup
+  PARAMS ((bfd_arch_info_type *, bfd_reloc_code_real_type));
+
 static reloc_howto_type elf_hppa_howto_table[ELF_HOWTO_TABLE_SIZE] =
 {
-/*  'bitpos' and 'abs' are obsolete */
-/* type			rs sz bsz pcrel  bpos abs    ovrf  sf		   name */
-/* 9.3.4. Address relocation types */
   {R_HPPA_NONE, 0, 3, 19, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_NONE"},
   {R_HPPA_32, 0, 3, 32, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_32"},
   {R_HPPA_11, 0, 3, 11, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_11"},
@@ -72,7 +86,6 @@ static reloc_howto_type elf_hppa_howto_table[ELF_HOWTO_TABLE_SIZE] =
   {R_HPPA_LR21, 0, 3, 21, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_LR21"},
   {R_HPPA_RR14, 0, 3, 14, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_RR14"},
   {R_HPPA_RR17, 0, 3, 17, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_RR17"},
-/* 9.3.5. GOTOFF address relocation types		*/
   {R_HPPA_GOTOFF_11, 0, 3, 11, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_GOTOFF_11"},
   {R_HPPA_GOTOFF_14, 0, 3, 14, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_GOTOFF_14"},
   {R_HPPA_GOTOFF_L21, 0, 3, 21, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_GOTOFF_L21"},
@@ -86,7 +99,6 @@ static reloc_howto_type elf_hppa_howto_table[ELF_HOWTO_TABLE_SIZE] =
   {R_HPPA_GOTOFF_RD14, 0, 3, 14, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_GOTOFF_RD14"},
   {R_HPPA_GOTOFF_LR21, 0, 3, 21, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_GOTOFF_LR21"},
   {R_HPPA_GOTOFF_RR14, 0, 3, 14, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_GOTOFF_RR14"},
-/* 9.3.6. Absolute call relocation types	*/
   {R_HPPA_ABS_CALL_11, 0, 3, 11, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_ABS_CALL_11"},
   {R_HPPA_ABS_CALL_14, 0, 3, 14, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_ABS_CALL_14"},
   {R_HPPA_ABS_CALL_17, 0, 3, 17, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_ABS_CALL_17"},
@@ -105,7 +117,6 @@ static reloc_howto_type elf_hppa_howto_table[ELF_HOWTO_TABLE_SIZE] =
   {R_HPPA_ABS_CALL_LR21, 0, 3, 21, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_ABS_CALL_LR21"},
   {R_HPPA_ABS_CALL_RR14, 0, 3, 14, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_ABS_CALL_RR14"},
   {R_HPPA_ABS_CALL_RR17, 0, 3, 17, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_ABS_CALL_RR17"},
-/* 9.3.7. PC-relative call relocation types	*/
   {R_HPPA_PCREL_CALL_11, 0, 3, 11, true, 0, complain_overflow_signed, hppa_elf_reloc, "R_HPPA_PCREL_CALL_11"},
   {R_HPPA_PCREL_CALL_14, 0, 3, 14, true, 0, complain_overflow_signed, hppa_elf_reloc, "R_HPPA_PCREL_CALL_14"},
   {R_HPPA_PCREL_CALL_17, 0, 3, 17, true, 0, complain_overflow_signed, hppa_elf_reloc, "R_HPPA_PCREL_CALL_17"},
@@ -125,28 +136,20 @@ static reloc_howto_type elf_hppa_howto_table[ELF_HOWTO_TABLE_SIZE] =
   {R_HPPA_PCREL_CALL_LR21, 0, 3, 21, true, 0, complain_overflow_signed, hppa_elf_reloc, "R_HPPA_PCREL_CALL_LR21"},
   {R_HPPA_PCREL_CALL_RR14, 0, 3, 14, true, 0, complain_overflow_signed, hppa_elf_reloc, "R_HPPA_PCREL_CALL_RR14"},
   {R_HPPA_PCREL_CALL_RR17, 0, 3, 17, true, 0, complain_overflow_signed, hppa_elf_reloc, "R_HPPA_PCREL_CALL_RR17"},
-
-/* 9.3.8. Plabel relocation types */
   {R_HPPA_PLABEL_32, 0, 3, 32, false, 0, complain_overflow_signed, hppa_elf_reloc, "R_HPPA_PLABEL_32"},
   {R_HPPA_PLABEL_11, 0, 3, 11, false, 0, complain_overflow_signed, hppa_elf_reloc, "R_HPPA_PLABEL_11"},
   {R_HPPA_PLABEL_14, 0, 3, 14, false, 0, complain_overflow_signed, hppa_elf_reloc, "R_HPPA_PLABEL_14"},
   {R_HPPA_PLABEL_L21, 0, 3, 21, false, 0, complain_overflow_signed, hppa_elf_reloc, "R_HPPA_PLABEL_L21"},
   {R_HPPA_PLABEL_R11, 0, 3, 11, false, 0, complain_overflow_signed, hppa_elf_reloc, "R_HPPA_PLABEL_R11"},
   {R_HPPA_PLABEL_R14, 0, 3, 14, false, 0, complain_overflow_signed, hppa_elf_reloc, "R_HPPA_PLABEL_R14"},
-
-/* 9.3.9. Data linkage table (DLT) relocation types	*/
   {R_HPPA_DLT_32, 0, 3, 32, false, 0, complain_overflow_signed, hppa_elf_reloc, "R_HPPA_DLT_32"},
   {R_HPPA_DLT_11, 0, 3, 11, false, 0, complain_overflow_signed, hppa_elf_reloc, "R_HPPA_DLT_11"},
   {R_HPPA_DLT_14, 0, 3, 14, false, 0, complain_overflow_signed, hppa_elf_reloc, "R_HPPA_DLT_14"},
   {R_HPPA_DLT_L21, 0, 3, 21, false, 0, complain_overflow_signed, hppa_elf_reloc, "R_HPPA_DLT_L21"},
   {R_HPPA_DLT_R11, 0, 3, 11, false, 0, complain_overflow_signed, hppa_elf_reloc, "R_HPPA_DLT_R11"},
   {R_HPPA_DLT_R14, 0, 3, 14, false, 0, complain_overflow_signed, hppa_elf_reloc, "R_HPPA_DLT_R14"},
-
-/* 9.3.10. Relocations for unwinder tables	*/
   {R_HPPA_UNWIND_ENTRY, 0, 3, 32, true, 0, complain_overflow_signed, hppa_elf_reloc, "R_HPPA_UNWIND_ENTRY"},
   {R_HPPA_UNWIND_ENTRIES, 0, 3, 32, true, 0, complain_overflow_signed, hppa_elf_reloc, "R_HPPA_UNWIND_ENTRIES"},
-
-/*  9.3.11. Relocation types for complex expressions	*/
   {R_HPPA_PUSH_CONST, 0, 3, 32, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_PUSH_CONST"},
   {R_HPPA_PUSH_PC, 0, 3, 32, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_PUSH_PC"},
   {R_HPPA_PUSH_SYM, 0, 3, 32, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_PUSH_SYM"},
@@ -177,7 +180,6 @@ static reloc_howto_type elf_hppa_howto_table[ELF_HOWTO_TABLE_SIZE] =
   {R_HPPA_EXPR_RD, 0, 3, 32, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_EXPR_RD"},
   {R_HPPA_EXPR_LR, 0, 3, 32, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_EXPR_LR"},
   {R_HPPA_EXPR_RR, 0, 3, 32, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_EXPR_RR"},
-
   {R_HPPA_EXPR_32, 0, 3, 32, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_EXPR_32"},
   {R_HPPA_EXPR_21, 0, 3, 21, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_EXPR_21"},
   {R_HPPA_EXPR_11, 0, 3, 11, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_HPPA_EXPR_11"},
@@ -191,89 +193,30 @@ static reloc_howto_type elf_hppa_howto_table[ELF_HOWTO_TABLE_SIZE] =
 static symext_chainS *symext_rootP;
 static symext_chainS *symext_lastP;
 static boolean symext_chain_built;
+static long global_value;
+static long GOT_value;
+static asymbol *global_symbol;
+static int global_sym_defined;
+
+static symext_entryS *symextn_contents;
+static unsigned int symextn_contents_real_size;
+
+/* Relocate the given INSN given the various input parameters.
+
+   FIXME: endianness and sizeof (long) issues abound here.  */
 
 static unsigned long
-hppa_elf_rebuild_insn (abfd, insn, value, r_type, r_field, r_format)
-     bfd *abfd;
-     unsigned long insn;
-     unsigned long value;
-     unsigned short r_type;
-     unsigned short r_field;
-     unsigned short r_format;
-{
-  unsigned long const_part;	/* part of the instruction that does not change */
-  unsigned long rebuilt_part;
-
-  switch (r_format)
-    {
-    case 11:
-      {
-	unsigned w1, w;
-
-	const_part = insn & 0xffffe002;
-	dis_assemble_12 (value, &w1, &w);
-	rebuilt_part = (w1 << 2) | w;
-	return const_part | rebuilt_part;
-      }
-
-    case 12:
-      {
-	unsigned w1, w;
-
-	const_part = insn & 0xffffe002;
-	dis_assemble_12 (value, &w1, &w);
-	rebuilt_part = (w1 << 2) | w;
-	return const_part | rebuilt_part;
-      }
-
-    case 14:
-      const_part = insn & 0xffffc000;
-      low_sign_unext (value, 14, &rebuilt_part);
-      return const_part | rebuilt_part;
-
-    case 17:
-      {
-	unsigned w1, w2, w;
-
-	const_part = insn & 0xffe0e002;
-	dis_assemble_17 (value, &w1, &w2, &w);
-	rebuilt_part = (w2 << 2) | (w1 << 16) | w;
-	return const_part | rebuilt_part;
-      }
-
-    case 21:
-      const_part = insn & 0xffe00000;
-      dis_assemble_21 (value, &rebuilt_part);
-      return const_part | rebuilt_part;
-
-    case 32:
-      const_part = 0;
-      return value;
-
-    default:
-      fprintf (stderr, "Relocation problem : ");
-      fprintf (stderr,
-	       "Unrecognized reloc type %d (fmt=%d,fld=%d), in module %s\n",
-	       r_type, r_format, r_field, abfd->filename);
-    }
-  return insn;
-}
-
-static unsigned long
-hppa_elf_relocate_insn (abfd, input_sect,
-			insn, address, symp, sym_value, r_addend,
-			r_type, r_format, r_field, pcrel)
+hppa_elf_relocate_insn (abfd, input_sect, insn, address, sym_value,
+			r_addend, r_format, r_field, pcrel)
      bfd *abfd;
      asection *input_sect;
      unsigned long insn;
      unsigned long address;
-     asymbol *symp;
      long sym_value;
      long r_addend;
-     unsigned short r_type;
-     unsigned short r_format;
-     unsigned short r_field;
-     unsigned char pcrel;
+     unsigned long r_format;
+     unsigned long r_field;
+     unsigned long pcrel;
 {
   unsigned char opcode = get_opcode (insn);
   long constant_value;
@@ -290,44 +233,30 @@ hppa_elf_relocate_insn (abfd, input_sect,
     case STH:
     case STW:
     case STWM:
+    case COMICLR:
+    case SUBI:
+    case ADDIT:
+    case ADDI:
+    case LDIL:
+    case ADDIL:
       constant_value = HPPA_R_CONSTANT (r_addend);
-      BFD_ASSERT (r_format == 14);
 
       if (pcrel)
 	sym_value -= address;
+
       sym_value = hppa_field_adjust (sym_value, constant_value, r_field);
-      return hppa_elf_rebuild_insn (abfd, insn, sym_value, r_type, r_field, r_format);
-
-    case COMICLR:
-    case SUBI:			/* case SUBIO: */
-    case ADDIT:		/* case ADDITO: */
-    case ADDI:			/* case ADDIO: */
-      BFD_ASSERT (r_format == 11);
-
-      constant_value = HPPA_R_CONSTANT(r_addend);
-      sym_value = hppa_field_adjust (sym_value, constant_value, r_field);
-      return hppa_elf_rebuild_insn (abfd, insn, sym_value, r_type, r_field, r_format);
-
-    case LDIL:
-    case ADDIL:
-      BFD_ASSERT (r_format == 21);
-
-      constant_value = HPPA_R_CONSTANT (r_addend);
-      sym_value = hppa_field_adjust (sym_value, constant_value, r_field);
-      return hppa_elf_rebuild_insn (abfd, insn, sym_value, r_type, r_field, r_format);
+      return hppa_rebuild_insn (abfd, insn, sym_value, r_format);
 
     case BL:
     case BE:
     case BLE:
       arg_reloc = HPPA_R_ARG_RELOC (r_addend);
 
-      BFD_ASSERT (r_format == 17);
-
       /* XXX computing constant_value is not needed??? */
       constant_value = assemble_17 ((insn & 0x001f0000) >> 16,
 				    (insn & 0x00001ffc) >> 2,
 				    insn & 1);
-      /* @@ Assumes only 32 bits.  */
+
       constant_value = (constant_value << 15) >> 15;
       if (pcrel)
 	{
@@ -339,53 +268,47 @@ hppa_elf_relocate_insn (abfd, input_sect,
       else
 	sym_value = hppa_field_adjust (sym_value, constant_value, r_field);
 
-      return hppa_elf_rebuild_insn (abfd, insn, sym_value >> 2, r_type, r_field, r_format);
+      return hppa_rebuild_insn (abfd, insn, sym_value >> 2, r_format);
 
     default:
       if (opcode == 0)
 	{
-	  BFD_ASSERT (r_format == 32);
 	  constant_value = HPPA_R_CONSTANT (r_addend);
+
+	  if (pcrel)
+	    sym_value -= address;
 
 	  return hppa_field_adjust (sym_value, constant_value, r_field);
 	}
       else
-	{
-	  fprintf (stderr,
-		   "Unrecognized opcode 0x%02x (fmt=%x,field=%x)\n",
-		   opcode, r_format, r_field);
-	  return insn;
-	}
+	abort ();
     }
 }
 
+/* Relocate a single unwind entry, or an entire table of them.  */
+
 static void
-hppa_elf_relocate_unwind_table (abfd, input_sect,
-				data, address, symp, sym_value, r_addend,
-				r_type, r_format, r_field, pcrel)
+hppa_elf_relocate_unwind_table (abfd, data, address, sym_value,
+				r_addend, r_type, r_field)
      bfd *abfd;
-     asection *input_sect;
      PTR data;
      unsigned long address;
-     asymbol *symp;
      long sym_value;
      long r_addend;
-     unsigned short r_type;
-     unsigned short r_format;
-     unsigned short r_field;
-     unsigned char pcrel;
+     unsigned long r_type;
+     unsigned long r_field;
 {
-  bfd_byte *hit_data = address + (bfd_byte *) (data);
+  bfd_byte *hit_data = address + (bfd_byte *) data;
   long start_offset;
   long end_offset;
   long relocated_value;
   int i;
 
-  BFD_ASSERT (r_format == 32);
-  BFD_ASSERT (r_field == e_fsel);
   switch (r_type)
     {
     case R_HPPA_UNWIND_ENTRY:
+      /* Need to relocate the first two 32bit fields in the unwind.  They
+	 correspond to a function's start and end address.  */
       start_offset = bfd_get_32 (abfd, hit_data);
       relocated_value = hppa_field_adjust (sym_value, start_offset, r_field);
       bfd_put_32 (abfd, relocated_value, hit_data);
@@ -397,79 +320,53 @@ hppa_elf_relocate_unwind_table (abfd, input_sect,
       break;
 
     case R_HPPA_UNWIND_ENTRIES:
+      /* Relocate a mass of unwind entires.  The count is passed in r_addend
+	 (who's braindamaged idea was this anyway?  */
       for (i = 0; i < r_addend; i++, hit_data += 3 * sizeof (unsigned long))
 	{
 	  unsigned int adjustment;
+	  /* Adjust the first 32bit field in the unwind entry.  It's
+	     the starting offset of a function.  */
 	  start_offset = bfd_get_32 (abfd, hit_data);
-	  /* Stuff the symbol value into the first word */
-	  /* of the  unwind descriptor */
 	  bfd_put_32 (abfd, sym_value, hit_data);
 	  adjustment = sym_value - start_offset;
 
+	  /* Now adjust the second 32bit field, it's the ending offset
+	     of a function.  */
 	  hit_data += sizeof (unsigned long);
 	  end_offset = adjustment + bfd_get_32 (abfd, hit_data);
 	  bfd_put_32 (abfd, end_offset, hit_data);
 
-	  /* If this is not the last unwind entry, */
-	  /* adjust the symbol value. */
-	  if (i + 1 < r_addend)
-	    {
-	      start_offset = bfd_get_32 (abfd, hit_data + 3 * sizeof (unsigned long));
-              sym_value = start_offset + adjustment;
-	    }
+	  /* Prepare for the next iteration.  */
+	  start_offset = bfd_get_32 (abfd, 
+				     hit_data + 3 * sizeof (unsigned long));
+	  sym_value = start_offset + adjustment;
 	}
       break;
 
     default:
-      fprintf (stderr,
-	       "Unrecognized relocation type 0x%02x (fmt=%x,field=%x)\n",
-	       r_type, r_format, r_field);
+      abort ();
     }
 }
 
-/* Provided the symbol, returns the value reffed */
+/* Return the relocated value of the given symbol.  */
+
 static long
 get_symbol_value (symbol)
      asymbol *symbol;
 {
-  long relocation = 0;
-
-  if (symbol == (asymbol *) NULL)
-    relocation = 0;
-  else if (symbol->section == &bfd_com_section)
-    {
-      relocation = 0;
-    }
+  if (symbol == NULL
+      || symbol->section == &bfd_com_section)
+    return 0;
   else
-    {
-      relocation = symbol->value +
-	symbol->section->output_section->vma +
-	symbol->section->output_offset;
-    }
-
-  return (relocation);
+    return symbol->value + symbol->section->output_section->vma
+      + symbol->section->output_offset;
 }
 
-/* This function provides a pretty straight-forward mapping between a */
-/* base relocation type, format and field into the relocation type */
-/* that will be emitted in an object file.  The only wrinkle in the */
-/* mapping is that when the T, TR, TL, P, PR, or PL expression */
-/* prefixes are involved, the type gets promoted to a *_GOTOFF_* */
-/* relocation (in the case of T, TR, and TL) or a PLABEL relocation */
-/* (in the case of P, PR, and PL).	*/
+/* Return one (or more) BFD relocations which implement the base
+   relocation with modifications based on format and field.
 
-/* NOTE: XXX the T, TR, TL, P, PR, and PL expression prefixes are not */
-/* handled yet. */
-
-static void
-hppa_elf_gen_reloc_error (base_type, fmt, field)
-     elf32_hppa_reloc_type base_type;
-     int fmt;
-     int field;
-{
-  fprintf (stderr, "undefined relocation: base=0x%x,fmt=0x%x,field=0x%x\n",
-	   base_type, fmt, field);
-}
+   FIXME:  Needs a decl in elf32-hppa.h.  */
 
 elf32_hppa_reloc_type **
 hppa_elf_gen_reloc_type (abfd, base_type, format, field)
@@ -478,18 +375,20 @@ hppa_elf_gen_reloc_type (abfd, base_type, format, field)
      int format;
      int field;
 {
-#define UNDEFINED	hppa_elf_gen_reloc_error(base_type,format,field)
-
   elf32_hppa_reloc_type *finaltype;
   elf32_hppa_reloc_type **final_types;
-  int i;
 
-  final_types = (elf32_hppa_reloc_type **) bfd_alloc_by_size_t (abfd, sizeof (elf32_hppa_reloc_type *) * 2);
+  /* Allocate slots for the BFD relocation.  */
+  final_types = (elf32_hppa_reloc_type **)
+    bfd_alloc_by_size_t (abfd, sizeof (elf32_hppa_reloc_type *) * 2);
   BFD_ASSERT (final_types != 0); /* FIXME */
 
-  finaltype = (elf32_hppa_reloc_type *) bfd_alloc_by_size_t (abfd, sizeof (elf32_hppa_reloc_type));
+  /* Allocate space for the relocation itself.  */
+  finaltype = (elf32_hppa_reloc_type *)
+    bfd_alloc_by_size_t (abfd, sizeof (elf32_hppa_reloc_type));
   BFD_ASSERT (finaltype != 0);	/* FIXME */
 
+  /* Some reasonable defaults.  */
   final_types[0] = finaltype;
   final_types[1] = NULL;
 
@@ -497,6 +396,9 @@ hppa_elf_gen_reloc_type (abfd, base_type, format, field)
 
   final_type = base_type;
 
+  /* Just a tangle of nested switch statements to deal with the braindamage
+     that a different field selector means a completely different relocation
+     for PA ELF.  */
   switch (base_type)
     {
     case R_HPPA:
@@ -517,7 +419,6 @@ hppa_elf_gen_reloc_type (abfd, base_type, format, field)
 	    case e_rdsel:
 	      final_type = R_HPPA_RD11;
 	      break;
-
 	    case e_psel:
 	      final_type = R_HPPA_PLABEL_11;
 	      break;
@@ -530,22 +431,12 @@ hppa_elf_gen_reloc_type (abfd, base_type, format, field)
 	    case e_rtsel:
 	      final_type = R_HPPA_DLT_R11;
 	      break;
-
-	    case e_lpsel:
-	    case e_ltsel:
-	    case e_lsel:
-	    case e_lrsel:
-	    case e_lssel:
-	    case e_rrsel:
 	    default:
-	      UNDEFINED;
-	      final_type = base_type;
+	      abort ();
 	      break;
 	    }
 	  break;
-	case 12:
-	  UNDEFINED;
-	  break;
+
 	case 14:
 	  switch (field)
 	    {
@@ -561,7 +452,6 @@ hppa_elf_gen_reloc_type (abfd, base_type, format, field)
 	    case e_rrsel:
 	      final_type = R_HPPA_RR14;
 	      break;
-
 	    case e_psel:
 	      final_type = R_HPPA_PLABEL_14;
 	      break;
@@ -574,21 +464,12 @@ hppa_elf_gen_reloc_type (abfd, base_type, format, field)
 	    case e_rtsel:
 	      final_type = R_HPPA_DLT_R14;
 	      break;
-
-	    case e_lpsel:
-	    case e_ltsel:
-
-	    case e_fsel:
-	    case e_lsel:
-	    case e_lssel:
-	    case e_ldsel:
-	    case e_lrsel:
 	    default:
-	      UNDEFINED;
-	      final_type = base_type;
+	      abort ();
 	      break;
 	    }
 	  break;
+
 	case 17:
 	  switch (field)
 	    {
@@ -607,16 +488,12 @@ hppa_elf_gen_reloc_type (abfd, base_type, format, field)
 	    case e_rrsel:
 	      final_type = R_HPPA_RR17;
 	      break;
-	    case e_lsel:
-	    case e_lssel:
-	    case e_ldsel:
-	    case e_lrsel:
 	    default:
-	      UNDEFINED;
-	      final_type = base_type;
+	      abort ();
 	      break;
 	    }
 	  break;
+
 	case 21:
 	  switch (field)
 	    {
@@ -638,17 +515,12 @@ hppa_elf_gen_reloc_type (abfd, base_type, format, field)
 	    case e_ltsel:
 	      final_type = R_HPPA_PLABEL_L21;
 	      break;
-	    case e_rsel:
-	    case e_rssel:
-	    case e_rdsel:
-	    case e_rrsel:
-	    case e_fsel:
 	    default:
-	      UNDEFINED;
-	      final_type = base_type;
+	      abort ();
 	      break;
 	    }
 	  break;
+
 	case 32:
 	  switch (field)
 	    {
@@ -662,17 +534,18 @@ hppa_elf_gen_reloc_type (abfd, base_type, format, field)
 	      final_type = R_HPPA_DLT_32;
 	      break;
 	    default:
-	      UNDEFINED;
-	      final_type = base_type;
+	      abort ();
 	      break;
 	    }
 	  break;
+
 	default:
-	  UNDEFINED;
-	  final_type = base_type;
+	  abort ();
 	  break;
 	}
       break;
+
+
     case R_HPPA_GOTOFF:
       switch (format)
 	{
@@ -691,20 +564,12 @@ hppa_elf_gen_reloc_type (abfd, base_type, format, field)
 	    case e_fsel:
 	      final_type = R_HPPA_GOTOFF_11;
 	      break;
-	    case e_lsel:
-	    case e_lrsel:
-	    case e_lssel:
-	    case e_rrsel:
 	    default:
-	      UNDEFINED;
-	      final_type = base_type;
+	      abort ();
 	      break;
 	    }
 	  break;
-	case 12:
-	  UNDEFINED;
-	  final_type = base_type;
-	  break;
+
 	case 14:
 	  switch (field)
 	    {
@@ -723,20 +588,12 @@ hppa_elf_gen_reloc_type (abfd, base_type, format, field)
 	    case e_fsel:
 	      final_type = R_HPPA_GOTOFF_14;
 	      break;
-	    case e_lsel:
-	    case e_lssel:
-	    case e_ldsel:
-	    case e_lrsel:
 	    default:
-	      UNDEFINED;
-	      final_type = base_type;
+	      abort ();
 	      break;
 	    }
 	  break;
-	case 17:
-	  UNDEFINED;
-	  final_type = base_type;
-	  break;
+
 	case 21:
 	  switch (field)
 	    {
@@ -752,27 +609,19 @@ hppa_elf_gen_reloc_type (abfd, base_type, format, field)
 	    case e_lrsel:
 	      final_type = R_HPPA_GOTOFF_LR21;
 	      break;
-	    case e_rsel:
-	    case e_rssel:
-	    case e_rdsel:
-	    case e_rrsel:
-	    case e_fsel:
 	    default:
-	      UNDEFINED;
-	      final_type = base_type;
+	      abort ();
 	      break;
 	    }
 	  break;
-	case 32:
-	  UNDEFINED;
-	  final_type = base_type;
-	  break;
+
 	default:
-	  UNDEFINED;
-	  final_type = base_type;
+	  abort ();
 	  break;
 	}
       break;
+
+
     case R_HPPA_PCREL_CALL:
       switch (format)
 	{
@@ -791,20 +640,12 @@ hppa_elf_gen_reloc_type (abfd, base_type, format, field)
 	    case e_fsel:
 	      final_type = R_HPPA_PCREL_CALL_11;
 	      break;
-	    case e_lsel:
-	    case e_lrsel:
-	    case e_lssel:
-	    case e_rrsel:
 	    default:
-	      UNDEFINED;
-	      final_type = base_type;
+	      abort ();
 	      break;
 	    }
 	  break;
-	case 12:
-	  UNDEFINED;
-	  final_type = base_type;
-	  break;
+
 	case 14:
 	  switch (field)
 	    {
@@ -823,16 +664,12 @@ hppa_elf_gen_reloc_type (abfd, base_type, format, field)
 	    case e_fsel:
 	      final_type = R_HPPA_PCREL_CALL_14;
 	      break;
-	    case e_lsel:
-	    case e_lssel:
-	    case e_ldsel:
-	    case e_lrsel:
 	    default:
-	      UNDEFINED;
-	      final_type = base_type;
+	      abort ();
 	      break;
 	    }
 	  break;
+
 	case 17:
 	  switch (field)
 	    {
@@ -851,16 +688,12 @@ hppa_elf_gen_reloc_type (abfd, base_type, format, field)
 	    case e_fsel:
 	      final_type = R_HPPA_PCREL_CALL_17;
 	      break;
-	    case e_lsel:
-	    case e_lssel:
-	    case e_ldsel:
-	    case e_lrsel:
 	    default:
-	      UNDEFINED;
-	      final_type = base_type;
+	      abort ();
 	      break;
 	    }
 	  break;
+
 	case 21:
 	  switch (field)
 	    {
@@ -876,27 +709,19 @@ hppa_elf_gen_reloc_type (abfd, base_type, format, field)
 	    case e_lrsel:
 	      final_type = R_HPPA_PCREL_CALL_LR21;
 	      break;
-	    case e_rsel:
-	    case e_rssel:
-	    case e_rdsel:
-	    case e_rrsel:
-	    case e_fsel:
 	    default:
-	      UNDEFINED;
-	      final_type = base_type;
+	      abort ();
 	      break;
 	    }
 	  break;
-	case 32:
-	  UNDEFINED;
-	  final_type = base_type;
-	  break;
+
 	default:
-	  UNDEFINED;
-	  final_type = base_type;
+	  abort ();
 	  break;
 	}
       break;
+
+
     case R_HPPA_PLABEL:
       switch (format)
 	{
@@ -910,11 +735,11 @@ hppa_elf_gen_reloc_type (abfd, base_type, format, field)
 	      final_type = R_HPPA_PLABEL_R11;
 	      break;
 	    default:
-	      UNDEFINED;
-	      final_type = base_type;
+	      abort ();
 	      break;
 	    }
 	  break;
+
 	case 14:
 	  switch (field)
 	    {
@@ -925,11 +750,11 @@ hppa_elf_gen_reloc_type (abfd, base_type, format, field)
 	      final_type = R_HPPA_PLABEL_R14;
 	      break;
 	    default:
-	      UNDEFINED;
-	      final_type = base_type;
+	      abort ();
 	      break;
 	    }
 	  break;
+
 	case 21:
 	  switch (field)
 	    {
@@ -937,11 +762,11 @@ hppa_elf_gen_reloc_type (abfd, base_type, format, field)
 	      final_type = R_HPPA_PLABEL_L21;
 	      break;
 	    default:
-	      UNDEFINED;
-	      final_type = base_type;
+	      abort ();
 	      break;
 	    }
 	  break;
+
 	case 32:
 	  switch (field)
 	    {
@@ -949,16 +774,17 @@ hppa_elf_gen_reloc_type (abfd, base_type, format, field)
 	      final_type = R_HPPA_PLABEL_32;
 	      break;
 	    default:
-	      UNDEFINED;
-	      final_type = base_type;
+	      abort ();
 	      break;
 	    }
 	  break;
+
 	default:
-	  UNDEFINED;
-	  final_type = base_type;
+	  abort ();
 	  break;
 	}
+
+
     case R_HPPA_ABS_CALL:
       switch (format)
 	{
@@ -977,20 +803,12 @@ hppa_elf_gen_reloc_type (abfd, base_type, format, field)
 	    case e_fsel:
 	      final_type = R_HPPA_ABS_CALL_11;
 	      break;
-	    case e_lsel:
-	    case e_lrsel:
-	    case e_lssel:
-	    case e_rrsel:
 	    default:
-	      UNDEFINED;
-	      final_type = base_type;
+	      abort ();
 	      break;
 	    }
 	  break;
-	case 12:
-	  UNDEFINED;
-	  final_type = base_type;
-	  break;
+
 	case 14:
 	  switch (field)
 	    {
@@ -1009,16 +827,12 @@ hppa_elf_gen_reloc_type (abfd, base_type, format, field)
 	    case e_fsel:
 	      final_type = R_HPPA_ABS_CALL_14;
 	      break;
-	    case e_lsel:
-	    case e_lssel:
-	    case e_ldsel:
-	    case e_lrsel:
 	    default:
-	      UNDEFINED;
-	      final_type = base_type;
+	      abort ();
 	      break;
 	    }
 	  break;
+
 	case 17:
 	  switch (field)
 	    {
@@ -1037,16 +851,12 @@ hppa_elf_gen_reloc_type (abfd, base_type, format, field)
 	    case e_fsel:
 	      final_type = R_HPPA_ABS_CALL_17;
 	      break;
-	    case e_lsel:
-	    case e_lssel:
-	    case e_ldsel:
-	    case e_lrsel:
 	    default:
-	      UNDEFINED;
-	      final_type = base_type;
+	      abort ();
 	      break;
 	    }
 	  break;
+
 	case 21:
 	  switch (field)
 	    {
@@ -1062,110 +872,33 @@ hppa_elf_gen_reloc_type (abfd, base_type, format, field)
 	    case e_lrsel:
 	      final_type = R_HPPA_ABS_CALL_LR21;
 	      break;
-	    case e_rsel:
-	    case e_rssel:
-	    case e_rdsel:
-	    case e_rrsel:
-	    case e_fsel:
 	    default:
-	      UNDEFINED;
-	      final_type = base_type;
+	      abort ();
 	      break;
 	    }
 	  break;
-	case 32:
-	  UNDEFINED;
-	  final_type = base_type;
-	  break;
+
 	default:
-	  UNDEFINED;
-	  final_type = base_type;
+	  abort ();
 	  break;
 	}
       break;
+
+
     case R_HPPA_UNWIND:
       final_type = R_HPPA_UNWIND_ENTRY;
       break;
+
+
     case R_HPPA_COMPLEX:
     case R_HPPA_COMPLEX_PCREL_CALL:
     case R_HPPA_COMPLEX_ABS_CALL:
-      final_types = (elf32_hppa_reloc_type **) bfd_alloc_by_size_t (abfd, sizeof (elf32_hppa_reloc_type *) * 6);
-      BFD_ASSERT (final_types != 0); /* FIXME */
-
-      finaltype = (elf32_hppa_reloc_type *) bfd_alloc_by_size_t (abfd, sizeof (elf32_hppa_reloc_type) * 5);
-      BFD_ASSERT (finaltype != 0); /* FIXME */
-
-      for (i = 0; i < 5; i++)
-	final_types[i] = &finaltype[i];
-
-      final_types[5] = NULL;
-
-      finaltype[0] = R_HPPA_PUSH_SYM;
-
-      if (base_type == R_HPPA_COMPLEX)
-	finaltype[1] = R_HPPA_PUSH_SYM;
-      else if (base_type == R_HPPA_COMPLEX_PCREL_CALL)
-	finaltype[1] = R_HPPA_PUSH_PCREL_CALL;
-      else			/* base_type == R_HPPA_COMPLEX_ABS_CALL */
-	finaltype[1] = R_HPPA_PUSH_ABS_CALL;
-
-      finaltype[2] = R_HPPA_SUB;
-
-      switch (field)
-	{
-	case e_fsel:
-	  finaltype[3] = R_HPPA_EXPR_F;
-	  break;
-	case e_lsel:
-	  finaltype[3] = R_HPPA_EXPR_L;
-	  break;
-	case e_rsel:
-	  finaltype[3] = R_HPPA_EXPR_R;
-	  break;
-	case e_lssel:
-	  finaltype[3] = R_HPPA_EXPR_LS;
-	  break;
-	case e_rssel:
-	  finaltype[3] = R_HPPA_EXPR_RS;
-	  break;
-	case e_ldsel:
-	  finaltype[3] = R_HPPA_EXPR_LD;
-	  break;
-	case e_rdsel:
-	  finaltype[3] = R_HPPA_EXPR_RD;
-	  break;
-	case e_lrsel:
-	  finaltype[3] = R_HPPA_EXPR_LR;
-	  break;
-	case e_rrsel:
-	  finaltype[3] = R_HPPA_EXPR_RR;
-	  break;
-	}
-
-      switch (format)
-	{
-	case 11:
-	  finaltype[4] = R_HPPA_EXPR_11;
-	  break;
-	case 12:
-	  finaltype[4] = R_HPPA_EXPR_12;
-	  break;
-	case 14:
-	  finaltype[4] = R_HPPA_EXPR_14;
-	  break;
-	case 17:
-	  finaltype[4] = R_HPPA_EXPR_17;
-	  break;
-	case 21:
-	  finaltype[4] = R_HPPA_EXPR_21;
-	  break;
-	case 32:
-	  finaltype[4] = R_HPPA_EXPR_32;
-	  break;
-	}
-
+      /* The code originally here was horribly broken, and apparently
+	 never used.  Zap it.  When we need complex relocations rewrite
+	 it correctly!  */
+      abort ();
       break;
-
+      
     default:
       final_type = base_type;
       break;
@@ -1177,11 +910,7 @@ hppa_elf_gen_reloc_type (abfd, base_type, format, field)
 #undef final_type
 
 
-/* this function is in charge of performing all the HP PA relocations */
-static long global_value;
-static long GOT_value;	/* XXX:  need to calculate this! For HPUX, GOT == DP */
-static asymbol *global_symbol;
-static int global_sym_defined;
+/* Actually perform a relocation.  */
 
 static bfd_reloc_status_type
 hppa_elf_reloc (abfd, reloc_entry, symbol_in, data, input_section, output_bfd,
@@ -1197,16 +926,16 @@ hppa_elf_reloc (abfd, reloc_entry, symbol_in, data, input_section, output_bfd,
   unsigned long insn;
   long sym_value = 0;
   unsigned long addr = reloc_entry->address;
-  bfd_byte *hit_data = addr + (bfd_byte *) (data);
-  unsigned short r_type = reloc_entry->howto->type & 0xFF;
-  unsigned short r_field = e_fsel;
+  bfd_byte *hit_data = addr + (bfd_byte *) data;
+  unsigned long r_type = reloc_entry->howto->type;
+  unsigned long r_field = e_fsel;
   boolean r_pcrel = reloc_entry->howto->pc_relative;
   unsigned r_format = reloc_entry->howto->bitsize;
   long r_addend = reloc_entry->addend;
 
+  /* If only performing a partial link, get out early.  */
   if (output_bfd)
     {
-      /* Partial linking - do nothing */
       reloc_entry->address += input_section->output_offset;
       return bfd_reloc_ok;
     }
@@ -1216,9 +945,16 @@ hppa_elf_reloc (abfd, reloc_entry, symbol_in, data, input_section, output_bfd,
   if (symbol_in && symbol_in->section == &bfd_und_section)
     return bfd_reloc_undefined;
 
+  /* Get the final relocated value.  */
   sym_value = get_symbol_value (symbol_in);
 
-  /* Compute the value of $global$.  */
+  /* Compute the value of $global$.
+     FIXME: None of this should be necessary.  $global$ is just a 
+     marker and shouldn't really figure into these computations.
+
+     Once that's fixed we'll need to teach this backend to change
+     DP-relative relocations involving symbols in the text section
+     to be simple absolute relocations.  */
   if (!global_sym_defined)
     {
       if (global_symbol)
@@ -1251,14 +987,8 @@ hppa_elf_reloc (abfd, reloc_entry, symbol_in, data, input_section, output_bfd,
 
     /* Handle all the basic type 1 relocations.  */
     case R_HPPA_32:
-      r_field = e_fsel;
-      goto do_basic_type_1;
     case R_HPPA_11:
-      r_field = e_fsel;
-      goto do_basic_type_1;
     case R_HPPA_14:
-      r_field = e_fsel;
-      goto do_basic_type_1;
     case R_HPPA_17:
       r_field = e_fsel;
       goto do_basic_type_1;
@@ -1266,11 +996,7 @@ hppa_elf_reloc (abfd, reloc_entry, symbol_in, data, input_section, output_bfd,
       r_field = e_lsel;
       goto do_basic_type_1;
     case R_HPPA_R11:
-      r_field = e_rsel;
-      goto do_basic_type_1;
     case R_HPPA_R14:
-      r_field = e_rsel;
-      goto do_basic_type_1;
     case R_HPPA_R17:
       r_field = e_rsel;
       goto do_basic_type_1;
@@ -1278,11 +1004,7 @@ hppa_elf_reloc (abfd, reloc_entry, symbol_in, data, input_section, output_bfd,
       r_field = e_lssel;
       goto do_basic_type_1;
     case R_HPPA_RS11:
-      r_field = e_rssel;
-      goto do_basic_type_1;
     case R_HPPA_RS14:
-      r_field = e_rssel;
-      goto do_basic_type_1;
     case R_HPPA_RS17:
       r_field = e_ldsel;
       goto do_basic_type_1;
@@ -1290,11 +1012,7 @@ hppa_elf_reloc (abfd, reloc_entry, symbol_in, data, input_section, output_bfd,
       r_field = e_ldsel;
       goto do_basic_type_1;
     case R_HPPA_RD11:
-      r_field = e_rdsel;
-      goto do_basic_type_1;
     case R_HPPA_RD14:
-      r_field = e_rdsel;
-      goto do_basic_type_1;
     case R_HPPA_RD17:
       r_field = e_rdsel;
       goto do_basic_type_1;
@@ -1302,21 +1020,17 @@ hppa_elf_reloc (abfd, reloc_entry, symbol_in, data, input_section, output_bfd,
       r_field = e_lrsel;
       goto do_basic_type_1;
     case R_HPPA_RR14:
-      r_field = e_rrsel;
-      goto do_basic_type_1;
     case R_HPPA_RR17:
       r_field = e_rrsel;
 
     do_basic_type_1:
       insn = hppa_elf_relocate_insn (abfd, input_section, insn, addr,
-				     symbol_in, sym_value, r_addend,
-				     r_type, r_format, r_field, r_pcrel);
+				     sym_value, r_addend, r_format,
+				     r_field, r_pcrel);
       break;
 
     /* Handle all the basic type 2 relocations.  */
     case R_HPPA_GOTOFF_11:
-      r_field = e_fsel;
-      goto do_basic_type_2;
     case R_HPPA_GOTOFF_14:
       r_field = e_fsel;
       goto do_basic_type_2;
@@ -1324,8 +1038,6 @@ hppa_elf_reloc (abfd, reloc_entry, symbol_in, data, input_section, output_bfd,
       r_field = e_lsel;
       goto do_basic_type_2;
     case R_HPPA_GOTOFF_R11:
-      r_field = e_rsel;
-      goto do_basic_type_2;
     case R_HPPA_GOTOFF_R14:
       r_field = e_rsel;
       goto do_basic_type_2;
@@ -1333,8 +1045,6 @@ hppa_elf_reloc (abfd, reloc_entry, symbol_in, data, input_section, output_bfd,
       r_field = e_lssel;
       goto do_basic_type_2;
     case R_HPPA_GOTOFF_RS11:
-      r_field = e_rssel;
-      goto do_basic_type_2;
     case R_HPPA_GOTOFF_RS14:
       r_field = e_rssel;
       goto do_basic_type_2;
@@ -1342,8 +1052,6 @@ hppa_elf_reloc (abfd, reloc_entry, symbol_in, data, input_section, output_bfd,
       r_field = e_ldsel;
       goto do_basic_type_2;
     case R_HPPA_GOTOFF_RD11:
-      r_field = e_rdsel;
-      goto do_basic_type_2;
     case R_HPPA_GOTOFF_RD14:
       r_field = e_rdsel;
       goto do_basic_type_2;
@@ -1356,17 +1064,13 @@ hppa_elf_reloc (abfd, reloc_entry, symbol_in, data, input_section, output_bfd,
     do_basic_type_2:
       sym_value -= GOT_value;
       insn = hppa_elf_relocate_insn (abfd, input_section, insn, addr,
-				     symbol_in, sym_value, r_addend,
-				     r_type, r_format, r_field, r_pcrel);
+				     sym_value, r_addend, r_format,
+				     r_field, r_pcrel);
       break;
 
     /* Handle all the basic type 3 relocations.  */
     case R_HPPA_ABS_CALL_11:
-      r_field = e_fsel;
-      goto do_basic_type_3;
     case R_HPPA_ABS_CALL_14:
-      r_field = e_fsel;
-      goto do_basic_type_3;
     case R_HPPA_ABS_CALL_17:
       r_field = e_fsel;
       goto do_basic_type_3;
@@ -1374,11 +1078,7 @@ hppa_elf_reloc (abfd, reloc_entry, symbol_in, data, input_section, output_bfd,
       r_field = e_lsel;
       goto do_basic_type_3;
     case R_HPPA_ABS_CALL_R11:
-      r_field = e_rsel;
-      goto do_basic_type_3;
     case R_HPPA_ABS_CALL_R14:
-      r_field = e_rsel;
-      goto do_basic_type_3;
     case R_HPPA_ABS_CALL_R17:
       r_field = e_rsel;
       goto do_basic_type_3;
@@ -1386,11 +1086,7 @@ hppa_elf_reloc (abfd, reloc_entry, symbol_in, data, input_section, output_bfd,
       r_field = e_lssel;
       goto do_basic_type_3;
     case R_HPPA_ABS_CALL_RS11:
-      r_field = e_lssel;
-      goto do_basic_type_3;
     case R_HPPA_ABS_CALL_RS14:
-      r_field = e_rssel;
-      goto do_basic_type_3;
     case R_HPPA_ABS_CALL_RS17:
       r_field = e_rssel;
       goto do_basic_type_3;
@@ -1398,11 +1094,7 @@ hppa_elf_reloc (abfd, reloc_entry, symbol_in, data, input_section, output_bfd,
       r_field = e_ldsel;
       goto do_basic_type_3;
     case R_HPPA_ABS_CALL_RD11:
-      r_field = e_rdsel;
-      goto do_basic_type_3;
     case R_HPPA_ABS_CALL_RD14:
-      r_field = e_rdsel;
-      goto do_basic_type_3;
     case R_HPPA_ABS_CALL_RD17:
       r_field = e_rdsel;
       goto do_basic_type_3;
@@ -1410,24 +1102,18 @@ hppa_elf_reloc (abfd, reloc_entry, symbol_in, data, input_section, output_bfd,
       r_field = e_lrsel;
       goto do_basic_type_3;
     case R_HPPA_ABS_CALL_RR14:
-      r_field = e_rrsel;
-      goto do_basic_type_3;
     case R_HPPA_ABS_CALL_RR17:
       r_field = e_rrsel;
 
     do_basic_type_3:
       insn = hppa_elf_relocate_insn (abfd, input_section, insn, addr,
-				     symbol_in, sym_value, r_addend,
-				     r_type, r_format, r_field, r_pcrel);
+				     sym_value, r_addend, r_format,
+				     r_field, r_pcrel);
       break;
 
     /* Handle all the basic type 4 relocations.  */  
     case R_HPPA_PCREL_CALL_11:
-      r_field = e_fsel;
-      goto do_basic_type_4;
     case R_HPPA_PCREL_CALL_14:
-      r_field = e_fsel;
-      goto do_basic_type_4;
     case R_HPPA_PCREL_CALL_17:
       r_field = e_fsel;
       goto do_basic_type_4;
@@ -1435,11 +1121,7 @@ hppa_elf_reloc (abfd, reloc_entry, symbol_in, data, input_section, output_bfd,
       r_field = e_lsel;
       goto do_basic_type_4;
     case R_HPPA_PCREL_CALL_R11:
-      r_field = e_rsel;
-      goto do_basic_type_4;
     case R_HPPA_PCREL_CALL_R14:
-      r_field = e_rsel;
-      goto do_basic_type_4;
     case R_HPPA_PCREL_CALL_R17:
       r_field = e_rsel;
       goto do_basic_type_4;
@@ -1447,11 +1129,7 @@ hppa_elf_reloc (abfd, reloc_entry, symbol_in, data, input_section, output_bfd,
       r_field = e_lssel;
       goto do_basic_type_4;
     case R_HPPA_PCREL_CALL_RS11:
-      r_field = e_rssel;
-      goto do_basic_type_4;
     case R_HPPA_PCREL_CALL_RS14:
-      r_field = e_rssel;
-      goto do_basic_type_4;
     case R_HPPA_PCREL_CALL_RS17:
       r_field = e_rssel;
       goto do_basic_type_4;
@@ -1459,11 +1137,7 @@ hppa_elf_reloc (abfd, reloc_entry, symbol_in, data, input_section, output_bfd,
       r_field = e_ldsel;
       goto do_basic_type_4;
     case R_HPPA_PCREL_CALL_RD11:
-      r_field = e_rdsel;
-      goto do_basic_type_4;
     case R_HPPA_PCREL_CALL_RD14:
-      r_field = e_rdsel;
-      goto do_basic_type_4;
     case R_HPPA_PCREL_CALL_RD17:
       r_field = e_rdsel;
       goto do_basic_type_4;
@@ -1471,15 +1145,13 @@ hppa_elf_reloc (abfd, reloc_entry, symbol_in, data, input_section, output_bfd,
       r_field = e_lrsel;
       goto do_basic_type_4;
     case R_HPPA_PCREL_CALL_RR14:
-      r_field = e_rrsel;
-      goto do_basic_type_4;
     case R_HPPA_PCREL_CALL_RR17:
       r_field = e_rrsel;
 
     do_basic_type_4:
       insn = hppa_elf_relocate_insn (abfd, input_section, insn, addr,
-				     symbol_in, sym_value, r_addend,
-				     r_type, r_format, r_field, r_pcrel);
+				     sym_value, r_addend, r_format,
+				     r_field, r_pcrel);
       break;
 
     /* Handle all the basic type 5 relocations.  */  
@@ -1496,65 +1168,23 @@ hppa_elf_reloc (abfd, reloc_entry, symbol_in, data, input_section, output_bfd,
       r_field = e_rsel;
     do_basic_type_5:
       insn = hppa_elf_relocate_insn (abfd, input_section, insn, addr,
-				     symbol_in, sym_value, r_addend,
-				     r_type, r_format, r_field, r_pcrel);
+				     sym_value, r_addend, r_format,
+				     r_field, r_pcrel);
       break;
 
     /* Handle all basic type 6 relocations.  */
     case R_HPPA_UNWIND_ENTRY:
     case R_HPPA_UNWIND_ENTRIES:
-      hppa_elf_relocate_unwind_table (abfd, input_section, data, addr,
-				      symbol_in, sym_value, r_addend,
-				      r_type, r_format, r_field, r_pcrel);
+      hppa_elf_relocate_unwind_table (abfd, data, addr,
+				      sym_value, r_addend,
+				      r_type, r_field);
       return bfd_reloc_ok;
-
-    /* Handle the stack operations and similar braindamage.  */
-    case R_HPPA_PUSH_CONST:
-    case R_HPPA_PUSH_PC:
-    case R_HPPA_PUSH_SYM:
-    case R_HPPA_PUSH_GOTOFF:
-    case R_HPPA_PUSH_ABS_CALL:
-    case R_HPPA_PUSH_PCREL_CALL:
-    case R_HPPA_PUSH_PLABEL:
-    case R_HPPA_MAX:
-    case R_HPPA_MIN:
-    case R_HPPA_ADD:
-    case R_HPPA_SUB:
-    case R_HPPA_MULT:
-    case R_HPPA_DIV:
-    case R_HPPA_MOD:
-    case R_HPPA_AND:
-    case R_HPPA_OR:
-    case R_HPPA_XOR:
-    case R_HPPA_NOT:
-    case R_HPPA_LSHIFT:
-    case R_HPPA_ARITH_RSHIFT:
-    case R_HPPA_LOGIC_RSHIFT:
-    case R_HPPA_EXPR_F:
-    case R_HPPA_EXPR_L:
-    case R_HPPA_EXPR_R:
-    case R_HPPA_EXPR_LS:
-    case R_HPPA_EXPR_RS:
-    case R_HPPA_EXPR_LD:
-    case R_HPPA_EXPR_RD:
-    case R_HPPA_EXPR_LR:
-    case R_HPPA_EXPR_RR:
-    case R_HPPA_EXPR_32:
-    case R_HPPA_EXPR_21:
-    case R_HPPA_EXPR_11:
-    case R_HPPA_EXPR_14:
-    case R_HPPA_EXPR_17:
-    case R_HPPA_EXPR_12:
-      fprintf (stderr, "Relocation problem: ");
-      fprintf (stderr, "Unimplemented reloc type %d, in module %s\n",
-	       r_type, abfd->filename);
-      return bfd_reloc_notsupported;
 
     /* This is a linker internal relocation.  */
     case R_HPPA_STUB_CALL_17:
       /* This relocation is for a branch to a long branch stub.
 	 Change instruction to a BLE,N.  It may also be necessary
-	 to change interchange the branch and its delay slot.
+	 to interchange the branch and its delay slot.
 	 The original instruction stream is
 
 	    bl <foo>,r		; call foo using register r as
@@ -1570,13 +1200,21 @@ hppa_elf_reloc (abfd, reloc_entry, symbol_in, data, input_section, output_bfd,
 	 This braindamage is necessary because the compiler may put
 	 an instruction which uses %r31 in the delay slot of the original
 	 call.  By changing the call instruction from a "bl" to a "ble"
-	 %r31 gets clobbered before the delay slot executes.
+	 %r31 gets clobbered before the delay slot executes.  This
+	 also means the stub has to play funny games to make sure
+	 we return to the instruction just after the BLE rather than
+	 two instructions after the BLE.
 
 	 We do not interchange the branch and delay slot if the delay
 	 slot was already nullified, or if the instruction in the delay
 	 slot modifies the return pointer to avoid an unconditional
-	 jump after the call returns (GCC optimization).  */
+	 jump after the call returns (GCC optimization).
+
+	 None of this horseshit would be necessary if we put the
+	 stubs between functions and just redirected the "bl" to
+	 the stub.  Live and learn.  */
 	 
+      /* Is this instruction nullified?  (does this ever happen?)  */
       if (insn & 2)
         {
 	  insn = BLE_N_XXX_0_0;
@@ -1584,12 +1222,12 @@ hppa_elf_reloc (abfd, reloc_entry, symbol_in, data, input_section, output_bfd,
 	  r_type = R_HPPA_ABS_CALL_17;
 	  r_pcrel = 0;
 	  insn = hppa_elf_relocate_insn (abfd, input_section, insn,
-					 addr, symbol_in, sym_value,
-					 r_addend, r_type, r_format,
-					 r_field, r_pcrel);
+					 addr, sym_value, r_addend,
+					 r_format, r_field, r_pcrel);
         }
       else
 	{
+	  /* So much for the trivial case...  */
 	  unsigned long old_delay_slot_insn = bfd_get_32 (abfd, hit_data + 4);
 	  unsigned rtn_reg = (insn & 0x03e00000) >> 21;
 
@@ -1600,12 +1238,15 @@ hppa_elf_reloc (abfd, reloc_entry, symbol_in, data, input_section, output_bfd,
 
 	      /* If the target of the LDO is the same as the return
 		 register then there is no reordering.  We can leave the
-		 instuction as a non-nullified BLE in this case.  */
+		 instuction as a non-nullified BLE in this case.
+
+		 FIXME:  This test looks wrong.  If we had a ble using
+		 ldo_target_reg as the *source* we'd fuck this up.  */
 	      if (ldo_target_reg == rtn_reg)
 		{
 		  unsigned long new_delay_slot_insn = old_delay_slot_insn;
 
-		  BFD_ASSERT(ldo_src_reg == ldo_target_reg);
+		  BFD_ASSERT (ldo_src_reg == ldo_target_reg);
 		  new_delay_slot_insn &= 0xfc00ffff;
 		  new_delay_slot_insn |= ((31 << 21) | (31 << 16));
 		  bfd_put_32 (abfd, new_delay_slot_insn, hit_data + 4);
@@ -1613,9 +1254,8 @@ hppa_elf_reloc (abfd, reloc_entry, symbol_in, data, input_section, output_bfd,
 		  r_type = R_HPPA_ABS_CALL_17;
 		  r_pcrel = 0;
 		  insn = hppa_elf_relocate_insn (abfd, input_section, insn,
-						 addr, symbol_in, sym_value,
-						 r_addend, r_type, r_format,
-						 r_field, r_pcrel);
+						 addr, sym_value, r_addend,
+						 r_format, r_field, r_pcrel);
 		  bfd_put_32 (abfd, insn, hit_data);
 		  return bfd_reloc_ok;
 		}
@@ -1627,8 +1267,8 @@ hppa_elf_reloc (abfd, reloc_entry, symbol_in, data, input_section, output_bfd,
 	          r_type = R_HPPA_ABS_CALL_17;
 	          r_pcrel = 0;
 	          insn = hppa_elf_relocate_insn (abfd, input_section, insn,
-					         addr, symbol_in, sym_value,
-					         r_addend, r_type, r_format,
+					         addr, sym_value,
+					         r_addend, r_format,
 					         r_field, r_pcrel);
 	          bfd_put_32 (abfd, insn, hit_data);
 	          return bfd_reloc_ok;
@@ -1637,8 +1277,8 @@ hppa_elf_reloc (abfd, reloc_entry, symbol_in, data, input_section, output_bfd,
 		{
 		  /* Check to see if the delay slot instruction has a
 		     relocation.  If so, we need to change the address
-		     field of it, because the instruction it relocates
-		     is going to be moved.  */
+		     field of it because the instruction it relocates
+		     is going to be moved.  Oh what a mess.  */
 		  arelent * next_reloc_entry = reloc_entry+1;
 
 		  if (next_reloc_entry->address == reloc_entry->address + 4)
@@ -1651,13 +1291,14 @@ hppa_elf_reloc (abfd, reloc_entry, symbol_in, data, input_section, output_bfd,
 		  r_type = R_HPPA_ABS_CALL_17;
 		  r_pcrel = 0;
 		  insn = hppa_elf_relocate_insn (abfd, input_section, insn,
-						 addr + 4, symbol_in, 
-						 sym_value, r_addend, r_type,
+						 addr + 4,
+						 sym_value, r_addend,
 						 r_format, r_field, r_pcrel);
 		  bfd_put_32 (abfd, insn, hit_data + 4);
 		  return bfd_reloc_ok;
 		}
 	    }
+	  /* Same comments as above regarding incorrect test.  */
           else if (rtn_reg == 31)
             {
               /* The return register is r31, so this is a millicode call.
@@ -1666,8 +1307,8 @@ hppa_elf_reloc (abfd, reloc_entry, symbol_in, data, input_section, output_bfd,
 	      r_type = R_HPPA_ABS_CALL_17;
 	      r_pcrel = 0;
 	      insn = hppa_elf_relocate_insn (abfd, input_section, insn,
-					     addr, symbol_in, sym_value,
-					     r_addend, r_type, r_format,
+					     addr, sym_value,
+					     r_addend, r_format,
 					     r_field, r_pcrel);
 	      bfd_put_32 (abfd, insn, hit_data);
 	      return bfd_reloc_ok;
@@ -1690,8 +1331,8 @@ hppa_elf_reloc (abfd, reloc_entry, symbol_in, data, input_section, output_bfd,
 	      r_type = R_HPPA_ABS_CALL_17;
 	      r_pcrel = 0;
 	      insn = hppa_elf_relocate_insn (abfd, input_section, insn,
-					     addr + 4, symbol_in, sym_value,
-					     r_addend, r_type, r_format,
+					     addr + 4, sym_value,
+					     r_addend, r_format,
 					     r_field, r_pcrel);
 	      bfd_put_32 (abfd, insn, hit_data + 4);
 	      return bfd_reloc_ok;
@@ -1699,9 +1340,10 @@ hppa_elf_reloc (abfd, reloc_entry, symbol_in, data, input_section, output_bfd,
 	}
       break;
       
+    /* Something we don't know how to handle.  */
     default:
       *error_message = (char *) "Unrecognized reloc";
-      return bfd_reloc_dangerous;
+      return bfd_reloc_notsupported;
     }
 
   /* Update the instruction word.  */
@@ -1709,7 +1351,10 @@ hppa_elf_reloc (abfd, reloc_entry, symbol_in, data, input_section, output_bfd,
   return (bfd_reloc_ok);
 }
 
-static const reloc_howto_type *
+/* Return the address of the howto table entry to perform the CODE
+   relocation for an ARCH machine.  */
+
+static CONST reloc_howto_type *
 elf_hppa_reloc_type_lookup (arch, code)
      bfd_arch_info_type *arch;
      bfd_reloc_code_real_type code;
@@ -1719,18 +1364,20 @@ elf_hppa_reloc_type_lookup (arch, code)
       BFD_ASSERT ((int) elf_hppa_howto_table[(int) code].type == (int) code);
       return &elf_hppa_howto_table[(int) code];
     }
-
-  return (reloc_howto_type *) 0;
+  return NULL;
 }
 
-#define bfd_elf32_bfd_reloc_type_lookup	elf_hppa_reloc_type_lookup
 
+/* Update the symbol extention chain to include the symbol pointed to
+   by SYMBOLP if SYMBOLP is a function symbol.  Used internally and by GAS.  */
 
 void
-elf_hppa_tc_symbol (abfd, symbolP, sym_idx)
+elf_hppa_tc_symbol (abfd, symbolP, sym_idx, symext_root, symext_last)
      bfd *abfd;
      elf_symbol_type *symbolP;
      int sym_idx;
+     symext_chainS **symext_root;
+     symext_chainS **symext_last;
 {
   symext_chainS *symextP;
   unsigned int arg_reloc;
@@ -1746,10 +1393,11 @@ elf_hppa_tc_symbol (abfd, symbolP, sym_idx)
   if (arg_reloc == 0)
     return;
 
+  /* Allocate memory and initialize this entry.  */
   symextP = (symext_chainS *) bfd_alloc (abfd, sizeof (symext_chainS) * 2);
   if (!symextP)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       abort();			/* FIXME */
     }
 
@@ -1759,47 +1407,45 @@ elf_hppa_tc_symbol (abfd, symbolP, sym_idx)
   symextP[1].entry = ELF32_HPPA_SX_WORD (HPPA_SXT_ARG_RELOC, arg_reloc);
   symextP[1].next = NULL;
 
-  if (symext_rootP == NULL)
+  /* Now update the chain itself so it can be walked later to build
+     the symbol extension section.  */
+  if (*symext_root == NULL)
     {
-      symext_rootP = &symextP[0];
-      symext_lastP = &symextP[1];
+      *symext_root = &symextP[0];
+      *symext_last = &symextP[1];
     }
   else
     {
-      symext_lastP->next = &symextP[0];
-      symext_lastP = &symextP[1];
+      (*symext_last)->next = &symextP[0];
+      *symext_last = &symextP[1];
     }
 }
 
-/* Accessor function for the list of symbol extension records. */
-symext_chainS *elf32_hppa_get_symextn_chain()
-{
-  return symext_rootP;
-}
-
-static symext_entryS *symextn_contents;
-static unsigned int symextn_contents_real_size;
+/* Build the symbol extension section.  Used internally and by GAS.  */ 
 
 void
-elf_hppa_tc_make_sections (abfd, ignored)
+elf_hppa_tc_make_sections (abfd, symext_root)
      bfd *abfd;
-     PTR ignored;
+     symext_chainS *symext_root;
 {
   symext_chainS *symextP;
-  int size;
-  int n;
-  int i;
-  void hppa_elf_stub_finish ();	/* forward declaration */
+  int size, n, i;
   asection *symextn_sec;
 
+  /* FIXME: Huh?  I don't see what this is supposed to do for us.  */
   hppa_elf_stub_finish (abfd);
 
-  if (symext_rootP == NULL)
+  /* If there are no entries in the symbol extension chain, then
+     there is no symbol extension section.  */
+  if (symext_root == NULL)
     return;
 
-  for (n = 0, symextP = symext_rootP; symextP; symextP = symextP->next, ++n)
+  /* Count the number of entries on the chain.  */
+  for (n = 0, symextP = symext_root; symextP; symextP = symextP->next, ++n)
     ;
 
+  /* Create the symbol extension section and set some appropriate
+     attributes.  */
   size = sizeof (symext_entryS) * n;
   symextn_sec = bfd_get_section_by_name (abfd, SYMEXTN_SECTION_NAME);
   if (symextn_sec == (asection *) 0)
@@ -1807,22 +1453,26 @@ elf_hppa_tc_make_sections (abfd, ignored)
       symextn_sec = bfd_make_section (abfd, SYMEXTN_SECTION_NAME);
       bfd_set_section_flags (abfd,
 			     symextn_sec,
-	 SEC_HAS_CONTENTS | SEC_LOAD | SEC_ALLOC | SEC_CODE | SEC_READONLY);
+			     SEC_LOAD | SEC_HAS_CONTENTS | SEC_DATA);
       symextn_sec->output_section = symextn_sec;
       symextn_sec->output_offset = 0;
       bfd_set_section_alignment (abfd, symextn_sec, 2);
     }
+  bfd_set_section_size (abfd, symextn_sec, symextn_contents_real_size);
+  symextn_contents_real_size = size;
+
+  /* Grab some memory for the contents of the symbol extension section
+     itself.  */
   symextn_contents = (symext_entryS *) bfd_alloc (abfd, size);
   if (!symextn_contents)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       abort();			/* FIXME */
     }
 
-  for (i = 0, symextP = symext_rootP; symextP; symextP = symextP->next, ++i)
+  /* Fill in the contents of the symbol extension section.  */
+  for (i = 0, symextP = symext_root; symextP; symextP = symextP->next, ++i)
     symextn_contents[i] = symextP->entry;
-  symextn_contents_real_size = size;
-  bfd_set_section_size (abfd, symextn_sec, symextn_contents_real_size);
 
   return;
 }
@@ -1974,7 +1624,7 @@ new_stub (abfd, stub_sec, link_info)
     }
   else
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       abort();			/* FIXME */
     }
 
@@ -2040,7 +1690,7 @@ add_stub_by_name(abfd, stub_sec, sym, link_info)
 	}
       else
 	{
-	  bfd_error = no_memory;
+	  bfd_set_error (bfd_error_no_memory);
 	  abort();		/* FIXME */
 	}
     }
@@ -2164,7 +1814,7 @@ hppa_elf_stub_finish (output_bfd)
   /* All the stubs have been built.  Finish up building	*/
   /* stub section.  Apply relocations to the section.	*/
 
-  if ( stubs_finished )
+  if (stubs_finished)
     return;
 
   for (; stub_list; stub_list = stub_list->next)
@@ -2287,7 +1937,7 @@ hppa_elf_stub_branch_reloc (stub_desc,	/* the bfd */
 	}
       if (!stub_desc->stub_sec->relocation)
 	{
-	  bfd_error = no_memory;
+	  bfd_set_error (bfd_error_no_memory);
 	  abort();		/* FIXME */
 	}
     }
@@ -2342,7 +1992,7 @@ hppa_elf_stub_reloc (stub_desc,	/* the bfd */
 	}
       if (!stub_desc->stub_sec->relocation)
 	{
-	  bfd_error = no_memory;
+	  bfd_set_error (bfd_error_no_memory);
 	  abort();		/* FIXME */
 	}
     }
@@ -2430,7 +2080,7 @@ hppa_elf_build_arg_reloc_stub (abfd, output_bfd, link_info, reloc_entry,
       stub_desc->stub_contents = (char *) malloc (STUB_BUFFER_INCR);
       if (!stub_desc->stub_contents)
 	{
-	  bfd_error = no_memory;
+	  bfd_set_error (bfd_error_no_memory);
 	  return NULL;
 	}
     }
@@ -2462,7 +2112,7 @@ hppa_elf_build_arg_reloc_stub (abfd, output_bfd, link_info, reloc_entry,
 							  sizeof (asymbol *));
       if (!reloc_entry->sym_ptr_ptr)
 	{
-	  bfd_error = no_memory;
+	  bfd_set_error (bfd_error_no_memory);
 	  return NULL;
 	}
       reloc_entry->sym_ptr_ptr[0] = stub_sym;
@@ -2478,13 +2128,13 @@ hppa_elf_build_arg_reloc_stub (abfd, output_bfd, link_info, reloc_entry,
       stub_sym = bfd_make_empty_symbol (abfd);
       if (!stub_sym)
 	{
-	  bfd_error = no_memory;
+	  bfd_set_error (bfd_error_no_memory);
 	  return NULL;
 	}
       stub_sym->name = bfd_zalloc (abfd, strlen (stub_sym_name) + 1);
       if (!stub_sym->name)
 	{
-	  bfd_error = no_memory;
+	  bfd_set_error (bfd_error_no_memory);
 	  return NULL;
 	}
       strcpy ((char *) stub_sym->name, stub_sym_name);
@@ -2501,7 +2151,7 @@ hppa_elf_build_arg_reloc_stub (abfd, output_bfd, link_info, reloc_entry,
 							  sizeof (asymbol *));
       if (!reloc_entry->sym_ptr_ptr)
 	{
-	  bfd_error = no_memory;
+	  bfd_set_error (bfd_error_no_memory);
 	  return NULL;
 	}
       reloc_entry->sym_ptr_ptr[0] = stub_sym;
@@ -2976,7 +2626,7 @@ hppa_elf_build_long_branch_stub (abfd, output_bfd, link_info, reloc_entry,
 							  sizeof (asymbol *));
       if (!reloc_entry->sym_ptr_ptr)
 	{
-	  bfd_error = no_memory;
+	  bfd_set_error (bfd_error_no_memory);
 	  return NULL;
 	}
       reloc_entry->sym_ptr_ptr[0] = stub_sym;
@@ -2988,13 +2638,13 @@ hppa_elf_build_long_branch_stub (abfd, output_bfd, link_info, reloc_entry,
       stub_sym = bfd_make_empty_symbol (abfd);
       if (!stub_sym)
 	{
-	  bfd_error = no_memory;
+	  bfd_set_error (bfd_error_no_memory);
 	  return NULL;
 	}
       stub_sym->name = bfd_zalloc (abfd, strlen (stub_sym_name) + 1);
       if (!stub_sym->name)
 	{
-	  bfd_error = no_memory;
+	  bfd_set_error (bfd_error_no_memory);
 	  return NULL;
 	}
       strcpy ((char *) stub_sym->name, stub_sym_name);
@@ -3012,7 +2662,7 @@ hppa_elf_build_long_branch_stub (abfd, output_bfd, link_info, reloc_entry,
 							  sizeof (asymbol *));
       if (!reloc_entry->sym_ptr_ptr)
 	{
-	  bfd_error = no_memory;
+	  bfd_set_error (bfd_error_no_memory);
 	  return NULL;
 	}
       reloc_entry->sym_ptr_ptr[0] = stub_sym;
@@ -3127,7 +2777,7 @@ hppa_elf_long_branch_needed_p (abfd, asec, reloc_entry, symbol, insn)
     case BL:
       raddr =
 	reloc_entry->address + asec->output_offset + asec->output_section->vma;
-      if ( too_far(sym_value - raddr,fmt+1) )
+      if (too_far(sym_value - raddr,fmt+1))
 	{
 #ifdef DETECT_STUBS
 	  fprintf(stderr,"long_branch needed on BL insn: abfd=%s,sym=%s,distance=0x%x\n",abfd->filename,symbol->name,sym_value - reloc_entry->address);
@@ -3351,15 +3001,15 @@ hppa_elf_set_section_contents (abfd, section, location, offset, count)
      file_ptr offset;
      bfd_size_type count;
 {
-  if ( strcmp(section->name, ".hppa_linker_stubs") == 0 )
+  if (strcmp(section->name, ".hppa_linker_stubs") == 0)
     {
-      if ( linker_stubs_max_size < offset + count )
+      if (linker_stubs_max_size < offset + count)
 	{
 	  linker_stubs_max_size = offset + count + STUB_ALLOC_INCR;
 	  linker_stubs = (char *)realloc(linker_stubs, linker_stubs_max_size);
 	}
 
-      if ( offset + count > linker_stubs_size )
+      if (offset + count > linker_stubs_size)
 	linker_stubs_size = offset + count;
 
       memcpy(linker_stubs + offset,location,count);
@@ -3429,15 +3079,16 @@ hppa_elf_get_section_contents (abfd, section, location, offset, count)
 	  int *symtab_map =
 	    (int *) elf_sym_extra(section->output_section->owner);
 	  
-	  for (i = 0; i < section->output_section->owner->symcount; i++ )
+	  for (i = 0; i < section->output_section->owner->symcount; i++)
 	    {
 	      elf_hppa_tc_symbol(section->output_section->owner,
 				 ((elf_symbol_type *)
 				  section->output_section->owner->outsymbols[i]),
-				 symtab_map[i]);
+				 symtab_map[i], &symext_rootP, &symext_lastP);
 	    }
 	  symext_chain_built++;
-	  elf_hppa_tc_make_sections (section->output_section->owner, NULL);
+	  elf_hppa_tc_make_sections (section->output_section->owner, 
+				     symext_rootP);
 	}
 
       /* At this point we know that the symbol extension section has been
@@ -3511,9 +3162,9 @@ elf32_hppa_backend_symbol_table_processing (abfd, esyms,symcnt)
   /* If the symbol extension section does not exist, all the symbol */
   /* all the symbol extension information is assumed to be zero.	*/
 
-  if ( symextn_hdr == NULL )
+  if (symextn_hdr == NULL)
     {
-      for ( i = 0; i < symcnt; i++ )
+      for (i = 0; i < symcnt; i++)
 	{
 	  esyms[i].tc_data.hppa_arg_reloc = 0;
 	}
@@ -3525,7 +3176,7 @@ elf32_hppa_backend_symbol_table_processing (abfd, esyms,symcnt)
   symextn_hdr->contents = bfd_zalloc(abfd,symextn_hdr->sh_size);
   if (!symextn_hdr->contents)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return false;
     }
   symextn_hdr->size = symextn_hdr->sh_size;
@@ -3534,34 +3185,34 @@ elf32_hppa_backend_symbol_table_processing (abfd, esyms,symcnt)
 
   if (bfd_seek (abfd, symextn_hdr->sh_offset, SEEK_SET) == -1)
     {
-      bfd_error = system_call_error;
+      bfd_set_error (bfd_error_system_call);
       return (false);
     }
   if (bfd_read ((PTR) symextn_hdr->contents, 1, symextn_hdr->size, abfd) 
       != symextn_hdr->size)
     {
       free ((PTR)symextn_hdr->contents);
-      bfd_error = system_call_error;
+      bfd_set_error (bfd_error_system_call);
       return (false);
     }	
 
   /* parse the entries, updating the symtab entries as we go */
 
-  for ( i = 0; i < symextn_hdr->size / sizeof(symext_entryS); i++ )
+  for (i = 0; i < symextn_hdr->size / sizeof(symext_entryS); i++)
     {
       symext_entryS *seP = ((symext_entryS *)symextn_hdr->contents) + i;
       int se_value = ELF32_HPPA_SX_VAL(*seP);
       int se_type = ELF32_HPPA_SX_TYPE(*seP);
 
-      switch ( se_type )
+      switch (se_type)
 	{
 	case HPPA_SXT_NULL:
 	  break;
 
 	case HPPA_SXT_SYMNDX:
-	  if ( se_value >= symcnt )
+	  if (se_value >= symcnt)
 	    {
-	      bfd_error = bad_value;
+	      bfd_set_error (bfd_error_bad_value);
 	      bfd_perror("elf32_hppa_backend_symbol_table_processing -- symbol index");
 	      return (false);
 	    }
@@ -3573,7 +3224,7 @@ elf32_hppa_backend_symbol_table_processing (abfd, esyms,symcnt)
 	  break;
 
 	default:
-	  bfd_error = bad_value;
+	  bfd_set_error (bfd_error_bad_value);
 	  bfd_perror("elf32_hppa_backend_symbol_table_processing");
 	  return (false);
 	}
@@ -3590,31 +3241,31 @@ elf32_hppa_backend_section_processing (abfd, secthdr)
 {
   int i,j,k;
 
-  if ( secthdr->sh_type == SHT_HPPA_SYMEXTN )
+  if (secthdr->sh_type == SHT_HPPA_SYMEXTN)
     {
-      for ( i = 0; i < secthdr->size / sizeof(symext_entryS); i++ )
+      for (i = 0; i < secthdr->size / sizeof(symext_entryS); i++)
 	{
 	  symext_entryS *seP = ((symext_entryS *)secthdr->contents) + i;
 	  int se_value = ELF32_HPPA_SX_VAL(*seP);
 	  int se_type = ELF32_HPPA_SX_TYPE(*seP);
 	  
-	  switch ( se_type )
+	  switch (se_type)
 	    {
 	    case HPPA_SXT_NULL:
 	      break;
 	      
 	    case HPPA_SXT_SYMNDX:
-	      for ( j = 0; j < abfd->symcount; j++ )
+	      for (j = 0; j < abfd->symcount; j++)
 		{
 		  /* locate the map entry for this symbol, if there is one. */
 		  /* modify the symbol extension section symbol index entry */
 		  /* to reflect the new symbol table index */
 		  
-		  for ( k = 0; k < elf32_hppa_symextn_map_size; k++ )
+		  for (k = 0; k < elf32_hppa_symextn_map_size; k++)
 		    {
-		      if ( elf32_hppa_symextn_map[k].old_index == se_value
+		      if (elf32_hppa_symextn_map[k].old_index == se_value
 			  && elf32_hppa_symextn_map[k].bfd == abfd->outsymbols[j]->the_bfd
-			  && elf32_hppa_symextn_map[k].sym == abfd->outsymbols[j] )
+			  && elf32_hppa_symextn_map[k].sym == abfd->outsymbols[j])
 			{
 			  bfd_put_32(abfd,
 				     ELF32_HPPA_SX_WORD (HPPA_SXT_SYMNDX, j),
@@ -3628,7 +3279,7 @@ elf32_hppa_backend_section_processing (abfd, secthdr)
 	      break;
 	      
 	    default:
-	      bfd_error = bad_value;
+	      bfd_set_error (bfd_error_bad_value);
 	      bfd_perror("elf32_hppa_backend_section_processing");
 	      return (false);
 	    }
@@ -3647,9 +3298,9 @@ elf32_hppa_backend_section_from_shdr (abfd, hdr, name)
 {
   asection *newsect;
 
-  if ( hdr->sh_type == SHT_HPPA_SYMEXTN )
+  if (hdr->sh_type == SHT_HPPA_SYMEXTN)
     {
-      BFD_ASSERT ( strcmp(name,".hppa_symextn") == 0 );
+      BFD_ASSERT (strcmp(name,".hppa_symextn") == 0);
 
       /* Bits that get saved. This one is real. */
       if (!hdr->rawdata)
@@ -3694,7 +3345,7 @@ elf32_hppa_backend_fake_sections (abfd, secthdr, asect)
      asection *asect;
 {
 
-  if ( strcmp(asect->name, ".hppa_symextn") == 0 )
+  if (strcmp(asect->name, ".hppa_symextn") == 0)
     {
       secthdr->sh_type = SHT_HPPA_SYMEXTN;
       secthdr->sh_flags = 0;
@@ -3737,24 +3388,24 @@ elf32_hppa_backend_section_from_bfd_section (abfd, hdr, asect, retval)
      asection *asect;
      int *retval;
 {
-  if ( hdr->sh_type == SHT_HPPA_SYMEXTN )
+  if (hdr->sh_type == SHT_HPPA_SYMEXTN)
     {
       if (hdr->rawdata)
 	{
 	  if (((struct sec *) (hdr->rawdata)) == asect)
 	    {
-	      BFD_ASSERT( strcmp(asect->name, ".hppa_symextn") == 0 );
+	      BFD_ASSERT (strcmp(asect->name, ".hppa_symextn") == 0);
 	      return true;
 	    }
 	}
     }
-  else if ( hdr->sh_type == SHT_STRTAB )
+  else if (hdr->sh_type == SHT_STRTAB)
     {
       if (hdr->rawdata)
 	{
 	  if (((struct sec *) (hdr->rawdata)) == asect)
 	    {
-	      BFD_ASSERT ( strcmp (asect->name, ".stabstr") == 0);
+	      BFD_ASSERT (strcmp (asect->name, ".stabstr") == 0);
 	      return true;
 	    }
 	}
@@ -3763,6 +3414,7 @@ elf32_hppa_backend_section_from_bfd_section (abfd, hdr, asect, retval)
   return false;
 }
 
+#define bfd_elf32_bfd_reloc_type_lookup	elf_hppa_reloc_type_lookup
 #define elf_backend_section_from_bfd_section	elf32_hppa_backend_section_from_bfd_section
 
 #define bfd_generic_get_section_contents	hppa_elf_get_section_contents
