@@ -189,7 +189,7 @@ SER_HARDWIRE=ser-unix.o
 
 # The `remote' debugging target is supported for most architectures,
 # but not all (e.g. 960)
-REMOTE_O=remote.o
+REMOTE_O = remote.o dcache.o
 
 # Host and target-dependent makefile fragments come in here.
 ####

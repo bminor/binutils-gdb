@@ -56,6 +56,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 	read mem	mAA..AA,LLLL	AA..AA is address, LLLL is length.
 	reply		XX..XX		XX..XX is mem contents
+					Can be fewer bytes than requested
+					if able to read only part of the data.
 			or ENN		NN is errno
 
 	write mem	MAA..AA,LLLL:XX..XX
@@ -63,7 +65,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 					LLLL is number of bytes,
 					XX..XX is data
 	reply		OK		for success
-			ENN		for an error
+			ENN		for an error (this includes the case
+					where only part of the data was
+					written).
 
 	cont		cAA..AA		AA..AA is address to resume
 					If AA..AA is omitted,
@@ -87,7 +91,16 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 					n... = register number
 					r... = register contents
 
-	kill req	k
+	kill request	k
+
+	toggle debug	d		toggle debug flag (see 386 & 68k stubs)
+	reset		r		reset -- see sparc stub.
+	reserved	<other>		On other requests, the stub should
+					ignore the request and send an empty
+					response ($#<checksum>).  This way
+					we can extend the protocol and GDB
+					can tell whether the stub it is
+					talking to uses the old or the new.
 */
 
 #include "defs.h"
@@ -102,6 +115,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "terminal.h"
 #include "gdbcmd.h"
 
+#include "dcache.h"
+
 #if !defined(DONT_USE_REMOTE)
 #ifdef USG
 #include <sys/types.h>
@@ -112,11 +127,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* Prototypes for local functions */
 
-static void
-remote_write_bytes PARAMS ((CORE_ADDR memaddr, char *myaddr, int len));
+static int
+remote_write_bytes PARAMS ((CORE_ADDR memaddr, unsigned char *myaddr, int len));
 
-static void
-remote_read_bytes PARAMS ((CORE_ADDR memaddr, char *myaddr, int len));
+static int
+remote_read_bytes PARAMS ((CORE_ADDR memaddr, unsigned char *myaddr, int len));
 
 static void
 remote_files_info PARAMS ((struct target_ops *ignore));
@@ -132,7 +147,7 @@ static void
 remote_fetch_registers PARAMS ((int regno));
 
 static void
-remote_resume PARAMS ((int step, int siggnal));
+remote_resume PARAMS ((int pid, int step, int siggnal));
 
 static int
 remote_start_remote PARAMS ((char *dummy));
@@ -178,7 +193,6 @@ remote_interrupt_twice PARAMS ((int signo));
 
 extern struct target_ops remote_ops;	/* Forward decl */
 
-static int kiodebug = 0;
 /* This was 5 seconds, which is a long time to sit and wait.
    Unless this is going though some terminal server or multiplexer or
    other form of hairy serial connection, I would think 2 seconds would
@@ -237,6 +251,8 @@ remote_start_remote (dummy)
 /* Open a connection to a remote debugger.
    NAME is the filename used for communication.  */
 
+static DCACHE *remote_dcache;
+
 static void
 remote_open (name, from_tty)
      char *name;
@@ -251,9 +267,7 @@ device is attached to the remote system (e.g. /dev/ttya).");
 
   unpush_target (&remote_ops);
 
-#if 0
-  dcache_init ();
-#endif
+  remote_dcache = dcache_init (remote_read_bytes, remote_write_bytes);
 
   remote_desc = SERIAL_OPEN (name);
   if (!remote_desc)
@@ -339,8 +353,8 @@ tohex (nib)
 /* Tell the remote machine to resume.  */
 
 static void
-remote_resume (step, siggnal)
-     int step, siggnal;
+remote_resume (pid, step, siggnal)
+     int pid, step, siggnal;
 {
   char buf[PBUFSIZ];
 
@@ -358,9 +372,7 @@ remote_resume (step, siggnal)
       target_terminal_inferior ();
     }
 
-#if 0
-  dcache_flush ();
-#endif
+  dcache_flush (remote_dcache);
 
   strcpy (buf, step ? "s": "c");
 
@@ -377,7 +389,7 @@ remote_interrupt (signo)
   /* If this doesn't work, try more severe steps.  */
   signal (signo, remote_interrupt_twice);
   
-  if (kiodebug)
+  if (remote_debug)
     printf ("remote_interrupt called\n");
 
   SERIAL_WRITE (remote_desc, "\003", 1); /* Send a ^C */
@@ -551,7 +563,6 @@ remote_store_registers (regno)
   remote_send (buf);
 }
 
-#if 0
 /* Read a word from remote address ADDR and return it.
    This goes through the data cache.  */
 
@@ -559,6 +570,7 @@ int
 remote_fetch_word (addr)
      CORE_ADDR addr;
 {
+#if 0
   if (icache)
     {
       extern CORE_ADDR text_start, text_end;
@@ -570,7 +582,8 @@ remote_fetch_word (addr)
 	  return buffer;
 	}
     }
-  return dcache_fetch (addr);
+#endif
+  return dcache_fetch (remote_dcache, addr);
 }
 
 /* Write a word WORD into remote address ADDR.
@@ -581,20 +594,22 @@ remote_store_word (addr, word)
      CORE_ADDR addr;
      int word;
 {
-  dcache_poke (addr, word);
+  dcache_poke (remote_dcache, addr, word);
 }
-#endif /* 0 */
+
 
 /* Write memory data directly to the remote machine.
    This does not inform the data cache; the data cache uses this.
    MEMADDR is the address in the remote memory space.
    MYADDR is the address of the buffer in our space.
-   LEN is the number of bytes.  */
+   LEN is the number of bytes.
 
-static void
+   Returns number of bytes transferred, or 0 for error.  */
+
+static int
 remote_write_bytes (memaddr, myaddr, len)
      CORE_ADDR memaddr;
-     char *myaddr;
+     unsigned char *myaddr;
      int len;
 {
   char buf[PBUFSIZ];
@@ -617,19 +632,33 @@ remote_write_bytes (memaddr, myaddr, len)
     }
   *p = '\0';
 
-  remote_send (buf);
+  putpkt (buf);
+  getpkt (buf, 0);
+
+  if (buf[0] == 'E')
+    {
+      /* There is no correspondance between what the remote protocol uses
+	 for errors and errno codes.  We would like a cleaner way of
+	 representing errors (big enough to include errno codes, bfd_error
+	 codes, and others).  But for now just return EIO.  */
+      errno = EIO;
+      return 0;
+    }
+  return len;
 }
 
 /* Read memory data directly from the remote machine.
    This does not use the data cache; the data cache uses this.
    MEMADDR is the address in the remote memory space.
    MYADDR is the address of the buffer in our space.
-   LEN is the number of bytes.  */
+   LEN is the number of bytes.
 
-static void
+   Returns number of bytes transferred, or 0 for error.  */
+
+static int
 remote_read_bytes (memaddr, myaddr, len)
      CORE_ADDR memaddr;
-     char *myaddr;
+     unsigned char *myaddr;
      int len;
 {
   char buf[PBUFSIZ];
@@ -640,7 +669,18 @@ remote_read_bytes (memaddr, myaddr, len)
     abort ();
 
   sprintf (buf, "m%x,%x", memaddr, len);
-  remote_send (buf);
+  putpkt (buf);
+  getpkt (buf, 0);
+
+  if (buf[0] == 'E')
+    {
+      /* There is no correspondance between what the remote protocol uses
+	 for errors and errno codes.  We would like a cleaner way of
+	 representing errors (big enough to include errno codes, bfd_error
+	 codes, and others).  But for now just return EIO.  */
+      errno = EIO;
+      return 0;
+    }
 
   /* Reply describes memory byte by byte,
      each byte encoded as two hex characters.  */
@@ -649,10 +689,13 @@ remote_read_bytes (memaddr, myaddr, len)
   for (i = 0; i < len; i++)
     {
       if (p[0] == 0 || p[1] == 0)
-	error ("Remote reply is too short: %s", buf);
+	/* Reply is short.  This means that we were able to read only part
+	   of what we wanted to.  */
+	break;
       myaddr[i] = fromhex (p[0]) * 16 + fromhex (p[1]);
       p += 2;
     }
+  return i;
 }
 
 /* Read or write LEN bytes from inferior memory at MEMADDR, transferring
@@ -668,8 +711,10 @@ remote_xfer_memory(memaddr, myaddr, len, should_write, target)
      int should_write;
      struct target_ops *target;			/* ignored */
 {
-  int origlen = len;
   int xfersize;
+  int bytes_xferred;
+  int total_xferred = 0;
+
   while (len > 0)
     {
       if (len > MAXBUFBYTES)
@@ -678,14 +723,20 @@ remote_xfer_memory(memaddr, myaddr, len, should_write, target)
 	xfersize = len;
 
       if (should_write)
-        remote_write_bytes(memaddr, myaddr, xfersize);
+        bytes_xferred = remote_write_bytes (memaddr, myaddr, xfersize);
       else
-	remote_read_bytes (memaddr, myaddr, xfersize);
-      memaddr += xfersize;
-      myaddr  += xfersize;
-      len     -= xfersize;
+	bytes_xferred = remote_read_bytes (memaddr, myaddr, xfersize);
+
+      /* If we get an error, we are done xferring.  */
+      if (bytes_xferred == 0)
+	break;
+
+      memaddr += bytes_xferred;
+      myaddr  += bytes_xferred;
+      len     -= bytes_xferred;
+      total_xferred += bytes_xferred;
     }
-  return origlen; /* no error possible */
+  return total_xferred;
 }
 
 static void
@@ -765,7 +816,7 @@ putpkt (buf)
 
   while (1)
     {
-      if (kiodebug)
+      if (remote_debug)
 	{
 	  *p = '\0';
 	  printf ("Sending packet: %s...", buf2);  fflush(stdout);
@@ -781,7 +832,7 @@ putpkt (buf)
 	  switch (ch)
 	    {
 	    case '+':
-	      if (kiodebug)
+	      if (remote_debug)
 		printf("Ack\n");
 	      return;
 	    case SERIAL_TIMEOUT:
@@ -791,7 +842,7 @@ putpkt (buf)
 	    case SERIAL_EOF:
 	      error ("putpkt: EOF while trying to read ACK");
 	    default:
-	      if (kiodebug)
+	      if (remote_debug)
 		printf ("%02X %c ", ch&0xFF, ch);
 	      continue;
 	    }
@@ -832,7 +883,7 @@ getpkt (buf, forever)
 	  if (forever)
 	    continue;
 	  if (++retries >= MAX_RETRIES)
-	    if (kiodebug) puts_filtered ("Timed out.\n");
+	    if (remote_debug) puts_filtered ("Timed out.\n");
 	  goto out;
 	}
 
@@ -850,13 +901,13 @@ getpkt (buf, forever)
 	  c = readchar ();
 	  if (c == SERIAL_TIMEOUT)
 	    {
-	      if (kiodebug)
+	      if (remote_debug)
 		puts_filtered ("Timeout in mid-packet, retrying\n");
 	      goto whole;		/* Start a new packet, count retries */
 	    } 
 	  if (c == '$')
 	    {
-	      if (kiodebug)
+	      if (remote_debug)
 		puts_filtered ("Saw new packet start in middle of old one\n");
 	      goto whole;		/* Start a new packet, count retries */
 	    }
@@ -901,162 +952,9 @@ out:
 
   SERIAL_WRITE (remote_desc, "+", 1);
 
-  if (kiodebug)
+  if (remote_debug)
     fprintf (stderr,"Packet received: %s\n", buf);
 }
-
-/* The data cache leads to incorrect results because it doesn't know about
-   volatile variables, thus making it impossible to debug functions which
-   use hardware registers.  Therefore it is #if 0'd out.  Effect on
-   performance is some, for backtraces of functions with a few
-   arguments each.  For functions with many arguments, the stack
-   frames don't fit in the cache blocks, which makes the cache less
-   helpful.  Disabling the cache is a big performance win for fetching
-   large structures, because the cache code fetched data in 16-byte
-   chunks.  */
-#if 0
-/* The data cache records all the data read from the remote machine
-   since the last time it stopped.
-
-   Each cache block holds 16 bytes of data
-   starting at a multiple-of-16 address.  */
-
-#define DCACHE_SIZE 64		/* Number of cache blocks */
-
-struct dcache_block {
-	struct dcache_block *next, *last;
-	unsigned int addr;	/* Address for which data is recorded.  */
-	int data[4];
-};
-
-struct dcache_block dcache_free, dcache_valid;
-
-/* Free all the data cache blocks, thus discarding all cached data.  */ 
-
-static void
-dcache_flush ()
-{
-  register struct dcache_block *db;
-
-  while ((db = dcache_valid.next) != &dcache_valid)
-    {
-      remque (db);
-      insque (db, &dcache_free);
-    }
-}
-
-/*
- * If addr is present in the dcache, return the address of the block 
- * containing it.
- */
-
-struct dcache_block *
-dcache_hit (addr)
-{
-  register struct dcache_block *db;
-
-  if (addr & 3)
-    abort ();
-
-  /* Search all cache blocks for one that is at this address.  */
-  db = dcache_valid.next;
-  while (db != &dcache_valid)
-    {
-      if ((addr & 0xfffffff0) == db->addr)
-	return db;
-      db = db->next;
-    }
-  return NULL;
-}
-
-/*  Return the int data at address ADDR in dcache block DC.  */
-
-int
-dcache_value (db, addr)
-     struct dcache_block *db;
-     unsigned int addr;
-{
-  if (addr & 3)
-    abort ();
-  return (db->data[(addr>>2)&3]);
-}
-
-/* Get a free cache block, put it on the valid list,
-   and return its address.  The caller should store into the block
-   the address and data that it describes.  */
-
-struct dcache_block *
-dcache_alloc ()
-{
-  register struct dcache_block *db;
-
-  if ((db = dcache_free.next) == &dcache_free)
-    /* If we can't get one from the free list, take last valid */
-    db = dcache_valid.last;
-
-  remque (db);
-  insque (db, &dcache_valid);
-  return (db);
-}
-
-/* Return the contents of the word at address ADDR in the remote machine,
-   using the data cache.  */
-
-int
-dcache_fetch (addr)
-     CORE_ADDR addr;
-{
-  register struct dcache_block *db;
-
-  db = dcache_hit (addr);
-  if (db == 0)
-    {
-      db = dcache_alloc ();
-      remote_read_bytes (addr & ~0xf, db->data, 16);
-      db->addr = addr & ~0xf;
-    }
-  return (dcache_value (db, addr));
-}
-
-/* Write the word at ADDR both in the data cache and in the remote machine.  */
-
-dcache_poke (addr, data)
-     CORE_ADDR addr;
-     int data;
-{
-  register struct dcache_block *db;
-
-  /* First make sure the word is IN the cache.  DB is its cache block.  */
-  db = dcache_hit (addr);
-  if (db == 0)
-    {
-      db = dcache_alloc ();
-      remote_read_bytes (addr & ~0xf, db->data, 16);
-      db->addr = addr & ~0xf;
-    }
-
-  /* Modify the word in the cache.  */
-  db->data[(addr>>2)&3] = data;
-
-  /* Send the changed word.  */
-  remote_write_bytes (addr, &data, 4);
-}
-
-/* Initialize the data cache.  */
-
-dcache_init ()
-{
-  register i;
-  register struct dcache_block *db;
-
-  db = (struct dcache_block *) xmalloc (sizeof (struct dcache_block) * 
-					DCACHE_SIZE);
-  dcache_free.next = dcache_free.last = &dcache_free;
-  dcache_valid.next = dcache_valid.last = &dcache_valid;
-  for (i=0;i<DCACHE_SIZE;i++,db++)
-    insque (db, &dcache_free);
-}
-#endif /* 0 */
 
 static void
 remote_kill ()
@@ -1099,7 +997,7 @@ static unsigned char break_insn[] = BREAKPOINT;
    by the caller to be long enough to save sizeof BREAKPOINT bytes (this
    is accomplished via BREAKPOINT_MAX).  */
 
-int
+static int
 remote_insert_breakpoint (addr, contents_cache)
      CORE_ADDR addr;
      char *contents_cache;
@@ -1114,7 +1012,7 @@ remote_insert_breakpoint (addr, contents_cache)
   return val;
 }
 
-int
+static int
 remote_remove_breakpoint (addr, contents_cache)
      CORE_ADDR addr;
      char *contents_cache;
@@ -1172,13 +1070,5 @@ void
 _initialize_remote ()
 {
   add_target (&remote_ops);
-
-  add_show_from_set (
-    add_set_cmd ("remotedebug", no_class, var_boolean, (char *)&kiodebug,
-		   "Set debugging of remote serial I/O.\n\
-When enabled, each packet sent or received with the remote target\n\
-is displayed.", &setlist),
-	&showlist);
 }
-
 #endif

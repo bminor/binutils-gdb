@@ -21,9 +21,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "defs.h"
 #include "dcache.h"
+#include "gdbcmd.h"
 
 extern int insque();
 extern int remque();
+
+int remote_dcache = 0;
 
 /* The data cache records all the data read from the remote machine
    since the last time it stopped.
@@ -41,17 +44,21 @@ dcache_flush (dcache)
 {
   register struct dcache_block *db;
 
-  while ((db = dcache->dcache_valid.next) != &dcache->dcache_valid)
-    {
-      remque (db);
-      insque (db, &dcache->dcache_free);
-    }
+  if (remote_dcache > 0)
+    while ((db = dcache->dcache_valid.next) != &dcache->dcache_valid)
+      {
+	remque (db);
+	insque (db, &dcache->dcache_free);
+      }
+
+  return;
 }
 
 /*
  * If addr is present in the dcache, return the address of the block
  * containing it.
  */
+static
 struct dcache_block *
 dcache_hit (dcache, addr)
      DCACHE *dcache;
@@ -59,7 +66,8 @@ dcache_hit (dcache, addr)
 {
   register struct dcache_block *db;
 
-  if (addr & 3)
+  if (addr & 3
+      || remote_dcache == 0)
     abort ();
 
   /* Search all cache blocks for one that is at this address.  */
@@ -70,16 +78,19 @@ dcache_hit (dcache, addr)
 	return db;
       db = db->next;
     }
+
   return NULL;
 }
 
 /*  Return the int data at address ADDR in dcache block DC.  */
+static
 int
 dcache_value (db, addr)
      struct dcache_block *db;
      unsigned int addr;
 {
-  if (addr & 3)
+  if (addr & 3
+      || remote_dcache == 0)
     abort ();
   return (db->data[XFORM (addr)]);
 }
@@ -91,11 +102,15 @@ dcache_value (db, addr)
    prevents errors from creeping in if a memory retrieval is
    interrupted (which used to put garbage blocks in the valid
    list...).  */
+static
 struct dcache_block *
 dcache_alloc (dcache)
      DCACHE *dcache;
 {
   register struct dcache_block *db;
+
+  if (remote_dcache == 0)
+    abort();
 
   if ((db = dcache->dcache_free.next) == &dcache->dcache_free)
     {
@@ -111,14 +126,22 @@ dcache_alloc (dcache)
   return (db);
 }
 
-/* Return the contents of the word at address ADDR in the remote machine,
-   using the data cache.  */
+/* Using the data cache DCACHE return the contents of the word at
+   address ADDR in the remote machine.  */
 int
 dcache_fetch (dcache, addr)
      DCACHE *dcache;
      CORE_ADDR addr;
 {
   register struct dcache_block *db;
+
+  if (remote_dcache == 0)
+    {
+      int i;
+
+      (*dcache->read_memory) (addr, (unsigned char *) &i, 4);
+      return(i);
+    }
 
   db = dcache_hit (dcache, addr);
   if (db == 0)
@@ -143,6 +166,12 @@ dcache_poke (dcache, addr, data)
 {
   register struct dcache_block *db;
 
+  if (remote_dcache == 0)
+    {
+      (*dcache->write_memory) (addr, (unsigned char *) &data, 4);
+      return;
+    }
+
   /* First make sure the word is IN the cache.  DB is its cache block.  */
   db = dcache_hit (dcache, addr);
   if (db == 0)
@@ -152,8 +181,8 @@ dcache_poke (dcache, addr, data)
       (*dcache->write_memory) (addr & ~LINE_SIZE_MASK, (unsigned char *) db->data, LINE_SIZE);
       immediate_quit--;
       db->addr = addr & ~LINE_SIZE_MASK;
-      remque (db);		/* Off the free list */
-      insque (db, &dcache->dcache_valid);	/* On the valid list */
+      remque (db); /* Off the free list */
+      insque (db, &dcache->dcache_valid); /* On the valid list */
     }
 
   /* Modify the word in the cache.  */
@@ -188,3 +217,19 @@ dcache_init (reading, writing)
   return(dcache);
 }
 
+void
+_initialitize_dcache ()
+{
+  add_show_from_set
+    (add_set_cmd ("remotecache", class_support, var_boolean,
+		  (char *) &remote_dcache,
+		  "\
+Set cache use for remote targets.\n\
+When on, use data caching for remote targets.  For many remote targets\n\
+this option can offer better throughput for reading target memory.\n\
+Unfortunately, gdb does not currently know anything about volatile\n\
+registers and thus data caching will produce incorrect results with\n\
+volatile registers are in use.  By default, this option is off.", 
+		  &setlist),
+     &showlist);
+}

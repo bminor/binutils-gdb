@@ -22,6 +22,16 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #ifndef DCACHE_H
 #define DCACHE_H
 
+/* The data cache leads to incorrect results because it doesn't know about
+   volatile variables, thus making it impossible to debug functions which
+   use hardware registers.  Therefore it is #if 0'd out.  Effect on
+   performance is some, for backtraces of functions with a few
+   arguments each.  For functions with many arguments, the stack
+   frames don't fit in the cache blocks, which makes the cache less
+   helpful.  Disabling the cache is a big performance win for fetching
+   large structures, because the cache code fetched data in 16-byte
+   chunks.  */
+
 #define LINE_SIZE_POWER (4)
 /* eg 1<<3 == 8 */
 #define LINE_SIZE (1 << LINE_SIZE_POWER)
@@ -57,8 +67,14 @@ typedef struct {
 
 } DCACHE;
 
+/* Using the data cache DCACHE return the contents of the word at
+   address ADDR in the remote machine.  */
 int dcache_fetch PARAMS((DCACHE *dcache, CORE_ADDR addr));
+
+/* Flush DCACHE. */
 void dcache_flush PARAMS((DCACHE *dcache));
+
+/* Initialize DCACHE. */
 DCACHE *dcache_init PARAMS((memxferfunc reading, memxferfunc writing));
 
 /* Write the word at ADDR both in the data cache and in the remote machine.  */
