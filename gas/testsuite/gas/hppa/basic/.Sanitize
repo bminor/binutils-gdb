@@ -31,6 +31,8 @@ addi.s
 basic.exp
 branch.s
 comclr.s
+copr.s
+coprmem.s
 dcor.s
 deposit.s
 ds.s
@@ -49,6 +51,7 @@ sh2add.s
 sh3add.s
 shift.s
 special.s
+spop.s
 sub.s
 subi.s
 system.s

@@ -1,3 +1,10 @@
+Mon Jan 17 00:25:03 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* gas/hppa/basic/fp_misc.s: Delete copr instruction.  It's tested
+	elsewhere now.
+	* gas/hppa/basic/{copr, coprmem, spop}.s: New tests.
+	* gas/hppa/basic/basic.exp: Run them.
+
 Thu Jan 13 11:59:22 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* gas/all/gas.exp: No longer expect difference of forward
