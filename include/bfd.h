@@ -741,6 +741,27 @@ who's name matches that provided, otherwise NULL. @xref{Sections}, for more info
 
 /*
 
+ bfd_make_section_old_way
+This function creates a new empty section called @var{name} and attaches it
+to the end of the chain of sections for the BFD supplied. An attempt to
+create a section with a name which is already in use, returns its pointer without
+changing the section chain.
+
+It has the funny name since this is the way it used to be before gilmore broke it.
+
+Possible errors are:
+@table @code
+@item invalid_operation
+If output has already started for this BFD.
+@item no_memory
+If obstack alloc fails.
+@end table
+*/
+
+ PROTO(asection *, bfd_make_section_old_way, (bfd *, CONST char *name));
+
+/*
+
  bfd_make_section
 This function creates a new empty section called @var{name} and attaches it
 to the end of the chain of sections for the BFD supplied. An attempt to
