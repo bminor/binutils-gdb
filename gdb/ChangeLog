@@ -1,5 +1,8 @@
 2003-03-02  Mark Kettenis  <kettenis@gnu.org>
 
+	* i386bsd-tdep.c (i386bsd_sigcontext_addr): Use get_next_frame and
+	get_frame_base.
+
 	* i386-tdep.c (i386_pe_skip_trampoline_code): Replace usage of
 	DEPRECATED_SYMBOL_NAME with SYMBOL_LINKAGE_NAME.
 
