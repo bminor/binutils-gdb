@@ -1098,6 +1098,14 @@ read_encoded_value (struct comp_unit *unit, unsigned char encoding,
     case DW_EH_PE_textrel:
       base = unit->tbase;
       break;
+    case DW_EH_PE_funcrel:
+      /* FIXME: kettenis/20040501: For now just pretend
+         DW_EH_PE_funcrel is equivalent to DW_EH_PE_absptr.  For
+         reading the initial location of an FDE it should be treated
+         as such, and currently that's the only place where this code
+         is used.  */
+      base = 0;
+      break;
     case DW_EH_PE_aligned:
       base = 0;
       offset = buf - unit->dwarf_frame_buffer;
