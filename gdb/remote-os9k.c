@@ -1,4 +1,4 @@
- /* Remote debugging interface for boot monitors, for GDB.
+/* Remote debugging interface for boot monitors, for GDB.
    Copyright 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
 
 This file is part of GDB.
@@ -82,10 +82,14 @@ static int monitor_log = 0;
 static int tty_xon = 0;
 static int tty_xoff = 0;
 
-static int timeout = 5;
+static int timeout = 10;
 static int is_trace_mode = 0;
 /* Descriptor for I/O to remote machine.  Initialize it to NULL*/
 static serial_t monitor_desc = NULL;
+
+static CORE_ADDR bufaddr = 0;
+static int buflen = 0;
+static char readbuf[16];
 
 /* Send data to monitor.  Works just like printf. */
 static void
@@ -204,7 +208,6 @@ expect_prompt(discard)
 
   if (is_trace_mode) {
     expect("trace", discard);
-    is_trace_mode = 0;
   } else {
     expect (PROMPT, discard);
   }
@@ -289,9 +292,6 @@ rombug_create_inferior (execfile, args, env)
 {
   int entry_pt;
 
-  /* Nonzero value indicates that a process really is running.  */
-  inferior_pid = 9000;
-
   if (args && *args)
     error("Can't pass arguments to remote ROMBUG process");
 
@@ -368,8 +368,9 @@ rombug_open(args, from_tty)
 	   dev_name);
 
   attach_flag = 1;
-  inferior_pid = 9000;
   rombug_fetch_registers();
+  bufaddr = 0;
+  buflen = 0;
 }
 
 /*
@@ -432,7 +433,6 @@ rombug_detach (from_tty)
   if (attach_flag) {
     printf_monitor (GO_CMD);
     attach_flag = 0;
-    inferior_pid = 0;
   }
   pop_target();		/* calls rombug_close to do the real work */
   if (from_tty)
@@ -454,15 +454,19 @@ rombug_resume (pid, step, sig)
     {
       is_trace_mode = 1;
       printf_monitor (STEP_CMD);
-      /* wait for the echo.  */
+      /* wait for the echo.  **
       expect (STEP_CMD, 1);
+      */
     }
   else
     {
       printf_monitor (GO_CMD);
-      /* swallow the echo.  */
+      /* swallow the echo.  **
       expect (GO_CMD, 1);
+      */
     }
+  bufaddr = 0;
+  buflen= 0;
 }
 
 /*
@@ -493,6 +497,8 @@ rombug_wait (pid, status)
   status->value.sig = TARGET_SIGNAL_TRAP;
   timeout = old_timeout;
   rombug_fetch_registers();
+  bufaddr = 0;
+  buflen = 0;
   pc = read_register(PC_REGNUM);
   addr = read_register(DATABASE_REG);
   obj_sec = find_pc_section (pc);
@@ -511,6 +517,7 @@ rombug_wait (pid, status)
 
       objfile_relocate(symfile_objfile, offs);
     }
+
   return 0;
 }
 
@@ -598,6 +605,7 @@ rombug_fetch_registers ()
 	  supply_register(regno, (char *) &val);
 	}
     }
+  is_trace_mode = 0;
   expect_prompt (1);
 }
 
@@ -705,6 +713,7 @@ char *name;
       if (name == 0) return;
       printf_monitor (SET_REG, name, read_register (regno));
 
+      is_trace_mode = 0;
       expect_prompt (1);
     }
 }
@@ -753,6 +762,7 @@ rombug_write_inferior_memory (memaddr, myaddr, len)
   expect (CMD_DELIM, 1);
   if (CMD_END)
     printf_monitor (CMD_END);
+  is_trace_mode = 0;
   expect_prompt (1);
 
   return len;
@@ -767,7 +777,6 @@ rombug_read_inferior_memory(memaddr, myaddr, len)
      int len;
 {
   int i, j;
-  char buf[20];
 
   /* Number of bytes read so far.  */
   int count;
@@ -794,6 +803,11 @@ rombug_read_inferior_memory(memaddr, myaddr, len)
     errno = EIO;
     return 0;
   }
+  if (bufaddr <= memaddr && (memaddr+len) <= (bufaddr+buflen))
+    {
+      memcpy(myaddr, &readbuf[memaddr-bufaddr], len);
+      return len;
+    }
   
   startaddr = memaddr;
   count = 0;
@@ -807,19 +821,22 @@ rombug_read_inferior_memory(memaddr, myaddr, len)
       if (sr_get_debug())
 	printf ("\nDisplay %d bytes at %x\n", len_this_pass, startaddr);
 
-      printf_monitor (MEM_DIS_CMD, startaddr, 16);
+      printf_monitor (MEM_DIS_CMD, startaddr, 8);
       expect ("- ", 1);
-      for (i = 0; i < len_this_pass; i++)
+      for (i = 0; i < 16; i++)
 	{
-	  get_hex_byte (&myaddr[count++]);
-	  if (sr_get_debug())
-	    printf ("\nRead a 0x%x from 0x%x\n", myaddr[count-1], startaddr);
-	  startaddr += 1;
+	  get_hex_byte (&readbuf[i]);
 	}
+      bufaddr = startaddr;
+      buflen = 16;
+      memcpy(&myaddr[count], readbuf, len_this_pass); 
+      count += len_this_pass;
+      startaddr += len_this_pass;
       expect(CMD_DELIM, 1);
     }
   if (CMD_END) 
       printf_monitor (CMD_END);
+  is_trace_mode = 0;
   expect_prompt (1);
 
   return len;
@@ -883,6 +900,7 @@ rombug_insert_breakpoint (addr, shadow)
 	  printf ("Breakpoint at %x\n", addr);
 	rombug_read_inferior_memory(addr, shadow, memory_breakpoint_size);
 	printf_monitor(SET_BREAK_CMD, addr);
+	is_trace_mode = 0;
 	expect_prompt(1);
 	return 0;
       }
@@ -909,6 +927,7 @@ rombug_remove_breakpoint (addr, shadow)
       {
 	breakaddr[i] = 0;
 	printf_monitor(CLR_BREAK_CMD, addr);
+	is_trace_mode = 0;
 	expect_prompt(1);
 	return 0;
       }

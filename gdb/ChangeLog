@@ -1,3 +1,15 @@
+Fri Apr 22 14:25:36 1994  Kung Hsu  (kung@mexican.cygnus.com)
+
+	* remote-os9k.c (rombug_fetch_registers): set trace mode
+	correctly.
+	* remote-os9k.c (rombug_read_inferior_memory): cache data in
+	buffer.
+	* os9kread,c (read_os9k_psymtab): process file symbol to truncate
+	extra info.
+	* os9kread.c (os9k_read_ofile_symtab): proper casting of args
+	passed to process_one_symbol.
+	* stabsread.c (read_type): process os9k functio prototype.
+
 Fri Apr 22 11:27:39 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* solib.c (symbol_add_stub): If so->textsection is NULL, don't

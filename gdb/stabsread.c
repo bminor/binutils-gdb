@@ -1545,13 +1545,17 @@ read_type (pp, objfile)
     case 'f':				/* Function returning another type */
       if (os9k_stabs && **pp == '(')
 	{
-	  /* Function prototype; skip it.
+	  /* Function prototype; parse it.
 	     We must conditionalize this on os9k_stabs because otherwise
 	     it could be confused with a Sun-style (1,3) typenumber
 	     (I think).  */
-	  while (**pp != ')')
-	    ++*pp;
+	  struct type *t;
 	  ++*pp;
+	  while (**pp != ')')
+            {
+              t = os9k_read_type(pp, objfile);
+              if (**pp == ',') ++*pp;
+            }
 	}
       type1 = read_type (pp, objfile);
       type = make_function_type (type1, dbx_lookup_type (typenums));

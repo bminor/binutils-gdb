@@ -719,34 +719,43 @@ read_os9k_psymtab (section_offsets, objfile, text_addr, text_size)
 	      {
 		unsigned long valu;
             	enum language tmp_language;
+		char *str, *p;
+		int n;
 		
 		valu = CUR_SYMBOL_VALUE;
 		if (valu)
 		  valu += ANOFFSET (section_offsets, SECT_OFF_TEXT);
 		past_first_source_file = 1;
 
+                p = strchr(namestring, ':');
+                if (p) n = p-namestring;
+                else n = strlen(namestring);
+                str = alloca(n+1);
+                strncpy(str, namestring, n);
+                str[n] = '\0';
+
 		if (psymfile_depth == 0) {
 		  if (!pst)
 		    pst = os9k_start_psymtab (objfile, section_offsets,
-				 namestring, valu,
+				 str, valu,
 				 cursymoffset,
 				 symnum-1,
 				 objfile -> global_psymbols.next,
 				 objfile -> static_psymbols.next);
 		} else { /* this is a include file */
-            	  tmp_language = deduce_language_from_filename (namestring);
+            	  tmp_language = deduce_language_from_filename (str);
             	  if (tmp_language != language_unknown
                 	&& (tmp_language != language_c
                     	|| psymtab_language != language_cplus))
               		psymtab_language = tmp_language;
 
 /*
-		  if (pst && STREQ (namestring, pst->filename))
+		  if (pst && STREQ (str, pst->filename))
 		    continue;
 		  {
 		    register int i;
 		    for (i = 0; i < includes_used; i++)
-		      if (STREQ (namestring, psymtab_include_list[i]))
+		      if (STREQ (str, psymtab_include_list[i]))
 			{
 			  i = -1; 
 			  break;
@@ -756,7 +765,7 @@ read_os9k_psymtab (section_offsets, objfile, text_addr, text_size)
 		  }
 */
 
-                  psymtab_include_list[includes_used++] = namestring;
+                  psymtab_include_list[includes_used++] = str;
                   if (includes_used >= includes_allocated)
                     {
                       char **orig = psymtab_include_list;
@@ -1397,8 +1406,8 @@ os9k_read_ofile_symtab (pst)
       bufp = symbuf;
       type = bufp->n_type;
 
-      os9k_process_one_symbol (type, bufp->n_desc, bufp->n_value,
-	      bufp->n_strx, section_offsets, objfile);
+      os9k_process_one_symbol ((int)type, (int)bufp->n_desc, 
+      (CORE_ADDR)bufp->n_value, bufp->n_strx, section_offsets, objfile);
 
       /* We skip checking for a new .o or -l file; that should never
          happen in this routine. */
