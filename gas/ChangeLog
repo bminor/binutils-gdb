@@ -6,10 +6,10 @@
 2001-06-28  Eric Christopher <echristo@redhat.com>
 	    H.J. Lu  <hjl@gnu.org>
 
-        * config/tc-mips.c (mips_arch): New. Use mips_arch instead
-        of mips_cpu for the ISA selection.
-        (md_longopts): Add OPTION_MARCH and OPTION_MTUNE.
-        (md_parse_option): Handle OPTION_MARCH and OPTION_MTUNE.
+	* config/tc-mips.c (mips_arch): New. Use mips_arch instead
+	of mips_cpu for the ISA selection.
+	(md_longopts): Add OPTION_MARCH and OPTION_MTUNE.
+	(md_parse_option): Handle OPTION_MARCH and OPTION_MTUNE.
 	(mips_tune): New.  Use mips_tune for scheduling and optimization
 	issues.
 	(append_insn): Use mips_tune and mips_arch.
