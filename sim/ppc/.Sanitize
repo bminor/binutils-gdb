@@ -53,6 +53,7 @@ device.h
 device_table.c
 device_table.h
 dgen.c
+doc
 double.c
 dp-bit.c
 emul_bugapi.c
