@@ -1,3 +1,8 @@
+Fri Apr 30 16:50:38 1993  K. Richard Pixley  (rich@rtl.cygnus.com)
+
+	* remove-udi.c (udi_wait): ifdef around SIGLOST usage.  Eg,
+	  Solaris doesn't have SIGLOST so use SIGURG as a backup.
+
 Fri Apr 30 11:05:42 1993  Jim Kingdon  (kingdon@cygnus.com)
 
 	* ser-unix.c [USE_{TERMIO,ALARM}_TIMEOUT]: New code to deal with
