@@ -505,8 +505,11 @@ init.c: $(OBS) $(TSOBS)
 	    -e '/version.o/d' \
 	    -e '/[a-z0-9A-Z_]*-exp.tab.o/d' \
 	    -e 's/\.o/.c/'` ; \
-	  sed <$(srcdir)/$$filename >>init.c-tmp -n \
-	    -e '/^_initialize_[a-z_0-9A-Z]* *(/s/^\([a-z_0-9A-Z]*\).*/  {extern void \1 (); \1 ();}/p' ; \
+	  case $$filename in \
+	    "") ;; \
+	    *) sed <$(srcdir)/$$filename >>init.c-tmp -n \
+	    -e '/^_initialize_[a-z_0-9A-Z]* *(/s/^\([a-z_0-9A-Z]*\).*/  {extern void \1 (); \1 ();}/p' ; ;; \
+	  esac ; \
 	done
 	@echo '}' >>init.c-tmp
 	@mv init.c-tmp init.c

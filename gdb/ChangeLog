@@ -1,3 +1,7 @@
+Fri Nov  5 05:58:03 1993  Jim Kingdon  (kingdon@cygnus.com)
+
+	* Makefile.in (init.c): Don't call sed if filename is empty.
+
 Thu Nov  4 08:27:24 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* dbxread.c (unknown_symchar_complaint): Make message refer to
