@@ -1,3 +1,14 @@
+Fri Feb 25 21:34:58 1994  Ian Lance Taylor  (ian@cygnus.com)
+
+	* elfcode.h: Don't include assert.h.
+	(swap_out_syms): Use BFD_ASSERT rather than assert.
+
+	* linker.c (_bfd_generic_link_write_global_symbol): Add missing
+	break in switch.
+
+	* hosts/i386v4.h (qsort, strtol): Remove incorrect and useless
+	declarations.
+
 Fri Feb 25 16:35:57 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* libhppa.h (hppa_rebuild_insn): Moved here from elf32-hppa.c.
