@@ -3577,11 +3577,9 @@ lang_check ()
 	 input format may not have equivalent representations in
 	 the output format (and besides BFD does not translate
 	 relocs for other link purposes than a final link).  */
-      if (link_info.relocateable
+      if ((link_info.relocateable || link_info.emitrelocations)
 	  && (compatible == NULL
-	      || bfd_get_flavour (input_bfd) != bfd_get_flavour (output_bfd)
-	      || (input_bfd->arch_info->bits_per_word
-		  != output_bfd->arch_info->bits_per_word))
+	      || bfd_get_flavour (input_bfd) != bfd_get_flavour (output_bfd))
 	  && (bfd_get_file_flags (input_bfd) & HAS_RELOC) != 0)
 	{
 	  einfo (_("%P%F: Relocatable linking with relocations from format %s (%B) to format %s (%B) is not supported\n"),
