@@ -1,7 +1,6 @@
 2000-10-24  Kevin Buettner  <kevinb@redhat.com>
 
 	* solib-svr4.c: New file created out of much of solib.c...
-
 	* solib.c (_SYSCALL32, BKPT_AT_SYMBOL): Move these defines to
 	solib-svr4.c.
 	(sys/types.h, signal.h, sys/param.h, fcntl.h, a.out.h,
@@ -36,7 +35,6 @@
 	TARGET_SO_SOLIB_CREATE_INFERIOR_HOOK,
 	TARGET_SO_SPECIAL_SYMBOL_HANDLING, TARGET_SO_CURRENT_SOS,
 	TARGET_SO_OPEN_SYMBOL_FILE_OBJECT):  New macros.
-
 	* solib.c (solib_map_sections, free_so, symbol_add_stub,
 	update_solib_list, solib_add, info_shared_library_command,
 	solib_address, clear_solib, solib_create_inferior_hook):  Use
@@ -44,10 +42,8 @@
 	side indirectly.
 	(current_target_so_ops): Define new global variable.
 	(_initialize_solib): Eliminate HAVE_LINK_H ifdef.
-
 	* solib-svr4.h: New file; defines struct link_map_offsets and
 	SVR4_FETCH_LINK_MAP_OFFSETS.
-
 	* solib-svr4.c (_initialize_svr4_solib, svr4_clear_solib,
 	svr4_free_so): New functions.
 	(special_symbol_handling, solib_create_inferior_function_hook,
@@ -67,10 +63,6 @@
 
 	* Makefile.in (solib.o): Add solist.h as a dependency.
 	(solib-svr4.o): Add dependencies.
-
-	* sparc-tdep.c (gregset.h): Don't include unless USE_PROC_FS is
-	defined.
-
 	* config/alpha/alpha-linux.mh, config/alpha/fbsd.mh,
 	config/arm/linux.mh, config/i386/fbsd.mh,
 	config/i386/i386dgux.mh, config/i386/i386gnu.mh,
@@ -89,6 +81,10 @@
 	config/sparc/nbsd.mh, config/sparc/nbsdelf.mh,
 	config/sparc/sun4os4.mt, config/sparc/sun4sol2.mh
 	(NATDEPFILES):  Add solib-svr4.o to list.
+
+	* sparc-tdep.c (gregset.h): Don't include unless USE_PROC_FS is
+	defined.
+
 
 2000-10-24  Kevin Buettner  <kevinb@redhat.com>
 
