@@ -60,6 +60,7 @@ CFILES = \
 	sparc-dis.c \
 	sparc-opc.c \
 	tic30-dis.c \
+	vax-dis.c \
 	w65-dis.c \
 	z8k-dis.c \
 	z8kgen.c
@@ -115,6 +116,7 @@ ALL_MACHINES = \
 	$(end-sanitize-sky) \
 	v850-dis.lo \
 	v850-opc.lo \
+	vax-dis.lo \
 	w65-dis.lo \
 	z8k-dis.lo
 
@@ -150,6 +152,11 @@ POTFILES = $(HFILES) $(CFILES)
 po/POTFILES.in: @MAINT@ Makefile
 	for file in $(POTFILES); do echo $$file; done | sort > tmp \
 	  && mv tmp $(srcdir)/po/POTFILES.in
+
+# We should reconfigure whenever bfd/configure.in changes, because
+# that's where the version number comes from.
+config.status: $(srcdir)/configure $(srcdir)/../bfd/configure.in
+	$(SHELL) ./config.status --recheck
 
 CLEANFILES = libopcodes.a stamp-lib dep.sed .dep .dep1
 # start-sanitize-cygnus
@@ -263,72 +270,79 @@ a29k-dis.lo: a29k-dis.c $(INCDIR)/dis-asm.h $(BFD_H) \
 alpha-dis.lo: alpha-dis.c $(INCDIR)/ansidecl.h sysdep.h \
   config.h $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/opcode/alpha.h
 alpha-opc.lo: alpha-opc.c $(INCDIR)/ansidecl.h $(INCDIR)/opcode/alpha.h \
-  $(BFD_H)
+  $(BFD_H) opintl.h
 arm-dis.lo: arm-dis.c $(INCDIR)/dis-asm.h $(BFD_H) \
   $(INCDIR)/ansidecl.h arm-opc.h $(INCDIR)/coff/internal.h \
-  $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h
+  $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h opintl.h
 cgen-asm.lo: cgen-asm.c sysdep.h config.h $(INCDIR)/libiberty.h \
-  $(BFD_H) $(INCDIR)/opcode/cgen.h
+  $(BFD_H) $(INCDIR)/symcat.h $(INCDIR)/opcode/cgen.h \
+  opintl.h
 cgen-dis.lo: cgen-dis.c sysdep.h config.h $(INCDIR)/libiberty.h \
-  $(BFD_H) $(INCDIR)/opcode/cgen.h
+  $(BFD_H) $(INCDIR)/symcat.h $(INCDIR)/opcode/cgen.h
 cgen-opc.lo: cgen-opc.c sysdep.h config.h $(INCDIR)/libiberty.h \
-  $(BFD_H) $(INCDIR)/opcode/cgen.h
+  $(BFD_H) $(INCDIR)/symcat.h $(INCDIR)/opcode/cgen.h
 d10v-dis.lo: d10v-dis.c $(INCDIR)/ansidecl.h $(INCDIR)/opcode/d10v.h \
   $(INCDIR)/dis-asm.h $(BFD_H)
 d10v-opc.lo: d10v-opc.c $(INCDIR)/ansidecl.h $(INCDIR)/opcode/d10v.h
 dis-buf.lo: dis-buf.c sysdep.h config.h $(INCDIR)/dis-asm.h \
-  $(BFD_H)
+  $(BFD_H) opintl.h
 disassemble.lo: disassemble.c $(INCDIR)/ansidecl.h \
   $(INCDIR)/dis-asm.h $(BFD_H)
 h8300-dis.lo: h8300-dis.c $(INCDIR)/opcode/h8300.h \
-  $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/ansidecl.h
+  $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/ansidecl.h opintl.h
 h8500-dis.lo: h8500-dis.c h8500-opc.h $(INCDIR)/dis-asm.h \
-  $(BFD_H) $(INCDIR)/ansidecl.h
+  $(BFD_H) $(INCDIR)/ansidecl.h opintl.h
 hppa-dis.lo: hppa-dis.c sysdep.h config.h $(INCDIR)/dis-asm.h \
   $(BFD_H) $(BFDDIR)/libhppa.h $(INCDIR)/opcode/hppa.h
 i386-dis.lo: i386-dis.c $(INCDIR)/dis-asm.h $(BFD_H) \
-  $(INCDIR)/ansidecl.h sysdep.h config.h
+  $(INCDIR)/ansidecl.h sysdep.h config.h opintl.h
 i960-dis.lo: i960-dis.c $(INCDIR)/dis-asm.h $(BFD_H) \
   $(INCDIR)/ansidecl.h
 m32r-asm.lo: m32r-asm.c sysdep.h config.h $(BFD_H) \
-  m32r-opc.h $(INCDIR)/opcode/cgen.h
+  $(INCDIR)/symcat.h m32r-opc.h $(INCDIR)/opcode/cgen.h \
+  opintl.h
 m32r-dis.lo: m32r-dis.c sysdep.h config.h $(INCDIR)/dis-asm.h \
-  $(BFD_H) m32r-opc.h $(INCDIR)/opcode/cgen.h
+  $(BFD_H) $(INCDIR)/symcat.h m32r-opc.h $(INCDIR)/opcode/cgen.h \
+  opintl.h
 m32r-opc.lo: m32r-opc.c sysdep.h config.h $(INCDIR)/libiberty.h \
-  $(BFD_H) m32r-opc.h $(INCDIR)/opcode/cgen.h
+  $(BFD_H) $(INCDIR)/symcat.h m32r-opc.h $(INCDIR)/opcode/cgen.h \
+  opintl.h
 m68k-dis.lo: m68k-dis.c $(INCDIR)/dis-asm.h $(BFD_H) \
-  $(INCDIR)/ansidecl.h $(INCDIR)/floatformat.h $(INCDIR)/opcode/m68k.h
+  $(INCDIR)/ansidecl.h $(INCDIR)/floatformat.h opintl.h \
+  $(INCDIR)/opcode/m68k.h
 m68k-opc.lo: m68k-opc.c $(INCDIR)/ansidecl.h $(INCDIR)/opcode/m68k.h
 m88k-dis.lo: m88k-dis.c $(INCDIR)/dis-asm.h $(BFD_H) \
-  $(INCDIR)/ansidecl.h $(INCDIR)/opcode/m88k.h
+  $(INCDIR)/ansidecl.h $(INCDIR)/opcode/m88k.h opintl.h
 mips-dis.lo: mips-dis.c sysdep.h config.h $(INCDIR)/dis-asm.h \
-  $(BFD_H) $(INCDIR)/opcode/mips.h $(BFDDIR)/elf-bfd.h \
+  $(BFD_H) $(INCDIR)/opcode/mips.h opintl.h $(BFDDIR)/elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   $(INCDIR)/bfdlink.h $(INCDIR)/elf/mips.h
-mips-opc.lo: mips-opc.c $(INCDIR)/ansidecl.h $(INCDIR)/opcode/mips.h
-# start-sanitize-r5900
-mips-opc.lo: vu0.h
-# end-sanitize-r5900
+mips-opc.lo: mips-opc.c $(INCDIR)/ansidecl.h $(INCDIR)/opcode/mips.h \
+  vu0.h
 mips16-opc.lo: mips16-opc.c $(INCDIR)/ansidecl.h $(INCDIR)/opcode/mips.h
 m10200-dis.lo: m10200-dis.c $(INCDIR)/ansidecl.h $(INCDIR)/opcode/mn10200.h \
-  $(INCDIR)/dis-asm.h $(BFD_H)
+  $(INCDIR)/dis-asm.h $(BFD_H) opintl.h
 m10200-opc.lo: m10200-opc.c $(INCDIR)/ansidecl.h $(INCDIR)/opcode/mn10200.h
 m10300-dis.lo: m10300-dis.c $(INCDIR)/ansidecl.h $(INCDIR)/opcode/mn10300.h \
-  $(INCDIR)/dis-asm.h $(BFD_H)
+  $(INCDIR)/dis-asm.h $(BFD_H) opintl.h
 m10300-opc.lo: m10300-opc.c $(INCDIR)/ansidecl.h $(INCDIR)/opcode/mn10300.h
 ns32k-dis.lo: ns32k-dis.c $(BFD_H) $(INCDIR)/ansidecl.h \
-  sysdep.h config.h $(INCDIR)/dis-asm.h $(INCDIR)/opcode/ns32k.h
+  sysdep.h config.h $(INCDIR)/dis-asm.h $(INCDIR)/opcode/ns32k.h \
+  opintl.h
 ppc-dis.lo: ppc-dis.c $(INCDIR)/ansidecl.h sysdep.h \
   config.h $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/opcode/ppc.h
-ppc-opc.lo: ppc-opc.c $(INCDIR)/ansidecl.h $(INCDIR)/opcode/ppc.h
+ppc-opc.lo: ppc-opc.c $(INCDIR)/ansidecl.h $(INCDIR)/opcode/ppc.h \
+  opintl.h
 sh-dis.lo: sh-dis.c sh-opc.h $(INCDIR)/dis-asm.h $(BFD_H) \
   $(INCDIR)/ansidecl.h
 sparc-dis.lo: sparc-dis.c $(INCDIR)/ansidecl.h sysdep.h \
   config.h $(INCDIR)/opcode/sparc.h $(INCDIR)/dis-asm.h \
-  $(BFD_H) $(INCDIR)/libiberty.h
+  $(BFD_H) $(INCDIR)/libiberty.h opintl.h
 sparc-opc.lo: sparc-opc.c $(INCDIR)/ansidecl.h $(INCDIR)/opcode/sparc.h
 tic30-dis.lo: tic30-dis.c $(INCDIR)/dis-asm.h $(BFD_H) \
   $(INCDIR)/ansidecl.h $(INCDIR)/opcode/tic30.h
+vax-dis.lo: vax-dis.c $(INCDIR)/opcode/vax.h $(INCDIR)/dis-asm.h \
+  $(BFD_H) $(INCDIR)/ansidecl.h
 w65-dis.lo: w65-dis.c w65-opc.h $(INCDIR)/dis-asm.h \
   $(BFD_H) $(INCDIR)/ansidecl.h
 z8k-dis.lo: z8k-dis.c sysdep.h config.h $(INCDIR)/dis-asm.h \

@@ -1,3 +1,20 @@
+Fri Jun 26 12:04:21 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in: For bfd_vax_arch, build vax-dis.lo.
+	* Makefile.am: Rebuild dependencies.
+ 	(CFILES): Add vax-dis.c.
+	(ALL_MACHINES): Add vax-dis.lo.
+	* aclocal.m4: Rebuild with current libtool.
+	* configure, Makefile.in: Rebuild.
+
+Fri Jun 26 12:03:20 1998  Klaus Kaempf  <kkaempf@progis.de>
+
+	* vax-dis.c: New file, from work by Pauline Middelink
+	<middelin@polyware.iaf.nl>.
+	* disassemble.c (ARCH_vax): Define if ARCH_all.
+	(disassembler): Add case for ARCH_vax.
+	* makefile.vms: Support compilation on vms/vax.
+
 start-sanitize-am33
 Wed Jun 24 09:53:06 1998  Jeffrey A Law  (law@cygnus.com)
 

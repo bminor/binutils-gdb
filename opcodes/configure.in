@@ -70,7 +70,17 @@ AC_CHECK_HEADERS(string.h strings.h stdlib.h)
 
 # start-sanitize-cygnus
 use_cgen=no
-if test ${USE_MAINTAINER_MODE} = yes ; then
+cgen_maint=no
+# Having --enable-maintainer-mode take arguments is another way to go.
+AC_ARG_ENABLE(cgen-maint,
+[  --enable-cgen-maint     build cgen generated files],
+[case "${enableval}" in
+  yes) cgen_maint=yes ;;
+  no)  cgen_maint=no ;;
+  *)   AC_MSG_ERROR([bad value ${enableval} for opcodes cgen-maint option]) ;;
+esac])dnl
+AM_CONDITIONAL(CGEN_MAINT, test x${cgen_maint} = xyes)
+if test "x${cgen_maint}" = xyes ; then
 	for targ in $target $canon_targets
 	do
 	    case $targ in
@@ -91,7 +101,7 @@ case "${host}" in
 *-*-cygwin32*)
   if test "$enable_shared" = "yes"; then
     WIN32LDFLAGS="-no-undefined"
-    WIN32LIBADD="-L`pwd`/../bfd -lbfd -L`pwd`/../libiberty -liberty -lcygwin"
+    WIN32LIBADD="-L`pwd`/../bfd -lbfd -L`pwd`/../libiberty -liberty -L`pwd`/../intl -lintl -lcygwin"
   fi
   ;;
 esac
@@ -184,7 +194,7 @@ if test x${all_targets} = xfalse ; then
 	bfd_v850e_arch)		ta="$ta v850-opc.lo v850-dis.lo" ;;
 	bfd_v850ea_arch)	ta="$ta v850-opc.lo v850-dis.lo" ;;
 # end-sanitize-v850e
-	bfd_vax_arch)		;;
+	bfd_vax_arch)		ta="$ta vax-dis.lo" ;;
 	bfd_w65_arch)		ta="$ta w65-dis.lo" ;;
 	bfd_we32k_arch)		;;
 	bfd_z8k_arch)		ta="$ta z8k-dis.lo" ;;
