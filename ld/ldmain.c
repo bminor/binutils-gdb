@@ -548,7 +548,7 @@ get_emulation (argc, argv)
 		   || strcmp (argv[i], "-mips4") == 0
 		   || strcmp (argv[i], "-mips5") == 0)
 	    {
-	      /* FIXME: The arguments -mips1, -mips2 and -mips3 are
+	      /* FIXME: The arguments -mips1, -mips2, -mips3, etc. are
 		 passed to the linker by some MIPS compilers.  They
 		 generally tell the linker to use a slightly different
 		 library path.  Perhaps someday these should be
