@@ -1,3 +1,9 @@
+2003-08-29  Dave Brolley  <brolley@redhat.com>
+
+	* Makefile.in (stamp-arch): Copy frv.cpu from $(srcdir)../../cpu
+	temporarily when regenerating files.
+	(stamp-cpu): Ditto.
+
 2003-08-20  Micheal Snyder  <msnyder@redhat.com>
 
 	* All generated files: Regenerate.
