@@ -1,3 +1,8 @@
+Tue Dec 31 18:11:13 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* simops.c (OP_10007E0): Know that kill encodes the signal number
+	via: 0xdead0000 | signal and turn it back into a signal.
+
 Fri Dec 27 14:44:06 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* v850_sim.h (SIG_V850_EXIT): Define as -1.

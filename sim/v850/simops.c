@@ -2053,9 +2053,12 @@ OP_10007E0 ()
 	  RETVAL = v850_callback->open (v850_callback, MEMPTR (PARM1), PARM2);
 	  break;
 	case SYS_exit:
-	  /* EXIT - caller can look in PARM1 to work out the 
-	     reason */
-	  State.exception = SIG_V850_EXIT;
+	  if ((PARM1 & 0xffff0000) == 0xdead0000 && (PARM1 & 0xffff) != 0)
+	    State.exception = PARM1 & 0xffff;	/* get signal encoded by kill */
+	  else if (PARM1 == 0xdead)
+	    State.exception = SIGABRT;		/* old libraries */
+	  else
+	    State.exception = SIG_V850_EXIT;	/* PARM1 has exit status encoded */
 	  break;
 
 	case SYS_stat:	/* added at hmsi */
