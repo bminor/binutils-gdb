@@ -1,3 +1,11 @@
+Sun Mar 31 13:30:03 1996  Doug Evans  <dje@canuck.cygnus.com>
+
+	* sparc.h (SPARC_OPCODE_ARCH_MASK): New macro.
+
+Thu Mar  7 15:08:23 1996  Doug Evans  <dje@charmed.cygnus.com>
+
+	* sparc.h (O): Mark operand letter as in use.
+
 Tue Feb 20 20:46:21 1996  Doug Evans  <dje@charmed.cygnus.com>
 
 	* sparc.h (sparc_{encode,decode}_sparclet_cpreg): Declare.

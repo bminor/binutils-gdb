@@ -49,13 +49,18 @@ enum sparc_opcode_arch_val {
 /* The highest architecture in the table.  */
 #define SPARC_OPCODE_ARCH_MAX (SPARC_OPCODE_ARCH_BAD - 1)
 
+/* Given an enum sparc_opcode_arch_val, return the bitmask to use in
+   insn encoding/decoding.  */
+#define SPARC_OPCODE_ARCH_MASK(arch) (1 << (arch))
+
 /* Table of cpu variants.  */
 
 struct sparc_opcode_arch {
   const char *name;
   /* Mask of sparc_opcode_arch_val's supported.
-     EG: For v7 this would be ((1 << v6) | (1 << v7)).  */
-  /* These are short's because sparc_opcode.architecture is.  */
+     EG: For v7 this would be
+     (SPARC_OPCODE_ARCH_MASK (..._V6) | SPARC_OPCODE_ARCH_MASK (..._V7)).
+     These are short's because sparc_opcode.architecture is.  */
   short supported;
 };
 
@@ -144,7 +149,8 @@ Kinds of operands:
 	z	%icc. (v9)
 	Z	%xcc. (v9)
 	q	Floating point queue.
-	r	Single register that is both rs1 and rsd.
+	r	Single register that is both rs1 and rd.
+	O	Single register that is both rs2 and rd.
 	Q	Coprocessor queue.
 	S	Special case.
 	t	Trap base register.
@@ -167,7 +173,7 @@ Kinds of operands:
 	x	OPF field (v9 impdep).
 
 The following chars are unused: (note: ,[] are used as punctuation)
-[OXY3450]
+[XY3450]
 
 */
 
