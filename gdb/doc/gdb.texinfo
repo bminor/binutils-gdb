@@ -2247,12 +2247,13 @@ to nonsharable executables.
 @cindex continuing
 @cindex resuming execution
 @dfn{Continuing} means resuming program execution until your program
-completes normally.  In contrast, @dfn{stepping} means resuming program
-execution for a very limited time: one line of source code, or one
-machine instruction.  Either when continuing or when stepping, the
-program may stop even sooner, due to a breakpoint or to a signal.  (If
-due to a signal, you may want to use @code{handle}, or use @samp{signal
-0} to resume execution; @pxref{Signals}.)
+completes normally.  In contrast, @dfn{stepping} means executing just
+one more ``step'' of your program, where ``step'' may mean either one
+line of source code, or one machine instruction (depending on what
+particular command you use).  Either when continuing
+or when stepping, the program may stop even sooner, due to a breakpoint
+or to a signal.  (If due to a signal, you may want to use @code{handle},
+or use @samp{signal 0} to resume execution; @pxref{Signals}.)
 
 @table @code
 @item continue @r{[}@var{ignore-count}@r{]}
@@ -3346,15 +3347,54 @@ expression.  For example, @samp{p/x} reprints the last value in hex.
 @cindex examining memory
 @table @code
 @kindex x
-@item x/@var{nfu} @var{expr}
-The command @code{x} (for `examine') can be used to examine memory
-without being constrained by your program's data types.  You can specify
-the unit size @var{u} of memory to inspect, and a repeat count @var{n} of how
-many of those units to display.  @code{x} understands the formats
-@var{f} used by @code{print}; two additional formats, @samp{s} (string)
-and @samp{i} (machine instruction) can be used without specifying a unit
-size.
+@item x/@var{nfu} @var{addr}
+@itemx x @var{addr}
+@itemx x
+You can use the command @code{x} (for `examine') to examine memory in
+any of several formats, independently of your program's data types.
+@var{n}, @var{f}, and @var{u} are all optional parameters to specify how
+much memory to display, and how to format it; @var{addr} is an
+expression giving the address where you want to start displaying memory.
+If you use defaults for @var{nfu}, you need not type the slash @samp{/}.
+Several commands set convenient defaults for @var{addr}.
 @end table
+
+@var{n}, the repeat count, is a decimal integer; the default is 1.  It
+specifies how much memory (counting by units @var{u}) to display.
+@c This really is **decimal**; unaffected by 'set radix' as of GDB
+@c 4.1.2.
+
+@var{f}, the display format, is one of the formats used by @code{print},
+or @samp{s} (null-terminated string) or @samp{i} (machine instruction).
+The default is @samp{x} (hexadecimal) initially, or the format from the
+last time you used either @code{x} or @code{print}.
+
+@var{u}, the unit size, is any of
+@table @code
+@item b
+Bytes.
+@item h
+Halfwords (two bytes).
+@item w
+Words (four bytes).  This is the initial default.
+@item g
+Giant words (eight bytes).
+@end table
+
+@noindent
+Each time you specify a unit size with @code{x}, that size becomes the
+default unit the next time you use @code{x}.  (For the @samp{s} and
+@samp{i} formats, the unit size is ignored and is normally not written.)
+
+@var{addr} is the address where you want _GDBN__ to begin displaying
+memory.  The expression need not have a pointer value (though it may);
+it is always interpreted as an integer address of a byte of memory.
+@xref{Expressions} for more information on expressions.  The default for
+@var{addr} is usually just after the last address examined---but several
+other commands also set the default address: @code{info breakpoints} (to
+the address of the last breakpoint listed), @code{info line} (to the
+starting address of a line), and @code{print} (if you use it to display
+a value from memory).
 
 For example, @samp{x/3uh 0x54320} is a request to display three halfwords
 (@code{h}) of memory, formatted as unsigned decimal integers (@samp{u}),
@@ -3366,105 +3406,25 @@ Since the letters indicating unit sizes are all distinct from the
 letters specifying output formats, you don't have to remember whether
 unit size or format comes first; either order will work.  The output
 specifications @samp{4xw} and @samp{4wx} mean exactly the same thing.
+(However, the count @var{n} must come first; @samp{wx4} will not work.)
 
-After the format specification, you supply an expression for the address
-where _GDBN__ is to begin reading from memory.  The expression need not
-have a pointer value (though it may); it is always interpreted as an
-integer address of a byte of memory.  @xref{Expressions} for more
-information on expressions.
+Even though the unit size @var{u} is ignored for the formats @samp{s}
+and @samp{i}, you might still want to use a count @var{n}; for example,
+@samp{3i} specifies that you want to see three machine instructions,
+including any operands.  The command @code{disassemble} gives an
+alternative way of inspecting machine instructions; @pxref{Machine
+Code}.
 
-These are the memory units @var{u} you can specify with the @code{x}
-command:
-
-@table @code
-@item b
-Examine individual bytes.
-
-@item h
-Examine halfwords (two bytes each).
-
-@item w
-Examine words (four bytes each).
-
-@cindex word
-Many assemblers and cpu designers still use `word' for a 16-bit quantity,
-as a holdover from specific predecessor machines of the 1970's that really
-did use two-byte words.  But more generally the term `word' has always
-referred to the size of quantity that a machine normally operates on and
-stores in its registers.  This is 32 bits for all the machines that _GDBN__
-runs on.
-
-@item g
-Examine giant words (8 bytes).
-@end table
-
-You can combine these unit specifications with any of the formats
-described for @code{print}.  @xref{Output formats}.
-
-@code{x} has two additional output specifications which derive the unit
-size from the data inspected:
-
-@table @code
-@item s
-Print a null-terminated string of characters.  Any explicitly specified
-unit size is ignored; instead, the unit is however many bytes it takes
-to reach a null character (including the null character).
-
-@item i
-Print a machine instruction in assembler syntax (or nearly).  Any
-specified unit size is ignored; the number of bytes in an instruction
-varies depending on the type of machine, the opcode and the addressing
-modes used.  The command @code{disassemble} gives an alternative way of
-inspecting machine instructions.  @xref{Machine Code}.
-@end table
-
-If you omit either the format @var{f} or the unit size @var{u}, @code{x}
-will use the same one that was used last.  If you don't use any letters
-or digits after the slash, you can omit the slash as well.
-
-You can also omit the address to examine.  Then the address used is just
-after the last unit examined.  This is why string and instruction
-formats actually compute a unit-size based on the data: so that the next
-string or instruction examined will start in the right place.  
-
-When the @code{print} command shows a value that resides in memory,
-@code{print} also sets the default address for the @code{x} command.
-@code{info line} also sets the default for @code{x}, to the address of
-the start of the machine code for the specified line 
-(@pxref{Machine Code}), 
-and @code{info breakpoints} sets it to the address of the last
-breakpoint listed (@pxref{Set Breaks}).@refill
-
-When you use @key{RET} to repeat an @code{x} command, the address
-specified previously (if any) is ignored, so that the repeated command
-examines the successive locations in memory rather than the same ones.
-
-You can examine several consecutive units of memory with one command by
-writing a repeat-count after the slash (before the format letters, if
-any).  Omitting the repeat count @var{n} displays one unit of the
-appropriate size.  The repeat count must be a decimal integer.  It has
-the same effect as repeating the @code{x} command @var{n} times except
-that the output may be more compact, with several units per line.  For
-example,
-
-@example
-x/10i $pc
-@end example
-
-@noindent
-prints ten instructions starting with the one to be executed next in the
-selected frame.  After doing this, you could print a further seven
-instructions with
-
-@example
-x/7
-@end example
-
-@noindent
----where the format and address are allowed to default.
+All the defaults for the arguments to @code{x} are designed to make it
+easy to continue scanning memory with minimal specifications each time
+you use @code{x}.  For example, after you've inspected three machine
+instructions with @samp{x/3i @var{addr}}, you can inspect the next seven
+with just @samp{x/7}.  If you use @key{RET} to repeat the @code{x} command,
+the repeat count @var{n} is used again; the other arguments default as
+for successive uses of @code{x}.
 
 @cindex @code{$_}, @code{$__}, and value history
-The addresses and contents printed by the @code{x} command are not put
+The addresses and contents printed by the @code{x} command are not saved
 in the value history because there is often too much of them and they
 would get in the way.  Instead, _GDBN__ makes these values available for
 subsequent use in expressions as values of the convenience variables
@@ -5320,16 +5280,17 @@ which match the regular-expression @var{regexp}.
 @kindex printsyms
 @cindex partial symbol dump
 Write a dump of debugging symbol data into the file @var{filename}.
+These commands are useful for debugging the _GDBN__ symbol-reading code.
 Only symbols with debugging data are included.  If you use
 @code{printsyms}, _GDBN__ includes all the symbols for which it has
 already collected full details: that is, @var{filename} reflects symbols
 for only those files whose symbols _GDBN__ has read.  You can find out
-which files these are using the command @code{info files}.  On the other
-hand, if you use @code{printpsyms}, the dump also shows information
-about symbols that _GDBN__ only knows partially---that is, symbols
-defined in files that _GDBN__ has not yet read.  The description of
-@code{symbol-file} describes how _GDBN__ reads symbols; both commands
-are described under @ref{Files}.
+which files these are using the command @code{info sources}.  On the
+other hand, if you use @code{printpsyms}, the dump also shows
+information about symbols that _GDBN__ only knows partially---that is,
+symbols defined in files that _GDBN__ has skimmed, but not yet read
+completely.  The description of @code{symbol-file} describes how _GDBN__
+reads symbols; both commands are described under @ref{Files}.
 
 @end table
 
@@ -5859,16 +5820,15 @@ _GDBN__ could not parse a type specification output by the compiler.
 @chapter Specifying a Debugging Target 
 @cindex debugging target
 @kindex target
-A @dfn{target} is an interface between the debugger and a particular 
-kind of file or process.  
-
-Often, you will be able to run _GDBN__ in the same host environment as the
-program you are debugging; in that case, the debugging target can just be
-specified as a side effect of the @code{file} or @code{core} commands.
-When you need more flexibility---for example, running _GDBN__ on a
-physically separate host, controlling standalone systems over a
-serial port, or realtime systems over a TCP/IP connection---you can use
-the @code{target} command.
+A @dfn{target} is the execution environment occupied by your program.
+Often, _GDBN__ runs in the same host environment as the program you are
+debugging; in that case, the debugging target is specified as a side
+effect when you use the @code{file} or @code{core} commands.  When you
+need more flexibility---for example, running _GDBN__ on a physically
+separate host, or controlling a standalone system over a serial port or
+a realtime system over a TCP/IP connection---you can use the
+@code{target} command to specify one of the target types configured for
+_GDBN__ (@pxref{Target Commands}).
 
 @menu
 * Active Targets::              Active Targets
@@ -5882,24 +5842,32 @@ the @code{target} command.
 @cindex active targets
 @cindex multiple targets
 
-Targets are managed in three @dfn{strata} that correspond to different
-classes of target: processes, core files, and executable files.  This
-allows you to (for example) start a process and inspect its activity
-without abandoning your work on a core file.
+There are three classes of targets: processes, core files, and
+executable files.  _GDBN__ can work concurrently on up to three active
+targets, one in each class.  This allows you to (for example) start a
+process and inspect its activity without abandoning your work on a core
+file.
 
-More than one target can potentially respond to a request.  In
-particular, when you access memory _GDBN__ will examine the three strata of
-targets until it finds a target that can handle that particular address.
-Strata are always examined in a fixed order: first a process if there is
-one, then a core file if there is one, and finally an executable file if
-there is one of those.
+If, for example, you execute @samp{gdb a.out}, then the executable file
+@code{a.out} is the only active target.  If you designate a core file as
+well---presumably from a prior run that crashed and coredumped---then
+_GDBN__ has two active targets and will use them in tandem, looking
+first in the corefile target, then in the executable file, to satisfy
+requests for memory addresses.  (Typically, these two classes of target
+are complementary, since core files contain only the program's
+read-write memory---variables and so on---plus machine status, while
+executable files contain only the program text and initialized data.)
 
-When you specify a new target in a given stratum, it replaces any target
-previously in that stratum.
+When you type @code{run}, your executable file becomes an active process
+target as well.  When a process target is active, all _GDBN__ commands
+requesting memory addresses refer to that target; addresses in an active
+core file or executable file target are obscured while the process
+target is active.
 
-To get rid of a target without replacing it, use the @code{detach}
-command.  The related command @code{attach} provides you with a way of
-choosing a particular running process as a new target. @xref{Attach}.
+Use the @code{core-file}, and @code{exec-file} commands to select a new
+core file or executable target (@pxref{Files}).  To specify as a target
+a process that's already running, use the @code{attach} command
+(@pxref{Attach}).
 
 @node Target Commands, Remote, Active Targets, Targets
 @section Commands for Managing Targets
