@@ -1,5 +1,5 @@
 /* dwarf2dbg.c - DWARF2 debug support
-   Copyright (C) 1999 Hewlett-Packard Co
+   Copyright (C) 1999 Free Software Foundation, Inc.
    Contributed by David Mosberger-Tang <davidm@hpl.hp.com>
 
    This file is part of GAS, the GNU Assembler.
@@ -17,9 +17,9 @@
    You should have received a copy of the GNU General Public License
    along with GAS; see the file COPYING.  If not, write to the Free
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
-   02111-1307, USA.
+   02111-1307, USA.  */
 
-   Logical line numbers can be controlled by the compiler via the
+/* Logical line numbers can be controlled by the compiler via the
    following two directives:
 
 	.file FILENO "file.c"
