@@ -1,3 +1,9 @@
+2003-08-20  Michael Snyder  <msnyder@redhat.com>
+            On behalf of Dave Brolley
+  
+	* sim/frv: New testsuite.
+	* frv-elf: New testsuite.
+  
 2003-07-09  Michael Snyder  <msnyder@redhat.com>
 
 	* sim/sh: New directory.  Tests for Renesas sh family.
