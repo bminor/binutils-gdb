@@ -205,7 +205,9 @@ if [ -n "${fatal}" -o "${hosts}" = "help" ] ; then
 	echo " +norecursion	configure this directory only. [recurse]" ;
 	echo " +objdir=ODIR	configure in a parallel tree rooted in ODIR. [rooted in \".\"]" ;
 	echo " +rm		remove this configuration. [build a configuration]" ;
-	echo " +subdirs		configure in subdirectories.  [in source directories]" ;
+	echo " +site		configure with site specific makefile" ;
+# This is correctly aligned in the output, even though it isn't here.
+	echo " +subdirs	configure in subdirectories.  [in source directories]" ;
 	echo " +target=TARGET	configure for TARGET.  [TARGET = HOST]" ;
 	echo " +tmpdir=TMPDIR	create temporary files in TMPDIR.  [ TMPDIR = \"/tmp\" ]" ;
 	echo ;
@@ -618,7 +620,10 @@ exit 0
 #
 #
 # $Log$
-# Revision 1.51  1991/10/08 06:07:58  wilson
+# Revision 1.52  1991/10/09 00:48:26  rich
+# Another patch from jim.
+#
+# Revision 1.51  1991/10/08  06:07:58  wilson
 # Fix bug in smake- file code.
 #
 # Revision 1.50  1991/10/04  23:49:37  rich
