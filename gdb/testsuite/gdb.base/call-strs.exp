@@ -113,7 +113,7 @@ gdb_expect {
     }
 
 
-#step
+#next
 send_gdb "next\n"
 gdb_expect {
         -re ".*str_func\\(\"abcd\", \"efgh\", \"ijkl\", \"mnop\", \"qrst\", \"uvwx\", \"yz12\"\\);.*$gdb_prompt $" {pass "next over strcpy"}

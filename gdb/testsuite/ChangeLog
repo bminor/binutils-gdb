@@ -1,3 +1,7 @@
+2002-09-12  Joel Brobecker  <brobecker@gnat.com>
+
+	* gdb.base/call-strs.exp: Fix a small typo in one of the comments.
+
 2002-09-10  Keith Seitz  <keiths@redhat.com>
 
 	* lib/mi-support.exp (mi_runto): New proc. Does the same as gdb's
