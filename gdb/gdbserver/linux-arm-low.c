@@ -1,5 +1,5 @@
 /* GNU/Linux/ARM specific low level interface, for the remote server for GDB.
-   Copyright 1995, 1996, 1998, 1999, 2000, 2001, 2002, 2003, 2004
+   Copyright 1995, 1996, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -21,6 +21,26 @@
 
 #include "server.h"
 #include "linux-low.h"
+
+#include <sys/ptrace.h>
+
+/* Correct for all GNU/Linux targets (for quite some time).  */
+#define GDB_GREGSET_T elf_gregset_t
+#define GDB_FPREGSET_T elf_fpregset_t
+
+#ifndef HAVE_ELF_FPREGSET_T
+/* Make sure we have said types.  Not all platforms bring in <linux/elf.h>
+   via <sys/procfs.h>.  */
+#ifdef HAVE_LINUX_ELF_H   
+#include <linux/elf.h>    
+#endif
+#endif
+   
+#include "../gdb_proc_service.h"
+
+#ifndef PTRACE_GET_THREAD_AREA
+#define PTRACE_GET_THREAD_AREA 22
+#endif
 
 #ifdef HAVE_SYS_REG_H
 #include <sys/reg.h>
@@ -93,6 +113,23 @@ arm_reinsert_addr ()
   unsigned long pc;
   collect_register_by_name ("lr", &pc);
   return pc;
+}
+
+/* Fetch the thread-local storage pointer for libthread_db.  */
+
+ps_err_e
+ps_get_thread_area (const struct ps_prochandle *ph,
+                    lwpid_t lwpid, int idx, void **base)
+{
+  if (ptrace (PTRACE_GET_THREAD_AREA, lwpid, NULL, base) != 0)
+    return PS_ERR;
+
+  /* IDX is the bias from the thread pointer to the beginning of the
+     thread descriptor.  It has to be subtracted due to implementation
+     quirks in libthread_db.  */
+  *base = (void *) ((char *)*base - idx);
+
+  return PS_OK;
 }
 
 struct linux_target_ops the_low_target = {
