@@ -1,3 +1,10 @@
+Sat Jun 13 11:31:35 1998  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	* i386.h (i386_optab): Add general form of aad and aam.  Add ud2a
+	and ud2b.
+	(i386_regtab): Allow cr0..7, db0..7, dr0..7, tr0..7, not just
+	those that happen to be implemented on pentiums.
+
 Tue Jun  9 12:16:01 1998  Alan Modra  <alan@spri.levels.unisa.edu.au>
 
 	* i386.h: Change occurences of Data16 to Size16, Data32 to Size32,
