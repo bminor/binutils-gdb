@@ -117,12 +117,6 @@ case "${targ}" in
     targ_underscore=yes
     ;;
 
-  sh-*-*)
-    targ_defvec=shcoff_vec
-    targ_selvecs="shcoff_vec shlcoff_vec"
-    targ_underscore=yes
-    ;;
-
   hppa*-*-*elf* | hppa*-*-lites* | hppa*-*-sysv4*)
     targ_defvec=bfd_elf32_hppa_vec
     ;;
@@ -432,6 +426,22 @@ case "${targ}" in
     targ_defvec=rs6000coff_vec
     ;;
 
+  sh-*-elf*)
+    targ_defvec=bfd_elf32_sh_vec
+    targ_selvecs="bfd_elf32_shl_vec shcoff_vec shlcoff_vec"
+    targ_underscore=yes
+    ;;
+  sh-*-*)
+    targ_defvec=shcoff_vec
+    targ_selvecs="shcoff_vec shlcoff_vec"
+    targ_underscore=yes
+    ;;
+
+  sparclet-*-aout*)
+    targ_defvec=sunos_big_vec
+    targ_selvecs=sparcle_aout_vec
+    targ_underscore=yes
+    ;;
   sparc-*-lynxos*)
     targ_defvec=sparclynx_coff_vec
     targ_selvecs=sparclynx_aout_vec
