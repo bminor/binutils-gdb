@@ -35,10 +35,10 @@ static boolean warn_signed_overflows   = FALSE;
 static boolean warn_unsigned_overflows = FALSE;
 
 /* Indicates the target BFD machine number.  */
-static int     machine                 = TARGET_MACHINE;
+static int     machine = -1;
 
 /* Indicates the target processor(s) for the assemble.  */
-static unsigned int	processor_mask = TARGET_PROCESSOR;
+static unsigned int	processor_mask = -1;
 
 
 /* Structure to hold information about predefined registers.  */
@@ -861,7 +861,6 @@ md_parse_option (c, arg)
 	{
 	  machine = bfd_mach_v850e;
 	  processor_mask = PROCESSOR_V850E;
-	  
 	  return 1;
 	}
 /* end-sanitize-v850e */
@@ -982,7 +981,40 @@ md_begin ()
   register const struct v850_opcode * op;
   flagword                            applicable;
 
-  
+/* start-sanitize-v850eq */
+  if (strncmp (TARGET_CPU, "v850eq", 6) == 0)
+    {
+      if (machine == -1)
+	machine = bfd_mach_v850eq;
+      
+      if (processor_mask == -1)
+	processor_mask = PROCESSOR_V850EQ;
+    }
+  else
+/* end-sanitize-v850eq */
+/* start-sanitize-v850e */
+  if (strncmp (TARGET_CPU, "v850e", 5) == 0)
+    {
+      if (machine == -1)
+	machine        = bfd_mach_v850e;
+      
+      if (processor_mask == -1)
+	processor_mask = PROCESSOR_V850E;
+    }
+  else
+/* end-sanitize-v850e */
+  if (strncmp (TARGET_CPU, "v850", 4) == 0)
+    {
+      if (machine == -1)
+	machine        = 0;
+      
+      if (processor_mask == -1)
+	processor_mask = PROCESSOR_V850;
+    }
+  else
+    as_bad ("Unable to determine default target processor from string: %s", 
+            TARGET_CPU);
+
   v850_hash = hash_new();
 
   /* Insert unique names into hash table.  The V850 instruction set
