@@ -57,6 +57,7 @@ logical.s
 logicalh.s
 misc.s
 misch.s
+mov32bug.s
 movb.s
 movbh.s
 movlh.s
