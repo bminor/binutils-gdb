@@ -1,3 +1,12 @@
+2002-04-17  matthew green  <mrg@redhat.com>
+
+	* gas/ppc/altivec.d: Fix dssall test.
+	* gas/ppc/altivec.s: Likewise.
+	* gas/ppc/altivec_xcoff.d: Likewise.
+	* gas/ppc/altivec_xcoff.s: Likewise.
+	* gas/ppc/altivec_xcoff64.d: Likewise.
+	* gas/ppc/altivec_xcoff64.s: Likewise.
+
 2002-04-04  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* gas/mips/mips.exp: Remove spurious whaitespace.

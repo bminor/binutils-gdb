@@ -3672,7 +3672,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 { "rac",     X(31,818),	X_MASK,		PWRCOM,		{ RT, RA, RB } },
 
 { "dss",     XDSS(31,822,0), XDSS_MASK,	PPCVEC,		{ STRM } },
-{ "dssall",  XDSS(31,822,1), XDSS_MASK,	PPCVEC,		{ STRM } },
+{ "dssall",  XDSS(31,822,1), XDSS_MASK,	PPCVEC,		{ 0 } },
 
 { "srawi",   XRC(31,824,0), X_MASK,	PPCCOM,		{ RA, RS, SH } },
 { "srai",    XRC(31,824,0), X_MASK,	PWRCOM,		{ RA, RS, SH } },

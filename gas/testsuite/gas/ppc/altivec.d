@@ -8,7 +8,7 @@ Disassembly of section \.text:
 
 00000000 <start>:
    0:	7c 60 06 6c 	dss	3
-   4:	7e 40 06 6c 	dssall	2
+   4:	7e 00 06 6c 	dssall
    8:	7c 25 22 ac 	dst	r5,r4,1
    c:	7e 08 3a ac 	dstt	r8,r7,0
   10:	7c 65 32 ec 	dstst	r5,r6,3
