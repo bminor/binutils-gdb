@@ -4,6 +4,8 @@ Fri Jul 15 19:09:25 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 	assembler, running objdump or nm (not fully supported) on the
 	resulting object file, and comparing the results against a file of
 	regular expressions in the test suite, all in one command.
+	Options for the assembler and objdump are read from comments at
+	the start of the .d file.
 	(fail_phase, slurp_options): New auxiliary routines.
 	(regexp_diff): Always return a value.  Fix bugs in actually doing
 	the regexp test.
