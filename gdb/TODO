@@ -162,10 +162,6 @@ MAINTAINERS file.
 
 --
 
-Zap still more of that nonexistant romp target.
-
---
-
 Fix copyright notices.
 
 Turns out that ``1998-2000'' isn't considered valid :-(

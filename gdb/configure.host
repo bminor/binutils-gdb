@@ -136,8 +136,6 @@ powerpc-*-aix*)		gdb_host=aix ;;
 powerpc-*-linux*)	gdb_host=linux ;;
 powerpc-*-netbsd*)	gdb_host=nbsd ;;
 
-romp-*-*)		gdb_host=rtbsd ;;
-
 rs6000-*-lynxos*)	gdb_host=rs6000lynx ;;
 rs6000-*-aix4*)		gdb_host=aix4 ;;
 rs6000-*-*)		gdb_host=rs6000 ;;
