@@ -8,5 +8,5 @@ CC= gcc -traditional
 # know what works and what fails on the 3B1.
 #PINSN_CC= cc
 
-XDEPFILES= infptrace.o inftarg.o fork-child.o corelow.o core-aout.o
+NATDEPFILES= infptrace.o inftarg.o fork-child.o corelow.o core-aout.o
 XM_FILE= xm-3b1.h

@@ -1,7 +1,6 @@
 # Host: Sparcstation, running GNU/Linux.
 
 XM_FILE= xm-linux.h
-XDEPFILES=
 
 NAT_FILE= nm-linux.h
 NATDEPFILES= fork-child.o infptrace.o inftarg.o corelow.o sparc-nat.o \

@@ -1,7 +1,6 @@
 # Host: S390, running Linux
 
 XM_FILE= xm-linux.h
-XDEPFILES= ser-tcp.o
 XM_CLIBS=
 
 NAT_FILE= nm-linux.h

@@ -691,7 +691,7 @@ REMOTE_EXAMPLES = m68k-stub.c i386-stub.c sparc-stub.c rem-multi.shar
 # variables analogous to SER_HARDWIRE which get defaulted in this
 # Makefile.in
 
-DEPFILES = $(TDEPFILES) $(XDEPFILES) $(SER_HARDWIRE) $(NATDEPFILES) \
+DEPFILES = $(TDEPFILES) $(SER_HARDWIRE) $(NATDEPFILES) \
 	   $(REMOTE_OBS) $(SIM_OBS) $(CONFIG_LIB_OBS)
 
 SOURCES = $(SFILES) $(ALLDEPFILES) $(YYFILES) $(CONFIG_SRCS)

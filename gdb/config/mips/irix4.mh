@@ -1,5 +1,4 @@
 # Host: SGI Iris running irix 4.x
-XDEPFILES=
 XM_FILE= xm-irix4.h
 NAT_FILE= nm-irix4.h
 NATDEPFILES= fork-child.o irix4-nat.o corelow.o procfs.o \

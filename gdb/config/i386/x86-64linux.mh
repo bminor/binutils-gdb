@@ -1,7 +1,6 @@
 # Host: AMD x86-64 running GNU/Linux
 
 XM_FILE= xm-i386.h
-XDEPFILES=
 
 NAT_FILE= nm-x86-64.h
 NATDEPFILES= infptrace.o inftarg.o fork-child.o corelow.o \

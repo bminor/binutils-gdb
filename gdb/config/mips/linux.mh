@@ -1,5 +1,4 @@
 # Host: Linux/MIPS
-XDEPFILES=
 XM_FILE= xm-linux.h
 NAT_FILE= nm-linux.h
 NATDEPFILES= infptrace.o inftarg.o fork-child.o mips-linux-nat.o \

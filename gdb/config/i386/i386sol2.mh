@@ -1,7 +1,6 @@
 # Host: Intel 386 running Solaris 2 (SVR4)
 
 XM_FILE= xm-i386v4.h
-XDEPFILES= 
 XM_CLIBS= -lsocket -lnsl
 
 NAT_FILE= nm-i386sol2.h

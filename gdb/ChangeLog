@@ -1,5 +1,96 @@
 2002-01-17  Andrew Cagney  <ac131313@redhat.com>
 
+	* config/alpha/alpha-osf3.mh (XDEPFILES): Delete.
+	* config/alpha/alpha-osf2.mh (XDEPFILES): Delete.
+	* config/alpha/alpha-osf1.mh (XDEPFILES): Delete.
+	* config/alpha/alpha-linux.mh (XDEPFILES): Delete.
+	* config/alpha/fbsd.mh (XDEPFILES): Delete.
+	* config/arm/linux.mh (XDEPFILES): Delete.
+	* config/arm/nbsd.mh (XDEPFILES): Delete.
+	* config/i386/i386dgux.mh (XDEPFILES): Delete.
+	* config/i386/i386sol2.mh (XDEPFILES): Delete.
+	* config/i386/i386m3.mh (XDEPFILES): Delete.
+	(NATDEPFILES): Move i387-tdep.o and core-aout.o to here.
+	* config/i386/i386gnu.mh (XDEPFILES): Delete.
+	* config/i386/fbsd.mh (XDEPFILES): Delete.
+	* config/i386/i386bsd.mh (XDEPFILES): Delete.
+	* config/i386/i386sco5.mh (XDEPFILES): Delete.
+	* config/i386/i386v4.mh (XDEPFILES): Delete.
+	* config/i386/i386v42mp.mh (XDEPFILES): Delete.
+	* config/i386/i386sco4.mh (XDEPFILES): Delete.
+	* config/i386/i386aix.mh (XDEPFILES): Delete.
+	* config/i386/go32.mh (XDEPFILES): Delete.
+	* config/i386/cygwin.mh (XDEPFILES): Delete.
+	* config/i386/i386lynx.mh (XDEPFILES): Delete.
+	* config/i386/i386mach.mh (XDEPFILES): Delete.
+	* config/i386/i386v32.mh (XDEPFILES): Delete.
+	* config/i386/linux.mh (XDEPFILES): Delete.
+	* config/i386/nbsdelf.mh (XDEPFILES): Delete.
+	* config/i386/ncr3000.mh (XDEPFILES): Delete.
+	* config/i386/i386mk.mh (NATDEPFILES): Rename XDEPFILES.
+	* config/i386/i386sco.mh (XDEPFILES): Delete.
+	* config/i386/i386v.mh (XDEPFILES): Delete.
+	* config/i386/nbsd.mh (XDEPFILES): Delete.
+	* config/i386/ptx.mh (NATDEPFILES): Rename XDEPFILES.
+	* config/i386/ptx4.mh (NATDEPFILES): Rename XDEPFILES.
+	* config/i386/symmetry.mh (XDEPFILES): Delete.
+	* config/i386/obsd.mh (XDEPFILES): Delete.
+	* config/i386/x86-64linux.mh (XDEPFILES): Delete.
+	* config/ia64/linux.mh (XDEPFILES): Delete.
+	* config/ia64/aix.mh (XDEPFILES): Delete.
+	* config/m68k/apollo68b.mh (XDEPFILES): Delete.
+	* config/m68k/dpx2.mh (XDEPFILES): Delete.
+	* config/m68k/3b1.mh (NATDEPFILES): Rename XDEPFILES.
+	* config/m68k/apollo68v.mh (XDEPFILES): Delete.
+	* config/m68k/hp300bsd.mh (XDEPFILES): Delete.
+	* config/m68k/linux.mh (XDEPFILES): Delete.
+	* config/m68k/m68klynx.mh (XDEPFILES): Delete.
+	* config/m68k/m68kv4.mh (XDEPFILES): Delete.
+	* config/m68k/nbsd.mh (XDEPFILES): Delete.
+	* config/m68k/sun2os3.mh (XDEPFILES): Delete.
+	* config/m68k/sun2os4.mh (XDEPFILES): Delete.
+	* config/m68k/sun3os3.mh (XDEPFILES): Delete.
+	* config/m68k/sun3os4.mh (XDEPFILES): Delete.
+	* config/m88k/delta88.mh (XDEPFILES): Delete.
+	* config/m88k/delta88v4.mh (XDEPFILES): Delete.
+	* config/m88k/m88k.mh (XDEPFILES): Delete.
+	* config/mips/littlemips.mh (NATDEPFILES): Rename XDEPFILES.
+	* config/mips/linux.mh (XDEPFILES): Delete.
+	* config/mips/irix6.mh (XDEPFILES): Delete.
+	* config/mips/irix5.mh (XDEPFILES): Delete.
+	* config/mips/irix4.mh (XDEPFILES): Delete.
+	* config/mips/irix3.mh (XDEPFILES): Delete.
+	* config/mips/decstation.mh (XDEPFILES): Delete.
+	* config/mips/mipsm3.mh (XDEPFILES): Delete.
+	(NATDEPFILES): Move core-aout.o to here.
+	* config/ns32k/nbsd.mh (XDEPFILES): Delete.
+	* config/pa/hpux1020.mh (XDEPFILES): Delete.
+	* config/pa/hppabsd.mh (XDEPFILES): Delete.
+	* config/pa/hppahpux.mh (XDEPFILES): Delete.
+	* config/pa/hpux11w.mh (XDEPFILES): Delete.
+	* config/pa/hppaosf.mh (XDEPFILES): Delete.
+	* config/pa/hpux11.mh (XDEPFILES): Delete.
+	* config/powerpc/aix.mh (XDEPFILES): Delete.
+	* config/powerpc/nbsd.mh (XDEPFILES): Delete.
+	* config/powerpc/linux.mh (XDEPFILES): Delete.
+	* config/romp/rtbsd.mh: Rename XDEPFILES.
+	* config/rs6000/rs6000lynx.mh (XDEPFILES): Delete.
+	* config/rs6000/aix4.mh (XDEPFILES): Delete.
+	* config/rs6000/rs6000.mh (XDEPFILES): Delete.
+	* config/s390/s390.mh (XDEPFILES): Delete.
+	* config/vax/vaxbsd.mh (NATDEPFILES): Rename XDEPFILES.
+	* config/sparc/sun4sol2.mh (XDEPFILES): Delete.
+	* config/sparc/sun4os4.mh (XDEPFILES): Delete.
+	* config/sparc/sparclynx.mh (XDEPFILES): Delete.
+	* config/sparc/nbsdelf.mh (XDEPFILES): Delete.
+	* config/sparc/nbsd.mh (XDEPFILES): Delete.
+	* config/sparc/linux.mh (XDEPFILES): Delete.
+	* config/vax/vaxult.mh (XDEPFILES): Delete.
+	* config/vax/vaxult2.mh (XDEPFILES): Delete.
+	* Makefile.in (DEPFILES): Remove XDEPFILES.
+
+2002-01-17  Andrew Cagney  <ac131313@redhat.com>
+
 	* utils.c (internal_verror): Fix comments, default is yes not no.
 	Update queries to match.  Default to quit and dump core.
 

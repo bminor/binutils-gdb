@@ -1,7 +1,6 @@
 # Host: Intel 386 running FreeBSD
 
 XM_FILE= xm-i386.h
-XDEPFILES=
 
 NAT_FILE= nm-fbsd.h
 # NOTE: Do not spread NATDEPFILES over several lines - it hurts BSD make.

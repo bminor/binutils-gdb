@@ -1,7 +1,6 @@
 # Host: Intel 386 running SVR4
 
 XM_FILE= xm-i386v4.h
-XDEPFILES= 
 # for network communication
 XM_CLIBS= -lsocket -lnsl
 

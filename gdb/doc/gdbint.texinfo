@@ -2041,26 +2041,18 @@ eventually disappear.
 Several files control @value{GDBN}'s configuration for host systems:
 
 @table @file
-@vindex XDEPFILES
 @item gdb/config/@var{arch}/@var{xyz}.mh
 Specifies Makefile fragments needed when hosting on machine @var{xyz}.
-In particular, this lists the required machine-dependent object files,
-by defining @samp{XDEPFILES=@dots{}}.  Also specifies the header file
-which describes host @var{xyz}, by defining @code{XM_FILE=
-xm-@var{xyz}.h}.  You can also define @code{CC}, @code{SYSV_DEFINE},
-@code{XM_CFLAGS}, @code{XM_ADD_FILES}, @code{XM_CLIBS}, @code{XM_CDEPS},
-etc.; see @file{Makefile.in}.
+Optionally specifies the header file which describes host @var{xyz}, by
+defining @code{XM_FILE= xm-@var{xyz}.h}.  You can also define @code{CC},
+@code{SYSV_DEFINE}, @code{XM_CFLAGS}, @code{XM_ADD_FILES},
+@code{XM_CLIBS}, @code{XM_CDEPS}, etc.; see @file{Makefile.in}.
 
 @item gdb/config/@var{arch}/xm-@var{xyz}.h
 (@file{xm.h} is a link to this file, created by @code{configure}).  Contains C
 macro definitions describing the host system environment, such as byte
 order, host C compiler and library.
 
-@item gdb/@var{xyz}-xdep.c
-Contains any miscellaneous C code required for this machine as a host.
-On most machines it doesn't exist at all.  If it does exist, put
-@file{@var{xyz}-xdep.o} into the @code{XDEPFILES} line in
-@file{gdb/config/@var{arch}/@var{xyz}.mh}.
 @end table
 
 @subheading Generic Host Support Files

@@ -5,7 +5,6 @@ MMALLOC=
 MMALLOC_CFLAGS=
 
 XM_FILE= xm-go32.h
-XDEPFILES=
 
 NAT_FILE= nm-go32.h
 NATDEPFILES= go32-nat.o i386-nat.o i387-nat.o

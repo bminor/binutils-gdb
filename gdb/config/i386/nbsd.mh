@@ -1,5 +1,4 @@
 # Host: Intel 386 running NetBSD
-XDEPFILES=
 
 # NATDEPFILES must remain entirely on one line for *BSD.  When
 # building a cross debugger, configure will cause this line to be

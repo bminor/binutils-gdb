@@ -1,7 +1,6 @@
 # Host: Intel 386 running GNU/Linux.
 
 XM_FILE= xm-i386.h
-XDEPFILES=
 
 NAT_FILE= nm-linux.h
 NATDEPFILES= infptrace.o inftarg.o fork-child.o corelow.o linux-proc.o \

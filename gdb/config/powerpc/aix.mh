@@ -1,7 +1,6 @@
 # Host: IBM PowerPC running AIX
 
 XM_FILE= xm-aix.h
-XDEPFILES= 
 
 NAT_FILE= nm-aix.h
 NATDEPFILES= fork-child.o infptrace.o inftarg.o corelow.o rs6000-nat.o \

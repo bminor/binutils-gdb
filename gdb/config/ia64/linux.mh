@@ -1,7 +1,6 @@
 # Host: Intel IA-64 running GNU/Linux
 
 XM_FILE= xm-linux.h
-XDEPFILES=
 
 NAT_FILE= nm-linux.h
 NATDEPFILES= infptrace.o inftarg.o fork-child.o corelow.o gcore.o \
