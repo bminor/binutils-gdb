@@ -256,9 +256,6 @@ struct ia64_frame_cache
 
 struct gdbarch_tdep
   {
-    int os_ident;	/* From the ELF header, one of the ELFOSABI_
-                           constants: ELFOSABI_LINUX, ELFOSABI_AIX,
-			   etc. */
     CORE_ADDR (*sigcontext_register_address) (CORE_ADDR, int);
     			/* OS specific function which, given a frame address
 			   and register number, returns the offset to the
@@ -2710,47 +2707,21 @@ ia64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
   struct gdbarch *gdbarch;
   struct gdbarch_tdep *tdep;
-  int os_ident;
 
-  if (info.abfd != NULL
-      && bfd_get_flavour (info.abfd) == bfd_target_elf_flavour)
-    {
-      os_ident = elf_elfheader (info.abfd)->e_ident[EI_OSABI];
-
-      /* If os_ident is 0, it is not necessarily the case that we're
-         on a SYSV system.  (ELFOSABI_NONE is defined to be 0.)
-         GNU/Linux uses a note section to record OS/ABI info, but
-         leaves e_ident[EI_OSABI] zero.  So we have to check for note
-         sections too.  */
-      if (os_ident == 0)
-	{
-	  bfd_map_over_sections (info.abfd,
-	                         process_note_abi_tag_sections,
-				 &os_ident);
-	}
-    }
-  else
-    os_ident = -1;
-
-  for (arches = gdbarch_list_lookup_by_info (arches, &info);
-       arches != NULL;
-       arches = gdbarch_list_lookup_by_info (arches->next, &info))
-    {
-      tdep = gdbarch_tdep (arches->gdbarch);
-      if (tdep &&tdep->os_ident == os_ident)
-	return arches->gdbarch;
-    }
+  /* If there is already a candidate, use it.  */
+  arches = gdbarch_list_lookup_by_info (arches, &info);
+  if (arches != NULL)
+    return arches->gdbarch;
 
   tdep = xmalloc (sizeof (struct gdbarch_tdep));
   gdbarch = gdbarch_alloc (&info, tdep);
-  tdep->os_ident = os_ident;
 
   /* Set the method of obtaining the sigcontext addresses at which
      registers are saved.  The method of checking to see if
      native_find_global_pointer is nonzero to indicate that we're
      on AIX is kind of hokey, but I can't think of a better way
      to do it.  */
-  if (os_ident == ELFOSABI_LINUX)
+  if (info.osabi == GDB_OSABI_LINUX)
     tdep->sigcontext_register_address = ia64_linux_sigcontext_register_address;
   else if (native_find_global_pointer != 0)
     tdep->sigcontext_register_address = ia64_aix_sigcontext_register_address;
@@ -2764,7 +2735,7 @@ ia64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
      generic_elf_find_global_pointer.  This arrangement should (in
      theory) allow us to cross debug GNU/Linux binaries from an AIX
      machine.  */
-  if (os_ident == ELFOSABI_LINUX)
+  if (info.osabi == GDB_OSABI_LINUX)
     tdep->find_global_pointer = generic_elf_find_global_pointer;
   else if (native_find_global_pointer != 0)
     tdep->find_global_pointer = native_find_global_pointer;

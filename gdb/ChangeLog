@@ -1,3 +1,11 @@
+2003-11-05  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* ia64-tdep.c (struct gdbarch_tdep): Remove os_ident field.
+	(ia64_gdbarch_init): Don't bother calculating the os.  
+	Instead use the gdbarch_info struct and look at the osabi field.  
+	Also use gdbarch_list_lookup_by_info() to look for a 
+	candidate gdbarch. 
+
 2003-11-05  Kevin Buettner  <kevinb@redhat.com>
 
 	* frv-tdep.c (frv_register_byte): Delete.
