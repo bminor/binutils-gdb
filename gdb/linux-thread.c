@@ -47,13 +47,13 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
    linuxthreads package heavily relies on wait() synchronization to keep
    them correct.  */
 
+#include "defs.h"
 #include <sys/types.h> /* for pid_t */
 #include <sys/ptrace.h> /* for PT_* flags */
 #include "gdb_wait.h" /* for WUNTRACED and __WCLONE flags */
 #include <signal.h> /* for struct sigaction and NSIG */
 #include <sys/utsname.h>
 
-#include "defs.h"
 #include "target.h"
 #include "inferior.h"
 #include "gdbcore.h"

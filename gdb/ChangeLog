@@ -1,3 +1,7 @@
+2000-02-09  Mark Kettenis  <kettenis@gnu.org>
+
+        * linux-thread.c: Include defs.h before gdb_wait.h.
+
 Wed Feb  9 18:59:16 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* Makefile.in (wait_h): Delete macro.  Update all dependencies
