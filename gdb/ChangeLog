@@ -1,3 +1,85 @@
+Thu May  2 11:22:02 1991  Jim Kingdon  (kingdon at cygint.cygnus.com)
+
+	* coffread.c (coff_sym_fns) [TDESC]: Make the type be m88kbcs.
+
+	* m88k-tdep.c (IEEE_isNAN): New function.
+
+	* infrun.c, m88k-tdep.c, m88k-xdep.c: Change
+	initialize_{tdesc,dcontext} to init_{tdesc,dcontext}.
+
+	* infrun.c [TDESC]: Add a bunch of crud.
+
+	* xm-88k.h [__GNUC__]: Don't define memset.
+
+	* m88k-xdep.c: #if 0 out push_breakpoint.
+
+	* tm-88k.h: Define GET_SAVED_REGISTER.
+
+	* tm-88k.h: Define DGUX.
+
+	* m88k-opcode.h (UEXT, SEXT, MAKE): Put parentheses around arguments.
+
+	* m88k-pinsn.c (sprint_address): Declare at top of file.
+
+	* m88k-xdep.c: #if 0 out core_file_command.
+
+	* values.c ({unpack_,value_as_}pointer): Just call
+	{unpack_,value_as_}long (for now anyway).
+
+	* m88k-tdep.c (get_saved_register): Make get_reg a dc_word_t (*)().
+	(psr_register): Change return type to dc_word_t.
+
+	* m88k-tdep.c (tdesc_read_function): Comment out call to ptrace.
+
+	* m88k-tdep.c (get_saved_register): Add lvalp parameter.
+
+	* gdbcore.h (write_memory): Don't prototype it.
+
+	* tm-88k.h, m88k-tdep.c: Make stack_error, stack_jmp global.
+	m88k-xdep.c: Don't mention stack_error.
+
+	* {x,t}config/m88k ({X,T}DEPFILES): Add missing files.
+
+	* mtrace.c: Don't typedef things like size_t, just #define them.
+
+	* coffread.c [TDESC]: #if 0 out references to coffsyn.
+
+	* symtab.h (struct symtab): Include EXTRA_SYMTAB_INFO.
+	tm-88k.h: Define EXTRA_SYMTAB_INFO.
+
+	* coffread.c [TDESC]: Include "tdesc.h" and make tdesc_handle
+	dc_dcontext_t not int.
+
+	* coffread.c [TDESC]: Use system include files not <intel-coff.h>.
+
+	* coffread.c [TDESC]: Move setting of debug_info from
+	coff_symfile_read to find_linenos and make it work with BFD.
+
+	* cplus-dem.c [__STDC__]: Make x{m,re}alloc return void*.
+
+	* signame.c: Cast const char* to char* when assigning to sys_siglist.
+
+	* utils.c (strsave): Make arg const char* not char*.
+
+	* infrun.c (wait_for_inferior) [SHIFT_INSN_REGS]: Use
+	bpstat_explains_signal (stop_bpstat) not stop_breakpoint.
+
+	* tm-88k.h (START_INFERIOR_HOOK): Make tdesc_handle a dc_handle_t.
+
+	* tm-88k.h (EXTRACT_RETURN_VALUE): Use char * not void *.
+
+	* findvar.c (read_var_value, case LOC_CONST_BYTES): Put the address
+	in a char *, not a CORE_ADDR.  Use SYMBOL_VALUE_BYTES.
+
+	* tm-88k.h (INIT_EXTRA_FRAME_INFO): Use fci not prev (fci is
+	prev except from create_new_frame).  Make next_frame a
+	local variable.
+	Declare get_prev_context.
+	{x,t}m-88k.h: Enclose USG and BCS defines in #if !defined.
+	m88k-{opcode.h,pinsn.c,xdep.c,tdep.c}: New files (same contents as
+	before; they had just been left out of the distribution for a long
+	time).
+
 Thu May  2 17:53:56 1991  John Gilmore  (gnu at cygint.cygnus.com)
 
 	Mips bringup and general cleanup
