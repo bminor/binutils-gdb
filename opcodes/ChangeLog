@@ -1,4 +1,7 @@
-Mon Nov 25 14:24:18 1996  J.T. Conklin  <jtc@cygnus.com>
+Mon Nov 25 16:15:17 1996  J.T. Conklin  <jtc@cygnus.com>
+
+	* m68k-opc.c (m68k-opcodes): Fix many forms of the move
+ 	instruction for the coldfire.
 
 	* m68k-opc.c (m68k-opcodes): The coldfire (mcf5200) can only use
  	register operands for immediate arithmetic, not, neg, negx, and
