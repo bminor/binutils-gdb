@@ -1,5 +1,16 @@
 2003-01-19  Andrew Cagney  <ac131313@redhat.com>
 
+	* Makefile.in: Update.
+	* d10v-frame.c, d10v-tdep.c: Update.
+	* infrun.c, stack.c, thread.c, valops.c, mi/mi-main.c: Ditto.
+	* legacy-frame.c, legacy-frame.h, sentinel-frame.c: Ditto.
+	* sentinel-frame.h: Ditto.
+	* dummy-frame.c, dummy-frame.h, frame-unwind.h: Ditto.
+	* frame.c, frame.h: Ditto.
+	* gdbarch.c, gdbarch.h, gdbarch.sh: Ditto.
+
+2003-01-19  Andrew Cagney  <ac131313@redhat.com>
+
 	* d10v-frame.c: Use D10V_RET1_REGNUM.
 	(saved_regs_unwinder): Don't use get_frame_saved_regs.
 	* frame.c (get_prev_frame): Always initialize frame.frame.

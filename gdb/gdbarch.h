@@ -1577,6 +1577,32 @@ extern void set_gdbarch_push_return_address (struct gdbarch *gdbarch, gdbarch_pu
 #endif
 #endif
 
+#if defined (POP_FRAME)
+/* Legacy for systems yet to multi-arch POP_FRAME */
+#if !defined (POP_FRAME_P)
+#define POP_FRAME_P() (1)
+#endif
+#endif
+
+/* Default predicate for non- multi-arch targets. */
+#if (!GDB_MULTI_ARCH) && !defined (POP_FRAME_P)
+#define POP_FRAME_P() (0)
+#endif
+
+extern int gdbarch_pop_frame_p (struct gdbarch *gdbarch);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (POP_FRAME_P)
+#error "Non multi-arch definition of POP_FRAME"
+#endif
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (POP_FRAME_P)
+#define POP_FRAME_P() (gdbarch_pop_frame_p (current_gdbarch))
+#endif
+
+/* Default (function) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (POP_FRAME)
+#define POP_FRAME (internal_error (__FILE__, __LINE__, "POP_FRAME"), 0)
+#define POP_FRAME (gdbarch_pop_frame (current_gdbarch))
+#endif
+
 typedef void (gdbarch_pop_frame_ftype) (void);
 extern void gdbarch_pop_frame (struct gdbarch *gdbarch);
 extern void set_gdbarch_pop_frame (struct gdbarch *gdbarch, gdbarch_pop_frame_ftype *pop_frame);

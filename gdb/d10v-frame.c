@@ -109,7 +109,7 @@ prologue_find_regs (unsigned short op, struct frame_unwind_cache *info,
 
 struct frame_unwind_cache *
 d10v_frame_unwind_cache (struct frame_info *fi,
-			 struct frame_unwind_cache **cache)
+			 void **cache)
 {
   CORE_ADDR fp, pc;
   unsigned long op;
@@ -230,7 +230,7 @@ d10v_frame_unwind_cache (struct frame_info *fi,
 
 static CORE_ADDR
 d10v_frame_pc_unwind (struct frame_info *frame,
-		      struct frame_unwind_cache **cache)
+		      void **cache)
 {
   struct frame_unwind_cache *info = d10v_frame_unwind_cache (frame, cache);
   return info->return_pc;
@@ -238,7 +238,7 @@ d10v_frame_pc_unwind (struct frame_info *frame,
 
 static void
 d10v_frame_id_unwind (struct frame_info *frame,
-		      struct frame_unwind_cache **cache,
+		      void **cache,
 		      struct frame_id *id)
 {
   struct frame_unwind_cache *info = d10v_frame_unwind_cache (frame, cache);
@@ -329,7 +329,7 @@ saved_regs_unwinder (struct frame_info *frame,
 
 static void
 d10v_frame_register_unwind (struct frame_info *frame,
-			    struct frame_unwind_cache **cache,
+			    void **cache,
 			    int regnum, int *optimizedp,
 			    enum lval_type *lvalp, CORE_ADDR *addrp,
 			    int *realnump, void *bufferp)
@@ -340,11 +340,11 @@ d10v_frame_register_unwind (struct frame_info *frame,
 }
 
 
-void
-do_d10v_pop_frame (struct frame_info *fi)
+static void
+d10v_frame_pop (struct frame_info *fi, void **unwind_cache,
+		struct regcache *regcache)
 {
-  struct frame_unwind_cache *info =
-    d10v_frame_unwind_cache (fi, &fi->unwind_cache);
+  struct frame_unwind_cache *info = d10v_frame_unwind_cache (fi, unwind_cache);
   CORE_ADDR fp;
   int regnum;
   char raw_buffer[8];
@@ -380,6 +380,7 @@ do_d10v_pop_frame (struct frame_info *fi)
 }
 
 static struct frame_unwind d10v_frame_unwind = {
+  d10v_frame_pop,
   d10v_frame_pc_unwind,
   d10v_frame_id_unwind,
   d10v_frame_register_unwind

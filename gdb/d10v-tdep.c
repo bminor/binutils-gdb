@@ -84,8 +84,6 @@ static int prologue_find_regs (unsigned short op, struct frame_info *fi,
 
 static void d10v_frame_init_saved_regs (struct frame_info *);
 
-void do_d10v_pop_frame (struct frame_info *fi);
-
 static int
 d10v_frame_chain_valid (CORE_ADDR chain, struct frame_info *frame)
 {
@@ -508,15 +506,6 @@ d10v_saved_pc_after_call (struct frame_info *frame)
 {
   return ((read_register (D10V_LR_REGNUM) << 2)
 	  | D10V_IMEM_START);
-}
-
-/* Discard from the stack the innermost frame, restoring all saved
-   registers.  */
-
-static void
-d10v_pop_frame (void)
-{
-  generic_pop_current_frame (do_d10v_pop_frame);
 }
 
 static int
@@ -1551,8 +1540,6 @@ d10v_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_use_struct_convention (gdbarch, d10v_use_struct_convention);
 
   set_gdbarch_frame_init_saved_regs (gdbarch, d10v_frame_init_saved_regs);
-
-  set_gdbarch_pop_frame (gdbarch, d10v_pop_frame);
 
   set_gdbarch_skip_prologue (gdbarch, d10v_skip_prologue);
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);

@@ -728,9 +728,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
       && (gdbarch->push_dummy_frame == 0))
     fprintf_unfiltered (log, "\n\tpush_dummy_frame");
   /* Skip verify of push_return_address, has predicate */
-  if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
-      && (gdbarch->pop_frame == 0))
-    fprintf_unfiltered (log, "\n\tpop_frame");
+  /* Skip verify of pop_frame, has predicate */
   if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
       && (gdbarch->store_struct_return == 0))
     fprintf_unfiltered (log, "\n\tstore_struct_return");
@@ -1760,6 +1758,15 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         "gdbarch_dump: POINTER_TO_ADDRESS = <0x%08lx>\n",
                         (long) current_gdbarch->pointer_to_address
                         /*POINTER_TO_ADDRESS ()*/);
+#endif
+#ifdef POP_FRAME_P
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "POP_FRAME_P()",
+                      XSTRING (POP_FRAME_P ()));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: POP_FRAME_P() = %d\n",
+                      POP_FRAME_P ());
 #endif
 #ifdef POP_FRAME
 #if GDB_MULTI_ARCH
@@ -4176,6 +4183,13 @@ set_gdbarch_push_return_address (struct gdbarch *gdbarch,
                                  gdbarch_push_return_address_ftype push_return_address)
 {
   gdbarch->push_return_address = push_return_address;
+}
+
+int
+gdbarch_pop_frame_p (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  return gdbarch->pop_frame != 0;
 }
 
 void

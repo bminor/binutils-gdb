@@ -26,13 +26,14 @@
 #include "regcache.h"
 #include "sentinel-frame.h"
 #include "inferior.h"
+#include "frame-unwind.h"
 
 struct frame_unwind_cache
 {
   struct regcache *regcache;
 };
 
-struct frame_unwind_cache *
+void *
 sentinel_frame_cache (struct regcache *regcache)
 {
   struct frame_unwind_cache *cache = 
@@ -45,7 +46,7 @@ sentinel_frame_cache (struct regcache *regcache)
 
 void
 sentinel_frame_register_unwind (struct frame_info *frame,
-				struct frame_unwind_cache **unwind_cache,
+				void **unwind_cache,
 				int regnum, int *optimized,
 				enum lval_type *lvalp, CORE_ADDR *addrp,
 				int *realnum, void *bufferp)
@@ -71,7 +72,7 @@ sentinel_frame_register_unwind (struct frame_info *frame,
 
 CORE_ADDR
 sentinel_frame_pc_unwind (struct frame_info *frame,
-			  struct frame_unwind_cache **cache)
+			  void **cache)
 {
   /* FIXME: cagney/2003-01-08: This should be using a per-architecture
      method that doesn't suffer from DECR_PC_AFTER_BREAK problems.
@@ -82,7 +83,7 @@ sentinel_frame_pc_unwind (struct frame_info *frame,
 
 void
 sentinel_frame_id_unwind (struct frame_info *frame,
-			  struct frame_unwind_cache **cache,
+			  void **cache,
 			  struct frame_id *id)
 {
   /* FIXME: cagney/2003-01-08: This should be using a per-architecture
@@ -93,8 +94,17 @@ sentinel_frame_id_unwind (struct frame_info *frame,
   id->pc = read_pc ();
 }
 
+static void
+sentinel_frame_pop (struct frame_info *frame,
+		    void **cache,
+		    struct regcache *regcache)
+{
+  internal_error (__FILE__, __LINE__, "Function sentinal_frame_pop called");
+}
+
 const struct frame_unwind sentinel_frame_unwind =
 {
+  sentinel_frame_pop,
   sentinel_frame_pc_unwind,
   sentinel_frame_id_unwind,
   sentinel_frame_register_unwind

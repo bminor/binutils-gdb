@@ -24,19 +24,19 @@
 
 #include "defs.h"
 #include "dummy-frame.h"
-#include "frame-unwind.h"
 #include "regcache.h"
 #include "frame.h"
 #include "inferior.h"
 #include "gdb_assert.h"
+#include "frame-unwind.h"
 
 /* Dummy frame.  This saves the processor state just prior to setting
    up the inferior function call.  Older targets save the registers
    on the target stack (but that really slows down function calls).  */
 
-struct frame_unwind_cache
+struct dummy_frame
 {
-  struct frame_unwind_cache *next;
+  struct dummy_frame *next;
 
   /* These values belong to the caller (the previous frame, the frame
      that this unwinds back to).  */
@@ -53,7 +53,7 @@ struct frame_unwind_cache
   CORE_ADDR call_hi;
 };
 
-static struct frame_unwind_cache *dummy_frame_stack = NULL;
+static struct dummy_frame *dummy_frame_stack = NULL;
 
 /* Function: find_dummy_frame(pc, fp, sp)
 
@@ -62,10 +62,10 @@ static struct frame_unwind_cache *dummy_frame_stack = NULL;
    adjust for DECR_PC_AFTER_BREAK.  This is because it is only legal
    to call this function after the PC has been adjusted.  */
 
-static struct frame_unwind_cache *
+static struct dummy_frame *
 find_dummy_frame (CORE_ADDR pc, CORE_ADDR fp)
 {
-  struct frame_unwind_cache *dummyframe;
+  struct dummy_frame *dummyframe;
 
   for (dummyframe = dummy_frame_stack; dummyframe != NULL;
        dummyframe = dummyframe->next)
@@ -104,9 +104,8 @@ find_dummy_frame (CORE_ADDR pc, CORE_ADDR fp)
   return NULL;
 }
 
-struct frame_unwind_cache *
-cached_find_dummy_frame (struct frame_info *frame,
-			 struct frame_unwind_cache **cache)
+struct dummy_frame *
+cached_find_dummy_frame (struct frame_info *frame, void **cache)
 {
   if ((*cache) == NULL)
     (*cache) = find_dummy_frame (get_frame_pc (frame), get_frame_base (frame));
@@ -116,7 +115,7 @@ cached_find_dummy_frame (struct frame_info *frame,
 struct regcache *
 generic_find_dummy_frame (CORE_ADDR pc, CORE_ADDR fp)
 {
-  struct frame_unwind_cache *dummy = find_dummy_frame (pc, fp);
+  struct dummy_frame *dummy = find_dummy_frame (pc, fp);
   if (dummy != NULL)
     return dummy->regcache;
   else
@@ -160,7 +159,7 @@ generic_pc_in_call_dummy (CORE_ADDR pc, CORE_ADDR sp, CORE_ADDR fp)
 int
 pc_in_dummy_frame (CORE_ADDR pc)
 {
-  struct frame_unwind_cache *dummyframe;
+  struct dummy_frame *dummyframe;
   for (dummyframe = dummy_frame_stack;
        dummyframe != NULL;
        dummyframe = dummyframe->next)
@@ -209,7 +208,7 @@ deprecated_read_register_dummy (CORE_ADDR pc, CORE_ADDR fp, int regno)
 void
 generic_push_dummy_frame (void)
 {
-  struct frame_unwind_cache *dummy_frame;
+  struct dummy_frame *dummy_frame;
   CORE_ADDR fp = get_frame_base (get_current_frame ());
 
   /* check to see if there are stale dummy frames, 
@@ -228,7 +227,7 @@ generic_push_dummy_frame (void)
     else
       dummy_frame = dummy_frame->next;
 
-  dummy_frame = XMALLOC (struct frame_unwind_cache);
+  dummy_frame = xmalloc (sizeof (struct dummy_frame));
   dummy_frame->regcache = regcache_xmalloc (current_gdbarch);
 
   dummy_frame->pc = read_pc ();
@@ -271,25 +270,63 @@ generic_pop_current_frame (void (*popper) (struct frame_info * frame))
     (*popper) (frame);
 }
 
-/* Function: pop_dummy_frame
-   Restore the machine state from a saved dummy stack frame. */
+/* Discard the innermost dummy frame from the dummy frame stack
+   (passed in as a parameter).  */
+
+static void
+discard_innermost_dummy (struct dummy_frame **stack)
+{
+  struct dummy_frame *tbd = (*stack);
+  (*stack) = (*stack)->next;
+  regcache_xfree (tbd->regcache);
+  xfree (tbd);
+}
+
+/* Function: dummy_frame_pop.  Restore the machine state from a saved
+   dummy stack frame. */
+
+static void
+dummy_frame_pop (struct frame_info *fi, void **cache,
+		 struct regcache *regcache)
+{
+  struct dummy_frame *dummy = cached_find_dummy_frame (fi, cache);
+
+  /* If it isn't, what are we even doing here?  */
+  gdb_assert (get_frame_type (fi) == DUMMY_FRAME);
+
+  if (dummy == NULL)
+    error ("Can't pop dummy frame!");
+
+  /* Discard all dummy frames up-to but not including this one.  */
+  while (dummy_frame_stack != dummy)
+    discard_innermost_dummy (&dummy_frame_stack);
+
+  /* Restore this one.  */
+  regcache_cpy (regcache, dummy->regcache);
+  flush_cached_frames ();
+
+  /* Now discard it.  */
+  discard_innermost_dummy (&dummy_frame_stack);
+
+  /* Note: target changed would be better.  Registers, memory and
+     frame are all invalid.  */
+  flush_cached_frames ();
+}
 
 void
 generic_pop_dummy_frame (void)
 {
-  struct frame_unwind_cache *dummy_frame = dummy_frame_stack;
+  struct dummy_frame *dummy_frame = dummy_frame_stack;
 
   /* FIXME: what if the first frame isn't the right one, eg..
      because one call-by-hand function has done a longjmp into another one? */
 
   if (!dummy_frame)
     error ("Can't pop dummy frame!");
-  dummy_frame_stack = dummy_frame->next;
   regcache_cpy (current_regcache, dummy_frame->regcache);
   flush_cached_frames ();
 
-  regcache_xfree (dummy_frame->regcache);
-  xfree (dummy_frame);
+  discard_innermost_dummy (&dummy_frame_stack);
 }
 
 /* Function: fix_call_dummy
@@ -306,14 +343,13 @@ generic_fix_call_dummy (char *dummy, CORE_ADDR pc, CORE_ADDR fun, int nargs,
 /* Given a call-dummy dummy-frame, return the registers.  Here the
    register value is taken from the local copy of the register buffer.  */
 
-void
-dummy_frame_register_unwind (struct frame_info *frame,
-			     struct frame_unwind_cache **cache,
+static void
+dummy_frame_register_unwind (struct frame_info *frame, void **cache,
 			     int regnum, int *optimized,
 			     enum lval_type *lvalp, CORE_ADDR *addrp,
 			     int *realnum, void *bufferp)
 {
-  struct frame_unwind_cache *dummy = cached_find_dummy_frame (frame, cache);
+  struct dummy_frame *dummy = cached_find_dummy_frame (frame, cache);
   gdb_assert (dummy != NULL);
 
   /* Describe the register's location.  Generic dummy frames always
@@ -334,11 +370,14 @@ dummy_frame_register_unwind (struct frame_info *frame,
     }
 }
 
-CORE_ADDR
+/* Assuming that FRAME is a dummy, return the resume address for the
+   previous frame.  */
+
+static CORE_ADDR
 dummy_frame_pc_unwind (struct frame_info *frame,
-		       struct frame_unwind_cache **cache)
+		       void **cache)
 {
-  struct frame_unwind_cache *dummy = cached_find_dummy_frame (frame, cache);
+  struct dummy_frame *dummy = cached_find_dummy_frame (frame, cache);
   /* Oops!  In a dummy-frame but can't find the stack dummy.  Pretend
      that the frame doesn't unwind.  Should this function instead
      return a has-no-caller indication?  */
@@ -348,23 +387,27 @@ dummy_frame_pc_unwind (struct frame_info *frame,
 }
 
 
-void
+/* Assuming that FRAME is a dummy, return the ID of the calling frame
+   (the frame that the dummy has the saved state of).  */
+
+static void
 dummy_frame_id_unwind (struct frame_info *frame,
-		       struct frame_unwind_cache **cache,
+		       void **cache,
 		       struct frame_id *id)
 {
-  struct frame_unwind_cache *dummy = cached_find_dummy_frame (frame, cache);
+  struct dummy_frame *dummy = cached_find_dummy_frame (frame, cache);
   /* Oops!  In a dummy-frame but can't find the stack dummy.  Pretend
      that the frame doesn't unwind.  Should this function instead
      return a has-no-caller indication?  */
   if (dummy == NULL)
-    *id = null_frame_id;
+    (*id) = null_frame_id;
   else
-    *id = dummy->id;
+    (*id) = dummy->id;
 }
 
 static struct frame_unwind dummy_frame_unwind =
 {
+  dummy_frame_pop,
   dummy_frame_pc_unwind,
   dummy_frame_id_unwind,
   dummy_frame_register_unwind
@@ -380,4 +423,3 @@ dummy_frame_p (CORE_ADDR pc)
   else
     return NULL;
 }
-

@@ -46,10 +46,10 @@ struct frame_unwind_cache
 
 void
 legacy_frame_register_unwind (struct frame_info *frame,
-			     struct frame_unwind_cache **cache,
-			     int regnum, int *optimizedp,
-			     enum lval_type *lvalp, CORE_ADDR *addrp,
-			     int *realnump, void *bufferp)
+			      void **unwind_cache,
+			      int regnum, int *optimizedp,
+			      enum lval_type *lvalp, CORE_ADDR *addrp,
+			      int *realnump, void *bufferp)
 {
   /* There is always a frame at this point.  And THIS is the frame
      we're interested in.  */
@@ -93,7 +93,7 @@ legacy_frame_register_unwind (struct frame_info *frame,
 	  *realnump = -1;
 	  if (bufferp != NULL)
 	    {
-#if 1
+#if 0
 	      /* Save each register value, as it is read in, in a
                  frame based cache.  */
 	      if ((*cache) == NULL)
@@ -142,14 +142,14 @@ legacy_frame_register_unwind (struct frame_info *frame,
 
 CORE_ADDR
 legacy_frame_pc_unwind (struct frame_info *frame,
-			struct frame_unwind_cache **cache)
+			void **unwind_cache)
 {
   return FRAME_SAVED_PC (frame);
 }
 
 void
 legacy_frame_id_unwind (struct frame_info *frame,
-			struct frame_unwind_cache **cache,
+			void **unwind_cache,
 			struct frame_id *id)
 {
   int fromleaf;
@@ -306,9 +306,17 @@ deprecated_generic_get_saved_register (char *raw_buffer, int *optimized,
     deprecated_read_register_gen (regnum, raw_buffer);
 }
 
+static void
+legacy_frame_pop (struct frame_info *fi, void **unwind_cache,
+		  struct regcache *regcache)
+{
+  gdb_assert (POP_FRAME_P ());
+  POP_FRAME;
+}
 
 const struct frame_unwind legacy_frame_unwind =
 {
+  legacy_frame_pop,
   legacy_frame_pc_unwind,
   legacy_frame_id_unwind,
   legacy_frame_register_unwind

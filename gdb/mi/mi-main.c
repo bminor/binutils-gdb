@@ -1,5 +1,5 @@
 /* MI Command Set.
-   Copyright 2000, 2001, 2002 Free Software Foundation, Inc.
+   Copyright 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
    Contributed by Cygnus Solutions (a Red Hat company).
 
    This file is part of GDB.
@@ -183,9 +183,9 @@ mi_cmd_exec_return (char *args, int from_tty)
 
   /* Because we have called return_command with from_tty = 0, we need
      to print the frame here. */
-  show_and_print_stack_frame (deprecated_selected_frame,
-			      frame_relative_level (deprecated_selected_frame),
-			      LOC_AND_ADDRESS);
+  print_stack_frame (deprecated_selected_frame,
+		     frame_relative_level (deprecated_selected_frame),
+		     LOC_AND_ADDRESS);
 
   return MI_CMD_DONE;
 }

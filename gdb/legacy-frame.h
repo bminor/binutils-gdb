@@ -22,45 +22,10 @@
 #if !defined (LEGACY_FRAME_H)
 #define LEGACY_FRAME_H 1
 
+struct frame_unwind;
+
 /* Frame unwinder for legacy code.  */
 
 const struct frame_unwind *legacy_frame_unwind_p (CORE_ADDR pc);
-
-
-struct frame_info;
-struct regcache;
-struct frame_id;
-struct frame_unwind_cache;
-
-/* LEGACY FRAMES
-  
-   The original extra frame info implementation of the`struct
-   frame_info' object.  These frames always initialize the entire
-   frame object using extra frame info.  */
-
-/* Assuming that FRAME is a legacy, return a register value for the
-   previous frame.  */
-
-extern void legacy_frame_register_unwind (struct frame_info *frame,
-					  struct frame_unwind_cache **unwind_cache,
-					  int regnum,
-					  int *optimized,
-					  enum lval_type *lvalp,
-					  CORE_ADDR *addrp,
-					  int *realnump,
-					  void *valuep);
-
-/* Assuming that FRAME is a legacy, return the resume address for the
-   previous frame.  */
-
-extern CORE_ADDR legacy_frame_pc_unwind (struct frame_info *frame,
-					 struct frame_unwind_cache **unwind_cache);
-
-/* Assuming that FRAME is a legacy, return the ID of the calling frame
-   (the frame that the legacy has the saved state of).  */
-
-extern void legacy_frame_id_unwind (struct frame_info *frame,
-				    struct frame_unwind_cache **unwind_cache,
-				    struct frame_id *id);
 
 #endif

@@ -2,7 +2,7 @@
    process.
 
    Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994,
-   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002 Free Software
+   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003 Free Software
    Foundation, Inc.
 
    This file is part of GDB.
@@ -3093,7 +3093,7 @@ normal_stop (void)
 	     LOCATION: Print only location
 	     SRC_AND_LOC: Print location and source line */
 	  if (do_frame_printing)
-	    show_and_print_stack_frame (deprecated_selected_frame, -1, source_flag);
+	    print_stack_frame (deprecated_selected_frame, -1, source_flag);
 
 	  /* Display the auto-display expressions.  */
 	  do_displays ();
@@ -3109,10 +3109,10 @@ normal_stop (void)
 
   if (stop_stack_dummy)
     {
-      /* Pop the empty frame that contains the stack dummy.
-         POP_FRAME ends with a setting of the current frame, so we
-         can use that next. */
-      POP_FRAME;
+      /* Pop the empty frame that contains the stack dummy.  POP_FRAME
+         ends with a setting of the current frame, so we can use that
+         next. */
+      frame_pop (get_current_frame ());
       /* Set stop_pc to what it was before we called the function.
          Can't rely on restore_inferior_status because that only gets
          called if we don't stop in the called function.  */

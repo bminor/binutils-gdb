@@ -36,7 +36,13 @@
 #include "gdbcore.h"
 #include "annotate.h"
 #include "language.h"
-#include "ui-out.h"
+#include "frame-unwind.h"
+#include "command.h"
+#include "gdbcmd.h"
+
+/* Flag to indicate whether backtraces should stop at main.  */
+
+static int backtrace_below_main;
 
 /* Return a frame uniq ID that can be used to, later, re-find the
    frame.  */
@@ -55,29 +61,6 @@ get_frame_id (struct frame_info *fi)
       id.pc = fi->pc;
       return id;
     }
-}
-
-struct frame_id
-frame_id_unwind (struct frame_info *frame)
-{
-  if (!frame->id_unwind_cache_p)
-    {
-      frame->unwind->id (frame, &frame->unwind_cache, &frame->id_unwind_cache);
-      frame->id_unwind_cache_p = 1;
-    }
-  return frame->id_unwind_cache;
-}
-
-void
-deprecated_update_frame_base_hack (struct frame_info *frame, CORE_ADDR base)
-{
-  /* See comment in "frame.h".  */
-  frame->frame = base;
-  gdb_assert (frame->next != NULL);
-  gdb_assert (frame->next->id_unwind_cache_p);
-  gdb_assert (frame->next->pc_unwind_cache_p);
-  frame->next->id_unwind_cache.base = base;
-  frame->next->id_unwind_cache.pc = frame->next->pc_unwind_cache;
 }
 
 const struct frame_id null_frame_id; /* All zeros.  */
@@ -148,6 +131,40 @@ frame_find_by_id (struct frame_id id)
   return NULL;
 }
 
+CORE_ADDR
+frame_pc_unwind (struct frame_info *frame)
+{
+  if (!frame->pc_unwind_cache_p)
+    {
+      frame->pc_unwind_cache = frame->unwind->pc (frame, &frame->unwind_cache);
+      frame->pc_unwind_cache_p = 1;
+    }
+  return frame->pc_unwind_cache;
+}
+
+struct frame_id
+frame_id_unwind (struct frame_info *frame)
+{
+  if (!frame->id_unwind_cache_p)
+    {
+      frame->unwind->id (frame, &frame->unwind_cache, &frame->id_unwind_cache);
+      frame->id_unwind_cache_p = 1;
+    }
+  return frame->id_unwind_cache;
+}
+
+void
+frame_pop (struct frame_info *frame)
+{
+  /* FIXME: cagney/2003-01-18: There is probably a chicken-egg problem
+     with passing in current_regcache.  The pop function needs to be
+     written carefully so as to not overwrite registers whose [old]
+     values are needed to restore other registers.  Instead, this code
+     should pass in a scratch cache and, as a second step, restore the
+     registers using that.  */
+  frame->unwind->pop (frame, &frame->unwind_cache, current_regcache);
+  flush_cached_frames ();
+}
 
 void
 frame_register_unwind (struct frame_info *frame, int regnum,
@@ -644,8 +661,8 @@ reinit_frame_cache (void)
     }
 }
 
-/* Create the previous frame using the original INIT_EXTRA_INFO
-   method.  */
+/* Create the previous frame using the deprecated methods
+   INIT_EXTRA_INFO, INIT_FRAME_PC and INIT_FRAME_PC_FIRST.  */
 
 static struct frame_info *
 legacy_get_prev_frame (struct frame_info *next_frame)
@@ -654,7 +671,8 @@ legacy_get_prev_frame (struct frame_info *next_frame)
   struct frame_info *prev;
   int fromleaf;
 
-  /* This code doesn't work with the sentinal frame.  */
+  /* This code only works on normal frames.  A sentinel frame, where
+     the level is -1, should never reach this code.  */
   gdb_assert (next_frame->level >= 0);
 
   /* On some machines it is possible to call a function without
@@ -666,7 +684,7 @@ legacy_get_prev_frame (struct frame_info *next_frame)
   /* Still don't want to worry about this except on the innermost
      frame.  This macro will set FROMLEAF if NEXT_FRAME is a frameless
      function invocation.  */
-  if (get_next_frame (next_frame) == NULL)
+  if (next_frame->level == 0)
     /* FIXME: 2002-11-09: Frameless functions can occure anywhere in
        the frame chain, not just the inner most frame!  The generic,
        per-architecture, frame code should handle this and the below
@@ -909,13 +927,13 @@ get_prev_frame (struct frame_info *next_frame)
   gdb_assert (next_frame != NULL);
 
   if (next_frame->level >= 0
-      /* && !backtrace_below_main */
+      && !backtrace_below_main
       && inside_main_func (get_frame_pc (next_frame)))
-    /* Don't unwind past main(), always unwind the sentinel frame.
+    /* Don't unwind past main(), bug always unwind the sentinel frame.
        Note, this is done _before_ the frame has been marked as
        previously unwound.  That way if the user later decides to
-       allow unwinds past main(), they can just happen.  */
-    return 0;
+       allow unwinds past main(), that just happens.  */
+    return NULL;
 
   /* Only try to do the unwind once.  */
   if (next_frame->prev_p)
@@ -933,16 +951,26 @@ get_prev_frame (struct frame_info *next_frame)
   if (inside_entry_file (get_frame_pc (next_frame)))
       return NULL;
 
+  /* If any of the old frame initialization methods are around, use
+     the legacy get_prev_frame method.  Just don't try to unwind a
+     sentinel frame using that method - it doesn't work.  All sentinal
+     frames use the new unwind code.  */
   if ((DEPRECATED_INIT_FRAME_PC_P ()
-       || DEPRECATED_INIT_FRAME_PC_FIRST_P ())
+       || DEPRECATED_INIT_FRAME_PC_FIRST_P ()
+       || INIT_EXTRA_FRAME_INFO_P ())
       && next_frame->level >= 0)
-     /* Don't try to unwind the sentinal frame using the old code.  */
     return legacy_get_prev_frame (next_frame);
 
-  /* Allocate the new frame but do not wire it in.  Some (bad) code in
-     INIT_EXTRA_FRAME_INFO tries to look along frame->next to pull
-     some fancy tricks (of course such code is, by definition,
-     recursive).  Try to prevent it.  */
+  /* Allocate the new frame but do not wire it in to the frame chain.
+     Some (bad) code in INIT_FRAME_EXTRA_INFO tries to look along
+     frame->next to pull some fancy tricks (of course such code is, by
+     definition, recursive).  Try to prevent it.
+
+     There is no reason to worry about memory leaks, should the
+     remainder of the function fail.  The allocated memory will be
+     quickly reclaimed when the frame cache is flushed, and the `we've
+     been here before' check above will stop repeated memory
+     allocation calls.  */
   prev_frame = FRAME_OBSTACK_ZALLOC (struct frame_info);
   prev_frame->level = next_frame->level + 1;
 
@@ -989,16 +1017,18 @@ get_prev_frame (struct frame_info *next_frame)
   next_frame->prev = prev_frame;
   prev_frame->next = next_frame;
 
-  /* NOTE: cagney/2002-12-18: Eventually this call will go away.
-     Instead of initializing extra info, all frames will use the
-     frame_cache (passed to the unwind functions) to store extra frame
-     info.  */
-  /* NOTE: cagney/2003-01-11: Legacy targets, when having the sentinel
-     frame unwound, rely on this call.  */
+  /* FIXME: cagney/2002-01-19: This call will go away.  Instead of
+     initializing extra info, all frames will use the frame_cache
+     (passed to the unwind functions) to store additional frame info.
+     Unfortunatly legacy targets can't use legacy_get_prev_frame() to
+     unwind the sentinel frame and, consequently, are forced to take
+     this code path and rely on the below call to INIT_EXTR_FRAME_INFO
+     to initialize the inner-most frame.  */
   if (INIT_EXTRA_FRAME_INFO_P ())
-    /* NOTE: This code doesn't bother trying to sort out frameless
-       functions.  That is left to the target.  */
-    INIT_EXTRA_FRAME_INFO (0, prev_frame);
+    {
+      gdb_assert (prev_frame->level == 0);
+      INIT_EXTRA_FRAME_INFO (0, prev_frame);
+    }
 
   return prev_frame;
 }
@@ -1008,35 +1038,6 @@ get_frame_pc (struct frame_info *frame)
 {
   /* This should just call frame_pc_unwind().  */
   return frame->pc;
-}
-
-CORE_ADDR
-frame_pc_unwind (struct frame_info *frame)
-{
-  if (!frame->pc_unwind_cache_p)
-    {
-      frame->pc_unwind_cache = frame->unwind->pc (frame, &frame->unwind_cache);
-      frame->pc_unwind_cache_p = 1;
-    }
-  return frame->pc_unwind_cache;
-}
-
-void
-deprecated_update_frame_pc_hack (struct frame_info *frame, CORE_ADDR pc)
-{
-  /* See comment in "frame.h".  */
-  frame->pc = pc;
-  gdb_assert (frame->next != NULL);
-  /* Got a bucket?  Legacy code that handles dummy frames directly
-     doesn't always use the unwind function to determine the dummy
-     frame's PC.  Consequently, it is possible for this function to be
-     called when the next frame's pc unwind cache isn't valid.  */
-  if (frame->next->pc_unwind_cache_p)
-    frame->next->pc_unwind_cache = pc;
-  /* Since the PC is unwound before the frame ID, only need to update
-     the frame ID's PC when it has been unwound.  */
-  if (frame->next->id_unwind_cache_p)
-    frame->next->id_unwind_cache.pc = pc;
 }
 
 static int
@@ -1149,6 +1150,31 @@ frame_extra_info_zalloc (struct frame_info *fi, long size)
 }
 
 void
+deprecated_update_frame_pc_hack (struct frame_info *frame, CORE_ADDR pc)
+{
+  /* See comment in "frame.h".  */
+  frame->pc = pc;
+  gdb_assert (frame->next != NULL);
+  /* Got a bucket?  Legacy code that handles dummy frames directly
+     doesn't always use the unwind function to determine the dummy
+     frame's PC.  Consequently, it is possible for this function to be
+     called when the next frame's pc unwind cache isn't valid.  */
+  if (frame->next->pc_unwind_cache_p)
+    frame->next->pc_unwind_cache = pc;
+  /* Since the PC is unwound before the frame ID, only need to update
+     the frame ID's PC when it has been unwound.  */
+  if (frame->next->id_unwind_cache_p)
+    frame->next->id_unwind_cache.pc = pc;
+}
+
+void
+deprecated_update_frame_base_hack (struct frame_info *frame, CORE_ADDR base)
+{
+  /* See comment in "frame.h".  */
+  frame->frame = base;
+}
+
+void
 deprecated_set_frame_saved_regs_hack (struct frame_info *frame,
 				      CORE_ADDR *saved_regs)
 {
@@ -1220,4 +1246,21 @@ void
 _initialize_frame (void)
 {
   obstack_init (&frame_cache_obstack);
+
+  /* FIXME: cagney/2003-01-19: This command needs a rename.  Suggest
+     `set backtrace {past,beyond,...}-main'.  Also suggest adding `set
+     backtrace ...-start' to control backtraces past start.  The
+     problem with `below' is that it stops the `up' command.  */
+
+  add_setshow_boolean_cmd ("backtrace-below-main", class_obscure,
+                          &backtrace_below_main, "\
+Set whether backtraces should continue past \"main\".\n\
+Normally the caller of \"main\" is not of interest, so GDB will terminate\n\
+the backtrace at \"main\".  Set this variable if you need to see the rest\n\
+of the stack trace.", "\
+Show whether backtraces should continue past \"main\".\n\
+Normally the caller of \"main\" is not of interest, so GDB will terminate\n\
+the backtrace at \"main\".  Set this variable if you need to see the rest\n\
+of the stack trace.",
+			   NULL, NULL, &setlist, &showlist);
 }

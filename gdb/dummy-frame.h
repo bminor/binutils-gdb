@@ -22,17 +22,10 @@
 #if !defined (DUMMY_FRAME_H)
 #define DUMMY_FRAME_H 1
 
-/* Does the PC belong to a dummy frame?  If it does, return a dummy
-   frame unwind descriptor.  */
-
-struct frame_unwind;
-extern const struct frame_unwind *dummy_frame_p (CORE_ADDR pc);
-
-
 struct frame_info;
 struct regcache;
+struct frame_unwind;
 struct frame_id;
-struct frame_unwind_cache;
 
 /* GENERIC DUMMY FRAMES
   
@@ -51,30 +44,10 @@ struct frame_unwind_cache;
    generic_{file,func}_frame_chain_valid and FIX_CALL_DUMMY as
    generic_fix_call_dummy.  */
 
-/* Assuming that FRAME is a dummy, return a register value for the
-   previous frame.  */
+/* If the PC falls in a dummy frame, return a dummy frame
+   unwinder.  */
 
-extern void dummy_frame_register_unwind (struct frame_info *frame,
-					 struct frame_unwind_cache **unwind_cache,
-					 int regnum,
-					 int *optimized,
-					 enum lval_type *lvalp,
-					 CORE_ADDR *addrp,
-					 int *realnump,
-					 void *valuep);
-
-/* Assuming that FRAME is a dummy, return the resume address for the
-   previous frame.  */
-
-extern CORE_ADDR dummy_frame_pc_unwind (struct frame_info *frame,
-					struct frame_unwind_cache **unwind_cache);
-
-/* Assuming that FRAME is a dummy, return the ID of the calling frame
-   (the frame that the dummy has the saved state of).  */
-
-extern void dummy_frame_id_unwind (struct frame_info *frame,
-				   struct frame_unwind_cache **unwind_cache,
-				   struct frame_id *id);
+extern const struct frame_unwind *dummy_frame_p (CORE_ADDR pc);
 
 /* Does the PC fall in a dummy frame?
 

@@ -24,13 +24,11 @@
 #define FRAME_H 1
 
 struct symtab_and_line;
+struct frame_unwind;
 
 /* The frame object.  */
 
 struct frame_info;
-
-/* The frame unwind cache object.  */
-struct frame_unwind_cache;
 
 /* The frame object's ID.  This provides a per-frame unique identifier
    that can be used to relocate a `struct frame_info' after a target
@@ -308,10 +306,9 @@ extern CORE_ADDR frame_pc_unwind (struct frame_info *frame);
    caller's frame.  */
 extern struct frame_id frame_id_unwind (struct frame_info *frame);
 
-
-/* FIXME: cagney/2003-01-12: Once `struct frame_info' has been made
-   opaque, this include can go.  */
-#include "frame-unwind.h"
+/* Discard the specified frame.  Restoring the registers to the state
+   of the caller.  */
+extern void frame_pop (struct frame_info *frame);
 
 /* Describe the saved registers of a frame.  */
 
@@ -398,14 +395,16 @@ struct frame_info
 
     /* Unwind cache shared between the unwind functions - they had
        better all agree as to the contents.  */
-    struct frame_unwind_cache *unwind_cache;
+    void *unwind_cache;
+
+    /* The frame's unwinder.  */
     const struct frame_unwind *unwind;
 
-    /* Cache for the unwound PC value.  */
+    /* Cached copy of the previous frame's resume address.  */
     int pc_unwind_cache_p;
     CORE_ADDR pc_unwind_cache;
 
-    /* Cache for the unwound frame ID value.  */
+    /* Cached copy of the previous frame's ID.  */
     int id_unwind_cache_p;
     struct frame_id id_unwind_cache;
 
@@ -515,8 +514,6 @@ extern void show_and_print_stack_frame (struct frame_info *fi, int level,
 					int source);
 
 extern void print_stack_frame (struct frame_info *, int, int);
-
-extern void print_only_stack_frame (struct frame_info *, int, int);
 
 extern void show_stack_frame (struct frame_info *);
 
@@ -641,6 +638,12 @@ extern CORE_ADDR *get_frame_saved_regs (struct frame_info *);
    overhead of unnecessary prologue analysis.  */
 extern void deprecated_update_frame_pc_hack (struct frame_info *frame,
 					     CORE_ADDR pc);
+
+/* FIXME: cagney/2002-12-18: Has the frame's base changed?  Or to be
+   more exact, whas that initial guess at the frame's base as returned
+   by read_fp() wrong.  If it was, fix it.  This shouldn't be
+   necessary since the code should be getting the frame's base correct
+   from the outset.  */
 extern void deprecated_update_frame_base_hack (struct frame_info *frame,
 					       CORE_ADDR base);
 

@@ -1,7 +1,7 @@
 /* Print and select stack frames for GDB, the GNU debugger.
 
    Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994,
-   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002 Free Software
+   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003 Free Software
    Foundation, Inc.
 
    This file is part of GDB.
@@ -98,10 +98,6 @@ static void print_frame (struct frame_info *fi,
 			 int args, 
 			 struct symtab_and_line sal);
 
-static void print_frame_info_base (struct frame_info *, int, int, int);
-
-static void print_stack_frame_base (struct frame_info *, int, int);
-
 static void backtrace_command (char *, int);
 
 struct frame_info *parse_frame_specification (char *);
@@ -127,21 +123,6 @@ struct print_stack_frame_args
     int args;
   };
 
-static int print_stack_frame_base_stub (char *);
-
-/* Show and print the frame arguments.
-   Pass the args the way catch_errors wants them.  */
-static int show_and_print_stack_frame_stub (void *args);
-static int
-show_and_print_stack_frame_stub (void *args)
-{
-  struct print_stack_frame_args *p = (struct print_stack_frame_args *) args;
-
-  print_frame_info (p->fi, p->level, p->source, p->args);
-
-  return 0;
-}
-
 /* Show or print the frame arguments.
    Pass the args the way catch_errors wants them.  */
 static int print_stack_frame_stub (void *args);
@@ -150,82 +131,9 @@ print_stack_frame_stub (void *args)
 {
   struct print_stack_frame_args *p = (struct print_stack_frame_args *) args;
 
-  print_frame_info_base (p->fi, p->level, p->source, p->args);
+  print_frame_info (p->fi, p->level, p->source, p->args);
   return 0;
 }
-
-/* Print a stack frame briefly.  FRAME_INFI should be the frame info
-   and LEVEL should be its level in the stack (or -1 for level not
-   defined). */
-
-/* Pass the args the way catch_errors wants them.  */
-static int
-print_stack_frame_base_stub (char *args)
-{
-  struct print_stack_frame_args *p = (struct print_stack_frame_args *) args;
-
-  print_frame_info_base (p->fi, p->level, p->source, p->args);
-  return 0;
-}
-
-/* print the frame arguments to the terminal.  
-   Pass the args the way catch_errors wants them.  */
-static int print_only_stack_frame_stub (void *);
-static int
-print_only_stack_frame_stub (void *args)
-{
-  struct print_stack_frame_args *p = (struct print_stack_frame_args *) args;
-
-  print_frame_info_base (p->fi, p->level, p->source, p->args);
-  return 0;
-}
-
-/* Print a stack frame briefly.  FRAME_INFI should be the frame info
-   and LEVEL should be its level in the stack (or -1 for level not defined).
-   This prints the level, the function executing, the arguments,
-   and the file name and line number.
-   If the pc is not at the beginning of the source line,
-   the actual pc is printed at the beginning.
-
-   If SOURCE is 1, print the source line as well.
-   If SOURCE is -1, print ONLY the source line.  */
-
-static void
-print_stack_frame_base (struct frame_info *fi, int level, int source)
-{
-  struct print_stack_frame_args args;
-
-  args.fi = fi;
-  args.level = level;
-  args.source = source;
-  args.args = 1;
-
-  catch_errors (print_stack_frame_stub, &args, "", RETURN_MASK_ALL);
-}
-
-/* Show and print a stack frame briefly.  FRAME_INFI should be the frame info
-   and LEVEL should be its level in the stack (or -1 for level not defined).
-   This prints the level, the function executing, the arguments,
-   and the file name and line number.
-   If the pc is not at the beginning of the source line,
-   the actual pc is printed at the beginning.
-
-   If SOURCE is 1, print the source line as well.
-   If SOURCE is -1, print ONLY the source line.  */
-
-void
-show_and_print_stack_frame (struct frame_info *fi, int level, int source)
-{
-  struct print_stack_frame_args args;
-
-  args.fi = fi;
-  args.level = level;
-  args.source = source;
-  args.args = 1;
-
-  catch_errors (show_and_print_stack_frame_stub, &args, "", RETURN_MASK_ALL);
-}
-
 
 /* Show or print a stack frame briefly.  FRAME_INFI should be the frame info
    and LEVEL should be its level in the stack (or -1 for level not defined).
@@ -248,30 +156,7 @@ print_stack_frame (struct frame_info *fi, int level, int source)
   args.args = 1;
 
   catch_errors (print_stack_frame_stub, (char *) &args, "", RETURN_MASK_ALL);
-}
-
-/* Print a stack frame briefly.  FRAME_INFI should be the frame info
-   and LEVEL should be its level in the stack (or -1 for level not defined).
-   This prints the level, the function executing, the arguments,
-   and the file name and line number.
-   If the pc is not at the beginning of the source line,
-   the actual pc is printed at the beginning.
-
-   If SOURCE is 1, print the source line as well.
-   If SOURCE is -1, print ONLY the source line.  */
-
-void
-print_only_stack_frame (struct frame_info *fi, int level, int source)
-{
-  struct print_stack_frame_args args;
-
-  args.fi = fi;
-  args.level = level;
-  args.source = source;
-  args.args = 1;
-
-  catch_errors (print_only_stack_frame_stub, &args, "", RETURN_MASK_ALL);
-}
+}  
 
 struct print_args_args
 {
@@ -280,12 +165,12 @@ struct print_args_args
   struct ui_file *stream;
 };
 
-static int print_args_stub (PTR);
+static int print_args_stub (void *);
 
 /* Pass the args the way catch_errors wants them.  */
 
 static int
-print_args_stub (PTR args)
+print_args_stub (void *args)
 {
   int numargs;
   struct print_args_args *p = (struct print_args_args *) args;
@@ -305,8 +190,8 @@ print_args_stub (PTR args)
    LOCATION: Print only location 
    LOC_AND_SRC: Print location and source line.  */
 
-static void
-print_frame_info_base (struct frame_info *fi, int level, int source, int args)
+void
+print_frame_info (struct frame_info *fi, int level, int source, int args)
 {
   struct symtab_and_line sal;
   int source_print;
@@ -581,16 +466,6 @@ print_frame (struct frame_info *fi,
   do_cleanups (old_chain);
 }
 
-
-/* Show or print the frame info.  If this is the tui, it will be shown in 
-   the source display */
-void
-print_frame_info (struct frame_info *fi, register int level, int source,
-		  int args)
-{
-  print_frame_info_base (fi, level, source, args);
-}
-
 /* Show the frame info.  If this is the tui, it will be shown in 
    the source display otherwise, nothing is done */
 void
@@ -1099,7 +974,7 @@ backtrace_command_1 (char *count_exp, int show_locals, int from_tty)
          means further attempts to backtrace would fail (on the other
          hand, perhaps the code does or could be fixed to make sure
          the frame->prev field gets set to NULL in that case).  */
-      print_frame_info_base (fi, trailing_level + i, 0, 1);
+      print_frame_info (fi, trailing_level + i, 0, 1);
       if (show_locals)
 	print_frame_local_vars (fi, 1, gdb_stdout);
     }
@@ -1599,8 +1474,8 @@ void
 frame_command (char *level_exp, int from_tty)
 {
   select_frame_command (level_exp, from_tty);
-  show_and_print_stack_frame (deprecated_selected_frame,
-			      frame_relative_level (deprecated_selected_frame), 1);
+  print_stack_frame (deprecated_selected_frame,
+		     frame_relative_level (deprecated_selected_frame), 1);
 }
 
 /* The XDB Compatibility command to print the current frame. */
@@ -1610,7 +1485,7 @@ current_frame_command (char *level_exp, int from_tty)
 {
   if (target_has_stack == 0 || deprecated_selected_frame == 0)
     error ("No stack.");
-  print_only_stack_frame (deprecated_selected_frame,
+  print_stack_frame (deprecated_selected_frame,
 			  frame_relative_level (deprecated_selected_frame), 1);
 }
 
@@ -1647,8 +1522,8 @@ static void
 up_command (char *count_exp, int from_tty)
 {
   up_silently_base (count_exp);
-  show_and_print_stack_frame (deprecated_selected_frame,
-			      frame_relative_level (deprecated_selected_frame), 1);
+  print_stack_frame (deprecated_selected_frame,
+		     frame_relative_level (deprecated_selected_frame), 1);
 }
 
 /* Select the frame down one or COUNT stack levels
@@ -1694,8 +1569,8 @@ static void
 down_command (char *count_exp, int from_tty)
 {
   down_silently_base (count_exp);
-  show_and_print_stack_frame (deprecated_selected_frame,
-			      frame_relative_level (deprecated_selected_frame), 1);
+  print_stack_frame (deprecated_selected_frame,
+		     frame_relative_level (deprecated_selected_frame), 1);
 }
 
 void
@@ -1750,6 +1625,10 @@ return_command (char *retval_exp, int from_tty)
 	error ("Not confirmed.");
     }
 
+  /* FIXME: cagney/2003-01-18: Rather than pop each frame in turn,
+     this code should just go straight to the relevant frame and pop
+     that.  */
+
   /* Do the real work.  Pop until the specified frame is current.  We
      use this method because the deprecated_selected_frame is not valid after
      a POP_FRAME.  The pc comparison makes this work even if the
@@ -1757,11 +1636,11 @@ return_command (char *retval_exp, int from_tty)
 
   while (selected_frame_addr != get_frame_base (frame = get_current_frame ())
 	 || selected_frame_pc != get_frame_pc (frame))
-    POP_FRAME;
+    frame_pop (get_current_frame ());
 
   /* Then pop that frame.  */
 
-  POP_FRAME;
+  frame_pop (get_current_frame ());
 
   /* Compute the return value (if any) and store in the place
      for return values.  */
@@ -1771,9 +1650,14 @@ return_command (char *retval_exp, int from_tty)
 
   /* If we are at the end of a call dummy now, pop the dummy frame too.  */
 
+  /* FIXME: cagney/2003-01-18: This is silly.  Instead of popping all
+     the frames except the dummy, and then, as an afterthought,
+     popping the dummy frame, this code should just pop through to the
+     dummy frame.  */
+  
   if (CALL_DUMMY_HAS_COMPLETED (read_pc(), read_sp (),
 				get_frame_base (get_current_frame ())))
-    POP_FRAME;
+    frame_pop (get_current_frame ());
 
   /* If interactive, print the frame that is now current.  */
 

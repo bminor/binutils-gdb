@@ -23,8 +23,8 @@
 #define SENTINEL_FRAME_H 1
 
 struct frame_info;
-struct frame_id;
-struct frame_unwind_cache;
+struct frame_unwind;
+struct regcache;
 
 /* Implement the sentinel frame.  The sentinel frame terminates the
    inner most end of the frame chain.  If unwound, it returns the
@@ -33,32 +33,7 @@ struct frame_unwind_cache;
 /* Pump prime the sentinel frame's cache.  Since this needs the
    REGCACHE provide that here.  */
 
-struct frame_unwind_cache *sentinel_frame_cache (struct regcache *regcache);
-
-/* Return the previous frames register value.  For a sentinel-frame,
-   it is the value found in the register cache.  */
-
-extern void sentinel_frame_register_unwind (struct frame_info *frame,
-					    struct frame_unwind_cache **unwind_cache,
-					    int regnum,
-					    int *optimized,
-					    enum lval_type *lvalp,
-					    CORE_ADDR *addrp,
-					    int *realnump,
-					    void *valuep);
-
-/* Return the resume address of the previous frame.  For the
-   sentinel-frame, it is the threads resume address.  */
-
-extern CORE_ADDR sentinel_frame_pc_unwind (struct frame_info *frame,
-					   struct frame_unwind_cache **unwind_cache);
-
-/* Return the frame ID of the previous frame.  For the sentinel-frame,
-   it is the ID of the inner most frame.  */
-
-extern void sentinel_frame_id_unwind (struct frame_info *frame,
-				      struct frame_unwind_cache **unwind_cache,
-				      struct frame_id *id);
+void *sentinel_frame_cache (struct regcache *regcache);
 
 extern const struct frame_unwind *sentinel_frame_unwind_p (CORE_ADDR pc);
 
