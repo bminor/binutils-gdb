@@ -1,3 +1,11 @@
+2000-11-22  Michael Chastain  <chastain@redhat.com>
+
+	* mips_pro.exp: Accept either "middle -> top -> main" or
+	"middle -> main" in the backtrace, because gcc can optimize
+	tail calls to jumps.  Remove setup_xfail for the hppa case.
+	Add a comment with the original warning messages from PR 3016,
+	which was filed in 1993, to preserve them for posterity.
+
 2000-11-17  Nick Duffek  <nsd@redhat.com>
 
 	* lib/gdb.exp (gdb_test): Override timeout with board info.
