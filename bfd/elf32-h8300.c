@@ -678,10 +678,7 @@ elf32_h8_merge_private_bfd_data (ibfd, obfd)
      mov.b:16	     ->    mov.b:8                2 bytes
      mov.b:24/32     ->    mov.b:8                4 bytes
 
-     mov.[bwl]:24/32 ->    mov.[bwl]:16           2 bytes
-
-
-*/
+     mov.[bwl]:24/32 ->    mov.[bwl]:16           2 bytes */
 
 static boolean
 elf32_h8_relax_section (abfd, sec, link_info, again)
@@ -747,6 +744,13 @@ elf32_h8_relax_section (abfd, sec, link_info, again)
 	 some long jumps created by the compiler.  */
       if (irel != internal_relocs)
 	last_reloc = irel - 1;
+
+      if (ELF32_R_TYPE (irel->r_info) != R_H8_DIR24R8
+	  && ELF32_R_TYPE (irel->r_info) != R_H8_PCREL16
+	  && ELF32_R_TYPE (irel->r_info) != R_H8_DIR16A8
+	  && ELF32_R_TYPE (irel->r_info) != R_H8_DIR24A8
+	  && ELF32_R_TYPE (irel->r_info) != R_H8_DIR32A16)
+	continue;
 
       /* Get the section contents if we haven't done so already.  */
       if (contents == NULL)
