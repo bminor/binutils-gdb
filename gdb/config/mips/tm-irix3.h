@@ -69,3 +69,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define LO_REGNUM 68		/* ... */
 #define FCRCS_REGNUM 69		/* FP control/status */
 #define FCRIR_REGNUM 70		/* FP implementation/revision */
+
+/* Offsets for register values in _sigtramp frame.
+   sigcontext is immediately above the _sigtramp frame on Irix.  */
+#define SIGFRAME_BASE		0x0 
+#define SIGFRAME_PC_OFF		(SIGFRAME_BASE + 2 * 4)
+#define SIGFRAME_REGSAVE_OFF	(SIGFRAME_BASE + 3 * 4)
