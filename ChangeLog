@@ -1,3 +1,7 @@
+Thu Mar 30 13:51:43 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config.sub: Merge in recent FSF changes.
+
 Tue Mar 28 14:47:34 1995  Jason Molenda (crash@phydeaux.cygnus.com)
 
 	build-all.mk,config/mh-solaris:  revert these two changes:
