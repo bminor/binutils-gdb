@@ -42,13 +42,13 @@ target_libs="libm xiberty newlib libio libg++"
 
 
 # these tools are built using the target libs, and are intended to run only
-# in the target environment.  we currently have none.
+# in the target environment
 #
 # note: any program that *uses* libraries that are in the "target_libs"
 # list belongs in this list.  those programs are also very likely
 # candidates for the "native_only" list which follows
 #
-target_tools="groff"
+target_tools="examples groff"
 
 ################################################################################
 
