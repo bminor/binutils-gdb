@@ -1,5 +1,10 @@
 2004-11-29  Mark Kettenis  <kettenis@gnu.org>
 
+	* config/sparc/nbsdaout.mh (NAT_FILE): Set to solib.h.
+	* config/sparc/nbsdelf.mh (NAT_FILE): Remove variable.
+	* config/sparc/nm-nbsd.h: Remove file.
+	* config/sparc/nm-nbsdaout.h: Remove file.
+
 	* sparc-nat.c (inf_ptrace_xfer_partial): New variable.
 	(sparc_xfer_partial): New function.
 	(sparc_target): Save value of to_xfer_partial from ptrace vector.
