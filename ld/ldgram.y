@@ -362,11 +362,14 @@ command_line_option:
 		{
 		  g_switch_value = yylval.integer;
 		}
-	| '-' NAME
-		 { einfo("%P%F illegal option -- %s\n", $2);  }
         | 	NAME
-		{ lang_add_input_file($1,lang_input_file_is_file_enum,
-				 (char *)NULL); }
+		{
+		  if (*$1 == '-')
+		    einfo("%P%F: illegal option -- %s\n", $1);
+		  else
+		    lang_add_input_file($1,lang_input_file_is_file_enum,
+					(char *)NULL);
+		}
 	| '{' script_file '}'  
 	;
 
