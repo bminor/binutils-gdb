@@ -1,3 +1,10 @@
+Thu Nov 28 00:46:24 1996  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* vax-tdep.c (vax_print_insn):  Made static, modified to take
+	disassemble_info as parameter.
+	(_initialize_vax_tdep):  New function to initialize tm_print_insn
+	to vax_print_insn.
+
 Wed Nov 27 11:29:06 1996  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	* blockframe.c: 	...Remove old-style CALL_DUMMY code...

@@ -1,5 +1,5 @@
 /* Print VAX instructions for GDB, the GNU debugger.
-   Copyright 1986, 1989, 1991, 1992 Free Software Foundation, Inc.
+   Copyright 1986, 1989, 1991, 1992, 1996 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -30,17 +30,19 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 static unsigned char *print_insn_arg ();
 
 /* Print the vax instruction at address MEMADDR in debugged memory,
-   on STREAM.  Returns length of the instruction, in bytes.  */
+   from disassembler info INFO.
+   Returns length of the instruction, in bytes.  */
 
-int
-vax_print_insn (memaddr, stream)
+static int
+vax_print_insn (memaddr, info)
      CORE_ADDR memaddr;
-     GDB_FILE *stream;
+     disassemble_info *info;
 {
   unsigned char buffer[MAXLEN];
   register int i;
   register unsigned char *p;
   register char *d;
+  GDB_FILE *stream = info->stream;
 
   read_memory (memaddr, buffer, MAXLEN);
 
@@ -232,4 +234,10 @@ print_insn_arg (d, p, addr, stream)
       }
 
   return (unsigned char *) p;
+}
+
+void
+_initialize_vax_tdep ()
+{
+  tm_print_insn = vax_print_insn;
 }
