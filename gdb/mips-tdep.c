@@ -1276,6 +1276,7 @@ mips_push_arguments(nargs, args, sp, struct_return, struct_addr)
       if (typecode == TYPE_CODE_STRUCT && MIPS_EABI && len > MIPS_REGSIZE)
 	{
 	  store_address (valbuf, MIPS_REGSIZE, VALUE_ADDRESS (arg));
+	  typecode = TYPE_CODE_PTR;
 	  len = MIPS_REGSIZE;
 	  val = valbuf;
 	}
@@ -1369,8 +1370,23 @@ mips_push_arguments(nargs, args, sp, struct_return, struct_addr)
 	      else
 		{
 		  /* Write this portion of the argument to the stack.  */
+		  int longword_offset;
+
 		  partial_len = len;
-		  write_memory (sp + stack_offset, val, partial_len);
+		  longword_offset = 0;
+		  if (TARGET_BYTE_ORDER == BIG_ENDIAN)
+		    if (MIPS_REGSIZE == 8 &&
+			(typecode == TYPE_CODE_INT ||
+			 typecode == TYPE_CODE_PTR ||
+			 typecode == TYPE_CODE_FLT) && len <= 4)
+		      longword_offset = 4;
+		    else if ((typecode == TYPE_CODE_STRUCT ||
+			      typecode == TYPE_CODE_UNION) &&
+			     len < MIPS_REGSIZE)
+		      longword_offset = MIPS_REGSIZE - len;
+
+		  write_memory (sp + stack_offset + longword_offset, 
+				val, partial_len);
 		  stack_offset += ROUND_UP (partial_len, MIPS_REGSIZE);
 		}
     
