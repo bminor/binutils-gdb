@@ -1,3 +1,8 @@
+Mon Sep 18 01:43:42 1995  Jeff Law  (law@snake.cs.utah.edu)
+
+	* somsolib.c (auto_solib_add_at_startup): Delete definition.  No
+	longer needed.
+
 Sat Sep 16 13:23:36 1995  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* config/mips/tm-mips.h (UNUSED_REGNUM):  Define.

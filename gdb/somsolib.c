@@ -96,17 +96,6 @@ struct so_list
   struct so_list *next;
 };
 
-/* If true, then shared library symbols will be added automatically
-   when the inferior is created.  This is almost always what users
-   will want to have happen; but for very large programs, the startup
-   time will be excessive, and so if this is a problem, the user can
-   clear this flag and then add the shared library symbols as needed.
-   Note that there is a potential for confusion, since if the shared
-   library symbols are not loaded, commands like "info fun" will *not*
-   report all the functions that are actually present.  */
-
-int auto_solib_add_at_startup = 1;
-
 static struct so_list *so_list_head;
 
 static void som_sharedlibrary_info_command PARAMS ((char *, int));
