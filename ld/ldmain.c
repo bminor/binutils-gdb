@@ -67,6 +67,10 @@ boolean trace_files;
 /* Nonzero means same, but note open failures, too.  */
 boolean trace_file_tries;
 
+/* Nonzero means version number was printed, so exit successfully
+   instead of complaining if no input files are given.  */
+boolean version_printed;
+
 /* 1 => write load map.  */
 boolean write_map;
 
@@ -143,7 +147,7 @@ main (argc, argv)
   bfd_init ();
 
   /* Initialize the data about options.  */
-  trace_files = trace_file_tries = false;
+  trace_files = trace_file_tries = version_printed = false;
   write_map = false;
   config.build_constructors = true;
   command_line.force_common_definition = false;
@@ -208,6 +212,8 @@ main (argc, argv)
 
   if (lang_has_input_file == false)
     {
+      if (version_printed)
+	exit (0);
       einfo ("%P%F: no input files\n");
     }
 

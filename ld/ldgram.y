@@ -118,14 +118,14 @@ static int error_index;
 %token NAME DEFINED TARGET_K SEARCH_DIR MAP ENTRY 
 %token OPTION_e OPTION_c OPTION_noinhibit_exec OPTION_s OPTION_S OPTION_sort_common OPTION_warn_common
 %token OPTION_EB OPTION_EL OPTION_G OPTION_Gval OPTION_help
-%token OPTION_format OPTION_oformat  OPTION_F OPTION_u OPTION_Bstatic OPTION_N
+%token OPTION_format OPTION_oformat  OPTION_F OPTION_u OPTION_y OPTION_Bstatic OPTION_N
 %token <integer> SIZEOF NEXT ADDR 
 %token OPTION_d OPTION_dc OPTION_dp OPTION_x OPTION_X OPTION_defsym
 %token OPTION_v OPTION_V OPTION_m OPTION_memul OPTION_M OPTION_t STARTUP HLL SYSLIB FLOAT  NOFLOAT 
 %token OPTION_L OPTION_Map
 %token OPTION_n OPTION_r OPTION_o OPTION_b  OPTION_R OPTION_relax OPTION_version
 %token <name> OPTION_l OPTION_Lfile OPTION_T OPTION_Aarch OPTION_Tfile
-%token <name> OPTION_Texp OPTION_y
+%token <name> OPTION_Texp OPTION_esymbol OPTION_usymbol OPTION_ysymbol
 %token OPTION_Ur 
 %token ORIGIN FILL OPTION_g
 %token LENGTH    CREATE_OBJECT_SYMBOLS INPUT OUTPUT  CONSTRUCTORS
@@ -165,16 +165,18 @@ command_line_option:
 	|	OPTION_v
 			{	
 			ldversion(0);
+			version_printed = true;
 			}
 	|	OPTION_V
 			{	
 			ldversion(1);
+			version_printed = true;
 			trace_file_tries = true;
 			}
 	|	OPTION_version
 			{	
 			ldversion(0);
-			exit(0);
+			version_printed = true;
 			}
 	|	OPTION_t {
 			trace_files = true;
@@ -218,6 +220,9 @@ command_line_option:
         |       OPTION_u NAME {
 			ldlang_add_undef($2);
 	      	}
+        |       OPTION_usymbol {
+			ldlang_add_undef($1);
+	      	}
 	|	OPTION_r {
 			link_info.relocateable = true;
 			config.build_constructors = false;
@@ -236,6 +241,9 @@ command_line_option:
 			}
 	|	OPTION_e NAME
 			{ lang_add_entry($2); 
+			}
+	|	OPTION_esymbol
+			{ lang_add_entry($1); 
 			}
 	|	OPTION_X {
 			link_info.discard = discard_l;
@@ -292,7 +300,11 @@ command_line_option:
 			lang_section_start($1,exp_intop($3));
 			hex_mode = 0; 
 		}
-	|	OPTION_y
+	|	OPTION_y NAME
+			{
+			add_ysym($2);
+			}
+	|	OPTION_ysymbol
 			{
 			add_ysym($1);
 			}

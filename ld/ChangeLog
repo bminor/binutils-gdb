@@ -1,3 +1,9 @@
+Thu Jan 27 12:35:01 1994  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	* ldmain.c ldmain.h ldgram.y: If -v -V or --version was given, 
+	exit successfully instead of complaining if no input files are
+	given. 
+
 Tue Jan 25 13:19:41 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	* Makefile.in: Format variable definitions consistently.
