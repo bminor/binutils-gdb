@@ -1,6 +1,6 @@
 /* YACC parser for C expressions, for GDB.
    Copyright 1986, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
-   1998, 1999, 2000
+   1998, 1999, 2000, 2003
    Free Software Foundation, Inc.
 
 This file is part of GDB.
@@ -831,6 +831,8 @@ typebase  /* Implements (approximately): (type-qualifier)* type-specifier */
 			{ $$ = builtin_type_long_long; }
 	|	SIGNED_KEYWORD LONG LONG
 			{ $$ = builtin_type_long_long; }
+	|	SIGNED_KEYWORD LONG LONG INT_KEYWORD
+			{ $$ = builtin_type_long_long; }
 	|	UNSIGNED LONG LONG
 			{ $$ = builtin_type_unsigned_long_long; }
 	|	UNSIGNED LONG LONG INT_KEYWORD
@@ -839,10 +841,6 @@ typebase  /* Implements (approximately): (type-qualifier)* type-specifier */
 			{ $$ = builtin_type_unsigned_long_long; }
 	|	LONG LONG UNSIGNED INT_KEYWORD
 			{ $$ = builtin_type_unsigned_long_long; }
-	|	SIGNED_KEYWORD LONG LONG
-			{ $$ = lookup_signed_typename ("long long"); }
-	|	SIGNED_KEYWORD LONG LONG INT_KEYWORD
-			{ $$ = lookup_signed_typename ("long long"); }
 	|	SHORT INT_KEYWORD
 			{ $$ = builtin_type_short; }
 	|	SHORT SIGNED_KEYWORD INT_KEYWORD

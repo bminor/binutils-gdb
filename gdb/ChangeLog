@@ -1,3 +1,9 @@
+2003-05-18  Andreas Schwab  <schwab@suse.de>
+
+	* c-exp.y (typebase): Remove duplicate occurence of
+	`SIGNED_KEYWORD LONG LONG'.  Use builtin_type_long_long instead
+	of lookup_signed_typename. 
+
 2003-05-18  Mark Kettenis  <kettenis@gnu.org>
 
 	* dwarf2loc.c (find_location_expression): Change type of second
