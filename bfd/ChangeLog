@@ -1,3 +1,7 @@
+2002-02-14  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf.c (elf_fake_sections): Use SHT_NOBITS when SEC_NEVER_LOAD.
+
 2002-02-13  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* config.bfd (sh-*-linux*, sh-*-elf* | sh-*-rtemself*): Add sh64
