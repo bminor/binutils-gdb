@@ -2,7 +2,6 @@ dnl Process this file with autoconf to produce a configure script.
 AC_PREREQ(2.3)dnl
 AC_INIT(main.c)
 
-CC=${CC-cc}
 AC_PROG_CC
 AC_AIX
 AC_MINIX
@@ -432,19 +431,19 @@ mips64*-big-*)		gdb_target=bigmips64 ;;
 mips*-big-*)		gdb_target=bigmips ;;
 mips*-dec-mach3*)	gdb_target=mach3 ;;
 mips*-dec-*)		gdb_target=decstation ;;
-mips64*el-*-ecoff*)	gdb_target=idtl64 ;;
-mips64*-idt-ecoff*)	gdb_target=idt64 ;;
+mips64*el-*-ecoff*)	gdb_target=embedl64 ;;
+mips64*-*-ecoff*)	gdb_target=embed64 ;;
 mips64*vr4300*el-*-elf*)	gdb_target=vr4300el ;;
 mips64*vr4300*-*-elf*)	gdb_target=vr4300 ;;
-mips64*el-*-elf*)	gdb_target=idtl64 ;;
-mips64*-*-elf*)		gdb_target=idt64 ;;
-mips*el-*-ecoff*)	gdb_target=idtl ;;
-mips*-*-ecoff*)		gdb_target=idt ;;
+mips64*el-*-elf*)	gdb_target=embedl64 ;;
+mips64*-*-elf*)		gdb_target=embed64 ;;
+mips*el-*-ecoff*)	gdb_target=embedl ;;
+mips*-*-ecoff*)		gdb_target=embed ;;
 # start-sanitize-gm
-mips*-*-magic*)		gdb_target=idt ;;
+mips*-*-magic*)		gdb_target=embed ;;
 # end-sanitize-gm
-mips*el-*-elf*)		gdb_target=idtl ;;
-mips*-*-elf*)		gdb_target=idt ;;
+mips*el-*-elf*)		gdb_target=embedl ;;
+mips*-*-elf*)		gdb_target=embed ;;
 mips*-little-*)		gdb_target=littlemips ;;
 mips*-sgi-irix5*)	gdb_target=irix5 ;;
 mips*-sgi-*)		gdb_target=irix3 ;;

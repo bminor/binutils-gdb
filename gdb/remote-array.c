@@ -41,6 +41,8 @@
 #include "monitor.h"
 #include "remote-utils.h"
 
+extern int baud_rate;
+
 static const char hexchars[]="0123456789abcdef";
 static char *hex2mem();
 
@@ -397,7 +399,7 @@ static void
 expect_prompt(discard)
      int discard;
 {
-  expect (expect_prompt, discard);
+  expect (">> ", discard);
 }
 
 /*
@@ -557,6 +559,7 @@ array_create_inferior (execfile, args, env)
  * array_open -- open a connection to a remote debugger.
  *	NAME is the filename used for communication.
  */
+static int baudrate = 9600;
 static char dev_name[100];
 
 static void
@@ -566,8 +569,6 @@ array_open(args, name, from_tty)
      int from_tty;
 {
   char packet[PBUFSIZ];
-
-  baud_rate = 4800;		/* this is the only supported baud rate */
 
   if (args == NULL)
     error ("Use `target %s DEVICE-NAME' to use a serial port, or \n\
@@ -610,14 +611,14 @@ array_open(args, name, from_tty)
      */
     debuglogs (3, "Trying to ACK the target's debug stub");
     /* unless your are on the new hardware, the old board won't initialize
-       because the '+' doesn't flush output like it does on the new ROMS.
+       because the '@' doesn't flush output like it does on the new ROMS.
      */
-    printf_monitor ("+");	/* ask for the last signal */
+    printf_monitor ("@");	/* ask for the last signal */
     expect_prompt(1);		/* See if we get a expect_prompt */   
     make_gdb_packet (packet, "?");	/* ask for a bogus packet */
     if (array_send_packet (packet) == 0)
       error ("Couldn't transmit packet\n");
-    printf_monitor ("+\n");	/* force it to flush stdout */
+    printf_monitor ("@\n");	/* force it to flush stdout */
    expect_prompt(1);		/* See if we get a expect_prompt */
 
   if (from_tty)
@@ -718,7 +719,7 @@ array_wait (pid, status)
 
   timeout = 0;		/* Don't time out -- user program is running. */
 
- expect_prompt(0);    /* Wait for expect_prompt, outputting extraneous text */
+  expect_prompt(0);    /* Wait for expect_prompt, outputting extraneous text */
   debuglogs (4, "array_wait(), got the expect_prompt.");
 
   status->kind = TARGET_WAITKIND_STOPPED;
@@ -842,7 +843,7 @@ static void
 array_files_info ()
 {
   printf ("\tAttached to %s at %d baud.\n",
-	  dev_name, baud_rate);
+	  dev_name, baudrate);
 }
 
 /*
@@ -1024,8 +1025,8 @@ array_insert_breakpoint (addr, shadow)
       if (sr_get_debug() > 4)
 	printf ("Breakpoint at %x\n", addr);
       array_read_inferior_memory(addr, shadow, memory_breakpoint_size);
-      printf_monitor("brk 0x%x\n", addr);
-     expect_prompt(1);
+      printf_monitor("b 0x%x\n", addr);
+      expect_prompt(1);
       return 0;
     }
   }
@@ -1050,8 +1051,8 @@ array_remove_breakpoint (addr, shadow)
     if (breakaddr[i] == addr) {
       breakaddr[i] = 0;
       /* some monitors remove breakpoints based on the address */
-      printf_monitor("unbrk %x\n", i);
-     expect_prompt(1);
+      printf_monitor("bd %x\n", i);
+      expect_prompt(1);
       return 0;
     }
   }
@@ -1195,12 +1196,12 @@ array_send_packet (packet)
 	return 1;
       case SERIAL_TIMEOUT:
 	debuglogs (3, "Timed out reading serial port\n");
-	printf_monitor("+");		/* resync with the monitor */
+	printf_monitor("@");		/* resync with the monitor */
        expect_prompt(1);		/* See if we get a expect_prompt */   
 	break;            /* Retransmit buffer */
       case '-':
 	debuglogs (3, "Got NAK\n");
-	printf_monitor("+");		/* resync with the monitor */
+	printf_monitor("@");		/* resync with the monitor */
        expect_prompt(1);		/* See if we get a expect_prompt */   
 	break;
       case '$':
@@ -1279,7 +1280,7 @@ array_get_packet (packet)
 	  debuglogs (3, "\nGDB packet checksum zero, must be a bogus packet\n");
 	if (csum == pktcsum) {
 	  debuglogs (3, "\nGDB packet checksum correct, packet data is \"%s\",\n", packet);
-	  printf_monitor ("+");
+	  printf_monitor ("@");
 	 expect_prompt (1);
 	  return 1;
 	}
@@ -1418,5 +1419,6 @@ void
 _initialize_array ()
 {
   add_target (&array_ops);
+  baud_rate = 4800;			/* this is the only supported baud rate */
 }
 

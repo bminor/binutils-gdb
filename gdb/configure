@@ -409,7 +409,6 @@ fi
 
 
 
-CC=${CC-cc}
 # Extract the first word of "gcc", so it can be a program name with args.
 set dummy gcc; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
@@ -498,7 +497,7 @@ else
   # On the NeXT, cc -E runs the code through the compiler's parser,
   # not just through cpp.
   cat > conftest.$ac_ext <<EOF
-#line 502 "configure"
+#line 501 "configure"
 #include "confdefs.h"
 #include <assert.h>
 Syntax Error
@@ -512,7 +511,7 @@ else
   rm -rf conftest*
   CPP="${CC-cc} -E -traditional-cpp"
   cat > conftest.$ac_ext <<EOF
-#line 516 "configure"
+#line 515 "configure"
 #include "confdefs.h"
 #include <assert.h>
 Syntax Error
@@ -539,7 +538,7 @@ echo "$ac_t""$CPP" 1>&6
 
 echo $ac_n "checking for AIX""... $ac_c" 1>&6
 cat > conftest.$ac_ext <<EOF
-#line 543 "configure"
+#line 542 "configure"
 #include "confdefs.h"
 #ifdef _AIX
   yes
@@ -566,7 +565,7 @@ if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 570 "configure"
+#line 569 "configure"
 #include "confdefs.h"
 #include <minix/config.h>
 EOF
@@ -891,7 +890,7 @@ else
   ac_cv_c_cross=yes
 else
 cat > conftest.$ac_ext <<EOF
-#line 895 "configure"
+#line 894 "configure"
 #include "confdefs.h"
 main(){return(0);}
 EOF
@@ -912,7 +911,7 @@ if eval "test \"`echo '$''{'ac_cv_header_stdc'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 916 "configure"
+#line 915 "configure"
 #include "confdefs.h"
 #include <stdlib.h>
 #include <stdarg.h>
@@ -934,7 +933,7 @@ rm -f conftest*
 if test $ac_cv_header_stdc = yes; then
   # SunOS 4.x string.h does not declare mem*, contrary to ANSI.
 cat > conftest.$ac_ext <<EOF
-#line 938 "configure"
+#line 937 "configure"
 #include "confdefs.h"
 #include <string.h>
 EOF
@@ -952,7 +951,7 @@ fi
 if test $ac_cv_header_stdc = yes; then
   # ISC 2.0.2 stdlib.h does not declare free, contrary to ANSI.
 cat > conftest.$ac_ext <<EOF
-#line 956 "configure"
+#line 955 "configure"
 #include "confdefs.h"
 #include <stdlib.h>
 EOF
@@ -973,7 +972,7 @@ if test "$cross_compiling" = yes; then
   ac_cv_header_stdc=no
 else
 cat > conftest.$ac_ext <<EOF
-#line 977 "configure"
+#line 976 "configure"
 #include "confdefs.h"
 #include <ctype.h>
 #define ISLOWER(c) ('a' <= (c) && (c) <= 'z')
@@ -1010,7 +1009,7 @@ if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1014 "configure"
+#line 1013 "configure"
 #include "confdefs.h"
 #include <$ac_hdr>
 EOF
@@ -1043,7 +1042,7 @@ if eval "test \"`echo '$''{'ac_cv_header_stat_broken'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1047 "configure"
+#line 1046 "configure"
 #include "confdefs.h"
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -1101,7 +1100,7 @@ else
   ac_cv_func_mmap=no
 else
 cat > conftest.$ac_ext <<EOF
-#line 1105 "configure"
+#line 1104 "configure"
 #include "confdefs.h"
 
 /* Thanks to Mike Haertel and Jim Avera for this test. */
@@ -1320,7 +1319,7 @@ test -z "$x_direct_test_library" && x_direct_test_library=Xt
 test -z "$x_direct_test_function" && x_direct_test_function=XtMalloc
 test -z "$x_direct_test_include" && x_direct_test_include=X11/Intrinsic.h
 cat > conftest.$ac_ext <<EOF
-#line 1324 "configure"
+#line 1323 "configure"
 #include "confdefs.h"
 #include <$x_direct_test_include>
 EOF
@@ -1383,7 +1382,7 @@ rm -f conftest*
 ac_save_LIBS="$LIBS"
 LIBS="-l$x_direct_test_library $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 1387 "configure"
+#line 1386 "configure"
 #include "confdefs.h"
 
 int main() { return 0; }
@@ -1501,7 +1500,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-lICE  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 1505 "configure"
+#line 1504 "configure"
 #include "confdefs.h"
 
 int main() { return 0; }
@@ -1544,7 +1543,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-ldnet  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 1548 "configure"
+#line 1547 "configure"
 #include "confdefs.h"
 
 int main() { return 0; }
@@ -1578,7 +1577,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-ldnet_stub  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 1582 "configure"
+#line 1581 "configure"
 #include "confdefs.h"
 
 int main() { return 0; }
@@ -1617,7 +1616,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-lnsl  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 1621 "configure"
+#line 1620 "configure"
 #include "confdefs.h"
 
 int main() { return 0; }
@@ -1655,7 +1654,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-lsocket  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 1659 "configure"
+#line 1658 "configure"
 #include "confdefs.h"
 
 int main() { return 0; }
@@ -1712,7 +1711,7 @@ if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1716 "configure"
+#line 1715 "configure"
 #include "confdefs.h"
 #include <tk.h>
 EOF
@@ -1814,7 +1813,7 @@ if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1818 "configure"
+#line 1817 "configure"
 #include "confdefs.h"
 #include <tclInt.h>
 EOF
@@ -2234,19 +2233,19 @@ mips64*-big-*)		gdb_target=bigmips64 ;;
 mips*-big-*)		gdb_target=bigmips ;;
 mips*-dec-mach3*)	gdb_target=mach3 ;;
 mips*-dec-*)		gdb_target=decstation ;;
-mips64*el-*-ecoff*)	gdb_target=idtl64 ;;
-mips64*-idt-ecoff*)	gdb_target=idt64 ;;
+mips64*el-*-ecoff*)	gdb_target=embedl64 ;;
+mips64*-*-ecoff*)	gdb_target=embed64 ;;
 mips64*vr4300*el-*-elf*)	gdb_target=vr4300el ;;
 mips64*vr4300*-*-elf*)	gdb_target=vr4300 ;;
-mips64*el-*-elf*)	gdb_target=idtl64 ;;
-mips64*-*-elf*)		gdb_target=idt64 ;;
-mips*el-*-ecoff*)	gdb_target=idtl ;;
-mips*-*-ecoff*)		gdb_target=idt ;;
+mips64*el-*-elf*)	gdb_target=embedl64 ;;
+mips64*-*-elf*)		gdb_target=embed64 ;;
+mips*el-*-ecoff*)	gdb_target=embedl ;;
+mips*-*-ecoff*)		gdb_target=embed ;;
 # start-sanitize-gm
-mips*-*-magic*)		gdb_target=idt ;;
+mips*-*-magic*)		gdb_target=embed ;;
 # end-sanitize-gm
-mips*el-*-elf*)		gdb_target=idtl ;;
-mips*-*-elf*)		gdb_target=idt ;;
+mips*el-*-elf*)		gdb_target=embedl ;;
+mips*-*-elf*)		gdb_target=embed ;;
 mips*-little-*)		gdb_target=littlemips ;;
 mips*-sgi-irix5*)	gdb_target=irix5 ;;
 mips*-sgi-*)		gdb_target=irix3 ;;
