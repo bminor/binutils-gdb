@@ -1,5 +1,6 @@
 Mon Oct 28 17:32:46 1996  Stu Grossman  (grossman@critters.cygnus.com)
 
+	* configure.in:  Exclude mmalloc from i386-windows.
 	* config/mh-windows:  Add rules for building MSVC makefiles.
 
 Thu Oct 24 09:22:46 1996  Stu Grossman  (grossman@critters.cygnus.com)
