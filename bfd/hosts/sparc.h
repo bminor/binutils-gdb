@@ -16,7 +16,7 @@ char *EXFUN(mktemp,(CONST char*));
 extern int EXFUN(fflush,(FILE *));
 extern int EXFUN(write,(int, CONST char *, int));
 extern int EXFUN(index,(CONST char *, char c));
-extern int EXFUN(abort,(void));
+extern void EXFUN(abort,(void));
 extern int EXFUN(close,(int));
 extern int EXFUN(fcntl,(int des, int cmd, int e));
 extern int EXFUN(fprintf,(FILE *,char *,...));

@@ -1277,7 +1277,7 @@ typedef struct bfd_target
   SDEF (void, _bfd_debug_info_end, (bfd *));
   SDEF (void, _bfd_debug_info_accumulate, (bfd *, struct sec  *));
   SDEF (bfd_byte *, _bfd_get_relocated_section_contents, (bfd*,struct bfd_seclet_struct *));
-  SDEF (boolean,_bfd_relax_section,(bfd *, struct sec *, struct symbol_cache_entry **, struct bfd_seclet_struct *));
+  SDEF (boolean,_bfd_relax_section,(bfd *, struct sec *, struct symbol_cache_entry **));
   SDEF(void, _bfd_coff_swap_aux_in,(
        bfd            *abfd ,
        PTR             ext,
