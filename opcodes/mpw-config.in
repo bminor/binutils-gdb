@@ -10,10 +10,12 @@ If "{target_arch}" =~ /m68k/
 	Set BFD_MACHINES  '"{o}"m68k-dis.c.o'
 Else If "{target_arch}" =~ /powerpc/
 	Set BFD_MACHINES  '"{o}"ppc-dis.c.o "{o}"ppc-opc.c.o'
+Else If "{target_arch}" =~ /i386/
+	Set BFD_MACHINES  '"{o}"i386-dis.c.o'
 Else If "{target_arch}" =~ /mips/
 	Set BFD_MACHINES  '"{o}"mips-dis.c.o "{o}"mips-opc.c.o'
-Else If "{target_arch}" =~ /sparc/
-	Set BFD_MACHINES  '"{o}"sparc-dis.c.o "{o}"sparc-opc.c.o'
+Else If "{target_arch}" =~ /sh/
+	Set BFD_MACHINES  '"{o}"sh-dis.c.o'
 End If
 
 Echo '# Start from mpw-config.in' > "{o}"mk.tmp

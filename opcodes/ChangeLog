@@ -1,3 +1,17 @@
+Thu Jun 15 17:23:31 1995  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* mpw-config.in: Add sh and i386 configs, remove sparc config.
+	* sh-opc.h: Add copyright.
+
+Mon Jun  5 03:30:43 1995  Ken Raeburn  <raeburn@kr-laptop.cygnus.com>
+
+	* Makefile.in (crunch-m68k): Delete extra target accidentally
+	checked in a while ago.
+
+Wed May 24 16:22:13 1995  Jim Wilson  <wilson@chestnut.cygnus.com>
+
+	* sh-opc.h (sh_table): Add SH3 support.
+
 Wed May 24 14:16:08 1995  Steve Chamberlain  <sac@slash.cygnus.com>
 
 	* sh-opc.h: Added bsrf and braf.
