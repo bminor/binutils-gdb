@@ -1,3 +1,7 @@
+2005-03-04  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* Makefile.in (stamp-h): Set CONFIG_HEADERS explicitly.
+
 2005-03-03  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* inferiors.c (change_inferior_id, add_thread, find_inferior_id):
