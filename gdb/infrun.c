@@ -1,5 +1,5 @@
 /* Start and stop the inferior process, for GDB.
-   Copyright (C) 1986, 1987 Free Software Foundation, Inc.
+   Copyright (C) 1986, 1987, 1988 Free Software Foundation, Inc.
 
 GDB is distributed in the hope that it will be useful, but WITHOUT ANY
 WARRANTY.  No author or distributor accepts responsibility to anyone
@@ -89,6 +89,10 @@ static int stop_after_attach;
    since the inferior stopped.  */
 
 int pc_changed;
+
+/* Nonzero if debugging a remote machine via a serial link or ethernet.  */
+
+int remote_debugging;
 
 /* Save register contents here when about to pop a stack dummy frame.  */
 
@@ -238,8 +242,38 @@ start_inferior ()
   /* Install inferior's terminal modes.  */
   terminal_inferior ();
 
+  if (remote_debugging)
+    {
+      trap_expected = 0;
+      fetch_inferior_registers();
+      set_current_frame (read_register(FP_REGNUM));
+      stop_frame = get_current_frame();
+      inferior_pid = 3;
+      if (insert_breakpoints())
+	fatal("Can't insert breakpoints");
+      breakpoints_inserted = 1;
+      proceed(-1, -1, 0);
+    }
+  else
+    {
+      wait_for_inferior ();
+      normal_stop ();
+    }
+}
+
+/* Start remote-debugging of a machine over a serial link.  */
+
+void
+start_remote ()
+{
+  clear_proceed_status ();
+  running_in_shell = 0;
+  trap_expected = 0;
+  inferior_pid = 3;
+  breakpoints_inserted = 0;
+  mark_breakpoints_out ();
   wait_for_inferior ();
-  normal_stop ();
+  normal_stop();
 }
 
 #ifdef ATTACH_DETACH
@@ -290,7 +324,16 @@ wait_for_inferior ()
   while (1)
     {
       prev_pc = read_pc ();
-      pid = wait (&w);
+
+      if (remote_debugging)
+	remote_wait (&w);
+      else
+	{
+	  pid = wait (&w);
+	  if (pid != inferior_pid)
+	    continue;
+	}
+
       pc_changed = 0;
       fetch_inferior_registers ();
       stop_pc = read_pc ();
@@ -530,6 +573,7 @@ wait_for_inferior ()
 	  else if (!random_signal && step_range_end)
 	    {
 	      newfun = find_pc_function (stop_pc);
+	      newmisc = -1;
 	      if (newfun)
 		{
 		  newfun_pc = BLOCK_START (SYMBOL_BLOCK_VALUE (newfun))

@@ -1,6 +1,6 @@
 /* Get info from stack frames;
    convert between frames, blocks, functions and pc values.
-   Copyright (C) 1986, 1987 Free Software Foundation, Inc.
+   Copyright (C) 1986, 1987, 1988 Free Software Foundation, Inc.
 
 GDB is distributed in the hope that it will be useful, but WITHOUT ANY
 WARRANTY.  No author or distributor accepts responsibility to anyone
@@ -288,17 +288,33 @@ find_pc_function (pc)
 
 int
 find_pc_misc_function (pc)
-     CORE_ADDR pc;
+     register CORE_ADDR pc;
 {
-  register int i;
+  register int lo = 0;
+  register int hi = misc_function_count-1;
+  register int new;
+  register int distance;
 
   /* Note that the last thing in the vector is always _etext.  */
-  for (i = 0; i < misc_function_count; i++)
-    {
-      if (pc < misc_function_vector[i].address)
-	return i - 1;
-    }
-  return -1;
+
+  /* trivial reject range test */
+  if (pc < misc_function_vector[0].address || 
+      pc > misc_function_vector[hi].address)
+    return -1;
+
+  do {
+    new = (lo + hi) >> 1;
+    distance = misc_function_vector[new].address - pc;
+    if (distance == 0)
+      return new;		/* an exact match */
+    else if (distance > 0)
+      hi = new;
+    else
+      lo = new;
+  } while (hi-lo != 1);
+
+  /* if here, we had no exact match, so return the lower choice */
+  return lo;
 }
 
 /* Return the innermost stack frame executing inside of the specified block,

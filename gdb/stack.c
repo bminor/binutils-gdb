@@ -39,6 +39,11 @@ FRAME selected_frame;
 
 int selected_frame_level;
 
+/* Nonzero means print the full filename and linenumber
+   when a frame is printed, and do so in a format programs can parse.  */
+
+int frame_file_full_name = 0;
+
 static void select_calling_frame ();
 
 void print_frame_info ();
@@ -114,9 +119,13 @@ print_frame_info (fi, level, source, args)
 
   if (source != 0 && sal.symtab)
     {
+      int done = 0;
       if (source < 0 && fi->pc != sal.pc)
 	printf ("0x%x\t", fi->pc);
-      print_source_lines (sal.symtab, sal.line, sal.line + 1);
+      if (frame_file_full_name)
+	done = identify_source_line (sal.symtab, sal.line);
+      if (!done)
+	print_source_lines (sal.symtab, sal.line, sal.line + 1);
       current_source_line = max (sal.line - 5, 1);
     }
   if (source != 0)

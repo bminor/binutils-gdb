@@ -1,5 +1,5 @@
 /* Print values for GNU debugger gdb.
-   Copyright (C) 1986, 1987 Free Software Foundation, Inc.
+   Copyright (C) 1986, 1987, 1988 Free Software Foundation, Inc.
 
 GDB is distributed in the hope that it will be useful, but WITHOUT ANY
 WARRANTY.  No author or distributor accepts responsibility to anyone
@@ -95,6 +95,10 @@ decode_format (string_ptr, oformat, osize)
 	break;
     }
 
+  /* Make sure 'g' size is not used on integer types.  */
+  if (val.size == 'g' && val.format != 'f')
+    val.size = 'w';
+
   while (*p == ' ' || *p == '\t') p++;
   *string_ptr = p;
 
@@ -103,12 +107,15 @@ decode_format (string_ptr, oformat, osize)
 
 /* Print value VAL on stdout according to FORMAT, a letter or 0.
    Do not end with a newline.
-   0 means print VAL according to its own type.  */
+   0 means print VAL according to its own type.
+   SIZE is the letter for the size of datum being printed.
+   This is used to pad hex numbers so they line up.  */
 
 static void
-print_formatted (val, format)
+print_formatted (val, format, size)
      register value val;
      register char format;
+     char size;
 {
   register CORE_ADDR val_long;
   int len = TYPE_LENGTH (VALUE_TYPE (val));
@@ -143,7 +150,24 @@ print_formatted (val, format)
       break;
 
     case 'x':
-      printf ("0x%x", val_long);
+      switch (size)
+	{
+	case 'b':
+	  printf ("0x%02x", val_long);
+	  break;
+	case 'h':
+	  printf ("0x%04x", val_long);
+	  break;
+	case 0:		/* no size specified, like in print */
+	case 'w':
+	  printf ("0x%08x", val_long);
+	  break;
+	case 'g':
+	  printf ("0x%16x", val_long);
+	  break;
+	default:
+	  error ("Undefined output size \"%c\".", size);
+	}
       break;
 
     case 'd':
@@ -279,6 +303,7 @@ do_examine (fmt, addr)
   while (count > 0)
     {
       print_address (next_address, stdout);
+      fputc (':', stdout);
       for (i = maxelts;
 	   i > 0 && count > 0;
 	   i--, count--)
@@ -287,7 +312,7 @@ do_examine (fmt, addr)
 	  /* Note that this sets next_address for the next object.  */
 	  last_examine_address = next_address;
 	  last_examine_value = value_at (val_type, next_address);
-	  print_formatted (last_examine_value, format);
+	  print_formatted (last_examine_value, format, size);
 	}
       fputc ('\n', stdout);
       fflush (stdout);
@@ -339,10 +364,11 @@ print_command (exp)
   else
     val = access_value_history (0);
 
+  if (!val) return;       /*  C++  */
   histindex = record_latest_value (val);
   printf ("$%d = ", histindex);
 
-  print_formatted (val, format);
+  print_formatted (val, format, fmt.size);
   printf ("\n");
 
   if (cleanup)
@@ -372,7 +398,7 @@ output_command (exp)
 
   val = evaluate_expression (expr);
 
-  print_formatted (val, format);
+  print_formatted (val, format, fmt.size);
 
   do_cleanups (old_chain);
 }
@@ -388,17 +414,41 @@ set_command (exp)
   do_cleanups (old_chain);
 }
 
+/* C++: Modified to give useful information about variable which
+   hang off of `this'.  */
 static void
 address_info (exp)
      char *exp;
 {
   register struct symbol *sym;
   register CORE_ADDR val;
+  struct block *block, *get_selected_block ();
 
   if (exp == 0)
     error ("Argument required.");
 
-  sym = lookup_symbol (exp, get_selected_block (), VAR_NAMESPACE);
+  block = get_selected_block ();
+  sym = lookup_symbol_1 (exp, block, VAR_NAMESPACE);
+  if (! sym)
+    {
+      value v;
+
+      /* C++: see if it hangs off of `this'.  Must
+	 not inadvertently convert from a method call
+	 to data ref.  */
+      v = value_of_this (0);
+      if (v)
+	{
+	  val = check_field (v, exp);
+	  if (val)
+	    {
+	      printf ("Symbol \"%s\" is a field of the local class variable `this'\n", exp);
+	      return;
+	    }
+	}
+      else
+	sym = lookup_symbol_2 (exp, 0, VAR_NAMESPACE);
+    }
   if (sym == 0)
     {
       register int i;
@@ -522,9 +572,12 @@ whatis_command (exp)
   else
     val = access_value_history (0);
 
-  printf ("type = ");
-  type_print (VALUE_TYPE (val), "", stdout, 1);
-  printf ("\n");
+  if (val != 0)
+    {
+      printf ("type = ");
+      type_print (VALUE_TYPE (val), "", stdout, 1);
+      printf ("\n");
+    }
 
   if (exp)
     do_cleanups (old_chain);
@@ -585,6 +638,143 @@ ptype_command (typename)
 
   type_print (type, "", stdout, 1);
   printf ("\n");
+}
+
+/* Print all the methods that correspond to the name METHOD.
+   Can optionally qualify the method with a CLASSNAME, as
+   in CLASSNAME :: METHODNAME.  This routine does not call
+   parse_c_expression, so the input must conform to one of
+   these two forms.  */
+
+static void
+pmethod_command (exp)
+     char *exp;
+{
+# if 0
+  struct expression *expr;
+  register value val;
+  register struct cleanup *old_chain;
+  char *classname, *methodname;
+
+  methodname = exp;
+  while (*exp++ <= ' ') ;	/* remove leading whitespace */
+  if (exp[-1] == ':')
+    if (*exp == ':')
+      classname = (char *)1;
+    else error ("Invalid syntax: \"%s\"", methodname);
+  else
+    {
+      classname = exp-1;
+      while (*exp++ != ':') ;
+      exp[-1] = '\0';
+      if (*exp == ':')
+	{
+	  while (*exp++ <= ' ') ; /* remove leading 2nd whitespace */
+	  methodname = exp-1;
+	  while (((*exp | 0x20) >= 'a' && ((*exp | 0x20) <= 'z')) || *exp == '_')
+	    exp++;
+	  if (*exp)
+	    {
+	      *exp++ = '\0';
+	      while (*exp)
+		if (*exp > ' ') error ("junk after method name");
+	    }
+	}
+      else error ("Invalid syntax: \"%s\"", methodname);
+    }
+  if (classname)
+    {
+      if (classname != (char *)1)
+	classtype = lookup_typename (classname);
+      else
+	{
+	  register struct symtab *s;
+	  register struct blockvector *bv;
+	  struct blockvector *prev_bv = 0;
+	  register struct block *b;
+	  register int i, j;
+	  register struct symbol *sym;
+	  char *val;
+	  int found_in_file;
+	  static char *classnames[]
+	    = {"variable", "function", "type", "method"};
+	  int print_count = 0;
+
+	  if (regexp)
+	    if (val = (char *) re_comp (regexp))
+	      error ("Invalid regexp: %s", val);
+
+	  printf (regexp
+		  ? "All %ss matching regular expression \"%s\":\n"
+		  : "All defined %ss:\n",
+		  classnames[class],
+		  regexp);
+
+	  for (s = symtab_list; s; s = s->next)
+	    {
+	      found_in_file = 0;
+	      bv = BLOCKVECTOR (s);
+	      /* Often many files share a blockvector.
+		 Scan each blockvector only once so that
+		 we don't get every symbol many times.
+		 It happens that the first symtab in the list
+		 for any given blockvector is the main file.  */
+	      if (bv != prev_bv)
+		for (i = 0; i < 2; i++)
+		  {
+		    b = BLOCKVECTOR_BLOCK (bv, i);
+		    for (j = 0; j < BLOCK_NSYMS (b); j++)
+		      {
+			QUIT;
+			sym = BLOCK_SYM (b, j);
+			if ((regexp == 0 || re_exec (SYMBOL_NAME (sym)))
+			    && ((class == 0 && SYMBOL_CLASS (sym) != LOC_TYPEDEF
+				 && SYMBOL_CLASS (sym) != LOC_BLOCK)
+				|| (class == 1 && SYMBOL_CLASS (sym) == LOC_BLOCK)
+				|| (class == 2 && SYMBOL_CLASS (sym) == LOC_TYPEDEF)
+				|| (class == 3 && SYMBOL_CLASS (sym) == LOC_BLOCK)))
+			  {
+			    if (!found_in_file)
+			      {
+				printf ("\nFile %s:\n", s->filename);
+				print_count += 2;
+			      }
+			    found_in_file = 1;
+			    MORE;
+			    if (i == 1)
+			      printf ("static ");
+
+			    type_print (SYMBOL_TYPE (sym),
+					(SYMBOL_CLASS (sym) == LOC_TYPEDEF
+					 ? "" : SYMBOL_NAME (sym)),
+					stdout, 0);
+			    printf (";\n");
+			  }
+		      }
+		  }
+	      prev_bv = bv;
+	    }
+	}
+    }
+  if (exp)
+    {
+      expr = parse_c_expression (exp);
+      old_chain = make_cleanup (free_current_contents, &expr);
+      val = evaluate_type (expr);
+    }
+  else
+    val = access_value_history (0);
+
+  if (val != 0)
+    {
+      printf ("type = ");
+      type_print (VALUE_TYPE (val), "", stdout, 1);
+      printf ("\n");
+    }
+
+  if (exp)
+    do_cleanups (old_chain);
+# endif
 }
 
 struct display
@@ -767,7 +957,8 @@ do_displays ()
 	    printf ("/%c ", d->format.format);
 	  print_expression (d->exp, stdout);
 	  printf (" = ");
-	  print_formatted (evaluate_expression (d->exp), d->format.format);
+	  print_formatted (evaluate_expression (d->exp),
+			   d->format.format, d->format.size);
 	  printf ("\n");
 	}
       fflush (stdout);
@@ -896,6 +1087,171 @@ print_frame_nameless_args (argsaddr, start, end, stream)
     }
 }
 
+static void
+printf_command (arg)
+     char *arg;
+{
+  register char *f;
+  register char *s = arg;
+  char *string;
+  value *val_args;
+  int nargs = 0;
+  int allocated_args = 20;
+  char *arg_bytes;
+  char *argclass;
+  int i;
+  int argindex;
+  int nargs_wanted;
+
+  val_args = (value *) xmalloc (allocated_args * sizeof (value));
+
+  if (s == 0)
+    error_no_arg ("format-control string and values to print");
+
+  /* Skip white space before format string */
+  while (*s == ' ' || *s == '\t') s++;
+
+  /* A format string should follow, enveloped in double quotes */
+  if (*s++ != '"')
+    error ("Bad format string, missing '\"'.");
+
+  /* Parse the format-control string and copy it into the string STRING,
+     processing some kinds of escape sequence.  */
+
+  f = string = (char *) alloca (strlen (s) + 1);
+  while (*s != '"')
+    {
+      int c = *s++;
+      switch (c)
+	{
+	case '\0':
+	  error ("Bad format string, non-terminated '\"'.");
+	  /* doesn't return */
+
+	case '\\':
+	  switch (c = *s++)
+	    {
+	    case '\\':
+	      *f++ = '\\';
+	      break;
+	    case 'n':
+	      *f++ = '\n';
+	      break;
+	    case 't':
+	      *f++ = '\t';
+	      break;
+	    case 'r':
+	      *f++ = '\r';
+	      break;
+	    case '"':
+	      *f++ = '"';
+	      break;
+	    default:
+	      /* ??? TODO: handle other escape sequences */
+	      error ("Unrecognized \\ escape character in format string.");
+	    }
+	  break;
+
+	default:
+	  *f++ = c;
+	}
+    }
+
+  /* Skip over " and following space and comma.  */
+  s++;
+  *f++ = '\0';
+  while (*s == ' ' || *s == '\t') s++;
+
+  if (*s != ',' && *s != 0)
+    error ("Invalid argument syntax");
+
+  if (*s == ',') s++;
+  while (*s == ' ' || *s == '\t') s++;
+
+  /* Now scan the string for %-specs and see what kinds of args they want.
+     argclass[I] is set to 1 if the Ith arg should be a string.  */
+
+  argclass = (char *) alloca (strlen (s));
+  nargs_wanted = 0;
+  f = string;
+  while (*f)
+    if (*f++ == '%')
+      {
+	while (index ("0123456789.hlL-+ #", *f)) f++;
+	if (*f == 's')
+	  argclass[nargs_wanted++] = 1;
+	else if (*f != '%')
+	  argclass[nargs_wanted++] = 0;
+	f++;
+      }
+
+  /* Now, parse all arguments and evaluate them.
+     Store the VALUEs in VAL_ARGS.  */
+
+  while (*s != '\0')
+    {
+      char *s1;
+      if (nargs == allocated_args)
+	val_args = (value *) xrealloc (val_args,
+				       (allocated_args *= 2)
+				       * sizeof (value));
+      s1 = s;
+      val_args[nargs++] = parse_to_comma_and_eval (&s1);
+      s = s1;
+      if (*s == ',')
+	s++;
+    }
+
+  if (nargs != nargs_wanted)
+    error ("Wrong number of arguments for specified format-string");
+
+  /* Now lay out an argument-list containing the arguments
+     as doubles, integers and C pointers.  */
+
+  arg_bytes = (char *) alloca (sizeof (double) * nargs);
+  argindex = 0;
+  for (i = 0; i < nargs; i++)
+    {
+      if (argclass[i])
+	{
+	  char *str;
+	  int tem, j;
+	  tem = value_as_long (val_args[i]);
+
+	  /* This is a %s argument.  Find the length of the string.  */
+	  for (j = 0; ; j++)
+	    {
+	      char c;
+	      QUIT;
+	      read_memory (tem + j, &c, 1);
+	      if (c == 0)
+		break;
+	    }
+
+	  /* Copy the string contents into a string inside GDB.  */
+	  str = (char *) alloca (j + 1);
+	  read_memory (tem, str, j);
+	  str[j] = 0;
+
+	  /* Pass address of internal copy as the arg to vprintf.  */
+	  *((int *) &arg_bytes[argindex]) = (int) str;
+	  argindex += sizeof (int);
+	}
+      else if (VALUE_TYPE (val_args[i])->code == TYPE_CODE_FLT)
+	{
+	  *((double *) &arg_bytes[argindex]) = value_as_double (val_args[i]);
+	  argindex += sizeof (double);
+	}
+      else
+	{
+	  *((int *) &arg_bytes[argindex]) = value_as_long (val_args[i]);
+	  argindex += sizeof (int);
+	}
+    }
+
+  vprintf (string, arg_bytes);
+}
+
 static
 initialize ()
 {
@@ -925,6 +1281,11 @@ The selected stack frame's lexical context is used to look up the name.");
   add_com ("whatis", class_vars, whatis_command,
 	   "Print data type of expression EXP.");
 
+  add_com ("pmethod", class_vars, pmethod_command,
+	   "Print definitions of method METHOD.\n\
+Argument must resolve to a method name within the containing scope.\n\
+All definitions found go into history array.");
+
   add_info ("display", display_info,
 	    "Expressions to display when program stops, with code numbers.");
   add_com ("undisplay", class_vars, undisplay_command,
@@ -941,6 +1302,9 @@ and examining is done as in the \"x\" command.\n\n\
 With no argument, display all currently requested auto-display expressions.\n\
 Use \"undisplay\" to cancel display requests previously made.");
 
+  add_com ("printf", class_vars, printf_command,
+	"printf \"printf format string\", arg1, arg2, arg3, ..., argn\n\
+This is useful for formatted output in user-defined commands.");
   add_com ("output", class_vars, output_command,
 	   "Like \"print\" but don't put in value history and don't print newline.\n\
 This is useful in user-defined commands.");

@@ -1,5 +1,5 @@
 /* Memory-access and commands for inferior process, for GDB.
-   Copyright (C) 1986, 1987 Free Software Foundation, Inc.
+   Copyright (C) 1986, 1987, 1988 Free Software Foundation, Inc.
 
 GDB is distributed in the hope that it will be useful, but WITHOUT ANY
 WARRANTY.  No author or distributor accepts responsibility to anyone
@@ -31,47 +31,7 @@ anyone else from sharing it farther.  Help stamp out software hoarding!
 #include <signal.h>
 #include <sys/param.h>
 
-#ifdef mac_aux
-/* Warning!  This table is positional and highly dependent on the local
-   system.  Check it closely against <sys/signal.h> when porting. */
-char *sys_siglist[] = {
-	"Signal 0",
-	"Hangup",
-	"Interrupt",
-	"Quit",
-	"Invalid instruction",
-	"Trace/breakpoint trap",
-	"IOT trap",
-	"EMT trap",
-	"Floating point exception",
-	"Killed",
-	"Bus error",
-	"Segmentation fault",
-	"Bad system call",
-	"Broken pipe",
-	"Alarm clock",
-	"Terminated",
-	"User signal 1",
-	"User signal 2",
-	"Child exited",
-	"Power-fail restart",
-	"Stopped",
-	"Stopped (tty input)",
-	"Stopped (tty output)",
-	"Stopped (signal)",
-	"Cputime limit exceeded",
-	"File size limit exceeded",
-	"Virtual timer expired",
-	"Profiling timer expired",
-	"Window changed",
-	"Continued",
-	"Urgent I/O condition",
-	"I/O possible",
-};
-#else
-/* More portable systems do it for you */
 extern char *sys_siglist[];
-#endif
 
 #define ERROR_NO_INFERIOR \
    if (inferior_pid == 0) error ("The program is not being run.");
@@ -161,7 +121,7 @@ set_args_command (args)
   if (!args) args = "";
   inferior_args = concat (" ", args, "");
 }
-  
+
 void
 tty_command (file)
      char *file;
@@ -197,19 +157,32 @@ Start it from the beginning? "))
 	error ("Program already started.");
     }
 
-  if (args)
-    set_args_command (args);
-
-  exec_file = (char *) get_exec_file ();
-  if (from_tty)
+  if (remote_debugging)
     {
-      printf ("Starting program: %s%s\n",
-	      exec_file, inferior_args);
-      fflush (stdout);
+      free (allargs);
+      if (from_tty)
+	{
+	  printf ("Starting program: %s%s\n",
+		  exec_file, inferior_args);
+	  fflush (stdout);
+	}
     }
+  else
+    {
+      if (args)
+	set_args_command (args);
 
-  allargs = concat ("exec ", exec_file, inferior_args);
-  inferior_pid = create_inferior (allargs, environ_vector (inferior_environ));
+      exec_file = (char *) get_exec_file ();
+      if (from_tty)
+	{
+	  printf ("Starting program: %s%s\n",
+		  exec_file, inferior_args);
+	  fflush (stdout);
+	}
+
+      allargs = concat ("exec ", exec_file, inferior_args);
+      inferior_pid = create_inferior (allargs, environ_vector (inferior_environ));
+    }
 
   clear_proceed_status ();
 
@@ -326,6 +299,7 @@ jump_command (arg, from_tty)
      int from_tty;
 {
   register CORE_ADDR addr;
+  struct symtabs_and_lines sals;
   struct symtab_and_line sal;
 
   ERROR_NO_INFERIOR;
@@ -333,7 +307,14 @@ jump_command (arg, from_tty)
   if (!arg)
     error_no_arg ("starting address");
 
-  sal = decode_line_spec (arg, 1);
+  sals = decode_line_spec (arg, 1);
+  if (sals.nelts != 1)
+    {
+      error ("Unreasonable jump request");
+    }
+
+  sal = sals.sals[0];
+  free (sals.sals);
 
   if (sal.symtab == 0 && sal.pc == 0)
     error ("No source file has been specified.");
@@ -751,8 +732,8 @@ registers_info (addr_exp)
 /*
  * attach_command --
  * takes a program started up outside of gdb and ``attaches'' to it.
- * This stops it cold in it's tracks and allows us to start tracing
- * it.  For this to work, we must be able to send the process a
+ * This stops it cold in its tracks and allows us to start tracing it.
+ * For this to work, we must be able to send the process a
  * signal and we must have the same effective uid as the program.
  */
 static void
@@ -762,11 +743,17 @@ attach_command (args, from_tty)
 {
   char *exec_file;
   int pid;
+  int remote;
 
   dont_repeat();
 
   if (!args)
     error_no_arg ("process-id to attach");
+
+  while (*args == ' ' || *args == '\t') args++;
+
+  if (args[0] == '/')
+    remote = 1;
   else
     pid = atoi (args);
 
@@ -782,12 +769,21 @@ attach_command (args, from_tty)
 
   if (from_tty)
     {
-      printf ("Attaching program: %s pid %d\n",
-	      exec_file, pid);
+      if (remote)
+	printf ("Attaching remote machine\n");
+      else
+	printf ("Attaching program: %s pid %d\n",
+		exec_file, pid);
       fflush (stdout);
     }
 
-  attach_program (pid);
+  if (remote)
+    {
+      remote_open (args, from_tty);
+      start_remote ();
+    }
+  else
+    attach_program (pid);
 }
 
 /*

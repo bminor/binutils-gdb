@@ -18,7 +18,6 @@ In other words, go ahead and share GDB, but don't try to stop
 anyone else from sharing it farther.  Help stamp out software hoarding!
 */
 
-#include <sys/types.h>
 #include <sys/file.h>
 #include <stdio.h>
 #include <setjmp.h>
@@ -49,6 +48,13 @@ struct cmd_list_element *infolist;
 
 FILE *instream;
 
+/* Current working directory.  */
+
+char *current_directory;
+
+/* The directory name is actually stored here.  */
+static char dirbuf[MAXPATHLEN];
+
 /* Nonzero if we should refrain from using an X window.  */
 
 int inhibit_windows = 0;
@@ -58,6 +64,8 @@ int inhibit_windows = 0;
    and a prompt string.  */
    
 void (*window_hook) ();
+
+extern int frame_file_full_name;
 
 void free_command_lines ();
 char *read_line ();
@@ -106,6 +114,9 @@ main (argc, argv, envp)
   line = (char *) xmalloc (linesize);
   instream = stdin;
 
+  getwd (dirbuf);
+  current_directory = dirbuf;
+
 #ifdef SET_STACK_LIMIT_HUGE
   {
     struct rlimit rlim;
@@ -118,6 +129,8 @@ main (argc, argv, envp)
   }
 #endif /* SET_STACK_LIMIT_HUGE */
 
+  /* Run the init function of each source file */
+
   /* Look for flag arguments.  */
 
   for (i = 1; i < argc; i++)
@@ -128,6 +141,8 @@ main (argc, argv, envp)
 	inhibit_gdbinit = 1;
       else if (!strcmp (argv[i], "-nw"))
 	inhibit_windows = 1;
+      else if (!strcmp (argv[i], "-fullname"))
+	frame_file_full_name = 1;
       else if (!strcmp (argv[i], "-batch"))
 	batch = 1, quiet = 1;
       else if (argv[i][0] == '-')
@@ -160,7 +175,8 @@ main (argc, argv, envp)
 	  extern void tty_command ();
 
 	  if (!strcmp (arg, "-q") || !strcmp (arg, "-nx")
-	      || !strcmp (arg, "quiet") || !strcmp (arg, "-batch"))
+	      || !strcmp (arg, "-quiet") || !strcmp (arg, "-batch")
+	      || !strcmp (arg, "-fullname"))
 	    /* Already processed above */
 	    continue;
 
@@ -369,6 +385,10 @@ read_line (repeat)
       c = fgetc (instream);
       if (c == -1 || c == '\n')
 	break;
+      else if (c == '\\')
+	if ((c = fgetc (instream)) == '\n')
+	  continue;
+	else ungetc (c, instream);
       if (p - line == linesize - 1)
 	{
 	  linesize *= 2;
@@ -378,7 +398,6 @@ read_line (repeat)
 	}
       *p++ = c;
     }
-
   signal (SIGTSTP, SIG_DFL);
   immediate_quit--;
 
@@ -649,10 +668,12 @@ copying_info ()
 {
   immediate_quit++;
   printf ("		    GDB GENERAL PUBLIC LICENSE\n\
+\n		    (Clarified 11 Feb 1988)\
 \n\
- Copyright (C) 1986 Richard M. Stallman\n\
+ Copyright (C) 1988 Richard M. Stallman\n\
  Everyone is permitted to copy and distribute verbatim copies\n\
  of this license, but changing it is not allowed.\n\
+ You can also use this wording to make the terms for other programs.\n\
 \n\
   The license agreements of most software companies keep you at the\n\
 mercy of those companies.  By contrast, our general public license is\n\
@@ -695,8 +716,8 @@ allowed to distribute or change GDB.\n\
   1. You may copy and distribute verbatim copies of GDB source code as\n\
 you receive it, in any medium, provided that you conspicuously and\n\
 appropriately publish on each copy a valid copyright notice \"Copyright\n\
-\(C) 1987 Free Software Foundation, Inc.\" (or with the year updated if\n\
-that is appropriate); keep intact the notices on all files that refer\n\
+\(C) 1988 Free Software Foundation, Inc.\" (or with whatever year is\n\
+appropriate); keep intact the notices on all files that refer\n\
 to this License Agreement and to the absence of any warranty; and give\n\
 any other recipients of the GDB program a copy of this License\n\
 Agreement along with the program.  You may charge a distribution fee\n\
@@ -717,48 +738,55 @@ Paragraph 1 above, provided that you also do the following:\n\
     that in whole or in part contains or is a derivative of GDB\n\
     or any part thereof, to be licensed to all third parties on terms\n\
     identical to those contained in this License Agreement (except that\n\
-    you may choose to grant more extensive warranty protection to third\n\
-    parties, at your option).\n\
+    you may choose to grant more extensive warranty protection to some\n\
+    or all third parties, at your option).\n\
 \n");
   printf ("\
     c) if the modified program serves as a debugger, cause it\n\
     when started running in the simplest and usual way, to print\n\
     an announcement including a valid copyright notice\n\
-    \"Copyright (C) 1987 Free Software Foundation, Inc.\" (or with\n\
-    the year updated if appropriate), saying that there\n\
-    is no warranty (or else, saying that you provide\n\
-    a warranty) and that users may redistribute the program under\n\
-    these conditions, and telling the user how to view a copy of\n\
-    this License Agreement.\n\
+    \"Copyright (C) 1988 Free Software Foundation, Inc.\" (or with\n\
+    the year that is appropriate), saying that there is no warranty\n\
+    (or else, saying that you provide a warranty) and that users may\n\
+    redistribute the program under these conditions, and telling the user\n\
+    how to view a copy of this License Agreement.\n\
 \n\
     d) You may charge a distribution fee for the physical act of\n\
     transferring a copy, and you may at your option offer warranty\n\
     protection in exchange for a fee.\n\
+\n\
+Mere aggregation of another unrelated program with this program (or its\n\
+derivative) on a volume of a storage or distribution medium does not bring\n\
+the other program under the scope of these terms.\n\
 --Type Return to print more--");
   fflush (stdout);
   read_line ();
 
   printf ("\
-  3. You may copy and distribute GDB or any portion of it in\n\
-compiled, executable or object code form under the terms of Paragraphs\n\
-1 and 2 above provided that you do the following:\n\
+  3. You may copy and distribute GDB (or a portion or derivative of it,\n\
+under Paragraph 2) in object code or executable form under the terms of\n\
+Paragraphs 1 and 2 above provided that you also do one of the following:\n\
 \n\
-    a) cause each such copy to be accompanied by the\n\
-    corresponding machine-readable source code, which must\n\
-    be distributed under the terms of Paragraphs 1 and 2 above; or,\n\
+    a) accompany it with the complete corresponding machine-readable\n\
+    source code, which must be distributed under the terms of\n\
+    Paragraphs 1 and 2 above; or,\n\
 \n\
-    b) cause each such copy to be accompanied by a\n\
-    written offer, with no time limit, to give any third party\n\
-    free (except for a nominal shipping charge) a machine readable\n\
-    copy of the corresponding source code, to be distributed\n\
-    under the terms of Paragraphs 1 and 2 above; or,\n\n");
+    b) accompany it with a written offer, valid for at least three\n\
+    years, to give any third party free (except for a nominal\n\
+    shipping charge) a complete machine-readable copy of the\n\
+    corresponding source code, to be distributed under the terms of\n\
+    Paragraphs 1 and 2 above; or,\n\n");
 
   printf ("\
-    c) in the case of a recipient of GDB in compiled, executable\n\
-    or object code form (without the corresponding source code) you\n\
-    shall cause copies you distribute to be accompanied by a copy\n\
-    of the written offer of source code which you received along\n\
-    with the copy you received.\n\
+    c) accompany it with the information you received as to where the\n\
+    corresponding source code may be obtained.  (This alternative is\n\
+    allowed only for noncommercial distribution and only if you\n\
+    received the program in object code or executable form alone.)\n\
+\n\
+For an executable file, complete source code means all the source code for\n\
+all modules it contains; but, as a special exception, it need not include\n\
+source code for modules which are standard libraries that accompany the\n\
+operating system on which the executable file runs.\n\
 --Type Return to print more--");
   fflush (stdout);
   read_line ();
@@ -819,7 +847,7 @@ ANY CLAIM BY ANY OTHER PARTY.\n");
 static void
 print_gdb_version ()
 {
-  printf ("GDB %s, Copyright (C) 1987 Free Software Foundation, Inc.\n\
+  printf ("GDB %s, Copyright (C) 1988 Free Software Foundation, Inc.\n\
 There is ABSOLUTELY NO WARRANTY for GDB; type \"info warranty\" for details.\n\
 GDB is free software and you are welcome to distribute copies of it\n\
  under certain conditions; type \"info copying\" to see the conditions.\n",
@@ -901,9 +929,8 @@ pwd_command (arg, from_tty)
      char *arg;
      int from_tty;
 {
-  char buf[MAXPATHLEN];
   if (arg) error ("The \"pwd\" command does not take an argument: %s", arg);
-  printf ("Working directory %s.\n", getwd (buf));
+  printf ("Working directory %s.\n", dirbuf);
 }
 
 static void
@@ -916,6 +943,7 @@ cd_command (dir, from_tty)
 
   if (chdir (dir) < 0)
     perror_with_name (dir);
+  getwd (dirbuf);
   if (from_tty)
     pwd_command ((char *) 0, 1);
 }
@@ -996,7 +1024,7 @@ dump_me_command ()
 static void
 initialize_main ()
 {
-  prompt = savestring ("(gdb) ", 6);
+  prompt = savestring ("(gdb+) ", 7);
 
   /* Define the classes of commands.
      They will appear in the help list in the reverse of this order.  */

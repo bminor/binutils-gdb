@@ -108,7 +108,7 @@ value value_addr ();
 value value_assign ();
 value value_neg ();
 value value_lognot ();
-value value_struct_elt ();
+value value_struct_elt (), value_struct_elt_for_address ();
 value value_field ();
 value value_cast ();
 value value_repeat ();
@@ -120,6 +120,7 @@ value value_being_returned ();
 value evaluate_expression ();
 value evaluate_type ();
 value parse_and_eval ();
+value parse_to_comma_and_eval ();
 
 value access_value_history ();
 value value_of_internalvar ();
@@ -128,3 +129,7 @@ struct internalvar *lookup_internalvar ();
 int value_equal ();
 int value_less ();
 int value_zerop ();
+
+/* C++ */
+value value_of_this ();
+value value_static_field ();

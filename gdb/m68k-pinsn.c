@@ -345,7 +345,7 @@ print_insn_arg (d, buffer, p, addr, stream)
 
     case 'd':
       val = NEXTWORD (p);
-      fprintf (stream, "%d(%s)", val, fetch_arg (buffer, place, 3));
+      fprintf (stream, "%d(%s)", val, reg_names[fetch_arg (buffer, place, 3)]);
       break;
 
     case 's':
@@ -710,20 +710,6 @@ print_base (regno, disp, stream)
    FROM is the address of the extended float.
    Store the double in *TO.  */
 
-#ifdef mac_aux
-#ifdef __STDC__
-#define	asm16(str)	asm ("short	" str#)
-#else
-#define	asm16(str)	asm ("short	str")
-#endif
-#else
-#ifdef __STDC__
-#define	asm16(str)	asm (".word	" str#)
-#else
-#define	asm16(str)	asm (".word	str")
-#endif
-#endif
-
 convert_from_68881 (from, to)
      char *from;
      double *to;
@@ -736,14 +722,12 @@ convert_from_68881 (from, to)
 #else
   /* Hand-assemble those insns since some assemblers lose
      and some have different syntax.  */
-  asm16 (020156);
-  asm16 (8);
-  asm16 (021156);
-  asm16 (12);
-  asm16 (0xf210);
-  asm16 (0x4800);
-  asm16 (0xf211);
-  asm16 (0x7400);
+  asm (".word 020156");
+  asm (".word 8");
+  asm (".word 021156");
+  asm (".word 12");
+  asm (".long 0xf2104800");
+  asm (".long 0xf2117400");
 #endif
 }
 
@@ -761,13 +745,11 @@ convert_to_68881 (from, to)
   asm ("fmovex fp0,a1@");
 #else
   /* Hand-assemble those insns since some assemblers lose.  */
-  asm16 (020156);
-  asm16 (8);
-  asm16 (021156);
-  asm16 (12);
-  asm16 (0xf210);
-  asm16 (0x5400);
-  asm16 (0xf211);
-  asm16 (0x6800);
+  asm (".word 020156");
+  asm (".word 8");
+  asm (".word 021156");
+  asm (".word 12");
+  asm (".long 0xf2105400");
+  asm (".long 0xf2116800");
 #endif
 }

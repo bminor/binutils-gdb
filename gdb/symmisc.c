@@ -105,11 +105,6 @@ free_symtab (s)
 	 Therefore, do nothing.  */
       break;
 
-    case free_explicit:
-      /* All the contents are part of a big block of memory
-	 and that is our `free_ptr' and will be freed below.  */
-      break;
-
     case free_contents:
       /* Here all the contents were malloc'ed structure by structure
 	 and must be freed that way.  */
@@ -122,8 +117,7 @@ free_symtab (s)
       free (bv);
       /* Free the type vector.  */
       tv = TYPEVECTOR (s);
-      if (tv)		/* FIXME, should this happen?  It does... */
-	free (tv);
+      free (tv);
       /* Also free the linetable.  */
       
     case free_linetable:
@@ -177,10 +171,11 @@ static void relocate_blockvector ();
 static void relocate_type ();
 static void relocate_block ();
 static void relocate_symbol ();
+static void relocate_source ();
 
-/* Relocate a file symbol table so that all the pointers
-   are valid C pointers.  Pass the struct symtab for the file
-   and the amount to relocate by.  */
+/* Relocate a file's symseg so that all the pointers are valid C pointers.
+   Value is a `struct symtab'; but it is not suitable for direct
+   insertion into the `symtab_list' because it describes several files.  */
 
 static struct symtab *
 relocate_symtab (root)
@@ -203,8 +198,6 @@ relocate_symtab (root)
   sp->version = root->version;
   sp->blockvector = root->blockvector;
   sp->typevector = root->typevector;
-  sp->free_code = free_explicit;
-  sp->free_ptr = (char *) root;
 
   RELOCATE (TYPEVECTOR (sp));
   RELOCATE (BLOCKVECTOR (sp));
@@ -216,19 +209,6 @@ relocate_symtab (root)
   relocate_blockvector (BLOCKVECTOR (sp));
 
   return sp;
-}
-
-static void
-relocate_typevector (tv)
-     struct typevector *tv;
-{
-  register int ntypes = TYPEVECTOR_NTYPES (tv);
-  register int i;
-
-  for (i = 0; i < ntypes; i++)
-    RELOCATE (TYPEVECTOR_TYPE (tv, i));
-  for (i = 0; i < ntypes; i++)
-    relocate_type (TYPEVECTOR_TYPE (tv, i));
 }
 
 static void
@@ -289,6 +269,19 @@ relocate_symbol (sp)
   RELOCATE (SYMBOL_TYPE (sp));
 }
 
+static void
+relocate_typevector (tv)
+     struct typevector *tv;
+{
+  register int ntypes = TYPEVECTOR_NTYPES (tv);
+  register int i;
+
+  for (i = 0; i < ntypes; i++)
+    RELOCATE (TYPEVECTOR_TYPE (tv, i));
+  for (i = 0; i < ntypes; i++)
+    relocate_type (TYPEVECTOR_TYPE (tv, i));
+}
+
 /* We cannot come up with an a priori spanning tree
    for the network of types, since types can be used
    for many symbols and also as components of other types.
@@ -314,10 +307,40 @@ relocate_type (tp)
       RELOCATE (TYPE_FIELD_NAME (tp, i));
     }
 }
+
+static void
+relocate_sourcevector (svp)
+     register struct sourcevector *svp;
+{
+  register int nfiles = svp->length;
+  register int i;
+  for (i = 0; i < nfiles; i++)
+    RELOCATE (svp->source[i]);
+  for (i = 0; i < nfiles; i++)
+    relocate_source (svp->source[i]);
+}
+
+static void
+relocate_source (sp)
+     register struct source *sp;
+{
+  register int nitems = sp->contents.nitems;
+  register int i;
+
+  RELOCATE (sp->name);
+  for (i = 0; i < nitems; i++)
+    if (sp->contents.item[i] > 0)
+      TEXT_RELOCATE (sp->contents.item[i]);
+}
 
 /* Read symsegs from file named NAME open on DESC,
    make symtabs from them, and return a chain of them.
-   Assumes DESC is prepositioned at the end of the string table,
+   These symtabs are not suitable for direct use in `symtab_list'
+   because each one describes a single object file, perhaps many source files.
+   `symbol_file_command' takes each of these, makes many real symtabs
+   from it, and then frees it.
+
+   We assume DESC is prepositioned at the end of the string table,
    just before the symsegs if there are any.  */
 
 struct symtab *
@@ -327,7 +350,7 @@ read_symsegs (desc, name)
 {
   struct symbol_root root;
   register char *data;
-  register struct symtab *sp, *chain = 0;
+  register struct symtab *sp, *sp1, *chain = 0;
   register int len;
 
   while (1)
@@ -343,8 +366,11 @@ read_symsegs (desc, name)
       len = myread (desc, data + sizeof root,
 		    root.length - sizeof root);
       sp = relocate_symtab (data);
+      RELOCATE (((struct symbol_root *)data)->sourcevector);
+      relocate_sourcevector (((struct symbol_root *)data)->sourcevector);
       sp->next = chain;
       chain = sp;
+      sp->linetable = (struct linetable *) ((struct symbol_root *)data)->sourcevector;
     }
 
   return chain;

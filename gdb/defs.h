@@ -73,3 +73,7 @@ struct command_line
 };
 
 struct command_line *read_command_lines ();
+
+/* String containing the current directory (what getwd would return).  */
+
+char *current_directory;

@@ -1,5 +1,5 @@
 /* List lines of source files for GDB, the GNU debugger.
-   Copyright (C) 1986, 1987 Free Software Foundation, Inc.
+   Copyright (C) 1986, 1987, 1988 Free Software Foundation, Inc.
 
 GDB is distributed in the hope that it will be useful, but WITHOUT ANY
 WARRANTY.  No author or distributor accepts responsibility to anyone
@@ -19,7 +19,6 @@ anyone else from sharing it farther.  Help stamp out software hoarding!
 */
 
 #include <stdio.h>
-#include <sys/types.h>
 #include <sys/param.h>
 #include <sys/stat.h>
 #include <sys/file.h>
@@ -40,9 +39,10 @@ struct symtab *current_source_symtab;
 
 int current_source_line;
 
-/* Line for "info line" to work on if no line specified.  */
+/* Line number of last line printed.  Default for various commands.
+   current_source_line is usually, but not always, the same as this.  */
 
-static int line_info_default_line;
+static int last_line_listed;
 
 /* First line number listed by last listing command.  */
 
@@ -59,13 +59,16 @@ select_source_symtab (s)
 {
   if (s)
     {
+      struct symtabs_and_lines sals;
       struct symtab_and_line sal;
 
       /* Make the default place to list be the function `main'
 	 if one exists.  */
       if (lookup_symbol ("main", 0, VAR_NAMESPACE))
 	{
-	  sal = decode_line_spec ("main", 1);
+	  sals = decode_line_spec ("main", 1);
+	  sal = sals.sals[0];
+	  free (sals.sals);
 	  current_source_symtab = sal.symtab;
 	  current_source_line = sal.line - 9;
 	  return;
@@ -275,10 +278,7 @@ openp (path, try_cwd_first, string, mode, prot, filename_opened)
       *filename_opened = savestring (filename, strlen (filename));
     else
       {
-	char dirname[MAXPATHLEN];
-	if (getwd (dirname) == NULL)
-	  perror_with_name ("getwd");
-	*filename_opened = concat (dirname, "/", filename);
+	*filename_opened = concat (current_directory, "/", filename);
       }
 
   return fd;
@@ -376,16 +376,39 @@ get_filename_and_charpos (s, line, fullname)
 {
   register int desc, linenums_changed = 0;
   
-  desc = openp (source_path, 0, s->filename, O_RDONLY, 0, fullname);
+  desc = openp (source_path, 0, s->filename, O_RDONLY, 0, &s->fullname);
   if (desc < 0)
     {
-      *fullname = NULL;
+      if (fullname)
+	*fullname = NULL;
       return 0;
     }  
+  if (fullname)
+    *fullname = s->fullname;
   if (s->line_charpos == 0) linenums_changed = 1;
   if (linenums_changed) find_source_lines (s, desc);
   close (desc);
   return linenums_changed;
+}
+
+/* Print text describing the full name of the source file S
+   and the line number LINE and its corresponding character position.
+   The text starts with two Ctrl-z so that the Emacs-GDB interface
+   can easily find it.
+
+   Return 1 if successful, 0 if could not find the file.  */
+
+int
+identify_source_line (s, line)
+     struct symtab *s;
+     int line;
+{
+  if (s->line_charpos == 0)
+    get_filename_and_charpos (s, line, 0);
+  if (s->fullname == 0)
+    return 0;
+  printf ("\032\032%s:%d:%d\n", s->fullname, line, s->line_charpos[line - 1]);
+  return 1;
 }
 
 /* Print source lines from the file of symtab S,
@@ -401,7 +424,7 @@ print_source_lines (s, line, stopline)
   register FILE *stream;
   int nlines = stopline - line;
 
-  desc = openp (source_path, 0, s->filename, O_RDONLY, 0, (char **) 0);
+  desc = openp (source_path, 0, s->filename, O_RDONLY, 0, &s->fullname);
   if (desc < 0)
     perror_with_name (s->filename);
 
@@ -432,7 +455,7 @@ print_source_lines (s, line, stopline)
     {
       c = fgetc (stream);
       if (c == EOF) break;
-      line_info_default_line = current_source_line;
+      last_line_listed = current_source_line;
       printf ("%d\t", current_source_line++);
       do
 	{
@@ -456,6 +479,7 @@ list_command (arg, from_tty)
      char *arg;
      int from_tty;
 {
+  struct symtabs_and_lines sals, sals_end;
   struct symtab_and_line sal, sal_end;
   struct symbol *sym;
   char *arg1;
@@ -500,7 +524,18 @@ list_command (arg, from_tty)
   if (*arg1 == ',')
     dummy_beg = 1;
   else
-    sal = decode_line_1 (&arg1, 0, 0, 0);
+    {
+      sals = decode_line_1 (&arg1, 0, 0, 0);
+
+      if (! sals.nelts) return;  /*  C++  */
+      if (sals.nelts != 1)
+	{
+	  error ("Unreasonable listing request");
+	}
+
+      sal = sals.sals[0];
+      free (sals.sals);
+    }
 
   /* Record whether the BEG arg is all digits.  */
 
@@ -517,10 +552,16 @@ list_command (arg, from_tty)
 	arg1++;
       if (*arg1 == 0)
 	dummy_end = 1;
-      else if (dummy_beg)
-	sal_end = decode_line_1 (&arg1, 0, 0, 0);
       else
-	sal_end = decode_line_1 (&arg1, 0, sal.symtab, sal.line);
+	{
+	  if (dummy_beg)
+	    sals_end = decode_line_1 (&arg1, 0, 0, 0);
+	  else
+	    sals_end = decode_line_1 (&arg1, 0, sal.symtab, sal.line);
+	  if (! sals_end.nelts) return;  /* C++ */
+	  sal_end = sals_end.sals[0];
+	  free (sals_end.sals);
+	}
     }
 
   if (*arg1)
@@ -583,18 +624,26 @@ line_info (arg, from_tty)
      char *arg;
      int from_tty;
 {
+  struct symtabs_and_lines sals;
   struct symtab_and_line sal;
   int start_pc, end_pc;
 
   if (arg == 0)
     {
       sal.symtab = current_source_symtab;
-      sal.line = line_info_default_line;
+      sal.line = last_line_listed;
     }
   else
     {
-      sal = decode_line_spec (arg);
+      sals = decode_line_spec (arg);
 
+      if (sals.nelts == 0)
+	return;			/* C++ */
+      if (sals.nelts != 1)
+	error ("unreasonable line info request");
+      
+      sal = sals.sals[0];
+      free (sals.sals);
       /* If this command is repeated with RET,
 	 turn it into the no-arg variant.  */
 
@@ -616,11 +665,160 @@ line_info (arg, from_tty)
       /* x/i should display this line's code.  */
       set_next_address (start_pc);
       /* Repeating "info line" should do the following line.  */
-      line_info_default_line = sal.line + 1;
+      last_line_listed = sal.line + 1;
     }
   else
     printf ("Line number %d is out of range for \"%s\".\n",
 	    sal.line, sal.symtab->filename);
+}
+
+/* Commands to search the source file for a regexp.  */
+
+static void
+forward_search_command (regex, from_tty)
+     char *regex;
+{
+  register int c;
+  register int desc;
+  register FILE *stream;
+  int line = last_line_listed + 1;
+  char *msg;
+
+  msg = (char *) re_comp (regex);
+  if (msg)
+    error (msg);
+
+  if (current_source_symtab == 0) 
+    error ("No default source file yet.  Do \"help list\".");
+
+  /* Search from last_line_listed+1 in current_source_symtab */
+
+  desc = openp (source_path, 0, current_source_symtab->filename,
+		O_RDONLY, 0, &current_source_symtab->fullname);
+  if (desc < 0)
+    perror_with_name (current_source_symtab->filename);
+
+  if (current_source_symtab->line_charpos == 0)
+    find_source_lines (current_source_symtab, desc);
+
+  if (line < 1 || line >= current_source_symtab->nlines)
+    {
+      close (desc);
+      error ("Expression not found");
+    }
+
+  if (lseek (desc, current_source_symtab->line_charpos[line - 1], 0) < 0)
+    {
+      close (desc);
+      perror_with_name (current_source_symtab->filename);
+    }
+
+  stream = fdopen (desc, "r");
+  clearerr (stream);
+  while (1) {
+    char buf[4096];		/* Should be reasonable??? */
+    register char *p = buf;
+
+    c = fgetc (stream);
+    if (c == EOF)
+      break;
+    do {
+      *p++ = c;
+    } while (c != '\n' && (c = fgetc (stream)) >= 0);
+
+    /* we now have a source line in buf, null terminate and match */
+    *p = 0;
+    if (re_exec (buf) > 0)
+      {
+	/* Match! */
+	fclose (stream);
+	print_source_lines (current_source_symtab,
+			   line, line+1);
+	current_source_line = max (line - 5, 1);
+	return;
+      }
+    line++;
+  }
+
+  printf ("Expression not found\n");
+  fclose (stream);
+}
+
+static void
+reverse_search_command (regex, from_tty)
+     char *regex;
+{
+  register int c;
+  register int desc;
+  register FILE *stream;
+  int line = last_line_listed - 1;
+  char *msg;
+
+  msg = (char *) re_comp (regex);
+  if (msg)
+    error (msg);
+
+  if (current_source_symtab == 0) 
+    error ("No default source file yet.  Do \"help list\".");
+
+  /* Search from last_line_listed-1 in current_source_symtab */
+
+  desc = openp (source_path, 0, current_source_symtab->filename,
+		O_RDONLY, 0, &current_source_symtab->fullname);
+  if (desc < 0)
+    perror_with_name (current_source_symtab->filename);
+
+  if (current_source_symtab->line_charpos == 0)
+    find_source_lines (current_source_symtab, desc);
+
+  if (line < 1 || line >= current_source_symtab->nlines)
+    {
+      close (desc);
+      error ("Expression not found");
+    }
+
+  if (lseek (desc, current_source_symtab->line_charpos[line - 1], 0) < 0)
+    {
+      close (desc);
+      perror_with_name (current_source_symtab->filename);
+    }
+
+  stream = fdopen (desc, "r");
+  clearerr (stream);
+  while (1)
+    {
+      char buf[4096];		/* Should be reasonable??? */
+      register char *p = buf;
+
+      c = fgetc (stream);
+      if (c == EOF)
+	break;
+      do {
+	*p++ = c;
+      } while (c != '\n' && (c = fgetc (stream)) >= 0);
+
+      /* We now have a source line in buf; null terminate and match.  */
+      *p = 0;
+      if (re_exec (buf) > 0)
+	{
+	  /* Match! */
+	  fclose (stream);
+	  print_source_lines (current_source_symtab,
+			      line, line+1);
+	  current_source_line = max (line - 5, 1);
+	  return;
+	}
+      line--;
+      if (fseek (stream, current_source_symtab->line_charpos[line - 1], 0) < 0)
+	{
+	  fclose (stream);
+	  perror_with_name (current_source_symtab->filename);
+	}
+    }
+
+  printf ("Expression not found\n");
+  fclose (stream);
+  return;
 }
 
 static
@@ -648,6 +846,13 @@ Default is to describe the last source line that was listed.\n\n\
 This sets the default address for \"x\" to the line's first instruction\n\
 so that \"x/i\" suffices to start examining the machine code.\n\
 The address is also stored as the value of \"$_\".");
+
+  add_com ("forward-search", class_files, forward_search_command,
+	   "Search for regular expression (see regex(3)) from last line listed.");
+  add_com_alias ("search", "forward-search", class_files, 0);
+
+  add_com ("reverse-search", class_files, reverse_search_command,
+	   "Search backward for regular expression (see regex(3)) from last line listed.");
 
   add_com ("list", class_files, list_command,
 	   "List specified function or line.\n\

@@ -30,7 +30,6 @@ anyone else from sharing it farther.  Help stamp out software hoarding!
 #include <a.out.h>
 #include <stdio.h>
 #include <obstack.h>
-#include <sys/types.h>
 #include <sys/param.h>
 #include <sys/file.h>
 
@@ -169,9 +168,6 @@ extern CORE_ADDR first_object_file_end;	/* From blockframe.c */
 /* File name symbols were loaded from.  */
 
 static char *symfile;
-
-int debug = 1;
-
 
 /* Look up a coff type-number index.  Return the address of the slot
    where the type for that index is stored.
@@ -785,7 +781,7 @@ read_coff_symtab (desc, nsyms)
   static AUXENT main_aux;
 
   int num_object_files = 0;
-  int next_file_symnum = 0;
+  int next_file_symnum;
   char *filestring;
   int depth;
   int fcn_first_line;
@@ -810,10 +806,6 @@ read_coff_symtab (desc, nsyms)
     {
       read_one_sym (cs, &main_sym, &main_aux);
 
-      /*
-       * If we are finished with the previous file's symbols, and the
-       * next thing is not a C_FILE, then we have hit the global symbols.
-       */
       if (cs->c_symnum == next_file_symnum && cs->c_sclass != C_FILE)
 	{
 	  CORE_ADDR last_file_end = cur_src_end_addr;
@@ -825,6 +817,10 @@ read_coff_symtab (desc, nsyms)
 	  complete_symtab ("_globals_", 0, first_object_file_end);
 	  /* done with all files, everything from here on out is globals */
 	}
+
+      /* Special case for file with type declarations only, no text.  */
+      if (!last_source_file && cs->c_type != T_NULL && cs->c_secnum == N_DEBUG)
+	complete_symtab (filestring, 0, 0);
 
       if (ISFCN (cs->c_type))
 	{
@@ -877,7 +873,6 @@ read_coff_symtab (desc, nsyms)
 		end_symtab ();
 		start_symtab ();
 	      }
-	    complete_symtab (filestring, 0, 0);	/* FIXME, 0 0 is wrong */
 	    num_object_files++;
 	    break;
 
@@ -902,12 +897,8 @@ read_coff_symtab (desc, nsyms)
 	  case C_STAT:
 	    if (cs->c_type == T_NULL && cs->c_secnum > N_UNDEF)
 	      {
-		/* These ".text", ".data", ".bss" entries don't seem to
-		 * appear in A/UX COFF output.   -- gnu@toad.com  4Apr88
-		 */
 		if (strcmp (cs->c_name, _TEXT) == 0)
 		  {
-		    /* We have a ".text" symbol */
 		    if (num_object_files == 1)
 		      {
 			/* Record end address of first file, crt0.s */
@@ -1020,9 +1011,15 @@ read_file_hdr (chan, file_hdr)
   if (myread (chan, (char *)file_hdr, FILHSZ) < 0)
     return -1;
 
-  if (BADMAG(file_hdr))
-    return -1;			/* Non understood file */
-  return file_hdr->f_nsyms;	/* OK magic number, return # syms */
+  switch (file_hdr->f_magic)
+    {
+      case NS32GMAGIC:
+      case NS32SMAGIC:
+	return file_hdr->f_nsyms;
+
+      default:
+	return -1;
+    }
 }
 
 read_aout_hdr (chan, aout_hdr, size)
@@ -1081,17 +1078,6 @@ read_one_sym (cs, sym, aux)
   cs->c_secnum = sym->n_scnum;
   cs->c_type = (unsigned) sym->n_type;
 
-#ifdef DEBUG
-  if (debug) {
-    fprintf(stderr, "sym %3x: %2x %s %x %x %x", cs->c_symnum,
-	  cs->c_sclass, cs->c_name, cs->c_value, cs->c_secnum, cs->c_type);
-    if (cs->c_nsyms > 1)
-      fprintf(stderr, " +aux %s\n", (char *)aux);
-    else
-      fprintf(stderr, "\n");
-  }
-#endif
-
   symnum += cs->c_nsyms;
 }
 
@@ -1111,13 +1097,6 @@ init_stringtab (chan, offset)
     return -1;
 
   val = myread (chan, (char *)&buffer, sizeof buffer);
-
-  /* If no string table, we get 0 bytes back from the read.  That's OK. */
-  if (val == 0) {
-    free_stringtab();
-    return 0;
-  }
-
   if (val != sizeof buffer)
     return -1;
 
@@ -1150,8 +1129,6 @@ getsymname (symbol_entry)
 
   if (symbol_entry->n_zeroes == 0)
     {
-      if (!stringtab)
-	error("Symbol entry references nonexistent string table");
       result = stringtab + symbol_entry->n_offset;
     }
   else
@@ -1172,11 +1149,9 @@ getfilename (aux_entry)
   char *result;
   extern char *rindex ();
 
-#ifndef mac_aux
   if (aux_entry->x_file.x_foff != 0)
     strcpy (buffer, stringtab + aux_entry->x_file.x_foff);
   else
-#endif
     {
       strncpy (buffer, aux_entry->x_file.x_fname, FILNMLEN);
       buffer[FILNMLEN] = '\0';
@@ -1578,8 +1553,7 @@ decode_base_type (cs, c_type, aux)
   switch (c_type)
     {
       case T_NULL:
-	/* NULL seems to be used as the basic type of void functions */
-	return builtin_type_void;	
+	/* shouldn't show up here */
 	break;
 
       case T_ARG:
@@ -1663,8 +1637,7 @@ decode_base_type (cs, c_type, aux)
       case T_ULONG:
 	return builtin_type_unsigned_long;
     }
-  printf ("unexpected type %d at symnum %d, name %s\n", c_type, cs->c_symnum,
-	cs->c_name);
+  printf ("unexpected type %d at symnum %d\n", c_type, cs->c_symnum);
   return builtin_type_void;
 }
 

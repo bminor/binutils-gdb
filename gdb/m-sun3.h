@@ -400,7 +400,7 @@ read_memory_integer (read_register (SP_REGNUM), 4)
 	the following jsr instruction.  *../
      jsr @#32323232
      addl #69696969,sp
-     bpt
+     trap #15
      nop
 Note this is 28 bytes.
 We actually start executing at the jsr, since the pushing of the

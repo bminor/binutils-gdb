@@ -24,7 +24,7 @@ anyone else from sharing it farther.  Help stamp out software hoarding!
 
 #include <a.out.h>
 #include <stdio.h>
-#include <sys/types.h>
+#include <signal.h>
 #include <sys/param.h>
 #include <sys/dir.h>
 #include <sys/file.h>
@@ -41,16 +41,8 @@ anyone else from sharing it farther.  Help stamp out software hoarding!
 #ifdef UMAX_CORE
 #include <sys/ptrace.h>
 #else /* not UMAX_CORE */
-#ifdef mac_aux
-#include <sys/seg.h>
-#include <sys/mmu.h>
-#include <sys/signal.h>
-#include <sys/time.h>
 #include <sys/user.h>
-#else
-#include <sys/user.h>
-#endif /* mac_aux */
-#endif /* UMAX_CORE */
+#endif
 #endif /* NEW_SUN_CORE */
 
 #ifndef N_TXTADDR
@@ -71,6 +63,8 @@ anyone else from sharing it farther.  Help stamp out software hoarding!
 #ifndef COFF_FORMAT
 #define AOUTHDR struct exec
 #endif
+
+extern char *sys_siglist[];
 
 START_FILE
 
@@ -105,8 +99,9 @@ static CORE_ADDR stack_end;
 /* Virtual addresses of bounds of two areas of memory in the exec file.
    Note that the data area in the exec file is used only when there is no core file.  */
 
-static CORE_ADDR text_start;
-static CORE_ADDR text_end;
+CORE_ADDR text_start;
+CORE_ADDR text_end;
+
 static CORE_ADDR exec_data_start;
 static CORE_ADDR exec_data_end;
 
@@ -211,6 +206,12 @@ core_file_command (filename, from_tty)
 	bcopy (&corestr.c_aouthdr, &core_aouthdr, sizeof (struct exec));
 
 	printf ("Core file is from \"%s\".\n", corestr.c_cmdname);
+	if (corestr.c_signo > 0)
+	  printf ("Program terminated with signal %d, %s.\n",
+			corestr.c_signo,
+			corestr.c_signo < NSIG
+			? sys_siglist[corestr.c_signo]
+			: "(undocumented)");
       }
 #else /* not NEW_SUN_CORE */
       /* 4.2-style (and perhaps also sysV-style) core dump file.  */
@@ -235,18 +236,14 @@ core_file_command (filename, from_tty)
 	reg_offset = 0;
 
 	bcopy (&u.pt_aouthdr, &core_aouthdr, sizeof (AOUTHDR));
-
+	printf ("Core file is from \"%s\".\n", u.pt_comm);
+	if (u.pt_signal > 0)
+	  printf ("Program terminated with signal %d, %s.\n",
+			u.pt_signal,
+			u.pt_signal < NSIG
+			? sys_siglist[u.pt_signal]
+			: "(undocumented)");
 #else /* not UMAX_CORE */
-#ifdef mac_aux
-	/* This may well not work for 0407 (nonshared text) a.out's */
-	data_end = data_start + u.u_dsize << PAGESHIFT;
-	stack_start = stack_end - u.u_ssize << PAGESHIFT;
-	data_offset = USIZE;
-	stack_offset = USIZE + u.u_dsize << PAGESHIFT;
-	reg_offset = (int) &u.u_ar0[0] - (int) &u;
-
-	core_aouthdr.a_magic = u.u_exdata.ux_mag;
-#else
 	data_end = data_start + NBPG * u.u_dsize;
 	stack_start = stack_end - NBPG * u.u_ssize;
 	data_offset = NBPG * UPAGES;
@@ -256,7 +253,6 @@ core_file_command (filename, from_tty)
 	/* I don't know where to find this info.
 	   So, for now, mark it as not available.  */
 	core_aouthdr.a_magic = 0;
-#endif /* not mac_aux */
 #endif /* not UMAX_CORE */
 
 	/* Read the register values out of the core file and store
@@ -285,10 +281,7 @@ core_file_command (filename, from_tty)
 	corefile = savestring (filename, strlen (filename));
       else
 	{
-	  char dirname[MAXPATHLEN];
-
-	  getwd (dirname);
-	  corefile = concat (dirname, "/", filename);
+	  corefile = concat (current_directory, "/", filename);
 	}
 
       set_current_frame (read_register (FP_REGNUM));
@@ -672,12 +665,6 @@ register_addr (regno, blockend)
   if (regno < 0 || regno >= NUM_REGS)
     error ("Invalid register number %d.", regno);
 
-#ifdef mac_aux
-/* FIXME, we don't know where the regs are.  Maybe the test command
- * that tests what parts of the upage are writeable will find 'em for us.
- */
-#define REGISTER_U_ADDR(addr, foo, bar)  addr = 0;
-#endif
   REGISTER_U_ADDR (addr, blockend, regno);
 
   return addr;

@@ -25,24 +25,13 @@ anyone else from sharing it farther.  Help stamp out software hoarding!
 #include "inferior.h"
 
 #include <stdio.h>
-#include <sys/types.h>
 #include <sys/param.h>
 #include <sys/dir.h>
+#include <sys/user.h>
 #include <signal.h>
 #include <sys/ioctl.h>
 #include <sgtty.h>
 #include <fcntl.h>
-
-#ifdef mac_aux
-#include <sys/seg.h>
-#include <sys/mmu.h>
-#include <sys/signal.h>
-#include <sys/time.h>
-#include <sys/user.h>
-#else
-#include <sys/user.h>
-#endif /* mac_aux */
-
 
 #ifdef UMAX_PTRACE
 #include <a.out.h>
@@ -53,10 +42,6 @@ anyone else from sharing it farther.  Help stamp out software hoarding!
 #include <machine/reg.h>
 #endif
 
-#ifdef SYSV_TTYS
-#include <termio.h>
-#endif
-
 extern int errno;
 
 /* Nonzero if we are debugging an attached outside process
@@ -64,31 +49,21 @@ extern int errno;
 
 static int attach_flag;
 
-#define	UPAGE_MASK	0x00003FFF
-
 START_FILE
 
 /* Record terminal status separately for debugger and inferior.  */
 
-#ifdef SYSV_TTYS
-static struct termio ti_inferior;
-#else
 static struct sgttyb sg_inferior;
 static struct tchars tc_inferior;
 static struct ltchars ltc_inferior;
 static int lmode_inferior;
-#endif
 static int tflags_inferior;
 static int pgrp_inferior;
 
-#ifdef SYSV_TTYS
-static struct termio ti_ours;
-#else
 static struct sgttyb sg_ours;
 static struct tchars tc_ours;
 static struct ltchars ltc_ours;
 static int lmode_ours;
-#endif
 static int tflags_ours;
 static int pgrp_ours;
 
@@ -107,15 +82,13 @@ static int terminal_is_ours;
 void
 terminal_init_inferior ()
 {
+  if (remote_debugging)
+    return;
 
-#ifdef SYSV_TTYS
-  ti_inferior = ti_ours;
-#else
   sg_inferior = sg_ours;
   tc_inferior = tc_ours;
   ltc_inferior = ltc_ours;
   lmode_inferior = lmode_ours;
-#endif
   tflags_inferior = tflags_ours;
   pgrp_inferior = inferior_pid;
 
@@ -128,18 +101,17 @@ terminal_init_inferior ()
 void
 terminal_inferior ()
 {
+  if (remote_debugging)
+    return;
+
   if (terminal_is_ours)   /*  && inferior_thisrun_terminal == 0) */
     {
       fcntl (0, F_SETFL, tflags_inferior);
       fcntl (0, F_SETFL, tflags_inferior);
-#ifdef SYSV_TTYS
-      ioctl (0, TCSETA, &ti_inferior);
-#else
       ioctl (0, TIOCSETN, &sg_inferior);
       ioctl (0, TIOCSETC, &tc_inferior);
       ioctl (0, TIOCSLTC, &ltc_inferior);
       ioctl (0, TIOCLSET, &lmode_inferior);
-#endif
       ioctl (0, TIOCSPGRP, &pgrp_inferior);
     }
   terminal_is_ours = 0;
@@ -156,6 +128,9 @@ terminal_inferior ()
 void
 terminal_ours_for_output ()
 {
+  if (remote_debugging)
+    return;
+
   terminal_ours_1 (1);
 }
 
@@ -166,6 +141,9 @@ terminal_ours_for_output ()
 void
 terminal_ours ()
 {
+  if (remote_debugging)
+    return;
+
   terminal_ours_1 (0);
 }
 
@@ -188,55 +166,37 @@ terminal_ours_1 (output_only)
       signal (SIGTTOU, osigttou);
 
       tflags_inferior = fcntl (0, F_GETFL, 0);
-#ifdef SYSV_TTYS
-      ioctl (0, TCGETA, &ti_inferior);
-#else
       ioctl (0, TIOCGETP, &sg_inferior);
       ioctl (0, TIOCGETC, &tc_inferior);
       ioctl (0, TIOCGLTC, &ltc_inferior);
       ioctl (0, TIOCLGET, &lmode_inferior);
-#endif
     }
 
-  fcntl (0, F_SETFL, tflags_ours);
-  fcntl (0, F_SETFL, tflags_ours);
-
-
-#ifdef SYSV_TTYS
-  ti_ours.c_lflag |= ICANON | ISIG;
-  if (output_only)
-    ti_ours.c_lflag &= ~((ICANON|ISIG)&ti_inferior.c_lflag);
-  ioctl (0, TCSETA, &ti_ours);
-  ti_ours.c_lflag |= ICANON | ISIG;
-#else
   sg_ours.sg_flags &= ~RAW & ~CBREAK;
   if (output_only)
     sg_ours.sg_flags |= (RAW | CBREAK) & sg_inferior.sg_flags;
+
+  fcntl (0, F_SETFL, tflags_ours);
+  fcntl (0, F_SETFL, tflags_ours);
   ioctl (0, TIOCSETN, &sg_ours);
   ioctl (0, TIOCSETC, &tc_ours);
   ioctl (0, TIOCSLTC, &ltc_ours);
   ioctl (0, TIOCLSET, &lmode_ours);
   sg_ours.sg_flags &= ~RAW & ~CBREAK;
-#endif
 }
 
 static void
 term_status_command ()
 {
   register int i;
+
+  if (remote_debugging)
+    {
+      printf ("No terminal status when remote debugging.\n");
+      return;
+    }
+
   printf ("Inferior's terminal status (currently saved by GDB):\n");
-#ifdef SYSV_TTYS
-  printf ("fcntl flags = 0x%x, owner pid = %d.\n",
-	  tflags_inferior, pgrp_inferior);
-  printf ("iflag = 0x%04x, oflag = 0x%04x, cflag = 0x%04x, lflag = 0x%04x\n",
-	  ti_inferior.c_iflag, ti_inferior.c_oflag,
-	  ti_inferior.c_cflag, ti_inferior.c_lflag);
-  printf ("line discipline = %d\n", ti_inferior.c_line);
-  printf ("control chars: ");
-  for (i = 0; i < NCC; i++)
-    printf ("0x%x ", ti_inferior.c_cc[i]);
-  printf ("\n");
-#else
   printf ("fcntl flags = 0x%x, lmode = 0x%x,\nsgttyb.sg_flags = 0x%x, owner pid = %d.\n",
 	  tflags_inferior, lmode_inferior,
 	  sg_inferior.sg_flags, pgrp_inferior);
@@ -248,7 +208,6 @@ term_status_command ()
   for (i = 0; i < sizeof (struct ltchars); i++)
     printf ("0x%x ", ((char *)&ltc_inferior)[i]);
   printf ("\n");
-#endif
 }
 
 static void
@@ -334,6 +293,8 @@ create_inferior (allargs, env)
 static void
 kill_command ()
 {
+  if (remote_debugging)
+    return;
   if (inferior_pid == 0)
     error ("The program is not being run.");
   if (!query ("Kill the inferior process? "))
@@ -343,6 +304,8 @@ kill_command ()
 
 kill_inferior ()
 {
+  if (remote_debugging)
+    return;
   if (inferior_pid == 0)
     return;
   ptrace (8, inferior_pid, 0, 0);
@@ -370,9 +333,14 @@ resume (step, signal)
      int signal;
 {
   errno = 0;
-  ptrace (step ? 9 : 7, inferior_pid, 1, signal);
-  if (errno)
-    perror_with_name ("ptrace");
+  if (remote_debugging)
+    remote_resume (step, signal);
+  else
+    {
+      ptrace (step ? 9 : 7, inferior_pid, 1, signal);
+      if (errno)
+	perror_with_name ("ptrace");
+    }
 }
 
 #ifdef NEW_SUN_PTRACE
@@ -415,17 +383,22 @@ fetch_inferior_registers ()
   struct fp_status inferior_fp_registers;
   extern char registers[];
 
-  ptrace (PTRACE_GETREGS, inferior_pid, &inferior_registers);
-  ptrace (PTRACE_GETFPREGS, inferior_pid, &inferior_fp_registers);
+  if (remote_debugging)
+    remote_fetch_registers (registers);
+  else
+    {
+      ptrace (PTRACE_GETREGS, inferior_pid, &inferior_registers);
+      ptrace (PTRACE_GETFPREGS, inferior_pid, &inferior_fp_registers);
 
-  bcopy (&inferior_registers, registers, 16 * 4);
-  bcopy (&inferior_fp_registers, &registers[REGISTER_BYTE (FP0_REGNUM)],
-	 sizeof inferior_fp_registers.fps_regs);
-  *(int *)&registers[REGISTER_BYTE (PS_REGNUM)] = inferior_registers.r_ps;
-  *(int *)&registers[REGISTER_BYTE (PC_REGNUM)] = inferior_registers.r_pc;
-  bcopy (&inferior_fp_registers.fps_control,
-	 &registers[REGISTER_BYTE (FPC_REGNUM)],
-	 sizeof inferior_fp_registers - sizeof inferior_fp_registers.fps_regs);
+      bcopy (&inferior_registers, registers, 16 * 4);
+      bcopy (&inferior_fp_registers, &registers[REGISTER_BYTE (FP0_REGNUM)],
+	     sizeof inferior_fp_registers.fps_regs);
+      *(int *)&registers[REGISTER_BYTE (PS_REGNUM)] = inferior_registers.r_ps;
+      *(int *)&registers[REGISTER_BYTE (PC_REGNUM)] = inferior_registers.r_pc;
+      bcopy (&inferior_fp_registers.fps_control,
+	     &registers[REGISTER_BYTE (FPC_REGNUM)],
+	     sizeof inferior_fp_registers - sizeof inferior_fp_registers.fps_regs);
+    }
 }
 
 /* Store our register values back into the inferior.
@@ -439,17 +412,22 @@ store_inferior_registers (regno)
   struct fp_status inferior_fp_registers;
   extern char registers[];
 
-  bcopy (registers, &inferior_registers, 16 * 4);
-  bcopy (&registers[REGISTER_BYTE (FP0_REGNUM)], &inferior_fp_registers,
-	 sizeof inferior_fp_registers.fps_regs);
-  inferior_registers.r_ps = *(int *)&registers[REGISTER_BYTE (PS_REGNUM)];
-  inferior_registers.r_pc = *(int *)&registers[REGISTER_BYTE (PC_REGNUM)];
-  bcopy (&registers[REGISTER_BYTE (FPC_REGNUM)],
-	 &inferior_fp_registers.fps_control,
-	 sizeof inferior_fp_registers - sizeof inferior_fp_registers.fps_regs);
+  if (remote_debugging)
+    remote_store_registers (registers);
+  else
+    {
+      bcopy (registers, &inferior_registers, 16 * 4);
+      bcopy (&registers[REGISTER_BYTE (FP0_REGNUM)], &inferior_fp_registers,
+	     sizeof inferior_fp_registers.fps_regs);
+      inferior_registers.r_ps = *(int *)&registers[REGISTER_BYTE (PS_REGNUM)];
+      inferior_registers.r_pc = *(int *)&registers[REGISTER_BYTE (PC_REGNUM)];
+      bcopy (&registers[REGISTER_BYTE (FPC_REGNUM)],
+	     &inferior_fp_registers.fps_control,
+	     sizeof inferior_fp_registers - sizeof inferior_fp_registers.fps_regs);
 
-  ptrace (PTRACE_SETREGS, inferior_pid, &inferior_registers);
-  ptrace (PTRACE_SETFPREGS, inferior_pid, &inferior_fp_registers);
+      ptrace (PTRACE_SETREGS, inferior_pid, &inferior_registers);
+      ptrace (PTRACE_SETFPREGS, inferior_pid, &inferior_fp_registers);
+    }
 }
 
 #else
@@ -467,7 +445,7 @@ fetch_inferior_registers ()
 #else
   struct user u;
   unsigned int offset = (char *) &u.u_ar0 - (char *) &u;
-  offset = ptrace (3, inferior_pid, offset, 0) & UPAGE_MASK;
+  offset = ptrace (3, inferior_pid, offset, 0) - KERNEL_U_ADDR;
 #endif
 
   for (regno = 0; regno < NUM_REGS; regno++)
@@ -497,7 +475,7 @@ store_inferior_registers (regno)
 #else
   struct user u;
   unsigned int offset = (char *) &u.u_ar0 - (char *) &u;
-  offset = ptrace (3, inferior_pid, offset, 0) & UPAGE_MASK;
+  offset = ptrace (3, inferior_pid, offset, 0) - KERNEL_U_ADDR;
 #endif
 
   if (regno >= 0)
@@ -551,13 +529,18 @@ read_inferior_memory (memaddr, myaddr, len)
 
   /* Read all the longwords */
   for (i = 0; i < count; i++, addr += sizeof (int))
-    buffer[i] = ptrace (1, inferior_pid, addr, 0);
+    {
+      if (remote_debugging)
+	buffer[i] = remote_fetch_word (addr);
+      else
+	buffer[i] = ptrace (1, inferior_pid, addr, 0);
+    }
 
   /* Copy appropriate bytes out of the buffer.  */
   bcopy ((char *) buffer + (memaddr & (sizeof (int) - 1)), myaddr, len);
 }
 
-/* Copy LEN bytes of data from debugger memnory at MYADDR
+/* Copy LEN bytes of data from debugger memory at MYADDR
    to inferior's memory at MEMADDR.
    On failure (cannot write the inferior)
    returns the value of errno.  */
@@ -580,11 +563,21 @@ write_inferior_memory (memaddr, myaddr, len)
 
   /* Fill start and end extra bytes of buffer with existing memory data.  */
 
-  buffer[0] = ptrace (1, inferior_pid, addr, 0);
+  if (remote_debugging)
+    buffer[0] = remote_fetch_word (addr);
+  else
+    buffer[0] = ptrace (1, inferior_pid, addr, 0);
+
   if (count > 1)
-    buffer[count - 1]
-      = ptrace (1, inferior_pid,
-		addr + (count - 1) * sizeof (int), 0);
+    {
+      if (remote_debugging)
+	buffer[count - 1]
+	  = remote_fetch_word (addr + (count - 1) * sizeof (int));
+      else
+	buffer[count - 1]
+	  = ptrace (1, inferior_pid,
+		    addr + (count - 1) * sizeof (int), 0);
+    }
 
   /* Copy data to be written over corresponding part of buffer */
 
@@ -595,7 +588,10 @@ write_inferior_memory (memaddr, myaddr, len)
   for (i = 0; i < count; i++, addr += sizeof (int))
     {
       errno = 0;
-      ptrace (4, inferior_pid, addr, buffer[i]);
+      if (remote_debugging)
+	remote_store_word (addr, buffer[i]);
+      else
+	ptrace (4, inferior_pid, addr, buffer[i]);
       if (errno)
 	return errno;
     }
@@ -611,7 +607,7 @@ try_writing_regs_command ()
   extern int errno;
 
   if (inferior_pid == 0)
-    error ("The program is not being run.");
+    error ("There is no inferior process now.");
 
   for (i = 0; ; i += 2)
     {
@@ -644,14 +640,10 @@ Report which ones can be written.");
 
   inferior_pid = 0;
 
-#ifdef SYSV_TTYS
-  ioctl (0, TCGETA, &ti_ours);
-#else
   ioctl (0, TIOCGETP, &sg_ours);
   ioctl (0, TIOCGETC, &tc_ours);
   ioctl (0, TIOCGLTC, &ltc_ours);
   ioctl (0, TIOCLGET, &lmode_ours);
-#endif
   fcntl (0, F_GETFL, tflags_ours);
   ioctl (0, TIOCGPGRP, &pgrp_ours);
 

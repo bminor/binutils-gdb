@@ -27,6 +27,10 @@ extern char *inferior_io_terminal;
 
 extern int inferior_pid;
 
+/* Nonzero if debugging a remote machine via a serial link or ethernet.  */
+
+extern int remote_debugging;
+
 /* Last signal that the inferior received (why it stopped).  */
 
 extern int stop_signal;

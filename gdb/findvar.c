@@ -213,7 +213,7 @@ read_var_value (var, frame)
   register int len;
 
   if (SYMBOL_CLASS (var) == LOC_BLOCK)
-    type = lookup_function_type (type);
+    type = lookup_function_type (type, 0);
 
   v = allocate_value (type);
   VALUE_LVAL (v) = lval_memory;	/* The most likely possibility.  */
@@ -368,7 +368,7 @@ locate_var_value (var, frame)
 	  test.i = 1;
 	  if (test.c != 1 && len < REGISTER_RAW_SIZE (val))
 	    /* Big-endian, and we want less than full size.  */
-	    addr+ = REGISTER_RAW_SIZE (val) - len;
+	    addr += REGISTER_RAW_SIZE (val) - len;
 	  break;
 	}
       error ("Address requested for identifier \"%s\" which is in a register.",

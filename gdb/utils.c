@@ -1,32 +1,4 @@
-head     1.2;
-access   ;
-symbols  RMS-has:1.2;
-locks    ; strict;
-comment  @ * @;
-
-
-1.2
-date     88.01.26.05.11.12;  author gnu;  state Exp;
-branches ;
-next     1.1;
-
-1.1
-date     88.01.21.05.11.11;  author gnu;  state Exp;
-branches ;
-next     ;
-
-
-desc
-@From RMS's development sources on wheaties, 20Jan88
-@
-
-
-1.2
-log
-@Avoid using TIOCFLUSH if it is not defined.
-@
-text
-@/* General utility routines for GDB, the GNU debugger.
+/* General utility routines for GDB, the GNU debugger.
    Copyright (C) 1986 Free Software Foundation, Inc.
 
 GDB is distributed in the hope that it will be useful, but WITHOUT ANY
@@ -219,9 +191,7 @@ void
 quit ()
 {
   fflush (stdout);
-#ifdef TIOCFLUSH
   ioctl (fileno (stdout), TIOCFLUSH, 0);
-#endif
   error ("Quit");
 }
 
@@ -448,14 +418,3 @@ printchar (ch, stream)
       fputc (c, stream);
     }
 }
-@
-
-
-1.1
-log
-@Initial revision
-@
-text
-@d194 1
-d196 1
-@

@@ -32,6 +32,7 @@ static int print_max;
 static void type_print_varspec_suffix ();
 static void type_print_varspec_prefix ();
 static void type_print_base ();
+static void type_print_method_args ();
 
 START_FILE
 
@@ -88,8 +89,10 @@ value_print (val, stream)
     }
   else
     {
-      /* A simple (nonrepeated) value */
-      /* If it is a pointer, indicate what it points to.  */
+      /* If it is a pointer, indicate what it points to.
+
+         C++: if it is a member pointer, we will take care
+	 of that when we print it.  */
       if (TYPE_CODE (VALUE_TYPE (val)) == TYPE_CODE_PTR)
 	{
 	  fprintf (stream, "(");
@@ -192,23 +195,172 @@ val_print (type, valaddr, address, stream)
 	}
       break;
 
+    case TYPE_CODE_MPTR:
+      {
+	struct type *domain = TYPE_DOMAIN_TYPE (type);
+	struct type *target = TYPE_TARGET_TYPE (type);
+	struct fn_field *f;
+	int j, len2;
+	char *kind = "";
+
+	val = unpack_long (builtin_type_int, valaddr);
+	if (TYPE_CODE (target) == TYPE_CODE_FUNC)
+	  {
+	    if (val < 128)
+	      {
+		len = TYPE_NFN_FIELDS (domain);
+		for (i = 0; i < len; i++)
+		  {
+		    f = TYPE_FN_FIELDLIST1 (domain, i);
+		    len2 = TYPE_FN_FIELDLIST_LENGTH (domain, i);
+
+		    for (j = 0; j < len2; j++)
+		      {
+			QUIT;
+			if (TYPE_FN_FIELD_VOFFSET (f, j) == val)
+			  {
+			    kind = " virtual";
+			    goto common;
+			  }
+		      }
+		  }
+	      }
+	    else
+	      {
+		struct symbol *sym = find_pc_function (val);
+		if (sym == 0)
+		  error ("invalid pointer to member function");
+		len = TYPE_NFN_FIELDS (domain);
+		for (i = 0; i < len; i++)
+		  {
+		    f = TYPE_FN_FIELDLIST1 (domain, i);
+		    len2 = TYPE_FN_FIELDLIST_LENGTH (domain, i);
+
+		    for (j = 0; j < len2; j++)
+		      {
+			QUIT;
+			if (!strcmp (SYMBOL_NAME (sym), TYPE_FN_FIELD_PHYSNAME (f, j)))
+			  goto common;
+		      }
+		  }
+	      }
+	  common:
+	    if (i < len)
+	      {
+		fprintf (stream, "& ");
+		type_print_base (domain, stream, 0, 0);
+		fprintf (stream, "::%s", kind);
+		type_print_varspec_prefix (TYPE_FN_FIELD_TYPE (f, j), stream, 0, 0);
+		if (TYPE_FN_FIELD_PHYSNAME (f, j)[0] == '_'
+		    && TYPE_FN_FIELD_PHYSNAME (f, j)[1] == '$')
+		  type_print_method_args
+		    (TYPE_FN_FIELD_ARGS (f, j) + 1, "~",
+		     TYPE_FN_FIELDLIST_NAME (domain, i), stream);
+		else
+		  type_print_method_args
+		    (TYPE_FN_FIELD_ARGS (f, j), "",
+		     TYPE_FN_FIELDLIST_NAME (domain, i), stream);
+		break;
+	      }
+	  }
+	else
+	  {
+	    /* VAL is a byte offset into the structure type DOMAIN.
+	       Find the name of the field for that offset and
+	       print it.  */
+	    int extra = 0;
+	    int bits = 0;
+	    len = TYPE_NFIELDS (domain);
+	    val <<= 3;		/* @@ Make VAL into bit offset */
+	    for (i = 0; i < len; i++)
+	      {
+		int bitpos = TYPE_FIELD_BITPOS (domain, i);
+		QUIT;
+		if (val == bitpos)
+		  break;
+		if (val < bitpos && i > 0)
+		  {
+		    int ptrsize = (TYPE_LENGTH (builtin_type_char) * TYPE_LENGTH (target));
+		    /* Somehow pointing into a field.  */
+		    i -= 1;
+		    extra = (val - TYPE_FIELD_BITPOS (domain, i));
+		    if (extra & 0x3)
+		      bits = 1;
+		    else
+		      extra >>= 3;
+		    break;
+		  }
+	      }
+	    if (i < len)
+	      {
+		fprintf (stream, "& ");
+		type_print_base (domain, stream, 0, 0);
+		fprintf (stream, "::");
+		fprintf (stream, "%s", TYPE_FIELD_NAME (domain, i));
+		if (extra)
+		  fprintf (stream, " + %d bytes", extra);
+		if (bits)
+		  fprintf (stream, " (offset in bits)");
+		break;
+	      }
+	  }
+	fputc ('(', stream);
+	type_print (type, "", stream, -1);
+	fprintf (stream, ") %d", val >> 3);
+	break;
+      }
+
+    case TYPE_CODE_REF:
+      fprintf (stream, "(0x%x &) = ", * (int *) valaddr);
+      /* De-reference the reference.  */
+      if (TYPE_CODE (TYPE_TARGET_TYPE (type)) != TYPE_CODE_UNDEF)
+	{
+	  value val = value_at (TYPE_TARGET_TYPE (type), * (int *)valaddr);
+	  val_print (VALUE_TYPE (val), VALUE_CONTENTS (val),
+		     VALUE_ADDRESS (val), stream);
+	}
+      else
+	fprintf (stream, "???");
+      break;
+
     case TYPE_CODE_STRUCT:
     case TYPE_CODE_UNION:
       fprintf (stream, "{");
       len = TYPE_NFIELDS (type);
-      for (i = 0; i < len; i++)
+      if (TYPE_BASECLASS (type))
+	{
+	  i = 1;
+	  fprintf (stream, "<%s> = ", TYPE_NAME (TYPE_BASECLASS (type)));
+	  val_print (TYPE_FIELD_TYPE (type, 0),
+		     valaddr + TYPE_FIELD_BITPOS (type, 0) / 8,
+		     0, stream);
+
+	}
+      else i = 0;
+      for (; i < len; i++)
 	{
 	  if (i) fprintf (stream, ", ");
 	  fprintf (stream, "%s = ", TYPE_FIELD_NAME (type, i));
-	  if (TYPE_FIELD_PACKED (type, i))
+	  /* check if static field */
+	  if (TYPE_FIELD_STATIC (type, i))
+	    {
+	      value v;
+
+	      v = value_static_field (type, TYPE_FIELD_NAME (type, i), i);
+	      val_print (TYPE_FIELD_TYPE (type, i),
+			 VALUE_CONTENTS (v), 0, stream);
+	    }
+	  else if (TYPE_FIELD_PACKED (type, i))
 	    {
 	      val = unpack_field_as_long (type, valaddr, i);
 	      val_print (TYPE_FIELD_TYPE (type, i), &val, 0, stream);
 	    }
 	  else
-	    val_print (TYPE_FIELD_TYPE (type, i), 
-		       valaddr + TYPE_FIELD_BITPOS (type, i) / 8,
-		       0, stream);
+	    {
+	      val_print (TYPE_FIELD_TYPE (type, i), 
+			 valaddr + TYPE_FIELD_BITPOS (type, i) / 8,
+			 0, stream);
+	    }
 	}
       fprintf (stream, "}");
       break;
@@ -336,13 +488,41 @@ type_print_1 (type, varstring, stream, show, level)
       ((show > 0 || TYPE_NAME (type) == 0)
        &&
        (code == TYPE_CODE_PTR || code == TYPE_CODE_FUNC
-	|| code == TYPE_CODE_ARRAY)))
+	|| code == TYPE_CODE_ARRAY
+	|| code == TYPE_CODE_MPTR
+	|| code == TYPE_CODE_REF)))
     fprintf (stream, " ");
   type_print_varspec_prefix (type, stream, show, 0);
   fprintf (stream, "%s", varstring);
   type_print_varspec_suffix (type, stream, show, 0);
 }
 
+/* Print the method arguments ARGS to the file STREAM.  */
+static void
+type_print_method_args (args, prefix, varstring, stream)
+     struct type **args;
+     char *prefix, *varstring;
+     FILE *stream;
+{
+  int i;
+
+  fprintf (stream, " %s%s (", prefix, varstring);
+  if (args[1] && args[1]->code != TYPE_CODE_VOID)
+    {
+      i = 1;			/* skip the class variable */
+      while (1)
+	{
+	  type_print (args[i++], "", stream, 0);
+	  if (args[i]->code != TYPE_CODE_VOID)
+	    {
+	      fprintf (stream, ", ");
+	    }
+	  else break;
+	}
+    }
+  fprintf (stream, ")");
+}
+  
 /* Print any asterisks or open-parentheses needed before the
    variable name (to describe its type).
 
@@ -370,12 +550,29 @@ type_print_varspec_prefix (type, stream, show, passed_a_ptr)
       fputc ('*', stream);
       break;
 
+    case TYPE_CODE_MPTR:
+      type_print_varspec_prefix (TYPE_TARGET_TYPE (type), stream, 0, 1);
+      if (passed_a_ptr)
+	fputc ('(', stream);
+      type_print_base (TYPE_DOMAIN_TYPE (type), stream, 0, 1);
+      fprintf (stream, "::*");
+      break;
+
+    case TYPE_CODE_REF:
+      type_print_varspec_prefix (TYPE_TARGET_TYPE (type), stream, 0, 1);
+      fputc ('&', stream);
+      break;
+
     case TYPE_CODE_FUNC:
-    case TYPE_CODE_ARRAY:
-      type_print_varspec_prefix (TYPE_TARGET_TYPE (type), stream, 0, 0);
+      type_print_varspec_prefix (TYPE_TARGET_TYPE (type), stream, 0,
+				 passed_a_ptr);
       if (passed_a_ptr)
 	fputc ('(', stream);
       break;
+
+    case TYPE_CODE_ARRAY:
+      type_print_varspec_prefix (TYPE_TARGET_TYPE (type), stream, 0,
+				 passed_a_ptr);
     }
 }
 
@@ -398,9 +595,8 @@ type_print_varspec_suffix (type, stream, show, passed_a_ptr)
   switch (TYPE_CODE (type))
     {
     case TYPE_CODE_ARRAY:
-      type_print_varspec_suffix (TYPE_TARGET_TYPE (type), stream, 0, 0);
-      if (passed_a_ptr)
-	fprintf (stream, ")");
+      type_print_varspec_suffix (TYPE_TARGET_TYPE (type), stream, 0,
+				 passed_a_ptr);
       fprintf (stream, "[");
       if (TYPE_LENGTH (type) >= 0)
 	fprintf (stream, "%d",
@@ -408,12 +604,18 @@ type_print_varspec_suffix (type, stream, show, passed_a_ptr)
       fprintf (stream, "]");
       break;
 
+    case TYPE_CODE_MPTR:
+      if (passed_a_ptr)
+	fputc (')', stream);
+      /* Fall through.  */
     case TYPE_CODE_PTR:
+    case TYPE_CODE_REF:
       type_print_varspec_suffix (TYPE_TARGET_TYPE (type), stream, 0, 1);
       break;
 
     case TYPE_CODE_FUNC:
-      type_print_varspec_suffix (TYPE_TARGET_TYPE (type), stream, 0, 0);
+      type_print_varspec_suffix (TYPE_TARGET_TYPE (type), stream, 0,
+				 passed_a_ptr);
       if (passed_a_ptr)
 	fprintf (stream, ")");
       fprintf (stream, "()");
@@ -458,6 +660,8 @@ type_print_base (type, stream, show, level)
     {
     case TYPE_CODE_ARRAY:
     case TYPE_CODE_PTR:
+    case TYPE_CODE_MPTR:
+    case TYPE_CODE_REF:
     case TYPE_CODE_FUNC:
       type_print_base (TYPE_TARGET_TYPE (type), stream, show, level);
       break;
@@ -478,46 +682,84 @@ type_print_base (type, stream, show, level)
 	fprintf (stream, "{...}");
       else
 	{
+	  struct type *basetype, *dtype;
+
+	  dtype = type;
+	  basetype = TYPE_BASECLASS (type);
+	  while (basetype)
+	    {
+	      if (TYPE_NAME (basetype) && (name = TYPE_NAME (basetype)))
+		{
+		  while (*name != ' ') name++;
+		  fprintf (stream, ": %s %s ",
+			   TYPE_VIA_PUBLIC (dtype) ? "public" : "private",
+			   name + 1);
+		}
+	      dtype = basetype;
+	      basetype = TYPE_BASECLASS (basetype);
+	    }
 	  fprintf (stream, "{");
 	  len = TYPE_NFIELDS (type);
-	  fprintf (stream, "\n");
-	  for (i = 0; i < len; i++)
+	  if (len) fprintf (stream, "\n");
+	  else fprintf (stream, "<no data fields>\n");
+
+	  /* If there is a base class for this type,
+	     do not print the field that it occupies.  */
+	  for (i = !! TYPE_BASECLASS (type); i < len; i++)
 	    {
 	      QUIT;
+	      /* Don't print out virtual function table.  */
+	      if (! strncmp (TYPE_FIELD_NAME (type, i),
+			   "_vptr$", 6))
+		continue;
+
 	      print_spaces (level + 4, stream);
-
-	      /* If this is a bit-field and there is a gap before it,
-		 print a nameless field to account for the gap.  */
-
-	      if (TYPE_FIELD_PACKED (type, i))
+	      if (TYPE_FIELD_STATIC (type, i))
 		{
-		  int gap = (TYPE_FIELD_BITPOS (type, i)
-			     - (i > 0
-				? (TYPE_FIELD_BITPOS (type, i - 1)
-				   + (TYPE_FIELD_PACKED (type, i - 1)
-				      ? TYPE_FIELD_BITSIZE (type, i - 1)
-				      : TYPE_LENGTH (TYPE_FIELD_TYPE (type, i - 1)) * 8))
-				: 0));
-		  if (gap != 0)
-		    {
-		      fprintf (stream, "int : %d;\n", gap);
-		      print_spaces (level + 4, stream);
-		    }
+		  fprintf (stream, "static ");
 		}
-
-	      /* Print the declaration of this field.  */
-
 	      type_print_1 (TYPE_FIELD_TYPE (type, i),
 			    TYPE_FIELD_NAME (type, i),
 			    stream, show - 1, level + 4);
-
-	      /* Print the field width.  */
-
-	      if (TYPE_FIELD_PACKED (type, i))
-		fprintf (stream, " : %d", TYPE_FIELD_BITSIZE (type, i));
-
+	      if (!TYPE_FIELD_STATIC (type, i)
+		  && TYPE_FIELD_PACKED (type, i))
+		{
+		  /* ??? don't know what to put here ??? */;
+		}
 	      fprintf (stream, ";\n");
 	    }
+
+	  /* C++: print out the methods */
+	  len = TYPE_NFN_FIELDS (type);
+	  if (len) fprintf (stream, "\n");
+	  for (i = 0; i < len; i++)
+	    {
+	      struct fn_field *f = TYPE_FN_FIELDLIST1 (type, i);
+	      int j, len2 = TYPE_FN_FIELDLIST_LENGTH (type, i);
+
+	      for (j = 0; j < len2; j++)
+		{
+		  QUIT;
+		  print_spaces (level + 4, stream);
+		  if (TYPE_FN_FIELD_VIRTUAL_P (f, j))
+		    fprintf (stream, "virtual ");
+		  type_print_base (TYPE_FN_FIELD_TYPE (f, j), stream, 0, level);
+		  type_print_varspec_prefix (TYPE_FN_FIELD_TYPE (f, j), stream, 0, 0);
+		  if (TYPE_FN_FIELD_PHYSNAME (f, j)[0] == '_'
+		      && TYPE_FN_FIELD_PHYSNAME (f, j)[1] == '$')
+		    type_print_method_args
+		      (TYPE_FN_FIELD_ARGS (f, j) + 1, "~",
+		       TYPE_FN_FIELDLIST_NAME (type, i), stream);
+		  else
+		    type_print_method_args
+		      (TYPE_FN_FIELD_ARGS (f, j), "",
+		       TYPE_FN_FIELDLIST_NAME (type, i), stream);
+
+		  fprintf (stream, ";\n");
+		}
+	      if (len2) fprintf (stream, "\n");
+	    }
+
 	  print_spaces (level, stream);
 	  fputc ('}', stream);
 	}

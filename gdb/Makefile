@@ -1,18 +1,20 @@
 # -I. for "#include <obstack.h>"
-CFLAGS = -g -I. -Dvfork=fork -DDEBUG
+CFLAGS = -g -I.
 # NOTE!!! -O  may FAIL TO WORK!  See initialize.h for some weird hacks.
+CC = cc
+BISON = bison
 
 # define this to be "obstack.o" if you don't have the obstack library installed
 # you must at the same time define OBSTACK1 as "obstack.o" 
 # so that the dependencies work right.
-OBSTACK = obstack.o alloca.o -lPW
-OBSTACK1 = obstack.o alloca.o
+OBSTACK = obstack.o
+OBSTACK1 = obstack.o
 
 STARTOBS = main.o firstfile.o
 
 OBS = blockframe.o breakpoint.o findvar.o stack.o source.o \
     values.o eval.o valops.o valarith.o valprint.o printcmd.o \
-    symtab.o symmisc.o coffread.o dbxread.o infcmd.o infrun.o
+    symtab.o symmisc.o coffread.o dbxread.o infcmd.o infrun.o remote.o
 
 TSOBS = core.o inflow.o
 
@@ -25,19 +27,15 @@ TSSTART = /lib/crt0.o
 
 NTSSTART = kdb-start.o
 
-gdb : $(STARTOBS) $(OBS) $(TSOBS) $(ENDOBS) $(OBSTACK1)
-	$(CC) -o gdb $(STARTOBS) $(OBS) $(TSOBS) $(ENDOBS) -lg $(OBSTACK)
+gdb+: $(STARTOBS) $(OBS) $(TSOBS) $(ENDOBS) $(OBSTACK1)
+	$(CC) -o gdb+ $(STARTOBS) $(OBS) $(TSOBS) $(ENDOBS) -lc -lg $(OBSTACK)
 
-xgdb : $(STARTOBS) $(OBS) xgdb.o $(TSOBS) $(ENDOBS) $(OBSTACK1)
-	$(CC) -o xgdb $(STARTOBS) $(OBS) xgdb.o $(TSOBS) $(ENDOBS) \
+xgdb+ : $(STARTOBS) $(OBS) xgdb.o $(TSOBS) $(ENDOBS) $(OBSTACK1)
+	$(CC) -o xgdb+ $(STARTOBS) $(OBS) xgdb.o $(TSOBS) $(ENDOBS) \
            -lXtk11 -lXrm -lX11 -lg $(OBSTACK)
 
 kdb : $(NTSSTART) $(STARTOBS) $(OBS) $(NTSOBS) $(ENDOBS) $(OBSTACK1)
 	ld -o kdb $(NTSSTART) $(STARTOBS) $(OBS) $(NTSOBS) $(ENDOBS) -lc -lg $(OBSTACK)
-
-clean:
-	rm -f $(STARTOBS) $(OBS) $(TSOBS) $(OBSTACK1) $(NTSSTART) $(NTSOBS)
-	rm -f xgdb.o gdb xgdb kdb tags errs expread.tab.c
 
 blockframe.o : blockframe.c defs.h initialize.h param.h symtab.h frame.h
 breakpoint.o : breakpoint.c defs.h initialize.h param.h symtab.h frame.h
@@ -48,9 +46,8 @@ dbxread.o : dbxread.c defs.h initialize.h param.h symtab.h
 environ.o : environ.c environ.h
 expprint.o : expprint.c defs.h symtab.h expression.h
 expread.tab.c : expread.y
-	@echo 'Expect 96 shift/reduce conflicts.'
-	yacc expread.y
-	mv y.tab.c expread.tab.c
+	@echo 'Expect 101 shift/reduce conflicts and 1 reduce/reduce conflict.'
+	$(BISON) -v expread.y
 expread.o : expread.tab.c defs.h param.h symtab.h frame.h expression.h
 	$(CC) -c ${CFLAGS} expread.tab.c
 	mv expread.tab.o expread.o
@@ -68,6 +65,7 @@ main.o : main.c defs.h command.h
 pinsn.o : pinsn.c defs.h param.h symtab.h \
     vax-opcode.h vax-pinsn.c m68k-opcode.h m68k-pinsn.c
 printcmd.o : printcmd.c defs.h initialize.h param.h symtab.h value.h expression.h
+remote.o : remote.c defs.h initialize.h param.h frame.h inferior.h
 source.o : source.c defs.h initialize.h symtab.h
 stack.o : stack.c defs.h initialize.h param.h symtab.h frame.h
 standalone.o : standalone.c defs.h initialize.h param.h symtab.h frame.h inferior.h wait.h
