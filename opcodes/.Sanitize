@@ -31,6 +31,15 @@ else
 	lose_these_too="${d10v_files} ${lose_these_too}"
 fi
 
+v850_files="v850-opc.c"
+
+if ( echo $* | grep keep\-v850 > /dev/null ) ; then
+	keep_these_too="${v850_files} ${keep_these_too}"
+else
+	lose_these_too="${v850_files} ${lose_these_too}"
+fi
+
+
 # All files listed between the "Things-to-keep:" line and the
 # "Files-to-sed:" line will be kept.  All other files will be removed.
 # Directories listed in this section will have their own Sanitize
@@ -75,6 +84,7 @@ sh-dis.c
 sparc-dis.c
 sparc-opc.c
 sysdep.h
+v850-opc.c
 w65-dis.c
 w65-opc.h
 z8k-dis.c
@@ -140,6 +150,35 @@ else
 		fi
 	done
 fi
+
+v850_files="ChangeLog Makefile.in configure.in configure disassemble.c"
+if ( echo $* | grep keep\-v850 > /dev/null ) ; then
+	for i in $v850_files ; do
+		if test ! -d $i && (grep sanitize-v850 $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Keeping v850 stuff in $i
+			fi
+		fi
+	done
+else
+	for i in $v850_files ; do
+		if test ! -d $i && (grep sanitize-v850 $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Removing traces of \"v850\" from $i...
+			fi
+			cp $i new
+			sed '/start\-sanitize\-v850/,/end-\sanitize\-v850/d' < $i > new
+			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
+				if [ -n "${verbose}" ] ; then
+					echo Caching $i in .Recover...
+				fi
+				mv $i .Recover
+			fi
+			mv new $i
+		fi
+	done
+fi
+
 
 for i in * ; do
 	if test ! -d $i && (grep sanitize $i > /dev/null) ; then

@@ -1,3 +1,12 @@
+start-sanitize-v850
+Tue Aug 20 14:41:03 1996  J.T. Conklin  <jtc@hippo.cygnus.com>
+
+	* Makefile.in (ALL_MACHINES): Add v850-opc.o.
+	* configure: (bfd_v850v_arch) Add new case.
+	* configure.in: (bfd_v850_arch) Add new case.
+	* v850-opc.c: New file.
+	
+end-sanitize-v850
 Mon Aug 19 15:21:38 1996  Doug Evans  <dje@canuck.cygnus.com>
 
 	* sparc-dis.c (print_insn_sparc): Handle little endian sparcs.
