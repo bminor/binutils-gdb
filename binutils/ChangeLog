@@ -1,3 +1,25 @@
+Mon Jan 22 19:29:36 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ieee.c: Extensive changes to pass a single info argument around
+	in the reading routines, rather than several arguments.  Add code
+	to read C++ debugging records.
+
+	* debug.h (debug_get_type_size): Declare.
+	(debug_get_field_name): Declare.
+	(debug_get_field_bitpos): Declare.
+	(debug_get_field_bitsize): Declare.
+	(debug_get_field_visibility): Declare.
+	(debug_get_field_physname): Declare.
+	* debug.c (debug_get_real_type): Handle DEBUG_KIND_TAGGED.
+	(debug_get_type_size): New function.
+	(debug_get_field_name): New function.
+	(debug_get_field_bitpos): New function.
+	(debug_get_field_bitsize): New function.
+	(debug_get_field_visibility): New function.
+	(debug_get_field_physname): New function.
+	(debug_write_type): Make sure we pass the real kind, not INDIRECT,
+	to tag_type.  Pass the name recursively for INDIRECT.
+
 Fri Jan 19 12:31:57 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* debug.h (struct debug_write_fns): Remove ellipsis_type.  Add int
