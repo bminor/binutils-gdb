@@ -1,3 +1,12 @@
+2001-09-26  Alan Modra  <amodra@bigpond.net.au>
+
+	* bucomm.c (fatal): Define using VPARAMS, VA_OPEN, VA_FIXEDARG,
+	VA_CLOSE.
+	(non_fatal): Likewise.
+	* objdump.c (objdump_sprintf): Likewise.
+	* readelf.c (error): Likewise.
+	(warn): Likewise.
+
 2001-09-25  Jakub Jelinek  <jakub@redhat.com>
 
 	* readelf.c (do_wide): New.

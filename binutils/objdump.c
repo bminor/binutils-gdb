@@ -1109,35 +1109,20 @@ typedef struct
 /* sprintf to a "stream" */
 
 static int
-#ifdef ANSI_PROTOTYPES
-objdump_sprintf (SFILE *f, const char *format, ...)
-#else
-objdump_sprintf (va_alist)
-     va_dcl
-#endif
+objdump_sprintf VPARAMS ((SFILE *f, const char *format, ...))
 {
-#ifndef ANSI_PROTOTYPES
-  SFILE *f;
-  const char *format;
-#endif
   char *buf;
-  va_list args;
   size_t n;
 
-#ifdef ANSI_PROTOTYPES
-  va_start (args, format);
-#else
-  va_start (args);
-  f = va_arg (args, SFILE *);
-  format = va_arg (args, const char *);
-#endif
+  VA_OPEN (args, format);
+  VA_FIXEDARG (args, SFILE *, f);
+  VA_FIXEDARG (args, const char *, format);
 
   vasprintf (&buf, format, args);
 
-  va_end (args);
-
   if (buf == NULL)
     {
+      va_end (args);
       fatal (_("Out of virtual memory"));
     }
 
@@ -1159,6 +1144,7 @@ objdump_sprintf (va_alist)
 
   free (buf);
 
+  VA_CLOSE (args);
   return n;
 }
 

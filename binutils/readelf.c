@@ -281,61 +281,27 @@ typedef int Elf32_Word;
    : get_64bit_elf_symbols (file, offset, size))
 
 
-#ifdef ANSI_PROTOTYPES
 static void
-error (const char * message, ...)
+error VPARAMS ((const char *message, ...))
 {
-  va_list args;
+  VA_OPEN (args, message);
+  VA_FIXEDARG (args, const char *, message);
 
   fprintf (stderr, _("%s: Error: "), program_name);
-  va_start (args, message);
   vfprintf (stderr, message, args);
-  va_end (args);
-  return;
+  VA_CLOSE (args);
 }
 
 static void
-warn (const char * message, ...)
+warn VPARAMS ((const char *message, ...))
 {
-  va_list args;
+  VA_OPEN (args, message);
+  VA_FIXEDARG (args, const char *, message);
 
   fprintf (stderr, _("%s: Warning: "), program_name);
-  va_start (args, message);
   vfprintf (stderr, message, args);
-  va_end (args);
-  return;
+  VA_CLOSE (args);
 }
-#else
-static void
-error (va_alist)
-     va_dcl
-{
-  char * message;
-  va_list args;
-
-  fprintf (stderr, _("%s: Error: "), program_name);
-  va_start (args);
-  message = va_arg (args, char *);
-  vfprintf (stderr, message, args);
-  va_end (args);
-  return;
-}
-
-static void
-warn (va_alist)
-     va_dcl
-{
-  char * message;
-  va_list args;
-
-  fprintf (stderr, _("%s: Warning: "), program_name);
-  va_start (args);
-  message = va_arg (args, char *);
-  vfprintf (stderr, message, args);
-  va_end (args);
-  return;
-}
-#endif
 
 static PTR get_data PARAMS ((PTR, FILE *, long, size_t, const char *));
 
