@@ -1,3 +1,9 @@
+Fri Mar 28 18:03:19 1997  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	* configure.in: Add AC_ARG_ENABLE for commonbfdlib.  If it is set,
+	set OPCODES_LIB to empty.
+	* configure: Rebuild.
+
 Fri Mar 28 15:25:24 1997  H.J. Lu  <hjl@gnu.ai.mit.edu>
 
 	* configure.in (sparc-*-linux*aout*, sparc-*-linux*): New
