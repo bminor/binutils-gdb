@@ -1,5 +1,7 @@
 2001-10-14  Hans-Peter Nilsson  <hp@bitrange.com>
 
+	* lib/ld-lib.exp (run_dump_test): Fix typo: asflags(), not asflags{}.
+
 	* ld-sh/rd-sh.exp: New framework file.
 	* ld-sh/ld-r-1.d, ld-sh/ldr1.s, ld-sh/ldr2.s, ld-sh/shared-1.d,
 	ld-sh/weak1.s, ld-sh/weak1.d, ld-sh/sub2l.s, ld-sh/sub2l-1.d: New

@@ -524,7 +524,7 @@ proc run_dump_test { name } {
     set opts(source) {}
     set opts(error) {}
     set opts(objcopy_linked_file) {}
-    set asflags{${file}.s} {}
+    set asflags(${file}.s) {}
 
     foreach i $opt_array {
 	set opt_name [lindex $i 0]
