@@ -1,3 +1,8 @@
+Tue Jun  3 16:15:13 1997  Nick Clifton  <nickc@cygnus.com>
+
+	* configure.in (emulations): Added Thumb architecture support from
+	armT-9703-28-branch.
+
 Mon Jun  2 16:25:07 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* doc/all.texi: Add enabling of ARM documentation.
