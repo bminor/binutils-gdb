@@ -99,6 +99,7 @@ extern void (*ui_loop_hook) PARAMS ((int));
 
 char * get_prompt PARAMS ((void));
 
+int gdbtk_test PARAMS ((char *));
 static void null_routine PARAMS ((int));
 static void gdbtk_flush PARAMS ((FILE *));
 static void gdbtk_fputs PARAMS ((const char *, FILE *));
@@ -174,10 +175,11 @@ static int gdb_loadfile PARAMS ((ClientData, Tcl_Interp *, int, Tcl_Obj *CONST o
 static int gdb_set_bp PARAMS ((ClientData, Tcl_Interp *, int, Tcl_Obj *CONST objv[]));
 static struct symtab *full_lookup_symtab PARAMS ((char *file));
 static int gdb_get_mem PARAMS ((ClientData, Tcl_Interp *, int, char *[]));
+static int gdb_search PARAMS ((ClientData, Tcl_Interp *, int, Tcl_Obj *CONST objv[]));
 static int gdb_get_trace_frame_num PARAMS ((ClientData, Tcl_Interp *, int, Tcl_Obj *CONST objv[]));
 
 /* Handle for TCL interpreter */
-static Tcl_Interp *interp = NULL;
+Tcl_Interp *gdbtk_interp = NULL;
 
 static int gdbtk_timer_going = 0;
 static void gdbtk_start_timer PARAMS ((void));
@@ -200,6 +202,10 @@ static int running_now;
    otherwise the exec file is used.  */
 
 static int disassemble_from_exec = -1;
+
+/* This variable holds the name of a Tcl file which should be sourced by the
+   interpreter when it goes idle at startup. Used with the testsuite. */
+static char *gdbtk_source_filename = NULL;
 
 #ifndef _WIN32
 
@@ -292,7 +298,7 @@ gdbtk_flush (stream)
 #if 0
   /* Force immediate screen update */
 
-  Tcl_VarEval (interp, "gdbtk_tcl_flush", NULL);
+  Tcl_VarEval (gdbtk_interp, "gdbtk_tcl_flush", NULL);
 #endif
 }
 
@@ -319,7 +325,7 @@ gdbtk_fputs (ptr, stream)
       merge[0] = "gdbtk_tcl_fputs";
       merge[1] = (char *)ptr;
       command = Tcl_Merge (2, merge);
-      Tcl_Eval (interp, command);
+      Tcl_Eval (gdbtk_interp, command);
       Tcl_Free (command);
     }
   in_fputs = 0;
@@ -337,7 +343,7 @@ gdbtk_warning (warning, args)
   merge[0] = "gdbtk_tcl_warning";
   merge[1] = buf;
   command = Tcl_Merge (2, merge);
-  Tcl_Eval (interp, command);
+  Tcl_Eval (gdbtk_interp, command);
   Tcl_Free (command);
 }
 
@@ -352,7 +358,7 @@ gdbtk_ignorable_warning (warning)
   merge[0] = "gdbtk_tcl_ignorable_warning";
   merge[1] = buf;
   command = Tcl_Merge (2, merge);
-  Tcl_Eval (interp, command);
+  Tcl_Eval (gdbtk_interp, command);
   Tcl_Free (command);
 }
 
@@ -369,10 +375,10 @@ gdbtk_query (query, args)
   merge[0] = "gdbtk_tcl_query";
   merge[1] = buf;
   command = Tcl_Merge (2, merge);
-  Tcl_Eval (interp, command);
+  Tcl_Eval (gdbtk_interp, command);
   Tcl_Free (command);
  
-  val = atol (interp->result);
+  val = atol (gdbtk_interp->result);
   return val;
 }
 
@@ -401,7 +407,7 @@ gdbtk_readline_begin (va_alist)
   merge[0] = "gdbtk_tcl_readline_begin";
   merge[1] = buf;
   command = Tcl_Merge (2, merge);
-  Tcl_Eval (interp, command);
+  Tcl_Eval (gdbtk_interp, command);
   Tcl_Free (command);
 }
 
@@ -420,15 +426,15 @@ gdbtk_readline (prompt)
   merge[0] = "gdbtk_tcl_readline";
   merge[1] = prompt;
   command = Tcl_Merge (2, merge);
-  result = Tcl_Eval (interp, command);
+  result = Tcl_Eval (gdbtk_interp, command);
   Tcl_Free (command);
   if (result == TCL_OK)
     {
-      return (strdup (interp -> result));
+      return (strdup (gdbtk_interp -> result));
     }
   else
     {
-      gdbtk_fputs (interp -> result, gdb_stdout);
+      gdbtk_fputs (gdbtk_interp -> result, gdb_stdout);
       gdbtk_fputs ("\n", gdb_stdout);
       return (NULL);
     }
@@ -437,13 +443,13 @@ gdbtk_readline (prompt)
 static void
 gdbtk_readline_end ()
 {
-  Tcl_Eval (interp, "gdbtk_tcl_readline_end");
+  Tcl_Eval (gdbtk_interp, "gdbtk_tcl_readline_end");
 }
 
 static void
 pc_changed()
 {
-  Tcl_Eval (interp, "gdbtk_pc_changed");
+  Tcl_Eval (gdbtk_interp, "gdbtk_pc_changed");
 }
 
 
@@ -610,11 +616,11 @@ breakpoint_notify(b, action)
   sprintf (buf, "gdbtk_tcl_breakpoint %s %d 0x%lx %d {%s}", action, b->number, 
 	   (long)b->address, b->line_number, filename);
 
-  v = Tcl_Eval (interp, buf);
+  v = Tcl_Eval (gdbtk_interp, buf);
 
   if (v != TCL_OK)
     {
-      gdbtk_fputs (interp->result, gdb_stdout);
+      gdbtk_fputs (gdbtk_interp->result, gdb_stdout);
       gdbtk_fputs ("\n", gdb_stdout);
     }
 }
@@ -1873,9 +1879,9 @@ tk_command (cmd, from_tty)
   if (cmd == NULL)
     error_no_arg ("tcl command to interpret");
 
-  retval = Tcl_Eval (interp, cmd);
+  retval = Tcl_Eval (gdbtk_interp, cmd);
 
-  result = strdup (interp->result);
+  result = strdup (gdbtk_interp->result);
 
   old_chain = make_cleanup (free, result);
 
@@ -1891,9 +1897,9 @@ static void
 cleanup_init (ignored)
      int ignored;
 {
-  if (interp != NULL)
-    Tcl_DeleteInterp (interp);
-  interp = NULL;
+  if (gdbtk_interp != NULL)
+    Tcl_DeleteInterp (gdbtk_interp);
+  gdbtk_interp = NULL;
 }
 
 /* Come here during long calculations to check for GUI events.  Usually invoked
@@ -1933,10 +1939,10 @@ x_event (signo)
       int val;
       if (varname == NULL)
 	{
-	  Tcl_Obj *varnamestrobj = Tcl_NewStringObj("download_cancel_ok",-1);
-	  varname = Tcl_ObjGetVar2(interp,varnamestrobj,NULL,TCL_GLOBAL_ONLY);
+	  Tcl_Obj *varnamestrobj = Tcl_NewStringObj ("download_cancel_ok",-1);
+	  varname = Tcl_ObjGetVar2 (gdbtk_interp,varnamestrobj,NULL,TCL_GLOBAL_ONLY);
 	}
-      if ((Tcl_GetIntFromObj(interp,varname,&val) == TCL_OK) && val)
+      if ((Tcl_GetIntFromObj (gdbtk_interp,varname,&val) == TCL_OK) && val)
 	{
 	  quit_flag = 1;
 #ifdef REQUEST_QUIT
@@ -2047,12 +2053,12 @@ gdbtk_call_command (cmdblk, arg, from_tty)
 
       if (!strcmp(cmdblk->name, "tstart") && !No_Update)
         {
-              Tcl_Eval (interp, "gdbtk_tcl_tstart"); 
+              Tcl_Eval (gdbtk_interp, "gdbtk_tcl_tstart"); 
               (*cmdblk->function.cfunc)(arg, from_tty);
         }
       else if (!strcmp(cmdblk->name, "tstop") && !No_Update) 
              {
-              Tcl_Eval (interp, "gdbtk_tcl_tstop"); 
+              Tcl_Eval (gdbtk_interp, "gdbtk_tcl_tstop"); 
               (*cmdblk->function.cfunc)(arg, from_tty);
              }
 /* end of hack */
@@ -2060,11 +2066,11 @@ gdbtk_call_command (cmdblk, arg, from_tty)
              {
                  running_now = 1;
                  if (!No_Update)
-                   Tcl_Eval (interp, "gdbtk_tcl_busy");
+                   Tcl_Eval (gdbtk_interp, "gdbtk_tcl_busy");
                  (*cmdblk->function.cfunc)(arg, from_tty);
                  running_now = 0;
                  if (!No_Update)
-                   Tcl_Eval (interp, "gdbtk_tcl_idle");
+                   Tcl_Eval (gdbtk_interp, "gdbtk_tcl_idle");
              }
     }
   else
@@ -2082,14 +2088,14 @@ tk_command_loop ()
   /* We no longer want to use stdin as the command input stream */
   instream = NULL;
 
-  if (Tcl_Eval (interp, "gdbtk_tcl_preloop") != TCL_OK)
+  if (Tcl_Eval (gdbtk_interp, "gdbtk_tcl_preloop") != TCL_OK)
     {
       char *msg;
 
       /* Force errorInfo to be set up propertly.  */
-      Tcl_AddErrorInfo (interp, "");
+      Tcl_AddErrorInfo (gdbtk_interp, "");
 
-      msg = Tcl_GetVar (interp, "errorInfo", TCL_GLOBAL_ONLY);
+      msg = Tcl_GetVar (gdbtk_interp, "errorInfo", TCL_GLOBAL_ONLY);
 #ifdef _WIN32
       MessageBox (NULL, msg, NULL, MB_OK | MB_ICONERROR | MB_TASKMODAL);
 #else
@@ -2153,17 +2159,17 @@ gdbtk_init ( argv0 )
 
   /* First init tcl and tk. */
   Tcl_FindExecutable (argv0); 
-  interp = Tcl_CreateInterp ();
+  gdbtk_interp = Tcl_CreateInterp ();
 
 #ifdef TCL_MEM_DEBUG
   Tcl_InitMemory (interp);
 #endif
 
-  if (!interp)
+  if (!gdbtk_interp)
     error ("Tcl_CreateInterp failed");
 
-  if (Tcl_Init(interp) != TCL_OK)
-    error ("Tcl_Init failed: %s", interp->result);
+  if (Tcl_Init(gdbtk_interp) != TCL_OK)
+    error ("Tcl_Init failed: %s", gdbtk_interp->result);
 
 #ifndef IDE
   /* For the IDE we register the cleanup later, after we've
@@ -2172,14 +2178,14 @@ gdbtk_init ( argv0 )
 #endif
 
   /* Initialize the Paths variable.  */
-  if (ide_initialize_paths (interp, "gdbtcl") != TCL_OK)
-    error ("ide_initialize_paths failed: %s", interp->result);
+  if (ide_initialize_paths (gdbtk_interp, "gdbtcl") != TCL_OK)
+    error ("ide_initialize_paths failed: %s", gdbtk_interp->result);
 
 #ifdef IDE
   /* start-sanitize-ide */
   /* Find the directory where we expect to find idemanager.  We ignore
      errors since it doesn't really matter if this fails.  */
-  libexecdir = Tcl_GetVar2 (interp, "Paths", "libexecdir", TCL_GLOBAL_ONLY);
+  libexecdir = Tcl_GetVar2 (gdbtk_interp, "Paths", "libexecdir", TCL_GLOBAL_ONLY);
 
   IluTk_Init ();
 
@@ -2187,152 +2193,153 @@ gdbtk_init ( argv0 )
   make_final_cleanup (gdbtk_cleanup, h);
   if (h == NULL)
     {
-      Tcl_AppendResult (interp, "can't initialize event system: ", errmsg,
+      Tcl_AppendResult (gdbtk_interp, "can't initialize event system: ", errmsg,
 			(char *) NULL);
-      fprintf(stderr, "WARNING: ide_event_init_client failed: %s\n", interp->result);
+      fprintf(stderr, "WARNING: ide_event_init_client failed: %s\n", gdbtk_interp->result);
 
-      Tcl_SetVar (interp, "IDE_ENABLED", "0", 0);
+      Tcl_SetVar (gdbtk_interp, "IDE_ENABLED", "0", 0);
     }
   else 
     {
-      if (ide_create_tclevent_command (interp, h) != TCL_OK)
-	error ("ide_create_tclevent_command failed: %s", interp->result);
+      if (ide_create_tclevent_command (gdbtk_interp, h) != TCL_OK)
+	error ("ide_create_tclevent_command failed: %s", gdbtk_interp->result);
 
-      if (ide_create_edit_command (interp, h) != TCL_OK)
-	error ("ide_create_edit_command failed: %s", interp->result);
+      if (ide_create_edit_command (gdbtk_interp, h) != TCL_OK)
+	error ("ide_create_edit_command failed: %s", gdbtk_interp->result);
       
-      if (ide_create_property_command (interp, h) != TCL_OK)
-	error ("ide_create_property_command failed: %s", interp->result);
+      if (ide_create_property_command (gdbtk_interp, h) != TCL_OK)
+	error ("ide_create_property_command failed: %s", gdbtk_interp->result);
 
-      if (ide_create_build_command (interp, h) != TCL_OK)
-	error ("ide_create_build_command failed: %s", interp->result);
+      if (ide_create_build_command (gdbtk_interp, h) != TCL_OK)
+	error ("ide_create_build_command failed: %s", gdbtk_interp->result);
 
-      if (ide_create_window_register_command (interp, h, "gdb-restore")
+      if (ide_create_window_register_command (gdbtk_interp, h, "gdb-restore")
 	  != TCL_OK)
 	error ("ide_create_window_register_command failed: %s",
-	       interp->result);
+	       gdbtk_interp->result);
 
-      if (ide_create_window_command (interp, h) != TCL_OK)
-	error ("ide_create_window_command failed: %s", interp->result);
+      if (ide_create_window_command (gdbtk_interp, h) != TCL_OK)
+	error ("ide_create_window_command failed: %s", gdbtk_interp->result);
 
-      if (ide_create_exit_command (interp, h) != TCL_OK)
-	error ("ide_create_exit_command failed: %s", interp->result);
+      if (ide_create_exit_command (gdbtk_interp, h) != TCL_OK)
+	error ("ide_create_exit_command failed: %s", gdbtk_interp->result);
 
-      if (ide_create_help_command (interp) != TCL_OK)
-	error ("ide_create_help_command failed: %s", interp->result);
+      if (ide_create_help_command (gdbtk_interp) != TCL_OK)
+	error ("ide_create_help_command failed: %s", gdbtk_interp->result);
 
       /*
-	if (ide_initialize (interp, "gdb") != TCL_OK)
-	error ("ide_initialize failed: %s", interp->result);
+	if (ide_initialize (gdbtk_interp, "gdb") != TCL_OK)
+	error ("ide_initialize failed: %s", gdbtk_interp->result);
       */
 
-      Tcl_SetVar (interp, "IDE_ENABLED", "1", 0);
+      Tcl_SetVar (gdbtk_interp, "IDE_ENABLED", "1", 0);
     }
   /* end-sanitize-ide */
 #else
-  Tcl_SetVar (interp, "IDE_ENABLED", "0", 0);
+  Tcl_SetVar (gdbtk_interp, "IDE_ENABLED", "0", 0);
 #endif /* IDE */
 
   /* We don't want to open the X connection until we've done all the
      IDE initialization.  Otherwise, goofy looking unfinished windows
      pop up when ILU drops into the TCL event loop.  */
 
-  if (Tk_Init(interp) != TCL_OK)
-    error ("Tk_Init failed: %s", interp->result);
+  if (Tk_Init(gdbtk_interp) != TCL_OK)
+    error ("Tk_Init failed: %s", gdbtk_interp->result);
 
-  if (Itcl_Init(interp) == TCL_ERROR) 
-    error ("Itcl_Init failed: %s", interp->result);
+  if (Itcl_Init(gdbtk_interp) == TCL_ERROR) 
+    error ("Itcl_Init failed: %s", gdbtk_interp->result);
 
-  if (Tix_Init(interp) != TCL_OK)
-    error ("Tix_Init failed: %s", interp->result);
+  if (Tix_Init(gdbtk_interp) != TCL_OK)
+    error ("Tix_Init failed: %s", gdbtk_interp->result);
 
-  if (Tktable_Init(interp) != TCL_OK)
-    error ("Tktable_Init failed: %s", interp->result);
-  Tcl_StaticPackage(interp, "Tktable", Tktable_Init,
+  if (Tktable_Init(gdbtk_interp) != TCL_OK)
+    error ("Tktable_Init failed: %s", gdbtk_interp->result);
+  Tcl_StaticPackage(gdbtk_interp, "Tktable", Tktable_Init,
 		    (Tcl_PackageInitProc *) NULL);  
   
 #ifdef __CYGWIN32__
-  if (ide_create_messagebox_command (interp) != TCL_OK)
+  if (ide_create_messagebox_command (gdbtk_interp) != TCL_OK)
     error ("messagebox command initialization failed");
   /* On Windows, create a sizebox widget command */
-  if (ide_create_sizebox_command (interp) != TCL_OK)
+  if (ide_create_sizebox_command (gdbtk_interp) != TCL_OK)
     error ("sizebox creation failed");
-  if (ide_create_winprint_command (interp) != TCL_OK)
+  if (ide_create_winprint_command (gdbtk_interp) != TCL_OK)
     error ("windows print code initialization failed");
   /* start-sanitize-ide */
   /* An interface to ShellExecute.  */
-  if (ide_create_shell_execute_command (interp) != TCL_OK)
+  if (ide_create_shell_execute_command (gdbtk_interp) != TCL_OK)
     error ("shell execute command initialization failed");
   /* end-sanitize-ide */
-  if (ide_create_win_grab_command (interp) != TCL_OK)
+  if (ide_create_win_grab_command (gdbtk_interp) != TCL_OK)
     error ("grab support command initialization failed");
   /* Path conversion functions.  */
-  if (ide_create_cygwin_path_command (interp) != TCL_OK)
+  if (ide_create_cygwin_path_command (gdbtk_interp) != TCL_OK)
     error ("cygwin path command initialization failed");
 #endif
 
-  Tcl_CreateCommand (interp, "gdb_cmd", call_wrapper, gdb_cmd, NULL);
-  Tcl_CreateCommand (interp, "gdb_immediate", call_wrapper,
+  Tcl_CreateCommand (gdbtk_interp, "gdb_cmd", call_wrapper, gdb_cmd, NULL);
+  Tcl_CreateCommand (gdbtk_interp, "gdb_immediate", call_wrapper,
                      gdb_immediate_command, NULL);
-  Tcl_CreateCommand (interp, "gdb_loc", call_wrapper, gdb_loc, NULL);
-  Tcl_CreateCommand (interp, "gdb_path_conv", call_wrapper, gdb_path_conv, NULL);
-  Tcl_CreateObjCommand (interp, "gdb_listfiles", call_obj_wrapper, gdb_listfiles, NULL);
-  Tcl_CreateCommand (interp, "gdb_listfuncs", call_wrapper, gdb_listfuncs,
+  Tcl_CreateCommand (gdbtk_interp, "gdb_loc", call_wrapper, gdb_loc, NULL);
+  Tcl_CreateCommand (gdbtk_interp, "gdb_path_conv", call_wrapper, gdb_path_conv, NULL);
+  Tcl_CreateObjCommand (gdbtk_interp, "gdb_listfiles", call_obj_wrapper, gdb_listfiles, NULL);
+  Tcl_CreateCommand (gdbtk_interp, "gdb_listfuncs", call_wrapper, gdb_listfuncs,
 		     NULL);
-  Tcl_CreateCommand (interp, "gdb_get_mem", call_wrapper, gdb_get_mem,
+  Tcl_CreateCommand (gdbtk_interp, "gdb_get_mem", call_wrapper, gdb_get_mem,
 		     NULL);
-  Tcl_CreateCommand (interp, "gdb_stop", call_wrapper, gdb_stop, NULL);
-  Tcl_CreateCommand (interp, "gdb_regnames", call_wrapper, gdb_regnames, NULL);
-  Tcl_CreateCommand (interp, "gdb_fetch_registers", call_wrapper,
+  Tcl_CreateCommand (gdbtk_interp, "gdb_stop", call_wrapper, gdb_stop, NULL);
+  Tcl_CreateCommand (gdbtk_interp, "gdb_regnames", call_wrapper, gdb_regnames, NULL);
+  Tcl_CreateCommand (gdbtk_interp, "gdb_fetch_registers", call_wrapper,
 		     gdb_fetch_registers, NULL);
-  Tcl_CreateCommand (interp, "gdb_changed_register_list", call_wrapper,
+  Tcl_CreateCommand (gdbtk_interp, "gdb_changed_register_list", call_wrapper,
 		     gdb_changed_register_list, NULL);
-  Tcl_CreateCommand (interp, "gdb_disassemble", call_wrapper,
+  Tcl_CreateCommand (gdbtk_interp, "gdb_disassemble", call_wrapper,
 		     gdb_disassemble, NULL);
-  Tcl_CreateCommand (interp, "gdb_eval", call_wrapper, gdb_eval, NULL);
-  Tcl_CreateCommand (interp, "gdb_get_breakpoint_list", call_wrapper,
+  Tcl_CreateCommand (gdbtk_interp, "gdb_eval", call_wrapper, gdb_eval, NULL);
+  Tcl_CreateCommand (gdbtk_interp, "gdb_get_breakpoint_list", call_wrapper,
 		     gdb_get_breakpoint_list, NULL);
-  Tcl_CreateCommand (interp, "gdb_get_breakpoint_info", call_wrapper,
+  Tcl_CreateCommand (gdbtk_interp, "gdb_get_breakpoint_info", call_wrapper,
 		     gdb_get_breakpoint_info, NULL);
-  Tcl_CreateCommand (interp, "gdb_clear_file", call_wrapper,
+  Tcl_CreateCommand (gdbtk_interp, "gdb_clear_file", call_wrapper,
 		     gdb_clear_file, NULL);
-  Tcl_CreateCommand (interp, "gdb_confirm_quit", call_wrapper,
+  Tcl_CreateCommand (gdbtk_interp, "gdb_confirm_quit", call_wrapper,
 		     gdb_confirm_quit, NULL);
-  Tcl_CreateCommand (interp, "gdb_force_quit", call_wrapper,
+  Tcl_CreateCommand (gdbtk_interp, "gdb_force_quit", call_wrapper,
 		     gdb_force_quit, NULL);
-  Tcl_CreateCommand (interp, "gdb_target_has_execution",
+  Tcl_CreateCommand (gdbtk_interp, "gdb_target_has_execution",
                      gdb_target_has_execution_command,
                      NULL, NULL);
-  Tcl_CreateCommand (interp, "gdb_is_tracing",
+  Tcl_CreateCommand (gdbtk_interp, "gdb_is_tracing",
                      gdb_trace_status,
                      NULL, NULL);
-  Tcl_CreateObjCommand (interp, "gdb_load_info", call_obj_wrapper, gdb_load_info, NULL);
-  Tcl_CreateObjCommand (interp, "gdb_get_locals", call_obj_wrapper, gdb_get_locals_command, 
+  Tcl_CreateObjCommand (gdbtk_interp, "gdb_load_info", call_obj_wrapper, gdb_load_info, NULL);
+  Tcl_CreateObjCommand (gdbtk_interp, "gdb_get_locals", call_obj_wrapper, gdb_get_locals_command, 
                          NULL);
-  Tcl_CreateObjCommand (interp, "gdb_get_args", call_obj_wrapper, gdb_get_args_command,
+  Tcl_CreateObjCommand (gdbtk_interp, "gdb_get_args", call_obj_wrapper, gdb_get_args_command,
                          NULL);
-  Tcl_CreateObjCommand (interp, "gdb_get_function", call_obj_wrapper, gdb_get_function_command,
+  Tcl_CreateObjCommand (gdbtk_interp, "gdb_get_function", call_obj_wrapper, gdb_get_function_command,
                          NULL);
-  Tcl_CreateObjCommand (interp, "gdb_get_line", call_obj_wrapper, gdb_get_line_command,
+  Tcl_CreateObjCommand (gdbtk_interp, "gdb_get_line", call_obj_wrapper, gdb_get_line_command,
                          NULL);
-  Tcl_CreateObjCommand (interp, "gdb_get_file", call_obj_wrapper, gdb_get_file_command,
+  Tcl_CreateObjCommand (gdbtk_interp, "gdb_get_file", call_obj_wrapper, gdb_get_file_command,
                          NULL);
-  Tcl_CreateObjCommand (interp, "gdb_tracepoint_exists",
+  Tcl_CreateObjCommand (gdbtk_interp, "gdb_tracepoint_exists",
                         call_obj_wrapper, gdb_tracepoint_exists_command,  NULL);
-  Tcl_CreateObjCommand (interp, "gdb_get_tracepoint_info",
+  Tcl_CreateObjCommand (gdbtk_interp, "gdb_get_tracepoint_info",
                         call_obj_wrapper, gdb_get_tracepoint_info,  NULL);
-  Tcl_CreateObjCommand (interp, "gdb_actions",
+  Tcl_CreateObjCommand (gdbtk_interp, "gdb_actions",
                         call_obj_wrapper, gdb_actions_command,  NULL);
-  Tcl_CreateObjCommand (interp, "gdb_prompt",
+  Tcl_CreateObjCommand (gdbtk_interp, "gdb_prompt",
                         call_obj_wrapper, gdb_prompt_command,  NULL);
-  Tcl_CreateObjCommand (interp, "gdb_find_file",
+  Tcl_CreateObjCommand (gdbtk_interp, "gdb_find_file",
                         call_obj_wrapper, gdb_find_file_command,  NULL);
-  Tcl_CreateObjCommand (interp, "gdb_get_tracepoint_list",
+  Tcl_CreateObjCommand (gdbtk_interp, "gdb_get_tracepoint_list",
                         call_obj_wrapper, gdb_get_tracepoint_list,  NULL);  
-  Tcl_CreateCommand (interp, "gdb_pc_reg", get_pc_register, NULL, NULL);
-  Tcl_CreateObjCommand (interp, "gdb_loadfile", call_obj_wrapper, gdb_loadfile,  NULL);
-  Tcl_CreateObjCommand (interp, "gdb_set_bp", call_obj_wrapper, gdb_set_bp,  NULL);
-  Tcl_CreateObjCommand (interp, "gdb_get_trace_frame_num",
+  Tcl_CreateCommand (gdbtk_interp, "gdb_pc_reg", get_pc_register, NULL, NULL);
+  Tcl_CreateObjCommand (gdbtk_interp, "gdb_loadfile", call_obj_wrapper, gdb_loadfile,  NULL);
+  Tcl_CreateObjCommand (gdbtk_interp, "gdb_set_bp", call_obj_wrapper, gdb_set_bp,  NULL);
+  Tcl_CreateObjCommand (gdbtk_interp, "gdb_search", call_obj_wrapper, gdb_search,  NULL);
+  Tcl_CreateObjCommand (gdbtk_interp, "gdb_get_trace_frame_num",
                         call_obj_wrapper, gdb_get_trace_frame_num,  NULL);  
 
   command_loop_hook = tk_command_loop;
@@ -2363,7 +2370,7 @@ gdbtk_init ( argv0 )
   add_com ("tk", class_obscure, tk_command,
 	   "Send a command directly into tk.");
 
-  Tcl_LinkVar (interp, "disassemble-from-exec", (char *)&disassemble_from_exec,
+  Tcl_LinkVar (gdbtk_interp, "disassemble-from-exec", (char *)&disassemble_from_exec,
 	       TCL_LINK_INT);
 
   /* find the gdb tcl library and source main.tcl */
@@ -2386,10 +2393,10 @@ gdbtk_init ( argv0 )
   do
     {
       Tcl_SetStringObj (auto_path_elem, lib, -1);
-      if (Tcl_ObjSetVar2 (interp, auto_path_name, NULL, auto_path_elem,
+      if (Tcl_ObjSetVar2 (gdbtk_interp, auto_path_name, NULL, auto_path_elem,
 			  TCL_GLOBAL_ONLY | TCL_LIST_ELEMENT ) == NULL)
 	{
-	  fputs_unfiltered (Tcl_GetVar (interp, "errorInfo", 0), gdb_stderr);
+	  fputs_unfiltered (Tcl_GetVar (gdbtk_interp, "errorInfo", 0), gdb_stderr);
 	  error ("");
 	}
       if (!found_main)
@@ -2398,7 +2405,7 @@ gdbtk_init ( argv0 )
 	  if (access (gdbtk_file, R_OK) == 0)
 	    {
 	      found_main++;
-	      Tcl_SetVar (interp, "GDBTK_LIBRARY", lib, 0);
+	      Tcl_SetVar (gdbtk_interp, "GDBTK_LIBRARY", lib, 0);
 	    }
 	}
      } 
@@ -2426,15 +2433,15 @@ proc gdbtk_find_main {} {\n\
 }\n\
 gdbtk_find_main";
 
-      if (Tcl_GlobalEval (interp, (char *) script) != TCL_OK)
+      if (Tcl_GlobalEval (gdbtk_interp, (char *) script) != TCL_OK)
 	{
-	  fputs_unfiltered (Tcl_GetVar (interp, "errorInfo", 0), gdb_stderr);
+	  fputs_unfiltered (Tcl_GetVar (gdbtk_interp, "errorInfo", 0), gdb_stderr);
 	  error ("");
 	}
 
-      if (interp->result[0] != '\0')
+      if (gdbtk_interp->result[0] != '\0')
 	{
-	  gdbtk_file = xstrdup (interp->result);
+	  gdbtk_file = xstrdup (gdbtk_interp->result);
 	  found_main++;
 	}
     }
@@ -2474,10 +2481,10 @@ gdbtk_find_main";
     Tcl_DStringAppend (&source_cmd, "}}} else {source {", -1);
     Tcl_DStringAppend (&source_cmd, gdbtk_file, -1);
     Tcl_DStringAppend (&source_cmd, "}}", -1);
-    if (Tcl_GlobalEval (interp, Tcl_DStringValue (&source_cmd)) != TCL_OK)
+    if (Tcl_GlobalEval (gdbtk_interp, Tcl_DStringValue (&source_cmd)) != TCL_OK)
 #else
 /* end-sanitize-tclpro */
-      if (Tcl_EvalFile (interp, gdbtk_file) != TCL_OK)
+      if (Tcl_EvalFile (gdbtk_interp, gdbtk_file) != TCL_OK)
 /* start-sanitize-tclpro */
 #endif
 /* end-sanitize-tclpro */
@@ -2485,9 +2492,9 @@ gdbtk_find_main";
       char *msg;
 
       /* Force errorInfo to be set up propertly.  */
-      Tcl_AddErrorInfo (interp, "");
+      Tcl_AddErrorInfo (gdbtk_interp, "");
 
-      msg = Tcl_GetVar (interp, "errorInfo", TCL_GLOBAL_ONLY);
+      msg = Tcl_GetVar (gdbtk_interp, "errorInfo", TCL_GLOBAL_ONLY);
 
       fputs_unfiltered_hook = NULL; /* Force errors to stdout/stderr */
 
@@ -2510,12 +2517,20 @@ gdbtk_find_main";
   /* start-sanitize-ide */
   /* Don't do this until we have initialized.  Otherwise, we may get a
      run command before we are ready for one.  */
-  if (ide_run_server_init (interp, h) != TCL_OK)
-    error ("ide_run_server_init failed: %s", interp->result);
+  if (ide_run_server_init (gdbtk_interp, h) != TCL_OK)
+    error ("ide_run_server_init failed: %s", gdbtk_interp->result);
   /* end-sanitize-ide */
 #endif
 
   free (gdbtk_file);
+  if (gdbtk_source_filename != NULL)
+    {
+      char *s = "after idle source ";
+      char *script = concat (s, gdbtk_source_filename, (char *) NULL);
+      Tcl_Eval (gdbtk_interp, script);
+      free (gdbtk_source_filename);
+      free (script);
+    }
 
   discard_cleanups (old_chain);
 }
@@ -2611,8 +2626,8 @@ gdbtk_load_hash (section, num)
 {
   char buf[128];
   sprintf (buf, "download_hash %s %ld", section, num);
-  Tcl_Eval (interp, buf); 
-  return  atoi (interp->result);
+  Tcl_Eval (gdbtk_interp, buf); 
+  return  atoi (gdbtk_interp->result);
 }
 
 /* gdb_get_locals -
@@ -2952,7 +2967,7 @@ TclDebug (va_alist)
   va_end (args);
 
   merge = Tcl_Merge (2, v);
-  Tcl_Eval (interp, merge);
+  Tcl_Eval (gdbtk_interp, merge);
   Tcl_Free (merge);
 }
 
@@ -3028,11 +3043,11 @@ tracepoint_notify(tp, action)
   sprintf (buf, "gdbtk_tcl_tracepoint %s %d 0x%lx %d {%s}", action, tp->number, 
 	   (long)tp->address, sal.line, filename, tp->pass_count);
 
-  v = Tcl_Eval (interp, buf);
+  v = Tcl_Eval (gdbtk_interp, buf);
 
   if (v != TCL_OK)
     {
-      gdbtk_fputs (interp->result, gdb_stdout);
+      gdbtk_fputs (gdbtk_interp->result, gdb_stdout);
       gdbtk_fputs ("\n", gdb_stdout);
     }
 }
@@ -3214,7 +3229,7 @@ gdbtk_pre_add_symbol (name)
   v[0] = "gdbtk_tcl_pre_add_symbol";
   v[1] = name;
   merge = Tcl_Merge (2, v);
-  Tcl_Eval (interp, merge);
+  Tcl_Eval (gdbtk_interp, merge);
   Tcl_Free (merge);
 }
 
@@ -3222,7 +3237,7 @@ gdbtk_pre_add_symbol (name)
 void
 gdbtk_post_add_symbol ()
 {
-  Tcl_Eval (interp, "gdbtk_tcl_post_add_symbol");
+  Tcl_Eval (gdbtk_interp, "gdbtk_tcl_post_add_symbol");
 }
 
 
@@ -3553,6 +3568,138 @@ gdb_set_bp (clientData, interp, objc, objv)
   ret = Tcl_EvalObj (interp, cmd);
   Tcl_DecrRefCount (cmd);
   return ret;
+}
+
+static int
+gdb_search (clientData, interp, objc, objv)
+     ClientData clientData;
+     Tcl_Interp *interp;
+     int objc;
+     Tcl_Obj *CONST objv[];
+{
+  struct symbol_search *ss;
+  struct symbol_search *p;
+  struct cleanup *old_chain;
+  Tcl_Obj *list, *result, *CONST *switch_objv;
+  int index, switch_objc, i;
+  namespace_enum space;
+  char *regexp, *val;
+  int static_only, nfiles;
+  Tcl_Obj **file_list;
+  char **files;
+  static char *search_options[] = { "functions", "variables", "types", (char *) NULL };
+  static char *switches[] = { "-files", "-static" };
+  enum search_opts { SEARCH_FUNCTIONS, SEARCH_VARIABLES, SEARCH_TYPES };
+  enum switches_opts { SWITCH_FILES, SWITCH_STATIC_ONLY };
+
+  if (objc < 3)
+    {
+      Tcl_WrongNumArgs (interp, 1, objv, "option regexp ?arg ...?");
+      return TCL_ERROR;
+    }
+
+  if (Tcl_GetIndexFromObj (interp, objv[1], search_options, "option", 0,
+                           &index) != TCL_OK)
+    return TCL_ERROR;
+
+  /* Unfortunately, we cannot teach search_symbols to search on
+     multiple regexps, so we have to do a two-tier search for
+     any searches which choose to narrow the playing field. */
+  switch ((enum search_opts) index)
+    {
+    case SEARCH_FUNCTIONS:
+      space = FUNCTIONS_NAMESPACE;      break;
+    case SEARCH_VARIABLES:
+      space = VARIABLES_NAMESPACE;      break;
+    case SEARCH_TYPES:
+      space = TYPES_NAMESPACE;          break;
+    }
+
+  regexp = Tcl_GetStringFromObj (objv[2], NULL);
+  /* Process any switches that refine the search */
+  switch_objc = objc - 3;
+  switch_objv = objv + 3;
+
+  static_only = 0;
+  nfiles = 0;
+  files = (char **) NULL;
+  while (switch_objc > 0)
+    {
+      if (Tcl_GetIndexFromObj (interp, switch_objv[0], switches,
+                               "option", 0, &index) != TCL_OK)
+        return TCL_ERROR;
+
+      switch ((enum switches_opts) index)
+        {
+        case SWITCH_FILES:
+          if (switch_objc < 2)
+            {
+              Tcl_WrongNumArgs (interp, 2, objv, "[-files fileList -static 1|0]");
+              return TCL_ERROR;
+            }              
+          Tcl_ListObjGetElements (interp, switch_objv[1], &nfiles, &file_list);
+          files = (char **) xmalloc (nfiles);
+          old_chain = make_cleanup (free, files);
+          
+          for (i = 0; i < nfiles; i++)
+              files[i] = Tcl_GetStringFromObj (file_list[i], NULL);
+          switch_objc--;
+          switch_objv++;
+          break;
+        case SWITCH_STATIC_ONLY:
+          if (switch_objc < 2)
+            {
+              Tcl_WrongNumArgs (interp, 2, objv, "[-files fileList] [-static 1|0]");
+              return TCL_ERROR;
+            }              
+          Tcl_GetIntFromObj (interp, switch_objv[1], &static_only);
+          switch_objc--;
+          switch_objv++;
+        }
+
+      switch_objc--;
+      switch_objv++;
+    }
+
+  search_symbols (regexp, space, nfiles, files, &ss);
+  if (files != NULL && ss != NULL)
+    do_cleanups (old_chain);
+  old_chain = make_cleanup (free_search_symbols, ss);
+  
+  list = Tcl_NewListObj (0, NULL);
+  for (p = ss; p != NULL; p = p->next)
+    {
+      Tcl_Obj *elem;
+
+      if (static_only && p->block != STATIC_BLOCK)
+        continue;
+
+      elem = Tcl_NewListObj (0, NULL);
+
+      if (p->msymbol == NULL)
+        Tcl_ListObjAppendElement (interp, elem, 
+                                  Tcl_NewStringObj (SYMBOL_SOURCE_NAME (p->symbol), -1));
+      else
+        Tcl_ListObjAppendElement (interp, elem,
+                                  Tcl_NewStringObj (SYMBOL_SOURCE_NAME (p->msymbol), -1));
+
+      Tcl_ListObjAppendElement (interp, list, elem);
+    }
+  
+  Tcl_SetObjResult (interp, list);
+  do_cleanups (old_chain);
+  return TCL_OK;
+}
+
+int
+gdbtk_test (filename)
+     char *filename;
+{
+  if (access (filename, R_OK) != 0)
+    return 0;
+  else
+    gdbtk_source_filename = xstrdup (filename);
+  return 1;
 }
 
 /* Come here during initialize_all_files () */

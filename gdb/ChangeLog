@@ -1,3 +1,24 @@
+Fri Jun 26 14:03:01 1998  Keith Seitz  <keiths@cygnus.com>
+
+	* symtab.h (enum namespace): Add new namespaces FUNCTIONS_NAMESPACE,
+	TYPES_NAMESPACE, METHODS_NAMESPACE, and VARIABLES_NAMESPACE used by
+	new search_symbols.
+	Add prototype for search_symbols and free_search_symbols.
+
+	* symtab.c (list_symbols): Rewrite to use new search_symbols.
+	(file_matches): New helper function for search_symbols.
+	(free_search_symbols): New function which frees data returned from
+	search_symbols.
+	(print_symbol_info): New helper function which prints info about a
+	matched symbol to stdout. Extracted from old list_symbols.
+	(print_msymbol_info): New helper function which prints info about
+	a matched msymbol to stdout. Extracted from old list_symbols.
+	(symtab_symbol_info): Extracted from old list_symbols.
+	(variables_info): Use symtab_symbol_info.
+	(functions_info): Use symtab_symbol_info.
+	(types_info): Use symtab_symbol_info.
+	(rbreak_command): Rewrite to use new search_symbols.
+
 Thu Jun 25 22:38:32 1998  Frank Ch. Eigler  <fche@cygnus.com>
 
 	* mips-tdep.c (mips_push_arguments): Use 128-bit stack frame

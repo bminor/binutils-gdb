@@ -61,6 +61,9 @@ extern void gdb_init PARAMS ((char *));
 extern void cygwin32_conv_to_posix_path (const char *, char *);
 #endif
 
+extern void (*pre_add_symbol_hook) PARAMS ((char *));
+extern void (*post_add_symbol_hook) PARAMS ((void));
+
 int
 main (argc, argv)
      int argc;
@@ -176,6 +179,9 @@ main (argc, argv)
 	{"command", required_argument, 0, 'x'},
 	{"version", no_argument, &print_version, 1},
 	{"x", required_argument, 0, 'x'},
+/* start-sanitize-gdbtk */
+    {"tclcommand", required_argument, 0, 'z'},
+/* end-sanitize-gdbtk */
 	{"directory", required_argument, 0, 'd'},
 	{"cd", required_argument, 0, 11},
 	{"tty", required_argument, 0, 't'},
@@ -250,6 +256,19 @@ main (argc, argv)
 					     cmdsize * sizeof (*cmdarg));
 	      }
 	    break;
+        /* start-sanitize-gdbtk */
+      case 'z':
+        {
+          extern int gdbtk_test PARAMS ((char *));
+          if (!gdbtk_test (optarg))
+            {
+              fprintf_unfiltered (gdb_stderr, "%s: unable to load tclcommand file \"%s\"",
+                                  argv[0], optarg);
+              exit (1);
+            }
+          break;
+        }
+        /* end-sanitize-gdbtk */
 	  case 'd':
 	    dirarg[ndir++] = optarg;
 	    if (ndir >= dirsize)
@@ -445,8 +464,12 @@ main (argc, argv)
 	 it, better only print one error message.  */
       if (!SET_TOP_LEVEL ())
 	{
+      if (pre_add_symbol_hook)
+        pre_add_symbol_hook (symarg);
 	  exec_file_command (execarg, !batch);
 	  symbol_file_command (symarg, 0);
+      if (post_add_symbol_hook)
+        post_add_symbol_hook ();
 	}
     }
   else

@@ -1,3 +1,18 @@
+Fri Jun 26 13:56:07 1998  Keith Seitz  <keiths@cygnus.com>
+
+	* gdbtk.c: Change all references to static global "interp" to
+	"gdbtk_interp" and export this global.
+	(gdbtk_init): If gdbtk_source_filename is not NULL, source this file
+	into the interpreter when it goes idle.
+	Add new command "gdb_search".
+	(gdb_search): New function which searches the symbol table.
+	(gdbtk_test): New function called by main when the --tclcommand
+	option is used.
+
+	* main.c (main): Add a new option "--tclcommand" which is used
+	by the testsuite to source a file into the interpreter when it
+	goes idle.
+
 Wed Jun 17 19:12:23 1998  Jeff Holcomb  <jeffh@cygnus.com>
 
 	* Makefile.in (install-only): Install tracing help files.
