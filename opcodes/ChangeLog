@@ -1,3 +1,8 @@
+Wed Feb  8 17:29:29 1995  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* i960-dis.c (struct tabent, struct sparse_tabent): Declare the
+        char fields as signed chars, since they may have negative values.
+
 Mon Feb  6 10:52:06 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
 
 	* i386-dis.c (dis386_twobyte): Add cpuid, From Charles Hannum
