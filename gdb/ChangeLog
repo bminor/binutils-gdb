@@ -1,5 +1,7 @@
 2004-07-17  Andrew Cagney  <cagney@gnu.org>
 
+	* README: Update to 6.2.
+
 	* utils.c (xvasprintf): Call xstrvprintf.
 
 	* parse.c: Update copyright.
