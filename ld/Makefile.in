@@ -53,11 +53,11 @@ INSTALL_DATA = $(INSTALL)
 AR = ar
 AR_FLAGS = qv
 CFLAGS = -g
-BISON = bison -y
 MAKEINFO = makeinfo
 RANLIB = ranlib
 
-LEX = `if [ -f ../flex/flex ] ; then echo ../flex/flex -S$(srcdir)/../flex/flex.skel ; else echo flex ; fi`
+BISON = `if [ -f ../bison/bison ] ; then echo ../bison/bison -y -L../bison/bison ; else echo bison -y ; fi`
+LEX = `if [ -f ../flex/flex ] ; then echo ../flex/flex -S../flex/flex.skel ; else echo flex ; fi`
 
 #version=/`./../gcc/gcc -dumpversion`
 version=

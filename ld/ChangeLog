@@ -1,3 +1,7 @@
+Wed May  6 11:07:35 1992  K. Richard Pixley  (rich@rtl.cygnus.com)
+
+	* Makefile.in: use flex & bison from ../ if they exist.
+
 Tue May  5 17:47:33 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* relax.c (build_it): don't allocate space in the output file for
