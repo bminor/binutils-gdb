@@ -310,7 +310,7 @@ esac
 case "${cpu}" in
 vax | tahoe | i386 | i860 | m68k | m68000 | m88k | sparc | ns32k \
 	| alliant | arm | c1 | c2 | mips | pyramid | tron | a29k \
-	| rtpc | rs6000 | i960)
+	| rtpc | rs6000 | i960 | none)
 	;;
 *)
 	echo '***' Invalid cpu \`${cpu}\': configuration \`$1\' not recognized 1>&2
