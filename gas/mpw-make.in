@@ -73,15 +73,47 @@ as.new \Option-f\Option-f {OBJECTS} {TARG_OBJECTS} {CLIBS}
 
 "{o}"config.h \Option-f "{o}"config-stamp
 
-"{o}"config-stamp \Option-f Makefile "{s}"config:ho-mpw.h
+"{o}"config-stamp \Option-f Makefile
 	Delete -i -y "{o}"config.new "{o}"config-stamp
 	Echo '#ifndef GAS_VERSION'			      > "{o}"config.new
 	Echo '#define GAS_VERSION      "{VERSION}"'          >> "{o}"config.new
 	Echo '#define TARGET_CPU       "{target_cpu}"'       >> "{o}"config.new
 	Echo '#define TARGET_ALIAS     "{target_alias}"'     >> "{o}"config.new
 	Echo '#define TARGET_CANONICAL "{target_canonical}"' >> "{o}"config.new
-	Catenate "{s}"config:ho-mpw.h                        >> "{o}"config.new
-	Echo '#endif /* GAS_VERSION */'			     >> "{o}"config.new
+	Echo '#ifndef MPW'				>> "{o}"config.new
+	Echo '#define MPW'				>> "{o}"config.new
+	Echo '#endif'					>> "{o}"config.new
+	Echo '#define bzero(a,b) memset(a,0,b)'		>> "{o}"config.new
+	Echo '#define bcopy(a,b,c) memcpy(b,a,c)'	>> "{o}"config.new
+	Echo '#define bcmp(a,b,c) memcmp(a,b,c)'	>> "{o}"config.new
+	Echo '#define M_ANSI 1'				>> "{o}"config.new
+	Echo '#include <stdlib.h>'			>> "{o}"config.new
+	Echo '#include <string.h>'			>> "{o}"config.new
+	Echo '#include <memory.h>'			>> "{o}"config.new
+	Echo 'char *strdup();'				>> "{o}"config.new
+	Echo '#ifdef MPW_C'				>> "{o}"config.new
+	Echo '#undef  __PTR_TO_INT'			>> "{o}"config.new
+	Echo '#define __PTR_TO_INT(P) ((int)(P))'	>> "{o}"config.new
+	Echo '#undef __INT_TO_PTR'			>> "{o}"config.new
+	Echo '#define __INT_TO_PTR(P) ((char *)(P))'	>> "{o}"config.new
+	Echo '#endif'					>> "{o}"config.new
+	Echo '#define sys_nerr	_sys_nerr'		>> "{o}"config.new
+	Echo '#define sys_errlist	_sys_errlist'	>> "{o}"config.new
+	Echo '#ifdef __STDIO__'				>> "{o}"config.new
+	Echo 'FILE *mpw_fopen();'			>> "{o}"config.new
+	Echo '#endif'					>> "{o}"config.new
+	Echo '#define fopen mpw_fopen'			>> "{o}"config.new
+	Echo '#define fseek mpw_fseek'			>> "{o}"config.new
+	Echo '#define abort mpw_abort'			>> "{o}"config.new
+	Echo '#define TRUE_FALSE_ALREADY_DEFINED'	>> "{o}"config.new
+	Echo '/* <cr> is an end-of-line marker. */'	>> "{o}"config.new
+	Echo '#define CR_EOL'				>> "{o}"config.new
+	Echo '#define ABORT_ON_ERROR'			>> "{o}"config.new
+	Echo '#define LOSING_COMPILER'			>> "{o}"config.new
+	Echo '#define HOST_SPECIAL_INIT(argc,argv)  mpw_special_init ((argv)[0]);' >> "{o}"config.new
+	Echo '#define WANT_FOPEN_BIN'			>> "{o}"config.new
+	Echo '#define HAVE_ERRNO_H'			>> "{o}"config.new
+	Echo '#endif /* GAS_VERSION */'			>> "{o}"config.new
 	MoveIfChange "{o}"config.new "{o}"config.h
 	Echo ' ' >"{o}"config-stamp
 
