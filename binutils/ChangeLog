@@ -1,3 +1,64 @@
+2004-11-03  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (do_debug_ranges): New variable.
+	(usage): Document new switch: -wR or --debug-dump=Ranges.
+	(parse_args): Handle new switch.  Replace switch statement for the
+	long options with a more compact table structure.
+	(process_section_headers): Allow the dumping of .debug_ranges
+	sections if so requested.
+	(debug_displays): Likewise.
+	(load_debug_range): New function: Grabs the contents of a
+	.debug_ranges section.
+	(free_debug_range): New function: Releases the grabbed
+	.debug_ranges section.
+	(decode_64bit_range): New function: Displays a 64-bit range in a
+	.debug_ranges section.
+	(decode_range): New function: Displays a 32-bit range in a
+	.debug_ranges section.
+	(read_and_display_attr_value): Record the value of DW_AT_low_pc
+	attributes.  Use decode_ranges() to display a DW_AT_ranges
+	attribute.
+	(display_debug_info): Use load_debug_range() and
+	free_debug_range().
+	(display_64bit_debug_ranges): New function.  Displays the contents
+	of a 64-bit format .debug_ranges section.
+	(display_debug_ranges): New function: Displays the contents of a
+	32-bit .debug_ranges section.
+	
+	(main): Move cmdline_dump_sects and num_cmdline_dump_sects into the
+	global scope.
+	(process_object): Initialise the dump_sects array from the
+	cmdline_dump_sects array before processing each object file.
+
+	(streq, strneq): New macros.  Use them to replace occurrences of
+	strcmp() and strncmp().
+
+	(debug_information): New structure array to replace
+	debug_line_pointer_sizes array.
+	(num_debug_info_entries): New variable to replace
+	num_debug_line_pointers.
+	(get_pointer_size_of_comp_unit): New function: Returns the pointer
+	size of a given compilation unit.
+	(get_debug_info): New function to replace
+	get_debug_line_pointer_sizes.
+	(display_debug_lines): Use the new functions.
+	(display_debug_loc): Likewise.
+	
+	(disassemble_section): Change return type to int.
+	(display_debug_lines): Move local variables to their
+	innermost scope.
+	(display_debug_section): Likewise.  Also record the return value
+	of functions called and pass this back to the parent.  Also only
+	warn about undumped sections when the user explicitly requested
+	their dumping.
+
+	(debug_apply_rela_addends): Allow relocations against STT_OBJECT
+	types as well.
+	
+	* NEWS: Mention the support for decoding .debug_ranges sections.
+	* doc/binutils.texi: Document the new command line switch to
+	readelf.
+
 2004-11-03  Randolph Chung  <tausq@debian.org>
 
 	* readelf.c (ia64_unw_aux_info, ia64_unw_table_entry): Rename from

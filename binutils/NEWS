@@ -1,5 +1,10 @@
 -*- text -*-
 
+* readelf can now display address ranges from .debug_range sections.  This
+  happens automatically when a DW_AT_range attribute is encountered.  The
+  command line switch --debug-dump=Ranges (or -wR) can also be used to display
+  the contents of the .debug_range section.
+
 * nm and objdump now have a switch "--special-syms" to enable the displaying of
   symbols which the target considers to be special.  By default these symbols
   are no longer displayed.  Currently the only special symbols are the Mapping
