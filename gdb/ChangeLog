@@ -1,3 +1,7 @@
+Wed Sep  1 14:41:28 1993  K. Richard Pixley  (rich@sendai.cygnus.com)
+
+	* regex.c: bcmp -> memcmp.
+
 Wed Sep  1 11:35:49 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* symtab.h (struct linetable), xcoffread.c (arrange_linetable):

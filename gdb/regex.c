@@ -32,9 +32,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #else  /* not emacs */
 
-#define bcmp(s1,s2,n)	memcmp((s1),(s2),(n))
-#define bzero(s,n)	memset((s),0,(n))
-
 /* Make alloca work the best possible way.  */
 #ifdef __GNUC__
 #define alloca __builtin_alloca
@@ -1011,7 +1008,7 @@ re_match (pbufp, string, size, pos, regs)
 
 int re_max_failures = 2000;
 
-static int bcmp_translate();
+static int memcmp_translate();
 /* Match the pattern described by PBUFP
    against data which is the virtual concatenation of STRING1 and STRING2.
    SIZE1 and SIZE2 are the sizes of the two data strings.
@@ -1219,7 +1216,7 @@ re_match_2 (pbufp, string1, size1, string2, size2, pos, regs, mstop)
 		if (mcnt > dend2 - d2)
 		  mcnt = dend2 - d2;
 		/* Compare that many; failure if mismatch, else skip them. */
-		if (translate ? bcmp_translate (d, d2, mcnt, translate) : bcmp (d, d2, mcnt))
+		if (translate ? memcmp_translate (d, d2, mcnt, translate) : memcmp (d, d2, mcnt))
 		  goto fail;
 		d += mcnt, d2 += mcnt;
 	      }
@@ -1537,7 +1534,7 @@ re_match_2 (pbufp, string1, size1, string2, size2, pos, regs, mstop)
 }
 
 static int
-bcmp_translate (s1, s2, len, translate)
+memcmp_translate (s1, s2, len, translate)
      unsigned char *s1, *s2;
      register int len;
      unsigned char *translate;
