@@ -985,7 +985,8 @@ as.o: as.c subsegs.h $(INCDIR)/obstack.h output-file.h \
   sb.h macro.h
 atof-generic.o: atof-generic.c
 bignum-copy.o: bignum-copy.c
-cond.o: cond.c $(INCDIR)/obstack.h
+cond.o: cond.c macro.h sb.h $(INCDIR)/obstack.h
+depend.o: depend.c
 ecoff.o: ecoff.c
 expr.o: expr.c $(INCDIR)/obstack.h
 flonum-copy.o: flonum-copy.c
@@ -996,6 +997,7 @@ gasp.o: gasp.c sb.h macro.h
 hash.o: hash.c
 input-file.o: input-file.c input-file.h
 input-scrub.o: input-scrub.c input-file.h sb.h
+itbl-ops.o: itbl-ops.c itbl-ops.h
 listing.o: listing.c input-file.h subsegs.h
 literal.o: literal.c subsegs.h $(INCDIR)/obstack.h
 macro.o: macro.c sb.h macro.h

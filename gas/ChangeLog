@@ -1,5 +1,7 @@
 Wed May 28 16:17:34 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* Makefile.in: Rebuild dependencies.
+
 	* config/tc-i386.c (tc_gen_reloc): Don't try to convert the type
  	of a BFD_RELOC_RVA reloc.
 
