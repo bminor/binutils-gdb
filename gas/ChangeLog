@@ -1,3 +1,11 @@
+2001-05-11  Jakub Jelinek  <jakub@redhat.com>
+
+	* config/tc-ia64.c (special_linkonce_name): New.
+	(make_unw_section): Map .gnu.linkonce.t.FOO text section into
+	.gnu.linkonce.ia64unw{,i}.FOO.
+	(ia64_elf_section_type): Handle .gnu.linkonce.ia64unw{,i}.FOO.
+	(dot_endp): Add comment about it.
+
 2001-05-11  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* config/tc-arm.c (arm_handle_align): When truncating an aligned 

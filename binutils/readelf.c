@@ -3408,7 +3408,7 @@ process_unwind (file)
      FILE * file;
 {
   Elf32_Internal_Shdr *sec, *unwsec = NULL, *strsec;
-  unsigned long i, addr_size;
+  unsigned long i, addr_size, unwcount = 0, unwstart = 0;
   struct unw_aux_info aux;
 
   if (!do_unwind)
@@ -3437,40 +3437,100 @@ process_unwind (file)
 			  aux.strtab, char *, "string table");
 	}
       else if (sec->sh_type == SHT_IA_64_UNWIND)
-	unwsec = sec;
-      else if (strcmp (SECTION_NAME (sec), ELF_STRING_ia64_unwind_info) == 0)
+	unwcount++;
+    }
+
+  if (!unwcount)
+    printf (_("\nThere are no unwind sections in this file.\n"));
+
+  while (unwcount-- > 0)
+    {
+      char *suffix;
+      size_t len, len2;
+
+      for (i = unwstart, sec = section_headers + unwstart;
+	   i < elf_header.e_shnum; ++i, ++sec)
+	if (sec->sh_type == SHT_IA_64_UNWIND)
+	  {
+	    unwsec = sec;
+	    break;
+	  }
+
+      unwstart = i + 1;
+      len = sizeof (ELF_STRING_ia64_unwind_once) - 1;
+
+      if (strncmp (SECTION_NAME (unwsec), ELF_STRING_ia64_unwind_once,
+		   len) == 0)
+	{
+	  /* .gnu.linkonce.ia64unw.FOO -> .gnu.linkonce.ia64unwi.FOO */
+	  len2 = sizeof (ELF_STRING_ia64_unwind_info_once) - 1;
+	  suffix = SECTION_NAME (unwsec) + len;
+	  for (i = 0, sec = section_headers; i < elf_header.e_shnum;
+	       ++i, ++sec)
+	    if (strncmp (SECTION_NAME (sec),
+			 ELF_STRING_ia64_unwind_info_once, len2) == 0
+		&& strcmp (SECTION_NAME (sec) + len2, suffix) == 0)
+	      break;
+	}
+      else
+	{
+	  /* .IA_64.unwindFOO -> .IA_64.unwind_infoFOO
+	     .IA_64.unwind or BAR -> .IA_64.unwind_info */
+	  len = sizeof (ELF_STRING_ia64_unwind) - 1;
+	  len2 = sizeof (ELF_STRING_ia64_unwind_info) - 1;
+	  suffix = "";
+	  if (strncmp (SECTION_NAME (unwsec), ELF_STRING_ia64_unwind,
+		       len) == 0)
+	    suffix = SECTION_NAME (unwsec) + len;
+	  for (i = 0, sec = section_headers; i < elf_header.e_shnum;
+	       ++i, ++sec)
+	    if (strncmp (SECTION_NAME (sec),
+			 ELF_STRING_ia64_unwind_info, len2) == 0
+		&& strcmp (SECTION_NAME (sec) + len2, suffix) == 0)
+	      break;
+	}
+
+      if (i == elf_header.e_shnum)
+	{
+	  printf (_("\nCould not find unwind info section for "));
+
+	  if (string_table == NULL)
+	    printf ("%d", unwsec->sh_name);
+	  else
+	    printf ("'%s'", SECTION_NAME (unwsec));
+	}
+      else
 	{
 	  aux.info_size = sec->sh_size;
 	  aux.info_addr = sec->sh_addr;
 	  GET_DATA_ALLOC (sec->sh_offset, aux.info_size, aux.info,
 			  char *, "unwind info");
+
+	  printf (_("\nUnwind section "));
+
+	  if (string_table == NULL)
+	    printf ("%d", unwsec->sh_name);
+	  else
+	    printf ("'%s'", SECTION_NAME (unwsec));
+
+	  printf (_(" at offset 0x%lx contains %lu entries:\n"),
+		  unwsec->sh_offset,
+		  (unsigned long) (unwsec->sh_size / (3 * addr_size)));
+
+	  (void) slurp_ia64_unwind_table (file, & aux, unwsec);
+
+	  if (aux.table_len > 0)
+	    dump_ia64_unwind (& aux);
+
+	  if (aux.table)
+	    free ((char *) aux.table);
+	  if (aux.info)
+	    free ((char *) aux.info);
+	  aux.table = NULL;
+	  aux.info = NULL;
 	}
     }
 
-  if (unwsec)
-    {
-      printf (_("\nUnwind section "));
-
-      if (string_table == NULL)
-	printf ("%d", unwsec->sh_name);
-      else
-	printf ("'%s'", SECTION_NAME (unwsec));
-
-      printf (_(" at offset 0x%lx contains %lu entries:\n"),
-	      unwsec->sh_offset, (unsigned long) (unwsec->sh_size / (3 * addr_size)));
-
-      (void) slurp_ia64_unwind_table (file, & aux, unwsec);
-
-      if (aux.table_len > 0)
-	dump_ia64_unwind (& aux);
-    }
-  else
-    printf (_("\nThere are no unwind sections in this file.\n"));
-
-  if (aux.table)
-    free ((char *) aux.table);
-  if (aux.info)
-    free ((char *) aux.info);
   if (aux.symtab)
     free (aux.symtab);
   if (aux.strtab)

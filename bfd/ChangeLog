@@ -1,5 +1,12 @@
 2001-05-11  Jakub Jelinek  <jakub@redhat.com>
 
+	* elfxx-ia64.c (is_unwind_section_name): Consider linkonce unwind
+	sections as well.
+	(elfNN_ia64_final_write_processing): Map .gnu.linkonce.ia64unw.FOO
+	to .gnu.linkonce.t.FOO text section.
+
+2001-05-11  Jakub Jelinek  <jakub@redhat.com>
+
 	* merge.c (struct sec_merge_hash_entry): Add u.entsize and u.suffix
 	fields, change sec into secinfo.
 	(struct sec_merge_info): Add chain, remove last fields.

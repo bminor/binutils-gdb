@@ -13,5 +13,5 @@ NOP=0x00300000010070000002000001000400  # a bundle full of nops
 OTHER_GOT_SYMBOLS='. = ALIGN (8); PROVIDE (__gp = . + 0x200000);'
 OTHER_GOT_SECTIONS='.IA_64.pltoff : { *(.IA_64.pltoff) }'
 OTHER_PLT_RELOC_SECTIONS='.rela.IA_64.pltoff : { *(.rela.IA_64.pltoff) }'
-OTHER_READONLY_SECTIONS='.opd : { *(.opd) }  .IA_64.unwind_info : { *(.IA_64.unwind_info*) }  .IA_64.unwind : { *(.IA_64.unwind*) }'
+OTHER_READONLY_SECTIONS='.opd : { *(.opd) }  .IA_64.unwind_info : { *(.IA_64.unwind_info*) *(.gnu.linkonce.ia64unwi.*) }  .IA_64.unwind : { *(.IA_64.unwind*) *(.gnu.linkonce.ia64unw.*) }'
 LIB_PATH=/usr/lib/ia64l64:/usr/lib:/usr/local/lib

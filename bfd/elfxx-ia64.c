@@ -921,12 +921,14 @@ static inline boolean
 is_unwind_section_name (name)
 	const char *name;
 {
-  size_t len1, len2;
+  size_t len1, len2, len3;
 
   len1 = sizeof (ELF_STRING_ia64_unwind) - 1;
   len2 = sizeof (ELF_STRING_ia64_unwind_info) - 1;
-  return (strncmp (name, ELF_STRING_ia64_unwind, len1) == 0
-	  && strncmp (name, ELF_STRING_ia64_unwind_info, len2) != 0);
+  len3 = sizeof (ELF_STRING_ia64_unwind_once) - 1;
+  return ((strncmp (name, ELF_STRING_ia64_unwind, len1) == 0
+	   && strncmp (name, ELF_STRING_ia64_unwind_info, len2) != 0)
+	  || strncmp (name, ELF_STRING_ia64_unwind_once, len3) == 0);
 }
 
 /* Handle an IA-64 specific section when reading an object file.  This
@@ -1064,6 +1066,18 @@ elfNN_ia64_final_write_processing (abfd, linker)
 	      else
 		/* .IA_64.unwindFOO -> FOO */
 		text_sect = bfd_get_section_by_name (abfd, sname);
+	    }
+	  else if (sname
+		   && (len = sizeof (ELF_STRING_ia64_unwind_once) - 1,
+		       strncmp (sname, ELF_STRING_ia64_unwind_once, len)) == 0)
+	    {
+	      /* .gnu.linkonce.ia64unw.FOO -> .gnu.linkonce.t.FOO */
+	      size_t len2 = sizeof (".gnu.linkonce.t.") - 1;
+	      char *once_name = alloca (len2 + strlen (sname) - len + 1);
+
+	      memcpy (once_name, ".gnu.linkonce.t.", len2);
+	      strcpy (once_name + len2, sname + len);
+	      text_sect = bfd_get_section_by_name (abfd, once_name);
 	    }
 	  else
 	    /* last resort: fall back on .text */

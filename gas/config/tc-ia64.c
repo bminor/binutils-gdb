@@ -526,6 +526,11 @@ static char special_section_name[][20] =
     {".IA_64.unwind"}, {".IA_64.unwind_info"}
   };
 
+static char *special_linkonce_name[] =
+  {
+    ".gnu.linkonce.ia64unw.", ".gnu.linkonce.ia64unwi."
+  };
+
 /* The best template for a particular sequence of up to three
    instructions:  */
 #define N	IA64_NUM_TYPES
@@ -852,11 +857,20 @@ static int generate_unwind_image PARAMS ((const char *));
 #define make_unw_section_name(special, text_name, result)		   \
   {									   \
     char *_prefix = special_section_name[special];			   \
-    size_t _prefix_len = strlen (_prefix), _text_len = strlen (text_name); \
-    char *_result = alloca (_prefix_len + _text_len + 1);		   \
+    char *_suffix = text_name;						   \
+    size_t _prefix_len, _suffix_len;					   \
+    char *_result;							   \
+    if (strncmp (text_name, ".gnu.linkonce.t.",				   \
+		 sizeof (".gnu.linkonce.t.") - 1) == 0)			   \
+      {									   \
+	_prefix = special_linkonce_name[special - SPECIAL_SECTION_UNWIND]; \
+	_suffix += sizeof (".gnu.linkonce.t.") - 1;			   \
+      }									   \
+    _prefix_len = strlen (_prefix), _suffix_len = strlen (_suffix);	   \
+    _result = alloca (_prefix_len + _suffix_len + 1);		   	   \
     memcpy(_result, _prefix, _prefix_len);				   \
-    memcpy(_result + _prefix_len, text_name, _text_len);		   \
-    _result[_prefix_len + _text_len] = '\0';				   \
+    memcpy(_result + _prefix_len, _suffix, _suffix_len);		   \
+    _result[_prefix_len + _suffix_len] = '\0';				   \
     result = _result;							   \
   }									   \
 while (0)
@@ -913,8 +927,16 @@ ia64_elf_section_type (str, len)
   if (strncmp (str, ELF_STRING_ia64_unwind_info, len) == 0)
     return SHT_PROGBITS;
 
+  len = sizeof (ELF_STRING_ia64_unwind_info_once) - 1;
+  if (strncmp (str, ELF_STRING_ia64_unwind_info_once, len) == 0)
+    return SHT_PROGBITS;
+
   len = sizeof (ELF_STRING_ia64_unwind) - 1;
   if (strncmp (str, ELF_STRING_ia64_unwind, len) == 0)
+    return SHT_IA_64_UNWIND;
+
+  len = sizeof (ELF_STRING_ia64_unwind_once) - 1;
+  if (strncmp (str, ELF_STRING_ia64_unwind_once, len) == 0)
     return SHT_IA_64_UNWIND;
 
   return -1;
@@ -3820,6 +3842,8 @@ dot_endp (dummy)
     .text       .IA_64.unwind
     .text.foo   .IA_64.unwind.text.foo
     .foo        .IA_64.unwind.foo
+    .gnu.linkonce.t.foo
+		.gnu.linkonce.ia64unw.foo
     _info       .IA_64.unwind_info         gas issues error message (ditto)
     _infoFOO    .IA_64.unwind_infoFOO      gas issues error message (ditto)
 
