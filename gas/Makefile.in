@@ -98,18 +98,14 @@ REAL_SOURCES = \
 	$(srcdir)/input-file.c \
 	$(srcdir)/input-scrub.c \
 	$(srcdir)/messages.c \
-	$(srcdir)/obstack.c \
 	$(srcdir)/output-file.c \
 	$(srcdir)/read.c \
-	$(srcdir)/strerror.c \
-	$(srcdir)/strstr.c \
 	$(srcdir)/subsegs.c \
 	$(srcdir)/symbols.c \
 	$(srcdir)/version.c \
 	$(srcdir)/write.c \
 	$(srcdir)/listing.c \
-	$(srcdir)/xmalloc.c \
-	$(srcdir)/xrealloc.c
+	$(srcdir)/xmalloc.c
 
 # in an expedient order
 LINKED_SOURCES = \
@@ -130,7 +126,6 @@ REAL_HEADERS = \
 	$(srcdir)/listing.h \
 	$(srcdir)/tc.h \
 	$(srcdir)/obj.h \
-	$(srcdir)/obstack.h \
 	$(srcdir)/read.h \
 	$(srcdir)/struc-symbol.h \
 	$(srcdir)/subsegs.h \
@@ -167,18 +162,14 @@ OBJS = \
 	input-file.o \
 	input-scrub.o \
 	messages.o \
-	obstack.o \
 	output-file.o \
 	read.o \
-	strerror.o \
-	strstr.o \
 	subsegs.o \
 	symbols.o \
 	version.o \
 	write.o \
 	listing.o \
-	xmalloc.o \
-	xrealloc.o
+	xmalloc.o
 
 #### host, target, and site specific Makefile frags come in here.
 
@@ -222,7 +213,7 @@ SUBDIR_INCLUDES = -I.. -I$(srcdir) -I$(srcdir)/config
 # Files to be copied away after each stage in building.
 STAGESTUFF = *.o as.new
 
-as.new: $(OBJS) $(LIBDEPS) $(LOCAL_LOADLIBES)
+as.new: $(OBJS) $(LIBS)
 	[ ! -f as.new ] || mv as.new as.old
 	$(CC) $(ALL_CFLAGS) $(LDFLAGS) -o as.new $(OBJS) $(LIBS) $(LOADLIBES)
 
@@ -239,7 +230,8 @@ app.o : app.c as.h host.h targ-env.h obj-format.h \
   write.h flonum.h bignum.h expr.h frags.h hash.h read.h symbols.h tc.h obj.h 
 as.o : as.c as.h host.h targ-env.h obj-format.h \
   targ-cpu.h struc-symbol.h \
-  write.h flonum.h bignum.h expr.h frags.h hash.h read.h symbols.h tc.h obj.h 
+  write.h flonum.h bignum.h expr.h frags.h hash.h read.h symbols.h subsegs.h \
+  tc.h obj.h 
 atof-generic.o : atof-generic.c as.h host.h targ-env.h obj-format.h \
   targ-cpu.h struc-symbol.h \
   write.h flonum.h bignum.h expr.h frags.h hash.h read.h symbols.h tc.h obj.h 
@@ -287,7 +279,6 @@ listing.o : listing.c as.h host.h targ-env.h flonum.h bignum.h \
 messages.o : messages.c as.h host.h targ-env.h obj-format.h \
   targ-cpu.h  struc-symbol.h \
   write.h flonum.h bignum.h expr.h frags.h hash.h read.h symbols.h tc.h obj.h
-obstack.o : obstack.c  
 output-file.o : output-file.c as.h host.h targ-env.h obj-format.h \
   targ-cpu.h  struc-symbol.h \
   write.h flonum.h bignum.h expr.h frags.h hash.h read.h symbols.h tc.h obj.h \
@@ -295,9 +286,6 @@ output-file.o : output-file.c as.h host.h targ-env.h obj-format.h \
 read.o : read.c as.h host.h targ-env.h obj-format.h \
   targ-cpu.h  struc-symbol.h \
   write.h flonum.h bignum.h expr.h frags.h hash.h read.h symbols.h tc.h obj.h
-
-strerror.o : strerror.c
-strstr.o : strstr.c   
 subsegs.o : subsegs.c as.h host.h targ-env.h obj-format.h \
   targ-cpu.h  struc-symbol.h \
   write.h flonum.h bignum.h expr.h frags.h hash.h read.h symbols.h tc.h obj.h \
@@ -312,7 +300,6 @@ write.o : write.c as.h host.h targ-env.h obj-format.h \
   write.h flonum.h bignum.h expr.h frags.h hash.h read.h symbols.h tc.h obj.h \
   subsegs.h  output-file.h 
 xmalloc.o : xmalloc.c
-xrealloc.o : xrealloc.c 
 atof-targ.o : atof-targ.c as.h host.h targ-env.h obj-format.h \
   targ-cpu.h struc-symbol.h \
   write.h flonum.h bignum.h expr.h frags.h hash.h read.h \
@@ -320,7 +307,7 @@ atof-targ.o : atof-targ.c as.h host.h targ-env.h obj-format.h \
 obj-format.o : obj-format.c as.h host.h targ-env.h obj-format.h \
   targ-cpu.h struc-symbol.h \
   write.h flonum.h bignum.h expr.h frags.h hash.h read.h \
-  symbols.h tc.h obj.h  
+  subsegs.h symbols.h tc.h obj.h  
 targ-cpu.o : targ-cpu.c targ-env.h obj-format.h \
   targ-cpu.h struc-symbol.h \
   write.h flonum.h bignum.h expr.h frags.h hash.h read.h \

@@ -1,9 +1,112 @@
+Thu Dec  3 01:24:07 1992  Ken Raeburn  (raeburn@kr-pc.cygnus.com)
+
+	* config/ho-generic.h (malloc, realloc): Declare.
+
+	* Lots of comment/whitespace changes.
+
+	* write.h (struct fix): Some fields reordered, narrowed.
+
+	* read.c (MASK_CHAR): Define using C types, not magic number.
+
+	* as.c, input-file.c: Deleted some unused code.
+
+	* app.c, as.h: Doc fix.
+
+	* flonum-konst.c, flonum-mult.c: Include ansidecl.h.
+
+	* as.h (xmalloc): Argument is long.
+
+	* xmalloc.c (error): Remove declaration; as.h takes care of it.
+
+Mon Nov 30 11:42:11 1992  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* configure.in: Accept target OS "vms".
+
+	* symbols.c:  Merged ANSI and non-ANSI function decls, using
+	PARAMS macro.
+
+	* xmalloc.c: Just include as.h, don't bother trying to figure out
+	other header files.
+
+	* strstr.c, strerror.c: Deleted.
+	* Makefile.in: Deleted references.
+
+	* config/tc-ns32k.c: Don't include header file for string
+	declarations; leave that to ho-*.h.
+
+Fri Nov 27 04:11:36 1992  Ken Raeburn  (raeburn at cambridge-laptop.cygnus.com)
+
+	* config/coff_gnu.h [TC_I860]: Guesses for reloc type values,
+	imported from FSF sources.
+
+	* messages.c (strerror): Declare unconditionally.
+
+	* as.h: Delete alloca and register definitions.
+
+	* config/atof-ieee.c (mask): Now const.
+
+	* obstack.c, obstack.h: Deleted.
+
+	* as.h (flag_readonly_data_in_text): New flag.
+	* as.c (main): Set it for -R.
+
+	* as.h (flag_suppress_warnings): New flag.
+	* as.c (main): Set it for -W.
+	* messages.c (as_warn): Check it instead of flagseen['W'].
+
+	* as.h (flag_always_generate_output): New flag.
+	* as.c (main): Set it for -Z.
+
+	* config/tc-sparc.h: Define NEED_FX_R_TYPE.
+	* config/tc-a29k.h: Ditto.
+	* write.h (struct fix): Don't conditionalize fx_r_type field on TC
+	macros.
+
+	* as.h: Merged ANSI and non-ANSI function decls, using PARAMS
+	macro.
+	* bignum.h, expr.h, flonum.h, frags.h, input-file.h, listing.h,
+	obj.h, output-file.h, read.h, struc-symbol.h, symbols.h, tc.h,
+	write.h: Likewise.
+	* read.c: Likewise.
+
+	* xmalloc.c: Conditionalize on HAVE_MALLOC_H, not USG.  Fold in
+	xrealloc from xrealloc.c.
+	* xrealloc.c: Deleted.
+	* Makefile.in (REAL_SOURCES, OBJS): Adjusted.
+
+	* configure.in: For host CPU a29k, rs6000, vax, consider using bsd
+	or vms ho- files.
+
+	* config/ho-sysv.h (setbuffer, HO_USG): Deleted.
+
+	* config/atof-ieee.c (atof_ieee): Exponent field isn't a pointer;
+	don't initialize it with NULL.
+
+	* config/ho-vax.h (M_VAX): Deleted; was unused.
+
+	* README-vms, config/ho-vms.h, config/obj-vms.c, config/obj-vms.h:
+	New files imported from FSF version, contributed by Eric Youngdale.
+	* README-vms-dbg, config/vms: Deleted.
+
+	* ChangeLog, config/ChangeLog: Merged.
+
+	* config/*tahoe*, configure.in: Tahoe support brought in from FSF
+	version.
+
+	* input-file.c (input_file_open): Eliminate call to setvbuf.
+	[USG] (setbuffer): Deleted macro.
+
 Mon Nov 23 11:00:16 1992  Ken Raeburn  (raeburn@cygnus.com)
 
 	* all files: Whitespace changes for GNU indentation style, done by
-	GNU `indent'.  Some cleanup still needed.
+	GNU `indent'.  Some cleanup still needed, especially of comments.
 
 	* configure.in: No te-386bsd.h file exists; don't try to use it.
+
+	* obj-coff.c (obj_coff_endef): Use as_warn, not fprintf.
+
+	* tc-m68k.c (md_assemble): Don't complain about 68000 with 68881;
+	could be doing emulation.
 
 Tue Nov 10 09:49:24 1992  Ian Lance Taylor  (ian@cygnus.com)
 
@@ -16,6 +119,47 @@ Tue Nov 10 09:49:24 1992  Ian Lance Taylor  (ian@cygnus.com)
 	read.c, app.c: removed definitions of comment_chars,
 	line_comment_chars, and line_separator_chars.
 
+	* tc-m68k.c (m68k_reg_parse): If REGISTER_PREFIX isn't defined,
+	still accept (but don't require) OPTIONAL_REGISTER_PREFIX before
+	the register name.
+	(insert_reg): put REGISTER_PREFIX before register names before
+	putting them in the symbol table.
+	* tc-m68k.h (OPTIONAL_REGISTER_PREFIX): Define to be "%", if not
+	M68KCOFF.
+
+	* obj-coffbfd.c (fill_section): set STYP_NOLOAD bit for .bss
+	section.
+
+	* atof-ieee.c, atof-ns32k.c, tc-*.c: made EXP_CHARS, FLT_CHARS,
+	comment_chars, line_comment_chars and line_seperator_chars
+	consistently const, and always initialized them.  Included read.h.
+
+Thu Nov  5 17:55:41 1992  Jim Wilson  (wilson@sphagnum.cygnus.com)
+
+	* tc-sparc.c (sparc_ip): Add code to flag error if an absolute
+	constant will not fit in an immediate field.
+	(md_apply_fix, RELOC_BASE13 case): Check for relocation overflow.
+
+Wed Nov  4 07:50:46 1992  Ken Raeburn  (raeburn@cygnus.com)
+
+	* obj-coff.c (callj_table): Delete global variable.
+	(obj_emit_relocations): Define it locally here, and only if
+	TC_I960 is defined.
+
+	* tc-m68k.c (m68k_reg_parse): Underscore is part of a symbol name.
+	(m68k_ip): Don't warn about bignum used as float bit-pattern.
+
+	* obj-coff.c: Replaced ANSI and non-ANSI function declarations
+	with a single set using PARAMS macro.
+
+	* tc-i960.c (tc_bout_fix_to_chars): Bit-field fixups want a length
+	of 2.
+
+	* tc-i960.c: Missed a couple of 0->NO_RELOC conversions.
+
+	* tc-i960.h (N_BALNAME, N_CALLNAME): Define as char-type values,
+	so widening works consistently.
+
 Wed Oct 28 08:52:34 1992  Ken Raeburn  (raeburn@cygnus.com)
 
 	* version.c: Put conditional "const" before version_string, not
@@ -24,8 +168,22 @@ Wed Oct 28 08:52:34 1992  Ken Raeburn  (raeburn@cygnus.com)
 	* app.c (do_scrub_next_char): Need double-\ before `000' to show
 	printed rep of null character.
 
+Fri Oct 23 14:40:38 1992  Ian Lance Taylor  (ian@cygnus.com)
+
+	* obj-coffbfd.c (write_object_file): check return value of
+	bfd_close_all_done.
+
 Tue Oct 20 12:18:08 1992  Ian Lance Taylor  (ian@cygnus.com)
 
+	* Support for i386-sysv.
+	obj-coffbfd.c (do_relocs_for, write_object_file): set segment
+	addresses to reasonable sizes.  New define ZERO_BASED_SEGMENTS can
+	be used to set them all to zero as was done before.
+	(fill_section): segment addresses now set in write_object_file.
+	(fill_section): Don't set STYP_NOLOAD for .bss section.
+	(fixup_segment): 386 uses strange common symbol format.
+	tc-i386.c (tc_coff_fix2rtype): use R_DIR32, not R_RELLONG, for
+	compatibility with SVR3.2 linker.
 	* configure.in: i386-sysv and i386-sco use coffbfd.
 
 	* app.c (do_scrub_next_char): discard whitespace after a label.
@@ -35,6 +193,16 @@ Sat Oct 10 12:33:45 1992  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
 	* configure.in: differentiate between SunOS 4 and Solaris2 for Sun4
 	hosts, use the sysv configuration for solaris2
 
+Mon Oct  5 09:28:57 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	 fix i960+non-bfd coff bit rot. 
+	* obj-coff.c (c_dot_file_symbol, obj_coff_ln, obj_coff_line):
+	support for C source listings. (obj_coff_endef): look in the right
+	part of the symbol for the symbol name
+
+	* tc-m68k.c (get_num): make it work for all segments, not just the
+	first three.
+
 Mon Oct  5 03:30:36 1992  Mark Eichin  (eichin at tweedledumber.cygnus.com)
 
 	* configure.in:	recognize i386-*-bsd emulation.
@@ -43,9 +211,29 @@ Thu Oct  1 23:05:12 1992  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
 
 	* configure.in: use the cpu-vendor-os triple for host and target
 
+Tue Sep 29 12:22:52 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* obj-coffbfd.c (write_object_file): don't fixup for the z8k
+	* tc-z8k.c: lots of bug fixes
+
+Tue Sep 29 10:51:55 1992  Ian Lance Taylor  (ian@cygnus.com)
+
+	* tc-i960.h, tc-i960.c: avoid the ANSI preprocessor addition
+	#elif, since it is not supported by old compilers.
+	ho-rs6000.h, tc-m68k.c: the native RS/6000 compiler miscompiles a
+	couple of expressions in tc-m68k.c.
+
 Mon Sep 28 21:18:24 1992  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	* read.c (cons): If NO_RELOC is defined, use it.
+
+	* tc-i960.c (get_cdisp): Use NO_RELOC, not 0, in call to fix_new.
+
+Fri Sep 25 18:18:52 1992  Ian Lance Taylor  (ian@cygnus.com)
+
+	* tc-m68k.h: if M68KCOFF, define DOT_LABEL_PREFIX (to require
+	local labels to start with a .) and set REGISTER_PREFIX to %.
+	tc-m68k.c (m68k_reg_parse): accept REGISTER_PREFIX if defined.
 
 Fri Sep 25 17:53:43 1992  John Gilmore  (gnu@cygnus.com)
 
@@ -60,6 +248,29 @@ Thu Sep 24 12:42:32 1992  Brendan Kehoe  (brendan@rtl.cygnus.com)
 
 	* listing.c (debugging_pseudo): Add stabs and stabn as things to
 	ignore.
+
+Tue Sep 22 13:02:07 1992  Sean Eric Fagan  (sef@cygnus.com)
+
+	* obj-coffbfd.c (do_relocs_for,fill_section): now allocate all
+	sections starting from zero, rather than making them consecutive.
+	This makes subsequent reloc calculations easier, esp if the object
+	format doesn't understand addends. (obj_coff_lcomm): (maybe temporarily)
+	allocate lcomm in .data rather than in .bss.  It seems that some
+	tools can't cope with a non-zero sized bss before linkage.
+ 
+Tue Sep 22 15:10:51 1992  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* tc-m68k.c: Replace "enum m68k_architecture" with "int"
+	throughout.  That enum no longer means what we thought it meant.
+
+	* tc-m68k.c (md_assemble, md_parse_option): Handle new
+	"-mno-688[58]1" options.
+
+	* tc-m68k.c: Added CPU32 support.
+
+Fri Sep 18 08:02:18 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* tc-m68k.c (m68k_ip): An(disp) is not pc relative.
 
 Tue Sep 15 17:25:05 1992  Jim Wilson  (wilson@sphagnum.cygnus.com)
 
@@ -84,6 +295,20 @@ Sun Sep 13 20:30:10 1992  Ian Lance Taylor  (ian@cygnus.com)
 	* write.c (fixup_segment): fixed missing parens in expression
 	checking for byte or word overflow.
 
+	* obj-coffbfd.h: define WARN_SIGNED_OVERFLOW_WORD.
+	obj-coffbfd.c (fixup_segment): check for signed .word overflow if
+	WARN_SIGNED_OVERFLOW_WORD.
+
+	* obj-coffbfd.c (fixup_segment): fixed missing parens in
+	expression checking for byte or word overflow.
+
+Fri Sep 11 10:21:04 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	Support for i386 coff
+	* obj-coffbfd.h : added stuff 
+	* tc-i386.c (tc_coff_fix2rtype): new function
+	* tc-i386.h : new coff defines
+
 Thu Sep 10 09:23:15 1992  Ian Lance Taylor  (ian@cygnus.com)
 
 	* input-scrub.c (input_scrub_push): call input_file_begin, not
@@ -97,6 +322,22 @@ Wed Sep  9 11:06:25 1992  Ian Lance Taylor  (ian@cygnus.com)
 	From Steve Chamberlain:
 	Makefile.in: Handle m68*-*-coff*.
 	read.c, read.h: add mult argument to s_space
+
+	* tc-m68k.c (m68k_ip, m68k_ip_op, get_num, try_moto_index): merge
+	 Motorola and MIT syntax; gas can now assemble either type of
+	 file.
+	tc-m68kmote.c, tc-m68kmote.h: removed now superfluous files.
+	From Steve Chamberlain:
+	m68kcoff.mt: for m68k COFF.
+	obj-coffbfd.c: (fixup_mdeps) added
+	 (size_section) removed bad sanity check
+	 (fill_section) added rs_machine_dependent case
+	 (write_object_file) call fixup_mdeps
+	 (fixup_segment) set fx_subsy to 0.
+	obj-coffbfd.h: define WORKING_DOT_WORD (too hard to support) and
+	 handle m68k.
+	tc-m68k.c, config/tc-m68k.h: added m68k COFF support and Motorala
+	 pseudo ops.
 
 Tue Sep  8 17:10:58 1992  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
@@ -115,6 +356,12 @@ Sun Aug 30 21:24:46 1992  Ian Lance Taylor  (ian@cygnus.com)
 Sat Aug 29 12:11:12 1992  Jim Wilson  (wilson@sphagnum.cygnus.com)
 
 	* Makefile.in (as.new): Depend on LOCAL_LOADLIBES.
+
+Fri Aug 28 16:25:22 1992  Ian Lance Taylor  (ian@cygnus.com)
+
+	* obj-bout.h, obj-bout.c (obj_header_append, obj_symbol_to_chars),
+	tc-i960.c (md_ri_to_chars): Always output bout object file in
+	little endian byte order (used to use endianness of host).
 
 Tue Aug 25 15:50:48 1992  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
@@ -136,16 +383,31 @@ Tue Aug 25 15:13:48 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 	* listing.c (buffer_line): rewind to the start of include
 	files, they might be included twice.
 
+	* z8k.c, z8k.h, z8k.mt: z8000 support stuff
+
 Mon Aug 24 12:45:43 1992  Ian Lance Taylor  (ian@cygnus.com)
 
 	* Makefile.in: defined TARGET_CPU for C code so that it can choose
 	one element of a family.
+
+	* tc-m68k.c: use TARGET_CPU to choose default cpu type.
+
+	* te-generic.h: default to LOCAL_LABELS_DOLLAR and LOCAL_LABELS_FB
+	so that we can assemble hand-written libgcc code.
 
 Fri Aug 21 14:38:44 1992  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	* messages.c (as_warn): Use fputs, not fprintf, with a buffer that
 	has already been formatted (but may still contain %-characters).
 	(as_bad): Likewise.
+
+Wed Aug 19 11:20:59 1992  Ian Lance Taylor  (ian@cygnus.com)
+
+	* tc-m68k.c, tc-m68kmote.c: the cas2 instruction is supposed to be
+	written with indirection on the last two operands, which can be
+	either data or address registers.  Added a new operand type 'r'
+	which accepts either register type.  Added '(' to notend stuff in
+	tc-m68kmote.c to accept (a0):(a2) in cas2 instruction.
 
 Wed Aug 19 09:25:09 1992  Ken Raeburn  (raeburn@cygnus.com)
 
@@ -213,15 +475,32 @@ Thu Aug 13 13:53:19 1992  Ken Raeburn  (raeburn@cygnus.com)
 	(free): Declare it.
 	(BROKEN_ASSERT): Define it if not __STDC__.
 
+Tue Aug 11 12:58:14 1992  Ken Raeburn  (raeburn@cygnus.com)
+
+	* sparc.mt: New file.
+
+Mon Aug 10 14:37:08 1992  Per Bothner  (bothner@cygnus.com)
+
+	* tc-m68k.c: ".align N" means align to N-byte boundary *only*
+	if TN_SUN3; otherwise align to 2**N-byte bounary.
+
 Thu Aug  6 12:10:39 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* read.c (s_fill): make the .fill size clamped error a warn and
 	fix bug where 0's were always placed.
 
+	* config/tc-h8300.c: if a :8 is seen after an operand, fill top
+	two bytes of any constant with 0xff:
+
 Wed Aug  5 12:02:40 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* config/tc-m68k.c (md_pseudo_table): fix the .align thing
 	the right way; for just the 68k. Sun 3 .align is nbytes, not ptwo.
+
+Wed Aug  5 01:54:34 1992  John Gilmore  (gnu at cygnus.com)
+
+	* tc-m68k.c (try_index):  Error if index scaling specified and
+	assembling for an older CPU than a 68020.
 
 Sat Aug  1 19:10:13 1992  Ken Raeburn  (raeburn@cygnus.com)
 
@@ -269,6 +548,10 @@ Mon Jul 13 14:11:36 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 	(relax_segment): SEG_BSS is ok now
 	* config/tc-m68k.c (m68k_ip_op): can now parse more @( modes
 
+Mon Jul  6 17:09:32 1992  Steve Chamberlain  (sac@cygnus.com)
+
+	* obj-coffbfd.c (fill_section): mark .lit sections as STYP_LIT
+
 Mon Jun  1 16:20:22 1992  Michael Tiemann  (tiemann@cygnus.com)
 
 	* configure.in: recognize m680x0 as having sun3 emulation mode for
@@ -296,6 +579,11 @@ Tue Jun  9 07:54:54 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 	* write.c (write_object_file): various changes to handle data in
 	the BSS segment in much the same was as stuff in the DATA segment. 
 
+	* tc-m68k.c (m68kip): Fix typo so that only arch's >=68020 do
+	pcrel data stuff. (md_estimate_size_before_relax): when relaxing a
+	68010 bxx into a bra+6 jmpxx, put the bytes of the jmp opcode into
+	the right place. (s_bss): Don't put .bss stuff into SEG_DATA, put
+	it into SEG_BSS
 
 Thu Jun  4 11:59:13 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
@@ -350,10 +638,19 @@ Thu May 28 11:22:02 1992  Jim Wilson  (wilson@sphagnum.cygnus.com)
 
 	* configure.in: Recognize sparclite as a sparc variant.
 
+	* tc-sparc.c: Use new ARCHITECTURES_CONFLICT_P macro.  Mention new
+	-Asparclite flag.
+
 Tue May 26 16:47:56 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* config/tc-a29k.c: lint
 	* listing.c, expr.c: patches from Andrew Smith
+
+Mon May  4 18:56:19 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* obj-coffbfd.c: use is a synonym for section, (do_relocs_for):
+	calc the base of relocs correctly.
+	* tc-a29k.c (parse_operand): allow expressions to be in any section.
 
 Mon Apr 27 13:13:31 1992  K. Richard Pixley  (rich@cygnus.com)
 
@@ -403,6 +700,11 @@ Fri Mar 13 08:03:03 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 	* flonum-const.c: renamed flonum-konst.c to stop dos name
 	conflict.
 
+Thu Mar 12 04:42:38 1992  K. Richard Pixley  (rich@cygnus.com)
+
+	* tc-m68k.h, te-sun3.h: moved LOCAL_LABELS_FB definition from
+	  tc-m68k.h to te-sun3.h. 
+
 Wed Mar 11 23:32:42 1992  K. Richard Pixley  (rich@cygnus.com)
 
 	* configure.in: vxworks68 gets te-sun3.h.
@@ -412,6 +714,8 @@ Wed Mar 11 23:32:42 1992  K. Richard Pixley  (rich@cygnus.com)
 
 	* symbols.c: remove local_labels_dollar, replace with a function
 	  interface for a sparse array.  All users adjusted.
+
+	* te-sun3.h: add LOCAL_LABELS_DOLLAR.
 
 Fri Mar  6 21:57:18 1992  K. Richard Pixley  (rich@cygnus.com)
 
@@ -488,6 +792,12 @@ Fri Feb 21 06:21:07 1992  K. Richard Pixley  (rich@rtl.cygnus.com)
 
 	* read.c, write.c subsegs.c: back out the .bss changes.
 
+	* obj-aout.c: do not include stab.gnu.h if NO_LISTING.
+
+	* tc-i860.c, a.out.gnu.h: move i860 relocs to a proper place.
+
+	* a.out.h: removed.
+
 Fri Feb 21 01:08:48 1992  Minh Tran-Le (TRANLE@INTELLICORP.COM)
 
 	* symbols.c (local_label_name): symbols now start with ^A.
@@ -503,6 +813,33 @@ Fri Feb 21 01:08:48 1992  Minh Tran-Le (TRANLE@INTELLICORP.COM)
 
 	* as.c (perform_an_assembly_pass): zero bss_fix_root, too.
 
+	* tc-i386.c: tc-i386.c: added handling of the following opcodes:
+	  i/o opcodes - inb, inw, outb and outw.  string manipulation with
+	  att syntax - scmp, slod, smov, ssca, ssto.
+
+	* obj-coff.c: (for aix386) Moved the symbols .text, .data and .bss
+	  to just after .file .
+
+	  In obj_crawl_symbol_chain() where it tries to put the external
+	  symbols apart, with the condition:
+	    (!S_IS_DEFINED(symbolP) &&
+	     !S_IS_DEBUG(symbolP) &&
+	     !SF_GET_STATICS(symbolP))
+	  it was moving too many symbols out. So I switch it back to the
+	  condition:
+	    (S_GET_STORAGE_CLASS(symbolP) == C_EXT && !SF_GET_FUNCTION(symbolP))
+
+	  In obj_emit_relocations() added the conditional on KEEP_RELOC_INFO
+	  so that we don't use the F_RELFLG which make the linker complain
+	  that somebody has stripped the relocation info.
+
+	  Also, the AIX ld program require that the relocation table
+	  is sorted by r_vaddr like the standard ATT assembler does.
+
+	  [he also changed the sizeof(struct ...)'s into the coff
+	  style FOOSZ macros.  I'm not sure this is right, but I can't
+	  remember why.  xoxorich.]
+
 Fri Feb 21 01:08:48 1992  K. Richard Pixley  (rich@cygnus.com)
 
 	* Makefile.in, configure.in, doc: use the doc.  Build it, install
@@ -515,6 +852,21 @@ Tue Feb 18 02:21:25 1992  K. Richard Pixley  (rich at cygnus.com)
 	* configure.in: use the new atof-ns32.c for ns32k.
 
 	* write.c: comment change only.
+
+	* tc-m88k.[hc]: pulled in from hack's unfinished work.  These
+	  aren't yet integrated.
+
+	* tc-i860.[hc]: blew off the dust.  Something must still be done
+	  about conflicting relocation types.
+
+	* tc-ns32k.c: Replaced previous tc_aout_fix_to_chars stub with the
+	  real thing.
+
+	* tc-i960.c, tc-sparc.c: white space and comments only.
+
+	* tc-a29k.h: delete duplicate macro definition.
+
+	* new file atof-ns32k.c copied from hack's last unreleased gas.
 
 Mon Feb 17 07:51:06 1992  K. Richard Pixley  (rich at cygnus.com)
 

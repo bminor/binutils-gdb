@@ -40,17 +40,8 @@
   malloc()
 
   */
-#include <stdio.h>
 
-#if __STDC__ == 1
-#include <stdlib.h>
-#else
-#ifdef USG
-#include <malloc.h>
-#else
-char *malloc ();
-#endif /* USG */
-#endif /* not __STDC__ */
+#include "as.h"
 
 #define error as_fatal
 
@@ -59,13 +50,21 @@ xmalloc (n)
      long n;
 {
   char *retval;
-  void error ();
 
-  if ((retval = malloc ((unsigned) n)) == NULL)
-    {
-      error ("virtual memory exceeded");
-    }
+  retval = malloc ((unsigned) n);
+  if (retval == NULL)
+    error ("virtual memory exceeded");
   return (retval);
 }
 
+char *
+xrealloc (ptr, n)
+     register char *ptr;
+     long n;
+{
+  ptr = realloc (ptr, (unsigned) n);
+  if (ptr == 0)
+    error ("virtual memory exceeded");
+  return (ptr);
+}
 /* end of xmalloc.c */

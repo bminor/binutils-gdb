@@ -29,11 +29,6 @@
 #endif /* const */
 #endif /* __STDC__ */
 
-#ifdef __GNUC__
-#define alloca __builtin_alloca
-#define register
-#endif /* __GNUC__ */
-
 #ifndef __LINE__
 #define __LINE__ "unknown"
 #endif /* __LINE__ */
@@ -92,7 +87,10 @@
 #define DEBUG			/* temporary */
 
 #ifdef BROKEN_ASSERT
-/* turn off all assertion checks */
+/* Turn off all assertion checks, on machines where the assert macro
+   is buggy.  (For example, on the RS/6000, Reiser-cpp substitution is
+   done to put the condition into a string, so if the condition contains
+   a string, parse errors result.)  */
 #undef DEBUG
 #define NDEBUG
 #endif
@@ -182,14 +180,12 @@ typedef enum _segT
 
 typedef int subsegT;
 
-COMMON subsegT now_subseg;
 /* What subseg we are accreting now? */
+COMMON subsegT now_subseg;
 
-
-COMMON segT now_seg;
 /* Segment our instructions emit to. */
 /* Only OK values are SEG_TEXT or SEG_DATA. */
-
+COMMON segT now_seg;
 
 extern char *const seg_name[];
 extern int section_alignment[];
@@ -199,20 +195,23 @@ extern int section_alignment[];
 
 typedef enum _relax_state
   {
-    rs_fill = 1,		/* Variable chars to be repeated fr_offset times.
-			Fr_symbol unused. Used with fr_offset == 0 for a
-			constant length frag. */
+    /* Variable chars to be repeated fr_offset times.
+       Fr_symbol unused. Used with fr_offset == 0 for a
+       constant length frag. */
+    rs_fill = 1,
 
-    rs_align,			/* Align: Fr_offset: power of 2. 1 variable char: fill
-		     character. */
+    /* Align: Fr_offset: power of 2. 1 variable char: fill character. */
+    rs_align,
 
-    rs_org,			/* Org: Fr_offset, fr_symbol: address. 1 variable char: fill
-		   character. */
+    /* Org: Fr_offset, fr_symbol: address. 1 variable char: fill
+       character. */
+    rs_org,
 
     rs_machine_dependent,
 
 #ifndef WORKING_DOT_WORD
-    rs_broken_word,		/* JF: gunpoint */
+    /* JF: gunpoint */
+    rs_broken_word,
 #endif
   } relax_stateT;
 
@@ -221,8 +220,9 @@ typedef enum _relax_state
    boundry.  Be very careful with this.  */
 typedef unsigned long relax_substateT;
 
-typedef unsigned long relax_addressT;	/* Enough bits for address. */
-/* Still an integer type. */
+/* Enough bits for address, but still an integer type.
+   Could be a problem, cross-assembling for 64-bit machines.  */
+typedef unsigned long relax_addressT;
 
 
 /* frags.c */
@@ -244,27 +244,37 @@ typedef unsigned long relax_addressT;	/* Enough bits for address. */
  */
 struct frag			/* a code fragment */
 {
-  unsigned long fr_address;	/* Object file address. */
-  struct frag *fr_next;		/* Chain forward; ascending address order. */
+  /* Object file address. */
+  unsigned long fr_address;
+  /* Chain forward; ascending address order. */
   /* Rooted in frch_root. */
+  struct frag *fr_next;
 
-  long fr_fix;			/* (Fixed) number of chars we know we have. */
+  /* (Fixed) number of chars we know we have. */
   /* May be 0. */
-  long fr_var;			/* (Variable) number of chars after above. */
+  long fr_fix;
+  /* (Variable) number of chars after above. */
   /* May be 0. */
-  struct symbol *fr_symbol;	/* For variable-length tail. */
-  long fr_offset;		/* For variable-length tail. */
-  char *fr_opcode;		/*->opcode low addr byte,for relax()ation*/
-  relax_stateT fr_type;		/* What state is my tail in? */
+  long fr_var;
+  /* For variable-length tail. */
+  struct symbol *fr_symbol;
+  /* For variable-length tail. */
+  long fr_offset;
+  /*->opcode low addr byte,for relax()ation*/
+  char *fr_opcode;
+  /* What state is my tail in? */
+  relax_stateT fr_type;
   relax_substateT fr_subtype;
+
   /* These are needed only on the NS32K machines */
   char fr_pcrel_adjust;
   char fr_bsr;
 #ifndef NO_LISTING
   struct list_info_struct *line;
 #endif
-  char fr_literal[1];		/* Chars begin here. */
-  /* One day we will compile fr_literal[0]. */
+  /* Chars begin here.
+     One day we will compile fr_literal[0]. */
+  char fr_literal[1];
 };
 
 #define SIZEOF_STRUCT_FRAG \
@@ -273,43 +283,54 @@ struct frag			/* a code fragment */
 
 typedef struct frag fragS;
 
-COMMON fragS *frag_now;		/* -> current frag we are building. */
-/* This frag is incomplete. */
-/* It is, however, included in frchain_now. */
-/* Frag_now->fr_fix is bogus. Use: */
-/* Virtual frag_now->fr_fix==obstack_next_free(&frags)-frag_now->fr_literal.*/
+/* Current frag we are building.  This frag is incomplete.  It is, however,
+   included in frchain_now.  The fr_fix field is bogus; instead, use:
+   obstack_next_free(&frags)-frag_now->fr_literal.  */
+COMMON fragS *frag_now;
 
-COMMON fragS zero_address_frag;	/* For foreign-segment symbol fixups. */
-COMMON fragS bss_address_frag;	/* For local common (N_BSS segment) fixups. */
+/* For foreign-segment symbol fixups. */
+COMMON fragS zero_address_frag;
+/* For local common (N_BSS segment) fixups. */
+COMMON fragS bss_address_frag;
 
 /* main program "as.c" (command arguments etc) */
 
-COMMON char flagseen[128];	/* ['x'] TRUE if "-x" seen. */
+/* ['x'] TRUE if "-x" seen. */
+COMMON char flagseen[128];
+COMMON unsigned char flag_readonly_data_in_text;
+COMMON unsigned char flag_suppress_warnings;
+COMMON unsigned char flag_always_generate_output;
 
-COMMON char *out_file_name;	/* name of emitted object file */
+/* name of emitted object file */
+COMMON char *out_file_name;
 
-COMMON int need_pass_2;		/* TRUE if we need a second pass. */
+/* TRUE if we need a second pass. */
+COMMON int need_pass_2;
 
-COMMON int linkrelax;		/* TRUE if we should do no relaxing, and
-				   leave lots of padding.  */
+/* TRUE if we should do no relaxing, and
+   leave lots of padding.  */
+COMMON int linkrelax;
 
-typedef struct
+struct _pseudo_type
   {
-    char *poc_name;		/* assembler mnemonic, lower case, no '.' */
-    void (*poc_handler) ();	/* Do the work */
-    int poc_val;		/* Value to pass to handler */
-  }
+    /* assembler mnemonic, lower case, no '.' */
+    char *poc_name;
+    /* Do the work */
+    void (*poc_handler) ();
+    /* Value to pass to handler */
+    int poc_val;
+  };
 
-pseudo_typeS;
+typedef struct _pseudo_type pseudo_typeS;
 
-#ifdef __STDC__
+#ifndef NO_STDARG
 
-int had_errors (void);
-int had_warnings (void);
-void as_bad (const char *Format,...);
-void as_fatal (const char *Format,...);
-void as_tsktsk (const char *Format,...);
-void as_warn (const char *Format,...);
+int had_errors PARAMS ((void));
+int had_warnings PARAMS ((void));
+void as_bad PARAMS ((const char *Format,...));
+void as_fatal PARAMS ((const char *Format,...));
+void as_tsktsk PARAMS ((const char *Format,...));
+void as_warn PARAMS ((const char *Format,...));
 
 #else
 
@@ -322,88 +343,47 @@ void as_warn ();
 
 #endif /* __STDC__ & !NO_STDARG */
 
-#ifdef __STDC__
-
-char *app_push (void);
-char *atof_ieee (char *str, int what_kind, LITTLENUM_TYPE * words);
-char *input_scrub_include_file (char *filename, char *position);
-char *input_scrub_new_file (char *filename);
-char *input_scrub_next_buffer (char **bufp);
-char *strstr (const char *s, const char *wanted);
-char *xmalloc (int size);
-char *xrealloc (char *ptr, long n);
-int do_scrub_next_char (int (*get) (), void (*unget) ());
-int gen_to_words (LITTLENUM_TYPE * words, int precision, long exponent_bits);
-int had_err (void);
-int had_errors (void);
-int had_warnings (void);
-int ignore_input (void);
-int scrub_from_file (void);
-int scrub_from_file (void);
-int scrub_from_string (void);
-int seen_at_least_1_file (void);
-void app_pop (char *arg);
-void as_howmuch (FILE * stream);
-void as_perror (char *gripe, char *filename);
-void as_where (void);
-void bump_line_counters (void);
-void do_scrub_begin (void);
-void input_scrub_begin (void);
-void input_scrub_close (void);
-void input_scrub_end (void);
-void int_to_gen (long x);
-void new_logical_line (char *fname, int line_number);
-void scrub_to_file (int ch);
-void scrub_to_string (int ch);
-void subseg_change (segT seg, int subseg);
-void subseg_new (segT seg, subsegT subseg);
-void subsegs_begin (void);
-
-#else /* not __STDC__ */
-
-char *app_push ();
-char *atof_ieee ();
-char *input_scrub_include_file ();
-char *input_scrub_new_file ();
-char *input_scrub_next_buffer ();
-char *strstr ();
-char *xmalloc ();
-char *xrealloc ();
-int do_scrub_next_char ();
-int gen_to_words ();
-int had_err ();
-int had_errors ();
-int had_warnings ();
-int ignore_input ();
-int scrub_from_file ();
-int scrub_from_file ();
-int scrub_from_string ();
-int seen_at_least_1_file ();
-void app_pop ();
-void as_howmuch ();
-void as_perror ();
-void as_where ();
-void bump_line_counters ();
-void do_scrub_begin ();
-void input_scrub_begin ();
-void input_scrub_close ();
-void input_scrub_end ();
-void int_to_gen ();
-void new_logical_line ();
-void scrub_to_file ();
-void scrub_to_string ();
-void subseg_change ();
-void subseg_new ();
-void subsegs_begin ();
-
-#endif /* not __STDC__ */
+char *app_push PARAMS ((void));
+char *atof_ieee PARAMS ((char *str, int what_kind, LITTLENUM_TYPE * words));
+char *input_scrub_include_file PARAMS ((char *filename, char *position));
+char *input_scrub_new_file PARAMS ((char *filename));
+char *input_scrub_next_buffer PARAMS ((char **bufp));
+char *strstr PARAMS ((const char *s, const char *wanted));
+char *xmalloc PARAMS ((long size));
+char *xrealloc PARAMS ((char *ptr, long n));
+int do_scrub_next_char PARAMS ((int (*get) (), void (*unget) ()));
+int gen_to_words PARAMS ((LITTLENUM_TYPE * words, int precision,
+			  long exponent_bits));
+int had_err PARAMS ((void));
+int had_errors PARAMS ((void));
+int had_warnings PARAMS ((void));
+int ignore_input PARAMS ((void));
+int scrub_from_file PARAMS ((void));
+int scrub_from_file PARAMS ((void));
+int scrub_from_string PARAMS ((void));
+int seen_at_least_1_file PARAMS ((void));
+void app_pop PARAMS ((char *arg));
+void as_howmuch PARAMS ((FILE * stream));
+void as_perror PARAMS ((char *gripe, char *filename));
+void as_where PARAMS ((void));
+void bump_line_counters PARAMS ((void));
+void do_scrub_begin PARAMS ((void));
+void input_scrub_begin PARAMS ((void));
+void input_scrub_close PARAMS ((void));
+void input_scrub_end PARAMS ((void));
+void int_to_gen PARAMS ((long x));
+void new_logical_line PARAMS ((char *fname, int line_number));
+void scrub_to_file PARAMS ((int ch));
+void scrub_to_string PARAMS ((int ch));
+void subseg_change PARAMS ((segT seg, int subseg));
+void subseg_new PARAMS ((segT seg, subsegT subseg));
+void subsegs_begin PARAMS ((void));
 
 /* this one starts the chain of target dependant headers */
 #include "targ-env.h"
 
 /* these define types needed by the interfaces */
 #include "struc-symbol.h"
-/*#include "aout/reloc.h"*/
 
 #include "write.h"
 #include "expr.h"
@@ -416,12 +396,5 @@ void subsegs_begin ();
 #include "obj.h"
 
 #include "listing.h"
-
-/*
- * Local Variables:
- * comment-column: 0
- * fill-column: 131
- * End:
- */
 
 /* end of as.h */

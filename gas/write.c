@@ -175,11 +175,11 @@ write_object_file ()
     {
 #ifdef	VMS
       /*
-		 *	Under VAX/VMS, the linker (and PSECT specifications)
-		 *	take care of correctly aligning the segments.
-		 *	Doing the alignment here (on initialized data) can
-		 *	mess up the calculation of global data PSECT sizes.
-		 */
+       *	Under VAX/VMS, the linker (and PSECT specifications)
+       *	take care of correctly aligning the segments.
+       *	Doing the alignment here (on initialized data) can
+       *	mess up the calculation of global data PSECT sizes.
+       */
 #undef	SUB_SEGMENT_ALIGN
 #define	SUB_SEGMENT_ALIGN ((frchainP->frch_seg != SEG_DATA) ? 2 : 0)
 #endif /* VMS */
@@ -188,9 +188,9 @@ write_object_file ()
       /* frag_align will have left a new frag. */
       /* Use this last frag for an empty ".fill". */
       /*
-		 * For this segment ...
-		 * Create a last frag. Do not leave a "being filled in frag".
-		 */
+       * For this segment ...
+       * Create a last frag. Do not leave a "being filled in frag".
+       */
       frag_wane (frag_now);
       frag_now->fr_fix = 0;
       know (frag_now->fr_next == NULL);
@@ -199,21 +199,21 @@ write_object_file ()
     }				/* walk the frag chain */
 
   /*
-	 * From now on, we don't care about sub-segments.
-	 * Build one frag chain for each segment. Linked thru fr_next.
-	 * We know that there is at least 1 text frchain & at least 1 data
-	 * frchain.
-	 */
+   * From now on, we don't care about sub-segments.
+   * Build one frag chain for each segment. Linked thru fr_next.
+   * We know that there is at least 1 text frchain & at least 1 data
+   * frchain.
+   */
 
   remove_subsegs (frchain_root, SEG_TEXT, &text_frag_root, &text_last_frag);
   remove_subsegs (data0_frchainP, SEG_DATA, &data_frag_root, &data_last_frag);
   remove_subsegs (bss0_frchainP, SEG_BSS, &bss_frag_root, &bss_last_frag);
 
   /*
-	 * We have two segments. If user gave -R flag, then we must put the
-	 * data frags into the text segment. Do this before relaxing so
-	 * we know to take advantage of -R and make shorter addresses.
-	 */
+   * We have two segments. If user gave -R flag, then we must put the
+   * data frags into the text segment. Do this before relaxing so
+   * we know to take advantage of -R and make shorter addresses.
+   */
 #ifndef OBJ_AOUT
   if (flagseen['R'])
     {
@@ -238,20 +238,20 @@ write_object_file ()
   relax_segment (data_frag_root, SEG_DATA);
   relax_segment (bss_frag_root, SEG_BSS);
   /*
-	 * Now the addresses of frags are correct within the segment.
-	 */
+   * Now the addresses of frags are correct within the segment.
+   */
 
   know (text_last_frag->fr_type == rs_fill && text_last_frag->fr_offset == 0);
   H_SET_TEXT_SIZE (&headers, text_last_frag->fr_address);
   text_last_frag->fr_address = H_GET_TEXT_SIZE (&headers);
 
   /*
-	 * Join the 2 segments into 1 huge segment.
-	 * To do this, re-compute every rn_address in the SEG_DATA frags.
-	 * Then join the data frags after the text frags.
-	 *
-	 * Determine a_data [length of data segment].
-	 */
+   * Join the 2 segments into 1 huge segment.
+   * To do this, re-compute every rn_address in the SEG_DATA frags.
+   * Then join the data frags after the text frags.
+   *
+   * Determine a_data [length of data segment].
+   */
   if (data_frag_root)
     {
       register relax_addressT slide;
@@ -264,10 +264,10 @@ write_object_file ()
 #ifdef OBJ_BOUT
 #define RoundUp(N,S) (((N)+(S)-1)&-(S))
       /* For b.out: If the data section has a strict alignment
-		   requirement, its load address in the .o file will be
-		   rounded up from the size of the text section.  These
-		   two values are *not* the same!  Similarly for the bss
-		   section....  */
+	 requirement, its load address in the .o file will be
+	 rounded up from the size of the text section.  These
+	 two values are *not* the same!  Similarly for the bss
+	 section....  */
       slide = RoundUp (slide, 1 << section_alignment[SEG_DATA]);
 #endif
 
@@ -320,26 +320,26 @@ write_object_file ()
   H_SET_BSS_SIZE (&headers, local_bss_counter);
 
   /*
-	 *
-	 * Crawl the symbol chain.
-	 *
-	 * For each symbol whose value depends on a frag, take the address of
-	 * that frag and subsume it into the value of the symbol.
-	 * After this, there is just one way to lookup a symbol value.
-	 * Values are left in their final state for object file emission.
-	 * We adjust the values of 'L' local symbols, even if we do
-	 * not intend to emit them to the object file, because their values
-	 * are needed for fix-ups.
-	 *
-	 * Unless we saw a -L flag, remove all symbols that begin with 'L'
-	 * from the symbol chain.  (They are still pointed to by the fixes.)
-	 *
-	 * Count the remaining symbols.
-	 * Assign a symbol number to each symbol.
-	 * Count the number of string-table chars we will emit.
-	 * Put this info into the headers as appropriate.
-	 *
-	 */
+   *
+   * Crawl the symbol chain.
+   *
+   * For each symbol whose value depends on a frag, take the address of
+   * that frag and subsume it into the value of the symbol.
+   * After this, there is just one way to lookup a symbol value.
+   * Values are left in their final state for object file emission.
+   * We adjust the values of 'L' local symbols, even if we do
+   * not intend to emit them to the object file, because their values
+   * are needed for fix-ups.
+   *
+   * Unless we saw a -L flag, remove all symbols that begin with 'L'
+   * from the symbol chain.  (They are still pointed to by the fixes.)
+   *
+   * Count the remaining symbols.
+   * Assign a symbol number to each symbol.
+   * Count the number of string-table chars we will emit.
+   * Put this info into the headers as appropriate.
+   *
+   */
   know (zero_address_frag.fr_address == 0);
   string_byte_count = sizeof (string_byte_count);
 
@@ -353,11 +353,11 @@ write_object_file ()
   H_SET_STRING_SIZE (&headers, string_byte_count);
 
   /*
-	 * Addresses of frags now reflect addresses we use in the object file.
-	 * Symbol values are correct.
-	 * Scan the frags, converting any ".org"s and ".align"s to ".fill"s.
-	 * Also converting any machine-dependent frags using md_convert_frag();
-	 */
+   * Addresses of frags now reflect addresses we use in the object file.
+   * Symbol values are correct.
+   * Scan the frags, converting any ".org"s and ".align"s to ".fill"s.
+   * Also converting any machine-dependent frags using md_convert_frag();
+   */
   subseg_change (SEG_TEXT, 0);
 
   for (fragP = text_frag_root; fragP; fragP = fragP->fr_next)
@@ -387,10 +387,10 @@ write_object_file ()
 	  know ((fragP->fr_next == NULL) || ((fragP->fr_next->fr_address - fragP->fr_address) == fragP->fr_fix));
 
 	  /*
-			 * After md_convert_frag, we make the frag into a ".space 0".
-			 * Md_convert_frag() should set up any fixSs and constants
-			 * required.
-			 */
+	   * After md_convert_frag, we make the frag into a ".space 0".
+	   * Md_convert_frag() should set up any fixSs and constants
+	   * required.
+	   */
 	  frag_wane (fragP);
 	  break;
 
@@ -691,10 +691,8 @@ relax_segment (segment_frag_root, segment)
   /* In case md_estimate_size_before_relax() wants to make fixSs. */
   subseg_change (segment, 0);
 
-  /*
-	 * For each frag in segment: count and store  (a 1st guess of)
-	 * fr_address.
-	 */
+  /* For each frag in segment: count and store  (a 1st guess of)
+     fr_address.  */
   address = 0;
   for (fragP = segment_frag_root; fragP; fragP = fragP->fr_next)
     {
@@ -712,10 +710,7 @@ relax_segment (segment_frag_root, segment)
 	  break;
 
 	case rs_org:
-	  /*
-			 * Assume .org is nugatory. It will grow with 1st
-			 * relax.
-			 */
+	  /* Assume .org is nugatory. It will grow with 1st relax.  */
 	  break;
 
 	case rs_machine_dependent:
@@ -734,39 +729,34 @@ relax_segment (segment_frag_root, segment)
 	}			/* switch(fr_type) */
     }				/* for each frag in the segment */
 
-  /*
-	 * Do relax().
-	 */
+  /* Do relax().  */
   {
-    register long stretch;	/* May be any size, 0 or negative. */
+    long stretch;	/* May be any size, 0 or negative. */
     /* Cumulative number of addresses we have */
     /* relaxed this pass. */
     /* We may have relaxed more than one address. */
-    register long stretched;	/* Have we stretched on this pass? */
-    /* This is 'cuz stretch may be zero, when,
-		   in fact some piece of code grew, and
-		   another shrank.  If a branch instruction
-		   doesn't fit anymore, we could be scrod */
+    long stretched;	/* Have we stretched on this pass? */
+    /* This is 'cuz stretch may be zero, when, in fact some piece of code
+       grew, and another shrank.  If a branch instruction doesn't fit anymore,
+       we could be scrod.  */
 
     do
       {
 	stretch = stretched = 0;
 	for (fragP = segment_frag_root; fragP; fragP = fragP->fr_next)
 	  {
-	    register long growth = 0;
-	    register unsigned long was_address;
-	    /* register long var; */
-	    register long offset;
-	    register symbolS *symbolP;
-	    register long target;
-	    register long after;
-	    register long aim;
+	    long growth = 0;
+	    unsigned long was_address;
+	    long offset;
+	    symbolS *symbolP;
+	    long target;
+	    long after;
+	    long aim;
 
 	    was_address = fragP->fr_address;
 	    address = fragP->fr_address += stretch;
 	    symbolP = fragP->fr_symbol;
 	    offset = fragP->fr_offset;
-	    /* var = fragP->fr_var; */
 
 	    switch (fragP->fr_type)
 	      {
@@ -776,9 +766,9 @@ relax_segment (segment_frag_root, segment)
 
 #ifndef WORKING_DOT_WORD
 		/* JF:  This is RMS's idea.  I do *NOT* want to be blamed
-					   for it I do not want to write it.  I do not want to have
-					   anything to do with it.  This is not the proper way to
-					   implement this misfeature. */
+		   for it I do not want to write it.  I do not want to have
+		   anything to do with it.  This is not the proper way to
+		   implement this misfeature.  */
 	      case rs_broken_word:
 		{
 		  struct broken_word *lie;
@@ -787,9 +777,9 @@ relax_segment (segment_frag_root, segment)
 		  extern int md_long_jump_size;
 
 		  /* Yes this is ugly (storing the broken_word pointer
-					   in the symbol slot).  Still, this whole chunk of
-					   code is ugly, and I don't feel like doing anything
-					   about it.  Think of it as stubbornness in action */
+		     in the symbol slot).  Still, this whole chunk of
+		     code is ugly, and I don't feel like doing anything
+		     about it.  Think of it as stubbornness in action.  */
 		  growth = 0;
 		  for (lie = (struct broken_word *) (fragP->fr_symbol);
 		       lie && lie->dispfrag == fragP;
@@ -799,8 +789,11 @@ relax_segment (segment_frag_root, segment)
 		      if (lie->added)
 			continue;
 
-		      offset = lie->add->sy_frag->fr_address + S_GET_VALUE (lie->add) + lie->addnum -
-			(lie->sub->sy_frag->fr_address + S_GET_VALUE (lie->sub));
+		      offset = (lie->add->sy_frag->fr_address
+				+ S_GET_VALUE (lie->add)
+				+ lie->addnum
+				- (lie->sub->sy_frag->fr_address
+				   + S_GET_VALUE (lie->sub)));
 		      if (offset <= -32768 || offset >= 32767)
 			{
 			  if (flagseen['K'])
@@ -814,7 +807,9 @@ relax_segment (segment_frag_root, segment)
 			      fragP->fr_subtype++;
 			      growth += md_short_jump_size;
 			    }
-			  for (untruth = lie->next_broken_word; untruth && untruth->dispfrag == lie->dispfrag; untruth = untruth->next_broken_word)
+			  for (untruth = lie->next_broken_word;
+			       untruth && untruth->dispfrag == lie->dispfrag;
+			       untruth = untruth->next_broken_word)
 			    if ((untruth->add->sy_frag == lie->add->sy_frag)
 				&& S_GET_VALUE (untruth->add) == S_GET_VALUE (lie->add))
 			      {
@@ -829,8 +824,8 @@ relax_segment (segment_frag_root, segment)
 		}		/* case rs_broken_word */
 #endif
 	      case rs_align:
-		growth = relax_align ((relax_addressT) (address + fragP->fr_fix), offset)
-		  - relax_align ((relax_addressT) (was_address + fragP->fr_fix), offset);
+		growth = (relax_align ((relax_addressT) (address + fragP->fr_fix), offset)
+			  - relax_align ((relax_addressT) (was_address + fragP->fr_fix), offset));
 		break;
 
 	      case rs_org:
@@ -851,21 +846,21 @@ relax_segment (segment_frag_root, segment)
 		know (fragP->fr_next);
 		after = fragP->fr_next->fr_address;
 		growth = ((target - after) > 0) ? (target - after) : 0;
-		/* Growth may be -ve, but variable part */
-		/* of frag cannot have < 0 chars. */
-		/* That is, we can't .org backwards. */
+		/* Growth may be -ve, but variable part of frag cannot have
+		   fewer than 0 chars.  That is, we can't .org backwards. */
 
 		growth -= stretch;	/* This is an absolute growth factor */
 		break;
 
 	      case rs_machine_dependent:
 		{
-		  register const relax_typeS *this_type;
-		  register const relax_typeS *start_type;
-		  register relax_substateT next_state;
-		  register relax_substateT this_state;
+		  const relax_typeS *this_type;
+		  const relax_typeS *start_type;
+		  relax_substateT next_state;
+		  relax_substateT this_state;
 
-		  start_type = this_type = md_relax_table + (this_state = fragP->fr_subtype);
+		  this_state = fragP->fr_subtype;
+		  start_type = this_type = md_relax_table + this_state;
 		  target = offset;
 
 		  if (symbolP)
@@ -880,47 +875,45 @@ relax_segment (segment_frag_root, segment)
 			+ symbolP->sy_frag->fr_address;
 
 		      /* If frag has yet to be reached on this pass,
-						   assume it will move by STRETCH just as we did.
-						   If this is not so, it will be because some frag
-						   between grows, and that will force another pass.  */
+			 assume it will move by STRETCH just as we did.
+			 If this is not so, it will be because some frag
+			 between grows, and that will force another pass.  */
 
 		      /* JF was just address */
 		      /* JF also added is_dnrange hack */
 		      /* There's gotta be a better/faster/etc way
-						   to do this. . . */
+			 to do this. . . */
 		      /* gnu@cygnus.com:  I changed this from > to >=
-						   because I ran into a zero-length frag (fr_fix=0)
-						   which was created when the obstack needed a new
-						   chunk JUST AFTER the opcode of a branch.  Since
-						   fr_fix is zero, fr_address of this frag is the same
-						   as fr_address of the next frag.  This
-						   zero-length frag was variable and jumped to .+2
-						   (in the next frag), but since the > comparison
-						   below failed (the two were =, not >), "stretch"
-						   was not added to the target.  Stretch was 178, so
-						   the offset appeared to be .-176 instead, which did
-						   not fit into a byte branch, so the assembler
-						   relaxed the branch to a word.  This didn't compare
-						   with what happened when the same source file was
-						   assembled on other machines, which is how I found it.
-						   You might want to think about what other places have
-						   trouble with zero length frags... */
+			 because I ran into a zero-length frag (fr_fix=0)
+			 which was created when the obstack needed a new
+			 chunk JUST AFTER the opcode of a branch.  Since
+			 fr_fix is zero, fr_address of this frag is the same
+			 as fr_address of the next frag.  This
+			 zero-length frag was variable and jumped to .+2
+			 (in the next frag), but since the > comparison
+			 below failed (the two were =, not >), "stretch"
+			 was not added to the target.  Stretch was 178, so
+			 the offset appeared to be .-176 instead, which did
+			 not fit into a byte branch, so the assembler
+			 relaxed the branch to a word.  This didn't compare
+			 with what happened when the same source file was
+			 assembled on other machines, which is how I found it.
+			 You might want to think about what other places have
+			 trouble with zero length frags... */
 
 		      if (symbolP->sy_frag->fr_address >= was_address
 			  && is_dnrange (fragP, symbolP->sy_frag))
 			{
 			  target += stretch;
-			}	/*  */
-
+			}
 		    }		/* if there's a symbol attached */
 
 		  aim = target - address - fragP->fr_fix;
 		  /* The displacement is affected by the instruction size
-					 * for the 32k architecture. I think we ought to be able
-					 * to add fragP->fr_pcrel_adjust in all cases (it should be
-					 * zero if not used), but just in case it breaks something
-					 * else we'll put this inside #ifdef NS32K ... #endif
-					 */
+		     for the 32k architecture. I think we ought to be able
+		     to add fragP->fr_pcrel_adjust in all cases (it should be
+		     zero if not used), but just in case it breaks something
+		     else we'll put this inside #ifdef NS32K ... #endif  */
 #ifdef TC_NS32K
 		  aim += fragP->fr_pcrel_adjust;
 #endif /* TC_NS32K */
@@ -929,52 +922,39 @@ relax_segment (segment_frag_root, segment)
 		    {
 		      /* Look backwards. */
 		      for (next_state = this_type->rlx_more; next_state;)
-			{
-			  if (aim >= this_type->rlx_backward)
-			    {
-			      next_state = 0;
-			    }
-			  else
-			    {	/* Grow to next state. */
-			      this_type = md_relax_table + (this_state = next_state);
-			      next_state = this_type->rlx_more;
-			    }
-			}
+			if (aim >= this_type->rlx_backward)
+			  next_state = 0;
+			else
+			  {
+			    /* Grow to next state. */
+			    this_state = next_state;
+			    this_type = md_relax_table + this_state;
+			    next_state = this_type->rlx_more;
+			  }
 		    }
 		  else
 		    {
-#ifdef DONTDEF
-		      /* JF these next few lines of code are for the mc68020 which can't handle short
-						   offsets of zero in branch instructions.  What a kludge! */
-		      if (aim == 0 && this_state == (1 << 2 + 0))
-			{	/* FOO hard encoded from m.c */
-			  aim = this_type->rlx_forward + 1;	/* Force relaxation into word mode */
-			}
-#endif
 #ifdef M68K_AIM_KLUDGE
 		      M68K_AIM_KLUDGE (aim, this_state, this_type);
 #endif
-		      /* JF end of 68020 code */
 		      /* Look forwards. */
 		      for (next_state = this_type->rlx_more; next_state;)
-			{
-			  if (aim <= this_type->rlx_forward)
-			    {
-			      next_state = 0;
-			    }
-			  else
-			    {	/* Grow to next state. */
-			      this_type = md_relax_table + (this_state = next_state);
-			      next_state = this_type->rlx_more;
-			    }
-			}
+			if (aim <= this_type->rlx_forward)
+			  next_state = 0;
+			else
+			  {
+			    /* Grow to next state. */
+			    this_state = next_state;
+			    this_type = md_relax_table + this_state;
+			    next_state = this_type->rlx_more;
+			  }
 		    }
 
-		  if ((growth = this_type->rlx_length - start_type->rlx_length) != 0)
+		  growth = this_type->rlx_length - start_type->rlx_length;
+		  if (growth != 0)
 		    fragP->fr_subtype = this_state;
-
-		  break;
-		}		/* case rs_machine_dependent */
+		}
+		break;
 
 	      default:
 		BAD_CASE (fragP->fr_type);
@@ -991,13 +971,13 @@ relax_segment (segment_frag_root, segment)
   }				/* do_relax */
 
   /*
-	 * We now have valid fr_address'es for each frag.
-	 */
+   * We now have valid fr_address'es for each frag.
+   */
 
   /*
-	 * All fr_address's are correct, relative to their own segment.
-	 * We have made all the fixS we will ever make.
-	 */
+   * All fr_address's are correct, relative to their own segment.
+   * We have made all the fixS we will ever make.
+   */
 }				/* relax_segment() */
 
 /*
