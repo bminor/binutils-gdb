@@ -1,3 +1,8 @@
+Mon Apr  7 15:45:02 1997  Andrew Cagney  <cagney@kremvax.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+	* config.in: Ditto.
+
 Fri Apr  4 20:02:37 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.in: Change mn10300-opc.o to m10300-opc.o, to match

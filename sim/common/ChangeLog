@@ -1,3 +1,10 @@
+Mon Apr  7 15:45:02 1997  Andrew Cagney  <cagney@kremvax.cygnus.com>
+
+	* aclocal.m4 (AC_TYPE_SIGNAL): Add check.
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+	* config.in: Ditto.
+
 Wed Apr  2 15:06:28 1997  Doug Evans  <dje@canuck.cygnus.com>
 
 	* sim-endian.h: Move host {LITTLE,BIG}_ENDIAN support from here,
