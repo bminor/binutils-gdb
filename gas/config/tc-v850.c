@@ -1461,7 +1461,7 @@ v850_reloc_prefix (operand)
     }
 
 #define CHECK_(name, reloc) 						\
-  if (strncmp (input_line_pointer, name##"(", strlen (name) + 1) == 0)	\
+  if (strncmp (input_line_pointer, name "(", strlen (name) + 1) == 0)	\
     {									\
       input_line_pointer += strlen (name);				\
       return reloc;							\
