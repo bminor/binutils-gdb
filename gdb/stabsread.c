@@ -3265,7 +3265,11 @@ read_huge_number (pp, end, bits)
       p++;
     }
 
-  upper_limit = LONG_MAX / radix;
+  if (os9k_stabs)
+    upper_limit = ULONG_MAX / radix;
+  else
+    upper_limit = LONG_MAX / radix;
+
   while ((c = *p++) >= '0' && c < ('0' + radix))
     {
       if (n <= upper_limit)
