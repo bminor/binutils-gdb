@@ -1,3 +1,9 @@
+Fri Nov 17 10:02:58 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* elflink.h (NAME(bfd_elf,size_dynamic_sections)): Only create
+	DT_INIT and DT_FINI entries if the _init or _fini symbol is
+	defined or mentioned in a regular file.
+
 Thu Nov 16 15:16:42 1995  Kim Knuttila  <krk@cygnus.com>
 
 	* coff-ppc.c (ppc_record_data_in_toc_entry): new function

@@ -1345,6 +1345,7 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
   if (elf_hash_table (info)->dynamic_sections_created)
     {
       struct elf_info_failed eif;
+      struct elf_link_hash_entry *h;
       bfd_size_type strsize;
 
       *sinterpptr = bfd_get_section_by_name (dynobj, ".interp");
@@ -1391,14 +1392,20 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
       /* Add some entries to the .dynamic section.  We fill in some of the
 	 values later, in elf_bfd_final_link, but we must add the entries
 	 now so that we know the final size of the .dynamic section.  */
-      if (elf_link_hash_lookup (elf_hash_table (info), "_init", false,
-				false, false) != NULL)
+      h =  elf_link_hash_lookup (elf_hash_table (info), "_init", false,
+				false, false);
+      if (h != NULL
+	  && (h->elf_link_hash_flags & (ELF_LINK_HASH_REF_REGULAR
+					| ELF_LINK_HASH_DEF_REGULAR)) != 0)
 	{
 	  if (! elf_add_dynamic_entry (info, DT_INIT, 0))
 	    return false;
 	}
-      if (elf_link_hash_lookup (elf_hash_table (info), "_fini", false,
-				false, false) != NULL)
+      h =  elf_link_hash_lookup (elf_hash_table (info), "_fini", false,
+				 false, false);
+      if (h != NULL
+	  && (h->elf_link_hash_flags & (ELF_LINK_HASH_REF_REGULAR
+					| ELF_LINK_HASH_DEF_REGULAR)) != 0)
 	{
 	  if (! elf_add_dynamic_entry (info, DT_FINI, 0))
 	    return false;
