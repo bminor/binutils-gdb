@@ -4,6 +4,47 @@ Tue Nov  9 11:40:27 1993  Stan Shebs  (shebs@rtl.cygnus.com)
 
 Tue Nov  9 11:26:05 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* elfcode.h (elf_object_p): Rather than looking through an array
+	of architectures, get the ELF EM_xxx code from the backend
+	information.  Let the generic ELF target match any EM_xxx code not
+	matched by another ELF target.  Call elf_backend_object_p to let
+	the backend do more checks and set global information.
+	* libelf.h (struct elf_backend_data): Added elf_machine_code and
+	elf_backend_object_p fields.
+	(struct bfd_elf_arch_map): Removed.
+	(bfd_elf_arch_map, bfd_elf_arch_map_size): Don't declare.
+	* elf32-target.h, elf64-target.h: Initialize elf_machine_code
+	field with ELF_MACHINE_CODE.  Initialize elf_backend_object_p
+	field with elf_backend_object_p (if it is defined).
+	* elf32-gen.c, elf32-hppa.c, elf32-i386.c, elf32-i860.c,
+	elf32-m68k.c, elf32-m88k.c, elf32-mips.c, elf32-sparc.c,
+	elf64-gen.c (ELF_MACHINE_CODE): Defined.
+	* elf32-mips.c: Include ecoffswap.h to get ECOFF swapping
+	routines.
+	(mips_elf_object_p): Set the right machine number.
+	(mips_elf_ecoff_debug_swap): Defined.
+	(elf_backend_object_p): Defined to be mips_elf_object_p.
+	(elf_backend_ecoff_debug_swap): Defined to be
+	mips_elf_ecoff_debug_swap.
+	* elf.c (bfd_elf_arch_map, bfd_elf_arch_map_size): Removed.
+
+	* libbfd-in.h (target_vector, default_vector): Declare.
+	* libbfd.h: Rebuilt.
+	* format.c (target_vector, default_vector): Don't declare.
+
+	* elf32-mips.c (elf_mips_howto_table): Don't complain on overflow
+	for R_MIPS_26.  Correct overflow detection requires matching the
+	upper four bits of the destination against the PC.  From Ted Lemon
+	<mellon@pepper.ncd.com>.
+
+	* bout.c (b_out_reloc_type_lookup): Return type should point to
+	const data.
+	* coff-i960.c (coff_i960_reloc_type_lookup): Likewise.
+	* elf32-hppa.c (elf_hppa_reloc_type_lookup): Likewise.
+	* mipsbsd.c (MY(reloc_howto_type_lookup)): Likewise.
+	* coff-i386.c (coff_i386_reloc): Made howto const.
+	* oasys.c (oasys_write_data): Made how const.
+
 	* libelf.h: Added some comments.
 	(struct elf_backend_data): Added elf_backend_ecoff_debug_swap
 	field.  Removed unused write_relocs field.
