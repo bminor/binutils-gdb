@@ -171,6 +171,8 @@ DIST=gdb
 LINT=/usr/5bin/lint
 LINTFLAGS= -I${BFD_DIR}
 
+REMOTE = remote.o	# Override if necessary
+
 # Host and target-dependent makefile fragments come in here.
 ####
 # End of host and target-dependent makefile fragments
@@ -297,7 +299,7 @@ TARFILES = ${TAGFILES_MAINDIR} ${OTHERS} ${REMOTE_EXAMPLES}
 
 OBS = main.o blockframe.o breakpoint.o findvar.o stack.o source.o \
     values.o eval.o valops.o valarith.o valprint.o printcmd.o \
-    symtab.o symfile.o symmisc.o infcmd.o infrun.o remote.o \
+    symtab.o symfile.o symmisc.o infcmd.o infrun.o $(REMOTE) \
     command.o utils.o expprint.o environ.o version.o gdbtypes.o \
     copying.o $(DEPFILES) mem-break.o target.o \
     ieee-float.o putenv.o parse.o language.o $(YYOBJ) \
