@@ -16,6 +16,11 @@ bl5:	.space 4
 bl6:	.space 4
 bl7:	.space 4
 bl8:	.space 4
+
+	.type sG6,@tls_object
+	.type sh6,@tls_object
+	.type sg3,@tls_object
+
 	.text
 	.globl	_start
 	.type	_start,@function

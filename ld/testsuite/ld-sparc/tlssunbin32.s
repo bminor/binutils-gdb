@@ -17,6 +17,14 @@ bl5:	.word 0
 bl6:	.word 0
 bl7:	.word 0
 bl8:	.word 0
+
+	.type sg2,@tls_object
+	.type sg3,@tls_object
+	.type sG6,@tls_object
+	.type sh2,@tls_object
+	.type sh3,@tls_object
+	.type sh6,@tls_object
+
 	.text
 	.globl	_start
 	.type	_start,#function
