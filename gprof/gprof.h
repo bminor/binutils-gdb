@@ -128,6 +128,8 @@ extern bool ignore_zeros;	/* ignore unused symbols/files */
 extern bool line_granularity;	/* function or line granularity? */
 extern bool print_descriptions;	/* output profile description */
 extern bool print_path;		/* print path or just filename? */
+extern bool ignore_non_functions;/* Ignore non-function symbols.  */
+
 extern File_Format file_format;	/* requested file format */
 
 extern bool first_output;	/* no output so far? */

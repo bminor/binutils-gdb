@@ -1,3 +1,13 @@
+Sun Dec 24 21:32:27 1995  Jeffrey A Law  (law@cygnus.com)
+
+	* core.c (core_sym_class): Ignore symbols without BSF_FUNCTION
+	set if ignore_non_function is set.
+	* gprof.h (ignore_non_functions): Declare.
+	* gprof.c (ignore_non_functions): Define.
+	(long_options): Add "ignore-non-functions".
+	(usage): Add new options.
+	(main): Recognize "-D" and "--ignore-non-functions" option.
+
 Tue Nov 21 13:24:39 1995  Ken Raeburn  <raeburn@cygnus.com>
 
 	* Makefile.in (.m.c): Strip out directory name from function

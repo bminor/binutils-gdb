@@ -179,6 +179,12 @@ DEFUN (core_sym_class, (sym), asymbol * sym)
     {
       return 0;
     }
+
+  /* If the object file supports marking of function symbols, then we can
+     zap anything that doesn't have BSF_FUNCTION set.  */
+  if (ignore_non_functions && (sym->flags & BSF_FUNCTION) == 0)
+    return 0;
+
   return 't';			/* it's a static text symbol */
 }
 

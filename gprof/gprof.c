@@ -50,6 +50,7 @@ bool ignore_zeros = TRUE;
 bool line_granularity = FALSE;
 bool print_descriptions = TRUE;
 bool print_path = FALSE;
+bool ignore_non_functions = FALSE;
 File_Format file_format = FF_AUTO;
 
 bool first_output = TRUE;
@@ -76,6 +77,7 @@ static struct option long_options[] =
 {
   {"line", no_argument, 0, 'l'},
   {"no-static", no_argument, 0, 'a'},
+  {"ignore-non-functions", no_argument, 0, 'D'},
 
     /* output styles: */
 
@@ -129,7 +131,7 @@ static void
 DEFUN (usage, (stream, status), FILE * stream AND int status)
 {
   fprintf (stream, "\
-Usage: %s [-[abchilLsTvwxyz]] [-[ACeEfFJnNOpPqQZ][name]] [-I dirs]\n\
+Usage: %s [-[abcDhilLsTvwxyz]] [-[ACeEfFJnNOpPqQZ][name]] [-I dirs]\n\
 	[-d[num]] [-k from/to] [-m min-count] [-t table-length]\n\
 	[--[no-]annotated-source[=name]] [--[no-]exec-counts[=name]]\n\
 	[--[no-]flat-profile[=name]] [--[no-]graph[=name]]\n\
@@ -138,7 +140,7 @@ Usage: %s [-[abchilLsTvwxyz]] [-[ACeEfFJnNOpPqQZ][name]] [-I dirs]\n\
 	[--file-format=name] [--file-info] [--help] [--line] [--min-count=n]\n\
 	[--no-static] [--print-path] [--separate-files]\n\
 	[--static-call-graph] [--sum] [--table-length=len] [--traditional]\n\
-	[--version] [--width=n]\n\
+	[--version] [--width=n] [--ignore-non-functions]\n\
 	[image-file] [profile-file...]\n",
 	   whoami);
   done (status);
@@ -156,7 +158,7 @@ DEFUN (main, (argc, argv), int argc AND char **argv)
   xmalloc_set_program_name (whoami);
 
   while ((ch = getopt_long (argc, argv,
-	"aA::bBcCd::e:E:f:F:hiI:J::k:lLm:n::N::O:p::P::q::Q::st:Tvw:xyzZ::",
+	"aA::bBcCdD::e:E:f:F:hiI:J::k:lLm:n::N::O:p::P::q::Q::st:Tvw:xyzZ::",
 			    long_options, 0))
 	 != EOF)
     {
@@ -205,6 +207,9 @@ DEFUN (main, (argc, argv), int argc AND char **argv)
 #ifndef DEBUG
 	  printf ("%s: debugging not supported; -d ignored\n", whoami);
 #endif	/* DEBUG */
+	  break;
+	case 'D':
+	  ignore_non_functions = TRUE;
 	  break;
 	case 'E':
 	  sym_id_add (optarg, EXCL_TIME);

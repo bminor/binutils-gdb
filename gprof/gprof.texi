@@ -294,6 +294,12 @@ function that was loaded directly before it in the executable file.
 @c This is compatible with Unix @code{gprof}, but a bad idea.  
 This option affects both the flat profile and the call graph.
 
+@item -D
+The @samp{-D} option causes @code{gprof} to ignore symbols which
+are not known to be functions.  This option will give more accurate
+profile data on systems where it is supported (Solaris and HPUX for
+example).
+
 @item -e @var{function_name}
 The @samp{-e @var{function}} option tells @code{gprof} to not print
 information about the function @var{function_name} (and its
