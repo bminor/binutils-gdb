@@ -49,6 +49,9 @@ enum bptype {
      stepping over signal handlers, and for skipping prologues.  */
   bp_step_resume,
 
+  /* Used by wait_for_inferior for stepping over signal handlers.  */
+  bp_through_sigtramp,
+
   /* The breakpoint at the end of a call dummy.  */
   /* FIXME: What if the function we are calling longjmp()s out of the
      call, or the user gets out with the "return" command?  We currently
@@ -145,6 +148,8 @@ struct breakpoint
   struct block *exp_valid_block;
   /* Value of the watchpoint the last time we checked it.  */
   value val;
+  /* Thread number for thread-specific breakpoint, or -1 if don't care */
+  int thread;
 };
 
 /* The following stuff is an abstract data type "bpstat" ("breakpoint status").
@@ -205,23 +210,25 @@ enum bpstat_what_main_action {
   /* Clear longjmp_resume breakpoint, then handle as BPSTAT_WHAT_SINGLE.  */
   BPSTAT_WHAT_CLEAR_LONGJMP_RESUME_SINGLE,
 
+  /* Clear step resume breakpoint, and keep checking.  */
+  BPSTAT_WHAT_STEP_RESUME,
+
+  /* Clear through_sigtramp breakpoint, muck with trap_expected, and keep
+     checking.  */
+  BPSTAT_WHAT_THROUGH_SIGTRAMP,
+
   /* This is just used to keep track of how many enums there are.  */
   BPSTAT_WHAT_LAST
 };
 
 struct bpstat_what {
-  enum bpstat_what_main_action main_action : 4;
-
-  /* Did we hit the step resume breakpoint?  This is separate from the
-     main_action to allow for it to be combined with any of the main
-     actions.  */
-  unsigned int step_resume : 1;
+  enum bpstat_what_main_action main_action;
 
   /* Did we hit a call dummy breakpoint?  This only goes with a main_action
      of BPSTAT_WHAT_STOP_SILENT or BPSTAT_WHAT_STOP_NOISY (the concept of
      continuing from a call dummy without popping the frame is not a
      useful one).  */
-  unsigned int call_dummy : 1;
+  int call_dummy;
 };
 
 /* Tell what to do about this bpstat.  */
@@ -292,8 +299,11 @@ struct bpstat
 struct frame_info;
 #endif
 
-extern int
-breakpoint_here_p PARAMS ((CORE_ADDR));
+extern int breakpoint_here_p PARAMS ((CORE_ADDR));
+
+extern int frame_in_dummy PARAMS ((struct frame_info *));
+
+extern int breakpoint_thread_match PARAMS ((CORE_ADDR, int));
 
 extern void
 until_break_command PARAMS ((char *, int));

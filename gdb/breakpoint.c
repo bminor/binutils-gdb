@@ -1267,6 +1267,9 @@ bpstat_what (bs)
     /* We hit the step_resume breakpoint.  */
     step_resume,
 
+    /* We hit the through_sigtramp breakpoint.  */
+    through_sig,
+
     /* This is just used to count how many enums there are.  */
     class_last
     };
@@ -1282,6 +1285,7 @@ bpstat_what (bs)
 #define clrlr BPSTAT_WHAT_CLEAR_LONGJMP_RESUME
 #define clrlrs BPSTAT_WHAT_CLEAR_LONGJMP_RESUME_SINGLE
 #define sr BPSTAT_WHAT_STEP_RESUME
+#define ts BPSTAT_WHAT_THROUGH_SIGTRAMP
 
 /* "Can't happen."  Might want to print an error message.
    abort() is not out of the question, but chances are GDB is just
@@ -1299,22 +1303,25 @@ bpstat_what (bs)
   /* step_resume entries: a step resume breakpoint overrides another
      breakpoint of signal handling (see comment in wait_for_inferior
      at first IN_SIGTRAMP where we set the step_resume breakpoint).  */
+  /* We handle the through_sigtramp_breakpoint the same way; having both
+     one of those and a step_resume_breakpoint is probably very rare (?).  */
 
   static const enum bpstat_what_main_action
     table[(int)class_last][(int)BPSTAT_WHAT_LAST] =
       {
 	/*                              old action */
-	/*       keep_c  stop_s  stop_n  single  setlr   clrlr   clrlrs  sr */
-
-/*no_effect*/	{keep_c, stop_s, stop_n, single, setlr , clrlr , clrlrs, sr},
-/*wp_silent*/	{stop_s, stop_s, stop_n, stop_s, stop_s, stop_s, stop_s, sr},
-/*wp_noisy*/    {stop_n, stop_n, stop_n, stop_n, stop_n, stop_n, stop_n, sr},
-/*bp_nostop*/	{single, stop_s, stop_n, single, setlr , clrlrs, clrlrs, sr},
-/*bp_silent*/	{stop_s, stop_s, stop_n, stop_s, stop_s, stop_s, stop_s, sr},
-/*bp_noisy*/    {stop_n, stop_n, stop_n, stop_n, stop_n, stop_n, stop_n, sr},
-/*long_jump*/	{setlr , stop_s, stop_n, setlr , err   , err   , err   , sr},
-/*long_resume*/	{clrlr , stop_s, stop_n, clrlrs, err   , err   , err   , sr},
-/*step_resume*/	{sr    , sr    , sr    , sr    , sr    , sr    , sr    , sr}
+	/*       keep_c stop_s stop_n single  setlr   clrlr   clrlrs  sr  ts
+	 */
+/*no_effect*/	{keep_c,stop_s,stop_n,single, setlr , clrlr , clrlrs, sr, ts},
+/*wp_silent*/	{stop_s,stop_s,stop_n,stop_s, stop_s, stop_s, stop_s, sr, ts},
+/*wp_noisy*/    {stop_n,stop_n,stop_n,stop_n, stop_n, stop_n, stop_n, sr, ts},
+/*bp_nostop*/	{single,stop_s,stop_n,single, setlr , clrlrs, clrlrs, sr, ts},
+/*bp_silent*/	{stop_s,stop_s,stop_n,stop_s, stop_s, stop_s, stop_s, sr, ts},
+/*bp_noisy*/    {stop_n,stop_n,stop_n,stop_n, stop_n, stop_n, stop_n, sr, ts},
+/*long_jump*/	{setlr ,stop_s,stop_n,setlr , err   , err   , err   , sr, ts},
+/*long_resume*/	{clrlr ,stop_s,stop_n,clrlrs, err   , err   , err   , sr, ts},
+/*step_resume*/	{sr    ,sr    ,sr    ,sr    , sr    , sr    , sr    , sr, ts},
+/*through_sig*/ {ts    ,ts    ,ts    ,ts    , ts    , ts    , ts    , ts, ts}
 	      };
 #undef keep_c
 #undef stop_s
@@ -1324,6 +1331,8 @@ bpstat_what (bs)
 #undef clrlr
 #undef clrlrs
 #undef err
+#undef sr
+#undef ts
   enum bpstat_what_main_action current_action = BPSTAT_WHAT_KEEP_CHECKING;
   struct bpstat_what retval;
 
@@ -1370,21 +1379,16 @@ bpstat_what (bs)
 	  bs_class = long_resume;
 	  break;
 	case bp_step_resume:
-#if 0
-	  /* Need to temporarily disable this until we can fix the bug
-	     with nexting over a breakpoint with ->stop clear causing
-	     an infinite loop.  For now, treat the breakpoint as having
-	     been hit even if the frame is wrong.  */
 	  if (bs->stop)
 	    {
-#endif
 	      bs_class = step_resume;
-#if 0
 	    }
 	  else
 	    /* It is for the wrong frame.  */
 	    bs_class = bp_nostop;
-#endif
+	  break;
+	case bp_through_sigtramp:
+	  bs_class = through_sig;
 	  break;
 	case bp_call_dummy:
 	  /* Make sure the action is stop (silent or noisy), so infrun.c
@@ -1468,6 +1472,7 @@ breakpoint_1 (bnum, allflag)
 	  case bp_longjmp:
 	  case bp_longjmp_resume:
 	  case bp_step_resume:
+	  case bp_through_sigtramp:
 	  case bp_call_dummy:
 	    if (addressprint)
 	      printf_filtered ("%s ", local_hex_string_custom ((unsigned long) b->address, "08l"));
@@ -1498,6 +1503,7 @@ breakpoint_1 (bnum, allflag)
 	    printf_filtered ("\tstop only in stack frame at ");
 	    print_address_numeric (b->frame, gdb_stdout);
 	    printf_filtered ("\n");
+	  }
 	if (b->cond)
 	  {
 	    printf_filtered ("\tstop only if ");
@@ -1824,7 +1830,7 @@ mention (b)
       break;
     case bp_breakpoint:
       printf_filtered ("Breakpoint %d at ", b->number);
-      print_address_numeric (b->address);
+      print_address_numeric (b->address, gdb_stdout);
       if (b->source_file)
 	printf_filtered (": file %s, line %d.",
 			 b->source_file, b->line_number);
@@ -1834,6 +1840,7 @@ mention (b)
     case bp_longjmp:
     case bp_longjmp_resume:
     case bp_step_resume:
+    case bp_through_sigtramp:
     case bp_call_dummy:
       break;
     }

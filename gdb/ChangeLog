@@ -1,5 +1,21 @@
 Thu Feb 24 08:30:33 1994  Jim Kingdon  (kingdon@deneb.cygnus.com)
 
+	* breakpoint.h (enum bptype): New type bp_through_sigtramp.
+	(bpstat_what_main_action): New code BPSTAT_WHAT_THROUGH_SIGTRAMP.
+	* breakpoint.c (bpstat_what): Return BPSTAT_WHAT_THROUGH_SIGTRAMP
+	if we hit a bp_through_sigtramp breakpoint.  Remove kludge which
+	ignored bs->stop for a bp_step_resume breakpoint.
+	* infrun.c (wait_for_inferior): Make a through_sigtramp_breakpoint
+	which performs one (the check_sigtramp2 one) of the functions
+	which had been handled by the step_resume_breakpoint.  For each
+	use of the step_resume_breakpoint, make it still use the
+	step_resume_breakpoint, use the through_sigtramp_breakpoint, or
+	operate on both.
+	Deal with BPSTAT_WHAT_THROUGH_SIGTRAMP return from bpstat_what.
+	When setting the frame address of the step resume breakpoint, set
+	it to the address for frame *before* the call instruction is
+	executed, not after.
+
 	* mips-tdep.c (mips_print_register): Print integers using
 	print_scalar_formatted rather than duplicating all the
 	CC_HAS_LONG_LONG and so on.

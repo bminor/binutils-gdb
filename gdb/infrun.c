@@ -335,6 +335,7 @@ static CORE_ADDR prev_pc;
 static CORE_ADDR prev_sp;
 static CORE_ADDR prev_func_start;
 static char *prev_func_name;
+static CORE_ADDR prev_frame_address;
 
 
 /* Start remote-debugging of a machine over a serial link.  */
@@ -360,6 +361,7 @@ init_wait_for_inferior ()
   prev_sp = 0;
   prev_func_start = 0;
   prev_func_name = NULL;
+  prev_frame_address = 0;
 
   trap_expected_after_continue = 0;
   breakpoints_inserted = 0;
@@ -402,20 +404,24 @@ wait_for_inferior ()
   struct symtab *current_symtab;
   int handling_longjmp = 0;	/* FIXME */
   struct breakpoint *step_resume_breakpoint = NULL;
+  struct breakpoint *through_sigtramp_breakpoint = NULL;
   int pid;
 
   old_cleanups = make_cleanup (delete_breakpoint_current_contents,
 			       &step_resume_breakpoint);
+  make_cleanup (delete_breakpoint_current_contents,
+		&through_sigtramp_breakpoint);
   sal = find_pc_line(prev_pc, 0);
   current_line = sal.line;
   current_symtab = sal.symtab;
 
   /* Are we stepping?  */
-#define CURRENTLY_STEPPING() ((step_resume_breakpoint == NULL \
-			       && !handling_longjmp \
-			       && (step_range_end \
-				   || trap_expected)) \
-			      || bpstat_should_step ())
+#define CURRENTLY_STEPPING() \
+  ((through_sigtramp_breakpoint == NULL \
+    && !handling_longjmp \
+    && ((step_range_end && step_resume_breakpoint == NULL) \
+	|| trap_expected)) \
+   || bpstat_should_step ())
 
   while (1)
     {
@@ -571,6 +577,15 @@ switch_thread:
 		      delete_breakpoint (step_resume_breakpoint);
 		      step_resume_breakpoint = NULL;
 		    }
+
+		  /* Not sure whether we need to blow this away too,
+		     but probably it is like the step-resume
+		     breakpoint.  */
+		  if (through_sigtramp_breakpoint)
+		    {
+		      delete_breakpoint (through_sigtramp_breakpoint);
+		      through_sigtramp_breakpoint = NULL;
+		    }
 		  prev_pc = 0;
 		  prev_sp = 0;
 		  prev_func_name = NULL;
@@ -663,11 +678,11 @@ switch_thread:
 	     if just proceeded over a breakpoint.
 
 	     However, if we are trying to proceed over a breakpoint
-	     and end up in sigtramp, then step_resume_breakpoint
+	     and end up in sigtramp, then through_sigtramp_breakpoint
 	     will be set and we should check whether we've hit the
 	     step breakpoint.  */
 	  if (stop_signal == TARGET_SIGNAL_TRAP && trap_expected
-	      && step_resume_breakpoint == NULL)
+	      && through_sigtramp_breakpoint == NULL)
 	    bpstat_clear (&stop_bpstat);
 	  else
 	    {
@@ -786,7 +801,13 @@ switch_thread:
 	      {
 		delete_breakpoint (step_resume_breakpoint);
 		step_resume_breakpoint = NULL;
-		what.step_resume = 0;
+	      }
+	    /* Not sure whether we need to blow this away too, but probably
+	       it is like the step-resume breakpoint.  */
+	    if (through_sigtramp_breakpoint != NULL)
+	      {
+		delete_breakpoint (through_sigtramp_breakpoint);
+		through_sigtramp_breakpoint = NULL;
 	      }
 
 #if 0
@@ -831,32 +852,42 @@ switch_thread:
 
 	  case BPSTAT_WHAT_STOP_NOISY:
 	    stop_print_frame = 1;
-	    /* We are about to nuke the step_resume_breakpoint via the
-	       cleanup chain, so no need to worry about it here.  */
+
+	    /* We are about to nuke the step_resume_breakpoint and
+	       through_sigtramp_breakpoint via the cleanup chain, so
+	       no need to worry about it here.  */
+
 	    goto stop_stepping;
 
 	  case BPSTAT_WHAT_STOP_SILENT:
 	    stop_print_frame = 0;
-	    /* We are about to nuke the step_resume_breakpoint via the
-	       cleanup chain, so no need to worry about it here.  */
+
+	    /* We are about to nuke the step_resume_breakpoint and
+	       through_sigtramp_breakpoint via the cleanup chain, so
+	       no need to worry about it here.  */
+
 	    goto stop_stepping;
+
+	  case BPSTAT_WHAT_STEP_RESUME:
+	    delete_breakpoint (step_resume_breakpoint);
+	    step_resume_breakpoint = NULL;
+	    break;
+
+	  case BPSTAT_WHAT_THROUGH_SIGTRAMP:
+	    delete_breakpoint (through_sigtramp_breakpoint);
+	    through_sigtramp_breakpoint = NULL;
+
+	    /* If were waiting for a trap, hitting the step_resume_break
+	       doesn't count as getting it.  */
+	    if (trap_expected)
+	      another_trap = 1;
+	    break;
 
 	  case BPSTAT_WHAT_LAST:
 	    /* Not a real code, but listed here to shut up gcc -Wall.  */
 
 	  case BPSTAT_WHAT_KEEP_CHECKING:
 	    break;
-	  }
-
-	if (what.step_resume)
-	  {
-	    delete_breakpoint (step_resume_breakpoint);
-	    step_resume_breakpoint = NULL;
-
-	    /* If were waiting for a trap, hitting the step_resume_break
-	       doesn't count as getting it.  */
-	    if (trap_expected)
-	      another_trap = 1;
 	  }
       }
 
@@ -892,10 +923,8 @@ switch_thread:
 	/* Having a step-resume breakpoint overrides anything
 	   else having to do with stepping commands until
 	   that breakpoint is reached.  */
-	/* I suspect this could/should be keep_going, because if the
-	   check_sigtramp2 check succeeds, then it will put in another
-	   step_resume_breakpoint, and we aren't (yet) prepared to nest
-	   them.  */
+	/* I'm not sure whether this needs to be check_sigtramp2 or
+	   whether it could/should be keep_going.  */
 	goto check_sigtramp2;
 
       if (step_range_end == 0)
@@ -928,20 +957,29 @@ switch_thread:
       if (IN_SIGTRAMP (stop_pc, stop_func_name)
 	  && !IN_SIGTRAMP (prev_pc, prev_func_name))
 	{
+	  /* We've just taken a signal; go until we are back to
+	     the point where we took it and one more.  */
+
 	  /* This code is needed at least in the following case:
 	     The user types "next" and then a signal arrives (before
 	     the "next" is done).  */
-	  /* We've just taken a signal; go until we are back to
-	     the point where we took it and one more.  */
+
+	  /* Note that if we are stopped at a breakpoint, then we need
+	     the step_resume breakpoint to override any breakpoints at
+	     the same location, so that we will still step over the
+	     breakpoint even though the signal happened.  */
+
 	  {
 	    struct symtab_and_line sr_sal;
 
 	    sr_sal.pc = prev_pc;
 	    sr_sal.symtab = NULL;
 	    sr_sal.line = 0;
+	    /* We perhaps could set the frame if we kept track of what
+	       the frame corresponding to prev_pc was.  But we don't,
+	       so don't.  */
 	    step_resume_breakpoint =
-	      set_momentary_breakpoint (sr_sal, get_current_frame (),
-					bp_step_resume);
+	      set_momentary_breakpoint (sr_sal, NULL, bp_step_resume);
 	    if (breakpoints_inserted)
 	      insert_breakpoints ();
 	  }
@@ -1054,6 +1092,7 @@ step_over_function:
 	    step_resume_breakpoint =
 	      set_momentary_breakpoint (sr_sal, get_current_frame (),
 					bp_step_resume);
+	    step_resume_breakpoint->frame = prev_frame_address;
 	    if (breakpoints_inserted)
 	      insert_breakpoints ();
 	  }
@@ -1180,9 +1219,11 @@ step_into_function:
 	  sr_sal.pc = prev_pc;
 	  sr_sal.symtab = NULL;
 	  sr_sal.line = 0;
-	  step_resume_breakpoint =
-	    set_momentary_breakpoint (sr_sal, get_current_frame (),
-				      bp_step_resume);
+	  /* We perhaps could set the frame if we kept track of what
+	     the frame corresponding to prev_pc was.  But we don't,
+	     so don't.  */
+	  through_sigtramp_breakpoint =
+	    set_momentary_breakpoint (sr_sal, NULL, bp_through_sigtramp);
 	  if (breakpoints_inserted)
 	    insert_breakpoints ();
 
@@ -1204,6 +1245,7 @@ step_into_function:
 					  function. */
       prev_func_name = stop_func_name;
       prev_sp = stop_sp;
+      prev_frame_address = stop_frame_address;
 
       /* If we did not do break;, it means we should keep
 	 running the inferior and not return to debugger.  */
@@ -1238,7 +1280,7 @@ step_into_function:
 	      breakpoints_inserted = 0;
 	    }
 	  else if (!breakpoints_inserted &&
-		   (step_resume_breakpoint != NULL || !another_trap))
+		   (through_sigtramp_breakpoint != NULL || !another_trap))
 	    {
 	      breakpoints_failed = insert_breakpoints ();
 	      if (breakpoints_failed)
@@ -1278,6 +1320,7 @@ step_into_function:
       prev_func_start = stop_func_start;
       prev_func_name = stop_func_name;
       prev_sp = stop_sp;
+      prev_frame_address = stop_frame_address;
     }
   do_cleanups (old_cleanups);
 }
