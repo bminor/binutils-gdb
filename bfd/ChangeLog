@@ -1,3 +1,11 @@
+2000-04-29  Andreas Jaeger  <aj@suse.de>
+
+	* libbfd-in.h: Correctly check GCC version.
+	* bfd-in.h: Likewise.
+	* libhppa.h: Likewise.
+	* libbfd.h: Regenerate.
+	* bfd-in2.h: Regenerate.
+
 2000-04-19  Michael Sokolov  <msokolov@ivan.Harhan.ORG>
 
 	K&R compiler fixes.

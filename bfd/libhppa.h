@@ -1,5 +1,5 @@
 /* HP PA-RISC SOM object file format:  definitions internal to BFD.
-   Copyright (C) 1990, 91, 92, 93, 94, 95, 96, 98, 1999
+   Copyright (C) 1990, 91, 92, 93, 94, 95, 96, 98, 99, 2000
    Free Software Foundation, Inc.
 
    Contributed by the Center for Software Science at the
@@ -35,7 +35,7 @@
 #endif /* GNU C? */
 #endif /* INLINE */
 
-#if __GNUC__ >= 2 && __GNUC_MINOR__ >= 7
+#if __GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 7)
 /* Declare the functions with the unused attribute to avoid warnings.  */
 static INLINE unsigned int assemble_3 (unsigned int)
      __attribute__ ((__unused__));

@@ -1,6 +1,6 @@
 /* libbfd.h -- Declarations used by bfd library *implementation*.
    (This include file is not for users of the library.)
-   Copyright 1990, 91, 92, 93, 94, 95, 96, 97, 98, 1999
+   Copyright 1990, 91, 92, 93, 94, 95, 96, 97, 98, 99, 2000
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
@@ -506,8 +506,8 @@ void	bfd_assert PARAMS ((const char*,int));
 extern void _bfd_abort PARAMS ((const char *, int, const char *))
      ATTRIBUTE_NORETURN;
 
-/* if gcc, we can give a function name, too */
-#if !defined (__GNUC__) || __GNUC_MINOR__ <= 5
+/* if gcc >= 2.6, we can give a function name, too */
+#if __GNUC__ < 2 || (__GNUC__ == 2 && __GNUC_MINOR__ < 6)
 #define __PRETTY_FUNCTION__  ((char *) NULL)
 #endif
 

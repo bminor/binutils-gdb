@@ -112,7 +112,7 @@ extern void *alloca ();
 #ifdef DEBUG
 #undef NDEBUG
 #endif
-#if !defined (__GNUC__) || __GNUC_MINOR__ <= 5
+#if __GNUC__ < 2 || (__GNUC__ == 2 && __GNUC_MINOR__ < 6)
 #define __PRETTY_FUNCTION__  ((char*)0)
 #endif
 #if 0
@@ -512,7 +512,7 @@ typedef struct _pseudo_type pseudo_typeS;
 #if (__GNUC__ >= 2) && !defined(VMS)
 /* for use with -Wformat */
 
-#if __GNUC_MINOR__ < 6
+#if __GNUC__ == 2 && __GNUC_MINOR__ < 6
 /* Support for double underscores in attribute names was added in gcc
    2.6, so avoid them if we are using an earlier version.  */
 #define __printf__ printf
