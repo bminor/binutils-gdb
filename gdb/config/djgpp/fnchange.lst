@@ -138,6 +138,8 @@
 @V@/gdb/ia64-linux-nat.c @V@/gdb/ia64lx-tdep.c
 @V@/gdb/jv-exp.tab.c @V@/gdb/jv-exp_tab.c
 @V@/gdb/m2-exp.tab.c @V@/gdb/m2-exp_tab.c
+@V@/gdb/m32r-linux-nat.c @V@/gdb/m32rlnxnat.c
+@V@/gdb/m32r-linux-tdep.c @V@/gdb/m32rlnxtdep.c
 @V@/gdb/m68klinux-nat.c @V@/gdb/m68kl-nat.c
 @V@/gdb/m68klinux-tdep.c @V@/gdb/m68kl-tdep.c
 @V@/gdb/m68kbsd-nat.c @V@/gdb/m68bsd-nat.c

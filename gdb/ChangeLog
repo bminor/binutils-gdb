@@ -1,3 +1,17 @@
+2004-09-30    Kei Sakamoto  <sakamoto.kei@renesas.com>
+
+	Add m32r-linux support.
+	* configure.tgt: Add m32r*-*-linux*.
+	* Makefile.in (ALLDEPFILES): Add m32r-tdep.c, m32r-linux-nat.c
+	and m32r-linux-tdep.c.
+	(m32r-linux-nat.o, m32r-linux-tdep.o): New dependencies.
+	* m32r-tdep.c: Move some definitions to m32r-tdep.h.
+	* config/djgpp/fnchange.lst: Add m32r-linux-nat.c and
+	m32r-linux-tdep.c.
+	* m32r-tdep.h, m32r-linux-nat.c, m32r-linux-tdep.c,
+	config/m32r/linux.mh, config/m32r/linux.mt,
+	config/m32r/nm-linux.h: New files.
+
 2004-09-30  Joel Brobecker  <brobecker@gnat.com>
 
 	* mips-tdep.c (mips32_decode_reg_save): Remove, unused.

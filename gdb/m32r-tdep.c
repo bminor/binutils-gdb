@@ -41,27 +41,7 @@
 
 #include "gdb_assert.h"
 
-struct gdbarch_tdep
-{
-  /* gdbarch target dependent data here. Currently unused for M32R. */
-};
-
-/* m32r register names. */
-
-enum
-{
-  R0_REGNUM = 0,
-  R3_REGNUM = 3,
-  M32R_FP_REGNUM = 13,
-  LR_REGNUM = 14,
-  M32R_SP_REGNUM = 15,
-  PSW_REGNUM = 16,
-  M32R_PC_REGNUM = 21,
-  /* m32r calling convention. */
-  ARG1_REGNUM = R0_REGNUM,
-  ARGN_REGNUM = R3_REGNUM,
-  RET1_REGNUM = R0_REGNUM,
-};
+#include "m32r-tdep.h"
 
 /* Local functions */
 
@@ -238,18 +218,12 @@ char *m32r_register_names[] = {
   "evb"
 };
 
-static int
-m32r_num_regs (void)
-{
-  return (sizeof (m32r_register_names) / sizeof (m32r_register_names[0]));
-}
-
 static const char *
 m32r_register_name (int reg_nr)
 {
   if (reg_nr < 0)
     return NULL;
-  if (reg_nr >= m32r_num_regs ())
+  if (reg_nr >= M32R_NUM_REGS)
     return NULL;
   return m32r_register_names[reg_nr];
 }
@@ -921,7 +895,7 @@ m32r_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_write_pc (gdbarch, m32r_write_pc);
   set_gdbarch_unwind_sp (gdbarch, m32r_unwind_sp);
 
-  set_gdbarch_num_regs (gdbarch, m32r_num_regs ());
+  set_gdbarch_num_regs (gdbarch, M32R_NUM_REGS);
   set_gdbarch_sp_regnum (gdbarch, M32R_SP_REGNUM);
   set_gdbarch_register_name (gdbarch, m32r_register_name);
   set_gdbarch_register_type (gdbarch, m32r_register_type);
@@ -929,8 +903,10 @@ m32r_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_extract_return_value (gdbarch, m32r_extract_return_value);
   set_gdbarch_push_dummy_call (gdbarch, m32r_push_dummy_call);
   set_gdbarch_store_return_value (gdbarch, m32r_store_return_value);
-  set_gdbarch_deprecated_extract_struct_value_address (gdbarch, m32r_extract_struct_value_address);
-  set_gdbarch_deprecated_use_struct_convention (gdbarch, m32r_use_struct_convention);
+  set_gdbarch_deprecated_extract_struct_value_address (gdbarch,
+						       m32r_extract_struct_value_address);
+  set_gdbarch_deprecated_use_struct_convention (gdbarch,
+						m32r_use_struct_convention);
 
   set_gdbarch_skip_prologue (gdbarch, m32r_skip_prologue);
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
