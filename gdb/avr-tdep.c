@@ -1094,6 +1094,39 @@ avr_breakpoint_from_pc (CORE_ADDR * pcptr, int *lenptr)
     return avr_break_insn;
 }
 
+/* Given a return value in `regbuf' with a type `valtype', 
+   extract and copy its value into `valbuf'.
+
+   Return values are always passed via registers r25:r24:...  */
+
+static void
+avr_extract_return_value (struct type *type, struct regcache *regcache,
+                          void *valbuf)
+{
+  if (TYPE_LENGTH (type) == 1)
+    {
+      ULONGEST c;
+
+      /* For single byte return values, r25 is always cleared, so we can
+         ignore it.  */
+      regcache_cooked_read_unsigned (regcache, 24, &c);
+      store_unsigned_integer (valbuf, 1, c);
+    }
+  else
+    {
+      int i;
+      /* The MSB of the return value is always in r25, calculate which
+         register holds the LSB.  */
+      int lsb_reg = 25 - TYPE_LENGTH (type) + 1;
+
+      for (i=0; i< TYPE_LENGTH (type); i++)
+        {
+          regcache_cooked_read (regcache, lsb_reg + i,
+                                (bfd_byte *) valbuf + i);
+        }
+    }
+}
+
 /* Initialize the gdbarch structure for the AVR's. */
 
 static struct gdbarch *
@@ -1157,6 +1190,7 @@ avr_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_register_name (gdbarch, avr_register_name);
   set_gdbarch_register_type (gdbarch, avr_register_type);
 
+  set_gdbarch_extract_return_value (gdbarch, avr_extract_return_value);
   set_gdbarch_print_insn (gdbarch, print_insn_avr);
 
   set_gdbarch_call_dummy_address (gdbarch, avr_call_dummy_address);
