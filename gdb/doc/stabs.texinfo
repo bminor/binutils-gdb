@@ -497,13 +497,13 @@ start of each code range, each with the same line number.
 XCOFF does not use stabs for line numbers.  Instead, it uses COFF line
 numbers (which are outside the scope of this document).  Standard COFF
 line numbers cannot deal with include files, but in XCOFF this is fixed
-with the C_BINCL method of marking include files (@pxref{Include
+with the @code{C_BINCL} method of marking include files (@pxref{Include
 Files}).
 
 @node Procedures
 @section Procedures
 
-@findex N_FUN
+@findex N_FUN, for functions
 @findex N_FNAME
 @findex N_STSYM, for functions (Sun acc)
 @findex N_GSYM, for functions (Sun acc)
@@ -731,6 +731,7 @@ statically, or as arguments to a function.
 * Register Variables::		Variables in registers.
 * Common Blocks::		Variables statically allocated together.
 * Statics::			Variables local to one source file.
+* Based Variables::		Fortran pointer based variables.
 * Parameters::			Variables for arguments to functions.
 @end menu
 
@@ -878,6 +879,8 @@ Initialized static variables are represented by the @samp{S} and
 @c find the variables)
 @findex N_STSYM
 @findex N_LCSYM
+@findex N_FUN, for variables
+@findex N_ROSYM
 In a.out files, @code{N_STSYM} means the data section, @code{N_FUN}
 means the text section, and @code{N_LCSYM} means the bss section.  For
 those systems with a read-only data section separate from the text
@@ -914,6 +917,45 @@ means that the address is relative to the start of the relevant section
 for that compilation unit.  I don't know what it does for @samp{S} stabs
 on Solaris 2.3 (in which ld no longer relocates stabs).  For more
 information on ld stab relocation, @xref{Stabs In ELF}.
+
+@node Based Variables
+@section Fortran Based Variables
+
+Fortran (at least, the Sun and SGI dialects of FORTRAN-77) has a feature
+which allows allocating arrays with @code{malloc}, but which avoids
+blurring the line between arrays and pointers the way that C does.  In
+stabs such a variable uses the @samp{b} symbol descriptor.
+
+For example, the Fortran declarations
+
+@example
+real foo, foo10(10), foo10_5(10,5)
+pointer (foop, foo)
+pointer (foo10p, foo10)
+pointer (foo105p, foo10_5)
+@end example
+
+produce the stabs
+
+@example
+foo:b6
+foo10:bar3;1;10;6
+foo10_5:bar3;1;5;ar3;1;10;6
+@end example
+
+In this example, @code{real} is type 6 and type 3 is an integral type
+which is the type of the subscripts of the array (probably
+@code{integer}).
+
+The @samp{b} symbol descriptor is like @samp{V} in that it denotes a
+statically allocated symbol whose scope is local to a function; see
+@xref{Statics}.  The value of the symbol, instead of being the address
+of the variable itself, is the address of a pointer to that variable.
+So in the above example, the value of the @code{foo} stab is the address
+of a pointer to a real, the value of the @code{foo10} stab is the
+address of a pointer to a 10-element array of reals, and the value of
+the @code{foo10_5} stab is the address of a pointer to a 5-element array
+of 10-element arrays of reals.
 
 @node Parameters
 @section Parameters
@@ -960,7 +1002,6 @@ pointer (I'm not sure whether this is true or not).
 pP (<<??>>)
 pF Fortran function parameter
 X  (function result variable)
-b  (based variable)
 @end example
 
 @menu
@@ -3035,7 +3076,7 @@ Variable on the stack; see @ref{Stack Variables}.
 Parameter passed by reference in register; see @ref{Reference Parameters}.
 
 @item b
-Based variable; see @ref{Parameters}.
+Based variable; see @ref{Based Variables}.
 
 @item c
 Constant; see @ref{Constants}.

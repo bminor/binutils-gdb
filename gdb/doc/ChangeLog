@@ -1,3 +1,7 @@
+Sat Sep 18 17:10:44 1993  Jim Kingdon  (kingdon@poseidon.cygnus.com)
+
+	* stabs.texinfo (Based Variables): New node.
+
 Thu Sep 16 17:48:55 1993  Jim Kingdon  (kingdon@cirdan.cygnus.com)
 
 	* stabs.texinfo (Negative Type Numbers): Re-write discussions of
