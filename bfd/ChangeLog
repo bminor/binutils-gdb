@@ -1,3 +1,8 @@
+2003-04-06  Andrew Cagney  <cagney@redhat.com>
+
+	* simple.c (bfd_simple_get_relocated_section_contents): Disable
+	free that leads to GDB vs BFD memory corruption.
+
 2003-04-04  Stephane Carrez  <stcarrez@nerim.fr>
 
 	* elf32-m68hc11.c (m68hc11_elf_relax_delete_bytes): Also adjust
