@@ -1,5 +1,10 @@
 2003-09-30  Andrew Cagney  <cagney@redhat.com>
 
+	* rs6000-tdep.c (rs6000_gdbarch_init): Set the PowerOpen red zone
+	to 224, not 220.
+
+2003-09-30  Andrew Cagney  <cagney@redhat.com>
+
 	* gdbarch.sh (DEPRECATED_REGISTER_VIRTUAL_SIZE): Rename
 	REGISTER_VIRTUAL_SIZE.
 	* gdbarch.h, gdbarch.c: Regenerate.
