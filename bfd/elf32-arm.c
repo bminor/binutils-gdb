@@ -2311,6 +2311,9 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
   switch (r_type)
     {
     case R_ARM_NONE:
+      /* We don't need to find a value for this symbol.  It's just a
+	 marker.  */
+      *unresolved_reloc_p = FALSE;
       return bfd_reloc_ok;
 
     case R_ARM_PC24:
