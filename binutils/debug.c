@@ -1211,7 +1211,7 @@ debug_record_variable (handle, name, type, kind, val)
 
   n->u.variable = v;
 
-  return true;  
+  return true;
 }
 
 /* Make a type with a given kind and size.  */
@@ -1786,7 +1786,7 @@ debug_make_baseclass (handle, type, bitpos, virtual, visibility)
      bfd_vma bitpos;
      boolean virtual;
      enum debug_visibility visibility;
-{     
+{
   struct debug_baseclass *b;
 
   b = (struct debug_baseclass *) xmalloc (sizeof *b);
@@ -2123,7 +2123,7 @@ debug_find_named_type (handle, name)
 	}
     }
 
-  return DEBUG_TYPE_NULL;	  
+  return DEBUG_TYPE_NULL;
 }
 
 /* Find a tagged type.  */
@@ -2304,7 +2304,7 @@ debug_get_return_type (handle, type)
     case DEBUG_KIND_METHOD:
       return type->u.kmethod->return_type;
     }
-  /*NOTREACHED*/      
+  /*NOTREACHED*/
 }
 
 /* Get the parameter types of a function or method type (except that
@@ -3314,7 +3314,7 @@ debug_type_samep (info, t1, t2)
     case DEBUG_KIND_POINTER:
       ret = debug_type_samep (info, t1->u.kpointer, t2->u.kpointer);
       break;
-	     
+
     case DEBUG_KIND_FUNCTION:
       if (t1->u.kfunction->varargs != t2->u.kfunction->varargs
 	  || ! debug_type_samep (info, t1->u.kfunction->return_type,

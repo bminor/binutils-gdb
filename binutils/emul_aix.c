@@ -80,7 +80,7 @@ ar_emul_aix_internal (after_bfd, file_name, verbose, target_name, is_append)
   if (bfd_xcoff_is_xcoff64 (try_bfd) && (! X64))
     return false;
 
-  if (bfd_xcoff_is_xcoff32 (try_bfd) 
+  if (bfd_xcoff_is_xcoff32 (try_bfd)
       && bfd_check_format (try_bfd, bfd_object) && (! X32))
     return false;
 
@@ -140,7 +140,7 @@ ar_emul_aix5_replace (after_bfd, file_name, verbose)
 			       "aix5coff64-rs6000", false);
 }
 
-boolean 
+boolean
 ar_emul_aix_create (abfd_out, archive_file_name, file_name)
      bfd **abfd_out;
      char *archive_file_name;
@@ -193,7 +193,7 @@ ar_emul_aix_parse_arg (arg)
   return true;
 }
 
-struct bin_emulation_xfer_struct bin_aix_emulation = 
+struct bin_emulation_xfer_struct bin_aix_emulation =
 {
   ar_emul_aix_usage,
   ar_emul_aix_append,
@@ -202,7 +202,7 @@ struct bin_emulation_xfer_struct bin_aix_emulation =
   ar_emul_aix_parse_arg,
 };
 
-struct bin_emulation_xfer_struct bin_aix5_emulation = 
+struct bin_emulation_xfer_struct bin_aix5_emulation =
 {
   ar_emul_aix_usage,
   ar_emul_aix5_append,

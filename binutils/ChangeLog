@@ -1,3 +1,12 @@
+2002-05-20  Kazu Hirata  <kazu@cs.umass.edu>
+
+	* debug.c: Fix formatting.
+	* debug.h: Likewise.
+	* dlltool.c: Likewise.
+	* dllwrap.c: Likewise.
+	* emul_aix.c: Likewise.
+	* emul_vanilla.c: Likewise.
+
 2002-05-19  Kazu Hirata  <kazu@cs.umass.edu>
 
 	* addr2line.c: Fix formatting.
