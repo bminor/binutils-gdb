@@ -1,3 +1,10 @@
+2005-03-28  Joel Brobecker  <brobecker@adacore.com>
+
+	* irix5-nat.c (supply_fpregset): Fix bug that caused the FSR
+	register value to be incorrectly written in the regcache.
+	(fill_fpregset): Fix bug that caused the FSR register value
+	to be incorrectly read from the regcache.
+
 2005-03-28  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* remote-rdi.c (arm_rdi_insert_breakpoint): Don't call

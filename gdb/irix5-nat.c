@@ -139,6 +139,7 @@ supply_fpregset (fpregset_t *fpregsetp)
 {
   int regi;
   static char zerobuf[32] = {0};
+  char fsrbuf[8];
 
   /* FIXME, this is wrong for the N32 ABI which has 64 bit FP regs. */
 
@@ -146,9 +147,17 @@ supply_fpregset (fpregset_t *fpregsetp)
     regcache_raw_supply (current_regcache, FP0_REGNUM + regi,
 			 (char *) &fpregsetp->fp_r.fp_regs[regi]);
 
+  /* We can't supply the FSR register directly to the regcache,
+     because there is a size issue: On one hand, fpregsetp->fp_csr
+     is 32bits long, while the regcache expects a 64bits long value.
+     So we use a buffer of the correct size and copy into it the register
+     value at the proper location.  */
+  memset (fsrbuf, 0, 4);
+  memcpy (fsrbuf + 4, &fpregsetp->fp_csr, 4);
+
   regcache_raw_supply (current_regcache,
 		       mips_regnum (current_gdbarch)->fp_control_status,
-		       (char *) &fpregsetp->fp_csr);
+		       fsrbuf);
 
   /* FIXME: how can we supply FCRIR?  SGI doesn't tell us. */
   regcache_raw_supply (current_regcache,
@@ -173,11 +182,22 @@ fill_fpregset (fpregset_t *fpregsetp, int regno)
 	}
     }
 
-  if ((regno == -1)
-      || (regno == mips_regnum (current_gdbarch)->fp_control_status))
-    regcache_raw_read (current_regcache,
-                       mips_regnum (current_gdbarch)->fp_control_status, 
-                       &fpregsetp->fp_csr);
+  if (regno == -1
+      || regno == mips_regnum (current_gdbarch)->fp_control_status)
+    {
+      char fsrbuf[8];
+
+      /* We can't fill the FSR register directly from the regcache,
+         because there is a size issue: On one hand, fpregsetp->fp_csr
+         is 32bits long, while the regcache expects a 64bits long buffer.
+         So we use a buffer of the correct size and copy the register
+         value from that buffer.  */
+      regcache_raw_read (current_regcache,
+                         mips_regnum (current_gdbarch)->fp_control_status,
+                         fsrbuf);
+
+      memcpy (&fpregsetp->fp_csr, fsrbuf + 4, 4);
+    }
 }
 
 
