@@ -67,8 +67,8 @@ store_inferior_registers (regno)
       if (regno == PCOQ_HEAD_REGNUM || regno == PCOQ_TAIL_REGNUM)
         {
           scratch = *(int *) &registers[REGISTER_BYTE (regno)] | 0x3;
-          ptrace (PT_WUREGS, inferior_pid, (PTRACE_ARG3_TYPE) regaddr,
-                  scratch, 0);
+          call_ptrace (PT_WUREGS, inferior_pid, (PTRACE_ARG3_TYPE) regaddr,
+                  scratch);
           if (errno != 0)
             {
 	      /* Error, even if attached.  Failing to write these two
@@ -81,8 +81,8 @@ store_inferior_registers (regno)
 	for (i = 0; i < REGISTER_RAW_SIZE (regno); i += sizeof(int))
 	  {
 	    errno = 0;
-	    ptrace (PT_WUREGS, inferior_pid, (PTRACE_ARG3_TYPE) regaddr,
-		    *(int *) &registers[REGISTER_BYTE (regno) + i], 0);
+	    call_ptrace (PT_WUREGS, inferior_pid, (PTRACE_ARG3_TYPE) regaddr,
+		    *(int *) &registers[REGISTER_BYTE (regno) + i]);
 	    if (errno != 0)
 	      {
 		/* Warning, not error, in case we are attached; sometimes the
@@ -122,8 +122,8 @@ fetch_register (regno)
   for (i = 0; i < REGISTER_RAW_SIZE (regno); i += sizeof (int))
     {
       errno = 0;
-      *(int *) &buf[i] = ptrace (PT_RUREGS, inferior_pid,
-				 (PTRACE_ARG3_TYPE) regaddr, 0, 0);
+      *(int *) &buf[i] = call_ptrace (PT_RUREGS, inferior_pid,
+				 (PTRACE_ARG3_TYPE) regaddr, 0);
       regaddr += sizeof (int);
       if (errno != 0)
 	{
@@ -174,16 +174,16 @@ child_xfer_memory (memaddr, myaddr, len, write, target)
 
       if (addr != memaddr || len < (int)sizeof (int)) {
 	/* Need part of initial word -- fetch it.  */
-        buffer[0] = ptrace (addr < text_end ? PT_RIUSER : PT_RDUSER, 
-			    inferior_pid, (PTRACE_ARG3_TYPE) addr, 0, 0);
+        buffer[0] = call_ptrace (addr < text_end ? PT_RIUSER : PT_RDUSER, 
+			    inferior_pid, (PTRACE_ARG3_TYPE) addr, 0);
       }
 
       if (count > 1)		/* FIXME, avoid if even boundary */
 	{
 	  buffer[count - 1]
-	    = ptrace (addr < text_end ? PT_RIUSER : PT_RDUSER, inferior_pid,
+	    = call_ptrace (addr < text_end ? PT_RIUSER : PT_RDUSER, inferior_pid,
 		      (PTRACE_ARG3_TYPE) (addr + (count - 1) * sizeof (int)),
-		      0, 0);
+		      0);
 	}
 
       /* Copy data to be written over corresponding part of buffer */
@@ -199,9 +199,9 @@ child_xfer_memory (memaddr, myaddr, len, write, target)
    WIUSER, or do these idiots really expect us to figure out which segment
    the address is in, so we can use a separate system call for it??!  */
 	  errno = 0;
-	  ptrace (addr < text_end ? PT_WIUSER : PT_WDUSER, inferior_pid, 
+	  call_ptrace (addr < text_end ? PT_WIUSER : PT_WDUSER, inferior_pid, 
 		  (PTRACE_ARG3_TYPE) addr,
-		  buffer[i], 0);
+		  buffer[i]);
 	  if (errno)
 	    return 0;
 	}
@@ -212,8 +212,8 @@ child_xfer_memory (memaddr, myaddr, len, write, target)
       for (i = 0; i < count; i++, addr += sizeof (int))
 	{
 	  errno = 0;
-	  buffer[i] = ptrace (addr < text_end ? PT_RIUSER : PT_RDUSER, 
-			      inferior_pid, (PTRACE_ARG3_TYPE) addr, 0, 0);
+	  buffer[i] = call_ptrace (addr < text_end ? PT_RIUSER : PT_RDUSER, 
+			      inferior_pid, (PTRACE_ARG3_TYPE) addr, 0);
 	  if (errno)
 	    return 0;
 	  QUIT;
