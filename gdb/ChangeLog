@@ -1,5 +1,13 @@
 Tue Nov 23 17:29:28 1993  Steve Chamberlain  (sac@jonny.cygnus.com)
 
+        * config/h8300/tm-h8300.h (BREAKPOINT): Insn changed to sleep.
+	(DECP_PC_AFTER_BREAK): Now is 0.
+	* config/h8500/tm-h8500.h (REGISTER_BYTES, REGISTER_BYTE,
+	REGISTER_NAMES): update to new view.  (INIT_EXTRA_FRAME_INFO): No
+	extra frame info now.
+	* config/sh/sh.h (NOP): Define NOP insn.
+	* config/z8k/tm-z8k.h (BIG): is now sim_z8001_mode.  
+	* config/z8k/z8ksim.mt (TDEPFILES): Add remote-sim.o to list.
 	* ser-go32.c: Lint. (strncasecmp): Removed, now in libiberty.
 	(go32_readchar): Special handling for faster polling. (async
 	structure): Volatile.
