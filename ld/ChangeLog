@@ -1,5 +1,8 @@
 2000-02-25  Alexandre Oliva  <oliva@lsd.ic.unicamp.br>
 
+	* configure.tgt (targ_extra_ofiles): Enable elf64_sparc on
+	GNU/Linux/sparc, but keep the default as 32.
+
 	* configure.tgt: Enable elf64_sparc on Solaris7+/sparc.  And make
 	it default if sparcv9 or sparc64.
 
