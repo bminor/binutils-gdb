@@ -1,7 +1,7 @@
 Thu Nov  9 12:22:15 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* configure.in (--enable-sim-alignment): Fix typo in specifing non
-	string alignment.
+	strict alignment.
 	(--enable-sim-switch): Make default on.
 	(--enable-sim-duplicate): Make default on.
 	(--enable-sim-smp): Make default 0.
