@@ -283,6 +283,15 @@ CC = cc
 all: all-cygnus
 endif
 
+ifeq ($(canonhost),i386-ncr-sysv4.3)
+TARGETS = $(NATIVE)
+CC = cc
+CFLAGS = -Hnocopyr
+SHELL = /usr/unsupported/bin/bash
+CONFIG_SHELL = /usr/unsupported/bin/bash
+all: all-cygnus
+endif
+
 ifeq ($(canonhost),i386-lynx)
 TARGETS = $(NATIVE)
 CC = /usr/cygnus/progressive/bin/gcc
@@ -334,6 +343,10 @@ endif
 
 ifeq ($(patsubst %-linux,linux,$(patsubst %-linuxaout,linux,$(canonhost))),linux)
 FLAGS_TO_PASS := $(FLAGS_TO_PASS) "GNU_MAKE=$(MAKE)"
+endif
+
+ifeq ($(patsubst %i386-ncr-sysv4.3,ncr,$(canonhost)),ncr)
+FLAGS_TO_PASS := $(FLAGS_TO_PASS) "CONFIG_SHELL=/usr/unsupported/bin/bash"
 endif
 
 all-emacs:
