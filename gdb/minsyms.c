@@ -801,16 +801,44 @@ compact_minimal_symbols (struct minimal_symbol *msymbol, int mcount,
 	      copyfrom++;
 	    }
 	  else
-	    {
-	      *copyto++ = *copyfrom++;
-
-	      add_minsym_to_hash_table (copyto - 1, objfile->msymbol_hash);
-	    }
+	    *copyto++ = *copyfrom++;
 	}
       *copyto++ = *copyfrom++;
       mcount = copyto - msymbol;
     }
   return (mcount);
+}
+
+/* Build (or rebuild) the minimal symbol hash tables.  This is necessary
+   after compacting or sorting the table since the entries move around
+   thus causing the internal minimal_symbol pointers to become jumbled. */
+  
+static void
+build_minimal_symbol_hash_tables (struct objfile *objfile)
+{
+  int i;
+  struct minimal_symbol *msym;
+
+  /* Clear the hash tables. */
+  for (i = 0; i < MINIMAL_SYMBOL_HASH_SIZE; i++)
+    {
+      objfile->msymbol_hash[i] = 0;
+      objfile->msymbol_demangled_hash[i] = 0;
+    }
+
+  /* Now, (re)insert the actual entries. */
+  for (i = objfile->minimal_symbol_count, msym = objfile->msymbols;
+       i > 0;
+       i--, msym++)
+    {
+      msym->hash_next = 0;
+      add_minsym_to_hash_table (msym, objfile->msymbol_hash);
+
+      msym->demangled_hash_next = 0;
+      if (SYMBOL_DEMANGLED_NAME (msym) != NULL)
+	add_minsym_to_demangled_hash_table (msym,
+                                            objfile->msymbol_demangled_hash);
+    }
 }
 
 /* Add the minimal symbols in the existing bunches to the objfile's official
@@ -928,12 +956,13 @@ install_minimal_symbols (struct objfile *objfile)
          ones and attempting to cache their C++ demangled names. */
 
       for (; mcount-- > 0; msymbols++)
-	{
-	  SYMBOL_INIT_DEMANGLED_NAME (msymbols, &objfile->symbol_obstack);
-	  if (SYMBOL_DEMANGLED_NAME (msymbols) != NULL)
-          add_minsym_to_demangled_hash_table (msymbols,
-                                              objfile->msymbol_demangled_hash);
-	}
+	SYMBOL_INIT_DEMANGLED_NAME (msymbols, &objfile->symbol_obstack);
+
+      /* Now build the hash tables; we can't do this incrementally
+         at an earlier point since we weren't finished with the obstack
+	 yet.  (And if the msymbol obstack gets moved, all the internal
+	 pointers to other msymbols need to be adjusted.) */
+      build_minimal_symbol_hash_tables (objfile);
     }
 }
 
@@ -944,6 +973,7 @@ msymbols_sort (struct objfile *objfile)
 {
   qsort (objfile->msymbols, objfile->minimal_symbol_count,
 	 sizeof (struct minimal_symbol), compare_minimal_symbols);
+  build_minimal_symbol_hash_tables (objfile);
 }
 
 /* Check if PC is in a shared library trampoline code stub.

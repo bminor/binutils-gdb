@@ -1,5 +1,10 @@
 2000-08-04  Kevin Buettner  <kevinb@redhat.com>
 
+	* minsyms.c (build_minimal_symbol_hash_tables): New function.
+	(compact_minimal_symbols): Don't construct hash tables here.
+	(install_minimal_symbols): Instead, construct them here.
+	(msymbols_sort): And rebuild them here too.
+
 	* dwarf2read.c (struct comp_unit_head): Add fields offset_size
 	and initial_length_size.  Change type of ``length'' field to long.
 	(read_initial_length, read_offset): New functions.
