@@ -65,7 +65,13 @@ START_RELOC_NUMBERS (elf_mips_reloc_type)
   RELOC_NUMBER (R_MIPS_HIGHEST, 29)
   RELOC_NUMBER (R_MIPS_CALL_HI16, 30)
   RELOC_NUMBER (R_MIPS_CALL_LO16, 31)
-  RELOC_NUMBER (R_MIPS_max, 33)
+  RELOC_NUMBER (R_MIPS_SCN_DISP, 32)
+  RELOC_NUMBER (R_MIPS_REL16, 33)
+  RELOC_NUMBER (R_MIPS_ADD_IMMEDIATE, 34)
+  RELOC_NUMBER (R_MIPS_PJUMP, 35)
+  RELOC_NUMBER (R_MIPS_RELGOT, 36)
+  RELOC_NUMBER (R_MIPS_JALR, 37)
+  RELOC_NUMBER (R_MIPS_max, 38)
   /* These relocs are used for the mips16.  */
   RELOC_NUMBER (R_MIPS16_26, 100)
   RELOC_NUMBER (R_MIPS16_GPREL, 101)
@@ -137,9 +143,9 @@ END_RELOC_NUMBERS
 #define E_MIPS_MACH_4900	0x00860000
 /* end-sanitize-tx49 */
 
-/* start-sanitize-vr5400 */
+/* start-sanitize-cygnus */
 #define E_MIPS_MACH_5400	0x00910000
-/* end-sanitize-vr5400 */
+/* end-sanitize-cygnus */
 /* start-sanitize-r5900 */
 #define E_MIPS_MACH_5900	0x00920000
 /* end-sanitize-r5900 */
@@ -589,6 +595,19 @@ extern void bfd_mips_elf32_swap_reginfo_out
 /* Ignore LD_LIBRARY_PATH.  */
 #define RHS_NO_LIBRARY_REPLACEMENT \
 				0x00000004
+
+#define RHF_NO_MOVE		   0x00000008
+#define RHF_SGI_ONLY		   0x00000010
+#define RHF_GUARANTEE_INIT	   0x00000020
+#define RHF_DELTA_C_PLUS_PLUS	   0x00000040
+#define RHF_GUARANTEE_START_INIT   0x00000080
+#define RHF_PIXIE		   0x00000100
+#define RHF_DEFAULT_DELAY_LOAD	   0x00000200
+#define RHF_REQUICKSTART	   0x00000400
+#define RHF_REQUICKSTARTED	   0x00000800
+#define RHF_CORD		   0x00001000
+#define RHF_NO_UNRES_UNDEF	   0x00002000
+#define RHF_RLD_ORDER_SAFE	   0x00004000
 
 /* Special values for the st_other field in the symbol table.  These
    are used in an Irix 5 dynamic symbol table.  */
