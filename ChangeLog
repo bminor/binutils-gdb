@@ -1,3 +1,8 @@
+Thu Apr 27 11:33:29 1995  Michael Meissner  (meissner@cygnus.com)
+
+	* config.guess (*:Linux:*:*): Check for whether the pre-BFD linker is
+	installed, and if so return linuxoldld as the system name.
+
 Wed Apr 26 10:59:02 1995  Jeff Law  (law@snake.cs.utah.edu)
 
 	* config.guess: Add hppa1.1-hp-lites support.
