@@ -1,3 +1,15 @@
+Fri Jan 15 18:13:17 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* coff-msym.c (ecoff_swap_hdr_out, ecoff_swap_fdr_out,
+	ecoff_swap_pdr_out, ecoff_swap_sym_out, ecoff_swap_ext_out,
+	ecoff_swap_rndx_out, ecoff_swap_rfd_out, ecoff_swap_opt_in,
+	ecoff_swap_opt_out, ecoff_swap_dnr_in, ecoff_swap_dnr_out): New
+	functions.
+	* coffswap.h: If NO_COFF_RELOCS is defined, don't define
+	bfd_swap_reloc_in or coff_swap_reloc_out.
+	* coff-mips.c: Added code to link and write out symbolic debugging
+	information, and to swap relocs in and out.
+
 Thu Jan 14 15:51:58 1993  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* libcoff.h, coffgen.c (coff_count_linenumbers), coffcode.h
