@@ -1,3 +1,22 @@
+Mon Apr 20 22:22:51 1992  K. Richard Pixley  (rich@rtl.cygnus.com)
+
+	* Makefile.in: remove old style staging.  Do not print recursion
+	  lines.
+
+	* Makefile.in: rework CFLAGS so that CFLAGS can be passed from the
+	  Makefile command line.  Remove MINUS_G.  Default CFLAGS to -g.
+	  Pass CFLAGS.
+
+Fri Apr 17 09:15:31 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* bfd.c, Makefile.in: added tekhex
+	* aoutx.h (set_section_contents): pages should be padded to the
+	size of a page, not the size of a segment.
+	* configure.in: added go32 host and i386-aout target.
+	* i386aout.c, libaout.h: now works for go32 target
+	* ieee.c: fix bit rot.
+	* seclet.c: support for padding seclet type.
+
 Wed Apr 15 18:11:58 1992  K. Richard Pixley  (rich@rtl.cygnus.com)
 
 	* Makefile.in: added .NOEXPORT:
