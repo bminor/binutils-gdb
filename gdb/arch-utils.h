@@ -111,9 +111,11 @@ extern int default_prepare_to_proceed (int select_it);
 
 extern int generic_prepare_to_proceed (int select_it);
 
-/* Version of init_frame_pc() that does nothing. */
+/* Versions of init_frame_pc().  Do nothing; do the default. */
 
 void init_frame_pc_noop (int fromleaf, struct frame_info *prev);
+
+void init_frame_pc_default (int fromleaf, struct frame_info *prev);
 
 /* Version of cannot_fetch_register() / cannot_store_register() that
    always fails. */

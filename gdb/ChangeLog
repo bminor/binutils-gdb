@@ -1,5 +1,16 @@
 2001-06-16  Andrew Cagney  <ac131313@redhat.com>
 
+	* arch-utils.c (init_frame_pc_default): New function
+	* arch-utils.h (init_frame_pc_default): Declare.
+	* gdbarch.sh (INIT_FRAME_PC): Default to init_frame_pc_default and
+	not init_frame_pc_noop.
+	* gdbarch.h, gdbarch.c: Re-generate.
+	* blockframe.c (INIT_FRAME_PC): Delete macro definition.
+	* mips-tdep.c (mips_gdbarch_init): Set init_frame_pc to
+	init_frame_pc_noop.
+
+2001-06-16  Andrew Cagney  <ac131313@redhat.com>
+
 	* gdbarch.c: Regenerate.  Out-of-sync with gdbarch.sh.
 
 2001-06-15  Andrew Cagney  <ac131313@redhat.com>

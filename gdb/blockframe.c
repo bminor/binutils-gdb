@@ -304,12 +304,6 @@ frameless_look_for_prologue (struct frame_info *frame)
 
 /* Default a few macros that people seldom redefine.  */
 
-#if !defined (INIT_FRAME_PC)
-#define INIT_FRAME_PC(fromleaf, prev) \
-  prev->pc = (fromleaf ? SAVED_PC_AFTER_CALL (prev->next) : \
-	      prev->next ? FRAME_SAVED_PC (prev->next) : read_pc ());
-#endif
-
 #ifndef FRAME_CHAIN_COMBINE
 #define	FRAME_CHAIN_COMBINE(chain, thisframe) (chain)
 #endif

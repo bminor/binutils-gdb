@@ -833,7 +833,7 @@ extern void set_gdbarch_init_frame_pc_first (struct gdbarch *gdbarch, gdbarch_in
 
 /* Default (function) for non- multi-arch platforms. */
 #if (!GDB_MULTI_ARCH) && !defined (INIT_FRAME_PC)
-#define INIT_FRAME_PC(fromleaf, prev) (init_frame_pc_noop (fromleaf, prev))
+#define INIT_FRAME_PC(fromleaf, prev) (init_frame_pc_default (fromleaf, prev))
 #endif
 
 typedef void (gdbarch_init_frame_pc_ftype) (int fromleaf, struct frame_info *prev);

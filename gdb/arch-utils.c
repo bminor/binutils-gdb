@@ -306,6 +306,17 @@ init_frame_pc_noop (int fromleaf, struct frame_info *prev)
   return;
 }
 
+void
+init_frame_pc_default (int fromleaf, struct frame_info *prev)
+{
+  if (fromleaf)
+    prev->pc = SAVED_PC_AFTER_CALL (prev->next);
+  else if (prev->next != NULL)
+    prev->pc = FRAME_SAVED_PC (prev->next);
+  else
+    prev->pc = read_pc ();
+}
+
 int
 cannot_register_not (int regnum)
 {

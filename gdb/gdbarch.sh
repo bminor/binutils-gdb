@@ -447,7 +447,7 @@ v:1:CALL_DUMMY_STACK_ADJUST_P:int:call_dummy_stack_adjust_p::::0:-1:::0x%08lx
 v:2:CALL_DUMMY_STACK_ADJUST:int:call_dummy_stack_adjust::::0:::gdbarch->call_dummy_stack_adjust_p && gdbarch->call_dummy_stack_adjust == 0:0x%08lx::CALL_DUMMY_STACK_ADJUST_P
 f:2:FIX_CALL_DUMMY:void:fix_call_dummy:char *dummy, CORE_ADDR pc, CORE_ADDR fun, int nargs, struct value **args, struct type *type, int gcc_p:dummy, pc, fun, nargs, args, type, gcc_p:::0
 f:2:INIT_FRAME_PC_FIRST:void:init_frame_pc_first:int fromleaf, struct frame_info *prev:fromleaf, prev:::init_frame_pc_noop::0
-f:2:INIT_FRAME_PC:void:init_frame_pc:int fromleaf, struct frame_info *prev:fromleaf, prev:::init_frame_pc_noop::0
+f:2:INIT_FRAME_PC:void:init_frame_pc:int fromleaf, struct frame_info *prev:fromleaf, prev:::init_frame_pc_default::0
 #
 v:2:BELIEVE_PCC_PROMOTION:int:believe_pcc_promotion:::::::
 v:2:BELIEVE_PCC_PROMOTION_TYPE:int:believe_pcc_promotion_type:::::::

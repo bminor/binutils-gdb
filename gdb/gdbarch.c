@@ -471,7 +471,7 @@ gdbarch_alloc (const struct gdbarch_info *info,
   gdbarch->sizeof_call_dummy_words = legacy_sizeof_call_dummy_words;
   gdbarch->call_dummy_stack_adjust_p = -1;
   gdbarch->init_frame_pc_first = init_frame_pc_noop;
-  gdbarch->init_frame_pc = init_frame_pc_noop;
+  gdbarch->init_frame_pc = init_frame_pc_default;
   gdbarch->coerce_float_to_double = default_coerce_float_to_double;
   gdbarch->register_convertible = generic_register_convertible_not;
   gdbarch->pointer_to_address = unsigned_pointer_to_address;
