@@ -1,3 +1,8 @@
+2004-11-29  Paul Hilfinger  <Hilfinger@gnat.com>
+
+	* gdb.base/bitfields2.exp: New test.
+	* gdb.base/bitfields2.c: New file.
+
 2004-11-28  Richard Earnshaw  <rearnsha@arm.com>
 
 	* config/sim.exp (gdb_load): Return 0 on success, -1 on failure.
