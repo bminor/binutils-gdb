@@ -1,3 +1,15 @@
+2001-02-20  Kevin Buettner  <kevinb@redhat.com>
+
+	* solib-aix5.c (solib-svr4.h): Remove include.
+	(solib_break_names): Delete names which aren't actually
+	used by AIX5.
+	(bkpt_names): Remove.
+	(aix5_relocate_main_executable, bfd_lookup_symbol): Replace calls
+	to STREQ() with equivalent calls to strcmp().
+	(in_svr4_dynsym_resolve_code, enable_break, bfd_lookup_symbol,
+	aix5_solib_create_inferior_hook): Revise comments.
+	(enable_break): Remove old ``bkpt_names'' code.
+
 2001-02-19  Andrew Cagney  <ac131313@redhat.com>
 
 	* Makefile.in (SFILES): Add frame.c .

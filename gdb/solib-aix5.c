@@ -46,7 +46,6 @@
 #include "gdbcmd.h"
 
 #include "solist.h"
-#include "solib-svr4.h"
 
 /* Link map info to include in an allocated so_list entry */
 
@@ -71,30 +70,12 @@ struct lm_info
       char *membername;		/* member name in archive file */
   };
 
-/* On SVR4 systems, a list of symbols in the dynamic linker where
-   GDB can try to place a breakpoint to monitor shared library
-   events.
-
-   If none of these symbols are found, or other errors occur, then
-   SVR4 systems will fall back to using a symbol as the "startup
-   mapping complete" breakpoint address.  */
+/* List of symbols in the dynamic linker where GDB can try to place
+   a breakpoint to monitor shared library events. */
 
 static char *solib_break_names[] =
 {
-  "r_debug_state",
   "_r_debug_state",
-  "_dl_debug_state",
-  "rtld_db_dlactivity",
-  NULL
-};
-
-static char *bkpt_names[] =
-{
-#ifdef SOLIB_BKPT_NAME
-  SOLIB_BKPT_NAME,		/* Prefer configured name if it exists. */
-#endif
-  "_start",
-  "main",
   NULL
 };
 
@@ -143,7 +124,7 @@ bfd_lookup_symbol (bfd *abfd, char *symname)
       for (i = 0; i < number_of_symbols; i++)
 	{
 	  sym = *symbol_table++;
-	  if (STREQ (sym->name, symname))
+	  if (strcmp (sym->name, symname) == 0)
 	    {
 	      /* Bfd symbols are section relative. */
 	      symaddr = sym->value + sym->section->vma;
@@ -156,8 +137,7 @@ bfd_lookup_symbol (bfd *abfd, char *symname)
   if (symaddr)
     return symaddr;
 
-  /* On FreeBSD, the dynamic linker is stripped by default.  So we'll
-     have to check the dynamic string table too.  */
+  /* Look for the symbol in the dynamic string table too.  */
 
   storage_needed = bfd_get_dynamic_symtab_upper_bound (abfd);
 /* FIXME: This problem should be addressed in BFD.  */
@@ -174,7 +154,7 @@ bfd_lookup_symbol (bfd *abfd, char *symname)
       for (i = 0; i < number_of_symbols; i++)
 	{
 	  sym = *symbol_table++;
-	  if (STREQ (sym->name, symname))
+	  if (strcmp (sym->name, symname) == 0)
 	    {
 	      /* Bfd symbols are section relative. */
 	      symaddr = sym->value + sym->section->vma;
@@ -422,7 +402,7 @@ aix5_current_sos (void)
 
 
 /* Return 1 if PC lies in the dynamic symbol resolution code of the
-   SVR4 run time loader.  */
+   run time loader.  */
 
 static CORE_ADDR interp_text_sect_low;
 static CORE_ADDR interp_text_sect_high;
@@ -450,35 +430,10 @@ in_svr4_dynsym_resolve_code (CORE_ADDR pc)
 
    DESCRIPTION
 
-   Both the SunOS and the SVR4 dynamic linkers have, as part of their
-   debugger interface, support for arranging for the inferior to hit
-   a breakpoint after mapping in the shared libraries.  This function
-   enables that breakpoint.
+   The dynamic linkers has, as part of its debugger interface, support
+   for arranging for the inferior to hit a breakpoint after mapping in
+   the shared libraries.  This function enables that breakpoint.
 
-   For SunOS, there is a special flag location (in_debugger) which we
-   set to 1.  When the dynamic linker sees this flag set, it will set
-   a breakpoint at a location known only to itself, after saving the
-   original contents of that place and the breakpoint address itself,
-   in it's own internal structures.  When we resume the inferior, it
-   will eventually take a SIGTRAP when it runs into the breakpoint.
-   We handle this (in a different place) by restoring the contents of
-   the breakpointed location (which is only known after it stops),
-   chasing around to locate the shared libraries that have been
-   loaded, then resuming.
-
-   For SVR4, the debugger interface structure contains a member (r_brk)
-   which is statically initialized at the time the shared library is
-   built, to the offset of a function (_r_debug_state) which is guaran-
-   teed to be called once before mapping in a library, and again when
-   the mapping is complete.  At the time we are examining this member,
-   it contains only the unrelocated offset of the function, so we have
-   to do our own relocation.  Later, when the dynamic linker actually
-   runs, it relocates r_brk to be the actual address of _r_debug_state().
-
-   The debugger interface structure also contains an enumeration which
-   is set to either RT_ADD or RT_DELETE prior to changing the mapping,
-   depending upon whether or not the library is being mapped or unmapped,
-   and then set to RT_CONSISTENT after the library is mapped/unmapped.
  */
 
 static int
@@ -580,19 +535,6 @@ enable_break (void)
          linker.  Warn and drop into the old code.  */
     bkpt_at_symbol:
       warning ("Unable to find dynamic linker breakpoint function.\nGDB will be unable to debug shared library initializers\nand track explicitly loaded dynamic code.");
-    }
-
-  /* Scan through the list of symbols, trying to look up the symbol and
-     set a breakpoint there.  Terminate loop when we/if we succeed. */
-
-  for (bkpt_namep = bkpt_names; *bkpt_namep != NULL; bkpt_namep++)
-    {
-      msymbol = lookup_minimal_symbol (*bkpt_namep, NULL, symfile_objfile);
-      if ((msymbol != NULL) && (SYMBOL_VALUE_ADDRESS (msymbol) != 0))
-	{
-	  create_solib_event_breakpoint (SYMBOL_VALUE_ADDRESS (msymbol));
-	  return 1;
-	}
     }
 
   /* Nothing good happened.  */
@@ -714,11 +656,11 @@ aix5_relocate_main_executable (void)
    point, this function gets called via expansion of the macro
    SOLIB_CREATE_INFERIOR_HOOK.
 
-   For SVR4 executables, this first instruction is either the first
+   For AIX5 executables, this first instruction is the first
    instruction in the dynamic linker (for dynamically linked
    executables) or the instruction at "start" for statically linked
    executables.  For dynamically linked executables, the system
-   first exec's /lib/libc.so.N, which contains the dynamic linker,
+   first exec's libc.so.N, which contains the dynamic linker,
    and starts it running.  The dynamic linker maps in any needed
    shared libraries, maps in the actual user executable, and then
    jumps to "start" in the user executable.
