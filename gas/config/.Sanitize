@@ -28,7 +28,6 @@ alpha-opcode.h
 atof-ieee.c
 atof-tahoe.c
 atof-vax.c
-cplus-dem.c
 go32.mh
 h8300.mt
 h8500.mt
