@@ -1,3 +1,7 @@
+2005-01-14  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* ia64-linux-nat.c: Include "ia64-tdep.h" to get register definitions.
+
 2005-01-14  Andrew Cagney  <cagney@gnu.org>
 
 	* exceptions.h (catch_exceptions): Delete errstring parameter.
