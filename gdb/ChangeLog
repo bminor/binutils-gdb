@@ -1,3 +1,9 @@
+Thu Aug 11 04:06:42 1994  Doug Evans  (dje@canuck.cygnus.com)
+
+	* defs.h (concat, basename, buildargv, freeargv, strerrno, strsigno,
+	errno_max, signo_max, strtoerrno, strtosigno):  Delete.
+	Include "libiberty.h" instead.
+
 Wed Aug 10 13:23:47 1994  Rick Sladkey  (jrs@world.std.com)
 
 	* i386v-nat.c (i386_insert_nonaligned_watchpoint):

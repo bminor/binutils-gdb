@@ -28,6 +28,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "ansidecl.h"
 
+#include "libiberty.h"
+
+/* libiberty.h can't declare this one, but evidently we can.  */
+extern char *strsignal PARAMS ((int));
+
 /* For BFD64 and bfd_vma.  */
 #include "bfd.h"
 
@@ -498,8 +503,6 @@ extern char *strsave PARAMS ((const char *));
 
 extern char *mstrsave PARAMS ((void *, const char *));
 
-extern char *concat PARAMS ((char *, ...));
-
 extern PTR xmalloc PARAMS ((long));
 
 extern PTR xrealloc PARAMS ((PTR, long));
@@ -564,30 +567,11 @@ extern void warning_setup PARAMS ((void));
 
 extern void warning ();
 
-/* Global functions from other, non-gdb GNU thingies (libiberty for
-   instance) */
-
-extern char *basename PARAMS ((char *));
+/* Global functions from other, non-gdb GNU thingies.
+   Libiberty thingies are no longer declared here.  We include libiberty.h
+   above, instead.  */
 
 extern char *getenv PARAMS ((const char *));
-
-extern char **buildargv PARAMS ((char *));
-
-extern void freeargv PARAMS ((char **));
-
-extern char *strerrno PARAMS ((int));
-
-extern char *strsigno PARAMS ((int));
-
-extern int errno_max PARAMS ((void));
-
-extern int signo_max PARAMS ((void));
-
-extern int strtoerrno PARAMS ((char *));
-
-extern int strtosigno PARAMS ((char *));
-
-extern char *strsignal PARAMS ((int));
 
 /* From other system libraries */
 
