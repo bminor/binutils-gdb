@@ -29,7 +29,7 @@ RANLIB = ranlib
 AR = ar
 AR_FLAGS = clq
 INCDIR = $(srcdir)/../include
-CSEARCH = -I$(INCDIR)
+CSEARCH = -I. -I$(INCDIR)
 DEP = mkdep
 
 
@@ -117,7 +117,10 @@ clean:
 clobber realclean: clean
 	rm -f libbfd.a TAGS
 
-$(BFD_LIBS) $(BFD_BACKENDS) $(OPTIONAL_BACKENDS):  libbfd.h $(BFD_H)
+$(BFD_LIBS):  libbfd.h $(BFD_H)
+$(BFD_MACHINES):  libbfd.h $(BFD_H)
+$(BFD_BACKENDS):  libbfd.h $(BFD_H)
+$(OPTIONAL_BACKENDS):  libbfd.h $(BFD_H)
 
 saber:
 	#suppress 65 on bfd_map_over_sections 
