@@ -447,11 +447,11 @@ evaluate_subexp_standard (struct type *expect_type,
     case OP_REGISTER:
       {
 	int regno = longest_to_int (exp->elts[pc + 1].longconst);
-	struct value *val = value_of_register (regno, get_selected_frame ());
+	struct value *val = value_of_register (regno, get_selected_frame (NULL));
 	(*pos) += 2;
 	if (val == NULL)
 	  error ("Value of register %s not available.",
-		 frame_map_regnum_to_name (get_selected_frame (), regno));
+		 frame_map_regnum_to_name (get_selected_frame (NULL), regno));
 	else
 	  return val;
       }

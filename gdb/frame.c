@@ -822,13 +822,19 @@ struct frame_info *deprecated_selected_frame;
    thrown.  */
 
 struct frame_info *
-get_selected_frame (void)
+get_selected_frame (const char *message)
 {
   if (deprecated_selected_frame == NULL)
-    /* Hey!  Don't trust this.  It should really be re-finding the
-       last selected frame of the currently selected thread.  This,
-       though, is better than nothing.  */
-    select_frame (get_current_frame ());
+    {
+      if (message != NULL && (!target_has_registers
+			      || !target_has_stack
+			      || !target_has_memory))
+	error ("%s", message);
+      /* Hey!  Don't trust this.  It should really be re-finding the
+	 last selected frame of the currently selected thread.  This,
+	 though, is better than nothing.  */
+      select_frame (get_current_frame ());
+    }
   /* There is always a frame.  */
   gdb_assert (deprecated_selected_frame != NULL);
   return deprecated_selected_frame;
@@ -843,7 +849,7 @@ deprecated_safe_get_selected_frame (void)
 {
   if (!target_has_registers || !target_has_stack || !target_has_memory)
     return NULL;
-  return get_selected_frame ();
+  return get_selected_frame (NULL);
 }
 
 /* Select frame FI (or NULL - to invalidate the current frame).  */

@@ -1949,7 +1949,7 @@ finish_tfind_command (char *msg,
       else
 	print_what = SRC_AND_LOC;
 
-      print_stack_frame (get_selected_frame (), 1, print_what);
+      print_stack_frame (get_selected_frame (NULL), 1, print_what);
       do_displays ();
     }
 }

@@ -1,4 +1,18 @@
-2004-10-27  Andrew Cagney  <cagney@gnu.org>
+2004-10-29  Andrew Cagney  <cagney@gnu.org>
+
+	* frame.h (get_selected_frame): Add message parameter.
+	* frame.c (get_selected_frame): Add and use message parameter.
+	* stack.c (current_frame_command, return_command, locals_info)
+	(catch_info, args_info, up_silently_base, down_silently_base): Use
+	get_selected_frame with an explicit message.
+	* thread.c, stack.c, sh-tdep.c, sh64-tdep.c: Update.
+	* remote-rdp.c, remote-mips.c, remote-e7000.c: Update.
+	* ocd.c, mi/mi-main.c, mi/mi-cmd-stack.c: Update.
+	* infrun.c, inflow.c, infcmd.c, frame.c: Update.
+	* findvar.c, eval.c, corelow.c, bsd-kvm.c: Update.
+	* breakpoint.c: Update.
+
+2004-10-29  Andrew Cagney  <cagney@gnu.org>
 
 	* trad-frame.c (trad_frame_get_prev_register): Use
 	frame_unwind_register instead of frame_register_unwind, do not

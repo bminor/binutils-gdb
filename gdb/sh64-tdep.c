@@ -2538,7 +2538,7 @@ sh_do_fp_register (struct gdbarch *gdbarch, struct ui_file *file, int regnum)
   raw_buffer = (char *) alloca (register_size (gdbarch, FP0_REGNUM));
 
   /* Get the data in raw format.  */
-  if (!frame_register_read (get_selected_frame (), regnum, raw_buffer))
+  if (!frame_register_read (get_selected_frame (NULL), regnum, raw_buffer))
     error ("can't read register %d (%s)", regnum, REGISTER_NAME (regnum));
 
   /* Get the register as a number */ 
@@ -2618,7 +2618,7 @@ sh_do_register (struct gdbarch *gdbarch, struct ui_file *file, int regnum)
   print_spaces_filtered (15 - strlen (REGISTER_NAME (regnum)), file);
 
   /* Get the data in raw format.  */
-  if (!frame_register_read (get_selected_frame (), regnum, raw_buffer))
+  if (!frame_register_read (get_selected_frame (NULL), regnum, raw_buffer))
     fprintf_filtered (file, "*value not available*\n");
       
   val_print (gdbarch_register_type (gdbarch, regnum), raw_buffer, 0, 0,

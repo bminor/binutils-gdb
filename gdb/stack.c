@@ -1445,9 +1445,8 @@ print_frame_label_vars (struct frame_info *fi, int this_level_only,
 void
 locals_info (char *args, int from_tty)
 {
-  if (!deprecated_selected_frame)
-    error ("No frame selected.");
-  print_frame_local_vars (deprecated_selected_frame, 0, gdb_stdout);
+  print_frame_local_vars (get_selected_frame ("No frame selected."),
+			  0, gdb_stdout);
 }
 
 static void
@@ -1467,10 +1466,8 @@ catch_info (char *ignore, int from_tty)
   else
     {
       /* Assume g++ compiled code -- old v 4.16 behaviour */
-      if (!deprecated_selected_frame)
-	error ("No frame selected.");
-
-      print_frame_label_vars (deprecated_selected_frame, 0, gdb_stdout);
+      print_frame_label_vars (get_selected_frame ("No frame selected."),
+			      0, gdb_stdout);
     }
 }
 
@@ -1537,9 +1534,8 @@ print_frame_arg_vars (struct frame_info *fi,
 void
 args_info (char *ignore, int from_tty)
 {
-  if (!deprecated_selected_frame)
-    error ("No frame selected.");
-  print_frame_arg_vars (deprecated_selected_frame, gdb_stdout);
+  print_frame_arg_vars (get_selected_frame ("No frame selected."),
+			gdb_stdout);
 }
 
 
@@ -1662,7 +1658,7 @@ void
 frame_command (char *level_exp, int from_tty)
 {
   select_frame_command (level_exp, from_tty);
-  print_stack_frame (get_selected_frame (), 1, SRC_AND_LOC);
+  print_stack_frame (get_selected_frame (NULL), 1, SRC_AND_LOC);
 }
 
 /* The XDB Compatibility command to print the current frame. */
@@ -1670,9 +1666,7 @@ frame_command (char *level_exp, int from_tty)
 static void
 current_frame_command (char *level_exp, int from_tty)
 {
-  if (target_has_stack == 0 || deprecated_selected_frame == 0)
-    error ("No stack.");
-  print_stack_frame (get_selected_frame (), 1, SRC_AND_LOC);
+  print_stack_frame (get_selected_frame ("No stack."), 1, SRC_AND_LOC);
 }
 
 /* Select the frame up one or COUNT stack levels
@@ -1687,10 +1681,7 @@ up_silently_base (char *count_exp)
     count = parse_and_eval_long (count_exp);
   count1 = count;
 
-  if (target_has_stack == 0 || deprecated_selected_frame == 0)
-    error ("No stack.");
-
-  fi = find_relative_frame (deprecated_selected_frame, &count1);
+  fi = find_relative_frame (get_selected_frame ("No stack."), &count1);
   if (count1 != 0 && count_exp == 0)
     error ("Initial frame selected; you cannot go up.");
   select_frame (fi);
@@ -1706,7 +1697,7 @@ static void
 up_command (char *count_exp, int from_tty)
 {
   up_silently_base (count_exp);
-  print_stack_frame (get_selected_frame (), 1, SRC_AND_LOC);
+  print_stack_frame (get_selected_frame (NULL), 1, SRC_AND_LOC);
 }
 
 /* Select the frame down one or COUNT stack levels
@@ -1721,10 +1712,7 @@ down_silently_base (char *count_exp)
     count = -parse_and_eval_long (count_exp);
   count1 = count;
 
-  if (target_has_stack == 0 || deprecated_selected_frame == 0)
-    error ("No stack.");
-
-  frame = find_relative_frame (deprecated_selected_frame, &count1);
+  frame = find_relative_frame (get_selected_frame ("No stack."), &count1);
   if (count1 != 0 && count_exp == 0)
     {
 
@@ -1749,7 +1737,7 @@ static void
 down_command (char *count_exp, int from_tty)
 {
   down_silently_base (count_exp);
-  print_stack_frame (get_selected_frame (), 1, SRC_AND_LOC);
+  print_stack_frame (get_selected_frame (NULL), 1, SRC_AND_LOC);
 }
 
 void
@@ -1759,13 +1747,7 @@ return_command (char *retval_exp, int from_tty)
   struct value *return_value = NULL;
   const char *query_prefix = "";
 
-  /* FIXME: cagney/2003-10-20: Perform a minimal existance test on the
-     target.  If that fails, error out.  For the moment don't rely on
-     get_selected_frame as it's error message is the the singularly
-     obscure "No registers".  */
-  if (!target_has_registers)
-    error ("No selected frame.");
-  thisfun = get_frame_function (get_selected_frame ());
+  thisfun = get_frame_function (get_selected_frame ("No selected frame."));
 
   /* Compute the return value.  If the computation triggers an error,
      let it bail.  If the return type can't be handled, set
@@ -1848,7 +1830,7 @@ If you continue, the return value that you specified will be ignored.\n";
   /* First discard all frames inner-to the selected frame (making the
      selected frame current).  */
   {
-    struct frame_id selected_id = get_frame_id (get_selected_frame ());
+    struct frame_id selected_id = get_frame_id (get_selected_frame (NULL));
     while (!frame_id_eq (selected_id, get_frame_id (get_current_frame ())))
       {
 	if (frame_id_inner (selected_id, get_frame_id (get_current_frame ())))

@@ -7644,7 +7644,7 @@ do_enable_breakpoint (struct breakpoint *bpt, enum bpdisp disposition)
 	{
 	  struct frame_id saved_frame_id;
 
-	  saved_frame_id = get_frame_id (get_selected_frame ());
+	  saved_frame_id = get_frame_id (get_selected_frame (NULL));
 	  if (bpt->exp_valid_block != NULL)
 	    {
 	      struct frame_info *fr =

@@ -139,7 +139,7 @@ mi_cmd_stack_list_locals (char *command, char **argv, int argc)
   if (argc != 1)
     error ("mi_cmd_stack_list_locals: Usage: PRINT_VALUES");
 
-   frame = get_selected_frame ();
+   frame = get_selected_frame (NULL);
 
    if (strcmp (argv[0], "0") == 0
        || strcmp (argv[0], "--no-values") == 0)

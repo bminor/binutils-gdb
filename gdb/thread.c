@@ -407,7 +407,7 @@ info_threads_command (char *arg, int from_tty)
   struct thread_info *tp;
   ptid_t current_ptid;
   struct frame_info *cur_frame;
-  struct frame_id saved_frame_id = get_frame_id (get_selected_frame ());
+  struct frame_id saved_frame_id = get_frame_id (get_selected_frame (NULL));
   char *extra_info;
 
   prune_threads ();
@@ -428,7 +428,7 @@ info_threads_command (char *arg, int from_tty)
       puts_filtered ("  ");
 
       switch_to_thread (tp->ptid);
-      print_stack_frame (get_selected_frame (), 0, LOCATION);
+      print_stack_frame (get_selected_frame (NULL), 0, LOCATION);
     }
 
   switch_to_thread (current_ptid);
@@ -442,7 +442,7 @@ info_threads_command (char *arg, int from_tty)
     {
       /* Ooops, can't restore, tell user where we are.  */
       warning ("Couldn't restore frame in current thread, at frame 0");
-      print_stack_frame (get_selected_frame (), 0, LOCATION);
+      print_stack_frame (get_selected_frame (NULL), 0, LOCATION);
     }
   else
     {
@@ -661,7 +661,7 @@ do_captured_thread_select (struct ui_out *uiout, void *tidstr)
   ui_out_text (uiout, target_tid_to_str (inferior_ptid));
   ui_out_text (uiout, ")]");
 
-  print_stack_frame (get_selected_frame (), 1, SRC_AND_LOC);
+  print_stack_frame (get_selected_frame (NULL), 1, SRC_AND_LOC);
   return GDB_RC_OK;
 }
 

@@ -89,7 +89,7 @@ bsd_kvm_open (char *filename, int from_tty)
 
   flush_cached_frames ();
   select_frame (get_current_frame ());
-  print_stack_frame (get_selected_frame (), -1, 1);
+  print_stack_frame (get_selected_frame (NULL), -1, 1);
 }
 
 static void
@@ -245,7 +245,7 @@ bsd_kvm_proc_cmd (char *arg, int fromtty)
 
   flush_cached_frames ();
   select_frame (get_current_frame ());
-  print_stack_frame (get_selected_frame (), -1, 1);
+  print_stack_frame (get_selected_frame (NULL), -1, 1);
 }
 
 #endif
@@ -265,7 +265,7 @@ bsd_kvm_pcb_cmd (char *arg, int fromtty)
 
   flush_cached_frames ();
   select_frame (get_current_frame ());
-  print_stack_frame (get_selected_frame (), -1, 1);
+  print_stack_frame (get_selected_frame (NULL), -1, 1);
 }
 
 /* Add the libkvm interface to the list of all possible targets and

@@ -219,13 +219,15 @@ extern void flush_cached_frames (void);
 extern void reinit_frame_cache (void);
 
 /* On demand, create the selected frame and then return it.  If the
-   selected frame can not be created, this function throws an error.  */
+   selected frame can not be created, this function prints then throws
+   an error.  When MESSAGE is non-NULL, use it for the error message,
+   otherwize use a generic error message.  */
 /* FIXME: cagney/2002-11-28: At present, when there is no selected
    frame, this function always returns the current (inner most) frame.
    It should instead, when a thread has previously had its frame
    selected (but not resumed) and the frame cache invalidated, find
    and then return that thread's previously selected frame.  */
-extern struct frame_info *get_selected_frame (void);
+extern struct frame_info *get_selected_frame (const char *message);
 
 /* Select a specific frame.  NULL, apparently implies re-select the
    inner most frame.  */

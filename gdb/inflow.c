@@ -594,7 +594,7 @@ kill_command (char *arg, int from_tty)
       if (deprecated_selected_frame == NULL)
 	fputs_filtered ("No selected stack frame.\n", gdb_stdout);
       else
-	print_stack_frame (get_selected_frame (), 1, SRC_AND_LOC);
+	print_stack_frame (get_selected_frame (NULL), 1, SRC_AND_LOC);
     }
   bfd_cache_close_all ();
 }
