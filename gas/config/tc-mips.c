@@ -238,6 +238,8 @@ static int mips_gp32 = 0;
 #define ISA_HAS_64BIT_REGS(ISA) (    \
    (ISA) == ISA_MIPS3                \
    || (ISA) == ISA_MIPS4             \
+   || (ISA) == ISA_MIPS5             \
+   || (ISA) == ISA_MIPS32            \
    )
 
 /* Whether the processor uses hardware interlocks to protect
@@ -8884,6 +8886,10 @@ struct option md_longopts[] =
   {"no-construct-floats", no_argument, NULL, OPTION_NO_CONSTRUCT_FLOATS},
 #define OPTION_MIPS32 (OPTION_MD_BASE + 28)
   {"mips32", no_argument, NULL, OPTION_MIPS32},
+#define OPTION_MIPS5 (OPTION_MD_BASE + 29)
+  {"mips5", no_argument, NULL, OPTION_MIPS5},
+#define OPTION_MIPS64 (OPTION_MD_BASE + 30)
+  {"mips64", no_argument, NULL, OPTION_MIPS64},
 #ifdef OBJ_ELF
 #define OPTION_ELF_BASE    (OPTION_MD_BASE + 35)
 #define OPTION_CALL_SHARED (OPTION_ELF_BASE + 0)
@@ -8969,8 +8975,16 @@ md_parse_option (c, arg)
       mips_opts.isa = ISA_MIPS4;
       break;
 
+    case OPTION_MIPS5:
+      mips_opts.isa = ISA_MIPS5;
+      break;
+
     case OPTION_MIPS32:
       mips_opts.isa = ISA_MIPS32;
+      break;
+
+    case OPTION_MIPS64:
+      mips_opts.isa = ISA_MIPS64;
       break;
 
     case OPTION_MCPU:
@@ -9206,7 +9220,9 @@ MIPS options:\n\
 -mips2			generate MIPS ISA II instructions\n\
 -mips3			generate MIPS ISA III instructions\n\
 -mips4			generate MIPS ISA IV instructions\n\
+-mips5                  generate MIPS ISA V instructions\n\
 -mips32                 generate MIPS32 ISA instructions\n\
+-mips64                 generate MIPS64 ISA instructions\n\
 -mcpu=CPU		generate code for CPU, where CPU is one of:\n"));
 
   first = 1;
@@ -10234,15 +10250,15 @@ s_mipsset (x)
       isa = atoi (name + 4);
       switch (isa)
       {
-      case  0: mips_opts.isa = file_mips_isa; break;
-      case  1: mips_opts.isa = ISA_MIPS1;     break;
-      case  2: mips_opts.isa = ISA_MIPS2;     break;
-      case  3: mips_opts.isa = ISA_MIPS3;     break;
-      case  4: mips_opts.isa = ISA_MIPS4;     break;
-      case 32: mips_opts.isa = ISA_MIPS32;    break;
-      default:
-        as_bad (_("unknown ISA level"));
-        break;
+      case  0: mips_opts.isa = file_mips_isa;   break;
+      case  1: mips_opts.isa = ISA_MIPS1;       break;
+      case  2: mips_opts.isa = ISA_MIPS2;       break;
+      case  3: mips_opts.isa = ISA_MIPS3;       break;
+      case  5: mips_opts.isa = ISA_MIPS5;       break;
+      case  4: mips_opts.isa = ISA_MIPS4;       break;
+      case 32: mips_opts.isa = ISA_MIPS32;      break;
+      case 64: mips_opts.isa = ISA_MIPS64;      break;
+      default: as_bad (_("unknown ISA level")); break;
       }
     }
   else if (strcmp (name, "autoextend") == 0)
@@ -11914,12 +11930,23 @@ static const struct mips_cpu_info mips_cpu_info_table[] =
   /* MIPS4 ISA */
   { "MIPS4",          1,      ISA_MIPS4,      CPU_R8000, },
 
+  /* MIPS5 ISA */
+  { "MIPS5",          1,      ISA_MIPS5,      CPU_MIPS5, },
+  { "Generic-MIPS5",  0,      ISA_MIPS5,      CPU_MIPS5, },
+
   /* MIPS32 ISA */
   { "MIPS32",         1,      ISA_MIPS32,     CPU_MIPS32, },
   { "Generic-MIPS32", 0,      ISA_MIPS32,     CPU_MIPS32, },
 
+#if 1
   /* XXX for now, MIPS64 -> MIPS3 because of history */
   { "MIPS64",         1,      ISA_MIPS3,      CPU_R4000 }, /* XXX! */
+#else
+  /* MIPS64 ISA */
+  { "MIPS64",         1,      ISA_MIPS64,     CPU_MIPS64 },
+#endif
+  { "mips64isa",      1,      ISA_MIPS64,     CPU_MIPS64 },
+  { "Generic-MIPS64", 0,      ISA_MIPS64,     CPU_MIPS64, },
 
   /* R2000 CPU */
   { "R2000",          0,      ISA_MIPS1,      CPU_R2000, },

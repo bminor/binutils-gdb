@@ -276,7 +276,8 @@ Here is a brief summary of how to invoke @code{@value{AS}}.  For details,
 @end ifset
 @ifset MIPS
  [ -nocpp ] [ -EL ] [ -EB ] [ -G @var{num} ] [ -mcpu=@var{CPU} ]
- [ -mips1 ] [ -mips2 ] [ -mips3 ] [ -mips4 ] [ -mips32 ]
+ [ -mips1 ] [ -mips2 ] [ -mips3 ] [ -mips4 ] [ -mips5 ]
+ [ -mips32 ] [ -mips64 ]
  [ -m4650 ] [ -no-m4650 ]
  [ --trap ] [ --break ]
  [ --emulation=@var{name} ]
@@ -674,8 +675,11 @@ Generate ``little endian'' format output.
 @itemx -mips32
 Generate code for a particular MIPS Instruction Set Architecture level.
 @samp{-mips1} corresponds to the @sc{r2000} and @sc{r3000} processors,
-@samp{-mips2} to the @sc{r6000} processor, @samp{-mips3} to the @sc{r4000}
-processor, @samp{-mips32} to a generic @sc{MIPS32} processor.
+@samp{-mips2} to the @sc{r6000} processor, and @samp{-mips3} to the @sc{r4000}
+processor.
+@samp{-mips5}, @samp{-mips32}, and @samp{-mips64} correspond
+to generic @sc{MIPS V}, @sc{MIPS32}, and @sc{MIPS64} ISA
+processors, respectively.
 
 @item -m4650
 @itemx -no-m4650

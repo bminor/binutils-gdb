@@ -52,6 +52,21 @@
         4Kp entries with a single mips32-4k entry.  Note that you can
         use ".set mips32".
 
+        * tc-mips.c (ISA_HAS_64BIT_REGS): Add checks for ISA_MIPS5 and
+        ISA_MIPS64.
+        (md_longopts, OPTION_MIPS5, OPTION_MIPS64): Add options for
+        -mips5 and -mips64.
+        (md_parse_option): Add cases for OPTION_MIPS5 and
+        OPTION_MIPS64.
+        (md_show_usage): Mention -mips5 and -mips64 arguments.
+        (s_mipsset): Add cases for MIPS5 and MIPS64.
+        (mips_cpu_info_table): Add entries for MIPS5 and MIPS64 ISAs
+        and pseudo-CPUs.
+        * doc/as.texinfo: Mention -mips5 and -mips64 options
+        and their meanings.
+        * doc/c-mips.texi: Likewise.  Also update introduction
+        and ".set" usage information.
+
 2000-12-01      Joel Sherrill <joel@OARcorp.com>
 
 	* configure.in (arm-*-rtems*, a29k-*rtems*, h8300-*-rtems*):

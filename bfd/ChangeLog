@@ -23,6 +23,19 @@
         (_bfd_mips_elf_print_private_bfd_data): Print ISA name for
         MIPS32.
 
+        * aoutx.h (NAME(aout,machine_type)): Add cases for
+        bfd_mach_mips5 and bfd_mach_mips64.
+        * archures.c (bfd_mach_mips5, bfd_mach_mips64): New constants.
+        * bfd-in2.h (bfd_mach_mips5, bfd_mach_mips64): Likewise.
+        * cpu_mips.c (I_mips5, I_mips64): New definitions.
+        (arch_info_struct): Add entries for bfd_mach_mips5 and
+        bfd_mach_mips64.
+        * elf32-mips.c (elf_mips_isa, elf_mips_mach,
+        _bfd_mips_elf_print_private_bfd_data): Add cases for
+        E_MIPS_ARCH_5 and E_MIPS_ARCH_64.
+        (_bfd_mips_elf_final_write_processing): Add cases for
+        bfd_mach_mips5 and bfd_mach_mips64.
+
 2000-12-01      Joel Sherrill <joel@OARcorp.com>
 
 	* config.bfd (arm-*-rtems*, a29k-*rtems*): New targets.

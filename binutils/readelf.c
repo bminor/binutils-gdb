@@ -1471,8 +1471,14 @@ get_machine_flags (e_flags, e_machine)
 	  if ((e_flags & EF_MIPS_ARCH) == E_MIPS_ARCH_4)
 	    strcat (buf, ", mips4");
 
+	  if ((e_flags & EF_MIPS_ARCH) == E_MIPS_ARCH_5)
+	    strcat (buf, ", mips5");
+
 	  if ((e_flags & EF_MIPS_ARCH) == E_MIPS_ARCH_32)
 	    strcat (buf, ", mips32");
+
+	  if ((e_flags & EF_MIPS_ARCH) == E_MIPS_ARCH_64)
+	    strcat (buf, ", mips64");
 
 	  switch ((e_flags & EF_MIPS_MACH))
 	    {

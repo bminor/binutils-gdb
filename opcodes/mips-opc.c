@@ -78,6 +78,7 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  *
 #define I4	INSN_ISA4
 #define I5	INSN_ISA5
 #define I32	INSN_ISA32
+#define I64     INSN_ISA64
 
 #define P3	INSN_4650
 #define L1	INSN_4010

@@ -4,6 +4,9 @@
         EF_MIPS_ARCH.  Replace use of E_MIPS_MACH_MIPS32 with
         E_MIPS_MACH_MIPS32_4K and adjust printed CPU name similarly.
 
+        * readelf.c (get_machine_flags): Add cases for E_MIPS_ARCH_5,
+        and E_MIPS_ARCH_64.
+
 2000-11-30  Richard Earnshaw  <rearnsha@arm.com>
 
 	* readelf.c (frame_display_row): Output 's' for DW_CFA_same_value.
