@@ -1,3 +1,7 @@
+2002-07-16  Moritz Jodeit  <moritz@jodeit.org>
+
+	* config/tc-z8k.c (build_bytes): Correct order of memset args.
+
 2002-07-16  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* NEWS: Add 'Changes in 2.13'.
