@@ -1,3 +1,9 @@
+2002-08-19  Elena Zannoni <ezannoni@redhat.com>
+ 
+        * archures.c (bfd_mach_ppc_e500): Added.
+        * bfd-in2.h: Rebuilt.
+	* cpu-powerpc.c (bfd_powerpc_archs): Added e500.
+
 2002-08-19  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-m68hc12.c (elf_backend_can_gc_sections): False.

@@ -182,6 +182,7 @@ DESCRIPTION
 .#define bfd_mach_ppc_rs64ii	642
 .#define bfd_mach_ppc_rs64iii	643
 .#define bfd_mach_ppc_7400	7400
+.#define bfd_mach_ppc_e500      500
 .  bfd_arch_rs6000,    {* IBM RS/6000 *}
 .#define bfd_mach_rs6k		0
 .#define bfd_mach_rs6k_rs1	6001
