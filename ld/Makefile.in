@@ -1,4 +1,4 @@
-# Makefile.in generated automatically by automake 1.4-p6 from Makefile.am
+# Makefile.in generated automatically by automake 1.4-p5 from Makefile.am
 
 # Copyright (C) 1994, 1995-8, 1999, 2001 Free Software Foundation, Inc.
 # This Makefile.in is free software; the Free Software Foundation
@@ -201,7 +201,7 @@ INCLUDES = -D_GNU_SOURCE -I. -I$(srcdir) -I../bfd -I$(BFDDIR) -I$(INCDIR) -I$(to
 BFDLIB = ../bfd/libbfd.la
 LIBIBERTY = ../libiberty/libiberty.a
 
-ALL_EMULATIONS =  	ea29k.o 	eaixppc.o 	eaixrs6.o 	ealpha.o 	earcelf.o 	earm_epoc_pe.o 	earmaoutb.o 	earmaoutl.o 	earmcoff.o 	earmelf.o 	earmelfb.o 	earmelf_fbsd.o 	earmelf_linux.o 	earmelfb_linux.o 	earmelf_nbsd.o 	earmelfb_nbsd.o 	earmnto.o 	earmnbsd.o 	earmpe.o 	earmsymbian.o 	eavr2.o 	eavr1.o 	eavr3.o 	eavr4.o 	eavr5.o 	ecoff_i860.o 	ecoff_sparc.o 	ecrisaout.o 	ecriself.o 	ecrislinux.o 	ed10velf.o 	ed30v_e.o 	ed30v_o.o 	ed30velf.o 	edelta68.o 	eelf32_dlx.o 	eebmon29k.o 	eelf32_i960.o 	eelf32_i860.o 	eelf32_sparc.o 	eelf32b4300.o 	eelf32cr16c.o 	eelf32bmip.o 	eelf32bmipn32.o 	eelf32btsmip.o 	eelf32crx.o 	eelf32btsmipn32.o 	eelf32ltsmip.o 	eelf32ltsmipn32.o 	eelf32ebmip.o 	eelf32elmip.o 	eelf32fr30.o 	eelf32frv.o 	eelf32i370.o 	eelf32ip2k.o 	eelf32iq2000.o 	eelf32iq10.o 	eelf32l4300.o 	eelf32lmip.o 	eelf32lppc.o 	eelf32lppcnto.o 	eelf32lppcsim.o 	eelf32mcore.o 	eelf32mipswindiss.o 	eelf32openrisc.o 	eelf32ppc.o 	eelf32ppc_fbsd.o 	eelf32ppclinux.o 	eelf32ppcnto.o 	eelf32ppcsim.o 	eelf32ppcwindiss.o 	eelf32vax.o 	eelf32xstormy16.o 	eelf32xtensa.o 	eelf_i386.o 	eelf_i386_be.o 	eelf_i386_chaos.o 	eelf_i386_fbsd.o 	eelf_i386_ldso.o 	eelf_s390.o 	egld960.o 	egld960coff.o 	eh8300.o 	eh8300h.o 	eh8300s.o 	eh8300elf.o 	eh8300hn.o 	eh8300sn.o 	eh8300sx.o 	eh8300helf.o 	eh8300self.o 	eh8300hnelf.o 	eh8300snelf.o 	eh8300sxelf.o 	eh8300sxn.o 	eh8300sxnelf.o 	eh8500.o 	eh8500b.o 	eh8500c.o 	eh8500m.o 	eh8500s.o 	ehp300bsd.o 	ehp3hpux.o 	ehppaelf.o 	ehppalinux.o 	ehppanbsd.o 	ehppaobsd.o 	ei386aout.o 	ei386beos.o 	ei386bsd.o 	ei386coff.o 	ei386go32.o 	ei386linux.o 	ei386lynx.o 	ei386mach.o 	ei386moss.o 	ei386msdos.o 	ei386nbsd.o 	ei386nto.o 	ei386nw.o 	ei386pe.o 	ei386pe_posix.o 	elnk960.o 	em32relf.o 	em32rlelf.o 	em32relf_linux.o 	em32rlelf_linux.o 	em68hc11elf.o 	em68hc11elfb.o 	em68hc12elf.o 	em68hc12elfb.o 	em68k4knbsd.o 	em68kaout.o 	em68kaux.o 	em68kcoff.o 	em68kelf.o 	em68kelfnbsd.o 	em68klinux.o 	em68klynx.o 	em68knbsd.o 	em68kpsos.o 	em88kbcs.o 	emcorepe.o 	emipsbig.o 	emipsbsd.o 	emipsidt.o 	emipsidtl.o 	emipslit.o 	emipslnews.o 	emipspe.o 	emsp430x110.o 	emsp430x112.o 	emsp430x1101.o 	emsp430x1111.o 	emsp430x1121.o 	emsp430x1122.o 	emsp430x1132.o 	emsp430x122.o 	emsp430x123.o 	emsp430x1222.o 	emsp430x1232.o 	emsp430x133.o 	emsp430x135.o 	emsp430x1331.o 	emsp430x1351.o 	emsp430x147.o 	emsp430x148.o 	emsp430x149.o 	emsp430x155.o 	emsp430x156.o 	emsp430x157.o 	emsp430x167.o 	emsp430x168.o 	emsp430x169.o 	emsp430x1610.o 	emsp430x1611.o 	emsp430x1612.o 	emsp430x311.o 	emsp430x312.o 	emsp430x313.o 	emsp430x314.o 	emsp430x315.o 	emsp430x323.o 	emsp430x325.o 	emsp430x336.o 	emsp430x337.o 	emsp430x412.o 	emsp430x413.o 	emsp430x415.o 	emsp430x417.o 	emsp430xE423.o 	emsp430xE425.o 	emsp430xE427.o 	emsp430xW423.o 	emsp430xW425.o 	emsp430xW427.o 	emsp430xG437.o 	emsp430xG438.o 	emsp430xG439.o 	emsp430x435.o 	emsp430x436.o 	emsp430x437.o 	emsp430x447.o 	emsp430x448.o 	emsp430x449.o 	enews.o 	ens32knbsd.o 	eor32.o 	eor32elf.o 	epc532macha.o 	epdp11.o 	epjelf.o 	epjlelf.o 	eppcmacos.o 	eppcnw.o 	eppcpe.o 	eppclynx.o 	eriscix.o 	esa29200.o 	esh.o 	eshelf32.o 	eshlelf32.o 	eshelf32_linux.o 	eshlelf32_linux.o 	eshelf32_nbsd.o 	eshlelf32_nbsd.o 	eshelf.o 	eshelf_linux.o 	eshlelf_linux.o 	eshelf_nbsd.o 	eshlelf_nbsd.o 	eshelf_nto.o 	eshlelf_nto.o 	eshl.o 	eshlelf.o 	eshlsymbian.o 	eshpe.o 	esparcaout.o 	esparclinux.o 	esparclynx.o 	esparcnbsd.o 	est2000.o 	esun3.o 	esun4.o 	etic30aout.o 	etic30coff.o 	etic3xcoff.o 	etic3xcoff_onchip.o 	etic4xcoff.o 	etic54xcoff.o 	etic80coff.o 	evanilla.o 	evax.o 	evaxnbsd.o 	evsta.o 	ew65.o 	ez8001.o 	  eelf32frvfd.o 	ez8002.o
+ALL_EMULATIONS =  	ea29k.o 	eaixppc.o 	eaixrs6.o 	ealpha.o 	earcelf.o 	earm_epoc_pe.o 	earmaoutb.o 	earmaoutl.o 	earmcoff.o 	earmelf.o 	earmelfb.o 	earmelf_fbsd.o 	earmelf_linux.o 	earmelfb_linux.o 	earmelf_nbsd.o 	earmelfb_nbsd.o 	earmnto.o 	earmnbsd.o 	earmpe.o 	earmsymbian.o 	eavr2.o 	eavr1.o 	eavr3.o 	eavr4.o 	eavr5.o 	ecoff_i860.o 	ecoff_sparc.o 	ecrisaout.o 	ecriself.o 	ecrislinux.o 	ed10velf.o 	ed30v_e.o 	ed30v_o.o 	ed30velf.o 	edelta68.o 	eelf32_dlx.o 	eebmon29k.o 	eelf32_i960.o 	eelf32_i860.o 	eelf32_sparc.o 	eelf32b4300.o 	eelf32cr16c.o 	eelf32bmip.o 	eelf32bmipn32.o 	eelf32btsmip.o 	eelf32crx.o 	eelf32btsmipn32.o 	eelf32ltsmip.o 	eelf32ltsmipn32.o 	eelf32ebmip.o 	eelf32elmip.o 	eelf32fr30.o 	eelf32frv.o 	eelf32i370.o 	eelf32ip2k.o 	eelf32iq2000.o 	eelf32iq10.o 	eelf32l4300.o 	eelf32lmip.o 	eelf32lppc.o 	eelf32lppcnto.o 	eelf32lppcsim.o 	eelf32mcore.o 	eelf32mipswindiss.o 	eelf32openrisc.o 	eelf32ppc.o 	eelf32ppc_fbsd.o 	eelf32ppclinux.o 	eelf32ppcnto.o 	eelf32ppcsim.o 	eelf32ppcwindiss.o 	eelf32vax.o 	eelf32xstormy16.o 	eelf32xtensa.o 	eelf_i386.o 	eelf_i386_be.o 	eelf_i386_chaos.o 	eelf_i386_fbsd.o 	eelf_i386_ldso.o 	eelf_s390.o 	egld960.o 	egld960coff.o 	eh8300.o 	eh8300h.o 	eh8300s.o 	eh8300elf.o 	eh8300hn.o 	eh8300sn.o 	eh8300sx.o 	eh8300helf.o 	eh8300self.o 	eh8300hnelf.o 	eh8300snelf.o 	eh8300sxelf.o 	eh8300sxn.o 	eh8300sxnelf.o 	eh8500.o 	eh8500b.o 	eh8500c.o 	eh8500m.o 	eh8500s.o 	ehp300bsd.o 	ehp3hpux.o 	ehppaelf.o 	ehppalinux.o 	ehppanbsd.o 	ehppaobsd.o 	ei386aout.o 	ei386beos.o 	ei386bsd.o 	ei386coff.o 	ei386go32.o 	ei386linux.o 	ei386lynx.o 	ei386mach.o 	ei386moss.o 	ei386msdos.o 	ei386nbsd.o 	ei386nto.o 	ei386nw.o 	ei386pe.o 	ei386pe_posix.o 	elnk960.o 	em32relf.o 	em32rlelf.o 	em32relf_linux.o 	em32rlelf_linux.o 	em68hc11elf.o 	em68hc11elfb.o 	em68hc12elf.o 	em68hc12elfb.o 	em68k4knbsd.o 	em68kaout.o 	em68kaux.o 	em68kcoff.o 	em68kelf.o 	em68kelfnbsd.o 	em68klinux.o 	em68klynx.o 	em68knbsd.o 	em68kpsos.o 	em88kbcs.o 	emaxqcoff.o 	emcorepe.o 	emipsbig.o 	emipsbsd.o 	emipsidt.o 	emipsidtl.o 	emipslit.o 	emipslnews.o 	emipspe.o 	emsp430x110.o 	emsp430x112.o 	emsp430x1101.o 	emsp430x1111.o 	emsp430x1121.o 	emsp430x1122.o 	emsp430x1132.o 	emsp430x122.o 	emsp430x123.o 	emsp430x1222.o 	emsp430x1232.o 	emsp430x133.o 	emsp430x135.o 	emsp430x1331.o 	emsp430x1351.o 	emsp430x147.o 	emsp430x148.o 	emsp430x149.o 	emsp430x155.o 	emsp430x156.o 	emsp430x157.o 	emsp430x167.o 	emsp430x168.o 	emsp430x169.o 	emsp430x1610.o 	emsp430x1611.o 	emsp430x1612.o 	emsp430x311.o 	emsp430x312.o 	emsp430x313.o 	emsp430x314.o 	emsp430x315.o 	emsp430x323.o 	emsp430x325.o 	emsp430x336.o 	emsp430x337.o 	emsp430x412.o 	emsp430x413.o 	emsp430x415.o 	emsp430x417.o 	emsp430xE423.o 	emsp430xE425.o 	emsp430xE427.o 	emsp430xW423.o 	emsp430xW425.o 	emsp430xW427.o 	emsp430xG437.o 	emsp430xG438.o 	emsp430xG439.o 	emsp430x435.o 	emsp430x436.o 	emsp430x437.o 	emsp430x447.o 	emsp430x448.o 	emsp430x449.o 	enews.o 	ens32knbsd.o 	eor32.o 	eor32elf.o 	epc532macha.o 	epdp11.o 	epjelf.o 	epjlelf.o 	eppcmacos.o 	eppcnw.o 	eppcpe.o 	eppclynx.o 	eriscix.o 	esa29200.o 	esh.o 	eshelf32.o 	eshlelf32.o 	eshelf32_linux.o 	eshlelf32_linux.o 	eshelf32_nbsd.o 	eshlelf32_nbsd.o 	eshelf.o 	eshelf_linux.o 	eshlelf_linux.o 	eshelf_nbsd.o 	eshlelf_nbsd.o 	eshelf_nto.o 	eshlelf_nto.o 	eshl.o 	eshlelf.o 	eshlsymbian.o 	eshpe.o 	esparcaout.o 	esparclinux.o 	esparclynx.o 	esparcnbsd.o 	est2000.o 	esun3.o 	esun4.o 	etic30aout.o 	etic30coff.o 	etic3xcoff.o 	etic3xcoff_onchip.o 	etic4xcoff.o 	etic54xcoff.o 	etic80coff.o 	evanilla.o 	evax.o 	evaxnbsd.o 	evsta.o 	ew65.o 	ez8001.o 	  eelf32frvfd.o 	ez8002.o
 
 
 ALL_64_EMULATIONS =  	eelf64_aix.o 	eelf64_ia64.o 	eelf64_ia64_fbsd.o 	eshelf64.o 	eshlelf64.o 	eshelf64_nbsd.o 	eshlelf64_nbsd.o 	eelf_x86_64.o 	eelf_x86_64_fbsd.o 	eelf64_s390.o 	eelf64_sparc.o 	eelf64_sparc_fbsd.o 	eelf64alpha.o 	eelf64alpha_fbsd.o 	eelf64alpha_nbsd.o 	eelf64bmip.o 	eelf64btsmip.o 	eelf64ltsmip.o 	eelf64hppa.o 	eelf64mmix.o 	emmo.o 	eelf64ppc.o 	eelf64lppc.o 	ehppa64linux.o
@@ -301,7 +301,7 @@ deffilep.c ldgram.c ldlex.c
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
-TAR = tar
+TAR = gtar
 GZIP_ENV = --best
 SOURCES = $(ld_new_SOURCES) $(EXTRA_ld_new_SOURCES)
 OBJECTS = $(ld_new_OBJECTS)
@@ -644,7 +644,7 @@ TAGS: tags-recursive $(HEADERS) $(SOURCES) config.in $(TAGS_DEPENDENCIES) $(LISP
 	  awk '    { files[$$0] = 1; } \
 	       END { for (i in files) print i; }'`; \
 	test -z "$(ETAGS_ARGS)config.in$$unique$(LISP)$$tags" \
-	  || (cd $(srcdir) && etags -o $$here/TAGS $(ETAGS_ARGS) $$tags config.in $$unique $(LISP))
+	  || (cd $(srcdir) && etags $(ETAGS_ARGS) $$tags config.in $$unique $(LISP) -o $$here/TAGS)
 
 mostlyclean-tags:
 
@@ -734,7 +734,7 @@ site.exp: Makefile
 	@echo 'set build_alias $(build_alias)' >> $@-t
 	@echo 'set build_triplet $(build_triplet)' >> $@-t
 	@echo '## All variables above are generated by configure. Do Not Edit ##' >> $@-t
-	@test ! -f $(srcdir)/site.exp || sed '1,/^## All variables above are.*##/ d' $(srcdir)/site.exp >> $@-t
+	@test ! -f site.exp || sed '1,/^## All variables above are.*##/ d' site.exp >> $@-t
 	@test ! -f site.exp || mv site.exp site.bak
 	@mv $@-t site.exp
 info-am: $(INFO_DEPS)
@@ -783,7 +783,7 @@ distclean-generic:
 	-test -z "$(DISTCLEANFILES)" || rm -f $(DISTCLEANFILES)
 
 maintainer-clean-generic:
-	-test -z "ldlexcdeffilephdeffilepcldgramhldgramc$(MAINTAINERCLEANFILES)" || rm -f ldlexc deffileph deffilepc ldgramh ldgramc $(MAINTAINERCLEANFILES)
+	-test -z "ldlexldeffilephdeffilepcldgramhldgramc$(MAINTAINERCLEANFILES)" || rm -f ldlexl deffileph deffilepc ldgramh ldgramc $(MAINTAINERCLEANFILES)
 mostlyclean-am:  mostlyclean-hdr mostlyclean-noinstPROGRAMS \
 		mostlyclean-compile mostlyclean-libtool \
 		mostlyclean-aminfo mostlyclean-tags mostlyclean-generic \
@@ -1455,6 +1455,9 @@ em68kpsos.c:	$(srcdir)/emulparams/m68kpsos.sh \
 em88kbcs.c: $(srcdir)/emulparams/m88kbcs.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/m88kbcs.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} m88kbcs "$(tdir_m88kbcs)"
+emaxqcoff.c: $(srcdir)/emulparams/maxqcoff.sh \
+  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/maxqcoff.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} maxqcoff "$(tdir_maxqcoff)"
 emcorepe.c: $(srcdir)/emulparams/mcorepe.sh \
   $(srcdir)/emultempl/pe.em $(srcdir)/scripttempl/pe.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} mcorepe "$(tdir_mcorepe)"

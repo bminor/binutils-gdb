@@ -234,6 +234,10 @@ DESCRIPTION
 .#define bfd_mach_sh_dsp     0x2d
 .#define bfd_mach_sh2a       0x2a
 .#define bfd_mach_sh2a_nofpu 0x2b
+.#define bfd_mach_sh2a_fake1 0x2a1
+.#define bfd_mach_sh2a_fake2 0x2a2
+.#define bfd_mach_sh2a_fake3 0x2a3
+.#define bfd_mach_sh2a_fake4 0x2a4
 .#define bfd_mach_sh2e       0x2e
 .#define bfd_mach_sh3        0x30
 .#define bfd_mach_sh3_nommu  0x31
@@ -350,6 +354,7 @@ DESCRIPTION
 .#define bfd_mach_msp44          44
 .  bfd_arch_xtensa,    {* Tensilica's Xtensa cores.  *}
 .#define bfd_mach_xtensa	1
+.   bfd_arch_maxq,     {* Dallas MAXQ 10/20 *}
 .  bfd_arch_last
 .  };
 */
@@ -416,6 +421,7 @@ extern const bfd_arch_info_type bfd_m68hc11_arch;
 extern const bfd_arch_info_type bfd_m68hc12_arch;
 extern const bfd_arch_info_type bfd_m68k_arch;
 extern const bfd_arch_info_type bfd_m88k_arch;
+extern const bfd_arch_info_type bfd_maxq_arch;
 extern const bfd_arch_info_type bfd_mcore_arch;
 extern const bfd_arch_info_type bfd_mips_arch;
 extern const bfd_arch_info_type bfd_mmix_arch;
@@ -478,6 +484,7 @@ static const bfd_arch_info_type * const bfd_archures_list[] =
     &bfd_m68hc12_arch,
     &bfd_m68k_arch,
     &bfd_m88k_arch,
+    &bfd_maxq_arch,
     &bfd_mcore_arch,
     &bfd_mips_arch,
     &bfd_mmix_arch,

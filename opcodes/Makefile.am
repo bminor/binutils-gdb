@@ -116,6 +116,7 @@ CFILES = \
 	m68k-dis.c \
 	m68k-opc.c \
 	m88k-dis.c \
+	maxq-dis.c \
 	mcore-dis.c \
 	mips-dis.c \
 	mips-opc.c \
@@ -233,6 +234,7 @@ ALL_MACHINES = \
 	m10200-opc.lo \
 	m10300-dis.lo \
 	m10300-opc.lo \
+	maxq-dis.lo \
 	mcore-dis.lo \
 	mips-dis.lo \
 	mips-opc.lo \
@@ -717,6 +719,8 @@ m68k-opc.lo: m68k-opc.c sysdep.h config.h $(INCDIR)/ansidecl.h \
 m88k-dis.lo: m88k-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/symcat.h $(INCDIR)/opcode/m88k.h \
   opintl.h $(INCDIR)/libiberty.h
+maxq-dis.lo: maxq-dis.c sysdep.h config.h $(INCDIR)/opcode/maxq.h \
+  $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/symcat.h
 mcore-dis.lo: mcore-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   mcore-opc.h $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/symcat.h
 mips-dis.lo: mips-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \

@@ -1,3 +1,20 @@
+2004-11-08  Inderpreet Singh   <inderpreetb@nioda.hcltech.com>
+	    Vineet Sharma      <vineets@noida.hcltech.com>
+
+	* coff-maxq.c: New File.
+        * cpu-maxq.c: New File.
+        * coffcode.h: Likewise.
+        * config.bfd: Likewise.
+        * configure.in (maxqcoff_vec): New target vector.
+	* Makefile.am: Add support for maxq target.
+	* configure.in: Likewise.
+        * archures.c:. Likewise.
+        * targets.c: Likewise.
+        * bfd_in2.h : Regenerated.
+	* Makefile.in: Regenerated.
+	* configure: Regenerated.
+	* doc/Makefile.in: Regenerated.
+
 2004-11-08  Aaron W. LaFramboise <aaron98wiridge9@aaronwl.com>
 
 	* coff-i386.c (coff_i386_reloc): Fix weak symbols.

@@ -130,6 +130,7 @@ m68*-sun-sunos[34]*)	targ_emul=sun3 ;;
 m68*-wrs-vxworks*)	targ_emul=sun3 ;;
 m68*-ericsson-ose)	targ_emul=sun3 ;;
 m68*-apple-aux*)	targ_emul=m68kaux ;;
+maxq-*-coff)            targ_emul=maxqcoff;;
 *-tandem-none)		targ_emul=st2000 ;;
 i370-*-elf* | i370-*-linux-gnu*) targ_emul=elf32i370 ;;
 i[3-7]86-*-nto-qnx*)	targ_emul=i386nto ;;

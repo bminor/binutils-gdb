@@ -71,6 +71,7 @@ m6811*|m68hc11*) targ_archs="bfd_m68hc11_arch bfd_m68hc12_arch" ;;
 m6812*|m68hc12*) targ_archs="bfd_m68hc12_arch bfd_m68hc11_arch" ;;
 m68*)		 targ_archs=bfd_m68k_arch ;;
 m88*)		 targ_archs=bfd_m88k_arch ;;
+maxq*)		 targ_archs=bfd_maxq_arch ;;
 mips*)		 targ_archs=bfd_mips_arch ;;
 or32*)		 targ_archs=bfd_or32_arch ;;
 pdp11*)		 targ_archs=bfd_pdp11_arch ;;
@@ -784,6 +785,10 @@ case "${targ}" in
   m88*-*-*)
     targ_defvec=m88kbcs_vec
     targ_underscore=yes
+    ;;
+
+  maxq-*-coff)
+    targ_defvec=maxqcoff_vec
     ;;
 
   mcore-*-elf)

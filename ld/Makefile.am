@@ -250,6 +250,7 @@ ALL_EMULATIONS = \
 	em68knbsd.o \
 	em68kpsos.o \
 	em88kbcs.o \
+	emaxqcoff.o \
 	emcorepe.o \
 	emipsbig.o \
 	emipsbsd.o \
@@ -1042,6 +1043,9 @@ em68kpsos.c:	$(srcdir)/emulparams/m68kpsos.sh \
 em88kbcs.c: $(srcdir)/emulparams/m88kbcs.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/m88kbcs.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} m88kbcs "$(tdir_m88kbcs)"
+emaxqcoff.c: $(srcdir)/emulparams/maxqcoff.sh \
+  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/maxqcoff.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} maxqcoff "$(tdir_maxqcoff)"
 emcorepe.c: $(srcdir)/emulparams/mcorepe.sh \
   $(srcdir)/emultempl/pe.em $(srcdir)/scripttempl/pe.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} mcorepe "$(tdir_mcorepe)"

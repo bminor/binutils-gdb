@@ -1,5 +1,7 @@
 -*- text -*-
 
+* Port to MAXQ processor contributed by HCL Tech.
+
 * Added SEGMENT_START to the linker script language to permit the user to
   override the base address for a segment from the command-line.
 

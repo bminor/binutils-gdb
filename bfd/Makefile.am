@@ -83,6 +83,7 @@ ALL_MACHINES = \
 	cpu-m88k.lo \
 	cpu-m10200.lo \
 	cpu-m10300.lo \
+	cpu-maxq.lo \
 	cpu-mcore.lo \
 	cpu-mips.lo \
 	cpu-mmix.lo \
@@ -140,6 +141,7 @@ ALL_MACHINES_CFILES = \
 	cpu-m88k.c \
 	cpu-m10200.c \
 	cpu-m10300.c \
+	cpu-mawq.c \
 	cpu-mcore.c \
 	cpu-mips.c \
 	cpu-mmix.c \
@@ -194,6 +196,7 @@ BFD32_BACKENDS = \
 	coff-i960.lo \
 	coff-m68k.lo \
 	coff-m88k.lo \
+	coff-maxq.lo \
 	coff-mips.lo \
 	coff-or32.lo \
 	coff-rs6000.lo \
@@ -362,6 +365,7 @@ BFD32_BACKENDS_CFILES = \
 	coff-i960.c \
 	coff-m68k.c \
 	coff-m88k.c \
+	coff-maxq.c \
 	coff-mips.c \
 	coff-or32.c \
 	coff-rs6000.c \
@@ -967,6 +971,7 @@ cpu-m88k.lo: cpu-m88k.c $(INCDIR)/filenames.h
 cpu-m10200.lo: cpu-m10200.c $(INCDIR)/filenames.h
 cpu-m10300.lo: cpu-m10300.c $(INCDIR)/filenames.h
 cpu-mcore.lo: cpu-mcore.c $(INCDIR)/filenames.h
+cpu-maxq.lo: cpu-maxq.c $(INCDIR)/filenames.h
 cpu-mips.lo: cpu-mips.c $(INCDIR)/filenames.h
 cpu-mmix.lo: cpu-mmix.c $(INCDIR)/filenames.h
 cpu-msp430.lo: cpu-msp430.c $(INCDIR)/filenames.h
@@ -1075,6 +1080,9 @@ coff-m68k.lo: coff-m68k.c $(INCDIR)/filenames.h $(INCDIR)/coff/m68k.h \
 coff-m88k.lo: coff-m88k.c $(INCDIR)/filenames.h $(INCDIR)/coff/m88k.h \
   $(INCDIR)/coff/external.h $(INCDIR)/coff/internal.h \
   libcoff.h $(INCDIR)/bfdlink.h coffcode.h coffswap.h
+coff-maxq.lo: coff-maxq.c $(INCDIR)/filenames.h $(INCDIR)/coff/maxq.h \
+  $(INCDIR)/coff/internal.h libcoff.h $(INCDIR)/libiberty.h \
+  coffcode.h coffswap.h
 coff-mips.lo: coff-mips.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
   $(INCDIR)/coff/internal.h $(INCDIR)/coff/sym.h $(INCDIR)/coff/symconst.h \
   $(INCDIR)/coff/ecoff.h $(INCDIR)/coff/mips.h $(INCDIR)/coff/external.h \

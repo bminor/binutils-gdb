@@ -1,3 +1,13 @@
+2004-11-08  Inderpreet Singh   <inderpreetb@nioda.hcltech.com>
+	    Vineet Sharma      <vineets@noida.hcltech.com>
+
+	* configure.in: Add support for new target maxq-coff.
+	* configure: Regenerate.
+	* NEWS: Mention new support.
+	* config/tc-maxq.c: New file.
+	* config/tc-maxq.h: New file.
+	* config/obj-coff.h: Add support for maxq-coff.
+
 2004-11-08  Aaron W. LaFramboise <aaron98wiridge9@aaronwl.com>
 
 	* symbols.c (any_external_name): Define.

@@ -1685,6 +1685,10 @@ enum bfd_architecture
 #define bfd_mach_sh_dsp     0x2d
 #define bfd_mach_sh2a       0x2a
 #define bfd_mach_sh2a_nofpu 0x2b
+#define bfd_mach_sh2a_fake1 0x2a1
+#define bfd_mach_sh2a_fake2 0x2a2
+#define bfd_mach_sh2a_fake3 0x2a3
+#define bfd_mach_sh2a_fake4 0x2a4
 #define bfd_mach_sh2e       0x2e
 #define bfd_mach_sh3        0x30
 #define bfd_mach_sh3_nommu  0x31
@@ -1801,6 +1805,7 @@ enum bfd_architecture
 #define bfd_mach_msp44          44
   bfd_arch_xtensa,    /* Tensilica's Xtensa cores.  */
 #define bfd_mach_xtensa        1
+   bfd_arch_maxq,     /* Dallas MAXQ 10/20 */
   bfd_arch_last
   };
 

@@ -736,6 +736,7 @@ do
     m88kbcs_vec)		tb="$tb coff-m88k.lo" ;;
     m88kmach3_vec)		tb="$tb m88kmach3.lo aout32.lo" ;;
     m88kopenbsd_vec)		tb="$tb m88kopenbsd.lo aout32.lo" ;;
+    maxqcoff_vec)               tb="$tb coff-maxq.lo" ;;
     mach_o_be_vec)              tb="$tb mach-o.lo" ;;
     mach_o_le_vec)              tb="$tb mach-o.lo" ;;
     mach_o_fat_vec)             tb="$tb mach-o.lo" ;;

@@ -1,3 +1,13 @@
+2004-11-08  Inderpreet Singh   <inderpreetb@nioda.hcltech.com>
+	    Vineet Sharma      <vineets@noida.hcltech.com>
+
+	* Makefile.am: Add entries for new maxq-coff target.
+	* Makefile.in: Regenerate.
+	* configure.tgt: Add support for maxq.
+	* emulparams/maxqcoff.sh: New File.
+	* scripttempl/maxqcoff.sc: New linker script for target maxq.
+	* NEWS: Mention the new target.
+
 2004-11-08  Aaron W. LaFramboise <aaron98wiridge9@aaronwl.com>
 
 	* testsuite/ld-scripts/weak.exp: Enable test on PE,

@@ -149,6 +149,7 @@ changequote([,])dnl
       m683??)		cpu_type=m68k ;;
       m5200)		cpu_type=m68k ;;
       m8*)		cpu_type=m88k ;;
+      maxq)             cpu_type=maxq ;;
       mips*el)		cpu_type=mips endian=little ;;
       mips*)		cpu_type=mips endian=big ;;
       or32*)		cpu_type=or32 endian=big ;;
@@ -379,6 +380,8 @@ changequote([,])dnl
 
       m88k-motorola-sysv3*)		fmt=coff em=delt88 ;;
       m88k-*-coff*)			fmt=coff ;;
+
+      maxq-*-coff)      		fmt=coff ;;
 
       mcore-*-elf)			fmt=elf ;;
       mcore-*-pe)			fmt=coff em=pe bfd_gas=yes ;;

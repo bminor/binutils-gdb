@@ -1,5 +1,7 @@
 -*- text -*-
 
+* Port to MAXQ processor contributed by HCL Tech.
+
 * Added support for generating unwind tables for ARM ELF targets.
 
 * Add a -g command line option to generate debug information in the target's

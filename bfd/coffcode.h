@@ -1986,6 +1986,12 @@ coff_set_arch_mach_hook (abfd, filehdr)
       machine = bfd_mach_m68020;
       break;
 #endif
+#ifdef MAXQ20MAGIC
+    case MAXQ20MAGIC:
+      arch = bfd_arch_maxq;
+      machine = 0;
+      break;
+#endif
 #ifdef MC88MAGIC
     case MC88MAGIC:
     case MC88DMAGIC:
@@ -2917,6 +2923,13 @@ coff_set_flags (abfd, magicp, flagsp)
       else
         * magicp = OR32_MAGIC_LITTLE;
       return TRUE;
+#endif
+
+#ifdef MAXQ20MAGIC
+    case bfd_arch_maxq:
+        *magicp = MAXQ20MAGIC;
+      return TRUE;
+      break;
 #endif
 
     default:			/* Unknown architecture.  */
@@ -4063,6 +4076,11 @@ coff_write_object_contents (abfd)
     internal_a.magic = NMAGIC; /* Assume separate i/d.  */
 #endif
 
+#ifdef MAXQ20MAGIC
+#define __A_MAGIC_SET__
+      internal_a.magic = MAXQ20MAGIC;
+#endif
+ 
 #ifndef __A_MAGIC_SET__
 #include "Your aouthdr magic number is not being set!"
 #else
