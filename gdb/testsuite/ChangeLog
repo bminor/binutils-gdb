@@ -1,5 +1,10 @@
 2004-01-07  Michael Chastain  <mec.gnu@mindspring.com>
 
+	* gdb.base/funcargs.exp: Remove obsolete setup_xfail for
+	hp_cc_compiler.
+
+2004-01-07  Michael Chastain  <mec.gnu@mindspring.com>
+
 	* gdb.cp/cttiadd.c: Add a marker for gdb_get_line_number.
 	* gdb.cp/ctti.exp: Use the marker instead of "next".
 	With gcc, run further before bailing.
