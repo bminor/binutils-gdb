@@ -1,3 +1,9 @@
+2003-06-19  Nick Clifton  <nickc@redhat.com>
+
+	* binutils-all/objcopy.exp: Replace occurances of testprog with
+	$test_prog.  Initialise this variable to testprog.exe on Cygwin
+	targeted systems.
+
 2003-04-26  Nick Clifton  <nickc@redhat.com>
 
 	* binutils-all/readelf.exp (prune_read_warnings): Rename to
