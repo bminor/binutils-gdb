@@ -1,3 +1,11 @@
+2000-02-28  Jim Blandy  <jimb@redhat.com>
+
+	* ldgram.y (exclude_name_list): Don't require a comma to separate
+ 	list entries; the lexer considers commas to be valid part of a
+	filename, so in something like `foo, bar' the comma is considered
+	part of the first filename, `foo,'.
+	* ld.texinfo: Update section on EXCLUDE_FILE lists.
+
 2000-02-27  Loren J. Rittle  <ljrittle@acm.org>
 
 	* configure.host: Added HOSTING_CRT0, HOSTING_LIBS for
