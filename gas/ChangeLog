@@ -1,3 +1,8 @@
+2000-05-03  Ian Lance Taylor  <ian@zembu.com>
+
+	* config/atof-ieee.c (gen_to_words): When adding carry back in,
+	don't permit lp to become less than the words array.
+
 2000-05-03  Rodney Brown  <RodneyBrown@pmsc.com>
 
 	config/tc-mcore.c (md_apply_fix3): BFD_RELOC_MCORE_PCREL_IMM11BY2
