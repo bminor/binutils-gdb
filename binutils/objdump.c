@@ -2611,7 +2611,7 @@ dump_reloc_set (abfd, sec, relpp, relcount)
 }
 
 /* The length of the longest architecture name + 1.  */
-#define LONGEST_ARCH sizeof("rs6000:6000")
+#define LONGEST_ARCH sizeof("powerpc:common")
 
 static const char *
 endian_string (endian)

@@ -1,3 +1,7 @@
+2000-08-17  Christopher C. Chimelis <chris@debian.org>
+
+	* objdump.c (LONGEST_ARCH): Set to sizeof("powerpc:common").
+
 2000-08-17  Nick Clifton  <nickc@redhat.com>
 
 	* readelf.c (display_debug_pubnames): Only issue warning
