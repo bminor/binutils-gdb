@@ -1,3 +1,8 @@
+2003-05-02  David Carlton  <carlton@bactrian.org>
+
+	* objfiles.c (allocate_objfile): For anonymous objfiles, allocate
+	the name with mstrsave.
+
 2003-05-02  Elena Zannoni  <ezannoni@redhat.com>
 
 	* charset.c (GDB_DEFAULT_TARGET_CHARSET,
