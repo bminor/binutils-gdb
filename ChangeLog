@@ -10,6 +10,14 @@ Tue Sep 15 16:00:54 1992  Ian Lance Taylor  (ian@cygnus.com)
 	* configure: always set $(tooldir) to $(libdir)/$(target_alias),
 	even for a native compilation.
 
+Tue Sep 15 02:22:56 1992  John Gilmore  (gnu@cygnus.com)
+
+	Changes to make the gdb.tar.Z rule work better.
+
+	* Makefile.in (GDB_SUPPORT_DIRS):  Add opcodes.
+	(DEVO_SUPPORT):  Add configure.texi.
+	(bfd-ilrt.tar.Z):  Remove ancient rule.
+
 Thu Sep 10 10:43:19 1992  Ian Lance Taylor  (ian@cygnus.com)
 
 	* Makefile.in: added -I for newlib/targ-include to XTRAFLAGS, to
