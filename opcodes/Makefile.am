@@ -239,11 +239,18 @@ alpha-dis.lo: alpha-dis.c $(INCDIR)/ansidecl.h sysdep.h \
   config.h $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/opcode/alpha.h
 alpha-opc.lo: alpha-opc.c $(INCDIR)/ansidecl.h $(INCDIR)/opcode/alpha.h \
   $(BFD_H) opintl.h
-arm-dis.lo: arm-dis.c $(INCDIR)/dis-asm.h $(BFD_H) \
-  $(INCDIR)/ansidecl.h arm-opc.h $(INCDIR)/coff/internal.h \
-  $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h opintl.h $(BFDDIR)/elf-bfd.h \
+arc-dis.lo: arc-dis.c $(INCDIR)/dis-asm.h $(BFD_H) \
+  $(INCDIR)/ansidecl.h $(INCDIR)/opcode/arc.h $(BFDDIR)/elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
-  $(INCDIR)/elf/arm.h $(INCDIR)/elf/reloc-macros.h
+  $(INCDIR)/bfdlink.h $(INCDIR)/elf/arc.h $(INCDIR)/elf/reloc-macros.h \
+  opintl.h
+arc-opc.lo: arc-opc.c $(INCDIR)/ansidecl.h $(INCDIR)/opcode/arc.h \
+  opintl.h
+arm-dis.lo: arm-dis.c sysdep.h config.h $(INCDIR)/dis-asm.h \
+  $(BFD_H) arm-opc.h $(INCDIR)/coff/internal.h $(BFDDIR)/libcoff.h \
+  $(INCDIR)/bfdlink.h opintl.h $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h \
+  $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/elf/arm.h \
+  $(INCDIR)/elf/reloc-macros.h
 cgen-asm.lo: cgen-asm.c sysdep.h config.h $(INCDIR)/libiberty.h \
   $(BFD_H) $(INCDIR)/symcat.h $(INCDIR)/opcode/cgen.h \
   opintl.h
@@ -337,11 +344,15 @@ sparc-dis.lo: sparc-dis.c $(INCDIR)/ansidecl.h sysdep.h \
   config.h $(INCDIR)/opcode/sparc.h $(INCDIR)/dis-asm.h \
   $(BFD_H) $(INCDIR)/libiberty.h opintl.h
 sparc-opc.lo: sparc-opc.c $(INCDIR)/ansidecl.h $(INCDIR)/opcode/sparc.h
-tic30-dis.lo: tic30-dis.c $(INCDIR)/dis-asm.h $(BFD_H) \
-  $(INCDIR)/ansidecl.h $(INCDIR)/opcode/tic30.h
+tic30-dis.lo: tic30-dis.c sysdep.h config.h $(INCDIR)/dis-asm.h \
+  $(BFD_H) $(INCDIR)/opcode/tic30.h
 tic80-dis.lo: tic80-dis.c $(INCDIR)/ansidecl.h $(INCDIR)/opcode/tic80.h \
   $(INCDIR)/dis-asm.h $(BFD_H)
 tic80-opc.lo: tic80-opc.c $(INCDIR)/ansidecl.h $(INCDIR)/opcode/tic80.h
+v850-dis.lo: v850-dis.c $(INCDIR)/ansidecl.h $(INCDIR)/opcode/v850.h \
+  $(INCDIR)/dis-asm.h $(BFD_H) opintl.h
+v850-opc.lo: v850-opc.c $(INCDIR)/ansidecl.h $(INCDIR)/opcode/v850.h \
+  opintl.h
 vax-dis.lo: vax-dis.c $(INCDIR)/opcode/vax.h $(INCDIR)/dis-asm.h \
   $(BFD_H) $(INCDIR)/ansidecl.h
 w65-dis.lo: w65-dis.c w65-opc.h $(INCDIR)/dis-asm.h \
