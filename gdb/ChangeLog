@@ -1,3 +1,9 @@
+Thu Apr 23 00:32:08 1998  Tom Tromey  <tromey@cygnus.com>
+
+	* config.in: Rebuilt.
+	* acconfig.h (ENABLE_NLS, HAVE_CATGETS, HAVE_STPCPY, HAVE_GETTEXT,
+	HAVE_LC_MESSAGES): Define.
+
 Wed Apr 22 21:17:35 1998  Christopher Faylor <cgf@cygnus.com>
 
 	* gdbtk.c (_initialize_gdbtk): add cygwin32 specific code to
