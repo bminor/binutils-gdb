@@ -1,5 +1,9 @@
 2004-11-22  Bob Wilson  <bob.wilson@acm.org>
 
+	* config/tc-xtensa.c (xg_add_opcode_fix): Set fx_no_overflow.
+
+2004-11-22  Bob Wilson  <bob.wilson@acm.org>
+
 	* dwarf2dbg.c (dwarf2_finish): Don't write a .debug_line section
 	without a corresponding .debug_info section.
 

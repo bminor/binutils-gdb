@@ -4266,6 +4266,7 @@ xg_add_opcode_fix (TInsn *tinsn,
   fmt_length = xtensa_format_length (xtensa_default_isa, fmt);
   the_fix = fix_new_exp (fragP, offset, fmt_length, expr,
 			 howto->pc_relative, reloc);
+  the_fix->fx_no_overflow = 1;
 
   if (expr->X_add_symbol
       && (S_IS_EXTERNAL (expr->X_add_symbol)
