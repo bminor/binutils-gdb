@@ -1,3 +1,7 @@
+Mon May  3 17:06:45 1993  Fred Fish  (fnf@cygnus.com)
+
+	* snapshots.readme:  Clarify bison/byacc/yacc notes.
+
 Thu Apr 29 09:36:25 1993  Jim Kingdon  (kingdon@cygnus.com)
 
 	* stabs.texinfo: Many changes to include information from the
