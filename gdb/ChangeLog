@@ -1,3 +1,8 @@
+2002-05-09  Tom Tromey  <tromey@redhat.com>
+
+	* jv-valprint.c (java_val_print): Handle `char' as a special case
+	of TYPE_CODE_INT.
+
 2002-05-09  Michael Snyder  <msnyder@redhat.com>
 
 	* arm-tdep.c (arm_scan_prologue): Accept strb r(0123),[r11,#-nn],
