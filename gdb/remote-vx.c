@@ -48,7 +48,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "vx-share/xdr_ld.h"
 #include "vx-share/xdr_rdb.h"
 #include "vx-share/dbgRpcLib.h"
-#include "vx-share/reg.h"
 
 #include <symtab.h>
 

@@ -1,3 +1,9 @@
+Wed Dec  9 19:53:25 1992  John Gilmore  (gnu@cygnus.com)
+
+	* vx-share/{reg.h,xdr_regs.h,xdr_regs.c}:  Remove, unused.
+	* remote-vx.c:  Don't include vx-share/reg.h.
+	* vx-share/ptrace.h:  Reproduce from scratch.
+
 Tue Dec  8 13:30:58 1992  Fred Fish  (fnf@cygnus.com)
 
 	* c-lang.c (_initialize_c_language):  Name changed from
