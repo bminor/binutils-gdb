@@ -50,6 +50,12 @@ enum bptype {
   bp_step_resume,
 
   /* The breakpoint at the end of a call dummy.  */
+  /* FIXME: What if the function we are calling longjmp()s out of the
+     call, or the user gets out with the "return" command?  We currently
+     have no way of cleaning up the breakpoint in these (obscure) situations.
+     (Probably can solve this by noticing longjmp, "return", etc., it's
+     similar to noticing when a watchpoint on a local variable goes out
+     of scope (with hardware support for watchpoints)).  */
   bp_call_dummy
 };
 

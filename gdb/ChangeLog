@@ -1,3 +1,8 @@
+Fri Oct 15 14:30:30 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* Move comments on bypassing call dummy breakpoint from stack.c
+	to breakpoint.h.
+
 Fri Oct 15 11:52:56 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* symtab.c (lookup_partial_symtab):  If filename is not found and
