@@ -1,3 +1,8 @@
+Mon Dec 29 14:17:08 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* core.c (core_sym_class): Treat weak symbols as text symbols.
+	From Dean Gaudet <dgaudet@arctic.org>.
+
 Wed Sep 24 11:35:43 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* aclocal.m4: Rebuild with new libtool.

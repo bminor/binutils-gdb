@@ -231,6 +231,13 @@ DEFUN (core_sym_class, (sym), asymbol * sym)
       return i;			/* it's a global symbol */
     }
 
+  if (i == 'W')
+    {
+      /* Treat weak symbols as text symbols.  FIXME: a weak symbol may
+         also be a data symbol.  */
+      return 'T';
+    }
+
   if (i != 't')
     {
       /* not a static text symbol */
