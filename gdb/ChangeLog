@@ -3,8 +3,8 @@
 	* frame.h (legacy_saved_regs_unwind)
 	(legacy_frame_chain_valid, legacy_frame_p)
 	(enum frame_type): Delete UNKNOWN_FRAME.
-	* dummy-frame.c (dummy_frame_this_id): 
-	* frame-unwind.c (frame_unwind_find_by_frame): 
+	* dummy-frame.c (dummy_frame_this_id): Simplify.
+	* frame-unwind.c (frame_unwind_find_by_frame): Simplify.
 	* frame.c (struct frame_info): Delete the field "type".
 	(legacy_saved_regs_prev_register, legacy_get_prev_frame)
 	(legacy_saved_regs_this_id, legacy_saved_regs_unwinder)
