@@ -3244,11 +3244,9 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_call_dummy_words (gdbarch, call_dummy_32);
 #else
       set_gdbarch_deprecated_pc_in_call_dummy (gdbarch, deprecated_pc_in_call_dummy_at_entry_point);
-      set_gdbarch_call_dummy_length (gdbarch, 0);
       set_gdbarch_call_dummy_words (gdbarch, call_dummy_nil);
 #endif
       set_gdbarch_deprecated_call_dummy_stack_adjust (gdbarch, 68);
-      set_gdbarch_call_dummy_start_offset (gdbarch, 0);
       set_gdbarch_frame_args_skip (gdbarch, 68);
       set_gdbarch_function_start_offset (gdbarch, 0);
       set_gdbarch_long_bit (gdbarch, 4 * TARGET_CHAR_BIT);
@@ -3298,8 +3296,6 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_call_dummy_words (gdbarch, call_dummy_64);
 #else
       set_gdbarch_deprecated_pc_in_call_dummy (gdbarch, deprecated_pc_in_call_dummy_at_entry_point);
-      set_gdbarch_call_dummy_length (gdbarch, 0);
-      set_gdbarch_call_dummy_start_offset (gdbarch, 0);
       set_gdbarch_call_dummy_words (gdbarch, call_dummy_nil);
 #endif
       set_gdbarch_deprecated_call_dummy_stack_adjust (gdbarch, 128);

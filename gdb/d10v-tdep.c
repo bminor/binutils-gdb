@@ -1672,9 +1672,6 @@ d10v_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 		      "d10v_gdbarch_init: bad byte order for float format");
     }
 
-  set_gdbarch_call_dummy_length (gdbarch, 0);
-  set_gdbarch_call_dummy_start_offset (gdbarch, 0);
-
   set_gdbarch_extract_return_value (gdbarch, d10v_extract_return_value);
   set_gdbarch_push_dummy_call (gdbarch, d10v_push_dummy_call);
   set_gdbarch_store_return_value (gdbarch, d10v_store_return_value);

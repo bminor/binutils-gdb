@@ -527,8 +527,6 @@ gdbarch_alloc (const struct gdbarch_info *info,
   current_gdbarch->deprecated_use_generic_dummy_frames = 1;
   current_gdbarch->call_dummy_location = AT_ENTRY_POINT;
   current_gdbarch->call_dummy_address = entry_point_address;
-  current_gdbarch->call_dummy_start_offset = -1;
-  current_gdbarch->call_dummy_length = -1;
   current_gdbarch->deprecated_pc_in_call_dummy = generic_pc_in_call_dummy;
   current_gdbarch->call_dummy_words = legacy_call_dummy_words;
   current_gdbarch->sizeof_call_dummy_words = legacy_sizeof_call_dummy_words;
@@ -671,12 +669,6 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of deprecated_use_generic_dummy_frames, invalid_p == 0 */
   /* Skip verify of call_dummy_location, invalid_p == 0 */
   /* Skip verify of call_dummy_address, invalid_p == 0 */
-  if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
-      && (gdbarch->call_dummy_start_offset == -1))
-    fprintf_unfiltered (log, "\n\tcall_dummy_start_offset");
-  if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
-      && (gdbarch->call_dummy_length == -1))
-    fprintf_unfiltered (log, "\n\tcall_dummy_length");
   /* Skip verify of deprecated_pc_in_call_dummy, has predicate */
   /* Skip verify of call_dummy_words, invalid_p == 0 */
   /* Skip verify of sizeof_call_dummy_words, invalid_p == 0 */
@@ -944,10 +936,9 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: CALL_DUMMY_LENGTH # %s\n",
                       XSTRING (CALL_DUMMY_LENGTH));
-  if (gdbarch->call_dummy_length >= 0)
-    fprintf_unfiltered (file,
-                        "gdbarch_dump: CALL_DUMMY_LENGTH = %d\n",
-                        CALL_DUMMY_LENGTH);
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: CALL_DUMMY_LENGTH = %d\n",
+                      CALL_DUMMY_LENGTH);
 #endif
 #ifdef CALL_DUMMY_LOCATION
   fprintf_unfiltered (file,
@@ -962,7 +953,7 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                       "gdbarch_dump: CALL_DUMMY_START_OFFSET # %s\n",
                       XSTRING (CALL_DUMMY_START_OFFSET));
   fprintf_unfiltered (file,
-                      "gdbarch_dump: CALL_DUMMY_START_OFFSET = 0x%08lx\n",
+                      "gdbarch_dump: CALL_DUMMY_START_OFFSET = %ld\n",
                       (long) CALL_DUMMY_START_OFFSET);
 #endif
 #ifdef CALL_DUMMY_WORDS
@@ -3725,9 +3716,6 @@ CORE_ADDR
 gdbarch_call_dummy_start_offset (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  if (gdbarch->call_dummy_start_offset == -1)
-    internal_error (__FILE__, __LINE__,
-                    "gdbarch: gdbarch_call_dummy_start_offset invalid");
   if (gdbarch_debug >= 2)
     fprintf_unfiltered (gdb_stdlog, "gdbarch_call_dummy_start_offset called\n");
   return gdbarch->call_dummy_start_offset;
@@ -3760,9 +3748,6 @@ int
 gdbarch_call_dummy_length (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  if (gdbarch->call_dummy_length == -1)
-    internal_error (__FILE__, __LINE__,
-                    "gdbarch: gdbarch_call_dummy_length invalid");
   if (gdbarch_debug >= 2)
     fprintf_unfiltered (gdb_stdlog, "gdbarch_call_dummy_length called\n");
   return gdbarch->call_dummy_length;

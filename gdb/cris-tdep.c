@@ -4255,11 +4255,7 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   
   /* Use generic dummy frames.  */
   
-  /* Start execution at the beginning of dummy.  */
-  set_gdbarch_call_dummy_start_offset (gdbarch, 0);
-  
   /* Read all about dummy frames in blockframe.c.  */
-  set_gdbarch_call_dummy_length (gdbarch, 0);
   set_gdbarch_deprecated_pc_in_call_dummy (gdbarch, deprecated_pc_in_call_dummy_at_entry_point);
   
   /* Defined to 1 to indicate that the target supports inferior function 

@@ -1163,10 +1163,8 @@ extern void set_gdbarch_call_dummy_start_offset (struct gdbarch *gdbarch, CORE_A
 #if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (CALL_DUMMY_START_OFFSET)
 #error "Non multi-arch definition of CALL_DUMMY_START_OFFSET"
 #endif
-#if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (CALL_DUMMY_START_OFFSET)
+#if !defined (CALL_DUMMY_START_OFFSET)
 #define CALL_DUMMY_START_OFFSET (gdbarch_call_dummy_start_offset (current_gdbarch))
-#endif
 #endif
 
 extern CORE_ADDR gdbarch_call_dummy_breakpoint_offset (struct gdbarch *gdbarch);
@@ -1183,10 +1181,8 @@ extern void set_gdbarch_call_dummy_length (struct gdbarch *gdbarch, int call_dum
 #if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (CALL_DUMMY_LENGTH)
 #error "Non multi-arch definition of CALL_DUMMY_LENGTH"
 #endif
-#if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (CALL_DUMMY_LENGTH)
+#if !defined (CALL_DUMMY_LENGTH)
 #define CALL_DUMMY_LENGTH (gdbarch_call_dummy_length (current_gdbarch))
-#endif
 #endif
 
 /* NOTE: cagney/2002-11-24: This function with predicate has a valid

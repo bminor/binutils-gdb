@@ -1,3 +1,32 @@
+2003-04-01  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbarch.sh (CALL_DUMMY_START_OFFSET): Default to zero.
+	CALL_DUMMY_LENGTH): Ditto.
+	* gdbarch.c: Re-generate.
+	* inferior.h (CALL_DUMMY_START_OFFSET): Delete macro.
+	(CALL_DUMMY_LENGTH): Delete macro.
+	* alpha-tdep.c (alpha_gdbarch_init): Do not set above when zero.
+	* arm-tdep.c (arm_gdbarch_init): Ditto.
+	* avr-tdep.c (avr_gdbarch_init): Ditto.
+	* cris-tdep.c (cris_gdbarch_init): Ditto.
+	* d10v-tdep.c (d10v_gdbarch_init): Ditto.
+	* frv-tdep.c (frv_gdbarch_init): Ditto.
+	* h8300-tdep.c (h8300_gdbarch_init): Ditto.
+	* hppa-tdep.c (hppa_gdbarch_init): Ditto.
+	* i386-tdep.c (i386_gdbarch_init): Ditto.
+	* ia64-tdep.c (ia64_gdbarch_init): Ditto.
+	* m68hc11-tdep.c (m68hc11_gdbarch_init): Ditto.
+	* mcore-tdep.c (mcore_gdbarch_init): Ditto.
+	* mips-tdep.c (mips_gdbarch_init): Ditto.
+	* mn10300-tdep.c (mn10300_gdbarch_init): Ditto.
+	* rs6000-tdep.c (rs6000_gdbarch_init): Ditto.
+	* s390-tdep.c (s390_gdbarch_init): Ditto.
+	* sh-tdep.c (sh_gdbarch_init): Ditto.
+	* sparc-tdep.c (sparc_gdbarch_init): Ditto.
+	* v850-tdep.c (v850_gdbarch_init): Ditto.
+	* vax-tdep.c (vax_gdbarch_init): Ditto.
+	* xstormy16-tdep.c (xstormy16_gdbarch_init): Ditto.
+
 2003-04-01  Corinna Vinschen  <vinschen@redhat.com>
 
 	* frame.c (get_prev_frame): Disable call to inside_entry_file().

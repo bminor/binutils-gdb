@@ -2932,8 +2932,6 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_call_dummy_words (gdbarch, arm_call_dummy_words);
   set_gdbarch_sizeof_call_dummy_words (gdbarch, 0);
-  set_gdbarch_call_dummy_start_offset (gdbarch, 0);
-  set_gdbarch_call_dummy_length (gdbarch, 0);
 
   set_gdbarch_push_dummy_call (gdbarch, arm_push_dummy_call);
 

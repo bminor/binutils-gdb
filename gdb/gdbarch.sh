@@ -521,9 +521,9 @@ F:2:GET_LONGJMP_TARGET:int:get_longjmp_target:CORE_ADDR *pc:pc::0:0
 v:1:DEPRECATED_USE_GENERIC_DUMMY_FRAMES:int:deprecated_use_generic_dummy_frames:::::1::0
 v:1:CALL_DUMMY_LOCATION:int:call_dummy_location:::::AT_ENTRY_POINT::0
 f::CALL_DUMMY_ADDRESS:CORE_ADDR:call_dummy_address:void::::entry_point_address::0
-v:2:CALL_DUMMY_START_OFFSET:CORE_ADDR:call_dummy_start_offset::::0:-1:::0x%08lx
+v::CALL_DUMMY_START_OFFSET:CORE_ADDR:call_dummy_start_offset
 v::CALL_DUMMY_BREAKPOINT_OFFSET:CORE_ADDR:call_dummy_breakpoint_offset
-v:2:CALL_DUMMY_LENGTH:int:call_dummy_length::::0:-1:::::gdbarch->call_dummy_length >= 0
+v::CALL_DUMMY_LENGTH:int:call_dummy_length
 # NOTE: cagney/2002-11-24: This function with predicate has a valid
 # (callable) initial value.  As a consequence, even when the predicate
 # is false, the corresponding function works.  This simplifies the
