@@ -1,5 +1,6 @@
 1999-06-13  Ian Lance Taylor  <ian@zembu.com>
 
+	From Bob Byrnes <byrnes@curl.com>:
 	* cg_dfn.c: Include "libiberty.h"
 	(DFN_INCR_DEPTH): Define instead of DFN_DEPTH.
 	(dfn_stack): Define as pointer rather than array.
