@@ -1,3 +1,8 @@
+Thu Mar  3 11:37:55 1994  Doug Evans  (dje@canuck.cygnus.com)
+
+	* config/atof-ieee.c (make_invalid_floating_point_number):
+	Add cast to avoid warning from gcc.
+
 Wed Mar  2 10:31:01 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
         * config/tc-hppa.c: Add a few casts to make HP C compiler happy.
