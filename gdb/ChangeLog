@@ -1,5 +1,8 @@
 2005-02-14  Andrew Cagney  <cagney@gnu.org>
 
+	* config/h8300/h8300.mt (DEPRECATED_TM_FILE): Delete.
+	* config/h8300/tm-h8300.h: Delete file.
+
 	Mark up add_cmd.
 	* arch-utils.c, avr-tdep.c, breakpoint.c, corefile.c: Update.
 	* cp-abi.c, cp-namespace.c, cp-support.c, dummy-frame.c: Update.
