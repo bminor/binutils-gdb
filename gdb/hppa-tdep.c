@@ -72,102 +72,6 @@ const struct objfile_data *hppa_objfile_priv_data = NULL;
    following functions static, once we hppa is partially multiarched.  */
 int hppa_pc_requires_run_before_use (CORE_ADDR pc);
 
-/* Handle 32/64-bit struct return conventions.  */
-
-static enum return_value_convention
-hppa32_return_value (struct gdbarch *gdbarch,
-		     struct type *type, struct regcache *regcache,
-		     void *readbuf, const void *writebuf)
-{
-  if (TYPE_LENGTH (type) <= 2 * 4)
-    {
-      /* The value always lives in the right hand end of the register
-	 (or register pair)?  */
-      int b;
-      int reg = TYPE_CODE (type) == TYPE_CODE_FLT ? HPPA_FP4_REGNUM : 28;
-      int part = TYPE_LENGTH (type) % 4;
-      /* The left hand register contains only part of the value,
-	 transfer that first so that the rest can be xfered as entire
-	 4-byte registers.  */
-      if (part > 0)
-	{
-	  if (readbuf != NULL)
-	    regcache_cooked_read_part (regcache, reg, 4 - part,
-				       part, readbuf);
-	  if (writebuf != NULL)
-	    regcache_cooked_write_part (regcache, reg, 4 - part,
-					part, writebuf);
-	  reg++;
-	}
-      /* Now transfer the remaining register values.  */
-      for (b = part; b < TYPE_LENGTH (type); b += 4)
-	{
-	  if (readbuf != NULL)
-	    regcache_cooked_read (regcache, reg, (char *) readbuf + b);
-	  if (writebuf != NULL)
-	    regcache_cooked_write (regcache, reg, (const char *) writebuf + b);
-	  reg++;
-	}
-      return RETURN_VALUE_REGISTER_CONVENTION;
-    }
-  else
-    return RETURN_VALUE_STRUCT_CONVENTION;
-}
-
-static enum return_value_convention
-hppa64_return_value (struct gdbarch *gdbarch,
-		     struct type *type, struct regcache *regcache,
-		     void *readbuf, const void *writebuf)
-{
-  /* RM: Floats are returned in FR4R, doubles in FR4.  Integral values
-     are in r28, padded on the left.  Aggregates less that 65 bits are
-     in r28, right padded.  Aggregates upto 128 bits are in r28 and
-     r29, right padded.  */ 
-  if (TYPE_CODE (type) == TYPE_CODE_FLT
-      && TYPE_LENGTH (type) <= 8)
-    {
-      /* Floats are right aligned?  */
-      int offset = register_size (gdbarch, HPPA_FP4_REGNUM) - TYPE_LENGTH (type);
-      if (readbuf != NULL)
-	regcache_cooked_read_part (regcache, HPPA_FP4_REGNUM, offset,
-				   TYPE_LENGTH (type), readbuf);
-      if (writebuf != NULL)
-	regcache_cooked_write_part (regcache, HPPA_FP4_REGNUM, offset,
-				    TYPE_LENGTH (type), writebuf);
-      return RETURN_VALUE_REGISTER_CONVENTION;
-    }
-  else if (TYPE_LENGTH (type) <= 8 && is_integral_type (type))
-    {
-      /* Integrals are right aligned.  */
-      int offset = register_size (gdbarch, HPPA_FP4_REGNUM) - TYPE_LENGTH (type);
-      if (readbuf != NULL)
-	regcache_cooked_read_part (regcache, 28, offset,
-				   TYPE_LENGTH (type), readbuf);
-      if (writebuf != NULL)
-	regcache_cooked_write_part (regcache, 28, offset,
-				    TYPE_LENGTH (type), writebuf);
-      return RETURN_VALUE_REGISTER_CONVENTION;
-    }
-  else if (TYPE_LENGTH (type) <= 2 * 8)
-    {
-      /* Composite values are left aligned.  */
-      int b;
-      for (b = 0; b < TYPE_LENGTH (type); b += 8)
-	{
-	  int part = min (8, TYPE_LENGTH (type) - b);
-	  if (readbuf != NULL)
-	    regcache_cooked_read_part (regcache, 28 + b / 8, 0, part,
-				       (char *) readbuf + b);
-	  if (writebuf != NULL)
-	    regcache_cooked_write_part (regcache, 28 + b / 8, 0, part,
-					(const char *) writebuf + b);
-	}
-      return RETURN_VALUE_REGISTER_CONVENTION;
-    }
-  else
-    return RETURN_VALUE_STRUCT_CONVENTION;
-}
-
 /* Routines to extract various sized constants out of hppa 
    instructions. */
 
@@ -1123,6 +1027,143 @@ hppa64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   regcache_cooked_write_unsigned (regcache, HPPA_SP_REGNUM, sp);
 
   return sp;
+}
+
+
+/* Handle 32/64-bit struct return conventions.  */
+
+static enum return_value_convention
+hppa32_return_value (struct gdbarch *gdbarch,
+		     struct type *type, struct regcache *regcache,
+		     void *readbuf, const void *writebuf)
+{
+  if (TYPE_LENGTH (type) <= 2 * 4)
+    {
+      /* The value always lives in the right hand end of the register
+	 (or register pair)?  */
+      int b;
+      int reg = TYPE_CODE (type) == TYPE_CODE_FLT ? HPPA_FP4_REGNUM : 28;
+      int part = TYPE_LENGTH (type) % 4;
+      /* The left hand register contains only part of the value,
+	 transfer that first so that the rest can be xfered as entire
+	 4-byte registers.  */
+      if (part > 0)
+	{
+	  if (readbuf != NULL)
+	    regcache_cooked_read_part (regcache, reg, 4 - part,
+				       part, readbuf);
+	  if (writebuf != NULL)
+	    regcache_cooked_write_part (regcache, reg, 4 - part,
+					part, writebuf);
+	  reg++;
+	}
+      /* Now transfer the remaining register values.  */
+      for (b = part; b < TYPE_LENGTH (type); b += 4)
+	{
+	  if (readbuf != NULL)
+	    regcache_cooked_read (regcache, reg, (char *) readbuf + b);
+	  if (writebuf != NULL)
+	    regcache_cooked_write (regcache, reg, (const char *) writebuf + b);
+	  reg++;
+	}
+      return RETURN_VALUE_REGISTER_CONVENTION;
+    }
+  else
+    return RETURN_VALUE_STRUCT_CONVENTION;
+}
+
+static enum return_value_convention
+hppa64_return_value (struct gdbarch *gdbarch,
+		     struct type *type, struct regcache *regcache,
+		     void *readbuf, const void *writebuf)
+{
+  int len = TYPE_LENGTH (type);
+  int regnum, offset;
+
+  if (len > 16)
+    {
+      /* All return values larget than 128 bits must be aggregate
+         return values.  */
+      gdb_assert (!hppa64_integral_or_pointer_p());
+      gdb_assert (!hppa64_floating_p());
+
+      /* "Aggregate return values larger than 128 bits are returned in
+	 a buffer allocated by the caller.  The address of the buffer
+	 must be passed in GR 28."  */
+      return RETURN_VALUE_STRUCT_CONVENTION;
+    }
+
+  if (hppa64_integral_or_pointer_p (type))
+    {
+      /* "Integral return values are returned in GR 28.  Values
+         smaller than 64 bits are padded on the left (with garbage)."  */
+      regnum = HPPA_RET0_REGNUM;
+      offset = 8 - len;
+    }
+  else if (hppa64_floating_p (type))
+    {
+      if (len > 8)
+	{
+	  /* "Double-extended- and quad-precision floating-point
+	     values are returned in GRs 28 and 29.  The sign,
+	     exponent, and most-significant bits of the mantissa are
+	     returned in GR 28; the least-significant bits of the
+	     mantissa are passed in GR 29.  For double-extended
+	     precision values, GR 29 is padded on the right with 48
+	     bits of garbage."  */
+	  regnum = HPPA_RET0_REGNUM;
+	  offset = 0;
+	}
+      else
+	{
+	  /* "Single-precision and double-precision floating-point
+	     return values are returned in FR 4R (single precision) or
+	     FR 4 (double-precision)."  */
+	  regnum = HPPA64_FP4_REGNUM;
+	  offset = 8 - len;
+	}
+    }
+  else
+    {
+      /* "Aggregate return values up to 64 bits in size are returned
+         in GR 28.  Aggregates smaller than 64 bits are left aligned
+         in the register; the pad bits on the right are undefined."
+
+	 "Aggregate return values between 65 and 128 bits are returned
+	 in GRs 28 and 29.  The first 64 bits are placed in GR 28, and
+	 the remaining bits are placed, left aligned, in GR 29.  The
+	 pad bits on the right of GR 29 (if any) are undefined."  */
+      regnum = HPPA_RET0_REGNUM;
+      offset = 0;
+    }
+
+  if (readbuf)
+    {
+      char *buf = readbuf;
+      while (len > 0)
+	{
+	  regcache_cooked_read_part (regcache, regnum, offset,
+				     min (len, 8), buf);
+	  buf += min (len, 8);
+	  len -= min (len, 8);
+	  regnum++;
+	}
+    }
+
+  if (writebuf)
+    {
+      const char *buf = writebuf;
+      while (len > 0)
+	{
+	  regcache_cooked_write_part (regcache, regnum, offset,
+				      min (len, 8), buf);
+	  buf += min (len, 8);
+	  len -= min (len, 8);
+	  regnum++;
+	}
+    }
+
+  return RETURN_VALUE_REGISTER_CONVENTION;
 }
 
 
