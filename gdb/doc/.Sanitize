@@ -43,6 +43,13 @@ stabs.texinfo
 
 # Things which are explicitly *not* kept by default.
 
+# Does Sanitize let us put these comments next to the file names?  
+# (It should, but does it?)
+#
+# config - Obsolete; only exists because CVS can't delete directories.
+# cyglogo.eps - Cygnus trademark, not for random use (? - is this the reason?)
+# cygref.tex - includes cygref.tex
+
 Things-to-lose:
 
 a4rc.sed
