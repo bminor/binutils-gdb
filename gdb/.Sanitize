@@ -228,6 +228,7 @@ remote-bug.c
 remote-e7000.c
 remote-eb.c
 remote-es.c
+remote-est.c
 remote-hms.c
 remote-mips.c
 remote-mm.c

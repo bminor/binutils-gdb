@@ -396,6 +396,7 @@ sr_com (args, fromtty)
 
   sr_write_cr (args);
   sr_write ("\030", 1);
+  registers_changed ();
   gr_expect_prompt ();
 }
 

@@ -1,3 +1,11 @@
+Fri Dec 23 17:03:13 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
+
+	* remote-est.c:  New file supports EST-300 CPU32 background 
+	mode ICE.
+	* remote-utils.c (sr_com):  Call registers_changed.
+	* configure.in (m68*-*-est*):  New configuration.
+	* config/m68k/tm-est.h:  New file.
+
 Fri Dec 23 16:18:50 1994  Stu Grossman  (grossman@cygnus.com)
 
 	* Makefile.in (CLIBS):  Put LIBIBERTY last.
