@@ -383,6 +383,7 @@ $(DIST_NAME).tar.Z:
 	make diststuff -f Makefile.in
 	cd ../ld; make diststuff -f Makefile.in
 	cd ../gprof; make diststuff -f Makefile.in
+	cd ../texinfo; mv texinfo.tex ..; rm -rf *; mv ../texinfo.tex .
 	cd ../..; tar chf - $(DIST_NAME) | compress >$(DIST_NAME).tar.Z
 	rm -rf ../../$(DIST_NAME)
 
