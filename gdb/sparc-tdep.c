@@ -21,11 +21,14 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "frame.h"
 #include "inferior.h"
 #include "obstack.h"
-#include "signame.h"
 #include "target.h"
 #include "ieee-float.h"
 
+#ifdef	USE_PROC_FS
+#include <sys/procfs.h>
+#else
 #include <sys/ptrace.h>
+#endif
 
 #include "gdbcore.h"
 
@@ -63,8 +66,8 @@ int one_stepped;
    set up a simulated single-step, we undo our damage.  */
 
 void
-single_step (pid)
-     int pid; /* ignored */
+single_step (ignore)
+     int ignore; /* pid, but we don't need it */
 {
   branch_type br, isannulled();
   CORE_ADDR pc;
@@ -641,6 +644,161 @@ const struct ext_format ext_format_sparc = {
 /* tot sbyte smask expbyte manbyte */
    16, 0,    0x80, 0,1,	   4,8,		/* sparc */
 };
+
+#ifdef USE_PROC_FS	/* Target dependent support for /proc */
+
+/*  The /proc interface divides the target machine's register set up into
+    two different sets, the general register set (gregset) and the floating
+    point register set (fpregset).  For each set, there is an ioctl to get
+    the current register set and another ioctl to set the current values.
+
+    The actual structure passed through the ioctl interface is, of course,
+    naturally machine dependent, and is different for each set of registers.
+    For the sparc for example, the general register set is typically defined
+    by:
+
+	typedef int gregset_t[38];
+
+	#define	R_G0	0
+	...
+	#define	R_TBR	37
+
+    and the floating point set by:
+
+	typedef struct prfpregset {
+		union { 
+			u_long  pr_regs[32]; 
+			double  pr_dregs[16];
+		} pr_fr;
+		void *  pr_filler;
+		u_long  pr_fsr;
+		u_char  pr_qcnt;
+		u_char  pr_q_entrysize;
+		u_char  pr_en;
+		u_long  pr_q[64];
+	} prfpregset_t;
+
+    These routines provide the packing and unpacking of gregset_t and
+    fpregset_t formatted data.
+
+ */
+
+
+/*  Given a pointer to a general register set in /proc format (gregset_t *),
+    unpack the register contents and supply them as gdb's idea of the current
+    register values. */
+
+void
+supply_gregset (gregsetp)
+prgregset_t *gregsetp;
+{
+  register int regno;
+  register prgreg_t *regp = (prgreg_t *) gregsetp;
+
+  /* GDB register numbers for Gn, On, Ln, In all match /proc reg numbers.  */
+  for (regno = G0_REGNUM ; regno <= I7_REGNUM ; regno++)
+    {
+      supply_register (regno, (char *) (regp + regno));
+    }
+
+  /* These require a bit more care.  */
+  supply_register (PS_REGNUM, (char *) (regp + R_PS));
+  supply_register (PC_REGNUM, (char *) (regp + R_PC));
+  supply_register (NPC_REGNUM,(char *) (regp + R_nPC));
+  supply_register (Y_REGNUM,  (char *) (regp + R_Y));
+}
+
+void
+fill_gregset (gregsetp, regno)
+prgregset_t *gregsetp;
+int regno;
+{
+  int regi;
+  register prgreg_t *regp = (prgreg_t *) gregsetp;
+  extern char registers[];
+
+  for (regi = 0 ; regi <= R_I7 ; regi++)
+    {
+      if ((regno == -1) || (regno == regi))
+	{
+	  *(regp + regno) = *(int *) &registers[REGISTER_BYTE (regi)];
+	}
+    }
+  if ((regno == -1) || (regno == PS_REGNUM))
+    {
+      *(regp + R_PS) = *(int *) &registers[REGISTER_BYTE (PS_REGNUM)];
+    }
+  if ((regno == -1) || (regno == PC_REGNUM))
+    {
+      *(regp + R_PC) = *(int *) &registers[REGISTER_BYTE (PC_REGNUM)];
+    }
+  if ((regno == -1) || (regno == NPC_REGNUM))
+    {
+      *(regp + R_nPC) = *(int *) &registers[REGISTER_BYTE (NPC_REGNUM)];
+    }
+  if ((regno == -1) || (regno == Y_REGNUM))
+    {
+      *(regp + R_Y) = *(int *) &registers[REGISTER_BYTE (Y_REGNUM)];
+    }
+}
+
+#if defined (FP0_REGNUM)
+
+/*  Given a pointer to a floating point register set in /proc format
+    (fpregset_t *), unpack the register contents and supply them as gdb's
+    idea of the current floating point register values. */
+
+void 
+supply_fpregset (fpregsetp)
+prfpregset_t *fpregsetp;
+{
+  register int regi;
+  char *from;
+  
+  for (regi = FP0_REGNUM ; regi < FP0_REGNUM+32 ; regi++)
+    {
+      from = (char *) &fpregsetp->pr_fr.pr_regs[regi-FP0_REGNUM];
+      supply_register (regi, from);
+    }
+  supply_register (FPS_REGNUM, (char *) &(fpregsetp->pr_fsr));
+}
+
+/*  Given a pointer to a floating point register set in /proc format
+    (fpregset_t *), update the register specified by REGNO from gdb's idea
+    of the current floating point register set.  If REGNO is -1, update
+    them all. */
+
+void
+fill_fpregset (fpregsetp, regno)
+prfpregset_t *fpregsetp;
+int regno;
+{
+  int regi;
+  char *to;
+  char *from;
+  extern char registers[];
+
+  for (regi = FP0_REGNUM ; regi < FP0_REGNUM+32 ; regi++)
+    {
+      if ((regno == -1) || (regno == regi))
+	{
+	  from = (char *) &registers[REGISTER_BYTE (regi)];
+	  to = (char *) &fpregsetp->pr_fr.pr_regs[regi-FP0_REGNUM];
+	  bcopy (from, to, REGISTER_RAW_SIZE (regno));
+	}
+    }
+  if ((regno == -1) || (regno == FPS_REGNUM))
+    {
+      fpregsetp->pr_fsr = *(int *) &registers[REGISTER_BYTE (FPS_REGNUM)];
+    }
+}
+
+#endif	/* defined (FP0_REGNUM) */
+
+#endif  /* USE_PROC_FS */
+
+
+#ifdef GET_LONGJMP_TARGET
 
 /* Figure out where the longjmp will land.  We expect that we have just entered
    longjmp and haven't yet setup the stack frame, so the args are still in the
@@ -664,3 +822,4 @@ get_longjmp_target(pc)
 
   return 1;
 }
+#endif /* GET_LONGJMP_TARGET */

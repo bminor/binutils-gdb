@@ -26,8 +26,15 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /*#include <sys/param.h> */
 #include "symtab.h"
 #include "inferior.h"
+#include "gdbcmd.h"
 
 extern CORE_ADDR text_start;	/* FIXME, kludge... */
+
+/* The user-settable top of the register stack in virtual memory.  We
+   won't attempt to access any stored registers above this address, if set
+   nonzero.  */
+
+static CORE_ADDR rstack_high_address = UINT_MAX;
 
 /* Structure to hold cached info about function prologues.  */
 struct prologue_info
@@ -504,9 +511,8 @@ read_register_stack (memaddr, myaddr, actual_mem_addr, lval)
   long rfb = read_register (RFB_REGNUM);
   long rsp = read_register (RSP_REGNUM);
 
-#ifdef RSTACK_HIGH_ADDR	/* Highest allowed address in register stack */
   /* If we don't do this 'info register' stops in the middle. */
-  if (memaddr >= RSTACK_HIGH_ADDR) 
+  if (memaddr >= rstack_high_address) 
     {
       int val=-1;			/* a bogus value */
       /* It's in a local register, but off the end of the stack.  */
@@ -519,9 +525,7 @@ read_register_stack (memaddr, myaddr, actual_mem_addr, lval)
       if (actual_mem_addr != NULL)
 	*actual_mem_addr = REGISTER_BYTE (regnum);
     }
-  else
-#endif	/* RSTACK_HIGH_ADDR */
-  if (memaddr < rfb)
+  else if (memaddr < rfb)
     {
       /* It's in a register.  */
       int regnum = (memaddr - rsp) / 4 + LR0_REGNUM;
@@ -570,17 +574,14 @@ write_register_stack (memaddr, myaddr, actual_mem_addr)
 {
   long rfb = read_register (RFB_REGNUM);
   long rsp = read_register (RSP_REGNUM);
-#ifdef RSTACK_HIGH_ADDR	/* Highest allowed address in register stack */
   /* If we don't do this 'info register' stops in the middle. */
-  if (memaddr >= RSTACK_HIGH_ADDR) 
+  if (memaddr >= rstack_high_address) 
     {
       /* It's in a register, but off the end of the stack.  */
       if (actual_mem_addr != NULL)
 	*actual_mem_addr = NULL; 
     }
-  else
-#endif	/* RSTACK_HIGH_ADDR */
-  if (memaddr < rfb)
+  else if (memaddr < rfb)
     {
       /* It's in a register.  */
       int regnum = (memaddr - rsp) / 4 + LR0_REGNUM;
@@ -812,5 +813,13 @@ _initialize_29k()
 {
   add_com ("reginv ", class_obscure, reginv_com, 
         "Invalidate gdb's internal register cache.");
-}
 
+  /* FIXME, there should be a way to make a CORE_ADDR variable settable. */
+  add_show_from_set
+    (add_set_cmd ("rstack_high_address", class_support, var_uinteger,
+		  (char *)&rstack_high_address,
+		  "Set top address in memory of the register stack.\n\
+Attempts to access registers saved above this address will be ignored\n\
+or will produce the value -1.", &setlist),
+     &showlist);
+}

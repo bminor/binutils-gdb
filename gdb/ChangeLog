@@ -1,3 +1,16 @@
+Fri Jun 19 10:28:05 1992  John Gilmore  (gnu at cygnus.com)
+
+	* remote.c (getpkt):  Error if input exceeds buffer size.
+	(_initialize_remote):  `set remotedebug' enables packet trace.
+
+	* dbxread.c (process_one_symbol:N_FUN):  GCC now produces relative
+	N_SLINE's, etc, just like Sun cc on Solaris2.	
+
+	* am29k-tdep.c (read_register_stack, write_register_stack):
+	Change RSTACK_HIGH_ADDR to rstack_high_address, a user-settable
+	variable.  Add `set' and `show' commands for it.
+	* doc/gdb.texinfo:  Document it.
+
 Thu Jun 18 19:35:22 1992  Fred Fish  (fnf@cygnus.com)
 
 	* valprint.c (type_print_1):  Plug memory leak.  Print all
@@ -5,6 +18,11 @@ Thu Jun 18 19:35:22 1992  Fred Fish  (fnf@cygnus.com)
 	* buildsym.c (read_range_type):  When we find a signed char
 	type, do a lookup of signed char, not plain char.  Plain char's
 	still get looked up as plain char's elsewhere.
+
+Thu Jun 18 18:59:04 1992  John Gilmore  (gnu at cygnus.com)
+
+	* eval.c:  Avoid residue-by-zero when evaluating without side effects.
+	(Bug and fix found by Pierre Willard.)
 
 Wed Jun 17 13:08:33 1992  Stu Grossman  (grossman at cygnus.com)
 
@@ -81,6 +99,8 @@ Mon Jun 15 07:21:00 1992  Fred Fish  (fnf@cygnus.com)
 	when appropriate.  Fix supplied by Peter Schauer.
 
 Mon Jun 15 01:45:48 1992  John Gilmore  (gnu at cygnus.com)
+
+	* sparc-tdep.c:  Clean up slightly for Solaris2.
 
 	* buildsym.c (define_symbol):  Nameless types are now on several
 	platforms; generalize them and un-ifdef them to make Solaris 2

@@ -178,6 +178,7 @@ evaluate_subexp (expect_type, exp, pos, noside)
       (*pos) += 3 + ((tem + sizeof (union exp_element))
 		     / sizeof (union exp_element));
       arg1 = value_struct_elt_for_reference (exp->elts[pc + 1].type,
+					     0,
 					     exp->elts[pc + 1].type,
 					     &exp->elts[pc + 2].string,
 					     expect_type);
@@ -552,7 +553,7 @@ evaluate_subexp (expect_type, exp, pos, noside)
 	return value_x_binop (arg1, arg2, op, OP_NULL);
       else
 	if (noside == EVAL_AVOID_SIDE_EFFECTS
-	    && op == BINOP_DIV)
+	    && (op == BINOP_DIV || op == BINOP_REM))
 	  return value_zero (VALUE_TYPE (arg1), not_lval);
       else
 	return value_binop (arg1, arg2, op);
@@ -694,8 +695,8 @@ evaluate_subexp (expect_type, exp, pos, noside)
 	}
       else
 	{
-	  tem = value_less (arg1, arg2);
-	  return value_from_longest (builtin_type_int, (LONGEST) ! tem);
+	  tem = value_less (arg2, arg1) || value_equal (arg1, arg2);
+	  return value_from_longest (builtin_type_int, (LONGEST) tem);
 	}
 
     case BINOP_LEQ:
@@ -709,8 +710,8 @@ evaluate_subexp (expect_type, exp, pos, noside)
 	}
       else 
 	{
-	  tem = value_less (arg2, arg1);
-	  return value_from_longest (builtin_type_int, (LONGEST) ! tem);
+	  tem = value_less (arg1, arg2) || value_equal (arg1, arg2);
+	  return value_from_longest (builtin_type_int, (LONGEST) tem);
 	}
 
     case BINOP_REPEAT:

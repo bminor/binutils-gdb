@@ -33,7 +33,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "defs.h"
 #include <string.h>
-#include <strings.h>
 
 #if defined(USG) || defined(__CYGNUSCLIB__)
 #include <sys/types.h>
@@ -1473,10 +1472,7 @@ process_one_symbol (type, desc, valu, name, offset, objfile)
 	 and when using gcc on Solaris 2.0, these addresses are just
 	 absolute, or relative to the N_SO, depending on
 	 BLOCK_ADDRESS_ABSOLUTE.  */
-      if (processing_gcc_compilation)	/* FIXME, gcc should prob. conform */
-	function_start_offset = offset;
-      else
-        function_start_offset = valu;	
+      function_start_offset = valu;	
 #else
       function_start_offset = offset;	/* Default on ordinary systems */
 #endif

@@ -63,6 +63,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 	The reply comes when the machine stops.
 	It is		SAA		AA is the "signal number"
 
+	or...		TAAPPPPPPPPFFFFFFFF
+					where AA is the signal number,
+					PPPPPPPP is the PC (PC_REGNUM), and
+					FFFFFFFF is the frame ptr (FP_REGNUM).
+
 	kill req	k
 */
 
@@ -74,7 +79,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "target.h"
 #include "wait.h"
 #include "terminal.h"
+#include "gdbcmd.h"
 
+#if !defined(DONT_USE_REMOTE)
 #ifdef USG
 #include <sys/types.h>
 #endif
@@ -140,7 +147,7 @@ remote_detach PARAMS ((char *, int));
 
 extern struct target_ops remote_ops;	/* Forward decl */
 
-static int kiodebug;
+static int kiodebug = 0;
 static int timeout = 5;
 
 #if 0
@@ -198,6 +205,8 @@ remote_close (quitting)
 #define B38400 EXTB
 #endif
 
+
+
 static struct {int rate, damn_b;} baudtab[] = {
 	{0, B0},
 	{50, B50},
@@ -238,7 +247,7 @@ remote_open (name, from_tty)
      int from_tty;
 {
   TERMINAL sg;
-  int a_rate, b_rate;
+  int a_rate, b_rate = 0;
   int baudrate_set = 0;
 
   if (name == 0)
@@ -304,7 +313,7 @@ device is attached to the remote system (e.g. /dev/ttya).");
 #endif
 
   /* Ack any packet which the remote side has already sent.  */
-  write (remote_desc, "+", 1);
+  write (remote_desc, "+\r", 2);
   putpkt ("?");			/* initiate a query from remote machine */
 
   start_remote ();		/* Initialize gdb process mechanisms */
@@ -367,7 +376,8 @@ remote_resume (step, siggnal)
   char buf[PBUFSIZ];
 
   if (siggnal)
-    error ("Can't send signals to a remote system.");
+    error ("Can't send signals to a remote system.  Try `handle %d ignore'.",
+	   siggnal);
 
 #if 0
   dcache_flush ();
@@ -383,6 +393,10 @@ remote_resume (step, siggnal)
 
 void remote_interrupt()
 {
+  
+  if (kiodebug)
+    printf ("remote_interrupt called\n");
+
   write (remote_desc, "\003", 1);	/* Send a ^C */
 }
 
@@ -398,7 +412,10 @@ remote_wait (status)
 {
   unsigned char buf[PBUFSIZ];
   void (*ofunc)();
-  
+  unsigned char *p;
+  int i;
+  char regs[REGISTER_RAW_SIZE (PC_REGNUM) + REGISTER_RAW_SIZE (FP_REGNUM)];
+
   WSETEXIT ((*status), 0);
 
   ofunc = signal (SIGINT, remote_interrupt);
@@ -407,14 +424,29 @@ remote_wait (status)
 
   if (buf[0] == 'E')
     error ("Remote failure reply: %s", buf);
-  if (buf[0] != 'S')
+  if (buf[0] == 'T')
+    {
+      /* Expedited reply, containing Signal, PC, and FP.  */
+      p = &buf[3];		/* after Txx */
+      for (i = 0; i < sizeof (regs); i++)
+	{
+	  if (p[0] == 0 || p[1] == 0)
+	    error ("Remote reply is too short: %s", buf);
+	  regs[i] = fromhex (p[0]) * 16 + fromhex (p[1]);
+	  p += 2;
+	}
+      supply_register (PC_REGNUM, &regs[0]);
+      supply_register (FP_REGNUM, &regs[REGISTER_RAW_SIZE (PC_REGNUM)]);
+    }
+  else if (buf[0] != 'S')
     error ("Invalid remote reply: %s", buf);
+
   WSETSTOP ((*status), (((fromhex (buf[1])) << 4) + (fromhex (buf[2]))));
+
   return 0;
 }
 
 /* Read the remote registers into the block REGS.  */
-
 /* Currently we just read all the registers, so we don't use regno.  */
 /* ARGSUSED */
 static void
@@ -620,10 +652,10 @@ remote_xfer_memory(memaddr, myaddr, len, should_write, target)
 }
 
 static void
-remote_files_info (target)
-struct target_ops *target;
+remote_files_info (ignore)
+struct target_ops *ignore;
 {
-  printf ("remote files info missing here.  FIXME.\n");
+  printf ("Debugging a target over a serial line.\n");
 }
 
 /*
@@ -653,7 +685,6 @@ Receiver responds with:
 static int
 readchar ()
 {
-  char buf;
   static int inbuf_index, inbuf_count;
 #define	INBUFSIZE	PBUFSIZ
   static char inbuf[INBUFSIZE];
@@ -732,19 +763,25 @@ putpkt (buf)
     if (kiodebug)
       {
 	*p = '\0';
-	printf ("Sending packet: %s (%s)\n", buf2, buf);
+	printf ("Sending packet: %s...", buf2);  fflush(stdout);
       }
     write (remote_desc, buf2, p - buf2);
 
     /* read until either a timeout occurs (\0) or '+' is read */
     do {
       ch = readchar ();
+      if (kiodebug) {
+	if (ch == '+')
+	  printf("Ack\n");
+	else
+	  printf ("%02X%c ", ch&0xFF, ch);
+      }
     } while ((ch != '+') && (ch != '\0'));
   } while (ch != '+');
 }
 
 /* Read a packet from the remote machine, with error checking,
-   and store it in BUF.  */
+   and store it in BUF.  BUF is expected to be of size PBUFSIZ.  */
 
 static void
 getpkt (buf)
@@ -783,6 +820,12 @@ getpkt (buf)
 	  c = readchar ();
 	  if (c == '#')
 	    break;
+	  if (bp >= buf+PBUFSIZ-1)
+	  {
+	    *bp = '\0';
+	    printf_filtered ("Remote packet too long: %s\n", buf);
+	    goto whole;
+	  }
 	  *bp++ = c;
 	  csum += c;
 	}
@@ -792,8 +835,10 @@ getpkt (buf)
       c2 = fromhex (readchar ());
       if ((csum & 0xff) == (c1 << 4) + c2)
 	break;
-      printf ("Bad checksum, sentsum=0x%x, csum=0x%x, buf=%s\n",
+      printf_filtered ("Bad checksum, sentsum=0x%x, csum=0x%x, buf=%s\n",
 	      (c1 << 4) + c2, csum & 0xff, buf);
+      /* Try the whole thing again.  */
+whole:
       write (remote_desc, "-", 1);
     }
 
@@ -804,7 +849,7 @@ getpkt (buf)
   write (remote_desc, "+", 1);
 
   if (kiodebug)
-    fprintf (stderr,"Packet received :%s\n", buf);
+    fprintf (stderr,"Packet received: %s\n", buf);
 }
 
 /* The data cache leads to incorrect results because it doesn't know about
@@ -1008,4 +1053,13 @@ void
 _initialize_remote ()
 {
   add_target (&remote_ops);
+
+  add_show_from_set (
+    add_set_cmd ("remotedebug", no_class, var_boolean, (char *)&kiodebug,
+		   "Set debugging of remote serial I/O.\n\
+When enabled, each packet sent or received with the remote target\n\
+is displayed.", &setlist),
+	&showlist);
 }
+
+#endif
