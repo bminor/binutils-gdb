@@ -1,5 +1,8 @@
 Sat May 16 12:44:52 1998  Doug Evans  <devans@seba.cygnus.com>
 
+	* cgen-sim.h (CGEN_CPU): New members idesc_{read,sem}_init_p.
+	* genmloop.sh: Use them rather than static locals.
+
 	* sim-engine.c (sim_engine_set_run_state): New function.
 	* sim-engine.h (sim_engine_set_run_state): Declare.
 	* genmloop.sh (pending_reason,pending_sigrc): New static locals.
