@@ -1,3 +1,11 @@
+2002-10-30  Joel Brobecker  <brobecker@gnat.com>
+
+	* hppa-tdep.c (find_function_in_inferior): Remove this extern,
+	as this is already provided by value.h, and was actually causing
+	a compilation error because of a conflict in parameter type
+	declaration due to a missing const keyword.
+	(low_text_segment_addres): Fix a compilation warning.
+
 2002-10-29  Daniel Jacobowitz  <drow@mvista.com>
 
 	* mips-linux-nat.c (mips_linux_cannot_fetch_register): Don't fetch
