@@ -189,7 +189,7 @@ refcard.dvi : refcard.tex $(REFEDITS)
 		cp $(srcdir)/refcard.tex sedref.tex ; \
 	else \
 		echo > tmp.sed ; \
-		for f in "$(REFEDITS)" ; do \
+		for f in $(REFEDITS) ; do \
 			cat $(srcdir)/$$f >>tmp.sed ; done ; \
 		sed -f tmp.sed $(srcdir)/refcard.tex >sedref.tex ; \
 	fi
