@@ -79,6 +79,9 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  *
 /* start-sanitize-tx49 */
 #define T4      INSN_4900
 /* end-sanitize-tx49 */
+/* start-sanitize-vr4320 */
+#define N4	INSN_4320
+/* end-sanitize-vr4320 */
 /* start-sanitize-vr5400 */
 #define N5	INSN_5400
 /* end-sanitize-vr5400 */
@@ -520,6 +523,10 @@ const struct mips_opcode mips_builtin_opcodes[] = {
 {"lwu",     "t,o(b)",	0x9c000000, 0xfc000000,	LDD|RD_b|WR_t,	I3	},
 {"lwu",     "t,A(b)",	0,    (int) M_LWU_AB,	INSN_MACRO,	I3	},
 {"lwxc1",   "D,t(b)",	0x4c000000, 0xfc00f83f, LDD|WR_D|RD_t|RD_b,	I4	},
+  /* start-sanitize-vr4320 */
+{"mac",     "s,t",	0x00000028, 0xfc00ffff, RD_s|RD_t|MOD_HILO,	N4},
+{"dmac",    "s,t",	0x00000029, 0xfc00ffff, RD_s|RD_t|WR_LO,	N4},
+  /* end-sanitize-vr4320 */
   /* start-sanitize-vr5400 */
 {"macc",    "d,s,t",	0x00000158, 0xfc0007ff, RD_s|RD_t|MOD_HILO|WR_d,	N5	},
 {"maccu",   "d,s,t",	0x00000159, 0xfc0007ff, RD_s|RD_t|MOD_HILO|WR_d,	N5	},

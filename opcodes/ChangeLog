@@ -1,3 +1,10 @@
+start-sanitize-vr4320
+Tue Mar  3 11:47:58 1998  Gavin Koch  <gavin@cygnus.com>
+
+	* mips-dis.c (_print_insn_mips) : Handle bfd_mach_mips4320.
+	* mips-opc.c ("mac","dmac") : Added 4320 insns.
+
+end-sanitize-vr4320
 Sat Feb 28 16:02:34 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* arm-dis.c (print_insn_big_arm, print_insn_little_arm): Do not
