@@ -1,3 +1,8 @@
+2002-07-18  Jim Blandy  <jimb@redhat.com>
+
+	* gdb.base/interrupt.exp: Correct logic for skipping tests on
+	targets that don't support interrupts.
+
 2002-07-10  Paul N. Hilfinger  <hilfingr@otisco.mckusick.com>
 
 	* gdb.base/attach.exp: Add patterns to match output from /proc-based

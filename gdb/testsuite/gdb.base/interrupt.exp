@@ -18,11 +18,9 @@
 # Please email any bugs, comments, and/or additions to this file to:
 # bug-gdb@prep.ai.mit.edu
 
-if [host_info exists name] {
-    if [board_info host exists gdb,nointerrupts] {
-	verbose "Skipping interrupt.exp because of nointerrupts."
-	continue
-    }
+if [target_info exists gdb,nointerrupts] {
+    verbose "Skipping interrupt.exp because of nointerrupts."
+    continue
 }
 
 if [target_info exists gdb,noinferiorio] {
