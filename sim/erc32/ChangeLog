@@ -1,3 +1,8 @@
+Wed Apr  8 19:33:34 1998  Mark Alexander  <marka@cygnus.com>
+
+	* erc32.c (sim_stop): Handle SIGINT gracefully.
+	* interf.c (sim_open): Don't catch SIGINT; GDB will do that for us.
+
 Wed Apr  8 18:29:40 1998  Mark Alexander  <marka@cygnus.com>
 
 	* exec.c (dispatch_instruction): Change how carry out is calculated
