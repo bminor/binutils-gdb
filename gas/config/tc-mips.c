@@ -1337,6 +1337,8 @@ md_begin ()
       symbol_table_insert (symbol_new (buf, reg_section, i,
 				       &zero_address_frag));
     }
+  symbol_table_insert (symbol_new ("$ra", reg_section, RA,
+				   &zero_address_frag));
   symbol_table_insert (symbol_new ("$fp", reg_section, FP,
 				   &zero_address_frag));
   symbol_table_insert (symbol_new ("$sp", reg_section, SP,
@@ -8194,7 +8196,12 @@ mips_ip (str, ip)
 		    goto notreg;
 		  else
 		    {
-		      if (s[1] == 'f' && s[2] == 'p')
+		      if (s[1] == 'r' && s[2] == 'a')
+			{
+			  s += 3;
+			  regno = RA;
+			}
+		      else if (s[1] == 'f' && s[2] == 'p')
 			{
 			  s += 3;
 			  regno = FP;
@@ -9147,7 +9154,12 @@ mips16_ip (str, ip)
 		}
 	      else
 		{
-		  if (s[1] == 'f' && s[2] == 'p')
+		  if (s[1] == 'r' && s[2] == 'a')
+		    {
+		      s += 3;
+		      regno = RA;
+		    }
+		  else if (s[1] == 'f' && s[2] == 'p')
 		    {
 		      s += 3;
 		      regno = FP;
@@ -12202,7 +12214,9 @@ tc_get_register (frame)
     }
   else
     {
-      if (strncmp (input_line_pointer, "fp", 2) == 0)
+      if (strncmp (input_line_pointer, "ra", 2) == 0)
+	reg = RA;
+      else if (strncmp (input_line_pointer, "fp", 2) == 0)
 	reg = FP;
       else if (strncmp (input_line_pointer, "sp", 2) == 0)
 	reg = SP;
