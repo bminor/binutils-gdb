@@ -130,7 +130,7 @@ i386_linux_sigtramp_start (CORE_ADDR pc)
      PC is not at the start of the instruction sequence, there will be
      a few trailing readable bytes on the stack.  */
 
-  if (read_memory_nobpt (pc, (char *) buf, LINUX_SIGTRAMP_LEN) != 0)
+  if (deprecated_read_memory_nobpt (pc, (char *) buf, LINUX_SIGTRAMP_LEN) != 0)
     return 0;
 
   if (buf[0] != LINUX_SIGTRAMP_INSN0)
@@ -151,7 +151,7 @@ i386_linux_sigtramp_start (CORE_ADDR pc)
 
       pc -= adjust;
 
-      if (read_memory_nobpt (pc, (char *) buf, LINUX_SIGTRAMP_LEN) != 0)
+      if (deprecated_read_memory_nobpt (pc, (char *) buf, LINUX_SIGTRAMP_LEN) != 0)
 	return 0;
     }
 
@@ -197,7 +197,7 @@ i386_linux_rt_sigtramp_start (CORE_ADDR pc)
      PC is not at the start of the instruction sequence, there will be
      a few trailing readable bytes on the stack.  */
 
-  if (read_memory_nobpt (pc, (char *) buf, LINUX_RT_SIGTRAMP_LEN) != 0)
+  if (deprecated_read_memory_nobpt (pc, (char *) buf, LINUX_RT_SIGTRAMP_LEN) != 0)
     return 0;
 
   if (buf[0] != LINUX_RT_SIGTRAMP_INSN0)
@@ -207,7 +207,7 @@ i386_linux_rt_sigtramp_start (CORE_ADDR pc)
 
       pc -= LINUX_RT_SIGTRAMP_OFFSET1;
 
-      if (read_memory_nobpt (pc, (char *) buf, LINUX_RT_SIGTRAMP_LEN) != 0)
+      if (deprecated_read_memory_nobpt (pc, (char *) buf, LINUX_RT_SIGTRAMP_LEN) != 0)
 	return 0;
     }
 

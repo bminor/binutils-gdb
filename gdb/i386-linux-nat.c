@@ -815,7 +815,7 @@ child_resume (ptid_t ptid, int step, enum target_signal signal)
          that's about to be restored, and set the trace flag there.  */
 
       /* First check if PC is at a system call.  */
-      if (read_memory_nobpt (pc, (char *) buf, LINUX_SYSCALL_LEN) == 0
+      if (deprecated_read_memory_nobpt (pc, (char *) buf, LINUX_SYSCALL_LEN) == 0
 	  && memcmp (buf, linux_syscall, LINUX_SYSCALL_LEN) == 0)
 	{
 	  int syscall = read_register_pid (LINUX_SYSCALL_REGNUM,

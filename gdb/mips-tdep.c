@@ -973,7 +973,7 @@ mips_fetch_instruction (CORE_ADDR addr)
     }
   else
     instlen = MIPS_INSTLEN;
-  status = read_memory_nobpt (addr, buf, instlen);
+  status = deprecated_read_memory_nobpt (addr, buf, instlen);
   if (status)
     memory_error (status, addr);
   return extract_unsigned_integer (buf, instlen);
@@ -988,7 +988,7 @@ mips16_fetch_instruction (CORE_ADDR addr)
 
   instlen = MIPS16_INSTLEN;
   addr = unmake_mips16_addr (addr);
-  status = read_memory_nobpt (addr, buf, instlen);
+  status = deprecated_read_memory_nobpt (addr, buf, instlen);
   if (status)
     memory_error (status, addr);
   return extract_unsigned_integer (buf, instlen);
@@ -1001,7 +1001,7 @@ mips32_fetch_instruction (CORE_ADDR addr)
   int instlen;
   int status;
   instlen = MIPS_INSTLEN;
-  status = read_memory_nobpt (addr, buf, instlen);
+  status = deprecated_read_memory_nobpt (addr, buf, instlen);
   if (status)
     memory_error (status, addr);
   return extract_unsigned_integer (buf, instlen);

@@ -2127,8 +2127,8 @@ int
 safe_frame_unwind_memory (struct frame_info *this_frame,
 			  CORE_ADDR addr, void *buf, int len)
 {
-  /* NOTE: read_memory_nobpt returns zero on success!  */
-  return !read_memory_nobpt (addr, buf, len);
+  /* NOTE: deprecated_read_memory_nobpt returns zero on success!  */
+  return !deprecated_read_memory_nobpt (addr, buf, len);
 }
 
 /* Architecture method.  */

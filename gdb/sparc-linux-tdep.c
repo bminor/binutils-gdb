@@ -96,7 +96,7 @@ sparc_linux_sigtramp_start (CORE_ADDR pc, ULONGEST insn0, ULONGEST insn1)
      sequence, there will be a few trailing readable bytes on the
      stack.  */
 
-  if (read_memory_nobpt (pc, buf, sizeof buf) != 0)
+  if (deprecated_read_memory_nobpt (pc, buf, sizeof buf) != 0)
     return 0;
 
   word0 = extract_unsigned_integer (buf, 4);
@@ -106,7 +106,7 @@ sparc_linux_sigtramp_start (CORE_ADDR pc, ULONGEST insn0, ULONGEST insn1)
 	return 0;
 
       pc -= 4;
-      if (read_memory_nobpt (pc, buf, sizeof buf) != 0)
+      if (deprecated_read_memory_nobpt (pc, buf, sizeof buf) != 0)
 	return 0;
 
       word0 = extract_unsigned_integer (buf, 4);

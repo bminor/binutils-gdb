@@ -456,7 +456,7 @@ frv_gdbarch_adjust_breakpoint_address (struct gdbarch *gdbarch, CORE_ADDR bpaddr
       char instr[frv_instr_size];
       int status;
 
-      status = read_memory_nobpt (addr, instr, sizeof instr);
+      status = deprecated_read_memory_nobpt (addr, instr, sizeof instr);
 
       if (status != 0)
 	break;

@@ -45,7 +45,12 @@ extern int have_core_file_p (void);
    address out of bounds.  If breakpoints are inserted, returns shadow
    contents, not the breakpoints themselves.  From breakpoint.c.  */
 
-extern int read_memory_nobpt (CORE_ADDR memaddr, char *myaddr, unsigned len);
+/* NOTE: cagney/2004-06-10: Code reading from a live inferior can use
+   the get_frame_memory methods, code reading from an exec can use the
+   target methods.  */
+
+extern int deprecated_read_memory_nobpt (CORE_ADDR memaddr, char *myaddr,
+					 unsigned len);
 
 /* Report a memory error with error().  */
 

@@ -557,7 +557,7 @@ mn10300_analyze_prologue (struct frame_info *fi, CORE_ADDR pc)
 
   /* Get the next two bytes into buf, we need two because rets is a two
      byte insn and the first isn't enough to uniquely identify it.  */
-  status = read_memory_nobpt (pc, buf, 2);
+  status = deprecated_read_memory_nobpt (pc, buf, 2);
   if (status != 0)
     return pc;
 
@@ -597,7 +597,7 @@ mn10300_analyze_prologue (struct frame_info *fi, CORE_ADDR pc)
 
   /* Suck in two bytes.  */
   if (addr + 2 >= stop
-      || (status = read_memory_nobpt (addr, buf, 2)) != 0)
+      || (status = deprecated_read_memory_nobpt (addr, buf, 2)) != 0)
     {
       fix_frame_pointer (fi, 0);
       return addr;
@@ -621,7 +621,7 @@ mn10300_analyze_prologue (struct frame_info *fi, CORE_ADDR pc)
   if (buf[0] == 0xcf)
     {
       /* Extract the register list for the movm instruction.  */
-      status = read_memory_nobpt (addr + 1, buf, 1);
+      status = deprecated_read_memory_nobpt (addr + 1, buf, 1);
       movm_args = *buf;
 
       addr += 2;
@@ -639,7 +639,7 @@ mn10300_analyze_prologue (struct frame_info *fi, CORE_ADDR pc)
 	}
 
       /* Get the next two bytes so the prologue scan can continue.  */
-      status = read_memory_nobpt (addr, buf, 2);
+      status = deprecated_read_memory_nobpt (addr, buf, 2);
       if (status != 0)
 	{
 	  /* Fix fi->frame since it's bogus at this point.  */
@@ -676,7 +676,7 @@ mn10300_analyze_prologue (struct frame_info *fi, CORE_ADDR pc)
 	}
 
       /* Get two more bytes so scanning can continue.  */
-      status = read_memory_nobpt (addr, buf, 2);
+      status = deprecated_read_memory_nobpt (addr, buf, 2);
       if (status != 0)
 	{
 	  /* Fix fi->frame if it's bogus at this point.  */
@@ -698,7 +698,7 @@ mn10300_analyze_prologue (struct frame_info *fi, CORE_ADDR pc)
      If none of the above was found, then this prologue has no 
      additional stack.  */
 
-  status = read_memory_nobpt (addr, buf, 2);
+  status = deprecated_read_memory_nobpt (addr, buf, 2);
   if (status != 0)
     {
       /* Fix fi->frame if it's bogus at this point.  */
@@ -721,7 +721,7 @@ mn10300_analyze_prologue (struct frame_info *fi, CORE_ADDR pc)
     {
       /* Suck in imm_size more bytes, they'll hold the size of the
          current frame.  */
-      status = read_memory_nobpt (addr + 2, buf, imm_size);
+      status = deprecated_read_memory_nobpt (addr + 2, buf, imm_size);
       if (status != 0)
 	{
 	  /* Fix fi->frame if it's bogus at this point.  */

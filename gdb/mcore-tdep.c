@@ -1008,7 +1008,7 @@ static int
 get_insn (CORE_ADDR pc)
 {
   char buf[4];
-  int status = read_memory_nobpt (pc, buf, 2);
+  int status = deprecated_read_memory_nobpt (pc, buf, 2);
   if (status != 0)
     return 0;
 

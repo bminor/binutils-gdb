@@ -138,7 +138,7 @@ i386nbsd_sigtramp_offset (CORE_ADDR pc)
   LONGEST off;
   int i;
 
-  if (read_memory_nobpt (pc, &insn, 1) != 0)
+  if (deprecated_read_memory_nobpt (pc, &insn, 1) != 0)
     return -1;
 
   switch (insn)
@@ -150,7 +150,7 @@ i386nbsd_sigtramp_offset (CORE_ADDR pc)
     case RETCODE_INSN2:
       /* INSN2 and INSN3 are the same.  Read at the location of PC+1
 	 to determine if we're actually looking at INSN2 or INSN3.  */
-      if (read_memory_nobpt (pc + 1, &insn, 1) != 0)
+      if (deprecated_read_memory_nobpt (pc + 1, &insn, 1) != 0)
 	return -1;
 
       if (insn == RETCODE_INSN3)
@@ -173,7 +173,7 @@ i386nbsd_sigtramp_offset (CORE_ADDR pc)
 
   pc -= off;
 
-  if (read_memory_nobpt (pc, (char *) ret, sizeof (ret)) != 0)
+  if (deprecated_read_memory_nobpt (pc, (char *) ret, sizeof (ret)) != 0)
     return -1;
 
   if (memcmp (ret, sigtramp_retcode, sizeof (ret)) == 0)

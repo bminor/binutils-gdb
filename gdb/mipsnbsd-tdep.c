@@ -198,7 +198,7 @@ mipsnbsd_sigtramp_offset (CORE_ADDR pc)
   LONGEST off;
   int i;
 
-  if (read_memory_nobpt (pc, (char *) w, sizeof (w)) != 0)
+  if (deprecated_read_memory_nobpt (pc, (char *) w, sizeof (w)) != 0)
     return -1;
 
   for (i = 0; i < RETCODE_NWORDS; i++)
@@ -212,7 +212,7 @@ mipsnbsd_sigtramp_offset (CORE_ADDR pc)
   off = i * 4;
   pc -= off;
 
-  if (read_memory_nobpt (pc, (char *) ret, sizeof (ret)) != 0)
+  if (deprecated_read_memory_nobpt (pc, (char *) ret, sizeof (ret)) != 0)
     return -1;
 
   if (memcmp (ret, retcode, RETCODE_SIZE) == 0)

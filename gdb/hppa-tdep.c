@@ -1327,7 +1327,7 @@ restart:
       old_save_sp = save_sp;
       old_stack_remaining = stack_remaining;
 
-      status = read_memory_nobpt (pc, buf, 4);
+      status = deprecated_read_memory_nobpt (pc, buf, 4);
       inst = extract_unsigned_integer (buf, 4);
 
       /* Yow! */
@@ -1376,7 +1376,7 @@ restart:
 	  while (reg_num >= (TARGET_PTR_BIT == 64 ? 19 : 23) && reg_num <= 26)
 	    {
 	      pc += 4;
-	      status = read_memory_nobpt (pc, buf, 4);
+	      status = deprecated_read_memory_nobpt (pc, buf, 4);
 	      inst = extract_unsigned_integer (buf, 4);
 	      if (status != 0)
 		return pc;
@@ -1389,7 +1389,7 @@ restart:
       reg_num = inst_saves_fr (inst);
       save_fr &= ~(1 << reg_num);
 
-      status = read_memory_nobpt (pc + 4, buf, 4);
+      status = deprecated_read_memory_nobpt (pc + 4, buf, 4);
       next_inst = extract_unsigned_integer (buf, 4);
 
       /* Yow! */
@@ -1416,13 +1416,13 @@ restart:
 	  while (reg_num >= 4 && reg_num <= (TARGET_PTR_BIT == 64 ? 11 : 7))
 	    {
 	      pc += 8;
-	      status = read_memory_nobpt (pc, buf, 4);
+	      status = deprecated_read_memory_nobpt (pc, buf, 4);
 	      inst = extract_unsigned_integer (buf, 4);
 	      if (status != 0)
 		return pc;
 	      if ((inst & 0xfc000000) != 0x34000000)
 		break;
-	      status = read_memory_nobpt (pc + 4, buf, 4);
+	      status = deprecated_read_memory_nobpt (pc + 4, buf, 4);
 	      next_inst = extract_unsigned_integer (buf, 4);
 	      if (status != 0)
 		return pc;
@@ -1647,7 +1647,7 @@ hppa_frame_cache (struct frame_info *next_frame, void **this_cache)
       {
 	int reg;
 	char buf4[4];
-	long status = read_memory_nobpt (pc, buf4, sizeof buf4);
+	long status = deprecated_read_memory_nobpt (pc, buf4, sizeof buf4);
 	long inst = extract_unsigned_integer (buf4, sizeof buf4);
 
 	/* Note the interesting effects of this instruction.  */
