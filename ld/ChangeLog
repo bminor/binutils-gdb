@@ -1,3 +1,16 @@
+2002-05-29  Matt Thomas  <matt@3am-software.com>
+            Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* Makefile.am (ALL_EMULATIONS): Add eelf32vax.o and evaxnbsd.o.
+	(eelf32vax.c)
+	(evaxnbsd.c): New rules.
+	* Makefile.in: Regenerate.
+	* configure.tgt (vax-*-netbsdelf*)
+	(vax-*-netbsdaout*)
+	(vax-*-netbsd*): New targets.
+	* emulparams/elf32vax.sh: New file.
+	* emulparams/vaxnbsd.sh: New file.
+
 2002-05-29  Adam Nemet  <anemet@lnxw.com>
 
 	* emultempl/armelf.em (arm_elf_after_open): Don't determine

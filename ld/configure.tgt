@@ -324,6 +324,11 @@ hppa*-*-lites*)		targ_emul=hppaelf ;;
 hppa*-*-netbsd*)	targ_emul=hppanbsd ;;
 hppa*-*-rtems*)		targ_emul=hppaelf ;;
 vax-dec-ultrix* | vax-dec-bsd*) targ_emul=vax ;;
+vax-*-netbsdelf*)	targ_emul=elf32vax
+			targ_extra_emuls=vaxnbsd ;;
+vax-*-netbsdaout* | vax-*-netbsd*)
+			targ_emul=vaxnbsd
+			targ_extra_emuls=elf32vax ;;
 mips*-*-pe)		targ_emul=mipspe ;
 			targ_extra_ofiles="deffilep.o pe-dll.o" ;;
 mips*-dec-ultrix*)	targ_emul=mipslit ;;

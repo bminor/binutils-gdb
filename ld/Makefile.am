@@ -171,6 +171,7 @@ ALL_EMULATIONS = \
 	eelf32ppclinux.o \
 	eelf32ppcsim.o \
 	eelf32ppcwindiss.o \
+	eelf32vax.o \
 	eelf32xstormy16.o \
 	eelf_i386.o \
 	eelf_i386_be.o \
@@ -271,6 +272,7 @@ ALL_EMULATIONS = \
 	etic80coff.o \
 	evanilla.o \
 	evax.o \
+	evaxnbsd.o \
 	evsta.o \
 	ew65.o \
 	ez8001.o \
@@ -513,6 +515,9 @@ eelf32xstormy16.c: $(srcdir)/emulparams/elf32xstormy16.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/emultempl/needrelax.em \
   $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32xstormy16 "$(tdir_xstormy16)"
+eelf32vax.c: $(srcdir)/emulparams/elf32vax.sh \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} elf32vax "$(tdir_elf32vax)"
 eelf32fr30.c: $(srcdir)/emulparams/elf32fr30.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32fr30 "$(tdir_fr30)"
@@ -1009,6 +1014,9 @@ evanilla.c: $(srcdir)/emulparams/vanilla.sh \
 evax.c: $(srcdir)/emulparams/vax.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} vax "$(tdir_vax)"
+evaxnbsd.c: $(srcdir)/emulparams/vaxnbsd.sh \
+  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} vaxnbsd "$(tdir_vaxnbsd)"
 evsta.c: $(srcdir)/emulparams/vsta.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} vsta "$(tdir_vsta)"
