@@ -68,7 +68,20 @@ sim_open (SIM_OPEN_KIND kind, char **argv)
      FIXME: Hmmm...  in the case of gdb we need getopt to call
      print_filtered.  */
   if (sim_parse_args (&simulation, argv) != SIM_RC_OK)
-    return 0;
+    {
+      /* Uninstall the modules to avoid memory leaks,
+	 file descriptor leaks, etc.  */
+      sim_module_uninstall (&simulation);
+      return 0;
+    }
+
+  if (sim_post_argv_init (&simulation) != SIM_RC_OK)
+    {
+      /* Uninstall the modules to avoid memory leaks,
+	 file descriptor leaks, etc.  */
+      sim_module_uninstall (&simulation);
+      return 0;
+    }
 
   engine_init(&simulation);
 
@@ -95,6 +108,9 @@ sim_size (int i)
 void
 sim_close (SIM_DESC sd, int quitting)
 {
+  /* Uninstall the modules to avoid memory leaks,
+     file descriptor leaks, etc.  */
+  sim_module_uninstall (&simulation);
 }
 
 

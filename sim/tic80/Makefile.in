@@ -18,8 +18,10 @@ SIM_OBJS = sim-endian.o sim-bits.o sim-config.o interp.o \
 	sim-io.o \
 	sim-utils.o \
 	sim-load.o \
+	sim-module.o \
 	sim-options.o \
-	sim-trace.o
+	sim-trace.o \
+	sim-profile.o
 
 # List of extra dependencies.
 # Generally this consists of simulator specific files included by sim-main.h.

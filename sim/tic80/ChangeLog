@@ -1,3 +1,11 @@
+Thu Apr 24 00:39:51 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+	* Makefile.in (SIM_OBJS): Add sim-module.o, sim-profile.o.
+	* sim-calls.c (sim_open): Call sim_module_uninstall if argument
+	parsing fails.  Call sim_post_argv_init.
+	(sim_close): Call sim_module_uninstall.
+
 Wed Apr 23 20:05:33 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* insns (and, bbo, bcnd, bsr, dcache, jsr, or, xor, nor): Enable.
