@@ -866,10 +866,14 @@ varobj_list (struct varobj ***varlist)
     -2 if the type changed
     Otherwise it is the number of children + parent changed
 
-   Only root variables can be updated... */
+   Only root variables can be updated... 
+
+   NOTE: This function may delete the caller's varobj. If it
+   returns -2, then it has done this and VARP will be modified
+   to point to the new varobj. */
 
 int
-varobj_update (struct varobj *var, struct varobj ***changelist)
+varobj_update (struct varobj **varp, struct varobj ***changelist)
 {
   int changed = 0;
   int type_changed;
@@ -889,7 +893,7 @@ varobj_update (struct varobj *var, struct varobj ***changelist)
     return -1;
 
   /*  Only root variables can be updated... */
-  if (var->root->rootvar != var)
+  if ((*varp)->root->rootvar != *varp)
     /* Not a root var */
     return -1;
 
@@ -903,10 +907,10 @@ varobj_update (struct varobj *var, struct varobj ***changelist)
      value_of_root variable dispose of the varobj if the type
      has changed. */
   type_changed = 1;
-  new = value_of_root (&var, &type_changed);
+  new = value_of_root (varp, &type_changed);
   if (new == NULL)
     {
-      var->error = 1;
+      (*varp)->error = 1;
       return -1;
     }
 
@@ -917,34 +921,34 @@ varobj_update (struct varobj *var, struct varobj ***changelist)
      them note that it's changed. */
   if (type_changed)
     {
-      vpush (&result, var);
+      vpush (&result, *varp);
       changed++;
     }
   /* If values are not equal, note that it's changed.
      There a couple of exceptions here, though.
      We don't want some types to be reported as "changed". */
-  else if (type_changeable (var) && !my_value_equal (var->value, new, &error2))
+  else if (type_changeable (*varp) && !my_value_equal ((*varp)->value, new, &error2))
     {
-      vpush (&result, var);
+      vpush (&result, *varp);
       changed++;
       /* error2 replaces var->error since this new value
          WILL replace the old one. */
-      var->error = error2;
+      (*varp)->error = error2;
     }
 
   /* We must always keep around the new value for this root
      variable expression, or we lose the updated children! */
-  value_free (var->value);
-  var->value = new;
+  value_free ((*varp)->value);
+  (*varp)->value = new;
 
   /* Initialize a stack */
   vpush (&stack, NULL);
 
   /* Push the root's children */
-  if (var->children != NULL)
+  if ((*varp)->children != NULL)
     {
       struct varobj_child *c;
-      for (c = var->children; c != NULL; c = c->next)
+      for (c = (*varp)->children; c != NULL; c = c->next)
 	vpush (&stack, c->child);
     }
 
@@ -1647,6 +1651,7 @@ value_of_root (struct varobj **var_handle, int *type_changed)
 	    }
 	  install_variable (tmp_var);
 	  *var_handle = tmp_var;
+	  var = *var_handle;
 	  *type_changed = 1;
 	}
     }

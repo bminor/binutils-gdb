@@ -1,5 +1,15 @@
 2001-08-17  Keith Seitz  <keiths@redhat.com>
 
+	* varobj.c (varobj_update): Change first parameter to
+	pointer to struct varobj*. This function can delete
+	varobjs, so we need to give callers the new varobj
+	when this happens.
+	(value_of_root): Update "var", too, if "var_handle"
+	changes.
+	* varobj.h (varobj_update): Likewise.
+
+2001-08-17  Keith Seitz  <keiths@redhat.com>
+
 	* Makefile.in (varobj_h): Define.
 	(mi-cmd-var.o): Depends on varobj_h.
 	(gdbtk-varobj.o): Change varobj.h to $(varobj_h).

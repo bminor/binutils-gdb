@@ -95,6 +95,6 @@ extern int varobj_set_value (struct varobj *var, char *expression);
 
 extern int varobj_list (struct varobj ***rootlist);
 
-extern int varobj_update (struct varobj *var, struct varobj ***changelist);
+extern int varobj_update (struct varobj **varp, struct varobj ***changelist);
 
 #endif /* VAROBJ_H */
