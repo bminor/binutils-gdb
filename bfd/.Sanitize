@@ -27,6 +27,7 @@ Things-to-keep:
 COPYING
 doc
 ChangeLog
+Makefile.dos
 Makefile.in
 TODO
 VERSION
@@ -52,7 +53,7 @@ coff-mips.c
 coff-rs6000.c
 coffcode.h
 config
-configdos.bat
+configure.bat
 configure.in
 core.c
 demo64.c
@@ -83,7 +84,6 @@ libcoff-in.h
 libcoff.h
 libieee.h
 liboasys.h
-makefile.dos
 newsos3.c
 oasys.c
 opncls.c
@@ -122,7 +122,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.36  1992/01/27 21:48:38  grossman
+# Revision 1.37  1992/02/21 22:55:08  sac
+# DOS file name change
+#
+# Revision 1.36  1992/01/27  21:48:38  grossman
 # Add seclet.h to files-to-keep.
 #
 # Revision 1.35  1992/01/24  22:42:49  sac
