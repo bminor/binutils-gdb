@@ -1,3 +1,10 @@
+Tue Feb  2 00:19:08 1993  John Gilmore  (gnu@cygnus.com)
+
+	* printcmd.c (print_frame_args, print_frame_nameless_args):
+	Let print_frame_nameless_args decide whether there are any,
+	laying groundwork for possibly later printing 29K args for
+	functions where we have tag words but no symbols.	
+
 Mon Feb  1 18:09:58 1993  Roland H. Pesch  (pesch@fowanton.cygnus.com)
 
 	* Makefile.in: fix GDB doc targets for new doc subdir structure

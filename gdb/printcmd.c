@@ -305,6 +305,7 @@ print_formatted (val, format, size)
     default:
       if (format == 0
 	  || TYPE_CODE (VALUE_TYPE (val)) == TYPE_CODE_ARRAY
+	  || TYPE_CODE (VALUE_TYPE (val)) == TYPE_CODE_STRING
 	  || TYPE_CODE (VALUE_TYPE (val)) == TYPE_CODE_STRUCT
 	  || TYPE_CODE (VALUE_TYPE (val)) == TYPE_CODE_UNION
 	  || VALUE_REPEATED (val))
@@ -702,6 +703,11 @@ validate_format (fmt, cmdname)
     error ("Format letter \"%c\" is meaningless in \"%s\" command.",
 	   fmt.format, cmdname);
 }
+
+/*  Evaluate string EXP as an expression in the current language and
+    print the resulting value.  EXP may contain a format specifier as the
+    first argument ("/x myvar" for example, to print myvar in hex).
+    */
 
 static void
 print_command_1 (exp, inspect, voidprint)
@@ -1526,48 +1532,59 @@ print_frame_args (func, fi, num, stream)
   if (num != -1)
     {
       long start;
-      CORE_ADDR addr;
 
       if (highest_offset == -1)
 	start = FRAME_ARGS_SKIP;
       else
 	start = highest_offset;
 
-      addr = FRAME_ARGS_ADDRESS (fi);
-      if (addr)
-        print_frame_nameless_args (addr, start, num - args_printed,
-				   first, stream);
+      print_frame_nameless_args (fi, start, num - args_printed,
+				 first, stream);
     }
 }
 
 /* Print nameless args on STREAM.
-   ARGSADDR is the address of the arglist, START is the offset
+   FI is the frameinfo for this frame, START is the offset
    of the first nameless arg, and NUM is the number of nameless args to
    print.  FIRST is nonzero if this is the first argument (not just
    the first nameless arg).  */
 static void
-print_frame_nameless_args (argsaddr, start, num, first, stream)
-     CORE_ADDR argsaddr;
+print_frame_nameless_args (fi, start, num, first, stream)
+     struct frame_info *fi;
      long start;
      int num;
      int first;
      FILE *stream;
 {
   int i;
+  CORE_ADDR argsaddr;
+  long arg_value;
+
   for (i = 0; i < num; i++)
     {
       QUIT;
+#ifdef NAMELESS_ARG_VALUE
+      NAMELESS_ARG_VALUE (fi, start, &arg_value);
+#else
+      argsaddr = FRAME_ARGS_ADDRESS (fi);
+      if (!argsaddr)
+	return;
+
+      arg_value = read_memory_integer (argsaddr + start, sizeof (int));
+#endif
+
       if (!first)
 	fprintf_filtered (stream, ", ");
-#ifndef PRINT_TYPELESS_INTEGER
-      fprintf_filtered (stream, "%d",
-	       read_memory_integer (argsaddr + start, sizeof (int)));
+
+#ifdef	PRINT_NAMELESS_INTEGER
+      PRINT_NAMELESS_INTEGER (stream, arg_value);
 #else
-      PRINT_TYPELESS_INTEGER (stream, builtin_type_int,
-			      (LONGEST)
-			      read_memory_integer (argsaddr + start,
-						   sizeof (int)));
-#endif
+#ifdef PRINT_TYPELESS_INTEGER
+      PRINT_TYPELESS_INTEGER (stream, builtin_type_int, (LONGEST) arg_value);
+#else
+      fprintf_filtered (stream, "%d", arg_value);
+#endif /* PRINT_TYPELESS_INTEGER */
+#endif /* PRINT_NAMELESS_INTEGER */
       first = 0;
       start += sizeof (int);
     }
