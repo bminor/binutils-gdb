@@ -70,6 +70,8 @@
 @V@/gdb/ChangeLog-2002 @V@/gdb/ChangeLog.002
 @V@/gdb/ChangeLog-3.x @V@/gdb/ChangeLog.3-x
 @V@/gdb/ada-exp.tab.c @V@/gdb/ada-exp_tab.c
+@V@/gdb/amd64fbsd-tdep.c @V@/gdb/x86fb-tdep.c
+@V@/gdb/amd64fbsd-nat.c @V@/gdb/x86fb-nat.c
 @V@/gdb/alphabsd-nat.c @V@/gdb/alphb-nat.c
 @V@/gdb/alphabsd-tdep.c @V@/gdb/alphb-tdep.c
 @V@/gdb/alphanbsd-nat.c @V@/gdb/alphnb-nat.c
@@ -202,6 +204,8 @@
 @V@/gdb/testsuite/gdb.c++/ambiguous.exp @V@/gdb/testsuite/gdb.cxx/ambiguous.exp
 @V@/gdb/testsuite/gdb.c++/annota2.cc @V@/gdb/testsuite/gdb.cxx/annota2.cc
 @V@/gdb/testsuite/gdb.c++/annota2.exp @V@/gdb/testsuite/gdb.cxx/annota2.exp
+@V@/gdb/testsuite/gdb.c++/annota3.cc @V@/gdb/testsuite/gdb.cxx/annota3.cc
+@V@/gdb/testsuite/gdb.c++/annota3.exp @V@/gdb/testsuite/gdb.cxx/annota3.exp
 @V@/gdb/testsuite/gdb.c++/anon-union.cc @V@/gdb/testsuite/gdb.cxx/anon-union.cc
 @V@/gdb/testsuite/gdb.c++/anon-union.exp @V@/gdb/testsuite/gdb.cxx/anon-union.exp
 @V@/gdb/testsuite/gdb.c++/casts.cc @V@/gdb/testsuite/gdb.cxx/casts.cc
