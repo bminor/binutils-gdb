@@ -1,3 +1,7 @@
+Thu Apr  9 12:10:06 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* Makefile.in:  version=4.4.88, add xm-vax.h to HFILES.
+
 Thu Apr  9 02:29:03 1992  John Gilmore  (gnu at cygnus.com)
 
 	* xm-sun4os5.h (DO_DEFERRED_STORES, CLEAR_DEFERRED_STORES):  Zap.
