@@ -65,7 +65,7 @@ MAKEINFO = `if [ -f $${rootme}/texinfo/C/makeinfo ] ; \
 	then echo $${rootme}/texinfo/C/makeinfo ; \
 	else echo makeinfo ; fi`
 
-SUBDIRS = libiberty mmalloc glob readline bfd gdb binutils ld gas tgas gcc libg++ newlib libm # clib -- newlib replaces
+SUBDIRS = libiberty mmalloc glob readline bfd gdb binutils opcodes ld gas tgas gcc libg++ newlib libm # clib -- newlib replaces
 OTHERS = 
 
 ALL = all.normal
@@ -136,18 +136,19 @@ install-dir.info:
 
 all.normal: all-autoconf all-libiberty all-mmalloc all-texinfo \
 	all-byacc all-flex all-bfd all-ld all-gas all-tgas all-gcc \
-	all-binutils all-libg++ all-readline all-gdb \
+	all-binutils all-opcodes all-libg++ all-readline all-gdb \
 	all-make all-rcs all-cvs all-diff all-grep \
 	all-patch all-emacs all-ispell all-etc \
 	all-newlib all-gprof all-send_pr all-libm
 
 all.cross: all-libiberty all-mmalloc all-gas all-byacc all-flex all-ld \
-	all-bfd all-readline all-gdb all-binutils all-gcc all-newlib
+	all-bfd all-readline all-gdb all-binutils all-opcodes all-gcc \
+	all-newlib
 #	$(MAKE) $(FLAGS_TO_PASS) subdir_do DO=all "DODIRS=$(SUBDIRS) $(OTHERS)"
 
 clean: clean-autoconf clean-libiberty clean-mmalloc clean-texinfo \
 	clean-bfd clean-newlib clean-binutils clean-flex \
-	clean-byacc clean-ld clean-gas clean-etc \
+	clean-byacc clean-ld clean-gas clean-etc clean-opcodes \
 	clean-gcc clean-readline clean-glob clean-gdb \
 	clean-make clean-diff clean-grep clean-rcs \
 	clean-cvs clean-patch clean-emacs clean-ispell \
@@ -175,6 +176,7 @@ install-no-fixedincludes: install-dirs gcc-no-fixedincludes \
 	install-autoconf \
 	install-bfd \
 	install-binutils \
+	install-opcodes \
 	install-byacc \
 	install-cvs \
 	install-diff \
@@ -211,7 +213,7 @@ gcc-no-fixedincludes:
 	fi
 
 install.cross: install-dirs install-libiberty install-mmalloc \
-        install-binutils install-byacc install-flex \
+        install-binutils install-opcodes install-byacc install-flex \
         install-ld install-gas install-readline \
         install-glob install-gdb install-mmalloc \
         install-newlib install-gcc install-etc
@@ -379,8 +381,37 @@ install-bfd: force
 		true ; \
 	fi
 
+
+### opcodes
+all-opcodes: force
+	@if [ -f ./opcodes/Makefile ] ; then \
+		rootme=`pwd` ; export rootme ; \
+		(cd ./bfd; \
+		$(MAKE) $(FLAGS_TO_PASS) all) ; \
+	else \
+		true ; \
+	fi
+
+clean-opcodes: force
+	@if [ -f ./opcodes/Makefile ] ; then \
+		rootme=`pwd` ; export rootme ; \
+		(cd ./bfd; \
+		$(MAKE) $(FLAGS_TO_PASS) clean) ; \
+	else \
+		true ; \
+	fi
+
+install-opcodes: force
+	@if [ -f ./opcodes/Makefile ] ; then \
+		rootme=`pwd` ; export rootme ; \
+		(cd ./bfd; \
+		$(MAKE) $(FLAGS_TO_PASS) install) ; \
+	else \
+		true ; \
+	fi
+
 ### binutils
-all-binutils: all-libiberty all-bfd all-flex
+all-binutils: all-opcodes all-libiberty all-bfd all-flex
 	@if [ -f ./binutils/Makefile ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./binutils; \

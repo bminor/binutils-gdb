@@ -65,6 +65,7 @@ make
 mmalloc
 move-if-change
 newlib
+opcodes
 patch
 prms
 rcs
