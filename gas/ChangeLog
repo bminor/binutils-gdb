@@ -1,5 +1,11 @@
 Thu Mar 28 15:27:47 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/tc-hppa.c: Remove nested comment.
+	(tc_gen_reloc): Move label done inside the ifdef in which it is
+	used.
+	(md_apply_fix): Pass pointers to correct types to libhppa.h
+	functions.  Always return a value.
+
 	* config/tc-mips.h (tc_frob_file): Define.
 	(mips_frob_file): Declare.
 	* config/tc-mips.c (struct mips_hi_fixup): Define.
