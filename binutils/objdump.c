@@ -261,7 +261,7 @@ bfd *abfd;
   unsigned long m;
   asection *section;
   /* Replace symbol section relative values with abs values */
-
+  boolean done_dot = false;
   
   for (i = 0; i < symcount; i++) {
     if (syms[i]->section != (asection *)NULL) {
@@ -338,33 +338,43 @@ bfd *abfd;
 
       i = 0;
       while (i <section->size) {
-	if (with_line_numbers) {
-	  static prevline;
-	  CONST char *filename;
-	  CONST char *functionname;
-	  unsigned int line;
-	  bfd_find_nearest_line(abfd,
-				section,
-				syms,
-				section->vma + i,
-				&filename,
-				&functionname,
-				&line);
-
-	  if (filename && functionname && line && line != prevline) {
-	    printf("%s:%u\n", filename, line);
-	    prevline = line;
+	if (data[i] ==0 && data[i+1] == 0 && data[i+2] == 0 &&
+	    data[i+3] == 0) {
+	  if (done_dot == false) {
+	    printf("...\n");
+	    done_dot=true;
 	  }
+	  i+=4;
 	}
-	print_address(section->vma + i, stdout);
-	printf(" ");
+	else {
+	  done_dot = false;
+	  if (with_line_numbers) {
+	    static prevline;
+	    CONST char *filename;
+	    CONST char *functionname;
+	    unsigned int line;
+	    bfd_find_nearest_line(abfd,
+				  section,
+				  syms,
+				  section->vma + i,
+				  &filename,
+				  &functionname,
+				  &line);
 
-	i +=   print(section->vma + i, 
-		     data + i,
-		     stdout);
-	putchar ('\n')  ;  
+	    if (filename && functionname && line && line != prevline) {
+	      printf("%s:%u\n", filename, line);
+	      prevline = line;
+	    }
+	  }
+	  print_address(section->vma + i, stdout);
+	  printf(" ");
+
+	  i +=   print(section->vma + i, 
+		       data + i,
+		       stdout);
+	  putchar ('\n')  ;  
+	}
       }
-
 
 
 
