@@ -1,3 +1,9 @@
+2003-12-10  Paul Brook  <paul@codesourcery.com>
+
+	* gas/arm/arm.exp: Add r15-bad.
+	* gas/arm/r15-bad.s: New file.
+	* gas/arm/r15-bad.l: New file.
+
 2003-12-06  Richard Sandiford  <rsandifo@redhat.com>
 
 	* gas/mips/elf-rel16.[sd]: New test.
