@@ -1,6 +1,41 @@
 		What has changed since GDB-3.5?
 		(Organized release by release)
 
+*** Changes in GDB-4.4:
+
+ * New machines supported (host and target)
+
+SCO Unix on i386 IBM PC clones		i386-sco-sysv	or  i386sco
+	(except core files)
+
+ * New machines supported (target)
+
+AMD 29000 embedded, using EBMON		a29k-none-none
+
+ * Improved ELF and DWARF support
+
+GDB can read ELF object files on System V Release 4, and can handle
+debugging records for C, in DWARF format, in ELF files.  This support
+is preliminary.  If you bring up GDB on another SVR4 system, please
+send mail to bug-gdb@prep.ai.mit.edu to let us know what changes were
+reqired (if any).
+
+ * New Readline
+
+GDB now uses the latest `readline' library.  One user-visible change
+is that two tabs will list possible command completions, which previously
+required typing M-? (meta-question mark, or ESC ?).
+
+ * Bugs fixed
+
+The `stepi' bug that many of you noticed has been squashed.
+Many bugs in C++ have been handled.  Many more remain to be handled.
+See the various ChangeLog files (primarily in gdb and bfd) for details.
+
+ * State of the MIPS world (in case you wondered):
+
+blah blah blah.....................................
+
 *** Changes in GDB-4.3:
 
  * New machines supported (host and target)
