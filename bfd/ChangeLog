@@ -1,5 +1,18 @@
 Fri Dec 15 12:05:57 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* targets.c (enum bfd_endian): Define.
+	(bfd_target): Rename byteorder_big_p to byteorder, and change it
+	from boolean to enum bfd_endian.  Change header_byteorder_big_p
+	correspondingly.
+	* bfd-in.h (bfd_big_endian, bfd_little_endian): New macros.
+	(bfd_header_big_endian, bfd_header_little_endian): New macros.
+	* bfd-in2.h: Rebuild.
+	* All targets: Change initialization of byteorder and
+	header_byteorder to use enum bfd_endian values rather than
+	booleans.
+	* All files: Change all references to byteorder_big_p and
+	header_byteorder_big_p to use new bfd_*_endian macros.
+
 	* coffgen.c (make_a_section_from_file): Set lma to s_paddr, not
 	s_vaddr.
 	* coffcode.h (coff_write_object_contents): Set s_paddr to lma, not
