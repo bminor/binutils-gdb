@@ -1,5 +1,5 @@
 /* tc-sh64.c -- Assemble code for the SuperH SH SHcompact and SHmedia.
-   Copyright 2000, 2001, 2002, 2003 Free Software Foundation.
+   Copyright 2000, 2001, 2002, 2003, 2004, 2005 Free Software Foundation.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -691,7 +691,7 @@ shmedia_md_apply_fix3 (fixS *fixP, valueT *valp)
   if (fixP->fx_addsy == NULL && fixP->fx_pcrel == 0)
     {
       /* Emit error for an out-of-range value.  */
-      shmedia_check_limits (valp, fixP->fx_r_type, fixP);
+      shmedia_check_limits ((offsetT *) valp, fixP->fx_r_type, fixP);
 
       switch (fixP->fx_r_type)
 	{

@@ -1,6 +1,6 @@
 /* tc-ppc.c -- Assemble for the PowerPC or POWER (RS/6000)
    Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003,
-   2004 Free Software Foundation, Inc.
+   2004, 2005 Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
 
    This file is part of GAS, the GNU Assembler.
@@ -5819,7 +5819,7 @@ md_apply_fix3 (fixP, valP, seg)
 	  if (fixP->fx_pcrel)
 	    abort ();
 	  {
-	    unsigned char *where = fixP->fx_frag->fr_literal + fixP->fx_where;
+	    char *where = fixP->fx_frag->fr_literal + fixP->fx_where;
 	    unsigned long val, mask;
 
 	    if (target_big_endian)

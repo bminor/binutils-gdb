@@ -1,6 +1,7 @@
 /* tc-avr.c -- Assembler code for the ATMEL AVR
 
-   Copyright 1999, 2000, 2001, 2002, 2004 Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2001, 2002, 2004, 2005
+   Free Software Foundation, Inc.
    Contributed by Denis Chertykov <denisc@overta.ru>
 
    This file is part of GAS, the GNU Assembler.
@@ -906,7 +907,7 @@ md_apply_fix3 (fixP, valP, seg)
     {
       /* Fetch the instruction, insert the fully resolved operand
 	 value, and stuff the instruction back again.  */
-      where = fixP->fx_frag->fr_literal + fixP->fx_where;
+      where = (unsigned char *) fixP->fx_frag->fr_literal + fixP->fx_where;
       insn = bfd_getl16 (where);
 
       switch (fixP->fx_r_type)

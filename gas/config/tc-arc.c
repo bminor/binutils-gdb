@@ -1121,7 +1121,7 @@ static void
 arc_extinst (ignore)
      int ignore ATTRIBUTE_UNUSED;
 {
-  unsigned char syntax[129];
+  char syntax[129];
   char *name;
   char *p;
   char c;

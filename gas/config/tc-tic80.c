@@ -1,5 +1,6 @@
 /* tc-tic80.c -- Assemble for the TI TMS320C80 (MV)
-   Copyright 1996, 1997, 2000, 2001, 2002 Free Software Foundation, Inc.
+   Copyright 1996, 1997, 2000, 2001, 2002, 2005
+   Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -685,7 +686,7 @@ md_assemble (str)
      char *str;
 {
   char *scan;
-  unsigned char *input_line_save;
+  char *input_line_save;
   struct tic80_opcode *opcode;
   expressionS myops[16];
 

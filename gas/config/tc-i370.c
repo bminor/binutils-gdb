@@ -1,7 +1,7 @@
 /* tc-i370.c -- Assembler for the IBM 360/370/390 instruction set.
    Loosely based on the ppc files by Linas Vepstas <linas@linas.org> 1998, 99
-   Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
-   Free Software Foundation, Inc.
+   Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003,
+   2005 Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
 
    This file is part of GAS, the GNU Assembler.
@@ -2055,7 +2055,7 @@ md_assemble (str)
       /* If there are fewer operands in the line then are called
 	 for by the instruction, we want to skip the optional
 	 operand.  */
-      nwanted = strlen (opcode->operands);
+      nwanted = strlen ((char *) opcode->operands);
       if (have_optional_index)
 	{
 	  if (opcount < nwanted)

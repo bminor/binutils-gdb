@@ -517,17 +517,19 @@ xstormy16_md_apply_fix3 (fixP, valueP, seg)
 #if CGEN_INT_INSN_P
 	  {
 	    CGEN_INSN_INT insn_value =
-	      cgen_get_insn_value (cd, where, CGEN_INSN_BITSIZE (insn));
+	      cgen_get_insn_value (cd, (unsigned char *) where,
+				   CGEN_INSN_BITSIZE (insn));
 
 	    /* ??? 0 is passed for `pc'.  */
 	    errmsg = CGEN_CPU_INSERT_OPERAND (cd) (cd, opindex, fields,
 						   &insn_value, (bfd_vma) 0);
-	    cgen_put_insn_value (cd, where, CGEN_INSN_BITSIZE (insn),
-				 insn_value);
+	    cgen_put_insn_value (cd, (unsigned char *) where,
+				 CGEN_INSN_BITSIZE (insn), insn_value);
 	  }
 #else
 	  /* ??? 0 is passed for `pc'.  */
-	  errmsg = CGEN_CPU_INSERT_OPERAND (cd) (cd, opindex, fields, where,
+	  errmsg = CGEN_CPU_INSERT_OPERAND (cd) (cd, opindex, fields,
+						 (unsigned char *) where,
 						 (bfd_vma) 0);
 #endif
 	  if (errmsg)

@@ -1,5 +1,6 @@
 /* tc-m68hc11.c -- Assembler code for the Motorola 68HC11 & 68HC12.
-   Copyright 1999, 2000, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005
+   Free Software Foundation, Inc.
    Written by Stephane Carrez (stcarrez@nerim.fr)
 
    This file is part of GAS, the GNU Assembler.
@@ -2449,8 +2450,8 @@ md_assemble (char *str)
   struct m68hc11_opcode_def *opc;
   struct m68hc11_opcode *opcode;
 
-  unsigned char *op_start, *save;
-  unsigned char *op_end;
+  unsigned char *op_start, *op_end;
+  char *save;
   char name[20];
   int nlen = 0;
   operand operands[M6811_MAX_OPERANDS];
@@ -2464,7 +2465,7 @@ md_assemble (char *str)
 
   /* Find the opcode end and get the opcode in 'name'.  The opcode is forced
      lower case (the opcode table only has lower case op-codes).  */
-  for (op_start = op_end = (unsigned char *) (str);
+  for (op_start = op_end = (unsigned char *) str;
        *op_end && nlen < 20 && !is_end_of_line[*op_end] && *op_end != ' ';
        op_end++)
     {
@@ -2544,7 +2545,7 @@ md_assemble (char *str)
       return;
     }
   save = input_line_pointer;
-  input_line_pointer = op_end;
+  input_line_pointer = (char *) op_end;
 
   if (opc)
     {

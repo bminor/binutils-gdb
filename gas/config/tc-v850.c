@@ -1,5 +1,5 @@
 /* tc-v850.c -- Assembler code for the NEC V850
-   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
+   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2005
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -1291,7 +1291,7 @@ md_convert_frag (abfd, sec, fragP)
 
       /* Now create the unconditional branch + fixup to the final
 	 target.  */
-      md_number_to_chars (buffer + 2, 0x00000780, 4);
+      md_number_to_chars ((char *) buffer + 2, 0x00000780, 4);
       fix_new (fragP, fragP->fr_fix + 2, 4, fragP->fr_symbol,
 	       fragP->fr_offset, 1, BFD_RELOC_UNUSED +
 	       (int) fragP->fr_opcode + 1);

@@ -667,7 +667,8 @@ md_assemble (instruction_string)
   /* Remember where it is, in case we want to modify the op-code later.  */
   opcode_low_byteP = frag_more (v.vit_opcode_nbytes);
   memcpy (opcode_low_byteP, v.vit_opcode, v.vit_opcode_nbytes);
-  opcode_as_number = md_chars_to_number (opcode_as_chars = v.vit_opcode, 4);
+  opcode_as_chars = v.vit_opcode;
+  opcode_as_number = md_chars_to_number ((unsigned char *) opcode_as_chars, 4);
   for (operandP = v.vit_operand,
        expP = exp_of_operand,
        segP = seg_of_operand,

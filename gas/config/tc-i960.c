@@ -1,6 +1,6 @@
 /* tc-i960.c - All the i80960-specific stuff
    Copyright 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
-   1999, 2000, 2001, 2002, 2003
+   1999, 2000, 2001, 2002, 2003, 2005
    Free Software Foundation, Inc.
 
    This file is part of GAS.
@@ -732,11 +732,11 @@ md_number_to_chars (buf, value, n)
    md_chars_to_number:  convert from target byte order to host byte order.
 
   *************************************************************************** */
-static int md_chars_to_number PARAMS ((unsigned char *, int));
+static int md_chars_to_number PARAMS ((char *, int));
 
 static int
 md_chars_to_number (val, n)
-     unsigned char *val;	/* Value in target byte order */
+     char *val;			/* Value in target byte order */
      int n;			/* Number of bytes in the input */
 {
   int retval;
@@ -744,7 +744,7 @@ md_chars_to_number (val, n)
   for (retval = 0; n--;)
     {
       retval <<= 8;
-      retval |= val[n];
+      retval |= (unsigned char) val[n];
     }
   return retval;
 }

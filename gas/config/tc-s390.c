@@ -1602,7 +1602,7 @@ s390_insn (ignore)
 	      && (addressT) exp.X_add_number < (1ULL << 32))
 	  || (   opformat->oplen == 2
 	      && (addressT) exp.X_add_number < (1ULL << 16)))
-	md_number_to_chars (insn, exp.X_add_number, opformat->oplen);
+	md_number_to_chars ((char *) insn, exp.X_add_number, opformat->oplen);
       else
 	as_bad (_("Invalid .insn format\n"));
     }
@@ -1612,9 +1612,9 @@ s390_insn (ignore)
 	  && opformat->oplen == 6
 	  && generic_bignum[3] == 0)
 	{
-	  md_number_to_chars (insn, generic_bignum[2], 2);
-	  md_number_to_chars (&insn[2], generic_bignum[1], 2);
-	  md_number_to_chars (&insn[4], generic_bignum[0], 2);
+	  md_number_to_chars ((char *) insn, generic_bignum[2], 2);
+	  md_number_to_chars ((char *) &insn[2], generic_bignum[1], 2);
+	  md_number_to_chars ((char *) &insn[4], generic_bignum[0], 2);
 	}
       else
 	as_bad (_("Invalid .insn format\n"));
@@ -1992,8 +1992,8 @@ md_apply_fix3 (fixP, valP, seg)
       if (fixP->fx_done)
 	{
 	  /* Insert the fully resolved operand value.  */
-	  s390_insert_operand (where, operand, (offsetT) value,
-			       fixP->fx_file, fixP->fx_line);
+	  s390_insert_operand ((unsigned char *) where, operand,
+			       (offsetT) value, fixP->fx_file, fixP->fx_line);
 	  return;
 	}
 

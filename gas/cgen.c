@@ -1,5 +1,5 @@
 /* GAS interface for targets using CGEN: Cpu tools GENerator.
-   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004
+   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -522,7 +522,7 @@ gas_cgen_finish_insn (insn, buf, length, relax_p, result)
   /* If we're recording insns as numbers (rather than a string of bytes),
      target byte order handling is deferred until now.  */
 #if CGEN_INT_INSN_P
-  cgen_put_insn_value (gas_cgen_cpu_desc, f, length, *buf);
+  cgen_put_insn_value (gas_cgen_cpu_desc, (unsigned char *) f, length, *buf);
 #else
   memcpy (f, buf, byte_len);
 #endif
@@ -616,17 +616,19 @@ gas_cgen_md_apply_fix3 (fixP, valP, seg)
 #if CGEN_INT_INSN_P
 	  {
 	    CGEN_INSN_INT insn_value =
-	      cgen_get_insn_value (cd, where, CGEN_INSN_BITSIZE (insn));
+	      cgen_get_insn_value (cd, (unsigned char *) where,
+				   CGEN_INSN_BITSIZE (insn));
 
 	    /* ??? 0 is passed for `pc'.  */
 	    errmsg = CGEN_CPU_INSERT_OPERAND (cd) (cd, opindex, fields,
 						   &insn_value, (bfd_vma) 0);
-	    cgen_put_insn_value (cd, where, CGEN_INSN_BITSIZE (insn),
-				 insn_value);
+	    cgen_put_insn_value (cd, (unsigned char *) where,
+				 CGEN_INSN_BITSIZE (insn), insn_value);
 	  }
 #else
 	  /* ??? 0 is passed for `pc'.  */
-	  errmsg = CGEN_CPU_INSERT_OPERAND (cd) (cd, opindex, fields, where,
+	  errmsg = CGEN_CPU_INSERT_OPERAND (cd) (cd, opindex, fields,
+						 (unsigned char *) where,
 						 (bfd_vma) 0);
 #endif
 	  if (errmsg)

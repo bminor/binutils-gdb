@@ -13816,7 +13816,7 @@ create_unwind_entry (int have_data)
 {
   int size;
   addressT where;
-  unsigned char *ptr;
+  char *ptr;
   /* The current word of data.  */
   valueT data;
   /* The number of bytes left in this word.  */
@@ -14025,7 +14025,7 @@ static void
 s_arm_unwind_fnend (int ignored ATTRIBUTE_UNUSED)
 {
   long where;
-  unsigned char *ptr;
+  char *ptr;
   valueT val;
 
   demand_empty_rest_of_line ();

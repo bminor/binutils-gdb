@@ -1152,7 +1152,7 @@ ia64_cons_align (nbytes)
 }
 
 /* Output COUNT bytes to a memory location.  */
-static unsigned char *vbyte_mem_ptr = NULL;
+static char *vbyte_mem_ptr = NULL;
 
 void
 output_vbyte_mem (count, ptr, comment)
@@ -1329,7 +1329,7 @@ output_P4_format (f, imask, imask_size)
      unsigned long imask_size;
 {
   imask[0] = UNW_P4;
-  (*f) (imask_size, imask, NULL);
+  (*f) (imask_size, (char *) imask, NULL);
 }
 
 static void
@@ -3917,7 +3917,8 @@ static void
 dot_spillreg (dummy)
      int dummy ATTRIBUTE_UNUSED;
 {
-  int sep, ab, xy, reg, treg;
+  int sep;
+  unsigned int ab, xy, reg, treg;
   expressionS e1, e2;
 
   if (!in_procedure ("spillreg"))
@@ -3952,7 +3953,8 @@ dot_spillmem (psprel)
      int psprel;
 {
   expressionS e1, e2;
-  int sep, ab, reg;
+  int sep;
+  unsigned int ab, reg;
 
   if (!in_procedure ("spillmem"))
     return;
@@ -3990,7 +3992,8 @@ static void
 dot_spillreg_p (dummy)
      int dummy ATTRIBUTE_UNUSED;
 {
-  int sep, ab, xy, reg, treg;
+  int sep;
+  unsigned int ab, xy, reg, treg;
   expressionS e1, e2, e3;
   unsigned int qp;
 
@@ -4041,7 +4044,8 @@ dot_spillmem_p (psprel)
      int psprel;
 {
   expressionS e1, e2, e3;
-  int sep, ab, reg;
+  int sep;
+  unsigned int ab, reg;
   unsigned int qp;
 
   if (!in_procedure ("spillmem.p"))
@@ -4361,7 +4365,7 @@ dot_endp (dummy)
      int dummy ATTRIBUTE_UNUSED;
 {
   expressionS e;
-  unsigned char *ptr;
+  char *ptr;
   int bytes_per_address;
   long where;
   segT saved_seg;
@@ -6348,7 +6352,8 @@ build_insn (slot, insnp)
 {
   const struct ia64_operand *odesc, *o2desc;
   struct ia64_opcode *idesc = slot->idesc;
-  bfd_signed_vma insn, val;
+  bfd_vma insn;
+  bfd_signed_vma val;
   const char *err;
   int i;
 

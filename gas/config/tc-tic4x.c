@@ -157,7 +157,7 @@ static void tic4x_insert_sym
 static char *tic4x_expression
   PARAMS ((char *, expressionS *));
 static char *tic4x_expression_abs
-  PARAMS ((char *, int *));
+  PARAMS ((char *, offsetT *));
 static void tic4x_emit_char
   PARAMS ((char, int));
 static void tic4x_seg_alloc
@@ -747,7 +747,7 @@ tic4x_expression (str, exp)
 static char *
 tic4x_expression_abs (str, value)
      char *str;
-     int *value;
+     offsetT *value;
 {
   char *s;
   char *t;
@@ -843,7 +843,7 @@ tic4x_bss (x)
   char c;
   char *name;
   char *p;
-  int size;
+  offsetT size;
   segT current_seg;
   subsegT current_subseg;
   symbolS *symbolP;
@@ -864,7 +864,7 @@ tic4x_bss (x)
     tic4x_expression_abs (++input_line_pointer, &size);
   if (size < 0)
     {
-      as_bad (".bss size %d < 0!", size);
+      as_bad (".bss size %ld < 0!", (long) size);
       return;
     }
   subseg_set (bss_section, 0);
@@ -1024,7 +1024,7 @@ tic4x_eval (x)
      int x ATTRIBUTE_UNUSED;
 {
   char c;
-  int value;
+  offsetT value;
   char *name;
 
   SKIP_WHITESPACE ();
@@ -1060,7 +1060,7 @@ tic4x_sect (x)
   char *subsection_name;
   char *name;
   segT seg;
-  int num;
+  offsetT num;
 
   SKIP_WHITESPACE ();
   if (*input_line_pointer == '"')
@@ -1163,7 +1163,7 @@ tic4x_usect (x)
   char *name;
   char *section_name;
   segT seg;
-  int size, alignment_flag;
+  offsetT size, alignment_flag;
   segT current_seg;
   subsegT current_subseg;
 
@@ -1226,15 +1226,15 @@ static void
 tic4x_version (x)
      int x ATTRIBUTE_UNUSED;
 {
-  unsigned int temp;
+  offsetT temp;
 
   input_line_pointer =
     tic4x_expression_abs (input_line_pointer, &temp);
   if (!IS_CPU_TIC3X (temp) && !IS_CPU_TIC4X (temp))
-    as_bad ("This assembler does not support processor generation %d",
-	    temp);
+    as_bad ("This assembler does not support processor generation %ld",
+	    (long) temp);
 
-  if (tic4x_cpu && temp != tic4x_cpu)
+  if (tic4x_cpu && temp != (offsetT) tic4x_cpu)
     as_warn ("Changing processor generation on fly not supported...");
   tic4x_cpu = temp;
   demand_empty_rest_of_line ();
@@ -2675,7 +2675,7 @@ md_atof (type, litP, sizeP)
   int ieee;
   LITTLENUM_TYPE words[MAX_LITTLENUMS];
   LITTLENUM_TYPE *wordP;
-  unsigned char *t;
+  char *t;
 
   switch (type)
     {
@@ -2718,7 +2718,7 @@ md_atof (type, litP, sizeP)
   if (t)
     input_line_pointer = t;
   *sizeP = prec * sizeof (LITTLENUM_TYPE);
-  t = litP;
+
   /* This loops outputs the LITTLENUMs in REVERSE order; in accord with
      little endian byte order.  */
   /* SES: However it is required to put the words (32-bits) out in the
@@ -3072,9 +3072,10 @@ long
 md_pcrel_from (fixP)
      fixS *fixP;
 {
-  unsigned char *buf = fixP->fx_where + fixP->fx_frag->fr_literal;
+  unsigned char *buf;
   unsigned int op;
 
+  buf = (unsigned char *) fixP->fx_frag->fr_literal + fixP->fx_where;
   op = (buf[3] << 24) | (buf[2] << 16) | (buf[1] << 8) | buf[0];
 
   return ((fixP->fx_where + fixP->fx_frag->fr_address) >> 2) +

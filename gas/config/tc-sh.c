@@ -2400,7 +2400,7 @@ find_cooked_opcode (char **str_p)
      The pre-processor will eliminate whitespace in front of
      any '@' after the first argument; we may be called from
      assemble_ppi, so the opcode might be terminated by an '@'.  */
-  for (op_start = op_end = (unsigned char *) (str);
+  for (op_start = op_end = (unsigned char *) str;
        *op_end
        && nlen < 20
        && !is_end_of_line[*op_end] && *op_end != ' ' && *op_end != '@';
@@ -2419,7 +2419,7 @@ find_cooked_opcode (char **str_p)
     }
 
   name[nlen] = 0;
-  *str_p = op_end;
+  *str_p = (char *) op_end;
 
   if (nlen == 0)
     as_bad (_("can't find opcode "));
@@ -2734,7 +2734,7 @@ assemble_ppi (char *op_end, sh_opcode_info *opcode)
 void
 md_assemble (char *str)
 {
-  unsigned char *op_end;
+  char *op_end;
   sh_operand_info operand[3];
   sh_opcode_info *opcode;
   unsigned int size = 0;

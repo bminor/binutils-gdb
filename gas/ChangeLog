@@ -1,3 +1,38 @@
+2005-02-23  Alan Modra  <amodra@bigpond.net.au>
+
+	* cgen.c: Warning fixes.
+	* config/tc-arc.c: Likewise.
+	* config/tc-arm.c: Likewise.
+	* config/tc-avr.c: Likewise.
+	* config/tc-d10v.c: Likewise.
+	* config/tc-d30v.c: Likewise.
+	* config/tc-frv.c: Likewise.
+	* config/tc-frv.h: Likewise.
+	* config/tc-h8300.c: Likewise.
+	* config/tc-h8500.c: Likewise.
+	* config/tc-i370.c: Likewise.
+	* config/tc-i960.c: Likewise.
+	* config/tc-ia64.c: Likewise.
+	* config/tc-ip2k.c: Likewise.
+	* config/tc-m68hc11.c: Likewise.
+	* config/tc-maxq.c: Likewise.
+	* config/tc-mcore.c: Likewise.
+	* config/tc-mips.c: Likewise.
+	* config/tc-msp430.c: Likewise.
+	* config/tc-pj.c: Likewise.
+	* config/tc-ppc.c: Likewise.
+	* config/tc-ppc.h: Likewise.
+	* config/tc-s390.c: Likewise.
+	* config/tc-sh.c: Likewise.
+	* config/tc-sh64.c: Likewise.
+	* config/tc-tic4x.c: Likewise.
+	* config/tc-tic80.c: Likewise.
+	* config/tc-v850.c: Likewise.
+	* config/tc-vax.c: Likewise.
+	* config/tc-w65.c: Likewise.
+	* config/tc-xstormy16.c: Likewise.
+	* config/tc-z8k.c: Likewise.
+
 2005-02-22  Catherine Moore  <clm@cm00re.com>
 
 	* read.c (read_a_source_file): Reinstate TC_EQUAL_IN_INSN test.

@@ -1,5 +1,6 @@
 /* tc-d30v.c -- Assembler code for the Mitsubishi D30V
-   Copyright 1997, 1998, 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+   Copyright 1997, 1998, 1999, 2000, 2001, 2002, 2005
+   Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -1428,9 +1429,9 @@ do_assemble (str, opcode, shortp, is_parallel)
      int shortp;
      int is_parallel;
 {
-  unsigned char *op_start;
-  unsigned char *save;
-  unsigned char *op_end;
+  char *op_start;
+  char *save;
+  char *op_end;
   char           name[NAME_BUF_LEN];
   int            cmp_hack;
   int            nlen = 0;
@@ -1443,11 +1444,11 @@ do_assemble (str, opcode, shortp, is_parallel)
     str++;
 
   /* Find the opcode end.  */
-  for (op_start = op_end = (unsigned char *) (str);
+  for (op_start = op_end = str;
        *op_end
        && nlen < (NAME_BUF_LEN - 1)
        && *op_end != '/'
-       && !is_end_of_line[*op_end] && *op_end != ' ';
+       && !is_end_of_line[(unsigned char) *op_end] && *op_end != ' ';
        op_end++)
     {
       name[nlen] = TOLOWER (op_start[nlen]);

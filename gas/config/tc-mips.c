@@ -11075,7 +11075,7 @@ md_apply_fix3 (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
       if (fixP->fx_done)
 	{
 	  if (8 <= sizeof (valueT))
-	    md_number_to_chars (buf, *valP, 8);
+	    md_number_to_chars ((char *) buf, *valP, 8);
 	  else
 	    {
 	      valueT hiv;
@@ -11098,14 +11098,14 @@ md_apply_fix3 (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	 value now.  This can happen if we have a .word which is not
 	 resolved when it appears but is later defined.   */
       if (fixP->fx_done)
-	md_number_to_chars (buf, *valP, 4);
+	md_number_to_chars ((char *) buf, *valP, 4);
       break;
 
     case BFD_RELOC_16:
       /* If we are deleting this reloc entry, we must fill in the
          value now.  */
       if (fixP->fx_done)
-	md_number_to_chars (buf, *valP, 2);
+	md_number_to_chars ((char *) buf, *valP, 2);
       break;
 
     case BFD_RELOC_LO16:
@@ -11121,7 +11121,7 @@ md_apply_fix3 (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 			  _("relocation overflow"));
 	  if (target_big_endian)
 	    buf += 2;
-	  md_number_to_chars (buf, *valP, 2);
+	  md_number_to_chars ((char *) buf, *valP, 2);
 	}
       break;
 
@@ -11147,7 +11147,7 @@ md_apply_fix3 (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
       if (*valP + 0x20000 <= 0x3ffff)
 	{
 	  insn |= (*valP >> 2) & 0xffff;
-	  md_number_to_chars (buf, insn, 4);
+	  md_number_to_chars ((char *) buf, insn, 4);
 	}
       else if (mips_pic == NO_PIC
 	       && fixP->fx_done
@@ -11169,7 +11169,7 @@ md_apply_fix3 (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	  fixP->fx_done = 0;
 	  fixP->fx_addsy = section_symbol (text_section);
 	  *valP += md_pcrel_from (fixP);
-	  md_number_to_chars (buf, insn, 4);
+	  md_number_to_chars ((char *) buf, insn, 4);
 	}
       else
 	{
@@ -12945,7 +12945,7 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT asec, fragS *fragp)
 	  fixp->fx_file = fragp->fr_file;
 	  fixp->fx_line = fragp->fr_line;
 
-	  md_number_to_chars (buf, insn, 4);
+	  md_number_to_chars ((char *) buf, insn, 4);
 	  buf += 4;
 	}
       else
@@ -13017,11 +13017,11 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT asec, fragS *fragp)
 	  i--;
 	  insn |= i;
 	  /* Branch over the jump.  */
-	  md_number_to_chars (buf, insn, 4);
+	  md_number_to_chars ((char *) buf, insn, 4);
 	  buf += 4;
 
 	  /* Nop */
-	  md_number_to_chars (buf, 0, 4);
+	  md_number_to_chars ((char *) buf, 0, 4);
 	  buf += 4;
 
 	  if (RELAX_BRANCH_LIKELY (fragp->fr_subtype))
@@ -13040,10 +13040,10 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT asec, fragS *fragp)
 		 delay slot.  */
 
 	      insn |= i;
-	      md_number_to_chars (buf, insn, 4);
+	      md_number_to_chars ((char *) buf, insn, 4);
 	      buf += 4;
 
-	      md_number_to_chars (buf, 0, 4);
+	      md_number_to_chars ((char *) buf, 0, 4);
 	      buf += 4;
 	    }
 
@@ -13062,7 +13062,7 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT asec, fragS *fragp)
 	      fixp->fx_file = fragp->fr_file;
 	      fixp->fx_line = fragp->fr_line;
 
-	      md_number_to_chars (buf, insn, 4);
+	      md_number_to_chars ((char *) buf, insn, 4);
 	      buf += 4;
 	    }
 	  else
@@ -13084,13 +13084,13 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT asec, fragS *fragp)
 	      fixp->fx_file = fragp->fr_file;
 	      fixp->fx_line = fragp->fr_line;
 
-	      md_number_to_chars (buf, insn, 4);
+	      md_number_to_chars ((char *) buf, insn, 4);
 	      buf += 4;
 
 	      if (mips_opts.isa == ISA_MIPS1)
 		{
 		  /* nop */
-		  md_number_to_chars (buf, 0, 4);
+		  md_number_to_chars ((char *) buf, 0, 4);
 		  buf += 4;
 		}
 
@@ -13102,7 +13102,7 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT asec, fragS *fragp)
 	      fixp->fx_file = fragp->fr_file;
 	      fixp->fx_line = fragp->fr_line;
 
-	      md_number_to_chars (buf, insn, 4);
+	      md_number_to_chars ((char *) buf, insn, 4);
 	      buf += 4;
 
 	      /* j(al)r $at.  */
@@ -13111,7 +13111,7 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT asec, fragS *fragp)
 	      else
 		insn = 0x00200008;
 
-	      md_number_to_chars (buf, insn, 4);
+	      md_number_to_chars ((char *) buf, insn, 4);
 	      buf += 4;
 	    }
 	}
@@ -13204,12 +13204,12 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT asec, fragS *fragp)
 
       if (use_extend)
 	{
-	  md_number_to_chars (buf, 0xf000 | extend, 2);
+	  md_number_to_chars ((char *) buf, 0xf000 | extend, 2);
 	  fragp->fr_fix += 2;
 	  buf += 2;
 	}
 
-      md_number_to_chars (buf, insn, 2);
+      md_number_to_chars ((char *) buf, insn, 2);
       fragp->fr_fix += 2;
       buf += 2;
     }
@@ -13605,6 +13605,7 @@ s_mips_end (int x ATTRIBUTE_UNUSED)
   else
     as_warn (_(".end directive missing or unknown symbol"));
 
+#ifdef OBJ_ELF
   /* Create an expression to calculate the size of the function.  */
   if (p && cur_proc_ptr)
     {
@@ -13620,7 +13621,6 @@ s_mips_end (int x ATTRIBUTE_UNUSED)
       cur_proc_ptr->func_end_sym = exp->X_add_symbol;
     }
 
-#ifdef OBJ_ELF
   /* Generate a .pdr section.  */
   if (OUTPUT_FLAVOR == bfd_target_elf_flavour && ! ECOFF_DEBUGGING
       && mips_flag_pdr)

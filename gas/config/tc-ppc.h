@@ -1,6 +1,6 @@
 /* tc-ppc.h -- Header file for tc-ppc.c.
    Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003,
-   2004 Free Software Foundation, Inc.
+   2004, 2005 Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
 
    This file is part of GAS, the GNU Assembler.
@@ -90,7 +90,7 @@ extern char *ppc_target_format PARAMS ((void));
 		      - ((FRAGP)->fr_address + (FRAGP)->fr_fix));	\
       if (count != 0 && (count & 3) == 0)				\
 	{								\
-	  unsigned char *dest = (FRAGP)->fr_literal + (FRAGP)->fr_fix;	\
+	  char *dest = (FRAGP)->fr_literal + (FRAGP)->fr_fix;		\
 									\
 	  (FRAGP)->fr_var = 4;						\
 	  if (target_big_endian)					\

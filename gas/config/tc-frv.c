@@ -745,7 +745,7 @@ frv_tomcat_shuffle (this_nop_type, vliw_to_split, insert_before_insn)
 	  /* Set the packing bit on the previous insn.  */
 	  if (pack_prev)
 	    {
-	      unsigned char *buffer = prev_insn->address;
+	      char *buffer = prev_insn->address;
 	      buffer[0] |= 0x80;
 	    }
 	  /* The branch is in the middle.  Split this vliw insn into first
@@ -784,7 +784,7 @@ frv_tomcat_shuffle (this_nop_type, vliw_to_split, insert_before_insn)
 	  /* Set the packing bit on the previous insn.  */
 	  if (pack_prev)
 	    {
-	      unsigned char *buffer = prev_insn->address;
+	      char *buffer = prev_insn->address;
 	      buffer[0] |= 0x80;
 	    }
 
@@ -830,7 +830,7 @@ frv_tomcat_shuffle (this_nop_type, vliw_to_split, insert_before_insn)
 	  /* Set the packing bit on the previous insn.  */
 	  if (pack_prev)
 	    {
-	      unsigned char *buffer = prev_insn->address;
+	      char *buffer = prev_insn->address;
 	      buffer[0] |= 0x80;
 	    }
 

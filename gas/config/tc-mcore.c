@@ -1845,10 +1845,10 @@ md_convert_frag (abfd, sec, fragP)
      segT sec ATTRIBUTE_UNUSED;
      register fragS * fragP;
 {
-  unsigned char * buffer;
+  char *buffer;
   int targ_addr = S_GET_VALUE (fragP->fr_symbol) + fragP->fr_offset;
 
-  buffer = (unsigned char *) (fragP->fr_fix + fragP->fr_literal);
+  buffer = fragP->fr_fix + fragP->fr_literal;
 
   switch (fragP->fr_subtype)
     {

@@ -203,7 +203,7 @@ static int the_flags;
 static int the_interrupt;
 
 static char *
-whatreg (int *reg, char *src)
+whatreg (unsigned int *reg, char *src)
 {
   if (ISDIGIT (src[1]))
     {
@@ -631,13 +631,14 @@ get_operand (char **ptr, struct z8k_op *mode, unsigned int dst ATTRIBUTE_UNUSED)
     }
   else
     {
-      int regn;
+      unsigned int regn;
 
       end = parse_reg (src, &mode->mode, &regn);
 
       if (end)
 	{
-	  int nw, nr;
+	  int nw;
+	  unsigned int nr;
 
 	  src = end;
 	  if (*src == '(')

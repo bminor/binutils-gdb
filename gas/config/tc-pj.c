@@ -1,6 +1,6 @@
 /*-
    tc-pj.c -- Assemble code for Pico Java
-   Copyright 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2001, 2002, 2005 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -253,8 +253,8 @@ void
 md_assemble (str)
      char *str;
 {
-  unsigned char *op_start;
-  unsigned char *op_end;
+  char *op_start;
+  char *op_end;
 
   pj_opc_info_t *opcode;
   char *output;
@@ -268,8 +268,9 @@ md_assemble (str)
     str++;
 
   /* Find the op code end.  */
-  for (op_start = op_end = (unsigned char *) (str);
-       *op_end && !is_end_of_line[*op_end] && *op_end != ' ';
+  op_start = str;
+  for (op_end = str;
+       *op_end && !is_end_of_line[*op_end & 0xff] && *op_end != ' ';
        op_end++)
     nlen++;
 
