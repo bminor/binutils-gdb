@@ -31,6 +31,8 @@ i386_cygwin_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
+  i386_coff_init_abi (info, gdbarch);
+
   tdep->struct_return = reg_struct_return;
 }
 

@@ -210,6 +210,9 @@ extern const struct regset *
   i386_regset_from_core_section (struct gdbarch *gdbarch,
 				 const char *sect_name, size_t sect_size);
 
+/* Initialize a basic COFF architecture variant.  */
+extern void i386_coff_init_abi (struct gdbarch_info, struct gdbarch *);
+
 /* Initialize a basic ELF architecture variant.  */
 extern void i386_elf_init_abi (struct gdbarch_info, struct gdbarch *);
 

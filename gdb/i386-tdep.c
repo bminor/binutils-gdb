@@ -1814,6 +1814,16 @@ i386_svr4_sigcontext_addr (struct frame_info *next_frame)
 }
 
 
+/* Generic COFF.  */
+
+void
+i386_coff_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
+{
+  /* We typically use DWARF-in-COFF with the stabs register numbering.  */
+  set_gdbarch_dwarf_reg_to_regnum (gdbarch, i386_stab_reg_to_regnum);
+  set_gdbarch_dwarf2_reg_to_regnum (gdbarch, i386_stab_reg_to_regnum);
+}
+
 /* Generic ELF.  */
 
 void
