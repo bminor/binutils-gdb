@@ -1,3 +1,8 @@
+2002-08-08  H.J. Lu <hjl@gnu.org>
+
+	* elflink.h (elf_add_default_symbol): Don't warn a defintion
+	overrides an indirect versioned symbol.
+
 2002-08-08  Jakub Jelinek  <jakub@redhat.com>
 
 	* elf32-i386.c (elf_i386_relocate_section): Fill in proper addend

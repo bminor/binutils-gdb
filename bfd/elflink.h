@@ -1085,10 +1085,13 @@ elf_add_default_symbol (abfd, info, h, name, sym, sec, value,
   if (override)
     {
       /* Here SHORTNAME is a versioned name, so we don't expect to see
-	 the type of override we do in the case above.  */
-      (*_bfd_error_handler)
-	(_("%s: warning: unexpected redefinition of `%s'"),
-	 bfd_archive_filename (abfd), shortname);
+	 the type of override we do in the case above unless it is
+	 overridden by a versioned definiton.  */
+      if (hi->root.type != bfd_link_hash_defined
+	  && hi->root.type != bfd_link_hash_defweak)
+	(*_bfd_error_handler)
+	  (_("%s: warning: unexpected redefinition of indirect versioned symbol `%s'"),
+	   bfd_archive_filename (abfd), shortname);
     }
   else
     {
