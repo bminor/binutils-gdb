@@ -297,6 +297,10 @@ proc is_elf_format {} {
 #	to pass.  The PROG, objdump, nm and objcopy options have no
 #	meaning and need not supplied if this is present.
 #
+#   warning: REGEX
+#	Expect a gas warning matching REGEX.  It is an error to issue
+#	both "error" and "warning".
+#
 # Each option may occur at most once.
 #
 # After the option lines come regexp lines.  `run_dump_test' calls
@@ -333,6 +337,7 @@ proc run_dump_test { name {extra_options {}} } {
     set opts(source) {}
     set opts(stderr) {}
     set opts(error) {}
+    set opts(warning) {}
 
     foreach i $opt_array {
 	set opt_name [lindex $i 0]
@@ -406,6 +411,16 @@ proc run_dump_test { name {extra_options {}} } {
 	}
     }
 
+    set expmsg $opts(error)
+    if { $opts(warning) != "" } {
+	set expmsg $opts(warning)
+    }
+    if { (($opts(warning) != "") && ($opts(error) != "")) \
+	 || (($opts(warning) != "") && ($opts(stderr) != "")) } {
+	perror "$testname: bad mix of stderr, error and warning test-directives"
+	return
+    }
+
     set progopts1 $opts($program)
     eval set progopts \$[string toupper $program]FLAGS
     eval set binary \$[string toupper $program]
@@ -421,24 +436,45 @@ proc run_dump_test { name {extra_options {}} } {
 	set sourcefile $srcdir/$subdir/$opts(source)
     }
 
-    send_log "$AS $ASFLAGS $opts(as) -o dump.o $sourcefile\n"
-    catch "exec $srcdir/lib/run $AS $ASFLAGS $opts(as) -o dump.o $sourcefile" comp_output
+    set cmd "$srcdir/lib/run $AS $ASFLAGS $opts(as) -o dump.o $sourcefile"
+    send_log "$cmd\n"
+    set cmdret [catch "exec $cmd" comp_output]
     set comp_output [prune_warnings $comp_output]
 
-    if { ![string match "" $comp_output] || $opts(stderr) != "" } then {
+    if { $cmdret != 0 || $comp_output != "" || $opts(stderr) != "" } then {
+	# If the executed program writes to stderr and stderr is not
+	# redirected, exec *always* returns failure, regardless of the
+	# program exit code.  Thankfully, we can retrieve the true
+	# return status from a special variable.  Redirection would
+	# cause a tcl-specific message to be appended, and we'd rather
+	# not deal with that if we can help it.
+	global errorCode
+	if { $cmdret != 0 && [lindex $errorCode 0] == "NONE" } {
+	    set cmdret 0
+	}
+
+	set exitstat "succeeded"
+	if { $cmdret != 0 } { set exitstat "failed" }
+
 	if { $opts(stderr) == "" }  then {
 	    send_log "$comp_output\n"
 	    verbose "$comp_output" 3
 
-	    if { $opts(error) != "" } {
-		verbose -log "failed with: <$comp_output>, expected: <$opts(error)>"
-		if [regexp $opts(error) $comp_output] {
+	    if { $expmsg != "" \
+		    && [regexp $expmsg $comp_output] \
+		    && (($cmdret == 0) == ($opts(warning) != "")) } {
+		verbose -log "$exitstat with: <$comp_output>, expected: <$expmsg>"
+
+		# Only "pass" and return here if we expected (and got)
+		# an error.
+		if { $opts(error) != "" } {
 		    pass $testname
 		    return
 		}
+	    } {
+		fail $testname
+		return
 	    }
-	    fail $testname
-	    return
 	} else {
 	    catch {write_file dump.stderr "$comp_output"} write_output
 	    if ![string match "" $write_output] then {
@@ -454,7 +490,7 @@ proc run_dump_test { name {extra_options {}} } {
 	    verbose "wrote pruned stderr to dump.stderr" 3
 	    if { [regexp_diff "dump.stderr" "$stderrfile"] } then {
 		if { $opts(error) != "" } {
-		    verbose -log "failed with: <$comp_output>, expected: <$opts(error)>"
+		    verbose -log "$exitstat with: <$comp_output>, expected: <$opts(error)>"
 		    if [regexp $opts(error) $comp_output] {
 			pass $testname
 			return

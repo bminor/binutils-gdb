@@ -1,3 +1,7 @@
+2005-02-07  Hans-Peter Nilsson  <hp@axis.com>
+
+	* lib/gas-defs.exp: Support new directive "warning".
+
 2005-02-02  Jan Beulich  <jbeulich@novell.com>
 
 	* gas/ia64/pred-rel.s: New.
