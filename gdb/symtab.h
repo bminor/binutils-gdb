@@ -42,7 +42,7 @@ struct agent_expr;
      struct symbol
      struct partial_symbol
 
-   These structures are layed out to encourage good packing.
+   These structures are laid out to encourage good packing.
    They use ENUM_BITFIELD and short int fields, and they order the
    structure members so that fields less than a word are next
    to each other so they can be packed together. */
