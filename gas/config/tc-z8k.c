@@ -177,12 +177,6 @@ md_begin (void)
     }
 }
 
-struct z8k_exp {
-  char *e_beg;
-  char *e_end;
-  expressionS e_exp;
-};
-
 typedef struct z8k_op {
   /* CLASS_REG_xxx.  */
   int regsize;
@@ -399,7 +393,8 @@ struct ctrl_names {
 };
 
 static struct ctrl_names ctrl_table[] = {
-  { 0x2, "fcw" },
+  { 0x1, "flags" },   /* ldctlb only.  */
+  { 0x2, "fcw" },     /* ldctl only.  Applies to all remaining control registers.  */
   { 0x3, "refresh" },
   { 0x4, "psapseg" },
   { 0x5, "psapoff" },
@@ -441,12 +436,13 @@ struct flag_names {
 };
 
 static struct flag_names flag_table[] = {
-  { 0x1, "p" },
-  { 0x1, "v" },
-  { 0x2, "s" },
-  { 0x4, "z" },
-  { 0x8, "c" },
+  { 0x1, "P" },
+  { 0x1, "V" },
+  { 0x2, "S" },
+  { 0x4, "Z" },
+  { 0x8, "C" },
   { 0x0, "+" },
+  { 0x0, "," },
   { 0, 0 }
 };
 
@@ -454,6 +450,7 @@ static void
 get_flags_operand (char **ptr, struct z8k_op *mode, unsigned int dst ATTRIBUTE_UNUSED)
 {
   char *src = *ptr;
+  char c;
   int i;
   int j;
 
@@ -466,9 +463,10 @@ get_flags_operand (char **ptr, struct z8k_op *mode, unsigned int dst ATTRIBUTE_U
     {
       if (!src[j])
 	goto done;
+      c = TOUPPER(src[j]);
       for (i = 0; flag_table[i].name; i++)
 	{
-	  if (flag_table[i].name[0] == src[j])
+	  if (flag_table[i].name[0] == c)
 	    {
 	      the_flags = the_flags | flag_table[i].value;
 	      goto match;
@@ -499,27 +497,48 @@ static void
 get_interrupt_operand (char **ptr, struct z8k_op *mode, unsigned int dst ATTRIBUTE_UNUSED)
 {
   char *src = *ptr;
-  int i;
+  int i, l;
 
   while (*src == ' ')
     src++;
 
   mode->mode = CLASS_IMM;
-  for (i = 0; intr_table[i].name; i++)
-    {
-      int j;
+  the_interrupt = 0;
 
-      for (j = 0; intr_table[i].name[j]; j++)
+  while (*src)
+    {
+      for (i = 0; intr_table[i].name; i++)
 	{
-	  if (intr_table[i].name[j] != src[j])
-	    goto fail;
+	  l = strlen (intr_table[i].name);
+	  if (! strncasecmp (intr_table[i].name, src, l))
+	    {
+	      the_interrupt |= intr_table[i].value;
+	      if (*(src + l) && *(src + l) != ',')
+		{
+		  *ptr = src + l;
+		invalid:
+		  as_bad (_("unknown interrupt %s"), src);
+		  while (**ptr && ! is_end_of_line[(unsigned char) **ptr])
+		    (*ptr)++;	 /* Consume rest of line.  */
+		  return;
+		}
+	      src += l;
+	      if (! *src)
+		{
+		  *ptr = src;
+		  return;
+		}
+	    }
 	}
-      the_interrupt = intr_table[i].value;
-      *ptr = src + j;
-      return;
-    fail:
-      ;
+      if (*src == ',')
+	src++;
+      else
+	{
+	  *ptr = src;
+	  goto invalid;
+	}
     }
+
   /* No interrupt type specified, opcode won't do anything.  */
   as_warn (_("opcode has no effect"));
   the_interrupt = 0x0;
@@ -720,7 +739,17 @@ get_operands (const opcode_entry_type *opcode, char *op_end, op_type *operand)
             }
         }
       else if (opcode->arg_info[0] == CLASS_FLAGS)
-	get_flags_operand (&ptr, operand + 0, 0);
+	{
+	  get_flags_operand (&ptr, operand + 0, 0);
+	  while (*ptr == ' ')
+	    ptr++;
+	  if (*ptr && ! is_end_of_line[(unsigned char) *ptr])
+	    {
+	      as_bad (_("invalid flag '%s'"), ptr);
+	      while (*ptr && ! is_end_of_line[(unsigned char) *ptr])
+		ptr++;	 /* Consume rest of line.  */
+	    }
+	}
       else if (opcode->arg_info[0] == (CLASS_IMM + (ARG_IMM2)))
 	get_interrupt_operand (&ptr, operand + 0, 0);
       else
@@ -760,6 +789,8 @@ get_operands (const opcode_entry_type *opcode, char *op_end, op_type *operand)
 	      if (*ptr == ',')
 		ptr++;
 	      get_ctrl_operand (&ptr, operand + 1, 1);
+	      if (the_ctrl == 0)
+		return NULL;
 	      return ptr;
 	    }
 	}
@@ -888,6 +919,10 @@ get_specific (opcode_entry_type *opcode, op_type *operands)
 	    case CLASS_REG_LONG:
 	    case CLASS_REGN0:
 	      reg[this_try->arg_info[i] & ARG_MASK] = operands[i].reg;
+	      break;
+	    case CLASS_CTRL:
+	      if (this_try->opcode == OPC_ldctlb && the_ctrl != 1)
+		as_bad (_("invalid control register name"));
 	      break;
 	    }
 	}
@@ -1035,9 +1070,13 @@ build_bytes (opcode_entry_type *this_try, struct z8k_op *operand ATTRIBUTE_UNUSE
 	  *output_ptr++ = the_cc;
 	  break;
 	case CLASS_0CCC:
+	  if (the_ctrl < 2 || the_ctrl > 7)
+	    as_bad (_("invalid control register name"));
 	  *output_ptr++ = the_ctrl;
 	  break;
 	case CLASS_1CCC:
+	  if (the_ctrl < 2 || the_ctrl > 7)
+	    as_bad (_("invalid control register name"));
 	  *output_ptr++ = the_ctrl | 0x8;
 	  break;
 	case CLASS_00II:

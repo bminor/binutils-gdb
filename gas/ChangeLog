@@ -1,3 +1,18 @@
+2003-12-15  Christian Groessler  <chris@groessler.org>
+
+	* config/tc-z8k.c (struct z8k_exp): Remove, not used anywhere.
+	(ctrl_table): Add "flags" keyword and some comments.
+	(flag_table): Convert to uppercase.
+	(get_flags_operand): Be case insensitive.
+	(get_interrupt_operand): Be case insensitive.  Support notation
+	where the inperrupt arguments are separated by commas.
+	(get_operands): Check whether get_flags_operand consumed all
+	arguments.  Return failure if get_ctrl_operand didn't recognize a
+	valid control register.
+	(get_specific): Add case CLASS_CTRL: Test for valid control
+	register for ldctlb opcode.
+	(build_bytes): Check for valid control registers.
+
 2003-12-15  Nick Clifton  <nickc@redhat.com>
 
 	* config/obj-aout.c (obj_crawl_symbol_chain): Skip defined
