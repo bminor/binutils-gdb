@@ -18,13 +18,6 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#ifdef HAVE_LINUX_USRREGS
-extern int regmap[];
-extern int num_regs;
-int cannot_fetch_register (int regno);
-int cannot_store_register (int regno);
-#endif
-
 #ifdef HAVE_LINUX_REGSETS
 typedef void (*regset_func) (void *);
 struct regset_info
@@ -35,3 +28,13 @@ struct regset_info
 };
 extern struct regset_info target_regsets[];
 #endif
+
+struct linux_target_ops
+{
+  int num_regs;
+  int *regmap;
+  int (*cannot_fetch_register) (int);
+  int (*cannot_store_register) (int);
+};
+
+extern struct linux_target_ops the_low_target;

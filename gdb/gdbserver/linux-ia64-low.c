@@ -26,11 +26,11 @@
 #include <sys/reg.h>
 #endif
 
-int num_regs = 590;
+#define ia64_num_regs 590
 
 #include <asm/ptrace_offsets.h>
 
-int regmap[] =
+static int ia64_regmap[] =
   {
     /* general registers */
     -1,		/* gr0 not available; i.e, it's always zero */
@@ -283,15 +283,21 @@ int regmap[] =
     -1, -1, -1, -1, -1, -1, -1, -1,
   };
 
-int
-cannot_store_register (int regno)
+static int
+ia64_cannot_store_register (int regno)
 {
   return 0;
 }
 
-int
-cannot_fetch_register (int regno)
+static int
+ia64_cannot_fetch_register (int regno)
 {
   return 0;
 }
 
+struct linux_target_ops the_low_target = {
+  ia64_num_regs,
+  ia64_regmap,
+  ia64_cannot_fetch_register,
+  ia64_cannot_store_register,
+};

@@ -25,10 +25,10 @@
 
 #include <asm/ptrace.h>
 
-int num_regs = 71;
+#define ppc_num_regs 71
 
 /* Currently, don't check/send MQ.  */
-int regmap[] =
+static int ppc_regmap[] =
  {PT_R0 * 4,     PT_R1 * 4,     PT_R2 * 4,     PT_R3 * 4,
   PT_R4 * 4,     PT_R5 * 4,     PT_R6 * 4,     PT_R7 * 4,
   PT_R8 * 4,     PT_R9 * 4,     PT_R10 * 4,    PT_R11 * 4,
@@ -48,15 +48,21 @@ int regmap[] =
   PT_NIP * 4,    PT_MSR * 4,    PT_CCR * 4,    PT_LNK * 4,
   PT_CTR * 4,    PT_XER * 4,    -1, };
 
-int
-cannot_store_register (int regno)
+static int
+ppc_cannot_store_register (int regno)
 {
   return 0;
 }
 
-int
-cannot_fetch_register (int regno)
+static int
+ppc_cannot_fetch_register (int regno)
 {
   return 0;
 }
 
+struct linux_target_ops the_low_target = {
+  ppc_num_regs,
+  ppc_regmap,
+  ppc_cannot_fetch_register,
+  ppc_cannot_store_register,
+};

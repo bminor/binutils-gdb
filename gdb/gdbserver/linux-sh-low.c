@@ -28,10 +28,10 @@
 
 #include <asm/ptrace.h>
 
-int num_regs = 41;
+#define sh_num_regs 41
 
 /* Currently, don't check/send MQ.  */
-int regmap[] = {
+static int sh_regmap[] = {
  0,	4,	8,	12,	16,	20,	24,	28,
  32,	36,	40,	44,	48,	52,	56,	60,
 
@@ -45,15 +45,21 @@ int regmap[] = {
  REG_FPREG0+48,  REG_FPREG0+52,  REG_FPREG0+56,  REG_FPREG0+60,
 };
 
-int
-cannot_store_register (int regno)
+static int
+sh_cannot_store_register (int regno)
 {
   return 0;
 }
 
-int
-cannot_fetch_register (int regno)
+static int
+sh_cannot_fetch_register (int regno)
 {
   return 0;
 }
 
+struct linux_target_ops the_low_target = {
+  sh_num_regs,
+  sh_regmap,
+  sh_cannot_fetch_register,
+  sh_cannot_store_register,
+};

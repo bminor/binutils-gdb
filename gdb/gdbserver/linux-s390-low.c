@@ -27,9 +27,9 @@
 
 #include <asm/ptrace.h>
 
-int num_regs = 67;
+#define s390_num_regs 67
 
-int regmap[] = {
+static int s390_regmap[] = {
   PT_PSWMASK, PT_PSWADDR,
 
   PT_GPR0, PT_GPR1, PT_GPR2, PT_GPR3,
@@ -62,20 +62,27 @@ int regmap[] = {
 #endif
 };
 
-int
-cannot_fetch_register (int regno)
+static int
+s390_cannot_fetch_register (int regno)
 {
-  if (regmap[regno] == -1)
+  if (s390_regmap[regno] == -1)
     return 1;
 
   return 0;
 }
 
-int
-cannot_store_register (int regno)
+static int
+s390_cannot_store_register (int regno)
 {
-  if (regmap[regno] == -1)
+  if (s390_regmap[regno] == -1)
     return 1;
 
   return 0;
 }
+
+struct linux_target_ops the_low_target = {
+  s390_num_regs,
+  s390_regmap,
+  s390_cannot_fetch_register,
+  s390_cannot_store_register,
+};

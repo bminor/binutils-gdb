@@ -26,14 +26,14 @@
 #include <sys/reg.h>
 #endif
 
-int num_regs = 90;
+#define mips_num_regs 90
 
 #include <asm/ptrace.h>
 
 /* Return the ptrace ``address'' of register REGNO. */
 
 /* Matches mips_generic32_regs */
-int regmap[] = {
+static int mips_regmap[] = {
   0,  1,  2,  3,  4,  5,  6,  7,
   8,  9,  10, 11, 12, 13, 14, 15,
   16, 17, 18, 19, 20, 21, 22, 23,
@@ -63,10 +63,10 @@ int regmap[] = {
    ZERO_REGNUM.  We also can not set BADVADDR, CAUSE, or FCRIR via
    ptrace().  */
 
-int
-cannot_fetch_register (int regno)
+static int
+mips_cannot_fetch_register (int regno)
 {
-  if (regmap[regno] == -1)
+  if (mips_regmap[regno] == -1)
     return 1;
 
   if (find_regno ("zero") == regno)
@@ -75,10 +75,10 @@ cannot_fetch_register (int regno)
   return 0;
 }
 
-int
-cannot_store_register (int regno)
+static int
+mips_cannot_store_register (int regno)
 {
-  if (regmap[regno] == -1)
+  if (mips_regmap[regno] == -1)
     return 1;
 
   if (find_regno ("zero") == regno)
@@ -95,3 +95,10 @@ cannot_store_register (int regno)
 
   return 0;
 }
+
+struct linux_target_ops the_low_target = {
+  mips_num_regs,
+  mips_regmap,
+  mips_cannot_fetch_register,
+  mips_cannot_store_register,
+};

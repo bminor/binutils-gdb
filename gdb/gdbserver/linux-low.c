@@ -44,11 +44,6 @@ static int use_regsets_p = 1;
 
 extern int errno;
 
-#ifdef HAVE_LINUX_USRREGS
-extern int num_regs;
-extern int regmap[];
-#endif
-
 static int inferior_pid;
 
 /* Start an inferior process and returns its pid.
@@ -175,10 +170,10 @@ register_addr (int regnum)
 {
   int addr;
 
-  if (regnum < 0 || regnum >= num_regs)
+  if (regnum < 0 || regnum >= the_low_target.num_regs)
     error ("Invalid register number %d.", regnum);
 
-  addr = regmap[regnum];
+  addr = the_low_target.regmap[regnum];
   if (addr == -1)
     addr = 0;
 
@@ -192,9 +187,9 @@ fetch_register (int regno)
   CORE_ADDR regaddr;
   register int i;
 
-  if (regno >= num_regs)
+  if (regno >= the_low_target.num_regs)
     return;
-  if (cannot_fetch_register (regno))
+  if ((*the_low_target.cannot_fetch_register) (regno))
     return;
 
   regaddr = register_addr (regno);
@@ -225,7 +220,7 @@ static void
 usr_fetch_inferior_registers (int regno)
 {
   if (regno == -1 || regno == 0)
-    for (regno = 0; regno < num_regs; regno++)
+    for (regno = 0; regno < the_low_target.num_regs; regno++)
       fetch_register (regno);
   else
     fetch_register (regno);
@@ -242,10 +237,10 @@ usr_store_inferior_registers (int regno)
 
   if (regno >= 0)
     {
-      if (regno >= num_regs)
+      if (regno >= the_low_target.num_regs)
 	return;
 
-      if (cannot_store_register (regno))
+      if ((*the_low_target.cannot_store_register) (regno))
 	return;
 
       regaddr = register_addr (regno);
@@ -272,7 +267,7 @@ usr_store_inferior_registers (int regno)
 	}
     }
   else
-    for (regno = 0; regno < num_regs; regno++)
+    for (regno = 0; regno < the_low_target.num_regs; regno++)
       store_inferior_registers (regno);
 }
 #endif /* HAVE_LINUX_USRREGS */

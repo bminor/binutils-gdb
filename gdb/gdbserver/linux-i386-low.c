@@ -29,13 +29,13 @@
 
 /* This module only supports access to the general purpose registers.  */
 
-int num_regs = 16;
+#define i386_num_regs 16
 
 /* This stuff comes from i386-linux-nat.c.  */
 
 /* Mapping between the general-purpose registers in `struct user'
    format and GDB's register array layout.  */
-int regmap[] = 
+static int i386_regmap[] = 
 {
   EAX * 4, ECX * 4, EDX * 4, EBX * 4,
   UESP * 4, EBP * 4, ESI * 4, EDI * 4,
@@ -43,16 +43,16 @@ int regmap[] =
   DS * 4, ES * 4, FS * 4, GS * 4
 };
 
-int
-cannot_store_register (int regno)
+static int
+i386_cannot_store_register (int regno)
 {
-  return (regno >= num_regs);
+  return (regno >= i386_num_regs);
 }
 
-int
-cannot_fetch_register (int regno)
+static int
+i386_cannot_fetch_register (int regno)
 {
-  return (regno >= num_regs);
+  return (regno >= i386_num_regs);
 }
 
 
@@ -65,8 +65,8 @@ i386_fill_gregset (void *buf)
 {
   int i;
 
-  for (i = 0; i < num_regs; i++)
-    collect_register (i, ((char *) buf) + regmap[i]);
+  for (i = 0; i < i386_num_regs; i++)
+    collect_register (i, ((char *) buf) + i386_regmap[i]);
 
   collect_register_by_name ("orig_eax", ((char *) buf) + ORIG_EAX * 4);
 }
@@ -76,8 +76,8 @@ i386_store_gregset (void *buf)
 {
   int i;
 
-  for (i = 0; i < num_regs; i++)
-    supply_register (i, ((char *) buf) + regmap[i]);
+  for (i = 0; i < i386_num_regs; i++)
+    supply_register (i, ((char *) buf) + i386_regmap[i]);
 
   supply_register_by_name ("orig_eax", ((char *) buf) + ORIG_EAX * 4);
 }
@@ -121,3 +121,9 @@ struct regset_info target_regsets[] = {
 
 #endif /* HAVE_LINUX_REGSETS */
 
+struct linux_target_ops the_low_target = {
+  i386_num_regs,
+  i386_regmap,
+  i386_cannot_fetch_register,
+  i386_cannot_store_register,
+};
