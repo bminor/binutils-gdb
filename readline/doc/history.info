@@ -1,5 +1,5 @@
-This is Info file history.info, produced by Makeinfo version 1.68 from
-the input file /usr/homes/chet/src/bash/readline-src/doc/hist.texinfo.
+This is history.info, produced by makeinfo version 4.1 from
+/usr/homes/chet/src/bash/readline-src/doc/hist.texinfo.
 
 INFO-DIR-SECTION Libraries
 START-INFO-DIR-ENTRY
@@ -10,7 +10,7 @@ END-INFO-DIR-ENTRY
 that provides a consistent user interface for recalling lines of
 previously typed input.
 
-   Copyright (C) 1988-1999 Free Software Foundation, Inc.
+   Copyright (C) 1988-2002 Free Software Foundation, Inc.
 
    Permission is granted to make and distribute verbatim copies of this
 manual provided the copyright notice and this permission notice pare
@@ -53,7 +53,7 @@ Using History Interactively
    This chapter describes how to use the GNU History Library
 interactively, from a user's standpoint.  It should be considered a
 user's guide.  For information on using the GNU History Library in your
-own programs, *note Programming with GNU History::..
+own programs, *note Programming with GNU History::.
 
 * Menu:
 
@@ -238,7 +238,7 @@ Programming with GNU History
    This chapter describes how to interface programs that you write with
 the GNU History Library.  It should be considered a technical guide.
 For information on the interactive use of GNU History, *note Using
-History Interactively::..
+History Interactively::.
 
 * Menu:
 
@@ -293,9 +293,11 @@ History Storage
    The history list is an array of history entries.  A history entry is
 declared as follows:
 
+     typedef void *histdata_t;
+     
      typedef struct _hist_entry {
        char *line;
-       char *data;
+       histdata_t data;
      } HIST_ENTRY;
 
    The history list itself might therefore be declared as
@@ -305,12 +307,14 @@ declared as follows:
    The state of the History library is encapsulated into a single
 structure:
 
-     /* A structure used to pass the current state of the history stuff around. */
+     /*
+      * A structure used to pass around the current state of the history.
+      */
      typedef struct _hist_state {
-       HIST_ENTRY **entries;         /* Pointer to the entries themselves. */
-       int offset;                   /* The location pointer within this array. */
-       int length;                   /* Number of elements within this array. */
-       int size;                     /* Number of slots allocated to this array. */
+       HIST_ENTRY **entries; /* Pointer to the entries themselves. */
+       int offset;           /* The location pointer within this array. */
+       int length;           /* Number of elements within this array. */
+       int size;             /* Number of slots allocated to this array. */
        int flags;
      } HISTORY_STATE;
 
@@ -324,7 +328,7 @@ History Functions
 =================
 
    This section describes the calling sequence for the various functions
-present in GNU History.
+exported by the GNU History library.
 
 * Menu:
 
@@ -354,11 +358,11 @@ Initializing History and State Management
 state of the History library when you want to use the history functions
 in your program.
 
- - Function: void using_history ()
+ - Function: void using_history (void)
      Begin a session in which the history functions might be used.  This
      initializes the interactive variables.
 
- - Function: HISTORY_STATE * history_get_history_state ()
+ - Function: HISTORY_STATE * history_get_history_state (void)
      Return a structure describing the current state of the input
      history.
 
@@ -374,7 +378,7 @@ History List Management
    These functions manage individual entries on the history list, or set
 parameters managing the list itself.
 
- - Function: void add_history (char *string)
+ - Function: void add_history (const char *string)
      Place STRING at the end of the history list.  The associated data
      field (if any) is set to `NULL'.
 
@@ -383,24 +387,25 @@ parameters managing the list itself.
      removed element is returned so you can free the line, data, and
      containing structure.
 
- - Function: HIST_ENTRY * replace_history_entry (int which, char *line,
-          char *data)
+ - Function: HIST_ENTRY * replace_history_entry (int which, const char
+          *line, histdata_t data)
      Make the history entry at offset WHICH have LINE and DATA.  This
      returns the old entry so you can dispose of the data.  In the case
      of an invalid WHICH, a `NULL' pointer is returned.
 
- - Function: void clear_history ()
+ - Function: void clear_history (void)
      Clear the history list by deleting all the entries.
 
  - Function: void stifle_history (int max)
      Stifle the history list, remembering only the last MAX entries.
 
- - Function: int unstifle_history ()
-     Stop stifling the history.  This returns the previous amount the
-     history was stifled.  The value is positive if the history was
-     stifled, negative if it wasn't.
+ - Function: int unstifle_history (void)
+     Stop stifling the history.  This returns the previously-set
+     maximum number of history entries (as set by `stifle_history()').
+     The value is positive if the history was stifled, negative if it
+     wasn't.
 
- - Function: int history_is_stifled ()
+ - Function: int history_is_stifled (void)
      Returns non-zero if the history is stifled, zero if it is not.
 
 
@@ -412,25 +417,26 @@ Information About the History List
    These functions return information about the entire history list or
 individual list entries.
 
- - Function: HIST_ENTRY ** history_list ()
-     Return a `NULL' terminated array of `HIST_ENTRY' which is the
+ - Function: HIST_ENTRY ** history_list (void)
+     Return a `NULL' terminated array of `HIST_ENTRY *' which is the
      current input history.  Element 0 of this list is the beginning of
      time.  If there is no history, return `NULL'.
 
- - Function: int where_history ()
+ - Function: int where_history (void)
      Returns the offset of the current history element.
 
- - Function: HIST_ENTRY * current_history ()
+ - Function: HIST_ENTRY * current_history (void)
      Return the history entry at the current position, as determined by
-     `where_history ()'.  If there is no entry there, return a `NULL'
+     `where_history()'.  If there is no entry there, return a `NULL'
      pointer.
 
  - Function: HIST_ENTRY * history_get (int offset)
      Return the history entry at position OFFSET, starting from
-     `history_base'.  If there is no entry there, or if OFFSET is
-     greater than the history length, return a `NULL' pointer.
+     `history_base' (*note History Variables::).  If there is no entry
+     there, or if OFFSET is greater than the history length, return a
+     `NULL' pointer.
 
- - Function: int history_total_bytes ()
+ - Function: int history_total_bytes (void)
      Return the number of bytes that the primary history entries are
      using.  This function returns the sum of the lengths of all the
      lines in the history.
@@ -445,15 +451,16 @@ Moving Around the History List
 set or changed.
 
  - Function: int history_set_pos (int pos)
-     Set the position in the history list to POS, an absolute index
-     into the list.
+     Set the current history offset to POS, an absolute index into the
+     list.  Returns 1 on success, 0 if POS is less than zero or greater
+     than the number of history entries.
 
- - Function: HIST_ENTRY * previous_history ()
+ - Function: HIST_ENTRY * previous_history (void)
      Back up the current history offset to the previous history entry,
      and return a pointer to that entry.  If there is no previous
      entry, return a `NULL' pointer.
 
- - Function: HIST_ENTRY * next_history ()
+ - Function: HIST_ENTRY * next_history (void)
      Move the current history offset forward to the next history entry,
      and return the a pointer to that entry.  If there is no next
      entry, return a `NULL' pointer.
@@ -470,24 +477,27 @@ and backward from the current history position.  The search may be
 "anchored", meaning that the string must match at the beginning of the
 history entry.
 
- - Function: int history_search (char *string, int direction)
+ - Function: int history_search (const char *string, int direction)
      Search the history for STRING, starting at the current history
-     offset.  If DIRECTION < 0, then the search is through previous
-     entries, else through subsequent.  If STRING is found, then the
-     current history index is set to that history entry, and the value
-     returned is the offset in the line of the entry where STRING was
-     found.  Otherwise, nothing is changed, and a -1 is returned.
+     offset.  If DIRECTION is less than 0, then the search is through
+     previous entries, otherwise through subsequent entries.  If STRING
+     is found, then the current history index is set to that history
+     entry, and the value returned is the offset in the line of the
+     entry where STRING was found.  Otherwise, nothing is changed, and
+     a -1 is returned.
 
- - Function: int history_search_prefix (char *string, int direction)
+ - Function: int history_search_prefix (const char *string, int
+          direction)
      Search the history for STRING, starting at the current history
      offset.  The search is anchored: matching lines must begin with
-     STRING.  If DIRECTION < 0, then the search is through previous
-     entries, else through subsequent.  If STRING is found, then the
-     current history index is set to that entry, and the return value
-     is 0.  Otherwise, nothing is changed, and a -1 is returned.
+     STRING.  If DIRECTION is less than 0, then the search is through
+     previous entries, otherwise through subsequent entries.  If STRING
+     is found, then the current history index is set to that entry, and
+     the return value is 0.  Otherwise, nothing is changed, and a -1 is
+     returned.
 
- - Function: int history_search_pos (char *string, int direction, int
-          pos)
+ - Function: int history_search_pos (const char *string, int direction,
+          int pos)
      Search for STRING in the history list, starting at POS, an
      absolute index into the list.  If DIRECTION is negative, the search
      proceeds backward from POS, otherwise forward.  Returns the
@@ -503,29 +513,35 @@ Managing the History File
    The History library can read the history from and write it to a file.
 This section documents the functions for managing a history file.
 
- - Function: int read_history (char *filename)
-     Add the contents of FILENAME to the history list, a line at a
-     time.  If FILENAME is `NULL', then read from `~/.history'.
-     Returns 0 if successful, or errno if not.
+ - Function: int read_history (const char *filename)
+     Add the contents of FILENAME to the history list, a line at a time.
+     If FILENAME is `NULL', then read from `~/.history'.  Returns 0 if
+     successful, or `errno' if not.
 
- - Function: int read_history_range (char *filename, int from, int to)
+ - Function: int read_history_range (const char *filename, int from,
+          int to)
      Read a range of lines from FILENAME, adding them to the history
      list.  Start reading at line FROM and end at TO.  If FROM is zero,
      start at the beginning.  If TO is less than FROM, then read until
      the end of the file.  If FILENAME is `NULL', then read from
      `~/.history'.  Returns 0 if successful, or `errno' if not.
 
- - Function: int write_history (char *filename)
+ - Function: int write_history (const char *filename)
      Write the current history to FILENAME, overwriting FILENAME if
      necessary.  If FILENAME is `NULL', then write the history list to
-     `~/.history'.  Values returned are as in `read_history ()'.
+     `~/.history'.  Returns 0 on success, or `errno' on a read or write
+     error.
 
- - Function: int append_history (int nelements, char *filename)
-     Append the last NELEMENTS of the history list to FILENAME.
+ - Function: int append_history (int nelements, const char *filename)
+     Append the last NELEMENTS of the history list to FILENAME.  If
+     FILENAME is `NULL', then append to `~/.history'.  Returns 0 on
+     success, or `errno' on a read or write error.
 
- - Function: int history_truncate_file (char *filename, int nlines)
+ - Function: int history_truncate_file (const char *filename, int
+          nlines)
      Truncate the history file FILENAME, leaving only the last NLINES
-     lines.
+     lines.  If FILENAME is `NULL', then `~/.history' is truncated.
+     Returns 0 on success, or `errno' on failure.
 
 
 File: history.info,  Node: History Expansion,  Prev: Managing the History File,  Up: History Functions
@@ -533,15 +549,15 @@ File: history.info,  Node: History Expansion,  Prev: Managing the History File, 
 History Expansion
 -----------------
 
-   These functions implement `csh'-like history expansion.
+   These functions implement history expansion.
 
  - Function: int history_expand (char *string, char **output)
      Expand STRING, placing the result into OUTPUT, a pointer to a
-     string (*note History Interaction::.).  Returns:
+     string (*note History Interaction::).  Returns:
     `0'
           If no expansions took place (or, if the only change in the
-          text was the de-slashifying of the history expansion
-          character);
+          text was the removal of escape characters preceding the
+          history expansion character);
 
     `1'
           if expansions did take place;
@@ -551,18 +567,13 @@ History Expansion
 
     `2'
           if the returned line should be displayed, but not executed,
-          as with the `:p' modifier (*note Modifiers::.).
+          as with the `:p' modifier (*note Modifiers::).
 
      If an error ocurred in expansion, then OUTPUT contains a
      descriptive error message.
 
- - Function: char * history_arg_extract (int first, int last, char
-          *string)
-     Extract a string segment consisting of the FIRST through LAST
-     arguments present in STRING.  Arguments are broken up as in Bash.
-
- - Function: char * get_history_event (char *string, int *cindex, int
-          qchar)
+ - Function: char * get_history_event (const char *string, int *cindex,
+          int qchar)
      Returns the text of the history event beginning at STRING +
      *CINDEX.  *CINDEX is modified to point to after the event
      specifier.  At function entry, CINDEX points to the index into
@@ -570,10 +581,17 @@ History Expansion
      character that is allowed to end the event specification in
      addition to the "normal" terminating characters.
 
- - Function: char ** history_tokenize (char *string)
+ - Function: char ** history_tokenize (const char *string)
      Return an array of tokens parsed out of STRING, much as the shell
-     might.  The tokens are split on white space and on the characters
-     `()<>;&|$', and shell quoting conventions are obeyed.
+     might.  The tokens are split on the characters in the
+     HISTORY_WORD_DELIMITERS variable, and shell quoting conventions
+     are obeyed.
+
+ - Function: char * history_arg_extract (int first, int last, const
+          char *string)
+     Extract a string segment consisting of the FIRST through LAST
+     arguments present in STRING.  Arguments are split using
+     `history_tokenize'.
 
 
 File: history.info,  Node: History Variables,  Next: History Programming Example,  Prev: History Functions,  Up: Programming with GNU History
@@ -581,7 +599,7 @@ File: history.info,  Node: History Variables,  Next: History Programming Example
 History Variables
 =================
 
-   This section describes the externally visible variables exported by
+   This section describes the externally-visible variables exported by
 the GNU History Library.
 
  - Variable: int history_base
@@ -590,12 +608,13 @@ the GNU History Library.
  - Variable: int history_length
      The number of entries currently stored in the history list.
 
- - Variable: int max_input_history
+ - Variable: int history_max_entries
      The maximum number of history entries.  This must be changed using
-     `stifle_history ()'.
+     `stifle_history()'.
 
  - Variable: char history_expansion_char
-     The character that starts a history event.  The default is `!'.
+     The character that introduces a history event.  The default is `!'.
+     Setting this to 0 inhibits history expansion.
 
  - Variable: char history_subst_char
      The character that invokes word substitution if found at the start
@@ -607,28 +626,32 @@ the GNU History Library.
      newline are ignored, suppressing history expansion for the
      remainder of the line.  This is disabled by default.
 
+ - Variable: char * history_word_delimiters
+     The characters that separate tokens for `history_tokenize()'.  The
+     default value is `" \t\n()<>;&|"'.
+
  - Variable: char * history_no_expand_chars
      The list of characters which inhibit history expansion if found
      immediately following HISTORY_EXPANSION_CHAR.  The default is
-     whitespace and `='.
+     space, tab, newline, carriage return, and `='.
 
  - Variable: char * history_search_delimiter_chars
      The list of additional characters which can delimit a history
-     search string, in addition to whitespace, `:' and `?' in the case
+     search string, in addition to space, TAB, `:' and `?' in the case
      of a substring search.  The default is empty.
 
  - Variable: int history_quotes_inhibit_expansion
      If non-zero, single-quoted words are not scanned for the history
      expansion character.  The default value is 0.
 
- - Variable: Function * history_inhibit_expansion_function
+ - Variable: rl_linebuf_func_t * history_inhibit_expansion_function
      This should be set to the address of a function that takes two
-     arguments: a `char *' (STRING) and an integer index into that
-     string (I).  It should return a non-zero value if the history
-     expansion starting at STRING[I] should not be performed; zero if
-     the expansion should be done.  It is intended for use by
-     applications like Bash that use the history expansion character
-     for additional purposes.  By default, this variable is set to NULL.
+     arguments: a `char *' (STRING) and an `int' index into that string
+     (I).  It should return a non-zero value if the history expansion
+     starting at STRING[I] should not be performed; zero if the
+     expansion should be done.  It is intended for use by applications
+     like Bash that use the history expansion character for additional
+     purposes.  By default, this variable is set to `NULL'.
 
 
 File: history.info,  Node: History Programming Example,  Prev: History Variables,  Up: Programming with GNU History
@@ -639,7 +662,12 @@ History Programming Example
    The following program demonstrates simple use of the GNU History
 Library.
 
-     main ()
+     #include <stdio.h>
+     #include <readline/history.h>
+     
+     main (argc, argv)
+          int argc;
+          char **argv;
      {
        char line[1024], *t;
        int len, done = 0;
@@ -758,6 +786,7 @@ Function and Variable Index
 * history_is_stifled:                    History List Management.
 * history_length:                        History Variables.
 * history_list:                          Information About the History List.
+* history_max_entries:                   History Variables.
 * history_no_expand_chars:               History Variables.
 * history_quotes_inhibit_expansion:      History Variables.
 * history_search:                        Searching the History List.
@@ -770,7 +799,7 @@ Function and Variable Index
 * history_tokenize:                      History Expansion.
 * history_total_bytes:                   Information About the History List.
 * history_truncate_file:                 Managing the History File.
-* max_input_history:                     History Variables.
+* history_word_delimiters:               History Variables.
 * next_history:                          Moving Around the History List.
 * previous_history:                      Moving Around the History List.
 * read_history:                          Managing the History File.
@@ -786,26 +815,26 @@ Function and Variable Index
 
 
 Tag Table:
-Node: Top1162
-Node: Using History Interactively1742
-Node: History Interaction2250
-Node: Event Designators3669
-Node: Word Designators4596
-Node: Modifiers6225
-Node: Programming with GNU History7363
-Node: Introduction to History8089
-Node: History Storage9774
-Node: History Functions10867
-Node: Initializing History and State Management11838
-Node: History List Management12630
-Node: Information About the History List14151
-Node: Moving Around the History List15457
-Node: Searching the History List16342
-Node: Managing the History File18174
-Node: History Expansion19680
-Node: History Variables21519
-Node: History Programming Example23837
-Node: Concept Index26441
-Node: Function and Variable Index26927
+Node: Top1136
+Node: Using History Interactively1716
+Node: History Interaction2223
+Node: Event Designators3642
+Node: Word Designators4569
+Node: Modifiers6198
+Node: Programming with GNU History7336
+Node: Introduction to History8061
+Node: History Storage9746
+Node: History Functions10857
+Node: Initializing History and State Management11841
+Node: History List Management12641
+Node: Information About the History List14235
+Node: Moving Around the History List15591
+Node: Searching the History List16580
+Node: Managing the History File18498
+Node: History Expansion20304
+Node: History Variables22199
+Node: History Programming Example24766
+Node: Concept Index27488
+Node: Function and Variable Index27974
 
 End Tag Table
