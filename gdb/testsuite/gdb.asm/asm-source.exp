@@ -112,6 +112,10 @@ switch -glob -- [istarget] {
         set asm-arch ia64
         set asm-flags "-gdwarf2 -I${srcdir}/${subdir} -I${objdir}/${subdir}"
     }
+    "hppa*-linux-*" {
+        set asm-arch pa
+        set asm-flags "-gdwarf2 -I${srcdir}/${subdir} -I${objdir}/${subdir}"
+    }
 }
 
 if { "${asm-arch}" == "" } {

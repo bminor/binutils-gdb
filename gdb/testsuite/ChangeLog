@@ -1,3 +1,8 @@
+2004-05-24  Randolph Chung  <tausq@debian.org>
+
+	* gdb.asm/asm-source.exp: Enable test for hppa-linux target.
+	* gdb.asm/pa.inc: New file.
+
 2004-05-22  Mark Kettenis  <kettenis@gnu.org>
 
 	* gdb.base/signull.c: Use sigjmp_buf instead of jmp_buf.
