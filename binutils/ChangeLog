@@ -1,3 +1,17 @@
+2002-6-13  Elias Athanasopoulos  <eathan@otenet.gr>
+
+	* nm.c (struct extended_symbol_info): New strcuture: Add the size
+	of the symbols to the information provided by the symbol_info
+	structure.
+	(print_symbols): Pass the symbol size to print_symbol.
+	(print_size_symbols): Pass the symbol size to print_symbol.
+	(print_symbol): Extra argument: The size of the symbol.  Store
+	this in the extended_symbol_info structure.
+	(print_symbol_info): Change type of info parameter to
+	extended_symbol_info.  Display the size, if known.
+	(print_symbol_info_posix): Likewise.
+	(print_symbol_info_sysv): Likewise.
+
 2002-06-08  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.am: Run "make dep-am".
