@@ -111,7 +111,7 @@ if [target_info exists gdb_stub] {
 #
 
 gdb_test_multiple "break pendfunc1" "set pending breakpoint" {
-     -re ".*Make breakpoint pending.*y or n. $" {
+     -re ".*Make breakpoint pending.*y or \\\[n\\\]. $" {
 	    gdb_test "y" "Breakpoint.*pendfunc1.*pending." "set pending breakpoint"
      }
 }
@@ -142,7 +142,7 @@ gdb_test "info break" \
 # Test not setting a pending breakpoint 
 #
 gdb_test_multiple "break pendfunc2" "Don't set pending breakpoint" {
-     -re ".*Make breakpoint pending.*y or n. $" {
+     -re ".*Make breakpoint pending.*y or \\\[n\\\]. $" {
 	    gdb_test "n" "" "Don't set pending breakpoint"
      }
 }
@@ -192,7 +192,7 @@ gdb_test "info break" \
 #
 
 gdb_test_multiple "break pendshr.c:26 if x > 3" "Set pending breakpoint 2" {
-     -re ".*Make breakpoint pending.*y or n. $" {
+     -re ".*Make breakpoint pending.*y or \\\[n\\\]. $" {
 	    gdb_test "y" "Breakpoint.*pendshr.c:26.*pending." \
 		"Set pending breakpoint 2"
      }
@@ -247,7 +247,7 @@ gdb_breakpoint "main"
 # Set non-existent pending breakpoint
 #
 gdb_test_multiple "break imaginary" "set imaginary pending breakpoint" {
-     -re ".*Make breakpoint pending.*y or n. $" {
+     -re ".*Make breakpoint pending.*y or \\\[n\\\]. $" {
 	    gdb_test "y" "Breakpoint.*imaginary.*pending." \
 		"set imaginary pending breakpoint"
      }

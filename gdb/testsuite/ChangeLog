@@ -1,3 +1,9 @@
+2004-02-23  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* lib/gdb.exp (gdb_breakpoint): Update query string to match
+	new nquery format.
+	* gdb.base/pending.exp: Ditto.
+
 2004-02-22  Mark Kettenis  <kettenis@gnu.org>
 
 	* configure.in: Run stabs tests on *BSD.
