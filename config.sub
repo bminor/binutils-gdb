@@ -120,6 +120,12 @@ gmicro)
 	os=sysv # maybe?
 	;;
 
+harris)
+	cpu=m88k
+	vendor=harris
+	os=m88kbcs
+	;;
+
 h8300hds)
 	cpu=h8300
 	vendor=hitachi
@@ -435,7 +441,7 @@ esac
 case "${vendor}" in
 	altos | amd | amdahl | aout | apollo | att | bcs | bout |\
 	cbm | convergent | convex | coff | cray | dec | encore |\
-	gould | hitachi | intel | isi | hp | ibm | little | mips | motorola |\
+	gould | harris | hitachi | intel | isi | hp | ibm | little | mips | motorola | \
 	ncr | next | none | nyu | sco | sequent | sgi | sony | sun |\
 	unicom | utek | wrs | bull ) ;; 
 
