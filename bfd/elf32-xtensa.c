@@ -3431,7 +3431,7 @@ struct value_map_hash_table_struct
 
 
 static bfd_boolean is_same_value
-  PARAMS ((const literal_value *, const literal_value *));
+  PARAMS ((const literal_value *, const literal_value *, bfd_boolean));
 static value_map_hash_table *value_map_hash_table_init
   PARAMS ((void));
 static unsigned hash_literal_value
@@ -3439,16 +3439,20 @@ static unsigned hash_literal_value
 static unsigned hash_bfd_vma
   PARAMS ((bfd_vma));
 static value_map *get_cached_value
-  PARAMS ((value_map_hash_table *, const literal_value *));
+  PARAMS ((value_map_hash_table *, const literal_value *, bfd_boolean));
 static value_map *add_value_map
-  PARAMS ((value_map_hash_table *, const literal_value *, const r_reloc *));
+  PARAMS ((value_map_hash_table *, const literal_value *, const r_reloc *,
+	   bfd_boolean));
 
 
 static bfd_boolean
-is_same_value (src1, src2)
+is_same_value (src1, src2, final_static_link)
      const literal_value *src1;
      const literal_value *src2;
+     bfd_boolean final_static_link;
 {
+  struct elf_link_hash_entry *h1, *h2;
+
   if (r_reloc_is_const (&src1->r_rel) != r_reloc_is_const (&src2->r_rel)) 
     return FALSE;
 
@@ -3466,8 +3470,14 @@ is_same_value (src1, src2)
   if (src1->value != src2->value)
     return FALSE;
   
-  /* Now check for the same section and the same elf_hash.  */
-  if (r_reloc_is_defined (&src1->r_rel))
+  /* Now check for the same section (if defined) or the same elf_hash
+     (if undefined or weak).  */
+  h1 = r_reloc_get_hash_entry (&src1->r_rel);
+  h2 = r_reloc_get_hash_entry (&src2->r_rel);
+  if (r_reloc_is_defined (&src1->r_rel)
+      && (final_static_link
+	  || ((!h1 || h1->root.type != bfd_link_hash_defweak)
+	      && (!h2 || h2->root.type != bfd_link_hash_defweak))))
     {
       if (r_reloc_get_section (&src1->r_rel)
 	  != r_reloc_get_section (&src2->r_rel))
@@ -3475,11 +3485,8 @@ is_same_value (src1, src2)
     }
   else
     {
-      if (r_reloc_get_hash_entry (&src1->r_rel)
-	  != r_reloc_get_hash_entry (&src2->r_rel))
-	return FALSE;
-
-      if (r_reloc_get_hash_entry (&src1->r_rel) == 0)
+      /* Require that the hash entries (i.e., symbols) be identical.  */
+      if (h1 != h2 || h1 == 0)
 	return FALSE;
     }
 
@@ -3540,9 +3547,10 @@ hash_literal_value (src)
 /* Check if the specified literal_value has been seen before.  */
 
 static value_map *
-get_cached_value (map, val)
+get_cached_value (map, val, final_static_link)
      value_map_hash_table *map;
      const literal_value *val;
+     bfd_boolean final_static_link;
 {
   value_map *map_e;
   value_map *bucket;
@@ -3553,7 +3561,7 @@ get_cached_value (map, val)
   bucket = map->buckets[idx];
   for (map_e = bucket; map_e; map_e = map_e->next)
     {
-      if (is_same_value (&map_e->val, val))
+      if (is_same_value (&map_e->val, val, final_static_link))
 	return map_e;
     }
   return NULL;
@@ -3564,17 +3572,18 @@ get_cached_value (map, val)
    already has an entry here.  */
 
 static value_map *
-add_value_map (map, val, loc)
+add_value_map (map, val, loc, final_static_link)
      value_map_hash_table *map;
      const literal_value *val;
      const r_reloc *loc;
+     bfd_boolean final_static_link;
 {
   value_map **bucket_p;
   unsigned idx;
 
   value_map *val_e = (value_map *) bfd_zmalloc (sizeof (value_map));
 
-  BFD_ASSERT (get_cached_value (map, val) == NULL);
+  BFD_ASSERT (get_cached_value (map, val, final_static_link) == NULL);
   val_e->val = *val;
   val_e->loc = *loc;
 
@@ -4480,6 +4489,7 @@ remove_literals (abfd, sec, link_info, values)
   bfd_byte *contents;
   Elf_Internal_Rela *internal_relocs;
   source_reloc *src_relocs;
+  bfd_boolean final_static_link;
   bfd_boolean ok = TRUE;
   int i;
 
@@ -4499,6 +4509,10 @@ remove_literals (abfd, sec, link_info, values)
       ok = FALSE;
       goto error_return;
     }
+
+  final_static_link =
+    (!link_info->relocatable
+     && !elf_hash_table (link_info)->dynamic_sections_created);
 
   /* Sort the source_relocs by target offset.  */
   src_relocs = relax_info->src_relocs;
@@ -4552,7 +4566,7 @@ remove_literals (abfd, sec, link_info, values)
       val.value = bfd_get_32 (abfd, contents + rel->r_rel.target_offset);
           
       /* Check if we've seen another literal with the same value.  */
-      val_map = get_cached_value (values, &val);
+      val_map = get_cached_value (values, &val, final_static_link);
       if (val_map != NULL) 
 	{
 	  /* First check that THIS and all the other relocs to this
@@ -4575,7 +4589,7 @@ remove_literals (abfd, sec, link_info, values)
 	{
 	  /* This is the first time we've seen this literal value.  */
 	  BFD_ASSERT (sec == r_reloc_get_section (&rel->r_rel));
-	  add_value_map (values, &val, &rel->r_rel);
+	  add_value_map (values, &val, &rel->r_rel, final_static_link);
 	}
     }
 
