@@ -1,13 +1,12 @@
 # Makefile for regression testing the sky simulator.
 
-#set -x
-
 VPATH = @srcdir@
 srcdir = @srcdir@
 srcroot = $(srcdir)/..
 
 prefix = @prefix@
 exec_prefix = @exec_prefix@
+bindir = $(exec_prefix)/bin
 
 host_alias = @host_alias@
 target_alias = @target_alias@
@@ -41,10 +40,11 @@ RUNTEST_FOR_TARGET = `\
     fi; \
   fi`
 
-
+# Note: we want to use dvp-elf-as for the SKY testcase,
+#       not the mips64r5900 one.
 AS_FOR_TARGET = `\
-  if [ -x ../../../gas/as-new ]; then \
-    echo ../../../gas/as-new ; \
+  if [ -x ${bindir}/dvp-elf-as ]; then \
+    echo ${bindir}/dvp-elf-as ; \
   else \
     echo $(target_alias)-as ; \
   fi`
@@ -57,8 +57,8 @@ LD_FOR_TARGET = `\
   fi`
 
 OBJCOPY_FOR_TARGET = `\
-  if [ -x ../../../binutils/objcopy ]; then \
-    echo ../../../binutils/objcopy ; \
+  if [ -x ${bindir}/dvp-elf-objcopy ]; then \
+    echo ${bindir}/dvp-elf-objcopy ; \
   else \
     echo $(target_alias)-objcopy ; \
   fi`
@@ -138,6 +138,8 @@ sanity:
 #------------------------------------
 
 LDFLAGS=-T$(srcdir)/sky.ld
+CFLAGS += -I$(srcdir)
+ASFLAGS = -a -I$(srcdir)
 
 sce%.exe: sce%.o sce_main.o refresh.o
 	$(GCC_FOR_TARGET) $(CFLAGS) $(LDFLAGS) sce_main.o refresh.o -o $@ $<
@@ -146,19 +148,19 @@ sce_main.o: sce_main.c
 	$(GCC_FOR_TARGET) -c $(CFLAGS) -o $@ $<
 	
 refresh.o: refresh.s
-	$(AS_FOR_TARGET) -o $@ $<
+	$(AS_FOR_TARGET) $(ASFLAGS) -o $@ $<
         
 sce_%.o: sce_%.dvpasm sce_%.vuasm
-	$(AS_FOR_TARGET) -o $@ $<
+	$(AS_FOR_TARGET) $(ASFLAGS) -o $@ $<
 
 sce2_%.o: sce2_%.dvpasm sce2_%.vubin
-	$(AS_FOR_TARGET) -o $@ $<
+	$(AS_FOR_TARGET) $(ASFLAGS) -o $@ $<
 
 sce2_%.vubin: sce2_%.vu.o
 	$(OBJCOPY_FOR_TARGET) -O binary $<  $@
                            
 sce2_%.vu.o: sce2_%.vuasm
-	$(AS_FOR_TARGET) -o $@ $<
+	$(AS_FOR_TARGET) $(ASFLAGS) -o $@ $<
  
 sce%.ok: sce%.exe
 	rm -f sce$*.ok 
