@@ -49,6 +49,8 @@ static boolean ppc_elf_merge_private_bfd_data PARAMS ((bfd *, bfd *));
 static int ppc_elf_additional_program_headers PARAMS ((bfd *));
 static boolean ppc_elf_modify_segment_map PARAMS ((bfd *));
 
+static asection *ppc_elf_create_got
+  PARAMS ((bfd *, struct bfd_link_info *));
 static boolean ppc_elf_create_dynamic_sections
   PARAMS ((bfd *, struct bfd_link_info *));
 
@@ -1632,6 +1634,30 @@ ppc_elf_modify_segment_map (abfd)
   return true;
 }
 
+/* The powerpc .got has a blrl instruction in it.  Mark it executable.  */
+
+static asection *
+ppc_elf_create_got (abfd, info)
+     bfd *abfd;
+     struct bfd_link_info *info;
+{
+  register asection *s;
+  flagword flags;
+
+  if (!_bfd_elf_create_got_section (abfd, info))
+    return NULL;
+
+  s = bfd_get_section_by_name (abfd, ".got");
+  if (s == NULL)
+    abort ();
+
+  flags = (SEC_ALLOC | SEC_LOAD | SEC_CODE | SEC_HAS_CONTENTS | SEC_IN_MEMORY
+	   | SEC_LINKER_CREATED);
+  if (!bfd_set_section_flags (abfd, s, flags))
+    return NULL;
+  return s;
+}
+
 /* We have to create .dynsbss and .rela.sbss here so that they get mapped
    to output sections (just like _bfd_elf_create_dynamic_sections has
    to create .dynbss and .rela.bss).  */
@@ -1643,6 +1669,9 @@ ppc_elf_create_dynamic_sections (abfd, info)
 {
   register asection *s;
   flagword flags;
+
+  if (!ppc_elf_create_got (abfd, info))
+    return false;
 
   if (!_bfd_elf_create_dynamic_sections (abfd, info))
     return false;
@@ -1663,7 +1692,13 @@ ppc_elf_create_dynamic_sections (abfd, info)
 	  || ! bfd_set_section_alignment (abfd, s, 2))
 	return false;
     }
-  return true;
+
+  s = bfd_get_section_by_name (abfd, ".plt");
+  if (s == NULL)
+    abort ();
+
+  flags = SEC_ALLOC | SEC_CODE | SEC_IN_MEMORY | SEC_LINKER_CREATED;
+  return bfd_set_section_flags (abfd, s, flags);
 }
 
 /* Adjust a symbol defined by a dynamic object and referenced by a
@@ -2119,10 +2154,9 @@ ppc_elf_check_relocs (abfd, info, sec, relocs)
 	    {
 	      if (dynobj == NULL)
 		elf_hash_table (info)->dynobj = dynobj = abfd;
-	      if (! _bfd_elf_create_got_section (dynobj, info))
+	      sgot = ppc_elf_create_got (dynobj, info);
+	      if (sgot == NULL)
 		return false;
-	      sgot = bfd_get_section_by_name (dynobj, ".got");
-	      BFD_ASSERT (sgot != NULL);
 	    }
 	}
 
@@ -2139,10 +2173,9 @@ ppc_elf_check_relocs (abfd, info, sec, relocs)
 	    {
 	      if (dynobj == NULL)
 		elf_hash_table (info)->dynobj = dynobj = abfd;
-	      if (! _bfd_elf_create_got_section (dynobj, info))
+	      sgot = ppc_elf_create_got (dynobj, info);
+	      if (sgot == NULL)
 		return false;
-	      sgot = bfd_get_section_by_name (dynobj, ".got");
-	      BFD_ASSERT (sgot != NULL);
 	    }
 
 	  if (srelgot == NULL
