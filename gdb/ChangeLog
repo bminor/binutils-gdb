@@ -1,3 +1,16 @@
+2002-04-22  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* Makefile.in (vax-tdep.o): Add $(arch_utils_h), $(inferior_h),
+	and vax-tdep.h.
+	* vax-tdep.h: New file.
+	* vax-tdep.c: Include inferior.h, arch-utils.h, and vax-tdep.h.
+	Make several routines static.
+	(vax_get_saved_register): New function.
+	(vax_gdbarch_init): New function.
+	(_initialize_vax_tdep): Register vax_gdbarch_init.
+	* config/vax/tm-vax.h: Set GDB_MULTI_ARCH to GDB_MULTI_ARCH_PARTIAL.
+	Remove macros now under the control of gdbarch.
+
 2002-04-22  Michael Snyder  <msnyder@redhat.com>
 
 	* arm-tdep.c: Some whitespace and coding standards tweaks.

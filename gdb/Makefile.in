@@ -2156,7 +2156,8 @@ values.o: values.c $(defs_h) $(expression_h) $(frame_h) $(gdbcmd_h) \
 	$(gdbcore_h) $(gdbtypes_h) $(symtab_h) $(target_h) $(value_h) \
 	$(gdb_string_h) scm-lang.h $(doublest_h)
 
-vax-tdep.o: vax-tdep.c $(OP_INCLUDE)/vax.h $(defs_h) $(symtab_h)
+vax-tdep.o: vax-tdep.c $(OP_INCLUDE)/vax.h $(defs_h) $(symtab_h) \
+	$(arch_utils_h) $(inferior_h) vax-tdep.h
 
 x86-64-linux-tdep.o : x86-64-linux-tdep.c $(defs_h) $(inferior_h) \
 	$(gdbcore_h) $(regcache_h) x86-64-tdep.h i386-tdep.h $(dwarf2cfi_h)
