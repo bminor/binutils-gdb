@@ -6,6 +6,9 @@ Fri May 29 16:03:26 1998  Pat Rankin  <rankin@eql.caltech.edu>
 
 Fri May 29 13:46:07 1998  Ian Lance Taylor  <ian@cygnus.com>
 
+	* symbols.c (symbol_find_base): Fix case insensitive symbol name
+	code.  From Chris Moller <moller@bops.com>.
+
 	Based on patch from Klaus Kaempf <kkaempf@progis.de>:
 	* struc-symbol.h (struct broken_word): Add seg and subseg fields.
 	* read.c (emit_expr): Initialize seg and subseg fields of a new
