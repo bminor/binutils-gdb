@@ -109,6 +109,10 @@ static boolean ppc_elf_finish_dynamic_symbol PARAMS ((bfd *,
 
 static boolean ppc_elf_finish_dynamic_sections PARAMS ((bfd *, struct bfd_link_info *));
 static enum elf_reloc_type_class ppc_elf_reloc_type_class PARAMS ((int));
+static boolean ppc_elf_grok_prstatus
+  PARAMS ((bfd *abfd, Elf_Internal_Note *note));
+static boolean ppc_elf_grok_psinfo
+  PARAMS ((bfd *abfd, Elf_Internal_Note *note));
 
 #define BRANCH_PREDICT_BIT 0x200000		/* branch prediction bit for branch taken relocs */
 #define RA_REGISTER_MASK 0x001f0000		/* mask to set RA in memory instructions */

@@ -64,6 +64,10 @@ static boolean elf_i386_finish_dynamic_sections
 static boolean elf_i386_fake_sections
   PARAMS ((bfd *, Elf32_Internal_Shdr *, asection *));
 static enum elf_reloc_type_class elf_i386_reloc_type_class PARAMS ((int));
+static boolean elf_i386_grok_prstatus
+  PARAMS ((bfd *abfd, Elf_Internal_Note *note));
+static boolean elf_i386_grok_psinfo
+  PARAMS ((bfd *abfd, Elf_Internal_Note *note));
 
 #define USE_REL	1		/* 386 uses REL relocations instead of RELA */
 
