@@ -24,8 +24,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "target.h"
 #include "wait.h"
 #include "gdbcore.h"
-#include "serial.h" /* For job_control.  */
-#include "terminal.h"		/* For new_tty */
+#include "terminal.h"
 
 #include <signal.h>
 

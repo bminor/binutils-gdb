@@ -6,13 +6,14 @@ Fri Oct  8 15:54:06 1993  Fred Fish  (fnf@deneb.cygnus.com)
 
 Fri Oct  8 14:56:21 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
-	* inflow.c: Remove unused includes of sys/param.h, etc.
+	* inflow.c: Remove unused includes of sys/param.h and sys/types.h.
 
 	* inflow.c, ser-unix.c, ser-go32.c, ser-tcp.c, serial.h,
-	terminal.h: Move all the process group stuff back to inflow.c;
-	that's a better place for it and fixes problems with trying to get/set
-	the process group of a tty we're doing remote debugging on.
-	* terminal.h: Skip the redefine crap if HAVE_TERMIOS.
+	terminal.h, fork-child.c, main.c, utils.c: Move all the process
+	group stuff back to inflow.c and terminal.h; that's a better place
+	for it and fixes problems with trying to get/set the process group
+	of a tty we're doing remote debugging on.
+	* terminal.h: Skip the redefines and includes if HAVE_TERMIOS.
 
 	* findvar.c, value.h (symbol_read_needs_frame): New function.
 	* c-exp.y, m2-exp.y: Call it instead of having our own switch on
@@ -293,7 +294,6 @@ Wed Sep 29 10:52:19 1993  Kung Hsu  (kung@cygnus.com)
 
 	* c-valprint.c: to fix virtual table print bug (pr2695).
 
->>>>>>> 1.1795
 Wed Sep 29 10:52:19 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* target.c (target_detach): Call generic_mourn_inferior.
@@ -387,7 +387,6 @@ Mon Sep 27 10:22:37 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* remote-udi.c (udi_mourn): Don't pop target.
 
->>>>>>> 1.1783
 Fri Sep 24 17:25:41 1993  Stu Grossman  (grossman at cygnus.com)
 
 	* corelow.c:  Add multi thread/process support for core files with
