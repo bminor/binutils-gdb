@@ -441,7 +441,7 @@ extern bfd_vma lang_size_sections
   PARAMS ((lang_statement_union_type *s,
 	   lang_output_section_statement_type *output_section_statement,
 	   lang_statement_union_type **prev, fill_type fill,
-	   bfd_vma dot, boolean relax));
+	   bfd_vma dot, boolean *relax));
 extern void lang_enter_group PARAMS ((void));
 extern void lang_leave_group PARAMS ((void));
 extern void lang_add_section

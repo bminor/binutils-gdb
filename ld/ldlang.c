@@ -119,12 +119,12 @@ static void print_statement
 static void print_statement_list
   PARAMS ((lang_statement_union_type *, lang_output_section_statement_type *));
 static void print_statements PARAMS ((void));
-static bfd_vma insert_pad
+static void insert_pad
   PARAMS ((lang_statement_union_type **, fill_type,
 	   unsigned int, asection *, bfd_vma));
 static bfd_vma size_input_section
   PARAMS ((lang_statement_union_type **, lang_output_section_statement_type *,
-	   fill_type, bfd_vma, boolean));
+	   fill_type, bfd_vma));
 static void lang_finish PARAMS ((void));
 static void ignore_bfd_errors PARAMS ((const char *, ...));
 static void lang_check PARAMS ((void));
@@ -2626,87 +2626,94 @@ dprint_statement (s, n)
   config.map_file = map_save;
 }
 
-static bfd_vma
-insert_pad (this_ptr, fill, power, output_section_statement, dot)
-     lang_statement_union_type **this_ptr;
+static void
+insert_pad (ptr, fill, alignment_needed, output_section, dot)
+     lang_statement_union_type **ptr;
      fill_type fill;
-     unsigned int power;
-     asection *output_section_statement;
+     unsigned int alignment_needed;
+     asection *output_section;
      bfd_vma dot;
 {
-  /* Align this section first to the
-     input sections requirement, then
-     to the output section's requirement.
-     If this alignment is > than any seen before,
-     then record it too. Perform the alignment by
-     inserting a magic 'padding' statement.  */
+  lang_statement_union_type *pad;
+  size_t ptr_off;
 
-  unsigned opb = bfd_arch_mach_octets_per_byte (ldfile_output_architecture,
-						ldfile_output_machine);
-  unsigned int alignment_needed = align_power (dot, power) - dot;
-
-  if (alignment_needed != 0)
+  /* ptr_off is zero, but let's not be too fast and loose with
+     pointers.  */
+  ptr_off = ((char *) &((lang_statement_union_type *) 0)->header.next
+	     - (char *) 0);
+  if (ptr != &statement_list.head
+      && ((pad = (lang_statement_union_type *) ((char *) ptr - ptr_off))
+	  ->header.type == lang_padding_statement_enum)
+      && pad->padding_statement.output_section == output_section)
     {
-      lang_statement_union_type *new =
-	((lang_statement_union_type *)
-	 stat_alloc (sizeof (lang_padding_statement_type)));
-
-      /* Link into existing chain.  */
-      new->header.next = *this_ptr;
-      *this_ptr = new;
-      new->header.type = lang_padding_statement_enum;
-      new->padding_statement.output_section = output_section_statement;
-      new->padding_statement.output_offset =
-	dot - output_section_statement->vma;
-      new->padding_statement.fill = fill;
-      new->padding_statement.size = alignment_needed * opb;
+      /* Use the existing pad statement.  The above test on output
+	 section is probably redundant, but it doesn't hurt to check.  */
     }
-
-  /* Remember the most restrictive alignment.  */
-  if (power > output_section_statement->alignment_power)
+  else
     {
-      output_section_statement->alignment_power = power;
+      /* Make a new padding statement, linked into existing chain.  */
+      pad = ((lang_statement_union_type *)
+	     stat_alloc (sizeof (lang_padding_statement_type)));
+      pad->header.next = *ptr;
+      *ptr = pad;
+      pad->header.type = lang_padding_statement_enum;
+      pad->padding_statement.output_section = output_section;
+      pad->padding_statement.fill = fill;
     }
-  output_section_statement->_raw_size += alignment_needed * opb;
-
-  return dot + alignment_needed;
+  pad->padding_statement.output_offset = dot - output_section->vma;
+  pad->padding_statement.size = alignment_needed;
+  output_section->_raw_size += alignment_needed;
 }
 
 /* Work out how much this section will move the dot point.  */
 
 static bfd_vma
-size_input_section (this_ptr, output_section_statement, fill, dot, relax)
+size_input_section (this_ptr, output_section_statement, fill, dot)
      lang_statement_union_type **this_ptr;
      lang_output_section_statement_type *output_section_statement;
      fill_type fill;
      bfd_vma dot;
-     boolean relax ATTRIBUTE_UNUSED;
 {
   lang_input_section_type *is = &((*this_ptr)->input_section);
   asection *i = is->section;
-  unsigned opb = bfd_arch_mach_octets_per_byte (ldfile_output_architecture,
-						ldfile_output_machine);
 
   if (is->ifile->just_syms_flag == false)
     {
-      if (output_section_statement->subsection_alignment != -1)
-       i->alignment_power =
-	output_section_statement->subsection_alignment;
+      unsigned opb = bfd_arch_mach_octets_per_byte (ldfile_output_architecture,
+						    ldfile_output_machine);
+      unsigned int alignment_needed;
+      asection *o;
 
-      dot = insert_pad (this_ptr, fill, i->alignment_power,
-			output_section_statement->bfd_section, dot);
+      /* Align this section first to the input sections requirement,
+	 then to the output section's requirement.  If this alignment
+	 is greater than any seen before, then record it too.  Perform
+	 the alignment by inserting a magic 'padding' statement.  */
+
+      if (output_section_statement->subsection_alignment != -1)
+	i->alignment_power = output_section_statement->subsection_alignment;
+
+      o = output_section_statement->bfd_section;
+      if (o->alignment_power < i->alignment_power)
+	o->alignment_power = i->alignment_power;
+
+      alignment_needed = align_power (dot, i->alignment_power) - dot;
+
+      if (alignment_needed != 0)
+	{
+	  insert_pad (this_ptr, fill, alignment_needed * opb, o, dot);
+	  dot += alignment_needed;
+	}
 
       /* Remember where in the output section this input section goes.  */
 
-      i->output_offset = dot - output_section_statement->bfd_section->vma;
+      i->output_offset = dot - o->vma;
 
       /* Mark how big the output section must be to contain this now.  */
       if (i->_cooked_size != 0)
 	dot += i->_cooked_size / opb;
       else
 	dot += i->_raw_size / opb;
-      output_section_statement->bfd_section->_raw_size =
-	(dot - output_section_statement->bfd_section->vma) * opb;
+      o->_raw_size = (dot - o->vma) * opb;
     }
   else
     {
@@ -2777,11 +2784,6 @@ _("%X%P: section %s [%V -> %V] overlaps section %s [%V -> %V]\n"),
     }
 }
 
-/* This variable indicates whether bfd_relax_section should be called
-   again.  */
-
-static boolean relax_again;
-
 /* Make sure the new address is within the region.  We explicitly permit the
    current address to be at the exact end of the region when the address is
    non-zero, in case the region is at the end of addressable memory and the
@@ -2828,7 +2830,7 @@ lang_size_sections (s, output_section_statement, prev, fill, dot, relax)
      lang_statement_union_type **prev;
      fill_type fill;
      bfd_vma dot;
-     boolean relax;
+     boolean *relax;
 {
   unsigned opb = bfd_arch_mach_octets_per_byte (ldfile_output_architecture,
 						ldfile_output_machine);
@@ -2947,9 +2949,8 @@ lang_size_sections (s, output_section_statement, prev, fill, dot, relax)
 		os->bfd_section->output_offset = 0;
 	      }
 
-	    (void) lang_size_sections (os->children.head, os,
-				       &os->children.head,
-				       os->fill, dot, relax);
+	    lang_size_sections (os->children.head, os, &os->children.head,
+				os->fill, dot, relax);
 
 	    /* Put the section within the requested block size, or
 	       align at the block boundary.  */
@@ -3020,8 +3021,7 @@ lang_size_sections (s, output_section_statement, prev, fill, dot, relax)
 	  dot = lang_size_sections (constructor_list.head,
 				    output_section_statement,
 				    &s->wild_statement.children.head,
-				    fill,
-				    dot, relax);
+				    fill, dot, relax);
 	  break;
 
 	case lang_data_statement_enum:
@@ -3113,12 +3113,10 @@ lang_size_sections (s, output_section_statement, prev, fill, dot, relax)
 		if (! bfd_relax_section (i->owner, i, &link_info, &again))
 		  einfo (_("%P%F: can't relax section: %E\n"));
 		if (again)
-		  relax_again = true;
+		  *relax = true;
 	      }
-	    dot = size_input_section (prev,
-				      output_section_statement,
-				      output_section_statement->fill,
-				      dot, relax);
+	    dot = size_input_section (prev, output_section_statement,
+				      output_section_statement->fill, dot);
 	  }
 	  break;
 	case lang_input_statement_enum:
@@ -3141,31 +3139,22 @@ lang_size_sections (s, output_section_statement, prev, fill, dot, relax)
 
 	    if (newdot != dot)
 	      {
-		/* The assignment changed dot.  Insert a pad.  */
 		if (output_section_statement == abs_output_section)
 		  {
 		    /* If we don't have an output section, then just adjust
 		       the default memory address.  */
 		    lang_memory_region_lookup ("*default*")->current = newdot;
 		  }
-		else if (!relax)
+		else
 		  {
-		    lang_statement_union_type *new =
-		      ((lang_statement_union_type *)
-		       stat_alloc (sizeof (lang_padding_statement_type)));
+		    /* Insert a pad after this statement.  We can't
+		       put the pad before when relaxing, in case the
+		       assignment references dot.  */
+		    insert_pad (&s->header.next, fill, (newdot - dot) * opb,
+				output_section_statement->bfd_section, dot);
 
-		    /* Link into existing chain.  */
-		    new->header.next = *prev;
-		    *prev = new;
-		    new->header.type = lang_padding_statement_enum;
-		    new->padding_statement.output_section =
-		      output_section_statement->bfd_section;
-		    new->padding_statement.output_offset =
-		      dot - output_section_statement->bfd_section->vma;
-		    new->padding_statement.fill = fill;
-		    new->padding_statement.size = (newdot - dot) * opb;
-		    output_section_statement->bfd_section->_raw_size +=
-		      new->padding_statement.size;
+		    /* Don't neuter the pad below when relaxing.  */
+		    s = s->header.next;
 		  }
 
 		dot = newdot;
@@ -3174,13 +3163,15 @@ lang_size_sections (s, output_section_statement, prev, fill, dot, relax)
 	  break;
 
 	case lang_padding_statement_enum:
-	  /* If we are relaxing, and this is not the first pass, some
-	     padding statements may have been inserted during previous
-	     passes.  We may have to move the padding statement to a new
-	     location if dot has a different value at this point in this
-	     pass than it did at this point in the previous pass.  */
-	  s->padding_statement.output_offset =
-	    dot - output_section_statement->bfd_section->vma;
+	  if (relax)
+	    {
+	      /* If we are relaxing, and this is not the first pass,
+		 we need to allow padding to shrink.  If padding is
+		 needed on this pass, it will be added back in.  */
+	      s->padding_statement.size = 0;
+	      break;
+	    }
+
 	  dot += s->padding_statement.size / opb;
 	  output_section_statement->bfd_section->_raw_size +=
 	    s->padding_statement.size;
@@ -3982,6 +3973,7 @@ static void
 reset_memory_regions ()
 {
   lang_memory_region_type *p = lang_memory_region_list;
+  asection *o;
 
   for (p = lang_memory_region_list;
        p != (lang_memory_region_type *) NULL;
@@ -3990,6 +3982,9 @@ reset_memory_regions ()
       p->old_length = (bfd_size_type) (p->current - p->origin);
       p->current = p->origin;
     }
+
+  for (o = output_bfd->sections; o != NULL; o = o->next)
+    o->_raw_size = 0;
 }
 
 /* If the wild pattern was marked KEEP, the member sections
@@ -4148,16 +4143,17 @@ lang_process ()
      section positions, since they will affect SIZEOF_HEADERS.  */
   lang_record_phdrs ();
 
+  /* Size up the sections.  */
+  lang_size_sections (statement_list.head,
+		      abs_output_section,
+		      &statement_list.head, 0, (bfd_vma) 0, NULL);
+
   /* Now run around and relax if we can.  */
   if (command_line.relax)
     {
-      /* First time round is a trial run to get the 'worst case'
-	 addresses of the objects if there was no relaxing.  */
-      lang_size_sections (statement_list.head,
-			  abs_output_section,
-			  &(statement_list.head), 0, (bfd_vma) 0, false);
-
       /* Keep relaxing until bfd_relax_section gives up.  */
+      boolean relax_again;
+
       do
 	{
 	  reset_memory_regions ();
@@ -4178,16 +4174,10 @@ lang_process ()
 	     globals are, so can make better guess.  */
 	  lang_size_sections (statement_list.head,
 			      abs_output_section,
-			      &(statement_list.head), 0, (bfd_vma) 0, true);
+			      &(statement_list.head), 0, (bfd_vma) 0,
+			      &relax_again);
 	}
       while (relax_again);
-    }
-  else
-    {
-      /* Size up the sections.  */
-      lang_size_sections (statement_list.head,
-			  abs_output_section,
-			  &(statement_list.head), 0, (bfd_vma) 0, false);
     }
 
   /* See if anything special should be done now we know how big

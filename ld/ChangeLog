@@ -1,3 +1,19 @@
+2001-08-18  Alan Modra  <amodra@bigpond.net.au>
+
+	* ldlang.c (insert_pad): Make use of an existing pad statement if
+	available.  Move code calculating alignment, adjusting section
+	alignment power, and adjusting dot to ..
+	(size_input_section): .. here.  Remove unused relax param.
+	(lang_size_sections): Change boolean `relax' param to boolean *.
+	Adjust call to size_input_section.  Make use of insert_pad to
+	place pad after the assignment statement.  If relaxing, zap
+	padding statements.
+	(reset_memory_regions): Reset output_bfd section sizes too.
+	(relax_again): Move to..
+	(lang_process): ..here.  Adjust call to lang_size_sections, and
+	remove duplicated code.
+	* ldlang.h (lang_size_sections): Change `relax' param to boolean *.
+
 2001-08-17  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld.texinfo: Document that fill values now use the four least
