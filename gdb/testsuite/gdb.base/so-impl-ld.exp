@@ -36,7 +36,7 @@ if ![isnative] then {
  
 if {! ([istarget "hppa*-*-*hpux*"]
        || [istarget "sparc-sun-solaris*"]
-       || [istarget " *-*-linux-gnu*"]) } {
+       || [istarget "*-*-linux-gnu*"]) } {
 	 return
 }
 

@@ -1,3 +1,8 @@
+2001-07-12  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb.base/so-impl-ld.exp: Remove stray space that prevented
+	running this test on Linux.
+
 2001-06-24  Michael Chastain  <chastain@redhat.com>
 
 	* gdb.base/arithmet.exp: Remove some tests to make all test names
