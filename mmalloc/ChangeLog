@@ -1,3 +1,8 @@
+2003-08-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* Makefile.in (install-info): Create dest dir. Support DESTDIR.
+	(install): Likewise.
+
 2002-11-28  Elena Zannoni  <ezannoni@redhat.com>
 
 	* Makefile.in (install): Move install-info to here...

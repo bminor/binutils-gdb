@@ -113,6 +113,7 @@ mmalloc.dvi: mmalloc.texi
 	rm -f mmalloc.?? mmalloc.??s mmalloc.log mmalloc.aux mmalloc.toc
 
 install-info: info
+	$(SHELL) $(srcdir)/../mkinstalldirs $(DESTDIR)$(infodir)
 	@list='$(INFO_DEPS)'; \
 	for file in $$list; do \
 	  if test -f $$file; then d=.; else d=$(srcdir); fi; \
@@ -156,9 +157,10 @@ check: test1.c
 #	./a.out
 
 install:	all install-info
-		$(INSTALL_DATA) $(TARGETLIB) $(libdir)/$(TARGETLIB)n
-		$(RANLIB) $(libdir)/$(TARGETLIB)n
-		mv -f $(libdir)/$(TARGETLIB)n $(libdir)/$(TARGETLIB)
+		$(SHELL) $(srcdir)/../mkinstalldirs $(DESTDIR)$(libdir)
+		$(INSTALL_DATA) $(TARGETLIB) $(DESTDIR)$(libdir)/$(TARGETLIB)n
+		$(RANLIB) $(DESTDIR)$(libdir)/$(TARGETLIB)n
+		mv -f $(DESTDIR)$(libdir)/$(TARGETLIB)n $(DESTDIR)$(libdir)/$(TARGETLIB)
 
 uninstall:	uninstall-info
 

@@ -1,3 +1,10 @@
+2003-08-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* Makefile.in (FLAGS_TO_PASS): Add DESTDIR.
+	(install-only): Support DESTDIR.
+	(uninstall): Likewise.
+	(install-gdbtk): Likewise.
+
 2003-08-08  Elena Zannoni  <ezannoni@redhat.com>
 
 	* symtab.c (lookup_symbol_aux): Make sure that is_a_field_of_this
