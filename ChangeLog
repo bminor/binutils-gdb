@@ -1,5 +1,8 @@
 Fri May  8 08:31:41 1992  K. Richard Pixley  (rich@cygnus.com)
 
+	* configure: do not bury `pwd` into config.status, thus do fewer
+	  pwd's.
+
 	* configure: print the "Building in" message only when building in
 	  other than "." AND verbose.
 
