@@ -1,3 +1,8 @@
+Mon Jan 19 22:26:29 1998  Doug Evans  <devans@seba>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+	* aclocal.m4: Recognize --enable-maintainer-mode.
+
 Mon Jan 19 12:45:45 1998  Doug Evans  <devans@seba.cygnus.com>
 
 start-sanitize-cygnus
@@ -6,6 +11,7 @@ start-sanitize-cygnus
 end-sanitize-cygnus
 	* cgen-scache.h: Deleted.
 	* Make-common.in (cgen-run.o,cgen-scache.o): Delete cgen-scache.h dep.
+	(CGEN_CPU_SCM): Add sim-model.scm.
 	* cgen-scache.c: Only compile contents if WITH_SCACHE.
 	(scache_init): Use runtime computed size of SCACHE.
 	(scache_flush): Likewise.

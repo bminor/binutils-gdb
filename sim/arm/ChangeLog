@@ -1,3 +1,25 @@
+Mon Jan 19 22:26:29 1998  Doug Evans  <devans@seba>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+
+Mon Dec 15 23:17:11 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+	* config.in: Ditto.
+
+Tue Dec  9 11:30:48 1997  Nick Clifton  <nickc@cygnus.com>
+
+	* Makefile.in: Updated with changes from branch.
+	* armdefs.h:   ditto
+	* armemu.c:    ditto   these changes
+	* armemu.h:    ditto   add support for
+	* armos.c:     ditto   the Thumb instruction
+	* armsupp.c:   ditto   set and the new v4
+	* armvirt.c:   ditto   architecture.
+	* wrapper.c:   ditto
+	* thumbemu.c:  New file from branch.
+
+
 Thu Dec  4 09:21:05 1997  Doug Evans  <devans@canuck.cygnus.com>
 
 	* configure: Regenerated to track ../common/aclocal.m4 changes.

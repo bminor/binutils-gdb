@@ -1,3 +1,7 @@
+Mon Jan 19 22:26:29 1998  Doug Evans  <devans@seba>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+
 Mon Jan  5 20:38:54 1998  Mark Alexander  <marka@cygnus.com>
 
 	* interp.c (sim_monitor): Handle Densan monitor outbyte

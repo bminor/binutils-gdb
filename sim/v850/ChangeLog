@@ -1,3 +1,12 @@
+Mon Jan 19 22:26:29 1998  Doug Evans  <devans@seba>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+
+Mon Dec 15 23:17:11 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+	* config.in: Ditto.
+
 Fri Dec  5 09:26:08 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* v850.igen: Revert break value back to its old value.

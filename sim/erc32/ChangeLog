@@ -1,3 +1,24 @@
+Mon Jan 19 22:26:29 1998  Doug Evans  <devans@seba>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+
+Mon Dec 15 23:17:11 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+	* config.in: Ditto.
+
+Thu Dec  4 09:21:05 1997  Doug Evans  <devans@canuck.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+
+Fri Oct  3 09:28:00 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+
+Wed Sep 24 17:38:57 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+
 Tue Sep 23 11:04:38 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure: Regenerated to track ../common/aclocal.m4 changes.

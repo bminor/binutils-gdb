@@ -1,3 +1,7 @@
+Mon Jan 19 22:26:29 1998  Doug Evans  <devans@seba>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+
 Mon Jan 19 14:13:40 1998  Doug Evans  <devans@seba.cygnus.com>
 
 	* arch.c, arch.h, cpuall.h: New files.

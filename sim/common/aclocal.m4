@@ -47,7 +47,7 @@ AC_PROG_RANLIB
 # FIXME: Seems to me this can cause problems for i386-windows hosts.
 # At one point there were hardcoded AC_DEFINE's if ${host} = i386-*-windows*.
 AC_CHECK_HEADERS(stdlib.h string.h strings.h unistd.h time.h sys/time.h sys/resource.h)
-AC_CHECK_FUNCS(getrusage time)
+AC_CHECK_FUNCS(getrusage time sigaction)
 
 . ${srcdir}/../../bfd/configure.host
 
@@ -56,6 +56,21 @@ dnl Eventually all simulators will support these.
 dnl Do not add any here that cannot be supported by all simulators.
 dnl Do not add similar but different options to a particular simulator,
 dnl all shall eventually behave the same way.
+
+
+dnl We don't use automake, but we still want to support
+dnl --enable-maintainer-mode.
+AC_ARG_ENABLE(maintainer-mode,
+[  --enable-maintainer-mode		Enable developer functionality.],
+[case "${enableval}" in
+  yes)	MAINT="" ;;
+  no)	MAINT="#" ;;
+  *)	AC_MSG_ERROR("--enable-maintainer-mode does not take a value"); MAINT="#" ;;
+esac
+if test x"$silent" != x"yes" && test x"$MAINT" = x""; then
+  echo "Setting maintainer mode" 6>&1
+fi],[MAINT="#"])dnl
+AC_SUBST(MAINT)
 
 
 dnl This is a generic option to enable special byte swapping
@@ -210,6 +225,33 @@ dnl in the simulator specific configure.in file between the SIM_AC_COMMON
 dnl and SIM_AC_OUTPUT lines.
 
 
+dnl Specify the running environment.
+dnl If the simulator invokes this in its configure.in then without this option
+dnl the default is the user environment and all are runtime selectable.
+dnl If the simulator doesn't invoke this, only the user environment is
+dnl supported.
+dnl ??? Until there is demonstrable value in doing something more complicated,
+dnl let's not.
+AC_DEFUN(SIM_AC_OPTION_ENVIRONMENT,
+[
+AC_ARG_ENABLE(sim-environment,
+[  --enable-sim-environment=environment	Specify mixed, user, virtual or operating environment.],
+[case "${enableval}" in
+  all | ALL)             sim_environment="-DWITH_ENVIRONMENT=ALL_ENVIRONMENT";;
+  user | USER)           sim_environment="-DWITH_ENVIRONMENT=USER_ENVIRONMENT";;
+  virtual | VIRTUAL)     sim_environment="-DWITH_ENVIRONMENT=VIRTUAL_ENVIRONMENT";;
+  operating | OPERATING) sim_environment="-DWITH_ENVIRONMENT=OPERATING_ENVIRONMENT";;
+  *)   AC_MSG_ERROR("Unknown value $enableval passed to --enable-sim-environment");
+       sim_environment="";;
+esac
+if test x"$silent" != x"yes" && test x"$sim_environment" != x""; then
+  echo "Setting sim environment = $sim_environment" 6>&1
+fi],
+[sim_environment="-DWITH_ENVIRONMENT=ALL_ENVIRONMENT"])dnl
+])
+AC_SUBST(sim_environment)
+
+
 dnl Specify the alignment restrictions of the target architecture.
 dnl Without this option all possible alignment restrictions are accommodated.
 dnl arg[1] is hardwired target alignment
@@ -279,6 +321,51 @@ fi],[sim_assert=""])dnl
 AC_SUBST(sim_assert)
 
 
+
+dnl --enable-sim-bitsize is for developers of the simulator
+dnl It specifies the number of BITS in the target.
+dnl arg[1] is the number of bits in a word
+dnl arg[2] is the number assigned to the most significant bit
+dnl In the future this macro may also take arguments for specifying
+dnl the number of bits in an address and an Open Firmware cell.
+dnl FIXME: this information should be obtained from bfd/archure
+AC_DEFUN(SIM_AC_OPTION_BITSIZE,
+wire_bitsize="[$1]"
+wire_msb="[$2]"
+[AC_ARG_ENABLE(sim-bitsize,
+[  --enable-sim-bitsize=n		Specify target bitsize (32 or 64).],
+[case "${enableval}" in
+  64,63) sim_bitsize="-DWITH_TARGET_WORD_BITSIZE=64 -DWITH_TARGET_WORD_MSB=63";;
+  32,31) sim_bitsize="-DWITH_TARGET_WORD_BITSIZE=32 -DWITH_TARGET_WORD_MSB=31";;
+  64,0) sim_bitsize="-DWITH_TARGET_WORD_BITSIZE=32 -DWITH_TARGET_WORD_MSB=0";;
+  32,0) sim_bitsize="-DWITH_TARGET_WORD_BITSIZE=32 -DWITH_TARGET_WORD_MSB=0";;
+  32) if test x"$wire_msb" != x -a x"$wire_msb" != x0; then
+        sim_bitsize="-DWITH_TARGET_WORD_BITSIZE=32 -DWITH_TARGET_WORD_MSB=31"
+      else
+        sim_bitsize="-DWITH_TARGET_WORD_BITSIZE=32 -DWITH_TARGET_WORD_MSB=0"
+      fi ;;
+  64) if test x"$wire_msb" != x -a x"$wire_msb" != x0; then
+        sim_bitsize="-DWITH_TARGET_WORD_BITSIZE=64 -DWITH_TARGET_WORD_MSB=63"
+      else
+        sim_bitsize="-DWITH_TARGET_WORD_BITSIZE=64 -DWITH_TARGET_WORD_MSB=0"
+      fi ;;
+  *)  AC_MSG_ERROR("--enable-sim-bitsize was given $enableval.  Expected 32 or 64"); sim_bitsize="";;
+esac
+if test x"$silent" != x"yes" && test x"$sim_bitsize" != x""; then
+  echo "Setting bitsize flags = $sim_bitsize" 6>&1
+fi],
+[sim_bitsize=""
+if test x"$wire_bitsize" != x; then
+  sim_bitsize="$sim_bitsize -DWITH_TARGET_WORD_BITSIZE=$wire_bitsize"
+fi
+if test x"$wire_msb" != x; then
+  sim_bitsize="$sim_bitsize -DWITH_TARGET_WORD_MSB=$wire_msb"
+fi])dnl
+])
+AC_SUBST(sim_bitsize)
+
+
+
 dnl --enable-sim-endian={yes,no,big,little} is for simulators
 dnl that support both big and little endian targets.
 dnl arg[1] is hardwired target endianness.
@@ -336,7 +423,7 @@ dnl (for instance in a canadian cross)
 AC_DEFUN(SIM_AC_OPTION_HOSTENDIAN,
 [
 AC_ARG_ENABLE(sim-hostendian,
-[  --enable-sim-hostendain=end		Specify host byte endian orientation.],
+[  --enable-sim-hostendian=end		Specify host byte endian orientation.],
 [case "${enableval}" in
   no)	 sim_hostendian="-DWITH_HOST_BYTE_ORDER=0";;
   b*|B*) sim_hostendian="-DWITH_HOST_BYTE_ORDER=BIG_ENDIAN";;
@@ -385,7 +472,7 @@ AC_ARG_ENABLE(sim-scache,
 [  --enable-sim-scache=size		Specify simulator execution cache size.],
 [case "${enableval}" in
   yes)	sim_scache="-DWITH_SCACHE=${default_sim_scache}";;
-  no)	sim_scace= ;;
+  no)	sim_scache="-DWITH_SCACHE=0" ;;
   [[0-9]]*) sim_cache=${enableval};;
   *)	AC_MSG_ERROR("Bad value $enableval passed to --enable-sim-scache");
 	sim_scache="";;
