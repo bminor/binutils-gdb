@@ -1,5 +1,13 @@
 2003-12-27  Mark Kettenis  <kettenis@gnu.org>
 
+	* sparc64nbsd-nat.c (sparc64nbsd_gregset_supplies_p)
+	(sparc64nbsd_fpregset_supplies_p): New functions.
+	(_initialize_sparcnbsd_nat): Initialize sparc_gregset_supplies_p
+	and sparc_fpregset_supplies_p.
+	* config/sparc/nbsd64.mh (NATDEPFILES): Remove sparc64-nat.o.
+
+2003-12-27  Mark Kettenis  <kettenis@gnu.org>
+
 	Merge from mainline:
 
 	2003-10-31  Jim Blandy  <jimb@redhat.com>

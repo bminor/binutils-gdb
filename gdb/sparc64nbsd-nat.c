@@ -79,6 +79,51 @@ sparc64nbsd_collect_fpregset (const struct regcache *regcache,
     sparc64_collect_fpregset (regcache, regnum, fpregs);
 }
 
+/* Determine whether `gregset_t' contains register REGNUM.  */
+
+static int
+sparc64nbsd_gregset_supplies_p (int regnum)
+{
+  if (gdbarch_ptr_bit (current_gdbarch) == 32)
+    return sparc32_gregset_supplies_p (regnum);
+
+  /* Integer registers.  */
+  if ((regnum >= SPARC_G1_REGNUM && regnum <= SPARC_G7_REGNUM)
+      || (regnum >= SPARC_O0_REGNUM && regnum <= SPARC_O7_REGNUM)
+      || (regnum >= SPARC_L0_REGNUM && regnum <= SPARC_L7_REGNUM)
+      || (regnum >= SPARC_I0_REGNUM && regnum <= SPARC_I7_REGNUM))
+    return 1;
+
+  /* Control registers.  */
+  if (regnum == SPARC64_PC_REGNUM
+      || regnum == SPARC64_NPC_REGNUM
+      || regnum == SPARC64_STATE_REGNUM
+      || regnum == SPARC64_Y_REGNUM)
+    return 1;
+
+  return 0;
+}
+
+/* Determine whether `fpregset_t' contains register REGNUM.  */
+
+static int
+sparc64nbsd_fpregset_supplies_p (int regnum)
+{
+  if (gdbarch_ptr_bit (current_gdbarch) == 32)
+    return sparc32_fpregset_supplies_p (regnum);
+
+  /* Floating-point registers.  */
+  if ((regnum >= SPARC_F0_REGNUM && regnum <= SPARC_F31_REGNUM)
+      || (regnum >= SPARC64_F32_REGNUM && regnum <= SPARC64_F62_REGNUM))
+    return 1;
+
+  /* Control registers.  */
+  if (regnum == SPARC64_FSR_REGNUM)
+    return 1;
+
+  return 0;
+}
+
 
 /* Provide a prototype to silence -Wmissing-prototypes.  */
 void _initialize_sparcnbsd_nat (void);
@@ -90,4 +135,6 @@ _initialize_sparcnbsd_nat (void)
   sparc_collect_gregset = sparc64nbsd_collect_gregset;
   sparc_supply_fpregset = sparc64nbsd_supply_fpregset;
   sparc_collect_fpregset = sparc64nbsd_collect_fpregset;
+  sparc_gregset_supplies_p = sparc64nbsd_gregset_supplies_p;
+  sparc_fpregset_supplies_p = sparc64nbsd_fpregset_supplies_p;
 }
