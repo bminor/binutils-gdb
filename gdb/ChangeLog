@@ -1,5 +1,10 @@
 2002-02-10  Andrew Cagney  <ac131313@redhat.com>
 
+	* gdbarch.sh (PUSH_RETURN_ADDRESS): Don't require when multi-arch
+	partial.
+
+2002-02-10  Andrew Cagney  <ac131313@redhat.com>
+
 	* gdbarch.sh (REGISTER_CONVERTIBLE): Don't require when
 	multi-arch partial.
 	(PUSH_ARGUMENTS): Switch to using predefault.
