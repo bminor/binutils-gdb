@@ -43,8 +43,15 @@ routine (void *arg)
   printf ("hello thread\n");
 }
 
-int
-main (int argc, char *argv[])
+/* Marker function for the testsuite */
+void
+done_making_threads (void)
+{
+  /* Nothing */
+};
+
+void
+create_thread (void)
 {
   pthread_t tid;
 
@@ -53,10 +60,20 @@ main (int argc, char *argv[])
       perror ("pthread_create 1");
       exit (1);
     }
-    
+}
+
+int
+main (int argc, char *argv[])
+{
+  int i;
+
+  /* Create a few threads */
+  for (i = 0; i < 5; i++)
+    create_thread ();
+  done_making_threads ();
+
   printf ("hello\n");
   printf ("hello\n");
-  pthread_join (tid, NULL);
   return 0;
 }
 

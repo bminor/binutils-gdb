@@ -1,3 +1,17 @@
+2002-09-05  Keith Seitz  <keiths@redhat.com>
+
+	* mi-pthreads.exp (check_mi_thread_command_set): New tests.
+	(check_mi_and_console_threads): Moved contents dealing with
+	getting MI thread list...
+	(get_mi_threads): ...to here.
+	(check_mi_and_console_threads): New tests.
+	(check_console_thread_commands): New tests.
+	* pthreads.c (done_making_threads): New marker function.
+	(create_thread): New function to create threads.
+	(main): Make several threads using create_thread.
+	Call marker function done_making_threads when done making
+	threads.
+
 2002-09-04  Keith Seitz  <keiths@redhat.com>
 
 	* configure.in: Add config header.

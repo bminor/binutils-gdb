@@ -36,9 +36,7 @@ if {[mi_gdb_start]} {
     continue
 }
 
-# Check that MI and the console know of the same threads.
-# Appends NAME to all test names.
-proc check_mi_and_console_threads {name} {
+proc get_mi_thread_list {name} {
   global expect_out
 
   # MI will return a list of thread ids:
@@ -46,6 +44,35 @@ proc check_mi_and_console_threads {name} {
   # -thread-list-ids
   # ^done,thread-ids=[thread-id="1",thread-id="2",...],number-of-threads="N"
   # (gdb)
+  mi_gdb_test "-thread-list-ids" \
+    {\^done,thread-ids=\[(thread-id="[0-9]+"(,)*)+\],number-of-threads="[0-9]+"} \
+    "-thread_list_ids ($name)"
+
+  set thread_list {}
+  if {![regexp {thread-ids=\[(thread-id="[0-9]+"(,)?)*\]} $expect_out(buffer) threads]} {
+    fail "finding threads in MI output ($name)"
+  } else {
+    pass "finding threads in MI output ($name)"
+
+    # Make list of console threads
+    set start [expr {[string first \[ $threads] + 1}]
+    set end   [expr {[string first \] $threads] - 1}]
+    set threads [string range $threads $start $end]
+    foreach thread [split $threads ,] {
+      if {[scan $thread {thread-id="%d"} num]} {
+	lappend thread_list $num
+      }
+    }
+  }
+
+  return $thread_list
+}
+
+# Check that MI and the console know of the same threads.
+# Appends NAME to all test names.
+proc check_mi_and_console_threads {name} {
+  global expect_out
+
   mi_gdb_test "-thread-list-ids" \
     {\^done,thread-ids=\[(thread-id="[0-9]+"(,)*)+\],number-of-threads="[0-9]+"} \
     "-thread-list-ids ($name)"
@@ -109,22 +136,7 @@ proc check_mi_and_console_threads {name} {
 	pass "console and MI have same number of threads ($name)"
 
 	# Get MI thread list
-	set mi_thread_list ""
-	if {![regexp {thread-ids=\[(thread-id="[0-9]+"(,)?)*\]} $mi_result threads]} {
-	  fail "finding threads in MI output ($name)"
-	} else {
-	  pass "finding threads in MI output ($name)"
-
-	  # Make list of console threads
-	  set start [expr {[string first \[ $threads] + 1}]
-	  set end   [expr {[string first \] $threads] - 1}]
-	  set threads [string range $threads $start $end]
-	  foreach thread [split $threads ,] {
-	    if {[scan $thread {thread-id="%d"} num]} {
-	      lappend mi_thread_list $num
-	    }
-	  }
-	}
+	set mi_thread_list [get_mi_thread_list $name]
 
 	# Check if MI and console have the same threads
 	set fails 0
@@ -147,6 +159,9 @@ proc check_mi_and_console_threads {name} {
   }
 }
 
+# This procedure checks for the bug gdb/669, where the console
+# command "info threads" and the MI command "-thread-list-ids"
+# return different threads in the system.
 proc check_for_gdb669_bug {} {
   mi_run_to_main
   check_mi_and_console_threads "at main"
@@ -154,6 +169,41 @@ proc check_for_gdb669_bug {} {
   for {set i 0} {$i < 4} {incr i} {
     mi_next "next, try $i"
     check_mi_and_console_threads "try $i"
+  }
+}
+
+# This procedure tests the various thread commands in MI.
+proc check_mi_thread_command_set {} {
+
+  mi_runto done_making_threads
+
+  set thread_list [get_mi_thread_list "in check_mi_thread_command_set"]
+  
+  mi_gdb_test "-thread-select" \
+    {\^error,msg="mi_cmd_thread_select: USAGE: threadnum."} \
+    "check_mi_thread_command_set: -thread-select"
+
+  mi_gdb_test "-thread-select 123456789" \
+    {\^error,msg="Thread ID 123456789 not known\."} \
+    "check_mi_thread_command_set: -thread-select 123456789"
+
+  foreach thread $thread_list {
+    mi_gdb_test "-thread-select $thread" \
+      "=context-changed,thread=\"$thread\"\r\n\\^done,new-thread-id=\"$thread\",frame={.*},line=\"(-)?\[0-9\]+\",file=\".*\"" \
+      "check_mi_thread_command_set: -thread-select $thread"
+  }
+}
+
+# This procedure checks that the console and MI don't get out
+# of sync with each other.
+proc check_console_thread_commands {} {
+
+  # Assumed that we're at done_making_threads
+  set thread_list [get_mi_thread_list "in check_console_thread_commands"]
+  foreach thread $thread_list {
+    mi_gdb_test "-interpreter-exec console \"thread $thread\"" \
+      "(\\~\".*\"\r\n)*=context-changed,thread=\"$thread\"\r\n\\^done" \
+      "-interpreter-exec console \"thread $thread\""
   }
 }
 
@@ -172,8 +222,11 @@ if  {[gdb_compile_pthreads "$srcdir/$subdir/$srcfile" $binfile executable $optio
 }
 
 mi_gdb_reinitialize_dir $srcdir/$subdir
+mi_gdb_load $binfile
 
+check_mi_thread_command_set
+check_console_thread_commands
 check_for_gdb669_bug
 
 mi_gdb_exit
-return 0
+
