@@ -5849,7 +5849,7 @@ Thu Feb 20 18:10:17 1992  Fred Fish  (fnf at cygnus.com)
 
 	* tm-sparc.h, tm-sysv4.h, solib.h:  Move shared lib definitions
 	into solib.h.
-	* sparc-pinsn.c, sparc-tdep.c, standalonec, sun3-xdep.c,
+	* sparc-pinsn.c, sparc-tdep.c, standalone.c, sun3-xdep.c,
 	sun386-xdep.c, symm-xdep.c, target.c, ultra3-xdep.c, utils.c,
 	value.h: Prototypes for static functions; lint.
 	* gdbtypes.h:  Empty file to ease transition.
