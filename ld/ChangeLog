@@ -1,5 +1,9 @@
 2003-10-24  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* ldlang.c (lang_vers_match): Fix a typo.
+
+2003-10-24  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* ldlang.c (lang_vers_match): Check demangled symbols.
 
 2003-10-24  H.J. Lu  <hongjiu.lu@intel.com>

@@ -4993,7 +4993,7 @@ lang_vers_match (struct bfd_elf_version_expr_head *head,
       if (!cxx_sym)
 	cxx_sym = sym;
     }
-  else if (head->mask & BFD_ELF_VERSION_JAVA_TYPE)
+  if (head->mask & BFD_ELF_VERSION_JAVA_TYPE)
     {
       java_sym = cplus_demangle (sym, DMGL_JAVA);
       if (!java_sym)
