@@ -86,6 +86,7 @@ mmalloc
 move-if-change
 newlib
 opcodes
+pagas
 patch
 prms
 rcs
@@ -100,6 +101,7 @@ tk
 test-build.mk
 texinfo
 tgas
+utils
 uudecode
 wdiff
 xiberty
