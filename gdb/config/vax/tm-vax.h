@@ -342,3 +342,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define FIX_CALL_DUMMY(dummyname, pc, fun, nargs, args, type, gcc_p)   \
 { *((char *) dummyname + 1) = nargs;		\
   *(int *)((char *) dummyname + 3) = fun; }
+
+/* If vax pcc says CHAR or SHORT, it provides the correct address.  */
+
+#define BELIEVE_PCC_PROMOTION 1
