@@ -1,3 +1,10 @@
+2005-04-06  Nick Clifton  <nickc@redhat.com>
+	    H.J. Lu  <hongjiu.lu@intel.com>
+
+	* po/rw.po: New translation: Kinyarwanda.
+	* configure.in (ALL_LINGUAS): Add rw.
+	* configure: Regenerate.
+
 2005-04-04  Maciej W. Rozycki  <macro@linux-mips.org>
 
 	* readelf.c (debug_apply_rela_addends): Reorder r_info as
