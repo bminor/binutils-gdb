@@ -1,5 +1,8 @@
 Wed Jul  7 14:30:00 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* config/mips/nm-riscos.h: machine/machparam.h is always the right
+	place to look for BSD43_NBPG, not machine/vmparam.h
+
 	* infcmd.c (run_stack_dummy): New argument name.
 	Change error message in (another) attempt to make it comprehensible.
 	* valops.c (call_function_by_hand): Pass name to run_stack_dummy.

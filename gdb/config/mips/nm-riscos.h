@@ -16,13 +16,15 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define PCB_OFFSET(FIELD) ((int)&((struct user*)0)->u_pcb.FIELD)
 
-#include <bsd43/machine/vmparam.h>
-#ifndef BSD43_NBPG
 /* RISC/os 5.0 defines this in machparam.h.  */
 #include <bsd43/machine/machparam.h>
-#endif
 #define NBPG BSD43_NBPG
 #define UPAGES BSD43_UPAGES
+
+/* Where is this used?  I don't see any uses in mips-nat.c, and I don't think
+   the uses in infptrace.c are used if FETCH_INFERIOR_REGISTERS is defined.
+   Does the compiler react badly to "extern CORE_ADDR kernel_u_addr" (even
+   if never referenced)?  */
 #define KERNEL_U_ADDR BSD43_UADDR
 
 #define REGISTER_U_ADDR(addr, blockend, regno) 		\
