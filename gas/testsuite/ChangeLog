@@ -1,3 +1,8 @@
+2003-05-23  Jason Eckhardt  <jle@rice.edu>
+
+	* gas/i860/xp.s: New file.
+	* gas/i860/xp.d: New file.
+
 2003-05-23  Richard Earnshaw  <rearnsha@arm.com>
 
 	* gas/i860/i860.exp: Don't call exit if the target isn't an i860.

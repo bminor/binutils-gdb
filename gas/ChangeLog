@@ -1,3 +1,14 @@
+2003-05-23  Jason Eckhardt  <jle@rice.edu>
+
+	* config/tc-i860.c (target_xp): Declare variable.
+	(OPTION_XP): Declare macro.
+	(md_longopts): Add option -mxp.
+	(md_parse_option): Set target_xp.
+	(md_show_usage): Add -mxp usage.
+	(i860_process_insn): Recognize XP registers bear, ccr, p0-p3.
+	(md_assemble): Don't try expansions if XP_ONLY is set.
+	* doc/c-i860.texi: Document -mxp option and i860XP support.
+
 2003-05-23  Eric Christopher  <echristo@redhat.com>
 
 	* config/tc-mips.c (macro_build_jalr): Warning patrol.

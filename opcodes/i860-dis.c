@@ -1,5 +1,5 @@
 /* Disassembler for the i860.
-   Copyright 2000 Free Software Foundation, Inc.
+   Copyright 2000, 2003 Free Software Foundation, Inc.
 
    Contributed by Jason Eckhardt <jle@cygnus.com>.
 
@@ -37,9 +37,11 @@ static const char *const frnames[] =
   "f16", "f17", "f18", "f19", "f20", "f21", "f22", "f23",
   "f24", "f25", "f26", "f27", "f28", "f29", "f30", "f31"};
 
-/* Control/status register names (encoded as 0..5 in the instruction).  */
+/* Control/status register names (encoded as 0..11 in the instruction).
+   Registers bear, ccr, p0, p1, p2 and p3 are XP only.  */
 static const char *const crnames[] = 
- {"fir", "psr", "dirbase", "db", "fsr", "epsr", "", ""};
+ {"fir", "psr", "dirbase", "db", "fsr", "epsr", "bear", "ccr",
+  "p0", "p1", "p2", "p3", "--", "--", "--", "--" };
 
 
 /* Prototypes.  */
@@ -190,7 +192,7 @@ print_insn_i860 (memaddr, info)
 	    /* Control register.  */
 	    case 'c':
 	      (*info->fprintf_func) (info->stream, "%s%s", I860_REG_PREFIX,
-				     crnames[(insn >> 21) & 0x7]);
+				     crnames[(insn >> 21) & 0xf]);
 	      break;
 
 	    /* 16-bit immediate (sign extend, except for bitwise ops).  */

@@ -1,5 +1,5 @@
 /* tc-i860.c -- Assembler for the Intel i860 architecture.
-   Copyright 1989, 1992, 1993, 1994, 1995, 1998, 1999, 2000, 2001, 2002
+   Copyright 1989, 1992, 1993, 1994, 1995, 1998, 1999, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
 
    Brought back from the dead and completely reworked
@@ -87,6 +87,9 @@ static char last_expand;
 
 /* If true, then warn if any pseudo operations were expanded.  */
 static int target_warn_expand = 0;
+
+/* If true, then XP support is enabled.  */
+static int target_xp = 0;
 
 /* Prototypes.  */
 static void i860_process_insn	PARAMS ((char *));
@@ -229,7 +232,7 @@ md_assemble (str)
 
   /* Check for expandable flag to produce pseudo-instructions.  This
      is an undesirable feature that should be avoided.  */
-  if (the_insn.expand != 0
+  if (the_insn.expand != 0 && the_insn.expand != XP_ONLY
       && ! (the_insn.fi[0].fup & (OP_SEL_HA | OP_SEL_H | OP_SEL_L | OP_SEL_GOT
 			    | OP_SEL_GOTOFF | OP_SEL_PLT)))
     {
@@ -687,6 +690,43 @@ i860_process_insn (str)
 		  s += 4;
 		  continue;
 		}
+	      /* The remaining control registers are XP only.  */
+	      if (target_xp && strncmp (s, "bear", 4) == 0)
+		{
+		  opcode |= 0x6 << 21;
+		  s += 4;
+		  continue;
+		}
+	      if (target_xp && strncmp (s, "ccr", 3) == 0)
+		{
+		  opcode |= 0x7 << 21;
+		  s += 3;
+		  continue;
+		}
+	      if (target_xp && strncmp (s, "p0", 2) == 0)
+		{
+		  opcode |= 0x8 << 21;
+		  s += 2;
+		  continue;
+		}
+	      if (target_xp && strncmp (s, "p1", 2) == 0)
+		{
+		  opcode |= 0x9 << 21;
+		  s += 2;
+		  continue;
+		}
+	      if (target_xp && strncmp (s, "p2", 2) == 0)
+		{
+		  opcode |= 0xa << 21;
+		  s += 2;
+		  continue;
+		}
+	      if (target_xp && strncmp (s, "p3", 2) == 0)
+		{
+		  opcode |= 0xb << 21;
+		  s += 2;
+		  continue;
+		}
 	      break;
 
 	    /* 5-bit immediate in src1.  */
@@ -884,6 +924,10 @@ i860_process_insn (str)
     }
 
   the_insn.opcode = opcode;
+
+  /* Only recognize XP instructions when the user has requested it.  */
+  if (insn->expand == XP_ONLY && ! target_xp)
+    as_bad (_("Unknown opcode: `%s'"), insn->name);
 }
 
 static int
@@ -1030,11 +1074,13 @@ const char *md_shortopts = "";
 #define OPTION_EB		(OPTION_MD_BASE + 0)
 #define OPTION_EL		(OPTION_MD_BASE + 1)
 #define OPTION_WARN_EXPAND	(OPTION_MD_BASE + 2)
+#define OPTION_XP		(OPTION_MD_BASE + 3)
 
 struct option md_longopts[] = {
   { "EB",	    no_argument, NULL, OPTION_EB },
   { "EL",	    no_argument, NULL, OPTION_EL },
   { "mwarn-expand", no_argument, NULL, OPTION_WARN_EXPAND },
+  { "mxp",	    no_argument, NULL, OPTION_XP },
   { NULL,	    no_argument, NULL, 0 }
 };
 size_t md_longopts_size = sizeof (md_longopts);
@@ -1056,6 +1102,10 @@ md_parse_option (c, arg)
 
     case OPTION_WARN_EXPAND:
       target_warn_expand = 1;
+      break;
+
+    case OPTION_XP:
+      target_xp = 1;
       break;
 
 #ifdef OBJ_ELF
@@ -1084,7 +1134,8 @@ md_show_usage (stream)
   fprintf (stream, _("\
   -EL			  generate code for little endian mode (default)\n\
   -EB			  generate code for big endian mode\n\
-  -mwarn-expand		  warn if pseudo operations are expanded\n"));
+  -mwarn-expand		  warn if pseudo operations are expanded\n\
+  -mxp			  enable i860XP support (disabled by default)\n"));
 #ifdef OBJ_ELF
   /* SVR4 compatibility flags.  */
   fprintf (stream, _("\

@@ -1,3 +1,9 @@
+2003-05-23  Jason Eckhardt  <jle@rice.edu>
+
+	* i860-dis.c (crnames): Add bear, ccr, p0, p1, p2, p3.
+	(print_insn_i860): Grab 4 bits of the control register field
+	instead of 3.
+
 2003-05-18  Jason Eckhardt  <jle@rice.edu>
 
 	* i860-dis.c (print_insn_i860): Instruction shrd has a dual bit,
