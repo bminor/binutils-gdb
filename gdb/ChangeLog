@@ -1,5 +1,17 @@
 2003-06-12  Jim Blandy  <jimb@redhat.com>
 
+	Actually finish the job started by my change of 2003-05-29.
+	* config/powerpc/tm-linux.h (SKIP_TRAMPOLINE_CODE): Remove the
+	other #definition of this.
+	(ppc_linux_skip_trampoline_code): Remove declaration.
+	* ppc-linux-tdep.c (ppc_linux_skip_trampoline_code): Make this
+	static.
+	(ppc_linux_init_abi): Register it as the skip_trampoline_code
+	method for GDBARCH.
+
+	* config/powerpc/nm-ppc64-linux.h (PTRACE_XFER_TYPE): This is
+	'long' on ppc64-*-linux*.
+
 	* ppc-linux-nat.c (ppc_register_u_addr, fill_gregset): If PT_MQ
 	isn't #defined, assume the register doesn't exist: act as if
 	tdep->ppc_mq_regnum were -1.
