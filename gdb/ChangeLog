@@ -1,3 +1,12 @@
+2004-12-21  Paul N. Hilfinger  <hilfingr@otisco.mckusick.com>
+
+	* ada-lang.c (ada_print_subexp): Remove i18n markup from Ada code
+	output.
+	* ada-typeprint.c (ada_typedef_print): Ditto.
+	(print_unchecked_union_type): Ditto.
+	(print_record_type): Ditto, and correct output for non-derived
+	types that was inadvertently left off during the markup.
+
 2004-12-19  Mark Kettenis  <kettenis@gnu.org>
 
 	* hppa-hpux-tdep.c (hppa64_hpux_search_dummy_call_sequence): Check

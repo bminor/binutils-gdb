@@ -8384,9 +8384,9 @@ ada_print_subexp (struct expression *exp, int *pos,
       /* XXX: sprint_subexp */
       *pos += oplen;
       print_subexp (exp, pos, stream, PREC_SUFFIX);
-      fputs_filtered (_(" in "), stream);
+      fputs_filtered (" in ", stream);
       print_subexp (exp, pos, stream, PREC_SUFFIX);
-      fputs_filtered (_("'range"), stream);
+      fputs_filtered ("'range", stream);
       if (exp->elts[pc + 1].longconst > 1)
         fprintf_filtered (stream, "(%ld)",
                           (long) exp->elts[pc + 1].longconst);
@@ -8398,7 +8398,7 @@ ada_print_subexp (struct expression *exp, int *pos,
         fputs_filtered ("(", stream);
       /* XXX: sprint_subexp */
       print_subexp (exp, pos, stream, PREC_SUFFIX);
-      fputs_filtered (_(" in "), stream);
+      fputs_filtered (" in ", stream);
       print_subexp (exp, pos, stream, PREC_EQUAL);
       fputs_filtered (" .. ", stream);
       print_subexp (exp, pos, stream, PREC_EQUAL);
@@ -8451,7 +8451,7 @@ ada_print_subexp (struct expression *exp, int *pos,
       *pos += oplen;
       /* XXX: sprint_subexp */
       print_subexp (exp, pos, stream, PREC_SUFFIX);
-      fputs_filtered (_(" in "), stream);
+      fputs_filtered (" in ", stream);
       LA_PRINT_TYPE (exp->elts[pc + 1].type, "", stream, 1, 0);
       return;
     }

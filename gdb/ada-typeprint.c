@@ -125,7 +125,7 @@ ada_typedef_print (struct type *type, struct symbol *new,
 		   struct ui_file *stream)
 {
    /* XXX: type_sprint */
-  fprintf_filtered (stream, _("type %.*s is "),
+  fprintf_filtered (stream, "type %.*s is ",
 		    ada_name_prefix_len (SYMBOL_PRINT_NAME (new)),
 		    SYMBOL_PRINT_NAME (new));
   type_print (type, "", stream, 1);
@@ -633,13 +633,15 @@ print_record_type (struct type *type0, struct ui_file *stream, int show,
 
   parent_type = ada_parent_type (type);
   if (ada_type_name (parent_type) != NULL)
-    fprintf_filtered (stream, _("new %s with record"),
+    fprintf_filtered (stream, "new %s with record",
 		      decoded_type_name (parent_type));
   else if (parent_type == NULL && ada_is_tagged_type (type, 0))
-    fprintf_filtered (stream, _("tagged record"));
+    fprintf_filtered (stream, "tagged record");
+  else
+    fprintf_filtered (stream, "record");
 
   if (show < 0)
-    fprintf_filtered (stream, _(" ... end record"));
+    fprintf_filtered (stream, " ... end record");
   else
     {
       int flds;
@@ -651,11 +653,11 @@ print_record_type (struct type *type0, struct ui_file *stream, int show,
       flds += print_record_field_types (type, type, stream, show, level);
 
       if (flds > 0)
-	fprintf_filtered (stream, _("\n%*send record"), level, "");
+	fprintf_filtered (stream, "\n%*send record", level, "");
       else if (flds < 0)
 	fprintf_filtered (stream, _(" <incomplete type> end record"));
       else
-	fprintf_filtered (stream, _(" null; end record"));
+	fprintf_filtered (stream, " null; end record");
     }
 }
 
@@ -668,18 +670,18 @@ print_unchecked_union_type (struct type *type, struct ui_file *stream,
 			    int show, int level)
 {
   if (show < 0)
-    fprintf_filtered (stream, _("record (?) is ... end record"));
+    fprintf_filtered (stream, "record (?) is ... end record");
   else if (TYPE_NFIELDS (type) == 0)
-    fprintf_filtered (stream, _("record (?) is null; end record"));
+    fprintf_filtered (stream, "record (?) is null; end record");
   else
     {
       int i;
 
-      fprintf_filtered (stream, _("record (?) is\n%*scase ? is"), level + 4, "");
+      fprintf_filtered (stream, "record (?) is\n%*scase ? is", level + 4, "");
 
       for (i = 0; i < TYPE_NFIELDS (type); i += 1)
 	{
-	  fprintf_filtered (stream, _("\n%*swhen ? =>\n%*s"), level + 8, "",
+	  fprintf_filtered (stream, "\n%*swhen ? =>\n%*s", level + 8, "",
 			    level + 12, "");
 	  ada_print_type (TYPE_FIELD_TYPE (type, i),
 			  TYPE_FIELD_NAME (type, i),
@@ -687,7 +689,7 @@ print_unchecked_union_type (struct type *type, struct ui_file *stream,
 	  fprintf_filtered (stream, ";");
 	}
 
-      fprintf_filtered (stream, _("\n%*send case;\n%*send record"),
+      fprintf_filtered (stream, "\n%*send case;\n%*send record",
 			level + 4, "", level, "");
     }
 }
