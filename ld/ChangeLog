@@ -1,3 +1,11 @@
+start-sanitize-d10v
+Tue Jul 23 10:36:19 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
+
+	* Makefile.in (ed10velf.c): New target.
+	* configure.tgt (d10v-*-elf*): New target.
+	* emulparams/d10velf.sh: New file.
+
+end-sanitize-d10v
 Thu Jul 18 16:25:39 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.tgt (sparc*-*-sysv4*): New target.  From Andrew Gierth

@@ -15,6 +15,9 @@ arm-*-pe)		targ_emul=armpe ;;
 # start-sanitize-arc
 arc-*-elf*)		targ_emul=arcelf ;;
 # end-sanitize-arc
+# start-sanitize-d10v
+d10v-*-elf*)		targ_emul=d10velf ;;
+# end-sanitize-d10v
 sparc64-*-aout*)	targ_emul=sparcaout ;;
 sparc64-*-elf*)		targ_emul=elf64_sparc ;;
 sparc-sun-sunos4*) 	targ_emul=sun4 ;;
