@@ -1,3 +1,8 @@
+Mon Mar 17 08:48:03 1997  J.T. Conklin  <jtc@beauty.cygnus.com>
+
+	* m68k-opc.c (m68k_opcodes): Provide correct entries for mulsl and
+ 	mulul insns on the coldfire.
+	
 Sat Mar 15 17:13:05 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* arm-dis.c (print_insn_arm): Don't print instruction bytes.
