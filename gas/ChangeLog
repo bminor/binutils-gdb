@@ -1,3 +1,14 @@
+Tue Apr  5 11:14:14 1994  Ken Raeburn  (raeburn@rtl.cygnus.com)
+
+	* config/tc-sparc.c (s_reserve): If section passed isn't bss,
+	don't spew remainder of input file in error message.
+	(tc_gen_reloc): If bfd_reloc_type_lookup returns null, print error
+	message with reloc type and try to process remainder of file.
+
+	* doc/Makefile.in (install-info-as, install-info-gasp): New
+	targets, now explicitly checking $(srcdir) for info files.
+	(install-info): Depend on both of them; do nothing more.
+
 Mon Apr  4 17:06:04 1994  Jeffrey A. Law  (law@cygnus.com)
 
 	* config/tc-hppa.c (tc_gen_reloc): Fix thinko in ELF version.
