@@ -1556,7 +1556,8 @@ default_print_registers_info (struct gdbarch *gdbarch,
          The function frame_register_read() should have returned the
          pre-cooked register so no conversion is necessary.  */
       /* Convert raw data to virtual format if necessary.  */
-      if (DEPRECATED_REGISTER_CONVERTIBLE (i))
+      if (DEPRECATED_REGISTER_CONVERTIBLE_P ()
+	  && DEPRECATED_REGISTER_CONVERTIBLE (i))
 	{
 	  DEPRECATED_REGISTER_CONVERT_TO_VIRTUAL (i, register_type (current_gdbarch, i),
 				       raw_buffer, virtual_buffer);

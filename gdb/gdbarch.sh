@@ -572,7 +572,7 @@ F:2:DEPRECATED_GET_SAVED_REGISTER:void:deprecated_get_saved_register:char *raw_b
 #
 # For register <-> value conversions, replaced by CONVERT_REGISTER_P et.al.
 # For raw <-> cooked register conversions, replaced by pseudo registers.
-f:2:DEPRECATED_REGISTER_CONVERTIBLE:int:deprecated_register_convertible:int nr:nr:::deprecated_register_convertible_not::0
+F::DEPRECATED_REGISTER_CONVERTIBLE:int:deprecated_register_convertible:int nr:nr
 # For register <-> value conversions, replaced by CONVERT_REGISTER_P et.al.
 # For raw <-> cooked register conversions, replaced by pseudo registers.
 f:2:DEPRECATED_REGISTER_CONVERT_TO_VIRTUAL:void:deprecated_register_convert_to_virtual:int regnum, struct type *type, char *from, char *to:regnum, type, from, to:::0::0

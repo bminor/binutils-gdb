@@ -1209,6 +1209,21 @@ extern void set_gdbarch_deprecated_get_saved_register (struct gdbarch *gdbarch, 
 /* For register <-> value conversions, replaced by CONVERT_REGISTER_P et.al.
    For raw <-> cooked register conversions, replaced by pseudo registers. */
 
+#if defined (DEPRECATED_REGISTER_CONVERTIBLE)
+/* Legacy for systems yet to multi-arch DEPRECATED_REGISTER_CONVERTIBLE */
+#if !defined (DEPRECATED_REGISTER_CONVERTIBLE_P)
+#define DEPRECATED_REGISTER_CONVERTIBLE_P() (1)
+#endif
+#endif
+
+extern int gdbarch_deprecated_register_convertible_p (struct gdbarch *gdbarch);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_REGISTER_CONVERTIBLE_P)
+#error "Non multi-arch definition of DEPRECATED_REGISTER_CONVERTIBLE"
+#endif
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_REGISTER_CONVERTIBLE_P)
+#define DEPRECATED_REGISTER_CONVERTIBLE_P() (gdbarch_deprecated_register_convertible_p (current_gdbarch))
+#endif
+
 typedef int (gdbarch_deprecated_register_convertible_ftype) (int nr);
 extern int gdbarch_deprecated_register_convertible (struct gdbarch *gdbarch, int nr);
 extern void set_gdbarch_deprecated_register_convertible (struct gdbarch *gdbarch, gdbarch_deprecated_register_convertible_ftype *deprecated_register_convertible);

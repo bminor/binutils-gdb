@@ -32,9 +32,6 @@ struct gdbarch_info;
 /* gdbarch trace variable */
 extern int gdbarch_debug;
 
-/* Fallback for register convertible. */
-extern gdbarch_deprecated_register_convertible_ftype deprecated_register_convertible_not;
-
 /* Implementation of extract return value that grubs around in the
    register cache.  */
 extern gdbarch_extract_return_value_ftype legacy_extract_return_value;

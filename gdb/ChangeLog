@@ -1,5 +1,12 @@
 2004-02-14  Andrew Cagney  <cagney@redhat.com>
 
+	* gdbarch.sh (DEPRECATED_REGISTER_CONVERTIBLE): Add predicate.
+	* gdbarch.h, gdbarch.c: Re-generate.
+	* arch-utils.c (deprecated_register_convertible_not): Delete.
+	* arch-utils.h (deprecated_register_convertible_not): Delete.
+	* mi/mi-main.c (get_register): Update.  Update copyright.
+	* infcmd.c (default_print_registers_info): Update.
+
 	* gdbarch.sh (DEPRECATED_EXTRA_STACK_ALIGNMENT_NEEDED): Delete.
 	(DEPRECATED_CALL_DUMMY_STACK_ADJUST): Delete.
 	(DEPRECATED_CALL_DUMMY_ADDRESS): Delete.

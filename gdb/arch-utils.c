@@ -195,13 +195,6 @@ default_double_format (struct gdbarch *gdbarch)
 
 /* Misc helper functions for targets. */
 
-int
-deprecated_register_convertible_not (int num)
-{
-  return 0;
-}
-  
-
 CORE_ADDR
 core_addr_identity (CORE_ADDR addr)
 {

@@ -500,7 +500,6 @@ gdbarch_alloc (const struct gdbarch_info *info,
   current_gdbarch->cannot_fetch_register = cannot_register_not;
   current_gdbarch->cannot_store_register = cannot_register_not;
   current_gdbarch->deprecated_pc_in_call_dummy = generic_pc_in_call_dummy;
-  current_gdbarch->deprecated_register_convertible = deprecated_register_convertible_not;
   current_gdbarch->convert_register_p = legacy_convert_register_p;
   current_gdbarch->register_to_value = legacy_register_to_value;
   current_gdbarch->value_to_register = legacy_value_to_register;
@@ -656,7 +655,7 @@ verify_gdbarch (struct gdbarch *current_gdbarch)
   /* Skip verify of deprecated_init_frame_pc_first, has predicate */
   /* Skip verify of deprecated_init_frame_pc, has predicate */
   /* Skip verify of deprecated_get_saved_register, has predicate */
-  /* Skip verify of deprecated_register_convertible, invalid_p == 0 */
+  /* Skip verify of deprecated_register_convertible, has predicate */
   /* Skip verify of deprecated_register_convert_to_virtual, invalid_p == 0 */
   /* Skip verify of deprecated_register_convert_to_raw, invalid_p == 0 */
   /* Skip verify of convert_register_p, invalid_p == 0 */
@@ -1425,6 +1424,15 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: DEPRECATED_REGISTER_BYTES = %d\n",
                       DEPRECATED_REGISTER_BYTES);
+#endif
+#ifdef DEPRECATED_REGISTER_CONVERTIBLE_P
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "DEPRECATED_REGISTER_CONVERTIBLE_P()",
+                      XSTRING (DEPRECATED_REGISTER_CONVERTIBLE_P ()));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: DEPRECATED_REGISTER_CONVERTIBLE_P() = %d\n",
+                      DEPRECATED_REGISTER_CONVERTIBLE_P ());
 #endif
 #ifdef DEPRECATED_REGISTER_CONVERTIBLE
   fprintf_unfiltered (file,
@@ -3874,6 +3882,13 @@ set_gdbarch_deprecated_get_saved_register (struct gdbarch *gdbarch,
                                            gdbarch_deprecated_get_saved_register_ftype deprecated_get_saved_register)
 {
   gdbarch->deprecated_get_saved_register = deprecated_get_saved_register;
+}
+
+int
+gdbarch_deprecated_register_convertible_p (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  return gdbarch->deprecated_register_convertible != NULL;
 }
 
 int
