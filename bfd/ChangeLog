@@ -1,3 +1,10 @@
+start-sanitize-sky
+Fri Jan 30 17:48:17 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* elf32-mips.c (elf_mips_dvp_11_pcrel_howto): Set pcrel_offset=true.
+	(mips_elf_relocate_section): Recognize R_MIPS_DVP_11_PCREL.
+
+end-sanitize-sky
 Fri Jan 30 19:07:07 1998  Geoff Keating  <geoffk@ozemail.com.au>
 
 	* elf32-ppc.c (ppc_elf_create_dynamic_sections): New procedure

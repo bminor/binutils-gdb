@@ -772,7 +772,7 @@ static  reloc_howto_type elf_mips_dvp_11_pcrel_howto =
 	 true,			/* partial_inplace */
 	 0x7ff,			/* src_mask */
 	 0x7ff,			/* dst_mask */
-	 false);		/* pcrel_offset */
+	 true);			/* pcrel_offset */
 /* end-sanitize-sky */
 
 /* Do a R_MIPS_HI16 relocation.  This has to be done in combination
@@ -4629,6 +4629,9 @@ mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 
       r_type = ELF32_R_TYPE (rel->r_info);
       if ((r_type < 0 || r_type >= (int) R_MIPS_max)
+/* start-sanitize-sky */
+	  && r_type != R_MIPS_DVP_11_PCREL
+/* end-sanitize-sky */
 	  && r_type != R_MIPS16_26
 	  && r_type != R_MIPS16_GPREL)
 	{
@@ -4639,6 +4642,10 @@ mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	howto = &elf_mips16_jump_howto;
       else if (r_type == R_MIPS16_GPREL)
 	howto = &elf_mips16_gprel_howto;
+/* start-sanitize-sky */
+      else if (r_type == R_MIPS_DVP_11_PCREL)
+	howto = &elf_mips_dvp_11_pcrel_howto;
+/* end-sanitize-sky */
       else
 	howto = elf_mips_howto_table + r_type;
 
