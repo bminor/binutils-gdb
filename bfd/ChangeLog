@@ -1,3 +1,7 @@
+2002-11-14  Svein E. Seldal  <Svein.Seldal@solidas.com>
+
+	* coff-tic4x.c (tic4x_howto_table): Formatting fixup
+
 2002-11-14  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* elf64-mmix.c (_bfd_mmix_finalize_linker_allocated_gregs):
