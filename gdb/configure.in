@@ -528,3 +528,5 @@ gdb_host_cpu=$gdb_host_cpu
 gdb_target_cpu=$gdb_target_cpu
 nativefile=$nativefile
 ])
+
+exit 0

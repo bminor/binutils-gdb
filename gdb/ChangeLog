@@ -1,3 +1,16 @@
+Sat Sep  2 06:41:26 1995  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* configure.in:  Explicitly `exit 0' for broken shells.
+	* configure:  Rebuilt.
+
+	* symtab.c (list_symbols):  Add missing blank after
+	`<function, no debug info>' output.
+
+	* valops.c (value_assign):  Handle truncation when assigning
+	to bitfields. Use value_copy to construct the return value
+	from toval.
+	* values.c (value_copy):  Copy VALUE_FRAME and VALUE_OPTIMIZED_OUT.
+
 Fri Sep  1 08:25:50 1995  James G. Smith  <jsmith@beauty.cygnus.com>
 
 	* configure (mips64*vr4300*-*-elf): Support added.

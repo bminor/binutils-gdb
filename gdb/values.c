@@ -228,8 +228,10 @@ value_copy (arg)
   VALUE_OFFSET (val) = VALUE_OFFSET (arg);
   VALUE_BITPOS (val) = VALUE_BITPOS (arg);
   VALUE_BITSIZE (val) = VALUE_BITSIZE (arg);
+  VALUE_FRAME (val) = VALUE_FRAME (arg);
   VALUE_REGNO (val) = VALUE_REGNO (arg);
   VALUE_LAZY (val) = VALUE_LAZY (arg);
+  VALUE_OPTIMIZED_OUT (val) = VALUE_OPTIMIZED_OUT (arg);
   val->modifiable = arg->modifiable;
   if (!VALUE_LAZY (val))
     {
