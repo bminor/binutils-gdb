@@ -6,8 +6,12 @@
 	* gdb.c++/namespace.exp: Move from gdb.hp/gdb.aCC to here, make it
 	work under g++.
 
-	* gdb.c++/misc.cc: Fix ambiguous initialization with correct initialization.
-	
+	* gdb.c++/misc.cc: Fix ambiguous initialization with correct 
+	initialization.
+
+2000-06-02  Michael Snyder  <msnyder@seadog.cygnus.com>
+
+	* gdb.c++/local.exp: This test has never been known to work with g++.
 
 2000-05-18  Michael Snyder  <msnyder@seadog.cygnus.com>
 
