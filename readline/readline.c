@@ -163,14 +163,16 @@ static void readline_initialize_everything ();
 static void start_using_history ();
 static void bind_arrow_keys ();
 
-#if !defined (__GO32__)
+#if !defined (__GO32__) || defined (HAVE_TERMIOS_H)
 static void readline_default_bindings ();
 #endif /* !__GO32__ */
 
 #if defined (__GO32__)
 #  include <go32.h>
 #  include <pc.h>
-#  undef HANDLE_SIGNALS
+#  if !defined (__DJGPP__)
+#    undef HANDLE_SIGNALS
+#  endif /* !__DJGPP__ */
 #endif /* __GO32__ */
 
 extern char *xmalloc (), *xrealloc ();
@@ -745,10 +747,10 @@ readline_initialize_everything ()
   /* Initialize the terminal interface. */
   _rl_init_terminal_io ((char *)NULL);
 
-#if !defined (__GO32__)
+#if !defined (__GO32__) || defined (HAVE_TERMIOS_H)
   /* Bind tty characters to readline functions. */
   readline_default_bindings ();
-#endif /* !__GO32__ */
+#endif /* !__GO32__ || HAVE_TERMIOS_H */
 
   /* Initialize the function names. */
   rl_initialize_funmap ();
@@ -1272,7 +1274,7 @@ rl_refresh_line (ignore1, ignore2)
   _rl_move_vert (curr_line);
   _rl_move_cursor_relative (0, the_line);   /* XXX is this right */
 
-#if defined (__GO32__)
+#if defined (__GO32__) && !defined (__DJGPP__)
   {
     int row, col, width, row_start;
 
@@ -1281,9 +1283,9 @@ rl_refresh_line (ignore1, ignore2)
     row_start = ScreenPrimary + (row * width);
     memset (row_start + col, 0, (width - col) * 2);
   }
-#else /* !__GO32__ */
+#else /* !__GO32__ || __DJGPP__ */
   _rl_clear_to_eol (0);		/* arg of 0 means to not use spaces */
-#endif /* !__GO32__ */
+#endif /* !__GO32__ || __DJGPP__ */
 
   rl_forced_update_display ();
   rl_display_fixed = 1;
