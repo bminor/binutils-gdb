@@ -180,7 +180,10 @@ coff_real_object_p (abfd, nscns, internal_f, internal_a)
   if ((internal_f->f_flags & F_EXEC) != 0)
     abfd->flags |= D_PAGED;
 
-  obj_conv_table_size (abfd) = bfd_get_symcount(abfd) = internal_f->f_nsyms;
+  obj_raw_syment_count (abfd) =
+    obj_conv_table_size (abfd) =
+      bfd_get_symcount(abfd) =
+	internal_f->f_nsyms;
   if (internal_f->f_nsyms)
     abfd->flags |= HAS_SYMS;
 
@@ -1423,7 +1426,7 @@ coff_get_normalized_symtab (abfd)
   }
 
   obj_raw_syments(abfd) = internal;
-  obj_raw_syment_count(abfd) = internal_ptr - internal;
+  BFD_ASSERT (obj_raw_syment_count (abfd) == internal_ptr - internal);
 
   return (internal);
 }				/* coff_get_normalized_symtab() */
