@@ -2,7 +2,7 @@
 # It does some substitutions.
 cat >e${EMULATION_NAME}.c <<EOF
 /* intel coff loader emulation specific stuff
-   Copyright 1991, 1992, 1994, 1995, 1996, 1999, 2000, 2001, 2002, 2003
+   Copyright 1991, 1992, 1994, 1995, 1996, 1999, 2000, 2001, 2002, 2003, 2005
    Free Software Foundation, Inc.
    Written by Steve Chamberlain steve@cygnus.com
 
@@ -94,12 +94,12 @@ lnk960_before_parse (void)
     {
       env = (char *) getenv (*p);
       if (env)
-	ldfile_add_library_path (concat (env, "/lib/libcoff", ""), FALSE);
+	ldfile_add_library_path (concat (env, "/lib/libcoff", NULL), FALSE);
     }
 
   env = (char *) getenv ("I960BASE");
   if (env)
-    ldfile_add_library_path(concat (env, "/lib", ""), FALSE);
+    ldfile_add_library_path (concat (env, "/lib", NULL), FALSE);
 
   ldfile_output_architecture = bfd_arch_i960;
   ldfile_output_machine = bfd_mach_i960_core;
@@ -119,8 +119,7 @@ lnk960_before_parse (void)
 	einfo ("%P%F I960BASE and G960BASE not set\n");
     }
 
-
-  ldfile_add_library_path (concat (name, "/lib", ""), FALSE);
+  ldfile_add_library_path (concat (name, "/lib", NULL), FALSE);
   ldfile_output_architecture = bfd_arch_i960;
   ldfile_output_machine = bfd_mach_i960_core;
 }

@@ -1,3 +1,16 @@
+2005-02-24  Nick Clifton  <nickc@redhat.com>
+
+	* emultempl/lnk960.em (lnk960_before_parse): Remove redundant
+	empty string from calls to concat.
+
+2005-02-23  Nick Clifton  <nickc@redhat.com>
+
+	* emultempl/lnk960.em (lnk960_before_parse): Terminate list of
+	arguments passed to concat() with a NULL.
+
+	* emultempl/m68kcoff.em: Include ldexp.h and ldlang.h because they
+	define types needed by ldfile.h
+
 2005-02-23  Alan Modra  <amodra@bigpond.net.au>
 
 	* pe-dll.c: Warning fixes.
