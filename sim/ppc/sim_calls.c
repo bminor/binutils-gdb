@@ -91,6 +91,7 @@ sim_open (char *args)
 	    print_info = 1;
 	    break;
 	  }
+	  p += 1;
 	}
       }
       argp += 1;

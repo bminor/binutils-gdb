@@ -279,7 +279,7 @@ device_tree_add_string(device_tree *root,
 				   path, /* full-name */
 				   node_string,
 				   device_tree_grow);
-  new_node->string = string;
+  new_node->string = strdup(string);
   TRACE(trace_device_tree,
 	("device_tree_add_string() = 0x%x\n", new_node));
   return new_node;

@@ -1,3 +1,17 @@
+Mon Nov  6 20:49:56 1995  Andrew Cagney  <cagney@highland.com.au>
+
+	* sim_calls.c (sim_open): Fix parsing of `target sim' options.
+
+	* device_tree.c (device_tree_add_string): Wasn't saving the value
+ 	of the string being entered into the tree.
+
+	* psim.c (create_filed_device_tree): Not terminating string device
+ 	names with a null.
+	
+	* psim.c (psim_create): Use `env' instead of
+ 	`environment-architecture' to be consistent with configure.
+  	Reconize user/uea, virtual/vea and operating/oea.
+
 Sat Nov  4 12:29:45 1995  Fred Fish  <fnf@cygnus.com>
 
 	* core.c:  Rename to corefile.c

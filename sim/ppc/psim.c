@@ -121,7 +121,7 @@ create_hardware_device_tree(bfd *image,
 			  MAX_NR_PROCESSORS);
   device_tree_add_boolean(root, "/options/little-endian?",
 			  !image->xvec->byteorder_big_p);
-  device_tree_add_string(root, "/options/environment-architecture",
+  device_tree_add_string(root, "/options/env",
 			 "operating");
   device_tree_add_boolean(root, "/options/strict-alignment?",
 			  (WITH_ALIGNMENT == STRICT_ALIGNMENT
@@ -209,7 +209,7 @@ create_vea_device_tree(bfd *image,
   device_tree_add_integer(root, "/options/smp", 1); /* always */
   device_tree_add_boolean(root, "/options/little-endian?",
 			  !image->xvec->byteorder_big_p);
-  device_tree_add_string(root, "/options/environment-architecture",
+  device_tree_add_string(root, "/options/env",
 			 (WITH_ENVIRONMENT == USER_ENVIRONMENT
 			  ? "user" : "virtual"));
   device_tree_add_boolean(root, "/options/strict-alignment?",
@@ -303,7 +303,7 @@ create_filed_device_tree(const char *file_name,
       }
       else {
 	/* any thing else */
-	space = '\0';
+	*space = '\0';
 	device_tree_add_string(root, device_path, space + 1);
       }
     }
@@ -410,16 +410,19 @@ psim_create(const char *file_name)
 
   /* fill in the missing OEA/VEA information */
   env = device_tree_find_string(system->devices,
-				"/options/environment-architecture");
-  current_environment = (strcmp(env, "user") == 0
+				"/options/env");
+  current_environment = ((strcmp(env, "user") == 0
+			  || strcmp(env, "uea") == 0)
 			 ? USER_ENVIRONMENT
-			 : strcmp(env, "virtual") == 0
+			 : (strcmp(env, "virtual") == 0
+			    || strcmp(env, "vea") == 0)
 			 ? VIRTUAL_ENVIRONMENT
-			 : strcmp(env, "operating") == 0
+			 : (strcmp(env, "operating") == 0
+			    || strcmp(env, "oea") == 0)
 			 ? OPERATING_ENVIRONMENT
 			 : 0);
   if (current_environment == 0)
-    error("unreconized /options/environment-architecture\n");
+    error("unreconized /options/env\n");
   if (CURRENT_ENVIRONMENT != current_environment)
     error("target environment conflict\n");
 
