@@ -24,7 +24,8 @@
 
 #include "obstack.h"
 
-/* This is allocated to grow and shrink as .ifdef/.endif pairs are scanned. */
+/* This is allocated to grow and shrink as .ifdef/.endif pairs are
+   scanned.  */
 struct obstack cond_obstack;
 
 struct file_line
@@ -59,15 +60,18 @@ static char *get_mri_string PARAMS ((int, int *));
 
 static struct conditional_frame *current_cframe = NULL;
 
-void 
+void
 s_ifdef (arg)
      int arg;
 {
-  register char *name;		/* points to name of symbol */
-  register symbolS *symbolP;	/* Points to symbol */
+  /* Points to name of symbol.  */
+  register char *name;
+  /* Points to symbol.  */
+  register symbolS *symbolP;
   struct conditional_frame cframe;
 
-  SKIP_WHITESPACE ();		/* Leading whitespace is part of operand. */
+  /* Leading whitespace is part of operand.  */
+  SKIP_WHITESPACE ();
   name = input_line_pointer;
 
   if (!is_name_beginner (*name))
@@ -98,9 +102,9 @@ s_ifdef (arg)
 
       demand_empty_rest_of_line ();
     }				/* if a valid identifyer name */
-}				/* s_ifdef() */
+}
 
-void 
+void
 s_if (arg)
      int arg;
 {
@@ -113,7 +117,8 @@ s_if (arg)
   if (flag_mri)
     stop = mri_comment_field (&stopc);
 
-  SKIP_WHITESPACE ();		/* Leading whitespace is part of operand. */
+  /* Leading whitespace is part of operand.  */
+  SKIP_WHITESPACE ();
 
   if (current_cframe != NULL && current_cframe->ignoring)
     {
@@ -158,7 +163,7 @@ s_if (arg)
     mri_comment_end (stop, stopc);
 
   demand_empty_rest_of_line ();
-}				/* s_if() */
+}
 
 /* Get a string for the MRI IFC or IFNC pseudo-ops.  */
 
@@ -246,7 +251,7 @@ s_ifc (arg)
   demand_empty_rest_of_line ();
 }
 
-void 
+void
 s_elseif (arg)
      int arg;
 {
@@ -286,8 +291,8 @@ s_elseif (arg)
 	}			/* if not a dead tree */
     }				/* if error else do it */
 
-
-  SKIP_WHITESPACE ();		/* Leading whitespace is part of operand. */
+  /* Leading whitespace is part of operand.  */
+  SKIP_WHITESPACE ();
 
   if (current_cframe != NULL && current_cframe->ignoring)
     {
@@ -301,7 +306,7 @@ s_elseif (arg)
       if (operand.X_op != O_constant)
 	as_bad (_("non-constant expression in \".elseif\" statement"));
     }
-  
+
   switch ((operatorT) arg)
     {
     case O_eq: t = operand.X_add_number == 0; break;
@@ -326,7 +331,7 @@ s_elseif (arg)
   demand_empty_rest_of_line ();
 }
 
-void 
+void
 s_endif (arg)
      int arg ATTRIBUTE_UNUSED;
 {
@@ -356,9 +361,9 @@ s_endif (arg)
     }
 
   demand_empty_rest_of_line ();
-}				/* s_endif() */
+}
 
-void 
+void
 s_else (arg)
      int arg ATTRIBUTE_UNUSED;
 {
@@ -404,9 +409,9 @@ s_else (arg)
     }
 
   demand_empty_rest_of_line ();
-}				/* s_else() */
+}
 
-void 
+void
 s_ifeqs (arg)
      int arg;
 {
@@ -443,9 +448,9 @@ s_ifeqs (arg)
     listing_list (2);
 
   demand_empty_rest_of_line ();
-}				/* s_ifeqs() */
+}
 
-int 
+int
 ignore_input ()
 {
   char *s;
@@ -477,9 +482,9 @@ ignore_input ()
     return 0;
 
   return (current_cframe != NULL) && (current_cframe->ignoring);
-}				/* ignore_input() */
+}
 
-static void 
+static void
 initialize_cframe (cframe)
      struct conditional_frame *cframe;
 {
@@ -533,5 +538,3 @@ cond_exit_macro (nest)
       obstack_free (&cond_obstack, hold);
     }
 }
-
-/* end of cond.c */

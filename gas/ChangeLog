@@ -1,6 +1,8 @@
 2000-08-31  Kazu Hirata  <kazu@hxi.com>
 
-	* frags.c: Fix formatting.
+	* as.c: Fix formatting.
+	* cond.c: Likewise.
+	* frags.c: Likewise.
 	* macro.c: Likewise.
 
 2000-08-31  Eric Christopher  <echristo@cygnus.com>

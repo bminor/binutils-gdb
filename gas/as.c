@@ -17,21 +17,18 @@
    You should have received a copy of the GNU General Public License
    along with GAS; see the file COPYING.  If not, write to the Free
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
-   02111-1307, USA. */
+   02111-1307, USA.  */
 
-/*
- * Main program for AS; a 32-bit assembler of GNU.
+/* Main program for AS; a 32-bit assembler of GNU.
  * Understands command arguments.
  * Has a few routines that don't fit in other modules because they
  * are shared.
- *
  *
  *			bugs
  *
  * : initialisers
  *	Since no-one else says they will support them in future: I
  * don't support them now.
- *
  */
 
 #include "ansidecl.h"
@@ -63,19 +60,21 @@ static void dump_statistics PARAMS ((void));
 static void perform_an_assembly_pass PARAMS ((int argc, char **argv));
 static int macro_expr PARAMS ((const char *, int, sb *, int *));
 
-int listing;			/* true if a listing is wanted */
+/* True if a listing is wanted.  */
+int listing;
 
-static char *listing_filename = NULL;	/* Name of listing file.  */
+/* Name of listing file.  */
+static char *listing_filename = NULL;
 
 /* Type of debugging to generate.  */
 
 enum debug_info_type debug_type = DEBUG_NONE;
 
 /* Maximum level of macro nesting.  */
-
 int max_macro_nest = 100;
 
-char *myname;			/* argv[0] */
+/* argv[0]  */
+char *myname;
 #ifdef BFD_ASSEMBLER
 segT reg_section, expr_section;
 segT text_section, data_section, bss_section;
@@ -101,7 +100,7 @@ struct defsym_list
 
 static struct defsym_list *defsyms;
 
-/* Keep a record of the itbl files we read in. */
+/* Keep a record of the itbl files we read in.  */
 
 struct itbl_file_list
 {
@@ -143,7 +142,7 @@ select_emulation_mode (argc, argv)
   if (p)
     p++;
   else
-    p = argv[i+1];
+    p = argv[i + 1];
 
   if (!p || !*p)
     as_fatal (_("missing emulation mode name"));
@@ -247,12 +246,12 @@ Options:\n\
 
     fprintf (stream, "\
   --em=[");
-    for (i = 0; i < n_emulations-1; i++)
+    for (i = 0; i < n_emulations - 1; i++)
       fprintf (stream, "%s | ", emulations[i]->name);
     fprintf (stream, "%s]\n", emulations[i]->name);
 
     def_em = getenv (EMULATION_ENVIRON);
-    if (!def_em) 
+    if (!def_em)
       def_em = DEFAULT_EMULATION;
     fprintf (stream, _("\
                           emulate output (default %s)\n"), def_em);
@@ -327,16 +326,14 @@ Options:\n\
   fprintf (stream, _("Report bugs to %s\n"), REPORT_BUGS_TO);
 }
 
-/*
- * Since it is easy to do here we interpret the special arg "-"
- * to mean "use stdin" and we set that argv[] pointing to "".
- * After we have munged argv[], the only things left are source file
- * name(s) and ""(s) denoting stdin. These file names are used
- * (perhaps more than once) later.
- *
- * check for new machine-dep cmdline options in
- * md_parse_option definitions in config/tc-*.c
- */
+/* Since it is easy to do here we interpret the special arg "-"
+   to mean "use stdin" and we set that argv[] pointing to "".
+   After we have munged argv[], the only things left are source file
+   name(s) and ""(s) denoting stdin. These file names are used
+   (perhaps more than once) later.
+
+   check for new machine-dep cmdline options in
+   md_parse_option definitions in config/tc-*.c.  */
 
 static void
 parse_args (pargc, pargv)
@@ -367,7 +364,7 @@ parse_args (pargc, pargv)
       'v',
 #endif
       'w', 'X',
-      /* New option for extending instruction set (see also --itbl below) */
+      /* New option for extending instruction set (see also --itbl below)  */
       't', ':',
       '\0'
     };
@@ -428,7 +425,7 @@ parse_args (pargc, pargv)
 
   /* Construct the option lists from the standard list and the target
      dependent list.  Include space for an extra NULL option and
-     always NULL terminate. */
+     always NULL terminate.  */
   shortopts = concat (std_shortopts, md_shortopts, (char *) NULL);
   longopts = (struct option *) xmalloc (sizeof (std_longopts)
 					+ md_longopts_size
@@ -486,7 +483,7 @@ parse_args (pargc, pargv)
 		print_version_id ();
 	      break;
 	    }
-	  /*FALLTHRU*/
+	  /* Fall through.  */
 
 	case '?':
 	  exit (EXIT_FAILURE);
@@ -576,29 +573,29 @@ the GNU General Public License.  This program has absolutely no warranty.\n"));
 	case OPTION_INSTTBL:
 	case 't':
 	  {
-	    /* optarg is the name of the file containing the instruction 
-	       formats, opcodes, register names, etc. */
+	    /* optarg is the name of the file containing the instruction
+	       formats, opcodes, register names, etc.  */
 	    struct itbl_file_list *n;
 
 	    if (optarg == NULL)
 	      {
-		as_warn ( _("No file name following -t option\n") );
+		as_warn (_("No file name following -t option\n"));
 		break;
 	      }
-	    
+
 	    n = (struct itbl_file_list *) xmalloc (sizeof *n);
 	    n->next = itbl_files;
 	    n->name = optarg;
 	    itbl_files = n;
 
 	    /* Parse the file and add the new instructions to our internal
-	       table.  If multiple instruction tables are specified, the 
-	       information from this table gets appended onto the existing 
-	       internal table. */
+	       table.  If multiple instruction tables are specified, the
+	       information from this table gets appended onto the existing
+	       internal table.  */
 	    itbl_files->name = xstrdup (optarg);
 	    if (itbl_parse (itbl_files->name) != 0)
 	      {
-		fprintf (stderr, _("Failed to read instruction table %s\n"), 
+		fprintf (stderr, _("Failed to read instruction table %s\n"),
 			 itbl_files->name);
 		exit (EXIT_SUCCESS);
 	      }
@@ -612,7 +609,7 @@ the GNU General Public License.  This program has absolutely no warranty.\n"));
 	case OPTION_GSTABS:
 	  debug_type = DEBUG_STABS;
 	  break;
- 
+
 	case OPTION_GDWARF2:
 	  debug_type = DEBUG_DWARF2;
 	  break;
@@ -632,22 +629,22 @@ the GNU General Public License.  This program has absolutely no warranty.\n"));
 	  break;
 
 	case OPTION_LISTING_LHS_WIDTH:
-	  listing_lhs_width = atoi(optarg);
+	  listing_lhs_width = atoi (optarg);
 	  if (listing_lhs_width_second < listing_lhs_width)
 	    listing_lhs_width_second = listing_lhs_width;
 	  break;
 	case OPTION_LISTING_LHS_WIDTH2:
 	  {
-	    int tmp = atoi(optarg);
+	    int tmp = atoi (optarg);
 	    if (tmp > listing_lhs_width)
 	      listing_lhs_width_second = tmp;
 	  }
 	  break;
 	case OPTION_LISTING_RHS_WIDTH:
-	  listing_rhs_width = atoi(optarg);
+	  listing_rhs_width = atoi (optarg);
 	  break;
 	case OPTION_LISTING_CONT_LINES:
-	  listing_lhs_cont_lines = atoi(optarg);
+	  listing_lhs_cont_lines = atoi (optarg);
 	  break;
 
 	case 'M':
@@ -726,8 +723,8 @@ the GNU General Public License.  This program has absolutely no warranty.\n"));
 	  break;
 
 	case 'D':
-	  /* DEBUG is implemented: it debugs different */
-	  /* things from other people's assemblers. */
+	  /* DEBUG is implemented: it debugs different
+	     things from other people's assemblers.  */
 	  flag_debug = 1;
 	  break;
 
@@ -736,7 +733,7 @@ the GNU General Public License.  This program has absolutely no warranty.\n"));
 	  break;
 
 	case 'I':
-	  {			/* Include file directory */
+	  {			/* Include file directory.  */
 	    char *temp = xstrdup (optarg);
 	    add_include_dir (temp);
 	    break;
@@ -750,7 +747,7 @@ the GNU General Public License.  This program has absolutely no warranty.\n"));
 	  break;
 
 	case 'X':
-	  /* -X means treat warnings as errors */
+	  /* -X means treat warnings as errors.  */
 	  break;
 	}
     }
@@ -764,7 +761,7 @@ the GNU General Public License.  This program has absolutely no warranty.\n"));
 
 static long start_time;
 
-int 
+int
 main (argc, argv)
      int argc;
      char **argv;
@@ -819,7 +816,7 @@ main (argc, argv)
   symbol_begin ();
   frag_init ();
   subsegs_begin ();
-  parse_args (&argc, &argv); 
+  parse_args (&argc, &argv);
   read_begin ();
   input_scrub_begin ();
   expr_begin ();
@@ -872,7 +869,8 @@ main (argc, argv)
 
   PROGRESS (1);
 
-  perform_an_assembly_pass (argc, argv);	/* Assemble it. */
+  /* Assemble it.  */
+  perform_an_assembly_pass (argc, argv);
 
   cond_finish_check (-1);
 
@@ -908,8 +906,8 @@ main (argc, argv)
     output_file_close (out_file_name);
 #endif
 
-  if (flag_fatal_warnings && had_warnings() > 0 && had_errors () == 0)
-    as_bad (_("%d warnings, treating warnings as errors"), had_warnings());
+  if (flag_fatal_warnings && had_warnings () > 0 && had_errors () == 0)
+    as_bad (_("%d warnings, treating warnings as errors"), had_warnings ());
 
   if (had_errors () > 0 && ! flag_always_generate_output)
     keep_it = 0;
@@ -960,19 +958,16 @@ dump_statistics ()
 #endif
 }
 
+/* Here to attempt 1 pass over each input file.
+   We scan argv[*] looking for filenames or exactly "" which is
+   shorthand for stdin. Any argv that is NULL is not a file-name.
+   We set need_pass_2 TRUE if, after this, we still have unresolved
+   expressions of the form (unknown value)+-(unknown value).
 
-/*			perform_an_assembly_pass()
- *
- * Here to attempt 1 pass over each input file.
- * We scan argv[*] looking for filenames or exactly "" which is
- * shorthand for stdin. Any argv that is NULL is not a file-name.
- * We set need_pass_2 TRUE if, after this, we still have unresolved
- * expressions of the form (unknown value)+-(unknown value).
- *
- * Note the un*x semantics: there is only 1 logical input file, but it
- * may be a catenation of many 'physical' input files.
- */
-static void 
+   Note the un*x semantics: there is only 1 logical input file, but it
+   may be a catenation of many 'physical' input files.  */
+
+static void
 perform_an_assembly_pass (argc, argv)
      int argc;
      char **argv;
@@ -991,7 +986,7 @@ perform_an_assembly_pass (argc, argv)
     for (i = SEG_E0; i < SEG_UNKNOWN; i++)
       segment_info[i].fix_root = 0;
   }
-  /* Create the three fixed ones */
+  /* Create the three fixed ones.  */
   {
     segT seg;
 
@@ -1022,7 +1017,7 @@ perform_an_assembly_pass (argc, argv)
   data_section = subseg_new (DATA_SECTION_NAME, 0);
   bss_section = subseg_new (BSS_SECTION_NAME, 0);
   /* @@ FIXME -- we're setting the RELOC flag so that sections are assumed
-     to have relocs, otherwise we don't find out in time. */
+     to have relocs, otherwise we don't find out in time.  */
   applicable = bfd_applicable_section_flags (stdoutput);
   bfd_set_section_flags (stdoutput, text_section,
 			 applicable & (SEC_ALLOC | SEC_LOAD | SEC_RELOC
@@ -1049,22 +1044,24 @@ perform_an_assembly_pass (argc, argv)
   obj_begin ();
 #endif
 
-  argv++;			/* skip argv[0] */
-  argc--;			/* skip argv[0] */
+  /* Skip argv[0].  */
+  argv++;
+  argc--;
+
   while (argc--)
     {
       if (*argv)
-	{			/* Is it a file-name argument? */
+	{			/* Is it a file-name argument?  */
 	  PROGRESS (1);
 	  saw_a_file++;
-	  /* argv->"" if stdin desired, else->filename */
+	  /* argv->"" if stdin desired, else->filename  */
 	  read_a_source_file (*argv);
 	}
-      argv++;			/* completed that argv */
+      argv++;			/* completed that argv  */
     }
   if (!saw_a_file)
     read_a_source_file ("");
-}				/* perform_an_assembly_pass() */
+}
 
 /* The interface between the macro code and gas expression handling.  */
 
@@ -1093,5 +1090,3 @@ macro_expr (emsg, idx, in, val)
 
   return idx;
 }
-
-/* end of as.c */
