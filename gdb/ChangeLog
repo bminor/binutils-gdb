@@ -1,3 +1,8 @@
+2003-06-22  Andrew Cagney  <cagney@redhat.com>
+
+	GDB 6.0 branch created.
+	* version.in: Bump to version 5.3.90_0000-00-00-cvs.
+
 2003-06-22  Daniel Jacobowitz  <drow@mvista.com>
 
 	* symfile.c (add_symbol_file_command): Use parse_and_eval_address.
