@@ -1,3 +1,7 @@
+2003-09-03  Michael Snyder  <msnyder@redhat.com>
+
+	* config/djgpp/fnchange.lst: Fix up sim/frv/profile-fr*.[ch].
+
 2003-09-03  Andrew Cagney  <cagney@redhat.com>
 
 	* config/rs6000/tm-rs6000.h (IBM6000_TARGET): Delete definition.

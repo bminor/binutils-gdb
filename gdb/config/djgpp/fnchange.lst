@@ -341,6 +341,10 @@
 @V@/opcodes/po/.cvsignore @V@/opcodes/po/_cvsignore
 @V@/readline/config.h.bot @V@/readline/config.h-bot
 @V@/readline/config.h.in @V@/readline/config.h-in
+@V@/sim/frv/profile-fr400.c @V@/sim/frv/fr400-profile.c
+@V@/sim/frv/profile-fr400.h @V@/sim/frv/fr400-profile.h
+@V@/sim/frv/profile-fr500.c @V@/sim/frv/fr500-profile.c
+@V@/sim/frv/profile-fr500.h @V@/sim/frv/fr500-profile.h
 @V@/sim/m68hc11/dv-m68hc11eepr.c @V@/sim/m68hc11/dv-eepr.c
 @V@/sim/m68hc11/dv-m68hc11sio.c @V@/sim/m68hc11/dv-sio.c
 @V@/sim/m68hc11/dv-m68hc11spi.c @V@/sim/m68hc11/dv-spi.c
