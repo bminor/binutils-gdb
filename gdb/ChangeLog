@@ -1,3 +1,56 @@
+Thu Sep 12 00:22:24 1991  John Gilmore  (gnu at cygint.cygnus.com)
+
+	AMD 29000 changes from David Wood <wood@david.ultra.nyu.edu>:
+
+	* Makefile.in (CLIBS):  Put XM_CLIBS and TM_CLIBS at end.
+	Pass MUNCH_DEFINE to munch whenever we run it.
+	* am29k-pinsn.c (print_insn):  Handle NOP specially.  Avoid %#x
+	format string; use 0x%x instead.
+	* am29k-tdep.c:  Use DUMMY_SAVE_GREGS and RETURN_REGNUM.
+	* ultra-xdep.c, xm-ultra.h:  New files for Ultracomputer host system.
+	* xm-rtbsd.h:  New host support for RT/PC running BSD Unix.
+	* inflow.c:  Handle `short' process group IDs.
+	* infptrace.c (fetch_register):  Support CANNOT_FETCH_REGISTER,
+	and check for ptrace errors.
+	* coffread.c (SDB_REG_TO_REGNUM):  Define if not already.
+	(coff_symfile_init):  Initialize text_bfd_scnum.
+	(read_coff_symtab):  Use it to find the text [and absolute?] sections.
+	* ../config.sub:  Add vendor nyu and os "sym[1-9]*".
+	* configure.in: Add hosts rtpc-*-* and a29k-*-*.
+	Merge target arm case with other "easy" cases.  Add target
+	cases a29k-*-none (rehack of am29k), a29k-*-kern (remote to
+	Ultracomputer kernel), and a29k-*-sym1 (ultracomputer OS's user
+	process).
+	* minimon.h, remote-adapt.c, remote-mm.c:  Add.
+	* munch:  Cope with RT/PC putting fns in data segment.
+	Restore ability to override `nm' by specifying MUNCH_NM.
+	* xconfig/rtbsd, xconfig/ultra3:  New host systems.
+	* tconfig/a29k:  Rename from tconfig/am29k.  Add remote-mm
+	and remote-adapt.  Remove encapsulated coff #define's (the
+	support should go in BFD, and gdb shouldn't know or care).
+	* tconfig/a29k-kern:  Same, but for remote kernel debugging.
+	* tconfig/ultra3:  For debugging user processes on Ultra3/Sym1.
+	* tm-29k.h:  Update BADMAG (though it should go away).
+	Allow the register definitions to be overridden in another
+	tm-file.  Fix SR_REGNUM.  Add a mess of _REGNUM's.  Separate
+	RETURN_REGNUM from GR96_REGNUM and DUMMY_SAVE_GREGS from
+	DUMMY_SAVE_GR96, for handling kernel calling conventions
+	that use GR64+ rather than GR96+.
+
+	* remote-mm.c (mm_attach, mm_wait):  Handle attach like
+	child_attach does, making a clean stop in the newly attached
+	program.
+	* remote-eb.c:  Lint.
+
+	* coffread.c:  Make coffread independent of any particular
+	variant of COFF.  Avoid #include-ing any particular one except
+	internalcoff.h.  BFD now passes key values for symbol reading
+	as part of its coff_data structure (LINESZ, SYMESZ, AUXESZ,
+	and the symbol masks and shifts); use them.
+	Remove obsolete end_of_text_addr.
+
+	* exec.c:  Remove unused include files.
+
 Wed Sep 11 19:38:44 1991  John Gilmore  (gnu at cygint.cygnus.com)
 
 	* Makefile.in (documentation targets):  Pass $(M4).
