@@ -1,3 +1,9 @@
+Fri Apr 28 08:05:12 2000  Clinton Popetz  <cpopetz@cygnus.com>
+
+	* coff-alpha.c (alpha_ecoff_backend_data): Add initialization of
+	_bfd_coff_force_symnames in strings and 
+	_bfd_coff_debug_string_prefix_length to their default values.
+
 2000-04-27  Alan Modra  <alan@linuxcare.com.au>
 
 	* elf32-m68k.c (elf_m68k_gc_sweep_hook):  Return if dynobj NULL.
