@@ -19,9 +19,9 @@ keep_these_too="${keep_these_too} .cvsignore CYGNUS autoconf
 	bfd binutils byacc cvs deja-gnu dejagnu diff dosrel dvips emacs emacs19
 	examples expect fileutils flex gas gcc gdb gdbm gdbtest glob gprof grep
 	groff include install.sh ispell ld libg++ libgcc libgloss libiberty
-	libio librx m4 make mmalloc move-if-change newlib opcodes pagas patch
-	prms rcs readline sed send-pr shellutils sim tcl textutils tk
-	test-build.mk texinfo tgas utils uudecode wdiff xiberty"
+	libio librx libstdc++ m4 make mmalloc move-if-change newlib opcodes
+	pagas patch prms rcs readline sed send-pr shellutils sim tcl textutils
+	tk test-build.mk texinfo tgas utils uudecode wdiff xiberty"
 
 cygnus_files="release release-info build-all.mk COPYING.NEWLIB"
 
