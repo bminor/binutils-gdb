@@ -35,6 +35,7 @@ alpha*-*-linux*)	gdb_host=alpha-linux ;;
 alpha*-*-freebsd*)	gdb_host=fbsd ;;
 
 arm*-*-linux*)		gdb_host=linux ;;
+arm*-*-netbsd*)		gdb_host=nbsd ;;
 arm*-*-*)		gdb_host=arm ;;
 
 hppa*-*-bsd*)		gdb_host=hppabsd ;;
