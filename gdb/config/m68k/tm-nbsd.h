@@ -1,5 +1,6 @@
 /* Macro definitions for m68k running under NetBSD.
-   Copyright 1994, 1996, 2001 Free Software Foundation, Inc.
+
+   Copyright 1994, 1996, 2001, 2004 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -32,8 +33,8 @@
 #define STACK_END_ADDR USRSTACK
 
 /* For NetBSD, sigtramp is 32 bytes before STACK_END_ADDR.  */
-#define DEPRECATED_SIGTRAMP_START(pc) (STACK_END_ADDR - 32)
-#define DEPRECATED_SIGTRAMP_END(pc) (STACK_END_ADDR)
+#define DEPRECATED_IN_SIGTRAMP(PC,FUNC_NAME) \
+((PC) >= (STACK_END_ADDR - 32) && (PC) < (STACK_END_ADDR))
 
 #include "m68k/tm-m68k.h"
 

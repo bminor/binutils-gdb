@@ -2064,8 +2064,7 @@ extern void set_gdbarch_in_solib_return_trampoline (struct gdbarch *gdbarch, gdb
 #define IN_SOLIB_RETURN_TRAMPOLINE(pc, name) (gdbarch_in_solib_return_trampoline (current_gdbarch, pc, name))
 #endif
 
-/* NOTE: cagney/2004-03-23: DEPRECATED_SIGTRAMP_START,
-   DEPRECATED_SIGTRAMP_END, and DEPRECATED_PC_IN_SIGTRAMP have all been
+/* NOTE: cagney/2004-03-23: DEPRECATED_PC_IN_SIGTRAMP have all been
    superseeded by signal trampoline frame sniffers. */
 
 #if defined (DEPRECATED_PC_IN_SIGTRAMP)
@@ -2091,56 +2090,6 @@ extern void set_gdbarch_deprecated_pc_in_sigtramp (struct gdbarch *gdbarch, gdba
 #endif
 #if !defined (DEPRECATED_PC_IN_SIGTRAMP)
 #define DEPRECATED_PC_IN_SIGTRAMP(pc, name) (gdbarch_deprecated_pc_in_sigtramp (current_gdbarch, pc, name))
-#endif
-
-#if defined (DEPRECATED_SIGTRAMP_START)
-/* Legacy for systems yet to multi-arch DEPRECATED_SIGTRAMP_START */
-#if !defined (DEPRECATED_SIGTRAMP_START_P)
-#define DEPRECATED_SIGTRAMP_START_P() (1)
-#endif
-#endif
-
-extern int gdbarch_deprecated_sigtramp_start_p (struct gdbarch *gdbarch);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_SIGTRAMP_START_P)
-#error "Non multi-arch definition of DEPRECATED_SIGTRAMP_START"
-#endif
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_SIGTRAMP_START_P)
-#define DEPRECATED_SIGTRAMP_START_P() (gdbarch_deprecated_sigtramp_start_p (current_gdbarch))
-#endif
-
-typedef CORE_ADDR (gdbarch_deprecated_sigtramp_start_ftype) (CORE_ADDR pc);
-extern CORE_ADDR gdbarch_deprecated_sigtramp_start (struct gdbarch *gdbarch, CORE_ADDR pc);
-extern void set_gdbarch_deprecated_sigtramp_start (struct gdbarch *gdbarch, gdbarch_deprecated_sigtramp_start_ftype *deprecated_sigtramp_start);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_SIGTRAMP_START)
-#error "Non multi-arch definition of DEPRECATED_SIGTRAMP_START"
-#endif
-#if !defined (DEPRECATED_SIGTRAMP_START)
-#define DEPRECATED_SIGTRAMP_START(pc) (gdbarch_deprecated_sigtramp_start (current_gdbarch, pc))
-#endif
-
-#if defined (DEPRECATED_SIGTRAMP_END)
-/* Legacy for systems yet to multi-arch DEPRECATED_SIGTRAMP_END */
-#if !defined (DEPRECATED_SIGTRAMP_END_P)
-#define DEPRECATED_SIGTRAMP_END_P() (1)
-#endif
-#endif
-
-extern int gdbarch_deprecated_sigtramp_end_p (struct gdbarch *gdbarch);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_SIGTRAMP_END_P)
-#error "Non multi-arch definition of DEPRECATED_SIGTRAMP_END"
-#endif
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_SIGTRAMP_END_P)
-#define DEPRECATED_SIGTRAMP_END_P() (gdbarch_deprecated_sigtramp_end_p (current_gdbarch))
-#endif
-
-typedef CORE_ADDR (gdbarch_deprecated_sigtramp_end_ftype) (CORE_ADDR pc);
-extern CORE_ADDR gdbarch_deprecated_sigtramp_end (struct gdbarch *gdbarch, CORE_ADDR pc);
-extern void set_gdbarch_deprecated_sigtramp_end (struct gdbarch *gdbarch, gdbarch_deprecated_sigtramp_end_ftype *deprecated_sigtramp_end);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_SIGTRAMP_END)
-#error "Non multi-arch definition of DEPRECATED_SIGTRAMP_END"
-#endif
-#if !defined (DEPRECATED_SIGTRAMP_END)
-#define DEPRECATED_SIGTRAMP_END(pc) (gdbarch_deprecated_sigtramp_end (current_gdbarch, pc))
 #endif
 
 /* A target might have problems with watchpoints as soon as the stack

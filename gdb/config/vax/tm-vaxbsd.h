@@ -1,6 +1,7 @@
 /* Definitions to make GDB run on a vax under 4.2bsd.
-   Copyright 1986, 1987, 1989, 1991, 1993, 1994, 1996, 1998, 1999, 2000, 2002
-   Free Software Foundation, Inc.
+
+   Copyright 1986, 1987, 1989, 1991, 1993, 1994, 1996, 1998, 1999,
+   2000, 2002, 2004 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -29,7 +30,7 @@
 /* On the VAX, sigtramp is in the u area.  Can't check the exact
    addresses because for cross-debugging we don't have VAX include
    files around.  This should be close enough.  */
-#define DEPRECATED_SIGTRAMP_START(pc)	STACK_END_ADDR
-#define DEPRECATED_SIGTRAMP_END(pc)	0x80000000
+#define DEPRECATED_IN_SIGTRAMP(PC,FUNC_NAME) \
+((PC) >= (STACK_END_ADDR) && (PC) < (0x80000000))
 
 #endif /* TM_VAXBSD_H */

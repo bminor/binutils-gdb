@@ -1,3 +1,16 @@
+2004-05-01  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbarch.sh (DEPRECATED_SIGTRAMP_START)
+	(DEPRECATED_SIGTRAMP_END): Delete.
+	* gdbarch.h, gdbarch.c: Re-generate.
+	* arch-utils.c (legacy_pc_in_sigtramp): Simplify.
+	* config/vax/tm-vaxbsd.h: Update copyright.
+	(DEPRECATED_SIGTRAMP_START, DEPRECATED_SIGTRAMP_END): Delete.
+	(DEPRECATED_IN_SIGTRAMP): Define.
+	* config/m68k/tm-nbsd.h: Update copyright.
+	(DEPRECATED_SIGTRAMP_START, DEPRECATED_SIGTRAMP_END): Delete.
+	(DEPRECATED_IN_SIGTRAMP): Define.
+
 2004-05-01  Mark Kettenis  <kettenis@gnu.org>
 
 	* dwarf2-frame.c (read_encoded_value): Handle DW_EH_PE_funcrel
