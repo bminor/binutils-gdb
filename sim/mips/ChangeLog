@@ -10,6 +10,8 @@ Tue Apr 21 11:59:50 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 	(signal_exception): On TRAP, restart at exception address.
 	(HALT_INSTRUCTION, HALT_INSTRUCTION_MASK): Define.
 	(signal_exception): Update.
+	(sim_open): Patch V_COMMON interrupt vector with an abort sequence
+ 	so that TRAP instructions are caught.
 
 Mon Apr 20 11:26:55 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
