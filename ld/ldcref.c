@@ -374,6 +374,8 @@ check_nocrossref (h, ignore)
     return true;
 
   defsec = hl->u.def.section->output_section;
+  if (defsec == NULL)
+    return true;
   defsecname = bfd_get_section_name (defsec->owner, defsec);
 
   for (ncrs = nocrossref_list; ncrs != NULL; ncrs = ncrs->next)
