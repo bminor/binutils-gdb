@@ -1,3 +1,7 @@
+2002-11-25  Andrew Cagney  <cagney@redhat.com>
+
+	* run.c (main): Delete token after #endif.
+
 2002-11-22  Andrew Cagney  <ac131313@redhat.com>
 
 	* dv-core.c: Update copyright.  sim/common contributed to the FSF.
