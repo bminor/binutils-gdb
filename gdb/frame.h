@@ -214,6 +214,22 @@ extern struct frame_info *frame_find_by_id (struct frame_id id);
    This replaced: frame->pc; */
 extern CORE_ADDR get_frame_pc (struct frame_info *);
 
+/* An address (not necessarily alligned to an instruction boundary)
+   that falls within THIS frame's code block.
+
+   When a function call is the last statement in a block, the return
+   address for the call may land at the start of the next block.
+   Similarly, if a no-return function call is the last statement in
+   the function, the return address may end up pointing beyond the
+   function, and possibly at the start of the next function.
+
+   These methods make an allowance for this.  For call frames, this
+   function returns the frame's PC-1 which "should" be an address in
+   the frame's block.  */
+
+extern CORE_ADDR get_frame_address_in_block (struct frame_info *this_frame);
+extern CORE_ADDR frame_unwind_address_in_block (struct frame_info *next_frame);
+
 /* The frame's inner-most bound.  AKA the stack-pointer.  Confusingly
    known as top-of-stack.  */
 
@@ -524,6 +540,8 @@ extern struct block *get_selected_block (CORE_ADDR *addr_in_block);
 
 extern struct symbol *get_frame_function (struct frame_info *);
 
+/* DEPRECATED: Replaced by tye pair get_frame_address_in_block and
+   frame_unwind_address_in_block.  */
 extern CORE_ADDR frame_address_in_block (struct frame_info *);
 
 extern CORE_ADDR get_pc_function_start (CORE_ADDR);

@@ -2033,6 +2033,33 @@ get_frame_pc (struct frame_info *frame)
   return frame_pc_unwind (frame->next);
 }
 
+/* Return an address of that falls within the frame's code block.  */
+
+CORE_ADDR
+frame_unwind_address_in_block (struct frame_info *next_frame)
+{
+  /* A draft address.  */
+  CORE_ADDR pc = frame_pc_unwind (next_frame);
+
+  /* If THIS frame is not inner most (i.e., NEXT isn't the sentinel),
+     and NEXT is `normal' (i.e., not a sigtramp, dummy, ....) THIS
+     frame's PC ends up pointing at the instruction fallowing the
+     "call".  Adjust that PC value so that it falls on the call
+     instruction (which, hopefully, falls within THIS frame's code
+     block.  So far it's proved to be a very good approximation.  See
+     get_frame_type for why ->type can't be used.  */
+  if (next_frame->level >= 0
+      && get_frame_type (next_frame) == NORMAL_FRAME)
+    --pc;
+  return pc;
+}
+
+CORE_ADDR
+get_frame_address_in_block (struct frame_info *this_frame)
+{
+  return frame_unwind_address_in_block (this_frame->next);
+}
+
 static int
 pc_notcurrent (struct frame_info *frame)
 {

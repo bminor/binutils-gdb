@@ -1,3 +1,10 @@
+2003-07-11  Andrew Cagney  <cagney@redhat.com>
+
+	* frame.h (get_frame_address_in_block): Declare.
+	(frame_unwind_address_in_block): Declare.
+	* frame.c (frame_unwind_address_in_block): New function.
+	(get_frame_address_in_block): New function.
+
 2003-07-09  Andreas Schwab  <schwab@suse.de>
 
 	* m68k-tdep.h (enum struct_return): Define.
