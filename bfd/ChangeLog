@@ -1,5 +1,71 @@
 2003-01-27  Alexandre Oliva  <aoliva@redhat.com>
 
+	* elfxx-mips.c (mips_elf_multi_got): New function.
+	(struct mips_got_entry): Make symndx and gotidx signed.  Moved
+	addend into union along with address and link hash entry.
+	(struct mips_got_info): Added bfd2got and next.
+	(struct mips_elf_hash_sort_data): Added max_unref_got_dynindx.
+	(mips_elf_got_section, mips_elf_create_got_section): Use
+	SEC_EXCLUDE bit to tell whether we really need the got
+	section.  Take boolean arguments to disregard an excluded
+	section, or to create it as excluded.  Adjust all callers.
+	Use mips_elf_got_section all over.
+	(mips_elf_local_got_index, mips_elf_got_page,
+	mips_elf_got16_entry): Take input bfd as argument, and pass it
+	on to mips_elf_create_local_got_entry.
+	(mips_elf_global_got_index, mips_elf_create_local_got_entry):
+	Take input bfd as argument, and manage entries in the
+	appropriate GOT.
+	(mips_elf_got_offset_from_index): Take input bfd as argument,
+	and use it to adjust the GP offset of the bfd.
+	(mips_elf_sort_hash_table, mips_elf_sort_hash_table_f): Move
+	unreferenced GOT entries of global symbols to the end.
+	(mips_elf_record_global_got_symbol): Take input bfd as
+	argument.  Add entries to the master GOT hash table.
+	(struct mips_elf_bfd2got_hash): New.
+	(struct mips_elf_got_per_bfd_arg): New.
+	(struct mips_elf_set_global_got_offset_arg): New.
+	(mips_elf_hash_bfd_vma, mips_elf_multi_got_entry_hash,
+	mips_elf_multi_got_entry_eq, mips_elf_bfd2got_entry_hash,
+	mips_elf_bfd2got_entry_eq, mips_elf_make_got_per_bfd,
+	mips_elf_merge_gots, mips_elf_set_global_got_offset,
+	mips_elf_resolve_final_got_entry,
+	mips_elf_resolve_final_got_entries, mips_elf_adjust_gp,
+	mips_elf_got_for_ibfd): New functions.
+	(ELF_MIPS_GP_OFFSET): Don't depend on SGI_COMPAT.
+	(MIPS_ELF_GOT_MAX_SIZE): New macro.
+	(STUB_LW): Generate 64-bit stub regardless of SGI_COMPAT.
+	(mips_elf_got_entry_hash): Take new fields into account.  Use
+	mips_elf_hash_bfd_vma.
+	(mips_elf_got_entry_eq): Take new fields into account.
+	(mips_elf_create_got_section): Initialize new fields.
+	(mips_elf_calculate_relocation): Pass input_bfd to functions
+	that now take it.  Adjust gp for the input_bfd.
+	(mips_elf_allocate_dynamic_relocation,
+	mips_elf_create_dynamic_relocation,
+	_bfd_mips_elf_create_dynamic_sections): Use...
+	(mips_elf_rel_dyn_section): New function.  Borrow code from...
+	(_bfd_mips_elf_check_relocs): Pass input_bfd to functions that
+	now take it.  Create the got section if needed, even if
+	excluded, before recording a global got symbol.  Move some
+	code to...
+	(mips_elf_record_local_got_symbol): New fn.
+	(_bfd_mips_elf_size_dynamic_sections): Disable combreloc.
+	Compute multi-got global entries offsets.  Move GOT code to...
+	(_bfd_mips_elf_always_size_sections): Call mips_elf_multi_got
+	if the GOT is too big.
+	(_bfd_mips_elf_finish_dynamic_symbol): Set got entry of
+	undefweak symbol to zero.  Generate dynamic relocations for
+	non-primary GOT entries for global symbols.
+	(_bfd_mips_elf_finish_dynamic_sections): Handle multi-got
+	case.  Generate dynamic relocations for local got entries.
+	Sort dynamic relocations on N64 too, using...
+	(sort_dynamic_relocs_64): New fns.
+	(_bfd_mips_elf_hide_symbol): Adjust multi-got counters.
+	(_bfd_mips_elf_merge_private_bfd_data): Ignore EF_MIPS_XGOT.
+
+2003-01-27  Alexandre Oliva  <aoliva@redhat.com>
+
 	* bfd.c (struct _bfd): Added id field.
 	* opncls.c (_bfd_id_counter): New static variable.
 	(_bfd_new_bfd): Use it.
