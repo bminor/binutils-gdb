@@ -3515,12 +3515,16 @@ elf_fix_symbol_flags (h, eif)
   /* If -Bsymbolic was used (which means to bind references to global
      symbols to the definition within the shared object), and this
      symbol was defined in a regular object, then it actually doesn't
-     need a PLT entry.  Likewise, if the symbol has any kind of
-     visibility (internal, hidden, or protected), it doesn't need a
-     PLT.  */
+     need a PLT entry, and we can accomplish that by forcing it local.
+     Likewise, if the symbol has hidden or internal visibility.
+     FIXME: It might be that we also do not need a PLT for other
+     non-hidden visibilities, but we would have to tell that to the
+     backend specifically; we can't just clear PLT-related data here.  */
   if ((h->elf_link_hash_flags & ELF_LINK_HASH_NEEDS_PLT) != 0
       && eif->info->shared
-      && (eif->info->symbolic || ELF_ST_VISIBILITY (h->other))
+      && (eif->info->symbolic
+	  || ELF_ST_VISIBILITY (h->other) == STV_INTERNAL
+	  || ELF_ST_VISIBILITY (h->other) == STV_HIDDEN)
       && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) != 0)
     {
       struct elf_backend_data *bed;

@@ -1,3 +1,8 @@
+2001-04-09  Hans-Peter Nilsson  <hp@axis.com>
+
+	* elflink.h (elf_fix_symbol_flags): For non-default visibilities,
+	only hide symbols marked STV_INTERNAL or STV_HIDDEN.
+
 2001-04-05  Steven J. Hill  <sjhill@cotw.com>
 
 	* config.bfd (mips*el*-*-linux-gnu*): Use traditional little
