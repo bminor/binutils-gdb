@@ -475,9 +475,10 @@ child_create_inferior (exec_file, allargs, env)
   if (new_console)
     flags |= CREATE_NEW_CONSOLE;
 
-  args = alloca (strlen (exec_file) + strlen (allargs) + 2);
+  args = alloca (strlen (real_path) + strlen (allargs) + 2);
 
-  strcpy (args, exec_file);
+  strcpy (args, real_path);
+
   strcat (args, " ");
   strcat (args, allargs);
 
@@ -489,18 +490,15 @@ child_create_inferior (exec_file, allargs, env)
   winenv = alloca(envlen + 1);	/* allocate new buffer */
 
   /* copy env strings into new buffer */
-  for (temp = winenv, i = 0;       env[i] && *env[i];     i++) 
+  for (temp = winenv, i = 0; env[i] && *env[i];     i++) 
     {
       strcpy(temp, env[i]);
       temp += strlen(temp) + 1;
     }
   *temp = 0;			/* final nil string to terminate new env */
 
-  strcat (real_path, " ");
-  strcat (real_path, args);
-
   ret = CreateProcess (0,
-		       real_path,
+		       args, 	/* command line */
 		       NULL,	/* Security */
 		       NULL,	/* thread */
 		       TRUE,	/* inherit handles */

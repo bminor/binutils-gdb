@@ -1,3 +1,14 @@
+Thu Feb  1 10:29:31 1996  Steve Chamberlain  <sac@slash.cygnus.com>
+
+	* config/powerpc/(cygwin32.mh, cygwin32.mt, tm-cygwin32.h,
+	xm-cygwin32.h): New.
+	* config/i386/(*win32*): Becomes *cygwin32*.
+	* configure.in (i[3456]86-*-win32*): Becomes i[3456]86-*-cygwin32.
+	(powerpcle-*-cygwin32): New.
+	* configure: Regenerate.
+	* win32-nat.c  (child_create_inferior): Call CreateProcess
+	with the right program arg.
+
 Thu Feb  1 11:01:10 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* config/pa/tm-hppa.h (SOFT_FLOAT): Provide a default definition.

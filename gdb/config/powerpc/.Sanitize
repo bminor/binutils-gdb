@@ -27,6 +27,8 @@ aix.mh
 aix.mt
 aix4.mh
 aix4.mt
+cygwin32.mh
+cygwin32.mt
 gdbserve.mt
 macos.mh
 macos.mt
@@ -37,6 +39,7 @@ ppc-nw.mt
 ppc-sim.mt
 ppcle-eabi.mt
 ppcle-sim.mt
+tm-cygwin32.h
 tm-macos.h
 tm-ppc-aix.h
 tm-ppc-aix4.h
@@ -45,6 +48,7 @@ tm-ppc-nw.h
 tm-ppc-sim.h
 tm-ppcle-eabi.h
 tm-ppcle-sim.h
+xm-cygwin32.h
 xm-aix.h
 xm-mpw.h
 

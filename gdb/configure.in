@@ -289,7 +289,7 @@ i[3456]86-*-unixware)	gdb_host=i386v4 ;;
 i[3456]86-*-sysv*)	gdb_host=i386v ;;
 i[3456]86-*-isc*)	gdb_host=i386v32 ;;
 i[3456]86-*-os9k)	gdb_host=i386os9k ;;
-i[3456]86-*-win32*)	gdb_host=win32 ;;
+i[3456]86-*-cygwin32)	gdb_host=cygwin32 ;;
 m680[01]0-sun-sunos3*)	gdb_host=sun2os3 ;;
 m680[01]0-sun-sunos4*)	gdb_host=sun2os4 ;;
 m68030-sony-*)		gdb_host=news1000 ;;
@@ -338,7 +338,7 @@ ns32k-umax-*)		gdb_host=umax ;;
 ns32k-utek-sysv*)	gdb_host=merlin ;;
 
 powerpc-*-aix*)		gdb_host=aix ;;
-
+powerpcle-*-cygwin32)	gdb_host=cygwin32 ;;
 pn-*-*)			gdb_host=pn ;;
 
 pyramid-*-*)		gdb_host=pyramid ;;
@@ -456,8 +456,7 @@ i[3456]86-*-mach*)	gdb_target=i386mach ;;
 i[3456]86-*-netware*)	gdb_target=i386nw
 		configdirs="${configdirs} nlm" ;;
 i[3456]86-*-osf1mk*)	gdb_target=i386mk ;;
-i[3456]86-*-win32)	gdb_target=win32  ;;
-
+i[3456]86-*-cygwin32)	gdb_target=cygwin32  ;;
 i960-*-bout*)		gdb_target=vxworks960 ;;
 i960-*-coff*)		gdb_target=nindy960 ;;
 i960-*-elf*)		gdb_target=nindy960 ;;
@@ -544,6 +543,7 @@ powerpc-*-netware*)	gdb_target=ppc-nw
 
 powerpc-*-aix4*)	gdb_target=aix4 ;;
 powerpc-*-aix*)		gdb_target=aix ;;
+powerpcle-*-cygwin32)	gdb_target=cygwin32 ;;
 powerpc-*-eabi*)	if test x"$powerpc_sim" = x"yes"; then
 			  gdb_target=ppc-sim
 			else
