@@ -5529,7 +5529,7 @@ get_symbol_index_type (type)
       else if (type >= SHN_LORESERVE && type <= SHN_HIRESERVE)
 	sprintf (buff, "RSV[0x%04x]", type);
       else
-	sprintf (buff, "%3d", type);
+	sprintf (buff, "0x%04x", type);
       break;
     }
 

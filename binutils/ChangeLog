@@ -1,7 +1,8 @@
 2002-11-06  Hiroyuki Machida  <machida@sm.sony.co.jp>
 
 	* readelf.c (get_symbol_index_type): Add hex number to
-	PROCESSOR-specific, OS-specific, and reserved symbol types.
+	PROCESSOR-specific, OS-specific, reserved and unknown symbol
+	types.
 
 2002-11-04  Alan Modra  <amodra@bigpond.net.au>
 
