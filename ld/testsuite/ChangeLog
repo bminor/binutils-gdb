@@ -1,3 +1,8 @@
+2004-09-30  Paul Brook  <paul@codesourcery.com>
+
+	* ld-arm/arm-elf.exp: Add test for --target2=abs.
+	* ld-arm/arm-target2-abs.d: New file.
+
 2004-09-29  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-pe/secrel1.s: Pad .rdata out to 16 byte boundary.

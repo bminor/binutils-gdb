@@ -925,6 +925,8 @@ bfd_elf32_arm_set_target_relocs (struct bfd_link_info *link_info,
   globals->target1_is_rel = target1_is_rel;
   if (strcmp (target2_type, "rel") == 0)
     globals->target2_reloc = R_ARM_REL32;
+  else if (strcmp (target2_type, "abs") == 0)
+    globals->target2_reloc = R_ARM_ABS32;
   else if (strcmp (target2_type, "got-rel") == 0)
     globals->target2_reloc = R_ARM_GOT_PREL;
   else

@@ -4922,7 +4922,9 @@ The @samp{--target2=type} switch overrides the default definition of the
 meanings, and target defaults are as follows:
 @table @samp
 @item rel
-@samp{R_ARM_REL32} (arm*-*-symbianelf, arm*-*-elf, arm*-*-eabi)
+@samp{R_ARM_REL32} (arm*-*-elf, arm*-*-eabi)
+@item abs
+@samp{R_ARM_ABS32} (arm*-*-symbianelf)
 @item got-rel
 @samp{R_ARM_GOT_PREL} (arm*-*-linux, arm*-*-*bsd)
 @end table
