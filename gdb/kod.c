@@ -132,6 +132,15 @@ kod_set_os (char *arg, int from_tty, struct cmd_list_element *command)
 {
   char *p;
 
+  /* NOTE: cagney/2002-03-17: This function gets called by the command
+     ``info set'' with COMMAND pointing to a show_cmd rather than a
+     set command.  This the test below is removed, a core dump results
+     (think about what happens when OPERATING_SYSTEM is NULL).  The
+     wiered thing is that all other ``set'' handlers don't need this
+     test.  */
+  if (command->type != set_cmd)
+    return;
+
   /* If we had already had an open OS, close it.  */
   if (gdb_kod_close)
     (*gdb_kod_close) ();
@@ -142,7 +151,6 @@ kod_set_os (char *arg, int from_tty, struct cmd_list_element *command)
       delete_cmd (old_operating_system, &infolist);
       xfree (old_operating_system);
     }
-  old_operating_system = xstrdup (operating_system);
 
   if (! operating_system || ! *operating_system)
     {
@@ -156,6 +164,8 @@ kod_set_os (char *arg, int from_tty, struct cmd_list_element *command)
   else
     {
       char *kodlib;
+
+      old_operating_system = xstrdup (operating_system);
 
       load_kod_library (operating_system);
 

@@ -1,5 +1,11 @@
 2002-03-17  Andrew Cagney  <ac131313@redhat.com>
 
+	* kod.c (kod_set_os): Revert previous change.  Is called by ``info
+	set'' and this leads to a core dump.  Move xstrdup of
+	operating_system to after check that it is not NULL.
+
+2002-03-17  Andrew Cagney  <ac131313@redhat.com>
+
 	* kod.c (kod_set_os): Remove unnecessary check that
 	``command->type'' is set_cmd.
 
