@@ -1117,9 +1117,11 @@ gdbtk_init ()
   if (ioctl (x_fd, FIOASYNC, &i))
     perror_with_name ("gdbtk_init: ioctl FIOASYNC failed");
 
+#ifdef SIOCSPGRP
   i = getpid();
   if (ioctl (x_fd, SIOCSPGRP, &i))
     perror_with_name ("gdbtk_init: ioctl SIOCSPGRP failed");
+#endif
 #else
   if (ioctl (x_fd,  I_SETSIG, S_INPUT|S_RDNORM) < 0)
     perror_with_name ("gdbtk_init: ioctl I_SETSIG failed");

@@ -1,3 +1,19 @@
+Thu Apr  6 17:00:46 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* Makefile.in (X11_INCLUDES): Define as empty.
+	(X11_CFLAGS): Define as including $(X11_INCLUDES).
+	(X11_LIB_SWITCHES): Define as empty.
+	(X11_LIBS): Define as -lX11.
+
+	* configure.in (enable_gdbtk): If gdbtk, support the --x-includes
+	and --x-libraries switches, setting the X11_INCLUDES and
+	X11_LIB_SWITCHES respectively.  Instead of using a hardcoded -lX11
+	in ENABLE_CLIBS, use the X11_LIB_SWITCHES and X11_LIBS variables.
+
+	* gdbtk.c (gdbtk_init): If SIOCSPGRP is not available, don't use
+	it.  This means that the stop button doesn't work, but is better
+	than nothing.
+
 Wed Apr  5 19:57:38 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* mips-tdep.c (mips_print_register): Remove unused variable

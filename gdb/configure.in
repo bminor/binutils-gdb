@@ -437,11 +437,30 @@ fi
 
 # start-sanitize-gdbtk
 if [ "${enable_gdbtk}" = "yes" ] ; then
+	if [ x"${other_options}" != x"" ]; then
+		for opt in $other_options; do
+			case "$opt" in
+				-x-includes=* | --x-includes=* | --x-include=* | --x-includ=* | --x-inclu=* \
+				| --x-incl=* | --x-inc=* | --x-in=* | --x-i=*)
+					X11_INCLUDES=`echo "$opt" | sed 's/[-_a-zA-Z0-9]*=//'`
+					sed -e "s;^\\(X11_INCLUDES[	]*=\\).*\$;\\1 -I${X11_INCLUDES};" \
+						< Makefile > Makefile.tem
+					mv -f Makefile.tem Makefile;;
+
+				-x-libraries=* | --x-libraries=* | --x-librarie=* | --x-librari=* \
+				| --x-librar=* | --x-libra=* | --x-libr=* | --x-lib=* | --x-li=* | --x-l=*)
+					X11_LIB_SWITCHES=`echo "$opt" | sed 's/[-_a-zA-Z0-9]*=//'`
+					sed -e "s;^\\(X11_LIB_SWITCHES[ 	]*=\\).*\$;\\1 -L${X11_LIB_SWITCHES};" \
+						< Makefile > Makefile.tem
+					mv -f Makefile.tem Makefile;;
+			esac
+		done
+	fi
 	sed -e '/# End of host and/i\
 \
 ENABLE_GDBTK = 1\
 ENABLE_DEPFILES = gdbtk.o\
-ENABLE_CLIBS = $(TCL) $(TK) -lX11 -lm
+ENABLE_CLIBS = $(TCL) $(TK) $(X11_LIB_SWITCHES) $(X11_LIBS) -lm
 ' < Makefile > Makefile.tem
 	mv -f Makefile.tem Makefile
 fi
