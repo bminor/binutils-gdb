@@ -154,7 +154,8 @@ static unsigned long som_count_subspaces PARAMS ((bfd *));
 static int compare_syms PARAMS ((asymbol **, asymbol **));
 static unsigned long som_compute_checksum PARAMS ((bfd *));
 static boolean som_prep_headers PARAMS ((bfd *));
- 
+static int som_sizeof_headers PARAMS ((bfd *, boolean));
+
 static reloc_howto_type som_hppa_howto_table[] =
 {
   {R_NO_RELOCATION, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_NO_RELOCATION"},
@@ -1757,9 +1758,7 @@ som_set_arch_mach (abfd, arch, machine)
      enum bfd_architecture arch;
      unsigned long machine;
 {
-  fprintf (stderr, "som_set_arch_mach unimplemented\n");
-  fflush (stderr);
-  /* Allow any architecture to be supported by the som backend */
+  /* Allow any architecture to be supported by the SOM backend */
   return bfd_default_set_arch_mach (abfd, arch, machine);
 }
 
