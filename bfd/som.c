@@ -174,6 +174,7 @@ static boolean som_write_space_strings PARAMS ((bfd *, unsigned long,
 static boolean som_write_symbol_strings PARAMS ((bfd *, unsigned long,
 						 asymbol **, unsigned int,
 						 unsigned *));
+static boolean som_begin_writing PARAMS ((bfd *));
 
 static reloc_howto_type som_hppa_howto_table[] =
 {
@@ -1975,6 +1976,246 @@ som_write_symbol_strings (abfd, current_offset, syms, num_syms, string_sizep)
   return true;
 }
 
+/* Compute variable information to be placed in the SOM headers, 
+   space/subspace dictionaries, relocation streams, etc.  Begin
+   writing parts of the object file.  */
+
+static boolean 
+som_begin_writing (abfd)
+     bfd *abfd;
+{
+  unsigned long current_offset = 0;
+  int strings_size = 0;
+  unsigned int total_reloc_size = 0;
+  unsigned long num_spaces, num_subspaces, num_syms, i;
+  asection *section;
+  asymbol **syms = bfd_get_outsymbols (abfd);
+  unsigned int total_subspaces = 0;
+
+  /* The file header will always be first in an object file, 
+     everything else can be in random locations.  To keep things
+     "simple" BFD will lay out the object file in the manner suggested
+     by the PRO ABI for PA-RISC Systems.  */
+
+  /* Before any output can really begin offsets for all the major
+     portions of the object file must be computed.  So, starting
+     with the initial file header compute (and sometimes write)
+     each portion of the object file.  */
+
+  /* Make room for the file header, it's contents are not complete
+     yet, so it can not be written at this time.  */
+  current_offset += sizeof (struct header);  
+
+  /* Any auxiliary headers will follow the file header.  Right now
+     we have no auxiliary headers, so current_offset does not change.  */
+  obj_som_file_hdr (abfd)->aux_header_location = current_offset;
+  obj_som_file_hdr (abfd)->aux_header_size = 0;
+
+  /* Next comes the initialization pointers; again we have no
+     initialization pointers, so current offset does not change.  */
+  obj_som_file_hdr (abfd)->init_array_location = current_offset;
+  obj_som_file_hdr (abfd)->init_array_total = 0;
+
+  /* Next are the space records.  These are fixed length records.
+
+     Count the number of spaces to determine how much room is needed
+     in the object file for the space records.
+
+     The names of the spaces are stored in a separate string table,
+     and the index for each space into the string table is computed
+     below.  Therefore, it is not possible to write the space headers
+     at this time.  */
+  num_spaces = som_count_spaces (abfd);
+  obj_som_file_hdr (abfd)->space_location = current_offset;
+  obj_som_file_hdr (abfd)->space_total = num_spaces;
+  current_offset += num_spaces * sizeof (struct space_dictionary_record);
+
+  /* Next are the subspace records.  These are fixed length records.
+
+     Count the number of subspaes to determine how much room is needed
+     in the object file for the subspace records.
+
+     A variety if fields in the subspace record are still unknown at
+     this time (index into string table, fixup stream location/size, etc).  */
+  num_subspaces = som_count_subspaces (abfd);
+  obj_som_file_hdr (abfd)->subspace_location = current_offset;
+  obj_som_file_hdr (abfd)->subspace_total = num_subspaces;
+  current_offset += num_subspaces * sizeof (struct subspace_dictionary_record);
+
+  /* Next is the string table for the space/subspace names.  We will
+     build and write the string table on the fly.  At the same time
+     we will fill in the space/subspace name index fields.  */
+
+  /* The string table needs to be aligned on a word boundary.  */
+  if (current_offset % 4)
+    current_offset += (4 - (current_offset % 4));
+
+  /* Mark the offset of the space/subspace string table in the 
+     file header.  */
+  obj_som_file_hdr (abfd)->space_strings_location = current_offset;
+
+  /* Scribble out the space strings.  */
+  if (som_write_space_strings (abfd, current_offset, &strings_size) == false)
+    return false;
+
+  /* Record total string table size in the header and update the
+     current offset.  */
+  obj_som_file_hdr (abfd)->space_strings_size = strings_size;
+  current_offset += strings_size;
+
+  /* Next is the symbol table.  These are fixed length records.
+
+     Count the number of symbols to determine how much room is needed
+     in the object file for the symbol table.
+
+     The names of the symbols are stored in a separate string table,
+     and the index for each symbol name into the string table is computed
+     below.  Therefore, it is not possible to write the symobl table
+     at this time.  */
+  num_syms = bfd_get_symcount (abfd);
+  obj_som_file_hdr (abfd)->symbol_location = current_offset;
+  obj_som_file_hdr (abfd)->symbol_total = num_syms;
+  current_offset += num_syms * sizeof (struct symbol_dictionary_record);
+
+  /* Do prep work before handling fixups.  */
+  som_prep_for_fixups (abfd, syms, num_syms);
+
+  /* Next comes the fixup stream which starts on a word boundary.  */
+  if (current_offset % 4)
+    current_offset += (4 - (current_offset % 4)); 
+  obj_som_file_hdr (abfd)->fixup_request_location = current_offset;
+
+  /* Write the fixups and update fields in subspace headers which
+     relate to the fixup stream.  */
+  if (som_write_fixups (abfd, current_offset, &total_reloc_size) == false)
+    return false;
+
+  /* Record the total size of the fixup stream in the file header.  */
+  obj_som_file_hdr (abfd)->fixup_request_total = total_reloc_size;
+  current_offset += total_reloc_size;
+
+  /* Next are the symbol strings.
+     Align them to a word boundary.  */
+  if (current_offset % 4)
+    current_offset += (4 - (current_offset % 4));
+  obj_som_file_hdr (abfd)->symbol_strings_location = current_offset;
+
+  /* Scribble out the symbol strings.  */
+  if (som_write_symbol_strings (abfd, current_offset, syms, 
+				num_syms, &strings_size)
+      == false)
+    return false;
+
+  /* Record total string table size in header and update the
+     current offset.  */
+  obj_som_file_hdr (abfd)->symbol_strings_size = strings_size;
+  current_offset += strings_size;
+
+  /* Next is the compiler records.  We do not use these.  */
+  obj_som_file_hdr (abfd)->compiler_location = current_offset;
+  obj_som_file_hdr (abfd)->compiler_total = 0;
+
+  /* Now compute the file positions for the loadable subspaces.  */
+
+  section = abfd->sections;
+  for (i = 0; i < num_spaces; i++)
+    {
+      asection *subsection;
+
+      /* Find a space.  */
+      while (som_section_data (section)->is_space == 0)
+	section = section->next;
+
+      /* Now look for all its subspaces.  */
+      for (subsection = abfd->sections;
+	   subsection != NULL;
+	   subsection = subsection->next)
+	{
+	  
+	  if (som_section_data (subsection)->is_subspace == 0
+	      || som_section_data (subsection)->containing_space != section
+	      || (subsection->flags & SEC_ALLOC) == 0)
+	    continue;
+
+	  som_section_data (subsection)->subspace_index = total_subspaces++;
+	  /* This is real data to be loaded from the file.  */
+	  if (subsection->flags & SEC_LOAD)
+	    {
+	      som_section_data (subsection)->subspace_dict.file_loc_init_value
+		= current_offset;
+	      section->filepos = current_offset;
+	      current_offset += bfd_section_size (abfd, subsection); 
+	    }
+	  /* Looks like uninitialized data.  */
+	  else
+	    {
+	      som_section_data (subsection)->subspace_dict.file_loc_init_value
+		= 0;
+	      som_section_data (subsection)->subspace_dict.
+		initialization_length = 0;
+	    }
+	}
+      /* Goto the next section.  */
+      section = section->next; 
+    }
+
+  /* Finally compute the file positions for unloadable subspaces.  */
+
+  obj_som_file_hdr (abfd)->unloadable_sp_location = current_offset;
+  section = abfd->sections;
+  for (i = 0; i < num_spaces; i++)
+    {
+      asection *subsection;
+
+      /* Find a space.  */
+      while (som_section_data (section)->is_space == 0)
+	section = section->next;
+
+      /* Now look for all its subspaces.  */
+      for (subsection = abfd->sections;
+	   subsection != NULL;
+	   subsection = subsection->next)
+	{
+	  
+	  if (som_section_data (subsection)->is_subspace == 0
+	      || som_section_data (subsection)->containing_space != section
+	      || (subsection->flags & SEC_ALLOC) != 0)
+	    continue;
+
+	  som_section_data (subsection)->subspace_index = total_subspaces++;
+	  /* This is real data to be loaded from the file.  */
+	  if ((subsection->flags & SEC_LOAD) == 0)
+	    {
+	      som_section_data (subsection)->subspace_dict.file_loc_init_value
+		= current_offset;
+	      section->filepos = current_offset;
+	      current_offset += bfd_section_size (abfd, subsection); 
+	    }
+	  /* Looks like uninitialized data.  */
+	  else
+	    {
+	      som_section_data (subsection)->subspace_dict.file_loc_init_value
+		= 0;
+	      som_section_data (subsection)->subspace_dict.
+		initialization_length = bfd_section_size (abfd, subsection);
+	    }
+	}
+      /* Goto the next section.  */
+      section = section->next; 
+    }
+
+  obj_som_file_hdr (abfd)->unloadable_sp_size
+    = current_offset - obj_som_file_hdr (abfd)->unloadable_sp_location;
+
+  /* Loader fixups are not supported in any way shape or form.  */
+  obj_som_file_hdr (abfd)->loader_fixup_location = 0;
+  obj_som_file_hdr (abfd)->loader_fixup_total = 0;
+
+  /* Done.  Store the total size of the SOM.  */
+  obj_som_file_hdr (abfd)->som_length = current_offset;
+  return true;
+}
+
 /* Finally, scribble out the various headers to the disk.  */
 
 static boolean
@@ -2333,12 +2574,9 @@ som_write_object_contents (abfd)
 	 Notify the world that output has begun.  */
       som_prep_headers (abfd);
       abfd->output_has_begun = true;
-#if 0
-      /* Not in Cygnus sources yet.  */
       /* Start writing the object file.  This include all the string
 	 tables, fixup streams, and other portions of the object file.  */
       som_begin_writing (abfd);
-#endif
     }
 
   /* Now that the symbol table information is complete, build and
@@ -2758,12 +2996,9 @@ som_set_section_contents (abfd, section, location, offset, count)
 	 Notify the world that output has begun.  */
       som_prep_headers (abfd);
       abfd->output_has_begun = true;
-#if 0
-      /* Not in Cygnus sources yet.  */
       /* Start writing the object file.  This include all the string
 	 tables, fixup streams, and other portions of the object file.  */
       som_begin_writing (abfd);
-#endif
     }
 
   /* Only write subspaces which have "real" contents (eg. the contents
