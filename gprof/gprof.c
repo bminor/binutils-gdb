@@ -45,7 +45,6 @@
 #include "getopt.h"
 
 static void usage (FILE *, int) ATTRIBUTE_NORETURN;
-int main (int, char **);
 
 const char *whoami;
 const char *function_mapping_file;
@@ -482,29 +481,20 @@ This program is free software.  This program has absolutely no warranty.\n"));
   /* --sum implies --line, otherwise we'd lose basic block counts in
        gmon.sum */
   if (output_style & STYLE_SUMMARY_FILE)
-    {
-      line_granularity = 1;
-    }
+    line_granularity = 1;
 
   /* append value of GPROF_PATH to source search list if set: */
   str = (char *) getenv ("GPROF_PATH");
   if (str)
-    {
-      search_list_append (&src_search_list, str);
-    }
+    search_list_append (&src_search_list, str);
 
   if (optind < argc)
-    {
-      a_out_name = argv[optind++];
-    }
-  if (optind < argc)
-    {
-      gmon_name = argv[optind++];
-    }
+    a_out_name = argv[optind++];
 
-  /*
-   * Turn off default functions:
-   */
+  if (optind < argc)
+    gmon_name = argv[optind++];
+
+  /* Turn off default functions.  */
   for (sp = &default_excluded_list[0]; *sp; sp++)
     {
       sym_id_add (*sp, EXCL_TIME);
@@ -551,17 +541,13 @@ This program is free software.  This program has absolutely no warranty.\n"));
 	{
 	  gmon_out_read (gmon_name);
 	  if (optind < argc)
-	    {
-	      gmon_name = argv[optind];
-	    }
+	    gmon_name = argv[optind];
 	}
       while (optind++ < argc);
     }
 
-  /*
-   * If user did not specify output style, try to guess something
-   * reasonable:
-   */
+  /* If user did not specify output style, try to guess something
+     reasonable.  */
   if (output_style == 0)
     {
       if (gmon_input & (INPUT_HISTOGRAM | INPUT_CALL_GRAPH))
@@ -604,44 +590,41 @@ This program is free software.  This program has absolutely no warranty.\n"));
       done (1);
     }
 
-  /* output whatever user whishes to see: */
-
+  /* Output whatever user whishes to see.  */
   if (cg && (output_style & STYLE_CALL_GRAPH) && bsd_style_output)
     {
-      cg_print (cg);		/* print the dynamic profile */
+      /* Print the dynamic profile.  */
+      cg_print (cg);
     }
 
   if (output_style & STYLE_FLAT_PROFILE)
     {
-      hist_print ();		/* print the flat profile */
+      /* Print the flat profile.  */
+      hist_print ();		
     }
 
   if (cg && (output_style & STYLE_CALL_GRAPH))
     {
       if (!bsd_style_output)
 	{
-	  cg_print (cg);	/* print the dynamic profile */
+	  /* Print the dynamic profile.  */
+	  cg_print (cg);	
 	}
       cg_print_index ();
     }
 
   if (output_style & STYLE_EXEC_COUNTS)
-    {
-      print_exec_counts ();
-    }
-
+    print_exec_counts ();
+  
   if (output_style & STYLE_ANNOTATED_SOURCE)
-    {
-      print_annotated_source ();
-    }
+    print_annotated_source ();
+  
   if (output_style & STYLE_FUNCTION_ORDER)
-    {
-      cg_print_function_ordering ();
-    }
+    cg_print_function_ordering ();
+  
   if (output_style & STYLE_FILE_ORDER)
-    {
-      cg_print_file_ordering ();
-    }
+    cg_print_file_ordering ();
+
   return 0;
 }
 
