@@ -1,3 +1,9 @@
+2003-04-09  Alexandre Oliva  <aoliva@redhat.com>
+
+	* dwarf2.c (_bfd_dwarf2_find_nearest_line): Try DWARF3-standard
+	and IRIX-specific shift-to-64-bit 4-byte lengths before following
+	addr_size.
+
 2003-04-08  Alexandre Oliva  <aoliva@redhat.com>
 
 	* elf32-mips.c (bfd_elf32_bfd_reloc_type_lookup): Detect (ctor)

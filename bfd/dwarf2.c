@@ -1927,26 +1927,34 @@ _bfd_dwarf2_find_nearest_line (abfd, section, symbols, offset,
       bfd_boolean found;
       unsigned int offset_size = addr_size;
 
-      if (addr_size == 4)
+      length = read_4_bytes (abfd, stash->info_ptr);
+      /* A 0xffffff length is the DWARF3 way of indicating we use
+	 64-bit offsets, instead of 32-bit offsets.  */
+      if (length == 0xffffffff)
 	{
-	  length = read_4_bytes (abfd, stash->info_ptr);
-	  if (length == 0xffffffff)
-	    {
-	      offset_size = 8;
-	      length = read_8_bytes (abfd, stash->info_ptr + 4);
-	      stash->info_ptr += 8;
-	    }
-	  else if (length == 0)
-	    {
-	      /* Handle (non-standard) 64-bit DWARF2 formats.  */
-	      offset_size = 8;
-	      length = read_4_bytes (abfd, stash->info_ptr + 4);
-	      stash->info_ptr += 4;
-	    }
+	  offset_size = 8;
+	  length = read_8_bytes (abfd, stash->info_ptr + 4);
+	  stash->info_ptr += 12;
+	}
+      /* A zero length is the IRIX way of indicating 64-bit offsets,
+	 mostly because the 64-bit length will generally fit in 32
+	 bits, and the endianness helps.  */
+      else if (length == 0)
+	{
+	  offset_size = 8;
+	  length = read_4_bytes (abfd, stash->info_ptr + 4);
+	  stash->info_ptr += 8;
+	}
+      /* In the absence of the hints above, we assume addr_size-sized
+	 offsets, for backward-compatibility with pre-DWARF3 64-bit
+	 platforms.  */
+      else if (addr_size == 8)
+	{
+	  length = read_8_bytes (abfd, stash->info_ptr);
+	  stash->info_ptr = 8;
 	}
       else
-	length = read_8_bytes (abfd, stash->info_ptr);
-      stash->info_ptr += addr_size;
+	stash->info_ptr += 4;
 
       if (length > 0)
 	{
