@@ -30,25 +30,28 @@ fi
 # with rm -rf.
 
 Things-to-keep:
+
+OSE68.mt
+coff-a29k.mt
+coff-h8300.mt
 delta88.mh
 dgux.mh
-rtbsd.mh
-sparc-ll.mh
-sun3.mh
-coff-a29k.mt
 ebmon29k.mt
-coff-h8300.mt
-hp300bsd.mt
-hp300bsd.mh
-st2000.mt
 go32.mt
+hp300bsd.mh
+hp300bsd.mt
 i386-aout.mt
 i386v.mt
+ieee-h8300.mt
 m68k.mt
 m68kv.mt
 m88k-bcs.mt
-sa29200.mt
 news.mt
+rtbsd.mh
+sa29200.mt
+sparc-ll.mh
+st2000.mt
+sun3.mh
 sun3.mt
 sun4.mt
 vxworks68.mt
