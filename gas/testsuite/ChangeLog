@@ -1,3 +1,7 @@
+2005-02-22  Eric Christopher  <echristo@redhat.com>
+
+	* gas/mips/elf-rel10.d: Update for label change.
+
 2005-02-22  Maciej W. Rozycki  <macro@mips.com>
 
 	* gas/mips/mips16-dwarf2.d: Pass -mabi=32.  Include relocation
