@@ -3,7 +3,7 @@
 #source: pt-1.s
 #name: Basic SHmedia PT and PTA instructions with -no-expand.
 
-.*:     file format .*-sh64
+.*:     file format .*-sh64.*
 
 Disassembly of section \.text:
 [0]+ <start>:

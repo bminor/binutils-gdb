@@ -3,7 +3,7 @@
 #source: crange2.s
 #name: .cranges descriptors for SHcompact and SHmedia in .text.
 
-.*:     file format .*-sh64
+.*:     file format .*-sh64.*
 
 RELOCATION RECORDS FOR \[\.cranges\]:
 

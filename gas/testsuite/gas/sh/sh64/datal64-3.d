@@ -7,7 +7,7 @@
 # check that STT_DATALABEL is set, but objdump doesn't do that at present,
 # and readelf isn't supported as a run_dump_test tool.
 
-.*:     file format .*-sh64
+.*:     file format .*-sh64.*
 .*
 architecture: sh5, flags 0x0+11:
 HAS_RELOC, HAS_SYMS

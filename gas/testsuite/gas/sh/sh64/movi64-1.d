@@ -3,7 +3,7 @@
 #source: movi-1.s
 #name: MOVI expansion, 64-bit ABI, 32-bit subset.
 
-.*:     file format .*-sh64
+.*:     file format .*-sh64.*
 
 Disassembly of section \.text:
 

@@ -3,7 +3,7 @@
 #objdump: -dr
 #name: PT, PTA, PTB expansion for external symbols, 64-bit ABI with -expand-pt32.
 
-.*:     file format .*-sh64
+.*:     file format .*-sh64.*
 
 Disassembly of section \.text:
 

@@ -3,7 +3,7 @@
 #source: movi-2.s
 #name: MOVI non-expansion of local symbols with relocs, 32-bit ABI.
 
-.*:     file format .*-sh64
+.*:     file format .*-sh64.*
 
 Disassembly of section \.text:
 

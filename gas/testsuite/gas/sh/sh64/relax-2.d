@@ -3,7 +3,7 @@
 #source: relax-2.s
 #name: Assembler PTB relaxation limit, from first to second state.
 
-.*:     file format .*-sh64
+.*:     file format .*-sh64.*
 
 Disassembly of section \.text:
 

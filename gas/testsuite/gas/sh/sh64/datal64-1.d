@@ -3,7 +3,7 @@
 #source: datal-1.s
 #name: DataLabel redundant local use, SHmedia 64-bit ABI
 
-.*:     file format .*-sh64
+.*:     file format .*-sh64.*
 
 RELOCATION RECORDS FOR \[\.text\]:
 OFFSET           TYPE              VALUE 

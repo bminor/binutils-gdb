@@ -3,7 +3,7 @@
 #source: shift-3.s
 #name: Shift expression, local but undefined symbol, 32-bit ABI with -no-expand.
 
-.*:     file format .*-sh64
+.*:     file format .*-sh64.*
 
 Disassembly of section \.text:
 

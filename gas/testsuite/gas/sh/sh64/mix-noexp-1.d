@@ -3,7 +3,7 @@
 #source: mix-1.s
 #name: Mixed-ISA objects with -no-expand.
 
-.*:     file format .*-sh64
+.*:     file format .*-sh64.*
 
 Disassembly of section \.text:
 

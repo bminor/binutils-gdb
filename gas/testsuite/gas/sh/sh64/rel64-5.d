@@ -3,7 +3,7 @@
 #source: rel-5.s
 #name: MOVI: PC-relative reloc within .text, 64-bit ABI.
 
-.*:     file format .*-sh64
+.*:     file format .*-sh64.*
 
 RELOCATION RECORDS FOR \[\.text\]:
 OFFSET           TYPE              VALUE 

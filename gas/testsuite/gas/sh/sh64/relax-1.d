@@ -3,7 +3,7 @@
 #source: relax-1.s
 #name: Assembler PT relaxation limit, from first to second state.
 
-.*:     file format .*-sh64
+.*:     file format .*-sh64.*
 
 Disassembly of section \.text:
 

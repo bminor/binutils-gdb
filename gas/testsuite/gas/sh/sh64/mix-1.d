@@ -2,7 +2,7 @@
 #objdump: -dr
 #name: Mixed-ISA objects.
 
-.*:     file format .*-sh64
+.*:     file format .*-sh64.*
 
 Disassembly of section \.text:
 

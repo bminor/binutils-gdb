@@ -3,7 +3,7 @@
 #source: crange4.s
 #name: .cranges descriptors with final variant.
 
-.*:     file format .*-sh64
+.*:     file format .*-sh64.*
 
 RELOCATION RECORDS FOR \[\.cranges\]:
 OFFSET  *TYPE  *VALUE 

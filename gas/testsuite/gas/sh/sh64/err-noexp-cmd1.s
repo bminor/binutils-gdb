@@ -3,7 +3,7 @@
 
 ! { dg-do assemble }
 ! { dg-options "-no-expand" }
-! { dg-error ".* only valid with SHcompact or SHmedia" "" { target sh64-*-* } 0 }
+! { dg-error ".* only valid with SHcompact or SHmedia" "" { target sh64-*-elf* } 0 }
 
 	.text
 start:

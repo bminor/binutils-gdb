@@ -2,7 +2,7 @@
 #objdump: -dr
 #name: Basic SHmedia instructions.
 
-.*:     file format .*-sh64
+.*:     file format .*-sh64.*
 
 Disassembly of section \.text:
 [0]+ <start>:

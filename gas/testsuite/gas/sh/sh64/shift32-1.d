@@ -3,7 +3,7 @@
 #source: shift-1.s
 #name: Shift expressions, 32-bit ABI.
 
-.*:     file format .*-sh64
+.*:     file format .*-sh64.*
 
 Disassembly of section \.text:
 

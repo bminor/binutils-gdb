@@ -2,7 +2,7 @@
 #objdump: -dr
 #name: Assertion .abi 64.
 
-.*:     file format .*-sh64
+.*:     file format .*-sh64.*
 
 Disassembly of section \.text:
 [0]+ <start>:

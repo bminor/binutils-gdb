@@ -3,7 +3,7 @@
 #source: pt-2.s
 #name: Inter-segment PT, 32-bit.
 
-.*:     file format .*-sh64
+.*:     file format .*-sh64.*
 
 Disassembly of section \.text:
 0+ <start>:

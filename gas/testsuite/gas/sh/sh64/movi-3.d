@@ -3,7 +3,7 @@
 #source: movi-3.s
 #name: Assembler PC-rel resolved negative MOVI.
 
-.*:     file format .*-sh64
+.*:     file format .*-sh64.*
 
 Disassembly of section \.text:
 

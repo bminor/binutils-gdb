@@ -37,6 +37,7 @@ if { ([istarget "*-*-elf*"]
      && ![istarget *-*-linux*aout*]
      && ![istarget *-*-linux*coff*]
      && ![istarget *-*-linux*oldld*]
+     && ![istarget sh64*-*-linux*]
 } then {
     set target_machine ""
     if {[istarget "mips*-*-*"]} then {

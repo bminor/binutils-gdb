@@ -2,7 +2,7 @@
 #objdump: -dr
 #name: MOVI expansion, 64-bit ABI, 64-bit subset.
 
-.*:     file format .*-sh64
+.*:     file format .*-sh64.*
 
 Disassembly of section \.text:
 

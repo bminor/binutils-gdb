@@ -1,3 +1,53 @@
+2002-10-09  Stephen Clarke <stephen.clarke@superh.com>
+
+	* gas/elf.exp: Don't run for sh64*-*-linux*, because it sets the
+	lsb in SHmedia code addresses.
+	* gas/sh/basic.exp: Force SHcompact for sh64*-*-linux* to enable
+	recognition of SH-1/2/3/4 instructions.
+	(proc do_fp): Do not run dsp tests for sh64*-*-linux*.
+	* gas/sh/sh64/abi-32.d: Adjust expected output to include
+	sh64*-*-linux* formats too.
+	* gas/sh/sh64/abi-64.d, gas/sh/sh64/basic-1.d,
+	gas/sh/sh64/case-1.d, gas/sh/sh64/case-noexp-1.d,
+	gas/sh/sh64/crange1-1.d, gas/sh/sh64/crange1-2.d,
+	gas/sh/sh64/crange2-1.d, gas/sh/sh64/crange2-2.d,
+	sh/sh64/crange2-noexp-1.d, gas/sh/sh64/crange3-1.d,
+	gas/sh/sh64/crange4-1.d, gas/sh/sh64/crange5-1.d,
+	gas/sh/sh64/creg-1.d, gas/sh/sh64/creg-2.d, gas/sh/sh64/datal-2.d,
+	gas/sh/sh64/datal32-1.d, gas/sh/sh64/datal32-3.d,
+	gas/sh/sh64/datal64-1.d, gas/sh/sh64/datal64-3.d,
+	gas/sh/sh64/endian-1.d, gas/sh/sh64/endian-2.d,
+	gas/sh/sh64/err-noexp-cmd1.s, gas/sh/sh64/immexpr32-1.d,
+	gas/sh/sh64/immexpr32-2.d, gas/sh/sh64/immexpr64-1.d,
+	gas/sh/sh64/immexpr64-2.d, gas/sh/sh64/lineno.d,
+	gas/sh/sh64/localcom-1.d, gas/sh/sh64/mix-1.d,
+	gas/sh/sh64/mix-noexp-1.d, gas/sh/sh64/movi-3.d,
+	gas/sh/sh64/movi32-1.d, gas/sh/sh64/movi32-2.d,
+	gas/sh/sh64/movi32-noexp-2.d, gas/sh/sh64/movi64-1.d,
+	gas/sh/sh64/movi64-2.d, gas/sh/sh64/movi64-3.d,
+	gas/sh/sh64/movi64-noexp-2.d, gas/sh/sh64/pt-1.d,
+	gas/sh/sh64/pt-noexp-1.d, gas/sh/sh64/pt32-1.d,
+	gas/sh/sh64/pt32-noexp-2.d, gas/sh/sh64/pt64-1.d,
+	gas/sh/sh64/pt64-32-1.d, gas/sh/sh64/pt64-32-2.d,
+	gas/sh/sh64/pt64-noexp-2.d, gas/sh/sh64/ptc32-1.d,
+	gas/sh/sh64/ptc32-noexp-1.d, gas/sh/sh64/ptc64-1.d,
+	gas/sh/sh64/ptc64-32-1.d, gas/sh/sh64/ptc64-noexp-1.d,
+	gas/sh/sh64/ptext32-1.d, gas/sh/sh64/ptext32-noexp-1.d,
+	gas/sh/sh64/ptext64-1.d, gas/sh/sh64/ptext64-32-1.d,
+	gas/sh/sh64/ptext64-noexp-1.d, gas/sh/sh64/rel32-1.d,
+	gas/sh/sh64/rel32-2.d, gas/sh/sh64/rel32-3.d,
+	gas/sh/sh64/rel32-4.d, gas/sh/sh64/rel32-5.d,
+	gas/sh/sh64/rel64-1.d, gas/sh/sh64/rel64-2.d,
+	gas/sh/sh64/rel64-3.d, gas/sh/sh64/rel64-4.d,
+	gas/sh/sh64/rel64-5.d, gas/sh/sh64/relax-1.d,
+	gas/sh/sh64/relax-2.d, gas/sh/sh64/relax-3.d,
+	gas/sh/sh64/shift32-1.d, gas/sh/sh64/shift32-3.d,
+	gas/sh/sh64/shift32-noexp-3.d, gas/sh/sh64/shift64-1.d,
+	gas/sh/sh64/shift64-2.d, gas/sh/sh64/shift64-3.d,
+	gas/sh/sh64/shift64-noexp-3.d, gas/sh/sh64/syntax-1.d,
+	gas/sh/sh64/syntax-2.d, gas/sh/sh64/ua32-1.d,
+	gas/sh/sh64/ua64-1.d: Likewise.
+	
 2002-10-03  Chris Demetriou  <cgd@broadcom.com>
 
 	* gas/mips/mips-no-jalx.l: Make error message regexps accomodate

@@ -2,7 +2,7 @@
 #objdump: -dr
 #name: Predefined control register names specified in crN syntax.
 
-.*:     file format .*-sh64
+.*:     file format .*-sh64.*
 
 Disassembly of section \.text:
 

@@ -3,7 +3,7 @@
 #source: rel-4.s
 #name: MOVI: PC+1-relative datalabel relocs, 32-bit ABI.
 
-.*:     file format .*-sh64
+.*:     file format .*-sh64.*
 
 RELOCATION RECORDS FOR \[\.text\]:
 OFFSET  *TYPE  *VALUE 

@@ -3,7 +3,7 @@
 #source: immexpr2.s
 #name: Resolved 64-bit operand, 32-bit ABI.
 
-.*:     file format .*-sh64
+.*:     file format .*-sh64.*
 
 Contents of section \.text:
  0000 6ff0fff0 6ff0fff0 6ff0fff0           .*

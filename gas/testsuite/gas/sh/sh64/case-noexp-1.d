@@ -3,7 +3,7 @@
 #source: case-1.s
 #name: Case-insensitive registers and opcodes with -no-expand.
 
-.*:     file format .*-sh64
+.*:     file format .*-sh64.*
 
 Disassembly of section \.text:
 

@@ -3,7 +3,7 @@
 #source: crange5.s
 #name: Avoid zero length .cranges range descriptor at .align in code.
 
-.*:     file format .*-sh64
+.*:     file format .*-sh64.*
 
 Contents of section \.text:
  0000 e8003a00 d4ff80f0 4455fc00 acf000e0  .*

@@ -1,9 +1,9 @@
-#as: --abi=32 -shcompact-const-crange
+#as: --abi=32 --isa=SHcompact -shcompact-const-crange
 #objdump: -sr
 #source: crange1.s
 #name: .cranges descriptors including SHcompact constant pool
 
-.*:     file format .*-sh64
+.*:     file format .*-sh64.*
 
 RELOCATION RECORDS FOR \[\.cranges\]:
 OFFSET  *TYPE  *VALUE 

@@ -3,7 +3,7 @@
 #source: crange2.s
 #name: PT to SHcompact with -no-expand.
 
-.*:     file format .*-sh64
+.*:     file format .*-sh64.*
 
 Disassembly of section \.text:
 

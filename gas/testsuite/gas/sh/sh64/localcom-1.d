@@ -3,7 +3,7 @@
 #source: localcom-1.s
 #name: Datalabel on local comm symbol and equated local comm symbol
 
-.*:     file format .*-sh64
+.*:     file format .*-sh64.*
 
 SYMBOL TABLE:
 0+0 l    d  \.text	0+ 

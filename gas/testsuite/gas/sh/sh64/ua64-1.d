@@ -6,7 +6,7 @@
 # Note that the relocs for externsym0 + 3 and externsym2 + 42 are
 # partial-in-place, i.e. REL-like, and are not displayed correctly.
 
-.*:     file format .*-sh64
+.*:     file format .*-sh64.*
 
 RELOCATION RECORDS FOR \[\.rodata\]:
 OFFSET           TYPE              VALUE 

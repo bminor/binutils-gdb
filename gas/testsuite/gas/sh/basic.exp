@@ -23,6 +23,12 @@ if [istarget "sh*-*-linux-gnu"] {
     global ASFLAGS
     set ASFLAGS "$ASFLAGS -big"
 }
+if [istarget "sh64*-*-linux*"] {
+    global ASFLAGS
+
+    set old_ASFLAGS $ASFLAGS
+    set ASFLAGS "$ASFLAGS --abi=32 --isa=SHcompact"
+}
 
 proc do_fp {} {
     set testname "fp.s: floating point tests (sh3e)"
@@ -124,7 +130,7 @@ if [istarget sh*-*-*] then {
     # dumped as sh4.
     if {[istarget sh*-*coff] || [istarget sh*-pe*] || [istarget sh*-rtems]} then {
 	run_dump_test "pcrel-coff"
-    } else {
+    } elseif {![istarget sh64*-*-linux*]} {
 	# Test DSP instructions
 	run_dump_test "dsp"
 
@@ -136,4 +142,9 @@ if [istarget sh*-*-*] then {
     if {[istarget sh*-*elf] || [istarget sh*-linux*]} then {
 	run_dump_test "pic"
     }
+}
+
+if {[info exists old_ASFLAGS]} {
+    global ASFLAGS
+    set ASFLAGS $old_ASFLAGS
 }

@@ -1,8 +1,8 @@
-#as: --isa=shmedia
+#as: --isa=shmedia --abi=64
 #objdump: -d
 #name: Minimum SH64 Syntax Support - Pseudos.
 
-dump.o:     file format elf64-sh64
+dump.o:     file format elf64-sh64.*
 
 Disassembly of section .text:
 

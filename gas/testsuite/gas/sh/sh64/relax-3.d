@@ -3,7 +3,7 @@
 #source: relax-3.s
 #name: Assembler PC-rel MOVI relaxation limit, from first to second state.
 
-.*:     file format .*-sh64
+.*:     file format .*-sh64.*
 
 Disassembly of section \.text:
 

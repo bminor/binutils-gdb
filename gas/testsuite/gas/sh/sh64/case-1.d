@@ -2,7 +2,7 @@
 #objdump: -dr
 #name: Case-insensitive registers and opcodes.
 
-.*:     file format .*-sh64
+.*:     file format .*-sh64.*
 
 Disassembly of section \.text:
 

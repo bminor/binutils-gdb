@@ -3,7 +3,7 @@
 #source: lineno.s
 #name: Dwarf2 line numbers vs macro opcodes
 
-.*:     file format .*-sh64
+.*:     file format .*-sh64.*
 
 Disassembly of section .text:
 

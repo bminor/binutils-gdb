@@ -3,7 +3,7 @@
 #source: ptc-1.s
 #name: PT constant, 64-bit ABI with -expand-pt32.
 
-.*:     file format .*-sh64
+.*:     file format .*-sh64.*
 
 Disassembly of section \.text:
 

@@ -1,9 +1,9 @@
-#as: --isa=shmedia -expand-pt32
+#as: --isa=shmedia --abi=64 -expand-pt32
 #objdump: -dr
 #source: pt-1.s
 #name: Basic SHmedia PT and PTA instructions with -expand-pt32.
 
-.*:     file format .*-sh64
+.*:     file format .*-sh64.*
 
 Disassembly of section \.text:
 [0]+ <start>:

@@ -1,8 +1,8 @@
-#as: --isa=shmedia --no-exp
+#as: --isa=shmedia --abi=64 --no-exp
 #objdump: -d
 #name: Minimum SH64 Syntax Support.
 
-.*:     file format elf64-sh64
+.*:     file format elf64-sh64.*
 
 Disassembly of section .text:
 
