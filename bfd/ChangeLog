@@ -1,3 +1,8 @@
+Thu Feb 13 20:11:47 1992  Fred Fish  (fnf at cygnus.com)
+
+	* elf.c (elf_slurp_symbol_table):  Remove obsolete use of
+	BSF_ABSOLUTE and replace with bfd_abs_section reference.
+
 Thu Feb 13 17:22:44 1992  Steve Chamberlain  (sac at rtl.cygnus.com)
 
 	* coffcode.h (get_normalized_symtab): fixed bug where symbols
