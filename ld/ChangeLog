@@ -1,3 +1,8 @@
+2002-02-18  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld.texinfo (Output Section Fill): Fix amateur texinfo.
+	(FILL): Likewise.
+
 2002-02-17  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* emultempl/mmo.em (mmo_after_open): Don't call

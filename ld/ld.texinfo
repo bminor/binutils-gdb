@@ -2943,10 +2943,10 @@ FILL(0x90909090)
 @end smallexample
 
 The @code{FILL} command is similar to the @samp{=@var{fillexp}} output
-section attribute (@pxref{Output Section Fill}), but it only affects the
+section attribute, but it only affects the
 part of the section following the @code{FILL} command, rather than the
 entire section.  If both are used, the @code{FILL} command takes
-precedence.  See (@pxref{Output Section Fill}) for details on the fill
+precedence.  @xref{Output Section Fill}, for details on the fill
 expression.
 
 @node Output Section Keywords
@@ -3228,15 +3228,15 @@ You can set the fill pattern for an entire section by using
 within the output section (for example, gaps left due to the required
 alignment of input sections) will be filled with the value, repeated as
 necessary.  If the fill expression is a simple hex number, ie. a string
-of hex digit starting with "0x" and without a trailing "k" or "M", then
+of hex digit starting with @samp{0x} and without a trailing @samp{k} or @samp{M}, then
 an arbitrarily long sequence of hex digits can be used to specify the
 fill pattern;  Leading zeros become part of the pattern too.  For all
-other cases, including extra parentheses or a unary '+', the fill
+other cases, including extra parentheses or a unary @code{+}, the fill
 pattern is the four least significant bytes of the value of the
 expression.  In all cases, the number is big-endian.
 
 You can also change the fill value with a @code{FILL} command in the
-output section commands; see @ref{Output Section Data}.
+output section commands; (@pxref{Output Section Data}).
 
 Here is a simple example:
 @smallexample
