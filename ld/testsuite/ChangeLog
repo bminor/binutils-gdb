@@ -1,3 +1,7 @@
+2002-02-17  Daniel Jacobowitz  <drow@mvista.com>
+
+	* vers.exp: Do not call diff -q.
+
 2002-02-18  John David Anglin  <dave@hiauly1.hia.nrc.ca>
 
 	* ld-selective/selective.exp: Link against libgcc on
