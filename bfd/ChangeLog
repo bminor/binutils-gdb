@@ -1,3 +1,12 @@
+Thu Jun 13 10:23:40 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* coffgen.c (make_a_section_from_file): Check return value of
+	_bfd_coff_read_string_table.
+	(coff_real_object_p): Check return value of
+	make_a_section_from_file.
+	(_bfd_coff_read_string_table): Check that there are some symbols
+	before trying to read the string table size.
+
 Wed Jun 12 11:16:37 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* xcofflink.c (xcoff_link_add_symbols): When considering whether
