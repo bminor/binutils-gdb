@@ -1,3 +1,23 @@
+2003-07-11  Mark Kettenis  <kettenis@gnu.org>
+
+	* alpha-tdep.h (struct gdbarch_tdep): Add members `sc_pc_offset',
+	`sc_regs_offset' and `sc_fpregs_offset'.
+	* alpha-tdep.c (SIGFRAME_PC_OFF, SIGFRAME_REGSAVE_OFF,
+	SIGFRAME_FPREGSAVE_OFF): Remove defines.
+	(alpha_sigtramp_register_address): Rewrite to use new members of
+	`struct gdbarch_tdep'.
+	(alpha_gdbarch_init): Initialize new members of struct
+	gdbarch_tdep'.
+	* alphafbsd-tdep.c (alphafbsd_use_struct_convention): Use
+	ALPHA_REGISTER_SIZE instead of DEPRECATED_REGISTER_SIZE.
+	(alphafbsd_sigtramp_start, alphafbsd_sigtramp_end): Nre variables.
+	(alphafbsd_pc_in_sigtramp): Implement.
+	(alphafbsd_sigtramp_offset): New function.
+	(alphafbsd_sigcontext_addr): New function.
+	(alphafbsd_init_abi): Initialize signal trampoline related members
+	of `struct gdbarch_tdep'.
+	(_initialize_alphafbsd_tdep): Add prototype.
+
 2003-07-11  Theodore A. Roth  <troth@openavr.org>
 
 	* Makefile.in (install-only): Quote sed expression when generating
