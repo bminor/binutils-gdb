@@ -1,3 +1,5 @@
+#include <string.h>
+
 #define ARRSIZE 32
 int intarray[ARRSIZE], intarray2[ARRSIZE];
 
