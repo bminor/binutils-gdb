@@ -1,5 +1,8 @@
 Tue Sep  9 10:19:37 1997  Nick Clifton  <nickc@cygnus.com>
 
+	* doc/c-v850.texi (V850 Opcodes): Document hi0() reloc prefix.
+	Correct description of hi() reloc prefix.
+
 start-sanitize-v850e
 	* doc/c-v850.texi (V850 Opcodes): Document new reloc prefix.
 	* config/tc-v850.c (v850_reloc_prefix): Add hilo() reloc prefix.

@@ -249,12 +249,12 @@ such code with code assembled for other processors.
 
 @table @code
 
-@cindex @code{hi} pseudo-op, V850
-@item hi()
+@cindex @code{hi0} pseudo-op, V850
+@item hi0()
 Computes the higher 16 bits of the given expression and stores it into
 the immediate operand field of the given instruction.  For example:
 
-    @samp{mulhi hi(here - there), r5, r6}
+    @samp{mulhi hi0(here - there), r5, r6}
 
 computes the difference between the address of labels 'here' and
 'there', takes the upper 16 bits of this difference, shifts it down 16
@@ -271,6 +271,28 @@ the immediate operand field of the given instruction.  For example:
 computes the difference between the address of labels 'here' and
 'there', takes the lower 16 bits of this difference and adds it to
 register 5, putting the result into register 6.
+
+@cindex @code{hi} pseudo-op, V850
+@item hi()
+Computes the higher 16 bits of the given expression and then adds the
+value of the most significant bit of the lower 16 bits of the expression
+and stores the result into the immediate operand field of the given
+instruction.  For example the following code can be used to compute the
+address of the label 'here' and store it into register 6:
+
+    @samp{movhi hi(here), r0, r6}
+    @samp{movea lo(here), r6, r6}
+
+The reason for this special behaviour is that movea performs a sign
+extention on its immediate operand.  So for example if the address of
+'here' was 0xFFFFFFFF then without the special behaviour of the hi()
+pseudo-op the movhi instruction would put 0xFFFF0000 into r6, then the
+movea instruction would takes its immediate operand, 0xFFFF, sign extend
+it to 32 bits, 0xFFFFFFFF, and then add it into r6 giving 0xFFFEFFFF
+which is wrong (the fifth nibble is E).  With the hi() pseudo op adding
+in the top bit of the lo() pseudo op, the movhi instruction actually
+stores 0 into r6 (0xFFFF + 1 = 0x0000), so that the movea instruction
+stores 0xFFFFFFFF into r6 - the right value.
 
 @c start-santize-v850e
 @cindex @code{hilo} pseudo-op, V850
