@@ -1,3 +1,8 @@
+Thu Oct 28 20:02:31 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	* hosts/std-host.h: Don't declare time; causes error on mach3.
+	* configure.in (i386mach3_vec): Require aout32.o stab-syms.o.
+
 Thu Oct 28 16:33:26 1993  Stan Shebs  (shebs@rtl.cygnus.com)
 
 	LynxOS and Sparc LynxOS changes:
