@@ -4914,7 +4914,7 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
 	return FALSE;
 
       /* Add some entries to the .dynamic section.  We fill in some of the
-	 values later, in elf_bfd_final_link, but we must add the entries
+	 values later, in bfd_elf_final_link, but we must add the entries
 	 now so that we know the final size of the .dynamic section.  */
 
       /* If there are initialization and/or finalization functions to
@@ -6648,6 +6648,9 @@ elf_link_input_bfd (struct elf_final_link_info *finfo, bfd *input_bfd)
 		  struct elf_link_hash_entry *h = NULL;
 		  const char *sym_name;
 
+		  if (r_symndx == STN_UNDEF)
+		    continue;
+
 		  if (r_symndx >= locsymcount
 		      || (elf_bad_symtab (input_bfd)
 			  && finfo->sections[r_symndx] == NULL))
@@ -6840,7 +6843,7 @@ elf_link_input_bfd (struct elf_final_link_info *finfo, bfd *input_bfd)
 			 symbol.  We set the rel_hash entry for this
 			 reloc to point to the global hash table entry
 			 for this symbol.  The symbol index is then
-			 set at the end of elf_bfd_final_link.  */
+			 set at the end of bfd_elf_final_link.  */
 		      indx = r_symndx - extsymoff;
 		      rh = elf_sym_hashes (input_bfd)[indx];
 		      while (rh->root.type == bfd_link_hash_indirect
@@ -7580,8 +7583,7 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
   if (! _bfd_elf_compute_section_file_positions (abfd, info))
     goto error_return;
 
-  /* That created the reloc sections.  Set their sizes, and assign
-     them file positions, and allocate some buffers.  */
+  /* Set sizes, and assign file positions for reloc sections.  */
   for (o = abfd->sections; o != NULL; o = o->next)
     {
       if ((o->flags & SEC_RELOC) != 0)

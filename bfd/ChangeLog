@@ -1,3 +1,24 @@
+2004-09-07  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf64-ppc.c (struct ppc_link_hash_table): Add stub_globals.
+	(is_ppc64_elf_target): Rename from is_ppc64_target.  Update all
+	callers.
+	(ppc_stub_name): Remove trailing "+0" on stub name.
+	(create_linkage_sections): Create relocations for
+	branch lookup table when --emit-relocs as well as when --shared.
+	(ppc_build_one_stub): Emit relocs for long branch stubs.  Adjust
+	relbrlt test.  For --emit-stub-syms, always output a sym even when
+	one already exists on a plt call stub.  Put stub type in the stub
+	symbol name.
+	(ppc_size_one_stub): Size long branch stub relocs.  Adjust relbrlt
+	test.
+	(ppc64_elf_size_stubs): Count global sym stubs added.  Zero
+	reloc_count in stub sections.  Adjust relbrlt test.
+	(ppc64_elf_build_stubs): Adjust relbrlt test.  Tweak stats output.
+	* elflink.c (bfd_elf_size_dynamic_sections): Fix comment typo.
+	(elf_link_input_bfd): Ignore symbol index zero relocs when checking
+	for relocs against discarded symbols.  Fix comments.
+
 2004-09-06  Mark Mitchell  <mark@codesourcery.com>
 
 	* elf-bfd.h (_bfd_elf_make_dynamic_segment): Declare it.
