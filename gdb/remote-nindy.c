@@ -121,7 +121,6 @@ extern int unlink();
 extern char *getenv();
 extern char *mktemp();
 
-extern char *coffstrip();
 extern void generic_mourn_inferior ();
 
 extern struct target_ops nindy_ops;
