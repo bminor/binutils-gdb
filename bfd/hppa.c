@@ -52,10 +52,7 @@ hppa_object_setup (abfd, file_hdrp, aux_hdrp)
   struct container *rawptr;
   struct header *f;
   struct hppa_data_struct *rawptr1;
-  asection *dbx, *dbx_strings;
-
-  dbx = bfd_get_section_by_name (abfd, "$GDB_SYMBOLS$");
-  dbx_strings = bfd_get_section_by_name (abfd, "$GDB_STRINGS$");
+  asection *text, *data, *bss;
 
   rawptr = (struct container *) bfd_zalloc (abfd, sizeof (struct container));
   if (rawptr == NULL) {
@@ -84,60 +81,44 @@ hppa_object_setup (abfd, file_hdrp, aux_hdrp)
 
   bfd_get_start_address (abfd) = aux_hdrp->exec_entry;
 
-  obj_hp_symbol_entry_size (abfd) = sizeof(struct symbol_dictionary_record); 
-  obj_dbx_symbol_entry_size (abfd) = 12; 
-
   obj_pa_symbols (abfd) = (hppa_symbol_type *)NULL;
-  obj_hp_sym_count (abfd) = file_hdrp->symbol_total;
-  obj_dbx_sym_count (abfd) = bfd_section_size (abfd, dbx) / 
-    obj_dbx_symbol_entry_size (abfd);
-  bfd_get_symcount (abfd) = obj_hp_sym_count (abfd) + obj_dbx_sym_count (abfd);
+  bfd_get_symcount (abfd) = file_hdrp->symbol_total;
 
   bfd_default_set_arch_mach(abfd, bfd_arch_hppa, 0);
 
   /* create the sections.  This is raunchy, but bfd_close wants to reclaim
      them */
-  obj_textsec (abfd) = (asection *)NULL;
-  obj_datasec (abfd) = (asection *)NULL;
-  obj_bsssec (abfd) = (asection *)NULL;
-  (void)bfd_make_section(abfd, ".text");
-  (void)bfd_make_section(abfd, ".data");
-  (void)bfd_make_section(abfd, ".bss");
 
-#if 0
-  abfd->sections = obj_textsec (abfd);
-  obj_textsec (abfd)->next = obj_datasec (abfd);
-  obj_datasec (abfd)->next = obj_bsssec (abfd);
-#endif
+  text = bfd_make_section(abfd, ".text");
+  data = bfd_make_section(abfd, ".data");
+  bss = bfd_make_section(abfd, ".bss");
 
-  obj_datasec (abfd)->_raw_size = aux_hdrp->exec_dsize;
-  obj_bsssec (abfd)->_raw_size = aux_hdrp->exec_bsize;
-  obj_textsec (abfd)->_raw_size = aux_hdrp->exec_tsize;
+  text->_raw_size = aux_hdrp->exec_tsize;
+  data->_raw_size = aux_hdrp->exec_dsize;
+  bss->_raw_size = aux_hdrp->exec_bsize;
 
-  obj_textsec (abfd)->flags = (SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS);
-  obj_datasec (abfd)->flags = (SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS);
-  obj_bsssec (abfd)->flags = SEC_ALLOC;
+  text->flags = (SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS);
+  data->flags = (SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS);
+  bss->flags = SEC_ALLOC;
 
   /* The virtual memory addresses of the sections */                    
-  obj_datasec (abfd)->vma = aux_hdrp->exec_dmem;                          
-  obj_bsssec (abfd)->vma = aux_hdrp->exec_bfill;                           
-  obj_textsec (abfd)->vma = aux_hdrp->exec_tmem;                          
+  text->vma = aux_hdrp->exec_tmem;                          
+  data->vma = aux_hdrp->exec_dmem;                          
+  bss->vma = aux_hdrp->exec_bfill;                           
                                                                         
   /* The file offsets of the sections */                                
-  obj_textsec (abfd)->filepos = aux_hdrp->exec_tfile;                      
-  obj_datasec (abfd)->filepos = aux_hdrp->exec_dfile;                      
+  text->filepos = aux_hdrp->exec_tfile;                      
+  data->filepos = aux_hdrp->exec_dfile;                      
                                                                        
   /* The file offsets of the relocation info */                         
-  obj_textsec (abfd)->rel_filepos = 0;                  
-  obj_datasec (abfd)->rel_filepos = 0;                  
+  text->rel_filepos = 0;                  
+  data->rel_filepos = 0;                  
                                                                         
   /* The file offsets of the string table and symbol table.  */         
-  obj_hp_sym_filepos (abfd) = file_hdrp->symbol_location;                  
-  obj_hp_str_filepos (abfd) = file_hdrp->symbol_strings_location;           
-  obj_dbx_sym_filepos (abfd) = dbx->filepos;  
-  obj_dbx_str_filepos (abfd) = dbx_strings->filepos; 
-  obj_hp_stringtab_size (abfd) = file_hdrp->symbol_strings_size;
-  obj_dbx_stringtab_size (abfd) = bfd_section_size (abfd, dbx_strings);
+  obj_sym_filepos (abfd) = file_hdrp->symbol_location;                  
+  bfd_get_symcount (abfd) = file_hdrp->symbol_total;
+  obj_str_filepos (abfd) = file_hdrp->symbol_strings_location;           
+  obj_stringtab_size (abfd) = file_hdrp->symbol_strings_size;
 
   return abfd->xvec;
 }
@@ -297,8 +278,6 @@ hppa_object_p (abfd)
 {
   struct header file_hdr;
   struct som_exec_auxhdr aux_hdr;
-  struct subspace_dictionary_record dbx_subspace;
-  struct subspace_dictionary_record dbx_strings_subspace;
 
   if (bfd_read ((PTR) &file_hdr, 1, FILE_HDR_SIZE, abfd) != FILE_HDR_SIZE)
     return 0;
@@ -433,25 +412,7 @@ hppa_new_section_hook (abfd, newsect)
      bfd *abfd;
      asection *newsect;
 {
-  /* align to double at least */
   newsect->alignment_power = 3;
-
-  if (bfd_get_format (abfd) == bfd_object) {
-    if (obj_textsec(abfd) == NULL && !strcmp(newsect->name, ".text")) {
-      obj_textsec(abfd)= newsect;
-      return true;
-    }
-
-    if (obj_datasec(abfd) == NULL && !strcmp(newsect->name, ".data")) {
-      obj_datasec(abfd) = newsect;
-      return true;
-    }
-
-    if (obj_bsssec(abfd) == NULL && !strcmp(newsect->name, ".bss")) {
-      obj_bsssec(abfd) = newsect;
-      return true;
-    }
-  }
 
   /* We allow more than three sections internally */
   return true;

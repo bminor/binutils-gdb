@@ -1,3 +1,15 @@
+Sat Jan  9 19:48:14 1993  Stu Grossman  (grossman at cygnus.com)
+
+	* hppa.c (hppa_object_setup):  Get rid of all knowledge of stabs
+	debug info.  Setup info about linker symbols only, and use
+	standard bfd fields to hold the info.
+	* (hppa_object_p):  Remove unneeded decls.
+	* (hppa_new_section_hook):  Get rid of most of this.
+	* libhppa.h (struct hppadata):  Remove ten pounds of useless ugly
+	fat.  Remove all knowledge of stabs, remove redundant knowledge of
+	linker symbols.
+	* Remove macros for accessing fields which are now gone.
+
 Fri Jan  8 15:20:00 1993  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* coffcode.h (sec_to_styp_flags): allow SEC_NEVER_LOAD to turn on
