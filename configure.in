@@ -26,6 +26,10 @@
 #
 host_libs="mmalloc libiberty opcodes bfd readline glob gash tcl tk tclX"
 
+if [ "${enable_gdbgui}" = "yes" ] ; then
+	host_libs="${host_libs} libgui"
+fi
+
 # these tools are built for the host environment
 #
 host_tools="texinfo byacc flex bison binutils ld gas gcc gdb make patch
