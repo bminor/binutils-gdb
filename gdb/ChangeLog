@@ -1,3 +1,20 @@
+2004-04-06  Randolph Chung  <tausq@debian.org>
+
+	Committed by Andrew Cagney (mechanical change).
+	* hppa-tdep.c: (args_for_find_stub, hp_som_som_object_present,
+	exception_catchpoints_are_fragile, find_stub_with_shl_get,
+	cover_find_stub_with_shl_get, initialize_hp_cxx_exception_support,
+	child_enable_exception_callback, current_ex_event,
+	null_symtab_and_line, child_get_current_exception_event,
+	HP_ACC_EH_notify_hook, HP_ACC_EH_set_hook_value,
+	HP_ACC_EH_notify_callback, HP_ACC_EH_break, HP_ACC_EH_catch_throw,
+	HP_ACC_EH_catch_catch, __eh_notification, hp_cxx_exception_support,
+	hp_cxx_exception_support_initialized, eh_notify_hook_addr,
+	eh_notify_callback_addr, eh_break_addr, eh_catch_catch_addr,
+	eh_catch_throw_addr, break_callback_sal, setup_d_pid_in_inferior):
+	Move hpux-specific definitions ...
+	* hppa-hpux-tdep.c: ... to here.
+
 2004-04-05  Andrew Cagney  <cagney@redhat.com>
 
 	* hppa-tdep.c (hppa_frame_cache): Pass the frame's func to
