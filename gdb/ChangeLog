@@ -1,5 +1,12 @@
 2004-11-12  Randolph Chung  <tausq@debian.org>
 
+	* config/tm/tm-hppa.h (SYMBOLS_CAN_START_WITH_DOLLAR): Remove.
+	* parse.c (SYMBOLS_CAN_START_WITH_DOLLAR): Remove.
+	(write_exp_msymbol): Remove conditional check for symbols starting 
+	with $.  Update comments.
+
+2004-11-12  Randolph Chung  <tausq@debian.org>
+
 	* pa64solib.c (pa64_solib_thread_start_addr): Rename from 
 	so_lib_thread_start_addr.
 	* pa64solib.h (so_list): Forward declare.

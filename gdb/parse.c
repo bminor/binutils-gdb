@@ -64,21 +64,6 @@ const struct exp_descriptor exp_descriptor_standard =
     evaluate_subexp_standard
   };
 
-/* Symbols which architectures can redefine.  */
-
-/* Some systems have routines whose names start with `$'.  Giving this
-   macro a non-zero value tells GDB's expression parser to check for
-   such routines when parsing tokens that begin with `$'.
-
-   On HP-UX, certain system routines (millicode) have names beginning
-   with `$' or `$$'.  For example, `$$dyncall' is a millicode routine
-   that handles inter-space procedure calls on PA-RISC.  */
-#ifndef SYMBOLS_CAN_START_WITH_DOLLAR
-#define SYMBOLS_CAN_START_WITH_DOLLAR (0)
-#endif
-
-
-
 /* Global variables declared in parser-defs.h (and commented there).  */
 struct expression *expout;
 int expout_size;
@@ -437,6 +422,9 @@ write_exp_msymbol (struct minimal_symbol *msymbol,
 void
 write_dollar_variable (struct stoken str)
 {
+  struct symbol *sym = NULL;
+  struct minimal_symbol *msym = NULL;
+
   /* Handle the tokens $digits; also $ (short for $0) and $$ (short for $$1)
      and $$digits (equivalent to $<-digits> if you could type that). */
 
@@ -474,36 +462,26 @@ write_dollar_variable (struct stoken str)
   if (i >= 0)
     goto handle_register;
 
-  if (SYMBOLS_CAN_START_WITH_DOLLAR)
+  /* On some systems, such as HP-UX and hppa-linux, certain system routines 
+     have names beginning with $ or $$.  Check for those, first. */
+
+  sym = lookup_symbol (copy_name (str), (struct block *) NULL,
+		       VAR_DOMAIN, (int *) NULL, (struct symtab **) NULL);
+  if (sym)
     {
-      struct symbol *sym = NULL;
-      struct minimal_symbol *msym = NULL;
-
-      /* On HP-UX, certain system routines (millicode) have names beginning
-	 with $ or $$, e.g. $$dyncall, which handles inter-space procedure
-	 calls on PA-RISC. Check for those, first. */
-
-      /* This code is not enabled on non HP-UX systems, since worst case 
-	 symbol table lookup performance is awful, to put it mildly. */
-
-      sym = lookup_symbol (copy_name (str), (struct block *) NULL,
-			   VAR_DOMAIN, (int *) NULL, (struct symtab **) NULL);
-      if (sym)
-	{
-	  write_exp_elt_opcode (OP_VAR_VALUE);
-	  write_exp_elt_block (block_found);	/* set by lookup_symbol */
-	  write_exp_elt_sym (sym);
-	  write_exp_elt_opcode (OP_VAR_VALUE);
-	  return;
-	}
-      msym = lookup_minimal_symbol (copy_name (str), NULL, NULL);
-      if (msym)
-	{
-	  write_exp_msymbol (msym,
-			     lookup_function_type (builtin_type_int),
-			     builtin_type_int);
-	  return;
-	}
+      write_exp_elt_opcode (OP_VAR_VALUE);
+      write_exp_elt_block (block_found);	/* set by lookup_symbol */
+      write_exp_elt_sym (sym);
+      write_exp_elt_opcode (OP_VAR_VALUE);
+      return;
+    }
+  msym = lookup_minimal_symbol (copy_name (str), NULL, NULL);
+  if (msym)
+    {
+      write_exp_msymbol (msym,
+			 lookup_function_type (builtin_type_int),
+			 builtin_type_int);
+      return;
     }
 
   /* Any other names starting in $ are debugger internal variables.  */
