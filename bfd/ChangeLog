@@ -1,3 +1,55 @@
+2003-12-18  Richard Sandiford  <rsandifo@redhat.com>
+
+	* elf32-mips.c (elf_mips_howto_table_rel): Replace all uses of
+	mips_elf_generic_reloc with _bfd_mips_elf_generic_reloc.  Use
+	_bfd_mips_elf_hi16_reloc for R_MIPS_HI16 and R_MIPS_GNU_REL_HI16,
+	_bfd_mips_elf_lo16_reloc for R_MIPS_LO16 and R_MIPS_GNU_REL_LO16,
+	and _bfd_mips_elf_got16_reloc for R_MIPS_GOT16.  Change rightshift
+	to 16 for R_MIPS_HI16 and R_MIPS_GNU_REL_HI16.
+	(mips_elf_generic_reloc, struct mips_hi16, mips_elf_hi16_reloc)
+	(mips_elf_lo16_reloc, mips_elf_got16_reloc): Delete.
+	(_bfd_mips_elf32_gprel16_reloc): Remove special case.
+	(mips_elf_gprel32_reloc, mips32_64bit_reloc): Likewise.
+
+	* elf64-mips.c (mips_elf64_howto_table_rel): Replace all uses of
+	mips_elf_generic_reloc with _bfd_mips_elf_generic_reloc.  Use
+	_bfd_mips_elf_hi16_reloc for R_MIPS_HI16, _bfd_mips_elf_lo16_reloc
+	for R_MIPS_LO16 and _bfd_mips_elf_got16_reloc for R_MIPS_GOT16.
+	Change R_MIPS_HI16's rightshift to 16.
+	(mips_elf64_howto_table_rela): Replace all uses of
+	mips_elf_generic_reloc with _bfd_mips_elf_generic_reloc.
+	Use _bfd_mips_elf_generic_reloc for R_MIPS_GOT16 as well.
+	(mips_elf64_hi16_reloc, mips_elf64_got16_reloc): Delete.
+	(mips_elf64_shift6_reloc): Remove special case.  Use
+	_bfd_mips_elf_generic_reloc instead of returning bfd_reloc_continue.
+
+	* elfn32-mips.c (prev_reloc_section): Delete.
+	(prev_reloc_address, prev_reloc_addend): Delete.
+	(elf_mips_howto_table_rel, elf_mips_howto_table_rela): As for
+	elf64-mips.c
+	(GET_RELOC_ADDEND, SET_RELOC_ADDEND): Delete.
+	(mips_elf_generic_reloc, struct mips_hi16, mips_elf_hi16_reloc)
+	(mips_elf_lo16_reloc, mips_elf_got16_reloc): Delete.
+	(mips_elf_gprel16_reloc): Delete use of GET_RELOC_ADDEND.
+	(mips_elf_literal_reloc, mips_elf_gprel32_reloc): Likewise.
+	(mips16_jump_reloc, mips16_gprel_reloc): Likewise.
+	(mips_elf_shift6_reloc): Likewise.  Delete use of SET_RELOC_ADDEND.
+
+	* elfxx-mips.c (_bfd_mips_elf_gprel16_with_gp): Use
+	_bfd_relocate_contents to install an in-place addend.
+	(mips_hi16): New structure.
+	(mips_hi16_list): Moved from elf32-mips.c.
+	(_bfd_mips_elf_hi16_reloc, _bfd_mips_elf_got16_reloc): New functions.
+	(_bfd_mips_elf_lo16_reloc, _bfd_mips_elf_generic_reloc): New functions.
+	(mips_elf_calculate_relocation): Assume addend is unshifted.
+	(_bfd_mips_elf_relocate_section): Don't apply the howto rightshift
+	on top of the usual high-part shift.  Don't shift the addend right
+	before calling mips_elf_calculate_relocation.
+
+	* elfxx-mips.h (_bfd_mips_elf_hi16_reloc): Declare.
+	(_bfd_mips_elf_got16_reloc, _bfd_mips_elf_lo16_reloc): Declare.
+	(_bfd_mips_elf_generic_reloc): Declare.
+
 2003-12-16  Eric Youngdale  <eric@mkssoftware.com>
 	    Nick Clifton  <nickc@redhat.com>
 

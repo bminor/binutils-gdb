@@ -1,5 +1,12 @@
 2003-12-18  Richard Sandiford  <rsandifo@redhat.com>
 
+	* config/tc-mips.c (mips_need_elf_addend_fixup): Delete.
+	(md_apply_fix3): Remove bfd_install_relocation workarounds.
+	(tc_gen_reloc): Likewise. Factor handling of pc-relative relocations
+	and treat fx_addnumber as relative to the relocation address.
+
+2003-12-18  Richard Sandiford  <rsandifo@redhat.com>
+
 	* config/tc-mips.c (s_change_section): When parsing the MIPS-specific
 	.section syntax, map SHT_MIPS_DWARF to SHT_PROGBITS.
 

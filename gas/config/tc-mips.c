@@ -11339,31 +11339,6 @@ mips_validate_fix (struct fix *fixP, asection *seg)
   return 1;
 }
 
-#ifdef OBJ_ELF
-static int
-mips_need_elf_addend_fixup (fixS *fixP)
-{
-  if (S_GET_OTHER (fixP->fx_addsy) == STO_MIPS16)
-    return 1;
-  if (mips_pic == EMBEDDED_PIC
-      && S_IS_WEAK (fixP->fx_addsy))
-    return 1;
-  if (mips_pic != EMBEDDED_PIC
-      && (S_IS_WEAK (fixP->fx_addsy)
-	  || S_IS_EXTERNAL (fixP->fx_addsy))
-      && !S_IS_COMMON (fixP->fx_addsy))
-    return 1;
-  if (((bfd_get_section_flags (stdoutput,
-			       S_GET_SEGMENT (fixP->fx_addsy))
-	& (SEC_LINK_ONCE | SEC_MERGE)) != 0)
-      || !strncmp (segment_name (S_GET_SEGMENT (fixP->fx_addsy)),
-		   ".gnu.linkonce",
-		   sizeof (".gnu.linkonce") - 1))
-    return 1;
-  return 0;
-}
-#endif
-
 /* Apply a fixup to the object file.  */
 
 void
@@ -11388,61 +11363,6 @@ md_apply_fix3 (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	  || fixP->fx_r_type == BFD_RELOC_VTABLE_ENTRY);
 
   buf = (bfd_byte *) (fixP->fx_frag->fr_literal + fixP->fx_where);
-
-  /* If we aren't adjusting this fixup to be against the section
-     symbol, we need to adjust the value.  */
-#ifdef OBJ_ELF
-  if (fixP->fx_addsy != NULL && OUTPUT_FLAVOR == bfd_target_elf_flavour)
-    {
-      if (mips_need_elf_addend_fixup (fixP)
-	  && howto->partial_inplace
-	  && fixP->fx_r_type != BFD_RELOC_GPREL16
-	  && fixP->fx_r_type != BFD_RELOC_GPREL32
-	  && fixP->fx_r_type != BFD_RELOC_MIPS16_GPREL)
-	{
-	  /* In this case, the bfd_install_relocation routine will
-	     incorrectly add the symbol value back in.  We just want
-	     the addend to appear in the object file.
-
-	     The condition above used to include
-	     "&& (! fixP->fx_pcrel || howto->pcrel_offset)".
-
-	     However, howto can't be trusted here, because we
-	     might change the reloc type in tc_gen_reloc.  We can
-	     check howto->partial_inplace because that conversion
-	     happens to preserve howto->partial_inplace; but it
-	     does not preserve howto->pcrel_offset.  I've just
-	     eliminated the check, because all MIPS PC-relative
-	     relocations are marked howto->pcrel_offset.
-
-	     howto->pcrel_offset was originally added for
-	     R_MIPS_PC16, which is generated for code like
-
-		    globl g1 .text
-		    .text
-		    .space 20
-	     g1:
-	     x:
-		    bal g1
-	   */
-	  *valP -= S_GET_VALUE (fixP->fx_addsy);
-	}
-
-      /* This code was generated using trial and error and so is
-	 fragile and not trustworthy.  If you change it, you should
-	 rerun the elf-rel, elf-rel2, and empic testcases and ensure
-	 they still pass.  */
-      if (fixP->fx_pcrel)
-	{
-	  *valP += fixP->fx_frag->fr_address + fixP->fx_where;
-
-	  /* BFD's REL handling, for MIPS, is _very_ weird.
-	     This gives the right results, but it can't possibly
-	     be the way things are supposed to work.  */
-	  *valP += fixP->fx_frag->fr_address + fixP->fx_where;
-	}
-    }
-#endif
 
   /* We are not done if this is a composite relocation to set up gp.  */
   if (fixP->fx_addsy == NULL && ! fixP->fx_pcrel
@@ -13406,52 +13326,49 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
 	as_fatal (_("Double check fx_r_type in tc-mips.c:tc_gen_reloc"));
       fixp->fx_r_type = BFD_RELOC_GPREL32;
     }
-  else if (fixp->fx_r_type == BFD_RELOC_PCREL_LO16)
+  else if (fixp->fx_pcrel)
     {
-      if (OUTPUT_FLAVOR == bfd_target_elf_flavour)
-	reloc->addend = fixp->fx_addnumber;
-      else
-	{
-	  /* We use a special addend for an internal RELLO reloc.  */
-	  if (symbol_section_p (fixp->fx_addsy))
-	    reloc->addend = reloc->address - S_GET_VALUE (fixp->fx_subsy);
-	  else
-	    reloc->addend = fixp->fx_addnumber + reloc->address;
-	}
-    }
-  else if (fixp->fx_r_type == BFD_RELOC_PCREL_HI16_S)
-    {
-      assert (fixp->fx_next != NULL
-	      && fixp->fx_next->fx_r_type == BFD_RELOC_PCREL_LO16);
+      bfd_vma pcrel_address;
 
-      /* The reloc is relative to the RELLO; adjust the addend
-	 accordingly.  */
+      /* Set PCREL_ADDRESS to this relocation's "PC".  The PC for high
+	 high-part relocs is the address of the low-part reloc.  */
+      if (fixp->fx_r_type == BFD_RELOC_PCREL_HI16_S)
+	{
+	  assert (fixp->fx_next != NULL
+		  && fixp->fx_next->fx_r_type == BFD_RELOC_PCREL_LO16);
+	  pcrel_address = (fixp->fx_next->fx_where
+			   + fixp->fx_next->fx_frag->fr_address);
+	}
+      else
+	pcrel_address = reloc->address;
+
       if (OUTPUT_FLAVOR == bfd_target_elf_flavour)
-	reloc->addend = fixp->fx_next->fx_addnumber;
+	{
+	  /* At this point, fx_addnumber is "symbol offset - pcrel_address".
+	     Relocations want only the symbol offset.  */
+	  reloc->addend = fixp->fx_addnumber + pcrel_address;
+	}
+      else if (fixp->fx_r_type == BFD_RELOC_PCREL_LO16
+	       || fixp->fx_r_type == BFD_RELOC_PCREL_HI16_S)
+	{
+	  /* We use a special addend for an internal RELLO or RELHI reloc.  */
+	  if (symbol_section_p (fixp->fx_addsy))
+	    reloc->addend = pcrel_address - S_GET_VALUE (fixp->fx_subsy);
+	  else
+	    reloc->addend = fixp->fx_addnumber + pcrel_address;
+	}
       else
 	{
-	  /* We use a special addend for an internal RELHI reloc.  */
-	  if (symbol_section_p (fixp->fx_addsy))
-	    reloc->addend = (fixp->fx_next->fx_frag->fr_address
-			     + fixp->fx_next->fx_where
-			     - S_GET_VALUE (fixp->fx_subsy));
+	  if (OUTPUT_FLAVOR != bfd_target_aout_flavour)
+	    /* A gruesome hack which is a result of the gruesome gas reloc
+	       handling.  */
+	    reloc->addend = pcrel_address;
 	  else
-	    reloc->addend = (fixp->fx_addnumber
-			     + fixp->fx_next->fx_frag->fr_address
-			     + fixp->fx_next->fx_where);
+	    reloc->addend = -pcrel_address;
 	}
     }
-  else if (fixp->fx_pcrel == 0 || OUTPUT_FLAVOR == bfd_target_elf_flavour)
-    reloc->addend = fixp->fx_addnumber;
   else
-    {
-      if (OUTPUT_FLAVOR != bfd_target_aout_flavour)
-	/* A gruesome hack which is a result of the gruesome gas reloc
-	   handling.  */
-	reloc->addend = reloc->address;
-      else
-	reloc->addend = -reloc->address;
-    }
+    reloc->addend = fixp->fx_addnumber;
 
   /* If this is a variant frag, we may need to adjust the existing
      reloc and generate a new one.  */
@@ -13500,8 +13417,7 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
       reloc2->address = (reloc->address
 			 + (RELAX_RELOC2 (fixp->fx_frag->fr_subtype)
 			    - RELAX_RELOC1 (fixp->fx_frag->fr_subtype)));
-      reloc2->addend = fixp->fx_addnumber - S_GET_VALUE (fixp->fx_addsy)
-	+ fixp->fx_frag->tc_frag_data.tc_fr_offset;
+      reloc2->addend = reloc->addend;
       reloc2->howto = bfd_reloc_type_lookup (stdoutput, BFD_RELOC_LO16);
       assert (reloc2->howto != NULL);
 
