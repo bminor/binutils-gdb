@@ -1254,11 +1254,9 @@ extern CORE_ADDR find_stab_function_addr PARAMS ((char *,
 						  struct objfile *));
 #endif
 
-extern unsigned int
-msymbol_hash_iw PARAMS ((const char *));
+extern unsigned int msymbol_hash_iw PARAMS ((const char *));
 
-extern unsigned int
-msymbol_hash PARAMS ((const char *));
+extern unsigned int msymbol_hash PARAMS ((const char *));
 
 extern void
 add_minsym_to_hash_table (struct minimal_symbol *sym,
