@@ -532,6 +532,18 @@ cat >>e${EMULATION_NAME}.c <<EOF
      DT_NEEDED entry for this file.  */
   bfd_elf_set_dt_needed_name (abfd, "");
 
+  /* First strip off everything before the last '/'.  */
+  name = strrchr (abfd->filename, '/');
+  if (name)
+    name++;
+  else
+    name = abfd->filename;
+
+  /* Tell the ELF backend that the output file needs a DT_NEEDED
+     entry for this file if it is used to resolve the reference in
+     a regular object.  */
+  bfd_elf_set_dt_needed_soname (abfd, name);
+
   /* Add this file into the symbol table.  */
   if (! bfd_link_add_symbols (abfd, &link_info))
     einfo ("%F%B: could not read symbols: %E\n", abfd);

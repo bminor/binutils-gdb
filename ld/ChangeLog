@@ -1,3 +1,8 @@
+2000-07-19  H.J. Lu  <hjl@gnu.org>
+
+	* emultempl/elf32.em (gld${EMULATION_NAME}_try_needed): Call
+	bfd_elf_set_dt_needed_soname ().
+
 2000-07-18  DJ Delorie  <dj@cygnus.com>
 
 	* pe-dll.c (pe_dll_id_target): check object target name also
