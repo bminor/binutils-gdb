@@ -28,7 +28,9 @@
 
 #define OBJ_ELF 1
 
+#ifndef OUTPUT_FLAVOR
 #define OUTPUT_FLAVOR bfd_target_elf_flavour
+#endif
 
 #include <bfd.h>
 
@@ -52,10 +54,6 @@ extern int alpha_flag_mdebug;
 #endif /* TC_MIPS */
 
 /* Additional information we keep for each symbol.  */
-
-/* FIXME: For some reason, this structure is needed both here and in
-   obj-multi.h.  */
-#ifndef OBJ_SYMFIELD_TYPE
 struct elf_obj_sy
 {
   /* Whether the symbol has been marked as local.  */
@@ -76,7 +74,6 @@ struct elf_obj_sy
   valueT ecoff_extern_size;
 #endif
 };
-#endif
 
 #define OBJ_SYMFIELD_TYPE struct elf_obj_sy
 
@@ -91,15 +88,23 @@ extern void elf_begin PARAMS ((void));
 /* should be conditional on address size! */
 #define elf_symbol(asymbol) ((elf_symbol_type *)(&(asymbol)->the_bfd))
 
+#ifndef S_GET_SIZE
 #define S_GET_SIZE(S) \
   (elf_symbol (symbol_get_bfdsym (S))->internal_elf_sym.st_size)
+#endif
+#ifndef S_SET_SIZE
 #define S_SET_SIZE(S,V) \
   (elf_symbol (symbol_get_bfdsym (S))->internal_elf_sym.st_size = (V))
+#endif
 
+#ifndef S_GET_ALIGN
 #define S_GET_ALIGN(S) \
   (elf_symbol (symbol_get_bfdsym (S))->internal_elf_sym.st_value)
+#endif
+#ifndef S_SET_ALIGN
 #define S_SET_ALIGN(S,V) \
   (elf_symbol (symbol_get_bfdsym (S))->internal_elf_sym.st_value = (V))
+#endif
 
 #define S_GET_OTHER(S) \
   (elf_symbol (symbol_get_bfdsym (S))->internal_elf_sym.st_other)
@@ -108,10 +113,14 @@ extern void elf_begin PARAMS ((void));
 
 extern asection *gdb_section;
 
+#ifndef obj_frob_file
 #define obj_frob_file  elf_frob_file
+#endif
 extern void elf_frob_file PARAMS ((void));
 
+#ifndef obj_frob_file_after_relocs
 #define obj_frob_file_after_relocs  elf_frob_file_after_relocs
+#endif
 extern void elf_frob_file_after_relocs PARAMS ((void));
 
 #define obj_app_file elf_file_symbol
@@ -128,11 +137,14 @@ extern void obj_elf_text PARAMS ((int));
 
 /* BFD wants to write the udata field, which is a no-no for the
    globally defined sections.  */
+#ifndef obj_sec_sym_ok_for_reloc
 #define obj_sec_sym_ok_for_reloc(SEC)	((SEC)->owner != 0)
+#endif
 
 /* When setting one symbol equal to another, by default we probably
    want them to have the same "size", whatever it means in the current
    context.  */
+#ifndef OBJ_COPY_SYMBOL_ATTRIBUTES
 #define OBJ_COPY_SYMBOL_ATTRIBUTES(DEST,SRC)			\
 do								\
   {								\
@@ -155,6 +167,7 @@ do								\
     S_SET_OTHER ((DEST), S_GET_OTHER (SRC));			\
   }								\
 while (0)
+#endif
 
 /* Stabs go in a separate section.  */
 #define SEPARATE_STAB_SECTIONS 1
@@ -175,6 +188,7 @@ extern void obj_elf_init_stab_section PARAMS ((segT));
 #define INIT_STAB_SECTION(seg) \
   ((void)(ECOFF_DEBUGGING ? 0 : (obj_elf_init_stab_section (seg), 0)))
 
+#undef OBJ_PROCESS_STAB
 #define OBJ_PROCESS_STAB(seg, what, string, type, other, desc)		\
   if (ECOFF_DEBUGGING)							\
     ecoff_stab ((seg), (what), (string), (type), (other), (desc))
@@ -186,7 +200,9 @@ extern void elf_frob_symbol PARAMS ((symbolS *, int *));
 #endif
 
 extern void elf_pop_insert PARAMS ((void));
+#ifndef obj_pop_insert
 #define obj_pop_insert()	elf_pop_insert()
+#endif
 
 #ifndef OBJ_MAYBE_ELF
 #define obj_ecoff_set_ext elf_ecoff_set_ext

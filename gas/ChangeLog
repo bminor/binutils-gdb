@@ -1,3 +1,25 @@
+1999-09-02  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	* config/obj-multi.h: Include obj-elf.h if OBJ_MAYBE_ELF. Reformat.
+	(obj_frob_file): Test for null pointer.
+	(OBJ_COPY_SYMBOL_ATTRIBUTES): Here too.
+	(OBJ_PROCESS_STAB): And here.
+	(elf_obj_sy): Remove
+
+	* config/obj-elf.h: #ifndef everything defined in obj-multi.h,
+	except OBJ_PROCESS_STAB, which we #undef for ecoff.
+	(elf_obj_sy): Remove #ifndef OBJ_SYMFIELD_TYPE.
+
+	* config/obj-coff.c (no_func): Remove.
+	(coff_format_ops): Change occurrences of no_func to 0, as we test
+	for 0 in obj-multi.h.
+
+	* configure.in:  Enable bfd for i386-coff when primary target is
+	bfd.  Enable i386 elf,coff emulation support.  Don't set
+	USE_EMULATIONS=1 or te_file=multi unless there is more than one
+	emulation to support.
+	*configure: Regenerate.
+
 1999-09-02  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-mcore.c (mcore_s_section): Do not dump literals if a

@@ -390,6 +390,9 @@ changequote([,])dnl
       *-elf)	bfd_gas=yes ;;
       *-ecoff)	bfd_gas=yes ;;
       *-som)	bfd_gas=yes ;;
+    #enable bfd for coff to allow testing if a bfd target is the primary target,
+    #but not for coff as the primary target
+      i386-coff)	if test x${primary_bfd_gas} = xyes; then bfd_gas=yes; fi ;;
       *)		;;
     esac
 
@@ -493,11 +496,12 @@ changequote([,])dnl
       mips-*-*-elf)	case "$endian" in
 			big)	emulation="mipsbelf mipslelf mipself" ;;
 			*)	emulation="mipslelf mipsbelf mipself" ;;
-      # Uncommenting the next line will turn on support for i386 COFF
-      # in any i386 ELF configuration.  This probably doesn't work
-      # correctly.
-      # i386-*-*-elf)	emulation="i386coff i386elf" ;;
 			esac ;;
+      i386-*-elf)	emulation="i386elf" ;;
+      i386-*-coff)	emulation="i386coff" ;;
+      # Uncommenting the next line will turn on support for i386 COFF
+      # in any i386 ELF configuration.
+      # i386-*-*-elf)	emulation="i386elf i386coff" ;;
     esac
 
     emulations="$emulations $emulation"
@@ -623,10 +627,16 @@ if test `set . $formats ; shift ; echo $#` -gt 1 ; then
   obj_format=multi
 fi
 if test `set . $emfiles ; shift ; echo $#` -gt 0 ; then
-  te_file=multi
-  extra_objects="$extra_objects $emfiles"
   DEFAULT_EMULATION=`set . $emulations ; echo $2`
-  AC_DEFINE(USE_EMULATIONS, 1, [Use emulation support?])
+  # e-mips* has more than one emulation per file, e-i386* has just one at the
+  # moment.  If only one emulation is specified, then don't define
+  # USE_EMULATIONS or include any of the e-files as they will only be bloat.
+  case "${obj_format}${emfiles}" in
+    multi* | *mips*)
+      te_file=multi
+      extra_objects="$extra_objects $emfiles"
+      AC_DEFINE(USE_EMULATIONS, 1, [Use emulation support?]) ;;
+  esac
 fi
 AC_SUBST(extra_objects)
 AC_DEFINE_UNQUOTED(EMULATIONS, $EMULATIONS, [Supported emulations.])

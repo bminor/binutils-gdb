@@ -4445,19 +4445,13 @@ coff_sec_sym_ok_for_reloc (sec)
   return 0;
 }
 
-static void
-no_func ()
-{
-  abort ();
-}
-
 const struct format_ops coff_format_ops =
 {
   bfd_target_coff_flavour,
   0,
   1,
   coff_frob_symbol,
-  no_func,
+  0,
   coff_frob_file_after_relocs,
   0, 0,
   0, 0,
@@ -4465,19 +4459,19 @@ const struct format_ops coff_format_ops =
 #if 0
   obj_generate_asm_lineno,
 #else
-  no_func,
+  0,
 #endif
 #if 0
   obj_stab,
 #else
-  no_func,
+  0,
 #endif
   coff_sec_sym_ok_for_reloc,
   coff_pop_insert,
 #if 0
   obj_set_ext,
 #else
-  no_func,
+  0,
 #endif
   coff_obj_read_begin_hook,
   coff_obj_symbol_new_hook,
