@@ -24,7 +24,7 @@ i[34]86-*-bsd*)		gdb_host=i386bsd ;;
 i[34]86-*-go32)		gdb_host=go32 ;;
 i[34]86-*-linux)	gdb_host=linux ;;
 i[34]86-*-mach)		gdb_host=i386mach ;;
-i[34]86-*-scosysv*)	gdb_host=i386sco ;;
+i[34]86-*-sco*)		gdb_host=i386sco ;;
 i[34]86-*-solaris*)	gdb_host=i386sol2 ;;
 i[34]86-*-sunos*)	gdb_host=sun386 ;;
 i[34]86-*-sysv32)	gdb_host=i386v32 ;;
@@ -128,7 +128,7 @@ i[34]86-*-bsd*)		gdb_target=i386bsd ;;
 i[34]86-*-solaris*)	gdb_target=i386sol2 ;;
 i[34]86-*-sunos*)	gdb_target=sun386 ;;
 i[34]86-*-sysv4*)	gdb_target=i386v4 ;;
-i[34]86-*-scosysv3*)	gdb_target=i386v ;;
+i[34]86-*-sco*)		gdb_target=i386v ;;
 i[34]86-*-sysv*)	gdb_target=i386v ;;
 i[34]86-*-linux)	gdb_target=linux ;;
 
