@@ -1,3 +1,7 @@
+Fri Sep 22 18:09:02 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ldfile.c (ldfile_set_output_arch): Make arch const.
+
 Thu Sep 21 17:55:24 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* scripttempl/elfppc.sc: Correctly locate __bss_start at the
