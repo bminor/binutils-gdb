@@ -2211,7 +2211,17 @@ print_assignment (assignment, output_section)
   result = exp_fold_tree (assignment->exp->assign.src, output_section,
 			  lang_final_phase_enum, print_dot, &print_dot);
   if (result.valid_p)
-    minfo ("0x%V", result.value + result.section->bfd_section->vma);
+    {
+      const char *dst;
+      bfd_vma value;
+
+      value = result.value + result.section->bfd_section->vma;
+      dst = assignment->exp->assign.dst;
+
+      minfo ("0x%V", value);
+      if (dst[0] == '.' && dst[1] == 0)
+	print_dot = value;
+    }
   else
     {
       minfo ("*undef*   ");

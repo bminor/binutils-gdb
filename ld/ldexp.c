@@ -41,7 +41,7 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA
 #include "libiberty.h"
 #include "safe-ctype.h"
 
-static void exp_print_token PARAMS ((token_code_type code));
+static void exp_print_token PARAMS ((token_code_type code, int infix_p));
 static void make_abs PARAMS ((etree_value_type *ptr));
 static etree_value_type new_abs PARAMS ((bfd_vma value));
 static void check PARAMS ((lang_output_section_statement_type *os,
@@ -67,9 +67,13 @@ static etree_value_type exp_fold_tree_no_dot
 
 struct exp_data_seg exp_data_seg;
 
+/* Print the string representation of the given token.  Surround it
+   with spaces if INFIX_P is true.  */
+
 static void
-exp_print_token (code)
+exp_print_token (code, infix_p)
      token_code_type code;
+     int infix_p;
 {
   static CONST struct
   {
@@ -122,20 +126,22 @@ exp_print_token (code)
   };
   unsigned int idx;
 
-  for (idx = ARRAY_SIZE (table); idx--;)
-    {
-      if (table[idx].code == code)
-	{
-	  fprintf (config.map_file, " %s ", table[idx].name);
-	  return;
-	}
-    }
+  for (idx = 0; idx < ARRAY_SIZE (table); idx++)
+    if (table[idx].code == code)
+      break;
 
-  /* Not in table, just print it alone.  */
-  if (code < 127)
-    fprintf (config.map_file, " %c ", code);
+  if (infix_p)
+    fputc (' ', config.map_file);
+
+  if (idx < ARRAY_SIZE (table))
+    fputs (table[idx].name, config.map_file);
+  else if (code < 127)
+    fputc (code, config.map_file);
   else
-    fprintf (config.map_file, " <code %d> ", code);
+    fprintf (config.map_file, "<code %d>", code);
+
+  if (infix_p)
+    fputc (' ', config.map_file);
 }
 
 static void
@@ -955,7 +961,7 @@ exp_print_tree (tree)
 	fprintf (config.map_file, "%s (UNDEFINED)", tree->assign.dst->name);
 #endif
       fprintf (config.map_file, "%s", tree->assign.dst);
-      exp_print_token (tree->type.node_code);
+      exp_print_token (tree->type.node_code, true);
       exp_print_tree (tree->assign.src);
       break;
     case etree_provide:
@@ -967,7 +973,7 @@ exp_print_tree (tree)
     case etree_binary:
       fprintf (config.map_file, "(");
       exp_print_tree (tree->binary.lhs);
-      exp_print_token (tree->type.node_code);
+      exp_print_token (tree->type.node_code, true);
       exp_print_tree (tree->binary.rhs);
       fprintf (config.map_file, ")");
       break;
@@ -979,10 +985,10 @@ exp_print_tree (tree)
       exp_print_tree (tree->trinary.rhs);
       break;
     case etree_unary:
-      exp_print_token (tree->unary.type.node_code);
+      exp_print_token (tree->unary.type.node_code, false);
       if (tree->unary.child)
 	{
-	  fprintf (config.map_file, "(");
+	  fprintf (config.map_file, " (");
 	  exp_print_tree (tree->unary.child);
 	  fprintf (config.map_file, ")");
 	}
@@ -1004,9 +1010,9 @@ exp_print_tree (tree)
 	}
       else
 	{
-	  exp_print_token (tree->type.node_code);
+	  exp_print_token (tree->type.node_code, false);
 	  if (tree->name.name)
-	    fprintf (config.map_file, "(%s)", tree->name.name);
+	    fprintf (config.map_file, " (%s)", tree->name.name);
 	}
       break;
     default:
