@@ -1,5 +1,7 @@
 2000-05-08  Alan Modra  <alan@linuxcare.com.au>
 
+	* versados.c (versados_scan): Init stringlen and pass_2_done.
+
 	* trad-core.c (trad_unix_core_file_p): Return
 	bfd_error_wrong_format rather than bfd_error_file_truncated.
 
