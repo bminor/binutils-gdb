@@ -1,3 +1,7 @@
+Thu Jul  2 17:11:27 1998  Doug Evans  <devans@seba.cygnus.com>
+
+	* m32r-opc.h (CGEN_MIN_INSN_SIZE): New #define.
+
 Wed Jul  1 16:11:16 1998  Doug Evans  <devans@seba.cygnus.com>
 
 	* m32r-asm.c,m32r-dis.c,m32r-opc.c,m32r-opc.h: Regenerate.
