@@ -1727,6 +1727,9 @@ os9kread.o: os9kread.c $(buildsym_h) $(complaints_h) $(bfd_h) $(defs_h) \
 
 mem-break.o: mem-break.c $(defs_h) 
 
+memattr.o: memattr.c $(defs_h) $(command_h) $(gdbcmd_h) $(memattr_h) \
+	$(target_h) $(value_h) $(language_h) $(gdb_string_h)
+
 minsyms.o: minsyms.c $(bfd_h) $(defs_h) $(objfiles_h) $(symfile_h) \
 	$(symtab_h) $(gdb_string_h) $(value_h) $(cp_abi_h)
 
