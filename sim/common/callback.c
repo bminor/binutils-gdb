@@ -534,7 +534,9 @@ os_fstat (p, fd, buf)
 
   if (p->ispipe[fd])
     {
+#if defined (HAVE_STRUCT_STAT_ST_ATIME) || defined (HAVE_STRUCT_STAT_ST_CTIME) || defined (HAVE_STRUCT_STAT_ST_MTIME)
       time_t t = (*p->time) (p, NULL);
+#endif
 
       /* We have to fake the struct stat contents, since the pipe is
 	 made up in the simulator.  */

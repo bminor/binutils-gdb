@@ -1,3 +1,7 @@
+2005-02-21  Jim Blandy  <jimb@redhat.com>
+
+	* callback.c (os_fstat): Don't declare 't' unless it's used.
+
 2005-02-09  Jim Blandy  <jimb@redhat.com>
 
 	* Make-common.in (CGEN): Load guile.scm, and include a trailing
