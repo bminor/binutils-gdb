@@ -38,6 +38,10 @@ static bfd_boolean elf32_d10v_gc_sweep_hook
 static bfd_boolean elf32_d10v_check_relocs
   PARAMS ((bfd *, struct bfd_link_info *, asection *,
 	   const Elf_Internal_Rela *));
+static bfd_vma extract_rel_addend
+  PARAMS ((bfd *, bfd_byte *, reloc_howto_type *));
+static void insert_rel_addend
+  PARAMS ((bfd *, bfd_byte *, reloc_howto_type *, bfd_vma));
 static bfd_boolean elf32_d10v_relocate_section
   PARAMS ((bfd *, struct bfd_link_info *, bfd *, asection *,
 	   bfd_byte *, Elf_Internal_Rela *, Elf_Internal_Sym *,
@@ -346,6 +350,75 @@ elf32_d10v_check_relocs (abfd, info, sec, relocs)
   return TRUE;
 }
 
+static bfd_vma
+extract_rel_addend (abfd, where, howto)
+     bfd *abfd;
+     bfd_byte *where;
+     reloc_howto_type *howto;
+{
+  bfd_vma insn, val;
+
+  switch (howto->size)
+    {
+    case 0:
+      insn = bfd_get_8 (abfd, where);
+      break;
+    case 1:
+      insn = bfd_get_16 (abfd, where);
+      break;
+    case 2:
+      insn = bfd_get_32 (abfd, where);
+      break;
+    default:
+      abort ();
+    }
+
+  val = (insn & howto->dst_mask) >> howto->bitpos << howto->rightshift;
+  /* We should really be testing for signed addends here, but we don't
+     have that info directly in the howto.  */
+  if (howto->pc_relative)
+    {
+      bfd_vma sign;
+      sign = howto->dst_mask & (~howto->dst_mask >> 1 | ~(-(bfd_vma) 1 >> 1));
+      sign = sign >> howto->bitpos << howto->rightshift;
+      val = (val ^ sign) - sign;
+    }
+  return val;
+}
+
+static void
+insert_rel_addend (abfd, where, howto, addend)
+     bfd *abfd;
+     bfd_byte *where;
+     reloc_howto_type *howto;
+     bfd_vma addend;
+{
+  bfd_vma insn;
+
+  addend = (addend >> howto->rightshift << howto->bitpos) & howto->dst_mask;
+  insn = ~howto->dst_mask;
+  switch (howto->size)
+    {
+    case 0:
+      insn &= bfd_get_8 (abfd, where);
+      insn |= addend;
+      bfd_put_8 (abfd, insn, where);
+      break;
+    case 1:
+      insn &= bfd_get_16 (abfd, where);
+      insn |= addend;
+      bfd_put_16 (abfd, insn, where);
+      break;
+    case 2:
+      insn &= bfd_get_32 (abfd, where);
+      insn |= addend;
+      bfd_put_32 (abfd, insn, where);
+      break;
+    default:
+      abort ();
+    }
+}
+
 /* Relocate a D10V ELF section.  */
 static bfd_boolean
 elf32_d10v_relocate_section (output_bfd, info, input_bfd, input_section,
@@ -391,20 +464,28 @@ elf32_d10v_relocate_section (output_bfd, info, input_bfd, input_section,
 
       if (info->relocatable)
 	{
+	  bfd_vma val;
+	  bfd_byte *where;
+
 	  /* This is a relocatable link.  We don't have to change
 	     anything, unless the reloc is against a section symbol,
 	     in which case we have to adjust according to where the
 	     section symbol winds up in the output section.  */
-	  if (r_symndx < symtab_hdr->sh_info)
-	    {
-	      sym = local_syms + r_symndx;
-	      if (ELF_ST_TYPE (sym->st_info) == STT_SECTION)
-		{
-		  sec = local_sections[r_symndx];
-		  rel->r_addend += sec->output_offset + sym->st_value;
-		}
-	    }
+	  if (r_symndx >= symtab_hdr->sh_info)
+	    continue;
 
+	  sym = local_syms + r_symndx;
+	  if (ELF_ST_TYPE (sym->st_info) != STT_SECTION)
+	    continue;
+
+	  sec = local_sections[r_symndx];
+	  val = sec->output_offset;
+	  if (val == 0)
+	    continue;
+
+	  where = contents + rel->r_offset;
+	  val += extract_rel_addend (input_bfd, where, howto);
+	  insert_rel_addend (input_bfd, where, howto, val);
 	  continue;
 	}
 
@@ -416,7 +497,23 @@ elf32_d10v_relocate_section (output_bfd, info, input_bfd, input_section,
 	{
 	  sym = local_syms + r_symndx;
 	  sec = local_sections[r_symndx];
-	  relocation = _bfd_elf_rela_local_sym (output_bfd, sym, sec, rel);
+	  relocation = (sec->output_section->vma
+			+ sec->output_offset
+			+ sym->st_value);
+	  if ((sec->flags & SEC_MERGE)
+	      && ELF_ST_TYPE (sym->st_info) == STT_SECTION)
+	    {
+	      asection *msec;
+	      bfd_vma addend;
+	      bfd_byte *where = contents + rel->r_offset;
+
+	      addend = extract_rel_addend (input_bfd, where, howto);
+	      msec = sec;
+	      addend = _bfd_elf_rel_local_sym (output_bfd, sym, &msec, addend);
+	      addend -= relocation;
+	      addend += msec->output_section->vma + msec->output_offset;
+	      insert_rel_addend (input_bfd, where, howto, addend);
+	    }
 	}
       else
 	{
@@ -456,7 +553,7 @@ elf32_d10v_relocate_section (output_bfd, info, input_bfd, input_section,
 
       r = _bfd_final_link_relocate (howto, input_bfd, input_section,
                                     contents, rel->r_offset,
-                                    relocation, rel->r_addend);
+                                    relocation, (bfd_vma) 0);
 
       if (r != bfd_reloc_ok)
 	{

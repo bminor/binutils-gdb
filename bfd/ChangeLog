@@ -1,5 +1,9 @@
 2003-11-05  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf32-d10v.c (extract_rel_addend, insert_rel_addend): New functions.
+	(elf32_d10v_relocate_section): Use them to handle -r reloc
+	adjustments, and in place of _bfd_elf_rela_local_sym.
+
 	* cpu-iq2000.c (arch_info_struct): Warning fix.
 
 2003-11-05  Alan Modra  <amodra@bigpond.net.au>
