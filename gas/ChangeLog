@@ -1,3 +1,11 @@
+Fri Feb  6 16:08:30 1998  Jeffrey A Law  (law@cygnus.com)
+
+        * config/tc-mips.c (md_begin): If mips_cpu is set, then use it as
+        the argument to bfd_set_arch_mach.
+        (load_address): Use bfd_arch_bits_per_address to determine the
+        bit size of an address instead of looking at the isa level.
+        (macro, macro2, s_cprestore, s_cpadd): Likewise.
+
 start-sanitize-v850e
 Fri Feb  6 14:44:34 1998  Nick Clifton  <nickc@cygnus.com>
 
