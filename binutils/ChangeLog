@@ -1,3 +1,20 @@
+Thu Nov  7 08:55:56 1991  Steve Chamberlain  (sac at cygnus.com)
+
+	* am29k-pinsn.c: Fixed bug in mtacc, dmac and fmac instruction
+	encodings. (Thaks to David Wood)
+
+Sun Nov  3 14:50:23 1991  Per Bothner  (bothner at cygnus.com)
+
+	* Makefile.in ($(DIST_NAME).tar.Z), TODO:  Various fixes.
+	* ar.c (get_pos_bfd): Fix to handling of before/after
+	positioning options.
+	* bucomm.c (fatal):  MISSING_VFPRINTF is no longer an issue,
+	since libiberty contains vfprintf etc if otherwise missing.
+	* m68k-pinsn.c (print_insn_arg):  Support BB/BW/BL
+	type operands, as used by branch instructions.
+	* nm.c:  Delegate printing of symbols to BFD,
+	by using bfd_print_symbol to do the formatting.
+
 Mon Oct 28 11:20:47 1991  Steve Chamberlain  (steve at cygnus.com)
 
 	* ar.c (write_archive.c): added unlink before rename since some
