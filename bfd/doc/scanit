@@ -17,9 +17,9 @@
 base=`echo $1 | cut -d '.' -f 1`
 out=`echo $2 | cut -d '.' -f 1`
 
-awk -f awkscan $1 | \
-sed -f sedscript | \
-sed -f unPROTO | \
-sed -f exmerge  | \
-sed -f exfilter  >$out.texi
+awk -f $3/awkscan $1 | \
+sed -f $3/sedscript | \
+sed -f $3/unPROTO | \
+sed -f $3/exmerge  | \
+sed -f $3/exfilter  >$out.texi
 

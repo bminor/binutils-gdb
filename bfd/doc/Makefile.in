@@ -8,21 +8,15 @@ SHELL = /bin/sh
 MAKEINFO = makeinfo
 
 .SUFFIXES: .texi .o .c .h .p .ip
-VPATH=..
-.c.texi:
-	./scanit $< $@
-
-.h.texi:
-	./scanit $< $@
 
 .c.p:
-	./scanph $< $@
+	$(srcdir)/scanph $< $@
 
 .h.p:
-	./scanph $< $@
+	$(srcdir)/scanph $< $@
 
 .c.ip:
-	./scanph -i $< $@
+	$(srcdir)/scanph -i $< $@
 
 # main GDB source directory
 
@@ -44,18 +38,26 @@ IPROTOS = cache.ip libbfd.ip reloc.ip init.ip archures.ip ctor.ip
 # SRCDOC, SRCPROT, SRCIPROT only used to sidestep Sun Make bug in interaction 
 # between VPATH and suffix rules.  If you use GNU Make, perhaps other Makes,
 # you don't need these three:
-SRCDOC = aoutx.h  archive.c archures.c \
-	bfd.c  cache.c coffcode.h \
-	core.c  format.c  libbfd.c  \
-	opncls.c  reloc.c  section.c  \
-	syms.c  targets.c init.c
+SRCDOC = $(srcdir)/../aoutx.h  $(srcdir)/../archive.c \
+	$(srcdir)/../archures.c $(srcdir)/../bfd.c \
+	$(srcdir)/../cache.c $(srcdir)/../coffcode.h \
+	$(srcdir)/../core.c  $(srcdir)/../format.c \
+	$(srcdir)/../libbfd.c $(srcdir)/../opncls.c \
+	$(srcdir)/../reloc.c  $(srcdir)/../section.c \
+	$(srcdir)/../syms.c  $(srcdir)/../targets.c \
+	$(srcdir)/../init.c
 
-SRCPROT = archive.c archures.c bfd.c \
-	coffcode.h core.c format.c \
-	libbfd.c opncls.c reloc.c \
-	section.c syms.c targets.c init.c
+SRCPROT = $(srcdir)/../archive.c $(srcdir)/../archures.c \
+	$(srcdir)/../bfd.c $(srcdir)/../coffcode.h $(srcdir)/../core.c \
+	$(srcdir)/../format.c $(srcdir)/../libbfd.c \
+	$(srcdir)/../opncls.c $(srcdir)/../reloc.c \
+	$(srcdir)/../section.c $(srcdir)/../syms.c \
+	$(srcdir)/../targets.c $(srcdir)/../init.c    
 
-SRCIPROT = cache.c libbfd.c reloc.c cpu-h8300.c  cpu-i960.c archures.c init.c ctor.c
+SRCIPROT = $(srcdir)/../cache.c $(srcdir)/../libbfd.c \
+	$(srcdir)/../reloc.c $(srcdir)/../cpu-h8300.c \
+	$(srcdir)/../cpu-i960.c $(srcdir)/../archures.c \
+	$(srcdir)/../init.c $(srcdir)/../ctor.c
 
 STAGESTUFF = $(PROTOS) *.p *.ip *.h bfd.?? $(DOCFILES)
 
@@ -76,10 +78,53 @@ protos: $(PROTOS) $(IPROTOS)
 	sed -f tolibbfd libbfd-in.h  > libbfd.h
 	sed -f tolibcoff libcoff-in.h  > libcoff.h
 
-# Following three rules only for the benefit of Sun Make; see comment above
-$(DOCFILES) : $(SRCDOC)
-$(PROTOS) : $(SRCPROT)
-$(IPROTOS) : $(SRCIPROT)
+aoutx.texi: $(srcdir)/scanit $(srcdir)/../aoutx.h
+	$(srcdir)/scanit $(srcdir)/../aoutx.h aoutx.texi $(srcdir)
+
+archive.texi: $(srcdir)/scanit $(srcdir)/../archive.c
+	$(srcdir)/scanit $(srcdir)/../archive.c archive.texi $(srcdir)
+
+archures.texi: $(srcdir)/scanit $(srcdir)/../archures.c
+	$(srcdir)/scanit $(srcdir)/../archures.c archures.texi $(srcdir)
+
+bfd.texi: $(srcdir)/scanit $(srcdir)/../bfd.c
+	$(srcdir)/scanit $(srcdir)/../bfd.c bfd.texi $(srcdir)
+
+cache.texi:	$(srcdir)/scanit $(srcdir)/../cache.c
+	$(srcdir)/scanit $(srcdir)/../cache.c cache.texi $(srcdir)
+
+coffcode.texi:	$(srcdir)/scanit $(srcdir)/../coffcode.h
+	$(srcdir)/scanit $(srcdir)/../coffcode.h coffcode.texi $(srcdir)
+
+core.texi:	$(srcdir)/scanit $(srcdir)/../core.c
+	$(srcdir)/scanit $(srcdir)/../core.c core.texi $(srcdir)
+
+format.texi:	$(srcdir)/scanit $(srcdir)/../format.c
+	$(srcdir)/scanit $(srcdir)/../format.c format.texi $(srcdir)
+
+libbfd.texi:	$(srcdir)/scanit $(srcdir)/../libbfd.c
+	$(srcdir)/scanit $(srcdir)/../libbfd.c libbfd.texi $(srcdir)
+
+opncls.texi:	$(srcdir)/scanit $(srcdir)/../opncls.c
+	$(srcdir)/scanit $(srcdir)/../opncls.c opncls.texi $(srcdir)
+
+reloc.texi :	$(srcdir)/scanit $(srcdir)/../reloc.c
+	$(srcdir)/scanit $(srcdir)/../reloc.c reloc.texi $(srcdir)
+
+section.texi:	$(srcdir)/scanit $(srcdir)/../section.c
+	$(srcdir)/scanit $(srcdir)/../section.c section.texi $(srcdir)
+
+syms.texi :	$(srcdir)/scanit $(srcdir)/../syms.c
+	$(srcdir)/scanit $(srcdir)/../syms.c syms.texi $(srcdir)
+
+targets.texi:	$(srcdir)/scanit $(srcdir)/../targets.c
+	$(srcdir)/scanit $(srcdir)/../targets.c targets.texi $(srcdir)
+
+init.texi:	$(srcdir)/scanit $(srcdir)/../init.c
+	$(srcdir)/scanit $(srcdir)/../init.c init.texi $(srcdir)
+
+ctor.texi:	$(srcdir)/scanit $(srcdir)/../ctor.c
+	$(srcdir)/scanit $(srcdir)/../ctor.c ctor.texi $(srcdir)
 
 clean:
 	rm -f $(STAGESTUFF) bfd.dvi bfd.ps *~* *# bfd.??? 
