@@ -2688,7 +2688,7 @@ ppc64_elf_get_synthetic_symtab (bfd *abfd,
 
   synthetic_opd = opd;
   synthetic_relocatable = relocatable;
-  qsort (syms, symcount, sizeof (asymbol *), compare_symbols);
+  qsort (syms, symcount, sizeof (*syms), compare_symbols);
 
   if (!relocatable && symcount > 1)
     {
@@ -2741,26 +2741,24 @@ ppc64_elf_get_synthetic_symtab (bfd *abfd,
       arelent *r;
       size_t size;
       long relcount;
-      asection *relopd;
 
       slurp_relocs = get_elf_backend_data (abfd)->s->slurp_reloc_table;
-      relopd = opd;
       relcount = (opd->flags & SEC_RELOC) ? opd->reloc_count : 0;
 
       if (! relcount
-	  || ! (*slurp_relocs) (abfd, relopd, syms, FALSE))
+	  || ! (*slurp_relocs) (abfd, opd, static_syms, FALSE))
 	goto done;
 
       size = 0;
-      for (i = secsymend, r = relopd->relocation; i < opdsymend; ++i)
+      for (i = secsymend, r = opd->relocation; i < opdsymend; ++i)
 	{
 	  asymbol *sym;
 
-	  while (r < relopd->relocation + relcount
+	  while (r < opd->relocation + relcount
 		 && r->address < syms[i]->value + opd->vma)
 	    ++r;
 
-	  if (r == relopd->relocation + relcount)
+	  if (r == opd->relocation + relcount)
 	    break;
 
 	  if (r->address != syms[i]->value + opd->vma)
@@ -2788,15 +2786,15 @@ ppc64_elf_get_synthetic_symtab (bfd *abfd,
 
       names = (char *) (s + count);
 
-      for (i = secsymend, r = relopd->relocation; i < opdsymend; ++i)
+      for (i = secsymend, r = opd->relocation; i < opdsymend; ++i)
 	{
 	  asymbol *sym;
 
-	  while (r < relopd->relocation + relcount
+	  while (r < opd->relocation + relcount
 		 && r->address < syms[i]->value + opd->vma)
 	    ++r;
 
-	  if (r == relopd->relocation + relcount)
+	  if (r == opd->relocation + relcount)
 	    break;
 
 	  if (r->address != syms[i]->value + opd->vma)
