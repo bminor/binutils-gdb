@@ -1,3 +1,13 @@
+Wed Jul 15 10:58:29 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* tracepoint.c (set_raw_tracepoint): Cope with symbols that do not
+	have an associated directory.
+
+Mon Jul 13 15:21:04 1998  Mark Alexander  <marka@cygnus.com>
+
+	* utils.c (puts_debug): Display non-printable characters in hex
+	instead of octal.
+
 Thu Jul  9 16:16:47 1998  Jeffrey A Law  (law@cygnus.com)
 
 	* mn10300-tdep.c (mn10300_generic_register_names): New variable.
