@@ -1,3 +1,8 @@
+2000-03-27  Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
+
+        * infcmd.c (_initialize_infcmd):  Add `info r' alias for
+        `info registers'.
+
 2000-04-13  Nick Duffek  <nsd@cygnus.com>
 
 	* sol-thread.c (init_sol_core_ops): Initialize to_thread_alive
