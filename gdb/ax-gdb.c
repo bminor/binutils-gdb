@@ -1342,7 +1342,7 @@ gen_struct_ref (struct agent_expr *ax, struct axs_value *value, char *field,
       gen_usual_unary (ax, value);
       gen_deref (ax, value);
     }
-  type = value->type;
+  type = check_typedef (value->type);
 
   /* This must yield a structure or a union.  */
   if (TYPE_CODE (type) != TYPE_CODE_STRUCT
