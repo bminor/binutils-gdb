@@ -12,7 +12,18 @@
 
 #define WIFEXITED(w)	(((w)&0377) == 0)
 #define WIFSIGNALED(w)	(((w)&0377) != 0177 && ((w)&~0377) == 0)
+#ifdef IBM6000
+
+/* Unfortunately, the above comment (about being compatible in all Unix 
+   systems) is not quite correct for AIX, sigh.  And AIX 3.2 can generate
+   status words like 0x57c (sigtrap received after load), and gdb would
+   choke on it. */
+
+#define WIFSTOPPED(w)	((w)&0x40)
+
+#else
 #define WIFSTOPPED(w)	(((w)&0377) == 0177)
+#endif
 
 #define WEXITSTATUS(w)	((w) >> 8)	/* same as WRETCODE */
 #define WTERMSIG(w)	((w) & 0177)
