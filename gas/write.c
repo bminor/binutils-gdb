@@ -1150,9 +1150,9 @@ fixup_segment(fixP, this_segment_type)
 		
 		if (!fixP->fx_bit_fixP) {
 			if ((size==1 &&
-			     (add_number& ~0xFF)   && (add_number&~0xFF!=(-1&~0xFF))) ||
+			     (add_number& ~0xFF)   && ((add_number&~0xFF)!=(-1&~0xFF))) ||
 			    (size==2 &&
-			     (add_number& ~0xFFFF) && (add_number&~0xFFFF!=(-1&~0xFFFF)))) {
+			     (add_number& ~0xFFFF) && ((add_number&~0xFFFF)!=(-1&~0xFFFF)))) {
 				as_bad("Value of %d too large for field of %d bytes at 0x%x",
 				       add_number, size, fragP->fr_address + where);
 			} /* generic error checking */

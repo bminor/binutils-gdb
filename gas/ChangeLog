@@ -1,3 +1,8 @@
+Sun Sep 13 20:30:10 1992  Ian Lance Taylor  (ian@cygnus.com)
+
+	* write.c (fixup_segment): fixed missing parens in expression
+	checking for byte or word overflow.
+
 Thu Sep 10 09:23:15 1992  Ian Lance Taylor  (ian@cygnus.com)
 
 	* input-scrub.c (input_scrub_push): call input_file_begin, not
