@@ -5,8 +5,8 @@ XDEPFILES=
 XM_CLIBS= -lsocket -lnsl
 
 NAT_FILE= nm-sun4sol2.h
-NATDEPFILES= corelow.o core-sol2.o solib.o solib-svr4.o fork-child.o procfs.o \
-	proc-api.o proc-events.o proc-flags.o proc-why.o
+NATDEPFILES= corelow.o core-sol2.o solib.o solib-svr4.o solib-legacy.o \
+	fork-child.o procfs.o proc-api.o proc-events.o proc-flags.o proc-why.o
 
 # /usr/include/v9 is needed only by core-sol2.c when including 
 # v9/sys/privregs.h, or rather the headers it in turn includes.

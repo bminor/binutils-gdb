@@ -1,5 +1,69 @@
 2001-03-09  Kevin Buettner  <kevinb@redhat.com>
 
+	* Makefile.in (solib-svr4.o): Depend on solib-svr4.c, not solib.c.
+	(solib-legacy.o): New makefile target.
+	* solib-legacy.c: New file.
+	* solib-svr4.h (SVR4_FETCH_LINK_MAP_OFFSETS): Delete.
+	(default_svr4_fetch_link_map_offsets): Delete.
+	(set_solib_svr4_fetch_link_map_offsets): Declare.
+	(legacy_svr4_fetch_link_map_offsets_hook): Declare.
+	* solib-svr4.c (elf/common.h): Include.
+	(link.h): Only include for SunOS shared library support.
+	(_SYSCALL32): Don't define.
+	(SVR4_FETCH_LINK_MAP_OFFSETS): Define.
+	(default_svr4_fetch_link_map_offsets): Made static; added forward
+	declaration.
+	(fetch_link_map_offsets): New static global.
+	(legacy_svr4_fetch_link_map_offsets_hook): New global variable.
+	(default_svr4_fetch_link_map_offsets):  Rewritten.  The guts
+	of what used to be in this function now reside in
+	legacy_svr4_fetch_link_map_offsets() in solib-legacy.c.
+	(open_symbol_file_object): Fix declaration in SunOS section
+	of the code.
+	(set_solib_svr4_fetch_link_map_offsets): New extern function.
+	(init_fetch_link_map_offsets): New static function.
+	(_initialize_svr4_solib): Put static global fetch_link_map_offsets
+	under multiarch control.
+
+	* config/alpha/alpha-linux.mt (TDEPFILES): Add solib-legacy.o to
+	list.
+	* config/alpha/fbsd.mh (NATDEPFILES): Likewise.
+	* config/arm/linux.mt (TDEPFILES): Likewise.
+	* config/i386/fbsd.mh (NATDEPFILES): Likewise.
+	* config/i386/i386dgux.mh (NATDEPFILES): Likewise.
+	* config/i386/i386gnu.mh (NATDEPFILES): Likewise.
+	* config/i386/i386sco5.mh (NATDEPFILES): Likewise.
+	* config/i386/i386sol2.mt (TDEPFILES): Likewise.
+	* config/i386/i386v4.mh (NATDEPFILES): Likewise.
+	* config/i386/i386v42mp.mh (NATDEPFILES): Likewise.
+	* config/i386/linux.mt (TDEPFILES): Likewise.
+	* config/i386/nbsd.mh (NATDEPFILES): Likewise.
+	* config/i386/nbsdelf.mh (NATDEPFILES): Likewise.
+	* config/i386/ncr3000.mt (TDEPFILES): Likewise.
+	* config/i386/ptx4.mh (XDEPFILES): Likewise.
+	* config/i386/sun386.mt (TDEPFILES): Likewise.
+	* config/ia64/linux.mt (TDEPFILES): Likewise.
+	* config/m68k/linux.mt (TDEPFILES): Likewise.
+	* config/m68k/m68kv4.mh (NATDEPFILES): Likewise.
+	* config/m68k/nbsd.mh (NATDEPFILES): Likewise.
+	* config/m68k/sun2os4.mt (TDEPFILES): Likewise.
+	* config/m68k/sun3os4.mt (TDEPFILES): Likewise.
+	* config/m88k/delta88v4.mh (NATDEPFILES): Likewise.
+	* config/mips/mipsv4.mh (NATDEPFILES): Likewise.
+	* config/ns32k/nbsd.mh (NATDEPFILES): Likewise.
+	* config/powerpc/linux.mt (TDEPFILES): Likewise.
+	* config/powerpc/nbsd.mh (NATDEPFILES): Likewise.
+	* config/powerpc/solaris.mh (NATDEPFILES): Likewise.
+	* config/sh/linux.mt (TDEPFILES): Likewise.
+	* config/sparc/linux.mt (TDEPFILES): Likewise.
+	* config/sparc/nbsd.mh (NATDEPFILES): Likewise.
+	* config/sparc/nbsdelf.mh (NATDEPFILES): Likewise.
+	* config/sparc/sp64linux.mt (TDEPFILES): Likewise.
+	* config/sparc/sun4os4.mt (TDEPFILES): Likewise.
+	* config/sparc/sun4sol2.mh (NATDEPFILES): Likewise.
+
+2001-03-09  Kevin Buettner  <kevinb@redhat.com>
+
 	* utils.c (xmrealloc, xcalloc): Return NULL for zero-sized requests.
 
 2001-03-09  Andrew Cagney  <ac131313@redhat.com>

@@ -20,7 +20,6 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#define _SYSCALL32	/* for Sparc64 cross Sparc32 */
 #include "defs.h"
 #include "regcache.h"
 
@@ -34,12 +33,10 @@
 #ifndef SVR4_SHARED_LIBS
  /* SunOS shared libs need the nlist structure.  */
 #include <a.out.h>
+#include <link.h>
 #else
 #include "elf/external.h"
-#endif
-
-#ifdef HAVE_LINK_H
-#include <link.h>
+#include "elf/common.h"
 #endif
 
 #include "symtab.h"
@@ -58,6 +55,19 @@
 
 #include "solist.h"
 #include "solib-svr4.h"
+
+#ifndef SVR4_FETCH_LINK_MAP_OFFSETS
+#define SVR4_FETCH_LINK_MAP_OFFSETS() fetch_link_map_offsets ()
+#endif
+
+static struct link_map_offsets *default_svr4_fetch_link_map_offsets (void);
+static struct link_map_offsets *(*fetch_link_map_offsets)(void) = 
+  default_svr4_fetch_link_map_offsets;
+
+/* legacy_svr4_fetch_link_map_offsets_hook is a pointer to a function
+   which is used to fetch link map offsets.  It will only be set
+   by solib-legacy.c, if at all. */
+struct link_map_offsets *(*legacy_svr4_fetch_link_map_offsets_hook)(void) = 0;
 
 /* Link map info to include in an allocated so_list entry */
 
@@ -122,101 +132,24 @@ static char *main_name_list[] =
 
 
 /* Fetch (and possibly build) an appropriate link_map_offsets structure
-   for native targets using struct definitions from link.h.  */
+   for native targets using struct definitions from link.h.  
+   
+   Note: For non-native targets (i.e. cross-debugging situations),
+   you need to define a target specific fetch_link_map_offsets()
+   function and call set_solib_svr4_fetch_link_map_offsets () to
+   register this function.  */
 
-struct link_map_offsets *
+static struct link_map_offsets *
 default_svr4_fetch_link_map_offsets (void)
 {
-#ifdef HAVE_LINK_H
-  static struct link_map_offsets lmo;
-  static struct link_map_offsets *lmp = 0;
-#if defined (HAVE_STRUCT_LINK_MAP32)
-  static struct link_map_offsets lmo32;
-  static struct link_map_offsets *lmp32 = 0;
-#endif
-
-#ifndef offsetof
-#define offsetof(TYPE, MEMBER) ((unsigned long) &((TYPE *)0)->MEMBER)
-#endif
-#define fieldsize(TYPE, MEMBER) (sizeof (((TYPE *)0)->MEMBER))
-
-  if (lmp == 0)
-    {
-      lmp = &lmo;
-
-#ifdef SVR4_SHARED_LIBS
-      lmo.r_debug_size = sizeof (struct r_debug);
-
-      lmo.r_map_offset = offsetof (struct r_debug, r_map);
-      lmo.r_map_size = fieldsize (struct r_debug, r_map);
-
-      lmo.link_map_size = sizeof (struct link_map);
-
-      lmo.l_addr_offset = offsetof (struct link_map, l_addr);
-      lmo.l_addr_size = fieldsize (struct link_map, l_addr);
-
-      lmo.l_next_offset = offsetof (struct link_map, l_next);
-      lmo.l_next_size = fieldsize (struct link_map, l_next);
-
-      lmo.l_prev_offset = offsetof (struct link_map, l_prev);
-      lmo.l_prev_size = fieldsize (struct link_map, l_prev);
-
-      lmo.l_name_offset = offsetof (struct link_map, l_name);
-      lmo.l_name_size = fieldsize (struct link_map, l_name);
-#else /* !SVR4_SHARED_LIBS */
-      lmo.link_map_size = sizeof (struct link_map);
-
-      lmo.l_addr_offset = offsetof (struct link_map, lm_addr);
-      lmo.l_addr_size = fieldsize (struct link_map, lm_addr);
-
-      lmo.l_next_offset = offsetof (struct link_map, lm_next);
-      lmo.l_next_size = fieldsize (struct link_map, lm_next);
-
-      lmo.l_name_offset = offsetof (struct link_map, lm_name);
-      lmo.l_name_size = fieldsize (struct link_map, lm_name);
-#endif /* SVR4_SHARED_LIBS */
-    }
-
-#if defined (HAVE_STRUCT_LINK_MAP32)
-  if (lmp32 == 0)
-    {
-      lmp32 = &lmo32;
-
-      lmo32.r_debug_size = sizeof (struct r_debug32);
-
-      lmo32.r_map_offset = offsetof (struct r_debug32, r_map);
-      lmo32.r_map_size = fieldsize (struct r_debug32, r_map);
-
-      lmo32.link_map_size = sizeof (struct link_map32);
-
-      lmo32.l_addr_offset = offsetof (struct link_map32, l_addr);
-      lmo32.l_addr_size = fieldsize (struct link_map32, l_addr);
-
-      lmo32.l_next_offset = offsetof (struct link_map32, l_next);
-      lmo32.l_next_size = fieldsize (struct link_map32, l_next);
-
-      lmo32.l_prev_offset = offsetof (struct link_map32, l_prev);
-      lmo32.l_prev_size = fieldsize (struct link_map32, l_prev);
-
-      lmo32.l_name_offset = offsetof (struct link_map32, l_name);
-      lmo32.l_name_size = fieldsize (struct link_map32, l_name);
-    }
-#endif /* defined (HAVE_STRUCT_LINK_MAP32) */
-
-#if defined (HAVE_STRUCT_LINK_MAP32)
-  if (bfd_get_arch_size (exec_bfd) == 32)
-    return lmp32;
+  if (legacy_svr4_fetch_link_map_offsets_hook)
+    return legacy_svr4_fetch_link_map_offsets_hook ();
   else
-#endif
-    return lmp;
-
-#else
-
-  internal_error (__FILE__, __LINE__,
-		  "default_svr4_fetch_link_map_offsets called without HAVE_LINK_H defined.");
-  return 0;
-
-#endif /* HAVE_LINK_H */
+    {
+      internal_error (__FILE__, __LINE__,
+"default_svr4_fetch_link_map_offsets called without legacy link_map support enabled.");
+      return 0;
+    }
 }
 
 /* Macro to extract an address from a solib structure.
@@ -951,7 +884,7 @@ open_symbol_file_object (void *from_ttyp)
 #else
 
 static int
-open_symbol_file_object (int *from_ttyp)
+open_symbol_file_object (void *from_ttyp)
 {
   return 1;
 }
@@ -1688,18 +1621,33 @@ svr4_relocate_section_addresses (struct so_list *so,
   sec->endaddr += LM_ADDR (so);
 }
 
+void
+set_solib_svr4_fetch_link_map_offsets (struct link_map_offsets *(*flmo) (void))
+{
+  fetch_link_map_offsets = flmo;
+}
+
+static void
+init_fetch_link_map_offsets (void)
+{
+  set_solib_svr4_fetch_link_map_offsets (default_svr4_fetch_link_map_offsets);
+}
+
 static struct target_so_ops svr4_so_ops;
 
 void
 _initialize_svr4_solib (void)
 {
+  register_gdbarch_swap (&fetch_link_map_offsets,
+                         sizeof (fetch_link_map_offsets),
+			 init_fetch_link_map_offsets);
+
   svr4_so_ops.relocate_section_addresses = svr4_relocate_section_addresses;
   svr4_so_ops.free_so = svr4_free_so;
   svr4_so_ops.clear_solib = svr4_clear_solib;
   svr4_so_ops.solib_create_inferior_hook = svr4_solib_create_inferior_hook;
   svr4_so_ops.special_symbol_handling = svr4_special_symbol_handling;
   svr4_so_ops.current_sos = svr4_current_sos;
-  svr4_so_ops.open_symbol_file_object = open_symbol_file_object;
   svr4_so_ops.open_symbol_file_object = open_symbol_file_object;
   svr4_so_ops.in_dynsym_resolve_code = svr4_in_dynsym_resolve_code;
 

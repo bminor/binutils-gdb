@@ -1,3 +1,3 @@
 # Target: Motorola PPC on Linux
-TDEPFILES= rs6000-tdep.o ppc-linux-tdep.o solib.o solib-svr4.o 
+TDEPFILES= rs6000-tdep.o ppc-linux-tdep.o solib.o solib-svr4.o solib-legacy.o
 TM_FILE= tm-linux.h
