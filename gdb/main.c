@@ -157,6 +157,15 @@ captured_main (void *data)
 
   long time_at_startup = get_run_time ();
 
+#if defined (HAVE_SETLOCALE) && defined (HAVE_LC_MESSAGES)
+  setlocale (LC_MESSAGES, "");
+#endif
+#if defined (HAVE_SETLOCALE)
+  setlocale (LC_CTYPE, "");
+#endif
+  bindtextdomain (PACKAGE, LOCALEDIR);
+  textdomain (PACKAGE);
+
   START_PROGRESS (argv[0], 0);
 
 #ifdef MPW

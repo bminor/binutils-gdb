@@ -312,7 +312,7 @@ CONFIG_UNINSTALL = @CONFIG_UNINSTALL@
 # your system doesn't have fcntl.h in /usr/include (which is where it
 # should be according to Posix).
 DEFS = @DEFS@
-GDB_CFLAGS = -I. -I$(srcdir) -I$(srcdir)/config $(DEFS)
+GDB_CFLAGS = -I. -I$(srcdir) -I$(srcdir)/config -DLOCALEDIR="\"$(prefix)/share/locale\"" $(DEFS)
 
 # M{H,T}_CFLAGS, if defined, have host- and target-dependent CFLAGS
 # from the config directory.
@@ -619,7 +619,7 @@ completer_h =	completer.h
 cp_abi_h =	cp-abi.h
 dcache_h =	dcache.h
 defs_h =	defs.h $(xm_h) $(tm_h) $(nm_h) config.status config.h \
-		gdbarch.h ui-file.h $(INCLUDE_DIR)/gdb/signals.h
+		gdbarch.h ui-file.h $(INCLUDE_DIR)/gdb/signals.h gdb_locale.h
 doublest_h =	doublest.h $(floatformat_h)
 dwarf2cfi_h =	dwarf2cfi.h
 event_loop_h =  event-loop.h

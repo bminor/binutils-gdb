@@ -1,3 +1,14 @@
+2002-06-21  Tom Tromey  <tromey@redhat.com>
+
+	* gdb_locale.h: New file.
+	* Makefile.in (GDB_CFLAGS): Define LOCALEDIR.
+	(defs_h): Added gdb_locale.h.
+	* configure, config.in: Rebuilt.
+	* configure.in (PACKAGE): Define.
+	* defs.h: Include gdb_locale.h.
+	* main.c (captured_main): Call setlocale, bindtextdomain,
+	textdomain.
+
 2002-06-21  Dave Brolley  <brolley@redhat.com>
 
 	From Stan Shebs, Jim Blandy, Mark Salter, Kevin Buettner:
