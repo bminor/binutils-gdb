@@ -6,13 +6,21 @@
 (This is a prototype to remind us of things that should be announced
 in the next release...)
 
+ * Testsuite
+
+This is the first GDB release which is accompanied by a matching testsuite.
+The testsuite requires installation of dejagnu, which should be available
+via ftp from most sites that carry GNU software.
+
+ * C++ demangling
+
 'Cfront' style demangling has had its name changed to 'ARM' style, to
 emphasize that it was written from the specifications in the Annotated
 Reference Manual, not to be compatible with AT&T cfront.  Despite disclaimers,
 it still generated too much confusion with users attempting to use gdb with
 AT&T cfront.
 
-  * Simulators
+ * Simulators
 
 GDB now uses a standard remote interface to a simulator library.
 So far, the library contains simulators for the Zilog Z8001/2, the
