@@ -1,3 +1,8 @@
+Mon Jan 10 22:14:20 1994  Rob Savoye  (rob@darkstar.cygnus.com)
+
+	* config/unix-gdb.exp: Remove gdb_unload cause it's already
+	defined in lib/gdb.exp.
+
 Fri Jan  7 12:42:45 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* gdb.t07/watchpoint.exp:  Clear xfail for calling function with
