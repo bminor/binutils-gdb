@@ -717,7 +717,7 @@ xmodem_h = xmodem.h
 #
 
 cli_cmds_h = $(srcdir)/cli/cli-cmds.h
-cli_decode_h = $(srcdir)/cli/cli-decode.h $(gdb_regex_h) $(command_h)
+cli_decode_h = $(srcdir)/cli/cli-decode.h $(command_h)
 cli_dump_h = $(srcdir)/cli/cli-dump.h
 cli_script_h = $(srcdir)/cli/cli-script.h
 cli_setshow_h = $(srcdir)/cli/cli-setshow.h
