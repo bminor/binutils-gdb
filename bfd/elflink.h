@@ -1075,7 +1075,41 @@ elf_link_add_object_symbols (abfd, info)
 		    goto error_return;
 
 		  if (hi->root.type == bfd_link_hash_indirect)
-		    hi->elf_link_hash_flags &= ~ ELF_LINK_NON_ELF;
+		    {
+		      hi->elf_link_hash_flags &= ~ ELF_LINK_NON_ELF;
+		      if (dynamic)
+			hi->elf_link_hash_flags |= ELF_LINK_HASH_DEF_DYNAMIC;
+		      /* We don't set DEF_REGULAR because we don't the
+                         symbol to get exported even if we are
+                         exporting all defined symbols.  FIXME: What a
+                         hack. */
+		      /* FIXME: Do we need to copy any flags from H to
+                         HI?  */
+		    }
+
+		  /* We also need to define an indirection from the
+                     nondefault version of the symbol.  */
+
+		  shortname = bfd_hash_allocate (&info->hash->table,
+						 strlen (name));
+		  if (shortname == NULL)
+		    goto error_return;
+		  strncpy (shortname, name, p - name);
+		  strcpy (shortname + (p - name), p + 1);
+
+		  hi = NULL;
+		  if (! (_bfd_generic_link_add_one_symbol
+			 (info, abfd, shortname, BSF_INDIRECT,
+			  bfd_ind_section_ptr, (bfd_vma) 0, name, false,
+			  collect, (struct bfd_link_hash_entry **) &hi)))
+		    goto error_return;
+
+		  if (hi->root.type == bfd_link_hash_indirect)
+		    {
+		      hi->elf_link_hash_flags &= ~ ELF_LINK_NON_ELF;
+		      if (dynamic)
+			hi->elf_link_hash_flags |= ELF_LINK_HASH_DEF_DYNAMIC;
+		    }
 		}
 	    }
 
@@ -1823,29 +1857,34 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
       size_t i;
       size_t bucketcount = 0;
       Elf_Internal_Sym isym;
+      struct elf_assign_sym_version_info sinfo;
 
       /* Set up the version definition section.  */
       s = bfd_get_section_by_name (dynobj, ".gnu.version_d");
       BFD_ASSERT (s != NULL);
+
+      /* Attach all the symbols to their version information.  This
+         may cause some symbols to be unexported.  */
+      sinfo.output_bfd = output_bfd;
+      sinfo.info = info;
+      sinfo.verdefs = verdefs;
+      sinfo.export_dynamic = export_dynamic;
+      sinfo.removed_dynamic = false;
+      sinfo.failed = false;
+
+      elf_link_hash_traverse (elf_hash_table (info),
+			      elf_link_assign_sym_version,
+			      (PTR) &sinfo);
+      if (sinfo.failed)
+	return false;
+
+      /* We may have created additional version definitions if we are
+         just linking a regular application.  */
+      verdefs = sinfo.verdefs;
+
       if (verdefs == NULL)
 	{
-	  struct elf_assign_sym_version_info sinfo;
 	  asection **spp;
-
-	  /* No version script was used.  In this case, we just check
-             that there were no version overrides for any symbols.  */
-	  sinfo.output_bfd = output_bfd;
-	  sinfo.info = info;
-	  sinfo.verdefs = verdefs;
-	  sinfo.removed_dynamic = false;
-	  sinfo.export_dynamic = export_dynamic;
-	  sinfo.failed = false;
-
-	  elf_link_hash_traverse (elf_hash_table (info),
-				  elf_link_assign_sym_version,
-				  (PTR) &sinfo);
-	  if (sinfo.failed)
-	    return false;
 
 	  /* Don't include this section in the output file.  */
 	  for (spp = &output_bfd->sections;
@@ -1857,27 +1896,12 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
 	}
       else
 	{
-	  struct elf_assign_sym_version_info sinfo;
 	  unsigned int cdefs;
 	  bfd_size_type size;
 	  struct bfd_elf_version_tree *t;
 	  bfd_byte *p;
 	  Elf_Internal_Verdef def;
 	  Elf_Internal_Verdaux defaux;
-
-	  /* Attach all of the symbols to their version information.
-             This may cause some symbols to be unexported.  */
-	  sinfo.output_bfd = output_bfd;
-	  sinfo.info = info;
-	  sinfo.verdefs = verdefs;
-	  sinfo.export_dynamic = export_dynamic;
-	  sinfo.removed_dynamic = false;
-	  sinfo.failed = false;
-	  elf_link_hash_traverse (elf_hash_table (info),
-				  elf_link_assign_sym_version,
-				  (PTR) &sinfo);
-	  if (sinfo.failed)
-	    return false;
 
 	  if (sinfo.removed_dynamic)
 	    {
@@ -1979,11 +2003,8 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
 	      h->type = STT_OBJECT;
 	      h->verinfo.vertree = t;
 
-	      if (info->shared)
-		{
-		  if (! _bfd_elf_link_record_dynamic_symbol (info, h))
-		    return false;
-		}
+	      if (! _bfd_elf_link_record_dynamic_symbol (info, h))
+		return false;
 
 	      def.vd_version = VER_DEF_CURRENT;
 	      def.vd_flags = 0;
@@ -2075,6 +2096,8 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
 	    bfd_byte *p;
 
 	    /* Build the version definition section.  */
+	    size = 0;
+	    crefs = 0;
 	    for (t = elf_tdata (output_bfd)->verref;
 		 t != NULL;
 		 t = t->vn_nextref)
@@ -2549,14 +2572,94 @@ elf_link_assign_sym_version (h, data)
 	    {
 	      h->verinfo.vertree = t;
 	      t->used = true;
+
+	      /* See if there is anything to force this symbol to
+                 local scope.  */
+	      if (t->locals != NULL)
+		{
+		  int len;
+		  char *alc;
+		  struct bfd_elf_version_expr *d;
+
+		  len = p - h->root.root.string;
+		  alc = bfd_alloc (sinfo->output_bfd, len);
+		  if (alc == NULL)
+		    return false;
+		  strncpy (alc, h->root.root.string, len - 1);
+		  alc[len - 1] = '\0';
+		  if (alc[len - 2] == ELF_VER_CHR)
+		    alc[len - 2] = '\0';
+
+		  for (d = t->locals; d != NULL; d = d->next)
+		    {
+		      if ((d->match[0] == '*' && d->match[1] == '\0')
+			  || fnmatch (d->match, alc, 0) == 0)
+			{
+			  if (h->dynindx != -1
+			      && info->shared
+			      && ! sinfo->export_dynamic
+			      && (h->elf_link_hash_flags
+				  & ELF_LINK_HASH_NEEDS_PLT) == 0)
+			    {
+			      sinfo->removed_dynamic = true;
+			      h->dynindx = -1;
+			      /* FIXME: The name of the symbol has
+				 already been recorded in the dynamic
+				 string table section.  */
+			    }
+
+			  break;
+			}
+		    }
+
+		  bfd_release (sinfo->output_bfd, alc);
+		}
+
 	      break;
 	    }
 	}
 
-      if (t == NULL)
+      /* If we are building an application, we need to create a
+         version node for this version.  */
+      if (t == NULL && ! info->shared)
 	{
-	  /* We could not find the version.  Return an error.
-	     FIXME: Why?  */
+	  struct bfd_elf_version_tree **pp;
+	  int version_index;
+
+	  /* If we aren't going to export this symbol, we don't need
+             to worry about it. */
+	  if (h->dynindx == -1)
+	    return true;
+
+	  t = ((struct bfd_elf_version_tree *)
+	       bfd_alloc (sinfo->output_bfd, sizeof *t));
+	  if (t == NULL)
+	    {
+	      sinfo->failed = true;
+	      return false;
+	    }
+
+	  t->next = NULL;
+	  t->name = p;
+	  t->globals = NULL;
+	  t->locals = NULL;
+	  t->deps = NULL;
+	  t->name_indx = (unsigned int) -1;
+	  t->used = true;
+
+	  version_index = 1;
+	  for (pp = &sinfo->verdefs; *pp != NULL; pp = &(*pp)->next)
+	    ++version_index;
+	  t->vernum = version_index;
+
+	  *pp = t;
+
+	  h->verinfo.vertree = t;
+	}
+      else if (t == NULL)
+	{
+	  /* We could not find the version for a symbol when
+             generating a shared archive.  Return an error.  */
 	  (*_bfd_error_handler)
 	    ("%s: invalid version %s", bfd_get_filename (sinfo->output_bfd),
 	     h->root.root.string);
@@ -3617,8 +3720,10 @@ elf_link_output_extsym (h, data)
          to the decorated version of the name.  For example, if the
          symbol foo@@GNU_1.2 is the default, which should be used when
          foo is used with no version, then we add an indirect symbol
-         foo which points to foo@@GNU_1.2.  */
-      if ((h->elf_link_hash_flags & ELF_LINK_NON_ELF) != 0)
+         foo which points to foo@@GNU_1.2.  We ignore these symbols,
+         since the indirected symbol is already in the hash table.  If
+         the indirect symbol is non-ELF, fall through and output it.  */
+      if ((h->elf_link_hash_flags & ELF_LINK_NON_ELF) == 0)
 	return true;
 
       /* Fall through.  */

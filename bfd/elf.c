@@ -701,9 +701,10 @@ _bfd_elf_print_private_bfd_data (abfd, farg)
 }
 
 /* Display ELF-specific fields of a symbol.  */
+
 void
-bfd_elf_print_symbol (ignore_abfd, filep, symbol, how)
-     bfd *ignore_abfd;
+bfd_elf_print_symbol (abfd, filep, symbol, how)
+     bfd *abfd;
      PTR filep;
      asymbol *symbol;
      bfd_print_symbol_type how;
@@ -733,11 +734,64 @@ bfd_elf_print_symbol (ignore_abfd, filep, symbol, how)
 		     (bfd_is_com_section (symbol->section)
 		      ? ((elf_symbol_type *) symbol)->internal_elf_sym.st_value
 		      : ((elf_symbol_type *) symbol)->internal_elf_sym.st_size));
+
+	/* If we have version information, print it.  */
+	if (elf_tdata (abfd)->dynversym_section != 0
+	    && (elf_tdata (abfd)->dynverdef_section != 0
+		|| elf_tdata (abfd)->dynverref_section != 0))
+	  {
+	    unsigned int vernum;
+	    const char *version_string;
+
+	    vernum = ((elf_symbol_type *) symbol)->version & VERSYM_VERSION;
+
+	    if (vernum == 0)
+	      version_string = "";
+	    else if (vernum == 1)
+	      version_string = "Base";
+	    else if (vernum < elf_tdata (abfd)->cverdefs)
+	      version_string =
+		elf_tdata (abfd)->verdef[vernum - 1].vd_nodename;
+	    else
+	      {
+		Elf_Internal_Verneed *t;
+
+		version_string = "";
+		for (t = elf_tdata (abfd)->verref;
+		     t != NULL;
+		     t = t->vn_nextref)
+		  {
+		    Elf_Internal_Vernaux *a;
+
+		    for (a = t->vn_auxptr; a != NULL; a = a->vna_nextptr)
+		      {
+			if (a->vna_other == vernum)
+			  {
+			    version_string = a->vna_nodename;
+			    break;
+			  }
+		      }
+		  }
+	      }
+
+	    if ((((elf_symbol_type *) symbol)->version & VERSYM_HIDDEN) == 0)
+	      fprintf (file, " %-12s", version_string);
+	    else
+	      {
+		int i;
+
+		fprintf (file, " (%s)", version_string);
+		for (i = strlen (version_string) - 10; i > 0; --i)
+		  putc (' ', file);
+	      }
+	  }
+
 	/* If the st_other field is not zero, print it.  */
 	if (((elf_symbol_type *) symbol)->internal_elf_sym.st_other != 0)
 	  fprintf (file, " 0x%02x",
 		   ((unsigned int)
 		    ((elf_symbol_type *) symbol)->internal_elf_sym.st_other));
+
 	fprintf (file, " %s", symbol->name);
       }
       break;
@@ -1098,16 +1152,19 @@ bfd_section_from_shdr (abfd, shindex)
     case SHT_GNU_verdef:
       elf_dynverdef (abfd) = shindex;
       elf_tdata (abfd)->dynverdef_hdr = *hdr;
+      return _bfd_elf_make_section_from_shdr (abfd, hdr, name);
       break;
 
     case SHT_GNU_versym:
       elf_dynversym (abfd) = shindex;
       elf_tdata (abfd)->dynversym_hdr = *hdr;
+      return _bfd_elf_make_section_from_shdr (abfd, hdr, name);
       break;
 
     case SHT_GNU_verneed:
       elf_dynverref (abfd) = shindex;
       elf_tdata (abfd)->dynverref_hdr = *hdr;
+      return _bfd_elf_make_section_from_shdr (abfd, hdr, name);
       break;
 
     case SHT_SHLIB:
@@ -1338,13 +1395,27 @@ elf_fake_sections (abfd, asect, failedptrarg)
     {
       this_hdr->sh_type = SHT_GNU_verdef;
       this_hdr->sh_entsize = 0;
-      this_hdr->sh_info = elf_tdata (abfd)->cverdefs;
+      /* objcopy or strip will copy over sh_info, but may not set
+         cverdefs.  The linker will set cverdefs, but sh_info will be
+         zero.  */
+      if (this_hdr->sh_info == 0)
+	this_hdr->sh_info = elf_tdata (abfd)->cverdefs;
+      else
+	BFD_ASSERT (elf_tdata (abfd)->cverdefs == 0
+		    || this_hdr->sh_info == elf_tdata (abfd)->cverdefs);
     }
   else if (strcmp (asect->name, ".gnu.version_r") == 0)
     {
       this_hdr->sh_type = SHT_GNU_verneed;
       this_hdr->sh_entsize = 0;
-      this_hdr->sh_info = elf_tdata (abfd)->cverrefs;
+      /* objcopy or strip will copy over sh_info, but may not set
+         cverrefs.  The linker will set cverrefs, but sh_info will be
+         zero.  */
+      if (this_hdr->sh_info == 0)
+	this_hdr->sh_info = elf_tdata (abfd)->cverrefs;
+      else
+	BFD_ASSERT (elf_tdata (abfd)->cverrefs == 0
+		    || this_hdr->sh_info == elf_tdata (abfd)->cverrefs);
     }
   else if ((asect->flags & SEC_ALLOC) != 0
 	   && (asect->flags & SEC_LOAD) != 0)
@@ -3187,7 +3258,9 @@ _bfd_elf_copy_private_section_data (ibfd, isec, obfd, osec)
   ohdr->sh_entsize = ihdr->sh_entsize;
 
   if (ihdr->sh_type == SHT_SYMTAB
-      || ihdr->sh_type == SHT_DYNSYM)
+      || ihdr->sh_type == SHT_DYNSYM
+      || ihdr->sh_type == SHT_GNU_verneed
+      || ihdr->sh_type == SHT_GNU_verdef)
     ohdr->sh_info = ihdr->sh_info;
 
   return true;
@@ -3831,17 +3904,34 @@ _bfd_elf_get_symbol_info (ignore_abfd, symbol, ret)
   bfd_symbol_info (symbol, ret);
 }
 
-/* Return whether a symbol name implies a local symbol.  In ELF, local
-   symbols generally start with ``.L''.  Most targets use this
-   function for the is_local_label_name entry point, but some override
-   it.  */
+/* Return whether a symbol name implies a local symbol.  Most targets
+   use this function for the is_local_label_name entry point, but some
+   override it.  */
 
 boolean
 _bfd_elf_is_local_label_name (abfd, name)
      bfd *abfd;
      const char *name;
 {
-  return name[0] == '.' && name[1] == 'L';
+  /* Normal local symbols start with ``.L''.  */
+  if (name[0] == '.' && name[1] == 'L')
+    return true;
+
+  /* At least some SVR4 compilers (e.g., UnixWare 2.1 cc) generate
+     DWARF debugging symbols starting with ``..''.  */
+  if (name[0] == '.' && name[1] == '.')
+    return true;
+
+  /* gcc will sometimes generate symbols beginning with ``_.L_'' when
+     emitting DWARF debugging output.  I suspect this is actually a
+     small bug in gcc (it calls ASM_OUTPUT_LABEL when it should call
+     ASM_GENERATE_INTERNAL_LABEL, and this causes the leading
+     underscore to be emitted on some ELF targets).  For ease of use,
+     we treat such symbols as local.  */
+  if (name[0] == '_' && name[1] == '.' && name[2] == 'L' && name[3] == '_')
+    return true;
+
+  return false;
 }
 
 alent *

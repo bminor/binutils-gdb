@@ -1,3 +1,30 @@
+Sun Mar  9 23:08:49 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	From Eric Youngdale <eric@andante.jic.com>:
+	* elf-bfd.h (elf_symbol_type): Add version field.
+	* elfcode.h (elf_slurp_symbol_table): Set version field.
+	* elflink.h (elf_link_add_object_symbols): When creating an
+ 	indirect symbol for a default version symbol, set DEF_DYNAMIC if
+ 	appropriate.  Set up an indirection from the nondefault version of
+	the symbol as well.
+	(NAME(bfd_elf,size_dynamic_sections)): Call
+	elf_link_assign_sym_version before checking whether there are any
+	versions.  Always record the version name as a dynamic symbol.
+	Initialize counters.
+	(elf_link_assign_sym_version): After finding a version, see if a
+	symbol should be forced to local scope.  Create a new version
+	definition if appropriate.
+	(elf_link_output_extsym): Correct indirect symbol handling.
+	* elf.c (bfd_elf_print_symbol): Print version information.
+	(bfd_section_from_shdr): Turn version sections into BFD sections.
+	(elf_fake_sections): Only copy cverdefs and cverrefs into sh_info
+	if sh_info is not already set.
+	(_bfd_elf_copy_private_section_data): Copy sh_info for version
+	sections.
+	* elflink.c (_bfd_elf_link_record_dynamic_symbol): Tell
+	_bfd_stringtab_add to copy the name into permanent memory if
+	appropriate.
+
 Fri Mar  7 11:55:31 1997  H.J. Lu  <hjl@gnu.ai.mit.edu>
 
 	* elf64-alpha.c (alpha_elf_dynamic_symbol_p): Fully parenthesize.

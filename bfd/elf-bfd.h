@@ -1,5 +1,5 @@
 /* BFD back-end data structures for ELF files.
-   Copyright (C) 1992, 1993, 1994, 1995, 1996 Free Software Foundation, Inc.
+   Copyright (C) 1992, 93, 94, 95, 96, 1997 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -62,6 +62,12 @@ typedef struct
       PTR any;
     }
   tc_data;
+
+  /* Version information.  This is from an Elf_Internal_Versym
+     structure in a SHT_GNU_versym section.  It is zero if there is no
+     version information.  */
+  unsigned short version;
+
 } elf_symbol_type;
 
 /* ELF linker hash table entries.  */
@@ -107,6 +113,19 @@ struct elf_link_hash_entry
      from the beginning of the section.  */
   struct elf_linker_section_pointers *linker_section_pointer;
 
+  /* Version information.  */
+  union
+  {
+    /* This field is used for a symbol which is not defined in a
+       regular object.  It points to the version information read in
+       from the dynamic object.  */
+    Elf_Internal_Verdef *verdef;
+    /* This field is used for a symbol which is defined in a regular
+       object.  It is set up in size_dynamic_sections.  It points to
+       the version information we should write out for this symbol.  */
+    struct bfd_elf_version_tree *vertree;
+  } verinfo;
+
   /* Symbol type (STT_NOTYPE, STT_OBJECT, etc.).  */
   char type;
 
@@ -114,7 +133,7 @@ struct elf_link_hash_entry
   unsigned char other;
 
   /* Some flags; legal values follow.  */
-  unsigned char elf_link_hash_flags;
+  unsigned short elf_link_hash_flags;
   /* Symbol is referenced by a non-shared object.  */
 #define ELF_LINK_HASH_REF_REGULAR 01
   /* Symbol is defined by a non-shared object.  */
@@ -131,8 +150,8 @@ struct elf_link_hash_entry
 #define ELF_LINK_HASH_NEEDS_PLT 0100
   /* Symbol appears in a non-ELF input file.  */
 #define ELF_LINK_NON_ELF 0200
-  /* Note: If you add more flags, you must change the type of
-     elf_link_hash_flags.  */
+  /* Symbol should be marked as hidden in the version information.  */
+#define ELF_LINK_HIDDEN 0400
 };
 
 /* ELF linker hash table.  */
@@ -572,8 +591,12 @@ struct elf_obj_tdata
   Elf_Internal_Shdr strtab_hdr;
   Elf_Internal_Shdr dynsymtab_hdr;
   Elf_Internal_Shdr dynstrtab_hdr;
+  Elf_Internal_Shdr dynversym_hdr;
+  Elf_Internal_Shdr dynverref_hdr;
+  Elf_Internal_Shdr dynverdef_hdr;
   unsigned int symtab_section, shstrtab_section;
   unsigned int strtab_section, dynsymtab_section;
+  unsigned int dynversym_section, dynverdef_section, dynverref_section;
   file_ptr next_file_pos;
   void *prstatus;			/* The raw /proc prstatus structure */
   void *prpsinfo;			/* The raw /proc prpsinfo structure */
@@ -626,8 +649,25 @@ struct elf_obj_tdata
      find_nearest_line.  */
   struct mips_elf_find_line *find_line_info;
 
+  /* An array of stub sections indexed by symbol number, used by the
+     MIPS ELF linker.  FIXME: We should figure out some way to only
+     include this field for a MIPS ELF target.  */
+  asection **local_stubs;
+
   /* Used to determine if the e_flags field has been initialized */
   boolean flags_init;
+
+  /* Number of symbol version definitions we are about to emit.  */
+  int cverdefs;
+
+  /* Number of symbol version references we are about to emit.  */
+  int cverrefs;
+
+  /* Symbol version definitions in external objects.  */
+  Elf_Internal_Verdef *verdef;
+
+  /* Symbol version references to external objects.  */
+  Elf_Internal_Verneed *verref;
 
   /* Linker sections that we are interested in.  */
   struct elf_linker_section *linker_section[ (int)LINKER_SECTION_MAX ];
@@ -639,6 +679,9 @@ struct elf_obj_tdata
 #define elf_shstrtab(bfd)	(elf_tdata(bfd) -> strtab_ptr)
 #define elf_onesymtab(bfd)	(elf_tdata(bfd) -> symtab_section)
 #define elf_dynsymtab(bfd)	(elf_tdata(bfd) -> dynsymtab_section)
+#define elf_dynversym(bfd)	(elf_tdata(bfd) -> dynversym_section)
+#define elf_dynverdef(bfd)	(elf_tdata(bfd) -> dynverdef_section)
+#define elf_dynverref(bfd)	(elf_tdata(bfd) -> dynverref_section)
 #define elf_num_locals(bfd)	(elf_tdata(bfd) -> num_locals)
 #define elf_num_globals(bfd)	(elf_tdata(bfd) -> num_globals)
 #define elf_section_syms(bfd)	(elf_tdata(bfd) -> section_syms)
@@ -654,6 +697,27 @@ struct elf_obj_tdata
 #define elf_flags_init(bfd)	(elf_tdata(bfd) -> flags_init)
 #define elf_linker_section(bfd,n) (elf_tdata(bfd) -> linker_section[(int)n])
 
+extern void _bfd_elf_swap_verdef_in
+  PARAMS ((bfd *, const Elf_External_Verdef *, Elf_Internal_Verdef *));
+extern void _bfd_elf_swap_verdef_out
+  PARAMS ((bfd *, const Elf_Internal_Verdef *, Elf_External_Verdef *));
+extern void _bfd_elf_swap_verdaux_in
+  PARAMS ((bfd *, const Elf_External_Verdaux *, Elf_Internal_Verdaux *));
+extern void _bfd_elf_swap_verdaux_out
+  PARAMS ((bfd *, const Elf_Internal_Verdaux *, Elf_External_Verdaux *));
+extern void _bfd_elf_swap_verneed_in
+  PARAMS ((bfd *, const Elf_External_Verneed *, Elf_Internal_Verneed *));
+extern void _bfd_elf_swap_verneed_out
+  PARAMS ((bfd *, const Elf_Internal_Verneed *, Elf_External_Verneed *));
+extern void _bfd_elf_swap_vernaux_in
+  PARAMS ((bfd *, const Elf_External_Vernaux *, Elf_Internal_Vernaux *));
+extern void _bfd_elf_swap_vernaux_out
+  PARAMS ((bfd *, const Elf_Internal_Vernaux *, Elf_External_Vernaux *));
+extern void _bfd_elf_swap_versym_in
+  PARAMS ((bfd *, const Elf_External_Versym *, Elf_Internal_Versym *));
+extern void _bfd_elf_swap_versym_out
+  PARAMS ((bfd *, const Elf_Internal_Versym *, Elf_External_Versym *));
+
 extern int _bfd_elf_section_from_bfd_section PARAMS ((bfd *, asection *));
 extern char *bfd_elf_string_from_elf_section
   PARAMS ((bfd *, unsigned, unsigned));
@@ -690,6 +754,7 @@ extern boolean _bfd_elf_link_hash_table_init
 	   struct bfd_hash_entry *(*) (struct bfd_hash_entry *,
 				       struct bfd_hash_table *,
 				       const char *)));
+extern boolean _bfd_elf_slurp_version_tables PARAMS ((bfd *));
 
 extern boolean _bfd_elf_copy_private_symbol_data
   PARAMS ((bfd *, asymbol *, bfd *, asymbol *));
@@ -712,6 +777,7 @@ extern long _bfd_elf_canonicalize_dynamic_reloc PARAMS ((bfd *, arelent **,
 extern asymbol *_bfd_elf_make_empty_symbol PARAMS ((bfd *));
 extern void _bfd_elf_get_symbol_info PARAMS ((bfd *, asymbol *,
 					       symbol_info *));
+extern boolean _bfd_elf_is_local_label_name PARAMS ((bfd *, const char *));
 extern alent *_bfd_elf_get_lineno PARAMS ((bfd *, asymbol *));
 extern boolean _bfd_elf_set_arch_mach PARAMS ((bfd *, enum bfd_architecture,
 						unsigned long));
