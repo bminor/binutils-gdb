@@ -1,3 +1,14 @@
+Mon Oct 28 17:34:24 1996  Stu Grossman  (grossman@critters.cygnus.com)
+
+	* mswin/genmakes mswin/recordit:  New scripts to generate make
+	files for MSVC.
+
+Sun Oct 27 20:18:04 1996  Mark Alexander  <marka@cygnus.com>
+
+	* config/mips/{tm-vr5000.h,tm-vr5000el.h,vr5000.mt,vr5000el.mt}:
+	New files.
+	* configure.tgt: Modify cases for vr5000 to use new files.
+
 Sat Oct 26 07:15:14 1996  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* config/alpha/alpha-osf3.mh (XM_CLIBS):  Add -lm for OSF/1-4.0.
