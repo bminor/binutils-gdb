@@ -318,6 +318,12 @@
 @V@/opcodes/ia64-opc.c @V@/opcodes/ia64-opc.c
 @V@/opcodes/m68hc11-dis.c @V@/opcodes/m68hc11dis.c
 @V@/opcodes/m68hc11-opc.c @V@/opcodes/m68hc11opc.c
+@V@/opcodes/openrisc-asm.c @V@/opcodes/orisc-asm.c
+@V@/opcodes/openrisc-desc.c @V@/opcodes/orisc-desc.c
+@V@/opcodes/openris-dis.c @V@/opcodes/orisc-dis.c
+@V@/opcodes/openrisc-ibld.c @V@/opcodes/orisc-ibld.c
+@V@/opcodes/openrisc-opc.c @V@/opcodes/orisc-opc.c
+@V@/opcodes/openrisc-opc.h @V@/opcodes/orisc-opc.h
 @V@/dejagnu/baseboards/mn10200-cygmon.exp @V@/dejagnu/baseboards/mn10200cygmon.exp
 @V@/dejagnu/baseboards/mn10200-sim.exp @V@/dejagnu/baseboards/mn10200sim.exp
 @V@/dejagnu/baseboards/mn10300-cygmon.exp @V@/dejagnu/baseboards/mn10300cygmon.exp
