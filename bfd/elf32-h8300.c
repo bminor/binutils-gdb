@@ -184,6 +184,15 @@ static const struct elf_reloc_map h8_reloc_map[] =
   { BFD_RELOC_H8_DIR32A16, R_H8_DIR32A16_X },
 };
 
+static reloc_howto_type *elf32_h8_reloc_type_lookup
+  PARAMS ((bfd *, bfd_reloc_code_real_type));
+static void elf32_h8_info_to_howto
+  PARAMS ((bfd *, arelent *, Elf32_Internal_Rela *));
+static void elf32_h8_info_to_howto_rel
+  PARAMS ((bfd *, arelent *, Elf32_Internal_Rel *));
+static int elf32_h8_mach
+  PARAMS ((flagword));
+
 static reloc_howto_type *
 elf32_h8_reloc_type_lookup (abfd, code)
      bfd *abfd ATTRIBUTE_UNUSED;
@@ -231,6 +240,97 @@ elf32_h8_info_to_howto_rel (abfd, bfd_reloc, elf_reloc)
   bfd_reloc->howto = &h8_elf_howto_table[r];
 }
 
+/* Object files encode the specific H8 model they were compiled
+   for in the ELF flags field.
+
+   Examine that field and return the proper BFD machine type for
+   the object file.  */
+static int
+elf32_h8_mach (flags)
+     flagword flags;
+{
+  switch (flags & EF_H8_MACH)
+    {
+    case E_H8_MACH_H8300:
+    default:
+      return bfd_mach_h8300;
+
+    case E_H8_MACH_H8300H:
+      return bfd_mach_h8300h;
+
+    case E_H8_MACH_H8300S:
+      return bfd_mach_h8300s;
+    }
+}
+
+/* The final processing done just before writing out a H8 ELF object
+   file.  We use this opportunity to encode the BFD machine type
+   into the flags field in the object file.  */
+
+void
+elf32_h8_final_write_processing (abfd, linker)
+     bfd *abfd;
+     boolean linker ATTRIBUTE_UNUSED;
+{
+  unsigned long val;
+
+  switch (bfd_get_mach (abfd))
+    {
+    default:
+    case bfd_mach_h8300:
+      val = E_H8_MACH_H8300;
+      break;
+
+    case bfd_mach_h8300h:
+      val = E_H8_MACH_H8300H;
+      break;
+
+    case bfd_mach_h8300s:
+      val = E_H8_MACH_H8300S;
+      break;
+    }
+
+  elf_elfheader (abfd)->e_flags &= ~ (EF_H8_MACH);
+  elf_elfheader (abfd)->e_flags |= val;
+}
+
+/* Return nonzero if ABFD represents a valid H8 ELF object file; also
+   record the encoded machine type found in the ELF flags.  */
+
+boolean
+elf32_h8_object_p (abfd)
+     bfd *abfd;
+{
+  bfd_default_set_arch_mach (abfd, bfd_arch_h8300,
+			     elf32_h8_mach (elf_elfheader (abfd)->e_flags));
+  return true;
+}
+
+/* Merge backend specific data from an object file to the output
+   object file when linking.  The only data we need to copy at this
+   time is the architecture/machine information.  */
+
+boolean
+elf32_h8_merge_private_bfd_data (ibfd, obfd)
+     bfd *ibfd;
+     bfd *obfd;
+{
+  if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour
+      || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
+    return true;
+
+  if (bfd_get_arch (obfd) == bfd_get_arch (ibfd)
+      && bfd_get_mach (obfd) < bfd_get_mach (ibfd))
+    {
+      if (! bfd_set_arch_mach (obfd, bfd_get_arch (ibfd),
+                               bfd_get_mach (ibfd)))
+        return false;
+    }
+
+  return true;
+}
+
+
 #define TARGET_BIG_SYM			bfd_elf32_h8300_vec
 #define TARGET_BIG_NAME			"elf32-h8300"
 #define ELF_ARCH			bfd_arch_h8300
@@ -239,6 +339,15 @@ elf32_h8_info_to_howto_rel (abfd, bfd_reloc, elf_reloc)
 #define bfd_elf32_bfd_reloc_type_lookup elf32_h8_reloc_type_lookup
 #define elf_info_to_howto		elf32_h8_info_to_howto
 #define elf_info_to_howto_rel		elf32_h8_info_to_howto_rel
+
+/* So we can set/examine bits in e_flags to get the specific
+   H8 architecture in use.  */
+#define elf_backend_final_write_processing \
+  elf32_h8_final_write_processing
+#define elf_backend_object_p \
+  elf32_h8_object_p
+#define bfd_elf32_bfd_merge_private_bfd_data \
+  elf32_h8_merge_private_bfd_data
 
 /* ??? when elf_backend_relocate_section is not defined, elf32-target.h
    defaults to using _bfd_generic_link_hash_table_create, but

@@ -3452,19 +3452,7 @@ prep_headers (abfd)
       break;
       /* Also note that EM_M32, AT&T WE32100 is unknown to bfd.  */
     case bfd_arch_h8300:
-      switch (bfd_get_mach (abfd))
-	{
-	default:
-	case bfd_mach_h8300:
-	  i_ehdrp->e_machine = EM_H8_300;
-	  break;
-	case bfd_mach_h8300h:
-	  i_ehdrp->e_machine = EM_H8_300H;
-	  break;
-	case bfd_mach_h8300s:
-	  i_ehdrp->e_machine = EM_H8S;
-	  break;
-	}
+      i_ehdrp->e_machine = EM_H8_300;
       break;
     case bfd_arch_h8500:
       i_ehdrp->e_machine = EM_H8_500;

@@ -1,4 +1,15 @@
-2001-08-29  Alan Modra  <amodra@bigpond.net.au>
+2000-08-29  Jeff Law <law@redhat.com>
+
+	* cpu-h8300.c (h8300_scan, compatible): Prototype.
+	(h8300_scan): Handle architecture:machine encodings typically
+	found in linker scripts.
+	* elf.c (prep_headers): Do not try to do H8 machine recognition
+	here.
+	* elf32-h8300.c:  Add some missing prototypes.
+	(elf32_h8_mach, elf32_h8_final_write_processing): New functions.
+	(elf32_h8_object_p): Similarly.
+
+2000-08-29  Alan Modra  <amodra@bigpond.net.au>
 
 	* targmatch.sed: Delete case statements.
 	* config.bfd <powerpc-*-aix* entry>: Select 64 bit xcoff for

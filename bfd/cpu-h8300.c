@@ -1,5 +1,5 @@
 /* BFD library support routines for the Hitachi H8/300 architecture.
-   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 2000
+   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 2000, 2001
    Free Software Foundation, Inc.
    Hacked by Steve Chamberlain of Cygnus Support.
 
@@ -24,6 +24,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "libbfd.h"
 
 int bfd_default_scan_num_mach ();
+
+static boolean h8300_scan
+  PARAMS ((const struct bfd_arch_info *, const char *));
+static const bfd_arch_info_type * compatible
+  PARAMS ((const bfd_arch_info_type *, const bfd_arch_info_type *));
 
 static boolean
 h8300_scan (info, string)
@@ -52,6 +57,18 @@ h8300_scan (info, string)
   string++;
   if (*string == '-')
     string++;
+
+  /* In ELF linker scripts, we typically express the architecture/machine
+     as architecture:machine.
+
+     So if we've matched so far and encounter a colon, try to match the
+     string following the colon.  */
+  if (*string == ':')
+    {
+      string++;
+      h8300_scan (info, string);
+    }
+
   if (*string == 'h' || *string == 'H')
     {
       return (info->mach == bfd_mach_h8300h);
