@@ -1,5 +1,10 @@
 2002-09-18  Andrew Cagney  <ac131313@redhat.com>
 
+	* infrun.c (signal_stop_update): Convert definition to ISO C.
+	(signal_print_update): Ditto.
+	(signal_pass_update): Ditto.
+	* inflow.c (terminal_save_ours): Ditto.
+
 	* h8300-tdep.c (h8300_gdbarch_init): Use C instead of C++
 	comments.
 	

@@ -3531,9 +3531,7 @@ signal_pass_state (int signo)
 }
 
 int
-signal_stop_update (signo, state)
-     int signo;
-     int state;
+signal_stop_update (int signo, int state)
 {
   int ret = signal_stop[signo];
   signal_stop[signo] = state;
@@ -3541,9 +3539,7 @@ signal_stop_update (signo, state)
 }
 
 int
-signal_print_update (signo, state)
-     int signo;
-     int state;
+signal_print_update (int signo, int state)
 {
   int ret = signal_print[signo];
   signal_print[signo] = state;
@@ -3551,9 +3547,7 @@ signal_print_update (signo, state)
 }
 
 int
-signal_pass_update (signo, state)
-     int signo;
-     int state;
+signal_pass_update (int signo, int state)
 {
   int ret = signal_program[signo];
   signal_program[signo] = state;
