@@ -1,5 +1,11 @@
 2002-12-31  Chris Demetriou  <cgd@broadcom.com>
 
+	* mips-opc.c (mips_builtin_opcodes): Move "di" into the
+	right order alphabetically, and make all hex constants use
+	lower-case letters.
+
+2002-12-31  Chris Demetriou  <cgd@broadcom.com>
+
 	* mips-dis.c (mips_cp0sel_name): New structure.
 	(mips_cp0sel_names_mips3264, mips_cp0sel_names_mips3264r2)
 	(mips_cp0sel_names_sb1): New arrays.

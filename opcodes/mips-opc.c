@@ -481,8 +481,6 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"dctr",    "o(b)",	0xbc050000, 0xfc1f0000, RD_b,			I3	},
 {"dctw",    "o(b)",	0xbc090000, 0xfc1f0000, RD_b,			I3	},
 {"deret",   "",         0x4200001f, 0xffffffff, 0, 			I32|G2	},
-{"di",      "",		0x41606000, 0xffffffff,	WR_t|WR_C0,		I33	},
-{"di",      "t",	0x41606000, 0xffe0ffff,	WR_t|WR_C0,		I33	},
 /* For ddiv, see the comments about div.  */
 {"ddiv",    "z,s,t",    0x0000001e, 0xfc00ffff, RD_s|RD_t|WR_HILO,      I3      },
 {"ddiv",    "d,v,t",	0,    (int) M_DDIV_3,	INSN_MACRO,		I3	},
@@ -491,6 +489,8 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"ddivu",   "z,s,t",    0x0000001f, 0xfc00ffff, RD_s|RD_t|WR_HILO,      I3      },
 {"ddivu",   "d,v,t",	0,    (int) M_DDIVU_3,	INSN_MACRO,		I3	},
 {"ddivu",   "d,v,I",	0,    (int) M_DDIVU_3I,	INSN_MACRO,		I3	},
+{"di",      "",		0x41606000, 0xffffffff,	WR_t|WR_C0,		I33	},
+{"di",      "t",	0x41606000, 0xffe0ffff,	WR_t|WR_C0,		I33	},
 /* The MIPS assembler treats the div opcode with two operands as
    though the first operand appeared twice (the first operand is both
    a source and a destination).  To get the div machine instruction,
@@ -979,8 +979,8 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"sdr",     "t,o(b)",	0xb4000000, 0xfc000000,	SM|RD_t|RD_b,		I3	},
 {"sdr",     "t,A(b)",	0,    (int) M_SDR_AB,	INSN_MACRO,		I3	},
 {"sdxc1",   "S,t(b)",   0x4c000009, 0xfc0007ff, SM|RD_S|RD_t|RD_b,	I4	},
-{"seb",     "d,w",	0x7C000420, 0xffe007ff,	WR_d|RD_t,		I33	},
-{"seh",     "d,w",	0x7C000620, 0xffe007ff,	WR_d|RD_t,		I33	},
+{"seb",     "d,w",	0x7c000420, 0xffe007ff,	WR_d|RD_t,		I33	},
+{"seh",     "d,w",	0x7c000620, 0xffe007ff,	WR_d|RD_t,		I33	},
 {"selsl",   "d,v,t",	0x00000005, 0xfc0007ff,	WR_d|RD_s|RD_t,		L1	},
 {"selsr",   "d,v,t",	0x00000001, 0xfc0007ff,	WR_d|RD_s|RD_t,		L1	},
 {"seq",     "d,v,t",	0,    (int) M_SEQ,	INSN_MACRO,		I1	},
@@ -1158,7 +1158,7 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"waiti",   "",		0x42000020, 0xffffffff,	TRAP,			L1	},
 {"wb", 	    "o(b)",	0xbc040000, 0xfc1f0000, SM|RD_b,		L1	},
 {"wrpgpr",  "d,w",	0x41c00000, 0xffe007ff, RD_t,			I33	},
-{"wsbh",    "d,w",	0x7C0000a0, 0xffe007ff,	WR_d|RD_t,		I33	},
+{"wsbh",    "d,w",	0x7c0000a0, 0xffe007ff,	WR_d|RD_t,		I33	},
 {"xor",     "d,v,t",	0x00000026, 0xfc0007ff,	WR_d|RD_s|RD_t,		I1	},
 {"xor",     "t,r,I",	0,    (int) M_XOR_I,	INSN_MACRO,		I1	},
 {"xor.ob",  "X,Y,Q",	0x7800000d, 0xfc20003f,	WR_D|RD_S|RD_T|FP_D,	MX|SB1	},
