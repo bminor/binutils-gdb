@@ -1,3 +1,8 @@
+2002-07-04  Mark Kettenis  <kettenis@gnu.org>
+
+	* osabi.c (generic_elf_osabi_sniffer): Add check for FreeBSD 3.x's
+	traditonal string branding within the ELF header.
+
 2002-07-04  Daniel Jacobowitz  <drow@mvista.com>
 
 	* symtab.c (remove_params): New function.
