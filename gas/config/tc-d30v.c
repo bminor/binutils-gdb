@@ -1126,6 +1126,8 @@ md_assemble (str)
 	    as_fatal (_("First opcode is long.  Unable to mix instructions as specified.")); 
 	  fixups = fixups->next;
 	  str = str2 + 2;
+	  prev_seg = now_seg;
+	  prev_subseg = now_subseg;
 	}
     }
 
@@ -1820,9 +1822,40 @@ d30v_align (n, pfill, label)
 
   if (label != NULL)
     {
+      symbolS *     sym;
+      int           label_seen = false;
+      struct frag * old_frag;
+      valueT        old_value;
+      valueT        new_value;
+      
       assert (S_GET_SEGMENT (label) == now_seg);
-      label->sy_frag = frag_now;
-      S_SET_VALUE (label, (valueT) frag_now_fix ());
+
+      old_frag  = label->sy_frag;
+      old_value = S_GET_VALUE (label);
+      new_value = (valueT) frag_now_fix();
+      
+      /* It is possible to have more than one label at a particular
+	 address, especially if debugging is enabled, so we must
+	 take care to adjust all the labels at this address in this
+	 fragment.  To save time we search from the end of the symbol
+	 list, backwards, since the symbols we are interested in are
+	 almost certainly the ones that were most recently added.
+	 Also to save time we stop searching once we have seen at least
+	 one matching label, and we encounter a label that is no longer
+	 in the target fragment.  Note, this search is guaranteed to
+	 find at least one match when sym == label, so no special case
+	 code is necessary.  */
+      for (sym = symbol_lastP; sym != NULL; sym = sym->sy_previous)
+	{
+	  if (sym->sy_frag == old_frag && S_GET_VALUE (sym) == old_value)
+	    {
+	      label_seen = true;
+	      sym->sy_frag = frag_now;
+	      S_SET_VALUE (sym, new_value);
+	    }
+	  else if (label_seen && sym->sy_frag != old_frag)
+	    break;
+	}
     }
 
   record_alignment(now_seg, n);
