@@ -1,3 +1,12 @@
+2002-05-07  Richard Sandiford  <rsandifo@redhat.com>
+
+	* lib/ld-lib.exp (run_dump_test): Add -L$srcdir/$subdir.
+	(is_elf_format): New, extracted from...
+	* ld-scripts/weak.exp: ...here.
+	* ld-scripts/overlay-size.exp: New test.
+	* ld-scripts/overlay-size.[tsd],
+	* ld-scripts/overlay-size-map.d: New files for it.
+
 2002-05-02  Richard Sandiford  <rsandifo@redhat.com>
 
 	* ld-scripts/map-address.exp: Quote conditions.

@@ -323,6 +323,29 @@ proc default_ld_nm { nm nmflags object } {
 }
 
 #
+# is_elf_format
+#	true if the object format is known to be ELF
+#
+proc is_elf_format {} {
+    if { ![istarget *-*-sysv4*] \
+	 && ![istarget *-*-unixware*] \
+	 && ![istarget *-*-elf*] \
+	 && ![istarget *-*-eabi*] \
+	 && ![istarget *-*-linux*] \
+	 && ![istarget *-*-irix5*] \
+	 && ![istarget *-*-irix6*] \
+	 && ![istarget *-*-solaris2*] } {
+	return 0
+    }
+
+    if { [istarget *-*-linux*aout*] \
+	 || [istarget *-*-linux*oldld*] } {
+	return 0
+    }
+    return 1
+}
+
+#
 # simple_diff
 #	compares two files line-by-line
 #	returns differences if exist
@@ -685,7 +708,11 @@ proc run_dump_test { name } {
     # Perhaps link the file(s).
     if { $run_ld } {
 	set objfile "tmpdir/dump"
-	set cmd "$LD $LDFLAGS $opts(ld) -o $objfile $objfiles"
+
+	# Add -L$srcdir/$subdir so that the linker command can use
+	# linker scripts in the source directory.
+	set cmd "$LD $LDFLAGS -L$srcdir/$subdir \
+		   $opts(ld) -o $objfile $objfiles"
 
 	send_log "$cmd\n"
 	set cmdret [catch "exec $cmd" comp_output]
