@@ -166,6 +166,16 @@ Options:\n\
 -w			ignored\n\
 -X			ignored\n\
 -Z			generate object file even after errors\n");
+  fprintf (stream, "\
+--listing-lhs-width	set the width in words of the output data column of\n\
+			the listing\n\
+--listing-lhs-width2	set the width in words of the continuation lines\n\
+			of the output data column; ignored if smaller than\n\
+			the width of the first line\n\
+--listing-rhs-width	set the max width in characters of the lines from\n\
+			the source file\n\
+--listing-cont-lines	set the maximum number of continuation lines used\n\
+			for the output data column of the listing\n");
 
   md_show_usage (stream);
 
@@ -333,11 +343,19 @@ parse_args (pargc, pargv)
        formats are added to the built-in set of instructions, and
        mnemonics for new registers may also be defined.  */
     {"itbl", required_argument, NULL, OPTION_INSTTBL},
-#define OPTION_DEPFILE (OPTION_STD_BASE + 9)
+#define OPTION_LISTING_LHS_WIDTH (OPTION_STD_BASE + 9)
+    {"listing-lhs-width", required_argument, NULL, OPTION_LISTING_LHS_WIDTH},
+#define OPTION_LISTING_LHS_WIDTH2 (OPTION_STD_BASE + 10)
+    {"listing-lhs-width", required_argument, NULL, OPTION_LISTING_LHS_WIDTH2},
+#define OPTION_LISTING_RHS_WIDTH (OPTION_STD_BASE + 11)
+    {"listing-rhs-width", required_argument, NULL, OPTION_LISTING_RHS_WIDTH},
+#define OPTION_LISTING_CONT_LINES (OPTION_STD_BASE + 12)
+    {"listing-cont-lines", required_argument, NULL, OPTION_LISTING_CONT_LINES},
+#define OPTION_DEPFILE (OPTION_STD_BASE + 13)
     {"MD", required_argument, NULL, OPTION_DEPFILE},
-#define OPTION_GSTABS (OPTION_STD_BASE + 10)
+#define OPTION_GSTABS (OPTION_STD_BASE + 14)
     {"gstabs", no_argument, NULL, OPTION_GSTABS},
-#define OPTION_STRIP_LOCAL_ABSOLUTE (OPTION_STD_BASE + 11)
+#define OPTION_STRIP_LOCAL_ABSOLUTE (OPTION_STD_BASE + 15)
     {"strip-local-absolute", no_argument, NULL, OPTION_STRIP_LOCAL_ABSOLUTE}
   };
 
@@ -527,6 +545,25 @@ the GNU General Public License.  This program has absolutely no warranty.\n");
 
 	case 'L':
 	  flag_keep_locals = 1;
+	  break;
+
+	case OPTION_LISTING_LHS_WIDTH:
+	  listing_lhs_width = atoi(optarg);
+	  if (listing_lhs_width_second < listing_lhs_width)
+	    listing_lhs_width_second = listing_lhs_width;
+	  break;
+	case OPTION_LISTING_LHS_WIDTH2:
+	  {
+	    int tmp = atoi(optarg);
+	    if (tmp > listing_lhs_width)
+	      listing_lhs_width_second = tmp;
+	  }
+	  break;
+	case OPTION_LISTING_RHS_WIDTH:
+	  listing_rhs_width = atoi(optarg);
+	  break;
+	case OPTION_LISTING_CONT_LINES:
+	  listing_lhs_cont_lines = atoi(optarg);
 	  break;
 
 	case 'M':

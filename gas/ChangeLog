@@ -1,3 +1,14 @@
+Tue Jan 27 06:38:35 1998  Richard Henderson  <rth@cygnus.com>
+
+	* as.c (parse_args): Add --listing-lhs-width, --listing-lhs-width2,
+	--listing-rhs-width, --listing-cont-lines.
+	(show_usage): Update.
+	* listing.c (listing_lhs_width, listing_lhs_width_second): New vars.
+	(listing_lhs_cont_lines, listing_rhs_width): New vars.
+	(print_lines): Use the variables instead of the constants.
+	(listing_listing): Likewise.	
+	* listing.h: Declare the new vars.
+	
 Tue Jan 27 05:32:05 1998  Richard Henderson  <rth@cygnus.com>
 
 	* as.c (parse_args): Add --keep-locals alias for -L.
