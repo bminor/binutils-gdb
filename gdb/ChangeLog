@@ -1,3 +1,8 @@
+2001-08-13  Christopher Faylor  <cgf@cygnus.com>
+
+	* top.c (SIGSETJMP): Protect env argument with parentheses.
+	(SIGLONGJMP): Protect env argument with parentheses.
+
 2001-08-10  Orjan Friberg  <orjanf@axis.com>
 
 	* remote.c (read_frame): Correct off-by-one error in condition.
