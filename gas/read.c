@@ -554,8 +554,9 @@ read_a_source_file (name)
 			}
 		      else
 			{
-			int lineno;
-			char *s;
+			  unsigned int lineno;
+			  char *s;
+
 			  as_where (&s, &lineno);
 			  OBJ_GENERATE_ASM_LINENO (s, lineno);
 			}
