@@ -1,3 +1,8 @@
+Tue Sep  9 10:21:56 1997  Nick Clifton  <nickc@cygnus.com>
+
+	* elf32-v850.c (v850_elf_print_private_bfd_data): Break after
+	decoding architecture.
+
 Sun Sep  7 12:25:22 1997  H.J. Lu  (hjl@gnu.ai.mit.edu)
 
 	* bfd/elf64-alpha.c (reloc_howto_type): Fix the howto table.

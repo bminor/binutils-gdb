@@ -1551,12 +1551,12 @@ v850_elf_print_private_bfd_data (abfd, ptr)
   switch (elf_elfheader (abfd)->e_flags & EF_V850_ARCH)
     {
     default:
-    case E_V850_ARCH: fprintf (file, ": v850 architecture");
+    case E_V850_ARCH: fprintf (file, ": v850 architecture"); break;
 /* start-sanitize-v850e */
-    case E_V850E_ARCH: fprintf (file, ": v850e architecture");
+    case E_V850E_ARCH: fprintf (file, ": v850e architecture"); break;
 /* end-sanitize-v850e */
 /* start-sanitize-v850eq */
-    case E_V850EQ_ARCH: fprintf (file, ": v850eq architecture");
+    case E_V850EQ_ARCH: fprintf (file, ": v850eq architecture"); break;
 /* end-sanitize-v850eq */
     }
   
