@@ -14,6 +14,17 @@ SECTIONS
 	  *(.strings)
    	 ${RELOCATING+ _etext = . ; }
 	} ${RELOCATING+ > ram}
+
+
+.tors   : {
+	___ctors = . ;
+	*(.ctors)
+	___ctors_end = . ;
+	___dtors = . ;
+	*(.dtors)
+	___dtors_end = . ;
+}  ${RELOCATING+ > ram}
+
 .data  :
 	{
 	*(.data)
