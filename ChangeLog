@@ -1,3 +1,7 @@
+Tue Oct  4 19:35:53 1994  Brendan Kehoe  (brendan@phydeaux.cygnus.com)
+
+	* Makefile.in (all-prms): Depend on all-librx.
+
 Tue Oct  4 12:05:42 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
 	* configure: Use ${config_shell} when running ${configsub}.

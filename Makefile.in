@@ -926,7 +926,7 @@ all-mmalloc:
 all-newlib: all-binutils all-gas all-pagas all-gcc
 all-opcodes: all-bfd
 all-patch:
-all-prms: all-libiberty
+all-prms: all-libiberty all-librx
 all-rcs:
 all-readline:
 all-recode: all-libiberty
