@@ -1,5 +1,7 @@
 Tue Mar 21 12:14:12 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* gdb.base/nodebug.c (array_index): Call malloc.
+
 	* gdb.base/{corefile.exp,default.exp}: Make names of "up" tests unique.
 
 Mon Mar 20 10:08:17 1995  Jeff Law  (law@snake.cs.utah.edu)
