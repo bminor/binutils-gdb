@@ -1,3 +1,10 @@
+Tue Jan 11 17:01:06 1994  Doug Evans  (dje@canuck.cygnus.com)
+
+	* expr.c (integer_constant): Fix computation of too_many_digits.
+	Variable digit_2 renamed to start.  Fix check for whether number
+	will fit in 32 bits.
+	* read.c (emit_expr): Use valueT instead of long.
+
 Tue Jan 11 13:01:20 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* config/obj-elf.c: If TC_MIPS, include elf/mips.h.

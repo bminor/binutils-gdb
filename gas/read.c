@@ -78,7 +78,7 @@ const char lex_type[256] =
   0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0,	/* _!"#$%&'()*+,-./ */
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0,	/* 0123456789:;<=>? */
   LEX_AT, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,	/* @ABCDEFGHIJKLMNO */
-  3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 0, 0, 0, 3,	/* PQRSTUVWXYZ[\]^_ */
+  3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 0, 0, 0, 0, 3,	/* PQRSTUVWXYZ[\]^_ */
   0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,	/* `abcdefghijklmno */
   3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 0, 0, 0, 0,	/* pqrstuvwxyz{|}~. */
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -1702,14 +1702,14 @@ emit_expr (exp, nbytes)
 
   if (op == O_constant)
     {
-      register long get;
-      register long use;
-      register long mask;
-      register long unmask;
+      register valueT get;
+      register valueT use;
+      register valueT mask;
+      register valueT unmask;
 
       /* JF << of >= number of bits in the object is undefined.  In
 	 particular SPARC (Sun 4) has problems */
-      if (nbytes >= sizeof (long))
+      if (nbytes >= sizeof (valueT))
 	mask = 0;
       else
 	mask = ~0 << (BITS_PER_CHAR * nbytes);	/* Don't store these bits. */
@@ -1728,7 +1728,7 @@ emit_expr (exp, nbytes)
 	  as_warn ("Value 0x%lx truncated to 0x%lx.", get, use);
 	}
       /* put bytes in right order. */
-      md_number_to_chars (p, (valueT) use, (int) nbytes);
+      md_number_to_chars (p, use, (int) nbytes);
     }
   else if (op == O_big)
     {
