@@ -747,7 +747,7 @@ solist_h = solist.h
 somsolib_h = somsolib.h
 source_h = source.h
 sparc_tdep_h = sparc-tdep.h
-sparc64_tdep_h = sparc64-tdep.h
+sparc64_tdep_h = sparc64-tdep.h $(sparc_tdep_h)
 srec_h = srec.h
 stabsread_h = stabsread.h
 stack_h = stack.h
@@ -2317,8 +2317,9 @@ sparcbsd-nat.o: sparcbsd-nat.c $(defs_h) $(inferior_h) $(regcache_h) \
 	$(sparc64_tdep_h) $(sparcbsd_nat_h)
 sparc64-tdep.o: sparc64-tdep.c $(defs_h) $(arch_utils_h) $(floatformat_h) \
 	$(frame_h) $(frame_base_h) $(frame_unwind_h) $(gdbcore_h) \
-	$(gdbtypes_h) $(osabi_h) $(regcache_h) $(target_h) $(value_h) \
-	$(gdb_assert_h) $(gdb_string_h) $(sparc64_tdep_h)
+	$(gdbtypes_h) $(inferior_h) $(osabi_h) $(regcache_h) $(target_h) \
+	$(value_h) $(gdb_assert_h) $(gdb_string_h) $(sparc_tdep_h) \
+	$(sparc64_tdep_h)
 sparc64fbsd-tdep.o: sparc64fbsd-tdep.c $(defs_h) $(gdbcore_h) $(osabi_h) \
 	$(regcache_h) $(target_h) $(gdb_string_h) $(sparc64_tdep_h)
 sparc64fbsd-nat.o: sparc64fbsd-nat.c $(defs_h) $(sparc64_tdep_h) \

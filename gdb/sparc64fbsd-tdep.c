@@ -93,7 +93,7 @@ sparc64fbsd_supply_reg (const char *regs, int regnum)
       ULONGEST sp;
 
       regcache_cooked_read_unsigned (current_regcache, SPARC_SP_REGNUM, &sp);
-      sparc_supply_rwindow (sp, regnum);
+      sparc_supply_rwindow (current_regcache, sp, regnum);
     }
 }
 
@@ -221,7 +221,7 @@ static struct core_fns sparc64fbsd_core_fns =
 static void
 sparc64fbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
-  /* Nothing yet.  */
+  sparc64_init_abi (info, gdbarch);
 }
 
 /* Provide a prototype to silence -Wmissing-prototypes.  */

@@ -30,12 +30,18 @@ struct trad_frame_saved_reg;
 
 struct gdbarch_tdep
 {
-  /* Size of an Procude Linkage Table (PLT) entry, 0 if we shouldn't
-     treat the PLT special when doing prologue analysis.  */
-  size_t plt_entry_size;
+  /* Register numbers for the PN and nPC registers.  The definitions
+     for (64-bit) UltraSPARC differ from the (32-bit) SPARC
+     definitions.  */
+  int pc_regnum;
+  int npc_regnum;
 
   /* Offset of saved PC in jmp_buf.  */
   int jb_pc_offset;
+
+  /* Size of an Procedure Linkage Table (PLT) entry, 0 if we shouldn't
+     treat the PLT special when doing prologue analysis.  */
+  size_t plt_entry_size;
 };
 
 /* Register numbers of various important registers.  */

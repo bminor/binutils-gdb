@@ -470,9 +470,10 @@ sparc32_analyze_prologue (CORE_ADDR pc, CORE_ADDR current_pc,
 }
 
 static CORE_ADDR
-sparc32_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
+sparc_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
 {
-  return frame_unwind_register_unsigned (next_frame, SPARC32_PC_REGNUM);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  return frame_unwind_register_unsigned (next_frame, tdep->pc_regnum);
 }
 
 /* Return PC of first real instruction of the function starting at
@@ -863,6 +864,7 @@ sparc_analyze_control_transfer (CORE_ADDR pc, CORE_ADDR *npc)
 void
 sparc_software_single_step (enum target_signal sig, int insert_breakpoints_p)
 {
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
   static CORE_ADDR npc, nnpc;
   static char npc_save[4], nnpc_save[4];
 
@@ -873,8 +875,8 @@ sparc_software_single_step (enum target_signal sig, int insert_breakpoints_p)
       gdb_assert (npc == 0);
       gdb_assert (nnpc == 0);
 
-      pc = sparc_address_from_register (SPARC32_PC_REGNUM);
-      npc = sparc_address_from_register (SPARC32_NPC_REGNUM);
+      pc = sparc_address_from_register (tdep->pc_regnum);
+      npc = sparc_address_from_register (tdep->npc_regnum);
 
       /* Analyze the instruction at PC.  */
       nnpc = sparc_analyze_control_transfer (pc, &npc);
@@ -899,10 +901,12 @@ sparc_software_single_step (enum target_signal sig, int insert_breakpoints_p)
 }
 
 static void
-sparc32_write_pc (CORE_ADDR pc, ptid_t ptid)
+sparc_write_pc (CORE_ADDR pc, ptid_t ptid)
 {
-  write_register_pid (SPARC32_PC_REGNUM, pc, ptid);
-  write_register_pid (SPARC32_NPC_REGNUM, pc + 4, ptid);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+
+  write_register_pid (tdep->pc_regnum, pc, ptid);
+  write_register_pid (tdep->npc_regnum, pc + 4, ptid);
 }
 
 
@@ -920,6 +924,10 @@ sparc32_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Allocate space for the new architecture.  */
   tdep = XMALLOC (struct gdbarch_tdep);
   gdbarch = gdbarch_alloc (&info, tdep);
+
+  tdep->pc_regnum = SPARC32_PC_REGNUM;
+  tdep->npc_regnum = SPARC32_NPC_REGNUM;
+  tdep->plt_entry_size = 0;
 
   set_gdbarch_long_double_bit (gdbarch, 128);
 
@@ -960,12 +968,11 @@ sparc32_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_print_insn (gdbarch, print_insn_sparc);
 
   set_gdbarch_software_single_step (gdbarch, sparc_software_single_step);
-
-  set_gdbarch_write_pc (gdbarch, sparc32_write_pc);
+  set_gdbarch_write_pc (gdbarch, sparc_write_pc);
 
   set_gdbarch_unwind_dummy_id (gdbarch, sparc_unwind_dummy_id);
 
-  set_gdbarch_unwind_pc (gdbarch, sparc32_unwind_pc);
+  set_gdbarch_unwind_pc (gdbarch, sparc_unwind_pc);
 
   frame_base_set_default (gdbarch, &sparc32_frame_base);
 

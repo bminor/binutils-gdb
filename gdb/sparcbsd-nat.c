@@ -99,7 +99,7 @@ store_inferior_registers (int regnum)
 
 	  regcache_cooked_read_unsigned (current_regcache,
 					 SPARC_SP_REGNUM, &sp);
-	  sparc_fill_rwindow (sp, regnum);
+	  sparc_collect_rwindow (current_regcache, sp, regnum);
 	}
 
       if (regnum != -1)

@@ -27,6 +27,7 @@
 #include "frame-unwind.h"
 #include "gdbcore.h"
 #include "gdbtypes.h"
+#include "inferior.h"
 #include "osabi.h"
 #include "regcache.h"
 #include "target.h"
@@ -35,6 +36,7 @@
 #include "gdb_assert.h"
 #include "gdb_string.h"
 
+#include "sparc-tdep.h"
 #include "sparc64-tdep.h"
 
 /* This file implements the The SPARC 64-bit ABI as defined by the
@@ -163,14 +165,6 @@ sparc64_structure_or_union_p (const struct type *type)
   return 0;
 }
 
-/* UltraSPARC architecture specific information.  */
-
-struct gdbarch_tdep
-{
-  /* Offset of saved PC in jmp_buf.  */
-  int jb_pc_offset;
-};
-
 /* Register information.  */
 
 struct sparc64_register_info
@@ -283,8 +277,7 @@ static struct sparc64_register_info sparc64_register_info[] =
 };
 
 /* Total number of registers.  */
-#define SPARC64_NUM_REGS \
-  (sizeof (sparc64_register_info) / sizeof (sparc64_register_info[0]))
+#define SPARC64_NUM_REGS ARRAY_SIZE (sparc64_register_info)
 
 /* We provide the aliases %d0..%d62 and %q0..%q60 for the floating
    registers as "psuedo" registers.  */
@@ -348,9 +341,7 @@ static struct sparc64_register_info sparc64_pseudo_register_info[] =
 };
 
 /* Total number of pseudo registers.  */
-#define SPARC64_NUM_PSEUDO_REGS \
-  (sizeof (sparc64_pseudo_register_info) \
-   / sizeof (sparc64_pseudo_register_info[0]))
+#define SPARC64_NUM_PSEUDO_REGS ARRAY_SIZE (sparc64_pseudo_register_info)
 
 /* Return the name of register REGNUM.  */
 
@@ -499,21 +490,6 @@ sparc64_pseudo_register_write (struct gdbarch *gdbarch,
       regcache_raw_write_unsigned (regcache, SPARC64_STATE_REGNUM, state);
     }
 }
-
-/* Use the program counter to determine the contents and size of a
-   breakpoint instruction.  Return a pointer to a string of bytes that
-   encode a breakpoint instruction, store the length of the string in
-   *LEN and optionally adjust *PC to point to the correct memory
-   location for inserting the breakpoint.  */
-   
-static const unsigned char *
-sparc_breakpoint_from_pc (CORE_ADDR *pc, int *len)
-{
-  static unsigned char break_insn[] = { 0x91, 0xd0, 0x20, 0x01 };
-
-  *len = sizeof (break_insn);
-  return break_insn;
-}
 
 
 struct sparc64_frame_cache
@@ -564,12 +540,6 @@ sparc64_analyze_prologue (CORE_ADDR pc, CORE_ADDR current_pc,
     }
 
   return pc;
-}
-
-static CORE_ADDR
-sparc64_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
-{
-  return frame_unwind_register_unsigned (next_frame, SPARC64_PC_REGNUM);
 }
 
 /* Return PC of first real instruction of the function starting at
@@ -732,15 +702,6 @@ static const struct frame_base sparc64_frame_base =
   sparc64_frame_base_address,
   sparc64_frame_base_address
 };
-
-static struct frame_id
-sparc_unwind_dummy_id (struct gdbarch *gdbarch, struct frame_info *next_frame)
-{
-  CORE_ADDR sp;
-
-  sp = frame_unwind_register_unsigned (next_frame, SPARC_SP_REGNUM);
-  return frame_id_build (sp, frame_pc_unwind (next_frame));
-}
 
 /* Check whether TYPE must be 16-byte aligned.  */
 
@@ -1193,19 +1154,6 @@ sparc64_store_return_value (struct type *type, struct regcache *regcache,
     }
 }
 
-/* Extract from REGCACHE, which contains the (raw) register state, the
-   address in which a function should return its structure value, as a
-   CORE_ADDR.  */
-
-static CORE_ADDR
-sparc_extract_struct_value_address (struct regcache *regcache)
-{
-  ULONGEST addr;
-
-  regcache_cooked_read_unsigned (regcache, SPARC_O0_REGNUM, &addr);
-  return addr;
-}
-
 static int
 sparc64_use_struct_convention (int gcc_p, struct type *type)
 {
@@ -1213,138 +1161,20 @@ sparc64_use_struct_convention (int gcc_p, struct type *type)
      registers.  */
   return (TYPE_LENGTH (type) > 32);
 }
-
 
-/* The SPARC Architecture doesn't have hardware single-step support,
-   and most operating systems don't implement it either, so we provide
-   software single-step mechanism.  */
-
-static CORE_ADDR
-sparc_analyze_control_transfer (CORE_ADDR pc, CORE_ADDR *npc)
-{
-  unsigned long insn = sparc_fetch_instruction (pc);
-  int conditional_p = X_COND (insn) & 0x7;
-  int branch_p = 0;
-  long offset = 0;			/* Must be signed for sign-extend.  */
-
-  if (X_OP (insn) == 0 && X_OP2 (insn) == 3 && (insn & 0x1000000) == 0)
-    {
-      /* Branch on Integer Register with Prediction (BPr).  */
-      branch_p = 1;
-      conditional_p = 1;
-    }
-  else if (X_OP (insn) == 0 && X_OP2 (insn) == 6)
-    {
-      /* Branch on Floating-Point Condition Codes (FBfcc).  */
-      branch_p = 1;
-      offset = 4 * X_DISP22 (insn);
-    }
-  else if (X_OP (insn) == 0 && X_OP2 (insn) == 5)
-    {
-      /* Branch on Floating-Point Condition Codes with Prediction
-         (FBPfcc).  */
-      branch_p = 1;
-      offset = 4 * X_DISP19 (insn);
-    }
-  else if (X_OP (insn) == 0 && X_OP2 (insn) == 2)
-    {
-      /* Branch on Integer Condition Codes (Bicc).  */
-      branch_p = 1;
-      offset = 4 * X_DISP22 (insn);
-    }
-  else if (X_OP (insn) == 0 && X_OP2 (insn) == 1)
-    {
-      /* Branch on Integer Condition Codes with Prediction (BPcc).  */
-      branch_p = 1;
-      offset = 4 * X_DISP19 (insn);
-    }
-
-  /* FIXME: Handle DONE and RETRY instructions.  */
-
-  /* FIXME: Handle the Trap instruction.  */
-
-  if (branch_p)
-    {
-      if (conditional_p)
-	{
-	  /* For conditional branches, return nPC + 4 iff the annul
-	     bit is 1.  */
-	  return (X_A (insn) ? *npc + 4 : 0);
-	}
-      else
-	{
-	  /* For unconditional branches, return the target if its
-	     specified condition is "always" and return nPC + 4 if the
-	     condition is "never".  If the annul bit is 1, set *NPC to
-	     zero.  */
-	  if (X_COND (insn) == 0x0)
-	    pc = *npc, offset = 4;
-	  if (X_A (insn))
-	    *npc = 0;
-
-	  gdb_assert (offset != 0);
-	  return pc + offset;
-	}
-    }
-
-  return 0;
-}
 
 void
-sparc_software_single_step (enum target_signal sig, int insert_breakpoints_p)
+sparc64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
-  static CORE_ADDR npc, nnpc;
-  static char npc_save[4], nnpc_save[4];
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
-  if (insert_breakpoints_p)
-    {
-      CORE_ADDR pc;
+  tdep->pc_regnum = SPARC64_PC_REGNUM;
+  tdep->npc_regnum = SPARC64_NPC_REGNUM;
 
-      pc = sparc_address_from_register (SPARC64_PC_REGNUM);
-      npc = sparc_address_from_register (SPARC64_NPC_REGNUM);
-
-      /* Analyze the instruction at PC.  */
-      nnpc = sparc_analyze_control_transfer (pc, &npc);
-      if (npc != 0)
-	target_insert_breakpoint (npc, npc_save);
-      if (nnpc != 0)
-	target_insert_breakpoint (nnpc, nnpc_save);
-
-      /* Assert that we have set at least one breakpoint.  */
-      gdb_assert (npc != 0 || nnpc != 0);
-    }
-  else
-    {
-      if (npc != 0)
-	target_remove_breakpoint (npc, npc_save);
-      if (nnpc != 0)
-	target_remove_breakpoint (nnpc, nnpc_save);
-
-      npc = 0;
-      nnpc = 0;
-    }
-}
-
-
-static struct gdbarch *
-sparc64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
-{
-  struct gdbarch_tdep *tdep;
-  struct gdbarch *gdbarch;
-
-  /* If there is already a candidate, use it.  */
-  arches = gdbarch_list_lookup_by_info (arches, &info);
-  if (arches != NULL)
-    return arches->gdbarch;
-
-  /* Allocate space for the new architecture.  */
-  tdep = XMALLOC (struct gdbarch_tdep);
-  gdbarch = gdbarch_alloc (&info, tdep);
-
+  /* This is what all the fuss is about.  */
   set_gdbarch_long_bit (gdbarch, 64);
   set_gdbarch_long_long_bit (gdbarch, 64);
   set_gdbarch_ptr_bit (gdbarch, 64);
-  set_gdbarch_long_double_bit (gdbarch, 128);
 
   set_gdbarch_num_regs (gdbarch, SPARC64_NUM_REGS);
   set_gdbarch_register_name (gdbarch, sparc64_register_name);
@@ -1354,147 +1184,23 @@ sparc64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_pseudo_register_write (gdbarch, sparc64_pseudo_register_write);
 
   /* Register numbers of various important registers.  */
-  set_gdbarch_sp_regnum (gdbarch, SPARC_SP_REGNUM); /* %sp */
   set_gdbarch_pc_regnum (gdbarch, SPARC64_PC_REGNUM); /* %pc */
-  set_gdbarch_deprecated_npc_regnum (gdbarch, SPARC64_NPC_REGNUM);
-  set_gdbarch_fp0_regnum (gdbarch, SPARC_F0_REGNUM); /* %f0 */
 
   /* Call dummy code.  */
+  set_gdbarch_call_dummy_location (gdbarch, AT_ENTRY_POINT);
+  set_gdbarch_push_dummy_code (gdbarch, NULL);
   set_gdbarch_push_dummy_call (gdbarch, sparc64_push_dummy_call);
 
   set_gdbarch_extract_return_value (gdbarch, sparc64_extract_return_value);
   set_gdbarch_store_return_value (gdbarch, sparc64_store_return_value);
-  set_gdbarch_extract_struct_value_address
-    (gdbarch, sparc_extract_struct_value_address);
   set_gdbarch_use_struct_convention (gdbarch, sparc64_use_struct_convention);
+  set_gdbarch_return_value_on_stack
+    (gdbarch, generic_return_value_on_stack_not);
+  set_gdbarch_stabs_argument_has_addr
+    (gdbarch, default_stabs_argument_has_addr);
 
   set_gdbarch_skip_prologue (gdbarch, sparc64_skip_prologue);
 
-  /* Stack grows downward.  */
-  set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
-
-  set_gdbarch_breakpoint_from_pc (gdbarch, sparc_breakpoint_from_pc);
-  set_gdbarch_decr_pc_after_break (gdbarch, 0);
-  set_gdbarch_function_start_offset (gdbarch, 0);
-
-  set_gdbarch_frame_args_skip (gdbarch, 8);
-
-  set_gdbarch_print_insn (gdbarch, print_insn_sparc);
-
-  set_gdbarch_software_single_step (gdbarch, sparc_software_single_step);
-
-  set_gdbarch_unwind_dummy_id (gdbarch, sparc_unwind_dummy_id);
-
-  set_gdbarch_unwind_pc (gdbarch, sparc64_unwind_pc);
-
-  frame_base_set_default (gdbarch, &sparc64_frame_base);
-
-  /* Hook in ABI-specific overrides, if they have been registered.  */
-  gdbarch_init_osabi (info, gdbarch);
-
   frame_unwind_append_sniffer (gdbarch, sparc64_frame_sniffer);
-
-  return gdbarch;
-}
-
-/* Helper functions for dealing with register windows.  */
-
-void
-sparc_supply_rwindow (CORE_ADDR sp, int regnum)
-{
-  int offset = 0;
-  char buf[8];
-  int i;
-
-  if (sp & 1)
-    {
-      /* Registers are 64-bit.  */
-      sp += BIAS;
-
-      for (i = SPARC_L0_REGNUM; i <= SPARC_I7_REGNUM; i++)
-	{
-	  if (regnum == i || regnum == -1)
-	    {
-	      target_read_memory (sp + ((i - SPARC_L0_REGNUM) * 8), buf, 8);
-	      supply_register (i, buf);
-	    }
-	}
-    }
-  else
-    {
-      /* Registers are 32-bit.  Toss any sign-extension of the stack
-	 pointer.  */
-      sp &= 0xffffffffUL;
-
-      /* Clear out the top half of the temporary buffer, and put the
-	 register value in the bottom half if we're in 64-bit mode.  */
-      if (gdbarch_ptr_bit (current_gdbarch) == 64)
-	{
-	  memset (buf, 0, 4);
-	  offset = 4;
-	}
-
-      for (i = SPARC_L0_REGNUM; i <= SPARC_I7_REGNUM; i++)
-	{
-	  if (regnum == i || regnum == -1)
-	    {
-	      target_read_memory (sp + ((i - SPARC_L0_REGNUM) * 4),
-				  buf + offset, 4);
-	      supply_register (i, buf);
-	    }
-	}
-    }
-}
-
-void
-sparc_fill_rwindow (CORE_ADDR sp, int regnum)
-{
-  int offset = 0;
-  char buf[8];
-  int i;
-
-  if (sp & 1)
-    {
-      /* Registers are 64-bit.  */
-      sp += BIAS;
-
-      for (i = SPARC_L0_REGNUM; i <= SPARC_I7_REGNUM; i++)
-	{
-	  if (regnum == -1 || regnum == SPARC_SP_REGNUM || regnum == i)
-	    {
-	      regcache_collect (i, buf);
-	      target_write_memory (sp + ((i - SPARC_L0_REGNUM) * 8), buf, 8);
-	    }
-	}
-    }
-  else
-    {
-      /* Registers are 32-bit.  Toss any sign-extension of the stack
-	 pointer.  */
-      sp &= 0xffffffffUL;
-
-      /* Only use the bottom half if we're in 64-bit mode.  */
-      if (gdbarch_ptr_bit (current_gdbarch) == 64)
-	offset = 4;
-
-      for (i = SPARC_L0_REGNUM; i <= SPARC_I7_REGNUM; i++)
-	{
-	  if (regnum == -1 || regnum == SPARC_SP_REGNUM || regnum == i)
-	    {
-	      regcache_collect (i, buf);
-	      target_write_memory (sp + ((i - SPARC_L0_REGNUM) * 4),
-				   buf + offset, 4);
-	    }
-	}
-    }
-}
-
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-void _initialize_sparc64_tdep (void);
-
-void
-_initialize_sparc64_tdep (void)
-{
-  register_gdbarch_init (bfd_arch_sparc, sparc64_gdbarch_init);
+  frame_base_set_default (gdbarch, &sparc64_frame_base);
 }

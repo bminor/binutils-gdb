@@ -1,3 +1,42 @@
+2003-10-18  Mark Kettenis  <kettenis@gnu.org>
+
+	Integrate SPARC and UltraSPARC targets.
+	* sparc-tdep.h (struct sparc32_frame_cache): Add pc_regnum and
+	npc_regnum members.
+	* sparc-tdep.c (sparc_unwind_pc): Rename from sparc32_unwind_pc.
+	Get register numbers for %pc from `struct gdbarch_tdep' instead of
+	using 32-bit specific constants.
+	(sparc_software_single_step): Get register numbers from %pc and
+	%npc from `struct gdbarch_tdep'.
+	(sparc_write_pc): Rename from sparc32_write_pc.  Get register
+	numbers from %pc and %npc from `struct gdbarch_tdep'.
+	(sparc32_gdbarch_init): Initialize TDEP->pc_regnum,
+	TDEP->npc_regnum and TDEP->plt_entry_size.  Set write_pc to
+	sparc_write_pc, set unwind_pc to sparc_unwind_pc.
+	* sparc64-tdep.h: Fix typo in multiple inclusion guard.  Include
+	"sparc-tdep.h".
+	(enum sparc_regnum): Remove.
+	(sparc_supply_rwindow, sparc_fill_rwindow): Remove prototypes.
+	(sparc64_init_abi): New prototype.
+	* sparc64-tdep.c: Include "inferior.h" and "sparc-tdep.h".
+	(struct gdbarch_tdep): Remove definition.
+	(SPARC64_NUM_REGS, SPARC64_NUM_PSEUDO_REGS): Use ARRAY_SIZE.
+	(sparc_breakpoint_from_pc, sparc64_unwind_pc,
+	sparc_unwind_dummy_id, sparc_extract_struct_value_address,
+	sparc_analyze_control_transfer, sparc_software_single_step,
+	sparc64_gdbarch_init, sparc_supply_rwindow, sparc_fill_rwindow,
+	_initialize_sparc64_tdep): Remove functions.
+	(sparc64_init_abi): New function.
+	* sparc64fbsd-tdep.c (sparc64fbsd_supply_reg): Call
+	sparc_supply_rwindow with correct number of arguments.
+	(sparc64fbsd_init_abi): Call sparc64_init_abi.
+	* sparcbsd-nat.c (store_inferior_registers): Call
+	sparc_collect_rwindow instead sparc_fill_rwindow.
+	* config/sparc/fbsd.mt (TDEPFILES): Add sparc-tdep.o and corelow.o.
+	* config/sparc/fbsd.mh (NATDEPFILES): Remove corelow.o.
+	* Makefile.in (sparc64_tdep_h): Add dependency on sparc-tdep.h.
+	(sparc64-tdep.o): Update dependencies.
+
 2003-10-15  Mark Kettenis  <kettenis@gnu.org>
 
 	* infrun.c (handle_inferior_event): Allow for breakpoint
