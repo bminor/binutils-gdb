@@ -223,34 +223,27 @@ get_frame_pc PARAMS ((FRAME));
 extern CORE_ADDR
 get_pc_function_start PARAMS ((CORE_ADDR));
 
-extern struct block *
-block_for_pc PARAMS ((CORE_ADDR));
+extern struct block * block_for_pc PARAMS ((CORE_ADDR));
 
-extern int
-frameless_look_for_prologue PARAMS ((FRAME));
+extern int frameless_look_for_prologue PARAMS ((FRAME));
 
-extern void
-print_frame_args PARAMS ((struct symbol *, struct frame_info *, int, FILE *));
+extern void print_frame_args PARAMS ((struct symbol *, struct frame_info *,
+				      int, FILE *));
 
-extern FRAME
-find_relative_frame PARAMS ((FRAME, int*));
+extern FRAME find_relative_frame PARAMS ((FRAME, int*));
 
-extern void
-print_stack_frame PARAMS ((FRAME, int, int));
+extern void print_stack_frame PARAMS ((FRAME, int, int));
 
-extern void
-select_frame PARAMS ((FRAME, int));
+extern void select_frame PARAMS ((FRAME, int));
 
-extern void
-record_selected_frame PARAMS ((FRAME_ADDR *, int *));
+extern void record_selected_frame PARAMS ((FRAME_ADDR *, int *));
 
-extern void
-print_frame_info PARAMS ((struct frame_info *, int, int, int));
+extern void print_frame_info PARAMS ((struct frame_info *, int, int, int));
 
-extern CORE_ADDR
-find_saved_register PARAMS ((FRAME, int));
+extern CORE_ADDR find_saved_register PARAMS ((FRAME, int));
 
-extern CORE_ADDR
-sigtramp_saved_pc PARAMS ((FRAME));
+extern FRAME block_innermost_frame PARAMS ((struct block *));
+
+extern CORE_ADDR sigtramp_saved_pc PARAMS ((FRAME));
 
 #endif /* !defined (FRAME_H)  */

@@ -81,7 +81,7 @@ allocate_space_in_inferior (len)
 	{
 	  error ("\"malloc\" exists in this program but is not a function.");
 	}
-      val = value_of_variable (sym);
+      val = value_of_variable (sym, NULL);
     }
   else
     {
@@ -332,7 +332,7 @@ value_assign (toval, fromval)
 	  int v;		/* FIXME, this won't work for large bitfields */
 	  read_memory (VALUE_ADDRESS (toval) + VALUE_OFFSET (toval),
 		       (char *) &v, sizeof v);
-	  modify_field ((char *) &v, (int) value_as_long (fromval),
+	  modify_field ((char *) &v, value_as_long (fromval),
 			VALUE_BITPOS (toval), VALUE_BITSIZE (toval));
 	  write_memory (VALUE_ADDRESS (toval) + VALUE_OFFSET (toval),
 			(char *)&v, sizeof v);
@@ -352,7 +352,7 @@ value_assign (toval, fromval)
 
 	  read_register_bytes (VALUE_ADDRESS (toval) + VALUE_OFFSET (toval),
 			       (char *) &v, sizeof v);
-	  modify_field ((char *) &v, (int) value_as_long (fromval),
+	  modify_field ((char *) &v, value_as_long (fromval),
 			VALUE_BITPOS (toval), VALUE_BITSIZE (toval));
 	  write_register_bytes (VALUE_ADDRESS (toval) + VALUE_OFFSET (toval),
 				(char *) &v, sizeof v);
@@ -415,7 +415,7 @@ value_assign (toval, fromval)
 	/* Modify what needs to be modified.  */
 	if (VALUE_BITSIZE (toval))
 	  modify_field (buffer + byte_offset,
-			(int) value_as_long (fromval),
+			value_as_long (fromval),
 			VALUE_BITPOS (toval), VALUE_BITSIZE (toval));
 	else if (use_buffer)
 	  memcpy (buffer + byte_offset, raw_buffer, use_buffer);
@@ -498,12 +498,30 @@ value_repeat (arg1, count)
 }
 
 value
-value_of_variable (var)
+value_of_variable (var, b)
      struct symbol *var;
+     struct block *b;
 {
   value val;
+  FRAME fr;
 
-  val = read_var_value (var, (FRAME) 0);
+  if (b == NULL)
+    /* Use selected frame.  */
+    fr = NULL;
+  else
+    {
+      fr = block_innermost_frame (b);
+      if (fr == NULL)
+	{
+	  if (BLOCK_FUNCTION (b) != NULL
+	      && SYMBOL_NAME (BLOCK_FUNCTION (b)) != NULL)
+	    error ("No frame is currently executing in block %s.",
+		   SYMBOL_NAME (BLOCK_FUNCTION (b)));
+	  else
+	    error ("No frame is currently executing in specified block");
+	}
+    }
+  val = read_var_value (var, fr);
   if (val == 0)
     error ("Address of symbol \"%s\" is unknown.", SYMBOL_SOURCE_NAME (var));
   return val;
@@ -632,14 +650,14 @@ push_word (sp, word)
      REGISTER_TYPE word;
 {
   register int len = sizeof (REGISTER_TYPE);
-  REGISTER_TYPE buffer;
+  char buffer[MAX_REGISTER_RAW_SIZE];
 
-  store_unsigned_integer (&buffer, len, word);
+  store_unsigned_integer (buffer, len, word);
 #if 1 INNER_THAN 2
   sp -= len;
-  write_memory (sp, (char *)&buffer, len);
+  write_memory (sp, buffer, len);
 #else /* stack grows upward */
-  write_memory (sp, (char *)&buffer, len);
+  write_memory (sp, buffer, len);
   sp += len;
 #endif /* stack grows upward */
 
@@ -694,7 +712,15 @@ value_arg_coerce (arg)
 {
   register struct type *type;
 
-  COERCE_ENUM (arg);
+  /* FIXME: We should coerce this according to the prototype (if we have
+     one).  Right now we do a little bit of this in typecmp(), but that
+     doesn't always get called.  For example, if passing a ref to a function
+     without a prototype, we probably should de-reference it.  Currently
+     we don't.  */
+
+  if (TYPE_CODE (VALUE_TYPE (arg)) == TYPE_CODE_ENUM)
+    arg = value_cast (builtin_type_unsigned_int, arg);
+
 #if 1	/* FIXME:  This is only a temporary patch.  -fnf */
   if (VALUE_REPEATED (arg)
       || TYPE_CODE (VALUE_TYPE (arg)) == TYPE_CODE_ARRAY)
@@ -1153,8 +1179,11 @@ value_string (ptr, len)
   return (val);
 }
 
-/* Compare two argument lists and return the position in which they differ,
-   or zero if equal.
+/* See if we can pass arguments in T2 to a function which takes arguments
+   of types T1.  Both t1 and t2 are NULL-terminated vectors.  If some
+   arguments need coercion of some sort, then the coerced values are written
+   into T2.  Return value is 0 if the arguments could be matched, or the
+   position at which they differ if not.
 
    STATICP is nonzero if the T1 argument list came from a
    static member function.
@@ -1186,8 +1215,22 @@ typecmp (staticp, t1, t2)
       if (! t2[i])
 	return i+1;
       if (TYPE_CODE (t1[i]) == TYPE_CODE_REF
-	  && TYPE_TARGET_TYPE (t1[i]) == VALUE_TYPE (t2[i]))
+	  /* We should be doing hairy argument matching, as below.  */
+	  && (TYPE_CODE (TYPE_TARGET_TYPE (t1[i]))
+	      == TYPE_CODE (VALUE_TYPE (t2[i]))))
+	{
+	  t2[i] = value_addr (t2[i]);
+	  continue;
+	}
+
+      if (TYPE_CODE (t1[i]) == TYPE_CODE_PTR
+	  && TYPE_CODE (VALUE_TYPE (t2[i])) == TYPE_CODE_ARRAY)
+	/* Array to pointer is a `trivial conversion' according to the ARM.  */
 	continue;
+
+      /* We should be doing much hairier argument matching (see section 13.2
+	 of the ARM), but as a quick kludge, just check for the same type
+	 code.  */
       if (TYPE_CODE (t1[i]) != TYPE_CODE (VALUE_TYPE (t2[i])))
 	return i+1;
     }

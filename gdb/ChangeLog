@@ -1,5 +1,16 @@
 Wed Aug 18 12:03:00 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* blockframe.c (block_innermost_frame): Uncomment.
+	Return NULL if passed NULL.
+	* frame.h: Declare it.
+	* expression.h (union exp_element): Add field block.
+	* parse.c (write_exp_elt_block): New function.
+	* expression.h (OP_VAR_VALUE): Now takes additional struct block *.
+	* *-exp.y: Write block for OP_VAR_VALUE.
+	* eval.c, expprint.c, parse.c: Deal with block for OP_VAR_VALUE.
+	* valops.c, value.h (value_of_variable), callers:
+	Add second argument, for block.
+
 	* main.c (gdb_readline): If we read some characters followed by EOF,
 	return them rather than returning NULL.
 

@@ -346,6 +346,7 @@ location	:	access_name
 access_name	:	LOCATION_NAME
 			{
 			  write_exp_elt_opcode (OP_VAR_VALUE);
+			  write_exp_elt_block (NULL);
 			  write_exp_elt_sym ($1.sym);
 			  write_exp_elt_opcode (OP_VAR_VALUE);
 			}
@@ -477,6 +478,7 @@ value_name	:	synonym_name
 		|	GENERAL_PROCEDURE_NAME
 			{
 			  write_exp_elt_opcode (OP_VAR_VALUE);
+			  write_exp_elt_block (NULL);
 			  write_exp_elt_sym ($1.sym);
 			  write_exp_elt_opcode (OP_VAR_VALUE);
 			}

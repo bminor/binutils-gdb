@@ -179,6 +179,15 @@ write_exp_elt_sym (expelt)
 }
 
 void
+write_exp_elt_block (b)
+     struct block *b;
+{
+  union exp_element tmp;
+  tmp.block = b;
+  write_exp_elt (tmp);
+}
+
+void
 write_exp_elt_longcst (expelt)
      LONGEST expelt;
 {
@@ -389,12 +398,12 @@ length_of_subexp (expr, endpos)
 
     case OP_LONG:
     case OP_DOUBLE:
+    case OP_VAR_VALUE:
       oplen = 4;
       break;
 
     case OP_TYPE:
     case OP_BOOL:
-    case OP_VAR_VALUE:
     case OP_LAST:
     case OP_REGISTER:
     case OP_INTERNALVAR:
@@ -518,12 +527,12 @@ prefixify_subexp (inexpr, outexpr, inend, outbeg)
 
     case OP_LONG:
     case OP_DOUBLE:
+    case OP_VAR_VALUE:
       oplen = 4;
       break;
 
     case OP_TYPE:
     case OP_BOOL:
-    case OP_VAR_VALUE:
     case OP_LAST:
     case OP_REGISTER:
     case OP_INTERNALVAR:

@@ -724,10 +724,8 @@ find_pc_partial_function (pc, name, address, endaddr)
   return 1;
 }
 
-/* Return the innermost stack frame executing inside of the specified block,
-   or zero if there is no such frame.  */
-
-#if 0	/* Currently unused */
+/* Return the innermost stack frame executing inside of BLOCK,
+   or zero if there is no such frame.  If BLOCK is NULL, just return NULL.  */
 
 FRAME
 block_innermost_frame (block)
@@ -737,6 +735,9 @@ block_innermost_frame (block)
   register FRAME frame;
   register CORE_ADDR start = BLOCK_START (block);
   register CORE_ADDR end = BLOCK_END (block);
+
+  if (block == NULL)
+    return NULL;
 
   frame = 0;
   while (1)
@@ -749,8 +750,6 @@ block_innermost_frame (block)
 	return frame;
     }
 }
-
-#endif	/* 0 */
 
 #ifdef SIGCONTEXT_PC_OFFSET
 /* Get saved user PC for sigtramp from sigcontext for BSD style sigtramp.  */

@@ -559,6 +559,7 @@ fblock	:	block COLONCOLON BLOCKNAME
 /* Useful for assigning to PROCEDURE variables */
 variable:	fblock
 			{ write_exp_elt_opcode(OP_VAR_VALUE);
+			  write_exp_elt_block (NULL);
 			  write_exp_elt_sym ($1);
 			  write_exp_elt_opcode (OP_VAR_VALUE); }
 	;
@@ -580,6 +581,8 @@ variable:	block COLONCOLON NAME
 				   copy_name ($3));
 
 			  write_exp_elt_opcode (OP_VAR_VALUE);
+			  /* block_found is set by lookup_symbol.  */
+			  write_exp_elt_block (block_found);
 			  write_exp_elt_sym (sym);
 			  write_exp_elt_opcode (OP_VAR_VALUE); }
 	;
@@ -623,6 +626,10 @@ variable:	NAME
 				  break;
 				}
 			      write_exp_elt_opcode (OP_VAR_VALUE);
+			      /* We want to use the selected frame, not
+				 another more inner frame which happens to
+				 be in the same block.  */
+			      write_exp_elt_block (NULL);
 			      write_exp_elt_sym (sym);
 			      write_exp_elt_opcode (OP_VAR_VALUE);
 			    }
