@@ -1,4 +1,4 @@
 # TARGET: HP PA-RISC running bsd
-TDEPFILES= hppa-pinsn.o hppabsd-tdep.o exec.o hppabsd-core.o
-TM_FILE= tm-hppabsd.h
+TDEPFILES= hppa-pinsn.o hppab-tdep.o exec.o hppab-core.o
+TM_FILE= tm-hppab.h
 

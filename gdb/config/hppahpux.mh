@@ -1,7 +1,6 @@
 # Host: Hewlett-Packard PA-RISC machine, running HPUX 
 TERMCAP = -lcurses
-XDEPFILES= hppahpux-xdep.o hppa-coredep.o
-XM_FILE= xm-hppahpux.h
+XDEPFILES= hppah-xdep.o coredep.o
+XM_FILE= xm-hppah.h
 REGEX=regex.o
 REGEX1=regex.o
-ALLOCA=alloca.o
