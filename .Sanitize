@@ -48,6 +48,7 @@ cvs
 deja-gnu
 diff
 emacs
+expect
 flex
 gas
 gcc
@@ -75,6 +76,7 @@ rcs
 readline
 send_pr
 standards.texi
+tcl
 test-build.mk
 texinfo
 tgas
