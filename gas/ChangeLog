@@ -1,3 +1,26 @@
+2003-07-09  Alexandre Oliva  <aoliva@redhat.com>
+
+	2000-05-25  Alexandre Oliva  <aoliva@cygnus.com>
+	* config/tc-mn10300.c (mn10300_insert_operand): Negate negative
+	accumulator's shift.
+	2000-05-08  Alexandre Oliva  <aoliva@cygnus.com>
+	* config/tc-mn10300.c (md_relax_table, md_convert_frag,
+	md_assemble, md_estimate_size_before_relax): Handle fbCC.
+	2000-04-20  Alexandre Oliva  <aoliva@cygnus.com>
+	* config/tc-mn10300.c (HAVE_AM33): Redefine in terms of
+	HAVE_AM33_2.
+	2000-04-03  Alexandre Oliva  <aoliva@cygnus.com>
+	* config/tc-mn10300.c (md_pseudo_table): Use AM33_2 constant.
+	(HAVE_AM33): Match AM33_2 too.
+	(HAVE_AM33_2): New macro.
+	(md_assemble): Use it.  Match 2.0 registers only if HAVE_AM33_2.
+	2000-04-01  Alexandre Oliva  <aoliva@cygnus.com>
+	* config/tc-mn10300.c (md_pseudo_table): Added `am33_2'.
+	(float_registers, double_registers): New variables.
+	(float_register_name, double_register_name): New functions.
+	(md_assemble): Recognize FP registers.  Implement FMT_D3.
+	(mn10300_insert_operand): Support FP registers.
+
 2003-07-08  Chris Demetriou  <cgd@broadcom.com>
 
 	* config/tc-mips.c (mips_validate_fix): Do not warn about branch
