@@ -1,3 +1,9 @@
+1999-10-25  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-mcore.c (parse_psrmod): New function: Parse the psr
+	flag specifiers of a psrclr/psrset instruction.
+	(md_assemble): Parse instructions of class OPSR.
+
 Mon Oct 18 18:11:10 MDT 1999	Diego Novillo <dnovillo@cygnus.com>
 
 	* tc_d10v.c (find_opcode): Allow ATSIGN to match expressions of the
