@@ -934,6 +934,12 @@ gdb_test "print 'scope0.c'::filelocal_ro" "= 201"
 
 # gdb currently cannot access bss memory on some targets if the inferior
 # is not running.
+#
+# For PA boards using monitor/remote-pa.c, the bss test is going to 
+# randomly fail.  We've already put remote-pa on the target stack,
+# so we actually read memory from the board.  Problem is crt0.o
+# is responsible for clearing bss and that hasnt' happened yet.
+setup_xfail "hppa*-*-*pro*"
 if {$gcc_compiled} then { setup_xfail "rs6000-*-*" }
 send "print 'scope0.c'::filelocal_bss\n"
 expect {

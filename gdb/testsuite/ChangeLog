@@ -1,5 +1,8 @@
 Tue Aug 22 00:30:37 1995  Jeff Law  (law@snake.cs.utah.edu)
 
+	* gdb.base/scope.exp: xfail 'scope0.c'::filelocal_bss before run
+	test for PRO targets.
+
 	* gdb.base/funcargs.exp: Avoid ever setting more than 8
 	breakpoints in the inferior at any given time by making
 	two groups of breakpoints for call2*, call6* and call7*
