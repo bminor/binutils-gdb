@@ -1,5 +1,11 @@
 2002-01-16  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf64-ppc.c (ppc64_elf_howto_raw): Remove stale FIXMEs.
+	(ppc64_elf_reloc_type_lookup): Use proper CTOR reloc.
+	(ORI_R0_R0_0): Correct.
+
+2002-01-16  Alan Modra  <amodra@bigpond.net.au>
+
 	* elflink.c (_bfd_elf_create_dynamic_sections): Don't set SEC_CODE
 	when plt_not_loaded.
 	* elf64-ppc.c (ppc64_elf_create_dynamic_sections): No need to

@@ -145,7 +145,7 @@ static boolean ppc64_elf_finish_dynamic_sections
 /* After that, we need two instructions to load the index, followed by
    a branch.  */
 #define LIS_R0_0	0x3c000000	/* lis   %r0,0		*/
-#define ORI_R0_R0_0	0x60008000	/* ori	 %r0,%r0,0	*/
+#define ORI_R0_R0_0	0x60000000	/* ori	 %r0,%r0,0	*/
 
 /* Relocation HOWTO's.  */
 static reloc_howto_type *ppc64_elf_howto_table[(int) R_PPC_max];
@@ -550,8 +550,7 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
 	 0xffffffff,		/* dst_mask */
 	 true),			/* pcrel_offset */
 
-  /* 32-bit relocation to the symbol's procedure linkage table.
-     FIXME: R_PPC64_PLT32 not supported.  */
+  /* 32-bit relocation to the symbol's procedure linkage table.  */
   HOWTO (R_PPC64_PLT32,		/* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
@@ -819,7 +818,6 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
 	 true),			/* pcrel_offset */
 
   /* 64-bit relocation to the symbol's procedure linkage table. */
-  /* FIXME: R_PPC64_PLT64 not supported.  */
   HOWTO (R_PPC64_PLT64,		/* type */
 	 0,			/* rightshift */
 	 4,			/* size (0=byte, 1=short, 2=long, 4=64 bits) */
@@ -1307,9 +1305,7 @@ ppc64_elf_reloc_type_lookup (abfd, code)
       break;
     case BFD_RELOC_HI16_S_BASEREL:	 ppc_reloc = R_PPC64_SECTOFF_HA;
       break;
-      /* FIXME: Is CTOR 32 or 64 bits?  Fix md_apply_fix3 in
-	 gas/config/tc-ppc.c too.  */
-    case BFD_RELOC_CTOR:		 ppc_reloc = R_PPC64_ADDR32;
+    case BFD_RELOC_CTOR:		 ppc_reloc = R_PPC64_ADDR64;
       break;
     case BFD_RELOC_64:			 ppc_reloc = R_PPC64_ADDR64;
       break;
