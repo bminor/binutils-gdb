@@ -1,3 +1,8 @@
+Fri Dec 15 23:12:15 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* i386gnu-nat.c: Include "gdb_assert.h" instead of <assert.h>.
+ 	(gnu_store_registers): Replace assert with gdb_assert.
+	
 2000-12-15  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
 	* sh-tdep.c (sh_generic_show_regs, sh3_show_regs, sh3e_show_regs,

@@ -22,7 +22,7 @@
 #include "inferior.h"
 #include "floatformat.h"
 
-#include <assert.h>
+#include "gdb_assert.h"
 #include <stdio.h>
 #include <errno.h>
 
@@ -321,7 +321,7 @@ gnu_store_registers (int regno)
 	{
 	  proc_debug (thread, "storing register %s", REGISTER_NAME (regno));
 
-	  assert (register_valid[regno]);
+	  gdb_assert (register_valid[regno]);
 	  fill (state, regno);
 	}
 
