@@ -633,6 +633,7 @@ _do_getb64, _do_putb64,  _do_getb32, _do_putb32, _do_getb16, _do_putb16, /* hdrs
     _bfd_write_archive_contents,
     bfd_false,
   },
+#undef hppa
   JUMP_TABLE(hppa)
 };
 

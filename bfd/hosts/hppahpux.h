@@ -16,6 +16,10 @@ void free();
 #define SEEK_SET 0
 #define SEEK_CUR 1
 
+#ifndef __STDC__
+#define NATIVE_HPPAHPUX_COMPILER
+#endif
+
 #if 0
 static int
 rename(from, to)

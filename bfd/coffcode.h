@@ -1815,19 +1815,6 @@ DEFUN(coff_write_relocs,(abfd),
       arelent        *q = p[i];
       memset((PTR)&n, 0, sizeof(n));
 
-
-#ifndef SWAP_OUT_RELOC_OFFSET
-      /* @@FIXME COFF relocs don't support addends.  Code should probably be
-	 in the target-independent code, using a target flag to decide whether
-	 to fold the addend into the section contents.  */
-
-      if (q->addend != 0)
-#ifdef R_IHCONST
-	if (q->howto->type != R_IHCONST)
-#endif
-	  abort ();
-#endif
-
       n.r_vaddr = q->address + s->vma;
       /* The 29k const/consth reloc pair is a real kludge - the consth
 	 part doesn't have a symbol - it has an offset. So rebuilt

@@ -1,3 +1,16 @@
+Tue Sep 29 08:30:21 1992  Ian Lance Taylor  (ian@cygnus.com)
+
+	* Portability fixes from p3:
+	coffcode.h (coff_write_relocs): removed sanity check until it
+	works on all targets (per advice from sac).
+	config/hp9000.mh: new file to define USG.
+	hppa.c: #undef hppa before the JUMP_TABLE.
+	hosts/hppahpux.h: #define NATIVE_HPPAHPUX_COMPILER if not
+	__STDC__.
+	targets.c (bfd_target_list): if NATIVE_HPPAHPUX_COMPILER, make
+	local variable target volatile to avoid mysterious bug in
+	HP9000/700 cc.
+
 Sat Sep 26 03:58:49 1992  John Gilmore  (gnu@cygnus.com)
 
 	* config/hppabsd.mh, config.hppahpux.mh:  Remove various bogosity.
