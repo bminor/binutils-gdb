@@ -1,4 +1,17 @@
+Thu Jun  1 16:15:16 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* linker.c (_bfd_generic_link_output_symbols, case
+	bfd_link_hash_indirect): Add cast to correct pointer types.
+
+Sat May 27 21:37:31 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
+
+	* config.bfd (m68k-bull-sysv*): Added strip_underscore=yes.
+	  (m68k-est-coff): Removed.  target does not effect object format.
+
 Wed May 24 10:52:01 1995  Steve Chamberlain  <sac@slash.cygnus.com>
+
+	* linker.c (_bfd_generic_link_output_symbols): Cope with
+	indirect symbols.
 
 	pr ld/6997
 
