@@ -1,0 +1,5 @@
+# TXVU testcases
+
+if [istarget txvu-*-*] {
+    run_dump_test "basic-1"
+}
