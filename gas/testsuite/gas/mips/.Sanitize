@@ -39,6 +39,30 @@ else
 	done
 fi
 
+r5900_losers="r5900.s r5900.d"
+if ( echo $* | grep keep\-r5900 > /dev/null ) ; then
+	keep_these_too="$keep_these_too $r5900_losers"
+	if [ -n "${verbose}" ] ; then
+		for i in $r5900_losers ; do
+			echo Keeping $i
+		done
+	fi
+else
+	for i in $r5900_losers ; do
+		if [ -n "${verbose}" ] ; then
+			echo Removing $i...
+		fi
+		if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
+			if [ -n "${verbose}" ] ; then
+				echo Caching $i in .Recover...
+			fi
+			mv $i .Recover
+		else
+			rm $i
+		fi
+	done
+fi
+
 # All files listed between the "Things-to-keep:" line and the
 # "Files-to-sed:" line will be kept.  All other files will be removed.
 # Directories listed in this section will have their own Sanitize
@@ -213,6 +237,34 @@ else
 			fi
 			cp $i new
 			sed '/start\-sanitize\-vr5400/,/end-\sanitize\-vr5400/d' < $i > new
+			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
+				if [ -n "${verbose}" ] ; then
+					echo Caching $i in .Recover...
+				fi
+				mv $i .Recover
+			fi
+			mv new $i
+		fi
+	done
+fi
+
+r5900_files="mips.exp"
+if ( echo $* | grep keep\-r5900 > /dev/null ) ; then
+	for i in $r5900_files ; do
+		if test ! -d $i && (grep sanitize-r5900 $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Keeping r5900 stuff in $i
+			fi
+		fi
+	done
+else
+	for i in $r5900_files ; do
+		if test ! -d $i && (grep sanitize-r5900 $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Removing traces of \"r5900\" from $i...
+			fi
+			cp $i new
+			sed '/start\-sanitize\-r5900/,/end-\sanitize\-r5900/d' < $i > new
 			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
 				if [ -n "${verbose}" ] ; then
 					echo Caching $i in .Recover...

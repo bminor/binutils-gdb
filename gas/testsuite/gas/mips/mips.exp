@@ -79,4 +79,7 @@ if [istarget mips*-*-*] then {
 # start-sanitize-vr5400
     run_dump_test "vr5400"
 # end-sanitize-vr5400
+# start-sanitize-r5900
+    run_dump_test "r5900"
+# end-sanitize-r5900
 }
