@@ -165,25 +165,12 @@ static void
 print_i387_value (char *raw)
 {
   DOUBLEST value;
-  int len = TARGET_LONG_DOUBLE_BIT / TARGET_CHAR_BIT;
-  char *tmp = alloca (len);
 
-  /* This code only works on targets where ... */
-  gdb_assert (TARGET_LONG_DOUBLE_FORMAT == &floatformat_i387_ext);
-
-  /* Take care of the padding.  FP reg is 80 bits.  The same value in
-     memory is 96 bits.  */
-  gdb_assert (FPU_REG_RAW_SIZE < len);
-  memcpy (tmp, raw, FPU_REG_RAW_SIZE);
-  memset (tmp + FPU_REG_RAW_SIZE, 0, len - FPU_REG_RAW_SIZE);
-  
-  /* Extract the value as a DOUBLEST.  */
-  /* Use extract_floating() rather than floatformat_to_doublest().
-     The latter is lossy in nature.  Once GDB gets a host/target
-     independent and non-lossy FP it will become possible to bypass
-     extract_floating() and call floatformat*() directly.  Note also
-     the assumptions about TARGET_LONG_DOUBLE above.  */
-  value = extract_floating (tmp, len);
+  /* Using extract_typed_floating here might affect the representation
+     of certain numbers such as NaNs, even if GDB is running natively.
+     This is fine since our caller already detects such special
+     numbers and we print the hexadecimal representation anyway.  */
+  value = extract_typed_floating (raw, builtin_type_i387_ext);
 
   /* We try to print 19 digits.  The last digit may or may not contain
      garbage, but we'd better print one too many.  We need enough room

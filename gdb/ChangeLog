@@ -1,5 +1,8 @@
 2001-10-28  Mark Kettenis  <kettenis@gnu.org>
 
+	* i387-tdep.c (print_i387_value): Use extract_typed_floating to
+	convert RAW to a DOUBLEST instead of extract_floating.
+
 	* gdbtypes.c (_initialize_gdbtypes): Set floating-point type for
 	builtin_type_i387_ext to floatformat_i387_ext.
 
