@@ -3071,7 +3071,7 @@ set_endian_from_file (abfd)
 #ifdef TARGET_BYTE_ORDER_SELECTABLE
   int want;
 
-  if (abfd->xvec->byteorder_big_p)
+  if (bfd_big_endian (abfd))
     want = BIG_ENDIAN;
   else
     want = LITTLE_ENDIAN;
@@ -3084,11 +3084,11 @@ set_endian_from_file (abfd)
 
 #else /* ! defined (TARGET_BYTE_ORDER_SELECTABLE) */
 
-  if (abfd->xvec->byteorder_big_p
+  if (bfd_big_endian (abfd)
       ? TARGET_BYTE_ORDER != BIG_ENDIAN
       : TARGET_BYTE_ORDER == BIG_ENDIAN)
     warning ("%s endian file does not match %s endian target.",
-	     abfd->xvec->byteorder_big_p ? "big" : "little",
+	     bfd_big_endian (abfd) ? "big" : "little",
 	     TARGET_BYTE_ORDER == BIG_ENDIAN ? "big" : "little");
 
 #endif /* ! defined (TARGET_BYTE_ORDER_SELECTABLE) */
