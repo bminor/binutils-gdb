@@ -83,9 +83,14 @@ target vector		Andrew Cagney		cagney@cygnus.com
 main (main.c, top.c)	Elena Zannoni		ezannoni@cygnus.com
 event loop		Elena Zannoni           ezannoni@cygnus.com
 generic symtabs		Jim Blandy		jimb@cygnus.com
-dwarf readers		Jim Blandy		jimb@cygnus.com
-elf reader		Jim Blandy		jimb@cygnus.com
-stabs reader		Jim Blandy		jimb@cygnus.com
+			Elena Zannoni		ezannoni@cygnus.com
+  dwarf readers		Jim Blandy		jimb@cygnus.com
+			Elena Zannoni		ezannoni@cygnus.com
+  elf reader		Jim Blandy		jimb@cygnus.com
+			Elena Zannoni		ezannoni@cygnus.com
+  stabs reader		Jim Blandy		jimb@cygnus.com
+			Elena Zannoni		ezannoni@cygnus.com
+  coff reader		Philippe De Muyter	phdm@macqel.be
 tracing bytecode stuff  Jim Blandy              jimb@cygnus.com
 tracing			Michael Snyder		msnyder@cygnus.com
 threads			Michael Snyder		msnyder@cygnus.com
@@ -99,7 +104,6 @@ defs.h			David Taylor		taylor@cygnus.com
 utils.c			David Taylor		taylor@cygnus.com
 Scheme support		Jim Blandy		jimb@cygnus.com
 svr4 shlibs (solib.c)	Jim Blandy		jimb@cygnus.com
-coff reader		Philippe De Muyter	phdm@macqel.be
 remote.c		Andrew Cagney		cagney@cygnus.com
 			J.T. Conklin		jtc@redback.com
 include/remote-sim.h, remote-sim.c
