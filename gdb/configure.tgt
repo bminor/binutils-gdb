@@ -129,6 +129,7 @@ m68*-*-os68k*)		gdb_target=os68k ;;
 # OBSOLETE m68*-*-sunos3*)		gdb_target=sun3os3 ;;
 # OBSOLETE m68*-*-sunos4*)		gdb_target=sun3os4 ;;
 # OBSOLETE m68*-*-sysv4*)		gdb_target=m68kv4 ;;
+m68*-*-uclinux*)	gdb_target=monitor ;;
 m68*-*-vxworks*)	gdb_target=vxworks68 ;;
 
 mcore*-*-*)		gdb_target=mcore ;;

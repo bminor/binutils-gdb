@@ -1,3 +1,8 @@
+2004-01-02  Daniel Jacobowitz  <drow@mvista.com>
+
+	From Bernardo Innocenti <bernie@develer.com>:
+	* configure.tgt: Add uClinux target.
+
 2004-01-02  Andrew Cagney  <cagney@redhat.com>
 
 	* utils.c (do_my_cleanups): Make static, add forward declaration.
