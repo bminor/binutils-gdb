@@ -289,7 +289,6 @@ mips_xfer_register (struct regcache *regcache, int reg_num, int length,
 		    enum bfd_endian endian, bfd_byte * in,
 		    const bfd_byte * out, int buf_offset)
 {
-  bfd_byte reg[MAX_REGISTER_SIZE];
   int reg_offset = 0;
   gdb_assert (reg_num >= NUM_REGS);
   /* Need to transfer the left or right part of the register, based on
@@ -1476,230 +1475,6 @@ mips_next_pc (CORE_ADDR pc)
     return mips32_next_pc (pc);
 }
 
-/* Set up the 'saved_regs' array.  This is a data structure containing
-   the addresses on the stack where each register has been saved, for
-   each stack frame.  Registers that have not been saved will have
-   zero here.  The stack pointer register is special: rather than the
-   address where the stack register has been saved,
-   saved_regs[SP_REGNUM] will have the actual value of the previous
-   frame's stack register.  */
-
-static void
-mips_find_saved_regs (struct frame_info *fci)
-{
-  int ireg;
-  /* r0 bit means kernel trap */
-  int kernel_trap;
-  /* What registers have been saved?  Bitmasks.  */
-  unsigned long gen_mask, float_mask;
-  mips_extra_func_info_t proc_desc;
-  t_inst inst;
-  CORE_ADDR *saved_regs;
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
-
-  if (deprecated_get_frame_saved_regs (fci) != NULL)
-    return;
-  saved_regs = frame_saved_regs_zalloc (fci);
-
-  /* If it is the frame for sigtramp, the saved registers are located
-     in a sigcontext structure somewhere on the stack.  If the stack
-     layout for sigtramp changes we might have to change these
-     constants and the companion fixup_sigtramp in mdebugread.c */
-#ifndef SIGFRAME_BASE
-  /* To satisfy alignment restrictions, sigcontext is located 4 bytes
-     above the sigtramp frame.  */
-#define SIGFRAME_BASE		mips_regsize (current_gdbarch)
-/* FIXME!  Are these correct?? */
-#define SIGFRAME_PC_OFF		(SIGFRAME_BASE + 2 * mips_regsize (current_gdbarch))
-#define SIGFRAME_REGSAVE_OFF	(SIGFRAME_BASE + 3 * mips_regsize (current_gdbarch))
-#define SIGFRAME_FPREGSAVE_OFF	\
-        (SIGFRAME_REGSAVE_OFF + MIPS_NUMREGS * mips_regsize (current_gdbarch) + 3 * mips_regsize (current_gdbarch))
-#endif
-  if ((get_frame_type (fci) == SIGTRAMP_FRAME))
-    {
-      for (ireg = 0; ireg < MIPS_NUMREGS; ireg++)
-	{
-	  CORE_ADDR reg_position =
-	    (get_frame_base (fci) + SIGFRAME_REGSAVE_OFF +
-	     ireg * mips_regsize (current_gdbarch));
-	  set_reg_offset (saved_regs, ireg, reg_position);
-	}
-      for (ireg = 0; ireg < MIPS_NUMREGS; ireg++)
-	{
-	  CORE_ADDR reg_position = (get_frame_base (fci)
-				    + SIGFRAME_FPREGSAVE_OFF
-				    + ireg * mips_regsize (current_gdbarch));
-	  set_reg_offset (saved_regs,
-			  mips_regnum (current_gdbarch)->fp0 + ireg,
-			  reg_position);
-	}
-
-      set_reg_offset (saved_regs, mips_regnum (current_gdbarch)->pc,
-		      get_frame_base (fci) + SIGFRAME_PC_OFF);
-      /* SP_REGNUM, contains the value and not the address.  */
-      set_reg_offset (saved_regs, SP_REGNUM, get_frame_base (fci));
-      return;
-    }
-
-  proc_desc = get_frame_extra_info (fci)->proc_desc;
-  if (proc_desc == NULL)
-    /* I'm not sure how/whether this can happen.  Normally when we
-       can't find a proc_desc, we "synthesize" one using
-       heuristic_proc_desc and set the saved_regs right away.  */
-    return;
-
-  kernel_trap = PROC_REG_MASK (proc_desc) & 1;
-  gen_mask = kernel_trap ? 0xFFFFFFFF : PROC_REG_MASK (proc_desc);
-  float_mask = kernel_trap ? 0xFFFFFFFF : PROC_FREG_MASK (proc_desc);
-
-  if (				/* In any frame other than the innermost or a frame interrupted
-				   by a signal, we assume that all registers have been saved.
-				   This assumes that all register saves in a function happen
-				   before the first function call.  */
-       (get_next_frame (fci) == NULL
-	|| (get_frame_type (get_next_frame (fci)) == SIGTRAMP_FRAME))
-       /* In a dummy frame we know exactly where things are saved.  */
-       && !PROC_DESC_IS_DUMMY (proc_desc)
-       /* Don't bother unless we are inside a function prologue.
-          Outside the prologue, we know where everything is. */
-       && in_prologue (get_frame_pc (fci), PROC_LOW_ADDR (proc_desc))
-       /* Not sure exactly what kernel_trap means, but if it means the
-          kernel saves the registers without a prologue doing it, we
-          better not examine the prologue to see whether registers
-          have been saved yet.  */
-       && !kernel_trap)
-    {
-      /* We need to figure out whether the registers that the
-         proc_desc claims are saved have been saved yet.  */
-
-      CORE_ADDR addr;
-
-      /* Bitmasks; set if we have found a save for the register.  */
-      unsigned long gen_save_found = 0;
-      unsigned long float_save_found = 0;
-      int instlen;
-
-      /* If the address is odd, assume this is MIPS16 code.  */
-      addr = PROC_LOW_ADDR (proc_desc);
-      instlen = pc_is_mips16 (addr) ? MIPS16_INSTLEN : MIPS_INSTLEN;
-
-      /* Scan through this function's instructions preceding the
-         current PC, and look for those that save registers.  */
-      while (addr < get_frame_pc (fci))
-	{
-	  inst = mips_fetch_instruction (addr);
-	  if (pc_is_mips16 (addr))
-	    mips16_decode_reg_save (inst, &gen_save_found);
-	  else
-	    mips32_decode_reg_save (inst, &gen_save_found, &float_save_found);
-	  addr += instlen;
-	}
-      gen_mask = gen_save_found;
-      float_mask = float_save_found;
-    }
-
-  /* Fill in the offsets for the registers which gen_mask says were
-     saved.  */
-  {
-    CORE_ADDR reg_position = (get_frame_base (fci)
-			      + PROC_REG_OFFSET (proc_desc));
-    for (ireg = MIPS_NUMREGS - 1; gen_mask; --ireg, gen_mask <<= 1)
-      if (gen_mask & 0x80000000)
-	{
-	  set_reg_offset (saved_regs, ireg, reg_position);
-	  reg_position -= mips_saved_regsize (tdep);
-	}
-  }
-
-  /* The MIPS16 entry instruction saves $s0 and $s1 in the reverse
-     order of that normally used by gcc.  Therefore, we have to fetch
-     the first instruction of the function, and if it's an entry
-     instruction that saves $s0 or $s1, correct their saved addresses.  */
-  if (pc_is_mips16 (PROC_LOW_ADDR (proc_desc)))
-    {
-      inst = mips_fetch_instruction (PROC_LOW_ADDR (proc_desc));
-      if ((inst & 0xf81f) == 0xe809 && (inst & 0x700) != 0x700)
-	/* entry */
-	{
-	  int reg;
-	  int sreg_count = (inst >> 6) & 3;
-
-	  /* Check if the ra register was pushed on the stack.  */
-	  CORE_ADDR reg_position = (get_frame_base (fci)
-				    + PROC_REG_OFFSET (proc_desc));
-	  if (inst & 0x20)
-	    reg_position -= mips_saved_regsize (tdep);
-
-	  /* Check if the s0 and s1 registers were pushed on the
-	     stack.  */
-	  for (reg = 16; reg < sreg_count + 16; reg++)
-	    {
-	      set_reg_offset (saved_regs, reg, reg_position);
-	      reg_position -= mips_saved_regsize (tdep);
-	    }
-	}
-    }
-
-  /* Fill in the offsets for the registers which float_mask says were
-     saved.  */
-  {
-    CORE_ADDR reg_position = (get_frame_base (fci)
-			      + PROC_FREG_OFFSET (proc_desc));
-
-    /* Fill in the offsets for the float registers which float_mask
-       says were saved.  */
-    for (ireg = MIPS_NUMREGS - 1; float_mask; --ireg, float_mask <<= 1)
-      if (float_mask & 0x80000000)
-	{
-	  if (mips_saved_regsize (tdep) == 4
-	      && TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
-	    {
-	      /* On a big endian 32 bit ABI, floating point registers
-	         are paired to form doubles such that the most
-	         significant part is in $f[N+1] and the least
-	         significant in $f[N] vis: $f[N+1] ||| $f[N].  The
-	         registers are also spilled as a pair and stored as a
-	         double.
-
-	         When little-endian the least significant part is
-	         stored first leading to the memory order $f[N] and
-	         then $f[N+1].
-
-	         Unfortunately, when big-endian the most significant
-	         part of the double is stored first, and the least
-	         significant is stored second.  This leads to the
-	         registers being ordered in memory as firt $f[N+1] and
-	         then $f[N].
-
-	         For the big-endian case make certain that the
-	         addresses point at the correct (swapped) locations
-	         $f[N] and $f[N+1] pair (keep in mind that
-	         reg_position is decremented each time through the
-	         loop).  */
-	      if ((ireg & 1))
-		set_reg_offset (saved_regs,
-				mips_regnum (current_gdbarch)->fp0 + ireg,
-				reg_position - mips_saved_regsize (tdep));
-	      else
-		set_reg_offset (saved_regs,
-				mips_regnum (current_gdbarch)->fp0 + ireg,
-				reg_position + mips_saved_regsize (tdep));
-	    }
-	  else
-	    set_reg_offset (saved_regs,
-			    mips_regnum (current_gdbarch)->fp0 + ireg,
-			    reg_position);
-	  reg_position -= mips_saved_regsize (tdep);
-	}
-
-    set_reg_offset (saved_regs, mips_regnum (current_gdbarch)->pc,
-		    saved_regs[RA_REGNUM]);
-  }
-
-  /* SP_REGNUM, contains the value and not the address.  */
-  set_reg_offset (saved_regs, SP_REGNUM, get_frame_base (fci));
-}
-
 struct mips_frame_cache
 {
   CORE_ADDR base;
@@ -2022,52 +1797,6 @@ mips_software_single_step (enum target_signal sig, int insert_breakpoints_p)
     }
   else
     target_remove_breakpoint (next_pc, break_mem);
-}
-
-static CORE_ADDR
-mips_init_frame_pc_first (int fromleaf, struct frame_info *prev)
-{
-  CORE_ADDR pc, tmp;
-
-  pc = ((fromleaf)
-	? DEPRECATED_SAVED_PC_AFTER_CALL (get_next_frame (prev))
-	: get_next_frame (prev)
-	? DEPRECATED_FRAME_SAVED_PC (get_next_frame (prev)) : read_pc ());
-  tmp = SKIP_TRAMPOLINE_CODE (pc);
-  return tmp ? tmp : pc;
-}
-
-
-static CORE_ADDR
-mips_frame_saved_pc (struct frame_info *frame)
-{
-  CORE_ADDR saved_pc;
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
-
-  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (frame), 0, 0))
-    {
-      /* Always unwind the cooked PC register value.  */
-      saved_pc = frame_unwind_register_signed (frame, NUM_REGS + mips_regnum (current_gdbarch)->pc);
-    }
-  else
-    {
-      mips_extra_func_info_t proc_desc
-	= get_frame_extra_info (frame)->proc_desc;
-      if (proc_desc && PROC_DESC_IS_DUMMY (proc_desc))
-	saved_pc = read_memory_integer ((get_frame_base (frame)
-					 - mips_saved_regsize (tdep)),
-					mips_saved_regsize (tdep));
-      else
-	{
-	  /* We have to get the saved pc from the sigcontext if it is
-	     a signal handler frame.  */
-	  int pcreg = (get_frame_type (frame) == SIGTRAMP_FRAME
-		       ? mips_regnum (current_gdbarch)->pc
-		       : proc_desc ? PROC_PC_REG (proc_desc) : RA_REGNUM);
-	  saved_pc = read_next_frame_reg (frame, NUM_REGS + pcreg);
-	}
-    }
-  return ADDR_BITS_REMOVE (saved_pc);
 }
 
 static struct mips_extra_func_info temp_proc_desc;
@@ -2769,154 +2498,6 @@ find_proc_desc (CORE_ADDR pc, struct frame_info *next_frame, int cur_frame)
   return proc_desc;
 }
 
-static CORE_ADDR
-get_frame_pointer (struct frame_info *frame, mips_extra_func_info_t proc_desc)
-{
-  return (read_next_frame_reg (frame, NUM_REGS + PROC_FRAME_REG (proc_desc))
-	  + PROC_FRAME_OFFSET (proc_desc) - PROC_FRAME_ADJUST (proc_desc));
-}
-
-static mips_extra_func_info_t cached_proc_desc;
-
-static CORE_ADDR
-mips_frame_chain (struct frame_info *frame)
-{
-  mips_extra_func_info_t proc_desc;
-  CORE_ADDR tmp;
-  CORE_ADDR saved_pc = DEPRECATED_FRAME_SAVED_PC (frame);
-
-  /* Check if the PC is inside a call stub.  If it is, fetch the
-     PC of the caller of that stub.  */
-  if ((tmp = SKIP_TRAMPOLINE_CODE (saved_pc)) != 0)
-    saved_pc = tmp;
-
-  if (DEPRECATED_PC_IN_CALL_DUMMY (saved_pc, 0, 0))
-    {
-      /* A dummy frame, uses SP not FP.  Get the old SP value.  If all
-         is well, frame->frame the bottom of the current frame will
-         contain that value.  */
-      return get_frame_base (frame);
-    }
-
-  /* Look up the procedure descriptor for this PC.  */
-  proc_desc = find_proc_desc (saved_pc, frame, 1);
-  if (!proc_desc)
-    return 0;
-
-  cached_proc_desc = proc_desc;
-
-  /* If no frame pointer and frame size is zero, we must be at end
-     of stack (or otherwise hosed).  If we don't check frame size,
-     we loop forever if we see a zero size frame.  */
-  if (PROC_FRAME_REG (proc_desc) == SP_REGNUM
-      && PROC_FRAME_OFFSET (proc_desc) == 0
-      /* The previous frame from a sigtramp frame might be frameless
-         and have frame size zero.  */
-      && !(get_frame_type (frame) == SIGTRAMP_FRAME)
-      /* For a generic dummy frame, let get_frame_pointer() unwind a
-         register value saved as part of the dummy frame call.  */
-      && !(DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (frame), 0, 0)))
-    return 0;
-  else
-    return get_frame_pointer (frame, proc_desc);
-}
-
-static void
-mips_init_extra_frame_info (int fromleaf, struct frame_info *fci)
-{
-  int regnum;
-  mips_extra_func_info_t proc_desc;
-
-  if (get_frame_type (fci) == DUMMY_FRAME)
-    return;
-
-  /* Use proc_desc calculated in frame_chain.  When there is no
-     next frame, i.e, get_next_frame (fci) == NULL, we call
-     find_proc_desc () to calculate it, passing an explicit
-     NULL as the frame parameter.  */
-  proc_desc =
-    get_next_frame (fci)
-    ? cached_proc_desc
-    : find_proc_desc (get_frame_pc (fci),
-		      NULL /* i.e, get_next_frame (fci) */ ,
-		      1);
-
-  frame_extra_info_zalloc (fci, sizeof (struct frame_extra_info));
-
-  get_frame_extra_info (fci)->proc_desc =
-    proc_desc == &temp_proc_desc ? 0 : proc_desc;
-  if (proc_desc)
-    {
-      /* Fixup frame-pointer - only needed for top frame */
-      /* This may not be quite right, if proc has a real frame register.
-         Get the value of the frame relative sp, procedure might have been
-         interrupted by a signal at it's very start.  */
-      if (get_frame_pc (fci) == PROC_LOW_ADDR (proc_desc)
-	  && !PROC_DESC_IS_DUMMY (proc_desc))
-	deprecated_update_frame_base_hack (fci,
-					   read_next_frame_reg (get_next_frame
-								(fci),
-								NUM_REGS +
-								SP_REGNUM));
-      else if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fci), 0, 0))
-	/* Do not ``fix'' fci->frame.  It will have the value of the
-	   generic dummy frame's top-of-stack (since the draft
-	   fci->frame is obtained by returning the unwound stack
-	   pointer) and that is what we want.  That way the fci->frame
-	   value will match the top-of-stack value that was saved as
-	   part of the dummy frames data.  */
-	/* Do nothing.  */ ;
-      else
-	deprecated_update_frame_base_hack (fci,
-					   get_frame_pointer (get_next_frame
-							      (fci),
-							      proc_desc));
-
-      if (proc_desc == &temp_proc_desc)
-	{
-	  char *name;
-
-	  /* Do not set the saved registers for a sigtramp frame,
-	     mips_find_saved_registers will do that for us.  We can't
-	     use (get_frame_type (fci) == SIGTRAMP_FRAME), it is not
-	     yet set.  */
-	  /* FIXME: cagney/2002-11-18: This problem will go away once
-	     frame.c:get_prev_frame() is modified to set the frame's
-	     type before calling functions like this.  */
-	  find_pc_partial_function (get_frame_pc (fci), &name,
-				    (CORE_ADDR *) NULL, (CORE_ADDR *) NULL);
-	  if (!PC_IN_SIGTRAMP (get_frame_pc (fci), name))
-	    {
-	      frame_saved_regs_zalloc (fci);
-	      /* Set value of previous frame's stack pointer.
-	         Remember that saved_regs[SP_REGNUM] is special in
-	         that it contains the value of the stack pointer
-	         register.  The other saved_regs values are addresses
-	         (in the inferior) at which a given register's value
-	         may be found.  */
-	      set_reg_offset (temp_saved_regs, SP_REGNUM,
-			      get_frame_base (fci));
-	      set_reg_offset (temp_saved_regs, mips_regnum (current_gdbarch)->pc,
-			      temp_saved_regs[RA_REGNUM]);
-	      memcpy (deprecated_get_frame_saved_regs (fci), temp_saved_regs,
-		      SIZEOF_FRAME_SAVED_REGS);
-	    }
-	}
-
-      /* hack: if argument regs are saved, guess these contain args */
-      /* assume we can't tell how many args for now */
-      get_frame_extra_info (fci)->num_args = -1;
-      for (regnum = MIPS_LAST_ARG_REGNUM; regnum >= A0_REGNUM; regnum--)
-	{
-	  if (PROC_REG_MASK (proc_desc) & (1 << regnum))
-	    {
-	      get_frame_extra_info (fci)->num_args = regnum - A0_REGNUM + 1;
-	      break;
-	    }
-	}
-    }
-}
-
 /* MIPS stack frames are almost impenetrable.  When execution stops,
    we basically have to look at symbol information for the function
    that we stopped in, which tells us *which* register (if any) is
@@ -3513,7 +3094,6 @@ mips_n32n64_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
   for (argnum = 0; argnum < nargs; argnum++)
     {
       char *val;
-      char valbuf[MAX_REGISTER_SIZE];
       struct value *arg = args[argnum];
       struct type *arg_type = check_typedef (VALUE_TYPE (arg));
       int len = TYPE_LENGTH (arg_type);
@@ -3727,7 +3307,6 @@ mips_n32n64_return_value (struct gdbarch *gdbarch,
       /* A struct that contains one or two floats.  Each value is part
          in the least significant part of their floating point
          register..  */
-      bfd_byte reg[MAX_REGISTER_SIZE];
       int regnum;
       int field;
       for (field = 0, regnum = mips_regnum (current_gdbarch)->fp0;
@@ -3778,7 +3357,6 @@ mips_n32n64_return_value (struct gdbarch *gdbarch,
 	   offset += register_size (current_gdbarch, regnum), regnum++)
 	{
 	  int xfer = register_size (current_gdbarch, regnum);
-	  int pos = 0;
 	  if (offset + xfer > TYPE_LENGTH (type))
 	    xfer = TYPE_LENGTH (type) - offset;
 	  if (mips_debug)
@@ -3855,7 +3433,6 @@ mips_o32_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
   for (argnum = 0; argnum < nargs; argnum++)
     {
       char *val;
-      char valbuf[MAX_REGISTER_SIZE];
       struct value *arg = args[argnum];
       struct type *arg_type = check_typedef (VALUE_TYPE (arg));
       int len = TYPE_LENGTH (arg_type);
@@ -4230,7 +3807,6 @@ mips_o32_return_value (struct gdbarch *gdbarch, struct type *type,
 	   offset += mips_stack_argsize (tdep), regnum++)
 	{
 	  int xfer = mips_stack_argsize (tdep);
-	  int pos = 0;
 	  if (offset + xfer > TYPE_LENGTH (type))
 	    xfer = TYPE_LENGTH (type) - offset;
 	  if (mips_debug)
@@ -4309,7 +3885,6 @@ mips_o64_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
   for (argnum = 0; argnum < nargs; argnum++)
     {
       char *val;
-      char valbuf[MAX_REGISTER_SIZE];
       struct value *arg = args[argnum];
       struct type *arg_type = check_typedef (VALUE_TYPE (arg));
       int len = TYPE_LENGTH (arg_type);
@@ -4600,87 +4175,6 @@ mips_o64_store_return_value (struct type *valtype, char *valbuf)
     }
 }
 
-static void
-mips_pop_frame (void)
-{
-  int regnum;
-  struct frame_info *frame = get_current_frame ();
-  CORE_ADDR new_sp = get_frame_base (frame);
-  mips_extra_func_info_t proc_desc;
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
-
-  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (frame), 0, 0))
-    {
-      generic_pop_dummy_frame ();
-      flush_cached_frames ();
-      return;
-    }
-
-  proc_desc = get_frame_extra_info (frame)->proc_desc;
-  write_register (mips_regnum (current_gdbarch)->pc,
-		  DEPRECATED_FRAME_SAVED_PC (frame));
-  mips_find_saved_regs (frame);
-  for (regnum = 0; regnum < NUM_REGS; regnum++)
-    if (regnum != SP_REGNUM && regnum != mips_regnum (current_gdbarch)->pc
-	&& deprecated_get_frame_saved_regs (frame)[regnum])
-      {
-	/* Floating point registers must not be sign extended, in case
-	   mips_saved_regsize() = 4 but sizeof (FP0_REGNUM) == 8.  */
-
-	if (mips_regnum (current_gdbarch)->fp0 <= regnum
-	    && regnum < mips_regnum (current_gdbarch)->fp0 + 32)
-	  write_register (regnum,
-			  read_memory_unsigned_integer
-			  (deprecated_get_frame_saved_regs (frame)[regnum],
-			   mips_saved_regsize (tdep)));
-	else
-	  write_register (regnum,
-			  read_memory_integer (deprecated_get_frame_saved_regs
-					       (frame)[regnum],
-					       mips_saved_regsize (tdep)));
-      }
-
-  write_register (SP_REGNUM, new_sp);
-  flush_cached_frames ();
-
-  if (proc_desc && PROC_DESC_IS_DUMMY (proc_desc))
-    {
-      struct linked_proc_info *pi_ptr, *prev_ptr;
-
-      for (pi_ptr = linked_proc_desc_table, prev_ptr = NULL;
-	   pi_ptr != NULL; prev_ptr = pi_ptr, pi_ptr = pi_ptr->next)
-	{
-	  if (&pi_ptr->info == proc_desc)
-	    break;
-	}
-
-      if (pi_ptr == NULL)
-	error ("Can't locate dummy extra frame info\n");
-
-      if (prev_ptr != NULL)
-	prev_ptr->next = pi_ptr->next;
-      else
-	linked_proc_desc_table = pi_ptr->next;
-
-      xfree (pi_ptr);
-
-      write_register (mips_regnum (current_gdbarch)->hi,
-		      read_memory_integer ((new_sp
-					    - 2 * mips_saved_regsize (tdep)),
-					   mips_saved_regsize (tdep)));
-      write_register (mips_regnum (current_gdbarch)->lo,
-		      read_memory_integer ((new_sp
-					    - 3 * mips_saved_regsize (tdep)),
-					   mips_saved_regsize (tdep)));
-      if (MIPS_FPU_TYPE != MIPS_FPU_NONE)
-	write_register (mips_regnum (current_gdbarch)->fp_control_status,
-			read_memory_integer ((new_sp
-					      -
-					      4 * mips_saved_regsize (tdep)),
-					     mips_saved_regsize (tdep)));
-    }
-}
-
 /* Floating point register management.
 
    Background: MIPS1 & 2 fp registers are 32 bits wide.  To support
@@ -4804,8 +4298,8 @@ mips_print_fp_register (struct ui_file *file, struct frame_info *frame,
 			int regnum)
 {				/* do values for FP (float) regs */
   char *raw_buffer;
-  double doub, flt1, flt2;	/* doubles extracted from raw hex data */
-  int inv1, inv2, namelen;
+  double doub, flt1;	/* doubles extracted from raw hex data */
+  int inv1, inv2;
 
   raw_buffer =
     (char *) alloca (2 *
@@ -5796,65 +5290,6 @@ mips_ignore_helper (CORE_ADDR pc)
 }
 
 
-/* When debugging a 64 MIPS target running a 32 bit ABI, the size of
-   the register stored on the stack (32) is different to its real raw
-   size (64).  The below ensures that registers are fetched from the
-   stack using their ABI size and then stored into the RAW_BUFFER
-   using their raw size.
-
-   The alternative to adding this function would be to add an ABI
-   macro - REGISTER_STACK_SIZE(). */
-
-static void
-mips_get_saved_register (char *raw_buffer,
-			 int *optimizedp,
-			 CORE_ADDR *addrp,
-			 struct frame_info *frame,
-			 int regnum, enum lval_type *lvalp)
-{
-  CORE_ADDR addrx;
-  enum lval_type lvalx;
-  int optimizedx;
-  int realnumx;
-
-  /* Always a pseudo.  */
-  gdb_assert (regnum >= NUM_REGS);
-
-  /* Make certain that all needed parameters are present.  */
-  if (addrp == NULL)
-    addrp = &addrx;
-  if (lvalp == NULL)
-    lvalp = &lvalx;
-  if (optimizedp == NULL)
-    optimizedp = &optimizedx;
-
-  if ((regnum % NUM_REGS) == SP_REGNUM)
-    /* The SP_REGNUM is special, its value is stored in saved_regs.
-       In fact, it is so special that it can even only be fetched
-       using a raw register number!  Once this code as been converted
-       to frame-unwind the problem goes away.  */
-    frame_register_unwind (deprecated_get_next_frame_hack (frame),
-			   regnum % NUM_REGS, optimizedp, lvalp, addrp,
-			   &realnumx, raw_buffer);
-  else
-    /* Get it from the next frame.  */
-    frame_register_unwind (deprecated_get_next_frame_hack (frame),
-			   regnum, optimizedp, lvalp, addrp,
-			   &realnumx, raw_buffer);
-}
-
-/* Immediately after a function call, return the saved pc.
-   Can't always go through the frames for this because on some machines
-   the new frame is not set up until the new function executes
-   some instructions.  */
-
-static CORE_ADDR
-mips_saved_pc_after_call (struct frame_info *frame)
-{
-  return read_signed_register (RA_REGNUM);
-}
-
-
 /* Convert a dbx stab register number (from `r' declaration) to a GDB
    [1 * NUM_REGS .. 2 * NUM_REGS) REGNUM.  */
 
@@ -6328,35 +5763,11 @@ mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
      ensure that all 32 bit addresses are sign extended to 64 bits.  */
   set_gdbarch_addr_bits_remove (gdbarch, mips_addr_bits_remove);
 
-#if 1
   /* Unwind the frame.  */
   set_gdbarch_unwind_pc (gdbarch, mips_unwind_pc);
   frame_unwind_append_sniffer (gdbarch, mips_mdebug_frame_sniffer);
   set_gdbarch_unwind_dummy_id (gdbarch, mips_unwind_dummy_id);
   frame_base_append_sniffer (gdbarch, mips_mdebug_frame_base_sniffer);
-#else
-  set_gdbarch_deprecated_target_read_fp (gdbarch, mips_read_sp);	/* Draft FRAME base.  */
-  /* Initialize a frame */
-  set_gdbarch_deprecated_frame_init_saved_regs (gdbarch,
-						mips_find_saved_regs);
-  set_gdbarch_deprecated_init_extra_frame_info (gdbarch,
-						mips_init_extra_frame_info);
-  /* There's a mess in stack frame creation.  See comments in
-     blockframe.c near reference to DEPRECATED_INIT_FRAME_PC_FIRST.  */
-  set_gdbarch_deprecated_init_frame_pc_first (gdbarch,
-					      mips_init_frame_pc_first);
-  set_gdbarch_deprecated_pop_frame (gdbarch, mips_pop_frame);
-  set_gdbarch_deprecated_save_dummy_frame_tos (gdbarch,
-					       generic_save_dummy_frame_tos);
-  set_gdbarch_deprecated_frame_chain (gdbarch, mips_frame_chain);
-  set_gdbarch_frameless_function_invocation (gdbarch,
-					     generic_frameless_function_invocation_not);
-  set_gdbarch_deprecated_frame_saved_pc (gdbarch, mips_frame_saved_pc);
-  set_gdbarch_deprecated_get_saved_register (gdbarch,
-					     mips_get_saved_register);
-  set_gdbarch_deprecated_saved_pc_after_call (gdbarch,
-					      mips_saved_pc_after_call);
-#endif
 
   /* Map debug register numbers onto internal register numbers.  */
   set_gdbarch_stab_reg_to_regnum (gdbarch, mips_stab_reg_to_regnum);
@@ -6624,17 +6035,6 @@ mips_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
 		      XSTRING (SETUP_ARBITRARY_FRAME (NUMARGS, ARGS)));
   fprintf_unfiltered (file,
 		      "mips_dump_tdep: SET_PROC_DESC_IS_DUMMY = function?\n");
-  fprintf_unfiltered (file,
-		      "mips_dump_tdep: SIGFRAME_BASE = %d\n", SIGFRAME_BASE);
-  fprintf_unfiltered (file,
-		      "mips_dump_tdep: SIGFRAME_FPREGSAVE_OFF = %d\n",
-		      SIGFRAME_FPREGSAVE_OFF);
-  fprintf_unfiltered (file,
-		      "mips_dump_tdep: SIGFRAME_PC_OFF = %d\n",
-		      SIGFRAME_PC_OFF);
-  fprintf_unfiltered (file,
-		      "mips_dump_tdep: SIGFRAME_REGSAVE_OFF = %d\n",
-		      SIGFRAME_REGSAVE_OFF);
   fprintf_unfiltered (file,
 		      "mips_dump_tdep: SKIP_TRAMPOLINE_CODE # %s\n",
 		      XSTRING (SKIP_TRAMPOLINE_CODE (PC)));

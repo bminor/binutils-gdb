@@ -1,5 +1,33 @@
 2004-02-10  Andrew Cagney  <cagney@redhat.com>
 
+	* mips-tdep.c (mips_gdbarch_init): Delete deprecated frame code.
+	(mips_init_frame_pc_first): Delete function.
+	(mips_frame_saved_pc): Delete function.
+	(mips_frame_chain): Delete function.
+	(mips_init_extra_frame_info): Delete function.
+	(mips_xfer_register): Delete unused variable "reg".
+	(mips_n32n64_push_dummy_call): Delete unused variable "valbuf".
+	(mips_n32n64_return_value): Delete unused variable "reg".
+	(mips_n32n64_return_value): Delete unused variable "pos".
+	(mips_o32_push_dummy_call): Delete unused variable "valbuf".
+	(mips_o32_return_value): Delete unused variable "pos".
+	(mips_o64_push_dummy_call): Delete unused variable "valbuf".
+	(mips_print_fp_register): Delete unused variable "namelen"
+	(mips_print_fp_register): Delete unused variable "flt2"
+	(get_frame_pointer): Delete function.
+	(cached_proc_desc): Delete static variable.
+	(mips_pop_frame): Delete function.
+	(mips_find_saved_regs): Delete function.
+	(mips_get_saved_register): Delete function.
+	(mips_saved_pc_after_call): Delete function.
+	(SIGFRAME_BASE): Delete macro.
+	(SIGFRAME_FPREGSAVE_OFF): Delete macro.
+	(SIGFRAME_PC_OFF): Delete macro.
+	(SIGFRAME_REGSAVE_OFF): Delete macro.
+	(mips_dump_tdep): Do not print deleted macro definitions.
+
+2004-02-10  Andrew Cagney  <cagney@redhat.com>
+
 	* Makefile.in (SFILES): Remove explictly listed tui files.
 	(SUBDIR_GDBTK_SRCS): Fix path to gdbtk-interp.c.
 
