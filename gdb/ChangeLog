@@ -1,5 +1,7 @@
 Mon Aug 14 13:43:01 1995  Kung Hsu  <kung@mexican.cygnus.com>
 
+	* blokcframe.c (inside_main_func): Add comments.
+
 	* blockframe.c (inside_main_func): Fix a typo in previous change.
 
 	* config/sparc/tm-sparclite.h: Define FRAME_CHAIN_VALID_ALTERNATE.
