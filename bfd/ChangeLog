@@ -1,3 +1,18 @@
+2002-01-29  Chris Demetriou  <cgd@broadcom.com>
+
+	* elf32-mips.c: Add additional comments about HI16 relocation
+	processing.
+	(_bfd_mips_elf_hi16_reloc): Don't subtract address here for
+	pc-relative relocations.  (Reverts change made on 2001-10-31.)
+	(_bfd_mips_elf_lo16_reloc): Subtract address of LO16 part here
+	for pc-relative relocations.
+	(mips_elf_calculate_relocation): Add a comment about a kludge
+	in the R_MIPS_GNU_REL_HI16 handling.
+	(_bfd_mips_elf_relocate_section): Implement that kludge;
+	adjust pc-relative HI16 relocation for difference in HI16 and
+	LO16 addresses, since it can't easily be done in
+	mips_elf_calculate_relocation.
+
 2002-01-29  Martin Schwidefsky  <schwidefsky@de.ibm.com>
 
 	* elf32-i386 (elf_i386_adjust_dynamic_symbol): Do not replace PLT32

@@ -1640,11 +1640,17 @@ static reloc_howto_type elf_mips_gnu_vtentry_howto =
 /* Do a R_MIPS_HI16 relocation.  This has to be done in combination
    with a R_MIPS_LO16 reloc, because there is a carry from the LO16 to
    the HI16.  Here we just save the information we need; we do the
-   actual relocation when we see the LO16.  MIPS ELF requires that the
-   LO16 immediately follow the HI16.  As a GNU extension, we permit an
+   actual relocation when we see the LO16.
+
+   MIPS ELF requires that the LO16 immediately follow the HI16.  As a
+   GNU extension, for non-pc-relative relocations, we permit an
    arbitrary number of HI16 relocs to be associated with a single LO16
    reloc.  This extension permits gcc to output the HI and LO relocs
-   itself.  */
+   itself.
+
+   This cannot be done for PC-relative relocations because both the HI16
+   and LO16 parts of the relocations must be done relative to the LO16
+   part, and there can be carry to or borrow from the HI16 part.  */
 
 struct mips_hi16
 {
@@ -1727,8 +1733,6 @@ _bfd_mips_elf_hi16_reloc (abfd,
   relocation += symbol->section->output_section->vma;
   relocation += symbol->section->output_offset;
   relocation += reloc_entry->addend;
-  if (reloc_entry->howto->pc_relative)
-    relocation -= reloc_entry->address;
 
   if (reloc_entry->address > input_section->_cooked_size)
     return bfd_reloc_outofrange;
@@ -1793,6 +1797,12 @@ _bfd_mips_elf_lo16_reloc (abfd,
 	  vallo = ((vallo & 0xffff) ^ 0x8000) - 0x8000;
 	  val = ((insn & 0xffff) << 16) + vallo;
 	  val += l->addend;
+
+	  /* If PC-relative, we need to subtract out the address of the LO
+	     half of the HI/LO.  (The actual relocation is relative
+	     to that instruction.)  */
+	  if (reloc_entry->howto->pc_relative)
+	    val -= reloc_entry->address;
 
 	  /* At this point, "val" has the value of the combined HI/LO
 	     pair.  If the low order 16 bits (which will be used for
@@ -6864,6 +6874,11 @@ mips_elf_calculate_relocation (abfd,
       break;
 
     case R_MIPS_GNU_REL_HI16:
+      /* Instead of subtracting 'p' here, we should be subtracting the
+	 equivalent value for the LO part of the reloc, since the value
+	 here is relative to that address.  Because that's not easy to do,
+	 we adjust 'addend' in _bfd_mips_elf_relocate_section().  See also
+	 the comment there for more information.  */
       value = mips_elf_high (addend + symbol - p);
       value &= howto->dst_mask;
       break;
@@ -7390,6 +7405,16 @@ _bfd_mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 
 		  /* Compute the combined addend.  */
 		  addend += l;
+
+		  /* If PC-relative, subtract the difference between the
+		     address of the LO part of the reloc and the address of
+		     the HI part.  The relocation is relative to the LO
+		     part, but mips_elf_calculate_relocation() doesn't know
+		     it address or the difference from the HI part, so
+		     we subtract that difference here.  See also the
+		     comment in mips_elf_calculate_relocation().  */
+		  if (r_type == R_MIPS_GNU_REL_HI16)
+		    addend -= (lo16_relocation->r_offset - rel->r_offset);
 		}
 	      else if (r_type == R_MIPS16_GPREL)
 		{
