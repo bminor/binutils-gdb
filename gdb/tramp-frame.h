@@ -22,6 +22,8 @@
 #ifndef TRAMP_FRAME_H
 #define TRAMP_FRAME_H
 
+#include "frame.h"		/* For "enum frame_type".  */
+
 struct trad_frame;
 struct frame_info;
 struct trad_frame_cache;
@@ -45,16 +47,24 @@ struct trad_frame_cache;
 
 struct tramp_frame
 {
-  /* The trampoline's entire instruction sequence.  Search for this in
-     the inferior at or around the frame's PC.  It is assumed that the
-     PC is INSN_SIZE aligned, and that each element of TRAMP contains
-     one INSN_SIZE instruction.  It is also assumed that TRAMP[0]
-     contains the first instruction of the trampoline and hence the
-     address of the instruction matching TRAMP[0] is the trampoline's
-     "func" address.  The instruction sequence shall be terminated by
+  /* The trampoline's type, some a signal trampolines, some are normal
+     call-frame trampolines (aka thunks).  */
+  enum frame_type frame_type;
+  /* The trampoline's entire instruction sequence.  It consists of a
+     bytes/mask pair.  Search for this in the inferior at or around
+     the frame's PC.  It is assumed that the PC is INSN_SIZE aligned,
+     and that each element of TRAMP contains one INSN_SIZE
+     instruction.  It is also assumed that INSN[0] contains the first
+     instruction of the trampoline and hence the address of the
+     instruction matching INSN[0] is the trampoline's "func" address.
+     The instruction sequence is terminated by
      TRAMP_SENTINEL_INSN.  */
   int insn_size;
-  ULONGEST insn[8];
+  struct
+  {
+    ULONGEST bytes;
+    ULONGEST mask;
+  } insn[8];
   /* Initialize a trad-frame cache corresponding to the tramp-frame.
      FUNC is the address of the instruction TRAMP[0] in memory.  */
   void (*init) (const struct tramp_frame *self,

@@ -1,3 +1,14 @@
+2004-07-20  Andrew Cagney  <cagney@gnu.org>
+
+	* tramp-frame.h (struct tramp_frame): Change "insn" to a struct
+	containing both bytes and mask.  Add "frame_type".
+	* tramp-frame.c (tramp_frame_start): Update.
+	(tramp_frame_prepend_unwinder): Update.
+	* mips-linux-tdep.c (mips_linux_o32_sigframe)
+	(mips_linux_o32_rt_sigframe, mips_linux_n32_rt_sigframe)
+	(mips_linux_n64_rt_sigframe): Update.  Make "static const".
+	* ppcnbsd-tdep.c (tramp_frame ppcnbsd_sigtramp): Update.
+
 2004-07-19  Eli Zaretskii  <eliz@gnu.org>
 
 	* config/djgpp/fnchange.lst: Add remapping for bfd/elf32-cr*.c,

@@ -830,25 +830,40 @@ static void mips_linux_n32n64_sigframe_init (const struct tramp_frame *self,
 #define MIPS_INST_LI_V0_N32_RT_SIGRETURN 0x24020000 + MIPS_NR_N32_rt_sigreturn
 #define MIPS_INST_SYSCALL 0x0000000c
 
-struct tramp_frame mips_linux_o32_sigframe = {
+static const struct tramp_frame mips_linux_o32_sigframe = {
+  SIGTRAMP_FRAME,
   4,
-  { MIPS_INST_LI_V0_SIGRETURN, MIPS_INST_SYSCALL, TRAMP_SENTINEL_INSN },
+  {
+    { MIPS_INST_LI_V0_SIGRETURN, -1 },
+    { MIPS_INST_SYSCALL, -1 },
+    { TRAMP_SENTINEL_INSN, -1 }
+  },
   mips_linux_o32_sigframe_init
 };
 
-struct tramp_frame mips_linux_o32_rt_sigframe = {
+static const struct tramp_frame mips_linux_o32_rt_sigframe = {
+  SIGTRAMP_FRAME,
   4,
-  { MIPS_INST_LI_V0_RT_SIGRETURN, MIPS_INST_SYSCALL, TRAMP_SENTINEL_INSN },
+  {
+    { MIPS_INST_LI_V0_RT_SIGRETURN, -1 },
+    { MIPS_INST_SYSCALL, -1 },
+    { TRAMP_SENTINEL_INSN, -1 } },
   mips_linux_o32_sigframe_init
 };
 
-struct tramp_frame mips_linux_n32_rt_sigframe = {
+static const struct tramp_frame mips_linux_n32_rt_sigframe = {
+  SIGTRAMP_FRAME,
   4,
-  { MIPS_INST_LI_V0_N32_RT_SIGRETURN, MIPS_INST_SYSCALL, TRAMP_SENTINEL_INSN },
+  {
+    { MIPS_INST_LI_V0_N32_RT_SIGRETURN, -1 },
+    { MIPS_INST_SYSCALL, -1 },
+    { TRAMP_SENTINEL_INSN, -1 }
+  },
   mips_linux_n32n64_sigframe_init
 };
 
-struct tramp_frame mips_linux_n64_rt_sigframe = {
+static const struct tramp_frame mips_linux_n64_rt_sigframe = {
+  SIGTRAMP_FRAME,
   4,
   { MIPS_INST_LI_V0_N64_RT_SIGRETURN, MIPS_INST_SYSCALL, TRAMP_SENTINEL_INSN },
   mips_linux_n32n64_sigframe_init

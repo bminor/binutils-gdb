@@ -293,14 +293,15 @@ ppcnbsd_sigtramp_cache_init (const struct tramp_frame *self,
    instruction, or zero if it isn't a signal trampoline.  */
 
 static const struct tramp_frame ppcnbsd_sigtramp = {
+  SIGTRAMP_FRAME,
   4, /* insn size */
   { /* insn */
-    0x38610018, /* addi r3,r1,24 */
-    0x38000127, /* li r0,295 */
-    0x44000002, /* sc */
-    0x38000001, /* li r0,1 */
-    0x44000002, /* sc */
-    TRAMP_SENTINEL_INSN
+    { 0x38610018, -1 }, /* addi r3,r1,24 */
+    { 0x38000127, -1 }, /* li r0,295 */
+    { 0x44000002, -1 }, /* sc */
+    { 0x38000001, -1 }, /* li r0,1 */
+    { 0x44000002, -1 }, /* sc */
+    { TRAMP_SENTINEL_INSN, -1 }
   },
   ppcnbsd_sigtramp_cache_init
 };
