@@ -530,8 +530,7 @@ static bfd *reldyn_sorting_bfd;
   (NEWABI_P (abfd) ? ".MIPS.options" : ".options")
 
 /* The name of the stub section.  */
-#define MIPS_ELF_STUB_SECTION_NAME(abfd) \
-  (NEWABI_P (abfd) ? ".MIPS.stubs" : ".stub")
+#define MIPS_ELF_STUB_SECTION_NAME(abfd) ".MIPS.stubs"
 
 /* The size of an external REL relocation.  */
 #define MIPS_ELF_REL_SIZE(abfd) \

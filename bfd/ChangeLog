@@ -1,3 +1,8 @@
+2004-04-06  Daniel Jacobowitz  <drow@mvista.com>
+
+	* elfxx-mips.c (MIPS_ELF_STUB_SECTION_NAME): Always use
+	".MIPS.stubs".
+
 2004-04-05  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elfxx-ia64.c (elfNN_ia64_size_dynamic_sections): Always
