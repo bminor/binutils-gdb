@@ -2228,7 +2228,7 @@ CAT(NAME,_update_armap_timestamp)
                               struct orl *map,
                               unsigned int orl_count, 
                               int stridx));
-  PTR (*_bfd_read_ar_hdr) PARAMS ((bfd *));
+  PTR (*_bfd_read_ar_hdr_fn) PARAMS ((bfd *));
   bfd *    (*openr_next_archived_file) PARAMS ((bfd *arch, bfd *prev));
   int      (*_bfd_stat_arch_elt) PARAMS ((bfd *, struct stat *));
   boolean  (*_bfd_update_armap_timestamp) PARAMS ((bfd *));

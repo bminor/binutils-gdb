@@ -1,3 +1,15 @@
+Mon Oct  9 11:24:08 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* targets.c (bfd_target): Rename _bfd_read_ar_hdr field to
+	_bfd_read_ar_hdr_fn.
+	* libbfd-in.h (_bfd_read_ar_hdr): Update accordingly.
+	* bfd-in2.h, libbfd.h: Rebuild.
+	* archive.c (_bfd_get_elt_at_filepos): Cast _bfd_read_ar_hdr
+	return value.
+	(do_slurp_bsd_armap, do_slurp_coff_armap): Likewise.
+	(bfd_slurp_bsd_armap_f2): Likewise.
+	(_bfd_slurp_extended_name_table): Likewise.
+
 Fri Oct  6 16:18:35 1995  Ken Raeburn  <raeburn@cygnus.com>
 
 	Mon Sep 25 22:49:32 1995  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
