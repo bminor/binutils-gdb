@@ -1,5 +1,13 @@
 Tue Sep 28 17:26:47 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* gdb.t24 (demangle.exp): Constructors of templates have names like
+	vector<int>::vector(int) not vector<int>::vector<int>(int).  See
+	section 14.6 of the ARM.
+
+	* gdb.t24 (demangle.exp): Remove a whole bunch of tests of the form
+	"_vt$MoveCmd"; these differ only in name from "_vt$foo", so they
+	accomplish little and slow down the testsuite.
+
 	* gdb.t24 (demangle.exp): Accept "XXX const" as well as "const XXX".
 	Accept spaces various places.
 
