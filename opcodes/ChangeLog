@@ -1,3 +1,9 @@
+2000-06-01  Kazu Hirata  <kazu@hxi.com>
+
+	* h8300-dis.c (bfd_h8_disassemble_init): Fix a typo.
+	(bfd_h8_disassemble): Distinguish the operand size of inc/dev.[wl]
+	correctly.  Fix a typo.
+
 2000-05-31  Nick Clifton  <nickc@cygnus.com>
 
 	* opintl.h (_(String)): Explain why dgettext is used instead of
