@@ -123,7 +123,8 @@ AC_CHECK_HEADERS(ctype.h endian.h link.h thread_db.h proc_service.h \
 	wchar.h wctype.h asm/debugreg.h sys/debugreg.h sys/select.h \
 	time.h sys/ioctl.h sys/user.h \
 	dirent.h sys/ndir.h sys/dir.h ndir.h \
-	curses.h ncurses.h)
+	curses.h ncurses.h \
+	poll.h sys/poll.h)
 AC_HEADER_STAT
 
 AC_C_CONST

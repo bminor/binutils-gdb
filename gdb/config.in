@@ -255,6 +255,9 @@
 /* Define if you have the <objlist.h> header file.  */
 #undef HAVE_OBJLIST_H
 
+/* Define if you have the <poll.h> header file.  */
+#undef HAVE_POLL_H
+
 /* Define if you have the <proc_service.h> header file.  */
 #undef HAVE_PROC_SERVICE_H
 
@@ -290,6 +293,9 @@
 
 /* Define if you have the <sys/param.h> header file.  */
 #undef HAVE_SYS_PARAM_H
+
+/* Define if you have the <sys/poll.h> header file.  */
+#undef HAVE_SYS_POLL_H
 
 /* Define if you have the <sys/procfs.h> header file.  */
 #undef HAVE_SYS_PROCFS_H
