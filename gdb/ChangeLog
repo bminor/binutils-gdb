@@ -1,3 +1,12 @@
+2004-08-06  Joel Brobecker  <brobecker@gnat.com>
+
+	* aix-thread.c (get_signaled_thread): New function.
+	(iter_trap): Delete, no longer used.
+	(iter_tid): New function.
+	(pd_update): Find the thread that received the SIGTRAP signal
+	by first locating the kernel thread, and then finding its
+	associated thread.
+
 2004-08-06  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* lin-lwp.c (child_wait): Continue inferior after processing

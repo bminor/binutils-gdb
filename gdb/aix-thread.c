@@ -622,6 +622,35 @@ gcmp (const void *t1v, const void *t2v)
   return ptid_cmp (t1->ptid, t2->ptid);
 }
 
+/* Search through the list of all kernel threads for the thread
+   that has stopped on a SIGTRAP signal, and return its TID.
+   Return 0 if none found.  */
+
+static pthdb_tid_t
+get_signaled_thread (void)
+{
+  struct thrdsinfo64 thrinf;
+  pthdb_tid_t ktid = 0;
+  int result = 0;
+
+  /* getthrds(3) isn't prototyped in any AIX 4.3.3 #include file.  */
+  extern int getthrds (pid_t, struct thrdsinfo64 *, 
+		       int, pthdb_tid_t *, int);
+
+  while (1)
+  {
+    if (getthrds (PIDGET (inferior_ptid), &thrinf, 
+          	  sizeof (thrinf), &ktid, 1) != 1)
+      break;
+
+    if (thrinf.ti_cursig == SIGTRAP)
+      return thrinf.ti_tid;
+  }
+
+  /* Didn't find any thread stopped on a SIGTRAP signal.  */
+  return 0;
+}
+
 /* Synchronize GDB's thread list with libpthdebug's.
 
    There are some benefits of doing this every time the inferior stops:
@@ -748,28 +777,15 @@ sync_threadlists (void)
   xfree (gbuf);
 }
 
-/* Iterate_over_threads() callback for locating a thread whose kernel
-   thread just received a trap signal.  */
+/* Iterate_over_threads() callback for locating a thread, using
+   the TID of its associated kernel thread.  */
 
 static int
-iter_trap (struct thread_info *thread, void *unused)
+iter_tid (struct thread_info *thread, void *tidp)
 {
-  struct thrdsinfo64 thrinf;
-  pthdb_tid_t tid;
+  const pthdb_tid_t tid = *(pthdb_tid_t *)tidp;
 
-  /* getthrds(3) isn't prototyped in any AIX 4.3.3 #include file.  */
-  extern int getthrds (pid_t, struct thrdsinfo64 *, 
-		       int, pthdb_tid_t *, int);
-
-  tid = thread->private->tid;
-  if (tid == PTHDB_INVALID_TID)
-    return 0;
-
-  if (getthrds (PIDGET (inferior_ptid), &thrinf, 
-		sizeof (thrinf), &tid, 1) != 1)
-    return 0;
-
-  return thrinf.ti_cursig == SIGTRAP;
+  return (thread->private->tid == tid);
 }
 
 /* Synchronize libpthdebug's state with the inferior and with GDB,
@@ -781,7 +797,8 @@ pd_update (int set_infpid)
 {
   int status;
   ptid_t ptid;
-  struct thread_info *thread;
+  pthdb_tid_t tid;
+  struct thread_info *thread = NULL;
 
   if (!pd_active)
     return inferior_ptid;
@@ -794,7 +811,9 @@ pd_update (int set_infpid)
 
   /* Define "current thread" as one that just received a trap signal.  */
 
-  thread = iterate_over_threads (iter_trap, NULL);
+  tid = get_signaled_thread ();
+  if (tid != 0)
+    thread = iterate_over_threads (iter_tid, &tid);
   if (!thread)
     ptid = inferior_ptid;
   else
