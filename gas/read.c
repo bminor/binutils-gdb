@@ -722,6 +722,8 @@ s_align_bytes (arg)
   if (temp && !need_pass_2)
     frag_align (temp, (int) temp_fill);
 
+  record_alignment (now_seg, temp);
+
   demand_empty_rest_of_line ();
 }				/* s_align_bytes() */
 

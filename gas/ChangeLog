@@ -1,3 +1,38 @@
+Thu May 27 13:02:15 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* frags.c (zero_address_frag, bss_address_frag): These are
+	external.
+
+	* tc.h (md_reloc_size): This is const.
+	* config/tc-{a29k,h8300,h8500,i386,i860,i960,m68k,ns32k,z8k}.c
+	(md_reloc_size): Now const.
+
+	* config/aout_gnu.h (enum machine_type, enum reloc_type): Delete
+	trailing commas.
+	* as.h (enum _segT): Ditto.
+
+	* struc-symbol.h (N_TYPE_seg): This should be const.
+
+Thu May 27 11:43:59 1993  Michael Meissner  (meissner@osf.org)
+
+	* config/obj-ecoff.c (add_file): Cast file_name to char * in
+	listing_source_file call.
+
+	* config/obj-elf.c (elf_stab_symbol_string): Cast first argument
+	of subseg_new call to eliminate const attribute.
+	(obj_elf_stab): Ditto.
+	(obj_symbol_new_hook): Cast first argument of bzero call to char *.
+
+	* read.c (s_align_bytes): Properly record alignment.
+
+	* expr.c (__): Undefine __ macro before use, since OSF/1 uses it
+	for the prototype/no prototype macro.
+
+	* as.c (got_sig): Don't do return ((SIGTY) 0), SIGTY might well be
+	void.
+
+	* as.h (relax_stateT enum): Delete trailing comma.
+
 Thu May 27 11:07:50 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* app.c (do_scrub_begin): Let line_comment_chars override

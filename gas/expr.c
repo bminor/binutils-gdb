@@ -506,9 +506,12 @@ operand (expressionP)
       expressionP->X_seg = absolute_section;
       break;
 
+    case '+':
+      operand (expressionP);
+      break;
+
     case '~':
     case '-':
-    case '+':
       {
 	/* unary operator: hope for SEG_ABSOLUTE */
 	segT opseg = operand (expressionP);
@@ -677,8 +680,10 @@ clean_up_expression (expressionP)
       if (expressionP->X_subtract_symbol == expressionP->X_add_symbol
 	  || (expressionP->X_subtract_symbol
 	      && expressionP->X_add_symbol
-	      && expressionP->X_subtract_symbol->sy_frag == expressionP->X_add_symbol->sy_frag
-	      && S_GET_VALUE (expressionP->X_subtract_symbol) == S_GET_VALUE (expressionP->X_add_symbol)))
+	      && (expressionP->X_subtract_symbol->sy_frag
+		  == expressionP->X_add_symbol->sy_frag)
+	      && (S_GET_VALUE (expressionP->X_subtract_symbol)
+		  == S_GET_VALUE (expressionP->X_add_symbol))))
 	{
 	  expressionP->X_subtract_symbol = NULL;
 	  expressionP->X_add_symbol = NULL;
@@ -721,16 +726,20 @@ expr_part (symbol_1_PP, symbol_2_P)
 {
   segT return_value;
 #ifndef MANY_SEGMENTS
-  assert ((*symbol_1_PP) == NULL \
-	  || (S_GET_SEGMENT (*symbol_1_PP) == text_section) \
-	  || (S_GET_SEGMENT (*symbol_1_PP) == data_section) \
-	  || (S_GET_SEGMENT (*symbol_1_PP) == bss_section) \
-	  || (!S_IS_DEFINED (*symbol_1_PP)));
-  assert (symbol_2_P == NULL \
-	  || (S_GET_SEGMENT (symbol_2_P) == text_section) \
-	  || (S_GET_SEGMENT (symbol_2_P) == data_section) \
-	  || (S_GET_SEGMENT (symbol_2_P) == bss_section) \
+#ifndef OBJ_ECOFF
+  int test = ((*symbol_1_PP) == NULL
+	      || (S_GET_SEGMENT (*symbol_1_PP) == text_section)
+	      || (S_GET_SEGMENT (*symbol_1_PP) == data_section)
+	      || (S_GET_SEGMENT (*symbol_1_PP) == bss_section)
+	      || (!S_IS_DEFINED (*symbol_1_PP)));
+  assert (test);
+  test = (symbol_2_P == NULL
+	  || (S_GET_SEGMENT (symbol_2_P) == text_section)
+	  || (S_GET_SEGMENT (symbol_2_P) == data_section)
+	  || (S_GET_SEGMENT (symbol_2_P) == bss_section)
 	  || (!S_IS_DEFINED (symbol_2_P)));
+  assert (test);
+#endif
 #endif
   if (*symbol_1_PP)
     {
@@ -785,12 +794,15 @@ expr_part (symbol_1_PP, symbol_2_P)
 	}
     }
 #ifndef MANY_SEGMENTS
-  assert (return_value == absolute_section \
-	  || return_value == text_section \
-	  || return_value == data_section \
-	  || return_value == bss_section \
-	  || return_value == undefined_section \
+#ifndef OBJ_ECOFF
+  test = (return_value == absolute_section
+	  || return_value == text_section
+	  || return_value == data_section
+	  || return_value == bss_section
+	  || return_value == undefined_section
 	  || return_value == pass1_section);
+  assert (test);
+#endif
 #endif
   know ((*symbol_1_PP) == NULL
 	|| (S_GET_SEGMENT (*symbol_1_PP) == return_value));
@@ -836,6 +848,7 @@ typedef enum
 
 operatorT;
 
+#undef __
 #define __ O_illegal
 
 static const operatorT op_encoding[256] =
@@ -975,10 +988,11 @@ expr (rank, resultP)
 	      segT seg1;
 	      segT seg2;
 #ifndef MANY_SEGMENTS
-
+#ifndef OBJ_ECOFF
 	      know (resultP->X_seg == data_section || resultP->X_seg == text_section || resultP->X_seg == bss_section || resultP->X_seg == undefined_section || resultP->X_seg == diff_section || resultP->X_seg == absolute_section || resultP->X_seg == pass1_section || resultP->X_seg == reg_section);
 
 	      know (right.X_seg == data_section || right.X_seg == text_section || right.X_seg == bss_section || right.X_seg == undefined_section || right.X_seg == diff_section || right.X_seg == absolute_section || right.X_seg == pass1_section);
+#endif
 #endif
 	      clean_up_expression (&right);
 	      clean_up_expression (resultP);
@@ -1000,8 +1014,10 @@ expr (rank, resultP)
 		  know (seg2 != absolute_section);
 		  know (resultP->X_subtract_symbol);
 #ifndef MANY_SEGMENTS
+#ifndef OBJ_ECOFF
 		  know (seg1 == text_section || seg1 == data_section || seg1 == bss_section);
 		  know (seg2 == text_section || seg2 == data_section || seg2 == bss_section);
+#endif
 #endif
 		  know (resultP->X_add_symbol);
 		  know (resultP->X_subtract_symbol);

@@ -40,6 +40,7 @@
    included by one source file per executable.  */
 #include "opcode/m68k.h"
 
+#ifndef BFD_ASSEMBLER
 #ifdef TE_SUN
 /* This variable contains the value to write out at the beginning of
    the a.out file.  The 2<<16 means that this is a 68020 file instead
@@ -49,10 +50,11 @@ long omagic = 2 << 16 | OMAGIC;	/* Magic byte for header file */
 #else
 long omagic = OMAGIC;
 #endif
+#endif
 
 /* This array holds the chars that always start a comment.  If the
    pre-processor is disabled, these aren't very useful */
-const char comment_chars[] = "|";
+CONST char comment_chars[] = "|";
 
 /* This array holds the chars that only start a comment at the beginning of
    a line.  If the line seems to have the form '# 123 filename'
@@ -61,25 +63,23 @@ const char comment_chars[] = "|";
    first line of the input file.  This is because the compiler outputs
    #NO_APP at the beginning of its output. */
 /* Also note that comments like this one will always work. */
-const char line_comment_chars[] = "#";
+CONST char line_comment_chars[] = "#";
 
-const char line_separator_chars[] = "";
+CONST char line_separator_chars[] = "";
 
 /* Chars that can be used to separate mant from exp in floating point nums */
-const char EXP_CHARS[] = "eE";
+CONST char EXP_CHARS[] = "eE";
 
-/* Chars that mean this number is a floating point constant */
-/* As in 0f12.456 */
-/* or    0d1.2345e12 */
+/* Chars that mean this number is a floating point constant, as
+   in "0f12.456" or "0d1.2345e12".  */
 
-const char FLT_CHARS[] = "rRsSfFdDxXeEpP";
+CONST char FLT_CHARS[] = "rRsSfFdDxXeEpP";
 
 /* Also be aware that MAXIMUM_NUMBER_OF_CHARS_FOR_FLOAT may have to be
    changed in read.c .  Ideally it shouldn't have to know about it at all,
-   but nothing is ideal around here.
-   */
+   but nothing is ideal around here.  */
 
-int md_reloc_size = 8;		/* Size of relocation record */
+const int md_reloc_size = 8;	/* Size of relocation record */
 
 /* Its an arbitrary name:  This means I don't approve of it */
 /* See flames below */
@@ -349,6 +349,11 @@ struct m68k_it
 
 static struct m68k_it the_ins;	/* the instruction being assembled */
 
+#define seg(exp)	((exp)->e_exp.X_seg)
+#define adds(exp)	((exp)->e_exp.X_add_symbol)
+#define subs(exp)	((exp)->e_exp.X_subtract_symbol)
+#define offs(exp)	((exp)->e_exp.X_add_number)
+
 /* Macros for adding things to the m68k_it struct */
 
 #define addword(w)	the_ins.opcode[the_ins.numo++]=(w)
@@ -373,35 +378,37 @@ static struct m68k_it the_ins;	/* the instruction being assembled */
 
 /* The numo+1 kludge is so we can hit the low order byte of the prev word.
    Blecch.  */
-#define add_fix(width,exp,pc_rel) \
-{\
-   the_ins.reloc[the_ins.nrel].n= (((width)=='B') \
-				   ? (the_ins.numo*2-1) \
-				   : (((width)=='b') \
-				      ? ((the_ins.numo-1)*2) \
-				      : (the_ins.numo*2)));\
-   the_ins.reloc[the_ins.nrel].add=adds((exp));\
-   the_ins.reloc[the_ins.nrel].sub=subs((exp));\
-   the_ins.reloc[the_ins.nrel].off=offs((exp));\
-   the_ins.reloc[the_ins.nrel].wid=width;\
-   the_ins.reloc[the_ins.nrel++].pcrel=pc_rel;\
+static void
+add_fix (width, exp, pc_rel)
+     char width;
+     struct m68k_exp *exp;
+     int pc_rel;
+{
+  the_ins.reloc[the_ins.nrel].n = (((width)=='B')
+				   ? (the_ins.numo*2-1)
+				   : (((width)=='b')
+				      ? ((the_ins.numo-1)*2)
+				      : (the_ins.numo*2)));
+  the_ins.reloc[the_ins.nrel].add = adds((exp));
+  the_ins.reloc[the_ins.nrel].sub = subs((exp));
+  the_ins.reloc[the_ins.nrel].off = offs((exp));
+  the_ins.reloc[the_ins.nrel].wid = width;
+  the_ins.reloc[the_ins.nrel++].pcrel = pc_rel;
 }
 
-#define add_frag(add,off,type) \
-{\
-   the_ins.fragb[the_ins.nfrag].fragoff=the_ins.numo;\
-   the_ins.fragb[the_ins.nfrag].fadd=add;\
-   the_ins.fragb[the_ins.nfrag].foff=off;\
-   the_ins.fragb[the_ins.nfrag++].fragty=type;\
+static void
+add_frag(add,off,type)
+     symbolS *add;
+     long off;
+     int type;
+{
+  the_ins.fragb[the_ins.nfrag].fragoff=the_ins.numo;
+  the_ins.fragb[the_ins.nfrag].fadd=add;
+  the_ins.fragb[the_ins.nfrag].foff=off;
+  the_ins.fragb[the_ins.nfrag++].fragty=type;
 }
 
 #define isvar(exp)	((exp) && (adds(exp) || subs(exp)))
-
-#define seg(exp)	((exp)->e_exp.X_seg)
-#define adds(exp)	((exp)->e_exp.X_add_symbol)
-#define subs(exp)	((exp)->e_exp.X_subtract_symbol)
-#define offs(exp)	((exp)->e_exp.X_add_number)
-
 
 struct m68k_incant
   {
@@ -419,42 +426,21 @@ struct m68k_incant
 #define gettwo(x)	(((x)->m_opcode)&0xffff)
 
 
-#if __STDC__ == 1
+static char *crack_operand PARAMS ((char *str, struct m68k_op *opP));
+static int get_num PARAMS ((struct m68k_exp *exp, int ok));
+static int get_regs PARAMS ((int i, char *str, struct m68k_op *opP));
+static int reverse_16_bits PARAMS ((int in));
+static int reverse_8_bits PARAMS ((int in));
+static int try_index PARAMS ((char **s, struct m68k_op *opP));
+static void install_gen_operand PARAMS ((int mode, int val));
+static void install_operand PARAMS ((int mode, int val));
+static void s_bss PARAMS ((void));
+static void s_data1 PARAMS ((void));
+static void s_data2 PARAMS ((void));
+static void s_even PARAMS ((void));
+static void s_proc PARAMS ((void));
 
-static char *crack_operand (char *str, struct m68k_op *opP);
-static int get_num (struct m68k_exp *exp, int ok);
-static int get_regs (int i, char *str, struct m68k_op *opP);
-static int reverse_16_bits (int in);
-static int reverse_8_bits (int in);
-static int try_index (char **s, struct m68k_op *opP);
-static void install_gen_operand (int mode, int val);
-static void install_operand (int mode, int val);
-static void s_bss (void);
-static void s_data1 (void);
-static void s_data2 (void);
-static void s_even (void);
-static void s_proc (void);
-
-#else /* not __STDC__ */
-
-static char *crack_operand ();
-static int get_num ();
-static int get_regs ();
-static int reverse_16_bits ();
-static int reverse_8_bits ();
-static int try_index ();
-static void install_gen_operand ();
-static void install_operand ();
-static void s_bss ();
-void s_align_bytes ();
-static void s_data1 ();
-static void s_data2 ();
-static void s_even ();
-static void s_proc ();
-
-#endif /* not __STDC__ */
-
-static int current_architecture = 0;
+static int current_architecture;
 
 /* BCC68000 is for patching in an extra jmp instruction for long offsets
    on the 68000.  The 68000 doesn't support long branches with branchs */
@@ -462,8 +448,8 @@ static int current_architecture = 0;
 /* This table desribes how you change sizes for the various types of variable
    size expressions.  This version only supports two kinds. */
 
-/* Note that calls to frag_var need to specify the maximum expansion needed */
-/* This is currently 10 bytes for DBCC */
+/* Note that calls to frag_var need to specify the maximum expansion
+   needed; this is currently 10 bytes for DBCC.  */
 
 /* The fields are:
    How far Forward this mode will reach:
@@ -471,8 +457,7 @@ static int current_architecture = 0;
    How many bytes this mode will add to the size of the frag
    Which mode to go to if the offset won't fit in this one
    */
-const relax_typeS
-  md_relax_table[] =
+CONST relax_typeS md_relax_table[] =
 {
   {1, 1, 0, 0},			/* First entries aren't used */
   {1, 1, 0, 0},			/* For no good reason except */
@@ -522,7 +507,7 @@ const relax_typeS
    function to call to execute this pseudo-op
    Integer arg to pass to the function
    */
-const pseudo_typeS md_pseudo_table[] =
+CONST pseudo_typeS md_pseudo_table[] =
 {
   {"data1", s_data1, 0},
   {"data2", s_data2, 0},
@@ -542,7 +527,7 @@ const pseudo_typeS md_pseudo_table[] =
    */
 extern void obj_coff_section ();
 
-const pseudo_typeS mote_pseudo_table[] =
+CONST pseudo_typeS mote_pseudo_table[] =
 {
 
   {"dc.l", cons, 4},
@@ -563,9 +548,6 @@ const pseudo_typeS mote_pseudo_table[] =
 #endif
   0,
 };
-
-/* #define isbyte(x)	((x)>=-128 && (x)<=127) */
-/* #define isword(x)	((x)>=-32768 && (x)<=32767) */
 
 #define issbyte(x)	((x)>=-128 && (x)<=127)
 #define isubyte(x)	((x)>=0 && (x)<=255)
@@ -639,7 +621,7 @@ m68k_reg_parse (ccp)
   symbolP = symbol_find (start);
   *p = c;
 
-  if (symbolP && S_GET_SEGMENT (symbolP) == SEG_REGISTER)
+  if (symbolP && S_GET_SEGMENT (symbolP) == reg_section)
     {
       *ccp = p;
       return S_GET_VALUE (symbolP);
@@ -938,7 +920,7 @@ m68k_ip_op (str, opP)
 
 #ifndef MIT_SYNTAX_ONLY
       /* The operand has no '@'.  Try to parse it using
-		   Motorola syntax.  */
+	 Motorola syntax.  */
       /* Logic of the parsing switch(*str):
 		   case			opP->mode =
 		   ----			-----------
@@ -1257,30 +1239,35 @@ m68k_ip_op (str, opP)
 	      break;
 	    }
 	}
-      /* if(str[-3]==':') {
-		   int siz;
+#if 0
+      if (str[-3]==':')
+	{
+	  int siz;
 
-		   switch(str[-2]) {
-		   case 'b':
-		   case 'B':
-		   siz=1;
-		   break;
-		   case 'w':
-		   case 'W':
-		   siz=2;
-		   break;
-		   case 'l':
-		   case 'L':
-		   siz=3;
-		   break;
-		   default:
-		   opP->error="Specified size isn't :w or :l";
-		   return FAIL;
-		   }
-		   opP->con1=add_exp(beg_str,str-4);
-		   opP->con1->e_siz=siz;
-		   } else */
-      opP->con1 = add_exp (beg_str, str - 2);
+	  switch (str[-2])
+	    {
+	    case 'b':
+	    case 'B':
+	      siz=1;
+	      break;
+	    case 'w':
+	    case 'W':
+	      siz=2;
+	      break;
+	    case 'l':
+	    case 'L':
+	      siz=3;
+	      break;
+	    default:
+	      opP->error="Specified size isn't :w or :l";
+	      return FAIL;
+	    }
+	  opP->con1=add_exp(beg_str,str-4);
+	  opP->con1->e_siz=siz;
+	}
+      else
+#endif
+	opP->con1 = add_exp (beg_str, str - 2);
       /* Should be offset,reg */
       if (str[-1] == ',')
 	{
@@ -1412,7 +1399,7 @@ m68k_ip_op (str, opP)
 }				/* m68k_ip_op() */
 
 
-#ifdef M68KCOFF
+#if defined (M68KCOFF) && !defined (BFD_ASSEMBLER)
 
 short
 tc_coff_fix2rtype (fixP)
@@ -1430,6 +1417,47 @@ tc_coff_fix2rtype (fixP)
 }
 
 #endif
+
+#ifdef BFD_ASSEMBLER
+
+arelent *
+tc_gen_reloc (section, fixp)
+     asection *section;
+     fixS *fixp;
+{
+  arelent *reloc;
+  bfd_reloc_code_real_type code;
+
+#define F(SZ,PCREL)		(((SZ) << 1) + (PCREL))
+  switch (F (fixp->fx_size, fixp->fx_pcrel))
+    {
+#define MAP(SZ,PCREL,TYPE)	case F(SZ,PCREL): code = (TYPE); break
+      MAP (1, 0, BFD_RELOC_8);
+      MAP (2, 0, BFD_RELOC_16);
+      MAP (4, 0, BFD_RELOC_32);
+      MAP (1, 1, BFD_RELOC_8_PCREL);
+      MAP (2, 1, BFD_RELOC_16_PCREL);
+      MAP (4, 1, BFD_RELOC_32_PCREL);
+    default:
+      abort ();
+    }
+
+  reloc = (arelent *) bfd_alloc_by_size_t (stdoutput, sizeof (arelent));
+  assert (reloc != 0);
+  reloc->sym_ptr_ptr = &fixp->fx_addsy->bsym;
+  reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;
+  if (fixp->fx_pcrel)
+    reloc->addend = fixp->fx_addnumber;
+  else
+    reloc->addend = 0;
+
+  reloc->howto = bfd_reloc_type_lookup (stdoutput, code);
+  assert (reloc->howto != 0);
+
+  return reloc;
+}
+
+#endif /* BFD_ASSEMBLER */
 
 #ifdef TEST1			/* TEST1 tests m68k_ip_op(), which parses operands */
 main ()
@@ -1460,9 +1488,9 @@ main ()
 #endif
 
 
-static struct hash_control *op_hash = NULL;	/* handle of the OPCODE hash table
-						   NULL means any use before m68k_ip_begin()
-						   will crash */
+/* Handle of the OPCODE hash table.  NULL means any use before
+   m68k_ip_begin() will crash.  */
+static struct hash_control *op_hash;
 
 
 /*
@@ -1614,9 +1642,8 @@ m68k_ip (instring)
   /* We've got the operands.  Find an opcode that'll accept them */
   for (losing = 0;;)
     {
-      /* if we didn't get the right number of ops,
-       or we have no common model with this pattern
-       then reject this pattern. */
+      /* If we didn't get the right number of ops, or we have no
+	 common model with this pattern then reject this pattern. */
 
       if (opsfound != opcode->m_opnum
 	  || ((opcode->m_arch & current_architecture) == 0))
@@ -1629,11 +1656,11 @@ m68k_ip (instring)
 	  for (s = opcode->m_operands, opP = &the_ins.operands[0]; *s && !losing; s += 2, opP++)
 	    {
 	      /* Warning: this switch is huge! */
-	      /* I've tried to organize the cases into  this order:
-	   non-alpha first, then alpha by letter.  lower-case goes directly
-	   before uppercase counterpart. */
-	      /* Code with multiple case ...: gets sorted by the lowest case ...
-	   it belongs to.  I hope this makes sense. */
+	      /* I've tried to organize the cases into this order:
+		 non-alpha first, then alpha by letter.  Lower-case
+		 goes directly before uppercase counterpart.  */
+	      /* Code with multiple case ...: gets sorted by the lowest
+		 case ... it belongs to.  I hope this makes sense.  */
 	      switch (*s)
 		{
 		case '!':
@@ -1854,8 +1881,10 @@ m68k_ip (instring)
 		    {
 		      long t;
 
-		      t = get_num (opP->con1, 80);
-		      if (!issbyte (t) || isvar (opP->con1))
+		      t = get_num (opP->con1, 0);
+		      if (!issbyte (t)
+			  || isvar (opP->con1)
+			  || seg (opP->con1) != absolute_section)
 			losing++;
 		    }
 		  break;
@@ -2032,10 +2061,10 @@ m68k_ip (instring)
 		default:
 		  {
 		    int got_one = 0, idx;
-		    const static struct
+		    CONST static struct
 		      {
 			int arch;
-			const char *name;
+			CONST char *name;
 		      }
 		    archs[] =
 		    {
@@ -2113,7 +2142,7 @@ m68k_ip (instring)
 	      if (strchr ("bwl", s[1]))
 		nextword = get_num (opP->con1, 80);
 	      else
-		nextword = nextword = get_num (opP->con1, 0);
+		nextword = get_num (opP->con1, 0);
 	      if (isvar (opP->con1))
 		add_fix (s[1], opP->con1, 0);
 	      switch (s[1])
@@ -2170,7 +2199,7 @@ m68k_ip (instring)
 		  break;
 		}		/* Its BIG */
 #else
-	      if (seg (opP->con1) != SEG_BIG)
+	      if (seg (opP->con1) != big_section)
 		{
 		  abort ();
 		}
@@ -2278,8 +2307,8 @@ m68k_ip (instring)
 	      nextword = 0;
 	      baseo = get_num (opP->con1, 80);
 	      outro = get_num (opP->con2, 80);
-	      /* Figure out the 'addressing mode' */
-	      /* Also turn on the BASE_DISABLE bit, if needed */
+	      /* Figure out the `addressing mode'.
+		 Also turn on the BASE_DISABLE bit, if needed.  */
 	      if (opP->reg == PC || opP->reg == ZPC)
 		{
 		  tmpreg = 0x3b;/* 7.3 */
@@ -2321,13 +2350,13 @@ m68k_ip (instring)
 		      as_fatal ("failed sanity check.");
 		    }
 		  /* IF its simple,
-	     GET US OUT OF HERE! */
+		     GET US OUT OF HERE! */
 
 		  /* Must be INDEX, with an index
-	     register.  Address register
-	     cannot be ZERO-PC, and either
-	     :b was forced, or we know
-	     it will fit */
+		     register.  Address register
+		     cannot be ZERO-PC, and either
+		     :b was forced, or we know
+		     it will fit */
 		  if (opP->mode == AINDX
 		      && opP->reg != FAIL
 		      && opP->reg != ZPC
@@ -2345,11 +2374,10 @@ m68k_ip (instring)
 	      else
 		nextword |= 0x40;	/* No index reg */
 
-	      /* It aint simple */
+	      /* It isn't simple.  */
 	      nextword |= 0x100;
-	      /* If the guy specified a width, we assume that
-	   it is wide enough.  Maybe it isn't.  If so, we lose
-	   */
+	      /* If the guy specified a width, we assume that it is
+		 wide enough.  Maybe it isn't.  If so, we lose.  */
 	      switch (siz1)
 		{
 		case 0:
@@ -2460,8 +2488,8 @@ m68k_ip (instring)
 	     on 68010 and 68000 */
 		  if (isvar (opP->con1)
 		      && !subs (opP->con1)
-		      && seg (opP->con1) == SEG_TEXT
-		      && now_seg == SEG_TEXT
+		      && seg (opP->con1) == text_section
+		      && now_seg == text_section
 		      && cpu_of_arch (current_architecture) >= m68020
 		      && !flagseen['S']
 		      && !strchr ("~%&$?", s[0]))
@@ -2615,6 +2643,7 @@ m68k_ip (instring)
 	    case 'w':
 	      if (isvar (opP->con1))
 		{
+#if 1
 		  /* check for DBcc instruction */
 		  if ((the_ins.opcode[0] & 0xf0f8) == 0x50c8)
 		    {
@@ -2623,7 +2652,7 @@ m68k_ip (instring)
 		      add_frag (adds (opP->con1), offs (opP->con1), TAB (DBCC, SZ_UNDEF));
 		      break;
 		    }
-
+#endif
 		  /* Don't ask! */
 		  opP->con1->e_exp.X_add_number += 2;
 		  add_fix ('w', opP->con1, 1);
@@ -3342,6 +3371,7 @@ insert_reg (regname, regnum)
 {
   char buf[100];
   int i;
+symbolS *s;
 
 #ifdef REGISTER_PREFIX
   buf[0] = REGISTER_PREFIX;
@@ -3349,22 +3379,25 @@ insert_reg (regname, regnum)
   regname = buf;
 #endif
 
-  symbol_table_insert (symbol_new (regname, SEG_REGISTER, regnum, &zero_address_frag));
+  symbol_table_insert (s = symbol_new (regname, reg_section, regnum, &zero_address_frag));
+
+verify_symbol_chain_2 (s);
 
   for (i = 0; regname[i]; i++)
     buf[i] = islower (regname[i]) ? toupper (regname[i]) : regname[i];
   buf[i] = '\0';
 
-  symbol_table_insert (symbol_new (buf, SEG_REGISTER, regnum, &zero_address_frag));
+  symbol_table_insert (s = symbol_new (buf, reg_section, regnum, &zero_address_frag));
+verify_symbol_chain_2 (s);
 }
 
-static const struct
+struct init_entry
   {
     char *name;
     int number;
-  }
+  };
 
-init_table[] =
+static CONST struct init_entry init_table[] =
 {
   "d0", DATA0,
   "d1", DATA1,
@@ -3582,7 +3615,8 @@ md_assemble (str)
     }
 
   if (the_ins.nfrag == 0)
-    {				/* No frag hacking involved; just put it out */
+    {
+      /* No frag hacking involved; just put it out */
       toP = frag_more (2 * the_ins.numo);
       fromP = &the_ins.opcode[0];
       for (m = the_ins.numo; m; --m)
@@ -3612,7 +3646,8 @@ md_assemble (str)
 	      n = 4;
 	      break;
 	    default:
-	      as_fatal ("Don't know how to figure width of %c in md_assemble()", the_ins.reloc[m].wid);
+	      as_fatal ("Don't know how to figure width of %c in md_assemble()",
+			the_ins.reloc[m].wid);
 	    }
 
 	  fix_new (frag_now,
@@ -3648,9 +3683,9 @@ md_assemble (str)
 	}
       for (m = 0; m < the_ins.nrel; m++)
 	{
-	  if ((the_ins.reloc[m].n) >= 2 * shorts_this_frag /* 2*the_ins.fragb[n].fragoff */ )
+	  if ((the_ins.reloc[m].n) >= 2 * shorts_this_frag)
 	    {
-	      the_ins.reloc[m].n -= 2 * shorts_this_frag /* 2*the_ins.fragb[n].fragoff */ ;
+	      the_ins.reloc[m].n -= 2 * shorts_this_frag;
 	      break;
 	    }
 	  wid = the_ins.reloc[m].wid;
@@ -3668,9 +3703,9 @@ md_assemble (str)
 		   the_ins.reloc[m].pcrel,
 		   NO_RELOC);
 	}
-      /* know(the_ins.fragb[n].fadd); */
-      (void) frag_var (rs_machine_dependent, 10, 0, (relax_substateT) (the_ins.fragb[n].fragty),
-		    the_ins.fragb[n].fadd, the_ins.fragb[n].foff, to_beg_P);
+      (void) frag_var (rs_machine_dependent, 10, 0,
+		       (relax_substateT) (the_ins.fragb[n].fragty),
+		       the_ins.fragb[n].fadd, the_ins.fragb[n].foff, to_beg_P);
     }
   n = (the_ins.numo - the_ins.fragb[n - 1].fragoff);
   shorts_this_frag = 0;
@@ -3696,7 +3731,7 @@ md_assemble (str)
       wid = (wid == 'b') ? 1 : (wid == 'w') ? 2 : (wid == 'l') ? 4 : 4000;
 
       fix_new (frag_now,
-	       (the_ins.reloc[m].n + toP - frag_now->fr_literal) - /* the_ins.numo */ shorts_this_frag * 2,
+	       (the_ins.reloc[m].n + toP - frag_now->fr_literal) - shorts_this_frag * 2,
 	       wid,
 	       the_ins.reloc[m].add,
 	       the_ins.reloc[m].sub,
@@ -3733,7 +3768,7 @@ md_begin ()
      my lord ghod hath spoken, so we do it this way.  Excuse the ugly var
      names.  */
 
-  register const struct m68k_opcode *ins;
+  register CONST struct m68k_opcode *ins;
   register struct m68k_incant *hack, *slak;
   register char *retval = 0;	/* empty string, or error msg text */
   register unsigned int i;
@@ -3894,7 +3929,7 @@ md_atof (type, litP, sizeP)
       md_number_to_chars (litP, (long) (*wordP++), sizeof (LITTLENUM_TYPE));
       litP += sizeof (LITTLENUM_TYPE);
     }
-  return "";			/* Someone should teach Dean about null pointers */
+  return 0;
 }
 
 /* Turn an integer of n bytes (in val) into a stream of bytes appropriate
@@ -3930,11 +3965,14 @@ md_number_to_chars (buf, val, n)
     }
 }
 
-void
-md_apply_fix (fixP, val)
+static void
+md_apply_fix_2 (fixP, val)
      fixS *fixP;
      long val;
 {
+  unsigned long upper_limit;
+  long lower_limit;
+
 #ifdef IBM_COMPILER_SUX
   /* This is unnecessary but it convinces the native rs6000
      compiler to generate the code we want. */
@@ -3948,30 +3986,62 @@ md_apply_fix (fixP, val)
     {
     case 1:
       *buf++ = val;
+      upper_limit = 0x7f;
+      lower_limit = -0x80;
       break;
     case 2:
       *buf++ = (val >> 8);
       *buf++ = val;
+      upper_limit = 0x7fff;
+      lower_limit = -0x8000;
       break;
     case 4:
       *buf++ = (val >> 24);
       *buf++ = (val >> 16);
       *buf++ = (val >> 8);
       *buf++ = val;
+      upper_limit = 0x7fffffff;
+      lower_limit = -0x80000000;
       break;
     default:
       BAD_CASE (fixP->fx_size);
     }
+
+  /* For non-pc-relative values, it's conceivable we might get something
+     like "0xff" for a byte field.  So extend the upper part of the range
+     to accept such numbers.  We arbitrarily disallow "-0xff" or "0xff+0xff",
+     so that we can do any range checking at all.  */
+  if (!fixP->fx_pcrel)
+    upper_limit = upper_limit * 2 + 1;
+
+  if ((unsigned) val > upper_limit && (val > 0 || val < lower_limit))
+    as_bad ("value out of range");
 }
 
+#ifdef BFD_ASSEMBLER
+int
+md_apply_fix (fixP, valp)
+     fixS *fixP;
+     long *valp;
+{
+  md_apply_fix_2 (fixP, *valp);
+  return 1;
+}
+#else
+void md_apply_fix (fixP, val)
+     fixS *fixP;
+     long val;
+{
+  md_apply_fix_2 (fixP, val);
+}
+#endif
 
 /* *fragP has been relaxed to its final size, and now needs to have
    the bytes inside it modified to conform to the new size  There is UGLY
    MAGIC here. ..
    */
 void
-md_convert_frag (headers, fragP)
-     object_headers *headers;
+md_convert_frag_1 (fragP)
      register fragS *fragP;
 {
   long disp;
@@ -4023,7 +4093,7 @@ md_convert_frag (headers, fragP)
 	    {
 	      fragP->fr_opcode[0] = 0x4E;
 	      fragP->fr_opcode[1] = 0xB9;	/* JBSR with ABSL LONG offset */
-	      subseg_change (SEG_TEXT, 0);
+	      subseg_change (text_section, 0); /* @@ */
 
 	      fix_new (fragP,
 		       fragP->fr_fix,
@@ -4041,7 +4111,7 @@ md_convert_frag (headers, fragP)
 	    {
 	      fragP->fr_opcode[0] = 0x4E;
 	      fragP->fr_opcode[1] = 0xF9;	/* JMP  with ABSL LONG offset */
-	      subseg_change (SEG_TEXT, 0);
+	      subseg_change (text_section, 0); /* @@ */
 	      fix_new (fragP, fragP->fr_fix, 4, fragP->fr_symbol, 0, fragP->fr_offset, 0,
 		       NO_RELOC);
 	      fragP->fr_fix += 4;
@@ -4070,7 +4140,7 @@ md_convert_frag (headers, fragP)
       *buffer_address++ = 0x4e;	/* put in jmp long (0x4ef9) */
       *buffer_address++ = 0xf9;
       fragP->fr_fix += 2;	/* account for jmp instruction */
-      subseg_change (SEG_TEXT, 0);
+      subseg_change (text_section, 0);
       fix_new (fragP, fragP->fr_fix, 4, fragP->fr_symbol, 0,
 	       fragP->fr_offset, 0,
 	       NO_RELOC);
@@ -4089,10 +4159,9 @@ md_convert_frag (headers, fragP)
       *buffer_address++ = 0xf9;
 
       fragP->fr_fix += 6;	/* account for bra/jmp instructions */
-      subseg_change (SEG_TEXT, 0);
+      subseg_change (text_section, 0);
       fix_new (fragP, fragP->fr_fix, 4, fragP->fr_symbol, 0,
-	       fragP->fr_offset, 0,
-	       NO_RELOC);
+	       fragP->fr_offset, 0, NO_RELOC);
       fragP->fr_fix += 4;
       ext = 0;
       break;
@@ -4111,49 +4180,64 @@ md_convert_frag (headers, fragP)
       /* The thing to do here is force it to ABSOLUTE LONG, since
 	PCREL is really trying to shorten an ABSOLUTE address anyway */
       /* JF FOO This code has not been tested */
-      subseg_change (SEG_TEXT, 0);
-      fix_new (fragP, fragP->fr_fix, 4, fragP->fr_symbol, 0, fragP->fr_offset, 0, NO_RELOC);
+      subseg_change (text_section, 0);
+      fix_new (fragP, fragP->fr_fix, 4, fragP->fr_symbol, 0, fragP->fr_offset,
+	       0, NO_RELOC);
       if ((fragP->fr_opcode[1] & 0x3F) != 0x3A)
 	as_bad ("Internal error (long PC-relative operand) for insn 0x%04lx at 0x%lx",
 		fragP->fr_opcode[0], fragP->fr_address);
       fragP->fr_opcode[1] &= ~0x3F;
       fragP->fr_opcode[1] |= 0x39;	/* Mode 7.1 */
       fragP->fr_fix += 4;
-      /* md_number_to_chars(buffer_address,
-	   (long)(fragP->fr_symbol->sy_value + fragP->fr_offset),
-	   4); */
       ext = 0;
       break;
     case TAB (PCLEA, SHORT):
-      subseg_change (SEG_TEXT, 0);
-      fix_new (fragP, (int) (fragP->fr_fix), 2, fragP->fr_symbol, (symbolS *) 0, fragP->fr_offset, 1,
-	       NO_RELOC);
+      subseg_change (text_section, 0);
+      fix_new (fragP, (int) (fragP->fr_fix), 2, fragP->fr_symbol,
+	       (symbolS *) 0, fragP->fr_offset, 1, NO_RELOC);
       fragP->fr_opcode[1] &= ~0x3F;
       fragP->fr_opcode[1] |= 0x3A;
       ext = 2;
       break;
     case TAB (PCLEA, LONG):
-      subseg_change (SEG_TEXT, 0);
-      fix_new (fragP, (int) (fragP->fr_fix) + 2, 4, fragP->fr_symbol, (symbolS *) 0, fragP->fr_offset + 2, 1,
-	       NO_RELOC);
+      subseg_change (text_section, 0);
+      fix_new (fragP, (int) (fragP->fr_fix) + 2, 4, fragP->fr_symbol,
+	       (symbolS *) 0, fragP->fr_offset + 2, 1, NO_RELOC);
       *buffer_address++ = 0x01;
       *buffer_address++ = 0x70;
       fragP->fr_fix += 2;
-      /* buffer_address+=2; */
       ext = 4;
       break;
-
-    }				/* switch on subtype */
+    }
 
   if (ext)
     {
       md_number_to_chars (buffer_address, (long) disp, (int) ext);
       fragP->fr_fix += ext;
-      /*	  H_SET_TEXT_SIZE(headers, H_GET_TEXT_SIZE(headers) + ext); */
-    }				/* if extending */
+    }
+}
 
-  return;
-}				/* md_convert_frag() */
+#ifndef BFD_ASSEMBLER
+
+void
+md_convert_frag (headers, fragP)
+     object_headers *headers;
+     fragS *fragP;
+{
+  md_convert_frag_1 (fragP);
+}
+
+#else
+
+void
+md_convert_frag (abfd, sec, fragP)
+     bfd *abfd;
+     asection sec;
+     fragS *fragP;
+{
+  md_convert_frag_1 (fragP);
+}
+#endif
 
 /* Force truly undefined symbols to their maximum size, and generally set up
    the frag list to be relaxed
@@ -4188,7 +4272,7 @@ md_estimate_size_before_relax (fragP, segment)
 	      {
 		fragP->fr_opcode[0] = 0x4E;
 		fragP->fr_opcode[1] = 0xB9;	/* JBSR with ABSL LONG offset */
-		subseg_change (SEG_TEXT, 0);
+		subseg_change (text_section, 0);
 		fix_new (fragP, fragP->fr_fix, 4,
 			 fragP->fr_symbol, 0, fragP->fr_offset, 0, NO_RELOC);
 		fragP->fr_fix += 4;
@@ -4198,7 +4282,7 @@ md_estimate_size_before_relax (fragP, segment)
 	      {
 		fragP->fr_opcode[0] = 0x4E;
 		fragP->fr_opcode[1] = 0xF9;	/* JMP  with ABSL LONG offset */
-		subseg_change (SEG_TEXT, 0);
+		subseg_change (text_section, 0);
 		fix_new (fragP, fragP->fr_fix, 4,
 			 fragP->fr_symbol, 0, fragP->fr_offset, 0, NO_RELOC);
 		fragP->fr_fix += 4;
@@ -4270,7 +4354,7 @@ md_estimate_size_before_relax (fragP, segment)
 	    buffer_address[0] = 0x4e;	/* put in jmp long (0x4ef9) */
 	    buffer_address[1] = 0xf8;
 	    fragP->fr_fix += 2;	/* account for jmp instruction */
-	    subseg_change (SEG_TEXT, 0);
+	    subseg_change (text_section, 0);
 	    fix_new (fragP, fragP->fr_fix, 2, fragP->fr_symbol, 0,
 		     fragP->fr_offset, 0, NO_RELOC);
 	    fragP->fr_fix += 2;
@@ -4282,7 +4366,7 @@ md_estimate_size_before_relax (fragP, segment)
 	    buffer_address[0] = 0x4e;	/* put in jmp long (0x4ef9) */
 	    buffer_address[1] = 0xf9;
 	    fragP->fr_fix += 2;	/* account for jmp instruction */
-	    subseg_change (SEG_TEXT, 0);
+	    subseg_change (text_section, 0);
 	    fix_new (fragP, fragP->fr_fix, 4, fragP->fr_symbol, 0,
 		     fragP->fr_offset, 0, NO_RELOC);
 	    fragP->fr_fix += 4;
@@ -4313,7 +4397,7 @@ md_estimate_size_before_relax (fragP, segment)
 	    buffer_address[4] = 0x4e;	/* Put in Jump Word */
 	    buffer_address[5] = 0xf8;
 	    fragP->fr_fix += 6;	/* account for bra/jmp instruction */
-	    subseg_change (SEG_TEXT, 0);
+	    subseg_change (text_section, 0);
 	    fix_new (fragP, fragP->fr_fix, 2, fragP->fr_symbol, 0,
 
 
@@ -4327,7 +4411,7 @@ md_estimate_size_before_relax (fragP, segment)
 	    buffer_address[4] = 0x4e;	/* put in jmp long (0x4ef9) */
 	    buffer_address[5] = 0xf9;
 	    fragP->fr_fix += 6;	/* account for bra/jmp instruction */
-	    subseg_change (SEG_TEXT, 0);
+	    subseg_change (text_section, 0);
 	    fix_new (fragP, fragP->fr_fix, 4, fragP->fr_symbol, 0,
 		     fragP->fr_offset, 0, NO_RELOC);
 	    fragP->fr_fix += 4;
@@ -4406,6 +4490,7 @@ md_ri_to_chars (the_bytes, ri)
 
 #endif /* comment */
 
+#ifndef BFD_ASSEMBLER
 void
 tc_aout_fix_to_chars (where, fixP, segment_address_in_file)
      char *where;
@@ -4438,13 +4523,14 @@ tc_aout_fix_to_chars (where, fixP, segment_address_in_file)
 	      (((!S_IS_DEFINED (fixP->fx_addsy)) << 4) & 0x10));
 
   return;
-}				/* tc_aout_fix_to_chars() */
+}
+#endif
 
 #endif /* OBJ_AOUT or OBJ_BOUT */
 
 #ifndef WORKING_DOT_WORD
-const int md_short_jump_size = 4;
-const int md_long_jump_size = 6;
+CONST int md_short_jump_size = 4;
+CONST int md_long_jump_size = 6;
 
 void
 md_create_short_jump (ptr, from_addr, to_addr, frag, to_symbol)
@@ -4524,6 +4610,7 @@ get_num (exp, ok)
 #else
   char *save_in;
   char c_save;
+  segT section;
 
   if (!exp)
     {
@@ -4532,7 +4619,7 @@ get_num (exp, ok)
     }
   if (!exp->e_beg || !exp->e_end)
     {
-      seg (exp) = SEG_ABSOLUTE;
+      seg (exp) = absolute_section;
       adds (exp) = 0;
       subs (exp) = 0;
       offs (exp) = (ok == 10) ? 1 : 0;
@@ -4573,19 +4660,19 @@ get_num (exp, ok)
   exp->e_end[1] = '\0';
   save_in = input_line_pointer;
   input_line_pointer = exp->e_beg;
-  switch (expression (&(exp->e_exp)))
+  section = expression (&exp->e_exp);
+  if (section == pass1_section)
     {
-    case SEG_PASS1:
-      seg (exp) = SEG_ABSOLUTE;
+      seg (exp) = absolute_section;
       adds (exp) = 0;
       subs (exp) = 0;
       offs (exp) = (ok == 10) ? 1 : 0;
       as_warn ("Unknown expression: '%s' defaulting to %d", exp->e_beg, offs (exp));
-      break;
-
-    case SEG_ABSENT:
+    }
+  else if (section == absent_section)
+    {
       /* Do the same thing the VAX asm does */
-      seg (exp) = SEG_ABSOLUTE;
+      seg (exp) = absolute_section;
       adds (exp) = 0;
       subs (exp) = 0;
       offs (exp) = 0;
@@ -4594,8 +4681,9 @@ get_num (exp, ok)
 	  as_warn ("expression out of range: defaulting to 1");
 	  offs (exp) = 1;
 	}
-      break;
-    case SEG_ABSOLUTE:
+    }
+  else if (section == absolute_section)
+    {
       switch (ok)
 	{
 	case 10:
@@ -4640,8 +4728,9 @@ get_num (exp, ok)
 	default:
 	  break;
 	}
-      break;
-    case SEG_BIG:
+    }
+  else if (section == big_section)
+    {
       if (offs (exp) < 0	/* flonum */
 	  && (ok == 80		/* no bignums */
 	      || (ok > 10	/* small-int ranges including 0 ok */
@@ -4654,38 +4743,32 @@ get_num (exp, ok)
 	  LITTLENUM_TYPE words[6];
 
 	  gen_to_words (words, 2, 8L);	/* These numbers are magic! */
-	  seg (exp) = SEG_ABSOLUTE;
+	  seg (exp) = absolute_section;
 	  adds (exp) = 0;
 	  subs (exp) = 0;
 	  offs (exp) = words[1] | (words[0] << 16);
 	}
       else if (ok != 0)
 	{
-	  seg (exp) = SEG_ABSOLUTE;
+	  seg (exp) = absolute_section;
 	  adds (exp) = 0;
 	  subs (exp) = 0;
 	  offs (exp) = (ok == 10) ? 1 : 0;
 	  as_warn ("Can't deal with expression \"%s\": defaulting to %ld", exp->e_beg, offs (exp));
 	}
-      break;
-    default:
-    case SEG_TEXT:
-    case SEG_DATA:
-    case SEG_BSS:
-    case SEG_UNKNOWN:
-    case SEG_DIFFERENCE:
+    }
+  else
+    {
       if (ok >= 10 && ok <= 70)
 	{
-	  seg (exp) = SEG_ABSOLUTE;
+	  seg (exp) = absolute_section;
 	  adds (exp) = 0;
 	  subs (exp) = 0;
 	  offs (exp) = (ok == 10) ? 1 : 0;
 	  as_warn ("Can't deal with expression \"%s\": defaulting to %ld", exp->e_beg, offs (exp));
 	}
-      break;
-
-
     }
+
   if (input_line_pointer != exp->e_end + 1)
     as_bad ("Ignoring junk after expression");
   exp->e_end[1] = c_save;
@@ -4706,7 +4789,7 @@ get_num (exp, ok)
     }
   return offs (exp);
 #endif
-}				/* get_num() */
+}
 
 /* These are the back-ends for the various machine dependent pseudo-ops.  */
 void demand_empty_rest_of_line ();	/* Hate those extra verbose names */
@@ -4714,26 +4797,26 @@ void demand_empty_rest_of_line ();	/* Hate those extra verbose names */
 static void
 s_data1 ()
 {
-  subseg_new (SEG_DATA, 1);
+  subseg_new (data_section, 1);
   demand_empty_rest_of_line ();
-}				/* s_data1() */
+}
 
 static void
 s_data2 ()
 {
-  subseg_new (SEG_DATA, 2);
+  subseg_new (data_section, 2);
   demand_empty_rest_of_line ();
-}				/* s_data2() */
+}
 
 static void
 s_bss ()
 {
   /* We don't support putting frags in the BSS segment, we fake it
-	   by marking in_bss, then looking at s_skip for clues */
+     by marking in_bss, then looking at s_skip for clues.  */
 
-  subseg_new (SEG_BSS, 0);
+  subseg_new (bss_section, 0);
   demand_empty_rest_of_line ();
-}				/* s_bss() */
+}
 
 static void
 s_even ()
@@ -4746,13 +4829,13 @@ s_even ()
   if (!need_pass_2)		/* Never make frag if expect extra pass. */
     frag_align (temp, (int) temp_fill);
   demand_empty_rest_of_line ();
-}				/* s_even() */
+}
 
 static void
 s_proc ()
 {
   demand_empty_rest_of_line ();
-}				/* s_proc() */
+}
 
 /* s_space is defined in read.c .skip is simply an alias to it. */
 
@@ -5030,6 +5113,7 @@ md_pcrel_from (fixP)
   return (fixP->fx_size + fixP->fx_where + fixP->fx_frag->fr_address);
 }
 
+#ifndef BFD_ASSEMBLER
 void
 tc_coff_symbol_emit_hook ()
 {
@@ -5050,7 +5134,7 @@ tc_coff_sizemachdep (frag)
     default:
       abort ();
     }
-
 }
+#endif
 
 /* end of tc-m68k.c */
