@@ -25,56 +25,46 @@
 #include "bfdlink.h"
 
 static boolean simple_dummy_warning
-  PARAMS ((struct bfd_link_info * ATTRIBUTE_UNUSED,
-	   const char * ATTRIBUTE_UNUSED, const char * ATTRIBUTE_UNUSED,
-	   bfd * ATTRIBUTE_UNUSED, asection * ATTRIBUTE_UNUSED,
-	   bfd_vma ATTRIBUTE_UNUSED));
+  PARAMS ((struct bfd_link_info *, const char *, const char *, bfd *,
+	   asection *, bfd_vma));
 
 static boolean simple_dummy_undefined_symbol
-  PARAMS ((struct bfd_link_info * ATTRIBUTE_UNUSED,
-	   const char * ATTRIBUTE_UNUSED, bfd * ATTRIBUTE_UNUSED,
-	   asection * ATTRIBUTE_UNUSED, bfd_vma ATTRIBUTE_UNUSED,
-	   boolean ATTRIBUTE_UNUSED));
+  PARAMS ((struct bfd_link_info *, const char *, bfd *, asection *,
+	   bfd_vma, boolean));
 
 static boolean simple_dummy_reloc_overflow 
-  PARAMS ((struct bfd_link_info * ATTRIBUTE_UNUSED,
-	   const char * ATTRIBUTE_UNUSED, const char * ATTRIBUTE_UNUSED,
-	   bfd_vma ATTRIBUTE_UNUSED, bfd * ATTRIBUTE_UNUSED,
-	   asection * ATTRIBUTE_UNUSED, bfd_vma ATTRIBUTE_UNUSED));
+  PARAMS ((struct bfd_link_info *, const char *, const char *, bfd_vma,
+	   bfd *, asection *, bfd_vma));
 
 static boolean simple_dummy_reloc_dangerous
-  PARAMS ((struct bfd_link_info * ATTRIBUTE_UNUSED,
-	   const char * ATTRIBUTE_UNUSED, bfd * ATTRIBUTE_UNUSED,
-	   asection * ATTRIBUTE_UNUSED, bfd_vma ATTRIBUTE_UNUSED));
+  PARAMS ((struct bfd_link_info *, const char *, bfd *, asection *, bfd_vma));
 
 static boolean simple_dummy_unattached_reloc
-  PARAMS ((struct bfd_link_info * ATTRIBUTE_UNUSED,
-	   const char * ATTRIBUTE_UNUSED, bfd * ATTRIBUTE_UNUSED,
-	   asection * ATTRIBUTE_UNUSED, bfd_vma ATTRIBUTE_UNUSED));
+  PARAMS ((struct bfd_link_info *, const char *, bfd *, asection *, bfd_vma));
 
 bfd_byte * bfd_simple_get_relocated_section_contents
   PARAMS ((bfd *, asection *, bfd_byte *));
 
 static boolean
 simple_dummy_warning (link_info, warning, symbol, abfd, section, address)
-     struct bfd_link_info *link_info;
-     const char *warning;
-     const char *symbol;
-     bfd *abfd;
-     asection *section;
-     bfd_vma address;
+     struct bfd_link_info *link_info ATTRIBUTE_UNUSED;
+     const char *warning ATTRIBUTE_UNUSED;
+     const char *symbol ATTRIBUTE_UNUSED;
+     bfd *abfd ATTRIBUTE_UNUSED;
+     asection *section ATTRIBUTE_UNUSED;
+     bfd_vma address ATTRIBUTE_UNUSED;
 {
   return true;
 }
 
 static boolean
 simple_dummy_undefined_symbol (link_info, name, abfd, section, address, fatal)
-     struct bfd_link_info *link_info;
-     const char *name;
-     bfd *abfd;
-     asection *section;
-     bfd_vma address;
-     boolean fatal;
+     struct bfd_link_info *link_info ATTRIBUTE_UNUSED;
+     const char *name ATTRIBUTE_UNUSED;
+     bfd *abfd ATTRIBUTE_UNUSED;
+     asection *section ATTRIBUTE_UNUSED;
+     bfd_vma address ATTRIBUTE_UNUSED;
+     boolean fatal ATTRIBUTE_UNUSED;
 {
   return true;
 }
@@ -82,35 +72,35 @@ simple_dummy_undefined_symbol (link_info, name, abfd, section, address, fatal)
 static boolean
 simple_dummy_reloc_overflow (link_info, name, reloc_name, addend, abfd,
 			     section, address)
-     struct bfd_link_info *link_info;
-     const char *name;
-     const char *reloc_name;
-     bfd_vma addend;
-     bfd *abfd;
-     asection *section;
-     bfd_vma address;
+     struct bfd_link_info *link_info ATTRIBUTE_UNUSED;
+     const char *name ATTRIBUTE_UNUSED;
+     const char *reloc_name ATTRIBUTE_UNUSED;
+     bfd_vma addend ATTRIBUTE_UNUSED;
+     bfd *abfd ATTRIBUTE_UNUSED;
+     asection *section ATTRIBUTE_UNUSED;
+     bfd_vma address ATTRIBUTE_UNUSED;
 {
   return true;
 }
 
 static boolean
 simple_dummy_reloc_dangerous (link_info, message, abfd, section, address)
-     struct bfd_link_info *link_info;
-     const char *message;
-     bfd *abfd;
-     asection *section;
-     bfd_vma address;
+     struct bfd_link_info *link_info ATTRIBUTE_UNUSED;
+     const char *message ATTRIBUTE_UNUSED;
+     bfd *abfd ATTRIBUTE_UNUSED;
+     asection *section ATTRIBUTE_UNUSED;
+     bfd_vma address ATTRIBUTE_UNUSED;
 {
   return true;
 }
 
 static boolean
 simple_dummy_unattached_reloc (link_info, name, abfd, section, address)
-     struct bfd_link_info *link_info;
-     const char *name;
-     bfd *abfd;
-     asection *section;
-     bfd_vma address;
+     struct bfd_link_info *link_info ATTRIBUTE_UNUSED;
+     const char *name ATTRIBUTE_UNUSED;
+     bfd *abfd ATTRIBUTE_UNUSED;
+     asection *section ATTRIBUTE_UNUSED;
+     bfd_vma address ATTRIBUTE_UNUSED;
 {
   return true;
 }

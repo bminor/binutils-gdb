@@ -1,3 +1,7 @@
+2002-10-25  Hans-Peter Nilsson  <hp@axis.com>
+
+	* simple.c: Correct placement of ATTRIBUTE_UNUSED.
+
 2002-10-24  John David Anglin  <dave@hiauly1.hia.nrc.ca>
 
 	* aoutx.h (NAME(aout,swap_ext_reloc_in)): Cast bytes->r_index to
