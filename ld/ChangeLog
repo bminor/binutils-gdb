@@ -1,4 +1,32 @@
+Fri Aug 30 18:32:31 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.tgt (sh-*-elf*): New target.
+	* emulparams/shelf.sh: New file.
+	* emulparams/shlelf.sh: New file.
+	* Makefile.in (ALL_EMULATIONS): Add eshelf.o and eshlelf.o.
+	(eshelf.c, eshlelf.c): New targets.
+	* scripttempl/elf.sc: If EMBEDDED is defined, then don't add
+	SIZEOF_HEADERS to TEXT_START_ADDR.  Expand CTOR_START and CTOR_END
+	around .ctors, and DTOR_START and DTOR_END around .dtors.  Expand
+	OTHER_RELOCATING_SECTIONS if RELOCATING.
+
+Thu Aug 29 16:57:46 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* configure.{host,tgt} (i[345]86-*-*): Recognize i686 for pentium
+	pro.
+
 Mon Aug 26 12:58:11 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ldgram.y (section): Add opt_nocrossrefs; pass value to
+	lang_enter_overlay.
+	(opt_nocrossrefs): New nonterminal.
+	* ldlex.l: Recognize NOCROSSREFS keyword in EXPRESSION mode.
+	* ldlang.c (overlay_nocrossrefs): New static variable.
+	(lang_enter_overlay): Add nocrossrefs parameter.
+	(lang_leave_overlay): Only add nocrossrefs if overlay_nocrossrefs
+	is set.  Initialize overlay_nocrossrefs.
+	* ldlang.h (lang_enter_overlay): Update declaration.
+	* ld.texinfo (Overlays): Update documentation.
 
 	* ldver.c (ldversion): Print GNU ld in the version message.
 

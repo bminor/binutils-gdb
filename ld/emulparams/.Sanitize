@@ -122,7 +122,9 @@ ppcpe.sh
 riscix.sh
 sa29200.sh
 sh.sh
+shelf.sh
 shl.sh
+shlelf.sh
 sparcaout.sh
 sparclynx.sh
 sparcnbsd.sh
