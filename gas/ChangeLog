@@ -1,5 +1,12 @@
 2002-07-19  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
+	* config/tc-mips.c (mips_need_elf_addend_fixup): Use S_IS_EXTERNAL
+	instead of S_IS_EXTERN.
+	(md_estimate_size_before_relax): Likewise.
+	(mips_fix_adjustable): Likewise.
+
+2002-07-19  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
 	* config/tc-mips.c (mips_pic_level): Remove IRIX4_PIC.
 
 2002-07-19  Miroslav Tichy <tichm9am@ss1000.ms.mff.cuni.cz>
