@@ -25,6 +25,8 @@ OBJS=targ-cpu.obj,obj-format.obj,atof-targ.obj,app.obj,as.obj,atof-generic.obj,\
   literal.obj,messages.obj,output-file.obj,read.obj,subsegs.obj,symbols.obj,\
   write.obj,listing.obj,ecoff.obj,stabs.obj,sb.obj,macro.obj
 
+GASPOBJS = gasp.obj,macro.obj,sb.obj,hash.obj
+
 LIBIBERTY = [-.libiberty]libiberty.olb
 LIBBFD = [-.bfd]libbfd.olb
 LIBOPCODES = [-.opcodes]libopcodes.olb
@@ -34,8 +36,8 @@ all: config.status [-.bfd]bfd.h as.exe gasp.exe
 as.exe: $(OBJS) $(LIBOPCODES) $(LIBBFD) $(LIBIBERTY)
 	link$(LFLAGS)/exe=$@ $(OBJS),$(LIBOPCODES)/lib,$(LIBBFD)/lib,$(LIBIBERTY)/lib$(LIBS)
 
-gasp.exe: gasp.obj $(LIBBFD) $(LIBIBERTY)
-	link$(LFLAGS)/exe=$@ gasp.obj,$(LIBBFD)/lib,$(LIBIBERTY)/lib$(LIBS)
+gasp.exe: $(GASPOBJS) $(LIBBFD) $(LIBIBERTY)
+	link$(LFLAGS)/exe=$@ $(GASPOBJS),$(LIBBFD)/lib,$(LIBIBERTY)/lib$(LIBS)
 
 config.status:
 	$$ @config-gas
