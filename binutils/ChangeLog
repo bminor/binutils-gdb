@@ -1,9 +1,14 @@
 Tue Apr 28 10:33:07 1998  Bill Moyer  <ttk@cygnus.com>
-  
- 	* dlltool.c, defparse.y, dlltool.h: added support 
- 	  for parsing IMPORT declarations from input def 
- 	  file correctly, added .idata sections to exp-file 
- 	  object code.
+
+	Add support for IMPORTS:
+	* defparse.y (impline): Add IMPORTS syntaxes.
+	* dlltool.c (ifunctype, iheadtype): New typedefs.
+	(import_list): New static variable.
+	(append_import): New static function.
+	(def_import): Add an entry to import_list.
+	(generate_idata_ofile): New static function.
+	(gen_exp_file): Call generate_idata_ofile.
+	* dlltool.h (def_import): Update declaration.
 
 Mon Apr 27 16:39:22 1998  Ian Lance Taylor  <ian@cygnus.com>
 
