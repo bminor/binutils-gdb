@@ -1,3 +1,8 @@
+Tue Nov 10 16:17:06 1998  Geoffrey Noer  <noer@cygnus.com>
+
+	* acinclude.m4: detect cygwin* instead of cygwin32*.
+	* aclocal.m4, configure: regenerate
+
 Tue Nov 10 15:13:59 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* elf.c (prep_headers): Add support for bfd_arch_fr30.
