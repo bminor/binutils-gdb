@@ -81,6 +81,9 @@ i386_register_u_addr (blockend, regnum)
   
 }
 
+#if 0
+/* mauro@olympus 1991.10.20 -- compiling the following code causes
+   undefined symbols at link time, specifically: corechan, have_inferior_p */
 struct env387 
 {
   unsigned short control;
@@ -239,3 +242,4 @@ i386_float_info ()
   fpstatep = (struct fpstate *)(buf + skip);
   print_387_status (fpstatep->status, (struct env387 *)fpstatep->state);
 }
+#endif /* mauro@olympus 1991.10.20 */
