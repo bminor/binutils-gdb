@@ -1,3 +1,8 @@
+2004-10-27  Jim Blandy  <jimb@redhat.com>
+
+	* remote.c (fetch_register_using_p): Construct 'p' packet in a
+	manner independent of the host byte order.
+
 2004-10-27  Mark Kettenis  <kettenis@gnu.org>
 
 	* mips-tdep.c (id_delayed): Remove prototype.

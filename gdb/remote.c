@@ -3176,9 +3176,10 @@ fetch_register_using_p (int regnum)
   char regp[MAX_REGISTER_SIZE];
   int i;
 
-  buf[0] = 'p';
-  bin2hex((char *) &regnum, &buf[1], sizeof(regnum));
-  buf[9] = 0;
+  p = buf;
+  *p++ = 'p';
+  p += hexnumstr (p, regnum);
+  *p++ = '\0';
   remote_send (buf, rs->remote_packet_size);
   if (buf[0] != 0 && buf[0] != 'E') {
      p = buf;
