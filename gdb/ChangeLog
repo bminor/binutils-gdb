@@ -1,3 +1,8 @@
+Wed Dec 10 17:41:07 1997  Jim Blandy  <jimb@zwingli.cygnus.com>
+
+	* ch-valprint.c (chill_val_print): To avoid segfaults, don't print
+ 	a string whose dynamic length is longer than its static length.
+
 Wed Dec 10 15:54:00 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* dwarf2read.c (dwarf2_build_psymtabs_hard): Check
