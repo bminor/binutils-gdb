@@ -3488,18 +3488,37 @@ build_instruction (doisa, features, mips16, insn)
 	 {
 	   char hi = (i == 0 ? ' ' : '1');
 	   int d = i * 2;
+	   if (! (insn->flags & UNSIGNED))
+	     {
+	       printf("if (RT_SW(%d) == -1)\n", d );
+	       printf(" {\n");
+	       printf("  LO%c = -RS_%sW(%d);\n", hi, sign, d );
+	       printf("  HI%c = 0;\n", hi );
+	       printf(" }\nelse ");
+	     };
 	   printf("if (RT_UW(%d) != 0)\n", d );
-	   printf("  {\n");
-	   printf("LO%c = (signed32)(RS_%sW(%d) / RT_%sW(%d));\n", hi, sign, d, sign, d );
-	   printf("HI%c = (signed32)(RS_%sW(%d) %% RT_%sW(%d));\n", hi, sign, d, sign, d );
-	   printf("  }\n");
+	   printf(" {\n");
+	   printf("  LO%c = (signed32)(RS_%sW(%d) / RT_%sW(%d));\n", hi, sign, d, sign, d );
+	   printf("  HI%c = (signed32)(RS_%sW(%d) %% RT_%sW(%d));\n", hi, sign, d, sign, d );
+	   printf(" }\n");
 	 }
        break;
      }
 
     case PDIVBW:
       printf("signed32 devisor = RT_SH(0);\n");
-      printf("if (devisor != 0)\n");
+      printf("if (devisor == -1)\n");
+      printf(" {\n");
+      printf("  LO_SW(0) = -RS_SW(0);\n");
+      printf("  HI_SW(0) = 0;\n");
+      printf("  LO_SW(1) = -RS_SW(1);\n");
+      printf("  HI_SW(1) = 0;\n");
+      printf("  LO_SW(2) = -RS_SW(2);\n");
+      printf("  HI_SW(2) = 0;\n");
+      printf("  LO_SW(3) = -RS_SW(3);\n");
+      printf("  HI_SW(3) = 0;\n");
+      printf(" }\n");
+      printf("else if (devisor != 0)\n");
       printf(" {\n");
       printf("  LO_SW(0) = RS_SW(0) / devisor;\n");
       printf("  HI_SW(0) = SIGNEXTEND( (RS_SW(0) %% devisor), 16 );\n");
