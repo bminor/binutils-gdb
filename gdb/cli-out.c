@@ -364,6 +364,7 @@ cli_out_new (struct ui_file *stream)
 
   struct ui_out_data *data = XMALLOC (struct ui_out_data);
   data->stream = stream;
+  data->suppress_output = 0;
   return ui_out_new (&cli_ui_out_impl, data, flags);
 }
 

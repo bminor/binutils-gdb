@@ -1,3 +1,8 @@
+2001-06-21  Keith Seitz  <keiths@redhat.com>
+
+	* cli-out.c (cli_out_new): Initialize new structure member
+	"suppress_output".
+
 2001-06-20  Andrew Cagney  <ac131313@redhat.com>
 
 	* ui-out.h (ui_out_table_header): Add parameter ``col_name''.
