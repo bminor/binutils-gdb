@@ -21,15 +21,14 @@
 @set BOUT
 @set COFF
 @set ELF
+@set SOM
 
 @c CPUs of interest
 @c ================
 @set A29K
 @set H8/300
 @set H8/500
-@c start Hitachi-SH
 @set SH
-@c end Hitachi-SH
 @set I80386
 @set I960
 @set M680X0
@@ -37,6 +36,7 @@
 @set SPARC
 @set VAX
 @set VXWORKS
+@set HPPA
 
 @c Does this version of the assembler use the difference-table kluge?
 @set DIFF-TBL-KLUGE

@@ -24,6 +24,9 @@
 @ifset SH
 @set H8
 @end ifset
+@ifset HPPA
+@set abnormal-separator
+@end ifset
 @c ------------
 @ifset GENERIC
 @settitle Using @value{AS}
@@ -150,6 +153,8 @@ code for @value{TARGET} architectures.
 * Copying::                     GNU GENERAL PUBLIC LICENSE
 @end ifset
 
+* Acknowledgements::            Who Did What
+
 * Index::                       Index
 @end menu
 @end ifinfo
@@ -181,6 +186,9 @@ Here is a brief summary of how to invoke @code{@value{AS}}.  For details,
 @end ifset
 @ifset H8
 @c Hitachi family chips have no machine-dependent assembler options
+@end ifset
+@ifset HPPA
+@c HPPA has no machine-dependent assembler options (yet).
 @end ifset
 @ifset SPARC
    [ -Av6 | -Av7 | -Av8 | -Asparclite | -bump ]
@@ -219,7 +227,8 @@ This option is accepted only for script compatibility with calls to
 other assemblers; it has no effect on @code{@value{AS}}.
 
 @item -f
-``fast''---skip preprocessing (assume source is compiler output)
+``fast''---skip whitespace and comment preprocessing (assume source is
+compiler output)
 
 @item -I @var{path}
 Add @var{path} to the search list for @code{.include} directives
@@ -476,6 +485,10 @@ On the @value{TARGET}, @code{@value{AS}} can be configured to produce either
 @ifset I960
 On the @value{TARGET}, @code{@value{AS}} can be configured to produce either
 @code{b.out} or COFF format object files.
+@end ifset
+@ifset HPPA
+On the @value{TARGET}, @code{@value{AS}} can be configured to produce either
+SOM or ELF format object files.
 @end ifset
 @end ifclear
 
@@ -752,7 +765,8 @@ likely that scripts written for other assemblers will also work with
 @cindex trusted compiler
 @cindex faster processing (@code{-f})
 @samp{-f} should only be used when assembling programs written by a
-(trusted) compiler.  @samp{-f} stops the assembler from pre-processing
+(trusted) compiler.  @samp{-f} stops the assembler from doing whitespace
+and comment pre-processing on
 the input file(s) before assembling them.  @xref{Pre-processing,
 ,Pre-processing}.
 
@@ -815,6 +829,13 @@ This option tells @code{@value{AS}} to retain those @samp{L@dots{}} symbols
 in the object file.  Usually if you do this you also tell the linker
 @code{@value{LD}} to preserve symbols whose names begin with @samp{L}.
 
+By default, a local label is any label beginning with @samp{L}, but each
+target is allowed to redefine the local label prefix.
+@ifclear GENERIC 
+On some targets a local label begins with @samp{.L}; on the HPPA local labels
+begin with @samp{L$}.
+@end ifclear
+
 @node o
 @section Name the Object File: @code{-o}
 
@@ -871,6 +892,11 @@ this option is only useful if you use sections named @samp{.text} and
 @samp{.data}.
 @end ifset
 
+@ifset HPPA
+@code{-R} is not supported for any of the HPPA targets .  Using
+@code{-R} will generate a warning from @code{@value{AS}}.
+@end ifset
+
 @node v
 @section Announce Version: @code{-v}
 
@@ -925,7 +951,7 @@ assembler, except that @code{@value{AS}} does not assemble Vax bit-fields.
 @section Pre-Processing
 
 @cindex preprocessing
-The pre-processor:
+The @code{@value{AS}} internal pre-processor:
 @itemize @bullet
 @cindex whitespace, removed by preprocessor
 @item
@@ -942,6 +968,13 @@ appropriate number of newlines.
 @item
 converts character constants into the appropriate numeric values.
 @end itemize
+
+Note that it does not do macro processing, include file handling, or
+anything else you may get from your C compiler's pre-processor.  You can
+do include file processing with the @code{.include} directive
+(@pxref{Include,,@code{.include}}).  Other ``CPP'' style pre-processing
+can be done with the @sc{GNU} C compiler, by giving the input file a
+@code{.S} suffix; see the compiler documentation for details.
 
 Excess whitespace, comments, and character constants
 cannot be used in the portions of the input text that are not
@@ -1011,6 +1044,9 @@ is considered a comment and is ignored.  The line comment character is
 @end ifset
 @ifset H8/500
 @samp{!} for the H8/500 family;
+@end ifset
+@ifset HPPA
+@samp{;} for the HPPA;
 @end ifset
 @ifset SH
 @samp{!} for the Hitachi SH;
@@ -1097,6 +1133,12 @@ sign (@samp{@@}).  The newline or at sign is considered part of the
 preceding statement.  Newlines and at signs within character constants
 are an exception: they don't end statements.
 @end ifset
+@ifset HPPA
+A @dfn{statement} ends at a newline character (@samp{\n}) or an exclamation 
+point (@samp{!}).  The newline or exclamation point is considered part of the
+preceding statement.  Newlines and exclamation points within character
+constants are an exception: they don't end statements.
+@end ifset
 @ifset H8
 A @dfn{statement} ends at a newline character (@samp{\n}); or (for the
 H8/300) a dollar sign (@samp{$}); or (for the
@@ -1158,6 +1200,12 @@ language.@refill
 A label is a symbol immediately followed by a colon (@code{:}).
 Whitespace before a label or after a colon is permitted, but you may not
 have whitespace between a label's symbol and its colon. @xref{Labels}.
+
+@ifset HPPA
+For HPPA targets, labels need not be immediately followed by a colon, but 
+the definition of a label must begin in column zero.  This also implies that
+only one label may be defined on each line.
+@end ifset
 
 @smallexample
 label:     .directive    followed by something
@@ -1268,6 +1316,14 @@ Mnemonic for horizontal Tab; for ASCII this is octal code 011.
 An octal character code.  The numeric code is 3 octal digits.
 For compatibility with other Unix systems, 8 and 9 are accepted as digits:
 for example, @code{\008} has the value 010, and @code{\009} the value 011.
+
+@ifset HPPA
+@item \@code{x} @var{hex-digit} @var{hex-digit}
+@cindex @code{\@var{xdd}} (hex character code)
+@cindex hex character code (@code{\@var{xdd}})
+A hex character code.  The numeric code is 2 hexidecimal digits.  Either
+an upper or lower case @code{x} may be used.
+@end ifset
 
 @item \\
 @cindex @code{\\} (@samp{\} character)
@@ -1413,6 +1469,9 @@ A flonum is written by writing (in order)
 @itemize @bullet
 @item
 The digit @samp{0}.
+@ifset HPPA
+@samp{0} is optional on the HPPA.
+@end ifset
 
 @item
 A letter, to tell @code{@value{AS}} the rest of the number is a flonum.
@@ -1432,6 +1491,8 @@ one of the letters @samp{DFPRSX} (in upper or lower case).
 
 On the Intel 960 architecture, the letter must be
 one of the letters @samp{DFT} (in upper or lower case).
+
+On the HPPA architecture, the letter must be @samp{E} (upper case only).
 @end ifset
 @ifclear GENERIC
 @ifset A29K
@@ -1442,6 +1503,9 @@ One of the letters @samp{DFPRSX} (in upper or lower case).
 @end ifset
 @ifset I960
 One of the letters @samp{DFT} (in upper or lower case).
+@end ifset
+@ifset HPPA
+On the HPPA architecture, the letter must be @samp{E} (upper case only).
 @end ifset
 @end ifclear
 
@@ -1572,8 +1636,32 @@ If you don't use any directives that place output in the @samp{.text}
 or @samp{.data} sections, these sections will still exist, but will be empty.
 @end ifset
 
+@ifset HPPA
+@ifset GENERIC
+When @code{@value{AS}} generates SOM or ELF output for the HPPA,
+@end ifset
+@code{@value{AS}} can also generate whatever other named sections you
+specify using the @samp{.space} and @samp{.subspace} directives.  See
+@cite{HP9000 Series 800 Assembly Language Reference Manual}
+(HP 92432-90001) for details on the @samp{.space} and @samp{.subspace}
+assembler directives.
+
+@ifset SOM
+Additionally, @code{@value{AS}} uses different names for the standard
+text, data, and bss sections when generating SOM output.  Program text
+is placed into the @samp{$CODE$} section, data into @samp{$DATA$}, and
+BSS into @samp{$BSS$}.
+@end ifset
+@end ifset
+
 Within the object file, the text section starts at address @code{0}, the
 data section follows, and the bss section follows the data section.
+
+@ifset HPPA
+When generating either SOM or ELF output files on the HPPA, the text
+section starts at address @code{0}, the data section at address
+@code{0x4000000}, and the bss section follows the data section.
+@end ifset
 
 To let @code{@value{LD}} know which data will change when the sections are
 relocated, and how to change that data, @code{@value{AS}} also writes to the
@@ -1651,7 +1739,7 @@ use of @code{@value{AS}} and have no meaning except during assembly.
 @ifset aout-bout
 @cindex text section
 @cindex data section
-@item text section
+@itemx text section
 @itemx data section
 @end ifset
 These sections hold your program.  @code{@value{AS}} and @code{@value{LD}} treat them as
@@ -1756,58 +1844,16 @@ value of every expression in your assembly language program to be a
 section-relative address.
 
 @table @b
-@item absent
-@cindex absent (internal section)
-An expression was expected and none was found.
-
 @item ASSEMBLER-INTERNAL-LOGIC-ERROR!
 @cindex assembler internal logic error
 An internal assembler logic error has been found.  This means there is a
 bug in the assembler.
 
-@item bignum/flonum
-@cindex bignum/flonum (internal section)
-If a number can't be written as a C @code{int} constant (a bignum or a
-flonum, but not an integer), it is recorded as belonging to this
-``section''.  @code{@value{AS}} has to remember that a flonum or a bignum
-does not fit into 32 bits, and cannot be an argument (@pxref{Arguments})
-in an expression: this is done by making a flonum or bignum be in a
-separate internal section.  This is purely for internal @code{@value{AS}}
-convenience; bignum/flonum section behaves similarly to absolute
-section.
-
-@item pass1 section
-@cindex pass1 (internal section)
-The expression was impossible to evaluate in the first pass.  The
-assembler will attempt a second pass (second reading of the source) to
-evaluate the expression.  Your expression mentioned an undefined symbol
-in a way that defies the one-pass (section + offset in section) assembly
-process.  No compiler need emit such an expression.
-
-@quotation
-@emph{Warning:} the second pass is currently not implemented.  @code{@value{AS}}
-will abort with an error message if one is required.
-@end quotation
-
-@item difference section
-@cindex difference (internal section)
-As an assist to the C compiler, expressions of the forms
-@display
-   (@var{undefined symbol}) @minus{} (@var{expression})
-   @var{something} @minus{} (@var{undefined symbol})
-   (@var{undefined symbol}) @minus{} (@var{undefined symbol})
-@end display
-
-are permitted, and belong to the difference section.  @code{@value{AS}}
-re-evaluates such expressions after the source file has been read and
-the symbol table built.  If by that time there are no undefined symbols
-in the expression then the expression assumes a new section.  The
-intention is to permit statements like
-@samp{.word label - base_of_table}
-to be assembled in one pass where both @code{label} and
-@code{base_of_table} are undefined.  This is useful for compiling C and
-Algol switch statements, Pascal case statements, FORTRAN computed goto
-statements and the like.
+@item expr section
+@cindex expr (internal section)
+The assembler stores complex expression internally as combinations of
+symbols.  When it needs to represent an expression as a symbol, it puts
+it in the expr section.
 @c FIXME item debug
 @c FIXME item transfer[t] vector preload
 @c FIXME item transfer[t] vector postload
@@ -1974,6 +2020,12 @@ operand.  You are warned if you use the same symbol to represent two
 different locations: the first definition overrides any other
 definitions.
 
+@ifset HPPA
+On the HPPA, a @dfn{label} need not be immediately followed by a colon,
+but instead must start in column zero.  Only one @dfn{label} may be
+defined on a single line.
+@end ifset
+
 @node Setting Symbols
 @section Giving Symbols Other Values
 
@@ -2133,6 +2185,9 @@ would want.
 @ifset COFF
 * COFF Symbols::                Symbol Attributes for COFF
 @end ifset
+@ifset SOM
+* SOM Symbols::                Symbol Attributes for SOM
+@end ifset
 @end menu
 
 @node Symbol Value
@@ -2244,6 +2299,21 @@ respectively, with @code{.val} and @code{.type}.
 The @code{@value{AS}} directives @code{.dim}, @code{.line}, @code{.scl},
 @code{.size}, and @code{.tag} can generate auxiliary symbol table
 information for COFF.
+@end ifset
+
+@ifset SOM
+@node SOM Symbols
+@subsection Symbol Attributes for SOM
+
+@cindex SOM symbol attributes
+@cindex symbol attributes, SOM
+
+The SOM format supports a multitude of symbol attributes set with the 
+with the @code{.EXPORT} and @code{.IMPORT} directives.
+
+The attributes are described in @cite{HP9000 Series 800 Assembly 
+Language Reference Manual} (HP 92432-90001) under the @code{IMPORT} and
+@code{EXPORT} assembler directive documentation.
 @end ifset
 
 @node Expressions
@@ -2595,6 +2665,13 @@ advancement.  For example @samp{.align 3} will advance the location
 counter until it a multiple of 8.  If the location counter is already a
 multiple of 8, no change is needed.
 
+@ifset HPPA
+For the HPPA, the first expression (which must be absolute) is the
+alignment request in bytes.  For example @samp{.align 8} will advance
+the location counter until it is a multiple of 8.  If the location counter
+is already a multiple of 8, no change is needed.
+@end ifset
+
 The second expression (also absolute) gives the value to be stored in
 the padding bytes.  It (and the comma) may be omitted.  If it is
 omitted, the padding bytes are zero.
@@ -2655,6 +2732,11 @@ program defines the location of the symbol.  Use @code{.comm} to tell
 will allocate space for each @code{.comm} symbol that is at least as
 long as the longest @code{.comm} request in any of the partial programs
 linked.  @var{length} is an absolute expression.
+
+@ifset HPPA
+The syntax for @code{.comm} differs slightly on the HPPA.  The syntax is
+@code{@var{symbol} .comm, @var{length}}; @var{symbol} is optional.
+@end ifset
 
 @node Data
 @section @code{.data @var{subsection}}
@@ -2796,6 +2878,11 @@ conditionally.  @xref{If,,@code{.if}}.
 This directive sets the value of @var{symbol} to @var{expression}.
 It is synonymous with @samp{.set}; @pxref{Set,,@code{.set}}.
 
+@ifset HPPA
+The syntax for @code{equ} on the HPPA is 
+@code{@var{symbol} .equ @var{expression}}.
+@end ifset
+
 @node Extern
 @section @code{.extern}
 
@@ -2879,6 +2966,13 @@ from another partial program it is linked with.
 
 Both spellings (@samp{.globl} and @samp{.global}) are accepted, for
 compatibility with other assemblers.
+
+@ifset HPPA
+On the HPPA symbols are made visible to @code{@value{LD}} with the 
+@code{.EXPORT} directive.  Using @code{.EXPORT} is necessary to provide
+the linker with the correct symbol type information necessary for linking
+in SOM
+@end ifset
 
 @node hword
 @section @code{.hword @var{expressions}}
@@ -3009,6 +3103,11 @@ those of the new local common.  The addresses are allocated in the bss
 section, so at run-time the bytes will start off zeroed.  @var{Symbol}
 is not declared global (@pxref{Global,,@code{.global}}), so is normally
 not visible to @code{@value{LD}}.
+
+@ifset HPPA
+The syntax for @code{.lcomm} differs slightly on the HPPA.  The syntax is
+@code{@var{symbol} .lcomm, @var{length}}; @var{symbol} is optional.
+@end ifset
 
 @node Lflags
 @section @code{.lflags}
@@ -3290,6 +3389,11 @@ message if one is required.
 If you @code{.set} a global symbol, the value stored in the object
 file is the last value stored into it.
 
+@ifset HPPA
+The syntax for @code{set} on the HPPA is
+@code{@var{symbol} .set @var{expression}}.
+@end ifset
+
 @node Short
 @section @code{.short @var{expressions}}
 
@@ -3364,6 +3468,13 @@ and @var{fill} are omitted, @var{fill} is assumed to be zero.
 @end ifclear
 On the AMD 29K, this directive is ignored; it is accepted for
 compatibility with other AMD 29K assemblers.
+
+@ifset HPPA
+@emph{Warning:} @code{.space} has a completely different meaning for HPPA
+targets; use @code{.block} as a substitute.  See @cite{HP9000 Series 800 
+Assembly Language Reference Manual} (HP 92432-90001) for the meaning of
+the @code{.space} directive.
+@end ifset
 
 @quotation
 @emph{Warning:} In most versions of the GNU assembler, the directive
@@ -3619,6 +3730,9 @@ subject, see the hardware manufacturer's manual.
 @ifset H8/500
 * H8/500-Dependent::            Hitachi H8/500 Dependent Features
 @end ifset
+@ifset HPPA
+* HPPA-Dependent::		HPPA Dependent Features
+@end ifset
 @ifset SH
 * SH-Dependent::                Hitachi SH Dependent Features
 @end ifset
@@ -3639,11 +3753,11 @@ subject, see the hardware manufacturer's manual.
 @end ifset
 @end menu
 
-@down
+@lowersections
 @end ifset
 
 @c The following major nodes are *sections* in the GENERIC version, *chapters*
-@c in single-cpu versions.  This is mainly achieved by @down.  There is a
+@c in single-cpu versions.  This is mainly achieved by @lowersections.  There is a
 @c peculiarity: to preserve cross-references, there must be a node called
 @c "Machine Dependencies".  Hence the conditional nodenames in each
 @c major node below.  Node defaulting in makeinfo requires adjacency of
@@ -4165,7 +4279,7 @@ family.
 * H8/500-Dependent::            Hitachi H8/500 Dependent Features
 * SH-Dependent::                Hitachi SH Dependent Features
 @end menu
-@down
+@lowersections
 @end ifclear
 @end ifset
 
@@ -4770,6 +4884,108 @@ mov[:g] sz ea,rd
 @end smallexample
 
 @end ifset
+
+@ifset HPPA
+@page
+@node HPPA-Dependent
+@chapter HPPA Dependent Features
+
+@cindex  support
+@menu
+* HPPA Notes::		      Notes
+* HPPA Options::              Options
+* HPPA Syntax::               Syntax
+* HPPA Floating Point::       Floating Point
+* HPPA Directives::           HPPA Machine Directives
+* HPPA Opcodes::	      Opcodes
+@end menu
+
+@node HPPA Notes
+@section Notes
+As a backend for GNU CC @code{@value{AS}} has been throughly tested and should
+work extremely well.  We have tested it only minimally on hand written assembly
+code and no one has tested it much on the assembly output from the HP
+compilers.
+
+The format of the debugging sections has changed since the original
+@code{@value{AS}} port (version 1.3X) was released; therefore,
+you must rebuild all objects and libraries with the new 
+assembler so that you can debug the final executable.
+
+The HPPA @code{@value{AS}} port generates a small subset of the relocations
+available in the SOM and ELF object file formats.  Additional relocation
+support will be added as it becomes necessary.  
+
+@node HPPA Options
+@section Options
+@code{@value{AS}} has no machine-dependent directives for the HPPA.
+
+@cindex HPPA Syntax
+@section HPPA Syntax
+@node HPPA Syntax
+The assembler syntax closely follows the HPPA instruction set
+reference manual; assembler directives and general syntax closely follow the
+HPPA assembly language reference manual with a few noteworthy differences.
+
+First a colon may immediately follow a label definition.  This is
+simply for compatability with how most assembly language programmers
+write code.
+
+Some obscure expression parsing problems may affect hand written code which
+uses the @code{spop} instructions, or code which makes significant
+use of the @code{!} line separator.
+
+@code{@value{AS} is much less forgiving about missing arguments and other
+similar oversights.  @code{@value{AS}} will flag missing arguments as
+syntax errors; this is regarded as a feature, not a bug.
+
+Finally, @code{@value{AS}} allows you to use an external symbol without
+explicitly importing the symbol.  @emph{Warning:} in the future this will be
+an error for HPPA targets.
+
+Special characters for HPPA targets include:
+
+@samp{;} is the line comment character.
+
+@samp{!} can be used instead of a newline to separate statements.
+
+Since @samp{$} has no special meaning, you may use it in symbol names.
+
+@node HPPA Floating Point
+@section Floating Point
+@cindex floating point, HPPA (@sc{ieee})
+@cindex HPPA floating point (@sc{ieee})
+The HPPA family uses @sc{ieee} floating-point numbers.
+
+@node HPPA Directives
+@section HPPA Machine Directives
+For detailed information on the HPPA machine instruction set, see
+@cite{HP9000 Series 800 Assembly Language Reference Manual} 
+(HP 92432-90001).
+
+@code{@value{AS}} does not support the following assembler directives
+found in the HP manual:
+@itemize @bullet
+@item endm 
+@item enter
+@item leave
+@item listoff
+@item liston
+@item locct
+@item macro
+@end itemize
+
+@code{@value{AS}} supports one additional assembler directive for the
+HPPA: @code{.PARAM}.  It conveys register argument locations for
+static functions.  Its syntax closely follows the @code{.EXPORT} directive.
+
+@node HPPA Opcodes
+@section Opcodes
+For detailed information on the HPPA machine instruction set, see
+@cite{PA-RISC Architecture and Instruction Set Reference Manual} 
+(HP 09740-90039).
+@end ifset
+
 @ifset SH
 @page
 @node SH-Dependent
@@ -5022,7 +5238,7 @@ stc SR,Rn
 
 @ifset Hitachi-all
 @ifclear GENERIC
-@up
+@raisesections
 @end ifclear
 @end ifset
 
@@ -5340,6 +5556,7 @@ and the instruction pairs they may expand into:
 @menu
 * M68K-Opts::                   M680x0 Options
 * M68K-Syntax::                 Syntax
+* M68K-Moto-Syntax::            Motorola Syntax
 * M68K-Float::                  Floating Point
 * M68K-Directives::             680x0 Machine Directives
 * M68K-opcodes::                Opcodes
@@ -5381,18 +5598,21 @@ target.
 @node M68K-Syntax
 @section Syntax
 
+@cindex @sc{mit}
+This syntax for the Motorola 680x0 was developed at @sc{mit}.
+
 @cindex M680x0 syntax
 @cindex syntax, M680x0
 @cindex M680x0 size modifiers
 @cindex size modifiers, M680x0
-The 680x0 version of @code{@value{AS}} uses syntax similar to the Sun assembler.
-Size modifiers are appended directly to the end of the opcode without an
-intervening period.  For example, write @samp{movl} rather than
-@samp{move.l}.
+The 680x0 version of @code{@value{AS}} uses syntax similar to the Sun
+assembler.  Intervening periods are now ignored; for example, @samp{movl}
+is equivalent to @samp{move.l}.
 
 @ifset INTERNALS
-If @code{@value{AS}} is compiled with SUN_ASM_SYNTAX defined, it will also allow
-Sun-style local labels of the form @samp{1$} through @samp{$9}.
+If @code{@value{AS}} is compiled with SUN_ASM_SYNTAX defined, it will
+also allow Sun-style local labels of the form @samp{1$} through
+@samp{$9}.
 @end ifset
 
 In the following table @dfn{apc} stands for any of the address
@@ -5414,7 +5634,9 @@ The following addressing modes are understood:
 @samp{a0} through @samp{a7}
 
 @item Address Register Indirect
-@samp{a0@@} through @samp{a7@@}
+@samp{a0@@} through @samp{a7@@}@*
+@samp{a7} is also known as @samp{sp}, i.e. the Stack Pointer.  @code{a6}
+is also known as @samp{fp}, the Frame Pointer.
 
 @item Address Register Postincrement
 @samp{a0@@+} through @samp{a7@@+}
@@ -5460,6 +5682,57 @@ is intended to let the assembler distinguish between user variables and
 registers named @samp{a0} through @samp{a7}, et cetera.  The @samp{%} is
 always accepted, but is only required for some configurations, notably
 @samp{m68k-coff}.
+
+@node M68K-Moto-Syntax
+@section Motorola Syntax
+
+@cindex Motorola syntax for the 680x0
+@cindex alternate syntax for the 680x0
+
+The standard Motorola syntax for this chip differs from the syntax
+already discussed (@pxref{M68K-Syntax,,Syntax}).  @code{@value{AS}} can
+accept both kinds of syntax, even within a single instruction.  The
+syntaxes are fully compatible, because the Motorola syntax never uses
+the @samp{@@} character and the @sc{mit} syntax always does, except in
+cases where the syntaxes are identical.  
+
+@cindex M680x0 syntax
+@cindex syntax, M680x0
+In particular, you may write or generate M68K assembler with the
+following conventions:
+
+(In the following table @dfn{apc} stands for any of the address
+registers (@samp{a0} through @samp{a7}), nothing, (@samp{}), the
+Program Counter (@samp{pc}), or the zero-address relative to the
+program counter (@samp{zpc}).)
+
+@cindex M680x0 addressing modes
+@cindex addressing modes, M680x0
+The following additional addressing modes are understood:
+@table @dfn
+@item Address Register Indirect
+@samp{a0} through @samp{a7}@* 
+@samp{a7} is also known as @samp{sp}, i.e. the Stack Pointer.  @code{a6}
+is also known as @samp{fp}, the Frame Pointer.
+
+@item Address Register Postincrement
+@samp{(a0)+} through @samp{(a7)+}
+
+@item Address Register Predecrement
+@samp{-(a0)} through @samp{-(a7)}
+
+@item Indirect Plus Offset
+@samp{@var{digits}(@var{apc})}
+
+@item Index
+@samp{@var{digits}(@var{apc},(@var{register}.@var{size}*@var{scale})}@*
+or @samp{(@var{apc},@var{register}.@var{size}*@var{scale})}@*
+In either case, @var{size} and @var{scale} are optional
+(@var{scale} defaults to @samp{1}, @var{size} defaults to @samp{l}).
+ @var{scale} can be @samp{1}, @samp{2}, @samp{4}, or @samp{8}.
+ @var{size} can be @samp{w} or @samp{l}.  @var{scale} is only supported
+on the 68020 and greater.
+@end table
 
 @node M68K-Float
 @section Floating Point
@@ -6646,7 +6919,7 @@ described elsewhere in the manual.
 
 @ifset GENERIC
 @c reverse effect of @down at top of generic Machine-Dep chapter
-@up
+@raisesections
 @end ifset
 
 @ifset INTERNALS
@@ -7384,17 +7657,16 @@ currently assembling into.
 
 @section External functions will you need
 
-You will find the following external functions useful (or
-indispensable) when you're writing the machine-dependent part
-of the assembler.
+You will find the following external functions useful (or indispensable) when
+you're writing the machine-dependent part of the assembler.
 
 @table @code
 
 @item char *frag_more(int bytes)
-This function allocates @var{bytes} more bytes in the current
-frag (or starts a new frag, if it can't expand the current frag
-any more.)  for you to store some object-file bytes in.  It
-returns a pointer to the bytes, ready for you to store data in.
+This function allocates @var{bytes} more bytes in the current frag (or starts a
+new frag, if it can't expand the current frag any more.)  for you to store some
+object-file bytes in.  It returns a pointer to the bytes, ready for you to
+store data in.
 
 @item void fix_new(fragS *frag, int where, short size, symbolS *add_symbol, symbolS *sub_symbol, long offset, int pcrel)
 This function stores a relocation fixup to be acted on later.
@@ -7423,70 +7695,61 @@ addressing mode used by this frag changes.  It typically points into the
 that @code{md_convert_frag()}, may have to change.@refill
 
 @item void frag_wane(fragS *fragPTR)
-This function is useful from within @code{md_convert_frag}.  It
-changes a frag to type rs_fill, and sets the variable-sized
-piece of the frag to zero.  The frag will never change in size
-again.
+This function is useful from within @code{md_convert_frag}.  It changes a frag
+to type rs_fill, and sets the variable-sized piece of the frag to zero.  The
+frag will never change in size again.
 
 @item segT expression(expressionS *retval)
-(@var{segT} is defined in @file{as.h}; @var{expressionS} is defined in @file{expr.h})
-This function parses the string pointed to by the external char
-pointer @var{input_line_pointer}, and returns the section-type
-of the expression.  It also stores the results in the
-@var{expressionS} pointed to by @var{retval}.
-@var{input_line_pointer} is advanced to point past the end of
-the expression.  (@var{input_line_pointer} is used by other
-parts of the assembler.  If you modify it, be sure to restore
-it to its original value.)
+(@var{segT} is defined in @file{as.h}; @var{expressionS} is defined in
+@file{expr.h}) This function parses the string pointed to by the external char
+pointer @var{input_line_pointer}, and returns the section-type of the symbol
+used in the expression, if any.  It stores the results in the @var{expressionS}
+pointed to by @var{retval}.  @var{input_line_pointer} is advanced to point past
+the end of the expression.  (@var{input_line_pointer} is used by other parts of
+the assembler.  If you modify it, be sure to restore it to its original value.)
 
 @item as_warn(char *message,@dots{})
-If warning messages are disabled, this function does nothing.
-Otherwise, it prints out the current file name, and the current
-line number, then uses @code{fprintf} to print the
-@var{message} and any arguments it was passed.
+If warning messages are disabled, this function does nothing.  Otherwise, it
+prints out the current file name, and the current line number, then uses
+@code{fprintf} to print the @var{message} and any arguments it was passed.
 
 @item as_bad(char *message,@dots{})
-This function should be called when @code{@value{AS}} encounters
-conditions that are bad enough that @code{@value{AS}} should not
-produce an object file, but should continue reading input and
-printing warning and bad error messages.
+This function should be called when @code{@value{AS}} encounters conditions
+that are bad enough that @code{@value{AS}} should not produce an object file,
+but should continue reading input and printing warning and bad error messages.
 
 @item as_fatal(char *message,@dots{})
-This function prints out the current file name and line number,
-prints the word @samp{FATAL:}, then uses @code{fprintf} to
-print the @var{message} and any arguments it was passed.  Then
-the assembler exits.  This function should only be used for
-serious, unrecoverable errors.
+This function prints out the current file name and line number, prints the word
+@samp{FATAL:}, then uses @code{fprintf} to print the @var{message} and any
+arguments it was passed.  Then the assembler exits.  This function should only
+be used for serious, unrecoverable errors.
 
 @item void float_const(int float_type)
-This function reads floating-point constants from the current
-input line, and calls @code{md_atof} to assemble them.  It is
-useful as the function to call for the directives
-@samp{.single}, @samp{.double}, @samp{.float}, etc.
+This function reads floating-point constants from the current input line, and
+calls @code{md_atof} to assemble them.  It is useful as the function to call
+for the directives @samp{.single}, @samp{.double}, @samp{.float}, etc.
 @var{float_type} must be a character from @var{FLT_CHARS}.
 
 @item void demand_empty_rest_of_line(void);
-This function can be used by machine-dependent directives to
-make sure the rest of the input line is empty.  It prints a
-warning message if there are additional characters on the line.
+This function can be used by machine-dependent directives to make sure the rest
+of the input line is empty.  It prints a warning message if there are
+additional characters on the line.
 
 @item long int get_absolute_expression(void)
-This function can be used by machine-dependent directives to
-read an absolute number from the current input line.  It
-returns the result.  If it isn't given an absolute expression,
-it prints a warning message and returns zero.
+This function can be used by machine-dependent directives to read an absolute
+number from the current input line.  It returns the result.  If it isn't given
+an absolute expression, it prints a warning message and returns zero.
 
 @end table
 
 
 @section The concept of Frags
 
-This assembler works to optimize the size of certain addressing
-modes.  (e.g. branch instructions) This means the size of many
-pieces of object code cannot be determined until after assembly
-is finished.  (This means that the addresses of symbols cannot be
-determined until assembly is finished.)  In order to do this,
-@code{@value{AS}} stores the output bytes as @dfn{frags}.
+This assembler works to optimize the size of certain addressing modes.
+(e.g. branch instructions) This means the size of many pieces of object code
+cannot be determined until after assembly is finished.  (This means that the
+addresses of symbols cannot be determined until assembly is finished.)  In
+order to do this, @code{@value{AS}} stores the output bytes as @dfn{frags}.
 
 Here is the definition of a frag (from @file{as.h})
 @smallexample
@@ -7521,53 +7784,133 @@ rs_org
 rs_machine_dependent
 
 @item fr_substate
-This stores the type of machine-dependent frag this is.  (what
-kind of addressing mode is being used, and what size is being
-tried/will fit/etc.
+This stores the type of machine-dependent frag this is.  (what kind of
+addressing mode is being used, and what size is being tried/will fit/etc.
 
 @item fr_address
-@var{fr_address} is only valid after relaxation is finished.
-Before relaxation, the only way to store an address is (pointer
-to frag containing the address) plus (offset into the frag).
+@var{fr_address} is only valid after relaxation is finished.  Before
+relaxation, the only way to store an address is (pointer to frag containing the
+address) plus (offset into the frag).
 
 @item fr_offset
-This contains a number, whose meaning depends on the type of
-the frag.
-for machine_dependent frags, this contains the offset from
-fr_symbol that the frag wants to go to.  Thus, for branch
-instructions it is usually zero.  (unless the instruction was
-@samp{jba foo+12}  or something like that.)
+This contains a number, whose meaning depends on the type of the frag.  for
+machine_dependent frags, this contains the offset from fr_symbol that the frag
+wants to go to.  Thus, for branch instructions it is usually zero.  (unless the
+instruction was @samp{jba foo+12} or something like that.)
 
 @item fr_symbol
-for machine_dependent frags, this points to the symbol the frag
-needs to reach.
+for machine_dependent frags, this points to the symbol the frag needs to reach.
 
 @item fr_opcode
-This points to the location in the frag (or in a previous frag)
-of the opcode for the instruction that caused this to be a frag.
-@var{fr_opcode} is needed if the actual opcode must be changed
-in order to use a different form of the addressing mode.
-(For example, if a conditional branch only comes in size tiny,
-a large-size branch could be implemented by reversing the sense
-of the test, and turning it into a tiny branch over a large jump.
-This would require changing the opcode.)
+This points to the location in the frag (or in a previous frag) of the opcode
+for the instruction that caused this to be a frag.  @var{fr_opcode} is needed
+if the actual opcode must be changed in order to use a different form of the
+addressing mode.  (For example, if a conditional branch only comes in size
+tiny, a large-size branch could be implemented by reversing the sense of the
+test, and turning it into a tiny branch over a large jump.  This would require
+changing the opcode.)
 
-@var{fr_literal} is a variable-size array that contains the
-actual object bytes.  A frag consists of a fixed size piece of
-object data, (which may be zero bytes long), followed by a
-piece of object data whose size may not have been determined
-yet.  Other information includes the type of the frag (which
+@var{fr_literal} is a variable-size array that contains the actual object
+bytes.  A frag consists of a fixed size piece of object data, (which may be
+zero bytes long), followed by a piece of object data whose size may not have
+been determined yet.  Other information includes the type of the frag (which
 controls how it is relaxed),
 
 @item fr_next
-This is the next frag in the singly-linked list.  This is
-usually only needed by the machine-independent part of
-@code{@value{AS}}.
+This is the next frag in the singly-linked list.  This is usually only needed
+by the machine-independent part of @code{@value{AS}}.
 
 @end table
 @end ifset
 
+@node Acknowledgements
+@chapter Acknowledgements
+
+If you've contributed to @code{@value{AS}} and your name isn't listed here, it
+is not meant as a slight.  We just don't know about it.  Send mail to the
+maintainer, and we'll correct the situation.  Currently (June 1993), the
+maintainer is Ken Raeburn (email address @code{raeburn@@cygnus.com}).
+
+Dean Elsner wrote the original GNU assembler for the VAX.@footnote{Any more
+details?}
+
+Jay Fenlason maintained GAS for a while, adding support for gdb-specific debug
+information and the 68k series machines, most of the preprocessing pass, and
+extensive changes in messages.c, input-file.c, write.c.
+
+K. Richard Pixley maintained GAS for a while, adding various enhancements and
+many bug fixes, including merging support for several processors, breaking GAS
+up to handle multiple object file format backends (including heavy rewrite,
+testing, an integration of the coff and b.out backends), adding configuration
+including heavy testing and verification of cross assemblers and file splits
+and renaming, converted GAS to strictly ansi C including full prototypes, added
+support for m680[34]0 & cpu32, considerable work on i960 including a COFF port
+(including considerable amounts of reverse engineering), a SPARC opcode file
+rewrite, DECstation, rs6000, and hp300hpux host ports, updated "know"
+assertions and made them work, much other reorganization, cleanup, and lint.
+
+Ken Raeburn wrote the high-level BFD interface code to replace most of the code
+in format-specific I/O modules.
+
+The original VMS support was contributed by David L. Kashtan.  Eric Youngdale
+has done much work with it since.
+
+The Intel 80386 machine description was written by Eliot Dresselhaus.
+
+Minh Tran-Le at IntelliCorp contributed some AIX 386 support.
+
+The Motorola 88k machine description was contributed by Devon Bowen of Buffalo
+University and Torbjorn Granlund of the Swedish Institute of Computer Science.
+
+Keith Knowles at the Open Software Foundation wrote the original MIPS back end
+(tc-mips.c, tc-mips.h), and contributed Rose format support (which hasn't been
+merged in yet).  Ralph Campbell worked with the MIPS code to support a.out
+format.
+
+Support for the Zilog Z8k and Hitachi H8/300 and H8/500 processors (tc-z8k,
+tc-h8300, tc-h8500), and IEEE 695 object file format (obj-ieee), was written by
+Steve Chamberlain of Cygnus Support.  Steve also modified the COFF back end to
+use BFD for some low-level operations, for use with the H8/300 and AMD 29k
+targets.
+
+John Gilmore built the AMD 29000 support, added .include support, and
+simplified the configuration of which versions accept which pseudo-ops.  He
+updated the 68k machine description so that Motorola's opcodes always produced
+fixed-size instructions (e.g. jsr), while synthetic instructions remained
+shrinkable (jbsr).  John fixed many bugs, including true tested
+cross-compilation support, and one bug in relaxation that took a week and
+required the apocryphal one-bit fix.
+
+Ian Lance Taylor of Cygnus Support merged the Motorola and MIT syntaxes for the
+68k, completed support for some COFF targets (68k, i386 SVR3, and SCO Unix),
+and made a few other minor patches.
+
+Steve Chamberlain made @code{@value{AS}} able to generate listings.
+
+Support for the HP9000/300 was contributed by Hewlett-Packard.
+
+GAS and BFD support for the native HPPA object format (SOM) along with
+a fairly extensive HPPA testsuite (for both SOM and ELF object formats)
+was written by Jeff Law.  This work was supported by both the Center for
+Software Science at the University of Utah and Cygnus Support. 
+
+Support for ELF format files has been worked on by Mark Eichin of Cygnus
+Support (original, incomplete implementation for SPARC), Pete Hoogenboom and
+Jeff Law at the University of Utah (HPPA mainly), Michael Meissner of the Open
+Software Foundation (i386 mainly), and Ken Raeburn of Cygnus Support (sparc,
+and some initial 64-bit support).
+
+Several engineers at Cygnus Support have also provided many small bug fixes and
+configuration enhancements.
+
+Many others have contributed large or small bugfixes and enhancements.  If
+you've contributed significant work and are not mentioned on this list, and
+want to be, let us know.  Some of the history has been lost; we aren't
+intentionally leaving anyone out.
+
 @ifset GENERIC
+@node Copying
+@unnumbered
 @include gpl.texinfo
 @end ifset
 
@@ -7578,3 +7921,6 @@ usually only needed by the machine-independent part of
 
 @contents
 @bye
+@c Local Variables:
+@c fill-column: 79
+@c End:
