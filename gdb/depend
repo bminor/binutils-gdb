@@ -42,7 +42,7 @@ cplus-dem.o : cplus-dem.c defs.h param.h tm.h config.status param-no-tm.h xm.h c
 dbxread.o : dbxread.c defs.h param.h tm.h config.status param-no-tm.h xm.h config.status \
   $(INCLUDE_DIR)/a.out.gnu.h $(INCLUDE_DIR)/reloc.h $(INCLUDE_DIR)/stab.gnu.h \
   $(INCLUDE_DIR)/stab.def symtab.h breakpoint.h value.h command.h target.h \
-  gdbcore.h $(INCLUDE_DIR)/bfd.h $(INCLUDE_DIR)/ansidecl.h $(BFD_DIR)/liba.out.h \
+  gdbcore.h $(INCLUDE_DIR)/bfd.h $(INCLUDE_DIR)/ansidecl.h $(BFD_DIR)/libaout.h \
   symfile.h 
 environ.o : environ.c environ.h defs.h 
 eval.o : eval.c defs.h param.h tm.h config.status param-no-tm.h xm.h config.status symtab.h value.h \
@@ -106,8 +106,7 @@ m88k-xdep.o : m88k-xdep.c defs.h param.h tm.h config.status param-no-tm.h xm.h c
   $(INCLUDE_DIR)/ansidecl.h /usr/include/setjmp.h 
 main.o : main.c defs.h gdbcmd.h command.h param.h tm.h config.status param-no-tm.h xm.h config.status \
   symtab.h inferior.h breakpoint.h value.h frame.h signals.h target.h \
-  $(INCLUDE_DIR)/getopt.h $(READLINE_DIR)/readline.h $(READLINE_DIR)/keymaps.h \
-  $(READLINE_DIR)/chardefs.h $(READLINE_DIR)/history.h 
+  $(INCLUDE_DIR)/getopt.h readline.h history.h 
 mem-break.o : mem-break.c defs.h param.h tm.h config.status param-no-tm.h xm.h config.status 
 mips-pinsn.o : mips-pinsn.c defs.h param.h tm.h config.status param-no-tm.h xm.h config.status symtab.h \
   mips-opcode.h 
