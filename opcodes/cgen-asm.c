@@ -28,6 +28,10 @@
 #include "opcode/cgen.h"
 #include "opintl.h"
 
+static CGEN_INSN_LIST *  hash_insn_array      PARAMS ((CGEN_CPU_DESC, const CGEN_INSN *, int, int, CGEN_INSN_LIST **, CGEN_INSN_LIST *));
+static CGEN_INSN_LIST *  hash_insn_list       PARAMS ((CGEN_CPU_DESC, const CGEN_INSN_LIST *, CGEN_INSN_LIST **, CGEN_INSN_LIST *));
+static void              build_asm_hash_table PARAMS ((CGEN_CPU_DESC));
+
 /* Set the cgen_parse_operand_fn callback.  */
 
 void

@@ -1,3 +1,15 @@
+2001-09-19  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* arm-dis.c:   Fix compile time warning messages.
+	* cgen-asm.c:  Fix compile time warning messages.
+	* cgen-dis.c:  Fix compile time warning messages.
+	* cris-dis.c:  Fix compile time warning messages.
+	* d10v-dis.c:  Fix compile time warning messages.
+	* fr30-asm.c:  Fix compile time warning messages.
+	* fr30-desc.c: Fix compile time warning messages.
+	* fr30-dis.c:  Fix compile time warning messages.
+	* fr30-ibld.c: Fix compile time warning messages.
+
 2001-09-18  Bruno Haible  <haible@clisp.cons.org>
 
 	* cgen-asm.c: Include "safe-ctype.h" instead of <ctype.h>.

@@ -202,7 +202,7 @@ dis_long (insn, memaddr, info)
 
   while (op->name)
     {
-      if ((op->format & LONG_OPCODE) && ((op->mask & insn) == op->opcode))
+      if ((op->format & LONG_OPCODE) && ((op->mask & insn) == (unsigned long) op->opcode))
 	{
 	  match = 1;
 	  (*info->fprintf_func) (info->stream, "%s\t", op->name);
@@ -253,7 +253,7 @@ dis_2_short (insn, memaddr, info, order)
       while (op->name)
 	{
 	  if ((op->format & SHORT_OPCODE)
-	      && ((op->mask & ins[j]) == op->opcode))
+	      && ((op->mask & ins[j]) == (unsigned long) op->opcode))
 	    {
 	      (*info->fprintf_func) (info->stream, "%s\t", op->name);
 	      for (i = 0; op->operands[i]; i++)

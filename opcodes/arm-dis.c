@@ -1105,7 +1105,7 @@ the -M switch:\n"));
   for (i = NUM_ARM_REGNAMES; i--;)
     fprintf (stream, "  reg-names-%s %*c%s\n",
 	     regnames[i].name,
-	     14 - strlen (regnames[i].name), ' ',
+	     (int)(14 - strlen (regnames[i].name)), ' ',
 	     regnames[i].description);
 
   fprintf (stream, "  force-thumb              Assume all insns are Thumb insns\n");

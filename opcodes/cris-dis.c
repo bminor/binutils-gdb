@@ -1197,7 +1197,7 @@ print_insn_cris_generic (memaddr, info, with_reg_prefix)
      bytes; stacked prefixes will not be expanded.  */
   unsigned char buffer[MAX_BYTES_PER_CRIS_INSN];
   unsigned char *bufp;
-  int status;
+  int status = 0;
   bfd_vma addr;
 
   /* There will be an "out of range" error after the last instruction.

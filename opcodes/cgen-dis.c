@@ -27,6 +27,10 @@
 #include "symcat.h"
 #include "opcode/cgen.h"
 
+static CGEN_INSN_LIST *  hash_insn_array      PARAMS ((CGEN_CPU_DESC, const CGEN_INSN *, int, int, CGEN_INSN_LIST **, CGEN_INSN_LIST *));
+static CGEN_INSN_LIST *  hash_insn_list       PARAMS ((CGEN_CPU_DESC, const CGEN_INSN_LIST *, CGEN_INSN_LIST **, CGEN_INSN_LIST *));
+static void              build_dis_hash_table PARAMS ((CGEN_CPU_DESC));
+     
 /* Subroutine of build_dis_hash_table to add INSNS to the hash table.
 
    COUNT is the number of elements in INSNS.

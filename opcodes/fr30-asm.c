@@ -35,14 +35,21 @@ along with this program; if not, write to the Free Software Foundation, Inc.,
 #include "fr30-opc.h"
 #include "opintl.h"
 #include "xregex.h"
+#include "libiberty.h"
 
 #undef min
 #define min(a,b) ((a) < (b) ? (a) : (b))
 #undef max
 #define max(a,b) ((a) > (b) ? (a) : (b))
 
-static const char * parse_insn_normal
-     PARAMS ((CGEN_CPU_DESC, const CGEN_INSN *, const char **, CGEN_FIELDS *));
+static const char * parse_insn_normal          PARAMS ((CGEN_CPU_DESC, const CGEN_INSN *, const char **, CGEN_FIELDS *));
+static int parse_register_number               PARAMS ((const char **));
+static const char * parse_register_list        PARAMS ((CGEN_CPU_DESC, const char **, int, unsigned long *, int, int));
+static const char * parse_low_register_list_ld PARAMS ((CGEN_CPU_DESC, const char **, int, unsigned long *));
+static const char * parse_hi_register_list_ld  PARAMS ((CGEN_CPU_DESC, const char **, int, unsigned long *));
+static const char * parse_low_register_list_st PARAMS ((CGEN_CPU_DESC, const char **, int, unsigned long *));
+static const char * parse_hi_register_list_st  PARAMS ((CGEN_CPU_DESC, const char **, int, unsigned long *));
+       const char * fr30_cgen_parse_operand    PARAMS ((CGEN_CPU_DESC, int, const char **, CGEN_FIELDS *));
 
 /* -- assembler routines inserted here */
 
@@ -70,9 +77,9 @@ parse_register_number (strp)
 
 static const char *
 parse_register_list (cd, strp, opindex, valuep, high_low, load_store)
-     CGEN_CPU_DESC cd;
+     CGEN_CPU_DESC cd ATTRIBUTE_UNUSED;
      const char **strp;
-     int opindex;
+     int opindex ATTRIBUTE_UNUSED;
      unsigned long *valuep;
      int high_low;   /* 0 == high, 1 == low */
      int load_store; /* 0 == load, 1 == store */
@@ -168,8 +175,7 @@ parse_hi_register_list_st (cd, strp, opindex, valuep)
 
    This function could be moved into `parse_insn_normal', but keeping it
    separate makes clear the interface between `parse_insn_normal' and each of
-   the handlers.
-*/
+   the handlers.  */
 
 const char *
 fr30_cgen_parse_operand (cd, opindex, strp, fields)
@@ -344,7 +350,7 @@ char *
 fr30_cgen_build_insn_regex (insn)
      CGEN_INSN *insn;
 {  
-  CGEN_OPCODE *opc = CGEN_INSN_OPCODE (insn);
+  CGEN_OPCODE *opc = (CGEN_OPCODE *) CGEN_INSN_OPCODE (insn);
   const char *mnem = CGEN_INSN_MNEMONIC (insn);
   int mnem_len;
   char rxbuf[CGEN_MAX_RX_ELEMENTS];

@@ -48,7 +48,6 @@ static const char * insert_normal
 static const char * insert_insn_normal
      PARAMS ((CGEN_CPU_DESC, const CGEN_INSN *,
 	      CGEN_FIELDS *, CGEN_INSN_BYTES_PTR, bfd_vma));
-
 static int extract_normal
      PARAMS ((CGEN_CPU_DESC, CGEN_EXTRACT_INFO *, CGEN_INSN_INT,
 	      unsigned int, unsigned int, unsigned int, unsigned int,
@@ -56,8 +55,30 @@ static int extract_normal
 static int extract_insn_normal
      PARAMS ((CGEN_CPU_DESC, const CGEN_INSN *, CGEN_EXTRACT_INFO *,
 	      CGEN_INSN_INT, CGEN_FIELDS *, bfd_vma));
+#if CGEN_INT_INSN_P
 static void put_insn_int_value
      PARAMS ((CGEN_CPU_DESC, CGEN_INSN_BYTES_PTR, int, int, CGEN_INSN_INT));
+#endif
+static CGEN_INLINE int fill_cache
+     PARAMS ((CGEN_CPU_DESC, CGEN_EXTRACT_INFO *, int, int, bfd_vma));
+static CGEN_INLINE long extract_1
+     PARAMS ((CGEN_CPU_DESC, CGEN_EXTRACT_INFO *, int, int, int, unsigned char *,
+	      bfd_vma));
+static CGEN_INLINE void insert_1
+     PARAMS ((CGEN_CPU_DESC, unsigned long, int, int, int, unsigned char *));
+const char * fr30_cgen_insert_operand
+     PARAMS ((CGEN_CPU_DESC, int, CGEN_FIELDS *, CGEN_INSN_BYTES_PTR, bfd_vma));
+int fr30_cgen_extract_operand
+     PARAMS ((CGEN_CPU_DESC, int, CGEN_EXTRACT_INFO *, CGEN_INSN_INT, CGEN_FIELDS *,
+	      bfd_vma));
+int fr30_cgen_get_int_operand
+     PARAMS ((CGEN_CPU_DESC, int, const CGEN_FIELDS *));
+bfd_vma fr30_cgen_get_vma_operand
+     PARAMS ((CGEN_CPU_DESC, int, const CGEN_FIELDS *));
+void fr30_cgen_set_int_operand
+     PARAMS ((CGEN_CPU_DESC, int, CGEN_FIELDS *, int));
+void fr30_cgen_set_vma_operand
+     PARAMS ((CGEN_CPU_DESC, int, CGEN_FIELDS *, bfd_vma));
 
 
 /* Operand insertion.  */
@@ -248,7 +269,7 @@ insert_insn_normal (cd, insn, fields, buffer, pc)
 #else
 
   cgen_put_insn_value (cd, buffer, min (cd->base_insn_bitsize,
-					CGEN_FIELDS_BITSIZE (fields)),
+					(unsigned) CGEN_FIELDS_BITSIZE (fields)),
 		       value);
 
 #endif /* ! CGEN_INT_INSN_P */
@@ -274,6 +295,7 @@ insert_insn_normal (cd, insn, fields, buffer, pc)
   return NULL;
 }
 
+#if CGEN_INT_INSN_P
 /* Cover function to store an insn value into an integral insn.  Must go here
  because it needs <prefix>-desc.h for CGEN_INT_INSN_P.  */
 
@@ -297,6 +319,7 @@ put_insn_int_value (cd, buf, length, insn_length, value)
       *buf = (*buf & ~(mask << shift)) | ((value & mask) << shift);
     }
 }
+#endif
 
 /* Operand extraction.  */
 
@@ -310,14 +333,14 @@ put_insn_int_value (cd, buf, length, insn_length, value)
 
 static CGEN_INLINE int
 fill_cache (cd, ex_info, offset, bytes, pc)
-     CGEN_CPU_DESC cd;
+     CGEN_CPU_DESC cd ATTRIBUTE_UNUSED;
      CGEN_EXTRACT_INFO *ex_info;
      int offset, bytes;
      bfd_vma pc;
 {
   /* It's doubtful that the middle part has already been fetched so
      we don't optimize that case.  kiss.  */
-  int mask;
+  unsigned int mask;
   disassemble_info *info = (disassemble_info *) ex_info->dis_info;
 
   /* First do a quick check.  */
@@ -355,10 +378,10 @@ fill_cache (cd, ex_info, offset, bytes, pc)
 static CGEN_INLINE long
 extract_1 (cd, ex_info, start, length, word_length, bufp, pc)
      CGEN_CPU_DESC cd;
-     CGEN_EXTRACT_INFO *ex_info;
+     CGEN_EXTRACT_INFO *ex_info ATTRIBUTE_UNUSED;
      int start,length,word_length;
      unsigned char *bufp;
-     bfd_vma pc;
+     bfd_vma pc ATTRIBUTE_UNUSED;
 {
   unsigned long x;
   int shift;
@@ -942,7 +965,7 @@ cgen_extract_fn * const fr30_cgen_extract_handlers[] =
 
 int
 fr30_cgen_get_int_operand (cd, opindex, fields)
-     CGEN_CPU_DESC cd;
+     CGEN_CPU_DESC cd ATTRIBUTE_UNUSED;
      int opindex;
      const CGEN_FIELDS * fields;
 {
@@ -1071,7 +1094,7 @@ fr30_cgen_get_int_operand (cd, opindex, fields)
 
 bfd_vma
 fr30_cgen_get_vma_operand (cd, opindex, fields)
-     CGEN_CPU_DESC cd;
+     CGEN_CPU_DESC cd ATTRIBUTE_UNUSED;
      int opindex;
      const CGEN_FIELDS * fields;
 {
@@ -1205,7 +1228,7 @@ fr30_cgen_get_vma_operand (cd, opindex, fields)
 
 void
 fr30_cgen_set_int_operand (cd, opindex, fields, value)
-     CGEN_CPU_DESC cd;
+     CGEN_CPU_DESC cd ATTRIBUTE_UNUSED;
      int opindex;
      CGEN_FIELDS * fields;
      int value;
@@ -1327,7 +1350,7 @@ fr30_cgen_set_int_operand (cd, opindex, fields, value)
 
 void
 fr30_cgen_set_vma_operand (cd, opindex, fields, value)
-     CGEN_CPU_DESC cd;
+     CGEN_CPU_DESC cd ATTRIBUTE_UNUSED;
      int opindex;
      CGEN_FIELDS * fields;
      bfd_vma value;

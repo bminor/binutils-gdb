@@ -38,19 +38,20 @@ along with this program; if not, write to the Free Software Foundation, Inc.,
 /* Default text to print if an instruction isn't recognized.  */
 #define UNKNOWN_INSN_MSG _("*unknown*")
 
-static void print_normal
-     PARAMS ((CGEN_CPU_DESC, PTR, long, unsigned int, bfd_vma, int));
-static void print_address
-     PARAMS ((CGEN_CPU_DESC, PTR, bfd_vma, unsigned int, bfd_vma, int));
-static void print_keyword
-     PARAMS ((CGEN_CPU_DESC, PTR, CGEN_KEYWORD *, long, unsigned int));
-static void print_insn_normal
-     PARAMS ((CGEN_CPU_DESC, PTR, const CGEN_INSN *, CGEN_FIELDS *,
-	      bfd_vma, int));
-static int print_insn PARAMS ((CGEN_CPU_DESC, bfd_vma,
-			       disassemble_info *, char *, int));
-static int default_print_insn
-     PARAMS ((CGEN_CPU_DESC, bfd_vma, disassemble_info *));
+static void print_normal               PARAMS ((CGEN_CPU_DESC, PTR, long, unsigned, bfd_vma, int));
+static void print_address              PARAMS ((CGEN_CPU_DESC, PTR, bfd_vma, unsigned, bfd_vma, int));
+static void print_keyword              PARAMS ((CGEN_CPU_DESC, PTR, CGEN_KEYWORD *, long, unsigned));
+static void print_insn_normal          PARAMS ((CGEN_CPU_DESC, PTR, const CGEN_INSN *, CGEN_FIELDS *, bfd_vma, int));
+static int  print_insn                 PARAMS ((CGEN_CPU_DESC, bfd_vma, disassemble_info *, char *, int));
+static int  default_print_insn         PARAMS ((CGEN_CPU_DESC, bfd_vma, disassemble_info *));
+static void print_register_list        PARAMS ((PTR, long, long, int));
+static void print_hi_register_list_ld  PARAMS ((CGEN_CPU_DESC, PTR, long, unsigned, bfd_vma, int));
+static void print_low_register_list_ld PARAMS ((CGEN_CPU_DESC, PTR, long, unsigned, bfd_vma, int));
+static void print_hi_register_list_st  PARAMS ((CGEN_CPU_DESC, PTR, long, unsigned, bfd_vma, int));
+static void print_low_register_list_st PARAMS ((CGEN_CPU_DESC, PTR, long, unsigned, bfd_vma, int));
+static void print_m4                   PARAMS ((CGEN_CPU_DESC, PTR, long, unsigned, bfd_vma, int));
+       void fr30_cgen_print_operand    PARAMS ((CGEN_CPU_DESC, int, PTR, CGEN_FIELDS *, void const *, bfd_vma, int));
+static int  read_insn                  PARAMS ((CGEN_CPU_DESC, bfd_vma, disassemble_info *, char *, int, CGEN_EXTRACT_INFO *, unsigned long *));
 
 /* -- disassembler routines inserted here */
 
@@ -96,60 +97,60 @@ print_register_list (dis_info, value, offset, load_store)
 
 static void
 print_hi_register_list_ld (cd, dis_info, value, attrs, pc, length)
-     CGEN_CPU_DESC cd;
+     CGEN_CPU_DESC cd ATTRIBUTE_UNUSED;
      PTR dis_info;
      long value;
-     unsigned int attrs;
-     bfd_vma pc;
-     int length;
+     unsigned int attrs ATTRIBUTE_UNUSED;
+     bfd_vma pc ATTRIBUTE_UNUSED;
+     int length ATTRIBUTE_UNUSED;
 {
   print_register_list (dis_info, value, 8, 0/*load*/);
 }
 
 static void
 print_low_register_list_ld (cd, dis_info, value, attrs, pc, length)
-     CGEN_CPU_DESC cd;
+     CGEN_CPU_DESC cd ATTRIBUTE_UNUSED;
      PTR dis_info;
      long value;
-     unsigned int attrs;
-     bfd_vma pc;
-     int length;
+     unsigned int attrs ATTRIBUTE_UNUSED;
+     bfd_vma pc ATTRIBUTE_UNUSED;
+     int length ATTRIBUTE_UNUSED;
 {
   print_register_list (dis_info, value, 0, 0/*load*/);
 }
 
 static void
 print_hi_register_list_st (cd, dis_info, value, attrs, pc, length)
-     CGEN_CPU_DESC cd;
+     CGEN_CPU_DESC cd ATTRIBUTE_UNUSED;
      PTR dis_info;
      long value;
-     unsigned int attrs;
-     bfd_vma pc;
-     int length;
+     unsigned int attrs ATTRIBUTE_UNUSED;
+     bfd_vma pc ATTRIBUTE_UNUSED;
+     int length ATTRIBUTE_UNUSED;
 {
   print_register_list (dis_info, value, 8, 1/*store*/);
 }
 
 static void
 print_low_register_list_st (cd, dis_info, value, attrs, pc, length)
-     CGEN_CPU_DESC cd;
+     CGEN_CPU_DESC cd ATTRIBUTE_UNUSED;
      PTR dis_info;
      long value;
-     unsigned int attrs;
-     bfd_vma pc;
-     int length;
+     unsigned int attrs ATTRIBUTE_UNUSED;
+     bfd_vma pc ATTRIBUTE_UNUSED;
+     int length ATTRIBUTE_UNUSED;
 {
   print_register_list (dis_info, value, 0, 1/*store*/);
 }
 
 static void
 print_m4 (cd, dis_info, value, attrs, pc, length)
-     CGEN_CPU_DESC cd;
+     CGEN_CPU_DESC cd ATTRIBUTE_UNUSED;
      PTR dis_info;
      long value;
-     unsigned int attrs;
-     bfd_vma pc;
-     int length;
+     unsigned int attrs ATTRIBUTE_UNUSED;
+     bfd_vma pc ATTRIBUTE_UNUSED;
+     int length ATTRIBUTE_UNUSED;
 {
   disassemble_info *info = (disassemble_info *) dis_info;
   (*info->fprintf_func) (info->stream, "%ld", value);
@@ -178,7 +179,7 @@ fr30_cgen_print_operand (cd, opindex, xinfo, fields, attrs, pc, length)
      int opindex;
      PTR xinfo;
      CGEN_FIELDS *fields;
-     void const *attrs;
+     void const *attrs ATTRIBUTE_UNUSED;
      bfd_vma pc;
      int length;
 {
@@ -458,7 +459,7 @@ print_insn_normal (cd, dis_info, insn, fields, pc, length)
    Returns 0 if all is well, non-zero otherwise.  */
 static int
 read_insn (cd, pc, info, buf, buflen, ex_info, insn_value)
-     CGEN_CPU_DESC cd;
+     CGEN_CPU_DESC cd ATTRIBUTE_UNUSED;
      bfd_vma pc;
      disassemble_info *info;
      char *buf;
@@ -537,7 +538,7 @@ print_insn (cd, pc, info, buf, buflen)
       /* Base size may exceed this instruction's size.  Extract the
          relevant part from the buffer. */
       if ((CGEN_INSN_BITSIZE (insn) / 8) < buflen &&
-	  (CGEN_INSN_BITSIZE (insn) / 8) <= sizeof (unsigned long))
+	  (unsigned) (CGEN_INSN_BITSIZE (insn) / 8) <= sizeof (unsigned long))
 	insn_value_cropped = bfd_get_bits (buf, CGEN_INSN_BITSIZE (insn), 
 					   info->endian == BFD_ENDIAN_BIG);
       else
@@ -552,8 +553,8 @@ print_insn (cd, pc, info, buf, buflen)
 
 	  /* Make sure the entire insn is loaded into insn_value, if it
 	     can fit.  */
-	  if (CGEN_INSN_BITSIZE (insn) > cd->base_insn_bitsize &&
-	      (CGEN_INSN_BITSIZE (insn) / 8) <= sizeof (unsigned long))
+	  if ((unsigned) CGEN_INSN_BITSIZE (insn) > cd->base_insn_bitsize &&
+	      (unsigned) (CGEN_INSN_BITSIZE (insn) / 8) <= sizeof (unsigned long))
 	    {
 	      unsigned long full_insn_value;
 	      int rc = read_insn (cd, pc, info, buf,
