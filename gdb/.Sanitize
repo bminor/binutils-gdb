@@ -29,7 +29,9 @@ else
 	fi
 fi
 
-gdbtk_files="gdbtk.c gdbtk.tcl"
+# mswin gdb is not really gdbtk, but is close enough for now.
+
+gdbtk_files="gdbtk.c gdbtk.tcl mswin"
 
 if ( echo $* | grep keep\-gdbtk > /dev/null ) ; then
 	keep_these_too="${gdbtk_files} ${keep_these_too}"
