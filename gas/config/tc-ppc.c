@@ -3125,8 +3125,6 @@ ppc_pe_section (ignore)
   segT sec;
   int align;
 
-  align = 4; /* default alignment to 16 byte boundary */
-
   section_name = input_line_pointer;
   c = get_symbol_end ();
 
@@ -3139,6 +3137,29 @@ ppc_pe_section (ignore)
 
   exp = 0;
   flags = SEC_NO_FLAGS;
+
+  if (strcmp (name, ".idata$2") == 0)
+    {
+      align = 0;
+    }
+  else if (strcmp (name, ".idata$3") == 0)
+    {
+      align = 0;
+    }
+  else if (strcmp (name, ".idata$4") == 0)
+    {
+      align = 2;
+    }
+  else if (strcmp (name, ".idata$5") == 0)
+    {
+      align = 2;
+    }
+  else if (strcmp (name, ".idata$6") == 0)
+    {
+      align = 1;
+    }
+  else
+    align = 4; /* default alignment to 16 byte boundary */
 
   if (*input_line_pointer == ',')
     {

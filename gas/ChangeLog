@@ -1,3 +1,8 @@
+Thu Nov 30 13:25:49 1995  Kim Knuttila  <krk@cygnus.com>
+
+	* config/tc-ppc.c (ppc_pe_section): To get the alignment right for
+	the various idata sections, we check the name on the .section pseudo.
+
 Thu Nov 30 11:23:42 1995  Manfred Hollstein KS/EF4A 60/1F/110 #40283  <manfred@lts.sel.alcatel.de>
 
 	* config/obj-coff.c (fixup_segment): If TC_M88K is defined, do not
