@@ -571,23 +571,22 @@ static CORE_ADDR
 i386_analyze_register_saves (CORE_ADDR pc, CORE_ADDR current_pc,
 			     struct i386_frame_cache *cache)
 {
-  if (cache->locals >= 0)
+  CORE_ADDR offset = 0;
+  unsigned char op;
+  int i;
+
+  if (cache->locals > 0)
+    offset -= cache->locals;
+  for (i = 0; i < 8 && pc < current_pc; i++)
     {
-      CORE_ADDR offset;
-      unsigned char op;
-      int i;
+      op = read_memory_unsigned_integer (pc, 1);
+      if (op < 0x50 || op > 0x57)
+	break;
 
-      offset = - 4 - cache->locals;
-      for (i = 0; i < 8 && pc < current_pc; i++)
-	{
-	  op = read_memory_unsigned_integer (pc, 1);
-	  if (op < 0x50 || op > 0x57)
-	    break;
-
-	  cache->saved_regs[op - 0x50] = offset;
-	  offset -= 4;
-	  pc++;
-	}
+      offset -= 4;
+      cache->saved_regs[op - 0x50] = offset;
+      cache->sp_offset += 4;
+      pc++;
     }
 
   return pc;

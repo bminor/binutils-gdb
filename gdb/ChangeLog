@@ -1,3 +1,9 @@
+2003-08-18  Mark Kettenis  <kettenis@gnu.org>
+
+	* i386-tdep.c (i386_analyze_register_saves): Handle register saves
+	at the start of a frameless function.  This probably fixes PR
+	backtrace/1338.
+
 2003-08-18  Michal Ludvig  <mludvig@suse.cz>
 
 	* config/i386/nm-x86-64linux.h (LINUX_CHILD_POST_STARTUP_INFERIOR):
