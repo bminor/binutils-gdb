@@ -1,3 +1,7 @@
+Fri Jun 21 17:40:56 1996  Joel Sherrill  <joel@merlin.gcs.redstone.army.mil>
+
+	* configure.tgt: Add support for *-*-rtems* configurations.
+
 Fri Jun 21 13:05:51 1996  Richard Henderson  <rth@tamu.edu>
 
 	* configure.tgt (alpha-*-linuxecoff*): New target.
