@@ -1556,7 +1556,7 @@ som_solib_restart ()
   /* Before the shlib info vanishes, use it to disable any breakpoints
      that may still be active in those shlibs.
      */
-  disable_breakpoints_in_shlibs ();
+  disable_breakpoints_in_shlibs (0);
 
   /* Discard all the shlib descriptors.
      */

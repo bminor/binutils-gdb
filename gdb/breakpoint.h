@@ -577,7 +577,7 @@ extern void create_solib_event_breakpoint PARAMS ((CORE_ADDR));
 
 extern void remove_solib_event_breakpoints PARAMS ((void));
 
-extern void disable_breakpoints_in_shlibs PARAMS ((void));
+extern void disable_breakpoints_in_shlibs PARAMS ((int silent));
 
 extern void re_enable_breakpoints_in_shlibs PARAMS ((void));
 

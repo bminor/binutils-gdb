@@ -3122,7 +3122,8 @@ create_solib_event_breakpoint (address)
 }
 
 void
-disable_breakpoints_in_shlibs ()
+disable_breakpoints_in_shlibs (silent)
+     int silent;
 {
   struct breakpoint *  b;
   int  disabled_shlib_breaks = 0;
@@ -3139,17 +3140,20 @@ disable_breakpoints_in_shlibs ()
           PC_SOLIB (b->address))
         {
           b->enable = shlib_disabled;
-          if (!disabled_shlib_breaks)
-            {
-              target_terminal_ours_for_output ();
-              printf_filtered ("Temporarily disabling shared library breakpoints:\n");
-            }
-          disabled_shlib_breaks = 1;
-          printf_filtered ("%d ", b->number);
+	  if (!silent)
+	    {
+	      if (!disabled_shlib_breaks)
+		{
+		  target_terminal_ours_for_output ();
+		  printf_filtered ("Temporarily disabling shared library breakpoints:\n");
+		}
+	      disabled_shlib_breaks = 1;
+	      printf_filtered ("%d ", b->number);
+	    }
         }
 #endif
     }
-  if (disabled_shlib_breaks)
+  if (disabled_shlib_breaks && !silent)
     printf_filtered ("\n");
 }
 

@@ -835,6 +835,8 @@ clear_solib()
   struct so_list *next;
   char *bfd_filename;
   
+  disable_breakpoints_in_shlibs (1);
+
   while (so_list_head)
     {
       if (so_list_head -> sections)
@@ -851,7 +853,7 @@ clear_solib()
       else
 	/* This happens for the executable on SVR4.  */
 	bfd_filename = NULL;
-      
+
       next = so_list_head -> next;
       if (bfd_filename)
 	free ((PTR)bfd_filename);

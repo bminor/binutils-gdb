@@ -1,5 +1,15 @@
 Tue Jan 19 10:27:23 1999  David Taylor  <taylor@texas.cygnus.com>
 
+	* breakpoint.c (disable_breakpoints_in_shlibs): new parameter,
+	silent, controls whether to print message about removal of shared
+	library breakpoints.
+	* breakpoint.h (disable_breakpoints_in_shlibs): decl updated.
+	* irix5-nat.c (clear_solib): call disable_breakpoints_in_shlibs.
+	* osfsolib.c (clear_solib): ditto.
+	* solib.c (clear_solib): ditto.
+	* somsolib.c (som_solib_restart): update call to
+	disable_breakpoints_in_shlibs.
+
 	* target.h (child_post_attach): only declare if CHILD_POST_ATTACH
 	is define.
 

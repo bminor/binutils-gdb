@@ -1083,6 +1083,8 @@ clear_solib()
   struct so_list *next;
   char *bfd_filename;
   
+  disable_breakpoints_in_shlibs (1);
+
   while (so_list_head)
     {
       if (so_list_head -> sections)
