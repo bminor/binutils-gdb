@@ -233,12 +233,6 @@ sim_open (kind, cb, abfd, argv)
   STATE_WATCHPOINTS (sd)->sizeof_pc = sizeof (PC);
   STATE_WATCHPOINTS (sd)->interrupt_handler = do_interrupt;
   STATE_WATCHPOINTS (sd)->interrupt_names = interrupt_names;
-  /* start-sanitize-v850e */
-  STATE_ARCHITECTURE (sd) = bfd_lookup_arch (bfd_arch_v850, bfd_mach_v850e);
-  /* end-sanitize-v850e */
-  /* start-sanitize-v850eq */
-  STATE_ARCHITECTURE (sd) = bfd_lookup_arch (bfd_arch_v850, bfd_mach_v850eq);
-  /* end-sanitize-v850eq */
 
   if (sim_pre_argv_init (sd, argv[0]) != SIM_RC_OK)
     return 0;
@@ -409,6 +403,13 @@ sim_create_inferior (sd, prog_bfd, argv, env)
   memset (&State, 0, sizeof (State));
   if (prog_bfd != NULL)
     PC = bfd_get_start_address (prog_bfd);
+  /* start-sanitize-v850eq */
+  /* For v850eq, set PSW[US] by default */
+  if (STATE_ARCHITECTURE (sd) != NULL
+      && STATE_ARCHITECTURE (sd)->arch == bfd_arch_v850
+      && STATE_ARCHITECTURE (sd)->mach == bfd_mach_v850eq)
+    PSW |= PSW_US;
+  /* end-sanitize-v850eq */
   return SIM_RC_OK;
 }
 

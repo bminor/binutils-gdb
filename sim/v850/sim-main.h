@@ -136,6 +136,9 @@ extern struct simops Simops[];
 #define CTBP  (State.sregs[20])
 /* end-sanitize-v850e */
 
+/* start-sanitize-v850eq */
+#define PSW_US BIT32 (8)
+/* end-sanitize-v850eq */
 #define PSW_NP 0x80
 #define PSW_EP 0x40
 #define PSW_ID 0x20
@@ -207,5 +210,54 @@ sim_core_read_unaligned_##LEN (STATE_CPU (simulator, 0), \
 #define store_mem(ADDR,LEN,DATA) \
 sim_core_write_unaligned_##LEN (STATE_CPU (simulator, 0), \
 				PC, sim_core_write_map, (ADDR), (DATA))
+
+
+/* Debug/tracing calls */
+
+enum op_types
+{
+  OP_UNKNOWN,
+  OP_NONE,
+  OP_TRAP,
+  OP_REG,
+  OP_REG_REG,
+  OP_REG_REG_CMP,
+  OP_REG_REG_MOVE,
+  OP_IMM_REG,
+  OP_IMM_REG_CMP,
+  OP_IMM_REG_MOVE,
+  OP_COND_BR,
+  OP_LOAD16,
+  OP_STORE16,
+  OP_LOAD32,
+  OP_STORE32,
+  OP_JUMP,
+  OP_IMM_REG_REG,
+  OP_UIMM_REG_REG,
+  OP_BIT,
+  OP_EX1,
+  OP_EX2,
+  OP_LDSR,
+  OP_STSR,
+/* start-sanitize-v850e */
+  OP_BIT_CHANGE,
+  OP_REG_REG_REG,
+  OP_REG_REG3,
+/* end-sanitize-v850e */
+/* start-sanitize-v850eq */
+  OP_IMM_REG_REG_REG,
+  OP_PUSHPOP1,
+  OP_PUSHPOP2,
+  OP_PUSHPOP3,
+/* end-sanitize-v850eq */
+};
+
+#ifdef DEBUG
+void trace_input PARAMS ((char *name, enum op_types type, int size));
+void trace_output PARAMS ((enum op_types result));
+#else
+#define trace_input(NAME, IN1, IN2)
+#define trace_output(RESULT)
+#endif
 
 #include "simops.h"

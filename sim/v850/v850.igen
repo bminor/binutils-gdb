@@ -455,7 +455,10 @@ rrrrr!0,11110,dddddd + ddddddddddddddd,0:V:::jarl
 00000000011,RRRRR:I:::jmp
 "jmp [r<reg1>]"
 {
-  COMPAT_1 (OP_60 ());
+  COMPAT_1 (0);
+  trace_input ("jmp", OP_REG, 0);
+  nia = State.regs[ reg1 ];
+  trace_output (OP_REG);
 }
 
 
@@ -884,18 +887,39 @@ rrrrr,1010,dddddd,0:IV:::sld.w
   COMPAT_1 (OP_500 ());
 }
 
+// start-sanitize-v850e
 rrrrr!0,0000110,dddd:IV:::sld.bu
 "sld.bu <disp4>[ep], r<reg2>"
 {
-  COMPAT_1 (OP_60 ());
+  unsigned long result;
+      
+  COMPAT_1 (0);
+  result = load_mem (State.regs[30] + disp4, 1);
+      
+  /* start-sanitize-v850eq */
+  if (PSW & PSW_US) {
+    trace_input ("sld.b", OP_LOAD16, 1);
+      
+    State.regs[ reg2 ] = EXTEND8 (result);
+  } else {
+  /* end-sanitize-v850eq */
+  trace_input ("sld.bu", OP_LOAD16, 1);
+  State.regs[ reg2 ] = result;
+  /* start-sanitize-v850eq */
+  }
+  /* end-sanitize-v850eq */
+  trace_output (OP_LOAD16);
 }
 
+// end-sanitize-v850e
+// start-sanitize-v850e
 rrrrr!0,0000111,dddd:IV:::sld.hu
 "sld.hu <disp5>[ep], r<reg2>"
 {
   COMPAT_1 (OP_70 ());
 }
 
+// end-sanitize-v850e
 
 
 // SST

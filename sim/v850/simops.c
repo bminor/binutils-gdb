@@ -41,44 +41,6 @@
 #include <sys/time.h>
 #endif
 
-enum op_types
-{
-  OP_UNKNOWN,
-  OP_NONE,
-  OP_TRAP,
-  OP_REG,
-  OP_REG_REG,
-  OP_REG_REG_CMP,
-  OP_REG_REG_MOVE,
-  OP_IMM_REG,
-  OP_IMM_REG_CMP,
-  OP_IMM_REG_MOVE,
-  OP_COND_BR,
-  OP_LOAD16,
-  OP_STORE16,
-  OP_LOAD32,
-  OP_STORE32,
-  OP_JUMP,
-  OP_IMM_REG_REG,
-  OP_UIMM_REG_REG,
-  OP_BIT,
-  OP_EX1,
-  OP_EX2,
-  OP_LDSR,
-  OP_STSR,
-/* start-sanitize-v850e */
-  OP_BIT_CHANGE,
-  OP_REG_REG_REG,
-  OP_REG_REG3,
-/* end-sanitize-v850e */
-/* start-sanitize-v850eq */
-  OP_IMM_REG_REG_REG,
-  OP_PUSHPOP1,
-  OP_PUSHPOP2,
-  OP_PUSHPOP3,
-/* end-sanitize-v850eq */
-};
-
 /* start-sanitize-v850e */
 /* This is an array of the bit positions of registers r20 .. r31 in that order in a prepare/dispose instruction.  */
 static int type1_regs[12] = { 27, 26, 25, 24, 31, 30, 29, 28, 23, 22, 0, 21 };
@@ -91,9 +53,6 @@ static int type3_regs[15] = { 2, 1, 0, 27, 26, 25, 24, 31, 30, 29, 28, 23, 22, 2
 /* end-sanitize-v850eq */
 
 #ifdef DEBUG
-static void trace_input PARAMS ((char *name, enum op_types type, int size));
-static void trace_output PARAMS ((enum op_types result));
-
 #ifndef SIZE_INSTRUCTION
 #define SIZE_INSTRUCTION 6
 #endif
@@ -111,7 +70,7 @@ static void trace_output PARAMS ((enum op_types result));
 #endif
 
 
-static void
+void
 trace_input (name, type, size)
      char *name;
      enum op_types type;
@@ -173,268 +132,127 @@ trace_input (name, type, size)
 		SIZE_LOCATION, SIZE_LOCATION, buf,
 		SIZE_INSTRUCTION, name);
 
-#if 0
   switch (type)
     {
     default:
     case OP_UNKNOWN:
     case OP_NONE:
-      strcpy (buf, "unknown");
-      break;
-
     case OP_TRAP:
-      sprintf (buf, "%ld", OP[0]);
+      num_values = 0;
       break;
-
+      
     case OP_REG:
-      sprintf (buf, "r%ld", OP[0]);
+    case OP_REG_REG_MOVE:
+      values[0] = State.regs[OP[0]];
+      num_values = 1;
       break;
-
+      
+      /* start-sanitize-v850e */
+    case OP_BIT_CHANGE:
+      /* end-sanitize-v850e */
     case OP_REG_REG:
     case OP_REG_REG_CMP:
-    case OP_REG_REG_MOVE:
-      sprintf (buf, "r%ld,r%ld", OP[0], OP[1]);
+      values[0] = State.regs[OP[1]];
+      values[1] = State.regs[OP[0]];
+      num_values = 2;
       break;
-
+      
     case OP_IMM_REG:
     case OP_IMM_REG_CMP:
+      values[0] = SEXT5 (OP[0]);
+      values[1] = OP[1];
+      num_values = 2;
+      break;
+      
     case OP_IMM_REG_MOVE:
-      sprintf (buf, "%ld,r%ld", OP[0], OP[1]);
+      values[0] = SEXT5 (OP[0]);
+      num_values = 1;
       break;
-
+      
     case OP_COND_BR:
-      sprintf (buf, "%ld", SEXT9 (OP[0]));
+      values[0] = State.pc;
+      values[1] = SEXT9 (OP[0]);
+      values[2] = PSW;
+      num_values = 3;
       break;
-
+      
     case OP_LOAD16:
-      sprintf (buf, "%ld[r30],r%ld", OP[1] * size, OP[0]);
+      values[0] = OP[1] * size;
+      values[1] = State.regs[30];
+      num_values = 2;
       break;
-
+      
     case OP_STORE16:
-      sprintf (buf, "r%ld,%ld[r30]", OP[0], OP[1] * size);
+      values[0] = State.regs[OP[0]];
+      values[1] = OP[1] * size;
+      values[2] = State.regs[30];
+      num_values = 3;
       break;
-
+      
     case OP_LOAD32:
-      sprintf (buf, "%ld[r%ld],r%ld", EXTEND16 (OP[2]) & ~0x1, OP[0], OP[1]);
+      values[0] = EXTEND16 (OP[2]);
+      values[1] = State.regs[OP[0]];
+      num_values = 2;
       break;
-
+      
     case OP_STORE32:
-      sprintf (buf, "r%ld,%ld[r%ld]", OP[1], EXTEND16 (OP[2] & ~0x1), OP[0]);
+      values[0] = State.regs[OP[1]];
+      values[1] = EXTEND16 (OP[2]);
+      values[2] = State.regs[OP[0]];
+      num_values = 3;
       break;
-
+      
     case OP_JUMP:
-      sprintf (buf, "%ld,r%ld", SEXT22 (OP[0]), OP[1]);
+      values[0] = SEXT22 (OP[0]);
+      values[1] = State.pc;
+      num_values = 2;
       break;
-
+      
     case OP_IMM_REG_REG:
-      sprintf (buf, "%ld,r%ld,r%ld", EXTEND16 (OP[0]), OP[1], OP[2]);
+      values[0] = EXTEND16 (OP[0]) << size;
+      values[1] = State.regs[OP[1]];
+      num_values = 2;
       break;
-
+      
     case OP_UIMM_REG_REG:
-      sprintf (buf, "%ld,r%ld,r%ld", OP[0] & 0xffff, OP[1], OP[2]);
+      values[0] = (OP[0] & 0xffff) << size;
+      values[1] = State.regs[OP[1]];
+      num_values = 2;
       break;
-
+      
     case OP_BIT:
-      sprintf (buf, "%ld,%ld[r%ld]", OP[1] & 0x7, EXTEND16 (OP[2]), OP[0]);
+      num_values = 0;
       break;
-
+      
     case OP_EX1:
-      {
-	char *cond;
-	switch (OP[0] & 0xf)
-	  {
-	  default:  cond = "?";	break;
-	  case 0x0: cond = "v";	break;
-	  case 0x1: cond = "c";	break;
-	  case 0x2: cond = "z";	break;
-	  case 0x3: cond = "nh";	break;
-	  case 0x4: cond = "s";	break;
-	  case 0x5: cond = "t";	break;
-	  case 0x6: cond = "lt";	break;
-	  case 0x7: cond = "le";	break;
-	  case 0x8: cond = "nv";	break;
-	  case 0x9: cond = "nc";	break;
-	  case 0xa: cond = "nz";	break;
-	  case 0xb: cond = "h";	break;
-	  case 0xc: cond = "ns";	break;
-	  case 0xd: cond = "sa";	break;
-	  case 0xe: cond = "ge";	break;
-	  case 0xf: cond = "gt";	break;
-	  }
-	sprintf (buf, "%s,r%ld", cond, OP[1]);
-	break;
-      }
-
+      values[0] = PSW;
+      num_values = 1;
+      break;
+      
     case OP_EX2:
-      strcpy (buf, "EX2");
+      num_values = 0;
       break;
-
+      
     case OP_LDSR:
+      values[0] = State.regs[OP[0]];
+      num_values = 1;
+      break;
+      
     case OP_STSR:
-      sprintf (buf, "r%ld,s%ld", OP[0], OP[1]);
-      break;
-
-    case OP_PUSHPOP1:
-      for (i = 0; i < 12; i++)
-	if (OP[3] & (1 << type1_regs[i]))
-	  sprintf (strchr (buf, 0), "r%d ", i + 20);
-      break;
-
-    case OP_PUSHPOP2:
-      for (i = 0; i < 16; i++)
-	if (OP[3] & (1 << type2_regs[i]))
-	  sprintf (strchr (buf, 0), "r%d ", i + 16);
-      if (OP[3] & (1 << 19))
-	strcat (buf, "F/EIPC, F/EIPSW " );
-      break;
-
-    case OP_PUSHPOP3:
-      for (i = 0; i < 15; i++)
-	if (OP[3] & (1 << type3_regs[i]))
-	  sprintf (strchr (buf, 0), "r%d ", i + 1);
-      if (OP[3] & (1 << 3))
-	strcat (buf, "PSW " );
-      if (OP[3] & (1 << 19))
-	strcat (buf, "F/EIPC, F/EIPSW " );
-      break;
-
-    case OP_BIT_CHANGE:
-      sprintf (buf, "r%ld, [r%ld]", OP[1], OP[0] );
-      break;
+      values[0] = State.sregs[OP[1]];
+      num_values = 1;
     }
-#endif
-
-  if (!TRACE_ALU_P (STATE_CPU (simulator, 0)))
-    {
-      trace_printf (simulator, STATE_CPU (simulator, 0),
-		    "%s\n", buf);
-    }
-  else
-    {
-#if 0
-      trace_printf (simulator, STATE_CPU (simulator, 0),
-		    "%-*s", SIZE_OPERANDS, buf);
-#endif
-      switch (type)
-	{
-	default:
-	case OP_UNKNOWN:
-	case OP_NONE:
-	case OP_TRAP:
-	  num_values = 0;
-	  break;
-
-	case OP_REG:
-	case OP_REG_REG_MOVE:
-	  values[0] = State.regs[OP[0]];
-	  num_values = 1;
-	  break;
-
-	case OP_BIT_CHANGE:
-	case OP_REG_REG:
-	case OP_REG_REG_CMP:
-	  values[0] = State.regs[OP[1]];
-	  values[1] = State.regs[OP[0]];
-	  num_values = 2;
-	  break;
-
-	case OP_IMM_REG:
-	case OP_IMM_REG_CMP:
-	  values[0] = SEXT5 (OP[0]);
-	  values[1] = OP[1];
-	  num_values = 2;
-	  break;
-
-	case OP_IMM_REG_MOVE:
-	  values[0] = SEXT5 (OP[0]);
-	  num_values = 1;
-	  break;
-
-	case OP_COND_BR:
-	  values[0] = State.pc;
-	  values[1] = SEXT9 (OP[0]);
-	  values[2] = PSW;
-	  num_values = 3;
-	  break;
-
-	case OP_LOAD16:
-	  values[0] = OP[1] * size;
-	  values[1] = State.regs[30];
-	  num_values = 2;
-	  break;
-
-	case OP_STORE16:
-	  values[0] = State.regs[OP[0]];
-	  values[1] = OP[1] * size;
-	  values[2] = State.regs[30];
-	  num_values = 3;
-	  break;
-
-	case OP_LOAD32:
-	  values[0] = EXTEND16 (OP[2]);
-	  values[1] = State.regs[OP[0]];
-	  num_values = 2;
-	  break;
-
-	case OP_STORE32:
-	  values[0] = State.regs[OP[1]];
-	  values[1] = EXTEND16 (OP[2]);
-	  values[2] = State.regs[OP[0]];
-	  num_values = 3;
-	  break;
-
-	case OP_JUMP:
-	  values[0] = SEXT22 (OP[0]);
-	  values[1] = State.pc;
-	  num_values = 2;
-	  break;
-
-	case OP_IMM_REG_REG:
-	  values[0] = EXTEND16 (OP[0]) << size;
-	  values[1] = State.regs[OP[1]];
-	  num_values = 2;
-	  break;
-
-	case OP_UIMM_REG_REG:
-	  values[0] = (OP[0] & 0xffff) << size;
-	  values[1] = State.regs[OP[1]];
-	  num_values = 2;
-	  break;
-
-	case OP_BIT:
-	  num_values = 0;
-	  break;
-
-	case OP_EX1:
-	  values[0] = PSW;
-	  num_values = 1;
-	  break;
-
-	case OP_EX2:
-	  num_values = 0;
-	  break;
-
-	case OP_LDSR:
-	  values[0] = State.regs[OP[0]];
-	  num_values = 1;
-	  break;
-
-	case OP_STSR:
-	  values[0] = State.sregs[OP[1]];
-	  num_values = 1;
-	}
-
-      for (i = 0; i < num_values; i++)
-	trace_printf (simulator, STATE_CPU (simulator, 0),
-		      "%*s0x%.8lx", SIZE_VALUES - 10, "", values[i]);
-
-      while (i++ < 3)
-	trace_printf (simulator, STATE_CPU (simulator, 0),
-		      "%*s", SIZE_VALUES, "");
-    }
+  
+  for (i = 0; i < num_values; i++)
+    trace_printf (simulator, STATE_CPU (simulator, 0),
+		  "%*s0x%.8lx", SIZE_VALUES - 10, "", values[i]);
+  
+  while (i++ < 3)
+    trace_printf (simulator, STATE_CPU (simulator, 0),
+		  "%*s", SIZE_VALUES, "");
 }
 
-static void
+void
 trace_output (result)
      enum op_types result;
 {
@@ -495,12 +313,6 @@ trace_output (result)
     }
 }
 
-#else
-#define trace_input(NAME, IN1, IN2)
-#define trace_output(RESULT)
-
-/* #define trace_input(NAME, IN1, IN2) fprintf (stderr, NAME "\n" ); */
-
 #endif
 
 
@@ -532,6 +344,7 @@ condition_met (unsigned code)
   
   return 1;
 }
+/* start-sanitize-v850e */
 
 static unsigned long
 Add32 (unsigned long a1, unsigned long a2, int * carry)
@@ -605,6 +418,7 @@ Multiply64 (boolean sign, unsigned long op0)
   return;
 }
 
+/* end-sanitize-v850e */
 
 /* Read a null terminated string from memory, return in a buffer */
 static char *
@@ -980,49 +794,6 @@ int
 OP_58F ()
 {
   return branch (15);
-}
-
-/* jmp [reg1] */
-/* sld.bu disp4[ep], reg2 */
-int
-OP_60 ()
-{
-  if (OP[1] == 0)
-    {
-      trace_input ("jmp", OP_REG, 0);
-      
-      PC = State.regs[ OP[0] ];
-      
-      trace_output (OP_REG);
-
-      return 0; /* Add nothing to the PC, we have already done it.  */
-    }
-/* start-sanitize-v850e */
-  else
-    {
-      unsigned long result;
-      
-      result = load_mem (State.regs[30] + (OP[3] & 0xf), 1);
-      
-/* start-sanitize-v850eq */
-#ifdef ARCH_v850eq
-      trace_input ("sld.b", OP_LOAD16, 1);
-      
-      State.regs[ OP[1] ] = EXTEND8 (result);
-#else
-/* end-sanitize-v850eq */
-      trace_input ("sld.bu", OP_LOAD16, 1);
-      
-      State.regs[ OP[1] ] = result;
-/* start-sanitize-v850eq */
-#endif
-/* end-sanitize-v850eq */
-      
-      trace_output (OP_LOAD16);
-      
-      return 2;
-    }
-/* end-sanitize-v850e */
 }
 
 /* jarl/jr disp22, reg */
@@ -2579,6 +2350,7 @@ OP_4007E0 ()
   return 4;
 }
 
+/* start-sanitize-v850e */
 /* tst1 reg2, [reg1] */
 int
 OP_E607E0 (void)
@@ -2598,6 +2370,8 @@ OP_E607E0 (void)
   return 4;
 }
 
+/* end-sanitize-v850e */
+/* start-sanitize-v850e */
 /* mulu reg1, reg2, reg3 */
 int
 OP_22207E0 (void)
@@ -2611,6 +2385,7 @@ OP_22207E0 (void)
   return 4;
 }
 
+/* end-sanitize-v850e */
 /* start-sanitize-v850e */
 
 #define BIT_CHANGE_OP( name, binop )		\
@@ -2667,7 +2442,6 @@ OP_20007E0 (void)
   return 4;
 }
 /* end-sanitize-v850e */
-
 /* start-sanitize-v850eq */
 /* This function is courtesy of Sugimoto at NEC, via Seow Tan (Soew_Tan@el.nec.com) */
 static void
@@ -2982,8 +2756,8 @@ OP_18007E0 (void)
 
   return 4;
 }
-/* end-sanitize-v850eq */
 
+/* end-sanitize-v850eq */
 /* start-sanitize-v850e */
 /* divu  reg1, reg2, reg3 */
 int
@@ -3054,6 +2828,8 @@ OP_2C207E0 (void)
   return 4;
 }
 
+/* end-sanitize-v850e */
+/* start-sanitize-v850e */
 /* div  reg1, reg2, reg3 */
 int
 OP_2C007E0 (void)
@@ -3123,6 +2899,8 @@ OP_2C007E0 (void)
   return 4;
 }
 
+/* end-sanitize-v850e */
+/* start-sanitize-v850e */
 /* divhu  reg1, reg2, reg3 */
 int
 OP_28207E0 (void)
@@ -3192,6 +2970,8 @@ OP_28207E0 (void)
   return 4;
 }
 
+/* end-sanitize-v850e */
+/* start-sanitize-v850e */
 /* divh  reg1, reg2, reg3 */
 int
 OP_28007E0 (void)
@@ -3261,6 +3041,8 @@ OP_28007E0 (void)
   return 4;
 }
 
+/* end-sanitize-v850e */
+/* start-sanitize-v850e */
 /* mulu imm9, reg2, reg3 */
 int
 OP_24207E0 (void)
@@ -3274,6 +3056,8 @@ OP_24207E0 (void)
   return 4;
 }
 
+/* end-sanitize-v850e */
+/* start-sanitize-v850e */
 /* mul imm9, reg2, reg3 */
 int
 OP_24007E0 (void)
@@ -3287,6 +3071,8 @@ OP_24007E0 (void)
   return 4;
 }
 
+/* end-sanitize-v850e */
+/* start-sanitize-v850e */
 /* cmov imm5, reg2, reg3 */
 int
 OP_30007E0 (void)
@@ -3301,6 +3087,8 @@ OP_30007E0 (void)
   
 }
 
+/* end-sanitize-v850e */
+/* start-sanitize-v850e */
 /* ctret */
 int
 OP_14407E0 (void)
@@ -3315,6 +3103,8 @@ OP_14407E0 (void)
   return 0;
 }
 
+/* end-sanitize-v850e */
+/* start-sanitize-v850e */
 /* hsw */
 int
 OP_34407E0 (void)
@@ -3340,6 +3130,8 @@ OP_34407E0 (void)
   return 4;
 }
 
+/* end-sanitize-v850e */
+/* start-sanitize-v850e */
 #define WORDHASNULLBYTE(x) (((x) - 0x01010101) & ~(x)&0x80808080)
 
 /* bsw */
@@ -3369,6 +3161,8 @@ OP_34007E0 (void)
   return 4;
 }
 
+/* end-sanitize-v850e */
+/* start-sanitize-v850e */
 /* bsh */
 int
 OP_34207E0 (void)
@@ -3395,6 +3189,8 @@ OP_34207E0 (void)
   return 4;
 }
 
+/* end-sanitize-v850e */
+/* start-sanitize-v850e */
 /* pushml list18 */
 /* ld.hu */
 int
@@ -3456,6 +3252,8 @@ OP_107E0 (void)
   return 4;
 }
 
+/* end-sanitize-v850e */
+/* start-sanitize-v850e */
 /* prepare list12, imm5 */
 /* ld.bu */
 int
@@ -3596,6 +3394,8 @@ OP_30780 (void)
   return 4;
 }
 
+/* end-sanitize-v850e */
+/* start-sanitize-v850e */
 /* sld.hu */
 int
 OP_70 (void)
@@ -3623,6 +3423,8 @@ OP_70 (void)
   return 2;
 }
 
+/* end-sanitize-v850e */
+/* start-sanitize-v850e */
 /* cmov reg1, reg2, reg3 */
 int
 OP_32007E0 (void)
@@ -3636,6 +3438,8 @@ OP_32007E0 (void)
   return 4;
 }
 
+/* end-sanitize-v850e */
+/* start-sanitize-v850e */
 /* mul reg1, reg2, reg3 */
 int
 OP_22007E0 (void)
