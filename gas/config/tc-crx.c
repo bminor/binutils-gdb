@@ -166,7 +166,7 @@ static int     getbits		        (operand_type);
 static int     get_number_of_operands   (void);
 static void    get_operandtype	        (char *, int, ins *);
 static int     gettrap		        (char *);
-static void    handle_pi_insn	        (char *);
+static void    handle_LoadStor	        (char *);
 static int     get_cinv_parameters      (char *);
 static unsigned long getconstant        (unsigned long, int);
 static int     getreg_image	        (reg);
@@ -1667,15 +1667,26 @@ gettrap (char *s)
   return 0;
 }
 
-/* Post-Increment instructions are a sub-group within load/stor instruction
-   groups. Therefore, when parsing a Post-Increment insn, we have to advance
-   the instruction pointer to the start of that sub-group.  */
+/* Post-Increment instructions, as well as Store-Immediate instructions, are a 
+   sub-group within load/stor instruction groups. 
+   Therefore, when parsing a Post-Increment/Store-Immediate insn, we have to 
+   advance the instruction pointer to the start of that sub-group (that is, up 
+   to the first instruction of that type).
+   Otherwise, the insn will be mistakenly identified as of type LD_STOR_INS.  */
 
 static void
-handle_pi_insn (char *operands)
+handle_LoadStor (char *operands)
 {
+  /* Assuming Store-Immediate insn has the following format :
+     'MNEMONIC $DISP, ...' (e.g. 'storb $1, 12(r5)').
+     STOR_IMM_INS are the only store insns containing a dollar sign ($).  */
+  if (strstr (operands, "$") != NULL)
+    while (! IS_INSN_TYPE (STOR_IMM_INS))
+      instruction++;
+
   /* Assuming Post-Increment insn has the following format :
-     'MNEMONIC DISP(REG)+, REG' (e.g. 'loadw 12(r5)+, r6').  */
+     'MNEMONIC DISP(REG)+, REG' (e.g. 'loadw 12(r5)+, r6').
+     LD_STOR_INS_INC are the only store insns containing a plus sign (+).  */
   if (strstr (operands, ")+") != NULL)
     while (! IS_INSN_TYPE (LD_STOR_INS_INC))
       instruction++;
@@ -1700,8 +1711,8 @@ parse_insn (ins *insn, char *operands)
     }
 
   /* Handle load/stor post-increment instructions.  */
-  if (IS_INSN_TYPE (LD_STOR_INS) || IS_INSN_TYPE (STOR_IMM_INS))
-    handle_pi_insn (operands);
+  if (IS_INSN_TYPE (LD_STOR_INS))
+    handle_LoadStor (operands);
 
   if (operands != NULL)
     parse_operands (insn, operands);
