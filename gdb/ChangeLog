@@ -1,3 +1,8 @@
+2002-12-04  J. Brobecker  <brobecker@gnat.com>
+
+	* config/pa/tm-hppah.h (PC_IN_SIGTRAMP): Renamed from IN_SIGTRAMP,
+	which is an obsolete macro name.
+
 2002-12-04  Daniel Jacobowitz  <drow@mvista.com>
 
 	* doublest.c (convert_floatformat_to_doublest): Cast exp_bias to int.

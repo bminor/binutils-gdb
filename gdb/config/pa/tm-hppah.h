@@ -36,7 +36,7 @@
 /* Actually, for a PA running HPUX the kernel calls the signal handler
    without an intermediate trampoline.  Luckily the kernel always sets
    the return pointer for the signal handler to point to _sigreturn.  */
-#define IN_SIGTRAMP(pc, name) (name && STREQ ("_sigreturn", name))
+#define PC_IN_SIGTRAMP(pc, name) (name && STREQ ("_sigreturn", name))
 
 /* For HPUX:
 
