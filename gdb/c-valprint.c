@@ -1,5 +1,5 @@
 /* Support for printing C values for GDB, the GNU debugger.
-   Copyright 1986, 1988, 1989, 1991, 1992, 1993, 1994
+   Copyright 1986, 1988, 1989, 1991, 1992, 1993, 1994, 1995
              Free Software Foundation, Inc.
 
 This file is part of GDB.
@@ -39,7 +39,7 @@ cp_print_class_method PARAMS ((char *, struct type *, GDB_FILE *));
 
 extern void
 cp_print_value_fields PARAMS ((struct type *, char *, GDB_FILE *, int, int,
-			       enum val_prettyprint, struct type **));
+			       enum val_prettyprint, struct type **, int));
 
 extern int
 cp_is_vtbl_ptr_type PARAMS ((struct type *));
@@ -60,8 +60,6 @@ cp_type_print_method_args PARAMS ((struct type **, char *, char *, int,
 				   GDB_FILE *));
 /* END-FIXME */
 
-
-extern struct obstack dont_print_obstack;
 
 
 /* Print data of type TYPE located at VALADDR (within GDB), which came from
@@ -323,7 +321,7 @@ c_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
 	  break;
 	}
       cp_print_value_fields (type, valaddr, stream, format, recurse, pretty,
-			     0);
+			     NULL, 0);
       break;
 
     case TYPE_CODE_ENUM:

@@ -1,5 +1,5 @@
 /* Find a variable's value in memory, for GDB, the GNU debugger.
-   Copyright 1986, 1987, 1989, 1991 Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1989, 1991, 1994, 1995 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -25,6 +25,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "gdbcore.h"
 #include "inferior.h"
 #include "target.h"
+#include <string.h>
 
 static void write_register_pid PARAMS ((int regno, LONGEST val, int pid));
 
@@ -629,7 +630,6 @@ read_register_pid (regno, pid)
 #endif
 
 /* Store VALUE, into the raw contents of register number REGNO.  */
-/* FIXME: The val arg should probably be a LONGEST.  */
 
 void
 write_register (regno, val)

@@ -2520,7 +2520,7 @@ set_proc_siginfo (pip, signo)
 
 #ifdef PROCFS_DONT_PIOCSSIG_CURSIG
   /* With Alpha OSF/1 procfs, the kernel gets really confused if it
-     receives a PIOCSSSIG with a signal identical to the current signal,
+     receives a PIOCSSIG with a signal identical to the current signal,
      it messes up the current signal. Work around the kernel bug.  */
   if (signo == pip -> prstatus.pr_cursig)
     return;

@@ -219,7 +219,7 @@ LOCAL FUNCTION
 SYNOPSIS
 
 	void elf_symtab_read (bfd *abfd, CORE_ADDR addr,
-			      struct objfile *objfile)
+			      struct objfile *objfile, int dynamic)
 
 DESCRIPTION
 
@@ -260,7 +260,7 @@ elf_symtab_read (abfd, addr, objfile, dynamic)
   asymbol *filesym = 0;
 #ifdef SOFUN_ADDRESS_MAYBE_MISSING
   /* Name of filesym, as saved on the symbol_obstack.  */
-  char *filesymname;
+  char *filesymname = obsavestring ("", 0, &objfile->symbol_obstack);
 #endif
   struct dbx_symfile_info *dbx = (struct dbx_symfile_info *)
 				 objfile->sym_stab_info;
@@ -304,9 +304,12 @@ elf_symtab_read (abfd, addr, objfile, dynamic)
 	      continue;
 	    }
 
-	  if (sym -> section == &bfd_und_section
+	  if (dynamic
+	      && sym -> section == &bfd_und_section
 	      && (sym -> flags & BSF_FUNCTION))
 	    {
+	      struct minimal_symbol *msym;
+
 	      /* Symbol is a reference to a function defined in
 		 a shared library.
 		 If its value is non zero then it is usually the address
@@ -314,17 +317,17 @@ elf_symtab_read (abfd, addr, objfile, dynamic)
 		 relative to the base address.
 		 If its value is zero then the dynamic linker has to resolve
 		 the symbol. We are unable to find any meaningful address
-		 for this symbol in the executable file, so we skip it.
-		 Irix 5 has a zero value for all shared library functions
-		 in the main symbol table, but the dynamic symbol table
-		 provides the right values.  */
+		 for this symbol in the executable file, so we skip it.  */
 	      symaddr = sym -> value;
 	      if (symaddr == 0)
 		continue;
 	      symaddr += addr;
-	      record_minimal_symbol_and_info ((char *) sym -> name, symaddr,
-					      mst_solib_trampoline, NULL,
-					      objfile);
+	      msym = record_minimal_symbol_and_info
+		((char *) sym -> name, symaddr,
+		mst_solib_trampoline, NULL, objfile);
+#ifdef SOFUN_ADDRESS_MAYBE_MISSING
+	      msym->filename = filesymname;
+#endif
 	      continue;
 	    }
 

@@ -1,3 +1,34 @@
+Fri Mar 10 02:49:40 1995  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	Fix problems with infinite recursion when printing a class
+	that contains a static instance of the class.
+	* cp-valprint.c (dont_print_vb_obstack):  Renamed from
+	dont_print_obstack, made static.
+	(dont_print_statmem_obstack):  New obstack, controls printing
+	of static member classes.
+	(_initialize_cp_valprint):  Initialize it.
+	(cp_print_static_field):  New function, handles printing of
+	static members.
+	(cp_print_value_fields):  New parameter dont_print_statmem to
+	handle recursive printing of static member classes, use
+	cp_print_static_field to handle printing of static members.
+	* c-valprint.c (cp_print_value_fields):  Update prototype and
+	call to include additional dont_print_statmem parameter.
+	* c-valprint.c, f-valprint.c (dont_print_obstack):  Remove unused
+	extern declaration.
+
+	* alpha-tdep.c, findvar.c, infptrace.c:  Include <string.h>.
+
+	* config/alpha/tm-alpha.h (FRAME_FIND_SAVED_REGS):  Call
+	alpha_find_saved_regs if fi->saved_regs is still NULL.
+
+	* elfread.c (elf_symtab_read):  Ensure that the filename field
+	of a minsym is nonempty. Ignore solib trampoline symbols from
+	the main symbol table, they might have a bogus value.
+
+	* procfs.c (set_proc_siginfo), config/alpha/alpha-osf2.mh:
+	Fix typos in comments.
+
 Thu Mar  9 17:19:47 1995  Jim Kingdon  <kingdon@deneb.cygnus.com>
 
 	* mdebugread.c (parse_symbol, psymtab_to_symtab_1): Initialize

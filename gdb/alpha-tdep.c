@@ -1,5 +1,5 @@
 /* Target-dependent code for the ALPHA architecture, for GDB, the GNU Debugger.
-   Copyright 1993, 1994 Free Software Foundation, Inc.
+   Copyright 1993, 1994, 1995 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -27,6 +27,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "dis-asm.h"
 #include "symfile.h"
 #include "objfiles.h"
+#include <string.h>
 
 /* FIXME: Some of this code should perhaps be merged with mips-tdep.c.  */
 

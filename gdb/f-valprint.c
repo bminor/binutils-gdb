@@ -1,5 +1,5 @@
 /* Support for printing Fortran values for GDB, the GNU debugger.
-   Copyright 1993, 1994 Free Software Foundation, Inc.
+   Copyright 1993, 1994, 1995 Free Software Foundation, Inc.
    Contributed by Motorola.  Adapted from the C definitions by Farooq Butt
    (fmbutt@engage.sps.mot.com), additionally worked over by Stan Shebs.
 
@@ -32,8 +32,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "frame.h"
 #include "gdbcore.h"
 #include "command.h"
-
-extern struct obstack dont_print_obstack;
 
 extern unsigned int print_max; /* No of array elements to print */ 
 

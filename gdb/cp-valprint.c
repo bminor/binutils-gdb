@@ -1,5 +1,6 @@
 /* Support for printing C++ values for GDB, the GNU debugger.
-   Copyright 1986, 1988, 1989, 1991 Free Software Foundation, Inc.
+   Copyright 1986, 1988, 1989, 1991, 1994, 1995
+   Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -32,7 +33,13 @@ int vtblprint;			/* Controls printing of vtbl's */
 int objectprint;		/* Controls looking up an object's derived type
 				   using what we find in its vtables.  */
 static int static_field_print;	/* Controls printing of static fields. */
-struct obstack dont_print_obstack;
+
+static struct obstack dont_print_vb_obstack;
+static struct obstack dont_print_statmem_obstack;
+
+static void
+cp_print_static_field PARAMS ((struct type *, value_ptr, GDB_FILE *, int, int,
+			       enum val_prettyprint));
 
 static void
 cplus_print_value PARAMS ((struct type *, char *, GDB_FILE *, int, int,
@@ -49,8 +56,6 @@ c_type_print_varspec_prefix PARAMS ((struct type *, GDB_FILE *, int, int));
 extern void
 cp_type_print_method_args PARAMS ((struct type **, char *, char *, int,
 				   GDB_FILE *));
-
-extern struct obstack dont_print_obstack;
 
 /* END-FIXME */
 
@@ -209,16 +214,19 @@ cp_is_vtbl_member(type)
 
 void
 cp_print_value_fields (type, valaddr, stream, format, recurse, pretty,
-		       dont_print)
+		       dont_print_vb, dont_print_statmem)
      struct type *type;
      char *valaddr;
      GDB_FILE *stream;
      int format;
      int recurse;
      enum val_prettyprint pretty;
-     struct type **dont_print;
+     struct type **dont_print_vb;
+     int dont_print_statmem;
 {
   int i, len, n_baseclasses;
+  struct obstack tmp_obstack;
+  char *last_dont_print = obstack_next_free (&dont_print_statmem_obstack);
 
   check_stub_type (type);
 
@@ -230,7 +238,7 @@ cp_print_value_fields (type, valaddr, stream, format, recurse, pretty,
      duplicates of virtual baseclasses.  */
   if (n_baseclasses > 0)
     cplus_print_value (type, valaddr, stream, format, recurse+1, pretty,
-		       dont_print);
+		       dont_print_vb);
 
   if (!len && n_baseclasses == 1)
     fprintf_filtered (stream, "<No data fields>");
@@ -238,6 +246,15 @@ cp_print_value_fields (type, valaddr, stream, format, recurse, pretty,
     {
       extern int inspect_it;
       int fields_seen = 0;
+
+      if (dont_print_statmem == 0)
+	{
+	  /* If we're at top level, carve out a completely fresh
+	     chunk of the obstack and use that until this particular
+	     invocation returns.  */
+	  tmp_obstack = dont_print_statmem_obstack;
+	  obstack_finish (&dont_print_statmem_obstack);
+	}
 
       for (i = n_baseclasses; i < len; i++)
 	{
@@ -336,10 +353,9 @@ cp_print_value_fields (type, valaddr, stream, format, recurse, pretty,
 		    {
 		      v = value_at (TYPE_FIELD_TYPE (type, i),
 				    (CORE_ADDR)SYMBOL_BLOCK_VALUE (sym));
-		      val_print (TYPE_FIELD_TYPE (type, i), 
-				 VALUE_CONTENTS_RAW (v),
-				 VALUE_ADDRESS (v),
-				 stream, format, 0, recurse + 1, pretty);
+		      cp_print_static_field (TYPE_FIELD_TYPE (type, i), v,
+					     stream, format, recurse + 1,
+					     pretty);
 		    }
 		}
 	      else
@@ -350,6 +366,14 @@ cp_print_value_fields (type, valaddr, stream, format, recurse, pretty,
 		}
 	    }
 	  annotate_field_end ();
+	}
+
+      if (dont_print_statmem == 0)
+	{
+	  /* Free the space used to deal with the printing
+	     of the members from top level.  */
+	  obstack_free (&dont_print_statmem_obstack, last_dont_print);
+	  dont_print_statmem_obstack = tmp_obstack;
 	}
 
       if (pretty)
@@ -365,28 +389,29 @@ cp_print_value_fields (type, valaddr, stream, format, recurse, pretty,
    baseclasses.  */
 
 static void
-cplus_print_value (type, valaddr, stream, format, recurse, pretty, dont_print)
+cplus_print_value (type, valaddr, stream, format, recurse, pretty,
+		   dont_print_vb)
      struct type *type;
      char *valaddr;
      GDB_FILE *stream;
      int format;
      int recurse;
      enum val_prettyprint pretty;
-     struct type **dont_print;
+     struct type **dont_print_vb;
 {
   struct obstack tmp_obstack;
   struct type **last_dont_print
-    = (struct type **)obstack_next_free (&dont_print_obstack);
+    = (struct type **)obstack_next_free (&dont_print_vb_obstack);
   int i, n_baseclasses = TYPE_N_BASECLASSES (type);
 
-  if (dont_print == 0)
+  if (dont_print_vb == 0)
     {
       /* If we're at top level, carve out a completely fresh
 	 chunk of the obstack and use that until this particular
 	 invocation returns.  */
-      tmp_obstack = dont_print_obstack;
+      tmp_obstack = dont_print_vb_obstack;
       /* Bump up the high-water mark.  Now alpha is omega.  */
-      obstack_finish (&dont_print_obstack);
+      obstack_finish (&dont_print_vb_obstack);
     }
 
   for (i = 0; i < n_baseclasses; i++)
@@ -403,16 +428,16 @@ cplus_print_value (type, valaddr, stream, format, recurse, pretty, dont_print)
       if (BASETYPE_VIA_VIRTUAL (type, i))
 	{
 	  struct type **first_dont_print
-	    = (struct type **)obstack_base (&dont_print_obstack);
+	    = (struct type **)obstack_base (&dont_print_vb_obstack);
 
-	  int j = (struct type **)obstack_next_free (&dont_print_obstack)
+	  int j = (struct type **)obstack_next_free (&dont_print_vb_obstack)
 	    - first_dont_print;
 
 	  while (--j >= 0)
 	    if (TYPE_BASECLASS (type, i) == first_dont_print[j])
 	      goto flush_it;
 
-	  obstack_ptr_grow (&dont_print_obstack, TYPE_BASECLASS (type, i));
+	  obstack_ptr_grow (&dont_print_vb_obstack, TYPE_BASECLASS (type, i));
 	}
 
       /* Fix to use baseclass_offset instead. FIXME */
@@ -440,22 +465,74 @@ cplus_print_value (type, valaddr, stream, format, recurse, pretty, dont_print)
       else
 	cp_print_value_fields (TYPE_BASECLASS (type, i), baddr, stream, format,
 			       recurse, pretty,
-			       (struct type **) obstack_base (&dont_print_obstack));
+			       (struct type **) obstack_base (&dont_print_vb_obstack),
+			       0);
       fputs_filtered (", ", stream);
 
     flush_it:
       ;
     }
 
-  if (dont_print == 0)
+  if (dont_print_vb == 0)
     {
       /* Free the space used to deal with the printing
 	 of this type from top level.  */
-      obstack_free (&dont_print_obstack, last_dont_print);
+      obstack_free (&dont_print_vb_obstack, last_dont_print);
       /* Reset watermark so that we can continue protecting
 	 ourselves from whatever we were protecting ourselves.  */
-      dont_print_obstack = tmp_obstack;
+      dont_print_vb_obstack = tmp_obstack;
     }
+}
+
+/* Print value of a static member.
+   To avoid infinite recursion when printing a class that contains
+   a static instance of the class, we keep the addresses of all printed
+   static member classes in an obstack and refuse to print them more
+   than once.
+
+   VAL contains the value to print, TYPE, STREAM, RECURSE, and PRETTY
+   have the same meanings as in c_val_print.  */
+
+static void
+cp_print_static_field (type, val, stream, format, recurse, pretty)
+     struct type *type;
+     value_ptr val;
+     GDB_FILE *stream;
+     int format;
+     int recurse;
+     enum val_prettyprint pretty;
+{
+  if (TYPE_CODE (type) == TYPE_CODE_STRUCT)
+    {
+      CORE_ADDR *first_dont_print;
+      int i;
+
+      first_dont_print
+	= (CORE_ADDR *)obstack_base (&dont_print_statmem_obstack);
+      i = (CORE_ADDR *)obstack_next_free (&dont_print_statmem_obstack)
+	- first_dont_print;
+
+      while (--i >= 0)
+	{
+	  if (VALUE_ADDRESS (val) == first_dont_print[i])
+	    {
+	      fputs_filtered ("<same as static member of an already seen type>",
+			      stream);
+	      return;
+	    }
+	}
+
+      obstack_grow (&dont_print_statmem_obstack, &VALUE_ADDRESS (val),
+		    sizeof (CORE_ADDR));
+
+      check_stub_type (type);
+      cp_print_value_fields (type, VALUE_CONTENTS (val),
+			     stream, format, recurse, pretty,
+			     NULL, 1);
+      return;
+    }
+  val_print (type, VALUE_CONTENTS (val), VALUE_ADDRESS (val),
+	     stream, format, 0, recurse, pretty);
 }
 
 void
@@ -540,5 +617,8 @@ _initialize_cp_valprint ()
   /* Give people the defaults which they are used to.  */
   objectprint = 0;
   vtblprint = 0;
-  obstack_begin (&dont_print_obstack, 32 * sizeof (struct type *));
+  obstack_begin (&dont_print_vb_obstack, 32 * sizeof (struct type *));
+  obstack_specify_allocation (&dont_print_statmem_obstack,
+			      32 * sizeof (CORE_ADDR), sizeof (CORE_ADDR),
+			      xmalloc, free);
 }
