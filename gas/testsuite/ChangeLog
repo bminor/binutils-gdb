@@ -1,3 +1,7 @@
+2005-03-10  Aldy Hernandez  <aldyh@redhat.com>
+
+        * gas/ppc/e500.d: Fix encoding of efscfd.
+
 2005-03-09  Richard Sandiford  <rsandifo@redhat.com>
 
 	* gas/mips/vr4130.[sd]: New test.
