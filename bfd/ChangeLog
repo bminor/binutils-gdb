@@ -1,4 +1,4 @@
-2000-08-29  Jeff Law <law@redhat.com>
+2001-08-29  Jeff Law <law@redhat.com>
 
 	* cpu-h8300.c (h8300_scan, compatible): Prototype.
 	(h8300_scan): Handle architecture:machine encodings typically
@@ -9,7 +9,7 @@
 	(elf32_h8_mach, elf32_h8_final_write_processing): New functions.
 	(elf32_h8_object_p): Similarly.
 
-2000-08-29  Alan Modra  <amodra@bigpond.net.au>
+2001-08-29  Alan Modra  <amodra@bigpond.net.au>
 
 	* targmatch.sed: Delete case statements.
 	* config.bfd <powerpc-*-aix* entry>: Select 64 bit xcoff for
