@@ -759,7 +759,7 @@ int current_source_line;
 
 /* The virtual function table is now an array of structures
    which have the form { int16 offset, delta; void *pfn; }. 
- 
+
    In normal virtual function tables, OFFSET is unused.
    DELTA is the amount which is added to the apparent object's base
    address in order to point to the actual object to which the

@@ -50,7 +50,6 @@ struct value_history_chunk
 static struct value_history_chunk *value_history_chain;
 
 static int value_history_count;	/* Abs number of last entry stored */
-
 
 /* List of all value objects currently allocated
    (except for those released by calls to release_value)
@@ -930,7 +929,13 @@ value_headof (arg, btype, dtype)
   CORE_ADDR pc_for_sym;
   char *demangled_name;
 
-  vtbl = value_ind (value_field (value_ind (arg), TYPE_VPTR_FIELDNO (dtype)));
+  btype = TYPE_VPTR_BASETYPE (dtype);
+  check_stub_type (btype);
+  if (btype != dtype)
+    vtbl = value_cast (lookup_pointer_type (btype), arg);
+  else
+    vtbl = arg;
+  vtbl = value_ind (value_field (value_ind (vtbl), TYPE_VPTR_FIELDNO (btype)));
 
   /* Check that VTBL looks like it points to a virtual function table.  */
   i = find_pc_misc_function (VALUE_ADDRESS (vtbl));
@@ -1021,7 +1026,6 @@ value_static_field (type, fieldname, fieldno)
 
   if (fieldno < 0)
     {
-      register struct type *t = type;
       /* Look for static field.  */
       int i;
       for (i = TYPE_NFIELDS (type) - 1; i >= TYPE_N_BASECLASSES (type); i--)
@@ -1084,7 +1088,7 @@ baseclass_addr (type, index, valaddr, valuep, errp)
 
   if (errp)
     *errp = 0;
-  
+
   if (BASETYPE_VIA_VIRTUAL (type, index))
     {
       /* Must hunt for the pointer to this virtual baseclass.  */
@@ -1255,7 +1259,7 @@ check_stub_method (type, i, j)
     argtypes[argcount] = NULL;		/* List terminator */
 
   free (demangled_name);
-  
+
   type = lookup_method_type (type, TYPE_TARGET_TYPE (TYPE_FN_FIELD_TYPE (f, j)), argtypes);
   /* Free the stub type...it's no longer needed.  */
   free (TYPE_FN_FIELD_TYPE (f, j));

@@ -3309,7 +3309,7 @@ define_symbol (valu, string, desc, type)
   } else {
     SYMBOL_LINE(sym) = 0;			/* unknown */
   }
-  
+
   if (string[0] == CPLUS_MARKER)
     {
       /* Special GNU C++ names.  */

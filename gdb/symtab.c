@@ -1933,7 +1933,7 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line)
 	      p = *argptr;
 	      while (*p && *p != ' ' && *p != '\t' && *p != ',' && *p !=':') p++;
 	      q = operator_chars (*argptr, &q1);
-	      
+
 	      copy = (char *) alloca (p - *argptr + 1 + (q1 - q));
 	      if (q1 - q)
 		{

@@ -1,3 +1,12 @@
+Tue Apr 30 13:13:33 1991  Michael Tiemann  (tiemann at cygint.cygnus.com)
+
+	* valprint.c (type_print_base): If the type being printed is a
+	struct containing undefined types, print "<undefine type>"
+	as the type instead of crashing.
+	* values.c (value_headof): Get the vtable pointer taking
+	TYPE_VPTR_BASETYPE into account.
+	* symtab.c, symtab.h, dbxread.c: Fix various whitespace splotches.
+
 Mon Apr 29 13:22:51 1991  Jim Kingdon  (kingdon at cygint.cygnus.com)
 
 	* Move BROKEN_LARGE_ALLOCA from tm-sun386.h to xm-sun386.h.

@@ -301,7 +301,7 @@ value_print (val, stream, format, pretty)
       printf_filtered ("<value optimized out>");
       return 0;
     }
-  
+
   /* A "repeated" value really contains several values in a row.
      They are made by the @ operator.
      Print such values as if they were arrays.  */
@@ -1640,7 +1640,15 @@ type_print_base (type, stream, show, level)
 		    fprintf_filtered (stream, "virtual ");
 		  else if (TYPE_FN_FIELD_STATIC_P (f, j))
 		    fprintf_filtered (stream, "static ");
-		  type_print (TYPE_TARGET_TYPE (TYPE_FN_FIELD_TYPE (f, j)), "", stream, 0);
+		  if (TYPE_TARGET_TYPE (TYPE_FN_FIELD_TYPE (f, j)) == 0)
+		    {
+		      /* Keep GDB from crashing here.  */
+		      fprintf (stream, "<undefined type> %s;\n",
+			       TYPE_FN_FIELD_PHYSNAME (f, j));
+		      break;
+		    }
+		  else
+		    type_print (TYPE_TARGET_TYPE (TYPE_FN_FIELD_TYPE (f, j)), "", stream, 0);
 		  if (TYPE_FLAGS (TYPE_FN_FIELD_TYPE (f, j)) & TYPE_FLAG_STUB)
 		    {
 		      /* Build something we can demangle.  */
