@@ -65,6 +65,25 @@ struct ui_stream
 
 /* Prototypes for ui-out API. */
 
+/* A result is a recursive data structure consisting of lists and
+   tupples. */
+
+enum ui_out_type
+  {
+    ui_out_type_tupple,
+    ui_out_type_list
+  };
+
+extern void ui_out_begin (struct ui_out *uiout,
+			  enum ui_out_type level_type,
+			  const char *id);
+
+extern void ui_out_end (struct ui_out *uiout, enum ui_out_type type);
+
+/* A table can be considered a special tupple/list combination with
+   the implied structure: ``table = { hdr = { header, ... } , body = [ {
+   field, ... }, ... ] }'' */
+
 extern void ui_out_table_begin (struct ui_out *uiout, int nbrofcols,
 				char *tblid);
 
@@ -74,6 +93,9 @@ extern void ui_out_table_header (struct ui_out *uiout, int width,
 extern void ui_out_table_body (struct ui_out *uiout);
 
 extern void ui_out_table_end (struct ui_out *uiout);
+
+/* Compatibility wrappers, new code should use ui_out_begin() and
+   ui_out_end(). */
 
 extern void ui_out_list_begin (struct ui_out *uiout, char *lstid);
 
@@ -164,9 +186,12 @@ typedef void (table_header_ftype) (struct ui_out * uiout, int width,
 				   enum ui_align align, char *colhdr);
 /* Note: level 0 is the top-level so LEVEL is always greater than
    zero. */
-typedef void (list_begin_ftype) (struct ui_out * uiout,
-				 int level, char *lstid);
-typedef void (list_end_ftype) (struct ui_out * uiout, int level);
+typedef void (ui_out_begin_ftype) (struct ui_out *uiout,
+				   enum ui_out_type type,
+				   int level, const char *id);
+typedef void (ui_out_end_ftype) (struct ui_out *uiout,
+				 enum ui_out_type type,
+				 int level);
 typedef void (field_int_ftype) (struct ui_out * uiout, int fldno, int width,
 			     enum ui_align align, char *fldname, int value);
 typedef void (field_skip_ftype) (struct ui_out * uiout, int fldno, int width,
@@ -195,8 +220,8 @@ struct ui_out_impl
     table_body_ftype *table_body;
     table_end_ftype *table_end;
     table_header_ftype *table_header;
-    list_begin_ftype *list_begin;
-    list_end_ftype *list_end;
+    ui_out_begin_ftype *begin;
+    ui_out_end_ftype *end;
     field_int_ftype *field_int;
     field_skip_ftype *field_skip;
     field_string_ftype *field_string;

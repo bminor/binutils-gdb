@@ -43,8 +43,9 @@ static void mi_table_body (struct ui_out *uiout);
 static void mi_table_end (struct ui_out *uiout);
 static void mi_table_header (struct ui_out *uiout, int width,
 			     enum ui_align alig, char *colhdr);
-static void mi_list_begin (struct ui_out *uiout, int list_flag, char *lstid);
-static void mi_list_end (struct ui_out *uiout, int list_flag);
+static void mi_begin (struct ui_out *uiout, enum ui_out_type type,
+		      int level, const char *id);
+static void mi_end (struct ui_out *uiout, enum ui_out_type type, int level);
 static void mi_field_int (struct ui_out *uiout, int fldno, int width,
 			  enum ui_align alig, char *fldname, int value);
 static void mi_field_skip (struct ui_out *uiout, int fldno, int width,
@@ -73,8 +74,8 @@ struct ui_out_impl mi_ui_out_impl =
   mi_table_body,
   mi_table_end,
   mi_table_header,
-  mi_list_begin,
-  mi_list_end,
+  mi_begin,
+  mi_end,
   mi_field_int,
   mi_field_skip,
   mi_field_string,
@@ -149,7 +150,10 @@ mi_table_header (struct ui_out *uiout, int width, int alignment, char *colhdr)
 /* Mark beginning of a list */
 
 void
-mi_list_begin (struct ui_out *uiout, int list_flag, char *lstid)
+mi_begin (struct ui_out *uiout,
+	  enum ui_out_type type,
+	  int level,
+	  const char *lstid)
 {
   struct ui_out_data *data = ui_out_data (uiout);
   field_separator (uiout);
@@ -162,7 +166,9 @@ mi_list_begin (struct ui_out *uiout, int list_flag, char *lstid)
 /* Mark end of a list */
 
 void
-mi_list_end (struct ui_out *uiout, int list_flag)
+mi_end (struct ui_out *uiout,
+	enum ui_out_type type,
+	int level)
 {
   struct ui_out_data *data = ui_out_data (uiout);
   list_close (uiout);

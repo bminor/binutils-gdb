@@ -43,8 +43,9 @@ static void cli_table_body (struct ui_out *uiout);
 static void cli_table_end (struct ui_out *uiout);
 static void cli_table_header (struct ui_out *uiout, int width,
 			      enum ui_align alig, char *colhdr);
-static void cli_list_begin (struct ui_out *uiout, int list_flag, char *lstid);
-static void cli_list_end (struct ui_out *uiout, int list_flag);
+static void cli_begin (struct ui_out *uiout, enum ui_out_type type,
+		       int level, const char *lstid);
+static void cli_end (struct ui_out *uiout, enum ui_out_type type, int level);
 static void cli_field_int (struct ui_out *uiout, int fldno, int width,
 			   enum ui_align alig, char *fldname, int value);
 static void cli_field_skip (struct ui_out *uiout, int fldno, int width,
@@ -73,8 +74,8 @@ static struct ui_out_impl cli_ui_out_impl =
   cli_table_body,
   cli_table_end,
   cli_table_header,
-  cli_list_begin,
-  cli_list_end,
+  cli_begin,
+  cli_end,
   cli_field_int,
   cli_field_skip,
   cli_field_string,
@@ -134,14 +135,19 @@ cli_table_header (struct ui_out *uiout, int width, enum ui_align alignment,
 /* Mark beginning of a list */
 
 void
-cli_list_begin (struct ui_out *uiout, int list_flag, char *lstid)
+cli_begin (struct ui_out *uiout,
+	   enum ui_out_type type,
+	   int level,
+	   const char *id)
 {
 }
 
 /* Mark end of a list */
 
 void
-cli_list_end (struct ui_out *uiout, int list_flag)
+cli_end (struct ui_out *uiout,
+	 enum ui_out_type type,
+	 int level)
 {
 }
 

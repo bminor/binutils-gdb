@@ -53,6 +53,8 @@ struct ui_out_level
   {
     /* Count each field; the first element is for non-list fields */
     int field_count;
+    /* The type of this level. */
+    enum ui_out_type type;
   };
 
 /* The ui_out structure */
@@ -103,24 +105,28 @@ current_level (struct ui_out *uiout)
 /* Create a new level, of TYPE.  Return the new level's index. */
 static int
 push_level (struct ui_out *uiout,
+	    enum ui_out_type type,
 	    const char *id)
 {
   struct ui_out_level *current;
   /* We had better not overflow the buffer. */
   uiout->level++;
-  gdb_assert (uiout->level > 0 && uiout->level < MAX_UI_OUT_LEVELS);
+  gdb_assert (uiout->level >= 0 && uiout->level < MAX_UI_OUT_LEVELS);
   current = current_level (uiout);
   current->field_count = 0;
+  current->type = type;
   return uiout->level;
 }
 
 /* Discard the current level, return the discarded level's index.
    TYPE is the type of the level being discarded. */
 static int
-pop_level (struct ui_out *uiout)
+pop_level (struct ui_out *uiout,
+	   enum ui_out_type type)
 {
   /* We had better not underflow the buffer. */
   gdb_assert (uiout->level > 0 && uiout->level < MAX_UI_OUT_LEVELS);
+  gdb_assert (current_level (uiout)->type == type);
   uiout->level--;
   return uiout->level + 1;
 }
@@ -134,9 +140,12 @@ static void default_table_body (struct ui_out *uiout);
 static void default_table_end (struct ui_out *uiout);
 static void default_table_header (struct ui_out *uiout, int width,
 				  enum ui_align alig, char *colhdr);
-static void default_list_begin (struct ui_out *uiout, int level,
-				char *lstid);
-static void default_list_end (struct ui_out *uiout, int level);
+static void default_begin (struct ui_out *uiout,
+			   enum ui_out_type type,
+			   int level, const char *id);
+static void default_end (struct ui_out *uiout,
+			 enum ui_out_type type,
+			 int level);
 static void default_field_int (struct ui_out *uiout, int fldno, int width,
 			       enum ui_align alig, char *fldname, int value);
 static void default_field_skip (struct ui_out *uiout, int fldno, int width,
@@ -162,8 +171,8 @@ struct ui_out_impl default_ui_out_impl =
   default_table_body,
   default_table_end,
   default_table_header,
-  default_list_begin,
-  default_list_end,
+  default_begin,
+  default_end,
   default_field_int,
   default_field_skip,
   default_field_string,
@@ -196,8 +205,12 @@ static void uo_table_body (struct ui_out *uiout);
 static void uo_table_end (struct ui_out *uiout);
 static void uo_table_header (struct ui_out *uiout, int width,
 			     enum ui_align align, char *colhdr);
-static void uo_list_begin (struct ui_out *uiout, int level, char *lstid);
-static void uo_list_end (struct ui_out *uiout, int level);
+static void uo_begin (struct ui_out *uiout,
+		      enum ui_out_type type,
+		      int level, const char *id);
+static void uo_end (struct ui_out *uiout,
+		    enum ui_out_type type,
+		    int level);
 static void uo_field_int (struct ui_out *uiout, int fldno, int width,
 			  enum ui_align align, char *fldname, int value);
 static void uo_field_skip (struct ui_out *uiout, int fldno, int width,
@@ -303,24 +316,40 @@ and before table_body.");
 }
 
 void
-ui_out_list_begin (struct ui_out *uiout, char *lstid)
+ui_out_begin (struct ui_out *uiout,
+	      enum ui_out_type type,
+	      const char *id)
 {
   int new_level;
   if (uiout->table_flag && !uiout->body_flag)
     internal_error (__FILE__, __LINE__,
 		    "table header or table_body expected; lists must be \
 specified after table_body.");
-  new_level = push_level (uiout, lstid);
+  new_level = push_level (uiout, type, id);
   if (uiout->table_flag && (new_level == 1))
     uiout->headercurr = uiout->headerfirst;
-  uo_list_begin (uiout, new_level, lstid);
+  uo_begin (uiout, type, new_level, id);
+}
+
+void
+ui_out_list_begin (struct ui_out *uiout,
+		   char *id)
+{
+  ui_out_begin (uiout, ui_out_type_list, id);
+}
+
+void
+ui_out_end (struct ui_out *uiout,
+	    enum ui_out_type type)
+{
+  int old_level = pop_level (uiout, type);
+  uo_end (uiout, type, old_level);
 }
 
 void
 ui_out_list_end (struct ui_out *uiout)
 {
-  int old_level = pop_level (uiout);
-  uo_list_end (uiout, old_level);
+  ui_out_end (uiout, ui_out_type_list);
 }
 
 static void
@@ -629,12 +658,17 @@ default_table_header (struct ui_out *uiout, int width, enum ui_align alignment,
 }
 
 static void
-default_list_begin (struct ui_out *uiout, int level, char *lstid)
+default_begin (struct ui_out *uiout,
+	       enum ui_out_type type,
+	       int level,
+	       const char *id)
 {
 }
 
 static void
-default_list_end (struct ui_out *uiout, int level)
+default_end (struct ui_out *uiout,
+	     enum ui_out_type type,
+	     int level)
 {
 }
 
@@ -728,19 +762,24 @@ uo_table_header (struct ui_out *uiout, int width, enum ui_align align, char *col
 }
 
 void
-uo_list_begin (struct ui_out *uiout, int level, char *lstid)
+uo_begin (struct ui_out *uiout,
+	  enum ui_out_type type,
+	  int level,
+	  const char *id)
 {
-  if (!uiout->impl->list_begin)
+  if (uiout->impl->begin == NULL)
     return;
-  uiout->impl->list_begin (uiout, level, lstid);
+  uiout->impl->begin (uiout, type, level, id);
 }
 
 void
-uo_list_end (struct ui_out *uiout, int level)
+uo_end (struct ui_out *uiout,
+	enum ui_out_type type,
+	int level)
 {
-  if (!uiout->impl->list_end)
+  if (uiout->impl->end == NULL)
     return;
-  uiout->impl->list_end (uiout, level);
+  uiout->impl->end (uiout, type, level);
 }
 
 void

@@ -1,3 +1,9 @@
+2001-05-08  Andrew Cagney  <ac131313@redhat.com>
+
+	* mi-out.c (mi_begin, mi_end): Replace mi_list_begin and
+	mi_list_end.
+	(mi_ui_out_impl): Update.
+
 2001-03-28  Andrew Cagney  <ac131313@redhat.com>
 
 	* mi-main.c (mi_cmd_data_read_memory): Use xcalloc.

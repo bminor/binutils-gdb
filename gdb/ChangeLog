@@ -1,3 +1,26 @@
+2001-05-08  Andrew Cagney  <ac131313@redhat.com>
+
+	* cli-out.c (cli_begin, cli_end): Replace cli_list_begin and
+	cli_list_end.
+	(cli_ui_out_impl): Update.
+
+	* ui-out.c (default_begin, default_end): Replace
+	default_list_begin and default_list_end.
+	(default_ui_out_impl): Update.
+	(uo_begin, uo_end): Replace ou_list_begin and uo_list_end.
+	(ui_out_begin, ui_out_end): Replace ui_out_list_begin and
+	ui_out_list_end.
+	(ui_out_list_begin, ui_out_list_end): New.  Compatibility
+	functions.
+	(struct ui_out_level): Add field type.
+	(push_level, pop_level): Update.  Add type parameter.
+
+	* ui-out.h (enum ui_out_type): Declare.
+	(ui_out_begin, ui_out_end): Declare.
+	(ui_out_begin_ftype, ui_out_end_ftype): Replace list_begin_ftype
+	and list_end_ftype.
+	(struct ui_out_impl): Update.
+
 2001-05-07  Andrew Cagney  <ac131313@redhat.com>
 
 	* ui-out.h (list_begin_ftype, list_end_ftype): Rename argument
