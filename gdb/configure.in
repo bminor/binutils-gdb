@@ -54,7 +54,7 @@ m68k-sony-*)		gdb_host=news ;;
 
 m68k-sun-sunos3*)	gdb_host=sun3os3 ;;
 m68k-sun-sunos4*)	gdb_host=sun3os4 ;;
-m68k-sun-*)		gdb_host=sun3 ;;
+m68k-sun-*)		gdb_host=sun3os4 ;;
 
 m88k-motorola-*)	gdb_host=delta88 ;;
 m88k-*-*)		gdb_host=m88k ;;
@@ -82,7 +82,7 @@ rs6000-*-*)		gdb_host=rs6000 ;;
 
 sparc-*-solaris2*)	gdb_host=sun4sol2 ;;
 sparc-*-sunos4*)	gdb_host=sun4os4 ;;
-sparc-*-*)		gdb_host=sun4 ;;
+sparc-*-*)		gdb_host=sun4os4 ;;
 
 tahoe-*-*)		gdb_host=tahoe ;;
 
@@ -169,7 +169,6 @@ m68k-isi-*)		gdb_target=isi ;;
 m68k-netx-*)		gdb_target=vxworks68 ;;
 
 m68k-sony-*)		gdb_target=news ;;
-m68k-sun-*)		gdb_target=sun3 ;;
 
 m68k-*-aout)		gdb_target=m68k-un ;;
 m68k-*-coff)		gdb_target=m68k-noun ;;
@@ -212,7 +211,7 @@ sparc-*-elf)		gdb_target=sparc-noun ;;
 sparc-*-solaris2*)	gdb_target=sun4sol2 ;;
 sparc-*-sunos4*)	gdb_target=sun4os4 ;;
 sparc-*-vxworks*)	gdb_target=sparc-un ;;
-sparc-*-*)		gdb_target=sun4 ;;
+sparc-*-*)		gdb_target=sun4os4 ;;
 
 tahoe-*-*)		gdb_target=tahoe ;;
 vax-*-*)		gdb_target=vax ;;

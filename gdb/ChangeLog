@@ -1,3 +1,19 @@
+Wed Sep  2 01:18:31 1992  John Gilmore  (gnu@cygnus.com)
+
+	* ser-termios.c, ser-go32.c:  Remove DEFUN crap, clean up.
+	* serial.h (EXFUN):  Remove all uses, convert to PARAMS.
+	* config/sun4os4.mh:  Include ser-termios.o.  FIXME, all .mh files
+	should include a ser-XXX.o module.
+
+	* dbxread.c (elfstab_build_psymtabs):  Remove DEFUN crap.
+	* defs.h, i960-pinsn.c, remote-hms.c:  Replace CONST with simple const.
+
+	* configure.in:  Map unrecognized sun 68k's, sun sparcs, into 
+	known suns in configure.in, rather than mapping them to unique
+	config files that happen to duplicate other config files.
+	* config/sun3.{mh,mt}:  Remove (use identical sun3os4.*).
+	* config/sun4.{mh,mt}:  Remove (use identical sun4os4.*).
+
 Wed Sep  2 00:10:43 1992  John Gilmore  (gnu@cygnus.com)
 
 	* configure.in (*-*-sunos*):  Use trailing * to match all
@@ -3288,7 +3304,7 @@ Fri Feb 21 17:29:54 1992  Fred Fish  (fnf at cygnus.com)
 	to minimal symbol table use.
 	* printcmd.c (delete_display, enable_display, disable_display_command):
 	Make static.
-	* procfs.c (EXFUN/DEFUN):  Remove all usages, convert to PARAM.
+	* procfs.c (EXFUN/DEFUN):  Remove all usages, convert to PARAMS.
 	* procfs.c (fetch_core_registers):  Add unused param reg_addr.
 	* pyr-xdep.c (fetch_inferior_registers):  Add unused param regno.
 	* pyr-xdep.c (store_inferior_registers):  Returns void.
@@ -3303,7 +3319,7 @@ Fri Feb 21 17:29:54 1992  Fred Fish  (fnf at cygnus.com)
 	* solib.c:  Add prototypes for local functions.
 	* solib.c (solib_add_common_symbols, locate_base):  Convert from misc
 	function vector use to minimal symbol table use.
-	* solib.c (EXFUN/DEFUN):  Remove all usages, convert to PARAM.
+	* solib.c (EXFUN/DEFUN):  Remove all usages, convert to PARAMS.
 	* solib.c (find_solib, shared_library_command):  Make static
 	* solib.c (read_memory, write_memory usages):  Cast args.
 	* solib.c (special_symbol_handling):  Add function

@@ -235,7 +235,7 @@ dcache_init ()
 
 static int timeout = 2;
 
-static CONST char *dev_name;
+static const char *dev_name;
 
 
 /* Descriptor for I/O to remote machine.  Initialize it to -1 so that

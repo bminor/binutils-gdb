@@ -328,7 +328,7 @@ mem( memaddr, word1, word2, noprint )
 	int len;
 	int mode;
 	int offset;
-	CONST char *reg1, *reg2, *reg3;
+	const char *reg1, *reg2, *reg3;
 
 	/* This lookup table is too sparse to make it worth typing in, but not
 	 * so large as to make a sparse array necessary.  We allocate the

@@ -1,7 +1,5 @@
-/* Remote serial interface for OS's with termios
-
-   Copyright 1992
-   Free Software Foundation, Inc.
+/* Remote serial interface for OS's with termios, for GDB.
+   Copyright 1992 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -25,26 +23,27 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <termios.h>
 #include <sys/time.h>
 
+/* File descriptor used in termios routines to access serial line.  */
 static int desc;
 
+/* Saved state about the terminal.  */
+static struct termios otermios;
+static int oflags;
 
-CONST char *
-DEFUN_VOID(serial_default_name)
+const char *
+serial_default_name ()
 {
   return "/dev/ttya";
 }
 
 void
-DEFUN_VOID(serial_raw)
+serial_raw ()
 {
   /* Now happens inside of serial_open */
 }
 
-static struct termios otermios;
-static int oflags;
-
 void
-DEFUN_VOID(serial_normal)
+serial_normal ()
 {
   fcntl(desc, oflags, 0);
 
@@ -55,8 +54,8 @@ DEFUN_VOID(serial_normal)
 }
 
 int
-DEFUN(serial_open,(name),
-      CONST char *name)
+serial_open (name)
+      const char *name;
 {
   struct termios termios;
 
@@ -88,9 +87,9 @@ DEFUN(serial_open,(name),
 }
 
 int
-DEFUN(serial_timedreadchar,(timeout, ok),
-      int timeout AND
-      int *ok)
+serial_timedreadchar (timeout, ok) 
+      int timeout;
+      int *ok;
 {
   unsigned char buf;
   fd_set readfds;
@@ -135,6 +134,7 @@ static struct {int rate, damn_b;} baudtab[] = {
 	{9600, B9600},
 
 	{19200, B19200},
+	{38400, B38400},
 #if 0
 	{300, B300},
 	{1200, B1200},
@@ -145,8 +145,8 @@ static struct {int rate, damn_b;} baudtab[] = {
 };
 
 static int 
-DEFUN(damn_b,(rate),
-      int rate)
+damn_b (rate)
+      int rate;
 {
   int i;
   for (i = 0; baudtab[i].rate != -1; i++)
@@ -160,7 +160,8 @@ DEFUN(damn_b,(rate),
 }
 
 int 
-DEFUN(serial_setbaudrate,(rate),int rate)
+serial_setbaudrate (rate)
+     int rate;
 {
   struct termios termios;
 
@@ -179,8 +180,8 @@ DEFUN(serial_setbaudrate,(rate),int rate)
 }
 
 int
-DEFUN(serial_nextbaudrate,(rate),
-      int rate)
+serial_nextbaudrate (rate)
+      int rate;
 {
   int lookup;
   lookup = damn_b(rate);
@@ -193,16 +194,16 @@ DEFUN(serial_nextbaudrate,(rate),
 }
 
 int
-DEFUN(serial_write,(str, len),
-      CONST char *str AND
-      int len)
+serial_write (str, len)
+      const char *str;
+      int len;
 {
   return (write (desc, str, len));
 }
 
 
 int
-DEFUN_VOID(serial_close)
+serial_close ()
 {
   return (close(desc));
 }
