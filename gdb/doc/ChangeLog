@@ -1,3 +1,8 @@
+2001-07-30  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdbint.texinfo: Remove extraneous START-INFO-DIR-ENTRY
+	and END-INFO-DIR-ENTRY.
+
 2001-07-28  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
 
 	* gdb.texinfo (TUI Configuration): Rename tui configuration variables.
