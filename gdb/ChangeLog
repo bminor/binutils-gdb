@@ -1,5 +1,10 @@
 2004-02-23  Jeff Johnston  <jjohnstn@redhat.com>
 
+	* printcmd.c (print_scalar_formatted): Initialize val_long
+	to remove compiler warning message.
+
+2004-02-23  Jeff Johnston  <jjohnstn@redhat.com>
+
 	* defs.h (nquery, yquery): New prototypes.
 	* breakpoint.c (break_command_1): Use new nquery interface.
 	* utils.c (defaulted_query, nquery, yquery): New functions.

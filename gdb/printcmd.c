@@ -347,7 +347,7 @@ void
 print_scalar_formatted (void *valaddr, struct type *type, int format, int size,
 			struct ui_file *stream)
 {
-  LONGEST val_long;
+  LONGEST val_long = 0;
   unsigned int len = TYPE_LENGTH (type);
 
   if (format != 'f')
