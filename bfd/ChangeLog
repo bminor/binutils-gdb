@@ -1,3 +1,8 @@
+2004-04-40  Hans-Peter Nilsson  <hp@axis.com>
+
+	* configure.in: Update version to 2.15.91.
+	* configure: Regenerate.
+
 2004-04-29  Brian Ford  <ford@vss.fsi.com>
 
 	* bfd.c (bfd_get_sign_extend_vma): Add pe[i]-i386 case to DJGPP hack.
