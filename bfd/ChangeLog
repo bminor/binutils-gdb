@@ -1,3 +1,9 @@
+2005-02-12  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf64-ppc.c (toc_adjusting_stub_needed): Return true for
+	old-style branches to undefined dot-symbols which will be
+	satisfied by a plt call.
+
 2005-02-11  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf64-ppc.c (move_plt_plist): New function, extracted from..

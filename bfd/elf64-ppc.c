@@ -8361,13 +8361,27 @@ toc_adjusting_stub_needed (struct bfd_link_info *info, asection *isec)
 	  break;
 	}
 
-      /* Ignore branches to undefined syms.  */
-      if (sym_sec == NULL)
-	continue;
-
       /* Calls to dynamic lib functions go through a plt call stub
-	 that uses r2.  Assume branches to other sections not included
-	 in the link need stubs too, to cover -R and absolute syms.  */
+	 that uses r2.  Branches to undefined symbols might be a call
+	 using old-style dot symbols that can be satisfied by a plt
+	 call into a new-style dynamic library.  */
+      if (sym_sec == NULL)
+	{
+	  struct ppc_link_hash_entry *eh = (struct ppc_link_hash_entry *) h;
+	  if (eh != NULL
+	      && eh->oh != NULL
+	      && eh->oh->elf.plt.plist != NULL)
+	    {
+	      ret = 1;
+	      break;
+	    }
+
+	  /* Ignore other undefined symbols.  */
+	  continue;
+	}
+
+      /* Assume branches to other sections not included in the link need
+	 stubs too, to cover -R and absolute syms.  */
       if (sym_sec->output_section == NULL)
 	{
 	  ret = 1;
@@ -8389,7 +8403,6 @@ toc_adjusting_stub_needed (struct bfd_link_info *info, asection *isec)
       opd_adjust = get_opd_info (sym_sec);
       if (opd_adjust != NULL)
 	{
-
 	  if (h == NULL)
 	    {
 	      long adjust;
