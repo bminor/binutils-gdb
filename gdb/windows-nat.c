@@ -50,6 +50,17 @@
 #include <sys/param.h>
 #include <unistd.h>
 
+/* The ui's event loop. */
+extern int (*ui_loop_hook) PARAMS ((int signo));
+
+/* If we're not using the old Cygwin header file set, define the
+   following which never should have been in the generic Win32 API
+   headers in the first place since they were our own invention... */
+#ifndef _GNU_H_WINDOWS_H
+#define FLAG_TRACE_BIT 0x100
+#define CONTEXT_DEBUGGER (CONTEXT_FULL | CONTEXT_FLOATING_POINT)
+#endif
+
 /* The string sent by cygwin when it processes a signal.
    FIXME: This should be in a cygwin include file. */
 #define CYGWIN_SIGNAL_STRING "cygwin: signal"
@@ -65,6 +76,7 @@ extern struct target_ops child_ops;
 
 static void child_stop PARAMS ((void));
 static int win32_child_thread_alive PARAMS ((int));
+void child_kill_inferior PARAMS ((void));
 
 static int last_sig = 0;	/* Set if a signal was received from the
 				   debugged process */
@@ -453,7 +465,9 @@ handle_output_debug_string (struct target_waitstatus *ourstatus)
     {
       char *p;
       /*last_sig = */strtol(s + sizeof(CYGWIN_SIGNAL_STRING) - 1, &p, 0);
-      if (gotasig = (ourstatus->value.sig = target_signal_from_host (last_sig)))
+      gotasig = target_signal_from_host (last_sig);
+      ourstatus->value.sig = gotasig;
+      if (gotasig)
 	ourstatus->kind = TARGET_WAITKIND_STOPPED;
     }
 
@@ -530,9 +544,10 @@ child_continue (DWORD continue_status, int id)
 
   DEBUG_EVENTS (("ContinueDebugEvent (cpid=%d, ctid=%d, DBG_CONTINUE);\n",
 		 current_event.dwProcessId, current_event.dwThreadId));
-  if (res = ContinueDebugEvent (current_event.dwProcessId,
-				current_event.dwThreadId,
-			        continue_status))
+  res = ContinueDebugEvent (current_event.dwProcessId,
+			    current_event.dwThreadId,
+			    continue_status);
+  if (res)
     for (th = &thread_head; (th = th->next) != NULL; )
       if (((id == -1) || (id == th->id)) && th->suspend_count)
 	{
@@ -556,98 +571,111 @@ child_wait (int pid, struct target_waitstatus *ourstatus)
   while (1)
     {
       DWORD continue_status;
-      BOOL t = WaitForDebugEvent (&current_event, INFINITE);
+      BOOL debug_event = WaitForDebugEvent (&current_event, 20);
       char *p;
       thread_info *th;
       int sig;
 
-      event_count++;
-
-      continue_status = DBG_CONTINUE;
-
-      switch (current_event.dwDebugEventCode)
+      if (debug_event)
 	{
-	case CREATE_THREAD_DEBUG_EVENT:
-	  DEBUG_EVENTS (("gdb: kernel event for pid=%d tid=%x code=%s)\n",
-			current_event.dwProcessId, current_event.dwThreadId,
-			"CREATE_THREAD_DEBUG_EVENT"));
-	  /* Record the existence of this thread */
-	  child_add_thread (current_event.dwThreadId,
-			    current_event.u.CreateThread.hThread);
-	  if (info_verbose)
-	      printf_unfiltered ("[New %s]\n",
-			       target_pid_to_str (current_event.dwThreadId));
-	  break;
+	  event_count++;
 
-	case EXIT_THREAD_DEBUG_EVENT:
-	  DEBUG_EVENTS (("gdb: kernel event for pid=%d tid=%d code=%s)\n",
-			current_event.dwProcessId, current_event.dwThreadId,
-			"EXIT_THREAD_DEBUG_EVENT"));
-	  child_delete_thread (current_event.dwThreadId);
-	  break;
+	  continue_status = DBG_CONTINUE;
 
-	case CREATE_PROCESS_DEBUG_EVENT:
-	  DEBUG_EVENTS (("gdb: kernel event for pid=%d tid=%d code=%s)\n",
-			current_event.dwProcessId, current_event.dwThreadId,
-			"CREATE_PROCESS_DEBUG_EVENT"));
-	  current_process_handle = current_event.u.CreateProcessInfo.hProcess;
+	  switch (current_event.dwDebugEventCode)
+	    {
+	    case CREATE_THREAD_DEBUG_EVENT:
+	      DEBUG_EVENTS (("gdb: kernel event for pid=%d tid=%x code=%s)\n",
+			     current_event.dwProcessId, current_event.dwThreadId,
+			     "CREATE_THREAD_DEBUG_EVENT"));
+	      /* Record the existence of this thread */
+	      child_add_thread (current_event.dwThreadId,
+				current_event.u.CreateThread.hThread);
+	      if (info_verbose)
+		printf_unfiltered ("[New %s]\n",
+				   target_pid_to_str (current_event.dwThreadId));
+	      break;
 
-	  main_thread_id = inferior_pid = current_event.dwThreadId;
-	  /* Add the main thread */
-	  current_thread = child_add_thread (inferior_pid,
-				current_event.u.CreateProcessInfo.hThread);
-	  break;
+	    case EXIT_THREAD_DEBUG_EVENT:
+	      DEBUG_EVENTS (("gdb: kernel event for pid=%d tid=%d code=%s)\n",
+			     current_event.dwProcessId, current_event.dwThreadId,
+			     "EXIT_THREAD_DEBUG_EVENT"));
+	      child_delete_thread (current_event.dwThreadId);
+	      break;
 
-	case EXIT_PROCESS_DEBUG_EVENT:
-	  DEBUG_EVENTS (("gdb: kernel event for pid=%d tid=%d code=%s)\n",
-			current_event.dwProcessId, current_event.dwThreadId,
-			"EXIT_PROCESS_DEBUG_EVENT"));
-	  ourstatus->kind = TARGET_WAITKIND_EXITED;
-	  ourstatus->value.integer = current_event.u.ExitProcess.dwExitCode;
-	  CloseHandle (current_process_handle);
-	  return current_event.dwProcessId;
-	  break;
+	    case CREATE_PROCESS_DEBUG_EVENT:
+	      DEBUG_EVENTS (("gdb: kernel event for pid=%d tid=%d code=%s)\n",
+			     current_event.dwProcessId, current_event.dwThreadId,
+			     "CREATE_PROCESS_DEBUG_EVENT"));
+	      current_process_handle = current_event.u.CreateProcessInfo.hProcess;
 
-	case LOAD_DLL_DEBUG_EVENT:
-	  DEBUG_EVENTS (("gdb: kernel event for pid=%d tid=%d code=%s)\n",
-			current_event.dwProcessId, current_event.dwThreadId,
-			"LOAD_DLL_DEBUG_EVENT"));
-          catch_errors (handle_load_dll, NULL, "", RETURN_MASK_ALL);
-	  registers_changed();          /* mark all regs invalid */
-	  break;
+	      main_thread_id = inferior_pid = current_event.dwThreadId;
+	      /* Add the main thread */
+	      current_thread = child_add_thread (inferior_pid,
+						 current_event.u.CreateProcessInfo.hThread);
+	      break;
 
-	case UNLOAD_DLL_DEBUG_EVENT:
-	  DEBUG_EVENTS (("gdb: kernel event for pid=%d tid=%d code=%s)\n",
-			current_event.dwProcessId, current_event.dwThreadId,
-			"UNLOAD_DLL_DEBUG_EVENT"));
-	  break;	/* FIXME: don't know what to do here */
+	    case EXIT_PROCESS_DEBUG_EVENT:
+	      DEBUG_EVENTS (("gdb: kernel event for pid=%d tid=%d code=%s)\n",
+			     current_event.dwProcessId, current_event.dwThreadId,
+			     "EXIT_PROCESS_DEBUG_EVENT"));
+	      ourstatus->kind = TARGET_WAITKIND_EXITED;
+	      ourstatus->value.integer = current_event.u.ExitProcess.dwExitCode;
+	      CloseHandle (current_process_handle);
+	      return current_event.dwProcessId;
+	      break;
 
-	case EXCEPTION_DEBUG_EVENT:
-	  DEBUG_EVENTS (("gdb: kernel event for pid=%d tid=%d code=%s)\n",
-			current_event.dwProcessId, current_event.dwThreadId,
-			"EXCEPTION_DEBUG_EVENT"));
-	  if (handle_exception (ourstatus))
-	    return current_event.dwThreadId;
-	  continue_status = DBG_EXCEPTION_NOT_HANDLED;
-	  break;
+	    case LOAD_DLL_DEBUG_EVENT:
+	      DEBUG_EVENTS (("gdb: kernel event for pid=%d tid=%d code=%s)\n",
+			     current_event.dwProcessId, current_event.dwThreadId,
+			     "LOAD_DLL_DEBUG_EVENT"));
+	      catch_errors (handle_load_dll, NULL, "", RETURN_MASK_ALL);
+	      registers_changed();          /* mark all regs invalid */
+	      break;
 
-	case OUTPUT_DEBUG_STRING_EVENT: /* message from the kernel */
-	  DEBUG_EVENTS (("gdb: kernel event for pid=%d tid=%d code=%s)\n",
-			current_event.dwProcessId, current_event.dwThreadId,
-			"OUTPUT_DEBUG_STRING_EVENT"));
-	  if (handle_output_debug_string (ourstatus))
-	    return main_thread_id;
-	  break;
-	default:
-	  printf_unfiltered ("gdb: kernel event for pid=%d tid=%d\n",
-			     current_event.dwProcessId,
-			     current_event.dwThreadId);
-	  printf_unfiltered ("                 unknown event code %d\n",
-			     current_event.dwDebugEventCode);
-	  break;
+	    case UNLOAD_DLL_DEBUG_EVENT:
+	      DEBUG_EVENTS (("gdb: kernel event for pid=%d tid=%d code=%s)\n",
+			     current_event.dwProcessId, current_event.dwThreadId,
+			     "UNLOAD_DLL_DEBUG_EVENT"));
+	      break;	/* FIXME: don't know what to do here */
+
+	    case EXCEPTION_DEBUG_EVENT:
+	      DEBUG_EVENTS (("gdb: kernel event for pid=%d tid=%d code=%s)\n",
+			     current_event.dwProcessId, current_event.dwThreadId,
+			     "EXCEPTION_DEBUG_EVENT"));
+	      if (handle_exception (ourstatus))
+		return current_event.dwThreadId;
+	      continue_status = DBG_EXCEPTION_NOT_HANDLED;
+	      break;
+
+	    case OUTPUT_DEBUG_STRING_EVENT: /* message from the kernel */
+	      DEBUG_EVENTS (("gdb: kernel event for pid=%d tid=%d code=%s)\n",
+			     current_event.dwProcessId, current_event.dwThreadId,
+			     "OUTPUT_DEBUG_STRING_EVENT"));
+	      if (handle_output_debug_string (ourstatus))
+		return main_thread_id;
+	      break;
+	    default:
+	      printf_unfiltered ("gdb: kernel event for pid=%d tid=%d\n",
+				 current_event.dwProcessId,
+				 current_event.dwThreadId);
+	      printf_unfiltered ("                 unknown event code %d\n",
+				 current_event.dwDebugEventCode);
+	      break;
+	    }
+
+	  CHECK (child_continue (continue_status, -1));
 	}
+      else
+	{
+	  int detach = 0;
 
-      CHECK (child_continue (continue_status, -1));
+	  if (ui_loop_hook != NULL)
+	    detach = ui_loop_hook (0);
+
+	  if (detach)
+	    child_kill_inferior ();
+	}
     }
 }
 
