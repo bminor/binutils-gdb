@@ -1,3 +1,8 @@
+2002-11-25  Andrew Cagney  <ac131313@redhat.com>
+
+	* MAINTAINERS: Mark h8500 as broken.  Breakage occured Fri Nov 5
+	16:32:04 1999 Andrew Cagney <cagney@b1.cygnus.com>.
+
 2002-11-25  Jim Blandy  <jimb@redhat.com>
 
 	* symfile.c (init_objfile_sect_indices): New function.
