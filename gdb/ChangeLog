@@ -1,3 +1,10 @@
+Thu Sep  8 16:15:34 1994  J.T. Conklin  (jtc@rtl.cygnus.com)
+
+	* sparclite/Makefile.in: Assorted stuff needed for eload.
+
+	* sparclite/eload.c: Merge in command line argument parsing and
+	  error message handling improvements orignally made to aload.c.
+
 Wed Sep  7 23:24:50 1994  Jeff Law  (law@snake.cs.utah.edu)
 
 	* defs.h (enum misc_command_type, command_control_type): Enums
@@ -434,7 +441,7 @@ Fri Aug 12 15:52:37 1994  Stu Grossman  (grossman@cygnus.com)
 
 Fri Aug 12 11:47:10 1994  J.T. Conklin  (jtc@phishhead.cygnus.com)
 
-	* sparclite/aload.c (sys_error, error): Use vfprintf to variable
+	* sparclite/aload.c (sys_error, error): Use vfprintf for variable
 	  argument lists.
 
 Thu Aug 11 04:06:42 1994  Doug Evans  (dje@canuck.cygnus.com)
