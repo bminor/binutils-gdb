@@ -1,3 +1,7 @@
+Mon Jul 28 20:51:16 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* t-pdivuw.s: Also check normal cases.
+
 Tue Jul 15 13:34:07 1997  Andrew Cagney  <cagney@sendai.cygnus.com>
 
 	ChangeLog: Create
