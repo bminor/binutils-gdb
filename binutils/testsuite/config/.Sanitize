@@ -25,6 +25,7 @@ Do-first:
 Things-to-keep:
 
 default.exp
+hppa.sed
 
 Things-to-lose:
 
