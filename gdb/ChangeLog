@@ -1,3 +1,11 @@
+2004-01-27  Jim Blandy  <jimb@redhat.com>
+
+	Clean up misapplied patch:
+	* dwarf2read.c (determine_prefix): Change one of the two forward
+	declarations for 'determine_prefix_aux' to a declaration for this.
+	(read_func_scope): Use cu->language, not cu_language.  Pass 'cu'
+	argument to 'die_specification'.
+
 2004-01-27  Paul N. Hilfinger  <hilfinger@gnat.com>
 	
 	* breakpoint.c (breakpoint_re_set_one): Set b->cond, b->val, and

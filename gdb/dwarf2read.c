@@ -765,7 +765,7 @@ static struct type *tag_type_to_type (struct die_info *, struct dwarf2_cu *);
 
 static void read_type_die (struct die_info *, struct dwarf2_cu *);
 
-static char *determine_prefix_aux (struct die_info *die, struct dwarf2_cu *);
+static char *determine_prefix (struct die_info *die, struct dwarf2_cu *);
 
 static char *determine_prefix_aux (struct die_info *die, struct dwarf2_cu *);
 
@@ -2169,9 +2169,9 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
   if (name == NULL || !dwarf2_get_pc_bounds (die, &lowpc, &highpc, cu))
     return;
 
-  if (cu_language == language_cplus)
+  if (cu->language == language_cplus)
     {
-      struct die_info *spec_die = die_specification (die);
+      struct die_info *spec_die = die_specification (die, cu);
 
 	  /* NOTE: carlton/2004-01-23: We have to be careful in the
 	     presence of DW_AT_specification.  For example, with GCC
