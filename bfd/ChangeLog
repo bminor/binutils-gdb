@@ -1,3 +1,22 @@
+Thu Jun 15 14:03:47 1995  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* bfd-in.h, bfd-in2.h (bfd_boolean): Rename bfd_true, bfd_false
+	to bfd_tttrue, bfd_fffalse so as not to conflict with functions.
+	* coffswap.h (coff_swap_scnhdr_out): Remove version that was
+	hacked for MPW C.
+	* mpw-config.in: Set shell vars instead of pasting to makefile
+	for each configuration, edit coffswap.h to make MPW C not choke.
+	(i386-unknown-coff, sh-hitachi-hms): Recognize.
+	* mpw-make.in (BFD_LIBS): Add versados.c.o.
+
+	* versados.c (versados_scan): Properly cast results from bfd_alloc.
+
+Wed Jun 14 15:27:32 1995  Steve Chamberlain  <sac@slash.cygnus.com>
+
+	* cofflink.c (process_embedded_commands): New function
+	reads and handles .drectve sections for PE.
+	(coff_link_input_bfd): Call new function if PE.
+
 Mon Jun 12 12:09:39 1995  Jeff Law  (law@snake.cs.utah.edu)
 
 	* bfd-in.h (bfd_set_section_vma): Case true to a boolean.

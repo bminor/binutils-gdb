@@ -489,10 +489,10 @@ versados_scan (abfd)
       if (esdid->section)
 	{
 	  esdid->section->relocation
-	    = bfd_alloc (abfd, sizeof (arelent) * esdid->relocs);
+	    = (arelent *) bfd_alloc (abfd, sizeof (arelent) * esdid->relocs);
 
 	  esdid->contents
-	    = bfd_alloc (abfd, esdid->section->_raw_size);
+	    = (unsigned char *) bfd_alloc (abfd, esdid->section->_raw_size);
 
 	  esdid->pc = 0;
 	  esdid->section->reloc_count = esdid->relocs;
@@ -505,7 +505,7 @@ versados_scan (abfd)
 	  VDATA (abfd)->stringlen += strlen (esdid->section->name) + 1;
 	}
     }
-  VDATA (abfd)->symbols = bfd_alloc (abfd,
+  VDATA (abfd)->symbols = (asymbol *) bfd_alloc (abfd,
 				     sizeof (asymbol) * abfd->symcount);
   VDATA (abfd)->strings = bfd_alloc (abfd, VDATA (abfd)->stringlen);
   abfd->symcount = VDATA (abfd)->nsyms;
@@ -788,6 +788,7 @@ versados_canonicalize_reloc (abfd, section, relptr, symbols)
 #define versados_bfd_link_hash_table_create _bfd_generic_link_hash_table_create
 #define versados_bfd_link_add_symbols _bfd_generic_link_add_symbols
 #define versados_bfd_final_link _bfd_generic_final_link
+#define versados_bfd_link_split_section _bfd_generic_link_split_section
 
 const bfd_target versados_vec =
 {

@@ -90,7 +90,8 @@ typedef struct _bfd bfd;
 typedef enum bfd_boolean {false, true} boolean;
 #define BFD_TRUE_FALSE
 #else
-typedef enum bfd_boolean {bfd_false, bfd_true} boolean;
+/* Use enum names that will appear nowhere else.  */
+typedef enum bfd_boolean {bfd_fffalse, bfd_tttrue} boolean;
 #endif
 
 /* A pointer to a position in a file.  */
@@ -297,7 +298,7 @@ typedef struct sec *sec_ptr;
 
 #define bfd_is_com_section(ptr) (((ptr)->flags & SEC_IS_COMMON) != 0)
 
-#define bfd_set_section_vma(bfd, ptr, val) (((ptr)->vma = (ptr)->lma= (val)), ((ptr)->user_set_vma = true), true)
+#define bfd_set_section_vma(bfd, ptr, val) (((ptr)->vma = (ptr)->lma= (val)), ((ptr)->user_set_vma = (boolean)true), true)
 #define bfd_set_section_alignment(bfd, ptr, val) (((ptr)->alignment_power = (val)),true)
 #define bfd_set_section_userdata(bfd, ptr, val) (((ptr)->userdata = (val)),true)
 
@@ -504,7 +505,7 @@ typedef struct _bfd_link_stack_heap bfd_link_stack_heap;
 
 #define bfd_get_symbol_leading_char(abfd) ((abfd)->xvec->symbol_leading_char)
 
-#define bfd_set_cacheable(abfd,bool) (((abfd)->cacheable = (bool)), true)
+#define bfd_set_cacheable(abfd,bool) (((abfd)->cacheable = (boolean)(bool)), true)
 
 /* Byte swapping routines.  */
 

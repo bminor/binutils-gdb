@@ -104,7 +104,7 @@ BFD_LIBS = \Option-d
 	"{o}"archive.c.o "{o}"archures.c.o "{o}"bfd.c.o "{o}"cache.c.o "{o}"coffgen.c.o "{o}"core.c.o \Option-d
 	"{o}"format.c.o "{o}"init.c.o "{o}"libbfd.c.o "{o}"opncls.c.o "{o}"reloc.c.o \Option-d
 	"{o}"section.c.o "{o}"syms.c.o "{o}"targets.c.o "{o}"hash.c.o "{o}"linker.c.o \Option-d
-	"{o}"elf.c.o "{o}"srec.c.o "{o}"binary.c.o
+	"{o}"elf.c.o "{o}"srec.c.o "{o}"binary.c.o "{o}"tekhex.c.o "{o}"versados.c.o
 
 # This list is alphabetized to make it easier to keep in sync
 # with the decls and initializer in archures.c.
@@ -380,6 +380,7 @@ saber \Option-f
 "{o}"srec.c.o  \Option-f "{s}"srec.c
 "{o}"binary.c.o  \Option-f "{s}"binary.c
 "{o}"tekhex.c.o  \Option-f "{s}"tekhex.c
+"{o}"versados.c.o  \Option-f "{s}"versados.c
 "{o}"oasys.c.o  \Option-f "{s}"oasys.c {INCDIR}:oasys.h liboasys.h
 "{o}"ieee.c.o  \Option-f "{s}"ieee.c {INCDIR}:ieee.h libieee.h
 "{o}"ecoff.c.o  \Option-f "{s}"ecoff.c {INCDIR}:aout:ar.h {INCDIR}:aout:ranlib.h \Option-d
