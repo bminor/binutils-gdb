@@ -1,5 +1,7 @@
 Fri Dec 16 11:07:10 1994  Stan Shebs  <shebs@andros.cygnus.com>
 
+	* config/obj-coff.h: Include libcoff.h, not ../bfd/libcoff.h.
+
 	* as.h: Include progress.h.
 	* as.c (main): Call START_PROGRESS and END_PROGRESS.
 	(main, perform_an_assembly_pass): Call PROGRESS.
