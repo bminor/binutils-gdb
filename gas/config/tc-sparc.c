@@ -1956,7 +1956,8 @@ md_apply_fix (fixP, value)
      don't want to include the value of an externally visible symbol.  */
   if (fixP->fx_addsy != NULL)
     {
-      if ((S_IS_EXTERN (fixP->fx_addsy)
+      if ((S_IS_EXTERNAL (fixP->fx_addsy)
+	   || S_IS_WEAK (fixP->fx_addsy)
 	   || (sparc_pic_code && ! fixP->fx_pcrel))
 	  && S_GET_SEGMENT (fixP->fx_addsy) != absolute_section
 	  && S_GET_SEGMENT (fixP->fx_addsy) != undefined_section
@@ -2216,7 +2217,8 @@ tc_gen_reloc (section, fixp)
 	{
 	case BFD_RELOC_32_PCREL_S2:
 	  if (! S_IS_DEFINED (fixp->fx_addsy)
-	      || S_IS_EXTERNAL (fixp->fx_addsy))
+	      || S_IS_EXTERNAL (fixp->fx_addsy)
+	      || S_IS_WEAK (fixp->fx_addsy))
 	    code = BFD_RELOC_SPARC_WPLT30;
 	  break;
 	case BFD_RELOC_HI22:
