@@ -3014,33 +3014,19 @@ elfNN_ia64_install_dyn_reloc (abfd, info, sec, srel, offset, type,
 {
   Elf_Internal_Rela outrel;
 
-  outrel.r_offset = (sec->output_section->vma
-		     + sec->output_offset
-		     + offset);
+  offset += sec->output_section->vma + sec->output_offset;
 
   BFD_ASSERT (dynindx != -1);
   outrel.r_info = ELFNN_R_INFO (dynindx, type);
   outrel.r_addend = addend;
-
-  if (elf_section_data (sec)->stab_info != NULL)
+  outrel.r_offset = _bfd_elf_section_offset (abfd, info, sec, offset);
+  if (outrel.r_offset == (bfd_vma) -1)
     {
-      /* This may be NULL for linker-generated relocations, as it is
-	 inconvenient to pass all the bits around.  And this shouldn't
-	 happen.  */
-      BFD_ASSERT (info != NULL);
-
-      offset = (_bfd_stab_section_offset
-		(abfd, &elf_hash_table (info)->stab_info, sec,
-		 &elf_section_data (sec)->stab_info, offset));
-      if (offset == (bfd_vma) -1)
-	{
-	  /* Run for the hills.  We shouldn't be outputting a relocation
-	     for this.  So do what everyone else does and output a no-op.  */
-	  outrel.r_info = ELFNN_R_INFO (0, R_IA64_NONE);
-	  outrel.r_addend = 0;
-	  offset = 0;
-	}
-      outrel.r_offset = offset;
+      /* Run for the hills.  We shouldn't be outputting a relocation
+	 for this.  So do what everyone else does and output a no-op.  */
+      outrel.r_info = ELFNN_R_INFO (0, R_IA64_NONE);
+      outrel.r_addend = 0;
+      outrel.r_offset = 0;
     }
 
   bfd_elfNN_swap_reloca_out (abfd, &outrel,

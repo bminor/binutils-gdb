@@ -1473,21 +1473,11 @@ elf64_x86_64_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	      skip = false;
 
-	      if (elf_section_data (input_section)->stab_info == NULL)
-		outrel.r_offset = rela->r_offset;
-	      else
-		{
-		  bfd_vma off;
-
-		  off = (_bfd_stab_section_offset
-			 (output_bfd, &elf_hash_table (info)->stab_info,
-			  input_section,
-			  &elf_section_data (input_section)->stab_info,
-			  rela->r_offset));
-		  if (off == (bfd_vma) -1)
-		    skip = true;
-		  outrel.r_offset = off;
-		}
+	      outrel.r_offset =
+		_bfd_elf_section_offset (output_bfd, info, input_section,
+					 rela->r_offset);
+	      if (outrel.r_offset == (bfd_vma) -1)
+		skip = true;
 
 	      outrel.r_offset += (input_section->output_section->vma
 				  + input_section->output_offset);

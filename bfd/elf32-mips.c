@@ -6358,29 +6358,10 @@ mips_elf_create_dynamic_relocation (output_bfd, info, rel, h, sec,
 	      < sreloc->_raw_size);
 
   skip = false;
-
-  /* We begin by assuming that the offset for the dynamic relocation
-     is the same as for the original relocation.  We'll adjust this
-     later to reflect the correct output offsets.  */
-  if (elf_section_data (input_section)->stab_info == NULL)
-    outrel.r_offset = rel->r_offset;
-  else
-    {
-      /* Except that in a stab section things are more complex.
-	 Because we compress stab information, the offset given in the
-	 relocation may not be the one we want; we must let the stabs
-	 machinery tell us the offset.  */
-      outrel.r_offset
-	= (_bfd_stab_section_offset
-	   (output_bfd, &elf_hash_table (info)->stab_info,
-	    input_section,
-	    &elf_section_data (input_section)->stab_info,
-	    rel->r_offset));
-      /* If we didn't need the relocation at all, this value will be
-	 -1.  */
-      if (outrel.r_offset == (bfd_vma) -1)
-	skip = true;
-    }
+  outrel.r_offset =
+    _bfd_elf_section_offset (output_bfd, info, input_section, rel->r_offset);
+  if (outrel.r_offset == (bfd_vma) -1)
+    skip = true;
 
   /* If we've decided to skip this relocation, just output an empty
      record.  Note that R_MIPS_NONE == 0, so that this call to memset

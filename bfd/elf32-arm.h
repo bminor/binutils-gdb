@@ -1149,22 +1149,11 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
 
 	  skip = false;
 
-	  if (elf_section_data (input_section)->stab_info == NULL)
-	    outrel.r_offset = rel->r_offset;
-	  else
-	    {
-	      bfd_vma off;
-
-	      off = (_bfd_stab_section_offset
-		     (output_bfd, &elf_hash_table (info)->stab_info,
-		      input_section,
-		      & elf_section_data (input_section)->stab_info,
-		      rel->r_offset));
-	      if (off == (bfd_vma) -1)
-		skip = true;
-	      outrel.r_offset = off;
-	    }
-
+	  outrel.r_offset =
+	    _bfd_elf_section_offset (output_bfd, info, input_section,
+				     rel->r_offset);
+	  if (outrel.r_offset == (bfd_vma) -1)
+	    skip = true;
 	  outrel.r_offset += (input_section->output_section->vma
 			      + input_section->output_offset);
 
@@ -1892,9 +1881,7 @@ elf32_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 		}
 	      msec = sec;
 	      addend =
-		_bfd_merged_section_offset (output_bfd, &msec,
-					    elf_section_data (sec)->merge_info,
-					    sym->st_value + addend, (bfd_vma) 0)
+		_bfd_elf_rel_local_sym (output_bfd, sym, &msec, addend)
 		- relocation;
 	      addend += msec->output_section->vma + msec->output_offset;
 	      value = (value & ~ howto->dst_mask) | (addend & howto->dst_mask);

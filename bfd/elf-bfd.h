@@ -1142,6 +1142,10 @@ extern enum elf_reloc_type_class _bfd_elf_reloc_type_class
   PARAMS ((const Elf_Internal_Rela *));
 extern bfd_vma _bfd_elf_rela_local_sym
   PARAMS ((bfd *, Elf_Internal_Sym *, asection *, Elf_Internal_Rela *));
+extern bfd_vma _bfd_elf_rel_local_sym
+  PARAMS ((bfd *, Elf_Internal_Sym *, asection **, bfd_vma));
+extern bfd_vma _bfd_elf_section_offset
+  PARAMS ((bfd *, struct bfd_link_info *, asection *, bfd_vma));
 
 extern unsigned long bfd_elf_hash
   PARAMS ((const char *));

@@ -3494,20 +3494,11 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	      skip = false;
 
-	      if (elf_section_data (input_section)->stab_info == NULL)
-		outrel.r_offset = offset;
-	      else
-		{
-		  bfd_vma off;
-
-		  off = (_bfd_stab_section_offset
-			 (output_bfd, htab->elf.stab_info, input_section,
-			  &elf_section_data (input_section)->stab_info,
-			  offset));
-		  if (off == (bfd_vma) -1)
-		    skip = true;
-		  outrel.r_offset = off;
-		}
+	      outrel.r_offset =
+		_bfd_elf_section_offset (output_bfd, info, input_section,
+					 rel->r_offset);
+	      if (outrel.r_offset == (bfd_vma) -1)
+		skip = true;
 
 	      outrel.r_offset += (input_section->output_section->vma
 				  + input_section->output_offset);

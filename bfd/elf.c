@@ -6393,7 +6393,8 @@ _bfd_elf_rela_local_sym (abfd, sym, sec, rel)
 		+ sec->output_offset
 		+ sym->st_value);
   if ((sec->flags & SEC_MERGE)
-      && ELF_ST_TYPE (sym->st_info) == STT_SECTION)
+      && ELF_ST_TYPE (sym->st_info) == STT_SECTION
+      && elf_section_data (sec)->merge_info)
     {
       asection *msec;
 
@@ -6407,4 +6408,38 @@ _bfd_elf_rela_local_sym (abfd, sym, sec, rel)
       rel->r_addend += msec->output_section->vma + msec->output_offset;
     }
   return relocation;
+}
+
+bfd_vma
+_bfd_elf_rel_local_sym (abfd, sym, psec, addend)
+     bfd *abfd;
+     Elf_Internal_Sym *sym;
+     asection **psec;
+     bfd_vma addend;
+{     
+  asection *sec = *psec;
+
+  if (elf_section_data (sec)->merge_info == NULL)
+    return sym->st_value + addend;
+
+  return _bfd_merged_section_offset (abfd, psec,
+				     elf_section_data (sec)->merge_info,
+				     sym->st_value + addend, (bfd_vma) 0);
+}
+
+bfd_vma
+_bfd_elf_section_offset (abfd, info, sec, offset)
+     bfd *abfd;
+     struct bfd_link_info *info;
+     asection *sec;
+     bfd_vma offset;
+{
+  struct bfd_elf_section_data *sec_data;
+
+  sec_data = elf_section_data (sec);
+  if (sec_data->stab_info != NULL)
+    return _bfd_stab_section_offset
+	   (abfd, &elf_hash_table (info)->stab_info,
+	    sec, &sec_data->stab_info, offset);
+  return offset;
 }

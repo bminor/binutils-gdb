@@ -1,3 +1,32 @@
+2001-12-07  Jakub Jelinek  <jakub@redhat.com>
+
+	* elf.c (_bfd_elf_rela_local_sym): Only call
+	_bfd_merged_section_offset if merge_info is non-NULL.
+	(_bfd_elf_rel_local_sym, _bfd_elf_section_offset): New.
+	* elf-bfd.h (_bfd_elf_rel_local_sym, _bfd_elf_section_offset): New
+	prototypes.
+	* elf32-arm.h (elf32_arm_final_link_relocate): Use
+	_bfd_elf_section_offset.
+	(elf32_arm_relocate_section): Use _bfd_elf_rel_local_sym.
+	* elf32-i386.c (elf_i386_relocate_section): Use
+	_bfd_elf_section_offset and _bfd_elf_rel_local_sym.
+	* elf32-sh.c (sh_elf_relocate_section): Likewise.
+	* elf32-sparc.c (elf32_sparc_relocate_section): Use
+	_bfd_elf_section_offset.
+	* elf32-cris.c (cris_elf_relocate_section): Likewise.
+	* elf32-hppa.c (elf32_hppa_relocate_section): Likewise.
+	* elf32-i370.c (i370_elf_relocate_section): Likewise.
+	* elf32-m68k.c (elf_m68k_relocate_section): Likewise.
+	* elf32-mips.c (mips_elf_create_dynamic_relocation): Likewise.
+	* elf32-ppc.c (ppc_elf_relocate_section): Likewise.
+	* elf32-s390.c (elf_s390_relocate_section): Likewise.
+	* elf64-alpha.c (elf64_alpha_relocate_section): Likewise.
+	* elf64-ppc.c (ppc64_elf_relocate_section): Likewise.
+	* elf64-s390.c (elf_s390_relocate_section): Likewise.
+	* elf64-sparc.c (sparc64_elf_relocate_section): Likewise.
+	* elf64-x86-64.c (elf64_x86_64_relocate_section): Likewise.
+	* elfxx-ia64.c (elfNN_ia64_install_dyn_reloc): Likewise.
+
 2001-12-07  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-hppa.c (clobber_millicode_symbols): Don't do anything if
