@@ -1,5 +1,31 @@
 2003-08-29  Mark Kettenis  <kettenis@gnu.org>
 
+	* amd64-nat.h: New file.
+	* amd64-nat.c: New file.
+	* amd64fbsd-nat.c: Include "amd64-nat.h".
+	(REG_ADDR, GETREGS_SUPPLIES): Remove macros.
+	(amd64fbsd32_r_reg_offset): New variable.
+	(supply_gregset): Simply call amd64_supply_native_gregset.
+	(fill_gregset): Rename `regno' to `regnum'.  Simply call
+	amd64_collect_native_gregset.
+	(fill_fpregset): Rename `regno' to `regnum'.
+	(fetch_inferior_registers): Rename `regno' to `regnum'.  Replace
+	usage of GETREGS_SUPPLIES with amd64_native_gregset_supplies_p.
+	Use `struct reg' and `struct fpreg' instead of `gregset_t' and
+	`fpregset_t'.  Call amd64_supply_native_gregset instead of
+	supply_gregset.  Call x86_64_supply_fxsave instead of
+	supply_fpregset.
+	(store_inferior_registers): Rename `regno' to `regnum'.  Replace
+	usage of GETREGS_SUPPLIES with amd64_native_gregset_supplies_p.
+	Use `struct reg' and `struct fpreg' instead of `gregset_t' and
+	`fpregset_t'.  Call amd64_collect_native_gregset instead of
+	fill_gregset.  Call x86_64_collect_fxsave instead of
+	fill_fpregset.
+	(_initialize_am64fbsd_nat): Initialize
+	amd64_native_gregset32_reg_offset and
+	amd64_native_gregset64_reg_offset.
+	* config/i386/fbsd64.mh (NATDEPFILES): Add amd64-nat.o.
+
 	* regcache.c (regcache_raw_supply): Don't assert that BUF isn't a
 	null pointer.  Fix typo in comment.
 
