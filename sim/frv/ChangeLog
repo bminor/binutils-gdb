@@ -1,3 +1,9 @@
+2003-09-10  Dave Brolley  <brolley@redhat.com>
+
+	* profile.c (slot_names): FM1 was listed twice. Changed first
+	instance to FM0. Added IALL, FMALL and FMLOW.
+	(print_parallel): Don't examine slots with no insns.
+
 2003-09-09  Dave Brolley  <brolley@redhat.com>
 
 	* frv.c (do_media_average): Select machine using a switch.

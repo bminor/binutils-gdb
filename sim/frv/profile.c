@@ -1,6 +1,6 @@
 /* frv simulator machine independent profiling code.
 
-   Copyright (C) 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
+   Copyright (C) 1998, 1999, 2000, 2001, 2003 Free Software Foundation, Inc.
    Contributed by Red Hat
 
 This file is part of the GNU simulators.
@@ -1706,12 +1706,15 @@ print_cache (SIM_CPU *cpu, FRV_CACHE *cache, const char *cache_name)
   sim_io_printf (sd, "\n");
 }
 
+/* This table must correspond to the UNIT_ATTR table in
+   opcodes/frv-desc.h. Only the units up to UNIT_C need be
+   listed since the others cannot occur after mapping.  */
 static char *
 slot_names[] =
 {
   "none",
-  "I0", "I1", "I01",
-  "FM1", "FM1", "FM01",
+  "I0", "I1", "I01", "IALL",
+  "FM0", "FM1", "FM01", "FMALL", "FMLOW",
   "B0", "B1", "B01",
   "C"
 };
@@ -1747,12 +1750,15 @@ print_parallel (SIM_CPU *cpu, int verbose)
       int max_name_len = 0;
       for (i = UNIT_NIL + 1; i < UNIT_NUM_UNITS; ++i)
 	{
-	  int len;
-	  if (INSNS_IN_SLOT (i) > max_val)
-	    max_val = INSNS_IN_SLOT (i);
-	  len = strlen (slot_names[i]);
-	  if (len > max_name_len)
-	    max_name_len = len;
+	  if (INSNS_IN_SLOT (i))
+	    {
+	      int len;
+	      if (INSNS_IN_SLOT (i) > max_val)
+		max_val = INSNS_IN_SLOT (i);
+	      len = strlen (slot_names[i]);
+	      if (len > max_name_len)
+		max_name_len = len;
+	    }
 	}
       if (max_val > 0)
 	{
