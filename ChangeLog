@@ -1,3 +1,11 @@
+Mon May 20 10:12:29 1996  Geoffrey Noer  <noer@cygnus.com>
+
+	* configure.in (*-*-cygwin32): configure make
+
+Tue May  7 14:19:42 1996  Tom Tromey  <tromey@snuffle.cygnus.com>
+
+	* Makefile.in (inet-install): Quote value of INSTALL_MODULES.
+
 Fri May  3 08:57:17 1996  Tom Tromey  <tromey@lisa.cygnus.com>
 
 	* Makefile.in (all-inet): Depend on all-perl.
