@@ -1,5 +1,12 @@
 Thu Sep 29 15:21:44 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
+	* elf.c (bfd_elf_print_symbol): Moved here from elf_print_symbol
+	in elfcode.h.  (case bfd_print_symbol_all): Print symbol's size
+	field, except for common symbols; print their alignment.
+	* elfcode.h (elf_print_symbol): Deleted.
+	* libelf.h (bfd_elf_print_symbol): Declare.
+	(bfd_elf{32,64}_print_symbol): Replace declarations with macros.
+
 	* syms.c (bfd_print_symbol_vandf): Show BSF_LOCAL and BSF_GLOBAL
 	in one column.  Use the column freed up to show BSF_FUNCTION and
 	BSF_FILE.

@@ -103,7 +103,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
   NAME(bfd_elf,canonicalize_dynamic_symtab)
 #define elf_make_empty_symbol		NAME(bfd_elf,make_empty_symbol)
 #define elf_get_symbol_info		NAME(bfd_elf,get_symbol_info)
-#define elf_print_symbol		NAME(bfd_elf,print_symbol)
 #define elf_get_lineno			NAME(bfd_elf,get_lineno)
 #define elf_set_arch_mach		NAME(bfd_elf,set_arch_mach)
 #define elf_find_nearest_line		NAME(bfd_elf,find_nearest_line)
@@ -2064,13 +2063,9 @@ assign_file_positions_except_relocs (abfd, dosyms)
 	  if (first == NULL)
 	    first = hdr;
 
-	  if ((abfd->flags & D_PAGED) != 0)
-	    {
-	      /* The section VMA must equal the file position modulo
-		 the page size.  This is required by the program
-		 header.  */
-	      off += (hdr->sh_addr - off) % maxpagesize;
-	    }
+	  /* The section VMA must equal the file position modulo the
+	     page size.  This is required by the program header.  */
+	  off += (hdr->sh_addr - off) % maxpagesize;
 
 	  off = assign_file_position_for_section (hdr, off, false);
 	}
@@ -3160,38 +3155,6 @@ elf_get_symbol_info (ignore_abfd, symbol, ret)
      symbol_info *ret;
 {
   bfd_symbol_info (symbol, ret);
-}
-
-void
-elf_print_symbol (ignore_abfd, filep, symbol, how)
-     bfd *ignore_abfd;
-     PTR filep;
-     asymbol *symbol;
-     bfd_print_symbol_type how;
-{
-  FILE *file = (FILE *) filep;
-  switch (how)
-    {
-    case bfd_print_symbol_name:
-      fprintf (file, "%s", symbol->name);
-      break;
-    case bfd_print_symbol_more:
-      fprintf (file, "elf ");
-      fprintf_vma (file, symbol->value);
-      fprintf (file, " %lx", (long) symbol->flags);
-      break;
-    case bfd_print_symbol_all:
-      {
-	CONST char *section_name;
-	section_name = symbol->section ? symbol->section->name : "(*none*)";
-	bfd_print_symbol_vandf ((PTR) file, symbol);
-	fprintf (file, " %s\t%s",
-		 section_name,
-		 symbol->name);
-      }
-      break;
-    }
-
 }
 
 alent *

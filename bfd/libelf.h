@@ -512,6 +512,11 @@ struct elf_obj_tdata
 extern char * elf_string_from_elf_section PARAMS ((bfd *, unsigned, unsigned));
 extern char * elf_get_str_section PARAMS ((bfd *, unsigned));
 
+extern void bfd_elf_print_symbol PARAMS ((bfd *, PTR, asymbol *,
+					  bfd_print_symbol_type));
+
+#define bfd_elf32_print_symbol	bfd_elf_print_symbol
+#define bfd_elf64_print_symbol	bfd_elf_print_symbol
 #define bfd_elf32_mkobject	bfd_elf_mkobject
 #define bfd_elf64_mkobject	bfd_elf_mkobject
 #define elf_mkobject		bfd_elf_mkobject
@@ -560,8 +565,6 @@ extern long bfd_elf32_get_reloc_upper_bound PARAMS ((bfd *, sec_ptr));
 extern long bfd_elf32_canonicalize_reloc PARAMS ((bfd *, sec_ptr,
 						  arelent **, asymbol **));
 extern asymbol *bfd_elf32_make_empty_symbol PARAMS ((bfd *));
-extern void bfd_elf32_print_symbol PARAMS ((bfd *, PTR, asymbol *,
-					    bfd_print_symbol_type));
 extern void bfd_elf32_get_symbol_info PARAMS ((bfd *, asymbol *,
 					       symbol_info *));
 extern alent *bfd_elf32_get_lineno PARAMS ((bfd *, asymbol *));
@@ -625,8 +628,6 @@ extern long bfd_elf64_get_reloc_upper_bound PARAMS ((bfd *, sec_ptr));
 extern long bfd_elf64_canonicalize_reloc PARAMS ((bfd *, sec_ptr,
 						  arelent **, asymbol **));
 extern asymbol *bfd_elf64_make_empty_symbol PARAMS ((bfd *));
-extern void bfd_elf64_print_symbol PARAMS ((bfd *, PTR, asymbol *,
-					    bfd_print_symbol_type));
 extern void bfd_elf64_get_symbol_info PARAMS ((bfd *, asymbol *,
 					       symbol_info *));
 extern alent *bfd_elf64_get_lineno PARAMS ((bfd *, asymbol *));
