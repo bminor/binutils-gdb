@@ -4698,6 +4698,32 @@ opd_entry_value (asection *opd_sec,
   bfd *opd_bfd = opd_sec->owner;
   Elf_Internal_Rela *lo, *hi, *look;
 
+  /* No relocs implies we are linking a --just-symbols object.  */
+  if (opd_sec->reloc_count == 0)
+    {
+      bfd_vma val;
+
+      if (!bfd_get_section_contents (opd_bfd, opd_sec, &val, offset, 8))
+	return (bfd_vma) -1;
+      
+      if (code_sec != NULL)
+	{
+	  asection *sec, *likely = NULL;
+	  for (sec = opd_bfd->sections; sec != NULL; sec = sec->next)
+	    if (sec->vma <= val
+		&& (sec->flags & SEC_LOAD) != 0
+		&& (sec->flags & SEC_ALLOC) != 0)
+	      likely = sec;
+	  if (likely != NULL)
+	    {
+	      *code_sec = likely;
+	      if (code_off != NULL)
+		*code_off = val - likely->vma;
+	    }
+	}
+      return val;
+    }
+
   /* Go find the opd reloc at the sym address.  */
   lo = _bfd_elf_link_read_relocs (opd_bfd, opd_sec, NULL, NULL, TRUE);
   BFD_ASSERT (lo != NULL);
@@ -5899,12 +5925,15 @@ ppc64_elf_edit_opd (bfd *obfd, struct bfd_link_info *info,
       opd_adjust = get_opd_info (sec);
       if (opd_adjust == NULL)
 	{
-	  /* Must be a ld -r link.  ie. check_relocs hasn't been
-	     called.  */
+	  /* check_relocs hasn't been called.  Must be a ld -r link
+	     or --just-symbols object.   */
 	  opd_adjust = bfd_zalloc (obfd, amt);
 	  ppc64_elf_section_data (sec)->opd.adjust = opd_adjust;
 	}
       memset (opd_adjust, 0, amt);
+
+      if (sec->sec_info_type == ELF_INFO_TYPE_JUST_SYMS)
+	continue;
 
       if (sec->output_section == bfd_abs_section_ptr)
 	continue;
