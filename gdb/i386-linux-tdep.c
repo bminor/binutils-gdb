@@ -209,11 +209,17 @@ i386_linux_rt_sigtramp_start (CORE_ADDR pc)
 static int
 i386_linux_pc_in_sigtramp (CORE_ADDR pc, char *name)
 {
-  if (name)
-    return STREQ ("__restore", name) || STREQ ("__restore_rt", name);
-  
-  return (i386_linux_sigtramp_start (pc) != 0
-	  || i386_linux_rt_sigtramp_start (pc) != 0);
+  /* If we have NAME, we can optimize the search.  The trampolines are
+     named __restore and __restore_rt.  However, they aren't dynamically
+     exported from the shared C library, so the trampoline may appear to
+     be part of the preceding function.  This should always be sigaction,
+     __sigaction, or __libc_sigaction (all aliases to the same function).  */
+  if (name == NULL || strstr (name, "sigaction") != NULL)
+    return (i386_linux_sigtramp_start (pc) != 0
+	    || i386_linux_rt_sigtramp_start (pc) != 0);
+
+  return (strcmp ("__restore", name) == 0
+	  || strcmp ("__restore_rt", name) == 0);
 }
 
 /* Assuming FRAME is for a GNU/Linux sigtramp routine, return the

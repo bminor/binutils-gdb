@@ -1,3 +1,8 @@
+2002-10-31  Daniel Jacobowitz  <drow@mvista.com>
+
+	* i386-linux-tdep.c (i386_linux_pc_in_sigtramp): Check for
+	trampolines in sigaction.
+
 2002-10-31  Andrew Cagney  <cagney@redhat.com>
 
 	* h8300-tdep.c: Include "gdb_assert.h".
