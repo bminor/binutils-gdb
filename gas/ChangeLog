@@ -1,3 +1,24 @@
+2001-12-06  Richard Earnshaw (rearnsha@arm.com)
+
+	* tc-arm.c (do_arit, do_cmp, do_mov, do_ldst, do_ldstt, do_ldmstm)
+	(do_branch, do_swi, do_adr, do_adrl, do_empty, do_mul, do_mla)
+	(do_swap, do_msr, do_mrs, do_mull, do_ldstv4, do_bx, do_blx)
+	(do_bkpt, do_clz, do_lstc2, do_cdp2, do_co_reg2, do_smla, do_smlal)
+	(do_smul, do_qadd, do_pld, do_ldrd, do_co_reg2c, do_cdp, do_lstc)
+	(do_co_reg, do_fpa_ctrl, do_fpa_ldst, do_fpa_ldmstm, do_fpa_monadic)
+	(do_fpa_dyadic, do_fpa_cmp, do_fpa_from_reg, do_fpa_to_reg, do_mia)
+	(do_mar, do_mra, do_c_binops, do_c_binops_1, do_c_binops_2)
+	(do_c_binops_3, do_c_triple, do_c_triple_4, do_c_triple_5, do_c_quad)
+	(do_c_quad_6, do_c_dspsc, do_c_dspsc_1, do_c_dspsc_2, do_c_shift)
+	(do_c_shift_1, do_c_shift_2, do_c_ldst, do_c_ldst_1, do_c_ldst_2)
+	(do_c_ldst_3, do_c_ldst_4, do_branch25): Delete redundant argument,
+	FLAGS.
+	(struct asm_opcode): Adjust parms field accordingly.
+	(md_assemble): Don't pass dummy second argument when calling worker
+	functions.
+	(build_arm_ops_hsh): Add prototype
+	(BAD_FLAGS): Delete.
+
 2001-12-05  Richard Earnshaw  <rearnsha@arm.com>
 
 	* tc-arm.c (struct asm_opcode): Delete comp_suffix and flags.  Add

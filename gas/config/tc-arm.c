@@ -481,100 +481,100 @@ enum cirrus_regtype
 
 /* Functions called by parser.  */
 /* ARM instructions.  */
-static void do_arit		PARAMS ((char *, unsigned long));
-static void do_cmp		PARAMS ((char *, unsigned long));
-static void do_mov		PARAMS ((char *, unsigned long));
-static void do_ldst		PARAMS ((char *, unsigned long));
-static void do_ldstt		PARAMS ((char *, unsigned long));
-static void do_ldmstm		PARAMS ((char *, unsigned long));
-static void do_branch		PARAMS ((char *, unsigned long));
-static void do_swi		PARAMS ((char *, unsigned long));
+static void do_arit		PARAMS ((char *));
+static void do_cmp		PARAMS ((char *));
+static void do_mov		PARAMS ((char *));
+static void do_ldst		PARAMS ((char *));
+static void do_ldstt		PARAMS ((char *));
+static void do_ldmstm		PARAMS ((char *));
+static void do_branch		PARAMS ((char *));
+static void do_swi		PARAMS ((char *));
 
 /* Pseudo Op codes.  */
-static void do_adr		PARAMS ((char *, unsigned long));
-static void do_adrl		PARAMS ((char *, unsigned long));
-static void do_empty		PARAMS ((char *, unsigned long));
+static void do_adr		PARAMS ((char *));
+static void do_adrl		PARAMS ((char *));
+static void do_empty		PARAMS ((char *));
 
 /* ARM v2.  */
-static void do_mul		PARAMS ((char *, unsigned long));
-static void do_mla		PARAMS ((char *, unsigned long));
+static void do_mul		PARAMS ((char *));
+static void do_mla		PARAMS ((char *));
 
 /* ARM v2S.  */
-static void do_swap		PARAMS ((char *, unsigned long));
+static void do_swap		PARAMS ((char *));
 
 /* ARM v3.  */
-static void do_msr		PARAMS ((char *, unsigned long));
-static void do_mrs		PARAMS ((char *, unsigned long));
+static void do_msr		PARAMS ((char *));
+static void do_mrs		PARAMS ((char *));
 
 /* ARM v3M.  */
-static void do_mull		PARAMS ((char *, unsigned long));
+static void do_mull		PARAMS ((char *));
 
 /* ARM v4.  */
-static void do_ldstv4		PARAMS ((char *, unsigned long));
+static void do_ldstv4		PARAMS ((char *));
 
 /* ARM v4T.  */
-static void do_bx               PARAMS ((char *, unsigned long));
+static void do_bx               PARAMS ((char *));
 
 /* ARM v5.  */
-static void do_blx		PARAMS ((char *, unsigned long));
-static void do_bkpt		PARAMS ((char *, unsigned long));
-static void do_clz		PARAMS ((char *, unsigned long));
-static void do_lstc2		PARAMS ((char *, unsigned long));
-static void do_cdp2		PARAMS ((char *, unsigned long));
-static void do_co_reg2		PARAMS ((char *, unsigned long));
+static void do_blx		PARAMS ((char *));
+static void do_bkpt		PARAMS ((char *));
+static void do_clz		PARAMS ((char *));
+static void do_lstc2		PARAMS ((char *));
+static void do_cdp2		PARAMS ((char *));
+static void do_co_reg2		PARAMS ((char *));
 
 /* ARM v5ExP.  */
-static void do_smla		PARAMS ((char *, unsigned long));
-static void do_smlal		PARAMS ((char *, unsigned long));
-static void do_smul		PARAMS ((char *, unsigned long));
-static void do_qadd		PARAMS ((char *, unsigned long));
+static void do_smla		PARAMS ((char *));
+static void do_smlal		PARAMS ((char *));
+static void do_smul		PARAMS ((char *));
+static void do_qadd		PARAMS ((char *));
 
 /* ARM v5E.  */
-static void do_pld		PARAMS ((char *, unsigned long));
-static void do_ldrd		PARAMS ((char *, unsigned long));
-static void do_co_reg2c		PARAMS ((char *, unsigned long));
+static void do_pld		PARAMS ((char *));
+static void do_ldrd		PARAMS ((char *));
+static void do_co_reg2c		PARAMS ((char *));
 
 /* Coprocessor Instructions.  */
-static void do_cdp		PARAMS ((char *, unsigned long));
-static void do_lstc		PARAMS ((char *, unsigned long));
-static void do_co_reg		PARAMS ((char *, unsigned long));
+static void do_cdp		PARAMS ((char *));
+static void do_lstc		PARAMS ((char *));
+static void do_co_reg		PARAMS ((char *));
 
 /* FPA instructions.  */
-static void do_fpa_ctrl		PARAMS ((char *, unsigned long));
-static void do_fpa_ldst		PARAMS ((char *, unsigned long));
-static void do_fpa_ldmstm	PARAMS ((char *, unsigned long));
-static void do_fpa_dyadic	PARAMS ((char *, unsigned long));
-static void do_fpa_monadic	PARAMS ((char *, unsigned long));
-static void do_fpa_cmp		PARAMS ((char *, unsigned long));
-static void do_fpa_from_reg	PARAMS ((char *, unsigned long));
-static void do_fpa_to_reg	PARAMS ((char *, unsigned long));
+static void do_fpa_ctrl		PARAMS ((char *));
+static void do_fpa_ldst		PARAMS ((char *));
+static void do_fpa_ldmstm	PARAMS ((char *));
+static void do_fpa_dyadic	PARAMS ((char *));
+static void do_fpa_monadic	PARAMS ((char *));
+static void do_fpa_cmp		PARAMS ((char *));
+static void do_fpa_from_reg	PARAMS ((char *));
+static void do_fpa_to_reg	PARAMS ((char *));
 
 /* XScale.  */
-static void do_mia		PARAMS ((char *, unsigned long));
-static void do_mar		PARAMS ((char *, unsigned long));
-static void do_mra		PARAMS ((char *, unsigned long));
+static void do_mia		PARAMS ((char *));
+static void do_mar		PARAMS ((char *));
+static void do_mra		PARAMS ((char *));
 
-/* ARM_EXT_MAVERICK.  */
-static void do_c_binops		PARAMS ((char *, unsigned long, int));
-static void do_c_binops_1	PARAMS ((char *, unsigned long));
-static void do_c_binops_2	PARAMS ((char *, unsigned long));
-static void do_c_binops_3	PARAMS ((char *, unsigned long));
-static void do_c_triple		PARAMS ((char *, unsigned long, int));
-static void do_c_triple_4	PARAMS ((char *, unsigned long));
-static void do_c_triple_5	PARAMS ((char *, unsigned long));
-static void do_c_quad		PARAMS ((char *, unsigned long, int));
-static void do_c_quad_6		PARAMS ((char *, unsigned long));
-static void do_c_dspsc		PARAMS ((char *, unsigned long, int));
-static void do_c_dspsc_1	PARAMS ((char *, unsigned long));
-static void do_c_dspsc_2	PARAMS ((char *, unsigned long));
-static void do_c_shift		PARAMS ((char *, unsigned long, int));
-static void do_c_shift_1	PARAMS ((char *, unsigned long));
-static void do_c_shift_2	PARAMS ((char *, unsigned long));
-static void do_c_ldst		PARAMS ((char *, unsigned long, int));
-static void do_c_ldst_1		PARAMS ((char *, unsigned long));
-static void do_c_ldst_2		PARAMS ((char *, unsigned long));
-static void do_c_ldst_3		PARAMS ((char *, unsigned long));
-static void do_c_ldst_4		PARAMS ((char *, unsigned long));
+/* Maverick.  */
+static void do_c_binops		PARAMS ((char *, int));
+static void do_c_binops_1	PARAMS ((char *));
+static void do_c_binops_2	PARAMS ((char *));
+static void do_c_binops_3	PARAMS ((char *));
+static void do_c_triple		PARAMS ((char *, int));
+static void do_c_triple_4	PARAMS ((char *));
+static void do_c_triple_5	PARAMS ((char *));
+static void do_c_quad		PARAMS ((char *, int));
+static void do_c_quad_6		PARAMS ((char *));
+static void do_c_dspsc		PARAMS ((char *, int));
+static void do_c_dspsc_1	PARAMS ((char *));
+static void do_c_dspsc_2	PARAMS ((char *));
+static void do_c_shift		PARAMS ((char *, int));
+static void do_c_shift_1	PARAMS ((char *));
+static void do_c_shift_2	PARAMS ((char *));
+static void do_c_ldst		PARAMS ((char *, int));
+static void do_c_ldst_1		PARAMS ((char *));
+static void do_c_ldst_2		PARAMS ((char *));
+static void do_c_ldst_3		PARAMS ((char *));
+static void do_c_ldst_4		PARAMS ((char *));
 static int cirrus_reg_required_here	PARAMS ((char **, int,
 						 enum cirrus_regtype));
 static int cirrus_valid_reg	PARAMS ((int, enum cirrus_regtype));
@@ -616,13 +616,14 @@ static void thumb_add_sub	PARAMS ((char *, int));
 static void insert_reg		PARAMS ((int));
 static void thumb_shift		PARAMS ((char *, int));
 static void thumb_mov_compare	PARAMS ((char *, int));
+static void build_arm_ops_hsh	PARAMS ((void));
 static void set_constant_flonums	PARAMS ((void));
 static valueT md_chars_to_number	PARAMS ((char *, int));
 static void insert_reg_alias	PARAMS ((char *, int));
 static void output_inst		PARAMS ((void));
 static int accum0_required_here PARAMS ((char **));
 static int ld_mode_required_here PARAMS ((char **));
-static void do_branch25         PARAMS ((char *, unsigned long));
+static void do_branch25         PARAMS ((char *));
 static symbolS * find_real_start PARAMS ((symbolS *));
 #ifdef OBJ_ELF
 static bfd_reloc_code_real_type	arm_parse_reloc PARAMS ((void));
@@ -666,7 +667,7 @@ struct asm_opcode
   unsigned long variant;
 
   /* Function to call to parse args.  */
-  void (* parms) PARAMS ((char *, unsigned long));
+  void (* parms) PARAMS ((char *));
 };
 
 static const struct asm_opcode insns[] =
@@ -779,7 +780,7 @@ static const struct asm_opcode insns[] =
      NickC:  but this is wrong because the bits 16 through 19 are
              handled by the PSR_xxx defines above.  */
 
-  /* ARM 7M long multiplies - need signed/unsigned flags!  */
+  /* ARM 7M long multiplies.  */
   {"smull",      0xe0c00090, 5,  ARM_EXT_V3M,      do_mull},
   {"smulls",     0xe0d00090, 5,  ARM_EXT_V3M,      do_mull},
   {"umull",      0xe0800090, 5,  ARM_EXT_V3M,      do_mull},
@@ -1688,7 +1689,6 @@ static const struct reg_entry reg_table[] =
 
 #define BAD_ARGS 	_("Bad arguments to instruction")
 #define BAD_PC 		_("r15 not allowed here")
-#define BAD_FLAGS 	_("Instruction should not have flags")
 #define BAD_COND 	_("Instruction is not conditional")
 #define ERR_NO_ACCUM	_("acc0 expected")
 
@@ -2716,20 +2716,17 @@ cp_address_required_here (str)
 }
 
 static void
-do_empty (str, flags)
+do_empty (str)
      char * str;
-     unsigned long flags;
 {
   /* Do nothing really.  */
-  inst.instruction |= flags; /* This is pointless.  */
   end_of_line (str);
   return;
 }
 
 static void
-do_mrs (str, flags)
+do_mrs (str)
      char *str;
-     unsigned long flags;
 {
   int skip = 0;
 
@@ -2771,7 +2768,6 @@ do_mrs (str, flags)
     inst.instruction |= SPSR_BIT;
   str += skip;
 
-  inst.instruction |= flags;
   end_of_line (str);
 }
 
@@ -2780,9 +2776,8 @@ do_mrs (str, flags)
       "{C|S}PSR_f, #expression".  */
 
 static void
-do_msr (str, flags)
+do_msr (str)
      char * str;
-     unsigned long flags;
 {
   skip_whitespace (str);
 
@@ -2800,7 +2795,6 @@ do_msr (str, flags)
   if (reg_required_here (& str, 0) != FAIL)
     {
       inst.error = NULL;
-      inst.instruction |= flags;
       end_of_line (str);
       return;
     }
@@ -2834,7 +2828,7 @@ do_msr (str, flags)
     }
 #endif
 
-  flags |= INST_IMMEDIATE;
+  inst.instruction |= INST_IMMEDIATE;
 
   if (inst.reloc.exp.X_add_symbol)
     {
@@ -2855,7 +2849,6 @@ do_msr (str, flags)
     }
 
   inst.error = NULL;
-  inst.instruction |= flags;
   end_of_line (str);
 }
 
@@ -2866,9 +2859,8 @@ do_msr (str, flags)
    SMLAL RdLo, RdHi, Rm, Rs.  */
 
 static void
-do_mull (str, flags)
+do_mull (str)
      char * str;
-     unsigned long flags;
 {
   int rdlo, rdhi, rm, rs;
 
@@ -2912,15 +2904,13 @@ do_mull (str, flags)
       return;
     }
 
-  inst.instruction |= flags;
   end_of_line (str);
   return;
 }
 
 static void
-do_mul (str, flags)
+do_mul (str)
      char * str;
-     unsigned long flags;
 {
   int rd, rm;
 
@@ -2968,15 +2958,13 @@ do_mul (str, flags)
       return;
     }
 
-  inst.instruction |= flags;
   end_of_line (str);
   return;
 }
 
 static void
-do_mla (str, flags)
+do_mla (str)
      char * str;
-     unsigned long flags;
 {
   int rd, rm;
 
@@ -3026,7 +3014,6 @@ do_mla (str, flags)
       return;
     }
 
-  inst.instruction |= flags;
   end_of_line (str);
   return;
 }
@@ -3181,9 +3168,8 @@ ld_mode_required_here (string)
    Error if any register is R15.  */
 
 static void
-do_smla (str, flags)
+do_smla (str)
      char *        str;
-     unsigned long flags;
 {
   int rd, rm, rs, rn;
 
@@ -3201,9 +3187,6 @@ do_smla (str, flags)
   else if (rd == REG_PC || rm == REG_PC || rs == REG_PC || rn == REG_PC)
     inst.error = BAD_PC;
 
-  else if (flags)
-    inst.error = BAD_FLAGS;
-
   else
     end_of_line (str);
 }
@@ -3214,9 +3197,8 @@ do_smla (str, flags)
    Warning if Rdlo == Rdhi.  */
 
 static void
-do_smlal (str, flags)
+do_smlal (str)
      char *        str;
-     unsigned long flags;
 {
   int rdlo, rdhi, rm, rs;
 
@@ -3243,10 +3225,7 @@ do_smlal (str, flags)
   if (rdlo == rdhi)
     as_tsktsk (_("rdhi and rdlo must be different"));
 
-  if (flags)
-    inst.error = BAD_FLAGS;
-  else
-    end_of_line (str);
+  end_of_line (str);
 }
 
 /* ARM V5E (El Segundo) signed-multiply (argument parse)
@@ -3254,9 +3233,8 @@ do_smlal (str, flags)
    Error if any register is R15.  */
 
 static void
-do_smul (str, flags)
+do_smul (str)
      char *        str;
-     unsigned long flags;
 {
   int rd, rm, rs;
 
@@ -3272,9 +3250,6 @@ do_smul (str, flags)
   else if (rd == REG_PC || rm == REG_PC || rs == REG_PC)
     inst.error = BAD_PC;
 
-  else if (flags)
-    inst.error = BAD_FLAGS;
-
   else
     end_of_line (str);
 }
@@ -3284,9 +3259,8 @@ do_smul (str, flags)
    Error if any register is R15.  */
 
 static void
-do_qadd (str, flags)
+do_qadd (str)
      char *        str;
-     unsigned long flags;
 {
   int rd, rm, rn;
 
@@ -3302,9 +3276,6 @@ do_qadd (str, flags)
   else if (rd == REG_PC || rm == REG_PC || rn == REG_PC)
     inst.error = BAD_PC;
 
-  else if (flags)
-    inst.error = BAD_FLAGS;
-
   else
     end_of_line (str);
 }
@@ -3319,9 +3290,8 @@ do_qadd (str, flags)
    Result unpredicatable if Rd or Rn is R15.  */
 
 static void
-do_co_reg2c (str, flags)
+do_co_reg2c (str)
      char *        str;
-     unsigned long flags;
 {
   int rd, rn;
 
@@ -3371,9 +3341,6 @@ do_co_reg2c (str, flags)
       return;
     }
 
-  if (flags)
-    inst.error = BAD_COND;
-
   end_of_line (str);
 }
 
@@ -3383,17 +3350,10 @@ do_co_reg2c (str, flags)
      Error if Rd or Rm are R15.  */
 
 static void
-do_clz (str, flags)
+do_clz (str)
      char *        str;
-     unsigned long flags;
 {
   int rd, rm;
-
-  if (flags)
-    {
-      as_bad (BAD_FLAGS);
-      return;
-    }
 
   skip_whitespace (str);
 
@@ -3416,13 +3376,9 @@ do_clz (str, flags)
      Otherwise, it's the same as LDC/STC.  */
 
 static void
-do_lstc2 (str, flags)
+do_lstc2 (str)
      char *        str;
-     unsigned long flags;
 {
-  if (flags)
-    inst.error = BAD_COND;
-
   skip_whitespace (str);
 
   if (co_proc_number (& str) == FAIL)
@@ -3452,9 +3408,8 @@ do_lstc2 (str, flags)
      Otherwise, it's the same as CDP.  */
 
 static void
-do_cdp2 (str, flags)
+do_cdp2 (str)
      char *        str;
-     unsigned long flags;
 {
   skip_whitespace (str);
 
@@ -3507,9 +3462,6 @@ do_cdp2 (str, flags)
 	}
     }
 
-  if (flags)
-    inst.error = BAD_FLAGS;
-
   end_of_line (str);
 }
 
@@ -3520,9 +3472,8 @@ do_cdp2 (str, flags)
      Otherwise, it's the same as MCR/MRC.  */
 
 static void
-do_co_reg2 (str, flags)
+do_co_reg2 (str)
      char *        str;
-     unsigned long flags;
 {
   skip_whitespace (str);
 
@@ -3575,9 +3526,6 @@ do_co_reg2 (str, flags)
 	}
     }
 
-  if (flags)
-    inst.error = BAD_COND;
-
   end_of_line (str);
 }
 
@@ -3624,9 +3572,8 @@ do_t_bkpt (str)
 	new one that can cope with setting one extra bit (the H bit).  */
 
 static void
-do_branch25 (str, flags)
+do_branch25 (str)
      char *        str;
-     unsigned long flags ATTRIBUTE_UNUSED;
 {
   if (my_get_expression (& inst.reloc.exp, & str))
     return;
@@ -3679,18 +3626,11 @@ do_branch25 (str, flags)
    Also, the <target_addr> can be 25 bits, hence has its own reloc.  */
 
 static void
-do_blx (str, flags)
+do_blx (str)
      char *        str;
-     unsigned long flags;
 {
   char * mystr = str;
   int rm;
-
-  if (flags)
-    {
-      as_bad (BAD_FLAGS);
-      return;
-    }
 
   skip_whitespace (mystr);
   rm = reg_required_here (& mystr, 0);
@@ -3704,7 +3644,7 @@ do_blx (str, flags)
 	 Use the condition code our caller put in inst.instruction.
 	 Pass ourselves off as a BX with a funny opcode.  */
       inst.instruction |= 0x012fff30;
-      do_bx (str, flags);
+      do_bx (str);
     }
   else
     {
@@ -3719,7 +3659,7 @@ do_blx (str, flags)
 
       /* Process like a B/BL, but with a different reloc.
 	 Note that B/BL expecte fffffe, not 0, offset in the opcode table.  */
-      do_branch25 (str, flags);
+      do_branch25 (str);
     }
 }
 
@@ -3771,13 +3711,11 @@ do_t_blx (str)
      BKPT <16 bit unsigned immediate>
      Instruction is not conditional.
 	The bit pattern given in insns[] has the COND_ALWAYS condition,
-	and it is an error if the caller tried to override that.
-     Note "flags" is nonzero if a flag was supplied (which is an error).  */
+	and it is an error if the caller tried to override that. */
 
 static void
-do_bkpt (str, flags)
+do_bkpt (str)
      char *        str;
-     unsigned long flags;
 {
   expressionS expr;
   unsigned long number;
@@ -3812,9 +3750,6 @@ do_bkpt (str, flags)
   inst.instruction |= number & 0xf;
 
   end_of_line (str);
-
-  if (flags)
-    inst.error = BAD_FLAGS;
 }
 
 /* Xscale multiply-accumulate (argument parse)
@@ -3823,17 +3758,13 @@ do_bkpt (str, flags)
      MIAxycc acc0,Rm,Rs.  */
 
 static void
-do_mia (str, flags)
+do_mia (str)
      char * str;
-     unsigned long flags;
 {
   int rs;
   int rm;
 
-  if (flags)
-    as_bad (BAD_FLAGS);
-
-  else if (accum0_required_here (& str) == FAIL)
+  if (accum0_required_here (& str) == FAIL)
     inst.error = ERR_NO_ACCUM;
 
   else if (skip_past_comma (& str) == FAIL
@@ -3857,16 +3788,12 @@ do_mia (str, flags)
      MARcc   acc0,RdLo,RdHi.  */
 
 static void
-do_mar (str, flags)
+do_mar (str)
      char * str;
-     unsigned long flags;
 {
   int rdlo, rdhi;
 
-  if (flags)
-    as_bad (BAD_FLAGS);
-
-  else if (accum0_required_here (& str) == FAIL)
+  if (accum0_required_here (& str) == FAIL)
     inst.error = ERR_NO_ACCUM;
 
   else if (skip_past_comma (& str) == FAIL
@@ -3890,18 +3817,11 @@ do_mar (str, flags)
      MRAcc   RdLo,RdHi,acc0.  */
 
 static void
-do_mra (str, flags)
+do_mra (str)
      char * str;
-     unsigned long flags;
 {
   int rdlo;
   int rdhi;
-
-  if (flags)
-    {
-      as_bad (BAD_FLAGS);
-      return;
-    }
 
   skip_whitespace (str);
 
@@ -3933,17 +3853,10 @@ do_mra (str, flags)
   Syntactically, like LDR with B=1, W=0, L=1.  */
 
 static void
-do_pld (str, flags)
+do_pld (str)
      char * str;
-     unsigned long flags;
 {
   int rd;
-
-  if (flags)
-    {
-      as_bad (BAD_FLAGS);
-      return;
-    }
 
   skip_whitespace (str);
 
@@ -4023,9 +3936,8 @@ do_pld (str, flags)
      STRccD R, mode.  */
 
 static void
-do_ldrd (str, flags)
+do_ldrd (str)
      char * str;
-     unsigned long flags;
 {
   int rd;
   int rn;
@@ -4055,7 +3967,7 @@ do_ldrd (str, flags)
 
   if (rd == REG_LR)
     {
-      inst.error = _("r12 or r14 not allowed here");
+      inst.error = _("r14 not allowed here");
       return;
     }
 
@@ -4564,9 +4476,8 @@ fp_op2 (str)
 }
 
 static void
-do_arit (str, flags)
+do_arit (str)
      char * str;
-     unsigned long flags;
 {
   skip_whitespace (str);
 
@@ -4581,15 +4492,13 @@ do_arit (str, flags)
       return;
     }
 
-  inst.instruction |= flags;
   end_of_line (str);
   return;
 }
 
 static void
-do_adr (str, flags)
+do_adr (str)
      char * str;
-     unsigned long flags;
 {
   /* This is a pseudo-op of the form "adr rd, label" to be converted
      into a relative address of the form "add rd, pc, #label-.-8".  */
@@ -4614,9 +4523,8 @@ do_adr (str, flags)
 }
 
 static void
-do_adrl (str, flags)
+do_adrl (str)
      char * str;
-     unsigned long flags;
 {
   /* This is a pseudo-op of the form "adrl rd, label" to be converted
      into a relative address of the form:
@@ -4647,9 +4555,8 @@ do_adrl (str, flags)
 }
 
 static void
-do_cmp (str, flags)
+do_cmp (str)
      char * str;
-     unsigned long flags;
 {
   skip_whitespace (str);
 
@@ -4668,15 +4575,13 @@ do_cmp (str, flags)
       return;
     }
 
-  inst.instruction |= flags;
   end_of_line (str);
   return;
 }
 
 static void
-do_mov (str, flags)
+do_mov (str)
      char * str;
-     unsigned long flags;
 {
   skip_whitespace (str);
 
@@ -4695,7 +4600,6 @@ do_mov (str, flags)
       return;
     }
 
-  inst.instruction |= flags;
   end_of_line (str);
   return;
 }
@@ -4760,9 +4664,8 @@ ldst_extend (str)
 }
 
 static void
-do_ldst (str, flags)
+do_ldst (str)
      char *        str;
-     unsigned long flags;
 {
   int pre_inc = 0;
   int conflict_reg;
@@ -4782,8 +4685,6 @@ do_ldst (str, flags)
       inst.error = _("Address expected");
       return;
     }
-
-  flags = 0;
 
   if (*str == '[')
     {
@@ -4933,9 +4834,8 @@ do_ldst (str, flags)
 }
 
 static void
-do_ldstt (str, flags)
+do_ldstt (str)
      char *        str;
-     unsigned long flags;
 {
   int conflict_reg;
 
@@ -5074,9 +4974,8 @@ ldst_extend_v4 (str)
 
 /* Halfword and signed-byte load/store operations.  */
 static void
-do_ldstv4 (str, flags)
+do_ldstv4 (str)
      char *        str;
-     unsigned long flags;
 {
   int pre_inc = 0;
   int conflict_reg;
@@ -5391,9 +5290,8 @@ reg_list (strp)
 }
 
 static void
-do_ldmstm (str, flags)
+do_ldmstm (str)
      char * str;
-     unsigned long flags;
 {
   int base_reg;
   long range;
@@ -5431,15 +5329,14 @@ do_ldmstm (str, flags)
       inst.instruction |= LDM_TYPE_2_OR_3;
     }
 
-  inst.instruction |= flags | range;
+  inst.instruction |= range;
   end_of_line (str);
   return;
 }
 
 static void
-do_swi (str, flags)
+do_swi (str)
      char * str;
-     unsigned long flags;
 {
   skip_whitespace (str);
 
@@ -5452,17 +5349,14 @@ do_swi (str, flags)
 
   inst.reloc.type = BFD_RELOC_ARM_SWI;
   inst.reloc.pc_rel = 0;
-  inst.instruction |= flags;
-
   end_of_line (str);
 
   return;
 }
 
 static void
-do_swap (str, flags)
+do_swap (str)
      char * str;
-     unsigned long flags;
 {
   int reg;
 
@@ -5517,15 +5411,13 @@ do_swap (str, flags)
       return;
     }
 
-  inst.instruction |= flags;
   end_of_line (str);
   return;
 }
 
 static void
-do_branch (str, flags)
+do_branch (str)
      char * str;
-     unsigned long flags ATTRIBUTE_UNUSED;
 {
   if (my_get_expression (&inst.reloc.exp, &str))
     return;
@@ -5569,9 +5461,8 @@ do_branch (str, flags)
 }
 
 static void
-do_bx (str, flags)
+do_bx (str)
      char * str;
-     unsigned long flags ATTRIBUTE_UNUSED;
 {
   int reg;
 
@@ -5591,9 +5482,8 @@ do_bx (str, flags)
 }
 
 static void
-do_cdp (str, flags)
+do_cdp (str)
      char * str;
-     unsigned long flags ATTRIBUTE_UNUSED;
 {
   /* Co-processor data operation.
      Format: CDP{cond} CP#,<expr>,CRd,CRn,CRm{,<expr>}  */
@@ -5653,9 +5543,8 @@ do_cdp (str, flags)
 }
 
 static void
-do_lstc (str, flags)
+do_lstc (str)
      char * str;
-     unsigned long flags;
 {
   /* Co-processor register load/store.
      Format: <LDC|STC{cond}[L] CP#,CRd,<address>  */
@@ -5685,15 +5574,13 @@ do_lstc (str, flags)
       return;
     }
 
-  inst.instruction |= flags;
   end_of_line (str);
   return;
 }
 
 static void
-do_co_reg (str, flags)
+do_co_reg (str)
      char * str;
-     unsigned long flags;
 {
   /* Co-processor register transfer.
      Format: <MCR|MRC>{cond} CP#,<expr1>,Rd,CRn,CRm{,<expr2>}  */
@@ -5748,19 +5635,14 @@ do_co_reg (str, flags)
 	  return;
 	}
     }
-  if (flags)
-    {
-      inst.error = BAD_COND;
-    }
 
   end_of_line (str);
   return;
 }
 
 static void
-do_fpa_ctrl (str, flags)
+do_fpa_ctrl (str)
      char * str;
-     unsigned long flags ATTRIBUTE_UNUSED;
 {
   /* FP control registers.
      Format: <WFS|RFS|WFC|RFC>{cond} Rn  */
@@ -5779,9 +5661,8 @@ do_fpa_ctrl (str, flags)
 }
 
 static void
-do_fpa_ldst (str, flags)
+do_fpa_ldst (str)
      char * str;
-     unsigned long flags ATTRIBUTE_UNUSED;
 {
   skip_whitespace (str);
 
@@ -5804,9 +5685,8 @@ do_fpa_ldst (str, flags)
 }
 
 static void
-do_fpa_ldmstm (str, flags)
+do_fpa_ldmstm (str)
      char * str;
-     unsigned long flags;
 {
   int num_regs;
 
@@ -5930,7 +5810,7 @@ do_fpa_ldmstm (str, flags)
 	    }
 	}
 
-      inst.instruction |= flags | offset;
+      inst.instruction |= offset;
     }
   else if (skip_past_comma (&str) == FAIL
 	   || cp_address_required_here (&str) == FAIL)
@@ -5944,9 +5824,8 @@ do_fpa_ldmstm (str, flags)
 }
 
 static void
-do_fpa_dyadic (str, flags)
+do_fpa_dyadic (str)
      char * str;
-     unsigned long flags;
 {
   skip_whitespace (str);
 
@@ -5973,15 +5852,13 @@ do_fpa_dyadic (str, flags)
       return;
     }
 
-  inst.instruction |= flags;
   end_of_line (str);
   return;
 }
 
 static void
-do_fpa_monadic (str, flags)
+do_fpa_monadic (str)
      char * str;
-     unsigned long flags;
 {
   skip_whitespace (str);
 
@@ -6000,15 +5877,13 @@ do_fpa_monadic (str, flags)
       return;
     }
 
-  inst.instruction |= flags;
   end_of_line (str);
   return;
 }
 
 static void
-do_fpa_cmp (str, flags)
+do_fpa_cmp (str)
      char * str;
-     unsigned long flags;
 {
   skip_whitespace (str);
 
@@ -6027,15 +5902,13 @@ do_fpa_cmp (str, flags)
       return;
     }
 
-  inst.instruction |= flags;
   end_of_line (str);
   return;
 }
 
 static void
-do_fpa_from_reg (str, flags)
+do_fpa_from_reg (str)
      char * str;
-     unsigned long flags;
 {
   skip_whitespace (str);
 
@@ -6054,15 +5927,13 @@ do_fpa_from_reg (str, flags)
       return;
     }
 
-  inst.instruction |= flags;
   end_of_line (str);
   return;
 }
 
 static void
-do_fpa_to_reg (str, flags)
+do_fpa_to_reg (str)
      char * str;
-     unsigned long flags;
 {
   skip_whitespace (str);
 
@@ -6077,7 +5948,6 @@ do_fpa_to_reg (str, flags)
       return;
     }
 
-  inst.instruction |= flags;
   end_of_line (str);
   return;
 }
@@ -6806,123 +6676,108 @@ cirrus_reg_required_here (str, shift, regtype)
 /* Wrapper functions.  */
 
 static void
-do_c_binops_1 (str, flags)
+do_c_binops_1 (str)
      char * str;
-     unsigned long flags;
 {
-  do_c_binops (str, flags, CIRRUS_MODE1);
+  do_c_binops (str, CIRRUS_MODE1);
 }
 
 static void
-do_c_binops_2 (str, flags)
+do_c_binops_2 (str)
      char * str;
-     unsigned long flags;
 {
-  do_c_binops (str, flags, CIRRUS_MODE2);
+  do_c_binops (str, CIRRUS_MODE2);
 }
 
 static void
-do_c_binops_3 (str, flags)
+do_c_binops_3 (str)
      char * str;
-     unsigned long flags;
 {
-  do_c_binops (str, flags, CIRRUS_MODE3);
+  do_c_binops (str, CIRRUS_MODE3);
 }
 
 static void
-do_c_triple_4 (str, flags)
+do_c_triple_4 (str)
      char * str;
-     unsigned long flags;
 {
-  do_c_triple (str, flags, CIRRUS_MODE4);
+  do_c_triple (str, CIRRUS_MODE4);
 }
 
 static void
-do_c_triple_5 (str, flags)
+do_c_triple_5 (str)
      char * str;
-     unsigned long flags;
 {
-  do_c_triple (str, flags, CIRRUS_MODE5);
+  do_c_triple (str, CIRRUS_MODE5);
 }
 
 static void
-do_c_quad_6 (str, flags)
+do_c_quad_6 (str)
      char * str;
-     unsigned long flags;
 {
-  do_c_quad (str, flags, CIRRUS_MODE6);
+  do_c_quad (str, CIRRUS_MODE6);
 }
 
 static void
-do_c_dspsc_1 (str, flags)
+do_c_dspsc_1 (str)
      char * str;
-     unsigned long flags;
 {
-  do_c_dspsc (str, flags, CIRRUS_MODE1);
+  do_c_dspsc (str, CIRRUS_MODE1);
 }
 
 static void
-do_c_dspsc_2 (str, flags)
+do_c_dspsc_2 (str)
      char * str;
-     unsigned long flags;
 {
-  do_c_dspsc (str, flags, CIRRUS_MODE2);
+  do_c_dspsc (str, CIRRUS_MODE2);
 }
 
 static void
-do_c_shift_1 (str, flags)
+do_c_shift_1 (str)
      char * str;
-     unsigned long flags;
 {
-  do_c_shift (str, flags, CIRRUS_MODE1);
+  do_c_shift (str, CIRRUS_MODE1);
 }
 
 static void
-do_c_shift_2 (str, flags)
+do_c_shift_2 (str)
      char * str;
-     unsigned long flags;
 {
-  do_c_shift (str, flags, CIRRUS_MODE2);
+  do_c_shift (str, CIRRUS_MODE2);
 }
 
 static void
-do_c_ldst_1 (str, flags)
+do_c_ldst_1 (str)
      char * str;
-     unsigned long flags;
 {
-  do_c_ldst (str, flags, CIRRUS_MODE1);
+  do_c_ldst (str, CIRRUS_MODE1);
 }
 
 static void
-do_c_ldst_2 (str, flags)
+do_c_ldst_2 (str)
      char * str;
-     unsigned long flags;
 {
-  do_c_ldst (str, flags, CIRRUS_MODE2);
+  do_c_ldst (str, CIRRUS_MODE2);
 }
 
 static void
-do_c_ldst_3 (str, flags)
+do_c_ldst_3 (str)
      char * str;
-     unsigned long flags;
 {
-  do_c_ldst (str, flags, CIRRUS_MODE3);
+  do_c_ldst (str, CIRRUS_MODE3);
 }
 
 static void
-do_c_ldst_4 (str, flags)
+do_c_ldst_4 (str)
      char * str;
-     unsigned long flags;
 {
-  do_c_ldst (str, flags, CIRRUS_MODE4);
+  do_c_ldst (str, CIRRUS_MODE4);
 }
 
 /* Isnsn like "foo X,Y".  */
 
 static void
-do_c_binops (str, flags, mode)
+do_c_binops (str, mode)
      char * str;
-     unsigned long flags;
      int mode;
 {
   int shift1, shift2;
@@ -6941,17 +6796,13 @@ do_c_binops (str, flags, mode)
     }
   else
     end_of_line (str);
-  
-  inst.instruction |= flags;
-  return;
 }
 
 /* Isnsn like "foo X,Y,Z".  */
 
 static void
-do_c_triple (str, flags, mode)
+do_c_triple (str, mode)
      char * str;
-     unsigned long flags;
      int mode;
 {
   int shift1, shift2, shift3;
@@ -6973,18 +6824,14 @@ do_c_triple (str, flags, mode)
     }
   else
     end_of_line (str);
-  
-  inst.instruction |= flags;
-  return;
 }
 
 /* Isnsn like "foo W,X,Y,Z".
     where W=MVAX[0:3] and X,Y,Z=MVFX[0:15].  */
 
 static void
-do_c_quad (str, flags, mode)
+do_c_quad (str, mode)
      char * str;
-     unsigned long flags;
      int mode;
 {
   int shift1, shift2, shift3, shift4;
@@ -7014,18 +6861,14 @@ do_c_quad (str, flags, mode)
     }
   else
     end_of_line (str);
-  
-  inst.instruction |= flags;
-  return;
 }
 
 /* cfmvsc32<cond> DSPSC,MVFX[15:0].
    cfmv32sc<cond> MVFX[15:0],DSPSC.  */
 
 static void
-do_c_dspsc (str, flags, mode)
+do_c_dspsc (str, mode)
      char * str;
-     unsigned long flags;
      int mode;
 {
   int error;
@@ -7058,11 +6901,8 @@ do_c_dspsc (str, flags, mode)
     }
   else
     {
-      inst.instruction |= flags;
       end_of_line (str);
     }
-
-  return;
 }
 
 /* Cirrus shift immediate instructions.
@@ -7070,9 +6910,8 @@ do_c_dspsc (str, flags, mode)
    cfsh64<cond> MVDX[15:0],MVDX[15:0],Shift[6:0].  */
 
 static void
-do_c_shift (str, flags, mode)
+do_c_shift (str, mode)
      char * str;
-     unsigned long flags;
      int mode;
 {
   int error;
@@ -7139,11 +6978,7 @@ do_c_shift (str, flags, mode)
   imm = (imm & 0xf) | ((imm & 0x70) << 1);
 
   inst.instruction |= imm;
-  inst.instruction |= flags;
-
   end_of_line (str);
-
-  return;
 }
 
 static int
@@ -7192,9 +7027,8 @@ cirrus_parse_offset (str, negative)
   <insn><cond> CRd,[Rn],<offset>.  */
 
 static void
-do_c_ldst (str, flags, mode)
+do_c_ldst (str, mode)
      char * str;
-     unsigned long flags;
      int mode;
 {
   int offset, negative;
@@ -7257,8 +7091,6 @@ do_c_ldst (str, flags, mode)
     inst.instruction |= CP_T_UD; /* Postive, so set bit U.  */
 
   inst.instruction |= offset >> 2;
-  inst.instruction |= flags;
-
   end_of_line (str);
   return;
 
@@ -9024,7 +8856,7 @@ md_assemble (str)
 
 	  inst.instruction = opcode->value;
 	  inst.size = INSN_SIZE;
-	  (*opcode->parms) (p, 0);
+	  (*opcode->parms) (p);
 	  output_inst ();
 	  return;
 	}
