@@ -5,11 +5,13 @@ Tue Feb 23 11:46:11 1993  Mike Stump  (mrs@cygnus.com)
 
 Tue Feb 23 11:21:33 1993  Fred Fish  (fnf@cygnus.com)
 
+	* dwarfread.c (read_tag_string_type):  Rewrite to allow forward
+	references of TAG_string_type DIEs in user defined types.
+	**** start-sanitize-chill ****
 	* ch-lang.c (chill_create_fundamental_type):  Track compiler
 	change that now emits debugging info with the type long for Chill
 	longs.
-	* dwarfread.c (read_tag_string_type):  Rewrite to allow forward
-	references of TAG_string_type DIEs in user defined types.
+	**** end-sanitize-chill ****
 
 Mon Feb 22 15:21:54 1993  Ian Lance Taylor  (ian@cygnus.com)
 
