@@ -1,3 +1,9 @@
+Thu Oct  5 10:02:57 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ecoff.h: Define section name macros and STYP macros for various
+	Alpha sections: .got, .hash, .dynsym, .dynstr, .rel.dyn, .conflic,
+	.comment, .liblist, .dynamic.
+
 Wed Oct  4 10:56:35 1995  Kim Knuttila  <krk@cygnus.com>
 
 	* pe.h: Moved DOSMAGIC and NT_SIGNATURE defines here
