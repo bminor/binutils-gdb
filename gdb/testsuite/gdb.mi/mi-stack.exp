@@ -73,13 +73,13 @@ proc test_stack_frame_listing {} {
     # -stack-list-frames 1 3
 
     mi_gdb_test "231-stack-list-frames" \
-	    "231\\^done,stack=\{frame=\{level=\"0 \",addr=\"$hex\",func=\"callee4\",file=\".*basics.c\",line=\"8\"\},frame=\{level=\"1 \",addr=\"$hex\",func=\"callee3\",.*\},frame=\{level=\"2 \",addr=\"$hex\",func=\"callee2\",.*\},frame=\{level=\"3 \",addr=\"$hex\",func=\"callee1\",.*\},frame=\{level=\"4 \",addr=\"$hex\",func=\"main\",.*\}\}" \
+	    "231\\^done,stack=\\\[frame=\{level=\"0 \",addr=\"$hex\",func=\"callee4\",file=\".*basics.c\",line=\"8\"\},frame=\{level=\"1 \",addr=\"$hex\",func=\"callee3\",.*\},frame=\{level=\"2 \",addr=\"$hex\",func=\"callee2\",.*\},frame=\{level=\"3 \",addr=\"$hex\",func=\"callee1\",.*\},frame=\{level=\"4 \",addr=\"$hex\",func=\"main\",.*\}\\\]" \
                 "stack frame listing"
     mi_gdb_test "232-stack-list-frames 1 1" \
-	    "232\\^done,stack=\{frame=\{level=\"1 \",addr=\"$hex\",func=\"callee3\",.*\}\}" \
+	    "232\\^done,stack=\\\[frame=\{level=\"1 \",addr=\"$hex\",func=\"callee3\",.*\}\\\]" \
                 "stack frame listing 1 1"
     mi_gdb_test "233-stack-list-frames 1 3" \
-	    "233\\^done,stack=\{frame=\{level=\"1 \",addr=\"$hex\",func=\"callee3\",.*\},frame=\{level=\"2 \",addr=\"$hex\",func=\"callee2\",.*\},frame=\{level=\"3 \",addr=\"$hex\",func=\"callee1\",.*\}\}" \
+	    "233\\^done,stack=\\\[frame=\{level=\"1 \",addr=\"$hex\",func=\"callee3\",.*\},frame=\{level=\"2 \",addr=\"$hex\",func=\"callee2\",.*\},frame=\{level=\"3 \",addr=\"$hex\",func=\"callee1\",.*\}\\\]" \
                 "stack frame listing 1 3"
 
     mi_gdb_test "234-stack-list-frames 1" \
@@ -102,27 +102,27 @@ proc test_stack_args_listing {} {
     # -stack-list-arguments 
 
     mi_gdb_test "231-stack-list-arguments 0" \
-	    "231\\^done,stack-args=\{frame=\{level=\"0\",args=\{\}\},frame=\{level=\"1\",args=\{name=\"strarg\"\}\},frame=\{level=\"2\",args=\{name=\"intarg\",name=\"strarg\"\}\},frame=\{level=\"3\",args=\{name=\"intarg\",name=\"strarg\",name=\"fltarg\"\}\},frame=\{level=\"4\",args=\{\}\}\}" \
+	    "231\\^done,stack-args=\\\[frame=\{level=\"0\",args=\{\}\},frame=\{level=\"1\",args=\{name=\"strarg\"\}\},frame=\{level=\"2\",args=\{name=\"intarg\",name=\"strarg\"\}\},frame=\{level=\"3\",args=\{name=\"intarg\",name=\"strarg\",name=\"fltarg\"\}\},frame=\{level=\"4\",args=\{\}\}\\\]" \
                 "stack args listing 0"
 
     mi_gdb_test "232-stack-list-arguments 0 1 1" \
-	    "232\\^done,stack-args=\{frame=\{level=\"1\",args=\{name=\"strarg\"\}\}\}" \
+	    "232\\^done,stack-args=\\\[frame=\{level=\"1\",args=\{name=\"strarg\"\}\}\\\]" \
                 "stack args listing 0 1 1"
 
     mi_gdb_test "233-stack-list-arguments 0 1 3" \
-	    "233\\^done,stack-args=\{frame=\{level=\"1\",args=\{name=\"strarg\"\}\},frame=\{level=\"2\",args=\{name=\"intarg\",name=\"strarg\"\}\},frame=\{level=\"3\",args=\{name=\"intarg\",name=\"strarg\",name=\"fltarg\"\}\}\}" \
+	    "233\\^done,stack-args=\\\[frame=\{level=\"1\",args=\{name=\"strarg\"\}\},frame=\{level=\"2\",args=\{name=\"intarg\",name=\"strarg\"\}\},frame=\{level=\"3\",args=\{name=\"intarg\",name=\"strarg\",name=\"fltarg\"\}\}\\\]" \
                 "stack args listing 0 1 3"
 
     mi_gdb_test "231-stack-list-arguments 1" \
-	    "231\\^done,stack-args=\{frame=\{level=\"0\",args=\{\}\},frame=\{level=\"1\",args=\{\{name=\"strarg\",value=\"$hex \\\\\"A string argument.\\\\\"\"\}\}\},frame=\{level=\"2\",args=\{\{name=\"intarg\",value=\"2\"\},\{name=\"strarg\",value=\"$hex \\\\\"A string argument.\\\\\"\"\}\}\},frame=\{level=\"3\",args=\{\{name=\"intarg\",value=\"2\"\},\{name=\"strarg\",value=\"$hex \\\\\"A string argument.\\\\\"\"\},\{name=\"fltarg\",value=\"3.5\"\}\}\},frame=\{level=\"4\",args=\{\}\}\}" \
+	    "231\\^done,stack-args=\\\[frame=\{level=\"0\",args=\{\}\},frame=\{level=\"1\",args=\{\{name=\"strarg\",value=\"$hex \\\\\"A string argument.\\\\\"\"\}\}\},frame=\{level=\"2\",args=\{\{name=\"intarg\",value=\"2\"\},\{name=\"strarg\",value=\"$hex \\\\\"A string argument.\\\\\"\"\}\}\},frame=\{level=\"3\",args=\{\{name=\"intarg\",value=\"2\"\},\{name=\"strarg\",value=\"$hex \\\\\"A string argument.\\\\\"\"\},\{name=\"fltarg\",value=\"3.5\"\}\}\},frame=\{level=\"4\",args=\{\}\}\\\]" \
                 "stack args listing 1"
 
     mi_gdb_test "232-stack-list-arguments 1 1 1" \
-	    "232\\^done,stack-args=\{frame=\{level=\"1\",args=\{\{name=\"strarg\",value=\"$hex \\\\\"A string argument.\\\\\"\"\}\}\}\}" \
+	    "232\\^done,stack-args=\\\[frame=\{level=\"1\",args=\{\{name=\"strarg\",value=\"$hex \\\\\"A string argument.\\\\\"\"\}\}\}\\\]" \
                 "stack args listing 1 1 1"
 
     mi_gdb_test "233-stack-list-arguments 1 1 3" \
-	    "233\\^done,stack-args=\{frame=\{level=\"1\",args=\{\{name=\"strarg\",value=\"$hex \\\\\"A string argument.\\\\\"\"\}\}\},frame=\{level=\"2\",args=\{\{name=\"intarg\",value=\"2\"\},\{name=\"strarg\",value=\"$hex \\\\\"A string argument.\\\\\"\"\}\}\},frame=\{level=\"3\",args=\{\{name=\"intarg\",value=\"2\"\},\{name=\"strarg\",value=\"$hex \\\\\"A string argument.\\\\\"\"\},\{name=\"fltarg\",value=\"3.5\"\}\}\}\}" \
+	    "233\\^done,stack-args=\\\[frame=\{level=\"1\",args=\{\{name=\"strarg\",value=\"$hex \\\\\"A string argument.\\\\\"\"\}\}\},frame=\{level=\"2\",args=\{\{name=\"intarg\",value=\"2\"\},\{name=\"strarg\",value=\"$hex \\\\\"A string argument.\\\\\"\"\}\}\},frame=\{level=\"3\",args=\{\{name=\"intarg\",value=\"2\"\},\{name=\"strarg\",value=\"$hex \\\\\"A string argument.\\\\\"\"\},\{name=\"fltarg\",value=\"3.5\"\}\}\}\\\]" \
                 "stack args listing 1 1 3"
 
     mi_gdb_test "234-stack-list-arguments" \

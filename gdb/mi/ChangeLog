@@ -1,3 +1,13 @@
+2001-06-26  Andrew Cagney  <ac131313@redhat.com>
+
+	* mi-cmd-stack.c (mi_cmd_stack_list_frames): Output a list of
+	"stack" entries.
+	(mi_cmd_stack_list_args): Ditto for "stack-args".
+	* gdbmi.texinfo (stack-list-frames, stack-list-arguments): Update
+	documentation.
+	(GDB/MI Stack Manipulation Commands): Fix section title.  Was
+	Stack Manipulation Commands in GDB/MI.
+
 2001-06-25  Andrew Cagney  <ac131313@redhat.com>
 
 	* gdbmi.texinfo: Update output examples that contain stop reason

@@ -77,7 +77,7 @@ mi_cmd_stack_list_frames (char *command, char **argv, int argc)
   if (fi == NULL)
     error ("mi_cmd_stack_list_frames: Not enough frames in stack.");
 
-  ui_out_tuple_begin (uiout, "stack");
+  ui_out_list_begin (uiout, "stack");
 
   /* Now let;s print the frames up to frame_high, or until there are
      frames in the stack. */
@@ -96,7 +96,7 @@ mi_cmd_stack_list_frames (char *command, char **argv, int argc)
 			0 /* args */ );
     }
 
-  ui_out_tuple_end (uiout);
+  ui_out_list_end (uiout);
   if (i < frame_high)
     error ("mi_cmd_stack_list_frames: Not enough frames in stack.");
 
@@ -183,7 +183,7 @@ mi_cmd_stack_list_args (char *command, char **argv, int argc)
   if (fi == NULL)
     error ("mi_cmd_stack_list_args: Not enough frames in stack.");
 
-  ui_out_tuple_begin (uiout, "stack-args");
+  ui_out_list_begin (uiout, "stack-args");
 
   /* Now let's print the frames up to frame_high, or until there are
      frames in the stack. */
@@ -198,7 +198,7 @@ mi_cmd_stack_list_args (char *command, char **argv, int argc)
       ui_out_tuple_end (uiout);
     }
 
-  ui_out_tuple_end (uiout);
+  ui_out_list_end (uiout);
   if (i < frame_high)
     error ("mi_cmd_stack_list_args: Not enough frames in stack.");
 

@@ -1,3 +1,8 @@
+2001-06-26  Andrew Cagney  <ac131313@redhat.com>
+
+	* mi-stack.exp: Update. Output for stack=..., args=... and
+	stack-args=... changed to a list.
+
 2001-06-25  Andrew Cagney  <ac131313@redhat.com>
 
 	* mi-console.exp: Update args=... part of stop-reason

@@ -2493,7 +2493,7 @@ Signal handling commands are not implemented.
 
 @c %%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 @node GDB/MI Stack Manipulation
-@section Stack manipulation commands in @sc{gdb/mi}
+@section @sc{gdb/mi} Stack Manipulation Commands
 
 
 @subheading The @code{-stack-info-frame} Command
@@ -2585,7 +2585,7 @@ functionality of @samp{-stack-list-arguments}.
 (@value{GDBP})
 -stack-list-frames
 ^done,
-stack=@{
+stack=[
 frame=@{level="0 ",addr="0x00010734",func="callee4",
 file="../../../devo/gdb/testsuite/gdb.mi/basics.c",line="8"@},
 frame=@{level="1 ",addr="0x0001076c",func="callee3",
@@ -2595,20 +2595,20 @@ file="../../../devo/gdb/testsuite/gdb.mi/basics.c",line="22"@},
 frame=@{level="3 ",addr="0x000107b4",func="callee1",
 file="../../../devo/gdb/testsuite/gdb.mi/basics.c",line="27"@},
 frame=@{level="4 ",addr="0x000107e0",func="main",
-file="../../../devo/gdb/testsuite/gdb.mi/basics.c",line="32"@}@}
+file="../../../devo/gdb/testsuite/gdb.mi/basics.c",line="32"@}]
 (@value{GDBP})
 -stack-list-arguments 0
 ^done,
-stack-args=@{
+stack-args=[
 frame=@{level="0",args=@{@}@},
 frame=@{level="1",args=@{name="strarg"@}@},
 frame=@{level="2",args=@{name="intarg",name="strarg"@}@},
 frame=@{level="3",args=@{name="intarg",name="strarg",name="fltarg"@}@},
-frame=@{level="4",args=@{@}@}@}
+frame=@{level="4",args=@{@}@}]
 (@value{GDBP})
 -stack-list-arguments 1
 ^done,
-stack-args=@{
+stack-args=[
 frame=@{level="0",args=@{@}@},
 frame=@{level="1",
  args=@{@{name="strarg",value="0x11940 \"A string argument.\""@}@}@},
@@ -2619,15 +2619,15 @@ frame=@{level="2",args=@{
 @{name="intarg",value="2"@},
 @{name="strarg",value="0x11940 \"A string argument.\""@},
 @{name="fltarg",value="3.5"@}@}@},
-frame=@{level="4",args=@{@}@}@}
+frame=@{level="4",args=@{@}@}]
 (@value{GDBP})
 -stack-list-arguments 0 2 2
-^done,stack-args=@{frame=@{level="2",args=@{name="intarg",name="strarg"@}@}@}
+^done,stack-args=[frame=@{level="2",args=@{name="intarg",name="strarg"@}@}]
 (@value{GDBP})
 -stack-list-arguments 1 2 2
-^done,stack-args=@{frame=@{level="2",
+^done,stack-args=[frame=@{level="2",
 args=@{@{name="intarg",value="2"@},
-@{name="strarg",value="0x11940 \"A string argument.\""@}@}@}@}
+@{name="strarg",value="0x11940 \"A string argument.\""@}@}@}]
 (@value{GDBP})
 @end smallexample
 
@@ -2676,7 +2676,7 @@ Full stack backtrace:
 (@value{GDBP})
 -stack-list-frames
 ^done,stack=
-@{frame=@{level="0 ",addr="0x0001076c",func="foo",
+[frame=@{level="0 ",addr="0x0001076c",func="foo",
   file="recursive2.c",line="11"@},
 frame=@{level="1 ",addr="0x000107a4",func="foo",
   file="recursive2.c",line="14"@},
@@ -2699,7 +2699,7 @@ frame=@{level="9 ",addr="0x000107a4",func="foo",
 frame=@{level="10",addr="0x000107a4",func="foo",
   file="recursive2.c",line="14"@},
 frame=@{level="11",addr="0x00010738",func="main",
-  file="recursive2.c",line="4"@}@}
+  file="recursive2.c",line="4"@}]
 (@value{GDBP})
 @end smallexample
 
@@ -2709,12 +2709,12 @@ Show frames between @var{low_frame} and @var{high_frame}:
 (@value{GDBP})
 -stack-list-frames 3 5
 ^done,stack=
-@{frame=@{level="3 ",addr="0x000107a4",func="foo",
+[frame=@{level="3 ",addr="0x000107a4",func="foo",
   file="recursive2.c",line="14"@},
 frame=@{level="4 ",addr="0x000107a4",func="foo",
   file="recursive2.c",line="14"@},
 frame=@{level="5 ",addr="0x000107a4",func="foo",
-  file="recursive2.c",line="14"@}@}
+  file="recursive2.c",line="14"@}]
 (@value{GDBP})
 @end smallexample
 
@@ -2724,8 +2724,8 @@ Show a single frame:
 (@value{GDBP})
 -stack-list-frames 3 3
 ^done,stack=
-@{frame=@{level="3 ",addr="0x000107a4",func="foo",
-  file="recursive2.c",line="14"@}@}
+[frame=@{level="3 ",addr="0x000107a4",func="foo",
+  file="recursive2.c",line="14"@}]
 (@value{GDBP})
 @end smallexample
 
