@@ -1,3 +1,7 @@
+2003-02-19  Mark Blackburn  <marklist@fangorn.ca>
+
+	* rclex.l: Handle strings spanning more than one line.
+
 2003-02-12  Bob Wilson  <bob.wilson@acm.org>
 
 	* nm.c (usage): Add `java' and `gnat' demangle styles and make

@@ -196,7 +196,7 @@ static char *get_string PARAMS ((int));
 			  MAYBE_RETURN (NUMBER);
 			}
 
-("\""[^\"\n]*"\""[ \t]*)+ {
+("\""[^\"\n]*"\""[ \t\n]*)+ {
 			  char *s;
 			  unsigned long length;
 
@@ -425,7 +425,10 @@ handle_quotes (input, len)
 	  ++t;
 	  assert (ISSPACE (*t));
 	  while (ISSPACE (*t))
+	  {
+	    if ((*t) == '\n') ++rc_lineno;
 	    ++t;
+	  }
 	  if (*t == '\0')
 	    break;
 	  assert (*t == '"');
