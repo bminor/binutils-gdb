@@ -1,3 +1,9 @@
+Sun Apr 19 19:20:00 1998  Tom Tromey  <tromey@cygnus.com>
+
+	* aclocal.m4, configure: Rebuilt.
+	* configure.in: Call AC_LINK_FILES so that <libintl.h> will
+	always exist.
+
 Fri Mar 27 16:37:25 1998  Tom Tromey  <tromey@cygnus.com>
 
 	* aclocal.m4, configure: Rebuilt with new cygettext.m4.
