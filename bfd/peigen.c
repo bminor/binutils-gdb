@@ -594,7 +594,7 @@ _bfd_pei_swap_aouthdr_out (abfd, in, out)
   /* first null out all data directory entries .. */
   memset (extra->DataDirectory, sizeof (extra->DataDirectory), 0);
 
-  add_data_entry (abfd, extra, 0, ".edata", 0);
+  add_data_entry (abfd, extra, 0, ".edata", ib);
 
   /* Don't call add_data_entry for .idata$2 or .idata$5.  It's done in
      bfd_coff_final_link where all the required information is
@@ -602,11 +602,11 @@ _bfd_pei_swap_aouthdr_out (abfd, in, out)
 
   /* However, until other .idata fixes are made (pending patch), the
      entry for .idata is needed for backwards compatability.  FIXME.  */
-  add_data_entry (abfd, extra, 1, ".idata" ,0);
+  add_data_entry (abfd, extra, 1, ".idata" , ib);
 
-  add_data_entry (abfd, extra, 2, ".rsrc" ,0);
+  add_data_entry (abfd, extra, 2, ".rsrc" , ib);
 
-  add_data_entry (abfd, extra, 3, ".pdata", 0);
+  add_data_entry (abfd, extra, 3, ".pdata", ib);
 
   /* For some reason, the virtual size (which is what's set by
      add_data_entry) for .reloc is not the same as the size recorded
@@ -614,7 +614,7 @@ _bfd_pei_swap_aouthdr_out (abfd, in, out)
      but since it's the best we've got, use it.  It does do the right
      thing for .pdata.  */
   if (pe_data (abfd)->has_reloc_section)
-    add_data_entry (abfd, extra, 5, ".reloc", 0);
+    add_data_entry (abfd, extra, 5, ".reloc", ib);
 
   {
     asection *sec;
@@ -1003,7 +1003,7 @@ static char * dir_names[IMAGE_NUMBEROF_DIRECTORY_ENTRIES] =
   N_ ("Load Configuration Directory"),
   N_ ("Bound Import Directory"),
   N_ ("Import Address Table Directory"),
-  N_ ("Reserved"),
+  N_ ("Delay Import Directory"),
   N_ ("Reserved"),
   N_ ("Reserved")
 };
@@ -1025,8 +1025,8 @@ pe_print_idata (abfd, vfile)
 {
   FILE *file = (FILE *) vfile;
   bfd_byte *data = 0;
-  asection *section = bfd_get_section_by_name (abfd, ".idata");
-  unsigned long adj;
+  asection *section;
+  bfd_signed_vma adj;
 
 #ifdef POWERPC_LE_PE
   asection *rel_section = bfd_get_section_by_name (abfd, ".reldata");
@@ -1041,46 +1041,34 @@ pe_print_idata (abfd, vfile)
   pe_data_type *pe = pe_data (abfd);
   struct internal_extra_pe_aouthdr *extra = &pe->pe_opthdr;
 
-  if (section != NULL)
+  bfd_vma addr;
+
+  addr = extra->DataDirectory[1].VirtualAddress;
+  datasize = extra->DataDirectory[1].Size;
+
+  if (addr == 0 || datasize == 0)
+    return true;
+
+  addr += extra->ImageBase;
+
+  for (section = abfd->sections; section != NULL; section = section->next)
     {
-      datasize = bfd_section_size (abfd, section);
-      dataoff = 0;
-
-      if (datasize == 0)
-	return true;
-
-      fprintf (file, _("\nThe import table is the .idata section\n"));
+      if (addr >= section->vma
+	  && addr < section->vma + bfd_section_size(abfd,section))
+	break;
     }
-  else
+
+  if (section == NULL)
     {
-      /* idata buried in some other section: e.g. KERNEL32.DLL.  */
-      bfd_vma addr, size;
-
-      addr = extra->DataDirectory[1].VirtualAddress;
-      size = extra->DataDirectory[1].Size;
-
-      if (addr == 0 || size == 0)
-	return true;
-
-      for (section = abfd->sections; section != NULL; section = section->next)
-	{
-	   if (addr >= section->vma
-	       && addr < section->vma + bfd_section_size(abfd,section))
-	         break;
-	}
-      if (section == NULL)
-	{
-	   fprintf (file,
-		    _("\nThere is an import table, but the section containing it could not be found\n"));
-	   return true;
-	}
-
-      fprintf (file, _("\nThere is an import table in %s at 0x%lx\n"),
-	       section->name, (unsigned long)addr);
-
-      dataoff = addr - section->vma;
-      datasize = size;
+      fprintf (file,
+	       _("\nThere is an import table, but the section containing it could not be found\n"));
+      return true;
     }
+
+  fprintf (file, _("\nThere is an import table in %s at 0x%lx\n"),
+	   section->name, (unsigned long) addr);
+
+  dataoff = addr - section->vma;
 
 #ifdef POWERPC_LE_PE
   if (rel_section != 0 && bfd_section_size (abfd, rel_section) != 0)
@@ -1097,13 +1085,12 @@ pe_print_idata (abfd, vfile)
       bfd_vma start_address;
       bfd_byte *data = 0;
       int offset;
+
       data = (bfd_byte *) bfd_malloc ((size_t) bfd_section_size (abfd,
 								 rel_section));
       if (data == NULL && bfd_section_size (abfd, rel_section) != 0)
 	return false;
 
-      datasize = bfd_section_size (abfd, rel_section);
-  
       bfd_get_section_contents (abfd,
 				rel_section,
 				(PTR) data, 0,
@@ -1130,7 +1117,8 @@ pe_print_idata (abfd, vfile)
 #endif
 
   fprintf(file,
-	  _("\nThe Import Tables (interpreted .idata section contents)\n"));
+	  _("\nThe Import Tables (interpreted %s section contents)\n"),
+	  section->name);
   fprintf(file,
 	  _(" vma:            Hint    Time      Forward  DLL       First\n"));
   fprintf(file,
@@ -1144,7 +1132,7 @@ pe_print_idata (abfd, vfile)
   if (! bfd_get_section_contents (abfd, section, (PTR) data, 0, secsize))
     return false;
 
-  adj = - section->vma;
+  adj = section->vma - extra->ImageBase;
 
   for (i = 0; i < datasize; i += onaline)
     {
@@ -1157,10 +1145,9 @@ pe_print_idata (abfd, vfile)
       bfd_size_type j;
       char *dll;
 
-      fprintf (file,
-	       " %08lx\t",
-	       (unsigned long int) (i + section->vma + dataoff));
-      
+      /* print (i + extra->DataDirectory[1].VirtualAddress)  */
+      fprintf (file, " %08lx\t", (unsigned long) (i + adj + dataoff));
+
       if (i + 20 > datasize)
 	{
 	  /* check stuff */
@@ -1183,14 +1170,14 @@ pe_print_idata (abfd, vfile)
       if (hint_addr == 0 && first_thunk == 0)
 	break;
 
-      dll = (char *) data + dll_name - section->vma + dataoff;
+      dll = (char *) data + dll_name - adj;
       fprintf(file, _("\n\tDLL Name: %s\n"), dll);
 
       if (hint_addr != 0)
 	{
 	  fprintf (file, _("\tvma:  Hint/Ord Member-Name\n"));
 
-	  idx = hint_addr + adj;
+	  idx = hint_addr - adj;
 
 	  for (j = 0; j < datasize; j += 4)
 	    {
@@ -1206,8 +1193,8 @@ pe_print_idata (abfd, vfile)
 		  int ordinal;
 		  char *member_name;
 
-		  ordinal = bfd_get_16 (abfd, data + member + adj);
-		  member_name = (char *) data + member + adj + 2;
+		  ordinal = bfd_get_16 (abfd, data + member - adj);
+		  member_name = (char *) data + member - adj + 2;
 		  fprintf (file, "\t%04lx\t %4d  %s",
 			   member, ordinal, member_name);
 		}
@@ -1218,7 +1205,7 @@ pe_print_idata (abfd, vfile)
 		  && first_thunk != 0
 		  && first_thunk != hint_addr)
 		fprintf (file, "\t%04lx",
-			 bfd_get_32 (abfd, data + first_thunk + adj + j));
+			 bfd_get_32 (abfd, data + first_thunk - adj + j));
 
 	      fprintf (file, "\n");
 	    }
@@ -1229,7 +1216,7 @@ pe_print_idata (abfd, vfile)
 	  int differ = 0;
 	  int idx2;
 
-	  idx2 = first_thunk + adj;
+	  idx2 = first_thunk - adj;
 
 	  for (j = 0; j < datasize; j += 4)
 	    {
@@ -1262,8 +1249,8 @@ pe_print_idata (abfd, vfile)
 		  else
 		    {
 		      ordinal = bfd_get_16(abfd,
-					   data + iat_member + adj);
-		      member_name = (char *) data + iat_member + adj + 2;
+					   data + iat_member - adj);
+		      member_name = (char *) data + iat_member - adj + 2;
 		      fprintf(file, "\t%04lx\t %4d  %s\n",
 			      iat_member, ordinal, member_name);
 		    }
@@ -1295,13 +1282,13 @@ pe_print_edata (abfd, vfile)
 {
   FILE *file = (FILE *) vfile;
   bfd_byte *data = 0;
-  asection *section = bfd_get_section_by_name (abfd, ".edata");
+  asection *section;
 
   bfd_size_type datasize;
   bfd_size_type dataoff;
   bfd_size_type i;
 
-  int adj;
+  bfd_signed_vma adj;
   struct EDT_type
     {
       long export_flags;             /* reserved - should be zero */
@@ -1320,45 +1307,36 @@ pe_print_edata (abfd, vfile)
   pe_data_type *pe = pe_data (abfd);
   struct internal_extra_pe_aouthdr *extra = &pe->pe_opthdr;
 
-  if (section != NULL)
+  bfd_vma addr;
+
+  addr = extra->DataDirectory[0].VirtualAddress;
+  datasize = extra->DataDirectory[0].Size;
+
+  if (addr == 0 || datasize == 0)
+    return true;
+
+  addr += extra->ImageBase;
+  for (section = abfd->sections; section != NULL; section = section->next)
     {
-      datasize = bfd_section_size (abfd, section);
-      dataoff = 0;
-      fprintf (file, _("\nThe export table is the .edata section\n"));
+      if (addr >= section->vma
+	  && addr < section->vma + bfd_section_size (abfd, section))
+	break;
     }
-  else
+
+  if (section == NULL)
     {
-      /* edata is buried in some other section: e.g. NTDLL.DLL.  */
-      bfd_vma addr, size;
-
-      addr = extra->DataDirectory[0].VirtualAddress;
-      size = extra->DataDirectory[0].Size;
-
-      if (addr == 0 || size == 0)
-	return true;
-
-      for (section = abfd->sections; section != NULL; section = section->next)
-	{
-	   if (addr >= section->vma
-	       && addr < section->vma + bfd_section_size (abfd, section))
-	     break;
-	}
-      if (section == NULL)
-	{
-	   fprintf (file,
-		    _("\nThere is an export table, but the section containing it could not be found\n"));
-	   return true;
-	}
-
-      fprintf (file, _("\nThere is an export table in %s at 0x%lx\n"),
-	       section->name, (unsigned long) addr);
-
-      datasize = size;
-      dataoff = addr - section->vma;
+      fprintf (file,
+	       _("\nThere is an export table, but the section containing it could not be found\n"));
+      return true;
     }
+
+  fprintf (file, _("\nThere is an export table in %s at 0x%lx\n"),
+	   section->name, (unsigned long) addr);
+
+  dataoff = addr - section->vma;
 
   data = (bfd_byte *) bfd_malloc (datasize);
-  if (data == NULL && datasize != 0)
+  if (data == NULL)
     return false;
 
   if (! bfd_get_section_contents (abfd, section, (PTR) data, dataoff,
@@ -1378,11 +1356,12 @@ pe_print_edata (abfd, vfile)
   edt.npt_addr       = bfd_get_32(abfd, data+32);
   edt.ot_addr        = bfd_get_32(abfd, data+36);
 
-  adj = - (section->vma + dataoff);
+  adj = section->vma - extra->ImageBase + dataoff;
 
   /* Dump the EDT first first */
   fprintf(file,
-	  _("\nThe Export Tables (interpreted .edata section contents)\n\n"));
+	  _("\nThe Export Tables (interpreted %s section contents)\n\n"),
+	  section->name);
 
   fprintf(file,
 	  _("Export Flags \t\t\t%lx\n"), (unsigned long) edt.export_flags);
@@ -1397,7 +1376,7 @@ pe_print_edata (abfd, vfile)
 	   _("Name \t\t\t\t"));
   fprintf_vma (file, edt.name);
   fprintf (file,
-	   " %s\n", data + edt.name + adj);
+	   " %s\n", data + edt.name - adj);
 
   fprintf(file,
 	  _("Ordinal Base \t\t\t%ld\n"), edt.base);
@@ -1406,11 +1385,11 @@ pe_print_edata (abfd, vfile)
 	  _("Number in:\n"));
 
   fprintf(file,
-	  _("\tExport Address Table \t\t%lx\n"),
+	  _("\tExport Address Table \t\t%08lx\n"),
 	  edt.num_functions);
 
   fprintf(file,
-	  _("\t[Name Pointer/Ordinal] Table\t%lu\n"), edt.num_names);
+	  _("\t[Name Pointer/Ordinal] Table\t%08lx\n"), edt.num_names);
 
   fprintf(file,
 	  _("Table Addresses\n"));
@@ -1448,7 +1427,7 @@ pe_print_edata (abfd, vfile)
   for (i = 0; i < edt.num_functions; ++i)
     {
       bfd_vma eat_member = bfd_get_32 (abfd,
-				       data + edt.eat_addr + (i * 4) + adj);
+				       data + edt.eat_addr + (i * 4) - adj);
       bfd_vma eat_actual = eat_member;
       bfd_vma edata_start = bfd_get_section_vma (abfd, section);
       bfd_vma edata_end = edata_start + datasize;
@@ -1463,7 +1442,7 @@ pe_print_edata (abfd, vfile)
 	  fprintf (file,
 		   "\t[%4ld] +base[%4ld] %04lx %s -- %s\n",
 		   (long) i, (long) (i + edt.base), eat_member,
-		   _("Forwarder RVA"), data + eat_member + adj);
+		   _("Forwarder RVA"), data + eat_member - adj);
 	}
       else
 	{
@@ -1485,14 +1464,14 @@ pe_print_edata (abfd, vfile)
       bfd_vma name_ptr = bfd_get_32(abfd,
 				    data +
 				    edt.npt_addr
-				    + (i*4) + adj);
+				    + (i*4) - adj);
       
-      char *name = (char *) data + name_ptr + adj;
+      char *name = (char *) data + name_ptr - adj;
 
       bfd_vma ord = bfd_get_16(abfd,
 				    data +
 				    edt.ot_addr
-				    + (i*2) + adj);
+				    + (i*2) - adj);
       fprintf(file,
 	      "\t[%4ld] %s\n", (long) ord, name);
 
@@ -1791,7 +1770,7 @@ _bfd_pe_print_private_bfd_data_common (abfd, vfile)
   fprintf (file,"MinorImageVersion\t%d\n", i->MinorImageVersion);
   fprintf (file,"MajorSubsystemVersion\t%d\n", i->MajorSubsystemVersion);
   fprintf (file,"MinorSubsystemVersion\t%d\n", i->MinorSubsystemVersion);
-  fprintf (file,"Reserved1\t\t%08lx\n", i->Reserved1);
+  fprintf (file,"Win32Version\t\t%08lx\n", i->Reserved1);
   fprintf (file,"SizeOfImage\t\t%08lx\n", i->SizeOfImage);
   fprintf (file,"SizeOfHeaders\t\t%08lx\n", i->SizeOfHeaders);
   fprintf (file,"CheckSum\t\t%08lx\n", i->CheckSum);
