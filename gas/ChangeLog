@@ -1,3 +1,7 @@
+2001-06-24  Ben Elliston  <bje@redhat.com>
+
+	* stabs.c (generate_asm_file): Make local variable `len' a size_t.
+
 2001-06-24  Jakub Jelinek  <jakub@redhat.com>
 
 	* config/tc-alpha.c (tc_gen_reloc): Handle relocs against SEC_MERGE

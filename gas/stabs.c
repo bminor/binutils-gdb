@@ -539,7 +539,7 @@ generate_asm_file (type, file)
   while (tmp < endp)
     {
       char *bslash = strchr (tmp, '\\');
-      int len = (bslash ? (bslash - tmp + 1) : strlen (tmp));
+      size_t len = (bslash) ? (size_t) (bslash - tmp + 1) : strlen (tmp);
 
       /* Double all backslashes, since demand_copy_C_string (used by
 	 s_stab to extract the part in quotes) will try to replace them as
