@@ -1,3 +1,7 @@
+2002-09-05  Jim Blandy  <jimb@redhat.com>
+
+	* gdb.threads/killed.exp: Fix test failure message.
+
 2002-09-04  Keith Seitz  <keiths@redhat.com>
 
 	* lib/mi-support.exp: Update copyright.
