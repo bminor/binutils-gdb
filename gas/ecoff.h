@@ -1,5 +1,5 @@
 /* ecoff.h -- header file for ECOFF debugging support
-   Copyright (C) 1993, 94, 95, 96, 1997 Free Software Foundation, Inc.
+   Copyright (C) 1993, 94, 95, 96, 97, 98, 1999 Free Software Foundation, Inc.
    Contributed by Cygnus Support.
    Put together by Ian Lance Taylor <ian@cygnus.com>.
 
@@ -41,10 +41,10 @@ extern void ecoff_new_file PARAMS ((const char *));
 
 /* This function should be called when a new symbol is created, by
    obj_symbol_new_hook.  */
-extern void ecoff_symbol_new_hook PARAMS ((struct symbol *));
+extern void ecoff_symbol_new_hook PARAMS ((symbolS *));
 
 /* This function should be called by the obj_frob_symbol hook.  */
-extern void ecoff_frob_symbol PARAMS ((struct symbol *));
+extern void ecoff_frob_symbol PARAMS ((symbolS *));
 
 /* Build the ECOFF debugging information.  This should be called by
    obj_frob_file.  This fills in the counts in *HDR; the offsets are
@@ -89,7 +89,7 @@ extern void ecoff_set_gp_prolog_size PARAMS ((int sz));
 /* This routine is called from the ECOFF code to set the external
    information for a symbol.  */
 #ifndef obj_ecoff_set_ext
-extern void obj_ecoff_set_ext PARAMS ((struct symbol *, EXTR *));
+extern void obj_ecoff_set_ext PARAMS ((symbolS *, EXTR *));
 #endif
 
 /* This routine is used to patch up a line number directive when
@@ -100,7 +100,7 @@ extern void ecoff_fix_loc PARAMS ((fragS *, unsigned long));
 extern int ecoff_no_current_file PARAMS ((void));
 
 /* This function returns the symbol associated with the current proc.  */
-extern struct symbol *ecoff_get_cur_proc_sym PARAMS ((void));
+extern symbolS *ecoff_get_cur_proc_sym PARAMS ((void));
 
 #endif /* ECOFF_DEBUGGING */
 

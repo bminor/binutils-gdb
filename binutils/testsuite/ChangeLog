@@ -1,3 +1,25 @@
+1999-06-29  Nick Clifton  <nickc@cygnus.com>
+
+	* binutils-all/objdump.exp: Add fr30 and MCore to expected cpus
+	list. 
+
+	* binutils-all/readelf.r: Do not assume a fixed number of spaces
+	in the output.
+
+1999-06-10  Nick Clifton  <nickc@cygnus.com>
+
+	* binutils-all/readelf.wi: Update to match latest output.
+	* binutils-all/readelf.h: Update to match latest output.
+
+Wed Jun  9 11:59:22 1999  Andreas Schwab  <schwab@issan.cs.uni-dortmund.de>
+
+	* binutils-all/objdump.exp: Tighten regexp to match `objdump -i'
+	output to avoid massive exponential behaviour.
+
+1999-05-28  Ian Lance Taylor  <ian@zembu.com>
+
+	* binutils-all/readelf.h: Update for changes of 1999-04-08.
+
 1999-03-12  Nick Clifton  <nickc@cygnus.com>
 
 	* binutils-all/readelf.wi: Remove FR30 specific componnts.

@@ -389,6 +389,14 @@ DESCRIPTION
 
 .#define NEWHOWTO( FUNCTION, NAME,SIZE,REL,IN) HOWTO(0,0,SIZE,0,REL,0,complain_overflow_dont,FUNCTION, NAME,false,0,0,IN)
 .
+
+DESCRIPTION
+	This is used to fill in an empty howto entry in an array.
+
+.#define EMPTY_HOWTO(C) \
+.  HOWTO((C),0,0,0,false,0,complain_overflow_dont,NULL,NULL,false,0,0,false)
+.
+
 DESCRIPTION
 	Helper routine to turn a symbol into a relocation value.
 
@@ -1405,7 +1413,7 @@ _bfd_relocate_contents (howto, input_bfd, relocation, location)
      bfd_byte *location;
 {
   int size;
-  bfd_vma x;
+  bfd_vma x = 0;
   boolean overflow;
   unsigned int rightshift = howto->rightshift;
   unsigned int bitpos = howto->bitpos;
@@ -1559,6 +1567,15 @@ _bfd_relocate_contents (howto, input_bfd, relocation, location)
 	    }
 
 	  /* We just assume (b & ~ fieldmask) == 0.  */
+
+	  /* We explicitly permit wrap around if this relocation
+	     covers the high bit of an address.  The Linux kernel
+	     relies on it, and it is the only way to write assembler
+	     code which can run when loaded at a location 0x80000000
+	     away from the location at which it is linked.  */
+	  if (howto->bitsize + rightshift
+	      == bfd_arch_bits_per_address (input_bfd))
+	    break;
 
 	  sum = a + b;
 	  if (sum < a || (sum & ~ fieldmask) != 0)
@@ -2028,6 +2045,14 @@ ENUMX
   BFD_RELOC_MIPS_CALL_HI16
 ENUMX
   BFD_RELOC_MIPS_CALL_LO16
+ENUMX
+  BFD_RELOC_MIPS_SUB
+ENUMX
+  BFD_RELOC_MIPS_GOT_PAGE
+ENUMX
+  BFD_RELOC_MIPS_GOT_OFST
+ENUMX
+  BFD_RELOC_MIPS_GOT_DISP
 COMMENT
 ENUMDOC
   MIPS ELF relocations.
@@ -2157,6 +2182,8 @@ ENUMDOC
   not stored in the instruction.
 ENUM
   BFD_RELOC_ARM_IMMEDIATE
+ENUMX
+  BFD_RELOC_ARM_ADRL_IMMEDIATE
 ENUMX
   BFD_RELOC_ARM_OFFSET_IMM
 ENUMX
@@ -2537,6 +2564,8 @@ ENUMX
   BFD_RELOC_MCORE_PCREL_32
 ENUMX
   BFD_RELOC_MCORE_PCREL_JSR_IMM11BY2
+ENUMX
+  BFD_RELOC_MCORE_RVA
 ENUMDOC
   Motorola Mcore relocations.
   
@@ -2680,9 +2709,9 @@ DESCRIPTION
 /*ARGSUSED*/
 boolean
 bfd_generic_relax_section (abfd, section, link_info, again)
-     bfd *abfd;
-     asection *section;
-     struct bfd_link_info *link_info;
+     bfd *abfd ATTRIBUTE_UNUSED;
+     asection *section ATTRIBUTE_UNUSED;
+     struct bfd_link_info *link_info ATTRIBUTE_UNUSED;
      boolean *again;
 {
   *again = false;
@@ -2705,8 +2734,8 @@ DESCRIPTION
 /*ARGSUSED*/
 boolean
 bfd_generic_gc_sections (abfd, link_info)
-     bfd *abfd;
-     struct bfd_link_info *link_info;
+     bfd *abfd ATTRIBUTE_UNUSED;
+     struct bfd_link_info *link_info ATTRIBUTE_UNUSED;
 {
   return true;
 }

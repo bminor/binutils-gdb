@@ -1,5 +1,4 @@
 # sparc64 set insn handling (includes set, setuw, setsw, setx)
-# FIXME: setuw,setsw not tested for yet.
 
 foo:
 	set foo,%g2
@@ -41,3 +40,17 @@ foo:
 	setx 0x00000001ffff0001,%g1,%g5		! test hm10,hi22,lo10
 	setx 0x00000001ffff0000,%g1,%g5		! test hm10,hi22
 	setx 0x0000000100000001,%g1,%g5		! test hm10,lo10
+
+	setuw foo,%g2
+	setuw 0x76543210,%g3
+	setuw 0,%g4
+	setuw 65535,%g5
+
+	setsw foo,%g2
+	setsw 0x76543210,%g3
+	setsw 0,%g4
+	setsw 65535,%g5
+	setsw 0xffffffff,%g1
+	setsw 0x7fffffff,%g2
+	setsw 0xffff0000,%g3
+	setsw -1,%g4

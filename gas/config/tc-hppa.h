@@ -1,5 +1,6 @@
 /* tc-hppa.h -- Header file for the PA
-   Copyright (C) 1989, 93, 94, 95, 96, 97, 1998 Free Software Foundation, Inc.
+   Copyright (C) 1989, 93, 94, 95, 96, 97, 98, 1999
+   Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -48,8 +49,13 @@
 /* FIXME.  The lack of a place to put things which are both target cpu
    and target format dependent makes hacks like this necessary.  */
 #ifdef OBJ_ELF
+#ifdef BFD64
+#include "bfd/elf64-hppa.h"
+#define TARGET_FORMAT "elf64-hppa"
+#else
 #include "bfd/elf32-hppa.h"
 #define TARGET_FORMAT "elf32-hppa"
+#endif
 #endif
 
 #ifdef OBJ_SOM
@@ -128,9 +134,9 @@ void elf_hppa_final_processing PARAMS ((void));
    *not* end up in the symbol table.  Likewise for absolute symbols
    with local scope.  */
 #define tc_frob_symbol(sym,punt) \
-    if ((S_GET_SEGMENT (sym) == &bfd_und_section && sym->sy_used == 0) \
+    if ((S_GET_SEGMENT (sym) == &bfd_und_section && ! symbol_used_p (sym)) \
 	|| (S_GET_SEGMENT (sym) == &bfd_abs_section \
-	    && (sym->bsym->flags & BSF_EXPORT) == 0)) \
+	    && ! S_IS_EXTERNAL (sym))) \
       punt = 1
 
 /* We need to be able to make relocations involving the difference of
@@ -147,9 +153,10 @@ void elf_hppa_final_processing PARAMS ((void));
 #ifdef OBJ_ELF
 #define tc_frob_symbol(sym,punt) \
   { \
-    if ((S_GET_SEGMENT (sym) == &bfd_und_section && sym->sy_used == 0) \
+    if ((S_GET_SEGMENT (sym) == &bfd_und_section && ! symbol_used_p (sym)) \
 	|| (S_GET_SEGMENT (sym) == &bfd_abs_section \
-	    && (sym->bsym->flags & BSF_EXPORT) == 0)) \
+	    && ! S_IS_EXTERNAL (sym)) \
+	|| strcmp (S_GET_NAME (sym), "$global$") == 0) \
       punt = 1; \
   }
 #endif

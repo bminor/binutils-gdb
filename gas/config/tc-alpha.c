@@ -4,7 +4,7 @@
    Written by Alessandro Forin, based on earlier gas-1.38 target CPU files.
    Modified by Ken Raeburn for gas-2.x and ECOFF support.
    Modified by Richard Henderson for ELF support.
-   Modified by Klaus K"ampf for EVAX (openVMS/Alpha) support.
+   Modified by Klaus K"ampf for EVAX (OpenVMS/Alpha) support.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -96,8 +96,9 @@ struct alpha_macro
 /* Two extra symbols we want to see in our input.  This is a blatent
    misuse of the expressionS.X_op field.  */
 
-#define O_pregister	(O_max+1)	/* O_register, but in parentheses */
-#define O_cpregister	(O_pregister+1)	/* + a leading comma */
+#define O_pregister  ((operatorT) (O_max+1)) /* O_register, in parentheses */
+#define O_cpregister ((operatorT) (O_pregister+1)) /* + a leading comma */
+#define O_alpha_max  ((operatorT) (O_cpregister+1))
 
 /* Macros for extracting the type and number of encoded register tokens */
 
@@ -709,6 +710,13 @@ md_begin ()
 {
   unsigned int i;
 
+  /* Verify that X_op field is wide enough.  */
+  {
+    expressionS e;
+    e.X_op = O_alpha_max;
+    assert (e.X_op == O_alpha_max);
+  }
+
   /* Create the opcode hash table */
 
   alpha_opcode_hash = hash_new ();
@@ -1081,7 +1089,7 @@ md_apply_fix (fixP, valueP)
 #endif
 
     do_reloc_gp:
-      fixP->fx_addsy = section_symbol (absolute_section);
+      fixP->fx_addsy = section_symbol (now_seg);
       md_number_to_chars (fixpos, value, 2);
       break;
 
@@ -1173,7 +1181,7 @@ md_apply_fix (fixP, valueP)
 	   Therefore they must be completely resolved as constants.  */
 
 	if (fixP->fx_addsy != 0
-	    && fixP->fx_addsy->bsym->section != absolute_section)
+	    && S_GET_SEGMENT (fixP->fx_addsy) != absolute_section)
 	  as_bad_where (fixP->fx_file, fixP->fx_line,
 			_("non-absolute expression in constant field"));
 
@@ -1393,7 +1401,8 @@ tc_gen_reloc (sec, fixp)
   arelent *reloc;
 
   reloc = (arelent *) xmalloc (sizeof (arelent));
-  reloc->sym_ptr_ptr = &fixp->fx_addsy->bsym;
+  reloc->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
+  *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
   reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;
 
   /* Make sure none of our internal relocations make it this far.
@@ -1435,7 +1444,7 @@ tc_gen_reloc (sec, fixp)
        */
       if ((S_IS_EXTERN (fixp->fx_addsy) || S_IS_WEAK (fixp->fx_addsy))
 	  && !S_IS_COMMON(fixp->fx_addsy))
-	reloc->addend -= fixp->fx_addsy->bsym->value;
+	reloc->addend -= symbol_get_bfdsym (fixp->fx_addsy)->value;
 #endif
     }
 
@@ -2109,9 +2118,6 @@ FIXME
   expressionS newtok[3];
   expressionS addend;
 
-  /* We're going to need this symbol in md_apply_fix().  */
-  (void) section_symbol (absolute_section);
-
 #ifdef OBJ_ECOFF
   if (regno (tok[2].X_add_number) == AXP_REG_PV)
     ecoff_set_gp_prolog_size (0);
@@ -2175,7 +2181,7 @@ add_to_link_pool (basesym, sym, addend)
   segment_info_type *seginfo = seg_info (alpha_link_section);
   fixS *fixp;
 
-  offset = -basesym->sy_obj;
+  offset = - *symbol_get_obj (basesym);
 
   /* @@ This assumes all entries in a given section will be of the same
      size...  Probably correct, but unwise to rely on.  */
@@ -2498,7 +2504,8 @@ load_expression (targreg, exp, pbasereg, poffset)
 	}
       insn.nfixups++;
       insn.fixups[0].reloc = BFD_RELOC_ALPHA_LITUSE;
-      insn.fixups[0].exp.X_op = O_constant;
+      insn.fixups[0].exp.X_op = O_symbol;
+      insn.fixups[0].exp.X_add_symbol = section_symbol (now_seg);
       insn.fixups[0].exp.X_add_number = 1;
       emit_lituse = 0;
 
@@ -2649,7 +2656,8 @@ emit_ir_load (tok, ntok, opname)
 	}
       insn.nfixups++;
       insn.fixups[0].reloc = BFD_RELOC_ALPHA_LITUSE;
-      insn.fixups[0].exp.X_op = O_constant;
+      insn.fixups[0].exp.X_op = O_symbol;
+      insn.fixups[0].exp.X_add_symbol = section_symbol (now_seg);
       insn.fixups[0].exp.X_add_number = 1;
     }
 
@@ -2702,7 +2710,8 @@ emit_loadstore (tok, ntok, opname)
 	}
       insn.nfixups++;
       insn.fixups[0].reloc = BFD_RELOC_ALPHA_LITUSE;
-      insn.fixups[0].exp.X_op = O_constant;
+      insn.fixups[0].exp.X_op = O_symbol;
+      insn.fixups[0].exp.X_add_symbol = section_symbol (now_seg);
       insn.fixups[0].exp.X_add_number = 1;
     }
 
@@ -3287,7 +3296,8 @@ emit_jsrjmp (tok, ntok, vopname)
 	}
       insn.nfixups++;
       insn.fixups[0].reloc = BFD_RELOC_ALPHA_LITUSE;
-      insn.fixups[0].exp.X_op = O_constant;
+      insn.fixups[0].exp.X_op = O_symbol;
+      insn.fixups[0].exp.X_add_symbol = section_symbol (now_seg);
       insn.fixups[0].exp.X_add_number = 3;
     }
 
@@ -3457,7 +3467,7 @@ s_alpha_comm (ignore)
       p = frag_more (temp);
       new_seg->flags |= SEC_IS_COMMON;
       if (! S_IS_DEFINED (symbolP))
-	symbolP->bsym->section = new_seg;
+	S_SET_SEGMENT (symbolP, new_seg);
 #else
       S_SET_VALUE (symbolP, (valueT) temp);
 #endif
@@ -3468,7 +3478,7 @@ s_alpha_comm (ignore)
   subseg_set (current_section, current_subsec);
 #endif
 
-  know (symbolP->sy_frag == &zero_address_frag);
+  know (symbol_get_frag (symbolP) == &zero_address_frag);
 
   demand_empty_rest_of_line ();
 }
@@ -3557,7 +3567,7 @@ s_alpha_ent (dummy)
 	    as_warn (_("nested .ent directives"));
 
 	  sym = symbol_find_or_make (name);
-	  sym->bsym->flags |= BSF_FUNCTION;
+	  symbol_get_bfdsym (sym)->flags |= BSF_FUNCTION;
 	  alpha_cur_ent_sym = sym;
 
 	  /* The .ent directive is sometimes followed by a number.  Not sure
@@ -3604,12 +3614,13 @@ s_alpha_end (dummy)
 	  /* Create an expression to calculate the size of the function.  */
 	  if (sym)
 	    {
-	      sym->sy_obj.size = (expressionS *) xmalloc (sizeof (expressionS));
-	      sym->sy_obj.size->X_op = O_subtract;
-	      sym->sy_obj.size->X_add_symbol
+	      symbol_get_obj (sym)->size =
+		(expressionS *) xmalloc (sizeof (expressionS));
+	      symbol_get_obj (sym)->size->X_op = O_subtract;
+	      symbol_get_obj (sym)->size->X_add_symbol
 	        = symbol_new ("L0\001", now_seg, frag_now_fix (), frag_now);
-	      sym->sy_obj.size->X_op_symbol = sym;
-	      sym->sy_obj.size->X_add_number = 0;
+	      symbol_get_obj (sym)->size->X_op_symbol = sym;
+	      symbol_get_obj (sym)->size->X_add_number = 0;
 	    }
 
 	  alpha_cur_ent_sym = NULL;
@@ -3765,7 +3776,7 @@ s_alpha_ent (ignore)
     }
 
   symbol = make_expr_symbol (&symexpr);
-  symbol->bsym->flags |= BSF_FUNCTION;
+  symbol_get_bfdsym (symbol)->flags |= BSF_FUNCTION;
   alpha_evax_proc.symbol = symbol;
 
   demand_empty_rest_of_line ();
@@ -3837,7 +3848,8 @@ s_alpha_pdesc (ignore)
       return;
     }
 
-  alpha_evax_proc.symbol->sy_obj = (valueT)seginfo->literal_pool_size;
+  *symbol_get_obj (alpha_evax_proc.symbol) =
+    (valueT) seginfo->literal_pool_size;
 
   expression (&exp);
   if (exp.X_op != O_symbol)
@@ -3849,7 +3861,8 @@ s_alpha_pdesc (ignore)
 
   entry_sym = make_expr_symbol (&exp);
   /* Save bfd symbol of proc desc in function symbol.  */
-  alpha_evax_proc.symbol->bsym->udata.p = (PTR)entry_sym->bsym;
+  symbol_get_bfdsym (alpha_evax_proc.symbol)->udata.p
+    = symbol_get_bfdsym (entry_sym);
 
   SKIP_WHITESPACE ();
   if (*input_line_pointer++ != ',')
@@ -4140,14 +4153,14 @@ s_alpha_file (ignore)
   extern char *demand_copy_string PARAMS ((int *lenP));
 
   sprintf (case_hack, "<CASE:%01d%01d>",
-	    alpha_flag_hash_long_names, alpha_flag_show_after_trunc);
+	   alpha_flag_hash_long_names, alpha_flag_show_after_trunc);
 
   s = symbol_find_or_make (case_hack);
-  s->bsym->flags |= BSF_FILE;
+  symbol_get_bfdsym (s)->flags |= BSF_FILE;
 
   get_absolute_expression ();
   s = symbol_find_or_make (demand_copy_string (&length));
-  s->bsym->flags |= BSF_FILE;
+  symbol_get_bfdsym (s)->flags |= BSF_FILE;
   demand_empty_rest_of_line ();
 
   return;
@@ -4282,7 +4295,7 @@ s_alpha_proc (is_static)
       input_line_pointer++;
       temp = get_absolute_expression ();
     }
-  /*  symbolP->sy_other = (signed char) temp; */
+  /*  *symbol_get_obj (symbolP) = (signed char) temp; */
   as_warn (_("unhandled: .proc %s,%d"), name, temp);
   demand_empty_rest_of_line ();
 }
@@ -4745,7 +4758,7 @@ alpha_align (n, pfill, label, force)
   if (label != NULL)
     {
       assert (S_GET_SEGMENT (label) == now_seg);
-      label->sy_frag = frag_now;
+      symbol_set_frag (label, frag_now);
       S_SET_VALUE (label, (valueT) frag_now_fix ());
     }
 

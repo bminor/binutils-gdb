@@ -25,6 +25,7 @@
 #	SHLIB_TEXT_START_ADDR - if set, add to SIZEOF_HEADERS to set
 #		start address of shared library.
 #	INPUT_FILES - INPUT command of files to always include
+#	WRITABLE_RODATA - if set, the .rodata section should be writable
 #
 # When adding sections, do note that the names of some sections are used
 # when specifying the start address of the next.
@@ -40,7 +41,7 @@ test "$LD_FLAG" = "N" && DATA_ADDR=.
 INTERP=".interp   ${RELOCATING-0} : { *(.interp) 	}"
 PLT=".plt    ${RELOCATING-0} : { *(.plt)	}"
 DYNAMIC=".dynamic     ${RELOCATING-0} : { *(.dynamic) }"
-
+RODATA=".rodata ${RELOCATING-0} : { *(.rodata) ${RELOCATING+*(.rodata.*)} ${RELOCATING+*(.gnu.linkonce.r*)} }"
 CTOR=".ctors ${CONSTRUCTING-0} : 
   {
     ${CONSTRUCTING+${CTOR_START}}
@@ -114,6 +115,9 @@ SECTIONS
   .gnu.version ${RELOCATING-0} : { *(.gnu.version)	}
   .gnu.version_d ${RELOCATING-0} : { *(.gnu.version_d)	}
   .gnu.version_r ${RELOCATING-0} : { *(.gnu.version_r)	}
+
+  .rel.init    ${RELOCATING-0} : { *(.rel.init)	}
+  .rela.init   ${RELOCATING-0} : { *(.rela.init)	}
   .rel.text    ${RELOCATING-0} :
     {
       *(.rel.text)
@@ -126,18 +130,8 @@ SECTIONS
       ${RELOCATING+*(.rela.text.*)}
       ${RELOCATING+*(.rela.gnu.linkonce.t*)}
     }
-  .rel.data    ${RELOCATING-0} :
-    {
-      *(.rel.data)
-      ${RELOCATING+*(.rel.data.*)}
-      ${RELOCATING+*(.rel.gnu.linkonce.d*)}
-    }
-  .rela.data   ${RELOCATING-0} :
-    {
-      *(.rela.data)
-      ${RELOCATING+*(.rela.data.*)}
-      ${RELOCATING+*(.rela.gnu.linkonce.d*)}
-    }
+  .rel.fini    ${RELOCATING-0} : { *(.rel.fini)	}
+  .rela.fini   ${RELOCATING-0} : { *(.rela.fini)	}
   .rel.rodata  ${RELOCATING-0} :
     {
       *(.rel.rodata)
@@ -150,20 +144,31 @@ SECTIONS
       ${RELOCATING+*(.rela.rodata.*)}
       ${RELOCATING+*(.rela.gnu.linkonce.r*)}
     }
-  .rel.got     ${RELOCATING-0} : { *(.rel.got)		}
-  .rela.got    ${RELOCATING-0} : { *(.rela.got)		}
+  ${OTHER_READONLY_RELOC_SECTIONS}
+  .rel.data    ${RELOCATING-0} :
+    {
+      *(.rel.data)
+      ${RELOCATING+*(.rel.data.*)}
+      ${RELOCATING+*(.rel.gnu.linkonce.d*)}
+    }
+  .rela.data   ${RELOCATING-0} :
+    {
+      *(.rela.data)
+      ${RELOCATING+*(.rela.data.*)}
+      ${RELOCATING+*(.rela.gnu.linkonce.d*)}
+    }
   .rel.ctors   ${RELOCATING-0} : { *(.rel.ctors)	}
   .rela.ctors  ${RELOCATING-0} : { *(.rela.ctors)	}
   .rel.dtors   ${RELOCATING-0} : { *(.rel.dtors)	}
   .rela.dtors  ${RELOCATING-0} : { *(.rela.dtors)	}
-  .rel.init    ${RELOCATING-0} : { *(.rel.init)	}
-  .rela.init   ${RELOCATING-0} : { *(.rela.init)	}
-  .rel.fini    ${RELOCATING-0} : { *(.rel.fini)	}
-  .rela.fini   ${RELOCATING-0} : { *(.rela.fini)	}
+  .rel.got     ${RELOCATING-0} : { *(.rel.got)		}
+  .rela.got    ${RELOCATING-0} : { *(.rela.got)		}
+  ${OTHER_GOT_RELOC_SECTIONS}
   .rel.bss     ${RELOCATING-0} : { *(.rel.bss)		}
   .rela.bss    ${RELOCATING-0} : { *(.rela.bss)		}
   .rel.plt     ${RELOCATING-0} : { *(.rel.plt)		}
   .rela.plt    ${RELOCATING-0} : { *(.rela.plt)		}
+
   .init        ${RELOCATING-0} : { KEEP (*(.init))	} =${NOP-0}
   ${DATA_PLT-${PLT}}
   .text    ${RELOCATING-0} :
@@ -180,12 +185,7 @@ SECTIONS
   ${RELOCATING+_etext = .;}
   ${RELOCATING+PROVIDE (etext = .);}
   .fini    ${RELOCATING-0} : { KEEP (*(.fini))		} =${NOP-0}
-  .rodata  ${RELOCATING-0} :
-  {
-    *(.rodata)
-    ${RELOCATING+*(.rodata.*)}
-    ${RELOCATING+*(.gnu.linkonce.r*)}
-  }
+  ${WRITABLE_RODATA-${RODATA}}
   .rodata1 ${RELOCATING-0} : { *(.rodata1) }
   ${RELOCATING+${OTHER_READONLY_SECTIONS}}
 
@@ -205,6 +205,7 @@ SECTIONS
   .data1 ${RELOCATING-0} : { *(.data1) }
   .eh_frame : { *(.eh_frame) }
   .gcc_except_table : { *(.gcc_except_table) }
+  ${WRITABLE_RODATA+${RODATA}}
   ${RELOCATING+${OTHER_READWRITE_SECTIONS}}
   ${RELOCATING+${CTOR}}
   ${RELOCATING+${DTOR}}
@@ -217,7 +218,7 @@ SECTIONS
      we can shorten the on-disk segment size.  */
   .sdata   ${RELOCATING-0} : { *(.sdata) *(.sdata.*) }
   ${RELOCATING+${OTHER_GOT_SECTIONS}}
-  ${RELOCATING+_edata  =  .;}
+  ${RELOCATING+_edata = .;}
   ${RELOCATING+PROVIDE (edata = .);}
   ${RELOCATING+__bss_start = .;}
   ${RELOCATING+${OTHER_BSS_SYMBOLS}}
@@ -233,7 +234,7 @@ SECTIONS
    ${RELOCATING+. = ALIGN(${ALIGNMENT});}
   }
   ${RELOCATING+. = ALIGN(${ALIGNMENT});}
-  ${RELOCATING+_end = . ;}
+  ${RELOCATING+_end = .;}
   ${RELOCATING+${OTHER_BSS_END_SYMBOLS}}
   ${RELOCATING+PROVIDE (end = .);}
 

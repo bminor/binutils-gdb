@@ -267,7 +267,7 @@ addr2line_SOURCES = addr2line.c $(BULIBS)
 
 srconv_SOURCES = srconv.c coffgrok.c $(BULIBS)
 
-dlltool_SOURCES = dlltool.c defparse.y deflex.l $(BULIBS)
+dlltool_SOURCES = dlltool.c defparse.y deflex.l dyn-string.c $(BULIBS)
 dlltool_LDADD = $(BFDLIB) $(LIBIBERTY) @LEXLIB@ $(INTLLIBS)
 
 coffdump_SOURCES = coffdump.c coffgrok.c $(BULIBS)
@@ -282,7 +282,7 @@ windres_SOURCES = windres.c resrc.c rescoff.c resbin.c rcparse.y rclex.l \
 windres_LDADD = $(BFDLIB) $(LIBIBERTY) @LEXLIB@ $(INTLLIBS)
 
 dllwrap_SOURCES = dllwrap.c dyn-string.c 
-dllwrap_LDADD = $(LIBIBERTY)
+dllwrap_LDADD = $(LIBIBERTY) $(INTLLIBS)
 
 DISTSTUFF = arparse.c arparse.h arlex.c nlmheader.c sysinfo.c sysinfo.h \
 	syslex.c deflex.c defparse.h defparse.c rclex.c rcparse.h rcparse.c
@@ -331,8 +331,8 @@ coffdump_OBJECTS =  coffdump.o coffgrok.o bucomm.o version.o filemode.o
 coffdump_LDADD = $(LDADD)
 coffdump_DEPENDENCIES =  ../bfd/libbfd.la ../libiberty/libiberty.a
 coffdump_LDFLAGS = 
-dlltool_OBJECTS =  dlltool.o defparse.o deflex.o bucomm.o version.o \
-filemode.o
+dlltool_OBJECTS =  dlltool.o defparse.o deflex.o dyn-string.o bucomm.o \
+version.o filemode.o
 dlltool_DEPENDENCIES =  ../bfd/libbfd.la ../libiberty/libiberty.a
 dlltool_LDFLAGS = 
 windres_OBJECTS =  windres.o resrc.o rescoff.o resbin.o rcparse.o \
@@ -412,7 +412,7 @@ configure.in deflex.c defparse.c nlmheader.c rclex.c rcparse.c
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
-TAR = tar
+TAR = gtar
 GZIP_ENV = --best
 SOURCES = $(nlmconv_SOURCES) $(srconv_SOURCES) $(sysdump_SOURCES) $(coffdump_SOURCES) $(dlltool_SOURCES) $(windres_SOURCES) $(dllwrap_SOURCES) $(size_SOURCES) $(objdump_SOURCES) $(ar_SOURCES) $(strings_SOURCES) $(ranlib_SOURCES) $(c__filt_SOURCES) $(objcopy_SOURCES) $(addr2line_SOURCES) $(readelf_SOURCES) $(nm_new_SOURCES) $(strip_new_SOURCES)
 OBJECTS = $(nlmconv_OBJECTS) $(srconv_OBJECTS) $(sysdump_OBJECTS) $(coffdump_OBJECTS) $(dlltool_OBJECTS) $(windres_OBJECTS) $(dllwrap_OBJECTS) $(size_OBJECTS) $(objdump_OBJECTS) $(ar_OBJECTS) $(strings_OBJECTS) $(ranlib_OBJECTS) $(c__filt_OBJECTS) $(objcopy_OBJECTS) $(addr2line_OBJECTS) $(readelf_OBJECTS) $(nm_new_OBJECTS) $(strip_new_OBJECTS)
@@ -1125,12 +1125,14 @@ sysinfo.o: sysinfo.c
 dlltool.o:dlltool.c
 	$(COMPILE) -c $(DLLTOOL_DEFS) $(srcdir)/dlltool.c
 
+rescoff.o:rescoff.c
+	$(COMPILE) -c $(DLLTOOL_DEFS) $(srcdir)/rescoff.c
+
 # coff/sym.h and coff/ecoff.h won't be found by the automatic dependency
 # scripts, since they are only included conditionally.
 nlmconv.o: nlmconv.c $(INCDIR)/coff/sym.h $(INCDIR)/coff/ecoff.h
 	ldname=`echo ld | sed '$(transform)'`; \
 	$(COMPILE) -c -DLD_NAME="\"$${ldname}\"" @NLMCONV_DEFS@ $(srcdir)/nlmconv.c
-
 
 diststuff: $(DISTSTUFF) info
 
@@ -1237,7 +1239,8 @@ debug.o: debug.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   debug.h
 dlltool.o: dlltool.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/libiberty.h bucomm.h config.h $(INCDIR)/fopen-same.h \
-  $(INCDIR)/getopt.h $(INCDIR)/demangle.h dlltool.h
+  $(INCDIR)/getopt.h $(INCDIR)/demangle.h dyn-string.h \
+  dlltool.h
 filemode.o: filemode.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   bucomm.h config.h $(INCDIR)/fopen-same.h
 ieee.o: ieee.c ../bfd/bfd.h $(INCDIR)/ansidecl.h $(INCDIR)/ieee.h \
@@ -1318,8 +1321,8 @@ readelf.o: readelf.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/elf/sparc.h $(INCDIR)/elf/m32r.h $(INCDIR)/elf/d10v.h \
   $(INCDIR)/elf/d30v.h $(INCDIR)/elf/sh.h $(INCDIR)/elf/mn10200.h \
   $(INCDIR)/elf/mn10300.h $(INCDIR)/elf/hppa.h $(INCDIR)/elf/arc.h \
-  $(INCDIR)/elf/fr30.h bucomm.h config.h $(INCDIR)/fopen-same.h \
-  $(INCDIR)/getopt.h
+  $(INCDIR)/elf/fr30.h $(INCDIR)/elf/mcore.h $(INCDIR)/elf/i960.h \
+  bucomm.h config.h $(INCDIR)/fopen-same.h $(INCDIR)/getopt.h
 resres.o: resres.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   bucomm.h config.h $(INCDIR)/fopen-same.h $(INCDIR)/libiberty.h \
   windres.h winduni.h

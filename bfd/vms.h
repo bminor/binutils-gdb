@@ -1,6 +1,6 @@
 #undef vms
 /* vms.h -- Header file for VMS (Alpha and Vax) support.
-   Copyright 1996, 1997 Free Software Foundation, Inc.
+   Copyright 1996, 1997, 1998, 1999 Free Software Foundation, Inc.
 
    Written by Klaus K"ampf (kkaempf@rmi.de)
 
@@ -583,7 +583,7 @@ struct vms_private_data_struct {
 
   struct hdr_struc hdr_data;		/* data from HDR/EMH record  */
   struct eom_struc eom_data;		/* data from EOM/EEOM record  */
-  int section_count;			/* # of sections in following array  */
+  unsigned int section_count;		/* # of sections in following array  */
   asection **sections;			/* array of GSD/EGSD sections  */
   int gsd_sym_count;			/* # of GSD/EGSD symbols  */
   asymbol **symbols;			/* vector of GSD/EGSD symbols  */

@@ -145,10 +145,23 @@ syntax is different.
 @item .half
 This is functionally identical to @code{.short}.
 
+@cindex @code{nword} directive, SPARC
+@item .nword
+On the Sparc, the @code{.nword} directive produces native word sized value,
+ie. if assembling with -32 it is equivalent to @code{.word}, if assembling
+with -64 it is equivalent to @code{.xword}.
+
 @cindex @code{proc} directive, SPARC
 @item .proc
 This directive is ignored.  Any text following it on the same
 line is also ignored.
+
+@cindex @code{register} directive, SPARC
+@item .register
+This directive declares use of a global application or system register.
+It must be followed by a register name %g2, %g3, %g6 or %g7, comma and
+the symbol name for that register or @code{#scratch} if it is a scratch
+register.
 
 @cindex @code{reserve} directive, SPARC
 @item .reserve
@@ -176,4 +189,3 @@ instead of the 16 bit values it produces on many other machines.
 On the Sparc V9 processor, the @code{.xword} directive produces
 64 bit values.
 @end table
-

@@ -40,6 +40,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define EXT_NAME_LEN 6		/* ditto for *NIX */
 #endif
 
+/* We need to open files in binary modes on system where that makes a
+   difference.  */
+#ifndef O_BINARY
+#define O_BINARY 0
+#endif
+
 #define BUFSIZE 8192
 
 /* Kludge declaration from BFD!  This is ugly!  FIXME!  XXX */
@@ -1296,7 +1302,7 @@ ranlib_touch (archname)
   bfd *arch;
   char **matching;
 
-  f = open (archname, O_RDWR, 0);
+  f = open (archname, O_RDWR | O_BINARY, 0);
   if (f < 0)
     {
       bfd_set_error (bfd_error_system_call);

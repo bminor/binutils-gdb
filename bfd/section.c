@@ -1,5 +1,5 @@
 /* Object file "section" support for the BFD library.
-   Copyright (C) 1990, 91, 92, 93, 94, 95, 96, 1997
+   Copyright (C) 1990, 91, 92, 93, 94, 95, 96, 97, 98, 1999
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
@@ -307,6 +307,10 @@ CODE_FRAGMENT
 .	{* This section should not be subject to garbage collection.  *}
 .#define SEC_KEEP 0x1000000
 .
+.	{* This section contains "short" data, and should be placed
+.	   "near" the GP.  *}
+.#define SEC_SHORT 0x2000000
+.
 .	{*  End of section flags.  *}
 .
 .	{* Some internal packed boolean fields.  *}
@@ -482,10 +486,14 @@ CODE_FRAGMENT
 static const asymbol global_syms[] =
 {
  /* the_bfd, name, value, attr, section [, udata] */
-  {0, BFD_COM_SECTION_NAME, 0, BSF_SECTION_SYM, (asection *) &bfd_com_section},
-  {0, BFD_UND_SECTION_NAME, 0, BSF_SECTION_SYM, (asection *) &bfd_und_section},
-  {0, BFD_ABS_SECTION_NAME, 0, BSF_SECTION_SYM, (asection *) &bfd_abs_section},
-  {0, BFD_IND_SECTION_NAME, 0, BSF_SECTION_SYM, (asection *) &bfd_ind_section},
+  {0, BFD_COM_SECTION_NAME, 0, BSF_SECTION_SYM,
+   (asection *) &bfd_com_section, { 0 }},
+  {0, BFD_UND_SECTION_NAME, 0, BSF_SECTION_SYM,
+   (asection *) &bfd_und_section, { 0 }},
+  {0, BFD_ABS_SECTION_NAME, 0, BSF_SECTION_SYM,
+   (asection *) &bfd_abs_section, { 0 }},
+  {0, BFD_IND_SECTION_NAME, 0, BSF_SECTION_SYM,
+   (asection *) &bfd_ind_section, { 0 }},
 };
 
 #define STD_SECTION(SEC, FLAGS, SYM, NAME, IDX)	\
@@ -733,7 +741,7 @@ DESCRIPTION
 /*ARGSUSED*/
 boolean
 bfd_set_section_flags (abfd, section, flags)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      sec_ptr section;
      flagword flags;
 {
@@ -1046,30 +1054,32 @@ _bfd_strip_section_from_output (s)
   asection **spp, *os;
   struct bfd_link_order *p, *pp;
 
+  /* Excise the input section from the link order.  */
   os = s->output_section;
   for (p = os->link_order_head, pp = NULL; p != NULL; pp = p, p = p->next)
     if (p->type == bfd_indirect_link_order
 	&& p->u.indirect.section == s)
       {
-	/* Excise the input section.  */
 	if (pp)
 	  pp->next = p->next;
 	else
 	  os->link_order_head = p->next;
 	if (!p->next)
 	  os->link_order_tail = pp;
-
-	if (!os->link_order_head)
-	  {
-	    /* Excise the output section.  */
-	    for (spp = &os->owner->sections; *spp; spp = &(*spp)->next)
-	      if (*spp == os)
-		{
-		  *spp = os->next;
-		  os->owner->section_count--;
-		  break;
-		}
-	  }
 	break;
       }
+
+  /* If the output section is empty, remove it too.  Careful about sections
+     that have been discarded in the link script -- they are mapped to 
+     bfd_abs_section, which has no owner.  */
+  if (!os->link_order_head && os->owner)
+    {
+      for (spp = &os->owner->sections; *spp; spp = &(*spp)->next)
+	if (*spp == os)
+	  {
+	    *spp = os->next;
+	    os->owner->section_count--;
+	    break;
+	  }
+    }
 }

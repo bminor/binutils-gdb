@@ -1,4 +1,4 @@
-# Linker script for PE.
+# Linker script for MCore PE.
 
 if test -z "${RELOCATEABLE_OUTPUT_FORMAT}"; then
   RELOCATEABLE_OUTPUT_FORMAT=${OUTPUT_FORMAT}
@@ -35,10 +35,16 @@ else
   R_RSRC=
 fi
 
-cat <<EOF
-${RELOCATING+OUTPUT_FORMAT(${OUTPUT_FORMAT})}
-${RELOCATING-OUTPUT_FORMAT(${RELOCATEABLE_OUTPUT_FORMAT})}
+if test "$RELOCATING"; then
+  # Can't use ${RELOCATING+blah "blah" blah} for this,
+  # because bash 2.x will lose the doublequotes.
+  cat <<EOF
+OUTPUT_FORMAT("${OUTPUT_FORMAT}", "${BIG_OUTPUT_FORMAT}",
+	  	           "${LITTLE_OUTPUT_FORMAT}")}
+EOF
+fi
 
+cat <<EOF
 ${LIB_SEARCH_DIRS}
 
 ENTRY(_mainCRTStartup)

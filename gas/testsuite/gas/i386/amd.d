@@ -5,7 +5,7 @@
 
 Disassembly of section .text:
 
-0+000 <.text>:
+0+000 <foo>:
    0:	0f 0d 03 [ 	]*prefetch \(%ebx\)
    3:	0f 0d 0c 75 00 10 00 00 [ 	]*prefetchw 0x1000\(,%esi,2\)
    b:	0f 0e [ 	]*femms  
@@ -29,9 +29,12 @@ Disassembly of section .text:
   6b:	0f 0f ce 0d [ 	]*pi2fd  %mm6,%mm1
   6f:	0f 0f d7 b7 [ 	]*pfmulhrw %mm7,%mm2
   73:	2e 0f [ 	]*\(bad\)  
-  75:	0f 54 [ 	]*\(bad\)  
-  77:	c3 [ 	]*ret    
+  75:	0f 54 c3 [ 	]*andps  %xmm3,%xmm0
   78:	07 [ 	]*pop    %es
   79:	c3 [ 	]*ret    
   7a:	90 [ 	]*nop    
   7b:	90 [ 	]*nop    
+  7c:	90 [ 	]*nop    
+  7d:	90 [ 	]*nop    
+  7e:	90 [ 	]*nop    
+  7f:	90 [ 	]*nop    

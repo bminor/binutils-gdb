@@ -76,6 +76,11 @@ char *program_version = "1.2";
    it.  */
 extern void as_abort PARAMS ((const char *, int, const char *));
 
+/* The default obstack chunk size.  If we set this to zero, the
+   obstack code will use whatever will fit in a 4096 byte block.  This
+   is used by the hash table code used by macro.c.  */
+int chunksize = 0;
+
 #define MAX_INCLUDES 30		/* Maximum include depth */
 #define MAX_REASONABLE 1000	/* Maximum number of expansions */
 

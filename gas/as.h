@@ -1,5 +1,5 @@
 /* as.h - global header file
-   Copyright (C) 1987, 90, 91, 92, 93, 94, 95, 96, 97, 1998
+   Copyright (C) 1987, 90, 91, 92, 93, 94, 95, 96, 97, 98, 1999
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -457,7 +457,7 @@ COMMON int linkrelax;
 extern int listing;
 
 /* Type of debugging information we should generate.  We currently
-   only support stabs and ECOFF.  */
+   support stabs, ECOFF, and DWARF2.  */
 
 enum debug_info_type
   {
@@ -559,7 +559,7 @@ char *atof_ieee PARAMS ((char *str, int what_kind, LITTLENUM_TYPE * words));
 char *input_scrub_include_file PARAMS ((char *filename, char *position));
 char *input_scrub_new_file PARAMS ((char *filename));
 char *input_scrub_next_buffer PARAMS ((char **bufp));
-int do_scrub_chars PARAMS ((int (*get) (char **), char *to, int tolen));
+int do_scrub_chars PARAMS ((int (*get) (char *, int), char *to, int tolen));
 int gen_to_words PARAMS ((LITTLENUM_TYPE * words, int precision,
 			  long exponent_bits));
 int had_err PARAMS ((void));
@@ -585,6 +585,7 @@ void subseg_set PARAMS ((segT seg, subsegT subseg));
 #ifdef BFD_ASSEMBLER
 segT subseg_get PARAMS ((const char *, int));
 #endif
+int subseg_text_p PARAMS ((segT));
 
 void start_dependencies PARAMS ((char *));
 void register_dependency PARAMS ((char *));
@@ -592,13 +593,13 @@ void print_dependencies PARAMS ((void));
 
 struct expressionS;
 struct fix;
-struct symbol;
+typedef struct symbol symbolS;
 struct relax_type;
 typedef struct frag fragS;
 
 #ifdef BFD_ASSEMBLER
 /* literal.c */
-valueT add_to_literal_pool PARAMS ((struct symbol *, valueT, segT, int));
+valueT add_to_literal_pool PARAMS ((symbolS *, valueT, segT, int));
 #endif
 
 int check_eh_frame PARAMS ((struct expressionS *, unsigned int *));
@@ -611,7 +612,6 @@ void eh_frame_convert_frag PARAMS ((fragS *));
 /* this one starts the chain of target dependant headers */
 #include "targ-env.h"
 
-#include "struc-symbol.h"
 #include "write.h"
 #include "frags.h"
 #include "hash.h"

@@ -740,7 +740,7 @@ pi (line, x)
       pt (x->types[i]);
       fprintf (stdout, "\n");
       if (x->types[i]
-	  & (Reg | SReg2 | SReg3 | Control | Debug | Test | RegMMX))
+	  & (Reg | SReg2 | SReg3 | Control | Debug | Test | RegMMX | RegXMM))
 	fprintf (stdout, "%s\n", x->regs[i]->reg_name);
       if (x->types[i] & Imm)
 	pe (x->imms[i]);
@@ -835,6 +835,7 @@ type_names[] =
   { Acc, "Acc" },
   { JumpAbsolute, "Jump Absolute" },
   { RegMMX, "rMMX" },
+  { RegXMM, "rXMM" },
   { EsSeg, "es" },
   { 0, "" }
 };
@@ -948,7 +949,10 @@ tc_i386_fix_adjustable(fixP)
 #define BFD_RELOC_386_GOTOFF	0
 #endif
 
-int
+static int
+intel_float_operand PARAMS ((char *mnemonic));
+
+static int
 intel_float_operand (mnemonic)
      char *mnemonic;
 {
@@ -1244,7 +1248,6 @@ md_assemble (line)
 
   {
     register unsigned int overlap0, overlap1;
-    expressionS *exp;
     unsigned int overlap2;
     unsigned int found_reverse_match;
     int suffix_check;
@@ -1256,11 +1259,12 @@ md_assemble (line)
         && (strncmp (mnemonic, "fsub", 4) !=0)
         && (strncmp (mnemonic, "fdiv", 4) !=0))
       {
-        const reg_entry *temp_reg;
-        expressionS *temp_disp;
-        expressionS *temp_imm;
+        const reg_entry *temp_reg = NULL;
+        expressionS *temp_disp = NULL;
+        expressionS *temp_imm = NULL;
         unsigned int temp_type;
-        int xchg1, xchg2;
+        int xchg1 = 0;
+	int xchg2 = 0;
 
         if (i.operands == 2)
           {
@@ -1552,8 +1556,10 @@ md_assemble (line)
 		    continue;
 		  }
 		/* Any other register is bad */
-		if (i.types[op] & (Reg | RegMMX | Control | Debug | Test
-				   | FloatReg | FloatAcc | SReg2 | SReg3))
+		if (i.types[op] & (Reg | RegMMX | RegXMM
+				   | SReg2 | SReg3
+				   | Control | Debug | Test
+				   | FloatReg | FloatAcc))
 		  {
 		    as_bad (_("`%%%s' not allowed with `%s%c'"),
 			    i.regs[op]->reg_name,
@@ -1740,12 +1746,12 @@ md_assemble (line)
           }
       }
 
-    if (i.tm.base_opcode == AMD_3DNOW_OPCODE)
+    if (i.tm.opcode_modifier & ImmExt)
       {
-	/* These AMD specific instructions have an opcode suffix which
-	   is coded in the same place as an 8-bit immediate field
-	   would be.  Here we fake an 8-bit immediate operand from the
-	   opcode suffix stored in tm.extension_opcode.  */
+	/* These AMD 3DNow! and Intel Katmai New Instructions have an
+	   opcode suffix which is coded in the same place as an 8-bit
+	   immediate field would be.  Here we fake an 8-bit immediate
+	   operand from the opcode suffix stored in tm.extension_opcode.  */
 
 	expressionS *exp;
 
@@ -1822,37 +1828,21 @@ md_assemble (line)
 	      {
 		unsigned int source, dest;
 		source = ((i.types[0]
-			   & (Reg
-			      | SReg2
-			      | SReg3
-			      | Control
-			      | Debug
-			      | Test
-			      | RegMMX))
+			   & (Reg | RegMMX | RegXMM
+			      | SReg2 | SReg3
+			      | Control | Debug | Test))
 			  ? 0 : 1);
 		dest = source + 1;
 
-		/* Certain instructions expect the destination to be
-		   in the i.rm.reg field.  This is by far the
-		   exceptional case.  For these instructions, if the
-		   source operand is a register, we must reverse the
-		   i.rm.reg and i.rm.regmem fields.  We accomplish
-		   this by pretending that the two register operands
-		   were given in the reverse order.  */
-		if (i.tm.opcode_modifier & ReverseRegRegmem)
-		  {
-		    const reg_entry *tmp = i.regs[source];
-		    i.regs[source] = i.regs[dest];
-		    i.regs[dest] = tmp;
-		  }
-
 		i.rm.mode = 3;
-		/* We must be careful to make sure that all
-		   segment/control/test/debug/MMX registers go into
-		   the i.rm.reg field (despite whether they are
-		   source or destination operands). */
-		if (i.regs[dest]->reg_type
-		    & (SReg2 | SReg3 | Control | Debug | Test | RegMMX))
+		/* One of the register operands will be encoded in the
+		   i.tm.reg field, the other in the combined i.tm.mode
+		   and i.tm.regmem fields.  If no form of this
+		   instruction supports a memory destination operand,
+		   then we assume the source operand may sometimes be
+		   a memory operand and so we need to store the
+		   destination in the i.rm.reg field.  */
+		if ((i.tm.operand_types[dest] & AnyMem) == 0)
 		  {
 		    i.rm.reg = i.regs[dest]->reg_num;
 		    i.rm.regmem = i.regs[source]->reg_num;
@@ -1981,6 +1971,8 @@ md_assemble (line)
 		      {
 			/* Fakes a zero displacement assuming that i.types[op]
 			   holds the correct displacement size. */
+			expressionS *exp;
+
 			exp = &disp_expressions[i.disp_operands++];
 			i.disps[op] = exp;
 			exp->X_op = O_constant;
@@ -1999,12 +1991,14 @@ md_assemble (line)
 		  {
 		    unsigned int op =
 		      ((i.types[0]
-			& (Reg | SReg2 | SReg3 | Control | Debug
-			   | Test | RegMMX))
+			& (Reg | RegMMX | RegXMM
+			   | SReg2 | SReg3
+			   | Control | Debug | Test))
 		       ? 0
 		       : ((i.types[1]
-			   & (Reg | SReg2 | SReg3 | Control | Debug
-			      | Test | RegMMX))
+			   & (Reg | RegMMX | RegXMM
+			      | SReg2 | SReg3
+			      | Control | Debug | Test))
 			  ? 1
 			  : 2));
 		    /* If there is an extension opcode to put here, the
@@ -2369,30 +2363,28 @@ md_assemble (line)
 		  {
 		    if (i.disps[n]->X_op == O_constant)
 		      {
-			if (i.types[n] & Disp8)
+			int size = 4;
+			long val = (long) i.disps[n]->X_add_number;
+
+			if (i.types[n] & (Disp8 | Disp16))
 			  {
-			    insn_size += 1;
-			    p = frag_more (1);
-			    md_number_to_chars (p,
-						(valueT) i.disps[n]->X_add_number,
-						1);
+			    long mask;
+
+			    size = 2;
+			    mask = ~ (long) 0xffff;
+			    if (i.types[n] & Disp8)
+			      {
+				size = 1;
+				mask = ~ (long) 0xff;
+			      }
+
+			    if ((val & mask) != 0 && (val & mask) != mask)
+				as_warn (_("%ld shortened to %ld"),
+					 val, val & ~mask);
 			  }
-			else if (i.types[n] & Disp16)
-			  {
-			    insn_size += 2;
-			    p = frag_more (2);
-			    md_number_to_chars (p,
-						(valueT) i.disps[n]->X_add_number,
-						2);
-			  }
-			else
-			  {	/* Disp32 */
-			    insn_size += 4;
-			    p = frag_more (4);
-			    md_number_to_chars (p,
-						(valueT) i.disps[n]->X_add_number,
-						4);
-			  }
+			insn_size += size;
+			p = frag_more (size);
+			md_number_to_chars (p, (valueT) val, size);
 		      }
 		    else if (i.types[n] & Disp32)
 		      {
@@ -2425,30 +2417,27 @@ md_assemble (line)
 		  {
 		    if (i.imms[n]->X_op == O_constant)
 		      {
-			if (i.types[n] & (Imm8 | Imm8S))
+			int size = 4;
+			long val = (long) i.imms[n]->X_add_number;
+
+			if (i.types[n] & (Imm8 | Imm8S | Imm16))
 			  {
-			    insn_size += 1;
-			    p = frag_more (1);
-			    md_number_to_chars (p,
-						(valueT) i.imms[n]->X_add_number,
-						1);
+			    long mask;
+
+			    size = 2;
+			    mask = ~ (long) 0xffff;
+			    if (i.types[n] & (Imm8 | Imm8S))
+			      {
+				size = 1;
+				mask = ~ (long) 0xff;
+			      }
+			    if ((val & mask) != 0 && (val & mask) != mask)
+				as_warn (_("%ld shortened to %ld"),
+					 val, val & ~mask);
 			  }
-			else if (i.types[n] & Imm16)
-			  {
-			    insn_size += 2;
-			    p = frag_more (2);
-			    md_number_to_chars (p,
-						(valueT) i.imms[n]->X_add_number,
-						2);
-			  }
-			else
-			  {
-			    insn_size += 4;
-			    p = frag_more (4);
-			    md_number_to_chars (p,
-						(valueT) i.imms[n]->X_add_number,
-						4);
-			  }
+			insn_size += size;
+			p = frag_more (size);
+			md_number_to_chars (p, (valueT) val, size);
 		      }
 		    else
 		      {		/* not absolute_section */
@@ -2474,7 +2463,8 @@ md_assemble (line)
 			    && GOT_symbol == i.imms[n]->X_add_symbol
 			    && (i.imms[n]->X_op == O_symbol
 				|| (i.imms[n]->X_op == O_add
-				    && (i.imms[n]->X_op_symbol->sy_value.X_op
+				    && ((symbol_get_value_expression
+					 (i.imms[n]->X_op_symbol)->X_op)
 					== O_subtract))))
 			  {
 			    r_type = BFD_RELOC_386_GOTPC;
@@ -2561,7 +2551,8 @@ i386_immediate (imm_start)
       if (cp != NULL)
         {
 	  char *tmpbuf;
-	  int len, first;
+	  int len = 0;
+	  int first;
 
 	  /* GOT relocations are not supported in 16 bit mode */
 	  if (flag_16bit_code)
@@ -2602,6 +2593,7 @@ i386_immediate (imm_start)
 
   exp_seg = expression (exp);
 
+  SKIP_WHITESPACE ();
   if (*input_line_pointer)
     as_bad (_("Ignoring junk `%s' after expression"), input_line_pointer);
 
@@ -2620,9 +2612,13 @@ i386_immediate (imm_start)
     }
   else if (exp->X_op == O_constant)
     {
+      int bigimm = Imm32;
+      if (flag_16bit_code ^ (i.prefix[DATA_PREFIX] != 0))
+	bigimm = Imm16;
+
       i.types[this_operand] |=
-	smallest_imm_type ((long) exp->X_add_number);
-  
+	(bigimm | smallest_imm_type ((long) exp->X_add_number));
+
       /* If a suffix is given, this operand may be shortended. */
       switch (i.suffix)
         {
@@ -2644,7 +2640,6 @@ i386_immediate (imm_start)
 #endif
           )
     {
-    seg_unimplemented:
       as_bad (_("Unimplemented segment type %d in operand"), exp_seg);
       return 0;
     }
@@ -2790,7 +2785,8 @@ i386_displacement (disp_start, disp_end)
       if (cp != NULL)
         {
 	  char *tmpbuf;
-	  int len, first;
+	  int len = 0;
+	  int first;
 
 	 /* GOT relocations are not supported in 16 bit mode */
 	 if (flag_16bit_code)
@@ -2839,7 +2835,7 @@ i386_displacement (disp_start, disp_end)
       {
         if (S_IS_LOCAL(exp->X_add_symbol)
             && S_GET_SEGMENT (exp->X_add_symbol) != undefined_section)
-          section_symbol(exp->X_add_symbol->bsym->section);
+          section_symbol (S_GET_SEGMENT (exp->X_add_symbol));
         assert (exp->X_op == O_symbol);
         exp->X_op = O_subtract;
         exp->X_op_symbol = GOT_symbol;
@@ -2847,6 +2843,7 @@ i386_displacement (disp_start, disp_end)
       }
 #endif
 
+     SKIP_WHITESPACE ();
      if (*input_line_pointer)
        as_bad (_("Ignoring junk `%s' after expression"),
                input_line_pointer);
@@ -3456,6 +3453,11 @@ i386_operand (operand_string)
   else if (*op_string == IMMEDIATE_PREFIX)
     {				/* ... or an immediate */
       ++op_string;
+      if (i.types[this_operand] & JumpAbsolute)
+	{
+	  as_bad (_("Immediate operand illegal with absolute jump"));
+	  return 0;
+	}
       if (!i386_immediate (op_string))
         return 0;
     }
@@ -3469,8 +3471,8 @@ i386_operand (operand_string)
       int found_base_index_form;
 
       /* Start and end of displacement string expression (if found). */
-      char *displacement_string_start;
-      char *displacement_string_end;
+      char *displacement_string_start = NULL;
+      char *displacement_string_end = NULL;
 
     do_memory_reference:
 
@@ -3781,8 +3783,8 @@ md_convert_frag (headers, sec, fragP)
 #else
 void
 md_convert_frag (abfd, sec, fragP)
-     bfd *abfd;
-     segT sec;
+     bfd *abfd ATTRIBUTE_UNUSED;
+     segT sec ATTRIBUTE_UNUSED;
      register fragS *fragP;
 #endif
 {
@@ -3798,7 +3800,7 @@ md_convert_frag (abfd, sec, fragP)
   /* Address we want to reach in file space. */
   target_address = S_GET_VALUE (fragP->fr_symbol) + fragP->fr_offset;
 #ifdef BFD_ASSEMBLER /* not needed otherwise? */
-  target_address += fragP->fr_symbol->sy_frag->fr_address;
+  target_address += symbol_get_frag (fragP->fr_symbol)->fr_address;
 #endif
 
   /* Address opcode resides at in file space. */
@@ -3864,8 +3866,8 @@ void
 md_create_short_jump (ptr, from_addr, to_addr, frag, to_symbol)
      char *ptr;
      addressT from_addr, to_addr;
-     fragS *frag;
-     symbolS *to_symbol;
+     fragS *frag ATTRIBUTE_UNUSED;
+     symbolS *to_symbol ATTRIBUTE_UNUSED;
 {
   long offset;
 
@@ -3915,15 +3917,34 @@ md_apply_fix3 (fixP, valp, seg)
   register char *p = fixP->fx_where + fixP->fx_frag->fr_literal;
   valueT value = *valp;
 
-  if (fixP->fx_r_type == BFD_RELOC_32 && fixP->fx_pcrel)
-     fixP->fx_r_type = BFD_RELOC_32_PCREL;
-
 #if defined (BFD_ASSEMBLER) && !defined (TE_Mach)
+  if (fixP->fx_pcrel)
+    {
+      switch (fixP->fx_r_type)
+	{
+	default:
+	  break;
+
+	case BFD_RELOC_32:
+	  fixP->fx_r_type = BFD_RELOC_32_PCREL;
+	  break;
+	case BFD_RELOC_16:
+	  fixP->fx_r_type = BFD_RELOC_16_PCREL;
+	  break;
+	case BFD_RELOC_8:
+	  fixP->fx_r_type = BFD_RELOC_8_PCREL;
+	  break;
+	}
+    }
+
   /*
    * This is a hack.  There should be a better way to
    * handle this.
    */
-  if (fixP->fx_r_type == BFD_RELOC_32_PCREL && fixP->fx_addsy)
+  if ((fixP->fx_r_type == BFD_RELOC_32_PCREL
+       || fixP->fx_r_type == BFD_RELOC_16_PCREL
+       || fixP->fx_r_type == BFD_RELOC_8_PCREL)
+      && fixP->fx_addsy)
     {
 #ifndef OBJ_AOUT
       if (OUTPUT_FLAVOR == bfd_target_elf_flavour
@@ -3936,7 +3957,7 @@ md_apply_fix3 (fixP, valp, seg)
 #if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
       if (OUTPUT_FLAVOR == bfd_target_elf_flavour
 	  && (S_GET_SEGMENT (fixP->fx_addsy) == seg
-	      || (fixP->fx_addsy->bsym->flags & BSF_SECTION_SYM) != 0)
+	      || symbol_section_p (fixP->fx_addsy))
 	  && ! S_IS_EXTERNAL (fixP->fx_addsy)
 	  && ! S_IS_WEAK (fixP->fx_addsy)
 	  && S_IS_DEFINED (fixP->fx_addsy)
@@ -4023,9 +4044,9 @@ md_apply_fix3 (fixP, valp, seg)
     default:
       break;
     }
-#endif
-
-#endif
+#endif /* defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF) */
+  *valp = value;
+#endif /* defined (BFD_ASSEMBLER) && !defined (TE_Mach) */
   md_number_to_chars (p, value, fixP->fx_size);
 
   return 1;
@@ -4178,7 +4199,7 @@ size_t md_longopts_size = sizeof (md_longopts);
 int
 md_parse_option (c, arg)
      int c;
-     char *arg;
+     char *arg ATTRIBUTE_UNUSED;
 {
   switch (c)
     {
@@ -4264,7 +4285,7 @@ md_undefined_symbol (name)
 /* Round up a section size to the appropriate boundary.  */
 valueT
 md_section_align (segment, size)
-     segT segment;
+     segT segment ATTRIBUTE_UNUSED;
      valueT size;
 {
 #ifdef OBJ_AOUT
@@ -4299,7 +4320,7 @@ md_pcrel_from (fixP)
 
 static void
 s_bss (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   register int temp;
 
@@ -4324,12 +4345,9 @@ i386_validate_fix (fixp)
     }
 }
 
-#define F(SZ,PCREL)		(((SZ) << 1) + (PCREL))
-#define MAP(SZ,PCREL,TYPE)	case F(SZ,PCREL): code = (TYPE); break
-
 arelent *
 tc_gen_reloc (section, fixp)
-     asection *section;
+     asection *section ATTRIBUTE_UNUSED;
      fixS *fixp;
 {
   arelent *rel;
@@ -4347,27 +4365,35 @@ tc_gen_reloc (section, fixp)
       code = fixp->fx_r_type;
       break;
     default:
-      switch (F (fixp->fx_size, fixp->fx_pcrel))
+      if (fixp->fx_pcrel)
 	{
-	  MAP (1, 0, BFD_RELOC_8);
-	  MAP (2, 0, BFD_RELOC_16);
-	  MAP (4, 0, BFD_RELOC_32);
-	  MAP (1, 1, BFD_RELOC_8_PCREL);
-	  MAP (2, 1, BFD_RELOC_16_PCREL);
-	  MAP (4, 1, BFD_RELOC_32_PCREL);
-	default:
-	  if (fixp->fx_pcrel)
-	    as_bad (_("Can not do %d byte pc-relative relocation"),
-		    fixp->fx_size);
-	  else
-	    as_bad (_("Can not do %d byte relocation"), fixp->fx_size);
-	  code = BFD_RELOC_32;
-	  break;
+	  switch (fixp->fx_size)
+	    {
+	    default:
+	      as_bad (_("Can not do %d byte pc-relative relocation"),
+		      fixp->fx_size);
+	      code = BFD_RELOC_32_PCREL;
+	      break;
+	    case 1: code = BFD_RELOC_8_PCREL;  break;
+	    case 2: code = BFD_RELOC_16_PCREL; break;
+	    case 4: code = BFD_RELOC_32_PCREL; break;
+	    }
+	}
+      else
+	{
+	  switch (fixp->fx_size)
+	    {
+	    default:
+	      as_bad (_("Can not do %d byte relocation"), fixp->fx_size);
+	      code = BFD_RELOC_32;
+	      break;
+	    case 1: code = BFD_RELOC_8;  break;
+	    case 2: code = BFD_RELOC_16; break;
+	    case 4: code = BFD_RELOC_32; break;
+	    }
 	}
       break;
     }
-#undef MAP
-#undef F
 
   if (code == BFD_RELOC_32
       && GOT_symbol
@@ -4375,7 +4401,8 @@ tc_gen_reloc (section, fixp)
     code = BFD_RELOC_386_GOTPC;
 
   rel = (arelent *) xmalloc (sizeof (arelent));
-  rel->sym_ptr_ptr = &fixp->fx_addsy->bsym;
+  rel->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
+  *rel->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
 
   rel->address = fixp->fx_frag->fr_address + fixp->fx_where;
   /* HACK: Since i386 ELF uses Rel instead of Rela, encode the
@@ -4470,6 +4497,6 @@ tc_coff_sizemachdep (frag)
 
 #endif /* I386COFF */
 
-#endif /* BFD_ASSEMBLER? */
+#endif /* ! BFD_ASSEMBLER */
 
 /* end of tc-i386.c */

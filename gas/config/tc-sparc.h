@@ -35,6 +35,9 @@ struct frag;
 extern const char *sparc_target_format PARAMS ((void));
 #define TARGET_FORMAT sparc_target_format ()
 
+#define RELOC_EXPANSION_POSSIBLE
+#define MAX_RELOC_EXPANSION 2
+
 #if 0
 #ifdef TE_SPARCAOUT
 /* Bi-endian support may eventually be unconditional, but until things are
@@ -57,7 +60,7 @@ extern int sparc_pic_code;
 
 #define md_do_align(n, fill, len, max, around)				\
 if ((n) && (n) <= 10 && !need_pass_2 && !(fill)				\
-    && now_seg != data_section && now_seg != bss_section)		\
+    && subseg_text_p (now_seg))						\
   {									\
     char *p;								\
     p = frag_var (rs_align_code, 1 << n, 1, (relax_substateT) 1024,	\
@@ -129,8 +132,7 @@ extern int elf32_sparc_force_relocation PARAMS ((struct fix *));
        || ((FIX)->fx_subsy != NULL					\
 	   && (S_GET_SEGMENT ((FIX)->fx_subsy)				\
 	       == S_GET_SEGMENT ((FIX)->fx_addsy)))			\
-       || strchr (S_GET_NAME ((FIX)->fx_addsy), '\001') != NULL		\
-       || strchr (S_GET_NAME ((FIX)->fx_addsy), '\002') != NULL))
+       || S_IS_LOCAL ((FIX)->fx_addsy)))
 #endif
 
 #ifdef OBJ_AOUT
@@ -160,5 +162,22 @@ extern void sparc_md_end PARAMS ((void));
 #define TC_CONS_FIX_NEW cons_fix_new_sparc
 extern void cons_fix_new_sparc
   PARAMS ((struct frag *, int, unsigned int, struct expressionS *));
+
+#define TC_FIX_TYPE	valueT
+
+#define TC_INIT_FIX_DATA(X)			\
+  do						\
+     {						\
+       (X)->tc_fix_data = 0;			\
+     }						\
+  while(0)
+
+#define TC_FIX_DATA_PRINT(FILE, FIXP)					\
+  do									\
+    {									\
+      fprintf((FILE), "addend2=%ld\n",   				\
+	      (unsigned long) (FIXP)->tc_fix_data);			\
+    }									\
+  while(0)
 
 /* end of tc-sparc.h */

@@ -1,5 +1,5 @@
 /* Generic symbol-table support for the BFD library.
-   Copyright (C) 1990, 91, 92, 93, 94, 95, 96, 97, 1998
+   Copyright (C) 1990, 91, 92, 93, 94, 95, 96, 97, 98, 1999
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
@@ -698,10 +698,10 @@ _bfd_generic_read_minisymbols (abfd, dynamic, minisymsp, sizep)
 /*ARGSUSED*/
 asymbol *
 _bfd_generic_minisymbol_to_symbol (abfd, dynamic, minisym, sym)
-     bfd *abfd;
-     boolean dynamic;
+     bfd *abfd ATTRIBUTE_UNUSED;
+     boolean dynamic ATTRIBUTE_UNUSED;
      const PTR minisym;
-     asymbol *sym;
+     asymbol *sym ATTRIBUTE_UNUSED;
 {
   return *(asymbol **) minisym;
 }
@@ -796,7 +796,8 @@ _bfd_stab_section_find_nearest_line (abfd, symbols, section, offset, pfound,
 {
   struct stab_find_info *info;
   bfd_size_type stabsize, strsize;
-  bfd_byte *stab, *str, *last_stab;
+  bfd_byte *stab, *str;
+  bfd_byte *last_stab = NULL;
   bfd_size_type stroff;
   struct indexentry *indexentry;
   char *directory_name, *file_name;
@@ -1032,23 +1033,24 @@ _bfd_stab_section_find_nearest_line (abfd, symbols, section, offset, pfound,
 		  file_name = NULL;
 		  saw_fun = 1;
 		}
-	      else {
-		last_stab = stab;
-		if (stab + STABSIZE >= info->stabs + stabsize
-		    || *(stab + STABSIZE + TYPEOFF) != N_SO)
-		  {
-		    directory_name = NULL;
-		  }
-		else
-		  {
-		    /* Two consecutive N_SOs are a directory and a file
-		       name.  */
-		    stab += STABSIZE;
-		    directory_name = file_name;
-		    file_name = ((char *) str
-				 + bfd_get_32 (abfd, stab + STRDXOFF));
-		  }
-	      }
+	      else
+		{
+		  last_stab = stab;
+		  if (stab + STABSIZE >= info->stabs + stabsize
+		      || *(stab + STABSIZE + TYPEOFF) != N_SO)
+		    {
+		      directory_name = NULL;
+		    }
+		  else
+		    {
+		      /* Two consecutive N_SOs are a directory and a
+			 file name.  */
+		      stab += STABSIZE;
+		      directory_name = file_name;
+		      file_name = ((char *) str
+				   + bfd_get_32 (abfd, stab + STRDXOFF));
+		    }
+		}
 	      break;
 
 	    case N_SOL:

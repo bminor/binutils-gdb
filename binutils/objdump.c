@@ -83,6 +83,9 @@ struct objdump_disasm_info {
 /* Architecture to disassemble for, or default if NULL.  */
 static char *machine = (char *) NULL;
 
+/* Target specific options to the disassembler.  */
+static char *disassembler_options = (char *) NULL;
+
 /* Endianness to disassemble for, or default if BFD_ENDIAN_UNKNOWN.  */
 static enum bfd_endian endian = BFD_ENDIAN_UNKNOWN;
 
@@ -217,7 +220,8 @@ usage (stream, status)
      int status;
 {
   fprintf (stream, _("\
-Usage: %s [-ahifCdDprRtTxsSlw] [-b bfdname] [-m machine] [-j section-name]\n\
+Usage: %s [-ahifCdDprRtTxsSlw] [-b bfdname] [-m machine] \n\
+       [-j section-name] [-M disassembler-options]\n\
        [--archive-headers] [--target=bfdname] [--debugging] [--disassemble]\n\
        [--disassemble-all] [--disassemble-zeroes] [--file-headers]\n\
        [--section-headers] [--headers]\n\
@@ -255,6 +259,7 @@ static struct option long_options[]=
   {"demangle", no_argument, &do_demangle, 1},
   {"disassemble", no_argument, NULL, 'd'},
   {"disassemble-all", no_argument, NULL, 'D'},
+  {"disassembler-options", required_argument, NULL, 'M'},
   {"disassemble-zeroes", no_argument, &disassemble_zeroes, 1},
   {"dynamic-reloc", no_argument, NULL, 'R'},
   {"dynamic-syms", no_argument, NULL, 'T'},
@@ -284,9 +289,9 @@ static struct option long_options[]=
 
 static void
 dump_section_header (abfd, section, ignored)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      asection *section;
-     PTR ignored;
+     PTR ignored ATTRIBUTE_UNUSED;
 {
   char *comma = "";
 
@@ -324,6 +329,7 @@ dump_section_header (abfd, section, ignored)
   PF (SEC_NEVER_LOAD, "NEVER_LOAD");
   PF (SEC_EXCLUDE, "EXCLUDE");
   PF (SEC_SORT_ENTRIES, "SORT_ENTRIES");
+  PF (SEC_SHORT, "SHORT");
 
   if ((section->flags & SEC_LINK_ONCE) != 0)
     {
@@ -1134,7 +1140,7 @@ objdump_sprintf (va_alist)
 
   n = strlen (buf);
 
-  while ((f->buffer + f->size) - f->current < n + 1)
+  while ((size_t) ((f->buffer + f->size) - f->current) < n + 1)
     {
       size_t curroff;
 
@@ -1305,11 +1311,16 @@ disassemble_bytes (info, disassemble_fn, insns, data, start, stop, relppp,
 	      if (info->bytes_per_line != 0)
 		bytes_per_line = info->bytes_per_line;
 	      if (bytes < 0)
-		break;
+		{
+		  if (sfile.current != sfile.buffer)
+		    printf ("%s\n", sfile.buffer);
+		  free (sfile.buffer);
+		  break;
+		}
 	    }
 	  else
 	    {
-	      long j;
+	      bfd_vma j;
 
 	      bytes = bytes_per_line;
 	      if (i + bytes > stop)
@@ -1329,7 +1340,7 @@ disassemble_bytes (info, disassemble_fn, insns, data, start, stop, relppp,
 	      ? show_raw_insn > 0
 	      : show_raw_insn >= 0)
 	    {
-	      long j;
+	      bfd_vma j;
 
 	      /* If ! prefix_addresses and ! wide_output, we print
                  bytes_per_line bytes per line.  */
@@ -1389,7 +1400,7 @@ disassemble_bytes (info, disassemble_fn, insns, data, start, stop, relppp,
 	    {
 	      while (pb < bytes)
 		{
-		  long j;
+		  bfd_vma j;
 		  char *s;
 
 		  putchar ('\n');
@@ -1559,10 +1570,12 @@ disassemble_data (abfd)
   disasm_info.flavour = bfd_get_flavour (abfd);
   disasm_info.arch = bfd_get_arch (abfd);
   disasm_info.mach = bfd_get_mach (abfd);
+  disasm_info.disassembler_options = disassembler_options;
+  
   if (bfd_big_endian (abfd))
-    disasm_info.endian = BFD_ENDIAN_BIG;
+    disasm_info.display_endian = disasm_info.endian = BFD_ENDIAN_BIG;
   else if (bfd_little_endian (abfd))
-    disasm_info.endian = BFD_ENDIAN_LITTLE;
+    disasm_info.display_endian = disasm_info.endian = BFD_ENDIAN_LITTLE;
   else
     /* ??? Aborting here seems too drastic.  We could default to big or little
        instead.  */
@@ -1859,7 +1872,7 @@ static void
 print_section_stabs (abfd, stabsect_name, strsect_name)
      bfd *abfd;
      const char *stabsect_name;
-     const char *strsect_name;
+     const char *strsect_name ATTRIBUTE_UNUSED;
 {
   int i;
   unsigned file_string_table_offset = 0, next_file_string_table_offset = 0;
@@ -2215,7 +2228,7 @@ dump_data (abfd)
 /* Should perhaps share code and display with nm? */
 static void
 dump_symbols (abfd, dynamic)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      boolean dynamic;
 {
   asymbol **current;
@@ -2468,7 +2481,10 @@ dump_reloc_set (abfd, sec, relpp, relcount)
       if (sym_name)
 	{
 	  printf_vma (q->address);
-	  printf (" %-16s  ", q->howto->name);
+	  if (q->howto->name)
+	    printf (" %-16s  ", q->howto->name);
+	  else
+	    printf (" %-16d  ", q->howto->type);
 	  objdump_print_symname (abfd, (struct disassemble_info *) NULL,
 				 *q->sym_ptr_ptr);
 	}
@@ -2686,7 +2702,7 @@ main (argc, argv)
   bfd_init ();
   set_default_bfd_target ();
 
-  while ((c = getopt_long (argc, argv, "pib:m:VCdDlfahrRtTxsSj:wE:",
+  while ((c = getopt_long (argc, argv, "pib:m:M:VCdDlfahrRtTxsSj:wE:",
 			   long_options, (int *) 0))
 	 != EOF)
     {
@@ -2698,6 +2714,9 @@ main (argc, argv)
 	  break;		/* we've been given a long option */
 	case 'm':
 	  machine = optarg;
+	  break;
+	case 'M':
+	  disassembler_options = optarg;
 	  break;
 	case 'j':
 	  only = optarg;

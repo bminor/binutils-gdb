@@ -103,8 +103,8 @@ ALL_EMULATIONS = \
 	earcelf.o \
 	earmelf.o \
 	earmelf_oabi.o \
-	earmlinux.o \
-	earm26linux.o \
+	earmelf_linux.o \
+	earmelf_linux26.o \
 	earmaoutb.o \
 	earmaoutl.o \
 	earmcoff.o \
@@ -117,14 +117,17 @@ ALL_EMULATIONS = \
 	edelta68.o \
 	eebmon29k.o \
 	eelf32_sparc.o \
+	eelf32_i960.o \
 	eelf32b4300.o \
 	eelf32bmip.o \
 	eelf32ebmip.o \
 	eelf32elmip.o \
+	eelf32bmipn32.o \
 	eelf32l4300.o \
 	eelf32lmip.o \
 	eelf32lppc.o \
 	eelf32ppc.o \
+	eelf32ppclinux.o \
 	eelf_i386.o \
 	eelf_i386_be.o \
 	egld960.o \
@@ -205,7 +208,8 @@ ALL_EMULATIONS = \
 
 ALL_64_EMULATIONS = \
 	eelf64_sparc.o \
-	eelf64alpha.o
+	eelf64alpha.o \
+	eelf64bmip.o
 
 ALL_EMUL_EXTRA_OFILES = \
 	pe-dll.o \
@@ -258,7 +262,7 @@ ldemul-list.h: Makefile
 
 # These all start with e so 'make clean' can find them.
 
-GENSCRIPTS = $(SHELL) $(srcdir)/genscripts.sh ${srcdir} ${libdir} @host@ @target@ @target_alias@ ${EMUL} "@NATIVE_LIB_DIRS@"
+GENSCRIPTS = $(SHELL) $(srcdir)/genscripts.sh ${srcdir} ${libdir} @host@ @target@ @target_alias@ "@EMULATION_LIBPATH@" "@NATIVE_LIB_DIRS@"
 GEN_DEPENDS = $(srcdir)/genscripts.sh $(srcdir)/emultempl/stringify.sed
 @TDIRS@
 
@@ -334,6 +338,9 @@ em32relf.c: $(srcdir)/emulparams/m32relf.sh \
 eelf32_sparc.c: $(srcdir)/emulparams/elf32_sparc.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32_sparc "$(tdir_elf32_sparc)"
+eelf32_i960.c: $(srcdir)/emulparams/elf32_i960.sh \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} elf32_i960 "$(tdir_elf32_i960)"
 eelf32b4300.c: $(srcdir)/emulparams/elf32b4300.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32b4300 "$(tdir_elf32b4300)"
@@ -349,6 +356,9 @@ eelf32ebmip.c: $(srcdir)/emulparams/elf32ebmip.sh \
 eelf32elmip.c: $(srcdir)/emulparams/elf32elmip.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32elmip "$(tdir_elf32elmip)"
+eelf32bmipn32.c: $(srcdir)/emulparams/elf32bmipn32.sh \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} elf32bmipn32 "$(tdir_elf32bmipn32)"
 eelf32l4300.c: $(srcdir)/emulparams/elf32l4300.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32l4300 "$(tdir_elf32l4300)"
@@ -364,12 +374,18 @@ eelf32lsmip.c: $(srcdir)/emulparams/elf32lsmip.sh \
 eelf32ppc.c: $(srcdir)/emulparams/elf32ppc.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elfppc.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32ppc "$(tdir_elf32ppc)"
+eelf32ppclinux.c: $(srcdir)/emulparams/elf32ppclinux.sh \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elfppc.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} elf32ppclinux "$(tdir_elf32ppclinux)"
 eelf64alpha.c: $(srcdir)/emulparams/elf64alpha.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf64alpha "$(tdir_elf64alpha)"
 eelf64_sparc.c: $(srcdir)/emulparams/elf64_sparc.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf64_sparc "$(tdir_elf64_sparc)"
+eelf64bmip.c: $(srcdir)/emulparams/elf64bmip.sh \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} elf64bmip "$(tdir_elf64bmip)"
 eelf_i386.c: $(srcdir)/emulparams/elf_i386.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf_i386 "$(tdir_elf_i386)"

@@ -234,11 +234,14 @@ sysinfo.o: sysinfo.c
 
 srconv_SOURCES = srconv.c coffgrok.c $(BULIBS)
 
-dlltool_SOURCES = dlltool.c defparse.y deflex.l $(BULIBS)
+dlltool_SOURCES = dlltool.c defparse.y deflex.l dyn-string.c $(BULIBS)
 dlltool_LDADD = $(BFDLIB) $(LIBIBERTY) @LEXLIB@ $(INTLLIBS)
 
 dlltool.o:dlltool.c
 	$(COMPILE) -c $(DLLTOOL_DEFS) $(srcdir)/dlltool.c
+
+rescoff.o:rescoff.c
+	$(COMPILE) -c $(DLLTOOL_DEFS) $(srcdir)/rescoff.c
 
 coffdump_SOURCES = coffdump.c coffgrok.c $(BULIBS)
 
@@ -257,7 +260,7 @@ windres_SOURCES = windres.c resrc.c rescoff.c resbin.c rcparse.y rclex.l \
 windres_LDADD = $(BFDLIB) $(LIBIBERTY) @LEXLIB@ $(INTLLIBS)
 
 dllwrap_SOURCES = dllwrap.c dyn-string.c 
-dllwrap_LDADD = $(LIBIBERTY)
+dllwrap_LDADD = $(LIBIBERTY) $(INTLLIBS)
 
 
 DISTSTUFF = arparse.c arparse.h arlex.c nlmheader.c sysinfo.c sysinfo.h \
@@ -378,7 +381,8 @@ debug.o: debug.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   debug.h
 dlltool.o: dlltool.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/libiberty.h bucomm.h config.h $(INCDIR)/fopen-same.h \
-  $(INCDIR)/getopt.h $(INCDIR)/demangle.h dlltool.h
+  $(INCDIR)/getopt.h $(INCDIR)/demangle.h dyn-string.h \
+  dlltool.h
 filemode.o: filemode.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   bucomm.h config.h $(INCDIR)/fopen-same.h
 ieee.o: ieee.c ../bfd/bfd.h $(INCDIR)/ansidecl.h $(INCDIR)/ieee.h \
@@ -459,8 +463,8 @@ readelf.o: readelf.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/elf/sparc.h $(INCDIR)/elf/m32r.h $(INCDIR)/elf/d10v.h \
   $(INCDIR)/elf/d30v.h $(INCDIR)/elf/sh.h $(INCDIR)/elf/mn10200.h \
   $(INCDIR)/elf/mn10300.h $(INCDIR)/elf/hppa.h $(INCDIR)/elf/arc.h \
-  $(INCDIR)/elf/fr30.h bucomm.h config.h $(INCDIR)/fopen-same.h \
-  $(INCDIR)/getopt.h
+  $(INCDIR)/elf/fr30.h $(INCDIR)/elf/mcore.h $(INCDIR)/elf/i960.h \
+  bucomm.h config.h $(INCDIR)/fopen-same.h $(INCDIR)/getopt.h
 resres.o: resres.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   bucomm.h config.h $(INCDIR)/fopen-same.h $(INCDIR)/libiberty.h \
   windres.h winduni.h

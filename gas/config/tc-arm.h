@@ -1,5 +1,6 @@
 /* This file is tc-arm.h
-   Copyright (C) 1994, 1995, 1996, 1997, 1998, 1999 Free Software Foundation, Inc.
+   Copyright (C) 1994, 1995, 1996, 1997, 1998, 1999
+   Free Software Foundation, Inc.
    Contributed by Richard Earnshaw (rwe@pegasus.esprit.ec.org)
 	Modified by David Taylor (dtaylor@armltd.co.uk)
 
@@ -103,7 +104,7 @@
  extern void arm_start_line_hook PARAMS ((void));
 
 #define tc_frob_label(S) arm_frob_label (S)
- extern void arm_frob_label PARAMS ((struct symbol *));
+ extern void arm_frob_label PARAMS ((symbolS *));
 
 /* We also need to mark assembler created symbols:  */
 #define tc_frob_fake_label(S) arm_frob_label (S)
@@ -121,9 +122,9 @@
 /* We need to keep some local information on symbols.  */
 
 #define TC_SYMFIELD_TYPE unsigned int
-#define ARM_GET_FLAG(s)   	((s)->sy_tc)
-#define ARM_SET_FLAG(s,v) 	((s)->sy_tc |= (v))
-#define ARM_RESET_FLAG(s,v) 	((s)->sy_tc &= ~(v))
+#define ARM_GET_FLAG(s)   	(*symbol_get_tc (s))
+#define ARM_SET_FLAG(s,v) 	(*symbol_get_tc (s) |= (v))
+#define ARM_RESET_FLAG(s,v) 	(*symbol_get_tc (s) &= ~(v))
 
 #define ARM_FLAG_THUMB 		(1 << 0)	/* The symbol is a Thumb symbol rather than an Arm symbol.  */
 #define ARM_FLAG_INTERWORK 	(1 << 1)	/* The symbol is attached to code that suppports interworking.  */
@@ -170,6 +171,9 @@ char * arm_canonicalize_symbol_name PARAMS ((char *));
 
 #define LOCAL_LABEL(name) (name[0] == '.' && (name[1] == 'L'))
 #define LOCAL_LABELS_FB   1
+#ifdef OBJ_ELF
+#define LOCAL_LABEL_PREFIX '.'
+#endif
 
 /* This expression evaluates to false if the relocation is for a local object
    for which we still want to do the relocation at runtime.  True if we

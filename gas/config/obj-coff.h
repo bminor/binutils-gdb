@@ -154,7 +154,7 @@
 #define OBJ_COFF_MAX_AUXENTRIES 1
 #endif /* OBJ_COFF_MAX_AUXENTRIES */
 
-extern void coff_obj_symbol_new_hook PARAMS ((struct symbol *));
+extern void coff_obj_symbol_new_hook PARAMS ((symbolS *));
 #define obj_symbol_new_hook coff_obj_symbol_new_hook
 
 extern void coff_obj_read_begin_hook PARAMS ((void));
@@ -211,32 +211,35 @@ extern void coff_obj_read_begin_hook PARAMS ((void));
 /* Alter the field names, for now, until we've fixed up the other
    references to use the new name.  */
 #ifdef TC_I960
-#define TC_SYMFIELD_TYPE	struct symbol *
+#define TC_SYMFIELD_TYPE	symbolS *
 #define sy_tc			bal
 #endif
 
 #define OBJ_SYMFIELD_TYPE	unsigned long
 #define sy_obj			sy_flags
 
-#define SYM_AUXENT(S)	(&coffsymbol ((S)->bsym)->native[1].u.auxent)
-#define SYM_AUXINFO(S)	(&coffsymbol ((S)->bsym)->native[1])
+#define SYM_AUXENT(S) \
+  (&coffsymbol (symbol_get_bfdsym (S))->native[1].u.auxent)
+#define SYM_AUXINFO(S) \
+  (&coffsymbol (symbol_get_bfdsym (S))->native[1])
 
 #define DO_NOT_STRIP	0
 
 extern void obj_coff_section PARAMS ((int));
 
 /* The number of auxiliary entries */
-#define S_GET_NUMBER_AUXILIARY(s)	(coffsymbol((s)->bsym)->native->u.syment.n_numaux)
+#define S_GET_NUMBER_AUXILIARY(s) \
+  (coffsymbol (symbol_get_bfdsym (s))->native->u.syment.n_numaux)
 /* The number of auxiliary entries */
 #define S_SET_NUMBER_AUXILIARY(s,v)	(S_GET_NUMBER_AUXILIARY (s) = (v))
 
 /* True if a symbol name is in the string table, i.e. its length is > 8. */
 #define S_IS_STRING(s)		(strlen(S_GET_NAME(s)) > 8 ? 1 : 0)
 
-extern int S_SET_DATA_TYPE PARAMS ((struct symbol *, int));
-extern int S_SET_STORAGE_CLASS PARAMS ((struct symbol *, int));
-extern int S_GET_STORAGE_CLASS PARAMS ((struct symbol *));
-extern void SA_SET_SYM_ENDNDX PARAMS ((struct symbol *, struct symbol *));
+extern int S_SET_DATA_TYPE PARAMS ((symbolS *, int));
+extern int S_SET_STORAGE_CLASS PARAMS ((symbolS *, int));
+extern int S_GET_STORAGE_CLASS PARAMS ((symbolS *));
+extern void SA_SET_SYM_ENDNDX PARAMS ((symbolS *, symbolS *));
 
 /* Auxiliary entry macros. SA_ stands for symbol auxiliary */
 /* Omit the tv related fields */
@@ -298,9 +301,9 @@ extern void SA_SET_SYM_ENDNDX PARAMS ((struct symbol *, struct symbol *));
 /* All other bits are unused. */
 
 /* Accessors */
-#define SF_GET(s)		((s)->sy_flags)
-#define SF_GET_DEBUG(s)		((s)->bsym->flags & BSF_DEBUGGING)
-#define SF_SET_DEBUG(s)		((s)->bsym->flags |= BSF_DEBUGGING)
+#define SF_GET(s)		(*symbol_get_obj (s))
+#define SF_GET_DEBUG(s)		(symbol_get_bfdsym (s)->flags & BSF_DEBUGGING)
+#define SF_SET_DEBUG(s)		(symbol_get_bfdsym (s)->flags |= BSF_DEBUGGING)
 #define SF_GET_NORMAL_FIELD(s)	(SF_GET (s) & SF_NORMAL_MASK)
 #define SF_GET_DEBUG_FIELD(s)	(SF_GET (s) & SF_DEBUG_MASK)
 #define SF_GET_FILE(s)		(SF_GET (s) & SF_FILE)
@@ -346,13 +349,13 @@ extern int coff_line_base;
 extern int coff_n_line_nos;
 
 #define obj_emit_lineno(WHERE,LINE,FILE_START)	abort ()
-extern void coff_add_linesym PARAMS ((struct symbol *));
+extern void coff_add_linesym PARAMS ((symbolS *));
 
 
 void c_dot_file_symbol PARAMS ((char *filename));
 #define obj_app_file c_dot_file_symbol
 
-extern void coff_frob_symbol PARAMS ((struct symbol *, int *));
+extern void coff_frob_symbol PARAMS ((symbolS *, int *));
 extern void coff_adjust_symtab PARAMS ((void));
 extern void coff_frob_section PARAMS ((segT));
 extern void coff_adjust_section_syms PARAMS ((bfd *, asection *, PTR));
@@ -364,7 +367,7 @@ extern void coff_frob_file_after_relocs PARAMS ((void));
 #define obj_frob_section(S)	coff_frob_section (S)
 #define obj_frob_file_after_relocs() coff_frob_file_after_relocs ()
 
-extern struct symbol *coff_last_function;
+extern symbolS *coff_last_function;
 
 /* Forward the segment of a forwarded symbol, handle assignments that
    just copy symbol values, etc.  */
@@ -778,7 +781,7 @@ extern void c_dot_file_symbol PARAMS ((char *filename));
 #define obj_app_file c_dot_file_symbol
 extern void obj_extra_stuff PARAMS ((object_headers * headers));
 
-extern segT s_get_segment PARAMS ((struct symbol * ptr));
+extern segT s_get_segment PARAMS ((symbolS *ptr));
 
 extern void c_section_header PARAMS ((struct internal_scnhdr * header,
 				      char *name,
@@ -792,7 +795,7 @@ extern void c_section_header PARAMS ((struct internal_scnhdr * header,
 				      long alignment));
 
 #ifndef tc_coff_symbol_emit_hook
-void tc_coff_symbol_emit_hook PARAMS ((struct symbol *));
+void tc_coff_symbol_emit_hook PARAMS ((symbolS *));
 #endif
 
 /* sanity check */

@@ -1,8 +1,9 @@
 # This shell script emits a C file. -*- C -*-
 # It does some substitutions.
-cat >e${EMULATION_NAME}.c <<EOF
+(echo;echo;echo;echo)>e${EMULATION_NAME}.c # there, now line numbers match ;-)
+cat >>e${EMULATION_NAME}.c <<EOF
 /* This file is part of GLD, the Gnu Linker.
-   Copyright 1995, 96, 97, 1998 Free Software Foundation, Inc.
+   Copyright 1995, 96, 97, 98, 1999 Free Software Foundation, Inc.
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -42,9 +43,25 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "ldfile.h"
 #include "coff/internal.h"
 #include "../bfd/libcoff.h"
+#include "../bfd/libbfd.h"
 #include "deffile.h"
 
 #define TARGET_IS_${EMULATION_NAME}
+
+#if defined(TARGET_IS_i386pe)
+#define DLL_SUPPORT
+#endif
+
+#define	PE_DEF_SUBSYSTEM		3
+
+#ifdef TARGET_IS_arm_epoc_pe
+#define bfd_arm_pe_allocate_interworking_sections \
+	bfd_arm_epoc_pe_allocate_interworking_sections
+#define bfd_arm_pe_get_bfd_for_interworking \
+	bfd_arm_epoc_pe_get_bfd_for_interworking
+#define bfd_arm_pe_process_before_allocation \
+	bfd_arm_epoc_pe_process_before_allocation
+#endif
 
 static void gld_${EMULATION_NAME}_set_symbols PARAMS ((void));
 static void gld_${EMULATION_NAME}_after_open PARAMS ((void));
@@ -57,10 +74,12 @@ static void gld${EMULATION_NAME}_place_section
   PARAMS ((lang_statement_union_type *));
 static char *gld_${EMULATION_NAME}_get_script PARAMS ((int *));
 static int gld_${EMULATION_NAME}_parse_args PARAMS ((int, char **));
+static void gld_${EMULATION_NAME}_finish PARAMS ((void));
 
 static struct internal_extra_pe_aouthdr pe;
 static int dll;
 static int support_old_code = 0;
+static char * thumb_entry_symbol = NULL;
 extern def_file *pe_def_file;
 static lang_assignment_statement_type *image_base_statement = 0;
 
@@ -78,7 +97,7 @@ gld_${EMULATION_NAME}_before_parse()
 {
   output_filename = "a.exe";
   ldfile_output_architecture = bfd_arch_${ARCH};
-#ifdef TARGET_IS_i386pe
+#ifdef DLL_SUPPORT
   config.has_shared = 1;
 #endif
 }
@@ -109,6 +128,7 @@ gld_${EMULATION_NAME}_before_parse()
 #define OPTION_ENABLE_STDCALL_FIXUP	(OPTION_STDCALL_ALIASES + 1)
 #define OPTION_DISABLE_STDCALL_FIXUP	(OPTION_ENABLE_STDCALL_FIXUP + 1)
 #define OPTION_IMPLIB_FILENAME		(OPTION_DISABLE_STDCALL_FIXUP + 1)
+#define OPTION_THUMB_ENTRY		(OPTION_IMPLIB_FILENAME + 1)
 
 static struct option longopts[] =
 {
@@ -128,7 +148,8 @@ static struct option longopts[] =
   {"stack", required_argument, NULL, OPTION_STACK},
   {"subsystem", required_argument, NULL, OPTION_SUBSYSTEM},
   {"support-old-code", no_argument, NULL, OPTION_SUPPORT_OLD_CODE},
-#ifdef TARGET_IS_i386pe
+  {"thumb-entry", required_argument, NULL, OPTION_THUMB_ENTRY},
+#ifdef DLL_SUPPORT
   /* getopt allows abbreviations, so we do this to stop it from treating -o
      as an abbreviation for this option */
   {"output-def", required_argument, NULL, OPTION_OUT_DEF},
@@ -174,7 +195,7 @@ static definfo init[] =
   D(MinorImageVersion,"__minor_image_version__", 0),
   D(MajorSubsystemVersion,"__major_subsystem_version__", 4),
   D(MinorSubsystemVersion,"__minor_subsystem_version__", 0),
-  D(Subsystem,"__subsystem__", 3),
+  D(Subsystem,"__subsystem__", PE_DEF_SUBSYSTEM),
   D(SizeOfStackReserve,"__size_of_stack_reserve__", 0x2000000),
   D(SizeOfStackCommit,"__size_of_stack_commit__", 0x1000),
   D(SizeOfHeapReserve,"__size_of_heap_reserve__", 0x100000),
@@ -202,7 +223,8 @@ gld_${EMULATION_NAME}_list_options (file)
   fprintf (file, _("  --stack <size>                     Set size of the initial stack\n"));
   fprintf (file, _("  --subsystem <name>[:<version>]     Set required OS subsystem [& version]\n"));
   fprintf (file, _("  --support-old-code                 Support interworking with old code\n"));
-#ifdef TARGET_IS_i386pe
+  fprintf (file, _("  --thumb-entry=<symbol>             Set the entry point to be Thumb <symbol>\n"));
+#ifdef DLL_SUPPORT
   fprintf (file, _("  --add-stdcall-alias                Export symbols with and without @nn\n"));
   fprintf (file, _("  --disable-stdcall-fixup            Don't link _sym to _sym@nn\n"));
   fprintf (file, _("  --enable-stdcall-fixup             Link _sym to _sym@nn without warnings\n"));
@@ -410,6 +432,10 @@ gld_${EMULATION_NAME}_parse_args(argc, argv)
     case OPTION_SUPPORT_OLD_CODE:
       support_old_code = 1;
       break;
+    case OPTION_THUMB_ENTRY:
+      thumb_entry_symbol = optarg;
+      break;
+#ifdef DLL_SUPPORT
     case OPTION_OUT_DEF:
       pe_out_def_filename = xstrdup (optarg);
       break;
@@ -417,9 +443,7 @@ gld_${EMULATION_NAME}_parse_args(argc, argv)
       pe_dll_export_everything = 1;
       break;
     case OPTION_EXCLUDE_SYMBOLS:
-#ifdef TARGET_IS_i386pe
       pe_dll_add_excludes (optarg);
-#endif
       break;
     case OPTION_KILL_ATS:
       pe_dll_kill_ats = 1;
@@ -436,6 +460,7 @@ gld_${EMULATION_NAME}_parse_args(argc, argv)
     case OPTION_IMPLIB_FILENAME:
       pe_implib_filename = xstrdup (optarg);
       break;
+#endif
     }
   return 1;
 }
@@ -517,7 +542,7 @@ gld_${EMULATION_NAME}_after_parse ()
      opened, so registering the symbol as undefined will make a
      difference.  */
 
-  if (entry_symbol)
+  if (! link_info.relocateable && entry_symbol != NULL)
     ldlang_add_undef (entry_symbol);
 }
 
@@ -617,7 +642,7 @@ gld_${EMULATION_NAME}_after_open ()
   pe_data (output_bfd)->pe_opthdr = pe;
   pe_data (output_bfd)->dll = init[DLLOFF].value;
 
-#ifdef TARGET_IS_i386pe
+#ifdef DLL_SUPPORT
   if (pe_enable_stdcall_fixup) /* -1=warn or 1=disable */
     pe_fixup_stdcalls ();
 
@@ -626,16 +651,89 @@ gld_${EMULATION_NAME}_after_open ()
     pe_dll_build_sections (output_bfd, &link_info);
 #endif
 
-#ifdef TARGET_IS_armpe
+#if defined(TARGET_IS_armpe) || defined(TARGET_IS_arm_epoc_pe)
+  if (strstr (bfd_get_target (output_bfd), "arm") == NULL)
+    {
+      /* The arm backend needs special fields in the output hash structure.
+	 These will only be created if the output format is an arm format,
+	 hence we do not support linking and changing output formats at the
+	 same time.  Use a link followed by objcopy to change output formats.  */
+      einfo ("%F%X%P: error: cannot change output format whilst linking ARM binaries\n");
+      return;
+    }
   {
     /* Find a BFD that can hold the interworking stubs.  */
     LANG_FOR_EACH_INPUT_STATEMENT (is)
       {
-	if (bfd_arm_get_bfd_for_interworking (is->the_bfd, & link_info))
+	if (bfd_arm_pe_get_bfd_for_interworking (is->the_bfd, & link_info))
 	  break;
       }
   }
 #endif
+
+  {
+    static int sequence = 0;
+    int is_ms_arch;
+    bfd *cur_arch = 0, *elt;
+    lang_input_statement_type *is2;
+    /* Careful - this is a shell script.  Watch those dollar signs! */
+    /* Microsoft import libraries have every member named the same,
+       and not in the right order for us to link them correctly.  We
+       must detect these and rename the members so that they'll link
+       correctly.  There are three types of objects: the head, the
+       thunks, and the sentinel(s).  The head is easy; it's the one
+       with idata2.  We assume that the sentinels won't have relocs,
+       and the thunks will.  It's easier than checking the symbol
+       table for external references. */
+    LANG_FOR_EACH_INPUT_STATEMENT (is)
+      {
+	if (is->the_bfd->my_archive)
+	  {
+	    bfd *arch = is->the_bfd->my_archive;
+	    if (cur_arch != arch)
+	      {
+		cur_arch = arch;
+		is_ms_arch = 1;
+		for (is2 = is;
+		     is2 && is2->the_bfd->my_archive == arch;
+		     is2 = (lang_input_statement_type *)is2->next)
+		  {
+		    if (strcmp (is->the_bfd->filename, is2->the_bfd->filename))
+		      is_ms_arch = 0;
+		  }
+	      }
+
+	    if (is_ms_arch)
+	      {
+		int idata2 = 0, i, reloc_count=0;
+		asection *sec;
+		char *new_name, seq;
+		for (sec = is->the_bfd->sections; sec; sec = sec->next)
+		  {
+		    if (strcmp (sec->name, ".idata\$2") == 0)
+		      idata2 = 1;
+		    reloc_count += sec->reloc_count;
+		  }
+
+		if (idata2) /* .idata2 is the TOC */
+		  seq = 'a';
+		else if (reloc_count > 0) /* thunks */
+		  seq = 'b';
+		else /* sentinel */
+		  seq = 'c';
+
+		new_name = bfd_alloc (is->the_bfd,
+				      strlen (is->the_bfd->filename)+2);
+		sprintf (new_name, "%s.%c", is->the_bfd->filename, seq);
+		is->the_bfd->filename = new_name;
+
+		new_name = bfd_alloc(is->the_bfd, strlen(is->filename)+2);
+		sprintf (new_name, "%s.%c", is->filename, seq);
+		is->filename = new_name;
+	      }
+	  }
+      }
+  }
 }
 
 static void  
@@ -658,7 +756,7 @@ gld_${EMULATION_NAME}_before_allocation()
   ppc_allocate_toc_section (&link_info);
 #endif /* TARGET_IS_ppcpe */
 
-#ifdef TARGET_IS_armpe
+#if defined(TARGET_IS_armpe) || defined(TARGET_IS_arm_epoc_pe)
   /* FIXME: we should be able to set the size of the interworking stub
      section.
 
@@ -668,7 +766,7 @@ gld_${EMULATION_NAME}_before_allocation()
   {
     LANG_FOR_EACH_INPUT_STATEMENT (is)
       {
-	if (! bfd_arm_process_before_allocation
+	if (! bfd_arm_pe_process_before_allocation
 	    (is->the_bfd, & link_info, support_old_code))
 	  {
 	    /* xgettext:c-format */
@@ -679,7 +777,7 @@ gld_${EMULATION_NAME}_before_allocation()
   }
 
   /* We have seen it all. Allocate it, and carry on */
-  bfd_arm_allocate_interworking_sections (& link_info);
+  bfd_arm_pe_allocate_interworking_sections (& link_info);
 #endif /* TARGET_IS_armpe */
 }
 
@@ -701,7 +799,7 @@ static boolean
 gld_${EMULATION_NAME}_unrecognized_file(entry)
   lang_input_statement_type *entry;
 {
-#ifdef TARGET_IS_i386pe
+#ifdef DLL_SUPPORT
   const char *ext = entry->filename + strlen (entry->filename) - 4;
 
   if (strcmp (ext, ".def") == 0 || strcmp (ext, ".DEF") == 0)
@@ -786,7 +884,10 @@ static boolean
 gld_${EMULATION_NAME}_recognized_file(entry)
   lang_input_statement_type *entry;
 {
+#ifdef DLL_SUPPORT
 #ifdef TARGET_IS_i386pe
+  pe_dll_id_target ("pei-i386");
+#endif
   if (bfd_get_format (entry->the_bfd) == bfd_object)
     {
       const char *ext = entry->filename + strlen (entry->filename) - 4;
@@ -800,7 +901,48 @@ gld_${EMULATION_NAME}_recognized_file(entry)
 static void
 gld_${EMULATION_NAME}_finish ()
 {
-#ifdef TARGET_IS_i386pe
+#if defined(TARGET_IS_armpe) || defined(TARGET_IS_arm_epoc_pe)
+  struct bfd_link_hash_entry * h;
+
+  if (thumb_entry_symbol != NULL)
+    {
+      h = bfd_link_hash_lookup (link_info.hash, thumb_entry_symbol, false, false, true);
+      
+      if (h != (struct bfd_link_hash_entry *) NULL
+	  && (h->type == bfd_link_hash_defined
+	      || h->type == bfd_link_hash_defweak)
+	  && h->u.def.section->output_section != NULL)
+	{
+	  static char buffer[32];
+	  bfd_vma val;
+	  
+	  /* Special procesing is required for a Thumb entry symbol.  The
+	     bottom bit of its address must be set.  */
+	  val = (h->u.def.value
+		 + bfd_get_section_vma (output_bfd,
+					h->u.def.section->output_section)
+		 + h->u.def.section->output_offset);
+	  
+	  val |= 1;
+	  
+	  /* Now convert this value into a string and store it in entry_symbol
+	     where the lang_finish() function will pick it up.  */
+	  buffer[0] = '0';
+	  buffer[1] = 'x';
+	  
+	  sprintf_vma (buffer + 2, val);
+	  
+	  if (entry_symbol != NULL && entry_from_cmdline)
+	    einfo (_("%P: warning: '--thumb-entry %s' is overriding '-e %s'\n"),
+		   thumb_entry_symbol, entry_symbol);
+	  entry_symbol = buffer;
+	}
+      else
+	einfo (_("%P: warning: connot find thumb start symbol %s\n"), thumb_entry_symbol);
+    }
+#endif /* defined(TARGET_IS_armpe) || defined(TARGET_IS_arm_epoc_pe) */
+
+#ifdef DLL_SUPPORT
   if (link_info.shared)
     {
       pe_dll_fill_sections (output_bfd, &link_info);

@@ -1,5 +1,5 @@
 /* Support for the generic parts of most COFF variants, for BFD.
-   Copyright 1995, 1996, 1997, 1998 Free Software Foundation, Inc.
+   Copyright 1995, 1996, 1997, 1998, 1999 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -504,6 +504,7 @@ coff_swap_sym_in (abfd, ext1, in1)
     {
       in->n_value = 0x0;
 
+#if 0
       /* FIXME: This is clearly wrong.  The problem seems to be that
          undefined C_SECTION symbols appear in the first object of a
          MS generated .lib file, and the symbols are not defined
@@ -518,6 +519,56 @@ coff_swap_sym_in (abfd, ext1, in1)
       /*      in->n_scnum = 3; */
       /*    else */
       /*      in->n_scnum = 2; */
+#else
+      /* Create synthetic empty sections as needed.  DJ */
+      if (in->n_scnum == 0)
+	{
+	  asection *sec;
+	  for (sec=abfd->sections; sec; sec=sec->next)
+	    {
+	      if (strcmp (sec->name, in->n_name) == 0)
+		{
+		  in->n_scnum = sec->target_index;
+		  break;
+		}
+	    }
+	}
+      if (in->n_scnum == 0)
+	{
+	  int unused_section_number = 0;
+	  asection *sec;
+	  char *name;
+	  for (sec=abfd->sections; sec; sec=sec->next)
+	    if (unused_section_number <= sec->target_index)
+	      unused_section_number = sec->target_index+1;
+
+	  name = bfd_alloc (abfd, strlen (in->n_name) + 10);
+	  if (name == NULL)
+	    return;
+	  strcpy (name, in->n_name);
+	  sec = bfd_make_section_anyway (abfd, name);
+
+	  sec->vma = 0;
+	  sec->lma = 0;
+	  sec->_cooked_size = 0;
+	  sec->_raw_size = 0;
+	  sec->filepos = 0;
+	  sec->rel_filepos = 0;
+	  sec->reloc_count = 0;
+	  sec->line_filepos = 0;
+	  sec->lineno_count = 0;
+	  sec->userdata = NULL;
+	  sec->next = (asection *) NULL;
+	  sec->flags = 0;
+	  sec->alignment_power = 2;
+	  sec->flags = SEC_HAS_CONTENTS | SEC_ALLOC | SEC_DATA | SEC_LOAD;
+
+	  sec->target_index = unused_section_number;
+
+	  in->n_scnum = unused_section_number;
+	}
+      in->n_sclass = C_STAT;
+#endif
     }
 
 #ifdef coff_swap_sym_in_hook
@@ -567,8 +618,8 @@ coff_swap_aux_in (abfd, ext1, type, class, indx, numaux, in1)
      PTR 	      ext1;
      int             type;
      int             class;
-     int	      indx;
-     int	      numaux;
+     int	      indx ATTRIBUTE_UNUSED;
+     int	      numaux ATTRIBUTE_UNUSED;
      PTR 	      in1;
 {
   AUXENT    *ext = (AUXENT *)ext1;
@@ -650,8 +701,8 @@ coff_swap_aux_out (abfd, inp, type, class, indx, numaux, extp)
      PTR 	inp;
      int   type;
      int   class;
-     int   indx;
-     int   numaux;
+     int   indx ATTRIBUTE_UNUSED;
+     int   numaux ATTRIBUTE_UNUSED;
      PTR	extp;
 {
   union internal_auxent *in = (union internal_auxent *)inp;
@@ -1184,7 +1235,11 @@ coff_swap_scnhdr_out (abfd, in, out)
     else if (strcmp (scnhdr_int->s_name, ".rsrc")  == 0)
       flags |= IMAGE_SCN_MEM_READ | IMAGE_SCN_MEM_SHARED;
     else
-      flags |= IMAGE_SCN_MEM_READ;
+      {
+	flags |= IMAGE_SCN_MEM_READ;
+	if (! (flags & SEC_READONLY))
+	  flags |= IMAGE_SCN_MEM_WRITE;
+      }
 
     bfd_h_put_32(abfd, flags, (bfd_byte *) scnhdr_ext->s_flags);
   }
@@ -2019,7 +2074,7 @@ static PTR
 pe_mkobject_hook (abfd, filehdr, aouthdr)
      bfd * abfd;
      PTR filehdr;
-     PTR aouthdr;
+     PTR aouthdr ATTRIBUTE_UNUSED;
 {
   struct internal_filehdr *internal_f = (struct internal_filehdr *) filehdr;
   pe_data_type *pe;

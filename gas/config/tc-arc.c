@@ -1,5 +1,5 @@
 /* tc-arc.c -- Assembler for the ARC
-   Copyright (C) 1994, 1995, 1997, 1998 Free Software Foundation, Inc.
+   Copyright (C) 1994, 1995, 1997, 1998, 1999 Free Software Foundation, Inc.
    Contributed by Doug Evans (dje@cygnus.com).
 
    This file is part of GAS, the GNU Assembler.
@@ -15,8 +15,9 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with GAS; see the file COPYING.  If not, write to
-   the Free Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
+   along with GAS; see the file COPYING.  If not, write to the Free
+   Software Foundation, 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA. */
 
 #include <stdio.h>
 #include <ctype.h>
@@ -797,7 +798,7 @@ arc_common (ignore)
 		   S_GET_NAME (symbolP), (long) S_GET_VALUE (symbolP), size);
 	}
     }
-  assert (symbolP->sy_frag == &zero_address_frag);
+  assert (symbol_get_frag (symbolP) == &zero_address_frag);
   if (*input_line_pointer != ',')
     {
       as_bad (_("expected comma after common length"));
@@ -830,8 +831,8 @@ arc_common (ignore)
 	  if (align)
 	    frag_align (align, 0, 0);
 	  if (S_GET_SEGMENT (symbolP) == bss_section)
-	    symbolP->sy_frag->fr_symbol = 0;
-	  symbolP->sy_frag = frag_now;
+	    symbol_get_frag (symbolP)->fr_symbol = 0;
+	  symbol_set_frag (symbolP, frag_now);
 	  p = frag_var (rs_org, 1, 1, (relax_substateT) 0, symbolP,
 			(offsetT) size, (char *) 0);
 	  *p = 0;
@@ -966,7 +967,7 @@ arc_rename (ignore)
   new = (char *) xmalloc (strlen (name) + 1);
   strcpy (new, name);
   *input_line_pointer = c;
-  sym->sy_tc.real_name = new;
+  symbol_get_tc (sym)->real_name = new;
 
   demand_empty_rest_of_line ();
 }
@@ -1241,13 +1242,13 @@ get_arc_exp_reloc_type (data_p, default_type, exp, expnew)
 
   if (exp->X_op == O_right_shift
       && exp->X_op_symbol != NULL
-      && exp->X_op_symbol->sy_value.X_op == O_constant
-      && exp->X_op_symbol->sy_value.X_add_number == 2
+      && symbol_constant_p (exp->X_op_symbol)
+      && S_GET_VALUE (exp->X_op_symbol) == 2
       && exp->X_add_number == 0)
     {
       if (exp->X_add_symbol != NULL
-	  && (exp->X_add_symbol->sy_value.X_op == O_constant
-	      || exp->X_add_symbol->sy_value.X_op == O_symbol))
+	  && (symbol_constant_p (exp->X_add_symbol)
+	      || symbol_equated_p (exp->X_add_symbol)))
 	{
 	  *expnew = *exp;
 	  expnew->X_op = O_symbol;
@@ -1255,9 +1256,10 @@ get_arc_exp_reloc_type (data_p, default_type, exp, expnew)
 	  return data_p ? BFD_RELOC_ARC_B26 : arc_operand_map['J'];
 	}
       else if (exp->X_add_symbol != NULL
-	       && exp->X_add_symbol->sy_value.X_op == O_subtract)
+	       && (symbol_get_value_expression (exp->X_add_symbol)->X_op
+		   == O_subtract))
 	{
-	  *expnew = exp->X_add_symbol->sy_value;
+	  *expnew = *symbol_get_value_expression (exp->X_add_symbol);
 	  return data_p ? BFD_RELOC_ARC_B26 : arc_operand_map['J'];
 	}
     }
@@ -1445,7 +1447,8 @@ tc_gen_reloc (section, fixP)
 
   reloc = (arelent *) xmalloc (sizeof (arelent));
 
-  reloc->sym_ptr_ptr = &fixP->fx_addsy->bsym;
+  reloc->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
+  *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixP->fx_addsy);
   reloc->address = fixP->fx_frag->fr_address + fixP->fx_where;
   reloc->howto = bfd_reloc_type_lookup (stdoutput, fixP->fx_r_type);
   if (reloc->howto == (reloc_howto_type *) NULL)
@@ -1473,8 +1476,8 @@ int
 arc_frob_symbol (sym)
      symbolS *sym;
 {
-  if (sym->sy_tc.real_name != (char *) NULL)
-    S_SET_NAME (sym, sym->sy_tc.real_name);
+  if (symbol_get_tc (sym)->real_name != (char *) NULL)
+    S_SET_NAME (sym, symbol_get_tc (sym)->real_name);
 
   return 0;
 }

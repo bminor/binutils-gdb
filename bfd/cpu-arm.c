@@ -1,5 +1,5 @@
 /* BFD support for the ARM processor
-   Copyright 1994, 95, 1997 Free Software Foundation, Inc.
+   Copyright 1994, 95, 97, 1999 Free Software Foundation, Inc.
    Contributed by Richard Earnshaw (rwe@pegasus.esprit.ec.org)
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -82,10 +82,17 @@ processors[] =
   { bfd_mach_arm_3,  "arm7di"   },
   { bfd_mach_arm_3M, "arm7dm"   },
   { bfd_mach_arm_3M, "arm7dmi"  },
+  { bfd_mach_arm_4T, "arm7tdmi" },
   { bfd_mach_arm_4,  "arm8"     },
   { bfd_mach_arm_4,  "arm810"   },
+  { bfd_mach_arm_4,  "arm9"     },
+  { bfd_mach_arm_4,  "arm920"   },
+  { bfd_mach_arm_4T, "arm920t"  },
+  { bfd_mach_arm_4T, "arm9tdmi" },
   { bfd_mach_arm_4,  "sa1"      },
-  { bfd_mach_arm_4T, "arm7tdmi" }
+  { bfd_mach_arm_4,  "strongarm"},
+  { bfd_mach_arm_4,  "strongarm110" },
+  { bfd_mach_arm_4,  "strongarm1100" },
 };
 
 static boolean 
@@ -127,7 +134,9 @@ static const bfd_arch_info_type arch_info_struct[] =
   N( bfd_mach_arm_3,  "armv3",  false, & arch_info_struct[3] ),
   N( bfd_mach_arm_3M, "armv3m", false, & arch_info_struct[4] ),
   N( bfd_mach_arm_4,  "armv4",  false, & arch_info_struct[5] ),
-  N( bfd_mach_arm_4T, "armv4t", false, NULL )
+  N( bfd_mach_arm_4T, "armv4t", false, & arch_info_struct[6] ),
+  N( bfd_mach_arm_5,  "armv5",  false, & arch_info_struct[7] ),
+  N( bfd_mach_arm_5T, "armv5t", false, NULL )
 };
 
 const bfd_arch_info_type bfd_arm_arch =

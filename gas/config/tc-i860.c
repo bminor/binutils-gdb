@@ -1,5 +1,5 @@
 /* tc-i860.c -- Assemble for the I860
-   Copyright (C) 1989, 92, 93, 94, 95, 1998 Free Software Foundation, Inc.
+   Copyright (C) 1989, 92, 93, 94, 95, 98, 1999 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -1118,9 +1118,9 @@ emit_machine_reloc (fixP, segment_address_in_file)
 	      ri.r_extern = 0;
 	      ri.r_symbolnum = S_GET_TYPE (symbolP);
 	    }
-	  if (symbolP && symbolP->sy_frag)
+	  if (symbolP && symbol_get_frag (symbolP))
 	    {
-	      ri.r_addend = symbolP->sy_frag->fr_address;
+	      ri.r_addend = symbol_get_frag (symbolP)->fr_address;
 	    }
 	  ri.r_type = fixP->fx_r_type;
 	  if (fixP->fx_pcrel)
@@ -1184,9 +1184,9 @@ tc_aout_fix_to_chars (where, fixP, segment_address_in_file)
 	      | ((r_extern << 6) & 0x40)
 	      | (fixP->fx_r_type & 0x3F));
 
-  if (fixP->fx_addsy->sy_frag)
+  if (symbol_get_frag (fixP->fx_addsy))
     {
-      r_addend = fixP->fx_addsy->sy_frag->fr_address;
+      r_addend = symbol_get_frag (fixP->fx_addsy)->fr_address;
     }
 
   if (fixP->fx_pcrel)

@@ -162,11 +162,13 @@ DESCRIPTION
 .#define bfd_mach_alpha_ev6  0x30
 .  bfd_arch_arm,       {* Advanced Risc Machines ARM *}
 .#define bfd_mach_arm_2		1
-.#define bfd_mach_arm_2a		2
+.#define bfd_mach_arm_2a	2
 .#define bfd_mach_arm_3		3
 .#define bfd_mach_arm_3M 	4
-.#define bfd_mach_arm_4 		5
+.#define bfd_mach_arm_4 	5
 .#define bfd_mach_arm_4T 	6
+.#define bfd_mach_arm_5 	7
+.#define bfd_mach_arm_5T	8
 .  bfd_arch_ns32k,     {* National Semiconductors ns32000 *}
 .  bfd_arch_w65,       {* WDC 65816 *}
 .  bfd_arch_tic30,     {* Texas Instruments TMS320C30 *}

@@ -1305,13 +1305,13 @@ print_archive_filename_bsd (filename)
 
 static void
 print_archive_filename_sysv (filename)
-     char *filename;
+     char *filename ATTRIBUTE_UNUSED;
 {
 }
 
 static void
 print_archive_filename_posix (filename)
-     char *filename;
+     char *filename ATTRIBUTE_UNUSED;
 {
 }
 
@@ -1319,7 +1319,7 @@ print_archive_filename_posix (filename)
 
 static void
 print_archive_member_bsd (archive, filename)
-     char *archive;
+     char *archive ATTRIBUTE_UNUSED;
      CONST char *filename;
 {
   if (!filename_per_symbol)

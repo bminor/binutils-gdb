@@ -1,5 +1,6 @@
 /* BFD back-end for Hitachi H8/300 COFF binaries.
-   Copyright 1990, 91, 92, 93, 94, 95, 96, 1997 Free Software Foundation, Inc.
+   Copyright 1990, 91, 92, 93, 94, 95, 96, 97, 98, 1999
+   Free Software Foundation, Inc.
    Written by Steve Chamberlain, <sac@cygnus.com>.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -203,13 +204,13 @@ h8300_coff_link_hash_table_create (abfd)
 static bfd_reloc_status_type
 special (abfd, reloc_entry, symbol, data, input_section, output_bfd,
 		 error_message)
-     bfd *abfd;
-     arelent *reloc_entry;
-     asymbol *symbol;
-     PTR data;
-     asection *input_section;
+     bfd *abfd ATTRIBUTE_UNUSED;
+     arelent *reloc_entry ATTRIBUTE_UNUSED;
+     asymbol *symbol ATTRIBUTE_UNUSED;
+     PTR data ATTRIBUTE_UNUSED;
+     asection *input_section ATTRIBUTE_UNUSED;
      bfd *output_bfd;
-     char **error_message;
+     char **error_message ATTRIBUTE_UNUSED;
 {
   if (output_bfd == (bfd *) NULL)
     return bfd_reloc_continue;
@@ -1060,13 +1061,13 @@ h8300_reloc16_extra_cases (abfd, link_info, link_order, reloc, data, src_ptr,
 	symbol = *(reloc->sym_ptr_ptr);
 	value = bfd_coff_reloc16_get_value (reloc, link_info, input_section);
 	if (symbol == bfd_abs_section_ptr->symbol
-	    || (value >= 0 && value <= 0xff))
+	    || value <= 0xff)
 	  {
 	    /* This should be handled in a manner very similar to
 	       R_RELBYTES.   If the value is in range, then just slam
 	       the value into the right location.  Else trigger a
 	       reloc overflow callback.  */
-	    if (value >= 0 && value <= 0xff)
+	    if (value <= 0xff)
 	      {
 		bfd_put_8 (abfd, value, data + dst_address);
 		dst_address += 1;
@@ -1345,44 +1346,4 @@ h8300_bfd_link_add_symbols(abfd, info)
 #define coff_bfd_relax_section bfd_coff_reloc16_relax_section
 
 
-
-const bfd_target h8300coff_vec =
-{
-  "coff-h8300",			/* name */
-  bfd_target_coff_flavour,
-  BFD_ENDIAN_BIG,		/* data byte order is big */
-  BFD_ENDIAN_BIG,		/* header byte order is big */
-
-  (HAS_RELOC | EXEC_P |		/* object flags */
-   HAS_LINENO | HAS_DEBUG |
-   HAS_SYMS | HAS_LOCALS | WP_TEXT | BFD_IS_RELAXABLE ),
-  (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC),	/* section flags */
-  '_',				/* leading char */
-  '/',				/* ar_pad_char */
-  15,				/* ar_max_namelen */
-  bfd_getb64, bfd_getb_signed_64, bfd_putb64,
-  bfd_getb32, bfd_getb_signed_32, bfd_putb32,
-  bfd_getb16, bfd_getb_signed_16, bfd_putb16,	/* data */
-  bfd_getb64, bfd_getb_signed_64, bfd_putb64,
-  bfd_getb32, bfd_getb_signed_32, bfd_putb32,
-  bfd_getb16, bfd_getb_signed_16, bfd_putb16,	/* hdrs */
-
-  {_bfd_dummy_target, coff_object_p,	/* bfd_check_format */
-   bfd_generic_archive_p, _bfd_dummy_target},
-  {bfd_false, coff_mkobject, _bfd_generic_mkarchive,	/* bfd_set_format */
-   bfd_false},
-  {bfd_false, coff_write_object_contents,	/* bfd_write_contents */
-   _bfd_write_archive_contents, bfd_false},
-
-     BFD_JUMP_TABLE_GENERIC (coff),
-     BFD_JUMP_TABLE_COPY (coff),
-     BFD_JUMP_TABLE_CORE (_bfd_nocore),
-     BFD_JUMP_TABLE_ARCHIVE (_bfd_archive_coff),
-     BFD_JUMP_TABLE_SYMBOLS (coff),
-     BFD_JUMP_TABLE_RELOCS (coff),
-     BFD_JUMP_TABLE_WRITE (coff),
-     BFD_JUMP_TABLE_LINK (coff),
-     BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
-
-  COFF_SWAP_TABLE,
-};
+CREATE_BIG_COFF_TARGET_VEC (h8300coff_vec, "coff-h8300", BFD_IS_RELAXABLE, 0, '_', NULL)

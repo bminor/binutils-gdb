@@ -1,5 +1,5 @@
 /* ldcref.c -- output a cross reference table
-   Copyright (C) 1996, 1997, 1998 Free Software Foundation, Inc.
+   Copyright (C) 1996, 1997, 1998, 1999 Free Software Foundation, Inc.
    Written by Ian Lance Taylor <ian@cygnus.com>
 
 This file is part of GLD, the Gnu Linker.
@@ -151,7 +151,7 @@ add_cref (name, abfd, section, value)
      const char *name;
      bfd *abfd;
      asection *section;
-     bfd_vma value;
+     bfd_vma value ATTRIBUTE_UNUSED;
 {
   struct cref_hash_entry *h;
   struct cref_ref *r;
@@ -354,7 +354,7 @@ check_nocrossrefs ()
 static boolean
 check_nocrossref (h, ignore)
      struct cref_hash_entry *h;
-     PTR ignore;
+     PTR ignore ATTRIBUTE_UNUSED;
 {
   struct bfd_link_hash_entry *hl;
   asection *defsec;

@@ -1,5 +1,5 @@
 /* VMS object file format
-   Copyright (C) 1989, 90, 91, 92, 93, 94, 95, 96, 1997
+   Copyright (C) 1989, 90, 91, 92, 93, 94, 95, 96, 97, 1999
    Free Software Foundation, Inc.
 
 This file is part of GAS, the GNU Assembler.
@@ -214,18 +214,17 @@ typedef struct nlist obj_symbol_type;	/* Symbol table entry */
 /* Force structure tags into scope so that their use in prototypes
    will never be their first occurance.  */
 struct fix;
-struct symbol;
 struct frag;
 
 /* obj-vms routines visible to the rest of gas.  */
 
 extern void tc_aout_fix_to_chars PARAMS ((char *,struct fix *,relax_addressT));
 
-extern int vms_resolve_symbol_redef PARAMS ((struct symbol *));
+extern int vms_resolve_symbol_redef PARAMS ((symbolS *));
 #define RESOLVE_SYMBOL_REDEFINITION(X)	vms_resolve_symbol_redef(X)
 
 /* Compiler-generated label "__vax_g_doubles" is used to augment .stabs. */
-extern void vms_check_for_special_label PARAMS ((struct symbol *));
+extern void vms_check_for_special_label PARAMS ((symbolS *));
 #define obj_frob_label(X) vms_check_for_special_label(X)
 
 extern void vms_check_for_main PARAMS ((void));

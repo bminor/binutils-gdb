@@ -48,7 +48,6 @@ mips-dis.c
 mips-opc.c
 mips16-opc.c
 ns32k-dis.c
-opintl.h
 ppc-dis.c
 ppc-opc.c
 sh-dis.c

@@ -44,7 +44,9 @@
 #include "sb.h"
 #include "macro.h"
 
-#ifndef HAVE_ITBL_CPU
+#ifdef HAVE_ITBL_CPU
+#include "itbl-ops.h"
+#else
 #define itbl_parse(itbl_file) 1
 #define itbl_init()
 #endif
@@ -143,6 +145,7 @@ Options:\n\
     m   include macro expansions\n\
     n   omit forms processing\n\
     s   include symbols\n\
+    L   include line debug statistics (if applicable)\n\
     =file set listing file name (must be last sub-option)\n"));
   
   fprintf (stream, _("\
@@ -365,7 +368,9 @@ parse_args (pargc, pargv)
 #define OPTION_STRIP_LOCAL_ABSOLUTE (OPTION_STD_BASE + 15)
     {"strip-local-absolute", no_argument, NULL, OPTION_STRIP_LOCAL_ABSOLUTE},
 #define OPTION_TRADITIONAL_FORMAT (OPTION_STD_BASE + 16)
-    {"traditional-format", no_argument, NULL, OPTION_TRADITIONAL_FORMAT}
+    {"traditional-format", no_argument, NULL, OPTION_TRADITIONAL_FORMAT},
+#define OPTION_GDWARF2 (OPTION_STD_BASE + 17)
+    {"gdwarf2", no_argument, NULL, OPTION_GDWARF2}
   };
 
   /* Construct the option lists from the standard list and the
@@ -546,6 +551,10 @@ the GNU General Public License.  This program has absolutely no warranty.\n"));
 	  debug_type = DEBUG_STABS;
 	  break;
  
+	case OPTION_GDWARF2:
+	  debug_type = DEBUG_DWARF2;
+	  break;
+
 	case 'J':
 	  flag_signed_overflow_ok = 1;
 	  break;

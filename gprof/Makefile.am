@@ -45,7 +45,7 @@ man_MANS = gprof.1
 
 # Dependencies.
 $(OBJECTS): ../bfd/bfd.h call_graph.h cg_arcs.h cg_print.h \
-	corefile.h gmon_io.h gmon_out.h gprof.h hertz.h hist.h \
+	corefile.h gmon_io.h gmon.h gmon_out.h gprof.h hertz.h hist.h \
 	search_list.h source.h sym_ids.h symtab.h utils.h \
 	$(srcdir)/../include/libiberty.h $(srcdir)/../bfd/sysdep.h \
 	gconfig.h ../bfd/config.h

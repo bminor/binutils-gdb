@@ -190,7 +190,8 @@ DEFUN (bb_read_rec, (ifp, filename), FILE * ifp AND const char *filename)
 
 	      DBG (BBDEBUG,
 		   printf ("[bb_read_rec] 0x%lx->0x%lx (%s:%d) cnt=%lu\n",
-			   addr, sym->addr, sym->name, sym->line_num, ncalls));
+			   (unsigned long) addr, (unsigned long) sym->addr,
+			   sym->name, sym->line_num, ncalls));
 
 	      for (i = 0; i < NBBS; i++)
 		{
@@ -319,17 +320,20 @@ DEFUN_VOID (print_exec_counts)
     {
       if (sym->ncalls > 0 || ! ignore_zeros)
 	{
+	  /* FIXME: This only works if bfd_vma is unsigned long.  */
 	  printf (_("%s:%d: (%s:0x%lx) %lu executions\n"),
 		  sym->file ? sym->file->name : _("<unknown>"), sym->line_num,
-		  sym->name, sym->addr, sym->ncalls);
+		  sym->name, (unsigned long) sym->addr, sym->ncalls);
 	}
       for (j = 0; j < NBBS && sym->bb_addr[j]; j ++)
 	{
 	  if (sym->bb_calls[j] > 0 || ! ignore_zeros)
 	    {
+	      /* FIXME: This only works if bfd_vma is unsigned long.  */
 	      printf (_("%s:%d: (%s:0x%lx) %lu executions\n"),
 		      sym->file ? sym->file->name : _("<unknown>"), sym->line_num,
-		      sym->name, sym->bb_addr[j], sym->bb_calls[j]);
+		      sym->name, (unsigned long) sym->bb_addr[j],
+		      sym->bb_calls[j]);
 	    }
 	}
     }

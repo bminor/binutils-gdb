@@ -52,13 +52,8 @@ if { ![istarget i386-*-sysv4*] \
     return
 }
 
-if { [istarget i386-*-linuxaout*] \
-     || [istarget i486-*-linuxaout*] \
-     || [istarget i586-*-linuxaout*] \
-     || [istarget i386-*-linuxoldld*] \
-     || [istarget i486-*-linuxoldld*] \
-     || [istarget i586-*-linuxoldld*] \
-     || [istarget m68k-*-linuxaout*] } {
+if { [istarget *-*-linux*aout*] \
+     || [istarget *-*-linux*oldld*] } {
     return
 }
 

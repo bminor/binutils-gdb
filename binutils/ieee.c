@@ -1,5 +1,5 @@
 /* ieee.c -- Read and write IEEE-695 debugging information.
-   Copyright (C) 1996, 1998 Free Software Foundation, Inc.
+   Copyright (C) 1996, 1998, 1999 Free Software Foundation, Inc.
    Written by Ian Lance Taylor <ian@cygnus.com>.
 
    This file is part of GNU Binutils.
@@ -4104,7 +4104,7 @@ static const struct debug_write_fns ieee_fns =
 /*ARGSUSED*/
 static boolean
 ieee_init_buffer (info, buflist)
-     struct ieee_handle *info;
+     struct ieee_handle *info ATTRIBUTE_UNUSED;
      struct ieee_buflist *buflist;
 {
   buflist->head = NULL;
@@ -4145,7 +4145,7 @@ ieee_change_buffer (info, buflist)
 /*ARGSUSED*/
 static boolean
 ieee_append_buffer (info, mainbuf, newbuf)
-     struct ieee_handle *info;
+     struct ieee_handle *info ATTRIBUTE_UNUSED;
      struct ieee_buflist *mainbuf;
      struct ieee_buflist *newbuf;
 {
@@ -5135,7 +5135,7 @@ ieee_finish_compilation_unit (info)
 
 static void
 ieee_add_bb11_blocks (abfd, sec, data)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      asection *sec;
      PTR data;
 {
@@ -5258,8 +5258,8 @@ ieee_add_bb11 (info, sec, low, high)
 /*ARGSUSED*/
 static boolean
 ieee_start_source (p, filename)
-     PTR p;
-     const char *filename;
+     PTR p ATTRIBUTE_UNUSED;
+     const char *filename ATTRIBUTE_UNUSED;
 {
   return true;
 }
@@ -5725,7 +5725,7 @@ ieee_array_type (p, low, high, stringp)
      PTR p;
      bfd_signed_vma low;
      bfd_signed_vma high;
-     boolean stringp;
+     boolean stringp ATTRIBUTE_UNUSED;
 {
   struct ieee_handle *info = (struct ieee_handle *) p;
   unsigned int eleindx;
@@ -5792,7 +5792,7 @@ ieee_array_type (p, low, high, stringp)
 static boolean
 ieee_set_type (p, bitstringp)
      PTR p;
-     boolean bitstringp;
+     boolean bitstringp ATTRIBUTE_UNUSED;
 {
   struct ieee_handle *info = (struct ieee_handle *) p;
   boolean localp;
@@ -7012,7 +7012,7 @@ ieee_typdef (p, name)
 static boolean
 ieee_tag (p, name)
      PTR p;
-     const char *name;
+     const char *name ATTRIBUTE_UNUSED;
 {
   struct ieee_handle *info = (struct ieee_handle *) p;
 
@@ -7026,9 +7026,9 @@ ieee_tag (p, name)
 
 static boolean
 ieee_int_constant (p, name, val)
-     PTR p;
-     const char *name;
-     bfd_vma val;
+     PTR p ATTRIBUTE_UNUSED;
+     const char *name ATTRIBUTE_UNUSED;
+     bfd_vma val ATTRIBUTE_UNUSED;
 {
   /* FIXME.  */
   return true;
@@ -7038,9 +7038,9 @@ ieee_int_constant (p, name, val)
 
 static boolean
 ieee_float_constant (p, name, val)
-     PTR p;
-     const char *name;
-     double val;
+     PTR p ATTRIBUTE_UNUSED;
+     const char *name ATTRIBUTE_UNUSED;
+     double val ATTRIBUTE_UNUSED;
 {
   /* FIXME.  */
   return true;
@@ -7051,8 +7051,8 @@ ieee_float_constant (p, name, val)
 static boolean
 ieee_typed_constant (p, name, val)
      PTR p;
-     const char *name;
-     bfd_vma val;
+     const char *name ATTRIBUTE_UNUSED;
+     bfd_vma val ATTRIBUTE_UNUSED;
 {
   struct ieee_handle *info = (struct ieee_handle *) p;
 

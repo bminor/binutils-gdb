@@ -24,6 +24,9 @@ typedef enum
   OMa,   SI,   I7,   LS,   BR,    BL,    LR,    LJ,
   RM,    RQ,   JSR,  JMP,  OBRa,  OBRb,  OBRc,  OBR2,
   O1R1,  OMb,  OMc,  SIa,
+  /* start-sanitize-m340 */  
+  MULSH,
+  /* end-sanitize-m340 */  
   JC,    JU,   JL,   RSI,  DO21,  OB2
 }
 mcore_opclass;
@@ -48,6 +51,9 @@ mcore_opcode_info mcore_table[] =
   { "stop",	O0,	0,	0x0004 },
   { "wait",	O0,	0,	0x0005 },
   { "doze",	O0,	0,	0x0006 },
+  /* start-sanitize-m340 */
+  { "idly4",    O0,     0,      0x0007 },
+  /* end-sanitize-m340 */
   { "trap",	OT,	0,	0x0008 },
 /* SPACE:                       0x000C - 0x000F */
 /* SPACE:                       0x0010 - 0x001F */
@@ -146,6 +152,10 @@ mcore_opcode_info mcore_table[] =
   { "movi",	I7,	0,	0x6000 },
 #define MCORE_INST_BMASKI_ALT	0x6000
 #define MCORE_INST_BGENI_ALT	0x6000
+/* start-sanitize-m340 */
+  { "mulsh",    MULSH,  0,      0x6800 },
+  { "muls.h",   MULSH,  0,      0x6800 },
+/* end-sanitize-m340 */
 /* SPACE:                       0x6900 - 0x6FFF */
   { "jmpi",	LJ,	1,	0x7000 },
   { "jsri",	LJ,	0,	0x7F00 },

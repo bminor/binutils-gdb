@@ -1,5 +1,5 @@
 /* DWARF 1 find nearest line (_bfd_dwarf1_find_nearest_line).
-   Copyright 1998 Free Software Foundation, Inc.
+   Copyright 1998, 1999 Free Software Foundation, Inc.
 
 Written by Gavin Romig-Koch of Cygnus Solutions (gavin@cygnus.com).  
 
@@ -140,8 +140,8 @@ alloc_dwarf1_unit (stash)
   struct dwarf1_debug* stash;
 {
   struct dwarf1_unit* x = 
-    (struct dwarf1_unit*) bfd_alloc (stash->abfd, 
-				       sizeof (struct dwarf1_unit));
+    (struct dwarf1_unit*) bfd_zalloc (stash->abfd, 
+				      sizeof (struct dwarf1_unit));
   x->prev = stash->lastUnit;
   stash->lastUnit = x;
 
@@ -157,8 +157,8 @@ alloc_dwarf1_func (stash, aUnit)
      struct dwarf1_unit* aUnit;
 {
   struct dwarf1_func* x = 
-    (struct dwarf1_func*) bfd_alloc (stash->abfd, 
-				  sizeof (struct dwarf1_func));
+    (struct dwarf1_func*) bfd_zalloc (stash->abfd, 
+				      sizeof (struct dwarf1_func));
   x->prev = aUnit->func_list;
   aUnit->func_list = x;
   
@@ -291,7 +291,7 @@ parse_line_table (stash, aUnit)
   xptr = stash->line_section + aUnit->stmt_list_offset;
   if (xptr < stash->line_section_end)
     {
-      int eachLine;
+      unsigned long eachLine;
 
       char* tblend;
       unsigned long base;
@@ -398,7 +398,7 @@ dwarf1_unit_find_nearest_line (stash, aUnit, addr,
     {
       if (aUnit->has_stmt_list)
 	{
-	  int i;
+	  unsigned long i;
 	  struct dwarf1_func* eachFunc;
 
 	  if (! aUnit->linenumber_table)
@@ -454,7 +454,7 @@ _bfd_dwarf1_find_nearest_line (abfd, section, symbols, offset,
                               filename_ptr, functionname_ptr, linenumber_ptr)
      bfd *abfd;
      asection *section;
-     asymbol **symbols;
+     asymbol **symbols ATTRIBUTE_UNUSED;
      bfd_vma offset;
      const char **filename_ptr;
      const char **functionname_ptr;

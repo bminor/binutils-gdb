@@ -1,5 +1,5 @@
 /* frags.h - Header file for the frag concept.
-   Copyright (C) 1987, 92, 93, 94, 95, 97, 1998
+   Copyright (C) 1987, 92, 93, 94, 95, 97, 98, 1999
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -54,7 +54,7 @@ struct frag
   /* (Variable) number of chars after above.  May be 0. */
   offsetT fr_var;
   /* For variable-length tail. */
-  struct symbol *fr_symbol;
+  symbolS *fr_symbol;
   /* For variable-length tail. */
   offsetT fr_offset;
   /* Points to opcode low addr byte, for relaxation.  */

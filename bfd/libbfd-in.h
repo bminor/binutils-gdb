@@ -1,6 +1,7 @@
 /* libbfd.h -- Declarations used by bfd library *implementation*.
    (This include file is not for users of the library.)
-   Copyright 1990, 91, 92, 93, 94, 95, 96, 97, 1998 Free Software Foundation, Inc.
+   Copyright 1990, 91, 92, 93, 94, 95, 96, 97, 98, 1999
+   Free Software Foundation, Inc.
    Written by Cygnus Support.
 
 ** NOTE: libbfd.h is a GENERATED file.  Don't change it; instead,
@@ -364,7 +365,7 @@ extern boolean _bfd_dwarf1_find_nearest_line
 /* Find the nearest line using DWARF 2 debugging information.  */
 extern boolean _bfd_dwarf2_find_nearest_line
   PARAMS ((bfd *, asection *, asymbol **, bfd_vma, const char **,
-	   const char **, unsigned int *));
+	   const char **, unsigned int *, unsigned int));
 
 /* A routine to create entries for a bfd_link_hash_table.  */
 extern struct bfd_hash_entry *_bfd_link_hash_newfunc
@@ -478,6 +479,9 @@ extern bfd_size_type _bfd_stringtab_add
 
 /* Write out a string table.  */
 extern boolean _bfd_stringtab_emit PARAMS ((bfd *, struct bfd_strtab_hash *));
+
+/* Check that endianness of input and output file match.  */
+extern boolean _bfd_generic_verify_endian_match PARAMS ((bfd *, bfd *));
 
 /* Macros to tell if bfds are read or write enabled.
 

@@ -1,5 +1,6 @@
 /* tc-hppa.c -- Assemble for the PA
-   Copyright (C) 1989, 93, 94, 95, 96, 97, 1998 Free Software Foundation, Inc.
+   Copyright (C) 1989, 93, 94, 95, 96, 97, 98, 1999
+   Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -34,32 +35,30 @@
 /* Be careful, this file includes data *declarations*.  */
 #include "opcode/hppa.h"
 
+#if defined (OBJ_ELF) && defined (OBJ_SOM)
+error only one of OBJ_ELF and OBJ_SOM can be defined
+#endif
+
 /* A "convient" place to put object file dependencies which do
    not need to be seen outside of tc-hppa.c.  */
 #ifdef OBJ_ELF
-/* Names of various debugging spaces/subspaces.  */
-#define GDB_DEBUG_SPACE_NAME ".stab"
-#define GDB_STRINGS_SUBSPACE_NAME ".stabstr"
-#define GDB_SYMBOLS_SUBSPACE_NAME ".stab"
-#define UNWIND_SECTION_NAME ".PARISC.unwind"
-/* Nonzero if CODE is a fixup code needing further processing.  */
-
 /* Object file formats specify relocation types.  */
-typedef elf32_hppa_reloc_type reloc_type;
+typedef elf_hppa_reloc_type reloc_type;
 
 /* Object file formats specify BFD symbol types.  */
 typedef elf_symbol_type obj_symbol_type;
 
+#ifdef BFD64
 /* How to generate a relocation.  */
-#define hppa_gen_reloc_type hppa_elf_gen_reloc_type
+#define hppa_gen_reloc_type _bfd_elf64_hppa_gen_reloc_type
+#else
+#define hppa_gen_reloc_type _bfd_elf32_hppa_gen_reloc_type
+#endif
 
 /* ELF objects can have versions, but apparently do not have anywhere
    to store a copyright string.  */
 #define obj_version obj_elf_version
 #define obj_copyright obj_elf_version
-
-/* Use space aliases.  */
-#define USE_ALIASES 1
 #endif
 
 #ifdef OBJ_SOM
@@ -75,9 +74,6 @@ typedef int reloc_type;
 /* SOM objects can have both a version string and a copyright string.  */
 #define obj_version obj_som_version
 #define obj_copyright obj_som_copyright
-
-/* Do not use space aliases.  */
-#define USE_ALIASES 0
 
 /* How to generate a relocation.  */
 #define hppa_gen_reloc_type hppa_som_gen_reloc_type
@@ -267,6 +263,7 @@ struct call_desc
     unsigned int arg_count;
   };
 
+#ifdef OBJ_SOM
 /* This structure defines an entry in the subspace dictionary
    chain.  */
 
@@ -321,17 +318,6 @@ struct space_dictionary_chain
 
 typedef struct space_dictionary_chain sd_chain_struct;
 
-/* Structure for previous label tracking.  Needed so that alignments,
-   callinfo declarations, etc can be easily attached to a particular
-   label.  */
-typedef struct label_symbol_struct
-  {
-    struct symbol *lss_label;
-    sd_chain_struct *lss_space;
-    struct label_symbol_struct *lss_next;
-  }
-label_symbol_struct;
-
 /* This structure defines attributes of the default subspace
    dictionary entries.  */
 
@@ -378,9 +364,6 @@ struct default_subspace_dict
     /* An index into the default spaces array.  */
     int def_space_index;
 
-    /* An alias for this section (or NULL if no alias exists).  */
-    char *alias;
-
     /* Subsegment associated with this subspace.  */
     subsegT subsegment;
   };
@@ -411,10 +394,24 @@ struct default_space_dict
 
     /* Segment associated with this space.  */
     asection *segment;
-
-    /* An alias for this section (or NULL if no alias exists).  */
-    char *alias;
   };
+#endif
+
+/* Structure for previous label tracking.  Needed so that alignments,
+   callinfo declarations, etc can be easily attached to a particular
+   label.  */
+typedef struct label_symbol_struct
+  {
+    struct symbol *lss_label;
+#ifdef OBJ_SOM
+    sd_chain_struct *lss_space;
+#endif
+#ifdef OBJ_ELF
+    segT lss_segment;
+#endif
+    struct label_symbol_struct *lss_next;
+  }
+label_symbol_struct;
 
 /* Extra information needed to perform fixups (relocations) on the PA.  */
 struct hppa_fix_struct
@@ -461,7 +458,10 @@ struct selector_entry
 
 /* Prototypes for functions local to tc-hppa.c.  */
 
+#ifdef OBJ_SOM
 static void pa_check_current_space_and_subspace PARAMS ((void));
+#endif
+
 static fp_operand_format pa_parse_fp_format PARAMS ((char **s));
 static void pa_cons PARAMS ((int));
 static void pa_data PARAMS ((int));
@@ -483,7 +483,6 @@ static int pa_parse_nonneg_cmpsub_cmpltr PARAMS ((char **, int));
 static int pa_parse_neg_cmpsub_cmpltr PARAMS ((char **, int));
 static int pa_parse_neg_add_cmpltr PARAMS ((char **, int));
 static int pa_parse_nonneg_add_cmpltr PARAMS ((char **, int));
-static void pa_align PARAMS ((int));
 static void pa_block PARAMS ((int));
 static void pa_brtab PARAMS ((int));
 static void pa_try PARAMS ((int));
@@ -492,9 +491,6 @@ static void pa_call_args PARAMS ((struct call_desc *));
 static void pa_callinfo PARAMS ((int));
 static void pa_code PARAMS ((int));
 static void pa_comm PARAMS ((int));
-#ifdef OBJ_SOM
-static void pa_compiler PARAMS ((int));
-#endif
 static void pa_copyright PARAMS ((int));
 static void pa_end PARAMS ((int));
 static void pa_enter PARAMS ((int));
@@ -510,15 +506,18 @@ static void pa_level PARAMS ((int));
 static void pa_origin PARAMS ((int));
 static void pa_proc PARAMS ((int));
 static void pa_procend PARAMS ((int));
-static void pa_space PARAMS ((int));
-static void pa_spnum PARAMS ((int));
-static void pa_subspace PARAMS ((int));
 static void pa_param PARAMS ((int));
 static void pa_undefine_label PARAMS ((void));
 static int need_pa11_opcode PARAMS ((struct pa_it *,
 				     struct pa_11_fp_reg_struct *));
 static int pa_parse_number PARAMS ((char **, struct pa_11_fp_reg_struct *));
 static label_symbol_struct *pa_get_label PARAMS ((void));
+#ifdef OBJ_SOM
+static void pa_compiler PARAMS ((int));
+static void pa_align PARAMS ((int));
+static void pa_space PARAMS ((int));
+static void pa_spnum PARAMS ((int));
+static void pa_subspace PARAMS ((int));
 static sd_chain_struct *create_new_space PARAMS ((char *, int, int,
 						  int, int, int,
 						  asection *, int));
@@ -539,6 +538,10 @@ static ssd_chain_struct *pa_subsegment_to_subspace PARAMS ((asection *,
 							    subsegT));
 static sd_chain_struct *pa_find_space_by_number PARAMS ((int));
 static unsigned int pa_subspace_start PARAMS ((sd_chain_struct *, int));
+static sd_chain_struct *pa_parse_space_stmt PARAMS ((char *, int));
+static int pa_next_subseg PARAMS ((sd_chain_struct *));
+static void pa_spaces_begin PARAMS ((void));
+#endif
 static void pa_ip PARAMS ((char *));
 static void fix_new_hppa PARAMS ((fragS *, int, int, symbolS *,
 				  long, expressionS *, int,
@@ -550,11 +553,8 @@ static int reg_name_search PARAMS ((char *));
 static int pa_chk_field_selector PARAMS ((char **));
 static int is_same_frag PARAMS ((fragS *, fragS *));
 static void process_exit PARAMS ((void));
-static sd_chain_struct *pa_parse_space_stmt PARAMS ((char *, int));
 static int log2 PARAMS ((int));
-static int pa_next_subseg PARAMS ((sd_chain_struct *));
 static unsigned int pa_stringer_aux PARAMS ((char *));
-static void pa_spaces_begin PARAMS ((void));
 
 #ifdef OBJ_ELF
 static void hppa_elf_mark_end_of_function PARAMS ((void));
@@ -563,6 +563,7 @@ static void pa_build_unwind_subspace PARAMS ((struct call_info *));
 
 /* File and gloally scoped variable declarations.  */
 
+#ifdef OBJ_SOM
 /* Root and final entry in the space chain.  */
 static sd_chain_struct *space_dict_root;
 static sd_chain_struct *space_dict_last;
@@ -570,6 +571,7 @@ static sd_chain_struct *space_dict_last;
 /* The current space and subspace.  */
 static sd_chain_struct *current_space;
 static ssd_chain_struct *current_subspace;
+#endif
 
 /* Root of the call_info chain.  */
 static struct call_info *call_info_root;
@@ -596,7 +598,12 @@ const pseudo_typeS md_pseudo_table[] =
 {
   /* align pseudo-ops on the PA specify the actual alignment requested,
      not the log2 of the requested alignment.  */
+#ifdef OBJ_SOM
   {"align", pa_align, 8},
+#endif
+#ifdef OBJ_ELF
+  {"align", s_align_bytes, 8},
+#endif
   {"begin_brtab", pa_brtab, 1},
   {"begin_try", pa_try, 1},
   {"block", pa_block, 1},
@@ -612,6 +619,7 @@ const pseudo_typeS md_pseudo_table[] =
   {"copyright", pa_copyright, 0},
   {"data", pa_data, 0},
   {"double", pa_float_cons, 'd'},
+  {"dword", pa_cons, 8},
   {"end", pa_end, 0},
   {"end_brtab", pa_brtab, 0},
   {"end_try", pa_try, 0},
@@ -631,7 +639,9 @@ const pseudo_typeS md_pseudo_table[] =
   {"level", pa_level, 0},
   {"long", pa_cons, 4},
   {"lsym", pa_lsym, 0},
+#ifdef OBJ_SOM
   {"nsubspa", pa_subspace, 1},
+#endif
   {"octa", pa_cons, 16},
   {"org", pa_origin, 0},
   {"origin", pa_origin, 0},
@@ -642,11 +652,15 @@ const pseudo_typeS md_pseudo_table[] =
   {"reg", pa_equ, 1},
   {"short", pa_cons, 2},
   {"single", pa_float_cons, 'f'},
+#ifdef OBJ_SOM
   {"space", pa_space, 0},
   {"spnum", pa_spnum, 0},
+#endif
   {"string", pa_stringer, 0},
   {"stringz", pa_stringer, 1},
+#ifdef OBJ_SOM
   {"subspa", pa_subspace, 0},
+#endif
   {"text", pa_text, 0},
   {"version", pa_version, 0},
   {"word", pa_cons, 4},
@@ -701,9 +715,10 @@ static label_symbol_struct *label_symbols_rootp = NULL;
 /* Holds the last field selector.  */
 static int hppa_field_selector;
 
-
+#ifdef OBJ_SOM
 /* A dummy bfd symbol so that all relocations have symbols of some kind.  */
 static symbolS *dummy_symbol;
+#endif
 
 /* Nonzero if errors are to be printed.  */
 static int print_errors = 1;
@@ -995,6 +1010,7 @@ static const struct selector_entry selector_table[] =
   {"t", e_tsel},
 };
 
+#ifdef OBJ_SOM
 /* default space and subspace dictionaries */
 
 #define GDB_SYMBOLS          GDB_SYMBOLS_SUBSPACE_NAME
@@ -1012,30 +1028,22 @@ static const struct selector_entry selector_table[] =
 
 static struct default_subspace_dict pa_def_subspaces[] =
 {
-  {"$CODE$", 1, 1, 1, 0, 0, 0, 24, 0x2c, 0, 8, 0, 0, ".text", SUBSEG_CODE},
-  {"$DATA$", 1, 1, 0, 0, 0, 0, 24, 0x1f, 1, 8, 1, 1, ".data", SUBSEG_DATA},
-  {"$LIT$", 1, 1, 0, 0, 0, 0, 16, 0x2c, 0, 8, 0, 0, ".text", SUBSEG_LIT},
-  {"$MILLICODE$", 1, 1, 0, 0, 0, 0, 8, 0x2c, 0, 8, 0, 0, ".text", SUBSEG_MILLI},
-  {"$BSS$", 1, 1, 0, 0, 0, 1, 80, 0x1f, 1, 8, 1, 1, ".bss", SUBSEG_BSS},
-#ifdef OBJ_ELF
-  {"$UNWIND$", 1, 1, 0, 0, 0, 0, 64, 0x2c, 0, 4, 0, 0, ".PARISC.unwind", SUBSEG_UNWIND},
-#endif
+  {"$CODE$", 1, 1, 1, 0, 0, 0, 24, 0x2c, 0, 8, 0, 0, SUBSEG_CODE},
+  {"$DATA$", 1, 1, 0, 0, 0, 0, 24, 0x1f, 1, 8, 1, 1, SUBSEG_DATA},
+  {"$LIT$", 1, 1, 0, 0, 0, 0, 16, 0x2c, 0, 8, 0, 0, SUBSEG_LIT},
+  {"$MILLICODE$", 1, 1, 0, 0, 0, 0, 8, 0x2c, 0, 8, 0, 0, SUBSEG_MILLI},
+  {"$BSS$", 1, 1, 0, 0, 0, 1, 80, 0x1f, 1, 8, 1, 1, SUBSEG_BSS},
   {NULL, 0, 1, 0, 0, 0, 0, 255, 0x1f, 0, 4, 0, 0, 0}
 };
 
 static struct default_space_dict pa_def_spaces[] =
 {
-  {"$TEXT$", 0, 1, 1, 0, 8, ASEC_NULL, ".text"},
-  {"$PRIVATE$", 1, 1, 1, 1, 16, ASEC_NULL, ".data"},
-  {NULL, 0, 0, 0, 0, 0, ASEC_NULL, NULL}
+  {"$TEXT$", 0, 1, 1, 0, 8, ASEC_NULL},
+  {"$PRIVATE$", 1, 1, 1, 1, 16, ASEC_NULL},
+  {NULL, 0, 0, 0, 0, 0, ASEC_NULL}
 };
 
 /* Misc local definitions used by the assembler.  */
-
-/* Return nonzero if the string pointed to by S potentially represents
-   a right or left half of a FP register  */
-#define IS_R_SELECT(S)   (*(S) == 'R' || *(S) == 'r')
-#define IS_L_SELECT(S)   (*(S) == 'L' || *(S) == 'l')
 
 /* These macros are used to maintain spaces/subspaces.  */
 #define SPACE_DEFINED(space_chain)	(space_chain)->sd_defined
@@ -1045,6 +1053,12 @@ static struct default_space_dict pa_def_spaces[] =
 
 #define SUBSPACE_DEFINED(ss_chain)	(ss_chain)->ssd_defined
 #define SUBSPACE_NAME(ss_chain)		(ss_chain)->ssd_name
+#endif
+
+/* Return nonzero if the string pointed to by S potentially represents
+   a right or left half of a FP register  */
+#define IS_R_SELECT(S)   (*(S) == 'R' || *(S) == 'r')
+#define IS_L_SELECT(S)   (*(S) == 'L' || *(S) == 'l')
 
 /* Insert FIELD into OPCODE starting at bit START.  Continue pa_ip
    main loop after insertion.  */
@@ -1071,11 +1085,11 @@ static struct default_space_dict pa_def_spaces[] =
 
 #define is_DP_relative(exp)			\
   ((exp).X_op == O_subtract			\
-   && strcmp((exp).X_op_symbol->bsym->name, "$global$") == 0)
+   && strcmp (S_GET_NAME ((exp).X_op_symbol), "$global$") == 0)
 
 #define is_PC_relative(exp)			\
   ((exp).X_op == O_subtract			\
-   && strcmp((exp).X_op_symbol->bsym->name, "$PIC_pcrel$0") == 0)
+   && strcmp (S_GET_NAME ((exp).X_op_symbol), "$PIC_pcrel$0") == 0)
 
 /* We need some complex handling for stabs (sym1 - sym2).  Luckily, we'll
    always be able to reduce the expression to a constant, so we don't
@@ -1098,18 +1112,6 @@ pa_check_eof ()
     as_fatal (_("Missing .procend\n"));
 }
 
-/* Check to make sure we have a valid space and subspace.  */
-
-static void
-pa_check_current_space_and_subspace ()
-{
-  if (current_space == NULL)
-    as_fatal (_("Not in a space.\n"));
-
-  if (current_subspace == NULL)
-    as_fatal (_("Not in a subspace.\n"));
-}
-
 /* Returns a pointer to the label_symbol_struct for the current space.
    or NULL if no label_symbol_struct exists for the current space.  */
 
@@ -1117,13 +1119,20 @@ static label_symbol_struct *
 pa_get_label ()
 {
   label_symbol_struct *label_chain;
-  sd_chain_struct *space_chain = current_space;
 
   for (label_chain = label_symbols_rootp;
        label_chain;
        label_chain = label_chain->lss_next)
-    if (space_chain == label_chain->lss_space && label_chain->lss_label)
+    {
+#ifdef OBJ_SOM
+    if (current_space == label_chain->lss_space && label_chain->lss_label)
       return label_chain;
+#endif
+#ifdef OBJ_ELF
+    if (now_seg == label_chain->lss_segment && label_chain->lss_label)
+      return label_chain;
+#endif
+    }
 
   return NULL;
 }
@@ -1136,7 +1145,6 @@ pa_define_label (symbol)
      symbolS *symbol;
 {
   label_symbol_struct *label_chain = pa_get_label ();
-  sd_chain_struct *space_chain = current_space;
 
   if (label_chain)
     label_chain->lss_label = symbol;
@@ -1146,7 +1154,12 @@ pa_define_label (symbol)
       label_chain
 	= (label_symbol_struct *) xmalloc (sizeof (label_symbol_struct));
       label_chain->lss_label = symbol;
-      label_chain->lss_space = space_chain;
+#ifdef OBJ_SOM
+      label_chain->lss_space = current_space;
+#endif
+#ifdef OBJ_ELF
+      label_chain->lss_segment = now_seg;
+#endif
       label_chain->lss_next = NULL;
 
       if (label_symbols_rootp)
@@ -1164,13 +1177,19 @@ pa_undefine_label ()
 {
   label_symbol_struct *label_chain;
   label_symbol_struct *prev_label_chain = NULL;
-  sd_chain_struct *space_chain = current_space;
 
   for (label_chain = label_symbols_rootp;
        label_chain;
        label_chain = label_chain->lss_next)
     {
-      if (space_chain == label_chain->lss_space && label_chain->lss_label)
+      if (1
+#ifdef OBJ_SOM
+ 	  && current_space == label_chain->lss_space && label_chain->lss_label
+#endif
+#ifdef OBJ_ELF
+ 	  && now_seg == label_chain->lss_segment && label_chain->lss_label
+#endif
+	  )
 	{
 	  /* Remove the label from the chain and free its memory.  */
 	  if (prev_label_chain)
@@ -1273,7 +1292,7 @@ cons_fix_new_hppa (frag, where, size, exp)
 
   fix_new_hppa (frag, where, size,
 		(symbolS *) NULL, (offsetT) 0, exp, 0, rel_type,
-		hppa_field_selector, 32, 0, NULL);
+		hppa_field_selector, size * 8, 0, NULL);
 
   /* Reset field selector to its default state.  */
   hppa_field_selector = 0;
@@ -1304,7 +1323,9 @@ md_begin ()
       flag_readonly_data_in_text = 0;
     }
 
+#ifdef OBJ_SOM
   pa_spaces_begin ();
+#endif
 
   op_hash = hash_new ();
 
@@ -1334,12 +1355,18 @@ md_begin ()
   if (lose)
     as_fatal (_("Broken assembler.  No assembly attempted."));
 
+#ifdef OBJ_SOM
   /* SOM will change text_section.  To make sure we never put
      anything into the old one switch to the new one now.  */
   subseg_set (text_section, 0);
+#endif
 
+#ifdef OBJ_SOM
   dummy_symbol = symbol_find_or_make ("L$dummy");
   S_SET_SEGMENT (dummy_symbol, text_section);
+  /* Force the symbol to be converted to a real symbol. */
+  (void) symbol_get_bfdsym (dummy_symbol); 
+#endif
 }
 
 /* Assemble a single instruction storing it into a frag.  */
@@ -1368,7 +1395,8 @@ md_assemble (str)
 	  if (label_symbol->lss_label)
 	    {
 	      last_call_info->start_symbol = label_symbol->lss_label;
-	      label_symbol->lss_label->bsym->flags |= BSF_FUNCTION;
+	      symbol_get_bfdsym (label_symbol->lss_label)->flags
+		|= BSF_FUNCTION;
 #ifdef OBJ_SOM
 	      /* Also handle allocation of a fixup to hold the unwind
 		 information when the label appears after the proc/procend.  */
@@ -1423,8 +1451,16 @@ pa_ip (str)
   unsigned long opcode;
   struct pa_opcode *insn;
 
+#ifdef OBJ_SOM
   /* We must have a valid space and subspace.  */
   pa_check_current_space_and_subspace ();
+#endif
+
+  /* Convert everything up to the first whitespace character into lower
+     case.  */
+  for (s = str; *s != ' ' && *s != '\t' && *s != '\n' && *s != '\0'; s++)
+    if (isupper (*s))
+      *s = tolower (*s);
 
   /* Skip to something interesting.  */
   for (s = str; isupper (*s) || islower (*s) || (*s >= '0' && *s <= '3'); ++s)
@@ -1450,14 +1486,6 @@ pa_ip (str)
     }
 
   save_s = str;
-
-  /* Convert everything into lower case.  */
-  while (*save_s)
-    {
-      if (isupper (*save_s))
-	*save_s = tolower (*save_s);
-      save_s++;
-    }
 
   /* Look up the opcode in the has table.  */
   if ((insn = (struct pa_opcode *) hash_find (op_hash, str)) == NULL)
@@ -2730,13 +2758,14 @@ tc_gen_reloc (section, fixp)
 
   reloc = (arelent *) xmalloc (sizeof (arelent));
 
-  reloc->sym_ptr_ptr = &fixp->fx_addsy->bsym;
+  reloc->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
+  *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
   codes = (bfd_reloc_code_real_type **) hppa_gen_reloc_type (stdoutput,
 			       fixp->fx_r_type,
 			       hppa_fixp->fx_r_format,
 			       hppa_fixp->fx_r_field,
 			       fixp->fx_subsy != NULL,
-			       fixp->fx_addsy->bsym);
+			       symbol_get_bfdsym (fixp->fx_addsy));
 
   if (codes == NULL)
     abort ();
@@ -2759,7 +2788,8 @@ tc_gen_reloc (section, fixp)
 
       code = *codes[0];
 
-      reloc->sym_ptr_ptr = &fixp->fx_addsy->bsym;
+      reloc->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
+      *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
       reloc->howto = bfd_reloc_type_lookup (stdoutput, code);
       reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;
       reloc->addend = 0;	/* default */
@@ -2809,7 +2839,8 @@ tc_gen_reloc (section, fixp)
     {
       code = *codes[i];
 
-      relocs[i]->sym_ptr_ptr = &fixp->fx_addsy->bsym;
+      relocs[i]->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
+      *relocs[i]->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
       relocs[i]->howto = bfd_reloc_type_lookup (stdoutput, code);
       relocs[i]->address = fixp->fx_frag->fr_address + fixp->fx_where;
 
@@ -2820,23 +2851,25 @@ tc_gen_reloc (section, fixp)
 	     of two symbols.  With that in mind we fill in all four
 	     relocs now and break out of the loop.  */
 	  assert (i == 1);
-	  relocs[0]->sym_ptr_ptr = (asymbol **) &bfd_abs_symbol;
+	  relocs[0]->sym_ptr_ptr = (asymbol **) &(bfd_abs_symbol);
 	  relocs[0]->howto = bfd_reloc_type_lookup (stdoutput, *codes[0]);
 	  relocs[0]->address = fixp->fx_frag->fr_address + fixp->fx_where;
 	  relocs[0]->addend = 0;
-	  relocs[1]->sym_ptr_ptr = &fixp->fx_addsy->bsym;
+	  relocs[1]->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
+	  *relocs[1]->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
 	  relocs[1]->howto = bfd_reloc_type_lookup (stdoutput, *codes[1]);
 	  relocs[1]->address = fixp->fx_frag->fr_address + fixp->fx_where;
 	  relocs[1]->addend = 0;
-	  relocs[2]->sym_ptr_ptr = &fixp->fx_subsy->bsym;
+	  relocs[2]->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
+	  *relocs[2]->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_subsy);
 	  relocs[2]->howto = bfd_reloc_type_lookup (stdoutput, *codes[2]);
 	  relocs[2]->address = fixp->fx_frag->fr_address + fixp->fx_where;
 	  relocs[2]->addend = 0;
-	  relocs[3]->sym_ptr_ptr = (asymbol **) &bfd_abs_symbol;
+	  relocs[3]->sym_ptr_ptr = (asymbol **) &(bfd_abs_symbol);
 	  relocs[3]->howto = bfd_reloc_type_lookup (stdoutput, *codes[3]);
 	  relocs[3]->address = fixp->fx_frag->fr_address + fixp->fx_where;
 	  relocs[3]->addend = 0;
-	  relocs[4]->sym_ptr_ptr = (asymbol **) &bfd_abs_symbol;
+	  relocs[4]->sym_ptr_ptr = (asymbol **) &(bfd_abs_symbol);
 	  relocs[4]->howto = bfd_reloc_type_lookup (stdoutput, *codes[4]);
 	  relocs[4]->address = fixp->fx_frag->fr_address + fixp->fx_where;
 	  relocs[4]->addend = 0;
@@ -2874,7 +2907,8 @@ tc_gen_reloc (section, fixp)
 	case R_N0SEL:
 	case R_N1SEL:
 	  /* There is no symbol or addend associated with these fixups.  */
-	  relocs[i]->sym_ptr_ptr = &dummy_symbol->bsym;
+          relocs[i]->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
+          *relocs[i]->sym_ptr_ptr = symbol_get_bfdsym (dummy_symbol);
 	  relocs[i]->addend = 0;
 	  break;
 
@@ -2882,7 +2916,8 @@ tc_gen_reloc (section, fixp)
 	case R_ENTRY:
 	case R_EXIT:
 	  /* There is no symbol associated with these fixups.  */
-	  relocs[i]->sym_ptr_ptr = &dummy_symbol->bsym;
+          relocs[i]->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
+          *relocs[i]->sym_ptr_ptr = symbol_get_bfdsym (dummy_symbol);
 	  relocs[i]->addend = fixp->fx_offset;
 	  break;
 
@@ -3039,7 +3074,7 @@ md_apply_fix (fixP, valp)
 	  && fmt != 32
 #endif
 	  )
-	new_val = ((fmt == 12 || fmt == 17) ? 8 : 0);
+	new_val = ((fmt == 12 || fmt == 17 || fmt == 22) ? 8 : 0);
 #ifdef OBJ_SOM
       /* These field selectors imply that we do not want an addend.  */
       else if (hppa_fixP->fx_r_field == e_psel
@@ -3048,7 +3083,7 @@ md_apply_fix (fixP, valp)
 	       || hppa_fixP->fx_r_field == e_tsel
 	       || hppa_fixP->fx_r_field == e_rtsel
 	       || hppa_fixP->fx_r_field == e_ltsel)
-	new_val = ((fmt == 12 || fmt == 17) ? 8 : 0);
+	new_val = ((fmt == 12 || fmt == 17 || fmt == 22) ? 8 : 0);
       /* This is truely disgusting.  The machine independent code blindly
 	 adds in the value of the symbol being relocated against.  Damn!  */
       else if (fmt == 32
@@ -3063,13 +3098,15 @@ md_apply_fix (fixP, valp)
       /* Handle pc-relative exceptions from above.  */
 #define arg_reloc_stub_needed(CALLER, CALLEE) \
   ((CALLEE) && (CALLER) && ((CALLEE) != (CALLER)))
-      if ((fmt == 12 || fmt == 17)
+      if ((fmt == 12 || fmt == 17 || fmt == 22)
 	  && fixP->fx_addsy
 	  && fixP->fx_pcrel
+#ifdef OBJ_SOM
 	  && !arg_reloc_stub_needed ((long) ((obj_symbol_type *)
-			fixP->fx_addsy->bsym)->tc_data.ap.hppa_arg_reloc,
-				    hppa_fixP->fx_arg_reloc)
-	  && ((int)(*valp) > -262144 && (int)(*valp) < 262143)
+		symbol_get_bfdsym (fixP->fx_addsy))->tc_data.ap.hppa_arg_reloc,
+		hppa_fixP->fx_arg_reloc)
+#endif
+	  && (((int)(*valp) > -262144 && (int)(*valp) < 262143) && fmt != 22)
 	  && S_GET_SEGMENT (fixP->fx_addsy) == hppa_fixP->segment
 	  && !(fixP->fx_subsy
 	       && S_GET_SEGMENT (fixP->fx_subsy) != hppa_fixP->segment))
@@ -4144,6 +4181,7 @@ pa_parse_neg_add_cmpltr (s, isbranch)
   return cmpltr;
 }
 
+#ifdef OBJ_SOM
 /* Handle an alignment directive.  Special so that we can update the
    alignment of the subspace if necessary.  */
 static void
@@ -4160,6 +4198,7 @@ pa_align (bytes)
   if (log2 (bytes) != -1)
     record_alignment (current_subspace->ssd_seg, log2 (bytes));
 }
+#endif
 
 /* Handle a .BLOCK type pseudo-op.  */
 
@@ -4172,8 +4211,10 @@ pa_block (z)
   unsigned int temp_size;
   unsigned int i;
 
+#ifdef OBJ_SOM
   /* We must have a valid space and subspace.  */
   pa_check_current_space_and_subspace ();
+#endif
 
   temp_size = get_absolute_expression ();
 
@@ -4251,8 +4292,10 @@ static void
 pa_call (unused)
      int unused;
 {
+#ifdef OBJ_SOM
   /* We must have a valid space and subspace.  */
   pa_check_current_space_and_subspace ();
+#endif
 
   pa_call_args (&last_call_desc);
   demand_empty_rest_of_line ();
@@ -4336,6 +4379,7 @@ static void
 pa_build_unwind_subspace (call_info)
      struct call_info *call_info;
 {
+#if 0
   char *unwind;
   asection *seg, *save_seg;
   subsegT subseg, save_subseg;
@@ -4397,6 +4441,7 @@ pa_build_unwind_subspace (call_info)
 
   /* Return back to the original segment/subsegment.  */
   subseg_set (save_seg, save_subseg);
+#endif
 }
 #endif
 
@@ -4411,8 +4456,10 @@ pa_callinfo (unused)
   char *name, c, *p;
   int temp;
 
+#ifdef OBJ_SOM
   /* We must have a valid space and subspace.  */
   pa_check_current_space_and_subspace ();
+#endif
 
   /* .CALLINFO must appear within a procedure definition.  */
   if (!within_procedure)
@@ -4549,9 +4596,11 @@ static void
 pa_code (unused)
      int unused;
 {
+#ifdef OBJ_SOM
   current_space = is_defined_space ("$TEXT$");
   current_subspace
     = pa_subsegment_to_subspace (current_space->sd_seg, 0);
+#endif
   s_text (0);
   pa_undefine_label ();
 }
@@ -4601,7 +4650,7 @@ pa_comm (unused)
       /* colon() has already set the frag to the current location in the
          current subspace; we need to reset the fragment to the zero address
          fragment.  We also need to reset the segment pointer.  */
-      symbol->sy_frag = &zero_address_frag;
+      symbol_set_frag (symbol, &zero_address_frag);
     }
   demand_empty_rest_of_line ();
 }
@@ -4620,8 +4669,10 @@ static void
 pa_enter (unused)
      int unused;
 {
+#ifdef OBJ_SOM
   /* We must have a valid space and subspace.  */
   pa_check_current_space_and_subspace ();
+#endif
 
   as_bad (_("The .ENTER pseudo-op is not supported"));
   demand_empty_rest_of_line ();
@@ -4633,8 +4684,10 @@ static void
 pa_entry (unused)
      int unused;
 {
+#ifdef OBJ_SOM
   /* We must have a valid space and subspace.  */
   pa_check_current_space_and_subspace ();
+#endif
 
   if (!within_procedure)
     as_bad (_("Misplaced .entry. Ignored."));
@@ -4738,8 +4791,10 @@ static void
 pa_exit (unused)
      int unused;
 {
+#ifdef OBJ_SOM
   /* We must have a valid space and subspace.  */
   pa_check_current_space_and_subspace ();
+#endif
 
   if (!within_procedure)
     as_bad (_(".EXIT must appear within a procedure"));
@@ -4808,13 +4863,13 @@ pa_type_args (symbolP, is_export)
   char *name, c, *p;
   unsigned int temp, arg_reloc;
   pa_symbol_type type = SYMBOL_TYPE_UNKNOWN;
-  obj_symbol_type *symbol = (obj_symbol_type *) symbolP->bsym;
+  obj_symbol_type *symbol = (obj_symbol_type *) symbol_get_bfdsym (symbolP);
 
   if (strncasecmp (input_line_pointer, "absolute", 8) == 0)
 
     {
       input_line_pointer += 8;
-      symbolP->bsym->flags &= ~BSF_FUNCTION;
+      symbol_get_bfdsym (symbolP)->flags &= ~BSF_FUNCTION;
       S_SET_SEGMENT (symbolP, bfd_abs_section_ptr);
       type = SYMBOL_TYPE_ABSOLUTE;
     }
@@ -4827,54 +4882,55 @@ pa_type_args (symbolP, is_export)
          Complain if one tries to EXPORT a CODE type since that's never
          done.  Both GCC and HP C still try to IMPORT CODE types, so
          silently fix them to be ENTRY types.  */
-      if (symbolP->bsym->flags & BSF_FUNCTION)
+      if (S_IS_FUNCTION (symbolP))
 	{
 	  if (is_export)
-	    as_tsktsk (_("Using ENTRY rather than CODE in export directive for %s"), symbolP->bsym->name);
+	    as_tsktsk (_("Using ENTRY rather than CODE in export directive for %s"),
+		       S_GET_NAME (symbolP));
 
-	  symbolP->bsym->flags |= BSF_FUNCTION;
+	  symbol_get_bfdsym (symbolP)->flags |= BSF_FUNCTION;
 	  type = SYMBOL_TYPE_ENTRY;
 	}
       else
 	{
-	  symbolP->bsym->flags &= ~BSF_FUNCTION;
+	  symbol_get_bfdsym (symbolP)->flags &= ~BSF_FUNCTION;
 	  type = SYMBOL_TYPE_CODE;
 	}
     }
   else if (strncasecmp (input_line_pointer, "data", 4) == 0)
     {
       input_line_pointer += 4;
-      symbolP->bsym->flags &= ~BSF_FUNCTION;
+      symbol_get_bfdsym (symbolP)->flags &= ~BSF_FUNCTION;
       type = SYMBOL_TYPE_DATA;
     }
   else if ((strncasecmp (input_line_pointer, "entry", 5) == 0))
     {
       input_line_pointer += 5;
-      symbolP->bsym->flags |= BSF_FUNCTION;
+      symbol_get_bfdsym (symbolP)->flags |= BSF_FUNCTION;
       type = SYMBOL_TYPE_ENTRY;
     }
   else if (strncasecmp (input_line_pointer, "millicode", 9) == 0)
     {
       input_line_pointer += 9;
-      symbolP->bsym->flags |= BSF_FUNCTION;
+      symbol_get_bfdsym (symbolP)->flags |= BSF_FUNCTION;
       type = SYMBOL_TYPE_MILLICODE;
     }
   else if (strncasecmp (input_line_pointer, "plabel", 6) == 0)
     {
       input_line_pointer += 6;
-      symbolP->bsym->flags &= ~BSF_FUNCTION;
+      symbol_get_bfdsym (symbolP)->flags &= ~BSF_FUNCTION;
       type = SYMBOL_TYPE_PLABEL;
     }
   else if (strncasecmp (input_line_pointer, "pri_prog", 8) == 0)
     {
       input_line_pointer += 8;
-      symbolP->bsym->flags |= BSF_FUNCTION;
+      symbol_get_bfdsym (symbolP)->flags |= BSF_FUNCTION;
       type = SYMBOL_TYPE_PRI_PROG;
     }
   else if (strncasecmp (input_line_pointer, "sec_prog", 8) == 0)
     {
       input_line_pointer += 8;
-      symbolP->bsym->flags |= BSF_FUNCTION;
+      symbol_get_bfdsym (symbolP)->flags |= BSF_FUNCTION;
       type = SYMBOL_TYPE_SEC_PROG;
     }
 
@@ -4882,7 +4938,7 @@ pa_type_args (symbolP, is_export)
      than BFD understands.  This is how we get this information
      to the SOM BFD backend.  */
 #ifdef obj_set_symbol_type
-  obj_set_symbol_type (symbolP->bsym, (int) type);
+  obj_set_symbol_type (symbol_get_bfdsym (symbolP), (int) type);
 #endif
 
   /* Now that the type of the exported symbol has been handled,
@@ -4903,7 +4959,9 @@ pa_type_args (symbolP, is_export)
 	  name = input_line_pointer;
 	  c = get_symbol_end ();
 	  arg_reloc = pa_align_arg_reloc (temp, pa_build_arg_reloc (name));
+#ifdef OBJ_SOM
 	  symbol->tc_data.ap.hppa_arg_reloc |= arg_reloc;
+#endif
 	  *input_line_pointer = c;
 	}
       /* The return value.  */
@@ -4915,7 +4973,9 @@ pa_type_args (symbolP, is_export)
 	  name = input_line_pointer;
 	  c = get_symbol_end ();
 	  arg_reloc = pa_build_arg_reloc (name);
+#ifdef OBJ_SOM
 	  symbol->tc_data.ap.hppa_arg_reloc |= arg_reloc;
+#endif
 	  *input_line_pointer = c;
 	}
       /* Privelege level.  */
@@ -4925,7 +4985,9 @@ pa_type_args (symbolP, is_export)
 	  *p = c;
 	  input_line_pointer++;
 	  temp = atoi (input_line_pointer);
+#ifdef OBJ_SOM
 	  symbol->tc_data.ap.hppa_priv_level = temp;
+#endif
 	  c = get_symbol_end ();
 	  *input_line_pointer = c;
 	}
@@ -4976,7 +5038,7 @@ pa_import (unused)
 	     the the current segment.  Note only BSF_FUNCTION really
 	     matters, we do not need to set the full SYMBOL_TYPE_* info.  */
 	  if (now_seg == text_section)
-	    symbol->bsym->flags |= BSF_FUNCTION;
+	    symbol_get_bfdsym (symbol)->flags |= BSF_FUNCTION;
 
 	  /* If the section is undefined, then the symbol is undefined
 	     Since this is an import, leave the section undefined.  */
@@ -5030,8 +5092,10 @@ static void
 pa_leave (unused)
      int unused;
 {
+#ifdef OBJ_SOM
   /* We must have a valid space and subspace.  */
   pa_check_current_space_and_subspace ();
+#endif
 
   as_bad (_("The .LEAVE pseudo-op is not supported"));
   demand_empty_rest_of_line ();
@@ -5078,8 +5142,10 @@ static void
 pa_origin (unused)
      int unused;
 {
+#ifdef OBJ_SOM
   /* We must have a valid space and subspace.  */
   pa_check_current_space_and_subspace ();
+#endif
 
   s_org (0);
   pa_undefine_label ();
@@ -5129,8 +5195,10 @@ pa_proc (unused)
 {
   struct call_info *call_info;
 
+#ifdef OBJ_SOM
   /* We must have a valid space and subspace.  */
   pa_check_current_space_and_subspace ();
+#endif
 
   if (within_procedure)
     as_fatal (_("Nested procedures"));
@@ -5176,7 +5244,7 @@ pa_proc (unused)
 	if (label_symbol->lss_label)
 	  {
 	    last_call_info->start_symbol = label_symbol->lss_label;
-	    label_symbol->lss_label->bsym->flags |= BSF_FUNCTION;
+	    symbol_get_bfdsym (label_symbol->lss_label)->flags |= BSF_FUNCTION;
 	  }
 	else
 	  as_bad (_("Missing function name for .PROC (corrupted label chain)"));
@@ -5196,8 +5264,10 @@ pa_procend (unused)
      int unused;
 {
 
+#ifdef OBJ_SOM
   /* We must have a valid space and subspace.  */
   pa_check_current_space_and_subspace ();
+#endif
 
   /* If we are within a procedure definition, make sure we've
      defined a label for the procedure; handle case where the
@@ -5215,7 +5285,8 @@ pa_procend (unused)
 	  if (label_symbol->lss_label)
 	    {
 	      last_call_info->start_symbol = label_symbol->lss_label;
-	      label_symbol->lss_label->bsym->flags |= BSF_FUNCTION;
+	      symbol_get_bfdsym (label_symbol->lss_label)->flags
+		|= BSF_FUNCTION;
 #ifdef OBJ_SOM
 	      /* Also handle allocation of a fixup to hold the unwind
 		 information when the label appears after the proc/procend.  */
@@ -5255,6 +5326,38 @@ pa_procend (unused)
   within_procedure = FALSE;
   demand_empty_rest_of_line ();
   pa_undefine_label ();
+}
+
+/* If VALUE is an exact power of two between zero and 2^31, then
+   return log2 (VALUE).  Else return -1.  */
+
+static int
+log2 (value)
+     int value;
+{
+  int shift = 0;
+
+  while ((1 << shift) != value && shift < 32)
+    shift++;
+
+  if (shift >= 32)
+    return -1;
+  else
+    return shift;
+}
+
+
+#ifdef OBJ_SOM
+/* Check to make sure we have a valid space and subspace.  */
+
+static void
+pa_check_current_space_and_subspace ()
+{
+  if (current_space == NULL)
+    as_fatal (_("Not in a space.\n"));
+
+  if (current_subspace == NULL)
+    as_fatal (_("Not in a subspace.\n"));
 }
 
 /* Parse the parameters to a .SPACE directive; if CREATE_FLAG is nonzero,
@@ -5525,24 +5628,6 @@ pa_spnum (unused)
   demand_empty_rest_of_line ();
 }
 
-/* If VALUE is an exact power of two between zero and 2^31, then
-   return log2 (VALUE).  Else return -1.  */
-
-static int
-log2 (value)
-     int value;
-{
-  int shift = 0;
-
-  while ((1 << shift) != value && shift < 32)
-    shift++;
-
-  if (shift >= 32)
-    return -1;
-  else
-    return shift;
-}
-
 /* Handle a .SUBSPACE pseudo-op; this switches the current subspace to the
    given subspace, creating the new subspace if necessary.
 
@@ -5553,7 +5638,7 @@ static void
 pa_subspace (create_new)
      int create_new;
 {
-  char *name, *ss_name, *alias, c;
+  char *name, *ss_name, c;
   char loadable, code_only, common, dup_common, zero, sort;
   int i, access, space_index, alignment, quadrant, applicable, flags;
   sd_chain_struct *space;
@@ -5587,7 +5672,6 @@ pa_subspace (create_new)
       space_index = ~0;
       alignment = 1;
       quadrant = 0;
-      alias = NULL;
 
       space = current_space;
       if (create_new)
@@ -5624,8 +5708,6 @@ pa_subspace (create_new)
 		  quadrant = pa_def_subspaces[i].quadrant;
 		  access = pa_def_subspaces[i].access;
 		  sort = pa_def_subspaces[i].sort;
-		  if (USE_ALIASES && pa_def_subspaces[i].alias)
-		    alias = pa_def_subspaces[i].alias;
 		  break;
 		}
 	      i++;
@@ -5734,14 +5816,6 @@ pa_subspace (create_new)
 	section = subseg_force_new (ss_name, 0);
       else if (ssd)
 	section = ssd->ssd_seg;
-      else if (alias)
-	section = subseg_new (alias, 0);
-      else if (!alias && USE_ALIASES)
-	{
-	  as_warn (_("Ignoring subspace decl due to ELF BFD bugs."));
-	  demand_empty_rest_of_line ();
-	  return;
-	}
       else
 	section = subseg_new (ss_name, 0);
 
@@ -5798,10 +5872,7 @@ pa_spaces_begin ()
       char *name;
 
       /* Pick the right name to use for the new section.  */
-      if (pa_def_spaces[i].alias && USE_ALIASES)
-	name = pa_def_spaces[i].alias;
-      else
-	name = pa_def_spaces[i].name;
+      name = pa_def_spaces[i].name;
 
       pa_def_spaces[i].segment = subseg_new (name, 0);
       create_new_space (pa_def_spaces[i].name, pa_def_spaces[i].spnum,
@@ -5821,16 +5892,8 @@ pa_spaces_begin ()
 
       /* Pick the right name for the new section and pick the right
          subsegment number.  */
-      if (pa_def_subspaces[i].alias && USE_ALIASES)
-	{
-	  name = pa_def_subspaces[i].alias;
-	  subsegment = pa_def_subspaces[i].subsegment;
-	}
-      else
-	{
-	  name = pa_def_subspaces[i].name;
-	  subsegment = 0;
-	}
+      name = pa_def_subspaces[i].name;
+      subsegment = 0;
 
       /* Create the new section.  */
       segment = subseg_new (name, subsegment);
@@ -5839,7 +5902,7 @@ pa_spaces_begin ()
       /* For SOM we want to replace the standard .text, .data, and .bss
          sections with our own.   We also want to set BFD flags for
 	 all the built-in subspaces.  */
-      if (!strcmp (pa_def_subspaces[i].name, "$CODE$") && !USE_ALIASES)
+      if (!strcmp (pa_def_subspaces[i].name, "$CODE$"))
 	{
 	  text_section = segment;
 	  applicable = bfd_applicable_section_flags (stdoutput);
@@ -5849,7 +5912,7 @@ pa_spaces_begin ()
 					       | SEC_READONLY
 					       | SEC_HAS_CONTENTS));
 	}
-      else if (!strcmp (pa_def_subspaces[i].name, "$DATA$") && !USE_ALIASES)
+      else if (!strcmp (pa_def_subspaces[i].name, "$DATA$"))
 	{
 	  data_section = segment;
 	  applicable = bfd_applicable_section_flags (stdoutput);
@@ -5860,14 +5923,14 @@ pa_spaces_begin ()
 
 
 	}
-      else if (!strcmp (pa_def_subspaces[i].name, "$BSS$") && !USE_ALIASES)
+      else if (!strcmp (pa_def_subspaces[i].name, "$BSS$"))
 	{
 	  bss_section = segment;
 	  applicable = bfd_applicable_section_flags (stdoutput);
 	  bfd_set_section_flags (stdoutput, segment,
 				 applicable & SEC_ALLOC);
 	}
-      else if (!strcmp (pa_def_subspaces[i].name, "$LIT$") && !USE_ALIASES)
+      else if (!strcmp (pa_def_subspaces[i].name, "$LIT$"))
 	{
 	  applicable = bfd_applicable_section_flags (stdoutput);
 	  bfd_set_section_flags (stdoutput, segment,
@@ -5876,8 +5939,7 @@ pa_spaces_begin ()
 					       | SEC_READONLY
 					       | SEC_HAS_CONTENTS));
 	}
-      else if (!strcmp (pa_def_subspaces[i].name, "$MILLICODE$")
-	       && !USE_ALIASES)
+      else if (!strcmp (pa_def_subspaces[i].name, "$MILLICODE$"))
 	{
 	  applicable = bfd_applicable_section_flags (stdoutput);
 	  bfd_set_section_flags (stdoutput, segment,
@@ -5886,7 +5948,7 @@ pa_spaces_begin ()
 					       | SEC_READONLY
 					       | SEC_HAS_CONTENTS));
 	}
-      else if (!strcmp (pa_def_subspaces[i].name, "$UNWIND$") && !USE_ALIASES)
+      else if (!strcmp (pa_def_subspaces[i].name, "$UNWIND$"))
 	{
 	  applicable = bfd_applicable_section_flags (stdoutput);
 	  bfd_set_section_flags (stdoutput, segment,
@@ -6037,7 +6099,7 @@ create_new_subspace (space, name, loadable, code_only, common,
      we'll set it to 1 which "locks-in" the subspace attributes.  */
   SUBSPACE_DEFINED (chain_entry) = 0;
 
-  chain_entry->ssd_subseg = USE_ALIASES ? pa_next_subseg (space) : 0;
+  chain_entry->ssd_subseg = 0;
   chain_entry->ssd_seg = seg;
   chain_entry->ssd_next = NULL;
 
@@ -6256,7 +6318,6 @@ pa_subspace_start (space, quadrant)
      sd_chain_struct *space;
      int quadrant;
 {
-#ifdef OBJ_SOM
   /* FIXME.  Assumes everyone puts read/write data at 0x4000000, this
      is not correct for the PA OSF1 port.  */
   if ((strcmp (SPACE_NAME (space), "$PRIVATE$") == 0) && quadrant == 1)
@@ -6265,7 +6326,6 @@ pa_subspace_start (space, quadrant)
     return 0x40000000;
   else
     return 0;
-#endif
   return 0;
 }
 
@@ -6278,6 +6338,7 @@ pa_next_subseg (space)
   space->sd_last_subseg++;
   return space->sd_last_subseg;
 }
+#endif
 
 /* Helper function for pa_stringer.  Used to find the end of
    a string.  */
@@ -6288,8 +6349,10 @@ pa_stringer_aux (s)
 {
   unsigned int c = *s & CHAR_MASK;
 
+#ifdef OBJ_SOM
   /* We must have a valid space and subspace.  */
   pa_check_current_space_and_subspace ();
+#endif
 
   switch (c)
     {
@@ -6430,9 +6493,11 @@ static void
 pa_data (unused)
      int unused;
 {
+#ifdef OBJ_SOM
   current_space = is_defined_space ("$PRIVATE$");
   current_subspace
     = pa_subsegment_to_subspace (current_space->sd_seg, 0);
+#endif
   s_data (0);
   pa_undefine_label ();
 }
@@ -6453,8 +6518,10 @@ static void
 pa_fill (unused)
      int unused;
 {
+#ifdef OBJ_SOM
   /* We must have a valid space and subspace.  */
   pa_check_current_space_and_subspace ();
+#endif
 
   s_fill (0);
   pa_undefine_label ();
@@ -6466,8 +6533,10 @@ static void
 pa_lcomm (needs_align)
      int needs_align;
 {
+#ifdef OBJ_SOM
   /* We must have a valid space and subspace.  */
   pa_check_current_space_and_subspace ();
+#endif
 
   s_lcomm (needs_align);
   pa_undefine_label ();
@@ -6479,8 +6548,10 @@ static void
 pa_lsym (unused)
      int unused;
 {
+#ifdef OBJ_SOM
   /* We must have a valid space and subspace.  */
   pa_check_current_space_and_subspace ();
+#endif
 
   s_lsym (0);
   pa_undefine_label ();
@@ -6492,9 +6563,11 @@ static void
 pa_text (unused)
      int unused;
 {
+#ifdef OBJ_SOM
   current_space = is_defined_space ("$TEXT$");
   current_subspace
     = pa_subsegment_to_subspace (current_space->sd_seg, 0);
+#endif
 
   s_text (0);
   pa_undefine_label ();
@@ -6549,7 +6622,7 @@ hppa_fix_adjustable (fixp)
       && (hppa_fix->segment->flags & SEC_CODE))
     {
       /* Apparently sy_used_in_reloc never gets set for sub symbols.  */
-      fixp->fx_subsy->sy_used_in_reloc = 1;
+      symbol_mark_used_in_reloc (fixp->fx_subsy);
       return 0;
     }
 
@@ -6571,7 +6644,7 @@ hppa_fix_adjustable (fixp)
       || hppa_fix->fx_r_field == e_lpsel)
     return 0;
 
-  if (fixp->fx_addsy && fixp->fx_addsy->bsym->flags & BSF_GLOBAL)
+  if (fixp->fx_addsy && S_IS_EXTERNAL (fixp->fx_addsy))
     return 0;
 
   /* Reject absolute calls (jumps).  */
@@ -6579,8 +6652,7 @@ hppa_fix_adjustable (fixp)
     return 0;
 
   /* Reject reductions of function symbols.  */
-  if (fixp->fx_addsy == 0
-      || (fixp->fx_addsy->bsym->flags & BSF_FUNCTION) == 0)
+  if (fixp->fx_addsy == 0 || ! S_IS_FUNCTION (fixp->fx_addsy))
     return 1;
 
   return 0;
@@ -6612,15 +6684,16 @@ hppa_force_relocation (fixp)
 #define arg_reloc_stub_needed(CALLER, CALLEE) \
   ((CALLEE) && (CALLER) && ((CALLEE) != (CALLER)))
 
+#ifdef OBJ_SOM
   /* It is necessary to force PC-relative calls/jumps to have a relocation
      entry if they're going to need either a argument relocation or long
      call stub.  FIXME.  Can't we need the same for absolute calls?  */
   if (fixp->fx_pcrel && fixp->fx_addsy
       && (arg_reloc_stub_needed ((long) ((obj_symbol_type *)
-				  fixp->fx_addsy->bsym)->tc_data.ap.hppa_arg_reloc,
-
-				 hppa_fixp->fx_arg_reloc)))
+	symbol_get_bfdsym (fixp->fx_addsy))->tc_data.ap.hppa_arg_reloc,
+	hppa_fixp->fx_arg_reloc)))
     return 1;
+#endif
   distance = (fixp->fx_offset + S_GET_VALUE (fixp->fx_addsy)
 	      - md_pcrel_from (fixp));
   /* Now check and see if we're going to need a long-branch stub.  */
@@ -6677,7 +6750,7 @@ hppa_elf_mark_end_of_function ()
 				frag_now);
 
 	  assert (symbolP);
-	  symbolP->bsym->flags = BSF_LOCAL;
+	  S_CLEAR_EXTERNAL (symbolP);
 	  symbol_table_insert (symbolP);
 	}
 
@@ -6707,7 +6780,8 @@ elf_hppa_final_processing ()
        call_info_pointer = call_info_pointer->ci_next)
     {
       elf_symbol_type *esym
-      = (elf_symbol_type *) call_info_pointer->start_symbol->bsym;
+	= ((elf_symbol_type *)
+	   symbol_get_bfdsym (call_info_pointer->start_symbol));
       esym->internal_elf_sym.st_size =
 	S_GET_VALUE (call_info_pointer->end_symbol)
 	- S_GET_VALUE (call_info_pointer->start_symbol) + 4;

@@ -1,6 +1,6 @@
 /* vms-misc.c -- Miscellaneous functions for VAX (openVMS/VAX) and
    EVAX (openVMS/Alpha) files.
-   Copyright 1996, 1997, 1998 Free Software Foundation, Inc.
+   Copyright 1996, 1997, 1998, 1999 Free Software Foundation, Inc.
 
    Written by Klaus K"ampf (kkaempf@rmi.de)
 
@@ -198,11 +198,12 @@ _bfd_vms_hash_newfunc (entry, table, string)
 	  bfd_set_error (bfd_error_no_memory);
 	  return (struct bfd_hash_entry *)NULL;
 	}
+      entry = (struct bfd_hash_entry *) ret;
     }
 
   /* Call the allocation method of the base class.  */
 
-  ret = (vms_symbol_entry *) bfd_hash_newfunc ((struct bfd_hash_entry *)ret, table, string);
+  ret = (vms_symbol_entry *) bfd_hash_newfunc (entry, table, string);
 #if VMS_DEBUG
   vms_debug (6, "_bfd_vms_hash_newfunc ret %p\n", ret);
 #endif
@@ -219,7 +220,7 @@ _bfd_vms_hash_newfunc (entry, table, string)
 
 void
 _bfd_vms_get_header_values (abfd, buf, type, length)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      unsigned char *buf;
      int *type;
      int *length;
@@ -343,7 +344,8 @@ _bfd_vms_get_record (abfd)
   /* read the record header on Alpha.  */
 
   if ((test_len != 0)
-      && (bfd_read (PRIV(vms_buf), 1, test_len, abfd) != test_len))
+      && (bfd_read (PRIV(vms_buf), 1, test_len, abfd)
+	  != (bfd_size_type) test_len))
     {
       bfd_set_error (bfd_error_file_truncated);
       return 0;
@@ -418,7 +420,8 @@ _bfd_vms_get_record (abfd)
 #if VMS_DEBUG
       vms_debug (10, "bfd_read remaining %d\n", remaining);
 #endif
-      if (bfd_read (vms_buf + test_len, 1, remaining, abfd) != remaining)
+      if (bfd_read (vms_buf + test_len, 1, remaining, abfd) !=
+	  (bfd_size_type) remaining)
 	{
 	  bfd_set_error (bfd_error_file_truncated);
 	  return 0;
@@ -1007,10 +1010,8 @@ _bfd_vms_length_hash_symbol (abfd, in, maxlen)
      const char *in;
      int maxlen;
 {
-  long int init;
   long int result;
   int in_len;
-  char *pnt = 0;
   char *new_name;
   const char *old_name;
   int i;
@@ -1054,7 +1055,7 @@ _bfd_vms_length_hash_symbol (abfd, in, maxlen)
 
   if ((in_len > maxlen)
       && PRIV(flag_hash_long_names))
-    sprintf (out, "_%08x", result);
+    sprintf (out, "_%08lx", result);
   else
     *out = 0;
 

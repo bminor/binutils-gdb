@@ -65,7 +65,12 @@ extern const struct relax_type md_relax_table[];
 
 #define TARGET_FORMAT	(target_big_endian ? "pe-mcore-big" : "pe-mcore-little")
 
-#define TARGET_SYMBOL_FIELDS  int sy_flags ;
+struct mcore_tc_sy
+{
+  int sy_flags;
+};
+
+#define TC_SYMFIELD_TYPE struct mcore_tc_sy
 
 #endif /* OBJ_COFF */
 
@@ -93,7 +98,6 @@ extern boolean mcore_fix_adjustable PARAMS ((struct fix *));
 # error No target format specified.
 #endif
 
-#include "struc-symbol.h" /* For definition of symbolS */
 #include "write.h"        /* For definition of fixS */
   
 extern void      md_begin            PARAMS ((void));

@@ -130,11 +130,12 @@ DEFUN (hist_read_rec, (ifp, filename), FILE * ifp AND const char *filename)
 
   DBG (SAMPLEDEBUG,
        printf ("[hist_read_rec] n_lowpc 0x%lx n_highpc 0x%lx ncnt %d\n",
-	       n_lowpc, n_highpc, ncnt);
+	       (unsigned long) n_lowpc, (unsigned long) n_highpc, ncnt);
        printf ("[hist_read_rec] s_lowpc 0x%lx s_highpc 0x%lx nsamples %d\n",
-	       s_lowpc, s_highpc, hist_num_bins);
+	       (unsigned long) s_lowpc, (unsigned long) s_highpc,
+	       hist_num_bins);
        printf ("[hist_read_rec]   lowpc 0x%lx   highpc 0x%lx\n",
-	       lowpc, highpc));
+	       (unsigned long) lowpc, (unsigned long) highpc));
 
   if (n_lowpc != s_lowpc || n_highpc != s_highpc
       || ncnt != hist_num_bins || hz != profrate)
@@ -229,8 +230,9 @@ scale_and_align_entries ()
 	{
 	  DBG (SAMPLEDEBUG,
 	       printf ("[scale_and_align_entries] pushing 0x%lx to 0x%lx\n",
-		       sym->hist.scaled_addr,
-		       sym->hist.scaled_addr + UNITS_TO_CODE));
+		       (unsigned long) sym->hist.scaled_addr,
+		       (unsigned long) (sym->hist.scaled_addr
+					+ UNITS_TO_CODE)));
 	  sym->hist.scaled_addr += UNITS_TO_CODE;
 	}
     }
@@ -305,7 +307,8 @@ DEFUN_VOID (hist_assign_samples)
       DBG (SAMPLEDEBUG,
 	   printf (
       "[assign_samples] bin_low_pc=0x%lx, bin_high_pc=0x%lx, bin_count=%d\n",
-		    sizeof (UNIT) * bin_low_pc, sizeof (UNIT) * bin_high_pc,
+		    (unsigned long) (sizeof (UNIT) * bin_low_pc),
+		    (unsigned long) (sizeof (UNIT) * bin_high_pc),
 		    bin_count));
       total_time += time;
 
@@ -338,9 +341,10 @@ DEFUN_VOID (hist_assign_samples)
 	      DBG (SAMPLEDEBUG,
 		   printf (
 			    "[assign_samples] [0x%lx,0x%lx) %s gets %f ticks %ld overlap\n",
-			    symtab.base[j].addr, sizeof (UNIT) * sym_high_pc,
+			    (unsigned long) symtab.base[j].addr,
+			    (unsigned long) (sizeof (UNIT) * sym_high_pc),
 			    symtab.base[j].name, overlap * time / hist_scale,
-			    overlap));
+			    (long) overlap));
 	      addr = symtab.base[j].addr;
 	      credit = overlap * time / hist_scale;
 	      /*

@@ -17,8 +17,8 @@ if { ![istarget *-*-sysv4*] \
     return
 }
 
-if { [istarget *-*-linuxaout*] \
-     || [istarget *-*-linuxoldld*] } {
+if { [istarget *-*-linux*aout*] \
+     || [istarget *-*-linux*oldld*] } {
     return
 }
 

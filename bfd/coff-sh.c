@@ -1,5 +1,5 @@
 /* BFD back-end for Hitachi Super-H COFF binaries.
-   Copyright 1993, 94, 95, 96, 97, 1998 Free Software Foundation, Inc.
+   Copyright 1993, 94, 95, 96, 97, 98, 1999 Free Software Foundation, Inc.
    Contributed by Cygnus Support.
    Written by Steve Chamberlain, <sac@cygnus.com>.
    Relaxing code written by Ian Lance Taylor, <ian@cygnus.com>.
@@ -32,7 +32,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 static bfd_reloc_status_type sh_reloc
   PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
 static long get_symbol_value PARAMS ((asymbol *));
-static boolean sh_merge_private_data PARAMS ((bfd *, bfd *));
 static boolean sh_relax_section
   PARAMS ((bfd *, asection *, struct bfd_link_info *, boolean *));
 static boolean sh_relax_delete_bytes
@@ -59,16 +58,16 @@ static bfd_byte *sh_coff_get_relocated_section_contents
    in coff/internal.h which we do not expect to ever see.  */
 static reloc_howto_type sh_coff_howtos[] =
 {
-  { 0 },
-  { 1 },
-  { 2 },
-  { 3 }, /* R_SH_PCREL8 */
-  { 4 }, /* R_SH_PCREL16 */
-  { 5 }, /* R_SH_HIGH8 */
-  { 6 }, /* R_SH_IMM24 */
-  { 7 }, /* R_SH_LOW16 */
-  { 8 },
-  { 9 }, /* R_SH_PCDISP8BY4 */
+  EMPTY_HOWTO (0),
+  EMPTY_HOWTO (1),
+  EMPTY_HOWTO (2),
+  EMPTY_HOWTO (3), /* R_SH_PCREL8 */
+  EMPTY_HOWTO (4), /* R_SH_PCREL16 */
+  EMPTY_HOWTO (5), /* R_SH_HIGH8 */
+  EMPTY_HOWTO (6), /* R_SH_IMM24 */
+  EMPTY_HOWTO (7), /* R_SH_LOW16 */
+  EMPTY_HOWTO (8),
+  EMPTY_HOWTO (9), /* R_SH_PCDISP8BY4 */
 
   HOWTO (R_SH_PCDISP8BY2,	/* type */
 	 1,			/* rightshift */
@@ -84,7 +83,7 @@ static reloc_howto_type sh_coff_howtos[] =
 	 0xff,			/* dst_mask */
 	 true),			/* pcrel_offset */
 
-  { 11 }, /* R_SH_PCDISP8 */
+  EMPTY_HOWTO (11), /* R_SH_PCDISP8 */
 
   HOWTO (R_SH_PCDISP,		/* type */
 	 1,			/* rightshift */
@@ -100,7 +99,7 @@ static reloc_howto_type sh_coff_howtos[] =
 	 0xfff,			/* dst_mask */
 	 true),			/* pcrel_offset */
 
-  { 13 },
+  EMPTY_HOWTO (13),
 
   HOWTO (R_SH_IMM32,		/* type */
 	 0,			/* rightshift */
@@ -116,13 +115,13 @@ static reloc_howto_type sh_coff_howtos[] =
 	 0xffffffff,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
-  { 15 },
-  { 16 }, /* R_SH_IMM8 */
-  { 17 }, /* R_SH_IMM8BY2 */
-  { 18 }, /* R_SH_IMM8BY4 */
-  { 19 }, /* R_SH_IMM4 */
-  { 20 }, /* R_SH_IMM4BY2 */
-  { 21 }, /* R_SH_IMM4BY4 */
+  EMPTY_HOWTO (15),
+  EMPTY_HOWTO (16), /* R_SH_IMM8 */
+  EMPTY_HOWTO (17), /* R_SH_IMM8BY2 */
+  EMPTY_HOWTO (18), /* R_SH_IMM8BY4 */
+  EMPTY_HOWTO (19), /* R_SH_IMM4 */
+  EMPTY_HOWTO (20), /* R_SH_IMM4BY2 */
+  EMPTY_HOWTO (21), /* R_SH_IMM4BY4 */
 
   HOWTO (R_SH_PCRELIMM8BY2,	/* type */
 	 1,			/* rightshift */
@@ -382,7 +381,7 @@ sh_reloc (abfd, reloc_entry, symbol_in, data, input_section, output_bfd,
      PTR data;
      asection *input_section;
      bfd *output_bfd;
-     char **error_message;
+     char **error_message ATTRIBUTE_UNUSED;
 {
   unsigned long insn;
   bfd_vma sym_value;
@@ -442,31 +441,7 @@ sh_reloc (abfd, reloc_entry, symbol_in, data, input_section, output_bfd,
   return bfd_reloc_ok;
 }
 
-/* This routine checks for linking big and little endian objects
-   together.  */
-
-static boolean
-sh_merge_private_data (ibfd, obfd)
-     bfd *ibfd;
-     bfd *obfd;
-{
-  if (ibfd->xvec->byteorder != obfd->xvec->byteorder
-      && obfd->xvec->byteorder != BFD_ENDIAN_UNKNOWN)
-    {
-      (*_bfd_error_handler)
-	("%s: compiled for a %s endian system and target is %s endian",
-	 bfd_get_filename (ibfd),
-	 bfd_big_endian (ibfd) ? "big" : "little",
-	 bfd_big_endian (obfd) ? "big" : "little");
-
-      bfd_set_error (bfd_error_wrong_format);
-      return false;
-    }
-
-  return true;
-}
-
-#define coff_bfd_merge_private_bfd_data sh_merge_private_data
+#define coff_bfd_merge_private_bfd_data _bfd_generic_verify_endian_match
 
 /* We can do relaxing.  */
 #define coff_bfd_relax_section sh_relax_section
@@ -2437,7 +2412,7 @@ sh_swap_insns (abfd, sec, relocs, contents, addr)
 static boolean
 sh_relocate_section (output_bfd, info, input_bfd, input_section, contents,
 		     relocs, syms, sections)
-     bfd *output_bfd;
+     bfd *output_bfd ATTRIBUTE_UNUSED;
      struct bfd_link_info *info;
      bfd *input_bfd;
      asection *input_section;
@@ -2704,89 +2679,20 @@ sh_coff_get_relocated_section_contents (output_bfd, link_info, link_order,
 
 /* The target vectors.  */
 
-const bfd_target shcoff_vec =
-{
-  "coff-sh",			/* name */
-  bfd_target_coff_flavour,
-  BFD_ENDIAN_BIG,		/* data byte order is big */
-  BFD_ENDIAN_BIG,		/* header byte order is big */
+CREATE_BIG_COFF_TARGET_VEC (shcoff_vec, "coff-sh", BFD_IS_RELAXABLE, 0, '_', NULL)
 
-  (HAS_RELOC | EXEC_P |		/* object flags */
-   HAS_LINENO | HAS_DEBUG |
-   HAS_SYMS | HAS_LOCALS | WP_TEXT | BFD_IS_RELAXABLE),
+#ifdef TARGET_SHL_SYM
+#define TARGET_SYM TARGET_SHL_SYM
+#else
+#define TARGET_SYM shlcoff_vec
+#endif
+     
+#ifndef TARGET_SHL_NAME
+#define TARGET_SHL_NAME "coff-shl"
+#endif
 
-  (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC),
-  '_',				/* leading symbol underscore */
-  '/',				/* ar_pad_char */
-  15,				/* ar_max_namelen */
-  bfd_getb64, bfd_getb_signed_64, bfd_putb64,
-  bfd_getb32, bfd_getb_signed_32, bfd_putb32,
-  bfd_getb16, bfd_getb_signed_16, bfd_putb16, /* data */
-  bfd_getb64, bfd_getb_signed_64, bfd_putb64,
-  bfd_getb32, bfd_getb_signed_32, bfd_putb32,
-  bfd_getb16, bfd_getb_signed_16, bfd_putb16, /* hdrs */
-
-  {_bfd_dummy_target, coff_object_p, /* bfd_check_format */
-     bfd_generic_archive_p, _bfd_dummy_target},
-  {bfd_false, coff_mkobject, _bfd_generic_mkarchive, /* bfd_set_format */
-     bfd_false},
-  {bfd_false, coff_write_object_contents, /* bfd_write_contents */
-     _bfd_write_archive_contents, bfd_false},
-
-  BFD_JUMP_TABLE_GENERIC (coff),
-  BFD_JUMP_TABLE_COPY (coff),
-  BFD_JUMP_TABLE_CORE (_bfd_nocore),
-  BFD_JUMP_TABLE_ARCHIVE (_bfd_archive_coff),
-  BFD_JUMP_TABLE_SYMBOLS (coff),
-  BFD_JUMP_TABLE_RELOCS (coff),
-  BFD_JUMP_TABLE_WRITE (coff),
-  BFD_JUMP_TABLE_LINK (coff),
-  BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
-
-  COFF_SWAP_TABLE,
-};
-
-const bfd_target shlcoff_vec =
-{
-  "coff-shl",			/* name */
-  bfd_target_coff_flavour,
-  BFD_ENDIAN_LITTLE,		/* data byte order is little */
-  BFD_ENDIAN_LITTLE,		/* header byte order is little endian too*/
-
-  (HAS_RELOC | EXEC_P |		/* object flags */
-   HAS_LINENO | HAS_DEBUG |
-   HAS_SYMS | HAS_LOCALS | WP_TEXT | BFD_IS_RELAXABLE),
-
-  (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC),
-  '_',				/* leading symbol underscore */
-  '/',				/* ar_pad_char */
-  15,				/* ar_max_namelen */
-  bfd_getl64, bfd_getl_signed_64, bfd_putl64,
-  bfd_getl32, bfd_getl_signed_32, bfd_putl32,
-  bfd_getl16, bfd_getl_signed_16, bfd_putl16, /* data */
-  bfd_getl64, bfd_getl_signed_64, bfd_putl64,
-  bfd_getl32, bfd_getl_signed_32, bfd_putl32,
-  bfd_getl16, bfd_getl_signed_16, bfd_putl16, /* hdrs */
-
-  {_bfd_dummy_target, coff_object_p, /* bfd_check_format */
-     bfd_generic_archive_p, _bfd_dummy_target},   
-  {bfd_false, coff_mkobject, _bfd_generic_mkarchive, /* bfd_set_format */
-     bfd_false},
-  {bfd_false, coff_write_object_contents, /* bfd_write_contents */
-     _bfd_write_archive_contents, bfd_false},
-
-  BFD_JUMP_TABLE_GENERIC (coff),
-  BFD_JUMP_TABLE_COPY (coff),
-  BFD_JUMP_TABLE_CORE (_bfd_nocore),
-  BFD_JUMP_TABLE_ARCHIVE (_bfd_archive_coff),
-  BFD_JUMP_TABLE_SYMBOLS (coff),
-  BFD_JUMP_TABLE_RELOCS (coff),
-  BFD_JUMP_TABLE_WRITE (coff),
-  BFD_JUMP_TABLE_LINK (coff),
-  BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
-
-  COFF_SWAP_TABLE,
-};
+CREATE_LITTLE_COFF_TARGET_VEC (TARGET_SYM, TARGET_SHL_NAME, BFD_IS_RELAXABLE, 0, '_', NULL)
+     
 
 /* Some people want versions of the SH COFF target which do not align
    to 16 byte boundaries.  We implement that by adding a couple of new
@@ -2874,6 +2780,8 @@ static const bfd_coff_backend_data bfd_coff_small_swap_table =
 #define coff_small_get_section_contents_in_window \
   coff_get_section_contents_in_window
 
+extern const bfd_target shlcoff_small_vec;
+
 const bfd_target shcoff_small_vec =
 {
   "coff-sh-small",		/* name */
@@ -2913,6 +2821,8 @@ const bfd_target shcoff_small_vec =
   BFD_JUMP_TABLE_LINK (coff),
   BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
 
+  & shlcoff_small_vec,
+  
   (PTR) &bfd_coff_small_swap_table
 };
 
@@ -2955,5 +2865,7 @@ const bfd_target shlcoff_small_vec =
   BFD_JUMP_TABLE_LINK (coff),
   BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
 
+  & shcoff_small_vec,
+  
   (PTR) &bfd_coff_small_swap_table
 };

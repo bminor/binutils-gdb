@@ -1,6 +1,5 @@
 /* tc-d30v.c -- Assembler code for the Mitsubishi D30V
-
-   Copyright (C) 1997, 1998 Free Software Foundation.
+   Copyright (C) 1997, 1998, 1999 Free Software Foundation.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -216,7 +215,7 @@ register_name (expressionP)
     {
       expressionP->X_op = O_register;
       /* temporarily store a pointer to the string here */
-      expressionP->X_op_symbol = (struct symbol *)input_line_pointer;
+      expressionP->X_op_symbol = (symbolS *)input_line_pointer;
       expressionP->X_add_number = reg_number;
       input_line_pointer = p;
       return 1;
@@ -1745,7 +1744,8 @@ tc_gen_reloc (seg, fixp)
 {
   arelent *reloc;
   reloc = (arelent *) xmalloc (sizeof (arelent));
-  reloc->sym_ptr_ptr = &fixp->fx_addsy->bsym;
+  reloc->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
+  *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
   reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;
   reloc->howto = bfd_reloc_type_lookup (stdoutput, fixp->fx_r_type);
   if (reloc->howto == (reloc_howto_type *) NULL)
@@ -2028,7 +2028,7 @@ d30v_frob_label (lab)
   d30v_cleanup (false);
 
   /* Update the label's address with the current output pointer.  */
-  lab->sy_frag = frag_now;
+  symbol_set_frag (lab, frag_now);
   S_SET_VALUE (lab, (valueT) frag_now_fix ());
 
   /* Record this label for future adjustment after we find out what
@@ -2110,7 +2110,7 @@ d30v_align (n, pfill, label)
       
       assert (S_GET_SEGMENT (label) == now_seg);
 
-      old_frag  = label->sy_frag;
+      old_frag  = symbol_get_frag (label);
       old_value = S_GET_VALUE (label);
       new_value = (valueT) frag_now_fix ();
       
@@ -2125,15 +2125,16 @@ d30v_align (n, pfill, label)
 	 in the target fragment.  Note, this search is guaranteed to
 	 find at least one match when sym == label, so no special case
 	 code is necessary.  */
-      for (sym = symbol_lastP; sym != NULL; sym = sym->sy_previous)
+      for (sym = symbol_lastP; sym != NULL; sym = symbol_previous (sym))
 	{
-	  if (sym->sy_frag == old_frag && S_GET_VALUE (sym) == old_value)
+	  if (symbol_get_frag (sym) == old_frag
+	      && S_GET_VALUE (sym) == old_value)
 	    {
 	      label_seen = true;
-	      sym->sy_frag = frag_now;
+	      symbol_set_frag (sym, frag_now);
 	      S_SET_VALUE (sym, new_value);
 	    }
-	  else if (label_seen && sym->sy_frag != old_frag)
+	  else if (label_seen && symbol_get_frag (sym) != old_frag)
 	    break;
 	}
     }

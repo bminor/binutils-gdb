@@ -1,5 +1,6 @@
 /* ldemul.c -- clearing house for ld emulation states
-   Copyright (C) 1991, 92, 93, 94, 95, 96, 1997, 1998 Free Software Foundation, Inc.
+   Copyright (C) 1991, 92, 93, 94, 95, 96, 97, 98, 1999
+   Free Software Foundation, Inc.
 
 This file is part of GLD, the Gnu Linker.
 
@@ -218,7 +219,7 @@ set_output_arch_default()
 /*ARGSUSED*/
 void
 syslib_default(ignore)
-     char  *ignore;
+     char  *ignore ATTRIBUTE_UNUSED;
 {
   info_msg (_("%S SYSLIB ignored\n"));
 }
@@ -226,7 +227,7 @@ syslib_default(ignore)
 /*ARGSUSED*/
 void
 hll_default(ignore)
-     char  *ignore;
+     char  *ignore ATTRIBUTE_UNUSED;
 {
   info_msg (_("%S HLL ignored\n"));
 }

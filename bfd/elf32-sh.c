@@ -1,5 +1,5 @@
 /* Hitachi SH specific support for 32-bit ELF
-   Copyright 1996, 1997, 1998 Free Software Foundation, Inc.
+   Copyright 1996, 1997, 1998, 1999 Free Software Foundation, Inc.
    Contributed by Ian Lance Taylor, Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -207,21 +207,21 @@ static reloc_howto_type sh_elf_howto_table[] =
 	 0xff,			/* dst_mask */
 	 true),			/* pcrel_offset */
 
-  { 10 },
-  { 11 },
-  { 12 },
-  { 13 },
-  { 14 },
-  { 15 },
-  { 16 },
-  { 17 },
-  { 18 },
-  { 19 },
-  { 20 },
-  { 21 },
-  { 22 },
-  { 23 },
-  { 24 },
+  EMPTY_HOWTO (10),
+  EMPTY_HOWTO (11),
+  EMPTY_HOWTO (12),
+  EMPTY_HOWTO (13),
+  EMPTY_HOWTO (14),
+  EMPTY_HOWTO (15),
+  EMPTY_HOWTO (16),
+  EMPTY_HOWTO (17),
+  EMPTY_HOWTO (18),
+  EMPTY_HOWTO (19),
+  EMPTY_HOWTO (20),
+  EMPTY_HOWTO (21),
+  EMPTY_HOWTO (22),
+  EMPTY_HOWTO (23),
+  EMPTY_HOWTO (24),
 
   /* The remaining relocs are a GNU extension used for relaxing.  The
      final pass of the linker never needs to do anything with any of
@@ -426,7 +426,7 @@ sh_elf_reloc (abfd, reloc_entry, symbol_in, data, input_section, output_bfd,
      PTR data;
      asection *input_section;
      bfd *output_bfd;
-     char **error_message;
+     char **error_message ATTRIBUTE_UNUSED;
 {
   unsigned long insn;
   bfd_vma sym_value;
@@ -497,13 +497,13 @@ sh_elf_reloc (abfd, reloc_entry, symbol_in, data, input_section, output_bfd,
 static bfd_reloc_status_type
 sh_elf_ignore_reloc (abfd, reloc_entry, symbol, data, input_section,
 		     output_bfd, error_message)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      arelent *reloc_entry;
-     asymbol *symbol;
-     PTR data;
+     asymbol *symbol ATTRIBUTE_UNUSED;
+     PTR data ATTRIBUTE_UNUSED;
      asection *input_section;
      bfd *output_bfd;
-     char **error_message;
+     char **error_message ATTRIBUTE_UNUSED;
 {
   if (output_bfd != NULL)
     reloc_entry->address += input_section->output_offset;
@@ -548,7 +548,7 @@ static const struct elf_reloc_map sh_reloc_map[] =
 
 static reloc_howto_type *
 sh_elf_reloc_type_lookup (abfd, code)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      bfd_reloc_code_real_type code;
 {
   unsigned int i;
@@ -566,7 +566,7 @@ sh_elf_reloc_type_lookup (abfd, code)
 
 static void
 sh_elf_info_to_howto (abfd, cache_ptr, dst)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      arelent *cache_ptr;
      Elf_Internal_Rela *dst;
 {
@@ -1161,13 +1161,15 @@ sh_elf_relax_delete_bytes (abfd, sec, addr, count)
 	case R_SH_SWITCH32:
 	  /* These relocs types represent
 	       .word L2-L1
-	     The r_offset field holds the difference between the reloc
+	     The r_addend field holds the difference between the reloc
 	     address and L1.  That is the start of the reloc, and
 	     adding in the contents gives us the top.  We must adjust
-	     both the r_offset field and the section contents.  */
+	     both the r_offset field and the section contents.
+	     N.B. in gas / coff bfd, the elf bfd r_addend is called r_offset,
+	     and the elf bfd r_offset is called r_vaddr.  */
 
-	  start = irel->r_offset;
-	  stop = (bfd_vma) ((bfd_signed_vma) start - (long) irel->r_addend);
+	  stop = irel->r_offset;
+	  start = (bfd_vma) ((bfd_signed_vma) stop - (long) irel->r_addend);
 
 	  if (start > addr
 	      && start < toaddr
@@ -1177,8 +1179,6 @@ sh_elf_relax_delete_bytes (abfd, sec, addr, count)
 		   && stop < toaddr
 		   && (start <= addr || start >= toaddr))
 	    irel->r_addend -= count;
-
-	  start = stop;
 
 	  if (ELF32_R_TYPE (irel->r_info) == (int) R_SH_SWITCH16)
 	    voff = bfd_get_signed_16 (abfd, contents + nraddr);
@@ -1306,6 +1306,56 @@ sh_elf_relax_delete_bytes (abfd, sec, addr, count)
       for (irelscan = internal_relocs; irelscan < irelscanend; irelscan++)
 	{
 	  Elf_Internal_Sym sym;
+
+	  /* Dwarf line numbers use R_SH_SWITCH32 relocs.  */
+	  if (ELF32_R_TYPE (irelscan->r_info) == (int) R_SH_SWITCH32)
+	    {
+	      bfd_vma start, stop;
+	      bfd_signed_vma voff;
+
+	      if (ocontents == NULL)
+		{
+		  if (elf_section_data (o)->this_hdr.contents != NULL)
+		    ocontents = elf_section_data (o)->this_hdr.contents;
+		  else
+		    {
+		      /* We always cache the section contents.
+                         Perhaps, if info->keep_memory is false, we
+                         should free them, if we are permitted to,
+                         when we leave sh_coff_relax_section.  */
+		      ocontents = (bfd_byte *) bfd_malloc (o->_raw_size);
+		      if (ocontents == NULL)
+			return false;
+		      if (! bfd_get_section_contents (abfd, o, ocontents,
+						      (file_ptr) 0,
+						      o->_raw_size))
+			return false;
+		      elf_section_data (o)->this_hdr.contents = ocontents;
+		    }
+		}
+
+	      stop = irelscan->r_offset;
+	      start
+		= (bfd_vma) ((bfd_signed_vma) stop - (long) irelscan->r_addend);
+
+	      /* STOP is in a different section, so it won't change.  */
+	      if (start > addr && start < toaddr)
+		irelscan->r_addend += count;
+
+	      voff = bfd_get_signed_32 (abfd, ocontents + irelscan->r_offset);
+	      stop = (bfd_vma) ((bfd_signed_vma) start + voff);
+
+	      if (start > addr
+		  && start < toaddr
+		  && (stop <= addr || stop >= toaddr))
+		bfd_put_signed_32 (abfd, voff + count,
+				   ocontents + irelscan->r_offset);
+	      else if (stop > addr
+		       && stop < toaddr
+		       && (start <= addr || start >= toaddr))
+		bfd_put_signed_32 (abfd, voff - count,
+				   ocontents + irelscan->r_offset);
+	    }
 
 	  if (ELF32_R_TYPE (irelscan->r_info) != (int) R_SH_DIR32)
 	    continue;
@@ -1621,7 +1671,7 @@ sh_elf_swap_insns (abfd, sec, relocs, contents, addr)
 static boolean
 sh_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 			 contents, relocs, local_syms, local_sections)
-     bfd *output_bfd;
+     bfd *output_bfd ATTRIBUTE_UNUSED;
      struct bfd_link_info *info;
      bfd *input_bfd;
      asection *input_section;
@@ -1927,7 +1977,7 @@ sh_elf_get_relocated_section_contents (output_bfd, link_info, link_order,
 static asection *
 sh_elf_gc_mark_hook (abfd, info, rel, h, sym)
        bfd *abfd;
-       struct bfd_link_info *info;
+       struct bfd_link_info *info ATTRIBUTE_UNUSED;
        Elf_Internal_Rela *rel;
        struct elf_link_hash_entry *h;
        Elf_Internal_Sym *sym;
@@ -1949,6 +1999,9 @@ sh_elf_gc_mark_hook (abfd, info, rel, h, sym)
 
           case bfd_link_hash_common:
             return h->root.u.c.p->section;
+
+	  default:
+	    break;
           }
        }
      }
@@ -1967,10 +2020,10 @@ sh_elf_gc_mark_hook (abfd, info, rel, h, sym)
 
 static boolean
 sh_elf_gc_sweep_hook (abfd, info, sec, relocs)
-     bfd *abfd;
-     struct bfd_link_info *info;
-     asection *sec;
-     const Elf_Internal_Rela *relocs;
+     bfd *abfd ATTRIBUTE_UNUSED;
+     struct bfd_link_info *info ATTRIBUTE_UNUSED;
+     asection *sec ATTRIBUTE_UNUSED;
+     const Elf_Internal_Rela *relocs ATTRIBUTE_UNUSED;
 {
   /* we don't use got and plt entries for sh. */
   return true;
@@ -2050,6 +2103,8 @@ sh_elf_check_relocs (abfd, info, sec, relocs)
 #define elf_backend_relocate_section	sh_elf_relocate_section
 #define bfd_elf32_bfd_get_relocated_section_contents \
 					sh_elf_get_relocated_section_contents
+#define bfd_elf32_bfd_merge_private_bfd_data \
+					_bfd_generic_verify_endian_match
 
 #define elf_backend_gc_mark_hook        sh_elf_gc_mark_hook
 #define elf_backend_gc_sweep_hook       sh_elf_gc_sweep_hook

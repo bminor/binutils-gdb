@@ -7,6 +7,7 @@
 # following shell variables:
 #  targ_emul		name of linker emulation to use
 #  targ_extra_emuls	additional linker emulations to provide
+#  targ_extra_libpath	additional linker emulations using LIB_PATH
 #  targ_extra_ofiles	additional objects needed by the emulation
 
 targ_extra_emuls=
@@ -59,6 +60,7 @@ i960-wrs-vxworks*)	targ_emul=gld960 ;;
 i960-*-coff)		targ_emul=gld960coff ;;
 i960-intel-nindy)	targ_emul=gld960 ;;
 i960-*-rtems*)		targ_emul=gld960coff ;;
+i960-*-elf*)		targ_emul=elf32_i960 ;;
 m32r-*-*)		targ_emul=m32relf ;;
 m68*-sun-sunos[34]*)	targ_emul=sun3 ;;
 m68*-wrs-vxworks*)	targ_emul=sun3 ;;
@@ -74,6 +76,7 @@ i[3456]86-*-sco*)	targ_emul=i386coff ;;
 i[3456]86-*-isc*)	targ_emul=i386coff ;;
 i[3456]86-*-lynxos*)	targ_emul=i386lynx ;;
 i[3456]86-*-coff)	targ_emul=i386coff ;;
+i[3456]86-*-rtemself*)  targ_emul=elf_i386 ;;
 i[3456]86-*-rtems*)	targ_emul=i386coff ;;
 i[3456]86-*-bsd)	targ_emul=i386bsd ;;
 i[3456]86-*-bsd386)	targ_emul=i386bsd ;;
@@ -95,8 +98,9 @@ i[3456]86-*-solaris*)	targ_emul=elf_i386 ;;
 i[3456]86-*-netbsd*)	targ_emul=i386nbsd ;;
 i[3456]86-*-netware)	targ_emul=i386nw ;;
 i[3456]86-*-elf*)	targ_emul=elf_i386 ;;
-i[3456]86-*-freebsdelf*) targ_emul=elf_i386 ;;
-i[3456]86-*-freebsd*)	targ_emul=i386bsd ;;
+i[3456]86-*-freebsdaout* | i[3456]86-*-freebsd[12].* | i[3456]86-*-freebsd[12])
+			targ_emul=i386bsd ;;
+i[3456]86-*-freebsd*)	targ_emul=elf_i386 ;;
 i[3456]86-*-sysv*)	targ_emul=i386coff ;;
 i[3456]86-*-ptx*)	targ_emul=i386coff ;;
 i[3456]86-*-mach*)	targ_emul=i386mach ;;
@@ -140,7 +144,8 @@ h8500-*-hms* | h8500-*-coff*)
 			targ_emul=h8500
 			targ_extra_emuls="h8500s h8500b h8500m h8500c"
 			;;
-sh-*-elf*)		targ_emul=shelf
+sh-*-elf* | sh-*-rtemself*)
+			targ_emul=shelf
 			targ_extra_emuls="shlelf sh shl"
 			;;
 sh-*-*|sh-*-rtems*)	targ_emul=sh; targ_extra_emuls=shl ;;
@@ -166,12 +171,16 @@ m68*-*-netbsd*)		targ_emul=m68knbsd ;;
 m68*-*-psos*)		targ_emul=m68kpsos ;;
 m68*-*-rtems*)		targ_emul=m68kcoff ;;
 hppa*-*-*elf*)		targ_emul=hppaelf ;;
+hppa*-*-linux-gnu*)	targ_emul=hppaelf ;;
 hppa*-*-lites*)		targ_emul=hppaelf ;;
 hppa*-*-rtems*)		targ_emul=hppaelf ;;
 vax-dec-ultrix* | vax-dec-bsd*) targ_emul=vax ;;
 mips*-dec-ultrix*)	targ_emul=mipslit ;;
 mips*-dec-osf*)		targ_emul=mipslit ;;
-mips*-sgi-irix[56]*)	targ_emul=elf32bsmip ;;
+mips*-sgi-irix5*)	targ_emul=elf32bsmip ;;
+mips*-sgi-irix6*)	targ_emul=elf32bmipn32
+	                targ_extra_emuls="elf32bsmip elf64bmip"
+	                ;;
 mips*-sgi-irix*)	targ_emul=mipsbig ;;
 mips*el-*-ecoff*)	targ_emul=mipsidtl ;;
 mips*-*-ecoff*)		targ_emul=mipsidt ;;
@@ -186,6 +195,7 @@ mips*vr5000el-*-elf*)	targ_emul=elf32l4300 ;;
 mips*vr5000-*-elf*)	targ_emul=elf32b4300 ;;
 mips*el-*-elf*)		targ_emul=elf32elmip ;;
 mips*-*-elf*)		targ_emul=elf32ebmip ;;
+mips*el-*-rtems*)	targ_emul=elf32elmip ;;
 mips*-*-rtems*)		targ_emul=elf32ebmip ;;
 mips*-*-vxworks*)	targ_emul=elf32ebmip ;;
 mips*el-*-linux-gnu*)	targ_emul=elf32lsmip
@@ -210,12 +220,15 @@ alpha*-*-netbsd*)	targ_emul=elf64alpha ;;
 z8k-*-coff) 		targ_emul=z8002; targ_extra_emuls=z8001 ;;
 ns32k-pc532-mach* | ns32k-pc532-ux*)	targ_emul=pc532macha ;;
 ns32k-pc532-netbsd* | ns32k-pc532-lites*) targ_emul=ns32knbsd ;;
-powerpc-*-elf* | powerpc-*-eabi* | powerpc-*-linux-gnu* | powerpc-*-sysv* \
+powerpc-*-linux-gnu*)	targ_emul=elf32ppclinux; targ_extra_emuls=elf32ppc;
+			targ_extra_libpath=elf32ppc ;;
+powerpc-*-elf* | powerpc-*-eabi* | powerpc-*-sysv* \
   | powerpc-*-netbsd* | powerpc-*-vxworks*)
 	targ_emul=elf32ppc ;;
 powerpcle-*-elf* | powerpcle-*-eabi* | powerpcle-*-solaris* \
   | powerpcle-*-sysv* | powerpcle-*-vxworks*)
 	targ_emul=elf32lppc ;;
+powerpcle-*-rtems*)	targ_emul=elf32leppc ;;
 powerpc-*-rtems*)	targ_emul=elf32ppc ;;
 powerpc-*-macos*)	targ_emul=ppcmacos ;;
 powerpc-*-netware*)	targ_emul=ppcnw ;;

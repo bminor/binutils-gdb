@@ -55,6 +55,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
    There are two such structures here:  one for big-endian machines and
    one for little-endian machines.   */
 
+/* Forward declaration for use when initialising alternative_target field.  */
+#ifdef TARGET_LITTLE_SYM
+extern const bfd_target TARGET_LITTLE_SYM;
+#endif
 
 #ifdef TARGET_BIG_SYM
 const bfd_target TARGET_BIG_SYM =
@@ -137,6 +141,13 @@ const bfd_target TARGET_BIG_SYM =
   BFD_JUMP_TABLE_LINK (nlm),
   BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
 
+  /* Alternative endian target.  */
+#ifdef TARGET_LITTLE_SYM
+  & TARGET_LITTLE_SYM,
+#else
+  NULL,
+#endif
+  
   /* backend_data: */
   (PTR) TARGET_BACKEND_DATA
 };
@@ -223,6 +234,13 @@ const bfd_target TARGET_LITTLE_SYM =
   BFD_JUMP_TABLE_LINK (nlm),
   BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
 
+  /* Alternative endian target.  */
+#ifdef TARGET_BIG_SYM
+  & TARGET_BIG_SYM,
+#else
+  NULL,
+#endif
+  
   /* backend_data: */
   (PTR) TARGET_BACKEND_DATA
 };

@@ -22,6 +22,8 @@ Mitsubishi D30V support added.
 
 Texas Instruments c80 (tms320c80) support added.
 
+i960 ELF support added.
+
 Changes in 2.9:
 
 Texas Instruments c30 (tms320c30) support added.

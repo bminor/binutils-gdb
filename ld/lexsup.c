@@ -120,6 +120,8 @@ int parsing_defsym = 0;
 #define OPTION_NO_CHECK_SECTIONS	(OPTION_CHECK_SECTIONS + 1)
 #define OPTION_MPC860C0                 (OPTION_NO_CHECK_SECTIONS + 1)
 #define OPTION_NO_UNDEFINED		(OPTION_MPC860C0 + 1)
+#define OPTION_INIT                     (OPTION_NO_UNDEFINED + 1)
+#define OPTION_FINI                     (OPTION_INIT + 1)
 
 /* The long options.  This structure is used for both the option
    parsing and the help text.  */
@@ -270,6 +272,8 @@ static const struct ld_option ld_options[] =
       '\0', N_("PROGRAM"), N_("Set the dynamic linker to use"), TWO_DASHES },
   { {"embedded-relocs", no_argument, NULL, OPTION_EMBEDDED_RELOCS},
       '\0', NULL, N_("Generate embedded relocs"), TWO_DASHES},
+  { {"fini", required_argument, NULL, OPTION_FINI},
+     '\0', N_("SYMBOL"), N_("Call SYMBOL at unload-time"), ONE_DASH },
   { {"force-exe-suffix", no_argument, NULL, OPTION_FORCE_EXE_SUFFIX},
       '\0', NULL, N_("Force generation of file with .exe suffix"), TWO_DASHES},
   { {"gc-sections", no_argument, NULL, OPTION_GC_SECTIONS},
@@ -280,6 +284,8 @@ static const struct ld_option ld_options[] =
       TWO_DASHES },
   { {"help", no_argument, NULL, OPTION_HELP},
       '\0', NULL, N_("Print option help"), TWO_DASHES },
+  { {"init", required_argument, NULL, OPTION_INIT},
+     '\0', N_("SYMBOL"), N_("Call SYMBOL at load-time"), ONE_DASH },
   { {"Map", required_argument, NULL, OPTION_MAP},
       '\0', N_("FILE"), N_("Write a map file"), ONE_DASH },
   { {"no-demangle", no_argument, NULL, OPTION_NO_DEMANGLE },
@@ -341,7 +347,7 @@ static const struct ld_option ld_options[] =
       '\0', N_("FILE"), N_("Read version information script"), TWO_DASHES },
   { {"version-exports-section", required_argument, NULL,
      OPTION_VERSION_EXPORTS_SECTION },
-    '\0', N_("SYMBOL"), N_("Take export symbols list from .exports, using SYMBOL as the version."),
+    '\0', N_("SYMBOL"), N_("Take export symbols list from .exports, using\n\t\t\t\tSYMBOL as the version."),
     TWO_DASHES },
   { {"warn-common", no_argument, NULL, OPTION_WARN_COMMON},
       '\0', NULL, N_("Warn about duplicate common symbols"), TWO_DASHES },
@@ -360,7 +366,7 @@ static const struct ld_option ld_options[] =
   { {"wrap", required_argument, NULL, OPTION_WRAP},
       '\0', N_("SYMBOL"), N_("Use wrapper functions for SYMBOL"), TWO_DASHES },
   { {"mpc860c0", optional_argument, NULL, OPTION_MPC860C0},
-      '\0', N_("[=WORDS]"), N_("Modify problematic branches in last WORDS (1-10, default 5) words of a page"), TWO_DASHES }
+      '\0', N_("[=WORDS]"), N_("Modify problematic branches in last WORDS (1-10,\n\t\t\t\tdefault 5) words of a page"), TWO_DASHES }
 };
 
 #define OPTION_COUNT ((int) (sizeof ld_options / sizeof ld_options[0]))
@@ -988,6 +994,14 @@ the GNU General Public License.  This program has absolutely no warranty.\n"));
             }
           command_line.relax = true;
           break;
+
+	case OPTION_INIT:
+	  link_info.init_function = optarg;
+	  break;
+	  
+	case OPTION_FINI:
+	  link_info.fini_function = optarg;
+	  break;
 	}
     }
 
@@ -1118,6 +1132,8 @@ help ()
 	}
     }
 
+  /* Note: Various tools (such as libtool) depend upon the
+     format of the listings below - do not change them.  */
   /* xgettext:c-format */
   printf (_("%s: supported targets:"), program_name);
   targets = bfd_target_list ();

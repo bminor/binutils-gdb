@@ -1,5 +1,5 @@
 /* debug.c -- Handle generic debugging information.
-   Copyright (C) 1995, 1996, 1998 Free Software Foundation, Inc.
+   Copyright (C) 1995, 1996, 1997, 1998, 1999 Free Software Foundation, Inc.
    Written by Ian Lance Taylor <ian@cygnus.com>.
 
    This file is part of GNU Binutils.
@@ -603,7 +603,7 @@ debug_error (message)
 
 static struct debug_name *
 debug_add_to_namespace (info, nsp, name, kind, linkage)
-     struct debug_handle *info;
+     struct debug_handle *info ATTRIBUTE_UNUSED;
      struct debug_namespace **nsp;
      const char *name;
      enum debug_object_kind kind;
@@ -1039,8 +1039,8 @@ debug_record_line (handle, lineno, addr)
 
 boolean
 debug_start_common_block (handle, name)
-     PTR handle;
-     const char *name;
+     PTR handle ATTRIBUTE_UNUSED;
+     const char *name ATTRIBUTE_UNUSED;
 {
   /* FIXME */
   debug_error (_("debug_start_common_block: not implemented"));
@@ -1051,8 +1051,8 @@ debug_start_common_block (handle, name)
 
 boolean
 debug_end_common_block (handle, name)
-     PTR handle;
-     const char *name;
+     PTR handle ATTRIBUTE_UNUSED;
+     const char *name ATTRIBUTE_UNUSED;
 {
   /* FIXME */
   debug_error (_("debug_end_common_block: not implemented"));
@@ -1143,10 +1143,10 @@ debug_record_typed_const (handle, name, type, val)
 
 boolean
 debug_record_label (handle, name, type, addr)
-     PTR handle;
-     const char *name;
-     debug_type type;
-     bfd_vma addr;
+     PTR handle ATTRIBUTE_UNUSED;
+     const char *name ATTRIBUTE_UNUSED;
+     debug_type type ATTRIBUTE_UNUSED;
+     bfd_vma addr ATTRIBUTE_UNUSED;
 {
   /* FIXME.  */
   debug_error (_("debug_record_label not implemented"));
@@ -1219,7 +1219,7 @@ debug_record_variable (handle, name, type, kind, val)
 /*ARGSUSED*/
 static struct debug_type *
 debug_make_type (info, kind, size)
-     struct debug_handle *info;
+     struct debug_handle *info ATTRIBUTE_UNUSED;
      enum debug_type_kind kind;
      unsigned int size;
 {
@@ -1781,7 +1781,7 @@ debug_make_undefined_tagged_type (handle, name, kind)
 /*ARGSUSED*/
 debug_baseclass
 debug_make_baseclass (handle, type, bitpos, virtual, visibility)
-     PTR handle;
+     PTR handle ATTRIBUTE_UNUSED;
      debug_type type;
      bfd_vma bitpos;
      boolean virtual;
@@ -1809,7 +1809,7 @@ debug_make_baseclass (handle, type, bitpos, virtual, visibility)
 /*ARGSUSED*/
 debug_field
 debug_make_field (handle, name, type, bitpos, bitsize, visibility)
-     PTR handle;
+     PTR handle ATTRIBUTE_UNUSED;
      const char *name;
      debug_type type;
      bfd_vma bitpos;
@@ -1840,7 +1840,7 @@ debug_make_field (handle, name, type, bitpos, bitsize, visibility)
 /*ARGSUSED*/
 debug_field
 debug_make_static_member (handle, name, type, physname, visibility)
-     PTR handle;
+     PTR handle ATTRIBUTE_UNUSED;
      const char *name;
      debug_type type;
      const char *physname;
@@ -1866,7 +1866,7 @@ debug_make_static_member (handle, name, type, physname, visibility)
 /*ARGSUSED*/
 debug_method
 debug_make_method (handle, name, variants)
-     PTR handle;
+     PTR handle ATTRIBUTE_UNUSED;
      const char *name;
      debug_method_variant *variants;
 {
@@ -1894,7 +1894,7 @@ debug_make_method (handle, name, variants)
 debug_method_variant
 debug_make_method_variant (handle, physname, type, visibility, constp,
 			   volatilep, voffset, context)
-     PTR handle;
+     PTR handle ATTRIBUTE_UNUSED;
      const char *physname;
      debug_type type;
      enum debug_visibility visibility;
@@ -1926,7 +1926,7 @@ debug_make_method_variant (handle, physname, type, visibility, constp,
 debug_method_variant
 debug_make_static_method_variant (handle, physname, type, visibility,
 				  constp, volatilep)
-     PTR handle;
+     PTR handle ATTRIBUTE_UNUSED;
      const char *physname;
      debug_type type;
      enum debug_visibility visibility;
@@ -2058,7 +2058,7 @@ debug_tag_type (handle, name, type)
 /*ARGSUSED*/
 boolean
 debug_record_type_size (handle, type, size)
-     PTR handle;
+     PTR handle ATTRIBUTE_UNUSED;
      debug_type type;
      unsigned int size;
 {
@@ -2394,7 +2394,7 @@ debug_get_fields (handle, type)
 /*ARGSUSED*/
 debug_type
 debug_get_field_type (handle, field)
-     PTR handle;
+     PTR handle ATTRIBUTE_UNUSED;
      debug_field field;
 {
   if (field == NULL)
@@ -2407,7 +2407,7 @@ debug_get_field_type (handle, field)
 /*ARGSUSED*/
 const char *
 debug_get_field_name (handle, field)
-     PTR handle;
+     PTR handle ATTRIBUTE_UNUSED;
      debug_field field;
 {
   if (field == NULL)
@@ -2420,7 +2420,7 @@ debug_get_field_name (handle, field)
 /*ARGSUSED*/
 bfd_vma
 debug_get_field_bitpos (handle, field)
-     PTR handle;
+     PTR handle ATTRIBUTE_UNUSED;
      debug_field field;
 {
   if (field == NULL || field->static_member)
@@ -2433,7 +2433,7 @@ debug_get_field_bitpos (handle, field)
 /*ARGSUSED*/
 bfd_vma
 debug_get_field_bitsize (handle, field)
-     PTR handle;
+     PTR handle ATTRIBUTE_UNUSED;
      debug_field field;
 {
   if (field == NULL || field->static_member)
@@ -2446,7 +2446,7 @@ debug_get_field_bitsize (handle, field)
 /*ARGSUSED*/
 enum debug_visibility
 debug_get_field_visibility (handle, field)
-     PTR handle;
+     PTR handle ATTRIBUTE_UNUSED;
      debug_field field;
 {
   if (field == NULL)
@@ -2458,7 +2458,7 @@ debug_get_field_visibility (handle, field)
 
 const char *
 debug_get_field_physname (handle, field)
-     PTR handle;
+     PTR handle ATTRIBUTE_UNUSED;
      debug_field field;
 {
   if (field == NULL || ! field->static_member)
@@ -2598,7 +2598,7 @@ debug_write_type (info, fns, fhandle, type, name)
 {
   unsigned int i;
   int is;
-  const char *tag;
+  const char *tag = NULL;
 
   /* If we have a name for this type, just output it.  We only output
      typedef names after they have been defined.  We output type tags
@@ -2648,7 +2648,6 @@ debug_write_type (info, fns, fhandle, type, name)
   if (name != NULL)
     name->mark = info->mark;
 
-  tag = NULL;
   if (name != NULL
       && type->kind != DEBUG_KIND_NAMED
       && type->kind != DEBUG_KIND_TAGGED)

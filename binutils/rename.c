@@ -31,6 +31,12 @@
 #endif /* HAVE_UTIMES */
 #endif /* ! HAVE_GOOD_UTIME_H */
 
+/* We need to open the file in binary modes on system where that makes
+   a difference.  */
+#ifndef O_BINARY
+#define O_BINARY 0
+#endif
+
 static int simple_copy PARAMS ((const char *, const char *));
 
 /* The number of bytes to copy at once.  */
@@ -48,10 +54,14 @@ simple_copy (from, to)
   int saved;
   char buf[COPY_BUF];
 
-  fromfd = open (from, O_RDONLY);
+  fromfd = open (from, O_RDONLY | O_BINARY);
   if (fromfd < 0)
     return -1;
+#ifdef O_CREAT
+  tofd = open (to, O_CREAT | O_WRONLY | O_TRUNC | O_BINARY, 0777);
+#else
   tofd = creat (to, 0777);
+#endif
   if (tofd < 0)
     {
       saved = errno;
@@ -139,17 +149,17 @@ smart_rename (from, to, preserve_dates)
      const char *to;
      int preserve_dates;
 {
-  int exists;
+  boolean exists;
   struct stat s;
   int ret = 0;
 
-  exists = lstat (to, &s);
+  exists = lstat (to, &s) == 0;
 
 #if defined (_WIN32) && !defined (__CYGWIN32__)
   /* Win32, unlike unix, will not erase `to' in `rename(from, to)' but
      fail instead.  Also, chown is not present.  */
 
-  if (exists == 0)
+  if (exists)
     remove (to);
 
   ret = rename (from, to);
@@ -163,7 +173,7 @@ smart_rename (from, to, preserve_dates)
 #else
   /* Use rename only if TO is not a symbolic link and has
      only one hard link.  */
-  if (exists < 0 || (!S_ISLNK (s.st_mode) && s.st_nlink == 1))
+  if (! exists || (!S_ISLNK (s.st_mode) && s.st_nlink == 1))
     {
       ret = rename (from, to);
       if (ret == 0)

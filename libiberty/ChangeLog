@@ -1,3 +1,27 @@
+1999-07-14  Richard Henderson  <rth@cygnus.com>
+
+	* argv.c: Include stdlib.h and string.h instead of
+	prototyping directly.
+	* choose-temp.c: Conditionally include string.h.
+
+1999-07-11  Ian Lance Taylor  <ian@zembu.com>
+
+	* splay-tree.c (splay_tree_insert): Add initialization to avoid
+	warning.
+
+1999-05-11  Jim Blandy  <jimb@zwingli.cygnus.com>
+
+	* cplus-dem.c (main): Use table lookup to distinguish identifier
+	characters from non-identifier characters.
+	(standard_symbol_alphabet, hp_symbol_alphabet): New functions.
+
+Thu May  6 20:34:42 1999  Fred Fish  <fnf@be.com>
+
+	* configure.in (sys/resource.h): Add to AC_CHECK_HEADERS list.
+	* getruntime.c: Only attempt to include sys/resource.h and
+	use getrusage if both HAVE_GETRUSAGE and HAVE_SYS_RESOURCE_H
+	are defined.
+
 1999-04-20  Jim Blandy  <jimb@zwingli.cygnus.com>
 
 	Fix from Dale Hawkins:

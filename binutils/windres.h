@@ -742,6 +742,8 @@ struct bindata
   unsigned char *data;
 };
 
+extern int verbose;
+
 /* Function declarations.  */
 
 extern struct res_directory *read_rc_file

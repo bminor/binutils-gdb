@@ -1,5 +1,5 @@
 /* COFF specific linker code.
-   Copyright 1994, 1995, 1996, 1997, 1998 Free Software Foundation, Inc.
+   Copyright 1994, 1995, 1996, 1997, 1998, 1999 Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -1069,7 +1069,7 @@ char **dst;
 static int
 process_embedded_commands (output_bfd, info,  abfd)
      bfd *output_bfd;
-     struct bfd_link_info *info;
+     struct bfd_link_info *info ATTRIBUTE_UNUSED;
      bfd *abfd;
 {
   asection *sec = bfd_get_section_by_name (abfd, ".drectve");

@@ -1,4 +1,4 @@
-.\" Copyright (c) 1991, 93, 94, 95, 96, 97, 1998 Free Software Foundation
+.\" Copyright (c) 1991, 93, 94, 95, 96, 97, 98, 1999 Free Software Foundation
 .\" See section COPYING for conditions for redistribution
 .TH objcopy 1 "October 1994" "cygnus support" "GNU Development Tools"
 .de BP
@@ -18,6 +18,7 @@ objcopy \- copy and translate object files
 .RB "[\|" \-F\ \fIbfdname\fR\ |\ \fB\-\-target=\fIbfdname\fR "\|]" 
 .RB "[\|" \-I\ \fIbfdname\fR\ |\ \fB\-\-input\-target=\fIbfdname\fR "\|]" 
 .RB "[\|" \-O\ \fIbfdname\fR\ |\ \fB\-\-output\-target=\fIbfdname\fR "\|]" 
+.RB "[\|" \-j\ \fIsectionname\fR\ |\ \fB\-\-only\-section=\fIsectionname\fR "\|]"
 .RB "[\|" \-R\ \fIsectionname\fR\ |\ \fB\-\-remove\-section=\fIsectionname\fR "\|]"
 .RB "[\|" \-S\fR\ |\ \fB\-\-strip\-all\fR "\|]" 
 .RB "[\|" \-g\fR\ |\ \fB\-\-strip\-debug\fR "\|]" 
@@ -122,6 +123,12 @@ Use
 .I bfdname
 as the object format for both the input and the output file; i.e.
 simply transfer data from source to destination with no translation.
+.TP
+.B \-j \fIsectionname\fR, \fB\-\-only\-section=\fIsectionname
+Copy only the named section from the input file to the output file,
+discarding all other sections.  This option may be given more than
+once.  Note that using this option inappropriately may make the output
+file unusable.
 .TP
 .B \-R \fIsectionname\fR, \fB\-\-remove-section=\fIsectionname
 Remove the named section from the file.  This option may be given more
@@ -301,7 +308,7 @@ The GNU Binary Utilities\c
 \&, Roland H. Pesch (June 1993).
 
 .SH COPYING
-Copyright (c) 1993, 94, 95, 96, 1997 Free Software Foundation, Inc.
+Copyright (c) 1993, 94, 95, 96, 97, 98, 1999 Free Software Foundation, Inc.
 .PP
 Permission is granted to make and distribute verbatim copies of
 this manual provided the copyright notice and this permission notice

@@ -1,5 +1,5 @@
 /* BFD back-end for ARM COFF files.
-   Copyright 1990, 91, 92, 93, 94, 95, 96, 97, 1998
+   Copyright 1990, 91, 92, 93, 94, 95, 96, 97, 98, 1999
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
@@ -89,10 +89,12 @@ static struct coff_link_hash_entry * find_thumb_glue
   PARAMS ((struct bfd_link_info *, CONST char *, bfd *));
 static struct coff_link_hash_entry * find_arm_glue
   PARAMS ((struct bfd_link_info *, CONST char *, bfd *));
+#ifndef COFF_IMAGE_WITH_PE
 static void record_arm_to_thumb_glue
   PARAMS ((struct bfd_link_info *, struct coff_link_hash_entry *));
 static void record_thumb_to_arm_glue
   PARAMS ((struct bfd_link_info *, struct coff_link_hash_entry *));
+#endif
 static boolean coff_arm_merge_private_bfd_data
   PARAMS ((bfd *, bfd *));
 static boolean coff_arm_print_private_bfd_data
@@ -126,11 +128,11 @@ coff_arm_reloc (abfd, reloc_entry, symbol, data, input_section, output_bfd,
 		 error_message)
      bfd *abfd;
      arelent *reloc_entry;
-     asymbol *symbol;
+     asymbol *symbol ATTRIBUTE_UNUSED;
      PTR data;
-     asection *input_section;
+     asection *input_section ATTRIBUTE_UNUSED;
      bfd *output_bfd;
-     char **error_message;
+     char **error_message ATTRIBUTE_UNUSED;
 {
   symvalue diff;
   if (output_bfd == (bfd *) NULL)
@@ -319,7 +321,7 @@ static reloc_howto_type aoutarm_std_reloc_howto[] =
 	0x0,
 	false),
   /* 8 is unused */
-  {-1},
+  EMPTY_HOWTO (-1),
   HOWTO( ARM_NEG16,
 	0,
 	-1,
@@ -406,7 +408,7 @@ static reloc_howto_type aoutarm_std_reloc_howto[] =
 
 static boolean
 in_reloc_p (abfd, howto)
-     bfd * abfd;
+     bfd * abfd ATTRIBUTE_UNUSED;
      reloc_howto_type * howto;
 {
   return !howto->pc_relative && howto->type != ARM_RVA32;
@@ -421,11 +423,11 @@ in_reloc_p (abfd, howto)
 
 static reloc_howto_type *
 coff_arm_rtype_to_howto (abfd, sec, rel, h, sym, addendp)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      asection *sec;
      struct internal_reloc *rel;
-     struct coff_link_hash_entry *h;
-     struct internal_syment *sym;
+     struct coff_link_hash_entry *h ATTRIBUTE_UNUSED;
+     struct internal_syment *sym ATTRIBUTE_UNUSED;
      bfd_vma *addendp;
 {
   reloc_howto_type *howto;
@@ -445,13 +447,13 @@ coff_arm_rtype_to_howto (abfd, sec, rel, h, sym, addendp)
 static bfd_reloc_status_type
 aoutarm_fix_pcrel_26_done (abfd, reloc_entry, symbol, data, input_section,
 			  output_bfd, error_message)
-     bfd *abfd;
-     arelent *reloc_entry;
-     asymbol *symbol;
-     PTR data;
-     asection *input_section;
-     bfd *output_bfd;
-     char **error_message;
+     bfd *abfd ATTRIBUTE_UNUSED;
+     arelent *reloc_entry ATTRIBUTE_UNUSED;
+     asymbol *symbol ATTRIBUTE_UNUSED;
+     PTR data ATTRIBUTE_UNUSED;
+     asection *input_section ATTRIBUTE_UNUSED;
+     bfd *output_bfd ATTRIBUTE_UNUSED;
+     char **error_message ATTRIBUTE_UNUSED;
 {
   /* This is dead simple at present.  */
   return bfd_reloc_ok;
@@ -468,7 +470,7 @@ aoutarm_fix_pcrel_26 (abfd, reloc_entry, symbol, data, input_section,
      PTR data;
      asection *input_section;
      bfd *output_bfd;
-     char **error_message;
+     char **error_message ATTRIBUTE_UNUSED;
 {
   bfd_vma relocation;
   bfd_size_type addr = reloc_entry->address;
@@ -528,7 +530,7 @@ coff_thumb_pcrel_common (abfd, reloc_entry, symbol, data, input_section,
      PTR data;
      asection *input_section;
      bfd *output_bfd;
-     char **error_message;
+     char **error_message ATTRIBUTE_UNUSED;
      thumb_pcrel_branchtype btype;
 {
   bfd_vma relocation = 0;
@@ -783,7 +785,7 @@ coff_arm_link_hash_table_create (abfd)
   return & ret->root.root;
 }
 
-static
+static void
 arm_emit_base_file_entry (info, output_bfd, input_section, reloc_offset)
       struct bfd_link_info *info;
       bfd *output_bfd;
@@ -934,8 +936,6 @@ static const insn32 a2t1_ldr_insn       = 0xe59fc000;
 static const insn32 a2t2_bx_r12_insn    = 0xe12fff1c;
 static const insn32 a2t3_func_addr_insn = 0x00000001;
 
-#define A2T3_OFFSET 8
-
 /*
    Thumb->ARM:				Thumb->(non-interworking aware) ARM
 
@@ -958,8 +958,6 @@ static const insn32 a2t3_func_addr_insn = 0x00000001;
 static const insn16 t2a1_bx_pc_insn = 0x4778;
 static const insn16 t2a2_noop_insn  = 0x46c0;
 static const insn32 t2a3_b_insn     = 0xea000000;
-
-#define T2A3_OFFSET 8
 
 static const insn16 t2a1_push_insn  = 0xb540;
 static const insn16 t2a2_ldr_insn   = 0x4e03;
@@ -1211,7 +1209,8 @@ coff_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 				      s->contents + my_offset + 8);
 
                           if (info->base_file)
-                            arm_emit_base_file_entry (info, output_bfd, s, A2T3_OFFSET);
+                            arm_emit_base_file_entry (info, output_bfd, s, 
+                                                            my_offset + 8);
 
 			}
 
@@ -1236,7 +1235,6 @@ coff_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 		      
 		      bfd_put_32 (output_bfd, tmp, contents + rel->r_vaddr
 				  - input_section->vma);
-		      
 		      done = 1;
 		    }
                 }
@@ -1319,6 +1317,9 @@ coff_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 			      /* Store the address of the function in the last word of the stub.  */
 			      bfd_put_32 (output_bfd, h_val,
 					  s->contents + my_offset + 16);
+
+                              if (info->base_file)
+                                arm_emit_base_file_entry (info, output_bfd, s, my_offset + 16);
 			    }
 			  else
 			    {
@@ -1341,8 +1342,6 @@ coff_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 					  t2a3_b_insn | ((ret_offset >> 2) & 0x00FFFFFF),
 					  s->contents + my_offset + 4);
 
-                              if (info->base_file)
-                                arm_emit_base_file_entry (info, output_bfd, s, T2A3_OFFSET);
 			    }
 			}
 
@@ -1365,9 +1364,6 @@ coff_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 				  contents + rel->r_vaddr
 				  - input_section->vma);
 		      
-                      if (info->base_file)
-                        arm_emit_base_file_entry (info, output_bfd, input_section, rel->r_vaddr);
-
 		      done = 1;
                     }
                 }
@@ -1537,7 +1533,7 @@ coff_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 	 Probably not, but it works, and if it works it don't need fixing!  nickc@cygnus.com */
       /* Only perform this fix during the final link, not a relocatable link.  nickc@cygnus.com  */
       if (! info->relocateable
-	  && rel->r_type == ARM_32)
+	  && (rel->r_type == ARM_32 || rel->r_type == ARM_RVA32))
 	{
 	  /* Determine if we need to set the bottom bit of a relocated address
 	     because the address is the address of a Thumb code symbol.  */
@@ -1610,7 +1606,8 @@ coff_arm_relocate_section (output_bfd, info, input_bfd, input_section,
   return true;
 }
 
-#ifndef COFF_WITH_PE
+#ifndef COFF_IMAGE_WITH_PE
+
 boolean
 bfd_arm_allocate_interworking_sections (info) 
      struct bfd_link_info * info;
@@ -1797,6 +1794,7 @@ record_thumb_to_arm_glue (info, h)
 /* Select a BFD to be used to hold the sections used by the glue code.
    This function is called from the linker scripts in ld/emultempl/
    {armcoff/pe}.em  */
+
 boolean
 bfd_arm_get_bfd_for_interworking (abfd, info)
      bfd * 		    abfd;
@@ -1959,7 +1957,7 @@ bfd_arm_process_before_allocation (abfd, info, support_old_code)
   return true;
 }
 
-#endif /* ! COFF_WITH_PE */
+#endif /* ! defined (COFF_IMAGE_WITH_PE) */
 
 #define coff_bfd_reloc_type_lookup 		coff_arm_reloc_type_lookup
 #define coff_relocate_section 			coff_arm_relocate_section
@@ -1979,8 +1977,8 @@ bfd_arm_process_before_allocation (abfd, info, support_old_code)
 
 static boolean
 coff_arm_adjust_symndx (obfd, info, ibfd, sec, irel, adjustedp)
-     bfd *obfd;
-     struct bfd_link_info *info;
+     bfd *obfd ATTRIBUTE_UNUSED;
+     struct bfd_link_info *info ATTRIBUTE_UNUSED;
      bfd *ibfd;
      asection *sec;
      struct internal_reloc *irel;
@@ -2183,7 +2181,7 @@ _bfd_coff_arm_set_private_flags (abfd, flags)
   if (APCS_SET (abfd)
       && (   (APCS_26_FLAG    (abfd) != flag)
 	  || (APCS_FLOAT_FLAG (abfd) != (flags & F_APCS_FLOAT))
-	  || (PIC_FLAG        (abfd) != (flags & F_PIC_INT ? F_PIC : 0))
+	  || (PIC_FLAG        (abfd) != (flags & F_PIC))
 	  ))
     return false;
 
@@ -2291,7 +2289,7 @@ coff_arm_copy_private_bfd_data (src, dest)
 
 static boolean
 coff_arm_is_local_label_name (abfd, name)
-     bfd *        abfd;
+     bfd *        abfd ATTRIBUTE_UNUSED;
      const char * name;
 {
 #ifdef LOCAL_LABEL_PREFIX
@@ -2344,7 +2342,7 @@ coff_arm_link_output_has_begun (sub, info)
 
 static boolean
 coff_arm_final_link_postscript (abfd, pfinfo)
-     bfd * abfd;
+     bfd * abfd ATTRIBUTE_UNUSED;
      struct coff_final_link_info * pfinfo;
 {
   struct coff_arm_link_hash_table * globals;
@@ -2430,128 +2428,33 @@ arm_bfd_coff_swap_sym_in (abfd, ext1, in1)
 
 #include "coffcode.h"
 
-const bfd_target
-#ifdef TARGET_LITTLE_SYM
-TARGET_LITTLE_SYM =
-#else
-armcoff_little_vec =
+#ifndef TARGET_LITTLE_SYM
+#define TARGET_LITTLE_SYM armcoff_little_vec
 #endif
-{
-#ifdef TARGET_LITTLE_NAME
-  TARGET_LITTLE_NAME,
-#else
-  "coff-arm-little",
+#ifndef TARGET_LITTLE_NAME
+#define TARGET_LITTLE_NAME "coff-arm-little"
 #endif
-  bfd_target_coff_flavour,
-  BFD_ENDIAN_LITTLE,		/* data byte order is little */
-  BFD_ENDIAN_LITTLE,		/* header byte order is little */
-
-  (HAS_RELOC | EXEC_P |		/* object flags */
-   HAS_LINENO | HAS_DEBUG |
-   HAS_SYMS | HAS_LOCALS | WP_TEXT | D_PAGED),
-
-#ifndef COFF_WITH_PE
-  (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* section flags */
-#else
-  (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC /* section flags */
-   | SEC_LINK_ONCE | SEC_LINK_DUPLICATES),
+#ifndef TARGET_BIG_SYM
+#define TARGET_BIG_SYM armcoff_big_vec
+#endif
+#ifndef TARGET_BIG_NAME
+#define TARGET_BIG_NAME "coff-arm-big"
 #endif
 
-#ifdef TARGET_UNDERSCORE
-  TARGET_UNDERSCORE,		/* leading underscore */
-#else
-  0,				/* leading underscore */
-#endif
-  '/',				/* ar_pad_char */
-  15,				/* ar_max_namelen */
-
-  bfd_getl64, bfd_getl_signed_64, bfd_putl64,
-     bfd_getl32, bfd_getl_signed_32, bfd_putl32,
-     bfd_getl16, bfd_getl_signed_16, bfd_putl16, /* data */
-  bfd_getl64, bfd_getl_signed_64, bfd_putl64,
-     bfd_getl32, bfd_getl_signed_32, bfd_putl32,
-     bfd_getl16, bfd_getl_signed_16, bfd_putl16, /* hdrs */
-
-/* Note that we allow an object file to be treated as a core file as well. */
-    {_bfd_dummy_target, coff_object_p, /* bfd_check_format */
-       bfd_generic_archive_p, coff_object_p},
-    {bfd_false, coff_mkobject, _bfd_generic_mkarchive, /* bfd_set_format */
-       bfd_false},
-    {bfd_false, coff_write_object_contents, /* bfd_write_contents */
-       _bfd_write_archive_contents, bfd_false},
-
-     BFD_JUMP_TABLE_GENERIC (coff),
-     BFD_JUMP_TABLE_COPY (coff),
-     BFD_JUMP_TABLE_CORE (_bfd_nocore),
-     BFD_JUMP_TABLE_ARCHIVE (_bfd_archive_coff),
-     BFD_JUMP_TABLE_SYMBOLS (coff),
-     BFD_JUMP_TABLE_RELOCS (coff),
-     BFD_JUMP_TABLE_WRITE (coff),
-     BFD_JUMP_TABLE_LINK (coff),
-     BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
-
-  (PTR) & bfd_coff_std_swap_table,
-};
-
-const bfd_target
-#ifdef TARGET_BIG_SYM
-TARGET_BIG_SYM =
-#else
-armcoff_big_vec =
-#endif
-{
-#ifdef TARGET_BIG_NAME
-  TARGET_BIG_NAME,
-#else
-  "coff-arm-big",
-#endif
-  bfd_target_coff_flavour,
-  BFD_ENDIAN_BIG,		/* data byte order is big */
-  BFD_ENDIAN_BIG,		/* header byte order is big */
-
-  (HAS_RELOC | EXEC_P |		/* object flags */
-   HAS_LINENO | HAS_DEBUG |
-   HAS_SYMS | HAS_LOCALS | WP_TEXT | D_PAGED),
-
-#ifndef COFF_WITH_PE
-  (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* section flags */
-#else
-  (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC /* section flags */
-   | SEC_LINK_ONCE | SEC_LINK_DUPLICATES),
+#ifndef TARGET_UNDERSCORE
+#define TARGET_UNDERSCORE 0
 #endif
 
-#ifdef TARGET_UNDERSCORE
-  TARGET_UNDERSCORE,		/* leading underscore */
+#ifdef COFF_WITH_PE
+#define EXTRA_S_FLAGS (SEC_LINK_ONCE | SEC_LINK_DUPLICATES)
 #else
-  0,				/* leading underscore */
+#define EXTRA_S_FLAGS 0
 #endif
-  '/',				/* ar_pad_char */
-  15,				/* ar_max_namelen */
 
-  bfd_getb64, bfd_getb_signed_64, bfd_putb64,
-     bfd_getb32, bfd_getb_signed_32, bfd_putb32,
-     bfd_getb16, bfd_getb_signed_16, bfd_putb16, /* data */
-  bfd_getb64, bfd_getb_signed_64, bfd_putb64,
-     bfd_getb32, bfd_getb_signed_32, bfd_putb32,
-     bfd_getb16, bfd_getb_signed_16, bfd_putb16, /* hdrs */
+/* Forward declaration for use initialising alternative_target field.  */
+extern const bfd_target TARGET_BIG_SYM ;
 
-/* Note that we allow an object file to be treated as a core file as well. */
-    {_bfd_dummy_target, coff_object_p, /* bfd_check_format */
-       bfd_generic_archive_p, coff_object_p},
-    {bfd_false, coff_mkobject, _bfd_generic_mkarchive, /* bfd_set_format */
-       bfd_false},
-    {bfd_false, coff_write_object_contents, /* bfd_write_contents */
-       _bfd_write_archive_contents, bfd_false},
+/* Target vectors.  */
+CREATE_LITTLE_COFF_TARGET_VEC (TARGET_LITTLE_SYM, TARGET_LITTLE_NAME, D_PAGED, EXTRA_S_FLAGS, TARGET_UNDERSCORE, & TARGET_BIG_SYM)
+CREATE_BIG_COFF_TARGET_VEC (TARGET_BIG_SYM, TARGET_BIG_NAME, D_PAGED, EXTRA_S_FLAGS, TARGET_UNDERSCORE, & TARGET_LITTLE_SYM)
 
-     BFD_JUMP_TABLE_GENERIC (coff),
-     BFD_JUMP_TABLE_COPY (coff),
-     BFD_JUMP_TABLE_CORE (_bfd_nocore),
-     BFD_JUMP_TABLE_ARCHIVE (_bfd_archive_coff),
-     BFD_JUMP_TABLE_SYMBOLS (coff),
-     BFD_JUMP_TABLE_RELOCS (coff),
-     BFD_JUMP_TABLE_WRITE (coff),
-     BFD_JUMP_TABLE_LINK (coff),
-     BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
-
-  (PTR) & bfd_coff_std_swap_table,
-};

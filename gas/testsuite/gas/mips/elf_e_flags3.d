@@ -17,10 +17,11 @@ Disassembly of section .text:
 
 000000000000000c <main>:
    c:	27bdffd8 	addiu	\$sp,\$sp,-40
-  10:	ffbf0020 	sd	\$ra,32\(\$sp\)
+  10:	afbf0020 	sw	\$ra,32\(\$sp\)
   14:	0c000000 	jal	0 <foo>
   18:	00000000 	nop
   1c:	0000102d 	move	\$v0,\$zero
-  20:	dfbf0020 	ld	\$ra,32\(\$sp\)
-  24:	03e00008 	jr	\$ra
-  28:	27bd0028 	addiu	\$sp,\$sp,40
+  20:	8fbf0020 	lw	\$ra,32\(\$sp\)
+  24:	00000000 	nop
+  28:	03e00008 	jr	\$ra
+  2c:	27bd0028 	addiu	\$sp,\$sp,40

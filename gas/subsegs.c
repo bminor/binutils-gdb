@@ -1,5 +1,5 @@
 /* subsegs.c - subsegments -
-   Copyright (C) 1987, 90, 91, 92, 93, 94, 95, 96, 1997
+   Copyright (C) 1987, 90, 91, 92, 93, 94, 95, 96, 97, 98, 1999
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -547,7 +547,7 @@ section_symbol (sec)
 	  if (S_GET_SEGMENT (s) == undefined_section)
 	    {
 	      S_SET_SEGMENT (s, sec);
-	      s->sy_frag = &zero_address_frag;
+	      symbol_set_frag (s, &zero_address_frag);
 	    }
 	}
     }
@@ -556,13 +556,58 @@ section_symbol (sec)
 
   /* Use the BFD section symbol, if possible.  */
   if (obj_sec_sym_ok_for_reloc (sec))
-    s->bsym = sec->symbol;
+    symbol_set_bfdsym (s, sec->symbol);
 
   seginfo->sym = s;
   return s;
 }
 
 #endif /* BFD_ASSEMBLER */
+
+/* Return whether the specified segment is thought to hold text.  */
+
+#ifndef BFD_ASSEMBLER
+const char * const nontext_section_names[] =
+{
+  ".eh_frame",
+  ".gcc_except_table",
+#ifdef OBJ_COFF
+#ifndef COFF_LONG_SECTION_NAMES
+  ".eh_fram",
+  ".gcc_exc",
+#endif
+#endif
+  NULL
+};
+#endif /* ! BFD_ASSEMBLER */
+
+int
+subseg_text_p (sec)
+     segT sec;
+{
+#ifdef BFD_ASSEMBLER
+  return (bfd_get_section_flags (stdoutput, sec) & SEC_CODE) != 0;
+#else /* ! BFD_ASSEMBLER */
+  const char * const *p;
+
+  if (sec == data_section || sec == bss_section)
+    return 0;
+
+  for (p = nontext_section_names; *p != NULL; ++p)
+    {
+      if (strcmp (segment_name (sec), *p) == 0)
+	return 0;
+
+#ifdef obj_segment_name
+      if (strcmp (obj_segment_name (sec), *p) == 0)
+	return 0;
+#endif
+    }
+
+  return 1;
+
+#endif /* ! BFD_ASSEMBLER */
+}
 
 void
 subsegs_print_statistics (file)

@@ -67,8 +67,14 @@
 /* Define if you have the getcwd function.  */
 #undef HAVE_GETCWD
 
+/* Define if you have the getgid function.  */
+#undef HAVE_GETGID
+
 /* Define if you have the getpagesize function.  */
 #undef HAVE_GETPAGESIZE
+
+/* Define if you have the getuid function.  */
+#undef HAVE_GETUID
 
 /* Define if you have the madvise function.  */
 #undef HAVE_MADVISE

@@ -1,5 +1,5 @@
 /* resrc.c -- read and write Windows rc files.
-   Copyright 1997, 1998 Free Software Foundation, Inc.
+   Copyright 1997, 1998, 1999 Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
 
    This file is part of GNU Binutils.
@@ -112,6 +112,8 @@ static int icons;
 
 /* Local functions.  */
 
+static FILE *look_for_default PARAMS ((char *, const char *, int,
+				       const char *, const char *));
 static void close_pipe PARAMS ((void));
 static void unexpected_eof PARAMS ((const char *));
 static int get_word PARAMS ((FILE *, const char *));
@@ -120,6 +122,55 @@ static void get_data
   PARAMS ((FILE *, unsigned char *, unsigned long, const char *));
 static void define_fontdirs PARAMS ((void));
 
+/* look for the preprocessor program */
+
+static FILE *
+look_for_default (cmd, prefix, end_prefix, preprocargs, filename)
+     char *cmd;
+     const char *prefix;
+     int end_prefix;
+     const char *preprocargs;
+     const char *filename;
+{
+  char *space;
+  int found;
+  struct stat s;
+
+  strcpy (cmd, prefix);
+
+  sprintf (cmd + end_prefix, "%s", DEFAULT_PREPROCESSOR);
+  space = strchr (cmd + end_prefix, ' ');
+  if (space)
+    *space = 0;
+
+  if (strchr (cmd, '/'))
+    {
+      found = (stat (cmd, &s) == 0
+#ifdef HAVE_EXECUTABLE_SUFFIX
+	       || stat (strcat (cmd, EXECUTABLE_SUFFIX), &s) == 0
+#endif
+	       );
+
+      if (! found)
+	{
+	  if (verbose)
+	    fprintf (stderr, "Tried `%s'\n", cmd);
+	  return NULL;
+	}
+    }
+
+  strcpy (cmd, prefix);
+
+  sprintf (cmd + end_prefix, "%s %s %s",
+	   DEFAULT_PREPROCESSOR, preprocargs, filename);
+
+  if (verbose)
+    fprintf (stderr, "Using `%s'\n", cmd);
+
+  cpp_pipe = popen (cmd, FOPEN_RT);
+  return cpp_pipe;
+}
+
 /* Read an rc file.  */
 
 struct res_directory *
@@ -131,21 +182,81 @@ read_rc_file (filename, preprocessor, preprocargs, language)
 {
   char *cmd;
 
-  if (preprocessor == NULL)
-    preprocessor = DEFAULT_PREPROCESSOR;
-
   if (preprocargs == NULL)
     preprocargs = "";
   if (filename == NULL)
     filename = "-";
 
-  cmd = xmalloc (strlen (preprocessor)
-		 + strlen (preprocargs)
-		 + strlen (filename)
-		 + 10);
-  sprintf (cmd, "%s %s %s", preprocessor, preprocargs, filename);
+  if (preprocessor)
+    {
+      cmd = xmalloc (strlen (preprocessor)
+		     + strlen (preprocargs)
+		     + strlen (filename)
+		     + 10);
+      sprintf (cmd, "%s %s %s", preprocessor, preprocargs, filename);
 
-  cpp_pipe = popen (cmd, FOPEN_RT);
+      cpp_pipe = popen (cmd, FOPEN_RT);
+    }
+  else
+    {
+      char *dash, *slash, *cp;
+
+      preprocessor = DEFAULT_PREPROCESSOR;
+
+      cmd = xmalloc (strlen (program_name)
+		     + strlen (preprocessor)
+		     + strlen (preprocargs)
+		     + strlen (filename)
+#ifdef HAVE_EXECUTABLE_SUFFIX
+		     + strlen (EXECUTABLE_SUFFIX)
+#endif
+		     + 10);
+
+
+      dash = slash = 0;
+      for (cp = program_name; *cp; cp++)
+	{
+	  if (*cp == '-')
+	    dash = cp;
+	  if (
+#if defined(__DJGPP__) || defined (__CYGWIN__) || defined(__WIN32__)
+	      *cp == ':' || *cp == '\\' ||
+#endif
+	      *cp == '/')
+	    {
+	      slash = cp;
+	      dash = 0;
+	    }
+	}
+
+      cpp_pipe = 0;
+
+      if (dash)
+	{
+	  /* First, try looking for a prefixed gcc in the windres
+	     directory, with the same prefix as windres */
+
+	  cpp_pipe = look_for_default (cmd, program_name, dash-program_name+1,
+				       preprocargs, filename);
+	}
+
+      if (slash && !cpp_pipe)
+	{
+	  /* Next, try looking for a gcc in the same directory as
+             that windres */
+
+	  cpp_pipe = look_for_default (cmd, program_name, slash-program_name+1,
+				       preprocargs, filename);
+	}
+
+      if (!cpp_pipe)
+	{
+	  /* Sigh, try the default */
+
+	  cpp_pipe = look_for_default (cmd, "", 0, preprocargs, filename);
+	}
+
+    }
   if (cpp_pipe == NULL)
     fatal (_("can't popen `%s': %s"), cmd, strerror (errno));
   free (cmd);

@@ -231,7 +231,11 @@ main (argc, argv)
   link_info.notice_hash = NULL;
   link_info.wrap_hash = NULL;
   link_info.mpc860c0 = 0;
-  
+  /* SVR4 linkers seem to set DT_INIT and DT_FINI based on magic _init
+     and _fini symbols.  We are compatible.  */
+  link_info.init_function = "_init";
+  link_info.fini_function = "_fini";
+
   ldfile_add_arch ("");
 
   config.make_executable = true;
@@ -701,7 +705,7 @@ add_keepsyms_file (filename)
 /*ARGSUSED*/
 static boolean
 add_archive_element (info, abfd, name)
-     struct bfd_link_info *info;
+     struct bfd_link_info *info ATTRIBUTE_UNUSED;
      bfd *abfd;
      const char *name;
 {
@@ -816,7 +820,7 @@ add_archive_element (info, abfd, name)
 /*ARGSUSED*/
 static boolean
 multiple_definition (info, name, obfd, osec, oval, nbfd, nsec, nval)
-     struct bfd_link_info *info;
+     struct bfd_link_info *info ATTRIBUTE_UNUSED;
      const char *name;
      bfd *obfd;
      asection *osec;
@@ -853,7 +857,7 @@ multiple_definition (info, name, obfd, osec, oval, nbfd, nsec, nval)
 /*ARGSUSED*/
 static boolean
 multiple_common (info, name, obfd, otype, osize, nbfd, ntype, nsize)
-     struct bfd_link_info *info;
+     struct bfd_link_info *info ATTRIBUTE_UNUSED;
      const char *name;
      bfd *obfd;
      enum bfd_link_hash_type otype;
@@ -920,7 +924,7 @@ multiple_common (info, name, obfd, otype, osize, nbfd, ntype, nsize)
 /*ARGSUSED*/
 static boolean
 add_to_set (info, h, reloc, abfd, section, value)
-     struct bfd_link_info *info;
+     struct bfd_link_info *info ATTRIBUTE_UNUSED;
      struct bfd_link_hash_entry *h;
      bfd_reloc_code_real_type reloc;
      bfd *abfd;
@@ -1019,7 +1023,7 @@ struct warning_callback_info
 /*ARGSUSED*/
 static boolean
 warning_callback (info, warning, symbol, abfd, section, address)
-     struct bfd_link_info *info;
+     struct bfd_link_info *info ATTRIBUTE_UNUSED;
      const char *warning;
      const char *symbol;
      bfd *abfd;
@@ -1141,7 +1145,7 @@ warning_find_reloc (abfd, sec, iarg)
 /*ARGSUSED*/
 static boolean
 undefined_symbol (info, name, abfd, section, address)
-     struct bfd_link_info *info;
+     struct bfd_link_info *info ATTRIBUTE_UNUSED;
      const char *name;
      bfd *abfd;
      asection *section;
@@ -1213,7 +1217,7 @@ undefined_symbol (info, name, abfd, section, address)
 /*ARGSUSED*/
 static boolean
 reloc_overflow (info, name, reloc_name, addend, abfd, section, address)
-     struct bfd_link_info *info;
+     struct bfd_link_info *info ATTRIBUTE_UNUSED;
      const char *name;
      const char *reloc_name;
      bfd_vma addend;
@@ -1237,7 +1241,7 @@ reloc_overflow (info, name, reloc_name, addend, abfd, section, address)
 /*ARGSUSED*/
 static boolean
 reloc_dangerous (info, message, abfd, section, address)
-     struct bfd_link_info *info;
+     struct bfd_link_info *info ATTRIBUTE_UNUSED;
      const char *message;
      bfd *abfd;
      asection *section;
@@ -1257,7 +1261,7 @@ reloc_dangerous (info, message, abfd, section, address)
 /*ARGSUSED*/
 static boolean
 unattached_reloc (info, name, abfd, section, address)
-     struct bfd_link_info *info;
+     struct bfd_link_info *info ATTRIBUTE_UNUSED;
      const char *name;
      bfd *abfd;
      asection *section;

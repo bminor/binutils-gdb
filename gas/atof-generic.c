@@ -220,7 +220,7 @@ atof_generic (address_of_string_pointer,
 	    && (!c || !strchr (string_of_decimal_exponent_marks, c)));
 	   p++)
 	{
-	  if (isdigit (c))
+	  if (isdigit ((unsigned char) c))
 	    {
 	      /* This may be retracted below. */
 	      number_of_digits_after_decimal++;

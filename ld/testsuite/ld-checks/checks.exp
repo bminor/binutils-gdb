@@ -24,7 +24,7 @@ proc section_check {} {
     global srcdir
     global subdir
     
-    set test "check sections"
+    set test "check sections 1"
     
     set ldflags "--check-sections"
 
@@ -34,10 +34,12 @@ proc section_check {} {
     }
 
     if ![ld_simple_link $ld tmpdir/asm.x "$ldflags tmpdir/asm.o"] {
-	fail "$test : using default linker script"
+	fail $test
     } else {
 	pass $test
     }
+
+    set test "check sections 2"
 
     # Change the linker flags so that our "buggy" linker
     # script is used.
@@ -51,7 +53,7 @@ proc section_check {} {
 
     # Make sure that we got some output from the linker
     if [string match "" $exec_output] then {
-	fail "$test - error message expected but not found"
+	fail $test
     } 
 
     # Now remove our expected error message
@@ -62,8 +64,7 @@ proc section_check {} {
 	pass $test
     } else {
 	verbose -log "Unexpected linker message(s): $exec_output"
-	
-	fail "$test - using erroneous linker script"
+	fail $test
     }
 }
 

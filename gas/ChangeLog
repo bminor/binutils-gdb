@@ -1,3 +1,809 @@
+1999-07-16  Jakub Jelinek  <jj@ultra.linux.cz>
+
+	* doc/c-sparc.texi: Document .register and .nword pseudo-ops.
+
+1999-07-16  Jakub Jelinek  <jj@ultra.linux.cz>
+
+	* config/tc-sparc.c (sparc_ip): Allow OLO10 relocations
+	on -64 and not pic.
+	(output_insn): Put OLO10's secondary addend into tc_fix_data.
+	(md_apply_fix3): Handle BFD_RELOC_SPARC_OLO10.
+	(tc_gen_reloc): Return two relocs for OLO10, LO10 and SPARC13.
+	* config/tc-sparc.h (RELOC_EXPANSION_POSSIBLE,
+	MAX_RELOC_EXPANSION): Define.
+	(TC_FIX_TYPE, TC_INIT_FIX_DATA, TC_FIX_DATA_PRINT): Likewise.
+
+1999-07-16  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	* config/tc-i386.c (intel_float_operand): Add prototype, make static.
+	(md_assemble): Localize *exp variable to if (fake_zero_displacement)
+	block.  Print a warning if an 8-bit or 16-bit constant
+	displacement or immediate is truncated on output.
+	(i386_immediate): Ensure Imm16 is always legal for a 16-bit mode
+	immediate.
+	(i386_operand): Disallow immediate jump absolute operand.
+
+1999-07-15  Ian Lance Taylor  <ian@zembu.com>
+
+	* configure.in: Bump version number to 2.9.5.
+	* configure: Rebuild.
+
+	* dwarf2dbg.c (dwarf2_gen_line_info): Don't assume that long long
+	or %llx work.
+
+Thu Jul 15 02:45:30 1999  Jeffrey A Law  (law@cygnus.com)
+
+	* config/tc-hppa.c (md_pseudo_table): Add ".dword" pseudo-op.
+	(cons_fix_new_hppa): Derive size of fixup from size of the object.
+
+1999-07-14  Philip Blundell  <pb@nexus.co.uk>
+
+	* symbols.c (dollar_label_name): Prepend LOCAL_LABEL_PREFIX if it
+	is defined.
+	* config/tc-arm.h (LOCAL_LABEL_PREFIX): Define to '.' for ELF.
+
+	* config/tc-arm.c (md_begin): Set F_SOFTFLOAT in the output file
+	if -mno-fpu was given.
+	(tc_gen_reloc): Fix typo.  Delete bogus code related to GOTPC
+	relocs.
+	(cons_fix_new_arm): Remove misleading comments.
+
+1999-07-14  Ian Lance Taylor  <ian@zembu.com>
+
+	* write.c (cvt_frag_to_fill): Use frag file and line in rs_org
+	error message.
+	(relax_segment): Likewise.  After giving a rs_org error, convert
+	the frag to rs_align to avoid cascading errors.
+
+1999-07-12  Andreas Schwab  <schwab@suse.de>
+
+	* config/tc-m68k.c: Add some ATTRIBUTE_UNUSED.
+
+1999-07-11  Ian Lance Taylor  <ian@zembu.com>
+
+	* Many files: Changes to avoid gcc warnings: Add ATTRIBUTE_UNUSED
+	as appropriate.  Fill in structure initializations.  Add variable
+	initializations.  Add casts.
+	* dwarf2dbg.c (print_stats): Change i to size_t.
+	* listing.c (listing_listing): Change list_line to unsigned int.
+
+1999-07-10  Ian Lance Taylor  <ian@zembu.com>
+
+	* config/tc-ppc.h (tc_fix_adjustable) [OBJ_ELF]: Call S_IS_LOCAL
+	rather than checking for \001 and \002 in symbol name.
+	* config/tc-sparc.h (tc_fix_adjustable) [OBJ_ELF]: Likewise.
+
+Thu Jul  8 12:32:23 1999  John David Anglin <dave@hiauly1.hia.nrc.ca>
+
+	* configure.in (hppa*-linux-gnu*): New target.
+	* configure: Rebuilt.
+
+1999-07-08  Nick Clifton  <nickc@cygnus.com>
+
+	* doc/c-arm.texi (ARM Directives): Document .thumb_set directive. 
+
+1999-07-07  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-v850.c (v850_comm): Use symbol_get_obj() rather than
+	accessing symbolP directly.
+
+Tue Jul  6 10:41:42 1999  Jeffrey A Law  (law@cygnus.com)
+
+	* config/tc-hppa.h (tc_frob_symbol): Always punt "$global$" symbol
+	for ELF.
+
+1999-07-05  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-arm.c (ARM_EXT_V5): Define.
+	(ARM_ARCH_V5, ARM_ARCH_V5T): Define.
+	(md_begin): Detect ARM v5 architectures.
+	(md_parse_option): Accept arm v5 specification.
+	(md_show_usage): Documment -marmv5 switch.
+
+	* doc/c-arm.texi: Document -marmv5 command line option.
+	
+	* config/tc-arm.c (do_adrl): New function.  Implement ADRL pseudo
+	op.
+	(validate_immediate_twopart): New function.  Determine if a
+	constant can be computed by two ADD instructions.
+	(output_inst): Remove its command line parameter - it was never
+	used.
+	(md_apply_fix3): Support BFD_RELOC_ARM_ADRL_IMMEDIATE, used to
+	implememt the ADRL pseudo op.
+	(tc_gen_reloc): Generate a suitable error message if an ADRL
+	instruction tries to generate a real reloc.
+
+	* doc/c-arm.texi: Document NOP, ADR and ADRL pseudo ops.
+
+Thu Jul  1 15:33:10 1999  Jeffrey A Law  (law@cygnus.com)
+
+	* config/tc-hppa.c (pa_ip): Convert the opcode and all completers
+	into lower case.
+
+1999-06-27  H.J. Lu  <hjl@gnu.org>
+
+	* subsegs.c (subseg_text_p): Use 1/0 instead of true/false for
+	non BFD_ASSEMBLER case.
+
+1999-06-26  Mumit Khan  <khan@xraylith.wisc.edu>
+
+	* config/obj-coff.c (obj_coff_section): Mark writable sections as
+	data.
+
+1999-06-26  David Mosberger  <davidm@hpl.hp.com>
+
+	* dwarf2dbg.c (dwarf2_gen_line_info): Don't call
+	out_end_sequence() when the address decreases due to a new frag.
+	(gen_dir_list): Set ls.file[i].dir to j + 1 (not j) because file
+	numbering starts with 1.
+
+1999-06-23  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-mcore.c (md_pseudo_table): Add .comm for ELF and allow
+	.section for COFF.
+	(mcore_s_text): Call obj_elf_text for ELF target.
+	(mcore_s_data): Call obj_elf_data for ELF target.
+	(mcore_s_section): No longer ELF specific.  Call obj_coff_section
+	for COFF target.
+	(mcore_s_bss): New function:  Dump literal table before changing
+	sections.
+	(mcore_s_comm): New function:  Dump literal table before changing
+	sections.
+	
+	* config/obj-elf.c (obj_elf_common, obj_elf_data, obj_elf_text):
+	No longer static functions.
+	* config/obj-elf.h (obj_elf_common, obj_elf_data, obj_elf_text):
+	Provide prototypes for these functions.
+
+1999-06-22  Ian Lance Taylor  <ian@zembu.com>
+
+	* subsegs.c (subseg_text_p): Rewrite non BFD_ASSEMBLER case to use
+	a list of names, to try obj_segment_name, and to try abbreviated
+	names when using COFF without long section names.
+
+	* config/tc-alpha.c: More use of symbol accessor functions.
+	* config/tc-arc.c: Likewise.
+	* config/tc-d30v.c: Likewise.
+	* config/tc-fr30.c: Likewise.
+	* config/tc-i860.c: Likewise.
+	* config/tc-m88k.c: Likewise.
+	* config/tc-mcore.c: Likewise.
+	* config/tc-ns32k.c: Likewise.
+	* config/tc-sparc.c: Likewise.
+	* config/tc-v850.c: Likewise.
+
+	* config/tc-arc.c (get_arc_exp_reloc_type): Change uses of
+	sy_value with appropriate accessor functions.
+	* config/tc-arm.c (md_apply_fix3): Likewise.
+	* config/tc-d10v.c (AT_WORD_P): Likewise.
+	* config/tc-v850.c (reg_name_search): Likewise.
+
+	* config/obj-ecoff.c (obj_ecoff_set_ext): Change uses of bsym to
+	use symbol_get_bfdsym instead.
+	* config/tc-ppc.c (md_assemble): Likewise.
+	* config/tc-v850.c (v850_comm): Likewise.
+
+1999-06-22  Jonathan Larmour  <jlarmour@cygnus.co.uk>
+
+	* config/tc-arc.c (tc_gen_reloc): Use symbol_get_bfdsym to get at
+	the symbol, rather than accessing the bsym member.
+	* config/tc-d10v.c (tc_gen_reloc): Likewise.
+	* config/tc-d30v.c (tc_gen_reloc): Likewise.
+	* config/tc-mcore.c (tc_gen_reloc): Likewise.
+	* config/tc-mn10200.c (tc_gen_reloc): Likewise.
+	* config/tc-mn10300.c (tc_gen_reloc): Likewise.
+	* config/tc-ns32k.c (tc_gen_reloc): Likewise.
+	* config/tc-tic30.c (tc_gen_reloc): Likewise.
+	* config/tc-v850.c (tc_gen_reloc): Likewise.
+
+Mon Jun 21 16:45:19 1999  Jeffrey A Law  (law@cygnus.com)
+
+	* tc-hppa.c (elf_hppa_reloc_type): Renamed from elf32_hppa_reloc_type.
+	(hppa_gen_reloc_type): Conditionalize on BFD64.
+	(tc_gen_reloc): Re-enable ELF relocations.
+	* tc-hppa.h (TARGET_FORMAT): Handle elf64-hppa format.
+
+1999-06-21  Ian Lance Taylor  <ian@zembu.com>
+
+	* config/tc-arm.c (ldst_extend): Add parentheses to avoid
+	warning.
+	(do_ldst): Move assignment out of if condition.
+	(md_apply_fix3): Add casts to avoid printf format warnings.  Add
+	parentheses to avoid warning.
+
+1999-06-21  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-arm.c (arm_adjust_symtab): Use symbol_get_bfdsym()
+	macro to get at the BFD symbol associated with a GAS symbol.
+
+1999-06-19  Ian Lance Taylor  <ian@zembu.com>
+
+	* config/tc-ppc.c: Update for symbol handling changes.
+	* config/obj-coff.c: Likewise.
+
+Fri Jun 18 14:34:18 1999  Jeffrey A Law  (law@cygnus.com)
+
+	* tc-hppa.c: General cleanups of ELF support.  No more spaces
+	and subspaces for ELF.
+	(GDB_DEBUG_SPACE_NAME): Delete definition for ELF.
+	(GDB_STRINGS_SUBSPACE_NAME): Likewise.
+	(GDB_SYMBOLS_SUBSPACE_NAME): Likewise
+	(UNWIND_SECTION_NAME): Likewise.
+	(space/subspace related structures): Conditionalize definitions
+	on OBJ_SOM.
+	(space/subspace directives and support routines): Conditionalize
+	definitions and references/uses on OBJ_SOM.
+	(label_symbol_struct): For ELF, track the symbol's segment.  For
+	SOM track its space.
+	(pa_define_label, pa_undefine_label, pa_get_label): Corresponding
+	changes.
+	(USE_ALIASES): Kill for both SOM & ELF.
+	(pa_def_subspaces, pa_def_spaces): Corresponding changes.
+	(pa_space, pa_subspace): Corresponding changes.
+	(pa_spaces_begin): Corresponding chagnes.
+	(md_begin): Do not muck around with space/subspace stuff for
+	OBJ_ELF.
+	(md_apply_fix): Temporarily disable argument relocation stuff
+	for OBJ_ELF.
+	(tc_gen_reloc): Temporarily disable relocation generation for
+	OBJ_ELF
+	(pa_build_unwind_subspace): Similarly.
+
+1999-06-16  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-arm.c (thumb_set): New pseudo op.
+	(text, data, section): Override these pseudo ops with ARM
+	specific versions.
+	(s_thumb_set): New function: Perform the same as a .set pseudo
+	op, but also mark the alias'ed symbol as being a Thumb
+	function.
+	(arm_s_text): New function: Perform the same as the .text
+	pseudo op, but dump the literal pool before changing
+	sections. 
+	(arm_s_data): New function: Perform the same as the .data
+	pseudo op, but dump the literal pool before changing
+	sections. 
+	(arm_s_section): New function: Perform the same as the
+	.section pseudo op, but dump the literal pool before changing 
+	sections. 
+	(arm_cleanup): Do not reset the current section before dumping
+	the literal pool.
+
+1999-06-17  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-m32r.c (md_longopts): Fix OPTION_WARN_UNMATCHED and
+	OPTION_NO_WARN_UNMATCHED entries.
+	(md_parse_option): Generate a warning message if an unrecognised
+	option is encountered.
+
+	* config/tc-d10v.c (do_not_ignore_hash): New variable.
+	(get_operands): When parsing an expression after an '@' symbol
+	has been detected, do not ignore '#' symbols.
+	(md_operand): Only ignore '#' symbols if do_not_ignore_hash is
+	false. 
+
+1999-06-13  Ian Lance Taylor  <ian@zembu.com>
+
+	From K. Richard Pixley <rich@noir.com>:
+	* configure.in (ppc-*-vxworks*): New target.
+	* configure: Rebuild.
+
+1999-06-12  Philip Blundell  <philb@gnu.org>
+
+	* config/tc-arm.c (tc_gen_reloc): Fix handling of GOTPC relocs.
+
+1999-06-13  Ian Lance Taylor  <ian@zembu.com>
+
+	* write.c (adjust_reloc_syms): Rather than never reducing reloc
+	which refer to symbols in linkonce sections, permit reducing the
+	relocs if the symbol is local.
+
+1999-06-12  Ian Lance Taylor  <ian@zembu.com>
+
+	* subsegs.c (subseg_text_p): New function.
+	* as.h (subseg_text_p): Declare.
+	* read.c (do_align): Use subseg_text_p to set the default fill.
+	* write.c (subsegs_finish): Likewise.
+	* config/obj-coff.c (write_object_file): Likewise.
+	* config/tc-i386.h (md_maybe_text): Don't define.
+	(md_do_align): Use subseg_text_p to set the default fill.
+	* config/tc-m32r.c (m32r_do_align): Likewise.
+	* config/tc-sh.c (sh_do_align): Likewise.
+	* config/tc-sparc.h (md_do_align): Likewise.
+
+1999-06-12  David O'Brien  <obrien@freebsd.org>
+
+	* configure.in: (i[3456]86-*-freebsd*): Now defaults to ELF.
+	* configure: Rebuild.
+
+1999-06-12  Ian Lance Taylor  <ian@zembu.com>
+
+	* dwarf2dbg.c: Include elf/dwarf2.h with "", not <>.
+	* Makefile.am: Rebuild dependencies.
+	* Makefile.in: Rebuild.
+
+	* config/tc-i386.c (i386_immediate): Remove unused label
+	seg_unimplemented.
+
+	* struc-symbol.h: Put local_symbol code in ifdef BFD_ASSEMBLER.
+	* symbols.c: Likewise.
+	* config/obj-aout.c (obj_crawl_symbol_chain): Refer directly to
+	sy_next field when taking address, rather than symbol_next.
+
+	* dwarf2dbg.c: Change bfd_vma to addressT and bfd_signed_vma to
+	offsetT.
+	(out_set_addr): Don't use BYTES_PER_ADDRESS.  Instead, get the
+	value from the output file architecture.
+	(dwarf2_gen_line_info): Ifdef BFD_ASSEMBLER specific code.
+	* dwarf2dbg.h: Change bfd_vma to addressT.
+
+1999-06-11  Ian Lance Taylor  <ian@zembu.com>
+
+	* dwarf2dbg.h: Use PARAMS in function declarations.
+
+1999-06-11  Martin Dorey  <mdorey@madge.com>
+
+	* write.c (fixup_segment): Don't add symbol value for i960 ELF.
+	* config/tc-i960.c (s_leafproc): Don't call tc_set_bal_of_cal if
+	OBJ_ELF.
+	(md_apply_fix): Simplify BFD_ASSEMBLER handling.
+
+1999-06-11  Ian Lance Taylor  <ian@zembu.com>
+
+	* config/tc-i386.c (md_apply_fix3): Add default case to switch.
+
+	* config/tc-sparc.c (md_pseudo_table): Remove pushsection and
+	popsection.
+
+	* config/tc-sparc.c (sparc_ip): Add default case to reloc switch.
+
+	* read.c (read_a_source_file): Only declare inescape if
+	QUOTES_IN_INSN.
+
+	* itbl-ops.c (itbl_disassemble): Change sprintf format strings to
+	match parameters.
+	(find_entry_byval): Add parens to avoid warning.
+
+	* as.c: If HAVE_ITBL_CPU, include "itbl-ops.h".
+
+	* symbols.c (resolve_symbol_value): Don't permit subtraction of
+	undefined symbols.
+
+1999-06-10  Jakub Jelinek  <jj@ultra.linux.cz>
+
+        * config/tc-sparc.c (sparc_ip): Don't use side-effect expression
+	with isoctal.
+
+	* config/tc-sparc.c (synthetize_setuw, synthetize_setsw,
+	synthetize_setx): New functions.
+	(md_assemble): Broken the special cases into the above
+	functions. Make compiler happy if sizeof(bfd_vma)==4.
+	Fix sethi generated from set/setuw. If instructions have a relloc,
+	always clear the fields to be relocated in the opcode.
+	(sparc_ip): Remove special_case global variable.
+
+1999-06-10  Ian Lance Taylor  <ian@zembu.com>
+
+	Based on patches from John W. Woznack <jwoznack@concentric.net>:
+	* itbl-ops.c (itbl_get_reg_val): Add pval parameter.  Return
+	indication of success rather than a value.
+	(itbl_get_val): Likewise.
+	(itbl_get_field): Use strcspn.  Change delimiters to include
+	parens.
+	* itbl-ops.h (itbl_get_reg_val): Update declaration.
+	(itbl_get_val): Likewise.
+	* config/tc-mips.c (mips_ip): Update call to itbl_get_reg_val.
+
+	* symbols.c (copy_symbol_attributes): Convert local symbols to
+	regular symbols.
+
+1999-06-10  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-arm.c (md_parse_option): Add support for ARM920 and
+	ARM920t. 
+
+1999-06-07  Jakub Jelinek  <jj@ultra.linux.cz>
+
+	* config/tc-sparc.c (md_assemble): Fix up setx, support setsw.
+	Optimize set if sizeof(bfd_vma) == 64.
+	(sparc_ip): Fix sethi - without %hi() it should generate
+	R_SPARC_22 reloc, not R_SPARC_HI22.
+	(tc_gen_reloc): Handle BFD_RELOC_SPARC22.
+
+1999-06-07  Jakub Jelinek  <jj@ultra.linux.cz>
+
+	* config/tc-sparc.c (md_begin): Handle native wordsize aliases.
+	(s_ncons): New function.
+	(native_op_table): New table.
+	(sparc_ip): Be more strict on %hi() etc.; prepare assembler for
+	R_SPARC_OLO10 handling.
+
+Mon Jun  7 10:22:16 1999  Richard Henderson  <rth@cygnus.com>
+
+	* expr.h (struct expressionS): Revert last change; widen X_op.
+	* config/tc-alpha.c (md_begin): Check the field is wide enough.
+
+Mon Jun  7 11:25:16 1999  Andreas Schwab  <schwab@issan.cs.uni-dortmund.de>
+
+	* Makefile.am (TARGET_CPU_CFILES): Add config/tc-fr30.c.
+	(TARGET_CPU_HFILES): Add config/tc-fr30.h.
+	(TARG_ENV_HFILES): Add config/te-epoc-pe.h.
+	* Makefile.in: Regenerated.
+
+	* config/obj-elf.c (obj_elf_common): In MRI mode if called as
+	`common' pass on to s_mri_common.
+	(elf_pseudo_table): Pass 1 to obj_elf_common for `common'. 
+
+1999-06-06  Richard Henderson  <rth@cygnus.com>
+
+	* config/obj-elf.c (obj_elf_section): Don't free the return
+	value of demand_copy_C_string.
+
+1999-06-05  Richard Henderson  <rth@cygnus.com>
+
+	* dwarf2dbg.c (dwarf2_gen_line_info): Mirror the section symbol
+	creation logic from obj_elf_create_section.
+
+	* config/obj-elf.c (elf_pseudo_tab): Add pushsection/popsection.
+	(section_stack): New.
+	(special_sections): Make const.
+	(obj_elf_section): Gut and rewrite parsing.
+	(obj_elf_change_section): New function broken out of obj_elf_section.
+	(obj_elf_parse_section_letters): Likewise.
+	(obj_elf_section_word): Likewise.
+	(obj_elf_section_type): Likewise.
+	(obj_elf_previous): Treat as a toggle.
+	(obj_elf_popsection): New.
+	* config/tc-ppc.c (ppc_section_word): Take str+len not ptr_str.
+	(ppc_section_type): Likewise.
+	* config/tc-ppc.h: Likewise.
+
+	* expr.h (struct expressionS): Don't make X_op a bitfield.
+	* config/tc-alpha.c: Update for symbol handling changes.
+	(md_apply_fix) [case GPREL]: Use now_seg instead of absolute_section.
+	(load_expression, emit_ir_load, emit_loadstore, emit_jsrjmp): Likewise.
+
+1999-06-05  Richard Henderson  <rth@cygnus.com>
+
+	* dwarf2dbg.c (*): Convert to K&R + prototypes.
+	(dwarf2_gen_line_info): Kill unused variables.
+	(dwarf2_finish): Likewise.
+	(dwarf2_where): Likewise.
+	(dwarf2_directive_file): If we've only got a string,
+	hand off to s_app_file.
+	* ecoff.c: Move the include of ecoff.h.
+	* symbols.h (S_IS_FUNCTION): Prototype.
+
+	* read.c (LEX_HASH): Supply a default.
+	(lex_type): Use it.
+	(s_globl): Update `c' after skipping whitespace.
+	* read.h (LEX_END_NAME, is_name_ender): New.
+	* expr.c (get_symbol_end): Respect it.
+
+1999-06-04  Mark Klein <mklein@dis.com>
+
+	* config/tc-hppa.c (md_begin): Convert local symbol dummy_symbol
+	to real if OBJ_SOM
+	(tc_gen_reloc): Still need bfd_abs_symbol in some relocs.
+
+	* config/tc-hppa.c: Update for symbol handling changes.
+
+1999-06-03  Ian Lance Taylor  <ian@zembu.com>
+
+	* cgen.c: Update for symbol handling changes.
+	* config/tc-m32r.c: Likewise.
+
+	* config/tc-hppa.h: Update for symbol handling changes.
+	* config/tc-hppa.c: Likewise.
+
+	* config/tc-arm.h: Update for symbol handling changes.
+	* config/tc-arm.c: Likewise.
+	(symbol_make_empty): Remove.  Just use symbol_create.
+
+	* symbols.c (symbol_set_tc): Correct name.
+
+	* Makefile.am: Rebuild dependencies.
+	($(OBJS)): Don't depend upon struc-symbol.h.
+	(.dep1, .tcdep, .objdep): Create itbl-parse.h.
+	* dep-in.sed: Don't remove struc-symbol.h.
+	* Makefile.in: Rebuild.
+
+	* doc/internals.texi (Symbols): Describe changes in symbol
+	handling.
+
+1999-06-03  Richard Henderson  <rth@cygnus.com>
+
+	* dwarf2dbg.c (dwarf2_gen_line_info): Use section_symbol
+	instead of doing the work by hand.
+
+1999-06-03  David Mosberger  <davidm@hpl.hp.com>
+
+	* dwarf2dbg.c (INITIAL_STATE): New macro encapsulating initial
+	state of line state-machine.
+	(struct ls): Collect DWARF2 line state-machine state in new member
+	SM.  Add member EMPTY_SEQUENCE to keep track if a code sequence
+	resulted in any DWARF2 directives.
+	(reset_state_machine): New function.
+	(out_end_sequence): Ditto.
+	(dwarf2_gen_line_info): When switching sections or switching to a
+	lower text address, call out_end_sequence() first to terminate the
+	previous code sequence as code sequences MUST have monotonically
+	increasing addresses.
+	(dwarf2_finish): Call out_end_sequence() instead of open coding it.
+
+1999-06-03  David Mosberger  <davidm@hpl.hp.com>
+
+	* as.c (parse_args): Add option -gdwarf2 to allow requesting
+	DWARF2 debug info (line information only, at this point).
+	* as.h: Update comment about supported debug formats.
+	* dwarf2dbg.c, dwarf2dbg.h: New files.
+	* Makefile.am (GAS_CFILES, HFILES, GENERIC_OBJS): Add them.
+
+	* expr.c (operand): Don't use [ for parens if we want an index op.
+	(op_encoding): Switch [ into O_index, if desired.
+	(op_rank): Renumber with O_index on bottom.
+	(expr): If O_index, match closing bracket.
+	* expr.h (O_index): New.
+
+	* read.c (read_a_source_file): Conditionally allow matched "
+	in lines passed to md_assemble.
+
+	* config/obj-elf.c (elf_pseudo_table): Add `common'.
+
+1999-06-03  Ian Lance Taylor  <ian@zembu.com>
+
+	Add support for storing local symbols in a small structure to save
+	memory when assembling large files.
+	* as.h: Don't include struc-symbol.h.
+	(symbolS): Add typedef.
+	* symbols.c: Include struc-symbol.h.
+	(local_hash): New static variable.
+	(save_symbol_name): New static function, from symbol_create.
+	(symbol_create): Call save_symbol_name.
+	(local_symbol_count): New static variable.
+	(local_symbol_conversion_count): Likewise.
+	(LOCAL_SYMBOL_CHECK): Define.
+	(local_symbol_make): New static function.
+	(local_symbol_convert): New static function.
+	(colon): Handle local symbols.  Create local symbol for local
+	label name.
+	(symbol_table_insert): Handle local symbols.
+	(symbol_find_or_make): Create local symbol for local label name.
+	(symbol_find_base): Check for local symbol.
+	(symbol_append, symbol_insert): Check for local symbols.
+	(symbol_clear_list_pointers, symbol_remove): Likewise.
+	(verify_symbol_chain): Likewise.
+	(copy_symbol_attributes): Likewise.
+	(resolve_symbol_value): Handle local symbols.
+	(resolve_local_symbol): New static function.
+	(resolve_local_symbol_values): New function.
+	(S_GET_VALUE, S_SET_VALUE): Handle local symbols.
+	(S_IS_FUNCTION, S_IS_EXTERNAL, S_IS_WEAK, S_IS_COMMON): Likewise.
+	(S_IS_DEFINED, S_IS_DEBUG, S_IS_LOCAL, S_GET_NAME): Likewise.
+	(S_GET_SEGMENT, S_SET_SEGMENT, S_SET_EXTERNAL): Likewise.
+	(S_CLEAR_EXTERNAL, S_SET_WEAK, S_SET_NAME): Likewise.
+	(symbol_previous, symbol_next): New functions.
+	(symbol_get_value_expression): Likewise.
+	(symbol_set_value_expression): Likewise.
+	(symbol_set_frag, symbol_get_frag): Likewise.
+	(symbol_mark_used, symbol_clear_used, symbol_used_p): Likewise.
+	(symbol_mark_used_in_reloc): Likewise.
+	(symbol_clear_used_in_reloc, symbol_used_in_reloc_p): Likewise.
+	(symbol_mark_mri_common, symbol_clear_mri_common): Likewise.
+	(symbol_mri_common_p): Likewise.
+	(symbol_mark_written, symbol_clear_written): Likewise.
+	(symbol_written_p): Likewise.
+	(symbol_mark_resolved, symbol_resolved_p): Likewise.
+	(symbol_section_p, symbol_equated_p): Likewise.
+	(symbol_constant_p): Likewise.
+	(symbol_get_bfdsym, symbol_set_bfdsym): Likewise.
+	(symbol_get_obj, symbol_set_obj): Likewise.
+	(symbol_get_tc, symbol_set_tc): Likewise.
+	(symbol_begin): Initialize local_hash.
+	(print_symbol_value_1): Handle local symbols.
+	(symbol_print_statistics): Print local symbol statistics.
+	* symbols.h: Include "struc-symbol.h" if not BFD_ASSEMBLER.
+	Declare new symbols.c functions.  Move many declarations here from
+	struc-symbol.h.
+	(SYMBOLS_NEED_BACKPOINTERS): Define if needed.
+	* struc-symbol.h (SYMBOLS_NEED_BACKPOINTERS): Don't set.
+	(struct symbol): Move bsym to make it clearly the first field.
+	Remove TARGET_SYMBOL_FIELDS.
+	(symbolS): Don't typedef.
+	(struct broken_word): Remove.
+	(N_TYPE_seg, seg_N_TYPE): Move to symbol.h.
+	(SEGMENT_TO_SYMBOL_TYPE, N_REGISTER): Likewise.
+	(symbol_clear_list_pointers): Likewise.
+	(symbol_insert, symbol_remove): Likewise.
+	(symbol_previous, symbol_append): Likewise.
+	(verify_symbol_chain, verify_symbol_chain_2): Likewise.
+	(struct local_symbol): Define.
+	(local_symbol_converted_p, local_symbol_mark_converted): Define.
+	(local_symbol_resolved_p, local_symbol_mark_resolved): Define.
+	(local_symbol_get_frag, local_symbol_set_frag): Define.
+	(local_symbol_get_real_symbol): Define.
+	(local_symbol_set_real_symbol): Define.
+	Define.
+	* write.c (write_object_file): Call resolve_local_symbol_values.
+	* config/obj-ecoff.h (OBJ_SYMFIELD_TYPE): Define.
+	(TARGET_SYMBOL_FIELDS): Don't define.
+	* config/obj-elf.h (OBJ_SYMFIELD_TYPE): Add local field.  If
+	ECOFF_DEBUGGING, add ECOFF fields.
+	(ELF_TARGET_SYMBOL_FIELDS, TARGET_SYMBOL_FIELDS): Don't define.
+	* config/obj-multi.h (struct elf_obj_sy): Add local field.  If
+	ECOFF_DEBUGGING, add ECOFF fields.
+	(ELF_TARGET_SYMBOL_FIELDS, TARGET_SYMBOL_FIELDS): Don't define.
+	(ECOFF_DEBUG_TARGET_SYMBOL_FIELDS): Don't define.
+	* config/tc-mcore.h: Don't include struc-symbol.h.
+	(TARGET_SYMBOL_FIELDS): Don't define.
+	(struct mcore_tc_sy): Define.
+	(TC_SYMFIELD_TYPE): Define.
+	* Many files: Use symbolS instead of struct symbol.  Use new
+	accessor functions rather than referring to symbolS fields
+	directly.
+
+	* read.c (s_mri_common): Don't add in value of line_label.
+
+	* config/tc-mips.c (md_apply_fix): Correct parenthesization when
+	checking for SEC_LINK_ONCE.
+
+	* config/tc-sh.h (sh_fix_adjustable): Declare.
+
+	* app.c (input_buffer): New static variable.
+	(app_push): Save saved_input in allocated buffer.
+	(app_pop): Restored saved_input.
+	(do_scrub_chars): Change get parameter to take char * and int as
+	arguments.  Change GET macro to pass input_buffer to get
+	function.  Don't save input into allocated buffer.
+	* as.h (do_scrub_chars): Update declaration.
+	* input-file.c (input_file_get): Change to take char * and int.
+	Read data into passed in buffer.  Remove static buffer.
+	* read.c (scrub_from_string): Change to take char * and int.  Copy
+	data into passed in buffer.
+
+	* hash.h: Neaten.  Declare hash_traverse.
+	* hash.c: Complete rewrite based on BFD hashing code.
+	* gasp.c (chunksize): New variable.
+	* macro.c (macro_expand_body): Call hash_jam with NULL rather than
+	hash_delete.
+
+1999-05-28  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-arm.c (md_apply_fix3): Add pipeline offset into reloc
+	addend unless the target uses an old ABI.
+
+Mon May 24 13:36:55 1999  Doug Evans  <devans@canuck.cygnus.com>
+
+	-Wchar-subscripts cleanup
+	* listing.c (listing_newline): Use unsigned char variable, so
+ 	calls to isascii,iscntrl are correct.
+	* atof-generic.c (atof_generic): Cast arg to isdigit, et. al. with
+	(unsigned char).
+	* ecoff.c (ecoff_directive_ent,ecoff_stab): Ditto.
+	* config/obj-elf.c (obj_elf_vtable_inherit): Ditto.
+	* config/tc-mips.c (mips_ip,mips16_ip): Ditto.
+	(my_getSmallExpression,get_number,s_mips_ent): Ditto.
+
+1999-05-28  Torbjorn Granlund  <tege@matematik.su.se>
+
+	* config/tc-m68k.c (m68k_ip): Check for disallowed index register
+	width for Coldfire.
+	(arch_coldfire_p): New #define.
+	(m68k_ip, m68k_init_after_args): Use arch_coldfire_p.
+
+1999-05-28  Linus Nordberg  <linus.nordberg@canit.se>
+
+	* config/tc-m68k.c (install_operand): Add places `n', `o'.
+
+	* config/tc-m68k.c (m68k_ip): Add formats `E', `G', `H'.
+	(install_operand): Add place `N'.
+	(init_table): Add registers ACC, MACSR, MASK.
+
+	* config/m68k-parse.h (m68k_register): Add ACC, MACSR, MASK.
+
+	* config/tc-m68k.c: Change mcf5200 --> mcf.
+	(archs): Add mcf5206e, mcf5307.
+	(m68k_ip): Add format `u'.
+	(install_operand): Add place `m', `M', `h'.
+	(init_table): Add upper/lower registers.
+
+	* config/m68k-parse.h (m68k_register): Add upper/lower registers.
+
+1999-05-28  Martin Dorey  <mdorey@madge.com>
+
+	* config/tc-i960.c: Several minor changes to add ELF and
+	BFD_ASSEMBLER support.
+	* config/tc-i960.h: Likewise.
+	* configure.in (i960-*-elf*): New target.
+	* aclocal.m4, configure: Rebuild.
+
+1999-05-25  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	* config/tc-i386.c (md_apply_fix3): Only do 1999-05-17 fx_pcrel
+	reloc changes when defined(BFD_ASSEMBLER).
+
+1999-05-17  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	* config/tc-i386.c (tc_gen_reloc): Remove F and MAP macros.
+
+	* write.c (write_print_statistics): Output to file, not stderr.
+
+	* expr.c (generic_bignum_to_int32,64): Prototype.
+
+	* read.c (s_lcomm_internal, sizeof_sleb128, sizeof_uleb128,
+	output_sleb128, output_uleb128, output_big_sleb128,
+	output_big_uleb128, output_big_leb128): Prototype.
+	(output_big_sleb128, output_big_uleb128): Make inline.
+	(output_big_leb128): Remove inline
+
+	From Maciej W. Rozycki <macro@ds2.pg.gda.pl>
+	* config/tc-i386.c (md_apply_fix3): Convert BFD_RELOC_16 with
+	fx_pcrel set to BFD_RELOC_16_PCREL.  Similarly for BFD_RELOC_8.
+	Handle BFD_RELOC_16_PCREL and BFD_RELOC_8_PCREL.  Return changed
+	value for correct overflow check in write.c:fixup_segment.
+	* write.c (fixup_segment): Move bitfield overflow checks to after
+	the md_apply_fix call.
+	* config/obj-coff.c (fixup_segment): Likewise.
+	* doc/internals.texi (CPU backend): Mention md_apply_fix modifying
+	valueT *val argument.
+
+Fri May 14 10:52:13 1999  Andreas Schwab  <schwab@issan.cs.uni-dortmund.de>
+
+	* config/atof-ieee.c (gen_to_words): Correctly round a
+	denormalized number.  Fix off-by-one in range checking for
+	exponent in a denormal. 
+
+1999-05-10  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-mcore.c (parse_reg): Accept 'sp' as a valid register
+	name. 
+
+Thu May 13 09:46:59 1999  Joel Sherrill (joel@OARcorp.com)
+
+	* configure.in (i386-*-rtemself*, sh-*-rtemself*): New targets.
+
+1999-05-12  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	* config/tc-i386.h (InvMem): New flag.  Add to AnyMem.
+	(ReverseRegRegmem): Remove.
+	(ImmExt): New flag.  Renumber some of the opcode_modifier bits.
+	* config/tc-i386.c (md_assemble): Test for PIII SIMD and AMD
+	3DNow! via ImmExt opcode_modifier.  Remove ReverseRegRegmem
+	kludge.
+
+	From  Doug Ledford <dledford@redhat.com>
+	* config/tc-i386.h (RegXMM): New for P/III.
+	* config/tc-i386.c: Add support for P/III.
+
+Sat May  8 23:28:50 1999  Richard Henderson  <rth@cygnus.com>
+
+	* config/tc-ppc.c (md_parse_option): Recognize -mppc64bridge.
+	(md_begin): Allow ppc32 insns in ppc64bridge mode.
+	(ppc_insert_operand): Accept SIGNOPT in ppc64 mode.
+
+Thu May  6 23:13:39 1999  Richard Henderson  <rth@cygnus.com>
+
+	* config/tc-i386.c (i386_immediate): Skip whitespace before
+	complaining about junk after expression.
+	(i386_displacement): Likewise.
+
+Thu May  6 19:50:14 1999  Richard Henderson  <rth@cygnus.com>
+
+	* symbols.c (symbol_find_base): Use memcpy instead of strcpy.
+	Don't copy before downcaseing.
+
+1999-05-05  Catherine Moore  <clm@cygnus.com>
+ 
+        * tc-m68k.c: Include elf/m68k.h.
+        (m68k_elf_final_processing): New routine.
+        * tc-m68k.h (elf_tc_final_processing m68k_elf_final_processing):
+        Define.
+ 
+Mon May  3 10:26:03 1999  Jeffrey A Law  (law@cygnus.com)
+
+	* config/tc-hppa.c (md_apply_fix): Handle 22 bit fmt insn like a
+	17 bit fmt insn.
+
 1999-04-30  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-mcore.c (mcore_s_section): Dump literals before

@@ -1,5 +1,5 @@
 /* Disassemble from a buffer, for GNU.
-   Copyright (C) 1993, 1994, 1998 Free Software Foundation, Inc.
+   Copyright (C) 1993, 1994, 1998, 1999 Free Software Foundation, Inc.
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -85,7 +85,7 @@ generic_strcat_address (addr, buf, len)
       char tmpBuf[30];
 
       sprintf_vma (tmpBuf, addr);
-      if ((strlen (buf) + strlen (tmpBuf)) <= len)
+      if ((strlen (buf) + strlen (tmpBuf)) <= (unsigned int) len)
 	strcat (buf, tmpBuf);
       else
 	strncat (buf, tmpBuf, (len - strlen(buf)));
@@ -97,8 +97,8 @@ generic_strcat_address (addr, buf, len)
 
 int
 generic_symbol_at_address (addr, info)
-     bfd_vma addr;
-     struct disassemble_info * info;
+     bfd_vma addr ATTRIBUTE_UNUSED;
+     struct disassemble_info *info ATTRIBUTE_UNUSED;
 {
   return 1;
 }

@@ -1,17 +1,203 @@
+1999-07-11  Ian Lance Taylor  <ian@zembu.com>
+
+	* dis-buf.c: Add ATTRIBUTE_UNUSED as appropriate.
+	(generic_strcat_address): Add cast to avoid warning.
+	* i386-dis.c: Initialize all structure fields to avoid warnings.
+	Add ATTRIBUTE_UNUSED as appropriate.
+
+1999-07-08  Jakub Jelinek  <jj@ultra.linux.cz>
+
+	* sparc-dis.c (print_insn_sparc): Differentiate between
+	addition and oring when guessing symbol for comment.
+
+1999-07-05  Nick Clifton  <nickc@cygnus.com>
+
+	* arm-dis.c (print_insn_arm): Display hex equivalent of rotated
+	constant. 
+
+1999-06-23  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	* i386-dis.c: Mention intel mode specials in macro char comment.
+
+1999-06-21  Ian Lance Taylor  <ian@zembu.com>
+
+	* alpha-dis.c: Don't include <stdlib.h>.
+	* arm-dis.c: Include "sysdep.h".
+	* tic30-dis.c: Don't include <stdlib.h> or <string.h>.  Include
+	"sysdep.h".
+	* Makefile.am: Rebuild dependencies.
+	* Makefile.in: Rebuild.
+
+1999-06-16  Nick Clifton  <nickc@cygnus.com>
+
+	* arm-dis.c (print_insn_arm): Add detection of IMB and IMBRange
+	SWIs. 
+
+1999-06-14  Nick Clifton  <nickc@cygnus.com> & Drew Mosley <dmoseley@cygnus.com>
+
+	* arm-dis.c (arm_regnames): Turn into a pointer to a register
+	name set.
+	(arm_regnames_standard): New variable: Array of ARM register
+	names according to ARM instruction set nomenclature. 
+	(arm_regnames_apcs): New variable: Array of ARM register names
+	according to ARM Procedure Call Standard.
+	(arm_regnames_raw): New variable: Array of ARM register names
+	using just 'r' and the register number.
+	(arm_toggle_regnames): New function: Toggle the chosen register set
+	naming scheme.
+	(parse_disassembler_options): New function: Parse any target
+	disassembler command line options.
+	(print_insn_big_arm): Call parse_disassembler_options if any
+	are defined.
+	(print_insn_little_arm): Call parse_disassembler_options if any
+	are defined.
+
+1999-06-13  Ian Lance Taylor  <ian@zembu.com>
+
+	* i386-dis.c (FWAIT_OPCODE): Define.
+	(used_prefixes): New static variable.
+	(fetch_data): Don't print an error message if we have already
+	fetched some bytes successfully.
+	(ckprefix): Clear used_prefixes.  Use FWAIT_OPCODE, not 0x9b.
+	(prefix_name): New static function.
+	(print_insn_i386): If setjmp fails, indicating a data error, but
+	we have managed to fetch some bytes, print the first one as a
+	prefix or a .byte pseudo-op.  If fwait is followed by a non
+	floating point instruction, print the first prefix.  Set
+	used_prefixes when prefixes are used.  If any prefixes were not
+	used after disassembling the instruction, print the first prefix
+	instead of printing the instruction.
+	(putop): Set used_prefixes when prefixes are used.
+	(append_seg, OP_E, OP_G, OP_REG, OP_I, OP_sI, OP_J): Likewise.
+	(OP_DIR, OP_SIMD_Suffix): Likewise.
+
+1999-06-07  Jakub Jelinek  <jj@ultra.linux.cz>
+
+	* sparc-opc.c: Fix up set, setsw, setuw operand kinds.
+	Support signx %reg, clruw %reg.
+
+1999-06-07  Jakub Jelinek  <jj@ultra.linux.cz>
+
+	* sparc-opc.c: Add aliases Solaris as supports.
+
+Mon Jun  7 12:04:52 1999  Andreas Schwab  <schwab@issan.cs.uni-dortmund.de>
+
+	* Makefile.am (CFILES): Add arc-{dis,opc}.c and v850-{dis,opc}.c.
+	* Makefile.in: Regenerated.
+
+1999-06-03  Philip Blundell  <philb@gnu.org>
+
+	* arm-dis.c (print_insn_arm): Make LDRH/LDRB consistent with LDR
+	when target is PC-relative.
+
+1999-05-28  Linus Nordberg  <linus.nordberg@canit.se>
+
+	* m68k-opc.c: Rename MACL/MSACL to MAC/MSAC.  Add MACM/MSACM.  Add
+	MOVE MACSR,CCR.
+
+	* m68k-dis.c (fetch_arg): Add places `n', `o'.
+
+	* m68k-opc.c: Add MSAC, MACL, MOVE to/from ACC, MACSR, MASK.
+	Add mcf5206e to appropriate instructions.
+	Add alias for MAC, MSAC.
+
+	* m68k-dis.c (print_insn_arg): Add formats `E', `G', `H' and place
+	`N'.
+
+	* m68k-opc.c (m68k_opcodes): Add divsw, divsl, divuw, divul, macl,
+	macw, remsl, remul for mcf5307.  Change mcf5200 --> mcf.
+
+	* m68k-dis.c: Add format `u' and places `h', `m', `M'.
+
+1999-05-18  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	* i386-dis.c (Ed): Define.
+	(dis386_twobyte_att, dis386_twobyte_intel): Use Ed for movd.
+	(Rw): Remove.
+	(OP_rm): Rename to OP_Rd.
+	(ONE): Remove.
+	(OP_ONE): Remove.
+	(putop): Add const to template and p.
+	(print_insn_x86): Delete.
+	(print_insn_i386): Merge old function print_insn_x86.  Add const
+	to dp.
+	(struct dis386): Add const to name.
+	(dis386_att, dis386_intel): Add const.
+	(dis386_twobyte_att, dis386_twobyte_intel): Add const.
+	(names32, names16, names8, names_seg, index16): Add const.
+	(grps, prefix_user_table, float_reg): Add const.
+	(float_mem_att, float_mem_intel): Add const.
+	(oappend): Add const to s.
+	(OP_REG): Add const to s.
+	(ptr_reg): Add const to s.
+	(dofloat): Add const to dp.
+	(OP_C): Don't skip modrm, it's now done in OP_Rd.
+	(OP_D): Ditto.
+	(OP_T): Ditto.
+	(OP_Rd): Check for valid mod.  Call Op_E to print.
+	(OP_E): Handle d_mode arg.  Check for bad sfence,lea,lds etc.
+	(OP_MS): Check for valid mod.  Call Op_EM to print.
+	(OP_3DNowSuffix): Set obufp and use oappend rather than
+	strcat.  Call BadOp() for errors.
+	(OP_SIMD_Suffix): Likewise.
+	(BadOp): New function.
+
+1999-05-12  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	* i386-dis.c (dis386_intel): Remove macro chars, except for
+	jEcxz.  Change cWtR and cRtd to cW and cR.
+	(dis386_twobyte_intel): Remove macro chars here too.
+	(putop): Handle R and W macros for intel mode.
+
+	* i386-dis.c (SIMD_Fixup): New function.
+	(dis386_twobyte_att): Use it on movlps and movhps, and change
+	Ev to EX on these insns.  Change movmskps Ev, XM to Gv, EX.
+	(dis386_twobyte_intel): Same here.
+
+	* i386-dis.c (Av): Remove.
+	(Ap): remove lptr.
+	(lptr): Remove.
+	(OPSIMD): Define.
+	(OP_SIMD_Suffix): New function.
+	(OP_DIR): Remove dead code.
+	(eAX_reg..eDI_reg): Renumber.
+	(onebyte_has_modrm): Table numbering comments.
+	(INTERNAL_DISASSEMBLER_ERROR): Move to before print_insn_x86.
+	(print_insn_x86): Move all prefix oappends to after uses_f3_prefix
+	checks.  Print error on invalid dp->bytemode2.  Remove simd_cmp,
+	and handle SIMD cmp insns in OP_SIMD_Suffix.
+	(info->bytes_per_line): Bump from 5 to 6.
+	(OP_None): Remove.
+	(OP_E): Use INTERNAL_DISASSEMBLER_ERROR.  Handle sfence.
+	(OP_3DNowSuffix): Ensure mnemonic index unsigned.
+
+	PIII SIMD support from Doug Ledford <dledford@redhat.com>
+	* i386-dis.c (XM, EX, None): Define.
+	(OP_XMM, OP_EX, OP_None): New functions.
+	(USE_GROUPS, USE_PREFIX_USER_TABLE): Define.
+	(GRP14): Rename to GRPAMD.
+	(GRP*): Add USE_GROUPS flag.
+	(PREGRP*): Define.
+	(dis386_twobyte_att, dis386_twobyte_intel): Add SIMD insns.
+	(twobyte_has_modrm): Add SIMD entries.
+	(twobyte_uses_f3_prefix, simd_cmp_op, prefix_user_table): New.
+	(grps): Add SIMD insns.
+	(print_insn_x86): New vars uses_f3_prefix and simd_cmp.  Don't
+	oappend repz if uses_f3_prefix.  Add code to handle new groups for
+	SIMD insns.
+
+	From Maciej W. Rozycki <macro@ds2.pg.gda.pl>
+	* i386-dis.c (dis386_att, dis386_intel): Change 0xE8 call insn
+	operand from Av to Jv.
+
+1999-05-07  Nick Clifton  <nickc@cygnus.com>
+
+	* mcore-dis.c (print_insn_mcore): Use .short to display
+	unidentified instructions, not .word.
+
 1999-04-26  Tom Tromey  <tromey@cygnus.com>
 
 	* aclocal.m4, configure: Updated for new version of libtool.
-
-1999-04-22  Nick Clifton  <nickc@cygnus.com>
-
-	* mcore-dis.c (print_insn_mcore): Display locaiton of address pool
-	for LRW instructions.
-
-1999-04-18  Nick Clifton  <nickc@cygnus.com>
-
-	* mcore-dis.c (print_insn_mcore): Display location of address pool
-	for JMP instructions.
-	* mcore-opc.h (mcore_table): Add 'nop'.
 
 1999-04-14  Doug Evans  <devans@casey.cygnus.com>
 
@@ -27,16 +213,6 @@ Mon Apr 12 23:46:17 1999  Jeffrey A Law  (law@cygnus.com)
 
 	* fr30-desc.c,fr30-desc.h,fr30-ibld.c: Rebuild.
 	* m32r-desc.c,m32r-desc.h,m32r-opinst.c: Rebuild.
-
-1999-04-08  Nick Clifton  <nickc@cygnus.com>
-
-	* mcore-dis.c: New file: Disassemble MCore opcodes.
-	* mcore-opc.h: New file: Definitions of MCore opcodes.
-	* Makefile.am: Add Mcore source files.
-	* Makefile.in: Regenerate.
-	* configure.in: Add support for MCore targets.
-	* configure: Regenerate.
-	* disassemble.c: Add support for MCore targets.
 
 1999-04-06  Ian Lance Taylor  <ian@zembu.com>
 

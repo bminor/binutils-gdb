@@ -156,7 +156,7 @@ reloc_howto_type MY(howto_table)[] =
 
 reloc_howto_type *
 MY(reloc_howto)(abfd, rel, r_index, r_extern, r_pcrel)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      struct reloc_std_external *rel;
      int *r_index;
      int *r_extern;
@@ -266,7 +266,7 @@ MY_swap_std_reloc_in (abfd, bytes, cache_ptr, symbols, symcount)
      struct reloc_std_external *bytes;
      arelent *cache_ptr;
      asymbol **symbols;
-     bfd_size_type symcount;
+     bfd_size_type symcount ATTRIBUTE_UNUSED;
 {
   int r_index;
   int r_extern;

@@ -134,6 +134,7 @@ GAS_CFILES = \
 	bignum-copy.c \
 	cond.c \
 	depend.c \
+	dwarf2dbg.c \
 	ecoff.c \
 	ehopt.c \
 	expr.c \
@@ -164,6 +165,7 @@ HFILES = \
 	bignum.h \
 	bit_fix.h \
 	cgen.h \
+	dwarf2dbg.h \
 	ecoff.h \
 	emul-target.h \
 	emul.h \
@@ -194,6 +196,7 @@ TARGET_CPU_CFILES = \
 	config/tc-arm.c \
 	config/tc-d10v.c \
 	config/tc-d30v.c \
+	config/tc-fr30.c \
 	config/tc-h8300.c \
 	config/tc-h8500.c \
 	config/tc-hppa.c \
@@ -226,6 +229,7 @@ TARGET_CPU_HFILES = \
 	config/tc-arm.h \
 	config/tc-d10v.h \
 	config/tc-d30v.h \
+	config/tc-fr30.h \
 	config/tc-h8300.h \
 	config/tc-h8500.h \
 	config/tc-hppa.h \
@@ -286,6 +290,7 @@ TARG_ENV_HFILES = \
 	config/te-delt88.h \
 	config/te-dpx2.h \
 	config/te-dynix.h \
+	config/te-epoc-pe.h \
 	config/te-generic.h \
 	config/te-go32.h \
 	config/te-hp300.h \
@@ -331,6 +336,7 @@ GENERIC_OBJS = \
 	bignum-copy.o \
 	cond.o \
 	depend.o \
+	dwarf2dbg.o \
 	ehopt.o \
 	expr.o \
 	flonum-konst.o \
@@ -416,7 +422,7 @@ as_new_DEPENDENCIES = $(TARG_CPU_O) $(OBJ_FORMAT_O) $(ATOF_TARG_O) \
 # Stuff that every object file depends upon.  If anything is removed
 # from this list, remove it from dep-in.sed as well.
 $(OBJS): config.h as.h $(TARG_ENV_H) $(OBJ_FORMAT_H) $(TARG_CPU_H) flonum.h \
-	expr.h struc-symbol.h write.h frags.h hash.h read.h symbols.h tc.h \
+	expr.h write.h frags.h hash.h read.h symbols.h tc.h \
 	obj.h listing.h bignum.h bit_fix.h $(INCDIR)/libiberty.h asintl.h
 
 gasp_new_SOURCES = gasp.c macro.c sb.c hash.c
@@ -709,6 +715,7 @@ DEP_FILE_DEPS =  $(CFILES) $(HFILES) $(TARGET_CPU_CFILES) \
 	echo '' > obj-format.h; \
 	echo '' > targ-env.h; \
 	echo '' > itbl-cpu.h; \
+	echo '' > itbl-parse.h; \
 	echo '# DO NOT DELETE THIS LINE -- mkdep uses it.' > .dep; \
 	$(DEP) -f .dep -DBFD_ASSEMBLER -I. -I.. -I$${srcdir} -I../../bfd $(DEP_INCLUDES) $?
 	sed -e '/IF YOU PUT ANYTHING/,$$d' < .depdir/.dep > .dep1
@@ -728,6 +735,7 @@ DEP_FILE_DEPS =  $(CFILES) $(HFILES) $(TARGET_CPU_CFILES) \
 	      echo '#include "obj-'"$${o}"'.h"' > obj-format.h; \
 	      echo '#include "te-generic.h"' > targ-env.h; \
 	      echo '' > itbl-cpu.h; \
+	      echo '' > itbl-parse.h; \
 	      echo '#include "opcodes/'"$${c}"'-desc.h"' > cgen-desc.h; \
 	      rm -f dummy.c; \
 	      cp $${srcdir}/config/tc-$${c}.c dummy.c; \
@@ -774,6 +782,7 @@ DEP_FILE_DEPS =  $(CFILES) $(HFILES) $(TARGET_CPU_CFILES) \
 	      echo '#include "obj-'"$${o}"'.h"' > obj-format.h; \
 	      echo '#include "te-generic.h"' > targ-env.h; \
 	      echo '' > itbl-cpu.h; \
+	      echo '' > itbl-parse.h; \
 	      rm -f dummy.c; \
 	      cp $${srcdir}/config/obj-$${o}.c dummy.c; \
 	      echo '# DO NOT DELETE THIS LINE -- mkdep uses it.' > .dep; \
@@ -879,14 +888,16 @@ atof-generic.o: atof-generic.c
 bignum-copy.o: bignum-copy.c
 cond.o: cond.c macro.h sb.h $(INCDIR)/obstack.h
 depend.o: depend.c
-ecoff.o: ecoff.c
+dwarf2dbg.o: dwarf2dbg.c dwarf2dbg.h subsegs.h $(INCDIR)/obstack.h \
+  $(INCDIR)/elf/dwarf2.h
+ecoff.o: ecoff.c ecoff.h
 ehopt.o: ehopt.c subsegs.h $(INCDIR)/obstack.h $(INCDIR)/elf/dwarf2.h
 expr.o: expr.c $(INCDIR)/obstack.h
 flonum-copy.o: flonum-copy.c
 flonum-konst.o: flonum-konst.c
 flonum-mult.o: flonum-mult.c
 frags.o: frags.c subsegs.h $(INCDIR)/obstack.h
-hash.o: hash.c
+hash.o: hash.c $(INCDIR)/obstack.h
 input-file.o: input-file.c input-file.h
 input-scrub.o: input-scrub.c input-file.h sb.h
 listing.o: listing.c input-file.h subsegs.h
@@ -900,9 +911,11 @@ sb.o: sb.c sb.h
 stabs.o: stabs.c $(INCDIR)/obstack.h subsegs.h ecoff.h \
   $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def
 subsegs.o: subsegs.c subsegs.h $(INCDIR)/obstack.h
-symbols.o: symbols.c $(INCDIR)/obstack.h subsegs.h
+symbols.o: symbols.c $(INCDIR)/obstack.h subsegs.h \
+  struc-symbol.h
 write.o: write.c subsegs.h $(INCDIR)/obstack.h output-file.h
 gasp.o: gasp.c sb.h macro.h
+itbl-ops.o: itbl-ops.c itbl-ops.h itbl-parse.h
 e-i386coff.o: $(srcdir)/config/e-i386coff.c emul.h \
   emul-target.h
 e-i386elf.o: $(srcdir)/config/e-i386elf.c emul.h emul-target.h
@@ -1051,7 +1064,8 @@ TCDEP_m68k_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-m68k.h \
 TCDEP_m68k_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   $(INCDIR)/bfdlink.h $(srcdir)/config/tc-m68k.h $(INCDIR)/obstack.h \
-  subsegs.h $(INCDIR)/opcode/m68k.h $(srcdir)/config/m68k-parse.h
+  subsegs.h $(INCDIR)/opcode/m68k.h $(srcdir)/config/m68k-parse.h \
+  $(INCDIR)/elf/m68k.h $(INCDIR)/elf/reloc-macros.h
 TCDEP_m68k_hp300 = $(srcdir)/config/obj-hp300.h $(srcdir)/config/obj-aout.h \
   $(srcdir)/config/tc-m68k.h $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h \
   $(INCDIR)/obstack.h subsegs.h $(INCDIR)/opcode/m68k.h \

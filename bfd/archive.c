@@ -1,5 +1,5 @@
 /* BFD back-end for archive files (libraries).
-   Copyright 1990, 91, 92, 93, 94, 95, 96, 97, 1998
+   Copyright 1990, 91, 92, 93, 94, 95, 96, 97, 98, 1999
    Free Software Foundation, Inc.
    Written by Cygnus Support.  Mostly Gumby Henkel-Wallace's fault.
 
@@ -1178,7 +1178,7 @@ normalize (abfd, file)
 #else
 static const char *
 normalize (abfd, file)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      const char *file;
 {
   const char *filename = strrchr (file, '/');
@@ -1339,6 +1339,14 @@ _bfd_construct_extended_name_table (abfd, trailing_slash, tabloc, tablen)
 }
 
 /** A couple of functions for creating ar_hdrs */
+
+#ifndef HAVE_GETUID
+#define getuid() 0
+#endif
+
+#ifndef HAVE_GETGID
+#define getgid() 0
+#endif
 
 /* Takes a filename, returns an arelt_data for it, or NULL if it can't
    make one.  The filename must refer to a filename in the filesystem.
@@ -1901,13 +1909,8 @@ bsd_write_armap (arch, elength, map, orl_count, stridx)
   bfd_ardata (arch)->armap_datepos = (SARMAG
 				      + offsetof (struct ar_hdr, ar_date[0]));
   sprintf (hdr.ar_date, "%ld", bfd_ardata (arch)->armap_timestamp);
-#ifndef _WIN32
   sprintf (hdr.ar_uid, "%ld", (long) getuid ());
   sprintf (hdr.ar_gid, "%ld", (long) getgid ());
-#else
-  sprintf (hdr.ar_uid, "%ld", (long) 666);
-  sprintf (hdr.ar_gid, "%ld", (long) 42);
-#endif
   sprintf (hdr.ar_size, "%-10d", (int) mapsize);
   strncpy (hdr.ar_fmag, ARFMAG, 2);
   for (i = 0; i < sizeof (struct ar_hdr); i++)

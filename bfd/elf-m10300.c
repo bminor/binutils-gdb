@@ -1,5 +1,5 @@
 /* Matsushita 10300 specific support for 32-bit ELF
-   Copyright (C) 1996, 1997, 1998 Free Software Foundation, Inc.
+   Copyright (C) 1996, 1997, 1998, 1999 Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
 
@@ -290,7 +290,7 @@ static const struct mn10300_reloc_map mn10300_reloc_map[] =
 
 static reloc_howto_type *
 bfd_elf32_bfd_reloc_type_lookup (abfd, code)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      bfd_reloc_code_real_type code;
 {
   unsigned int i;
@@ -310,7 +310,7 @@ bfd_elf32_bfd_reloc_type_lookup (abfd, code)
 
 static void
 mn10300_info_to_howto (abfd, cache_ptr, dst)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      arelent *cache_ptr;
      Elf32_Internal_Rela *dst;
 {
@@ -385,7 +385,7 @@ mn10300_elf_check_relocs (abfd, info, sec, relocs)
 static asection *
 mn10300_elf_gc_mark_hook (abfd, info, rel, h, sym)
      bfd *abfd;
-     struct bfd_link_info *info;
+     struct bfd_link_info *info ATTRIBUTE_UNUSED;
      Elf_Internal_Rela *rel;
      struct elf_link_hash_entry *h;
      Elf_Internal_Sym *sym;
@@ -407,6 +407,9 @@ mn10300_elf_gc_mark_hook (abfd, info, rel, h, sym)
 
 	    case bfd_link_hash_common:
 	      return h->root.u.c.p->section;
+
+	    default:
+	      break;
 	    }
 	}
     }
@@ -431,15 +434,15 @@ mn10300_elf_final_link_relocate (howto, input_bfd, output_bfd,
 				 addend, info, sym_sec, is_local)
      reloc_howto_type *howto;
      bfd *input_bfd;
-     bfd *output_bfd;
+     bfd *output_bfd ATTRIBUTE_UNUSED;
      asection *input_section;
      bfd_byte *contents;
      bfd_vma offset;
      bfd_vma value;
      bfd_vma addend;
-     struct bfd_link_info *info;
-     asection *sym_sec;
-     int is_local;
+     struct bfd_link_info *info ATTRIBUTE_UNUSED;
+     asection *sym_sec ATTRIBUTE_UNUSED;
+     int is_local ATTRIBUTE_UNUSED;
 {
   unsigned long r_type = howto->type;
   bfd_byte *hit_data = contents + offset;
@@ -696,7 +699,7 @@ mn10300_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 static boolean
 elf32_mn10300_finish_hash_table_entry (gen_entry, in_args)
      struct bfd_hash_entry *gen_entry;
-     PTR in_args;
+     PTR in_args ATTRIBUTE_UNUSED;
 {
   struct elf32_mn10300_link_hash_entry *entry;
   unsigned int byte_count = 0;
@@ -849,7 +852,6 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 	      asection *sym_sec;
 	      const char *sym_name;
 	      char *new_name;
-	      Elf_Internal_Shdr *hdr;
 
 	      /* Get cached copy of section contents if it exists.  */
 	      if (elf_section_data (section)->this_hdr.contents != NULL)
@@ -1193,7 +1195,6 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 		  struct elf32_mn10300_link_hash_entry *sym_hash;
 		  asection *sym_sec;
 		  const char *sym_name;
-		  Elf_Internal_Shdr *hdr;
 		  char *new_name;
 
 		  bfd_elf32_swap_symbol_in (input_bfd, esym, &isym);
@@ -1461,7 +1462,6 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 	{
 	  Elf_Internal_Sym isym;
 	  asection *sym_sec;
-	  Elf_Internal_Shdr *hdr;
 	  const char *sym_name;
 	  char *new_name;
 
@@ -2735,13 +2735,9 @@ elf_mn10300_mach (flags)
 void
 _bfd_mn10300_elf_final_write_processing (abfd, linker)
      bfd *abfd;
-     boolean linker;
+     boolean linker ATTRIBUTE_UNUSED;
 {
   unsigned long val;
-  unsigned int i;
-  Elf_Internal_Shdr **hdrpp;
-  const char *name;
-  asection *sec;
 
   switch (bfd_get_mach (abfd))
     {

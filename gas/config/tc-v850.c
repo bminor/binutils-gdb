@@ -1,5 +1,5 @@
 /* tc-v850.c -- Assembler code for the NEC V850
-   Copyright (C) 1996, 1997, 1998 Free Software Foundation.
+   Copyright (C) 1996, 1997, 1998, 1999 Free Software Foundation.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -297,7 +297,7 @@ v850_comm (area)
 	}
     }
   
-  know (symbolP->sy_frag == & zero_address_frag);
+  know (symbol_get_frag (symbolP) == & zero_address_frag);
   
   if (*input_line_pointer != ',')
     have_align = 0;
@@ -323,7 +323,7 @@ v850_comm (area)
 	    }
 	}
       
-      if (symbolP->local)
+      if (symbol_get_obj (symbolP)->local)
 	{
 	  segT   old_sec;
 	  int    old_subsec;
@@ -421,24 +421,24 @@ v850_comm (area)
 	    {
 	    case AREA_SDA:
 	      if (S_GET_SEGMENT (symbolP) == sbss_section)
-		symbolP->sy_frag->fr_symbol = 0;
+		symbol_get_frag (symbolP)->fr_symbol = 0;
 	      break;
 
 	    case AREA_ZDA:
 	      if (S_GET_SEGMENT (symbolP) == zbss_section)
-		symbolP->sy_frag->fr_symbol = 0;
+		symbol_get_frag (symbolP)->fr_symbol = 0;
 	      break;
 
 	    case AREA_TDA:
 	      if (S_GET_SEGMENT (symbolP) == tbss_section)
-		symbolP->sy_frag->fr_symbol = 0;
+		symbol_get_frag (symbolP)->fr_symbol = 0;
 	      break;
 
 	    default:
-	      abort();
+	      abort ();
 	    }
 	  
-	  symbolP->sy_frag = frag_now;
+	  symbol_set_frag (symbolP, frag_now);
 	  pfrag = frag_var (rs_org, 1, 1, (relax_substateT) 0, symbolP,
 			    (offsetT) size, (char *) 0);
 	  *pfrag = 0;
@@ -548,7 +548,7 @@ v850_comm (area)
       goto allocate_common;
     }
 
-  symbolP->bsym->flags |= BSF_OBJECT;
+  symbol_get_bfdsym (symbolP)->flags |= BSF_OBJECT;
 
   demand_empty_rest_of_line ();
   return;
@@ -726,9 +726,9 @@ reg_name_search (regs, regcount, name, accept_numbers)
     {
       /* If the symbol is an alias for another name then use that.
 	 If the symbol is an alias for a number, then return the number.  */
-      if (symbolP->sy_value.X_op == O_symbol)
+      if (symbol_equated_p (symbolP))
 	{
-	  name = S_GET_NAME (symbolP->sy_value.X_add_symbol);
+	  name = S_GET_NAME (symbol_get_value_expression (symbolP)->X_add_symbol);
 	}
       else if (accept_numbers)
 	{
@@ -2243,7 +2243,8 @@ tc_gen_reloc (seg, fixp)
   arelent * reloc;
   
   reloc              = (arelent *) xmalloc (sizeof (arelent));
-  reloc->sym_ptr_ptr = & fixp->fx_addsy->bsym;
+  reloc->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
+  *reloc->sym_ptr_ptr= symbol_get_bfdsym (fixp->fx_addsy);
   reloc->address     = fixp->fx_frag->fr_address + fixp->fx_where;
   reloc->howto       = bfd_reloc_type_lookup (stdoutput, fixp->fx_r_type);
 

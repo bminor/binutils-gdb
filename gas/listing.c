@@ -375,7 +375,7 @@ listing_newline (ps)
 	      
 	      while (--len)
 		{
-		  char c = * src ++;
+		  unsigned char c = * src ++;
 
 		  /* Omit control characters in the listing.  */
 		  if (isascii (c) && ! iscntrl (c))
@@ -789,7 +789,7 @@ list_symbol_table ()
 	{
 #ifdef BFD_ASSEMBLER
 	  /* Don't report section symbols.  They are not interesting.  */
-	  if (ptr->bsym->flags & BSF_SECTION_SYM)
+	  if (symbol_section_p (ptr))
 	    continue;
 #endif
 	  if (S_GET_NAME (ptr))
@@ -821,11 +821,11 @@ list_symbol_table ()
 		  got_some = 1;
 		}
 
-	      if (ptr->sy_frag && ptr->sy_frag->line)
+	      if (symbol_get_frag (ptr) && symbol_get_frag (ptr)->line)
 		{
 		  fprintf (list_file, "%20s:%-5d  %s:%s %s\n",
-			   ptr->sy_frag->line->file->filename,
-			   ptr->sy_frag->line->line,
+			   symbol_get_frag (ptr)->line->file->filename,
+			   symbol_get_frag (ptr)->line->line,
 			   segment_name (S_GET_SEGMENT (ptr)),
 			   buf, S_GET_NAME (ptr));
 		}
@@ -978,7 +978,7 @@ debugging_pseudo (list, line)
 
 static void
 listing_listing (name)
-     char *name;
+     char *name ATTRIBUTE_UNUSED;
 {
   list_info_type *list = head;
   file_info_type *current_hll_file = (file_info_type *) NULL;
@@ -1006,7 +1006,7 @@ listing_listing (name)
 
   while (list)
     {
-      int list_line;
+      unsigned int list_line;
 
       width = listing_rhs_width > paper_width ? paper_width :
 	listing_rhs_width;
@@ -1180,7 +1180,7 @@ listing_file (name)
 
 void
 listing_eject (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   if (listing)
     listing_tail->edict = EDICT_EJECT;
@@ -1188,7 +1188,7 @@ listing_eject (ignore)
 
 void
 listing_flags (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   while ((*input_line_pointer++) && (*input_line_pointer != '\n'))
     input_line_pointer++;
@@ -1261,7 +1261,7 @@ listing_psize (width_only)
 
 void
 listing_nopage (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   paper_height = 0;
 }

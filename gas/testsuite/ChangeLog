@@ -1,3 +1,91 @@
+1999-06-13  Ian Lance Taylor  <ian@zembu.com>
+
+	* gas/i386/katmai.d: Tweak for recent disassembler changes.
+
+1999-06-12  Ian Lance Taylor  <ian@zembu.com>
+
+	* gas/elf/elf.exp: Don't run tests on "*-*-linux*aout*" or
+	"*-*-linux*oldld*".
+	* gas/vtable/vtable.exp: Likewise.
+	* gas/i386/reloc.d: Modify expected reloc names to accept a.out
+	names.
+
+	* gas/i386/amd.s: Add a symbol so a.out tests will work.
+	* gas/i386/katmai.s: Likewise.
+	* gas/i386/amd.d: Corresponding change.
+	* gas/i386/katmai.d: Corresponding change.
+
+1999-06-10  Ian Lance Taylor  <ian@zembu.com>
+
+	* gas/mips/sync.d: Pass -mips2 to the assembler.
+
+	* gas/mips/elf_e_flags.s: Tweak code so that the tests pass for
+	mips-elf target as well as mips64-elf target.
+	* gas/mips/elf_e_flags1.d: Corresponding changes.
+	* gas/mips/elf_e_flags2.d: Likewise.
+	* gas/mips/elf_e_flags3.d: Likewise.
+	* gas/mips/elf_e_flags4.d: Likewise.
+
+	* gas/elf/elf.exp: Add setup_xfail for mips*-*-*.
+
+	* gas/all/itbl-test.c (main): Update itbl_get_reg_val call for new
+	parameter.
+
+1999-06-10  Jakub Jelinek  <jj@ultra.linux.cz>
+
+	* gas/sparc/synth64.s: Add checks for single register signx/clruw.
+	* gas/sparc/set64.s: Add tests for setuw and setsw synthetic insns.
+	* gas/sparc/prefetch.d: Add -64 as switch.
+	* gas/sparc/rdpr.d: Ditto.
+	* gas/sparc/wrpr.d: Ditto.
+	* gas/sparc/synth64.d: Ditto, reflect synth64.s changes.
+	* gas/sparc/reloc64.d: Add -64 as switch, be more tolerant, as
+	current gas outputs %hi(0) and not %hi(0x0).
+	* gas/sparc/set64.d: Add -64 as switch, reflect set64.s changes and
+	optimizations for setx instruction.
+	* gas/sparc/sparc.exp: Do sparc64*-*-* checks if it is any of the
+	compiled-in targets.
+
+1999-06-10  Richard Henderson  <rth@cygnus.com>
+
+	* gas/macros/irp.s: Use `foo' and `bar' instead of `r' and `s'.
+	* gas/macros/rept.s, gas/macros/test2.s, gas/macros/test3.s: Likewise.
+	* gas/macros/{irp,rept,test2,test3}.d: Update.
+
+1999-06-05  Richard Henderson  <rth@cygnus.com>
+
+	* gas/elf/elf.exp: New directory.
+	* gas/elf/section0.[sd]: New test.
+	* gas/elf/section1.[sd]: New test.
+
+1999-06-03  Philip Blundell  <philb@gnu.org>
+
+	* gas/arm/arm7t.d, gas/arm/inst.d: Update to match current gas,
+ 	bfd and opcodes.
+
+1999-05-28  Ian Lance Taylor  <ian@zembu.com>
+
+	* gas/vtable/vtable.exp: Don't run test for i960 yet.
+
+1999-05-17  Nick Clifton  <nickc@cygnus.com>
+
+	* gas/mcore/allinsn.d: Updated to match latest objdump output.
+
+1999-05-12  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	* gas/i386/opcode.d: Modify callw to suit disasm fix.
+
+	* gas/i386/amd.d: Modify a '(bad)' to SIMD instruction.
+
+	* gas/i386/amd.s: Pad to multiple of 8
+	* gas/i386/amd.d: Here too.
+
+	* gas/i386/prefix.[sd]: Align with nops
+	* gas/i386/reloc.[sd]: Here too.
+
+	* gas/i386/katmai.[sd]: New for PIII SIMD
+	* gas/i386/i386.exp: Call it.
+
 1999-05-02  Nick Clifton  <nickc@cygnus.com>
 
 	* gas/mcore/allinsn.d: Update to match latest assembler

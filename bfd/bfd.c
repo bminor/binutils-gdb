@@ -1,5 +1,5 @@
 /* Generic BFD library interface and support routines.
-   Copyright (C) 1990, 91, 92, 93, 94, 95, 96, 97, 1998
+   Copyright (C) 1990, 91, 92, 93, 94, 95, 96, 97, 98, 1999
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
@@ -618,7 +618,7 @@ DESCRIPTION
 /*ARGSUSED*/
 void
 bfd_set_reloc (ignore_abfd, asect, location, count)
-     bfd *ignore_abfd;
+     bfd *ignore_abfd ATTRIBUTE_UNUSED;
      sec_ptr asect;
      arelent **location;
      unsigned int count;

@@ -1,5 +1,5 @@
 /* expr.c -operands, expressions-
-   Copyright (C) 1987, 90, 91, 92, 93, 94, 95, 96, 97, 1998
+   Copyright (C) 1987, 90, 91, 92, 93, 94, 95, 96, 97, 98, 1999
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -34,6 +34,10 @@
 #include "obstack.h"
 
 static void floating_constant PARAMS ((expressionS * expressionP));
+static valueT generic_bignum_to_int32 PARAMS ((void));
+#ifdef BFD64
+static valueT generic_bignum_to_int64 PARAMS ((void));
+#endif
 static void integer_constant PARAMS ((int radix, expressionS * expressionP));
 static void mri_char_constant PARAMS ((expressionS *));
 static void current_location PARAMS ((expressionS *));
@@ -100,7 +104,7 @@ make_expr_symbol (expressionP)
 			    ? absolute_section
 			    : expr_section),
 			   0, &zero_address_frag);
-  symbolP->sy_value = *expressionP;
+  symbol_set_value_expression (symbolP, expressionP);
 
   if (expressionP->X_op == O_constant)
     resolve_symbol_value (symbolP, 1);
@@ -985,7 +989,9 @@ operand (expressionP)
       break;
 
     case '(':
+#ifndef NEED_INDEX_OPERATOR
     case '[':
+#endif
       /* didn't begin with digit & not a name */
       segment = expression (expressionP);
       /* Expression() will pass trailing whitespace */
@@ -1305,7 +1311,7 @@ operand (expressionP)
 
   /* The PA port needs this information.  */
   if (expressionP->X_add_symbol)
-    expressionP->X_add_symbol->sy_used = 1;
+    symbol_mark_used (expressionP->X_add_symbol);
 
   switch (expressionP->X_op)
     {
@@ -1352,8 +1358,8 @@ clean_up_expression (expressionP)
       break;
     case O_subtract:
       if (expressionP->X_op_symbol == expressionP->X_add_symbol
-	  || ((expressionP->X_op_symbol->sy_frag
-	       == expressionP->X_add_symbol->sy_frag)
+	  || ((symbol_get_frag (expressionP->X_op_symbol)
+	       == symbol_get_frag (expressionP->X_add_symbol))
 	      && SEG_NORMAL (S_GET_SEGMENT (expressionP->X_add_symbol))
 	      && (S_GET_VALUE (expressionP->X_op_symbol)
 		  == S_GET_VALUE (expressionP->X_add_symbol))))
@@ -1411,7 +1417,13 @@ static const operatorT op_encoding[256] =
   __, __, __, __, __, __, __, __,
   __, __, __, __, __, __, __, __,
   __, __, __, __, __, __, __, __,
-  __, __, __, __, __, __, O_bit_exclusive_or, __,
+  __, __, __,
+#ifdef NEED_INDEX_OPERATOR
+  O_index,
+#else
+  __,
+#endif
+  __, __, O_bit_exclusive_or, __,
   __, __, __, __, __, __, __, __,
   __, __, __, __, __, __, __, __,
   __, __, __, __, __, __, __, __,
@@ -1449,28 +1461,29 @@ static operator_rankT op_rank[] =
   0,	/* O_symbol_rva */
   0,	/* O_register */
   0,	/* O_bit */
-  8,	/* O_uminus */
-  8,	/* O_bit_not */
-  8,	/* O_logical_not */
-  7,	/* O_multiply */
-  7,	/* O_divide */
-  7,	/* O_modulus */
-  7,	/* O_left_shift */
-  7,	/* O_right_shift */
-  6,	/* O_bit_inclusive_or */
-  6,	/* O_bit_or_not */
-  6,	/* O_bit_exclusive_or */
-  6,	/* O_bit_and */
-  4,	/* O_add */
-  4,	/* O_subtract */
-  3,	/* O_eq */
-  3,	/* O_ne */
-  3,	/* O_lt */
-  3,	/* O_le */
-  3,	/* O_ge */
-  3,	/* O_gt */
-  2,	/* O_logical_and */
-  1	/* O_logical_or */
+  9,	/* O_uminus */
+  9,	/* O_bit_not */
+  9,	/* O_logical_not */
+  8,	/* O_multiply */
+  8,	/* O_divide */
+  8,	/* O_modulus */
+  8,	/* O_left_shift */
+  8,	/* O_right_shift */
+  7,	/* O_bit_inclusive_or */
+  7,	/* O_bit_or_not */
+  7,	/* O_bit_exclusive_or */
+  7,	/* O_bit_and */
+  5,	/* O_add */
+  5,	/* O_subtract */
+  4,	/* O_eq */
+  4,	/* O_ne */
+  4,	/* O_lt */
+  4,	/* O_le */
+  4,	/* O_ge */
+  4,	/* O_gt */
+  3,	/* O_logical_and */
+  2,	/* O_logical_or */
+  1,	/* O_index */
 };
 
 /* Unfortunately, in MRI mode for the m68k, multiplication and
@@ -1637,6 +1650,17 @@ expr (rank, resultP)
 
       know (*input_line_pointer != ' ');
 
+      if (op_left == O_index)
+	{
+	  if (*input_line_pointer != ']')
+	    as_bad ("missing right bracket");
+	  else
+	    {
+	      ++input_line_pointer;
+	      SKIP_WHITESPACE ();
+	    }
+	}
+
       if (retval == undefined_section)
 	{
 	  if (SEG_NORMAL (rightseg))
@@ -1696,8 +1720,8 @@ expr (rank, resultP)
       else if (op_left == O_subtract
 	       && right.X_op == O_symbol
 	       && resultP->X_op == O_symbol
-	       && (right.X_add_symbol->sy_frag
-		   == resultP->X_add_symbol->sy_frag)
+	       && (symbol_get_frag (right.X_add_symbol)
+		   == symbol_get_frag (resultP->X_add_symbol))
 	       && SEG_NORMAL (S_GET_SEGMENT (right.X_add_symbol)))
 
 	{
@@ -1811,7 +1835,7 @@ expr (rank, resultP)
 
   /* The PA port needs this information.  */
   if (resultP->X_add_symbol)
-    resultP->X_add_symbol->sy_used = 1;
+    symbol_mark_used (resultP->X_add_symbol);
 
   return resultP->X_op == O_constant ? absolute_section : retval;
 }
@@ -1839,9 +1863,13 @@ get_symbol_end ()
   /* We accept \001 in a name in case this is being called with a
      constructed string.  */
   if (is_name_beginner (c = *input_line_pointer++) || c == '\001')
-    while (is_part_of_name (c = *input_line_pointer++)
-	   || c == '\001')
-      ;
+    {
+      while (is_part_of_name (c = *input_line_pointer++)
+	     || c == '\001')
+	;
+      if (is_name_ender (c))
+	c = *input_line_pointer++;
+    }
   *--input_line_pointer = 0;
   return (c);
 }

@@ -85,7 +85,7 @@ extern int tc_get_register PARAMS ((int frame));
 extern void alpha_frob_ecoff_data PARAMS ((void));
 
 #define tc_frob_label(sym) alpha_define_label (sym)
-extern void alpha_define_label PARAMS ((struct symbol *));
+extern void alpha_define_label PARAMS ((symbolS *));
 
 #define md_cons_align(nbytes) alpha_cons_align (nbytes)
 extern void alpha_cons_align PARAMS ((int));

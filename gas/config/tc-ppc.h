@@ -1,5 +1,5 @@
 /* tc-ppc.h -- Header file for tc-ppc.c.
-   Copyright (C) 1994, 1995, 1996, 1997, 1998 Free Software Foundation, Inc.
+   Copyright (C) 1994, 95, 96, 97, 98, 1999 Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
 
    This file is part of GAS, the GNU Assembler.
@@ -121,7 +121,7 @@ extern int ppc_pe_fix_adjustable PARAMS ((struct fix *));
 struct ppc_tc_sy
 {
   /* We keep a few linked lists of symbols.  */
-  struct symbol *next;
+  symbolS *next;
   /* Non-zero if the symbol should be output.  The RS/6000 assembler
      only outputs symbols that are external or are mentioned in a
      .globl or .lglobl statement.  */
@@ -137,11 +137,11 @@ struct ppc_tc_sy
   int align;
   /* For a function symbol, a symbol whose value is the size.  The
      field is NULL if there is no size.  */
-  struct symbol *size;
+  symbolS *size;
   /* For a csect symbol, the last symbol which has been defined in
      this csect, or NULL if none have been defined so far.  For a .bs
      symbol, the referenced csect symbol.  */
-  struct symbol *within;
+  symbolS *within;
 };
 
 #define TC_SYMFIELD_TYPE struct ppc_tc_sy
@@ -158,11 +158,11 @@ extern char *ppc_canonicalize_symbol_name PARAMS ((char *));
 
 /* Get the symbol class from the name.  */
 #define tc_symbol_new_hook(sym) ppc_symbol_new_hook (sym)
-extern void ppc_symbol_new_hook PARAMS ((struct symbol *));
+extern void ppc_symbol_new_hook PARAMS ((symbolS *));
 
 /* Set the symbol class of a label based on the csect.  */
 #define tc_frob_label(sym) ppc_frob_label (sym)
-extern void ppc_frob_label PARAMS ((struct symbol *));
+extern void ppc_frob_label PARAMS ((symbolS *));
 
 /* TOC relocs requires special handling.  */
 #define tc_fix_adjustable(fixp) ppc_fix_adjustable (fixp)
@@ -178,7 +178,7 @@ extern void ppc_frob_section PARAMS ((asection *));
 
 /* Finish up the symbol.  */
 #define tc_frob_symbol(sym, punt) punt = ppc_frob_symbol (sym)
-extern int ppc_frob_symbol PARAMS ((struct symbol *));
+extern int ppc_frob_symbol PARAMS ((symbolS *));
 
 /* Finish up the entire symtab.  */
 #define tc_adjust_symtab() ppc_adjust_symtab ()
@@ -203,18 +203,18 @@ extern void ppc_adjust_symtab PARAMS ((void));
 
 #define TC_FORCE_RELOCATION_SECTION(FIXP,SEC)				\
 (TC_FORCE_RELOCATION (FIXP)						\
- || ((FIXP)->fx_addsy && !(FIXP)->fx_subsy && (FIXP)->fx_addsy->bsym	\
-     && (FIXP)->fx_addsy->bsym->section != SEC))
+ || ((FIXP)->fx_addsy && !(FIXP)->fx_subsy				\
+     && S_GET_SEGMENT ((FIXP)->fx_addsy) != SEC))
 
 /* Support for SHF_EXCLUDE and SHT_ORDERED */
 extern int ppc_section_letter PARAMS ((int, char **));
-extern int ppc_section_type PARAMS ((char **));
-extern int ppc_section_word PARAMS ((char **));
+extern int ppc_section_type PARAMS ((char *, size_t));
+extern int ppc_section_word PARAMS ((char *, size_t));
 extern int ppc_section_flags PARAMS ((int, int, int));
 
 #define md_elf_section_letter(LETTER, PTR_MSG)	ppc_section_letter (LETTER, PTR_MSG)
-#define md_elf_section_type(PTR_STR)		ppc_section_type (PTR_STR)
-#define md_elf_section_word(PTR_STR)		ppc_section_word (PTR_STR)
+#define md_elf_section_type(STR, LEN)		ppc_section_type (STR, LEN)
+#define md_elf_section_word(STR, LEN)		ppc_section_word (STR, LEN)
 #define md_elf_section_flags(FLAGS, ATTR, TYPE)	ppc_section_flags (FLAGS, ATTR, TYPE)
 
 /* Add extra PPC sections -- Note, for now, make .sbss2 and .PPC.EMB.sbss0 a
@@ -247,8 +247,7 @@ extern const char *ppc_comment_chars;
        || ((FIX)->fx_subsy != NULL					\
 	   && (S_GET_SEGMENT ((FIX)->fx_subsy)				\
 	       == S_GET_SEGMENT ((FIX)->fx_addsy)))			\
-       || strchr (S_GET_NAME ((FIX)->fx_addsy), '\001') != NULL		\
-       || strchr (S_GET_NAME ((FIX)->fx_addsy), '\002') != NULL))
+       || S_IS_LOCAL ((FIX)->fx_addsy)))
 
 /* We must never ever try to resolve references to externally visible
    symbols in the assembler, because the .o file might go into a shared

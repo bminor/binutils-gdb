@@ -447,9 +447,14 @@ write_coff_file (filename, target, resources)
   if (! bfd_set_format (abfd, bfd_object))
     bfd_fatal ("bfd_set_format");
 
+#ifdef DLLTOOL_ARM
+  if (! bfd_set_arch_mach (abfd, bfd_arch_arm, 0))
+    bfd_fatal ("bfd_set_arch_mach(arm)");
+#else
   /* FIXME: This is obviously i386 specific.  */
   if (! bfd_set_arch_mach (abfd, bfd_arch_i386, 0))
-    bfd_fatal ("bfd_set_arch_mach");
+    bfd_fatal ("bfd_set_arch_mach(i386)");
+#endif /* arm */
 
   if (! bfd_set_file_flags (abfd, HAS_SYMS | HAS_RELOC))
     bfd_fatal ("bfd_set_file_flags");

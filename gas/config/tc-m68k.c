@@ -1,5 +1,5 @@
 /* tc-m68k.c -- Assemble for the m68k family
-   Copyright (C) 1987, 91, 92, 93, 94, 95, 96, 97, 1998
+   Copyright (C) 1987, 91, 92, 93, 94, 95, 96, 97, 98, 1999
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -26,6 +26,10 @@
 
 #include "opcode/m68k.h"
 #include "m68k-parse.h"
+
+#if defined (OBJ_ELF)
+#include "elf/m68k.h"
+#endif
 
 /* This string holds the chars that always start a comment.  If the
    pre-processor is disabled, these aren't very useful.  The macro
@@ -189,7 +193,7 @@ static const enum m68k_register m68060_control_regs[] = {
   USP, VBR, URP, SRP, PCR,
   0
 };
-static const enum m68k_register mcf5200_control_regs[] = {
+static const enum m68k_register mcf_control_regs[] = {
   CACR, TC, ITT0, ITT1, DTT0, DTT1, VBR, ROMBAR, 
   RAMBAR0, RAMBAR1, MBAR,
   0
@@ -247,9 +251,10 @@ struct m68k_it
   reloc[5];			/* Five is enough??? */
 };
 
-#define cpu_of_arch(x)		((x) & (m68000up|mcf5200))
+#define cpu_of_arch(x)		((x) & (m68000up|mcf))
 #define float_of_arch(x)	((x) & mfloat)
 #define mmu_of_arch(x)		((x) & mmmu)
+#define arch_coldfire_p(x)	(((x) & mcf) != 0)
 
 /* Macros for determining if cpu supports a specific addressing mode */
 #define HAVE_LONG_BRANCH(x)	((x) & (m68020|m68030|m68040|m68060|cpu32))
@@ -391,6 +396,8 @@ static const struct m68k_cpu archs[] = {
   { m68881, "68881", 0 },
   { m68851, "68851", 0 },
   { mcf5200, "5200", 0 },
+  { mcf5206e, "5206e", 0 },
+  { mcf5307, "5307", 0},
   /* Aliases (effectively, so far as gas is concerned) for the above
      cpus.  */
   { m68020, "68k", 1 },
@@ -418,6 +425,9 @@ static const struct m68k_cpu archs[] = {
   { cpu32,  "68349", 1 },
   { cpu32,  "68360", 1 },
   { m68881, "68882", 1 },
+  { mcf5200, "5202", 1 },
+  { mcf5200, "5204", 1 },
+  { mcf5200, "5206", 1 },
 };
 
 static const int n_archs = sizeof (archs) / sizeof (archs[0]);
@@ -897,7 +907,8 @@ tc_gen_reloc (section, fixp)
 #undef MAP
 
   reloc = (arelent *) xmalloc (sizeof (arelent));
-  reloc->sym_ptr_ptr = &fixp->fx_addsy->bsym;
+  reloc->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
+  *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
   reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;
 #ifndef OBJ_ELF
   if (fixp->fx_pcrel)
@@ -1471,8 +1482,23 @@ m68k_ip (instring)
 		    losing++;
 		  break;
 
+		case 'E':
+		  if (opP->reg != ACC)
+		    losing++;
+		  break;
+
 		case 'F':
 		  if (opP->mode != FPREG)
+		    losing++;
+		  break;
+
+		case 'G':
+		  if (opP->reg != MACSR)
+		    losing++;
+		  break;
+
+		case 'H':
+		  if (opP->reg != MASK)
 		    losing++;
 		  break;
 
@@ -1737,6 +1763,19 @@ m68k_ip (instring)
 		    ++losing;
 		  break;
 
+		case 'u':
+		  if (opP->reg < DATA0L || opP->reg > ADDR7U)
+		    losing++;
+		  /* FIXME: kludge instead of fixing parser:
+                     upper/lower registers are *not* CONTROL
+                     registers, but ordinary ones. */
+		  if ((opP->reg >= DATA0L && opP->reg <= DATA7L)
+		      || (opP->reg >= DATA0U && opP->reg <= DATA7U))
+		    opP->mode = DREG;
+		  else
+		    opP->mode = AREG;
+		  break;
+
 		default:
 		  abort ();
 		}		/* switch on type of operand */
@@ -1994,11 +2033,11 @@ m68k_ip (instring)
 		      && ((opP->disp.size == SIZE_UNSPEC
 			   && flag_short_refs == 0
 			   && cpu_of_arch (current_architecture) >= m68020
-			   && cpu_of_arch (current_architecture) != mcf5200)
+			   && ! arch_coldfire_p (current_architecture))
 			  || opP->disp.size == SIZE_LONG)))
 		{
 		  if (cpu_of_arch (current_architecture) < m68020
-		      || cpu_of_arch (current_architecture) == mcf5200)
+		      || arch_coldfire_p (current_architecture))
 		    opP->error =
 		      _("displacement too large for this architecture; needs 68020 or higher");
 		  if (opP->reg == PC)
@@ -2107,11 +2146,15 @@ m68k_ip (instring)
 		  if ((opP->index.scale != 1 
 		       && cpu_of_arch (current_architecture) < m68020)
 		      || (opP->index.scale == 8 
-			  && current_architecture == mcf5200))
+			  && arch_coldfire_p (current_architecture)))
 		    {
 		      opP->error =
 			_("scale factor invalid on this architecture; needs cpu32 or 68020 or higher");
 		    }
+
+		  if (arch_coldfire_p (current_architecture)
+		      && opP->index.size == SIZE_WORD)
+		    opP->error = _("invalid index size for coldfire");
 
 		  switch (opP->index.scale)
 		    {
@@ -2144,7 +2187,7 @@ m68k_ip (instring)
 		    {
 		      if (siz1 == SIZE_BYTE
 			  || cpu_of_arch (current_architecture) < m68020
-			  || cpu_of_arch (current_architecture) == mcf5200
+			  || arch_coldfire_p (current_architecture)
 			  || (siz1 == SIZE_UNSPEC
 			      && ! isvar (&opP->disp)
 			      && issbyte (baseo)))
@@ -2211,7 +2254,7 @@ m68k_ip (instring)
 	      /* It isn't simple.  */
 
 	      if (cpu_of_arch (current_architecture) < m68020
-		  || cpu_of_arch (current_architecture) == mcf5200)
+		  || arch_coldfire_p (current_architecture))
 		opP->error =
 		  _("invalid operand mode for this architecture; needs 68020 or higher");
 
@@ -2570,8 +2613,15 @@ m68k_ip (instring)
 	  install_operand (s[1], opP->reg - DATA);
 	  break;
 
+	case 'E':		/* Ignore it */
+	  break;
+
 	case 'F':
 	  install_operand (s[1], opP->reg - FP0);
+	  break;
+
+	case 'G':		/* Ignore it */
+	case 'H':
 	  break;
 
 	case 'I':
@@ -2901,6 +2951,11 @@ m68k_ip (instring)
 	  addword (tmpreg >> 16);
 	  addword (tmpreg & 0xFFFF);
 	  break;
+	case 'u':
+	  install_operand (s[1], opP->reg - DATA0L);
+	  opP->reg -= (DATA0L);
+	  opP->reg &= 0x0F;	/* remove upper/lower bit */
+	  break;
 	default:
 	  abort ();
 	}
@@ -3039,6 +3094,30 @@ install_operand (mode, val)
     case 'L':
       the_ins.opcode[1] = (val >> 16);
       the_ins.opcode[2] = val & 0xffff;
+      break;
+    case 'm':
+      the_ins.opcode[0] |= ((val & 0x8) << (6 - 3));
+      the_ins.opcode[0] |= ((val & 0x7) << 9);
+      the_ins.opcode[1] |= ((val & 0x10) << (7 - 4));
+      break;
+    case 'n':
+      the_ins.opcode[0] |= ((val & 0x8) << (6 - 3));
+      the_ins.opcode[0] |= ((val & 0x7) << 9);
+      break;
+    case 'o':
+      the_ins.opcode[1] |= val << 12;
+      the_ins.opcode[1] |= ((val & 0x10) << (7 - 4));
+      break;
+    case 'M':
+      the_ins.opcode[0] |= (val & 0xF);
+      the_ins.opcode[1] |= ((val & 0x10) << (6 - 4));
+      break;
+    case 'N':
+      the_ins.opcode[1] |= (val & 0xF);
+      the_ins.opcode[1] |= ((val & 0x10) << (6 - 4));
+      break;
+    case 'h':
+      the_ins.opcode[1] |= ((val != 1) << 10);
       break;
     case 'c':
     default:
@@ -3241,6 +3320,10 @@ static const struct init_entry init_table[] =
   { "ccr", CCR },
   { "cc", CCR },
 
+  { "acc", ACC },
+  { "macsr", MACSR },
+  { "mask", MASK },
+
   /* control registers */
   { "sfc", SFC },		/* Source Function Code */
   { "sfcr", SFC },
@@ -3344,6 +3427,43 @@ static const struct init_entry init_table[] =
   { "za5", ZADDR5 },
   { "za6", ZADDR6 },
   { "za7", ZADDR7 },
+
+  /* Upper and lower data and address registers, used by macw and msacw. */
+  { "d0l", DATA0L },
+  { "d1l", DATA1L },
+  { "d2l", DATA2L },
+  { "d3l", DATA3L },
+  { "d4l", DATA4L },
+  { "d5l", DATA5L },
+  { "d6l", DATA6L },
+  { "d7l", DATA7L },
+
+  { "a0l", ADDR0L },
+  { "a1l", ADDR1L },
+  { "a2l", ADDR2L },
+  { "a3l", ADDR3L },
+  { "a4l", ADDR4L },
+  { "a5l", ADDR5L },
+  { "a6l", ADDR6L },
+  { "a7l", ADDR7L },
+
+  { "d0u", DATA0U },
+  { "d1u", DATA1U },
+  { "d2u", DATA2U },
+  { "d3u", DATA3U },
+  { "d4u", DATA4U },
+  { "d5u", DATA5U },
+  { "d6u", DATA6U },
+  { "d7u", DATA7U },
+
+  { "a0u", ADDR0U },
+  { "a1u", ADDR1U },
+  { "a2u", ADDR2U },
+  { "a3u", ADDR3U },
+  { "a4u", ADDR4U },
+  { "a5u", ADDR5U },
+  { "a6u", ADDR6U },
+  { "a7u", ADDR7U },
 
   { 0, 0 }
 };
@@ -3779,7 +3899,9 @@ select_control_regs ()
       control_regs = cpu32_control_regs;
       break;
     case mcf5200:
-      control_regs = mcf5200_control_regs;
+    case mcf5206e:
+    case mcf5307:
+      control_regs = mcf_control_regs;
       break;
     default:
       abort ();
@@ -3853,7 +3975,7 @@ m68k_init_after_args ()
   select_control_regs ();
 
   if (cpu_of_arch (current_architecture) < m68020
-      || cpu_of_arch (current_architecture) == mcf5200)
+      || arch_coldfire_p (current_architecture))
     md_relax_table[TAB (PCINDEX, BYTE)].rlx_more = 0;
 }
 
@@ -4171,7 +4293,7 @@ md_convert_frag_1 (fragP)
   disp = (disp + fragP->fr_offset) - object_address;
 
 #ifdef BFD_ASSEMBLER
-  disp += fragP->fr_symbol->sy_frag->fr_address;
+  disp += symbol_get_frag (fragP->fr_symbol)->fr_address;
 #endif
 
   switch (fragP->fr_subtype)
@@ -4373,8 +4495,8 @@ md_convert_frag (headers, sec, fragP)
 
 void
 md_convert_frag (abfd, sec, fragP)
-     bfd *abfd;
-     segT sec;
+     bfd *abfd ATTRIBUTE_UNUSED;
+     segT sec ATTRIBUTE_UNUSED;
      fragS *fragP;
 {
   md_convert_frag_1 (fragP);
@@ -4620,14 +4742,14 @@ md_estimate_size_before_relax (fragP, segment)
 	 word mode.  */
       if (fragP->fr_symbol && S_GET_VALUE (fragP->fr_symbol) == 0)
 	{
+	  fragS *stop;
 	  fragS *l;
 
-	  for (l = fragP->fr_next;
-	       l != fragP->fr_symbol->sy_frag;
-	       l = l->fr_next)
+	  stop = symbol_get_frag (fragP->fr_symbol);
+	  for (l = fragP->fr_next; l != stop; l = l->fr_next)
 	    if (l->fr_fix + l->fr_var != 0)
 	      break;
-	  if (l == fragP->fr_symbol->sy_frag)
+	  if (l == stop)
 	    {
 	      fragP->fr_subtype = TAB (TABTYPE (fragP->fr_subtype), SHORT);
 	      fragP->fr_var += 2;
@@ -4712,8 +4834,8 @@ void
 md_create_short_jump (ptr, from_addr, to_addr, frag, to_symbol)
      char *ptr;
      addressT from_addr, to_addr;
-     fragS *frag;
-     symbolS *to_symbol;
+     fragS *frag ATTRIBUTE_UNUSED;
+     symbolS *to_symbol ATTRIBUTE_UNUSED;
 {
   valueT offset;
 
@@ -4898,7 +5020,7 @@ get_num (exp, ok)
 
 static void
 s_data1 (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   subseg_set (data_section, 1);
   demand_empty_rest_of_line ();
@@ -4906,7 +5028,7 @@ s_data1 (ignore)
 
 static void
 s_data2 (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   subseg_set (data_section, 2);
   demand_empty_rest_of_line ();
@@ -4914,7 +5036,7 @@ s_data2 (ignore)
 
 static void
 s_bss (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   /* We don't support putting frags in the BSS segment, we fake it
      by marking in_bss, then looking at s_skip for clues.  */
@@ -4925,7 +5047,7 @@ s_bss (ignore)
 
 static void
 s_even (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   register int temp;
   register long temp_fill;
@@ -4940,7 +5062,7 @@ s_even (ignore)
 
 static void
 s_proc (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   demand_empty_rest_of_line ();
 }
@@ -5016,7 +5138,7 @@ mri_chip ()
 
 static void
 s_chip (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   char *stop = NULL;
   char stopc;
@@ -5033,7 +5155,7 @@ s_chip (ignore)
 
 static void
 s_fopt (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   SKIP_WHITESPACE ();
 
@@ -5143,7 +5265,7 @@ static const struct opt_action opt_table[] =
 
 static void
 s_opt (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   do
     {
@@ -5211,8 +5333,8 @@ s_opt (ignore)
 
 static void
 skip_to_comma (arg, on)
-     int arg;
-     int on;
+     int arg ATTRIBUTE_UNUSED;
+     int on ATTRIBUTE_UNUSED;
 {
   while (*input_line_pointer != ','
 	 && ! is_end_of_line[(unsigned char) *input_line_pointer])
@@ -5223,8 +5345,8 @@ skip_to_comma (arg, on)
 
 static void
 opt_nest (arg, on)
-     int arg;
-     int on;
+     int arg ATTRIBUTE_UNUSED;
+     int on ATTRIBUTE_UNUSED;
 {
   if (*input_line_pointer != '=')
     {
@@ -5240,8 +5362,8 @@ opt_nest (arg, on)
 
 static void
 opt_chip (arg, on)
-     int arg;
-     int on;
+     int arg ATTRIBUTE_UNUSED;
+     int on ATTRIBUTE_UNUSED;
 {
   if (*input_line_pointer != '=')
     {
@@ -5257,7 +5379,7 @@ opt_chip (arg, on)
 
 static void
 opt_list (arg, on)
-     int arg;
+     int arg ATTRIBUTE_UNUSED;
      int on;
 {
   listing_list (on);
@@ -5267,7 +5389,7 @@ opt_list (arg, on)
 
 static void
 opt_list_symbols (arg, on)
-     int arg;
+     int arg ATTRIBUTE_UNUSED;
      int on;
 {
   if (on)
@@ -5280,7 +5402,7 @@ opt_list_symbols (arg, on)
 
 static void
 s_reg (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   char *s;
   int c;
@@ -5351,7 +5473,7 @@ s_reg (ignore)
 
   S_SET_SEGMENT (line_label, reg_section);
   S_SET_VALUE (line_label, ~mask);
-  line_label->sy_frag = &zero_address_frag;
+  symbol_set_frag (line_label, &zero_address_frag);
 
   if (flag_mri)
     mri_comment_end (stop, stopc);
@@ -5384,7 +5506,7 @@ static struct save_opts *save_stack;
 
 static void
 s_save (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   struct save_opts *s;
 
@@ -5409,7 +5531,7 @@ s_save (ignore)
 
 static void
 s_restore (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   struct save_opts *s;
 
@@ -6086,7 +6208,7 @@ s_mri_else (qual)
 
 static void
 s_mri_endi (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   if (mri_control_stack == NULL
       || mri_control_stack->type != mri_if)
@@ -6429,7 +6551,7 @@ s_mri_for (qual)
 
 static void
 s_mri_endf (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   if (mri_control_stack == NULL
       || mri_control_stack->type != mri_for)
@@ -6465,7 +6587,7 @@ s_mri_endf (ignore)
 
 static void
 s_mri_repeat (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   struct mri_control_info *n;
 
@@ -6570,7 +6692,7 @@ s_mri_while (qual)
 
 static void
 s_mri_endw (ignore)
-     int ignore;
+     int ignore ATTRIBUTE_UNUSED;
 {
   char *buf;
 
@@ -6929,7 +7051,7 @@ is_label (str)
 /* ARGSUSED */
 symbolS *
 md_undefined_symbol (name)
-     char *name;
+     char *name ATTRIBUTE_UNUSED;
 {
   return 0;
 }
@@ -6937,7 +7059,7 @@ md_undefined_symbol (name)
 /* Round up a section size to the appropriate boundary.  */
 valueT
 md_section_align (segment, size)
-     segT segment;
+     segT segment ATTRIBUTE_UNUSED;
      valueT size;
 {
 #ifdef OBJ_AOUT
@@ -7005,5 +7127,12 @@ tc_coff_sizemachdep (frag)
 
 #endif
 #endif
-
+#ifdef OBJ_ELF
+void m68k_elf_final_processing()
+{
+   /* Set file-specific flags if this is a cpu32 processor */
+   if (cpu_of_arch (current_architecture) & cpu32)
+     elf_elfheader (stdoutput)->e_flags |= EF_CPU32;
+}
+#endif
 /* end of tc-m68k.c */

@@ -715,14 +715,14 @@ extern boolean bfd_arm_get_bfd_for_interworking
   PARAMS ((bfd *, struct bfd_link_info *));
 
 /* ELF ARM Interworking support.  Called from linker.  */
-  extern boolean bfd_elf32_arm_allocate_interworking_sections
-    PARAMS ((struct bfd_link_info *));
- 
-  extern boolean bfd_elf32_arm_process_before_allocation
-    PARAMS ((bfd *, struct bfd_link_info *));
- 
-  extern boolean bfd_elf32_arm_get_bfd_for_interworking
-    PARAMS ((bfd *, struct bfd_link_info *));
+extern boolean bfd_elf32_arm_allocate_interworking_sections
+  PARAMS ((struct bfd_link_info *));
+
+extern boolean bfd_elf32_arm_process_before_allocation
+  PARAMS ((bfd *, struct bfd_link_info *, int));
+
+extern boolean bfd_elf32_arm_get_bfd_for_interworking
+  PARAMS ((bfd *, struct bfd_link_info *));
 
 /* And more from the source.  */
 void 
@@ -759,7 +759,7 @@ bfd_make_readable PARAMS ((bfd *abfd));
  /* Byte swapping macros for user section data.  */
 
 #define bfd_put_8(abfd, val, ptr) \
-                (*((unsigned char *)(ptr)) = (unsigned char)(val))
+                ((void) (*((unsigned char *)(ptr)) = (unsigned char)(val)))
 #define bfd_put_signed_8 \
                bfd_put_8
 #define bfd_get_8(abfd, ptr) \
@@ -793,6 +793,20 @@ bfd_make_readable PARAMS ((bfd *abfd));
                 BFD_SEND(abfd, bfd_getx64, (ptr))
 #define bfd_get_signed_64(abfd, ptr) \
                 BFD_SEND(abfd, bfd_getx_signed_64, (ptr))
+
+#define bfd_get(bits, abfd, ptr)                               \
+                ((bits) == 8 ? bfd_get_8 (abfd, ptr)           \
+                : (bits) == 16 ? bfd_get_16 (abfd, ptr)        \
+                : (bits) == 32 ? bfd_get_32 (abfd, ptr)        \
+                : (bits) == 64 ? bfd_get_64 (abfd, ptr)        \
+                : (abort (), (bfd_vma) - 1))
+
+#define bfd_put(bits, abfd, val, ptr)                          \
+                ((bits) == 8 ? bfd_put_8 (abfd, val, ptr)      \
+                : (bits) == 16 ? bfd_put_16 (abfd, val, ptr)   \
+                : (bits) == 32 ? bfd_put_32 (abfd, val, ptr)   \
+                : (bits) == 64 ? bfd_put_64 (abfd, val, ptr)   \
+                : (abort (), (void) 0))
 
 
  /* Byte swapping macros for file header data.  */
@@ -989,6 +1003,10 @@ typedef struct sec
 
         /* This section should not be subject to garbage collection.  */
 #define SEC_KEEP 0x1000000
+
+        /* This section contains "short" data, and should be placed
+          "near" the GP.  */
+#define SEC_SHORT 0x2000000
 
         /*  End of section flags.  */
 
@@ -1303,11 +1321,13 @@ enum bfd_architecture
 #define bfd_mach_alpha_ev6  0x30
   bfd_arch_arm,        /* Advanced Risc Machines ARM */
 #define bfd_mach_arm_2         1
-#define bfd_mach_arm_2a                2
+#define bfd_mach_arm_2a        2
 #define bfd_mach_arm_3         3
 #define bfd_mach_arm_3M        4
-#define bfd_mach_arm_4                 5
+#define bfd_mach_arm_4         5
 #define bfd_mach_arm_4T        6
+#define bfd_mach_arm_5         7
+#define bfd_mach_arm_5T        8
   bfd_arch_ns32k,      /* National Semiconductors ns32000 */
   bfd_arch_w65,        /* WDC 65816 */
   bfd_arch_tic30,      /* Texas Instruments TMS320C30 */
@@ -1540,6 +1560,9 @@ struct reloc_howto_struct
 #define HOWTO(C, R,S,B, P, BI, O, SF, NAME, INPLACE, MASKSRC, MASKDST, PC) \
   {(unsigned)C,R,S,B, P, BI, O,SF,NAME,INPLACE,MASKSRC,MASKDST,PC}
 #define NEWHOWTO( FUNCTION, NAME,SIZE,REL,IN) HOWTO(0,0,SIZE,0,REL,0,complain_overflow_dont,FUNCTION, NAME,false,0,0,IN)
+
+#define EMPTY_HOWTO(C) \
+  HOWTO((C),0,0,0,false,0,complain_overflow_dont,NULL,NULL,false,0,0,false)
 
 #define HOWTO_PREPARE(relocation, symbol)      \
   {                                            \
@@ -1828,6 +1851,10 @@ to compensate for the borrow when the low bits are added. */
   BFD_RELOC_MIPS_GOT_LO16,
   BFD_RELOC_MIPS_CALL_HI16,
   BFD_RELOC_MIPS_CALL_LO16,
+  BFD_RELOC_MIPS_SUB,
+  BFD_RELOC_MIPS_GOT_PAGE,
+  BFD_RELOC_MIPS_GOT_OFST,
+  BFD_RELOC_MIPS_GOT_DISP,
 
 
 /* i386/elf relocations */
@@ -1898,6 +1925,7 @@ not stored in the instruction. */
 /* These relocs are only used within the ARM assembler.  They are not
 (at present) written to any object files. */
   BFD_RELOC_ARM_IMMEDIATE,
+  BFD_RELOC_ARM_ADRL_IMMEDIATE,
   BFD_RELOC_ARM_OFFSET_IMM,
   BFD_RELOC_ARM_SHIFT_IMM,
   BFD_RELOC_ARM_SWI,
@@ -2162,6 +2190,7 @@ short offset into 11 bits. */
   BFD_RELOC_MCORE_PCREL_IMM4BY2,
   BFD_RELOC_MCORE_PCREL_32,
   BFD_RELOC_MCORE_PCREL_JSR_IMM11BY2,
+  BFD_RELOC_MCORE_RVA,
 
 /* These two relocations are used by the linker to determine which of 
 the entries in a C++ virtual function table are actually used.  When
@@ -2973,8 +3002,12 @@ CAT(NAME,_canonicalize_dynamic_reloc)
    /* Read in the dynamic relocs.  */
   long  (*_bfd_canonicalize_dynamic_reloc)
     PARAMS ((bfd *, arelent **, struct symbol_cache_entry **));
-
+    
+ /* Opposite endian version of this target.  */
+ const struct bfd_target * alternative_target;
+ 
  PTR backend_data;
+ 
 } bfd_target;
 boolean 
 bfd_set_default_target  PARAMS ((const char *name));
@@ -2984,6 +3017,9 @@ bfd_find_target PARAMS ((CONST char *target_name, bfd *abfd));
 
 const char **
 bfd_target_list PARAMS ((void));
+
+const bfd_target *
+bfd_search_for_target PARAMS ((int (* search_func)(const bfd_target *, void *), void *));
 
 boolean 
 bfd_check_format PARAMS ((bfd *abfd, bfd_format format));

@@ -1,19 +1,324 @@
-1999-04-29  Nick Clifton  <nickc@cygnus.com>
+Tue Jul 20 15:18:46 1999  Bob Manson  <manson@charmed.cygnus.com>
 
-	* emulparams/elf32mcore.sh (OTHER_BSS_SYMBOLS): Define.
-	(OTHER_BSS_END_SYMBOLS): Define.
+	* ldlang.c (lang_gc_sections): Only handle the start symbol
+	specially if there is one.
 
-	* scripttempl/mcorepe.sc: New file: Duplicte of pe.sc with stack
-	section added.
+Mon Jul 19 14:19:14 1999  Mark P. Mitchell  <mark@codesourcery.com>
+
+	* emulparams/elf32bmipn32.sh (OTHER_RELOCATING_SECTIONS): Add
+	.MIPS.events and .MIPS.content handling.
+	* emulparams/elf64bmip.sh (OTHER_RELOCATING_SECTIONS): Likewise.
+
+1999-07-17  Nick Clifton  <nickc@cygnus.com>
+
+	* ldlang.c (get_target): New function: Return true iff the
+	given target is the target being sought.
+	(stricpy): New function:  Like strcpy but convert to lower
+	case as well.
+	(strcut): New function:  Like strstr but remove the located
+	substring as well.
+	(name_compare): New function: Compute a compatability rating
+	for two target names.
+	(winner): New variable: Best target found by
+	closest_target_match() so far.
+	(closest_target_match): New function: Find the target which is
+	the closest match to the original target.
+	(get_first_input_target): New function: Find the target format
+	of the first of the linker's input file.
+	(open_output): Be more clever about deciding the output target
+	format. 
+
+1999-07-16  Jakub Jelinek  <jj@ultra.linux.cz>
+
+	* emulparams/elf64_sparc.sh: Add 64-bit directories to native LIB_PATH.
+
+Thu Jul 15 15:55:15 1999  Mark P. Mitchell  <mark@codesourcery.com>
+
+	* configure.host: Set up HOSTING_CRT0 and HOSTING_LIBS for IRIX6.
+
+1999-07-15  Ian Lance Taylor  <ian@zembu.com>
+
+	* configure.in: Bump version number to 2.9.5.
+	* configure: Rebuild.
+
+1999-07-14  Richard Henderson  <rth@cygnus.com>
+
+	* ldlang.c (wild_doit): Copy SEC_SHORT to output section.
+
+	* scripttempl/elf.sc: Re-order .rel[a].foo outputs to the
+	same order seen for the main sections.  Add
+	OTHER_READONLY_RELOC_SECTIONS and OTHER_GOT_RELOC_SECTIONS.
+
+1999-07-12  Andreas Schwab  <schwab@suse.de>
+
+	* emultempl/linux.em (ld_${EMULATION_NAME}_emulation): Fill in
+	structure initializations.
+
+	* emultempl/elf32.em (ld_${EMULATION_NAME}_emulation): Add missing
+	comma in initializer.
+
+1999-07-11  Ian Lance Taylor  <ian@zembu.com>
+
+	* Many files: Changes to avoid gcc warnings: Add ATTRIBUTE_UNUSED
+	as appropriate.  Fill in structure initializations.
+
+1999-07-10  Ian Lance Taylor  <ian@zembu.com>
+
+	* ldfile.c: Revert patch of 1999-07-08.
+	(ldfile_try_open_bfd): If we are searching for the file, skip
+	files with an incompatible architecture.
+
+1999-07-09  Nick Clifton  <nickc@cygnus.com>
+
+	* scripttempl/armcoff.sc (OUTPUT_FORMAT): Include big endian and
+	little endian formats.
+
+1999-07-08  Felix Lee  <flee@cygnus.com>
+
+	* scripttempl/mcorepe.sc: fix quoting problem, for bash 2.x
+
+1999-07-08  Jakub Jelinek  <jj@ultra.linux.cz>
+
+	* ldfile.c (ldfile_open_file_search): Skip libraries made for
+	incompatible architectures in the search path. Let the user know
+	about any such skips.
+
+Thu Jul  8 12:32:23 1999  John David Anglin <dave@hiauly1.hia.nrc.ca>
+
+        * configure.tgt (hppa*-linux-gnu*): New target.
+
+1999-07-07  Mark Mitchell  <mark@codesourcery.com>
+
+	* Makefile.am (ALL_64_EMULATIONS): Add eelf64bmip.
+	(eelf64bmip): New target.
+	* Makefile.in: Regenerated.
+	* configure.tgt (mips-sgi-irix6*): Add 64-bit emulation.
+	* emulparams/elf64bmip.sh: New file.
+
+1999-07-05  Nick Clifton  <nickc@cygnus.com>
+
+	* emultempl/pe.em (after_open): Abort if input format is ARM and
+	output format is not. 
+	* emultempl/armcoff.em (after_open): Abort if input format is ARM
+	and output format is not. 
+	* emultempl/armelf.em (after_open): Abort if input format is ARM
+	and output format is not. 
+
+1999-07-02  Ian Lance Taylor  <ian@zembu.com>
+
+	* ldlang.c: Revert change of 1999-06-23.
+
+1999-06-30  Mark Mitchell  <mark@codesourcery.com>
+
+	* Makefile.am (ALL_EMULATIONS): Add eelf32bmipn32.o.
+	(eelf32bmipn32.c): New target.
+	* Makefile.in: Regenerated.
+	* configure.tgt (mips-sgi-irix6*): Make n32 the default
+	emulation.
+	* emulparams/elf32bmipn32.sh: New file.
+	
+1999-06-28  Jim Pick <jim@jimpick.com>
+
+	* emultempl/armelf.em: Added code so that .xs linker scripts are
+	called so that ARM shared libraries are built correctly.
+
+1999-06-22  Mark Mitchell  <mark@codesourcery.com>
+
+	* ldmain.c (main): Initialize link_info.init_function and
+	link_info.fini_function.
+	* lexsup.c (OPTION_INIT): New macro.
+	(OPTION_FINI): Likewise.
+	(ld_options): Add descriptions for them.
+	(parse_args): Handle them.
+
+1999-06-23  Ian Lance Taylor  <ian@zembu.com>
+
+	* ldlang.c (section_already_linked): Only discard link once
+	sections if we are building constructors.
+
+1999-06-22  Nick Clifton  <nickc@cygnus.com>
+
+	* ld.texinfo (Location Counter): Describe behaviour of
+	location counter inside section statements.
+
+1999-06-20  Mark Mitchell  <mark@codesourcery.com>
+
+	* scripttempl/elf.sc (WRITABLE_RODATA): New variable for
+	controlling whether or not .rodata is in the data segment or the
+	text segment.
+
+1999-06-18  Nick Clifton  <nickc@cygnus.com>
+
+	* emultempl/pe.em: Add new command line switch --thumb-entry.
+	* emultempl/armelf.em: Add new command line switch --thumb-entry.
+	* emultempl/armcoff.em: Add new command line switch --thumb-entry.
+	* ld.texinfo: Document new ARM command line switch: --thumb-entry.	
+1999-06-20  H.J. Lu  <hjl@gnu.org>
+
+	* configure.in (all_libpath): Accumulate across all enabled targets.
+
+Sun Jun 20 14:10:33 1999  Richard Henderson  <rth@cygnus.com>
+
+	* emultempl/armelf.em: Watch EMULATION_LIBPATH instead of
+	DEFAULT_EMULATION.
+	* emultempl/elf32.em: Likewise.
+	* emultempl/sunos.em: Likewise.
+
+Fri Jun 18 15:24:48 1999  Richard Henderson  <rth@cygnus.com>
+
+	* Makefile.am (GENSCRIPTS): Pass EMULATION_LIBPATH, not EMUL.
+	* configure.in (all_emuls): Add targ_extra_libpath.
+	(all_libpath, EMULATION_LIBPATH): Define.
+	* configure.tgt (powerpc-*-linux-gnu*): Define targ_extra_libpath.
+	* genscripts.sh (LIB_PATH): Define if emulation in EMULATION_LIBPATH.
+
+Mon Jun 14 10:38:36 1999  Andreas Schwab  <schwab@issan.cs.uni-dortmund.de>
+
+	* ld.texinfo: Fix use of @item vs. @itemx.
+
+1999-06-13  Ian Lance Taylor  <ian@zembu.com>
+
+	From Thomas Zenker <thz@lennartz-electronic.de>:
+	* ldgram.y (attributes_opt): Use attributes_list instead of NAME.
+	(attributes_list, attributes_string): New nonterminals.
+	* ldlang.c (lang_set_flags): Add invert parameter.  Don't handle
+	'!'.
+	* ldlang.c (lang_set_flags): Update declaration.
+
+1999-06-12  Ian Lance Taylor  <ian@zembu.com>
+
+	* emultempl/pe.em (gld_${EMULATION_NAME}_after_parse): Don't add
+	entry_symbol as an undefined symbol when doing a relocateable
+	link.  From <jeffdb@goodnet.com>.
+
+1999-06-12  David O'Brien  <obrien@freebsd.org>
+
+	* configure.tgt: (i[3456]86-*-freebsd*): Now defaults to ELF.
+
+1999-06-09  Nick Clifton  <nickc@cygnus.com>
+
+	* lexsup.c (help): Restore previous format of output.
+
+1999-06-04  Nick Clifton  <nickc@cygnus.com>
+
+	* emultempl/pe.em: If compiling for arm_epoc_pe rename
+	interworking functions to avoid a name space clash.
+
+1999-06-02  Jason Merrill  <jason@yorick.cygnus.com>
+
+	* scripttempl/v850.sc: Add initp support.
+
+1999-06-02  Nick Clifton  <nickc@cygnus.com>
+
+	* emultempl/pe.em: Rename global arm interworking functions to
+	avoid name collision when all targets BFD is built.
+
+1999-05-30  Cort Dougan  <cort@attis.cs.nmt.edu>
+
+	* Makefile.am (ALL_EMULATIONS): Add eelf32ppclinux.o.
+	* configure.tgt (powerpc-*-linux-gnu): Use it.
+	* emulparams/elf32ppclinux.sh: New file.
+
+1999-05-29  Ian Lance Taylor  <ian@zembu.com>
+
+	* ld.texinfo (Options): Clarify that options which refer to files
+	must be properly ordered.
+
+1999-05-29  Nick Clifton  <nickc@cygnus.com>
+
+	* emultempl/armelf.em (..._parse_args): New function: Parse
+	command line option.  Accept arm-elf specific command line option
+	'-p' or '--no-pipeline-knowledge'.
+	(..._list_options): New function: Describe the new command line
+	option.
+	(..._before_allocation): Pass the value of the new variable
+	no_pipeline_knowledge to bfd_elf32_arm_process_before_allocation.
+	
+	* emultemp/armelf_oabi.em (..._before_allocation): Pass zero as
+	the third parameter to bfd_elf32_arm_process_before_allocation.
+
+1999-05-28  Nick Clifton  <nickc@cygnus.com>
+
+	* lexsup.c (help): Minor formatting changes.
+
+1999-05-28  Martin Dorey  <mdorey@madge.com>
+
+	* configure.tgt (i960-*-elf*): New target.
+	* emulparams/elf32_i960.sh: New file.
+	* Makefile.am (ALL_EMULATIONS): Add eelf32_i960.o.
+	(eelf32_i960.c): New target.
+	* Makefile.in: Rebuild.
+
+1999-05-26  Nick Clifton  <nickc@cygnus.com>
+
+	* emulparams/armelf_oabi.sh (TEMPLATE_NAME): Set to armelf_oabi. 
+
+1999-05-24  Philip Blundell  <philb@gnu.org>
+
+	* emultempl/armelf.em (before_parse): Set config.dynamic_link and
+ 	config.has_shared.
+	* emulparams/armelf.sh (GENERATE_SHLIB_SCRIPT): Define.
+	* emulparams/armelf_linux.sh (GENERATE_SHLIB_SCRIPT): Likewise.
+
+1999-04-13  Philip Blundell  <philb@gnu.org>
+
+	* emultempl/armelf.em: Add definitions related to shared objects
+	(copied from elf32.em).
+
+Wed May 19 12:44:26 1999  Andreas Schwab  <schwab@issan.cs.uni-dortmund.de>
+
+	* Makefile.am (ALL_EMULATIONS): Remove earmlinux.o and
+	earm26linux.o, add earmelf_linux.o and earmelf_linux26.o.
+	* Makefile.in: Regenerated.
+
+1999-05-16  Nick Clifton  <nickc@cygnus.com>
+
+	* emulparams/elf32mcore.sh (GENERATE_SHLIB_SCRIPT): Define.
+	(TEMPLATE_NAME): Define.
+
+Thu May 13 09:48:09 1999  Joel Sherrill (joel@OARcorp.com)
+
+	* configure.tgt (i386-*-rtemself*, sh-*-rtemself*): New targets.
+	(mips*el-*-rtems*, powerpcle-*-rtems*): New targets.
+
+1999-05-10  DJ Delorie  <dj@cygnus.com>
+
+	* scripttempl/pe.sc: Specify the output arch, which Ian says is
+	the Right Thing to do.
+
+	* emultempl/pe.em: various changes to parameterize the
+	target-specific information.
+	(gld_i386pe_after_open): Detect and fix MS import libraries
+	by renaming the member objects (which are all named the same).
+
+	* pe-dll.c: various changes to parameterize the target-specific
+	information.
+	(generate_reloc): support relocs more generically to allow for
+	expansion.
+	(pe_exe_build_sections): new; used to add .relocs to .exes
+	(pe_exe_fill_sections): ditto
+
+1999-05-10  Catherine Moore  <clm@cygnus.com>
+
+	* emultempl/pe.em (gld_${EMULATION_NAME}_after_open):
+	Check for TARGET_IS_arm_epoc_pe.
+	(gld_${EMULATION_NAME}_before_allocation): Likewise.
+
+1999-05-12  Anthony Green  <green@cygnus.com>
+
+	* ldlang.c (walk_wild, walk_wild_file, walk_wild_section,
+	output_section_callback, gc_section_callback): New functions for
+	generic section walks.
+	(wild, lang_gc_wild): Use walk_wild.
+	(wild_file, lang_gc_wild_file): Deleted. Common logic moved to
+	walk_wild_file.
+	(wild_section, lang_gc_wild_section): Deleted. Common logic moved
+	to walk_fild_section.  Unique logic moved into callbacks
+	output_section_callback and gc_section_callback.
 
 1999-04-26  Tom Tromey  <tromey@cygnus.com>
 
 	* aclocal.m4, configure: Updated for new version of libtool.
-
-1999-04-22  Nick Clifton  <nickc@cygnus.com>
-
-	* emulparams/elf32mcore.sh (OTHER_RELOCATING_SECTIONS): Define to
-	generate _stack section.
 
 1999-04-12  Philip Blundell  <pb@nexus.co.uk>
 
@@ -56,17 +361,6 @@
 
 	* ldmain.c (main): Init link_info.no_undefined.
 	* lexsup.c: Add command-line option --no-undefined.
-
-1999-04-08  Nick Clifton  <nickc@cygnus.com>
-
-	* configure.tgt: Add support for MCore targets.
-	* Makefile.am: Add support for MCore targets.
-	* Makefile.in: Regenerate.
-	
-	* emulparams/elf32mcore.sh: New file:  Definitions for mcore-elf
-	target. 
-	* emulparams/mcorepe.sh: New file:  Definitions for mcore-pe
-	target.  
 
 1999-04-06  Ian Lance Taylor  <ian@zembu.com>
 

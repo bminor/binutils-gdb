@@ -5,7 +5,7 @@ AC_INIT(ar.c)
 
 AC_CANONICAL_SYSTEM
 
-AM_INIT_AUTOMAKE(binutils, 2.9.4)
+AM_INIT_AUTOMAKE(binutils, 2.9.5)
 
 AM_PROG_LIBTOOL
 
@@ -44,6 +44,12 @@ CY_GNU_GETTEXT
 
 AM_MAINTAINER_MODE
 AC_EXEEXT
+if test -n "$EXEEXT"; then
+  AC_DEFINE(HAVE_EXECUTABLE_SUFFIX, 1,
+	    [Does the platform use an executable suffix?])
+fi
+AC_DEFINE_UNQUOTED(EXECUTABLE_SUFFIX, "${EXEEXT}",
+		   [Suffix used for executables, if any.])
 
 # host-specific stuff:
 
@@ -63,6 +69,9 @@ AC_CHECK_HEADERS(string.h strings.h stdlib.h unistd.h fcntl.h sys/file.h)
 AC_HEADER_SYS_WAIT
 AC_FUNC_ALLOCA
 AC_CHECK_FUNCS(sbrk utimes)
+
+# Some systems have frexp only in -lm, not in -lc.
+AC_SEARCH_LIBS(frexp, -lm)
 
 AC_MSG_CHECKING(for time_t in time.h)
 AC_CACHE_VAL(bu_cv_decl_time_t_time_h,
@@ -188,6 +197,15 @@ changequote([,])dnl
   	  BUILD_DLLTOOL='$(DLLTOOL_PROG)$(EXEEXT)'
 	  DLLTOOL_DEFS="$DLLTOOL_DEFS -DDLLTOOL_PPC"
 	  BUILD_WINDRES='$(WINDRES_PROG)$(EXEEXT)'
+	 ;;
+	mcore-*pe)
+  	  BUILD_DLLTOOL='$(DLLTOOL_PROG)$(EXEEXT)'
+	  DLLTOOL_DEFS="$DLLTOOL_DEFS -DDLLTOOL_MCORE"
+	  BUILD_WINDRES='$(WINDRES_PROG)$(EXEEXT)'
+	 ;;
+	mcore-*elf)
+  	  BUILD_DLLTOOL='$(DLLTOOL_PROG)$(EXEEXT)'
+	  DLLTOOL_DEFS="$DLLTOOL_DEFS -DDLLTOOL_MCORE_ELF"
 	 ;;
 	esac
     fi

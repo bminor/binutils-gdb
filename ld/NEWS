@@ -14,10 +14,16 @@ Changes in version 2.10:
 
 * Added ASSERT to the linker script language.
 
+* Added EXCLUDE_FILE to the linker script language for further control over
+  wildcard file names.
+
 * Added -O option to optimize linker output (as of this writing, this only
 affects ELF shared library generation).
 
 * The -e option now accepts a number as well as a symbol name.
+
+* Added --no-undefined option to disallow undefined symbols when creating a
+  shared library.
 
 * Added --demangle and --no-demangle options.
 

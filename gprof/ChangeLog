@@ -1,3 +1,32 @@
+1999-07-15  Ian Lance Taylor  <ian@zembu.com>
+
+	* configure.in: Bump version number to 2.9.5.
+	* configure: Rebuild.
+
+1999-07-11  Ian Lance Taylor  <ian@zembu.com>
+
+	* corefile.c (core_create_function_syms): Add ATTRIBUTED_UNUSED.
+	* sym-ids.c (non_existent_file): Fully initialize structure.
+
+1999-07-01  Ian Lance Taylor  <ian@zembu.com>
+
+	* Many files: Add casts in many print statements to cast bfd_vma
+	values to unsigned long when calling printf.
+	* Makefile.am ($(OBJECTS)): Add gmon.h.
+	* Makefile.in: Rebuild.
+
+Mon Jun 14 10:35:28 1999  Andreas Schwab  <schwab@issan.cs.uni-dortmund.de>
+
+	* gprof.texi: Fix typo.
+
+1999-06-13  Ian Lance Taylor  <ian@zembu.com>
+
+	From Bob Byrnes <byrnes@curl.com>:
+	* cg_dfn.c: Include "libiberty.h"
+	(DFN_INCR_DEPTH): Define instead of DFN_DEPTH.
+	(dfn_stack): Define as pointer rather than array.
+	(pre_visit): Reallocate dfn_stack as needed.
+
 1999-04-26  Tom Tromey  <tromey@cygnus.com>
 
 	* aclocal.m4, configure: Updated for new version of libtool.

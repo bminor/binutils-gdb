@@ -1,5 +1,5 @@
 /* macro.c - macro support for gas and gasp
-   Copyright (C) 1994, 95, 96, 97, 1998 Free Software Foundation, Inc.
+   Copyright (C) 1994, 95, 96, 97, 98, 1999 Free Software Foundation, Inc.
 
    Written by Steve and Judy Chamberlain of Cygnus Support,
       sac@cygnus.com
@@ -902,7 +902,9 @@ macro_expand_body (in, out, formals, formal_hash, comment_char, locals)
       formal_entry *f;
 
       f = loclist->next;
-      hash_delete (formal_hash, sb_terminate (&loclist->name));
+      /* Setting the value to NULL effectively deletes the entry.  We
+         avoid calling hash_delete because it doesn't reclaim memory.  */
+      hash_jam (formal_hash, sb_terminate (&loclist->name), NULL);
       sb_kill (&loclist->name);
       sb_kill (&loclist->def);
       sb_kill (&loclist->actual);
