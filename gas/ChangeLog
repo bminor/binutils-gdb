@@ -1,5 +1,8 @@
 Wed Dec 15 15:39:53 1993  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
+	* Makefile.in (RUNTEST): New variable.
+	(CHECKFLAGS): Pass it down.
+
 	* ecoff.c (ecoff_directive_frame): Permit extra trailing operands;
 	unused for now, but supplied by Alpha OSF1 compiler.
 
