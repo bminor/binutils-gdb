@@ -1,5 +1,9 @@
 2001-10-31  Andrew Cagney  <ac131313@redhat.com>
 
+	* varobj.c: Re-indent.
+
+2001-10-31  Andrew Cagney  <ac131313@redhat.com>
+
 	* x86-64-tdep.c (value_push, x86_64_push_arguments): Replace
 	``value_ptr'' with ``struct value *''.
 	* s390-tdep.c (s390_push_arguments): Ditto.
