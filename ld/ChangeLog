@@ -1,3 +1,24 @@
+2000-02-16  Timothy Wall  <twall@cygnus.com>
+
+	* mri.c (mri_draw_tree): Add default LMA region argument to call
+	to lang_leave_output_section_statement.
+	* ldlang.h: Update prototypes with LMA region arguments.
+	* ldlang.c (lang_size_sections): Encapsulate region bounds
+	checking in os_check_region call.
+	(os_check_region): New function.
+	(lang_output_section_statement_lookup): Initialize lma_region.
+	(lang_leave_output_section_statement): Add LMA region argument.
+	(lang_leave_overlay): Ditto.
+	* ldgram.y: Handle LMA region syntax.
+	* ld.texinfo (Output Section Description): Describe LMA region usage.
+	* emultempl/armelf.em (gld$place_orphan): Add default value for
+	lma region in call to lang_leave_output_statement.
+	* emultempl/elf32.em (gld$place_orphan): Add default value for
+	lma region in call to lang_leave_output_statement.
+	* emultempl/pe.em (gld$place_orphan): Add default value for
+	lma region in call to lang_leave_output_statement.
+	
+	
 2000-02-04  Timothy Wall  <twall@redhat.com>
 
 	* ldlang.c (lang_check_section_addresses): Use bytes instead of

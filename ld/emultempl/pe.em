@@ -1146,7 +1146,8 @@ gld_${EMULATION_NAME}_place_orphan (file, s)
 
       lang_leave_output_section_statement
 	((bfd_vma) 0, "*default*",
-	 (struct lang_output_section_phdr_list *) NULL);
+	 (struct lang_output_section_phdr_list *) NULL,
+	"*default*");
 
       /* Now stick the new statement list right after PLACE.  */
       if (place != NULL)

@@ -2127,7 +2127,7 @@ The full description of an output section looks like this:
     @var{output-section-command}
     @var{output-section-command}
     @dots{}
-  @} [>@var{region}] [:@var{phdr} :@var{phdr} @dots{}] [=@var{fillexp}]
+  @} [>@var{region}] [AT>@var{lma_region}] [:@var{phdr} :@var{phdr} @dots{}] [=@var{fillexp}]
 @end group
 @end smallexample
 
@@ -2632,7 +2632,7 @@ like this:
     @var{output-section-command}
     @var{output-section-command}
     @dots{}
-  @} [>@var{region}] [:@var{phdr} :@var{phdr} @dots{}] [=@var{fillexp}]
+  @} [>@var{region}] [AT>@var{lma_region}] [:@var{phdr} :@var{phdr} @dots{}] [=@var{fillexp}]
 @end group
 @end smallexample
 We've already described @var{section}, @var{address}, and
@@ -2686,6 +2686,7 @@ SECTIONS @{
 
 @node Output Section LMA
 @subsubsection Output section LMA
+@kindex AT>@var{lma_region}
 @kindex AT(@var{lma})
 @cindex load address
 @cindex section load address
@@ -2696,7 +2697,9 @@ Address}).
 
 The linker will normally set the LMA equal to the VMA.  You can change
 that by using the @code{AT} keyword.  The expression @var{lma} that
-follows the @code{AT} keyword specifies the load address of the section.
+follows the @code{AT} keyword specifies the load address of the
+section.  Alternatively, with @samp{AT>@var{lma_region}} expression,
+you may specify a memory region for the section's load address. @xref{MEMORY}.
 
 @cindex ROM initialized data
 @cindex initialized data in ROM

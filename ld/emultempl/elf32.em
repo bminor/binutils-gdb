@@ -1024,7 +1024,8 @@ gld${EMULATION_NAME}_place_orphan (file, s)
   wild_doit (&os->children, s, os, file);
 
   lang_leave_output_section_statement
-    ((bfd_vma) 0, "*default*", (struct lang_output_section_phdr_list *) NULL);
+    ((bfd_vma) 0, "*default*", (struct lang_output_section_phdr_list *) NULL,
+     "*default*");
   stat_ptr = &add;
 
   if (*ps == '\0' && config.build_constructors)

@@ -682,6 +682,7 @@ lang_output_section_statement_lookup (name)
       lookup = (lang_output_section_statement_type *)
 	new_stat (lang_output_section_statement, stat_ptr);
       lookup->region = (lang_memory_region_type *) NULL;
+      lookup->lma_region = (lang_memory_region_type *) NULL;
       lookup->fill = 0;
       lookup->block_value = 1;
       lookup->name = name;
@@ -2695,6 +2696,43 @@ _("%X%P: section %s [%V -> %V] overlaps section %s [%V -> %V]\n"),
 
 static boolean relax_again;
 
+/* Make sure the new address is within the region.  We explicitly permit the
+   current address to be at the exact end of the region when the address is
+   non-zero, in case the region is at the end of addressable memory and the
+   calculation wraps around.  */ 
+
+static void
+os_region_check (os, region, tree, base)
+  lang_output_section_statement_type *os;
+  struct memory_region_struct *region;
+  etree_type *tree;
+  bfd_vma base;
+{
+  if ((region->current < region->origin
+       || (region->current - region->origin > region->length))
+      && ((region->current != region->origin + region->length)
+           || base == 0))
+    {
+      if (tree != (etree_type *) NULL)
+        {
+          einfo (_("%X%P: address 0x%v of %B section %s is not within region %s\n"),
+                 region->current,
+                 os->bfd_section->owner,
+                 os->bfd_section->name,
+                 region->name);
+        }
+      else
+        {
+          einfo (_("%X%P: region %s is full (%B section %s)\n"),
+                 region->name,
+                 os->bfd_section->owner,
+                 os->bfd_section->name);
+        }
+      /* Reset the region pointer.  */
+      region->current = region->origin;
+    }
+}
+
 /* Set the sizes for all the output sections.  */
 
 bfd_vma
@@ -2853,37 +2891,35 @@ lang_size_sections (s, output_section_statement, prev, fill, dot, relax)
 	      {
 		os->region->current = dot;
 		
-		/* Make sure the new address is within the region.  We
-                   explicitly permit the current address to be at the
-                   exact end of the region when the VMA is non-zero,
-                   in case the region is at the end of addressable
-                   memory and the calculation wraps around.  */
-		if ((os->region->current < os->region->origin
-		     || (os->region->current - os->region->origin
-			 > os->region->length))
-		    && ((os->region->current
-			 != os->region->origin + os->region->length)
-			|| os->bfd_section->vma == 0))
+		/* Make sure the new address is within the region.  */
+                os_region_check (os, os->region, os->addr_tree, 
+                                 os->bfd_section->vma);
 
-		  {
-		    if (os->addr_tree != (etree_type *) NULL)
-		      {
-			einfo (_("%X%P: address 0x%v of %B section %s is not within region %s\n"),
-			       os->region->current,
-			       os->bfd_section->owner,
-			       os->bfd_section->name,
-			       os->region->name);
-		      }
-		    else
-		      {
-			einfo (_("%X%P: region %s is full (%B section %s)\n"),
-			       os->region->name,
-			       os->bfd_section->owner,
-			       os->bfd_section->name);
-		      }
-		    /* Reset the region pointer.  */
-		    os->region->current = os->region->origin;
-		  }
+                /* if there's no load address specified, use the run region as
+                   the load region */
+                if (os->lma_region == NULL && os->load_base == NULL)
+                    os->lma_region = os->region;
+
+                if (os->lma_region != NULL)
+                  {
+                    if (os->load_base != NULL)
+                      {
+                        einfo (_("%X%P: use an absolute load address or a load memory region, not both\n"));
+                      }
+                    else
+                      {
+                        /* don't allocate twice */
+                        if (os->lma_region != os->region)
+                          {
+                            /* set load_base, which will be handled later */
+                            os->load_base = exp_intop (os->lma_region->current);
+                            os->lma_region->current += 
+                              os->bfd_section->_raw_size / opb;
+                            os_region_check (os, os->lma_region, NULL,
+                                             os->bfd_section->lma);
+                          }
+                      }
+                  }
 	      }
 	  }
 	  break;
@@ -4259,13 +4295,22 @@ lang_float (maybe)
 }
 
 void
-lang_leave_output_section_statement (fill, memspec, phdrs)
+lang_leave_output_section_statement (fill, memspec, phdrs, lma_memspec)
      bfd_vma fill;
      const char *memspec;
      struct lang_output_section_phdr_list *phdrs;
+     const char *lma_memspec;
 {
   current_section->fill = fill;
   current_section->region = lang_memory_region_lookup (memspec);
+  if (strcmp (lma_memspec, "*default*") != 0)
+    {
+      current_section->lma_region = lang_memory_region_lookup (lma_memspec);
+      /* if no runtime region has been given, but the load region has been,
+         use the load region */
+      if (strcmp (memspec, "*default*") == 0)
+        current_section->region = lang_memory_region_lookup (lma_memspec);
+    }
   current_section->phdrs = phdrs;
   stat_ptr = &statement_list;
 }
@@ -4644,7 +4689,8 @@ lang_leave_overlay_section (fill, phdrs)
 
   name = current_section->name;
 
-  lang_leave_output_section_statement (fill, "*default*", phdrs);
+  lang_leave_output_section_statement (fill, "*default*", 
+                                       phdrs, "*default*");
 
   /* Define the magic symbols.  */
 
@@ -4674,12 +4720,14 @@ lang_leave_overlay_section (fill, phdrs)
    looks through all the sections in the overlay and sets them.  */
 
 void
-lang_leave_overlay (fill, memspec, phdrs)
+lang_leave_overlay (fill, memspec, phdrs, lma_memspec)
      bfd_vma fill;
      const char *memspec;
      struct lang_output_section_phdr_list *phdrs;
+     const char *lma_memspec;
 {
   lang_memory_region_type *region;
+  lang_memory_region_type *lma_region;
   struct overlay_list *l;
   struct lang_nocrossref *nocrossref;
 
@@ -4687,6 +4735,11 @@ lang_leave_overlay (fill, memspec, phdrs)
     region = NULL;
   else
     region = lang_memory_region_lookup (memspec);
+
+  if (lma_memspec == NULL)
+    lma_region = NULL;
+  else
+    lma_region = lang_memory_region_lookup (lma_memspec);
 
   nocrossref = NULL;
 
@@ -4699,6 +4752,8 @@ lang_leave_overlay (fill, memspec, phdrs)
 	l->os->fill = fill;
       if (region != NULL && l->os->region == NULL)
 	l->os->region = region;
+      if (lma_region != NULL && l->os->lma_region == NULL)
+        l->os->lma_region = lma_region;
       if (phdrs != NULL && l->os->phdrs == NULL)
 	l->os->phdrs = phdrs;
 

@@ -266,7 +266,8 @@ mri_draw_tree ()
       }
 
       lang_leave_output_section_statement
-	(0, "*default*", (struct lang_output_section_phdr_list *) NULL);
+	(0, "*default*", (struct lang_output_section_phdr_list *) NULL, 
+         "*default*");
 
       p = p->next;
     }

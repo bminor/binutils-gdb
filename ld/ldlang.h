@@ -136,6 +136,7 @@ typedef struct lang_output_section_statement_struct
   flagword flags;		/* Or together of all input sections */
   enum section_type sectype;
   struct memory_region_struct *region;
+  struct memory_region_struct *lma_region;
   size_t block_value;
   fill_type fill;
 
@@ -409,7 +410,8 @@ extern void lang_add_attribute PARAMS ((enum statement_enum));
 extern void lang_startup PARAMS ((const char *));
 extern void lang_float PARAMS ((enum bfd_boolean));
 extern void lang_leave_output_section_statement
-  PARAMS ((bfd_vma, const char *, struct lang_output_section_phdr_list *));
+  PARAMS ((bfd_vma, const char *, struct lang_output_section_phdr_list *,
+           const char *));
 extern void lang_abs_symbol_at_end_of PARAMS ((const char *, const char *));
 extern void lang_abs_symbol_at_beginning_of PARAMS ((const char *,
 						     const char *));
@@ -475,7 +477,8 @@ extern void lang_enter_overlay_section PARAMS ((const char *));
 extern void lang_leave_overlay_section
   PARAMS ((bfd_vma, struct lang_output_section_phdr_list *));
 extern void lang_leave_overlay
-  PARAMS ((bfd_vma, const char *, struct lang_output_section_phdr_list *));
+  PARAMS ((bfd_vma, const char *, struct lang_output_section_phdr_list *,
+           const char *));
 
 extern struct bfd_elf_version_tree *lang_elf_version_info;
 

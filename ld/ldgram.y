@@ -92,6 +92,7 @@ static int error_index;
 %type <integer> fill_opt
 %type <name_list> exclude_name_list
 %type <name> memspec_opt casesymlist
+%type <name> memspec_at_opt
 %type <cname> wildcard_name
 %type <wildcard> wildcard_spec
 %token <integer> INT  
@@ -799,6 +800,11 @@ exp	:
 	;
 
 
+memspec_at_opt:
+                AT '>' NAME { $$ = $3; }
+        |       { $$ = "*default*"; }
+        ;
+
 opt_at:
 		AT '(' exp ')' { $$ = $3; }
 	|	{ $$ = 0; }
@@ -815,10 +821,10 @@ section:	NAME 		{ ldlex_expression(); }
 			}
 		statement_list_opt 	
  		'}' { ldlex_popstate (); ldlex_expression (); }
-		memspec_opt phdr_opt fill_opt
+		memspec_opt memspec_at_opt phdr_opt fill_opt
 		{
 		  ldlex_popstate ();
-		  lang_leave_output_section_statement ($13, $11, $12);
+		  lang_leave_output_section_statement ($14, $11, $13, $12);
 		}
 		opt_comma
 	|	OVERLAY
@@ -832,10 +838,10 @@ section:	NAME 		{ ldlex_expression(); }
 		overlay_section
 		'}'
 			{ ldlex_popstate (); ldlex_expression (); }
-		memspec_opt phdr_opt fill_opt
+		memspec_opt memspec_at_opt phdr_opt fill_opt
 			{
 			  ldlex_popstate ();
-			  lang_leave_overlay ($14, $12, $13);
+			  lang_leave_overlay ($15, $12, $14, $13);
 			}
 		opt_comma
 	|	/* The GROUP case is just enough to support the gcc
