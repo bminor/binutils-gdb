@@ -1,3 +1,19 @@
+2003-06-26  Roland McGrath  <roland@redhat.com>
+
+	* readelf.c (loadaddr): Variable removed.
+	(dynamic_info, version_info): Fix type long -> bfd_vma.
+	(program_headers): New variable.
+	(get_program_headers): New function, broken out of
+	process_program_headers.
+	(process_program_headers): Call it.  Don't set `loadaddr'.
+	(slurp_ia64_unwind_table): Use get_program_headers.
+	(process_corefile_note_segments):  Likewise.
+	(offset_from_vma): New function.
+	(process_relocs, process_dynamic_segment): Call that instead of
+	subtracting `loadaddr'.
+	(process_version_sections, process_symbol_table): Likewise.
+	(process_mips_specific): Likewise.
+
 2003-06-26  Nick Clifton  <nickc@redhat.com>
 
 	* objcopy (enum strip_action): Add STRIP_NONDEBUG.

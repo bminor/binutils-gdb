@@ -106,11 +106,11 @@ Elf_Internal_Syminfo *dynamic_syminfo;
 unsigned long dynamic_syminfo_offset;
 unsigned int dynamic_syminfo_nent;
 char program_interpreter[64];
-long dynamic_info[DT_JMPREL + 1];
-long version_info[16];
-long loadaddr = 0;
+bfd_vma dynamic_info[DT_JMPREL + 1];
+bfd_vma version_info[16];
 Elf_Internal_Ehdr elf_header;
 Elf_Internal_Shdr *section_headers;
+Elf_Internal_Phdr *program_headers;
 Elf_Internal_Dyn *dynamic_segment;
 Elf_Internal_Shdr *symtab_shndx_hdr;
 int show_name;
@@ -282,6 +282,8 @@ static int get_32bit_program_headers
   PARAMS ((FILE *, Elf_Internal_Phdr *));
 static int get_64bit_program_headers
   PARAMS ((FILE *, Elf_Internal_Phdr *));
+static int get_program_headers
+  PARAMS ((FILE *));
 static int get_file_header
   PARAMS ((FILE *));
 static Elf_Internal_Sym *get_32bit_elf_symbols
@@ -296,6 +298,8 @@ static int get_32bit_dynamic_segment
   PARAMS ((FILE *));
 static int get_64bit_dynamic_segment
   PARAMS ((FILE *));
+static long offset_from_vma
+  PARAMS ((FILE *, bfd_vma vma, bfd_size_type size));
 #ifdef SUPPORT_DISASSEMBLY
 static int disassemble_section
   PARAMS ((Elf_Internal_Shdr *, FILE *));
@@ -3179,13 +3183,45 @@ get_64bit_program_headers (file, program_headers)
   return 1;
 }
 
+/* Returns 1 if the program headers were read into `program_headers'.  */
+
+static int
+get_program_headers (file)
+     FILE *file;
+{
+  Elf_Internal_Phdr *phdrs;
+
+  /* Check cache of prior read.  */
+  if (program_headers != NULL)
+    return 1;
+
+  phdrs = (Elf_Internal_Phdr *) malloc
+    (elf_header.e_phnum * sizeof (Elf_Internal_Phdr));
+
+  if (phdrs == NULL)
+    {
+      error (_("Out of memory\n"));
+      return 0;
+    }
+
+  if (is_32bit_elf
+      ? get_32bit_program_headers (file, phdrs)
+      : get_64bit_program_headers (file, phdrs))
+    {
+      program_headers = phdrs;
+      return 1;
+    }
+
+  free (phdrs);
+  return 0;
+}
+
 /* Returns 1 if the program headers were loaded.  */
 
 static int
 process_program_headers (file)
      FILE *file;
 {
-  Elf_Internal_Phdr *program_headers;
   Elf_Internal_Phdr *segment;
   unsigned int i;
 
@@ -3207,25 +3243,8 @@ process_program_headers (file)
       printf ("\n");
     }
 
-  program_headers = (Elf_Internal_Phdr *) malloc
-    (elf_header.e_phnum * sizeof (Elf_Internal_Phdr));
-
-  if (program_headers == NULL)
-    {
-      error (_("Out of memory\n"));
+  if (! get_program_headers (file))
       return 0;
-    }
-
-  if (is_32bit_elf)
-    i = get_32bit_program_headers (file, program_headers);
-  else
-    i = get_64bit_program_headers (file, program_headers);
-
-  if (i == 0)
-    {
-      free (program_headers);
-      return 0;
-    }
 
   if (do_segments)
     {
@@ -3249,7 +3268,6 @@ process_program_headers (file)
 	}
     }
 
-  loadaddr = -1;
   dynamic_addr = 0;
   dynamic_size = 0;
 
@@ -3337,18 +3355,6 @@ process_program_headers (file)
 
       switch (segment->p_type)
 	{
-	case PT_LOAD:
-	  if (loadaddr == -1)
-	    {
-	      unsigned long align_mask = -segment->p_align;
-
-	      if (align_mask == 0)
-		--align_mask;
-	      loadaddr = ((segment->p_vaddr & align_mask)
-			  - (segment->p_offset & align_mask));
-	    }
-	  break;
-
 	case PT_DYNAMIC:
 	  if (dynamic_addr)
 	    error (_("more than one dynamic segment\n"));
@@ -3374,12 +3380,6 @@ process_program_headers (file)
 
       if (do_segments)
 	putc ('\n', stdout);
-    }
-
-  if (loadaddr == -1)
-    {
-      /* Very strange.  */
-      loadaddr = 0;
     }
 
   if (do_segments && section_headers != NULL)
@@ -3418,9 +3418,41 @@ process_program_headers (file)
 	}
     }
 
-  free (program_headers);
-
   return 1;
+}
+
+
+/* Find the file offset corresponding to VMA by using the program headers.  */
+
+static long
+offset_from_vma (file, vma, size)
+     FILE *file;
+     bfd_vma vma;
+     bfd_size_type size;
+{
+  Elf_Internal_Phdr *seg;
+
+  if (! get_program_headers (file))
+    {
+      warn (_("Cannot interpret virtual addresses without program headers.\n"));
+      return (long) vma;
+    }
+
+  for (seg = program_headers;
+       seg < program_headers + elf_header.e_phnum;
+       ++seg)
+    {
+      if (seg->p_type != PT_LOAD)
+	continue;
+
+      if (vma >= (seg->p_vaddr & -seg->p_align)
+	  && vma + size <= seg->p_vaddr + seg->p_filesz)
+	return vma - seg->p_vaddr + seg->p_offset;
+    }
+
+  warn (_("Virtual address 0x%lx not located in any PT_LOAD segment.\n"),
+	(long) vma);
+  return (long) vma;
 }
 
 
@@ -3996,7 +4028,9 @@ process_relocs (file)
 		(_("\n'%s' relocation section at offset 0x%lx contains %ld bytes:\n"),
 		 name, rel_offset, rel_size);
 
-	      dump_relocations (file, rel_offset - loadaddr, rel_size,
+	      dump_relocations (file,
+				offset_from_vma (file, rel_offset, rel_size),
+				rel_size,
 				dynamic_symbols, num_dynamic_syms,
 				dynamic_strings, is_rela);
 	    }
@@ -4222,14 +4256,13 @@ slurp_ia64_unwind_table (file, aux, sec)
      Elf_Internal_Shdr *sec;
 {
   unsigned long size, addr_size, nrelas, i;
-  Elf_Internal_Phdr *prog_hdrs, *seg;
+  Elf_Internal_Phdr *seg;
   struct unw_table_entry *tep;
   Elf_Internal_Shdr *relsec;
   Elf_Internal_Rela *rela, *rp;
   unsigned char *table, *tp;
   Elf_Internal_Sym *sym;
   const char *relname;
-  int result;
 
   addr_size = is_32bit_elf ? 4 : 8;
 
@@ -4238,21 +4271,12 @@ slurp_ia64_unwind_table (file, aux, sec)
 
   if (elf_header.e_phnum)
     {
-      prog_hdrs = (Elf_Internal_Phdr *)
-	xmalloc (elf_header.e_phnum * sizeof (Elf_Internal_Phdr));
-
-      if (is_32bit_elf)
-	result = get_32bit_program_headers (file, prog_hdrs);
-      else
-	result = get_64bit_program_headers (file, prog_hdrs);
-
-      if (!result)
-	{
-	  free (prog_hdrs);
+      if (! get_program_headers (file))
 	  return 0;
-	}
 
-      for (seg = prog_hdrs; seg < prog_hdrs + elf_header.e_phnum; ++seg)
+      for (seg = program_headers;
+	   seg < program_headers + elf_header.e_phnum;
+	   ++seg)
 	{
 	  if (seg->p_type != PT_LOAD)
 	    continue;
@@ -4264,8 +4288,6 @@ slurp_ia64_unwind_table (file, aux, sec)
 	      break;
 	    }
 	}
-
-      free (prog_hdrs);
     }
 
   /* Second, build the unwind table from the contents of the unwind section:  */
@@ -4818,7 +4840,7 @@ process_dynamic_segment (file)
 	     we default to reading in the entire file (!) and
 	     processing that.  This is overkill, I know, but it
 	     should work.  */
-	  section.sh_offset = entry->d_un.d_val - loadaddr;
+	  section.sh_offset = offset_from_vma (file, entry->d_un.d_val, 0);
 
 	  if (fseek (file, 0, SEEK_END))
 	    error (_("Unable to seek to end of file!"));
@@ -4860,7 +4882,7 @@ process_dynamic_segment (file)
 	     processing that.  This is overkill, I know, but it
 	     should work.  */
 
-	  offset = entry->d_un.d_val - loadaddr;
+	  offset = offset_from_vma (file, entry->d_un.d_val, 0);
 	  if (fseek (file, 0, SEEK_END))
 	    error (_("Unable to seek to end of file\n"));
 	  str_tab_len = ftell (file) - offset;
@@ -4896,7 +4918,8 @@ process_dynamic_segment (file)
 	  else if (entry->d_tag == DT_SYMINSZ)
 	    syminsz = entry->d_un.d_val;
 	  else if (entry->d_tag == DT_SYMINFO)
-	    dynamic_syminfo_offset = entry->d_un.d_val - loadaddr;
+	    dynamic_syminfo_offset = offset_from_vma (file, entry->d_un.d_val,
+						      syminsz);
 	}
 
       if (dynamic_syminfo_offset != 0 && syminsz != 0)
@@ -5585,7 +5608,9 @@ process_version_sections (file)
 	    edata =
 	      ((unsigned char *)
 	       get_data (NULL, file,
-			 version_info[DT_VERSIONTAGIDX (DT_VERSYM)] - loadaddr,
+			 offset_from_vma
+			 (file, version_info[DT_VERSIONTAGIDX (DT_VERSYM)],
+			  total * sizeof (short)),
 			 total * sizeof (short), _("version symbol data")));
 	    if (!edata)
 	      {
@@ -5641,8 +5666,9 @@ process_version_sections (file)
 			  Elf_Internal_Verneed ivn;
 			  unsigned long offset;
 
-			  offset = version_info[DT_VERSIONTAGIDX (DT_VERNEED)]
-			    - loadaddr;
+			  offset = offset_from_vma
+			    (file, version_info[DT_VERSIONTAGIDX (DT_VERNEED)],
+			     sizeof (Elf_External_Verneed));
 
 			  do
 			    {
@@ -5697,8 +5723,9 @@ process_version_sections (file)
 			  Elf_External_Verdef evd;
 			  unsigned long offset;
 
-			  offset = (version_info[DT_VERSIONTAGIDX (DT_VERDEF)]
-				    - loadaddr);
+			  offset = offset_from_vma
+			    (file, version_info[DT_VERSIONTAGIDX (DT_VERDEF)],
+			     sizeof evd);
 
 			  do
 			    {
@@ -5925,7 +5952,9 @@ process_symbol_table (file)
   if (dynamic_info[DT_HASH] && ((do_using_dynamic && dynamic_strings != NULL)
 				|| do_histogram))
     {
-      if (fseek (file, dynamic_info[DT_HASH] - loadaddr, SEEK_SET))
+      if (fseek (file, offset_from_vma (file, dynamic_info[DT_HASH],
+					sizeof nb + sizeof nc),
+		 SEEK_SET))
 	{
 	  error (_("Unable to seek to start of dynamic information"));
 	  return 0;
@@ -6056,8 +6085,9 @@ process_symbol_table (file)
 		  int is_nobits;
 		  int check_def;
 
-		  offset = version_info[DT_VERSIONTAGIDX (DT_VERSYM)]
-		    - loadaddr;
+		  offset = offset_from_vma
+		    (file, version_info[DT_VERSIONTAGIDX (DT_VERSYM)],
+		     sizeof data + si * sizeof (vers_data));
 
 		  get_data (&data, file, offset + si * sizeof (vers_data),
 			    sizeof (data), _("version data"));
@@ -6079,8 +6109,9 @@ process_symbol_table (file)
 			  Elf_Internal_Vernaux ivna;
 
 			  /* We must test both.  */
-			  offset = (version_info[DT_VERSIONTAGIDX (DT_VERNEED)]
-				    - loadaddr);
+			  offset = offset_from_vma
+			    (file, version_info[DT_VERSIONTAGIDX (DT_VERNEED)],
+			     sizeof evn);
 
 			  do
 			    {
@@ -6140,9 +6171,10 @@ process_symbol_table (file)
 			      Elf_External_Verdaux evda;
 			      unsigned long offset;
 
-			      offset
-				= (version_info[DT_VERSIONTAGIDX (DT_VERDEF)]
-				   - loadaddr);
+			      offset = offset_from_vma
+				(file,
+				 version_info[DT_VERSIONTAGIDX (DT_VERDEF)],
+				 sizeof (Elf_External_Verdef));
 
 			      do
 				{
@@ -9733,16 +9765,20 @@ process_mips_specific (file)
     switch (entry->d_tag)
       {
       case DT_MIPS_LIBLIST:
-	liblist_offset = entry->d_un.d_val - loadaddr;
+	liblist_offset
+	  = offset_from_vma (file, entry->d_un.d_val,
+			     liblistno * sizeof (Elf32_External_Lib));
 	break;
       case DT_MIPS_LIBLISTNO:
 	liblistno = entry->d_un.d_val;
 	break;
       case DT_MIPS_OPTIONS:
-	options_offset = entry->d_un.d_val - loadaddr;
+	options_offset = offset_from_vma (file, entry->d_un.d_val, 0);
 	break;
       case DT_MIPS_CONFLICT:
-	conflicts_offset = entry->d_un.d_val - loadaddr;
+	conflicts_offset
+	  = offset_from_vma (file, entry->d_un.d_val,
+			     conflictsno * sizeof (Elf32_External_Conflict));
 	break;
       case DT_MIPS_CONFLICTNO:
 	conflictsno = entry->d_un.d_val;
@@ -10394,30 +10430,12 @@ static int
 process_corefile_note_segments (file)
      FILE *file;
 {
-  Elf_Internal_Phdr *program_headers;
   Elf_Internal_Phdr *segment;
   unsigned int i;
   int res = 1;
 
-  program_headers = (Elf_Internal_Phdr *) malloc
-    (elf_header.e_phnum * sizeof (Elf_Internal_Phdr));
-
-  if (program_headers == NULL)
-    {
-      error (_("Out of memory\n"));
+  if (! get_program_headers (file))
       return 0;
-    }
-
-  if (is_32bit_elf)
-    i = get_32bit_program_headers (file, program_headers);
-  else
-    i = get_64bit_program_headers (file, program_headers);
-
-  if (i == 0)
-    {
-      free (program_headers);
-      return 0;
-    }
 
   for (i = 0, segment = program_headers;
        i < elf_header.e_phnum;
@@ -10428,8 +10446,6 @@ process_corefile_note_segments (file)
 					      (bfd_vma) segment->p_offset,
 					      (bfd_vma) segment->p_filesz);
     }
-
-  free (program_headers);
 
   return res;
 }
@@ -10646,6 +10662,12 @@ process_file (file_name)
   process_arch_specific (file);
 
   fclose (file);
+
+  if (program_headers)
+    {
+      free (program_headers);
+      program_headers = NULL;
+    }
 
   if (section_headers)
     {
