@@ -638,7 +638,7 @@ dbx_symfile_init (objfile)
   unsigned char size_temp[DBX_STRINGTAB_SIZE_SIZE];
 
   /* Allocate struct to keep track of the symfile */
-  objfile->sym_stab_info = (PTR)
+  objfile->sym_stab_info = (struct dbx_symfile_info *)
     xmmalloc (objfile -> md, sizeof (struct dbx_symfile_info));
   memset ((PTR) objfile->sym_stab_info, 0, sizeof (struct dbx_symfile_info));
 
@@ -1338,12 +1338,16 @@ read_dbx_symtab (section_offsets, objfile, text_addr, text_size)
 
   if (pst)
     {
+      /* Don't set pst->texthigh lower than it already is.  */
+      CORE_ADDR text_end =
+	(lowest_text_address == (CORE_ADDR)-1
+	 ? (text_addr + section_offsets->offsets[SECT_OFF_TEXT])
+	 : lowest_text_address)
+	+ text_size;
+
       end_psymtab (pst, psymtab_include_list, includes_used,
 		   symnum * symbol_size,
-		   (lowest_text_address == (CORE_ADDR)-1
-		    ? (text_addr + section_offsets->offsets[SECT_OFF_TEXT])
-		    : lowest_text_address)
-		   + text_size,
+		   text_end > pst->texthigh ? text_end : pst->texthigh,
 		   dependency_list, dependencies_used, textlow_not_set);
     }
 
@@ -1553,21 +1557,8 @@ end_psymtab (pst, include_list, num_includes, capping_symbol_offset,
 	 is wrong, in that a psymtab with N_SLINE entries but nothing else
 	 is not empty, but we don't realize that.  Fixing that without slowing
 	 things down might be tricky.  */
-      struct partial_symtab *prev_pst;
 
-      /* First, snip it out of the psymtab chain */
-
-      if (pst->objfile->psymtabs == pst)
-	pst->objfile->psymtabs = pst->next;
-      else
-	for (prev_pst = pst->objfile->psymtabs; prev_pst; prev_pst = pst->next)
-	  if (prev_pst->next == pst)
-	    prev_pst->next = pst->next;
-
-      /* Next, put it on a free list for recycling */
-
-      pst->next = pst->objfile->free_psymtabs;
-      pst->objfile->free_psymtabs = pst;
+      discard_psymtab (pst);
 
       /* Indicate that psymtab was thrown away.  */
       pst = (struct partial_symtab *)NULL;
@@ -1936,6 +1927,9 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
 
       /* Relocate for dynamic loading */
       valu += ANOFFSET (section_offsets, SECT_OFF_TEXT);
+#ifdef SMASH_TEXT_ADDRESS
+      SMASH_TEXT_ADDRESS (valu);
+#endif
       goto define_a_symbol;
 
     case N_LBRAC:
@@ -1946,10 +1940,6 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
       if (n_opt_found && desc == 1)
 	break;
 
-#if defined(BLOCK_ADDRESS_ABSOLUTE)
-      /* Relocate for dynamic loading (?).  */
-      valu += function_start_offset;
-#else
       if (block_address_function_relative)
 	/* Relocate for Sun ELF acc fn-relative syms.  */
 	valu += function_start_offset;
@@ -1957,7 +1947,6 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
 	/* On most machines, the block addresses are relative to the
 	   N_SO, the linker did not relocate them (sigh).  */
 	valu += last_source_start_addr;
-#endif
 
 #ifdef SUN_FIXED_LBRAC_BUG
       if (!SUN_FIXED_LBRAC_BUG && valu < last_pc_address) {
@@ -1977,10 +1966,6 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
       if (n_opt_found && desc == 1)
 	break;
 
-#if defined(BLOCK_ADDRESS_ABSOLUTE)
-      /* Relocate for dynamic loading (?).  */
-      valu += function_start_offset;
-#else
       if (block_address_function_relative)
 	/* Relocate for Sun ELF acc fn-relative syms.  */
 	valu += function_start_offset;
@@ -1988,7 +1973,6 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
 	/* On most machines, the block addresses are relative to the
 	   N_SO, the linker did not relocate them (sigh).  */
 	valu += last_source_start_addr;
-#endif
 
       new = pop_context();
       if (desc != new->depth)
@@ -2093,6 +2077,9 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
 	 Don't start a new symtab in this case.  */
       if (*name == '\000')
 	break;
+
+      if (block_address_function_relative)
+        function_start_offset = 0;
 
       start_stabs ();
       start_symtab (name, NULL, valu);
@@ -2408,7 +2395,7 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
          a definition.  If symbol reference is being defined, go 
          ahead and add it.  Otherwise, just return sym. */
 
-      char *s;
+      char *s = name;
       int refnum;
 
       /* If this stab defines a new reference ID that is not on the
@@ -2416,7 +2403,8 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
 
 	 We go ahead and advance NAME past the reference, even though
 	 it is not strictly necessary at this time.  */
-      if (refnum = symbol_reference_defined (&s), refnum)
+      refnum = symbol_reference_defined (&s);
+      if (refnum >= 0)
 	if (!ref_search (refnum))
 	  ref_add (refnum, 0, name, valu);
       name = s;
@@ -2660,7 +2648,8 @@ stabsect_build_psymtabs (objfile, section_offsets, mainline, stab_name,
     error ("stabsect_build_psymtabs:  Found stabs (%s), but not string section (%s)",
 	   stab_name, stabstr_name);
 
-  objfile->sym_stab_info = (PTR) xmalloc (sizeof (struct dbx_symfile_info));
+  objfile->sym_stab_info = (struct dbx_symfile_info *)
+    xmalloc (sizeof (struct dbx_symfile_info));
   memset (objfile->sym_stab_info, 0, sizeof (struct dbx_symfile_info));
 
   text_sect = bfd_get_section_by_name (sym_bfd, text_name);
