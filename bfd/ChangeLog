@@ -1,3 +1,8 @@
+Tue May 27 15:58:53 1997  Richard Henderson  <rth@tamu.edu>
+
+	* elf64-alpha.c (PLT_ENTRY_*): Use a new thread-safe format.
+	(elf64_alpha_finish_dynamic_symbol): Fill it in properly.
+
 Mon May 26 14:05:13 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* coff-ppc.c (coff_ppc_relocate_section): If PE file, don't add
