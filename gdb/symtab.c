@@ -1217,7 +1217,7 @@ lookup_block_symbol (register const struct block *block, const char *name,
 
   /* Here if block isn't sorted, or we fail to find a match during the
      binary search above.  If during the binary search above, we find a
-     symbol which is a C++ symbol, then we have re-enabled the linear
+     symbol which is a Java symbol, then we have re-enabled the linear
      search flag which was reset when starting the binary search.
 
      This loop is equivalent to the loop above, but hacked greatly for speed.

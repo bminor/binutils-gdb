@@ -1,3 +1,7 @@
+2001-10-15  Elena Zannoni  <ezannoni@redhat.com>
+
+        * symtab.c (lookup_block_symbol): Update comment.
+
 2001-10-15  Andrew Cagney  <ac131313@redhat.com>
 
 	* value.h (value_as_address): Rename value_as_pointer.
