@@ -1,4 +1,8 @@
 start-sanitize-sky
+Thu Mar 19 10:42:51 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* dvp-opc.c (vif_opcodes): Add stcycl.
+
 Tue Mar 17 10:53:58 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* dvp-dis.c (print_dma): Change length from 16 to 8.
