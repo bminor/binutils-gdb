@@ -1,3 +1,9 @@
+Wed Jan  4 12:27:29 1995  Kung Hsu  <kung@mexican.cygnus.com>
+
+	* remote-os9k.c (rombug_open): catch exception e in rombug.
+	* remote-os9k.c (rombug_wait): print message before register display
+	from rombug.
+
 Wed Jan  4 09:18:27 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* top.c (locate_arg): Call strchr not index.

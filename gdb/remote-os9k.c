@@ -359,13 +359,16 @@ rombug_open(args, from_tty)
   push_monitor (&rombug_cmds);
   printf_monitor("\r");	/* CR wakes up monitor */
   expect_prompt(1);
-
   push_target (&rombug_ops);
+  attach_flag = 1;
+
   if (from_tty)
     printf("Remote %s connected to %s\n", target_shortname,
 	   dev_name);
 
-  attach_flag = 1;
+  printf_monitor ("ov e \r");
+  expect_prompt(1);
+
   rombug_fetch_registers();
   bufaddr = 0;
   buflen = 0;
@@ -488,7 +491,8 @@ rombug_wait (pid, status)
   status->kind = TARGET_WAITKIND_EXITED;
   status->value.integer = 0;
 
-  timeout = 0;		/* Don't time out -- user program is running. */
+  timeout = -1;		/* Don't time out -- user program is running. */
+  expect ("eax:", 0);   /* output any message before register display */
   expect_prompt(1);     /* Wait for prompt, outputting extraneous text */
 
   status->kind = TARGET_WAITKIND_STOPPED;
