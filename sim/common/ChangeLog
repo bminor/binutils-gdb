@@ -1,3 +1,9 @@
+2000-12-13  Ben Elliston  <bje@redhat.com>
+
+	* cgen.sh: Set prefix/PREFIX (append ISA if applicable). Factor
+	sed expressions into $sedscript, substituting @prefix@/@PREFIX@.
+	(defs): New action.
+
 2000-12-12  Geoffrey Keating  <geoffk@redhat.com>
 
 	* sim-endian.h: Don't have parameters on macro definitions which
