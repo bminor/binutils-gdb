@@ -1,3 +1,12 @@
+Fri Jun 14 20:06:44 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* listing.c (listing_newline): Don't do anything if listing is 0.
+
+Thu Jun 13 17:50:54 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* subsegs.c (section_symbol): If symbol_table_frozen is set, call
+	symbol_create, not symbol_new.
+
 Wed Jun 12 14:10:44 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* write.c (adjust_reloc_syms): Don't set sy_used_in_reloc for an
