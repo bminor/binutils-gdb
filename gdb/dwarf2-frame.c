@@ -445,6 +445,31 @@ bad CFI data; mismatched DW_CFA_restore_state at 0x%s"), paddr (fs->pc));
 	      /* cfa_how deliberately not set.  */
 	      break;
 
+	    case DW_CFA_GNU_window_save:
+	      /* This is SPARC-specific code, and contains hard-coded
+		 constants for the register numbering scheme used by
+		 GCC.  Rather than having a architecture-specific
+		 operation that's only ever used by a single
+		 architecture, we provide the implementation here.
+		 Incidentally that's what GCC does too in its
+		 unwinder.  */
+	      {
+		struct gdbarch *gdbarch = get_frame_arch (next_frame);
+		int size = register_size(gdbarch, 0);
+		dwarf2_frame_state_alloc_regs (&fs->regs, 32);
+		for (reg = 8; reg < 16; reg++)
+		  {
+		    fs->regs.reg[reg].how = DWARF2_FRAME_REG_SAVED_REG;
+		    fs->regs.reg[reg].loc.reg = reg + 16;
+		  }
+		for (reg = 16; reg < 32; reg++)
+		  {
+		    fs->regs.reg[reg].how = DWARF2_FRAME_REG_SAVED_OFFSET;
+		    fs->regs.reg[reg].loc.offset = (reg - 16) * size;
+		  }
+	      }
+	      break;
+
 	    case DW_CFA_GNU_args_size:
 	      /* Ignored.  */
 	      insn_ptr = read_uleb128 (insn_ptr, insn_end, &utmp);

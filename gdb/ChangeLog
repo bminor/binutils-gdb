@@ -1,3 +1,8 @@
+2005-03-26  Mark Kettenis  <kettenis@gnu.org>
+
+	* dwarf2-frame.c (execute_cfa_program): Implement
+	DW_CFA_GNU_window_save.
+
 2005-03-25  Mark Kettenis  <kettenis@gnu.org>
 
 	* config/sparc/nbsd64.mh (NAT_FILE): Remove.
