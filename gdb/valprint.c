@@ -332,7 +332,7 @@ print_longest (stream, format, use_local, val_long)
   vbot = (long) val_long;
 
   if ((format == 'd' && (val_long < INT_MIN || val_long > INT_MAX))
-      || ((format == 'u' || format == 'x') && val_long > UINT_MAX))
+      || ((format == 'u' || format == 'x') && (unsigned long long)val_long > UINT_MAX))
     {
       fprintf_filtered (stream, "0x%lx%08lx", vtop, vbot);
       return;
@@ -728,6 +728,10 @@ val_print_string (addr, len, stream)
   struct cleanup *old_chain = NULL; /* Top of the old cleanup chain. */
   char peekchar;		/* Place into which we can read one char. */
 
+  /* If errcode is non-zero, this is the address which failed to read
+     successfully.  */
+  CORE_ADDR err_addr;
+
   /* First we need to figure out the limit on the number of characters we are
      going to attempt to fetch and print.  This is actually pretty simple.  If
      LEN is nonzero, then the limit is the minimum of LEN and print_max.  If
@@ -773,6 +777,7 @@ val_print_string (addr, len, stream)
 
     /* Read as much as we can. */
     nfetch = target_read_memory_partial (addr, bufptr, nfetch, &errcode);
+    err_addr = addr + nfetch;
     if (len != 0)
       {
 	addr += nfetch;
@@ -786,24 +791,30 @@ val_print_string (addr, len, stream)
 	   after the null byte, or at the next character after the end of
 	   the buffer. */
 	limit = bufptr + nfetch;
-	do {
-	  addr++;
-	  bufptr++;
-	} while (bufptr < limit && *(bufptr - 1) != '\0');
+	while (bufptr < limit)
+	  {
+	    ++addr;
+	    ++bufptr;
+	    if (bufptr[-1] == '\0')
+	      break;
+	  }
       }
   } while (errcode == 0					/* no error */
 	   && bufsize < fetchlimit			/* no overrun */
 	   && !(len == 0 && *(bufptr - 1) == '\0'));	/* no null term */
 
+  /* bufptr and addr now point immediately beyond the last byte which we
+     consider part of the string (including a '\0' which ends the string).  */
+
   /* We now have either successfully filled the buffer to fetchlimit, or
      terminated early due to an error or finding a null byte when LEN is
-     zero. */
+     zero.  */
 
-  if (len == 0 && *(bufptr - 1) != '\0')
+  if (len == 0 && bufptr > buffer && *(bufptr - 1) != '\0')
     {
       /* We didn't find a null terminator we were looking for.  Attempt
 	 to peek at the next character.  If not successful, or it is not
-	 a null byte, then force ellipsis to be printed. */
+	 a null byte, then force ellipsis to be printed.  */
       if (target_read_memory (addr, &peekchar, 1) != 0 || peekchar != '\0')
 	{
 	  force_ellipsis = 1;
@@ -818,14 +829,20 @@ val_print_string (addr, len, stream)
     }
 
   QUIT;
-  
-  if (addressprint)
+
+  /* If we get an error before fetching anything, don't print a string.
+     But if we fetch something and then get an error, print the string
+     and then the error message.  */
+  if (errcode == 0 || bufptr > buffer)
     {
-      fputs_filtered (" ", stream);
+      if (addressprint)
+	{
+	  fputs_filtered (" ", stream);
+	}
+      LA_PRINT_STRING (stream, buffer, bufptr - buffer, force_ellipsis);
     }
-  LA_PRINT_STRING (stream, buffer, bufptr - buffer, force_ellipsis);
-  
-  if (errcode != 0 && force_ellipsis)
+
+  if (errcode != 0)
     {
       if (errcode == EIO)
 	{
@@ -835,10 +852,9 @@ val_print_string (addr, len, stream)
 	}
       else
 	{
-	  /* FIXME-32x64: assumes addr fits in a long.  */
-	  error ("Error reading memory address 0x%lx: %s.",
-		 (unsigned long) addr,
-		 safe_strerror (errcode));
+	  fprintf_filtered (stream, " <Error reading address ");
+	  print_address_numeric (addr, stream);
+	  fprintf_filtered (stream, ": %s>", safe_strerror (errcode));
 	}
     }
   gdb_flush (stream);
