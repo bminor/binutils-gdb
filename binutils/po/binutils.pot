@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2000-06-18 18:12-0700\n"
+"POT-Creation-Date: 2000-07-19 17:37-0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -22,8 +22,8 @@ msgid ""
 "       [--basenames] [--functions] [addr addr ...]\n"
 msgstr ""
 
-#: addr2line.c:83 ar.c:287 nlmconv.c:1119 nm.c:306 objcopy.c:359 objcopy.c:391
-#: objdump.c:271 readelf.c:1818 size.c:91 strings.c:530 windres.c:737
+#: addr2line.c:83 ar.c:287 nlmconv.c:1119 objcopy.c:359 objcopy.c:391
+#: readelf.c:1818 size.c:91 strings.c:530 windres.c:737
 #, c-format
 msgid "Report bugs to %s\n"
 msgstr ""
@@ -482,7 +482,7 @@ msgstr ""
 msgid "Excluding symbol: %s"
 msgstr ""
 
-#: dlltool.c:1424 dlltool.c:1435 nm.c:901 nm.c:912 objdump.c:440 objdump.c:457
+#: dlltool.c:1424 dlltool.c:1435 nm.c:920 nm.c:931 objdump.c:441 objdump.c:458
 #, c-format
 msgid "%s: no symbols"
 msgstr ""
@@ -1361,33 +1361,67 @@ msgstr ""
 
 #: nm.c:294
 #, c-format
-msgid ""
-"Usage: %s [-aABCDglnopPrsuvV] [-t radix] [--radix=radix] [--target=bfdname]\n"
-"       [--debug-syms] [--extern-only] [--print-armap] [--print-file-name]\n"
-"       [--numeric-sort] [--no-sort] [--reverse-sort] [--size-sort]\n"
-"       [--undefined-only] [--portability] [-f {bsd,sysv,posix}]\n"
-"       [--format={bsd,sysv,posix}] [--demangle] [--no-demangle] [--dynamic]\n"
-"       [--defined-only] [--line-numbers]\n"
-"       [--version] [--help]\n"
-"       [file...]\n"
+msgid "Usage: %s [OPTION]... [FILE]...\n"
 msgstr ""
 
-#: nm.c:339
+#: nm.c:295
+msgid "List symbols from FILEs (a.out by default).\n"
+msgstr ""
+
+#: nm.c:296
+msgid ""
+"\n"
+"  -a, --debug-syms       Display debugger-only symbols\n"
+"  -A, --print-file-name  Print name of the input file before every symbol\n"
+"  -B                     Same as --format=bsd\n"
+"  -C, --demangle         Decode low-level symbol names into user-level "
+"names\n"
+"      --no-demangle      Do not demangle low-level symbol names\n"
+"  -D, --dynamic          Display dynamic symbols instead of normal symbols\n"
+"      --defined-only     Display only defined symbols\n"
+"  -e                     (ignored)\n"
+"  -f, --format=FORMAT    Use the output format FORMAT.  FORMAT can be "
+"`bsd',\n"
+"                           `sysv' or `posix'.  The default is `bsd'\n"
+"  -g, --extern-only      Display only external symbols\n"
+"  -h, --help             Display this information\n"
+"  -l, --line-numbers     Use debugging information to find a filename and\n"
+"                           line number for each symbol\n"
+"  -n, --numeric-sort     Sort symbols numerically by address\n"
+"  -o                     Same as -A\n"
+"  -p, --no-sort          Do not sort the symbols\n"
+"  -P, --portability      Same as --format=posix\n"
+"  -r, --reverse-sort     Reverse the sense of the sort\n"
+"  -s, --print-armap      Include index for symbols from archive members\n"
+"      --size-sort        Sort symbols by size\n"
+"  -t, --radix=RADIX      Use RADIX for printing symbol values\n"
+"      --target=BFDNAME   Specify the target object format as BFDNAME\n"
+"  -u, --undefined-only   Display only undefined symbols\n"
+"  -V, --version          Display this program's version number\n"
+"\n"
+msgstr ""
+
+#: nm.c:325 objdump.c:272
+#, c-format
+msgid "Report bugs to %s.\n"
+msgstr ""
+
+#: nm.c:358
 #, c-format
 msgid "%s: invalid radix"
 msgstr ""
 
-#: nm.c:364
+#: nm.c:383
 #, c-format
 msgid "%s: invalid output format"
 msgstr ""
 
-#: nm.c:490
+#: nm.c:509
 #, c-format
 msgid "data size %ld"
 msgstr ""
 
-#: nm.c:1280
+#: nm.c:1299
 #, c-format
 msgid ""
 "\n"
@@ -1396,7 +1430,7 @@ msgid ""
 "\n"
 msgstr ""
 
-#: nm.c:1282
+#: nm.c:1301
 #, c-format
 msgid ""
 "\n"
@@ -1405,14 +1439,14 @@ msgid ""
 "\n"
 msgstr ""
 
-#: nm.c:1283 nm.c:1337
+#: nm.c:1302 nm.c:1356
 msgid ""
 "Name                  Value   Class        Type         Size   Line  "
 "Section\n"
 "\n"
 msgstr ""
 
-#: nm.c:1334
+#: nm.c:1353
 #, c-format
 msgid ""
 "\n"
@@ -1421,7 +1455,7 @@ msgid ""
 "\n"
 msgstr ""
 
-#: nm.c:1336
+#: nm.c:1355
 #, c-format
 msgid ""
 "\n"
@@ -1430,7 +1464,7 @@ msgid ""
 "\n"
 msgstr ""
 
-#: nm.c:1507
+#: nm.c:1526
 msgid ""
 "\n"
 "Archive index:\n"
@@ -1700,227 +1734,229 @@ msgstr ""
 
 #: objdump.c:223
 #, c-format
-msgid "Usage: %s <switches> file(s)\n"
+msgid "Usage: %s OPTION... FILE...\n"
 msgstr ""
 
 #: objdump.c:224
-msgid " At least one of the following switches must be given:\n"
+msgid "Display information from object FILE.\n"
 msgstr ""
 
 #: objdump.c:225
 msgid ""
-"  -a  --archive-headers    Display archive header information\n"
-"  -f  --file-headers       Display the contents of the overall file header\n"
-"  -p  --private-headers    Display object format specific file header "
-"contents\n"
-"  -h  --[section-]headers  Display the contents of the section headers\n"
-"  -x  --all-headers        Display the contents of all headers\n"
-"  -d  --disassemble        Display assembler contents of executable "
-"sections\n"
-"  -D  --disassemble-all    Display assembler contents of all sections\n"
-"  -S  --source             Intermix source code with disassembly\n"
-"  -s  --full-contents      Display the full contents of all sections "
-"requested\n"
-"  -g  --debugging          Display debug information in object file\n"
-"  -G  --stabs              Display the STABS contents of an ELF format file\n"
-"  -t  --syms               Display the contents of the symbol table(s)\n"
-"  -T  --dynamic-syms       Display the contents of the dynamic symbol table\n"
-"  -r  --reloc              Display the relocation entries in the file\n"
-"  -R  --dynamic-reloc      Display the dynamic relocation entries in the "
-"file\n"
-"  -V  --version            Display this program's version number\n"
-"  -i  --info               List object formats and architectures supported\n"
-"  -H  --help               Display this information\n"
+"\n"
+" At least one of the following switches must be given:\n"
 msgstr ""
 
-#: objdump.c:247
+#: objdump.c:226
+msgid ""
+"  -a, --archive-headers    Display archive header information\n"
+"  -f, --file-headers       Display the contents of the overall file header\n"
+"  -p, --private-headers    Display object format specific file header "
+"contents\n"
+"  -h, --[section-]headers  Display the contents of the section headers\n"
+"  -x, --all-headers        Display the contents of all headers\n"
+"  -d, --disassemble        Display assembler contents of executable "
+"sections\n"
+"  -D, --disassemble-all    Display assembler contents of all sections\n"
+"  -S, --source             Intermix source code with disassembly\n"
+"  -s, --full-contents      Display the full contents of all sections "
+"requested\n"
+"  -g, --debugging          Display debug information in object file\n"
+"  -G, --stabs              Display (in raw form) any STABS info in the file\n"
+"  -t, --syms               Display the contents of the symbol table(s)\n"
+"  -T, --dynamic-syms       Display the contents of the dynamic symbol table\n"
+"  -r, --reloc              Display the relocation entries in the file\n"
+"  -R, --dynamic-reloc      Display the dynamic relocation entries in the "
+"file\n"
+"  -V, --version            Display this program's version number\n"
+"  -i, --info               List object formats and architectures supported\n"
+"  -H, --help               Display this information\n"
+msgstr ""
+
+#: objdump.c:248
 msgid ""
 "\n"
 " The following switches are optional:\n"
 msgstr ""
 
-#: objdump.c:248
+#: objdump.c:249
 msgid ""
-"  -b  --target <bfdname>         Specify the target object format as "
-"<bfdname>\n"
-"  -m  --architecture <machine>   Specify the target architecture as "
-"<machine>\n"
-"  -j  --section <name>           Only display information for section "
-"<name>\n"
-"  -M  --disassembler-options <o> Pass text <o> on to the disassembler\n"
+"  -b, --target=BFDNAME           Specify the target object format as "
+"BFDNAME\n"
+"  -m, --architecture=MACHINE     Specify the target architecture as MACHINE\n"
+"  -j, --section=NAME             Only display information for section NAME\n"
+"  -M, --disassembler-options=OPT Pass text OPT on to the disassembler\n"
 "  -EB --endian=big               Assume big endian format when "
 "disassembling\n"
 "  -EL --endian=little            Assume little endian format when "
 "disassembling\n"
 "      --file-start-context       Include context from start of file (with "
 "-S)\n"
-"  -l  --line-numbers             Include line numbers and filenames in "
+"  -l, --line-numbers             Include line numbers and filenames in "
 "output\n"
-"  -C  --demangle                 Decode mangled/processed symbol names\n"
-"  -w  --wide                     Format output for more than 80 columns\n"
-"  -z  --disassemble-zeroes       Do not skip blocks of zeroes when "
+"  -C, --demangle                 Decode mangled/processed symbol names\n"
+"  -w, --wide                     Format output for more than 80 columns\n"
+"  -z, --disassemble-zeroes       Do not skip blocks of zeroes when "
 "disassembling\n"
-"      --start-address <addr>     Only process data whoes address is >= "
-"<addr>\n"
-"      --stop-address <addr>      Only process data whoes address is <= "
-"<addr>\n"
+"      --start-address=ADDR       Only process data whoes address is >= ADDR\n"
+"      --stop-address=ADDR        Only process data whoes address is <= ADDR\n"
 "      --prefix-addresses         Print complete address alongside "
 "disassembly\n"
 "      --[no-]show-raw-insn       Display hex alongside symbolic disassembly\n"
-"      --adjust-vma <offset>      Add <offset> to all displayed section "
+"      --adjust-vma=OFFSET        Add OFFSET to all displayed section "
 "addresses\n"
 "\n"
 msgstr ""
 
-#: objdump.c:416
+#: objdump.c:417
 msgid "Sections:\n"
 msgstr ""
 
-#: objdump.c:419
+#: objdump.c:420
 msgid "Idx Name          Size      VMA       LMA       File off  Algn"
 msgstr ""
 
-#: objdump.c:421
+#: objdump.c:422
 msgid ""
 "Idx Name          Size      VMA               LMA               File off  "
 "Algn"
 msgstr ""
 
-#: objdump.c:425
+#: objdump.c:426
 msgid "  Flags"
 msgstr ""
 
-#: objdump.c:475
+#: objdump.c:476
 #, c-format
 msgid "%s: not a dynamic object"
 msgstr ""
 
-#: objdump.c:491
+#: objdump.c:492
 #, c-format
 msgid "%s: No dynamic symbols"
 msgstr ""
 
-#: objdump.c:1194
+#: objdump.c:1195
 msgid "Out of virtual memory"
 msgstr ""
 
-#: objdump.c:1603
+#: objdump.c:1604
 #, c-format
 msgid "Can't use supplied machine %s"
 msgstr ""
 
-#: objdump.c:1621
+#: objdump.c:1622
 #, c-format
 msgid "Can't disassemble for architecture %s\n"
 msgstr ""
 
-#: objdump.c:1700
+#: objdump.c:1701
 #, c-format
 msgid "Disassembly of section %s:\n"
 msgstr ""
 
-#: objdump.c:1874
+#: objdump.c:1875
 #, c-format
 msgid ""
 "No %s section present\n"
 "\n"
 msgstr ""
 
-#: objdump.c:1881
+#: objdump.c:1882
 #, c-format
 msgid "%s has no %s section"
 msgstr ""
 
-#: objdump.c:1895
+#: objdump.c:1896
 #, c-format
 msgid "Reading %s section of %s failed: %s"
 msgstr ""
 
-#: objdump.c:1907
+#: objdump.c:1908
 #, c-format
 msgid "Reading %s section of %s failed: %s\n"
 msgstr ""
 
-#: objdump.c:1950
+#: objdump.c:1951
 #, c-format
 msgid ""
 "Contents of %s section:\n"
 "\n"
 msgstr ""
 
-#: objdump.c:2050
+#: objdump.c:2051
 #, c-format
 msgid "architecture: %s, "
 msgstr ""
 
-#: objdump.c:2053
+#: objdump.c:2054
 #, c-format
 msgid "flags 0x%08x:\n"
 msgstr ""
 
-#: objdump.c:2066
+#: objdump.c:2067
 msgid ""
 "\n"
 "start address 0x"
 msgstr ""
 
-#: objdump.c:2098
+#: objdump.c:2099
 #, c-format
 msgid ""
 "\n"
 "%s:     file format %s\n"
 msgstr ""
 
-#: objdump.c:2140
+#: objdump.c:2141
 #, c-format
 msgid "%s: printing debugging information failed"
 msgstr ""
 
-#: objdump.c:2217
+#: objdump.c:2218
 #, c-format
 msgid "In archive %s:\n"
 msgstr ""
 
-#: objdump.c:2269
+#: objdump.c:2270
 #, c-format
 msgid "Contents of section %s:\n"
 msgstr ""
 
-#: objdump.c:2782
+#: objdump.c:2783
 #, c-format
 msgid "BFD header file version %s\n"
 msgstr ""
 
-#: objdump.c:2855
+#: objdump.c:2856
 msgid "unrecognized -E option"
 msgstr ""
 
-#: objdump.c:2866
+#: objdump.c:2867
 #, c-format
 msgid "unrecognized --endian type `%s'"
 msgstr ""
 
-#: rdcoff.c:204
+#: rdcoff.c:205
 #, c-format
 msgid "parse_coff_type: Bad type code 0x%x"
 msgstr ""
 
-#: rdcoff.c:422 rdcoff.c:530 rdcoff.c:711
+#: rdcoff.c:423 rdcoff.c:531 rdcoff.c:729
 #, c-format
 msgid "bfd_coff_get_syment failed: %s"
 msgstr ""
 
-#: rdcoff.c:438 rdcoff.c:731
+#: rdcoff.c:439 rdcoff.c:749
 #, c-format
 msgid "bfd_coff_get_auxent failed: %s"
 msgstr ""
 
-#: rdcoff.c:797
+#: rdcoff.c:816
 #, c-format
 msgid "%ld: .bf without preceding function"
 msgstr ""
 
-#: rdcoff.c:847
+#: rdcoff.c:866
 #, c-format
 msgid "%ld: unexpected .ef\n"
 msgstr ""
@@ -3789,7 +3825,7 @@ msgstr ""
 msgid "unable to open output file %s"
 msgstr ""
 
-#: stabs.c:349 stabs.c:1769
+#: stabs.c:349 stabs.c:1770
 msgid "numeric overflow"
 msgstr ""
 
@@ -3817,70 +3853,70 @@ msgstr ""
 
 #. Complain and keep going, so compilers can invent new
 #. cross-reference types.
-#: stabs.c:1306
+#: stabs.c:1307
 msgid "unrecognized cross reference type"
 msgstr ""
 
 #. Does this actually ever happen?  Is that why we are worrying
 #. about dealing with it rather than just calling error_type?
-#: stabs.c:1861
+#: stabs.c:1862
 msgid "missing index type"
 msgstr ""
 
-#: stabs.c:2188
+#: stabs.c:2189
 msgid "unknown virtual character for baseclass"
 msgstr ""
 
-#: stabs.c:2206
+#: stabs.c:2207
 msgid "unknown visibility character for baseclass"
 msgstr ""
 
-#: stabs.c:2398
+#: stabs.c:2399
 msgid "unnamed $vb type"
 msgstr ""
 
-#: stabs.c:2404
+#: stabs.c:2405
 msgid "unrecognized C++ abbreviation"
 msgstr ""
 
-#: stabs.c:2484
+#: stabs.c:2485
 msgid "unknown visibility character for field"
 msgstr ""
 
-#: stabs.c:2740
+#: stabs.c:2741
 msgid "const/volatile indicator missing"
 msgstr ""
 
-#: stabs.c:2980
+#: stabs.c:2981
 #, c-format
 msgid "No mangling for \"%s\"\n"
 msgstr ""
 
-#: stabs.c:3293
+#: stabs.c:3294
 msgid "Undefined N_EXCL"
 msgstr ""
 
-#: stabs.c:3381
+#: stabs.c:3382
 #, c-format
 msgid "Type file number %d out of range\n"
 msgstr ""
 
-#: stabs.c:3386
+#: stabs.c:3387
 #, c-format
 msgid "Type index number %d out of range\n"
 msgstr ""
 
-#: stabs.c:3473
+#: stabs.c:3474
 #, c-format
 msgid "Unrecognized XCOFF type %d\n"
 msgstr ""
 
-#: stabs.c:3772
+#: stabs.c:3773
 #, c-format
 msgid "bad mangled name `%s'\n"
 msgstr ""
 
-#: stabs.c:3868
+#: stabs.c:3869
 msgid "no argument types in mangled string\n"
 msgstr ""
 

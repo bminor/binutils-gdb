@@ -1,3 +1,9 @@
+2000-07-19  Mark Kettenis  <kettenis@gnu.org>
+
+	* nm.c (usage): Change output of `nm --help' to include a
+	description of the purpose of the program and a detailed
+	description of the accepted options.
+
 2000-07-19  H.J. Lu  <hjl@gnu.org>
 
 	* readelf.c (process_dynamic_segment): Change DF_1_NODEPLIB
