@@ -134,6 +134,12 @@ mips16.d
 mips16.s
 mips4.d
 mips4.s
+mips4010.d
+mips4010.s
+mips4100.d
+mips4100.s
+mips4650.d
+mips4650.s
 mul-ilocks.d
 mul.d
 mul.s

@@ -1,4 +1,4 @@
-#objdump: -dr --prefix-addresses
+#objdump: -dr --prefix-addresses -mmips:3000
 #name: MIPS jal-empic
 #as: -mips1 -membedded-pic
 #source: jal.s

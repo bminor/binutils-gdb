@@ -1,4 +1,4 @@
-#objdump: -dr --prefix-addresses
+#objdump: -dr --prefix-addresses -mmips:3000
 #name: MIPS lifloat-empic
 #as: -mips1 -membedded-pic --defsym EMPIC=1
 #source: lifloat.s

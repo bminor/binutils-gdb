@@ -1,3 +1,16 @@
+Tue Jan 27 21:55:44 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* gas/mips/4010.s: Add 4010 tests.
+	* gas/mips/4010.d: Expected output.
+	* gas/mips/4100.s: Add 4010 tests.
+	* gas/mips/4100.d: Expected output.
+	* gas/mips/4650.s: Add 4010 tests.
+	* gas/mips/4650.d: Expected output.
+	* gas/mips/mips.exp: Run the new tests.
+	* gas/mips/*.d: Pass the right processor model to objdump.
+	Fix minor cases where expected output was wrong due to opcode
+	conflicts.
+
 Tue Jan 27 05:35:02 1998  Richard Henderson  <rth@cygnus.com>
 
 	* gas/m68k/mri_moveml.[sd]: New testcase.
