@@ -241,7 +241,9 @@ char *name;
   return (NULL);
 }
 
-/* Demangle a GDB method stub type.  */
+/* Demangle a GDB method stub type.
+   Note that this function is g++ specific. */
+
 char *
 gdb_mangle_name (type, i, j)
      struct type *type;
@@ -460,6 +462,10 @@ found:
       block = BLOCK_SUPERBLOCK (block);
     }
 
+  /* FIXME: this code is never executed--block is always NULL at this
+     point.  What is it trying to do, anyway?  We already should have
+     checked the STATIC_BLOCK above (it is the superblock of top-level
+     blocks).  Why is VAR_NAMESPACE special-cased?  */
   /* Don't need to mess with the psymtabs; if we have a block,
      that file is read in.  If we don't, then we deal later with
      all the psymtab stuff that needs checking.  */
@@ -1333,6 +1339,7 @@ operator_chars (p, end)
  * Put matches in SYM_ARR (which better be big enough!).
  * These allocations seem to define "big enough":
  * sym_arr = (struct symbol **) alloca(TYPE_NFN_FIELDS_TOTAL (t) * sizeof(struct symbol*));
+ * Note that this function is g++ specific.
  */
 
 int

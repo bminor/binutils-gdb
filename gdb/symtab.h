@@ -331,15 +331,15 @@ struct minimal_symbol
    Each block represents one name scope.
    Each lexical context has its own block.
 
-   The first two blocks in the blockvector are special.
-   The first one contains all the symbols defined in this compilation
+   The blockvector begins with some special blocks.
+   The GLOBAL_BLOCK contains all the symbols defined in this compilation
    whose scope is the entire program linked together.
-   The second one contains all the symbols whose scope is the
+   The STATIC_BLOCK contains all the symbols whose scope is the
    entire compilation excluding other separate compilations.
-   In C, these correspond to global symbols and static symbols.
+   Blocks starting with the FIRST_LOCAL_BLOCK are not special.
 
    Each block records a range of core addresses for the code that
-   is in the scope of the block.  The first two special blocks
+   is in the scope of the block.  The STATIC_BLOCK and GLOBAL_BLOCK
    give, for the range of code, the entire range of code produced
    by the compilation that the symbol segment belongs to.
 
@@ -370,40 +370,33 @@ struct blockvector
 struct block
 {
 
-  /* Addresses in the executable code that are in this block.
-     Note: in an unrelocated symbol segment in a file,
-     these are always zero.  They can be filled in from the
-     N_LBRAC and N_RBRAC symbols in the loader symbol table.  */
+  /* Addresses in the executable code that are in this block.  */
 
   CORE_ADDR startaddr;
   CORE_ADDR endaddr;
 
-  /* The symbol that names this block,
-     if the block is the body of a function;
-     otherwise, zero.
-     Note: In an unrelocated symbol segment in an object file,
-     this field may be zero even when the block has a name.
-     That is because the block is output before the name
-     (since the name resides in a higher block).
-     Since the symbol does point to the block (as its value),
-     it is possible to find the block and set its name properly.  */
+  /* The symbol that names this block, if the block is the body of a
+     function; otherwise, zero.  */
 
   struct symbol *function;
 
   /* The `struct block' for the containing block, or 0 if none.
-     Note that in an unrelocated symbol segment in an object file
-     this pointer may be zero when the correct value should be
-     the second special block (for symbols whose scope is one compilation).
-     This is because the compiler outputs the special blocks at the
-     very end, after the other blocks.   */
+
+     The superblock of a top-level local block (i.e. a function in the
+     case of C) is the STATIC_BLOCK.  The superblock of the
+     STATIC_BLOCK is the GLOBAL_BLOCK.  */
 
   struct block *superblock;
 
-  /* A flag indicating whether or not the function corresponding
-     to this block was compiled with gcc or not.  If there is no
-     function corresponding to this block, this meaning of this flag
-     is undefined.  (In practice it will be 1 if the block was created
-     while processing a file compiled with gcc and 0 when not). */
+  /* Version of GCC used to compile the function corresponding
+     to this block, or 0 if not compiled with GCC.  When possible,
+     GCC should be compatible with the native compiler, or if that
+     is not feasible, the differences should be fixed during symbol
+     reading.  As of 16 Apr 93, this flag is never used to distinguish
+     between gcc2 and the native compiler.
+
+     If there is no function corresponding to this block, this meaning
+     of this flag is undefined.  */
 
   unsigned char gcc_compile_flag;
 
@@ -430,12 +423,6 @@ struct block
 
 
 /* Represent one symbol name; a variable, constant, function or typedef.  */
-
-/* For a non-global symbol allocated statically,
-   the correct core address cannot be determined by the compiler.
-   The compiler puts an index number into the symbol's value field.
-   This index number can be matched with the "desc" field of
-   an entry in the loader symbol table.  */
 
 /* Different name spaces for symbols.  Looking up a symbol specifies a
    namespace and ignores symbol definitions in other name spaces. */
@@ -493,7 +480,17 @@ enum address_class
 
   LOC_REF_ARG,
 
-  /* Value is at spec'd offset in register window */
+  /* Value is in specified register.  Just like LOC_REGISTER except this is
+     an argument.  Probably the cleaner way to handle this would be to
+     separate address_class (which would include separate ARG and LOCAL
+     to deal with FRAME_ARGS_ADDRESS versus FRAME_LOCALS_ADDRESS), and
+     an is_argument flag.
+
+     For some symbol formats (stabs, for some compilers at least),
+     gdb generates a LOC_ARG and a LOC_REGISTER rather than a LOC_REGPARM.
+     This is because that's what the compiler does, but perhaps it would
+     be better if the symbol-reading code detected this (is it possible?)
+     and generated a LOC_REGPARM.  */
 
   LOC_REGPARM,
 
@@ -865,26 +862,29 @@ struct partial_symtab
    DELTA is the amount which is added to the apparent object's base
    address in order to point to the actual object to which the
    virtual function should be applied.
-   PFN is a pointer to the virtual function.  */
+   PFN is a pointer to the virtual function.
+
+   Note that this macro is g++ specific (FIXME). */
   
 #define VTBL_FNADDR_OFFSET 2
 
 /* Macro that yields non-zero value iff NAME is the prefix for C++ operator
    names.  If you leave out the parenthesis here you will lose!
    Currently 'o' 'p' CPLUS_MARKER is used for both the symbol in the
-   symbol-file and the names in gdb's symbol table.  */
+   symbol-file and the names in gdb's symbol table.
+   Note that this macro is g++ specific (FIXME). */
 
 #define OPNAME_PREFIX_P(NAME) \
   ((NAME)[0] == 'o' && (NAME)[1] == 'p' && (NAME)[2] == CPLUS_MARKER)
 
 /* Macro that yields non-zero value iff NAME is the prefix for C++ vtbl
-   names.  */
+   names.  Note that this macro is g++ specific (FIXME).  */
 
 #define VTBL_PREFIX_P(NAME) \
   ((NAME)[3] == CPLUS_MARKER && !strncmp ((NAME), "_vt", 3))
 
 /* Macro that yields non-zero value iff NAME is the prefix for C++ destructor
-   names.  */
+   names.  Note that this macro is g++ specific (FIXME).  */
 
 #define DESTRUCTOR_PREFIX_P(NAME) \
   ((NAME)[0] == '_' && (NAME)[1] == CPLUS_MARKER && (NAME)[2] == '_')

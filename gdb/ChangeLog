@@ -1,3 +1,8 @@
+Fri Apr 16 09:42:03 1993  Jim Kingdon  (kingdon@cygnus.com)
+
+	* symtab.{c,h}: Doc fixes (remove symseg references, last relevant
+	in gdb 2.8!).
+
 Thu Apr 15 21:16:58 1993  Fred Fish  (fnf@cygnus.com)
 
 	* depend, alldeps.mak:  Update, now that gcc -MM bug is fixed.
