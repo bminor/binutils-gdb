@@ -15,12 +15,6 @@
 
 Do-first:
 
-if ( echo $* | grep keep\-arc > /dev/null ) ; then
-	keep_these_too="arc ${keep_these_too}"
-else
-	lose_these_too="arc ${lose_these_too}"
-fi
-
 gm_files="tm-magic.h"
 
 if ( echo $* | grep keep\-gm > /dev/null ) ; then
@@ -59,6 +53,7 @@ Things-to-keep:
 
 a29k
 alpha
+arc
 arm
 convex
 d10v

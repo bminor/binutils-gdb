@@ -21,12 +21,10 @@ Do-first:
 
 Things-to-keep:
 
-Things-to-lose:
-
 arc.mt
-go32.mh
 tm-arc.h
-xm-go32.h
+
+Things-to-lose:
 
 Do-last:
 
