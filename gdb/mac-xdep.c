@@ -81,11 +81,21 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "mac-defs.h"
 
+/* This is true if we are running as a standalone application.  */
+
 int mac_app;
 
-int useWNE;
+/* This is true if we are using WaitNextEvent.  */
 
-int hasColorQD;
+int use_wne;
+
+/* This is true if we have Color Quickdraw.  */
+
+int has_color_qd;
+
+/* This is true if we are using Color Quickdraw. */
+
+int use_color_qd;
 
 int inbackground;
 
@@ -109,7 +119,6 @@ Rect console_text_rect;
 /* This will go away eventually. */
 gdb_has_a_terminal () { return 1; }
 
-
 mac_init ()
 {
   SysEnvRec se;
@@ -122,6 +131,24 @@ mac_init ()
   int i;
   Handle menubar;
   MenuHandle menu;
+  Handle siow_resource;
+
+  mac_app = 0;
+
+  /* Don't do anything if we`re running under MPW. */
+  if (!StandAlone)
+    return;
+
+  /* Don't do anything if we're using SIOW. */
+  /* This test requires that the siow 0 resource, as defined in
+     {RIncludes}siow.r, not be messed with.  If it is, then the
+     standard Mac setup below will step on SIOW's Mac setup and
+     most likely crash the machine. */
+  siow_resource = GetResource('siow', 0);
+  if (siow_resource != nil)
+    return;
+
+  mac_app = 1;
 
   /* Do the standard Mac environment setup. */
   InitGraf (&QD (thePort));
@@ -135,7 +162,9 @@ mac_init ()
 
   /* Color Quickdraw is different from Classic QD. */
   SysEnvirons(2, &se);
-  hasColorQD = se.hasColorQD;
+  has_color_qd = se.hasColorQD;
+  /* Use it if we got it. */
+  use_color_qd = has_color_qd;
 
   sizerect.top = 50;
   sizerect.left = 50;
@@ -157,14 +186,12 @@ mac_init ()
   DrawMenuBar ();
 
   new_console_window ();
-
-  return 1;
 }
 
 new_console_window ()
 {
   /* Create the main window we're going to play in. */
-  if (hasColorQD)
+  if (has_color_qd)
     console_window = GetNewCWindow (wConsole, NULL, (WindowPtr) -1L);
   else
     console_window = GetNewWindow (wConsole, NULL, (WindowPtr) -1L);
@@ -201,24 +228,25 @@ mac_command_loop()
   EventRecord event;
   WindowPtr win;
   RgnHandle cursorRgn;
-  int i;
+  int i, tm;
   Handle menubar;
   MenuHandle menu;
 
-  /* Figure out if the WaitNextEvent Trap is available. */
-  useWNE =
+  /* Figure out if the WaitNextEvent Trap is available.  */
+  use_wne =
     (NGetTrapAddress (0x60, ToolTrap) != NGetTrapAddress (0x9f, ToolTrap));
-  /* Pass WNE an empty region the 1st time thru. */
+  /* Pass WaitNextEvent an empty region the first time through.  */
   cursorRgn = NewRgn ();
-  /* Go into the main event-handling loop. */
+  /* Go into the main event-handling loop.  */
   while (!eventloopdone)
     {
-      /* Use WaitNextEvent if it is available, otherwise GetNextEvent. */
-      if (useWNE)
+      /* Use WaitNextEvent if it is available, otherwise GetNextEvent.  */
+      if (use_wne)
 	{
 	  get_global_mouse (&mouse);
 	  adjust_cursor (mouse, cursorRgn);
-	  gotevent = WaitNextEvent (everyEvent, &event, GetCaretTime(), cursorRgn);
+	  tm = GetCaretTime();
+	  gotevent = WaitNextEvent (everyEvent, &event, tm, cursorRgn);
 	}
       else
 	{
@@ -249,6 +277,8 @@ mac_command_loop()
     }
 }
 
+/* Collect the global coordinates of the mouse pointer.  */
+
 get_global_mouse (mouse)
 Point *mouse;
 {
@@ -258,13 +288,16 @@ Point *mouse;
   *mouse = evt.where;
 }
 
+/* Change the cursor's appearance to be appropriate for the given mouse
+   location.  */
+
 adjust_cursor (mouse, region)
 Point mouse;
 RgnHandle region;
 {
 }
 
-/* Decipher an event, maybe do something with it. */
+/* Decipher an event, maybe do something with it.  */
 
 do_event (evt)
 EventRecord *evt;
@@ -395,18 +428,19 @@ Point where;
   GrafPtr oldport;
 
   winsize = GrowWindow (win, where, &sizerect);
+  /* Only do anything if it actually changed size. */
   if (winsize != 0)
     {
       GetPort (&oldport);
       SetPort (win);
-      EraseRect (&win->portRect);
-      h = LoWord (winsize);
-      v = HiWord (winsize);
-      SizeWindow (win, h, v, 1);
-      adjust_console_sizes ();
-      adjust_console_scrollbars ();
-      adjust_console_text ();
-      InvalRect (&win->portRect);
+      if (win == console_window)
+	{
+	  EraseRect (&win->portRect);
+	  h = LoWord (winsize);
+	  v = HiWord (winsize);
+	  SizeWindow (win, h, v, 1);
+	  resize_console_window ();
+	}
       SetPort (oldport);
     }
 }
@@ -417,10 +451,18 @@ Point where;
 short part;
 {
   ZoomWindow (win, part, (win == FrontWindow ()));
+  if (win == console_window)
+    {
+      resize_console_window ();
+    }
+}
+
+resize_console_window ()
+{
   adjust_console_sizes ();
   adjust_console_scrollbars ();
   adjust_console_text ();
-  InvalRect (&(win->portRect));
+  InvalRect (&console_window->portRect);
 }
 
 close_window (win)
@@ -499,6 +541,11 @@ do_mouse_down (WindowPtr win, EventRecord *event)
 	  TEClick (mouse, 0, console_text);
 	}
     }
+}
+
+scroll_text (hlines, vlines)
+int hlines, vlines;
+{
 }
 
 activate_window (win, activate)
@@ -717,27 +764,22 @@ int key;
 	  bpstat_do_actions (&stop_bpstat);
 	}
     }
-  else if (0 /* editing chars... */)
-    {
-    }
   else
     {
-      /* A self-inserting character. */
+      /* A self-inserting character.  This includes delete.  */
       TEKey (key, console_text);
     }
 }
+
+/* Draw all graphical stuff in the console window.  */
 
 draw_console ()
 {
   SetPort (console_window);
   TEUpdate (&(console_window->portRect), console_text);
-#if 0
-  FrameRect (&((*console_text)->viewRect));
-  FrameRect (&((*console_text)->destRect));
-#endif
 }
 
-/* Cause an update of a window's entire contents. */
+/* Cause an update of a given window's entire contents.  */
 
 force_update (win)
 WindowPtr win;
@@ -757,15 +799,20 @@ adjust_console_sizes ()
   Rect tmprect;
 
   tmprect = console_window->portRect;
+  /* Move and size the scrollbar. */
   MoveControl (console_v_scrollbar, tmprect.right - sbarwid, 0);
   SizeControl (console_v_scrollbar, sbarwid + 1, tmprect.bottom - sbarwid + 1);
+  /* Move and size the text. */
   tmprect.left += 7;
   tmprect.right -= sbarwid;
   tmprect.bottom -= sbarwid;
   InsetRect(&tmprect, 1, 1);
-  (*console_text)->viewRect = tmprect;
   (*console_text)->destRect = tmprect;
-  /* (should fiddle bottom of viewrect to be even multiple of lines?) */
+  /* Fiddle bottom of viewrect to be even multiple of text lines. */
+  tmprect.bottom = tmprect.top
+    + ((tmprect.bottom - tmprect.top) / (*console_text)->lineHeight)
+      * (*console_text)->lineHeight;
+  (*console_text)->viewRect = tmprect;
 }
 
 adjust_console_scrollbars ()
@@ -793,8 +840,8 @@ adjust_console_text ()
   TEScroll (((*console_text)->viewRect.left
 	     - (*console_text)->destRect.left)
 	    - 0 /* get h scroll value */,
-	    (((*console_text)->viewRect.top
-	      - (*console_text)->destRect.top)
+	    ((((*console_text)->viewRect.top - (*console_text)->destRect.top)
+	      / (*console_text)->lineHeight)
 	     - GetCtlValue (console_v_scrollbar))
 	    * (*console_text)->lineHeight,
 	    console_text);
@@ -890,7 +937,6 @@ hacked_fprintf (FILE *fp, const char *fmt, ...)
       char buf[1000];
 
       ret = vsprintf(buf, fmt, ap);
-      TESetSelect (40000, 40000, console_text);
       TEInsert (buf, strlen(buf), console_text);
     }
   else
@@ -908,12 +954,7 @@ hacked_printf (const char *fmt, ...)
   va_list ap;
 
   va_start (ap, fmt);
-  if (mac_app)
-    {
-      ret = hacked_vfprintf(stdout, fmt, ap);
-    }
-  else
-    ret = vfprintf (stdout, fmt, ap);
+  ret = hacked_vfprintf(stdout, fmt, ap);
   va_end (ap);
   return ret;
 }
@@ -929,8 +970,13 @@ hacked_vfprintf (FILE *fp, const char *format, va_list args)
       int ret;
 
       ret = vsprintf(buf, format, args);
-      TESetSelect (40000, 40000, console_text);
       TEInsert (buf, strlen(buf), console_text);
+      if (strchr(buf, '\n'))
+	{
+	  adjust_console_sizes ();
+	  adjust_console_scrollbars ();
+	  adjust_console_text ();
+	}
       return ret;
     }
   else
@@ -943,8 +989,13 @@ hacked_fputs (const char *s, FILE *fp)
 {
   if (mac_app && (fp == stdout || fp == stderr))
     {
-      TESetSelect (40000, 40000, console_text);
       TEInsert (s, strlen(s), console_text);
+      if (strchr(s, '\n'))
+	{
+	  adjust_console_sizes ();
+	  adjust_console_scrollbars ();
+	  adjust_console_text ();
+	}
       return 0;
     }
   else
@@ -957,12 +1008,17 @@ hacked_fputc (const char c, FILE *fp)
 {
   if (mac_app && (fp == stdout || fp == stderr))
     {
-      char buf[2];
+      char buf[1];
 
       buf[0] = c;
-      TESetSelect (40000, 40000, console_text);
       TEInsert (buf, 1, console_text);
-      return 0;
+      if (c == '\n')
+	{
+	  adjust_console_sizes ();
+	  adjust_console_scrollbars ();
+	  adjust_console_text ();
+	}
+      return c;
     }
   else
     return fputc (c, fp);
@@ -974,11 +1030,17 @@ hacked_putc (const char c, FILE *fp)
 {
   if (mac_app && (fp == stdout || fp == stderr))
     {
-      char buf[2];
+      char buf[1];
 
       buf[0] = c;
-      TESetSelect (40000, 40000, console_text);
       TEInsert (buf, 1, console_text);
+      if (c == '\n')
+	{
+	  adjust_console_sizes ();
+	  adjust_console_scrollbars ();
+	  adjust_console_text ();
+	}
+      return c;
     }
   else
     return fputc (c, fp);
@@ -989,6 +1051,24 @@ hacked_putc (const char c, FILE *fp)
 hacked_fflush (FILE *fp)
 {
   if (mac_app && (fp == stdout || fp == stderr))
-    return 0;
+    {
+      adjust_console_sizes ();
+      adjust_console_scrollbars ();
+      adjust_console_text ();
+      return 0;
+    }
   return fflush (fp);
+}
+
+#undef fgetc
+
+hacked_fgetc (FILE *fp)
+{
+  if (mac_app && (fp == stdin))
+    {
+      /* Catch any attempts to use this.  */
+      DebugStr("\pShould not be reading from stdin!");
+      return '\n';
+    }
+  return fgetc (fp);
 }

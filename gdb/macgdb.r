@@ -75,7 +75,7 @@ resource 'MENU' (mDebug, preload) {
 };
 
 resource 'ALRT' (128) {
-	{40, 40, 229, 363},
+	{40, 40, 180, 420},
 	128,
 	{	/* array: 4 elements */
 		/* [1] */
@@ -90,33 +90,20 @@ resource 'ALRT' (128) {
 };
 
 resource 'DITL' (128) {
-	{	/* array DITLarray: 4 elements */
+	{	/* array DITLarray: 2 elements */
 		/* [1] */
-		{164, 115, 184, 185},
+		{110, 150, 128, 200},
 		Button {
 			enabled,
 			"OK"
 		},
 		/* [2] */
-		{5, 10, 43, 290},
+		{10, 10, 100, 370},
 		StaticText {
 			disabled,
-			"MacGDB"
+			"GDB 4.12.3\n"
+			"Copyright ©  1994 Free Software Foundation, Inc.\n"
 		},
-		/* [3] */
-		{76, 3, 154, 301},
-		StaticText {
-			disabled,
-			"GNU Debugger"
-			"\nCopyright ©  1994 Free Software Foundation Inc.\n"
-			"Written by Stan Shebs."
-		},
-		/* [4] */
-		{53, 82, 71, 227},
-		StaticText {
-			disabled,
-			"version 4.12.1"
-		}
 	}
 };
 
@@ -146,8 +133,8 @@ resource 'SIZE' (-1) {
 	reserved,
 	reserved,
 	reserved,
-	4000*1024,
-	4000*1024
+	5000*1024,
+	2000*1024
 };
 
 resource 'DLOG' (128) {

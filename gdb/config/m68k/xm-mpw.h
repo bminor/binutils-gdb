@@ -61,6 +61,9 @@ void mpw_abort ();
 #define fseek mpw_fseek
 #define abort mpw_abort
 
+/* Map these standard functions to versions that can do I/O in a console
+   window. */
+
 #define printf hacked_printf
 #define fprintf hacked_fprintf
 #define vprintf hacked_vfprintf
@@ -69,6 +72,8 @@ void mpw_abort ();
 #undef putc
 #define putc hacked_putc
 #define fflush hacked_fflush
+
+#define fgetc hacked_fgetc
 
 /* Define as macros so as to mask the previous enum. */
 

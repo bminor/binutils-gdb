@@ -152,7 +152,7 @@ mac_readchar (scb, timeout)
      int timeout;
 {
   int status, n;
-  /* time_t */ unsigned long starttime, now;
+  /* time_t */ unsigned long start_time, now;
   OSErr err;
   CntrlParam cb;
   IOParam pb;
@@ -160,7 +160,7 @@ mac_readchar (scb, timeout)
   if (scb->bufcnt-- > 0)
     return *scb->bufp++;
 
-  time (&starttime);
+  time (&start_time);
 
   while (1)
     {
@@ -190,10 +190,8 @@ mac_readchar (scb, timeout)
       else
 	{
 	  time (&now);
-	  if (now > starttime + timeout) {
-	    printf_unfiltered ("start %u, now %u, timeout %d\n", starttime, now, timeout);
+	  if (now > start_time + timeout)
 	    return SERIAL_TIMEOUT;
-	  }
 	}
     }
 }
@@ -257,9 +255,9 @@ mac_write (scb, str, len)
   OSErr err;
   IOParam pb;
 
-  if (first_mac_write++ < 8)
+  if (first_mac_write++ < 4)
     {
-      sleep (1);
+      sec_sleep (1);
     }
   pb.ioRefNum = output_refnum;
   pb.ioBuffer = (Ptr) str;
@@ -272,9 +270,22 @@ mac_write (scb, str, len)
   return 0;
 }
 
+sec_sleep (int timeout)
+{
+  unsigned long start_time, now;
+
+  time (&start_time);
+
+  while (1)
+    {
+      time (&now);
+      if (now > start_time + timeout)
+	return;
+    }
+}
+
 static void
-mac_close (scb)
-     serial_t scb;
+mac_close (serial_t scb)
 {
   if (input_refnum)
     {

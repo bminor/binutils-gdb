@@ -211,7 +211,7 @@ CDEPS = {XM_CDEPS} {TM_CDEPS} {NAT_CDEPS} \Option-d
 ADD_FILES = {REGEX} {XM_ADD_FILES} {TM_ADD_FILES} {NAT_ADD_FILES}
 ADD_DEPS = {REGEX1} {XM_ADD_FILES} {TM_ADD_FILES} {NAT_ADD_FILES}
 
-VERSION = 4.12.1
+VERSION = 4.12.3
 DIST=gdb
 
 LINT=:usr:5bin:lint
@@ -678,7 +678,7 @@ YYOBJ = c-exp.tab.c.o m2-exp.tab.c.o ch-exp.tab.c.o
 # .c.o \Option-f 
 #	{CC} -c {INTERNAL_CFLAGS} $<
 
-all \Option-f  gdb MacGDB
+all \Option-f  gdb SiowGDB MacGDB
 #	@{MAKE} {FLAGS_TO_PASS} DO=all "DODIRS=`echo {SUBDIRS} | sed 's:testsuite::'`" subdir_do
 
 # The check target can not use subdir_do, because subdir_do does not
@@ -721,6 +721,35 @@ uninstall \Option-f  force
 :init.c \Option-f  {OBS} {TSOBS}
 	Duplicate -d -y "{s}"mpw-init.c :init.c
 
+:init-new.c \Option-f  {OBS} {TSOBS}
+	Echo Making init.c
+	Delete -i -y init.c-tmp
+	Echo '/* Do not modify this file.  */' >init.c-tmp
+	Echo '/* It is created automatically by the Makefile.  */'>>init.c-tmp
+	Echo 'void initialize_all_files () {' >>init.c-tmp
+	For i in {OBS} {TSOBS}
+	  set filename `Echo {i} | sed \Option-d
+	    -e ',^Onindy.o,d' \Option-d
+	    -e ',^nindy.o,d' \Option-d
+	    -e ',ttyflush.o,d' \Option-d
+	    -e ',xdr_ld.o,d' \Option-d
+	    -e ',xdr_ptrace.o,d' \Option-d
+	    -e ',xdr_rdb.o,d' \Option-d
+	    -e ',udr.o,d' \Option-d
+	    -e ',udip2soc.o,d' \Option-d
+	    -e ',udi2go32.o,d' \Option-d
+	    -e ',version.o,d' \Option-d
+	    -e ',[a-z0-9A-Z_]*-exp.tab.o,d' \Option-d
+	    -e 's,\.gc\.o,.c,' \Option-d
+	    -e 's,\.c\.o,.c,'`
+	  If {filename} != ""
+	    sed <{s}{filename} >>init.c-tmp -n \Option-d
+	    -e ',^_initialize_[a-z_0-9A-Z]* *(,s,^\([a-z_0-9A-Z]*\).*,  {extern void \1 (); \1 ();},p'
+	  End if
+	End For
+	Echo '}' >>init.c-tmp
+	Rename -y init.c-tmp init-new.c
+
 # .PRECIOUS \Option-f  "{s}"init.c
 
 LOADLIBES = {EXTRALIBS}
@@ -747,6 +776,21 @@ saber_gdb \Option-f  {SFILES} {DEPFILES} "{s}"copying.c "{s}"version.c
 	#load -ltermcap 
 	#load `echo " "{DEPFILES} | sed -e 's:\.o:.c:g' -e 's, , ::,g'`
 	echo "Load "{s}".c corresponding to \Option-f " {DEPFILES}
+
+# Version of GDB that uses the SIOW library.
+
+SiowGDB \Option-f  {OBS} {TSOBS} {ADD_DEPS} {CDEPS} "{o}"init.c.o
+	Delete -i -y SiowGDB
+	Rez -o SiowGDB {RIncludes}siow.r -append \Option-d
+		-d __kPrefSize=5000 -d __kMinSize=2000
+	Link -d -model far -o SiowGDB -t 'APPL' -c 'gdb ' \Option-d
+	  "{o}"init.c.o {OBS} {TSOBS} {ADD_FILES} {CLIBS} \Option-d
+	  "{CLibraries}"StdClib.o \Option-d
+	  "{Libraries}"SIOW.o \Option-d
+	  "{Libraries}"Runtime.o \Option-d
+	  "{Libraries}"Interface.o
+
+# Version of GDB that uses a real library.
 
 MacGDB \Option-f  {OBS} {TSOBS} {ADD_DEPS} {CDEPS} "{o}"init.c.o
 	Delete -i -y MacGDB
@@ -1249,12 +1293,12 @@ MAKEOVERRIDES=
 "{o}"main.c.o \Option-f  "{s}"main.c {bfd_h} {getopt_h} {readline_headers} "{s}"call-cmds.h \Option-d
 	{defs_h} {gdbcmd_h} {inferior_h} "{s}"language.h "{s}"signals.h \Option-d
 	{remote_utils_h}
-	{CC} "{srcdir}"main.c {INTERNAL_CFLAGS} {READLINE_CFLAGS} -o "{o}"main.c.o
+	{CC} "{srcdir}"main.c {INTERNAL_CFLAGS} {READLINE_CFLAGS} -s gdb_main -o "{o}"main.c.o
 
 "{o}"top.c.o \Option-f  "{s}"top.c {bfd_h} {getopt_h} {readline_headers} "{s}"call-cmds.h \Option-d
 	{defs_h} {gdbcmd_h} {inferior_h} "{s}"language.h "{s}"signals.h \Option-d
 	{remote_utils_h}
-	{CC} "{srcdir}"top.c {INTERNAL_CFLAGS} {READLINE_CFLAGS} -o "{o}"top.c.o
+	{CC} "{srcdir}"top.c {INTERNAL_CFLAGS} {READLINE_CFLAGS} -s gdb_top -o "{o}"top.c.o
 
 "{o}"maint.c.o \Option-f  "{s}"maint.c {defs_h} {gdbcmd_h} {gdbtypes_h} {symtab_h} "{s}"language.h \Option-d
 	{expression_h}

@@ -1,3 +1,35 @@
+Wed Jun 22 11:10:27 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* mpw-make.in (VERSION): Update to 4.12.3.
+	(SiowGDB): New target, GDB using SIOW library.
+	(init-new.c): New target, attempt to generate init.c from sources.
+	(main.c.o, top.c.o): Put each in its own segment.
+	* main.c (main) [MPW]: Always call mac_init.
+	* utils.c (query) [MPW]: Always return "yes" if in MacGDB, output
+	an extra newline otherwise.
+	* mac-xdep.c: More comments in various places, remove junk.
+	(mac_init): Add tests for MPW and SIOW.
+	(use_wne, has_color_qd): Renamed.
+	(use_color_qd): New variable.
+	(grow_window): Only do console resizing to console window,
+	call resize_console_window.
+	(zoom_window): Call resize_console_window.
+	(resize_console_window, scroll_text): New functions.
+	(adjust_console_sizes): Always align viewrect to even multiples of
+	text lines.
+	(adjust_console_text): Always scroll by whole lines.
+	(hacked_vfprintf, hacked_puts, hacked_fputc, hacked_putc): Force a
+	recalculation of scroll positions if a newline was output.
+	(hacked_fflush): Similarly, for flushing.
+	(hacked_fgetc): New function, aborts if called in MacGDB.
+	* ser-mac.c (mac_readchar): Rename starttime to start_time,
+	remove debugging printf.
+	(mac_write): Sleep on first 4 writes.
+	(sec_sleep): New function, works like standard sleep.
+	* macgdb.r: Adjust positioning and contents of About box.
+	Set minimum size to 2000K, preferred size to 5000K.
+	* config/m68k/xm-mpw.h (fgetc): Define as a macro.
+
 Wed Jun 15 17:36:07 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	* mpw-make.in (.c.o, .gc.o): Prefix segment names with gdb_.
