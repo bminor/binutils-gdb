@@ -564,7 +564,7 @@ f_val_print (type, valaddr, embedded_offset, address, stream, format, deref_ref,
       fputs_filtered ("(", stream);
       print_floating (valaddr, type, stream);
       fputs_filtered (",", stream);
-      print_floating (valaddr, type, stream);
+      print_floating (valaddr + TYPE_LENGTH (type), type, stream);
       fputs_filtered (")", stream);
       break;
 

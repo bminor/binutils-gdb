@@ -1,3 +1,8 @@
+Tue May 23 13:20:00 1999  Gregory Lielens  <info@fft.be>
+
+	* f-valprint.c : Corrected f_val_print function for TYPE_CODE
+	(type) = TYPE_CODE_COMPLEX
+
 Wed May 24 00:38:09 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* utils.c (make_cleanup_close, do_close_cleanup): New functions.
