@@ -1,3 +1,8 @@
+2002-03-01  David Mosberger  <davidm@hpl.hp.com>
+
+	* scripttempl/elf.sc (SECTIONS): Add entries for .preinit_array,
+	.init_array, and .fini_array.
+
 2002-02-20  Andreas Schwab  <schwab@suse.de>
 
 	* emulparams/elf64_ia64.sh (OTHER_READONLY_SECTIONS): Don't fold
@@ -60,7 +65,7 @@
 
 2002-02-15  Richard Henderson  <rth@redhat.com>
 
-        * emulparams/elf64alpha.sh (NOP): Adjust for big-endian
+	* emulparams/elf64alpha.sh (NOP): Adjust for big-endian
 	definition.  Emit a unop+nop pair.
 
 2002-02-15  Hans-Peter Nilsson  <hp@bitrange.com>

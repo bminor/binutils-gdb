@@ -246,6 +246,23 @@ cat <<EOF
     ${RELOCATING+${INIT_END}}
   } =${NOP-0}
 
+  /* Ensure the __preinit_array_start label is properly aligned.  We
+     could instead move the label definition inside the section, but
+     the linker would then create the section even if it turns out to
+     be empty, which isn't pretty.  */
+  ${RELOCATING+. = ALIGN(${ALIGNMENT})}
+  ${RELOCATING+${CREATE_SHLIB-PROVIDE (__preinit_array_start = .);}}
+  .preinit_array   ${RELOCATING-0} : { *(.preinit_array) }
+  ${RELOCATING+${CREATE_SHLIB-PROVIDE (__preinit_array_end = .);}}
+
+  ${RELOCATING+${CREATE_SHLIB-PROVIDE (__init_array_start = .)}};
+  .init_array   ${RELOCATING-0} : { *(.init_array) }
+  ${RELOCATING+${CREATE_SHLIB-PROVIDE (__init_array_end = .);}}
+
+  ${RELOCATING+${CREATE_SHLIB-PROVIDE (__fini_array_start = .);}}
+  .fini_array   ${RELOCATING-0} : { *(.fini_array) }
+  ${RELOCATING+${CREATE_SHLIB-PROVIDE (__fini_array_end = .);}}
+
   ${DATA_PLT-${BSS_PLT-${PLT}}}
   .text         ${RELOCATING-0} :
   {
