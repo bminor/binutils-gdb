@@ -1,4 +1,11 @@
+Fri May 14 11:12:26 1993  Per Bothner  (bothner@cygnus.com)
+
+	* NEWS:  Mention copy->objcopy renaming and new c++filt program.
+
 Wed May 12 12:05:36 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* Makefile.in (cplus-dem.o, $(DEMANGLER_PROG)): Build the
+	demangler via cplus-dem.o, rather than directly from the .c file.
 
 	* objcopy.c: Renamed from copy.c, updated comments accordingly.
 	* Makefile.in, binutils.texi: Renamed copy to objcopy.
