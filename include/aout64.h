@@ -26,22 +26,35 @@ struct external_exec
 #endif
 
 #define _N_HDROFF(x)	(N_SEGSIZE(x) - EXEC_BYTES_SIZE)
-/* address in an a.out of the text section. When demand paged, it's
- set up a bit to make nothing at 0, when an object file it's 0.
- There's a special hack case when the entry point is < TEXT_START_ADDR
- for executables, then the real start is 0 
+
+/* If the exec header is mapped in as part of a shared text segemnt.
+   Only relevant for ZMAGIC files. */
+
+#ifndef N_HEADER_IN_TEXT
+#define N_HEADER_IN_TEXT(x) 1
+#endif
+
+/* Virtual memory address of the text section. When demand paged, it's
+   set up a bit to make nothing at 0, when an object file it's 0.
+   There's a special hack case when the entry point is < TEXT_START_ADDR
+   for executables, then the real start is 0 
+
+   Note that this differs from Sun's definition:  They consider
+   the text segment to start at 0x2000; we view it as starting at 0x2000.
+   I.e., we never consider the exec header to be part of the text segment.
 */
 
+#ifndef N_TXTADDR
 #define N_TXTADDR(x) \
-    (N_MAGIC(x)==OMAGIC? 0 \
-     : (N_MAGIC(x) == ZMAGIC && (x).a_entry < TEXT_START_ADDR)? 0 \
+    (N_MAGIC(x)!=ZMAGIC? 0 \
+     : N_HEADER_IN_TEXT(x) ? TEXT_START_ADDR+EXEC_BYTES_SIZE \
      : TEXT_START_ADDR)
+#endif
 
-/* offset in an a.out of the start of the text section. When demand
-   paged, this is the start of the file
-*/
+/* Offset in an a.out of the start of the text section. */
 
-#define N_TXTOFF(x)	( (N_MAGIC((x)) == ZMAGIC) ? 0 : EXEC_BYTES_SIZE)
+#define N_TXTOFF(x)   ( N_MAGIC(x) != ZMAGIC ? EXEC_BYTES_SIZE \
+		       : N_HEADER_IN_TEXT(x) ? EXEC_BYTES_SIZE : PAGE_SIZE)
 #if ARCH_SIZE==64
 #define OMAGIC 0x1001		/* Code indicating object file  */
 #define ZMAGIC 0x1002		/* Code indicating demand-paged executable.  */

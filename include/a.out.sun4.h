@@ -7,6 +7,7 @@
 #define	SEG_SIZE_SUN3	0x20000		/* Resolution of r/w protection hw */
 
 #define TEXT_START_ADDR	PAGE_SIZE	/* Location 0 is not accessible */
+#define N_HEADER_IN_TEXT(x) 1
 
 /* Non-default definitions of the accessor macros... */
 
@@ -15,11 +16,6 @@
 #define N_SEGSIZE(x)	(N_MACHTYPE(x) == M_SPARC?	SEG_SIZE_SPARC:	\
 			 N_MACHTYPE(x) == M_68020?	SEG_SIZE_SUN3:	\
 			/* Guess? */			PAGE_SIZE)
-
-/* Offset in a.out file of the text section.  For ZMAGIC, the text section
-   actually includes the a.out header.  */
-
-#define N_TXTOFF(x)	( (N_MAGIC((x)) == ZMAGIC) ? 0 : EXEC_BYTES_SIZE)
 
 /* Virtual Address of text segment from the a.out file.  For OMAGIC,
    (almost always "unlinked .o's" these days), should be zero.
@@ -31,4 +27,4 @@
 #define N_TXTADDR(x) \
     (N_MAGIC(x)==OMAGIC? 0 \
      : (N_MAGIC(x) == ZMAGIC && (x).a_entry < TEXT_START_ADDR)? 0 \
-     : TEXT_START_ADDR)
+     : TEXT_START_ADDR+EXEC_BYTES_SIZE)
