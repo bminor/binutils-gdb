@@ -1,5 +1,5 @@
 /* Main header file for the bfd library -- portable access to object files.
-   Copyright 1990, 1991, 1992, 1993, 1994 Free Software Foundation, Inc.
+   Copyright 1990, 1991, 1992, 1993, 1994, 1995 Free Software Foundation, Inc.
    Contributed by Cygnus Support.
 
 ** NOTE: bfd.h and bfd-in2.h are GENERATED files.  Don't change them;
@@ -160,6 +160,7 @@ typedef unsigned long bfd_size_type;
 #define printf_vma(x) fprintf_vma(stdout,x)
 
 typedef unsigned int flagword;	/* 32 bits of flags */
+typedef unsigned char bfd_byte;
 
 /** File formats */
 
@@ -229,6 +230,9 @@ typedef enum bfd_format {
 /* A count of carsyms (canonical archive symbols).  */
 typedef unsigned long symindex;
 
+/* How to perform a relocation.  */
+typedef const struct reloc_howto_struct reloc_howto_type;
+
 #define BFD_NO_MORE_SYMBOLS ((symindex) ~0)
 
 /* General purpose part of a symbol X;
@@ -259,7 +263,6 @@ struct orl {			/* output ranlib */
   file_ptr pos;			/* bfd* or file position */
   int namidx;			/* index into string table */
 };
-
 
 
 /* Linenumber stuff */
@@ -1153,7 +1156,7 @@ typedef struct reloc_cache_entry
   bfd_vma addend;
 
         /* Pointer to how to perform the required relocation */
-  const struct reloc_howto_struct *howto;
+  reloc_howto_type *howto;
 
 } arelent;
 enum complain_overflow
@@ -1173,9 +1176,6 @@ enum complain_overflow
 	   unsigned number. */
   complain_overflow_unsigned
 };
-
-typedef unsigned char bfd_byte;
-typedef const struct reloc_howto_struct reloc_howto_type;
 
 struct reloc_howto_struct
 {
@@ -1531,7 +1531,7 @@ of instruction. */
 
   BFD_RELOC_UNUSED };
 typedef enum bfd_reloc_code_real bfd_reloc_code_real_type;
-const struct reloc_howto_struct *
+reloc_howto_type *
 
 bfd_reloc_type_lookup  PARAMS ((bfd *abfd, bfd_reloc_code_real_type code));
 
@@ -1844,6 +1844,7 @@ typedef enum bfd_error
   bfd_error_no_debug_section,
   bfd_error_bad_value,
   bfd_error_file_truncated,
+  bfd_error_file_too_big,
   bfd_error_invalid_error_code
 } bfd_error_type;
 
@@ -2013,7 +2014,9 @@ enum bfd_flavour {
   bfd_target_tekhex_flavour,
   bfd_target_srec_flavour,
   bfd_target_som_flavour,
-  bfd_target_os9k_flavour};
+  bfd_target_os9k_flavour,
+  bfd_target_msdos_flavour
+};
 
  /* Forward declaration.  */
 typedef struct bfd_link_info _bfd_link_info;
@@ -2161,7 +2164,7 @@ CAT(NAME,_bfd_reloc_type_lookup)
   long  (*_bfd_canonicalize_reloc) PARAMS ((bfd *, sec_ptr, arelent **,
                                             struct symbol_cache_entry **));
    /* See documentation on reloc types.  */
-  CONST struct reloc_howto_struct *
+  reloc_howto_type *
        (*reloc_type_lookup) PARAMS ((bfd *abfd,
                                      bfd_reloc_code_real_type code));
 

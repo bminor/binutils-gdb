@@ -1,4 +1,23 @@
+Mon Feb  6 03:20:17 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	Changes from Bryan Ford, baford@schirf.cs.utah.edu:
+	* config.bfd (i[345]86-*-msdos*): New target.
+	* configure.in (i386msdos_vec): Handle it.
+	* i386msdos.c: New file.
+	* config/i386-msdos.mt: New file.
+	* bfd.c (enum bfd_error): Added new value bfd_error_file_too_big.
+	(bfd_errmsgs): Added string to table.
+	* libaout.h (reloc_type-lookup): Declare it.
+	* targets.c (enum bfd_flavour): Added bfd_target_msdos_flavour.
+	(i386msdos_vec): Declare.
+	(bfd_target_vector): Add it to the list.
+	* bfd-in2.h: Regenerated.
+
 Wed Feb  1 01:32:14 1995  Jeff Law  (law@snake.cs.utah.edu)
+
+	* som.c (som_set_reloc_info, case R_DATA_ONE_SYMBOL): If there's
+	nothing in R_DATA_OVERRIDE, then try to find the addend in the
+	section's contents.
 
 	* som.c (som_object_setup): More heruistics to detect the
 	braindamaged HP OSF1 linker. 
