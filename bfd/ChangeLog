@@ -1,3 +1,8 @@
+Tue Nov 25 11:26:27 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* coff-arm.c (arm_allocate_interworking_sections): Fix typo
+	(COFF_WITH_PR to COFF_WITH_PE).
+
 Mon Nov 24 15:47:49 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* coff-arm.c: Make variables and some functions static, so that

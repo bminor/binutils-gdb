@@ -1459,7 +1459,7 @@ coff_arm_relocate_section (output_bfd, info, input_bfd, input_section,
   return true;
 }
 
-#ifndef COFF_WITH_PR
+#ifndef COFF_WITH_PE
 boolean
 arm_allocate_interworking_sections (info) 
      struct bfd_link_info *info;
