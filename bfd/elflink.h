@@ -1034,6 +1034,15 @@ elf_link_add_object_symbols (abfd, info)
 
 	      h->size = sym.st_size;
 	    }
+
+	  /* If this is a common symbol, then we always want H->SIZE
+             to be the size of the common symbol.  The code just above
+             won't fix the size if a common symbol becomes larger.  We
+             don't warn about a size change here, because that is
+             covered by --warn-common.  */
+	  if (h->root.type == bfd_link_hash_common)
+	    h->size = h->root.u.c.size;
+
 	  if (ELF_ST_TYPE (sym.st_info) != STT_NOTYPE
 	      && (definition || h->type == STT_NOTYPE))
 	    {
