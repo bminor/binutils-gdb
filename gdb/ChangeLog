@@ -1,3 +1,7 @@
+Tue Dec 31 15:19:32 1996  Geoffrey Noer  <noer@cygnus.com>
+
+        * config/mn10300/tm-mn10300.h: more small register fixes
+
 Tue Dec 31 06:51:43 1996  Mark Alexander  <marka@cygnus.com>
 
 	* config/i386/xm-windows.h: Undo previous change to SIGTRAP
