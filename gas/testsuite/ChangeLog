@@ -1,3 +1,8 @@
+2004-08-18  Nick Clifton  <nickc@redhat.com>
+
+	* gas/macros/strings.s: Remove #NO_APP, accidentally committed as
+	part of another patch.
+
 2004-08-15  Nick Clifton  <nickc@redhat.com>
 
 	* gas/all/altmacro.d: Allow for rest of frag being padded to an

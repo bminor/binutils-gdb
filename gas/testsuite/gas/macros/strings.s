@@ -1,4 +1,3 @@
-#NO_APP
 	.macro M arg1
 	.ascii	"\arg1"
 	.endm
