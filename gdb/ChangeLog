@@ -1,3 +1,7 @@
+Fri Jan 14 14:17:06 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* Makefile.in (ALLPARAM): Add config/nm-lynx.h.
+
 Fri Jan 14 11:49:44 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* remote-mips.c (mips_request, mips_wait): Correct prototypes.
