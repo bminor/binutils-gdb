@@ -1,5 +1,17 @@
 Wed Sep  7 19:10:09 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
+	* config/tc-i386.c (tc_gen_reloc): Use bfd_get_reloc_code_name to
+	display the name of the relocation type that couldn't be handled.
+	* config/tc-sparc.c (tc_gen_reloc): Likewise.
+	* config/tc-alpha.c (tc_gen_reloc): Likewise.  Deleted abort call
+	after call to as_fatal.
+
+	* configure.in (i386-*-linux*): Don't set bfd_gas.
+
+	* Makefile.in (CC_FOR_TARGET, NM_FOR_TARGET, OBJDUMP_FOR_TARGET,
+	install, uninstall): Don't use "brokensed" hack any more, the new
+	autoconf code should never let program_transform_name be empty.
+
 	Update for autoconf beta 1.112:
 	* aclocal.m4 (GAS_CHECK_DECL_NEEDED, GAS_WORKING_ASSERT): New
 	macros.
