@@ -170,8 +170,9 @@ struct alpha_elf_link_hash_entry
 
     int flags;
 
-    /* An additional flag.  */
+    /* Additional flags.  */
 #define ALPHA_ELF_GOT_ENTRY_RELOCS_DONE 0x10
+#define ALPHA_ELF_GOT_ENTRY_RELOCS_XLATED 0x20
 
     int use_count;
   } *got_entries;
@@ -3400,6 +3401,37 @@ elf64_alpha_relocate_section (output_bfd, info, input_bfd, input_section,
 		gotent = (alpha_elf_tdata(input_bfd)->
 			  local_got_entries[r_symndx]);
 		dynamic_symbol = false;
+
+		/* Need to adjust local GOT entries' addends for SEC_MERGE
+		   unless it has been done already.  */
+		if ((sec->flags & SEC_MERGE)
+		    && ELF_ST_TYPE (sym->st_info) == STT_SECTION
+		    && elf_section_data (sec)->merge_info
+		    && (gotent->flags & ALPHA_ELF_GOT_ENTRY_RELOCS_XLATED) == 0)
+		  {
+		    struct alpha_elf_got_entry *ent;
+		    asection *msec;
+
+		    for (ent = gotent; ent; ent = ent->next)
+		      {
+			ent->flags |= ALPHA_ELF_GOT_ENTRY_RELOCS_XLATED;
+			if (ent->use_count == 0)
+			  continue;
+			msec = sec;
+			ent->addend =
+			  _bfd_merged_section_offset (output_bfd, &msec,
+						      elf_section_data (sec)->
+						      merge_info,
+						      sym->st_value
+						      + ent->addend,
+						      (bfd_vma) 0);
+			ent->addend -= sym->st_value;
+			ent->addend += msec->output_section->vma
+				       + msec->output_offset
+				       - sec->output_section->vma
+				       - sec->output_offset;
+		      }
+		  }
 	      }
 
 	    BFD_ASSERT(gotent != NULL);

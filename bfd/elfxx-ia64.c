@@ -111,6 +111,10 @@ struct elfNN_ia64_local_hash_entry
 {
   struct bfd_hash_entry root;
   struct elfNN_ia64_dyn_sym_info *info;
+
+  /* True if this hash entry's addends was translated for
+     SHF_MERGE optimization.  */
+  unsigned sec_merge_done : 1;
 };
 
 struct elfNN_ia64_local_hash_table
@@ -216,6 +220,9 @@ static void elfNN_ia64_dyn_sym_traverse
 	   PTR info));
 static boolean elfNN_ia64_create_dynamic_sections
   PARAMS ((bfd *abfd, struct bfd_link_info *info));
+static struct elfNN_ia64_local_hash_entry * get_local_sym_hash
+  PARAMS ((struct elfNN_ia64_link_hash_table *ia64_info,
+	   bfd *abfd, const Elf_Internal_Rela *rel, boolean create));
 static struct elfNN_ia64_dyn_sym_info * get_dyn_sym_info
   PARAMS ((struct elfNN_ia64_link_hash_table *ia64_info,
 	   struct elf_link_hash_entry *h,
@@ -1719,6 +1726,32 @@ elfNN_ia64_create_dynamic_sections (abfd, info)
   return true;
 }
 
+/* Find and/or create a hash entry for local symbol.  */
+static struct elfNN_ia64_local_hash_entry *
+get_local_sym_hash (ia64_info, abfd, rel, create)
+     struct elfNN_ia64_link_hash_table *ia64_info;
+     bfd *abfd;
+     const Elf_Internal_Rela *rel;
+     boolean create;
+{
+  char *addr_name;
+  size_t len;
+
+  /* Construct a string for use in the elfNN_ia64_local_hash_table.
+     name describes what was once anonymous memory.  */
+
+  len = sizeof (void*)*2 + 1 + sizeof (bfd_vma)*4 + 1 + 1;
+  len += 10;	/* %p slop */
+
+  addr_name = alloca (len);
+  sprintf (addr_name, "%p:%lx",
+	   (void *) abfd, (unsigned long) ELFNN_R_SYM (rel->r_info));
+
+  /* Collect the canonical entry data for this address.  */
+  return elfNN_ia64_local_hash_lookup (&ia64_info->loc_hash_table,
+				       addr_name, create, create);
+}
+
 /* Find and/or create a descriptor for dynamic symbol info.  This will
    vary based on global or local symbol, and the addend to the reloc.  */
 
@@ -1739,22 +1772,8 @@ get_dyn_sym_info (ia64_info, h, abfd, rel, create)
   else
     {
       struct elfNN_ia64_local_hash_entry *loc_h;
-      char *addr_name;
-      size_t len;
 
-      /* Construct a string for use in the elfNN_ia64_local_hash_table.
-         The name describes what was once anonymous memory.  */
-
-      len = sizeof (void*)*2 + 1 + sizeof (bfd_vma)*4 + 1 + 1;
-      len += 10;	/* %p slop */
-
-      addr_name = alloca (len);
-      sprintf (addr_name, "%p:%lx",
-	       (void *) abfd, (unsigned long) ELFNN_R_SYM (rel->r_info));
-
-      /* Collect the canonical entry data for this address.  */
-      loc_h = elfNN_ia64_local_hash_lookup (&ia64_info->loc_hash_table,
-					    addr_name, create, create);
+      loc_h = get_local_sym_hash (ia64_info, abfd, rel, create);
       BFD_ASSERT (loc_h);
 
       pp = &loc_h->info;
@@ -3482,6 +3501,37 @@ elfNN_ia64_relocate_section (output_bfd, info, input_bfd, input_section,
 	  sym = local_syms + r_symndx;
 	  sym_sec = local_sections[r_symndx];
 	  value = _bfd_elf_rela_local_sym (output_bfd, sym, sym_sec, rel);
+	  if ((sym_sec->flags & SEC_MERGE)
+	      && ELF_ST_TYPE (sym->st_info) == STT_SECTION
+	      && elf_section_data (sym_sec)->merge_info)
+ 	    {
+	      struct elfNN_ia64_local_hash_entry *loc_h;
+      
+	      loc_h = get_local_sym_hash (ia64_info, input_bfd, rel, false);
+	      if (loc_h && ! loc_h->sec_merge_done)
+		{
+		  struct elfNN_ia64_dyn_sym_info *dynent;
+		  asection *msec;
+
+		  for (dynent = loc_h->info; dynent; dynent = dynent->next)
+		    {
+		      msec = sym_sec;
+		      dynent->addend =
+			_bfd_merged_section_offset (output_bfd, &msec,
+						    elf_section_data (msec)->
+						    merge_info,
+						    sym->st_value
+						    + dynent->addend,
+						    (bfd_vma) 0);
+		      dynent->addend -= sym->st_value;
+		      dynent->addend += msec->output_section->vma
+					+ msec->output_offset
+					- sym_sec->output_section->vma
+					- sym_sec->output_offset;
+		    }
+		  loc_h->sec_merge_done = 1;
+		}
+	    }
 	}
       else
 	{

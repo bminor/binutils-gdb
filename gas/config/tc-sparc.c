@@ -2909,12 +2909,7 @@ md_apply_fix3 (fixP, valP, segment)
       if (symbol_used_in_reloc_p (sym)
 	  && (S_IS_EXTERNAL (sym)
 	      || S_IS_WEAK (sym)
-#if 0 /* Although fixups against local symbols in SEC_MERGE sections
-	 should be treated as if they were against external symbols
-	 write.c:fixup_segment() will not have included the value of
-	 the symbol under these particular cicumstances.  */
 	      || (seg->flags & SEC_MERGE)
-#endif
 	      || (sparc_pic_code && ! fixP->fx_pcrel)
 	      || (seg != segment
 		  && (((bfd_get_section_flags (stdoutput, seg) & SEC_LINK_ONCE) != 0)

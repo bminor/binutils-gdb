@@ -1,3 +1,10 @@
+2001-11-28  Jakub Jelinek  <jakub@redhat.com>
+
+	* write.c (adjust_reloc_syms): Mark SEC_MERGE symbols as used
+	in reloc if it has non-zero addend.
+	* config/tc-alpha.c (tc_gen_reloc): Reinstall SEC_MERGE check.
+	* config/tc-sparc.c (md_apply_fix3): Likewise.
+
 2001-11-28  Andreas Schwab  <schwab@suse.de>
 
 	* as.c (parse_args): Call md_after_parse_args if defined.

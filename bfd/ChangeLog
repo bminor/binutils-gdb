@@ -1,3 +1,17 @@
+2001-11-28  Jakub Jelinek  <jakub@redhat.com>
+
+	* elf64-alpha.c (ALPHA_ELF_GOT_ENTRY_RELOCS_XLATED): Defined.
+	(elf64_alpha_relocate_section): Translate local_got_entries
+	for STT_SECTION symbol to SHF_MERGE section the first time
+	we see it.
+	* elfxx-ia64.c (struct elfNN_ia64_local_hash_entry): Add
+	sec_merge_done.
+	(get_local_sym_hash): New, extracted from get_dyn_sym_info.
+	(get_dyn_sym_info): Use it.
+	(elfNN_ia64_relocate_section): Translate local dyn entries
+	for STT_SECTION symbol to SHF_MERGE section the first time
+	we see it.
+
 2001-11-27  H.J. Lu <hjl@gnu.org>
 
 	* elflink.h (elf_bfd_discard_info): Skip if the input bfd isn't
