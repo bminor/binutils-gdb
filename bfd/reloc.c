@@ -1498,11 +1498,9 @@ _bfd_relocate_contents (howto, input_bfd, relocation, location)
              trouble; we would need to verify that B is in range, as
              we do for A above.  */
 	  signmask = ((~ howto->src_mask) >> 1) & howto->src_mask;
-	  if ((b & signmask) != 0)
-	    {
-	      /* Set all the bits above the sign bit.  */
-	      b -= signmask << 1;
-	    }
+
+	  /* Set all the bits above the sign bit.  */
+	  b = (b ^ signmask) - signmask;
 
 	  b = (b & addrmask) >> bitpos;
 
@@ -1545,7 +1543,7 @@ _bfd_relocate_contents (howto, input_bfd, relocation, location)
 
 	case complain_overflow_bitfield:
 	  /* Much like the signed check, but for a field one bit
-	     wider, and no trimming with addrmask.  We allow a
+	     wider, and no trimming inputs with addrmask.  We allow a
 	     bitfield to represent numbers in the range -2**n to
 	     2**n-1, where n is the number of bits in the field.
 	     Note that when bfd_vma is 32 bits, a 32-bit reloc can't
@@ -1558,15 +1556,19 @@ _bfd_relocate_contents (howto, input_bfd, relocation, location)
 	    flag = bfd_reloc_overflow;
 
 	  signmask = ((~ howto->src_mask) >> 1) & howto->src_mask;
-	  if ((b & signmask) != 0)
-	    b -= signmask << 1;
+	  b = (b ^ signmask) - signmask;
 
 	  b >>= bitpos;
 
 	  sum = a + b;
 
+	  /* We mask with addrmask here to explicitly allow an address
+	     wrap-around.  The Linux kernel relies on it, and it is
+	     the only way to write assembler code which can run when
+	     loaded at a location 0x80000000 away from the location at
+	     which it is linked.  */
 	  signmask = fieldmask + 1;
-	  if (((~ (a ^ b)) & (a ^ sum)) & signmask)
+	  if (((~ (a ^ b)) & (a ^ sum)) & signmask & addrmask)
 	    flag = bfd_reloc_overflow;
 
 	  break;
