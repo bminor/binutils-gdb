@@ -1,3 +1,8 @@
+2002-07-11  Grace Sainsbury  <graces@redhat.com>
+
+	* monitor.c (monitor_fetch_register): Make name a constant.
+	(monitor_store_register): Same.
+
 2002-07-11  Daniel Jacobowitz  <drow@mvista.com>
 
 	Based on patch from Daniel Berlin <dberlin@dberlin.org>.

@@ -1174,7 +1174,7 @@ monitor_wait (ptid_t ptid, struct target_waitstatus *status)
 static void
 monitor_fetch_register (int regno)
 {
-  char *name;
+  const char *name;
   char *zerobuf;
   char *regbuf;
   int i;
@@ -1336,7 +1336,7 @@ monitor_fetch_registers (int regno)
 static void
 monitor_store_register (int regno)
 {
-  char *name;
+  const char *name;
   ULONGEST val;
   
   if (current_monitor->regname != NULL)
