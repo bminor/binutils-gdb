@@ -1,3 +1,10 @@
+2002-06-18  Chris Demetriou  <cgd@broadcom.com>
+
+	* mdmx.c (SD_): Delete.
+	(Unpredictable): Re-define, for now, to directly invoke
+	unpredictable_action().
+	(mdmx_acc_op): Fix error in .ob immediate handling.
+
 2002-06-18  Andrew Cagney  <cagney@redhat.com>
 
 	* interp.c (sim_firmware_command): Initialize `address'.
