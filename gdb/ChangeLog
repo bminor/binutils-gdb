@@ -1,5 +1,8 @@
 Tue Jan 11 06:59:10 1994  Jim Kingdon  (kingdon@deneb.cygnus.com)
 
+	* remote-mips.c (mips_wait): Use new function mips_signal_from_protocol
+	to convert a signal number with appropriate bounds checking.
+
 	* remote-mips.c (mips_wait): Fix typos (0x177 -> 0177, 0x377 -> 0377).
 
 Tue Jan 11 00:53:46 1994  John Gilmore  (gnu@cygnus.com)

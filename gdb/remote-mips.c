@@ -1026,6 +1026,26 @@ mips_resume (pid, step, siggnal)
 		mips_receive_wait);
 }
 
+/* Return the signal corresponding to SIG, where SIG is the number which
+   the MIPS protocol uses for the signal.  */
+enum target_signal
+mips_signal_from_protocol (sig)
+     int sig;
+{
+  /* We allow a few more signals than the IDT board actually returns, on
+     the theory that there is at least *some* hope that perhaps the numbering
+     for these signals is widely agreed upon.  */
+  if (sig <= 0
+      || sig > 31)
+    return TARGET_SIGNAL_UNKNOWN;
+
+  /* Don't want to use target_signal_from_host because we are converting
+     from MIPS signal numbers, not host ones.  Our internal numbers
+     match the MIPS numbers for the signals the board can return, which
+     are: SIGINT, SIGSEGV, SIGBUS, SIGILL, SIGFPE, SIGTRAP.  */
+  return (enum target_signal) sig;
+}
+
 /* Wait until the remote stops, and return a wait status.  */
 
 static int
@@ -1062,20 +1082,12 @@ mips_wait (pid, status)
   else if ((rstatus & 0377) == 0177)
     {
       status->kind = TARGET_WAITKIND_STOPPED;
-      /* Don't want to use target_signal_from_host because we are converting
-	 from MIPS signal numbers, not host ones.  Our internal numbers
-	 match the MIPS numbers for the signals the board can return, which
-	 are: SIGINT, SIGSEGV, SIGBUS, SIGILL, SIGFPE, SIGTRAP.  */
-      status->value.sig = (enum target_signal) (((rstatus) >> 8) & 0377);
+      status->value.sig = mips_signal_from_protocol (((rstatus) >> 8) & 0377);
     }
   else
     {
       status->kind = TARGET_WAITKIND_SIGNALLED;
-      /* Don't want to use target_signal_from_host because we are converting
-	 from MIPS signal numbers, not host ones.  Our internal numbers
-	 match the MIPS numbers for the signals the board can return, which
-	 are: SIGINT, SIGSEGV, SIGBUS, SIGILL, SIGFPE, SIGTRAP.  */
-      status->value.sig = (enum target_signal) (rstatus & 0177);
+      status->value.sig = mips_signal_from_protocol (rstatus & 0177);
     }
 
   return 0;
