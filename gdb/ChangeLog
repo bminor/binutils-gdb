@@ -1,5 +1,8 @@
 Tue Jan 14 12:28:52 1992  Stu Grossman  (grossman at cygnus.com)
 
+	* inflow.c:  remove #include <sys/dir.h>.  Not necessary, and
+	doesn't exist on some systems.
+
 	* infrun.c (wait_for_inferior!!!!):  Prevent gdb from hanging when
 	nexting over recursive function calls.
 
