@@ -1,3 +1,9 @@
+Wed Sep 21 11:11:30 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* config/tc-mips.c (insns_since_cache_access): Remove.
+	(append_insn): Remove setting of insns_since_cache_access, and
+	special 4600 handling; it turns out not to be required.
+
 Tue Sep 20 16:13:18 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
 	* config/tc-mips.c (md_shortopts): Remove E.
