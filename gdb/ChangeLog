@@ -1,3 +1,17 @@
+2000-03-22  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+        From  Philippe De Muyter  <phdm@macqel.be>
+
+	* event-loop.c (sys/types.h): File now included unconditionally.
+	(use_poll): New variable..
+	(gdb_notifier): poll- and select-versions merged.
+	(add_file_handler): If HAVE_POLL, check whether poll is usable,
+	and reset `use_poll' if not.
+	(create_file_handler): Select poll- or select-version according to
+	`use_poll'.
+	(delete_file_handler, handle_file_event): Likewise.
+	(gdb_wait_for_event, poll_timers): Likewise.
+
 2000-03-22  Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
 
 	* printcmd.c (print_scalar_formatted):  Truncate addresses to the
