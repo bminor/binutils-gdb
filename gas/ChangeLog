@@ -1,3 +1,8 @@
+Thu Nov 19 15:01:29 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-arm.c (md_parse_option): Add support for -marm7xxx and
+	-marm6xxx command line switches.
+
 1998-11-18  Doug Evans  <devans@casey.cygnus.com>
 
 	* Makefile.am (DEP): Use $(srcdir)/../mkdep.
