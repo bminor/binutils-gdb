@@ -1,5 +1,18 @@
 2002-09-02  Jason Thorpe  <thorpej@wasabisystems.com>
 
+	* Makefile.in (i386nbsd-tdep.o): Add $(solib_svr4_h) to
+	dependency list.
+	* i386nbsd-tdep.c (i386nbsdelf_init_abi): Set
+	solib_svr4_fetch_link_map_offsets to
+	nbsd_ilp32_solib_svr4_fetch_link_map_offsets.
+	* config/i386/nbsd.mt (TDEPFILES): Add solib.o and solib-svr4.o.
+	* config/i386/nbsdaout.mh (NATDEPFILES): Remove solib.o.
+	* config/i386/nbsdelf.mh (NATDEPFILES): Remove solib.o,
+	solib-svr4.o, and solib-legacy.o.
+	* config/i386/tm-nbsd.h: Include solib.h.
+
+2002-09-02  Jason Thorpe  <thorpej@wasabisystems.com>
+
 	* configure.tgt (i[3456]86-*-netbsdelf*): Merge with... 
 	(i[3456]86-*-netbsd*): ...this.  Set gdb_target to nbsd. 
 	(i[3456]86-*-openbsd*): Make this a separate entry.  Add a

@@ -22,5 +22,6 @@
 #define TM_NBSD_H
 
 #include "i386/tm-i386.h"
+#include "solib.h"
 
 #endif /* TM_NBSD_H */

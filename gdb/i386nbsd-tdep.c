@@ -29,6 +29,8 @@
 #include "i387-tdep.h"
 #include "nbsd-tdep.h"
 
+#include "solib-svr4.h"
+
 /* Map a GDB register number to an offset in the reg structure.  */
 static int regmap[] =
 {
@@ -275,6 +277,8 @@ i386nbsdelf_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   /* NetBSD ELF uses SVR4-style shared libraries.  */
   set_gdbarch_in_solib_call_trampoline (gdbarch,
                                         generic_in_solib_call_trampoline);
+  set_solib_svr4_fetch_link_map_offsets (gdbarch,
+				 nbsd_ilp32_solib_svr4_fetch_link_map_offsets);
 
   /* NetBSD ELF uses -fpcc-struct-return by default.  */
   tdep->struct_return = pcc_struct_return;
