@@ -2601,35 +2601,6 @@ This function performs architecture-specific conversions as described
 above for @code{store_typed_address}.
 @end deftypefun
 
-
-@value{GDBN} also provides functions that do the same tasks, but assume
-that pointers are simply byte addresses; they aren't sensitive to the
-current architecture, beyond knowing the appropriate endianness.
-
-@deftypefun CORE_ADDR extract_address (void *@var{addr}, int len)
-Extract a @var{len}-byte number from @var{addr} in the appropriate
-endianness for the current architecture, and return it.  Note that
-@var{addr} refers to @value{GDBN}'s memory, not the inferior's.
-
-This function should only be used in architecture-specific code; it
-doesn't have enough information to turn bits into a true address in the
-appropriate way for the current architecture.  If you can, use
-@code{extract_typed_address} instead.
-@end deftypefun
-
-@deftypefun void store_address (void *@var{addr}, int @var{len}, LONGEST @var{val})
-Store @var{val} at @var{addr} as a @var{len}-byte integer, in the
-appropriate endianness for the current architecture.  Note that
-@var{addr} refers to a buffer in @value{GDBN}'s memory, not the
-inferior's.
-
-This function should only be used in architecture-specific code; it
-doesn't have enough information to turn a true address into bits in the
-appropriate way for the current architecture.  If you can, use
-@code{store_typed_address} instead.
-@end deftypefun
-
-
 Here are some macros which architectures can define to indicate the
 relationship between pointers and addresses.  These have default
 definitions, appropriate for architectures on which all pointers are
