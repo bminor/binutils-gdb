@@ -813,6 +813,7 @@ call_wrapper (clientData, interp, argc, argv)
 	 mode because gdbtk_call_command may have bombed out while in
 	 the command routine.  */
 
+      running_now = 0;
       Tcl_Eval (interp, "gdbtk_tcl_idle");
     }
 

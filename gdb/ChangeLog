@@ -1,3 +1,8 @@
+Mon Feb 10 13:50:53 1997  Stu Grossman  (grossman@critters.cygnus.com)
+
+	* gdbtk.c (call_wrapper):  Clear running_now if an error occurs.
+	This fixes PR 11323, where gdbtk stops responding if an error occurs.
+
 Mon Feb 10 07:54:26 1997  Fred Fish  <fnf@cygnus.com>
 
 	* xcoffread.c (RECORD_MINIMAL_SYMBOL): Add NULL asection* parameter
