@@ -1,3 +1,8 @@
+2001-06-10  H.J. Lu  <hjl@gnu.org>
+
+	* gas/elf/section2.e: Support 64bit BFD.
+	* gas/elf/section2.e-mips: Likewise.
+
 2001-06-08  H.J. Lu  <hjl@gnu.org>
 
 	* gas/mips/elfel-rel3.s: Moved to ...
