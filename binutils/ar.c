@@ -46,6 +46,11 @@ extern int errno;
 #endif
 #define BUFSIZE 8192
 
+/* Kludge declaration from BFD!  This is ugly!  FIXME!  XXX */
+
+struct ar_hdr *
+bfd_special_undocumented_glue PARAMS ((bfd *abfd, char *filename));
+
 /* Forward declarations */
 
 static void
@@ -618,10 +623,6 @@ extract_file(abfd)
 
 
 /* Just do it quickly; don't worry about dups, armap, or anything like that */
-
-/* This is ugly! XXX */
-
-PROTO(struct ar_hdr *, bfd_special_undocumented_glue, (bfd *abfd, char *filename));
 
 static void
 do_quick_append(archive_filename, files_to_append)
