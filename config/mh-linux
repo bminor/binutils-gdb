@@ -1,8 +1,2 @@
-# Define SYSV as -DSYSV if you are using a System V operating system.
-# FIXME: What is this used for?  It should go away (and even if it hasn't,
-# it's not clear linux should define it).
-SYSV = -DSYSV
-RANLIB = ranlib
-
-# What is this doing here?
-#LDFLAGS = -static
+# This is the Makefile fragment used when running on a Linux host.
+# It does not have to do anything at present.
