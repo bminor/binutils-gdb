@@ -1,3 +1,7 @@
+2001-05-23  Alan Modra  <amodra@one.net.au>
+
+	* gas/elf/ehopt0.d: Tweak for bigendian targets.
+
 2001-05-15  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
 	* gas/mips/abs.d: Remove $ before register names, per latest
