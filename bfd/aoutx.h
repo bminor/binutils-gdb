@@ -1137,7 +1137,8 @@ aout_get_external_symbols (abfd)
       obj_aout_external_sym_count (abfd) = count;
     }
       
-  if (obj_aout_external_strings (abfd) == NULL)
+  if (obj_aout_external_strings (abfd) == NULL
+      && exec_hdr (abfd)->a_syms != 0)
     {
       unsigned char string_chars[BYTES_IN_WORD];
       bfd_size_type stringsize;
@@ -2523,6 +2524,12 @@ NAME(aout,canonicalize_reloc) (abfd, section, relptr, symbols)
   arelent *tblptr = section->relocation;
   unsigned int count;
 
+  if (section == obj_bsssec (abfd))
+    {
+      *relptr = NULL;
+      return 0;
+    }
+
   if (!(tblptr || NAME(aout,slurp_reloc_table)(abfd, section, symbols)))
     return -1;
 
@@ -2568,6 +2575,9 @@ NAME(aout,get_reloc_upper_bound) (abfd, asect)
     return (sizeof (arelent *)
 	    * ((exec_hdr(abfd)->a_trsize / obj_reloc_entry_size (abfd))
 	       + 1));
+
+  if (asect == obj_bsssec (abfd))
+    return sizeof (arelent *);
 
   bfd_set_error (bfd_error_invalid_operation);
   return -1;
@@ -3997,7 +4007,7 @@ aout_link_write_other_symbol (h, data)
       {
 	asection *sec;
 
-	sec = h->root.u.def.section;
+	sec = h->root.u.def.section->output_section;
 	BFD_ASSERT (sec == &bfd_abs_section
 		    || sec->owner == output_bfd);
 	if (sec == obj_textsec (output_bfd))
@@ -4009,8 +4019,8 @@ aout_link_write_other_symbol (h, data)
 	else
 	  type = N_ABS | N_EXT;
 	val = (h->root.u.def.value
-	       + sec->output_section->vma
-	       + sec->output_offset);
+	       + sec->vma
+	       + h->root.u.def.section->output_offset);
       }
       break;
     case bfd_link_hash_common:

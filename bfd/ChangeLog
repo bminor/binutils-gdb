@@ -1,5 +1,8 @@
 Fri Jun 10 13:25:13 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* aoutx.h (NAME(aout,canonicalize_reloc)): Handle .bss section.
+	(NAME(aout,get_reloc_upper_bound)): Likewise.
+
 	* coff-i960.c (coff_i960_reloc_type_lookup): Add BFD_RELOC_CTOR.
 	* linker.c (_bfd_generic_link_write_global_symbol): Don't assume
 	the section of a common symbol is not NULL.
