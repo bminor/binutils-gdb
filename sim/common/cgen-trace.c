@@ -57,14 +57,14 @@ static char *bufptr;
 static unsigned long last_cycle_count;
 
 void
-trace_insn_init (SIM_CPU *cpu)
+trace_insn_init (SIM_CPU *cpu, int first_p)
 {
   bufptr = trace_buf;
   *bufptr = 0;
 }
 
 void
-trace_insn_fini (SIM_CPU *cpu)
+trace_insn_fini (SIM_CPU *cpu, int last_p)
 {
   if (CPU_PROFILE_FLAGS (cpu) [PROFILE_MODEL_IDX])
     {
@@ -96,6 +96,7 @@ trace_insn (SIM_CPU *cpu, const struct cgen_insn *opcode,
 			 SIZE_PC, (unsigned) pc,
 			 SIZE_INSTRUCTION,
 			 CGEN_INSN_MNEMONIC (opcode));
+      printed_result_p = 0;
       return;
     }
 
@@ -150,7 +151,7 @@ trace_insn (SIM_CPU *cpu, const struct cgen_insn *opcode,
 		     SIZE_LOCATION, SIZE_LOCATION, buf,
 		     SIZE_INSTRUCTION,
 #if 0
-		     CGEN_INSN_SYNTAX (opcode)->mnemonic
+		     CGEN_INSN_NAME (opcode)
 #else
 		     disasm_buf
 #endif

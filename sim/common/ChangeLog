@@ -1,3 +1,12 @@
+Fri May 15 16:06:05 1998  Doug Evans  <devans@seba.cygnus.com>
+
+	* cgen-trace.c (trace_insn_init): New arg first_p. 
+	All callers updated.
+	(trace_insn_fini): New arg last_p.  All callers updated.
+	* cgen-trace.h (trace_insn_init,trace_insn_fini): Update.
+	(TRACE_INSN_INIT,TRACE_INSN_FINI): Update.
+	* genmloop.sh (engine_resume): Update.
+
 Fri May 15 15:59:00 1998  Joyce Janczyn  <janczyn@cygnus.com>
 
 	* Make-common.in (install-common): Run ranlib on installed copy of

@@ -192,7 +192,7 @@ engine_resume (SIM_DESC sd, int step, int siggnal)
       ++insn_count;
 
       engine->jmpbuf = NULL;
-      TRACE_INSN_FINI ((sim_cpu *) cpu);
+      TRACE_INSN_FINI ((sim_cpu *) cpu, 1);
       PROFILE_EXEC_TIME (CPU_PROFILE_DATA (cpu))
 	+= sim_elapsed_time_since (start_time);
       PROFILE_TOTAL_INSN_COUNT (CPU_PROFILE_DATA (cpu))
@@ -313,7 +313,7 @@ cat <<EOF
 	    PROFILE_COUNT_SCACHE_HIT (current_cpu);
 	    /* Make core access statistics come out right.
 	       The size is a guess, but it's currently not used either.  */
-	    PROFILE_COUNT_CORE (current_cpu, pc, 2, sim_core_execute_map);
+	    PROFILE_COUNT_CORE (current_cpu, pc, 2, exec_map);
 	  }
 
 /* begin full-exec-scache */
