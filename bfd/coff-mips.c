@@ -562,7 +562,7 @@ ecoff_styp_to_sec_flags (abfd, hdr)
   /* For 386 COFF, at least, an unloadable text or data section is
      actually a shared library section.  */
   if ((styp_flags & STYP_TEXT)
-      || (stype_FLAGS & STYP_MIPS_INIT))
+      || (styp_flags & STYP_MIPS_INIT))
     {
       if (sec_flags & SEC_NEVER_LOAD)
 	sec_flags |= SEC_CODE | SEC_SHARED_LIBRARY;
@@ -1022,7 +1022,14 @@ ecoff_set_symbol_info (abfd, ecoff_sym, asym, ext, indirect_ptr_ptr)
 	    /* Set up the constructor section to hold the reloc.  */
 	    section->flags = SEC_CONSTRUCTOR;
 	    ++section->reloc_count;
-	    section->alignment_power = 4;
+
+	    /* Constructor sections must be rounded to a four byte
+	       boundary (FIXME: assuming 32 bit entries).  These are
+	       not real sections--they are handled specially by the
+	       linker--so the ECOFF 16 byte alignment restriction does
+	       not apply.  */
+	    section->alignment_power = 2;
+
 	    reloc_chain->next = section->constructor_chain;
 	    section->constructor_chain = reloc_chain;
 	    

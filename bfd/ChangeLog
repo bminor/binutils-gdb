@@ -1,3 +1,8 @@
+Mon Jun 14 10:23:53 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* coff-mips.c (ecoff_set_symbol_info): Constructor sections should
+	only be aligned to a 4 byte boundary.
+
 Sat Jun 12 16:13:17 1993  Jim Kingdon  (kingdon@cygnus.com)
 
 	* hosts/std-host.h (struct int64e_struct): Remove needless typedef
