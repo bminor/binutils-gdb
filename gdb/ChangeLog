@@ -1,3 +1,9 @@
+Sat Dec 14 20:50:01 1996  Mark Alexander  <marka@cygnus.com>
+
+	* mips-tdep.c (mips_push_arguments): Handle floating point args.
+	* config/mips/tm-mips.h (FIX_CALL_DUMMY): Define to set up $25
+	correctly for PIC on Irix 5.
+
 Sat Dec 14 09:52:30 1996  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* i386-tdep.c (i386_frame_find_saved_regs):  Handle zero return

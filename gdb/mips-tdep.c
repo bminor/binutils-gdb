@@ -1,5 +1,5 @@
 /* Target-dependent code for the MIPS architecture, for GDB, the GNU Debugger.
-   Copyright 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995
+   Copyright 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996
    Free Software Foundation, Inc.
    Contributed by Alessandro Forin(af@cs.cmu.edu) at CMU
    and by Per Bothner(bothner@cs.wisc.edu) at U.Wisconsin.
@@ -448,8 +448,8 @@ CORE_ADDR
 mips_addr_bits_remove (addr)
     CORE_ADDR addr;
 {
-  if (GDB_TARGET_IS_MIPS64
-      && (addr >> 32 == (CORE_ADDR)0xffffffff)
+#if GDB_TARGET_IS_MIPS64
+  if ((addr >> 32 == (CORE_ADDR)0xffffffff)
       && (strcmp(target_shortname,"pmon")==0
 	 || strcmp(target_shortname,"ddb")==0
 	 || strcmp(target_shortname,"sim")==0))
@@ -469,6 +469,7 @@ mips_addr_bits_remove (addr)
 	 addressing, and this masking will have to be disabled.  */
         addr &= (CORE_ADDR)0xffffffff;
     }
+#endif
 
   return addr;
 }
@@ -565,6 +566,7 @@ heuristic_proc_desc(start_pc, limit_pc, next_frame)
     CORE_ADDR sp = read_next_frame_reg (next_frame, SP_REGNUM);
     CORE_ADDR cur_pc;
     unsigned long frame_size;
+    unsigned long r30_frame_size = 0;
     int has_frame_reg = 0;
     CORE_ADDR reg30 = 0; /* Value of $r30. Used by gcc for frame-pointer */
     unsigned long reg_mask = 0;
@@ -589,15 +591,30 @@ heuristic_proc_desc(start_pc, limit_pc, next_frame)
 
 	if ((word & 0xFFFF0000) == 0x27bd0000		/* addiu $sp,$sp,-i */
 	    || (word & 0xFFFF0000) == 0x23bd0000	/* addi $sp,$sp,-i */
-	    || (word & 0xFFFF0000) == 0x67bd0000) 	/* daddiu $sp,$sp,-i */
-	    frame_size += (-word) & 0xFFFF;
-	else if ((word & 0xFFE00000) == 0xafa00000	/* sw reg,offset($sp) */
-	        || (word & 0xFFE00000) == 0xffa00000) {	/* sd reg,offset($sp) */
+	    || (word & 0xFFFF0000) == 0x67bd0000) {	/* daddiu $sp,$sp,-i */
+	    if (word & 0x8000)
+	      frame_size += (-word) & 0xffff;
+	    else
+	      /* Exit loop if a positive stack adjustment is found, which
+		 usually means that the stack cleanup code in the function
+		 epilogue is reached.  */
+	      break;
+	}
+	else if ((word & 0xFFE00000) == 0xafa00000) {	/* sw reg,offset($sp) */
 	    int reg = (word & 0x001F0000) >> 16;
 	    reg_mask |= 1 << reg;
 	    temp_saved_regs.regs[reg] = sp + (word & 0xffff);
 	}
+	else if ((word & 0xFFE00000) == 0xffa00000) {	/* sd reg,offset($sp) */
+	    /* Irix 6.2 N32 ABI uses sd instructions for saving $gp and $ra,
+	       but the register size used is only 32 bits. Make the address
+	       for the saved register point to the lower 32 bits.  */
+	    int reg = (word & 0x001F0000) >> 16;
+	    reg_mask |= 1 << reg;
+	    temp_saved_regs.regs[reg] = sp + (word & 0xffff) + 8 - MIPS_REGSIZE;
+	}
 	else if ((word & 0xFFFF0000) == 0x27be0000) { /* addiu $30,$sp,size */
+	    /* Old gcc frame, r30 is virtual frame pointer.  */
 	    if ((word & 0xffff) != frame_size)
 		reg30 = sp + (word & 0xffff);
 	    else if (!has_frame_reg) {
@@ -605,6 +622,24 @@ heuristic_proc_desc(start_pc, limit_pc, next_frame)
 		has_frame_reg = 1;
 		reg30 = read_next_frame_reg(next_frame, 30);
 		alloca_adjust = (unsigned)(reg30 - (sp + (word & 0xffff)));
+		if (alloca_adjust > 0) {
+		    /* FP > SP + frame_size. This may be because
+		     * of an alloca or somethings similar.
+		     * Fix sp to "pre-alloca" value, and try again.
+		     */
+		    sp += alloca_adjust;
+		    goto restart;
+		}
+	    }
+	}
+	else if ((word & 0xFFFFFFFB) == 0x03a0f021) { /* mov $30,$sp */
+	    /* New gcc frame, virtual frame pointer is at r30 + frame_size.  */
+	    if (!has_frame_reg) {
+		unsigned alloca_adjust;
+		has_frame_reg = 1;
+		reg30 = read_next_frame_reg(next_frame, 30);
+		r30_frame_size = frame_size;
+		alloca_adjust = (unsigned)(reg30 - sp);
 		if (alloca_adjust > 0) {
 		    /* FP > SP + frame_size. This may be because
 		     * of an alloca or somethings similar.
@@ -623,7 +658,7 @@ heuristic_proc_desc(start_pc, limit_pc, next_frame)
     }
     if (has_frame_reg) {
 	PROC_FRAME_REG(&temp_proc_desc) = 30;
-	PROC_FRAME_OFFSET(&temp_proc_desc) = 0;
+	PROC_FRAME_OFFSET(&temp_proc_desc) = r30_frame_size;
     }
     else {
 	PROC_FRAME_REG(&temp_proc_desc) = SP_REGNUM;
@@ -645,7 +680,7 @@ find_proc_desc (pc, next_frame)
   CORE_ADDR startaddr;
 
   find_pc_partial_function (pc, NULL, &startaddr, NULL);
-  if (b == NULL)
+  if (b == NULL || PC_IN_CALL_DUMMY (pc, 0, 0))
     sym = NULL;
   else
     {
@@ -841,115 +876,160 @@ setup_arbitrary_frame (argc, argv)
 }
 
 
+int
+mips_pc_in_call_dummy (pc)
+     CORE_ADDR pc;
+{
+  return pc >= CALL_DUMMY_ADDRESS ()
+	 && pc <= CALL_DUMMY_ADDRESS () + DECR_PC_AFTER_BREAK;
+}
+
 CORE_ADDR
 mips_push_arguments(nargs, args, sp, struct_return, struct_addr)
-  int nargs;
-  value_ptr *args;
-  CORE_ADDR sp;
-  int struct_return;
-  CORE_ADDR struct_addr;
+     int nargs;
+     value_ptr *args;
+     CORE_ADDR sp;
+     int struct_return;
+     CORE_ADDR struct_addr;
 {
-  register i;
-  int accumulate_size;
-  struct mips_arg { char *contents; int len; int offset; };
-  struct mips_arg *mips_args;
-  register struct mips_arg *m_arg;
-  int fake_args = 0;
-  int len;
+  int argreg;
+  int float_argreg;
+  int argnum;
+  int len = 0;
+  int stack_offset;
 
-  /* Macro to round n up to the next a boundary (a must be a power of two) */
-  #define ALIGN(n,a) (((n)+(a)-1) & ~((a)-1))
+  /* Macros to round N up or down to the next A boundary; A must be
+     a power of two. */
+#define ROUND_DOWN(n,a) ((n) & ~((a)-1))
+#define ROUND_UP(n,a) (((n)+(a)-1) & ~((a)-1))
   
   /* First ensure that the stack and structure return address (if any)
-     are properly aligned. */
-
-  sp = ALIGN (sp, MIPS_REGSIZE);
-  struct_addr = ALIGN (struct_addr, MIPS_REGSIZE);
+     are properly aligned. The stack has to be 64-bit aligned even
+     on 32-bit machines, because doubles must be 64-bit aligned. */
+  sp = ROUND_DOWN (sp, 8);
+  struct_addr = ROUND_DOWN (struct_addr, MIPS_REGSIZE);
       
-  accumulate_size = struct_return ? MIPS_REGSIZE : 0;
-  
-  /* Allocate descriptors for each argument, plus some extras for the
-     dummies we will create to zero-fill the holes left when we align
-     arguments passed in registers that are smaller than a register.  */
-  mips_args =
-    (struct mips_arg*) alloca ((nargs + MIPS_NUM_ARG_REGS) * sizeof (struct mips_arg));
+  /* Now make space on the stack for the args. We allocate more
+     than necessary for EABI, because the first few arguments are
+     passed in registers, but that's OK. */
+  for (argnum = 0; argnum < nargs; argnum++)
+    len += ROUND_UP (TYPE_LENGTH(VALUE_TYPE(args[argnum])), MIPS_REGSIZE);
+  sp -= ROUND_UP (len, MIPS_REGSIZE);
 
-  /* Build up the list of argument descriptors.  */
-  for (i = 0, m_arg = mips_args; i < nargs; i++, m_arg++) {
-    value_ptr arg = args[i];
-    len = m_arg->len = TYPE_LENGTH (VALUE_TYPE (arg));
-    /* This entire mips-specific routine is because doubles must be aligned
-     * on 8-byte boundaries. It still isn't quite right, because MIPS decided
-     * to align 'struct {int a, b}' on 4-byte boundaries (even though this
-     * breaks their varargs implementation...). A correct solution
-     * requires a simulation of gcc's 'alignof' (and use of 'alignof'
-     * in stdarg.h/varargs.h).
-     * On the 64 bit r4000 we always pass the first four arguments
-     * using eight bytes each, so that we can load them up correctly
-     * in CALL_DUMMY.
-     */
-    if (len > 4) /* FIXME? */
-      accumulate_size = ALIGN (accumulate_size, 8);
-    m_arg->offset = accumulate_size;
-    m_arg->contents = VALUE_CONTENTS(arg);
-    if (! GDB_TARGET_IS_MIPS64)
-      /* For 32-bit targets, align the next argument on a 32-bit boundary.  */
-      accumulate_size = ALIGN (accumulate_size + len, 4);
-    else
-      {
-	/* The following test attempts to determine if the argument
-	   is being passed on the stack.  But it fails account for
-	   floating point arguments in the EABI, which should have their
-	   own accumulated size separate from that for integer arguments.
-	   FIXME!! */
-	if (accumulate_size >= MIPS_NUM_ARG_REGS * MIPS_REGSIZE)
-	  /* The argument is being passed on the stack, not a register,
-	     so adjust the size of the argument upward to account for stack
-	     alignment.  But shouldn't we be right-aligning small arguments
-	     as we do below for the args-in-registers case?  FIXME!! */
-	  accumulate_size = ALIGN (accumulate_size + len, 8);
-	else
-	  {
-	    if (len < MIPS_REGSIZE)
-	      {
-	      /* The argument is being passed in a register, but is smaller
-		 than a register.  So it it must be right-aligned in the
-		 register image being placed in the stack, and the rest
-		 of the register image must be zero-filled.  */
-		static char zeroes[MIPS_REGSIZE] = { 0 };
+  /* Initialize the integer and float register pointers.  */
+  argreg = A0_REGNUM;
+  float_argreg = FPA0_REGNUM;
 
-		/* Align the arg in the rightmost part of the 64-bit word.  */
-		if (TARGET_BYTE_ORDER == BIG_ENDIAN)
-		  m_arg->offset += MIPS_REGSIZE - len;
-
-		/* Create a fake argument to zero-fill the unsused part
-		   of the 64-bit word.  */
-		++m_arg;
-		m_arg->len = MIPS_REGSIZE - len;
-		m_arg->contents = zeroes;
-		if (TARGET_BYTE_ORDER == BIG_ENDIAN)
-		  m_arg->offset = accumulate_size;
-		else
-		  m_arg->offset = accumulate_size + len;
-		++fake_args;
-	      }
-	    accumulate_size = ALIGN (accumulate_size + len, MIPS_REGSIZE);
-	  }
-      }
-  }
-  accumulate_size = ALIGN (accumulate_size, 8);
-  if (accumulate_size < 4 * MIPS_REGSIZE)
-    accumulate_size = 4 * MIPS_REGSIZE;
-  sp -= accumulate_size;
-  for (i = nargs + fake_args; m_arg--, --i >= 0; )
-    write_memory(sp + m_arg->offset, m_arg->contents, m_arg->len);
+  /* the struct_return pointer occupies the first parameter-passing reg */
   if (struct_return)
-    {
-      char buf[TARGET_PTR_BIT / HOST_CHAR_BIT];
+      write_register (argreg++, struct_addr);
 
-      store_address (buf, sizeof buf, struct_addr);
-      write_memory (sp, buf, sizeof buf);
+  /* The offset onto the stack at which we will start copying parameters
+     (after the registers are used up) begins at 16 in the old ABI.
+     This leaves room for the "home" area for register parameters.  */
+  stack_offset = MIPS_EABI ? 0 : MIPS_REGSIZE * 4;
+
+  /* Now load as many as possible of the first arguments into
+     registers, and push the rest onto the stack.  Loop thru args
+     from first to last.  */
+  for (argnum = 0; argnum < nargs; argnum++)
+    {
+      char *val;
+      char valbuf[REGISTER_RAW_SIZE(A0_REGNUM)];
+      value_ptr arg = args[argnum];
+      struct type *arg_type = check_typedef (VALUE_TYPE (arg));
+      int len = TYPE_LENGTH (arg_type);
+      enum type_code typecode = TYPE_CODE (arg_type);
+
+      /* The EABI passes structures that fit in a register by value.
+	 In all other cases, pass the structure by reference.  */
+      if (typecode == TYPE_CODE_STRUCT && (!MIPS_EABI || len > MIPS_REGSIZE))
+	{
+	  store_address (valbuf, MIPS_REGSIZE, VALUE_ADDRESS (arg));
+	  len = MIPS_REGSIZE;
+	  val = valbuf;
+	}
+      else
+	val = (char *)VALUE_CONTENTS (arg);
+
+      /* 32-bit ABIs always start floating point arguments in an
+         even-numbered floating point register.   */
+      if (!GDB_TARGET_IS_MIPS64 && typecode == TYPE_CODE_FLT
+          && (float_argreg & 1))
+	float_argreg++;
+
+      /* Floating point arguments passed in registers have to be
+         treated specially.  On 32-bit architectures, doubles
+	 are passed in register pairs; the even register gets
+	 the low word, and the odd register gets the high word.  */
+      if (typecode == TYPE_CODE_FLT
+	  && float_argreg <= MIPS_LAST_FP_ARG_REGNUM
+	  && mips_fpu != MIPS_FPU_NONE)
+	{
+	  if (!GDB_TARGET_IS_MIPS64 && len == 8)
+	    {
+	      int low_offset = TARGET_BYTE_ORDER == BIG_ENDIAN ? 4 : 0;
+	      unsigned long regval;
+
+	      regval = extract_unsigned_integer (val+low_offset, 4);
+	      write_register (float_argreg++, regval);	/* low word */
+	      regval = extract_unsigned_integer (val+4-low_offset, 4);
+	      write_register (float_argreg++, regval);	/* high word */
+
+	    }
+	  else
+	    {
+	      CORE_ADDR regval = extract_address (val, len);
+	      write_register (float_argreg++, regval);
+	    }
+
+	  /* If this is the old ABI, skip one or two general registers.  */
+	  if (!MIPS_EABI)
+	    argreg += GDB_TARGET_IS_MIPS64 ? 1 : 2;
+	}
+      else
+	{
+	  /* Copy the argument to general registers or the stack in
+	     register-sized pieces.  Large arguments are split between
+	     registers and stack.  */
+	  while (len > 0)
+	    {
+	      int partial_len = len < MIPS_REGSIZE ? len : MIPS_REGSIZE;
+	      CORE_ADDR regval = extract_address (val, partial_len);
+	      
+	      if (argreg <= MIPS_LAST_ARG_REGNUM)
+		{
+		  /* It's a simple argument being passed in a general register.  */
+		  write_register (argreg, regval);
+		  argreg++;
+    
+		  /* If this is the old ABI, prevent subsequent floating
+		     point arguments from being passed in floating point
+		     registers.  */
+		  if (!MIPS_EABI)
+		    float_argreg = MIPS_LAST_FP_ARG_REGNUM + 1;
+		}
+	      else
+		{
+		  /* Promote this portion of the argument to a register-sized
+		     chunk before pushing it on the stack.  */
+		  char partial_buf[MIPS_REGSIZE];
+		  store_address (partial_buf, MIPS_REGSIZE, regval);
+		  write_memory (sp + stack_offset, partial_buf, MIPS_REGSIZE);
+		  stack_offset += MIPS_REGSIZE;
+		}
+    
+	      len -= partial_len;
+	      val += partial_len;
+	    }
+	}
     }
+
+  /* Set the return address register to point to the entry
+     point of the program, where a breakpoint lies in wait.  */
+  write_register (RA_REGNUM, CALL_DUMMY_ADDRESS());
+
+  /* Return adjusted stack pointer.  */
   return sp;
 }
 
@@ -1037,8 +1117,8 @@ mips_push_dummy_frame()
      addresses to point to the place on the stack where we'll be writing the
      dummy code (in mips_push_arguments). */
   write_register (SP_REGNUM, sp);
-  PROC_LOW_ADDR(proc_desc) = sp - CALL_DUMMY_SIZE + CALL_DUMMY_START_OFFSET;
-  PROC_HIGH_ADDR(proc_desc) = sp;
+  PROC_LOW_ADDR(proc_desc) = CALL_DUMMY_ADDRESS();
+  PROC_HIGH_ADDR(proc_desc) =  CALL_DUMMY_ADDRESS() + 4;
   SET_PROC_DESC_IS_DUMMY(proc_desc);
   PROC_PC_REG(proc_desc) = RA_REGNUM;
 }
@@ -1292,15 +1372,17 @@ mips_skip_prologue (pc, lenient)
 	  continue;
 #endif
 
-	/* Must add cases for 64-bit operations.  FIXME!! */
-	if ((inst & 0xffff0000) == 0x27bd0000)	/* addiu $sp,$sp,offset */
+	if ((inst & 0xffff0000) == 0x27bd0000	/* addiu $sp,$sp,offset */
+	    || (inst & 0xffff0000) == 0x67bd0000) /* daddiu $sp,$sp,offset */
 	    seen_sp_adjust = 1;
 	else if (inst == 0x03a1e823 || 	        /* subu $sp,$sp,$at */
 		 inst == 0x03a8e823)   	        /* subu $sp,$sp,$t0 */
 	    seen_sp_adjust = 1;
-	else if ((inst & 0xFFE00000) == 0xAFA00000 && (inst & 0x001F0000))
-	    continue;				/* sw reg,n($sp) */
-						/* reg != $zero */
+	else if (((inst & 0xFFE00000) == 0xAFA00000 /* sw reg,n($sp) */
+		  || (inst & 0xFFE00000) == 0xFFA00000) /* sd reg,n($sp) */
+		 && (inst & 0x001F0000))	/* reg != $zero */
+	    continue;
+						
 	else if ((inst & 0xFFE00000) == 0xE7A00000) /* swc1 freg,n($sp) */
 	    continue;
 	else if ((inst & 0xF3E00000) == 0xA3C00000 && (inst & 0x001F0000))
