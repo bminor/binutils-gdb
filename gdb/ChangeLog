@@ -1,6 +1,8 @@
 Tue May 12 14:15:48 1992  Stu Grossman  (grossman at cygnus.com)
 
-	* breakpoint.c, infcmd.c:  Change many printfs to printf_filtered.
+	* infrun.c (child_attach):  Don't allow gdb to attach to itself.
+	It gets permanently stuck in many OSes.
+	* breakpoint.c, infcmd.c, infrun.c:  Change many printfs to printf_filtered.
 	* breakpoint.c: Improve	help text for info breakpoints.
 
 Mon May 11 14:17:18 1992  John Gilmore  (gnu at cygnus.com)
