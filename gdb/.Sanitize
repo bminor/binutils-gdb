@@ -309,6 +309,7 @@ mpw-config.in
 mpw-make.sed
 msg.defs
 msg_reply.defs
+nec4102rom.c
 news-xdep.c
 nindy-share
 nindy-tdep.c
