@@ -123,6 +123,20 @@ add_minsym_to_hash_table (struct minimal_symbol *sym,
     }
 }
 
+/* Add the minimal symbol SYM to an objfile's minsym demangled hash table,
+   TABLE.  */
+static void
+add_minsym_to_demangled_hash_table (struct minimal_symbol *sym,
+                                  struct minimal_symbol **table)
+{
+  if (sym->demangled_hash_next == NULL)
+    {
+      unsigned int hash = msymbol_hash_iw (SYMBOL_DEMANGLED_NAME (sym));
+      sym->demangled_hash_next = table[hash];
+      table[hash] = sym;
+    }
+}
+
 
 /* Look through all the current minimal symbol tables and find the
    first minimal symbol that matches NAME.  If OBJF is non-NULL, limit
@@ -167,60 +181,60 @@ lookup_minimal_symbol (name, sfile, objf)
 	{
 	  /* Do two passes: the first over the ordinary hash table,
 	     and the second over the demangled hash table.  */
-	  int pass = 1;
+        int pass;
 
-	  msymbol = objfile->msymbol_hash[hash];
-	  
-	  while (msymbol != NULL && found_symbol == NULL)
+        for (pass = 1; pass <= 2 && found_symbol == NULL; pass++)
 	    {
-	      if (SYMBOL_MATCHES_NAME (msymbol, name))
+            /* Select hash list according to pass.  */
+            if (pass == 1)
+              msymbol = objfile->msymbol_hash[hash];
+            else
+              msymbol = objfile->msymbol_demangled_hash[dem_hash];
+
+            while (msymbol != NULL && found_symbol == NULL)
 		{
-		  switch (MSYMBOL_TYPE (msymbol))
+                if (SYMBOL_MATCHES_NAME (msymbol, name))
 		    {
-		    case mst_file_text:
-		    case mst_file_data:
-		    case mst_file_bss:
+                    switch (MSYMBOL_TYPE (msymbol))
+                      {
+                      case mst_file_text:
+                      case mst_file_data:
+                      case mst_file_bss:
 #ifdef SOFUN_ADDRESS_MAYBE_MISSING
-		      if (sfile == NULL || STREQ (msymbol->filename, sfile))
-			found_file_symbol = msymbol;
+                        if (sfile == NULL || STREQ (msymbol->filename, sfile))
+                          found_file_symbol = msymbol;
 #else
-		      /* We have neither the ability nor the need to
-		         deal with the SFILE parameter.  If we find
-		         more than one symbol, just return the latest
-		         one (the user can't expect useful behavior in
-		         that case).  */
-		      found_file_symbol = msymbol;
+                        /* We have neither the ability nor the need to
+                           deal with the SFILE parameter.  If we find
+                           more than one symbol, just return the latest
+                           one (the user can't expect useful behavior in
+                           that case).  */
+                        found_file_symbol = msymbol;
 #endif
-		      break;
+                        break;
 
-		    case mst_solib_trampoline:
+                      case mst_solib_trampoline:
 
-		      /* If a trampoline symbol is found, we prefer to
-		         keep looking for the *real* symbol. If the
-		         actual symbol is not found, then we'll use the
-		         trampoline entry. */
-		      if (trampoline_symbol == NULL)
-			trampoline_symbol = msymbol;
-		      break;
+                        /* If a trampoline symbol is found, we prefer to
+                           keep looking for the *real* symbol. If the
+                           actual symbol is not found, then we'll use the
+                           trampoline entry. */
+                        if (trampoline_symbol == NULL)
+                          trampoline_symbol = msymbol;
+                        break;
 
-		    case mst_unknown:
-		    default:
-		      found_symbol = msymbol;
-		      break;
+                      case mst_unknown:
+                      default:
+                        found_symbol = msymbol;
+                        break;
+                      }
 		    }
-		}
 
-	      /* Find the next symbol on the hash chain.  At the end
-		 of the first pass, try the demangled hash list.  */
-	      if (pass == 1)
-		msymbol = msymbol->hash_next;
-	      else
-		msymbol = msymbol->demangled_hash_next;
-	      if (msymbol == NULL)
-		{
-		  ++pass;
-		  if (pass == 2)
-		    msymbol = objfile->msymbol_demangled_hash[dem_hash];
+                /* Find the next symbol on the hash chain.  */
+                if (pass == 1)
+                  msymbol = msymbol->hash_next;
+                else
+                  msymbol = msymbol->demangled_hash_next;
 		}
 	    }
 	}
@@ -934,8 +948,8 @@ install_minimal_symbols (objfile)
 	{
 	  SYMBOL_INIT_DEMANGLED_NAME (msymbols, &objfile->symbol_obstack);
 	  if (SYMBOL_DEMANGLED_NAME (msymbols) != NULL)
-	    add_minsym_to_hash_table (msymbols,
-				      objfile->msymbol_demangled_hash);
+          add_minsym_to_demangled_hash_table (msymbols,
+                                              objfile->msymbol_demangled_hash);
 	}
     }
 }
