@@ -1,3 +1,12 @@
+Mon Apr 13 16:50:27 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.am (libopcodes_la_LIBADD): Add @WIN32LIBADD@.
+	(libopcodes_la_LDFLAGS): Add @WIN32LDFLAGS@.
+	* configure.in: Define and substitute WIN32LDFLAGS and
+	WIN32LIBADD.
+	* aclocal.m4: Rebuild with new libtool.
+	* configure, Makefile.in: Rebuild.
+
 start-sanitize-r5900
 Mon Apr 13 16:02:02 1998  Frank Ch. Eigler  <fche@cygnus.com>
 
