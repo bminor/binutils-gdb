@@ -213,7 +213,9 @@ static const template i386_optab[] = {
 {"daa",	   0,	0x27, X, NoSuf,			{ 0, 0, 0} },
 {"das",	   0,	0x2f, X, NoSuf,			{ 0, 0, 0} },
 {"aad",	   0, 0xd50a, X, NoSuf,			{ 0, 0, 0} },
+{"aad",	   1,   0xd5, X, NoSuf,			{ Imm8S, 0, 0} },
 {"aam",	   0, 0xd40a, X, NoSuf,			{ 0, 0, 0} },
+{"aam",	   1,   0xd4, X, NoSuf,			{ Imm8S, 0, 0} },
 
 /* conversion insns */
 /* conversion:	intel naming */
@@ -752,11 +754,17 @@ static const template i386_optab[] = {
 {"rdtsc",   0, 0x0f31, X, NoSuf,		{ 0, 0, 0} },
 {"rdmsr",   0, 0x0f32, X, NoSuf,		{ 0, 0, 0} },
 {"cmpxchg8b",1,0x0fc7, 1, NoSuf|Modrm,		{ LLongMem, 0, 0} },
+{"sysenter", 0, 0x0f34, X, NoSuf,		{ 0, 0, 0} },
+{"sysexit",  0, 0x0f35, X, NoSuf,		{ 0, 0, 0} },
+{"fxsave",   1,	0x0fae, 0, sl_Suf|Modrm,	{ LLongMem, 0, 0} },
+{"fxrstor",  1,	0x0fae, 1, sl_Suf|Modrm,	{ LLongMem, 0, 0} },
 
 /* Pentium Pro extensions */
 {"rdpmc",   0, 0x0f33, X, NoSuf,		{ 0, 0, 0} },
 
 {"ud2",	    0, 0x0f0b, X, NoSuf,		{ 0, 0, 0} }, /* official undefined instr. */
+{"ud2a",    0, 0x0f0b, X, NoSuf,		{ 0, 0, 0} }, /* alias for ud2 */
+{"ud2b",    0, 0x0fb9, X, NoSuf,		{ 0, 0, 0} }, /* 2nd. official undefined instr. */
 
 {"cmovo",   2, 0x0f40, X, wl_Suf|ReverseModrm,	{ WordReg|WordMem, WordReg, 0} },
 {"cmovno",  2, 0x0f41, X, wl_Suf|ReverseModrm,	{ WordReg|WordMem, WordReg, 0} },
@@ -908,23 +916,34 @@ static const reg_entry i386_regtab[] = {
   {"gs", SReg3, 5},
   /* control registers */
   {"cr0", Control, 0},
+  {"cr1", Control, 1},
   {"cr2", Control, 2},
   {"cr3", Control, 3},
   {"cr4", Control, 4},
+  {"cr5", Control, 5},
+  {"cr6", Control, 6},
+  {"cr7", Control, 7},
   /* debug registers */
   {"db0", Debug, 0},
   {"db1", Debug, 1},
   {"db2", Debug, 2},
   {"db3", Debug, 3},
+  {"db4", Debug, 4},
+  {"db5", Debug, 5},
   {"db6", Debug, 6},
   {"db7", Debug, 7},
   {"dr0", Debug, 0},
   {"dr1", Debug, 1},
   {"dr2", Debug, 2},
   {"dr3", Debug, 3},
+  {"dr4", Debug, 4},
+  {"dr5", Debug, 5},
   {"dr6", Debug, 6},
   {"dr7", Debug, 7},
   /* test registers */
+  {"tr0", Test, 0},
+  {"tr1", Test, 1},
+  {"tr2", Test, 2},
   {"tr3", Test, 3},
   {"tr4", Test, 4},
   {"tr5", Test, 5},
