@@ -1656,19 +1656,15 @@ elf64_alpha_relax_section (abfd, sec, link_info, again)
   info.relocs = internal_relocs;
   info.relend = irelend = internal_relocs + sec->reloc_count;
 
-  /* Find the GP for this object.  */
+  /* Find the GP for this object.  Do not store the result back via 
+     _bfd_set_gp_value, since this could change again before final.  */
   info.gotobj = alpha_elf_tdata (abfd)->gotobj;
   if (info.gotobj)
     {
       asection *sgot = alpha_elf_tdata (info.gotobj)->got;
-      info.gp = _bfd_get_gp_value (info.gotobj);
-      if (info.gp == 0)
-	{
-	  info.gp = (sgot->output_section->vma
-		     + sgot->output_offset
-		     + 0x8000);
-	  _bfd_set_gp_value (info.gotobj, info.gp);
-	}
+      info.gp = (sgot->output_section->vma
+		 + sgot->output_offset
+		 + 0x8000);
     }
 
   for (irel = internal_relocs; irel < irelend; irel++)
