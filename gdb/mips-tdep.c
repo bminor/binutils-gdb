@@ -43,6 +43,7 @@ extern struct obstack frame_cache_obstack;
 
 /* FIXME! this code assumes 4-byte instructions.  */
 #define MIPS_INSTLEN 4		/* Length of an instruction */
+#define MIPS16_INSTLEN 2	/* Length of an instruction on MIPS16*/
 #define MIPS_NUMREGS 32		/* Number of integer or float registers */
 typedef unsigned long t_inst;	/* Integer big enough to hold an instruction */
 
@@ -406,19 +407,21 @@ mips_find_saved_regs (fci)
 
       if ((addr = PROC_LOW_ADDR (proc_desc)) & 1)
 	{
-	  instlen = 2;		/* MIPS16 */
+	  instlen = MIPS16_INSTLEN;	/* MIPS16 */
 	  addr &= ~1;
 	}
       else
-	instlen = MIPS_INSTLEN;	/* MIPS32 */
+	instlen = MIPS_INSTLEN;		/* MIPS32 */
 
+      /* Scan through this function's instructions preceding the current
+         PC, and look for those that save registers.  */
       while (addr < fci->pc)
 	{
 	  status = read_memory_nobpt (addr, buf, instlen);
 	  if (status)
 	    memory_error (status, addr);
 	  inst = extract_unsigned_integer (buf, instlen);
-	  if (instlen == 2)
+	  if (instlen == MIPS16_INSTLEN)
 	    mips16_decode_reg_save (inst, &gen_save_found);
 	  else
 	    mips32_decode_reg_save (inst, &gen_save_found, &float_save_found);
@@ -446,10 +449,8 @@ mips_find_saved_regs (fci)
   if (! GDB_TARGET_IS_MIPS64)
     reg_position += 4;
 
-  /* FIXME!  this code looks scary... 
-   * Looks like it's trying to do stuff with a register, 
-   * but .... ???
-   */
+  /* Fill in the offsets for the float registers which float_mask says
+     were saved.  */
   for (ireg = MIPS_NUMREGS-1; float_mask; --ireg, float_mask <<= 1)
     if (float_mask & 0x80000000)
       {
@@ -551,6 +552,7 @@ heuristic_proc_start(pc)
 {
     CORE_ADDR start_pc = pc;
     CORE_ADDR fence = start_pc - heuristic_fence_post;
+    int instlen;
 
     if (start_pc == 0)	return 0;
 
@@ -558,8 +560,10 @@ heuristic_proc_start(pc)
 	|| fence < VM_MIN_ADDRESS)
       fence = VM_MIN_ADDRESS;
 
+    instlen = pc & 1 ? MIPS16_INSTLEN : MIPS_INSTLEN;
+
     /* search back for previous return */
-    for (start_pc -= MIPS_INSTLEN; ; start_pc -= MIPS_INSTLEN) /* FIXME!! */
+    for (start_pc -= instlen; ; start_pc -= instlen)
 	if (start_pc < fence)
 	  {
 	    /* It's not clear to me why we reach this point when
@@ -591,10 +595,21 @@ Otherwise, you told GDB there was a function where there isn't one, or\n\
 
 	    return 0; 
 	  }
+	else if (start_pc & 1)
+	  {
+	    /* On MIPS16, look for the 'entry' pseudo-op at the start
+	       of a function.  This is only going to work if the program
+	       was compiled with -mentry.  Otherwise, there's no reliable
+	       way of finding the start of a function.  */
+	    if ((read_memory_integer (start_pc & ~1, 2) & 0xf81f)== 0xe809)
+	      return start_pc;
+	  }
 	else if (ABOUT_TO_RETURN(start_pc))
+	  {
+	    start_pc += 2 * MIPS_INSTLEN; /* skip return, and its delay slot */
 	    break;
+	  }
 
-    start_pc += 2 * MIPS_INSTLEN; /* skip return, and its delay slot */
 #if 0
     /* skip nops (usually 1) 0 - is this */
     while (start_pc < pc && read_memory_integer (start_pc, MIPS_INSTLEN) == 0)
@@ -1362,49 +1377,31 @@ mips_step_skips_delay (pc)
   return is_delayed ((unsigned long)extract_unsigned_integer (buf, MIPS_INSTLEN));
 }
 
-/* To skip prologues, I use this predicate.  Returns either PC itself
-   if the code at PC does not look like a function prologue; otherwise
-   returns an address that (if we're lucky) follows the prologue.  If
-   LENIENT, then we must skip everything which is involved in setting
-   up the frame (it's OK to skip more, just so long as we don't skip
-   anything which might clobber the registers which are being saved.
-   We must skip more in the case where part of the prologue is in the
-   delay slot of a non-prologue instruction).  */
 
-CORE_ADDR
-mips_skip_prologue (pc, lenient)
-     CORE_ADDR pc;
+/* Skip the PC past function prologue instructions (32-bit version).
+   This is a helper function for mips_skip_prologue.  */
+
+static CORE_ADDR
+mips32_skip_prologue (pc, lenient)
+     CORE_ADDR pc;	/* starting PC to search from */
      int lenient;
 {
     t_inst inst;
-    unsigned offset; 
+    CORE_ADDR end_pc;
     int seen_sp_adjust = 0;
     int load_immediate_bytes = 0;
-    CORE_ADDR post_prologue_pc;
-
-    /* See if we can determine the end of the prologue via the symbol table.
-       If so, then return either PC, or the PC after the prologue, whichever
-       is greater.  */
-
-    post_prologue_pc = after_prologue (pc, NULL);
-
-    if (post_prologue_pc != 0)
-      return max (pc, post_prologue_pc);
-
-    /* Can't determine prologue from the symbol table, need to examine
-       instructions.  */
 
     /* Skip the typical prologue instructions. These are the stack adjustment
        instruction and the instructions that save registers on the stack
        or in the gcc frame.  */
-    for (offset = 0; offset < 100; offset += MIPS_INSTLEN)
+    for (end_pc = pc + 100; pc < end_pc; pc += MIPS_INSTLEN)
       {
 	char buf[MIPS_INSTLEN];
 	int status;
 
-	status = read_memory_nobpt (pc + offset, buf, MIPS_INSTLEN);
+	status = read_memory_nobpt (pc, buf, MIPS_INSTLEN);
 	if (status)
-	  memory_error (status, pc + offset);
+	  memory_error (status, pc);
 	inst = (unsigned long)extract_unsigned_integer (buf, MIPS_INSTLEN);
 
 #if 0
@@ -1430,8 +1427,9 @@ mips_skip_prologue (pc, lenient)
 	    continue;				/* reg != $zero */
  
         /* move $s8,$sp.  With different versions of gas this will be either
-           `addu $s8,$sp,$zero' or `or $s8,$sp,$zero'.  Accept either.  */
-        else if (inst == 0x03A0F021 || inst == 0x03a0f025)
+           `addu $s8,$sp,$zero' or `or $s8,$sp,$zero' or `daddu s8,sp,$0'.
+	    Accept any one of these.  */
+        else if (inst == 0x03A0F021 || inst == 0x03a0f025 || inst == 0x03a0f02d)
 	    continue;
 
 	else if ((inst & 0xFF9F07FF) == 0x00800021) /* move reg,$a0-$a3 */
@@ -1475,12 +1473,123 @@ mips_skip_prologue (pc, lenient)
        skipped some load immediate instructions. Undo the skipping
        if the load immediate was not followed by a stack adjustment.  */
     if (load_immediate_bytes && !seen_sp_adjust)
-      offset -= load_immediate_bytes;
-    return pc + offset;
+      pc -= load_immediate_bytes;
+    return pc;
+}
+
+/* Skip the PC past function prologue instructions (16-bit version).
+   This is a helper function for mips_skip_prologue.  */
+
+static CORE_ADDR
+mips16_skip_prologue (pc, lenient)
+     CORE_ADDR pc;	/* starting PC to search from */
+     int lenient;
+{
+    CORE_ADDR end_pc;
+
+    /* Table of instructions likely to be found in a function prologue.  */
+    static struct
+    {
+      unsigned short inst;
+      unsigned short mask;
+    } table[] =
+    {
+      { 0x6300, 0xff00 },	/* addiu $sp,offset */
+      { 0xfb00, 0xff00 },	/* daddiu $sp,offset */
+      { 0xd000, 0xf800 },	/* sw reg,n($sp) */
+      { 0xf900, 0xff00 },	/* sd reg,n($sp) */
+      { 0x6200, 0xff00 },	/* sw $ra,n($sp) */
+      { 0xfa00, 0xff00 },	/* sd $ra,n($sp) */
+      { 0x673d, 0xffff },	/* move $s1,sp */
+      { 0xd980, 0xff80 },	/* sw $a0-$a3,n($s1) */
+      { 0x6704, 0xff1c },	/* move reg,$a0-$a3 */
+      { 0xe809, 0xf81f },	/* entry pseudo-op */
+      { 0, 0 }			/* end of table marker */
+    };
+
+    /* Skip the typical prologue instructions. These are the stack adjustment
+       instruction and the instructions that save registers on the stack
+       or in the gcc frame.  */
+    for (end_pc = pc + 100; pc < end_pc; pc += MIPS16_INSTLEN)
+      {
+	char buf[MIPS16_INSTLEN];
+	int status;
+	unsigned short inst;
+	int extend_bytes;
+	int prev_extend_bytes;
+	int i;
+
+	status = read_memory_nobpt (pc & ~1, buf, MIPS16_INSTLEN);
+	if (status)
+	  memory_error (status, pc);
+	inst = (unsigned long)extract_unsigned_integer (buf, MIPS16_INSTLEN);
+
+#if 0
+	if (lenient && is_delayed (inst))
+	  continue;
+#endif
+
+	/* Normally we ignore an extend instruction.  However, if it is
+	   not followed by a valid prologue instruction, we must adjust
+	   the pc back over the extend so that it won't be considered
+	   part of the prologue.  */
+	if ((inst & 0xf800) == 0xf000)		/* extend */
+	  {
+	    extend_bytes = MIPS16_INSTLEN;
+	    continue;
+	  }
+	prev_extend_bytes = extend_bytes;
+	extend_bytes = 0;
+
+	/* Check for other valid prologue instructions besides extend.  */
+	for (i = 0; table[i].mask != 0; i++)
+	  if ((inst & table[i].mask) == table[i].inst)	/* found, get out */
+	    break;
+	if (table[i].mask != 0)			/* it was in table? */
+	  continue;				/* ignore it
+	else					/* non-prologue */
+	  {
+	    /* Return the current pc, adjusted backwards by 2 if
+	       the previous instruction was an extend.  */
+	    return pc - prev_extend_bytes;
+	  }
+    }
+}
+
+/* To skip prologues, I use this predicate.  Returns either PC itself
+   if the code at PC does not look like a function prologue; otherwise
+   returns an address that (if we're lucky) follows the prologue.  If
+   LENIENT, then we must skip everything which is involved in setting
+   up the frame (it's OK to skip more, just so long as we don't skip
+   anything which might clobber the registers which are being saved.
+   We must skip more in the case where part of the prologue is in the
+   delay slot of a non-prologue instruction).  */
+
+CORE_ADDR
+mips_skip_prologue (pc, lenient)
+     CORE_ADDR pc;
+     int lenient;
+{
+  /* See if we can determine the end of the prologue via the symbol table.
+     If so, then return either PC, or the PC after the prologue, whichever
+     is greater.  */
+
+  CORE_ADDR post_prologue_pc = after_prologue (pc, NULL);
+
+  if (post_prologue_pc != 0)
+    return max (pc, post_prologue_pc);
+
+  /* Can't determine prologue from the symbol table, need to examine
+     instructions.  */
+
+  if (pc & 1)
+    return mips16_skip_prologue (pc, lenient);
+  else
+    return mips32_skip_prologue (pc, lenient);
 }
 
 #if 0
-/* The lenient prologue stuff should be superceded by the code in
+/* The lenient prologue stuff should be superseded by the code in
    init_extra_frame_info which looks to see whether the stores mentioned
    in the proc_desc have actually taken place.  */
 

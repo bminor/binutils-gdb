@@ -1,3 +1,13 @@
+Fri Jan 31 08:26:39 1997  Mark Alexander  <marka@cygnus.com>
+
+	* mips-tdep.c (MIPS16_INSTLEN): Define.
+	(mips_find_saved_regs): Replace hardcoded 2's with MIPS16_INSTLEN.
+	(heuristic_proc_start): Recognize 'entry' pseudo-op as a start
+	of function on MIPS16.
+	(mips32_skip_prologue, mips16_skip_prologue): New helper functions
+	for mips_skip_prologue.
+	(mips_skip_prologue): Recognize both 16- and 32-bit prologues.
+
 Wed Jan 29 12:45:54 1997  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* config/powerpc/ppc{,le}-sim.mt (SIM): Remove the library
