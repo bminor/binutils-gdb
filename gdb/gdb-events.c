@@ -1,6 +1,6 @@
 /* User Interface Events.
 
-   Copyright 1999, 2001, 2002 Free Software Foundation, Inc.
+   Copyright 1999, 2001, 2002, 2004 Free Software Foundation, Inc.
 
    Contributed by Cygnus Solutions.
 
@@ -39,15 +39,11 @@
 #include "gdb-events.h"
 #include "gdbcmd.h"
 
-#if WITH_GDB_EVENTS
 static struct gdb_events null_event_hooks;
 static struct gdb_events queue_event_hooks;
 static struct gdb_events *current_event_hooks = &null_event_hooks;
-#endif
 
 int gdb_events_debug;
-
-#if WITH_GDB_EVENTS
 
 void
 breakpoint_create_event (int b)
@@ -149,9 +145,6 @@ selected_thread_changed_event (int thread_num)
   current_event_hooks->selected_thread_changed (thread_num);
 }
 
-#endif
-
-#if WITH_GDB_EVENTS
 struct gdb_events *
 set_gdb_event_hooks (struct gdb_events *vector)
 {
@@ -162,15 +155,12 @@ set_gdb_event_hooks (struct gdb_events *vector)
     current_event_hooks = vector;
   return old_events;
 }
-#endif
 
-#if WITH_GDB_EVENTS
 void
 clear_gdb_event_hooks (void)
 {
   set_gdb_event_hooks (&null_event_hooks);
 }
-#endif
 
 enum gdb_event
 {
@@ -415,7 +405,6 @@ void
 _initialize_gdb_events (void)
 {
   struct cmd_list_element *c;
-#if WITH_GDB_EVENTS
   queue_event_hooks.breakpoint_create = queue_breakpoint_create;
   queue_event_hooks.breakpoint_delete = queue_breakpoint_delete;
   queue_event_hooks.breakpoint_modify = queue_breakpoint_modify;
@@ -426,7 +415,6 @@ _initialize_gdb_events (void)
   queue_event_hooks.target_changed = queue_target_changed;
   queue_event_hooks.selected_frame_level_changed = queue_selected_frame_level_changed;
   queue_event_hooks.selected_thread_changed = queue_selected_thread_changed;
-#endif
 
   c = add_set_cmd ("eventdebug", class_maintenance, var_zinteger,
 		   (char *) (&gdb_events_debug), "Set event debugging.\n\
