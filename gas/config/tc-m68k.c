@@ -381,7 +381,7 @@ struct m68k_incant {
 	unsigned long m_opcode;
 	short m_opnum;
 	short m_codenum;
-	enum m68k_architecture m_arch;
+	int m_arch;
 	struct m68k_incant *m_next;
 };
 
@@ -426,7 +426,7 @@ static void s_proc();
 
 #endif /* not __STDC__ */
 
-static enum m68k_architecture current_architecture = 0;
+static int current_architecture = 0;
 
 /* BCC68000 is for patching in an extra jmp instruction for long offsets
    on the 68000.  The 68000 doesn't support long branches with branchs */
@@ -1470,6 +1470,14 @@ void m68k_ip (instring)
 	    losing++;
 	  break;
 
+	case '`':
+	  switch (opP->mode) {
+	  case MSCR: case IMMED: case DREG: case AREG:
+	  case AINC: case REGLST: case AINDR:
+	    losing++;
+	  }
+	  break;
+
 	case '#':
 	  if(opP->mode!=IMMED)
 	    losing++;
@@ -1831,7 +1839,7 @@ void m68k_ip (instring)
 	      {
 		int got_one = 0, idx;
 		const static struct {
-		  enum m68k_architecture arch;
+		  int arch;
 		  const char *name;
 		} archs[] = {
 		  m68000, "68000",
@@ -1839,6 +1847,7 @@ void m68k_ip (instring)
 		  m68020, "68020",
 		  m68030, "68030",
 		  m68040, "68040",
+		  cpu32,  "cpu32",
 		  m68881, "68881",
 		  m68851, "68851",
 		};
@@ -1894,6 +1903,7 @@ void m68k_ip (instring)
     case '$':
     case '?':
     case '/':
+    case '`':
 #ifndef NO_68851
     case '|':
 #endif
@@ -3082,6 +3092,7 @@ init_regtable()
     insert_reg(init_table[i].name, init_table[i].number);
 }
 
+static int no_68851, no_68881;
 
 void
 md_assemble(str)
@@ -3101,7 +3112,7 @@ md_assemble(str)
 
 	    if (cpu_of_arch (current_architecture) == 0)
 	      {
-		enum m68k_architecture cpu_type;
+		int cpu_type;
 
 #ifndef TARGET_CPU
 		cpu_type = m68020;
@@ -3117,33 +3128,42 @@ md_assemble(str)
 		  cpu_type = m68030;
 		else if (strcmp (TARGET_CPU, "m68040") == 0)
 		  cpu_type = m68040;
+		else if (strcmp (TARGET_CPU, "cpu32") == 0)
+		  cpu_type = cpu32;
 		else
 		  cpu_type = m68020;
 #endif
 
-		/* If float or mmu were specified, just default cpu.  */
-		if (current_architecture != 0)
-		  current_architecture |= cpu_type;
-		else
-		  {
-		    if ((cpu_type & m68020up) != 0)
-		      current_architecture = (cpu_type
-#ifndef NO_68881
-					      | m68881
-#endif
-#ifndef NO_68851
-					      | m68851
-#endif
-					      );
-		    else
-		      current_architecture = cpu_type;
-		  }
+		current_architecture |= cpu_type;
 	      }
-	    if (cpu_of_arch (current_architecture) == m68000
-		&& (current_architecture & m68881) != 0)
+	    if (current_architecture & m68881)
 	      {
-		as_bad ("incompatible processors 68000 and 68881 specified");
+		if (current_architecture & m68000)
+		  as_bad ("incompatible processors 68000 and 68881/2 specified");
+		if (current_architecture & m68010)
+		  as_bad ("incompatible processors 68010 and 68881/2 specified");
+		if (current_architecture & m68040)
+		  as_bad ("incompatible processors 68040 and 68881/2 specified");
 	      }
+	    /* What other incompatibilities ought we to check for?  */
+
+	    /* Toss in some default assumptions about coprocessors.  */
+	    if (!no_68881
+		&& (cpu_of_arch (current_architecture)
+		    /* Can CPU32 have a 68881 coprocessor??  */
+		    & (m68020 | m68030 | cpu32)))
+	      {
+		current_architecture |= m68881;
+	      }
+	    if (!no_68851
+		&& (cpu_of_arch (current_architecture) & m68020up) != 0)
+	      {
+		current_architecture |= m68851;
+	      }
+	    if (no_68881 && (current_architecture & m68881))
+	      as_bad ("options for 68881 and no-68881 both given");
+	    if (no_68851 && (current_architecture & m68851))
+	      as_bad ("options for 68851 and no-68851 both given");
 	    done_first_time = 1;
 	  }
 
@@ -4229,6 +4249,10 @@ static void s_proc() {
  *		errors.  More than one may be specified.  The default is
  *		-m68020 -m68851 -m68881.  Note that -m68008 is a synonym
  *		for -m68000, and -m68882 is a synonym for -m68881.
+ *	-[A]m[c]no-68851, -[A]m[c]no-68881
+ *		Don't accept 688?1 instructions.  (The "c" is kind of silly,
+ *		so don't use or document it, but that's the way the parsing
+ *		works).
  *
  * MAYBE_FLOAT_TOO is defined below so that specifying a processor type
  * (e.g. m68020) also requests that float instructions be included.  This
@@ -4238,7 +4262,7 @@ static void s_proc() {
  * of that funny floaty stuff going on.  FIXME-later.
  */
 #ifndef MAYBE_FLOAT_TOO
-#define	MAYBE_FLOAT_TOO	m68881
+#define	MAYBE_FLOAT_TOO	/* m68881 */ 0 /* this is handled later */
 #endif
 
 int md_parse_option(argP,cntP,vecP)
@@ -4288,13 +4312,21 @@ char ***vecP;
 
 		} else if (!strcmp(*argP, "68882")) {
 			current_architecture |= m68882;
-
 #endif /* NO_68881 */
+		/* Even if we aren't configured to support the processor,
+		   it should still be possible to assert that the user
+		   doesn't have it...  */
+		} else if (!strcmp (*argP, "no-68881")
+			   || !strcmp (*argP, "no-68882")) {
+		  no_68881 = 1;
 #ifndef NO_68851
 		} else if (!strcmp(*argP,"68851")) {
 			current_architecture |= m68851;
-
 #endif /* NO_68851 */
+		} else if (!strcmp (*argP, "no-68851")) {
+		  no_68851 = 1;
+		} else if (!strcmp (*argP, "pu32")) { /* "-mcpu32" */
+		  current_architecture |= cpu32;
 		} else {
 			as_warn("Unknown architecture, \"%s\". option ignored", *argP);
 		} /* switch on architecture */
