@@ -1,3 +1,18 @@
+Wed Jul  8 17:41:47 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-events.c (ETRACE_P): New macro.
+	(struct _sim_event): Add member trace.
+	(sim_events_free): Reclaim trace message.
+
+	* sim-events.c, sim-events.h (sim_events_schedule_vtracef,
+ 	sim_events_schedule_tracef): New functions, include printf trace
+ 	information in argument list.  If tracing, store asprintf'd trace
+ 	message in sim_event.
+
+	* hw-events.c, hw-events.h (hw_event_queue_schedule_tracef,
+ 	hw_event_queue_schedule_vtracef): New functions, mimic
+ 	sim_event_tracef.
+
 Mon Jul  6 15:51:14 1998  Jeffrey A Law  (law@cygnus.com)
 
 	* sim-bits.h (EXTEND24): Define.
