@@ -70,10 +70,11 @@ move_to_cr (int cr, reg_t val)
 	     PC<<2);
 	  State.exception = SIGILL;
 	}
-      State.cregs[PSW_CR] = (val & ~0x4032);
+      State.cregs[cr] = (val & ~0x4032);
       break;
     case BPSW_CR:
-      State.cregs[BPSW_CR] = (val & ~0x4032);
+    case DPSW_CR:
+      State.cregs[cr] = (val & ~0x4032);
       break;
     case MOD_S_CR:
     case MOD_E_CR:
@@ -2651,14 +2652,45 @@ OP_5F00 ()
   switch (OP[0])
     {
     default:
+#if (DEBUG & DEBUG_TRAP) == 0
       {
 	uint16 vec = OP[0] + TRAP_VECTOR_START;
 	BPC = PC + 1;
 	move_to_cr (BPSW_CR, PSW);
 	move_to_cr (PSW_CR, PSW & PSW_SM_BIT);
 	JMP (vec);
+	break;
       }
-      break;
+#else			/* if debugging use trap to print registers */
+      {
+	int i;
+	static int first_time = 1;
+
+	if (first_time)
+	  {
+	    first_time = 0;
+	    (*d10v_callback->printf_filtered) (d10v_callback, "Trap  #     PC ");
+	    for (i = 0; i < 16; i++)
+	      (*d10v_callback->printf_filtered) (d10v_callback, "  %sr%d", (i > 9) ? "" : " ", i);
+	    (*d10v_callback->printf_filtered) (d10v_callback, "         a0         a1 f0 f1 c\n");
+	  }
+
+	(*d10v_callback->printf_filtered) (d10v_callback, "Trap %2d 0x%.4x:", (int)OP[0], (int)PC);
+
+	for (i = 0; i < 16; i++)
+	  (*d10v_callback->printf_filtered) (d10v_callback, " %.4x", (int) State.regs[i]);
+
+	for (i = 0; i < 2; i++)
+	  (*d10v_callback->printf_filtered) (d10v_callback, " %.2x%.8lx",
+					     ((int)(State.a[i] >> 32) & 0xff),
+					     ((unsigned long)State.a[i]) & 0xffffffff);
+
+	(*d10v_callback->printf_filtered) (d10v_callback, "  %d  %d %d\n",
+					   State.F0 != 0, State.F1 != 0, State.C != 0);
+	(*d10v_callback->flush_stdout) (d10v_callback);
+	break;
+      }
+#endif
     case 15:			/* new system call trap */
       /* Trap 15 is used for simulating low-level I/O */
       {

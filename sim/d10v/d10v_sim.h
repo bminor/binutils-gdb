@@ -12,6 +12,7 @@
 #define DEBUG_LINE_NUMBER	0x00000004
 #define DEBUG_MEMSIZE		0x00000008
 #define DEBUG_INSTRUCTION	0x00000010
+#define DEBUG_TRAP		0x00000020
 
 #ifndef	DEBUG
 #define	DEBUG (DEBUG_TRACE | DEBUG_VALUES | DEBUG_LINE_NUMBER)
@@ -115,6 +116,7 @@ enum
   BPSW_CR = 1,
   PC_CR = 2,
   BPC_CR = 3,
+  DPSW_CR = 4,
   RPT_C_CR = 7,
   RPT_S_CR = 8,
   RPT_E_CR = 9,
@@ -143,7 +145,7 @@ enum
    or assigned-to directly */
 #define PC	(State.cregs[PC_CR])
 #define PSW	(move_from_cr (PSW_CR))
-#define BPSW	(0 + State.cregs[PSW_CR])
+#define BPSW	(0 + State.cregs[BPSW_CR])
 #define BPC	(State.cregs[BPC_CR])
 #define RPT_C	(State.cregs[RPT_C_CR])
 #define RPT_S	(State.cregs[RPT_S_CR])
@@ -190,6 +192,7 @@ enum
 #define INC_ADDR(x,i)	x = ((State.MD && x == (MOD_E & ~((i)-1))) ? MOD_S : (x)+(i))
 
 extern uint8 *dmem_addr PARAMS ((uint32));
+extern uint8 *imem_addr PARAMS ((uint32));
 extern bfd_vma decode_pc PARAMS ((void));
 
 #define	RB(x)	(*(dmem_addr(x)))

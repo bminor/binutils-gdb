@@ -1,3 +1,41 @@
+Wed Feb 11 16:53:49 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* d10v_sim.h (enum): Define DPSW_CR.
+
+	* simops.c (move_to_cr): Mask out hardwired zero bits in DPSW.
+
+Tue Feb 10 18:28:38 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* interp.c (sim_write_phys): Delete.
+	(sim_load): Call sim_load_file with sim_write and LMA.
+
+Mon Feb  9 12:05:01 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* interp.c: Rewrite xfer_mem so that it translates addresses as -
+ 	0x00... - DMAP translated memory, 0x01... IMAP translated memory,
+ 	0x10... - on-chip data, 0x11... - on-chip insn, 0x12... - unified
+ 	memory.
+	(pc_addr): Delete.
+	(imem_addr): New function - translate IMEM address.
+	(sim_resume): Use imem_addr to translate insn address, abort if
+ 	translation failed.
+	(sim_create_inferior): Write ARGV to memory using sim_write.  Pass
+ 	argc/argv using r0/r1 not r2/r3.
+	(sim_size): Do not initialize IMAP/DMAP here.
+	(sim_open): Call sim_create_inferior and sim_size to initialize
+ 	the system.
+	(sim_create_inferior): Initialize IMAP/DMAP to hardware reset
+ 	defaults.
+	(init_system): Delete.
+	(xfer_mem, sim_fetch_register, sim_store_register): Do not call
+ 	init_system.
+	(decode_pc): Check prog_bfd is defined before looking up .text
+ 	section.
+
+Sun Feb  1 16:47:51 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+
 Sat Jan 31 18:15:41 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure: Regenerated to track ../common/aclocal.m4 changes.
