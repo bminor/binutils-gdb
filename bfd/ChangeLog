@@ -1,3 +1,11 @@
+2004-04-21  Chris Demetriou  <cgd@broadcom.com>
+
+	* coff-mips.c (bfd_mips_ecoff_create_embedded_relocs): Remove.
+	* elf32-mips.c (bfd_mips_elf32_create_embedded_relocs): Remove.
+	* bfd-in.h (bfd_mips_ecoff_create_embedded_relocs)
+	(bfd_mips_elf32_create_embedded_relocs): Remove prototypes
+	* bfd-in2.h: Regenerate.
+
 2004-04-21  Bob Wilson  <bob.wilson@acm.org>
 
 	* elf32-xtensa.c (is_same_value): Add final_static_link argument and

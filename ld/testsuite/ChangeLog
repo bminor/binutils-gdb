@@ -1,3 +1,39 @@
+2004-04-21  Chris Demetriou  <cgd@broadcom.com>
+
+	* ld-empic/run.c: Removed as part of MIPS --embedded-relocs removal.
+	* ld-empic/empic.exp: Likewise.
+	* ld-empic/relax.t: Likewise.
+	* ld-empic/relax1.c: Likewise.
+	* ld-empic/relax2.c: Likewise.
+	* ld-empic/relax3.c: Likewise.
+	* ld-empic/relax4.c: Likewise.
+	* ld-empic/runtest1.c: Likewise.
+	* ld-empic/runtest2.c: Likewise.
+	* ld-empic/runtesti.s: Likewise.
+	* ld-mips-elf/empic1-ln.d: Likewise.
+	* ld-mips-elf/empic1-lp.d: Likewise.
+	* ld-mips-elf/empic1-mn.d: Likewise.
+	* ld-mips-elf/empic1-mp.d: Likewise.
+	* ld-mips-elf/empic1-ref.s: Likewise.
+	* ld-mips-elf/empic1-sn.d: Likewise.
+	* ld-mips-elf/empic1-sp.d: Likewise.
+	* ld-mips-elf/empic1-space.s: Likewise.
+	* ld-mips-elf/empic1-tgt.s: Likewise.
+	* ld-mips-elf/empic2-fwd-0.d: Likewise.
+	* ld-mips-elf/empic2-fwd-1.d: Likewise.
+	* ld-mips-elf/empic2-fwd-tgt.s: Likewise.
+	* ld-mips-elf/empic2-ref.s: Likewise.
+	* ld-mips-elf/empic2-rev-0.d: Likewise.
+	* ld-mips-elf/empic2-rev-1.d: Likewise.
+	* ld-mips-elf/empic2-rev-tgt.s: Likewise.
+	* ld-mips-elf/empic2-space.s: Likewise.
+	* ld-mips-elf/emrelocs-eb.d: Likewise.
+	* ld-mips-elf/emrelocs-el.d: Likewise.
+	* ld-mips-elf/emrelocs.ld: Likewise.
+	* ld-mips-elf/emrelocs1.s: Likewise.
+	* ld-mips-elf/emrelocs2.s: Likewise.
+	* ld-mips-elf/mips-elf.exp: Don't run now-removed tests.
+
 2004-04-20  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-elfweak/elfweak.exp: Add an undefined weak size change

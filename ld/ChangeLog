@@ -1,3 +1,27 @@
+2004-04-21  Chris Demetriou  <cgd@broadcom.com>
+
+	* ld.texinfo: Remove MIPS --embedded-relocs documentation.
+	* emulparams/elf32bmip.sh (EXTRA_EM_FILE): Remove definition.
+	* emulparams/mipsidt.sh (TEMPLATE_NAME): Use generic.em.
+	(EXTRA_EM_FILE): Use mipsecoff.em
+	* emulparams/mipsidtl.sh (TEMPLATE_NAME): Use generic.em.
+	(EXTRA_EM_FILE): Use mipsecoff.em
+	* emultempl/mipsecoff.em: Restructure to be included as an
+	extra emulation file.
+	(check_sections, gld${EMULATION_NAME}_after_open)
+	(gld${EMULATION_NAME}_after_allocation)
+	(gld${EMULATION_NAME}_get_script)
+	(ld_${EMULATION_NAME}_emulation): Remove
+	(gld${EMULATION_NAME}_before_parse): Rename to...
+	(mipsecoff_before_parse): This.
+	(LDEMUL_BEFORE_PARSE): Define.
+	* emultempl/mipself.em: Remove file.
+	* scripttempl/mips.sc (.rel.sdata): Do not include in output.
+	(__runtime_reloc_start, __runtime_reloc_stop): Stop providing
+	these symbols.
+	* Makefile.am: Remove dependencies on emultempl/mipself.em.
+	* Makefile.in: Regenerate.
+
 2004-04-21	Anil Paranjpe	<anilp1@kpitcummins.com>
 
 	* ld.texinfo (synthesizing on H8/300): Information about linker

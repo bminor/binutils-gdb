@@ -594,8 +594,6 @@ extern bfd_boolean bfd_ecoff_write_accumulated_debug
   (void *handle, bfd *abfd, struct ecoff_debug_info *debug,
    const struct ecoff_debug_swap *swap,
    struct bfd_link_info *info, file_ptr where);
-extern bfd_boolean bfd_mips_ecoff_create_embedded_relocs
-  (bfd *, struct bfd_link_info *, struct bfd_section *, struct bfd_section *, char **);
 
 /* Externally visible ELF routines.  */
 
@@ -676,8 +674,6 @@ extern struct bfd_section *_bfd_elf_tls_setup
   (bfd *, struct bfd_link_info *);
 
 extern bfd_boolean bfd_m68k_elf32_create_embedded_relocs
-  (bfd *, struct bfd_link_info *, struct bfd_section *, struct bfd_section *, char **);
-extern bfd_boolean bfd_mips_elf32_create_embedded_relocs
   (bfd *, struct bfd_link_info *, struct bfd_section *, struct bfd_section *, char **);
 
 /* SunOS shared library support routines for the linker.  */

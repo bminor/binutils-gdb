@@ -58,25 +58,6 @@ if { $linux_gnu } {
 }
 
 if { $embedded_elf } {
-    # Check basic Embedded-PIC PC-relative HI/LO relocs.
-    run_dump_test "empic1-ln"
-    run_dump_test "empic1-lp"
-    run_dump_test "empic1-mn"
-    run_dump_test "empic1-mp"
-    run_dump_test "empic1-sn"
-    run_dump_test "empic1-sp"
-
-    # Embedded-PIC PC-relative HI/LO reloc edge-case regression tests.
-    # As of 2001-12-26, the linker botches the fwd-0 and rev-1 tests.
-    run_dump_test "empic2-fwd-0"
-    run_dump_test "empic2-fwd-1"
-    run_dump_test "empic2-rev-0"
-    run_dump_test "empic2-rev-1"
-
-    # Check generation of embedded relocs section.
-    run_dump_test "emrelocs-eb"
-    run_dump_test "emrelocs-el"
-
     run_dump_test "region1"
 }
 
