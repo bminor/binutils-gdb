@@ -105,7 +105,7 @@ get_longjmp_target PARAMS ((CORE_ADDR *));
 
 /* Saved Pc.  Get it from ucontext if within sigtramp.  */
 
-#undef FRAME_SAVED_PC(FRAME)
+#undef FRAME_SAVED_PC
 #define FRAME_SAVED_PC(FRAME) \
   (((FRAME)->signal_handler_caller \
     ? i386v4_sigtramp_saved_pc (FRAME) \

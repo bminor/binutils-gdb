@@ -1,3 +1,7 @@
+Tue Mar  8 11:42:39 1994  Jim Kingdon  (kingdon@cygnus.com)
+
+	* config/i386/tm-i386v4.h: Give just macro name, not args, to #undef.
+
 Tue Mar  8 06:56:13 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* dbxread.c: New variable lowest_text_address.
