@@ -1,3 +1,8 @@
+2003-10-14  Anil Paranjpe  <anilp1@KPITCummins.com>
+
+	* objcopy.c (copy_main): Reads machine flags from arch_info
+	structure.
+
 2003-10-20  Andrew Cagney  <cagney@redhat.com>
 
 	* coffgrok.h (coff_section): Replace 'struct sec" with "struct

@@ -1,3 +1,8 @@
+2003-10-21  Anil Paranjpe  <anilp1@KPITCummins.com>
+
+	* binary.c (binary_object_p): Pass machine flag along with
+	architecture.
+
 2003-10-21  Thorsten Brehm  <brehm@gmx.net>
 
 	* archures.c (bfd_default_scan): Add support for mcf528x.

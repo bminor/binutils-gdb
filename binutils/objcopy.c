@@ -351,8 +351,10 @@ extern unsigned int Chunk;
    on by the --srec-forceS3 command line switch.  */
 extern bfd_boolean S3Forced;
 
-/* Defined in bfd/binary.c.  Used to set architecture of input binary files.  */
-extern enum bfd_architecture bfd_external_binary_architecture;
+/* Defined in bfd/binary.c.  Used to set architecture and machine of input
+   binary files.  */
+extern enum bfd_architecture  bfd_external_binary_architecture;
+extern unsigned long          bfd_external_machine;
 
 /* Forward declarations.  */
 static void setup_section (bfd *, asection *, void *);
@@ -2769,7 +2771,10 @@ copy_main (int argc, char *argv[])
 	  temp_arch_info = bfd_scan_arch (binary_architecture);
 
 	  if (temp_arch_info != NULL)
-	    bfd_external_binary_architecture = temp_arch_info->arch;
+	    {
+	      bfd_external_binary_architecture = temp_arch_info->arch;
+	      bfd_external_machine             = temp_arch_info->mach;
+	    }
 	  else
 	    fatal (_("architecture %s unknown"), binary_architecture);
 	}
