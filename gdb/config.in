@@ -88,3 +88,6 @@
 
 /* Define if you have the dl library (-ldl).  */
 #undef HAVE_LIBDL
+
+/* Define if you have the Solaris thread_db library (/usr/lib/libthread_db.so.1).  */
+#undef HAVE_THREAD_DB_LIB

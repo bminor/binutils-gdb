@@ -76,5 +76,9 @@ extern char *sunpro_static_transform_name PARAMS ((char *));
 #define PIDGET(pid) ((pid) & 0xffff)
 #define TIDGET(pid) (((pid) >> 16) & 0xffff)
 
+#ifdef HAVE_THREAD_DB_LIB
+
 extern char *solaris_pid_to_str PARAMS ((int pid));
 #define target_pid_to_str(PID) solaris_pid_to_str (PID)
+
+#endif

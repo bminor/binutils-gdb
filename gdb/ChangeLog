@@ -1,3 +1,14 @@
+Mon May 13 23:53:30 1996  Stu Grossman  (grossman@critters.cygnus.com)
+
+	* Makefile.in config.in configure configure.in
+	config/sparc/nm-sun4sol2.h config/sparc/sun4sol2.mh
+	config/sparc/tm-sun4sol2.h:  Use autoconf to config Solaris thread
+	and pthread support, since pre-2.5 systems don't come with
+	libthread_db.so.1.
+
+	* procfs.c (info_proc):  Use int instead of id_t.  Old versions of
+	Irix don't see to define this.
+
 start-sanitize-gdbtk
 Mon May 13 13:43:25 1996  Fred Fish  <fnf@cygnus.com>
 

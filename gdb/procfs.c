@@ -3633,7 +3633,7 @@ info_proc (args, from_tty)
   int status = 0;
   int all = 0;
   int nlwp;
-  id_t *lwps;
+  int *lwps;
 
   old_chain = make_cleanup (null_cleanup, 0);
 
@@ -3745,7 +3745,7 @@ No process.  Start debugging a program or specify an explicit process ID.");
     }
 #else /* PIOCLWPIDS */
   nlwp = 1;
-  lwps = alloca ((2 * nlwp + 2) * sizeof (id_t));
+  lwps = alloca ((2 * nlwp + 2) * sizeof *lwps);
   lwps[0] = 0;
 #endif /* PIOCLWPIDS */
 
