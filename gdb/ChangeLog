@@ -1,3 +1,8 @@
+2001-08-21  Keith Seitz  <keiths@redhat.com>
+
+	* printcmd.c (print_insn): Use the given stream for
+	output.
+
 2001-07-24  Andrew Cagney  <ac131313@redhat.com>
 
 	* arm-tdep.c (convert_from_extended, convert_to_extended): Delete
