@@ -19,10 +19,12 @@ Wed Oct 16 12:19:51 1991  John Gilmore  (gnu at cygnus.com)
 
 Tue Oct 15 20:12:32 1991  Roland H. Pesch  (pesch at fowanton.cygnus.com)
 
-	* doc/refcard.tex (sec "Working Files"): consistent metavars, due
-	to François Pinard (pinard@iro.umontreal.ca)
+	* doc/refcard.tex (sec "Working Files"): consistent metavars and
+	other improvements, due to comments by François Pinard
+	(pinard@iro.umontreal.ca) 
 
-	* doc/gdb.texinfo (appendix "Installing GDB"): changes in configure.
+	* doc/gdb.texinfo (appendix "Installing GDB"): changes in
+	configure, and improvenets related to Pinard's refcard comments
 
 Tue Oct 15 08:45:12 1991  John Gilmore  (gnu at cygnus.com)
 
