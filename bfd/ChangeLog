@@ -1,3 +1,12 @@
+Mon Nov  6 14:34:07 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* xcofflink.c (xcoff_link_add_symbols): Set the alignment power of
+	the created .tc section to 2.
+	(xcoff_mark): Don't keep a .loader reloc for a call to an
+	undefined symbol when creating a shared library.
+	(xcoff_build_ldsyms): When creating a shared library, generate
+	global linkage code for a call to an undefined symbol.
+
 Sun Nov  5 21:44:13 1995  Ken Raeburn  <raeburn@cygnus.com>
 
 	* Makefile.in (CFILES): Rebuild list from BFD_LIBS, ALL_MACHINES,

@@ -939,6 +939,7 @@ xcoff_link_add_symbols (abfd, info)
 	goto error_return;
       xcoff_hash_table (info)->toc_section = tsec;
       tsec->flags |= SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS | SEC_IN_MEMORY;
+      tsec->alignment_power = 2;
     }
   /* Likewise for the .debug section.  */
   if (xcoff_hash_table (info)->debug_section == NULL)
@@ -2066,7 +2067,8 @@ xcoff_mark (info, sec)
 		      || h->root.type == bfd_link_hash_common
 		      || ((h->flags & XCOFF_CALLED) != 0
 			  && (h->flags & XCOFF_DEF_REGULAR) == 0
-			  && (h->flags & XCOFF_REF_DYNAMIC) != 0
+			  && ((h->flags & XCOFF_REF_DYNAMIC) != 0
+			      || info->shared)
 			  && (h->root.type == bfd_link_hash_undefined
 			      || h->root.type == bfd_link_hash_undefweak)
 			  && h->root.root.string[0] == '.'))
@@ -2734,13 +2736,15 @@ xcoff_build_ldsyms (h, p)
     h->flags |= XCOFF_MARK;
 
   /* If this symbol is called, and it is defined in a dynamic object,
-     then we need to set up global linkage code for it.  (Unless we
-     did garbage collection and we didn't need this symbol.)  */
+     or if we are creating a dynamic object and it is not defined at
+     all, then we need to set up global linkage code for it.  (Unless
+     we did garbage collection and we didn't need this symbol.)  */
   if ((h->flags & XCOFF_CALLED) != 0
       && (h->flags & XCOFF_DEF_REGULAR) == 0
-      && (h->flags & XCOFF_REF_DYNAMIC) != 0
       && (h->root.type == bfd_link_hash_undefined
 	  || h->root.type == bfd_link_hash_undefweak)
+      && ((h->flags & XCOFF_REF_DYNAMIC) != 0
+	  || ldinfo->info->shared)
       && h->root.root.string[0] == '.'
       && (! xcoff_hash_table (ldinfo->info)->gc
 	  || (h->flags & XCOFF_MARK) != 0))
@@ -2761,7 +2765,8 @@ xcoff_build_ldsyms (h, p)
       BFD_ASSERT ((hds->root.type == bfd_link_hash_undefined
 		   || hds->root.type == bfd_link_hash_undefweak)
 		  && (hds->flags & XCOFF_DEF_REGULAR) == 0
-		  && (hds->flags & XCOFF_REF_DYNAMIC) != 0);
+		  && ((hds->flags & XCOFF_REF_DYNAMIC) != 0
+		      || ldinfo->info->shared));
       hds->flags |= XCOFF_MARK;
       if (hds->toc_section == NULL)
 	{
