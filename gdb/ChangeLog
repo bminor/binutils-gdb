@@ -1,3 +1,11 @@
+1998-12-14  Anthony Thompson   (athompso@cambridge.arm.com)
+
+	* remote-rdp.c (rdp_init): Don't discard first character on reset.
+	(translate_open_mode): Define table.
+	(exec_swi): Handle SWI_Clock.  SWI_Open now handles stdin/stdout.
+	SWI_Write returns number of bytes not written.  SWI_Read does the
+	same.  SWI_Seek should return success/failure flag.  Fix SWI_Flen.
+
 1998-12-14  J.T. Conklin  <jtc@redbacknetworks.com>
 
 	* config/i386/nbsd.mh, config/m68k/nbsd.mh, config/ns32k/nbsd.mh

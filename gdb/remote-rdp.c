@@ -320,15 +320,16 @@ rdp_init (cold, tty)
 	    {
 	    case SERIAL_TIMEOUT:
 	      break;
+
 	    case RDP_RESET:
 	      while ((restype = SERIAL_READCHAR (io, 1)) == RDP_RESET)
 		;
-	      while ((restype = SERIAL_READCHAR (io, 1)) > 0)
+	      do
 		{
 		  printf_unfiltered ("%c", isgraph (restype) ? restype : ' ');
 		}
-	      while ((restype = SERIAL_READCHAR (io, 1)) > 0)
-		;
+	      while ((restype = SERIAL_READCHAR (io, 1)) > 0);
+
 	      if (tty)
 		{
 		  printf_unfiltered ("\nThe board has sent notification that it was reset.\n");
@@ -337,9 +338,12 @@ rdp_init (cold, tty)
 	      sleep (3);
 	      if (tty)
 		printf_unfiltered ("\nTrying again.\n");
+	      cold = 0;
 	      break;
+
 	    default:
 	      break;
+
 	    case RDP_RES_VALUE:
 	      {
 		int resval = SERIAL_READCHAR (io, 1);
@@ -807,6 +811,26 @@ argsin;
 #define SWI_GenerateError               0x71
 
 
+#ifndef O_BINARY
+#define O_BINARY 0
+#endif
+
+static int translate_open_mode[] =
+{
+  O_RDONLY,                          /* "r"   */
+  O_RDONLY+O_BINARY,                 /* "rb"  */
+  O_RDWR,                            /* "r+"  */
+  O_RDWR  +O_BINARY,                 /* "r+b" */
+  O_WRONLY         +O_CREAT+O_TRUNC, /* "w"   */
+  O_WRONLY+O_BINARY+O_CREAT+O_TRUNC, /* "wb"  */
+  O_RDWR           +O_CREAT+O_TRUNC, /* "w+"  */
+  O_RDWR  +O_BINARY+O_CREAT+O_TRUNC, /* "w+b" */
+  O_WRONLY         +O_APPEND+O_CREAT,/* "a"   */
+  O_WRONLY+O_BINARY+O_APPEND+O_CREAT,/* "ab"  */
+  O_RDWR           +O_APPEND+O_CREAT,/* "a+"  */
+  O_RDWR  +O_BINARY+O_APPEND+O_CREAT /* "a+b" */
+};
+
 static int
 exec_swi (swi, args)
      int swi;
@@ -836,31 +860,41 @@ exec_swi (swi, args)
     case SWI_Time:
       args->n = callback->time (callback, NULL);
       return 1;
+
+    case SWI_Clock :
+       /* return number of centi-seconds... */
+       args->n = 
+#ifdef CLOCKS_PER_SEC
+          (CLOCKS_PER_SEC >= 100)
+             ? (clock() / (CLOCKS_PER_SEC / 100))
+             : ((clock() * 100) / CLOCKS_PER_SEC) ;
+#else
+     /* presume unix... clock() returns microseconds */
+          clock() / 10000 ;
+#endif
+       return 1 ;
+
     case SWI_Remove:
       args->n = callback->unlink (callback, args->s);
       return 1;
     case SWI_Rename:
       args->n = callback->rename (callback, args[0].s, args[1].s);
       return 1;
+
     case SWI_Open:
-      i = 0;
+	/* Now we need to decode the Demon open mode */
+	i = translate_open_mode[args[1].n];
 
-#ifdef O_BINARY
-      if (args[1].n & 1)
-	i |= O_BINARY;
-#endif
-      if (args[1].n & 2)
-	i |= O_RDWR;
-
-      if (args[1].n & 4)
-	{
-	  i |= O_CREAT;
-	}
-
-      if (args[1].n & 8)
-	i |= O_APPEND;
-
-      args->n = callback->open (callback, args->s, i);
+	/* Filename ":tt" is special: it denotes stdin/out */
+	if (strcmp(args->s,":tt")==0)
+	  {
+	    if (i == O_RDONLY ) /* opening tty "r" */
+	      args->n = 0 /* stdin */ ;
+	    else 
+	      args->n = 1 /* stdout */ ;
+	  }
+	else
+	  args->n = callback->open (callback, args->s, i);
       return 1;
 
     case SWI_Close:
@@ -868,25 +902,30 @@ exec_swi (swi, args)
       return 1;
 
     case SWI_Write:
-      args->n = callback->write (callback, args[0].n, args[1].s, args[1].n);
+      /* Return the number of bytes *not* written */
+      args->n = args[1].n -
+	callback->write (callback, args[0].n, args[1].s, args[1].n);
       return 1;
+
     case SWI_Read:
       {
 	char *copy = alloca (args[2].n);
 	int done = callback->read (callback, args[0].n, copy, args[2].n);
 	if (done > 0)
-	  remote_rdp_xfer_inferior_memory (args[0].n, copy, done, 1, 0);
-	args->n -= done;
+	  remote_rdp_xfer_inferior_memory (args[1].n, copy, done, 1, 0);
+	args->n = args[2].n-done;
 	return 1;
       }
 
     case SWI_Seek:
-      args->n = callback->lseek (callback, args[0].n, args[1].n, 0) >= 0;
+      /* Return non-zero on failure */
+      args->n = callback->lseek (callback, args[0].n, args[1].n, 0) < 0;
       return 1;
+
     case SWI_Flen:
       {
-	long old = callback->lseek (callback, args->n, 1, 1);
-	args->n = callback->lseek (callback, args->n, 2, 0);
+	long old = callback->lseek (callback, args->n, 0, SEEK_CUR);
+	args->n = callback->lseek (callback, args->n, 0, SEEK_END);
 	callback->lseek (callback, args->n, old, 0);
 	return 1;
       }
