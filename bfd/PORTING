@@ -22,6 +22,7 @@ DEFAULT_VECTOR=<target>_vec
 SELECT_ARCHITECTURES=bfd_<cpu>_arch
 
 See the list of cpu types in archures.c, or "ls cpu-*.c".
+for more information about .mt and .mh files, see config/README.
 
 The file <target>.c is the hard part.  It implements the
 bfd_target <target>_vec, which includes pointers to
