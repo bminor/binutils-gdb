@@ -1,5 +1,9 @@
 Tue Mar 11 01:13:31 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/tc-mips.c (mips_fix_adjustable): Permit a reloc against a
+	mips16 symbol to be adjusted if a symbol is being subtracted from
+	it.
+
 	From Eric Youngdale <eric@andante.jic.com>:
 	* config/obj-elf.c (obj_elf_symver): Check for duplicate or
 	illegal symbol version names.
