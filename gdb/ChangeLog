@@ -1,3 +1,8 @@
+2004-12-26  Mark Kettenis  <kettenis@gnu.org>
+
+	* inftarg.c (child_xfer_partial): Remove code that handles
+	TARGET_OBJ_WCOOKIE.
+
 2004-12-25  Mark Kettenis  <kettenis@gnu.org>
 
 	* inftarg.c (child_create_inferior) [HPUXHPPA]: Remove code.

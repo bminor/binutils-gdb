@@ -559,13 +559,6 @@ child_xfer_partial (struct target_ops *ops, enum target_object object,
       return NATIVE_XFER_AUXV (ops, object, annex, readbuf, writebuf,
 			       offset, len);
 
-    case TARGET_OBJECT_WCOOKIE:
-#ifndef NATIVE_XFER_WCOOKIE
-#define NATIVE_XFER_WCOOKIE(OPS,OBJECT,ANNEX,WRITEBUF,READBUF,OFFSET,LEN) (-1)
-#endif
-      return NATIVE_XFER_WCOOKIE (ops, object, annex, readbuf, writebuf,
-				  offset, len);
-
     default:
       return -1;
     }
