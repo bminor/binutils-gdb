@@ -1,3 +1,7 @@
+Thu Jan 25 13:08:51 1996  Doug Evans (dje@cygnus.com)
+
+	* infrun.c (normal_stop): Fix test for shared library event.
+
 Thu Jan 25 03:26:38 1996  Doug Evans  <dje@charmed.cygnus.com>
 
 	* configure.in (sparc64-*-*): Add default host configuration.
