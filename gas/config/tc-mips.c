@@ -2224,7 +2224,10 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
 	      /* If the previous instruction had a fixup in mips16
                  mode, we can not swap.  This normally means that the
                  previous instruction was a 4 byte branch anyhow.  */
-	      || (mips_opts.mips16 && prev_insn_fixp))
+	      || (mips_opts.mips16 && prev_insn_fixp)
+	      /* If the previous instruction is a sync, sync.l, or 
+		 sync.p, we can not swap. */
+	      || (prev_pinfo && INSN_SYNC))
 	    {
 	      /* We could do even better for unconditional branches to
 		 portions of this object file; we could pick up the

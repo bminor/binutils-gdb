@@ -1,6 +1,11 @@
 start-sanitize-sky
 Wed Dec  9 17:06:48 1998  Doug Evans  <devans@canuck.cygnus.com>
 
+	Thu Nov 19 16:57:01 EST 1998  Frank Ch. Eigler <fche@cygnus.com>
+
+	* config/tc-mips.c (append_insn): Don't move INSN_SYNC
+	instructions into delay slot.
+
 	Tue Oct 13 14:06:18 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* config/tc-dvp.h (md_end): Define.
