@@ -1,3 +1,8 @@
+Tue May 19 17:36:08 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* mips-dis.c (print_mips16_insn_arg): Handle type ']' correctly
+	with a shift count of 0.
+
 start-sanitize-r5900
 Mon May 18 14:27:06 1998  Frank Ch. Eigler  <fche@cygnus.com>
 
