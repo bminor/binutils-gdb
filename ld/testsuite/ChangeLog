@@ -1,3 +1,8 @@
+1999-08-09  Jakub Jelinek  <jj@ultra.linux.cz>
+
+	* ld-elfvers/vers.exp: Run tests on sparc*-*-linux*.
+	* ld-shared/shared.exp: Likewise.
+
 1999-07-28  Nick Clifton  <nickc@cygnus.com>
 
 	* lib/ld-lib.exp (proc big_or_little_endian): New proc.

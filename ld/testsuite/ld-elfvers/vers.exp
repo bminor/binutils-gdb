@@ -35,7 +35,8 @@ if { ![istarget i?86-*-sysv4*] \
      && ![istarget powerpc-*-linux*] \
      && ![istarget powerpc-*-sysv4*] \
      && ![istarget sparc*-*-elf] \
-     && ![istarget sparc*-*-solaris2*]
+     && ![istarget sparc*-*-solaris2*] \
+     && ![istarget sparc*-*-linux*] \
      && ![istarget alpha*-*-linux*] } {
     return
 }
