@@ -2396,11 +2396,12 @@ set_fp_model_sfunc (char *args, int from_tty,
 }
 
 static void
-show_fp_model (char *args, int from_tty,
-	       struct cmd_list_element *c)
+show_fp_model (struct ui_file *file, int from_tty,
+	       struct cmd_list_element *c, const char *value)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
 
+  deprecated_show_value_hack (file, from_tty, c, value);
   if (arm_fp_model == ARM_FLOAT_AUTO 
       && gdbarch_bfd_arch_info (current_gdbarch)->arch == bfd_arch_arm)
     /* i18n: "the default [floating point model] for the current ABI..." */

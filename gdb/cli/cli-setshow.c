@@ -90,6 +90,28 @@ parse_binary_operation (char *arg)
     }
 }
 
+void
+deprecated_show_value_hack (struct ui_file *ignore_file,
+			    int ignore_from_tty,
+			    struct cmd_list_element *c,
+			    const char *value)
+{
+  /* Print doc minus "show" at start.  */
+  print_doc_line (gdb_stdout, c->doc + 5);
+  switch (c->var_type)
+    {
+    case var_string:
+    case var_string_noescape:
+    case var_filename:
+    case var_enum:
+      printf_filtered ((" is \"%s\".\n"), value);
+      break;
+    default:
+      printf_filtered ((" is %s.\n"), value);
+      break;
+    }
+}
+
 /* Do a "set" or "show" command.  ARG is NULL if no argument, or the text
    of the argument, and FROM_TTY is nonzero if this command is being entered
    directly by the user (i.e. these are just like any other
@@ -257,7 +279,6 @@ do_setshow_command (char *arg, int from_tty, struct cmd_list_element *c)
     {
       struct cleanup *old_chain;
       struct ui_stream *stb;
-      int quote;
 
       stb = ui_out_stream_new (uiout);
       old_chain = make_cleanup_ui_out_stream_delete (stb);
@@ -266,7 +287,6 @@ do_setshow_command (char *arg, int from_tty, struct cmd_list_element *c)
       if (c->pre_show_hook)
 	(c->pre_show_hook) (c);
 
-      quote = 0;
       switch (c->var_type)
 	{
 	case var_string:
@@ -275,7 +295,6 @@ do_setshow_command (char *arg, int from_tty, struct cmd_list_element *c)
 
 	    if (*(unsigned char **) c->var)
 	      fputstr_filtered (*(unsigned char **) c->var, '"', stb->stream);
-	    quote = 1;
 	  }
 	  break;
 	case var_string_noescape:
@@ -283,7 +302,6 @@ do_setshow_command (char *arg, int from_tty, struct cmd_list_element *c)
 	case var_enum:
 	  if (*(char **) c->var)
 	    fputs_filtered (*(char **) c->var, stb->stream);
-	  quote = 1;
 	  break;
 	case var_boolean:
 	  fputs_filtered (*(int *) c->var ? "on" : "off", stb->stream);
@@ -337,28 +355,15 @@ do_setshow_command (char *arg, int from_tty, struct cmd_list_element *c)
 
       if (ui_out_is_mi_like_p (uiout))
 	ui_out_field_stream (uiout, "value", stb);
-      else if (c->fprint_setshow != NULL)
+      else
 	{
 	  long length;
 	  char *value = ui_file_xstrdup (stb->stream, &length);
 	  make_cleanup (xfree, value);
-	  c->fprint_setshow (c, gdb_stdout, value);
-	  fprintf_filtered (gdb_stdout, "\n");
-	}
-      else
-	{
-	  /* Print doc minus "show" at start.  */
-	  print_doc_line (gdb_stdout, c->doc + 5);
-
-	  ui_out_text (uiout, " is ");
-	  ui_out_wrap_hint (uiout, "    ");
-	  if (quote)
-	    ui_out_text (uiout, "\"");
-	  ui_out_field_stream (uiout, "value", stb);
-	  if (quote)
-	    ui_out_text (uiout, "\"");
-	  ui_out_text (uiout, ".\n");
-	  do_cleanups (old_chain);
+	  if (c->show_value_func != NULL)
+	    c->show_value_func (gdb_stdout, from_tty, c, value);
+	  else
+	    deprecated_show_value_hack (gdb_stdout, from_tty, c, value);
 	}
       do_cleanups (old_chain);
     }

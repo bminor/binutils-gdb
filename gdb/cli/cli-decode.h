@@ -90,7 +90,7 @@ struct cmd_list_element
 
     /* For set/show commands.  A method for printing the output to the
        specified stream.  */
-    fprint_setshow_ftype *fprint_setshow;
+    show_value_ftype *show_value_func;
 
     /* flags : a bitfield 
        

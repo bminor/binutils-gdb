@@ -634,7 +634,7 @@ add_packet_config_cmd (struct packet_config *config,
 		       char *name,
 		       char *title,
 		       cmd_sfunc_ftype *set_func,
-		       cmd_sfunc_ftype *show_func,
+		       show_value_ftype *show_func,
 		       struct cmd_list_element **set_remote_list,
 		       struct cmd_list_element **show_remote_list,
 		       int legacy)
@@ -750,9 +750,11 @@ set_remote_protocol_vcont_packet_cmd (char *args, int from_tty,
 }
 
 static void
-show_remote_protocol_vcont_packet_cmd (char *args, int from_tty,
-				       struct cmd_list_element *c)
+show_remote_protocol_vcont_packet_cmd (struct ui_file *file, int from_tty,
+				       struct cmd_list_element *c,
+				       const char *value)
 {
+  deprecated_show_value_hack (file, from_tty, c, value);
   show_packet_config_cmd (&remote_protocol_vcont);
 }
 
@@ -767,9 +769,11 @@ set_remote_protocol_qSymbol_packet_cmd (char *args, int from_tty,
 }
 
 static void
-show_remote_protocol_qSymbol_packet_cmd (char *args, int from_tty,
-					 struct cmd_list_element *c)
+show_remote_protocol_qSymbol_packet_cmd (struct ui_file *file, int from_tty,
+					 struct cmd_list_element *c,
+					 const char *value)
 {
+  deprecated_show_value_hack (file, from_tty, c, value);
   show_packet_config_cmd (&remote_protocol_qSymbol);
 }
 
@@ -785,9 +789,11 @@ set_remote_protocol_P_packet_cmd (char *args, int from_tty,
 }
 
 static void
-show_remote_protocol_P_packet_cmd (char *args, int from_tty,
-				   struct cmd_list_element *c)
+show_remote_protocol_P_packet_cmd (struct ui_file *file, int from_tty,
+				   struct cmd_list_element *c,
+				   const char *value)
 {
+  deprecated_show_value_hack (file, from_tty, c, value);
   show_packet_config_cmd (&remote_protocol_P);
 }
 
@@ -816,9 +822,11 @@ set_remote_protocol_Z_software_bp_packet_cmd (char *args, int from_tty,
 }
 
 static void
-show_remote_protocol_Z_software_bp_packet_cmd (char *args, int from_tty,
-					       struct cmd_list_element *c)
+show_remote_protocol_Z_software_bp_packet_cmd (struct ui_file *file, int from_tty,
+					       struct cmd_list_element *c,
+					       const char *value)
 {
+  deprecated_show_value_hack (file, from_tty, c, value);
   show_packet_config_cmd (&remote_protocol_Z[Z_PACKET_SOFTWARE_BP]);
 }
 
@@ -830,9 +838,11 @@ set_remote_protocol_Z_hardware_bp_packet_cmd (char *args, int from_tty,
 }
 
 static void
-show_remote_protocol_Z_hardware_bp_packet_cmd (char *args, int from_tty,
-					       struct cmd_list_element *c)
+show_remote_protocol_Z_hardware_bp_packet_cmd (struct ui_file *file, int from_tty,
+					       struct cmd_list_element *c,
+					       const char *value)
 {
+  deprecated_show_value_hack (file, from_tty, c, value);
   show_packet_config_cmd (&remote_protocol_Z[Z_PACKET_HARDWARE_BP]);
 }
 
@@ -844,9 +854,11 @@ set_remote_protocol_Z_write_wp_packet_cmd (char *args, int from_tty,
 }
 
 static void
-show_remote_protocol_Z_write_wp_packet_cmd (char *args, int from_tty,
-					    struct cmd_list_element *c)
+show_remote_protocol_Z_write_wp_packet_cmd (struct ui_file *file, int from_tty,
+					    struct cmd_list_element *c,
+					    const char *value)
 {
+  deprecated_show_value_hack (file, from_tty, c, value);
   show_packet_config_cmd (&remote_protocol_Z[Z_PACKET_WRITE_WP]);
 }
 
@@ -858,9 +870,11 @@ set_remote_protocol_Z_read_wp_packet_cmd (char *args, int from_tty,
 }
 
 static void
-show_remote_protocol_Z_read_wp_packet_cmd (char *args, int from_tty,
-					   struct cmd_list_element *c)
+show_remote_protocol_Z_read_wp_packet_cmd (struct ui_file *file, int from_tty,
+					   struct cmd_list_element *c,
+					   const char *value)
 {
+  deprecated_show_value_hack (file, from_tty, c, value);
   show_packet_config_cmd (&remote_protocol_Z[Z_PACKET_READ_WP]);
 }
 
@@ -872,9 +886,11 @@ set_remote_protocol_Z_access_wp_packet_cmd (char *args, int from_tty,
 }
 
 static void
-show_remote_protocol_Z_access_wp_packet_cmd (char *args, int from_tty,
-					     struct cmd_list_element *c)
+show_remote_protocol_Z_access_wp_packet_cmd (struct ui_file *file, int from_tty,
+					     struct cmd_list_element *c,
+					     const char *value)
 {
+  deprecated_show_value_hack (file, from_tty, c, value);
   show_packet_config_cmd (&remote_protocol_Z[Z_PACKET_ACCESS_WP]);
 }
 
@@ -896,8 +912,9 @@ set_remote_protocol_Z_packet_cmd (char *args, int from_tty,
 }
 
 static void
-show_remote_protocol_Z_packet_cmd (char *args, int from_tty,
-				   struct cmd_list_element *c)
+show_remote_protocol_Z_packet_cmd (struct ui_file *file, int from_tty,
+				   struct cmd_list_element *c,
+				   const char *value)
 {
   int i;
   for (i = 0; i < NR_Z_PACKET_TYPES; i++)
@@ -938,9 +955,11 @@ set_remote_protocol_binary_download_cmd (char *args,
 }
 
 static void
-show_remote_protocol_binary_download_cmd (char *args, int from_tty,
-					  struct cmd_list_element *c)
+show_remote_protocol_binary_download_cmd (struct ui_file *file, int from_tty,
+					  struct cmd_list_element *c,
+					  const char *value)
 {
+  deprecated_show_value_hack (file, from_tty, c, value);
   show_packet_config_cmd (&remote_protocol_binary_download);
 }
 
@@ -955,9 +974,11 @@ set_remote_protocol_qPart_auxv_packet_cmd (char *args, int from_tty,
 }
 
 static void
-show_remote_protocol_qPart_auxv_packet_cmd (char *args, int from_tty,
-					    struct cmd_list_element *c)
+show_remote_protocol_qPart_auxv_packet_cmd (struct ui_file *file, int from_tty,
+					    struct cmd_list_element *c,
+					    const char *value)
 {
+  deprecated_show_value_hack (file, from_tty, c, value);
   show_packet_config_cmd (&remote_protocol_qPart_auxv);
 }
 
@@ -971,9 +992,11 @@ set_remote_protocol_p_packet_cmd (char *args, int from_tty,
 }
 
 static void
-show_remote_protocol_p_packet_cmd (char *args, int from_tty,
-				   struct cmd_list_element *c)
+show_remote_protocol_p_packet_cmd (struct ui_file *file, int from_tty,
+				   struct cmd_list_element *c,
+				   const char *value)
 {
+  deprecated_show_value_hack (file, from_tty, c, value);
   show_packet_config_cmd (&remote_protocol_p);
 }
 
@@ -5500,13 +5523,13 @@ show_remote_cmd (char *args, int from_tty)
 {
   /* FIXME: cagney/2002-06-15: This function should iterate over
      remote_show_cmdlist for a list of sub commands to show.  */
-  show_remote_protocol_Z_packet_cmd (args, from_tty, NULL);
-  show_remote_protocol_P_packet_cmd (args, from_tty, NULL);
-  show_remote_protocol_p_packet_cmd (args, from_tty, NULL);
-  show_remote_protocol_qSymbol_packet_cmd (args, from_tty, NULL);
-  show_remote_protocol_vcont_packet_cmd (args, from_tty, NULL);
-  show_remote_protocol_binary_download_cmd (args, from_tty, NULL);
-  show_remote_protocol_qPart_auxv_packet_cmd (args, from_tty, NULL);
+  show_remote_protocol_Z_packet_cmd (gdb_stdout, from_tty, NULL, NULL);
+  show_remote_protocol_P_packet_cmd (gdb_stdout, from_tty, NULL, NULL);
+  show_remote_protocol_p_packet_cmd (gdb_stdout, from_tty, NULL, NULL);
+  show_remote_protocol_qSymbol_packet_cmd (gdb_stdout, from_tty, NULL, NULL);
+  show_remote_protocol_vcont_packet_cmd (gdb_stdout, from_tty, NULL, NULL);
+  show_remote_protocol_binary_download_cmd (gdb_stdout, from_tty, NULL, NULL);
+  show_remote_protocol_qPart_auxv_packet_cmd (gdb_stdout, from_tty, NULL, NULL);
 }
 
 static void

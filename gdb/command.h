@@ -230,6 +230,17 @@ typedef void (fprint_setshow_ftype) (struct cmd_list_element *cmd,
 				     struct ui_file *file,
 				     const char *value);
 
+/* Method for show a set/show variable's VALUE on FILE.  If this
+   method isn't supplied deprecated_show_value_hack() is called (which
+   is not good).  */
+typedef void (show_value_ftype) (struct ui_file *file,
+				 int from_tty,
+				 struct cmd_list_element *cmd,
+				 const char *value);
+/* NOTE: i18n: This function is not i18n friendly.  Callers should
+   instead print the value out directly.  */
+extern show_value_ftype deprecated_show_value_hack;
+
 extern void add_setshow_enum_cmd (char *name,
 				  enum command_class class,
 				  const char *enumlist[],
@@ -239,7 +250,7 @@ extern void add_setshow_enum_cmd (char *name,
 				  const char *help_doc,
 				  fprint_setshow_ftype *fprint_setshow,
 				  cmd_sfunc_ftype *set_func,
-				  cmd_sfunc_ftype *show_func,
+				  show_value_ftype *show_func,
 				  struct cmd_list_element **set_list,
 				  struct cmd_list_element **show_list);
 
@@ -251,7 +262,7 @@ extern void add_setshow_auto_boolean_cmd (char *name,
 					  const char *help_doc,
 					  fprint_setshow_ftype *fprint_setshow,
 					  cmd_sfunc_ftype *set_func,
-					  cmd_sfunc_ftype *show_func,
+					  show_value_ftype *show_func,
 					  struct cmd_list_element **set_list,
 					  struct cmd_list_element **show_list);
 
@@ -261,7 +272,7 @@ extern void add_setshow_boolean_cmd (char *name,
 				     const char *set_doc, const char *show_doc,
 				     const char *help_doc, fprint_setshow_ftype *fprint_setshow,
 				     cmd_sfunc_ftype *set_func,
-				     cmd_sfunc_ftype *show_func,
+				     show_value_ftype *show_func,
 				     struct cmd_list_element **set_list,
 				     struct cmd_list_element **show_list);
 
@@ -273,7 +284,7 @@ extern void add_setshow_filename_cmd (char *name,
 				      const char *help_doc,
 				      fprint_setshow_ftype *fprint_setshow,
 				      cmd_sfunc_ftype *set_func,
-				      cmd_sfunc_ftype *show_func,
+				      show_value_ftype *show_func,
 				      struct cmd_list_element **set_list,
 				      struct cmd_list_element **show_list);
 
@@ -285,7 +296,7 @@ extern void add_setshow_string_cmd (char *name,
 				    const char *help_doc,
 				    fprint_setshow_ftype *fprint_setshow,
 				    cmd_sfunc_ftype *set_func,
-				    cmd_sfunc_ftype *show_func,
+				    show_value_ftype *show_func,
 				    struct cmd_list_element **set_list,
 				    struct cmd_list_element **show_list);
 
@@ -297,7 +308,7 @@ extern void add_setshow_uinteger_cmd (char *name,
 				      const char *help_doc,
 				      fprint_setshow_ftype *fprint_setshow,
 				      cmd_sfunc_ftype *set_func,
-				      cmd_sfunc_ftype *show_func,
+				      show_value_ftype *show_func,
 				      struct cmd_list_element **set_list,
 				      struct cmd_list_element **show_list);
 
@@ -309,7 +320,7 @@ extern void add_setshow_zinteger_cmd (char *name,
 				      const char *help_doc,
 				      fprint_setshow_ftype *fprint_setshow,
 				      cmd_sfunc_ftype *set_func,
-				      cmd_sfunc_ftype *show_func,
+				      show_value_ftype *show_func,
 				      struct cmd_list_element **set_list,
 				      struct cmd_list_element **show_list);
 

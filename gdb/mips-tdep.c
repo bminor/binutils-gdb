@@ -761,9 +761,12 @@ mips_mask_address_p (struct gdbarch_tdep *tdep)
 }
 
 static void
-show_mask_address (char *cmd, int from_tty, struct cmd_list_element *c)
+show_mask_address (struct ui_file *file, int from_tty,
+		   struct cmd_list_element *c, const char *value)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+
+  deprecated_show_value_hack (file, from_tty, c, value);
   switch (mask_address_var)
     {
     case AUTO_BOOLEAN_TRUE:
@@ -5266,7 +5269,8 @@ Show zeroing of upper 32 bits of 64-bit addresses."), _("\
 Use \"on\" to enable the masking, \"off\" to disable it and \"auto\" to \n\
 allow GDB to determine the correct value."),
 				NULL, /* FIXME: i18n: Zerroing of upper 32 bits of 64-bit address is %s.  */
-				NULL, show_mask_address, &setmipscmdlist, &showmipscmdlist);
+				NULL, show_mask_address,
+				&setmipscmdlist, &showmipscmdlist);
 
   /* Allow the user to control the size of 32 bit registers within the
      raw remote packet.  */
