@@ -4323,9 +4323,20 @@ pa_callinfo (unused)
 	  *p = c;
 	  last_call_info->ci_unwind.descriptor.hpux_interrupt_marker = 1;
 	}
+      /* Is this a millicode routine.  "millicode" isn't in my
+	 assembler manual, but my copy is old.  The HP assembler
+	 accepts it, and there's a place in the unwind descriptor
+	 to drop the information, so we'll accept it too.  */
+      else if ((strncasecmp (name, "millicode", 9) == 0))
+	{
+	  p = input_line_pointer;
+	  *p = c;
+	  last_call_info->ci_unwind.descriptor.millicode = 1;
+	}
       else
 	{
 	  as_bad ("Invalid .CALLINFO argument: %s", name);
+	  *input_line_pointer = c;
 	}
       if (!is_end_of_statement ())
 	input_line_pointer++;
@@ -4478,7 +4489,7 @@ pa_equ (reg)
   if (label_symbol)
     {
       symbol = label_symbol->lss_label;
-      S_SET_VALUE (symbol, (unsigned int) get_absolute_expression ());
+      S_SET_VALUE (symbol, pa_parse_number (&input_line_pointer, 0));
       S_SET_SEGMENT (symbol, &bfd_abs_section);
     }
   else
