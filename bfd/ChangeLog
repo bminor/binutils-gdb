@@ -1,3 +1,17 @@
+Thu Mar  2 14:37:57 1995  Bryan Ford  <baford@cs.utah.edu>
+
+	* binary.c: Add support for reading binary files.  Loads the raw
+	contents of the file into a data section and wraps some symbols
+	around it.  The symbols `_binary_<filename>_start' and
+	`_binary_<filename>_end' indicate the start and end of the data,
+	while `_binary_<filename>_size' is an absolute symbol whose value
+	is the size of the data.  <filename> is the name of the binary
+	input file, with all non-alphanumeric characters converted to
+	underscores.
+
+	* archures.c (bfd_arch_get_compatible): Assume users knows what
+	they're doing if one of the architectures is bfd_arch_unknown.
+
 Wed Mar  1 17:30:46 1995  Michael Meissner  <meissner@cygnus.com>
 
 	* elf32-ppc.c (elf_powerpc_howto_table): For relocation
