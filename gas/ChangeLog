@@ -1,3 +1,13 @@
+Fri Aug 31 12:05:13 2001  J"orn Rennecke <amylaar@redhat.com>
+			  Jeff Law <law@redhat.com>
+
+	* tc-h8300.c (relocation mappings): Remove.  Moved to tc-h8300.h.
+	(build_bytes): Mark fixups for PCrel branches as signed.  For
+	OBJ_ELF, make sure the reloc's offset points to the first byte
+	to be modified.
+	(md_convert_frag): Update definiton based on BFD_ASSEMBLER.
+	* tc-h8300.h (relocation mappings): Add.
+
 Thu Aug 30 12:05:13 2001  J"orn Rennecke <amylaar@redhat.com>
 
 	* tc-h8300.c (tc_crawl_symbol_chain, tc_headers_hook): Don't

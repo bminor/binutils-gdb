@@ -32,18 +32,6 @@
 
 #ifdef OBJ_ELF
 #include "elf/h8.h"
-
-#define R_MOV24B1 BFD_RELOC_H8_DIR24A8
-#define R_MOVL1 BFD_RELOC_H8_DIR32A16
-#define R_MOV24B1 BFD_RELOC_H8_DIR24A8
-#define R_MOVL1 BFD_RELOC_H8_DIR32A16
-#define R_RELLONG BFD_RELOC_32
-#define R_MOV16B1 BFD_RELOC_H8_DIR16A8
-#define R_RELWORD BFD_RELOC_16
-#define R_RELBYTE BFD_RELOC_8
-#define R_PCRWORD BFD_RELOC_16_PCREL
-#define R_PCRBYTE BFD_RELOC_8_PCREL
-#define R_JMPL1 BFD_RELOC_H8_DIR24R8
 #endif
 
 const char comment_chars[] = ";";
@@ -1110,6 +1098,7 @@ build_bytes (this_try, operand)
 	  int where = size16 ? 2 : 1;
 	  int size = size16 ? 2 : 1;
 	  int type = size16 ? R_PCRWORD : R_PCRBYTE;
+	  fixS *fixP;
 
 	  check_operand (operand + i, size16 ? 0x7fff : 0x7f, "@");
 
@@ -1119,16 +1108,25 @@ build_bytes (this_try, operand)
 		       (unsigned long) operand->exp.X_add_number);
 	    }
 
+#ifndef OBJ_ELF
+	  /* The COFF port has always been off by one, changing it
+	     now would be an incompatible change, so we leave it as-is.
+
+	     We don't want to do this for ELF as we want to be
+	     compatible with the proposed ELF format from Hitachi.  */
 	  operand[i].exp.X_add_number -= 1;
+#endif
+
 	  operand[i].exp.X_add_number =
 	    ((operand[i].exp.X_add_number & 0xff) ^ 0x80) - 0x80;
 
-	  fix_new_exp (frag_now,
-		       output - frag_now->fr_literal + where,
-		       size,
-		       &operand[i].exp,
-		       1,
-		       type);
+	  fixP = fix_new_exp (frag_now,
+			      output - frag_now->fr_literal + where,
+			      size,
+			      &operand[i].exp,
+			      1,
+			      type);
+	  fixP->fx_signed = 1;
 	}
       else if (x & MEMIND)
 	{
@@ -1448,7 +1446,11 @@ tc_aout_fix_to_chars ()
 
 void
 md_convert_frag (headers, seg, fragP)
+#ifdef BFD_ASSEMBLER
+     bfd *headers ATTRIBUTE_UNUSED;
+#else
      object_headers *headers ATTRIBUTE_UNUSED;
+#endif
      segT seg ATTRIBUTE_UNUSED;
      fragS *fragP ATTRIBUTE_UNUSED;
 {
