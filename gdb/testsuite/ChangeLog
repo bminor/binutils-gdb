@@ -1,6 +1,7 @@
 2003-09-11  Elena Zannoni  <ezannoni@redhat.com>
 
         * gdb.base/relocate.exp: Handle new gdb output at startup.
+	* gdb.stabs/weird.exp: Ditto.
 
 2003-09-08  Michael Chastain  <mec@shout.net>
 
