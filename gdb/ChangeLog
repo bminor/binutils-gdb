@@ -1,5 +1,7 @@
 2004-05-29  Mark Kettenis  <kettenis@gnu.org>
 
+	* MAINTAINERS: Undelete m88k.  Add myself as maintainer.
+
 	* amd64obsd-tdep.c (amd64obsd_sigtramp_p): Adjust for new
 	assembler in OpenBSD 3.5-current.
 	(amd64obsd_sigcontext_addr): Likewise.
