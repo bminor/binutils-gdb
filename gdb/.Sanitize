@@ -250,6 +250,7 @@ mips-tdep.c
 mipsm3-nat.c
 mipsv4-nat.c
 mipsread.c
+mon960-rom.c
 monitor.h
 monitor.c
 mpw-config.in

@@ -22,8 +22,10 @@ Do-first:
 Things-to-keep:
 
 nindy960.mt
+mon960.mt
 tm-i960.h
 tm-nindy960.h
+tm-mon960.h
 tm-vx960.h
 vxworks960.mt
 
