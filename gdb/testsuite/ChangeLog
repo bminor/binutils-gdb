@@ -1,5 +1,9 @@
 2004-07-13  Andrew Cagney  <cagney@gnu.org>
 
+	* gdb.base/step-test.exp: Update copyright.  Use
+	gdb_test_multiple.  Ensure that test names do not include
+	architecture dependent output.
+
 	* gdb.gdb/observer.exp: Update copyright.
 	(setup_test): Use gdb_test_multiple.
 	(attach_first_observer, attach_second_observer)
