@@ -338,6 +338,7 @@ cplus_print_value (type, valaddr, stream, format, recurse, pretty, dont_print)
     {
       char *baddr;
       int err;
+      char *basename = TYPE_NAME (TYPE_BASECLASS (type, i));
 
       if (BASETYPE_VIA_VIRTUAL (type, i))
 	{
@@ -357,8 +358,8 @@ cplus_print_value (type, valaddr, stream, format, recurse, pretty, dont_print)
       /* Fix to use baseclass_offset instead. FIXME */
       baddr = baseclass_addr (type, i, valaddr, 0, &err);
       if (err == 0 && baddr == 0)
-	error ("could not find virtual baseclass `%s'\n",
-	       type_name_no_tag (TYPE_BASECLASS (type, i)));
+	error ("could not find virtual baseclass %s\n",
+	       basename ? basename : "");
 
       if (pretty)
 	{
@@ -366,7 +367,9 @@ cplus_print_value (type, valaddr, stream, format, recurse, pretty, dont_print)
 	  print_spaces_filtered (2 * recurse, stream);
 	}
       fputs_filtered ("<", stream);
-      fputs_filtered (type_name_no_tag (TYPE_BASECLASS (type, i)), stream);
+      /* Not sure what the best notation is in the case where there is no
+	 baseclass name.  */
+      fputs_filtered (basename ? basename : "", stream);
       fputs_filtered ("> = ", stream);
       if (err != 0)
 	fprintf_filtered (stream, "<invalid address 0x%x>", baddr);

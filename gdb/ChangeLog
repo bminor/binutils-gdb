@@ -1,5 +1,11 @@
 Thu Jul 29 12:09:46 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* cp-valprint.c (cplus_print_value): Don't dump core if the
+	baseclass doesn't have a name.
+	* values.c (vb_match): New function, which finds the virtual
+	base class pointer even if the types are nameless.
+	(baseclass_{addr,offset}): Use it.
+
 	* hppa-tdep.c: Make "maintenance print unwind" command from old
 	"unwind" command.
 

@@ -991,6 +991,56 @@ value_from_vtable_info (arg, type)
   return value_headof (arg, 0, type);
 }
 
+/* Return true if the INDEXth field of TYPE is a virtual baseclass
+   pointer which is for the base class whose type is BASECLASS.  */
+
+static int
+vb_match (type, index, basetype)
+     struct type *type;
+     int index;
+     struct type *basetype;
+{
+  struct type *fieldtype;
+  struct type *fieldtype_target_type;
+  char *name = TYPE_FIELD_NAME (type, index);
+  char *field_class_name = NULL;
+
+  if (*name != '_')
+    return 0;
+  /* gcc 2.4 uses _vb$.  */
+  if (name[1] == 'v' && name[2] == 'b' && name[3] == CPLUS_MARKER)
+    field_class_name = name + 4;
+  /* gcc 2.5 will use __vb_.  */
+  if (name[1] == '_' && name[2] == 'v' && name[3] == 'b' && name[4] == '_')
+    field_class_name = name + 5;
+
+  if (field_class_name == NULL)
+    /* This field is not a virtual base class pointer.  */
+    return 0;
+
+  /* It's a virtual baseclass pointer, now we just need to find out whether
+     it is for this baseclass.  */
+  fieldtype = TYPE_FIELD_TYPE (type, index);
+  if (fieldtype == NULL
+      || TYPE_CODE (fieldtype) != TYPE_CODE_PTR)
+    /* "Can't happen".  */
+    return 0;
+
+  /* What we check for is that either the types are equal (needed for
+     nameless types) or have the same name.  This is ugly, and a more
+     elegant solution should be devised (which would probably just push
+     the ugliness into symbol reading unless we change the stabs format).  */
+  if (TYPE_TARGET_TYPE (fieldtype) == basetype)
+    return 1;
+
+  if (TYPE_NAME (basetype) != NULL
+      && TYPE_NAME (TYPE_TARGET_TYPE (fieldtype)) != NULL
+      && STREQ (TYPE_NAME (basetype),
+		TYPE_NAME (TYPE_TARGET_TYPE (fieldtype))))
+    return 1;
+  return 0;
+}
+
 /* Compute the offset of the baseclass which is
    the INDEXth baseclass of class TYPE, for a value ARG,
    wih extra offset of OFFSET.
@@ -1013,15 +1063,12 @@ baseclass_offset (type, index, arg, offset)
       /* Must hunt for the pointer to this virtual baseclass.  */
       register int i, len = TYPE_NFIELDS (type);
       register int n_baseclasses = TYPE_N_BASECLASSES (type);
-      char *vbase_name, *type_name = type_name_no_tag (basetype);
 
-      vbase_name = (char *)alloca (strlen (type_name) + 8);
-      sprintf (vbase_name, "_vb%c%s", CPLUS_MARKER, type_name);
       /* First look for the virtual baseclass pointer
 	 in the fields.  */
       for (i = n_baseclasses; i < len; i++)
 	{
-	  if (STREQ (vbase_name, TYPE_FIELD_NAME (type, i)))
+	  if (vb_match (type, i, basetype))
 	    {
 	      CORE_ADDR addr
 		= unpack_pointer (TYPE_FIELD_TYPE (type, i),
@@ -1081,15 +1128,12 @@ baseclass_addr (type, index, valaddr, valuep, errp)
       /* Must hunt for the pointer to this virtual baseclass.  */
       register int i, len = TYPE_NFIELDS (type);
       register int n_baseclasses = TYPE_N_BASECLASSES (type);
-      char *vbase_name, *type_name = type_name_no_tag (basetype);
 
-      vbase_name = (char *)alloca (strlen (type_name) + 8);
-      sprintf (vbase_name, "_vb%c%s", CPLUS_MARKER, type_name);
       /* First look for the virtual baseclass pointer
 	 in the fields.  */
       for (i = n_baseclasses; i < len; i++)
 	{
-	  if (STREQ (vbase_name, TYPE_FIELD_NAME (type, i)))
+	  if (vb_match (type, i, basetype))
 	    {
 	      value val = allocate_value (basetype);
 	      CORE_ADDR addr;
