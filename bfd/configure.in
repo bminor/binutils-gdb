@@ -515,6 +515,17 @@ do
     # This list is alphabetized to make it easy to compare
     # with the two vector lists in targets.c.  For the same reason,
     # use one entry per line, even though this leads to long lines.
+    # FIXME: We include cofflink.lo not because it's needed for
+    # bfd_elf32_sh64[l]_vec, but because we include bfd_elf32_sh[l]_vec
+    # which needs it but does not list it.  Should be fixed in right place.
+    bfd_elf32_sh64_vec)		tb="$tb elf32-sh64.lo elf32.lo $elf cofflink.lo"
+				target_size=64 ;;
+    bfd_elf32_sh64l_vec)	tb="$tb elf32-sh64.lo elf32.lo $elf cofflink.lo"
+				target_size=64 ;;
+    bfd_elf64_sh64_vec)		tb="$tb elf64-sh64.lo elf64.lo $elf"
+				target_size=64 ;;
+    bfd_elf64_sh64l_vec)	tb="$tb elf64-sh64.lo elf64.lo $elf"
+				target_size=64 ;;
     a29kcoff_big_vec)		tb="$tb coff-a29k.lo cofflink.lo" ;;
     a_out_adobe_vec)		tb="$tb aout-adobe.lo aout32.lo" ;;
     aout0_big_vec)		tb="$tb aout0.lo aout32.lo" ;;

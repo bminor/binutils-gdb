@@ -58,6 +58,9 @@ compatible (a,b)
 #define SH3_DSP_NEXT &arch_info_struct[4]
 #define SH3E_NEXT    &arch_info_struct[5]
 #define SH4_NEXT     NULL
+#undef  SH4_NEXT
+#define SH4_NEXT     &arch_info_struct[6]
+#define SH64_NEXT    NULL
 
 static const bfd_arch_info_type arch_info_struct[] =
 {
@@ -144,6 +147,20 @@ static const bfd_arch_info_type arch_info_struct[] =
     bfd_default_compatible,
     scan_mach,
     SH4_NEXT
+  },
+  {
+    64,				/* 64 bits in a word */
+    64,				/* 64 bits in an address */
+    8,				/* 8 bits in a byte */
+    bfd_arch_sh,
+    bfd_mach_sh5,
+    "sh",			/* arch_name  */
+    "sh5",			/* printable name */
+    1,
+    false,			/* not the default */
+    bfd_default_compatible,
+    scan_mach,
+    SH64_NEXT
   },
 };
 

@@ -1,5 +1,5 @@
 /* Hitachi SH specific support for 32-bit ELF
-   Copyright 1996, 1997, 1998, 1999, 2000, 2001
+   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002
    Free Software Foundation, Inc.
    Contributed by Ian Lance Taylor, Cygnus Support.
 
@@ -492,6 +492,114 @@ static reloc_howto_type sh_elf_howto_table[] =
   EMPTY_HOWTO (42),
   EMPTY_HOWTO (43),
   EMPTY_HOWTO (44),
+
+#ifdef INCLUDE_SHMEDIA
+  /* Used in SHLLI.L and SHLRI.L.  */
+  HOWTO (R_SH_DIR5U,		/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 5,			/* bitsize */
+	 false,			/* pc_relative */
+	 10,			/* bitpos */
+	 complain_overflow_unsigned, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_SH_DIR5U",		/* name */
+	 false,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0xfc00,		/* dst_mask */
+	 false),	       	/* pcrel_offset */
+
+  /* Used in SHARI, SHLLI et al.  */
+  HOWTO (R_SH_DIR6U,		/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 6,			/* bitsize */
+	 false,			/* pc_relative */
+	 10,			/* bitpos */
+	 complain_overflow_unsigned, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_SH_DIR6U",		/* name */
+	 false,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0xfc00,		/* dst_mask */
+	 false),	       	/* pcrel_offset */
+
+  /* Used in BxxI, LDHI.L et al.  */
+  HOWTO (R_SH_DIR6S,		/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 6,			/* bitsize */
+	 false,			/* pc_relative */
+	 10,			/* bitpos */
+	 complain_overflow_signed, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_SH_DIR6S",		/* name */
+	 false,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0xfc00,		/* dst_mask */
+	 false),	       	/* pcrel_offset */
+
+  /* Used in ADDI, ANDI et al.  */
+  HOWTO (R_SH_DIR10S,		/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 10,			/* bitsize */
+	 false,			/* pc_relative */
+	 10,			/* bitpos */
+	 complain_overflow_signed, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_SH_DIR10S",		/* name */
+	 false,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0xffc00,		/* dst_mask */
+	 false),	       	/* pcrel_offset */
+
+  /* Used in LD.UW, ST.W et al.  */
+  HOWTO (R_SH_DIR10SW,	/* type */
+	 1,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 11,			/* bitsize */
+	 false,			/* pc_relative */
+	 10,			/* bitpos */
+	 complain_overflow_signed, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_SH_DIR10SW",	/* name */
+	 false,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0xffc00,		/* dst_mask */
+	 false),	       	/* pcrel_offset */
+
+  /* Used in LD.L, FLD.S et al.  */
+  HOWTO (R_SH_DIR10SL,	/* type */
+	 2,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 12,			/* bitsize */
+	 false,			/* pc_relative */
+	 10,			/* bitpos */
+	 complain_overflow_signed, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_SH_DIR10SL",	/* name */
+	 false,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0xffc00,		/* dst_mask */
+	 false),	       	/* pcrel_offset */
+
+  /* Used in FLD.D, FST.P et al.  */
+  HOWTO (R_SH_DIR10SQ,	/* type */
+	 3,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 13,			/* bitsize */
+	 false,			/* pc_relative */
+	 10,			/* bitpos */
+	 complain_overflow_signed, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_SH_DIR10SQ",	/* name */
+	 false,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0xffc00,		/* dst_mask */
+	 false),	       	/* pcrel_offset */
+
+#else
   EMPTY_HOWTO (45),
   EMPTY_HOWTO (46),
   EMPTY_HOWTO (47),
@@ -499,6 +607,8 @@ static reloc_howto_type sh_elf_howto_table[] =
   EMPTY_HOWTO (49),
   EMPTY_HOWTO (50),
   EMPTY_HOWTO (51),
+#endif
+
   EMPTY_HOWTO (52),
   EMPTY_HOWTO (53),
   EMPTY_HOWTO (54),
@@ -720,6 +830,704 @@ static reloc_howto_type sh_elf_howto_table[] =
 	 0xffffffff,		/* dst_mask */
 	 true),			/* pcrel_offset */
 
+  HOWTO (R_SH_GOTPLT32,		/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 32,			/* bitsize */
+	 false,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_bitfield, /* complain_on_overflow */
+	 bfd_elf_generic_reloc, /* */
+	 "R_SH_GOTPLT32",	/* name */
+	 false,			/* partial_inplace */
+	 0xffffffff,		/* src_mask */
+	 0xffffffff,		/* dst_mask */
+	 false),		/* pcrel_offset */
+
+#ifdef INCLUDE_SHMEDIA
+  /* Used in MOVI and SHORI (x & 65536).  */
+  HOWTO (R_SH_GOT_LOW16,	/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 64,			/* bitsize */
+	 false,			/* pc_relative */
+	 10,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_SH_GOT_LOW16",    	/* name */
+	 false,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0x3fffc00,		/* dst_mask */
+	 false),	       	/* pcrel_offset */
+
+  /* Used in MOVI and SHORI ((x >> 16) & 65536).  */
+  HOWTO (R_SH_GOT_MEDLOW16,	/* type */
+	 16,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 64,			/* bitsize */
+	 false,			/* pc_relative */
+	 10,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_SH_GOT_MEDLOW16",	/* name */
+	 false,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0x3fffc00,		/* dst_mask */
+	 false),	       	/* pcrel_offset */
+
+  /* Used in MOVI and SHORI ((x >> 32) & 65536).  */
+  HOWTO (R_SH_GOT_MEDHI16,	/* type */
+	 32,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 64,			/* bitsize */
+	 false,			/* pc_relative */
+	 10,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_SH_GOT_MEDHI16",	/* name */
+	 false,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0x3fffc00,		/* dst_mask */
+	 false),	       	/* pcrel_offset */
+
+  /* Used in MOVI and SHORI ((x >> 48) & 65536).  */
+  HOWTO (R_SH_GOT_HI16,		/* type */
+	 48,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 64,			/* bitsize */
+	 false,			/* pc_relative */
+	 10,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_SH_GOT_HI16",	/* name */
+	 false,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0x3fffc00,		/* dst_mask */
+	 false),	       	/* pcrel_offset */
+
+  /* Used in MOVI and SHORI (x & 65536).  */
+  HOWTO (R_SH_GOTPLT_LOW16,	/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 64,			/* bitsize */
+	 false,			/* pc_relative */
+	 10,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_SH_GOTPLT_LOW16",   /* name */
+	 false,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0x3fffc00,		/* dst_mask */
+	 false),	       	/* pcrel_offset */
+
+  /* Used in MOVI and SHORI ((x >> 16) & 65536).  */
+  HOWTO (R_SH_GOTPLT_MEDLOW16,	/* type */
+	 16,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 64,			/* bitsize */
+	 false,			/* pc_relative */
+	 10,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_SH_GOTPLT_MEDLOW16", /* name */
+	 false,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0x3fffc00,		/* dst_mask */
+	 false),	       	/* pcrel_offset */
+
+  /* Used in MOVI and SHORI ((x >> 32) & 65536).  */
+  HOWTO (R_SH_GOTPLT_MEDHI16,	/* type */
+	 32,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 64,			/* bitsize */
+	 false,			/* pc_relative */
+	 10,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_SH_GOTPLT_MEDHI16",	/* name */
+	 false,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0x3fffc00,		/* dst_mask */
+	 false),	       	/* pcrel_offset */
+
+  /* Used in MOVI and SHORI ((x >> 48) & 65536).  */
+  HOWTO (R_SH_GOTPLT_HI16,	/* type */
+	 48,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 64,			/* bitsize */
+	 false,			/* pc_relative */
+	 10,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_SH_GOTPLT_HI16",	/* name */
+	 false,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0x3fffc00,		/* dst_mask */
+	 false),	       	/* pcrel_offset */
+
+  /* Used in MOVI and SHORI (x & 65536).  */
+  HOWTO (R_SH_PLT_LOW16,	/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 64,			/* bitsize */
+	 true,			/* pc_relative */
+	 10,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_SH_PLT_LOW16",    	/* name */
+	 false,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0x3fffc00,		/* dst_mask */
+	 true),		       	/* pcrel_offset */
+
+  /* Used in MOVI and SHORI ((x >> 16) & 65536).  */
+  HOWTO (R_SH_PLT_MEDLOW16,	/* type */
+	 16,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 64,			/* bitsize */
+	 true,			/* pc_relative */
+	 10,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_SH_PLT_MEDLOW16",	/* name */
+	 false,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0x3fffc00,		/* dst_mask */
+	 true),		       	/* pcrel_offset */
+
+  /* Used in MOVI and SHORI ((x >> 32) & 65536).  */
+  HOWTO (R_SH_PLT_MEDHI16,	/* type */
+	 32,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 64,			/* bitsize */
+	 true,			/* pc_relative */
+	 10,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_SH_PLT_MEDHI16",	/* name */
+	 false,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0x3fffc00,		/* dst_mask */
+	 true),		       	/* pcrel_offset */
+
+  /* Used in MOVI and SHORI ((x >> 48) & 65536).  */
+  HOWTO (R_SH_PLT_HI16,		/* type */
+	 48,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 64,			/* bitsize */
+	 true,			/* pc_relative */
+	 10,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_SH_PLT_HI16",	/* name */
+	 false,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0x3fffc00,		/* dst_mask */
+	 true),		       	/* pcrel_offset */
+
+  /* Used in MOVI and SHORI (x & 65536).  */
+  HOWTO (R_SH_GOTOFF_LOW16,	/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 64,			/* bitsize */
+	 false,			/* pc_relative */
+	 10,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_SH_GOTOFF_LOW16",   /* name */
+	 false,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0x3fffc00,		/* dst_mask */
+	 false),	       	/* pcrel_offset */
+
+  /* Used in MOVI and SHORI ((x >> 16) & 65536).  */
+  HOWTO (R_SH_GOTOFF_MEDLOW16,	/* type */
+	 16,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 64,			/* bitsize */
+	 false,			/* pc_relative */
+	 10,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_SH_GOTOFF_MEDLOW16", /* name */
+	 false,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0x3fffc00,		/* dst_mask */
+	 false),	       	/* pcrel_offset */
+
+  /* Used in MOVI and SHORI ((x >> 32) & 65536).  */
+  HOWTO (R_SH_GOTOFF_MEDHI16,	/* type */
+	 32,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 64,			/* bitsize */
+	 false,			/* pc_relative */
+	 10,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_SH_GOTOFF_MEDHI16",	/* name */
+	 false,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0x3fffc00,		/* dst_mask */
+	 false),	       	/* pcrel_offset */
+
+  /* Used in MOVI and SHORI ((x >> 48) & 65536).  */
+  HOWTO (R_SH_GOTOFF_HI16,	/* type */
+	 48,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 64,			/* bitsize */
+	 false,			/* pc_relative */
+	 10,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_SH_GOTOFF_HI16",	/* name */
+	 false,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0x3fffc00,		/* dst_mask */
+	 false),	       	/* pcrel_offset */
+
+  /* Used in MOVI and SHORI (x & 65536).  */
+  HOWTO (R_SH_GOTPC_LOW16,	/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 64,			/* bitsize */
+	 true,			/* pc_relative */
+	 10,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_SH_GOTPC_LOW16",    /* name */
+	 false,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0x3fffc00,		/* dst_mask */
+	 true),		       	/* pcrel_offset */
+
+  /* Used in MOVI and SHORI ((x >> 16) & 65536).  */
+  HOWTO (R_SH_GOTPC_MEDLOW16,	/* type */
+	 16,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 64,			/* bitsize */
+	 true,			/* pc_relative */
+	 10,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_SH_GOTPC_MEDLOW16", /* name */
+	 false,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0x3fffc00,		/* dst_mask */
+	 true),		       	/* pcrel_offset */
+
+  /* Used in MOVI and SHORI ((x >> 32) & 65536).  */
+  HOWTO (R_SH_GOTPC_MEDHI16,	/* type */
+	 32,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 64,			/* bitsize */
+	 true,			/* pc_relative */
+	 10,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_SH_GOTPC_MEDHI16",	/* name */
+	 false,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0x3fffc00,		/* dst_mask */
+	 true),		       	/* pcrel_offset */
+
+  /* Used in MOVI and SHORI ((x >> 48) & 65536).  */
+  HOWTO (R_SH_GOTPC_HI16,	/* type */
+	 48,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 64,			/* bitsize */
+	 true,			/* pc_relative */
+	 10,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_SH_GOTPC_HI16",	/* name */
+	 false,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0x3fffc00,		/* dst_mask */
+	 true),		       	/* pcrel_offset */
+
+  /* Used in LD.L, FLD.S et al.  */
+  HOWTO (R_SH_GOT10BY4,		/* type */
+	 2,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 12,			/* bitsize */
+	 false,			/* pc_relative */
+	 10,			/* bitpos */
+	 complain_overflow_signed, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_SH_GOT10BY4",	/* name */
+	 false,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0xffc00,		/* dst_mask */
+	 false),	       	/* pcrel_offset */
+
+  /* Used in LD.L, FLD.S et al.  */
+  HOWTO (R_SH_GOTPLT10BY4,	/* type */
+	 2,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 12,			/* bitsize */
+	 false,			/* pc_relative */
+	 10,			/* bitpos */
+	 complain_overflow_signed, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_SH_GOTPLT10BY4",	/* name */
+	 false,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0xffc00,		/* dst_mask */
+	 false),	       	/* pcrel_offset */
+
+  /* Used in FLD.D, FST.P et al.  */
+  HOWTO (R_SH_GOT10BY8,		/* type */
+	 3,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 13,			/* bitsize */
+	 false,			/* pc_relative */
+	 10,			/* bitpos */
+	 complain_overflow_signed, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_SH_GOT10BY8",	/* name */
+	 false,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0xffc00,		/* dst_mask */
+	 false),	       	/* pcrel_offset */
+
+  /* Used in FLD.D, FST.P et al.  */
+  HOWTO (R_SH_GOTPLT10BY8,	/* type */
+	 3,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 13,			/* bitsize */
+	 false,			/* pc_relative */
+	 10,			/* bitpos */
+	 complain_overflow_signed, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_SH_GOTPLT10BY8",	/* name */
+	 false,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0xffc00,		/* dst_mask */
+	 false),	       	/* pcrel_offset */
+
+  HOWTO (R_SH_COPY64,		/* type */
+	 0,			/* rightshift */
+	 4,			/* size (0 = byte, 1 = short, 2 = long) */
+	 64,			/* bitsize */
+	 false,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_SH_COPY64", 	/* name */
+	 false,			/* partial_inplace */
+	 0,			/* src_mask */
+	 ((bfd_vma) 0) - 1,	/* dst_mask */
+	 false),	       	/* pcrel_offset */
+
+  HOWTO (R_SH_GLOB_DAT64,	/* type */
+	 0,			/* rightshift */
+	 4,			/* size (0 = byte, 1 = short, 2 = long) */
+	 64,			/* bitsize */
+	 false,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_SH_GLOB_DAT64", 	/* name */
+	 false,			/* partial_inplace */
+	 0,			/* src_mask */
+	 ((bfd_vma) 0) - 1,	/* dst_mask */
+	 false),	       	/* pcrel_offset */
+
+  HOWTO (R_SH_JMP_SLOT64,	/* type */
+	 0,			/* rightshift */
+	 4,			/* size (0 = byte, 1 = short, 2 = long) */
+	 64,			/* bitsize */
+	 false,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_SH_JMP_SLOT64", 	/* name */
+	 false,			/* partial_inplace */
+	 0,			/* src_mask */
+	 ((bfd_vma) 0) - 1,	/* dst_mask */
+	 false),	       	/* pcrel_offset */
+
+  HOWTO (R_SH_RELATIVE64,	/* type */
+	 0,			/* rightshift */
+	 4,			/* size (0 = byte, 1 = short, 2 = long) */
+	 64,			/* bitsize */
+	 false,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_SH_RELATIVE64", 	/* name */
+	 false,			/* partial_inplace */
+	 0,			/* src_mask */
+	 ((bfd_vma) 0) - 1,	/* dst_mask */
+	 false),	       	/* pcrel_offset */
+
+  EMPTY_HOWTO (197),
+  EMPTY_HOWTO (198),
+  EMPTY_HOWTO (199),
+  EMPTY_HOWTO (200),
+  EMPTY_HOWTO (201),
+  EMPTY_HOWTO (202),
+  EMPTY_HOWTO (203),
+  EMPTY_HOWTO (204),
+  EMPTY_HOWTO (205),
+  EMPTY_HOWTO (206),
+  EMPTY_HOWTO (207),
+  EMPTY_HOWTO (208),
+  EMPTY_HOWTO (209),
+  EMPTY_HOWTO (210),
+  EMPTY_HOWTO (211),
+  EMPTY_HOWTO (212),
+  EMPTY_HOWTO (213),
+  EMPTY_HOWTO (214),
+  EMPTY_HOWTO (215),
+  EMPTY_HOWTO (216),
+  EMPTY_HOWTO (217),
+  EMPTY_HOWTO (218),
+  EMPTY_HOWTO (219),
+  EMPTY_HOWTO (220),
+  EMPTY_HOWTO (221),
+  EMPTY_HOWTO (222),
+  EMPTY_HOWTO (223),
+  EMPTY_HOWTO (224),
+  EMPTY_HOWTO (225),
+  EMPTY_HOWTO (226),
+  EMPTY_HOWTO (227),
+  EMPTY_HOWTO (228),
+  EMPTY_HOWTO (229),
+  EMPTY_HOWTO (230),
+  EMPTY_HOWTO (231),
+  EMPTY_HOWTO (232),
+  EMPTY_HOWTO (233),
+  EMPTY_HOWTO (234),
+  EMPTY_HOWTO (235),
+  EMPTY_HOWTO (236),
+  EMPTY_HOWTO (237),
+  EMPTY_HOWTO (238),
+  EMPTY_HOWTO (239),
+  EMPTY_HOWTO (240),
+  EMPTY_HOWTO (241),
+
+  /* Relocations for SHmedia code.  None of these are partial_inplace or
+     use the field being relocated (except R_SH_PT_16).  */
+
+  /* The assembler will generate this reloc before a block of SHmedia
+     instructions.  A section should be processed as assuming it contains
+     data, unless this reloc is seen.  Note that a block of SHcompact
+     instructions are instead preceded by R_SH_CODE.
+     This is currently not implemented, but should be used for SHmedia
+     linker relaxation.  */
+  HOWTO (R_SH_SHMEDIA_CODE,	/* type */
+	 0,			/* rightshift */
+	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* bitsize */
+	 false,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_unsigned, /* complain_on_overflow */
+	 sh_elf_ignore_reloc,	/* special_function */
+	 "R_SH_SHMEDIA_CODE",	/* name */
+	 false,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0,			/* dst_mask */
+	 false),		/* pcrel_offset */
+
+  /* The assembler will generate this reloc at a PTA or PTB instruction,
+     and the linker checks the right type of target, or changes a PTA to a
+     PTB, if the original insn was PT.  */
+  HOWTO (R_SH_PT_16,		/* type */
+	 2,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 18,			/* bitsize */
+	 true,			/* pc_relative */
+	 10,			/* bitpos */
+	 complain_overflow_signed, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_SH_PT_16",		/* name */
+	 false,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0x3fffc00,		/* dst_mask */
+	 true),			/* pcrel_offset */
+
+  /* Used in unexpanded MOVI.  */
+  HOWTO (R_SH_IMMS16,		/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 16,			/* bitsize */
+	 false,			/* pc_relative */
+	 10,			/* bitpos */
+	 complain_overflow_signed, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_SH_IMMS16",		/* name */
+	 false,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0x3fffc00,		/* dst_mask */
+	 false),	       	/* pcrel_offset */
+
+  /* Used in SHORI.  */
+  HOWTO (R_SH_IMMU16,		/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 16,			/* bitsize */
+	 false,			/* pc_relative */
+	 10,			/* bitpos */
+	 complain_overflow_unsigned, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_SH_IMMU16",		/* name */
+	 false,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0x3fffc00,		/* dst_mask */
+	 false),	       	/* pcrel_offset */
+
+  /* Used in MOVI and SHORI (x & 65536).  */
+  HOWTO (R_SH_IMM_LOW16,	/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 64,			/* bitsize */
+	 false,			/* pc_relative */
+	 10,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_SH_IMM_LOW16",    	/* name */
+	 false,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0x3fffc00,		/* dst_mask */
+	 false),	       	/* pcrel_offset */
+
+  /* Used in MOVI and SHORI ((x - $) & 65536).  */
+  HOWTO (R_SH_IMM_LOW16_PCREL,	/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 64,			/* bitsize */
+	 true,			/* pc_relative */
+	 10,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_SH_IMM_LOW16_PCREL", /* name */
+	 false,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0x3fffc00,		/* dst_mask */
+	 true),			/* pcrel_offset */
+
+  /* Used in MOVI and SHORI ((x >> 16) & 65536).  */
+  HOWTO (R_SH_IMM_MEDLOW16,	/* type */
+	 16,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 64,			/* bitsize */
+	 false,			/* pc_relative */
+	 10,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_SH_IMM_MEDLOW16",	/* name */
+	 false,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0x3fffc00,		/* dst_mask */
+	 false),	       	/* pcrel_offset */
+
+  /* Used in MOVI and SHORI (((x - $) >> 16) & 65536).  */
+  HOWTO (R_SH_IMM_MEDLOW16_PCREL, /* type */
+	 16,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 64,			/* bitsize */
+	 true,			/* pc_relative */
+	 10,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_SH_IMM_MEDLOW16_PCREL", /* name */
+	 false,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0x3fffc00,		/* dst_mask */
+	 true),			/* pcrel_offset */
+
+  /* Used in MOVI and SHORI ((x >> 32) & 65536).  */
+  HOWTO (R_SH_IMM_MEDHI16,	/* type */
+	 32,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 64,			/* bitsize */
+	 false,			/* pc_relative */
+	 10,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_SH_IMM_MEDHI16",	/* name */
+	 false,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0x3fffc00,		/* dst_mask */
+	 false),	       	/* pcrel_offset */
+
+  /* Used in MOVI and SHORI (((x - $) >> 32) & 65536).  */
+  HOWTO (R_SH_IMM_MEDHI16_PCREL, /* type */
+	 32,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 64,			/* bitsize */
+	 true,			/* pc_relative */
+	 10,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_SH_IMM_MEDHI16_PCREL", /* name */
+	 false,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0x3fffc00,		/* dst_mask */
+	 true),			/* pcrel_offset */
+
+  /* Used in MOVI and SHORI ((x >> 48) & 65536).  */
+  HOWTO (R_SH_IMM_HI16,		/* type */
+	 48,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 64,			/* bitsize */
+	 false,			/* pc_relative */
+	 10,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_SH_IMM_HI16",	/* name */
+	 false,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0x3fffc00,		/* dst_mask */
+	 false),	       	/* pcrel_offset */
+
+  /* Used in MOVI and SHORI (((x - $) >> 48) & 65536).  */
+  HOWTO (R_SH_IMM_HI16_PCREL,	/* type */
+	 48,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 64,			/* bitsize */
+	 true,			/* pc_relative */
+	 10,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_SH_IMM_HI16_PCREL", /* name */
+	 false,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0x3fffc00,		/* dst_mask */
+	 true),			/* pcrel_offset */
+
+  /* For the .uaquad pseudo.  */
+  HOWTO (R_SH_64,		/* type */
+	 0,			/* rightshift */
+	 4,			/* size (0 = byte, 1 = short, 2 = long) */
+	 64,			/* bitsize */
+	 false,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_SH_64", 		/* name */
+	 false,			/* partial_inplace */
+	 0,			/* src_mask */
+	 ((bfd_vma) 0) - 1,	/* dst_mask */
+	 false),	       	/* pcrel_offset */
+
+  /* For the .uaquad pseudo, (x - $).  */
+  HOWTO (R_SH_64_PCREL,		/* type */
+	 48,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 64,			/* bitsize */
+	 true,			/* pc_relative */
+	 10,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_SH_64_PCREL",	/* name */
+	 false,			/* partial_inplace */
+	 0,			/* src_mask */
+	 ((bfd_vma) 0) - 1,	/* dst_mask */
+	 true),			/* pcrel_offset */
+
+#endif
 };
 
 static bfd_reloc_status_type
@@ -965,6 +1773,58 @@ static const struct elf_reloc_map sh_reloc_map[] =
   { BFD_RELOC_SH_RELATIVE, R_SH_RELATIVE },
   { BFD_RELOC_32_GOTOFF, R_SH_GOTOFF },
   { BFD_RELOC_SH_GOTPC, R_SH_GOTPC },
+  { BFD_RELOC_SH_GOTPLT32, R_SH_GOTPLT32 },
+#ifdef INCLUDE_SHMEDIA
+  { BFD_RELOC_SH_GOT_LOW16, R_SH_GOT_LOW16 },
+  { BFD_RELOC_SH_GOT_MEDLOW16, R_SH_GOT_MEDLOW16 },
+  { BFD_RELOC_SH_GOT_MEDHI16, R_SH_GOT_MEDHI16 },
+  { BFD_RELOC_SH_GOT_HI16, R_SH_GOT_HI16 },
+  { BFD_RELOC_SH_GOTPLT_LOW16, R_SH_GOTPLT_LOW16 },
+  { BFD_RELOC_SH_GOTPLT_MEDLOW16, R_SH_GOTPLT_MEDLOW16 },
+  { BFD_RELOC_SH_GOTPLT_MEDHI16, R_SH_GOTPLT_MEDHI16 },
+  { BFD_RELOC_SH_GOTPLT_HI16, R_SH_GOTPLT_HI16 },
+  { BFD_RELOC_SH_PLT_LOW16, R_SH_PLT_LOW16 },
+  { BFD_RELOC_SH_PLT_MEDLOW16, R_SH_PLT_MEDLOW16 },
+  { BFD_RELOC_SH_PLT_MEDHI16, R_SH_PLT_MEDHI16 },
+  { BFD_RELOC_SH_PLT_HI16, R_SH_PLT_HI16 },
+  { BFD_RELOC_SH_GOTOFF_LOW16, R_SH_GOTOFF_LOW16 },
+  { BFD_RELOC_SH_GOTOFF_MEDLOW16, R_SH_GOTOFF_MEDLOW16 },
+  { BFD_RELOC_SH_GOTOFF_MEDHI16, R_SH_GOTOFF_MEDHI16 },
+  { BFD_RELOC_SH_GOTOFF_HI16, R_SH_GOTOFF_HI16 },
+  { BFD_RELOC_SH_GOTPC_LOW16, R_SH_GOTPC_LOW16 },
+  { BFD_RELOC_SH_GOTPC_MEDLOW16, R_SH_GOTPC_MEDLOW16 },
+  { BFD_RELOC_SH_GOTPC_MEDHI16, R_SH_GOTPC_MEDHI16 },
+  { BFD_RELOC_SH_GOTPC_HI16, R_SH_GOTPC_HI16 },
+  { BFD_RELOC_SH_COPY64, R_SH_COPY64 },
+  { BFD_RELOC_SH_GLOB_DAT64, R_SH_GLOB_DAT64 },
+  { BFD_RELOC_SH_JMP_SLOT64, R_SH_JMP_SLOT64 },
+  { BFD_RELOC_SH_RELATIVE64, R_SH_RELATIVE64 },
+  { BFD_RELOC_SH_GOT10BY4, R_SH_GOT10BY4 },
+  { BFD_RELOC_SH_GOT10BY8, R_SH_GOT10BY8 },
+  { BFD_RELOC_SH_GOTPLT10BY4, R_SH_GOTPLT10BY4 },
+  { BFD_RELOC_SH_GOTPLT10BY8, R_SH_GOTPLT10BY8 },
+  { BFD_RELOC_SH_PT_16, R_SH_PT_16 },
+  { BFD_RELOC_SH_SHMEDIA_CODE, R_SH_SHMEDIA_CODE },
+  { BFD_RELOC_SH_IMMU5, R_SH_DIR5U },
+  { BFD_RELOC_SH_IMMS6, R_SH_DIR6S },
+  { BFD_RELOC_SH_IMMU6, R_SH_DIR6U },
+  { BFD_RELOC_SH_IMMS10, R_SH_DIR10S },
+  { BFD_RELOC_SH_IMMS10BY2, R_SH_DIR10SW },
+  { BFD_RELOC_SH_IMMS10BY4, R_SH_DIR10SL },
+  { BFD_RELOC_SH_IMMS10BY8, R_SH_DIR10SQ },
+  { BFD_RELOC_SH_IMMS16, R_SH_IMMS16 },
+  { BFD_RELOC_SH_IMMU16, R_SH_IMMU16 },
+  { BFD_RELOC_SH_IMM_LOW16, R_SH_IMM_LOW16 },
+  { BFD_RELOC_SH_IMM_LOW16_PCREL, R_SH_IMM_LOW16_PCREL },
+  { BFD_RELOC_SH_IMM_MEDLOW16, R_SH_IMM_MEDLOW16 },
+  { BFD_RELOC_SH_IMM_MEDLOW16_PCREL, R_SH_IMM_MEDLOW16_PCREL },
+  { BFD_RELOC_SH_IMM_MEDHI16, R_SH_IMM_MEDHI16 },
+  { BFD_RELOC_SH_IMM_MEDHI16_PCREL, R_SH_IMM_MEDHI16_PCREL },
+  { BFD_RELOC_SH_IMM_HI16, R_SH_IMM_HI16 },
+  { BFD_RELOC_SH_IMM_HI16_PCREL, R_SH_IMM_HI16_PCREL },
+  { BFD_RELOC_64, R_SH_64 },
+  { BFD_RELOC_64_PCREL, R_SH_64_PCREL },
+#endif /* not INCLUDE_SHMEDIA */
 };
 
 /* Given a BFD reloc code, return the howto structure for the
@@ -1001,6 +1861,8 @@ sh_elf_info_to_howto (abfd, cache_ptr, dst)
   BFD_ASSERT (r < (unsigned int) R_SH_max);
   BFD_ASSERT (r < R_SH_FIRST_INVALID_RELOC || r > R_SH_LAST_INVALID_RELOC);
   BFD_ASSERT (r < R_SH_FIRST_INVALID_RELOC_2 || r > R_SH_LAST_INVALID_RELOC_2);
+  BFD_ASSERT (r < R_SH_FIRST_INVALID_RELOC_3 || r > R_SH_LAST_INVALID_RELOC_3);
+  BFD_ASSERT (r < R_SH_FIRST_INVALID_RELOC_4 || r > R_SH_LAST_INVALID_RELOC_4);
 
   cache_ptr->howto = &sh_elf_howto_table[r];
 }
@@ -1040,6 +1902,14 @@ sh_elf_relax_section (abfd, sec, link_info, again)
       || (sec->flags & SEC_RELOC) == 0
       || sec->reloc_count == 0)
     return true;
+
+#ifdef INCLUDE_SHMEDIA
+  if (elf_section_data (sec)->this_hdr.sh_flags
+      & (SHF_SH5_ISA32 | SHF_SH5_ISA32_MIXED))
+    {
+      return true;
+    }
+#endif
 
   /* If this is the first time we have been called for this section,
      initialize the cooked size.  */
@@ -2140,6 +3010,178 @@ sh_elf_swap_insns (abfd, sec, relocs, contents, addr)
   return true;
 }
 
+#ifdef INCLUDE_SHMEDIA
+
+/* The size in bytes of an entry in the procedure linkage table.  */
+
+#define PLT_ENTRY_SIZE 64
+
+/* First entry in an absolute procedure linkage table look like this.  */
+
+static const bfd_byte elf_sh_plt0_entry_be[PLT_ENTRY_SIZE] =
+{
+  0xcc, 0x00, 0x01, 0x10, /* movi  .got.plt >> 16, r17 */
+  0xc8, 0x00, 0x01, 0x10, /* shori .got.plt & 65535, r17 */
+  0x89, 0x10, 0x09, 0x90, /* ld.l  r17, 8, r25 */
+  0x6b, 0xf1, 0x46, 0x00, /* ptabs r17, tr0 */
+  0x89, 0x10, 0x05, 0x10, /* ld.l  r17, 4, r17 */
+  0x44, 0x01, 0xff, 0xf0, /* blink tr0, r63 */
+  0x6f, 0xf0, 0xff, 0xf0, /* nop */
+  0x6f, 0xf0, 0xff, 0xf0, /* nop */
+  0x6f, 0xf0, 0xff, 0xf0, /* nop */
+  0x6f, 0xf0, 0xff, 0xf0, /* nop */
+  0x6f, 0xf0, 0xff, 0xf0, /* nop */
+  0x6f, 0xf0, 0xff, 0xf0, /* nop */
+  0x6f, 0xf0, 0xff, 0xf0, /* nop */
+  0x6f, 0xf0, 0xff, 0xf0, /* nop */
+  0x6f, 0xf0, 0xff, 0xf0, /* nop */
+  0x6f, 0xf0, 0xff, 0xf0, /* nop */
+};
+
+static const bfd_byte elf_sh_plt0_entry_le[PLT_ENTRY_SIZE] =
+{
+  0x10, 0x01, 0x00, 0xcc, /* movi  .got.plt >> 16, r17 */
+  0x10, 0x01, 0x00, 0xc8, /* shori .got.plt & 65535, r17 */
+  0x90, 0x09, 0x10, 0x89, /* ld.l  r17, 8, r25 */
+  0x00, 0x46, 0xf1, 0x6b, /* ptabs r17, tr0 */
+  0x10, 0x05, 0x10, 0x89, /* ld.l  r17, 4, r17 */
+  0xf0, 0xff, 0x01, 0x44, /* blink tr0, r63 */
+  0xf0, 0xff, 0xf0, 0x6f, /* nop */
+  0xf0, 0xff, 0xf0, 0x6f, /* nop */
+  0xf0, 0xff, 0xf0, 0x6f, /* nop */
+  0xf0, 0xff, 0xf0, 0x6f, /* nop */
+  0xf0, 0xff, 0xf0, 0x6f, /* nop */
+  0xf0, 0xff, 0xf0, 0x6f, /* nop */
+  0xf0, 0xff, 0xf0, 0x6f, /* nop */
+  0xf0, 0xff, 0xf0, 0x6f, /* nop */
+  0xf0, 0xff, 0xf0, 0x6f, /* nop */
+  0xf0, 0xff, 0xf0, 0x6f, /* nop */
+};
+
+/* Sebsequent entries in an absolute procedure linkage table look like
+   this.  */
+
+static const bfd_byte elf_sh_plt_entry_be[PLT_ENTRY_SIZE] =
+{
+  0xcc, 0x00, 0x01, 0x90, /* movi  nameN-in-GOT >> 16, r25 */
+  0xc8, 0x00, 0x01, 0x90, /* shori nameN-in-GOT & 65535, r25 */
+  0x89, 0x90, 0x01, 0x90, /* ld.l  r25, 0, r25 */
+  0x6b, 0xf1, 0x66, 0x00, /* ptabs r25, tr0 */
+  0x44, 0x01, 0xff, 0xf0, /* blink tr0, r63 */
+  0x6f, 0xf0, 0xff, 0xf0, /* nop */
+  0x6f, 0xf0, 0xff, 0xf0, /* nop */
+  0x6f, 0xf0, 0xff, 0xf0, /* nop */
+  0xcc, 0x00, 0x01, 0x90, /* movi  .PLT0 >> 16, r25 */
+  0xc8, 0x00, 0x01, 0x90, /* shori .PLT0 & 65535, r25 */
+  0x6b, 0xf1, 0x66, 0x00, /* ptabs r25, tr0 */
+  0xcc, 0x00, 0x01, 0x50, /* movi  reloc-offset >> 16, r21 */
+  0xc8, 0x00, 0x01, 0x50, /* shori reloc-offset & 65535, r21 */
+  0x44, 0x01, 0xff, 0xf0, /* blink tr0, r63 */
+  0x6f, 0xf0, 0xff, 0xf0, /* nop */
+  0x6f, 0xf0, 0xff, 0xf0, /* nop */
+};
+
+static const bfd_byte elf_sh_plt_entry_le[PLT_ENTRY_SIZE] =
+{
+  0x90, 0x01, 0x00, 0xcc, /* movi  nameN-in-GOT >> 16, r25 */
+  0x90, 0x01, 0x00, 0xc8, /* shori nameN-in-GOT & 65535, r25 */
+  0x90, 0x01, 0x90, 0x89, /* ld.l  r25, 0, r25 */
+  0x00, 0x66, 0xf1, 0x6b, /* ptabs r25, tr0 */
+  0xf0, 0xff, 0x01, 0x44, /* blink tr0, r63 */
+  0xf0, 0xff, 0xf0, 0x6f, /* nop */
+  0xf0, 0xff, 0xf0, 0x6f, /* nop */
+  0xf0, 0xff, 0xf0, 0x6f, /* nop */
+  0x90, 0x01, 0x00, 0xcc, /* movi  .PLT0 >> 16, r25 */
+  0x90, 0x01, 0x00, 0xc8, /* shori .PLT0 & 65535, r25 */
+  0x00, 0x66, 0xf1, 0x6b, /* ptabs r25, tr0 */
+  0x50, 0x01, 0x00, 0xcc, /* movi  reloc-offset >> 16, r21 */
+  0x50, 0x01, 0x00, 0xc8, /* shori reloc-offset & 65535, r21 */
+  0xf0, 0xff, 0x01, 0x44, /* blink tr0, r63 */
+  0xf0, 0xff, 0xf0, 0x6f, /* nop */
+  0xf0, 0xff, 0xf0, 0x6f, /* nop */
+};
+
+/* Entries in a PIC procedure linkage table look like this.  */
+
+static const bfd_byte elf_sh_pic_plt_entry_be[PLT_ENTRY_SIZE] =
+{
+  0xcc, 0x00, 0x01, 0x90, /* movi  nameN@GOT >> 16, r25 */
+  0xc8, 0x00, 0x01, 0x90, /* shori nameN@GOT & 65535, r25 */
+  0x40, 0xc2, 0x65, 0x90, /* ldx.l r12, r25, r25 */
+  0x6b, 0xf1, 0x66, 0x00, /* ptabs r25, tr0 */
+  0x44, 0x01, 0xff, 0xf0, /* blink tr0, r63 */
+  0x6f, 0xf0, 0xff, 0xf0, /* nop */
+  0x6f, 0xf0, 0xff, 0xf0, /* nop */
+  0x6f, 0xf0, 0xff, 0xf0, /* nop */
+  0xce, 0x00, 0x01, 0x10, /* movi  -GOT_BIAS, r17 */
+  0x00, 0xca, 0x45, 0x10, /* sub.l r12, r17, r17 */
+  0x89, 0x10, 0x09, 0x90, /* ld.l  r17, 8, r25 */
+  0x6b, 0xf1, 0x66, 0x00, /* ptabs r25, tr0 */
+  0x89, 0x10, 0x05, 0x10, /* ld.l  r17, 4, r17 */
+  0xcc, 0x00, 0x01, 0x50, /* movi  reloc-offset >> 16, r21 */
+  0xc8, 0x00, 0x01, 0x50, /* shori reloc-offset & 65535, r21 */
+  0x44, 0x01, 0xff, 0xf0, /* blink tr0, r63 */
+};
+
+static const bfd_byte elf_sh_pic_plt_entry_le[PLT_ENTRY_SIZE] =
+{
+  0x90, 0x01, 0x00, 0xcc, /* movi  nameN@GOT >> 16, r25 */
+  0x90, 0x01, 0x00, 0xc8, /* shori nameN@GOT & 65535, r25 */
+  0x90, 0x65, 0xc2, 0x40, /* ldx.l r12, r25, r25 */
+  0x00, 0x66, 0xf1, 0x6b, /* ptabs r25, tr0 */
+  0xf0, 0xff, 0x01, 0x44, /* blink tr0, r63 */
+  0xf0, 0xff, 0xf0, 0x6f, /* nop */
+  0xf0, 0xff, 0xf0, 0x6f, /* nop */
+  0xf0, 0xff, 0xf0, 0x6f, /* nop */
+  0x10, 0x01, 0x00, 0xce, /* movi  -GOT_BIAS, r17 */
+  0x10, 0x45, 0xca, 0x00, /* sub.l r12, r17, r17 */
+  0x90, 0x09, 0x10, 0x89, /* ld.l  r17, 8, r25 */
+  0x00, 0x66, 0xf1, 0x6b, /* ptabs r25, tr0 */
+  0x10, 0x05, 0x10, 0x89, /* ld.l  r17, 4, r17 */
+  0x50, 0x01, 0x00, 0xcc, /* movi  reloc-offset >> 16, r21 */
+  0x50, 0x01, 0x00, 0xc8, /* shori reloc-offset & 65535, r21 */
+  0xf0, 0xff, 0x01, 0x44, /* blink tr0, r63 */
+};
+
+static const bfd_byte *elf_sh_plt0_entry;
+static const bfd_byte *elf_sh_plt_entry;
+static const bfd_byte *elf_sh_pic_plt_entry;
+
+/* Return size of a PLT entry.  */
+#define elf_sh_sizeof_plt(info) PLT_ENTRY_SIZE
+
+/* Return offset of the PLT0 address in an absolute PLT entry.  */
+#define elf_sh_plt_plt0_offset(info) 32
+
+/* Return offset of the linker in PLT0 entry.  */
+#define elf_sh_plt0_gotplt_offset(info) 0
+
+/* Return offset of the trampoline in PLT entry */
+#define elf_sh_plt_temp_offset(info) 33 /* Add one because it's SHmedia.  */
+
+/* Return offset of the symbol in PLT entry.  */
+#define elf_sh_plt_symbol_offset(info) 0
+
+/* Return offset of the relocation in PLT entry.  */
+#define elf_sh_plt_reloc_offset(info) (info->shared ? 52 : 44)
+
+inline static void
+movi_shori_putval (output_bfd, value, addr)
+     bfd *output_bfd;
+     unsigned long value;
+     char *addr;
+{
+  bfd_put_32 (output_bfd,
+	      bfd_get_32 (output_bfd, addr)
+	      | ((value >> 6) & 0x3fffc00),
+	      addr);
+  bfd_put_32 (output_bfd,
+	      bfd_get_32 (output_bfd, addr + 4)
+	      | ((value << 10) & 0x3fffc00),
+	      addr + 4);
+}
+
+#else
 /* The size in bytes of an entry in the procedure linkage table.  */
 
 #define PLT_ENTRY_SIZE 28
@@ -2379,6 +3421,7 @@ static const bfd_byte *elf_sh_pic_plt_entry;
 
 /* Return offset of the relocation in PLT entry.  */
 #define elf_sh_plt_reloc_offset(info) 24
+#endif
 
 /* The sh linker needs to keep track of the number of relocs that it
    decides to copy in check_relocs for each symbol.  This is so that
@@ -2404,6 +3447,10 @@ struct elf_sh_pcrel_relocs_copied
 struct elf_sh_link_hash_entry
 {
   struct elf_link_hash_entry root;
+
+#ifdef INCLUDE_SHMEDIA
+  bfd_vma datalabel_got_offset;
+#endif
 
   /* Number of PC relative relocs copied for this symbol.  */
   struct elf_sh_pcrel_relocs_copied *pcrel_relocs_copied;
@@ -2461,6 +3508,9 @@ sh_elf_link_hash_newfunc (entry, table, string)
   if (ret != (struct elf_sh_link_hash_entry *) NULL)
     {
       ret->pcrel_relocs_copied = NULL;
+#ifdef INCLUDE_SHMEDIA
+      ret->datalabel_got_offset = (bfd_vma) -1;
+#endif
     }
 
   return (struct bfd_hash_entry *) ret;
@@ -3014,6 +4064,7 @@ sh_elf_relocate_section (output_bfd, info, input_bfd, input_section,
   bfd *dynobj;
   bfd_vma *local_got_offsets;
   asection *sgot;
+  asection *sgotplt;
   asection *splt;
   asection *sreloc;
 
@@ -3023,6 +4074,7 @@ sh_elf_relocate_section (output_bfd, info, input_bfd, input_section,
   local_got_offsets = elf_local_got_offsets (input_bfd);
 
   sgot = NULL;
+  sgotplt = NULL;
   splt = NULL;
   sreloc = NULL;
 
@@ -3039,6 +4091,7 @@ sh_elf_relocate_section (output_bfd, info, input_bfd, input_section,
       bfd_vma relocation;
       bfd_vma addend = (bfd_vma) 0;
       bfd_reloc_status_type r;
+      int seen_stt_datalabel = 0;
 
       r_symndx = ELF32_R_SYM (rel->r_info);
 
@@ -3056,6 +4109,10 @@ sh_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	  || r_type >= R_SH_max
 	  || (r_type >= (int) R_SH_FIRST_INVALID_RELOC
 	      && r_type <= (int) R_SH_LAST_INVALID_RELOC)
+	  || (   r_type >= (int) R_SH_FIRST_INVALID_RELOC_3
+	      && r_type <= (int) R_SH_LAST_INVALID_RELOC_3)
+	  || (   r_type >= (int) R_SH_FIRST_INVALID_RELOC_4
+	      && r_type <= (int) R_SH_LAST_INVALID_RELOC_4)
 	  || (r_type >= (int) R_SH_FIRST_INVALID_RELOC_2
 	      && r_type <= (int) R_SH_LAST_INVALID_RELOC_2))
 	{
@@ -3080,6 +4137,14 @@ sh_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	  relocation = (sec->output_section->vma
 			+ sec->output_offset
 			+ sym->st_value);
+	  /* A local symbol never has STO_SH5_ISA32, so we don't need
+	     datalabel processing here.  Make sure this does not change
+	     without notice.  */
+	  if ((sym->st_other & STO_SH5_ISA32) != 0)
+	    ((*info->callbacks->reloc_dangerous)
+	     (info,
+	      _("Unexpected STO_SH5_ISA32 on local symbol is not handled"),
+	      input_bfd, input_section, rel->r_offset));
 	  if (info->relocateable)
 	    {
 	      /* This is a relocateable link.  We don't have to change
@@ -3158,7 +4223,15 @@ sh_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
 	  while (h->root.type == bfd_link_hash_indirect
 		 || h->root.type == bfd_link_hash_warning)
-	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+	    {
+#ifdef INCLUDE_SHMEDIA
+	      /* If the reference passes a symbol marked with
+		 STT_DATALABEL, then any STO_SH5_ISA32 on the final value
+		 doesn't count.  */
+	      seen_stt_datalabel |= h->type == STT_DATALABEL;
+#endif
+	      h = (struct elf_link_hash_entry *) h->root.u.i.link;
+	    }
 	  if (h->root.type == bfd_link_hash_defined
 	      || h->root.type == bfd_link_hash_defweak)
 	    {
@@ -3167,9 +4240,21 @@ sh_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		 We check specially because in some obscure cases
 		 sec->output_section will be NULL.  */
 	      if (r_type == R_SH_GOTPC
-		  || (r_type == R_SH_PLT32
+		  || r_type == R_SH_GOTPC_LOW16
+		  || r_type == R_SH_GOTPC_MEDLOW16
+		  || r_type == R_SH_GOTPC_MEDHI16
+		  || r_type == R_SH_GOTPC_HI16
+		  || ((r_type == R_SH_PLT32
+		       || r_type == R_SH_PLT_LOW16
+		       || r_type == R_SH_PLT_MEDLOW16
+		       || r_type == R_SH_PLT_MEDHI16
+		       || r_type == R_SH_PLT_HI16)
 		      && h->plt.offset != (bfd_vma) -1)
-		  || (r_type == R_SH_GOT32
+		  || ((r_type == R_SH_GOT32
+		       || r_type == R_SH_GOT_LOW16
+		       || r_type == R_SH_GOT_MEDLOW16
+		       || r_type == R_SH_GOT_MEDHI16
+		       || r_type == R_SH_GOT_HI16)
 		      && elf_hash_table (info)->dynamic_sections_created
 		      && (! info->shared
 			  || (! info->symbolic && h->dynindx != -1)
@@ -3204,9 +4289,14 @@ sh_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		  relocation = 0;
 		}
 	      else
-		relocation = (h->root.u.def.value
+		relocation = ((h->root.u.def.value
 			      + sec->output_section->vma
-			      + sec->output_offset);
+			      + sec->output_offset)
+			      /* A STO_SH5_ISA32 causes a "bitor 1" to the
+				 symbol value, unless we've seen
+				 STT_DATALABEL on the way to it.  */
+			      | ((h->other & STO_SH5_ISA32) != 0
+				 && ! seen_stt_datalabel));
 	    }
 	  else if (h->root.type == bfd_link_hash_undefweak)
 	    relocation = 0;
@@ -3277,6 +4367,11 @@ sh_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	  break;
 
 	default:
+#ifdef INCLUDE_SHMEDIA
+	  if (shmedia_prepare_reloc (info, input_bfd, input_section,
+				     contents, rel, &relocation))
+	    goto final_link_relocate;
+#endif
 	  bfd_set_error (bfd_error_bad_value);
 	  return false;
 
@@ -3383,7 +4478,56 @@ sh_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	    }
 	  goto final_link_relocate;
 
+	case R_SH_GOTPLT32:
+#ifdef INCLUDE_SHMEDIA
+	case R_SH_GOTPLT_LOW16:
+	case R_SH_GOTPLT_MEDLOW16:
+	case R_SH_GOTPLT_MEDHI16:
+	case R_SH_GOTPLT_HI16:
+	case R_SH_GOTPLT10BY4:
+	case R_SH_GOTPLT10BY8:
+#endif
+	  /* Relocation is to the entry for this symbol in the
+	     procedure linkage table.  */
+
+	  if (h == NULL
+	      || ELF_ST_VISIBILITY (h->other) == STV_INTERNAL
+	      || ELF_ST_VISIBILITY (h->other) == STV_HIDDEN
+	      || ! info->shared
+	      || info->symbolic
+	      || h->dynindx == -1
+	      || h->plt.offset == (bfd_vma) -1
+	      || h->got.offset != (bfd_vma) -1)
+	    goto force_got;
+
+	  /* Relocation is to the entry for this symbol in the global
+	     offset table extension for the procedure linkage table.  */
+	  if (sgotplt == NULL)
+	    {
+	      sgotplt = bfd_get_section_by_name (dynobj, ".got.plt");
+	      BFD_ASSERT (sgotplt != NULL);
+	    }
+
+	  relocation = (sgotplt->output_offset
+			+ ((h->plt.offset / elf_sh_sizeof_plt (info)
+			    - 1 + 3) * 4));
+
+#ifdef GOT_BIAS
+	  relocation -= GOT_BIAS;
+#endif
+
+	  goto final_link_relocate;
+
+	force_got:
 	case R_SH_GOT32:
+#ifdef INCLUDE_SHMEDIA
+	case R_SH_GOT_LOW16:
+	case R_SH_GOT_MEDLOW16:
+	case R_SH_GOT_MEDHI16:
+	case R_SH_GOT_HI16:
+	case R_SH_GOT10BY4:
+	case R_SH_GOT10BY8:
+#endif
 	  /* Relocation is to the entry for this symbol in the global
 	     offset table.  */
 	  if (sgot == NULL)
@@ -3397,6 +4541,15 @@ sh_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	      bfd_vma off;
 
 	      off = h->got.offset;
+#ifdef INCLUDE_SHMEDIA
+	      if (seen_stt_datalabel)
+		{
+		  struct elf_sh_link_hash_entry *hsh;
+
+		  hsh = (struct elf_sh_link_hash_entry *)h;
+		  off = hsh->datalabel_got_offset;
+		}
+#endif
 	      BFD_ASSERT (off != (bfd_vma) -1);
 
 	      if (! elf_hash_table (info)->dynamic_sections_created
@@ -3424,7 +4577,17 @@ sh_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		    {
 		      bfd_put_32 (output_bfd, relocation,
 				  sgot->contents + off);
-		      h->got.offset |= 1;
+#ifdef INCLUDE_SHMEDIA
+		      if (seen_stt_datalabel)
+			{
+			  struct elf_sh_link_hash_entry *hsh;
+
+			  hsh = (struct elf_sh_link_hash_entry *)h;
+			  hsh->datalabel_got_offset |= 1;
+			}
+		      else
+#endif
+			h->got.offset |= 1;
 		    }
 		}
 
@@ -3434,10 +4597,27 @@ sh_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	    {
 	      bfd_vma off;
 
+#ifdef INCLUDE_SHMEDIA
+	      if (rel->r_addend)
+		{
+		  BFD_ASSERT (local_got_offsets != NULL
+			      && (local_got_offsets[symtab_hdr->sh_info
+						    + r_symndx]
+				  != (bfd_vma) -1));
+
+		  off = local_got_offsets[symtab_hdr->sh_info
+					  + r_symndx];
+		}
+	      else
+		{
+#endif
 	      BFD_ASSERT (local_got_offsets != NULL
 			  && local_got_offsets[r_symndx] != (bfd_vma) -1);
 
 	      off = local_got_offsets[r_symndx];
+#ifdef INCLUDE_SHMEDIA
+		}
+#endif
 
 	      /* The offset must always be a multiple of 4.  We use
 		 the least significant bit to record whether we have
@@ -3468,15 +4648,30 @@ sh_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		      ++srelgot->reloc_count;
 		    }
 
-		  local_got_offsets[r_symndx] |= 1;
+#ifdef INCLUDE_SHMEDIA
+		  if (rel->r_addend)
+		    local_got_offsets[symtab_hdr->sh_info + r_symndx] |= 1;
+		  else
+#endif
+		    local_got_offsets[r_symndx] |= 1;
 		}
 
 	      relocation = sgot->output_offset + off;
 	    }
 
+#ifdef GOT_BIAS
+ 	  relocation -= GOT_BIAS;
+#endif
+
 	  goto final_link_relocate;
 
 	case R_SH_GOTOFF:
+#ifdef INCLUDE_SHMEDIA
+	case R_SH_GOTOFF_LOW16:
+	case R_SH_GOTOFF_MEDLOW16:
+	case R_SH_GOTOFF_MEDHI16:
+	case R_SH_GOTOFF_HI16:
+#endif
 	  /* Relocation is relative to the start of the global offset
 	     table.  */
 
@@ -3493,9 +4688,21 @@ sh_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	     calculation.  */
 	  relocation -= sgot->output_section->vma;
 
+#ifdef GOT_BIAS
+	  relocation -= GOT_BIAS;
+#endif
+
+	  addend = rel->r_addend;
+
 	  goto final_link_relocate;
 
 	case R_SH_GOTPC:
+#ifdef INCLUDE_SHMEDIA
+	case R_SH_GOTPC_LOW16:
+	case R_SH_GOTPC_MEDLOW16:
+	case R_SH_GOTPC_MEDHI16:
+	case R_SH_GOTPC_HI16:
+#endif
 	  /* Use global offset table as symbol value.  */
 
 	  if (sgot == NULL)
@@ -3506,9 +4713,21 @@ sh_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	  relocation = sgot->output_section->vma;
 
+#ifdef GOT_BIAS
+	  relocation += GOT_BIAS;
+#endif
+
+	  addend = rel->r_addend;
+
 	  goto final_link_relocate;
 
 	case R_SH_PLT32:
+#ifdef INCLUDE_SHMEDIA
+	case R_SH_PLT_LOW16:
+	case R_SH_PLT_MEDLOW16:
+	case R_SH_PLT_MEDHI16:
+	case R_SH_PLT_HI16:
+#endif
 	  /* Relocation is to the entry for this symbol in the
 	     procedure linkage table.  */
 
@@ -3538,6 +4757,12 @@ sh_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	  relocation = (splt->output_section->vma
 			+ splt->output_offset
 			+ h->plt.offset);
+
+#ifdef INCLUDE_SHMEDIA
+	  relocation++;
+#endif
+
+	  addend = rel->r_addend;
 
 	  goto final_link_relocate;
 
@@ -3851,9 +5076,32 @@ sh_elf_check_relocs (abfd, info, sec, relocs)
 	{
 	  switch (ELF32_R_TYPE (rel->r_info))
 	    {
+	    case R_SH_GOTPLT32:
 	    case R_SH_GOT32:
 	    case R_SH_GOTOFF:
 	    case R_SH_GOTPC:
+#ifdef INCLUDE_SHMEDIA
+	    case R_SH_GOTPLT_LOW16:
+	    case R_SH_GOTPLT_MEDLOW16:
+	    case R_SH_GOTPLT_MEDHI16:
+	    case R_SH_GOTPLT_HI16:
+	    case R_SH_GOTPLT10BY4:
+	    case R_SH_GOTPLT10BY8:
+	    case R_SH_GOT_LOW16:
+	    case R_SH_GOT_MEDLOW16:
+	    case R_SH_GOT_MEDHI16:
+	    case R_SH_GOT_HI16:
+	    case R_SH_GOT10BY4:
+	    case R_SH_GOT10BY8:
+	    case R_SH_GOTOFF_LOW16:
+	    case R_SH_GOTOFF_MEDLOW16:
+	    case R_SH_GOTOFF_MEDHI16:
+	    case R_SH_GOTOFF_HI16:
+	    case R_SH_GOTPC_LOW16:
+	    case R_SH_GOTPC_MEDLOW16:
+	    case R_SH_GOTPC_MEDHI16:
+	    case R_SH_GOTPC_HI16:
+#endif
 	      elf_hash_table (info)->dynobj = dynobj = abfd;
 	      if (! _bfd_elf_create_got_section (dynobj, info))
 		return false;
@@ -3880,7 +5128,16 @@ sh_elf_check_relocs (abfd, info, sec, relocs)
 	    return false;
 	  break;
 
+	force_got:
 	case R_SH_GOT32:
+#ifdef INCLUDE_SHMEDIA
+	case R_SH_GOT_LOW16:
+	case R_SH_GOT_MEDLOW16:
+	case R_SH_GOT_MEDHI16:
+	case R_SH_GOT_HI16:
+	case R_SH_GOT10BY4:
+	case R_SH_GOT10BY8:
+#endif
 	  /* This symbol requires a global offset table entry.  */
 
 	  if (sgot == NULL)
@@ -3911,12 +5168,30 @@ sh_elf_check_relocs (abfd, info, sec, relocs)
 
 	  if (h != NULL)
 	    {
+#ifdef INCLUDE_SHMEDIA
+	      if (h->type == STT_DATALABEL)
+		{
+		  struct elf_sh_link_hash_entry *hsh;
+
+		  h = (struct elf_link_hash_entry *) h->root.u.i.link;
+		  hsh = (struct elf_sh_link_hash_entry *)h;
+		  if (hsh->datalabel_got_offset != (bfd_vma) -1)
+		    break;
+
+		  hsh->datalabel_got_offset = sgot->_raw_size;
+		}
+	      else
+		{
+#endif
 	      if (h->got.offset != (bfd_vma) -1)
 		{
 		  /* We have already allocated space in the .got.  */
 		  break;
 		}
 	      h->got.offset = sgot->_raw_size;
+#ifdef INCLUDE_SHMEDIA
+		}
+#endif
 
 	      /* Make sure this symbol is output as a dynamic symbol.  */
 	      if (h->dynindx == -1)
@@ -3938,19 +5213,46 @@ sh_elf_check_relocs (abfd, info, sec, relocs)
 
 		  size = symtab_hdr->sh_info;
 		  size *= sizeof (bfd_vma);
+#ifdef INCLUDE_SHMEDIA
+		  /* Reserve space for both the datalabel and
+		     codelabel local GOT offsets.  */
+		  size *= 2;
+#endif
 		  local_got_offsets = (bfd_vma *) bfd_alloc (abfd, size);
 		  if (local_got_offsets == NULL)
 		    return false;
 		  elf_local_got_offsets (abfd) = local_got_offsets;
 		  for (i = 0; i < symtab_hdr->sh_info; i++)
 		    local_got_offsets[i] = (bfd_vma) -1;
+#ifdef INCLUDE_SHMEDIA
+		  for (; i < 2 * symtab_hdr->sh_info; i++)
+		    local_got_offsets[i] = (bfd_vma) -1;
+#endif
 		}
+#ifdef INCLUDE_SHMEDIA
+	      if ((rel->r_addend & 1) != 0)
+		{
+		  if (local_got_offsets[symtab_hdr->sh_info
+					+ r_symndx] != (bfd_vma) -1)
+		    {
+		      /* We have already allocated space in the .got.  */
+		      break;
+		    }
+		  local_got_offsets[symtab_hdr->sh_info
+				    + r_symndx] = sgot->_raw_size;
+		}
+	      else
+		{
+#endif
 	      if (local_got_offsets[r_symndx] != (bfd_vma) -1)
 		{
 		  /* We have already allocated space in the .got.  */
 		  break;
 		}
 	      local_got_offsets[r_symndx] = sgot->_raw_size;
+#ifdef INCLUDE_SHMEDIA
+		}
+#endif
 
 	      if (info->shared)
 		{
@@ -3965,7 +5267,45 @@ sh_elf_check_relocs (abfd, info, sec, relocs)
 
 	  break;
 
+	case R_SH_GOTPLT32:
+#ifdef INCLUDE_SHMEDIA
+	case R_SH_GOTPLT_LOW16:
+	case R_SH_GOTPLT_MEDLOW16:
+	case R_SH_GOTPLT_MEDHI16:
+	case R_SH_GOTPLT_HI16:
+	case R_SH_GOTPLT10BY4:
+	case R_SH_GOTPLT10BY8:
+#endif
+	  /* If this is a local symbol, we resolve it directly without
+	     creating a procedure linkage table entry.  */
+
+	  if (h == NULL
+	      || ELF_ST_VISIBILITY (h->other) == STV_INTERNAL
+	      || ELF_ST_VISIBILITY (h->other) == STV_HIDDEN
+	      || ! info->shared
+	      || info->symbolic
+	      || h->dynindx == -1
+	      || h->got.offset != (bfd_vma) -1)
+	    goto force_got;
+
+	  /* Make sure this symbol is output as a dynamic symbol.  */
+	  if (h->dynindx == -1)
+	    {
+	      if (! bfd_elf32_link_record_dynamic_symbol (info, h))
+		return false;
+	    }
+
+	  h->elf_link_hash_flags |= ELF_LINK_HASH_NEEDS_PLT;
+
+	  break;
+
 	case R_SH_PLT32:
+#ifdef INCLUDE_SHMEDIA
+	case R_SH_PLT_LOW16:
+	case R_SH_PLT_MEDLOW16:
+	case R_SH_PLT_MEDHI16:
+	case R_SH_PLT_HI16:
+#endif
 	  /* This symbol requires a procedure linkage table entry.  We
 	     actually build the entry in adjust_dynamic_symbol,
 	     because this might be a case of linking PIC code which is
@@ -4093,6 +5433,7 @@ sh_elf_check_relocs (abfd, info, sec, relocs)
   return true;
 }
 
+#ifndef sh_elf_set_mach_from_flags
 static boolean
 sh_elf_set_mach_from_flags (abfd)
      bfd *abfd;
@@ -4128,7 +5469,9 @@ sh_elf_set_mach_from_flags (abfd)
     }
   return true;
 }
+#endif /* not sh_elf_set_mach_from_flags */
 
+#ifndef sh_elf_set_private_flags
 /* Function to keep SH specific file flags.  */
 
 static boolean
@@ -4143,7 +5486,9 @@ sh_elf_set_private_flags (abfd, flags)
   elf_flags_init (abfd) = true;
   return sh_elf_set_mach_from_flags (abfd);
 }
+#endif /* not sh_elf_set_private_flags */
 
+#ifndef sh_elf_copy_private_data
 /* Copy backend specific data from one object module to another */
 
 static boolean
@@ -4157,7 +5502,9 @@ sh_elf_copy_private_data (ibfd, obfd)
 
   return sh_elf_set_private_flags (obfd, elf_elfheader (ibfd)->e_flags);
 }
+#endif /* not sh_elf_copy_private_data */
 
+#ifndef sh_elf_merge_private_data
 /* This routine checks for linking big and little endian objects
    together, and for linking sh-dsp with sh3e / sh4 objects.  */
 
@@ -4198,6 +5545,7 @@ sh_elf_merge_private_data (ibfd, obfd)
 
   return sh_elf_set_mach_from_flags (obfd);
 }
+#endif /* not sh_elf_merge_private_data */
 
 /* Finish up dynamic symbol handling.  We set the contents of various
    dynamic sections here.  */
@@ -4244,6 +5592,10 @@ sh_elf_finish_dynamic_symbol (output_bfd, info, h, sym)
 	 The first three are reserved.  */
       got_offset = (plt_index + 3) * 4;
 
+#ifdef GOT_BIAS
+      got_offset -= GOT_BIAS;
+#endif
+
       /* Fill in the entry in the procedure linkage table.  */
       if (! info->shared)
 	{
@@ -4254,6 +5606,19 @@ sh_elf_finish_dynamic_symbol (output_bfd, info, h, sym)
 	    }
 	  memcpy (splt->contents + h->plt.offset, elf_sh_plt_entry,
 		  elf_sh_sizeof_plt (info));
+#ifdef INCLUDE_SHMEDIA
+	  movi_shori_putval (output_bfd,
+			     (sgot->output_section->vma
+			      + sgot->output_offset
+			      + got_offset),
+			     (splt->contents + h->plt.offset
+			      + elf_sh_plt_symbol_offset (info)));
+
+	  movi_shori_putval (output_bfd,
+			     (splt->output_section->vma + splt->output_offset),
+			     (splt->contents + h->plt.offset
+			      + elf_sh_plt_plt0_offset (info)));
+#else
 	  bfd_put_32 (output_bfd,
 		      (sgot->output_section->vma
 		       + sgot->output_offset
@@ -4265,6 +5630,7 @@ sh_elf_finish_dynamic_symbol (output_bfd, info, h, sym)
 		      (splt->output_section->vma + splt->output_offset),
 		      (splt->contents + h->plt.offset
 		       + elf_sh_plt_plt0_offset (info)));
+#endif
 	}
       else
 	{
@@ -4276,14 +5642,31 @@ sh_elf_finish_dynamic_symbol (output_bfd, info, h, sym)
 	    }
 	  memcpy (splt->contents + h->plt.offset, elf_sh_pic_plt_entry,
 		  elf_sh_sizeof_plt (info));
+#ifdef INCLUDE_SHMEDIA
+	  movi_shori_putval (output_bfd, got_offset,
+			     (splt->contents + h->plt.offset
+			      + elf_sh_plt_symbol_offset (info)));
+#else
 	  bfd_put_32 (output_bfd, got_offset,
 		      (splt->contents + h->plt.offset
 		       + elf_sh_plt_symbol_offset (info)));
+#endif
 	}
 
+#ifdef GOT_BIAS
+      got_offset += GOT_BIAS;
+#endif
+
+#ifdef INCLUDE_SHMEDIA
+      movi_shori_putval (output_bfd,
+			 plt_index * sizeof (Elf32_External_Rela),
+			 (splt->contents + h->plt.offset
+			  + elf_sh_plt_reloc_offset (info)));
+#else
       bfd_put_32 (output_bfd, plt_index * sizeof (Elf32_External_Rela),
 		  (splt->contents + h->plt.offset
 		   + elf_sh_plt_reloc_offset (info)));
+#endif
 
       /* Fill in the entry in the global offset table.  */
       bfd_put_32 (output_bfd,
@@ -4299,6 +5682,9 @@ sh_elf_finish_dynamic_symbol (output_bfd, info, h, sym)
 		      + got_offset);
       rel.r_info = ELF32_R_INFO (h->dynindx, R_SH_JMP_SLOT);
       rel.r_addend = 0;
+#ifdef GOT_BIAS
+      rel.r_addend = GOT_BIAS;
+#endif
       bfd_elf32_swap_reloca_out (output_bfd, &rel,
 				((Elf32_External_Rela *) srel->contents
 				 + plt_index));
@@ -4498,12 +5884,20 @@ sh_elf_finish_dynamic_sections (output_bfd, info)
 				       elf_sh_plt0_entry_le);
 		}
 	      memcpy (splt->contents, elf_sh_plt0_entry, PLT_ENTRY_SIZE);
+#ifdef INCLUDE_SHMEDIA
+	      movi_shori_putval (output_bfd,
+				 sgot->output_section->vma
+				 + sgot->output_offset,
+				 splt->contents
+				 + elf_sh_plt0_gotplt_offset (info));
+#else
 	      bfd_put_32 (output_bfd,
 			  sgot->output_section->vma + sgot->output_offset + 4,
 			  splt->contents + elf_sh_plt0_gotid_offset (info));
 	      bfd_put_32 (output_bfd,
 			  sgot->output_section->vma + sgot->output_offset + 8,
 			  splt->contents + elf_sh_plt0_linker_offset (info));
+#endif
 	    }
 
 	  /* UnixWare sets the entsize of .plt to 4, although that doesn't
