@@ -114,7 +114,7 @@ Wed Aug 29 12:05:13 2001  J"orn Rennecke <amylaar@redhat.com>
 
 2001-08-27  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
-	* tc_mips.c (load_address): Reflect change to MAX_GPREL_OFFSET.
+	* config/tc-mips.c (load_address): Reflect change to MAX_GPREL_OFFSET.
 	(macro): Reflect change to MAX_GPREL_OFFSET.
 
 2001-08-27  Torbjorn Granlund  <tege@swox.com>
@@ -168,9 +168,9 @@ Wed Aug 29 12:05:13 2001  J"orn Rennecke <amylaar@redhat.com>
 
 2001-08-26  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
-	* tc_mips.h (MAX_GPREL_OFFSET): Change it to the maximum allowed
-	value, not the word beyond maximum.
-	* tc_mips.c (macro_build_lui): Code cleanup.
+	* config/tc-mips.h (MAX_GPREL_OFFSET): Change it to the maximum
+	allowed value, not the word beyond maximum.
+	* config/tc-mips.c (macro_build_lui): Code cleanup.
 	(macro): Reflect change to MAX_GPREL_OFFSET.
 	(mips_ip): Check explicitly against S_EX_NONE.
 	(my_get_SmallExpression): parse for %gp_rel, not %gprel.
@@ -188,8 +188,8 @@ Wed Aug 29 12:05:13 2001  J"orn Rennecke <amylaar@redhat.com>
 
 2001-08-21  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
-	* tc_mips.c (md_begin): Warn about incompatibility between -march=FOO
-	and -mipsN option, continue with default ISA.
+	* config/tc-mips.c (md_begin): Warn about incompatibility between
+	-march=FOO and -mipsN option, continue with default ISA.
 
 2001-08-21  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
@@ -315,12 +315,13 @@ Wed Aug 29 12:05:13 2001  J"orn Rennecke <amylaar@redhat.com>
 
 2001-08-07  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
-	* tc-mips.c (macro_build): Replace magic constants by defines.
+	* config/tc-mips.c (macro_build): Replace magic constants by defines.
 	(mips_ip): Likewise. Typo.
 
 2001-08-04  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
-	* tc-mips.c (mips_abi_string): Initialize with NULL instead of 0.
+	* config/tc-mips.c (mips_abi_string): Initialize with NULL instead
+	of 0.
 	(RELAX_ENCODE): Replace bfd_vma by valueT.
 	(load_address): Formatting.
 	(macro): Likewise. Code cleanup. Typo.
