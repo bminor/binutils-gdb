@@ -1,3 +1,8 @@
+Wed Nov 18 15:03:17 1998  Andrew Cagney  <cagney@chook.cygnus.com>
+
+	* 29k-share/udi/udip2soc.c (UDIConnect): Replace sys_errlist with
+ 	strerror.
+
 Mon Nov 16 14:17:05 1998  Geoffrey Noer  <noer@cygnus.com>
 
 	* defs.h: if compiling under Cygwin, define __CYGWIN__ if

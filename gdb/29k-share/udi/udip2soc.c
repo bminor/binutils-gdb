@@ -53,7 +53,6 @@ static  char udip2soc_c_AMD[]="@(#)udip2soc.c	2.8, AMD";
 
 extern	int		errno;
 extern	int		sys_nerr;
-/*extern	char*		sys_errlist[];*/
 extern	int		udr_errno;
 extern	char*		getenv();
 
@@ -265,7 +264,7 @@ UDIConnect(Config, Session)
     if (soc_con[cnt].dfe_sd == -1)
       {
     	sprintf(dfe_errmsg, "DFE-ipc ERROR, socket() call failed %s ",
-		sys_errlist[errno]);
+		strerror (errno));
 	dfe_errno = UDIErrorUnknownError;
 	goto tip_failure;
       }
@@ -350,7 +349,7 @@ UDIConnect(Config, Session)
 	    if (pos == 0)
 	      {
 		sprintf(dfe_errmsg, "DFE-ipc ERROR, connect() call failed: %s",
-	    		sys_errlist[errno]);
+	    		strerror (errno));
 	        dfe_errno = UDIErrorCantConnect;
 		goto tip_failure;
 	      }
@@ -387,7 +386,7 @@ UDIConnect(Config, Session)
 		    sizeof(soc_con[cnt].tip_sockaddr_in)))
 	  {
     	    sprintf(dfe_errmsg, "DFE-ipc ERROR, connect() call failed %s ",
-		    sys_errlist[errno]);
+		    strerror (errno));
 	    dfe_errno = UDIErrorCantConnect;
 	    goto tip_failure;
 	  }
