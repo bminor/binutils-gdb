@@ -56,6 +56,9 @@ extern host_callback default_callback;
 
 static char *myname;
 
+/* bfd descriptor of the executable.  Same name as gdb uses.  */
+bfd *exec_bfd;
+
 
 /* NOTE: sim_size() and sim_trace() are going away */
 extern void sim_size PARAMS ((int i));
@@ -179,7 +182,7 @@ main (ac, av)
   sim_set_callbacks (NULL, &default_callback);
   default_callback.init (&default_callback);
 
-  abfd = bfd_openr (name, 0);
+  exec_bfd = abfd = bfd_openr (name, 0);
   if (!abfd) 
     {
       fprintf (stderr, "%s: can't open %s: %s\n", 

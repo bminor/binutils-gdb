@@ -1,3 +1,8 @@
+Wed Apr 23 17:54:27 1997  Mike Meissner  <meissner@cygnus.com>
+
+	* run.c (exec_bfd): Add back in.
+	(main): Set exec_bfd.
+
 Tue Apr 22 14:43:46 1997  Doug Evans  <dje@canuck.cygnus.com>
 
 	* sim-load.c (sim_load_file): #include <stdio.h> for NULL.
