@@ -572,7 +572,7 @@ print a tally of functions and the number of times each was called.
 If @var{symspec} is specified, print tally, but exclude matching symbols.
 
 @item -r
-@item --function-ordering
+@itemx --function-ordering
 The @samp{--function-ordering} option causes @code{gprof} to print a
 suggested function ordering for the program based on profiling data.
 This option suggests an ordering which may improve paging, tlb and
@@ -584,7 +584,7 @@ in a particular order is system dependent and out of the scope of this
 manual.
 
 @item -R @var{map_file}
-@item --file-ordering @var{map_file}
+@itemx --file-ordering @var{map_file}
 The @samp{--file-ordering} option causes @code{gprof} to print a
 suggested .o link line ordering for the program based on profiling data.
 This option suggests an ordering which may improve paging, tlb and

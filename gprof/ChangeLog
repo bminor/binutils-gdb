@@ -1,5 +1,10 @@
 2004-05-17  Ben Elliston  <bje@au.ibm.com>
 
+	* gprof.texi (Output Options): Correct last patch to use @itemx, not
+	@item, for options with long option alternatives.
+
+2004-05-17  Ben Elliston  <bje@au.ibm.com>
+
 	* gprof.texi (Introduction): Update synopsis.
 	(Output Options): Document -r and -R.
 	(Analysis Options): Document -t, --table-length.
