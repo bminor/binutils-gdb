@@ -9340,37 +9340,6 @@ md_pcrel_from (fixP)
   return fixP->fx_size + fixP->fx_where + fixP->fx_frag->fr_address;
 }
 
-/* This is called by emit_expr via TC_CONS_FIX_NEW when creating a
-   reloc for a cons.  We could use the definition there, except that
-   we want to handle 64 bit relocs specially.  */
-
-void
-cons_fix_new_mips (frag, where, nbytes, exp)
-     fragS *frag ATTRIBUTE_UNUSED;
-     int where;
-     unsigned int nbytes;
-     expressionS *exp;
-{
-#ifndef OBJ_ELF
-  /* If we are assembling in 32 bit mode, turn an 8 byte reloc into a
-     4 byte reloc.  */
-  if (nbytes == 8 && ! mips_64)
-    {
-      if (target_big_endian)
-	where += 4;
-      nbytes = 4;
-    }
-#endif
-
-  if (nbytes != 2 && nbytes != 4 && nbytes != 8)
-    as_bad (_("Unsupported reloc size %d"), nbytes);
-
-  fix_new_exp (frag_now, where, (int) nbytes, exp, 0,
-	       (nbytes == 2
-		? BFD_RELOC_16
-		: (nbytes == 4 ? BFD_RELOC_32 : BFD_RELOC_64)));
-}
-
 /* This is called before the symbol table is processed.  In order to
    work with gcc when using mips-tfile, we must keep all local labels.
    However, in other cases, we want to discard them.  If we were

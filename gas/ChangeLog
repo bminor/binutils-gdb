@@ -1,3 +1,9 @@
+2001-08-16  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
+	* config/tc-mips.c (cons_fix_new_mips): Remove.
+	* config/tc-mips.h (TC_CONS_FIX_NEW): Remove.
+	(cons_fix_new_mips): Remove.
+
 2001-08-14  Jeff Johnston  <jjohnstn@redhat.com>
 
         * expr.c (operand)[LITERAL_PREFIXDOLLAR_HEX]: Treat $L as

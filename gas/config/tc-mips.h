@@ -103,10 +103,6 @@ extern void mips_frob_file PARAMS ((void));
 extern void mips_frob_file_after_relocs PARAMS ((void));
 #endif
 
-#define TC_CONS_FIX_NEW cons_fix_new_mips
-extern void cons_fix_new_mips
-  PARAMS ((struct frag *, int, unsigned int, struct expressionS *));
-
 #define tc_fix_adjustable(fixp) mips_fix_adjustable (fixp)
 extern int mips_fix_adjustable PARAMS ((struct fix *));
 
