@@ -1,5 +1,9 @@
 Tue Mar  5 12:02:23 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* configure.in: Don't set SHLIB or SHLINK to an empty string,
+	since they appear as targets in Makefile.in.
+	* configure: Rebuild.
+
 	* sunos.c (sunos_scan_ext_relocs): If not making a shared library,
 	don't fiddle with a symbol which is not defined anywhere.
 

@@ -1,3 +1,9 @@
+Tue Mar  5 15:51:57 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in: Don't set SHLIB or SHLINK to an empty string,
+	since they appear as targets in Makefile.in.
+	* configure: Rebuild.
+
 Mon Feb 26 13:03:40 1996  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* mpw-make.sed: Edit out shared library support bits.
