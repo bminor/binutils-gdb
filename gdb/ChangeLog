@@ -1,3 +1,8 @@
+Thu Sep  5 17:05:13 1996  Geoffrey Noer  <noer@cygnus.com>
+
+	* config/i386/cygwin32.mh:
+	* config/powerpc/cygwin32.mh: build ser-tcp.o for both hosts
+
 Thu Sep  5 12:09:13 1996  Per Bothner  <bothner@deneb.cygnus.com>
 
 	* value.h (COERCE_REF):  Fix previous change.
