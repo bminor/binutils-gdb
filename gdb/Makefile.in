@@ -1948,9 +1948,6 @@ op50-rom.o: op50-rom.c $(defs_h) $(gdbcore_h) $(target_h) $(monitor_h) \
 	$(serial_h)
 # OBSOLETE os9kread.o: os9kread.c
 osabi.o: osabi.c $(defs_h) $(gdb_string_h) $(osabi_h) $(elf_bfd_h)
-osfsolib.o: osfsolib.c $(defs_h) $(gdb_string_h) $(symtab_h) $(bfd_h) \
-	$(symfile_h) $(objfiles_h) $(gdbcore_h) $(command_h) $(target_h) \
-	$(frame_h) $(gdb_regex_h) $(inferior_h) $(language_h) $(gdbcmd_h)
 p-lang.o: p-lang.c $(defs_h) $(gdb_string_h) $(symtab_h) $(gdbtypes_h) \
 	$(expression_h) $(parser_defs_h) $(language_h) $(p_lang_h) \
 	$(valprint_h)

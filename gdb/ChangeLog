@@ -1,3 +1,8 @@
+2002-09-16  Joel Brobecker  <brobecker@gnat.com>
+
+	* osfsolib.c: Remove file, replaced by solib-osf.c.
+	* Makefile.in: Remove compilation rules for osfsolib.c.
+
 2002-09-16  David Carlton  <carlton@math.stanford.edu>
 
 	* cp-valprint.c (cp_print_class_method): Correct args to
