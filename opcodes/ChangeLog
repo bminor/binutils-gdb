@@ -9,6 +9,9 @@ start-sanitize-sky
 Mon Feb 23 09:51:39 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* dvp-opc.c (extra_dma_flags): Fix typos.
+	(dma_operands): Fix word numbers.
+	(dma_opcodes): Likewise.
+	({insert,extract}_dma_flags): Likewise.
 
 end-sanitize-sky
 Mon Feb 23 10:34:58 1998  Jeffrey A Law  (law@cygnus.com)
