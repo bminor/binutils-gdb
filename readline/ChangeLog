@@ -1,3 +1,8 @@
+Tue Oct 31 10:38:58 1995  steve chamberlain  <sac@slash.cygnus.com>
+
+	* display.c, parens.c, readline.c, rldefs.h: Change use of
+	WIN32 to __WIN32__.
+
 Tue Oct 10 11:07:23 1995  Fred Fish  <fnf@cygnus.com>
 
 	* Makefile.in (BISON): Remove macro.
