@@ -4383,17 +4383,25 @@ SECTIONS @{ @dots{}
 @end group
 @end smallexample
 
-@item ALIGN(@var{exp})
-@kindex ALIGN(@var{exp})
+@item ALIGN(@var{align})
+@itemx ALIGN(@var{exp},@var{align})
+@kindex ALIGN(@var{align})
+@kindex ALIGN(@var{exp},@var{align})
 @cindex round up location counter
 @cindex align location counter
-Return the location counter (@code{.}) aligned to the next @var{exp}
-boundary.
-@code{ALIGN} doesn't change the value of the location counter---it just
-does arithmetic on it.  Here is an example which aligns the output
-@code{.data} section to the next @code{0x2000} byte boundary after the
-preceding section and sets a variable within the section to the next
-@code{0x8000} boundary after the input sections:
+@cindex round up expression
+@cindex align expression
+Return the location counter (@code{.}) or arbitrary expression aligned
+to the next @var{align} boundary.  The single operand @code{ALIGN}
+doesn't change the value of the location counter---it just does
+arithmetic on it.  The two operand @code{ALIGN} allows an arbitrary
+expression to be aligned upwards (@code{ALIGN(@var{align})} is
+equivalent to @code{ALIGN(., @var{align})}).
+
+Here is an example which aligns the output @code{.data} section to the
+next @code{0x2000} byte boundary after the preceding section and sets a
+variable within the section to the next @code{0x8000} boundary after the
+input sections:
 @smallexample
 @group
 SECTIONS @{ @dots{}

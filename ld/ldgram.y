@@ -804,6 +804,8 @@ exp	:
 			{ $$ = exp_unop(ABSOLUTE, $3); }
 	|	ALIGN_K '(' exp ')'
 			{ $$ = exp_unop(ALIGN_K,$3); }
+	|	ALIGN_K '(' exp ',' exp ')'
+			{ $$ = exp_binop(ALIGN_K,$3,$5); }
 	|	DATA_SEGMENT_ALIGN '(' exp ',' exp ')'
 			{ $$ = exp_binop (DATA_SEGMENT_ALIGN, $3, $5); }
 	|	DATA_SEGMENT_END '(' exp ')'

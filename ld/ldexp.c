@@ -394,6 +394,10 @@ fold_binary (etree_type *tree,
 		result = other;
 	      break;
 
+	    case ALIGN_K:
+	      result.value = align_n (result.value, other.value);
+	      break;
+	      
 	    case DATA_SEGMENT_ALIGN:
 	      if (allocation_done != lang_first_phase_enum
 		  && current_section == abs_output_section
