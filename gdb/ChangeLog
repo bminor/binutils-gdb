@@ -1,3 +1,12 @@
+Thu Oct 22 01:01:24 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* Makefile.in (HFILES):  Add nm-i386sco.h.
+	* dwarfread.c:  include <sys/types.h> for SCO.
+	* infptrace.c:  Don't include ptrace.h under SCO.
+	* config/i386sco.mh:  Use -D_POSIX_SOURCE instead of -posix for
+	gcc.
+	* config/i386v.mt:  Add exec.o to TDEPFILES.
+
 Wed Oct 21 19:08:20 1992  Stu Grossman  (grossman at cygnus.com)
 
 	* i386v-nat.c:  Remove space from front of #endif.
