@@ -3,15 +3,6 @@
 
 *** Changes since GDB-4.18:
 
-* New features
-
-On SVR4 native platforms (such as Solaris), if you attach to a process
-without first loading a symbol file, GDB will now attempt to locate and
-load symbols from the running process's executable file.
-
-C++ support has been greatly improved. Overload resolution now works properly
-in almost all cases. RTTI support is on the way.
-
 * New native configurations
 
 ARM GNU/Linux					arm*-*-linux*
@@ -31,6 +22,17 @@ Convex						c1-*-*, c2-*-*
 Pyramid						pyramid-*-*
 ARM RISCix					arm-*-* (as host)
 Tahoe						tahoe-*-*
+
+* New features for SVR4
+
+On SVR4 native platforms (such as Solaris), if you attach to a process
+without first loading a symbol file, GDB will now attempt to locate and
+load symbols from the running process's executable file.
+
+* Many C++ enhancements
+
+C++ support has been greatly improved. Overload resolution now works properly
+in almost all cases. RTTI support is on the way.
 
 * Remote targets can connect to a sub-program
 
@@ -68,6 +70,16 @@ accept a range of breakpoints, e.g. ``5-7''.  The tracepoint command
 The ``apropos'' command searches through command names and
 documentation strings, printing out matches, making it much easier to
 try to find a command that does what you are looking for.
+
+* New MI interface
+
+A new machine oriented interface (MI) has been added to GDB.  This
+interface is designed for debug environments running GDB as a separate
+process.  This is part of the long term libGDB project.  See
+gdb/mi/gdbmi.texinfo for further information.  It can be enabled by
+configuring with:
+
+	.../configure --enable-gdbmi
 
 *** Changes in GDB-4.18:
 
