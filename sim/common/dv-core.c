@@ -57,8 +57,6 @@ dv_core_attach_address_callback (struct hw *me,
   /* NOTE: At preset the space is assumed to be zero.  Perhaphs the
      space should be mapped onto something for instance: space0 -
      unified memory; space1 - IO memory; ... */
-  if (space != 0)
-    hw_abort (me, "Hey! Unknown space %d", space);
   sim_core_attach (hw_system (me),
 		   NULL, /*cpu*/
 		   level,
