@@ -1,3 +1,7 @@
+2002-11-12  Segher Boessenkool  <segher@koffie.nl>
+
+	* ppc-dis.c (print_insn_powerpc): Correct condition register display.
+
 2002-11-07  Aldy Hernandez  <aldyh@redhat.com>
 
 	* ppc-opc.c (EVUIMM_4): Change bit size to 32.
