@@ -1,3 +1,9 @@
+2005-03-14  Jan-Benedict Glaw  <jbglaw@lug-owl.de>
+
+	* vax-dis.c: Fix spelling error
+	(print_insn_vax): Use ".word 0x0012 # Entry mask: r1 r2 >" instead
+	of just "Entry mask: < r1 ... >"
+
 2005-03-12  Zack Weinberg  <zack@codesourcery.com>
 
 	* arm-dis.c (arm_opcodes): Document %E and %V.
