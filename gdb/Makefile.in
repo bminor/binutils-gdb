@@ -1278,7 +1278,7 @@ alphabsd-tdep.o: alphabsd-tdep.c $(defs_h) $(regcache_h) alphabsd-tdep.h
 alphafbsd-tdep.o: alphafbsd-tdep.c $(defs_h) $(value_h) $(alpha_tdep_h)
 
 alphanbsd-tdep.o: alphanbsd-tdep.c $(defs_h) $(gdbcore_h) $(regcache_h) \
-	$(value_h) $(alpha_tdep_h) alphabsd-tdep.h nbsd-tdep.h
+	$(value_h) $(alpha_tdep_h) solib-svr4.h alphabsd-tdep.h nbsd-tdep.h
 
 annotate.o: annotate.c $(defs_h) $(annotate_h) $(value_h) $(target_h) $(gdbtypes_h)
 
@@ -2071,7 +2071,7 @@ sh-tdep.o: sh-tdep.c $(bfd_h) $(dis_asm_h) \
 	$(regcache_h) $(doublest_h) $(sh_tdep_h)
 
 shnbsd-tdep.o: shnbsd-tdep.c $(defs_h) $(gdbcore_h) $(regcache_h) \
-	$(value_h) $(sh_tdep_h) shnbsd-tdep.h nbsd-tdep.h
+	$(value_h) $(sh_tdep_h) solib-svr4.h shnbsd-tdep.h nbsd-tdep.h
 
 shnbsd-nat.o: shnbsd-nat.c $(defs_h) $(inferior_h) shnbsd-tdep.h
 

@@ -24,6 +24,8 @@
 #include "regcache.h"
 #include "value.h"
 
+#include "solib-svr4.h"
+
 #include "alpha-tdep.h"
 #include "alphabsd-tdep.h"
 #include "nbsd-tdep.h"

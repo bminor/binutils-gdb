@@ -1,5 +1,12 @@
 2002-05-22  Jason Thorpe  <thorpej@wasabisystems.com>
 
+	* Makefile.in (alphanbsd-tdep.o, shnbsd-tdep.o): Add solib-svr4.h
+	to dependency list.
+	* alphanbsd-tdep.c: Include solib-svr4.h.
+	* shnbsd-tdep.c: Ditto.
+
+2002-05-22  Jason Thorpe  <thorpej@wasabisystems.com>
+
 	* Makefile.in (armnbsd-tdep.o): Add solib-svr4.h and
 	nbsd-tdep.h to dependency list.
 	* configure.host (arm*-*-netbsdelf*, arm*-*-netbsd*,
