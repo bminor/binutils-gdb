@@ -1,3 +1,18 @@
+2004-03-15  Andrew Cagney  <cagney@redhat.com>
+
+	* Makefile.in (frame-unwind.o): Update dependencies.
+	* frame-unwind.c: Include "gdb_obstack.h".
+	(frame_unwind_init): Replace "gdbarch" parameter with an "obstack"
+	parameter.
+	(append_predicate): Delete function.
+	(struct frame_unwind_table_entry): New structure.
+	(struct frame_unwind_table): Replace "sniffer" with "head" and
+	"tail".
+	(frame_unwind_append_sniffer): Update.
+	(frame_unwind_find_by_frame): Update.
+	(_initialize_frame_unwind): Registe frame_unwind_init using
+	gdbarch_data_register_pre_init.
+
 2004-03-15  Mark Kettenis  <kettenis@gnu.org>
 
 	* i386bsd-nat.c: Update copyright year.

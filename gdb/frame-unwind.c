@@ -1,6 +1,6 @@
 /* Definitions for frame unwinder, for GDB, the GNU debugger.
 
-   Copyright 2003 Free Software Foundation, Inc.
+   Copyright 2003, 2004 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -24,31 +24,30 @@
 #include "frame-unwind.h"
 #include "gdb_assert.h"
 #include "dummy-frame.h"
+#include "gdb_obstack.h"
 
 static struct gdbarch_data *frame_unwind_data;
 
-struct frame_unwind_table
+struct frame_unwind_table_entry
 {
-  frame_unwind_sniffer_ftype **sniffer;
-  int nr;
+  frame_unwind_sniffer_ftype *sniffer;
+  struct frame_unwind_table_entry *next;
 };
 
-/* Append a predicate to the end of the table.  */
-static void
-append_predicate (struct frame_unwind_table *table,
-		  frame_unwind_sniffer_ftype *sniffer)
+struct frame_unwind_table
 {
-  table->sniffer = xrealloc (table->sniffer, ((table->nr + 1)
-					      * sizeof (frame_unwind_sniffer_ftype *)));
-  table->sniffer[table->nr] = sniffer;
-  table->nr++;
-}
+  struct frame_unwind_table_entry *head;
+  struct frame_unwind_table_entry **tail;
+};
 
 static void *
-frame_unwind_init (struct gdbarch *gdbarch)
+frame_unwind_init (struct obstack *obstack)
 {
-  struct frame_unwind_table *table = XCALLOC (1, struct frame_unwind_table);
-  append_predicate (table, dummy_frame_sniffer);
+  struct frame_unwind_table *table
+    = OBSTACK_ZALLOC (obstack, struct frame_unwind_table);
+  table->head = OBSTACK_ZALLOC (obstack, struct frame_unwind_table_entry);
+  table->head->sniffer = dummy_frame_sniffer;
+  table->tail = &table->head->next;
   return table;
 }
 
@@ -56,16 +55,10 @@ void
 frame_unwind_append_sniffer (struct gdbarch *gdbarch,
 			     frame_unwind_sniffer_ftype *sniffer)
 {
-  struct frame_unwind_table *table =
-    gdbarch_data (gdbarch, frame_unwind_data);
-  if (table == NULL)
-    {
-      /* ULGH, called during architecture initialization.  Patch
-         things up.  */
-      table = frame_unwind_init (gdbarch);
-      deprecated_set_gdbarch_data (gdbarch, frame_unwind_data, table);
-    }
-  append_predicate (table, sniffer);
+  struct frame_unwind_table *table = gdbarch_data (gdbarch, frame_unwind_data);
+  (*table->tail) = GDBARCH_OBSTACK_ZALLOC (gdbarch, struct frame_unwind_table_entry);
+  (*table->tail)->sniffer = sniffer;
+  table->tail = &((*table->tail)->next);
 }
 
 const struct frame_unwind *
@@ -74,16 +67,17 @@ frame_unwind_find_by_frame (struct frame_info *next_frame)
   int i;
   struct gdbarch *gdbarch = get_frame_arch (next_frame);
   struct frame_unwind_table *table = gdbarch_data (gdbarch, frame_unwind_data);
+  struct frame_unwind_table_entry *entry;
   if (!DEPRECATED_USE_GENERIC_DUMMY_FRAMES && legacy_frame_p (gdbarch))
     /* Seriously old code.  Don't even try to use this new mechanism.
        (Note: The variable USE_GENERIC_DUMMY_FRAMES is deprecated, not
        the dummy frame mechanism.  All architectures should be using
        generic dummy frames).  */
     return legacy_saved_regs_unwind;
-  for (i = 0; i < table->nr; i++)
+  for (entry = table->head; entry != NULL; entry = entry->next)
     {
       const struct frame_unwind *desc;
-      desc = table->sniffer[i] (next_frame);
+      desc = entry->sniffer (next_frame);
       if (desc != NULL)
 	return desc;
     }
@@ -95,5 +89,5 @@ extern initialize_file_ftype _initialize_frame_unwind; /* -Wmissing-prototypes *
 void
 _initialize_frame_unwind (void)
 {
-  frame_unwind_data = gdbarch_data_register_post_init (frame_unwind_init);
+  frame_unwind_data = gdbarch_data_register_pre_init (frame_unwind_init);
 }
