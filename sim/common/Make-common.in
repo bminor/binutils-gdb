@@ -479,6 +479,8 @@ stamp-h: config.in config.status
 .gdbinit: # config.status $(srccom)/gdbinit.in
 	CONFIG_FILES=$@:../common/gdbinit.in CONFIG_HEADERS= $(SHELL) ./config.status
 
+# start-sanitize-cygnus
+
 # CGEN support
 
 SCHEME = @SCHEME@
@@ -525,5 +527,7 @@ cgen-decode: force
 		$(SCHEME) $(SCHEMEFLAGS) \
 		$(srccgen) $(CGEN_VERBOSE) \
 		$(arch) "$(FLAGS)" $(cpu) $(mach) "$(SUFFIX)" ignored
+
+# end-sanitize-cygnus
 
 ## End COMMON_POST_CONFIG_FRAG

@@ -1,7 +1,9 @@
 Mon Jan 19 12:45:45 1998  Doug Evans  <devans@seba.cygnus.com>
 
+start-sanitize-cygnus
 	* Make-common.in (cgen-{arch,cpu,decode}): New targets.
 	* cgen.sh: New file.
+end-sanitize-cygnus
 	* cgen-scache.h: Deleted.
 	* cgen-scache.c: Only compile contents if WITH_SCACHE.
 	(scache_init): Use runtime computed size of SCACHE.

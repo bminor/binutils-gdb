@@ -15,6 +15,13 @@
 
 Do-first:
 
+cygnus_files="cgen.sh"
+if ( echo $* | grep keep\-cygnus > /dev/null ) ; then
+        keep_these_too="${cygnus_files} ${keep_these_too}"
+else
+        lose_these_too="${cygnus_files} ${lose_these_too}"
+fi
+
 # All files listed between the "Things-to-keep:" line and the
 # "Files-to-sed:" line will be kept.  All other files will be removed.
 # Directories listed in this section will have their own Sanitize
@@ -28,7 +35,6 @@ Make-common.in
 Makefile.in
 aclocal.m4
 callback.c
-cgen.sh
 cgen-mem.h
 cgen-ops.h
 cgen-scache.c
@@ -129,6 +135,34 @@ else
                         fi
                         cp $i new
                         sed '/start\-sanitize\-d30v/,/end-\sanitize\-d30v/d' < $i > new
+                        if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
+                                if [ -n "${verbose}" ] ; then
+                                        echo Caching $i in .Recover...
+                                fi
+                                mv $i .Recover
+                        fi
+                        mv new $i
+                fi
+        done
+fi
+
+cygnus_files="ChangeLog Make-common.in"
+if ( echo $* | grep keep\-cygnus > /dev/null ) ; then
+        for i in $cygnus_files ; do
+                if test ! -d $i && (grep sanitize-cygnus $i > /dev/null) ; then
+                        if [ -n "${verbose}" ] ; then
+                                echo Keeping cygnus stuff in $i
+                        fi
+                fi
+        done
+else
+        for i in $cygnus_files ; do
+                if test ! -d $i && (grep sanitize-cygnus $i > /dev/null) ; then
+                        if [ -n "${verbose}" ] ; then
+                                echo Removing traces of \"cygnus\" from $i...
+                        fi
+                        cp $i new
+                        sed '/start\-sanitize\-cygnus/,/end-\sanitize\-cygnus/d' < $i > new
                         if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
                                 if [ -n "${verbose}" ] ; then
                                         echo Caching $i in .Recover...
