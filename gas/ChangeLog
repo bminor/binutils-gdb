@@ -1,3 +1,10 @@
+2004-07-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-ia64.c (start_unwind_section): Set the linked-to
+	section.
+	(ia64_elf_section_change_hook): Set the linked-to section for
+	SHT_IA_64_UNWIND.
+
 2004-07-26  Dmitry Diky  <diwil@spec.ru>
 
 	* config/tc-msp430.c: Add new subtargets: msp430x1610,

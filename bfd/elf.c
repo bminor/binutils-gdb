@@ -2790,6 +2790,7 @@ assign_section_numbers (bfd *abfd)
       i_shdrp[t->strtab_section] = &t->strtab_hdr;
       t->symtab_hdr.sh_link = t->strtab_section;
     }
+
   for (sec = abfd->sections; sec; sec = sec->next)
     {
       struct bfd_elf_section_data *d = elf_section_data (sec);
@@ -2816,6 +2817,40 @@ assign_section_numbers (bfd *abfd)
 	{
 	  d->rel_hdr2->sh_link = t->symtab_section;
 	  d->rel_hdr2->sh_info = d->this_idx;
+	}
+
+      /* We need to set up sh_link for SHF_LINK_ORDER.  */
+      if ((d->this_hdr.sh_flags & SHF_LINK_ORDER) != 0)
+	{
+	  s = elf_linked_to_section (sec);
+	  if (s)
+	    d->this_hdr.sh_link = elf_section_data (s)->this_idx;
+	  else
+	    {
+	      struct bfd_link_order *p;
+
+	      /* Find out what the corresponding section in output
+		 is.  */
+	      for (p = sec->link_order_head; p != NULL; p = p->next)
+		{
+		  s = p->u.indirect.section;
+		  if (p->type == bfd_indirect_link_order
+		      && (bfd_get_flavour (s->owner)
+			  == bfd_target_elf_flavour))
+		    {
+		      Elf_Internal_Shdr ** const elf_shdrp
+			= elf_elfsections (s->owner);
+		      int elfsec
+			= _bfd_elf_section_from_bfd_section (s->owner, s);
+		      elfsec = elf_shdrp[elfsec]->sh_link;
+		      BFD_ASSERT (elfsec != 0);
+		      s = elf_shdrp[elfsec]->bfd_section->output_section;
+		      BFD_ASSERT (s != NULL);
+		      d->this_hdr.sh_link = elf_section_data (s)->this_idx;
+		      break;
+		    }
+		}
+	    }
 	}
 
       switch (d->this_hdr.sh_type)

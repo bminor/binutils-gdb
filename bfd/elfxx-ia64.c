@@ -1365,9 +1365,7 @@ elfNN_ia64_final_write_processing (abfd, linker)
      bfd_boolean linker ATTRIBUTE_UNUSED;
 {
   Elf_Internal_Shdr *hdr;
-  const char *sname;
-  asection *text_sect, *s;
-  size_t len;
+  asection *s;
 
   for (s = abfd->sections; s; s = s->next)
     {
@@ -1375,64 +1373,11 @@ elfNN_ia64_final_write_processing (abfd, linker)
       switch (hdr->sh_type)
 	{
 	case SHT_IA_64_UNWIND:
-	  /* See comments in gas/config/tc-ia64.c:dot_endp on why we
-	     have to do this.  */
-	  sname = bfd_get_section_name (abfd, s);
-	  len = sizeof (ELF_STRING_ia64_unwind) - 1;
-	  if (sname && strncmp (sname, ELF_STRING_ia64_unwind, len) == 0)
-	    {
-	      sname += len;
-
-	      if (sname[0] == '\0')
-		/* .IA_64.unwind -> .text */
-		text_sect = bfd_get_section_by_name (abfd, ".text");
-	      else
-		/* .IA_64.unwindFOO -> FOO */
-		text_sect = bfd_get_section_by_name (abfd, sname);
-	    }
-	  else if (sname
-		   && (len = sizeof (ELF_STRING_ia64_unwind_once) - 1,
-		       strncmp (sname, ELF_STRING_ia64_unwind_once, len)) == 0)
-	    {
-	      /* .gnu.linkonce.ia64unw.FOO -> .gnu.linkonce.t.FOO */
-	      size_t len2 = sizeof (".gnu.linkonce.t.") - 1;
-	      char *once_name = bfd_malloc (len2 + strlen (sname + len) + 1);
-
-	      if (once_name != NULL)
-		{
-		  memcpy (once_name, ".gnu.linkonce.t.", len2);
-		  strcpy (once_name + len2, sname + len);
-		  text_sect = bfd_get_section_by_name (abfd, once_name);
-		  free (once_name);
-		}
-	      else
-		/* Should only happen if we run out of memory, in
-		   which case we're probably toast anyway.  Try to
-		   cope by finding the section the slow way.  */
-		for (text_sect = abfd->sections;
-		     text_sect != NULL;
-		     text_sect = text_sect->next)
-		  {
-		    if (strncmp (bfd_section_name (abfd, text_sect),
-				 ".gnu.linkonce.t.", len2) == 0
-			&& strcmp (bfd_section_name (abfd, text_sect) + len2,
-				   sname + len) == 0)
-		      break;
-		  }
-	    }
-	  else
-	    /* last resort: fall back on .text */
-	    text_sect = bfd_get_section_by_name (abfd, ".text");
-
-	  if (text_sect)
-	    {
-	      /* The IA-64 processor-specific ABI requires setting
-		 sh_link to the unwind section, whereas HP-UX requires
-		 sh_info to do so.  For maximum compatibility, we'll
-		 set both for now... */
-	      hdr->sh_link = elf_section_data (text_sect)->this_idx;
-	      hdr->sh_info = elf_section_data (text_sect)->this_idx;
-	    }
+	  /* The IA-64 processor-specific ABI requires setting sh_link
+	     to the unwind section, whereas HP-UX requires sh_info to
+	     do so.  For maximum compatibility, we'll set both for
+	     now... */
+	  hdr->sh_info = hdr->sh_link;
 	  break;
 	}
     }

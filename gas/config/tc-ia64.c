@@ -3403,6 +3403,8 @@ start_unwind_section (const segT text_seg, int sec_index)
       bfd_set_section_flags (stdoutput, now_seg,
 			     SEC_LOAD | SEC_ALLOC | SEC_READONLY);
     }
+
+  elf_linked_to_section (now_seg) = text_seg;
 }
 
 static void
@@ -11022,6 +11024,9 @@ ia64_float_to_chars_littleendian (char *lit, LITTLENUM_TYPE *words,
 void
 ia64_elf_section_change_hook  (void)
 {
+  if (elf_section_type (now_seg) == SHT_IA_64_UNWIND
+      && elf_linked_to_section (now_seg) == NULL)
+    elf_linked_to_section (now_seg) = text_section;
   dot_byteorder (-1);
 }
 

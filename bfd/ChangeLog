@@ -1,3 +1,15 @@
+2004-07-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf-bfd.h (bfd_elf_section_data): Add a pointer for the
+	linked-to section.
+	(elf_linked_to_section): New.
+
+	* elf.c (assign_section_numbers): Set up sh_link for
+	SHF_LINK_ORDER.
+
+	* elfxx-ia64.c (elfNN_ia64_final_write_processing): Set sh_info
+	to sh_link for SHT_IA_64_UNWIND sections.
+
 2004-07-22  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elflink.c (elf_fixup_link_order): Add _() to error message.
