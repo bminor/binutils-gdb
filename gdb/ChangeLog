@@ -1,3 +1,13 @@
+Tue Jan 25 11:31:53 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* paread.c (read_unwind_info): Just assign to objfile->obj_private,
+	not OBJ_UNWIND_INFO.  Assigning to a cast is a GCC-ism which
+	the HP compiler in ANSI mode doesn't like.
+
+	* main.c: When defaulting HAVE_SIGSETMASK based on USG, just do it
+	based on USG, rather than defining HAVE_SIGSETMASK to an expression
+	containing defined.  This is for the HP compiler in ANSI mode.
+
 Mon Jan 24 20:51:29 1994  John Gilmore  (gnu@cygnus.com)
 
 	* sparc-nat.c (fetch_inferior_registers, store_inferior_registers):

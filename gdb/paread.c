@@ -400,7 +400,7 @@ read_unwind_info (objfile)
 	 compare_unwind_entries);
 
   /* Keep a pointer to the unwind information.  */
-  OBJ_UNWIND_INFO (objfile) = ui;
+  objfile->obj_private = (PTR) ui;
 }
 
 /* Scan and build partial symbols for a symbol file.

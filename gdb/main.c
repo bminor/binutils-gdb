@@ -324,7 +324,11 @@ static void stop_sig PARAMS ((int));
 
 /* Some System V have job control but not sigsetmask(). */
 #if !defined (HAVE_SIGSETMASK)
-#define HAVE_SIGSETMASK !defined (USG)
+#if !defined (USG)
+#define HAVE_SIGSETMASK 1
+#else
+#define HAVE_SIGSETMASK 0
+#endif
 #endif
 
 #if 0 == (HAVE_SIGSETMASK)
