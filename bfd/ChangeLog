@@ -1,3 +1,12 @@
+Tue Apr  9 11:44:21 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* aoutx.h (aout_link_add_symbols): Always call add_dynamic_symbols
+	entry point, not just for DYNAMIC objects.
+	* sunos.c (sunos_add_dynamic_symbols): Always call
+	sunos_create_dynamic_sections.  If called with a non DYNAMIC
+	object, don't do anything else.
+	(sunos_add_one_symbol): Don't call sunos_create_dynamic_sections.
+
 Mon Apr  8 12:09:36 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.in: Permit --enable-shared to specify a list of
