@@ -19,7 +19,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "defs.h"
-#include "rs6k-opcode.h"
+#include "opcode/rs6k.h"
 
 /* Print the rs6k instruction at address MEMADDR in debugged memory,
    on STREAM.  Returns length of the instruction, in bytes.  */
