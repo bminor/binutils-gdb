@@ -44,7 +44,6 @@ delta88.mh
 delta88.mt
 es1800.mt
 go32.mh
-h8300hms.mt
 hp300bsd.mh
 hp300bsd.mt
 hp300hpux.mh
@@ -129,7 +128,6 @@ vaxbsd.mh
 vaxult.mh
 vxworks68.mt
 vxworks960.mt
-z8ksim.mt
 
 Do-last:
 
