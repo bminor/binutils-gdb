@@ -64,10 +64,15 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define FUNCTION_START_OFFSET 0
 
 /* Advance PC across any function entry prologue instructions
-   to reach some "real" code.  */
+   to reach some "real" code.  SKIP_PROLOGUE_FRAMELESS_P advances
+   the PC past some of the prologue, but stops as soon as it
+   knows that the function has a frame.  Its result is equal
+   to its input PC if the function is frameless, unequal otherwise.  */
 
 #define SKIP_PROLOGUE(pc) \
-  { pc = skip_prologue (pc); }
+  { pc = skip_prologue (pc, 0); }
+#define SKIP_PROLOGUE_FRAMELESS_P(pc) \
+  { pc = skip_prologue (pc, 1); }
 extern CORE_ADDR skip_prologue ();
 
 /* Immediately after a function call, return the saved pc.
@@ -570,7 +575,7 @@ extern void single_step ();
 
 /* We need two arguments (in general) to the "info frame" command.
    Note that the definition of this macro implies that there exists a
-   function "setup_arbitrary_frame" in mach-dep.c */
+   function "setup_arbitrary_frame" in sparc-tdep.c */
 
 #define FRAME_SPECIFICATION_DYADIC
 

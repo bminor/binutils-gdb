@@ -5,19 +5,19 @@
 
 This file is part of GDB.
 
-GDB is free software; you can redistribute it and/or modify
+This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 1, or (at your option)
-any later version.
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
 
-GDB is distributed in the hope that it will be useful,
+This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with GDB; see the file COPYING.  If not, write to
-the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+along with this program; if not, write to the Free Software
+Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include <stdio.h>
 #include "defs.h"
@@ -127,9 +127,13 @@ sparc_frame_chain (thisframe)
      FRAME thisframe;
 {
   CORE_ADDR retval;
-  read_memory ((CORE_ADDR)&(((struct rwindow *)(thisframe->frame))->rw_in[6]),
+  int err;
+  err = target_read_memory
+	      ((CORE_ADDR)&(((struct rwindow *)(thisframe->frame))->rw_in[6]),
 	       &retval,
 	       sizeof (CORE_ADDR));
+  if (err)
+    return 0;
   return retval;
 }
 
@@ -186,7 +190,7 @@ setup_arbitrary_frame (frame, stack)
     fatal ("internal: create_new_frame returned invalid frame id");
   
   fid->bottom = stack;
-
+  fid->pc = FRAME_SAVED_PC (fid);
   return fid;
 }
 
@@ -286,11 +290,18 @@ do_restore_insn ()
   restore_inferior_status (&inf_status);
 }
 
-/* This routine should be more specific in it's actions; making sure
+/* Given a pc value, skip it forward past the function prologue by
+   disassembling instructions that appear to be a prologue.
+
+   If FRAMELESS_P is set, we are only testing to see if the function
+   is frameless.  This allows a quicker answer.
+
+   This routine should be more specific in its actions; making sure
    that it uses the same register in the initial prologue section.  */
 CORE_ADDR 
-skip_prologue (start_pc)
+skip_prologue (start_pc, frameless_p)
      CORE_ADDR start_pc;
+     int frameless_p;
 {
   union
     {
@@ -315,8 +326,6 @@ skip_prologue (start_pc)
     } x;
   int dest = -1;
   CORE_ADDR pc = start_pc;
-  /* Have we found a save instruction?  */
-  int found_save = 0;
 
   x.i = read_memory_integer (pc, 4);
 
@@ -345,9 +354,15 @@ skip_prologue (start_pc)
      as there isn't any sign extension).  */
   if (x.add.op == 2 && (x.add.op3 ^ 32) == 28)
     {
-      found_save = 1;
       pc += 4;
+      if (frameless_p)			/* If the save is all we care about, */
+	return pc;			/* return before doing more work */
       x.i = read_memory_integer (pc, 4);
+    }
+  else
+    {
+      /* Without a save instruction, it's not a prologue.  */
+      return start_pc;
     }
 
   /* Now we need to recognize stores into the frame from the input
@@ -365,11 +380,7 @@ skip_prologue (start_pc)
       pc += 4;
       x.i = read_memory_integer (pc, 4);
     }
-  if (found_save)
-    return pc;
-  else
-    /* Without a save instruction, it's not a prologue.  */
-    return start_pc;
+  return pc;
 }
 
 /* Check instruction at ADDR to see if it is an annulled branch.
