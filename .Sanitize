@@ -24,6 +24,8 @@ Do-first:
 Things-to-keep:
 
 .cvsignore
+COPYING
+COPYING.LIB
 CYGNUS
 ChangeLog
 INSTALL
