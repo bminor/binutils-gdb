@@ -1,3 +1,8 @@
+2001-07-26  Alan Modra  <amodra@bigpond.net.au>
+
+	* gas/i386/relax.s: Test rs_space.
+	* gas/i386/relax.d: Update.
+
 2001-07-23  Alan Modra  <amodra@bigpond.net.au>
 
 	* gas/i386/opcode.d: Tweak lgdt for 2001-07-18 change.
