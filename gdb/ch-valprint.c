@@ -176,49 +176,6 @@ chill_val_print_array_elements (type, valaddr, address, stream,
     }
 }
 
-/* In certain cases it could happen, that an array type doesn't
-   have a length (this have to do with seizing). The reason is
-   shown in the following stabs:
-
-   .stabs "m_x:Tt81=s36i:1,0,32;ar:82=ar80;0;1;83=xsm_struct:,32,256;;",128,0,25,0
-  
-   .stabs "m_struct:Tt83=s16f1:9,0,16;f2:85=*84,32,32;f3:84,64,64;;",128,0,10,0
-
-   When processing t81, the array ar80 doesn't have a length, cause
-   struct m_struct is specified extern at thse moment. Afterwards m_struct
-   gets specified and updated, but not the surrounding type.
-
-   So we walk through array's till we find a type with a length and
-   calculate the array length.
-
-   FIXME: Where may this happen too ?
-   */
-
-static void
-calculate_array_length (type)
-     struct type *type;
-{
-  struct type *target_type;
-  struct type *range_type;
-  LONGEST lower_bound, upper_bound;
-
-  if (TYPE_CODE (type) != TYPE_CODE_ARRAY)
-    /* not an array, stop processing */
-    return;
-
-  target_type = TYPE_TARGET_TYPE (type);
-  range_type = TYPE_FIELD_TYPE (type, 0);
-  lower_bound = TYPE_FIELD_BITPOS (range_type, 0);
-  upper_bound = TYPE_FIELD_BITPOS (range_type, 1);
-
-  if (TYPE_LENGTH (target_type) == 0 &&
-      TYPE_CODE (target_type) == TYPE_CODE_ARRAY)
-    /* we've got another array */
-    calculate_array_length (target_type);
-
-  TYPE_LENGTH (type) = (upper_bound - lower_bound + 1) * TYPE_LENGTH (target_type);
-}
-
 /* Print data of type TYPE located at VALADDR (within GDB), which came from
    the inferior at address ADDRESS, onto stdio stream STREAM according to
    FORMAT (a letter or 0 for natural format).  The data at VALADDR is in
@@ -254,10 +211,6 @@ chill_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
   switch (TYPE_CODE (type))
     {
     case TYPE_CODE_ARRAY:
-      if (TYPE_LENGTH (type) == 0)
-	/* see comment function calculate_array_length */
-	calculate_array_length (type);
-
       if (TYPE_LENGTH (type) > 0 && TYPE_LENGTH (TYPE_TARGET_TYPE (type)) > 0)
 	{
 	  if (prettyprint_arrays)

@@ -1,3 +1,12 @@
+Wed Apr 10 02:56:06 1996  Wilfried Moser (Alcatel)  <moser@rtl.cygnus.com>
+
+	* ch-valprint.c (chill_val_print): Remove call to calculate_array_length.
+	(calculate_array_length): Move function from here ...
+
+	* ch-exp.c (calculate_array_length): ... to here.
+	(parse_primval): If we have a symbol with an array type
+	and the length is 0, call calculate_array_length.
+
 Tue Apr  9 01:23:05 1996  Wilfried Moser (Alcatel)  <moser@rtl.cygnus.com>
 
 	* eval.c (evaluate_subexp_standard): In case of TYPE_CODE_SET:
