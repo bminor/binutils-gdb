@@ -37,6 +37,7 @@ aclocal.m4
 alpha.c
 basic_blocks.c
 basic_blocks.h
+bbconv.pl
 bsd_callg_bl.m
 call_graph.c
 call_graph.h

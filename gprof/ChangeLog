@@ -1,5 +1,9 @@
 Tue Feb  3 14:25:25 1998  Brent Baccala  <baccala@freesoft.org>
 
+	* bbconv.pl: New file.
+	* Makefile.am (EXTRA_DIST): Add bbconv.pl.
+	* Makefile.in: Rebuild.
+
 	* gprof.texi: Extensive additions to document all arguments and
 	output formats.
 

@@ -87,7 +87,7 @@ noinst_HEADERS = \
 	core.h gmon.h gmon_io.h gmon_out.h gprof.h hertz.h hist.h \
 	search_list.h source.h sym_ids.h symtab.h utils.h
 
-EXTRA_DIST = flat_bl.c bsd_callg_bl.c fsf_callg_bl.c
+EXTRA_DIST = flat_bl.c bsd_callg_bl.c fsf_callg_bl.c bbconv.pl
 
 BUILT_SOURCES = flat_bl.c bsd_callg_bl.c fsf_callg_bl.c
 
