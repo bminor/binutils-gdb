@@ -27,8 +27,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "target.h"
 
 static CORE_ADDR next_insn PARAMS ((CORE_ADDR memaddr,
-				    unsigned long *pword1,
-				    unsigned long *pword2));
+				    unsigned int *pword1,
+				    unsigned int *pword2));
 
 /* gdb960 is always running on a non-960 host.  Check its characteristics.
    This routine must be called as part of gdb initialization.  */
@@ -710,7 +710,7 @@ mem( memaddr, word1, word2, noprint )
 
 static CORE_ADDR
 next_insn (memaddr, pword1, pword2)
-     unsigned long *pword1, *pword2;
+     unsigned int *pword1, *pword2;
      CORE_ADDR memaddr;
 {
   int len;

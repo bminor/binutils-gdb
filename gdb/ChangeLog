@@ -1,3 +1,9 @@
+Wed Feb  7 11:31:26 1996  Stu Grossman  (grossman@cygnus.com)
+
+	* symtab.c (gdb_mangle_name):  Change opname var to be const to
+	match return val of cplus_mangle_name.
+	* i960-tdep.c:  Change arg types of next_insn to match callers.
+
 Wed Feb  7 07:34:24 1996  Fred Fish  <fnf@cygnus.com>
 
 	* config/i386/linux.mh (XM_CLIBS, GDBSERVER_LIBS):  Remove.  These
