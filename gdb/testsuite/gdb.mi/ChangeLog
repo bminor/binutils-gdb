@@ -1,3 +1,11 @@
+2002-09-10  Keith Seitz  <keiths@redhat.com>
+
+	* mi-simplerun.exp (test_controlled_execution): Follow renaming of
+	mi_run_to to mi_execute_to.
+	* mi-var-cmd.exp: Likewise.
+	* mi0-simplerun.exp: Likewise.
+	* mi0-var-cmd.exp: Likewise.
+
 2002-09-03  Keith Seitz  <keiths@redhat.com>
 
 	* gdb680.exp: New file to test to check for uiout list/tuple
