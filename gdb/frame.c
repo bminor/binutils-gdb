@@ -40,6 +40,97 @@
 #include "command.h"
 #include "gdbcmd.h"
 
+/* We keep a cache of stack frames, each of which is a "struct
+   frame_info".  The innermost one gets allocated (in
+   wait_for_inferior) each time the inferior stops; current_frame
+   points to it.  Additional frames get allocated (in get_prev_frame)
+   as needed, and are chained through the next and prev fields.  Any
+   time that the frame cache becomes invalid (most notably when we
+   execute something, but also if we change how we interpret the
+   frames (e.g. "set heuristic-fence-post" in mips-tdep.c, or anything
+   which reads new symbols)), we should call reinit_frame_cache.  */
+
+struct frame_info
+{
+  /* Level of this frame.  The inner-most (youngest) frame is at level
+     0.  As you move towards the outer-most (oldest) frame, the level
+     increases.  This is a cached value.  It could just as easily be
+     computed by counting back from the selected frame to the inner
+     most frame.  */
+  /* NOTE: cagney/2002-04-05: Perhaphs a level of ``-1'' should be
+     reserved to indicate a bogus frame - one that has been created
+     just to keep GDB happy (GDB always needs a frame).  For the
+     moment leave this as speculation.  */
+  int level;
+
+  /* The frame's type.  */
+  /* FIXME: cagney/2003-04-02: Should instead be returning
+     ->unwind->type.  Unfortunatly, legacy code is still explicitly
+     setting the type using the method deprecated_set_frame_type.
+     Eliminate that method and this field can be eliminated.  */
+  enum frame_type type;
+
+  /* For each register, address of where it was saved on entry to the
+     frame, or zero if it was not saved on entry to this frame.  This
+     includes special registers such as pc and fp saved in special
+     ways in the stack frame.  The SP_REGNUM is even more special, the
+     address here is the sp for the previous frame, not the address
+     where the sp was saved.  */
+  /* Allocated by frame_saved_regs_zalloc () which is called /
+     initialized by DEPRECATED_FRAME_INIT_SAVED_REGS(). */
+  CORE_ADDR *saved_regs;	/*NUM_REGS + NUM_PSEUDO_REGS*/
+
+  /* Anything extra for this structure that may have been defined in
+     the machine dependent files. */
+  /* Allocated by frame_extra_info_zalloc () which is called /
+     initialized by DEPRECATED_INIT_EXTRA_FRAME_INFO */
+  struct frame_extra_info *extra_info;
+
+  /* If dwarf2 unwind frame informations is used, this structure holds
+     all related unwind data.  */
+  struct context *context;
+
+  /* The frame's low-level unwinder and corresponding cache.  The
+     low-level unwinder is responsible for unwinding register values
+     for the previous frame.  The low-level unwind methods are
+     selected based on the presence, or otherwize, of register unwind
+     information such as CFI.  */
+  void *prologue_cache;
+  const struct frame_unwind *unwind;
+
+  /* Cached copy of the previous frame's resume address.  */
+  struct {
+    int p;
+    CORE_ADDR value;
+  } prev_pc;
+  
+  /* Cached copy of the previous frame's function address.  */
+  struct
+  {
+    CORE_ADDR addr;
+    int p;
+  } prev_func;
+  
+  /* This frame's ID.  */
+  struct
+  {
+    int p;
+    struct frame_id value;
+  } this_id;
+  
+  /* The frame's high-level base methods, and corresponding cache.
+     The high level base methods are selected based on the frame's
+     debug info.  */
+  const struct frame_base *base;
+  void *base_cache;
+
+  /* Pointers to the next (down, inner, younger) and previous (up,
+     outer, older) frame_info's in the frame cache.  */
+  struct frame_info *next; /* down, inner, younger */
+  int prev_p;
+  struct frame_info *prev; /* up, outer, older */
+};
+
 /* Flag to control debugging.  */
 
 static int frame_debug;

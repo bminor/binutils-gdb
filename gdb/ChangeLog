@@ -1,5 +1,10 @@
 2003-04-12  Andrew Cagney  <cagney@redhat.com>
 
+	* frame.h (struct frame_info): Move definition from here ...
+	* frame.c (struct frame_info): ... to here.
+
+2003-04-12  Andrew Cagney  <cagney@redhat.com>
+
 	* gdbthread.h (save_infrun_state): Delete parameter
 	"prev_func_start".
 	(struct thread_info): Delete field "prev_func_start".
