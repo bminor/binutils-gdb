@@ -444,12 +444,12 @@ extern struct ui_file *gdb_stdin;
 /* Serious error notifications */
 extern struct ui_file *gdb_stderr;
 /* Log/debug/trace messages that should bypass normal stdout/stderr
-   filtering.  For momement, always call this stream using
+   filtering.  For moment, always call this stream using
    *_unfiltered. In the very near future that restriction shall be
    removed - either call shall be unfiltered. (cagney 1999-06-13). */
 extern struct ui_file *gdb_stdlog;
 /* Target output that should bypass normal stdout/stderr filtering.
-   For momement, always call this stream using *_unfiltered. In the
+   For moment, always call this stream using *_unfiltered. In the
    very near future that restriction shall be removed - either call
    shall be unfiltered. (cagney 1999-07-02). */
 extern struct ui_file *gdb_stdtarg;
