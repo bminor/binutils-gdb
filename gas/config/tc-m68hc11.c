@@ -58,15 +58,16 @@ const char FLT_CHARS[] = "dD";
    size expressions.  This version only supports two kinds.  */
 
 /* The fields are:
-   How far Forward this mode will reach:
-   How far Backward this mode will reach:
-   How many bytes this mode will add to the size of the frag
-   Which mode to go to if the offset won't fit in this one    */
+   How far Forward this mode will reach.
+   How far Backward this mode will reach.
+   How many bytes this mode will add to the size of the frag.
+   Which mode to go to if the offset won't fit in this one.  */
 
-relax_typeS md_relax_table[] = {
-  {1, 1, 0, 0},			/* First entries aren't used */
-  {1, 1, 0, 0},			/* For no good reason except */
-  {1, 1, 0, 0},			/* that the VAX doesn't either */
+relax_typeS md_relax_table[] =
+{
+  {1, 1, 0, 0},			/* First entries aren't used.  */
+  {1, 1, 0, 0},			/* For no good reason except.  */
+  {1, 1, 0, 0},			/* that the VAX doesn't either.  */
   {1, 1, 0, 0},
 
   /* Relax for bcc <L>.
@@ -147,36 +148,30 @@ typedef struct alias
 }
 alias;
 
-static alias alias_opcodes[] = {
+static alias alias_opcodes[] =
+{
   {"cpd", "cmpd"},
   {"cpx", "cmpx"},
   {"cpy", "cmpy"},
   {0, 0}
 };
 
-/* local functions */
-static register_id reg_name_search PARAMS ((char *name));
-static register_id register_name PARAMS (());
-static int check_range PARAMS ((long num, int mode));
-
+/* Local functions.  */
+static register_id reg_name_search PARAMS ((char *));
+static register_id register_name PARAMS ((void));
+static int check_range PARAMS ((long, int));
 static void print_opcode_list PARAMS ((void));
-
 static void get_default_target PARAMS ((void));
-static void print_insn_format PARAMS ((char *name));
-static int get_operand PARAMS ((operand * op, int first, long opmode));
-static void fixup8 PARAMS ((expressionS * oper, int mode, int opmode));
-static void fixup16 PARAMS ((expressionS * oper, int mode, int opmode));
+static void print_insn_format PARAMS ((char *));
+static int get_operand PARAMS ((operand *, int, long));
+static void fixup8 PARAMS ((expressionS *, int, int));
+static void fixup16 PARAMS ((expressionS *, int, int));
 static struct m68hc11_opcode *find_opcode
-PARAMS (
-	(struct m68hc11_opcode_def * opc, operand operands[],
-	 int *nb_operands));
+  PARAMS ((struct m68hc11_opcode_def *, operand *, int *));
 static void build_jump_insn
-PARAMS (
-	(struct m68hc11_opcode * opcode, operand operands[], int nb_operands,
-	 int optimize));
-
-static void build_insn PARAMS ((struct m68hc11_opcode * opcode,
-			       operand operands[], int nb_operands));
+  PARAMS ((struct m68hc11_opcode *, operand *, int, int));
+static void build_insn
+  PARAMS ((struct m68hc11_opcode *, operand *, int));
 
 /* Controls whether relative branches can be turned into long branches.
    When the relative offset is too large, the insn are changed:
@@ -186,7 +181,7 @@ static void build_insn PARAMS ((struct m68hc11_opcode * opcode,
            jmp L
     dbcc -> db!cc +3
             jmp L
- 
+
   Setting the flag forbidds this.  */
 static short flag_fixed_branchs = 0;
 
@@ -234,7 +229,8 @@ static struct m68hc11_opcode *m68hc11_sorted_opcodes;
    pseudo-op name without dot
    function to call to execute this pseudo-op
    Integer arg to pass to the function.  */
-const pseudo_typeS md_pseudo_table[] = {
+const pseudo_typeS md_pseudo_table[] =
+{
   /* The following pseudo-ops are supported for MRI compatibility.  */
   {"fcb", cons, 1},
   {"fdb", cons, 2},
@@ -245,13 +241,13 @@ const pseudo_typeS md_pseudo_table[] = {
 
   {0, 0, 0}
 };
-
 
 /* Options and initialization.  */
 
 CONST char *md_shortopts = "Sm:";
 
-struct option md_longopts[] = {
+struct option md_longopts[] =
+{
 #define OPTION_FORCE_LONG_BRANCH (OPTION_MD_BASE)
   {"force-long-branchs", no_argument, NULL, OPTION_FORCE_LONG_BRANCH},
 
@@ -302,7 +298,6 @@ m68hc11_mach ()
 {
   return 0;
 }
-
 
 void
 md_show_usage (stream)
@@ -436,14 +431,13 @@ md_undefined_symbol (name)
   return 0;
 }
 
-/* Equal to MAX_PRECISION in atof-ieee.c */
+/* Equal to MAX_PRECISION in atof-ieee.c.  */
 #define MAX_LITTLENUMS 6
 
 /* Turn a string in input_line_pointer into a floating point constant
    of type TYPE, and store the appropriate bytes in *LITP.  The number
    of LITTLENUMS emitted is stored in *SIZEP.  An error message is
    returned, or NULL on OK.  */
-
 char *
 md_atof (type, litP, sizeP)
      char type;
@@ -506,7 +500,6 @@ md_section_align (seg, addr)
   int align = bfd_get_section_alignment (stdoutput, seg);
   return ((addr + (1 << align) - 1) & (-1 << align));
 }
-
 
 static int
 cmp_opcode (op1, op2)
@@ -620,7 +613,6 @@ void
 m68hc11_init_after_args ()
 {
 }
-
 
 /* Builtin help.  */
 
@@ -747,10 +739,8 @@ print_opcode_list ()
   int example = flag_print_opcodes == 2;
 
   if (example)
-    {
-      printf (_("# Example of `%s' instructions\n\t.sect .text\n_start:\n"),
-	      default_cpu);
-    }
+    printf (_("# Example of `%s' instructions\n\t.sect .text\n_start:\n"),
+	    default_cpu);
 
   opcodes = m68hc11_sorted_opcodes;
 
@@ -782,7 +772,6 @@ print_opcode_list ()
     }
   printf ("\n");
 }
-
 
 /* Print the instruction format.  This operation is called when some
    instruction is not correct.  Instruction format is printed as an
@@ -816,7 +805,6 @@ print_insn_format (name)
     }
   while (strcmp (opcode->name, name) == 0);
 }
-
 
 /* Analysis of 68HC11 and 68HC12 operands.  */
 
@@ -856,7 +844,7 @@ skip_whites (p)
   return p;
 }
 
-/* register_name() checks the string at input_line_pointer
+/* Check the string at input_line_pointer
    to see if it is a valid register name.  */
 static register_id
 register_name ()
@@ -874,7 +862,7 @@ register_name ()
   if (c)
     *p++ = 0;
 
-  /* look to see if it's in the register table.  */
+  /* Look to see if it's in the register table.  */
   reg_number = reg_name_search (input_line_pointer);
   if (reg_number != REG_NONE)
     {
@@ -890,8 +878,7 @@ register_name ()
   return reg_number;
 }
 
-/* get_operands parses a string of operands and returns
-   an array of expressions.
+/* Parse a string of operands and return an array of expressions.
 
    Operand              mode[0]         mode[1]       exp[0]       exp[1]
    #n                   M6811_OP_IMM16  -             O_*
@@ -905,10 +892,7 @@ register_name ()
    n,r+                 M6812_POST_INC  " "
    A,r B,r D,r          M6811_OP_REG    M6812_OP_REG  O_register   O_register
    [D,r]                M6811_OP_IDX_2  M6812_OP_REG  O_register   O_register
-   [n,r]                M6811_OP_IDX_1  M6812_OP_REG  O_constant   O_register
-
-*/
-
+   [n,r]                M6811_OP_IDX_1  M6812_OP_REG  O_constant   O_register  */
 static int
 get_operand (oper, which, opmode)
      operand *oper;
@@ -942,7 +926,7 @@ get_operand (oper, which, opmode)
       if (!(opmode & (M6811_OP_IMM8 | M6811_OP_IMM16 | M6811_OP_BITMASK)))
 	{
 	  as_bad (_("Immediate operand is not allowed for operand %d."),
-                  which);
+		  which);
 	  return -1;
 	}
 
@@ -1115,7 +1099,7 @@ get_operand (oper, which, opmode)
 	  input_line_pointer = p;
 	  reg = register_name ();
 
-	  /* Backtrack... */
+	  /* Backtrack.  */
 	  if (which == 0 && opmode & M6812_OP_IDX_P2
 	      && reg != REG_X && reg != REG_Y
 	      && reg != REG_PC && reg != REG_SP)
@@ -1185,9 +1169,7 @@ get_operand (oper, which, opmode)
   /* If the mode is not known until now, this is either a label
      or an indirect address.  */
   if (mode == M6811_OP_NONE)
-    {
-      mode = M6811_OP_IND16 | M6811_OP_JUMP_REL;
-    }
+    mode = M6811_OP_IND16 | M6811_OP_JUMP_REL;
 
   p = input_line_pointer;
   while (*p == ' ' || *p == '\t')
@@ -1209,15 +1191,11 @@ check_range (num, mode)
 {
   /* Auto increment and decrement are ok for [-8..8] without 0.  */
   if (mode & M6812_AUTO_INC_DEC)
-    {
-      return (num != 0 && num <= 8 && num >= -8);
-    }
+    return (num != 0 && num <= 8 && num >= -8);
 
   /* The 68HC12 supports 5, 9 and 16-bits offsets.  */
   if (mode & (M6812_INDEXED_IND | M6812_INDEXED | M6812_OP_IDX))
-    {
-      mode = M6811_OP_IND16;
-    }
+    mode = M6811_OP_IND16;
 
   if (mode & M6812_OP_JUMP_REL16)
     mode = M6811_OP_IND16;
@@ -1255,7 +1233,6 @@ check_range (num, mode)
       return 0;
     }
 }
-
 
 /* Gas fixup generation.  */
 
@@ -1342,7 +1319,7 @@ fixup16 (oper, mode, opmode)
       if (!check_range (oper->X_add_number, mode))
 	{
 	  as_bad (_("Operand out of 16-bit range: `%ld'."),
-                  oper->X_add_number);
+		  oper->X_add_number);
 	}
       number_to_chars_bigendian (f, oper->X_add_number & 0x0FFFF, 2);
     }
@@ -1365,7 +1342,6 @@ fixup16 (oper, mode, opmode)
       as_fatal (_("Operand `%x' not recognized in fixup16."), oper->X_op);
     }
 }
-
 
 /* 68HC11 and 68HC12 code generation.  */
 
@@ -1389,11 +1365,11 @@ convert_branch (code)
 
 /* Start a new insn that contains at least 'size' bytes.  Record the
    line information of that insn in the dwarf2 debug sections.  */
-static char*
+static char *
 m68hc11_new_insn (size)
      int size;
 {
-  char* f;
+  char *f;
 
   f = frag_more (size);
 
@@ -1401,7 +1377,7 @@ m68hc11_new_insn (size)
   if (debug_type == DEBUG_DWARF2)
     {
       bfd_vma addr;
-          
+
       dwarf2_where (&debug_line);
       addr = frag_now->fr_address + frag_now_fix () - size;
       dwarf2_gen_line_info (addr, &debug_line);
@@ -1666,7 +1642,7 @@ build_indexed_byte (op, format, move_insn)
 	  if (!check_range (val, mode))
 	    {
 	      as_bad (_("Increment/decrement value is out of range: `%ld'."),
-                      val);
+		      val);
 	    }
 	  if (mode & (M6812_POST_INC | M6812_PRE_INC))
 	    byte |= (val - 1) & 0x07;
@@ -1772,9 +1748,10 @@ build_indexed_byte (op, format, move_insn)
 	}
       f = frag_more (1);
       number_to_chars_bigendian (f, byte, 1);
-      /*
-         fix_new_exp (frag_now, f - frag_now->fr_literal, 2,
-         &op->exp, false, BFD_RELOC_16); */
+#if 0
+      fix_new_exp (frag_now, f - frag_now->fr_literal, 2,
+		   &op->exp, false, BFD_RELOC_16);
+#endif
       frag_var (rs_machine_dependent, 2, 2,
 		ENCODE_RELAX (STATE_INDEXED_OFFSET, STATE_UNDF),
 		op->exp.X_add_symbol, val, f);
@@ -1988,7 +1965,6 @@ build_insn (opcode, operands, nb_operands)
       fixup16 (&operands[1].exp, M6811_OP_IND16, operands[1].mode);
     }
 }
-
 
 /* Opcode identification and operand analysis.  */
 
@@ -2144,7 +2120,6 @@ find (opc, operands, nb_operands)
   return opcode;
 }
 
-
 /* Find the real opcode and its associated operands.  We use a progressive
    approach here.  On entry, 'opc' points to the first opcode in the
    table that matches the opcode name in the source line.  We try to
@@ -2175,9 +2150,7 @@ find_opcode (opc, operands, nb_operands)
 
       result = get_operand (&operands[i], i, opc->format);
       if (result <= 0)
-	{
-	  return 0;
-	}
+	return 0;
 
       /* Special case where the bitmask of the bclr/brclr
          instructions is not introduced by #.
@@ -2194,21 +2167,19 @@ find_opcode (opc, operands, nb_operands)
 	{
 	  opcode = find (opc, operands, i);
 	  if (opcode)
-	    {
-	      return opcode;
-	    }
+	    return opcode;
 	}
 
       if (*input_line_pointer == ',')
 	input_line_pointer++;
     }
+  
   return 0;
 }
 
 #define M6812_XBCC_MARKER (M6812_OP_TBCC_MARKER \
                            | M6812_OP_DBCC_MARKER \
                            | M6812_OP_IBCC_MARKER)
-
 
 /* Gas line assembler entry point.  */
 
@@ -2231,7 +2202,7 @@ md_assemble (str)
   int branch_optimize = 0;
   int alias_id = -1;
 
-  /* Drop leading whitespace */
+  /* Drop leading whitespace.  */
   while (*str == ' ')
     str++;
 
@@ -2343,7 +2314,7 @@ md_assemble (str)
   if (alias_id >= 0)
     {
       char *f = m68hc11_new_insn (m68hc12_alias[alias_id].size);
-      
+
       number_to_chars_bigendian (f, m68hc12_alias[alias_id].code1, 1);
       if (m68hc12_alias[alias_id].size > 1)
 	number_to_chars_bigendian (f + 1, m68hc12_alias[alias_id].code2, 1);
@@ -2378,10 +2349,8 @@ md_assemble (str)
   else
     build_insn (opcode, operands, nb_operands);
 }
-
 
 /* Relocation, relaxation and frag conversions.  */
-
 long
 md_pcrel_from_section (fixp, sec)
      fixS *fixp;
@@ -2390,7 +2359,7 @@ md_pcrel_from_section (fixp, sec)
   int adjust;
   if (fixp->fx_addsy != (symbolS *) NULL
       && (!S_IS_DEFINED (fixp->fx_addsy)
-          || (S_GET_SEGMENT (fixp->fx_addsy) != sec)))
+	  || (S_GET_SEGMENT (fixp->fx_addsy) != sec)))
     return 0;
 
   adjust = fixp->fx_pcrel_adjust;
@@ -2480,7 +2449,7 @@ md_convert_frag (abfd, sec, fragP)
     case ENCODE_RELAX (STATE_CONDITIONAL_BRANCH, STATE_WORD):
       /* Invert branch.  */
       fragP->fr_opcode[0] ^= 1;
-      fragP->fr_opcode[1] = 3;	/* Branch offset */
+      fragP->fr_opcode[1] = 3;	/* Branch offset.  */
       buffer_address[0] = M6811_JMP;
       fix_new (fragP, fragP->fr_fix + 1, 2,
 	       fragP->fr_symbol, fragP->fr_offset, 0, BFD_RELOC_16);
@@ -2597,8 +2566,8 @@ md_estimate_size_before_relax (fragP, segment)
 	}
       else
 	{
-	  fragP->fr_opcode[0] ^= 1;	/* Reverse sense of branch. */
-	  fragP->fr_opcode[1] = 3;	/* Skip next jmp insn (3 bytes) */
+	  fragP->fr_opcode[0] ^= 1;	/* Reverse sense of branch.  */
+	  fragP->fr_opcode[1] = 3;	/* Skip next jmp insn (3 bytes).  */
 
 	  /* Don't use fr_opcode[2] because this may be
              in a different frag.  */
@@ -2643,7 +2612,7 @@ md_estimate_size_before_relax (fragP, segment)
 	}
       else
 	{
-	  fragP->fr_opcode[0] ^= 0x20;	/* Reverse sense of branch. */
+	  fragP->fr_opcode[0] ^= 0x20;	/* Reverse sense of branch.  */
 	  fragP->fr_opcode[1] = 3;	/* Skip next jmp insn (3 bytes).  */
 
 	  /* Don't use fr_opcode[2] because this may be
@@ -2751,16 +2720,20 @@ md_apply_fix (fixp, valuep)
 
     case BFD_RELOC_M68HC11_HI8:
       value = value >> 8;
-      /* Fall through */
+      /* Fall through.  */
 
     case BFD_RELOC_M68HC11_LO8:
     case BFD_RELOC_8:
-      /*bfd_putb8 ((bfd_vma) value, (unsigned char *) where); */
+#if 0
+      bfd_putb8 ((bfd_vma) value, (unsigned char *) where);
+#endif
       ((bfd_byte *) where)[0] = (bfd_byte) value;
       break;
 
     case BFD_RELOC_8_PCREL:
-      /*bfd_putb8 ((bfd_vma) value, (unsigned char *) where); */
+#if 0
+      bfd_putb8 ((bfd_vma) value, (unsigned char *) where);
+#endif
       ((bfd_byte *) where)[0] = (bfd_byte) value;
 
       if (value < -128 || value > 127)
@@ -2786,6 +2759,7 @@ md_apply_fix (fixp, valuep)
       as_fatal (_("Line %d: unknown relocation type: 0x%x."),
 		fixp->fx_line, fixp->fx_r_type);
     }
+  
   return 0;
 }
 
@@ -2801,12 +2775,12 @@ m68hc11_end_of_source ()
   segT saved_seg;
   subsegT saved_subseg;
   segT debug_info;
-  char* p;
+  char *p;
   long total_size = 0;
-  
+
   if (debug_type != DEBUG_DWARF2)
     return;
-  
+
   dwarf2_finish ();
 
   saved_seg = now_seg;
@@ -2817,7 +2791,7 @@ m68hc11_end_of_source ()
   subseg_set (debug_info, 0);
   p = frag_more (10);
   total_size = 12;
-  
+
 # define STUFF(val,size)	md_number_to_chars (p, val, size); p += size;
   STUFF (total_size, 4); /* Length of compilation unit.  */
   STUFF (2, 2); /* Dwarf version */
