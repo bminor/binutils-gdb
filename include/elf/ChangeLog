@@ -1,3 +1,26 @@
+1998-07-21 13:07  Ulrich Drepper  <drepper@cygnus.com>
+
+	* arm.h: New file.
+	* d10v.h: New file.
+start-sanitize-d30v
+	* d30v.h: New file.
+end-sanitize-d30v
+	* i386.h: New file.
+	* m68k.h: New file.
+	* mn10200.h: New file.
+	* sh.h: New file.
+
+	* mips.h: Add R_MIPS_* and SHT_MIPS_* entries.
+
+	* mn10300.h: Add R_MN10300_* entries.
+
+	* ppc.h: Add R_PPC_* entries.
+
+1998-07-20 07:11  Ulrich Drepper  <drepper@cygnus.com>
+
+	* mips.h: Add ODK_*, OEX_*, OPAD_*, OHW_*, and OGP_* constants.
+	Define Elf32_External_Lib.
+
 1998-07-19 15:24  Ulrich Drepper  <drepper@cygnus.com>
 
 	* mips.h (PT_MIPS_OPTIONS): New symbol.
