@@ -1189,6 +1189,7 @@ const struct language_defn unknown_language_defn = {
   type_check_off,
   unk_lang_parser,
   unk_lang_error,
+  evaluate_subexp_standard,
   unk_lang_printchar,		/* Print character constant */
   unk_lang_printstr,
   unk_lang_create_fundamental_type,
@@ -1215,6 +1216,7 @@ const struct language_defn auto_language_defn = {
   type_check_off,
   unk_lang_parser,
   unk_lang_error,
+  evaluate_subexp_standard,
   unk_lang_printchar,		/* Print character constant */
   unk_lang_printstr,
   unk_lang_create_fundamental_type,
@@ -1240,6 +1242,7 @@ const struct language_defn local_language_defn = {
   type_check_off,
   unk_lang_parser,
   unk_lang_error,
+  evaluate_subexp_standard,
   unk_lang_printchar,		/* Print character constant */
   unk_lang_printstr,
   unk_lang_create_fundamental_type,

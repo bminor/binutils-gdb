@@ -1,5 +1,20 @@
 Sun Feb 12 11:03:47 1995  Per Bothner  <bothner@kalessin.cygnus.com>
 
+	* language.h (struct language_defn):  New field evaluate_exp.
+	* c-lang.c (c_language_defn, cplus_language_defn, asm_langauge_defn),
+	f-lang.c (f_language_defn), language.c (unknown_language_defn,
+	auto_language_defn, local_language_defn), m2-lang.c (m2_language_defn):
+	Set evaluate_exp to evaluate_subexp_standard.
+	* ch-lang.c (evaluate_subexp_chill):  New function.  Chill-specific
+	support for MULTI_SUBSCRIPT.
+	(chill_language_defn):  Set evaluate_exp to evaluate_subexp_chill.
+	* eval.c (enum noside):  Move from here ....
+	* expression.h (enum noside):  ... to here.
+	(evaluate_subexp_standard):  New prototype.
+	* eval.c (evaluate_subexp):  Renamed to evaluate_subexp_standard.
+	Removed lo-longer-needed test for chill_varying_type.
+	(evaluate_subexp):  New.  Calls exp->language_defn->evaluate_exp.
+
 	* ch-exp.y (maybe_expression_list):  New non-terminal.
 	(primitive_value):  Allow empty parameter list.
 

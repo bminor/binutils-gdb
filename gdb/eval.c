@@ -30,37 +30,29 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "language.h"	/* For CAST_IS_CONVERSION */
 #include "f-lang.h" /* for array bound stuff */
 
-/* Values of NOSIDE argument to eval_subexp.  */
-
-enum noside
-{
-  EVAL_NORMAL,
-  EVAL_SKIP,			/* Only effect is to increment pos.  */
-  EVAL_AVOID_SIDE_EFFECTS	/* Don't modify any variables or
-				   call any functions.  The value
-				   returned will have the correct
-				   type, and will have an
-				   approximately correct lvalue
-				   type (inaccuracy: anything that is
-				   listed as being in a register in
-				   the function in which it was
-				   declared will be lval_register).  */
-};
-
 /* Prototypes for local functions. */
 
 static value_ptr evaluate_subexp_for_sizeof PARAMS ((struct expression *,
 						     int *));
 
-static value_ptr evaluate_subexp_with_coercion PARAMS ((struct expression *,
+value_ptr evaluate_subexp_with_coercion PARAMS ((struct expression *,
 							int *, enum noside));
 
 static value_ptr evaluate_subexp_for_address PARAMS ((struct expression *,
 						      int *, enum noside));
 
-static value_ptr evaluate_subexp PARAMS ((struct type *, struct expression *,
-					  int *, enum noside));
-
+#ifdef __GNUC__
+inline
+#endif
+static value_ptr
+evaluate_subexp (expect_type, exp, pos, noside)
+     struct type *expect_type;
+     register struct expression *exp;
+     register int *pos;
+     enum noside noside;
+{
+  return (*exp->language_defn->evaluate_exp) (expect_type, exp, pos, noside);
+}
 
 /* Parse the string EXP as a C expression, evaluate it,
    and return the result as a number.  */
@@ -223,8 +215,8 @@ evaluate_labeled_field_init (struct_val, fieldnop, exp, pos, noside)
   return val;
 }
 
-static value_ptr
-evaluate_subexp (expect_type, exp, pos, noside)
+value_ptr
+evaluate_subexp_standard (expect_type, exp, pos, noside)
      struct type *expect_type;
      register struct expression *exp;
      register int *pos;
@@ -654,19 +646,7 @@ evaluate_subexp (expect_type, exp, pos, noside)
          at parse time.  We have made all array subscript operations, 
          substring operations as well as function calls  come here 
          and we now have to discover what the heck this thing actually was.  
-         If it is an array, we massage it into a form that the 
-         MULTI_F77_SUBSCRIPT operator can deal with. If it is 
-         a function, we process just as if we got an OP_FUNCALL and 
-         for a subscring operation, we perform the appropriate 
-         substring operation.  */ 
-
-      /* First get the nargs and then jump all the way over the:
-         
-         OP_UNDETERMINED_ARGLIST
-         nargs 
-         OP_UNDETERMINED_ARGLIST 
-            
-         instruction sequence */
+	 If it is a function, we process just as if we got an OP_FUNCALL. */
 
       nargs = longest_to_int (exp->elts[pc+1].longconst);
       (*pos) += 2;
@@ -952,8 +932,7 @@ evaluate_subexp (expect_type, exp, pos, noside)
 		}
 	    }
 	  
-	  if (binop_user_defined_p (op, arg1, arg2)
-	      && ! chill_varying_type (VALUE_TYPE (arg1)))
+	  if (binop_user_defined_p (op, arg1, arg2))
 	    {
 	      arg1 = value_x_binop (arg1, arg2, op, OP_NULL);
 	    }
@@ -1045,9 +1024,7 @@ evaluate_subexp (expect_type, exp, pos, noside)
 	   returns the correct type value */
 
 	VALUE_TYPE (arg1) = tmp_type; 
-
-	arg1 = value_subscript (arg1, arg2);
-	return arg1;
+	return value_ind (value_add (value_coerce_array (arg1), arg2));
       }
 
     case BINOP_LOGICAL_AND:
@@ -1488,7 +1465,7 @@ evaluate_subexp_for_address (exp, pos, noside)
 
    */
 
-static value_ptr
+value_ptr
 evaluate_subexp_with_coercion (exp, pos, noside)
      register struct expression *exp;
      register int *pos;

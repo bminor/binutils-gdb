@@ -407,6 +407,7 @@ const struct language_defn m2_language_defn = {
   type_check_on,
   m2_parse,			/* parser */
   m2_error,			/* parser error function */
+  evaluate_subexp_standard,
   m2_printchar,			/* Print character constant */
   m2_printstr,			/* function to print string constant */
   m2_create_fundamental_type,	/* Create fundamental type in this language */

@@ -423,6 +423,7 @@ const struct language_defn f_language_defn = {
   type_check_on,
   f_parse,			/* parser */
   f_error,			/* parser error function */
+  evaluate_subexp_standard,
   f_printchar,			/* Print character constant */
   f_printstr,			/* function to print string constant */
   f_create_fundamental_type,	/* Create fundamental type in this language */

@@ -132,13 +132,6 @@ enum exp_opcode
      by each of the next following subexpressions, one per dimension. */
    MULTI_SUBSCRIPT,
 
-  /* For Fortran array subscripting (column major style). Like the 
-     Modula operator, we find that the dimensionality is 
-     encoded in the operator.  This operator is distinct 
-     from the above one because it uses column-major array 
-     ordering not row-major.  */ 
-  MULTI_F77_SUBSCRIPT,
-
   /* The OP_... series take immediate following arguments.
      After the arguments come another OP_... (the same one)
      so that the grouping can be recognized from the end.  */
@@ -192,11 +185,6 @@ enum exp_opcode
   /* The following OP is a special one, it introduces a F77 complex
      literal. It is followed by exactly two args that are doubles.  */ 
   OP_COMPLEX,
-
-  /* The following OP introduces a F77 substring operator.
-     It should have a string type and two integer types that follow 
-     indicating the "from" and "to" for the substring. */ 
-  OP_F77_SUBSTR,
 
   /* OP_STRING represents a string constant.
      Its format is the same as that of a STRUCTOP, but the string
@@ -341,6 +329,28 @@ extern struct expression *parse_exp_1 PARAMS ((char **, struct block *, int));
    we've encountered so far.  To use this, set it to NULL, then call
    parse_<whatever>, then look at it.  */
 extern struct block *innermost_block;
+
+/* From eval.c */
+
+/* Values of NOSIDE argument to eval_subexp.  */
+
+enum noside
+{
+  EVAL_NORMAL,
+  EVAL_SKIP,			/* Only effect is to increment pos.  */
+  EVAL_AVOID_SIDE_EFFECTS	/* Don't modify any variables or
+				   call any functions.  The value
+				   returned will have the correct
+				   type, and will have an
+				   approximately correct lvalue
+				   type (inaccuracy: anything that is
+				   listed as being in a register in
+				   the function in which it was
+				   declared will be lval_register).  */
+};
+
+extern struct value* evaluate_subexp_standard
+PARAMS ((struct type *, struct expression *, int*, enum noside));
 
 /* From expprint.c */
 

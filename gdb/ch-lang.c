@@ -20,6 +20,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "defs.h"
 #include "symtab.h"
 #include "gdbtypes.h"
+#include "value.h"
 #include "expression.h"
 #include "parser-defs.h"
 #include "language.h"
@@ -269,7 +270,6 @@ static const struct op_print chill_op_print_tab[] = {
     {"->",  UNOP_ADDR, PREC_PREFIX, 0},
     {NULL,  0, 0, 0}
 };
-
 
 /* The built-in types of Chill.  */
 
@@ -289,6 +289,54 @@ struct type ** const (chill_builtin_types[]) =
   0
 };
 
+static value_ptr
+evaluate_subexp_chill (expect_type, exp, pos, noside)
+     struct type *expect_type;
+     register struct expression *exp;
+     register int *pos;
+     enum noside noside;
+{
+  int pc = *pos;
+  int tem, nargs;
+  value_ptr arg1;
+  value_ptr *argvec;
+  switch (exp->elts[*pos].opcode)
+    {
+    case MULTI_SUBSCRIPT:
+      if (noside == EVAL_SKIP || noside == EVAL_AVOID_SIDE_EFFECTS)
+	break;
+      (*pos) += 3;
+      nargs = longest_to_int (exp->elts[pc + 1].longconst);
+      arg1 = evaluate_subexp_with_coercion (exp, pos, noside);
+
+      switch (TYPE_CODE (VALUE_TYPE (arg1)))
+	{
+	case TYPE_CODE_PTR:
+	case TYPE_CODE_FUNC:
+	  /* It's a function call. */
+	  /* Allocate arg vector, including space for the function to be
+	     called in argvec[0] and a terminating NULL */
+	  argvec = (value_ptr *) alloca (sizeof (value_ptr) * (nargs + 2));
+	  argvec[0] = arg1;
+	  tem = 1;
+	  for (; tem <= nargs; tem++)
+	    argvec[tem] = evaluate_subexp_with_coercion (exp, pos, noside);
+	  argvec[tem] = 0; /* signal end of arglist */
+
+	  return call_function_by_hand (argvec[0], nargs, argvec + 1);
+	}
+
+      while (nargs-- > 0)
+	{
+	  value_ptr index = evaluate_subexp_with_coercion (exp, pos, noside);
+	  arg1 = value_subscript (arg1, index);
+	}
+      return (arg1);
+    }
+
+  return evaluate_subexp_standard (expect_type, exp, pos, noside);
+}
+
 const struct language_defn chill_language_defn = {
   "chill",
   language_chill,
@@ -297,6 +345,7 @@ const struct language_defn chill_language_defn = {
   type_check_on,
   chill_parse,			/* parser */
   chill_error,			/* parser error function */
+  evaluate_subexp_chill,
   chill_printchar,		/* print a character constant */
   chill_printstr,		/* function to print a string constant */
   chill_create_fundamental_type,/* Create fundamental type in this language */
