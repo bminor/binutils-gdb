@@ -2226,6 +2226,7 @@ Symnum n_type n_othr n_desc n_value  n_strx String
 @chapter GNU C++ Stabs
 
 @menu
+* Class Names::			C++ class names are both tags and typedefs.
 * Basic Cplusplus Types::
 * Simple Classes::
 * Class Instance::
@@ -2256,6 +2257,37 @@ Fortunately, the @samp{@@} type descriptor used in this C++ sense always
 will be followed by a digit, @samp{(}, or @samp{-}, and type attributes
 never start with those things.
 @end table
+
+@node Class Names
+@section C++ Class Names
+
+In C++, a class name which is declared with @code{class}, @code{struct},
+or @code{union}, is not only a tag, as in C, but also a type name.  Thus
+there should be stabs with both @samp{t} and @samp{T} symbol descriptors
+(@pxref{Typedefs}).
+
+To save space, there is a special abbreviation for this case.  If the
+@samp{T} symbol descriptor is followed by @samp{t}, then the stab
+defines both a type name and a tag.
+
+For example, the C++ code
+
+@example
+struct foo @{int x;@};
+@end example
+
+can be represented as either
+
+@example
+.stabs "foo:T19=s4x:1,0,32;;",128,0,0,0       # @r{128 is N_LSYM}
+.stabs "foo:t19",128,0,0,0
+@end example
+
+or
+
+@example
+.stabs "foo:Tt19=s4x:1,0,32;;",128,0,0,0
+@end example
 
 @node Basic Cplusplus Types
 @section Basic Types For C++
@@ -2503,10 +2535,9 @@ functions were publicly accessable.  The example that follows
 contrasts public, protected and privately accessable fields and shows
 how these protections are encoded in C++ stabs.
 
-@c FIXME:  What does "part of the string" mean?
 Protections for class member data are signified by two characters
 embedded in the stab defining the class type.  These characters are
-located after the name: part of the string.  @samp{/0} means private,
+located after the @samp{name:} part of the string.  @samp{/0} means private,
 @samp{/1} means protected, and @samp{/2} means public.  If these
 characters are omited this means that the member is public.  The
 following C++ source:

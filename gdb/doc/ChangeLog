@@ -1,5 +1,7 @@
 Wed Oct 27 00:25:46 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* stabs.texinfo (Class Names): New node.
+
 	* gdb.texinfo (Command Files): Explain order of init file reading.
 
 	* remote.texi (Bootstrapping): Talk about getting the serial driver
