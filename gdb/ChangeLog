@@ -1,5 +1,10 @@
 Thu Oct 28 16:55:34 1993  Fred Fish  (fnf@cygnus.com)
 
+	* NEWS:  Note improvements in C++ support, preliminary thread
+	implementation, and LynxOS native and target support for 386.
+
+Thu Oct 28 16:55:34 1993  Fred Fish  (fnf@cygnus.com)
+
 	* README:  Add note from Peter Schauer about OSF/1 shared
 	libraries.  Add note from Pace Willisson about configuring on BSDI
 	BSD/386 release 1.0.  Update gdb references to gdb 4.11.

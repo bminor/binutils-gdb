@@ -1,16 +1,40 @@
 		What has changed since GDB-3.5?
 		(Organized release by release)
 
-GDB now works on the DEC Alpha.  GCC 2.4.5 does not produce usable
-debug info, but GDB works fairly well with the DEC compiler and should
-work with a future GCC release.  See the README file for a few
-Alpha-specific notes.
+*** Changes in GDB-4.11:
+
+* User visible changes:
+
+* Remote Debugging
 
 The "set remotedebug" option is now consistent between the mips remote
 target, remote targets using the gdb-specific protocol, UDI (AMD's
 debug protocol for the 29k) and the 88k bug monitor.  It is now an
 integer specifying a debug level (normally 0 or 1, but 2 means more
 debugging info for the mips target).
+
+* DEC Alpha native support
+
+GDB now works on the DEC Alpha.  GCC 2.4.5 does not produce usable
+debug info, but GDB works fairly well with the DEC compiler and should
+work with a future GCC release.  See the README file for a few
+Alpha-specific notes.
+
+* Preliminary thread implementation
+
+GDB now has preliminary thread support for both SGI/Irix and LynxOS.
+
+* LynxOS native and target support for 386
+
+This release has been hosted on LynxOS 2.2, and also can be configured
+to remotely debug programs running under LynxOS (see gdb/gdbserver/README
+for details).
+
+* Improvements in C++ mangling/demangling.
+
+This release has much better g++ debugging, specifically in name 
+mangling/demangling, virtual function calls, print virtual table,
+call methods, ...etc.
 
 *** Changes in GDB-4.10:
 
