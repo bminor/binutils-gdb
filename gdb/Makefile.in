@@ -158,6 +158,47 @@ SIM =
 
 WIN32LIBS = @WIN32LIBS@
 
+# Where is the TCL library?  Typically in ../tcl.
+LIB_INSTALL_DIR = $(libdir)
+# This variable is needed when doing dynamic linking.
+LIB_RUNTIME_DIR = $(libdir)
+TCL = @TCL_LD_SEARCH_FLAGS@ @TCL_BUILD_LIB_SPEC@
+TCL_CFLAGS = @TCLHDIR@
+TCL_DEPS =
+GDBTKLIBS = @GDBTKLIBS@
+# Extra flags that the GDBTK files need:
+GDBTK_CFLAGS = @GDBTK_CFLAGS@
+
+# Where is the TK library?  Typically in ../tk.
+TK = @TK_BUILD_LIB_SPEC@
+TK_CFLAGS = @TKHDIR@ @TK_BUILD_INCLUDES@
+TK_DEPS =
+
+# Where is Itcl?  Typically in ../itcl/itcl.
+ITCL_CFLAGS = @ITCLHDIR@
+ITCL = @ITCLLIB@
+ITCL_DEPS = @ITCL_DEPS@ 
+
+# Where is Itk?  Typically in ../itcl/itk.
+ITK_CFLAGS = @ITKHDIR@
+ITK = @ITKLIB@
+ITK_DEPS = @ITK_DEPS@ 
+
+# Where is Tix?  Typically in ../tix.
+TIX_CFLAGS = @TIXHDIR@
+TIX = @TIXLIB@
+TIX_DEPS = @TIX_DEPS@
+
+X11_CFLAGS = @TK_XINCLUDES@
+X11_LDFLAGS =
+X11_LIBS =
+
+WIN32LDAPP = @WIN32LDAPP@
+
+ENABLE_GDBTK= @ENABLE_GDBTK@
+LIBGUI = @LIBGUI@
+GUI_CFLAGS_X = @GUI_CFLAGS_X@
+IDE_CFLAGS=$(GUI_CFLAGS_X) $(IDE_CFLAGS_X)
 
 ENABLE_CFLAGS= @ENABLE_CFLAGS@
 
@@ -390,6 +431,7 @@ SFILES = ax-general.c ax-gdb.c bcache.c blockframe.c breakpoint.c \
 	kod.c kod-cisco.c \
 	ui-out.c cli-out.c \
 	varobj.c wrapper.c \
+	gdbtk-varobj.c \
 	jv-exp.y jv-lang.c jv-valprint.c jv-typeprint.c \
 	m2-exp.y m2-lang.c m2-typeprint.c m2-valprint.c main.c maint.c \
 	mem-break.c minsyms.c mipsread.c nlmread.c objfiles.c parse.c \
@@ -609,6 +651,18 @@ install-only:
 		fi ; \
 		$(INSTALL_PROGRAM) gdb$(EXEEXT) $(bindir)/$$transformed_name$(EXEEXT) ; \
 		$(INSTALL_DATA) $(srcdir)/gdb.1 $(man1dir)/$$transformed_name.1
+	$(SHELL) $(srcdir)/../mkinstalldirs $(datadir)/gdbtcl ; \
+	$(SHELL) $(srcdir)/../mkinstalldirs \
+		$(datadir)/gdbtcl/images \
+		$(datadir)/gdbtcl/images2 ; \
+	$(SHELL) $(srcdir)/../mkinstalldirs $(datadir)/gdbtcl/help \
+		$(datadir)/gdbtcl/help/images \
+		$(datadir)/gdbtcl/help/trace ; \
+	cd $(srcdir)/gdbtk/library ; \
+	for i in *.tcl *.ith *.itb images/*.gif images2/*.gif images/icons.txt images2/icons.txt tclIndex help/*.html  help/trace/*.html help/trace/index.toc help/images/*.gif; \
+	  do \
+		$(INSTALL_DATA) $$i $(datadir)/gdbtcl/$$i ; \
+	  done ;
 	@$(MAKE) DO=install "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS) subdir_do 
 
 uninstall: force
@@ -620,6 +674,7 @@ uninstall: force
 		  true ; \
 		fi ; \
 		rm -f $(bindir)/$$transformed_name$(EXEEXT) $(man1dir)/$$transformed_name.1
+	rm -rf $(datadir)/gdbtcl
 	@$(MAKE) DO=uninstall "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS) subdir_do 
 
 # We do this by grepping through sources.  If that turns out to be too slow,
@@ -1169,6 +1224,62 @@ findvar.o: findvar.c $(defs_h) $(gdbcore_h) $(inferior_h) target.h \
 
 fork-child.o: fork-child.c $(wait_h) $(defs_h) $(gdbcore_h) \
 	$(inferior_h) target.h terminal.h gdbthread.h gdb_string.h
+
+gdbres.o: $(srcdir)/gdbtk/gdb.rc $(srcdir)/gdbtk/gdbtool.ico
+	$(WINDRES) --include $(srcdir)/gdbtk $(srcdir)/gdbtk/gdb.rc gdbres.o
+
+gdbtk.o: $(srcdir)/gdbtk/generic/gdbtk.c \
+	$(srcdir)/gdbtk/generic/gdbtk.h $(defs_h) \
+	$(symtab_h) $(inferior_h) $(command_h) \
+	$(bfd_h) symfile.h objfiles.h target.h gdb_string.h $(tracepoint_h) \
+	$(top_h) 
+	$(CC) -c $(INTERNAL_CFLAGS) $(IDE_CFLAGS) $(ITCL_CFLAGS) \
+        $(ITK_CFLAGS) $(TIX_CFLAGS) \
+	$(TCL_CFLAGS) $(TK_CFLAGS) $(X11_CFLAGS) $(GDBTK_CFLAGS)\
+		$(srcdir)/gdbtk/generic/gdbtk.c -DGDBTK_LIBRARY=\"$(datadir)/gdbtcl\"
+
+gdbtk-cmds.o: $(srcdir)/gdbtk/generic/gdbtk-cmds.c \
+	$(srcdir)/gdbtk/generic/gdbtk.h \
+	$(defs_h) $(symtab_h) $(inferior_h)	\
+	$(command_h) $(bfd_h) $(top_h) symfile.h objfiles.h target.h	\
+	gdb_string.h $(tracepoint_h) $(frame_h) source.h
+	$(CC) -c $(INTERNAL_CFLAGS) $(IDE_CFLAGS) $(ITCL_CFLAGS)	\
+	$(TIX_CFLAGS) $(TCL_CFLAGS) $(TK_CFLAGS) $(X11_CFLAGS)		\
+	$(GDBTK_CFLAGS) $(srcdir)/gdbtk/generic/gdbtk-cmds.c				\
+	-DGDBTK_LIBRARY=\"$(datadir)/gdbtcl\"
+
+gdbtk-hooks.o: $(srcdir)/gdbtk/generic/gdbtk-hooks.c \
+	$(srcdir)/gdbtk/generic/gdbtk.h $(defs_h) \
+	$(symtab_h) $(inferior_h) $(command_h) \
+	$(bfd_h) symfile.h objfiles.h target.h gdb_string.h $(tracepoint_h)
+	$(CC) -c $(INTERNAL_CFLAGS) $(IDE_CFLAGS) $(ITCL_CFLAGS) $(TIX_CFLAGS) \
+	$(TCL_CFLAGS) $(TK_CFLAGS) $(X11_CFLAGS) $(GDBTK_CFLAGS)\
+		$(srcdir)/gdbtk/generic/gdbtk-hooks.c -DGDBTK_LIBRARY=\"$(datadir)/gdbtcl\"
+
+gdbtk-variable.o: $(srcdir)/gdbtk/generic/gdbtk-variable.c \
+	$(srcdir)/gdbtk/generic/gdbtk.h $(srcdir)/gdbtk/generic/gdbtk-wrapper.h
+	$(CC) -c $(INTERNAL_CFLAGS) $(IDE_CFLAGS) $(ITCL_CFLAGS) $(TIX_CFLAGS) \
+	$(TCL_CFLAGS) $(TK_CFLAGS) $(X11_CFLAGS) $(GDBTK_CFLAGS)\
+		$(srcdir)/gdbtk/generic/gdbtk-variable.c
+
+gdbtk-varobj.o: $(srcdir)/gdbtk/generic/gdbtk-varobj.c \
+	$(srcdir)/gdbtk/generic/gdbtk.h \
+	$(defs_h) $(value_h) varobj.h
+	$(CC) -c $(INTERNAL_CFLAGS) $(IDE_CFLAGS) $(ITCL_CFLAGS) $(TIX_CFLAGS) \
+	$(TCL_CFLAGS) $(TK_CFLAGS) $(X11_CFLAGS) $(GDBTK_CFLAGS)\
+		$(srcdir)/gdbtk/generic/gdbtk-varobj.c
+
+gdbtk-wrapper.o: $(srcdir)/gdbtk/generic/gdbtk-wrapper.c \
+	$(srcdir)/gdbtk/generic/gdbtk-wrapper.h
+	$(CC) -c $(INTERNAL_CFLAGS) $(IDE_CFLAGS) $(GDBTK_CFLAGS)\
+		$(srcdir)/gdbtk/generic/gdbtk-wrapper.c
+
+v850ice.o: v850ice.c $(defs_h) $(symtab_h) $(inferior_h) $(command_h) \
+	$(frame_h) $(breakpoint_h) $(gdbcore_h) $(value_h) symfile.h \
+	gdb_string.h target.h objfiles.h
+	$(CC) -c $(INTERNAL_CFLAGS) $(IDE_CFLAGS) $(ITCL_CFLAGS) $(TIX_CFLAGS) \
+	$(TCL_CFLAGS) $(TK_CFLAGS) $(X11_CFLAGS) $(GDBTK_CFLAGS)\
+		$(srcdir)/v850ice.c
 
 tracepoint.o: tracepoint.c $(defs_h) $(symtab_h) $(frame_h) $(tracepoint_h) \
 	$(gdbtypes_h) $(expression_h) $(gdbcmd_h) $(value_h) target.h \

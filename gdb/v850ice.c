@@ -31,6 +31,7 @@
 #include "value.h"
 #include "command.h"
 
+#include <tcl.h>
 #include <windows.h>
 #include <winuser.h>		/* for WM_USER */
 
@@ -119,6 +120,8 @@ static int ice_nexti PARAMS ((char *));
 
 static void togdb_force_update PARAMS ((void));
 
+static void view_source PARAMS ((CORE_ADDR));
+
 static void do_gdb (char *, char *, void (*func) PARAMS ((char *, int)), int);
 
 
@@ -131,6 +134,7 @@ long (__stdcall * RegisterClient) PARAMS ((HWND));
 
 long (__stdcall * UnregisterClient) PARAMS ((void));
 
+extern Tcl_Interp *gdbtk_interp;
 
 /* Globals local to this file only */
 static int ice_open = 0;	/* Is ICE open? */
@@ -256,6 +260,7 @@ v850ice_wndproc (hwnd, message, wParam, lParam)
       MessageBox (0, "Address resolution\nNot implemented", "GDB", MB_OK);
       break;
     case WM_SOURCE:
+      view_source ((CORE_ADDR) lParam);
       break;
     case WM_STATE_CHANGE:
       switch (wParam)
@@ -837,7 +842,12 @@ ice_cont (c)
   printf_filtered ("continue (ice)\n");
   ReplyMessage ((LRESULT) 1);
 
+  if (gdbtk_interp == NULL)
+    {
       continue_command (NULL, 1);
+    }
+  else
+    Tcl_Eval (gdbtk_interp, "gdb_immediate continue");
 
   return 1;
 }
@@ -855,7 +865,12 @@ do_gdb (cmd, str, func, count)
     {
       printf_unfiltered (str);
 
+      if (gdbtk_interp == NULL)
+	{
 	  func (NULL, 0);
+	}
+      else
+	Tcl_Eval (gdbtk_interp, cmd);
     }
 }
 
@@ -896,8 +911,22 @@ v850ice_command (arg, from_tty)
 static void
 togdb_force_update (void)
 {
+  if (gdbtk_interp != NULL)
+    Tcl_Eval (gdbtk_interp, "gdbtk_update");
 }
 
+static void
+view_source (addr)
+     CORE_ADDR addr;
+{
+  char c[256];
+
+  if (gdbtk_interp != NULL)
+    {
+      sprintf (c, "catch {set src [lindex [ManagedWin::find SrcWin] 0]\n$src location BROWSE [gdb_loc *0x%x]}", addr);
+      Tcl_Eval (gdbtk_interp, c);
+    }
+}
 
 /* Define the target subroutine names */
 

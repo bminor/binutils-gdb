@@ -1584,3 +1584,104 @@ proc rerun_to_main {} {
   }
 }
 
+# From dejagnu:
+# srcdir = testsuite src dir (e.g., devo/gdb/testsuite)
+# objdir = testsuite obj dir (e.g., gdb/testsuite)
+# subdir = subdir of testsuite (e.g., gdb.gdbtk)
+#
+# To gdbtk:
+# env(DEFS)=the "defs" files (e.g., devo/gdb/testsuite/gdb.gdbtk/defs)
+# env(SRCDIR)=directory containing the test code (e.g., *.test)
+# env(OBJDIR)=directory which contains any executables
+#            (e.g., gdb/testsuite/gdb.gdbtk)
+proc gdbtk_start {test} {
+  global verbose
+  global GDB
+  global GDBFLAGS
+  global env srcdir subdir objdir
+
+  gdb_stop_suppressing_tests;
+
+  verbose "Starting $GDB -nx -q --tclcommand=$test"
+
+  set real_test [which $test]
+  if {$real_test == 0} {
+    perror "$test is not found"
+    exit 1
+  }
+
+  if {![is_remote host]} {
+    if { [which $GDB] == 0 } {
+      perror "$GDB does not exist."
+      exit 1
+    }
+  }
+
+  set wd [pwd]
+  cd [file join $srcdir .. gdbtcl2]
+  set env(GDBTK_LIBRARY) [pwd]
+  cd [file join $srcdir .. .. tcl library]
+  set env(TCL_LIBRARY) [pwd]
+  cd [file join $srcdir .. .. tk library]
+  set env(TK_LIBRARY) [pwd]
+  cd [file join $srcdir .. .. tix library]
+  set env(TIX_LIBRARY) [pwd]
+  cd [file join $srcdir .. .. itcl itcl library]
+  set env(ITCL_LIBRARY) [pwd]
+  cd [file join .. $srcdir .. .. libgui library]
+  set env(CYGNUS_GUI_LIBRARY) [pwd]
+  cd $wd
+  cd [file join $srcdir $subdir]
+  set env(DEFS) [file join [pwd] defs]
+  cd $wd
+  cd [file join $objdir $subdir]
+  set env(OBJDIR) [pwd]
+  cd $wd
+  cd $srcdir
+  set env(SRCDIR) [pwd]
+  cd $wd
+  set env(GDBTK_VERBOSE) 1
+  set env(GDBTK_LOGFILE) [file join $objdir gdb.log]
+  set env(GDBTK_TEST_RUNNING) 1
+  set err [catch {exec $GDB -nx -q --tclcommand=$test} res]
+  if { $err } {
+    perror "Execing $GDB failed: $res"
+    exit 1;
+  }
+  return $res
+}
+
+# gdbtk tests call this function to print out the results of the
+# tests. The argument is a proper list of lists of the form:
+# {status name description msg}. All of these things typically
+# come from the testsuite harness.
+proc gdbtk_analyze_results {results} {
+  foreach test $results {
+    set status [lindex $test 0]
+    set name [lindex $test 1]
+    set description [lindex $test 2]
+    set msg [lindex $test 3]
+
+    switch $status {
+      PASS {
+	pass "$description ($name)"
+      }
+
+      FAIL {
+	fail "$description ($name)"
+      }
+
+      ERROR {
+	perror "$name"
+      }
+
+      XFAIL {
+	xfail "$description ($name)"
+      }
+
+      XPASS {
+	xpass "$description ($name)"
+      }
+    }
+  }
+}

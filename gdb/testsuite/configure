@@ -709,6 +709,42 @@ if test "${shared}" = "true"; then
 fi
 
 # End stuff to support --enable-shared
+# Start stuff to support --enable-gdbtk
+# Check whether --enable-gdbtk or --disable-gdbtk was given.
+if test "${enable_gdbtk+set}" = set; then
+  enableval="$enable_gdbtk"
+  case "${enableval}" in
+    yes)
+        case "$host" in
+        *go32*)
+            enable_gdbtk=no ;;
+        *windows*)
+            enable_gdbtk=no ;;
+        *)
+            enable_gdbtk=yes ;;
+        esac ;;
+    no)
+        enable_gdbtk=no  ;;
+    *)
+        { echo "configure: error: bad value ${enableval} given for gdbtk option" 1>&2; exit 1; } ;;
+esac
+else
+  
+# Default is on for everything but go32 and windows
+case "$host" in
+    *go32* | *windows*)
+        ;;
+    *)
+        enable_gdbtk=yes ;;
+    esac
+
+fi
+
+
+if test "${enable_gdbtk}" = "yes"; then
+    configdirs="${configdirs} gdb.gdbtk"
+fi
+# End stuff to support --enable-shared
 
 # configure the subdirectories too
 subdirs="$configdirs"

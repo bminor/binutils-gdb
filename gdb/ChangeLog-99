@@ -3209,6 +3209,9 @@ Sat Sep 18 07:13:03 1999  Jeffrey A Law  (law@cygnus.com)
 1999-09-17  Fernando Nasser  <fnasser@totem.to.cygnus.com>
 
 	* Makefile.in: Add entries for varobj.[cho] and wrapper.[cho].
+	gdbtk-varobj.[co].  gdbtk-varobj.o is not yet on the COMMON_OBS
+	list because it conflicts with the older gdbtk-variable.o which
+	is still the default. 
 
 1999-09-17  Fernando Nasser  <fnasser@totem.to.cygnus.com>
 
@@ -3368,6 +3371,8 @@ Tue Sep 14 14:34:28 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* defs.h (continuation): Make this a typedef.
 
+	* Makefile.in (gdbtk.o, gdbtk-cmds.o): Depend on $(top_h).
+
 	* Makefile.in (i386-linux-nat.o): Depend on symfile.h, not
 	$(symfile_h); the latter has no definition.
 
@@ -3411,6 +3416,8 @@ Tue Sep 14 14:34:28 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 	__dld_break, which contains the permanent breakpoint, when interesting
 	things happen.	Tell GDB that the breakpoint in __dld_break is
 	permanent.
+	* gdbtk-cmds.c (gdb_get_breakpoint_info): Report a permanent
+	breakpoint as enabled.
 	* infrun.c (SKIP_PERMANENT_BREAKPOINT): Provide default	definition.
 	(default_skip_permanent_breakpoint): New function.
 	(resume): If we're trying to resume at a permanent breakpoint, use

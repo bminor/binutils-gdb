@@ -20,6 +20,8 @@ x86 linux native	Jim Blandy		jimb@cygnus.com
 Scheme support		Jim Blandy		jimb@cygnus.com
 svr4 shlibs (solib.c)	Jim Blandy		jimb@cygnus.com
 arm target		Jim Ingham		jingham@cygnus.com
+gdbtk (c & tcl)		Jim Ingham		jingham@cygnus.com
+libgui (w/foundry, sn)	Jim Ingham		jingham@cygnus.com
 hurd native		Mark Kettenis		kettenis@wins.va.nl
 hpux, hp pa native	Jeff Law		law@cygnus.com
 m32r target		Michael Snyder		msnyder@cygnus.com

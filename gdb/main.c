@@ -255,6 +255,11 @@ captured_main (void *data)
       {"command", required_argument, 0, 'x'},
       {"version", no_argument, &print_version, 1},
       {"x", required_argument, 0, 'x'},
+#ifdef GDBTK
+      {"tclcommand", required_argument, 0, 'z'},
+      {"enable-external-editor", no_argument, 0, 'y'},
+      {"editor-command", required_argument, 0, 'w'},
+#endif
       {"ui", required_argument, 0, 'i'},
       {"interpreter", required_argument, 0, 'i'},
       {"i", required_argument, 0, 'i'},
@@ -334,6 +339,40 @@ captured_main (void *data)
 					     cmdsize * sizeof (*cmdarg));
 	      }
 	    break;
+#ifdef GDBTK
+	  case 'z':
+	    {
+	      extern int gdbtk_test PARAMS ((char *));
+	      if (!gdbtk_test (optarg))
+		{
+		  fprintf_unfiltered (gdb_stderr, "%s: unable to load tclcommand file \"%s\"",
+				      argv[0], optarg);
+		  exit (1);
+		}
+	      break;
+	    }
+	  case 'y':
+	    {
+	      /*
+	       * This enables the edit/button in the main window, even
+	       * when IDE_ENABLED is set to false. In this case you must
+	       * use --tclcommand to specify a tcl/script to be called,
+	       * Tcl/Variable to store the edit/command is:
+	       * external_editor
+	       */
+	      enable_external_editor = 1;
+	      break;
+	    }
+	  case 'w':
+	    {
+	      /*
+	       * if editor command is enabled, both flags are set
+	       */
+	      enable_external_editor = 1;
+	      external_editor_command = xstrdup (optarg);
+	      break;
+	    }
+#endif /* GDBTK */
 	  case 'd':
 	    dirarg[ndir++] = optarg;
 	    if (ndir >= dirsize)
