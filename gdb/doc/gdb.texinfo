@@ -9360,7 +9360,7 @@ may be arbitrarily combined):
 @item ALLOBJ
 Display sections for all loaded object files, including shared libraries.
 @item @var{sections}
-Display info only for named var{sections}.
+Display info only for named @var{sections}.
 @item @var{section-flags}
 Display info only for sections for which @var{section-flags} are true.
 The section flags that @value{GDBN} currently knows about are:
@@ -9377,7 +9377,7 @@ Section needs to be relocated before loading.
 Section cannot be modified by the child process.
 @item CODE
 Section contains executable code only.
-@tem DATA
+@item DATA
 Section contains data only (no executable code).
 @item ROM
 Section will reside in ROM.
