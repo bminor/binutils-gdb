@@ -5,6 +5,16 @@ Mon Sep 25 16:04:09 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 Mon Sep 25 11:48:02 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* coffgen.c (string_size): Remove static variable.
+	(debug_string_size, debug_string_section): Likewise.
+	(coff_fix_symbol_name): Add string_size_p, debug_string_section_p,
+	and debug_string_size_p parameters.  Use them instead of the
+	global variables.  Change all callers.
+	(coff_write_symbol): Likewise.
+	(coff_write_alien_symbol, coff_write_native_symbol): Likewise.
+	(coff_write_symbols): Add local variables to replace removed
+	global variables.
+
 	* libcoff-in.h (struct coff_section_tdata): Add offset, i,
 	function, and line_base fields.
 	* libcoff.h: Rebuild.

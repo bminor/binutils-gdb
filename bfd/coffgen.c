@@ -41,13 +41,18 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "coff/internal.h"
 #include "libcoff.h"
 
-static boolean coff_write_symbol PARAMS ((bfd *, asymbol *,
-					  combined_entry_type *,
-					  unsigned int *));
-static boolean coff_write_alien_symbol PARAMS ((bfd *, asymbol *,
-						unsigned int *));
-static boolean coff_write_native_symbol PARAMS ((bfd *, coff_symbol_type *,
-						 unsigned int *));
+static void coff_fix_symbol_name
+  PARAMS ((bfd *, asymbol *, combined_entry_type *, bfd_size_type *,
+	   asection **, bfd_size_type *));
+static boolean coff_write_symbol
+  PARAMS ((bfd *, asymbol *, combined_entry_type *, unsigned int *,
+	   bfd_size_type *, asection **, bfd_size_type *));
+static boolean coff_write_alien_symbol
+  PARAMS ((bfd *, asymbol *, unsigned int *, bfd_size_type *,
+	   asection **, bfd_size_type *));
+static boolean coff_write_native_symbol
+  PARAMS ((bfd *, coff_symbol_type *, unsigned int *, bfd_size_type *,
+	   asection **, bfd_size_type *));
 
 #define STRING_SIZE_SIZE (4)
 
@@ -603,15 +608,15 @@ coff_mangle_symbols (bfd_ptr)
     }
 }
 
-static bfd_size_type string_size;
-static bfd_size_type debug_string_size;
-static asection *debug_string_section;
-
 static void
-coff_fix_symbol_name (abfd, symbol, native)
+coff_fix_symbol_name (abfd, symbol, native, string_size_p,
+		      debug_string_section_p, debug_string_size_p)
      bfd *abfd;
      asymbol *symbol;
      combined_entry_type *native;
+     bfd_size_type *string_size_p;
+     asection **debug_string_section_p;
+     bfd_size_type *debug_string_size_p;
 {
   unsigned int name_length;
   union internal_auxent *auxent;
@@ -638,9 +643,9 @@ coff_fix_symbol_name (abfd, symbol, native)
 	    }
 	  else
 	    {
-	      auxent->x_file.x_n.x_offset = string_size + STRING_SIZE_SIZE;
+	      auxent->x_file.x_n.x_offset = *string_size_p + STRING_SIZE_SIZE;
 	      auxent->x_file.x_n.x_zeroes = 0;
-	      string_size += name_length + 1;
+	      *string_size_p += name_length + 1;
 	    }
 	}
       else
@@ -661,9 +666,10 @@ coff_fix_symbol_name (abfd, symbol, native)
 	}
       else if (!bfd_coff_symname_in_debug (abfd, &native->u.syment))
 	{
-	  native->u.syment._n._n_n._n_offset = string_size + STRING_SIZE_SIZE;
+	  native->u.syment._n._n_n._n_offset = (*string_size_p
+						+ STRING_SIZE_SIZE);
 	  native->u.syment._n._n_n._n_zeroes = 0;
-	  string_size += name_length + 1;
+	  *string_size_p += name_length + 1;
 	}
       else
 	{
@@ -675,26 +681,27 @@ coff_fix_symbol_name (abfd, symbol, native)
 	     and also followed by a null byte.  FIXME: We assume that
 	     the .debug section has already been created, and that it
 	     is large enough.  */
-	  if (debug_string_section == (asection *) NULL)
-	    debug_string_section = bfd_get_section_by_name (abfd, ".debug");
+	  if (*debug_string_section_p == (asection *) NULL)
+	    *debug_string_section_p = bfd_get_section_by_name (abfd, ".debug");
 	  filepos = bfd_tell (abfd);
 	  bfd_put_16 (abfd, name_length + 1, buf);
 	  if (!bfd_set_section_contents (abfd,
-					 debug_string_section,
+					 *debug_string_section_p,
 					 (PTR) buf,
-					 (file_ptr) debug_string_size,
+					 (file_ptr) *debug_string_size_p,
 					 (bfd_size_type) 2)
 	      || !bfd_set_section_contents (abfd,
-					    debug_string_section,
+					    *debug_string_section_p,
 					    (PTR) symbol->name,
-					    (file_ptr) debug_string_size + 2,
+					    ((file_ptr) *debug_string_size_p
+					     + 2),
 					    (bfd_size_type) name_length + 1))
 	    abort ();
 	  if (bfd_seek (abfd, filepos, SEEK_SET) != 0)
 	    abort ();
-	  native->u.syment._n._n_n._n_offset = debug_string_size + 2;
+	  native->u.syment._n._n_n._n_offset = *debug_string_size_p + 2;
 	  native->u.syment._n._n_n._n_zeroes = 0;
-	  debug_string_size += name_length + 3;
+	  *debug_string_size_p += name_length + 3;
 	}
     }
 }
@@ -708,11 +715,15 @@ coff_fix_symbol_name (abfd, symbol, native)
 /* Write a symbol out to a COFF file.  */
 
 static boolean
-coff_write_symbol (abfd, symbol, native, written)
+coff_write_symbol (abfd, symbol, native, written, string_size_p,
+		   debug_string_section_p, debug_string_size_p)
      bfd *abfd;
      asymbol *symbol;
      combined_entry_type *native;
      unsigned int *written;
+     bfd_size_type *string_size_p;
+     asection **debug_string_section_p;
+     bfd_size_type *debug_string_size_p;
 {
   unsigned int numaux = native->u.syment.n_numaux;
   int type = native->u.syment.n_type;
@@ -741,7 +752,8 @@ coff_write_symbol (abfd, symbol, native, written)
 	symbol->section->output_section->target_index;
     }
 
-  coff_fix_symbol_name (abfd, symbol, native);
+  coff_fix_symbol_name (abfd, symbol, native, string_size_p,
+			debug_string_section_p, debug_string_size_p);
 
   symesz = bfd_coff_symesz (abfd);
   buf = bfd_alloc (abfd, symesz);
@@ -794,10 +806,14 @@ coff_write_symbol (abfd, symbol, native, written)
    or we may be linking a non COFF file to a COFF file.  */
 
 static boolean
-coff_write_alien_symbol (abfd, symbol, written)
+coff_write_alien_symbol (abfd, symbol, written, string_size_p,
+			 debug_string_section_p, debug_string_size_p)
      bfd *abfd;
      asymbol *symbol;
      unsigned int *written;
+     bfd_size_type *string_size_p;
+     asection **debug_string_section_p;
+     bfd_size_type *debug_string_size_p;
 {
   combined_entry_type *native;
   combined_entry_type dummy;
@@ -848,16 +864,21 @@ coff_write_alien_symbol (abfd, symbol, written)
     native->u.syment.n_sclass = C_EXT;
   native->u.syment.n_numaux = 0;
 
-  return coff_write_symbol (abfd, symbol, native, written);
+  return coff_write_symbol (abfd, symbol, native, written, string_size_p,
+			    debug_string_section_p, debug_string_size_p);
 }
 
 /* Write a native symbol to a COFF file.  */
 
 static boolean
-coff_write_native_symbol (abfd, symbol, written)
+coff_write_native_symbol (abfd, symbol, written, string_size_p,
+			  debug_string_section_p, debug_string_size_p)
      bfd *abfd;
      coff_symbol_type *symbol;
      unsigned int *written;
+     bfd_size_type *string_size_p;
+     asection **debug_string_section_p;
+     bfd_size_type *debug_string_size_p;
 {
   combined_entry_type *native = symbol->native;
   alent *lineno = symbol->lineno;
@@ -911,7 +932,9 @@ coff_write_native_symbol (abfd, symbol, written)
 	count * bfd_coff_linesz (abfd);
     }
 
-  return coff_write_symbol (abfd, &(symbol->symbol), native, written);
+  return coff_write_symbol (abfd, &(symbol->symbol), native, written,
+			    string_size_p, debug_string_section_p,
+			    debug_string_size_p);
 }
 
 /* Write out the COFF symbols.  */
@@ -920,12 +943,16 @@ boolean
 coff_write_symbols (abfd)
      bfd *abfd;
 {
+  bfd_size_type string_size;
+  asection *debug_string_section;
+  bfd_size_type debug_string_size;
   unsigned int i;
   unsigned int limit = bfd_get_symcount (abfd);
   unsigned int written = 0;
   asymbol **p;
 
   string_size = 0;
+  debug_string_section = NULL;
   debug_string_size = 0;
 
   /* Seek to the right place */
@@ -943,12 +970,16 @@ coff_write_symbols (abfd)
       if (c_symbol == (coff_symbol_type *) NULL
 	  || c_symbol->native == (combined_entry_type *) NULL)
 	{
-	  if (!coff_write_alien_symbol (abfd, symbol, &written))
+	  if (!coff_write_alien_symbol (abfd, symbol, &written, &string_size,
+					&debug_string_section,
+					&debug_string_size))
 	    return false;
 	}
       else
 	{
-	  if (!coff_write_native_symbol (abfd, c_symbol, &written))
+	  if (!coff_write_native_symbol (abfd, c_symbol, &written,
+					 &string_size, &debug_string_section,
+					 &debug_string_size))
 	    return false;
 	}
     }
