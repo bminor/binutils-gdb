@@ -20,6 +20,15 @@
 
 # This file was written by Corinna Vinschen <vinschen@redhat.com>
 
+if [target_info exists gdb,nointerrupts] {
+    verbose "Skipping interrupt.exp because of nointerrupts."
+    continue
+}
+
+if [target_info exists gdb,noinferiorio] {
+    verbose "Skipping interrupt.exp because of noinferiorio."
+    return
+}
 
 if $tracelevel then {
         strace $tracelevel
@@ -32,11 +41,6 @@ set testfile "fileio"
 set srcfile ${testfile}.c
 set binfile ${objdir}/${subdir}/${testfile}
 
-# test only on a remote target board
-if {! [is_remote target]} {
-    return 0;
-}
-
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
 }
@@ -48,8 +52,8 @@ if [get_compiler_info ${binfile}] {
     return -1;
 }
 
-catch "system \"chmod -f +w dir2.fileio.test\""
-catch "system \"rm -rf *.fileio.test\""
+remote_exec build "test -r dir2.fileio.test && chmod -f +w dir2.fileio.test"
+remote_exec build "rm -rf *.fileio.test"
 
 set oldtimeout $timeout
 set timeout [expr "$timeout + 60"]
@@ -77,17 +81,17 @@ gdb_test continue \
 
 send_gdb "tbreak 88\n" ; gdb_expect -re "$gdb_prompt $"
 gdb_test continue \
-"Continuing\\..*open 2:.*OK.*test_open \\(\\) at.*$srcfile:88.*" \
+"Continuing\\..*open 2:.*EEXIST.*test_open \\(\\) at.*$srcfile:88.*" \
 "Creating already existing file returns EEXIST"
 
 send_gdb "tbreak 95\n" ; gdb_expect -re "$gdb_prompt $"
 gdb_test continue \
-"Continuing\\..*open 3:.*OK.*test_open \\(\\) at.*$srcfile:95.*" \
+"Continuing\\..*open 3:.*EISDIR.*test_open \\(\\) at.*$srcfile:95.*" \
 "Open directory for writing returns EISDIR"
 
 send_gdb "tbreak 102\n" ; gdb_expect -re "$gdb_prompt $"
 gdb_test continue \
-"Continuing\\..*open 4:.*OK.*test_open \\(\\) at.*$srcfile:102.*" \
+"Continuing\\..*open 4:.*ENOENT.*test_open \\(\\) at.*$srcfile:102.*" \
 "Opening nonexistant file returns ENOENT"
 
 send_gdb "tbreak 109\n" ; gdb_expect -re "$gdb_prompt $"
@@ -96,7 +100,7 @@ catch "system \"chmod -f -w nowrt.fileio.test\""
 
 send_gdb "tbreak 119\n" ; gdb_expect -re "$gdb_prompt $"
 gdb_test continue \
-"Continuing\\..*open 5:.*OK.*test_open \\(\\) at.*$srcfile:119.*" \
+"Continuing\\..*open 5:.*EACCES.*test_open \\(\\) at.*$srcfile:119.*" \
 "Open for write but no write permission returns EACCES"
 
 send_gdb "tbreak 140\n" ; gdb_expect -re "$gdb_prompt $"
@@ -106,12 +110,12 @@ gdb_test continue \
 
 send_gdb "tbreak 145\n" ; gdb_expect -re "$gdb_prompt $"
 gdb_test continue \
-"Continuing\\..*write 2:.*OK.*test_write \\(\\) at.*$srcfile:145.*" \
+"Continuing\\..*write 2:.*EBADF.*test_write \\(\\) at.*$srcfile:145.*" \
 "Write using invalid file descriptor returns EBADF"
 
 send_gdb "tbreak 156\n" ; gdb_expect -re "$gdb_prompt $"
 gdb_test continue \
-"Continuing\\..*write 3:.*OK.*test_write \\(\\) at.*$srcfile:156.*" \
+"Continuing\\..*write 3:.*EBADF.*test_write \\(\\) at.*$srcfile:156.*" \
 "Writing to a read-only file returns EBADF"
 
 send_gdb "tbreak 182\n" ; gdb_expect -re "$gdb_prompt $"
@@ -121,7 +125,7 @@ gdb_test continue \
 
 send_gdb "tbreak 186\n" ; gdb_expect -re "$gdb_prompt $"
 gdb_test continue \
-"Continuing\\..*read 2:.*OK.*test_read \\(\\) at.*$srcfile:186.*" \
+"Continuing\\..*read 2:.*EBADF.*test_read \\(\\) at.*$srcfile:186.*" \
 "Read using invalid file descriptor returns EBADF"
 
 send_gdb "tbreak 221\n" ; gdb_expect -re "$gdb_prompt $"
@@ -136,7 +140,7 @@ gdb_test continue \
 
 send_gdb "tbreak 245\n" ; gdb_expect -re "$gdb_prompt $"
 gdb_test continue \
-"Continuing\\..*close 2:.*OK.*test_close \\(\\) at.*$srcfile:245.*" \
+"Continuing\\..*close 2:.*EBADF.*test_close \\(\\) at.*$srcfile:245.*" \
 "Closing an invalid file descriptor returns EBADF"
 
 send_gdb "tbreak 262\n" ; gdb_expect -re "$gdb_prompt $"
@@ -146,17 +150,17 @@ gdb_test continue \
 
 send_gdb "tbreak 267\n" ; gdb_expect -re "$gdb_prompt $"
 gdb_test continue \
-"Continuing\\..*stat 2:.*OK.*test_stat \\(\\) at.*$srcfile:267.*" \
-"Stat a NULL pathname returns ENOENT"
+	"Continuing\\..*stat 2:.*(ENOENT|EFAULT).*test_stat \\(\\) at.*$srcfile:267.*" \
+"Stat a NULL pathname returns ENOENT or EFAULT"
 
 send_gdb "tbreak 272\n" ; gdb_expect -re "$gdb_prompt $"
 gdb_test continue \
-"Continuing\\..*stat 3:.*OK.*test_stat \\(\\) at.*$srcfile:272.*" \
+"Continuing\\..*stat 3:.*ENOENT.*test_stat \\(\\) at.*$srcfile:272.*" \
 "Stat an empty pathname returns ENOENT"
 
 send_gdb "tbreak 276\n" ; gdb_expect -re "$gdb_prompt $"
 gdb_test continue \
-"Continuing\\..*stat 4:.*OK.*test_stat \\(\\) at.*$srcfile:276.*" \
+"Continuing\\..*stat 4:.*ENOENT.*test_stat \\(\\) at.*$srcfile:276.*" \
 "Stat a nonexistant file returns ENOENT"
 
 send_gdb "tbreak 301\n" ; gdb_expect -re "$gdb_prompt $"
@@ -166,7 +170,7 @@ gdb_test continue \
 
 send_gdb "tbreak 305\n" ; gdb_expect -re "$gdb_prompt $"
 gdb_test continue \
-"Continuing\\..*fstat 2:.*OK.*test_fstat \\(\\) at.*$srcfile:305.*" \
+"Continuing\\..*fstat 2:.*EBADF.*test_fstat \\(\\) at.*$srcfile:305.*" \
 "Fstat an invalid file descriptor returns EBADF"
 
 send_gdb "tbreak 314\n" ; gdb_expect -re "$gdb_prompt $"
@@ -200,6 +204,7 @@ gdb_test continue \
 "Continuing\\..*system 1:.*OK.*test_system \\(\\) at.*$srcfile:347.*" \
 "System(3) call"
 
+# Is this ok?  POSIX says system returns a waitpid status?
 send_gdb "tbreak 349\n" ; gdb_expect -re "$gdb_prompt $"
 gdb_test continue \
 "Continuing\\..*system 2:.*OK.*test_system \\(\\) at.*$srcfile:349.*" \
@@ -212,22 +217,22 @@ gdb_test continue \
 
 send_gdb "tbreak 383\n" ; gdb_expect -re "$gdb_prompt $"
 gdb_test continue \
-"Continuing\\..*rename 2:.*OK.*test_rename \\(\\) at.*$srcfile:383.*" \
+"Continuing\\..*rename 2:.*EISDIR.*test_rename \\(\\) at.*$srcfile:383.*" \
 "Renaming a file to existing directory returns EISDIR"
 
 send_gdb "tbreak 388\n" ; gdb_expect -re "$gdb_prompt $"
 gdb_test continue \
-"Continuing\\..*rename 3:.*OK.*test_rename \\(\\) at.*$srcfile:388.*" \
+	"Continuing\\..*rename 3:.*(ENOTEMPTY|EEXIST).*test_rename \\(\\) at.*$srcfile:388.*" \
 "Renaming a directory to a non-empty directory returns ENOTEMPTY or EEXIST"
 
 send_gdb "tbreak 393\n" ; gdb_expect -re "$gdb_prompt $"
 gdb_test continue \
-"Continuing\\..*rename 4:.*OK.*test_rename \\(\\) at.*$srcfile:393.*" \
+"Continuing\\..*rename 4:.*EINVAL.*test_rename \\(\\) at.*$srcfile:393.*" \
 "Renaming a directory to a subdir of itself returns EINVAL"
 
 send_gdb "tbreak 397\n" ; gdb_expect -re "$gdb_prompt $"
 gdb_test continue \
-"Continuing\\..*rename 5:.*OK.*test_rename \\(\\) at.*$srcfile:397.*" \
+"Continuing\\..*rename 5:.*ENOENT.*test_rename \\(\\) at.*$srcfile:397.*" \
 "Renaming a nonexistant file returns ENOENT"
 
 send_gdb "tbreak 412\n" ; gdb_expect -re "$gdb_prompt $"
@@ -242,12 +247,12 @@ if [ishost *cygwin*] {
     setup_xfail "*-*-*"
 }
 gdb_test continue \
-"Continuing\\..*unlink 2:.*OK.*test_unlink \\(\\) at.*$srcfile:432.*" \
+"Continuing\\..*unlink 2:.*EACCES.*test_unlink \\(\\) at.*$srcfile:432.*" \
 "Unlinking a file in a directory w/o write access returns EACCES"
 
 send_gdb "tbreak 436\n" ; gdb_expect -re "$gdb_prompt $"
 gdb_test continue \
-"Continuing\\..*unlink 3:.*OK.*test_unlink \\(\\) at.*$srcfile:436.*" \
+"Continuing\\..*unlink 3:.*ENOENT.*test_unlink \\(\\) at.*$srcfile:436.*" \
 "Unlinking a nonexistant file returns ENOENT"
 
 send_gdb "tbreak 446\n" ; gdb_expect -re "$gdb_prompt $"
@@ -264,8 +269,8 @@ gdb_test continue \
 send_gdb "quit\n"
 send_gdb "y\n"
 
-catch "system \"chmod -f +w dir2.fileio.test\""
-catch "system \"rm -rf *.fileio.test\""
+remote_exec build "test -r dir2.fileio.test && chmod -f +w dir2.fileio.test"
+remote_exec build "rm -rf *.fileio.test"
 
 set timeout $oldtimeout
 return 0

@@ -1,3 +1,13 @@
+2003-06-14  Andrew Cagney  <cagney@redhat.com>
+
+	* gdb.base/fileio.c: Include <errno.h>, and <sys/wait.h>.  Gag
+	-Wformat errors.  Add lost line.  Use WEXITSTATUS to get system
+	exit status.
+	* gdb.base/fileio.exp: Disable target when nointerrupts and
+	noinferiorio, instead of limiting it to remote.  Use remote_exec
+	instead of system.
+	
+
 2003-06-12  Jeff Johnston  <jjohnstn@redhat.com>
 
 	* gdb.base/float.exp: Add ia64 support.
