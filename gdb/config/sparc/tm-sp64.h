@@ -1,6 +1,6 @@
 /* Target machine sub-parameters for SPARC64, for GDB, the GNU debugger.
-   This is included by other tm-*.h files to define SPARC cpu-related info.
-   Copyright 1986, 1987, 1989, 1991, 1992, 1993 Free Software Foundation, Inc.
+   This is included by other tm-*.h files to define SPARC64 cpu-related info.
+   Copyright 1994, 1995 Free Software Foundation, Inc.
    This is (obviously) based on the SPARC Vn (n<9) port.
    Contributed by Doug Evans (dje@cygnus.com).
 
@@ -20,51 +20,25 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
+#define GDB_TARGET_IS_SPARC64
+
+/* Need to define this so gdb will know what to do with long long's.
+   Defining FORCE_LONG_LONG is incorrect (as of 940731) because that
+   doesn't work for BFD64 targets.  */
+
+#define CC_HAS_LONG_LONG
+
 #include "sparc/tm-sparc.h"
-
-/* We have long longs.  */
-#define LONG_LONG
-
-/* When passing a structure to a function, Sun cc passes the address
-   in a register, not the structure itself.  It (under SunOS4) creates
-   two symbols, so we get a LOC_ARG saying the address is on the stack
-   (a lie, and a serious one since we don't know which register to
-   use), and a LOC_REGISTER saying that the struct is in a register
-   (sort of a lie, but fixable with REG_STRUCT_HAS_ADDR).  Gcc version
-   two (as of 1.92) behaves like sun cc.  REG_STRUCT_HAS_ADDR is smart
-   enough to distinguish between Sun cc, gcc version 1 and gcc version 2.
-
-   This still doesn't work if the argument is not one passed in a
-   register (i.e. it's the 7th or later argument).  */
-
-#undef  REG_STRUCT_HAS_ADDR
-#define REG_STRUCT_HAS_ADDR(gcc_p) (gcc_p != 1)
-#undef  STRUCT_ARG_SYM_GARBAGE
-#define STRUCT_ARG_SYM_GARBAGE(gcc_p) (gcc_p != 1)
 
 /* Stack has strict alignment.  */
 
 #undef  STACK_ALIGN
 #define STACK_ALIGN(ADDR) (((ADDR)+15)&-16)
 
-/* Nonzero if instruction at PC is a return instruction.  */
-/* For SPARC, this is either a "jmpl %o7+8,%g0" or "jmpl %i7+8,%g0".
-
-   Note: this does not work for functions returning structures under SunOS.
-   This should work for v9, however.  */
-#undef  ABOUT_TO_RETURN
-#define ABOUT_TO_RETURN(pc) \
-  ((read_memory_integer (pc, 4)|0x00040000) == 0x81c7e008)
-
-/* Say how long (ordinary) registers are.  */
-
-#undef  REGISTER_TYPE
-#define REGISTER_TYPE long long
-
-/* Number of machine registers */
+/* Number of machine registers.  */
 
 #undef  NUM_REGS
-#define NUM_REGS 127
+#define NUM_REGS 125
 
 /* Initializer for an array of names of registers.
    There should be NUM_REGS strings in this initializer.  */
@@ -76,9 +50,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* FIXME: fcc0-3 are currently separate, even though they are also part of
    fsr.  May have to remove them but let's postpone this as long as
    possible.  */
-/* FIXME: cle and tle are new registers that haven't entered the docs yet.
-   They stand for "current little endian format" and "trap little endian
-   format".  */
+/* FIXME: Whether to include f33, f35, etc. here is not clear.
+   There are advantages and disadvantages.  */
 
 #undef  REGISTER_NAMES
 #define REGISTER_NAMES  \
@@ -94,9 +67,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
   "f32", "f34", "f36", "f38", "f40", "f42", "f44", "f46",	\
   "f48", "f50", "f52", "f54", "f56", "f58", "f60", "f62",	\
                                                                 \
-  "ccr", "y", "pc", "npc", "asi", "cle", "tle",			\
-  "fsr", "fprs", "ver", "tick", "pil", "pstate", "wstate",	\
-  "tba", "tl", "tt", "tpc", "tnpc", "tstate",			\
+  "pc", "npc, "ccr", "fsr", fprs", "y", "asi",			\
+  "ver", "tick", "pil", "pstate",				\
+  "tstate", "tba", "tl", "tt", "tpc", "tnpc", "wstate",		\
   "cwp", "cansave", "canrestore", "cleanwin", "otherwin",	\
   "asr16", "asr17", "asr18", "asr19", "asr20", "asr21",		\
   "asr22", "asr23", "asr24", "asr25", "asr26", "asr27",		\
@@ -144,58 +117,45 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* v9 misc. and priv. regs */
 
-#define C0_REGNUM 80				/* Start of control registers */
-#define CCR_REGNUM (C0_REGNUM + 0)		/* Condition Code Register (%xcc,%icc) */
-#define	Y_REGNUM (C0_REGNUM + 1)		/* Temp register for multiplication, etc.  */
-#define PC_REGNUM (C0_REGNUM + 2)		/* floating point condition code reg 2 */
-#define NPC_REGNUM (C0_REGNUM + 3)		/* floating point condition code reg 2 */
-#define ASI_REGNUM (C0_REGNUM + 4)		/* Alternate Space Identifier */
-#define CLE_REGNUM (C0_REGNUM + 5)		/* Current Little Endian format */
-#define TLE_REGNUM (C0_REGNUM + 6)		/* Trap Little Endian format */
-#define FSR_REGNUM (C0_REGNUM + 7)		/* Floating Point State */
-#define FPRS_REGNUM (C0_REGNUM + 8)		/* Floating Point Registers State */
-#define VER_REGNUM (C0_REGNUM + 9)		/* Version register */
-#define TICK_REGNUM (C0_REGNUM + 10)		/* Tick register */
-#define PIL_REGNUM (C0_REGNUM + 11)		/* Processor Interrupt Level */
-#define PSTATE_REGNUM (C0_REGNUM + 12)		/* Processor State */
-#define WSTATE_REGNUM (C0_REGNUM + 13)		/* Window State */
-#define TBA_REGNUM (C0_REGNUM + 14)		/* floating point condition code reg 3 */
-#define TL_REGNUM (C0_REGNUM + 15)		/* Trap Level */
-#define TT_REGNUM (C0_REGNUM + 16)		/* Trap Type */
-#define TPC_REGNUM (C0_REGNUM + 17)		/* Trap pc */
-#define TNPC_REGNUM (C0_REGNUM + 18)		/* Trap npc */
-#define TSTATE_REGNUM (C0_REGNUM + 19)		/* Trap State */
-#define CWP_REGNUM (C0_REGNUM + 20)		/* Current Window Pointer */
-#define CANSAVE_REGNUM (C0_REGNUM + 21)		/* Savable Windows */
-#define CANRESTORE_REGNUM (C0_REGNUM + 22)	/* Restorable Windows */
-#define CLEANWIN_REGNUM (C0_REGNUM + 23)	/* Clean Windows */
-#define OTHERWIN_REGNUM (C0_REGNUM + 24)	/* Other Windows */
-#define ASR_REGNUM(n) (C0_REGNUM+(25-16)+(n))	/* Ancillary State Register
+#define C0_REGNUM FP_MAX_REGNUM			/* Start of control registers */
+#define PC_REGNUM (C0_REGNUM + 0)		/* Current PC */
+#define NPC_REGNUM (C0_REGNUM + 1)		/* Next PC */
+#define CCR_REGNUM (C0_REGNUM + 2)		/* Condition Code Register (%xcc,%icc) */
+#define FSR_REGNUM (C0_REGNUM + 3)		/* Floating Point State */
+#define FPRS_REGNUM (C0_REGNUM + 4)		/* Floating Point Registers State */
+#define	Y_REGNUM (C0_REGNUM + 5)		/* Temp register for multiplication, etc.  */
+#define ASI_REGNUM (C0_REGNUM + 6)		/* Alternate Space Identifier */
+#define VER_REGNUM (C0_REGNUM + 7)		/* Version register */
+#define TICK_REGNUM (C0_REGNUM + 8)		/* Tick register */
+#define PIL_REGNUM (C0_REGNUM + 9)		/* Processor Interrupt Level */
+#define PSTATE_REGNUM (C0_REGNUM + 10)		/* Processor State */
+#define TSTATE_REGNUM (C0_REGNUM + 11)		/* Trap State */
+#define TBA_REGNUM (C0_REGNUM + 12)		/* Trap Base Address */
+#define TL_REGNUM (C0_REGNUM + 13)		/* Trap Level */
+#define TT_REGNUM (C0_REGNUM + 14)		/* Trap Type */
+#define TPC_REGNUM (C0_REGNUM + 15)		/* Trap pc */
+#define TNPC_REGNUM (C0_REGNUM + 16)		/* Trap npc */
+#define WSTATE_REGNUM (C0_REGNUM + 17)		/* Window State */
+#define CWP_REGNUM (C0_REGNUM + 18)		/* Current Window Pointer */
+#define CANSAVE_REGNUM (C0_REGNUM + 19)		/* Savable Windows */
+#define CANRESTORE_REGNUM (C0_REGNUM + 20)	/* Restorable Windows */
+#define CLEANWIN_REGNUM (C0_REGNUM + 21)	/* Clean Windows */
+#define OTHERWIN_REGNUM (C0_REGNUM + 22)	/* Other Windows */
+#define ASR_REGNUM(n) (C0_REGNUM+(23-16)+(n))	/* Ancillary State Register
 						   (n = 16...31) */
-#define ICC_REGNUM (C0_REGNUM + 41)		/* 32 bit condition codes */
-#define XCC_REGNUM (C0_REGNUM + 42)		/* 64 bit condition codes */
-#define FCC0_REGNUM (C0_REGNUM + 43)		/* floatpoint condition code reg 0 */
-#define FCC1_REGNUM (C0_REGNUM + 44)		/* floating point condition code reg 0 */
-#define FCC2_REGNUM (C0_REGNUM + 45)		/* floating point condition code reg 1 */
-#define FCC3_REGNUM (C0_REGNUM + 46)		/* floating point condition code reg 2 */
-
-/* FIXME: PS_REGNUM, FPS_REGNUM, CPS_REGNUM are for priviledged v8 registers
-   which don't exist in v9 (in the same form).  We use bits of sparc-tdep.c
-   which requires these, so define them here to be unused ASR regs so
-   sparc-tdep.c will compile.  What we really want to do is put some
-   conditionals in sparc-tdep.c (run time or compile time) or separate the v8
-   stuff out of sparc-tdep.c.  */
-
-#define PS_REGNUM (ASR_REGNUM (29))
-#define FPS_REGNUM (ASR_REGNUM (30))
-#define CPS_REGNUM (ASR_REGNUM (31))
+#define ICC_REGNUM (C0_REGNUM + 39)		/* 32 bit condition codes */
+#define XCC_REGNUM (C0_REGNUM + 40)		/* 64 bit condition codes */
+#define FCC0_REGNUM (C0_REGNUM + 41)		/* fp cc reg 0 */
+#define FCC1_REGNUM (C0_REGNUM + 42)		/* fp cc reg 1 */
+#define FCC2_REGNUM (C0_REGNUM + 43)		/* fp cc reg 2 */
+#define FCC3_REGNUM (C0_REGNUM + 44)		/* fp cc reg 3 */
 
 /* Total amount of space needed to store our copies of the machine's
    register state, the array `registers'.
    Some of the registers aren't 64 bits, but it's a lot simpler just to assume
    they all are (since most of them are).  */
 #undef  REGISTER_BYTES
-#define REGISTER_BYTES (32*8+32*8+47*8)
+#define REGISTER_BYTES (32*8+32*8+45*8)
 
 /* Index within `registers' of the first byte of the space for
    register N.  */
@@ -206,45 +166,37 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    : (N) < C0_REGNUM ? 32*8 + 32*4 + ((N)-64)*8	\
    : 64*8 + ((N)-C0_REGNUM)*8)
 
+/* Say how long (ordinary) registers are.  This is a piece of bogosity
+   used in push_word and a few other places; REGISTER_RAW_SIZE is the
+   real way to know how big a register is.  */
+
+#undef  REGISTER_SIZE
+#define REGISTER_SIZE 8
+
 /* Number of bytes of storage in the actual machine representation
    for register N.  */
+/* ??? It's not clear whether we want to return 4 or 8 for fp regs.  */
 
 #undef  REGISTER_RAW_SIZE
-#define REGISTER_RAW_SIZE(N) (8)
+#define REGISTER_RAW_SIZE(N) 8
 
 /* Number of bytes of storage in the program's representation
    for register N.  */
 
 #undef  REGISTER_VIRTUAL_SIZE
-#define REGISTER_VIRTUAL_SIZE(N) (8)
+#define REGISTER_VIRTUAL_SIZE(N) 8
 
 /* Largest value REGISTER_RAW_SIZE can have.  */
 /* tm-sparc.h defines this as 8, but play it safe.  */
 
 #undef  MAX_REGISTER_RAW_SIZE
-#define MAX_REGISTER_RAW_SIZE (8)
+#define MAX_REGISTER_RAW_SIZE 8
 
 /* Largest value REGISTER_VIRTUAL_SIZE can have.  */
 /* tm-sparc.h defines this as 8, but play it safe.  */
 
 #undef  MAX_REGISTER_VIRTUAL_SIZE
-#define MAX_REGISTER_VIRTUAL_SIZE (8)
-
-/* Convert data from raw format for register REGNUM
-   to virtual format for register REGNUM.  */
-/* ??? Remove when tm-sparc.h is fixed.  */
-
-#undef  REGISTER_CONVERT_TO_VIRTUAL
-#define REGISTER_CONVERT_TO_VIRTUAL(REGNUM,FROM,TO) \
-{ memcpy ((TO), (FROM), REGISTER_RAW_SIZE (0)); }
-
-/* Convert data from virtual format for register REGNUM
-   to raw format for register REGNUM.  */
-/* ??? Remove when tm-sparc.h is fixed.  */
-
-#undef  REGISTER_CONVERT_TO_RAW
-#define REGISTER_CONVERT_TO_RAW(REGNUM,FROM,TO)	\
-{ memcpy ((TO), (FROM), REGISTER_RAW_SIZE (0)); }
+#define MAX_REGISTER_VIRTUAL_SIZE 8
 
 /* Return the GDB type object for the "standard" data type
    of data in register N.  */
@@ -268,24 +220,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
   { target_write_memory ((SP)+(16*8), (char *)&(ADDR), 8); }
 
 /* Extract from an array REGBUF containing the (raw) register state
-   a function return value of type TYPE, and copy that, in virtual format,
-   into VALBUF.  */ /* FIXME */
-
-#undef  EXTRACT_RETURN_VALUE
-#define EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF)	      \
-  {      	       	       	       	       	       	       	           \
-    if (TYPE_CODE (TYPE) == TYPE_CODE_FLT)		       		   \
-      {							       		   \
-	memcpy ((VALBUF), ((int *)(REGBUF))+FP0_REGNUM, TYPE_LENGTH(TYPE));\
-      }							       		   \
-    else						       		   \
-      memcpy ((VALBUF),						   	   \
-	      (char *)(REGBUF) + 8 * 8 +				   \
-	      (TYPE_LENGTH(TYPE) >= 8 ? 0 : 8 - TYPE_LENGTH(TYPE)),	   \
-	      TYPE_LENGTH(TYPE));					   \
-  }
-
-/* Extract from an array REGBUF containing the (raw) register state
    the address in which a function should return its structure value,
    as a CORE_ADDR (or an expression that can be used as one).  */
 
@@ -301,12 +235,6 @@ sparc64_extract_struct_value_address PARAMS ((char [REGISTER_BYTES]));
 #undef  FRAME_ARGS_SKIP
 #define FRAME_ARGS_SKIP 136
 
-/* Sparc has no reliable single step ptrace call */
-
-#undef  NO_SINGLE_STEP
-#define NO_SINGLE_STEP 1
-extern void single_step ();
-
 /* We need two arguments (in general) to the "info frame" command.
    Note that the definition of this macro implies that there exists a
    function "setup_arbitrary_frame" in sparc-tdep.c */

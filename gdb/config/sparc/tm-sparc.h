@@ -123,7 +123,8 @@ extern CORE_ADDR sparc_pc_adjust PARAMS ((CORE_ADDR));
 /* Nonzero if instruction at PC is a return instruction.  */
 /* For SPARC, this is either a "jmpl %o7+8,%g0" or "jmpl %i7+8,%g0".
 
-   Note: this does not work for functions returning structures under SunOS.  */
+   Note: this does not work for functions returning structures under SunOS.
+   v9 does not have such critters though.  */
 #define ABOUT_TO_RETURN(pc) \
   ((read_memory_integer (pc, 4)|0x00040000) == 0x81c7e008)
 
@@ -259,8 +260,9 @@ extern CORE_ADDR sparc_pc_adjust PARAMS ((CORE_ADDR));
       }							       		   \
     else						       		   \
       memcpy ((VALBUF),						   	   \
-	      (char *)(REGBUF) + 4 * 8 +				   \
-	      (TYPE_LENGTH(TYPE) >= 4 ? 0 : 4 - TYPE_LENGTH(TYPE)),	   \
+	      (char *)(REGBUF) + REGISTER_RAW_SIZE (O0_REGNUM) * 8 +	   \
+	      (TYPE_LENGTH(TYPE) >= REGISTER_RAW_SIZE (O0_REGNUM)	   \
+	       ? 0 : REGISTER_RAW_SIZE (O0_REGNUM) - TYPE_LENGTH(TYPE)),   \
 	      TYPE_LENGTH(TYPE));					   \
   }
 

@@ -1,10 +1,15 @@
-# Target: SPARC simulator
-# Which simulator has deliberately been avoided.  There are two and I'm
-# currently playing with both. /dje
+# Target: SPARC64 (with simulator)
+# solib.o and procfs.o taken out for now.  We don't have shared libraries yet,
+# and the elf version requires procfs.o but the a.out version doesn't.
+# Then again, having procfs.o in a target makefile fragment seems wrong.
+TDEPFILES = sparc-tdep.o $(SIMFILES)
+TM_FILE= tm-sp64.h
 
 # Need gcc for long long support.
 CC = gcc
-# Regular "have long long" detection is disabled for now.
-MH_CFLAGS = -DFORCE_LONG_LONG -I${srcdir}/../sim/sp64
-TDEPFILES= solib.o sparc-tdep.o sp64-tdep.o remote-sim.o ../sim/sp64/libsim.a
-TM_FILE= tm-sp64sim.h
+
+MH_CFLAGS = -I${srcdir}/../sim/sp64
+SIMFILES = remote-sim.o ../sim/sp64/libsim.a
+
+# The simulator uses the sqrt() function.
+TM_CLIBS = -lm
