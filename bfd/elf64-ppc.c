@@ -5621,7 +5621,13 @@ allocate_dynrelocs (h, inf)
 
   if (info->shared)
     {
-      if (SYMBOL_REFERENCES_LOCAL (info, h))
+      /* Relocs that use pc_count are those that appear on a call
+	 insn, or certain REL relocs (see MUST_BE_DYN_RELOC) that can
+	 generated via assembly.  We want calls to protected symbols
+	 to resolve directly to the function rather than going via the
+	 plt.  If people want function pointer comparisons to work as
+	 expected then they should avoid writing weird assembly.  */
+      if (SYMBOL_CALLS_LOCAL (info, h))
 	{
 	  struct ppc_dyn_relocs **pp;
 
@@ -7874,7 +7880,7 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		   || h->root.type != bfd_link_hash_undefweak)
 	       && (MUST_BE_DYN_RELOC (r_type)
 		   || (h != NULL
-		       && !SYMBOL_REFERENCES_LOCAL (info, h))))
+		       && !SYMBOL_CALLS_LOCAL (info, h))))
 	      || (ELIMINATE_COPY_RELOCS
 		  && !info->shared
 		  && h != NULL

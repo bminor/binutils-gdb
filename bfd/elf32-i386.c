@@ -1679,7 +1679,13 @@ allocate_dynrelocs (h, inf)
 
   if (info->shared)
     {
-      if (SYMBOL_REFERENCES_LOCAL (info, h))
+      /* The only reloc that uses pc_count is R_386_PC32, which will
+	 appear on a call or on something like ".long foo - .".  We
+	 want calls to protected symbols to resolve directly to the
+	 function rather than going via the plt.  If people want
+	 function pointer comparisons to work as expected then they
+	 should avoid writing assembly like ".long foo - .".  */
+      if (SYMBOL_CALLS_LOCAL (info, h))
 	{
 	  struct elf_i386_dyn_relocs **pp;
 
@@ -2434,7 +2440,7 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
 		   || h->root.type != bfd_link_hash_undefweak)
 	       && (r_type != R_386_PC32
 		   || (h != NULL
-		       && !SYMBOL_REFERENCES_LOCAL (info, h))))
+		       && !SYMBOL_CALLS_LOCAL (info, h))))
 	      || (ELIMINATE_COPY_RELOCS
 		  && !info->shared
 		  && h != NULL

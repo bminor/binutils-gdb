@@ -1,3 +1,13 @@
+2003-05-15  Alan Modra  <amodra@bigpond.net.au>
+	    H.J. Lu <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (allocate_dynrelocs): Use SYMBOL_CALLS_LOCAL.
+	(elf_i386_relocate_section): Likewise.
+	* elf32-ppc.c (allocate_dynrelocs): Likewise.
+	(ppc_elf_relocate_section): Likewise.
+	* elf64-ppc.c (allocate_dynrelocs): Likewise.
+	(ppc64_elf_relocate_section): Likewise.
+
 2003-05-15  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
 	* elf32-mips.c (gprel32_with_gp): Remove useless N64 ABI case.
