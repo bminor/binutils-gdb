@@ -1319,7 +1319,7 @@ gdbtk_init ( argv0 )
      char *argv0;
 {
   struct cleanup *old_chain;
-  char *lib, *gdbtk_lib, gdbtk_lib_tmp[1024],gdbtk_file[128];
+  char *lib, *gdbtk_lib, *gdbtk_lib_tmp, *gdbtk_file;
   int i, found_main;
   struct sigaction action;
   static sigset_t nullsigmask = {0};
@@ -1354,7 +1354,7 @@ gdbtk_init ( argv0 )
 
 #ifdef IDE
   /* Initialize the Paths variable.  */
-  if (ide_initialize_paths (interp, "gdb") != TCL_OK)
+  if (ide_initialize_paths (interp, "gdbtcl") != TCL_OK)
     error ("ide_initialize_paths failed: %s", interp->result);
 
   /* Find the directory where we expect to find idemanager.  We ignore
@@ -1502,7 +1502,8 @@ gdbtk_init ( argv0 )
     else
       gdbtk_lib = GDBTK_LIBRARY;
 
-  strcpy (gdbtk_lib_tmp, gdbtk_lib);
+  gdbtk_lib_tmp = xstrdup (gdbtk_lib);
+
   found_main = 0;
   /* see if GDBTK_LIBRARY is a path list */
   lib = strtok (gdbtk_lib_tmp, GDBTK_PATH_SEP);
@@ -1515,8 +1516,7 @@ gdbtk_init ( argv0 )
 	}
       if (!found_main)
 	{
-	  strcpy (gdbtk_file, lib);
-	  strcat (gdbtk_file, "/main.tcl");
+	  gdbtk_file = concat (lib, "/main.tcl", (char *) NULL);
 	  if (access (gdbtk_file, R_OK) == 0)
 	    {
 	      found_main++;
@@ -1525,7 +1525,42 @@ gdbtk_init ( argv0 )
 	}
      } 
   while ((lib = strtok (NULL, ":")) != NULL);
-  
+
+  free (gdbtk_lib_tmp);
+
+#ifdef IDE
+  if (!found_main)
+    {
+      /* Try finding it with the auto path.  */
+
+      static const char script[] ="\
+proc gdbtk_find_main {} {\n\
+  global auto_path GDBTK_LIBRARY\n\
+  foreach dir $auto_path {\n\
+    set f [file join $dir main.tcl]\n\
+    if {[file exists $f]} then {\n\
+      set GDBTK_LIBRARY $dir\n\
+      return $f\n\
+    }\n\
+  }\n\
+  return ""\n\
+}\n\
+gdbtk_find_main";
+
+      if (Tcl_GlobalEval (interp, (char *) script) != TCL_OK)
+	{
+	  fputs_unfiltered (Tcl_GetVar (interp, "errorInfo", 0), gdb_stderr);
+	  error ("");
+	}
+
+      if (interp->result[0] != '\0')
+	{
+	  gdbtk_file = xstrdup (interp->result);
+	  found_main++;
+	}
+    }
+#endif
+
   if (!found_main)
     {
       fputs_unfiltered_hook = NULL; /* Force errors to stdout/stderr */
@@ -1559,6 +1594,8 @@ gdbtk_init ( argv0 )
       fputs_unfiltered (Tcl_GetVar (interp, "errorInfo", 0), gdb_stderr);
       error ("");
     }
+
+  free (gdbtk_file);
 
   discard_cleanups (old_chain);
 }
