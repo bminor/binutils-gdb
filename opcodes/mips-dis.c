@@ -1,6 +1,6 @@
 /* Print mips instructions for GDB, the GNU debugger, or for objdump.
    Copyright 1989, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002
+   2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
    Contributed by Nobuyuki Hikichi(hikichi@sra.co.jp).
 
@@ -50,7 +50,7 @@ static int _print_insn_mips
   PARAMS ((bfd_vma, struct disassemble_info *, enum bfd_endian));
 static int print_insn_mips
   PARAMS ((bfd_vma, unsigned long int, struct disassemble_info *));
-static int print_insn_arg
+static void print_insn_args
   PARAMS ((const char *, unsigned long, bfd_vma, struct disassemble_info *));
 static int print_insn_mips16
   PARAMS ((bfd_vma, struct disassemble_info *));
@@ -664,342 +664,344 @@ lookup_mips_cp0sel_name(names, len, cp0reg, sel)
 
 /* Print insn arguments for 32/64-bit code.  */
 
-static int
-print_insn_arg (d, l, pc, info)
+static void
+print_insn_args (d, l, pc, info)
      const char *d;
      register unsigned long int l;
      bfd_vma pc;
      struct disassemble_info *info;
 {
-  int op, delta, consumed;
+  int op, delta;
 
-  consumed = 1;
-  switch (*d)
+  for (; *d != '\0'; d++)
     {
-    case ',':
-    case '(':
-    case ')':
-    case '[':
-    case ']':
-      (*info->fprintf_func) (info->stream, "%c", *d);
-      break;
-
-    case '+':
-      /* Extension character; switch for second char.  */
-      d++;
-      consumed++;
       switch (*d)
 	{
-	case 'A':
+	case ',':
+	case '(':
+	case ')':
+	case '[':
+	case ']':
+	  (*info->fprintf_func) (info->stream, "%c", *d);
+	  break;
+
+	case '+':
+	  /* Extension character; switch for second char.  */
+	  d++;
+	  switch (*d)
+	    {
+	    case '\0':
+	      /* xgettext:c-format */
+	      (*info->fprintf_func) (info->stream,
+				     _("# internal error, incomplete extension sequence (+)"));
+	      return;
+
+	    case 'A':
+	      (*info->fprintf_func) (info->stream, "0x%x",
+				     (l >> OP_SH_SHAMT) & OP_MASK_SHAMT);
+	      break;
+	
+	    case 'B':
+	      (*info->fprintf_func) (info->stream, "0x%x",
+				     (((l >> OP_SH_INSMSB) & OP_MASK_INSMSB)
+				      - ((l >> OP_SH_SHAMT) & OP_MASK_SHAMT)
+				      + 1));
+	      break;
+
+	    case 'C':
+	      (*info->fprintf_func) (info->stream, "0x%x",
+				     (((l >> OP_SH_EXTMSBD) & OP_MASK_EXTMSBD)
+				      + 1));
+	      break;
+
+	    case 'D':
+	      {
+		const struct mips_cp0sel_name *n;
+		unsigned int cp0reg, sel;
+
+		cp0reg = (l >> OP_SH_RD) & OP_MASK_RD;
+		sel = (l >> OP_SH_SEL) & OP_MASK_SEL;
+
+		/* CP0 register including 'sel' code for mtcN (et al.), to be
+		   printed textually if known.  If not known, print both
+		   CP0 register name and sel numerically since CP0 register
+		   with sel 0 may have a name unrelated to register being
+		   printed.  */
+		n = lookup_mips_cp0sel_name(mips_cp0sel_names,
+					    mips_cp0sel_names_len, cp0reg, sel);
+		if (n != NULL)
+		  (*info->fprintf_func) (info->stream, "%s", n->name);
+		else
+		  (*info->fprintf_func) (info->stream, "$%d,%d", cp0reg, sel);
+		break;
+	      }
+
+	    default:
+	      /* xgettext:c-format */
+	      (*info->fprintf_func) (info->stream,
+				     _("# internal error, undefined extension sequence (+%c)"),
+				     *d);
+	      return;
+	    }
+	  break;
+
+	case 's':
+	case 'b':
+	case 'r':
+	case 'v':
+	  (*info->fprintf_func) (info->stream, "%s",
+				 mips_gpr_names[(l >> OP_SH_RS) & OP_MASK_RS]);
+	  break;
+
+	case 't':
+	case 'w':
+	  (*info->fprintf_func) (info->stream, "%s",
+				 mips_gpr_names[(l >> OP_SH_RT) & OP_MASK_RT]);
+	  break;
+
+	case 'i':
+	case 'u':
+	  (*info->fprintf_func) (info->stream, "0x%x",
+				 (l >> OP_SH_IMMEDIATE) & OP_MASK_IMMEDIATE);
+	  break;
+
+	case 'j': /* Same as i, but sign-extended.  */
+	case 'o':
+	  delta = (l >> OP_SH_DELTA) & OP_MASK_DELTA;
+	  if (delta & 0x8000)
+	    delta |= ~0xffff;
+	  (*info->fprintf_func) (info->stream, "%d",
+				 delta);
+	  break;
+
+	case 'h':
+	  (*info->fprintf_func) (info->stream, "0x%x",
+				 (unsigned int) ((l >> OP_SH_PREFX)
+						 & OP_MASK_PREFX));
+	  break;
+
+	case 'k':
+	  (*info->fprintf_func) (info->stream, "0x%x",
+				 (unsigned int) ((l >> OP_SH_CACHE)
+						 & OP_MASK_CACHE));
+	  break;
+
+	case 'a':
+	  info->target = (((pc + 4) & ~(bfd_vma) 0x0fffffff)
+			  | (((l >> OP_SH_TARGET) & OP_MASK_TARGET) << 2));
+	  (*info->print_address_func) (info->target, info);
+	  break;
+
+	case 'p':
+	  /* Sign extend the displacement.  */
+	  delta = (l >> OP_SH_DELTA) & OP_MASK_DELTA;
+	  if (delta & 0x8000)
+	    delta |= ~0xffff;
+	  info->target = (delta << 2) + pc + INSNLEN;
+	  (*info->print_address_func) (info->target, info);
+	  break;
+
+	case 'd':
+	  (*info->fprintf_func) (info->stream, "%s",
+				 mips_gpr_names[(l >> OP_SH_RD) & OP_MASK_RD]);
+	  break;
+
+	case 'U':
+	  {
+	    /* First check for both rd and rt being equal.  */
+	    unsigned int reg = (l >> OP_SH_RD) & OP_MASK_RD;
+	    if (reg == ((l >> OP_SH_RT) & OP_MASK_RT))
+	      (*info->fprintf_func) (info->stream, "%s",
+				     mips_gpr_names[reg]);
+	    else
+	      {
+		/* If one is zero use the other.  */
+		if (reg == 0)
+		  (*info->fprintf_func) (info->stream, "%s",
+					 mips_gpr_names[(l >> OP_SH_RT) & OP_MASK_RT]);
+		else if (((l >> OP_SH_RT) & OP_MASK_RT) == 0)
+		  (*info->fprintf_func) (info->stream, "%s",
+					 mips_gpr_names[reg]);
+		else /* Bogus, result depends on processor.  */
+		  (*info->fprintf_func) (info->stream, "%s or %s",
+					 mips_gpr_names[reg],
+					 mips_gpr_names[(l >> OP_SH_RT) & OP_MASK_RT]);
+	      }
+	  }
+	  break;
+
+	case 'z':
+	  (*info->fprintf_func) (info->stream, "%s", mips_gpr_names[0]);
+	  break;
+
+	case '<':
 	  (*info->fprintf_func) (info->stream, "0x%x",
 				 (l >> OP_SH_SHAMT) & OP_MASK_SHAMT);
 	  break;
-	
-	case 'B':
+
+	case 'c':
 	  (*info->fprintf_func) (info->stream, "0x%x",
-				 (((l >> OP_SH_INSMSB) & OP_MASK_INSMSB)
-				   - ((l >> OP_SH_SHAMT) & OP_MASK_SHAMT)
-				  + 1));
+				 (l >> OP_SH_CODE) & OP_MASK_CODE);
+	  break;
+
+	case 'q':
+	  (*info->fprintf_func) (info->stream, "0x%x",
+				 (l >> OP_SH_CODE2) & OP_MASK_CODE2);
 	  break;
 
 	case 'C':
 	  (*info->fprintf_func) (info->stream, "0x%x",
-				 (((l >> OP_SH_EXTMSBD) & OP_MASK_EXTMSBD)
-				  + 1));
+				 (l >> OP_SH_COPZ) & OP_MASK_COPZ);
+	  break;
+
+	case 'B':
+	  (*info->fprintf_func) (info->stream, "0x%x",
+				 (l >> OP_SH_CODE20) & OP_MASK_CODE20);
+	  break;
+
+	case 'J':
+	  (*info->fprintf_func) (info->stream, "0x%x",
+				 (l >> OP_SH_CODE19) & OP_MASK_CODE19);
+	  break;
+
+	case 'S':
+	case 'V':
+	  (*info->fprintf_func) (info->stream, "%s",
+				 mips_fpr_names[(l >> OP_SH_FS) & OP_MASK_FS]);
+	  break;
+
+	case 'T':
+	case 'W':
+	  (*info->fprintf_func) (info->stream, "%s",
+				 mips_fpr_names[(l >> OP_SH_FT) & OP_MASK_FT]);
 	  break;
 
 	case 'D':
+	  (*info->fprintf_func) (info->stream, "%s",
+				 mips_fpr_names[(l >> OP_SH_FD) & OP_MASK_FD]);
+	  break;
+
+	case 'R':
+	  (*info->fprintf_func) (info->stream, "%s",
+				 mips_fpr_names[(l >> OP_SH_FR) & OP_MASK_FR]);
+	  break;
+
+	case 'E':
+	  /* Coprocessor register for lwcN instructions, et al.
+
+	     Note that there is no load/store cp0 instructions, and
+	     that FPU (cp1) instructions disassemble this field using
+	     'T' format.  Therefore, until we gain understanding of
+	     cp2 register names, we can simply print the register
+	     numbers.  */
+	  (*info->fprintf_func) (info->stream, "$%d",
+				 (l >> OP_SH_RT) & OP_MASK_RT);
+	  break;
+
+	case 'G':
+	  /* Coprocessor register for mtcN instructions, et al.  Note
+	     that FPU (cp1) instructions disassemble this field using
+	     'S' format.  Therefore, we only need to worry about cp0,
+	     cp2, and cp3.  */
+	  op = (l >> OP_SH_OP) & OP_MASK_OP;
+	  if (op == OP_OP_COP0)
+	    (*info->fprintf_func) (info->stream, "%s",
+				   mips_cp0_names[(l >> OP_SH_RD) & OP_MASK_RD]);
+	  else
+	    (*info->fprintf_func) (info->stream, "$%d",
+				   (l >> OP_SH_RD) & OP_MASK_RD);
+	  break;
+
+	case 'K':
+	  (*info->fprintf_func) (info->stream, "%s",
+				 mips_hwr_names[(l >> OP_SH_RD) & OP_MASK_RD]);
+	  break;
+
+	case 'N':
+	  (*info->fprintf_func) (info->stream, "$fcc%d",
+				 (l >> OP_SH_BCC) & OP_MASK_BCC);
+	  break;
+
+	case 'M':
+	  (*info->fprintf_func) (info->stream, "$fcc%d",
+				 (l >> OP_SH_CCC) & OP_MASK_CCC);
+	  break;
+
+	case 'P':
+	  (*info->fprintf_func) (info->stream, "%d",
+				 (l >> OP_SH_PERFREG) & OP_MASK_PERFREG);
+	  break;
+
+	case 'e':
+	  (*info->fprintf_func) (info->stream, "%d",
+				 (l >> OP_SH_VECBYTE) & OP_MASK_VECBYTE);
+	  break;
+
+	case '%':
+	  (*info->fprintf_func) (info->stream, "%d",
+				 (l >> OP_SH_VECALIGN) & OP_MASK_VECALIGN);
+	  break;
+
+	case 'H':
+	  (*info->fprintf_func) (info->stream, "%d",
+				 (l >> OP_SH_SEL) & OP_MASK_SEL);
+	  break;
+
+	case 'O':
+	  (*info->fprintf_func) (info->stream, "%d",
+				 (l >> OP_SH_ALN) & OP_MASK_ALN);
+	  break;
+
+	case 'Q':
 	  {
-	    const struct mips_cp0sel_name *n;
-	    unsigned int cp0reg, sel;
-
-	    cp0reg = (l >> OP_SH_RD) & OP_MASK_RD;
-	    sel = (l >> OP_SH_SEL) & OP_MASK_SEL;
-
-	    /* CP0 register including 'sel' code for mtcN (et al.), to be
-	       printed textually if known.  If not known, print both
-	       CP0 register name and sel numerically since CP0 register
-	       with sel 0 may have a name unrelated to register being
-	       printed.  */
-	    n = lookup_mips_cp0sel_name(mips_cp0sel_names,
-					mips_cp0sel_names_len, cp0reg, sel);
-	    if (n != NULL)
-	      (*info->fprintf_func) (info->stream, "%s", n->name);
+	    unsigned int vsel = (l >> OP_SH_VSEL) & OP_MASK_VSEL;
+	    if ((vsel & 0x10) == 0)
+	      {
+		int fmt;
+		vsel &= 0x0f;
+		for (fmt = 0; fmt < 3; fmt++, vsel >>= 1)
+		  if ((vsel & 1) == 0)
+		    break;
+		(*info->fprintf_func) (info->stream, "$v%d[%d]",
+				       (l >> OP_SH_FT) & OP_MASK_FT,
+				       vsel >> 1);
+	      }
+	    else if ((vsel & 0x08) == 0)
+	      {
+		(*info->fprintf_func) (info->stream, "$v%d",
+				       (l >> OP_SH_FT) & OP_MASK_FT);
+	      }
 	    else
-	      (*info->fprintf_func) (info->stream, "$%d,%d", cp0reg, sel);
-	    break;
+	      {
+		(*info->fprintf_func) (info->stream, "0x%x",
+				       (l >> OP_SH_FT) & OP_MASK_FT);
+	      }
 	  }
+	  break;
+
+	case 'X':
+	  (*info->fprintf_func) (info->stream, "$v%d",
+				 (l >> OP_SH_FD) & OP_MASK_FD);
+	  break;
+
+	case 'Y':
+	  (*info->fprintf_func) (info->stream, "$v%d",
+				 (l >> OP_SH_FS) & OP_MASK_FS);
+	  break;
+
+	case 'Z':
+	  (*info->fprintf_func) (info->stream, "$v%d",
+				 (l >> OP_SH_FT) & OP_MASK_FT);
+	  break;
 
 	default:
 	  /* xgettext:c-format */
 	  (*info->fprintf_func) (info->stream,
-				 _("# internal error, undefined extension sequence (+%c)"),
+				 _("# internal error, undefined modifier(%c)"),
 				 *d);
-	  /* Do not eat the trailing newline.  */
-	  if (*d == '\0')
-	    consumed--;
-	  break;
+	  return;
 	}
-      break;
-
-    case 's':
-    case 'b':
-    case 'r':
-    case 'v':
-      (*info->fprintf_func) (info->stream, "%s",
-			     mips_gpr_names[(l >> OP_SH_RS) & OP_MASK_RS]);
-      break;
-
-    case 't':
-    case 'w':
-      (*info->fprintf_func) (info->stream, "%s",
-			     mips_gpr_names[(l >> OP_SH_RT) & OP_MASK_RT]);
-      break;
-
-    case 'i':
-    case 'u':
-      (*info->fprintf_func) (info->stream, "0x%x",
-			     (l >> OP_SH_IMMEDIATE) & OP_MASK_IMMEDIATE);
-      break;
-
-    case 'j': /* Same as i, but sign-extended.  */
-    case 'o':
-      delta = (l >> OP_SH_DELTA) & OP_MASK_DELTA;
-      if (delta & 0x8000)
-	delta |= ~0xffff;
-      (*info->fprintf_func) (info->stream, "%d",
-			     delta);
-      break;
-
-    case 'h':
-      (*info->fprintf_func) (info->stream, "0x%x",
-			     (unsigned int) ((l >> OP_SH_PREFX)
-					     & OP_MASK_PREFX));
-      break;
-
-    case 'k':
-      (*info->fprintf_func) (info->stream, "0x%x",
-			     (unsigned int) ((l >> OP_SH_CACHE)
-					     & OP_MASK_CACHE));
-      break;
-
-    case 'a':
-      info->target = (((pc + 4) & ~(bfd_vma) 0x0fffffff)
-		      | (((l >> OP_SH_TARGET) & OP_MASK_TARGET) << 2));
-      (*info->print_address_func) (info->target, info);
-      break;
-
-    case 'p':
-      /* Sign extend the displacement.  */
-      delta = (l >> OP_SH_DELTA) & OP_MASK_DELTA;
-      if (delta & 0x8000)
-	delta |= ~0xffff;
-      info->target = (delta << 2) + pc + INSNLEN;
-      (*info->print_address_func) (info->target, info);
-      break;
-
-    case 'd':
-      (*info->fprintf_func) (info->stream, "%s",
-			     mips_gpr_names[(l >> OP_SH_RD) & OP_MASK_RD]);
-      break;
-
-    case 'U':
-      {
-	/* First check for both rd and rt being equal.  */
-	unsigned int reg = (l >> OP_SH_RD) & OP_MASK_RD;
-	if (reg == ((l >> OP_SH_RT) & OP_MASK_RT))
-	  (*info->fprintf_func) (info->stream, "%s",
-				 mips_gpr_names[reg]);
-	else
-	  {
-	    /* If one is zero use the other.  */
-	    if (reg == 0)
-	      (*info->fprintf_func) (info->stream, "%s",
-				     mips_gpr_names[(l >> OP_SH_RT) & OP_MASK_RT]);
-	    else if (((l >> OP_SH_RT) & OP_MASK_RT) == 0)
-	      (*info->fprintf_func) (info->stream, "%s",
-				     mips_gpr_names[reg]);
-	    else /* Bogus, result depends on processor.  */
-	      (*info->fprintf_func) (info->stream, "%s or %s",
-				     mips_gpr_names[reg],
-				     mips_gpr_names[(l >> OP_SH_RT) & OP_MASK_RT]);
-	  }
-      }
-      break;
-
-    case 'z':
-      (*info->fprintf_func) (info->stream, "%s", mips_gpr_names[0]);
-      break;
-
-    case '<':
-      (*info->fprintf_func) (info->stream, "0x%x",
-			     (l >> OP_SH_SHAMT) & OP_MASK_SHAMT);
-      break;
-
-    case 'c':
-      (*info->fprintf_func) (info->stream, "0x%x",
-			     (l >> OP_SH_CODE) & OP_MASK_CODE);
-      break;
-
-    case 'q':
-      (*info->fprintf_func) (info->stream, "0x%x",
-			     (l >> OP_SH_CODE2) & OP_MASK_CODE2);
-      break;
-
-    case 'C':
-      (*info->fprintf_func) (info->stream, "0x%x",
-			     (l >> OP_SH_COPZ) & OP_MASK_COPZ);
-      break;
-
-    case 'B':
-      (*info->fprintf_func) (info->stream, "0x%x",
-			     (l >> OP_SH_CODE20) & OP_MASK_CODE20);
-      break;
-
-    case 'J':
-      (*info->fprintf_func) (info->stream, "0x%x",
-			     (l >> OP_SH_CODE19) & OP_MASK_CODE19);
-      break;
-
-    case 'S':
-    case 'V':
-      (*info->fprintf_func) (info->stream, "%s",
-			     mips_fpr_names[(l >> OP_SH_FS) & OP_MASK_FS]);
-      break;
-
-    case 'T':
-    case 'W':
-      (*info->fprintf_func) (info->stream, "%s",
-			     mips_fpr_names[(l >> OP_SH_FT) & OP_MASK_FT]);
-      break;
-
-    case 'D':
-      (*info->fprintf_func) (info->stream, "%s",
-			     mips_fpr_names[(l >> OP_SH_FD) & OP_MASK_FD]);
-      break;
-
-    case 'R':
-      (*info->fprintf_func) (info->stream, "%s",
-			     mips_fpr_names[(l >> OP_SH_FR) & OP_MASK_FR]);
-      break;
-
-    case 'E':
-      /* Coprocessor register for lwcN instructions, et al.
-
-	 Note that there is no load/store cp0 instructions, and
-	 that FPU (cp1) instructions disassemble this field using
-	 'T' format.  Therefore, until we gain understanding of
-	 cp2 register names,
-	 we can simply print the register numbers.  */
-      (*info->fprintf_func) (info->stream, "$%d",
-			     (l >> OP_SH_RT) & OP_MASK_RT);
-      break;
-
-    case 'G':
-      /* Coprocessor register for mtcN instructions, et al.
-	 Note that FPU (cp1) instructions disassemble this field using
-	 'S' format.  Therefore, we only need to worry about cp0, cp2,
-	 and cp3.  */
-      op = (l >> OP_SH_OP) & OP_MASK_OP;
-      if (op == OP_OP_COP0)
-        (*info->fprintf_func) (info->stream, "%s",
-			       mips_cp0_names[(l >> OP_SH_RD) & OP_MASK_RD]);
-      else
-        (*info->fprintf_func) (info->stream, "$%d",
-			       (l >> OP_SH_RD) & OP_MASK_RD);
-      break;
-
-    case 'K':
-      (*info->fprintf_func) (info->stream, "%s",
-			     mips_hwr_names[(l >> OP_SH_RD) & OP_MASK_RD]);
-      break;
-
-    case 'N':
-      (*info->fprintf_func) (info->stream, "$fcc%d",
-			     (l >> OP_SH_BCC) & OP_MASK_BCC);
-      break;
-
-    case 'M':
-      (*info->fprintf_func) (info->stream, "$fcc%d",
-			     (l >> OP_SH_CCC) & OP_MASK_CCC);
-      break;
-
-    case 'P':
-      (*info->fprintf_func) (info->stream, "%d",
-			     (l >> OP_SH_PERFREG) & OP_MASK_PERFREG);
-      break;
-
-    case 'e':
-      (*info->fprintf_func) (info->stream, "%d",
-			     (l >> OP_SH_VECBYTE) & OP_MASK_VECBYTE);
-      break;
-
-    case '%':
-      (*info->fprintf_func) (info->stream, "%d",
-			     (l >> OP_SH_VECALIGN) & OP_MASK_VECALIGN);
-      break;
-
-    case 'H':
-      (*info->fprintf_func) (info->stream, "%d",
-			     (l >> OP_SH_SEL) & OP_MASK_SEL);
-      break;
-
-    case 'O':
-      (*info->fprintf_func) (info->stream, "%d",
-			     (l >> OP_SH_ALN) & OP_MASK_ALN);
-      break;
-
-    case 'Q':
-      {
-	unsigned int vsel = (l >> OP_SH_VSEL) & OP_MASK_VSEL;
-	if ((vsel & 0x10) == 0)
-	  {
-	    int fmt;
-	    vsel &= 0x0f;
-	    for (fmt = 0; fmt < 3; fmt++, vsel >>= 1)
-	      if ((vsel & 1) == 0)
-		break;
-	    (*info->fprintf_func) (info->stream, "$v%d[%d]",
-				   (l >> OP_SH_FT) & OP_MASK_FT,
-				   vsel >> 1);
-	  }
-	else if ((vsel & 0x08) == 0)
-	  {
-	    (*info->fprintf_func) (info->stream, "$v%d",
-				   (l >> OP_SH_FT) & OP_MASK_FT);
-	  }
-	else
-	  {
-	    (*info->fprintf_func) (info->stream, "0x%x",
-				   (l >> OP_SH_FT) & OP_MASK_FT);
-	  }
-      }
-      break;
-
-    case 'X':
-      (*info->fprintf_func) (info->stream, "$v%d",
-			     (l >> OP_SH_FD) & OP_MASK_FD);
-      break;
-
-    case 'Y':
-      (*info->fprintf_func) (info->stream, "$v%d",
-			     (l >> OP_SH_FS) & OP_MASK_FS);
-      break;
-
-    case 'Z':
-      (*info->fprintf_func) (info->stream, "$v%d",
-			     (l >> OP_SH_FT) & OP_MASK_FT);
-      break;
-
-    default:
-      /* xgettext:c-format */
-      (*info->fprintf_func) (info->stream,
-			     _("# internal error, undefined modifier(%c)"),
-			     *d);
-      break;
     }
-
-  return consumed;
 }
 
 /* Check if the object uses NewABI conventions.  */
@@ -1106,16 +1108,8 @@ print_insn_mips (memaddr, word, info)
 	      d = op->args;
 	      if (d != NULL && *d != '\0')
 		{
-		  int consumed;
-
 		  (*info->fprintf_func) (info->stream, "\t");
-		  while (*d != '\0')
-		    {
-		      /* print_insn_arg will not eat the trailing NUL
-			 of (erroneous) multi-character strings.  */
-		      consumed = print_insn_arg (d, word, memaddr, info);
-		      d += consumed;
-		    }
+		  print_insn_args (d, word, memaddr, info);
 		}
 
 	      return INSNLEN;

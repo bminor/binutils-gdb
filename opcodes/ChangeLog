@@ -1,3 +1,11 @@
+2003-01-02  Chris Demetriou  <cgd@broadcom.com>
+
+	* mips-dis.c: Update copyright years.
+	(print_insn_arg): Rename to...
+	(print_insn_args): This, returning void.  Process the whole
+	string of args rather than a single one.  Reindent.
+	(print_insn_mips): Update to match the above.
+
 2002-12-31  Chris Demetriou  <cgd@broadcom.com>
 
 	* mips-opc.c (mips_builtin_opcodes): Move "di" into the
