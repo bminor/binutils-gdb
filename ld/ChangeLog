@@ -8,6 +8,11 @@ Wed Aug 29 13:37:20 2001  J"orn Rennecke <amylaar@redhat.com>
 	* emulparams/h8300self.sh: New file.
 	* Makefile.in: Regenerated.
 
+2001-08-28  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* ldmain.c (main): Rename BSIZE to BufferSize to avoid collision
+	with macro name.
+
 2001-08-27  Linus Nordberg  <linus@swox.com>
 	    Alan Modra  <amodra@bigpond.net.au>
 
