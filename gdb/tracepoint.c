@@ -1928,7 +1928,7 @@ finish_tfind_command (char *msg,
 
   flush_cached_frames ();
   registers_changed ();
-  select_frame (get_current_frame (), 0);
+  select_frame (get_current_frame ());
   set_traceframe_num (target_frameno);
   set_tracepoint_num (target_tracept);
   if (target_frameno == -1)

@@ -476,7 +476,7 @@ info_threads_command (char *arg, int from_tty)
     }
   else
     {
-      select_frame (cur_frame, saved_frame_level);
+      select_frame (cur_frame);
     }
 
   /* re-show current frame. */
@@ -495,7 +495,7 @@ switch_to_thread (ptid_t ptid)
   flush_cached_frames ();
   registers_changed ();
   stop_pc = read_pc ();
-  select_frame (get_current_frame (), 0);
+  select_frame (get_current_frame ());
 }
 
 static void

@@ -338,7 +338,7 @@ generic_prepare_to_proceed (int select_it)
 	      flush_cached_frames ();
 	      registers_changed ();
 	      stop_pc = wait_pc;
-	      select_frame (get_current_frame (), 0);
+	      select_frame (get_current_frame ());
 	    }
           /* We return 1 to indicate that there is a breakpoint here,
              so we need to step over it before continuing to avoid

@@ -3441,7 +3441,7 @@ and/or watchpoints.\n");
 
   if (!stop_stack_dummy)
     {
-      select_frame (get_current_frame (), 0);
+      select_frame (get_current_frame ());
 
       /* Print current location without a level number, if
          we have changed functions or hit a breakpoint.
@@ -3517,7 +3517,7 @@ and/or watchpoints.\n");
          Can't rely on restore_inferior_status because that only gets
          called if we don't stop in the called function.  */
       stop_pc = read_pc ();
-      select_frame (get_current_frame (), 0);
+      select_frame (get_current_frame ());
     }
 
 done:
@@ -4024,7 +4024,7 @@ restore_selected_frame (void *args)
       return 0;
     }
 
-  select_frame (frame, fr->level);
+  select_frame (frame);
 
   return (1);
 }
@@ -4079,7 +4079,7 @@ restore_inferior_status (struct inferior_status *inf_status)
 	   frame.  */
 
 
-	select_frame (get_current_frame (), 0);
+	select_frame (get_current_frame ());
 
     }
 

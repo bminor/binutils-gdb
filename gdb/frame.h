@@ -244,7 +244,7 @@ extern void print_only_stack_frame (struct frame_info *, int, int);
 
 extern void show_stack_frame (struct frame_info *);
 
-extern void select_frame (struct frame_info *, int);
+extern void select_frame (struct frame_info *);
 
 extern void record_selected_frame (CORE_ADDR *, int *);
 

@@ -458,7 +458,7 @@ varobj_create (char *objname,
 	{
 	  var->root->frame = FRAME_FP (fi);
 	  old_fi = selected_frame;
-	  select_frame (fi, -1);
+	  select_frame (fi);
 	}
 
       /* We definitively need to catch errors here.
@@ -485,7 +485,7 @@ varobj_create (char *objname,
 
       /* Reset the selected frame */
       if (fi != NULL)
-	select_frame (old_fi, -1);
+	select_frame (old_fi);
     }
 
   /* If the variable object name is null, that means this
@@ -983,7 +983,7 @@ varobj_update (struct varobj **varp, struct varobj ***changelist)
     }
 
   /* Restore selected frame */
-  select_frame (old_fi, -1);
+  select_frame (old_fi);
 
   if (type_changed)
     return -2;
@@ -1862,7 +1862,7 @@ c_value_of_root (struct varobj **var_handle)
       within_scope = fi != NULL;
       /* FIXME: select_frame could fail */
       if (within_scope)
-	select_frame (fi, -1);
+	select_frame (fi);
     }
 
   if (within_scope)

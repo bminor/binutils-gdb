@@ -1101,7 +1101,7 @@ select_thread (mach_port_t task, int thread_id, int flag)
       stop_pc = read_pc ();
       flush_cached_frames ();
 
-      select_frame (get_current_frame (), 0);
+      select_frame (get_current_frame ());
     }
 
   return KERN_SUCCESS;

@@ -1,5 +1,40 @@
 2002-05-04  Andrew Cagney  <ac131313@redhat.com>
 
+	* frame.h (select_frame): Delete level parameter.
+	* stack.c (select_frame): Update.  Use frame_relative_level to
+	obtain the frame's level.
+	(select_and_print_frame): Update call.
+	(select_frame_command): Ditto.
+	(up_silently_base): Ditto.
+	(down_silently_base): Ditto.
+	* ocd.c (ocd_start_remote): Ditto.
+	* remote-rdp.c (remote_rdp_open): Ditto.
+	* remote-mips.c (mips_initialize): Ditto.
+	(common_open): Ditto.
+	* remote-e7000.c (e7000_start_remote): Ditto.
+	* m3-nat.c (select_thread): Ditto.
+	* hppa-tdep.c (child_get_current_exception_event): Ditto.
+	(child_get_current_exception_event): Ditto.
+	* varobj.c (varobj_create): Ditto.
+	(varobj_update): Ditto.
+	(c_value_of_root): Ditto.
+	* tracepoint.c (finish_tfind_command): Ditto.
+	* corelow.c (core_open): Ditto.
+	* arch-utils.c (generic_prepare_to_proceed): Ditto.
+	* thread.c (info_threads_command): Ditto.
+	(switch_to_thread): Ditto.
+	* infrun.c (normal_stop): Ditto.
+	(restore_selected_frame): Ditto.
+	(restore_inferior_status): Ditto.
+	* breakpoint.c (insert_breakpoints): Ditto.
+	(watchpoint_check): Ditto.
+	(bpstat_stop_status): Ditto.
+	(do_enable_breakpoint): Ditto.
+	* blockframe.c (flush_cached_frames): Ditto.
+	(reinit_frame_cache): Ditto.
+
+2002-05-04  Andrew Cagney  <ac131313@redhat.com>
+
 	* MAINTAINERS (Host/Native): Add Jason Thorpe as NetBSD
 	maintainer.
 

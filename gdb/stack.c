@@ -1459,50 +1459,18 @@ args_plus_locals_info (char *ignore, int from_tty)
 }
 
 
-/* Select frame FI, and note that its stack level is LEVEL.
-   LEVEL may be -1 if an actual level number is not known.  */
+/* Select frame FI (or NULL - to invalidate the current frame).  */
 
 void
-select_frame (struct frame_info *fi, int level)
+select_frame (struct frame_info *fi)
 {
   register struct symtab *s;
 
   selected_frame = fi;
-  /* FIXME: cagney/2002-04-05: It can't be this easy (and looking at
-     the increasingly complex list of checkes, it wasn't)!  GDB is
-     dragging around, and constantly updating, the global variable
-     selected_frame_level.  Surely all that was needed was for the
-     level to be computed direct from the frame (by counting back to
-     the inner-most frame) or, as has been done here using a cached
-     value.  For moment, check that the expected and the actual level
-     are consistent.  If, after a few weeks, no one reports that this
-     assertion has failed, the global selected_frame_level and many
-     many parameters can all be deleted.  */
-  if (fi == NULL && level == -1)
-    /* Ok.  The target is clearing the selected frame as part of a
-       cache flush.  */
-    ;
-  else if (fi != NULL && fi->level == level)
-    /* Ok.  What you would expect.  Level is redundant.  */
-    ;
-  else if (fi != NULL && level == -1)
-    /* Ok.  See breakpoint.c.  The watchpoint code changes the
-       selected frame to the frame that contains the watchpoint and
-       then, later changes it back to the old value.  The -1 is used
-       as a marker so that the watchpoint code can easily detect that
-       things are not what they should be.  Why the watchpoint code
-       can't mindlessly save/restore the selected frame I don't know,
-       hopefully it can be simplified that way.  Hopefully the global
-       selected_frame can be replaced by a frame parameter, making
-       still more simplification possible.  */
-    ;
-  else
-    internal_error (__FILE__, __LINE__,
-		    "Conflicting frame levels fi->level=%d, level=%d",
-		    (fi ? fi->level : -1),
-		    level);
+  /* NOTE: cagney/2002-05-04: FI can be NULL.  This occures when the
+     frame is being invalidated.  */
   if (selected_frame_level_changed_hook)
-    selected_frame_level_changed_hook (level);
+    selected_frame_level_changed_hook (frame_relative_level (fi));
 
   /* Ensure that symbols for this frame are read in.  Also, determine the
      source language of this frame, and switch to it if desired.  */
@@ -1520,12 +1488,12 @@ select_frame (struct frame_info *fi, int level)
 }
 
 
-/* Select frame FI, noting that its stack level is LEVEL.  Also print
-   the stack frame and show the source if this is the tui version.  */
+/* Select frame FI.  Also print the stack frame and show the source if
+   this is the tui version.  */
 void
 select_and_print_frame (struct frame_info *fi, int level)
 {
-  select_frame (fi, level);
+  select_frame (fi);
   if (fi)
     {
       print_stack_frame (fi, level, 1);
@@ -1640,7 +1608,7 @@ select_frame_command (char *level_exp, int from_tty)
   if (!frame1)
     level = 0;
 
-  select_frame (frame, level);
+  select_frame (frame);
 }
 
 /* The "frame" command.  With no arg, print selected frame briefly.
@@ -1685,7 +1653,7 @@ up_silently_base (char *count_exp)
   fi = find_relative_frame (selected_frame, &count1);
   if (count1 != 0 && count_exp == 0)
     error ("Initial frame selected; you cannot go up.");
-  select_frame (fi, frame_relative_level (selected_frame) + count - count1);
+  select_frame (fi);
 }
 
 static void
@@ -1730,7 +1698,7 @@ down_silently_base (char *count_exp)
       error ("Bottom (i.e., innermost) frame selected; you cannot go down.");
     }
 
-  select_frame (frame, frame_relative_level (selected_frame) + count - count1);
+  select_frame (frame);
 }
 
 /* ARGSUSED */

@@ -254,7 +254,7 @@ flush_cached_frames (void)
   obstack_init (&frame_cache_obstack);
 
   current_frame = NULL;		/* Invalidate cache */
-  select_frame (NULL, -1);
+  select_frame (NULL);
   annotate_frames_invalid ();
 }
 
@@ -268,7 +268,7 @@ reinit_frame_cache (void)
   /* FIXME: The inferior_ptid test is wrong if there is a corefile.  */
   if (PIDGET (inferior_ptid) != 0)
     {
-      select_frame (get_current_frame (), 0);
+      select_frame (get_current_frame ());
     }
 }
 

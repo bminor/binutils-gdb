@@ -4465,7 +4465,7 @@ child_get_current_exception_event (void)
   if (level != 0)
     return (struct exception_event_record *) NULL;
 
-  select_frame (fi, -1);
+  select_frame (fi);
 
   /* Read in the arguments */
   /* __d_eh_notify_callback() is called with 3 arguments:
@@ -4491,11 +4491,11 @@ child_get_current_exception_event (void)
   if (level != 0)
     return (struct exception_event_record *) NULL;
 
-  select_frame (fi, -1);
+  select_frame (fi);
   throw_addr = fi->pc;
 
   /* Go back to original (top) frame */
-  select_frame (curr_frame, -1);
+  select_frame (curr_frame);
 
   current_ex_event.kind = (enum exception_event_kind) event_kind;
   current_ex_event.throw_sal = find_pc_line (throw_addr, 1);

@@ -918,7 +918,7 @@ insert_breakpoints (void)
 	    fi = find_frame_addr_in_frame_chain (b->watchpoint_frame);
 	    within_current_scope = (fi != NULL);
 	    if (within_current_scope)
-	      select_frame (fi, -1);
+	      select_frame (fi);
 	  }
 
 	if (within_current_scope)
@@ -1003,7 +1003,7 @@ insert_breakpoints (void)
 	/* Restore the frame and level.  */
 	if ((saved_frame != selected_frame) ||
 	    (saved_level != frame_relative_level (selected_frame)))
-	  select_frame (saved_frame, saved_level);
+	  select_frame (saved_frame);
 
 	if (val)
 	  return_val = val;	/* remember failure */
@@ -2334,7 +2334,7 @@ watchpoint_check (PTR p)
 	/* If we end up stopping, the current frame will get selected
 	   in normal_stop.  So this call to select_frame won't affect
 	   the user.  */
-	select_frame (fr, -1);
+	select_frame (fr);
     }
 
   if (within_current_scope)
@@ -2665,7 +2665,7 @@ bpstat_stop_status (CORE_ADDR *pc, int not_a_breakpoint)
 	  {
 	    /* Need to select the frame, with all that implies
 	       so that the conditions will have the right context.  */
-	    select_frame (get_current_frame (), 0);
+	    select_frame (get_current_frame ());
 	    value_is_zero
 	      = catch_errors (breakpoint_cond_eval, (b->cond),
 			      "Error in testing breakpoint condition:\n",
@@ -7283,7 +7283,7 @@ is valid is not currently in scope.\n", bpt->number);
 
 	  save_selected_frame = selected_frame;
 	  save_selected_frame_level = frame_relative_level (selected_frame);
-	  select_frame (fr, -1);
+	  select_frame (fr);
 	}
 
       value_free (bpt->val);
@@ -7318,7 +7318,7 @@ have been allocated for other watchpoints.\n", bpt->number);
 	}
 
       if (save_selected_frame_level >= 0)
-	select_frame (save_selected_frame, save_selected_frame_level);
+	select_frame (save_selected_frame);
       value_free_to_mark (mark);
     }
   if (modify_breakpoint_hook)
