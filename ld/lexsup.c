@@ -118,7 +118,6 @@ enum option_values
   OPTION_NO_GC_SECTIONS,
   OPTION_CHECK_SECTIONS,
   OPTION_NO_CHECK_SECTIONS,
-  OPTION_MPC860C0,
   OPTION_NO_UNDEFINED,
   OPTION_INIT,
   OPTION_FINI,
@@ -440,9 +439,7 @@ static const struct ld_option ld_options[] =
   { {"whole-archive", no_argument, NULL, OPTION_WHOLE_ARCHIVE},
       '\0', NULL, N_("Include all objects from following archives"), TWO_DASHES },
   { {"wrap", required_argument, NULL, OPTION_WRAP},
-      '\0', N_("SYMBOL"), N_("Use wrapper functions for SYMBOL"), TWO_DASHES },
-  { {"mpc860c0", optional_argument, NULL, OPTION_MPC860C0},
-      '\0', N_("[=WORDS]"), N_("Modify problematic branches in last WORDS (1-10,\n\t\t\t\tdefault 5) words of a page"), TWO_DASHES }
+      '\0', N_("SYMBOL"), N_("Use wrapper functions for SYMBOL"), TWO_DASHES }
 };
 
 #define OPTION_COUNT ARRAY_SIZE (ld_options)
@@ -1244,22 +1241,6 @@ parse_args (unsigned argc, char **argv)
 
 	  lang_leave_group ();
 	  ingroup = 0;
-	  break;
-	case OPTION_MPC860C0:
-	  /* Default value (in bytes).  */
-	  link_info.mpc860c0 = 20;
-	  if (optarg)
-	    {
-	      unsigned words;
-
-	      words = is_num (optarg, 1, 10, 0);
-	      if (words == 0)
-		einfo (_("%P%F: invalid argument to option \"mpc860c0\"\n"));
-
-	      /* Convert words to bytes.  */
-	      link_info.mpc860c0 = words * 4;
-	    }
-	  command_line.relax = TRUE;
 	  break;
 
 	case OPTION_INIT:

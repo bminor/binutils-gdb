@@ -316,7 +316,6 @@ main (int argc, char **argv)
      and _fini symbols.  We are compatible.  */
   link_info.init_function = "_init";
   link_info.fini_function = "_fini";
-  link_info.mpc860c0 = 0;
   link_info.pei386_auto_import = -1;
   link_info.pei386_runtime_pseudo_reloc = FALSE;
   link_info.spare_dynamic_tags = 5;
@@ -345,8 +344,6 @@ main (int argc, char **argv)
     {
       if (command_line.gc_sections)
 	einfo ("%P%F: --gc-sections and -r may not be used together\n");
-      if (link_info.mpc860c0)
-	einfo (_("%P%F: -r and --mpc860c0 may not be used together\n"));
       else if (command_line.relax)
 	einfo (_("%P%F: --relax and -r may not be used together\n"));
       if (link_info.shared)

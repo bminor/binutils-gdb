@@ -1,3 +1,10 @@
+2003-12-02  Alan Modra  <amodra@bigpond.net.au>
+
+	* ldmain.c (main): Remove mpc860c0 code.
+	* lexsup.c (enum option_values): Delete OPTION_MPC860C0.
+	(ld_options): Delete mpc860c0 entry.
+	(parse_args): Likewise.
+
 2003-12-01  Alan Modra  <amodra@bigpond.net.au>
 
 	* emultempl/elf32.em (gld${EMULATION_NAME}_before_allocation): Test
