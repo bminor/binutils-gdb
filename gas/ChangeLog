@@ -1,3 +1,10 @@
+Fri May 12 14:17:47 1995  Steve Chamberlain  <sac@slash.cygnus.com>
+
+	Initial support for PE object files.
+	* configure.in, configure (i386-*-pe, i386-*-*nt): Add.
+	* config/obj-coff.c (fixup_segment): Cope with PE wierdness.
+	* config/obj-coff.h (TE_PE): New target format.
+
 Thu May 11 14:58:21 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* config/obj-elf.c (NEED_ECOFF_DEBUG): Define if ECOFF_DEBUGGING

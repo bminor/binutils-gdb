@@ -136,6 +136,7 @@ te-multi.h
 te-nbsd.h
 te-nbsd532.h
 te-pc532mach.h
+te-pe.h
 te-ppcnw.h
 te-sco386.h
 te-sun3.h
