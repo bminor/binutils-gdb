@@ -457,14 +457,18 @@ proc gdb_test { args } {
 	}
     }
 
-    if [info exists timeout] {
-	set tmt $timeout;
+    if [target_info exists gdb,timeout] {
+	set tmt [target_info gdb,timeout];
     } else {
-	global timeout;
 	if [info exists timeout] {
 	    set tmt $timeout;
 	} else {
-	    set tmt 60;
+	    global timeout;
+	    if [info exists timeout] {
+		set tmt $timeout;
+	    } else {
+		set tmt 60;
+	    }
 	}
     }
     gdb_expect $tmt {

@@ -1,5 +1,9 @@
 2000-11-17  Nick Duffek  <nsd@redhat.com>
 
+	* lib/gdb.exp (gdb_test): Override timeout with board info.
+
+2000-11-17  Nick Duffek  <nsd@redhat.com>
+
 	* gdb.base/display.exp: Don't kill running stub.  Add "again" to
 	the second kill and detach messages.
 
